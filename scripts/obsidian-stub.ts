@@ -310,6 +310,8 @@ function stubControl(): StubControl {
 /** Minimal Setting stand-in. Callbacks are invoked so a render can be driven. */
 export class Setting {
 	static created: Setting[] = [];
+	name = '';
+	readonly texts: StubControl[] = [];
 	settingEl: El;
 	readonly toggles: StubControl[] = [];
 	readonly dropdowns: StubControl[] = [];
@@ -320,7 +322,8 @@ export class Setting {
 		container?.appendChild?.(this.settingEl);
 		Setting.created.push(this);
 	}
-	setName() {
+	setName(name: string) {
+		this.name = name;
 		return this;
 	}
 	setDesc() {
@@ -334,6 +337,7 @@ export class Setting {
 	}
 	addText(cb?: (text: StubControl) => void) {
 		const text = stubControl();
+		this.texts.push(text);
 		cb?.(text);
 		return this;
 	}

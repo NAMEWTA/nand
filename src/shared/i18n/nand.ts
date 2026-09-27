@@ -1,6 +1,7 @@
 /** Home, module gates, intro, and NAND about copy. */
 export const messages = {
 	en: {
+		'modules.changeFailed': 'Could not change the module state. Try turning the module off and on again.',
 		'settings.productHome': 'Home',
 		'modules.dashboard': 'Board',
 		'modules.dashboardDesc': 'Memos, tasks, widgets, and the board file. Turning this off stops those services.',
@@ -70,6 +71,7 @@ export const messages = {
 		'terminalAgent.terminal.dropEmpty': 'No text or path was available from that drop.',
 	},
 	zh: {
+		'modules.changeFailed': '模块状态切换失败，请尝试关闭后重新打开。',
 		'settings.productHome': '首页',
 		'modules.dashboard': '看板',
 		'modules.dashboardDesc': '备忘、待办、小组件和看板文件。关闭后这些服务不再启动。',

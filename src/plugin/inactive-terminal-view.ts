@@ -1,3 +1,4 @@
+import { renderEmptyState } from '../shared/empty-state';
 import { ItemView, type WorkspaceLeaf } from 'obsidian';
 import { t } from '../shared/i18n';
 import { TERMINAL_VIEW_TYPE } from '../terminal-agent';
@@ -26,8 +27,11 @@ export class InactiveTerminalView extends ItemView {
 
 	async onOpen(): Promise<void> {
 		this.contentEl.empty();
-		this.contentEl.createEl('p', { text: t('modules.terminalOff') });
-		const button = this.contentEl.createEl('button', { text: t('modules.openHome') });
-		button.addEventListener('click', () => this.plugin.openHome());
+		renderEmptyState(this.contentEl, {
+			icon: 'terminal',
+			title: t('modules.terminal'),
+			description: t('modules.terminalOff'),
+			action: { label: t('modules.openHome'), run: () => this.plugin.openHome() },
+		});
 	}
 }

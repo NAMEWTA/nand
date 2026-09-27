@@ -16,6 +16,10 @@ NAND 是 NAMEWTA 的通用 Obsidian 工作台。看板、编辑器和桌面端�
 
 功能区的首页图标打开设置首页。
 
+评论的删除操作位于卡片右下角的“更多”菜单。Agent 设置按 CLI 路径、权限模式和额外参数分行显示；看板主题与已有配置保持兼容。
+
+本轮修复、前后截图与验证范围见 [UI 验证记录](docs/ui-review-2026-09-26.md)。
+
 ## 资金参考
 
 看板参考了 [PandoraReads/apex-dashboard](https://github.com/PandoraReads/apex-dashboard)（MIT）。终端参考了 [ZyphrZero/Termy](https://github.com/ZyphrZero/Termy)（GPL-3.0）。智能体启动与用量参考了 [stablyai/orca](https://github.com/stablyai/orca)（MIT）。感谢这些项目。

@@ -13,6 +13,8 @@ import { commentsCmExtension } from '../src/editor-view/comments/cm-extension';
 import { formatCommentTime, mountCommentsPanel } from '../src/editor-view/comments/panel';
 import { CommentStore, registerCommentStore, type CommentFs } from '../src/editor-view/comments/store';
 import { El } from './mini-dom';
+import { Menu } from './obsidian-stub';
+import { setLanguage } from '../src/shared/i18n/runtime';
 
 const doc = '---\ntitle: x\n---\n\nHello prefix TARGET suffix tail.\n\n```\ncode TARGET\n```\n\nAfter.';
 
@@ -151,7 +153,7 @@ assert.equal(formatCommentTime('not-a-time'), 'not-a-time');
 const panelNote = 'Please keep this note byte-for-byte.';
 const panelFs = memoryFs();
 const panelStore = new CommentStore(panelFs, { debounceMs: 1000 });
-await panelStore.add('notes/demo.md', {
+const panelThread = await panelStore.add('notes/demo.md', {
 	quote: makeAnchor(panelNote, 7, 11),
 	start: 7,
 	end: 11,
@@ -173,6 +175,23 @@ assert.ok(card, 'comment card is rendered');
 assert.equal(card?.parentElement, list);
 assert.equal(card?.textContent.includes('keep'), true);
 assert.equal(panelNote, 'Please keep this note byte-for-byte.', 'rendering a card does not touch the note');
+assert.equal(card?.querySelector('.apex-editor-comment-quote')?.tagName, 'BUTTON', 'quote supports keyboard activation');
+await panelStore.resolve(panelThread.id);
+assert.equal(host.querySelector('.apex-editor-comment-status')?.textContent, '已解决');
+setLanguage('en');
+await panelStore.reply(panelThread.id, 'English reply');
+assert.equal(host.querySelector('.apex-editor-comment-status')?.textContent, 'Resolved');
+await panelStore.reopen(panelThread.id);
+assert.equal(host.querySelector('.apex-editor-comment-status'), null);
+host.querySelector('.apex-editor-comment-more')?.click();
+assert.equal(Menu.last?.items[0]?.title, 'Delete');
+Menu.last?.items[0]?.click();
+await panelStore.flush();
+assert.equal(panelStore.threadsFor('notes/demo.md').length, 0, 'more menu retains deletion');
+setLanguage('zh');
+await panelStore.add('notes/demo.md', { quote: makeAnchor(panelNote, 7, 11), start: 7, end: 11, text: 'visible' });
+await panelStore.flush();
+
 
 const frames: FrameRequestCallback[] = [];
 const editorBody = new El('body');

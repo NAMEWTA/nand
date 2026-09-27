@@ -1,3 +1,4 @@
+import { renderEmptyState } from '../../shared/empty-state';
 import type { DashboardView } from './dashboard-view';
 import { Notice } from 'obsidian';
 import type { DashboardData } from '../types';
@@ -22,9 +23,12 @@ export function showModuleDisabled(this: DashboardView): void {
 	if (!root) return;
 	root.empty();
 	root.addClass('nand-module-off');
-	root.createEl('p', { text: t('modules.dashboardOff') });
-	const button = root.createEl('button', { text: t('modules.openHome') });
-	button.addEventListener('click', () => this.plugin.openHome());
+	renderEmptyState(root, {
+		icon: 'layout-dashboard',
+		title: t('modules.dashboard'),
+		description: t('modules.dashboardOff'),
+		action: { label: t('modules.openHome'), run: () => this.plugin.openHome() },
+	});
 }
 
 export async function onOpen(this: DashboardView): Promise<void> {

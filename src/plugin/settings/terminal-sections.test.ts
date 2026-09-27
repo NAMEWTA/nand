@@ -71,6 +71,21 @@ test('stacked terminal sections keep the appearance block, launcher subscription
 	tab.plugin = { terminalHost: plugin } as unknown as DashboardPlugin;
 	tab.renderTerminalProduct(host as unknown as HTMLElement);
 
+
+	const groups = host.querySelectorAll('.terminal-agent-settings-group');
+	assert.equal(groups.length, Object.keys(settings.agentSettings.agents).length);
+	const cli = Setting.created.find((setting) => setting.name === 'CLI 路径');
+	const args = Setting.created.find((setting) => setting.name === '额外参数');
+	const permission = Setting.created.find((setting) => setting.name === '权限模式');
+	assert.equal(cli?.texts.length, 1);
+	assert.equal(args?.texts.length, 1);
+	assert.equal(permission?.dropdowns.length, 1);
+	cli?.texts[0]?.fire?.(' /opt/test/claude ');
+	args?.texts[0]?.fire?.('--test-argument');
+	permission?.dropdowns[0]?.fire?.('manual');
+	assert.equal(settings.agentSettings.agents['claude-code'].cliPath, '/opt/test/claude');
+	assert.equal(settings.agentSettings.agents['claude-code'].extraArgs, '--test-argument');
+	assert.equal(settings.agentSettings.agents['claude-code'].permissionMode, 'manual');
 	const appearance = host.querySelector('.conditional-section-custom-color-settings');
 	assert.ok(appearance, 'appearance custom-color block must stay in the stacked container');
 	assert.equal(appearance.parent === null, false);

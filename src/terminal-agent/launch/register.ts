@@ -169,8 +169,8 @@ function host(plugin: OrcaPluginHost): LaunchHost {
 }
 
 export function renderAgentSettings(containerEl: HTMLElement, plugin: OrcaPluginHost): void {
-  containerEl.createEl('h3', { text: t('terminalAgent.agents.heading') });
-  containerEl.createEl('p', { text: t('terminalAgent.agents.intro') });
+  containerEl.addClass('terminal-agent-settings');
+  new Setting(containerEl).setName(t('terminalAgent.agents.heading')).setDesc(t('terminalAgent.agents.intro')).setHeading();
 
   new Setting(containerEl)
     .setName(t('terminalAgent.agents.permission'))
@@ -188,9 +188,14 @@ export function renderAgentSettings(containerEl: HTMLElement, plugin: OrcaPlugin
 
   for (const agent of AGENT_CATALOG) {
     const entry = plugin.settings.agentSettings.agents[agent.id];
-    new Setting(containerEl)
+    const group = containerEl.createDiv({ cls: 'terminal-agent-settings-group' });
+    new Setting(group)
       .setName(agent.title)
-      .setDesc(agent.installDocsUrl)
+      .setHeading();
+    group.createEl('a', { cls: 'terminal-agent-docs', text: t('terminalAgent.agents.documentation'), href: agent.installDocsUrl });
+    const cli = new Setting(group)
+      .setName(t('terminalAgent.agents.cliPath'))
+      .setDesc(t('terminalAgent.agents.cliPlaceholder'))
       .addText((text) => {
         text
           .setPlaceholder(t('terminalAgent.agents.cliPlaceholder'))
@@ -199,7 +204,10 @@ export function renderAgentSettings(containerEl: HTMLElement, plugin: OrcaPlugin
             plugin.settings.agentSettings.agents[agent.id].cliPath = value.trim();
             await plugin.saveSettings();
           });
-      })
+      });
+    cli.settingEl.addClass('terminal-agent-command-setting');
+    new Setting(group)
+      .setName(t('terminalAgent.agents.agentPermission'))
       .addDropdown((dropdown) => {
         dropdown
           .addOption('inherit', t('terminalAgent.agents.followGlobal'))
@@ -211,7 +219,10 @@ export function renderAgentSettings(containerEl: HTMLElement, plugin: OrcaPlugin
             plugin.settings.agentSettings.agents[agent.id].permissionMode = mode;
             await plugin.saveSettings();
           });
-      })
+      });
+    const args = new Setting(group)
+      .setName(t('terminalAgent.agents.extraArgs'))
+      .setDesc(t('terminalAgent.agents.extraPlaceholder'))
       .addText((text) => {
         text
           .setPlaceholder(t('terminalAgent.agents.extraPlaceholder'))
@@ -222,8 +233,10 @@ export function renderAgentSettings(containerEl: HTMLElement, plugin: OrcaPlugin
           });
       });
 
+    args.settingEl.addClass('terminal-agent-command-setting');
+
     if (agent.accountKind !== 'none') {
-      new Setting(containerEl)
+      new Setting(group)
         .setName(t('terminalAgent.agents.account', { title: agent.title }))
         .setDesc(t('terminalAgent.agents.accountDesc'))
         .addText((text) => {
@@ -238,7 +251,7 @@ export function renderAgentSettings(containerEl: HTMLElement, plugin: OrcaPlugin
     }
 
     if (agent.usage !== 'none') {
-      new Setting(containerEl)
+      new Setting(group)
         .setName(t('terminalAgent.agents.usage', { title: agent.title }))
         .setDesc(t('terminalAgent.agents.usageDesc'))
         .addToggle((toggle) => {

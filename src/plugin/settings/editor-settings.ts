@@ -1,3 +1,4 @@
+import { renderEmptyState } from '../../shared/empty-state';
 import { Setting } from 'obsidian';
 import type { EditorDomainId } from '../../shared/editor-workbench';
 import { t } from '../../shared/i18n';
@@ -64,5 +65,5 @@ export function renderEditorSettings(this: DashboardSettingTab, containerEl: HTM
 
 /** Sync product is not built yet. One line, so the settings page already has a home for it. */
 export function renderSyncSettings(this: DashboardSettingTab, containerEl: HTMLElement): void {
-	new Setting(containerEl).setName(t('settings.tabSync')).setDesc(t('editor.sync.placeholder'));
+	renderEmptyState(containerEl, { icon: 'refresh-cw', title: t('settings.tabSync'), description: t('editor.sync.placeholder') });
 }

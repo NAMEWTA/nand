@@ -1964,7 +1964,9 @@ export class TerminalSettingsRenderer extends BaseSettingsRenderer {
                 // ServerManager may not be initialized yet
               });
           });
-      })
+      });
+    new Setting(containerEl)
+      .setName(t('settingsDetails.advanced.binaryDownloadNow'))
       .addButton((button) => {
         button
           .setButtonText(t('settingsDetails.advanced.binaryDownloadNow'))

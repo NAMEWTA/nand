@@ -51,7 +51,7 @@ Copy the nearest script, including extra aliases such as the music stubs. Do not
 |---|---|
 | Comment anchors, the comment store, or the editor/dashboard import boundary | `pnpm run test:editor-comments` |
 | Terminal agent behavior covered by its `*.test.ts` files | `pnpm run test:terminal-agent` |
-| `src/plugin/settings/nav.ts` or the settings side-nav CSS | `pnpm run test:settings-nav` |
+| Module lifecycle (`src/plugin/module-lifecycle.test.ts`), settings navigation, or settings CSS | `pnpm run test:settings-nav` |
 | A dashboard behavior that already has a verify script | the matching `test:*` in `package.json` |
 
 `test:terminal-agent` and `test:settings-nav` use:

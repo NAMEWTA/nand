@@ -1,3 +1,4 @@
+import { renderEmptyState } from '../../shared/empty-state';
 import type { View, WorkspaceLeaf } from 'obsidian';
 import { FileSystemAdapter, Modal, Notice, Plugin, normalizePath, setIcon, setTooltip } from 'obsidian';
 import {
@@ -3009,10 +3010,11 @@ class TerminalViewPlaceholder extends TerminalView {
   async onOpen() {
     if (!this.plugin.isActive()) {
       this.contentEl.empty();
-      this.contentEl.createEl('p', { text: sharedT('modules.terminalOff') });
-      const button = this.contentEl.createEl('button', { text: sharedT('modules.openHome') });
-      button.addEventListener('click', () => {
-        this.plugin.openHome();
+      renderEmptyState(this.contentEl, {
+        icon: 'terminal',
+        title: sharedT('modules.terminal'),
+        description: sharedT('modules.terminalOff'),
+        action: { label: sharedT('modules.openHome'), run: () => this.plugin.openHome() },
       });
       return;
     }

@@ -1,4 +1,5 @@
-import { MarkdownView, TFile, type App } from 'obsidian';
+import { MarkdownView, Menu, setIcon, TFile, type App } from 'obsidian';
+import { renderEmptyState } from '../../shared/empty-state';
 import { makeAnchor, selectionIsCommentable } from './anchor';
 import { askText } from './prompt';
 import { getCommentStore, type CommentStore } from './store';
@@ -26,7 +27,7 @@ export function mountCommentsPanel(el: HTMLElement, ctx: CommentPanelContext): (
 	el.empty();
 	el.addClass('apex-editor-comments');
 	if (!store) {
-		el.createDiv({ text: t('editor.comments.noFile') });
+		renderEmptyState(el, { icon: 'message-square', title: t('editor.comments.title'), description: t('editor.comments.noFile') });
 		return () => undefined;
 	}
 	const path = ctx.file?.extension === 'md' ? ctx.file.path : null;
@@ -34,7 +35,7 @@ export function mountCommentsPanel(el: HTMLElement, ctx: CommentPanelContext): (
 	const render = () => {
 		if (disposed) return;
 		const active = el.ownerDocument.activeElement;
-		if (active instanceof HTMLTextAreaElement && el.contains(active)) return;
+		if (active?.instanceOf(HTMLTextAreaElement) && el.contains(active)) return;
 		draw(el, ctx, store, path);
 	};
 	const off = store.subscribe(render);
@@ -52,13 +53,13 @@ function draw(el: HTMLElement, ctx: CommentPanelContext, store: CommentStore, pa
 	const head = el.createDiv({ cls: 'apex-editor-comments-head' });
 	head.createDiv({ cls: 'apex-editor-comments-title', text: t('editor.comments.title') });
 	if (!path) {
-		el.createDiv({ cls: 'apex-editor-comments-empty', text: t('editor.comments.noFile') });
+		renderEmptyState(el, { icon: 'file-text', title: t('editor.comments.title'), description: t('editor.comments.noFile') });
 		return;
 	}
-	head.createDiv({ cls: 'apex-editor-comments-path', text: path });
+	head.createDiv({ cls: 'apex-editor-comments-path', text: path, attr: { title: path } });
 	const threads = store.threadsFor(path);
 	if (threads.length === 0) {
-		el.createDiv({ cls: 'apex-editor-comments-empty', text: t('editor.comments.empty') });
+		renderEmptyState(el, { icon: 'message-square', title: t('editor.comments.title'), description: t('editor.comments.empty') });
 		return;
 	}
 	const list = el.createDiv({ cls: 'apex-editor-comments-list' });
@@ -72,14 +73,15 @@ function renderCard(parent: HTMLElement, ctx: CommentPanelContext, store: Commen
 		cls: 'apex-editor-comment' + (store.focusedId === thread.id ? ' is-focused' : ''),
 	});
 	card.dataset['commentId'] = thread.id;
-	const quote = card.createDiv({ cls: 'apex-editor-comment-quote', text: thread.target.quote.exact || '…' });
+	card.dataset['status'] = thread.status;
+	const quote = card.createEl('button', { cls: 'apex-editor-comment-quote', text: thread.target.quote.exact || '…', attr: { type: 'button', 'aria-label': `${t('editor.comments.jump')}: ${thread.target.quote.exact || '…'}` } });
 	quote.addEventListener('click', () => {
 		void jumpToComment(ctx.app, thread);
 	});
-	if (thread.status === 'orphaned') {
-		card.createDiv({ cls: 'apex-editor-comment-status', text: t('editor.comments.orphaned') });
-	} else if (thread.status === 'resolved') {
-		card.createDiv({ cls: 'apex-editor-comment-status', text: t('editor.comments.resolve') });
+	if (thread.status !== 'open') {
+		const status = card.createDiv({ cls: 'apex-editor-comment-status' });
+		setIcon(status.createSpan({ attr: { 'aria-hidden': 'true' } }), thread.status === 'resolved' ? 'check-check' : 'unlink');
+		status.createSpan({ text: t(thread.status === 'resolved' ? 'editor.comments.resolved' : 'editor.comments.orphaned') });
 	}
 	const messages = card.createDiv({ cls: 'apex-editor-comment-messages' });
 	for (const message of thread.thread) {
@@ -110,9 +112,13 @@ function renderCard(parent: HTMLElement, ctx: CommentPanelContext, store: Commen
 			if (text) void store.reply(thread.id, text);
 		});
 	});
-	const remove = actions.createEl('button', { text: t('editor.comments.delete') });
-	remove.addEventListener('click', () => {
-		void store.remove(thread.id);
+	const more = actions.createEl('button', { cls: 'apex-editor-comment-more', attr: { type: 'button', 'aria-label': t('editor.comments.more'), 'aria-haspopup': 'menu' } });
+	setIcon(more, 'ellipsis');
+	more.addEventListener('click', () => {
+		const menu = new Menu();
+		menu.addItem((item) => item.setTitle(t('editor.comments.delete')).setIcon('trash-2').onClick(() => { void store.remove(thread.id); }));
+		const rect = more.getBoundingClientRect();
+		menu.showAtPosition({ x: rect.left, y: rect.bottom });
 	});
 	return card;
 }

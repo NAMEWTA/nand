@@ -1,3 +1,4 @@
+import { renderEmptyState } from '../../shared/empty-state';
 import { t } from '../../shared/i18n';
 import type { EditorDomain } from '../host/registry';
 
@@ -8,7 +9,7 @@ export const focusDomain: EditorDomain = {
 	icon: 'crosshair',
 	mountPanel(el) {
 		el.empty();
-		el.createDiv({ cls: 'apex-editor-placeholder', text: t('editor.focus.placeholder') });
+		renderEmptyState(el, { icon: 'crosshair', title: t('editor.focus.title'), description: t('editor.focus.placeholder') });
 		return () => {
 			el.empty();
 		};

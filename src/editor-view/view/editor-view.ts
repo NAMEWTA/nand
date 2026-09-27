@@ -1,3 +1,4 @@
+import { renderEmptyState } from '../../shared/empty-state';
 import { ItemView, type WorkspaceLeaf } from 'obsidian';
 import type { EditorDomainId } from '../../shared/editor-workbench';
 import { t } from '../../shared/i18n';
@@ -49,9 +50,12 @@ export class EditorView extends ItemView {
 		this.contentEl.empty();
 		this.contentEl.addClass('apex-editor-view');
 		if (!this.plugin.settings.modules.editor || !this.plugin.editorHost) {
-			this.contentEl.createEl('p', { text: t('modules.editorOff') });
-			const button = this.contentEl.createEl('button', { text: t('modules.openHome') });
-			button.addEventListener('click', () => this.plugin.openHome());
+			renderEmptyState(this.contentEl, {
+				icon: 'pen-line',
+				title: t('modules.editor'),
+				description: t('modules.editorOff'),
+				action: { label: t('modules.openHome'), run: () => this.plugin.openHome() },
+			});
 			return;
 		}
 		this.tabsEl = this.contentEl.createDiv({ cls: 'apex-editor-tabs-host' });

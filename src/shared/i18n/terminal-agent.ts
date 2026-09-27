@@ -1,6 +1,10 @@
 /** Terminal agent strings. Chinese and English only. */
 export const messages = {
 	en: {
+        'terminalAgent.agents.cliPath': 'CLI path',
+        'terminalAgent.agents.agentPermission': 'Permission mode',
+        'terminalAgent.agents.extraArgs': 'Extra arguments',
+        'terminalAgent.agents.documentation': 'Installation guide',
 		"terminalAgent.backgroundImageSizes.auto": "Auto",
 		"terminalAgent.backgroundImageSizes.contain": "Contain",
 		"terminalAgent.backgroundImageSizes.cover": "Cover",
@@ -401,6 +405,10 @@ export const messages = {
 		"terminalAgent.menu.workflows": "Workflows",
 	},
 	zh: {
+        'terminalAgent.agents.cliPath': 'CLI 路径',
+        'terminalAgent.agents.agentPermission': '权限模式',
+        'terminalAgent.agents.extraArgs': '额外参数',
+        'terminalAgent.agents.documentation': '安装指南',
 		"terminalAgent.backgroundImageSizes.auto": "自动",
 		"terminalAgent.backgroundImageSizes.contain": "包含",
 		"terminalAgent.backgroundImageSizes.cover": "覆盖",

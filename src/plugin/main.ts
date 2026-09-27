@@ -16,6 +16,7 @@ import { normalizeEditorWorkbench } from '../shared/editor-workbench';
 import { IntroModal } from './intro-modal';
 import { InactiveTerminalView } from './inactive-terminal-view';
 import { terminalLeafKind } from './terminal-leaf-kind';
+import { ModuleLifecycle } from './module-lifecycle';
 
 import { teardownBasenameIndex } from '../dashboard-view/renderer';
 import { MediaTagService, sanitizeMediaTags, registerMediaTagService } from '../dashboard-view/media/media-tags';
@@ -308,13 +309,15 @@ export default class DashboardPlugin extends Plugin {
 		this.settingsTab.refresh();
 	}
 
-	async applyModuleFlags(): Promise<void> {
-		if (this.settings.modules.dashboard) await this.ensureDashboardServices();
-		else this.stopDashboardServices();
-		if (this.settings.modules.editor) this.ensureEditor();
-		else this.stopEditor();
-		if (this.settings.modules.terminal && Platform.isDesktopApp) await this.ensureTerminal();
-		else await this.stopTerminal();
+	private readonly moduleLifecycle = new ModuleLifecycle();
+
+	applyModuleFlags(): Promise<void> {
+		return this.moduleLifecycle.apply(() => this.settings.modules, Platform.isDesktopApp, {
+			dashboard: (enabled) => enabled ? this.ensureDashboardServices() : this.stopDashboardServices(),
+			editor: (enabled) => enabled ? this.ensureEditor() : this.stopEditor(),
+			terminalActive: () => this.terminalHost?.isActive() === true,
+			terminal: (enabled) => enabled ? this.ensureTerminal() : this.stopTerminal(),
+		});
 	}
 
 	private async ensureDashboardServices(): Promise<void> {
@@ -383,12 +386,18 @@ export default class DashboardPlugin extends Plugin {
 	}
 
 	private async ensureTerminal(): Promise<void> {
-		if (!Platform.isDesktopApp) return;
+		if (!Platform.isDesktopApp || this.terminalHost?.isActive()) return;
 		if (!this.terminalHost) {
 			this.terminalHost = new TerminalAgentController(this, {
 				readAbsoluteReference: () => collectReferences(this.app, 'absolute'),
 			});
-			await this.terminalHost.onload();
+			try {
+				await this.terminalHost.onload();
+			} catch (error) {
+				this.terminalHost.onunload();
+				this.terminalHost = undefined;
+				throw error;
+			}
 		} else {
 			this.terminalHost.activate();
 		}
@@ -396,7 +405,8 @@ export default class DashboardPlugin extends Plugin {
 	}
 
 	private async stopTerminal(): Promise<void> {
-		if (this.terminalHost?.isActive()) await this.terminalHost.deactivate();
+		if (!this.terminalHost?.isActive()) return;
+		await this.terminalHost.deactivate();
 		await this.reopenTerminalLeaves();
 	}
 
@@ -412,6 +422,7 @@ export default class DashboardPlugin extends Plugin {
 	}
 
 	onunload(): void {
+		this.moduleLifecycle.dispose();
 		this.terminalHost?.onunload();
 		this.editorHost?.onunload();
 		teardownBasenameIndex(this.app);

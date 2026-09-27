@@ -1833,13 +1833,16 @@
 	cursor: pointer;
 	display: inline-flex;
 	align-items: center;
-	gap: 5px;
-	padding: 5px 14px;
-	border-radius: var(--db-radius-sm, 6px);
-	font-size: 0.85em;
+	gap: var(--size-4-2);
+	padding: var(--size-4-2) var(--size-4-3);
+	border: 0;
+	box-shadow: none;
+	border-radius: var(--radius-s);
+	background: transparent;
+	font-size: var(--font-ui-small);
 	font-weight: 500;
 	color: var(--text-muted);
-	transition: color 0.15s ease, background 0.15s ease;
+	transition: color 100ms ease, background 100ms ease;
 }
 
 /* Icon sized to the tab's text so it never dwarfs the label, and vertically
@@ -1859,9 +1862,10 @@
 }
 
 .dashboard-settings-tab.active {
-	background: var(--db-accent, var(--interactive-accent));
-	color: var(--db-text-inverse, var(--text-on-accent, #fff));
+	background: var(--background-modifier-hover);
+	color: var(--text-normal);
 	font-weight: 600;
+	box-shadow: inset 0 -2px var(--interactive-accent);
 }
 
 /* ===== About Author page ===== */
@@ -21721,8 +21725,8 @@ body.is-mobile .dashboard-media-item .dashboard-media-tagbtn { opacity: 1; }
 	display: flex;
 	flex-direction: column;
 	height: 100%;
-	padding: 8px 10px 16px;
-	gap: 8px;
+	padding: var(--size-4-3);
+	gap: var(--size-4-3);
 	color: var(--text-normal);
 }
 .apex-editor-tabs {
@@ -21767,58 +21771,82 @@ body.is-mobile .dashboard-media-item .dashboard-media-tagbtn { opacity: 1; }
 	font-size: 13px;
 }
 .apex-editor-comments-path {
-	color: var(--text-faint);
-	font-size: 11px;
-	margin-top: 2px;
-	word-break: break-all;
+	color: var(--text-muted);
+	font-size: var(--font-ui-smaller);
+	margin-top: var(--size-4-1);
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
 }
 .apex-editor-comment {
 	border: 1px solid var(--background-modifier-border);
-	border-radius: 8px;
-	padding: 8px;
-	margin-top: 8px;
+	border-radius: var(--radius-m);
+	padding: var(--size-4-3);
+	margin-top: var(--size-4-3);
 	background: var(--background-primary);
+	min-width: 0;
 }
 .apex-editor-comment.is-focused {
 	border-color: var(--interactive-accent);
 }
-.apex-editor-comment-quote {
-	font-size: 12px;
+.apex-editor-comment .apex-editor-comment-quote {
+	display: block;
+	width: 100%;
+	height: auto;
+	text-align: start;
+	font: inherit;
+	font-size: var(--font-ui-small);
+	line-height: 1.5;
 	color: var(--text-muted);
-	border-left: 2px solid var(--interactive-accent);
-	padding-left: 8px;
+	background: var(--background-secondary);
+	border: 0;
+	border-inline-start: 2px solid var(--background-modifier-border);
+	border-radius: var(--radius-s);
+	box-shadow: none;
+	padding: var(--size-4-2);
 	cursor: pointer;
 	white-space: pre-wrap;
+	overflow-wrap: anywhere;
 }
 .apex-editor-comment-status {
-	margin-top: 6px;
-	font-size: 11px;
-	color: var(--text-faint);
+	display: flex;
+	align-items: center;
+	gap: var(--size-4-1);
+	margin-top: var(--size-4-2);
+	font-size: var(--font-ui-smaller);
+	color: var(--text-muted);
 }
 .apex-editor-comment-message {
-	margin-top: 6px;
+	padding-top: var(--size-4-3);
+	line-height: 1.5;
 }
 .apex-editor-comment-text {
-	font-size: 13px;
+	font-size: var(--font-ui-small);
 	white-space: pre-wrap;
+	overflow-wrap: anywhere;
 }
 .apex-editor-comment-time {
-	font-size: 10px;
-	color: var(--text-faint);
+	font-size: var(--font-ui-smaller);
+	color: var(--text-muted);
+	margin-top: var(--size-4-1);
+	font-variant-numeric: tabular-nums;
 }
 .apex-editor-comment-actions {
 	display: flex;
+	align-items: center;
 	flex-wrap: wrap;
-	gap: 6px;
-	margin-top: 8px;
+	gap: var(--size-4-1);
+	margin-top: var(--size-4-3);
 }
 .apex-editor-comment-actions button {
 	border: none;
-	background: var(--background-modifier-hover);
-	color: var(--text-normal);
-	border-radius: 6px;
-	padding: 3px 8px;
-	font-size: 12px;
+	box-shadow: none;
+	background: transparent;
+	color: var(--text-muted);
+	border-radius: var(--radius-s);
+	padding: var(--size-4-1) var(--size-4-2);
+	min-height: 28px;
+	font-size: var(--font-ui-small);
 }
 .apex-comment-prompt-title {
 	margin: 0 0 8px;
@@ -23755,12 +23783,12 @@ body.is-mobile .dashboard-media-item .dashboard-media-tagbtn { opacity: 1; }
   background: color-mix(in srgb, var(--background-modifier-hover) 60%, transparent);
 }
 .terminal-display-tab.is-active {
-  color: var(--text-on-accent, var(--text-normal));
-  background: var(--interactive-accent);
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+  color: var(--text-normal);
+  background: var(--background-primary);
+  box-shadow: inset 0 -2px var(--interactive-accent);
 }
 .terminal-display-tab.is-active:hover {
-  background: var(--interactive-accent-hover, var(--interactive-accent));
+  background: var(--background-modifier-hover);
 }
 .terminal-display-tab-content {
   display: flex;
@@ -24183,15 +24211,20 @@ body.is-mobile .dashboard-media-item .dashboard-media-tagbtn { opacity: 1; }
 }
 
 .terminal-usage-card {
-  margin: 12px 0 18px;
+  margin: var(--size-4-4) 0;
+  padding: var(--size-4-4);
+  border: 1px solid var(--background-modifier-border);
+  border-radius: var(--radius-m);
+  background: var(--background-primary);
 }
 
 .terminal-usage-row {
   display: grid;
-  grid-template-columns: 72px minmax(0, 1fr) auto;
-  gap: 8px;
+  grid-template-columns: minmax(3rem, auto) minmax(2rem, 1fr) auto;
+  gap: var(--size-4-2);
   align-items: center;
-  margin: 6px 0;
+  margin-top: var(--size-4-3);
+  font-variant-numeric: tabular-nums;
 }
 
 .terminal-usage-track {
@@ -24222,6 +24255,118 @@ body.is-mobile .dashboard-media-item .dashboard-media-tagbtn { opacity: 1; }
 
 .terminal-usage-reset {
   grid-column: 1 / -1;
+}
+
+/* ===== NAND surface polish: host theme outside the board ===== */
+.nand-empty-state {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	gap: var(--size-4-3);
+	box-sizing: border-box;
+	width: 100%;
+	min-height: 160px;
+	height: 100%;
+	padding: var(--size-4-6) var(--size-4-4);
+	text-align: center;
+	color: var(--text-muted);
+}
+.nand-empty-state-icon { display: flex; color: var(--text-faint); }
+.nand-empty-state-icon svg { width: 28px; height: 28px; }
+.nand-empty-state-title { color: var(--text-normal); font-size: var(--font-ui-medium); font-weight: 600; }
+.nand-empty-state-description { max-width: 32ch; font-size: var(--font-ui-small); line-height: 1.6; overflow-wrap: anywhere; }
+.nand-empty-state button { flex: none; width: auto; max-width: 100%; margin-top: var(--size-4-1); }
+.apex-editor-view > .nand-empty-state { flex: 1; min-height: 0; }
+.apex-editor-comments-head { padding: var(--size-4-1) 0 var(--size-4-1); }
+.apex-editor-comment-status svg { display: block; width: 14px; height: 14px; }
+.apex-editor-comment-message + .apex-editor-comment-message { margin-top: var(--size-4-3); border-top: 1px solid var(--background-modifier-border); }
+.apex-editor-comment-actions button:hover { background: var(--background-modifier-hover); color: var(--text-normal); }
+.apex-editor-comment-actions .apex-editor-comment-more { margin-inline-start: auto; display: flex; align-items: center; justify-content: center; }
+.apex-editor-comment-more svg { width: 16px; height: 16px; }
+.apex-editor-comment.is-focused .apex-editor-comment-quote { border-inline-start-color: var(--interactive-accent); }
+.apex-editor-comment[data-status="orphaned"] .apex-editor-comment-status { color: var(--text-warning); }
+.apex-editor-tab { box-shadow: none; min-height: 28px; }
+.apex-comment-popover { gap: var(--size-4-2); padding: var(--size-4-2); border-radius: var(--radius-m); }
+.apex-comment-prompt { min-height: 112px; padding: var(--size-4-3); line-height: 1.6; }
+.apex-comment-prompt-row { margin-top: var(--size-4-4); }
+
+:is(.nand-settings, .dashboard-settings-root) { container: nand-settings / inline-size; }
+:is(.nand-settings, .dashboard-settings-root) .dashboard-settings-products { gap: var(--size-4-1); padding-bottom: var(--size-4-3); margin-bottom: var(--size-4-2); border-bottom: 1px solid var(--background-modifier-border); }
+:is(.nand-settings, .dashboard-settings-root) .setting-item:not(.dashboard-settings-section) { gap: var(--size-4-4); flex-wrap: wrap; padding-block: var(--size-4-3); }
+:is(.nand-settings, .dashboard-settings-root) .setting-item-info { min-width: 0; overflow-wrap: anywhere; }
+:is(.nand-settings, .dashboard-settings-root) .setting-item-control { min-width: 0; max-width: 100%; gap: var(--size-4-2); flex-wrap: wrap; }
+:is(.nand-settings, .dashboard-settings-root) .setting-item-description { line-height: 1.5; margin-top: var(--size-4-1); }
+:is(.nand-settings, .dashboard-settings-root) .setting-item-heading { margin-top: var(--size-4-6); border-top: none; }
+.nand-terminal-settings .settings-card { margin-bottom: var(--size-4-6); }
+.nand-terminal-settings .settings-card:first-child .setting-item-heading { margin-top: 0; }
+.nand-terminal-settings input[type="text"] { width: 16rem; max-width: 100%; min-width: 0; }
+.nand-home-settings .nand-home-module-icon { order: -1; display: flex; align-items: center; color: var(--text-muted); flex: 0 0 20px; }
+.nand-home-module-icon svg { width: 20px; height: 20px; }
+.nand-home-settings .setting-item-info { flex: 1; }
+.terminal-agent-settings-group { margin-block: var(--size-4-6); padding: var(--size-4-4); border: 1px solid var(--background-modifier-border); border-radius: var(--radius-m); background: var(--background-primary); }
+.terminal-agent-settings-group .setting-item-heading { margin-top: 0; padding-top: 0; }
+.terminal-agent-docs { display: inline-block; margin-bottom: var(--size-4-3); font-size: var(--font-ui-smaller); }
+.terminal-agent-command-setting input { font-family: var(--font-monospace); }
+.terminal-usage-modal h2 { font-size: var(--font-ui-large); }
+.terminal-usage-card h3 { margin: 0 0 var(--size-4-3); font-size: var(--font-ui-medium); overflow-wrap: anywhere; }
+.terminal-usage-reset { line-height: 1.5; overflow-wrap: anywhere; }
+.terminal-usage-pct { white-space: nowrap; }
+.terminal-search-container { gap: var(--size-4-2); }
+.preset-script-modal .setting-item { gap: var(--size-4-3); flex-wrap: wrap; }
+.preset-scripts-menu-item { min-height: 32px; }
+.preset-scripts-menu-item:focus-within .preset-scripts-menu-actions { opacity: 1; }
+
+@container nand-settings (max-width: 520px) {
+	.nand-terminal-settings .setting-item-info { flex-basis: 100%; margin-inline-end: 0; }
+	.nand-terminal-settings .setting-item-control { flex: 1 1 100%; justify-content: flex-start; }
+	.nand-terminal-settings input[type="text"] { width: 100%; flex: 1; }
+	.nand-terminal-settings select { max-width: 100%; }
+}
+
+/* Native button rules are more specific than a single class selector. */
+:is(.nand-settings, .dashboard-settings-root) button.dashboard-settings-tab { border: none; box-shadow: none; background: transparent; }
+:is(.nand-settings, .dashboard-settings-root) button.dashboard-settings-tab.active { background: var(--background-modifier-hover); box-shadow: inset 0 -2px var(--interactive-accent); }
+:is(.nand-settings, .dashboard-settings-root) .setting-item:not(.dashboard-settings-section) > .setting-item-info { flex: 1; }
+:is(.nand-settings, .dashboard-settings-root) .setting-item:not(.dashboard-settings-section) > .setting-item-control { flex: 0 1 auto; }
+.nand-home-settings .setting-item:last-child .setting-item-info { padding-inline-start: 36px; }
+@container nand-settings (max-width: 520px) {
+	.nand-terminal-settings .setting-item:not(.dashboard-settings-section) > .setting-item-info,
+	.nand-terminal-settings .setting-item:not(.dashboard-settings-section) > .setting-item-control { flex: 1 1 100%; }
+}
+
+.apex-editor-tabs button.apex-editor-tab { border: none; box-shadow: none; background: transparent; }
+.apex-editor-tabs button.apex-editor-tab.is-active { background: var(--background-modifier-hover); }
+.nand-terminal-settings .terminal-agent-settings-group .setting-item { padding-inline: 0; }
+.nand-terminal-settings .terminal-agent-settings-group .setting-item-heading { margin: 0; padding-block: 0 var(--size-4-2); }
+
+/* Existing configuration dialogs keep their board palette. */
+.modal--dashboard :is(.setting-item, .dashboard-modal-field) { gap: var(--size-4-3); }
+.modal--dashboard .setting-item-description { line-height: 1.5; }
+.modal--dashboard .dashboard-modal-btn { min-height: 32px; padding-inline: var(--size-4-4); }
+.modal--dashboard :is(input, textarea, button):focus-visible { outline: 2px solid var(--db-accent, var(--interactive-accent)); outline-offset: 2px; }
+.preset-script-modal .modal-button-container { gap: var(--size-4-2); padding-top: var(--size-4-4); }
+.preset-script-modal .modal-button-container button { border-radius: var(--radius-s); }
+
+/* Board geometry stays independent of its thirteen color palettes. */
+.apex-dashboard-root .dashboard-section-header { gap: var(--size-4-3); margin-bottom: var(--size-4-3); }
+.apex-dashboard-root .dashboard-section-title-wrap { min-width: 0; gap: var(--size-4-2); }
+.apex-dashboard-root .dashboard-card-header { align-items: center; gap: var(--size-4-2); margin-bottom: var(--size-4-2); }
+.apex-dashboard-root .dashboard-card-title { min-width: 0; overflow-wrap: anywhere; line-height: 1.5; }
+.apex-dashboard-root .dashboard-card-btn { min-width: 28px; min-height: 28px; border-radius: var(--db-radius-sm); }
+.apex-dashboard-root .dashboard-card:focus-within .dashboard-card-actions { opacity: 1; }
+.apex-dashboard-root .dashboard-card-body { line-height: 1.5; overflow-wrap: anywhere; }
+.apex-dashboard-root .dashboard-section-header-actions { gap: var(--size-4-2); }
+.apex-dashboard-root .dashboard-card-btn:focus-visible { outline: 2px solid var(--db-accent); outline-offset: 2px; }
+:is(.apex-editor-view, .apex-comment-popover, .nand-empty-state, .nand-settings, .dashboard-settings-root) :is(button, a):focus-visible { outline: 2px solid var(--interactive-accent); outline-offset: 2px; }
+@media (pointer: coarse) {
+	:is(.apex-editor-view, .apex-comment-popover, .nand-empty-state, .nand-settings, .dashboard-settings-root) button,
+	.apex-dashboard-root .dashboard-card-btn { min-width: 44px; min-height: 44px; }
+	.apex-dashboard-root .dashboard-card-actions { opacity: 1; }
+}
+@media (prefers-reduced-motion: reduce) {
+	:is(.apex-editor-view, .nand-settings, .dashboard-settings-root, .apex-dashboard-root) *,
+	.apex-comment-popover { animation-duration: 0.01ms; animation-iteration-count: 1; transition-duration: 0.01ms; }
 }
 
 /* xterm */

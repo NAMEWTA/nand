@@ -1,3 +1,4 @@
+import { renderEmptyState } from '../../shared/empty-state';
 import { t } from '../../shared/i18n';
 import type { EditorDomain } from '../host/registry';
 
@@ -8,7 +9,7 @@ export const writingStatsDomain: EditorDomain = {
 	icon: 'bar-chart-3',
 	mountPanel(el) {
 		el.empty();
-		el.createDiv({ cls: 'apex-editor-placeholder', text: t('editor.writingStats.placeholder') });
+		renderEmptyState(el, { icon: 'bar-chart-3', title: t('editor.writingStats.title'), description: t('editor.writingStats.placeholder') });
 		return () => {
 			el.empty();
 		};

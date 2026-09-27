@@ -350,8 +350,9 @@ export class DashboardSettingTab extends PluginSettingTab {
 		const shell = host.createDiv({ cls: 'dashboard-settings-shell' });
 		const products = shell.createDiv({ cls: 'dashboard-settings-products' });
 		for (const tab of this.productTabs()) {
-			const btn = products.createDiv({
+			const btn = products.createEl('button', {
 				cls: 'dashboard-settings-tab' + (tab.key === this.activeProduct ? ' active' : ''),
+				attr: { type: 'button', 'aria-pressed': String(tab.key === this.activeProduct) },
 			});
 			setIcon(btn.createSpan({ cls: 'dashboard-settings-tab-icon' }), tab.icon);
 			btn.createSpan({ text: tab.label });
@@ -365,6 +366,7 @@ export class DashboardSettingTab extends PluginSettingTab {
 	}
 
 	renderTerminalProduct(host: HTMLElement): void {
+		host.addClass('nand-terminal-settings');
 		if (!Platform.isDesktopApp || !this.plugin.terminalHost) {
 			host.createEl('p', { text: t('settings.terminalDesktopOnly') });
 			return;
