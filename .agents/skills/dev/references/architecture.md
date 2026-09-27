@@ -131,13 +131,13 @@ New directories and source files use kebab-case (`library-new-note.ts`, `termina
 | i18n key | dotted, both languages in that module | A key another product already stores |
 | Command id | SKILL rule 9 | Ids already registered |
 
-A rename that touches the next table, a view type, or a CSS class a theme already uses is a data migration, not a cleanup.
+The project is in pre-release development. Keep the current product namespaces consistent; do not add historical-name migration tools or startup gates.
 
 ## Data that must not be casually renamed
 
 | Data | Location | Rule |
 |---|---|---|
-| Plugin settings | `data.json` via `loadData` / `saveData` | Includes `editorWorkbench` and `dataNamespaceVersion: 1`. Check the raw namespace version before applying defaults; unversioned existing data opens only a read-only upgrade settings tab. Normalization order is SKILL rule 10. Never store comment text here |
+| Plugin settings | `data.json` via `loadData` / `saveData` | Includes `editorWorkbench`. Load settings without requiring a namespace version marker. Normalization order is SKILL rule 10. Never store comment text here |
 | Comment threads | vault `.nand/editor/comments/` | `references/editor-comments.md` |
 | Weread progress | `.obsidian/plugins/<manifest.id>/weread-progress.json` | `manifestId()` reads `plugins.nand.manifest.id` and otherwise uses the plugin id |
 | Habits, expense, pomodoro, reading | `habits.json`, `expense.json`, `pomodoro.json`, `reading.json` under `plugins/<manifest.id>/` | Resolve the plugin directory using `manifest.id` |
@@ -159,4 +159,4 @@ A rename that touches the next table, a view type, or a CSS class a theme alread
 - Do not start the terminal, or import `electron`, on the phone path.
 - Do not put product domain logic in `src/plugin` beyond shell, commands, and settings composition.
 
-The namespace migration tool lives outside this repository. `docs/namespace-upgrade.md` describes the required sequence and rollback. Do not add runtime aliases or silently mark existing data as migrated. Dashboard persistence receives `DashboardSettingsAccess` from the owning view; terminal views receive their controller directly, without plugin-registry lookups.
+No namespace migration package or version marker is required. Do not add runtime aliases. Dashboard persistence receives `DashboardSettingsAccess` from the owning view; terminal views receive their controller directly, without plugin-registry lookups.

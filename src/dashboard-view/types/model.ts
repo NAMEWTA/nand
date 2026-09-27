@@ -20,7 +20,6 @@ export interface CalendarTaskTarget {
 }
 
 export interface DashboardSettings {
-	dataNamespaceVersion: 1;
 	/** Path of the ACTIVE workspace file (no .md extension). */
 	dashboardFile: string;
 	/** All workspace board files in switcher order (button i+1). Paths follow
@@ -292,7 +291,6 @@ export interface QuickCommand {
 }
 
 export const DEFAULT_SETTINGS: DashboardSettings = {
-	dataNamespaceVersion: 1,
 	dashboardFile: 'dashboard',
 	workspaceFiles: ['dashboard'],
 	workspaceNames: [''],

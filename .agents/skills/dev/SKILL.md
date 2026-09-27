@@ -45,7 +45,7 @@ This skill is for this repository only. It adapts the Obsidian plugin rules name
 | Entry | `src/plugin/main.ts` → committed `main.js` |
 | Styles | one `styles.css` at the repo root |
 
-Pinned leaves store the view type string. The approved namespace upgrade uses a separate migration tool before enabling this build. Keep the current names stable; see `references/architecture.md` for persisted names and the startup gate.
+Pinned leaves store the view type string. The project is in pre-release development: use the current namespace directly, without migration tools, compatibility aliases, or a namespace startup gate. See `references/architecture.md` for persisted names.
 
 ## Hard rules
 

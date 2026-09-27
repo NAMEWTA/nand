@@ -17,8 +17,6 @@ import { IntroModal } from './intro-modal';
 import { InactiveTerminalView } from './inactive-terminal-view';
 import { terminalLeafKind } from './terminal-leaf-kind';
 import { ModuleLifecycle } from './module-lifecycle';
-import { requiresNamespaceMigration } from './namespace-version';
-import { NamespaceUpgradeTab } from './settings/namespace-upgrade';
 
 import { teardownBasenameIndex } from '../dashboard-view/renderer';
 import { MediaTagService, sanitizeMediaTags, registerMediaTagService } from '../dashboard-view/media/media-tags';
@@ -154,15 +152,9 @@ export default class DashboardPlugin extends Plugin {
 	terminalHost?: TerminalAgentController;
 	private settingsTab!: DashboardSettingTab;
 	private dashboardServicesStarted = false;
-	private namespaceUpgradeRequired = false;
 
 	async onload(): Promise<void> {
 		await this.loadSettings();
-		if (this.namespaceUpgradeRequired) {
-			this.addSettingTab(new NamespaceUpgradeTab(this.app, this));
-			new Notice(t('namespace.instructions'), 0);
-			return;
-		}
 
 		this.registerView(DASHBOARD_VIEW_TYPE, (leaf) => new DashboardView(leaf, this));
 		this.registerView(EDITOR_VIEW_TYPE, (leaf) => new EditorView(leaf, this));
@@ -497,13 +489,6 @@ export default class DashboardPlugin extends Plugin {
 
 	async loadSettings(): Promise<void> {
 		const loaded: unknown = await this.loadData();
-		if (requiresNamespaceMigration(loaded)) {
-			this.namespaceUpgradeRequired = true;
-			const language =
-				loaded && typeof loaded === 'object' && 'language' in loaded && loaded.language === 'en' ? 'en' : 'zh';
-			setLanguage(language);
-			return;
-		}
 		const raw = (loaded ?? {}) as Record<string, unknown> & Partial<DashboardSettings>;
 		// Migrate old widgetTheme combo to individual flags
 		if ('widgetTheme' in raw && typeof raw.widgetTheme === 'string') {
@@ -624,7 +609,6 @@ export default class DashboardPlugin extends Plugin {
 	}
 
 	async saveSettings(): Promise<void> {
-		if (this.namespaceUpgradeRequired) throw new Error(t('namespace.instructions'));
 		await this.saveData(this.settings);
 	}
 
