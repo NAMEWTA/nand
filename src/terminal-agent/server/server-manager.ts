@@ -1,3 +1,4 @@
+import { AgentDataClient } from './agent-data-client';
 /**
  * ServerManager - unified server manager
  * 
@@ -129,6 +130,7 @@ export class ServerManager {
   private eventListeners: Map<keyof ServerEvents, Set<EventListener<keyof ServerEvents>>> = new Map();
   
   // Module clients (lazy-loaded)
+  private _agentDataClient: AgentDataClient | null = null;
   private _ptyClient: PtyClient | null = null;
 
   /**
@@ -201,6 +203,11 @@ export class ServerManager {
    * 
 
    */
+  agentData(): AgentDataClient {
+    if (!this._agentDataClient) { this._agentDataClient = new AgentDataClient(); this._agentDataClient.setWebSocket(this.ws); }
+    return this._agentDataClient;
+  }
+
   pty(): PtyClient {
     if (!this._ptyClient) {
       this._ptyClient = new PtyClient();
@@ -269,6 +276,8 @@ export class ServerManager {
     this.wsConnectPromise = null;
     
     // Destroy module clients
+    this._agentDataClient?.destroy();
+    this._agentDataClient = null;
     this._ptyClient?.destroy();
     
     this._ptyClient = null;
@@ -651,6 +660,7 @@ export class ServerManager {
         
         // Clear the WebSocket on module clients
         this._ptyClient?.setWebSocket(null);
+        this._agentDataClient?.setWebSocket(null);
 
         if (this.isDevInstallInProgress()) {
           debugLog('[ServerManager] 开发安装进行中，跳过 WebSocket 重连通知');
@@ -685,6 +695,7 @@ export class ServerManager {
   private updateClientsWebSocket(): void {
     if (this.ws) {
       this._ptyClient?.setWebSocket(this.ws);
+      this._agentDataClient?.setWebSocket(this.ws);
     }
   }
 
@@ -715,6 +726,7 @@ export class ServerManager {
       
       // Dispatch messages by module
       switch (msg.module) {
+        case 'agent_data': this._agentDataClient?.handleMessage(msg); break;
         case 'pty':
           this._ptyClient?.handleMessage(msg);
           break;

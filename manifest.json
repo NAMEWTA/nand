@@ -3,7 +3,7 @@
 	"name": "NAND",
 	"minAppVersion": "1.12.0",
 	"version": "0.0.1",
-	"description": "NAND workbench — board, Markdown comments, and desktop coding agents.",
+	"description": "NAND — dashboards, comments, coding agents, icons, contacts, automations and notifications.",
 	"author": "NAMEWTA",
 	"isDesktopOnly": false
 }

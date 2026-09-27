@@ -24,11 +24,13 @@ Each person/company is one Markdown file. `nand-type` is `person` or `company`; 
 | `wechat`、`emails` | 字符串列表 | 微信、邮箱 |
 | `tags` | 字符串列表 | 标签 |
 
+人物不生成企业网址字段，企业不生成生日和个人联系方式字段。未知属性仍会保留。更改显示名称不会自动重命名文件。
+
 电话始终按字符串填写，例如 `phones: ["057100000000"]`，保留前导零和 `+` 号。列表推荐使用 YAML 数组；单个文本值也可读取为一项。生日推荐加引号，例如 `birthday: "1990-05-20"`。
 
 ## 工作经历 / Employment
 
-The table between `<!-- nand:employments -->` and `<!-- /nand:employments -->` has fixed columns:
+The table between `<!-- nand:employments -->` and `<!-- /nand:employments -->` uses these semantic columns (new tables display localized English or Chinese headings):
 
 | company                 | department | title | start   | end | status  | key_role | notes    |
 | ----------------------- | ---------- | ----- | ------- | --- | ------- | -------- | -------- |
@@ -36,7 +38,7 @@ The table between `<!-- nand:employments -->` and `<!-- /nand:employments -->` h
 
 `status`: current（现任）or past（曾任）, independent of missing dates. Dates accept YYYY-MM or YYYY-MM-DD. Concurrent jobs are allowed. `key_role`: empty, leader（负责人）, contact（关键联系人）. A company's employee count means recorded current contacts, deduplicated by person UUID, not its total workforce.
 
-现任经历的 `end` 必须为空；曾任经历可保留未知起止时间。关键人物来自现任经历的 `key_role`。企业人员列表由人物履历计算，不在企业文件内维护第二份人员名单。表头名称与顺序须保持不变。
+现任经历的 `end` 必须为空；曾任经历可保留未知起止时间。关键人物来自现任经历的 `key_role`。企业人员列表由人物履历计算，不在企业文件内维护第二份人员名单。表头顺序须保持不变；支持下列机器字段名及 NAND 生成的中英文表头，切换界面语言仍可读取。
 
 ## 人际关系 / Relationships
 

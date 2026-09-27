@@ -42,6 +42,7 @@ function memory() {
 					files.set(p, text);
 				},
 				rename: async (from: string, to: string) => {
+					if (files.has(to)) throw new Error('Destination file already exists!');
 					files.set(to, files.get(from)!);
 					files.delete(from);
 				},
@@ -52,8 +53,8 @@ function memory() {
 	return {
 		app,
 		files,
-		fail: () => {
-			failing = true;
+		fail: (value = true) => {
+			failing = value;
 		},
 	};
 }
@@ -433,4 +434,82 @@ test('dashboard source migrates stable ownership, suppresses completed tasks and
 	await source.createTask(action, 'one-run'); await source.createTask(action, 'one-run');
 	assert.equal(raw.split('Scheduled todo').length - 1, 1);
 	assert.equal(readTaskMeta(raw.split('\n').find(line => line.includes('Scheduled todo'))!).runId, 'one-run');
+});
+
+test('failed state commits are invisible and retry preserves scheduler cursors', async () => {
+	const f = fixture(), service = f.make();
+	await service.load();
+	await service.save(definition());
+	f.fail();
+	await assert.rejects(service.save(definition({ name: 'lost edit' })));
+	assert.equal(service.definitions[0]?.name, 'Test');
+	await assert.rejects(service.run(service.definitions[0]!, 'scheduled', 1000, 1000));
+	assert.equal(service.state.runs.length, 0);
+	assert.deepEqual(service.state.cursors, {});
+	f.fail(false);
+	await service.tick(1000);
+	assert.equal(service.state.runs[0]?.status, 'succeeded');
+	assert.equal(f.notified.length, 1);
+});
+
+test('edits keep list order and deletion retains run snapshots', async () => {
+	const f = fixture(), service = f.make();
+	await service.load();
+	await service.save(definition());
+	await service.save(definition({ id: 'b' }));
+	await service.save(definition({ name: 'edited' }));
+	assert.deepEqual(service.definitions.map((d) => d.id), ['a', 'b']);
+	await service.run(service.definitions[0]!);
+	await service.remove(service.definitions[0]!);
+	assert.equal(service.state.runs[0]?.definition?.name, 'edited');
+});
+
+test('clearing read notifications preserves delivery receipts across restart', async () => {
+	const m = memory();
+	const request = { id: 'once', title: 'title', body: 'body', channels: ['in-app' as const] };
+	const first = new NotificationService(m.app, 'inbox.json', async () => {});
+	await first.load();
+	m.fail();
+	await assert.rejects(first.send(request));
+	assert.equal(first.records.length, 0);
+	m.fail(false);
+	await first.send(request);
+	await Promise.all([first.markRead(), first.clearRead()]);
+	assert.equal(first.records.length, 0);
+	const second = new NotificationService(m.app, 'inbox.json', async () => {});
+	await second.load();
+	await second.send(request);
+	assert.equal(second.records.length, 0);
+});
+
+test('partial primary write recovers last valid data and a later write can succeed', async () => {
+	const m = memory();
+	const validate = (v: unknown): v is { revision: number } => !!v && typeof v === 'object' && typeof (v as { revision?: unknown }).revision === 'number';
+	const store = new JsonStore(m.app, 'store.json', validate);
+	await store.load({ revision: 0 });
+	await store.save({ revision: 1 });
+	await store.save({ revision: 2 });
+	m.files.set('store.json', '{"revision":');
+	const restarted = new JsonStore(m.app, 'store.json', validate);
+	assert.deepEqual(await restarted.load({ revision: 0 }), { revision: 1 });
+	await restarted.save({ revision: 3 });
+	assert.equal(JSON.parse(m.files.get('store.json')!).revision, 3);
+	assert.equal(m.files.get('store.json.corrupt'), '{"revision":');
+});
+
+test('failed inbox load cannot overwrite unreadable receipts and a successful retry emits state', async () => {
+	const m = memory();
+	m.files.set('inbox.json', '{broken');
+	const inbox = new NotificationService(m.app, 'inbox.json', async () => {});
+	await assert.rejects(inbox.load());
+	await assert.rejects(inbox.clearRead());
+	await assert.rejects(inbox.markRead());
+	assert.equal(m.files.get('inbox.json'), '{broken');
+	let changed = 0;
+	inbox.subscribe(() => { changed++; });
+	m.files.set('inbox.json', JSON.stringify({ records: [], receipts: {} }));
+	await inbox.load();
+	assert.equal(changed, 1);
+	await inbox.send({ id: 'retry', title: 'test', body: 'test', channels: ['in-app'] });
+	assert.equal(inbox.unread, 1);
 });

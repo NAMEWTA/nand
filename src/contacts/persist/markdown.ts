@@ -1,3 +1,5 @@
+import { messages as contactMessages } from '../../shared/i18n/contacts';
+import { t } from '../../shared/i18n';
 import { parseDocument, stringify } from 'yaml';
 import {
 	ContactsError,
@@ -13,6 +15,8 @@ import {
 } from '../model';
 
 const employmentColumns = ['company', 'department', 'title', 'start', 'end', 'status', 'key_role', 'notes'];
+const columnKeys: Record<string, string> = { title: 'jobTitle', key_role: 'keyRole', kind: 'kind' };
+const columnKey = (key: string) => `contacts.${columnKeys[key] ?? key}`;
 const relationColumns = ['person', 'kind', 'company', 'notes'];
 const sections = ['employments', 'relations', ...proseSections] as const;
 type Section = (typeof sections)[number];
@@ -80,7 +84,7 @@ function table(text: string, headers: string[]): string[][] {
 	if (!text.trim()) return [];
 	const lines = text.trim().split(/\r?\n/);
 	if (
-		!same(splitRow(lines[0] ?? ''), headers) ||
+		![headers, ...(['en', 'zh'] as const).map((lang) => headers.map((key) => (contactMessages[lang] as Record<string, string>)[columnKey(key)] ?? key))].some((labels) => same(splitRow(lines[0] ?? ''), labels)) ||
 		!splitRow(lines[1] ?? '').every((c) => /^:?-{3,}:?$/.test(c)) ||
 		splitRow(lines[1] ?? '').length !== headers.length
 	)
@@ -117,7 +121,7 @@ function writeRef(ref: EntityRef): string {
 	return `[${label}](${encodeURI(ref.link).replace(/[()#?]/g, (c) => '%' + c.charCodeAt(0).toString(16))})${ref.id ? ` <!-- nand:ref ${ref.id} -->` : ''}`;
 }
 function writeTable(headers: string[], rows: string[][]): string {
-	return [headers, headers.map(() => '---'), ...rows].map((row) => `| ${row.join(' | ')} |`).join('\n');
+	return [headers.map((key) => t(columnKey(key))), headers.map(() => '---'), ...rows].map((row) => `| ${row.join(' | ')} |`).join('\n');
 }
 function sectionText(record: ArchiveRecord, key: Section): string {
 	if (key === 'employments')
@@ -224,12 +228,13 @@ export function parseRecord(raw: string, path: string, modified = 0): ArchiveRec
 }
 export function createMarkdown(record: ArchiveRecord): string {
 	validateRecord(record);
-	const values = { 'nand-type': record.kind, 'nand-id': record.id, ...record.fields };
+	const fields = Object.fromEntries(Object.entries(record.fields).filter(([key]) => record.kind === 'person' ? key !== 'website' : ['name', 'aliases', 'region', 'website', 'tags'].includes(key)));
+	const values = { 'nand-type': record.kind, 'nand-id': record.id, ...fields };
 	const used = record.kind === 'person' ? sections : (['notes'] as const);
 	return (
 		`---\n${stringify(values)}---\n\n# ${record.fields.name.replace(/\r?\n/g, ' ')}\n\n` +
 		used
-			.map((key) => `## ${key}\n\n<!-- nand:${key} -->\n${sectionText(record, key)}\n<!-- /nand:${key} -->`)
+			.map((key) => `## ${t(`contacts.${key}`)}\n\n<!-- nand:${key} -->\n${sectionText(record, key)}\n<!-- /nand:${key} -->`)
 			.join('\n\n') +
 		'\n'
 	);
@@ -262,7 +267,7 @@ export function patchMarkdown(current: string, base: ArchiveRecord, next: Archiv
 		const replacement = `<!-- nand:${key} -->\n${sectionText(next, key)}\n<!-- /nand:${key} -->`;
 		result = section
 			? result.slice(0, section.start) + replacement + result.slice(section.end)
-			: result + `\n\n## ${key}\n\n${replacement}\n`;
+			: result + `\n\n## ${t(`contacts.${key}`)}\n\n${replacement}\n`;
 	}
 	// Keep the generated title in sync, but preserve a user-customized heading.
 	if (base.fields.name !== next.fields.name) {

@@ -9,6 +9,8 @@ export type TaskTarget = { path: string; cardId: string; title: string };
 export class AutomationEditor extends Modal {
 	private draft: AutomationDefinition;
 	private saving = false;
+	private generation = 0;
+	private originalSchedule: string;
 	private runImmediately = false;
 	constructor(
 		app: App,
@@ -20,6 +22,7 @@ export class AutomationEditor extends Modal {
 		existing?: AutomationDefinition,
 	) {
 		super(app);
+		this.originalSchedule = JSON.stringify(existing?.schedule);
 		this.draft = existing
 			? structuredClone(existing)
 			: {
@@ -54,9 +57,11 @@ export class AutomationEditor extends Modal {
 		this.draw();
 	}
 	onClose(): void {
+		this.generation++;
 		this.contentEl.empty();
 	}
 	private draw(): void {
+		const generation = ++this.generation;
 		const el = this.contentEl;
 		el.empty();
 		el.addClass('nand-automation-editor');
@@ -100,7 +105,8 @@ export class AutomationEditor extends Modal {
 		if (action.kind === 'create-task') {
 			const row = new Setting(side).setName(t('automation.target'));
 			void this.targets()
-				.then((targets) =>
+				.then((targets) => {
+					if (generation !== this.generation) return;
 					row.addDropdown((input) => {
 						input.addOption('', t('automation.select'));
 						for (const [i, target] of targets.entries()) input.addOption(String(i), target.title);
@@ -109,9 +115,9 @@ export class AutomationEditor extends Modal {
 							const target = targets[Number(v)];
 							if (v && target) Object.assign(action, { path: target.path, cardId: target.cardId });
 						});
-					}),
-				)
-				.catch((error) => new Notice(String(error)));
+					});
+				})
+				.catch((error) => { if (generation === this.generation) new Notice(String(error)); });
 		}
 		if (this.draft.source?.kind !== 'widget') this.scheduleFields(side);
 		new Setting(side).setName(t('automation.grace')).addText((input) =>
@@ -155,7 +161,7 @@ export class AutomationEditor extends Modal {
 		const agents = this.service.agent()?.listAgents() ?? [];
 		new Setting(el).setName(t('automation.agent')).addDropdown((input) => {
 			input.addOption('', t('automation.select'));
-			for (const agent of agents.filter((a) => a.enabled)) input.addOption(agent.id, agent.title);
+			for (const agent of agents.filter((a) => a.enabled && a.installed !== false)) input.addOption(agent.id, agent.title);
 			input.setValue(action.agentId).onChange((v) => {
 				action.agentId = v;
 				action.session = undefined;
@@ -280,17 +286,16 @@ export class AutomationEditor extends Modal {
 			if (this.runImmediately) this.draft.schedule = { kind: 'once', at: Date.now() };
 			validateSchedule(this.draft.schedule);
 			const a = this.draft.action;
-			if (
-				!this.draft.name.trim() ||
-				(a.kind === 'agent' &&
-					(!a.agentId ||
-						!a.cwd.trim() ||
-						!a.prompt.trim() ||
-						(a.sessionMode === 'specific' && !a.session))) ||
-				(a.kind === 'create-task' && (!a.path || !a.cardId || !a.text.trim())) ||
-				(a.kind === 'notify' && (!a.body.trim() || !this.draft.channels.length))
-			)
-				throw new Error(t('automation.invalid'));
+			const invalid = (key: string) => { throw new Error(t(`automation.${key}`)); };
+			if (!this.draft.name.trim()) invalid('nameRequired');
+			if (!Number.isFinite(this.draft.graceMinutes) || this.draft.graceMinutes < 0) invalid('graceInvalid');
+			if (a.kind === 'agent' && (!a.agentId || !a.cwd.trim())) invalid('agentRequired');
+			if (a.kind === 'agent' && a.sessionMode === 'specific' && !a.session?.sessionId) invalid('sessionMissing');
+			if (a.kind === 'create-task' && (!a.path || !a.cardId)) invalid('targetRequired');
+			if (!(a.kind === 'agent' ? a.prompt : a.kind === 'notify' ? a.body : a.text).trim()) invalid('contentRequired');
+			if (a.kind === 'notify' && !this.draft.channels.length) invalid('channelsRequired');
+			if (!this.runImmediately && this.draft.schedule.kind === 'once' && this.draft.schedule.at <= Date.now() &&
+				JSON.stringify(this.draft.schedule) !== this.originalSchedule) invalid('pastTime');
 			await this.service.save(this.draft);
 			this.close();
 			await this.service.tick();

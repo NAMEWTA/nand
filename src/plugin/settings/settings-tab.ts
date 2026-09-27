@@ -115,8 +115,6 @@ export class DashboardSettingTab extends PluginSettingTab {
 			{
 				type: 'group',
 				items: [
-					{ name: t('automation.title'), desc: t('automation.localOnly'), render: (setting) => { asBlock(setting); onProduct('automation', 'automation')(setting); renderAutomationSettings(this.plugin, setting.settingEl); } },
-					{ name: t('contacts.storage'), desc: t('contacts.folderHint'), aliases: [t('contacts.folder'), t('contacts.columns')], render: (setting) => { asBlock(setting); onProduct('contacts', 'contacts-storage')(setting); this.renderContactsSettings(setting.settingEl); } },
 					{
 						name: t('settings.sectionBar'),
 						searchable: false, // the tab bar, not a setting
@@ -135,6 +133,8 @@ export class DashboardSettingTab extends PluginSettingTab {
 							this.renderHomeSettings(setting.settingEl);
 						},
 					},
+					{ name: t('automation.title'), desc: t('automation.localOnly'), render: (setting) => { asBlock(setting); onProduct('automation', 'automation')(setting); renderAutomationSettings(this.plugin, setting.settingEl); } },
+					{ name: t('contacts.storage'), desc: t('contacts.folderHint'), aliases: [t('contacts.folder'), t('contacts.columns')], render: (setting) => { asBlock(setting); onProduct('contacts', 'contacts-storage')(setting); this.renderContactsSettings(setting.settingEl); } },
 					...this.iconicDefinitions(),
 					{
 						name: t('settings.general'),

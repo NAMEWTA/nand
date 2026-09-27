@@ -1,9 +1,10 @@
+import { PI_EXTENSION, OPENCODE_EXTENSION } from './native-extensions';
 import { Platform } from 'obsidian';
 import { t } from '../../shared/i18n';
 
 async function nodeModules() {
 	if (!Platform.isDesktop) throw new Error(t('automation.agentUnavailable'));
-	return Promise.all([import('node:fs/promises'), import('node:os'), import('node:path'), import('node:process')]);
+	return Promise.resolve([window.require('node:fs/promises') as typeof import('node:fs/promises'), window.require('node:os') as typeof import('node:os'), window.require('node:path') as typeof import('node:path'), window.require('node:process') as typeof import('node:process')] as const);
 }
 export interface NativeHookEvent {
 	event: string;
@@ -21,7 +22,7 @@ const timeout = setTimeout(() => process.exit(0), 3000);
 process.stdin.on('data', data => { input += data; if (input.length > 65536) process.exit(0); });
 process.stdin.on('end', () => { try {
  const data = JSON.parse(input || '{}');
- const name = Date.now() + '-' + crypto.randomUUID();
+ const name = process.hrtime.bigint().toString().padStart(24, '0') + '-' + crypto.randomUUID();
  const file = path.join(dir, name);
  fs.writeFileSync(file + '.pending', JSON.stringify({ token, event: process.argv[2], at: Date.now(), data }), { mode: 0o600 });
  fs.renameSync(file + '.pending', file + '.json');
@@ -112,6 +113,14 @@ export class AutomationHooks {
 	private async install(agent: string, env: Record<string, string>): Promise<void> {
 		const [fs, os, path, process] = await nodeModules();
 		const home = os.homedir();
+		if (agent === 'pi' || agent === 'opencode') {
+			const file = agent === 'pi'
+				? path.join(env.PI_CODING_AGENT_DIR || process.env.PI_CODING_AGENT_DIR || path.join(home, '.pi', 'agent'), 'extensions', 'nand-status.ts')
+				: path.join(process.env.XDG_CONFIG_HOME || path.join(home, '.config'), 'opencode', 'plugins', 'nand-status.mjs');
+			await fs.mkdir(path.dirname(file), { recursive: true });
+			await fs.writeFile(file, agent === 'pi' ? PI_EXTENSION : OPENCODE_EXTENSION, { mode: 0o600 });
+			return;
+		}
 		const providers: Record<string, { file: string; events: string[] }> = {
 			'claude-code': {
 				file: path.join(
@@ -127,6 +136,10 @@ export class AutomationHooks {
 			gemini: {
 				file: path.join(home, '.gemini', 'settings.json'),
 				events: ['SessionStart', 'BeforeAgent', 'AfterAgent'],
+			},
+			grok: {
+				file: path.join(env.GROK_HOME || process.env.GROK_HOME || path.join(home, '.grok'), 'hooks', 'nand-status.json'),
+				events: ['SessionStart', 'UserPromptSubmit', 'Stop', 'StopFailure', 'StopCancelled'],
 			},
 			droid: {
 				file: path.join(home, '.factory', 'settings.json'),

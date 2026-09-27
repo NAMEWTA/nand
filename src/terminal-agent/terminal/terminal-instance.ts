@@ -151,6 +151,8 @@ interface TerminalCommandMarker {
   exitCode: number | null;
 }
 
+type NativeTerminalStatus = 'unknown' | 'running' | 'waiting' | 'idle' | 'exited';
+
 export class TerminalInstance {
   private automationObservers = new Set<(event: { kind: 'data'; text: string } | { kind: 'exit'; code: number } | { kind: 'cancelled' | 'interrupted' }) => void>();
   automationManaged = false;
@@ -161,6 +163,19 @@ export class TerminalInstance {
   private emitAutomation(event: { kind: 'data'; text: string } | { kind: 'exit'; code: number } | { kind: 'cancelled' | 'interrupted' }): void {
     for (const observer of this.automationObservers) observer(event);
   }
+  private nativeState: NativeTerminalStatus = 'unknown';
+  private nativeStateListeners = new Set<() => void>();
+  get nativeStatus(): NativeTerminalStatus { return this.nativeState; }
+  set nativeStatus(value: NativeTerminalStatus) {
+    if (this.nativeState === value) return;
+    this.nativeState = value;
+    for (const listener of this.nativeStateListeners) listener();
+  }
+  onNativeStatusChange(listener: () => void): () => void {
+    this.nativeStateListeners.add(listener);
+    return () => { this.nativeStateListeners.delete(listener); };
+  }
+  nativeSessionId?: string;
   readonly id: string;
   readonly shellType: string;
 
@@ -995,6 +1010,7 @@ export class TerminalInstance {
     if (this.isDestroyed) return;
     this.emitAutomation({ kind: 'cancelled' });
     this.automationObservers.clear();
+    this.nativeStateListeners.clear();
     this.isDestroyed = true;
     this.outputPaused = true;
     this.outputQueue = [];

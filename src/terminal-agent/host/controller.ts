@@ -23,11 +23,9 @@ import { t as sharedT } from '../../shared/i18n';
 import { debugLog, errorLog } from '../logger';
 import { TERMINAL_RIBBON_ICON_ID } from '../icons';
 import { mountNandStatusBarEntry } from './status-bar-entry';
-import { accountConfigDir } from '../launch/accounts';
 import { getAgent } from '../launch/catalog';
-import { cachedVaultSessions, createNodeSessionIo, scanVaultSessions } from '../sessions/scan';
 import { sessionAge } from '../sessions/scope';
-import type { SessionIo, VaultScanRequest, VaultSession } from '../sessions/types';
+import type { VaultSession, VaultSessionAgent } from '../sessions/types';
 import { FeatureVisibilityManager } from '../settings/visibility';
 import { shell } from 'electron';
 import type { TerminalInstance } from '../terminal/terminal-instance';
@@ -80,6 +78,8 @@ type ElectronRemoteRuntime = {
 
 export interface TerminalAgentBridge {
   readAbsoluteReference(): string | null;
+  openAutomations?(): Promise<void>;
+  openNotifications?(): void;
 }
 
 interface TerminalAgentStore {
@@ -128,7 +128,7 @@ export class TerminalAgentController {
     return eventRef;
   }
 
-  addCommand(command: import('obsidian').Command): import('obsidian').Command {
+  addCommand(command: import('obsidian').Command & { nameKey?: string }): import('obsidian').Command {
     return this.host.addCommand(command);
   }
 
@@ -173,7 +173,7 @@ export class TerminalAgentController {
   private _presetScriptsMenuCleanup: (() => void) | null = null;
   private _presetMenuAnchor: DOMRect | null = null;
   private _vaultSessionLoad = 0;
-  private _sessionIo: SessionIo | null = null;
+  private _vaultSessionAbort: AbortController | null = null;
 
   /**
    * Snapshot of the most recent availability probe result, keyed by the
@@ -319,6 +319,7 @@ export class TerminalAgentController {
    * Called when the plugin unloads
    */
   onunload(): void {
+    this._active = false;
     void this.handleUnload();
   }
 
@@ -429,13 +430,13 @@ export class TerminalAgentController {
   activate(): void {
     this._active = true;
     this.updateStatusBar();
-    refreshRegisteredUsage();
+    refreshRegisteredUsage(this);
   }
 
   async deactivate(): Promise<void> {
     this._active = false;
     this._statusBarItem?.toggleClass('is-hidden', true);
-    refreshRegisteredUsage();
+    refreshRegisteredUsage(this);
     this.closePresetScriptsMenu();
     if (this._terminalService) {
       try {
@@ -624,15 +625,33 @@ export class TerminalAgentController {
     this._statusBarItem.toggleClass('is-hidden', !shouldShow);
   }
 
-  openFreshTerminal(): Promise<void> {
-    return this.activateTerminalView(this.getLeafForNewTerminal());
+  async openFreshTerminal(): Promise<void> {
+    const view = this.getActiveTerminalView();
+    if (view) {
+      const initializing = view.isInitializing();
+      if (initializing) await view.waitForTerminalInstance();
+      if (!initializing || (await this.getTerminalService()).hasPendingSession()) await view.newSession();
+      await this.app.workspace.revealLeaf(view.leaf);
+      return;
+    }
+    await this.activateTerminalView(this.getLeafForNewTerminal());
   }
+  launchAgent(id: import('../launch/types').AgentId): Promise<void> { return launchRegisteredAgent(this, id); }
+  resumeSession(session: import('../sessions/types').VaultSession): Promise<void> { return resumeRegisteredSession(this, session); }
+  openAutomationCenter(): Promise<void> { return this.bridge.openAutomations?.() ?? Promise.resolve(); }
+  openNotificationCenter(): void { this.bridge.openNotifications?.(); }
+
 
   async insertIntoActiveTerminal(text: string): Promise<boolean> {
-    const terminalView = this.getActiveTerminalView();
-    const terminal = terminalView?.getTerminalInstance();
+    let terminalView = this.getActiveTerminalView();
+    if (!terminalView) {
+      const leaf = this.app.workspace.getLeavesOfType(TERMINAL_VIEW_TYPE)[0];
+      await leaf?.loadIfDeferred();
+      if (leaf && this.isTerminalView(leaf.view)) terminalView = leaf.view;
+    }
+    const terminal = await terminalView?.waitForTerminalInstance();
     if (!terminalView || !terminal) {
-      new Notice('没有打开的终端');
+      new Notice(t('workbench.sessionMissing'));
       return false;
     }
     terminal.write(text);
@@ -654,7 +673,11 @@ export class TerminalAgentController {
   async activateTerminalView(targetLeaf?: WorkspaceLeaf): Promise<void> {
     const { workspace } = this.app;
     
-    const leaf = targetLeaf ?? this.getLeafForNewTerminal();
+    if (!targetLeaf) {
+      const existing = workspace.getLeavesOfType(TERMINAL_VIEW_TYPE)[0];
+      if (existing) { await existing.loadIfDeferred(); await workspace.revealLeaf(existing); return; }
+    }
+    const leaf = targetLeaf ?? workspace.getLeaf('tab');
 
     // If locking new instances is enabled, pin the tab
     if (this.settings.lockNewInstance) {
@@ -840,8 +863,8 @@ export class TerminalAgentController {
   ): Promise<TerminalView | null> {
     const deadline = Date.now() + timeoutMs;
     do {
+      await leaf.loadIfDeferred?.();
       if (this.isTerminalView(leaf.view)) {
-        await leaf.loadIfDeferred?.();
         return leaf.view;
       }
       await this.delay(50);
@@ -1042,7 +1065,7 @@ export class TerminalAgentController {
     // Open terminal
     this.addCommand({
       id: 'open-terminal',
-      name: t('commands.openTerminal'),
+      nameKey: 'terminalAgent.commands.openTerminal', name: t('commands.openTerminal'),
       checkCallback: (checking: boolean) => {
         // Check visibility settings
         if (!this.featureVisibilityManager.isVisibleAt('terminal', 'showInCommandPalette')) {
@@ -1057,7 +1080,7 @@ export class TerminalAgentController {
 
     this.addCommand({
       id: 'terminal-toggle-always-on-top',
-      name: t('commands.terminalToggleAlwaysOnTop'),
+      nameKey: 'terminalAgent.commands.terminalToggleAlwaysOnTop', name: t('commands.terminalToggleAlwaysOnTop'),
       checkCallback: (checking: boolean) => {
         if (!this.featureVisibilityManager.isVisibleAt('terminal', 'showInCommandPalette')) {
           return false;
@@ -1078,7 +1101,7 @@ export class TerminalAgentController {
     // Clear screen
     this.addCommand({
       id: 'terminal-clear',
-      name: t('commands.terminalClear'),
+      nameKey: 'terminalAgent.commands.terminalClear', name: t('commands.terminalClear'),
       checkCallback: (checking: boolean) => {
         if (!this.featureVisibilityManager.isVisibleAt('terminal', 'showInCommandPalette')) {
           return false;
@@ -1098,7 +1121,7 @@ export class TerminalAgentController {
     // Copy
     this.addCommand({
       id: 'terminal-copy',
-      name: t('commands.terminalCopy'),
+      nameKey: 'terminalAgent.commands.terminalCopy', name: t('commands.terminalCopy'),
       checkCallback: (checking: boolean) => {
         if (!this.featureVisibilityManager.isVisibleAt('terminal', 'showInCommandPalette')) {
           return false;
@@ -1121,7 +1144,7 @@ export class TerminalAgentController {
     // Paste
     this.addCommand({
       id: 'terminal-paste',
-      name: t('commands.terminalPaste'),
+      nameKey: 'terminalAgent.commands.terminalPaste', name: t('commands.terminalPaste'),
       checkCallback: (checking: boolean) => {
         if (!this.featureVisibilityManager.isVisibleAt('terminal', 'showInCommandPalette')) {
           return false;
@@ -1143,7 +1166,7 @@ export class TerminalAgentController {
     // Increase font size
     this.addCommand({
       id: 'terminal-font-increase',
-      name: t('commands.terminalFontIncrease'),
+      nameKey: 'terminalAgent.commands.terminalFontIncrease', name: t('commands.terminalFontIncrease'),
       checkCallback: (checking: boolean) => {
         if (!this.featureVisibilityManager.isVisibleAt('terminal', 'showInCommandPalette')) {
           return false;
@@ -1163,7 +1186,7 @@ export class TerminalAgentController {
     // Decrease font size
     this.addCommand({
       id: 'terminal-font-decrease',
-      name: t('commands.terminalFontDecrease'),
+      nameKey: 'terminalAgent.commands.terminalFontDecrease', name: t('commands.terminalFontDecrease'),
       checkCallback: (checking: boolean) => {
         if (!this.featureVisibilityManager.isVisibleAt('terminal', 'showInCommandPalette')) {
           return false;
@@ -1183,7 +1206,7 @@ export class TerminalAgentController {
     // Reset font size
     this.addCommand({
       id: 'terminal-font-reset',
-      name: t('commands.terminalFontReset'),
+      nameKey: 'terminalAgent.commands.terminalFontReset', name: t('commands.terminalFontReset'),
       checkCallback: (checking: boolean) => {
         if (!this.featureVisibilityManager.isVisibleAt('terminal', 'showInCommandPalette')) {
           return false;
@@ -1203,7 +1226,7 @@ export class TerminalAgentController {
     // Split horizontally
     this.addCommand({
       id: 'terminal-split-horizontal',
-      name: t('commands.terminalSplitHorizontal'),
+      nameKey: 'terminalAgent.commands.terminalSplitHorizontal', name: t('commands.terminalSplitHorizontal'),
       checkCallback: (checking: boolean) => {
         if (!this.featureVisibilityManager.isVisibleAt('terminal', 'showInCommandPalette')) {
           return false;
@@ -1222,7 +1245,7 @@ export class TerminalAgentController {
     // Split vertically
     this.addCommand({
       id: 'terminal-split-vertical',
-      name: t('commands.terminalSplitVertical'),
+      nameKey: 'terminalAgent.commands.terminalSplitVertical', name: t('commands.terminalSplitVertical'),
       checkCallback: (checking: boolean) => {
         if (!this.featureVisibilityManager.isVisibleAt('terminal', 'showInCommandPalette')) {
           return false;
@@ -1241,7 +1264,7 @@ export class TerminalAgentController {
     // Clear buffer
     this.addCommand({
       id: 'terminal-clear-buffer',
-      name: t('commands.terminalClearBuffer'),
+      nameKey: 'terminalAgent.commands.terminalClearBuffer', name: t('commands.terminalClearBuffer'),
       checkCallback: (checking: boolean) => {
         if (!this.featureVisibilityManager.isVisibleAt('terminal', 'showInCommandPalette')) {
           return false;
@@ -1260,7 +1283,7 @@ export class TerminalAgentController {
 
     this.addCommand({
       id: 'terminal-send-selection',
-      name: t('commands.terminalSendSelection'),
+      nameKey: 'terminalAgent.commands.terminalSendSelection', name: t('commands.terminalSendSelection'),
       checkCallback: (checking: boolean) => {
         if (!this.featureVisibilityManager.isVisibleAt('terminal', 'showInCommandPalette')) {
           return false;
@@ -1276,7 +1299,7 @@ export class TerminalAgentController {
 
     this.addCommand({
       id: 'terminal-send-current-note',
-      name: t('commands.terminalSendCurrentNote'),
+      nameKey: 'terminalAgent.commands.terminalSendCurrentNote', name: t('commands.terminalSendCurrentNote'),
       checkCallback: (checking: boolean) => {
         if (!this.featureVisibilityManager.isVisibleAt('terminal', 'showInCommandPalette')) {
           return false;
@@ -1292,7 +1315,7 @@ export class TerminalAgentController {
 
     this.addCommand({
       id: 'terminal-send-current-path',
-      name: t('commands.terminalSendCurrentPath'),
+      nameKey: 'terminalAgent.commands.terminalSendCurrentPath', name: t('commands.terminalSendCurrentPath'),
       checkCallback: (checking: boolean) => {
         if (!this.featureVisibilityManager.isVisibleAt('terminal', 'showInCommandPalette')) {
           return false;
@@ -1308,7 +1331,7 @@ export class TerminalAgentController {
 
     this.addCommand({
       id: 'terminal-prompt-previous',
-      name: t('commands.terminalPromptPrevious'),
+      nameKey: 'terminalAgent.commands.terminalPromptPrevious', name: t('commands.terminalPromptPrevious'),
       checkCallback: (checking: boolean) => {
         if (!this.featureVisibilityManager.isVisibleAt('terminal', 'showInCommandPalette')) {
           return false;
@@ -1324,7 +1347,7 @@ export class TerminalAgentController {
 
     this.addCommand({
       id: 'terminal-prompt-next',
-      name: t('commands.terminalPromptNext'),
+      nameKey: 'terminalAgent.commands.terminalPromptNext', name: t('commands.terminalPromptNext'),
       checkCallback: (checking: boolean) => {
         if (!this.featureVisibilityManager.isVisibleAt('terminal', 'showInCommandPalette')) {
           return false;
@@ -1340,7 +1363,7 @@ export class TerminalAgentController {
 
     this.addCommand({
       id: 'terminal-prompt-last-failed',
-      name: t('commands.terminalPromptLastFailed'),
+      nameKey: 'terminalAgent.commands.terminalPromptLastFailed', name: t('commands.terminalPromptLastFailed'),
       checkCallback: (checking: boolean) => {
         if (!this.featureVisibilityManager.isVisibleAt('terminal', 'showInCommandPalette')) {
           return false;
@@ -1538,7 +1561,7 @@ export class TerminalAgentController {
   }
 
   private isTerminalView(view: View | null | undefined): view is TerminalView {
-    return !!view && view.getViewType() === TERMINAL_VIEW_TYPE;
+    return view instanceof TerminalView;
   }
 
   /**
@@ -2103,56 +2126,31 @@ export class TerminalAgentController {
     const menu = this._presetScriptsMenuEl;
     const host = menu?.querySelector<HTMLElement>('.preset-scripts-menu-sessions');
     if (!menu || !host) return;
-    const request = this.vaultScanRequest();
-    if (!request) {
-      this.renderVaultSessionRows(host, []);
-      return;
-    }
-    const cached = cachedVaultSessions(request.key);
-    if (cached) {
-      this.renderVaultSessionRows(host, cached);
-      return;
-    }
+    this._vaultSessionAbort?.abort();
+    const abort = this._vaultSessionAbort = new AbortController();
     this.renderVaultSessionLoading(host);
     const token = this._vaultSessionLoad;
-    void scanVaultSessions(request).then((sessions) => {
+    void (async () => {
+      const service = await this.getTerminalService();
+      const history = service.history(() => this.settings.agentSettings, this.manifest.dir ?? '');
+      await history.scan(abort.signal);
+      const page = await history.query('', 0, abort.signal, 'active');
+      return page.rows.slice(0, 20).map((session): VaultSession => ({
+        ...session, agentId: session.agentId as VaultSessionAgent,
+        title: history.meta(session.key).title || session.title,
+        env: JSON.parse(session.accountKey) as Record<string, string>,
+      }));
+    })().then((sessions) => {
       if (token !== this._vaultSessionLoad || this._presetScriptsMenuEl !== menu) return;
       this.renderVaultSessionRows(host, sessions);
       this.repositionPresetScriptsMenu();
     }).catch((error) => {
+      if (abort.signal.aborted) return;
       errorLog('[TerminalAgentController] Failed to read vault sessions:', error);
       if (token !== this._vaultSessionLoad || this._presetScriptsMenuEl !== menu) return;
       this.renderVaultSessionRows(host, []);
       this.repositionPresetScriptsMenu();
     });
-  }
-
-  private vaultScanRequest(): VaultScanRequest | null {
-    const adapter = this.app.vault.adapter;
-    if (!(adapter instanceof FileSystemAdapter)) return null;
-    const vaultPath = adapter.getBasePath();
-    if (!vaultPath) return null;
-    const io = this._sessionIo ?? (this._sessionIo = createNodeSessionIo());
-    const dataDir = this.manifest.dir ?? '';
-    const claudeAccount = accountConfigDir(
-      'claude',
-      this.settings.agentSettings.agents['claude-code']?.accountId ?? '',
-      dataDir,
-    );
-    const codexAccount = accountConfigDir(
-      'codex',
-      this.settings.agentSettings.agents.codex?.accountId ?? '',
-      dataDir,
-    );
-    const claudeConfigDirs = claudeAccount ? [claudeAccount] : [];
-    const codexHomes = codexAccount ? [codexAccount] : [];
-    return {
-      key: [vaultPath, ...claudeConfigDirs, ...codexHomes].join('|'),
-      vaultPath,
-      io,
-      claudeConfigDirs,
-      codexHomes,
-    };
   }
 
   private renderVaultSessionLoading(host: HTMLElement): void {
@@ -2205,7 +2203,7 @@ export class TerminalAgentController {
 
     item.addEventListener('click', () => {
       this.closePresetScriptsMenu();
-      void resumeRegisteredSession(session).catch((error) => {
+      void resumeRegisteredSession(this, session).catch((error) => {
         const message = error instanceof Error ? error.message : String(error);
         new Notice(t('sessions.resumeFailed', { message }));
       });
@@ -2850,6 +2848,8 @@ export class TerminalAgentController {
   }
 
   private closePresetScriptsMenu(): void {
+    this._vaultSessionAbort?.abort();
+    this._vaultSessionAbort = null;
     this._vaultSessionLoad += 1;
     this._presetMenuAnchor = null;
     if (this._presetScriptsMenuCleanup) {
@@ -2862,7 +2862,7 @@ export class TerminalAgentController {
     }
   }
 
-  private async runPresetScript(script: PresetScript): Promise<void> {
+  async runPresetScript(script: PresetScript): Promise<void> {
     if (!script) {
       new Notice(t('notices.presetScript.notFound'));
       return;
@@ -2870,7 +2870,7 @@ export class TerminalAgentController {
 
     const normalizedScript = this.normalizePresetScript(script);
     if (isAgentId(normalizedScript.id)) {
-      await launchRegisteredAgent(normalizedScript.id);
+      await launchRegisteredAgent(this, normalizedScript.id);
       return;
     }
     const actions = normalizedScript.actions.filter((action) => action.enabled !== false);

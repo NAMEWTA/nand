@@ -299,7 +299,7 @@ export const DEFAULT_TERMINAL_SETTINGS: TerminalSettings = {
   platformCustomShellPaths: { ...DEFAULT_PLATFORM_CUSTOM_SHELL_PATHS },
   shellArgs: [],
   autoEnterVaultDirectory: true,
-  newInstanceBehavior: 'newHorizontalSplit',
+  newInstanceBehavior: 'newTab',
   createInstanceNearExistingOnes: true,
   focusNewInstance: true,
   lockNewInstance: false,

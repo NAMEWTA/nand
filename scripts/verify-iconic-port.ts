@@ -77,7 +77,14 @@ const wait = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve, 
 
 test('defaults, all locale values, command ids and resource bytes match pinned upstream', () => {
 	assert.deepEqual(DEFAULT_ICONIC_SETTINGS, fixture.defaults);
-	assert.deepEqual(iconicTranslations, fixture.locales);
+	const locales = structuredClone(fixture.locales);
+	// Reviewed NAND copy changes. The upstream oracle remains immutable.
+	locales.en['iconic.backups.backupNotice'] = 'NAND could not load icon settings.';
+	for (const key of Object.keys(locales.zh) as Array<keyof typeof locales.zh>) locales.zh[key] = locales.zh[key].replaceAll('……', '…');
+	locales.zh['iconic.backups.backupNotice'] = 'NAND 无法加载图标设置。';
+	locales.zh['iconic.settings.minimalFolderIcons.name'] = '极简文件夹图标';
+	locales.zh['iconic.commands.toggleQuickSwitcherIcons'] = '切换快速切换器图标';
+	assert.deepEqual(iconicTranslations, locales);
 	for (const [name, hash] of Object.entries(fixture.hashes))
 		assert.equal(
 			createHash('sha256')
@@ -105,7 +112,7 @@ test('defaults, all locale values, command ids and resource bytes match pinned u
 	internals.activate = async () => {};
 	return controller.onload().then(async () => {
 		await controller.onload();
-		assert.deepEqual(ids, fixture.commands);
+		assert.deepEqual(ids, fixture.commands.map((id) => id === 'toggle-minimal.folder-icons' ? 'toggle-minimal-folder-icons' : id));
 	});
 });
 

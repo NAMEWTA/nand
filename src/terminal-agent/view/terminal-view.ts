@@ -1,8 +1,12 @@
+import { render } from 'preact';
+import { onLanguageChanged } from '../../shared/i18n';
+import { SessionSidebar, HistorySidebar, UsageFooter } from './workbench';
+import { h } from 'preact';
 import { t as automationT } from '../../shared/i18n';
 import { refreshLeafTitle } from '../../shared/workspace-title';
 import type { TerminalAgentController } from '../host/controller';
 
-type TerminalViewHost = Pick<TerminalAgentController, 'settings' | 'activateTerminalView' | 'toggleAlwaysOnTopTerminal' | 'getAlwaysOnTopTerminalLabel' | 'isAlwaysOnTopTerminal' | 'handleTerminalViewClosed'>;
+type TerminalViewHost = Pick<TerminalAgentController, 'settings' | 'activateTerminalView' | 'toggleAlwaysOnTopTerminal' | 'getAlwaysOnTopTerminalLabel' | 'isAlwaysOnTopTerminal' | 'handleTerminalViewClosed' | 'app' | 'manifest' | 'openAutomationCenter' | 'openNotificationCenter' | 'runPresetScript' | 'launchAgent' | 'resumeSession'>;
 import type { WorkspaceLeaf, Menu } from 'obsidian';
 import { FileSystemAdapter, ItemView, Notice, TFile, TFolder, setIcon } from 'obsidian';
 import { shell, webUtils } from 'electron';
@@ -62,6 +66,10 @@ export type TerminalAttachOptions = {
 export class TerminalView extends ItemView {
   protected terminalService: TerminalService | null;
   private terminalInstance: TerminalInstance | null = null;
+  private closed = false;
+  private sidebar: HTMLElement | null = null;
+  private historyPanel: HTMLElement | null = null;
+  private footer: HTMLElement | null = null;
   private terminalContainer: HTMLElement | null = null;
   private dropHintEl: HTMLElement | null = null;
   private dragEnterDepth = 0;
@@ -147,22 +155,31 @@ export class TerminalView extends ItemView {
   onOpen(): Promise<void> {
     // Use contentEl instead of containerEl.children[1]
     const container = this.contentEl;
+    this.closed = false;
     container.empty();
+    container.addClass('nand-agent-workbench');
+    this.sidebar = container.createDiv('nand-agent-sidebar');
+    const center = container.createDiv('nand-agent-center');
+    this.historyPanel = container.createDiv('nand-agent-history');
+    this.footer = container.createDiv('nand-agent-usage');
+    this.drawWorkbench();
+    this.register(onLanguageChanged(() => this.drawWorkbench()));
+    this.register(container.onWindowMigrated(() => { this.drawWorkbench(); this.handleHostWindowChanged(); }));
     container.addClass('terminal-view-container');
 
     // Create the search bar container
-    this.searchContainer = container.createDiv('terminal-search-container');
+    this.searchContainer = center.createDiv('terminal-search-container');
     this.createSearchUI();
 
-    this.terminalContainer = container.createDiv('terminal-container');
+    this.terminalContainer = center.createDiv('terminal-container');
     this.ensureDropHint();
     this.hideDropHint();
     if (!this.removeDropHandlers) {
       this.removeDropHandlers = this.setupDropHandlers();
     }
 
-    window.setTimeout(() => {
-      if (!this.terminalInstance && this.terminalContainer) {
+    container.win.setTimeout(() => {
+      if (!this.closed && !this.terminalInstance && this.terminalContainer) {
         void this.initializeTerminal();
       }
     }, 0);
@@ -264,6 +281,9 @@ export class TerminalView extends ItemView {
   }
 
   async onClose(): Promise<void> {
+    this.closed = true;
+    for (const node of [this.sidebar, this.historyPanel, this.footer]) if (node) render(null, node);
+    this.releaseTerminalInstance();
     this.getTerminalPlugin()?.handleTerminalViewClosed(this);
 
     this.resizeObserver?.disconnect();
@@ -301,7 +321,7 @@ export class TerminalView extends ItemView {
     this.fileUriLinkAddon = null;
     terminal.detach();
     this.terminalInstance = null;
-    this.initPromise = Promise.resolve(terminal);
+    this.initPromise = null;
     this.initResolve = null;
     this.initReject = null;
     return terminal;
@@ -337,13 +357,50 @@ export class TerminalView extends ItemView {
     this.setupResizeObserver();
   }
 
+  private drawWorkbench(): void {
+    if (!this.terminalService || this.closed) return;
+    const service = this.terminalService, host = this.terminalHost;
+    const history = service.history(() => host.settings.agentSettings, host.manifest.dir ?? '');
+    if (this.sidebar) render(h(SessionSidebar, { host, service, active: this.terminalInstance?.id ?? '',
+      select: (terminal: TerminalInstance) => this.selectSession(terminal), create: () => this.newSession(), close: (terminal: TerminalInstance) => this.closeSession(terminal) }), this.sidebar);
+    if (this.historyPanel) render(h(HistorySidebar, { history, host }), this.historyPanel);
+    if (this.footer) render(h(UsageFooter, { host, history }), this.footer);
+  }
+  selectSession(terminal: TerminalInstance): void {
+    if (terminal === this.terminalInstance) return;
+    const other = this.app.workspace.getLeavesOfType(TERMINAL_VIEW_TYPE).find((leaf) => leaf !== this.leaf && leaf.view instanceof TerminalView && leaf.view.getTerminalInstance() === terminal);
+    if (other) { void this.app.workspace.revealLeaf(other); return; }
+    this.releaseTerminalInstance(); this.adoptTerminalInstance(terminal); this.drawWorkbench();
+  }
+  async newSession(): Promise<void> {
+    if (!this.terminalService || this.closed) return;
+    const terminal = await this.terminalService.createTerminal();
+    if (this.closed) return;
+    this.selectSession(terminal);
+  }
+  private async closeSession(terminal: TerminalInstance): Promise<void> {
+    const affected = this.app.workspace.getLeavesOfType(TERMINAL_VIEW_TYPE)
+      .map((leaf) => leaf.view).filter((view): view is TerminalView => view instanceof TerminalView && view.getTerminalInstance() === terminal);
+    for (const view of affected) view.releaseTerminalInstance();
+    await this.terminalService?.destroyTerminal(terminal.id);
+    for (const view of affected) {
+      const next = this.terminalService?.getAllTerminals().find((candidate) => !candidate.getXterm().element?.isConnected);
+      if (next) view.selectSession(next);
+      view.drawWorkbench();
+    }
+    this.drawWorkbench();
+  }
+
   private async initializeTerminal(): Promise<void> {
     try {
       if (!this.terminalService) {
         throw new Error('TerminalService not initialized');
       }
 
-      this.terminalInstance = await this.terminalService.createTerminal();
+      const unattached = this.terminalService.hasPendingSession() ? undefined : this.terminalService.getAllTerminals().find((terminal) => !terminal.getXterm().element?.isConnected);
+      this.terminalInstance = unattached ?? await this.terminalService.createTerminal();
+      if (this.closed) { this.terminalInstance.detach(); this.terminalInstance = null; return; }
+      this.drawWorkbench();
       this.initResolve?.(this.terminalInstance);
       this.initResolve = null;
       this.initReject = null;
@@ -387,6 +444,7 @@ export class TerminalView extends ItemView {
     this.titleChangeCleanup = terminal.onTitleChange(() => {
       this.updateLeafHeader(this.leaf);
       this.updateDropHintText();
+      this.drawWorkbench();
     });
 
     this.searchStateCleanup = terminal.onSearchStateChange((visible) => {
@@ -1224,17 +1282,22 @@ export class TerminalView extends ItemView {
     return this.terminalInstance;
   }
 
+  isInitializing(): boolean { return this.initResolve !== null; }
+
   async waitForTerminalInstance(timeoutMs = 8000): Promise<TerminalInstance> {
     if (this.terminalInstance) return this.terminalInstance;
     if (!this.initPromise) {
       throw new Error(t('terminal.notInitialized'));
     }
 
+    const win = this.contentEl.win;
+    let timeout = 0;
     const timeoutPromise = new Promise<never>((_, reject) => {
-      window.setTimeout(() => reject(new Error(t('terminal.notInitialized'))), timeoutMs);
+      timeout = win.setTimeout(() => reject(new Error(t('terminal.notInitialized'))), timeoutMs);
     });
+    try { return await Promise.race([this.initPromise, timeoutPromise]); }
+    finally { win.clearTimeout(timeout); }
 
-    return Promise.race([this.initPromise, timeoutPromise]);
   }
 
   private updateLeafHeader(leaf: WorkspaceLeaf): void {

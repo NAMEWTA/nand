@@ -1,4 +1,5 @@
-import { FileSystemAdapter } from 'obsidian';
+import { ContactsView, CONTACTS_VIEW_TYPE } from '../contacts';
+import { FileSystemAdapter, Notice } from 'obsidian';
 import type DashboardPlugin from './main';
 import { AutomationService } from '../automation/service';
 import { AutomationEditor } from '../automation/editor';
@@ -54,14 +55,27 @@ export async function createAutomationHost(
 			else throw new Error(t('automation.invalid'));
 		},
 		open: async (source) => {
-			await app.workspace.openLinkText(source.path, '', false);
+			if (source.kind === 'contacts') {
+				await plugin.openContacts();
+				const leaf = app.workspace.getLeavesOfType(CONTACTS_VIEW_TYPE)[0];
+				await leaf?.loadIfDeferred();
+				await plugin.contactsHost?.ensureLoaded();
+				if (leaf?.view instanceof ContactsView) leaf.view.select(source.path);
+			} else {
+				const file = app.vault.getFileByPath(source.path);
+				if (!file) throw new Error(t('automation.sourceMissing'));
+				await plugin.switchWorkspace(file.path);
+				await plugin.openDashboard();
+			}
 		},
 		createTask: (action, runId) => dashboard.createTask(action, runId),
 	};
-	const notifications = new NotificationService(app, `.nand/notifications/${deviceId}.json`, (source) =>
-		sources.open(source),
-	);
-	await notifications.load();
+	const notifications = new NotificationService(app, `.nand/notifications/${deviceId}.json`, (source) => sources.open(source), async (target) => {
+		await open();
+		const leaf = app.workspace.getLeavesOfType(AUTOMATION_VIEW_TYPE)[0];
+		await leaf?.loadIfDeferred();
+		if (leaf?.view instanceof AutomationView) leaf.view.showRun(target.runId);
+	});
 	const service = new AutomationService(
 		app,
 		`.nand/automation/${deviceId}.json`,
@@ -80,14 +94,20 @@ export async function createAutomationHost(
 				body:
 					d.action.kind === 'notify' && run.status === 'succeeded'
 						? d.action.body
-						: `${t(`automation.${run.status}`)}${run.message ? `: ${run.message.slice(0, 240)}` : ''}`,
+						: `${t(`automation.${run.status}`)}${run.message ? `: ${(run.errorCode ? t(`automation.${run.errorCode}`) : run.message).slice(0, 240)}` : ''}`,
 				source: d.source,
+				target: { runId: run.id, automationId: d.id, terminalId: run.terminalId },
 				channels: d.channels,
 			});
 		},
 	);
-	await service.load();
+	const retry = async () => {
+		try { await notifications.load(); await service.load(); }
+		catch (error) { service.loadError = String(error); new Notice(t('automation.failedLoad')); }
+	};
+	await retry();
 	const edit = (source?: SourceRef, title?: string, existing?: AutomationDefinition) => {
+		if (service.loadError) { new Notice(t('automation.failedLoad')); return; }
 		const current =
 			existing ?? service.definitions.find((d) => source?.kind === 'dashboard' && d.source?.id === source.id);
 		const cwd = app.vault.adapter instanceof FileSystemAdapter ? app.vault.adapter.getBasePath() : '';
@@ -96,7 +116,7 @@ export async function createAutomationHost(
 	const inbox = () => new NotificationInbox(app, notifications).open();
 	plugin.registerView(
 		AUTOMATION_VIEW_TYPE,
-		(leaf) => new AutomationView(leaf, { service, edit: (d) => edit(d?.source, d?.name, d), inbox }),
+		(leaf) => new AutomationView(leaf, { service, retry, edit: (d) => edit(d?.source, d?.name, d), inbox }),
 	);
 	const open = async () => {
 		let leaf = app.workspace.getLeavesOfType(AUTOMATION_VIEW_TYPE)[0];
@@ -109,7 +129,10 @@ export async function createAutomationHost(
 	plugin.addRibbonIcon('timer', t('automation.title'), () => {
 		void open();
 	});
-	plugin.addRibbonIcon('bell', t('automation.inbox'), inbox);
+	const bell = plugin.addRibbonIcon('bell', t('automation.inbox'), inbox);
+	const updateUnread = () => { if (notifications.unread) bell.dataset.nandUnread = String(notifications.unread); else delete bell.dataset.nandUnread; };
+	updateUnread();
+	plugin.register(notifications.subscribe(updateUnread));
 	const tick = () => {
 		if (!app.workspace.layoutReady) return;
 		void service.tick().catch((error) => {

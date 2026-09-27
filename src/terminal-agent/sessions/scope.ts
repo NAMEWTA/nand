@@ -47,7 +47,7 @@ export function isCwdInsideVault(
   return target.startsWith(withSep);
 }
 
-export function resumeArgs(agentId: 'claude-code' | 'codex' | 'gemini', sessionId: string, launch: readonly string[]): string[] {
+export function resumeArgs(agentId: import('./types').VaultSessionAgent, sessionId: string, launch: readonly string[]): string[] {
   const flags: string[] = [];
   for (let index = 0; index < launch.length; index += 1) {
     const arg = launch[index] ?? '';
@@ -59,7 +59,7 @@ export function resumeArgs(agentId: 'claude-code' | 'codex' | 'gemini', sessionI
     flags.push(arg);
   }
   if (agentId === 'codex') return [...flags, 'resume', sessionId];
-  return [...flags, '--resume', sessionId];
+  return [...flags, agentId === 'pi' || agentId === 'opencode' ? '--session' : '--resume', sessionId];
 }
 
 export type SessionAge =

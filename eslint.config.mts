@@ -1,3 +1,4 @@
+import noObsidianThenable from './scripts/no-obsidian-thenable.mjs';
 import tseslint from 'typescript-eslint';
 import obsidianmd from "eslint-plugin-obsidianmd";
 import globals from "globals";
@@ -24,6 +25,7 @@ export default tseslint.config(
 		},
 	},
 	...obsidianmd.configs.recommended,
+	{ plugins: { nand: { rules: { "no-obsidian-thenable": noObsidianThenable } } }, rules: { "nand/no-obsidian-thenable": "error" } },
 	globalIgnores([
 		"node_modules",
 		"dist",

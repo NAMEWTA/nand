@@ -33,6 +33,7 @@ export interface AgentSettings {
 }
 
 export interface PendingTerminalSession {
+  agentId?: AgentId;
   shellType: string;
   shellArgs?: string[];
   cwd?: string;
@@ -47,6 +48,9 @@ export interface UsageWindow {
 }
 
 export interface UsageSnapshot {
+  checkedAt?: number;
+  stale?: boolean;
+  source?: string;
   agentId: AgentId;
   provider: string;
   account: string | null;

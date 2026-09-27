@@ -374,6 +374,7 @@ export class Setting {
 /** Key scope records handlers; tests dispatch through the topmost active scope. */
 export class Scope {
  handlers: { modifiers: string[] | null; key: string | null; callback: (event: KeyboardEvent) => unknown }[] = [];
- constructor(readonly parent?: Scope) {}
+ readonly parent?: Scope;
+ constructor(parent?: Scope) { this.parent = parent; }
  register(modifiers: string[] | null, key: string | null, callback: (event: KeyboardEvent) => unknown) { this.handlers.push({ modifiers, key, callback }); }
 }

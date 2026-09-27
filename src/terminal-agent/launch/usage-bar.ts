@@ -17,7 +17,7 @@ export interface UsageBarElement {
 export function enabledUsageAgents(plugin: UsageBarHost): AgentId[] {
 	const { agents } = plugin.settings.agentSettings;
 	return AGENT_CATALOG
-		.filter((agent) => agent.usage !== 'none' && agents[agent.id]?.showUsage !== false)
+		.filter((agent) => agent.usage !== 'none' && agents[agent.id]?.enabled !== false && agents[agent.id]?.showUsage !== false)
 		.map((agent) => agent.id);
 }
 

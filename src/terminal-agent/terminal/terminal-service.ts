@@ -1,3 +1,6 @@
+import { AutomationHooks } from '../launch/automation-hooks';
+import { NativeHistory } from '../history/service';
+import type { AgentSettings } from '../launch/types';
 /**
  * TerminalService - terminal service built on the unified Rust server
  * 
@@ -60,9 +63,16 @@ export class TerminalService {
   // Terminal instance registry
   private terminals: Map<string, TerminalInstance> = new Map();
   private pendingSessions: PendingTerminalSession[] = [];
+  private historyStore?: NativeHistory;
+  private listeners = new Set<() => void>();
+  history(settings: () => AgentSettings, dir: string): NativeHistory { return this.historyStore ??= new NativeHistory(this.app, this, settings, dir); }
+  subscribe(listener: () => void): () => void { this.listeners.add(listener); return () => { this.listeners.delete(listener); }; }
+  private emit(): void { for (const listener of this.listeners) listener(); }
+  hasPendingSession(): boolean { return this.pendingSessions.length > 0; }
   
   // Shutdown state flag
   private isShuttingDown = false;
+  private hooks: AutomationHooks;
 
   constructor(
     app: App,
@@ -72,6 +82,7 @@ export class TerminalService {
     saveSettings: () => Promise<void> = () => Promise.resolve(),
   ) {
     this.app = app;
+    this.hooks = new AutomationHooks(app.workspace.containerEl.win);
     this.settings = settings;
     this.serverManager = serverManager;
     this.getTerminalEnvironment = getTerminalEnvironment;
@@ -153,6 +164,8 @@ export class TerminalService {
   /**
    * Get the PTY client
    */
+  async historyClient() { await this.ensureServer(); return this.serverManager.agentData(); }
+
   getPtyClient(): PtyClient {
     return this.serverManager.pty();
   }
@@ -191,6 +204,7 @@ export class TerminalService {
 
   async createTerminal(session?: PendingTerminalSession, observe?: (terminal: TerminalInstance) => void): Promise<TerminalInstance> {
     let created: TerminalInstance | undefined;
+    let closeHook: (() => void) | undefined;
     try {
       // Ensure the server is running
       await this.serverManager.ensureServer();
@@ -233,6 +247,21 @@ export class TerminalService {
         env = Object.keys(terminalEnv).length > 0 ? terminalEnv : undefined;
       }
 
+      if (pending?.agentId && !env?.NAND_HOOK_TOKEN) {
+        const hook = await this.hooks.prepare(pending.agentId, env ?? {}, (event) => {
+          if (!created || event.data.parent_session_id || event.data.subagent_id || event.data.agent_id) return;
+          const id = event.data.session_id;
+          if (typeof id === 'string') {
+            if (created.nativeSessionId && id !== created.nativeSessionId && event.event !== 'SessionStart') return;
+            created.nativeSessionId = id;
+          }
+          if (['UserPromptSubmit', 'BeforeAgent'].includes(event.event)) created.nativeStatus = 'running';
+          if (event.event === 'PermissionRequest') created.nativeStatus = 'waiting';
+          if (['Stop', 'AfterAgent', 'StopFailure', 'StopCancelled'].includes(event.event)) created.nativeStatus = 'idle';
+          this.emit();
+        });
+        closeHook = () => hook.close(); env = { ...env, ...hook.env };
+      }
       const terminal = new TerminalInstance({
         shellType,
         shellArgs,
@@ -256,7 +285,10 @@ export class TerminalService {
         textOpacity: this.settings.textOpacity,
       });
       
+      if (this.isShuttingDown) throw new Error('Terminal service stopped');
       created = terminal;
+      terminal.onNativeStatusChange(() => this.emit());
+      terminal.observeAutomation((event) => { if (event.kind !== 'data') { closeHook?.(); terminal.nativeStatus = 'exited'; this.emit(); } });
       observe?.(terminal);
       // Initialize the terminal through ServerManager
       await terminal.initializeWithServerManager(this.serverManager);
@@ -264,10 +296,13 @@ export class TerminalService {
         terminal.setTitle(pending.title);
       }
       
+      if (this.isShuttingDown) { terminal.destroy(); throw new Error('Terminal service stopped'); }
       this.terminals.set(terminal.id, terminal);
+      this.emit();
       
       return terminal;
     } catch (error) {
+      closeHook?.();
       created?.destroy();
       const errorMessage = error instanceof Error ? error.message : String(error);
       errorLog('[TerminalService] 创建终端实例失败:', errorMessage);
@@ -327,6 +362,7 @@ export class TerminalService {
         errorLog(`[TerminalService] 销毁终端 ${id} 失败:`, error);
       } finally {
         this.terminals.delete(id);
+        this.emit();
         
         // Stop the server if this was the last terminal
         if (this.terminals.size === 0 && !this.isShuttingDown) {
@@ -341,6 +377,7 @@ export class TerminalService {
    * Destroy all terminal instances
    */
   destroyAllTerminals(): void {
+    this.hooks.dispose();
     const failedTerminals: string[] = [];
 
     for (const [id, terminal] of this.terminals.entries()) {

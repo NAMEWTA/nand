@@ -14,6 +14,8 @@ export function renderAutomationSettings(plugin: DashboardPlugin, el: HTMLElemen
 		.addButton((button) =>
 			button.setButtonText(t('automation.open')).onClick(() => plugin.automationHost?.inbox()),
 		);
-	new Setting(el).setName(t('automation.channels')).setDesc(t('automation.channelHelp'));
-	new Setting(el).setName(t('automation.sessionMode')).setDesc(t('automation.hookHelp'));
+	el.createEl('h4', { text: t('automation.channels') });
+	el.createEl('p', { text: t('automation.channelHelp'), cls: 'setting-item-description' });
+	el.createEl('h4', { text: t('automation.sessionMode') });
+	el.createEl('p', { text: t('automation.hookHelp'), cls: 'setting-item-description' });
 }

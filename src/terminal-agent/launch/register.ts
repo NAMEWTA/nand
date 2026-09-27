@@ -1,3 +1,6 @@
+import { runtimeProcess } from './runtime-process';
+import { resolveCli } from './resolver';
+import { absolutePluginDir } from './accounts';
 import { Notice, Setting, type App } from 'obsidian';
 import { t } from '../../shared/i18n';
 import type { TerminalSettings } from '../settings/model';
@@ -17,7 +20,7 @@ export interface OrcaPluginHost {
   settings: TerminalSettings;
   manifest: { dir?: string };
   saveSettings: () => Promise<void>;
-  addCommand: (command: { id: string; name: string; callback: () => void }) => void;
+  addCommand: (command: { id: string; nameKey?: string; name: string; callback: () => void }) => void;
   addStatusBarItem: () => HTMLElement;
   registerInterval: (id: number) => number;
   getTerminalService: () => Promise<TerminalService>;
@@ -29,54 +32,49 @@ export interface OrcaPluginHost {
   isActive?: () => boolean;
 }
 
-let refreshUsageStatus: (() => void) | null = null;
-let launchBound: ((agentId: AgentId) => Promise<void>) | null = null;
-let resumeBound: ((session: VaultSession) => Promise<void>) | null = null;
-
-export function launchRegisteredAgent(agentId: AgentId): Promise<void> {
-  if (!launchBound) {
-    return Promise.reject(new Error('agent launcher is not ready'));
-  }
-  return launchBound(agentId);
+const refreshers = new WeakMap<OrcaPluginHost, () => void>();
+export function launchRegisteredAgent(plugin: OrcaPluginHost, agentId: AgentId): Promise<void> {
+  if (plugin.isActive && !plugin.isActive()) return Promise.reject(new Error(t('automation.agentUnavailable')));
+  return launchAgent(host(plugin), agentId);
+}
+export function resumeRegisteredSession(plugin: OrcaPluginHost, session: VaultSession): Promise<void> {
+  if (plugin.isActive && !plugin.isActive()) return Promise.reject(new Error(t('automation.agentUnavailable')));
+  return resumeAgent(host(plugin), session);
 }
 
-export function resumeRegisteredSession(session: VaultSession): Promise<void> {
-  if (!resumeBound) {
-    return Promise.reject(new Error('agent launcher is not ready'));
-  }
-  return resumeBound(session);
+export function usageContext(plugin: Pick<OrcaPluginHost, 'app' | 'manifest' | 'settings'>) {
+  const adapter = plugin.app.vault.adapter as unknown as { getBasePath(): string };
+  return { settings: plugin.settings.agentSettings, pluginDir: absolutePluginDir(adapter.getBasePath(), plugin.manifest.dir ?? '') };
 }
 
 async function openUsage(plugin: OrcaPluginHost): Promise<void> {
   if (!usageBarVisible(plugin)) return;
-  const snapshots = await readUsageSnapshots(enabledUsageAgents(plugin));
+  const snapshots = await readUsageSnapshots(enabledUsageAgents(plugin), usageContext(plugin));
   new UsageModal(plugin.app, snapshots).open();
 }
 
-export function refreshRegisteredUsage(): void {
-  refreshUsageStatus?.();
+export function refreshRegisteredUsage(plugin: OrcaPluginHost): void {
+  refreshers.get(plugin)?.();
 }
 
 export function registerOrca(plugin: OrcaPluginHost): void {
-  launchBound = (agentId) => launchAgent(host(plugin), agentId);
-  resumeBound = (session) => resumeAgent(host(plugin), session);
-  plugin.addCommand({
+  if (resolveCli('pwsh', '', '')) plugin.addCommand({
     id: 'new-terminal-powershell',
-    name: t('terminalAgent.commands.shellPowerShell'),
+    nameKey: 'terminalAgent.commands.shellPowerShell', name: t('terminalAgent.commands.shellPowerShell'),
     callback: () => {
       void launchShell(host(plugin), 'pwsh', 'PowerShell');
     },
   });
-  plugin.addCommand({
+  if (runtimeProcess().platform === 'win32') plugin.addCommand({
     id: 'new-terminal-cmd',
-    name: t('terminalAgent.commands.shellCmd'),
+    nameKey: 'terminalAgent.commands.shellCmd', name: t('terminalAgent.commands.shellCmd'),
     callback: () => {
       void launchShell(host(plugin), 'cmd', 'Command Prompt');
     },
   });
-  plugin.addCommand({
+  if (runtimeProcess().platform === 'win32') plugin.addCommand({
     id: 'new-terminal-gitbash',
-    name: t('terminalAgent.commands.shellGitBash'),
+    nameKey: 'terminalAgent.commands.shellGitBash', name: t('terminalAgent.commands.shellGitBash'),
     callback: () => {
       void launchShell(host(plugin), 'gitbash', 'Git Bash');
     },
@@ -84,7 +82,7 @@ export function registerOrca(plugin: OrcaPluginHost): void {
 
   plugin.addCommand({
     id: 'insert-absolute-reference',
-    name: '把绝对引用插入当前终端',
+    nameKey: 'terminalAgent.commands.insertAbsoluteReference', name: t('terminalAgent.commands.insertAbsoluteReference'),
     callback: () => {
       const text = plugin.readAbsoluteReference();
       if (!text) {
@@ -98,7 +96,7 @@ export function registerOrca(plugin: OrcaPluginHost): void {
 
   plugin.addCommand({
     id: 'show-usage',
-    name: t('terminalAgent.commands.showUsage'),
+    nameKey: 'terminalAgent.commands.showUsage', name: t('terminalAgent.commands.showUsage'),
     callback: () => {
       void openUsage(plugin);
     },
@@ -106,7 +104,7 @@ export function registerOrca(plugin: OrcaPluginHost): void {
 
   plugin.addCommand({
     id: 'open-agent-settings',
-    name: t('terminalAgent.commands.agentSettings'),
+    nameKey: 'terminalAgent.commands.agentSettings', name: t('terminalAgent.commands.agentSettings'),
     callback: () => plugin.openSettings(),
   });
 
@@ -121,7 +119,7 @@ export function registerOrca(plugin: OrcaPluginHost): void {
     if (inflight) return;
     inflight = true;
     try {
-      const painted = await paintUsageBar(status, plugin, (ids) => readUsageSnapshots(ids));
+      const painted = await paintUsageBar(status, plugin, (ids) => readUsageSnapshots(ids, usageContext(plugin)));
       if (painted) {
         latest = painted;
         consecutiveFailures = painted.some((snapshot) => snapshot.failed) ? consecutiveFailures + 1 : 0;
@@ -131,9 +129,7 @@ export function registerOrca(plugin: OrcaPluginHost): void {
       nextAt = Date.now() + nextUsageDelayMs(plugin.settings.agentSettings.usageRefreshSec, consecutiveFailures);
     }
   };
-  refreshUsageStatus = () => {
-    void render();
-  };
+  refreshers.set(plugin, () => { void render(); });
   status.addEventListener('click', () => {
     if (!usageBarVisible(plugin)) return;
     new UsageModal(plugin.app, latest).open();
@@ -153,7 +149,7 @@ function host(plugin: OrcaPluginHost): LaunchHost {
       const adapter = plugin.app.vault.adapter as { getBasePath?: () => string };
       return typeof adapter.getBasePath === 'function' ? adapter.getBasePath() : undefined;
     },
-    getPluginDataDir: () => plugin.manifest.dir ?? '',
+    getPluginDataDir: () => absolutePluginDir((plugin.app.vault.adapter as unknown as { getBasePath(): string }).getBasePath(), plugin.manifest.dir ?? ''),
     getAgentSettings: () => plugin.settings.agentSettings,
     saveAgentSettings: async (settings: AgentSettings) => {
       plugin.settings.agentSettings = normalizeAgentSettings(settings);
@@ -260,7 +256,7 @@ export function renderAgentSettings(containerEl: HTMLElement, plugin: OrcaPlugin
             .onChange(async (value) => {
               plugin.settings.agentSettings.agents[agent.id].showUsage = value;
               await plugin.saveSettings();
-              refreshUsageStatus?.();
+              refreshRegisteredUsage(plugin);
             });
         });
     }
@@ -275,7 +271,7 @@ export function renderAgentSettings(containerEl: HTMLElement, plugin: OrcaPlugin
         .onChange(async (value) => {
           plugin.settings.agentSettings.showUsageInStatusBar = value;
           await plugin.saveSettings();
-          refreshUsageStatus?.();
+          refreshRegisteredUsage(plugin);
         });
     });
 

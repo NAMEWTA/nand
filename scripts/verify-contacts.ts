@@ -1,3 +1,4 @@
+import { t, setLanguage } from '../src/shared/i18n';
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { TFile, TFolder, MarkdownView, type App } from 'obsidian';
@@ -58,7 +59,7 @@ test('portable Markdown round trip preserves strings, Unicode, links, table esca
 	assert.deepEqual(result.prose, person.prose);
 	assert.deepEqual(result.employments, person.employments);
 	assert.deepEqual(result.relations, person.relations);
-	assert.ok(result.raw.includes('| company |'));
+	assert.ok(result.raw.includes(`| ${t('contacts.company')} |`));
 	assert.ok(!result.raw.includes('data.json'));
 });
 
@@ -101,7 +102,7 @@ test('malformed YAML, duplicate identity and table boundaries never silently tru
 	for (const raw of [
 		base.raw.replace('name: 张三', 'name: [broken'),
 		base.raw.replace('<!-- /nand:notes -->', ''),
-		base.raw.replace('| company |', '| changed |'),
+		base.raw.replace(`| ${t('contacts.company')} |`, '| changed |'),
 		base.raw.replace('nand-id:', 'nand-id: duplicate\nnand-id:'),
 	]) {
 		assert.ok(parseRecord(raw, base.path)!.errors.length);
@@ -443,4 +444,17 @@ test('renaming updates the generated heading without overwriting a customized he
 	assert.ok(patchMarkdown(base.raw, base, draft).includes('# 新名字\n'));
 	const customized = base.raw.replace('# 张三\n', '# 我的客户记录\n');
 	assert.ok(patchMarkdown(customized, base, draft).includes('# 我的客户记录\n'));
+});
+
+
+test('new notes localize headings and tables while language changes preserve parsing', () => {
+  for (const language of ['en', 'zh'] as const) {
+    setLanguage(language);
+    const raw = createMarkdown(fixture());
+    assert.ok(raw.includes(`## ${t('contacts.employments')}`));
+    assert.ok(!raw.includes('website:'));
+    setLanguage(language === 'en' ? 'zh' : 'en');
+    assert.deepEqual(parseRecord(raw, 'person.md')?.errors, []);
+  }
+  setLanguage('zh');
 });

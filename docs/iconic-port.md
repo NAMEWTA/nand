@@ -12,7 +12,7 @@
 - `settings/model.ts`、`settings/sections.ts`：原版默认值、字段与六个设置分组。旧版及 1.13 声明式入口均保留 22 个配置项、规则书和使用情况入口。
 - `persistence/store.ts`：独立文件读写、延迟保存、备份、恢复及外部重载。
 - `res/`、`resources.ts`、`utils/`：上游资源及工具；私有 Obsidian API 类型集中在领域内部。
-- `shared/i18n/iconic.ts`：逐项保留上游中英文各 339 条文案，使用 NAND 当前语言，保留 `{#}` 占位符。
+- `shared/i18n/iconic.ts`：以固定上游中英文各 339 条文案为基础，应用经过审阅的 NAND 术语修订，使用 NAND 当前语言，保留 `{#}` 占位符。
 
 文件名使用 kebab-case，源文件使用相对导入。图标领域不依赖看板、评论、终端、档案或同步领域。14 个命令保留上游局部 ID，由 Obsidian 加上 `nand:` 前缀。
 
@@ -65,3 +65,5 @@
 ## 资源与发布
 
 上游 MIT-0、Lucide ISC、Unicode License v3 及来源保存在 `src/iconic/res/NOTICE.txt`。esbuild 将完整通知放入 `main.js` banner，既有仅包含 `main.js`、`manifest.json`、`styles.css` 的发布包也会携带许可证。本次没有改发布流程，也没有创建发布版本。
+
+2026-09-27：修正内联标题的 body 状态选择器；命令 ID 使用 `toggle-minimal-folder-icons`。中文省略号、极简、快速切换器等调整在测试中使用显式覆盖表，固定上游 oracle 不改写。偶发加载失败 #33 未稳定复现，不将这些改动宣称为其根因修复。

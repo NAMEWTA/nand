@@ -53,6 +53,7 @@ Copy the nearest script, including extra aliases such as the music stubs. Do not
 | Comment composer, language subscriptions, dashboard persistence | `pnpm run test:issue-regressions` |
 | Comment anchors, the comment store, or the editor/dashboard import boundary | `pnpm run test:editor-comments` |
 | Automation scheduler, notification delivery, native hooks or reminder metadata | `pnpm run test:automation`; for Rust/PTTY changes also `cargo test --manifest-path processes/rust-terminal-servers/Cargo.toml` and `node scripts/verify-pty-automation.mjs` against a local release build (Linux) |
+| Promise callback handling of Obsidian controls | `pnpm run test:promise-callbacks` (run separately from lint: it creates then removes a temporary typed fixture under src) |
 | Terminal agent behavior covered by its `*.test.ts` files | `pnpm run test:terminal-agent` |
 | Module lifecycle (`src/plugin/module-lifecycle.test.ts`), settings navigation, or settings CSS | `pnpm run test:settings-nav` |
 | Archive model, Markdown format, index or controller | `pnpm run test:contacts`; see Archives checks below |
@@ -136,3 +137,12 @@ The archives leaf introduces Preact: `tsconfig` includes `.tsx`, JSX uses `preac
 `test:iconic-port` bundles with `scripts/iconic-obsidian-stub.ts` and runs in UTC. Its fixed 1.1.10 fixture contains outputs produced by the original RuleManager, defaults, commands, locale values and resource hashes. It also checks isolated persistence, backup recovery, external reload and patch restoration. The oracle lives in `scripts/fixtures/iconic/upstream-1.1.10.json`; its README records provenance. Do not generate expected rule outputs from the migrated implementation. See [the port record](../../../../docs/iconic-port.md) for desktop checks and platform limits.
 
 For changes to icon settings, verify that every declaration routes persistence through the icon controller rather than a shell `control.key`. For lifecycle/CSS changes, check disabled-state cleanup and both main and floating windows; body state classes must remain on the same element as the module gate. Automated stubs do not replace those desktop checks.
+
+
+## Native history checks
+
+History protocol/parser changes require `cargo test --locked --manifest-path processes/rust-terminal-servers/Cargo.toml`, a matching local release binary, and `node scripts/verify-pty-automation.mjs`. The Linux integration script covers concurrent history scan and PTY initialization, paged query, cancellation, real exit status and process-tree shutdown. Rust fixtures cover full transcripts, scope, account identity, OpenCode SQLite, Gemini JSONL ownership, Grok companion-file changes, metadata filters and usage deduplication. `test:terminal-agent` executes the generated Pi/OpenCode extensions against an isolated event spool.
+
+The Rust service now bundles SQLite through rusqlite; rebuild platform binaries from the same commit as main.js. Do not ship an earlier service with the new agent_data protocol. The release workflow builds five target binaries; local Linux success does not verify macOS/Windows execution or authenticated provider quota APIs.
+
+Obsidian 的外置 Node 模块必须在 desktop guard 后使用 `window.require`；esbuild external 的 `import('node:…')` 在渲染进程中可能无法解析。Node 单测与 tsc 不会捕获这一点，历史／hook 加载改动要在真实 Obsidian 中打开工作台验证。

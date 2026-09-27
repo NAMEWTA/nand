@@ -1,10 +1,11 @@
+import { stableRibbon } from './ribbon';
 import { ContactsController, ContactsView, CONTACTS_VIEW_TYPE } from '../contacts';
 import { createAutomationHost } from './automation-host';
 import type { AutomationUiPort } from '../shared/automation/types';
 import { normalizeContactsSettings } from '../shared/contacts-settings';
 import { IconicController } from '../iconic';
 import { refreshLeafTitle } from '../shared/workspace-title';
-import { Notice, Platform, Plugin, TAbstractFile, TFile } from 'obsidian';
+import { Notice, Platform, Plugin, TAbstractFile, TFile, type Command } from 'obsidian';
 import {
 	DEFAULT_SETTINGS,
 	type DashboardSettings,
@@ -17,7 +18,7 @@ import { DashboardSettingTab } from './settings';
 import { DashboardView, DASHBOARD_VIEW_TYPE, showModuleDisabled } from '../dashboard-view';
 import { EditorView, EDITOR_VIEW_TYPE, createEditorHost, type EditorHost, collectReferences } from '../editor-view';
 import { TerminalAgentController, TERMINAL_VIEW_TYPE, readLegacyTerminalSettings } from '../terminal-agent';
-import { setLanguage, t } from '../shared/i18n';
+import { onLanguageChanged, setLanguage, t } from '../shared/i18n';
 import { normalizeEditorWorkbench } from '../shared/editor-workbench';
 import { IntroModal } from './intro-modal';
 import { InactiveTerminalView } from './inactive-terminal-view';
@@ -146,6 +147,14 @@ function migrateAnniversaries(raw: Record<string, unknown>): AnniversaryConfig[]
 }
 
 export default class DashboardPlugin extends Plugin {
+	override addCommand(command: Command & { nameKey?: string }): Command {
+		const registered = super.addCommand(command);
+		if (command.nameKey) this.register(onLanguageChanged(() => { registered.name = `${this.manifest.name}: ${t(command.nameKey!)}`; }));
+		return registered;
+	}
+	override addRibbonIcon(icon: string, title: string, callback: (evt: MouseEvent) => unknown): HTMLElement {
+		return stableRibbon(this, icon, title, callback, (glyph, id, action) => super.addRibbonIcon(glyph, id, action));
+	}
 	automationHost?: AutomationUiPort & { dispose(): void; inbox(): void };
 	settings!: DashboardSettings;
 	contactsHost?: ContactsController;
@@ -187,7 +196,7 @@ export default class DashboardPlugin extends Plugin {
 
 		this.addCommand({
 			id: 'cycle-theme',
-			name: t('main.cycleTheme'),
+			nameKey: 'main.cycleTheme', name: t('main.cycleTheme'),
 			callback: async () => {
 				const themes = [
 					'earth',
@@ -214,19 +223,19 @@ export default class DashboardPlugin extends Plugin {
 
 		this.addCommand({
 			id: 'next-workspace',
-			name: t('main.nextWorkspace'),
+			nameKey: 'main.nextWorkspace', name: t('main.nextWorkspace'),
 			callback: () => this.cycleWorkspace(1),
 		});
 
 		this.addCommand({
 			id: 'previous-workspace',
-			name: t('main.prevWorkspace'),
+			nameKey: 'main.prevWorkspace', name: t('main.prevWorkspace'),
 			callback: () => this.cycleWorkspace(-1),
 		});
 
 		this.addCommand({
 			id: 'toggle-note-popover',
-			name: t('main.toggleNotePopover'),
+			nameKey: 'main.toggleNotePopover', name: t('main.toggleNotePopover'),
 			callback: async () => {
 				const value = !this.settings.disableNotePopover;
 				this.settings = { ...this.settings, disableNotePopover: value };
@@ -237,7 +246,7 @@ export default class DashboardPlugin extends Plugin {
 
 		this.addCommand({
 			id: 'add-section',
-			name: t('main.addSection'),
+			nameKey: 'main.addSection', name: t('main.addSection'),
 			callback: () => {
 				const leaves = this.app.workspace.getLeavesOfType(DASHBOARD_VIEW_TYPE);
 				if (leaves.length === 0) {
@@ -253,7 +262,7 @@ export default class DashboardPlugin extends Plugin {
 
 		this.addCommand({
 			id: 'toggle-banner-mode',
-			name: t('main.toggleBannerMode'),
+			nameKey: 'main.toggleBannerMode', name: t('main.toggleBannerMode'),
 			callback: () => {
 				const leaves = this.app.workspace.getLeavesOfType(DASHBOARD_VIEW_TYPE);
 				if (leaves.length === 0) {
@@ -437,6 +446,8 @@ export default class DashboardPlugin extends Plugin {
 		if (!Platform.isDesktopApp || this.terminalHost?.isActive()) return;
 		if (!this.terminalHost) {
 			this.terminalHost = new TerminalAgentController(this, {
+                openAutomations: async () => { await this.automationHost?.open(); },
+                openNotifications: () => this.automationHost?.inbox(),
 				readAbsoluteReference: () => collectReferences(this.app, 'absolute'),
 			});
 			try {

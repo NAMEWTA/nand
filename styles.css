@@ -1588,7 +1588,7 @@
 
 /* Sections on an inactive tab. !important: themes restyle .setting-item with
  * their own display rules, which would resurrect hidden rows. */
-.setting-item.dashboard-settings-section.dashboard-settings-page-hidden {
+.setting-item[data-settings-product].dashboard-settings-page-hidden {
 	display: none !important;
 }
 
@@ -1800,7 +1800,9 @@
 
 .dashboard-settings-products {
 	display: flex;
-	flex-wrap: wrap;
+	flex-wrap: nowrap;
+	overflow-x: auto;
+	white-space: nowrap;
 	gap: 4px;
 	max-width: 100%;
 }
@@ -24830,7 +24832,7 @@ body:where(.nand-iconic-enabled) {
 	gap: 0.3em;
 	font-size: var(--inline-title-size); /* Allow gap size to scale naturally */
 }
-:where(body.nand-iconic-enabled) .show-inline-title .iconic-title-wrapper {
+:where(body.nand-iconic-enabled).show-inline-title .iconic-title-wrapper {
 	display: flex;
 }
 :where(body.nand-iconic-enabled) .iconic-title-wrapper > .iconic-icon {
@@ -25482,3 +25484,31 @@ body:where(.nand-iconic-enabled)[data-theme="Ukiyo"] .workspace-leaf > .workspac
  .nand-automation-layout, .nand-automation-editor-body { grid-template-columns: minmax(0, 1fr); }
  .nand-automation-view button, .nand-automation-editor button { min-height: 44px; }
 }
+
+/* Agent workbench: xterm remains an imperative island owned by TerminalService. */
+.workspace-leaf-content[data-type="terminal-view"] { container-type: inline-size; container-name: nand-terminal; }
+.workspace-leaf-content[data-type="terminal-view"] .view-content.nand-agent-workbench { display: grid; grid-template-columns: minmax(160px, 220px) minmax(160px, 1fr) minmax(200px, 272px); grid-template-rows: minmax(0, 1fr) auto; gap: 0; padding: 0; overflow: hidden; }
+.nand-agent-sidebar, .nand-agent-history { min-width: 0; overflow: auto; padding: 12px; background: var(--background-secondary); display: flex; flex-direction: column; gap: 8px; }
+.nand-agent-sidebar { border-right: 1px solid var(--background-modifier-border); }
+.nand-agent-history { border-left: 1px solid var(--background-modifier-border); }
+.nand-agent-center { min-width: 0; min-height: 0; display: flex; flex-direction: column; overflow: hidden; }
+.nand-agent-center > .terminal-container { flex: 1; min-height: 0; }
+.nand-agent-usage { grid-column: 1 / -1; display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding: 8px 12px; border-top: 1px solid var(--background-modifier-border); font-size: var(--font-ui-smaller); }
+.nand-agent-usage button { max-width: 100%; white-space: normal; height: auto; }
+.nand-agent-workbench button { min-height: 32px; }
+.nand-session-row { display: flex; gap: 4px; }
+.nand-session-row > button:first-child { display: flex; flex-direction: column; align-items: start; gap: 2px; height: auto; padding: 6px 8px; flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+.nand-agent-workbench button.is-active { background: var(--background-modifier-hover); color: var(--text-accent); }
+.nand-history-row > button { display: flex; flex-direction: column; align-items: start; width: 100%; height: auto; padding: 8px; text-align: left; white-space: normal; overflow-wrap: anywhere; }
+.nand-history-row small { color: var(--text-muted); }
+.nand-agent-history input, .nand-agent-history select { width: 100%; min-width: 0; }
+.nand-history-preview pre, .nand-agent-history details pre { white-space: pre-wrap; overflow-wrap: anywhere; font-size: var(--font-ui-small); }
+.nand-history-preview { border-top: 1px solid var(--background-modifier-border); padding-top: 8px; }
+.nand-history-actions, .nand-history-pagination { display: flex; flex-wrap: wrap; gap: 4px; }
+.nand-notification-description { white-space: pre-line; }
+.nand-settings [data-settings-product="contacts"] input { min-width: 0; max-width: 100%; }
+@container nand-terminal (max-width: 680px) { .workspace-leaf-content[data-type="terminal-view"] .view-content.nand-agent-workbench { grid-template-columns: 140px minmax(120px, 1fr); grid-template-rows: minmax(160px, 1fr) minmax(0, 200px) auto; } .nand-agent-history { grid-column: 1 / -1; max-height: 240px; border-top: 1px solid var(--background-modifier-border); } }
+.is-mobile .nand-agent-workbench button { min-height: 44px; }
+
+.side-dock-ribbon-action[data-nand-unread] { position: relative; }
+.side-dock-ribbon-action[data-nand-unread]::after { content: attr(data-nand-unread); position: absolute; top: 0; right: 0; padding: 0 4px; border-radius: var(--radius-s); background: var(--interactive-accent); color: var(--text-on-accent); font-size: var(--font-ui-smaller); }

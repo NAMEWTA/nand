@@ -67,13 +67,8 @@ test('AI_LAUNCHER_CATALOG only contains coding agent entries today', () => {
     .filter((entry) => entry.category === 'coding-agent')
     .map((entry) => entry.presetId)
     .sort();
-  assert.deepEqual(codingAgentIds, [
-    'claude-code', 'codex', 'grok', 'opencode', 'gemini', 'qwen-code', 'kimi', 'antigravity', 'minimax',
-    'openclaude', 'autohand', 'ante', 'trae', 'opencode2', 'mimo-code', 'pi', 'omp', 'prime-agent',
-    'aider', 'goose', 'amp', 'kilo', 'kiro', 'crush', 'aug', 'cline', 'codebuff', 'command-code',
-    'continue', 'cursor', 'droid', 'mistral-vibe', 'rovo', 'hermes', 'openclaw', 'copilot', 'muse', 'zcode', 'devin',
-  ].sort());
-  assert.equal(AI_LAUNCHER_CATALOG.length, 39);
+  assert.deepEqual(codingAgentIds, ['claude-code', 'codex', 'gemini', 'grok', 'opencode', 'pi']);
+  assert.equal(AI_LAUNCHER_CATALOG.length, 6);
 });
 
 test('commandAvailabilityToLauncherStatus maps probe results to badge statuses', () => {
@@ -139,7 +134,7 @@ test('every catalog entry advertises a version registry source', () => {
   // where to look. If a future launcher ships without one, fail the test
   // until the author makes a deliberate decision (and updates the README
   // outbound-traffic section accordingly).
-  const withRegistry = new Set(['claude-code', 'codex', 'opencode', 'gemini', 'qwen-code']);
+  const withRegistry = new Set(['claude-code', 'codex', 'opencode', 'gemini', 'pi']);
   for (const entry of AI_LAUNCHER_CATALOG) {
     if (!withRegistry.has(entry.presetId)) {
       assert.equal(entry.versionRegistry, undefined);
@@ -161,7 +156,7 @@ test('version registry sources match the documented endpoints', () => {
     ['codex', 'npm:@openai/codex'],
     ['opencode', 'github-release:anomalyco/opencode'],
     ['gemini', 'npm:@google/gemini-cli'],
-    ['qwen-code', 'npm:@qwen-code/qwen-code'],
+    ['pi', 'npm:@mariozechner/pi-coding-agent'],
   ]);
   for (const entry of AI_LAUNCHER_CATALOG) {
     const registry = entry.versionRegistry;

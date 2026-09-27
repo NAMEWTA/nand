@@ -1,4 +1,4 @@
-export type VaultSessionAgent = 'claude-code' | 'codex' | 'gemini';
+export type VaultSessionAgent = 'claude-code' | 'codex' | 'gemini' | 'opencode' | 'pi' | 'grok';
 
 export interface VaultSession {
   transcriptPath?: string;

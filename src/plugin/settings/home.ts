@@ -10,8 +10,8 @@ export function renderHomeSettings(this: DashboardSettingTab, containerEl: HTMLE
 		{ key: 'dashboard', name: t('modules.dashboard'), desc: t('modules.dashboardDesc') },
 		{ key: 'editor', name: t('modules.editor'), desc: t('modules.editorDesc') },
 		{ key: 'terminal', name: t('modules.terminal'), desc: t('modules.terminalDesc') },
-		{ key: 'contacts', name: t('contacts.title'), desc: t('contacts.description') },
 		{ key: 'iconic', name: t('modules.iconic'), desc: t('modules.iconicDesc') },
+		{ key: 'contacts', name: t('contacts.title'), desc: t('contacts.description') },
 	];
 	for (const row of rows) {
 		const setting = new Setting(containerEl)

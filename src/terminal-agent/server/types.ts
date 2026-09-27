@@ -12,7 +12,7 @@
  * Module type
  * Must stay in sync with the Rust-side ModuleType
  */
-export type ModuleType = 'pty';
+export type ModuleType = 'pty' | 'agent_data';
 
 // ============================================================================
 // Server info

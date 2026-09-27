@@ -24,6 +24,8 @@ export class UsageModal extends Modal {
       const card = contentEl.createDiv({ cls: 'terminal-usage-card' });
       const title = snapshot.account ? `${snapshot.provider} · ${snapshot.account}` : snapshot.provider;
       card.createEl('h3', { text: title });
+      if (snapshot.stale) card.createEl('p', { text: `${t('agents.usageStale')} · ${snapshot.status}` });
+      if (snapshot.checkedAt) card.createEl('small', { text: `${t('agents.usageUpdated')} ${new Date(snapshot.checkedAt).toLocaleString()}` });
       if (snapshot.windows.length === 0) {
         card.createEl('p', { text: snapshot.status });
         continue;
@@ -68,5 +70,5 @@ function refreshLabel(window: UsageWindow): string {
       : window.name === '每周'
         ? t('agents.refreshWeek')
         : t('agents.refreshGeneric');
-  return window.resetAt ? `${name} ${window.resetAt}` : name;
+  return window.resetAt ? `${name} ${new Date(window.resetAt).toLocaleString()}` : name;
 }

@@ -10,6 +10,7 @@ name = "rust-terminal-servers"
 path = "src/main.rs"
 
 [dependencies]
+rusqlite = { version = "0.32", features = ["bundled"] }
 # PTY support
 portable-pty = "0.9"
 which = "6.0"

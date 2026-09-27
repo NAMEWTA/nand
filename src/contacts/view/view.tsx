@@ -126,6 +126,10 @@ export class ContactsView extends ItemView {
 			selectedId: typeof raw.selectedId === 'string' ? raw.selectedId : '',
 			scroll: typeof raw.scroll === 'number' && Number.isFinite(raw.scroll) ? Math.max(0, raw.scroll) : 0,
 		};
+		if (this.app.workspace.layoutReady) await this.controller?.ensureLoaded();
+		if (this.app.workspace.layoutReady && this.controller && this.state.selectedPath && !this.controller.index.byPath.has(this.state.selectedPath) && !this.controller.index.get(this.state.selectedId)) {
+			this.state.selectedPath = ''; this.state.selectedId = ''; this.persist();
+		}
 		this.render();
 		await super.setState(raw, result);
 		if (!this.state.selectedPath)
@@ -227,6 +231,7 @@ export class ContactsView extends ItemView {
 			await this.controller.remove(base);
 			this.state.selectedPath = '';
 			this.state.selectedId = '';
+			this.persist();
 			this.history = [];
 			this.render();
 		} catch (error) {

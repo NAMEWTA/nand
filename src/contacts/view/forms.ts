@@ -70,7 +70,8 @@ class RecordPicker extends FuzzySuggestModal<ArchiveRecord> {
 		return this.values;
 	}
 	getItemText(r: ArchiveRecord): string {
-		return `${r.fields.name} · ${r.fields.region || r.path}`;
+		const duplicate = this.values.some((other) => other.id !== r.id && other.fields.name === r.fields.name);
+		return duplicate ? `${r.fields.name} · ${r.fields.region || r.path}` : r.fields.name;
 	}
 	onChooseItem(record: ArchiveRecord): void {
 		this.chosen = true;
@@ -353,7 +354,7 @@ export class RecordEditorModal extends Modal {
 					.setCta()
 					.onClick(() => {
 						b.setDisabled(true);
-						void this.save().finally(() => b.setDisabled(false));
+						void this.save().finally(() => { b.setDisabled(false); });
 					}),
 			);
 		if (this.base.path)
@@ -459,12 +460,14 @@ export class FilterModal extends Modal {
 			},
 		];
 		if (this.draft.kind === 'person') {
-			const companies = this.controller
-				.choices('company')
-				.map((r): [string, string] => [r.id, r.fields.name + ' · ' + r.path]);
+			const companies = this.controller.choices('company');
+			const options = (status: 'current' | 'past'): Array<[string, string]> => companies
+				.filter((company) => this.controller.index.members(company.id, status).length > 0)
+				.map((r) => [r.id, companies.some((other) => other.id !== r.id && other.fields.name === r.fields.name)
+					? `${r.fields.name} · ${r.fields.region || r.path}` : r.fields.name]);
 			groups.unshift(
-				{ key: 'current', title: 'currentCompany', values: companies },
-				{ key: 'past', title: 'pastCompany', values: companies },
+				{ key: 'current', title: 'currentCompany', values: options('current') },
+				{ key: 'past', title: 'pastCompany', values: options('past') },
 			);
 			groups.push({
 				key: 'relations',

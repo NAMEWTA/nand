@@ -1,4 +1,7 @@
-import { scanNativeAutomationSessions } from '../sessions/automation-scan';
+import { runtimeProcess } from './runtime-process';
+import { AutomationError } from '../../shared/automation/errors';
+import { isCwdInsideVault } from '../sessions/scope';
+import { canonicalVaultCwd } from '../sessions/canonical-cwd';
 import type {
 	AgentRuntimePort,
 	AgentSessionRef,
@@ -17,8 +20,8 @@ import { accountEnv } from './accounts';
 import { effectivePermission, launchArgs } from './flags';
 import { resolveCli } from './resolver';
 import type { AgentId } from './types';
-import { createNodeSessionIo, scanVaultSessions } from '../sessions/scan';
-import { accountConfigDir } from './accounts';
+import { createNodeSessionIo } from '../sessions/scan';
+import { absolutePluginDir } from './accounts';
 
 // Orca's native resume capability set, pinned to 27b823f (MIT, Lovecast Inc.).
 export const RESUME_FLAGS: Readonly<Record<string, readonly string[]>> = {
@@ -136,32 +139,25 @@ export class TerminalAutomationRuntime implements AgentRuntimePort {
 			title: a.title,
 			enabled: this.host.settings.agentSettings.agents[a.id]?.enabled ?? false,
 			resumable: !!RESUME_FLAGS[a.id],
+			installed: !!resolveCli(a.detectCommand, this.host.settings.agentSettings.agents[a.id]?.cliPath ?? '', ''),
 		}));
 	}
 	async listSessions(cwd: string): Promise<AgentSessionRef[]> {
 		await this.loaded;
-		const settings = this.host.settings.agentSettings;
-		const dir = this.host.manifest.dir ?? '';
-		const claude = accountConfigDir('claude', settings.agents['claude-code'].accountId, dir);
-		const codex = accountConfigDir('codex', settings.agents.codex.accountId, dir);
-		const sessions = await scanVaultSessions({
-			key: `${cwd}:${claude}:${codex}`,
-			vaultPath: cwd,
-			io: createNodeSessionIo(),
-			claudeConfigDirs: claude ? [claude] : [],
-			codexHomes: codex ? [codex] : [],
-			limit: 1000,
-		});
-		const native = await scanNativeAutomationSessions(createNodeSessionIo(), cwd);
-		const unique = new Map<string, AgentSessionRef>();
-		for (const s of [
-			...sessions.map((s) => ({ ...s, accountKey: JSON.stringify(s.env) })),
-			...native,
-			...this.registry.filter((s) => s.cwd === cwd),
-		])
-			unique.set(`${s.agentId}:${s.accountKey}:${s.sessionId}`, s);
-		return [...unique.values()].sort((a, b) => b.modifiedAtMs - a.modifiedAtMs);
+		const vault = (this.host.app.vault.adapter as unknown as { getBasePath(): string }).getBasePath();
+		const canonical = await canonicalVaultCwd(vault, cwd);
+		const service = await this.host.getTerminalService();
+		const history = service.history(() => this.host.settings.agentSettings, this.host.manifest.dir ?? '');
+		await history.scan();
+		const result: AgentSessionRef[] = [];
+		for (let offset = 0; ; offset += 100) {
+			const page = await history.query('', offset);
+			result.push(...page.rows.filter((s) => isCwdInsideVault(canonical, s.cwd, runtimeProcess().platform)));
+			if (offset + 100 >= page.total) break;
+		}
+		return result;
 	}
+
 	private receive(slot: LiveSession, event: NativeHookEvent): void {
 		if (event.at < slot.since || event.data.agent_id || event.data.subagent_id || event.data.parent_session_id)
 			return;
@@ -187,18 +183,20 @@ export class TerminalAutomationRuntime implements AgentRuntimePort {
 		}
 		if (event.event === 'UserPromptSubmit' || event.event === 'BeforeAgent') {
 			slot.busy = true;
+			if (slot.terminal) slot.terminal.nativeStatus = 'running';
 			slot.started = true;
 			for (const listener of slot.listeners ?? []) listener();
 		}
-		if (slot.started && ['Stop', 'AfterAgent', 'StopFailure'].includes(event.event)) {
+		if (slot.started && ['Stop', 'AfterAgent', 'StopFailure', 'StopCancelled'].includes(event.event)) {
 			slot.busy = false;
+			if (slot.terminal) slot.terminal.nativeStatus = 'idle';
 			slot.started = false;
 			const message =
 				typeof event.data.last_assistant_message === 'string'
 					? event.data.last_assistant_message.slice(-8000)
 					: '';
 			slot.finish?.({
-				status: event.event === 'StopFailure' ? 'failed' : 'succeeded',
+				status: event.event === 'StopFailure' ? 'failed' : event.event === 'StopCancelled' ? 'cancelled' : 'succeeded',
 				message,
 				output: slot.output,
 				session: slot.session,
@@ -206,13 +204,28 @@ export class TerminalAutomationRuntime implements AgentRuntimePort {
 			slot.finish = undefined;
 		}
 	}
+	private async sessionUsage(session: AgentSessionRef) {
+		const abort = new AbortController();
+		const timeout = this.host.app.workspace.containerEl.win.setTimeout(() => abort.abort(), 10_000);
+		try {
+		const service = await this.host.getTerminalService();
+		const history = service.history(() => this.host.settings.agentSettings, this.host.manifest.dir ?? '');
+		await history.scan(abort.signal);
+		for (let offset = 0; ; offset += 100) {
+			const page = await history.query('', offset, abort.signal);
+			const row = page.rows.find((s) => s.agentId === session.agentId && s.sessionId === session.sessionId && s.accountKey === session.accountKey);
+			if (row) return row.usage;
+			if (offset + 100 >= page.total) return undefined;
+		}
+		} finally { this.host.app.workspace.containerEl.win.clearTimeout(timeout); }
+	}
 	async start(action: AgentAction, run: AutomationRun, previous?: AutomationRun): Promise<AgentRunHandle> {
 		await this.loaded;
 		const id = action.agentId as AgentId;
 		const agent = getAgent(id),
 			settings = this.host.settings.agentSettings;
 		const entry = settings.agents[id];
-		if (!entry?.enabled) throw new Error(t('automation.agentUnavailable'));
+		if (!entry?.enabled) throw new AutomationError('agentDisabled');
 		if (
 			effectivePermission(settings, id) === 'yolo' &&
 			!settings.yoloAcknowledged &&
@@ -220,7 +233,7 @@ export class TerminalAutomationRuntime implements AgentRuntimePort {
 		)
 			throw new Error(t('automation.permissionRequired'));
 		const io = createNodeSessionIo();
-		if (!(await io.stat(action.cwd))?.isDirectory) throw new Error(t('automation.invalid'));
+		await canonicalVaultCwd((this.host.app.vault.adapter as unknown as { getBasePath(): string }).getBasePath(), action.cwd);
 		if (
 			action.sessionMode === 'specific' &&
 			(!action.session ||
@@ -238,7 +251,7 @@ export class TerminalAutomationRuntime implements AgentRuntimePort {
 		const env =
 			action.sessionMode === 'specific' && action.session?.accountKey
 				? (JSON.parse(action.session.accountKey) as Record<string, string>)
-				: accountEnv(agent, entry.accountId, this.host.manifest.dir ?? '');
+				: accountEnv(agent, entry.accountId, absolutePluginDir((this.host.app.vault.adapter as unknown as { getBasePath(): string }).getBasePath(), this.host.manifest.dir ?? ''));
 		if (!env || typeof env !== 'object' || Object.values(env).some((v) => typeof v !== 'string'))
 			throw new Error(t('automation.sessionMissing'));
 		const accountKey = JSON.stringify(env);
@@ -280,11 +293,28 @@ export class TerminalAutomationRuntime implements AgentRuntimePort {
 		const completion = new Promise<RunResult>((resolve) => {
 			slot.finish = resolve;
 		});
+		const priorSession = action.sessionMode === 'specific' ? action.session : reuse?.session;
+		const baseline = priorSession ? await this.sessionUsage(priorSession).catch(() => undefined) : undefined;
+		const measuredCompletion = completion.then(async (result) => {
+			if (!result.session) return result;
+			try {
+				const usage = await this.sessionUsage(result.session);
+				if (usage?.known && (!priorSession || baseline?.known)) result.usage = {
+					input: Math.max(0, usage.input - (baseline?.input ?? 0)),
+					output: Math.max(0, usage.output - (baseline?.output ?? 0)),
+					cacheRead: Math.max(0, usage.cacheRead - (baseline?.cacheRead ?? 0)),
+					cacheWrite: Math.max(0, usage.cacheWrite - (baseline?.cacheWrite ?? 0)),
+					cost: usage.cost === null || (baseline && baseline.cost === null) ? null : Math.max(0, usage.cost - (baseline?.cost ?? 0)),
+					known: true,
+				};
+			} catch { /* Unavailable native usage must never change the run result. */ }
+			return result;
+		});
 		let terminal = slot.terminal;
 		if (reuse && terminal) terminal.write(`\x1b[200~${action.prompt}\x1b[201~\r`);
 		else {
 			const command = resolveCli(agent.detectCommand, entry.cliPath, '');
-			if (!command) throw new Error(t('automation.agentUnavailable'));
+			if (!command) throw new AutomationError('cliMissing');
 			const built = automationArgs(
 				id,
 				action.prompt,
@@ -374,7 +404,7 @@ export class TerminalAutomationRuntime implements AgentRuntimePort {
 		return {
 			terminalId: terminal.id,
 			session: slot.session ?? action.session,
-			completion,
+			completion: measuredCompletion,
 			onRunning: (listener) => {
 				slot.listeners ??= new Set();
 				slot.listeners.add(listener);

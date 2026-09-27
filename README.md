@@ -12,10 +12,11 @@ NAND 是 NAMEWTA 的通用 Obsidian 工作台。看板、编辑器、图标、�
 |---|---|
 | 看板 | 卡片、小组件、日历与阅读等工作台内容 |
 | 编辑器 | Markdown 评论、高亮与复制入口 |
-| 终端／编程智能体 | 桌面终端、工作流启动与会话管理 |
+| 终端／编程智能体 | 六种编程智能体、原生历史与用量；见 [工作台说明](docs/agent-workbench.md) |
 | 图标 | 文件和界面图标、颜色及批量规则；见 [使用指南](docs/icons.md) |
 | 档案 | 联系人、企业、工作经历与人际关系；见 [档案说明](docs/contacts.md) |
 | 自动化 | 统一提醒、定时创建待办、Agent 定时任务与手动快捷操作；见 [自动化说明](docs/automation.md) |
+| 通知 | 应用内与系统投递、持久化收件箱、未读计数 |
 | 同步 | 预留入口 |
 
 设置页在顶部切换领域，当前领域的设置分组向下排列。首页、自动化和同步入口始终保留，关闭的功能领域隐藏其页签。
@@ -63,3 +64,5 @@ NAND 是 NAMEWTA 的通用 Obsidian 工作台。看板、编辑器、图标、�
 看板参考了 [PandoraReads/apex-dashboard](https://github.com/PandoraReads/apex-dashboard)（MIT）。终端参考了 [ZyphrZero/Termy](https://github.com/ZyphrZero/Termy)（GPL-3.0）。智能体启动与用量参考了 [stablyai/orca](https://github.com/stablyai/orca)（MIT）。感谢这些项目。
 
 图标领域移植自 [gfxholo/iconic 1.1.10](https://github.com/gfxholo/iconic/tree/268e133c6f99dcef670cbda0d25a74b8239aa099)（MIT-0）。图标检索数据与 Emoji 数据的许可证见 [NOTICE](src/iconic/res/NOTICE.txt)，并随构建产物保留。
+
+智能体工作台升级与 issue 回归记录见 [实施记录](docs/agent-upgrade-2026-09-27.md)。Pi 的可选版本检查读取 npm 包 `@mariozechner/pi-coding-agent`；与其他更新检查共用开关。

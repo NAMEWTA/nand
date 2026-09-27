@@ -1,3 +1,4 @@
+import { AutomationError } from '../shared/automation/errors';
 import type { ScheduleSpec } from '../shared/automation/types';
 import { isValidAutomationSchedule } from './schedule/automation-schedule-parsing';
 import {
@@ -8,11 +9,11 @@ import {
 export function validateSchedule(schedule: ScheduleSpec): void {
 	if (schedule.kind === 'manual') return;
 	if (schedule.kind === 'once') {
-		if (!Number.isFinite(schedule.at)) throw new Error('Invalid date');
+		if (!Number.isFinite(schedule.at)) throw new AutomationError('invalidDate');
 		return;
 	}
-	if (schedule.kind !== 'recurring' || !Number.isFinite(schedule.start)) throw new Error('Invalid schedule');
-	if (!isValidAutomationSchedule(schedule.expression)) throw new Error('Invalid recurrence');
+	if (schedule.kind !== 'recurring' || !Number.isFinite(schedule.start)) throw new AutomationError('invalidSchedule');
+	if (!isValidAutomationSchedule(schedule.expression)) throw new AutomationError('invalidRecurrence');
 }
 export function latestOccurrence(schedule: ScheduleSpec, now: number): number | null {
 	validateSchedule(schedule);

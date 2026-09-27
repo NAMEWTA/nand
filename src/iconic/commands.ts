@@ -105,7 +105,7 @@ export function registerIconicCommands(controller: IconicController): void {
 	// COMMAND: Toggle minimal folder icons
 	controller.dialogCommands.push(
 		controller.addCommand({
-			id: 'toggle-minimal.folder-icons',
+			id: 'toggle-minimal-folder-icons',
 			get name() {
 				return STRINGS.commands.toggleMinimalFolderIcons;
 			},

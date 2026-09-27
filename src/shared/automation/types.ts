@@ -1,3 +1,7 @@
+export interface AgentUsage {
+	input: number; output: number; cacheRead: number; cacheWrite: number;
+	cost: number | null; known: boolean; partial?: boolean;
+}
 export type NotificationChannelId = 'in-app' | 'system' | 'email' | 'sms';
 export type ScheduleSpec =
 	{ kind: 'manual' } | { kind: 'once'; at: number } | { kind: 'recurring'; expression: string; start: number };
@@ -57,6 +61,8 @@ export interface AutomationRun {
 	startedAt: number;
 	endedAt?: number;
 	message: string;
+	errorCode?: string;
+	usage?: AgentUsage;
 	output?: string;
 	terminalId?: string;
 	session?: AgentSessionRef;
@@ -67,6 +73,7 @@ export interface AgentDescription {
 	title: string;
 	resumable: boolean;
 	enabled: boolean;
+	installed?: boolean;
 }
 export interface AgentRunHandle {
 	onRunning?(listener: () => void): () => void;
@@ -76,6 +83,7 @@ export interface AgentRunHandle {
 		status: 'succeeded' | 'failed' | 'cancelled' | 'interrupted';
 		message: string;
 		output?: string;
+		usage?: AgentUsage;
 		session?: AgentSessionRef;
 	}>;
 }

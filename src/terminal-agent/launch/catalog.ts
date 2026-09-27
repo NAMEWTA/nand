@@ -189,13 +189,46 @@ const EXISTING_CATALOG: readonly AgentCatalogEntry[] = [
 	},
 ];
 
-export const AGENT_CATALOG: readonly AgentCatalogEntry[] = [
- ...EXISTING_CATALOG,
- ...Object.entries(AUTOMATION_AGENTS).filter(([id]) => !EXISTING_CATALOG.some(a => a.id === id)).map(([id, config]): AgentCatalogEntry => ({
-  id: id as AgentId, title: id, detectCommand: config.command, launchCommand: id === 'kiro' ? 'kiro-cli chat --tui' : id === 'opencode2' ? 'opencode2 --standalone' : id === 'hermes' ? 'hermes --tui' : config.command,
-  installDocsUrl: 'https://github.com/stablyai/orca', yoloFlags: [], accountKind: 'none', usage: 'none', contextAware: false, icon: 'bot',
- })),
-];
+export const CORE_AGENT_IDS = ['claude-code', 'codex', 'gemini', 'opencode', 'pi', 'grok'] as const;
+export const AGENT_CATALOG: readonly AgentCatalogEntry[] = (
+	[
+		...EXISTING_CATALOG,
+		...Object.entries(AUTOMATION_AGENTS)
+			.filter(([id]) => !EXISTING_CATALOG.some((a) => a.id === id))
+			.map(([id, config]): AgentCatalogEntry => ({
+				id: id as AgentId,
+				title: id === 'pi' ? 'Pi' : id,
+				detectCommand: config.command,
+				launchCommand:
+					id === 'kiro'
+						? 'kiro-cli chat --tui'
+						: id === 'opencode2'
+							? 'opencode2 --standalone'
+							: id === 'hermes'
+								? 'hermes --tui'
+								: config.command,
+				installDocsUrl:
+					id === 'pi'
+						? 'https://github.com/badlogic/pi-mono/tree/main/packages/coding-agent'
+						: 'https://github.com/stablyai/orca',
+				...(id === 'pi'
+					? {
+							installCommands: {
+								darwin: 'npm install -g @mariozechner/pi-coding-agent',
+								linux: 'npm install -g @mariozechner/pi-coding-agent',
+								win32: 'npm install -g @mariozechner/pi-coding-agent',
+							},
+							versionRegistry: { kind: 'npm' as const, package: '@mariozechner/pi-coding-agent' },
+						}
+					: {}),
+				yoloFlags: [],
+				accountKind: 'none',
+				usage: 'none',
+				contextAware: false,
+				icon: 'bot',
+			})),
+	] as AgentCatalogEntry[]
+).filter((agent) => (CORE_AGENT_IDS as readonly string[]).includes(agent.id));
 
 export function getAgent(id: AgentId): AgentCatalogEntry {
 	const entry = AGENT_CATALOG.find((agent) => agent.id === id);

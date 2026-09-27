@@ -37,20 +37,21 @@ function Action({
 }
 function Markdown({ view, text, path }: { view: ContactsView; text: string; path: string }) {
 	const ref = useRef<HTMLDivElement>(null);
+	const markdown = text || ct('noDetails');
 	useEffect(() => {
 		const host = ref.current;
 		if (!host) return;
 		const target = host.createDiv();
 		const child = new Component();
 		view.addChild(child);
-		void MarkdownRenderer.render(view.app, text || ct('noDetails'), target, path, child).catch(() => {
+		void MarkdownRenderer.render(view.app, markdown, target, path, child).catch(() => {
 			target.setText(text);
 		});
 		return () => {
 			view.removeChild(child);
 			target.remove();
 		};
-	}, [view, text, path]);
+	}, [view, text, path, markdown]);
 	return <div className="nand-contacts-markdown markdown-rendered" ref={ref} />;
 }
 function Section({ title, action, children }: { title: string; action?: ReactNode; children: ReactNode }) {
@@ -447,7 +448,7 @@ export function ContactsSurface({ view }: { view: ContactsView }) {
 							</button>
 						</div>
 					)}
-					<footer className="nand-contacts-pagination">
+					{records.length > 60 && <footer className="nand-contacts-pagination">
 						<button disabled={page === 0} onClick={() => view.page(page - 1)}>
 							{ct('previous')}
 						</button>
@@ -457,7 +458,7 @@ export function ContactsSurface({ view }: { view: ContactsView }) {
 						<button disabled={page + 1 >= pages} onClick={() => view.page(page + 1)}>
 							{ct('next')}
 						</button>
-					</footer>
+					</footer>}
 				</>
 			)}
 		</div>

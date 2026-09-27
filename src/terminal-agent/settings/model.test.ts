@@ -25,14 +25,8 @@ test('OpenCode built-in launcher starts the IDE bridge client directly', () => {
 });
 
 test('built-in workflow order keeps the coding agents from the shared catalog', () => {
-  assert.deepEqual(
-    DEFAULT_PRESET_SCRIPTS.slice(0, 9).map((script) => script.id),
-    ['claude-code', 'codex', 'grok', 'opencode', 'gemini', 'qwen-code', 'kimi', 'antigravity', 'minimax'],
-  );
-
-  assert.equal(DEFAULT_PRESET_SCRIPTS[3]?.id, 'opencode');
-  assert.equal(DEFAULT_PRESET_SCRIPTS.length, 39);
-  assert.equal(DEFAULT_PRESET_SCRIPTS.find(s => s.id === 'kiro')?.actions[0]?.value, 'kiro-cli chat --tui');
+  assert.deepEqual(DEFAULT_PRESET_SCRIPTS.map((script) => script.id), ['claude-code', 'codex', 'grok', 'opencode', 'gemini', 'pi']);
+  assert.equal(DEFAULT_PRESET_SCRIPTS.length, 6);
 });
 
 test('built-in context-aware workflow marker covers all built-ins', () => {

@@ -1,6 +1,7 @@
-import { Modal, Notice, type App } from 'obsidian';
+import { Platform, Modal, Notice, type App } from 'obsidian';
 import { t } from '../i18n';
 import { resumeArgs } from '../sessions/scope';
+import { canonicalVaultCwd } from '../sessions/canonical-cwd';
 import type { VaultSession } from '../sessions/types';
 import { accountEnv } from './accounts';
 import { getAgent } from './catalog';
@@ -25,7 +26,7 @@ export async function launchAgent(host: LaunchHost, agentId: AgentId): Promise<v
   const settings = host.getAgentSettings();
   const entry = settings.agents[agentId];
   if (!entry?.enabled) {
-    new Notice(`${getAgent(agentId).title} 已在设置中关闭`);
+    new Notice(t('sessions.disabled', { title: getAgent(agentId).title }));
     return;
   }
 
@@ -39,13 +40,13 @@ export async function launchAgent(host: LaunchHost, agentId: AgentId): Promise<v
   const agent = getAgent(agentId);
   const command = resolveCli(agent.detectCommand, entry.cliPath, '');
   if (!command) {
-    new Notice(`未找到 ${agent.title}。请先安装 CLI，或在智能体设置里填写绝对路径。${agent.installDocsUrl}`);
+    new Notice(`${t('sessions.missingCli', { title: agent.title })} ${agent.installDocsUrl}`);
     return;
   }
 
   const cwd = host.getVaultPath();
   if (!cwd) {
-    new Notice('无法取得当前库路径，已取消启动');
+    new Notice(t('workbench.vaultMissing'));
     return;
   }
 
@@ -55,6 +56,7 @@ export async function launchAgent(host: LaunchHost, agentId: AgentId): Promise<v
   await host.queueSession({
     shellType: `custom:${command}`,
     shellArgs: launchArgs(settings, agentId),
+    agentId,
     cwd,
     env: {
       ...accountEnv(agent, entry.accountId, host.getPluginDataDir()),
@@ -66,6 +68,11 @@ export async function launchAgent(host: LaunchHost, agentId: AgentId): Promise<v
 }
 
 export async function resumeAgent(host: LaunchHost, session: VaultSession): Promise<void> {
+  if (!Platform.isDesktop) throw new Error(t('workbench.sessionMissing'));
+  const vault = host.getVaultPath();
+  if (!vault) throw new Error(t('sessions.missingCli', { title: session.agentId }));
+  await canonicalVaultCwd(vault, session.cwd);
+  if (session.transcriptPath && !(await (window.require('node:fs/promises') as typeof import('node:fs/promises')).stat(session.transcriptPath)).isFile()) throw new Error(t('workbench.sessionMissing'));
   const settings = host.getAgentSettings();
   const entry = settings.agents[session.agentId];
   const agent = getAgent(session.agentId);
@@ -89,7 +96,8 @@ export async function resumeAgent(host: LaunchHost, session: VaultSession): Prom
 
   await host.queueSession({
     shellType: `custom:${command}`,
-    shellArgs: resumeArgs(session.agentId, session.sessionId, launchArgs(settings, session.agentId)),
+    agentId: session.agentId,
+    shellArgs: resumeArgs(session.agentId, session.agentId === 'pi' ? session.transcriptPath || '' : session.sessionId, launchArgs(settings, session.agentId)),
     cwd: session.cwd,
     env: {
       ...accountEnv(agent, entry.accountId, host.getPluginDataDir()),
@@ -136,13 +144,13 @@ class YoloConfirmModal extends Modal {
   onOpen(): void {
     const { contentEl } = this;
     contentEl.empty();
-    contentEl.createEl('h2', { text: 'YOLO 会直接修改当前库' });
+    contentEl.createEl('h2', { text: t('workbench.yoloTitle') });
     contentEl.createEl('p', {
-      text: '没有隔离 worktree。智能体以 YOLO 启动时会跳过确认，直接读写这个库。你可以随时在设置里改成 Manual。',
+      text: t('workbench.yoloDescription'),
     });
     const row = contentEl.createDiv({ cls: 'modal-button-container' });
-    const cancel = row.createEl('button', { text: '取消' });
-    const ok = row.createEl('button', { text: '我知道，继续', cls: 'mod-warning' });
+    const cancel = row.createEl('button', { text: t('common.cancel') });
+    const ok = row.createEl('button', { text: t('common.confirm'), cls: 'mod-warning' });
     cancel.addEventListener('click', () => this.finish(false));
     ok.addEventListener('click', () => this.finish(true));
   }

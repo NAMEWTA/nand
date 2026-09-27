@@ -1,6 +1,6 @@
 import type { App } from 'obsidian';
 
-/** Serialized writes, with a previous snapshot retained for recovery. Never overwrite corrupt data. */
+/** Serialized writes with a durable previous snapshot for crash recovery. */
 export class JsonStore<T> {
 	private tail: Promise<void> = Promise.resolve();
 	private snapshot?: string;
@@ -48,8 +48,9 @@ export class JsonStore<T> {
 				}
 			}
 			if (this.snapshot) await adapter.write(`${this.path}.backup`, this.snapshot);
-			await adapter.write(`${this.path}.pending`, text);
-			await adapter.rename(`${this.path}.pending`, this.path);
+			// FileSystemAdapter.rename rejects an existing destination. Keep the last
+			// valid snapshot before writing; a torn primary is recovered by load().
+			await adapter.write(this.path, text);
 			this.snapshot = text;
 		});
 		this.tail = operation.catch(() => {});

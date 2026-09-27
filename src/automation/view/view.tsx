@@ -1,4 +1,4 @@
-import { ItemView, Notice, type WorkspaceLeaf } from 'obsidian';
+import { ItemView, Modal, Setting, Notice, type WorkspaceLeaf } from 'obsidian';
 import { render } from 'preact/compat';
 import { onLanguageChanged, t } from '../../shared/i18n';
 import { isActiveRun, type AutomationDefinition } from '../../shared/automation/types';
@@ -10,6 +10,7 @@ export interface AutomationViewHost {
 	service: AutomationService;
 	edit(definition?: AutomationDefinition): void;
 	inbox(): void;
+	retry(): Promise<void>;
 }
 export class AutomationView extends ItemView {
 	private unsubscribe?: () => void;
@@ -50,12 +51,69 @@ export class AutomationView extends ItemView {
 		render(null, this.contentEl);
 		return Promise.resolve();
 	}
+	private clearHistory(): void {
+		const modal = new Modal(this.app);
+		modal.contentEl.createEl('p', { text: t('automation.clearHistoryConfirm') });
+		new Setting(modal.contentEl)
+			.addButton((b) => b.setButtonText(t('automation.cancel')).onClick(() => modal.close()))
+			.addButton((b) =>
+				b
+					.setButtonText(t('automation.clearHistory'))
+					.setClass('mod-warning')
+					.onClick(() => {
+						modal.close();
+						this.run(() => this.host.service.clearHistory());
+					}),
+			);
+		modal.open();
+	}
+	private remove(definition: AutomationDefinition): void {
+		const modal = new Modal(this.app);
+		modal.contentEl.createEl('p', { text: t('automation.deleteConfirm') });
+		new Setting(modal.contentEl)
+			.addButton((b) => b.setButtonText(t('automation.cancel')).onClick(() => modal.close()))
+			.addButton((b) =>
+				b.setButtonText(t('automation.delete')).onClick(() => {
+					modal.close();
+					this.run(() => this.host.service.remove(definition));
+				}),
+			);
+		modal.open();
+	}
+	showRun(id: string): void {
+		this.selected = this.host.service.state.runs.find((r) => r.id === id)?.automationId ?? '';
+		this.draw();
+	}
 	private run(operation: () => Promise<unknown>): void {
 		void operation().catch((error) => new Notice(String(error)));
 	}
 	private draw(): void {
+		if (this.host.service.loadError) {
+			render(
+				<div>
+					<p>{t('automation.failedLoad')}</p>
+					<pre>{this.host.service.loadError}</pre>
+					<button
+						onClick={() =>
+							this.run(async () => {
+								await this.host.retry();
+								this.draw();
+							})
+						}
+					>
+						{t('automation.retry')}
+					</button>
+				</div>,
+				this.contentEl,
+			);
+			return;
+		}
 		const service = this.host.service;
-		const list = service.definitions.filter(
+		const definitions = [...service.definitions];
+		const currentIds = new Set(definitions.map((d) => d.id));
+		for (const run of service.state.runs)
+			if (run.definition && !definitions.some((d) => d.id === run.automationId)) definitions.push(run.definition);
+		const list = definitions.filter(
 			(d) =>
 				(!this.agentFilter || (d.action.kind === 'agent' && d.action.agentId === this.agentFilter)) &&
 				`${d.name} ${JSON.stringify(d.action)}`.toLowerCase().includes(this.search.toLowerCase()) &&
@@ -66,7 +124,7 @@ export class AutomationView extends ItemView {
 							? !d.enabled
 							: d.action.kind === this.filter)),
 		);
-		const selected = service.definitions.find((d) => d.id === this.selected);
+		const selected = definitions.find((d) => d.id === this.selected);
 		const runs = selected
 			? service.state.runs
 					.filter((r) => r.automationId === selected.id)
@@ -74,7 +132,7 @@ export class AutomationView extends ItemView {
 					.reverse()
 			: [];
 		const next = (d: AutomationDefinition) => {
-			if (!d.enabled) return '—';
+			if (!d.enabled || !currentIds.has(d.id)) return '—';
 			try {
 				const value = nextOccurrence(d.schedule, Date.now());
 				return value ? new Date(value).toLocaleString() : '—';
@@ -87,6 +145,7 @@ export class AutomationView extends ItemView {
 				<div className="nand-automation-toolbar">
 					<button onClick={() => this.host.edit()}>{t('automation.new')}</button>
 					<button onClick={() => this.host.inbox()}>{t('automation.inbox')}</button>
+					<button onClick={() => this.clearHistory()}>{t('automation.clearHistory')}</button>
 					<input
 						aria-label={t('automation.search')}
 						placeholder={t('automation.search')}
@@ -142,7 +201,10 @@ export class AutomationView extends ItemView {
 									this.draw();
 								}}
 							>
-								<strong>{d.name}</strong>
+								<strong>
+									{d.name}
+									{!currentIds.has(d.id) ? ` · ${t('automation.history')}` : ''}
+								</strong>
 								<span>
 									{t(`automation.${d.action.kind}`)} ·{' '}
 									{t(`automation.${d.enabled ? 'enabled' : 'disabled'}`)}
@@ -170,18 +232,27 @@ export class AutomationView extends ItemView {
 									: t('automation.otherDevice')}
 							</p>
 							<div className="nand-automation-toolbar">
-								<button onClick={() => this.run(() => service.run(selected))}>
+								<button
+									disabled={!currentIds.has(selected.id)}
+									onClick={() => this.run(() => service.run(selected))}
+								>
 									{t('automation.run')}
 								</button>
-								<button onClick={() => this.host.edit(selected)}>{t('automation.edit')}</button>
 								<button
+									disabled={!currentIds.has(selected.id)}
+									onClick={() => this.host.edit(selected)}
+								>
+									{t('automation.edit')}
+								</button>
+								<button
+									disabled={!currentIds.has(selected.id)}
 									onClick={() =>
 										this.run(() => service.save({ ...selected, enabled: !selected.enabled }))
 									}
 								>
 									{t(`automation.${selected.enabled ? 'pause' : 'resume'}`)}
 								</button>
-								<button onClick={() => this.run(() => service.remove(selected))}>
+								<button disabled={!currentIds.has(selected.id)} onClick={() => this.remove(selected)}>
 									{t('automation.delete')}
 								</button>
 							</div>
@@ -201,7 +272,15 @@ export class AutomationView extends ItemView {
 									<span>
 										{new Date(run.startedAt).toLocaleString()} · {t(`automation.${run.status}`)}
 									</span>
-									{run.message && <p>{run.message}</p>}
+									{(run.errorCode || run.message) && (
+										<p>{run.errorCode ? t(`automation.${run.errorCode}`) : run.message}</p>
+									)}
+									{run.usage?.known && (
+										<p>
+											{t('automation.tokens')}: {run.usage.input} / {run.usage.output}
+											{run.usage.cost !== null ? ` · $${run.usage.cost.toFixed(4)}` : ''}
+										</p>
+									)}
 									{run.output && (
 										<details>
 											<summary>{t('automation.output')}</summary>
