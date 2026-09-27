@@ -19,5 +19,7 @@ export interface EditorDomain {
 	getReadingPostProcessor?(): MarkdownPostProcessor;
 	onActiveFileChange?(file: TFile | null): void;
 	onSettingsChanged?(): void;
+	onEnable?(): void;
+	onDisable?(): void;
 	registerCommands?(plugin: DashboardPlugin): void;
 }

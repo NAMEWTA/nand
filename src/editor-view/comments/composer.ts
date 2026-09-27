@@ -5,20 +5,35 @@ export function commentShortcut(): string {
 	return t('editor.comments.shortcut', { modifier: Platform.isMacOS ? '⌘' : 'Ctrl' });
 }
 
+export interface CommentComposer {
+	setVisible(visible: boolean): void;
+	dispose(): void;
+}
+
+let composerId = 0;
+
 /** A temporary key scope belongs to this composer, never to the note editor. */
 export function mountCommentComposer(
 	parent: HTMLElement,
 	app: App,
 	save: (text: string) => Promise<void>,
 	focusEditor: () => void,
-): () => void {
+	beforeOpen: () => boolean = () => true,
+	onLayout: () => void = () => undefined,
+): CommentComposer {
 	const button = parent.createEl('button', { cls: 'nand-editor-comment-popover-btn', attr: { type: 'button' } });
 	const input = parent.createEl('textarea', { cls: 'nand-editor-comment-popover-input' });
 	const hint = parent.createDiv({ cls: 'nand-editor-comment-shortcut' });
 	const actions = parent.createDiv({ cls: 'nand-editor-comment-composer-actions' });
 	const cancel = actions.createEl('button', { attr: { type: 'button' } });
 	const submit = actions.createEl('button', { cls: 'mod-cta', attr: { type: 'button' } });
+	const id = `nand-comment-composer-${++composerId}`;
+	const label = parent.createEl('label', { cls: 'nand-editor-comment-label', attr: { for: id } });
+	input.id = id;
+	hint.id = `${id}-hint`;
+	input.setAttribute('aria-describedby', hint.id);
 	let editing = false,
+		visible = true,
 		pending = false,
 		disposed = false,
 		pushed = false;
@@ -29,7 +44,7 @@ export function mountCommentComposer(
 		pushed = false;
 	};
 	const acquire = () => {
-		if (!editing || pushed) return;
+		if (!editing || !visible || disposed || pushed) return;
 		if (!scope) {
 			scope = new Scope(app.scope);
 			scope.register(['Mod'], 'Enter', (event) => {
@@ -49,6 +64,7 @@ export function mountCommentComposer(
 		input.hidden = hint.hidden = actions.hidden = !editing;
 		submit.disabled = pending || !input.value.trim();
 		input.disabled = cancel.disabled = pending;
+		onLayout();
 	};
 	const close = () => {
 		if (pending) return;
@@ -56,11 +72,11 @@ export function mountCommentComposer(
 		input.value = '';
 		release();
 		sync();
-		focusEditor();
+		if (visible && !disposed) focusEditor();
 	};
 	const commit = async () => {
 		const text = input.value.trim();
-		if (!text || pending || disposed) return;
+		if (!text || pending || disposed || !visible) return;
 		pending = true;
 		sync();
 		try {
@@ -79,13 +95,15 @@ export function mountCommentComposer(
 	const translate = () => {
 		button.textContent = t('editor.comments.popover');
 		input.placeholder = t('editor.comments.placeholder');
-		input.setAttribute('aria-label', t('editor.comments.placeholder'));
+		label.textContent = t('editor.comments.placeholder');
 		hint.textContent = commentShortcut();
 		cancel.textContent = t('editor.comments.cancel');
 		submit.textContent = t('editor.comments.submit');
+		onLayout();
 	};
 	button.addEventListener('mousedown', (event) => event.preventDefault());
 	button.addEventListener('click', () => {
+		if (disposed || !visible || !beforeOpen()) return;
 		editing = true;
 		sync();
 		input.focus();
@@ -110,7 +128,13 @@ export function mountCommentComposer(
 	const offLanguage = onLanguageChanged(translate);
 	translate();
 	sync();
-	return () => {
+	return {
+		setVisible(next) {
+			visible = next;
+			if (!visible) release();
+			else if (parent.ownerDocument.hasFocus() && parent.contains(parent.ownerDocument.activeElement)) acquire();
+		},
+		dispose() {
 		disposed = true;
 		release();
 		offLanguage();
@@ -118,5 +142,6 @@ export function mountCommentComposer(
 		parent.removeEventListener('focusout', focusOut);
 		win?.removeEventListener('blur', release);
 		win?.removeEventListener('focus', windowFocus);
+		},
 	};
 }

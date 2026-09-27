@@ -1,10 +1,10 @@
 import { EditorState, StateEffect, type Extension } from '@codemirror/state';
 import { Decoration, EditorView, ViewPlugin, type DecorationSet, type ViewUpdate } from '@codemirror/view';
 import { editorInfoField } from 'obsidian';
-import { makeAnchor, selectionIsCommentable } from './anchor';
 import { getCommentStore } from './store';
 import type DashboardPlugin from '../../plugin/main';
-import { mountCommentComposer } from './composer';
+import { SelectionPopover } from './selection-popover';
+import type { CommentPopoverCoordinator } from './popover-coordinator';
 
 const bump = StateEffect.define<number>();
 
@@ -15,7 +15,7 @@ function pathOf(state: EditorState): string | null {
 }
 
 function buildDecorations(view: EditorView, plugin: DashboardPlugin): DecorationSet {
-	if (!plugin.settings.editorWorkbench.highlightEnabled) return Decoration.none;
+	if (!plugin.settings.modules.editor || !plugin.settings.editorWorkbench.highlightEnabled) return Decoration.none;
 	const path = pathOf(view.state);
 	const store = getCommentStore();
 	if (!path || !store) return Decoration.none;
@@ -46,29 +46,29 @@ function buildDecorations(view: EditorView, plugin: DashboardPlugin): Decoration
 }
 
 /** CodeMirror 6 highlights + selection popover. Registered by the host, not the side panel. */
-export function commentsCmExtension(plugin: DashboardPlugin): Extension {
+export function commentsCmExtension(plugin: DashboardPlugin, coordinator: CommentPopoverCoordinator): Extension {
 	return ViewPlugin.fromClass(
 		class {
 			decorations: DecorationSet;
-			private popover: HTMLElement | null = null;
-			private disposeComposer: (() => void) | null = null;
+			private readonly popover: SelectionPopover;
+			private readonly unregister: () => void;
 			private dead = false;
 			private applying = false;
-			private readonly off: () => void;
+			private off: () => void = () => undefined;
 			private readonly onClick: (event: MouseEvent) => void;
 
 			constructor(private readonly view: EditorView) {
 				this.decorations = buildDecorations(view, plugin);
-				const store = getCommentStore();
-				this.off = store
-					? store.subscribe(() => {
-							if (this.applying || this.dead) return;
-							queueMicrotask(() => {
-								if (this.dead) return;
-								this.view.dispatch({ effects: bump.of(store.revision) });
-							});
-						})
-					: () => undefined;
+				this.popover = new SelectionPopover(view, plugin, coordinator);
+				this.unregister = coordinator.register({
+					dom: view.dom,
+					setEnabled: (enabled) => {
+						this.popover.setEnabled(enabled);
+						this.bindStore(enabled);
+						queueMicrotask(() => { if (!this.dead) view.dispatch({ effects: bump.of(0) }); });
+					},
+					refresh: () => this.popover.refresh(),
+				});
 				this.onClick = (event) => {
 					const target = event.target as HTMLElement | null;
 					if (!target?.instanceOf(HTMLElement)) return;
@@ -78,15 +78,7 @@ export function commentsCmExtension(plugin: DashboardPlugin): Extension {
 					if (id) getCommentStore()?.focus(id);
 				};
 				view.dom.addEventListener('click', this.onClick);
-				const path = pathOf(view.state);
-				if (path && store) {
-					void store.loadFile(path).then(() => {
-						if (this.dead) return;
-						store.reconcile(path, view.state.doc.toString());
-						this.view.dispatch({ effects: bump.of(store.revision) });
-					});
-				}
-				this.queuePopover(view);
+				this.popover.refresh();
 			}
 
 			update(update: ViewUpdate): void {
@@ -109,7 +101,7 @@ export function commentsCmExtension(plugin: DashboardPlugin): Extension {
 					update.focusChanged ||
 					refreshed
 				) {
-					this.queuePopover(update.view);
+					this.popover.update(update);
 				}
 			}
 
@@ -117,97 +109,27 @@ export function commentsCmExtension(plugin: DashboardPlugin): Extension {
 				this.dead = true;
 				this.off();
 				this.view.dom.removeEventListener('click', this.onClick);
-				this.disposeComposer?.();
-				this.disposeComposer = null;
-				this.popover?.remove();
-				this.popover = null;
+				this.unregister();
+				this.popover.destroy();
 			}
 
-			private popoverShouldShow(view: EditorView): boolean {
-				const store = getCommentStore();
-				const path = pathOf(view.state);
-				const selection = view.state.selection.main;
-				return (
-					plugin.settings.editorWorkbench.popoverEnabled &&
-					!!store &&
-					!!path &&
-					!selection.empty &&
-					selectionIsCommentable(view.state.doc.toString(), selection.from, selection.to)
-				);
-			}
-
-			/** Position the popover after layout. coordsAtPos is illegal during update. */
-			private queuePopover(view: EditorView): void {
-				if (!this.popoverShouldShow(view)) {
-					this.disposeComposer?.();
-					this.disposeComposer = null;
-					this.popover?.remove();
-					this.popover = null;
-					return;
+			private bindStore(enabled: boolean): void {
+				this.off();
+				const store = enabled ? getCommentStore() : null;
+				this.off = store ? store.subscribe(() => {
+					if (this.applying || this.dead) return;
+					queueMicrotask(() => {
+						if (!this.dead) this.view.dispatch({ effects: bump.of(store.revision) });
+					});
+				}) : () => undefined;
+				const path = pathOf(this.view.state);
+				if (path && store) {
+					void store.loadFile(path).then(() => {
+						if (this.dead || !plugin.settings.modules.editor || getCommentStore() !== store || pathOf(this.view.state) !== path) return;
+						store.reconcile(path, this.view.state.doc.toString());
+						this.view.dispatch({ effects: bump.of(store.revision) });
+					});
 				}
-				view.requestMeasure({
-					key: this,
-					read: (measured) => {
-						if (this.dead || !this.popoverShouldShow(measured)) return null;
-						const selection = measured.state.selection.main;
-						const coords = measured.coordsAtPos(selection.from);
-						const path = pathOf(measured.state);
-						if (!coords || !path) return null;
-						return { coords, path, from: selection.from, to: selection.to };
-					},
-					write: (place, measured) => {
-						if (this.dead) return;
-						if (!place) {
-							this.disposeComposer?.();
-							this.disposeComposer = null;
-							this.popover?.remove();
-							this.popover = null;
-							return;
-						}
-						const pop = this.ensurePopover(measured);
-						const input = pop.querySelector('textarea');
-						if (!input?.instanceOf(HTMLTextAreaElement) || input.hidden) {
-							pop.dataset['path'] = place.path;
-							pop.dataset['from'] = String(place.from);
-							pop.dataset['to'] = String(place.to);
-						}
-						pop.style.left = `${Math.max(8, place.coords.left)}px`;
-						pop.style.top = `${Math.max(8, place.coords.top - 36)}px`;
-					},
-				});
-			}
-
-			private ensurePopover(view: EditorView): HTMLElement {
-				if (this.popover) return this.popover;
-				const pop = view.dom.ownerDocument.body.createDiv({ cls: 'nand-editor-comment-popover' });
-				this.disposeComposer = mountCommentComposer(
-					pop,
-					plugin.app,
-					async (text) => {
-						const notePath = pop.dataset['path'];
-						const from = Number(pop.dataset['from']);
-						const to = Number(pop.dataset['to']);
-						const store = getCommentStore();
-						if (
-							!store ||
-							!notePath ||
-							!Number.isFinite(from) ||
-							!Number.isFinite(to) ||
-							to <= from ||
-							to > view.state.doc.length
-						)
-							throw new Error('Comment selection is no longer available');
-						await store.add(notePath, {
-							quote: makeAnchor(view.state.doc.toString(), from, to),
-							start: from,
-							end: to,
-							text,
-						});
-					},
-					() => view.focus(),
-				);
-				this.popover = pop;
-				return pop;
 			}
 		},
 		{ decorations: (plugin) => plugin.decorations },

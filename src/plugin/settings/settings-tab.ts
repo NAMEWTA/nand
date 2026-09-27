@@ -1,3 +1,5 @@
+import { renderContactsSettings } from './contacts-settings';
+import { IconicSettingsSections, ICONIC_SETTINGS_PAGES } from '../../iconic/settings/sections';
 import { renderGeneralSettings, renderLayoutPicker } from './general';
 import { renderWorkspaceSettings } from './workspace-settings';
 import { renderServiceSettings } from './services';
@@ -16,7 +18,7 @@ import { renderCalendarSettings } from './calendar-settings';
 import { renderCoffeeSettings } from './coffee';
 import { renderEditorSettings, renderSyncSettings } from './editor-settings';
 import { renderWidgetBackgroundSetting } from './widget-background-setting';
-import { App, Platform, PluginSettingTab, setIcon, Setting, type SettingDefinitionItem } from 'obsidian';
+import { App, Platform, PluginSettingTab, setIcon, Setting, requireApiVersion, type SettingGroup, type SettingGroupItem, type SettingDefinitionItem } from 'obsidian';
 import type DashboardPlugin from '../main';
 import type { DashboardSettings, CountdownConfig, AlbumConfig, AnniversaryConfig } from '../../dashboard-view/types';
 import { t } from '../../shared/i18n';
@@ -32,6 +34,7 @@ export type { DashboardSettings };
  *  Each product stacks its sections on that tab. */
 
 export class DashboardSettingTab extends PluginSettingTab {
+	declare renderContactsSettings: (containerEl: HTMLElement) => void;
 	declare renderGeneralSettings: (containerEl: HTMLElement) => void;
 	declare renderLayoutPicker: (containerEl: HTMLElement) => void;
 	declare renderWorkspaceSettings: (containerEl: HTMLElement) => void;
@@ -111,6 +114,7 @@ export class DashboardSettingTab extends PluginSettingTab {
 			{
 				type: 'group',
 				items: [
+					{ name: t('contacts.storage'), desc: t('contacts.folderHint'), aliases: [t('contacts.folder'), t('contacts.columns')], render: (setting) => { asBlock(setting); onProduct('contacts', 'contacts-storage')(setting); this.renderContactsSettings(setting.settingEl); } },
 					{
 						name: t('settings.sectionBar'),
 						searchable: false, // the tab bar, not a setting
@@ -129,6 +133,7 @@ export class DashboardSettingTab extends PluginSettingTab {
 							this.renderHomeSettings(setting.settingEl);
 						},
 					},
+					...this.iconicDefinitions(),
 					{
 						name: t('settings.general'),
 						desc: t('settings.languageDesc'),
@@ -296,6 +301,41 @@ export class DashboardSettingTab extends PluginSettingTab {
 		];
 	}
 
+	private iconicDefinitions(): SettingGroupItem[] {
+		const controller = this.plugin?.iconicHost;
+		if (!controller?.isActive()) return [];
+		if (requireApiVersion('1.13.0')) {
+			const groups = new IconicSettingsSections(controller).getSettingDefinitions();
+			return groups.flatMap((group, index) => {
+				const page = ICONIC_SETTINGS_PAGES[index] ?? 'iconic-general';
+				const tag = (setting: Setting) => {
+					setting.settingEl.dataset.settingsProduct = 'iconic';
+					setting.settingEl.dataset.settingsPage = page;
+					setting.settingEl.toggleClass('dashboard-settings-page-hidden', this.activeProduct !== 'iconic');
+				};
+				const heading: SettingGroupItem[] = group.heading
+					? [{
+						name: `${t('modules.iconic')} · ${group.heading}`,
+						searchable: false,
+						render: (setting: Setting) => { tag(setting); setting.setHeading(); },
+					}]
+					: [];
+				return [...heading, ...(group.items ?? []).map((item) => {
+					if (!('render' in item) || !item.render) return item;
+					const render = item.render;
+					return {
+						...item,
+						render: (setting: Setting, group: SettingGroup) => {
+							tag(setting);
+							return render(setting, group);
+						},
+					};
+				})];
+			});
+		}
+		return [];
+	}
+
 	/** Remembered across update() re-renders. */
 	activeProduct: SettingsProduct = 'home';
 	activePage: SettingsPage = 'home';
@@ -303,16 +343,20 @@ export class DashboardSettingTab extends PluginSettingTab {
 	productTabs(): Array<{ key: SettingsProduct; label: string; icon: string }> {
 		const icons: Record<SettingsProduct, string> = {
 			home: 'house',
+			contacts: 'contact-round',
 			dashboard: 'layout-dashboard',
 			editor: 'pen-line',
 			terminal: 'terminal',
+			iconic: 'images',
 			sync: 'refresh-cw',
 		};
 		const labels: Record<SettingsProduct, string> = {
 			home: t('settings.productHome'),
+			contacts: t('contacts.title'),
 			dashboard: t('settings.productDashboard'),
 			editor: t('settings.productEditor'),
 			terminal: t('settings.productTerminal'),
+			iconic: t('modules.iconic'),
 			sync: t('settings.productSync'),
 		};
 		return visibleProducts(this.plugin.settings.modules).map((key) => ({ key, label: labels[key], icon: icons[key] }));
@@ -321,6 +365,7 @@ export class DashboardSettingTab extends PluginSettingTab {
 	sectionTabs(): Array<{ key: SettingsPage; label: string; icon: string }> {
 		const terminalLabels = terminalMenuLabels();
 		const meta: Partial<Record<SettingsPage, { label: string; icon: string }>> = {
+			'contacts-storage': { label: t('contacts.storage'), icon: 'contact-round' },
 			general: { label: t('settings.tabGeneral'), icon: 'settings' },
 			widgets: { label: t('settings.tabWidgets'), icon: 'layout-grid' },
 			coffee: { label: t('settings.tabAbout'), icon: 'user-round' },
@@ -388,6 +433,7 @@ export class DashboardSettingTab extends PluginSettingTab {
 		this.renderChrome(barHost);
 
 		const host = containerEl.createDiv({ cls: 'dashboard-settings-content' });
+		if (this.activeProduct === 'contacts') { this.renderContactsSettings(host); return; }
 		if (this.activeProduct === 'home') {
 			this.renderHomeSettings(host);
 			return;
@@ -399,6 +445,10 @@ export class DashboardSettingTab extends PluginSettingTab {
 		if (this.activeProduct === 'editor') {
 			this.renderEditorSettings(host);
 			new Setting(host).setName(t('editor.copy.title')).setDesc(t('editor.copy.desc')).setHeading();
+			return;
+		}
+		if (this.activeProduct === 'iconic') {
+			if (this.plugin.iconicHost?.isActive()) new IconicSettingsSections(this.plugin.iconicHost).renderFallback(host);
 			return;
 		}
 		if (this.activeProduct === 'terminal') {
@@ -459,3 +509,5 @@ DashboardSettingTab.prototype.renderSyncSettings = renderSyncSettings;
 DashboardSettingTab.prototype.renderCoffeeSettings = renderCoffeeSettings;
 DashboardSettingTab.prototype.renderHomeSettings = renderHomeSettings;
 DashboardSettingTab.prototype.renderWidgetBackgroundSetting = renderWidgetBackgroundSetting;
+
+DashboardSettingTab.prototype.renderContactsSettings = renderContactsSettings;

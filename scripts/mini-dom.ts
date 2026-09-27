@@ -222,7 +222,10 @@ export class El {
 
 	removeChild(child: El): El {
 		const i = this.children.indexOf(child);
-		if (i >= 0) this.children.splice(i, 1);
+		if (i >= 0) {
+			this.children.splice(i, 1);
+			child.parent = null;
+		}
 		return child;
 	}
 

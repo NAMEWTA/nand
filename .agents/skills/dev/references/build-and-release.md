@@ -29,6 +29,7 @@ The package manager is pnpm. `package.json` pins `packageManager`. The lockfile 
 - Externals: `obsidian`, `electron`, `@codemirror/*`, `@lezer/*`, Node builtins.
 - `ws` resolves to `node_modules/ws/wrapper.mjs`.
 - `.md` and `.svg` load as text.
+- The generated banner embeds `src/iconic/res/NOTICE.txt` so upstream and resource licenses ship in the existing three-file release.
 
 Do not add a second entry. Do not bundle CodeMirror.
 
@@ -53,6 +54,8 @@ Copy the nearest script, including extra aliases such as the music stubs. Do not
 | Comment anchors, the comment store, or the editor/dashboard import boundary | `pnpm run test:editor-comments` |
 | Terminal agent behavior covered by its `*.test.ts` files | `pnpm run test:terminal-agent` |
 | Module lifecycle (`src/plugin/module-lifecycle.test.ts`), settings navigation, or settings CSS | `pnpm run test:settings-nav` |
+| Archive model, Markdown format, index or controller | `pnpm run test:contacts`; see Archives checks below |
+| Icon rules, lifecycle, settings or persistence | `pnpm run test:iconic-port`, plus `test:settings-nav` for shell changes |
 | A dashboard behavior that already has a verify script | the matching `test:*` in `package.json` |
 
 `test:terminal-agent` and `test:settings-nav` use:
@@ -119,3 +122,15 @@ Match the log: one short imperative sentence, then a blank line and a short body
 - [ ] The tag equals `manifest.version`
 - [ ] `release.yml` is left to create the GitHub release
 - [ ] The terminal binary upload step is still in the workflow if you edited it
+
+## Archives checks
+
+`pnpm run test:contacts` bundles `scripts/verify-contacts.ts` into ignored `scripts/tmp/` and runs Node's tests. It covers Markdown round trips, unknown content preservation, write conflicts, malformed documents, stable IDs, relationships, company counts, 5,000-record filtering, and mocked-vault create/save/delete/rebuild/folder switching. It also checks native-editor draft protection, inverse relationship deduplication, and generated versus customized headings. Run `test:settings-nav` and `test:mobile-stability` for archive shell changes too; the latter is shared/dashboard regression coverage, not archive phone UI verification. Actual Obsidian checks are listed in `docs/contacts-development.md`.
+
+The archives leaf introduces Preact: `tsconfig` includes `.tsx`, JSX uses `preact`, and esbuild aliases React compatibility imports to Preact. The existing typed eslint configuration covers both `.ts` and `.tsx`. `src/contacts/persist/format-guide.md` is a runtime text asset: rebuild `main.js` when it changes.
+
+## Icons checks
+
+`test:iconic-port` bundles with `scripts/iconic-obsidian-stub.ts` and runs in UTC. Its fixed 1.1.10 fixture contains outputs produced by the original RuleManager, defaults, commands, locale values and resource hashes. It also checks isolated persistence, backup recovery, external reload and patch restoration. The oracle lives in `scripts/fixtures/iconic/upstream-1.1.10.json`; its README records provenance. Do not generate expected rule outputs from the migrated implementation. See [the port record](../../../../docs/iconic-port.md) for desktop checks and platform limits.
+
+For changes to icon settings, verify that every declaration routes persistence through the icon controller rather than a shell `control.key`. For lifecycle/CSS changes, check disabled-state cleanup and both main and floating windows; body state classes must remain on the same element as the module gate. Automated stubs do not replace those desktop checks.

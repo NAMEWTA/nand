@@ -6,9 +6,11 @@ import { mountCommentsPanel } from './panel';
 import { commentsReadingProcessor, refreshReadingViews } from './reading';
 import type { EditorDomain } from '../host/registry';
 import type DashboardPlugin from '../../plugin/main';
+import { CommentPopoverCoordinator } from './popover-coordinator';
 
 export function createCommentsDomain(plugin: DashboardPlugin): EditorDomain {
-	const extension = commentsCmExtension(plugin);
+	const popovers = new CommentPopoverCoordinator(plugin.app);
+	const extension = commentsCmExtension(plugin, popovers);
 	const processor = commentsReadingProcessor(plugin);
 	return {
 		id: 'comments',
@@ -24,8 +26,11 @@ export function createCommentsDomain(plugin: DashboardPlugin): EditorDomain {
 			return processor;
 		},
 		onSettingsChanged() {
+			popovers.refresh();
 			refreshReadingViews(plugin);
 		},
+		onEnable() { popovers.enable(); },
+		onDisable() { popovers.disable(); },
 		registerCommands() {
 			registerCommentCommands(plugin);
 		},

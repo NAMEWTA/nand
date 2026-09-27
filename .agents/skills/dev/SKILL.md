@@ -3,9 +3,9 @@ name: dev
 description: >-
   Development rules for the NAND Obsidian plugin in this repository
   (plugin id nand). Use when editing the plugin shell, dashboard, editor
-  comments, terminal agent, sync placeholder, shared modules, manifest,
+  comments, terminal agent, icons, archives, sync placeholder, shared modules, manifest,
   styles.css, main.js, settings, i18n, esbuild, eslint, or a GitHub release.
-  Use when the user mentions NAND, nand, 看板, 仪表盘, 评论, 终端, 设置, 发版,
+  Use when the user mentions NAND, nand, 看板, 仪表盘, 评论, 终端, 图标, 档案, 设置, 发版,
   or Obsidian 插件. Project rules override generic Obsidian plugin advice.
 when-to-use: >-
   Editing src/, styles.css, manifest.json, main.js, esbuild.config.mjs,
@@ -39,8 +39,8 @@ This skill is for this repository only. It adapts the Obsidian plugin rules name
 |---|---|
 | Display name | `NAND` |
 | Plugin id | `nand` |
-| View types (frozen) | `nand-dashboard-view`, `nand-editor-view`, `terminal-view` |
-| `minAppVersion` | `1.8.7` |
+| View types (frozen) | `nand-dashboard-view`, `nand-editor-view`, `terminal-view`, `nand-contacts-view` |
+| `minAppVersion` | `1.12.0` |
 | `isDesktopOnly` | `false` |
 | Entry | `src/plugin/main.ts` → committed `main.js` |
 | Styles | one `styles.css` at the repo root |
@@ -49,17 +49,17 @@ Pinned leaves store the view type string. The project is in pre-release developm
 
 ## Hard rules
 
-1. Keep the view type strings in the identity table. Register all three on phones and when a module is off. A terminal leaf whose module is off shows `InactiveTerminalView`.
-2. `dashboard-view`, `editor-view`, `terminal-agent`, and `sync` do not import each other. `shared` holds no comment threads, dashboard cards, or terminal sessions. `src/shared/exclude-folders-editor.ts` is the only shared file that imports the dashboard. Do not add another.
+1. Keep the view type strings in the identity table. Register all four on phones and when a module is off. A terminal leaf whose module is off shows `InactiveTerminalView`.
+2. `dashboard-view`, `editor-view`, `terminal-agent`, `iconic`, `contacts`, and `sync` do not import each other. `shared` holds no comment threads, dashboard cards, or terminal sessions. `src/shared/exclude-folders-editor.ts` is the only shared file that imports the dashboard. Do not add another.
 3. `plugin/main.ts` and `plugin/settings/` are the composition root and may deep-import a product. Leave those imports there. A product imports the plugin class with `import type` only. The terminal reaches editor data through the callback the shell passes in.
 4. `src/sync` stays `export {}`. Dashboard markdown write-back stays in `dashboard-view/persist`.
 5. Comments never rewrite the note. Bodies live in `.nand/editor/comments/`, not in `data.json` and not in the plugin folder.
 6. Construct `TerminalAgentController` only when `Platform.isDesktopApp` and the terminal module is on. Skip music on phones. Destroy music when the dashboard module turns off.
 7. Source files use relative imports. `tsconfig` `baseUrl` is `src`; that does not allow `dashboard-view/...` specifiers.
 8. User-facing copy goes through `src/shared/i18n/`, with `en` and `zh` in the same module, both merged in `runtime.ts`. Terminal strings are keys prefixed `terminalAgent.` in `src/shared/i18n/terminal-agent.ts`. `src/terminal-agent/i18n.ts` only adds that prefix. Do not add a new `section-NN.ts`. A missing key is echoed by `t()`. Default language is `zh`.
-9. Put a command id in `NAND_COMMANDS` only when another product must spell it. Register new shell commands in `src/plugin/commands.ts`. Leave the commands already inline in `main.ts` where they are. Leave terminal commands inside `terminal-agent`. Ids omit the plugin id. Names omit the word "command". No default hotkeys.
+9. Put a command id in `NAND_COMMANDS` only when another product must spell it. Register new shell commands in `src/plugin/commands.ts`. Leave the commands already inline in `main.ts` where they are. Leave terminal commands inside `terminal-agent` and icon commands inside `iconic`. Ids omit the plugin id. Names omit the word "command". No default hotkeys.
 10. One `DashboardSettingTab`. Products and the section order come from `src/plugin/settings/nav.ts`. The top row is home, then the open modules, then sync. There is no left-hand page list. Keep `display()` / `renderFallback()` because `minAppVersion` is below 1.13. Normalize `editorWorkbench` in `loadSettings` after the `{...raw}` spread.
-11. Register CodeMirror extensions and the reading post-processor once, inside `createEditorHost`. Closing the editor side panel only detaches panel DOM. Turning the editor module off flushes and disposes the comment store and does not unregister those extensions.
+11. For editor comments, register CodeMirror extensions and the reading post-processor once, inside `createEditorHost`. Closing the editor side panel only detaches panel DOM. Turning the editor module off flushes and disposes the comment store and does not unregister those extensions.
 12. A new editor domain implements `EditorDomain`. `writing-stats` and `focus` stay placeholders unless the task names them.
 13. Do the task you were asked to do. A bug fix does not restyle a widget. A comment change does not retile the dashboard.
 14. If you change the identity table, an import boundary, a settings product, the i18n home, a test entry, or the release path, update the one skill file that owns that fact in the same change. The map is in `references/skill-maintenance.md`.
@@ -70,7 +70,9 @@ Pinned leaves store the view type string. The project is in pre-release developm
 src/plugin/            shell: main.ts, ribbon, commands, the one settings tab
 src/dashboard-view/    workbench. persist/ is the markdown write-back engine
 src/editor-view/       editor panel, comments, copy
+src/contacts/          archive panel, Markdown records, employment and relationships
 src/terminal-agent/    desktop terminal
+src/iconic/            icons: managers, dialogs, components, rules and independent persistence
 src/shared/            i18n, cross-product ids and events, shared DTOs
 src/sync/              reserved. index.ts is `export {}`
 ```

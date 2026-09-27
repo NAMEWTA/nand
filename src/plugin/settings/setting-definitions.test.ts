@@ -29,6 +29,7 @@ import { DashboardSettingTab } from './settings-tab';
 
 function definitionNames(): string[] {
 	const tab = Object.create(DashboardSettingTab.prototype) as DashboardSettingTab;
+	Object.assign(tab, { plugin: { iconicHost: { isActive: () => true } } });
 	const names: string[] = [];
 	const walk = (node: unknown): void => {
 		if (!node || typeof node !== 'object') return;
@@ -58,15 +59,18 @@ test('declarative setting names are unique in both languages', () => {
 		setLanguage('zh');
 		const zh = definitionNames();
 		assertUnique(zh);
+		assert.ok(zh.includes('资料与显示'));
 		assert.equal(zh.includes('settings.widgetTheme'), false);
 		assert.equal(zh.filter((name) => name === '通用').length, 1);
 		assert.equal(zh.includes('导航'), true);
+		assert.ok(zh.indexOf('导航') < zh.indexOf('规则书'));
 		assert.equal(zh.includes('快捷与天气'), true);
 		assert.equal(zh.includes('其余小组件'), true);
 
 		setLanguage('en');
 		const en = definitionNames();
 		assertUnique(en);
+		assert.ok(en.includes('Storage and display'));
 		assert.equal(en.includes('settings.widgetTheme'), false);
 		assert.equal(en.filter((name) => name === 'General').length, 1);
 		assert.equal(en.includes('Navigation'), true);

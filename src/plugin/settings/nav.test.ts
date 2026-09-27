@@ -5,21 +5,21 @@ import path from 'node:path';
 
 import { defaultPage, productOrder, sidePages, visibleProducts } from './nav.ts';
 
-const ALL_ON = { dashboard: true, editor: true, terminal: true };
+const ALL_ON = { dashboard: true, editor: true, terminal: true, iconic: true, contacts: true };
 
 test('home is the first primary settings product', () => {
 	assert.equal(productOrder()[0], 'home');
-	assert.deepEqual(productOrder(), ['home', 'dashboard', 'editor', 'terminal', 'sync']);
+	assert.deepEqual(productOrder(), ['home', 'dashboard', 'editor', 'terminal', 'iconic', 'contacts', 'sync']);
 });
 
 test('top tabs keep home and sync and hide closed domains', () => {
-	assert.deepEqual(visibleProducts(ALL_ON), ['home', 'dashboard', 'editor', 'terminal', 'sync']);
-	assert.deepEqual(visibleProducts({ dashboard: false, editor: true, terminal: true }), ['home', 'editor', 'terminal', 'sync']);
-	assert.deepEqual(visibleProducts({ dashboard: true, editor: false, terminal: true }), ['home', 'dashboard', 'terminal', 'sync']);
-	assert.deepEqual(visibleProducts({ dashboard: true, editor: true, terminal: false }), ['home', 'dashboard', 'editor', 'sync']);
-	assert.deepEqual(visibleProducts({ dashboard: false, editor: false, terminal: false }), ['home', 'sync']);
-	assert.equal(visibleProducts({ dashboard: false, editor: true, terminal: false }).includes('home'), true);
-	assert.equal(visibleProducts({ dashboard: false, editor: true, terminal: false }).includes('sync'), true);
+	assert.deepEqual(visibleProducts(ALL_ON), ['home', 'dashboard', 'editor', 'terminal', 'iconic', 'contacts', 'sync']);
+	assert.deepEqual(visibleProducts({ iconic: false, contacts: false, dashboard: false, editor: true, terminal: true }), ['home', 'editor', 'terminal', 'sync']);
+	assert.deepEqual(visibleProducts({ iconic: false, contacts: false, dashboard: true, editor: false, terminal: true }), ['home', 'dashboard', 'terminal', 'sync']);
+	assert.deepEqual(visibleProducts({ iconic: false, contacts: false, dashboard: true, editor: true, terminal: false }), ['home', 'dashboard', 'editor', 'sync']);
+	assert.deepEqual(visibleProducts({ iconic: false, contacts: false, dashboard: false, editor: false, terminal: false }), ['home', 'sync']);
+	assert.equal(visibleProducts({ iconic: false, contacts: false, dashboard: false, editor: true, terminal: false }).includes('home'), true);
+	assert.equal(visibleProducts({ iconic: false, contacts: false, dashboard: false, editor: true, terminal: false }).includes('sync'), true);
 });
 
 test('domain sections stay in their previous order for stacking on one tab', () => {
@@ -42,4 +42,11 @@ test('settings stylesheet does not keep a left-hand settings column', () => {
 	const source = fs.readFileSync(path.join(process.cwd(), 'src/plugin/settings/settings-tab.ts'), 'utf8');
 	assert.equal(source.includes('dashboard-settings-sidenav'), false);
 	assert.equal(source.includes('nand-settings-split'), false);
+});
+
+test('archives has independent navigation and respects its module gate', () => {
+	assert.deepEqual(sidePages('contacts'), ['contacts-storage']);
+	assert.equal(defaultPage('contacts'), 'contacts-storage');
+	assert.equal(visibleProducts({ ...ALL_ON, contacts: false }).includes('contacts'), false);
+	assert.equal(visibleProducts({ ...ALL_ON, dashboard: false }).includes('contacts'), true);
 });

@@ -7,7 +7,8 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { EditorState } from '@codemirror/state';
 import { EditorView } from '@codemirror/view';
-import { editorInfoField } from 'obsidian';
+import { editorInfoField, Scope } from 'obsidian';
+import { CommentPopoverCoordinator } from '../src/editor-view/comments/popover-coordinator';
 import { locateAnchor, makeAnchor, selectionIsCommentable } from '../src/editor-view/comments/anchor';
 import { commentsCmExtension } from '../src/editor-view/comments/cm-extension';
 import { formatCommentTime, mountCommentsPanel } from '../src/editor-view/comments/panel';
@@ -217,6 +218,15 @@ const editorDocument = Object.assign(new El('#document'), {
 			scrollWidth: 80,
 		});
 		el.getBoundingClientRect = () => ({ top: 0, right: 80, bottom: 16, left: 0, width: 80, height: 16 });
+		const textContent = Object.getOwnPropertyDescriptor(El.prototype, 'textContent')!;
+		Object.defineProperty(el, 'textContent', {
+			get() { return textContent.get!.call(el); },
+			set(value: string) {
+				textContent.set!.call(el, '');
+				if (value) el.appendChild(editorDocument.createTextNode(value));
+			},
+		});
+
 		return el;
 	},
 	createElementNS(_ns: string, tag: string) {
@@ -289,23 +299,111 @@ const flushFrames = () => {
 		for (const cb of batch) cb(0);
 	}
 };
+const workspaceEvents = new Map<string, Set<(leaf?: unknown) => void>>();
+const noteLeaf = { view: { containerEl: editorBody }, getContainer: () => workspaceRoot };
+const terminalLeaf = { view: { containerEl: new El('div') } };
+terminalLeaf.view.containerEl.ownerDocument = editorDocument;
+const workspaceRoot = {};
+const workspace = {
+	activeLeaf: noteLeaf as typeof noteLeaf | typeof terminalLeaf,
+	iterateAllLeaves(cb: (leaf: typeof noteLeaf) => void) { cb(noteLeaf); },
+	getMostRecentLeaf: () => noteLeaf,
+	on(name: string, cb: (leaf?: unknown) => void) {
+		const callbacks = workspaceEvents.get(name) ?? new Set();
+		workspaceEvents.set(name, callbacks);
+		callbacks.add(cb);
+		return { name, cb };
+	},
+	offref(event: { name: string; cb: (leaf?: unknown) => void }) { workspaceEvents.get(event.name)?.delete(event.cb); },
+};
+const emitWorkspace = (name: string) => { for (const cb of workspaceEvents.get(name) ?? []) cb(name === 'active-leaf-change' ? workspace.activeLeaf : undefined); };
+const keyScopes: Scope[] = [];
+const commentPlugin = {
+	settings: { modules: { editor: true }, editorWorkbench: { highlightEnabled: true, popoverEnabled: true } },
+	app: { workspace, scope: new Scope(), keymap: {
+		pushScope: (scope: Scope) => keyScopes.push(scope),
+		popScope: (scope: Scope) => { const i = keyScopes.indexOf(scope); if (i >= 0) keyScopes.splice(i, 1); },
+	} },
+};
+const coordinator = new CommentPopoverCoordinator(commentPlugin.app as never);
+coordinator.enable();
+Object.assign(win, { innerWidth: 1000, innerHeight: 800 });
+let paneHeight = 600;
+const paneRect = () => ({ top: 0, right: 800, bottom: paneHeight, left: 0, width: 800, height: paneHeight });
 const editor = new EditorView({
 	parent: editorBody as unknown as HTMLElement,
 	state: EditorState.create({
 		doc: panelNote,
 		extensions: [
 			editorInfoField.init(() => ({ file: { path: 'notes/demo.md' } }) as never),
-			commentsCmExtension({
-				settings: { editorWorkbench: { highlightEnabled: true, popoverEnabled: true } },
-			} as never),
+			commentsCmExtension(commentPlugin as never, coordinator),
 		],
 	}),
 });
+editor.dom.getBoundingClientRect = paneRect as never;
+editor.scrollDOM.getBoundingClientRect = paneRect as never;
 flushFrames();
 editor.dispatch({ selection: { anchor: 7, head: 11 } });
 flushFrames();
 assert.ok(editorBody.querySelector('.nand-editor-comment-hl'), 'selecting text keeps the comment highlight');
 assert.ok(editorBody.querySelector('.nand-editor-comment-popover'), 'selecting text shows the comment button');
+
+const popup = editorBody.querySelector('.nand-editor-comment-popover')!;
+assert.ok(popup && !(popup as unknown as HTMLElement).hidden);
+const openButton = popup.children[0]!;
+openButton.click();
+const draft = popup.children[1]!;
+draft.value = 'draft across tabs';
+draft.dispatchEvent({ type: 'input' });
+flushFrames();
+assert.equal(keyScopes.length, 1);
+const beforeHiddenSubmit = panelStore.threadsFor('notes/demo.md').length;
+workspace.activeLeaf = terminalLeaf;
+emitWorkspace('active-leaf-change');
+assert.equal((popup as unknown as HTMLElement).hidden, true, 'hide synchronously without a CM transaction');
+assert.equal(keyScopes.length, 0, 'hidden composer releases keyboard scope');
+popup.children[3]!.children[1]!.click();
+await Promise.resolve();
+assert.equal(panelStore.threadsFor('notes/demo.md').length, beforeHiddenSubmit, 'stale hidden click cannot save');
+flushFrames();
+assert.equal((popup as unknown as HTMLElement).hidden, true);
+workspace.activeLeaf = noteLeaf;
+emitWorkspace('active-leaf-change');
+flushFrames();
+assert.equal((popup as unknown as HTMLElement).hidden, false);
+assert.equal(draft.value, 'draft across tabs');
+popup.children[3]!.children[1]!.click();
+workspace.activeLeaf = terminalLeaf;
+emitWorkspace('active-leaf-change');
+flushFrames();
+await Promise.resolve();
+await Promise.resolve();
+await panelStore.flush();
+assert.equal(panelStore.threadsFor('notes/demo.md').length, beforeHiddenSubmit, 'switching leaves before submission measurement prevents the write');
+workspace.activeLeaf = noteLeaf;
+emitWorkspace('active-leaf-change');
+flushFrames();
+assert.equal(draft.value, 'draft across tabs');
+paneHeight = 30;
+emitWorkspace('layout-change');
+flushFrames();
+assert.equal((popup as unknown as HTMLElement).hidden, true, 'rendered selection outside resized pane is hidden');
+paneHeight = 600;
+emitWorkspace('layout-change');
+flushFrames();
+assert.equal((popup as unknown as HTMLElement).hidden, false);
+editor.dispatch({ selection: { anchor: 12, head: 16 } });
+flushFrames();
+assert.equal(popup.isConnected, false, 'selection replacement discards the old draft context');
+commentPlugin.settings.modules.editor = false;
+coordinator.disable();
+assert.equal(editorBody.querySelector('.nand-editor-comment-popover'), null);
+assert.equal([...workspaceEvents.values()].every((callbacks) => callbacks.size === 0), true);
+commentPlugin.settings.modules.editor = true;
+coordinator.enable();
+await Promise.resolve();
+flushFrames();
+assert.ok(editorBody.querySelector('.nand-editor-comment-popover'), 'module restart restores the existing CM extension');
 
 const coldBody = new El('div');
 Object.assign(coldBody, { ownerDocument: editorDocument, nodeType: 1 });
@@ -317,9 +415,7 @@ const coldEditor = new EditorView({
 		doc: panelNote,
 		extensions: [
 			editorInfoField.init(() => ({ file: { path: 'notes/demo.md' } }) as never),
-			commentsCmExtension({
-				settings: { editorWorkbench: { highlightEnabled: true, popoverEnabled: true } },
-			} as never),
+			commentsCmExtension(commentPlugin as never, coordinator),
 		],
 	}),
 });
@@ -328,6 +424,8 @@ await coldStore.loadFile('notes/demo.md');
 flushFrames();
 assert.ok(coldBody.querySelector('.nand-editor-comment-hl'), 'loading the sidecar paints the highlight without reopening the note');
 coldEditor.destroy();
+editor.destroy();
+coordinator.disable();
 
 function walk(dir: string): string[] {
 	const out: string[] = [];

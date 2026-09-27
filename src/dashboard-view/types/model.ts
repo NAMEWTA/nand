@@ -1,3 +1,4 @@
+import { DEFAULT_CONTACTS_SETTINGS, type ContactsSettings } from '../../shared/contacts-settings';
 import type { Language } from '../../shared/i18n';
 import type { EditorWorkbenchSettings } from '../../shared/editor-workbench';
 import { DEFAULT_EDITOR_WORKBENCH } from '../../shared/editor-workbench';
@@ -20,6 +21,7 @@ export interface CalendarTaskTarget {
 }
 
 export interface DashboardSettings {
+	contacts: ContactsSettings;
 	/** Path of the ACTIVE workspace file (no .md extension). */
 	dashboardFile: string;
 	/** All workspace board files in switcher order (button i+1). Paths follow
@@ -188,6 +190,8 @@ export interface DashboardSettings {
 		dashboard: boolean;
 		editor: boolean;
 		terminal: boolean;
+		contacts: boolean;
+		iconic: boolean;
 	};
 	countdownEnabled: boolean;
 	/** Multiple countdowns managed in settings; rendered in the sidebar. */
@@ -291,6 +295,7 @@ export interface QuickCommand {
 }
 
 export const DEFAULT_SETTINGS: DashboardSettings = {
+	contacts: { ...DEFAULT_CONTACTS_SETTINGS },
 	dashboardFile: 'dashboard',
 	workspaceFiles: ['dashboard'],
 	workspaceNames: [''],
@@ -384,6 +389,8 @@ export const DEFAULT_SETTINGS: DashboardSettings = {
 		dashboard: true,
 		editor: true,
 		terminal: true,
+		contacts: true,
+		iconic: true,
 	},
 	countdownEnabled: false,
 	countdowns: [] as CountdownConfig[],

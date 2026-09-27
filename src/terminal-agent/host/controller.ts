@@ -1,3 +1,4 @@
+import { refreshLeafTitle } from '../../shared/workspace-title';
 import { renderEmptyState } from '../../shared/empty-state';
 import { resolvePluginDirectory } from './filesystem-paths';
 import type { View, WorkspaceLeaf } from 'obsidian';
@@ -2962,8 +2963,7 @@ export class TerminalAgentController {
   }
 
   private updateLeafHeader(leaf: WorkspaceLeaf): void {
-    const leafWithHeader = leaf as WorkspaceLeaf & { updateHeader?: () => void };
-    leafWithHeader.updateHeader?.();
+    refreshLeafTitle(this.app, leaf);
   }
 
   /**

@@ -1,3 +1,7 @@
+import { ContactsController, ContactsView, CONTACTS_VIEW_TYPE } from '../contacts';
+import { normalizeContactsSettings } from '../shared/contacts-settings';
+import { IconicController } from '../iconic';
+import { refreshLeafTitle } from '../shared/workspace-title';
 import { Notice, Platform, Plugin, TAbstractFile, TFile } from 'obsidian';
 import {
 	DEFAULT_SETTINGS,
@@ -141,6 +145,7 @@ function migrateAnniversaries(raw: Record<string, unknown>): AnniversaryConfig[]
 
 export default class DashboardPlugin extends Plugin {
 	settings!: DashboardSettings;
+	contactsHost?: ContactsController;
 	mediaTagService!: MediaTagService;
 	habitService!: HabitService;
 	expenseService!: ExpenseService;
@@ -150,11 +155,13 @@ export default class DashboardPlugin extends Plugin {
 	editorHost?: EditorHost;
 	/** Desktop PTY host. Absent on phones and while the agent module is off. */
 	terminalHost?: TerminalAgentController;
+	iconicHost?: IconicController;
 	private settingsTab!: DashboardSettingTab;
 	private dashboardServicesStarted = false;
 
 	async onload(): Promise<void> {
 		await this.loadSettings();
+		this.registerView(CONTACTS_VIEW_TYPE, (leaf) => new ContactsView(leaf, this));
 
 		this.registerView(DASHBOARD_VIEW_TYPE, (leaf) => new DashboardView(leaf, this));
 		this.registerView(EDITOR_VIEW_TYPE, (leaf) => new EditorView(leaf, this));
@@ -170,6 +177,7 @@ export default class DashboardPlugin extends Plugin {
 			void this.openEditorView();
 		});
 
+		this.addRibbonIcon('contact-round', t('contacts.open'), () => { void this.openContacts(); });
 		registerShellCommands(this);
 
 		this.addCommand({
@@ -317,9 +325,42 @@ export default class DashboardPlugin extends Plugin {
 		return this.moduleLifecycle.apply(() => this.settings.modules, Platform.isDesktopApp, {
 			dashboard: (enabled) => (enabled ? this.ensureDashboardServices() : this.stopDashboardServices()),
 			editor: (enabled) => (enabled ? this.ensureEditor() : this.stopEditor()),
+			iconic: (enabled) => this.setIconicEnabled(enabled),
+			contacts: (enabled) => this.setContactsEnabled(enabled),
 			terminalActive: () => this.terminalHost?.isActive() === true,
 			terminal: (enabled) => (enabled ? this.ensureTerminal() : this.stopTerminal()),
 		});
+	}
+
+	private async setIconicEnabled(enabled: boolean): Promise<void> {
+		if (!enabled) {
+			await this.iconicHost?.deactivate();
+			return;
+		}
+		if (!this.iconicHost) this.iconicHost = new IconicController(this);
+		await this.iconicHost.onload();
+	}
+
+	private async setContactsEnabled(enabled: boolean): Promise<void> {
+		if (enabled && !this.contactsHost) {
+			this.contactsHost = new ContactsController(this.app, () => this.settings.contacts);
+			this.contactsHost.load();
+		} else if (!enabled && this.contactsHost) {
+			await this.contactsHost.queue.settled();
+			this.contactsHost.unload(); this.contactsHost = undefined;
+		}
+		this.refreshContactsViews();
+	}
+
+	refreshContactsViews(): void {
+		for (const leaf of this.app.workspace.getLeavesOfType(CONTACTS_VIEW_TYPE)) if (leaf.view instanceof ContactsView) leaf.view.bindController();
+	}
+
+	async openContacts(): Promise<void> {
+		if (!this.settings.modules.contacts) { new Notice(t('contacts.disabled')); this.openHome(); return; }
+		const existing = this.app.workspace.getLeavesOfType(CONTACTS_VIEW_TYPE)[0];
+		if (existing) { await this.app.workspace.revealLeaf(existing); return; }
+		await this.app.workspace.getLeaf('tab').setViewState({ type: CONTACTS_VIEW_TYPE, active: true });
 	}
 
 	private async ensureDashboardServices(): Promise<void> {
@@ -421,12 +462,15 @@ export default class DashboardPlugin extends Plugin {
 					? this.terminalHost.createLeafView(leaf)
 					: new InactiveTerminalView(leaf, this);
 			await leaf.open(next);
-			(leaf as typeof leaf & { updateHeader?: () => void }).updateHeader?.();
+			refreshLeafTitle(this.app, leaf);
 		}
 	}
 
 	onunload(): void {
+		for (const leaf of this.app.workspace.getLeavesOfType(CONTACTS_VIEW_TYPE)) if (leaf.view instanceof ContactsView) leaf.view.disposeSurface();
+		this.contactsHost?.unload();
 		this.moduleLifecycle.dispose();
+		this.iconicHost?.onunload();
 		this.terminalHost?.onunload();
 		this.editorHost?.onunload();
 		teardownBasenameIndex(this.app);
@@ -520,12 +564,15 @@ export default class DashboardPlugin extends Plugin {
 			workspaceNames: workspace.names,
 			dashboardFile: workspace.active,
 			editorWorkbench: normalizeEditorWorkbench(raw.editorWorkbench),
+			contacts: normalizeContactsSettings(raw.contacts),
 			terminalAgent: await this.importTerminalAgent(raw.terminalAgent),
 			introSeen: raw.introSeen === true,
 			modules: {
 				dashboard: raw.modules?.dashboard !== false,
 				editor: raw.modules?.editor !== false,
 				terminal: raw.modules?.terminal !== false,
+				contacts: raw.modules?.contacts !== false,
+				iconic: raw.modules?.iconic !== false,
 			},
 		};
 		// First install only (no data.json has ever existed): start with the

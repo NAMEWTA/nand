@@ -20,11 +20,15 @@
 		"lib": [
 			"DOM",
 			"ESNext"
-		]
+		],
+		"resolveJsonModule": true,
+		"jsx": "react-jsx",
+		"jsxImportSource": "preact"
 	},
 	"include": [
 		"src/**/*.ts",
-		"scripts/**/*.ts"
+		"scripts/**/*.ts",
+		"src/**/*.tsx"
 	],
 	"exclude": [
 		"**/*.test.ts"

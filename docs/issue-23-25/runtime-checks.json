@@ -1,0 +1,74 @@
+[
+  {
+    "case": "palette",
+    "round": 1,
+    "type": "terminal-view",
+    "visible": 0
+  },
+  {
+    "case": "palette",
+    "round": 2,
+    "type": "terminal-view",
+    "visible": 0
+  },
+  {
+    "case": "palette",
+    "round": 3,
+    "type": "terminal-view",
+    "visible": 0
+  },
+  {
+    "case": "draft restore",
+    "passed": true
+  },
+  {
+    "case": "tooltip hover and keyboard submit",
+    "passed": true
+  },
+  {
+    "case": "window title",
+    "round": 1,
+    "enabled": false,
+    "title": "智能体 - vault - Obsidian 1.13.7",
+    "tab": "智能体"
+  },
+  {
+    "case": "window title",
+    "round": 1,
+    "enabled": true,
+    "title": "Terminal - vault - Obsidian 1.13.7",
+    "tab": "Terminal"
+  },
+  {
+    "case": "window title",
+    "round": 2,
+    "enabled": false,
+    "title": "智能体 - vault - Obsidian 1.13.7",
+    "tab": "智能体"
+  },
+  {
+    "case": "window title",
+    "round": 2,
+    "enabled": true,
+    "title": "Terminal - vault - Obsidian 1.13.7",
+    "tab": "Terminal"
+  },
+  {
+    "case": "window title",
+    "round": 3,
+    "enabled": false,
+    "title": "智能体 - vault - Obsidian 1.13.7",
+    "tab": "智能体"
+  },
+  {
+    "case": "window title",
+    "round": 3,
+    "enabled": true,
+    "title": "Terminal - vault - Obsidian 1.13.7",
+    "tab": "Terminal"
+  },
+  {
+    "case": "background terminal does not overwrite note title",
+    "passed": true
+  }
+]

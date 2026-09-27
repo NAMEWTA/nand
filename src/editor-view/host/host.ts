@@ -45,6 +45,7 @@ export function createEditorHost(plugin: DashboardPlugin): EditorHost {
 			if (loaded) return;
 			loaded = true;
 			registerCommentStore(store);
+			for (const domain of domains) domain.onEnable?.();
 			if (!booted) {
 				booted = true;
 				const extensions = domains.flatMap((domain) => domain.getEditorExtensions?.() ?? []);
@@ -77,6 +78,7 @@ export function createEditorHost(plugin: DashboardPlugin): EditorHost {
 			}
 		},
 		onunload() {
+			for (const domain of domains) domain.onDisable?.();
 			void store.flush();
 			store.dispose();
 			registerCommentStore(null);

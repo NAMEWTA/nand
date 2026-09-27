@@ -64,7 +64,7 @@ Regex lookbehind is illegal here (iOS < 16.4). The plugin is not desktop-only. T
 - Sentence case in English UI and in `t()` values. Proper nouns stay capitalized. Where the strings live is SKILL rule 8.
 - Command id shape is SKILL rule 9. Register with `addCommand`.
 - Settings headings use `Setting.setHeading()`, not a hand-built `<h2>`, and are not named "General", "Settings", or the display name.
-- Keep every persisted field inside `plugin.settings`. `saveData` replaces the whole object.
+- Keep shell preferences inside `plugin.settings`. `saveData` replaces the whole object. Domain stores such as comments and icons own their documented files; do not mix those payloads into shell preferences.
 - Implement a new setting in both `getSettingDefinitions()` and the fallback renderer. Tag the row with the product page so search and the pre-1.13 tab bar agree. Page ids are the settings table in `references/architecture.md`.
 - Redraw with the tab's `refresh()` (`update()` when present, otherwise the fallback). Do not call `display()` to refresh declarative settings.
 - From a settings callback, `activeDocument` is the settings window. To touch the main workspace, use `this.app.workspace.containerEl.ownerDocument`.
@@ -110,3 +110,5 @@ This plugin is not submitted through a fresh sample-plugin checklist on every ch
 - Fix new eslint errors before pushing. CI runs the lint script in the SKILL.md finish gate.
 - Warnings are public if the plugin is ever scored. Don't add `no-unused-vars` warnings.
 - Releases already attest the zip (`actions/attest-build-provenance`). Leave that step in `release.yml`.
+
+The Iconic port retains upstream CSS declarations and `.iconic-*` names for behavioral parity. Every imported selector is gated by `body.nand-iconic-enabled` (using `:where` to preserve specificity); disable removes that body marker in main and floating windows. Treat this as a scoped port exception, not a template for new global CSS. Private Obsidian members used by this port are described locally in `src/iconic/utils/obsidian-internal.ts`; do not add ambient declarations or blanket lint suppressions.

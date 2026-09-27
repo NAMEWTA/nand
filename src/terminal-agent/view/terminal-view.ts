@@ -1,3 +1,4 @@
+import { refreshLeafTitle } from '../../shared/workspace-title';
 import type { TerminalAgentController } from '../host/controller';
 
 type TerminalViewHost = Pick<TerminalAgentController, 'settings' | 'activateTerminalView' | 'toggleAlwaysOnTopTerminal' | 'getAlwaysOnTopTerminalLabel' | 'isAlwaysOnTopTerminal' | 'handleTerminalViewClosed'>;
@@ -1233,8 +1234,7 @@ export class TerminalView extends ItemView {
   }
 
   private updateLeafHeader(leaf: WorkspaceLeaf): void {
-    const leafWithHeader = leaf as WorkspaceLeaf & { updateHeader?: () => void };
-    leafWithHeader.updateHeader?.();
+    refreshLeafTitle(this.app, leaf);
   }
 
   private getTerminalPlugin(): TerminalViewHost {

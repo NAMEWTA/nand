@@ -5,6 +5,8 @@ import { mountCommentComposer } from '../src/editor-view/comments/composer';
 import { createDashboardSettingsAccess } from '../src/dashboard-view/settings-access';
 import { readCalendarTaskFilter, writeCalendarTaskFilter } from '../src/dashboard-view/calendar/calendar-modal';
 import { onLanguageChanged, setLanguage } from '../src/shared/i18n';
+import { intersectRects, placePopover } from '../src/editor-view/comments/popover-position';
+import { refreshLeafTitle } from '../src/shared/workspace-title';
 import type { DashboardSettings } from '../src/dashboard-view/types';
 
 async function main() {
@@ -20,13 +22,13 @@ async function main() {
 	} as unknown as App;
 	const win = new El('window');
 	const parent = new El('div');
-	parent.ownerDocument = { defaultView: win, activeElement: null };
+	parent.ownerDocument = { defaultView: win, activeElement: null, hasFocus: () => false };
 	let saves = 0,
 		text = '',
 		focused = 0,
 		fail = false;
 	let finish: (() => void) | undefined;
-	const dispose = mountCommentComposer(
+	const composer = mountCommentComposer(
 		parent as unknown as HTMLElement,
 		app,
 		async (value) => {
@@ -60,6 +62,8 @@ async function main() {
 		)?.handlers;
 		handlers?.find((h) => h.key === name)?.callback({ isComposing: composing });
 	};
+	assert.equal(input.getAttribute('aria-label'), null);
+	assert.equal(parent.children[4]!.getAttribute('for'), (input as unknown as HTMLTextAreaElement).id);
 	assert.equal(input.hidden, true);
 	assert.equal(scopes.length, 0);
 	click(button);
@@ -91,6 +95,13 @@ async function main() {
 	assert.equal(focused, 1);
 	click(button);
 	type('keep my draft');
+	composer.setVisible(false);
+	assert.equal(scopes.length, 0);
+	click(submit);
+	assert.equal(saves, 1);
+	assert.equal(input.value, 'keep my draft');
+	composer.setVisible(true);
+	parent.dispatchEvent({ type: 'focusin' });
 	fail = true;
 	key('Enter');
 	await Promise.resolve();
@@ -107,7 +118,7 @@ async function main() {
 	click(cancel);
 	assert.equal(input.value, '');
 	click(button);
-	dispose();
+	composer.dispose();
 	assert.equal(scopes.length, 0, 'unmount releases its scope');
 	let changed = 0;
 	const off = onLanguageChanged(() => changed++);
@@ -116,6 +127,35 @@ async function main() {
 	off();
 	setLanguage('en');
 	assert.equal(changed, 1, 'language notification is idempotent and disposable');
+
+	const bounds = { left: 100, top: 100, right: 500, bottom: 400 };
+	assert.deepEqual(placePopover({ left: 490, right: 495, top: 110, bottom: 126 }, bounds, 260, 160), { left: 232, top: 134 });
+	assert.deepEqual(placePopover({ left: 110, right: 120, top: 390, bottom: 400 }, bounds, 260, 160), { left: 110, top: 222 });
+	assert.equal(placePopover(bounds, bounds, 390, 290), null, 'too small panes hide the popup');
+	assert.equal(intersectRects(bounds, { left: 510, right: 600, top: 100, bottom: 200 }), null);
+	let mainTitle = '', popoutTitle = '', headerCalls = 0;
+	let mainActive = 'Note', popupActive = 'Terminal';
+	const root = {};
+	const popupWindow = { updateTitle() { popoutTitle = popupActive; } };
+	const titleApp = { workspace: { rootSplit: root, updateTitle() { mainTitle = mainActive; } } };
+	const mainLeaf = { getContainer: () => root, updateHeader() { headerCalls++; } };
+	const popupLeaf = { getContainer: () => popupWindow, updateHeader() { headerCalls++; } };
+	refreshLeafTitle(titleApp as never, mainLeaf as never);
+	assert.equal(mainTitle, 'Note', 'background terminal refresh preserves the current note title');
+	mainActive = '智能体';
+	refreshLeafTitle(titleApp as never, mainLeaf as never);
+	assert.equal(mainTitle, '智能体');
+	mainActive = 'Terminal';
+	refreshLeafTitle(titleApp as never, mainLeaf as never);
+	assert.equal(mainTitle, 'Terminal');
+	refreshLeafTitle(titleApp as never, popupLeaf as never);
+	assert.equal(popoutTitle, 'Terminal');
+	popupActive = 'Renamed';
+	refreshLeafTitle(titleApp as never, popupLeaf as never);
+	assert.equal(popoutTitle, 'Renamed');
+	assert.equal(mainTitle, 'Terminal');
+	assert.equal(headerCalls, 5);
+	assert.doesNotThrow(() => refreshLeafTitle({ workspace: { rootSplit: root } } as never, mainLeaf as never));
 
 	let disk = '';
 	let refreshes = 0;

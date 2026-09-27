@@ -6,9 +6,10 @@ function fixture(active = true) {
 	const calls: string[] = [];
 	const leaves = [{ session: 'one', output: 'keep-one' }, { session: 'two', output: 'keep-two' }];
 	const original = [...leaves];
-	const flags = { dashboard: true, editor: true, terminal: active };
+	const flags = { dashboard: true, editor: true, terminal: active, iconic: false, contacts: true };
 	const lifecycle = new ModuleLifecycle();
 	const effects: ModuleEffects = {
+		contacts: async () => {}, iconic: async () => {},
 		dashboard: () => {}, editor: () => {}, terminalActive: () => active,
 		terminal: async (enabled) => {
 			calls.push(enabled ? 'activate' : 'deactivate');
@@ -94,5 +95,16 @@ test('unload prevents pending module work from starting services', async () => {
 	const pending = f.apply();
 	f.lifecycle.dispose();
 	await pending;
+	assert.deepEqual(f.calls, []);
+});
+
+test('archive transitions run on mobile without restarting the terminal', async () => {
+	const f = fixture(false);
+	const values: boolean[] = [];
+	f.effects.contacts = async (enabled) => { values.push(enabled); };
+	await f.apply(false);
+	f.flags.contacts = false;
+	await f.apply(false);
+	assert.deepEqual(values, [true, false]);
 	assert.deepEqual(f.calls, []);
 });

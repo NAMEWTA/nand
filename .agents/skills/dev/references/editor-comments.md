@@ -54,6 +54,9 @@ Do not guess a nearby paragraph. Do not auto-reopen an orphaned thread when some
 - Side panel: reply, resolve, reopen, delete, jump, reanchor. Jump switches preview to source, then `setSelection` and `scrollIntoView`.
 - Closing the panel does not call `editorHost.onunload`. Extension lifetime is SKILL rule 11.
 - Clicking a highlight focuses that thread (`store.focus`). It does not edit the note.
+- The comments domain owns `CommentPopoverCoordinator`; `EditorDomain.onEnable` / `onDisable` connect it to the editor host. Workspace activation/layout changes hide overlays independently of CM transactions. There is at most one visible selection popover per document/window.
+- `SelectionPopover` keeps a transient draft for the same valid selection. It measures the actual selection against the source pane, suspends its composer and key scope while hidden, and validates the source again before writing. Module/leaf teardown disposes drafts, observers and listeners. Restarting the module rebinds store subscriptions on existing CM views.
+- Composer textareas use an associated label and `aria-describedby` for shortcut help; do not add an `aria-label` tooltip that covers the help. Small panes constrain the input and wrap the action row so submission controls remain visible.
 
 Cross-product event names live in `src/shared/events.ts`. `COMMENT_TO_TASK` is reserved: `commentToTaskPayload` shapes a payload and nothing dispatches it yet. `ACTIVE_FILE_COMMENTS_CHANGED` is declared and has no caller yet. Do not import the dashboard to create a task, and do not start emitting either event unless the task says so.
 
@@ -62,6 +65,8 @@ Cross-product event names live in `src/shared/events.ts`. `COMMENT_TO_TASK` is r
 `pnpm run test:editor-comments` bundles `scripts/verify-editor-comments.ts` with esbuild and the Obsidian stub. The runner shape is in `references/build-and-release.md`.
 
 The script checks anchors, the in-memory filesystem (the note string is unchanged), index hash length 16, reply, resolve, rename, delete, orphan reconcile, the editor/dashboard import boundary, and the view type constants from the identity table.
+
+It also exercises the real CM extension with controlled DOM geometry and workspace events: hiding without a CM transaction, scroll clipping, draft restoration, stale submission rejection, and module restart. `test:issue-regressions` covers composer scopes/accessibility, placement boundaries, and routing terminal title refreshes to the correct host window. These Node fixtures do not replace real Obsidian tooltip/window tests.
 
 - The bundle's `__dirname` is `node_modules/.tmp`. Resolve the repo with `process.cwd()`.
 - `CommentStore` uses `window.setTimeout`. The test polyfills `window` on `globalThis` before constructing the store.

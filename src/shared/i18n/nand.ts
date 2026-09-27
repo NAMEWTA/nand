@@ -1,6 +1,8 @@
 /** Home, module gates, intro, and NAND about copy. */
 export const messages = {
 	en: {
+		'modules.iconic': 'Icons',
+		'modules.iconicDesc': 'Customize icons and colors for files, folders, tabs, bookmarks, tags, properties, and the ribbon.',
 		'settings.writeFailed': 'Could not save this setting. Please try again.',
 		'modules.changeFailed': 'Could not change the module state. Try turning the module off and on again.',
 		'settings.productHome': 'Home',
@@ -72,6 +74,8 @@ export const messages = {
 		'terminalAgent.terminal.dropEmpty': 'No text or path was available from that drop.',
 	},
 	zh: {
+		'modules.iconic': '图标',
+		'modules.iconicDesc': '自定义文件、文件夹、标签页、书签、标签、属性和功能区的图标与颜色。',
 		'settings.writeFailed': '设置保存失败，请重试。',
 		'modules.changeFailed': '模块状态切换失败，请尝试关闭后重新打开。',
 		'settings.productHome': '首页',

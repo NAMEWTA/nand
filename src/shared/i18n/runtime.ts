@@ -1,3 +1,4 @@
+import { iconicTranslations } from './iconic';
 import { messages as m0 } from './common';
 import { messages as m1 } from './settings';
 import { messages as m2 } from './workspace-switcher';
@@ -42,6 +43,7 @@ import { messages as m42 } from './section-42';
 import { messages as m43 } from './editor';
 import { messages as m44 } from './terminal-agent';
 import { messages as m45 } from './nand';
+import { messages as contacts } from './contacts';
 
 export type Language = 'en' | 'zh';
 
@@ -78,6 +80,7 @@ function mergeDicts(...parts: Array<Record<string, string>>): Record<string, str
 
 const translations: Record<Language, Record<string, string>> = {
 	en: mergeDicts(
+		iconicTranslations.en,
 		m0.en,
 		m1.en,
 		m2.en,
@@ -122,8 +125,10 @@ const translations: Record<Language, Record<string, string>> = {
 		m43.en,
 		m44.en,
 		m45.en,
+		contacts.en,
 	),
 	zh: mergeDicts(
+		iconicTranslations.zh,
 		m0.zh,
 		m1.zh,
 		m2.zh,
@@ -168,6 +173,7 @@ const translations: Record<Language, Record<string, string>> = {
 		m43.zh,
 		m44.zh,
 		m45.zh,
+		contacts.zh,
 	),
 };
 
