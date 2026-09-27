@@ -13,6 +13,8 @@ One plugin process, several products. The shell at the entry in the SKILL identi
 | Terminal | `src/terminal-agent` | Barrel exports `TerminalAgentController`, `TerminalView`, `TERMINAL_VIEW_TYPE`, `renderStackedTerminalAgentSettings`, `renderTerminalAgentSettings`, `readLegacyTerminalSettings`. Settings deep-imports `renderStackedTerminalAgentSettings` from `settings/sections` |
 | Icons | `src/iconic` | `IconicController`; settings compose `IconicSettingsSections` |
 | Archives | `src/contacts` | `ContactsController`, `ContactsView`, `CONTACTS_VIEW_TYPE`. Settings compose the archive settings rows |
+| Automations | `src/automation` | `AutomationService`, editor and `AutomationView`, composed by `plugin/automation-host.ts` |
+| Notifications | `src/notifications` | `NotificationService` and native inbox; scheduler receives a delivery callback |
 | Sync | `src/sync` | `export {}` plus `README.md`. No view type yet |
 
 `src/dashboard-view/persist` writes the dashboard markdown. Leave the directory name `sync` free.
@@ -29,7 +31,7 @@ product ──✕──▶ other product, including that product's barrel
 
 The one existing break in the shared row is the file named in SKILL rule 2. Do not add a second one, and do not "fix" it by letting `editor-view` import `dashboard-view`.
 
-`shared` may contain DTOs that more than one side must serialize (`EditorWorkbenchSettings`, `NAND_EVENTS`, `NAND_COMMANDS`). It must not contain comment threads, dashboard cards, or terminal sessions.
+`shared` may contain DTOs that more than one side must serialize (`EditorWorkbenchSettings`, `NAND_EVENTS`, `NAND_COMMANDS`). It must not contain comment threads, dashboard cards, or terminal implementations. `shared/automation` contains only serialized automation/session-reference DTOs and source/runtime ports; `shared/json-store.ts` provides atomic adapter snapshots.
 
 The plugin shell may pass a narrow callback into a product. The terminal host receives `readAbsoluteReference: () => collectReferences(app, 'absolute')` from `main.ts`. That callback is the boundary.
 
@@ -40,15 +42,16 @@ The shell owns these services and activates them according to module flags. Tear
 | Object | When it exists |
 |---|---|
 | `iconicHost` | Created on first enable and retained for the plugin lifetime. Managers and activation scope exist only while enabled; commands and editor bridges register once |
-| `contactsHost` | While the archives module is on; starts its file index lazily when a view opens. Closing a leaf only removes its subscription |
+| `contactsHost` | While the archives module is on; starts its file index after layout readiness when a view or the automation source adapter requests it. Closing a leaf only removes its subscription |
 | `editorHost` | While the editor module is on. Highlights and the reading post-processor survive closing the side panel |
 | `musicService` | While the dashboard module is on, and never when `Platform.isPhone` |
 | `habitService`, `expenseService`, `mediaTagService` | While the dashboard module is on. Loaded once for that stretch |
+| `automationHost` | Plugin lifetime, independent of leaves. Source adapters respect module gates; terminal actions require an active desktop terminal host |
 | `terminalHost` | While the terminal module is on and `Platform.isDesktopApp` |
 
 `onunload` disposes archive surfaces and their controller, stops the module transition queue, then calls `iconicHost.onunload()`, `terminalHost.onunload()`, `editorHost.onunload()` (comment flush, then dispose), and `teardownBasenameIndex`. If dashboard services were started, it then flushes and destroys media tags and destroys habit, expense, and music. Leaf teardown follows `references/obsidian-api.md`.
 
-All four view types are registered on every platform. The terminal factory uses `terminalHost.createLeafView` when that host is active, and `InactiveTerminalView` otherwise. `applyModuleFlags` runs after registration. A missing `settings.modules` key stays on.
+The four existing product view types are registered on every platform; the automation view follows successful store loading. The terminal factory uses `terminalHost.createLeafView` when that host is active, and `InactiveTerminalView` otherwise. `applyModuleFlags` runs after registration. A missing `settings.modules` key stays on.
 
 `EditorView.onClose` only runs `detachPanel`. `createEditorHost` registers extensions on the first `onload` (`booted`). A later module restart calls `onload` again on the same host and does not register them a second time.
 
@@ -110,6 +113,7 @@ Registration details that apply to every command are SKILL rule 9.
 | `terminal` | `shell`, `instance`, `workflows`, `appearance`, `behavior`, `connection`, `visibility`, `agents`. The top tab is hidden while the module is off | `shell` |
 | `iconic` | `iconic-general`, `iconic-sidebars`, `iconic-editor`, `iconic-menus`, `iconic-picker`, `iconic-advanced`. Visible while the icons module is on | `iconic-general` |
 | `contacts` | `contacts-storage`. Visible while the archives module is on | `contacts-storage` |
+| `automation` | none. Links to the automation center and notification inbox, with delivery and execution capabilities; always a top tab | `automation` |
 | `sync` | none. One placeholder row from `renderSyncSettings`. Sync is always a top tab and is not a home toggle | `sync` |
 
 There is no left-hand page list. `visibleProducts` in `nav.ts` is the top row. `coffee` is the about screen; the page id stays `coffee`. How a row is rendered in both the declarative list and the fallback is `references/obsidian-api.md`. Editor highlight and popover toggles call `editorHost.notifySettingsChanged()`. The default domain dropdown calls `notifyLayoutChanged()`.
@@ -189,3 +193,7 @@ Employment and direct relationships are stored only on people; company membershi
 The single NAND settings tab adds 图标 / Icons with the six stacked sections listed in the Settings table. Both fallback and API 1.13 definitions expose 22 preferences, rulebook and usage checker. Commands remain in `src/iconic/commands.ts`; retain upstream ids (including `toggle-minimal.folder-icons`) under the NAND plugin prefix. English/Chinese strings live in `shared/i18n/iconic.ts`; the domain accessor resolves the current NAND language and preserves upstream `{#}` placeholders.
 
 For a future upstream update, compare the pinned source and the port's documented adaptations before editing. Keep the committed upstream oracle independent of migrated code, verify both settings renderers write to the domain store, and retain resource license notices in the bundle. User instructions and test evidence live in [the icon guide](../../../../docs/icons.md) and [the port record](../../../../docs/iconic-port.md).
+
+## Automation ownership
+
+`plugin/automation-host.ts` injects dashboard, contacts, terminal and notification ports; products never import each other. Dashboard task metadata is Markdown-owned, archive reminders occupy a bounded Markdown region, and widget metadata remains with widget settings. Standalone definitions, cursors and run snapshots live in `.nand/automation/<device-id>.json`; notification deliveries and native session references use sibling device-specific directories. Device identity uses Obsidian local storage. The automation view is registered after persistent stores have loaded successfully. Source scanning and the first scheduler tick wait for `workspace.onLayoutReady`; plugin `onload` must not await the contacts index because that index itself waits for layout readiness.

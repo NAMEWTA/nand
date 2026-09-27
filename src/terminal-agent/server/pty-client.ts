@@ -32,6 +32,8 @@ export class PtyClient extends ModuleClient {
   
   /** Temporarily stores the init request ID for response correlation */
   private pendingInitId: string | null = null;
+  private initTimedOut = false;
+  private verifiedExitSessions = new Set<string>();
   private readonly enqueueInit = createSerialQueue();
 
   constructor() {
@@ -42,11 +44,12 @@ export class PtyClient extends ModuleClient {
    * Initialize a PTY session. Overlapping calls wait, so one pendingInitId
    * is enough to match init_complete.
    */
-  init(config: PtyConfig = {}): Promise<string> {
-    return this.enqueueInit(() => this.beginInit(config));
+  init(config: PtyConfig = {}, ready?: (sessionId: string) => void): Promise<string> {
+    return this.enqueueInit(() => this.beginInit(config, ready));
   }
 
-  private beginInit(config: PtyConfig): Promise<string> {
+  private beginInit(config: PtyConfig, ready?: (sessionId: string) => void): Promise<string> {
+    if (this.initTimedOut) return Promise.reject(new Error('PTY initialization timed out; restart the terminal module'));
     return new Promise((resolve, reject) => {
       // Generate a temporary ID for correlating the response
       const tempId = `init-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
@@ -58,6 +61,7 @@ export class PtyClient extends ModuleClient {
         if (this.pendingInitId === tempId) {
           this.pendingInitId = null;
         }
+        this.initTimedOut = true;
         reject(new Error('PTY init timeout'));
       }, 30000);
       
@@ -68,7 +72,7 @@ export class PtyClient extends ModuleClient {
         if (this.pendingInitId === tempId) {
           this.pendingInitId = null;
         }
-        resolve(sessionId);
+        try { ready?.(sessionId); resolve(sessionId); } catch (error) { reject(error instanceof Error ? error : new Error(String(error))); }
       };
       
       const wrappedReject = (error: Error) => {
@@ -311,11 +315,13 @@ export class PtyClient extends ModuleClient {
     
     switch (msg.type) {
       case 'init_complete':
+        if (this.initTimedOut && sessionId) { this.destroySession(sessionId); break; }
         // Handle init response
         if (sessionId && this.pendingInitId) {
           const resolver = this.initResolvers.get(this.pendingInitId);
           if (resolver) {
             if (msg.success) {
+              if (msg.exit_status === true) this.verifiedExitSessions.add(sessionId);
               resolver.resolve(sessionId);
             } else {
               resolver.reject(new Error(msg.message as string || 'PTY init failed'));
@@ -335,7 +341,8 @@ export class PtyClient extends ModuleClient {
         
       case 'exit':
         if (sessionId) {
-          const code = (msg.code as number) || 0;
+          const code = this.verifiedExitSessions.has(sessionId) && typeof msg.code === 'number' ? msg.code : -1;
+          this.verifiedExitSessions.delete(sessionId);
           this.emitSessionExit(sessionId, code);
           // Clear listeners for this session
           this.sessionListeners.delete(sessionId);
@@ -405,6 +412,8 @@ export class PtyClient extends ModuleClient {
    */
   override destroy(): void {
     this.sessionListeners.clear();
+    this.verifiedExitSessions.clear();
+    for (const pending of this.initResolvers.values()) pending.reject(new Error('PTY client closed'));
     this.initResolvers.clear();
     this.pendingInitId = null;
     super.destroy();

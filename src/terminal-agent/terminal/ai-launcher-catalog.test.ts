@@ -68,17 +68,12 @@ test('AI_LAUNCHER_CATALOG only contains coding agent entries today', () => {
     .map((entry) => entry.presetId)
     .sort();
   assert.deepEqual(codingAgentIds, [
-    'antigravity',
-    'claude-code',
-    'codex',
-    'gemini',
-    'grok',
-    'kimi',
-    'minimax',
-    'opencode',
-    'qwen-code',
-  ]);
-  assert.equal(AI_LAUNCHER_CATALOG.length, 9);
+    'claude-code', 'codex', 'grok', 'opencode', 'gemini', 'qwen-code', 'kimi', 'antigravity', 'minimax',
+    'openclaude', 'autohand', 'ante', 'trae', 'opencode2', 'mimo-code', 'pi', 'omp', 'prime-agent',
+    'aider', 'goose', 'amp', 'kilo', 'kiro', 'crush', 'aug', 'cline', 'codebuff', 'command-code',
+    'continue', 'cursor', 'droid', 'mistral-vibe', 'rovo', 'hermes', 'openclaw', 'copilot', 'muse', 'zcode', 'devin',
+  ].sort());
+  assert.equal(AI_LAUNCHER_CATALOG.length, 39);
 });
 
 test('commandAvailabilityToLauncherStatus maps probe results to badge statuses', () => {

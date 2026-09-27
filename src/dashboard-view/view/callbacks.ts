@@ -155,6 +155,11 @@ export function createCallbacks(this: DashboardView) {
 		},
 		onTaskReminderEdit: (cardId: string, taskPath: number[], reminder: string | undefined) =>
 			this.sync.editTaskReminder(cardId, taskPath, reminder),
+		onTaskAutomationEdit: (cardId: string, taskPath: number[]) => {
+			void this.sync.taskAutomationSource(cardId, taskPath).then(source => {
+				this.plugin.automationHost?.edit({ kind: 'dashboard', path: source.path, id: source.id }, source.title);
+			}).catch(error => new Notice(String(error)));
+		},
 		onAddFromTemplate: (columnName: string) => this.openTemplatePicker(columnName),
 		onArchiveTasks: (columnName: string) => this.archiveCompletedTasks(columnName),
 		onLibraryConfigChange: (columnName: string, config: LibraryConfig) => {

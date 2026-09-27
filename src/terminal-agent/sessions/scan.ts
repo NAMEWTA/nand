@@ -75,7 +75,7 @@ export async function scanVaultSessions(request: VaultScanRequest, now = Date.no
   ])).flat();
   const unique = dedupeSessions(sessions);
   unique.sort((left, right) => right.modifiedAtMs - left.modifiedAtMs);
-  const limited = unique.slice(0, SESSION_LIMIT);
+  const limited = unique.slice(0, request.limit ?? SESSION_LIMIT);
   cache = { key: request.key, at: now, sessions: limited };
   return limited;
 }
@@ -104,7 +104,7 @@ async function scanClaude(request: VaultScanRequest): Promise<VaultSession[]> {
       const dir = pathApi.join(projectRoot, name);
       const info = await request.io.stat(dir);
       if (!info?.isDirectory) continue;
-      const files = await newestJsonl(request.io, dir, CLAUDE_FILES_PER_DIR);
+      const files = await newestJsonl(request.io, dir, request.limit ?? CLAUDE_FILES_PER_DIR);
       for (const file of files) {
         const session = await readTranscript(request, file, 'claude-code', root, 'CLAUDE_CONFIG_DIR');
         if (session) found.push(session);
@@ -123,7 +123,7 @@ async function scanCodex(request: VaultScanRequest): Promise<VaultSession[]> {
   ], request.io.platform);
   const found: VaultSession[] = [];
   for (const root of roots) {
-    const files = await newestCodexFiles(request.io, pathApi.join(root, 'sessions'), CODEX_FILE_CAP);
+    const files = await newestCodexFiles(request.io, pathApi.join(root, 'sessions'), request.limit ?? CODEX_FILE_CAP);
     for (const file of files) {
       const session = await readTranscript(request, file, 'codex', root, 'CODEX_HOME');
       if (session) found.push(session);
@@ -138,7 +138,7 @@ async function scanGemini(request: VaultScanRequest): Promise<VaultSession[]> {
   const projects = await geminiProjects(request, root);
   const found: VaultSession[] = [];
   for (const project of projects) {
-    const files = await newestChatFiles(request.io, pathApi.join(root, 'tmp', project.slug, 'chats'), GEMINI_FILES_PER_DIR);
+    const files = await newestChatFiles(request.io, pathApi.join(root, 'tmp', project.slug, 'chats'), request.limit ?? GEMINI_FILES_PER_DIR);
     for (const file of files) {
       const loaded = await readCapped(request.io, file.path);
       if (!loaded) continue;
@@ -148,6 +148,7 @@ async function scanGemini(request: VaultScanRequest): Promise<VaultSession[]> {
       if (!sessionId) continue;
       found.push({
         agentId: 'gemini',
+        transcriptPath: file.path,
         title: parsed.title || sessionId,
         cwd: project.cwd,
         sessionId,
@@ -216,6 +217,7 @@ async function readTranscript(
   if (!sessionId) return null;
   return {
     agentId,
+    transcriptPath: file.path,
     title: parsed.title || sessionId,
     cwd: parsed.cwd,
     sessionId,

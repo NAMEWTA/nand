@@ -1,4 +1,6 @@
 import { ContactsController, ContactsView, CONTACTS_VIEW_TYPE } from '../contacts';
+import { createAutomationHost } from './automation-host';
+import type { AutomationUiPort } from '../shared/automation/types';
 import { normalizeContactsSettings } from '../shared/contacts-settings';
 import { IconicController } from '../iconic';
 import { refreshLeafTitle } from '../shared/workspace-title';
@@ -144,6 +146,7 @@ function migrateAnniversaries(raw: Record<string, unknown>): AnniversaryConfig[]
 }
 
 export default class DashboardPlugin extends Plugin {
+	automationHost?: AutomationUiPort & { dispose(): void; inbox(): void };
 	settings!: DashboardSettings;
 	contactsHost?: ContactsController;
 	mediaTagService!: MediaTagService;
@@ -171,6 +174,8 @@ export default class DashboardPlugin extends Plugin {
 		});
 
 		await this.applyModuleFlags();
+		try { this.automationHost = await createAutomationHost(this); }
+		catch (error) { console.error('[NAND automation]', error); new Notice(t('automation.failedLoad')); }
 
 		this.addRibbonIcon('home', t('main.openHome'), () => this.openHome());
 		this.addRibbonIcon('pen-line', t('editor.openPanel'), () => {
@@ -467,6 +472,7 @@ export default class DashboardPlugin extends Plugin {
 	}
 
 	onunload(): void {
+		this.automationHost?.dispose();
 		for (const leaf of this.app.workspace.getLeavesOfType(CONTACTS_VIEW_TYPE)) if (leaf.view instanceof ContactsView) leaf.view.disposeSurface();
 		this.contactsHost?.unload();
 		this.moduleLifecycle.dispose();

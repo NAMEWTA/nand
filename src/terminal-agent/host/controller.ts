@@ -1,3 +1,4 @@
+import { TerminalAutomationRuntime } from '../launch/automation-runtime';
 import { refreshLeafTitle } from '../../shared/workspace-title';
 import { renderEmptyState } from '../../shared/empty-state';
 import { resolvePluginDirectory } from './filesystem-paths';
@@ -90,6 +91,21 @@ interface TerminalAgentStore {
  * Main class for the Obsidian Terminal plugin
  */
 export class TerminalAgentController {
+  private automationRuntime?: TerminalAutomationRuntime;
+  getAutomationRuntime(): TerminalAutomationRuntime {
+    return this.automationRuntime ?? (this.automationRuntime = new TerminalAutomationRuntime(this));
+  }
+  async openAutomationTerminal(id: string): Promise<void> {
+    const terminal = (await this.getTerminalService()).getTerminal(id);
+    if (!terminal) throw new Error(sharedT('automation.sessionMissing'));
+    const existing = this.app.workspace.getLeavesOfType(TERMINAL_VIEW_TYPE).find(leaf => leaf.view instanceof TerminalView && leaf.view.getTerminalInstance()?.id === id);
+    if (existing) { await this.app.workspace.revealLeaf(existing); return; }
+    const leaf = this.app.workspace.getLeaf('tab');
+    this.pendingRestoredTerminals.set(leaf, terminal);
+    await leaf.setViewState({ type: TERMINAL_VIEW_TYPE, active: true });
+    await this.app.workspace.revealLeaf(leaf);
+  }
+
   constructor(
     private readonly host: Plugin,
     private readonly bridge: TerminalAgentBridge,
@@ -307,6 +323,7 @@ export class TerminalAgentController {
   }
 
   private async handleUnload(): Promise<void> {
+    this.automationRuntime?.dispose();
     debugLog(t('plugin.unloadingMessage'));
 
     // Stop any in-flight launcher upgrade watchdogs so their poll

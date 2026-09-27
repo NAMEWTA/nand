@@ -1,3 +1,4 @@
+import { t as automationT } from '../../shared/i18n';
 import { refreshLeafTitle } from '../../shared/workspace-title';
 import type { TerminalAgentController } from '../host/controller';
 
@@ -128,6 +129,9 @@ export class TerminalView extends ItemView {
         });
     });
 
+    if (view.terminalInstance?.automationManaged) menu.addItem(item => item.setTitle(automationT('automation.hide')).setIcon('eye-off').onClick(() => {
+      view.releaseTerminalInstance(); view.leaf.detach();
+    }));
     const plugin = this.getTerminalPlugin();
     if (plugin) {
       menu.addItem((item) => {

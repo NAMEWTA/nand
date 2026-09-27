@@ -1,3 +1,4 @@
+import { taskMetaSuffix } from '../../shared/automation/metadata';
 import { escapeYamlString, serializeDocTree } from './extract-card-parts';
 import {
 	parseBanner,
@@ -462,6 +463,7 @@ export function serialize(data: DashboardData): string {
 					let taskLine = `${prefix}- [${task.checked ? 'x' : ' '}] ${task.text}`;
 					if (task.reminder) taskLine += ` ⏰ ${task.reminder}`;
 					if (task.collapsed) taskLine += ` <!--collapsed-->`;
+					taskLine += taskMetaSuffix(task);
 					lines.push(taskLine);
 					for (const child of task.children ?? []) writeTask(child, indent + 1);
 				};

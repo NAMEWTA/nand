@@ -52,7 +52,8 @@
 		"format:check": "prettier --check \"src/**/*.ts\" \"scripts/**/*.ts\"",
 		"test:issue-regressions": "esbuild scripts/verify-issue-regressions.ts --bundle --platform=node --format=cjs --outfile=node_modules/.tmp/verify-issue-regressions.cjs --alias:obsidian=./scripts/obsidian-stub.ts --log-level=warning && node node_modules/.tmp/verify-issue-regressions.cjs",
 		"test:contacts": "esbuild scripts/verify-contacts.ts --bundle --platform=node --format=cjs --outfile=scripts/tmp/verify-contacts.cjs --alias:obsidian=./scripts/obsidian-stub.ts --loader:.md=text --log-level=warning && node --test scripts/tmp/verify-contacts.cjs",
-		"test:iconic-port": "esbuild scripts/verify-iconic-port.ts --bundle --platform=node --format=cjs --outfile=scripts/tmp/verify-iconic-port.cjs --alias:obsidian=./scripts/iconic-obsidian-stub.ts --log-level=warning && TZ=UTC node --test scripts/tmp/verify-iconic-port.cjs"
+		"test:iconic-port": "esbuild scripts/verify-iconic-port.ts --bundle --platform=node --format=cjs --outfile=scripts/tmp/verify-iconic-port.cjs --alias:obsidian=./scripts/iconic-obsidian-stub.ts --log-level=warning && TZ=UTC node --test scripts/tmp/verify-iconic-port.cjs",
+		"test:automation": "esbuild scripts/verify-automation.ts --bundle --platform=node --format=cjs --outfile=scripts/tmp/verify-automation.cjs --alias:obsidian=./scripts/obsidian-stub.ts --log-level=warning && TZ=America/New_York node --test scripts/tmp/verify-automation.cjs"
 	},
 	"keywords": [],
 	"license": "GPL-3.0-only",

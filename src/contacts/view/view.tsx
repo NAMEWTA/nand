@@ -1,7 +1,7 @@
 import { ItemView, Menu, Notice, Platform, type WorkspaceLeaf, type ViewStateResult } from 'obsidian';
 import { render } from 'preact/compat';
 import type DashboardPlugin from '../../plugin/main';
-import { onLanguageChanged } from '../../shared/i18n';
+import { onLanguageChanged, t } from '../../shared/i18n';
 import { type ContactsController } from '../controller';
 import { emptyQuery, type ContactsQuery } from '../index-store';
 import { newRecord, type ArchiveRecord, type RecordKind } from '../model';
@@ -234,6 +234,9 @@ export class ContactsView extends ItemView {
 		}
 	}
 	private recordMenu(menu: Menu, record: ArchiveRecord): void {
+		menu.addItem(item => item.setTitle(t('automation.new')).setIcon('bell-plus').onClick(() => {
+			this.plugin.automationHost?.edit({ kind: 'contacts', path: record.path, id: record.id }, record.fields.name);
+		}));
 		menu.addItem((item) =>
 			item
 				.setTitle(ct('source'))

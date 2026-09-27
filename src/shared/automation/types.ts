@@ -1,0 +1,106 @@
+export type NotificationChannelId = 'in-app' | 'system' | 'email' | 'sms';
+export type ScheduleSpec =
+	{ kind: 'manual' } | { kind: 'once'; at: number } | { kind: 'recurring'; expression: string; start: number };
+export interface SourceRef {
+	kind: 'dashboard' | 'contacts' | 'widget';
+	path: string;
+	id: string;
+}
+export interface AgentSessionRef {
+	agentId: string;
+	sessionId: string;
+	cwd: string;
+	title: string;
+	modifiedAtMs: number;
+	accountKey: string;
+	transcriptPath?: string;
+	terminalId?: string;
+}
+export type AutomationAction =
+	| { kind: 'notify'; body: string }
+	| { kind: 'create-task'; path: string; cardId: string; text: string }
+	| {
+			kind: 'agent';
+			agentId: string;
+			cwd: string;
+			prompt: string;
+			sessionMode: 'fresh' | 'reuse' | 'specific';
+			session?: AgentSessionRef;
+	  };
+export interface AutomationDefinition {
+	id: string;
+	name: string;
+	enabled: boolean;
+	deviceId: string;
+	revision: number;
+	schedule: ScheduleSpec;
+	action: AutomationAction;
+	channels: NotificationChannelId[];
+	notifyOn: 'always' | 'failure' | 'never';
+	graceMinutes: number;
+	source?: SourceRef;
+	createdAt: number;
+	updatedAt: number;
+}
+export type RunStatus =
+	'pending' | 'running' | 'unknown' | 'succeeded' | 'failed' | 'cancelled' | 'interrupted' | 'skipped';
+export interface AutomationRun {
+	definition?: AutomationDefinition;
+	notificationAttempted?: boolean;
+	id: string;
+	automationId: string;
+	revision: number;
+	title: string;
+	scheduledFor: number;
+	trigger: 'manual' | 'scheduled';
+	status: RunStatus;
+	startedAt: number;
+	endedAt?: number;
+	message: string;
+	output?: string;
+	terminalId?: string;
+	session?: AgentSessionRef;
+	source?: SourceRef;
+}
+export interface AgentDescription {
+	id: string;
+	title: string;
+	resumable: boolean;
+	enabled: boolean;
+}
+export interface AgentRunHandle {
+	onRunning?(listener: () => void): () => void;
+	terminalId: string;
+	session?: AgentSessionRef;
+	completion: Promise<{
+		status: 'succeeded' | 'failed' | 'cancelled' | 'interrupted';
+		message: string;
+		output?: string;
+		session?: AgentSessionRef;
+	}>;
+}
+export interface AgentRuntimePort {
+	listAgents(): AgentDescription[];
+	listSessions(cwd: string): Promise<AgentSessionRef[]>;
+	start(
+		action: Extract<AutomationAction, { kind: 'agent' }>,
+		run: AutomationRun,
+		previous?: AutomationRun,
+	): Promise<AgentRunHandle>;
+	stop(terminalId: string): Promise<void>;
+	open(terminalId: string): Promise<void>;
+}
+export interface AutomationSourcePort {
+	list(): Promise<AutomationDefinition[]>;
+	save(definition: AutomationDefinition): Promise<void>;
+	remove(definition: AutomationDefinition): Promise<void>;
+	open(source: SourceRef): Promise<void>;
+	createTask(action: Extract<AutomationAction, { kind: 'create-task' }>, runId: string): Promise<void>;
+}
+export interface AutomationUiPort {
+	edit(source?: SourceRef, title?: string, existing?: AutomationDefinition): void;
+	open(): Promise<void>;
+}
+export function isActiveRun(run: AutomationRun): boolean {
+	return run.status === 'pending' || run.status === 'running' || run.status === 'unknown';
+}

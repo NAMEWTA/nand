@@ -41,7 +41,6 @@ export function render(this: DashboardView, data: DashboardData): void {
 
 	this.runCleanup(preserveWidgets);
 	this.data = data;
-	this.firedReminders.clear();
 	this.sidebarWidgetsSig = widgetSig;
 
 	const container = this.containerEl.children[1] as HTMLElement;

@@ -1,13 +1,4 @@
-export type AgentId =
-	| 'grok'
-	| 'codex'
-	| 'claude-code'
-	| 'opencode'
-	| 'gemini'
-	| 'qwen-code'
-	| 'kimi'
-	| 'antigravity'
-	| 'minimax';
+export type AgentId = keyof typeof import('./automation-catalog').AUTOMATION_AGENTS;
 
 export type UsageKind =
 	| 'claude'

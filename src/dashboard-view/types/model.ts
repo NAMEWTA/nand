@@ -1,3 +1,5 @@
+import type { AutomationDefinition } from '../../shared/automation/types';
+import type { TaskAutomationMeta } from '../../shared/automation/metadata';
 import { DEFAULT_CONTACTS_SETTINGS, type ContactsSettings } from '../../shared/contacts-settings';
 import type { Language } from '../../shared/i18n';
 import type { EditorWorkbenchSettings } from '../../shared/editor-workbench';
@@ -531,7 +533,7 @@ export interface TrackerDataPoint {
 	value: number | null;
 }
 
-export interface TaskItem {
+export interface TaskItem extends TaskAutomationMeta {
 	text: string;
 	checked: boolean;
 	reminder?: string;
@@ -656,6 +658,7 @@ export interface LibraryConfig {
 
 /** One countdown entry. Multiple countdowns are managed in settings (countdowns[]). */
 export interface CountdownConfig {
+	automation?: AutomationDefinition;
 	id: string;
 	label: string;
 	targetDate: string;
@@ -709,6 +712,7 @@ export interface AlbumConfig {
 /** One anniversary ("纪念日") entry: elapsed time since a historical date,
  *  with an optional same-day-every-year reminder. */
 export interface AnniversaryConfig {
+	automation?: AutomationDefinition;
 	id: string;
 	label: string;
 	/** Historical date the elapsed time is measured from (YYYY-MM-DD or
@@ -924,6 +928,7 @@ export interface RenderCallbacks {
 	onColumnRename(oldName: string, newName: string, columnIndex?: number): void;
 	onColumnDelete(columnName: string, columnIndex?: number): void;
 	onTaskReminderEdit(cardId: string, taskPath: number[], reminder: string | undefined): void;
+	onTaskAutomationEdit?(cardId: string, taskPath: number[]): void;
 	onTaskNest(cardId: string, taskPath: number[]): void;
 	onTaskNestInto(cardId: string, srcPath: number[], destPath: number[]): void;
 	onTaskUnnest(cardId: string, taskPath: number[]): void;

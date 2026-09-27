@@ -35,7 +35,7 @@ Do not add a second entry. Do not bundle CodeMirror.
 
 ## Tests
 
-There is no aggregate test script. CI (`.github/workflows/lint.yml`) runs `build` and `lint` on Node 22 and 24 for every branch push. pnpm 11 needs Node 22.13 or newer, so the release workflow uses Node 22 as well. It does not run `test:*`. There is no Obsidian runtime in CI. Name the script you ran; a passing `build` does not verify UI.
+There is no aggregate test script. CI (`.github/workflows/lint.yml`) runs `build` and `lint` on Node 22 and 24 for every branch push. pnpm 11 needs Node 22.13 or newer, so the release workflow uses Node 22 as well. It also runs `test:automation`. Other `test:*` scripts remain local. There is no Obsidian runtime in CI. Name the script you ran; a passing `build` does not verify UI.
 
 A `*.test.ts` file runs only when a `package.json` script names it. `scripts/verify-*.ts` files are wired as `test:<name>`:
 
@@ -52,6 +52,7 @@ Copy the nearest script, including extra aliases such as the music stubs. Do not
 |---|---|
 | Comment composer, language subscriptions, dashboard persistence | `pnpm run test:issue-regressions` |
 | Comment anchors, the comment store, or the editor/dashboard import boundary | `pnpm run test:editor-comments` |
+| Automation scheduler, notification delivery, native hooks or reminder metadata | `pnpm run test:automation`; for Rust/PTTY changes also `cargo test --manifest-path processes/rust-terminal-servers/Cargo.toml` and `node scripts/verify-pty-automation.mjs` against a local release build (Linux) |
 | Terminal agent behavior covered by its `*.test.ts` files | `pnpm run test:terminal-agent` |
 | Module lifecycle (`src/plugin/module-lifecycle.test.ts`), settings navigation, or settings CSS | `pnpm run test:settings-nav` |
 | Archive model, Markdown format, index or controller | `pnpm run test:contacts`; see Archives checks below |
@@ -96,7 +97,8 @@ Raising `minAppVersion` drops users. Keep the settings fallback described in `re
 2. `pnpm run build`
 3. Zip `dist/<id>/{main.js,manifest.json,styles.css}` as `<id>-<version>.zip`
 4. Attest the zip
-5. `softprops/action-gh-release` with generated notes, attaching the zip and `processes/rust-terminal-servers/binaries/*`
+5. Wait for `terminal-build.yml`, which builds and tests Linux x64/arm64, macOS x64/arm64 and Windows x64 from the same source commit; download the binaries plus SHA256 artifacts
+6. `softprops/action-gh-release` with generated notes, attaching the zip and `terminal-artifacts/*` (never stale checked-in binaries)
 
 Push `main`, then push the tag. That workflow is the only release creator. Leave the attestation step and the terminal-binary upload in place.
 

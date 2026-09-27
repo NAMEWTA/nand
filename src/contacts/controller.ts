@@ -11,6 +11,8 @@ import {
 import { ContactsIndex } from './index-store';
 import { createMarkdown, parseRecord, patchMarkdown, relativeLink } from './persist/markdown';
 import guide from './persist/format-guide.md';
+import { patchReminders } from './reminders';
+import type { AutomationDefinition } from '../shared/automation/types';
 
 /** A failed write never poisons later saves. Keys are stable entity IDs, not mutable paths. */
 export class WriteQueue {
@@ -32,6 +34,24 @@ export class WriteQueue {
 	}
 }
 export class ContactsController extends Component {
+	async saveReminder(definition: AutomationDefinition, remove = false): Promise<void> {
+		const source = definition.source;
+		if (!source) throw new ContactsError('missing');
+		await this.ensureLoaded();
+		await this.queue.run(source.id, async () => {
+			this.guard();
+			const record = this.index.get(source.id);
+			if (!record) throw new ContactsError('missing');
+			const base = await this.snapshot(record.path);
+			const file = this.app.vault.getFileByPath(base.path);
+			if (!file) throw new ContactsError('missing');
+			await this.app.vault.process(file, raw => {
+				this.checkEditor(file, raw);
+				return patchReminders(raw, definition, remove);
+			});
+			await this.readFile(file, this.generation);
+		});
+	}
 	readonly index = new ContactsIndex();
 	readonly queue = new WriteQueue();
 	private listeners = new Set<() => void>();

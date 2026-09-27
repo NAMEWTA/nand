@@ -1,7 +1,7 @@
 /** Settings chrome shared by the declarative tab and the pre-1.13 fallback.
  *  Open products sit on one top row. Section ids are the order stacked on that tab. */
 
-export type SettingsProduct = 'home' | 'dashboard' | 'editor' | 'terminal' | 'iconic' | 'contacts' | 'sync';
+export type SettingsProduct = 'home' | 'dashboard' | 'editor' | 'terminal' | 'iconic' | 'contacts' | 'automation' | 'sync';
 
 export type SettingsPage =
 	| 'contacts-storage'
@@ -11,6 +11,7 @@ export type SettingsPage =
 	| 'coffee'
 	| 'comments'
 	| 'copy'
+	| 'automation'
 	| 'sync'
 	| 'shell'
 	| 'instance'
@@ -30,7 +31,7 @@ export type SettingsPage =
 export const secondaryAxis = 'vertical' as const;
 
 export function productOrder(): SettingsProduct[] {
-	return ['home', 'dashboard', 'editor', 'terminal', 'iconic', 'contacts', 'sync'];
+	return ['home', 'dashboard', 'editor', 'terminal', 'iconic', 'contacts', 'automation', 'sync'];
 }
 
 export interface ModuleGates {
@@ -44,7 +45,7 @@ export interface ModuleGates {
 /** Top tabs. Home and sync stay. Board, editor, and agents appear only while open. */
 export function visibleProducts(modules: ModuleGates): SettingsProduct[] {
 	return productOrder().filter((product) => {
-		if (product === 'home' || product === 'sync') return true;
+		if (product === 'home' || product === 'automation' || product === 'sync') return true;
 		return modules[product];
 	});
 }
@@ -66,6 +67,7 @@ export function defaultPage(product: SettingsProduct): SettingsPage {
 	if (product === 'contacts') return 'contacts-storage';
 	if (product === 'terminal') return 'shell';
 	if (product === 'iconic') return 'iconic-general';
+	if (product === 'automation') return 'automation';
 	if (product === 'sync') return 'sync';
 	if (product === 'home') return 'home';
 	return 'general';

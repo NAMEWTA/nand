@@ -143,8 +143,16 @@ impl PtyHandler {
             Arc::clone(&pty_writer),
         );
         
+        // Deliver identity before any output/exit, including immediately exiting commands.
+        let response = ServerResponse::new(ModuleType::Pty, "init_complete", serde_json::json!({
+            "success": true, "session_id": session_id, "exit_status": true
+        }));
+        let sender = self.ws_sender.lock().await.clone().ok_or_else(|| RouterError::ModuleError("WebSocket sender not set".into()))?;
+        sender.lock().await.send(Message::Text(response.to_json().into())).await
+            .map_err(|error| RouterError::ModuleError(error.to_string()))?;
+
         // Start the PTY output reader task
-        let read_task = self.start_read_task(session_id.clone(), pty_reader, pty_writer, shell_type).await?;
+        let read_task = self.start_read_task(session_id.clone(), pty_reader, pty_writer, shell_type, Arc::clone(&pty_session)).await?;
         context.read_task = Some(read_task);
         
         // Store the session context
@@ -155,15 +163,7 @@ impl PtyHandler {
         
         log_info!("PTY 会话创建成功: session_id={}", session_id);
         
-        // Return a success response that includes the session_id
-        Ok(Some(ServerResponse::new(
-            ModuleType::Pty,
-            "init_complete",
-            serde_json::json!({
-                "success": true,
-                "session_id": session_id
-            }),
-        )))
+        Ok(None)
     }
     
     /// Start the PTY output reader task
@@ -175,6 +175,7 @@ impl PtyHandler {
         reader: Arc<Mutex<PtyReader>>,
         _writer: Arc<Mutex<PtyWriter>>,
         _shell_type: Option<String>,
+        child_session: Arc<TokioMutex<PtySession>>,
     ) -> Result<tokio::task::JoinHandle<()>, RouterError> {
         const OUTPUT_BATCH_INTERVAL_MS: u64 = 4;
         const READ_BUFFER_SIZE: usize = 8192;
@@ -320,20 +321,30 @@ impl PtyHandler {
 
                 if let Some(e) = pending_error {
                     log_error!("PTY 输出读取错误: session_id={}, {}", session_id, e);
-                    break;
+                    pending_exit = true;
                 }
 
                 if pending_exit {
                     // EOF: the process has exited
                     log_info!("PTY 输出结束: session_id={}", session_id);
 
+                    // Reap the actual child. A PTY EOF can precede waitability briefly.
+                    let mut code: i64 = -1;
+                    for _ in 0..100 {
+                        match child_session.lock().await.exit_code() {
+                            Ok(Some(status)) => { code = i64::from(status); break; }
+                            Err(_) => break,
+                            Ok(None) => {}
+                        }
+                        time::sleep(Duration::from_millis(10)).await;
+                    }
                     // Send the exit event
                     let exit_response = ServerResponse::new(
                         ModuleType::Pty,
                         "exit",
                         serde_json::json!({
                             "session_id": session_id,
-                            "code": 0
+                            "code": code
                         }),
                     );
                     let mut sender = ws_sender.lock().await;
@@ -383,7 +394,8 @@ impl PtyHandler {
         let mut sessions = self.sessions.lock().await;
         if let Some(mut context) = sessions.remove(session_id) {
             // Terminate the PTY process
-            if let Ok(mut session) = context.session.try_lock() {
+            {
+                let mut session = context.session.lock().await;
                 let _ = session.kill();
             }
             
@@ -411,7 +423,8 @@ impl PtyHandler {
             log_info!("清理会话: {}", session_id);
             
             // Terminate the PTY process
-            if let Ok(mut session) = context.session.try_lock() {
+            {
+                let mut session = context.session.lock().await;
                 let _ = session.kill();
             }
             

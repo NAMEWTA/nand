@@ -11,7 +11,10 @@ permissions:
     attestations: write
 
 jobs:
+    terminal:
+        uses: ./.github/workflows/terminal-build.yml
     release:
+        needs: terminal
         runs-on: ubuntu-latest
 
         steps:
@@ -44,10 +47,16 @@ jobs:
               with:
                   subject-path: ${{ steps.package.outputs.zip }}
 
+            - uses: actions/download-artifact@v4
+              with:
+                  pattern: terminal-*
+                  merge-multiple: true
+                  path: terminal-artifacts
+
             - name: Create GitHub release
               uses: softprops/action-gh-release@v2
               with:
                   files: |
                       ${{ steps.package.outputs.zip }}
-                      processes/rust-terminal-servers/binaries/*
+                      terminal-artifacts/*
                   generate_release_notes: true

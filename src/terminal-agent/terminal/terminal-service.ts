@@ -189,7 +189,8 @@ export class TerminalService {
     this.pendingSessions.push(session);
   }
 
-  async createTerminal(): Promise<TerminalInstance> {
+  async createTerminal(session?: PendingTerminalSession, observe?: (terminal: TerminalInstance) => void): Promise<TerminalInstance> {
+    let created: TerminalInstance | undefined;
     try {
       // Ensure the server is running
       await this.serverManager.ensureServer();
@@ -197,7 +198,7 @@ export class TerminalService {
       debugLog('[TerminalService] 创建终端');
 
       const { TerminalInstance } = await preloadTerminalInstance();
-      const pending = this.pendingSessions.shift();
+      const pending = session ?? this.pendingSessions.shift();
 
       let cwd: string | undefined;
       let shellType = '';
@@ -255,6 +256,8 @@ export class TerminalService {
         textOpacity: this.settings.textOpacity,
       });
       
+      created = terminal;
+      observe?.(terminal);
       // Initialize the terminal through ServerManager
       await terminal.initializeWithServerManager(this.serverManager);
       if (pending?.title) {
@@ -265,6 +268,7 @@ export class TerminalService {
       
       return terminal;
     } catch (error) {
+      created?.destroy();
       const errorMessage = error instanceof Error ? error.message : String(error);
       errorLog('[TerminalService] 创建终端实例失败:', errorMessage);
       

@@ -114,6 +114,12 @@ impl PtySession {
         Ok((session, reader, writer))
     }
 
+    /// Nonblocking child status. EOF alone does not imply a successful exit.
+    pub fn exit_code(&self) -> Result<Option<u32>, String> {
+        let mut child = self.child.lock().map_err(|e| e.to_string())?;
+        child.try_wait().map(|status| status.map(|s| s.exit_code())).map_err(|e| e.to_string())
+    }
+
     /// Resize the PTY
     pub fn resize(&mut self, cols: u16, rows: u16) -> Result<(), Box<dyn std::error::Error>> {
         self.master.resize(PtySize {

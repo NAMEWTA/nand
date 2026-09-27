@@ -394,6 +394,22 @@ dependencies = [
 ]
 
 [[package]]
+name = "rust-terminal-servers"
+version = "1.0.0"
+dependencies = [
+ "async-trait",
+ "futures-util",
+ "portable-pty",
+ "serde",
+ "serde_json",
+ "thiserror 2.0.18",
+ "tokio",
+ "tokio-tungstenite",
+ "uuid",
+ "which",
+]
+
+[[package]]
 name = "rustix"
 version = "0.38.44"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -653,22 +669,6 @@ dependencies = [
  "getrandom",
  "js-sys",
  "wasm-bindgen",
-]
-
-[[package]]
-name = "rust-terminal-servers"
-version = "1.0.0"
-dependencies = [
- "async-trait",
- "futures-util",
- "portable-pty",
- "serde",
- "serde_json",
- "thiserror 2.0.18",
- "tokio",
- "tokio-tungstenite",
- "uuid",
- "which",
 ]
 
 [[package]]

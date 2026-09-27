@@ -80,15 +80,11 @@ import {
 	renderScrollToTop,
 } from './vault-refresh';
 import {
-	startReminderChecker,
-	stopReminderChecker,
 	startWeatherRefresh,
 	stopWeatherRefresh,
 	startDayRolloverChecker,
 	stopDayRolloverChecker,
 	checkDayRollover,
-	checkReminders,
-	showReminderModal,
 } from './timers';
 import type { RenderCallbacks } from '../types';
 import { Events, HoverParent, HoverPopover, ItemView, WorkspaceLeaf, TFile } from 'obsidian';
@@ -228,15 +224,11 @@ export class DashboardView extends ItemView implements HoverParent {
 	declare refreshRecentDocs: () => void;
 	declare runCleanup: (preserveSidebarWidgets?: boolean) => void;
 	declare renderScrollToTop: (container: HTMLElement) => void;
-	declare startReminderChecker: () => void;
-	declare stopReminderChecker: () => void;
 	declare startWeatherRefresh: () => void;
 	declare stopWeatherRefresh: () => void;
 	declare startDayRolloverChecker: () => void;
 	declare stopDayRolloverChecker: () => void;
 	declare checkDayRollover: () => void;
-	declare checkReminders: () => void;
-	declare showReminderModal: (taskText: string, cardId: string, taskPath: number[]) => void;
 
 	plugin: DashboardPlugin;
 	sync: SyncEngine;
@@ -263,10 +255,7 @@ export class DashboardView extends ItemView implements HoverParent {
 	bannerImageIndex = 0;
 	static readonly BANNER_QUOTE_ROTATION_MS = 60 * 60 * 1000; // 1 hour (on the hour)
 	static readonly BANNER_IMAGE_ROTATION_MS = 30 * 60 * 1000; // 30 min (on the half)
-	static readonly REMINDER_CHECK_MS = 60 * 1000; // 1 minute
 	static readonly BANNER_QUOTE_OFFSET_MS = 60 * 60 * 1000; // offset by 1 hour from image
-	reminderTimer: number | null = null;
-	firedReminders = new Set<string>();
 	sidebarPinned = this.app.loadLocalStorage('nand.dashboard.sidebar-pinned') === 'true';
 	sidebarExpanded = false;
 	bannerCollapsed = this.app.loadLocalStorage('nand.dashboard.banner-collapsed') === 'true';
@@ -412,12 +401,8 @@ DashboardView.prototype.debouncedRefreshBannerStats = debouncedRefreshBannerStat
 DashboardView.prototype.refreshRecentDocs = refreshRecentDocs;
 DashboardView.prototype.runCleanup = runCleanup;
 DashboardView.prototype.renderScrollToTop = renderScrollToTop;
-DashboardView.prototype.startReminderChecker = startReminderChecker;
-DashboardView.prototype.stopReminderChecker = stopReminderChecker;
 DashboardView.prototype.startWeatherRefresh = startWeatherRefresh;
 DashboardView.prototype.stopWeatherRefresh = stopWeatherRefresh;
 DashboardView.prototype.startDayRolloverChecker = startDayRolloverChecker;
 DashboardView.prototype.stopDayRolloverChecker = stopDayRolloverChecker;
 DashboardView.prototype.checkDayRollover = checkDayRollover;
-DashboardView.prototype.checkReminders = checkReminders;
-DashboardView.prototype.showReminderModal = showReminderModal;

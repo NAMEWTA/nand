@@ -152,6 +152,15 @@ interface TerminalCommandMarker {
 }
 
 export class TerminalInstance {
+  private automationObservers = new Set<(event: { kind: 'data'; text: string } | { kind: 'exit'; code: number } | { kind: 'cancelled' | 'interrupted' }) => void>();
+  automationManaged = false;
+  observeAutomation(callback: (event: { kind: 'data'; text: string } | { kind: 'exit'; code: number } | { kind: 'cancelled' | 'interrupted' }) => void): () => void {
+    this.automationObservers.add(callback);
+    return () => this.automationObservers.delete(callback);
+  }
+  private emitAutomation(event: { kind: 'data'; text: string } | { kind: 'exit'; code: number } | { kind: 'cancelled' | 'interrupted' }): void {
+    for (const observer of this.automationObservers) observer(event);
+  }
   readonly id: string;
   readonly shellType: string;
 
@@ -586,6 +595,7 @@ export class TerminalInstance {
     // Handle output data (session-level)
     this.outputUnsubscribe = this.ptyClient.onSessionOutput(this.sessionId, (data: Uint8Array) => {
       const rawText = new TextDecoder().decode(data);
+      this.emitAutomation({ kind: 'data', text: rawText });
       const filteredText = filterSynchronizedOutputScrollbackPurge(
         rawText,
         this.synchronizedOutputCompatibilityState,
@@ -597,6 +607,7 @@ export class TerminalInstance {
     
     // Handle exit events (session-level)
     this.exitUnsubscribe = this.ptyClient.onSessionExit(this.sessionId, (code: number) => {
+      this.emitAutomation({ kind: 'exit', code });
       debugLog('[Terminal] PTY 会话退出, code:', code);
       this.enqueueTerminalOutput(`\r\n\x1b[33m[会话已结束, 退出码: ${code}]\x1b[0m\r\n`);
     });
@@ -632,16 +643,12 @@ export class TerminalInstance {
   private async initializePtySession(serverManager: ServerManager, cwd: string | undefined): Promise<void> {
     const ptyClient = serverManager.pty();
     this.resetSessionProtocolState();
-    const sessionId = await ptyClient.init(this.buildPtyConfig(cwd));
-    if (this.isDestroyed) {
-      ptyClient.destroySession(sessionId);
-      return;
-    }
-
-    this.ptyClient = ptyClient;
-    this.sessionId = sessionId;
-    debugLog('[Terminal] 获取到 session_id:', this.sessionId);
-    this.setupPtyClientHandlers();
+    await ptyClient.init(this.buildPtyConfig(cwd), sessionId => {
+      if (this.isDestroyed) { ptyClient.destroySession(sessionId); return; }
+      this.ptyClient = ptyClient;
+      this.sessionId = sessionId;
+      this.setupPtyClientHandlers();
+    });
   }
 
   private resetSessionProtocolState(): void {
@@ -919,6 +926,7 @@ export class TerminalInstance {
 
   handleServerCrash(): void {
     if (this.isDestroyed) return;
+    if (this.automationManaged) { this.emitAutomation({ kind: 'interrupted' }); this.destroy(); return; }
 
     this.webSocketDisconnected = false;
     this.sessionRecoveryNeeded = true;
@@ -929,6 +937,7 @@ export class TerminalInstance {
 
   handleWebSocketDisconnected(): void {
     if (this.isDestroyed) return;
+    if (this.automationManaged) { this.emitAutomation({ kind: 'interrupted' }); this.destroy(); return; }
 
     this.sessionRecoveryNeeded = true;
     this.clearPendingInput();
@@ -984,6 +993,8 @@ export class TerminalInstance {
 
   destroy(): void {
     if (this.isDestroyed) return;
+    this.emitAutomation({ kind: 'cancelled' });
+    this.automationObservers.clear();
     this.isDestroyed = true;
     this.outputPaused = true;
     this.outputQueue = [];

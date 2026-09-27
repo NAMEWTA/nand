@@ -1,3 +1,4 @@
+import { AUTOMATION_AGENTS } from './automation-catalog';
 import type { AgentId, UsageKind } from './types';
 
 export interface AgentCatalogEntry {
@@ -22,7 +23,7 @@ export interface AgentCatalogEntry {
  * Preset workflows, the install catalog, permission flags, and usage readers
  * all come from this list.
  */
-export const AGENT_CATALOG: readonly AgentCatalogEntry[] = [
+const EXISTING_CATALOG: readonly AgentCatalogEntry[] = [
 	{
 		id: 'claude-code',
 		title: 'Claude Code',
@@ -186,6 +187,14 @@ export const AGENT_CATALOG: readonly AgentCatalogEntry[] = [
 		contextAware: false,
 		icon: 'bot',
 	},
+];
+
+export const AGENT_CATALOG: readonly AgentCatalogEntry[] = [
+ ...EXISTING_CATALOG,
+ ...Object.entries(AUTOMATION_AGENTS).filter(([id]) => !EXISTING_CATALOG.some(a => a.id === id)).map(([id, config]): AgentCatalogEntry => ({
+  id: id as AgentId, title: id, detectCommand: config.command, launchCommand: id === 'kiro' ? 'kiro-cli chat --tui' : id === 'opencode2' ? 'opencode2 --standalone' : id === 'hermes' ? 'hermes --tui' : config.command,
+  installDocsUrl: 'https://github.com/stablyai/orca', yoloFlags: [], accountKind: 'none', usage: 'none', contextAware: false, icon: 'bot',
+ })),
 ];
 
 export function getAgent(id: AgentId): AgentCatalogEntry {

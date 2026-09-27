@@ -1,3 +1,4 @@
+import { readTaskMeta, TASK_META_REGEX } from '../../shared/automation/metadata';
 import {
 	COLLAPSED_REGEX,
 	DOC_LINE_REGEX,
@@ -309,7 +310,8 @@ export function extractCardParts(body: string): {
 
 		const taskMatch = trimmed.match(/^- \[([ xX])\]\s*(.+)$/);
 		if (taskMatch && taskMatch[1] && taskMatch[2]) {
-			let taskText = taskMatch[2];
+			const taskMeta = readTaskMeta(taskMatch[2]);
+			let taskText = taskMatch[2].replace(TASK_META_REGEX, '');
 			let taskReminder: string | undefined;
 			let taskCollapsed = false;
 			const collapsedMatch = taskText.match(COLLAPSED_REGEX);
@@ -323,6 +325,7 @@ export function extractCardParts(body: string): {
 				taskReminder = reminderMatch[1];
 			}
 			const node: TaskItem = {
+				...taskMeta,
 				checked: taskMatch[1] !== ' ',
 				text: taskText,
 				reminder: taskReminder,

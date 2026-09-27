@@ -14,6 +14,7 @@ import { parse, serialize, generateDefaultMarkdown } from '../parser';
 import { t } from '../../shared/i18n';
 import {
 	type TaskPath,
+	getTaskByPath,
 	updateTaskAt,
 	removeTaskAt,
 	insertSibling,
@@ -289,7 +290,7 @@ export class SyncEngine {
 	async addTask(cardId: string, text: string, parentPath?: TaskPath): Promise<void> {
 		if (!this.data || !text.trim()) return;
 
-		const node: TaskItem = { text: text.trim(), checked: false };
+		const node: TaskItem = { text: text.trim(), checked: false, id: crypto.randomUUID() };
 		this.data = this.mapCardTasks(this.data, cardId, (tasks) =>
 			parentPath && parentPath.length > 0
 				? appendChild(tasks, parentPath, node)
@@ -383,6 +384,19 @@ export class SyncEngine {
 			updateTaskAt(tasks, taskPath, (t) => ({ ...t, reminder })),
 		);
 		await this.writeToDisk();
+	}
+
+	async taskAutomationSource(cardId: string, taskPath: TaskPath): Promise<{ id: string; path: string; title: string }> {
+		if (!this.data || !this.file) throw new Error(t('automation.sourceMissing'));
+		const card = this.data.columns.flatMap(c => c.cards).find(c => c.id === cardId);
+		const task = card ? getTaskByPath(card.tasks, taskPath) : undefined;
+		if (!task) throw new Error(t('automation.sourceMissing'));
+		const id = task.id ?? crypto.randomUUID();
+		if (!task.id) {
+			this.data = this.mapCardTasks(this.data, cardId, tasks => updateTaskAt(tasks, taskPath, t => ({ ...t, id })));
+			await this.writeToDisk();
+		}
+		return { id, path: this.file.path, title: task.text };
 	}
 
 	async deleteCard(cardId: string): Promise<void> {

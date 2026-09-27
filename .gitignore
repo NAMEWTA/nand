@@ -30,3 +30,6 @@ speculo/.speculo/back/
 .speculo-file-*.tmp
 specdev-worktree/
 scripts/tmp/
+
+# Rust intermediate build outputs
+processes/rust-terminal-servers/target/

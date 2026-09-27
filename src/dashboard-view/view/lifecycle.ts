@@ -84,7 +84,7 @@ export async function onOpen(this: DashboardView): Promise<void> {
 	this.pomodoroUnsubscribe = this.pomodoroService.subscribe(() => this.onPomodoroDataChanged());
 	this.readingUnsubscribe = this.readingService.subscribe(() => this.onReadingDataChanged());
 	this.registerVaultListeners();
-	this.startReminderChecker();
+	// Reminders are owned by the plugin automation service.
 	this.startWeatherRefresh();
 	this.startDayRolloverChecker();
 	this.isOpen = true;
@@ -108,7 +108,6 @@ export async function onClose(this: DashboardView): Promise<void> {
 	this.popoverModal = null;
 	this.runCleanup();
 	this.unregisterVaultListeners();
-	this.stopReminderChecker();
 	this.stopWeatherRefresh();
 	this.stopDayRolloverChecker();
 	this.pomodoroMiniPanel?.destroy();

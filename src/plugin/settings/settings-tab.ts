@@ -1,3 +1,4 @@
+import { renderAutomationSettings } from './automation-settings';
 import { renderContactsSettings } from './contacts-settings';
 import { IconicSettingsSections, ICONIC_SETTINGS_PAGES } from '../../iconic/settings/sections';
 import { renderGeneralSettings, renderLayoutPicker } from './general';
@@ -114,6 +115,7 @@ export class DashboardSettingTab extends PluginSettingTab {
 			{
 				type: 'group',
 				items: [
+					{ name: t('automation.title'), desc: t('automation.localOnly'), render: (setting) => { asBlock(setting); onProduct('automation', 'automation')(setting); renderAutomationSettings(this.plugin, setting.settingEl); } },
 					{ name: t('contacts.storage'), desc: t('contacts.folderHint'), aliases: [t('contacts.folder'), t('contacts.columns')], render: (setting) => { asBlock(setting); onProduct('contacts', 'contacts-storage')(setting); this.renderContactsSettings(setting.settingEl); } },
 					{
 						name: t('settings.sectionBar'),
@@ -348,6 +350,7 @@ export class DashboardSettingTab extends PluginSettingTab {
 			editor: 'pen-line',
 			terminal: 'terminal',
 			iconic: 'images',
+			automation: 'timer',
 			sync: 'refresh-cw',
 		};
 		const labels: Record<SettingsProduct, string> = {
@@ -357,6 +360,7 @@ export class DashboardSettingTab extends PluginSettingTab {
 			editor: t('settings.productEditor'),
 			terminal: t('settings.productTerminal'),
 			iconic: t('modules.iconic'),
+			automation: t('automation.title'),
 			sync: t('settings.productSync'),
 		};
 		return visibleProducts(this.plugin.settings.modules).map((key) => ({ key, label: labels[key], icon: icons[key] }));
@@ -365,6 +369,7 @@ export class DashboardSettingTab extends PluginSettingTab {
 	sectionTabs(): Array<{ key: SettingsPage; label: string; icon: string }> {
 		const terminalLabels = terminalMenuLabels();
 		const meta: Partial<Record<SettingsPage, { label: string; icon: string }>> = {
+			automation: { label: t('automation.title'), icon: 'timer' },
 			'contacts-storage': { label: t('contacts.storage'), icon: 'contact-round' },
 			general: { label: t('settings.tabGeneral'), icon: 'settings' },
 			widgets: { label: t('settings.tabWidgets'), icon: 'layout-grid' },
@@ -433,6 +438,7 @@ export class DashboardSettingTab extends PluginSettingTab {
 		this.renderChrome(barHost);
 
 		const host = containerEl.createDiv({ cls: 'dashboard-settings-content' });
+		if (this.activeProduct === 'automation') { renderAutomationSettings(this.plugin, host); return; }
 		if (this.activeProduct === 'contacts') { this.renderContactsSettings(host); return; }
 		if (this.activeProduct === 'home') {
 			this.renderHomeSettings(host);

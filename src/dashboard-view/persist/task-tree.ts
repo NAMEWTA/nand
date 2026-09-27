@@ -1,3 +1,4 @@
+import { taskMetaSuffix } from '../../shared/automation/metadata';
 import type { TaskItem } from '../types';
 
 export type TaskPath = number[];
@@ -231,6 +232,7 @@ export function serializeTasksForNote(tasks: TaskItem[]): string {
 		const prefix = indent > 0 ? '    '.repeat(indent) : '';
 		let line = `${prefix}- [${task.checked ? 'x' : ' '}] ${task.text}`;
 		if (task.reminder) line += ` ⏰ ${task.reminder}`;
+		line += taskMetaSuffix(task);
 		lines.push(line);
 		for (const child of task.children ?? []) write(child, indent + 1);
 	};

@@ -166,11 +166,11 @@ export function createReminderButton(
 	btn.setAttribute('draggable', 'false');
 	btn.addClass('dashboard-task-reminder-btn');
 
-	if (task.reminder) {
+	if (task.reminder || task.automation) {
 		btn.addClass('dashboard-task-reminder-btn--active');
 		setIcon(btn, 'bell-ring');
 		btn.setAttribute('aria-label', t('reminder.editReminder'));
-		if (!task.checked && isReminderOverdue(task.reminder)) {
+		if (!task.checked && task.reminder && isReminderOverdue(task.reminder)) {
 			btn.addClass('dashboard-task-reminder-btn--overdue');
 		}
 	} else {
@@ -181,7 +181,8 @@ export function createReminderButton(
 	btn.addEventListener('click', (e) => {
 		e.stopPropagation();
 		e.preventDefault();
-		showReminderPopup(btn, cardId, taskPath, task, callbacks);
+		if (callbacks.onTaskAutomationEdit) callbacks.onTaskAutomationEdit(cardId, taskPath);
+		else showReminderPopup(btn, cardId, taskPath, task, callbacks);
 	});
 
 	return btn;

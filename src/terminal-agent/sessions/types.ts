@@ -1,6 +1,7 @@
 export type VaultSessionAgent = 'claude-code' | 'codex' | 'gemini';
 
 export interface VaultSession {
+  transcriptPath?: string;
   agentId: VaultSessionAgent;
   title: string;
   cwd: string;
@@ -19,6 +20,7 @@ export interface SessionIo {
 }
 
 export interface VaultScanRequest {
+  limit?: number;
   key: string;
   vaultPath: string;
   io: SessionIo;

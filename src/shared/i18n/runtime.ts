@@ -1,3 +1,4 @@
+import { messages as automation } from './automation';
 import { iconicTranslations } from './iconic';
 import { messages as m0 } from './common';
 import { messages as m1 } from './settings';
@@ -126,6 +127,7 @@ const translations: Record<Language, Record<string, string>> = {
 		m44.en,
 		m45.en,
 		contacts.en,
+		automation.en,
 	),
 	zh: mergeDicts(
 		iconicTranslations.zh,
@@ -174,6 +176,7 @@ const translations: Record<Language, Record<string, string>> = {
 		m44.zh,
 		m45.zh,
 		contacts.zh,
+		automation.zh,
 	),
 };
 
