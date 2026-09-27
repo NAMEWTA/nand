@@ -22,7 +22,7 @@ const DEFAULT_WEBVIEW_TIMEOUT_MS = 3500;
 /** Own persistent Electron session so login-walled apps (Keep, Todoist) stay
  *  signed in across Obsidian restarts. nodeintegration/allowpopups stay off
  *  (Electron defaults) — the guest page never gets host access. */
-const WEBVIEW_PARTITION = 'persist:apex-dashboard-web';
+const WEBVIEW_PARTITION = 'persist:nand-dashboard-web';
 
 /* ---------------------- native chrome theming ----------------------- */
 
@@ -70,7 +70,7 @@ function relativeLuminance(color: string): number | null {
 function resolveFrameColorScheme(): 'dark' | 'light' {
 	try {
 		const doc: Document | null = typeof activeDocument !== 'undefined' ? activeDocument : null;
-		const root = doc?.querySelector?.('.apex-dashboard-root') ?? null;
+		const root = doc?.querySelector?.('.nand-dashboard-root') ?? null;
 		if (root) {
 			const bg = getComputedStyle(root).getPropertyValue('--db-bg').trim();
 			const luminance = bg.length > 0 ? relativeLuminance(bg) : null;

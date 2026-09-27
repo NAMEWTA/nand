@@ -16,7 +16,7 @@ export function setupBannerBehavior(this: DashboardView, bannerEl: HTMLElement):
 		if (window.innerWidth <= 640) return;
 		this.bannerCollapsed = !this.bannerCollapsed;
 		bannerEl.toggleClass('dashboard-banner--collapsed', this.bannerCollapsed);
-		this.app.saveLocalStorage('apex-dashboard-banner-collapsed', String(this.bannerCollapsed));
+		this.app.saveLocalStorage('nand.dashboard.banner-collapsed', String(this.bannerCollapsed));
 	});
 
 	const onResize = () => {
@@ -124,7 +124,7 @@ export function renderBannerPinButton(this: DashboardView, bannerEl: HTMLElement
 	pinBtn.addEventListener('click', (e) => {
 		e.stopPropagation();
 		this.sidebarPinned = !this.sidebarPinned;
-		this.app.saveLocalStorage('apex-dashboard-sidebar-pinned', String(this.sidebarPinned));
+		this.app.saveLocalStorage('nand.dashboard.sidebar-pinned', String(this.sidebarPinned));
 		const sidebar = this.containerEl.querySelector('.dashboard-sidebar');
 		if (sidebar) {
 			if (this.sidebarPinned) {

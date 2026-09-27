@@ -16,7 +16,7 @@
 /* ----- 1. AURORA (宝莉 / Pony) — night sky + rainbow, MLP-inspired ----- */
 /* Neutral glass surfaces carry the content; saturation lives in the drifting
    rainbow aurora, the per-section pony hues, and the candy progress gradient. */
-.apex-dashboard-root[data-theme="aurora"] {
+.nand-dashboard-root[data-theme="aurora"] {
 	--db-bg: #0b1226;
 	--db-bg-section: rgba(255, 255, 255, 0.035);
 	--db-bg-card: rgba(255, 255, 255, 0.06);
@@ -98,7 +98,7 @@
 }
 
 /* Ponyville daytime — cotton-candy sky, white glass, deepened accents */
-.theme-light .apex-dashboard-root[data-theme="aurora"] {
+.theme-light .nand-dashboard-root[data-theme="aurora"] {
 	--db-bg: #f2f6ff;
 	--db-bg-section: rgba(255, 255, 255, 0.55);
 	--db-bg-card-hover: rgba(255, 255, 255, 0.85);
@@ -146,46 +146,46 @@
 /* --- Per-section pony hues (dark): each section type gets its own Mane-Six
    color. memo=Pinkie, sticky=Rarity lavender, todo=Applejack, notes=Fluttershy,
    projects=Rainbow Dash, library=Twilight; the rest round out the rainbow. --- */
-.apex-dashboard-root[data-theme="aurora"] .dashboard-section-row[data-section-type="memo"] { --db-sec-hue: #ff5fb0; --db-sec-glow: rgba(255, 95, 176, 0.16); }
-.apex-dashboard-root[data-theme="aurora"] .dashboard-section-row[data-section-type="sticky"] { --db-sec-hue: #c084fc; --db-sec-glow: rgba(192, 132, 252, 0.16); }
-.apex-dashboard-root[data-theme="aurora"] .dashboard-section-row[data-section-type="todo"] { --db-sec-hue: #ffb03a; --db-sec-glow: rgba(255, 176, 58, 0.16); }
-.apex-dashboard-root[data-theme="aurora"] .dashboard-section-row[data-section-type="notes"] { --db-sec-hue: #ffdf5e; --db-sec-glow: rgba(255, 223, 94, 0.15); }
-.apex-dashboard-root[data-theme="aurora"] .dashboard-section-row[data-section-type="projects"] { --db-sec-hue: #40b5ff; --db-sec-glow: rgba(64, 181, 255, 0.16); }
-.apex-dashboard-root[data-theme="aurora"] .dashboard-section-row[data-section-type="library"] { --db-sec-hue: #a06bff; --db-sec-glow: rgba(160, 107, 255, 0.16); }
-.apex-dashboard-root[data-theme="aurora"] .dashboard-section-row[data-section-type="weread"] { --db-sec-hue: #2fd6b5; --db-sec-glow: rgba(47, 214, 181, 0.16); }
-.apex-dashboard-root[data-theme="aurora"] .dashboard-section-row[data-section-type="calendar"] { --db-sec-hue: #ff7a6b; --db-sec-glow: rgba(255, 122, 107, 0.16); }
-.apex-dashboard-root[data-theme="aurora"] .dashboard-section-row[data-section-type="heatmap"] { --db-sec-hue: #ff6b81; --db-sec-glow: rgba(255, 107, 129, 0.16); }
-.apex-dashboard-root[data-theme="aurora"] .dashboard-section-row[data-section-type="dataview"] { --db-sec-hue: #35e0e8; --db-sec-glow: rgba(53, 224, 232, 0.16); }
-.apex-dashboard-root[data-theme="aurora"] .dashboard-section-row[data-section-type="web"] { --db-sec-hue: #7f8cff; --db-sec-glow: rgba(127, 140, 255, 0.16); }
-.apex-dashboard-root[data-theme="aurora"] .dashboard-section-row[data-section-type="images"] { --db-sec-hue: #ff4d7e; --db-sec-glow: rgba(255, 77, 126, 0.16); }
-.apex-dashboard-root[data-theme="aurora"] .dashboard-section-row[data-section-type="videos"] { --db-sec-hue: #e879f9; --db-sec-glow: rgba(232, 121, 249, 0.16); }
+.nand-dashboard-root[data-theme="aurora"] .dashboard-section-row[data-section-type="memo"] { --db-sec-hue: #ff5fb0; --db-sec-glow: rgba(255, 95, 176, 0.16); }
+.nand-dashboard-root[data-theme="aurora"] .dashboard-section-row[data-section-type="sticky"] { --db-sec-hue: #c084fc; --db-sec-glow: rgba(192, 132, 252, 0.16); }
+.nand-dashboard-root[data-theme="aurora"] .dashboard-section-row[data-section-type="todo"] { --db-sec-hue: #ffb03a; --db-sec-glow: rgba(255, 176, 58, 0.16); }
+.nand-dashboard-root[data-theme="aurora"] .dashboard-section-row[data-section-type="notes"] { --db-sec-hue: #ffdf5e; --db-sec-glow: rgba(255, 223, 94, 0.15); }
+.nand-dashboard-root[data-theme="aurora"] .dashboard-section-row[data-section-type="projects"] { --db-sec-hue: #40b5ff; --db-sec-glow: rgba(64, 181, 255, 0.16); }
+.nand-dashboard-root[data-theme="aurora"] .dashboard-section-row[data-section-type="library"] { --db-sec-hue: #a06bff; --db-sec-glow: rgba(160, 107, 255, 0.16); }
+.nand-dashboard-root[data-theme="aurora"] .dashboard-section-row[data-section-type="weread"] { --db-sec-hue: #2fd6b5; --db-sec-glow: rgba(47, 214, 181, 0.16); }
+.nand-dashboard-root[data-theme="aurora"] .dashboard-section-row[data-section-type="calendar"] { --db-sec-hue: #ff7a6b; --db-sec-glow: rgba(255, 122, 107, 0.16); }
+.nand-dashboard-root[data-theme="aurora"] .dashboard-section-row[data-section-type="heatmap"] { --db-sec-hue: #ff6b81; --db-sec-glow: rgba(255, 107, 129, 0.16); }
+.nand-dashboard-root[data-theme="aurora"] .dashboard-section-row[data-section-type="dataview"] { --db-sec-hue: #35e0e8; --db-sec-glow: rgba(53, 224, 232, 0.16); }
+.nand-dashboard-root[data-theme="aurora"] .dashboard-section-row[data-section-type="web"] { --db-sec-hue: #7f8cff; --db-sec-glow: rgba(127, 140, 255, 0.16); }
+.nand-dashboard-root[data-theme="aurora"] .dashboard-section-row[data-section-type="images"] { --db-sec-hue: #ff4d7e; --db-sec-glow: rgba(255, 77, 126, 0.16); }
+.nand-dashboard-root[data-theme="aurora"] .dashboard-section-row[data-section-type="videos"] { --db-sec-hue: #e879f9; --db-sec-glow: rgba(232, 121, 249, 0.16); }
 
 /* --- Light-mode pony hues: same identities, deepened for contrast on the
    cotton-candy sky (butter yellow in particular must go amber). --- */
-.theme-light .apex-dashboard-root[data-theme="aurora"] .dashboard-section-row[data-section-type="memo"] { --db-sec-hue: #e0218a; --db-sec-glow: rgba(224, 33, 138, 0.14); }
-.theme-light .apex-dashboard-root[data-theme="aurora"] .dashboard-section-row[data-section-type="sticky"] { --db-sec-hue: #a21caf; --db-sec-glow: rgba(162, 28, 175, 0.14); }
-.theme-light .apex-dashboard-root[data-theme="aurora"] .dashboard-section-row[data-section-type="todo"] { --db-sec-hue: #d97706; --db-sec-glow: rgba(217, 119, 6, 0.14); }
-.theme-light .apex-dashboard-root[data-theme="aurora"] .dashboard-section-row[data-section-type="notes"] { --db-sec-hue: #ca8a04; --db-sec-glow: rgba(202, 138, 4, 0.14); }
-.theme-light .apex-dashboard-root[data-theme="aurora"] .dashboard-section-row[data-section-type="projects"] { --db-sec-hue: #0369a1; --db-sec-glow: rgba(3, 105, 161, 0.14); }
-.theme-light .apex-dashboard-root[data-theme="aurora"] .dashboard-section-row[data-section-type="library"] { --db-sec-hue: #7c3aed; --db-sec-glow: rgba(124, 58, 237, 0.14); }
-.theme-light .apex-dashboard-root[data-theme="aurora"] .dashboard-section-row[data-section-type="weread"] { --db-sec-hue: #0d9488; --db-sec-glow: rgba(13, 148, 136, 0.14); }
-.theme-light .apex-dashboard-root[data-theme="aurora"] .dashboard-section-row[data-section-type="calendar"] { --db-sec-hue: #ea580c; --db-sec-glow: rgba(234, 88, 12, 0.14); }
-.theme-light .apex-dashboard-root[data-theme="aurora"] .dashboard-section-row[data-section-type="heatmap"] { --db-sec-hue: #dc2626; --db-sec-glow: rgba(220, 38, 38, 0.14); }
-.theme-light .apex-dashboard-root[data-theme="aurora"] .dashboard-section-row[data-section-type="dataview"] { --db-sec-hue: #0e7490; --db-sec-glow: rgba(14, 116, 144, 0.14); }
-.theme-light .apex-dashboard-root[data-theme="aurora"] .dashboard-section-row[data-section-type="web"] { --db-sec-hue: #4f46e5; --db-sec-glow: rgba(79, 70, 229, 0.14); }
-.theme-light .apex-dashboard-root[data-theme="aurora"] .dashboard-section-row[data-section-type="images"] { --db-sec-hue: #e11d48; --db-sec-glow: rgba(225, 29, 72, 0.14); }
-.theme-light .apex-dashboard-root[data-theme="aurora"] .dashboard-section-row[data-section-type="videos"] { --db-sec-hue: #c026d3; --db-sec-glow: rgba(192, 38, 211, 0.14); }
+.theme-light .nand-dashboard-root[data-theme="aurora"] .dashboard-section-row[data-section-type="memo"] { --db-sec-hue: #e0218a; --db-sec-glow: rgba(224, 33, 138, 0.14); }
+.theme-light .nand-dashboard-root[data-theme="aurora"] .dashboard-section-row[data-section-type="sticky"] { --db-sec-hue: #a21caf; --db-sec-glow: rgba(162, 28, 175, 0.14); }
+.theme-light .nand-dashboard-root[data-theme="aurora"] .dashboard-section-row[data-section-type="todo"] { --db-sec-hue: #d97706; --db-sec-glow: rgba(217, 119, 6, 0.14); }
+.theme-light .nand-dashboard-root[data-theme="aurora"] .dashboard-section-row[data-section-type="notes"] { --db-sec-hue: #ca8a04; --db-sec-glow: rgba(202, 138, 4, 0.14); }
+.theme-light .nand-dashboard-root[data-theme="aurora"] .dashboard-section-row[data-section-type="projects"] { --db-sec-hue: #0369a1; --db-sec-glow: rgba(3, 105, 161, 0.14); }
+.theme-light .nand-dashboard-root[data-theme="aurora"] .dashboard-section-row[data-section-type="library"] { --db-sec-hue: #7c3aed; --db-sec-glow: rgba(124, 58, 237, 0.14); }
+.theme-light .nand-dashboard-root[data-theme="aurora"] .dashboard-section-row[data-section-type="weread"] { --db-sec-hue: #0d9488; --db-sec-glow: rgba(13, 148, 136, 0.14); }
+.theme-light .nand-dashboard-root[data-theme="aurora"] .dashboard-section-row[data-section-type="calendar"] { --db-sec-hue: #ea580c; --db-sec-glow: rgba(234, 88, 12, 0.14); }
+.theme-light .nand-dashboard-root[data-theme="aurora"] .dashboard-section-row[data-section-type="heatmap"] { --db-sec-hue: #dc2626; --db-sec-glow: rgba(220, 38, 38, 0.14); }
+.theme-light .nand-dashboard-root[data-theme="aurora"] .dashboard-section-row[data-section-type="dataview"] { --db-sec-hue: #0e7490; --db-sec-glow: rgba(14, 116, 144, 0.14); }
+.theme-light .nand-dashboard-root[data-theme="aurora"] .dashboard-section-row[data-section-type="web"] { --db-sec-hue: #4f46e5; --db-sec-glow: rgba(79, 70, 229, 0.14); }
+.theme-light .nand-dashboard-root[data-theme="aurora"] .dashboard-section-row[data-section-type="images"] { --db-sec-hue: #e11d48; --db-sec-glow: rgba(225, 29, 72, 0.14); }
+.theme-light .nand-dashboard-root[data-theme="aurora"] .dashboard-section-row[data-section-type="videos"] { --db-sec-hue: #c026d3; --db-sec-glow: rgba(192, 38, 211, 0.14); }
 
 /* --- Rainbow identity consumption: the title wears its hue and cards glow
    the same color on hover (the crown hairline was tried and retired — the
    title color alone carries the per-section identity). Selectors outrank the
    base .dashboard-section-row/.dashboard-card rules, so placement before them
    in the file is safe. --- */
-.apex-dashboard-root[data-theme="aurora"] .dashboard-section-row .dashboard-section-title {
+.nand-dashboard-root[data-theme="aurora"] .dashboard-section-row .dashboard-section-title {
 	color: var(--db-sec-hue);
 }
 
-.apex-dashboard-root[data-theme="aurora"] .dashboard-section-row .dashboard-card:hover {
+.nand-dashboard-root[data-theme="aurora"] .dashboard-section-row .dashboard-card:hover {
 	border-color: var(--db-sec-glow);
 	box-shadow: var(--db-shadow-card-hover), 0 0 18px var(--db-sec-glow);
 }
@@ -194,7 +194,7 @@
 /* ----- 2. EARTH (托斯卡纳暖阳) — parchment + slow warm sunlight ----- */
 /* Afternoon sun drifting across a plaster wall: honey, terracotta and olive
    washes breathe behind warm-glass sections; cards stay solid cream. */
-.apex-dashboard-root[data-theme="earth"] {
+.nand-dashboard-root[data-theme="earth"] {
 	--db-bg: #f3ecdf;
 	--db-bg-section: rgba(250, 244, 232, 0.55);
 	--db-bg-card: #FBF7EE;
@@ -261,7 +261,7 @@
 	--db-aurora-size: 250% 250%;
 	--db-aurora-speed: 32s;
 }
-.theme-dark .apex-dashboard-root[data-theme="earth"] {
+.theme-dark .nand-dashboard-root[data-theme="earth"] {
 	/* Dark soil with ember glows */
 	--db-bg: #221b11;
 	--db-bg-section: rgba(48, 39, 25, 0.55);
@@ -315,7 +315,7 @@
 /* ----- 5. NORDIC (极夜峡湾) — frost aurora over cool white ----- */
 /* The land of aurora borealis: icy cyan, frost blue and mint washes drifting
    behind cool-glass sections. Tight radii keep the minimal identity. */
-.apex-dashboard-root[data-theme="nordic"] {
+.nand-dashboard-root[data-theme="nordic"] {
 	--db-bg: #f7fafc;
 	--db-bg-section: rgba(255, 255, 255, 0.60);
 	--db-bg-card: #ffffff;
@@ -382,7 +382,7 @@
 	--db-aurora-size: 250% 250%;
 	--db-aurora-speed: 26s;
 }
-.theme-dark .apex-dashboard-root[data-theme="nordic"] {
+.theme-dark .nand-dashboard-root[data-theme="nordic"] {
 	/* Fjord night with cold aurora */
 	--db-bg: #101828;
 	--db-bg-section: rgba(30, 41, 59, 0.55);
@@ -435,8 +435,8 @@
 
 
 /* Earth + Nordic: drifting wash backgrounds (same mechanism as lilac) */
-.apex-dashboard-root[data-theme="earth"],
-.apex-dashboard-root[data-theme="nordic"] {
+.nand-dashboard-root[data-theme="earth"],
+.nand-dashboard-root[data-theme="nordic"] {
 	background: var(--db-aurora-bg);
 	background-size: var(--db-aurora-size);
 	animation: db-aurora-shift var(--db-aurora-speed) ease-in-out infinite;
@@ -446,7 +446,7 @@
 }
 
 /* ----- 6. ISLAND (动物森友会 — 淡彩无人岛) ----- */
-.apex-dashboard-root[data-theme="island"] {
+.nand-dashboard-root[data-theme="island"] {
 	/* 背景：奶油白底，区块/侧栏用淡绿淡蓝 */
 	--db-bg: #f8f8f0;
 	--db-bg-section: #e6f4e8;
@@ -505,7 +505,7 @@
 	--db-quote-border: #82d5bb;
 	--db-link: #19c8b9;
 }
-.theme-dark .apex-dashboard-root[data-theme="island"] {
+.theme-dark .nand-dashboard-root[data-theme="island"] {
 	--db-bg: #1a2a1e;
 	--db-bg-section: #223428;
 	--db-bg-card: #263830;
@@ -541,7 +541,7 @@
 }
 
 /* ----- 7. TUNDRA (苔原 — Earth clone, transparent sections) ----- */
-.apex-dashboard-root[data-theme="tundra"] {
+.nand-dashboard-root[data-theme="tundra"] {
 	--db-bg: #eef0ec;
 	--db-bg-section: transparent;
 	--db-bg-card: #FAF6F0;
@@ -602,7 +602,7 @@
 	--db-aurora-size: 400% 400%;
 	--db-aurora-speed: 14s;
 }
-.theme-dark .apex-dashboard-root[data-theme="tundra"] {
+.theme-dark .nand-dashboard-root[data-theme="tundra"] {
 	--db-bg: #141816;
 	--db-bg-section: transparent;
 		--db-bg-card: rgba(107, 143, 94, 0.10);
@@ -650,7 +650,7 @@
 }
 
 /* ----- 9. BLOSSOM (花漾 — Prism clone, transparent sections) ----- */
-.apex-dashboard-root[data-theme="blossom"] {
+.nand-dashboard-root[data-theme="blossom"] {
 	--db-bg: #12081a;
 	--db-bg-section: transparent;
 	--db-bg-card: rgba(255, 255, 255, 0.06);
@@ -710,7 +710,7 @@
 	--db-aurora-size: 400% 400%;
 	--db-aurora-speed: 14s;
 }
-.theme-light .apex-dashboard-root[data-theme="blossom"] {
+.theme-light .nand-dashboard-root[data-theme="blossom"] {
 	--db-bg: #faf5f8;
 	--db-bg-section: transparent;
 	--db-bg-card: rgba(255, 255, 255, 0.55);
@@ -761,13 +761,13 @@
 }
 
 /* Blossom: static gradient background */
-.apex-dashboard-root[data-theme="blossom"] {
+.nand-dashboard-root[data-theme="blossom"] {
 	background: var(--db-aurora-bg);
 	transition: color 0.3s ease;
 }
 
 /* Tundra: aurora animation — cold gray + avocado green */
-.apex-dashboard-root[data-theme="tundra"] {
+.nand-dashboard-root[data-theme="tundra"] {
 	background: var(--db-aurora-bg);
 	background-size: var(--db-aurora-size);
 	animation: db-aurora-shift var(--db-aurora-speed) ease-in-out infinite;
@@ -776,10 +776,10 @@
 }
 
 /* ===== Shared: transparent sections for tundra, blossom, matcha, lilac ===== */
-.apex-dashboard-root[data-theme="tundra"] .dashboard-section-row,
-.apex-dashboard-root[data-theme="blossom"] .dashboard-section-row,
-.apex-dashboard-root[data-theme="matcha"] .dashboard-section-row,
-.apex-dashboard-root[data-theme="lilac"] .dashboard-section-row {
+.nand-dashboard-root[data-theme="tundra"] .dashboard-section-row,
+.nand-dashboard-root[data-theme="blossom"] .dashboard-section-row,
+.nand-dashboard-root[data-theme="matcha"] .dashboard-section-row,
+.nand-dashboard-root[data-theme="lilac"] .dashboard-section-row {
 	background: transparent;
 	border: none;
 	backdrop-filter: none;
@@ -787,10 +787,10 @@
 	padding: 6px;
 }
 
-.apex-dashboard-root[data-theme="tundra"] .dashboard-section,
-.apex-dashboard-root[data-theme="blossom"] .dashboard-section,
-.apex-dashboard-root[data-theme="matcha"] .dashboard-section,
-.apex-dashboard-root[data-theme="lilac"] .dashboard-section {
+.nand-dashboard-root[data-theme="tundra"] .dashboard-section,
+.nand-dashboard-root[data-theme="blossom"] .dashboard-section,
+.nand-dashboard-root[data-theme="matcha"] .dashboard-section,
+.nand-dashboard-root[data-theme="lilac"] .dashboard-section {
 	background: transparent;
 	border: none;
 	backdrop-filter: none;
@@ -798,23 +798,23 @@
 }
 
 /* Tighter kanban gap for transparent-section themes */
-.apex-dashboard-root[data-theme="tundra"] .dashboard-kanban,
-.apex-dashboard-root[data-theme="blossom"] .dashboard-kanban,
-.apex-dashboard-root[data-theme="matcha"] .dashboard-kanban,
-.apex-dashboard-root[data-theme="lilac"] .dashboard-kanban {
+.nand-dashboard-root[data-theme="tundra"] .dashboard-kanban,
+.nand-dashboard-root[data-theme="blossom"] .dashboard-kanban,
+.nand-dashboard-root[data-theme="matcha"] .dashboard-kanban,
+.nand-dashboard-root[data-theme="lilac"] .dashboard-kanban {
 	--db-kanban-gap: 8px;
 }
 
 /* Allow card hover translate without clipping top border */
-.apex-dashboard-root[data-theme="tundra"] .dashboard-section-cards,
-.apex-dashboard-root[data-theme="blossom"] .dashboard-section-cards,
-.apex-dashboard-root[data-theme="matcha"] .dashboard-section-cards,
-.apex-dashboard-root[data-theme="lilac"] .dashboard-section-cards,
-.apex-dashboard-root[data-theme="neon"] .dashboard-section-cards,
-.apex-dashboard-root[data-theme="volt"] .dashboard-section-cards,
-.apex-dashboard-root[data-theme="magma"] .dashboard-section-cards,
-.apex-dashboard-root[data-theme="onyx"] .dashboard-section-cards,
-.apex-dashboard-root[data-theme="mono"] .dashboard-section-cards {
+.nand-dashboard-root[data-theme="tundra"] .dashboard-section-cards,
+.nand-dashboard-root[data-theme="blossom"] .dashboard-section-cards,
+.nand-dashboard-root[data-theme="matcha"] .dashboard-section-cards,
+.nand-dashboard-root[data-theme="lilac"] .dashboard-section-cards,
+.nand-dashboard-root[data-theme="neon"] .dashboard-section-cards,
+.nand-dashboard-root[data-theme="volt"] .dashboard-section-cards,
+.nand-dashboard-root[data-theme="magma"] .dashboard-section-cards,
+.nand-dashboard-root[data-theme="onyx"] .dashboard-section-cards,
+.nand-dashboard-root[data-theme="mono"] .dashboard-section-cards {
 	overflow: visible;
 }
 
@@ -822,7 +822,7 @@
 /* The old sage-on-sage palette collapsed bg into accent. Now the bowl itself
    is warm sage/cream and the tea is DEEP matcha green with gold notes —
    distinct lightness, distinct role. Washes drift at tea-ceremony pace. */
-.apex-dashboard-root[data-theme="matcha"] {
+.nand-dashboard-root[data-theme="matcha"] {
 	--db-bg: #98a184;
 	--db-bg-section: transparent;
 	--db-bg-card: rgba(243, 239, 226, 0.88);
@@ -892,7 +892,7 @@
 }
 
 /* Morning matcha latte — rice-paper base, green only where the tea is */
-.theme-light .apex-dashboard-root[data-theme="matcha"] {
+.theme-light .nand-dashboard-root[data-theme="matcha"] {
 	--db-bg: #f1efe3;
 	--db-bg-section: transparent;
 	--db-bg-card: rgba(255, 254, 248, 0.85);
@@ -947,7 +947,7 @@
 }
 
 /* Matcha: slow tea-garden washes drifting behind the cream cards */
-.apex-dashboard-root[data-theme="matcha"] {
+.nand-dashboard-root[data-theme="matcha"] {
 	background: var(--db-aurora-bg);
 	background-size: var(--db-aurora-size);
 	animation: db-aurora-shift var(--db-aurora-speed) ease-in-out infinite;
@@ -961,7 +961,7 @@
 /* The washes drift slowly (28s) behind solid ivory cards: a living lilac bed
    instead of the old flat Morandi slab. Motion guards live with the aurora
    ones (reduced-motion + mobile pin). */
-.apex-dashboard-root[data-theme="lilac"] {
+.nand-dashboard-root[data-theme="lilac"] {
 	--db-bg: #9b87b4;
 	--db-bg-section: transparent;
 	--db-bg-card: rgba(248, 243, 251, 0.75);
@@ -1031,7 +1031,7 @@
 }
 
 /* Morning lilac — watercolor paper with blush and periwinkle washes */
-.theme-light .apex-dashboard-root[data-theme="lilac"] {
+.theme-light .nand-dashboard-root[data-theme="lilac"] {
 	--db-bg: #f7f2fb;
 	--db-bg-section: transparent;
 	--db-bg-card: rgba(255, 255, 255, 0.72);
@@ -1086,7 +1086,7 @@
 }
 
 /* Lilac: slow garden wash drifting behind the ivory cards */
-.apex-dashboard-root[data-theme="lilac"] {
+.nand-dashboard-root[data-theme="lilac"] {
 	background: var(--db-aurora-bg);
 	background-size: var(--db-aurora-size);
 	animation: db-aurora-shift var(--db-aurora-speed) ease-in-out infinite;
@@ -1097,7 +1097,7 @@
 
 
 /* ----- 15. NEON (霓虹) — Near-black + neon magenta, identical in light & dark ----- */
-	.apex-dashboard-root[data-theme="neon"] {
+	.nand-dashboard-root[data-theme="neon"] {
 		--db-bg: #0a0a0c;
 		/* Opaque modal-layer surface: dialogs render outside this root where the
 		   near-black gradient behind doesn't exist, so --db-bg-card (transparent)
@@ -1153,7 +1153,7 @@
 		--db-link: #ff2e88;
 	}
 	/* Neon: near-black with a whisper of magenta at the top — identical in light & dark */
-	.apex-dashboard-root[data-theme="neon"] {
+	.nand-dashboard-root[data-theme="neon"] {
 		background:
 			radial-gradient(ellipse at 50% 0%, rgba(255, 46, 136, 0.05) 0%, transparent 45%),
 			linear-gradient(180deg, #0d0a0f 0%, #0a0a0c 70%);
@@ -1161,7 +1161,7 @@
 	}
 
 	/* ----- 16. VOLT (电光) — Near-black + electric cyan, identical in light & dark ----- */
-	.apex-dashboard-root[data-theme="volt"] {
+	.nand-dashboard-root[data-theme="volt"] {
 		--db-bg: #090a0e;
 		--db-bg-modal: #0e1218;
 		--db-bg-modal-raised: rgba(255, 255, 255, 0.06);
@@ -1214,7 +1214,7 @@
 		--db-link: #00c2ff;
 	}
 	/* Volt: cool near-black with a whisper of cyan at the top — identical in light & dark */
-	.apex-dashboard-root[data-theme="volt"] {
+	.nand-dashboard-root[data-theme="volt"] {
 		background:
 			radial-gradient(ellipse at 50% 0%, rgba(0, 194, 255, 0.05) 0%, transparent 45%),
 			linear-gradient(180deg, #0b0e14 0%, #090a0e 70%);
@@ -1222,7 +1222,7 @@
 	}
 
 	/* ----- 17. MAGMA (熔岩) — Warm near-black + lava orange, identical in light & dark ----- */
-	.apex-dashboard-root[data-theme="magma"] {
+	.nand-dashboard-root[data-theme="magma"] {
 		--db-bg: #0c0a08;
 		--db-bg-modal: #161009;
 		--db-bg-modal-raised: rgba(255, 255, 255, 0.06);
@@ -1275,7 +1275,7 @@
 		--db-link: #ff6b1a;
 	}
 	/* Magma: warm near-black with a whisper of lava glow at the top — identical in light & dark */
-	.apex-dashboard-root[data-theme="magma"] {
+	.nand-dashboard-root[data-theme="magma"] {
 		background:
 			radial-gradient(ellipse at 50% 0%, rgba(255, 107, 26, 0.05) 0%, transparent 45%),
 			linear-gradient(180deg, #120d09 0%, #0c0a08 70%);
@@ -1283,7 +1283,7 @@
 	}
 
 	/* ----- 18. ONYX (曜黑) — Pure black + lemon, identical in light & dark ----- */
-	.apex-dashboard-root[data-theme="onyx"] {
+	.nand-dashboard-root[data-theme="onyx"] {
 		--db-bg: #000000;
 		--db-bg-modal: #0e0e0e;
 		--db-bg-modal-raised: rgba(255, 255, 255, 0.06);
@@ -1336,7 +1336,7 @@
 		--db-link: #e9ff40;
 	}
 	/* Onyx: pure black with a whisper of lemon at the top — identical in light & dark */
-	.apex-dashboard-root[data-theme="onyx"] {
+	.nand-dashboard-root[data-theme="onyx"] {
 		background:
 			radial-gradient(ellipse at 50% 0%, rgba(233, 255, 64, 0.04) 0%, transparent 45%),
 			linear-gradient(180deg, #0A0A0A 0%, #000000 70%);
@@ -1347,7 +1347,7 @@
 /* Pure neutral black/white read funereal. The fix keeps the ink/paper pairing:
    warm rice-paper ground, blue-undertone sumi ink, a whisper of ink-wash
    drift, and ONE cinnabar seal accent like the red stamp on a scroll. */
-.apex-dashboard-root[data-theme="mono"] {
+.nand-dashboard-root[data-theme="mono"] {
 	--db-bg: #faf9f4;
 	--db-bg-section: transparent;
 	--db-bg-card: #fefdf9;
@@ -1414,7 +1414,7 @@
 	--db-aurora-size: 250% 250%;
 	--db-aurora-speed: 40s;
 }
-.theme-dark .apex-dashboard-root[data-theme="mono"] {
+.theme-dark .nand-dashboard-root[data-theme="mono"] {
 	/* Night ink — lifted off pure black, warm paper-white text */
 	--db-bg: #111417;
 	--db-bg-section: transparent;
@@ -1471,7 +1471,7 @@
 }
 
 /* Mono: ink-wash drift — monochrome, the slowest of all themes */
-.apex-dashboard-root[data-theme="mono"] {
+.nand-dashboard-root[data-theme="mono"] {
 	background: var(--db-aurora-bg);
 	background-size: var(--db-aurora-size);
 	animation: db-aurora-shift var(--db-aurora-speed) ease-in-out infinite;
@@ -1482,11 +1482,11 @@
 
 
 /* ===== Shared: transparent sections for neon, volt, magma, onyx, mono ===== */
-.apex-dashboard-root[data-theme="neon"] .dashboard-section-row,
-.apex-dashboard-root[data-theme="volt"] .dashboard-section-row,
-.apex-dashboard-root[data-theme="magma"] .dashboard-section-row,
-.apex-dashboard-root[data-theme="onyx"] .dashboard-section-row,
-.apex-dashboard-root[data-theme="mono"] .dashboard-section-row {
+.nand-dashboard-root[data-theme="neon"] .dashboard-section-row,
+.nand-dashboard-root[data-theme="volt"] .dashboard-section-row,
+.nand-dashboard-root[data-theme="magma"] .dashboard-section-row,
+.nand-dashboard-root[data-theme="onyx"] .dashboard-section-row,
+.nand-dashboard-root[data-theme="mono"] .dashboard-section-row {
 	background: transparent;
 	border: none;
 	backdrop-filter: none;
@@ -1494,11 +1494,11 @@
 	padding: 6px;
 }
 
-.apex-dashboard-root[data-theme="neon"] .dashboard-section,
-.apex-dashboard-root[data-theme="volt"] .dashboard-section,
-.apex-dashboard-root[data-theme="magma"] .dashboard-section,
-.apex-dashboard-root[data-theme="onyx"] .dashboard-section,
-.apex-dashboard-root[data-theme="mono"] .dashboard-section {
+.nand-dashboard-root[data-theme="neon"] .dashboard-section,
+.nand-dashboard-root[data-theme="volt"] .dashboard-section,
+.nand-dashboard-root[data-theme="magma"] .dashboard-section,
+.nand-dashboard-root[data-theme="onyx"] .dashboard-section,
+.nand-dashboard-root[data-theme="mono"] .dashboard-section {
 	background: transparent;
 	border: none;
 	backdrop-filter: none;
@@ -1506,11 +1506,11 @@
 }
 
 /* Tighter kanban gap for neon, volt, magma, onyx */
-.apex-dashboard-root[data-theme="neon"] .dashboard-kanban,
-.apex-dashboard-root[data-theme="volt"] .dashboard-kanban,
-.apex-dashboard-root[data-theme="magma"] .dashboard-kanban,
-.apex-dashboard-root[data-theme="onyx"] .dashboard-kanban,
-.apex-dashboard-root[data-theme="mono"] .dashboard-kanban {
+.nand-dashboard-root[data-theme="neon"] .dashboard-kanban,
+.nand-dashboard-root[data-theme="volt"] .dashboard-kanban,
+.nand-dashboard-root[data-theme="magma"] .dashboard-kanban,
+.nand-dashboard-root[data-theme="onyx"] .dashboard-kanban,
+.nand-dashboard-root[data-theme="mono"] .dashboard-kanban {
 	gap: 8px;
 }
 
@@ -1519,12 +1519,12 @@
    ================================================================= */
 
 /* Reset Obsidian view-content padding for dashboard */
-.workspace-leaf-content[data-type="apex-dashboard-view"] .view-content {
+.workspace-leaf-content[data-type="nand-dashboard-view"] .view-content {
 	padding: 0 !important;
 }
 
 /* ===== Root ===== */
-.apex-dashboard-root {
+.nand-dashboard-root {
 	display: flex;
 	flex-direction: column;
 	height: 100%;
@@ -1540,7 +1540,7 @@
 /* ===== User background-image layer (Appearance Studio) =====
    Painted directly on the root, behind all content. Glass surfaces
    (backdrop-filter: var(--db-backdrop-blur)) auto-frost over it. */
-.apex-dashboard-bg {
+.nand-dashboard-bg {
 	position: absolute;
 	inset: 0;
 	z-index: 0;
@@ -1548,19 +1548,19 @@
 	background-position: center;
 	background-repeat: no-repeat;
 }
-.apex-dashboard-bg-scrim {
+.nand-dashboard-bg-scrim {
 	position: absolute;
 	inset: 0;
 }
 /* Lift dashboard content above the background layer.
    Banner sits one level above main so its collapsed bookmark tab — which pokes
    downward past the 4px collapsed banner into main's area — stays clickable. */
-.apex-dashboard-root > .dashboard-banner {
+.nand-dashboard-root > .dashboard-banner {
 	position: relative;
 	z-index: 2;
 }
-.apex-dashboard-root > .dashboard-main,
-.apex-dashboard-root > .dashboard-mobile-widget-bar {
+.nand-dashboard-root > .dashboard-main,
+.nand-dashboard-root > .dashboard-mobile-widget-bar {
 	position: relative;
 	z-index: 1;
 }
@@ -2031,7 +2031,7 @@
 }
 
 /* Aurora gradient animation for aurora theme only */
-.apex-dashboard-root[data-theme="aurora"] {
+.nand-dashboard-root[data-theme="aurora"] {
 	background: var(--db-aurora-bg);
 	background-size: var(--db-aurora-size);
 	animation: db-aurora-shift var(--db-aurora-speed) ease-in-out infinite;
@@ -2042,13 +2042,13 @@
 
 /* Respect reduced-motion: stop the aurora drift for users who disable animation */
 @media (prefers-reduced-motion: reduce) {
-	.apex-dashboard-root[data-theme="aurora"],
-	.apex-dashboard-root[data-theme="tundra"],
-	.apex-dashboard-root[data-theme="lilac"],
-	.apex-dashboard-root[data-theme="earth"],
-	.apex-dashboard-root[data-theme="nordic"],
-	.apex-dashboard-root[data-theme="matcha"],
-	.apex-dashboard-root[data-theme="mono"] {
+	.nand-dashboard-root[data-theme="aurora"],
+	.nand-dashboard-root[data-theme="tundra"],
+	.nand-dashboard-root[data-theme="lilac"],
+	.nand-dashboard-root[data-theme="earth"],
+	.nand-dashboard-root[data-theme="nordic"],
+	.nand-dashboard-root[data-theme="matcha"],
+	.nand-dashboard-root[data-theme="mono"] {
 		animation: none;
 		/* Pin to the animation's start frame — without this the 400%-sized
 		   gradient falls back to background-position 0% 0% (top-left corner),
@@ -2063,13 +2063,13 @@
    Pinning the gradient to the animation's start frame keeps the theme's look
    (the glow band sits exactly where the drift starts); desktop keeps the drift. */
 @media (max-width: 640px) {
-	.apex-dashboard-root[data-theme="aurora"],
-	.apex-dashboard-root[data-theme="tundra"],
-	.apex-dashboard-root[data-theme="lilac"],
-	.apex-dashboard-root[data-theme="earth"],
-	.apex-dashboard-root[data-theme="nordic"],
-	.apex-dashboard-root[data-theme="matcha"],
-	.apex-dashboard-root[data-theme="mono"] {
+	.nand-dashboard-root[data-theme="aurora"],
+	.nand-dashboard-root[data-theme="tundra"],
+	.nand-dashboard-root[data-theme="lilac"],
+	.nand-dashboard-root[data-theme="earth"],
+	.nand-dashboard-root[data-theme="nordic"],
+	.nand-dashboard-root[data-theme="matcha"],
+	.nand-dashboard-root[data-theme="mono"] {
 		animation: none;
 		background-position: 0% 50%;
 		will-change: auto;
@@ -2080,11 +2080,11 @@
    The animated gradient root behind translucent cards forces the browser to
    re-blur every frame, which strobes/flickers on many systems. Removing the
    blur eliminates the strobe while keeping the gradient look. */
-.apex-dashboard-root[data-theme="aurora"] {
+.nand-dashboard-root[data-theme="aurora"] {
 	--db-backdrop-blur: none;
 }
-.apex-dashboard-root[data-theme="aurora"] .dashboard-card,
-.apex-dashboard-root[data-theme="aurora"] .dashboard-section {
+.nand-dashboard-root[data-theme="aurora"] .dashboard-card,
+.nand-dashboard-root[data-theme="aurora"] .dashboard-section {
 	backdrop-filter: none;
 	-webkit-backdrop-filter: none;
 }
@@ -10889,7 +10889,7 @@
 
 /* ===== Scroll-to-top floating button ===== */
 /* position:fixed anchors to the viewport. Kept below the mobile drawer/modal
-   stacks (z-index 100/9999) so overlays correctly cover it. The .apex-dashboard-root
+   stacks (z-index 100/9999) so overlays correctly cover it. The .nand-dashboard-root
    has isolation:isolate, so this sits in the view's own stacking context. */
 .dashboard-scroll-top {
 	position: fixed;
@@ -12683,287 +12683,287 @@
    that section's pony hue. Modal inputs live OUTSIDE the dashboard root —
    --db-sec-* is not in the applyModalTheme mirror list there, so they derive
    the glow from --db-accent (which is mirrored) instead. */
-.apex-dashboard-root[data-theme="aurora"] .dashboard-memo-textarea:focus {
+.nand-dashboard-root[data-theme="aurora"] .dashboard-memo-textarea:focus {
 	border-color: var(--db-border-input-focus);
 	box-shadow: 0 0 16px var(--db-sec-glow);
 }
 
-.apex-dashboard-root[data-theme="aurora"] .dashboard-modal-input:focus {
+.nand-dashboard-root[data-theme="aurora"] .dashboard-modal-input:focus {
 	border-color: var(--db-border-input-focus);
 	box-shadow: 0 0 16px color-mix(in srgb, var(--db-accent) 18%, transparent);
 }
 
-.apex-dashboard-root[data-theme="aurora"] .dashboard-section-row--drag-over {
+.nand-dashboard-root[data-theme="aurora"] .dashboard-section-row--drag-over {
 	border-color: var(--db-border-input-focus);
 	box-shadow: 0 0 20px var(--db-sec-glow);
 }
 
-.apex-dashboard-root[data-theme="aurora"] .dashboard-add-section {
+.nand-dashboard-root[data-theme="aurora"] .dashboard-add-section {
 	border-radius: var(--db-radius-lg, 14px);
 	border-color: var(--db-border-add-section);
 }
 
-.apex-dashboard-root[data-theme="aurora"] .dashboard-add-section:hover {
+.nand-dashboard-root[data-theme="aurora"] .dashboard-add-section:hover {
 	border-color: var(--db-border-input-focus);
 	box-shadow: 0 0 12px var(--db-sec-glow);
 }
 
 /* -- Earth: pill-shaped, warm terracotta -- */
 
-.apex-dashboard-root[data-theme="earth"] .dashboard-add-section {
+.nand-dashboard-root[data-theme="earth"] .dashboard-add-section {
 	border-radius: 16px;
 	border-color: rgba(188, 90, 52, 0.35);
 }
 
-.apex-dashboard-root[data-theme="earth"] .dashboard-add-section:hover {
+.nand-dashboard-root[data-theme="earth"] .dashboard-add-section:hover {
 	border-color: #bc5a34;
 	box-shadow: 0 0 12px rgba(217, 119, 6, 0.12);
 }
 
 /* -- Nordic: clean minimal with subtle accent border -- */
-.apex-dashboard-root[data-theme="nordic"] .dashboard-card {
+.nand-dashboard-root[data-theme="nordic"] .dashboard-card {
 	border: 1px solid rgba(43, 187, 215, 0.14);
 }
 
-.theme-dark .apex-dashboard-root[data-theme="nordic"] .dashboard-card {
+.theme-dark .nand-dashboard-root[data-theme="nordic"] .dashboard-card {
 	border-color: rgba(43, 187, 215, 0.18);
 }
 
-.apex-dashboard-root[data-theme="nordic"] .dashboard-add-section {
+.nand-dashboard-root[data-theme="nordic"] .dashboard-add-section {
 	border-color: rgba(100, 125, 165, 0.4);
 	border-radius: 8px;
 }
 
-.theme-dark .apex-dashboard-root[data-theme="nordic"] .dashboard-add-section {
+.theme-dark .nand-dashboard-root[data-theme="nordic"] .dashboard-add-section {
 	border-color: rgba(88, 130, 190, 0.35);
 }
 
-.apex-dashboard-root[data-theme="nordic"] .dashboard-add-section:hover {
+.nand-dashboard-root[data-theme="nordic"] .dashboard-add-section:hover {
 	border-color: #177d95;
 }
 
 /* -- Island: Animal Crossing — forest greens, ocean accents, 3D press -- */
-.apex-dashboard-root[data-theme="island"] .dashboard-card {
+.nand-dashboard-root[data-theme="island"] .dashboard-card {
 	border: 2px solid var(--db-border-card);
 	box-shadow: 0 4px 0 0 #a8c8a5;
 	transition: background 0.25s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.25s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.25s cubic-bezier(0.4, 0, 0.2, 1), transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.apex-dashboard-root[data-theme="island"] .dashboard-card:hover {
+.nand-dashboard-root[data-theme="island"] .dashboard-card:hover {
 	box-shadow: 0 5px 0 0 #98b894, 0 8px 24px rgba(74, 103, 65, 0.15);
 	transform: translateY(-2px);
 	border-color: #82b87e;
 }
 
-.theme-dark .apex-dashboard-root[data-theme="island"] .dashboard-card {
+.theme-dark .nand-dashboard-root[data-theme="island"] .dashboard-card {
 	box-shadow: 0 4px 0 0 #2a4a2e;
 }
 
-.theme-dark .apex-dashboard-root[data-theme="island"] .dashboard-card:hover {
+.theme-dark .nand-dashboard-root[data-theme="island"] .dashboard-card:hover {
 	box-shadow: 0 5px 0 0 #2a4a2e, 0 6px 16px rgba(0, 0, 0, 0.2);
 }
 
-.apex-dashboard-root[data-theme="island"] .dashboard-memo-textarea:focus {
+.nand-dashboard-root[data-theme="island"] .dashboard-memo-textarea:focus {
 	border-color: #ffcc00;
 	box-shadow: 0 3px 0 0 #e0b800, 0 0 0 3px rgba(255, 204, 0, 0.15);
 }
 
-.apex-dashboard-root[data-theme="island"] .dashboard-modal-input:focus {
+.nand-dashboard-root[data-theme="island"] .dashboard-modal-input:focus {
 	border-color: #ffcc00;
 	box-shadow: 0 3px 0 0 #e0b800, 0 0 0 3px rgba(255, 204, 0, 0.15);
 }
 
-.apex-dashboard-root[data-theme="island"] .dashboard-section-row--drag-over {
+.nand-dashboard-root[data-theme="island"] .dashboard-section-row--drag-over {
 	border-color: #19c8b9;
 	box-shadow: 0 0 0 2px rgba(25, 200, 185, 0.15);
 }
 
-.apex-dashboard-root[data-theme="island"] .dashboard-note-quote {
+.nand-dashboard-root[data-theme="island"] .dashboard-note-quote {
 	border-left-color: #82d5bb;
 }
 
-.apex-dashboard-root[data-theme="island"] .dashboard-add-section {
+.nand-dashboard-root[data-theme="island"] .dashboard-add-section {
 	border-radius: 50px;
 	border: 2px dashed rgba(25, 200, 185, 0.35);
 	font-weight: 600;
 	letter-spacing: 0.02em;
 }
 
-.apex-dashboard-root[data-theme="island"] .dashboard-add-section:hover {
+.nand-dashboard-root[data-theme="island"] .dashboard-add-section:hover {
 	border-color: #19c8b9;
 	background: rgba(25, 200, 185, 0.06);
 	transform: translateY(-1px);
 	box-shadow: 0 4px 0 0 #a8c8a5;
 }
 
-.theme-dark .apex-dashboard-root[data-theme="island"] .dashboard-add-section:hover {
+.theme-dark .nand-dashboard-root[data-theme="island"] .dashboard-add-section:hover {
 	box-shadow: 0 4px 0 0 #2a4a2e;
 }
 
 /* Island: modal — cream parchment, green-tinted */
 
 /* Island: checkbox — grass green */
-.apex-dashboard-root[data-theme="island"] .task-checkbox:checked {
+.nand-dashboard-root[data-theme="island"] .task-checkbox:checked {
 	accent-color: #6fba2c;
 }
 
 /* Island: banner — forest frame */
-.apex-dashboard-root[data-theme="island"] .dashboard-banner {
+.nand-dashboard-root[data-theme="island"] .dashboard-banner {
 	border-radius: 20px;
 	border: 2px solid #b5d4b0;
 }
 
 /* Neon: banner — solid dark frame + scrim so the image and white quote read clearly */
-.apex-dashboard-root[data-theme="neon"] .dashboard-banner {
+.nand-dashboard-root[data-theme="neon"] .dashboard-banner {
 	background-color: #0a0a0c;
 	border: 1px solid rgba(255, 46, 136, 0.16);
 }
-.apex-dashboard-root[data-theme="neon"] .dashboard-banner-overlay {
+.nand-dashboard-root[data-theme="neon"] .dashboard-banner-overlay {
 	background: linear-gradient(180deg, rgba(0, 0, 0, 0.30) 0%, rgba(0, 0, 0, 0.55) 100%);
 }
-.apex-dashboard-root[data-theme="neon"] .dashboard-banner-quote {
+.nand-dashboard-root[data-theme="neon"] .dashboard-banner-quote {
 	color: #ffffff;
 	text-shadow: 0 1px 4px rgba(0, 0, 0, 0.7), 0 0 16px rgba(0, 0, 0, 0.4);
 }
-.apex-dashboard-root[data-theme="neon"] .dashboard-banner-author {
+.nand-dashboard-root[data-theme="neon"] .dashboard-banner-author {
 	color: rgba(255, 255, 255, 0.82);
 	text-shadow: 0 1px 3px rgba(0, 0, 0, 0.6);
 }
 
 /* Volt: banner — solid dark frame + scrim so the image and white quote read clearly */
-.apex-dashboard-root[data-theme="volt"] .dashboard-banner {
+.nand-dashboard-root[data-theme="volt"] .dashboard-banner {
 	background-color: #090a0e;
 	border: 1px solid rgba(0, 194, 255, 0.16);
 }
-.apex-dashboard-root[data-theme="volt"] .dashboard-banner-overlay {
+.nand-dashboard-root[data-theme="volt"] .dashboard-banner-overlay {
 	background: linear-gradient(180deg, rgba(0, 0, 0, 0.30) 0%, rgba(0, 0, 0, 0.55) 100%);
 }
-.apex-dashboard-root[data-theme="volt"] .dashboard-banner-quote {
+.nand-dashboard-root[data-theme="volt"] .dashboard-banner-quote {
 	color: #ffffff;
 	text-shadow: 0 1px 4px rgba(0, 0, 0, 0.7), 0 0 16px rgba(0, 0, 0, 0.4);
 }
-.apex-dashboard-root[data-theme="volt"] .dashboard-banner-author {
+.nand-dashboard-root[data-theme="volt"] .dashboard-banner-author {
 	color: rgba(255, 255, 255, 0.82);
 	text-shadow: 0 1px 3px rgba(0, 0, 0, 0.6);
 }
 
 /* Magma: banner — solid dark frame + scrim so the image and white quote read clearly */
-.apex-dashboard-root[data-theme="magma"] .dashboard-banner {
+.nand-dashboard-root[data-theme="magma"] .dashboard-banner {
 	background-color: #0c0a08;
 	border: 1px solid rgba(255, 107, 26, 0.16);
 }
-.apex-dashboard-root[data-theme="magma"] .dashboard-banner-overlay {
+.nand-dashboard-root[data-theme="magma"] .dashboard-banner-overlay {
 	background: linear-gradient(180deg, rgba(0, 0, 0, 0.30) 0%, rgba(0, 0, 0, 0.55) 100%);
 }
-.apex-dashboard-root[data-theme="magma"] .dashboard-banner-quote {
+.nand-dashboard-root[data-theme="magma"] .dashboard-banner-quote {
 	color: #ffffff;
 	text-shadow: 0 1px 4px rgba(0, 0, 0, 0.7), 0 0 16px rgba(0, 0, 0, 0.4);
 }
-.apex-dashboard-root[data-theme="magma"] .dashboard-banner-author {
+.nand-dashboard-root[data-theme="magma"] .dashboard-banner-author {
 	color: rgba(255, 255, 255, 0.82);
 	text-shadow: 0 1px 3px rgba(0, 0, 0, 0.6);
 }
 
 /* Onyx: banner — solid dark frame + scrim so the image and white quote read clearly */
-.apex-dashboard-root[data-theme="onyx"] .dashboard-banner {
+.nand-dashboard-root[data-theme="onyx"] .dashboard-banner {
 	background-color: #0a0a0a;
 	border: 1px solid rgba(233, 255, 64, 0.16);
 }
-.apex-dashboard-root[data-theme="onyx"] .dashboard-banner-overlay {
+.nand-dashboard-root[data-theme="onyx"] .dashboard-banner-overlay {
 	background: linear-gradient(180deg, rgba(0, 0, 0, 0.30) 0%, rgba(0, 0, 0, 0.55) 100%);
 }
-.apex-dashboard-root[data-theme="onyx"] .dashboard-banner-quote {
+.nand-dashboard-root[data-theme="onyx"] .dashboard-banner-quote {
 	color: #ffffff;
 	text-shadow: 0 1px 4px rgba(0, 0, 0, 0.7), 0 0 16px rgba(0, 0, 0, 0.4);
 }
-.apex-dashboard-root[data-theme="onyx"] .dashboard-banner-author {
+.nand-dashboard-root[data-theme="onyx"] .dashboard-banner-author {
 	color: rgba(255, 255, 255, 0.82);
 	text-shadow: 0 1px 3px rgba(0, 0, 0, 0.6);
 }
 
 /* Island: card title — round, friendly */
-.apex-dashboard-root[data-theme="island"] .dashboard-card-title {
+.nand-dashboard-root[data-theme="island"] .dashboard-card-title {
 	font-weight: 600;
 	letter-spacing: 0.02em;
 	color: #4a6741;
 }
 
 /* Island: section headers — forest accent */
-.apex-dashboard-root[data-theme="island"] .dashboard-section-header {
+.nand-dashboard-root[data-theme="island"] .dashboard-section-header {
 	color: #4a6741;
 }
 
 /* Island: sidebar links — ocean tint on hover */
-.apex-dashboard-root[data-theme="island"] .dashboard-quick-link:hover {
+.nand-dashboard-root[data-theme="island"] .dashboard-quick-link:hover {
 	background: #e4f0f8;
 }
 
 /* Island: NookPhone-style pastel tints on memo cards */
-.apex-dashboard-root[data-theme="island"] .dashboard-card[data-type="memo"] {
+.nand-dashboard-root[data-theme="island"] .dashboard-card[data-type="memo"] {
 	border-left: 4px solid #82d5bb;
 }
 
-.apex-dashboard-root[data-theme="island"] .dashboard-card[data-type="todo"] {
+.nand-dashboard-root[data-theme="island"] .dashboard-card[data-type="todo"] {
 	border-left: 4px solid #6fba2c;
 }
 
-.apex-dashboard-root[data-theme="island"] .dashboard-card[data-type="project"] {
+.nand-dashboard-root[data-theme="island"] .dashboard-card[data-type="project"] {
 	border-left: 4px solid #889df0;
 }
 
-.apex-dashboard-root[data-theme="island"] .dashboard-card[data-type="link"] {
+.nand-dashboard-root[data-theme="island"] .dashboard-card[data-type="link"] {
 	border-left: 4px solid #f8a6b2;
 }
 
-.apex-dashboard-root[data-theme="island"] .dashboard-card[data-type="notes"] {
+.nand-dashboard-root[data-theme="island"] .dashboard-card[data-type="notes"] {
 	border-left: 4px solid #f7cd67;
 }
 
 /* Island: progress bar — teal to grass green gradient */
-.apex-dashboard-root[data-theme="island"] .dashboard-progress-fill {
+.nand-dashboard-root[data-theme="island"] .dashboard-progress-fill {
 	background: linear-gradient(90deg, #19c8b9, #6fba2c);
 }
 
 /* -- Tundra: pill-shaped, warm organic (cloned from Earth) -- */
 
-.apex-dashboard-root[data-theme="tundra"] .dashboard-add-section {
+.nand-dashboard-root[data-theme="tundra"] .dashboard-add-section {
 	border-radius: 16px;
 	border-color: rgba(217, 119, 6, 0.25);
 }
 
-.apex-dashboard-root[data-theme="tundra"] .dashboard-add-section:hover {
+.nand-dashboard-root[data-theme="tundra"] .dashboard-add-section:hover {
 	border-color: #d97706;
 }
 
 /* Tundra: modal — warm organic, rounded */
 
 /* -- Blossom: rose glass glow (cloned from Prism) -- */
-.apex-dashboard-root[data-theme="blossom"] .dashboard-card:hover {
+.nand-dashboard-root[data-theme="blossom"] .dashboard-card:hover {
 	box-shadow: 0 6px 24px rgba(244, 63, 94, 0.12), 0 0 16px rgba(168, 85, 247, 0.06);
 	border-color: rgba(244, 63, 94, 0.2);
 }
 
-.apex-dashboard-root[data-theme="blossom"] .dashboard-memo-textarea:focus {
+.nand-dashboard-root[data-theme="blossom"] .dashboard-memo-textarea:focus {
 	border-color: rgba(244, 63, 94, 0.4);
 	box-shadow: 0 0 16px rgba(244, 63, 94, 0.08);
 }
 
-.apex-dashboard-root[data-theme="blossom"] .dashboard-modal-input:focus {
+.nand-dashboard-root[data-theme="blossom"] .dashboard-modal-input:focus {
 	border-color: rgba(244, 63, 94, 0.4);
 	box-shadow: 0 0 16px rgba(244, 63, 94, 0.08);
 }
 
-.apex-dashboard-root[data-theme="blossom"] .dashboard-section-row--drag-over {
+.nand-dashboard-root[data-theme="blossom"] .dashboard-section-row--drag-over {
 	border-color: rgba(244, 63, 94, 0.4);
 	box-shadow: 0 0 20px rgba(244, 63, 94, 0.06);
 }
 
-.apex-dashboard-root[data-theme="blossom"] .dashboard-add-section {
+.nand-dashboard-root[data-theme="blossom"] .dashboard-add-section {
 	border-radius: var(--db-radius-lg, 14px);
 	border-color: rgba(244, 63, 94, 0.15);
 }
 
-.apex-dashboard-root[data-theme="blossom"] .dashboard-add-section:hover {
+.nand-dashboard-root[data-theme="blossom"] .dashboard-add-section:hover {
 	border-color: rgba(244, 63, 94, 0.4);
 	box-shadow: 0 0 12px rgba(244, 63, 94, 0.06);
 }
@@ -12971,54 +12971,54 @@
 /* Blossom: modal — rose glass with warm glow */
 
 /* -- Matcha: deep matcha + gold tea glow -- */
-.apex-dashboard-root[data-theme="matcha"] .dashboard-card:hover {
+.nand-dashboard-root[data-theme="matcha"] .dashboard-card:hover {
 	box-shadow: 0 6px 24px rgba(80, 95, 55, 0.18), 0 0 16px rgba(110, 148, 52, 0.12);
 	border-color: rgba(110, 148, 52, 0.30);
 }
-.apex-dashboard-root[data-theme="matcha"] .dashboard-memo-textarea:focus {
+.nand-dashboard-root[data-theme="matcha"] .dashboard-memo-textarea:focus {
 	border-color: rgba(79, 112, 40, 0.45);
 	box-shadow: 0 0 16px rgba(110, 148, 52, 0.12);
 }
-.apex-dashboard-root[data-theme="matcha"] .dashboard-modal-input:focus {
+.nand-dashboard-root[data-theme="matcha"] .dashboard-modal-input:focus {
 	border-color: var(--db-border-input-focus);
 	box-shadow: 0 0 16px color-mix(in srgb, var(--db-accent) 18%, transparent);
 }
-.apex-dashboard-root[data-theme="matcha"] .dashboard-section-row--drag-over {
+.nand-dashboard-root[data-theme="matcha"] .dashboard-section-row--drag-over {
 	border-color: var(--db-border-input-focus);
 	box-shadow: 0 0 20px color-mix(in srgb, var(--db-accent) 14%, transparent);
 }
-.apex-dashboard-root[data-theme="matcha"] .dashboard-add-section {
+.nand-dashboard-root[data-theme="matcha"] .dashboard-add-section {
 	border-radius: var(--db-radius-lg, 14px);
 	border-color: rgba(79, 112, 40, 0.30);
 }
-.apex-dashboard-root[data-theme="matcha"] .dashboard-add-section:hover {
+.nand-dashboard-root[data-theme="matcha"] .dashboard-add-section:hover {
 	border-color: #4a6a24;
 	box-shadow: 0 0 12px rgba(110, 148, 52, 0.14);
 }
 /* Matcha: modal — soft green glass */
 
 /* -- Lilac: wisteria + rose garden glow -- */
-.apex-dashboard-root[data-theme="lilac"] .dashboard-card:hover {
+.nand-dashboard-root[data-theme="lilac"] .dashboard-card:hover {
 	box-shadow: 0 6px 24px rgba(94, 61, 122, 0.20), 0 0 16px rgba(230, 73, 128, 0.10);
 	border-color: rgba(157, 78, 221, 0.35);
 }
-.apex-dashboard-root[data-theme="lilac"] .dashboard-memo-textarea:focus {
+.nand-dashboard-root[data-theme="lilac"] .dashboard-memo-textarea:focus {
 	border-color: rgba(157, 78, 221, 0.45);
 	box-shadow: 0 0 16px rgba(157, 78, 221, 0.10);
 }
-.apex-dashboard-root[data-theme="lilac"] .dashboard-modal-input:focus {
+.nand-dashboard-root[data-theme="lilac"] .dashboard-modal-input:focus {
 	border-color: var(--db-border-input-focus);
 	box-shadow: 0 0 16px color-mix(in srgb, var(--db-accent) 18%, transparent);
 }
-.apex-dashboard-root[data-theme="lilac"] .dashboard-section-row--drag-over {
+.nand-dashboard-root[data-theme="lilac"] .dashboard-section-row--drag-over {
 	border-color: var(--db-border-input-focus);
 	box-shadow: 0 0 20px color-mix(in srgb, var(--db-accent) 14%, transparent);
 }
-.apex-dashboard-root[data-theme="lilac"] .dashboard-add-section {
+.nand-dashboard-root[data-theme="lilac"] .dashboard-add-section {
 	border-radius: var(--db-radius-lg, 14px);
 	border-color: var(--db-border-add-section);
 }
-.apex-dashboard-root[data-theme="lilac"] .dashboard-add-section:hover {
+.nand-dashboard-root[data-theme="lilac"] .dashboard-add-section:hover {
 	border-color: var(--db-border-input-focus);
 	box-shadow: 0 0 12px color-mix(in srgb, var(--db-accent) 16%, transparent);
 }
@@ -13235,11 +13235,11 @@
 	   heatmap popup, etc.); the modal rules catch body-mounted modals and
 	   theme overrides. Frost degrades to flat translucent fills; desktop is
 	   completely untouched. */
-	.apex-dashboard-root[data-theme] {
+	.nand-dashboard-root[data-theme] {
 		--db-backdrop-blur: none;
 	}
-	.apex-dashboard-root,
-	.apex-dashboard-root * {
+	.nand-dashboard-root,
+	.nand-dashboard-root * {
 		backdrop-filter: none !important;
 		-webkit-backdrop-filter: none !important;
 	}
@@ -13265,7 +13265,7 @@
 	}
 
 	/* Root: allow vertical scrolling */
-	.apex-dashboard-root {
+	.nand-dashboard-root {
 		overflow-y: auto;
 		overflow-x: hidden;
 	}
@@ -16605,7 +16605,7 @@
 }
 
 /* ===== Note popover modal — in-place edit popup for hover-previewed links =====
-   The modal lives on document.body (outside .apex-dashboard-root), so it uses
+   The modal lives on document.body (outside .nand-dashboard-root), so it uses
    Obsidian's global theme vars rather than the dashboard's --db-* vars. The
    embedded MarkdownView renders with the app's native note theme. */
 
@@ -20985,8 +20985,8 @@ body.is-mobile .dashboard-media-item .dashboard-media-tagbtn { opacity: 1; }
    repeated plugin loads on phones. Desktop/tablet-wide layouts keep the full
    glass treatment. */
 @media (max-width: 640px) {
-	.is-mobile .apex-dashboard-root,
-	.is-mobile .apex-dashboard-root *,
+	.is-mobile .nand-dashboard-root,
+	.is-mobile .nand-dashboard-root *,
 	.is-mobile .dashboard-modal,
 	.is-mobile [data-theme] .dashboard-modal,
 	.is-mobile .theme-light [data-theme] .dashboard-modal,
@@ -21006,11 +21006,11 @@ body.is-mobile .dashboard-media-item .dashboard-media-tagbtn { opacity: 1; }
 		filter: none !important;
 	}
 
-	.is-mobile .apex-dashboard-root {
+	.is-mobile .nand-dashboard-root {
 		--db-backdrop-blur: none !important;
 	}
 
-	.is-mobile .apex-dashboard-bg {
+	.is-mobile .nand-dashboard-bg {
 		filter: none !important;
 		transform: none !important;
 	}
@@ -21674,16 +21674,16 @@ body.is-mobile .dashboard-media-item .dashboard-media-tagbtn { opacity: 1; }
 }
 
 /* ===== Editor product: comments (does not use dashboard theme classes) ===== */
-.apex-comment-hl {
+.nand-editor-comment-hl {
 	background: color-mix(in srgb, var(--text-highlight-bg) 70%, transparent);
 	border-radius: 2px;
 	cursor: pointer;
 }
-.apex-comment-hl.is-orphaned {
+.nand-editor-comment-hl.is-orphaned {
 	outline: 1px dashed var(--text-muted);
 	background: transparent;
 }
-.apex-comment-popover {
+.nand-editor-comment-popover {
 	position: fixed;
 	z-index: var(--layer-popover, 30);
 	display: flex;
@@ -21695,13 +21695,13 @@ body.is-mobile .dashboard-media-item .dashboard-media-tagbtn { opacity: 1; }
 	border: 1px solid var(--background-modifier-border);
 	box-shadow: var(--shadow-s);
 }
-.apex-comment-popover-btn,
-.apex-editor-tab,
-.apex-editor-comment-actions button,
-.apex-comment-prompt-row button {
+.nand-editor-comment-popover-btn,
+.nand-editor-tab,
+.nand-editor-comment-actions button,
+.nand-editor-comment-prompt-row button {
 	cursor: pointer;
 }
-.apex-comment-popover-btn {
+.nand-editor-comment-popover-btn {
 	border: none;
 	background: var(--interactive-accent);
 	color: var(--text-on-accent);
@@ -21709,8 +21709,8 @@ body.is-mobile .dashboard-media-item .dashboard-media-tagbtn { opacity: 1; }
 	padding: 4px 10px;
 	font-size: 12px;
 }
-.apex-comment-popover-input,
-.apex-comment-prompt {
+.nand-editor-comment-popover-input,
+.nand-editor-comment-prompt {
 	width: 220px;
 	min-height: 64px;
 	resize: vertical;
@@ -21721,7 +21721,7 @@ body.is-mobile .dashboard-media-item .dashboard-media-tagbtn { opacity: 1; }
 	padding: 6px 8px;
 	font: inherit;
 }
-.apex-editor-view {
+.nand-editor-view {
 	display: flex;
 	flex-direction: column;
 	height: 100%;
@@ -21729,12 +21729,12 @@ body.is-mobile .dashboard-media-item .dashboard-media-tagbtn { opacity: 1; }
 	gap: var(--size-4-3);
 	color: var(--text-normal);
 }
-.apex-editor-tabs {
+.nand-editor-tabs {
 	display: flex;
 	gap: 4px;
 	flex-wrap: wrap;
 }
-.apex-editor-tab {
+.nand-editor-tab {
 	display: inline-flex;
 	align-items: center;
 	gap: 4px;
@@ -21745,32 +21745,32 @@ body.is-mobile .dashboard-media-item .dashboard-media-tagbtn { opacity: 1; }
 	padding: 4px 8px;
 	font-size: 12px;
 }
-.apex-editor-tab.is-active {
+.nand-editor-tab.is-active {
 	background: var(--background-modifier-hover);
 	color: var(--text-normal);
 }
-.apex-editor-tab-icon {
+.nand-editor-tab-icon {
 	display: inline-flex;
 	width: 14px;
 	height: 14px;
 }
-.apex-editor-body {
+.nand-editor-body {
 	min-height: 0;
 	overflow: auto;
 	flex: 1;
 }
-.apex-editor-placeholder,
-.apex-editor-comments-empty {
+.nand-editor-placeholder,
+.nand-editor-comments-empty {
 	color: var(--text-muted);
 	font-size: 13px;
 	line-height: 1.5;
 	padding: 8px 2px;
 }
-.apex-editor-comments-title {
+.nand-editor-comments-title {
 	font-weight: 600;
 	font-size: 13px;
 }
-.apex-editor-comments-path {
+.nand-editor-comments-path {
 	color: var(--text-muted);
 	font-size: var(--font-ui-smaller);
 	margin-top: var(--size-4-1);
@@ -21778,7 +21778,7 @@ body.is-mobile .dashboard-media-item .dashboard-media-tagbtn { opacity: 1; }
 	text-overflow: ellipsis;
 	white-space: nowrap;
 }
-.apex-editor-comment {
+.nand-editor-comment {
 	border: 1px solid var(--background-modifier-border);
 	border-radius: var(--radius-m);
 	padding: var(--size-4-3);
@@ -21786,10 +21786,10 @@ body.is-mobile .dashboard-media-item .dashboard-media-tagbtn { opacity: 1; }
 	background: var(--background-primary);
 	min-width: 0;
 }
-.apex-editor-comment.is-focused {
+.nand-editor-comment.is-focused {
 	border-color: var(--interactive-accent);
 }
-.apex-editor-comment .apex-editor-comment-quote {
+.nand-editor-comment .nand-editor-comment-quote {
 	display: block;
 	width: 100%;
 	height: auto;
@@ -21808,7 +21808,7 @@ body.is-mobile .dashboard-media-item .dashboard-media-tagbtn { opacity: 1; }
 	white-space: pre-wrap;
 	overflow-wrap: anywhere;
 }
-.apex-editor-comment-status {
+.nand-editor-comment-status {
 	display: flex;
 	align-items: center;
 	gap: var(--size-4-1);
@@ -21816,29 +21816,29 @@ body.is-mobile .dashboard-media-item .dashboard-media-tagbtn { opacity: 1; }
 	font-size: var(--font-ui-smaller);
 	color: var(--text-muted);
 }
-.apex-editor-comment-message {
+.nand-editor-comment-message {
 	padding-top: var(--size-4-3);
 	line-height: 1.5;
 }
-.apex-editor-comment-text {
+.nand-editor-comment-text {
 	font-size: var(--font-ui-small);
 	white-space: pre-wrap;
 	overflow-wrap: anywhere;
 }
-.apex-editor-comment-time {
+.nand-editor-comment-time {
 	font-size: var(--font-ui-smaller);
 	color: var(--text-muted);
 	margin-top: var(--size-4-1);
 	font-variant-numeric: tabular-nums;
 }
-.apex-editor-comment-actions {
+.nand-editor-comment-actions {
 	display: flex;
 	align-items: center;
 	flex-wrap: wrap;
 	gap: var(--size-4-1);
 	margin-top: var(--size-4-3);
 }
-.apex-editor-comment-actions button {
+.nand-editor-comment-actions button {
 	border: none;
 	box-shadow: none;
 	background: transparent;
@@ -21848,14 +21848,14 @@ body.is-mobile .dashboard-media-item .dashboard-media-tagbtn { opacity: 1; }
 	min-height: 28px;
 	font-size: var(--font-ui-small);
 }
-.apex-comment-prompt-title {
+.nand-editor-comment-prompt-title {
 	margin: 0 0 8px;
 }
-.apex-comment-prompt {
+.nand-editor-comment-prompt {
 	width: 100%;
 	box-sizing: border-box;
 }
-.apex-comment-prompt-row {
+.nand-editor-comment-prompt-row {
 	display: flex;
 	justify-content: flex-end;
 	gap: 8px;
@@ -22142,7 +22142,7 @@ body.is-mobile .dashboard-media-item .dashboard-media-tagbtn { opacity: 1; }
 }
 
 /* ==================== Changelog Modal Styles ==================== */
-.termy-changelog-modal .modal {
+.terminal-changelog-modal .modal {
   width: min(900px, calc(100vw - 48px));
   max-width: 900px;
   max-height: min(80vh, 900px);
@@ -22150,7 +22150,7 @@ body.is-mobile .dashboard-media-item .dashboard-media-tagbtn { opacity: 1; }
   overflow: hidden;
 }
 
-.termy-changelog-shell {
+.terminal-changelog-shell {
   display: flex;
   flex-direction: column;
   min-height: 0;
@@ -22164,7 +22164,7 @@ body.is-mobile .dashboard-media-item .dashboard-media-tagbtn { opacity: 1; }
     var(--background-primary);
 }
 
-.termy-changelog-header {
+.terminal-changelog-header {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
@@ -22179,27 +22179,27 @@ body.is-mobile .dashboard-media-item .dashboard-media-tagbtn { opacity: 1; }
     );
 }
 
-.termy-changelog-heading {
+.terminal-changelog-heading {
   display: flex;
   flex-direction: column;
   gap: 6px;
   min-width: 0;
 }
 
-.termy-changelog-subtitle {
+.terminal-changelog-subtitle {
   color: var(--text-muted);
   font-size: 13px;
   line-height: 1.5;
 }
 
-.termy-changelog-actions {
+.terminal-changelog-actions {
   display: flex;
   align-items: center;
   gap: 8px;
   flex-shrink: 0;
 }
 
-.termy-changelog-version-badge {
+.terminal-changelog-version-badge {
   display: inline-flex;
   align-items: center;
   height: 28px;
@@ -22213,18 +22213,18 @@ body.is-mobile .dashboard-media-item .dashboard-media-tagbtn { opacity: 1; }
   letter-spacing: 0.04em;
 }
 
-.termy-changelog-action {
+.terminal-changelog-action {
   width: 30px;
   height: 30px;
 }
 
-.termy-changelog-body {
+.terminal-changelog-body {
   overflow-y: auto;
   padding: 22px 24px 26px;
 }
 
-.termy-changelog-loading,
-.termy-changelog-error {
+.terminal-changelog-loading,
+.terminal-changelog-error {
   padding: 22px 18px;
   border: 1px solid var(--background-modifier-border);
   border-radius: 12px;
@@ -22234,27 +22234,27 @@ body.is-mobile .dashboard-media-item .dashboard-media-tagbtn { opacity: 1; }
   line-height: 1.6;
 }
 
-.termy-changelog-error {
+.terminal-changelog-error {
   color: var(--text-error);
 }
 
-.termy-changelog-markdown {
+.terminal-changelog-markdown {
   line-height: 1.7;
 }
 
-.termy-changelog-markdown > :first-child {
+.terminal-changelog-markdown > :first-child {
   margin-top: 0;
 }
 
-.termy-changelog-markdown h3 {
+.terminal-changelog-markdown h3 {
   margin-top: 24px;
 }
 
-.termy-changelog-markdown ul {
+.terminal-changelog-markdown ul {
   margin-block: 10px 18px;
 }
 
-.termy-changelog-markdown li {
+.terminal-changelog-markdown li {
   margin-block: 6px;
 }
 
@@ -23144,7 +23144,7 @@ body.is-mobile .dashboard-media-item .dashboard-media-tagbtn { opacity: 1; }
   display: none;
 }
 
-.termy-always-on-top-tab-badge {
+.terminal-always-on-top-tab-badge {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -23157,13 +23157,13 @@ body.is-mobile .dashboard-media-item .dashboard-media-tagbtn { opacity: 1; }
   transform: translateY(-1px);
 }
 
-.termy-always-on-top-tab-badge svg {
+.terminal-always-on-top-tab-badge svg {
   width: 11px;
   height: 11px;
   stroke-width: 2.1;
 }
 
-.workspace-tab-header.is-active .termy-always-on-top-tab-badge {
+.workspace-tab-header.is-active .terminal-always-on-top-tab-badge {
   color: var(--interactive-accent);
   opacity: 1;
 }
@@ -24041,13 +24041,13 @@ body.is-mobile .dashboard-media-item .dashboard-media-tagbtn { opacity: 1; }
 }
 
 /* Launcher install modal — content layout */
-.termy-launcher-install-modal .termy-launcher-install-desc {
+.terminal-launcher-install-modal .terminal-launcher-install-desc {
   margin: 0 0 12px;
   line-height: 1.5;
   color: var(--text-normal);
 }
 
-.termy-launcher-install-modal .termy-launcher-install-detail {
+.terminal-launcher-install-modal .terminal-launcher-install-detail {
   display: flex;
   flex-direction: column;
   gap: 4px;
@@ -24057,7 +24057,7 @@ body.is-mobile .dashboard-media-item .dashboard-media-tagbtn { opacity: 1; }
   background: var(--background-secondary);
 }
 
-.termy-launcher-install-modal .termy-launcher-install-detail-label {
+.terminal-launcher-install-modal .terminal-launcher-install-detail-label {
   font-size: 11px;
   font-weight: 600;
   letter-spacing: 0.04em;
@@ -24065,14 +24065,14 @@ body.is-mobile .dashboard-media-item .dashboard-media-tagbtn { opacity: 1; }
   color: var(--text-muted);
 }
 
-.termy-launcher-install-modal .termy-launcher-install-detail-command {
+.terminal-launcher-install-modal .terminal-launcher-install-detail-command {
   font-family: var(--font-monospace);
   font-size: 13px;
   color: var(--text-normal);
 }
 
 /* Install command card — copy-paste friendly install one-liner. */
-.termy-launcher-install-modal .termy-launcher-install-card {
+.terminal-launcher-install-modal .terminal-launcher-install-card {
   display: flex;
   flex-direction: column;
   gap: 8px;
@@ -24083,26 +24083,26 @@ body.is-mobile .dashboard-media-item .dashboard-media-tagbtn { opacity: 1; }
   background: var(--background-secondary);
 }
 
-.termy-launcher-install-modal .termy-launcher-install-card-title {
+.terminal-launcher-install-modal .terminal-launcher-install-card-title {
   font-weight: 600;
   font-size: 13px;
   color: var(--text-normal);
 }
 
-.termy-launcher-install-modal .termy-launcher-install-card-desc {
+.terminal-launcher-install-modal .terminal-launcher-install-card-desc {
   margin: 0;
   font-size: 12px;
   line-height: 1.5;
   color: var(--text-muted);
 }
 
-.termy-launcher-install-modal .termy-launcher-install-command-row {
+.terminal-launcher-install-modal .terminal-launcher-install-command-row {
   display: flex;
   align-items: center;
   gap: 8px;
 }
 
-.termy-launcher-install-modal .termy-launcher-install-command {
+.terminal-launcher-install-modal .terminal-launcher-install-command {
   flex: 1 1 auto;
   min-width: 0;
   padding: 8px 10px;
@@ -24115,7 +24115,7 @@ body.is-mobile .dashboard-media-item .dashboard-media-tagbtn { opacity: 1; }
   white-space: pre-wrap;
 }
 
-.termy-launcher-install-modal .termy-launcher-install-command-copy {
+.terminal-launcher-install-modal .terminal-launcher-install-command-copy {
   flex: 0 0 auto;
   padding: 6px 12px;
   border-radius: 6px;
@@ -24126,7 +24126,7 @@ body.is-mobile .dashboard-media-item .dashboard-media-tagbtn { opacity: 1; }
   cursor: pointer;
 }
 
-.termy-launcher-install-modal .termy-launcher-install-command-copy:hover {
+.terminal-launcher-install-modal .terminal-launcher-install-command-copy:hover {
   background: var(--background-modifier-hover);
 }
 
@@ -24277,19 +24277,19 @@ body.is-mobile .dashboard-media-item .dashboard-media-tagbtn { opacity: 1; }
 .nand-empty-state-title { color: var(--text-normal); font-size: var(--font-ui-medium); font-weight: 600; }
 .nand-empty-state-description { max-width: 32ch; font-size: var(--font-ui-small); line-height: 1.6; overflow-wrap: anywhere; }
 .nand-empty-state button { flex: none; width: auto; max-width: 100%; margin-top: var(--size-4-1); }
-.apex-editor-view > .nand-empty-state { flex: 1; min-height: 0; }
-.apex-editor-comments-head { padding: var(--size-4-1) 0 var(--size-4-1); }
-.apex-editor-comment-status svg { display: block; width: 14px; height: 14px; }
-.apex-editor-comment-message + .apex-editor-comment-message { margin-top: var(--size-4-3); border-top: 1px solid var(--background-modifier-border); }
-.apex-editor-comment-actions button:hover { background: var(--background-modifier-hover); color: var(--text-normal); }
-.apex-editor-comment-actions .apex-editor-comment-more { margin-inline-start: auto; display: flex; align-items: center; justify-content: center; }
-.apex-editor-comment-more svg { width: 16px; height: 16px; }
-.apex-editor-comment.is-focused .apex-editor-comment-quote { border-inline-start-color: var(--interactive-accent); }
-.apex-editor-comment[data-status="orphaned"] .apex-editor-comment-status { color: var(--text-warning); }
-.apex-editor-tab { box-shadow: none; min-height: 28px; }
-.apex-comment-popover { gap: var(--size-4-2); padding: var(--size-4-2); border-radius: var(--radius-m); }
-.apex-comment-prompt { min-height: 112px; padding: var(--size-4-3); line-height: 1.6; }
-.apex-comment-prompt-row { margin-top: var(--size-4-4); }
+.nand-editor-view > .nand-empty-state { flex: 1; min-height: 0; }
+.nand-editor-comments-head { padding: var(--size-4-1) 0 var(--size-4-1); }
+.nand-editor-comment-status svg { display: block; width: 14px; height: 14px; }
+.nand-editor-comment-message + .nand-editor-comment-message { margin-top: var(--size-4-3); border-top: 1px solid var(--background-modifier-border); }
+.nand-editor-comment-actions button:hover { background: var(--background-modifier-hover); color: var(--text-normal); }
+.nand-editor-comment-actions .nand-editor-comment-more { margin-inline-start: auto; display: flex; align-items: center; justify-content: center; }
+.nand-editor-comment-more svg { width: 16px; height: 16px; }
+.nand-editor-comment.is-focused .nand-editor-comment-quote { border-inline-start-color: var(--interactive-accent); }
+.nand-editor-comment[data-status="orphaned"] .nand-editor-comment-status { color: var(--text-warning); }
+.nand-editor-tab { box-shadow: none; min-height: 28px; }
+.nand-editor-comment-popover { gap: var(--size-4-2); padding: var(--size-4-2); border-radius: var(--radius-m); }
+.nand-editor-comment-prompt { min-height: 112px; padding: var(--size-4-3); line-height: 1.6; }
+.nand-editor-comment-prompt-row { margin-top: var(--size-4-4); }
 
 :is(.nand-settings, .dashboard-settings-root) { container: nand-settings / inline-size; }
 :is(.nand-settings, .dashboard-settings-root) .dashboard-settings-products { gap: var(--size-4-1); padding-bottom: var(--size-4-3); margin-bottom: var(--size-4-2); border-bottom: 1px solid var(--background-modifier-border); }
@@ -24335,8 +24335,8 @@ body.is-mobile .dashboard-media-item .dashboard-media-tagbtn { opacity: 1; }
 	.nand-terminal-settings .setting-item:not(.dashboard-settings-section) > .setting-item-control { flex: 1 1 100%; }
 }
 
-.apex-editor-tabs button.apex-editor-tab { border: none; box-shadow: none; background: transparent; }
-.apex-editor-tabs button.apex-editor-tab.is-active { background: var(--background-modifier-hover); }
+.nand-editor-tabs button.nand-editor-tab { border: none; box-shadow: none; background: transparent; }
+.nand-editor-tabs button.nand-editor-tab.is-active { background: var(--background-modifier-hover); }
 .nand-terminal-settings .terminal-agent-settings-group .setting-item { padding-inline: 0; }
 .nand-terminal-settings .terminal-agent-settings-group .setting-item-heading { margin: 0; padding-block: 0 var(--size-4-2); }
 
@@ -24349,24 +24349,24 @@ body.is-mobile .dashboard-media-item .dashboard-media-tagbtn { opacity: 1; }
 .preset-script-modal .modal-button-container button { border-radius: var(--radius-s); }
 
 /* Board geometry stays independent of its thirteen color palettes. */
-.apex-dashboard-root .dashboard-section-header { gap: var(--size-4-3); margin-bottom: var(--size-4-3); }
-.apex-dashboard-root .dashboard-section-title-wrap { min-width: 0; gap: var(--size-4-2); }
-.apex-dashboard-root .dashboard-card-header { align-items: center; gap: var(--size-4-2); margin-bottom: var(--size-4-2); }
-.apex-dashboard-root .dashboard-card-title { min-width: 0; overflow-wrap: anywhere; line-height: 1.5; }
-.apex-dashboard-root .dashboard-card-btn { min-width: 28px; min-height: 28px; border-radius: var(--db-radius-sm); }
-.apex-dashboard-root .dashboard-card:focus-within .dashboard-card-actions { opacity: 1; }
-.apex-dashboard-root .dashboard-card-body { line-height: 1.5; overflow-wrap: anywhere; }
-.apex-dashboard-root .dashboard-section-header-actions { gap: var(--size-4-2); }
-.apex-dashboard-root .dashboard-card-btn:focus-visible { outline: 2px solid var(--db-accent); outline-offset: 2px; }
-:is(.apex-editor-view, .apex-comment-popover, .nand-empty-state, .nand-settings, .dashboard-settings-root) :is(button, a):focus-visible { outline: 2px solid var(--interactive-accent); outline-offset: 2px; }
+.nand-dashboard-root .dashboard-section-header { gap: var(--size-4-3); margin-bottom: var(--size-4-3); }
+.nand-dashboard-root .dashboard-section-title-wrap { min-width: 0; gap: var(--size-4-2); }
+.nand-dashboard-root .dashboard-card-header { align-items: center; gap: var(--size-4-2); margin-bottom: var(--size-4-2); }
+.nand-dashboard-root .dashboard-card-title { min-width: 0; overflow-wrap: anywhere; line-height: 1.5; }
+.nand-dashboard-root .dashboard-card-btn { min-width: 28px; min-height: 28px; border-radius: var(--db-radius-sm); }
+.nand-dashboard-root .dashboard-card:focus-within .dashboard-card-actions { opacity: 1; }
+.nand-dashboard-root .dashboard-card-body { line-height: 1.5; overflow-wrap: anywhere; }
+.nand-dashboard-root .dashboard-section-header-actions { gap: var(--size-4-2); }
+.nand-dashboard-root .dashboard-card-btn:focus-visible { outline: 2px solid var(--db-accent); outline-offset: 2px; }
+:is(.nand-editor-view, .nand-editor-comment-popover, .nand-empty-state, .nand-settings, .dashboard-settings-root) :is(button, a):focus-visible { outline: 2px solid var(--interactive-accent); outline-offset: 2px; }
 @media (pointer: coarse) {
-	:is(.apex-editor-view, .apex-comment-popover, .nand-empty-state, .nand-settings, .dashboard-settings-root) button,
-	.apex-dashboard-root .dashboard-card-btn { min-width: 44px; min-height: 44px; }
-	.apex-dashboard-root .dashboard-card-actions { opacity: 1; }
+	:is(.nand-editor-view, .nand-editor-comment-popover, .nand-empty-state, .nand-settings, .dashboard-settings-root) button,
+	.nand-dashboard-root .dashboard-card-btn { min-width: 44px; min-height: 44px; }
+	.nand-dashboard-root .dashboard-card-actions { opacity: 1; }
 }
 @media (prefers-reduced-motion: reduce) {
-	:is(.apex-editor-view, .nand-settings, .dashboard-settings-root, .apex-dashboard-root) *,
-	.apex-comment-popover { animation-duration: 0.01ms; animation-iteration-count: 1; transition-duration: 0.01ms; }
+	:is(.nand-editor-view, .nand-settings, .dashboard-settings-root, .nand-dashboard-root) *,
+	.nand-editor-comment-popover { animation-duration: 0.01ms; animation-iteration-count: 1; transition-duration: 0.01ms; }
 }
 
 /* xterm */
@@ -24655,3 +24655,17 @@ body.is-mobile .dashboard-media-item .dashboard-media-tagbtn { opacity: 1; }
 .xterm .xterm-scrollable-element > .shadow.top.left {
 	box-shadow: var(--vscode-scrollbar-shadow, #000) 6px 0 6px -6px inset;
 }
+
+/* NAND wrappers are layout containers, not native setting rows. */
+.nand-settings .setting-group .setting-item.dashboard-settings-section {
+ padding: 0;
+ border: none;
+ background: transparent;
+}
+.nand-settings .setting-group .setting-item.dashboard-settings-section::before { content: none; }
+.nand-empty-state.nand-empty-state--content { height: auto; min-height: 160px; }
+.nand-editor-comment-popover [hidden] { display: none; }
+.nand-editor-comment-composer-actions { display: flex; gap: var(--size-4-2); justify-content: flex-end; }
+.nand-editor-comment-shortcut { color: var(--text-muted); font-size: var(--font-ui-smaller); }
+.nand-editor-comment-popover { max-width: calc(100vw - 16px); }
+.nand-editor-comment-popover textarea { max-width: 100%; }

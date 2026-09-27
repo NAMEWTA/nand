@@ -1,3 +1,4 @@
+import { createDashboardSettingsAccess } from '../settings-access';
 import type { DashboardView } from './dashboard-view';
 import { setIcon } from 'obsidian';
 import { renderSidebarPomodoro, renderSidebarReading } from '../renderer';
@@ -157,6 +158,7 @@ export function refreshMobileWidgetPanel(this: DashboardView, bar: HTMLElement):
 			this.app,
 			(file, line) => this.openNote(file, undefined, line),
 			{ autoLoad: true },
+			createDashboardSettingsAccess(this.plugin),
 		);
 	} else if (this.mobileWidgetExpanded === 'habit') {
 		renderSidebarHabitWidget(panel, this.app);

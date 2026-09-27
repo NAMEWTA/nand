@@ -1,3 +1,4 @@
+import { createDashboardSettingsAccess } from '../settings-access';
 import { DASHBOARD_VIEW_TYPE } from './dashboard-view';
 import type { DashboardView } from './dashboard-view';
 import { Platform } from 'obsidian';
@@ -100,6 +101,7 @@ export function renderSidebar(
 		reuseWidgets,
 		(file, line) => this.openNote(file, undefined, line),
 		renderQuickActionsWidget,
+		createDashboardSettingsAccess(this.plugin),
 	);
 
 	if (!isStackedLayout(this.plugin.settings)) {
@@ -187,7 +189,7 @@ export function attachStripHeightHandle(this: DashboardView, sidebar: HTMLElemen
 		// height carries no usable unit value.
 		const startH = clampWidgetUnitHeight(this.plugin.settings.widgetUnitHeight);
 		sidebar.addClass('dashboard-sidebar--resizing');
-		const shieldHost = sidebar.closest('.apex-dashboard-root') ?? sidebar.parentElement;
+		const shieldHost = sidebar.closest('.nand-dashboard-root') ?? sidebar.parentElement;
 		shieldHost?.addClass('dashboard-frames-muted');
 		let last = startH;
 		startGuardedDrag(e, {
@@ -226,7 +228,7 @@ export function attachSidebarWidthHandle(this: DashboardView, sidebar: HTMLEleme
 		const startX = e.clientX;
 		const startW = clampSidebarWidth(this.plugin.settings.sidebarWidth);
 		sidebar.addClass('dashboard-sidebar--resizing');
-		const shieldHost = sidebar.closest('.apex-dashboard-root') ?? sidebar.parentElement;
+		const shieldHost = sidebar.closest('.nand-dashboard-root') ?? sidebar.parentElement;
 		shieldHost?.addClass('dashboard-frames-muted');
 		let last = startW;
 		startGuardedDrag(e, {

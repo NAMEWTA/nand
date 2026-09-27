@@ -52,7 +52,7 @@ export function render(this: DashboardView, data: DashboardData): void {
 	activeDocument.body.querySelectorAll(':scope > .dashboard-card--ghost').forEach((el) => el.remove());
 
 	container.empty();
-	container.addClass('apex-dashboard-root');
+	container.addClass('nand-dashboard-root');
 	container.setAttribute('data-theme', this.plugin.settings.stylePreset);
 	// Layout mode rides on an attribute so CSS owns the switch. Phones
 	// always report 'side' (isStackedLayout excludes them) so their DOM and

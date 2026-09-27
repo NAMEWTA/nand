@@ -14,7 +14,7 @@ const RING_SIZE = 28;
 const RING_STROKE = 2.5;
 /** localStorage key for the last dragged position (device-local by design:
  *  a position saved on a big screen must not yank the panel off a phone). */
-const POS_KEY = 'apex-dashboard.pomodoro-mini-pos';
+const POS_KEY = 'nand.dashboard.pomodoro-mini-pos';
 
 interface PanelRefs {
 	panel: HTMLElement;
@@ -253,9 +253,9 @@ export function createPomodoroMiniPanel(
 			toggleBtn,
 		};
 
-		wireFloatingDrag(panel, doc, POS_KEY, '.dashboard-pomodoro-mini-btn');
+		wireFloatingDrag(panel, doc, POS_KEY, '.dashboard-pomodoro-mini-btn', plugin.app);
 		// Restore the last dragged spot (clamped to this viewport's size).
-		restoreFloatingPos(panel, doc, POS_KEY);
+		restoreFloatingPos(panel, doc, POS_KEY, plugin.app);
 
 		// Idle-fold: pointer moves over the panel (or a drag in progress) keep
 		// it open; hover/tap/keyboard focus on the folded ring re-expands it.

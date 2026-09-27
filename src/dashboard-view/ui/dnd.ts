@@ -5,7 +5,7 @@ import type { RenderCallbacks } from '../types';
  *  dataTransfer.types for it at dragover time — when text/plain payloads are
  *  not yet readable — to decline the drag instead of painting misleading
  *  drop-target highlights. */
-export const KANBAN_FILE_DRAG_TYPE = 'application/x-apex-libcard';
+export const KANBAN_FILE_DRAG_TYPE = 'application/x-nand-dashboard-libcard';
 
 /** Custom drag type marking "an item drag inside a card" (task/doc items set
  *  it on dragstart). The card-level external-file-drop layer and the
@@ -13,7 +13,7 @@ export const KANBAN_FILE_DRAG_TYPE = 'application/x-apex-libcard';
  *  file drag — the file layer used to force dropEffect='link' over the
  *  effectAllowed='move' item drags carry, which made the browser forbid the
  *  drop and left empty cards (no item handlers to win the race) undroppable. */
-export const ITEM_DRAG_TYPE = 'application/x-apex-item';
+export const ITEM_DRAG_TYPE = 'application/x-nand-dashboard-item';
 
 interface DnDState {
 	draggingCardId: string | null;

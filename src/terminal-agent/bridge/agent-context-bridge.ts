@@ -6,7 +6,7 @@ import type {
   TFile,
   WorkspaceLeaf,
 } from "obsidian";
-import { normalizePath } from "obsidian";
+import { absoluteVaultPath } from '../host/filesystem-paths';
 
 /**
  * Node built-ins are resolved on demand inside the
@@ -24,8 +24,8 @@ import {
   buildAgentContextTerminalEnv,
   renderNANDCodexSkill,
   serializeAgentContextSnapshotState,
-  TERMY_CODEX_SKILL_MANAGED_MARKER,
-  TERMY_CODEX_SKILL_RELATIVE_PATH,
+  NAND_CODEX_SKILL_MANAGED_MARKER,
+  NAND_CODEX_SKILL_RELATIVE_PATH,
 } from "./agent-context";
 import { debugLog, errorLog } from "../logger";
 
@@ -66,7 +66,7 @@ type OpenFileContext = FileContext & {
 
 type AgentContextSnapshot = {
   schemaVersion: 1;
-  source: "termy";
+  source: "nand-terminal";
   updatedAt: string;
   vaultRoot: string | null;
   workspaceFolders: string[];
@@ -202,7 +202,7 @@ export class AgentContextBridge {
 
       const skillFilePath = this.path.join(
         vaultRoot,
-        TERMY_CODEX_SKILL_RELATIVE_PATH,
+        NAND_CODEX_SKILL_RELATIVE_PATH,
       );
       const skillContent = renderNANDCodexSkill();
 
@@ -211,7 +211,7 @@ export class AgentContextBridge {
         if (currentContent === skillContent) {
           return;
         }
-        if (!currentContent.includes(TERMY_CODEX_SKILL_MANAGED_MARKER)) {
+        if (!currentContent.includes(NAND_CODEX_SKILL_MANAGED_MARKER)) {
           debugLog(
             `[AgentContextBridge] Existing unmanaged Codex skill found at ${skillFilePath}; leaving it unchanged`,
           );
@@ -262,7 +262,7 @@ export class AgentContextBridge {
 
     return {
       schemaVersion: 1,
-      source: "termy",
+      source: "nand-terminal",
       updatedAt: new Date().toISOString(),
       vaultRoot,
       workspaceFolders: vaultRoot ? [vaultRoot] : [],
@@ -352,7 +352,7 @@ export class AgentContextBridge {
   private getVaultRoot(): string | null {
     const adapter = this.app.vault.adapter as { getBasePath?: () => string };
     if (adapter && typeof adapter.getBasePath === "function") {
-      return normalizePath(adapter.getBasePath());
+      return absoluteVaultPath(adapter.getBasePath(), this.path);
     }
 
     return null;

@@ -1,5 +1,6 @@
 import type { App, Editor, EventRef, TFile } from 'obsidian';
-import { FileSystemAdapter, normalizePath } from 'obsidian';
+import { FileSystemAdapter } from 'obsidian';
+import { absoluteVaultPath } from '../host/filesystem-paths';
 import { WebSocket, WebSocketServer, type RawData } from 'ws';
 import { buildIdeBridgeTerminalEnv } from './agent-context';
 import { debugLog, errorLog } from '../logger';
@@ -364,7 +365,7 @@ export class ClaudeCodeIdeBridge {
   private getVaultPath(): string | null {
     const adapter = this.app.vault.adapter;
     if (adapter instanceof FileSystemAdapter) {
-      return normalizePath(adapter.getBasePath());
+      return absoluteVaultPath(adapter.getBasePath(), this.path);
     }
 
     return null;
@@ -517,7 +518,7 @@ export class ClaudeCodeIdeBridge {
         tools: {},
       },
       serverInfo: {
-        name: 'termy/obsidian-ide',
+        name: 'nand/obsidian-ide',
         version: this.version,
       },
       instructions:

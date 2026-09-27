@@ -5,7 +5,7 @@ import { activityColor } from './pomodoro-service';
 
 /** Mount inside the themed dashboard root so --db-* variables resolve. */
 function mountOverlay(doc: Document): HTMLElement {
-	const root = doc.querySelector('.apex-dashboard-root');
+	const root = doc.querySelector('.nand-dashboard-root');
 	return (root ?? doc.body).createDiv({ cls: 'dashboard-pomodoro-stats-overlay' });
 }
 

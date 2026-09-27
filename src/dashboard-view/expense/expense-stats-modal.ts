@@ -55,12 +55,12 @@ const RECORDS_LIMIT = 50;
 
 /**
  * Mount point for the stats overlay. The `--db-*` theme variables live on
- * `.apex-dashboard-root[data-theme]`, so the overlay must be appended INSIDE
+ * `.nand-dashboard-root[data-theme]`, so the overlay must be appended INSIDE
  * that root (not doc.body) or every var() resolves to nothing (same reason as
  * the pomodoro stats overlay).
  */
 function mountOverlay(doc: Document): HTMLElement {
-	const root = doc.querySelector('.apex-dashboard-root');
+	const root = doc.querySelector('.nand-dashboard-root');
 	const host = root ?? doc.body;
 	return host.createDiv({ cls: 'dashboard-expense-stats-overlay' });
 }

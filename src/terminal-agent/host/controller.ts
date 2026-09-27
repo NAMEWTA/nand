@@ -1,4 +1,5 @@
 import { renderEmptyState } from '../../shared/empty-state';
+import { resolvePluginDirectory } from './filesystem-paths';
 import type { View, WorkspaceLeaf } from 'obsidian';
 import { FileSystemAdapter, Modal, Notice, Plugin, normalizePath, setIcon, setTooltip } from 'obsidian';
 import {
@@ -57,7 +58,7 @@ import { isAgentId, launchRegisteredAgent, refreshRegisteredUsage, registerOrca,
 import { normalizeAgentSettings } from '../launch/defaults';
 import { LauncherInstallModal } from '../view/launcher-install-modal';
 
-const ALWAYS_ON_TOP_TAB_BADGE_CLASS = 'termy-always-on-top-tab-badge';
+const ALWAYS_ON_TOP_TAB_BADGE_CLASS = 'terminal-always-on-top-tab-badge';
 
 type ElectronBrowserWindowLike = {
   setAlwaysOnTop: (flag: boolean, level?: string) => void;
@@ -206,7 +207,8 @@ export class TerminalAgentController {
         version,
         binaryDownloadConfig,
         this.settings.enableDebugLog,
-        offlineMode
+        offlineMode,
+        this.manifest.id
       );
       
       debugLog('[TerminalAgentController] ServerManager initialized');
@@ -2974,21 +2976,8 @@ export class TerminalAgentController {
     if (!(adapter instanceof FileSystemAdapter)) {
       throw new Error('FileSystemAdapter is not available');
     }
-    const vaultPath = normalizePath(adapter.getBasePath());
-    const configDir = normalizePath(this.app.vault.configDir);
-    const manifestDir = this.manifest.dir
-      ? normalizePath(this.manifest.dir)
-      : normalizePath(`${configDir}/plugins/${this.manifest.id}`);
-
-    if (this.isAbsolutePath(manifestDir)) {
-      return manifestDir;
-    }
-
-    return normalizePath(`${vaultPath}/${manifestDir}`);
-  }
-
-  private isAbsolutePath(path: string): boolean {
-    return path.startsWith('/') || /^[A-Za-z]:\//.test(path);
+    return resolvePluginDirectory(adapter.getBasePath(), this.app.vault.configDir,
+      this.manifest.dir, this.manifest.id, window.require('path') as typeof import('path'));
   }
 }
 
@@ -3003,7 +2992,7 @@ class TerminalViewPlaceholder extends TerminalView {
 
   constructor(leaf: WorkspaceLeaf, plugin: TerminalAgentController) {
     // Inject TerminalService lazily to avoid loading xterm.js at startup
-    super(leaf, null);
+    super(leaf, null, plugin);
     this.plugin = plugin;
   }
 

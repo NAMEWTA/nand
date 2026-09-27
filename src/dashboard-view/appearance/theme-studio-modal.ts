@@ -664,7 +664,7 @@ interface TFileStub {
 // ── Theme-default reading (for sensible picker/slider starting values) ─────
 
 function readThemeDefaults(): Partial<Record<keyof CustomColors, string>> {
-	const root = activeDocument.querySelector<HTMLElement>('.apex-dashboard-root');
+	const root = activeDocument.querySelector<HTMLElement>('.nand-dashboard-root');
 	if (!root) return {};
 	const cs = getComputedStyle(root);
 	const out: Partial<Record<keyof CustomColors, string>> = {};
@@ -676,7 +676,7 @@ function readThemeDefaults(): Partial<Record<keyof CustomColors, string>> {
 
 /** Read the active theme's blur + radius so advanced sliders start at the right spot. */
 function readAdvancedDefaults(): AdvancedDefaults {
-	const root = activeDocument.querySelector<HTMLElement>('.apex-dashboard-root');
+	const root = activeDocument.querySelector<HTMLElement>('.nand-dashboard-root');
 	if (!root) return { blur: 0, radius: 14 };
 	const cs = getComputedStyle(root);
 	const blurRaw = cs.getPropertyValue('--db-backdrop-blur').trim();

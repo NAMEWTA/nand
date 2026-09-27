@@ -103,7 +103,7 @@ async function fetchNpmLatest(packageName: string): Promise<LatestVersionLookupR
   const url = new URL(`https://registry.npmjs.org/${encodeURIComponent(packageName)}`);
   const json = await fetchJson(url, {
     Accept: 'application/json',
-    'User-Agent': 'termy-obsidian-plugin',
+    'User-Agent': 'nand-obsidian-plugin',
   });
   if (!json) {
     return { version: null, error: 'Registry request failed or timed out' };
@@ -122,7 +122,7 @@ async function fetchGithubReleaseLatest(repo: string): Promise<LatestVersionLook
   const url = new URL(`https://api.github.com/repos/${repo}/releases/latest`);
   const json = await fetchJson(url, {
     Accept: 'application/vnd.github+json',
-    'User-Agent': 'termy-obsidian-plugin',
+    'User-Agent': 'nand-obsidian-plugin',
   });
   if (!json) {
     return { version: null, error: 'GitHub releases request failed or timed out' };

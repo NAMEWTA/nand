@@ -1,6 +1,10 @@
 /** Home, module gates, intro, and NAND about copy. */
 export const messages = {
 	en: {
+		'settings.writeFailed': 'Could not save this setting. Please try again.',
+		'namespace.title': 'Data upgrade required',
+		'namespace.instructions':
+			'Before enabling NAND, use the separate nand-namespace-migrator package to back up and upgrade this vault. Existing data has not been changed. See the namespace upgrade guide supplied with this build.',
 		'modules.changeFailed': 'Could not change the module state. Try turning the module off and on again.',
 		'settings.productHome': 'Home',
 		'modules.dashboard': 'Board',
@@ -71,6 +75,10 @@ export const messages = {
 		'terminalAgent.terminal.dropEmpty': 'No text or path was available from that drop.',
 	},
 	zh: {
+		'settings.writeFailed': '设置保存失败，请重试。',
+		'namespace.title': '需要迁移现有数据',
+		'namespace.instructions':
+			'请先使用随构建提供的独立 nand-namespace-migrator 工具备份并迁移此库，再启用 NAND。现有数据未被修改，操作步骤见命名升级说明。',
 		'modules.changeFailed': '模块状态切换失败，请尝试关闭后重新打开。',
 		'settings.productHome': '首页',
 		'modules.dashboard': '看板',
@@ -117,7 +125,8 @@ export const messages = {
 		'terminalAgent.agents.usage': '{title} 用量',
 		'terminalAgent.agents.usageDesc': '关闭后，状态栏和用量面板都不再显示这个智能体。',
 		'terminalAgent.agents.status': '状态栏显示用量',
-		'terminalAgent.agents.statusDesc': '总开关。每个智能体还可以单独关闭。状态栏只显示剩余比例，点开后查看窗口和刷新时间。',
+		'terminalAgent.agents.statusDesc':
+			'总开关。每个智能体还可以单独关闭。状态栏只显示剩余比例，点开后查看窗口和刷新时间。',
 		'terminalAgent.agents.check': '检查用量',
 		'terminalAgent.agents.checkDesc': '读取已配置用量读取器的智能体在本机的登录态。',
 		'terminalAgent.agents.checkButton': '查看',

@@ -24,7 +24,7 @@ export function attachNoteHover(
 	el.addEventListener('mouseover', (event: MouseEvent) => {
 		app.workspace.trigger('hover-link', {
 			event,
-			source: 'apex-dashboard',
+			source: 'nand-dashboard',
 			hoverParent,
 			targetEl: el,
 			linktext: subpath ? `${file.basename}${subpath}` : file.basename,

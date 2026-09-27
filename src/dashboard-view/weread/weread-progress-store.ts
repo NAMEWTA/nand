@@ -17,7 +17,7 @@ import type { WereadReadingState } from './weread-shelf-model';
 
 const DATA_FILE = 'weread-progress.json';
 
-/** Plugin id from the loaded manifest, never the legacy `apex-dashboard` folder. */
+/** Plugin id from the loaded manifest, never the legacy `nand-dashboard` folder. */
 function manifestId(app: App): string {
 	const plugins = (
 		app as App & {

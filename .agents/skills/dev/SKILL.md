@@ -29,7 +29,7 @@ This skill is for this repository only. It adapts the Obsidian plugin rules name
 | Move files, add a product, add a command, add UI copy, or change settings pages | [references/architecture.md](references/architecture.md) |
 | Call the Obsidian API, or edit settings UI, CSS, or DOM | [references/obsidian-api.md](references/obsidian-api.md) |
 | Render a product surface inside a leaf | [../view-render/SKILL.md](../view-render/SKILL.md) |
-| Touch comments, highlights, or `.apex-editor/` | [references/editor-comments.md](references/editor-comments.md) |
+| Touch comments, highlights, or `.nand/editor/` | [references/editor-comments.md](references/editor-comments.md) |
 | Build, test, bump a version, or release | [references/build-and-release.md](references/build-and-release.md) |
 | Change the identity table, an import boundary, a settings product, the i18n home, a test entry, or the release path | [references/skill-maintenance.md](references/skill-maintenance.md) |
 
@@ -39,13 +39,13 @@ This skill is for this repository only. It adapts the Obsidian plugin rules name
 |---|---|
 | Display name | `NAND` |
 | Plugin id | `nand` |
-| View types (frozen) | `apex-dashboard-view`, `apex-editor-view`, `terminal-view` |
+| View types (frozen) | `nand-dashboard-view`, `nand-editor-view`, `terminal-view` |
 | `minAppVersion` | `1.8.7` |
 | `isDesktopOnly` | `false` |
 | Entry | `src/plugin/main.ts` → committed `main.js` |
 | Styles | one `styles.css` at the repo root |
 
-Pinned leaves store the view type string. Renaming one orphans user workspaces. Legacy `apex-dashboard` CSS classes and localStorage keys stay; the data table in `references/architecture.md` lists the other persisted names.
+Pinned leaves store the view type string. The approved namespace upgrade uses a separate migration tool before enabling this build. Keep the current names stable; see `references/architecture.md` for persisted names and the startup gate.
 
 ## Hard rules
 
@@ -53,11 +53,11 @@ Pinned leaves store the view type string. Renaming one orphans user workspaces. 
 2. `dashboard-view`, `editor-view`, `terminal-agent`, and `sync` do not import each other. `shared` holds no comment threads, dashboard cards, or terminal sessions. `src/shared/exclude-folders-editor.ts` is the only shared file that imports the dashboard. Do not add another.
 3. `plugin/main.ts` and `plugin/settings/` are the composition root and may deep-import a product. Leave those imports there. A product imports the plugin class with `import type` only. The terminal reaches editor data through the callback the shell passes in.
 4. `src/sync` stays `export {}`. Dashboard markdown write-back stays in `dashboard-view/persist`.
-5. Comments never rewrite the note. Bodies live in `.apex-editor/comments/`, not in `data.json` and not in the plugin folder.
+5. Comments never rewrite the note. Bodies live in `.nand/editor/comments/`, not in `data.json` and not in the plugin folder.
 6. Construct `TerminalAgentController` only when `Platform.isDesktopApp` and the terminal module is on. Skip music on phones. Destroy music when the dashboard module turns off.
 7. Source files use relative imports. `tsconfig` `baseUrl` is `src`; that does not allow `dashboard-view/...` specifiers.
 8. User-facing copy goes through `src/shared/i18n/`, with `en` and `zh` in the same module, both merged in `runtime.ts`. Terminal strings are keys prefixed `terminalAgent.` in `src/shared/i18n/terminal-agent.ts`. `src/terminal-agent/i18n.ts` only adds that prefix. Do not add a new `section-NN.ts`. A missing key is echoed by `t()`. Default language is `zh`.
-9. Put a command id in `APEX_COMMANDS` only when another product must spell it. Register new shell commands in `src/plugin/commands.ts`. Leave the commands already inline in `main.ts` where they are. Leave terminal commands inside `terminal-agent`. Ids omit the plugin id. Names omit the word "command". No default hotkeys.
+9. Put a command id in `NAND_COMMANDS` only when another product must spell it. Register new shell commands in `src/plugin/commands.ts`. Leave the commands already inline in `main.ts` where they are. Leave terminal commands inside `terminal-agent`. Ids omit the plugin id. Names omit the word "command". No default hotkeys.
 10. One `DashboardSettingTab`. Products and the section order come from `src/plugin/settings/nav.ts`. The top row is home, then the open modules, then sync. There is no left-hand page list. Keep `display()` / `renderFallback()` because `minAppVersion` is below 1.13. Normalize `editorWorkbench` in `loadSettings` after the `{...raw}` spread.
 11. Register CodeMirror extensions and the reading post-processor once, inside `createEditorHost`. Closing the editor side panel only detaches panel DOM. Turning the editor module off flushes and disposes the comment store and does not unregister those extensions.
 12. A new editor domain implements `EditorDomain`. `writing-stats` and `focus` stay placeholders unless the task names them.

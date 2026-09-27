@@ -8,7 +8,7 @@ import { openEndReadingModal, refreshSidebarReadingWidget } from '../renderer';
 /** Self-refresh cadence (ms) — matches the service's tick cadence. */
 const POLL_MS = 1000;
 /** localStorage key for the last dragged position (device-local). */
-const POS_KEY = 'apex-dashboard.reading-mini-pos';
+const POS_KEY = 'nand.dashboard.reading-mini-pos';
 
 export interface ReadingMiniTimer {
 	/** Force an immediate refresh (state changed outside the poll cadence). */
@@ -104,8 +104,8 @@ export function createReadingMiniTimer(service: ReadingService, doc: Document): 
 			});
 		});
 
-		wireFloatingDrag(panel, doc, POS_KEY, '.dashboard-reading-mini-btn');
-		restoreFloatingPos(panel, doc, POS_KEY);
+		wireFloatingDrag(panel, doc, POS_KEY, '.dashboard-reading-mini-btn', service.getApp());
+		restoreFloatingPos(panel, doc, POS_KEY, service.getApp());
 	}
 
 	function unmount(): void {

@@ -78,7 +78,7 @@ export class LauncherInstallModal extends Modal {
 
   onOpen(): void {
     const { contentEl, modalEl } = this;
-    modalEl.addClass('termy-launcher-install-modal');
+    modalEl.addClass('terminal-launcher-install-modal');
     contentEl.empty();
 
     const titleEl = contentEl.createDiv({ cls: 'modal-title' });
@@ -89,7 +89,7 @@ export class LauncherInstallModal extends Modal {
         : t('modals.launcherInstall.titleNotInstalled', { name: this.options.name }),
     });
 
-    const descEl = contentEl.createEl('p', { cls: 'termy-launcher-install-desc' });
+    const descEl = contentEl.createEl('p', { cls: 'terminal-launcher-install-desc' });
     descEl.setText(this.buildDescription());
 
     if (this.options.updateAvailable) {
@@ -97,13 +97,13 @@ export class LauncherInstallModal extends Modal {
     } else if (this.options.command) {
       // Fall back to the detected-command hint when the launcher is missing
       // entirely. We surface the version row separately when known.
-      const detail = contentEl.createDiv({ cls: 'termy-launcher-install-detail' });
+      const detail = contentEl.createDiv({ cls: 'terminal-launcher-install-detail' });
       detail.createDiv({
-        cls: 'termy-launcher-install-detail-label',
+        cls: 'terminal-launcher-install-detail-label',
         text: t('modals.launcherInstall.detectedCommand'),
       });
       detail.createEl('code', {
-        cls: 'termy-launcher-install-detail-command',
+        cls: 'terminal-launcher-install-detail-command',
         text: this.options.command,
       });
     }
@@ -206,15 +206,15 @@ export class LauncherInstallModal extends Modal {
   }
 
   private renderVersionDelta(contentEl: HTMLElement): void {
-    const detail = contentEl.createDiv({ cls: 'termy-launcher-install-detail' });
+    const detail = contentEl.createDiv({ cls: 'terminal-launcher-install-detail' });
     detail.createDiv({
-      cls: 'termy-launcher-install-detail-label',
+      cls: 'terminal-launcher-install-detail-label',
       text: t('modals.launcherInstall.versionLabel'),
     });
     const local = this.options.localVersion ?? '?';
     const latest = this.options.latestVersion ?? '?';
     detail.createEl('code', {
-      cls: 'termy-launcher-install-detail-command',
+      cls: 'terminal-launcher-install-detail-command',
       text: `${local} → ${latest}`,
     });
   }
@@ -226,9 +226,9 @@ export class LauncherInstallModal extends Modal {
    */
   private renderInstallCommand(contentEl: HTMLElement, command: string): void {
     const showingUpgrade = this.options.updateAvailable === true && this.options.upgradeCommand === command;
-    const card = contentEl.createDiv({ cls: 'termy-launcher-install-card' });
+    const card = contentEl.createDiv({ cls: 'terminal-launcher-install-card' });
     card.createDiv({
-      cls: 'termy-launcher-install-card-title',
+      cls: 'terminal-launcher-install-card-title',
       text: showingUpgrade
         ? t('modals.launcherInstall.cardTitleUpgradeOneClick')
         : this.options.updateAvailable
@@ -236,7 +236,7 @@ export class LauncherInstallModal extends Modal {
           : t('modals.launcherInstall.cardTitleInstall'),
     });
     card.createEl('p', {
-      cls: 'termy-launcher-install-card-desc',
+      cls: 'terminal-launcher-install-card-desc',
       text: showingUpgrade
         ? t('modals.launcherInstall.cardDescUpgradeOneClick')
         : this.options.updateAvailable
@@ -244,14 +244,14 @@ export class LauncherInstallModal extends Modal {
           : t('modals.launcherInstall.cardDescInstall'),
     });
 
-    const commandRow = card.createDiv({ cls: 'termy-launcher-install-command-row' });
+    const commandRow = card.createDiv({ cls: 'terminal-launcher-install-command-row' });
     const commandEl = commandRow.createEl('code', {
-      cls: 'termy-launcher-install-command',
+      cls: 'terminal-launcher-install-command',
       text: command,
     });
 
     const copyBtn = commandRow.createEl('button', {
-      cls: 'termy-launcher-install-command-copy',
+      cls: 'terminal-launcher-install-command-copy',
       text: t('modals.launcherInstall.buttonCopy'),
     });
     copyBtn.addEventListener('click', () => {

@@ -1,3 +1,4 @@
+import type { DashboardSettingsAccess } from '../settings-access';
 import { App, setIcon } from 'obsidian';
 import type { DashboardSettings } from '../types';
 import { t } from '../../shared/i18n';
@@ -11,7 +12,12 @@ import { CountdownSettingsModal } from '../widgets/countdown-modal';
 import { countdownTimers } from './destroy-all-charts';
 import { openBookSearch, openEditBookInfo, showReadingStats } from './render-dashboard';
 
-export function renderSidebarCountdown(container: HTMLElement, cd: import('../types').CountdownConfig, app: App): void {
+export function renderSidebarCountdown(
+	container: HTMLElement,
+	cd: import('../types').CountdownConfig,
+	app: App,
+	settingsAccess?: DashboardSettingsAccess,
+): void {
 	const widget = container.createDiv({ cls: 'dashboard-sidebar-widget dashboard-sidebar-countdown' });
 	applyWidgetBackground(widget, cd.background, app);
 
@@ -25,28 +31,10 @@ export function renderSidebarCountdown(container: HTMLElement, cd: import('../ty
 	settingsBtn.addEventListener('click', (e) => {
 		e.stopPropagation();
 		const modal = new CountdownSettingsModal(app, cd, (updated) => {
-			const plugin = (
-				app as unknown as {
-					plugins: {
-						plugins: Record<
-							string,
-							{
-								settings?: import('../types').DashboardSettings;
-								saveSettings?: () => Promise<void>;
-								refreshAllDashboards?: () => void;
-							}
-						>;
-					};
-				}
-			).plugins?.plugins?.['apex-dashboard'];
-			if (plugin?.settings) {
-				plugin.settings = {
-					...plugin.settings,
-					countdowns: (plugin.settings.countdowns ?? []).map((c) => (c.id === updated.id ? updated : c)),
-				};
-				void plugin.saveSettings?.();
-				plugin.refreshAllDashboards?.();
-			}
+			void settingsAccess?.updateSettings((current) => ({
+				...current,
+				countdowns: current.countdowns.map((c) => (c.id === updated.id ? updated : c)),
+			}));
 		});
 		modal.open();
 	});

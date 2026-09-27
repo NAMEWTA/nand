@@ -266,7 +266,7 @@ async function main(): Promise<void> {
 	const wv16 = findTag(blockedDesktop.host, 'webview')[0]!;
 	assert.ok(wv16, '16: webview mounted for blocked site');
 	assert.equal(wv16.getAttribute('src'), 'https://deny.com', '16: webview src');
-	assert.equal(wv16.getAttribute('partition'), 'persist:apex-dashboard-web', '16: isolated persistent partition');
+	assert.equal(wv16.getAttribute('partition'), 'persist:nand-dashboard-web', '16: isolated persistent partition');
 	assert.equal(wv16.getAttribute('nodeintegration'), null, '16: no node integration');
 	assert.equal(findTag(blockedDesktop.host, 'iframe').length, 0, '16: no iframe alongside');
 

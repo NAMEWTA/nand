@@ -65,5 +65,10 @@ export function renderEditorSettings(this: DashboardSettingTab, containerEl: HTM
 
 /** Sync product is not built yet. One line, so the settings page already has a home for it. */
 export function renderSyncSettings(this: DashboardSettingTab, containerEl: HTMLElement): void {
-	renderEmptyState(containerEl, { icon: 'refresh-cw', title: t('settings.tabSync'), description: t('editor.sync.placeholder') });
+	renderEmptyState(containerEl, {
+		icon: 'refresh-cw',
+		title: t('settings.tabSync'),
+		description: t('editor.sync.placeholder'),
+		layout: 'content',
+	});
 }

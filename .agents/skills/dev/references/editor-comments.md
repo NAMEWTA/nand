@@ -5,8 +5,8 @@ Comments are a sidecar on the vault. The note file is never written by this feat
 ## On-disk layout
 
 ```
-.apex-editor/comments/index.json
-.apex-editor/comments/files/<first 16 hex of sha256(path)>.json
+.nand/editor/comments/index.json
+.nand/editor/comments/files/<first 16 hex of sha256(path)>.json
 ```
 
 - Hash the path string, not the file bytes, with `crypto.subtle` SHA-256, first 16 hex chars.
@@ -35,7 +35,7 @@ Thread ids look like `c-…`, message ids like `m-…`.
 
 Do not guess a nearby paragraph. Do not auto-reopen an orphaned thread when some later text happens to match. `reopen()` refuses orphaned threads. `reanchor()` is the explicit user action that binds a new selection and sets `open`.
 
-`selectionIsCommentable` rejects a selection that starts inside YAML frontmatter or sits inside a fenced code block. Reading-mode highlights also skip `pre`, `code`, `script`, `style`, and existing `.apex-comment-hl` nodes.
+`selectionIsCommentable` rejects a selection that starts inside YAML frontmatter or sits inside a fenced code block. Reading-mode highlights also skip `pre`, `code`, `script`, `style`, and existing `.nand-editor-comment-hl` nodes.
 
 ## Store rules
 

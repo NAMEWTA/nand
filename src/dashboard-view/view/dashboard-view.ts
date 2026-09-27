@@ -139,7 +139,7 @@ export function prependAfterFrontmatter(md: string, block: string): string {
 	return body ? `${block}\n\n${body}` : `${block}\n`;
 }
 
-export const DASHBOARD_VIEW_TYPE = 'apex-dashboard-view';
+export const DASHBOARD_VIEW_TYPE = 'nand-dashboard-view';
 
 export class DashboardView extends ItemView implements HoverParent {
 	declare onOpen: () => Promise<void>;
@@ -267,9 +267,9 @@ export class DashboardView extends ItemView implements HoverParent {
 	static readonly BANNER_QUOTE_OFFSET_MS = 60 * 60 * 1000; // offset by 1 hour from image
 	reminderTimer: number | null = null;
 	firedReminders = new Set<string>();
-	sidebarPinned = this.app.loadLocalStorage('apex-dashboard-sidebar-pinned') === 'true';
+	sidebarPinned = this.app.loadLocalStorage('nand.dashboard.sidebar-pinned') === 'true';
 	sidebarExpanded = false;
-	bannerCollapsed = this.app.loadLocalStorage('apex-dashboard-banner-collapsed') === 'true';
+	bannerCollapsed = this.app.loadLocalStorage('nand.dashboard.banner-collapsed') === 'true';
 	pendingScrollCardId: string | null = null;
 	pendingScrollToLastCardOfColumn: string | null = null;
 	pomodoroService: PomodoroService | null = null;

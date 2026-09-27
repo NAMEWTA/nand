@@ -1,7 +1,7 @@
 import { locateAnchor, makeAnchor } from './anchor';
 import type { CommentFileDoc, CommentIndex, CommentMessage, CommentThread, NewCommentInput } from './model';
 
-const ROOT = '.apex-editor/comments';
+const ROOT = '.nand/editor/comments';
 const INDEX_PATH = `${ROOT}/index.json`;
 const FILES_DIR = `${ROOT}/files`;
 const DEFAULT_DEBOUNCE_MS = 300;
@@ -37,7 +37,10 @@ function nid(prefix: string): string {
 async function sha16(path: string): Promise<string> {
 	const data = new TextEncoder().encode(path);
 	const buf = await crypto.subtle.digest('SHA-256', data);
-	return [...new Uint8Array(buf)].map((b) => b.toString(16).padStart(2, '0')).join('').slice(0, 16);
+	return [...new Uint8Array(buf)]
+		.map((b) => b.toString(16).padStart(2, '0'))
+		.join('')
+		.slice(0, 16);
 }
 
 function emptyIndex(): CommentIndex {
@@ -63,7 +66,11 @@ function normalizeThread(raw: unknown, path: string): CommentThread | null {
 	const target = asRecord(rec['target']);
 	const quote = target ? asRecord(target['quote']) : null;
 	if (!target || !quote) return null;
-	if (typeof quote['exact'] !== 'string' || typeof quote['prefix'] !== 'string' || typeof quote['suffix'] !== 'string') {
+	if (
+		typeof quote['exact'] !== 'string' ||
+		typeof quote['prefix'] !== 'string' ||
+		typeof quote['suffix'] !== 'string'
+	) {
 		return null;
 	}
 	if (typeof target['start'] !== 'number' || typeof target['end'] !== 'number') return null;
@@ -110,7 +117,7 @@ function normalizeIndex(raw: unknown): CommentIndex {
 }
 
 /**
- * Sidecar comment index under the vault `.apex-editor/` folder.
+ * Sidecar comment index under the vault `.nand/editor/` folder.
  * Mutations for one store are serialized. Disk writes are debounced.
  */
 export class CommentStore {

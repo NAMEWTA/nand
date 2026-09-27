@@ -2,7 +2,7 @@ import { App, MarkdownView, Modal, TFile, WorkspaceLeaf, setIcon } from 'obsidia
 import { t } from '../../shared/i18n';
 import { applyModalTheme, removeNativeModalCloseButton } from '../appearance/modal-theme';
 
-const MODE_STORAGE_KEY = 'apex-dashboard-note-popover-mode';
+const MODE_STORAGE_KEY = 'nand.dashboard.note-popover-mode';
 type NoteViewMode = 'source' | 'preview';
 
 /**

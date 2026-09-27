@@ -198,7 +198,7 @@ function showReminderPopup(
 	const popup = activeDocument.body.createDiv({ cls: 'dashboard-task-reminder-popup' });
 
 	// Inherit theme variables from dashboard root (popup is on body, outside theme scope)
-	const dashboardRoot = anchorBtn.closest('.apex-dashboard-root') as HTMLElement;
+	const dashboardRoot = anchorBtn.closest('.nand-dashboard-root') as HTMLElement;
 	if (dashboardRoot) {
 		const rs = getComputedStyle(dashboardRoot);
 		const themeVars = [

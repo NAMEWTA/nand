@@ -77,7 +77,7 @@ const RADIUS_TOKENS = {
 
 /**
  * Apply user appearance overrides to a dashboard root container:
- *  - a global background-image layer (`.apex-dashboard-bg`) with dim + blur + fill
+ *  - a global background-image layer (`.nand-dashboard-bg`) with dim + blur + fill
  *  - custom color overrides on `--db-*` tokens (win over `[data-theme]` via inline specificity)
  *  - advanced overrides: glass blur, corner radius, surface opacity
  *
@@ -103,9 +103,9 @@ export function applyAppearance(container: HTMLElement, app: App, settings: Dash
  * it swaps the background layer and rewrites the `--db-*` overrides in place.
  */
 export function refreshAppearanceLive(app: App, settings: DashboardSettings): void {
-	const roots = activeDocument.querySelectorAll<HTMLElement>('.apex-dashboard-root');
+	const roots = activeDocument.querySelectorAll<HTMLElement>('.nand-dashboard-root');
 	roots.forEach((root) => {
-		root.querySelectorAll(':scope > .apex-dashboard-bg').forEach((el) => el.remove());
+		root.querySelectorAll(':scope > .nand-dashboard-bg').forEach((el) => el.remove());
 		clearCustomColors(root);
 		clearAdvanced(root);
 		applyBackground(root, app, settings);
@@ -121,10 +121,10 @@ function applyBackground(container: HTMLElement, app: App, settings: DashboardSe
 	const resolved = resolveVaultImage(app, path);
 	if (!resolved) return;
 
-	const layer = container.createDiv({ cls: 'apex-dashboard-bg' });
+	const layer = container.createDiv({ cls: 'nand-dashboard-bg' });
 	layer.style.backgroundImage = `url("${resolved}")`;
 	layer.style.backgroundSize = settings.bgSize === 'contain' ? 'contain' : 'cover';
-	// background-position/repeat come from the .apex-dashboard-bg CSS class.
+	// background-position/repeat come from the .nand-dashboard-bg CSS class.
 
 	const blur = Platform.isMobile ? 0 : clampNumber(settings.bgBlur, 0, 30, 0);
 	if (blur > 0) {
@@ -135,7 +135,7 @@ function applyBackground(container: HTMLElement, app: App, settings: DashboardSe
 
 	const dim = clampNumber(settings.bgDim, 0, 100, DEFAULT_DIM);
 	if (dim > 0) {
-		const scrim = layer.createDiv({ cls: 'apex-dashboard-bg-scrim' });
+		const scrim = layer.createDiv({ cls: 'nand-dashboard-bg-scrim' });
 		scrim.style.background = `rgba(0,0,0,${dim / 100})`;
 	}
 }

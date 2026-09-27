@@ -42,7 +42,7 @@ export function refreshMediaSections(
 	}
 	return refreshed;
 }
-const COLLAPSED_KEY = 'apex-dashboard-collapsed';
+const COLLAPSED_KEY = 'nand.dashboard.media-collapsed';
 function getCollapsedSections(app: App): Set<string> {
 	try {
 		const raw = app.loadLocalStorage(COLLAPSED_KEY) as string | null;
@@ -70,7 +70,7 @@ function attachSectionResizeHandle(el: HTMLElement, column: DashboardColumn, cal
 		// Guarded drag (pointer capture + viewport shield, see drag-guard):
 		// keeps the move/up stream whole across embedded frames and Windows
 		// webview surface overflow. frames-muted stays for hover calm.
-		const shieldHost = el.closest('.apex-dashboard-root') ?? el.parentElement;
+		const shieldHost = el.closest('.nand-dashboard-root') ?? el.parentElement;
 		shieldHost?.addClass('dashboard-frames-muted');
 
 		startGuardedDrag(e, {
@@ -143,7 +143,7 @@ function attachPairWidthHandle(el: HTMLElement, column: DashboardColumn, callbac
 		// the pair divider shares a gutter-adjacent strip with everything the
 		// board hosts, and on Windows a webview surface can overflow onto the
 		// strip mid-drag — capture keeps the stream on this document.
-		const shieldHost = el.closest('.apex-dashboard-root') ?? board;
+		const shieldHost = el.closest('.nand-dashboard-root') ?? board;
 		shieldHost.addClass('dashboard-frames-muted');
 		startGuardedDrag(e, {
 			cursor: 'col-resize',
@@ -421,7 +421,7 @@ export function renderSection(
 		});
 
 		if (settings) {
-			renderCalendarSection(el, app, settings, callbacks.onOpenNoteAtLine);
+			renderCalendarSection(el, app, settings, callbacks.onOpenNoteAtLine, callbacks.settingsAccess);
 		} else {
 			el.createDiv({ cls: 'dashboard-library-empty', text: t('calendar.noEvents') });
 		}

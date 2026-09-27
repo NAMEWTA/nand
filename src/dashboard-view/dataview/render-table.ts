@@ -473,7 +473,7 @@ function fillYearHeatmapData(totals: Map<string, number>, year: number): Tracker
 	return points;
 }
 function dvCssVar(name: string): string {
-	const root = activeDocument.querySelector('.apex-dashboard-root');
+	const root = activeDocument.querySelector('.nand-dashboard-root');
 	const el = root instanceof HTMLElement ? root : activeDocument.body;
 	return getComputedStyle(el).getPropertyValue(name).trim();
 }

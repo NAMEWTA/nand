@@ -1,3 +1,5 @@
+import type { App } from 'obsidian';
+type PositionStorage = Pick<App, 'loadLocalStorage' | 'saveLocalStorage'>;
 /** Shared helpers for body-level floating mini panels (pomodoro pill,
  *  reading timer): viewport-clamped positioning, persisted drag positions
  *  and a pointer-drag wiring that leaves inner buttons clickable. */
@@ -12,21 +14,27 @@ interface SavedPos {
 	top: number;
 }
 
-function loadPos(doc: Document, key: string): SavedPos | null {
+function loadPos(storage: PositionStorage, key: string): SavedPos | null {
 	try {
-		const raw = doc.defaultView?.localStorage.getItem(key);
+		const raw = storage.loadLocalStorage(key) as unknown;
 		if (!raw) return null;
-		const parsed = JSON.parse(raw) as Partial<SavedPos>;
-		if (typeof parsed.left !== 'number' || typeof parsed.top !== 'number') return null;
+		const parsed = (typeof raw === 'string' ? JSON.parse(raw) : raw) as Partial<SavedPos>;
+		if (
+			typeof parsed.left !== 'number' ||
+			typeof parsed.top !== 'number' ||
+			!Number.isFinite(parsed.left) ||
+			!Number.isFinite(parsed.top)
+		)
+			return null;
 		return { left: parsed.left, top: parsed.top };
 	} catch {
 		return null;
 	}
 }
 
-function savePos(doc: Document, key: string, pos: SavedPos): void {
+function savePos(storage: PositionStorage, key: string, pos: SavedPos): void {
 	try {
-		doc.defaultView?.localStorage.setItem(key, JSON.stringify(pos));
+		storage.saveLocalStorage(key, pos);
 	} catch {
 		// Storage unavailable (sandboxed context) — position lives for this mount only.
 	}
@@ -49,8 +57,8 @@ function applyClampedPos(panel: HTMLElement, doc: Document, left: number, top: n
 }
 
 /** Restore the last dragged spot (clamped to this viewport), if any. */
-export function restoreFloatingPos(panel: HTMLElement, doc: Document, key: string): void {
-	const saved = loadPos(doc, key);
+export function restoreFloatingPos(panel: HTMLElement, doc: Document, key: string, storage: PositionStorage): void {
+	const saved = loadPos(storage, key);
 	if (saved) applyClampedPos(panel, doc, saved.left, saved.top);
 }
 
@@ -60,7 +68,13 @@ export function restoreFloatingPos(panel: HTMLElement, doc: Document, key: strin
  * pointer; release persists the spot under `key`. Elements matching
  * `skipSelector` (buttons) never start a drag.
  */
-export function wireFloatingDrag(panel: HTMLElement, doc: Document, key: string, skipSelector: string): void {
+export function wireFloatingDrag(
+	panel: HTMLElement,
+	doc: Document,
+	key: string,
+	skipSelector: string,
+	storage: PositionStorage,
+): void {
 	panel.addEventListener('pointerdown', (e: PointerEvent) => {
 		if ((e.target as HTMLElement).closest(skipSelector)) return;
 		const startPX = e.clientX;
@@ -85,7 +99,7 @@ export function wireFloatingDrag(panel: HTMLElement, doc: Document, key: string,
 			if (moved) {
 				panel.removeClass('dashboard-floating-mini--dragging');
 				const r = panel.getBoundingClientRect();
-				savePos(doc, key, { left: r.left, top: r.top });
+				savePos(storage, key, { left: r.left, top: r.top });
 			}
 		};
 

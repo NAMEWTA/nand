@@ -29,10 +29,10 @@ const COLUMNS: Array<{ key: SortKey; labelKey: string; cls: string }> = [
 	{ key: 'note', labelKey: 'expense.colNote', cls: 'dashboard-expense-ledger-th-note' },
 ];
 
-/** Mount point for the ledger overlay: inside .apex-dashboard-root so the
+/** Mount point for the ledger overlay: inside .nand-dashboard-root so the
  *  --db-* theme variables resolve (same reason as the stats overlay). */
 function mountOverlay(doc: Document): HTMLElement {
-	const root = doc.querySelector('.apex-dashboard-root');
+	const root = doc.querySelector('.nand-dashboard-root');
 	const host = root ?? doc.body;
 	return host.createDiv({ cls: 'dashboard-expense-ledger-overlay' });
 }

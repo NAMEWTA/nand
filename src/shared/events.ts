@@ -1,7 +1,7 @@
 /** Cross-product event names. Payload types live next to the event, not in either product. */
-export const APEX_EVENTS = {
-	COMMENT_TO_TASK: 'apex:comment-to-task',
-	ACTIVE_FILE_COMMENTS_CHANGED: 'apex:comments-changed',
+export const NAND_EVENTS = {
+	COMMENT_TO_TASK: 'nand:editor:comment-to-task',
+	ACTIVE_FILE_COMMENTS_CHANGED: 'nand:editor:comments-changed',
 } as const;
 
 /** Reserved for a later "turn this comment into a task" action. P0 does not emit it. */

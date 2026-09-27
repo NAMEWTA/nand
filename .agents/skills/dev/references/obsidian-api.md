@@ -49,7 +49,8 @@ No `any`. No `var`. `unknown` plus a narrowing function is the pattern already u
 | Edit a note in the background | `Vault.process` |
 | Delete | `FileManager.trashFile` |
 | Look up a path | `Vault.getAbstractFileByPath` or `getFileByPath`. Not `getFiles().find` |
-| User-supplied paths | `normalizePath` |
+| Vault-relative paths | `normalizePath` |
+| Desktop filesystem paths | Native `path.resolve` / `path.join`; retain absolute roots, UNC prefixes, spaces and literal `%20` |
 | Network | `requestUrl`. Not `fetch` |
 | OS / form factor | `Platform.isPhone`, `Platform.isDesktopApp`, `Platform.isDesktop`. Not `navigator.userAgent` |
 | Language | The plugin's own i18n. Do not read `localStorage.language` |
@@ -72,8 +73,8 @@ Regex lookbehind is illegal here (iOS < 16.4). The plugin is not desktop-only. T
 
 - Build UI with `createEl` / `createDiv` / `createSpan` / `createSvg` on a parent `HTMLElement`. Do not `document.createElement`.
 - Put styles in the one stylesheet named in the SKILL identity table. Do not inject `<style>` or `<link>`. Do not assign large style blobs from TypeScript when a class will do. Coordinates (comment popover `left` / `top`) are the exception.
-- Use Obsidian variables (`var(--background-primary)`, `var(--text-normal)`, `var(--interactive-accent)`, `var(--size-4-2)`, …). Dashboard theme tokens (`--db-*`) are scoped to `.apex-dashboard-root[data-theme]`. Editor UI must not depend on those tokens; it must look right in the sidebar without the dashboard mounted.
-- Scope selectors (`.apex-editor-view`, `.apex-comment-hl`, `.dashboard-…`). No bare `button { }` rules.
+- Use Obsidian variables (`var(--background-primary)`, `var(--text-normal)`, `var(--interactive-accent)`, `var(--size-4-2)`, …). Dashboard theme tokens (`--db-*`) are scoped to `.nand-dashboard-root[data-theme]`. Editor UI must not depend on those tokens; it must look right in the sidebar without the dashboard mounted.
+- Scope selectors (`.nand-editor-view`, `.nand-editor-comment-hl`, `.dashboard-…`). No bare `button { }` rules.
 - Avoid `!important` and `:has`. Toggle a class from TypeScript instead.
 - Icon-only buttons need an accessible name (`aria-label` or `setTooltip`). Interactive targets should be at least 44×44px on touch. Don't remove `:focus-visible` outlines.
 - Keyboard: a control that clicks must also work with Enter / Space if it is not a native `button`.

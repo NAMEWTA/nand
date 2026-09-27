@@ -11,6 +11,8 @@
  */
 export class El {
 	readonly tagName: string;
+	ownerDocument: unknown;
+	instanceOf(type: typeof El): boolean { return this instanceof type; }
 	className = '';
 	children: El[] = [];
 	private text = '';
@@ -343,7 +345,7 @@ export class El {
 	// ---- Obsidian HTMLElement helpers ----
 
 	createEl(tag: string, o?: { cls?: string; text?: string; value?: string; attr?: Record<string, string> }): El {
-		const el = new El(tag);
+		const el = (this.ownerDocument as { createElement?: (tag: string) => El } | undefined)?.createElement?.(tag) ?? new El(tag);
 		this.appendChild(el);
 		if (o?.cls) el.addClass(...o.cls.split(/\s+/));
 		if (o?.text !== undefined) el.textContent = o.text;

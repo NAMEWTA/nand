@@ -1,3 +1,4 @@
+import type { DashboardSettingsAccess } from '../settings-access';
 import { App, Menu, Notice, Platform, setIcon, TFile } from 'obsidian';
 import { t } from '../../shared/i18n';
 import type { DashboardSettings } from '../types';
@@ -56,6 +57,7 @@ export function renderCalendarSection(
 	app: App,
 	settings: DashboardSettings,
 	onOpenNote?: (file: TFile, line?: number) => void,
+	settingsAccess?: DashboardSettingsAccess,
 ): void {
 	const excludeFolders = settings.calendarExcludeFolders ?? [];
 
@@ -76,7 +78,7 @@ export function renderCalendarSection(
 	let view: 'month' | 'week' = 'month';
 	let weekStart: Date = mondayOf(now);
 	/** Persisted task filter, shared with the full-screen modal. */
-	let filter: CalendarTaskFilter = readCalendarTaskFilter(app);
+	let filter: CalendarTaskFilter = readCalendarTaskFilter(settingsAccess);
 	/** Latest unfiltered scan (the filter is applied per render, like the modal). */
 	let byDay = new Map<string, VaultTask[]>();
 
@@ -130,7 +132,9 @@ export function renderCalendarSection(
 				item
 					.setTitle(t(`calendar.filter.${f}`))
 					.setChecked(f === filter)
-					.onClick(() => applyFilter(f)),
+					.onClick(() => {
+						void applyFilter(f);
+					}),
 			);
 		}
 		filterBtn.setAttribute('aria-expanded', 'true');
@@ -154,10 +158,10 @@ export function renderCalendarSection(
 		filterLabel.textContent = t(`calendar.filter.${filter}`);
 	}
 
-	function applyFilter(next: CalendarTaskFilter): void {
+	async function applyFilter(next: CalendarTaskFilter): Promise<void> {
 		if (next === filter) return;
+		if (!(await writeCalendarTaskFilter(settingsAccess, next))) return;
 		filter = next;
-		writeCalendarTaskFilter(app, filter);
 		syncChrome();
 		renderGrid();
 	}
@@ -209,7 +213,7 @@ export function renderCalendarSection(
 					app,
 					iso,
 					viewByDay.get(iso) ?? [],
-					{ onToggle, onOpenNote },
+					{ onToggle, onOpenNote, settingsAccess },
 					settings.dashboardFile,
 				).open();
 			},
@@ -220,7 +224,7 @@ export function renderCalendarSection(
 					app,
 					iso,
 					viewByDay.get(iso) ?? [],
-					{ onToggle, onOpenNote },
+					{ onToggle, onOpenNote, settingsAccess },
 					settings.dashboardFile,
 					true,
 				).open();

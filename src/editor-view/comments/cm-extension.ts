@@ -4,7 +4,7 @@ import { editorInfoField } from 'obsidian';
 import { makeAnchor, selectionIsCommentable } from './anchor';
 import { getCommentStore } from './store';
 import type DashboardPlugin from '../../plugin/main';
-import { t } from '../../shared/i18n';
+import { mountCommentComposer } from './composer';
 
 const bump = StateEffect.define<number>();
 
@@ -36,7 +36,7 @@ function buildDecorations(view: EditorView, plugin: DashboardPlugin): Decoration
 		if (range.from < cursor) continue;
 		marks.push(
 			Decoration.mark({
-				class: 'apex-comment-hl',
+				class: 'nand-editor-comment-hl',
 				attributes: { 'data-comment-id': range.id },
 			}).range(range.from, range.to),
 		);
@@ -51,6 +51,7 @@ export function commentsCmExtension(plugin: DashboardPlugin): Extension {
 		class {
 			decorations: DecorationSet;
 			private popover: HTMLElement | null = null;
+			private disposeComposer: (() => void) | null = null;
 			private dead = false;
 			private applying = false;
 			private readonly off: () => void;
@@ -69,10 +70,10 @@ export function commentsCmExtension(plugin: DashboardPlugin): Extension {
 						})
 					: () => undefined;
 				this.onClick = (event) => {
-					const target = event.target;
-					if (!(target instanceof HTMLElement)) return;
-					const mark = target.closest('.apex-comment-hl');
-					if (!(mark instanceof HTMLElement)) return;
+					const target = event.target as HTMLElement | null;
+					if (!target?.instanceOf(HTMLElement)) return;
+					const mark = target.closest('.nand-editor-comment-hl');
+					if (!mark?.instanceOf(HTMLElement)) return;
 					const id = mark.dataset['commentId'];
 					if (id) getCommentStore()?.focus(id);
 				};
@@ -116,6 +117,8 @@ export function commentsCmExtension(plugin: DashboardPlugin): Extension {
 				this.dead = true;
 				this.off();
 				this.view.dom.removeEventListener('click', this.onClick);
+				this.disposeComposer?.();
+				this.disposeComposer = null;
 				this.popover?.remove();
 				this.popover = null;
 			}
@@ -136,6 +139,8 @@ export function commentsCmExtension(plugin: DashboardPlugin): Extension {
 			/** Position the popover after layout. coordsAtPos is illegal during update. */
 			private queuePopover(view: EditorView): void {
 				if (!this.popoverShouldShow(view)) {
+					this.disposeComposer?.();
+					this.disposeComposer = null;
 					this.popover?.remove();
 					this.popover = null;
 					return;
@@ -153,13 +158,15 @@ export function commentsCmExtension(plugin: DashboardPlugin): Extension {
 					write: (place, measured) => {
 						if (this.dead) return;
 						if (!place) {
+							this.disposeComposer?.();
+							this.disposeComposer = null;
 							this.popover?.remove();
 							this.popover = null;
 							return;
 						}
 						const pop = this.ensurePopover(measured);
 						const input = pop.querySelector('textarea');
-						if (!(input instanceof HTMLTextAreaElement) || input.hidden) {
+						if (!input?.instanceOf(HTMLTextAreaElement) || input.hidden) {
 							pop.dataset['path'] = place.path;
 							pop.dataset['from'] = String(place.from);
 							pop.dataset['to'] = String(place.to);
@@ -172,57 +179,33 @@ export function commentsCmExtension(plugin: DashboardPlugin): Extension {
 
 			private ensurePopover(view: EditorView): HTMLElement {
 				if (this.popover) return this.popover;
-				const doc = view.dom.ownerDocument;
-				const pop = doc.createElement('div');
-				pop.className = 'apex-comment-popover';
-				const button = doc.createElement('button');
-				button.type = 'button';
-				button.className = 'apex-comment-popover-btn';
-				button.textContent = t('editor.comments.popover');
-				const input = doc.createElement('textarea');
-				input.className = 'apex-comment-popover-input';
-				input.placeholder = t('editor.comments.placeholder');
-				input.hidden = true;
-				button.addEventListener('mousedown', (event) => event.preventDefault());
-				input.addEventListener('mousedown', (event) => event.stopPropagation());
-				button.addEventListener('click', () => {
-					input.hidden = false;
-					button.hidden = true;
-					input.focus();
-				});
-				const submit = () => {
-					const text = input.value.trim();
-					if (!text) return;
-					const notePath = pop.dataset['path'];
-					const from = Number(pop.dataset['from']);
-					const to = Number(pop.dataset['to']);
-					const store = getCommentStore();
-					if (!store || !notePath || !Number.isFinite(from) || !Number.isFinite(to) || to <= from) return;
-					const docText = view.state.doc.toString();
-					void store.add(notePath, {
-						quote: makeAnchor(docText, from, to),
-						start: from,
-						end: to,
-						text,
-					});
-					input.value = '';
-					input.hidden = true;
-					button.hidden = false;
-					view.focus();
-				};
-				input.addEventListener('keydown', (event) => {
-					if (event.key === 'Enter' && !event.shiftKey) {
-						event.preventDefault();
-						submit();
-					} else if (event.key === 'Escape') {
-						event.preventDefault();
-						input.hidden = true;
-						button.hidden = false;
-						view.focus();
-					}
-				});
-				pop.append(button, input);
-				doc.body.append(pop);
+				const pop = view.dom.ownerDocument.body.createDiv({ cls: 'nand-editor-comment-popover' });
+				this.disposeComposer = mountCommentComposer(
+					pop,
+					plugin.app,
+					async (text) => {
+						const notePath = pop.dataset['path'];
+						const from = Number(pop.dataset['from']);
+						const to = Number(pop.dataset['to']);
+						const store = getCommentStore();
+						if (
+							!store ||
+							!notePath ||
+							!Number.isFinite(from) ||
+							!Number.isFinite(to) ||
+							to <= from ||
+							to > view.state.doc.length
+						)
+							throw new Error('Comment selection is no longer available');
+						await store.add(notePath, {
+							quote: makeAnchor(view.state.doc.toString(), from, to),
+							start: from,
+							end: to,
+							text,
+						});
+					},
+					() => view.focus(),
+				);
 				this.popover = pop;
 				return pop;
 			}

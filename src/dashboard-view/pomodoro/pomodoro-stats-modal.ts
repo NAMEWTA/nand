@@ -34,13 +34,13 @@ function heatColor(minutes: number): string {
 
 /**
  * Mount point for the stats overlay. The `--db-*` theme variables live on
- * `.apex-dashboard-root[data-theme]`, so the overlay must be appended INSIDE
+ * `.nand-dashboard-root[data-theme]`, so the overlay must be appended INSIDE
  * that root (not doc.body) or every var() resolves to nothing and the charts
  * render blank. The root has no transform/filter, so the overlay's
  * position:fixed still anchors to the viewport.
  */
 function mountOverlay(doc: Document): HTMLElement {
-	const root = doc.querySelector('.apex-dashboard-root');
+	const root = doc.querySelector('.nand-dashboard-root');
 	const host = root ?? doc.body;
 	return host.createDiv({ cls: 'dashboard-pomodoro-stats-overlay' });
 }

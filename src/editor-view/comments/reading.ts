@@ -40,10 +40,7 @@ export function refreshReadingViews(plugin: DashboardPlugin, path?: string): voi
 	}
 }
 
-export function highlightQuotes(
-	root: HTMLElement,
-	threads: { id: string; quote: TextQuoteAnchor }[],
-): void {
+export function highlightQuotes(root: HTMLElement, threads: { id: string; quote: TextQuoteAnchor }[]): void {
 	const pending = threads.filter((thread) => thread.quote.exact.length > 0);
 	if (pending.length === 0) return;
 	const nodes = collectText(root);
@@ -85,7 +82,7 @@ function skipText(node: Text): boolean {
 	while (el) {
 		const tag = el.tagName;
 		if (tag === 'CODE' || tag === 'PRE' || tag === 'SCRIPT' || tag === 'STYLE') return true;
-		if (el.classList.contains('apex-comment-hl')) return true;
+		if (el.classList.contains('nand-editor-comment-hl')) return true;
 		el = el.parentElement;
 	}
 	return false;
@@ -106,19 +103,13 @@ function nodeAt(
 	return null;
 }
 
-function wrap(
-	doc: Document,
-	index: { node: Text; start: number }[],
-	from: number,
-	to: number,
-	id: string,
-): boolean {
+function wrap(doc: Document, index: { node: Text; start: number }[], from: number, to: number, id: string): boolean {
 	if (to <= from) return false;
 	const start = nodeAt(index, from);
 	const end = nodeAt(index, to);
 	if (!start || !end) return false;
 	const span = doc.createElement('span');
-	span.className = 'apex-comment-hl';
+	span.className = 'nand-editor-comment-hl';
 	span.dataset['commentId'] = id;
 	if (start.node === end.node) {
 		let target = start.node;

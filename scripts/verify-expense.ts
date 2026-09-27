@@ -61,7 +61,7 @@ const makeAdapter = (files: Record<string, string>) => {
 	};
 };
 
-const DATA_PATH = '.obsidian/plugins/apex-dashboard/expense.json';
+const DATA_PATH = '.obsidian/plugins/nand-dashboard/expense.json';
 
 interface Harness {
 	service: ExpenseService;
@@ -79,7 +79,7 @@ const boot = (file: string): Harness => {
 	};
 	const plugin = {
 		app: { vault: { configDir: '.obsidian', adapter } },
-		manifest: { id: 'apex-dashboard' },
+		manifest: { id: 'nand-dashboard' },
 		settings: { expenseCurrency: '¥' },
 	} as unknown as ConstructorParameters<typeof ExpenseServiceClass>[0];
 	const service = new ExpenseServiceClass(plugin);

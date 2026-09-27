@@ -1,19 +1,20 @@
 import { renderEmptyState } from '../../shared/empty-state';
 import { ItemView, type WorkspaceLeaf } from 'obsidian';
 import type { EditorDomainId } from '../../shared/editor-workbench';
-import { t } from '../../shared/i18n';
+import { onLanguageChanged, t } from '../../shared/i18n';
 import type { EditorHost } from '../host/host';
 import { detachPanel, watchActiveFile } from './lifecycle';
 import { renderDomainTabs } from './tabs';
 import type DashboardPlugin from '../../plugin/main';
 
-export const EDITOR_VIEW_TYPE = 'apex-editor-view';
+export const EDITOR_VIEW_TYPE = 'nand-editor-view';
 
 /** Right-hand editor panel. Closing it does not unload the editor host. */
 export class EditorView extends ItemView {
 	private unmount: (() => void) | null = null;
 	private offFile: (() => void) | null = null;
 	private offLayout: (() => void) | null = null;
+	private offLanguage: (() => void) | null = null;
 	private tabsEl: HTMLElement | null = null;
 	private bodyEl: HTMLElement | null = null;
 
@@ -47,30 +48,53 @@ export class EditorView extends ItemView {
 	}
 
 	async onOpen(): Promise<void> {
+		this.offLanguage?.();
+		this.offLanguage = onLanguageChanged(() => {
+			const scroll = this.bodyEl?.scrollTop ?? 0;
+			if (this.plugin.settings.modules.editor) {
+				// Comment panels translate in place so their focus and scroll survive.
+				if (this.plugin.settings.editorWorkbench.activeDomain === 'comments') this.renderTabs();
+				else this.render();
+			} else this.renderDisabled();
+			if (this.bodyEl) this.bodyEl.scrollTop = scroll;
+			(this.leaf as WorkspaceLeaf & { updateHeader?: () => void }).updateHeader?.();
+		});
 		this.contentEl.empty();
-		this.contentEl.addClass('apex-editor-view');
+		this.contentEl.addClass('nand-editor-view');
 		if (!this.plugin.settings.modules.editor || !this.plugin.editorHost) {
-			renderEmptyState(this.contentEl, {
-				icon: 'pen-line',
-				title: t('modules.editor'),
-				description: t('modules.editorOff'),
-				action: { label: t('modules.openHome'), run: () => this.plugin.openHome() },
-			});
+			this.renderDisabled();
 			return;
 		}
-		this.tabsEl = this.contentEl.createDiv({ cls: 'apex-editor-tabs-host' });
-		this.bodyEl = this.contentEl.createDiv({ cls: 'apex-editor-body' });
+		this.tabsEl = this.contentEl.createDiv({ cls: 'nand-editor-tabs-host' });
+		this.bodyEl = this.contentEl.createDiv({ cls: 'nand-editor-body' });
 		this.offFile = watchActiveFile(this.plugin.editorHost, () => this.render());
 		this.offLayout = this.plugin.editorHost.onLayoutChanged(() => this.render());
 		this.render();
 	}
 
 	async onClose(): Promise<void> {
+		this.offLanguage?.();
+		this.offLanguage = null;
 		this.offFile?.();
 		this.offFile = null;
 		this.offLayout?.();
 		this.offLayout = null;
 		this.unmount = detachPanel(this.unmount);
+	}
+
+	private renderTabs(): void {
+		if (!this.tabsEl || !this.plugin.editorHost) return;
+		const buttons = Array.from(this.tabsEl.querySelectorAll('button'));
+		const focused = buttons.indexOf(this.tabsEl.ownerDocument.activeElement as HTMLButtonElement);
+		renderDomainTabs(
+			this.tabsEl,
+			this.plugin.editorHost.domains(),
+			this.plugin.settings.editorWorkbench.activeDomain,
+			(id) => {
+				void this.activate(id);
+			},
+		);
+		if (focused >= 0) this.tabsEl.querySelectorAll('button')[focused]?.focus();
 	}
 
 	private render(): void {
@@ -81,9 +105,7 @@ export class EditorView extends ItemView {
 		if (!host) return;
 		const domainId = this.plugin.settings.editorWorkbench.activeDomain;
 		const domains = host.domains();
-		renderDomainTabs(tabs, domains, domainId, (id) => {
-			void this.activate(id);
-		});
+		this.renderTabs();
 		this.unmount = detachPanel(this.unmount);
 		const domain = domains.find((item) => item.id === domainId) ?? domains[0];
 		if (!domain?.mountPanel) {
@@ -94,6 +116,18 @@ export class EditorView extends ItemView {
 			app: this.app,
 			plugin: this.plugin,
 			file: host.getActiveFile(),
+		});
+	}
+
+	private renderDisabled(): void {
+		this.contentEl.empty();
+		this.tabsEl = null;
+		this.bodyEl = null;
+		renderEmptyState(this.contentEl, {
+			icon: 'pen-line',
+			title: t('modules.editor'),
+			description: t('modules.editorOff'),
+			action: { label: t('modules.openHome'), run: () => this.plugin.openHome() },
 		});
 	}
 

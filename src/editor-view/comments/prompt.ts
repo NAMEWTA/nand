@@ -1,5 +1,6 @@
 import { App, Modal } from 'obsidian';
-import { t } from '../../shared/i18n';
+import { onLanguageChanged, t } from '../../shared/i18n';
+import { commentShortcut } from './composer';
 
 /** Small text prompt. Resolves null when cancelled. Does not touch the note. */
 export function askText(app: App, title: string, placeholder: string): Promise<string | null> {
@@ -11,6 +12,7 @@ export function askText(app: App, title: string, placeholder: string): Promise<s
 
 class TextPromptModal extends Modal {
 	private settled = false;
+	private offLanguage: (() => void) | null = null;
 
 	constructor(
 		app: App,
@@ -24,28 +26,45 @@ class TextPromptModal extends Modal {
 	onOpen(): void {
 		const { contentEl } = this;
 		contentEl.empty();
-		contentEl.createEl('h3', { text: this.titleText, cls: 'apex-comment-prompt-title' });
-		const input = contentEl.createEl('textarea', { cls: 'apex-comment-prompt' });
-		input.placeholder = this.placeholder;
+		const title = contentEl.createEl('h3', { text: t(this.titleText), cls: 'nand-editor-comment-prompt-title' });
+		const input = contentEl.createEl('textarea', { cls: 'nand-editor-comment-prompt' });
+		input.placeholder = t(this.placeholder);
 		input.rows = 4;
-		const row = contentEl.createDiv({ cls: 'apex-comment-prompt-row' });
+		const hint = contentEl.createDiv({ cls: 'nand-editor-comment-shortcut' });
+		const row = contentEl.createDiv({ cls: 'nand-editor-comment-prompt-row' });
 		const cancel = row.createEl('button', { text: t('editor.comments.cancel') });
 		const ok = row.createEl('button', { text: t('editor.comments.save'), cls: 'mod-cta' });
 		cancel.addEventListener('click', () => this.finish(null));
-		ok.addEventListener('click', () => this.finish(input.value.trim() || null));
-		input.addEventListener('keydown', (ev) => {
-			if (ev.key === 'Enter' && (ev.metaKey || ev.ctrlKey)) {
-				ev.preventDefault();
-				this.finish(input.value.trim() || null);
-			} else if (ev.key === 'Escape') {
-				ev.preventDefault();
-				this.finish(null);
-			}
+		const submit = () => {
+			const value = input.value.trim();
+			if (value) this.finish(value);
+		};
+		ok.addEventListener('click', submit);
+		const sync = () => {
+			ok.disabled = !input.value.trim();
+		};
+		input.addEventListener('input', sync);
+		this.scope.register(['Mod'], 'Enter', (event) => {
+			if (!event.isComposing) submit();
+			return false;
 		});
+		const translate = () => {
+			title.textContent = t(this.titleText);
+			input.placeholder = t(this.placeholder);
+			input.setAttribute('aria-label', t(this.placeholder));
+			hint.textContent = commentShortcut();
+			cancel.textContent = t('editor.comments.cancel');
+			ok.textContent = t('editor.comments.submit');
+		};
+		this.offLanguage = onLanguageChanged(translate);
+		translate();
+		sync();
 		input.focus();
 	}
 
 	onClose(): void {
+		this.offLanguage?.();
+		this.offLanguage = null;
 		this.contentEl.empty();
 		if (!this.settled) {
 			this.settled = true;

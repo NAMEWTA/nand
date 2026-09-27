@@ -32,7 +32,7 @@ import { buildBinaryFilename } from './binary-download-urls';
 import type { BinaryDownloadConfig } from './binary-download-urls';
 
 type BinaryUpdateResult = 'skipped-offline' | 'already-ready' | 'downloaded' | 'updated';
-const DEV_RELOAD_REQUEST_FILE = '.termy-dev-reload.json';
+const DEV_RELOAD_REQUEST_FILE = '.terminal-dev-reload.json';
 const DEV_RELOAD_PHASE_INSTALLING = 'installing';
 
 interface ServerExitDetails {
@@ -147,7 +147,8 @@ export class ServerManager {
     version: string = '0.0.0',
     downloadConfig: BinaryDownloadConfig,
     debugMode: boolean = false,
-    offlineMode: boolean = false
+    offlineMode: boolean = false,
+    private readonly pluginId: string = 'nand'
   ) {
     this.pluginDir = pluginDir;
     this.version = version;
@@ -913,7 +914,7 @@ export class ServerManager {
       }
 
       const request = JSON.parse(this.fs.readFileSync(requestPath, 'utf-8')) as DevReloadRequest;
-      if (request.pluginId && request.pluginId !== 'termy') {
+      if (request.pluginId && request.pluginId !== this.pluginId) {
         return false;
       }
       if (request.phase !== DEV_RELOAD_PHASE_INSTALLING) {

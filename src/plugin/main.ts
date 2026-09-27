@@ -17,6 +17,8 @@ import { IntroModal } from './intro-modal';
 import { InactiveTerminalView } from './inactive-terminal-view';
 import { terminalLeafKind } from './terminal-leaf-kind';
 import { ModuleLifecycle } from './module-lifecycle';
+import { requiresNamespaceMigration } from './namespace-version';
+import { NamespaceUpgradeTab } from './settings/namespace-upgrade';
 
 import { teardownBasenameIndex } from '../dashboard-view/renderer';
 import { MediaTagService, sanitizeMediaTags, registerMediaTagService } from '../dashboard-view/media/media-tags';
@@ -152,9 +154,15 @@ export default class DashboardPlugin extends Plugin {
 	terminalHost?: TerminalAgentController;
 	private settingsTab!: DashboardSettingTab;
 	private dashboardServicesStarted = false;
+	private namespaceUpgradeRequired = false;
 
 	async onload(): Promise<void> {
 		await this.loadSettings();
+		if (this.namespaceUpgradeRequired) {
+			this.addSettingTab(new NamespaceUpgradeTab(this.app, this));
+			new Notice(t('namespace.instructions'), 0);
+			return;
+		}
 
 		this.registerView(DASHBOARD_VIEW_TYPE, (leaf) => new DashboardView(leaf, this));
 		this.registerView(EDITOR_VIEW_TYPE, (leaf) => new EditorView(leaf, this));
@@ -301,9 +309,11 @@ export default class DashboardPlugin extends Plugin {
 	openHome(): void {
 		this.settingsTab.activeProduct = 'home';
 		this.settingsTab.activePage = 'home';
-		const setting = (this.app as unknown as {
-			setting: { open: () => void; openTabById: (id: string) => void };
-		}).setting;
+		const setting = (
+			this.app as unknown as {
+				setting: { open: () => void; openTabById: (id: string) => void };
+			}
+		).setting;
 		setting.open();
 		setting.openTabById(this.manifest.id);
 		this.settingsTab.refresh();
@@ -313,10 +323,10 @@ export default class DashboardPlugin extends Plugin {
 
 	applyModuleFlags(): Promise<void> {
 		return this.moduleLifecycle.apply(() => this.settings.modules, Platform.isDesktopApp, {
-			dashboard: (enabled) => enabled ? this.ensureDashboardServices() : this.stopDashboardServices(),
-			editor: (enabled) => enabled ? this.ensureEditor() : this.stopEditor(),
+			dashboard: (enabled) => (enabled ? this.ensureDashboardServices() : this.stopDashboardServices()),
+			editor: (enabled) => (enabled ? this.ensureEditor() : this.stopEditor()),
 			terminalActive: () => this.terminalHost?.isActive() === true,
-			terminal: (enabled) => enabled ? this.ensureTerminal() : this.stopTerminal(),
+			terminal: (enabled) => (enabled ? this.ensureTerminal() : this.stopTerminal()),
 		});
 	}
 
@@ -414,10 +424,12 @@ export default class DashboardPlugin extends Plugin {
 		if (!this.app.workspace.layoutReady) return;
 		const active = terminalLeafKind(this.terminalHost?.isActive() === true) === 'active';
 		for (const leaf of this.app.workspace.getLeavesOfType(TERMINAL_VIEW_TYPE)) {
-			const next = active && this.terminalHost
-				? this.terminalHost.createLeafView(leaf)
-				: new InactiveTerminalView(leaf, this);
+			const next =
+				active && this.terminalHost
+					? this.terminalHost.createLeafView(leaf)
+					: new InactiveTerminalView(leaf, this);
 			await leaf.open(next);
+			(leaf as typeof leaf & { updateHeader?: () => void }).updateHeader?.();
 		}
 	}
 
@@ -485,6 +497,13 @@ export default class DashboardPlugin extends Plugin {
 
 	async loadSettings(): Promise<void> {
 		const loaded: unknown = await this.loadData();
+		if (requiresNamespaceMigration(loaded)) {
+			this.namespaceUpgradeRequired = true;
+			const language =
+				loaded && typeof loaded === 'object' && 'language' in loaded && loaded.language === 'en' ? 'en' : 'zh';
+			setLanguage(language);
+			return;
+		}
 		const raw = (loaded ?? {}) as Record<string, unknown> & Partial<DashboardSettings>;
 		// Migrate old widgetTheme combo to individual flags
 		if ('widgetTheme' in raw && typeof raw.widgetTheme === 'string') {
@@ -596,7 +615,7 @@ export default class DashboardPlugin extends Plugin {
 					},
 				],
 			};
-			this.app.saveLocalStorage('apex-dashboard-sidebar-pinned', 'true');
+			this.app.saveLocalStorage('nand.dashboard.sidebar-pinned', 'true');
 			await this.saveSettings();
 		} else if (this.terminalAgentImported) {
 			await this.saveSettings();
@@ -605,6 +624,7 @@ export default class DashboardPlugin extends Plugin {
 	}
 
 	async saveSettings(): Promise<void> {
+		if (this.namespaceUpgradeRequired) throw new Error(t('namespace.instructions'));
 		await this.saveData(this.settings);
 	}
 
@@ -615,7 +635,7 @@ export default class DashboardPlugin extends Plugin {
 	writeTerminalAgent(data: unknown): Promise<void> {
 		this.settings = {
 			...this.settings,
-			terminalAgent: data && typeof data === 'object' ? data as Record<string, unknown> : null,
+			terminalAgent: data && typeof data === 'object' ? (data as Record<string, unknown>) : null,
 		};
 		return this.saveSettings();
 	}

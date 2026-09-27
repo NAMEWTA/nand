@@ -27,7 +27,7 @@ product ──✕──▶ other product, including that product's barrel
 
 The one existing break in the shared row is the file named in SKILL rule 2. Do not add a second one, and do not "fix" it by letting `editor-view` import `dashboard-view`.
 
-`shared` may contain DTOs that more than one side must serialize (`EditorWorkbenchSettings`, `APEX_EVENTS`, `APEX_COMMANDS`). It must not contain comment threads, dashboard cards, or terminal sessions.
+`shared` may contain DTOs that more than one side must serialize (`EditorWorkbenchSettings`, `NAND_EVENTS`, `NAND_COMMANDS`). It must not contain comment threads, dashboard cards, or terminal sessions.
 
 The plugin shell may pass a narrow callback into a product. The terminal host receives `readAbsoluteReference: () => collectReferences(app, 'absolute')` from `main.ts`. That callback is the boundary.
 
@@ -86,7 +86,7 @@ Editor folders: `comments`, `copy`, `host`, `view`. `writing-stats` and `focus` 
 
 | Kind | Home |
 |---|---|
-| Ids another product must spell | `APEX_COMMANDS` in `src/shared/commands.ts`. Today: `open-dashboard`, `open-editor-view`, `add-comment-to-selection` |
+| Ids another product must spell | `NAND_COMMANDS` in `src/shared/commands.ts`. Today: `open-dashboard`, `open-editor-view`, `add-comment-to-selection` |
 | Shell commands | `src/plugin/commands.ts`. Commands already passed to `addCommand` inside `main.ts` stay there |
 | Editor commands | The owning domain under `src/editor-view` |
 | Terminal commands | Inside `src/terminal-agent` |
@@ -115,7 +115,7 @@ SKILL rule 8 is where strings live. To add a key:
 2. If the module is new, import it in `src/shared/i18n/runtime.ts` and pass both `.en` and `.zh` to `mergeDicts`.
 3. Terminal UI calls `t` from `src/terminal-agent/i18n.ts` with the key minus the prefix in SKILL rule 8. The wrapper adds the prefix. Do not store a string table in that wrapper.
 
-`setLanguage` follows `settings.language`. Do not read Obsidian's locale. English casing is the UI text rule in `references/obsidian-api.md`.
+`setLanguage` follows `settings.language` and emits `onLanguageChanged` only on a change. Views and composers dispose their subscriptions on unmount. Do not read Obsidian's locale. English casing is the UI text rule in `references/obsidian-api.md`.
 
 ## Names
 
@@ -124,9 +124,9 @@ New directories and source files use kebab-case (`library-new-note.ts`, `termina
 | Kind | Shape | Leave alone |
 |---|---|---|
 | Product root | `dashboard-view`, `editor-view`, `terminal-agent`, `plugin`, `shared`, `sync` | Do not fold these into one tree |
-| New dashboard CSS | `dashboard-…` | `apex-dashboard-*` and `apex-dashboard.*` already shipped |
-| Editor CSS | `apex-editor-…` | The frozen view type string |
-| New terminal CSS | `terminal-…` | Existing `termy-…` classes |
+| New dashboard CSS | `dashboard-…` | Current theme roots use `nand-dashboard-*` |
+| Editor CSS | `nand-editor-…` | The frozen view type string |
+| New terminal CSS | `terminal-…` | Existing `terminal-…` classes |
 | i18n file | kebab-case, one feature per module under `src/shared/i18n/` | Legacy `section-NN.ts` buckets |
 | i18n key | dotted, both languages in that module | A key another product already stores |
 | Command id | SKILL rule 9 | Ids already registered |
@@ -137,11 +137,14 @@ A rename that touches the next table, a view type, or a CSS class a theme alread
 
 | Data | Location | Rule |
 |---|---|---|
-| Plugin settings | `data.json` via `loadData` / `saveData` | Includes `editorWorkbench`. Normalization order is SKILL rule 10. Never store comment text here |
-| Comment threads | vault `.apex-editor/comments/` | `references/editor-comments.md` |
+| Plugin settings | `data.json` via `loadData` / `saveData` | Includes `editorWorkbench` and `dataNamespaceVersion: 1`. Check the raw namespace version before applying defaults; unversioned existing data opens only a read-only upgrade settings tab. Normalization order is SKILL rule 10. Never store comment text here |
+| Comment threads | vault `.nand/editor/comments/` | `references/editor-comments.md` |
 | Weread progress | `.obsidian/plugins/<manifest.id>/weread-progress.json` | `manifestId()` reads `plugins.nand.manifest.id` and otherwise uses the plugin id |
-| Habits, expense, pomodoro, reading | `habits.json`, `expense.json`, `pomodoro.json`, `reading.json` under `plugins/<manifest.id>/` | Header comments in the habit and expense services still say `plugins/apex-dashboard`. The path expression uses `manifest.id`. Do not aim new files at `apex-dashboard` |
-| CSS classes, localStorage keys | `apex-dashboard-*`, `apex-dashboard.*` | Users and themes already depend on these names |
+| Habits, expense, pomodoro, reading | `habits.json`, `expense.json`, `pomodoro.json`, `reading.json` under `plugins/<manifest.id>/` | Resolve the plugin directory using `manifest.id` |
+| CSS classes | `nand-dashboard-*`, `nand-editor-*`, `terminal-*` | Keep current theme hooks stable |
+| Vault-local UI state | `nand.dashboard.*` via `App.loadLocalStorage` / `App.saveLocalStorage` | Includes mini-panel positions; never use global storage for new positions |
+| Electron sessions | `persist:nand-dashboard-web`, `persist:nand-dashboard-music-*` | New sessions require signing in again; do not delete previous partition directories |
+| Terminal context | `NAND_CONTEXT_PATH`, `.agents/skills/nand-obsidian-context/` | Native absolute paths; only overwrite plugin-managed skill files |
 | Dashboard markdown | the user's dashboard note | Written only by `dashboard-view/persist` |
 | Workspace paths | settings, via `workspace-registry` | No leading `/`, no `.md` suffix |
 
@@ -155,3 +158,5 @@ A rename that touches the next table, a view type, or a CSS class a theme alread
 - Do not register a view under a new type to "version" it.
 - Do not start the terminal, or import `electron`, on the phone path.
 - Do not put product domain logic in `src/plugin` beyond shell, commands, and settings composition.
+
+The namespace migration tool lives outside this repository. `docs/namespace-upgrade.md` describes the required sequence and rollback. Do not add runtime aliases or silently mark existing data as migrated. Dashboard persistence receives `DashboardSettingsAccess` from the owning view; terminal views receive their controller directly, without plugin-registry lookups.

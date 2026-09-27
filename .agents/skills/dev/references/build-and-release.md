@@ -49,6 +49,7 @@ Copy the nearest script, including extra aliases such as the music stubs. Do not
 
 | When you change… | Run |
 |---|---|
+| Comment composer, language subscriptions, dashboard persistence | `pnpm run test:issue-regressions` |
 | Comment anchors, the comment store, or the editor/dashboard import boundary | `pnpm run test:editor-comments` |
 | Terminal agent behavior covered by its `*.test.ts` files | `pnpm run test:terminal-agent` |
 | Module lifecycle (`src/plugin/module-lifecycle.test.ts`), settings navigation, or settings CSS | `pnpm run test:settings-nav` |

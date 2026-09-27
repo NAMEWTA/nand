@@ -1,6 +1,9 @@
 /** Editor product */
 export const messages = {
 	en: {
+		'editor.comments.submit': 'Submit',
+		'editor.comments.shortcut': '{modifier}+Enter to submit · Enter for a new line',
+		'editor.comments.saveFailed': 'Could not add the comment. Your draft has been kept.',
 		'editor.viewTitle': 'Editor',
 		'editor.openPanel': 'Open editor panel',
 		'editor.comments.title': 'Comments',
@@ -36,7 +39,8 @@ export const messages = {
 		'settings.productSync': 'Sync',
 		'settings.terminalDesktopOnly': 'The terminal is available on desktop only.',
 		'editor.copy.title': 'Copy',
-		'editor.copy.desc': 'Copy a stable reference to the current note or the selected files. The note itself is not changed.',
+		'editor.copy.desc':
+			'Copy a stable reference to the current note or the selected files. The note itself is not changed.',
 		'editor.copy.relative': 'Copy relative reference',
 		'editor.copy.absolute': 'Copy absolute reference',
 		'editor.copy.missing': 'No stable path to copy.',
@@ -46,11 +50,16 @@ export const messages = {
 		'settings.editorHighlight': 'Show comment highlights',
 		'settings.editorHighlightDesc': 'Highlights stay on after the editor panel is closed.',
 		'settings.editorPopover': 'Selection comment button',
-		'settings.editorPopoverDesc': 'Show a Comment button above the current selection. The command still works if this is off.',
+		'settings.editorPopoverDesc':
+			'Show a Comment button above the current selection. The command still works if this is off.',
 		'settings.editorDefaultDomain': 'Default panel',
-		'settings.editorDefaultDomainDesc': 'Which editor tool opens first. Comments, writing stats, and focus share this sidebar.',
+		'settings.editorDefaultDomainDesc':
+			'Which editor tool opens first. Comments, writing stats, and focus share this sidebar.',
 	},
 	zh: {
+		'editor.comments.submit': '提交',
+		'editor.comments.shortcut': '{modifier}+Enter 提交 · Enter 换行',
+		'editor.comments.saveFailed': '评论添加失败，草稿已保留。',
 		'editor.viewTitle': '编辑器',
 		'editor.openPanel': '打开编辑器面板',
 		'editor.comments.title': '评论',

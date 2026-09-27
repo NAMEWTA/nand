@@ -14,7 +14,7 @@ interface HolidayCache {
 	fetchedAt: number;
 }
 
-const CACHE_KEY = 'apex-dashboard-holiday-cache';
+const CACHE_KEY = 'nand.dashboard.holiday-cache';
 const CACHE_TTL = 24 * 60 * 60 * 1000;
 
 let memoryCache: HolidayCache | null = null;

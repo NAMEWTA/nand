@@ -116,7 +116,9 @@ export class MusicService {
 	private persistTimer: number | null = null;
 
 	constructor(private plugin: DashboardPlugin) {
-		this.account = new NeteaseAccount(`persist:apex-netease-${encodeURIComponent(plugin.app.vault.getName())}`);
+		this.account = new NeteaseAccount(
+			`persist:nand-dashboard-music-${encodeURIComponent(plugin.app.vault.getName())}`,
+		);
 		this.audio = createEl('audio');
 		this.audio.preload = 'auto';
 		this.audio.addEventListener('playing', () => {

@@ -37,7 +37,7 @@ const div = (className: string, scroll?: { top?: number; left?: number }): El =>
 // Structure mirrors the real stacked DOM: root > main > region > sidebar
 // (deck) + kanban (section rows with card decks and task lists).
 const buildTree = (scrolled: boolean): El => {
-	const root = cls(new El('div'), 'apex-dashboard-root');
+	const root = cls(new El('div'), 'nand-dashboard-root');
 	const main = cls(new El('div'), 'dashboard-main');
 	const region = div('dashboard-scroll-region', scrolled ? { top: 321 } : undefined);
 	const sidebar = cls(new El('div'), 'dashboard-sidebar');

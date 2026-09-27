@@ -19,7 +19,7 @@ export const VIDEO_EXTS = new Set(['mp4', 'mov', 'mkv', 'avi', 'webm', 'm4v']);
 const PAGE_SIZE_OPTIONS = [20, 50, 100];
 type MediaViewMode = 'grid' | 'list';
 type ThumbSize = 'small' | 'medium' | 'large';
-const THUMB_SIZE_STORAGE_KEY = 'apex-dashboard-media-thumb-size';
+const THUMB_SIZE_STORAGE_KEY = 'nand.dashboard.media-thumb-size';
 function readStoredThumbSize(app: App): ThumbSize {
 	const stored = app.loadLocalStorage(THUMB_SIZE_STORAGE_KEY) as string | null;
 	return stored === 'small' || stored === 'large' ? stored : 'medium';
@@ -462,7 +462,7 @@ export function renderMediaSection(
 	function openMediaPopup(): void {
 		closeMediaPopup();
 		filterPopup = activeDocument.body.createDiv({ cls: 'dashboard-library-filter-popup' });
-		const dashboardRoot = filterBtn.closest<HTMLElement>('.apex-dashboard-root');
+		const dashboardRoot = filterBtn.closest<HTMLElement>('.nand-dashboard-root');
 		if (dashboardRoot) {
 			const rs = getComputedStyle(dashboardRoot);
 			[

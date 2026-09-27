@@ -1,3 +1,4 @@
+import type { DashboardSettingsAccess } from '../settings-access';
 import { App, Component, Platform, TFile } from 'obsidian';
 import type { HoverParent, EventRef } from 'obsidian';
 import type { DashboardSettings } from '../types';
@@ -12,7 +13,7 @@ import { renderSidebarHabitWidget } from '../habit/habit-widget';
 import { renderSidebarExpenseWidget } from '../expense/expense-widget';
 import { renderSidebarAlbumWidget } from '../widgets/album-widget';
 import { renderSidebarAnniversaryWidget } from '../widgets/anniversary-widget';
-import { applyWidgetBackground, appendInlineBackgroundButton, getWidgetPlugin } from '../widgets/widget-background';
+import { applyWidgetBackground, appendInlineBackgroundButton } from '../widgets/widget-background';
 import { renderSidebarMusicWidget } from '../music/music-widget';
 import { SUPPORTED_FILE_EXTS } from '../../shared/file-types';
 import type { HolidayInfo } from '../calendar/holiday-service';
@@ -70,12 +71,12 @@ export function destroyAllCharts(preserveWidgets?: HTMLElement | null): void {
 	}
 }
 export function getCSSVar(name: string): string {
-	const el = activeDocument.querySelector('.apex-dashboard-root');
+	const el = activeDocument.querySelector('.nand-dashboard-root');
 	if (!el) return '';
 	return getComputedStyle(el).getPropertyValue(name).trim();
 }
 function isAccentLight(): boolean {
-	const el = activeDocument.querySelector('.apex-dashboard-root');
+	const el = activeDocument.querySelector('.nand-dashboard-root');
 	if (!el) return false;
 	return isLightColor(getComputedStyle(el).getPropertyValue('--db-accent').trim());
 }
@@ -288,7 +289,7 @@ export function sidebarWidgetSignature(
 	});
 }
 function saveSingletonBackground(
-	app: App,
+	settingsAccess: DashboardSettingsAccess | undefined,
 	key:
 		| 'quickActionsBackground'
 		| 'pomodoroBackground'
@@ -297,11 +298,7 @@ function saveSingletonBackground(
 		| 'yearProgressBackground',
 	bg: import('../types').WidgetBackground | undefined,
 ): void {
-	const plugin = getWidgetPlugin(app);
-	if (!plugin) return;
-	plugin.settings = { ...plugin.settings, [key]: bg };
-	void plugin.saveSettings();
-	plugin.refreshAllDashboards();
+	void settingsAccess?.updateSettings((current) => ({ ...current, [key]: bg }));
 }
 export function renderSidebarWidgets(
 	container: HTMLElement,
@@ -314,6 +311,7 @@ export function renderSidebarWidgets(
 	reuse?: HTMLElement | null,
 	onOpenNote?: (file: TFile, line?: number) => void,
 	renderQuickActions?: (container: HTMLElement) => void,
+	settingsAccess?: DashboardSettingsAccess,
 ): HTMLElement | null {
 	const anyEnabled =
 		settings.widgetWeatherEnabled ||
@@ -389,12 +387,15 @@ export function renderSidebarWidgets(
 			key: 'yearProgress',
 			render: (host) =>
 				renderSidebarYearProgress(host, settings.yearProgressBackground, app, (bg) =>
-					saveSingletonBackground(app, 'yearProgressBackground', bg),
+					saveSingletonBackground(settingsAccess, 'yearProgressBackground', bg),
 				),
 		});
 	}
 	if (settings.widgetCalendarEnabled) {
-		enabled.push({ key: 'calendar', render: (host) => renderSidebarCalendar(host, settings, app, onOpenNote) });
+		enabled.push({
+			key: 'calendar',
+			render: (host) => renderSidebarCalendar(host, settings, app, onOpenNote, undefined, settingsAccess),
+		});
 	}
 	if (settings.widgetWeatherEnabled) {
 		enabled.push({ key: 'weather', render: (host) => renderSidebarWeather(host, settings, app) });
@@ -404,7 +405,7 @@ export function renderSidebarWidgets(
 			key: 'pomodoro',
 			render: (host) =>
 				renderSidebarPomodoro(host, pomodoroService, settings, app, (bg) =>
-					saveSingletonBackground(app, 'pomodoroBackground', bg),
+					saveSingletonBackground(settingsAccess, 'pomodoroBackground', bg),
 				),
 		});
 	}
@@ -416,7 +417,7 @@ export function renderSidebarWidgets(
 			key: 'habit',
 			render: (host) =>
 				renderSidebarHabitWidget(host, app, settings.habitBackground, (bg) =>
-					saveSingletonBackground(app, 'habitBackground', bg),
+					saveSingletonBackground(settingsAccess, 'habitBackground', bg),
 				),
 		});
 	}
@@ -454,16 +455,10 @@ export function renderSidebarWidgets(
 				key: `anniversary-${ref.id}`,
 				render: (host) =>
 					renderSidebarAnniversaryWidget(host, ref, app, (updated) => {
-						const plugin = getWidgetPlugin(app);
-						if (!plugin) return;
-						plugin.settings = {
-							...plugin.settings,
-							anniversaries: (plugin.settings.anniversaries ?? []).map((a) =>
-								a.id === updated.id ? updated : a,
-							),
-						};
-						void plugin.saveSettings();
-						plugin.refreshAllDashboards();
+						void settingsAccess?.updateSettings((current) => ({
+							...current,
+							anniversaries: current.anniversaries.map((a) => (a.id === updated.id ? updated : a)),
+						}));
 					}),
 			});
 		}
@@ -473,14 +468,17 @@ export function renderSidebarWidgets(
 			key: 'music',
 			render: (host) =>
 				renderSidebarMusicWidget(host, settings.musicBackground, app, (bg) =>
-					saveSingletonBackground(app, 'musicBackground', bg),
+					saveSingletonBackground(settingsAccess, 'musicBackground', bg),
 				),
 		});
 	}
 	if (settings.countdownEnabled) {
 		for (const cd of settings.countdowns ?? []) {
 			const cdRef = cd;
-			enabled.push({ key: `countdown-${cd.id}`, render: (host) => renderSidebarCountdown(host, cdRef, app) });
+			enabled.push({
+				key: `countdown-${cd.id}`,
+				render: (host) => renderSidebarCountdown(host, cdRef, app, settingsAccess),
+			});
 		}
 	}
 
@@ -544,7 +542,7 @@ export function renderSidebarWidgets(
 				const btnGroup = el.querySelector<HTMLElement>('.dashboard-qa-btn-group');
 				if (btnGroup) {
 					const gear = appendInlineBackgroundButton(btnGroup, app, settings.quickActionsBackground, (bg) =>
-						saveSingletonBackground(app, 'quickActionsBackground', bg),
+						saveSingletonBackground(settingsAccess, 'quickActionsBackground', bg),
 					);
 					btnGroup.insertBefore(gear, btnGroup.firstChild);
 				}

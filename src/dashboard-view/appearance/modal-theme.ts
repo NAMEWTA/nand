@@ -1,5 +1,5 @@
 /**
- * `--db-*` theme variables are declared on `.apex-dashboard-root[data-theme]`,
+ * `--db-*` theme variables are declared on `.nand-dashboard-root[data-theme]`,
  * but Obsidian renders Modal dialogs in the body-level modal layer outside that
  * root. Without mirroring the resolved values onto the modal container, every
  * `var(--db-*)` inside a dialog degrades: fallback-less rules resolve to nothing
@@ -70,7 +70,7 @@ const MODAL_THEME_VARS: readonly string[] = [
  * copies that had drifted across calendar-modal / renderer / stats overlays.
  */
 export function applyModalTheme(target: HTMLElement): void {
-	const root = activeDocument.querySelector<HTMLElement>('.apex-dashboard-root');
+	const root = activeDocument.querySelector<HTMLElement>('.nand-dashboard-root');
 	if (!root) return;
 	const computed = getComputedStyle(root);
 	for (const name of MODAL_THEME_VARS) {

@@ -1,4 +1,5 @@
 import { getDailyNotesPlugin, prependAfterFrontmatter } from './dashboard-view';
+import { createDashboardSettingsAccess } from '../settings-access';
 import type { DashboardView } from './dashboard-view';
 import { Notice, TFile } from 'obsidian';
 import { nowMoment } from '../../shared/datetime';
@@ -14,6 +15,7 @@ import { createMemoNote } from '../notes/memo-note';
 
 export function createCallbacks(this: DashboardView) {
 	return {
+		settingsAccess: createDashboardSettingsAccess(this.plugin),
 		onCardEdit: (card: DashboardCard) => this.openCardEditModal(card),
 		onOpenNoteInPopover: (file: TFile, subpath?: string) => this.openNote(file, subpath),
 		onOpenNoteAtLine: (file: TFile, line?: number) => this.openNote(file, undefined, line),

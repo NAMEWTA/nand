@@ -10,13 +10,13 @@ export function renderDomainTabs(
 	onPick: (id: EditorDomainId) => void,
 ): void {
 	host.empty();
-	const bar = host.createDiv({ cls: 'apex-editor-tabs' });
+	const bar = host.createDiv({ cls: 'nand-editor-tabs' });
 	for (const domain of domains) {
 		const btn = bar.createEl('button', {
-			cls: 'apex-editor-tab' + (domain.id === active ? ' is-active' : ''),
+			cls: 'nand-editor-tab' + (domain.id === active ? ' is-active' : ''),
 			attr: { type: 'button' },
 		});
-		setIcon(btn.createSpan({ cls: 'apex-editor-tab-icon' }), domain.icon);
+		setIcon(btn.createSpan({ cls: 'nand-editor-tab-icon' }), domain.icon);
 		btn.createSpan({ text: t(domain.titleKey) });
 		btn.addEventListener('click', () => onPick(domain.id));
 	}

@@ -46,9 +46,19 @@ import { messages as m45 } from './nand';
 export type Language = 'en' | 'zh';
 
 let currentLang: Language = 'zh';
+const languageListeners = new Set<() => void>();
+
+export function onLanguageChanged(listener: () => void): () => void {
+	languageListeners.add(listener);
+	return () => {
+		languageListeners.delete(listener);
+	};
+}
 
 export function setLanguage(lang: Language): void {
+	if (currentLang === lang) return;
 	currentLang = lang;
+	for (const listener of [...languageListeners]) listener();
 }
 
 export function getLanguage(): Language {

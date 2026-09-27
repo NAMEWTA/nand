@@ -8,7 +8,7 @@ export interface Habit {
 	createdAt: string;
 }
 
-/** v1 data layout, stored at .obsidian/plugins/apex-dashboard/habits.json. */
+/** v1 data layout, stored at .obsidian/plugins/<manifest.id>/habits.json. */
 export interface HabitData {
 	version: 1;
 	habits: Habit[];

@@ -6,7 +6,7 @@ import { getCommentStore, type CommentStore } from './store';
 import type { CommentThread } from './model';
 import type DashboardPlugin from '../../plugin/main';
 import { momentOf } from '../../shared/datetime';
-import { t } from '../../shared/i18n';
+import { onLanguageChanged, t } from '../../shared/i18n';
 
 export interface CommentPanelContext {
 	app: App;
@@ -25,9 +25,13 @@ export function formatCommentTime(ts: string): string {
 export function mountCommentsPanel(el: HTMLElement, ctx: CommentPanelContext): () => void {
 	const store = getCommentStore();
 	el.empty();
-	el.addClass('apex-editor-comments');
+	el.addClass('nand-editor-comments');
 	if (!store) {
-		renderEmptyState(el, { icon: 'message-square', title: t('editor.comments.title'), description: t('editor.comments.noFile') });
+		renderEmptyState(el, {
+			icon: 'message-square',
+			title: t('editor.comments.title'),
+			description: t('editor.comments.noFile'),
+		});
 		return () => undefined;
 	}
 	const path = ctx.file?.extension === 'md' ? ctx.file.path : null;
@@ -39,57 +43,89 @@ export function mountCommentsPanel(el: HTMLElement, ctx: CommentPanelContext): (
 		draw(el, ctx, store, path);
 	};
 	const off = store.subscribe(render);
+	const offLanguage = onLanguageChanged(() => {
+		if (disposed) return;
+		const scroll = el.scrollTop;
+		const buttons = Array.from(el.querySelectorAll('button'));
+		const focused = buttons.indexOf(el.ownerDocument.activeElement as HTMLButtonElement);
+		render();
+		if (focused >= 0) el.querySelectorAll('button')[focused]?.focus({ preventScroll: true });
+		el.scrollTop = scroll;
+	});
 	if (path) void store.loadFile(path).then(render);
 	else render();
 	return () => {
 		disposed = true;
 		off();
+		offLanguage();
 		el.empty();
 	};
 }
 
 function draw(el: HTMLElement, ctx: CommentPanelContext, store: CommentStore, path: string | null): void {
 	el.empty();
-	const head = el.createDiv({ cls: 'apex-editor-comments-head' });
-	head.createDiv({ cls: 'apex-editor-comments-title', text: t('editor.comments.title') });
+	const head = el.createDiv({ cls: 'nand-editor-comments-head' });
+	head.createDiv({ cls: 'nand-editor-comments-title', text: t('editor.comments.title') });
 	if (!path) {
-		renderEmptyState(el, { icon: 'file-text', title: t('editor.comments.title'), description: t('editor.comments.noFile') });
+		renderEmptyState(el, {
+			icon: 'file-text',
+			title: t('editor.comments.title'),
+			description: t('editor.comments.noFile'),
+		});
 		return;
 	}
-	head.createDiv({ cls: 'apex-editor-comments-path', text: path, attr: { title: path } });
+	head.createDiv({ cls: 'nand-editor-comments-path', text: path, attr: { title: path } });
 	const threads = store.threadsFor(path);
 	if (threads.length === 0) {
-		renderEmptyState(el, { icon: 'message-square', title: t('editor.comments.title'), description: t('editor.comments.empty') });
+		renderEmptyState(el, {
+			icon: 'message-square',
+			title: t('editor.comments.title'),
+			description: t('editor.comments.empty'),
+		});
 		return;
 	}
-	const list = el.createDiv({ cls: 'apex-editor-comments-list' });
+	const list = el.createDiv({ cls: 'nand-editor-comments-list' });
 	for (const thread of threads) {
 		renderCard(list, ctx, store, thread);
 	}
 }
 
-function renderCard(parent: HTMLElement, ctx: CommentPanelContext, store: CommentStore, thread: CommentThread): HTMLElement {
+function renderCard(
+	parent: HTMLElement,
+	ctx: CommentPanelContext,
+	store: CommentStore,
+	thread: CommentThread,
+): HTMLElement {
 	const card = parent.createDiv({
-		cls: 'apex-editor-comment' + (store.focusedId === thread.id ? ' is-focused' : ''),
+		cls: 'nand-editor-comment' + (store.focusedId === thread.id ? ' is-focused' : ''),
 	});
 	card.dataset['commentId'] = thread.id;
 	card.dataset['status'] = thread.status;
-	const quote = card.createEl('button', { cls: 'apex-editor-comment-quote', text: thread.target.quote.exact || '…', attr: { type: 'button', 'aria-label': `${t('editor.comments.jump')}: ${thread.target.quote.exact || '…'}` } });
+	const quote = card.createEl('button', {
+		cls: 'nand-editor-comment-quote',
+		text: thread.target.quote.exact || '…',
+		attr: { type: 'button', 'aria-label': `${t('editor.comments.jump')}: ${thread.target.quote.exact || '…'}` },
+	});
 	quote.addEventListener('click', () => {
 		void jumpToComment(ctx.app, thread);
 	});
 	if (thread.status !== 'open') {
-		const status = card.createDiv({ cls: 'apex-editor-comment-status' });
-		setIcon(status.createSpan({ attr: { 'aria-hidden': 'true' } }), thread.status === 'resolved' ? 'check-check' : 'unlink');
-		status.createSpan({ text: t(thread.status === 'resolved' ? 'editor.comments.resolved' : 'editor.comments.orphaned') });
+		const status = card.createDiv({ cls: 'nand-editor-comment-status' });
+		setIcon(
+			status.createSpan({ attr: { 'aria-hidden': 'true' } }),
+			thread.status === 'resolved' ? 'check-check' : 'unlink',
+		);
+		status.createSpan({
+			text: t(thread.status === 'resolved' ? 'editor.comments.resolved' : 'editor.comments.orphaned'),
+		});
 	}
-	const messages = card.createDiv({ cls: 'apex-editor-comment-messages' });
+	const messages = card.createDiv({ cls: 'nand-editor-comment-messages' });
 	for (const message of thread.thread) {
-		const row = messages.createDiv({ cls: 'apex-editor-comment-message' });
-		row.createDiv({ cls: 'apex-editor-comment-text', text: message.text });
-		row.createDiv({ cls: 'apex-editor-comment-time', text: formatCommentTime(message.ts) });
+		const row = messages.createDiv({ cls: 'nand-editor-comment-message' });
+		row.createDiv({ cls: 'nand-editor-comment-text', text: message.text });
+		row.createDiv({ cls: 'nand-editor-comment-time', text: formatCommentTime(message.ts) });
 	}
-	const actions = card.createDiv({ cls: 'apex-editor-comment-actions' });
+	const actions = card.createDiv({ cls: 'nand-editor-comment-actions' });
 	if (thread.status === 'orphaned') {
 		const reanchor = actions.createEl('button', { text: t('editor.comments.reanchor') });
 		reanchor.addEventListener('click', () => {
@@ -108,22 +144,36 @@ function renderCard(parent: HTMLElement, ctx: CommentPanelContext, store: Commen
 	}
 	const reply = actions.createEl('button', { text: t('editor.comments.reply') });
 	reply.addEventListener('click', () => {
-		void askText(ctx.app, t('editor.comments.reply'), t('editor.comments.placeholder')).then((text) => {
+		void askText(ctx.app, 'editor.comments.reply', 'editor.comments.placeholder').then((text) => {
 			if (text) void store.reply(thread.id, text);
 		});
 	});
-	const more = actions.createEl('button', { cls: 'apex-editor-comment-more', attr: { type: 'button', 'aria-label': t('editor.comments.more'), 'aria-haspopup': 'menu' } });
+	const more = actions.createEl('button', {
+		cls: 'nand-editor-comment-more',
+		attr: { type: 'button', 'aria-label': t('editor.comments.more'), 'aria-haspopup': 'menu' },
+	});
 	setIcon(more, 'ellipsis');
 	more.addEventListener('click', () => {
 		const menu = new Menu();
-		menu.addItem((item) => item.setTitle(t('editor.comments.delete')).setIcon('trash-2').onClick(() => { void store.remove(thread.id); }));
+		menu.addItem((item) =>
+			item
+				.setTitle(t('editor.comments.delete'))
+				.setIcon('trash-2')
+				.onClick(() => {
+					void store.remove(thread.id);
+				}),
+		);
 		const rect = more.getBoundingClientRect();
 		menu.showAtPosition({ x: rect.left, y: rect.bottom });
 	});
 	return card;
 }
 
-async function reanchorFromSelection(ctx: CommentPanelContext, store: CommentStore, thread: CommentThread): Promise<void> {
+async function reanchorFromSelection(
+	ctx: CommentPanelContext,
+	store: CommentStore,
+	thread: CommentThread,
+): Promise<void> {
 	const view = ctx.app.workspace.getActiveViewOfType(MarkdownView);
 	if (!view?.file || view.file.path !== thread.target.path) {
 		await jumpToComment(ctx.app, thread);

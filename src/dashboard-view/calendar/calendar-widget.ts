@@ -1,3 +1,4 @@
+import type { DashboardSettingsAccess } from '../settings-access';
 import { App, Notice, Platform, setIcon, TFile } from 'obsidian';
 import { t } from '../../shared/i18n';
 import type { DashboardSettings } from '../types';
@@ -151,6 +152,7 @@ export function renderSidebarCalendar(
 	app: App,
 	onOpenNote?: (file: TFile, line?: number) => void,
 	opts?: { autoLoad?: boolean },
+	settingsAccess?: DashboardSettingsAccess,
 ): void {
 	const excludeFolders = settings.calendarExcludeFolders ?? [];
 
@@ -232,7 +234,13 @@ export function renderSidebarCalendar(
 		const tasks = (await collectVaultTasks(app, excludeFolders, settings.dashboardFile)).filter(isCalendarRelevant);
 		const byDay = indexTasksByDay(tasks);
 		const onDayClick = (iso: string): void => {
-			new DayAgendaModal(app, iso, byDay.get(iso) ?? [], { onToggle, onOpenNote }, settings.dashboardFile).open();
+			new DayAgendaModal(
+				app,
+				iso,
+				byDay.get(iso) ?? [],
+				{ onToggle, onOpenNote, settingsAccess },
+				settings.dashboardFile,
+			).open();
 		};
 		// Hover preview only on desktop (no hover on touch). Shows the day's
 		// full task list next to the cell after a short delay; cancelled if the
@@ -292,7 +300,7 @@ export function renderSidebarCalendar(
 		new CalendarMonthModal(
 			app,
 			byDay,
-			{ onToggle, onOpenNote },
+			{ onToggle, onOpenNote, settingsAccess },
 			view,
 			view === 'week' ? weekStart : undefined,
 			settings.dashboardFile,

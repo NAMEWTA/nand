@@ -20,6 +20,7 @@ export interface CalendarTaskTarget {
 }
 
 export interface DashboardSettings {
+	dataNamespaceVersion: 1;
 	/** Path of the ACTIVE workspace file (no .md extension). */
 	dashboardFile: string;
 	/** All workspace board files in switcher order (button i+1). Paths follow
@@ -291,6 +292,7 @@ export interface QuickCommand {
 }
 
 export const DEFAULT_SETTINGS: DashboardSettings = {
+	dataNamespaceVersion: 1,
 	dashboardFile: 'dashboard',
 	workspaceFiles: ['dashboard'],
 	workspaceNames: [''],
@@ -849,6 +851,7 @@ export interface DashboardData {
 }
 
 export interface RenderCallbacks {
+	settingsAccess?: import('../settings-access').DashboardSettingsAccess;
 	onCardEdit(card: DashboardCard): void;
 	/** subpath is the raw `#heading` / `#^block` fragment of a wikilink, when present. */
 	onOpenNoteInPopover(this: void, file: TFile, subpath?: string): void;

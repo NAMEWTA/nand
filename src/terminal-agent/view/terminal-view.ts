@@ -1,3 +1,6 @@
+import type { TerminalAgentController } from '../host/controller';
+
+type TerminalViewHost = Pick<TerminalAgentController, 'settings' | 'activateTerminalView' | 'toggleAlwaysOnTopTerminal' | 'getAlwaysOnTopTerminalLabel' | 'isAlwaysOnTopTerminal' | 'handleTerminalViewClosed'>;
 import type { WorkspaceLeaf, Menu } from 'obsidian';
 import { FileSystemAdapter, ItemView, Notice, TFile, TFolder, setIcon } from 'obsidian';
 import { shell, webUtils } from 'electron';
@@ -39,7 +42,6 @@ import {
   toPlatformPath,
 } from '../terminal/terminal-path-utils';
 import { TERMINAL_FILE_URI_REGEX } from '../terminal/terminal-file-links';
-import type { TerminalSettings } from '../settings/model';
 import { debugLog, errorLog } from '../logger';
 import { clamp, normalizeBackgroundPosition, normalizeBackgroundSize, toCssUrl } from '../style-utils';
 import { t } from '../i18n';
@@ -75,7 +77,7 @@ export class TerminalView extends ItemView {
   private readonly fs: FsModule;
   private readonly path: PathModule;
 
-  constructor(leaf: WorkspaceLeaf, terminalService: TerminalService | null) {
+  constructor(leaf: WorkspaceLeaf, terminalService: TerminalService | null, private readonly terminalHost: TerminalViewHost) {
     super(leaf);
     this.terminalService = terminalService;
     this.fs = window.require('fs') as FsModule;
@@ -342,6 +344,7 @@ export class TerminalView extends ItemView {
       this.initReject = null;
 
       this.bindTerminalInstance(this.terminalInstance);
+      this.updateLeafHeader(this.leaf);
       const xterm = this.terminalInstance.getXterm();
       this.registerTerminalHyperlinkHandler(xterm);
 
@@ -1234,44 +1237,7 @@ export class TerminalView extends ItemView {
     leafWithHeader.updateHeader?.();
   }
 
-  private getTerminalPlugin(): {
-    settings: TerminalSettings;
-    activateTerminalView: () => Promise<void>;
-    toggleAlwaysOnTopTerminal: (terminalView: TerminalView) => Promise<void>;
-    getAlwaysOnTopTerminalLabel: (terminalView: TerminalView) => string;
-    isAlwaysOnTopTerminal: (terminalView: TerminalView) => boolean;
-    handleTerminalViewClosed: (terminalView: TerminalView) => void;
-  } | null {
-    const appWithPlugins = this.app as typeof this.app & {
-      plugins?: { getPlugin?: (id: string) => unknown };
-    };
-    const plugin = appWithPlugins.plugins?.getPlugin?.('termy');
-    if (!this.isTerminalPlugin(plugin)) return null;
-    return plugin;
-  }
-
-  private isTerminalPlugin(value: unknown): value is {
-    settings: TerminalSettings;
-    activateTerminalView: () => Promise<void>;
-    toggleAlwaysOnTopTerminal: (terminalView: TerminalView) => Promise<void>;
-    getAlwaysOnTopTerminalLabel: (terminalView: TerminalView) => string;
-    isAlwaysOnTopTerminal: (terminalView: TerminalView) => boolean;
-    handleTerminalViewClosed: (terminalView: TerminalView) => void;
-  } {
-    if (!value || typeof value !== 'object') return false;
-    const candidate = value as {
-      settings?: unknown;
-      activateTerminalView?: unknown;
-      toggleAlwaysOnTopTerminal?: unknown;
-      getAlwaysOnTopTerminalLabel?: unknown;
-      isAlwaysOnTopTerminal?: unknown;
-      handleTerminalViewClosed?: unknown;
-    };
-    return typeof candidate.activateTerminalView === 'function'
-      && typeof candidate.toggleAlwaysOnTopTerminal === 'function'
-      && typeof candidate.getAlwaysOnTopTerminalLabel === 'function'
-      && typeof candidate.isAlwaysOnTopTerminal === 'function'
-      && typeof candidate.handleTerminalViewClosed === 'function'
-      && typeof candidate.settings === 'object';
+  private getTerminalPlugin(): TerminalViewHost {
+    return this.terminalHost;
   }
 }

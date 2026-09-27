@@ -70,7 +70,7 @@ assert.equal(activeSize(a.el), 'M', 'medium active with no stored value');
 assert.equal(gridSize(a.el), 'medium', 'grid renders medium');
 
 // 2. Stored large: L active on open, grid --large, no write on open.
-const store2: Record<string, string> = { 'apex-dashboard-media-thumb-size': 'large' };
+const store2: Record<string, string> = { 'nand.dashboard.media-thumb-size': 'large' };
 const b = open(store2);
 assert.equal(activeSize(b.el), 'L', 'stored large restores L');
 assert.equal(gridSize(b.el), 'large', 'grid renders large');
@@ -87,12 +87,12 @@ const menu = (Menu as unknown as { last: { items: Array<{ click(): void }> } | n
 assert.ok(menu, 'dropdown click opens a menu');
 assert.equal(menu!.items.length, 3, 'menu lists the three sizes');
 menu!.items[0]!.click();
-assert.equal(store3['apex-dashboard-media-thumb-size'], 'small', 'menu pick saves to localStorage');
+assert.equal(store3['nand.dashboard.media-thumb-size'], 'small', 'menu pick saves to localStorage');
 assert.equal(gridSize(c.el), 'small', 'grid re-renders small');
 assert.equal(activeSize(c.el), 'S', 'S shown on the collapsed button after pick');
 
 // 4. Garbage stored: falls back to medium.
-const store4: Record<string, string> = { 'apex-dashboard-media-thumb-size': 'huge' };
+const store4: Record<string, string> = { 'nand.dashboard.media-thumb-size': 'huge' };
 const d = open(store4);
 assert.equal(activeSize(d.el), 'M', 'garbage falls back to medium');
 

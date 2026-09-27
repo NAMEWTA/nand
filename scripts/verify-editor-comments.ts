@@ -83,9 +83,9 @@ assert.equal(note, 'Please keep this note byte-for-byte.', 'adding a comment doe
 assert.ok(added.id.startsWith('c-'));
 await store.flush();
 for (const key of fsMem.files.keys()) {
-	assert.ok(key.startsWith('.apex-editor/comments/'), `sidecar path ${key}`);
+	assert.ok(key.startsWith('.nand/editor/comments/'), `sidecar path ${key}`);
 }
-const index = JSON.parse(fsMem.files.get('.apex-editor/comments/index.json') ?? '{}') as {
+const index = JSON.parse(fsMem.files.get('.nand/editor/comments/index.json') ?? '{}') as {
 	files: Record<string, { hash: string; open: number; total: number }>;
 };
 const meta = index.files['notes/demo.md'];
@@ -93,7 +93,7 @@ assert.ok(meta, 'index records the note');
 assert.equal(meta.hash.length, 16);
 assert.equal(meta.open, 1);
 assert.equal(meta.total, 1);
-const fileBody = JSON.parse(fsMem.files.get(`.apex-editor/comments/files/${meta.hash}.json`) ?? '{}') as {
+const fileBody = JSON.parse(fsMem.files.get(`.nand/editor/comments/files/${meta.hash}.json`) ?? '{}') as {
 	path: string;
 	comments: { target: { quote: { exact: string } } }[];
 };
@@ -109,7 +109,7 @@ assert.equal(followed?.target.quote.exact, 'keep');
 await store.reply(added.id, 'second');
 await store.resolve(added.id);
 await store.flush();
-const resolvedIndex = JSON.parse(fsMem.files.get('.apex-editor/comments/index.json') ?? '{}') as {
+const resolvedIndex = JSON.parse(fsMem.files.get('.nand/editor/comments/index.json') ?? '{}') as {
 	files: Record<string, { open: number; total: number }>;
 };
 assert.equal(resolvedIndex.files['notes/demo.md']?.open, 0);
@@ -118,14 +118,14 @@ assert.equal(resolvedIndex.files['notes/demo.md']?.total, 1);
 await store.renamePath('notes/demo.md', 'notes/renamed.md');
 assert.equal(store.threadsFor('notes/renamed.md')[0]?.target.path, 'notes/renamed.md');
 assert.equal(store.threadsFor('notes/demo.md').length, 0);
-const renamedIndex = JSON.parse(fsMem.files.get('.apex-editor/comments/index.json') ?? '{}') as {
+const renamedIndex = JSON.parse(fsMem.files.get('.nand/editor/comments/index.json') ?? '{}') as {
 	files: Record<string, { hash: string }>;
 };
 assert.ok(renamedIndex.files['notes/renamed.md']);
 assert.equal(renamedIndex.files['notes/demo.md'], undefined);
 
 await store.deletePath('notes/renamed.md');
-const afterDelete = JSON.parse(fsMem.files.get('.apex-editor/comments/index.json') ?? '{}') as {
+const afterDelete = JSON.parse(fsMem.files.get('.nand/editor/comments/index.json') ?? '{}') as {
 	files: Record<string, unknown>;
 };
 assert.equal(afterDelete.files['notes/renamed.md'], undefined);
@@ -169,21 +169,21 @@ mountCommentsPanel(host as unknown as HTMLElement, {
 	file: { path: 'notes/demo.md', extension: 'md' } as never,
 });
 await panelStore.loadFile('notes/demo.md');
-const card = host.querySelector('.apex-editor-comment');
-const list = host.querySelector('.apex-editor-comments-list');
+const card = host.querySelector('.nand-editor-comment');
+const list = host.querySelector('.nand-editor-comments-list');
 assert.ok(card, 'comment card is rendered');
 assert.equal(card?.parentElement, list);
 assert.equal(card?.textContent.includes('keep'), true);
 assert.equal(panelNote, 'Please keep this note byte-for-byte.', 'rendering a card does not touch the note');
-assert.equal(card?.querySelector('.apex-editor-comment-quote')?.tagName, 'BUTTON', 'quote supports keyboard activation');
+assert.equal(card?.querySelector('.nand-editor-comment-quote')?.tagName, 'BUTTON', 'quote supports keyboard activation');
 await panelStore.resolve(panelThread.id);
-assert.equal(host.querySelector('.apex-editor-comment-status')?.textContent, '已解决');
+assert.equal(host.querySelector('.nand-editor-comment-status')?.textContent, '已解决');
 setLanguage('en');
 await panelStore.reply(panelThread.id, 'English reply');
-assert.equal(host.querySelector('.apex-editor-comment-status')?.textContent, 'Resolved');
+assert.equal(host.querySelector('.nand-editor-comment-status')?.textContent, 'Resolved');
 await panelStore.reopen(panelThread.id);
-assert.equal(host.querySelector('.apex-editor-comment-status'), null);
-host.querySelector('.apex-editor-comment-more')?.click();
+assert.equal(host.querySelector('.nand-editor-comment-status'), null);
+host.querySelector('.nand-editor-comment-more')?.click();
 assert.equal(Menu.last?.items[0]?.title, 'Delete');
 Menu.last?.items[0]?.click();
 await panelStore.flush();
@@ -304,8 +304,8 @@ const editor = new EditorView({
 flushFrames();
 editor.dispatch({ selection: { anchor: 7, head: 11 } });
 flushFrames();
-assert.ok(editorBody.querySelector('.apex-comment-hl'), 'selecting text keeps the comment highlight');
-assert.ok(editorBody.querySelector('.apex-comment-popover'), 'selecting text shows the comment button');
+assert.ok(editorBody.querySelector('.nand-editor-comment-hl'), 'selecting text keeps the comment highlight');
+assert.ok(editorBody.querySelector('.nand-editor-comment-popover'), 'selecting text shows the comment button');
 
 const coldBody = new El('div');
 Object.assign(coldBody, { ownerDocument: editorDocument, nodeType: 1 });
@@ -323,10 +323,10 @@ const coldEditor = new EditorView({
 		],
 	}),
 });
-assert.equal(coldBody.querySelector('.apex-comment-hl'), null, 'highlight waits until the sidecar is loaded');
+assert.equal(coldBody.querySelector('.nand-editor-comment-hl'), null, 'highlight waits until the sidecar is loaded');
 await coldStore.loadFile('notes/demo.md');
 flushFrames();
-assert.ok(coldBody.querySelector('.apex-comment-hl'), 'loading the sidecar paints the highlight without reopening the note');
+assert.ok(coldBody.querySelector('.nand-editor-comment-hl'), 'loading the sidecar paints the highlight without reopening the note');
 coldEditor.destroy();
 
 function walk(dir: string): string[] {
@@ -355,14 +355,14 @@ for (const file of walk(path.join(root, 'src/terminal-agent'))) {
 	assert.equal(importFrom(file, 'dashboard-view'), false, `${file} must not import dashboard-view`);
 }
 const viewSource = fs.readFileSync(path.join(root, 'src/dashboard-view/view/dashboard-view.ts'), 'utf8');
-assert.match(viewSource, /DASHBOARD_VIEW_TYPE = 'apex-dashboard-view'/);
+assert.match(viewSource, /DASHBOARD_VIEW_TYPE = 'nand-dashboard-view'/);
 const editorSource = fs.readFileSync(path.join(root, 'src/editor-view/view/editor-view.ts'), 'utf8');
-assert.match(editorSource, /EDITOR_VIEW_TYPE = 'apex-editor-view'/);
+assert.match(editorSource, /EDITOR_VIEW_TYPE = 'nand-editor-view'/);
 const terminalSource = fs.readFileSync(path.join(root, 'src/terminal-agent/view/terminal-view.ts'), 'utf8');
 assert.match(terminalSource, /TERMINAL_VIEW_TYPE = 'terminal-view'/);
 
 const commentCss = fs.readFileSync(path.join(root, 'styles.css'), 'utf8');
-const popoverAt = commentCss.indexOf('.apex-comment-popover {');
+const popoverAt = commentCss.indexOf('.nand-editor-comment-popover {');
 assert.equal(popoverAt >= 0, true);
 const popoverRule = commentCss.slice(popoverAt, commentCss.indexOf('}', popoverAt));
 assert.equal(popoverRule.includes('var(--layer-popover, 30)'), true);

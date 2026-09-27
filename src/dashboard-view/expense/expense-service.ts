@@ -20,7 +20,7 @@ export interface ExpenseRecord {
 	createdAt: number;
 }
 
-/** v1 data layout, stored at .obsidian/plugins/apex-dashboard/expense.json. */
+/** v1 data layout, stored at .obsidian/plugins/<manifest.id>/expense.json. */
 export interface ExpenseData {
 	version: 1;
 	/** Append-ordered; never pruned (financial history spans years). */

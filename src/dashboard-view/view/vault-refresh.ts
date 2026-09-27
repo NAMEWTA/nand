@@ -395,7 +395,7 @@ export function runCleanup(this: DashboardView, preserveSidebarWidgets = false):
  * Floating "back to top" button pinned to the bottom-right corner.
  *
  * The active scroll element differs by layout: on desktop the inner
- * `.dashboard-kanban` scrolls; on mobile (<=640px) the `.apex-dashboard-root`
+ * `.dashboard-kanban` scrolls; on mobile (<=640px) the `.nand-dashboard-root`
  * itself scrolls. We detect which one is actually scrollable and listen to it,
  * so the button always scrolls the right container and only appears once the
  * user has scrolled down. Cleanup is registered so listeners are torn down on

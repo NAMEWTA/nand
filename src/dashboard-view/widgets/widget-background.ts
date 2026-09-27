@@ -3,26 +3,7 @@ import { t } from '../../shared/i18n';
 import { applyModalTheme } from '../appearance/modal-theme';
 import { PathPickerModal } from '../ui/path-picker-modal';
 import { resolveVaultImage } from '../banner/banner';
-import { DEFAULT_WIDGET_BACKGROUND, type DashboardSettings, type WidgetBackground } from '../types';
-
-/** Runtime bridge to the plugin instance (the service-locator idiom the
- *  countdown settings button already uses): lets widget cards persist edits
- *  without the plugin being threaded through every render signature. */
-export interface WidgetPluginHandle {
-	settings: DashboardSettings;
-	saveSettings(): Promise<void>;
-	refreshAllDashboards(): void;
-}
-
-export function getWidgetPlugin(app: App): WidgetPluginHandle | null {
-	const plugin = (
-		app as unknown as {
-			plugins?: { plugins?: Record<string, unknown> };
-		}
-	).plugins?.plugins?.['apex-dashboard'] as Partial<WidgetPluginHandle> | undefined;
-	if (!plugin?.settings || !plugin.saveSettings || !plugin.refreshAllDashboards) return null;
-	return plugin as WidgetPluginHandle;
-}
+import { DEFAULT_WIDGET_BACKGROUND, type WidgetBackground } from '../types';
 
 /** Mount the half-hidden gear button at a card's top-right corner. Revealed
  *  on card hover (the countdown settings-button recipe); the click opens

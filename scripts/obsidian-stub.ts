@@ -131,7 +131,7 @@ export class Menu {
 export function normalizePath(path: string): string {
 	return path;
 }
-export const Platform = { isMobile: false, isMobileApp: false, isDesktop: true, isDesktopApp: true };
+export const Platform = { isMacOS: false, isMobile: false, isMobileApp: false, isDesktop: true, isDesktopApp: true };
 export function setIcon(_el: unknown, _icon: string): void {}
 export class ToggleComponent {
 	toggleEl: El;
@@ -369,4 +369,11 @@ export class Setting {
 		cb?.(stubControl());
 		return this;
 	}
+}
+
+/** Key scope records handlers; tests dispatch through the topmost active scope. */
+export class Scope {
+ handlers: { modifiers: string[] | null; key: string | null; callback: (event: KeyboardEvent) => unknown }[] = [];
+ constructor(readonly parent?: Scope) {}
+ register(modifiers: string[] | null, key: string | null, callback: (event: KeyboardEvent) => unknown) { this.handlers.push({ modifiers, key, callback }); }
 }

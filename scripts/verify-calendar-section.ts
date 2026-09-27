@@ -181,7 +181,7 @@ async function main(): Promise<void> {
 	);
 
 	// 5. Filter helpers normalize without a reachable plugin instance.
-	assert.equal(readCalendarTaskFilter({} as App), 'all', '5: filter normalizes to all');
+	assert.equal(readCalendarTaskFilter(), 'all', '5: filter normalizes to all');
 
 	// 6. Hover preview: resting on a month cell pops the day's COMPLETE task
 	//    list (no cap — 12 tasks all listed), leave closes it, and so does any

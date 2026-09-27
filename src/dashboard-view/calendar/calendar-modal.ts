@@ -1,3 +1,4 @@
+import type { DashboardSettingsAccess } from '../settings-access';
 import { App, Menu, Modal, Notice, setIcon } from 'obsidian';
 import type { TFile } from 'obsidian';
 import { t } from '../../shared/i18n';
@@ -19,53 +20,35 @@ import {
 } from './alltasks-scan';
 import { insertTaskForDay, type TaskInsertTarget } from './daily-notes';
 import { applyModalTheme } from '../appearance/modal-theme';
-import type { DashboardSettings } from '../types';
 
 interface CalendarModalCallbacks {
+	settingsAccess?: DashboardSettingsAccess;
 	onToggle: (task: VaultTask, nextChecked: boolean) => Promise<void> | void;
 	/** Open a task's source note, optionally scrolling to the task's line. */
 	onOpenNote?: (file: TFile, line?: number) => void;
 }
 
-/** Minimal plugin surface needed to persist the calendar task filter. */
-type DashboardPluginHandle = {
-	settings?: DashboardSettings;
-	saveSettings?: () => Promise<void>;
-};
-
-/** Live plugin lookup (same pattern as renderer.ts's countdown settings path). */
-function lookupDashboardPlugin(app: App): DashboardPluginHandle | undefined {
-	return (app as unknown as { plugins?: { plugins?: Record<string, DashboardPluginHandle> } }).plugins?.plugins?.[
-		'apex-dashboard'
-	];
-}
-
-/** Current persisted filter; unknown or hand-edited values normalize to 'all'.
- *  Shared with the calendar section (the choice applies to both surfaces). */
-export function readCalendarTaskFilter(app: App): CalendarTaskFilter {
-	const raw = lookupDashboardPlugin(app)?.settings?.calendarTaskFilter;
+/** Current persisted filter shared by both calendar surfaces. */
+export function readCalendarTaskFilter(access?: DashboardSettingsAccess): CalendarTaskFilter {
+	const raw = access?.getSettings().calendarTaskFilter;
 	return raw !== undefined && CALENDAR_TASK_FILTERS.includes(raw) ? raw : 'all';
 }
-
-/** Persist the filter (spread-replace + save). When the plugin can't be
- *  reached the in-view choice still applies for this session. */
-export function writeCalendarTaskFilter(app: App, filter: CalendarTaskFilter): void {
-	const plugin = lookupDashboardPlugin(app);
-	if (!plugin?.settings) return;
-	plugin.settings = { ...plugin.settings, calendarTaskFilter: filter };
-	void plugin.saveSettings?.();
+export async function writeCalendarTaskFilter(
+	access: DashboardSettingsAccess | undefined,
+	filter: CalendarTaskFilter,
+): Promise<boolean> {
+	if (!access) {
+		new Notice(t('settings.writeFailed'));
+		return false;
+	}
+	return access.updateSettings((current) => ({ ...current, calendarTaskFilter: filter }));
 }
-
-/** Where calendar-added tasks land in the daily note; anything but 'end'
- *  (including an unreachable plugin) keeps the historical 'start' behavior. */
-/** User-pinned destination override (undefined = the daily-note chain). */
-function readTaskTarget(app: App): import('../types').CalendarTaskTarget | undefined {
-	const target = lookupDashboardPlugin(app)?.settings?.calendarTaskTarget;
+function readTaskTarget(access?: DashboardSettingsAccess): import('../types').CalendarTaskTarget | undefined {
+	const target = access?.getSettings().calendarTaskTarget;
 	return target && target.path?.trim() && (target.kind === 'file' || target.kind === 'folder') ? target : undefined;
 }
-
-function readTaskInsertPosition(app: App): 'start' | 'end' {
-	return lookupDashboardPlugin(app)?.settings?.calendarTaskInsertPosition === 'end' ? 'end' : 'start';
+function readTaskInsertPosition(access?: DashboardSettingsAccess): 'start' | 'end' {
+	return access?.getSettings().calendarTaskInsertPosition === 'end' ? 'end' : 'start';
 }
 
 /**
@@ -98,7 +81,7 @@ export class CalendarMonthModal extends Modal {
 		this.byDay = byDay;
 		this.cb = cb;
 		this.dashboardFile = dashboardFile;
-		this.filter = readCalendarTaskFilter(app);
+		this.filter = readCalendarTaskFilter(cb.settingsAccess);
 		const now = new Date();
 		this.year = now.getFullYear();
 		this.month = now.getMonth();
@@ -248,7 +231,9 @@ export class CalendarMonthModal extends Modal {
 				item
 					.setTitle(t(`calendar.filter.${f}`))
 					.setChecked(f === this.filter)
-					.onClick(() => this.applyFilter(f)),
+					.onClick(() => {
+						void this.applyFilter(f);
+					}),
 			);
 		}
 		anchor.setAttribute('aria-expanded', 'true');
@@ -257,10 +242,10 @@ export class CalendarMonthModal extends Modal {
 	}
 
 	/** Switch the active filter, persist it, and re-render the grid. */
-	private applyFilter(filter: CalendarTaskFilter): void {
+	private async applyFilter(filter: CalendarTaskFilter): Promise<void> {
 		if (filter === this.filter) return;
+		if (!(await writeCalendarTaskFilter(this.cb.settingsAccess, filter))) return;
 		this.filter = filter;
-		writeCalendarTaskFilter(this.app, filter);
 		this.render();
 	}
 
@@ -434,8 +419,8 @@ export class DayAgendaModal extends Modal {
 				this.iso,
 				line,
 				this.dashboardFile,
-				readTaskInsertPosition(this.app),
-				readTaskTarget(this.app),
+				readTaskInsertPosition(this.cb.settingsAccess),
+				readTaskTarget(this.cb.settingsAccess),
 			);
 		} catch (err) {
 			console.error('[Dashboard] add task failed:', err);
