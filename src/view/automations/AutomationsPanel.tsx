@@ -66,6 +66,13 @@ export function AutomationsPanel({
 			return t('automation.invalid');
 		}
 	};
+	const status = (d: AutomationDefinition) => {
+		const run = [...service.state.runs].reverse().find(r => r.automationId === d.id && r.revision === d.revision);
+		if (run) return run.status;
+		if (d.schedule.kind === 'once' && (service.state.cursors[`${d.id}:${d.revision}`] ?? -Infinity) >= d.schedule.at)
+			return 'processed';
+		return 'pending';
+	};
 	return (
 		<>
 			<div className="nand-automation-toolbar">
@@ -137,9 +144,7 @@ export function AutomationsPanel({
 							</span>
 							<small>{next(d)}</small>
 							<small>
-								{t(
-									`automation.${[...service.state.runs].reverse().find((r) => r.automationId === d.id)?.status || 'pending'}`,
-								)}
+								{t(`automation.${status(d)}`)}
 							</small>
 						</button>
 					))}

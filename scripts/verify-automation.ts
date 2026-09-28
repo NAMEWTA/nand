@@ -899,3 +899,50 @@ test('automation panel localizes next/run dates and system reasons while preserv
 		setLanguage('zh');
 	}
 });
+
+test('cleared once history reads only the matching revision cursor and never replays failed, succeeded or skipped work', async () => {
+	const f = fixture(); let taskAttempts = 0;
+	f.source.createTask = async () => { taskAttempts++; throw new AutomationError('sourceMissing'); };
+	let service = f.make(); await service.load();
+	for (const d of [
+		definition({ id: 'success' }),
+		definition({ id: 'failure', action: { kind: 'create-task', path: 'missing', cardId: 'none', text: 'Keep' } }),
+		definition({ id: 'skipped', schedule: { kind: 'once', at: -200000 }, graceMinutes: 0 }),
+		definition({ id: 'future', schedule: { kind: 'once', at: 1000000 } }),
+		definition({ id: 'manual', schedule: { kind: 'manual' } }),
+		definition({ id: 'recurring', schedule: { kind: 'recurring', expression: '* * * * *', start: 1000000 } }),
+		definition({ id: 'revised' }),
+	]) await service.save(d);
+	await service.tick(2000);
+	assert.deepEqual(service.state.runs.map(r => r.status), ['succeeded', 'failed', 'skipped', 'succeeded']);
+	const revised = service.definitions.find(d => d.id === 'revised')!;
+	await service.save({ ...revised, schedule: { kind: 'once', at: 1000000 } });
+	service.state.cursors['future:0'] = 1000000;
+	service.state.cursors['future:1'] = 999999;
+	service.state.cursors['manual:1'] = 1000000;
+	service.state.cursors['recurring:1'] = 1000000;
+	const { document } = parseHTML('<html><body></body></html>'), prior = globalThis.document;
+	Object.assign(globalThis, { document });
+	const panel = document.createElement('div');
+	const labels = () => {
+		render(h(AutomationsPanel, { host: { service, edit: () => {}, inbox: () => {}, retry: async () => {} }, state: { selected: '', search: '', filter: '', agentFilter: '' }, refresh: () => {}, actions: { clearHistory: () => {}, remove: () => {}, run: () => {} } }), panel);
+		return Array.from(panel.querySelectorAll('.nand-automation-list > button')).map(button => button.querySelector('small:last-child')?.textContent);
+	};
+	try {
+		setLanguage('zh');
+		assert.deepEqual(labels(), ['已完成', '失败', '已跳过', '待执行', '待执行', '待执行', '待执行']);
+		const cursors = structuredClone(service.state.cursors), notified = f.notified.length;
+		await service.clearHistory(); assert.deepEqual(service.state.cursors, cursors);
+		for (const language of ['zh', 'en', 'zh'] as const) {
+			setLanguage(language);
+			assert.deepEqual(labels(), [t('automation.processed'), t('automation.processed'), t('automation.processed'), ...Array(4).fill(t('automation.pending'))]);
+			await service.tick(2000); service = f.make(); await service.load(); await service.tick(3000);
+			assert.equal(service.state.runs.length, 0); assert.equal(f.notified.length, notified); assert.equal(taskAttempts, 1);
+			assert.deepEqual(service.state.cursors, cursors);
+		}
+	} finally {
+		render(null, panel);
+		if (prior === undefined) Reflect.deleteProperty(globalThis, 'document'); else Object.assign(globalThis, { document: prior });
+		setLanguage('zh');
+	}
+});

@@ -10,7 +10,7 @@ export interface AutomationsApi {
 	readonly deviceId: string;
 	readonly loadError: string;
 	readonly definitions: readonly AutomationDefinition[];
-	readonly state: { readonly runs: readonly AutomationRun[] };
+	readonly state: { readonly runs: readonly AutomationRun[]; readonly cursors: Readonly<Record<string, number>> };
 	readonly sources: AutomationSourcePort;
 	agent(): AgentRuntimePort | undefined;
 	subscribe(listener: () => void): () => void;
