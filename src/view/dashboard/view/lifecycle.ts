@@ -95,6 +95,7 @@ export async function onOpen(this: DashboardView): Promise<void> {
 }
 
 export async function onClose(this: DashboardView): Promise<void> {
+	closeOwnedDashboardPanels(this.app, this);
 	this.lifecycleRevision++;
 	this.isOpening = false;
 	this.isOpen = false;

@@ -6,7 +6,7 @@ import { useWindowClock } from './use-window-clock';
 export interface CountdownPanelProps {
 	config: CountdownConfig;
 	win: Window;
-	edit: () => void;
+	edit?: () => void;
 }
 function CountdownValue({ value, win }: { value: number; win: Window }) {
 	const previous = useRef(value);
@@ -39,16 +39,18 @@ export function CountdownPanel({ config, win, edit }: CountdownPanelProps) {
 		: 0;
 	return (
 		<>
-			<button
-				class="dashboard-sidebar-countdown-settings-btn"
-				aria-label={t('countdown.settingsTitle')}
-				onClick={(e) => {
-					e.stopPropagation();
-					edit();
-				}}
-			>
-				<Icon name="settings" />
-			</button>
+			{edit && (
+				<button
+					class="dashboard-sidebar-countdown-settings-btn"
+					aria-label={t('countdown.settingsTitle')}
+					onClick={(e) => {
+						e.stopPropagation();
+						edit();
+					}}
+				>
+					<Icon name="settings" />
+				</button>
+			)}
 			<div class="dashboard-sidebar-countdown-content">
 				{!valid ? (
 					<div class="dashboard-sidebar-countdown-placeholder">{t('countdown.setTarget')}</div>

@@ -77,7 +77,7 @@ export class AutomationView extends ItemView {
 		this.draw();
 	}
 	private run(operation: () => Promise<unknown>): void {
-		void operation().catch((error) => new Notice(String(error)));
+		void operation().catch((error) => new Notice(error instanceof Error ? error.message : String(error)));
 	}
 	private draw(): void {
 		render(

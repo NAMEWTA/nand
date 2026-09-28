@@ -1,4 +1,5 @@
 import { Events, HoverParent, HoverPopover, ItemView, TFile, WorkspaceLeaf } from 'obsidian';
+import { h } from 'preact';
 import type { DashboardUpdateSource } from '../../../core/dashboard/render-update';
 import type { BannerData, DashboardCard, DashboardData, QuickAction } from '../../../core/dashboard/types/index';
 import type { HolidayInfo } from '../../../platform/obsidian/calendar/holiday-service';
@@ -11,6 +12,9 @@ import type { PomodoroMiniPanel } from '../pomodoro/pomodoro-mini-panel';
 import type { ReadingMiniTimer } from '../reading/reading-mini-timer';
 import type { RenderCallbacks } from '../render-contract';
 import { NotePopoverModal } from '../ui/note-popover-modal';
+import { closeOwnedDashboardPanels, DashboardPanelModal } from '../ui/panel-modal';
+import { AnniversaryPanel } from '../widgets/AnniversaryPanel';
+import { CountdownPanel } from '../widgets/CountdownPanel';
 import {
 	addColumnWithType,
 	deleteColumn,
@@ -231,6 +235,7 @@ export class DashboardView extends ItemView implements HoverParent {
 	sidebarWidgetsEl: HTMLElement | null = null;
 	sidebarWidgetsSig: string | null = null;
 	isOpening = false;
+	openingPromise: Promise<void> | null = null;
 	isOpen = false;
 	lifecycleRevision = 0;
 	pendingInitialData: DashboardData | null = null;
@@ -272,13 +277,68 @@ export class DashboardView extends ItemView implements HoverParent {
 		return 'home';
 	}
 
+	/** Source identities survive reordering and do not depend on translated labels. */
+	async focusWidget(sourceId: string): Promise<boolean> {
+		await this.openingPromise;
+		if (!this.isOpen || !this.plugin.settings.modules.dashboard) return false;
+		const settings = this.plugin.settings;
+		const countdown = settings.countdownEnabled
+			? settings.countdowns.find((entry) => `widget:${entry.id}` === sourceId)
+			: undefined;
+		const anniversary = settings.anniversaryEnabled
+			? settings.anniversaries.find((entry) => `widget:${entry.id}` === sourceId)
+			: undefined;
+		if (!countdown && !anniversary) return false;
+		const key = countdown ? `countdown-${countdown.id}` : `anniversary-${anniversary!.id}`;
+		const widget = Array.from(this.contentEl.querySelectorAll<HTMLElement>('[data-widget-key]')).find(
+			(el) => el.dataset.widgetKey === key,
+		);
+		closeOwnedDashboardPanels(this.app, this);
+		const sidebar = widget?.closest<HTMLElement>('.dashboard-sidebar');
+		if (sidebar) {
+			this.sidebarExpanded = true;
+			sidebar.classList.remove('dashboard-sidebar--collapsed');
+			sidebar.classList.add('dashboard-sidebar--expanded');
+		}
+		if (widget && widget.getClientRects().length > 0) {
+			widget.tabIndex = -1;
+			widget.scrollIntoView({ block: 'center', inline: 'nearest' });
+			widget.focus({ preventScroll: true });
+			return true;
+		}
+		// The sidebar is hidden on phones/narrow panes; show the same panel in native chrome.
+		const modal = new DashboardPanelModal(
+			this.app,
+			`dashboard-sidebar-widget dashboard-sidebar-${countdown ? 'countdown' : 'anniversary'}`,
+			(_close, root) => {
+				root.dataset.widgetKey = key;
+				const win = root.ownerDocument.defaultView!;
+				return countdown
+					? h(CountdownPanel, { config: countdown, win })
+					: h(AnniversaryPanel, { config: anniversary!, win });
+			},
+			this,
+		);
+		modal.open();
+		modal.contentEl.tabIndex = -1;
+		modal.contentEl.focus({ preventScroll: true });
+		return true;
+	}
+
 	/** Reentrancy guard: a second toolbar click while the title prompt is open
 	 *  must not stack a second dialog (overlay stacking is a known bug class). */
 	libraryNewNoteInFlight = false;
 	cardNewNoteInFlight = false;
 }
 
-DashboardView.prototype.onOpen = onOpen;
+DashboardView.prototype.onOpen = function () {
+	if (this.isOpening && this.openingPromise) return this.openingPromise;
+	const opening = onOpen.call(this).finally(() => {
+		if (this.openingPromise === opening) this.openingPromise = null;
+	});
+	this.openingPromise = opening;
+	return opening;
+};
 DashboardView.prototype.onClose = onClose;
 DashboardView.prototype.handleDataUpdate = handleDataUpdate;
 DashboardView.prototype.refresh = refresh;

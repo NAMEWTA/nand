@@ -1,10 +1,15 @@
-import { MarkdownView, type App, type TFile } from 'obsidian';
+import { MarkdownView, normalizePath, type App, type TFile } from 'obsidian';
 import { anniversaryDateThisYear, parseAnniversaryDate } from '../../../core/anniversaries/calendar';
 import { parse as parseDashboard, serialize as serializeDashboard } from '../../../core/dashboard/parser/index';
 import type { DashboardSettings } from '../../../core/dashboard/types/index';
 import { readTaskMeta, TASK_META_REGEX, taskMetaSuffix } from '../../../shared/automation/metadata';
 import type { AutomationAction, AutomationDefinition, SourceRef } from '../../../shared/automation/types';
 import { t } from '../../../shared/i18n/index';
+
+function widgetDashboardPath(path: string): string {
+	const normalized = normalizePath(path.trim());
+	return /\.md$/i.test(normalized) ? normalized : `${normalized}.md`;
+}
 
 /** Background writes stay in the dashboard persistence domain and always re-read the note. */
 export class DashboardAutomationSource {
@@ -15,6 +20,21 @@ export class DashboardAutomationSource {
 		private saveSettings: () => Promise<void>,
 		private isEnabled: () => boolean,
 	) {}
+	/** Resolve old extensionless references without changing task/contact source protocols. */
+	resolveWidgetSource(source: SourceRef): TFile {
+		if (!this.isEnabled()) throw new Error(t('automation.widgetModuleDisabled'));
+		const settings = this.settings();
+		const path = widgetDashboardPath(source.path);
+		const file = this.app.vault.getFileByPath(path);
+		if (!file || ![settings.dashboardFile, ...settings.workspaceFiles].some((p) => widgetDashboardPath(p) === path))
+			throw new Error(t('automation.widgetDashboardMissing'));
+		const matches = [
+			...(settings.countdownEnabled ? settings.countdowns : []),
+			...(settings.anniversaryEnabled ? settings.anniversaries : []),
+		].filter((entry) => `widget:${entry.id}` === source.id);
+		if (matches.length !== 1) throw new Error(t('automation.widgetMissing'));
+		return file;
+	}
 	private files(): TFile[] {
 		const settings = this.settings();
 		if (!this.isEnabled()) return [];
@@ -117,7 +137,12 @@ export class DashboardAutomationSource {
 			body: string,
 		) => {
 			if (!Number.isFinite(at)) return;
-			const source: SourceRef = { kind: 'widget', path: settings.dashboardFile, id: `widget:${entry.id}` };
+			const path = widgetDashboardPath(settings.dashboardFile);
+			const source: SourceRef = {
+				kind: 'widget',
+				path: this.app.vault.getFileByPath(path)?.path ?? path,
+				id: `widget:${entry.id}`,
+			};
 			if (!entry.automation) {
 				entry.automation = this.definition(source.id, name, at, source);
 				changed = true;
@@ -175,7 +200,7 @@ export class DashboardAutomationSource {
 			const entry = [...settings.countdowns, ...settings.anniversaries].find(
 				(e) => `widget:${e.id}` === source.id,
 			);
-			if (!entry) throw new Error(t('automation.sourceMissing'));
+			if (!entry) throw new Error(t('automation.widgetMissing'));
 			entry.automation = { ...definition, enabled: remove ? false : definition.enabled };
 			await this.saveSettings();
 			return;

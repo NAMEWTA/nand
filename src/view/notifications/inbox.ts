@@ -26,7 +26,7 @@ export class NotificationInbox extends Modal {
 	private draw(): void {
 		const report = (operation: Promise<unknown>) => {
 			void operation.catch((error) => {
-				new Notice(String(error));
+				new Notice(error instanceof Error ? error.message : String(error));
 			});
 		};
 		render(
@@ -35,7 +35,16 @@ export class NotificationInbox extends Modal {
 				unread: this.service.unread,
 				markRead: (id) => report(this.service.markRead(id)),
 				clearRead: () => report(this.service.clearRead()),
-				open: (record) => report(this.service.open(record).then(() => this.close())),
+				open: (record) => {
+					// Release native modal focus before revealing the source or another modal.
+					this.close();
+					report(
+						this.service.open(record).catch((error) => {
+							this.open();
+							throw error;
+						}),
+					);
+				},
 			}),
 			this.contentEl,
 		);

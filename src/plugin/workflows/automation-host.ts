@@ -14,6 +14,8 @@ import { t } from '../../shared/i18n/index';
 import { AutomationEditor } from '../../view/automations/editor';
 import { AUTOMATION_VIEW_TYPE, AutomationView } from '../../view/automations/view';
 import { NotificationInbox } from '../../view/notifications/inbox';
+import { DashboardView } from '../../view/dashboard/view/dashboard-view';
+import { DASHBOARD_VIEW_TYPE } from '../../view/dashboard/view/view-type';
 import type DashboardPlugin from '../main';
 import { CONTACTS_VIEW_TYPE, ContactsView } from '../modules/contacts/index';
 
@@ -63,6 +65,15 @@ export async function createAutomationHost(
 				await leaf?.loadIfDeferred();
 				await plugin.contactsHost?.ensureLoaded();
 				if (leaf?.view instanceof ContactsView) leaf.view.select(source.path);
+			} else if (source.kind === 'widget') {
+				const file = dashboard.resolveWidgetSource(source);
+				await plugin.switchWorkspace(file.path);
+				await plugin.openDashboard();
+				const leaf = app.workspace.getLeavesOfType(DASHBOARD_VIEW_TYPE)[0];
+				await leaf?.loadIfDeferred();
+				if (leaf) await app.workspace.revealLeaf(leaf);
+				if (!(leaf?.view instanceof DashboardView) || !(await leaf.view.focusWidget(source.id)))
+					throw new Error(t('automation.widgetMissing'));
 			} else {
 				const file = app.vault.getFileByPath(source.path);
 				if (!file) throw new Error(t('automation.sourceMissing'));
@@ -141,6 +152,7 @@ export async function createAutomationHost(
 			await leaf.setViewState({ type: AUTOMATION_VIEW_TYPE, active: true });
 		}
 		await app.workspace.revealLeaf(leaf);
+		app.workspace.setActiveLeaf(leaf, { focus: true });
 	};
 	plugin.addRibbonIcon('timer', t('automation.title'), () => {
 		void open();

@@ -749,3 +749,52 @@ test('failed inbox load cannot overwrite unreadable receipts and a successful re
 	await inbox.send({ id: 'retry', title: 'test', body: 'test', channels: ['in-app'] });
 	assert.equal(inbox.unread, 1);
 });
+
+test('widget sources resolve canonical and legacy dashboard paths without changing reminder identity', async () => {
+	for (const language of ['zh', 'en', 'zh'] as const) {
+		setLanguage(language);
+		for (const path of ['dashboard', 'Projects/My board', 'Projects/My board.md']) {
+			const settings = structuredClone(DEFAULT_SETTINGS);
+			settings.dashboardFile = path;
+			settings.workspaceFiles = [path];
+			settings.countdownEnabled = settings.anniversaryEnabled = true;
+			settings.countdowns = [{ ...settings.countdowns[0]!, id: 'count', label: 'User countdown', targetDate: '2027-01-01', reminderDays: 1 }];
+			settings.anniversaries = [{ ...settings.anniversaries[0]!, id: 'ann', label: 'User anniversary', startDate: '2020-01-01', annualReminder: true }];
+			const file = { path: path.endsWith('.md') ? path : `${path}.md` };
+			let exists = true, enabled = true, saves = 0;
+			const app = { vault: { getFileByPath: (p: string) => exists && p === file.path ? file : null, read: async () => '' }, workspace: { getLeavesOfType: () => [] } } as unknown as App;
+			const source = new DashboardAutomationSource(app, () => settings, 'original-device', async () => { saves++; }, () => enabled);
+			const rows = await source.list();
+			assert.equal(rows.length, 2);
+			const persisted = JSON.stringify([settings.countdowns, settings.anniversaries]);
+			assert.equal(saves, 1);
+			for (const row of rows) {
+				assert.equal(row.source?.path, file.path);
+				assert.equal(source.resolveWidgetSource(row.source!), file);
+				assert.equal(source.resolveWidgetSource({ ...row.source!, path: file.path.slice(0, -3) }), file);
+				assert.equal(row.deviceId, 'original-device');
+			}
+			assert.deepEqual(await source.list(), rows);
+			assert.equal(saves, 1, 'Reading/resolving never rewrites persisted definitions');
+			const ref = rows[0]!.source!;
+			exists = false;
+			assert.throws(() => source.resolveWidgetSource(ref), { message: t('automation.widgetDashboardMissing') });
+			exists = true;
+			enabled = false;
+			assert.throws(() => source.resolveWidgetSource(ref), { message: t('automation.widgetModuleDisabled') });
+			enabled = true;
+			settings.countdownEnabled = false;
+			assert.throws(() => source.resolveWidgetSource(ref), { message: t('automation.widgetMissing') });
+			settings.countdownEnabled = true;
+			assert.throws(() => source.resolveWidgetSource({ ...ref, id: 'widget:deleted' }), { message: t('automation.widgetMissing') });
+			assert.equal(JSON.stringify([settings.countdowns, settings.anniversaries]), persisted);
+			settings.countdowns.push({ ...settings.countdowns[0]! });
+			assert.throws(() => source.resolveWidgetSource(ref), { message: t('automation.widgetMissing') });
+			settings.countdowns.pop();
+			settings.dashboardFile = 'Other'; settings.workspaceFiles = ['Other'];
+			assert.throws(() => source.resolveWidgetSource(ref), { message: t('automation.widgetDashboardMissing') });
+			assert.equal(saves, 1);
+		}
+	}
+	setLanguage('zh');
+});
