@@ -41,6 +41,7 @@ export interface ModuleGates {
 	terminal: boolean;
 	contacts: boolean;
 	iconic: boolean;
+	automation: boolean;
 }
 
 /** Top tabs. Home and sync stay. Board, editor, and agents appear only while open. */

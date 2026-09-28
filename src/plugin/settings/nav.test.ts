@@ -5,7 +5,7 @@ import path from 'node:path';
 
 import { defaultPage, productOrder, sidePages, visibleProducts } from './nav.ts';
 
-const ALL_ON = { dashboard: true, editor: true, terminal: true, iconic: true, contacts: true };
+const ALL_ON = { automation: true, dashboard: true, editor: true, terminal: true, iconic: true, contacts: true };
 
 test('home is the first primary settings product', () => {
 	assert.equal(productOrder()[0], 'home');
@@ -33,29 +33,29 @@ test('top tabs keep home and sync and hide closed domains', () => {
 		'sync',
 	]);
 	assert.deepEqual(
-		visibleProducts({ iconic: false, contacts: false, dashboard: false, editor: true, terminal: true }),
+		visibleProducts({ automation: false, iconic: false, contacts: false, dashboard: false, editor: true, terminal: true }),
 		['home', 'editor', 'terminal', 'automation', 'sync'],
 	);
 	assert.deepEqual(
-		visibleProducts({ iconic: false, contacts: false, dashboard: true, editor: false, terminal: true }),
+		visibleProducts({ automation: false, iconic: false, contacts: false, dashboard: true, editor: false, terminal: true }),
 		['home', 'dashboard', 'terminal', 'automation', 'sync'],
 	);
 	assert.deepEqual(
-		visibleProducts({ iconic: false, contacts: false, dashboard: true, editor: true, terminal: false }),
+		visibleProducts({ automation: false, iconic: false, contacts: false, dashboard: true, editor: true, terminal: false }),
 		['home', 'dashboard', 'editor', 'automation', 'sync'],
 	);
 	assert.deepEqual(
-		visibleProducts({ iconic: false, contacts: false, dashboard: false, editor: false, terminal: false }),
+		visibleProducts({ automation: false, iconic: false, contacts: false, dashboard: false, editor: false, terminal: false }),
 		['home', 'automation', 'sync'],
 	);
 	assert.equal(
-		visibleProducts({ iconic: false, contacts: false, dashboard: false, editor: true, terminal: false }).includes(
+		visibleProducts({ automation: false, iconic: false, contacts: false, dashboard: false, editor: true, terminal: false }).includes(
 			'home',
 		),
 		true,
 	);
 	assert.equal(
-		visibleProducts({ iconic: false, contacts: false, dashboard: false, editor: true, terminal: false }).includes(
+		visibleProducts({ automation: false, iconic: false, contacts: false, dashboard: false, editor: true, terminal: false }).includes(
 			'sync',
 		),
 		true,

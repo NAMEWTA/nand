@@ -23,7 +23,7 @@ import { CONTACTS_VIEW_TYPE, ContactsView } from '../modules/contacts/index';
 /** Composition only: every source read/write stays in its owning product. */
 export async function createAutomationHost(
 	plugin: DashboardPlugin,
-): Promise<AutomationUiPort & { dispose(): void; inbox(): void; service: AutomationService }> {
+): Promise<AutomationUiPort & { dispose(): void; inbox(): void; service: AutomationService; setExecutionEnabled(enabled: boolean): Promise<void> }> {
 	const app = plugin.app;
 	let deviceId: string = app.loadLocalStorage('nand.automation.device') as string;
 	if (typeof deviceId !== 'string' || !deviceId) {
@@ -124,6 +124,7 @@ export async function createAutomationHost(
 				channels: d.channels,
 			});
 		},
+		plugin.settings.modules.automation,
 	);
 	const retry = async () => {
 		try {
@@ -136,6 +137,10 @@ export async function createAutomationHost(
 	};
 	await retry();
 	const edit = (source?: SourceRef, title?: string, existing?: AutomationDefinition) => {
+		if (!service.executionEnabled) {
+			new Notice(t('automation.moduleOff'));
+			return;
+		}
 		if (service.loadError) {
 			new Notice(t('automation.failedLoad'));
 			return;
@@ -193,6 +198,11 @@ export async function createAutomationHost(
 	app.workspace.onLayoutReady(tick);
 	return {
 		service,
+		setExecutionEnabled: async (enabled) => {
+			const wasEnabled = service.executionEnabled;
+			await service.setExecutionEnabled(enabled);
+			if (enabled && !wasEnabled) tick();
+		},
 		edit,
 		open,
 		inbox,

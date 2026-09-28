@@ -1,6 +1,7 @@
 /** Home, module gates, intro, and NAND about copy. */
 export const messages = {
 	en: {
+		'modules.automationDesc': 'Scheduled and manual automations. Turning this off stops their agents and keeps history and notifications. Independent terminals stay open.',
 		'modules.iconic': 'Icons',
 		'modules.iconicDesc':
 			'Customize icons and colors for files, folders, tabs, bookmarks, tags, properties, and the ribbon.',
@@ -77,6 +78,7 @@ export const messages = {
 		'terminalAgent.terminal.dropEmpty': 'No text or path was available from that drop.',
 	},
 	zh: {
+		'modules.automationDesc': '定时与手动自动化。关闭会停止自动化启动的智能体，保留历史和通知，不影响独立终端。',
 		'modules.iconic': '图标',
 		'modules.iconicDesc': '自定义文件、文件夹、标签页、书签、标签、属性和功能区的图标与颜色。',
 		'settings.writeFailed': '设置保存失败，请重试。',

@@ -1,3 +1,5 @@
+import { renderHomeSettings } from '../src/plugin/settings/home';
+import type { DashboardSettingTab } from '../src/plugin/settings/settings-tab';
 import { AutomationsPanel } from '../src/view/automations/AutomationsPanel';
 import { parseHTML } from 'linkedom';
 import { h, render } from 'preact';
@@ -342,6 +344,81 @@ function fixture(agent?: AgentRuntimePort) {
 		);
 	return { ...m, source, effects, notified, make };
 }
+
+test('Home execution gate survives restart, keeps history and cursors, and resumes only unhandled occurrences', async () => {
+	const f = fixture();
+	let service = f.make(); await service.load();
+	await service.save(definition()); await service.tick(1000);
+	await service.save(definition({ id: 'later', schedule: { kind: 'once', at: 2000 } }));
+	await service.save(definition({ id: 'expired', schedule: { kind: 'once', at: -500000 }, graceMinutes: 0 }));
+	await service.save(definition({ id: 'foreign', deviceId: 'another-device' }));
+	const before = structuredClone(service.state), deliveries = f.notified.length;
+	await service.setExecutionEnabled(false);
+	await service.tick(3000);
+	await assert.rejects(service.run(definition()), /./);
+	await assert.rejects(service.save(definition()), /./);
+	await assert.rejects(service.remove(definition()), /./);
+	await assert.rejects(service.clearHistory(), /./);
+	assert.deepEqual(JSON.parse(JSON.stringify(service.state)), JSON.parse(JSON.stringify(before)));
+	service = new AutomationService(f.app.vault.adapter, '.nand/automation/test.json', 'device', f.source,
+		() => undefined, async run => { f.notified.push(run.id); }, false);
+	await service.load(); await service.tick(3000);
+	assert.equal(service.executionEnabled, false); assert.deepEqual(JSON.parse(JSON.stringify(service.state)), JSON.parse(JSON.stringify(before)));
+	assert.equal(f.notified.length, deliveries);
+	for (let i = 0; i < 5; i++) {
+		await service.setExecutionEnabled(true); await service.tick(3000);
+		await service.setExecutionEnabled(false);
+	}
+	assert.equal(service.state.runs.length, 3); assert.equal(f.notified.length, deliveries + 1);
+	assert.equal(service.state.runs.find(run => run.automationId === 'expired')?.status, 'skipped');
+	assert.equal(service.state.runs.some(run => run.automationId === 'foreign'), false);
+	assert.deepEqual(service.state.cursors, { 'a:1': 1000, 'later:1': 2000, 'expired:1': -500000 });
+});
+
+test('shutdown waits for an in-flight agent start and stops only its returned terminal before resolving', async () => {
+	let launch!: (handle: AgentRunHandle) => void;
+	let entered!: () => void;
+	const starting = new Promise<void>(resolve => { entered = resolve; });
+	const stopped: string[] = [];
+	const agent: AgentRuntimePort = {
+		listAgents: () => [], listSessions: async () => [], open: async () => {},
+		stop: async id => { stopped.push(id); },
+		start: () => new Promise(resolve => { launch = resolve; entered(); }),
+	};
+	const f = fixture(agent), service = f.make(); await service.load();
+	const d = definition({ action: { kind: 'agent', agentId: 'codex', cwd: '/vault', prompt: 'test', sessionMode: 'fresh' } });
+	await service.save(d);
+	const run = service.run(d); await starting;
+	let closed = false;
+	const closing = service.setExecutionEnabled(false).then(() => { closed = true; });
+	await Promise.resolve(); assert.equal(closed, false);
+	await assert.rejects(service.run(d));
+	launch({ terminalId: 'automation-owned', completion: new Promise(() => {}) });
+	await Promise.all([run, closing]);
+	assert.deepEqual(stopped, ['automation-owned']);
+	assert.equal(service.state.runs[0]?.status, 'cancelled');
+	assert.equal(JSON.parse(f.files.get('.nand/automation/test.json')!).runs[0].status, 'cancelled');
+});
+
+test('failed shutdown persistence or stop stays disabled and retries without losing owned execution', async () => {
+	let stops = 0, failStop = false;
+	const agent: AgentRuntimePort = {
+		listAgents: () => [], listSessions: async () => [], open: async () => {},
+		stop: async () => { stops++; if (failStop) throw Error('stop unavailable'); },
+		start: async () => ({ terminalId: 'owned', completion: new Promise(() => {}) }),
+	};
+	const f = fixture(agent), service = f.make(); await service.load();
+	const d = definition({ action: { kind: 'agent', agentId: 'codex', cwd: '/vault', prompt: 'test', sessionMode: 'fresh' } });
+	await service.save(d); await service.run(d);
+	f.fail(); await assert.rejects(service.setExecutionEnabled(false), /disk full/);
+	assert.equal(service.executionEnabled, false); assert.equal(stops, 0);
+	f.fail(false); failStop = true;
+	await assert.rejects(service.setExecutionEnabled(false), /stop unavailable/);
+	assert.equal(service.state.runs[0]?.status, 'unknown');
+	failStop = false; await service.setExecutionEnabled(false);
+	assert.equal(stops, 2); assert.equal(service.state.runs[0]?.status, 'cancelled');
+	await service.setExecutionEnabled(true); assert.equal(service.executionEnabled, true);
+});
 
 test('manual, once, cron and supported RRULE honor start times and reject unsupported rules', () => {
 	assert.equal(latestOccurrence({ kind: 'manual' }, Date.now()), null);
@@ -945,4 +1022,82 @@ test('cleared once history reads only the matching revision cursor and never rep
 		if (prior === undefined) Reflect.deleteProperty(globalThis, 'document'); else Object.assign(globalThis, { document: prior });
 		setLanguage('zh');
 	}
+});
+
+
+test('Home toggle saves before applying execution, restores failed saves, and leaves runtime failures retryable', async () => {
+ const rows = Setting as unknown as { created: { name: string; toggles: StubControl[] }[] };
+ const settings = structuredClone(DEFAULT_SETTINGS);
+ let persisted = true, failing = true, failRuntime = false, effects = 0;
+ const tab = {
+  plugin: { settings, saveSettings: async () => { if (failing) throw Error('disk full'); persisted = settings.modules.automation; },
+   applyModuleFlags: async () => { effects++; assert.equal(persisted, settings.modules.automation); if (failRuntime) throw Error('stop failed'); } },
+  activeProduct: 'home', activePage: 'home', refresh: () => {},
+ } as unknown as DashboardSettingTab;
+ for (const language of ['zh', 'en', 'zh'] as const) {
+  setLanguage(language); rows.created.length = 0;
+  renderHomeSettings.call(tab, new Setting({} as HTMLElement).settingEl);
+  const toggle = rows.created.find(row => row.name === t('automation.title'))!.toggles[0]!;
+  assert.equal(toggle.value, true);
+  const count = effects; failing = true;
+  await toggle.fire!(false);
+  assert.equal(effects, count); assert.equal(settings.modules.automation, true); assert.equal(toggle.value, true);
+  assert.equal(toggle.disabled, false);
+  failing = false; failRuntime = true; await toggle.fire!(false);
+  assert.equal(settings.modules.automation, false); assert.equal(persisted, false); assert.equal(toggle.value, false);
+  failRuntime = false; await toggle.fire!(true);
+  assert.equal(settings.modules.automation, true); assert.equal(persisted, true);
+ }
+});
+
+test('disabled panel retains history and notifications but disables definition and execution mutations', async () => {
+ const f = fixture(), service = f.make(); await service.load(); await service.save(definition()); await service.tick(1000);
+ await service.setExecutionEnabled(false);
+ const { document } = parseHTML('<html><body></body></html>'), prior = globalThis.document;
+ Object.assign(globalThis, { document }); const panel = document.createElement('div');
+ try {
+  for (const language of ['zh', 'en', 'zh'] as const) {
+   setLanguage(language);
+   render(h(AutomationsPanel, { host: { service, edit: () => {}, inbox: () => {}, retry: async () => {} }, state: { selected: 'a', search: '', filter: '', agentFilter: '' }, refresh: () => {}, actions: { clearHistory: () => {}, remove: () => {}, run: () => {} } }), panel);
+   assert.ok(panel.textContent!.includes(t('automation.moduleOff')));
+   for (const key of ['new', 'clearHistory', 'run', 'edit', 'pause', 'delete']) {
+    const button = Array.from(panel.querySelectorAll('button')).find(button => button.textContent === t(`automation.${key}`))!;
+    assert.ok(button.hasAttribute('disabled'), key);
+   }
+   assert.equal(Array.from(panel.querySelectorAll('button')).find(button => button.textContent === t('automation.inbox'))!.hasAttribute('disabled'), false);
+   assert.equal(panel.querySelectorAll('.nand-automation-run').length, 1);
+  }
+ } finally { render(null, panel); if (prior === undefined) Reflect.deleteProperty(globalThis, 'document'); else Object.assign(globalThis, { document: prior }); setLanguage('zh'); }
+});
+
+
+test('shutdown drains an already-started file effect without undoing it or sending new notifications', async () => {
+ const f = fixture(); let release!: () => void, entered!: () => void;
+ const gate = new Promise<void>(resolve => { release = resolve; });
+ const starting = new Promise<void>(resolve => { entered = resolve; });
+ f.source.createTask = async (_, id) => { entered(); await gate; f.effects.push(id); };
+ const service = f.make(); await service.load();
+ const d = definition({ action: { kind: 'create-task', path: 'Board.md', cardId: 'c', text: 'Preserve effect' } });
+ await service.save(d); const running = service.run(d); await starting;
+ let closed = false; const closing = service.setExecutionEnabled(false).then(() => { closed = true; });
+ await Promise.resolve(); assert.equal(closed, false); release();
+ const [run] = await Promise.all([running, closing]);
+ assert.deepEqual(f.effects, [run!.id]); assert.equal(service.state.runs[0]?.status, 'cancelled');
+ assert.equal(f.notified.length, 0);
+});
+
+test('an agent handle arriving during failed cancellation persistence remains owned for retry', async () => {
+ let launch!: (handle: AgentRunHandle) => void, entered!: () => void;
+ const starting = new Promise<void>(resolve => { entered = resolve; }), stopped: string[] = [];
+ const agent: AgentRuntimePort = { listAgents: () => [], listSessions: async () => [], open: async () => {},
+  stop: async id => { stopped.push(id); }, start: () => new Promise(resolve => { launch = resolve; entered(); }) };
+ const f = fixture(agent), service = f.make(); await service.load();
+ const d = definition({ action: { kind: 'agent', agentId: 'codex', cwd: '/vault', prompt: 'test', sessionMode: 'fresh' } });
+ await service.save(d); const run = service.run(d); await starting; f.fail();
+ const closing = assert.rejects(service.setExecutionEnabled(false), /disk full/);
+ launch({ terminalId: 'late-owned', completion: new Promise(() => {}) }); await Promise.all([run, closing]);
+ assert.equal(service.executionEnabled, false); assert.deepEqual(stopped, []);
+ f.fail(false); await service.setExecutionEnabled(true);
+ assert.deepEqual(stopped, ['late-owned']); assert.equal(service.state.runs[0]?.terminalId, 'late-owned');
+ assert.equal(service.state.runs[0]?.status, 'cancelled'); assert.equal(service.executionEnabled, true);
 });

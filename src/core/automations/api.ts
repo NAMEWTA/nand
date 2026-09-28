@@ -7,6 +7,7 @@ import type {
 
 /** Read and action surface shared by native hosts and any automation panel. */
 export interface AutomationsApi {
+	readonly executionEnabled: boolean;
 	readonly deviceId: string;
 	readonly loadError: string;
 	readonly definitions: readonly AutomationDefinition[];

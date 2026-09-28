@@ -14,6 +14,7 @@ export interface NandSettings extends DashboardSettings {
 		terminal: boolean;
 		contacts: boolean;
 		iconic: boolean;
+		automation: boolean;
 	};
 	editorWorkbench: EditorWorkbenchSettings;
 	terminalAgent: Record<string, unknown> | null;
@@ -29,6 +30,7 @@ export const DEFAULT_SETTINGS: NandSettings = {
 		terminal: true,
 		contacts: true,
 		iconic: true,
+		automation: true,
 	},
 	editorWorkbench: { ...DEFAULT_EDITOR_WORKBENCH },
 	terminalAgent: null,

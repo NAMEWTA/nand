@@ -1,6 +1,7 @@
 import type { ModuleGates } from './settings/nav';
 
 export interface ModuleEffects {
+	automation: (enabled: boolean) => Promise<void>;
 	contacts: (enabled: boolean) => Promise<void>;
 	dashboard: (enabled: boolean) => Promise<void> | void;
 	editor: (enabled: boolean) => void;
@@ -18,6 +19,9 @@ export class ModuleLifecycle {
 		const next = this.pending.then(async () => {
 			if (this.disposed) return;
 			const flags = { ...readFlags() };
+			// Stop owned automation work before another module can remove its runtime.
+			if (!flags.automation) await effects.automation(false);
+			if (this.disposed) return;
 			await effects.dashboard(flags.dashboard);
 			if (this.disposed) return;
 			effects.editor(flags.editor);
@@ -27,6 +31,7 @@ export class ModuleLifecycle {
 			if (terminal !== effects.terminalActive()) await effects.terminal(terminal);
 			if (this.disposed) return;
 			await effects.iconic(flags.iconic);
+			if (!this.disposed && flags.automation) await effects.automation(true);
 		});
 		// Keep the caller's rejection, but allow a later request to recover.
 		this.pending = next.catch(() => undefined);

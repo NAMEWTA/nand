@@ -9,9 +9,10 @@ function fixture(active = true) {
 		{ session: 'two', output: 'keep-two' },
 	];
 	const original = [...leaves];
-	const flags = { dashboard: true, editor: true, terminal: active, iconic: false, contacts: true };
+	const flags = { automation: true, dashboard: true, editor: true, terminal: active, iconic: false, contacts: true };
 	const lifecycle = new ModuleLifecycle();
 	const effects: ModuleEffects = {
+		automation: async () => {},
 		contacts: async () => {},
 		iconic: async () => {},
 		dashboard: () => {},
@@ -132,4 +133,20 @@ test('archive transitions run on mobile without restarting the terminal', async 
 	await f.apply(false);
 	assert.deepEqual(values, [true, false]);
 	assert.deepEqual(f.calls, []);
+});
+
+
+test('automation stops before its terminal dependency and repeated toggles preserve independent sessions', async () => {
+ const f = fixture(); const order: string[] = [];
+ f.effects.automation = async enabled => { order.push(`automation:${enabled}`); };
+ const terminal = f.effects.terminal;
+ f.effects.terminal = async enabled => { order.push(`terminal:${enabled}`); await terminal(enabled); };
+ for (let i = 0; i < 5; i++) {
+  f.flags.automation = false; await f.apply(); f.flags.automation = true; await f.apply();
+ }
+ assert.deepEqual(f.calls, []); f.leaves.forEach((leaf, i) => assert.equal(leaf, f.original[i]));
+ order.length = 0; f.flags.automation = false; f.flags.terminal = false; await f.apply();
+ assert.deepEqual(order, ['automation:false', 'terminal:false']);
+ order.length = 0; f.flags.automation = true; f.flags.terminal = true; await f.apply();
+ assert.deepEqual(order, ['terminal:true', 'automation:true']);
 });

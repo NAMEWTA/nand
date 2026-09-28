@@ -154,7 +154,7 @@ export default class DashboardPlugin extends Plugin {
 	override addRibbonIcon(icon: string, title: string, callback: (evt: MouseEvent) => unknown): HTMLElement {
 		return stableRibbon(this, icon, title, callback, (glyph, id, action) => super.addRibbonIcon(glyph, id, action));
 	}
-	automationHost?: AutomationUiPort & { dispose(): void; inbox(): void };
+	automationHost?: AutomationUiPort & { dispose(): void; inbox(): void; setExecutionEnabled(enabled: boolean): Promise<void> };
 	settings!: NandSettings;
 	contactsHost?: ContactsController;
 	mediaTagService!: MediaTagService;
@@ -348,6 +348,7 @@ export default class DashboardPlugin extends Plugin {
 
 	applyModuleFlags(): Promise<void> {
 		return this.moduleLifecycle.apply(() => this.settings.modules, Platform.isDesktopApp, {
+			automation: async (enabled) => { await this.automationHost?.setExecutionEnabled(enabled); },
 			dashboard: (enabled) => (enabled ? this.ensureDashboardServices() : this.stopDashboardServices()),
 			editor: (enabled) => (enabled ? this.ensureEditor() : this.stopEditor()),
 			iconic: (enabled) => this.setIconicEnabled(enabled),
@@ -615,6 +616,7 @@ export default class DashboardPlugin extends Plugin {
 				terminal: raw.modules?.terminal !== false,
 				contacts: raw.modules?.contacts !== false,
 				iconic: raw.modules?.iconic !== false,
+				automation: raw.modules?.automation !== false,
 			},
 		};
 		// First install only (no data.json has ever existed): start with the

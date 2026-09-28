@@ -35,6 +35,7 @@ export function AutomationsPanel({
 		);
 	}
 	const service = host.service;
+	const enabled = service.executionEnabled !== false;
 	const definitions = [...service.definitions];
 	const currentIds = new Set(definitions.map((d) => d.id));
 	for (const run of service.state.runs)
@@ -58,7 +59,7 @@ export function AutomationsPanel({
 				.reverse()
 		: [];
 	const next = (d: AutomationDefinition) => {
-		if (!d.enabled || !currentIds.has(d.id)) return '—';
+		if (!enabled || !d.enabled || !currentIds.has(d.id)) return '—';
 		try {
 			const value = nextOccurrence(d.schedule, Date.now());
 			return value ? new Date(value).toLocaleString(getLanguage() === 'zh' ? 'zh-CN' : 'en-US') : '—';
@@ -76,9 +77,9 @@ export function AutomationsPanel({
 	return (
 		<>
 			<div className="nand-automation-toolbar">
-				<button onClick={() => host.edit()}>{t('automation.new')}</button>
+				<button disabled={!enabled} onClick={() => host.edit()}>{t('automation.new')}</button>
 				<button onClick={() => host.inbox()}>{t('automation.inbox')}</button>
-				<button onClick={() => actions.clearHistory()}>{t('automation.clearHistory')}</button>
+				<button disabled={!enabled} onClick={() => actions.clearHistory()}>{t('automation.clearHistory')}</button>
 				<label className="nand-automation-filter">
 					<span>{t('automation.search')}</span>
 				<input
@@ -130,7 +131,7 @@ export function AutomationsPanel({
 				</select>
 				</label>
 			</div>
-			<p className="setting-item-description">{t('automation.localOnly')}</p>
+			<p className="setting-item-description">{t(enabled ? 'automation.localOnly' : 'automation.moduleOff')}</p>
 			<div className={`nand-automation-layout${selected ? ' has-detail' : ''}`}>
 				<div className="nand-automation-list">
 					{list.length === 0 && <p>{t('automation.empty')}</p>}
@@ -173,23 +174,23 @@ export function AutomationsPanel({
 						</p>
 						<div className="nand-automation-toolbar">
 							<button
-								disabled={!currentIds.has(selected.id)}
+								disabled={!enabled || !currentIds.has(selected.id)}
 								onClick={() => actions.run(() => service.run(selected))}
 							>
 								{t('automation.run')}
 							</button>
-							<button disabled={!currentIds.has(selected.id)} onClick={() => host.edit(selected)}>
+							<button disabled={!enabled || !currentIds.has(selected.id)} onClick={() => host.edit(selected)}>
 								{t('automation.edit')}
 							</button>
 							<button
-								disabled={!currentIds.has(selected.id)}
+								disabled={!enabled || !currentIds.has(selected.id)}
 								onClick={() =>
 									actions.run(() => service.save({ ...selected, enabled: !selected.enabled }))
 								}
 							>
 								{t(`automation.${selected.enabled ? 'pause' : 'resume'}`)}
 							</button>
-							<button disabled={!currentIds.has(selected.id)} onClick={() => actions.remove(selected)}>
+							<button disabled={!enabled || !currentIds.has(selected.id)} onClick={() => actions.remove(selected)}>
 								{t('automation.delete')}
 							</button>
 						</div>

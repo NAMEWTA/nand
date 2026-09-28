@@ -7,7 +7,7 @@ export function renderHomeSettings(this: DashboardSettingTab, containerEl: HTMLE
 	containerEl.addClass('nand-home-settings');
 	const modules = this.plugin.settings.modules;
 	const rows: Array<{
-		key: 'dashboard' | 'editor' | 'terminal' | 'iconic' | 'contacts';
+		key: 'dashboard' | 'editor' | 'terminal' | 'iconic' | 'contacts' | 'automation';
 		name: string;
 		desc: string;
 	}> = [
@@ -16,6 +16,7 @@ export function renderHomeSettings(this: DashboardSettingTab, containerEl: HTMLE
 		{ key: 'terminal', name: t('modules.terminal'), desc: t('modules.terminalDesc') },
 		{ key: 'iconic', name: t('modules.iconic'), desc: t('modules.iconicDesc') },
 		{ key: 'contacts', name: t('contacts.title'), desc: t('contacts.description') },
+		{ key: 'automation', name: t('automation.title'), desc: t('modules.automationDesc') },
 	];
 	for (const row of rows) {
 		const setting = new Setting(containerEl)
@@ -24,9 +25,12 @@ export function renderHomeSettings(this: DashboardSettingTab, containerEl: HTMLE
 			.addToggle((toggle) => {
 				toggle.setValue(modules[row.key]).onChange(async (value) => {
 					toggle.setDisabled(true);
+					const previous = this.plugin.settings.modules[row.key];
+					let saved = false;
 					try {
 						this.plugin.settings.modules = { ...this.plugin.settings.modules, [row.key]: value };
 						await this.plugin.saveSettings();
+						saved = true;
 						await this.plugin.applyModuleFlags();
 						if (this.activeProduct !== 'home') {
 							this.activeProduct = 'home';
@@ -34,6 +38,8 @@ export function renderHomeSettings(this: DashboardSettingTab, containerEl: HTMLE
 						}
 						this.refresh();
 					} catch {
+						if (!saved) this.plugin.settings.modules[row.key] = previous;
+						toggle.setValue(this.plugin.settings.modules[row.key]);
 						new Notice(t('modules.changeFailed'));
 					} finally {
 						toggle.setDisabled(false);
@@ -43,7 +49,9 @@ export function renderHomeSettings(this: DashboardSettingTab, containerEl: HTMLE
 		const icon = setting.settingEl.createDiv({ cls: 'nand-home-module-icon', attr: { 'aria-hidden': 'true' } });
 		setIcon(
 			icon,
-			row.key === 'contacts'
+			row.key === 'automation'
+				? 'timer'
+				: row.key === 'contacts'
 				? 'contact-round'
 				: row.key === 'dashboard'
 					? 'layout-dashboard'

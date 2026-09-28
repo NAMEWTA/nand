@@ -39,6 +39,10 @@ export class AutomationService {
 	private launching = new Set<string>();
 	private refreshing?: Promise<void>;
 	private writes: Promise<void> = Promise.resolve();
+	private launches = new Set<Promise<unknown>>();
+	private ownedAgents = new Map<string, { agent: AgentRuntimePort; terminalId: string }>();
+	private transitions: Promise<void> = Promise.resolve();
+	private needsShutdown = false;
 	constructor(
 		storage: TextStorage,
 		path: string,
@@ -46,6 +50,7 @@ export class AutomationService {
 		readonly sources: AutomationSourcePort,
 		readonly agent: () => AgentRuntimePort | undefined,
 		private notify: (run: AutomationRun, definition: AutomationDefinition) => Promise<void>,
+		private enabled = true,
 	) {
 		this.store = new JsonStore(storage, path, (value): value is AutomationState => {
 			if (!value || typeof value !== 'object') return false;
@@ -59,6 +64,40 @@ export class AutomationService {
 				typeof s.cursors === 'object'
 			);
 		});
+	}
+	get executionEnabled(): boolean {
+		return this.enabled && !this.stopped;
+	}
+	/** Close admission immediately; await starts, owned processes and durable cancellation. */
+	setExecutionEnabled(enabled: boolean): Promise<void> {
+		if (!enabled) {
+			this.enabled = false;
+			this.needsShutdown = true;
+			this.emit();
+		}
+		const transition = this.transitions.then(async () => {
+			if (this.stopped) return;
+			if (this.needsShutdown) {
+				// Stop known processes while an in-flight start finishes. A later pass
+				// also catches handles returned after the gate closed.
+				const stopping = this.state.runs.filter(isActiveRun).map(run => this.stop(run));
+				const results = await Promise.allSettled([...stopping, ...this.launches]);
+				const failure = results.slice(0, stopping.length).find(result => result.status === 'rejected');
+				if (failure?.status === 'rejected') throw failure.reason;
+				for (const run of this.state.runs) {
+					if (isActiveRun(run) || this.ownedAgents.has(run.id)) await this.stop(run);
+				}
+				await this.writes;
+				this.needsShutdown = false;
+			}
+			this.enabled = enabled;
+			this.emit();
+		});
+		this.transitions = transition.catch(() => {});
+		return transition;
+	}
+	private requireExecution(): void {
+		if (!this.executionEnabled) throw new AutomationError('moduleOff');
 	}
 	async load(): Promise<void> {
 		try {
@@ -118,6 +157,7 @@ export class AutomationService {
 		);
 	}
 	async save(d: AutomationDefinition): Promise<void> {
+		this.requireExecution();
 		if (!this.loaded) throw new AutomationError('failedLoad');
 		if (!validDefinition(d)) throw new AutomationError('invalid');
 		const old = this.definitions.find((item) => item.id === d.id);
@@ -145,6 +185,7 @@ export class AutomationService {
 		});
 	}
 	async remove(d: AutomationDefinition): Promise<void> {
+		this.requireExecution();
 		if (d.deviceId !== this.deviceId) throw new AutomationError('otherDevice');
 		if (this.state.runs.some((r) => r.automationId === d.id && isActiveRun(r)))
 			throw new AutomationError('stopFirst');
@@ -157,6 +198,7 @@ export class AutomationService {
 		});
 	}
 	async clearHistory(): Promise<void> {
+		this.requireExecution();
 		if (!this.loaded) throw new AutomationError('failedLoad');
 		await this.commit((state) => {
 			state.runs = state.runs.filter(isActiveRun);
@@ -164,13 +206,13 @@ export class AutomationService {
 	}
 
 	async tick(now = Date.now()): Promise<void> {
-		if (!this.loaded || this.stopped || this.evaluating) return;
+		if (!this.loaded || !this.executionEnabled || this.evaluating) return;
 		this.evaluating = true;
 		try {
 			await this.refresh();
 			const launches: Promise<unknown>[] = [];
 			for (const d of this.definitions) {
-				if (this.stopped) break;
+				if (!this.executionEnabled) break;
 				if (!d.enabled || d.deviceId !== this.deviceId) continue;
 				try {
 					const at = latestOccurrence(d.schedule, now);
@@ -190,12 +232,24 @@ export class AutomationService {
 			this.evaluating = false;
 		}
 	}
-	async run(
+	run(
 		d: AutomationDefinition,
 		trigger: 'manual' | 'scheduled' = 'manual',
 		at = Date.now(),
 		now = Date.now(),
 	): Promise<AutomationRun | undefined> {
+		const launch = this.execute(d, trigger, at, now);
+		this.launches.add(launch);
+		void launch.finally(() => this.launches.delete(launch)).catch(() => {});
+		return launch;
+	}
+	private async execute(
+		d: AutomationDefinition,
+		trigger: 'manual' | 'scheduled' = 'manual',
+		at = Date.now(),
+		now = Date.now(),
+	): Promise<AutomationRun | undefined> {
+		this.requireExecution();
 		if (!this.loaded || this.stopped || this.launching.has(d.id)) return undefined;
 		if (d.deviceId !== this.deviceId) throw new AutomationError('otherDevice');
 		const active = this.state.runs.find((r) => r.automationId === d.id && isActiveRun(r));
@@ -230,7 +284,7 @@ export class AutomationService {
 			throw error;
 		}
 		try {
-			if (this.stopped || !isActiveRun(run)) return run;
+			if (!this.executionEnabled || !isActiveRun(run)) return run;
 			if (active || (trigger === 'scheduled' && now - at > d.graceMinutes * 60_000 + 120_000)) {
 				await this.updateRun(run, {
 					status: 'skipped',
@@ -242,8 +296,11 @@ export class AutomationService {
 				const agent = this.agent();
 				if (!agent) throw new AutomationError('agentUnavailable');
 				const handle = await agent.start(d.action, run, previous);
+				this.ownedAgents.set(run.id, { agent, terminalId: handle.terminalId });
+				if (!this.executionEnabled && !this.stopped) return run;
 				if (this.stopped || !isActiveRun(run)) {
 					await agent.stop(handle.terminalId);
+					this.ownedAgents.delete(run.id);
 					return run;
 				}
 				try {
@@ -254,6 +311,7 @@ export class AutomationService {
 					});
 				} catch (error) {
 					await agent.stop(handle.terminalId);
+					this.ownedAgents.delete(run.id);
 					throw error;
 				}
 				const unsubscribe = handle.onRunning?.(() => {
@@ -264,6 +322,7 @@ export class AutomationService {
 				void handle.completion
 					.then(async (result) => {
 						unsubscribe?.();
+						this.ownedAgents.delete(run.id);
 						if (!isActiveRun(run)) return;
 						await this.updateRun(run, { ...result, endedAt: Date.now() });
 						if (!this.stopped) await this.publish(run, d);
@@ -286,18 +345,23 @@ export class AutomationService {
 		return run;
 	}
 	async stop(run: AutomationRun): Promise<void> {
-		if (!isActiveRun(run)) return;
+		const owned = this.ownedAgents.get(run.id);
+		if (!isActiveRun(run) && !owned) return;
 		// Persist cancellation first so a simultaneous completion cannot overwrite it.
-		await this.updateRun(run, { status: 'cancelled', endedAt: Date.now() });
+		await this.updateRun(run, {
+			status: 'cancelled', endedAt: Date.now(), terminalId: owned?.terminalId ?? run.terminalId,
+		}, true);
 		try {
-			if (run.terminalId) await this.agent()?.stop(run.terminalId);
+			if (owned) await owned.agent.stop(owned.terminalId);
+			else if (run.terminalId) await this.agent()?.stop(run.terminalId);
+			if (this.ownedAgents.get(run.id) === owned) this.ownedAgents.delete(run.id);
 		} catch (error) {
 			await this.updateRun(run, { status: 'unknown', endedAt: undefined, ...automationFailure(error) }, true);
 			throw error;
 		}
 	}
 	private async publish(run: AutomationRun, definition: AutomationDefinition): Promise<void> {
-		if (run.notificationAttempted) return;
+		if (!this.executionEnabled || run.notificationAttempted) return;
 		await this.notify(run, definition);
 		await this.updateRun(run, { notificationAttempted: true }, true);
 	}

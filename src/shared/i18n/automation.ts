@@ -1,5 +1,6 @@
 export const messages = {
 	en: {
+		'automation.moduleOff': 'Automations are turned off on Home. History is read-only; notifications remain available.',
 		'automation.colon': ': ',
 		'automation.operationFailed': 'Operation failed: {detail}',
 		'automation.processExit': 'Process exited with code {code}',
@@ -146,6 +147,7 @@ export const messages = {
 		'automation.failedLoad': 'Could not load automation data',
 	},
 	zh: {
+		'automation.moduleOff': '自动化已在首页关闭。历史仅供查看，通知中心仍可使用。',
 		'automation.colon': '：',
 		'automation.operationFailed': '操作失败：{detail}',
 		'automation.processExit': '进程已退出，退出码为 {code}',
