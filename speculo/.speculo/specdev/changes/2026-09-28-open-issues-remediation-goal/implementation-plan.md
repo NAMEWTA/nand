@@ -3,7 +3,7 @@ schema_version: 1
 artifact: "implementation-plan"
 change: "2026-09-28-open-issues-remediation-goal"
 status: "in_progress"
-source_map_revision: 6
+source_map_revision: 7
 orchestration: "lead-directed"
 lead: "codex-issue-planning"
 implementation_agent_limit: 1

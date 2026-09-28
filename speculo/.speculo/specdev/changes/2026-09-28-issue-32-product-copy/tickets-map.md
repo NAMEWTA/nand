@@ -1,12 +1,12 @@
 ---
 schema_version: 3
 plan_contract_version: 1
-plan_revision: 1
+plan_revision: 2
 requested_deliverables: []
 deliverable_policy: "用户要求完整覆盖所有确认问题，未指定固定数量；本 Map 枚举全部切片，不以票数替代验收"
 artifact: "tickets-map"
 change: "2026-09-28-issue-32-product-copy"
-status: "ready"
+status: "completed"
 ---
 
 # Tickets Map: #32 统一 NAMEWTA 品牌与终端命令标点
@@ -33,7 +33,7 @@ Spec <Path>{roots.state}/specdev/changes/2026-09-28-issue-32-product-copy/spec.m
 
 | ID | Ticket | 可观察产出 | Blocked By | Depth | Risk | Ready | Owner | Contract IDs | Wave/Gate | Status |
 |---|---|---|---|---|---|---|---|---|---|---|
-| T-01 | <Path>{roots.state}/specdev/changes/2026-09-28-issue-32-product-copy/ticket/01-plan.md</Path> | 修正已锁定的品牌及标点文案 | — | standard | medium | yes | codex-issue-planning | AC-001, AC-002 | G1/G2/G3 | ready |
+| T-01 | <Path>{roots.state}/specdev/changes/2026-09-28-issue-32-product-copy/ticket/01-plan.md</Path> | 修正已锁定的品牌及标点文案 | — | standard | medium | yes | codex-issue-planning | AC-001, AC-002 | G1/G2/G3 | done |
 
 frontmatter 是 Ticket 状态权威；本表只作投影。
 
@@ -47,8 +47,8 @@ frontmatter 是 Ticket 状态权威；本表只作投影。
 
 | Contract ID | 覆盖 Ticket | 验证接缝 | 状态 | 说明 |
 |---|---|---|---|---|
-| AC-001 | T-01 | 对应 Ticket 行为验证矩阵 | covered | 实施证据尚未产生 |
-| AC-002 | T-01 | 对应 Ticket 行为验证矩阵 | covered | 实施证据尚未产生 |
+| AC-001 | T-01 | 对应 Ticket 行为验证矩阵 | covered | evidence/T-01.md passed |
+| AC-002 | T-01 | 对应 Ticket 行为验证矩阵 | covered | evidence/T-01.md passed |
 
 ## 5. 并行与路径所有权
 
@@ -71,3 +71,5 @@ Ticket变更回写此投影；合同/路径变化递增 plan_revision 并重过 
 ## 9. 总控与恢复
 
 运行 `node speculo/workflows/specdev/common/tools/ticket-control.mjs --map speculo/.speculo/specdev/changes/2026-09-28-issue-32-product-copy/tickets-map.md --repo .` 只读检查。下一 Work：<Path>{roots.workflows}/specdev/P-goal-plan/P-goal-plan.md</Path> plan，未来获准 run 才转 <Path>{roots.workflows}/specdev/I-implement/I-implement.md</Path>。本 Map 的 requested_deliverables=[] 表示用户未定数量，不表示无交付。
+
+plan_revision=2：增加 verify-iconic-port.ts 的既有 NAND 文案覆盖白名单；上游固定样本保持不变。
