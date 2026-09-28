@@ -248,6 +248,10 @@ function addUnit(d: Date, amount: number, unit: string): Date {
 /** Chainable control recorded so tests can fire the real onChange from a render. */
 export interface StubControl {
 	options: string[];
+	value?: unknown;
+	labels?: Record<string, string>;
+	disabled?: boolean;
+	click?: () => void;
 	inputEl: El;
 	fire: ((value: string | boolean) => void) | null;
 	addOption(value: string, _label?: string): StubControl;
@@ -256,6 +260,7 @@ export interface StubControl {
 	setLimits(_min: number, _max: number, _step: number): StubControl;
 	setDynamicTooltip(): StubControl;
 	setButtonText(_text: string): StubControl;
+	setCta(): StubControl;
 	setDisabled(_disabled: boolean): StubControl;
 	setIcon(_icon: string): StubControl;
 	setTooltip(_text: string): StubControl;
@@ -268,11 +273,13 @@ function stubControl(): StubControl {
 		options: [],
 		inputEl: new El('input'),
 		fire: null,
-		addOption(value: string) {
+		addOption(value: string, label = value) {
 			control.options.push(value);
+			(control.labels ??= {})[value] = label;
 			return control;
 		},
-		setValue() {
+		setValue(value: unknown) {
+			control.value = value;
 			return control;
 		},
 		setPlaceholder() {
@@ -287,7 +294,9 @@ function stubControl(): StubControl {
 		setButtonText() {
 			return control;
 		},
-		setDisabled() {
+		setCta() { return control; },
+		setDisabled(disabled: boolean) {
+			control.disabled = disabled;
 			return control;
 		},
 		setIcon() {
@@ -300,7 +309,8 @@ function stubControl(): StubControl {
 			control.fire = fn;
 			return control;
 		},
-		onClick() {
+		onClick(fn: () => void) {
+			control.click = fn;
 			return control;
 		},
 	};
@@ -311,6 +321,8 @@ function stubControl(): StubControl {
 export class Setting {
 	static created: Setting[] = [];
 	name = '';
+	desc = '';
+	readonly buttons: StubControl[] = [];
 	readonly texts: StubControl[] = [];
 	settingEl: El;
 	readonly toggles: StubControl[] = [];
@@ -326,7 +338,8 @@ export class Setting {
 		this.name = name;
 		return this;
 	}
-	setDesc() {
+	setDesc(desc = '') {
+		this.desc = desc;
 		return this;
 	}
 	setHeading() {
@@ -341,6 +354,7 @@ export class Setting {
 		cb?.(text);
 		return this;
 	}
+	addTextArea(cb?: (text: StubControl) => void) { return this.addText(cb); }
 	addToggle(cb?: (toggle: StubControl) => void) {
 		const toggle = stubControl();
 		this.toggles.push(toggle);
@@ -358,7 +372,9 @@ export class Setting {
 		return this;
 	}
 	addButton(cb?: (button: StubControl) => void) {
-		cb?.(stubControl());
+		const button = stubControl();
+		this.buttons.push(button);
+		cb?.(button);
 		return this;
 	}
 	addExtraButton(cb?: (button: StubControl) => void) {

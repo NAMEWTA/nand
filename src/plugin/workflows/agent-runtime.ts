@@ -18,7 +18,6 @@ import type {
 	AutomationAction,
 	AutomationRun,
 } from '../../shared/automation/types';
-import { t } from '../../shared/i18n/index';
 import { JsonStore } from '../../shared/json-store';
 import type { TerminalAgentController } from '../modules/terminal/controller';
 
@@ -61,14 +60,14 @@ export function automationArgs(
 	];
 	if (session) {
 		const flags = RESUME_FLAGS[agentId];
-		if (!flags) throw new Error(t('automation.sessionMissing'));
+		if (!flags) throw new AutomationError('sessionMissing');
 		const locator =
 			agentId === 'pi' || agentId === 'prime-agent'
 				? session.transcriptPath
 				: agentId === 'omp'
 					? session.transcriptPath || session.sessionId
 					: session.sessionId;
-		if (!locator) throw new Error(t('automation.sessionMissing'));
+		if (!locator) throw new AutomationError('sessionMissing');
 		if (agentId === 'copilot') args.push(`--resume=${locator}`);
 		else args.push(...flags, locator);
 	}
@@ -233,21 +232,28 @@ export class TerminalAutomationRuntime implements AgentRuntimePort {
 	async start(action: AgentAction, run: AutomationRun, previous?: AutomationRun): Promise<AgentRunHandle> {
 		await this.loaded;
 		const id = action.agentId as AgentId;
-		const agent = getAgent(id),
-			settings = this.host.settings.agentSettings;
+		const settings = this.host.settings.agentSettings;
 		const entry = settings.agents[id];
-		if (!entry?.enabled) throw new AutomationError('agentDisabled');
+		if (!entry?.enabled || !AGENT_CATALOG.some((agent) => agent.id === id))
+			throw new AutomationError('agentDisabled');
+		const agent = getAgent(id);
+		const command = resolveCli(agent.detectCommand, entry.cliPath, '');
+		if (!command) throw new AutomationError('cliMissing');
+		try {
+			await canonicalVaultCwd(
+				(this.host.app.vault.adapter as unknown as { getBasePath(): string }).getBasePath(),
+				action.cwd,
+			);
+		} catch {
+			throw new AutomationError('cwdInvalid');
+		}
 		if (
 			effectivePermission(settings, id) === 'yolo' &&
 			!settings.yoloAcknowledged &&
 			launchArgs(settings, id).length
 		)
-			throw new Error(t('automation.permissionRequired'));
+			throw new AutomationError('permissionRequired');
 		const io = createNodeSessionIo();
-		await canonicalVaultCwd(
-			(this.host.app.vault.adapter as unknown as { getBasePath(): string }).getBasePath(),
-			action.cwd,
-		);
 		if (
 			action.sessionMode === 'specific' &&
 			(!action.session ||
@@ -255,27 +261,52 @@ export class TerminalAutomationRuntime implements AgentRuntimePort {
 				action.session.cwd !== action.cwd ||
 				!action.session.sessionId)
 		)
-			throw new Error(t('automation.sessionMissing'));
+			throw new AutomationError('sessionMissing');
 		if (
 			action.sessionMode === 'specific' &&
 			action.session?.transcriptPath &&
 			!(await io.stat(action.session.transcriptPath))?.isFile
 		)
-			throw new Error(t('automation.sessionMissing'));
+			throw new AutomationError('sessionMissing');
+		let sessionEnv: Record<string, string> | undefined;
+		if (action.sessionMode === 'specific' && action.session?.accountKey) {
+			try {
+				sessionEnv = JSON.parse(action.session.accountKey) as Record<string, string>;
+			} catch {
+				throw new AutomationError('sessionMissing');
+			}
+			if (
+				!sessionEnv ||
+				typeof sessionEnv !== 'object' ||
+				Array.isArray(sessionEnv) ||
+				Object.values(sessionEnv).some((value) => typeof value !== 'string')
+			)
+				throw new AutomationError('sessionMissing');
+		}
 		const env =
-			action.sessionMode === 'specific' && action.session?.accountKey
-				? (JSON.parse(action.session.accountKey) as Record<string, string>)
-				: accountEnv(
-						agent,
-						entry.accountId,
-						absolutePluginDir(
-							(this.host.app.vault.adapter as unknown as { getBasePath(): string }).getBasePath(),
-							this.host.manifest.dir ?? '',
-						),
-					);
-		if (!env || typeof env !== 'object' || Object.values(env).some((v) => typeof v !== 'string'))
-			throw new Error(t('automation.sessionMissing'));
+			sessionEnv ??
+			accountEnv(
+				agent,
+				entry.accountId,
+				absolutePluginDir(
+					(this.host.app.vault.adapter as unknown as { getBasePath(): string }).getBasePath(),
+					this.host.manifest.dir ?? '',
+				),
+			);
 		const accountKey = JSON.stringify(env);
+		if (action.sessionMode === 'specific') {
+			const sessions = await this.listSessions(action.cwd);
+			if (
+				!sessions.some(
+					(session) =>
+						session.agentId === id &&
+						session.sessionId === action.session?.sessionId &&
+						session.accountKey === accountKey &&
+						session.cwd === action.cwd,
+				)
+			)
+				throw new AutomationError('sessionMissing');
+		}
 		if (
 			action.sessionMode === 'specific' &&
 			[...this.live.values()].some(
@@ -286,7 +317,7 @@ export class TerminalAutomationRuntime implements AgentRuntimePort {
 					v.accountKey === accountKey,
 			)
 		)
-			throw new Error(t('automation.busy'));
+			throw new AutomationError('busy');
 		const prior =
 			action.sessionMode === 'reuse' && previous?.terminalId ? this.live.get(previous.terminalId) : undefined;
 		const reuse =
@@ -340,8 +371,6 @@ export class TerminalAutomationRuntime implements AgentRuntimePort {
 		let terminal = slot.terminal;
 		if (reuse && terminal) terminal.write(`\x1b[200~${action.prompt}\x1b[201~\r`);
 		else {
-			const command = resolveCli(agent.detectCommand, entry.cliPath, '');
-			if (!command) throw new AutomationError('cliMissing');
 			const built = automationArgs(
 				id,
 				action.prompt,
@@ -407,13 +436,10 @@ export class TerminalAutomationRuntime implements AgentRuntimePort {
 						await Promise.race([
 							ready,
 							completion.then(() => {
-								throw new Error(t('automation.sessionMissing'));
+								throw new AutomationError('sessionMissing');
 							}),
 							new Promise<never>((_, reject) => {
-								timeout = win.setTimeout(
-									() => reject(new Error(t('automation.inputNotReady'))),
-									20_000,
-								);
+								timeout = win.setTimeout(() => reject(new AutomationError('inputNotReady')), 20_000);
 							}),
 						]);
 						terminal.write(`\x1b[200~${action.prompt}\x1b[201~\r`);

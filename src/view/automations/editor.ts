@@ -16,7 +16,7 @@ export class AutomationEditor extends Modal {
 		app: App,
 		private service: AutomationsApi,
 		private targets: () => Promise<TaskTarget[]>,
-		cwd: string,
+		private readonly cwd: string,
 		source?: SourceRef,
 		title = '',
 		existing?: AutomationDefinition,
@@ -36,11 +36,7 @@ export class AutomationEditor extends Modal {
 						? { kind: 'notify', body: title }
 						: {
 								kind: 'agent',
-								agentId:
-									service
-										.agent()
-										?.listAgents()
-										.find((a) => a.enabled)?.id ?? '',
+								agentId: this.availableAgents()[0]?.id ?? '',
 								prompt: '',
 								cwd,
 								sessionMode: 'fresh',
@@ -52,6 +48,9 @@ export class AutomationEditor extends Modal {
 					createdAt: Date.now(),
 					updatedAt: Date.now(),
 				};
+	}
+	private availableAgents() {
+		return (this.service.agent()?.listAgents() ?? []).filter((agent) => agent.enabled && agent.installed !== false);
 	}
 	onOpen(): void {
 		this.draw();
@@ -80,7 +79,13 @@ export class AutomationEditor extends Modal {
 							? { kind: 'notify', body: '' }
 							: v === 'create-task'
 								? { kind: 'create-task', path: '', cardId: '', text: '' }
-								: { kind: 'agent', agentId: '', cwd: '', prompt: '', sessionMode: 'fresh' };
+								: {
+										kind: 'agent',
+										agentId: this.availableAgents()[0]?.id ?? '',
+										cwd: this.cwd,
+										prompt: '',
+										sessionMode: 'fresh',
+									};
 					this.draw();
 				});
 			});
@@ -160,17 +165,27 @@ export class AutomationEditor extends Modal {
 			.addButton((button) => button.setButtonText(t('automation.cancel')).onClick(() => this.close()));
 	}
 	private agentFields(el: HTMLElement, action: Extract<AutomationAction, { kind: 'agent' }>): void {
-		const agents = this.service.agent()?.listAgents() ?? [];
-		new Setting(el).setName(t('automation.agent')).addDropdown((input) => {
-			input.addOption('', t('automation.select'));
-			for (const agent of agents.filter((a) => a.enabled && a.installed !== false))
-				input.addOption(agent.id, agent.title);
-			input.setValue(action.agentId).onChange((v) => {
-				action.agentId = v;
-				action.session = undefined;
-				this.draw();
+		const agents = this.availableAgents();
+		const unavailable = !!action.agentId && !agents.some((agent) => agent.id === action.agentId);
+		new Setting(el)
+			.setName(t('automation.agent'))
+			.setDesc(
+				unavailable
+					? t('automation.agentSelectionUnavailable')
+					: !agents.length
+						? t('automation.noAvailableAgents')
+						: '',
+			)
+			.addDropdown((input) => {
+				input.addOption('', t('automation.select'));
+				if (unavailable) input.addOption(action.agentId, `${action.agentId} (${t('automation.unavailable')})`);
+				for (const agent of agents) input.addOption(agent.id, agent.title);
+				input.setValue(action.agentId).onChange((v) => {
+					action.agentId = v;
+					action.session = undefined;
+					this.draw();
+				});
 			});
-		});
 		new Setting(el).setName(t('automation.cwd')).addText((input) =>
 			input.setValue(action.cwd).onChange((v) => {
 				action.cwd = v;
@@ -295,6 +310,8 @@ export class AutomationEditor extends Modal {
 			if (!this.draft.name.trim()) invalid('nameRequired');
 			if (!Number.isFinite(this.draft.graceMinutes) || this.draft.graceMinutes < 0) invalid('graceInvalid');
 			if (a.kind === 'agent' && (!a.agentId || !a.cwd.trim())) invalid('agentRequired');
+			if (a.kind === 'agent' && !this.availableAgents().some((agent) => agent.id === a.agentId))
+				invalid('agentSelectionUnavailable');
 			if (a.kind === 'agent' && a.sessionMode === 'specific' && !a.session?.sessionId) invalid('sessionMissing');
 			if (a.kind === 'create-task' && (!a.path || !a.cardId)) invalid('targetRequired');
 			if (!(a.kind === 'agent' ? a.prompt : a.kind === 'notify' ? a.body : a.text).trim())

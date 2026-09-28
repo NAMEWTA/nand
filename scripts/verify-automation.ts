@@ -1,7 +1,19 @@
 import { createNotificationDelivery } from '../src/platform/obsidian/notifications/delivery';
 import { DashboardAutomationSource } from '../src/platform/obsidian/dashboard/automation';
 import { DEFAULT_SETTINGS } from '../src/plugin/settings/model';
-import { automationArgs, RESUME_FLAGS } from '../src/plugin/workflows/agent-runtime';
+import { automationArgs, RESUME_FLAGS, TerminalAutomationRuntime } from '../src/plugin/workflows/agent-runtime';
+import { AutomationEditor } from '../src/view/automations/editor';
+import { AutomationError } from '../src/shared/automation/errors';
+import { normalizeAgentSettings } from '../src/core/agent-launch/defaults';
+import { setLanguage, t } from '../src/shared/i18n/index';
+import type { AutomationsApi } from '../src/core/automations/api';
+import type { TerminalAgentController } from '../src/plugin/modules/terminal/controller';
+import { Notice, Setting } from 'obsidian';
+import type { StubControl } from './obsidian-stub';
+import * as nodeFs from 'node:fs';
+import * as nodePath from 'node:path';
+import { tmpdir } from 'node:os';
+import { createRequire } from 'node:module';
 import { AUTOMATION_AGENTS } from '../src/core/agent-launch/automation-catalog';
 import type { AgentId } from '../src/core/agent-launch/types';
 import { parseNativeSession } from '../src/platform/desktop/ai-vault/automation-scan';
@@ -23,6 +35,229 @@ import type {
 	AutomationSourcePort,
 } from '../src/shared/automation/types';
 import { mergeNativeHooks } from '../src/platform/desktop/agent-hooks/automation-hooks';
+
+test('agent editor uses the same availability set for defaults, controls and save, without replacing stale choices', async () => {
+	const settings = Setting as unknown as {
+		created: { name: string; desc: string; dropdowns: StubControl[]; buttons: StubControl[] }[];
+	};
+	const notices = Notice as unknown as { messages: string[] };
+	let agents = [
+		{ id: 'claude-code', title: 'Claude Code', enabled: true, installed: false, resumable: true },
+		{ id: 'codex', title: 'Codex', enabled: true, installed: true, resumable: true },
+	];
+	const saved: AutomationDefinition[] = [];
+	let runtimeAvailable = true;
+	const api = {
+		deviceId: 'device',
+		agent: () => runtimeAvailable ? ({ listAgents: () => agents }) : undefined,
+		save: async (value: AutomationDefinition) => {
+			saved.push(structuredClone(value));
+		},
+		tick: async () => {},
+	} as unknown as AutomationsApi;
+	const inspect = (editor: AutomationEditor) =>
+		editor as unknown as { draft: AutomationDefinition; save(): Promise<void> };
+	try {
+		for (const language of ['zh', 'en', 'zh'] as const) {
+			setLanguage(language);
+			const editor = new AutomationEditor({} as App, api, async () => [], '/vault');
+			const state = inspect(editor);
+			assert.equal(state.draft.action.kind === 'agent' && state.draft.action.agentId, 'codex');
+			settings.created.length = 0;
+			editor.onOpen();
+			const row = settings.created.find((row) => row.name === t('automation.agent'))!;
+			assert.deepEqual(row.dropdowns[0]!.options, ['', 'codex']);
+			assert.equal(row.dropdowns[0]!.value, 'codex');
+			state.draft.name = 'Untouched user title';
+			if (state.draft.action.kind !== 'agent') throw Error('Expected agent draft');
+			state.draft.action.prompt = 'Untouched user prompt';
+			await state.save();
+			assert.equal(
+				saved[saved.length - 1]?.action.kind === 'agent' &&
+					(saved[saved.length - 1]!.action as { agentId: string }).agentId,
+				'codex',
+			);
+			const count = saved.length;
+			agents[1]!.installed = false;
+			await state.save();
+			assert.equal(saved.length, count, 'Availability is rechecked after the editor opens');
+			assert.equal(notices.messages[notices.messages.length - 1], t('automation.agentSelectionUnavailable'));
+			const stale = new AutomationEditor({} as App, api, async () => [], '/vault', undefined, '', state.draft);
+			settings.created.length = 0;
+			stale.onOpen();
+			const staleRow = settings.created.find((row) => row.name === t('automation.agent'))!;
+			assert.equal(staleRow.desc, t('automation.agentSelectionUnavailable'));
+			assert.equal(staleRow.dropdowns[0]!.value, 'codex');
+			assert.ok(staleRow.dropdowns[0]!.labels?.codex?.includes(t('automation.unavailable')));
+			await inspect(stale).save();
+			assert.equal(saved.length, count);
+			assert.deepEqual(
+				inspect(stale).draft.action,
+				state.draft.action,
+				'Invalid editing preserves the selected identity and user input',
+			);
+			const empty = new AutomationEditor({} as App, api, async () => [], '/vault');
+			const emptyState = inspect(empty);
+			emptyState.draft.name = 'No CLI';
+			if (emptyState.draft.action.kind !== 'agent') throw Error('Expected agent draft');
+			assert.equal(emptyState.draft.action.agentId, '');
+			emptyState.draft.action.prompt = 'Keep me';
+			await emptyState.save();
+			assert.equal(saved.length, count);
+			agents[1]!.installed = true;
+			agents[1]!.enabled = false;
+			await state.save();
+			assert.equal(saved.length, count, 'Disabled agents cannot be saved');
+			agents[1]!.enabled = true;
+			runtimeAvailable = false;
+			await state.save();
+			assert.equal(saved.length, count, 'A disabled terminal module cannot save an agent action');
+			runtimeAvailable = true;
+			editor.onClose();
+			stale.onClose();
+			empty.onClose();
+		}
+	} finally {
+		setLanguage('zh');
+	}
+});
+
+test('runtime preflight orders factual failures before permission and prevents all launch effects on rejection', async () => {
+	const root = nodeFs.mkdtempSync(nodePath.join(tmpdir(), 'nand-preflight-'));
+	const vault = nodePath.join(root, 'vault');
+	const outside = nodePath.join(root, 'outside');
+	nodeFs.mkdirSync(vault);
+	nodeFs.mkdirSync(outside);
+	const cli = nodePath.join(root, 'synthetic-cli');
+	nodeFs.writeFileSync(cli, 'synthetic; never executed');
+	const previousWindow = Object.getOwnPropertyDescriptor(globalThis, 'window');
+	Object.defineProperty(globalThis, 'window', {
+		value: { require: createRequire(nodePath.join(process.cwd(), 'package.json')) },
+		configurable: true,
+	});
+	const nativeFs = createRequire(nodePath.join(process.cwd(), 'package.json'))('node:fs') as typeof nodeFs;
+	const exists = nativeFs.existsSync;
+	nativeFs.existsSync = (file: nodeFs.PathLike) => /(^|[/\\])grok(?:\.exe)?$/.test(String(file)) ? false : exists(file);
+	const settings = normalizeAgentSettings({});
+	settings.globalPermissionMode = 'yolo';
+	settings.yoloAcknowledged = false;
+	settings.agents.grok.enabled = true;
+	settings.agents.grok.cliPath = nodePath.join(root, 'absent');
+	let launches = 0,
+		preparations = 0,
+		writes = 0;
+	const host = {
+		settings: { agentSettings: settings },
+		manifest: { dir: '.obsidian/plugins/nand' },
+		app: {
+			loadLocalStorage: () => 'synthetic',
+			workspace: { containerEl: { win: {} } },
+			vault: { adapter: { exists: async () => false, getBasePath: () => vault } },
+		},
+		getTerminalService: async () => ({
+			createTerminal: async () => {
+				launches++;
+				return {
+					id: 'synthetic',
+					write: () => {
+						writes++;
+					},
+				};
+			},
+		}),
+	} as unknown as TerminalAgentController;
+	const runtime = new TerminalAutomationRuntime(host);
+	const internals = runtime as unknown as { hooks: { prepare(): Promise<unknown>; dispose(): void } };
+	internals.hooks = {
+		prepare: async () => {
+			preparations++;
+			return { env: {}, close() {} };
+		},
+		dispose() {},
+	};
+	const action: Extract<import('../src/shared/automation/types').AutomationAction, { kind: 'agent' }> = {
+		kind: 'agent',
+		agentId: 'grok',
+		cwd: nodePath.join(vault, 'missing'),
+		prompt: 'synthetic prompt',
+		sessionMode: 'fresh',
+	};
+	const run = {
+		id: 'synthetic-run',
+		title: 'Synthetic',
+		trigger: 'scheduled',
+	} as import('../src/shared/automation/types').AutomationRun;
+	const rejects = async (code: string) => {
+		await assert.rejects(
+			runtime.start(action, run),
+			(error: unknown) =>
+				error instanceof AutomationError && error.code === code && error.message === t(`automation.${code}`),
+		);
+		assert.equal(launches, 0);
+		assert.equal(preparations, 0);
+		assert.equal(writes, 0);
+	};
+	try {
+		for (const language of ['zh', 'en'] as const) {
+			setLanguage(language);
+			settings.agents.grok.enabled = false;
+			await rejects('agentDisabled');
+			settings.agents.grok.enabled = true;
+			settings.agents.grok.cliPath = nodePath.join(root, 'absent');
+			await rejects('cliMissing');
+			settings.agents.grok.cliPath = cli;
+			action.cwd = nodePath.join(vault, 'missing');
+			await rejects('cwdInvalid');
+			action.cwd = outside;
+			await rejects('cwdInvalid');
+			if (process.platform !== 'win32') {
+				const link = nodePath.join(vault, `escape-${language}`);
+				nodeFs.symlinkSync(outside, link, 'dir');
+				action.cwd = link;
+				await rejects('cwdInvalid');
+			}
+			action.cwd = vault;
+			settings.yoloAcknowledged = false;
+			await rejects('permissionRequired');
+			settings.yoloAcknowledged = true;
+			action.sessionMode = 'specific';
+			await rejects('sessionMissing');
+			action.session = {
+				agentId: 'grok',
+				cwd: vault,
+				sessionId: 'gone',
+				title: 'gone',
+				accountKey: '{invalid',
+				modifiedAtMs: 0,
+			};
+			await rejects('sessionMissing');
+			action.session.accountKey = '{}';
+			action.session.transcriptPath = nodePath.join(root, 'missing-transcript');
+			await rejects('sessionMissing');
+			action.session.transcriptPath = undefined;
+			runtime.listSessions = async () => [];
+			await rejects('sessionMissing');
+			action.sessionMode = 'fresh';
+			action.session = undefined;
+		}
+		const handle = await runtime.start(action, run);
+		assert.equal(handle.terminalId, 'synthetic');
+		assert.equal(launches, 1);
+		assert.equal(preparations, 1);
+		action.sessionMode = 'specific';
+		action.session = { agentId: 'grok', cwd: vault, sessionId: 'present', title: 'Present', accountKey: '{}', modifiedAtMs: 0 };
+		runtime.listSessions = async () => [action.session!];
+		assert.equal((await runtime.start(action, run)).terminalId, 'synthetic');
+		assert.equal(launches, 2); assert.equal(preparations, 2);
+	} finally {
+		runtime.dispose();
+		setLanguage('zh');
+		nativeFs.existsSync = exists;
+		if (previousWindow) Object.defineProperty(globalThis, 'window', previousWindow);
+		else Reflect.deleteProperty(globalThis, 'window');
+		nodeFs.rmSync(root, { recursive: true, force: true });
+	}
+});
 
 function memory() {
 	const files = new Map<string, string>();
