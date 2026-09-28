@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import { Notice, TFile, TFolder, type App } from 'obsidian';
 import { NativeHistory } from '../src/platform/obsidian/ai-vault/service';
 import { HistorySidebar } from '../src/view/terminal/workbench';
+import { UsageModal } from '../src/view/agent-usage/usage-modal';
 import type { NativeSession } from '../src/platform/terminal-server/agent-data-client';
 import type { WorkbenchHost } from '../src/view/terminal/host';
 import { parseHTML } from 'linkedom';
@@ -230,4 +231,98 @@ async function verifyExports() {
 	render(null, panel);
 	console.log('History export: visible Vault files, concurrent collisions, safe names, content, localized failures and actual sidebar open/pending behavior passed.');
 }
-void verifyExports().catch((error) => { console.error(error); process.exitCode = 1; });
+void verifyExports().then(verifyHistoryMatrix).catch((error) => { console.error(error); process.exitCode = 1; });
+
+async function verifyHistoryMatrix() {
+	const panel = document.createElement('div'); document.body.appendChild(panel);
+	const modifiedAtMs = Date.UTC(2026, 8, 28, 12);
+	const all = Array.from({ length: 111 }, (_, index) => ({
+		key: String(index), title: `History ${index}`, agentId: 'codex', modifiedAtMs,
+		usage: { known: false }, accountKey: '{}', text: `Transcript ${index}`,
+	} as NativeSession));
+	let records = all.slice(), failSave = false;
+	const metadata = new Map<string, { favorite?: boolean; archived?: boolean }>();
+	const requests: Array<{ query: string; offset: number; filter: string }> = [];
+	const history = {
+		scan: async () => [], meta: (key: string) => metadata.get(key) ?? {},
+		read: async (session: NativeSession) => session,
+		update: async (key: string, patch: object) => { if (failSave) throw Error('disk full'); metadata.set(key, { ...metadata.get(key), ...patch }); },
+		query: async (query = '', offset = 0, _signal?: AbortSignal, filter = 'active') => {
+			requests.push({ query, offset, filter });
+			const matches = records.filter((row) => row.title.includes(query) && (filter === 'favorite' ? metadata.get(row.key)?.favorite : filter === 'archived' ? metadata.get(row.key)?.archived : !metadata.get(row.key)?.archived));
+			return { rows: matches.slice(offset, offset + 100), total: matches.length };
+		},
+	} as unknown as NativeHistory;
+	const host = { app: {} } as WorkbenchHost;
+	const wait = () => new Promise<void>((resolve) => setTimeout(resolve, 160));
+	const button = (key: string) => Array.from(panel.querySelectorAll<HTMLButtonElement>('button')).find((b) => b.textContent === t('terminalAgent.workbench.' + key))!;
+	const range = () => panel.querySelector('.nand-history-pagination span')?.textContent;
+	const paginate = (direction: 'next' | 'previous') => panel.querySelector<HTMLButtonElement>(`[aria-label="${t('terminalAgent.workbench.' + direction)}"]`)!.click();
+	const changeFilter = async (value: string) => {
+		const select = panel.querySelector('select')!;
+		Object.defineProperty(select, 'value', { value, writable: true, configurable: true });
+		select.dispatchEvent(new document.defaultView!.Event('change', { bubbles: true })); await wait();
+	};
+	const searchFor = async (value: string) => {
+		const input = panel.querySelector('input')!; input.value = value;
+		input.dispatchEvent(new document.defaultView!.Event('input', { bubbles: true })); await wait();
+	};
+	for (const language of ['zh', 'en', 'zh'] as const) {
+		setLanguage(language); records = all.slice(); metadata.clear();
+		render(h(HistorySidebar, { history, host }), panel); await wait();
+		assert.equal(range(), t('terminalAgent.workbench.range', { start: 1, end: 100, total: 111 }));
+		assert.equal(panel.querySelector('.nand-history-row small')!.textContent, `codex · ${new Date(modifiedAtMs).toLocaleDateString(language === 'zh' ? 'zh-CN' : 'en-US')}`);
+		paginate('next'); await wait();
+		assert.equal(range(), t('terminalAgent.workbench.range', { start: 101, end: 111, total: 111 }));
+		assert.equal(panel.querySelectorAll('.nand-history-row').length, 11);
+		assert.equal(panel.querySelector<HTMLButtonElement>(`[aria-label="${t('terminalAgent.workbench.next')}"]`)!.disabled, true);
+		panel.querySelector<HTMLButtonElement>('.nand-history-row button')!.click(); await wait();
+		assert.ok(panel.querySelector('.nand-history-preview')!.textContent!.includes(t('terminalAgent.workbench.usageUnknown')));
+		button('favorite').click(); await wait();
+		assert.equal(button('unfavorite').getAttribute('aria-pressed'), 'true');
+		await changeFilter('favorite');
+		assert.equal(requests.at(-1)!.offset, 0);
+		assert.equal(panel.querySelectorAll('.nand-history-row').length, 1);
+		button('unfavorite').click(); await wait();
+		assert.ok(panel.textContent!.includes(t('terminalAgent.workbench.noMatches')));
+		assert.equal(button('favorite').getAttribute('aria-pressed'), 'false');
+		await changeFilter('');
+		await searchFor('unmatched');
+		assert.ok(panel.textContent!.includes(t('terminalAgent.workbench.noMatches')));
+		await searchFor('');
+		records = all.slice(0, 101);
+		panel.querySelector<HTMLButtonElement>(`[aria-label="${t('terminalAgent.workbench.refresh')}"]`)!.click(); await wait();
+		paginate('next'); await wait();
+		assert.equal(range(), t('terminalAgent.workbench.range', { start: 101, end: 101, total: 101 }));
+		panel.querySelector<HTMLButtonElement>('.nand-history-row button')!.click(); await wait();
+		button('archived').click(); await wait(); await wait();
+		assert.equal(button('unarchive').getAttribute('aria-pressed'), 'true');
+		assert.equal(panel.querySelectorAll('.nand-history-row').length, 100, 'Archiving the last row clamps to the remaining first page');
+		assert.equal(requests.at(-1)!.offset, 0);
+		assert.equal(range(), undefined, 'A single remaining page needs no pager');
+		await changeFilter('archived');
+		assert.equal(panel.querySelectorAll('.nand-history-row').length, 1);
+		button('unarchive').click(); await wait();
+		assert.ok(panel.textContent!.includes(t('terminalAgent.workbench.noMatches')));
+		assert.equal(button('archived').getAttribute('aria-pressed'), 'false');
+		failSave = true; button('favorite').click(); await wait();
+		assert.equal(button('favorite').getAttribute('aria-pressed'), 'false', 'Failed metadata writes do not publish a state change');
+		failSave = false;
+		await changeFilter(''); records = [];
+		panel.querySelector<HTMLButtonElement>(`[aria-label="${t('terminalAgent.workbench.refresh')}"]`)!.click(); await wait();
+		assert.ok(panel.textContent!.includes(t('terminalAgent.workbench.empty')));
+		assert.ok(!panel.textContent!.includes(t('terminalAgent.workbench.noMatches')));
+		const environment = globalThis as { document?: unknown };
+		delete environment.document; // Native Modal stub owns its mini-DOM, separate from Preact's document.
+		try {
+			const usage = new UsageModal({} as App, [{ provider: 'Synthetic', checkedAt: modifiedAtMs, status: 'unknown', stale: true, windows: [{ name: '每月', usedPct: null, resetAt: modifiedAtMs }] } as never]);
+			usage.onOpen();
+			const localizedTime = new Date(modifiedAtMs).toLocaleString(language === 'zh' ? 'zh-CN' : 'en-US');
+			assert.equal(usage.contentEl.textContent!.split(localizedTime).length - 1, 2, 'Checked and reset dates use the NAND language');
+			assert.ok(!usage.contentEl.textContent!.includes('100%'), 'Unknown remaining quota is not inferred');
+			usage.onClose();
+		} finally { environment.document = document; }
+		render(null, panel);
+	}
+	console.log('History matrix: zh/en/zh dates, 111/101 ranges, search/filter empty states, metadata toggles, page shrink and unknown usage passed.');
+}

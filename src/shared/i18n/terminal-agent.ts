@@ -1,6 +1,13 @@
 /** Terminal agent strings. Chinese and English only. */
 export const messages = {
 	en: {
+		'terminalAgent.workbench.range': '{start}–{end} of {total}',
+		'terminalAgent.workbench.previous': 'Previous history page',
+		'terminalAgent.workbench.next': 'Next history page',
+		'terminalAgent.workbench.noMatches': 'No history matches this search or filter',
+		'terminalAgent.workbench.unfavorite': 'Remove favorite',
+		'terminalAgent.workbench.unarchive': 'Unarchive',
+
 		'terminalAgent.workbench.exported': 'Exported and opened: {path}',
 		'terminalAgent.workbench.exportReadFailed': 'Could not read this history for export: {message}',
 		'terminalAgent.workbench.exportWriteFailed': 'Could not save the exported note: {message}',
@@ -490,6 +497,13 @@ export const messages = {
 		'terminalAgent.menu.workflows': 'Workflows',
 	},
 	zh: {
+		'terminalAgent.workbench.range': '第 {start}–{end} 条，共 {total} 条',
+		'terminalAgent.workbench.previous': '上一页历史',
+		'terminalAgent.workbench.next': '下一页历史',
+		'terminalAgent.workbench.noMatches': '没有符合当前搜索或筛选条件的历史',
+		'terminalAgent.workbench.unfavorite': '取消收藏',
+		'terminalAgent.workbench.unarchive': '取消归档',
+
 		'terminalAgent.workbench.exported': '已导出并打开：{path}',
 		'terminalAgent.workbench.exportReadFailed': '无法读取这条历史以导出：{message}',
 		'terminalAgent.workbench.exportWriteFailed': '无法保存导出的笔记：{message}',

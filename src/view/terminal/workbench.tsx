@@ -9,7 +9,7 @@ import type { TerminalService } from '../../platform/desktop/terminal/terminal-s
 import { usageContext } from '../../platform/obsidian/agents/usage-context';
 import type { NativeHistory } from '../../platform/obsidian/ai-vault/service';
 import type { HistoryPage, NativeSession, NativeUsage } from '../../platform/terminal-server/agent-data-client';
-import { t as sharedT } from '../../shared/i18n/index';
+import { getLanguage, t as sharedT } from '../../shared/i18n/index';
 import { t } from '../../shared/i18n/terminal-accessor';
 import { UsageModal } from '../agent-usage/usage-modal';
 import type { WorkbenchHost } from './host';
@@ -96,7 +96,7 @@ export function HistorySidebar({ history, host }: { history: NativeHistory; host
 	const [query, setQuery] = useState(''),
 		[offset, setOffset] = useState(0),
 		[revision, refresh] = useState(0);
-	const [page, setPage] = useState<HistoryPage>(),
+	const [page, setPage] = useState<HistoryPage & { offset: number }>(),
 		[busy, setBusy] = useState(false),
 		[error, setError] = useState('');
 	const [selected, setSelected] = useState<NativeSession>(),
@@ -132,8 +132,12 @@ export function HistorySidebar({ history, host }: { history: NativeHistory; host
 					const warnings = await history.scan(abort.signal);
 					if (!abort.signal.aborted) setError(warnings.join('\n'));
 				}
-				const next = await history.query(query, offset, abort.signal, filter || 'active');
-				if (!abort.signal.aborted) setPage(next);
+				const next = await history.query(query.trim(), offset, abort.signal, filter || 'active');
+				if (!abort.signal.aborted) {
+					const lastOffset = Math.max(0, Math.floor((next.total - 1) / 100) * 100);
+					if (offset > lastOffset) setOffset(lastOffset);
+					else setPage({ ...next, offset });
+				}
 			} catch (e) {
 				if (!abort.signal.aborted) setError(String(e));
 			} finally {
@@ -242,22 +246,22 @@ export function HistorySidebar({ history, host }: { history: NativeHistory; host
 								{history.meta(session.key).title || session.title}
 							</strong>
 							<small>
-								{session.agentId} · {new Date(session.modifiedAtMs).toLocaleDateString()}
+								{session.agentId} · {new Date(session.modifiedAtMs).toLocaleDateString(getLanguage() === 'zh' ? 'zh-CN' : 'en-US')}
 							</small>
 							<small>{(history.meta(session.key).tags ?? []).join(' · ')}</small>
 						</button>
 					</div>
 				))}
-			{page && page.total === 0 && !busy && <p>{t('workbench.empty')}</p>}
+			{page && page.total === 0 && !busy && <p>{t(query.trim() || filter ? 'workbench.noMatches' : 'workbench.empty')}</p>}
 			{page && page.total > 100 && (
 				<div className="nand-history-pagination">
-					<button disabled={offset === 0} onClick={() => setOffset(Math.max(0, offset - 100))}>
+					<button disabled={busy || page.offset === 0} onClick={() => setOffset(Math.max(0, page.offset - 100))} aria-label={t('workbench.previous')}>
 						←
 					</button>
 					<span>
-						{offset + 1} / {page.total}
+						{t('workbench.range', { start: page.offset + 1, end: page.offset + page.rows.length, total: page.total })}
 					</span>
-					<button disabled={offset + 100 >= page.total} onClick={() => setOffset(offset + 100)}>
+					<button disabled={busy || page.offset + 100 >= page.total} onClick={() => setOffset(page.offset + 100)} aria-label={t('workbench.next')}>
 						→
 					</button>
 				</div>
@@ -279,11 +283,11 @@ export function HistorySidebar({ history, host }: { history: NativeHistory; host
 							{t('workbench.resume')}
 						</button>
 						<button onClick={() => edit(selected)}>{t('workbench.rename')}</button>
-						<button onClick={() => update(selected, { favorite: !history.meta(selected.key).favorite })}>
-							{t('workbench.favorite')}
+						<button aria-pressed={!!history.meta(selected.key).favorite} onClick={() => update(selected, { favorite: !history.meta(selected.key).favorite })}>
+							{t(history.meta(selected.key).favorite ? 'workbench.unfavorite' : 'workbench.favorite')}
 						</button>
-						<button onClick={() => update(selected, { archived: !history.meta(selected.key).archived })}>
-							{t('workbench.archived')}
+						<button aria-pressed={!!history.meta(selected.key).archived} onClick={() => update(selected, { archived: !history.meta(selected.key).archived })}>
+							{t(history.meta(selected.key).archived ? 'workbench.unarchive' : 'workbench.archived')}
 						</button>
 						<button disabled={exporting} onClick={() => void exportSession(selected)}>
 							{t('workbench.export')}

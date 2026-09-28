@@ -2,6 +2,9 @@ import { Modal, type App } from 'obsidian';
 import type { UsageSnapshot, UsageWindow } from '../../core/agent-launch/types';
 import { remainingPercent } from '../../platform/desktop/agents/usage';
 import { t } from '../../shared/i18n/terminal-accessor';
+import { getLanguage } from '../../shared/i18n';
+
+const dateTime = (value: number | string): string => new Date(value).toLocaleString(getLanguage() === 'zh' ? 'zh-CN' : 'en-US');
 
 export class UsageModal extends Modal {
 	constructor(
@@ -30,7 +33,7 @@ export class UsageModal extends Modal {
 			if (snapshot.stale) card.createEl('p', { text: `${t('agents.usageStale')} · ${snapshot.status}` });
 			if (snapshot.checkedAt)
 				card.createEl('small', {
-					text: `${t('agents.usageUpdated')} ${new Date(snapshot.checkedAt).toLocaleString()}`,
+					text: `${t('agents.usageUpdated')} ${dateTime(snapshot.checkedAt)}`,
 				});
 			if (snapshot.windows.length === 0) {
 				card.createEl('p', { text: snapshot.status });
@@ -77,5 +80,5 @@ function refreshLabel(window: UsageWindow): string {
 				: window.name === '每周'
 					? t('agents.refreshWeek')
 					: t('agents.refreshGeneric');
-	return window.resetAt ? `${name} ${new Date(window.resetAt).toLocaleString()}` : name;
+	return window.resetAt ? `${name} ${dateTime(window.resetAt)}` : name;
 }
