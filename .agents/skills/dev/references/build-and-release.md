@@ -97,11 +97,12 @@ Raising `minAppVersion` drops users. Keep the settings fallback described in `re
 `.github/workflows/release.yml` runs on any tag push:
 
 1. `pnpm install --frozen-lockfile`
-2. `pnpm run build`
+2. Validate tag, manifest/package versions and compatibility entry with `scripts/verify-release-artifacts.mjs`, then `pnpm run build`
 3. Zip `dist/<id>/{main.js,manifest.json,styles.css}` as `<id>-<version>.zip`
 4. Attest the zip
 5. Wait for `terminal-build.yml`, which builds and tests Linux x64/arm64, macOS x64/arm64 and Windows x64 from the same source commit; download the binaries plus SHA256 artifacts
-6. `softprops/action-gh-release` with generated notes, attaching the zip and `terminal-artifacts/*` (never stale checked-in binaries)
+6. Validate all five binary/checksum pairs with `scripts/verify-release-artifacts.mjs` and exercise the packaged Linux binary through `scripts/verify-pty-automation.mjs`
+7. `softprops/action-gh-release` with generated notes, attaching the zip and `terminal-artifacts/*` (never stale checked-in binaries)
 
 Push `main`, then push the tag. That workflow is the only release creator. Leave the attestation step and the terminal-binary upload in place.
 

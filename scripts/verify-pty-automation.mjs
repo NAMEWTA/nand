@@ -6,6 +6,7 @@ import WebSocket from 'ws';
 import fs from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
+import { createHash } from 'node:crypto';
 
 const binary = process.argv[2] || 'processes/rust-terminal-servers/target/release/rust-terminal-servers';
 const child = spawn(binary, [], { stdio: ['ignore', 'pipe', 'pipe'] });
@@ -54,12 +55,22 @@ try {
  ws.send(JSON.stringify({module:'agent_data',type:'query',requestId:'history-query',...scope,query:'needle'}));
  await until(() => messages.some(m=>m.requestId==='history-query'));
  const page = messages.find(m=>m.requestId==='history-query'); assert.equal(page.data.total,1); assert.equal(page.data.rows[0].text,'');
+ const beforeRead = createHash('sha256').update(await fs.readFile(path.join(source, 'session.jsonl'))).digest('hex');
+ ws.send(JSON.stringify({module:'agent_data',type:'read',requestId:'history-read',...scope,key:page.data.rows[0].key}));
+ await until(() => messages.some(m=>m.requestId==='history-read'));
+ const transcript = messages.find(m=>m.requestId==='history-read');
+ assert.equal(transcript.error, undefined);
+ assert.ok(transcript.data.text.includes('history needle'));
+ assert.equal(transcript.data.sessionId, 'one');
+ assert.equal(createHash('sha256').update(await fs.readFile(path.join(source, 'session.jsonl'))).digest('hex'), beforeRead, 'History read changed the native transcript');
+ assert.equal(page.data.usage.known, false, 'Unknown usage must not be reported as measured');
+ assert.ok(!messages.some(m=>m.code==='PARSE_ERROR'), 'History requests leaked into the PTY protocol');
  await fs.appendFile(path.join(source,'session.jsonl'),message);
  ws.send(JSON.stringify({...scan,requestId:'history-cancel'}));
  ws.send(JSON.stringify({module:'agent_data',type:'cancel',requestId:'history-cancel'}));
  await until(() => messages.some(m=>m.requestId==='history-cancel'));
  assert.equal(messages.find(m=>m.requestId==='history-cancel').error,'cancelled');
- console.log('PTY/history integration passed: output, exit ordering and codes, process-tree cancellation, concurrent history scan, query and cancellation');
+ console.log('PTY/history integration passed: output, exit ordering and codes, process-tree cancellation, concurrent history scan, query, full transcript read, native source integrity, unknown usage and cancellation');
 } finally {
  clearTimeout(timer); ws?.terminate(); child.kill('SIGKILL');
  await fs.rm(temporary, {recursive:true,force:true});

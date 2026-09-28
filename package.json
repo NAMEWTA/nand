@@ -1,6 +1,6 @@
 {
 	"name": "nand",
-	"version": "0.0.1",
+	"version": "0.0.2",
 	"description": "NAND — dashboards, comments, coding agents, icons, contacts, automations and notifications.",
 	"main": "main.js",
 	"type": "module",
