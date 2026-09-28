@@ -3,7 +3,9 @@ import { ContactsApplication } from '../../../core/contacts/application';
 import type { ContactsFile, ContactsFiles } from '../../../core/contacts/files';
 import { ContactsError } from '../../../core/contacts/model';
 import guide from '../../../core/contacts/persist/format-guide.md';
+import englishGuide from '../../../core/contacts/persist/format-guide-en.md';
 import type { ContactsSettings } from '../../../shared/contacts-settings';
+import { getLanguage } from '../../../shared/i18n';
 /** Native lifecycle, Vault IO and protection of unsaved editor content. */
 export class ContactsController extends Component {
 	private readonly application: ContactsApplication;
@@ -17,7 +19,7 @@ export class ContactsController extends Component {
 			return file;
 		};
 		const files: ContactsFiles = {
-			formatGuide: guide,
+			get formatGuide() { return getLanguage() === 'en' ? englishGuide : guide; },
 			ready: async () => {
 				if (!app.workspace.layoutReady)
 					await new Promise<void>((resolve) => app.workspace.onLayoutReady(resolve));

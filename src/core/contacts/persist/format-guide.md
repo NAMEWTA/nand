@@ -1,14 +1,14 @@
-# 档案格式 / Archive format
+# 档案格式
 
-已保存的 Markdown 文件是档案资料的完整来源。日常使用档案面板查看和编辑；面板、搜索和人数统计可从文件重建，不需要 NAND 的 data.json。复制整个资料文件夹即可带走资料；正文引用的目录外附件需要另行复制。原始文件也可直接提供给 AI 阅读。未保存的表单草稿不在文件中。
+已保存的 Markdown 文件是档案资料的完整来源。日常使用档案面板查看和编辑；面板、搜索和人数统计可从文件重建，不需要 NAND 的 `data.json`。复制整个资料文件夹即可带走资料；正文引用的目录外附件需要另行复制。原始文件也可直接提供给 AI 阅读。未保存的表单草稿不在文件中。
 
-Each person/company is one Markdown file. `nand-type` is `person` or `company`; `nand-id` is an immutable UUID. Names are not identifiers. Same-name people must remain separate.
+每个人物或企业对应一个 Markdown 文件。`nand-type` 为 `person`（人物）或 `company`（企业）；`nand-id` 是不可变的 UUID。姓名不是身份标识，同名人物应保留为不同档案。面板只识别所选目录及其子目录中带有上述类型属性的档案，普通 Markdown 笔记不自动变成联系人。恢复原档案时保留其 ID；为另一个人物建档时生成新 ID，不能直接复制身份标识。
 
-面板只识别所选目录及其子目录中带有上述类型属性的档案，普通 Markdown 笔记不自动变成联系人。恢复原档案时保留其 ID；为另一个人物建档时生成新 ID，不能直接复制身份标识。
+面板创建的文件分别位于资料文件夹下的 `联系人/` 和 `企业/`，说明文件为 `档案格式说明.md`；这些路径名称不随界面语言改变。
 
-## 属性 / Properties
+## 属性
 
-属性放在文件开头的 YAML frontmatter（两行 `---` 之间）。缺少可选字段时按空值处理，未知属性会保留。
+属性放在文件开头的 YAML 区域（两行 `---` 之间）。缺少可选字段时按空值处理，未知属性会保留。下列机器字段名不翻译。
 
 | 属性 | 类型 | 含义 |
 | --- | --- | --- |
@@ -24,45 +24,74 @@ Each person/company is one Markdown file. `nand-type` is `person` or `company`; 
 | `wechat`、`emails` | 字符串列表 | 微信、邮箱 |
 | `tags` | 字符串列表 | 标签 |
 
-人物不生成企业网址字段，企业不生成生日和个人联系方式字段。未知属性仍会保留。更改显示名称不会自动重命名文件。
+人物不生成企业网址字段，企业不生成生日和个人联系方式字段。未知属性仍会保留。更改显示名称不会自动重命名文件，包括企业名称；若要改文件名，请在 Obsidian 中另行重命名并保留 `nand-id`。
 
 电话始终按字符串填写，例如 `phones: ["057100000000"]`，保留前导零和 `+` 号。列表推荐使用 YAML 数组；单个文本值也可读取为一项。生日推荐加引号，例如 `birthday: "1990-05-20"`。
 
-## 工作经历 / Employment
+## 工作经历
 
-The table between `<!-- nand:employments -->` and `<!-- /nand:employments -->` uses these semantic columns (new tables display localized English or Chinese headings):
+工作经历表放在 `<!-- nand:employments -->` 与 `<!-- /nand:employments -->` 之间。以下是中文表头示例：
 
-| company                 | department | title | start   | end | status  | key_role | notes    |
-| ----------------------- | ---------- | ----- | ------- | --- | ------- | -------- | -------- |
-| [公司](../企业/公司.md) | 部门       | 职务  | 2020-01 |     | current | leader   | 任职备注 |
+| 企业 | 部门 | 职务 | 开始时间 | 结束时间 | 任职状态 | 关键角色 | 备注 |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| [公司](../企业/公司.md) | 部门 | 职务 | 2020-01 | | current | leader | 任职备注 |
 
-`status`: current（现任）or past（曾任）, independent of missing dates. Dates accept YYYY-MM or YYYY-MM-DD. Concurrent jobs are allowed. `key_role`: empty, leader（负责人）, contact（关键联系人）. A company's employee count means recorded current contacts, deduplicated by person UUID, not its total workforce.
+`status` 为 `current`（现任）或 `past`（曾任），不根据日期是否缺失推断。日期接受 `YYYY-MM` 或 `YYYY-MM-DD`，可同时任职于多家公司。现任经历的 `end` 必须为空；曾任经历可保留未知起止时间。`key_role` 可为空、`leader`（负责人）或 `contact`（关键联系人）。关键人物来自现任经历的 `key_role`。
 
-现任经历的 `end` 必须为空；曾任经历可保留未知起止时间。关键人物来自现任经历的 `key_role`。企业人员列表由人物履历计算，不在企业文件内维护第二份人员名单。表头顺序须保持不变；支持下列机器字段名及 NAND 生成的中英文表头，切换界面语言仍可读取。
+企业人数指已收录的现任联系人，按人物 UUID 去重，不是企业实际员工总数。企业人员列表由人物履历计算，不在企业文件内维护第二份人员名单。
 
-## 人际关系 / Relationships
+## 人际关系
 
-| person          | kind   | company                 | notes    |
-| --------------- | ------ | ----------------------- | -------- |
+关系表放在 `<!-- nand:relations -->` 与 `<!-- /nand:relations -->` 之间：
+
+| 联系人 | 对方是此人的… | 企业 | 备注 |
+| --- | --- | --- | --- |
 | [李四](李四.md) | leader | [公司](../企业/公司.md) | 直属领导 |
 
-Stored between `<!-- nand:relations -->` and `<!-- /nand:relations -->`.
-The linked person is the note owner's `kind`: leader（领导）, report（下属）, colleague（同事）, friend（朋友）, or a custom label. The inverse is computed, not written to a second file. Shared employers do not prove a direct relationship.
+链接的人物是当前档案主人的 `kind`：`leader`（领导）、`report`（下属）、`colleague`（同事）、`friend`（朋友），也可以是自定义称谓。例如表格位于张三档案时，上例表示“李四是张三的领导”；李四面板中显示“张三是下属”。反向关系由面板计算，不写入第二份文件。同在一家公司不表示两人有直接关系。
 
-例如这张表位于张三的档案时，上例表示“李四是张三的领导”；李四面板中显示“张三是下属”。`company` 可以为空。自定义关系只保留原始称谓与来源，不猜测其反向含义。
+`company` 可以为空。自定义关系只保留原始称谓与来源，不猜测其反向含义。
 
-`<!-- nand:row UUID -->` identifies a row. `<!-- nand:ref UUID -->` identifies a link target even after a rename. Keep these when possible. Human-readable links and table content carry the facts; comments only carry identity. New manually written rows can omit identifiers if their links resolve. Unknown/broken targets remain in the file.
+## 表头、链接与行身份
+
+表头须整行采用下列三种形式之一，列顺序不变，不混合语言。两种界面语言都可读取全部形式；保存修改后的表格使用当时的界面语言。这里只展示表头的精确文本，并非需要加入档案的附加表格。
+
+工作经历：
+
+```text
+| company | department | title | start | end | status | key_role | notes |
+| Companies | Department | Role | Start date | End date | Employment status | Key role | Notes |
+| 企业 | 部门 | 职务 | 开始时间 | 结束时间 | 任职状态 | 关键角色 | 备注 |
+```
+
+人际关系：
+
+```text
+| person | kind | company | notes |
+| People | This person’s… | Companies | Notes |
+| 联系人 | 对方是此人的… | 企业 | 备注 |
+```
+
+`<!-- nand:row UUID -->` 标识一行；`<!-- nand:ref UUID -->` 标识链接目标，重命名后仍可识别。这里的 `UUID` 应替换为对应的实际标识，尽量保留已有标识。可读链接与表格内容承载事实，注释仅承载身份。新手工行可以省略标识，但链接必须能正确解析。未知或失效的目标仍保留在文件中。
 
 使用标准 Markdown 相对链接（相对于当前文件），不是 `[[双链]]`；路径中的空格等特殊字符应进行 URL 编码。表格行标识放在第一列，目标标识紧跟对应链接。不要将一个对象的链接与另一个对象的 ID 拼在一起；可见链接和身份指向不同对象时会阻止面板保存。
 
-## 自由文字 / Prose
+表格单元格内使用 `&#124;` 表示竖线、`&#92;` 表示反斜杠、`<br>` 表示换行。
 
-`traits` 性格与偏好，`habits` 生活习惯，`notes` 备注／企业特别情况 are ordinary Markdown between matching nand markers. Text outside these regions and unknown properties are preserved. Do not duplicate or nest region markers. Within tables use `&#124;` for a literal pipe, `&#92;` for a backslash, and `<br>` for line breaks.
+## 自由文字
 
-## 使用与恢复 / Usage and recovery
+下列标记之间是普通 Markdown 正文。标记名不翻译，不重复或嵌套标记。区域外文字和未知属性会保留。
+
+| 内容 | 开始标记 | 结束标记 |
+| --- | --- | --- |
+| 性格与偏好 | `<!-- nand:traits -->` | `<!-- /nand:traits -->` |
+| 生活习惯 | `<!-- nand:habits -->` | `<!-- /nand:habits -->` |
+| 备注／企业特别情况 | `<!-- nand:notes -->` | `<!-- /nand:notes -->` |
+
+## 使用与恢复
 
 面板通过明确的保存操作写入资料。不同基本字段或不同正文区域的外部修改可合并；同一字段或同一张履历／关系表的并发修改会报告冲突，保留当前表单草稿。表格冲突按整张表处理，不按行合并。可复制草稿后重新载入原始资料；复制内容为 JSON，仅用于留存输入，不是 Markdown 导出。
 
-Changing the configured folder switches the data source; it does not move or delete the old folder. Deletion follows Obsidian's file deletion settings and keeps references in other records. Disabling or uninstalling NAND does not remove saved archive files. Keep an independent backup for disk failure or accidental deletion.
+更改资料文件夹会切换数据来源，不移动或删除旧文件夹。删除遵循 Obsidian 的文件删除设置，其他档案中的引用会保留。关闭或卸载 NAND 不删除已保存档案；请独立备份以应对磁盘故障或误删。
 
-本说明在创建档案且目录中缺少说明文件时生成。升级不会覆盖已有说明文件，也不会自动改写全部档案。
+本说明在创建档案且目录中缺少说明文件时，按当时的 NAND 语言生成。切换语言或升级不会覆盖已有说明，也不会自动改写已有档案。

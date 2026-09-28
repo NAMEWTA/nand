@@ -1,6 +1,7 @@
 import { WriteQueue } from '../src/shared/storage/write-queue';
 import { t, setLanguage } from '../src/shared/i18n/index';
 import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
 import { test } from 'node:test';
 import { TFile, TFolder, MarkdownView, type App } from 'obsidian';
 import { cloneRecord, newRecord, emptyRef, ContactsError, type ArchiveRecord } from '../src/core/contacts/model';
@@ -457,4 +458,68 @@ test('new notes localize headings and tables while language changes preserve par
 		assert.deepEqual(parseRecord(raw, 'person.md')?.errors, []);
 	}
 	setLanguage('zh');
+});
+
+test('format guide uses creation-time language and preserves existing documents and record identity', async () => {
+	setLanguage('zh');
+	const f = memoryVault();
+	try {
+		await f.controller.ensureLoaded();
+		setLanguage('en'); // The controller was created before this language change.
+		const company = await f.controller.create(newNamed('company', 'Guide Company'));
+		const english = f.text.get('档案/档案格式说明.md')!;
+		assert.ok(english.startsWith('# Archive format\n'), 'An English first creation needs the complete English guide');
+		assert.match(english, /Changing the display name does not rename the file/);
+		const original = f.text.get(company.path)!;
+		setLanguage('zh');
+		await f.controller.create(newNamed('person', 'Later Person'));
+		assert.equal(f.text.get('档案/档案格式说明.md'), english, 'Switching language never replaces an existing guide');
+		assert.equal(f.text.get(company.path), original);
+		const base = await f.controller.snapshot(company.path), draft = cloneRecord(base);
+		draft.fields.name = 'Renamed Company';
+		const renamed = await f.controller.save(base, draft);
+		assert.equal(renamed.id, company.id);
+		assert.equal(renamed.path, company.path);
+
+		f.settings.rootFolder = '中文档案';
+		await f.controller.reload();
+		await f.controller.create(newNamed('person', '中文人物'));
+		const chinese = f.text.get('中文档案/档案格式说明.md')!;
+		assert.ok(chinese.startsWith('# 档案格式\n'));
+		assert.match(chinese, /更改显示名称不会自动重命名文件/);
+		for (const guide of [english, chinese]) {
+			for (const marker of ['employments', 'relations', 'traits', 'habits', 'notes']) {
+				assert.ok(guide.includes(`<!-- nand:${marker} -->`));
+				assert.ok(guide.includes(`<!-- /nand:${marker} -->`));
+			}
+			for (const field of ['nand-type', 'nand-id', 'birthday', 'birthplace', 'region', 'website', 'aliases', 'mobiles', 'phones', 'wechat', 'emails', 'tags', 'key_role'])
+				assert.ok(guide.includes('`' + field + '`'), field);
+		}
+		const custom = '# My guide\r\nKeep exact bytes: 用户内容\r\n';
+		f.text.set('中文档案/档案格式说明.md', custom);
+		const before = new Map(f.text);
+		setLanguage('en');
+		await f.controller.reload();
+		await f.controller.create(newNamed('person', 'Another Person'));
+		for (const [path, value] of before) assert.equal(f.text.get(path), value, path);
+	} finally {
+		f.controller.onunload();
+		setLanguage('zh');
+	}
+});
+
+test('both format guides document table headings accepted by the real Markdown parser', () => {
+	for (const name of ['format-guide.md', 'format-guide-en.md']) {
+		const guide = readFileSync(`src/core/contacts/persist/${name}`, 'utf8');
+		const headers = guide.split('\n').filter((line) => /^\| (company|Companies|企业|person|People|联系人) \|/.test(line));
+		assert.ok(headers.length >= 6, 'Each guide documents machine, English and Chinese heading rows');
+		for (const header of headers) {
+			const columns = header.split('|').length - 2;
+			const scope = columns === 8 ? 'employments' : 'relations';
+			assert.ok(columns === 8 || columns === 4);
+			const record = fixture();
+			const raw = createMarkdown(record).replace(new RegExp(`(<!-- nand:${scope} -->\\n)[^\\n]+`), '$1' + header);
+			assert.deepEqual(parseRecord(raw, record.path)!.errors, [], `${name}: ${header}`);
+		}
+	}
 });
