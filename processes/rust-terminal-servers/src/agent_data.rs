@@ -137,7 +137,15 @@ impl ModuleHandler for AgentData {
 }
 fn execute(operation: &str, request: &Request, cancel: &AtomicBool) -> Result<Value, String> {
     let vault = fs::canonicalize(&request.vault).map_err(|e| e.to_string())?;
-    let index = PathBuf::from(&request.index);
+    // Resolve the vault once, then anchor its relative index path to that same
+    // representation. Node and Rust differ on Windows verbatim prefixes, and
+    // macOS may spell the same directory through /var or /private/var.
+    let supplied_index = Path::new(&request.index);
+    let relative_index = supplied_index
+        .strip_prefix(Path::new(&request.vault))
+        .or_else(|_| supplied_index.strip_prefix(&vault))
+        .map_err(|_| "index outside vault")?;
+    let index = vault.join(relative_index);
     // Index writes are confined to this vault's NAND data area.
     let parent = index.parent().ok_or("index path")?;
     if !parent.starts_with(vault.join(".nand"))
@@ -733,7 +741,7 @@ mod tests {
         fn new() -> Self {
             let p = std::env::temp_dir().join(format!("nand-history-{}", uuid::Uuid::new_v4()));
             fs::create_dir_all(&p).unwrap();
-            Self(p)
+            Self(fs::canonicalize(p).unwrap())
         }
     }
     impl Drop for Temp {
@@ -754,6 +762,47 @@ mod tests {
             filter: String::new(),
             offset: 0,
             key: String::new(),
+        }
+    }
+    #[test]
+    fn index_paths_accept_vault_aliases_but_reject_escaping_writes() {
+        let temp = Temp::new();
+        let outside = Temp::new();
+        let cancel = AtomicBool::new(false);
+        let mut req = request(&temp.0, vec![]);
+        #[cfg(windows)]
+        {
+            // Node realpath uses drive paths; Rust canonicalize uses verbatim paths.
+            req.vault = req.vault.trim_start_matches(r"\\?\").to_string();
+            req.index = req.index.trim_start_matches(r"\\?\").to_string();
+        }
+        #[cfg(unix)]
+        {
+            let alias = outside.0.join("vault-alias");
+            std::os::unix::fs::symlink(&temp.0, &alias).unwrap();
+            req = request(&alias, vec![]);
+        }
+        assert_eq!(execute("query", &req, &cancel).unwrap()["total"], 0);
+        req.index = outside.0.join("outside.sqlite").to_string_lossy().into();
+        assert_eq!(execute("query", &req, &cancel).unwrap_err(), "index outside vault");
+        assert!(!Path::new(&req.index).exists());
+        req.index = Path::new(&req.vault).join(".nand/../../escape.sqlite").to_string_lossy().into();
+        assert_eq!(execute("query", &req, &cancel).unwrap_err(), "index outside vault");
+        #[cfg(unix)]
+        {
+            let linked = temp.0.join(".nand/escape");
+            std::os::unix::fs::symlink(&outside.0, &linked).unwrap();
+            req.index = linked.join("linked.sqlite").to_string_lossy().into();
+            req.vault = temp.0.to_string_lossy().into();
+            assert_eq!(execute("query", &req, &cancel).unwrap_err(), "index outside vault");
+            assert!(!outside.0.join("linked.sqlite").exists());
+            let source = outside.0.join("source.sqlite");
+            fs::write(&source, b"preserve native file").unwrap();
+            let linked = temp.0.join(".nand/linked.sqlite");
+            std::os::unix::fs::symlink(&source, &linked).unwrap();
+            req.index = linked.to_string_lossy().into();
+            assert_eq!(execute("query", &req, &cancel).unwrap_err(), "symlinked index");
+            assert_eq!(fs::read(&source).unwrap(), b"preserve native file");
         }
     }
     #[test]
