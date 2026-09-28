@@ -25569,10 +25569,15 @@ body:where(.nand-iconic-enabled)[data-theme="Ukiyo"] .workspace-leaf > .workspac
 .workspace-leaf-content[data-type="terminal-view"] .view-content.nand-agent-workbench { display: grid; grid-template-columns: minmax(160px, 220px) minmax(160px, 1fr) minmax(200px, 272px); grid-template-rows: minmax(0, 1fr) auto; gap: 0; padding: 0; overflow: hidden; }
 .nand-agent-sidebar, .nand-agent-history { min-width: 0; overflow: auto; padding: 12px; background: var(--background-secondary); display: flex; flex-direction: column; gap: 8px; }
 .nand-agent-sidebar { border-right: 1px solid var(--background-modifier-border); }
+.nand-agent-sidebar > *, .nand-agent-history > * { flex-shrink: 0; }
+.nand-agent-workbench-title { margin: 0; font-size: var(--font-ui-medium); }
+.nand-agent-sidebar button { white-space: normal; height: auto; overflow-wrap: anywhere; }
 .nand-agent-history { border-left: 1px solid var(--background-modifier-border); }
 .nand-agent-center { min-width: 0; min-height: 0; display: flex; flex-direction: column; overflow: hidden; }
 .nand-agent-center > .terminal-container { flex: 1; min-height: 0; }
 .nand-agent-usage { grid-column: 1 / -1; display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding: 8px 12px; border-top: 1px solid var(--background-modifier-border); font-size: var(--font-ui-smaller); }
+/* Obsidian's desktop status bar overlays the bottom of the leaf. */
+.nand-agent-usage { padding-bottom: calc(var(--size-4-2) + var(--size-4-8)); }
 .nand-agent-usage button { max-width: 100%; white-space: normal; height: auto; }
 .nand-agent-workbench button { min-height: 32px; }
 .nand-session-row { display: flex; gap: 4px; }
@@ -25580,7 +25585,7 @@ body:where(.nand-iconic-enabled)[data-theme="Ukiyo"] .workspace-leaf > .workspac
 .nand-agent-workbench button.is-active { background: var(--background-modifier-hover); color: var(--text-accent); }
 .nand-history-row > button { display: flex; flex-direction: column; align-items: start; width: 100%; height: auto; padding: 8px; text-align: left; white-space: normal; overflow-wrap: anywhere; }
 .nand-history-row small { color: var(--text-muted); }
-.nand-agent-history input, .nand-agent-history select { width: 100%; min-width: 0; }
+.nand-agent-history input, .nand-agent-history select { width: 100%; min-width: 0; min-height: var(--input-height); }
 .nand-history-preview pre, .nand-agent-history details pre { white-space: pre-wrap; overflow-wrap: anywhere; font-size: var(--font-ui-small); }
 .nand-history-preview { border-top: 1px solid var(--background-modifier-border); padding-top: 8px; }
 .nand-history-actions, .nand-history-pagination { display: flex; flex-wrap: wrap; gap: 4px; }

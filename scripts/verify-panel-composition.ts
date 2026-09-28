@@ -1,7 +1,9 @@
 import assert from 'node:assert/strict';
 import { Notice, TFile, TFolder, type App } from 'obsidian';
 import { NativeHistory } from '../src/platform/obsidian/ai-vault/service';
-import { HistorySidebar } from '../src/view/terminal/workbench';
+import { HistorySidebar, SessionSidebar } from '../src/view/terminal/workbench';
+import type { PtySession } from '../src/platform/desktop/terminal/pty-session';
+import type { TerminalService } from '../src/platform/desktop/terminal/terminal-service';
 import { UsageModal } from '../src/view/agent-usage/usage-modal';
 import type { NativeSession } from '../src/platform/terminal-server/agent-data-client';
 import type { WorkbenchHost } from '../src/view/terminal/host';
@@ -231,7 +233,41 @@ async function verifyExports() {
 	render(null, panel);
 	console.log('History export: visible Vault files, concurrent collisions, safe names, content, localized failures and actual sidebar open/pending behavior passed.');
 }
-void verifyExports().then(verifyHistoryMatrix).catch((error) => { console.error(error); process.exitCode = 1; });
+void verifyExports().then(verifyHistoryMatrix).then(verifySessionIdentity).catch((error) => { console.error(error); process.exitCode = 1; });
+
+async function verifySessionIdentity() {
+	const panel = document.createElement('div'); document.body.appendChild(panel);
+	const first = { id: 'terminal-12345678-aaaa', getTitle: () => 'Same Terminal', nativeStatus: 'unknown' } as PtySession;
+	const second = { id: 'terminal-abcdef01-bbbb', getTitle: () => 'Same Terminal', nativeStatus: 'unknown' } as PtySession;
+	let sessions = [first, second], selected: PtySession | undefined, redraw = () => {}, unsubscribed = 0;
+	const service = {
+		getAllTerminals: () => sessions,
+		subscribe: (listener: () => void) => { redraw = listener; return () => { unsubscribed++; }; },
+	} as unknown as TerminalService;
+	const host = { settings: { agentSettings: { agents: {} }, presetScripts: [] } } as unknown as WorkbenchHost;
+	const paint = () => render(h(SessionSidebar, { host, service, active: selected?.id ?? first.id, select: (session) => { selected = session; }, create: async () => {}, close: async () => {} }), panel);
+	const buttons = () => Array.from(panel.querySelectorAll<HTMLButtonElement>('.nand-session-row > button:first-child'));
+	const wait = () => new Promise<void>((resolve) => setTimeout(resolve, 160));
+	for (const language of ['zh', 'en', 'zh'] as const) {
+		setLanguage(language); sessions = [first, second]; paint(); await wait();
+		assert.equal(panel.querySelector('h3')?.textContent, language === 'zh' ? '智能体工作台' : 'Agent workbench');
+		assert.equal(t('main.dashboard'), language === 'zh' ? '看板' : 'Dashboard');
+		const before = new Map(buttons().map((button) => [button.title, button.textContent]));
+		assert.match(before.get(first.id)!, /#12345678/);
+		assert.match(before.get(second.id)!, /#abcdef01/);
+		for (const button of buttons()) assert.match(button.textContent!, new RegExp(t('terminalAgent.workbench.status.unknown')));
+		buttons()[1]!.click(); paint();
+		assert.equal(selected, second, 'Same titles still select the exact session object');
+		assert.equal(panel.querySelector<HTMLButtonElement>('.is-active')?.title, second.id);
+		sessions = [second, first]; redraw(); await wait();
+		for (const button of buttons()) assert.equal(button.textContent, before.get(button.title), 'Reordering preserves session labels');
+		sessions = [second]; redraw(); await wait();
+		assert.equal(buttons()[0]!.textContent, before.get(second.id), 'Closing another session does not renumber the survivor');
+	}
+	render(null, panel);
+	assert.equal(unsubscribed, 1, 'Unmount releases the service subscription');
+	console.log('Session sidebar: stable identity, exact selection, reorder/close, unknown status and bilingual surface names passed.');
+}
 
 async function verifyHistoryMatrix() {
 	const panel = document.createElement('div'); document.body.appendChild(panel);

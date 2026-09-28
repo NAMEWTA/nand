@@ -69,6 +69,7 @@ export function SessionSidebar({
 	};
 	return (
 		<>
+			<h3 className="nand-agent-workbench-title">{t('workbench.title')}</h3>
 			<button className="mod-cta" onClick={menu}>
 				＋ {t('workbench.new')}
 			</button>
@@ -77,8 +78,10 @@ export function SessionSidebar({
 			<h4>{t('workbench.openSessions')}</h4>
 			{service.getAllTerminals().map((terminal) => (
 				<div className="nand-session-row" key={terminal.id}>
-					<button className={terminal.id === active ? 'is-active' : ''} onClick={() => select(terminal)}>
-						{terminal.getTitle()} <small>{t(`workbench.status.${terminal.nativeStatus}`)}</small>
+					<button className={terminal.id === active ? 'is-active' : ''} title={terminal.id} onClick={() => select(terminal)}>
+						<span>{terminal.getTitle()}</span>
+						<small>#{terminal.id.replace(/^terminal-/, '').slice(0, 8)}</small>
+						<small>{t(`workbench.status.${terminal.nativeStatus}`)}</small>
 					</button>
 					<button
 						aria-label={t('workbench.close')}

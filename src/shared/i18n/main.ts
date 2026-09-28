@@ -15,8 +15,8 @@ export const messages = {
 		'main.prevWorkspace': 'Switch to previous workspace',
 	},
 	zh: {
-		'main.openDashboard': '打开工作台',
-		'main.dashboard': '工作台',
+		'main.openDashboard': '打开看板',
+		'main.dashboard': '看板',
 		'main.cycleTheme': '切换到下一个主题',
 		'main.addSection': '添加新分区',
 		'main.toggleNotePopover': '切换：直接在标签页打开笔记',
