@@ -45,6 +45,7 @@ import {
 import type { PtySession } from '../../../platform/desktop/terminal/pty-session';
 import type { TerminalService } from '../../../platform/desktop/terminal/terminal-service';
 import { refreshLeafTitle } from '../../../platform/obsidian/workspace-title';
+import type { LocalizedCommand } from '../../../platform/obsidian/localized-command';
 import type { ServerManager } from '../../../platform/terminal-server/server-manager';
 import { t as sharedT } from '../../../shared/i18n/index';
 import { i18n, t } from '../../../shared/i18n/terminal-accessor';
@@ -151,7 +152,7 @@ export class TerminalAgentController {
 		return eventRef;
 	}
 
-	addCommand(command: import('obsidian').Command & { nameKey?: string }): import('obsidian').Command {
+	addCommand(command: LocalizedCommand): import('obsidian').Command {
 		return this.host.addCommand(command);
 	}
 
@@ -1446,6 +1447,8 @@ export class TerminalAgentController {
 			this.addCommand({
 				id: commandId,
 				name: `${t('commands.presetScriptPrefix')}${script.name || t('settingsDetails.terminal.presetScriptsUnnamed')}`,
+				nameResolver: () =>
+					`${t('commands.presetScriptPrefix')}${this.getPresetScriptById(script.id)?.name || t('settingsDetails.terminal.presetScriptsUnnamed')}`,
 				checkCallback: (checking: boolean) => {
 					if (!this.featureVisibilityManager.isVisibleAt('terminal', 'showInCommandPalette')) {
 						return false;

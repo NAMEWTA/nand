@@ -1,4 +1,5 @@
 import { TFile } from 'obsidian';
+import type { LocalizedCommand } from '../../platform/obsidian/localized-command';
 import type { EditorDomain } from './domain';
 
 export interface EditorHost {
@@ -19,7 +20,7 @@ export interface EditorPluginHost {
 		editorWorkbench: import('../../shared/editor-workbench').EditorWorkbenchSettings;
 	};
 	editorHost?: EditorHost;
-	addCommand(command: import('obsidian').Command): import('obsidian').Command;
+	addCommand(command: LocalizedCommand): import('obsidian').Command;
 	saveSettings(): Promise<void>;
 	openHome(): void;
 }

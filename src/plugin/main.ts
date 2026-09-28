@@ -1,10 +1,11 @@
 import { Notice, Platform, Plugin, TAbstractFile, TFile, type Command } from 'obsidian';
 import { type AlbumConfig, type AnniversaryConfig, type CountdownConfig } from '../core/dashboard/types/index';
 import { refreshLeafTitle } from '../platform/obsidian/workspace-title';
+import { registerLocalizedCommand, type LocalizedCommand } from '../platform/obsidian/localized-command';
 import type { AutomationUiPort } from '../shared/automation/types';
 import { normalizeContactsSettings } from '../shared/contacts-settings';
 import { normalizeEditorWorkbench } from '../shared/editor-workbench';
-import { onLanguageChanged, setLanguage, t } from '../shared/i18n/index';
+import { setLanguage, t } from '../shared/i18n/index';
 import { closeDashboardPanelModals } from '../view/dashboard/ui/panel-modal';
 import { DASHBOARD_VIEW_TYPE } from '../view/dashboard/view/view-type';
 import { normalizeTransition } from '../view/dashboard/widgets/album-model';
@@ -147,15 +148,8 @@ function migrateAnniversaries(raw: Record<string, unknown>): AnniversaryConfig[]
 }
 
 export default class DashboardPlugin extends Plugin {
-	override addCommand(command: Command & { nameKey?: string }): Command {
-		const registered = super.addCommand(command);
-		if (command.nameKey)
-			this.register(
-				onLanguageChanged(() => {
-					registered.name = `${this.manifest.name}: ${t(command.nameKey!)}`;
-				}),
-			);
-		return registered;
+	override addCommand(command: LocalizedCommand): Command {
+		return registerLocalizedCommand(this, command, (native) => super.addCommand(native));
 	}
 	override addRibbonIcon(icon: string, title: string, callback: (evt: MouseEvent) => unknown): HTMLElement {
 		return stableRibbon(this, icon, title, callback, (glyph, id, action) => super.addRibbonIcon(glyph, id, action));

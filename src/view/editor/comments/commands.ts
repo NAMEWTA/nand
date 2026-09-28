@@ -10,6 +10,7 @@ import { askText } from './prompt';
 export function registerCommentCommands(plugin: EditorPluginHost): void {
 	plugin.addCommand({
 		id: NAND_COMMANDS.ADD_COMMENT,
+		nameKey: 'editor.comments.add',
 		name: t('editor.comments.add'),
 		editorCallback: (editor, ctx) => {
 			const file = ctx.file;

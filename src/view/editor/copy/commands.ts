@@ -6,6 +6,7 @@ import { collectReferences } from './collect';
 export function registerCopyCommands(plugin: EditorPluginHost): void {
 	plugin.addCommand({
 		id: 'copy-relative-reference',
+		nameKey: 'editor.copy.relative',
 		name: t('editor.copy.relative'),
 		callback: () => {
 			writeReference(plugin, 'relative');
@@ -13,6 +14,7 @@ export function registerCopyCommands(plugin: EditorPluginHost): void {
 	});
 	plugin.addCommand({
 		id: 'copy-absolute-reference',
+		nameKey: 'editor.copy.absolute',
 		name: t('editor.copy.absolute'),
 		callback: () => {
 			writeReference(plugin, 'absolute');

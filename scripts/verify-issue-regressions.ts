@@ -4,12 +4,55 @@ import { El } from './mini-dom';
 import { mountCommentComposer } from '../src/view/editor/comments/composer';
 import { createDashboardSettingsAccess } from '../src/view/dashboard/settings-access';
 import { readCalendarTaskFilter, writeCalendarTaskFilter } from '../src/view/dashboard/calendar/calendar-preferences';
-import { onLanguageChanged, setLanguage } from '../src/shared/i18n/index';
+import { onLanguageChanged, setLanguage, t } from '../src/shared/i18n/index';
+import { registerLocalizedCommand, type LocalizedCommand } from '../src/platform/obsidian/localized-command';
+import { registerCommentCommands } from '../src/view/editor/comments/commands';
+import { registerCopyCommands } from '../src/view/editor/copy/commands';
+import type { EditorPluginHost } from '../src/view/editor/host';
+import type { Command, Plugin } from 'obsidian';
 import { intersectRects, placePopover } from '../src/view/editor/comments/popover-position';
 import { refreshLeafTitle } from '../src/platform/obsidian/workspace-title';
 import type { DashboardSettings } from '../src/core/dashboard/types/index';
 
 async function main() {
+	const commandCleanups: Array<() => void> = [];
+	const commands: Command[] = [];
+	const commandHost = {
+		manifest: { name: 'NAND' } as Plugin['manifest'],
+		register: (off: () => void) => commandCleanups.push(off),
+	};
+	const addCommand = (command: LocalizedCommand) => registerLocalizedCommand(commandHost, command, (native) => {
+		const registered = { ...native, id: `nand:${native.id}`, name: `NAND: ${native.name}` };
+		commands.push(registered);
+		return registered;
+	});
+	setLanguage('zh');
+	registerCommentCommands({ addCommand } as EditorPluginHost);
+	registerCopyCommands({ addCommand } as EditorPluginHost);
+	let scriptName = 'My workflow 中文';
+	const callback = () => {};
+	const hotkeys: Command['hotkeys'] = [{ modifiers: ['Mod'], key: '9' }];
+	const workflow = addCommand({ id: 'custom-workflow', name: '', nameResolver: () => t('terminalAgent.commands.presetScriptPrefix') + scriptName, callback, hotkeys });
+	const originalCommands = [...commands];
+	const originalCallbacks = commands.map((command) => command.callback ?? command.editorCallback);
+	for (const language of ['en', 'zh', 'zh', 'en'] as const) {
+		setLanguage(language);
+		const keys = ['editor.comments.add', 'editor.copy.relative', 'editor.copy.absolute'];
+		keys.forEach((key, index) => assert.equal(commands[index]!.name, `NAND: ${t(key)}`));
+		assert.equal(workflow.name, `NAND: ${t('terminalAgent.commands.presetScriptPrefix')}${scriptName}`);
+		assert.equal(workflow.hotkeys, hotkeys);
+		assert.deepEqual(commands, originalCommands, 'Language changes update the existing registered objects');
+		assert.deepEqual(commands.map((command) => command.callback ?? command.editorCallback), originalCallbacks);
+	}
+	scriptName = '用户改名 / Keep English';
+	setLanguage('zh');
+	assert.equal(workflow.name, `NAND: ${t('terminalAgent.commands.presetScriptPrefix')}${scriptName}`);
+	assert.equal(commands.length, 4, 'Repeated language events do not register commands again');
+	assert.equal(commandCleanups.length, 4);
+	const disposedNames = commands.map((command) => command.name);
+	commandCleanups.forEach((off) => off());
+	setLanguage('en');
+	assert.deepEqual(commands.map((command) => command.name), disposedNames, 'Plugin unload releases name subscriptions');
 	const scopes: Scope[] = [];
 	const app = {
 		scope: new Scope(),
