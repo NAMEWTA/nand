@@ -37,7 +37,7 @@ function Action({
 }
 function Markdown({ view, text, path }: { view: ContactsPanelHost; text: string; path: string }) {
 	const ref = useRef<HTMLDivElement>(null);
-	const markdown = text || ct('noDetails');
+	const markdown = text.trim() ? text : ct('noDetails');
 	useEffect(() => {
 		const host = ref.current;
 		if (!host) return;
@@ -151,6 +151,7 @@ function Detail({ view, record }: { view: ContactsPanelHost; record: ArchiveReco
 				title={ct('basic')}
 				action={<Action icon="pencil" label={ct('edit')} action={() => edit('basic')} disabled={blocked} />}
 			>
+				{!rows.length && <p className="nand-contacts-muted">{ct('noDetails')}</p>}
 				<dl className="nand-contacts-fields">
 					{rows.map(([key, value]) => (
 						<div key={key}>

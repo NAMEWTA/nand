@@ -109,6 +109,7 @@ export class RecordEditorModal extends Modal {
 	private errorEl!: HTMLElement;
 	private unsubscribe?: () => void;
 	private statusEl!: HTMLElement;
+	private readonly addingRow: boolean;
 	constructor(
 		private controller: ContactsController,
 		base: ArchiveRecord,
@@ -120,6 +121,7 @@ export class RecordEditorModal extends Modal {
 		this.originalRoot = controller.root;
 		this.base = cloneRecord(base);
 		this.draft = cloneRecord(base);
+		this.addingRow = !rowId;
 		this.initializeRow();
 	}
 	private initializeRow(): void {
@@ -151,7 +153,14 @@ export class RecordEditorModal extends Modal {
 	}
 	onOpen(): void {
 		this.modalEl.addClass('nand-contacts-form');
-		this.setTitle(ct(this.base.path ? 'edit' : this.base.kind === 'person' ? 'addPerson' : 'addCompany'));
+		const title = this.editScope === 'relation'
+			? this.addingRow ? 'addRelation' : 'editRelation'
+			: this.editScope === 'employment'
+				? this.addingRow ? 'addEmployment' : 'editEmployment'
+				: this.base.kind === 'person'
+					? this.base.path ? 'editPerson' : 'addPerson'
+					: this.base.path ? 'editCompany' : 'addCompany';
+		this.setTitle(ct(title));
 		this.renderForm();
 		this.unsubscribe = this.controller.subscribe(() => {
 			if (!this.base.path) return;
@@ -202,7 +211,7 @@ export class RecordEditorModal extends Modal {
 			);
 		if (optional)
 			setting.addButton((b) =>
-				b.setButtonText(ct('clear')).onClick(() => {
+				b.setButtonText(ct('clearReference')).onClick(() => {
 					value = emptyRef();
 					update(value);
 					render();
@@ -233,7 +242,8 @@ export class RecordEditorModal extends Modal {
 				const isList = (listFields as readonly string[]).includes(key),
 					value = this.draft.fields[key];
 				this.text(
-					key === 'region' && this.draft.kind === 'company' ? 'companyRegion' : key,
+					key === 'name' ? this.draft.kind === 'person' ? 'personName' : 'companyName'
+						: key === 'region' && this.draft.kind === 'company' ? 'companyRegion' : key,
 					Array.isArray(value) ? value.join('\n') : value,
 					(input) => {
 						Object.assign(this.draft.fields, {

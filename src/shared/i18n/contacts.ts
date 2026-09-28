@@ -1,5 +1,15 @@
 export const messages = {
 	zh: {
+		'contacts.editPerson': '编辑联系人',
+		'contacts.editCompany': '编辑企业',
+		'contacts.addRelation': '新增关系',
+		'contacts.editRelation': '编辑关系',
+		'contacts.addEmployment': '新增工作经历',
+		'contacts.editEmployment': '编辑工作经历',
+		'contacts.personName': '姓名',
+		'contacts.companyName': '企业名称',
+		'contacts.clearReference': '清除',
+
 		'contacts.title': '档案',
 		'contacts.duplicateRelation': '这条关系已经存在，请编辑已有记录。',
 		'contacts.deleteEntry': '删除这条记录？其他履历和关系将保留。',
@@ -130,6 +140,16 @@ export const messages = {
 		'contacts.phoneMenu': '档案操作',
 	},
 	en: {
+		'contacts.editPerson': 'Edit person',
+		'contacts.editCompany': 'Edit company',
+		'contacts.addRelation': 'Add relationship',
+		'contacts.editRelation': 'Edit relationship',
+		'contacts.addEmployment': 'Add employment',
+		'contacts.editEmployment': 'Edit employment',
+		'contacts.personName': 'Person name',
+		'contacts.companyName': 'Company name',
+		'contacts.clearReference': 'Clear',
+
 		'contacts.title': 'Archives',
 		'contacts.duplicateRelation': 'This relationship already exists. Edit the existing entry.',
 		'contacts.deleteEntry': 'Delete this entry? Other employment and relationships will remain.',
