@@ -2,7 +2,7 @@
 schema_version: 6
 artifact: "goal-plan"
 change: "2026-09-28-issue-31-contacts-polish"
-status: "draft"
+status: "completed"
 modes: []
 orchestration: "lead-directed"
 lead: "codex-issue-planning"
@@ -81,3 +81,5 @@ HEAD/输入/Skill摘要漂移：暂停相交分支，返回对应owner修订计�
 本change现在归属 <Path>{roots.state}/specdev/changes/2026-09-28-open-issues-remediation-goal/implementation-plan.md</Path>；该父Plan拥有跨change串行、共享资源和全局执行边界；本Goal只保留子合同Gate，策略相同不冲突。请从父 <Path>{roots.state}/specdev/changes/2026-09-28-open-issues-remediation-goal/tickets-map.md</Path> 恢复，不独立抢占writer。
 
 实施检查点：用户授权完整本地实施/测试/必要提交覆盖历史 plan-only。T-01 result=15d4a820e4033b8b74bbef8828ccae582665a537；见对应 Evidence。其余 Ticket 继续串行实施。无远程写入。
+
+实施检查点：用户授权完整本地实施/测试/必要提交覆盖历史 plan-only。T-02 result=161353e8627c20088f8166f0b053080004a6298e；见对应 Evidence。本 change 全部合同完成，ready_for_execution=false 表示无待派单。无远程写入。

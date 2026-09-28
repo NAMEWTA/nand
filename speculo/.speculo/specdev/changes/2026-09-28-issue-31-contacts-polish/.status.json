@@ -2,7 +2,7 @@
   "schema_version": 6,
   "artifact": "change-status",
   "change": "2026-09-28-issue-31-contacts-polish",
-  "change_status": "active",
+  "change_status": "completed",
   "current_work": null,
   "works_run": [
     "specdev/triage",
@@ -39,8 +39,8 @@
     "history": []
   },
   "created_at": "2026-09-28T05:55:43.895113+00:00",
-  "updated_at": "2026-09-28T08:02:02.646773+00:00",
-  "completed_at": null,
+  "updated_at": "2026-09-28T08:08:33.439761+00:00",
+  "completed_at": "2026-09-28T08:08:33.439761+00:00",
   "archived": false,
   "archive_path": null,
   "blockers": [],
@@ -85,6 +85,49 @@
           "evidence": "<Path>{roots.state}/specdev/changes/2026-09-28-issue-31-contacts-polish/evidence/T-01.md</Path>"
         },
         "evidence": "<Path>{roots.state}/specdev/changes/2026-09-28-issue-31-contacts-polish/evidence/T-01.md</Path>",
+        "attempts": 1,
+        "promotion_status": "applied"
+      }
+    },
+    {
+      "ticket_id": "T-02",
+      "owner": "codex-issue-planning",
+      "implementation_owner": "codex-issue-planning",
+      "integration_owner": "codex-issue-planning",
+      "provider": "git",
+      "base_sha": "fed02264e78d493a28755c1f7d5a6dbfe790efef",
+      "parent_branch": "main",
+      "branch": "main",
+      "workspace_ref": "current",
+      "source_checkpoint": "161353e8627c20088f8166f0b053080004a6298e",
+      "status": "integrated",
+      "updated_at": "2026-09-28T08:08:33.439761+00:00",
+      "integration": {
+        "status": "passed",
+        "parent_ref": "refs/heads/main",
+        "parent_before_sha": "fed02264e78d493a28755c1f7d5a6dbfe790efef",
+        "source_sha": "161353e8627c20088f8166f0b053080004a6298e",
+        "candidate_sha": null,
+        "candidate_tree_sha": null,
+        "candidate_branch": null,
+        "candidate_workspace_ref": null,
+        "result_sha": "161353e8627c20088f8166f0b053080004a6298e",
+        "method": "direct-parent",
+        "conflict_paths": [],
+        "verification": "passed",
+        "full_suite": {
+          "required": true,
+          "status": "passed",
+          "reason": "本票要求的全部测试与匹配回归、build/lint，见命令表",
+          "evidence": "<Path>{roots.state}/specdev/changes/2026-09-28-issue-31-contacts-polish/evidence/T-02.md</Path>"
+        },
+        "e2e": {
+          "required": false,
+          "status": "not-required",
+          "reason": "Ticket 明定资源/本地数据合同不要求 GUI E2E；另完成实际 Obsidian Vault 文件生成与字节比较",
+          "evidence": "<Path>{roots.state}/specdev/changes/2026-09-28-issue-31-contacts-polish/evidence/T-02.md</Path>"
+        },
+        "evidence": "<Path>{roots.state}/specdev/changes/2026-09-28-issue-31-contacts-polish/evidence/T-02.md</Path>",
         "attempts": 1,
         "promotion_status": "applied"
       }
