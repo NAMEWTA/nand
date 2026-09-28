@@ -2,7 +2,7 @@
 schema_version: 6
 artifact: "goal-plan"
 change: "2026-09-28-issue-36-automation-presentation"
-status: "draft"
+status: "completed"
 modes: ["high-assurance"]
 orchestration: "lead-directed"
 lead: "codex-issue-planning"
@@ -92,3 +92,5 @@ HEAD/输入/Skill摘要漂移：暂停相交分支，返回对应owner修订计�
 实施检查点：用户授权完整本地实施/测试/必要提交覆盖历史 plan-only。T-03 result=ffc6f806b65d75399e36d06389d37f99bbca5170；见对应 Evidence。其余 Ticket 继续串行实施。无远程写入。
 
 实施检查点：用户授权完整本地实施/测试/必要提交覆盖历史 plan-only。T-04 result=db826cd19d286bda47ac30e90c9885e93b31a4e8；见对应 Evidence。其余 Ticket 继续串行实施。无远程写入。
+
+实施检查点：用户授权完整本地实施/测试/必要提交覆盖历史 plan-only。T-05 result=318dc49e35f942bdca860c1662e69cdd32f0b9fa；见对应 Evidence。本 change 全部合同完成，ready_for_execution=false 表示无待派单。无远程写入。

@@ -1,0 +1,68 @@
+Already up to date
+Done in 369ms using pnpm v11.1.3
+$ esbuild scripts/verify-automation.ts --bundle --platform=node --format=cjs --outfile=scripts/tmp/verify-automation.cjs --alias:obsidian=./scripts/obsidian-stub.ts --log-level=warning && TZ=America/New_York node --test scripts/tmp/verify-automation.cjs
+✔ agent editor uses the same availability set for defaults, controls and save, without replacing stale choices (23.948822ms)
+✔ runtime preflight orders factual failures before permission and prevents all launch effects on rejection (20.258979ms)
+✖ Home execution gate survives restart, keeps history and cursors, and resumes only unhandled occurrences (2.350067ms)
+✖ shutdown waits for an in-flight agent start and stops only its returned terminal before resolving (0.962655ms)
+✖ failed shutdown persistence or stop stays disabled and retries without losing owned execution (0.787682ms)
+✔ manual, once, cron and supported RRULE honor start times and reject unsupported rules (3.215947ms)
+✔ daily recurrence remains at local 9am through daylight-saving changes (0.978682ms)
+✔ a due occurrence executes once across concurrent ticks, leaf independence and restart (0.763506ms)
+✔ late occurrences are skipped, foreign devices never execute, recent missed occurrence alone runs (2.703078ms)
+✔ active agents do not overlap; a slow agent startup does not hold reminders (1.078068ms)
+✔ failure committing pending state prevents external task creation (0.445955ms)
+✔ restart marks unconfirmed runs interrupted rather than executing them again (0.620115ms)
+✔ corrupt primary recovers the backup and supports subsequent saves without losing corrupt evidence (0.250631ms)
+✔ notification deliveries are idempotent across concurrent calls and restart (0.80204ms)
+✔ task identities and automation metadata survive nested task serialization (2.070258ms)
+✔ archive reminders preserve note text and malformed regions refuse edits (0.438528ms)
+✔ native hook installation preserves unrelated hooks and remains idempotent (0.389453ms)
+✔ all CLI prompt transports preserve text and the native resume flags stay explicit (0.283982ms)
+✔ native session discovery requires exact metadata and ignores subagent sessions (0.306282ms)
+✔ PTY listeners attach synchronously before immediate exit and legacy status stays unverified (0.948217ms)
+✔ editing the action alone does not replay an already consumed one-time occurrence (0.514339ms)
+✔ completed delivery is not replayed even after notification retention has trimmed its record (0.370446ms)
+✔ dashboard source migrates stable ownership, suppresses completed tasks and creates each run once (2.221253ms)
+✔ failed state commits are invisible and retry preserves scheduler cursors (0.582138ms)
+✔ edits keep list order and deletion retains run snapshots (0.579075ms)
+✔ clearing read notifications preserves delivery receipts across restart (0.439298ms)
+✔ partial primary write recovers last valid data and a later write can succeed (0.321985ms)
+✔ failed inbox load cannot overwrite unreadable receipts and a successful retry emits state (0.43603ms)
+✔ widget sources resolve canonical and legacy dashboard paths without changing reminder identity (2.65717ms)
+✔ inbox renders structured reasons in the current language and deduplicates only exact reminder text (7.318413ms)
+✔ structured failures survive run and inbox persistence, language changes, cleanup and recovery without redelivery (2.250009ms)
+✔ automation panel localizes next/run dates and system reasons while preserving prompt, output and unknown text (4.923823ms)
+✔ cleared once history reads only the matching revision cursor and never replays failed, succeeded or skipped work (9.561129ms)
+ℹ tests 33
+ℹ suites 0
+ℹ pass 30
+ℹ fail 3
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 250.018802
+
+✖ failing tests:
+
+test at scripts/tmp/verify-automation.cjs:34382:30
+✖ Home execution gate survives restart, keeps history and cursors, and resumes only unhandled occurrences (2.350067ms)
+  TypeError: service.setExecutionEnabled is not a function
+      at TestContext.<anonymous> (/srv/nand/scripts/tmp/verify-automation.cjs:34390:17)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7)
+
+test at scripts/tmp/verify-automation.cjs:34422:30
+✖ shutdown waits for an in-flight agent start and stops only its returned terminal before resolving (0.962655ms)
+  TypeError: service.setExecutionEnabled is not a function
+      at TestContext.<anonymous> (/srv/nand/scripts/tmp/verify-automation.cjs:34449:27)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7)
+
+test at scripts/tmp/verify-automation.cjs:34462:30
+✖ failed shutdown persistence or stop stays disabled and retries without losing owned execution (0.787682ms)
+  TypeError: service.setExecutionEnabled is not a function
+      at TestContext.<anonymous> (/srv/nand/scripts/tmp/verify-automation.cjs:34482:47)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7)
+[ELIFECYCLE] Command failed with exit code 1.

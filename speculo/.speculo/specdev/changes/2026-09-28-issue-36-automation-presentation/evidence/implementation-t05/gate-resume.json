@@ -1,0 +1,186 @@
+{
+  "passed": true,
+  "due": {
+    "id": "gate-due-on-resume",
+    "at": 1790588594998
+  },
+  "whileOff": 0,
+  "cycles": [
+    {
+      "flag": true,
+      "enabled": true,
+      "hostSame": true,
+      "serviceSame": true,
+      "manualSame": true,
+      "manualNative": true,
+      "manualEmulator": true,
+      "manualAlive": true
+    },
+    {
+      "flag": false,
+      "enabled": false,
+      "hostSame": true,
+      "serviceSame": true,
+      "manualSame": true,
+      "manualNative": true,
+      "manualEmulator": true,
+      "manualAlive": true
+    },
+    {
+      "flag": true,
+      "enabled": true,
+      "hostSame": true,
+      "serviceSame": true,
+      "manualSame": true,
+      "manualNative": true,
+      "manualEmulator": true,
+      "manualAlive": true
+    },
+    {
+      "flag": false,
+      "enabled": false,
+      "hostSame": true,
+      "serviceSame": true,
+      "manualSame": true,
+      "manualNative": true,
+      "manualEmulator": true,
+      "manualAlive": true
+    },
+    {
+      "flag": true,
+      "enabled": true,
+      "hostSame": true,
+      "serviceSame": true,
+      "manualSame": true,
+      "manualNative": true,
+      "manualEmulator": true,
+      "manualAlive": true
+    },
+    {
+      "flag": false,
+      "enabled": false,
+      "hostSame": true,
+      "serviceSame": true,
+      "manualSame": true,
+      "manualNative": true,
+      "manualEmulator": true,
+      "manualAlive": true
+    },
+    {
+      "flag": true,
+      "enabled": true,
+      "hostSame": true,
+      "serviceSame": true,
+      "manualSame": true,
+      "manualNative": true,
+      "manualEmulator": true,
+      "manualAlive": true
+    },
+    {
+      "flag": false,
+      "enabled": false,
+      "hostSame": true,
+      "serviceSame": true,
+      "manualSame": true,
+      "manualNative": true,
+      "manualEmulator": true,
+      "manualAlive": true
+    },
+    {
+      "flag": true,
+      "enabled": true,
+      "hostSame": true,
+      "serviceSame": true,
+      "manualSame": true,
+      "manualNative": true,
+      "manualEmulator": true,
+      "manualAlive": true
+    },
+    {
+      "flag": false,
+      "enabled": false,
+      "hostSame": true,
+      "serviceSame": true,
+      "manualSame": true,
+      "manualNative": true,
+      "manualEmulator": true,
+      "manualAlive": true
+    },
+    {
+      "flag": true,
+      "enabled": true,
+      "hostSame": true,
+      "serviceSame": true,
+      "manualSame": true,
+      "manualNative": true,
+      "manualEmulator": true,
+      "manualAlive": true
+    }
+  ],
+  "result": {
+    "registrations": {
+      "timers": 0,
+      "focus": 0
+    },
+    "listeners": 1,
+    "beforeListeners": 1,
+    "runs": [
+      {
+        "definition": {
+          "id": "gate-due-on-resume",
+          "name": "Gate due on resume",
+          "enabled": true,
+          "deviceId": "d2f89b25-f748-43dd-83d4-7e35bfdee51a",
+          "revision": 1,
+          "schedule": {
+            "kind": "once",
+            "at": 1790588594998
+          },
+          "action": {
+            "kind": "notify",
+            "body": "Resume exactly once"
+          },
+          "channels": [
+            "in-app"
+          ],
+          "notifyOn": "always",
+          "graceMinutes": 720,
+          "createdAt": 1790588594298,
+          "updatedAt": 1790588594298
+        },
+        "id": "ca981f67-e6da-46c4-bc89-8924954feaf0",
+        "automationId": "gate-due-on-resume",
+        "revision": 1,
+        "title": "Gate due on resume",
+        "scheduledFor": 1790588594998,
+        "trigger": "scheduled",
+        "status": "succeeded",
+        "startedAt": 1790588596305,
+        "message": "",
+        "endedAt": 1790588596440,
+        "notificationAttempted": true
+      }
+    ],
+    "notifications": [
+      {
+        "id": "ca981f67-e6da-46c4-bc89-8924954feaf0",
+        "title": "Gate due on resume",
+        "body": "Resume exactly once",
+        "target": {
+          "runId": "ca981f67-e6da-46c4-bc89-8924954feaf0",
+          "automationId": "gate-due-on-resume"
+        },
+        "channels": [
+          "in-app"
+        ],
+        "createdAt": 1790588596475,
+        "read": false,
+        "deliveries": {
+          "in-app": "sent"
+        }
+      }
+    ],
+    "cursorsPreserved": true,
+    "persisted": true
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "passed": true,
+  "during": {
+    "enabled": false,
+    "closed": false
+  },
+  "after": {
+    "flag": false,
+    "enabled": false,
+    "status": "cancelled",
+    "terminalId": "terminal-11bdabed-97c5-4383-b097-f01733db5b30",
+    "persisted": "cancelled",
+    "ownedAlive": false,
+    "manualSame": true,
+    "manualAlive": true
+  }
+}

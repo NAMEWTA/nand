@@ -2,7 +2,7 @@
   "schema_version": 6,
   "artifact": "change-status",
   "change": "2026-09-28-issue-36-automation-presentation",
-  "change_status": "active",
+  "change_status": "completed",
   "current_work": null,
   "works_run": [
     "specdev/triage",
@@ -39,8 +39,8 @@
     "history": []
   },
   "created_at": "2026-09-28T05:55:43.895113+00:00",
-  "updated_at": "2026-09-28T09:26:37.223986+00:00",
-  "completed_at": null,
+  "updated_at": "2026-09-28T09:45:19.790591+00:00",
+  "completed_at": "2026-09-28T09:45:19.790591+00:00",
   "archived": false,
   "archive_path": null,
   "blockers": [],
@@ -214,6 +214,49 @@
           "evidence": "<Path>{roots.state}/specdev/changes/2026-09-28-issue-36-automation-presentation/evidence/T-04.md</Path>"
         },
         "evidence": "<Path>{roots.state}/specdev/changes/2026-09-28-issue-36-automation-presentation/evidence/T-04.md</Path>",
+        "attempts": 1,
+        "promotion_status": "applied"
+      }
+    },
+    {
+      "ticket_id": "T-05",
+      "owner": "codex-issue-planning",
+      "implementation_owner": "codex-issue-planning",
+      "integration_owner": "codex-issue-planning",
+      "provider": "git",
+      "base_sha": "be8fe87fc02cd08069e6836d884fd948f29d7325",
+      "parent_branch": "main",
+      "branch": "main",
+      "workspace_ref": "current",
+      "source_checkpoint": "318dc49e35f942bdca860c1662e69cdd32f0b9fa",
+      "status": "integrated",
+      "updated_at": "2026-09-28T09:45:19.790591+00:00",
+      "integration": {
+        "status": "passed",
+        "parent_ref": "refs/heads/main",
+        "parent_before_sha": "be8fe87fc02cd08069e6836d884fd948f29d7325",
+        "source_sha": "318dc49e35f942bdca860c1662e69cdd32f0b9fa",
+        "candidate_sha": null,
+        "candidate_tree_sha": null,
+        "candidate_branch": null,
+        "candidate_workspace_ref": null,
+        "result_sha": "318dc49e35f942bdca860c1662e69cdd32f0b9fa",
+        "method": "direct-parent",
+        "conflict_paths": [],
+        "verification": "passed",
+        "full_suite": {
+          "required": true,
+          "status": "passed",
+          "reason": "本票要求的全部测试与匹配回归、build/lint，见命令表",
+          "evidence": "<Path>{roots.state}/specdev/changes/2026-09-28-issue-36-automation-presentation/evidence/T-05.md</Path>"
+        },
+        "e2e": {
+          "required": true,
+          "status": "passed",
+          "reason": "本票所要求的宿主行为逐项验收见 Ticket Evidence",
+          "evidence": "<Path>{roots.state}/specdev/changes/2026-09-28-issue-36-automation-presentation/evidence/T-05.md</Path>"
+        },
+        "evidence": "<Path>{roots.state}/specdev/changes/2026-09-28-issue-36-automation-presentation/evidence/T-05.md</Path>",
         "attempts": 1,
         "promotion_status": "applied"
       }
