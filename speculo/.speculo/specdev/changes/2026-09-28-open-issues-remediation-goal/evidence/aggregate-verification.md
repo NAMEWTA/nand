@@ -1,6 +1,6 @@
-# 联合实施与验收（公开发布前）
+# 联合实施与验收（完成）
 
-候选提交：`096c853fb2e08699603f79fef011895b9b9c1703`。16票中15票done；36条AC中34条passed。#37两条发行合同本地部分完成，公开发行与默认下载仍未验证，父Goal保持active。
+公开版本：[0.0.3](https://github.com/NAMEWTA/nand/releases/tag/0.0.3)，源码提交`301b74713b0a2f38d5159aaabbe64debcbda9296`。16/16票done、36/36条AC passed；所有发行及required E2E门均闭合。
 
 ## 合同逐项对账
 
@@ -29,8 +29,8 @@
 | 36/AC-011 | 关闭前已开始的自动化自有 agent 执行按现有 stop 合同停止并落盘终态；已送达通知/已完成文件副作用不可撤销，不影响独立手动终端。 | [T-05](../../2026-09-28-issue-36-automation-presentation/evidence/T-05.md) | passed |
 | 36/AC-012 | 定义、运行日志、游标和通知历史不删除；关闭时仍可只读查看历史及操作通知已读；重启仍关闭。 | [T-05](../../2026-09-28-issue-36-automation-presentation/evidence/T-05.md) | passed |
 | 36/AC-013 | 重新开启只按既有游标、宽限和设备规则评估未处理触发，不重放已有游标覆盖的事件；不得让旧服务/定时器重复订阅。 | [T-05](../../2026-09-28-issue-36-automation-presentation/evidence/T-05.md) | passed |
-| 37/AC-001 | 新版本插件默认下载同一 tag 的配套服务，五个平台二进制及摘要齐全；从旧插件升级能因版本变化选择新服务。 | [T-01](../../2026-09-28-issue-37-terminal-release/evidence/T-01.md) | partial-public-release-pending |
-| 37/AC-002 | 新 Release 默认安装首次终端成功、历史/用量/导出/恢复可用，关闭后无孤儿进程，控制台无 agent_data 解析错误。 | [T-01](../../2026-09-28-issue-37-terminal-release/evidence/T-01.md) | partial-public-release-pending |
+| 37/AC-001 | 新版本插件默认下载同一 tag 的配套服务，五个平台二进制及摘要齐全；从旧插件升级能因版本变化选择新服务。 | [T-01](../../2026-09-28-issue-37-terminal-release/evidence/T-01.md) | passed |
+| 37/AC-002 | 新 Release 默认安装首次终端成功、历史/用量/导出/恢复可用，关闭后无孤儿进程，控制台无 agent_data 解析错误。 | [T-01](../../2026-09-28-issue-37-terminal-release/evidence/T-01.md) | passed |
 | 38/AC-001 | 新建默认值来自实际可选列表；空列表不能保存 agent 动作；编辑失效选择时清楚提示而不替换成别的智能体。 | [T-01](../../2026-09-28-issue-38-agent-preflight/evidence/T-01.md) | passed |
 | 38/AC-002 | 执行前按启用、CLI、库内cwd、权限、会话依次检查；缺 CLI/目录返回各自稳定 code，权限未确认仍禁止启动。 | [T-01](../../2026-09-28-issue-38-agent-preflight/evidence/T-01.md) | passed |
 | 39/AC-001 | 倒计时/纪念日来源带真实可解析看板路径，从通知或自动化点击能打开所属看板并定位对应 widget id。 | [T-01](../../2026-09-28-issue-39-widget-source/evidence/T-01.md) | passed |
@@ -45,17 +45,19 @@
 
 ## 聚合验证
 
-最终功能源码对应上述候选，automations/terminal/settings/mobile/architecture日志复用最后一票相同生产字节的通过结果；contacts/issues/panels/icons、Rust及PTY集成在合并全部票后重新执行。build/lint在最终发行说明更新后再次通过。没有将基线或PROBE_CONTROL作为本轮通过证据。
+最终源码对应上述tag；main后续仅追加验收证据。automations/terminal/settings/mobile/architecture等复用同一生产字节的末次通过记录；跨平台路径修复后Rust30、terminal190、PTY、build/lint再次通过。没有将基线或PROBE_CONTROL当成通过证据。
 
-- 自动化37、终端190、设置21、档案22、图标8、移动交互5测试通过；跨面板和命令生命周期、581模块架构检查通过。
-- Rust 29测试、真实WebSocket PTY/历史/进程树清理/只读原生记录集成通过。
-- 本轮真实Obsidian中英往返、窄叶子/主题、进程重启及自动化总开关跨域流程见逐票截图与JSON。合成Vault、原生日志、档案和状态保全各由所属票证据覆盖。
-- 9份冻结Source按其记录的原文范围校验SHA256；15个implementation提交的直接父、当前候选祖先关系、写集、required suite/E2E均核实。见integration-audit.json。
-- 9个子票schema验证、父ticket-control均0错误；validator的历史HEAD假设限制见各票原始日志，不伪造历史SHA。
-- lint无错误，157条既有警告；没有触碰真实用户库或执行远程写入。
+- 自动化37、终端190、设置21、档案22、图标8、移动交互5测试通过；跨面板与581模块架构检查通过。
+- Rust30测试、真实WebSocket PTY/历史/已知用量/退出/取消/只读原生日志与进程树清理通过。
+- Node22/24 main CI36417025301通过；公开发行run36417073903的五平台native build/test及release六个job全部成功。
+- 全新profile/Vault仅安装公开zip三文件，默认GitHub服务下载首次PTY成功，服务摘要匹配公开资产；真实GUI历史/未知用量、zh/en/zh三份可见导出、合成CLI恢复、模块启停与真实进程重启/退出全部通过。既有导出与原生日志字节不变，无agent_data解析错误，无孤儿服务/shell。
+- 各票真实Obsidian中英往返、窄叶子/主题、自动化总开关跨域保存和重启流程见对应截图/JSON。
+- 9份冻结Source SHA256核验；16个implementation提交直接父/祖先/写集及required suite/E2E核验，见integration-audit.json。
+- 9个子票schema、父ticket-control均0错误；历史HEAD假设限制由实际Git父子审计补足。
+- build通过；lint 0 errors/157既有warnings。
 
-## 未闭合发行门
+## 发布记录与限制
 
-本地候选zip及Linux服务摘要见#37的release-candidate.json。仍需授权将main及0.0.2标签推送至NAMEWTA/nand，让既有release.yml从同提交构建五平台二进制/摘要并公开发布；然后用全新隔离Vault和配置目录走公开默认下载路径验收。此步骤前不得把#37或父Goal标completed。
+用户明确授权最后步骤。0.0.2 CI发现macOS/Windows路径规范化问题后阻止发布，保留原tag；补回归及修复后递增0.0.3，原workflow创建公开Release。11个公开资产重新下载，五binary摘要通过，zip逐字节匹配tag源码。证据见#37/public-003。未评论或关闭issue。
 
-历史规划快照保留于planning-snapshot/；implementation-control.json与final-audit.json是本次真实状态。
+GUI实际覆盖Linux与合成CLI，没有冒称macOS/WindowsGUI或真实账号额度验证。历史规划快照保留planning-snapshot/，当前final-audit.json与implementation-control.json才是完成状态。

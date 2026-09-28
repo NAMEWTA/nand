@@ -2,7 +2,7 @@
 schema_version: 1
 artifact: "implementation-plan"
 change: "2026-09-28-open-issues-remediation-goal"
-status: "in_progress"
+status: "completed"
 source_map_revision: 11
 orchestration: "lead-directed"
 lead: "codex-issue-planning"
@@ -10,7 +10,7 @@ implementation_agent_limit: 1
 integration_attempt_limit: 3
 ticket_workspace_policy: "current"
 integration_gate: "direct-parent"
-ready_for_execution: true
+ready_for_execution: false
 ---
 
 # Implementation Plan: 联合串行修复计划
@@ -23,7 +23,7 @@ Outcome：9条open issue中的确认残留与用户确认的自动化开关全�
 
 ## 2. Ready Frontier and Waves
 
-本轮已获得完整本地实施授权，15票完成；剩余#37已进入最终候选与公开发行门。结构ready候选以控制器从子票动态计算；下面是满足依赖后的推荐串行队列，每个Wave只有1票：
+本轮本地实施及公开发布授权均已执行，16票全部完成，无待派票。结构ready候选以控制器从子票动态计算；下面是满足依赖后的推荐串行队列，每个Wave只有1票：
 
 1. `2026-09-28-issue-37-terminal-release::T-01`
 2. `2026-09-28-issue-38-agent-preflight::T-01`
@@ -50,11 +50,11 @@ current/direct-parent，唯一Lead及实现writer codex-issue-planning，impleme
 
 每票先Map→项目Skill→Ticket→上游事实；读取绑定字节摘要，漂移则由owner审查。运行包只允许当前票writable_paths；当前权限模型若禁止某个必要路径（例如技能目录），该票在执行前登记具体受限路径，不绕过或移动源，独立分支可继续。
 
-授权：用户本次完整实施请求覆盖本地实现、测试、必要implementation commit和current/direct-parent推进；具体push/tag/release仍按G4单独确认。评论/关闭issue和archive未授权。
+授权：用户本次完整实施请求覆盖本地实现、测试、必要implementation commit和current/direct-parent推进；用户最后步骤授权已覆盖并完成push/tag/release，见#37发行证据。评论/关闭issue和archive未授权。
 
 ## 4. Repository Integration Queue
 
-repository=NAMEWTA/nand，branch=main（运行前重读），一个integration队列；基线及代码摘要见子Evidence。每票记录parent-before、implementation、result SHA及命令/E2E。本轮生产与证据提交已记录于逐票Evidence；最终生产候选为096c853fb2e08699603f79fef011895b9b9c1703。不能重置/清理他人工作；当前分支失败时停止启动后继，保留失败修改并按授权纠正。
+repository=NAMEWTA/nand，branch=main（运行前重读），一个integration队列；基线及代码摘要见子Evidence。每票记录parent-before、implementation、result SHA及命令/E2E。本轮生产与证据提交已记录于逐票Evidence；最终生产候选为301b74713b0a2f38d5159aaabbe64debcbda9296。不能重置/清理他人工作；当前分支失败时停止启动后继，保留失败修改并按授权纠正。
 
 ## 5. Gates and Aggregate Verification
 
@@ -73,7 +73,7 @@ G5：36条AC逐项对账，各member完成其Goal，父聚合Evidence完整；�
 
 ## 7. Progress and Decisions
 
-15票done、#37 in_progress；34/36AC passed。当前恢复键为本父Goal与evidence/final-audit.json。聚合测试及15个直接父/祖先/写集检查已通过；剩余公开发行门待具体动作授权。
+16票done、36/36AC passed。当前完成记录为本父Goal与evidence/final-audit.json。聚合测试及16个直接父/祖先/写集检查通过；0.0.3同提交五平台公开发行、全新默认下载、真实Obsidian重启及进程清理全部通过。
 
 每个child继续拥有自身状态、诊断和验收；本父不得越过Gate。实际逐票编排见evidence/implementation-orchestration.md，聚合AC对账见evidence/aggregate-verification.md；历史规划快照保留在evidence/planning-snapshot/。
 
@@ -82,3 +82,5 @@ G5：36条AC逐项对账，各member完成其Goal，父聚合Evidence完整；�
 本次用户要求“完整实现…所有 ticket…完成实施”，取代上述 plan-only 的本地执行限制。当前串行实施和必要本地提交已授权；不改写旧 tag，不发送 issue 消息。#37 先准备本地可审阅候选，公开发布与真实宿主验收仍保持独立 gate。历史的 blocked/frontier 快照不作为拒绝本次本地执行的理由。逐票真实结果见 evidence/implementation-orchestration.md。
 
 最新发布授权：用户回复“请你继续完成最后的步骤，给你权限”。main及0.0.2标签已推送，五平台CI阻止了macOS/Windows失败候选发布；修复路径规范化后继续0.0.3发行及required公开默认下载验收，不重复请求同一发布步骤授权。
+
+最终G4/G5：0.0.3 Release run36417073903成功，11资产校验及Linux真实GUI通过；所有合同完成，ready_for_execution=false表示无待执行票。

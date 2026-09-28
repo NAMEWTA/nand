@@ -1,0 +1,12 @@
+{
+  "url": "https://github.com/NAMEWTA/nand/releases/tag/0.0.3",
+  "tag": "0.0.3",
+  "source": "301b74713b0a2f38d5159aaabbe64debcbda9296",
+  "files": {
+    "main.js": "ec8d852fed951d81cce5136e93b6662f76446605e82cce36c748893247d7ce75",
+    "manifest.json": "df27a2a972aeddea96de76a9550e7b6ad41b974c3abc568326d9c60fa04b1a58",
+    "styles.css": "39126d2fcd8ff646bedd1d1748e560c0d3d2c36e50cf472de22bc0b55ece5a78"
+  },
+  "binaries_present": false,
+  "fixture_settings": "provider usage/update checks disabled only; server connection uses defaults"
+}

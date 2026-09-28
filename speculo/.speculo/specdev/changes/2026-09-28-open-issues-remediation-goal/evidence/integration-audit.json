@@ -59,6 +59,12 @@
     "scope_files": 17,
     "ancestor": true
   },
+  "2026-09-28-issue-37-terminal-release::T-01": {
+    "result": "301b74713b0a2f38d5159aaabbe64debcbda9296",
+    "parent": "3ce79fe2edb3bda424e0a10b98960435200e0f38",
+    "scope_files": 6,
+    "ancestor": true
+  },
   "2026-09-28-issue-38-agent-preflight::T-01": {
     "result": "f18b06a76af7333e9fb68b5e87e36ec2b008ffa3",
     "parent": "e7c59b2e87a858725874d53530bdacb72918f5ca",

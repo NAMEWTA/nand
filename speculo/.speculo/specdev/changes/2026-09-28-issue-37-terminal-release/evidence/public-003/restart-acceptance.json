@@ -1,0 +1,143 @@
+{
+  "passed": true,
+  "noManualTerminalCommandNeeded": true,
+  "noResumeReplay": true,
+  "nativeFilesUnchanged": true,
+  "exportsUnchanged": true,
+  "noAgentDataParseError": true,
+  "appPid": 1187807,
+  "serverPid": 1188668,
+  "version": "0.0.3",
+  "history": {
+    "rows": [
+      {
+        "accountKey": "{\"GROK_HOME\":\"/tmp/nand-public-0.0.3-e2e/native-grok\"}",
+        "agentId": "grok",
+        "cwd": "/tmp/nand-public-0.0.3-e2e/vault",
+        "key": "[\"grok\",\"{\\\"GROK_HOME\\\":\\\"/tmp/nand-public-0.0.3-e2e/native-grok\\\"}\",\"nand-public-fixture\"]",
+        "modifiedAtMs": 1790595637217,
+        "sessionId": "nand-public-fixture",
+        "text": "",
+        "title": "Public release synthetic history",
+        "transcriptPath": "/tmp/nand-public-0.0.3-e2e/native-grok/sessions/public-fixture/session.json",
+        "usage": {
+          "cacheRead": 0,
+          "cacheWrite": 0,
+          "cost": null,
+          "input": 0,
+          "known": false,
+          "output": 0,
+          "partial": false
+        }
+      }
+    ],
+    "total": 1,
+    "usage": {
+      "cacheRead": 0,
+      "cacheWrite": 0,
+      "cost": null,
+      "input": 0,
+      "known": false,
+      "output": 0,
+      "partial": true
+    }
+  },
+  "sessions": [
+    {
+      "id": "terminal-12fabdaf-987d-47e1-ac2d-5af9a3427999",
+      "nativeId": "3941a0a6-19be-476a-82cf-4eae9cb8b5ff",
+      "alive": true
+    }
+  ],
+  "files": [
+    {
+      "path": "NAND Exports/grok-nand-public-fixture (2).md",
+      "text": "# Public release synthetic history\n\n\n## user\n\nSynthetic public-release acceptance prompt 中文\n\n## assistant\n\nSynthetic answer without provider usage data.\n\n```text\nkeep native bytes\n```\n"
+    },
+    {
+      "path": "NAND Exports/grok-nand-public-fixture (3).md",
+      "text": "# Public release synthetic history\n\n\n## user\n\nSynthetic public-release acceptance prompt 中文\n\n## assistant\n\nSynthetic answer without provider usage data.\n\n```text\nkeep native bytes\n```\n"
+    },
+    {
+      "path": "NAND Exports/grok-nand-public-fixture.md",
+      "text": "# Public release synthetic history\n\n\n## user\n\nSynthetic public-release acceptance prompt 中文\n\n## assistant\n\nSynthetic answer without provider usage data.\n\n```text\nkeep native bytes\n```\n"
+    }
+  ],
+  "body": "vault\nNAND Exports\nRelease acceptance\n终端\ngrok-nand-public-fixture (3)\ngrok-nand-public-fixture (2)\ngrok-nand-public-fixture\n智能体工作台\n＋ 新建会话\n自动化\n通知中心\n打开的会话\n终端\n#12fabdaf\n状态未知\n×\n拖到这里插入文件的绝对路径\nroot@wta-ubuntu:/tmp/nand-public-0.0.3-e2e/vault#  \n当前库历史 ↻\n未归档历史\n收藏\n归档\nPublic release synthetic history\ngrok · 2026/9/28\n当前库消耗 · 原生 token 用量不可用\n用量",
+  "consoleEvents": [
+    {
+      "method": "Runtime.executionContextCreated",
+      "params": {
+        "context": {
+          "id": 1,
+          "origin": "app://obsidian.md",
+          "name": "",
+          "uniqueId": "1103804664537672814.-6284511344708680915",
+          "auxData": {
+            "isDefault": true,
+            "type": "default",
+            "frameId": "ED50DA6E4064042776CE14271276D889"
+          }
+        }
+      }
+    },
+    {
+      "method": "Runtime.consoleAPICalled",
+      "params": {
+        "type": "log",
+        "args": [
+          {
+            "type": "string",
+            "value": "%cObsidian Developer Console"
+          },
+          {
+            "type": "string",
+            "value": "color:#7f6df2; font-size:40px; font-weight:bold;"
+          }
+        ],
+        "executionContextId": 1,
+        "timestamp": 1790596384625.587,
+        "stackTrace": {
+          "callFrames": [
+            {
+              "functionName": "e",
+              "scriptId": "141",
+              "url": "app://obsidian.md/app.js",
+              "lineNumber": 0,
+              "columnNumber": 3810683
+            }
+          ]
+        }
+      }
+    },
+    {
+      "method": "Runtime.consoleAPICalled",
+      "params": {
+        "type": "warning",
+        "args": [
+          {
+            "type": "string",
+            "value": "[Terminal] webgl renderer unavailable:"
+          },
+          {
+            "type": "string",
+            "value": "WebGL2 not supported"
+          }
+        ],
+        "executionContextId": 1,
+        "timestamp": 1790596409655.58,
+        "stackTrace": {
+          "callFrames": [
+            {
+              "functionName": "warnWebglUnavailable",
+              "scriptId": "158",
+              "url": "plugin:nand",
+              "lineNumber": 420,
+              "columnNumber": 9332
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

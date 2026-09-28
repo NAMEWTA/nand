@@ -1,0 +1,1 @@
+({text:activeDocument.body.innerText,settings:app.plugins.plugins.nand.settings.modules,settingsTab: {activeProduct:app.plugins.plugins.nand.settingsTab.activeProduct,activePage:app.plugins.plugins.nand.settingsTab.activePage}})

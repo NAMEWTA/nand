@@ -1,0 +1,1 @@
+({electronKeys:Object.keys(window.require('electron')),commands:Object.keys(app.commands.commands).filter(x=>/quit/.test(x)),settingsDocument:app.plugins.plugins.nand.settingsTab.containerEl.ownerDocument.URL})

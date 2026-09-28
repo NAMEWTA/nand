@@ -1,0 +1,10 @@
+{
+  "version": "0.0.3",
+  "vault": "/tmp/nand-public-0.0.3-e2e/vault",
+  "profile": "/tmp/nand-public-0.0.3-e2e/profile",
+  "plugin_installed": false,
+  "binary_installed": false,
+  "cache_copied": false,
+  "provider_usage_disabled": true,
+  "server_connection_settings": "absent; native defaults will apply"
+}

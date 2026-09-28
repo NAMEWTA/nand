@@ -6,7 +6,7 @@ requested_deliverables: []
 deliverable_policy: "用户要求完整覆盖所有确认问题，未指定固定数量；本 Map 枚举全部切片，不以票数替代验收"
 artifact: "tickets-map"
 change: "2026-09-28-issue-37-terminal-release"
-status: "in_progress"
+status: "completed"
 ---
 
 # Tickets Map: #37 发布与插件匹配的终端服务
@@ -46,8 +46,8 @@ frontmatter 是 Ticket 状态权威；本表只作投影。
 
 | Contract ID | 覆盖 Ticket | 验证接缝 | 状态 | 说明 |
 |---|---|---|---|---|
-| AC-001 | T-01 | 对应 Ticket 行为验证矩阵 | covered | 实施证据尚未产生 |
-| AC-002 | T-01 | 对应 Ticket 行为验证矩阵 | covered | 实施证据尚未产生 |
+| AC-001 | T-01 | 对应 Ticket 行为验证矩阵 | covered | evidence/T-01.md passed |
+| AC-002 | T-01 | 对应 Ticket 行为验证矩阵 | covered | evidence/T-01.md passed |
 
 ## 5. 并行与路径所有权
 
@@ -74,3 +74,5 @@ Ticket变更回写此投影；合同/路径变化递增 plan_revision 并重过 
 实施 revision=2：#37/T-01 扩展发布校验脚本、技能 release 参考及 README 写集，见票内实施复核。
 
 Revision 3：CI发现macOS/Windows路径表示差异，T-01新增agent_data.rs写集；以0.0.3修复并重新执行完整五平台门，不跳过失败测试。
+
+公开0.0.3发行及全新默认下载E2E完成，AC-001/002 passed。

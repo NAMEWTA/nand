@@ -1,0 +1,57 @@
+{
+  "passed": true,
+  "rows": [
+    {
+      "lang": "zh",
+      "preview": "在终端恢复重命名 / 标签收藏归档导出 Markdown原生 token 用量不可用\n## user\n\nSynthetic public-release acceptance prompt 中文\n\n## assistant\n\nSynthetic answer without provider usage data.\n\n```text\nkeep native bytes\n```\n",
+      "path": "NAND Exports/grok-nand-public-fixture.md",
+      "body": "# Public release synthetic history\n\n\n## user\n\nSynthetic public-release acceptance prompt 中文\n\n## assistant\n\nSynthetic answer without provider usage data.\n\n```text\nkeep native bytes\n```\n",
+      "indexed": true,
+      "browser": true,
+      "opened": true
+    },
+    {
+      "lang": "en",
+      "preview": "Resume in terminalRename / tagsFavoriteArchiveExport MarkdownNative token usage unavailable\n## user\n\nSynthetic public-release acceptance prompt 中文\n\n## assistant\n\nSynthetic answer without provider usage data.\n\n```text\nkeep native bytes\n```\n",
+      "path": "NAND Exports/grok-nand-public-fixture (2).md",
+      "body": "# Public release synthetic history\n\n\n## user\n\nSynthetic public-release acceptance prompt 中文\n\n## assistant\n\nSynthetic answer without provider usage data.\n\n```text\nkeep native bytes\n```\n",
+      "indexed": true,
+      "browser": true,
+      "opened": true
+    },
+    {
+      "lang": "zh",
+      "preview": "在终端恢复重命名 / 标签收藏归档导出 Markdown原生 token 用量不可用\n## user\n\nSynthetic public-release acceptance prompt 中文\n\n## assistant\n\nSynthetic answer without provider usage data.\n\n```text\nkeep native bytes\n```\n",
+      "path": "NAND Exports/grok-nand-public-fixture (3).md",
+      "body": "# Public release synthetic history\n\n\n## user\n\nSynthetic public-release acceptance prompt 中文\n\n## assistant\n\nSynthetic answer without provider usage data.\n\n```text\nkeep native bytes\n```\n",
+      "indexed": true,
+      "browser": true,
+      "opened": true
+    }
+  ],
+  "resumeArgs": "--permission-mode\nbypassPermissions\n--resume\nnand-public-fixture\n",
+  "resumed": {
+    "terminals": [
+      {
+        "id": "terminal-7f9a84bc-005d-4122-b8a4-5f7e9483928b",
+        "nativeId": "8dbb8a1b-af45-46af-9d89-4bf86a9c1926",
+        "alive": true
+      },
+      {
+        "id": "terminal-4fccecf0-115c-4ff9-bbd3-73c3eceb71b1",
+        "nativeId": "1d160c80-ae4d-44aa-8d50-f4a9afc36144",
+        "alive": true
+      }
+    ],
+    "notices": [
+      "已导出并打开：NAND Exports/grok-nand-public-fixture.md",
+      "Exported and opened: NAND Exports/grok-nand-public-fixture (2).md",
+      "已导出并打开：NAND Exports/grok-nand-public-fixture (3).md"
+    ]
+  },
+  "nativeHashes": {
+    "chat_history.jsonl": "2eabb839c6717516b9f4ead072da6441f57fa747b458a4262dfe099bd62a2d82",
+    "session.json": "481b85d292fdb3124507e24219a160e4b6c75b4ead70c89795e5c491c7427657"
+  },
+  "consoleErrors": []
+}

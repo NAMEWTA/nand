@@ -1,0 +1,34 @@
+{
+  "terminalAgent": {
+    "checkAiLauncherUpdates": false,
+    "agentSettings": {
+      "showUsageInStatusBar": false,
+      "agents": {
+        "claude-code": {
+          "enabled": false,
+          "showUsage": false
+        },
+        "codex": {
+          "enabled": false,
+          "showUsage": false
+        },
+        "gemini": {
+          "enabled": false,
+          "showUsage": false
+        },
+        "opencode": {
+          "enabled": false,
+          "showUsage": false
+        },
+        "pi": {
+          "enabled": false,
+          "showUsage": false
+        },
+        "grok": {
+          "enabled": false,
+          "showUsage": false
+        }
+      }
+    }
+  }
+}

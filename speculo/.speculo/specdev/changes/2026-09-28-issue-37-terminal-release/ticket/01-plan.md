@@ -8,7 +8,7 @@ artifact: "ticket"
 change: "2026-09-28-issue-37-terminal-release"
 id: "T-01"
 title: "准备并发布同提交配套终端服务资产"
-status: "in_progress"
+status: "done"
 kind: "operations"
 planning_depth: "deep"
 planning_depth_reason: "跨持久化/生命周期或发布边界，要求恢复和集成门"
@@ -108,12 +108,12 @@ Expand：新增可选字段/开关并保留旧数据读取；Migrate：只在正
 
 ## 10. 验收标准
 
-- [ ] AC-001：新版本插件默认下载同一 tag 的配套服务，五个平台二进制及摘要齐全；从旧插件升级能因版本变化选择新服务。
-- [ ] AC-002：新 Release 默认安装首次终端成功、历史/用量/导出/恢复可用，关闭后无孤儿进程，控制台无 agent_data 解析错误。
-- [ ] Skill Execution Records 完整记录真实调用、摘要、操作、证据与结果。
-- [ ] 路径未越界；所需 E2E 已实际执行。
-- [ ] 授权后形成非空 implementation commit，Lead direct-parent 验证通过并记录 result SHA；当前本地计划不是该证据。
-- [ ] 所有回归/构建/lint通过，未完成项没有伪标 done；无需要改动时取消该票并注明事实，禁止 empty commit。
+- [x] AC-001：新版本插件默认下载同一 tag 的配套服务，五个平台二进制及摘要齐全；从旧插件升级能因版本变化选择新服务。
+- [x] AC-002：新 Release 默认安装首次终端成功、历史/用量/导出/恢复可用，关闭后无孤儿进程，控制台无 agent_data 解析错误。
+- [x] Skill Execution Records 完整记录真实调用、摘要、操作、证据与结果。
+- [x] 路径未越界；所需 E2E 已实际执行。
+- [x] 授权后形成非空 implementation commit，Lead direct-parent 验证通过并记录 result SHA；当前本地计划不是该证据。
+- [x] 所有回归/构建/lint通过，未完成项没有伪标 done；无需要改动时取消该票并注明事实，禁止 empty commit。
 
 ## 11. SKILL 调用计划
 
@@ -132,3 +132,5 @@ dev implement：先读架构/领域参考，用其依赖与命名/持久化规�
 本地实现和验证已通过；剩余 blocker 是五平台 CI、具体公开发布及公开下载 Obsidian E2E。不是实现失败，不阻止独立票继续。见 evidence/T-01.md。
 
 CI修复范围更新：0.0.2五平台发行检查在macOS/Windows的历史索引路径规范化失败，Release未创建。Lead扩展写集为agent_data.rs，补充别名/规范路径与库外写入拒绝回归；不改写0.0.2标签，修正版使用0.0.3。用户已明确授权继续最后发布步骤。
+
+最终闭合：用户发布授权已执行；0.0.3同提交五平台公开发行与全新默认下载E2E均passed，见evidence/T-01.md。历史plan-only和“此次不发布”是已被本轮授权覆盖的规划快照。

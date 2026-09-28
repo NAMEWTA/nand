@@ -1,5 +1,5 @@
 Already up to date
-Done in 344ms using pnpm v11.1.3
+Done in 319ms using pnpm v11.1.3
 $ eslint .
 
 /srv/nand/src/core/comments/store.ts

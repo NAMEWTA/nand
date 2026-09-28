@@ -1,0 +1,65 @@
+{
+  "passed": true,
+  "before": {
+    "pid": 1173910,
+    "sessions": [
+      {
+        "id": "terminal-7f9a84bc-005d-4122-b8a4-5f7e9483928b",
+        "nativeId": "8dbb8a1b-af45-46af-9d89-4bf86a9c1926",
+        "alive": true
+      },
+      {
+        "id": "terminal-4fccecf0-115c-4ff9-bbd3-73c3eceb71b1",
+        "nativeId": "1d160c80-ae4d-44aa-8d50-f4a9afc36144",
+        "alive": false
+      },
+      {
+        "id": "terminal-40be3908-adbe-4e36-9c3a-b21b885cf672",
+        "nativeId": "38af3ea9-a2a6-43c1-9b5e-180fb7b429a3",
+        "alive": true
+      }
+    ]
+  },
+  "ownedProcesses": [
+    {
+      "pid": 1173910,
+      "ppid": 1172632,
+      "name": "rust-terminal-s"
+    },
+    {
+      "pid": 1173911,
+      "ppid": 1173910,
+      "name": "bash"
+    },
+    {
+      "pid": 1185453,
+      "ppid": 1173910,
+      "name": "sleep"
+    }
+  ],
+  "off": {
+    "flag": false,
+    "active": false,
+    "sessions": 0,
+    "leafTypes": [
+      "terminal-view"
+    ]
+  },
+  "on": {
+    "flag": true,
+    "active": true,
+    "sessions": 0,
+    "leafTypes": [
+      "terminal-view"
+    ]
+  },
+  "afterSessions": [
+    {
+      "id": "terminal-c5648b8a-8025-4988-b15e-d6dd68110d7b",
+      "nativeId": "d4680e23-e81d-4cb6-98f0-d19d2c826902",
+      "alive": true
+    }
+  ],
+  "noOrphans": true,
+  "resumeNotReplayed": true
+}

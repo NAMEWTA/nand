@@ -1,0 +1,18 @@
+{
+  "passed": true,
+  "appPid": 1187807,
+  "serverPid": 1188668,
+  "ownedProcesses": [
+    {
+      "pid": 1188668,
+      "ppid": 1187853,
+      "name": "rust-terminal-s"
+    },
+    {
+      "pid": 1188704,
+      "ppid": 1188668,
+      "name": "bash"
+    }
+  ],
+  "allStopped": true
+}

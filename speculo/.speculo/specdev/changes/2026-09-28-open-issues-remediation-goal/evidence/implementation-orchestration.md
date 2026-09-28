@@ -1,25 +1,29 @@
-# 串行实施检查点
+# 联合实施编排最终证据
 
-2026-09-28：用户授权按总控完整实施；沿用 current/main、唯一 writer，无子代理，无远程写入。上一规划阶段留下可复验诊断和计划，属于进展；本轮基于当前状态重验。
+## 1. Parent Plan and Final Revision
 
-- #37/T-01：本地 0.0.2 候选与发布 gate 已实现并验证，见 ../../2026-09-28-issue-37-terminal-release/evidence/T-01.md。未完成五平台 CI、公开发布及公开下载 GUI 验收，不标 done。该票暂交还共享文件，后续独立票串行继续。
-- #38/T-01：代码与单元/行为测试已实现，提交 f18b06a（parent e7c59b2）；Obsidian 1.13.7 真实控件、预检、正常合成运行和进程重启验收已通过；本票 done。详见 ../../2026-09-28-issue-38-agent-preflight/evidence/T-01.md。
-- #39/T-01：路径解析、稳定 ID 聚焦、来源错误与收件箱焦点已实现；c324543（parent 5356993），真实 Obsidian 中英、102 个部件、窄屏、重启/模块生命周期通过，见 ../../2026-09-28-issue-39-widget-source/evidence/T-01.md。
-- #30/T-01：a56c441（parent dd4b9f4），命令即时语言刷新、回调/快捷键保持、42 个原生命令不重复、重启已通过。
-- #30/T-02：ce50587（parent c12c44a），六叶子/窗口标题、两个 PTY 与组件状态保持、模块关闭、重启与延迟加载通过；#30 全部合同完成。
-- #32/T-01：78a658f（parent a9d310f），作者品牌、终端空格与图标菜单标点；真实中英往返/重启通过。
-- #31/T-01：档案表单/空态语义已实现，24 场景及重启、104 条记录六尺寸主题组合通过，见子 Evidence。
-- #31/T-02：双语格式资源、生成时语言与已有文件保护已完成，22 回归及真实 Vault 字节比较通过；#31 全部合同完成。
-- #40/T-01：可见 Vault 导出/打开、本地化失败、并发重名保护，真实原生历史与文件浏览器/快速切换及重启通过。
-- #41/T-01：NAND locale、111/101分页、空态、取消收藏/归档与越界回退完成，真实原生历史、状态重启与224文件摘要通过。
-- #41/T-02：08081b6，同名会话稳定短标识、看板/智能体工作台命名、24布局组合及真实重启后完整复验通过；#41 全部合同完成。
-- #36/T-01：a2d6b84，结构化系统错误/参数、动态通知呈现、日期/冒号和提醒去重；29回归与宿主三轮/重启通过。
-- #36/T-02：d8ab246，当前修订游标区分已处理/待执行；原诊断绿，30回归及真实清理/重复tick/重启通过。
-- #36/T-03：ffc6f80，可见筛选/普通正文、独立滚动及新建编辑标题；106定义/100运行、24布局/24表单、分栏/键盘/重试及真实重启通过。
-- #36/T-04：db826cd，打开命令独立命名、原生设置帮助与去重标题；命令身份/回调及三轮中英/重启通过。
-- #36/T-05：318dc49，独立执行开关、等待启动/停止/落盘、只读历史、通知已读及手动终端隔离；37自动化回归、真实PTY竞态/重启/11次切换通过。#36全部合同完成。
-- 15票完成；#37本地代码完成但公开发布验收尚未完成。接下来做36条AC聚合审查和最终发布候选。
+父implementation-plan与implementation-map最终revision11，current/main、唯一Lead，implementation_agent_limit=1，integration_gate=direct-parent。用户明确完整实施及最后发布授权已执行，无子代理。16票/36合同全部完成，ready_for_execution=false表示无待派单。
 
-原计划中的 plan-only 授权是历史快照；本次本地实现/测试/必要提交由用户明确要求支持。公开发布在具体候选可审阅后处理，issue 写回不在当前任务内。
+## 2. Member and Ticket Completion
 
-宿主环境：Xvfb :97（初始 exec session 40402），Obsidian CDP http://127.0.0.1:9228（最新重启 exec session 28880）。profile/vault/helper 在 /tmp/nand-obsidian-e2e；复用前必须查询实际进程/CDP，不靠此文件认定仍活跃。初始化与脚本副本见 #38/evidence/implementation。
+9个member均completed；16张ticket均done；36条AC均passed。逐条描述、子Evidence路径和结果在aggregate-verification.md及final-audit.json。阶段进展原文完整保留implementation-orchestration-checkpoints.md；#37最终公开发行证据覆盖该历史检查点的未闭合状态。
+
+## 3. Dependency and Serialization Audit
+
+全部票在同一当前工作区串行；未创建ticket worktree、没有并行writer或遗留claim锁。#37先完成本地发行接缝再交还共享写集，其余15票按依赖验证后推进；所有代码合并后再完成#37公开发布。依赖及共享写集序列未被绕过，父ticket-control无错误。
+
+## 4. Repository Integration Audit
+
+基线09aade655241fff439d3147a55ec1448a4f93eea；最终生产代码301b74713b0a2f38d5159aaabbe64debcbda9296，公开tag0.0.3。16个implementation result的直接父、候选祖先、精确写集、full_suite与E2E状态由integration-audit.json独立核对。各提交非空，无force/reset/tag改写。后续main提交只记录证据；公开发行由既有release.yml创建。
+
+## 5. Aggregate Verification
+
+aggregate-verification.md逐项对账；Rust30、terminal190、automation37、settings21、contacts22、icons8、mobile5及架构581模块通过。build/lint0错误（157既有警告）。Node22/24 CI和五平台native CI均通过。全新公开zip安装及默认服务下载、首次PTY、历史/用量/导出/恢复、模块启停、真实Obsidian进程重启、数据保全与进程清理均已实际验证，见#37/public-003。
+
+## 6. Contract, Drift and Deviation Audit
+
+9份冻结Source原文SHA256保持。写集扩展先由Lead更新子owner和父revision再实施；Skill入口摘要匹配，所需记录齐全。0.0.2真实CI发现macOS/Windows索引路径规范化差异，发行gate阻止公开Release；修复并补跨平台回归后递增0.0.3，旧tag保留，第二次发行全绿。历史HEAD型validator不能同时令所有旧result等于当前文档HEAD，故schema验证与真实Git父子/祖先/写集审计分离，不伪造历史SHA。
+
+## 7. Residual Risk and Boundary
+
+无剩余合同、active锁或实施动作。真实GUI为Linux隔离profile/Vault、合成原生日志与CLI；macOS/Windows为native CI覆盖，不声称真实GUI或真实账号额度测试。未改永久ADR、未触及真实用户Vault、未评论/关闭issue，未归档child。发布和main证据同步已获用户授权。
