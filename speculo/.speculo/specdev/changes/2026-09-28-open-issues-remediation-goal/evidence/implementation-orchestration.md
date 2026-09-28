@@ -8,9 +8,10 @@
 - #30/T-01：a56c441（parent dd4b9f4），命令即时语言刷新、回调/快捷键保持、42 个原生命令不重复、重启已通过。
 - #30/T-02：ce50587（parent c12c44a），六叶子/窗口标题、两个 PTY 与组件状态保持、模块关闭、重启与延迟加载通过；#30 全部合同完成。
 - #32/T-01：78a658f（parent a9d310f），作者品牌、终端空格与图标菜单标点；真实中英往返/重启通过。
-- 下一票 #31/T-01：档案表单与空态语义。
-- 其余 10 票尚未实施，36 条 AC 聚合验收尚未完成。
+- #31/T-01：档案表单/空态语义已实现，24 场景及重启、104 条记录六尺寸主题组合通过，见子 Evidence。
+- 下一票 #31/T-02：双语格式说明首次生成及已有文件保护。
+- 其余 9 票尚未实施，36 条 AC 聚合验收尚未完成。
 
 原计划中的 plan-only 授权是历史快照；本次本地实现/测试/必要提交由用户明确要求支持。公开发布在具体候选可审阅后处理，issue 写回不在当前任务内。
 
-宿主环境：Xvfb :97（初始 exec session 40402），Obsidian CDP http://127.0.0.1:9228（最新重启 exec session 31842）。profile/vault/helper 在 /tmp/nand-obsidian-e2e；复用前必须查询实际进程/CDP，不靠此文件认定仍活跃。初始化与脚本副本见 #38/evidence/implementation。
+宿主环境：Xvfb :97（初始 exec session 40402），Obsidian CDP http://127.0.0.1:9228（最新重启 exec session 72455）。profile/vault/helper 在 /tmp/nand-obsidian-e2e；复用前必须查询实际进程/CDP，不靠此文件认定仍活跃。初始化与脚本副本见 #38/evidence/implementation。

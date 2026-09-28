@@ -1,0 +1,658 @@
+{
+  "passed": true,
+  "rows": [
+    {
+      "lang": "zh",
+      "detail": {
+        "sections": [
+          {
+            "title": "基本资料与联系方式",
+            "text": "基本资料与联系方式尚未填写"
+          },
+          {
+            "title": "工作经历",
+            "text": "工作经历尚未填写"
+          },
+          {
+            "title": "人际关系",
+            "text": "人际关系Polish Person B朋友来自对方档案Keep relation notes"
+          },
+          {
+            "title": "性格与偏好",
+            "text": "性格与偏好尚未填写"
+          },
+          {
+            "title": "生活习惯",
+            "text": "生活习惯尚未填写"
+          },
+          {
+            "title": "备注",
+            "text": "备注尚未填写"
+          }
+        ],
+        "prose": [
+          "尚未填写",
+          "尚未填写",
+          "尚未填写"
+        ]
+      },
+      "cases": [
+        {
+          "title": "新增联系人",
+          "labels": [
+            "姓名",
+            "别名",
+            "出生日期",
+            "出生地",
+            "当前地区",
+            "手机号",
+            "固定电话",
+            "微信",
+            "邮箱",
+            "标签",
+            ""
+          ],
+          "buttons": [
+            "复制草稿",
+            "取消",
+            "保存"
+          ],
+          "validation": "请填写姓名或企业名称。"
+        },
+        {
+          "title": "新增企业",
+          "labels": [
+            "企业名称",
+            "别名",
+            "企业地区",
+            "网址",
+            "标签",
+            ""
+          ],
+          "buttons": [
+            "复制草稿",
+            "取消",
+            "保存"
+          ]
+        },
+        {
+          "title": "编辑联系人",
+          "labels": [
+            "姓名",
+            "别名",
+            "出生日期",
+            "出生地",
+            "当前地区",
+            "手机号",
+            "固定电话",
+            "微信",
+            "邮箱",
+            "标签",
+            "",
+            ""
+          ],
+          "buttons": [
+            "复制草稿",
+            "取消",
+            "保存",
+            "重新载入原始资料"
+          ]
+        },
+        {
+          "title": "编辑企业",
+          "labels": [
+            "企业名称",
+            "别名",
+            "企业地区",
+            "网址",
+            "标签",
+            "",
+            ""
+          ],
+          "buttons": [
+            "复制草稿",
+            "取消",
+            "保存",
+            "重新载入原始资料"
+          ]
+        },
+        {
+          "title": "新增关系",
+          "labels": [
+            "关联联系人",
+            "关系名称",
+            "对方是此人的…",
+            "关联企业（可选）",
+            "备注",
+            "",
+            ""
+          ],
+          "buttons": [
+            "选择…",
+            "选择…",
+            "新增企业",
+            "清除",
+            "复制草稿",
+            "取消",
+            "保存",
+            "重新载入原始资料"
+          ]
+        },
+        {
+          "title": "编辑关系",
+          "labels": [
+            "关联联系人",
+            "关系名称",
+            "对方是此人的…",
+            "关联企业（可选）",
+            "备注",
+            "",
+            ""
+          ],
+          "buttons": [
+            "选择…",
+            "选择…",
+            "新增企业",
+            "清除",
+            "复制草稿",
+            "取消",
+            "保存",
+            "重新载入原始资料"
+          ]
+        },
+        {
+          "title": "新增工作经历",
+          "labels": [
+            "所属企业",
+            "部门",
+            "职务",
+            "开始时间",
+            "结束时间",
+            "备注",
+            "任职状态",
+            "关键角色",
+            "",
+            ""
+          ],
+          "buttons": [
+            "选择…",
+            "新增企业",
+            "复制草稿",
+            "取消",
+            "保存",
+            "重新载入原始资料"
+          ]
+        },
+        {
+          "title": "编辑工作经历",
+          "labels": [
+            "所属企业",
+            "部门",
+            "职务",
+            "开始时间",
+            "结束时间",
+            "备注",
+            "任职状态",
+            "关键角色",
+            "",
+            ""
+          ],
+          "buttons": [
+            "选择…",
+            "新增企业",
+            "复制草稿",
+            "取消",
+            "保存",
+            "重新载入原始资料"
+          ]
+        }
+      ],
+      "filters": {
+        "clear": "清除筛选",
+        "title": "筛选",
+        "buttons": [
+          "取消",
+          "应用"
+        ]
+      }
+    },
+    {
+      "lang": "en",
+      "detail": {
+        "sections": [
+          {
+            "title": "Profile and contact details",
+            "text": "Profile and contact detailsNot recorded yet"
+          },
+          {
+            "title": "Employment",
+            "text": "EmploymentNot recorded yet"
+          },
+          {
+            "title": "Relationships",
+            "text": "RelationshipsPolish Person BFriendFrom the other person’s recordKeep relation notes"
+          },
+          {
+            "title": "Personality and preferences",
+            "text": "Personality and preferencesNot recorded yet"
+          },
+          {
+            "title": "Habits",
+            "text": "HabitsNot recorded yet"
+          },
+          {
+            "title": "Notes",
+            "text": "NotesNot recorded yet"
+          }
+        ],
+        "prose": [
+          "Not recorded yet",
+          "Not recorded yet",
+          "Not recorded yet"
+        ]
+      },
+      "cases": [
+        {
+          "title": "Add person",
+          "labels": [
+            "Person name",
+            "Aliases",
+            "Date of birth",
+            "Birthplace",
+            "Current region",
+            "Mobile numbers",
+            "Phone numbers",
+            "WeChat",
+            "Email addresses",
+            "Tags",
+            ""
+          ],
+          "buttons": [
+            "Copy draft",
+            "Cancel",
+            "Save"
+          ],
+          "validation": "Enter a person or company name."
+        },
+        {
+          "title": "Add company",
+          "labels": [
+            "Company name",
+            "Aliases",
+            "Company region",
+            "Website",
+            "Tags",
+            ""
+          ],
+          "buttons": [
+            "Copy draft",
+            "Cancel",
+            "Save"
+          ]
+        },
+        {
+          "title": "Edit person",
+          "labels": [
+            "Person name",
+            "Aliases",
+            "Date of birth",
+            "Birthplace",
+            "Current region",
+            "Mobile numbers",
+            "Phone numbers",
+            "WeChat",
+            "Email addresses",
+            "Tags",
+            "",
+            ""
+          ],
+          "buttons": [
+            "Copy draft",
+            "Cancel",
+            "Save",
+            "Reload original record"
+          ]
+        },
+        {
+          "title": "Edit company",
+          "labels": [
+            "Company name",
+            "Aliases",
+            "Company region",
+            "Website",
+            "Tags",
+            "",
+            ""
+          ],
+          "buttons": [
+            "Copy draft",
+            "Cancel",
+            "Save",
+            "Reload original record"
+          ]
+        },
+        {
+          "title": "Add relationship",
+          "labels": [
+            "Related person",
+            "Relationship name",
+            "This person’s…",
+            "Related company (optional)",
+            "Notes",
+            "",
+            ""
+          ],
+          "buttons": [
+            "Choose…",
+            "Choose…",
+            "Add company",
+            "Clear",
+            "Copy draft",
+            "Cancel",
+            "Save",
+            "Reload original record"
+          ]
+        },
+        {
+          "title": "Edit relationship",
+          "labels": [
+            "Related person",
+            "Relationship name",
+            "This person’s…",
+            "Related company (optional)",
+            "Notes",
+            "",
+            ""
+          ],
+          "buttons": [
+            "Choose…",
+            "Choose…",
+            "Add company",
+            "Clear",
+            "Copy draft",
+            "Cancel",
+            "Save",
+            "Reload original record"
+          ]
+        },
+        {
+          "title": "Add employment",
+          "labels": [
+            "Company",
+            "Department",
+            "Role",
+            "Start date",
+            "End date",
+            "Notes",
+            "Employment status",
+            "Key role",
+            "",
+            ""
+          ],
+          "buttons": [
+            "Choose…",
+            "Add company",
+            "Copy draft",
+            "Cancel",
+            "Save",
+            "Reload original record"
+          ]
+        },
+        {
+          "title": "Edit employment",
+          "labels": [
+            "Company",
+            "Department",
+            "Role",
+            "Start date",
+            "End date",
+            "Notes",
+            "Employment status",
+            "Key role",
+            "",
+            ""
+          ],
+          "buttons": [
+            "Choose…",
+            "Add company",
+            "Copy draft",
+            "Cancel",
+            "Save",
+            "Reload original record"
+          ]
+        }
+      ],
+      "filters": {
+        "clear": "Clear filters",
+        "title": "Filter",
+        "buttons": [
+          "Cancel",
+          "Apply"
+        ]
+      }
+    },
+    {
+      "lang": "zh",
+      "detail": {
+        "sections": [
+          {
+            "title": "基本资料与联系方式",
+            "text": "基本资料与联系方式尚未填写"
+          },
+          {
+            "title": "工作经历",
+            "text": "工作经历尚未填写"
+          },
+          {
+            "title": "人际关系",
+            "text": "人际关系Polish Person B朋友来自对方档案Keep relation notes"
+          },
+          {
+            "title": "性格与偏好",
+            "text": "性格与偏好尚未填写"
+          },
+          {
+            "title": "生活习惯",
+            "text": "生活习惯尚未填写"
+          },
+          {
+            "title": "备注",
+            "text": "备注尚未填写"
+          }
+        ],
+        "prose": [
+          "尚未填写",
+          "尚未填写",
+          "尚未填写"
+        ]
+      },
+      "cases": [
+        {
+          "title": "新增联系人",
+          "labels": [
+            "姓名",
+            "别名",
+            "出生日期",
+            "出生地",
+            "当前地区",
+            "手机号",
+            "固定电话",
+            "微信",
+            "邮箱",
+            "标签",
+            ""
+          ],
+          "buttons": [
+            "复制草稿",
+            "取消",
+            "保存"
+          ],
+          "validation": "请填写姓名或企业名称。"
+        },
+        {
+          "title": "新增企业",
+          "labels": [
+            "企业名称",
+            "别名",
+            "企业地区",
+            "网址",
+            "标签",
+            ""
+          ],
+          "buttons": [
+            "复制草稿",
+            "取消",
+            "保存"
+          ]
+        },
+        {
+          "title": "编辑联系人",
+          "labels": [
+            "姓名",
+            "别名",
+            "出生日期",
+            "出生地",
+            "当前地区",
+            "手机号",
+            "固定电话",
+            "微信",
+            "邮箱",
+            "标签",
+            "",
+            ""
+          ],
+          "buttons": [
+            "复制草稿",
+            "取消",
+            "保存",
+            "重新载入原始资料"
+          ]
+        },
+        {
+          "title": "编辑企业",
+          "labels": [
+            "企业名称",
+            "别名",
+            "企业地区",
+            "网址",
+            "标签",
+            "",
+            ""
+          ],
+          "buttons": [
+            "复制草稿",
+            "取消",
+            "保存",
+            "重新载入原始资料"
+          ]
+        },
+        {
+          "title": "新增关系",
+          "labels": [
+            "关联联系人",
+            "关系名称",
+            "对方是此人的…",
+            "关联企业（可选）",
+            "备注",
+            "",
+            ""
+          ],
+          "buttons": [
+            "选择…",
+            "选择…",
+            "新增企业",
+            "清除",
+            "复制草稿",
+            "取消",
+            "保存",
+            "重新载入原始资料"
+          ]
+        },
+        {
+          "title": "编辑关系",
+          "labels": [
+            "关联联系人",
+            "关系名称",
+            "对方是此人的…",
+            "关联企业（可选）",
+            "备注",
+            "",
+            ""
+          ],
+          "buttons": [
+            "选择…",
+            "选择…",
+            "新增企业",
+            "清除",
+            "复制草稿",
+            "取消",
+            "保存",
+            "重新载入原始资料"
+          ]
+        },
+        {
+          "title": "新增工作经历",
+          "labels": [
+            "所属企业",
+            "部门",
+            "职务",
+            "开始时间",
+            "结束时间",
+            "备注",
+            "任职状态",
+            "关键角色",
+            "",
+            ""
+          ],
+          "buttons": [
+            "选择…",
+            "新增企业",
+            "复制草稿",
+            "取消",
+            "保存",
+            "重新载入原始资料"
+          ]
+        },
+        {
+          "title": "编辑工作经历",
+          "labels": [
+            "所属企业",
+            "部门",
+            "职务",
+            "开始时间",
+            "结束时间",
+            "备注",
+            "任职状态",
+            "关键角色",
+            "",
+            ""
+          ],
+          "buttons": [
+            "选择…",
+            "新增企业",
+            "复制草稿",
+            "取消",
+            "保存",
+            "重新载入原始资料"
+          ]
+        }
+      ],
+      "filters": {
+        "clear": "清除筛选",
+        "title": "筛选",
+        "buttons": [
+          "取消",
+          "应用"
+        ]
+      }
+    }
+  ],
+  "cleared": {
+    "company": {
+      "id": "",
+      "label": "",
+      "link": ""
+    },
+    "othersPreserved": true
+  }
+}
