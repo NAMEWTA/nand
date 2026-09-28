@@ -6,16 +6,16 @@ import type DashboardPlugin from './main';
 export function registerShellCommands(plugin: DashboardPlugin): void {
 	plugin.addCommand({
 		id: 'open-automations',
-		nameKey: 'automation.title',
-		name: t('automation.title'),
+		nameKey: 'automation.openAutomations',
+		name: t('automation.openAutomations'),
 		callback: () => {
 			void plugin.automationHost?.open();
 		},
 	});
 	plugin.addCommand({
 		id: 'open-notifications',
-		nameKey: 'automation.inbox',
-		name: t('automation.inbox'),
+		nameKey: 'automation.openNotifications',
+		name: t('automation.openNotifications'),
 		callback: () => plugin.automationHost?.inbox(),
 	});
 	plugin.addCommand({

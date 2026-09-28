@@ -42,6 +42,11 @@ export const messages = {
 		'automation.delivery.unknown': 'Unverified',
 
 		'automation.title': 'Automations',
+		'automation.openAutomations': 'Open automations',
+		'automation.openNotifications': 'Open notifications',
+		'automation.help': 'Usage guide',
+		'automation.configureHelp': 'Open Automations, then choose New automation or Edit to configure notification channels and session mode for that automation. These are per-automation options, not global defaults.',
+		'automation.sessionHelp': 'For Run agent actions, choose New each time, Reuse previous live session, or Choose a session in the automation editor. Reuse starts a new session if no compatible live session remains; an unavailable explicitly selected session reports an error.',
 		'automation.new': 'New automation',
 		'automation.editTitle': 'Edit automation',
 		'automation.actionFilter': 'Action / status',
@@ -181,6 +186,11 @@ export const messages = {
 		'automation.delivery.unknown': '状态未知',
 
 		'automation.title': '自动化',
+		'automation.openAutomations': '打开自动化',
+		'automation.openNotifications': '打开通知中心',
+		'automation.help': '使用说明',
+		'automation.configureHelp': '打开自动化后，选择“新建自动化”或“编辑”，即可配置该条自动化的通知渠道和会话方式。这些选项按每条自动化设置，不是全局默认值。',
+		'automation.sessionHelp': '运行智能体时，可在自动化编辑器中选择“每次新建”“沿用上次存活会话”或“指定会话”。沿用模式在没有兼容存活会话时会新建；明确指定的会话不可用时会报错。',
 		'automation.new': '新建自动化',
 		'automation.editTitle': '编辑自动化',
 		'automation.actionFilter': '动作 / 状态',

@@ -1,3 +1,5 @@
+import { registerShellCommands } from '../src/plugin/commands';
+import type DashboardPlugin from '../src/plugin/main';
 import assert from 'node:assert/strict';
 import { Scope, Notice, type App } from 'obsidian';
 import { El } from './mini-dom';
@@ -53,6 +55,23 @@ async function main() {
 	commandCleanups.forEach((off) => off());
 	setLanguage('en');
 	assert.deepEqual(commands.map((command) => command.name), disposedNames, 'Plugin unload releases name subscriptions');
+	let automationOpens = 0, inboxOpens = 0;
+	registerShellCommands({ addCommand, automationHost: { open: async () => { automationOpens++; }, inbox: () => { inboxOpens++; } } } as unknown as DashboardPlugin);
+	const shellCommands = commands.slice(4);
+	const openAutomation = shellCommands.find(command => command.id === 'nand:open-automations')!;
+	const openInbox = shellCommands.find(command => command.id === 'nand:open-notifications')!;
+	const shellCallbacks = shellCommands.map(command => command.callback);
+	for (const language of ['zh', 'en', 'zh'] as const) {
+		setLanguage(language);
+		assert.equal(openAutomation.name, language === 'zh' ? 'NAND: 打开自动化' : 'NAND: Open automations');
+		assert.equal(openInbox.name, language === 'zh' ? 'NAND: 打开通知中心' : 'NAND: Open notifications');
+		assert.equal(t('automation.title'), language === 'zh' ? '自动化' : 'Automations');
+		assert.equal(t('automation.inbox'), language === 'zh' ? '通知中心' : 'Notifications');
+		openAutomation.callback?.(); openInbox.callback?.();
+		assert.deepEqual(shellCommands.map(command => command.callback), shellCallbacks);
+	}
+	assert.deepEqual([automationOpens, inboxOpens, shellCommands.length, commands.length], [3, 3, 6, 10]);
+	commandCleanups.slice(4).forEach(off => off());
 	const scopes: Scope[] = [];
 	const app = {
 		scope: new Scope(),
