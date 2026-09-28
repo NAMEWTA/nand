@@ -1,0 +1,269 @@
+{
+  "passed": 3,
+  "results": [
+    {
+      "language": "zh",
+      "rows": [
+        {
+          "type": "nand-dashboard-view",
+          "display": "工作台",
+          "tab": "工作台",
+          "header": "工作台",
+          "sameView": true,
+          "sameState": true,
+          "sameInstance": true,
+          "sameContainer": true,
+          "sameNativeChild": true,
+          "sameIcon": true
+        },
+        {
+          "type": "nand-contacts-view",
+          "display": "档案",
+          "tab": "档案",
+          "header": "档案",
+          "sameView": true,
+          "sameState": true,
+          "sameInstance": true,
+          "sameContainer": true,
+          "sameNativeChild": true,
+          "sameIcon": true
+        },
+        {
+          "type": "nand-editor-view",
+          "display": "编辑器",
+          "tab": "编辑器",
+          "header": "编辑器",
+          "sameView": true,
+          "sameState": true,
+          "sameInstance": true,
+          "sameContainer": true,
+          "sameNativeChild": true,
+          "sameIcon": true
+        },
+        {
+          "type": "nand-automation-view",
+          "display": "自动化",
+          "tab": "自动化",
+          "header": "自动化",
+          "sameView": true,
+          "sameState": true,
+          "sameInstance": true,
+          "sameContainer": true,
+          "sameNativeChild": true,
+          "sameIcon": true
+        },
+        {
+          "type": "terminal-view",
+          "display": "Terminal",
+          "tab": "Terminal",
+          "header": "Terminal",
+          "sameView": true,
+          "sameState": true,
+          "sameInstance": true,
+          "sameContainer": true,
+          "sameNativeChild": true,
+          "search": "language retained search",
+          "sameIcon": true
+        },
+        {
+          "type": "terminal-view",
+          "display": "终端",
+          "tab": "终端",
+          "header": "终端",
+          "sameView": true,
+          "sameState": true,
+          "sameInstance": true,
+          "sameContainer": true,
+          "sameNativeChild": true,
+          "search": "language retained search",
+          "sameIcon": true
+        }
+      ],
+      "mainTitle": "Welcome - vault - Obsidian 1.13.7",
+      "popoutTitle": "终端 - vault - Obsidian 1.13.7",
+      "defaultTitle": "终端",
+      "customTitle": "Terminal",
+      "sessionsStable": true,
+      "sessionCount": 2,
+      "contactPath": "档案/联系人/Widget source regression contact.md",
+      "automation": "widget:count-100",
+      "ribbonsStable": true
+    },
+    {
+      "language": "en",
+      "rows": [
+        {
+          "type": "nand-dashboard-view",
+          "display": "Dashboard",
+          "tab": "Dashboard",
+          "header": "Dashboard",
+          "sameView": true,
+          "sameState": true,
+          "sameInstance": true,
+          "sameContainer": true,
+          "sameNativeChild": true,
+          "sameIcon": true
+        },
+        {
+          "type": "nand-contacts-view",
+          "display": "Archives",
+          "tab": "Archives",
+          "header": "Archives",
+          "sameView": true,
+          "sameState": true,
+          "sameInstance": true,
+          "sameContainer": true,
+          "sameNativeChild": true,
+          "sameIcon": true
+        },
+        {
+          "type": "nand-editor-view",
+          "display": "Editor",
+          "tab": "Editor",
+          "header": "Editor",
+          "sameView": true,
+          "sameState": true,
+          "sameInstance": true,
+          "sameContainer": true,
+          "sameNativeChild": true,
+          "sameIcon": true
+        },
+        {
+          "type": "nand-automation-view",
+          "display": "Automations",
+          "tab": "Automations",
+          "header": "Automations",
+          "sameView": true,
+          "sameState": true,
+          "sameInstance": true,
+          "sameContainer": true,
+          "sameNativeChild": true,
+          "sameIcon": true
+        },
+        {
+          "type": "terminal-view",
+          "display": "Terminal",
+          "tab": "Terminal",
+          "header": "Terminal",
+          "sameView": true,
+          "sameState": true,
+          "sameInstance": true,
+          "sameContainer": true,
+          "sameNativeChild": true,
+          "search": "language retained search",
+          "sameIcon": true
+        },
+        {
+          "type": "terminal-view",
+          "display": "Terminal",
+          "tab": "Terminal",
+          "header": "Terminal",
+          "sameView": true,
+          "sameState": true,
+          "sameInstance": true,
+          "sameContainer": true,
+          "sameNativeChild": true,
+          "search": "language retained search",
+          "sameIcon": true
+        }
+      ],
+      "mainTitle": "Welcome - vault - Obsidian 1.13.7",
+      "popoutTitle": "Terminal - vault - Obsidian 1.13.7",
+      "defaultTitle": "Terminal",
+      "customTitle": "Terminal",
+      "sessionsStable": true,
+      "sessionCount": 2,
+      "contactPath": "档案/联系人/Widget source regression contact.md",
+      "automation": "widget:count-100",
+      "ribbonsStable": true
+    },
+    {
+      "language": "zh",
+      "rows": [
+        {
+          "type": "nand-dashboard-view",
+          "display": "工作台",
+          "tab": "工作台",
+          "header": "工作台",
+          "sameView": true,
+          "sameState": true,
+          "sameInstance": true,
+          "sameContainer": true,
+          "sameNativeChild": true,
+          "sameIcon": true
+        },
+        {
+          "type": "nand-contacts-view",
+          "display": "档案",
+          "tab": "档案",
+          "header": "档案",
+          "sameView": true,
+          "sameState": true,
+          "sameInstance": true,
+          "sameContainer": true,
+          "sameNativeChild": true,
+          "sameIcon": true
+        },
+        {
+          "type": "nand-editor-view",
+          "display": "编辑器",
+          "tab": "编辑器",
+          "header": "编辑器",
+          "sameView": true,
+          "sameState": true,
+          "sameInstance": true,
+          "sameContainer": true,
+          "sameNativeChild": true,
+          "sameIcon": true
+        },
+        {
+          "type": "nand-automation-view",
+          "display": "自动化",
+          "tab": "自动化",
+          "header": "自动化",
+          "sameView": true,
+          "sameState": true,
+          "sameInstance": true,
+          "sameContainer": true,
+          "sameNativeChild": true,
+          "sameIcon": true
+        },
+        {
+          "type": "terminal-view",
+          "display": "Terminal",
+          "tab": "Terminal",
+          "header": "Terminal",
+          "sameView": true,
+          "sameState": true,
+          "sameInstance": true,
+          "sameContainer": true,
+          "sameNativeChild": true,
+          "search": "language retained search",
+          "sameIcon": true
+        },
+        {
+          "type": "terminal-view",
+          "display": "终端",
+          "tab": "终端",
+          "header": "终端",
+          "sameView": true,
+          "sameState": true,
+          "sameInstance": true,
+          "sameContainer": true,
+          "sameNativeChild": true,
+          "search": "language retained search",
+          "sameIcon": true
+        }
+      ],
+      "mainTitle": "Welcome - vault - Obsidian 1.13.7",
+      "popoutTitle": "终端 - vault - Obsidian 1.13.7",
+      "defaultTitle": "终端",
+      "customTitle": "Terminal",
+      "sessionsStable": true,
+      "sessionCount": 2,
+      "contactPath": "档案/联系人/Widget source regression contact.md",
+      "automation": "widget:count-100",
+      "ribbonsStable": true
+    }
+  ]
+}

@@ -1,0 +1,137 @@
+{
+  "leaves": [
+    {
+      "id": "5d1262f4d7245bed",
+      "type": "nand-automation-view"
+    },
+    {
+      "id": "cb482cdf94a3a41b",
+      "type": "terminal-view"
+    },
+    {
+      "id": "dbc05e45cdd07e09",
+      "type": "markdown"
+    },
+    {
+      "id": "39cb63c924f9901b",
+      "type": "markdown"
+    },
+    {
+      "id": "b78186dc9b24866f",
+      "type": "nand-dashboard-view"
+    },
+    {
+      "id": "4e1bf55d30f7d6c8",
+      "type": "nand-contacts-view"
+    },
+    {
+      "id": "c45633097aa0ca00",
+      "type": "file-explorer"
+    },
+    {
+      "id": "61f3cae1da15bba3",
+      "type": "search"
+    },
+    {
+      "id": "1135cb82d85beb81",
+      "type": "bookmarks"
+    },
+    {
+      "id": "aa55c454d870b9a3",
+      "type": "backlink"
+    },
+    {
+      "id": "d2d355fd035c079d",
+      "type": "outgoing-link"
+    },
+    {
+      "id": "9cf0bd4cd0099425",
+      "type": "tag"
+    },
+    {
+      "id": "ce40f9940a733bd2",
+      "type": "all-properties"
+    },
+    {
+      "id": "8503162c6eab39e4",
+      "type": "outline"
+    },
+    {
+      "id": "d199db807892e22d",
+      "type": "nand-editor-view"
+    },
+    {
+      "id": "78ecf049c7d4baed",
+      "type": "terminal-view"
+    }
+  ],
+  "ribbons": [
+    {
+      "id": "nand:ribbon-terminal",
+      "display": "",
+      "hidden": false
+    },
+    {
+      "id": "nand:ribbon-automations",
+      "display": "",
+      "hidden": false
+    },
+    {
+      "id": "nand:ribbon-notifications",
+      "display": "",
+      "hidden": false
+    },
+    {
+      "id": "nand:ribbon-home",
+      "display": "",
+      "hidden": false
+    },
+    {
+      "id": "nand:ribbon-editor",
+      "display": "",
+      "hidden": false
+    },
+    {
+      "id": "nand:ribbon-contacts",
+      "display": "",
+      "hidden": false
+    },
+    {
+      "id": "switcher:Open quick switcher",
+      "display": "",
+      "hidden": false
+    },
+    {
+      "id": "graph:Open graph view",
+      "display": "",
+      "hidden": false
+    },
+    {
+      "id": "canvas:Create new canvas",
+      "display": "",
+      "hidden": false
+    },
+    {
+      "id": "daily-notes:Open today's daily note",
+      "display": "",
+      "hidden": false
+    },
+    {
+      "id": "templates:Insert template",
+      "display": "",
+      "hidden": false
+    },
+    {
+      "id": "command-palette:Open command palette",
+      "display": "",
+      "hidden": false
+    },
+    {
+      "id": "bases:Create new base",
+      "display": "",
+      "hidden": false
+    }
+  ],
+  "language": "zh",
+  "workspaceSaved": true
+}

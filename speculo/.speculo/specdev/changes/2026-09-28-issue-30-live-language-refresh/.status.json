@@ -2,7 +2,7 @@
   "schema_version": 6,
   "artifact": "change-status",
   "change": "2026-09-28-issue-30-live-language-refresh",
-  "change_status": "active",
+  "change_status": "completed",
   "current_work": null,
   "works_run": [
     "specdev/triage",
@@ -39,8 +39,8 @@
     "history": []
   },
   "created_at": "2026-09-28T05:55:43.895113+00:00",
-  "updated_at": "2026-09-28T07:30:53.235592+00:00",
-  "completed_at": null,
+  "updated_at": "2026-09-28T07:50:16.527651+00:00",
+  "completed_at": "2026-09-28T07:50:16.527651+00:00",
   "archived": false,
   "archive_path": null,
   "blockers": [],
@@ -85,6 +85,49 @@
           "evidence": "<Path>{roots.state}/specdev/changes/2026-09-28-issue-30-live-language-refresh/evidence/T-01.md</Path>"
         },
         "evidence": "<Path>{roots.state}/specdev/changes/2026-09-28-issue-30-live-language-refresh/evidence/T-01.md</Path>",
+        "attempts": 1,
+        "promotion_status": "applied"
+      }
+    },
+    {
+      "ticket_id": "T-02",
+      "owner": "codex-issue-planning",
+      "implementation_owner": "codex-issue-planning",
+      "integration_owner": "codex-issue-planning",
+      "provider": "git",
+      "base_sha": "c12c44a98cb5c6d907443726bb29f646e5fd2a59",
+      "parent_branch": "main",
+      "branch": "main",
+      "workspace_ref": "current",
+      "source_checkpoint": "ce5058781905ad8e5b25faaefc0cec4fa93b2d0f",
+      "status": "integrated",
+      "updated_at": "2026-09-28T07:50:16.527651+00:00",
+      "integration": {
+        "status": "passed",
+        "parent_ref": "refs/heads/main",
+        "parent_before_sha": "c12c44a98cb5c6d907443726bb29f646e5fd2a59",
+        "source_sha": "ce5058781905ad8e5b25faaefc0cec4fa93b2d0f",
+        "candidate_sha": null,
+        "candidate_tree_sha": null,
+        "candidate_branch": null,
+        "candidate_workspace_ref": null,
+        "result_sha": "ce5058781905ad8e5b25faaefc0cec4fa93b2d0f",
+        "method": "direct-parent",
+        "conflict_paths": [],
+        "verification": "passed",
+        "full_suite": {
+          "required": true,
+          "status": "passed",
+          "reason": "本票要求的全部测试与匹配回归、build/lint，见命令表",
+          "evidence": "<Path>{roots.state}/specdev/changes/2026-09-28-issue-30-live-language-refresh/evidence/T-02.md</Path>"
+        },
+        "e2e": {
+          "required": true,
+          "status": "passed",
+          "reason": "真实 Obsidian 六叶子、弹出窗口、两个 PTY 引用保持、模块关闭、重启及原生 deferred leaf",
+          "evidence": "<Path>{roots.state}/specdev/changes/2026-09-28-issue-30-live-language-refresh/evidence/T-02.md</Path>"
+        },
+        "evidence": "<Path>{roots.state}/specdev/changes/2026-09-28-issue-30-live-language-refresh/evidence/T-02.md</Path>",
         "attempts": 1,
         "promotion_status": "applied"
       }

@@ -1,0 +1,16 @@
+{
+  "deferred": false,
+  "loadedTitle": "Terminal",
+  "leaves": 6,
+  "sessions": [
+    {
+      "id": "terminal-a1ecbfe7-7d71-434e-880a-d49a7469669d",
+      "ptyId": "1daf691f-b53a-4bbb-8dc0-6eadeef3a41c"
+    },
+    {
+      "id": "terminal-65254466-5734-42c6-ad65-7f94ebea768e",
+      "ptyId": "5c0d71c0-21ea-4d35-a368-717407ca2383"
+    }
+  ],
+  "popout": true
+}

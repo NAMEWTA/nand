@@ -1,0 +1,47 @@
+Already up to date
+Done in 489ms using pnpm v11.1.3
+$ node --experimental-strip-types --import ./scripts/register-ts-hooks.mjs --test src/plugin/settings/nav.test.ts src/plugin/settings/connection-menu.test.ts src/plugin/settings/weather-copy.test.ts src/plugin/terminal-leaf-kind.test.ts src/plugin/module-lifecycle.test.ts && esbuild src/plugin/settings/terminal-sections.test.ts --bundle --platform=node --format=cjs --outfile=scripts/tmp/terminal-sections.test.cjs --alias:obsidian=./scripts/iconic-obsidian-stub.ts --loader:.svg=text --log-level=warning && node --test scripts/tmp/terminal-sections.test.cjs && esbuild src/plugin/settings/setting-definitions.test.ts --bundle --platform=node --format=cjs --outfile=scripts/tmp/setting-definitions.test.cjs --alias:obsidian=./scripts/iconic-obsidian-stub.ts --loader:.svg=text --log-level=warning && node --test scripts/tmp/setting-definitions.test.cjs
+✔ board and editor toggles preserve every terminal session and output (6.16227ms)
+✔ only real terminal transitions replace leaves; repeated flags are no-ops (0.502929ms)
+✔ mobile never activates a terminal (0.335874ms)
+✔ queued requests read the latest flags and wait for shutdown (0.453059ms)
+✔ a rejected transition does not poison the queue (0.552932ms)
+✔ unload prevents pending module work from starting services (0.299925ms)
+✔ archive transitions run on mobile without restarting the terminal (0.478875ms)
+✔ connection menu matches the server-connection title in both plugin languages (0.985572ms)
+✔ other terminal menu labels stay on their existing keys (0.29781ms)
+✔ settings tab reads terminal menu labels from the shared helper (0.265219ms)
+✔ home is the first primary settings product (2.281981ms)
+✔ top tabs keep home and sync and hide closed domains (0.402428ms)
+✔ domain sections stay in their previous order for stacking on one tab (0.328869ms)
+✔ settings stylesheet does not keep a left-hand settings column (4.148424ms)
+✔ archives has independent navigation and respects its module gate (0.766758ms)
+✔ weather setting copy is translated in both languages (2.795927ms)
+✔ an active host reopens a terminal leaf (1.155731ms)
+✔ an inactive host reopens the placeholder leaf (0.227746ms)
+ℹ tests 18
+ℹ suites 0
+ℹ pass 18
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 556.700068
+✔ stacked terminal sections keep the appearance block, launcher subscription, and offline hint (17.53813ms)
+ℹ tests 1
+ℹ suites 0
+ℹ pass 1
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 182.853757
+✔ declarative setting names are unique in both languages (2.489597ms)
+ℹ tests 1
+ℹ suites 0
+ℹ pass 1
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 138.630219

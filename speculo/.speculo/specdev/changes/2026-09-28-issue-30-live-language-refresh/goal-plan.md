@@ -2,7 +2,7 @@
 schema_version: 6
 artifact: "goal-plan"
 change: "2026-09-28-issue-30-live-language-refresh"
-status: "draft"
+status: "completed"
 modes: []
 orchestration: "lead-directed"
 lead: "codex-issue-planning"
@@ -81,3 +81,5 @@ HEAD/输入/Skill摘要漂移：暂停相交分支，返回对应owner修订计�
 本change现在归属 <Path>{roots.state}/specdev/changes/2026-09-28-open-issues-remediation-goal/implementation-plan.md</Path>；该父Plan拥有跨change串行、共享资源和全局执行边界；本Goal只保留子合同Gate，策略相同不冲突。请从父 <Path>{roots.state}/specdev/changes/2026-09-28-open-issues-remediation-goal/tickets-map.md</Path> 恢复，不独立抢占writer。
 
 用户实施授权检查点：T-01 已完成并在 main direct-parent 提交 a56c441，T-02 接续串行实施。历史未授权状态已由本次用户“完整实现”指令覆盖；远程发布和 issue 写回仍未执行。
+
+完成检查点：T-01/T-02 四条合同均通过；T-02 实现 ce5058781905ad8e5b25faaefc0cec4fa93b2d0f。真实宿主命令/叶子/窗口标题、PTY和状态保持、延迟加载及重启见两张 Ticket Evidence。ready_for_execution=false 表示本 change 已完成，无待派单；父总控继续执行。历史 plan-only 段落仅保留作为授权前记录。
