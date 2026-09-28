@@ -1,5 +1,5 @@
 import { Menu, Modal, Notice, Setting, type App } from 'obsidian';
-import { useEffect, useState } from 'preact/hooks';
+import { useEffect, useRef, useState } from 'preact/hooks';
 import { AGENT_CATALOG } from '../../core/agent-launch/catalog';
 import type { UsageSnapshot } from '../../core/agent-launch/types';
 import type { VaultSessionAgent } from '../../core/ai-vault/types';
@@ -102,6 +102,26 @@ export function HistorySidebar({ history, host }: { history: NativeHistory; host
 	const [selected, setSelected] = useState<NativeSession>(),
 		[preview, setPreview] = useState('');
 	const [filter, setFilter] = useState('');
+	const [exporting, setExporting] = useState(false);
+	const exportPending = useRef(false);
+	const exportSession = async (session: NativeSession) => {
+		if (exportPending.current) return;
+		exportPending.current = true;
+		setExporting(true);
+		try {
+			const file = await history.export(session);
+			try { await app.workspace.getLeaf('tab').openFile(file); }
+			catch (error) {
+				throw new Error(t('workbench.exportOpenFailed', { path: file.path, message: error instanceof Error ? error.message : String(error) }));
+			}
+			new Notice(t('workbench.exported', { path: file.path }));
+		} catch (error) {
+			new Notice(error instanceof Error ? error.message : String(error));
+		} finally {
+			exportPending.current = false;
+			setExporting(false);
+		}
+	};
 	useEffect(() => {
 		const abort = new AbortController();
 		setBusy(true);
@@ -265,15 +285,7 @@ export function HistorySidebar({ history, host }: { history: NativeHistory; host
 						<button onClick={() => update(selected, { archived: !history.meta(selected.key).archived })}>
 							{t('workbench.archived')}
 						</button>
-						<button
-							onClick={() =>
-								report(
-									history.export(selected).then((file) => {
-										new Notice(file);
-									}),
-								)
-							}
-						>
+						<button disabled={exporting} onClick={() => void exportSession(selected)}>
 							{t('workbench.export')}
 						</button>
 					</div>

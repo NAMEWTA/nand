@@ -1,4 +1,9 @@
 import assert from 'node:assert/strict';
+import { Notice, TFile, TFolder, type App } from 'obsidian';
+import { NativeHistory } from '../src/platform/obsidian/ai-vault/service';
+import { HistorySidebar } from '../src/view/terminal/workbench';
+import type { NativeSession } from '../src/platform/terminal-server/agent-data-client';
+import type { WorkbenchHost } from '../src/view/terminal/host';
 import { parseHTML } from 'linkedom';
 import { h, render } from 'preact';
 import { TerminalWorkbench } from '../src/view/terminal/TerminalWorkbench';
@@ -128,3 +133,101 @@ assert.equal(left.childNodes.length, 0);
 assert.ok(right.textContent?.includes('One'), 'unmounting a workbench leaves separately composed panels alive');
 render(null, right);
 console.log('Panel composition: independent actions, persistent xterm island/search, clean unmount passed.');
+
+async function verifyExports() {
+	const files = new Map<string, TFile | TFolder>(), contents = new Map<string, string>();
+	const metadata = new Map<string, string>();
+	const opened: TFile[] = [];
+	let failRead = false, failWrite = false, failOpen = false, gate: Promise<void> | undefined;
+	const app = {
+		loadLocalStorage: () => 'export-test',
+		vault: {
+			adapter: {
+				exists: async (path: string) => metadata.has(path), read: async (path: string) => metadata.get(path)!,
+				mkdir: async (path: string) => { metadata.set(path, ''); },
+				write: async (path: string, text: string) => { metadata.set(path, text); },
+			},
+			getAbstractFileByPath: (path: string) => files.get(path) ?? null,
+			createFolder: async (path: string) => {
+				await Promise.resolve();
+				if (files.has(path)) throw Error('exists');
+				files.set(path, Object.assign(new TFolder(), { path }));
+			},
+			create: async (path: string, text: string) => {
+				await Promise.resolve();
+				if (failWrite) throw Error('disk full');
+				if (files.has(path)) throw Error('exists');
+				const file = Object.assign(new TFile(), { path });
+				files.set(path, file); contents.set(path, text); return file;
+			},
+		},
+		workspace: { getLeaf: (mode: string) => {
+			assert.equal(mode, 'tab');
+			return { openFile: async (file: TFile) => { if (failOpen) throw Error('leaf unavailable'); opened.push(file); } };
+		} },
+	} as unknown as App;
+	const history = new NativeHistory(app, {} as never, () => ({} as never), '');
+	const session = { key: 'one', agentId: 'co/dex', sessionId: '../a:b\\c?*', title: 'Selected history', text: '', modifiedAtMs: 0 } as NativeSession;
+	const transcript = 'user: keep original 中文\n\nassistant: ```code```';
+	history.read = async (row) => { if (gate) await gate; if (failRead) throw Error('source unavailable'); return { ...row, text: transcript }; };
+	history.scan = async () => [];
+	history.query = async () => ({ rows: [session], total: 1 } as never);
+	await history.update(session.key, { title: 'My custom title 中文' });
+	const results = await Promise.all([history.export(session), history.export(session), history.export(session)]);
+	assert.equal(new Set(results.map((file) => file.path)).size, 3, 'Concurrent exports claim unique paths');
+	for (const file of results) {
+		assert.ok(file instanceof TFile);
+		assert.match(file.path, /^NAND Exports\/[a-zA-Z0-9_() -]+\.md$/);
+		assert.equal(contents.get(file.path), `# My custom title 中文\n\n${transcript}`);
+	}
+	const firstBytes = contents.get(results[0]!.path);
+	for (const language of ['en', 'zh'] as const) {
+		setLanguage(language);
+		failRead = true;
+		await assert.rejects(history.export(session), new RegExp(language === 'en' ? 'Could not read' : '无法读取'));
+		failRead = false; failWrite = true;
+		await assert.rejects(history.export(session), new RegExp(language === 'en' ? 'Could not save' : '无法保存'));
+		failWrite = false;
+	}
+	assert.equal(contents.size, 3, 'Read/write failures never publish a file');
+	assert.equal(contents.get(results[0]!.path), firstBytes, 'Existing files are not overwritten');
+	files.set('NAND Exports', Object.assign(new TFile(), { path: 'NAND Exports' }));
+	await assert.rejects(history.export(session), /不是文件夹/);
+	files.set('NAND Exports', Object.assign(new TFolder(), { path: 'NAND Exports' }));
+
+	const panel = document.createElement('div'); document.body.appendChild(panel);
+	const host = { app } as WorkbenchHost;
+	const wait = () => new Promise<void>((resolve) => setTimeout(resolve, 100));
+	const notices = (Notice as unknown as { messages: string[] }).messages;
+	render(h(HistorySidebar, { history, host }), panel); await wait();
+	panel.querySelector<HTMLButtonElement>('.nand-history-row button')!.click(); await wait();
+	const preview = panel.querySelector('.nand-history-preview pre')!.textContent;
+	const exportButton = () => Array.from(panel.querySelectorAll<HTMLButtonElement>('.nand-history-actions button')).find((button) => button.textContent === t('terminalAgent.workbench.export'))!;
+	let release!: () => void;
+	gate = new Promise<void>((resolve) => { release = resolve; });
+	exportButton().click(); exportButton().click(); await wait();
+	assert.equal(exportButton().disabled, true);
+	assert.equal(opened.length, 0);
+	release(); gate = undefined; await wait();
+	assert.equal(opened.length, 1, 'Rapid repeat clicks export and open only once');
+	assert.ok(notices.at(-1)!.startsWith('已导出并打开：NAND Exports/'));
+	assert.equal(contents.size, 4);
+	for (const language of ['en', 'zh'] as const) {
+		setLanguage(language); render(h(HistorySidebar, { history, host }), panel);
+		failRead = true; exportButton().click(); await wait();
+		assert.match(notices.at(-1)!, new RegExp(language === 'en' ? 'Could not read' : '无法读取'));
+		failRead = false; failWrite = true; exportButton().click(); await wait();
+		assert.match(notices.at(-1)!, new RegExp(language === 'en' ? 'Could not save' : '无法保存'));
+		failWrite = false;
+		assert.equal(panel.querySelector('.nand-history-preview pre')!.textContent, preview, 'Failures preserve the current preview');
+		assert.equal(opened.length, 1);
+		assert.equal(contents.size, 4);
+	}
+	failOpen = true; exportButton().click(); await wait();
+	assert.match(notices.at(-1)!, /笔记已保存到 NAND Exports\/.*但无法打开/);
+	assert.equal(contents.size, 5, 'An open failure retains the successfully saved note');
+	assert.equal(opened.length, 1);
+	render(null, panel);
+	console.log('History export: visible Vault files, concurrent collisions, safe names, content, localized failures and actual sidebar open/pending behavior passed.');
+}
+void verifyExports().catch((error) => { console.error(error); process.exitCode = 1; });

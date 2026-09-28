@@ -27,7 +27,7 @@
 | Pi | `PI_CODING_AGENT_DIR/sessions` JSONL |
 | Grok | `GROK_HOME/sessions` 中的 `session.json` 与 `chat_history.jsonl` |
 
-NAND 的改名、标签、收藏和归档保存在 `.nand/terminal-agent/<device>/history.json`，不会修改原生日志。索引位于同目录的 `index.sqlite`，导出位于 `.nand/terminal-agent/exports/`。导出后可用 Obsidian 文件浏览器打开 Markdown。历史不会实时自动刷新；需要最新记录时，使用刷新按钮。
+NAND 的改名、标签、收藏和归档保存在 `.nand/terminal-agent/<device>/history.json`，不会修改原生日志。索引位于同目录的 `index.sqlite`，新导出通过 Vault 笔记接口写入可见的 `NAND Exports/`，完成后自动打开；文件浏览器和快速切换（Ctrl/Cmd+O）都可找到。重名会使用编号后缀，不覆盖已有文件。旧的 `.nand/terminal-agent/exports/` 内容保留原位。读取或保存失败会提示原因；若保存成功但打开失败，提示会给出已保存路径。历史不会实时自动刷新；需要最新记录时，使用刷新按钮。
 
 ## 额度与用量
 

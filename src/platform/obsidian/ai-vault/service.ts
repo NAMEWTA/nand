@@ -1,4 +1,4 @@
-import { Platform, type App } from 'obsidian';
+import { Platform, TFolder, type App, type TFile } from 'obsidian';
 import type { AgentSettings } from '../../../core/agent-launch/types';
 import { t } from '../../../shared/i18n/terminal-accessor';
 import { JsonStore } from '../../../shared/json-store';
@@ -111,12 +111,36 @@ export class NativeHistory {
 			signal,
 		);
 	}
-	async export(session: NativeSession): Promise<string> {
-		const full = await this.read(session);
-		const folder = '.nand/terminal-agent/exports';
-		if (!(await this.app.vault.adapter.exists(folder))) await this.app.vault.adapter.mkdir(folder);
-		const file = `${folder}/${session.agentId}-${session.sessionId.replace(/[^a-zA-Z0-9_-]/g, '_')}-${Date.now()}.md`;
-		await this.app.vault.adapter.write(file, `# ${this.meta(session.key).title || session.title}\n\n${full.text}`);
-		return file;
+	async export(session: NativeSession): Promise<TFile> {
+		let full: NativeSession;
+		try {
+			await this.loaded;
+			full = await this.read(session);
+		} catch (error) {
+			throw new Error(t('workbench.exportReadFailed', { message: error instanceof Error ? error.message : String(error) }));
+		}
+		try {
+			const vault = this.app.vault, folder = 'NAND Exports';
+			if (!vault.getAbstractFileByPath(folder)) {
+				try { await vault.createFolder(folder); }
+				catch (error) { if (!(vault.getAbstractFileByPath(folder) instanceof TFolder)) throw error; }
+			}
+			if (!(vault.getAbstractFileByPath(folder) instanceof TFolder)) throw new Error(t('workbench.exportFolderConflict'));
+			const agent = session.agentId.replace(/[^a-zA-Z0-9_-]/g, '_').slice(0, 32) || 'agent';
+			const id = session.sessionId.replace(/[^a-zA-Z0-9_-]/g, '_').slice(0, 96) || 'session';
+			const content = `# ${this.meta(session.key).title || session.title}\n\n${full.text}`;
+			for (let index = 0; index < 1000; index++) {
+				const path = `${folder}/${agent}-${id}${index ? ` (${index + 1})` : ''}.md`;
+				if (vault.getAbstractFileByPath(path)) continue;
+				try { return await vault.create(path, content); }
+				catch (error) {
+					// A simultaneous export can claim this name; Vault.create never overwrites it.
+					if (!vault.getAbstractFileByPath(path)) throw error;
+				}
+			}
+			throw new Error(t('workbench.exportNameUnavailable'));
+		} catch (error) {
+			throw new Error(t('workbench.exportWriteFailed', { message: error instanceof Error ? error.message : String(error) }));
+		}
 	}
 }

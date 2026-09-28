@@ -1,6 +1,13 @@
 /** Terminal agent strings. Chinese and English only. */
 export const messages = {
 	en: {
+		'terminalAgent.workbench.exported': 'Exported and opened: {path}',
+		'terminalAgent.workbench.exportReadFailed': 'Could not read this history for export: {message}',
+		'terminalAgent.workbench.exportWriteFailed': 'Could not save the exported note: {message}',
+		'terminalAgent.workbench.exportOpenFailed': 'The note was saved at {path}, but could not be opened: {message}',
+		'terminalAgent.workbench.exportFolderConflict': 'NAND Exports exists but is not a folder.',
+		'terminalAgent.workbench.exportNameUnavailable': 'No available export filename was found.',
+
 		'terminalAgent.agents.usageStale': 'Last known quota (refresh failed)',
 		'terminalAgent.agents.usageUpdated': 'Checked',
 		'terminalAgent.workbench.vaultMissing': 'The current vault path is unavailable',
@@ -483,6 +490,13 @@ export const messages = {
 		'terminalAgent.menu.workflows': 'Workflows',
 	},
 	zh: {
+		'terminalAgent.workbench.exported': '已导出并打开：{path}',
+		'terminalAgent.workbench.exportReadFailed': '无法读取这条历史以导出：{message}',
+		'terminalAgent.workbench.exportWriteFailed': '无法保存导出的笔记：{message}',
+		'terminalAgent.workbench.exportOpenFailed': '笔记已保存到 {path}，但无法打开：{message}',
+		'terminalAgent.workbench.exportFolderConflict': 'NAND Exports 已存在，但不是文件夹。',
+		'terminalAgent.workbench.exportNameUnavailable': '没有可用的导出文件名。',
+
 		'terminalAgent.agents.usageStale': '上次已知额度（刷新失败）',
 		'terminalAgent.agents.usageUpdated': '查询时间',
 		'terminalAgent.workbench.vaultMissing': '无法取得当前库路径',
