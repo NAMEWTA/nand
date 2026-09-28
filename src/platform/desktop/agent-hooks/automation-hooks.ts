@@ -1,9 +1,9 @@
 import { Platform } from 'obsidian';
-import { t } from '../../../shared/i18n/index';
+import { AutomationError } from '../../../shared/automation/errors';
 import { OPENCODE_EXTENSION, PI_EXTENSION } from './native-extensions';
 
 async function nodeModules() {
-	if (!Platform.isDesktop) throw new Error(t('automation.agentUnavailable'));
+	if (!Platform.isDesktop) throw new AutomationError('agentUnavailable');
 	return Promise.resolve([
 		window.require('node:fs/promises') as typeof import('node:fs/promises'),
 		window.require('node:os') as typeof import('node:os'),
@@ -47,17 +47,17 @@ export function mergeNativeHooks(
 	events: string[],
 	runtime = { platform: 'linux', execPath: 'node' },
 ): Record<string, unknown> {
-	if (!value || typeof value !== 'object' || Array.isArray(value)) throw new Error('Invalid agent hook settings');
+	if (!value || typeof value !== 'object' || Array.isArray(value)) throw new AutomationError('hookSettingsInvalid');
 	const settings = value as Record<string, unknown>;
 	if (
 		settings.hooks !== undefined &&
 		(!settings.hooks || typeof settings.hooks !== 'object' || Array.isArray(settings.hooks))
 	)
-		throw new Error('Invalid agent hooks');
+		throw new AutomationError('hookSettingsInvalid');
 	const hooks = { ...(settings.hooks as Record<string, unknown> | undefined) };
 	for (const event of events) {
 		const previous = hooks[event] ?? [];
-		if (!Array.isArray(previous)) throw new Error('Invalid agent hook event');
+		if (!Array.isArray(previous)) throw new AutomationError('hookSettingsInvalid');
 		const rows = (previous as unknown[]).filter((row: unknown) => !JSON.stringify(row).includes(SCRIPT_NAME));
 		hooks[event] = [
 			...rows,
@@ -197,7 +197,7 @@ export class AutomationHooks {
 		}
 		if (current !== raw) {
 			await fs.unlink(next);
-			throw new Error('Agent settings changed; retry');
+			throw new AutomationError('hookSettingsChanged');
 		}
 		await fs.rename(next, provider.file);
 	}

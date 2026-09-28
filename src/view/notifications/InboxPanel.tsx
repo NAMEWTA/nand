@@ -1,4 +1,4 @@
-import type { NotificationRecord } from '../../core/notifications/service';
+import { notificationBody, type NotificationRecord } from '../../core/notifications/service';
 import { getLanguage, t } from '../../shared/i18n';
 
 export function InboxPanel({
@@ -28,14 +28,16 @@ export function InboxPanel({
 				</div>
 			</div>
 			{!records.length && <p>{t('automation.inboxEmpty')}</p>}
-			{[...records].reverse().map((record) => (
+			{[...records].reverse().map((record) => {
+				const body = notificationBody(record);
+				return (
 				<div className="setting-item" key={record.id}>
 					<div className="setting-item-info">
 						<div className="setting-item-name">
 							{record.read ? '' : '● '}
 							{record.title}
 						</div>
-						<div className="setting-item-description nand-notification-description">{`${record.body}\n${new Date(record.createdAt).toLocaleString(getLanguage() === 'zh' ? 'zh-CN' : 'en-US')}\n${record.channels.map((channel) => `${t(`automation.${channel}`)}: ${t(`automation.delivery.${record.deliveries[channel] ?? 'pending'}`)}`).join(' · ')}`}</div>
+						<div className="setting-item-description nand-notification-description">{`${body === record.title ? '' : body + '\n'}${new Date(record.createdAt).toLocaleString(getLanguage() === 'zh' ? 'zh-CN' : 'en-US')}\n${record.channels.map((channel) => `${t(`automation.${channel}`)}${t('automation.colon')}${t(`automation.delivery.${record.deliveries[channel] ?? 'pending'}`)}`).join(' · ')}`}</div>
 					</div>
 					<div className="setting-item-control">
 						{(record.source || record.target) && (
@@ -44,7 +46,8 @@ export function InboxPanel({
 						{!record.read && <button onClick={() => markRead(record.id)}>{t('automation.read')}</button>}
 					</div>
 				</div>
-			))}
+				);
+			})}
 		</>
 	);
 }

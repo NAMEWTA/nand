@@ -1,4 +1,4 @@
-import { AutomationError } from '../../shared/automation/errors';
+import { AutomationError, automationFailure } from '../../shared/automation/errors';
 import { isDefinition } from '../../shared/automation/metadata';
 import {
 	isActiveRun,
@@ -118,10 +118,10 @@ export class AutomationService {
 		);
 	}
 	async save(d: AutomationDefinition): Promise<void> {
-		if (!this.loaded) throw new Error(t('automation.failedLoad'));
-		if (!validDefinition(d)) throw new Error(t('automation.invalid'));
+		if (!this.loaded) throw new AutomationError('failedLoad');
+		if (!validDefinition(d)) throw new AutomationError('invalid');
 		const old = this.definitions.find((item) => item.id === d.id);
-		if (old && old.deviceId !== this.deviceId) throw new Error(t('automation.otherDevice'));
+		if (old && old.deviceId !== this.deviceId) throw new AutomationError('otherDevice');
 		const changed =
 			!old ||
 			JSON.stringify(old.schedule) !== JSON.stringify(d.schedule) ||
@@ -145,9 +145,9 @@ export class AutomationService {
 		});
 	}
 	async remove(d: AutomationDefinition): Promise<void> {
-		if (d.deviceId !== this.deviceId) throw new Error(t('automation.otherDevice'));
+		if (d.deviceId !== this.deviceId) throw new AutomationError('otherDevice');
 		if (this.state.runs.some((r) => r.automationId === d.id && isActiveRun(r)))
-			throw new Error(t('automation.stopFirst'));
+			throw new AutomationError('stopFirst');
 		if (d.source) {
 			await this.sources.remove(d);
 			await this.refresh();
@@ -157,7 +157,7 @@ export class AutomationService {
 		});
 	}
 	async clearHistory(): Promise<void> {
-		if (!this.loaded) throw new Error(t('automation.failedLoad'));
+		if (!this.loaded) throw new AutomationError('failedLoad');
 		await this.commit((state) => {
 			state.runs = state.runs.filter(isActiveRun);
 		});
@@ -197,7 +197,7 @@ export class AutomationService {
 		now = Date.now(),
 	): Promise<AutomationRun | undefined> {
 		if (!this.loaded || this.stopped || this.launching.has(d.id)) return undefined;
-		if (d.deviceId !== this.deviceId) throw new Error(t('automation.otherDevice'));
+		if (d.deviceId !== this.deviceId) throw new AutomationError('otherDevice');
 		const active = this.state.runs.find((r) => r.automationId === d.id && isActiveRun(r));
 		if (active && trigger === 'manual') {
 			if (active.terminalId) await this.agent()?.open(active.terminalId);
@@ -235,6 +235,7 @@ export class AutomationService {
 				await this.updateRun(run, {
 					status: 'skipped',
 					message: t(active ? 'automation.busy' : 'automation.missed'),
+					errorCode: active ? 'busy' : 'missed',
 					endedAt: Date.now(),
 				});
 			} else if (d.action.kind === 'agent') {
@@ -276,8 +277,7 @@ export class AutomationService {
 			await this.updateRun(run, {
 				status: 'failed',
 				endedAt: Date.now(),
-				message: error instanceof Error ? error.message : String(error),
-				errorCode: error instanceof AutomationError ? error.code : undefined,
+				...automationFailure(error),
 			});
 		} finally {
 			this.launching.delete(d.id);
@@ -292,7 +292,7 @@ export class AutomationService {
 		try {
 			if (run.terminalId) await this.agent()?.stop(run.terminalId);
 		} catch (error) {
-			await this.updateRun(run, { status: 'unknown', endedAt: undefined, message: String(error) }, true);
+			await this.updateRun(run, { status: 'unknown', endedAt: undefined, ...automationFailure(error) }, true);
 			throw error;
 		}
 	}

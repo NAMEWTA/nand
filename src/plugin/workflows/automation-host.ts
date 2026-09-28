@@ -4,6 +4,7 @@ import { NotificationService } from '../../core/notifications/service';
 import { listContactReminders } from '../../platform/obsidian/contacts/reminders-source';
 import { DashboardAutomationSource } from '../../platform/obsidian/dashboard/automation';
 import { createNotificationDelivery } from '../../platform/obsidian/notifications/delivery';
+import { AutomationError, automationOutcome } from '../../shared/automation/errors';
 import type {
 	AutomationDefinition,
 	AutomationSourcePort,
@@ -50,13 +51,13 @@ export async function createAutomationHost(
 		save: async (d) => {
 			if (d.source?.kind === 'dashboard' || d.source?.kind === 'widget') await dashboard.save(d);
 			else if (d.source?.kind === 'contacts' && plugin.contactsHost) await plugin.contactsHost.saveReminder(d);
-			else throw new Error(t('automation.invalid'));
+			else throw new AutomationError('invalid');
 		},
 		remove: async (d) => {
 			if (d.source?.kind === 'dashboard' || d.source?.kind === 'widget') await dashboard.save(d, true);
 			else if (d.source?.kind === 'contacts' && plugin.contactsHost)
 				await plugin.contactsHost.saveReminder(d, true);
-			else throw new Error(t('automation.invalid'));
+			else throw new AutomationError('invalid');
 		},
 		open: async (source) => {
 			if (source.kind === 'contacts') {
@@ -73,10 +74,10 @@ export async function createAutomationHost(
 				await leaf?.loadIfDeferred();
 				if (leaf) await app.workspace.revealLeaf(leaf);
 				if (!(leaf?.view instanceof DashboardView) || !(await leaf.view.focusWidget(source.id)))
-					throw new Error(t('automation.widgetMissing'));
+					throw new AutomationError('widgetMissing');
 			} else {
 				const file = app.vault.getFileByPath(source.path);
-				if (!file) throw new Error(t('automation.sourceMissing'));
+				if (!file) throw new AutomationError('sourceMissing');
 				await plugin.switchWorkspace(file.path);
 				await plugin.openDashboard();
 			}
@@ -113,7 +114,11 @@ export async function createAutomationHost(
 				body:
 					d.action.kind === 'notify' && run.status === 'succeeded'
 						? d.action.body
-						: `${t(`automation.${run.status}`)}${run.message ? `: ${(run.errorCode ? t(`automation.${run.errorCode}`) : run.message).slice(0, 240)}` : ''}`,
+						: automationOutcome(run),
+				presentation: d.action.kind === 'notify' && run.status === 'succeeded' ? undefined : {
+					kind: 'automation-run', status: run.status, message: run.message,
+					errorCode: run.errorCode, errorParams: run.errorParams,
+				},
 				source: d.source,
 				target: { runId: run.id, automationId: d.id, terminalId: run.terminalId },
 				channels: d.channels,

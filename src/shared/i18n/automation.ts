@@ -1,5 +1,10 @@
 export const messages = {
 	en: {
+		'automation.colon': ': ',
+		'automation.operationFailed': 'Operation failed: {detail}',
+		'automation.processExit': 'Process exited with code {code}',
+		'automation.hookSettingsInvalid': 'Agent hook settings are invalid',
+		'automation.hookSettingsChanged': 'Agent settings changed. Please retry.',
 		'automation.tokens': 'Input / output tokens',
 		'automation.agentDisabled': 'This agent is disabled in settings',
 		'automation.cliMissing': 'The agent CLI is not installed or its configured path is invalid',
@@ -132,6 +137,11 @@ export const messages = {
 		'automation.failedLoad': 'Could not load automation data',
 	},
 	zh: {
+		'automation.colon': '：',
+		'automation.operationFailed': '操作失败：{detail}',
+		'automation.processExit': '进程已退出，退出码为 {code}',
+		'automation.hookSettingsInvalid': '智能体 hook 设置无效',
+		'automation.hookSettingsChanged': '智能体设置已更改，请重试。',
 		'automation.tokens': '输入 / 输出 token',
 		'automation.agentDisabled': '此智能体已在设置中关闭',
 		'automation.cliMissing': '未安装智能体 CLI，或配置的路径无效',

@@ -1,3 +1,4 @@
+import { AutomationError } from '../../../shared/automation/errors';
 import { MarkdownView, normalizePath, type App, type TFile } from 'obsidian';
 import { anniversaryDateThisYear, parseAnniversaryDate } from '../../../core/anniversaries/calendar';
 import { parse as parseDashboard, serialize as serializeDashboard } from '../../../core/dashboard/parser/index';
@@ -22,17 +23,17 @@ export class DashboardAutomationSource {
 	) {}
 	/** Resolve old extensionless references without changing task/contact source protocols. */
 	resolveWidgetSource(source: SourceRef): TFile {
-		if (!this.isEnabled()) throw new Error(t('automation.widgetModuleDisabled'));
+		if (!this.isEnabled()) throw new AutomationError('widgetModuleDisabled');
 		const settings = this.settings();
 		const path = widgetDashboardPath(source.path);
 		const file = this.app.vault.getFileByPath(path);
 		if (!file || ![settings.dashboardFile, ...settings.workspaceFiles].some((p) => widgetDashboardPath(p) === path))
-			throw new Error(t('automation.widgetDashboardMissing'));
+			throw new AutomationError('widgetDashboardMissing');
 		const matches = [
 			...(settings.countdownEnabled ? settings.countdowns : []),
 			...(settings.anniversaryEnabled ? settings.anniversaries : []),
 		].filter((entry) => `widget:${entry.id}` === source.id);
-		if (matches.length !== 1) throw new Error(t('automation.widgetMissing'));
+		if (matches.length !== 1) throw new AutomationError('widgetMissing');
 		return file;
 	}
 	private files(): TFile[] {
@@ -104,7 +105,7 @@ export class DashboardAutomationSource {
 				leaf.view.getMode() === 'source' &&
 				leaf.view.editor.getValue() !== raw
 			)
-				throw new Error(t('automation.editorConflict'));
+				throw new AutomationError('editorConflict');
 	}
 
 	private definition(id: string, name: string, at: number, source: SourceRef): AutomationDefinition {
@@ -194,19 +195,19 @@ export class DashboardAutomationSource {
 
 	async save(definition: AutomationDefinition, remove = false): Promise<void> {
 		const source = definition.source;
-		if (!source) throw new Error(t('automation.invalid'));
+		if (!source) throw new AutomationError('invalid');
 		if (source.kind === 'widget') {
 			const settings = this.settings();
 			const entry = [...settings.countdowns, ...settings.anniversaries].find(
 				(e) => `widget:${e.id}` === source.id,
 			);
-			if (!entry) throw new Error(t('automation.widgetMissing'));
+			if (!entry) throw new AutomationError('widgetMissing');
 			entry.automation = { ...definition, enabled: remove ? false : definition.enabled };
 			await this.saveSettings();
 			return;
 		}
 		const file = this.files().find((f) => f.path === source.path);
-		if (!file) throw new Error(t('automation.sourceMissing'));
+		if (!file) throw new AutomationError('sourceMissing');
 		await this.app.vault.process(file, (raw) => {
 			this.checkEditor(file, raw);
 			let found = false;
@@ -215,13 +216,13 @@ export class DashboardAutomationSource {
 				.map((line) => {
 					const meta = readTaskMeta(line);
 					if (meta.id !== source.id) return line;
-					if (found) throw new Error(t('automation.sourceMissing'));
+					if (found) throw new AutomationError('sourceMissing');
 					found = true;
 					const text = line.replace(TASK_META_REGEX, '').replace(/\s*⏰\s*\d{4}-\d\d-\d\d\s+\d\d:\d\d/, '');
 					return text + taskMetaSuffix({ ...meta, automation: remove ? undefined : definition });
 				})
 				.join('\n');
-			if (!found) throw new Error(t('automation.sourceMissing'));
+			if (!found) throw new AutomationError('sourceMissing');
 			return next;
 		});
 	}
@@ -241,14 +242,14 @@ export class DashboardAutomationSource {
 	}
 	async createTask(action: Extract<AutomationAction, { kind: 'create-task' }>, runId: string): Promise<void> {
 		const file = this.files().find((f) => f.path === action.path);
-		if (!file) throw new Error(t('automation.sourceMissing'));
+		if (!file) throw new AutomationError('sourceMissing');
 		await this.app.vault.process(file, (raw) => {
 			this.checkEditor(file, raw);
 			if (raw.split('\n').some((line) => readTaskMeta(line).runId === runId)) return raw;
 			const data = parseDashboard(raw);
 			const matches = data.columns.flatMap((c) => c.cards).filter((c) => c.id === action.cardId);
 			const card = matches.length === 1 ? matches[0] : undefined;
-			if (!card) throw new Error(t('automation.sourceMissing'));
+			if (!card) throw new AutomationError('sourceMissing');
 			card.tasks.unshift({ text: action.text, checked: false, id: crypto.randomUUID(), runId });
 			return serializeDashboard(data);
 		});

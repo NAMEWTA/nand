@@ -420,6 +420,8 @@ export class TerminalAutomationRuntime implements AgentRuntimePort {
 												: 'failed'
 										: event.kind,
 								message: event.kind === 'exit' ? String(event.code) : '',
+								errorCode: event.kind === 'exit' ? 'processExit' : undefined,
+								errorParams: event.kind === 'exit' ? { code: event.code } : undefined,
 								output: slot.output,
 								session: slot.session,
 							});

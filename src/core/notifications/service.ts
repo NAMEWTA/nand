@@ -1,4 +1,5 @@
-import type { NotificationChannelId, SourceRef } from '../../shared/automation/types';
+import type { AutomationMessage, NotificationChannelId, RunStatus, SourceRef } from '../../shared/automation/types';
+import { automationOutcome } from '../../shared/automation/errors';
 import { t } from '../../shared/i18n/index';
 import { JsonStore } from '../../shared/json-store';
 import type { TextStorage } from '../../shared/storage/ports';
@@ -14,8 +15,17 @@ export interface NotificationRequest {
 	id: string;
 	title: string;
 	body: string;
+	/** Optional presentation data; body remains the original delivery snapshot. */
+	presentation?: AutomationMessage & { kind: 'automation-run'; status: RunStatus };
 	source?: SourceRef;
 	channels: NotificationChannelId[];
+}
+export function notificationBody(record: NotificationRequest): string {
+	const value = record.presentation;
+	if (!value || value.kind !== 'automation-run' ||
+		!['pending', 'running', 'unknown', 'succeeded', 'failed', 'cancelled', 'interrupted', 'skipped'].includes(value.status))
+		return record.body;
+	return automationOutcome(value);
 }
 export interface NotificationRecord extends NotificationRequest {
 	createdAt: number;

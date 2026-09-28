@@ -53,7 +53,12 @@ export interface AutomationDefinition {
 }
 export type RunStatus =
 	'pending' | 'running' | 'unknown' | 'succeeded' | 'failed' | 'cancelled' | 'interrupted' | 'skipped';
-export interface AutomationRun {
+export interface AutomationMessage {
+	message: string;
+	errorCode?: string;
+	errorParams?: Record<string, string | number>;
+}
+export interface AutomationRun extends AutomationMessage {
 	definition?: AutomationDefinition;
 	notificationAttempted?: boolean;
 	id: string;
@@ -65,8 +70,6 @@ export interface AutomationRun {
 	status: RunStatus;
 	startedAt: number;
 	endedAt?: number;
-	message: string;
-	errorCode?: string;
 	usage?: AgentUsage;
 	output?: string;
 	terminalId?: string;
@@ -87,6 +90,8 @@ export interface AgentRunHandle {
 	completion: Promise<{
 		status: 'succeeded' | 'failed' | 'cancelled' | 'interrupted';
 		message: string;
+		errorCode?: string;
+		errorParams?: Record<string, string | number>;
 		output?: string;
 		usage?: AgentUsage;
 		session?: AgentSessionRef;

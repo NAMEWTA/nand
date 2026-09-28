@@ -1,9 +1,14 @@
+import { AutomationsPanel } from '../src/view/automations/AutomationsPanel';
+import { parseHTML } from 'linkedom';
+import { h, render } from 'preact';
+import { InboxPanel } from '../src/view/notifications/InboxPanel';
+import type { NotificationRecord } from '../src/core/notifications/service';
 import { createNotificationDelivery } from '../src/platform/obsidian/notifications/delivery';
 import { DashboardAutomationSource } from '../src/platform/obsidian/dashboard/automation';
 import { DEFAULT_SETTINGS } from '../src/plugin/settings/model';
 import { automationArgs, RESUME_FLAGS, TerminalAutomationRuntime } from '../src/plugin/workflows/agent-runtime';
 import { AutomationEditor } from '../src/view/automations/editor';
-import { AutomationError } from '../src/shared/automation/errors';
+import { AutomationError, automationMessage, automationOutcome } from '../src/shared/automation/errors';
 import { normalizeAgentSettings } from '../src/core/agent-launch/defaults';
 import { setLanguage, t } from '../src/shared/i18n/index';
 import type { AutomationsApi } from '../src/core/automations/api';
@@ -23,7 +28,7 @@ import test from 'node:test';
 import type { App } from 'obsidian';
 import { AutomationService } from '../src/core/automations/service';
 import { JsonStore } from '../src/shared/json-store';
-import { NotificationService } from '../src/core/notifications/service';
+import { NotificationService, notificationBody } from '../src/core/notifications/service';
 import { latestOccurrence, nextOccurrence, validateSchedule } from '../src/core/automations/schedule';
 import { readTaskMeta, taskMetaSuffix } from '../src/shared/automation/metadata';
 import { patchReminders, readReminders } from '../src/core/contacts/reminders';
@@ -797,4 +802,100 @@ test('widget sources resolve canonical and legacy dashboard paths without changi
 		}
 	}
 	setLanguage('zh');
+});
+
+test('inbox renders structured reasons in the current language and deduplicates only exact reminder text', () => {
+	const { document } = parseHTML('<html><body></body></html>');
+	const prior = globalThis.document;
+	Object.assign(globalThis, { document });
+	try {
+		const panel = document.createElement('div');
+		const records = [
+			{ id: 'structured', title: 'User title 保留', body: 'Old delivery snapshot', presentation: { kind: 'automation-run', status: 'failed', message: 'Original failure', errorCode: 'cliMissing' } },
+			{ id: 'legacy', title: 'Legacy', body: 'Keep original free text 原文' },
+			{ id: 'same', title: 'Exact reminder', body: 'Exact reminder' },
+			{ id: 'different', title: 'Different', body: 'Different ' },
+		].map(row => ({ ...row, createdAt: Date.UTC(2026, 8, 28, 12), read: false, channels: ['in-app'], deliveries: { 'in-app': 'sent' } }));
+		for (const language of ['zh', 'en', 'zh'] as const) {
+			setLanguage(language);
+			render(h(InboxPanel, { records: records as NotificationRecord[], unread: 4, markRead: () => {}, clearRead: () => {}, open: () => {} }), panel);
+			assert.ok(panel.textContent!.includes(t('automation.cliMissing')), 'Persisted system reason follows the current language');
+			assert.ok(panel.textContent!.includes('Keep original free text 原文'));
+			assert.equal(panel.textContent!.split('Exact reminder').length - 1, 1);
+			assert.ok(panel.textContent!.includes('Different '), 'Whitespace differences are user content');
+			assert.ok(panel.textContent!.includes(language === 'zh' ? '应用内：已提交' : 'In-app: Submitted'));
+			assert.ok(panel.textContent!.includes(new Date(records[0]!.createdAt).toLocaleString(language === 'zh' ? 'zh-CN' : 'en-US')));
+		}
+		render(null, panel);
+	} finally {
+		if (prior === undefined) Reflect.deleteProperty(globalThis, 'document'); else Object.assign(globalThis, { document: prior });
+		setLanguage('zh');
+	}
+});
+
+test('structured failures survive run and inbox persistence, language changes, cleanup and recovery without redelivery', async () => {
+	const m = memory();
+	let delivered = 0;
+	const adapter = { available: () => true, send: () => { delivered++; }, dispose: () => {} };
+	const inbox = () => new NotificationService(m.app.vault.adapter, 'notifications.json', async () => {}, undefined, adapter);
+	let notifications = inbox(); await notifications.load();
+	let failure: Error = new AutomationError('processExit', { code: 17 });
+	const source: AutomationSourcePort = { list: async () => [], save: async () => {}, remove: async () => {}, open: async () => {}, createTask: async () => { throw failure; } };
+	const make = () => new AutomationService(m.app.vault.adapter, 'automation.json', 'device', source, () => undefined, async (run, d) => {
+		await notifications.send({ id: run.id, title: d.name, body: automationOutcome(run), channels: d.channels, presentation: { kind: 'automation-run', status: run.status, message: run.message, errorCode: run.errorCode, errorParams: run.errorParams } });
+	});
+	let service = make(); await service.load();
+	const d = definition({ action: { kind: 'create-task', path: 'Board.md', cardId: 'one', text: 'User text 原文' } });
+	await service.save(d); const run = (await service.run(d))!;
+	assert.equal(run.errorCode, 'processExit'); assert.deepEqual(run.errorParams, { code: 17 });
+	const id = run.id, snapshot = notifications.records[0]!.body;
+	for (const language of ['en', 'zh', 'en'] as const) {
+		setLanguage(language); notifications = inbox(); await notifications.load(); service = make(); await service.load();
+		const persisted = service.state.runs.find(r => r.id === id)!;
+		assert.equal(automationMessage(persisted), t('automation.processExit', { code: 17 }));
+		assert.equal(notificationBody(notifications.records[0]!), automationOutcome(persisted));
+		assert.equal(notifications.records[0]!.body, snapshot, 'Stored delivery text is not migrated on language changes');
+		assert.equal(delivered, 1, 'Reload never submits the notification twice');
+	}
+	failure = new Error('External failure 原文');
+	const generic = (await service.run(d))!;
+	assert.equal(generic.errorCode, 'operationFailed'); assert.deepEqual(generic.errorParams, { detail: 'External failure 原文' });
+	assert.ok(automationMessage(generic).includes('External failure 原文'));
+	const record = notifications.records[0]!;
+	assert.equal(notificationBody({ ...record, presentation: { kind: 'automation-run', status: 'failed', message: 'Legacy fallback', errorCode: 'futureUnknown' } }), t('automation.failed') + t('automation.colon') + 'Legacy fallback');
+	assert.equal(automationMessage({ message: 'Old English 原文', errorCode: 'futureUnknown' }), 'Old English 原文');
+	assert.equal(automationMessage({ message: 'Missing params', errorCode: 'processExit' }), 'Missing params');
+	assert.equal(automationMessage({ message: 'Malformed params', errorCode: 'processExit', errorParams: [] as never }), 'Malformed params');
+	await notifications.markRead(); await notifications.clearRead();
+	const count = delivered; notifications = inbox(); await notifications.load(); service = make(); await service.load();
+	assert.equal(notifications.records.length, 0); assert.equal(delivered, count);
+	m.files.set('notifications.json', 'broken'); notifications = inbox(); await notifications.load();
+	assert.equal(m.files.get('notifications.json.corrupt'), 'broken');
+	assert.equal(delivered, count);
+	setLanguage('zh');
+});
+
+test('automation panel localizes next/run dates and system reasons while preserving prompt, output and unknown text', () => {
+	const { document } = parseHTML('<html><body></body></html>');
+	const prior = globalThis.document; Object.assign(globalThis, { document });
+	try {
+		const panel = document.createElement('div'), now = Date.now();
+		const d = definition({ schedule: { kind: 'once', at: now + 86400000 }, action: { kind: 'notify', body: 'User prompt 原文' } });
+		const f = fixture(), service = f.make();
+		service.state.definitions = [d];
+		service.state.runs = [{ id: 'run', automationId: d.id, revision: 1, title: d.name, scheduledFor: now, trigger: 'manual', status: 'failed', startedAt: now, message: 'Original detail', errorCode: 'processExit', errorParams: { code: 17 }, output: 'CLI output 原文' }];
+		for (const language of ['zh', 'en', 'zh'] as const) {
+			setLanguage(language);
+			render(h(AutomationsPanel, { host: { service, edit: () => {}, inbox: () => {}, retry: async () => {} }, state: { selected: d.id, search: '', filter: '', agentFilter: '' }, refresh: () => {}, actions: { clearHistory: () => {}, remove: () => {}, run: () => {} } }), panel);
+			const text = panel.textContent!;
+			assert.ok(text.includes(new Date(now).toLocaleString(language === 'zh' ? 'zh-CN' : 'en-US')));
+			assert.ok(text.includes(t('automation.next') + t('automation.colon') + new Date(now + 86400000).toLocaleString(language === 'zh' ? 'zh-CN' : 'en-US')));
+			assert.ok(text.includes(t('automation.processExit', { code: 17 })));
+			assert.ok(text.includes('User prompt 原文')); assert.ok(text.includes('CLI output 原文'));
+		}
+		render(null, panel);
+	} finally {
+		if (prior === undefined) Reflect.deleteProperty(globalThis, 'document'); else Object.assign(globalThis, { document: prior });
+		setLanguage('zh');
+	}
 });

@@ -1,7 +1,8 @@
 import { nextOccurrence } from '../../core/automations/schedule';
 import type { AutomationDefinition } from '../../shared/automation/types';
 import { isActiveRun } from '../../shared/automation/types';
-import { t } from '../../shared/i18n';
+import { automationMessage } from '../../shared/automation/errors';
+import { getLanguage, t } from '../../shared/i18n';
 import type { AutomationPanelActions, AutomationPanelState, AutomationViewHost } from './panel-contract';
 
 export function AutomationsPanel({
@@ -60,7 +61,7 @@ export function AutomationsPanel({
 		if (!d.enabled || !currentIds.has(d.id)) return '—';
 		try {
 			const value = nextOccurrence(d.schedule, Date.now());
-			return value ? new Date(value).toLocaleString() : '—';
+			return value ? new Date(value).toLocaleString(getLanguage() === 'zh' ? 'zh-CN' : 'en-US') : '—';
 		} catch {
 			return t('automation.invalid');
 		}
@@ -179,7 +180,7 @@ export function AutomationsPanel({
 							</button>
 						</div>
 						<p>
-							{t('automation.next')}: {next(selected)}
+							{t('automation.next')}{t('automation.colon')}{next(selected)}
 						</p>
 						<pre>
 							{selected.action.kind === 'agent'
@@ -192,14 +193,14 @@ export function AutomationsPanel({
 						{runs.map((run) => (
 							<div className="nand-automation-run" key={run.id}>
 								<span>
-									{new Date(run.startedAt).toLocaleString()} · {t(`automation.${run.status}`)}
+									{new Date(run.startedAt).toLocaleString(getLanguage() === 'zh' ? 'zh-CN' : 'en-US')} · {t(`automation.${run.status}`)}
 								</span>
 								{(run.errorCode || run.message) && (
-									<p>{run.errorCode ? t(`automation.${run.errorCode}`) : run.message}</p>
+									<p>{automationMessage(run)}</p>
 								)}
 								{run.usage?.known && (
 									<p>
-										{t('automation.tokens')}: {run.usage.input} / {run.usage.output}
+										{t('automation.tokens')}{t('automation.colon')}{run.usage.input} / {run.usage.output}
 										{run.usage.cost !== null ? ` · $${run.usage.cost.toFixed(4)}` : ''}
 									</p>
 								)}
