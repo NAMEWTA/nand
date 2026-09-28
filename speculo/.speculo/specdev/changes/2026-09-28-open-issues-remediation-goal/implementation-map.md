@@ -3,7 +3,7 @@ schema_version: 1
 artifact: "implementation-map"
 change: "2026-09-28-open-issues-remediation-goal"
 status: "in_progress"
-revision: 10
+revision: 11
 members: ["2026-09-28-issue-37-terminal-release", "2026-09-28-issue-38-agent-preflight", "2026-09-28-issue-39-widget-source", "2026-09-28-issue-30-live-language-refresh", "2026-09-28-issue-32-product-copy", "2026-09-28-issue-31-contacts-polish", "2026-09-28-issue-40-visible-export", "2026-09-28-issue-41-workbench-usability", "2026-09-28-issue-36-automation-presentation"]
 tasks: ["2026-09-28-issue-37-terminal-release::T-01", "2026-09-28-issue-38-agent-preflight::T-01", "2026-09-28-issue-39-widget-source::T-01", "2026-09-28-issue-30-live-language-refresh::T-01", "2026-09-28-issue-30-live-language-refresh::T-02", "2026-09-28-issue-32-product-copy::T-01", "2026-09-28-issue-31-contacts-polish::T-01", "2026-09-28-issue-31-contacts-polish::T-02", "2026-09-28-issue-40-visible-export::T-01", "2026-09-28-issue-41-workbench-usability::T-01", "2026-09-28-issue-41-workbench-usability::T-02", "2026-09-28-issue-36-automation-presentation::T-01", "2026-09-28-issue-36-automation-presentation::T-02", "2026-09-28-issue-36-automation-presentation::T-03", "2026-09-28-issue-36-automation-presentation::T-04", "2026-09-28-issue-36-automation-presentation::T-05"]
 dependencies: ["2026-09-28-issue-41-workbench-usability::T-02 <- 2026-09-28-issue-41-workbench-usability::T-01", "2026-09-28-issue-36-automation-presentation::T-02 <- 2026-09-28-issue-36-automation-presentation::T-01", "2026-09-28-issue-36-automation-presentation::T-03 <- 2026-09-28-issue-36-automation-presentation::T-02", "2026-09-28-issue-36-automation-presentation::T-04 <- 2026-09-28-issue-36-automation-presentation::T-03", "2026-09-28-issue-36-automation-presentation::T-05 <- 2026-09-28-issue-36-automation-presentation::T-04", "2026-09-28-issue-36-automation-presentation::T-01 <- 2026-09-28-issue-38-agent-preflight::T-01", "2026-09-28-issue-41-workbench-usability::T-02 <- 2026-09-28-issue-30-live-language-refresh::T-02"]
@@ -82,3 +82,5 @@ revision=8：#40/T-01 增补本地化导出读/写/打开错误，合同与串�
 revision=9：#36/T-01 增补看板写入、智能体退出和 hook 设置错误生产点位，结构化代码/参数合同不变。
 
 revision=10：#36/T-02 增补现有AutomationApi游标只读投影。
+
+Revision 11：#37范围扩展Rust历史路径规范化，依据0.0.2真实CI失败；唯一Lead继续串行，修正版发行0.0.3。

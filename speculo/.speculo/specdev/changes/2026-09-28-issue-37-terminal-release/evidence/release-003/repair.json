@@ -1,0 +1,15 @@
+{
+  "source_commit": "301b74713b0a2f38d5159aaabbe64debcbda9296",
+  "parent": "3ce79fe2edb3bda424e0a10b98960435200e0f38",
+  "version": "0.0.3",
+  "failed_tag_preserved": "0.0.2",
+  "failed_workflow": "https://github.com/NAMEWTA/nand/actions/runs/36416418168",
+  "reason": "macOS directory aliases and Windows verbatim path prefixes mismatch the canonical vault; helper tests also passed noncanonical roots",
+  "regression": "vault aliases and Windows drive-form index paths accepted; outside/traversal/symlink escapes rejected",
+  "local_rust_tests": "30/30",
+  "terminal_tests": "190/190",
+  "build": "passed",
+  "lint": "0 errors, 157 existing warnings",
+  "pty": "passed",
+  "publication_authorized": true
+}

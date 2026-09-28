@@ -3,7 +3,7 @@ schema_version: 1
 artifact: "implementation-plan"
 change: "2026-09-28-open-issues-remediation-goal"
 status: "in_progress"
-source_map_revision: 10
+source_map_revision: 11
 orchestration: "lead-directed"
 lead: "codex-issue-planning"
 implementation_agent_limit: 1
@@ -80,3 +80,5 @@ G5：36条AC逐项对账，各member完成其Goal，父聚合Evidence完整；�
 ## 8. 实施授权更新（2026-09-28）
 
 本次用户要求“完整实现…所有 ticket…完成实施”，取代上述 plan-only 的本地执行限制。当前串行实施和必要本地提交已授权；不改写旧 tag，不发送 issue 消息。#37 先准备本地可审阅候选，公开发布与真实宿主验收仍保持独立 gate。历史的 blocked/frontier 快照不作为拒绝本次本地执行的理由。逐票真实结果见 evidence/implementation-orchestration.md。
+
+最新发布授权：用户回复“请你继续完成最后的步骤，给你权限”。main及0.0.2标签已推送，五平台CI阻止了macOS/Windows失败候选发布；修复路径规范化后继续0.0.3发行及required公开默认下载验收，不重复请求同一发布步骤授权。

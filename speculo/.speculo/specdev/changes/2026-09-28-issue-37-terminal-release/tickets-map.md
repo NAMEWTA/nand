@@ -1,7 +1,7 @@
 ---
 schema_version: 3
 plan_contract_version: 1
-plan_revision: 2
+plan_revision: 3
 requested_deliverables: []
 deliverable_policy: "用户要求完整覆盖所有确认问题，未指定固定数量；本 Map 枚举全部切片，不以票数替代验收"
 artifact: "tickets-map"
@@ -72,3 +72,5 @@ Ticket变更回写此投影；合同/路径变化递增 plan_revision 并重过 
 运行 `node speculo/workflows/specdev/common/tools/ticket-control.mjs --map speculo/.speculo/specdev/changes/2026-09-28-issue-37-terminal-release/tickets-map.md --repo .` 只读检查。下一 Work：<Path>{roots.workflows}/specdev/P-goal-plan/P-goal-plan.md</Path> plan，未来获准 run 才转 <Path>{roots.workflows}/specdev/I-implement/I-implement.md</Path>。本 Map 的 requested_deliverables=[] 表示用户未定数量，不表示无交付。
 
 实施 revision=2：#37/T-01 扩展发布校验脚本、技能 release 参考及 README 写集，见票内实施复核。
+
+Revision 3：CI发现macOS/Windows路径表示差异，T-01新增agent_data.rs写集；以0.0.3修复并重新执行完整五平台门，不跳过失败测试。
