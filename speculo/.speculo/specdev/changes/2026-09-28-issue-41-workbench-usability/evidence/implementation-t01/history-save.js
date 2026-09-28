@@ -1,0 +1,1 @@
+(async()=>{const f=window.__historyFixture;f.el.querySelector('.nand-history-row button').click();await f.pause();await f.click('收藏');await f.click('归档');const row=(await f.history.query('History fixture 110',0,undefined,'all')).rows[0];await app.workspace.saveLayout();return {key:row.key,metadata:f.history.meta(row.key)}})()

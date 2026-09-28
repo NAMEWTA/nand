@@ -6,7 +6,7 @@ requested_deliverables: []
 deliverable_policy: "用户要求完整覆盖所有确认问题，未指定固定数量；本 Map 枚举全部切片，不以票数替代验收"
 artifact: "tickets-map"
 change: "2026-09-28-issue-41-workbench-usability"
-status: "ready"
+status: "in_progress"
 ---
 
 # Tickets Map: #41 工作台历史语义与会话辨识
@@ -33,8 +33,8 @@ Spec <Path>{roots.state}/specdev/changes/2026-09-28-issue-41-workbench-usability
 
 | ID | Ticket | 可观察产出 | Blocked By | Depth | Risk | Ready | Owner | Contract IDs | Wave/Gate | Status |
 |---|---|---|---|---|---|---|---|---|---|---|
-| T-01 | <Path>{roots.state}/specdev/changes/2026-09-28-issue-41-workbench-usability/ticket/01-plan.md</Path> | 历史列表日期、分页与状态操作准确 | — | standard | medium | yes | codex-issue-planning | AC-001, AC-002 | G1/G2/G3 | ready |
-| T-02 | <Path>{roots.state}/specdev/changes/2026-09-28-issue-41-workbench-usability/ticket/02-plan.md</Path> | 运行会话可辨识并复核窄屏布局 | T-01 | standard | medium | yes | codex-issue-planning | AC-003, AC-004, AC-005 | G1/G2/G3 | ready |
+| T-01 | <Path>{roots.state}/specdev/changes/2026-09-28-issue-41-workbench-usability/ticket/01-plan.md</Path> | 历史列表日期、分页与状态操作准确 | — | standard | medium | yes | codex-issue-planning | AC-001, AC-002 | G1/G2/G3 | done |
+| T-02 | <Path>{roots.state}/specdev/changes/2026-09-28-issue-41-workbench-usability/ticket/02-plan.md</Path> | 运行会话可辨识并复核窄屏布局 | T-01 | standard | medium | yes | codex-issue-planning | AC-003, AC-004, AC-005 | G1/G2/G3 | done |
 
 frontmatter 是 Ticket 状态权威；本表只作投影。
 
@@ -49,8 +49,8 @@ frontmatter 是 Ticket 状态权威；本表只作投影。
 
 | Contract ID | 覆盖 Ticket | 验证接缝 | 状态 | 说明 |
 |---|---|---|---|---|
-| AC-001 | T-01 | 对应 Ticket 行为验证矩阵 | covered | 实施证据尚未产生 |
-| AC-002 | T-01 | 对应 Ticket 行为验证矩阵 | covered | 实施证据尚未产生 |
+| AC-001 | T-01 | 对应 Ticket 行为验证矩阵 | covered | evidence/T-01.md passed |
+| AC-002 | T-01 | 对应 Ticket 行为验证矩阵 | covered | evidence/T-01.md passed |
 | AC-003 | T-02 | 对应 Ticket 行为验证矩阵 | covered | 实施证据尚未产生 |
 | AC-004 | T-02 | 对应 Ticket 行为验证矩阵 | covered | 实施证据尚未产生 |
 | AC-005 | T-02 | 对应 Ticket 行为验证矩阵 | covered | 实施证据尚未产生 |
