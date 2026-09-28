@@ -8,7 +8,7 @@ artifact: "ticket"
 change: "2026-09-28-issue-41-workbench-usability"
 id: "T-02"
 title: "运行会话可辨识并复核窄屏布局"
-status: "ready"
+status: "done"
 kind: "bug"
 planning_depth: "standard"
 planning_depth_reason: "跨入口与领域接缝的可独立验收行为切片"
@@ -108,13 +108,13 @@ E2E owner/environment：Lead / current-workspace（未创建 worktree）。场�
 
 ## 10. 验收标准
 
-- [ ] AC-003：同时打开两个同名终端时可用稳定短会话标识区分，重绘/切换不重新编号或错选；未知状态仍标未知。
-- [ ] AC-004：看板显示为“看板/Dashboard”，终端组合界面为智能体工作台，持久化 view type 不变。
-- [ ] AC-005：100+历史筛选控件保持宿主正常可读高度；800px及窄leaf用量文字可达且不被状态栏遮挡。
-- [ ] Skill Execution Records 完整记录真实调用、摘要、操作、证据与结果。
-- [ ] 路径未越界；所需 E2E 已实际执行。
-- [ ] 授权后形成非空 implementation commit，Lead direct-parent 验证通过并记录 result SHA；当前本地计划不是该证据。
-- [ ] 所有回归/构建/lint通过，未完成项没有伪标 done；无需要改动时取消该票并注明事实，禁止 empty commit。
+- [x] AC-003：同时打开两个同名终端时可用稳定短会话标识区分，重绘/切换不重新编号或错选；未知状态仍标未知。
+- [x] AC-004：看板显示为“看板/Dashboard”，终端组合界面为智能体工作台，持久化 view type 不变。
+- [x] AC-005：100+历史筛选控件保持宿主正常可读高度；800px及窄leaf用量文字可达且不被状态栏遮挡。
+- [x] Skill Execution Records 完整记录真实调用、摘要、操作、证据与结果。
+- [x] 路径未越界；所需 E2E 已实际执行。
+- [x] 授权后形成非空 implementation commit，Lead direct-parent 验证通过并记录 result SHA；当前本地计划不是该证据。
+- [x] 所有回归/构建/lint通过，未完成项没有伪标 done；无需要改动时取消该票并注明事实，禁止 empty commit。
 
 ## 11. SKILL 调用计划
 
@@ -125,3 +125,5 @@ dev implement：先读架构/领域参考，用其依赖与命名/持久化规�
 ## 12. 停止、检查点与交付
 
 用户要求完整分析与计划，未规定固定票数，不能用删合同减票。当前为 plan，不实施。缺 required 接缝/环境、契约偏差、他人写集、源漂移则暂停本票及真实下游；独立票仍可规划。恢复读取 Map/Goal/源HEAD/Skill摘要/最近Evidence，核对未闭合动作再继续。交付所有 AC Evidence 后交回 Goal，不能自动远程评论、关闭或归档。
+
+用户本次实施授权覆盖历史 plan-only；完成证据见 evidence/T-02.md。

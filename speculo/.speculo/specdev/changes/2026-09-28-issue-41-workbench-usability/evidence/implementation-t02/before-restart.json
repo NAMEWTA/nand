@@ -1,0 +1,1823 @@
+{
+  "passed": true,
+  "original": [
+    {
+      "id": "terminal-50b26dc6-0f3f-47d2-bd8c-1e2c605972ad",
+      "pty": "2c0bcf3c-32a8-4d80-9873-961d3cbeae23",
+      "alive": true
+    },
+    {
+      "id": "terminal-02a935ba-2d91-4ecb-8c1f-d33a9ada293a",
+      "pty": "94050dbb-5eba-45fa-beac-01fc08e28ce0",
+      "alive": true
+    }
+  ],
+  "identities": [
+    {
+      "title": "看板",
+      "heading": "智能体工作台",
+      "labels": [
+        {
+          "id": "terminal-50b26dc6-0f3f-47d2-bd8c-1e2c605972ad",
+          "text": "Same Terminal#50b26dc6状态未知"
+        },
+        {
+          "id": "terminal-02a935ba-2d91-4ecb-8c1f-d33a9ada293a",
+          "text": "Same Terminal#02a935ba状态未知"
+        }
+      ],
+      "selectedFirst": "terminal-50b26dc6-0f3f-47d2-bd8c-1e2c605972ad",
+      "selectedSecond": "terminal-02a935ba-2d91-4ecb-8c1f-d33a9ada293a",
+      "same": true,
+      "history": 100,
+      "types": [
+        "nand-dashboard-view",
+        "terminal-view"
+      ]
+    },
+    {
+      "title": "Dashboard",
+      "heading": "Agent workbench",
+      "labels": [
+        {
+          "id": "terminal-50b26dc6-0f3f-47d2-bd8c-1e2c605972ad",
+          "text": "Same Terminal#50b26dc6Status unverified"
+        },
+        {
+          "id": "terminal-02a935ba-2d91-4ecb-8c1f-d33a9ada293a",
+          "text": "Same Terminal#02a935baStatus unverified"
+        }
+      ],
+      "selectedFirst": "terminal-50b26dc6-0f3f-47d2-bd8c-1e2c605972ad",
+      "selectedSecond": "terminal-02a935ba-2d91-4ecb-8c1f-d33a9ada293a",
+      "same": true,
+      "history": 100,
+      "types": [
+        "nand-dashboard-view",
+        "terminal-view"
+      ]
+    },
+    {
+      "title": "看板",
+      "heading": "智能体工作台",
+      "labels": [
+        {
+          "id": "terminal-50b26dc6-0f3f-47d2-bd8c-1e2c605972ad",
+          "text": "Same Terminal#50b26dc6状态未知"
+        },
+        {
+          "id": "terminal-02a935ba-2d91-4ecb-8c1f-d33a9ada293a",
+          "text": "Same Terminal#02a935ba状态未知"
+        }
+      ],
+      "selectedFirst": "terminal-50b26dc6-0f3f-47d2-bd8c-1e2c605972ad",
+      "selectedSecond": "terminal-02a935ba-2d91-4ecb-8c1f-d33a9ada293a",
+      "same": true,
+      "history": 100,
+      "types": [
+        "nand-dashboard-view",
+        "terminal-view"
+      ]
+    }
+  ],
+  "rows": [
+    {
+      "lang": "zh",
+      "theme": "light",
+      "width": 1280,
+      "height": 900,
+      "geometry": {
+        "leaf": {
+          "x": 44,
+          "y": 40,
+          "width": 1236,
+          "height": 860,
+          "bottom": 900,
+          "right": 1280
+        },
+        "select": {
+          "x": 1021,
+          "y": 162,
+          "width": 235,
+          "height": 30,
+          "bottom": 192,
+          "right": 1256
+        },
+        "input": {
+          "x": 1021,
+          "y": 124,
+          "width": 235,
+          "height": 30,
+          "bottom": 154,
+          "right": 1256
+        },
+        "usage": {
+          "x": 44,
+          "y": 819,
+          "width": 1236,
+          "height": 81,
+          "bottom": 900,
+          "right": 1280
+        },
+        "content": [
+          {
+            "x": 56,
+            "y": 836.203125,
+            "width": 191.921875,
+            "height": 15.59375,
+            "bottom": 851.796875,
+            "right": 247.921875
+          },
+          {
+            "x": 255.921875,
+            "y": 828,
+            "width": 50.015625,
+            "height": 32,
+            "bottom": 860,
+            "right": 305.9375
+          }
+        ],
+        "status": {
+          "x": 1243,
+          "y": 875,
+          "width": 37,
+          "height": 25,
+          "bottom": 900,
+          "right": 1280
+        },
+        "normalHeight": 30,
+        "overflow": {
+          "client": 1236,
+          "scroll": 1236
+        },
+        "text": "当前库消耗 · 原生 token 用量不可用用量"
+      }
+    },
+    {
+      "lang": "zh",
+      "theme": "light",
+      "width": 800,
+      "height": 600,
+      "geometry": {
+        "leaf": {
+          "x": 44,
+          "y": 40,
+          "width": 756,
+          "height": 560,
+          "bottom": 600,
+          "right": 800
+        },
+        "select": {
+          "x": 541,
+          "y": 162,
+          "width": 235,
+          "height": 30,
+          "bottom": 192,
+          "right": 776
+        },
+        "input": {
+          "x": 541,
+          "y": 124,
+          "width": 235,
+          "height": 30,
+          "bottom": 154,
+          "right": 776
+        },
+        "usage": {
+          "x": 44,
+          "y": 519,
+          "width": 756,
+          "height": 81,
+          "bottom": 600,
+          "right": 800
+        },
+        "content": [
+          {
+            "x": 56,
+            "y": 536.203125,
+            "width": 191.921875,
+            "height": 15.59375,
+            "bottom": 551.796875,
+            "right": 247.921875
+          },
+          {
+            "x": 255.921875,
+            "y": 528,
+            "width": 50.015625,
+            "height": 32,
+            "bottom": 560,
+            "right": 305.9375
+          }
+        ],
+        "status": {
+          "x": 763,
+          "y": 575,
+          "width": 37,
+          "height": 25,
+          "bottom": 600,
+          "right": 800
+        },
+        "normalHeight": 30,
+        "overflow": {
+          "client": 756,
+          "scroll": 756
+        },
+        "text": "当前库消耗 · 原生 token 用量不可用用量"
+      }
+    },
+    {
+      "lang": "zh",
+      "theme": "light",
+      "width": 500,
+      "height": 600,
+      "geometry": {
+        "leaf": {
+          "x": 44,
+          "y": 40,
+          "width": 456,
+          "height": 560,
+          "bottom": 600,
+          "right": 500
+        },
+        "select": {
+          "x": 57,
+          "y": 442,
+          "width": 419,
+          "height": 30,
+          "bottom": 472,
+          "right": 476
+        },
+        "input": {
+          "x": 57,
+          "y": 404,
+          "width": 419,
+          "height": 30,
+          "bottom": 434,
+          "right": 476
+        },
+        "usage": {
+          "x": 44,
+          "y": 519,
+          "width": 456,
+          "height": 81,
+          "bottom": 600,
+          "right": 500
+        },
+        "content": [
+          {
+            "x": 56,
+            "y": 536.203125,
+            "width": 191.921875,
+            "height": 15.59375,
+            "bottom": 551.796875,
+            "right": 247.921875
+          },
+          {
+            "x": 255.921875,
+            "y": 528,
+            "width": 50.015625,
+            "height": 32,
+            "bottom": 560,
+            "right": 305.9375
+          }
+        ],
+        "status": {
+          "x": 463,
+          "y": 575,
+          "width": 37,
+          "height": 25,
+          "bottom": 600,
+          "right": 500
+        },
+        "normalHeight": 30,
+        "overflow": {
+          "client": 456,
+          "scroll": 456
+        },
+        "text": "当前库消耗 · 原生 token 用量不可用用量"
+      }
+    },
+    {
+      "lang": "zh",
+      "theme": "light",
+      "width": 350,
+      "height": 500,
+      "geometry": {
+        "leaf": {
+          "x": 44,
+          "y": 40,
+          "width": 306,
+          "height": 460,
+          "bottom": 500,
+          "right": 350
+        },
+        "select": {
+          "x": 57,
+          "y": 342,
+          "width": 269,
+          "height": 30,
+          "bottom": 372,
+          "right": 326
+        },
+        "input": {
+          "x": 57,
+          "y": 304,
+          "width": 269,
+          "height": 30,
+          "bottom": 334,
+          "right": 326
+        },
+        "usage": {
+          "x": 44,
+          "y": 419,
+          "width": 306,
+          "height": 81,
+          "bottom": 500,
+          "right": 350
+        },
+        "content": [
+          {
+            "x": 56,
+            "y": 436.203125,
+            "width": 191.921875,
+            "height": 15.59375,
+            "bottom": 451.796875,
+            "right": 247.921875
+          },
+          {
+            "x": 255.921875,
+            "y": 428,
+            "width": 50.015625,
+            "height": 32,
+            "bottom": 460,
+            "right": 305.9375
+          }
+        ],
+        "status": {
+          "x": 313,
+          "y": 475,
+          "width": 37,
+          "height": 25,
+          "bottom": 500,
+          "right": 350
+        },
+        "normalHeight": 30,
+        "overflow": {
+          "client": 306,
+          "scroll": 306
+        },
+        "text": "当前库消耗 · 原生 token 用量不可用用量"
+      }
+    },
+    {
+      "lang": "zh",
+      "theme": "dark",
+      "width": 1280,
+      "height": 900,
+      "geometry": {
+        "leaf": {
+          "x": 44,
+          "y": 40,
+          "width": 1236,
+          "height": 860,
+          "bottom": 900,
+          "right": 1280
+        },
+        "select": {
+          "x": 1021,
+          "y": 162,
+          "width": 235,
+          "height": 30,
+          "bottom": 192,
+          "right": 1256
+        },
+        "input": {
+          "x": 1021,
+          "y": 124,
+          "width": 235,
+          "height": 30,
+          "bottom": 154,
+          "right": 1256
+        },
+        "usage": {
+          "x": 44,
+          "y": 819,
+          "width": 1236,
+          "height": 81,
+          "bottom": 900,
+          "right": 1280
+        },
+        "content": [
+          {
+            "x": 56,
+            "y": 836.203125,
+            "width": 191.921875,
+            "height": 15.59375,
+            "bottom": 851.796875,
+            "right": 247.921875
+          },
+          {
+            "x": 255.921875,
+            "y": 828,
+            "width": 50.015625,
+            "height": 32,
+            "bottom": 860,
+            "right": 305.9375
+          }
+        ],
+        "status": {
+          "x": 1243,
+          "y": 875,
+          "width": 37,
+          "height": 25,
+          "bottom": 900,
+          "right": 1280
+        },
+        "normalHeight": 30,
+        "overflow": {
+          "client": 1236,
+          "scroll": 1236
+        },
+        "text": "当前库消耗 · 原生 token 用量不可用用量"
+      }
+    },
+    {
+      "lang": "zh",
+      "theme": "dark",
+      "width": 800,
+      "height": 600,
+      "geometry": {
+        "leaf": {
+          "x": 44,
+          "y": 40,
+          "width": 756,
+          "height": 560,
+          "bottom": 600,
+          "right": 800
+        },
+        "select": {
+          "x": 541,
+          "y": 162,
+          "width": 235,
+          "height": 30,
+          "bottom": 192,
+          "right": 776
+        },
+        "input": {
+          "x": 541,
+          "y": 124,
+          "width": 235,
+          "height": 30,
+          "bottom": 154,
+          "right": 776
+        },
+        "usage": {
+          "x": 44,
+          "y": 519,
+          "width": 756,
+          "height": 81,
+          "bottom": 600,
+          "right": 800
+        },
+        "content": [
+          {
+            "x": 56,
+            "y": 536.203125,
+            "width": 191.921875,
+            "height": 15.59375,
+            "bottom": 551.796875,
+            "right": 247.921875
+          },
+          {
+            "x": 255.921875,
+            "y": 528,
+            "width": 50.015625,
+            "height": 32,
+            "bottom": 560,
+            "right": 305.9375
+          }
+        ],
+        "status": {
+          "x": 763,
+          "y": 575,
+          "width": 37,
+          "height": 25,
+          "bottom": 600,
+          "right": 800
+        },
+        "normalHeight": 30,
+        "overflow": {
+          "client": 756,
+          "scroll": 756
+        },
+        "text": "当前库消耗 · 原生 token 用量不可用用量"
+      }
+    },
+    {
+      "lang": "zh",
+      "theme": "dark",
+      "width": 500,
+      "height": 600,
+      "geometry": {
+        "leaf": {
+          "x": 44,
+          "y": 40,
+          "width": 456,
+          "height": 560,
+          "bottom": 600,
+          "right": 500
+        },
+        "select": {
+          "x": 57,
+          "y": 442,
+          "width": 419,
+          "height": 30,
+          "bottom": 472,
+          "right": 476
+        },
+        "input": {
+          "x": 57,
+          "y": 404,
+          "width": 419,
+          "height": 30,
+          "bottom": 434,
+          "right": 476
+        },
+        "usage": {
+          "x": 44,
+          "y": 519,
+          "width": 456,
+          "height": 81,
+          "bottom": 600,
+          "right": 500
+        },
+        "content": [
+          {
+            "x": 56,
+            "y": 536.203125,
+            "width": 191.921875,
+            "height": 15.59375,
+            "bottom": 551.796875,
+            "right": 247.921875
+          },
+          {
+            "x": 255.921875,
+            "y": 528,
+            "width": 50.015625,
+            "height": 32,
+            "bottom": 560,
+            "right": 305.9375
+          }
+        ],
+        "status": {
+          "x": 463,
+          "y": 575,
+          "width": 37,
+          "height": 25,
+          "bottom": 600,
+          "right": 500
+        },
+        "normalHeight": 30,
+        "overflow": {
+          "client": 456,
+          "scroll": 456
+        },
+        "text": "当前库消耗 · 原生 token 用量不可用用量"
+      }
+    },
+    {
+      "lang": "zh",
+      "theme": "dark",
+      "width": 350,
+      "height": 500,
+      "geometry": {
+        "leaf": {
+          "x": 44,
+          "y": 40,
+          "width": 306,
+          "height": 460,
+          "bottom": 500,
+          "right": 350
+        },
+        "select": {
+          "x": 57,
+          "y": 342,
+          "width": 269,
+          "height": 30,
+          "bottom": 372,
+          "right": 326
+        },
+        "input": {
+          "x": 57,
+          "y": 304,
+          "width": 269,
+          "height": 30,
+          "bottom": 334,
+          "right": 326
+        },
+        "usage": {
+          "x": 44,
+          "y": 419,
+          "width": 306,
+          "height": 81,
+          "bottom": 500,
+          "right": 350
+        },
+        "content": [
+          {
+            "x": 56,
+            "y": 436.203125,
+            "width": 191.921875,
+            "height": 15.59375,
+            "bottom": 451.796875,
+            "right": 247.921875
+          },
+          {
+            "x": 255.921875,
+            "y": 428,
+            "width": 50.015625,
+            "height": 32,
+            "bottom": 460,
+            "right": 305.9375
+          }
+        ],
+        "status": {
+          "x": 313,
+          "y": 475,
+          "width": 37,
+          "height": 25,
+          "bottom": 500,
+          "right": 350
+        },
+        "normalHeight": 30,
+        "overflow": {
+          "client": 306,
+          "scroll": 306
+        },
+        "text": "当前库消耗 · 原生 token 用量不可用用量"
+      }
+    },
+    {
+      "lang": "en",
+      "theme": "light",
+      "width": 1280,
+      "height": 900,
+      "geometry": {
+        "leaf": {
+          "x": 44,
+          "y": 40,
+          "width": 1236,
+          "height": 860,
+          "bottom": 900,
+          "right": 1280
+        },
+        "select": {
+          "x": 1021,
+          "y": 162,
+          "width": 235,
+          "height": 30,
+          "bottom": 192,
+          "right": 1256
+        },
+        "input": {
+          "x": 1021,
+          "y": 124,
+          "width": 235,
+          "height": 30,
+          "bottom": 154,
+          "right": 1256
+        },
+        "usage": {
+          "x": 44,
+          "y": 819,
+          "width": 1236,
+          "height": 81,
+          "bottom": 900,
+          "right": 1280
+        },
+        "content": [
+          {
+            "x": 56,
+            "y": 836.203125,
+            "width": 291.734375,
+            "height": 15.59375,
+            "bottom": 851.796875,
+            "right": 347.734375
+          },
+          {
+            "x": 355.734375,
+            "y": 828,
+            "width": 62.359375,
+            "height": 32,
+            "bottom": 860,
+            "right": 418.09375
+          }
+        ],
+        "status": {
+          "x": 1243,
+          "y": 875,
+          "width": 37,
+          "height": 25,
+          "bottom": 900,
+          "right": 1280
+        },
+        "normalHeight": 30,
+        "overflow": {
+          "client": 1236,
+          "scroll": 1236
+        },
+        "text": "Vault consumption · Native token usage unavailableUsage"
+      }
+    },
+    {
+      "lang": "en",
+      "theme": "light",
+      "width": 800,
+      "height": 600,
+      "geometry": {
+        "leaf": {
+          "x": 44,
+          "y": 40,
+          "width": 756,
+          "height": 560,
+          "bottom": 600,
+          "right": 800
+        },
+        "select": {
+          "x": 541,
+          "y": 162,
+          "width": 235,
+          "height": 30,
+          "bottom": 192,
+          "right": 776
+        },
+        "input": {
+          "x": 541,
+          "y": 124,
+          "width": 235,
+          "height": 30,
+          "bottom": 154,
+          "right": 776
+        },
+        "usage": {
+          "x": 44,
+          "y": 519,
+          "width": 756,
+          "height": 81,
+          "bottom": 600,
+          "right": 800
+        },
+        "content": [
+          {
+            "x": 56,
+            "y": 536.203125,
+            "width": 291.734375,
+            "height": 15.59375,
+            "bottom": 551.796875,
+            "right": 347.734375
+          },
+          {
+            "x": 355.734375,
+            "y": 528,
+            "width": 62.359375,
+            "height": 32,
+            "bottom": 560,
+            "right": 418.09375
+          }
+        ],
+        "status": {
+          "x": 763,
+          "y": 575,
+          "width": 37,
+          "height": 25,
+          "bottom": 600,
+          "right": 800
+        },
+        "normalHeight": 30,
+        "overflow": {
+          "client": 756,
+          "scroll": 756
+        },
+        "text": "Vault consumption · Native token usage unavailableUsage"
+      }
+    },
+    {
+      "lang": "en",
+      "theme": "light",
+      "width": 500,
+      "height": 600,
+      "geometry": {
+        "leaf": {
+          "x": 44,
+          "y": 40,
+          "width": 456,
+          "height": 560,
+          "bottom": 600,
+          "right": 500
+        },
+        "select": {
+          "x": 57,
+          "y": 442,
+          "width": 419,
+          "height": 30,
+          "bottom": 472,
+          "right": 476
+        },
+        "input": {
+          "x": 57,
+          "y": 404,
+          "width": 419,
+          "height": 30,
+          "bottom": 434,
+          "right": 476
+        },
+        "usage": {
+          "x": 44,
+          "y": 519,
+          "width": 456,
+          "height": 81,
+          "bottom": 600,
+          "right": 500
+        },
+        "content": [
+          {
+            "x": 56,
+            "y": 536.203125,
+            "width": 291.734375,
+            "height": 15.59375,
+            "bottom": 551.796875,
+            "right": 347.734375
+          },
+          {
+            "x": 355.734375,
+            "y": 528,
+            "width": 62.359375,
+            "height": 32,
+            "bottom": 560,
+            "right": 418.09375
+          }
+        ],
+        "status": {
+          "x": 463,
+          "y": 575,
+          "width": 37,
+          "height": 25,
+          "bottom": 600,
+          "right": 500
+        },
+        "normalHeight": 30,
+        "overflow": {
+          "client": 456,
+          "scroll": 456
+        },
+        "text": "Vault consumption · Native token usage unavailableUsage"
+      }
+    },
+    {
+      "lang": "en",
+      "theme": "light",
+      "width": 350,
+      "height": 500,
+      "geometry": {
+        "leaf": {
+          "x": 44,
+          "y": 40,
+          "width": 306,
+          "height": 460,
+          "bottom": 500,
+          "right": 350
+        },
+        "select": {
+          "x": 57,
+          "y": 323,
+          "width": 269,
+          "height": 30,
+          "bottom": 353,
+          "right": 326
+        },
+        "input": {
+          "x": 57,
+          "y": 285,
+          "width": 269,
+          "height": 30,
+          "bottom": 315,
+          "right": 326
+        },
+        "usage": {
+          "x": 44,
+          "y": 379.8125,
+          "width": 306,
+          "height": 120.1875,
+          "bottom": 500,
+          "right": 350
+        },
+        "content": [
+          {
+            "x": 56,
+            "y": 388.8125,
+            "width": 282,
+            "height": 31.1875,
+            "bottom": 420,
+            "right": 338
+          },
+          {
+            "x": 56,
+            "y": 428,
+            "width": 62.359375,
+            "height": 32,
+            "bottom": 460,
+            "right": 118.359375
+          }
+        ],
+        "status": {
+          "x": 313,
+          "y": 475,
+          "width": 37,
+          "height": 25,
+          "bottom": 500,
+          "right": 350
+        },
+        "normalHeight": 30,
+        "overflow": {
+          "client": 306,
+          "scroll": 306
+        },
+        "text": "Vault consumption · Native token usage unavailableUsage"
+      }
+    },
+    {
+      "lang": "en",
+      "theme": "dark",
+      "width": 1280,
+      "height": 900,
+      "geometry": {
+        "leaf": {
+          "x": 44,
+          "y": 40,
+          "width": 1236,
+          "height": 860,
+          "bottom": 900,
+          "right": 1280
+        },
+        "select": {
+          "x": 1021,
+          "y": 162,
+          "width": 235,
+          "height": 30,
+          "bottom": 192,
+          "right": 1256
+        },
+        "input": {
+          "x": 1021,
+          "y": 124,
+          "width": 235,
+          "height": 30,
+          "bottom": 154,
+          "right": 1256
+        },
+        "usage": {
+          "x": 44,
+          "y": 819,
+          "width": 1236,
+          "height": 81,
+          "bottom": 900,
+          "right": 1280
+        },
+        "content": [
+          {
+            "x": 56,
+            "y": 836.203125,
+            "width": 291.734375,
+            "height": 15.59375,
+            "bottom": 851.796875,
+            "right": 347.734375
+          },
+          {
+            "x": 355.734375,
+            "y": 828,
+            "width": 62.359375,
+            "height": 32,
+            "bottom": 860,
+            "right": 418.09375
+          }
+        ],
+        "status": {
+          "x": 1243,
+          "y": 875,
+          "width": 37,
+          "height": 25,
+          "bottom": 900,
+          "right": 1280
+        },
+        "normalHeight": 30,
+        "overflow": {
+          "client": 1236,
+          "scroll": 1236
+        },
+        "text": "Vault consumption · Native token usage unavailableUsage"
+      }
+    },
+    {
+      "lang": "en",
+      "theme": "dark",
+      "width": 800,
+      "height": 600,
+      "geometry": {
+        "leaf": {
+          "x": 44,
+          "y": 40,
+          "width": 756,
+          "height": 560,
+          "bottom": 600,
+          "right": 800
+        },
+        "select": {
+          "x": 541,
+          "y": 162,
+          "width": 235,
+          "height": 30,
+          "bottom": 192,
+          "right": 776
+        },
+        "input": {
+          "x": 541,
+          "y": 124,
+          "width": 235,
+          "height": 30,
+          "bottom": 154,
+          "right": 776
+        },
+        "usage": {
+          "x": 44,
+          "y": 519,
+          "width": 756,
+          "height": 81,
+          "bottom": 600,
+          "right": 800
+        },
+        "content": [
+          {
+            "x": 56,
+            "y": 536.203125,
+            "width": 291.734375,
+            "height": 15.59375,
+            "bottom": 551.796875,
+            "right": 347.734375
+          },
+          {
+            "x": 355.734375,
+            "y": 528,
+            "width": 62.359375,
+            "height": 32,
+            "bottom": 560,
+            "right": 418.09375
+          }
+        ],
+        "status": {
+          "x": 763,
+          "y": 575,
+          "width": 37,
+          "height": 25,
+          "bottom": 600,
+          "right": 800
+        },
+        "normalHeight": 30,
+        "overflow": {
+          "client": 756,
+          "scroll": 756
+        },
+        "text": "Vault consumption · Native token usage unavailableUsage"
+      }
+    },
+    {
+      "lang": "en",
+      "theme": "dark",
+      "width": 500,
+      "height": 600,
+      "geometry": {
+        "leaf": {
+          "x": 44,
+          "y": 40,
+          "width": 456,
+          "height": 560,
+          "bottom": 600,
+          "right": 500
+        },
+        "select": {
+          "x": 57,
+          "y": 442,
+          "width": 419,
+          "height": 30,
+          "bottom": 472,
+          "right": 476
+        },
+        "input": {
+          "x": 57,
+          "y": 404,
+          "width": 419,
+          "height": 30,
+          "bottom": 434,
+          "right": 476
+        },
+        "usage": {
+          "x": 44,
+          "y": 519,
+          "width": 456,
+          "height": 81,
+          "bottom": 600,
+          "right": 500
+        },
+        "content": [
+          {
+            "x": 56,
+            "y": 536.203125,
+            "width": 291.734375,
+            "height": 15.59375,
+            "bottom": 551.796875,
+            "right": 347.734375
+          },
+          {
+            "x": 355.734375,
+            "y": 528,
+            "width": 62.359375,
+            "height": 32,
+            "bottom": 560,
+            "right": 418.09375
+          }
+        ],
+        "status": {
+          "x": 463,
+          "y": 575,
+          "width": 37,
+          "height": 25,
+          "bottom": 600,
+          "right": 500
+        },
+        "normalHeight": 30,
+        "overflow": {
+          "client": 456,
+          "scroll": 456
+        },
+        "text": "Vault consumption · Native token usage unavailableUsage"
+      }
+    },
+    {
+      "lang": "en",
+      "theme": "dark",
+      "width": 350,
+      "height": 500,
+      "geometry": {
+        "leaf": {
+          "x": 44,
+          "y": 40,
+          "width": 306,
+          "height": 460,
+          "bottom": 500,
+          "right": 350
+        },
+        "select": {
+          "x": 57,
+          "y": 323,
+          "width": 269,
+          "height": 30,
+          "bottom": 353,
+          "right": 326
+        },
+        "input": {
+          "x": 57,
+          "y": 285,
+          "width": 269,
+          "height": 30,
+          "bottom": 315,
+          "right": 326
+        },
+        "usage": {
+          "x": 44,
+          "y": 379.8125,
+          "width": 306,
+          "height": 120.1875,
+          "bottom": 500,
+          "right": 350
+        },
+        "content": [
+          {
+            "x": 56,
+            "y": 388.8125,
+            "width": 282,
+            "height": 31.1875,
+            "bottom": 420,
+            "right": 338
+          },
+          {
+            "x": 56,
+            "y": 428,
+            "width": 62.359375,
+            "height": 32,
+            "bottom": 460,
+            "right": 118.359375
+          }
+        ],
+        "status": {
+          "x": 313,
+          "y": 475,
+          "width": 37,
+          "height": 25,
+          "bottom": 500,
+          "right": 350
+        },
+        "normalHeight": 30,
+        "overflow": {
+          "client": 306,
+          "scroll": 306
+        },
+        "text": "Vault consumption · Native token usage unavailableUsage"
+      }
+    },
+    {
+      "lang": "zh",
+      "theme": "light",
+      "width": 1280,
+      "height": 900,
+      "geometry": {
+        "leaf": {
+          "x": 44,
+          "y": 40,
+          "width": 1236,
+          "height": 860,
+          "bottom": 900,
+          "right": 1280
+        },
+        "select": {
+          "x": 1021,
+          "y": 162,
+          "width": 235,
+          "height": 30,
+          "bottom": 192,
+          "right": 1256
+        },
+        "input": {
+          "x": 1021,
+          "y": 124,
+          "width": 235,
+          "height": 30,
+          "bottom": 154,
+          "right": 1256
+        },
+        "usage": {
+          "x": 44,
+          "y": 819,
+          "width": 1236,
+          "height": 81,
+          "bottom": 900,
+          "right": 1280
+        },
+        "content": [
+          {
+            "x": 56,
+            "y": 836.203125,
+            "width": 191.921875,
+            "height": 15.59375,
+            "bottom": 851.796875,
+            "right": 247.921875
+          },
+          {
+            "x": 255.921875,
+            "y": 828,
+            "width": 50.015625,
+            "height": 32,
+            "bottom": 860,
+            "right": 305.9375
+          }
+        ],
+        "status": {
+          "x": 1243,
+          "y": 875,
+          "width": 37,
+          "height": 25,
+          "bottom": 900,
+          "right": 1280
+        },
+        "normalHeight": 30,
+        "overflow": {
+          "client": 1236,
+          "scroll": 1236
+        },
+        "text": "当前库消耗 · 原生 token 用量不可用用量"
+      }
+    },
+    {
+      "lang": "zh",
+      "theme": "light",
+      "width": 800,
+      "height": 600,
+      "geometry": {
+        "leaf": {
+          "x": 44,
+          "y": 40,
+          "width": 756,
+          "height": 560,
+          "bottom": 600,
+          "right": 800
+        },
+        "select": {
+          "x": 541,
+          "y": 162,
+          "width": 235,
+          "height": 30,
+          "bottom": 192,
+          "right": 776
+        },
+        "input": {
+          "x": 541,
+          "y": 124,
+          "width": 235,
+          "height": 30,
+          "bottom": 154,
+          "right": 776
+        },
+        "usage": {
+          "x": 44,
+          "y": 519,
+          "width": 756,
+          "height": 81,
+          "bottom": 600,
+          "right": 800
+        },
+        "content": [
+          {
+            "x": 56,
+            "y": 536.203125,
+            "width": 191.921875,
+            "height": 15.59375,
+            "bottom": 551.796875,
+            "right": 247.921875
+          },
+          {
+            "x": 255.921875,
+            "y": 528,
+            "width": 50.015625,
+            "height": 32,
+            "bottom": 560,
+            "right": 305.9375
+          }
+        ],
+        "status": {
+          "x": 763,
+          "y": 575,
+          "width": 37,
+          "height": 25,
+          "bottom": 600,
+          "right": 800
+        },
+        "normalHeight": 30,
+        "overflow": {
+          "client": 756,
+          "scroll": 756
+        },
+        "text": "当前库消耗 · 原生 token 用量不可用用量"
+      }
+    },
+    {
+      "lang": "zh",
+      "theme": "light",
+      "width": 500,
+      "height": 600,
+      "geometry": {
+        "leaf": {
+          "x": 44,
+          "y": 40,
+          "width": 456,
+          "height": 560,
+          "bottom": 600,
+          "right": 500
+        },
+        "select": {
+          "x": 57,
+          "y": 442,
+          "width": 419,
+          "height": 30,
+          "bottom": 472,
+          "right": 476
+        },
+        "input": {
+          "x": 57,
+          "y": 404,
+          "width": 419,
+          "height": 30,
+          "bottom": 434,
+          "right": 476
+        },
+        "usage": {
+          "x": 44,
+          "y": 519,
+          "width": 456,
+          "height": 81,
+          "bottom": 600,
+          "right": 500
+        },
+        "content": [
+          {
+            "x": 56,
+            "y": 536.203125,
+            "width": 191.921875,
+            "height": 15.59375,
+            "bottom": 551.796875,
+            "right": 247.921875
+          },
+          {
+            "x": 255.921875,
+            "y": 528,
+            "width": 50.015625,
+            "height": 32,
+            "bottom": 560,
+            "right": 305.9375
+          }
+        ],
+        "status": {
+          "x": 463,
+          "y": 575,
+          "width": 37,
+          "height": 25,
+          "bottom": 600,
+          "right": 500
+        },
+        "normalHeight": 30,
+        "overflow": {
+          "client": 456,
+          "scroll": 456
+        },
+        "text": "当前库消耗 · 原生 token 用量不可用用量"
+      }
+    },
+    {
+      "lang": "zh",
+      "theme": "light",
+      "width": 350,
+      "height": 500,
+      "geometry": {
+        "leaf": {
+          "x": 44,
+          "y": 40,
+          "width": 306,
+          "height": 460,
+          "bottom": 500,
+          "right": 350
+        },
+        "select": {
+          "x": 57,
+          "y": 342,
+          "width": 269,
+          "height": 30,
+          "bottom": 372,
+          "right": 326
+        },
+        "input": {
+          "x": 57,
+          "y": 304,
+          "width": 269,
+          "height": 30,
+          "bottom": 334,
+          "right": 326
+        },
+        "usage": {
+          "x": 44,
+          "y": 419,
+          "width": 306,
+          "height": 81,
+          "bottom": 500,
+          "right": 350
+        },
+        "content": [
+          {
+            "x": 56,
+            "y": 436.203125,
+            "width": 191.921875,
+            "height": 15.59375,
+            "bottom": 451.796875,
+            "right": 247.921875
+          },
+          {
+            "x": 255.921875,
+            "y": 428,
+            "width": 50.015625,
+            "height": 32,
+            "bottom": 460,
+            "right": 305.9375
+          }
+        ],
+        "status": {
+          "x": 313,
+          "y": 475,
+          "width": 37,
+          "height": 25,
+          "bottom": 500,
+          "right": 350
+        },
+        "normalHeight": 30,
+        "overflow": {
+          "client": 306,
+          "scroll": 306
+        },
+        "text": "当前库消耗 · 原生 token 用量不可用用量"
+      }
+    },
+    {
+      "lang": "zh",
+      "theme": "dark",
+      "width": 1280,
+      "height": 900,
+      "geometry": {
+        "leaf": {
+          "x": 44,
+          "y": 40,
+          "width": 1236,
+          "height": 860,
+          "bottom": 900,
+          "right": 1280
+        },
+        "select": {
+          "x": 1021,
+          "y": 162,
+          "width": 235,
+          "height": 30,
+          "bottom": 192,
+          "right": 1256
+        },
+        "input": {
+          "x": 1021,
+          "y": 124,
+          "width": 235,
+          "height": 30,
+          "bottom": 154,
+          "right": 1256
+        },
+        "usage": {
+          "x": 44,
+          "y": 819,
+          "width": 1236,
+          "height": 81,
+          "bottom": 900,
+          "right": 1280
+        },
+        "content": [
+          {
+            "x": 56,
+            "y": 836.203125,
+            "width": 191.921875,
+            "height": 15.59375,
+            "bottom": 851.796875,
+            "right": 247.921875
+          },
+          {
+            "x": 255.921875,
+            "y": 828,
+            "width": 50.015625,
+            "height": 32,
+            "bottom": 860,
+            "right": 305.9375
+          }
+        ],
+        "status": {
+          "x": 1243,
+          "y": 875,
+          "width": 37,
+          "height": 25,
+          "bottom": 900,
+          "right": 1280
+        },
+        "normalHeight": 30,
+        "overflow": {
+          "client": 1236,
+          "scroll": 1236
+        },
+        "text": "当前库消耗 · 原生 token 用量不可用用量"
+      }
+    },
+    {
+      "lang": "zh",
+      "theme": "dark",
+      "width": 800,
+      "height": 600,
+      "geometry": {
+        "leaf": {
+          "x": 44,
+          "y": 40,
+          "width": 756,
+          "height": 560,
+          "bottom": 600,
+          "right": 800
+        },
+        "select": {
+          "x": 541,
+          "y": 162,
+          "width": 235,
+          "height": 30,
+          "bottom": 192,
+          "right": 776
+        },
+        "input": {
+          "x": 541,
+          "y": 124,
+          "width": 235,
+          "height": 30,
+          "bottom": 154,
+          "right": 776
+        },
+        "usage": {
+          "x": 44,
+          "y": 519,
+          "width": 756,
+          "height": 81,
+          "bottom": 600,
+          "right": 800
+        },
+        "content": [
+          {
+            "x": 56,
+            "y": 536.203125,
+            "width": 191.921875,
+            "height": 15.59375,
+            "bottom": 551.796875,
+            "right": 247.921875
+          },
+          {
+            "x": 255.921875,
+            "y": 528,
+            "width": 50.015625,
+            "height": 32,
+            "bottom": 560,
+            "right": 305.9375
+          }
+        ],
+        "status": {
+          "x": 763,
+          "y": 575,
+          "width": 37,
+          "height": 25,
+          "bottom": 600,
+          "right": 800
+        },
+        "normalHeight": 30,
+        "overflow": {
+          "client": 756,
+          "scroll": 756
+        },
+        "text": "当前库消耗 · 原生 token 用量不可用用量"
+      }
+    },
+    {
+      "lang": "zh",
+      "theme": "dark",
+      "width": 500,
+      "height": 600,
+      "geometry": {
+        "leaf": {
+          "x": 44,
+          "y": 40,
+          "width": 456,
+          "height": 560,
+          "bottom": 600,
+          "right": 500
+        },
+        "select": {
+          "x": 57,
+          "y": 442,
+          "width": 419,
+          "height": 30,
+          "bottom": 472,
+          "right": 476
+        },
+        "input": {
+          "x": 57,
+          "y": 404,
+          "width": 419,
+          "height": 30,
+          "bottom": 434,
+          "right": 476
+        },
+        "usage": {
+          "x": 44,
+          "y": 519,
+          "width": 456,
+          "height": 81,
+          "bottom": 600,
+          "right": 500
+        },
+        "content": [
+          {
+            "x": 56,
+            "y": 536.203125,
+            "width": 191.921875,
+            "height": 15.59375,
+            "bottom": 551.796875,
+            "right": 247.921875
+          },
+          {
+            "x": 255.921875,
+            "y": 528,
+            "width": 50.015625,
+            "height": 32,
+            "bottom": 560,
+            "right": 305.9375
+          }
+        ],
+        "status": {
+          "x": 463,
+          "y": 575,
+          "width": 37,
+          "height": 25,
+          "bottom": 600,
+          "right": 500
+        },
+        "normalHeight": 30,
+        "overflow": {
+          "client": 456,
+          "scroll": 456
+        },
+        "text": "当前库消耗 · 原生 token 用量不可用用量"
+      }
+    },
+    {
+      "lang": "zh",
+      "theme": "dark",
+      "width": 350,
+      "height": 500,
+      "geometry": {
+        "leaf": {
+          "x": 44,
+          "y": 40,
+          "width": 306,
+          "height": 460,
+          "bottom": 500,
+          "right": 350
+        },
+        "select": {
+          "x": 57,
+          "y": 342,
+          "width": 269,
+          "height": 30,
+          "bottom": 372,
+          "right": 326
+        },
+        "input": {
+          "x": 57,
+          "y": 304,
+          "width": 269,
+          "height": 30,
+          "bottom": 334,
+          "right": 326
+        },
+        "usage": {
+          "x": 44,
+          "y": 419,
+          "width": 306,
+          "height": 81,
+          "bottom": 500,
+          "right": 350
+        },
+        "content": [
+          {
+            "x": 56,
+            "y": 436.203125,
+            "width": 191.921875,
+            "height": 15.59375,
+            "bottom": 451.796875,
+            "right": 247.921875
+          },
+          {
+            "x": 255.921875,
+            "y": 428,
+            "width": 50.015625,
+            "height": 32,
+            "bottom": 460,
+            "right": 305.9375
+          }
+        ],
+        "status": {
+          "x": 313,
+          "y": 475,
+          "width": 37,
+          "height": 25,
+          "bottom": 500,
+          "right": 350
+        },
+        "normalHeight": 30,
+        "overflow": {
+          "client": 306,
+          "scroll": 306
+        },
+        "text": "当前库消耗 · 原生 token 用量不可用用量"
+      }
+    }
+  ],
+  "survivor": [
+    {
+      "id": "terminal-50b26dc6-0f3f-47d2-bd8c-1e2c605972ad",
+      "text": "Same Terminal#50b26dc6状态未知"
+    },
+    {
+      "id": "terminal-02a935ba-2d91-4ecb-8c1f-d33a9ada293a",
+      "text": "Same Terminal#02a935ba状态未知"
+    }
+  ]
+}

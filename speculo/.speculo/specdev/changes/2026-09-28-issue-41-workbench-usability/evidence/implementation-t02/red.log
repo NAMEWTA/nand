@@ -1,0 +1,7 @@
+Target assertions exit 1 (expected baseline failure):
+同名会话标签相同
+1280px select=16.890625 < native30
+800px select=16.890625 < native30
+500px select=16.890625 < native30
+350px select=16.890625 < native30
+No PROBE_CONTROL. Original diagnosis is T-01 and already green; these are the T-02 real-host failures.

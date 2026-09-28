@@ -1,0 +1,5 @@
+ERROR: T-01: parent branch HEAD must equal recorded result_sha
+ERROR: T-01: repository is dirty while Ticket is recorded as integrated
+ERROR: T-02: repository is dirty while Ticket is recorded as integrated
+ERROR: evidence/T-02.md: missing '## 9. 残余风险与交付定位'
+Summary: 4 error(s), 0 warning(s)

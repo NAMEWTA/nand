@@ -2,7 +2,7 @@
   "schema_version": 6,
   "artifact": "change-status",
   "change": "2026-09-28-issue-41-workbench-usability",
-  "change_status": "active",
+  "change_status": "completed",
   "current_work": null,
   "works_run": [
     "specdev/triage",
@@ -39,8 +39,8 @@
     "history": []
   },
   "created_at": "2026-09-28T05:55:43.895113+00:00",
-  "updated_at": "2026-09-28T08:30:27.229861+00:00",
-  "completed_at": null,
+  "updated_at": "2026-09-28T08:44:15.776806+00:00",
+  "completed_at": "2026-09-28T08:44:15.776806+00:00",
   "archived": false,
   "archive_path": null,
   "blockers": [],
@@ -85,6 +85,49 @@
           "evidence": "<Path>{roots.state}/specdev/changes/2026-09-28-issue-41-workbench-usability/evidence/T-01.md</Path>"
         },
         "evidence": "<Path>{roots.state}/specdev/changes/2026-09-28-issue-41-workbench-usability/evidence/T-01.md</Path>",
+        "attempts": 1,
+        "promotion_status": "applied"
+      }
+    },
+    {
+      "ticket_id": "T-02",
+      "owner": "codex-issue-planning",
+      "implementation_owner": "codex-issue-planning",
+      "integration_owner": "codex-issue-planning",
+      "provider": "git",
+      "base_sha": "4b4457cbc198e49b9b36607845bf93cc8dc56d75",
+      "parent_branch": "main",
+      "branch": "main",
+      "workspace_ref": "current",
+      "source_checkpoint": "08081b641892925ae32f92ecf0ff806ffb7ac333",
+      "status": "integrated",
+      "updated_at": "2026-09-28T08:44:15.776806+00:00",
+      "integration": {
+        "status": "passed",
+        "parent_ref": "refs/heads/main",
+        "parent_before_sha": "4b4457cbc198e49b9b36607845bf93cc8dc56d75",
+        "source_sha": "08081b641892925ae32f92ecf0ff806ffb7ac333",
+        "candidate_sha": null,
+        "candidate_tree_sha": null,
+        "candidate_branch": null,
+        "candidate_workspace_ref": null,
+        "result_sha": "08081b641892925ae32f92ecf0ff806ffb7ac333",
+        "method": "direct-parent",
+        "conflict_paths": [],
+        "verification": "passed",
+        "full_suite": {
+          "required": true,
+          "status": "passed",
+          "reason": "本票要求的全部测试与匹配回归、build/lint，见命令表",
+          "evidence": "<Path>{roots.state}/specdev/changes/2026-09-28-issue-41-workbench-usability/evidence/T-02.md</Path>"
+        },
+        "e2e": {
+          "required": true,
+          "status": "passed",
+          "reason": "本票所要求的宿主行为逐项验收见 Ticket Evidence",
+          "evidence": "<Path>{roots.state}/specdev/changes/2026-09-28-issue-41-workbench-usability/evidence/T-02.md</Path>"
+        },
+        "evidence": "<Path>{roots.state}/specdev/changes/2026-09-28-issue-41-workbench-usability/evidence/T-02.md</Path>",
         "attempts": 1,
         "promotion_status": "applied"
       }

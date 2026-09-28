@@ -6,7 +6,7 @@ requested_deliverables: []
 deliverable_policy: "用户要求完整覆盖所有确认问题，未指定固定数量；本 Map 枚举全部切片，不以票数替代验收"
 artifact: "tickets-map"
 change: "2026-09-28-issue-41-workbench-usability"
-status: "in_progress"
+status: "completed"
 ---
 
 # Tickets Map: #41 工作台历史语义与会话辨识
@@ -51,9 +51,9 @@ frontmatter 是 Ticket 状态权威；本表只作投影。
 |---|---|---|---|---|
 | AC-001 | T-01 | 对应 Ticket 行为验证矩阵 | covered | evidence/T-01.md passed |
 | AC-002 | T-01 | 对应 Ticket 行为验证矩阵 | covered | evidence/T-01.md passed |
-| AC-003 | T-02 | 对应 Ticket 行为验证矩阵 | covered | 实施证据尚未产生 |
-| AC-004 | T-02 | 对应 Ticket 行为验证矩阵 | covered | 实施证据尚未产生 |
-| AC-005 | T-02 | 对应 Ticket 行为验证矩阵 | covered | 实施证据尚未产生 |
+| AC-003 | T-02 | 对应 Ticket 行为验证矩阵 | covered | evidence/T-02.md passed |
+| AC-004 | T-02 | 对应 Ticket 行为验证矩阵 | covered | evidence/T-02.md passed |
+| AC-005 | T-02 | 对应 Ticket 行为验证矩阵 | covered | evidence/T-02.md passed |
 
 ## 5. 并行与路径所有权
 
