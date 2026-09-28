@@ -1,0 +1,282 @@
+{
+  "runs": [
+    {
+      "definition": {
+        "enabled": true,
+        "deviceId": "d2f89b25-f748-43dd-83d4-7e35bfdee51a",
+        "revision": 1,
+        "schedule": {
+          "kind": "manual"
+        },
+        "channels": [
+          "in-app"
+        ],
+        "notifyOn": "always",
+        "graceMinutes": 30,
+        "createdAt": 1790585469241,
+        "updatedAt": 1790585469242,
+        "id": "presentation-missing-source",
+        "name": "Presentation source failure 原文",
+        "action": {
+          "kind": "create-task",
+          "path": "Missing acceptance board.md",
+          "cardId": "absent",
+          "text": "User task 原文"
+        }
+      },
+      "id": "ca1da208-2aeb-4cd1-b721-18a5c824a93c",
+      "automationId": "presentation-missing-source",
+      "revision": 1,
+      "title": "Presentation source failure 原文",
+      "scheduledFor": 1790585469244,
+      "trigger": "manual",
+      "status": "failed",
+      "startedAt": 1790585469244,
+      "message": "来源不存在或包含重复的任务标识",
+      "endedAt": 1790585469247,
+      "errorCode": "sourceMissing",
+      "notificationAttempted": true
+    },
+    {
+      "definition": {
+        "enabled": true,
+        "deviceId": "d2f89b25-f748-43dd-83d4-7e35bfdee51a",
+        "revision": 1,
+        "schedule": {
+          "kind": "manual"
+        },
+        "channels": [
+          "in-app"
+        ],
+        "notifyOn": "always",
+        "graceMinutes": 30,
+        "createdAt": 1790585469241,
+        "updatedAt": 1790585469265,
+        "id": "presentation-reminder",
+        "name": "Presentation exact reminder 原文",
+        "action": {
+          "kind": "notify",
+          "body": "Presentation exact reminder 原文"
+        }
+      },
+      "id": "c9be3739-34a8-4603-9490-067283e2b044",
+      "automationId": "presentation-reminder",
+      "revision": 1,
+      "title": "Presentation exact reminder 原文",
+      "scheduledFor": 1790585469271,
+      "trigger": "manual",
+      "status": "succeeded",
+      "startedAt": 1790585469271,
+      "message": "",
+      "endedAt": 1790585469273,
+      "notificationAttempted": true
+    },
+    {
+      "definition": {
+        "enabled": true,
+        "deviceId": "d2f89b25-f748-43dd-83d4-7e35bfdee51a",
+        "revision": 1,
+        "schedule": {
+          "kind": "once",
+          "at": 1822121469241
+        },
+        "channels": [
+          "in-app"
+        ],
+        "notifyOn": "always",
+        "graceMinutes": 30,
+        "createdAt": 1790585469241,
+        "updatedAt": 1790585469282,
+        "id": "presentation-cli",
+        "name": "Presentation CLI 原文",
+        "action": {
+          "kind": "agent",
+          "agentId": "codex",
+          "cwd": "/tmp/nand-obsidian-e2e/vault",
+          "prompt": "Keep user prompt 原文",
+          "sessionMode": "fresh"
+        }
+      },
+      "id": "2ec8776e-3949-4afb-8182-6f41cd6f225b",
+      "automationId": "presentation-cli",
+      "revision": 1,
+      "title": "Presentation CLI 原文",
+      "scheduledFor": 1790585469287,
+      "trigger": "manual",
+      "status": "succeeded",
+      "startedAt": 1790585469287,
+      "message": "0",
+      "terminalId": "terminal-eb45eef4-417e-42e3-99c7-adb0ba4faf18",
+      "errorCode": "processExit",
+      "errorParams": {
+        "code": 0
+      },
+      "output": "",
+      "endedAt": 1790585469378,
+      "notificationAttempted": true
+    },
+    {
+      "definition": {
+        "enabled": true,
+        "deviceId": "d2f89b25-f748-43dd-83d4-7e35bfdee51a",
+        "revision": 1,
+        "schedule": {
+          "kind": "manual"
+        },
+        "channels": [
+          "in-app"
+        ],
+        "notifyOn": "always",
+        "graceMinutes": 30,
+        "createdAt": 1790585469241,
+        "updatedAt": 1790585469242,
+        "id": "presentation-missing-source",
+        "name": "Presentation source failure 原文",
+        "action": {
+          "kind": "create-task",
+          "path": "Missing acceptance board.md",
+          "cardId": "absent",
+          "text": "User task 原文"
+        }
+      },
+      "id": "presentation-legacy-run",
+      "automationId": "presentation-missing-source",
+      "revision": 1,
+      "title": "Presentation source failure 原文",
+      "scheduledFor": 1790585469244,
+      "trigger": "manual",
+      "status": "failed",
+      "startedAt": 1790585469244,
+      "message": "Legacy failure English 原文",
+      "endedAt": 1790585469247,
+      "notificationAttempted": true,
+      "output": "Legacy CLI output 原文"
+    }
+  ],
+  "records": [
+    {
+      "id": "ca1da208-2aeb-4cd1-b721-18a5c824a93c",
+      "title": "Presentation source failure 原文",
+      "body": "失败：来源不存在或包含重复的任务标识",
+      "presentation": {
+        "kind": "automation-run",
+        "status": "failed",
+        "message": "来源不存在或包含重复的任务标识",
+        "errorCode": "sourceMissing"
+      },
+      "target": {
+        "runId": "ca1da208-2aeb-4cd1-b721-18a5c824a93c",
+        "automationId": "presentation-missing-source"
+      },
+      "channels": [
+        "in-app"
+      ],
+      "createdAt": 1790585469254,
+      "read": false,
+      "deliveries": {
+        "in-app": "sent"
+      }
+    },
+    {
+      "id": "c9be3739-34a8-4603-9490-067283e2b044",
+      "title": "Presentation exact reminder 原文",
+      "body": "Presentation exact reminder 原文",
+      "target": {
+        "runId": "c9be3739-34a8-4603-9490-067283e2b044",
+        "automationId": "presentation-reminder"
+      },
+      "channels": [
+        "in-app"
+      ],
+      "createdAt": 1790585469274,
+      "read": false,
+      "deliveries": {
+        "in-app": "sent"
+      }
+    },
+    {
+      "id": "2ec8776e-3949-4afb-8182-6f41cd6f225b",
+      "title": "Presentation CLI 原文",
+      "body": "已完成：进程已退出，退出码为 0",
+      "presentation": {
+        "kind": "automation-run",
+        "status": "succeeded",
+        "message": "0",
+        "errorCode": "processExit",
+        "errorParams": {
+          "code": 0
+        }
+      },
+      "target": {
+        "runId": "2ec8776e-3949-4afb-8182-6f41cd6f225b",
+        "automationId": "presentation-cli",
+        "terminalId": "terminal-eb45eef4-417e-42e3-99c7-adb0ba4faf18"
+      },
+      "channels": [
+        "in-app"
+      ],
+      "createdAt": 1790585469392,
+      "read": false,
+      "deliveries": {
+        "in-app": "sent"
+      }
+    },
+    {
+      "id": "presentation-legacy-run",
+      "title": "Presentation legacy notification",
+      "body": "Legacy notification English 原文",
+      "createdAt": 1790585469244,
+      "channels": [
+        "in-app"
+      ],
+      "read": false,
+      "deliveries": {
+        "in-app": "sent"
+      }
+    }
+  ],
+  "receipts": {
+    "e444eff8-7036-447c-b8a0-8db9efbdd587": {
+      "in-app": "sent"
+    },
+    "87a1be81-47f1-4d37-b3ad-2761613b5313": {
+      "in-app": "sent"
+    },
+    "b8a1ea8e-7e97-4ee0-88df-6e349899e2e0": {
+      "in-app": "sent"
+    },
+    "a2e32693-dd1f-4402-ac1f-97fec01099bf": {
+      "in-app": "sent"
+    },
+    "aabe0422-075e-49a9-acc1-4ee44112ea8c": {
+      "in-app": "sent"
+    },
+    "widget-test-legacy": {
+      "in-app": "sent"
+    },
+    "widget-test-nested": {
+      "in-app": "sent"
+    },
+    "widget-test-deletedWidget": {
+      "in-app": "sent"
+    },
+    "widget-test-deletedFile": {
+      "in-app": "sent"
+    },
+    "widget-test-disabled": {
+      "in-app": "sent"
+    },
+    "ca1da208-2aeb-4cd1-b721-18a5c824a93c": {
+      "in-app": "sent"
+    },
+    "c9be3739-34a8-4603-9490-067283e2b044": {
+      "in-app": "sent"
+    },
+    "2ec8776e-3949-4afb-8182-6f41cd6f225b": {
+      "in-app": "sent"
+    },
+    "presentation-legacy-run": {
+      "in-app": "sent"
+    }
+  }
+}

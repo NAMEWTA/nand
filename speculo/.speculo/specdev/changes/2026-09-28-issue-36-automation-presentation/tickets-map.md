@@ -1,12 +1,12 @@
 ---
 schema_version: 3
 plan_contract_version: 1
-plan_revision: 1
+plan_revision: 2
 requested_deliverables: []
 deliverable_policy: "用户要求完整覆盖所有确认问题，未指定固定数量；本 Map 枚举全部切片，不以票数替代验收"
 artifact: "tickets-map"
 change: "2026-09-28-issue-36-automation-presentation"
-status: "ready"
+status: "in_progress"
 ---
 
 # Tickets Map: #36 自动化状态与通知呈现准确可读
@@ -33,7 +33,7 @@ Spec <Path>{roots.state}/specdev/changes/2026-09-28-issue-36-automation-presenta
 
 | ID | Ticket | 可观察产出 | Blocked By | Depth | Risk | Ready | Owner | Contract IDs | Wave/Gate | Status |
 |---|---|---|---|---|---|---|---|---|---|---|
-| T-01 | <Path>{roots.state}/specdev/changes/2026-09-28-issue-36-automation-presentation/ticket/01-plan.md</Path> | 运行与通知结构化状态按当前语言展示 | — | deep | high | yes | codex-issue-planning | AC-001, AC-002, AC-003 | G1/G2/G3 | ready |
+| T-01 | <Path>{roots.state}/specdev/changes/2026-09-28-issue-36-automation-presentation/ticket/01-plan.md</Path> | 运行与通知结构化状态按当前语言展示 | — | deep | high | yes | codex-issue-planning | AC-001, AC-002, AC-003 | G1/G2/G3 | done |
 | T-02 | <Path>{roots.state}/specdev/changes/2026-09-28-issue-36-automation-presentation/ticket/02-plan.md</Path> | 清理运行历史后保留准确已处理状态 | T-01 | standard | medium | yes | codex-issue-planning | AC-004, AC-005 | G1/G2/G3 | ready |
 | T-03 | <Path>{roots.state}/specdev/changes/2026-09-28-issue-36-automation-presentation/ticket/03-plan.md</Path> | 自动化管理界面有可见筛选与稳定阅读区域 | T-02 | standard | medium | yes | codex-issue-planning | AC-006, AC-007 | G1/G2/G3 | ready |
 | T-04 | <Path>{roots.state}/specdev/changes/2026-09-28-issue-36-automation-presentation/ticket/04-plan.md</Path> | 自动化入口命名与帮助说明清晰 | T-03 | standard | medium | yes | codex-issue-planning | AC-008, AC-009 | G1/G2/G3 | ready |
@@ -55,9 +55,9 @@ frontmatter 是 Ticket 状态权威；本表只作投影。
 
 | Contract ID | 覆盖 Ticket | 验证接缝 | 状态 | 说明 |
 |---|---|---|---|---|
-| AC-001 | T-01 | 对应 Ticket 行为验证矩阵 | covered | 实施证据尚未产生 |
-| AC-002 | T-01 | 对应 Ticket 行为验证矩阵 | covered | 实施证据尚未产生 |
-| AC-003 | T-01 | 对应 Ticket 行为验证矩阵 | covered | 实施证据尚未产生 |
+| AC-001 | T-01 | 对应 Ticket 行为验证矩阵 | covered | evidence/T-01.md passed |
+| AC-002 | T-01 | 对应 Ticket 行为验证矩阵 | covered | evidence/T-01.md passed |
+| AC-003 | T-01 | 对应 Ticket 行为验证矩阵 | covered | evidence/T-01.md passed |
 | AC-004 | T-02 | 对应 Ticket 行为验证矩阵 | covered | 实施证据尚未产生 |
 | AC-005 | T-02 | 对应 Ticket 行为验证矩阵 | covered | 实施证据尚未产生 |
 | AC-006 | T-03 | 对应 Ticket 行为验证矩阵 | covered | 实施证据尚未产生 |
@@ -90,3 +90,5 @@ Ticket变更回写此投影；合同/路径变化递增 plan_revision 并重过 
 ## 9. 总控与恢复
 
 运行 `node speculo/workflows/specdev/common/tools/ticket-control.mjs --map speculo/.speculo/specdev/changes/2026-09-28-issue-36-automation-presentation/tickets-map.md --repo .` 只读检查。下一 Work：<Path>{roots.workflows}/specdev/P-goal-plan/P-goal-plan.md</Path> plan，未来获准 run 才转 <Path>{roots.workflows}/specdev/I-implement/I-implement.md</Path>。本 Map 的 requested_deliverables=[] 表示用户未定数量，不表示无交付。
+
+revision=2：T-01 扩展三个系统失败生产点位写集；合同和串行不变。
