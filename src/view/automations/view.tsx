@@ -1,7 +1,8 @@
 import { ItemView, Modal, Notice, Setting, type WorkspaceLeaf } from 'obsidian';
 import { render } from 'preact/compat';
+import { onLeafLanguageChanged } from '../../platform/obsidian/workspace-title';
 import { type AutomationDefinition } from '../../shared/automation/types';
-import { onLanguageChanged, t } from '../../shared/i18n/index';
+import { t } from '../../shared/i18n/index';
 import { AutomationsPanel } from './AutomationsPanel';
 import type { AutomationPanelState, AutomationViewHost } from './panel-contract';
 
@@ -28,7 +29,7 @@ export class AutomationView extends ItemView {
 	onOpen(): Promise<void> {
 		this.contentEl.addClass('nand-automation-view');
 		this.unsubscribe = this.host.service.subscribe(() => this.draw());
-		this.register(onLanguageChanged(() => this.draw()));
+		this.register(onLeafLanguageChanged(this.app, this.leaf, () => this.draw()));
 		this.register(
 			this.contentEl.onWindowMigrated(() => {
 				render(null, this.contentEl);

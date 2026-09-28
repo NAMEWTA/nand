@@ -12,7 +12,8 @@ import { render } from 'preact/compat';
 import { emptyQuery } from '../../core/contacts/index-store';
 import { newRecord, type ArchiveRecord, type RecordKind } from '../../core/contacts/model';
 import { type ContactsController } from '../../platform/obsidian/contacts/controller';
-import { onLanguageChanged, t } from '../../shared/i18n/index';
+import { t } from '../../shared/i18n/index';
+import { onLeafLanguageChanged } from '../../platform/obsidian/workspace-title';
 import { confirm, ct, deleteRow, editRecord, errorText, FilterModal, RecordEditorModal, type EditScope } from './forms';
 import type { ContactsHost } from './host';
 import type { ContactsPanelState } from './panel-contract';
@@ -73,7 +74,7 @@ export class ContactsView extends ItemView {
 				this.register(() => observer.disconnect());
 			}
 		}
-		this.register(onLanguageChanged(() => this.render()));
+		this.register(onLeafLanguageChanged(this.app, this.leaf, () => this.render()));
 		this.register(
 			this.contentEl.onWindowMigrated(() => {
 				if (this.root) render(null, this.root);

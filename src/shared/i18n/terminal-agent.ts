@@ -895,7 +895,7 @@ export const messages = {
 		'terminalAgent.terminal.contextMenu.splitTerminal': '拆分终端',
 		'terminalAgent.terminal.contextMenu.splitVertical': '垂直拆分',
 		'terminalAgent.terminal.contextMenu.switchDefaultTerminal': '切换默认终端',
-		'terminalAgent.terminal.defaultTitle': 'Terminal',
+		'terminalAgent.terminal.defaultTitle': '终端',
 		'terminalAgent.terminal.dropHintPasteFilePath': '拖到这里插入文件的绝对路径',
 		'terminalAgent.terminal.initFailed': '初始化终端失败：{message}',
 		'terminalAgent.terminal.loading': '正在加载终端...',

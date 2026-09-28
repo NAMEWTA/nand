@@ -1,7 +1,8 @@
 import { ItemView, type WorkspaceLeaf } from 'obsidian';
 import { h, render as paint } from 'preact';
 import type { EditorDomainId } from '../../../shared/editor-workbench';
-import { onLanguageChanged, t } from '../../../shared/i18n/index';
+import { t } from '../../../shared/i18n/index';
+import { onLeafLanguageChanged } from '../../../platform/obsidian/workspace-title';
 import { EmptyState } from '../../primitives/EmptyState';
 
 import type { EditorHost, EditorPluginHost } from '../host';
@@ -50,7 +51,7 @@ export class EditorView extends ItemView {
 
 	async onOpen(): Promise<void> {
 		this.offLanguage?.();
-		this.offLanguage = onLanguageChanged(() => {
+		this.offLanguage = onLeafLanguageChanged(this.app, this.leaf, () => {
 			const scroll = this.bodyEl?.scrollTop ?? 0;
 			if (this.plugin.settings.modules.editor) {
 				// Comment panels translate in place so their focus and scroll survive.
@@ -58,7 +59,6 @@ export class EditorView extends ItemView {
 				else this.render();
 			} else this.renderDisabled();
 			if (this.bodyEl) this.bodyEl.scrollTop = scroll;
-			(this.leaf as WorkspaceLeaf & { updateHeader?: () => void }).updateHeader?.();
 		});
 		if (this.tabsEl) paint(null, this.tabsEl);
 		paint(null, this.contentEl);

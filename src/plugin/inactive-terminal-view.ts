@@ -1,4 +1,5 @@
 import { ItemView, type WorkspaceLeaf } from 'obsidian';
+import { onLeafLanguageChanged } from '../platform/obsidian/workspace-title';
 import { t } from '../shared/i18n/index';
 import { renderEmptyState } from '../view/primitives/empty-state';
 import type DashboardPlugin from './main';
@@ -26,6 +27,11 @@ export class InactiveTerminalView extends ItemView {
 	}
 
 	async onOpen(): Promise<void> {
+		this.register(onLeafLanguageChanged(this.app, this.leaf, () => this.draw()));
+		this.draw();
+	}
+
+	private draw(): void {
 		this.contentEl.empty();
 		renderEmptyState(this.contentEl, {
 			icon: 'terminal',

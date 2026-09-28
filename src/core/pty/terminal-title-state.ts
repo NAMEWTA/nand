@@ -11,8 +11,8 @@ export class TerminalTitleState {
 		this.title = defaultTitle;
 	}
 
-	getTitle(): string {
-		return this.title;
+	getTitle(defaultTitle = this.defaultTitle): string {
+		return this.source === 'default' ? defaultTitle : this.title;
 	}
 
 	setCustomTitle(title: string): boolean {

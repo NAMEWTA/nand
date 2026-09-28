@@ -102,12 +102,12 @@ export class PtySession {
 	}
 	private applyTitleChange(changed: boolean): void {
 		if (changed) {
-			const title = this.titleState.getTitle();
+			const title = this.getTitle();
 			this.titleChangeCallbacks.forEach((callback) => callback(title));
 		}
 	}
 	getTitle(): string {
-		return this.titleState.getTitle();
+		return this.titleState.getTitle(t('terminal.defaultTitle'));
 	}
 	isClaudeCodeSession(): boolean {
 		return this.claudeCodeSessionState.isActive();

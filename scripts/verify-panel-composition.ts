@@ -4,6 +4,8 @@ import { h, render } from 'preact';
 import { TerminalWorkbench } from '../src/view/terminal/TerminalWorkbench';
 import { InboxPanel } from '../src/view/notifications/InboxPanel';
 import type { NotificationRecord } from '../src/core/notifications/service';
+import { onLeafLanguageChanged } from '../src/platform/obsidian/workspace-title';
+import { setLanguage, t } from '../src/shared/i18n';
 
 const { document } = parseHTML('<html><body></body></html>');
 Object.assign(globalThis, { document });
@@ -81,6 +83,42 @@ assert.equal(left.querySelector('.terminal-container'), xtermHost, 'workbench re
 assert.equal(xtermHost.firstChild, xtermOwnedChild, 'Preact does not replace xterm-owned content');
 assert.equal(left.querySelector('input'), search, 'search focus target survives data refresh');
 assert.equal(search.value, 'needle');
+setLanguage('zh');
+let header = '', headerUpdates = 0, mainUpdates = 0, popoutUpdates = 0;
+const mainContainer = {};
+const nativeContainer = document.createElement('div');
+const nativeHeader = document.createElement('div');
+nativeHeader.className = 'view-header-title';
+nativeContainer.appendChild(nativeHeader);
+const popoutContainer = { updateTitle: () => { popoutUpdates++; } };
+let owner = mainContainer;
+const nativeLeaf = {
+	view: { containerEl: nativeContainer, getDisplayText: () => t('automation.title') },
+	getContainer: () => owner,
+	updateHeader: () => { header = t('automation.title'); headerUpdates++; },
+};
+const nativeApp = { workspace: { rootSplit: mainContainer, updateTitle: () => { mainUpdates++; } } };
+const offLanguage = onLeafLanguageChanged(nativeApp as never, nativeLeaf as never, () => {
+	render(h(TerminalWorkbench, { ...refs, ...actions, sessions: inbox('updated'), usage: t('automation.title') }), left);
+});
+for (const language of ['en', 'zh', 'zh'] as const) {
+	setLanguage(language);
+	assert.equal(header, t('automation.title'));
+	assert.equal(nativeHeader.textContent, t('automation.title'), 'The pane header and tab both update');
+	assert.equal(left.querySelector('.terminal-container'), xtermHost);
+	assert.equal(xtermHost.firstChild, xtermOwnedChild, 'Language changes must not remount the native terminal');
+	assert.equal(left.querySelector('input'), search);
+	assert.equal(search.value, 'needle', 'Language repaint retains the current search input');
+}
+assert.equal(headerUpdates, 2, 'Same-language updates are idempotent');
+assert.equal(mainUpdates, 2);
+owner = popoutContainer;
+setLanguage('en');
+assert.equal(popoutUpdates, 1, 'A migrated leaf refreshes the current host window');
+assert.equal(mainUpdates, 2, 'Popout refresh does not alter the main window title');
+offLanguage();
+setLanguage('zh');
+assert.equal(headerUpdates, 3, 'Closed views release both repaint and header subscriptions');
 left.querySelector<HTMLButtonElement>('.nand-agent-sidebar button')!.click();
 right.querySelector<HTMLButtonElement>('button')!.click();
 assert.deepEqual(read, ['updated', 'right'], 'composed instances dispatch to their own hosts');

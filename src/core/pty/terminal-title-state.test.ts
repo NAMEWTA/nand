@@ -37,3 +37,17 @@ test('TerminalTitleState replaces automatic titles with custom titles', () => {
 	assert.equal(state.clearAutomaticTitle(), false);
 	assert.equal(state.getTitle(), 'Claude Scratch');
 });
+
+test('TerminalTitleState localizes only the default source, including after an automatic title clears', () => {
+	const state = new TerminalTitleState('Terminal');
+	assert.equal(state.getTitle('终端'), '终端');
+	assert.equal(state.getTitle('Terminal'), 'Terminal');
+	state.setAutomaticTitle('Claude Code');
+	assert.equal(state.getTitle('终端'), 'Claude Code');
+	state.clearAutomaticTitle();
+	assert.equal(state.getTitle('终端'), '终端');
+	state.setCustomTitle('Terminal');
+	assert.equal(state.getTitle('终端'), 'Terminal', 'An explicit user title matching the old default is still user content');
+	state.setCustomTitle('用户会话 / My session');
+	assert.equal(state.getTitle('Terminal'), '用户会话 / My session');
+});

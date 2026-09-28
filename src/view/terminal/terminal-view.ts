@@ -4,8 +4,8 @@ import type { Menu, WorkspaceLeaf } from 'obsidian';
 import { FileSystemAdapter, ItemView, Notice, TFile, TFolder } from 'obsidian';
 import { h, render } from 'preact';
 import type { PtySession } from '../../platform/desktop/terminal/pty-session';
-import { refreshLeafTitle } from '../../platform/obsidian/workspace-title';
-import { t as automationT, onLanguageChanged } from '../../shared/i18n/index';
+import { onLeafLanguageChanged, refreshLeafTitle } from '../../platform/obsidian/workspace-title';
+import { t as automationT } from '../../shared/i18n/index';
 import type { TerminalViewHost } from './host';
 import { TerminalWorkbench } from './TerminalWorkbench';
 import { HistorySidebar, SessionSidebar, UsageFooter } from './workbench';
@@ -165,7 +165,7 @@ export class TerminalView extends ItemView {
 		container.empty();
 		container.addClass('nand-agent-workbench');
 		this.drawWorkbench();
-		this.register(onLanguageChanged(() => this.drawWorkbench()));
+		this.register(onLeafLanguageChanged(this.app, this.leaf, () => this.drawWorkbench()));
 		this.register(
 			container.onWindowMigrated(() => {
 				this.drawWorkbench();

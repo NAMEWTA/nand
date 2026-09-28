@@ -6,6 +6,7 @@ import type { HolidayInfo } from '../../../platform/obsidian/calendar/holiday-se
 import { SyncEngine } from '../../../platform/obsidian/dashboard/sync';
 import { PomodoroService } from '../../../platform/obsidian/pomodoro/pomodoro-service';
 import { ReadingService } from '../../../platform/obsidian/reading/reading-service';
+import { onLeafLanguageChanged } from '../../../platform/obsidian/workspace-title';
 import { t } from '../../../shared/i18n/index';
 import type { DashboardHost } from '../host';
 import type { PomodoroMiniPanel } from '../pomodoro/pomodoro-mini-panel';
@@ -58,6 +59,7 @@ import {
 	onOpen,
 	refresh,
 	reloadFromDisk,
+	showModuleDisabled,
 	toggleBannerMode,
 } from './lifecycle';
 import {
@@ -252,6 +254,10 @@ export class DashboardView extends ItemView implements HoverParent {
 	constructor(leaf: WorkspaceLeaf, plugin: DashboardHost) {
 		super(leaf);
 		this.plugin = plugin;
+		this.register(onLeafLanguageChanged(this.app, this.leaf, () => {
+			if (!this.plugin.settings.modules.dashboard) showModuleDisabled.call(this);
+			else if (this.isOpen && this.data) this.render(this.data);
+		}));
 		this.register(
 			this.containerEl.onWindowMigrated(() => {
 				if (!this.isOpen || !this.data) return;
