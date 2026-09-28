@@ -1,0 +1,504 @@
+{
+  "change": "2026-09-28-docs-knowledge-consolidation",
+  "captured_at": "2026-09-28T05:29:53.123500+00:00",
+  "source_root": "<Path>docs/</Path>",
+  "count": 44,
+  "files": [
+    {
+      "source": "<Path>docs/agent-upgrade-2026-09-27.md</Path>",
+      "snapshot": "<Path>{roots.state}/specdev/archive/2026-09/2026-09-28-docs-knowledge-consolidation/evidence/original-docs/agent-upgrade-2026-09-27.md</Path>",
+      "bytes": 6807,
+      "sha256": "e49549075bb02f45d1b9f68279e7e926710c8dc3b1d34565e55dafa9e4480184",
+      "public_action": "remove-after-verified-archive",
+      "graduation": "promoted-in-part",
+      "promotion_targets": [
+        "<Path>{roots.state}/specdev/adr/0003-pty-session-view-lifetimes.md</Path>",
+        "<Path>{roots.state}/specdev/adr/0004-vault-scoped-native-history.md</Path>",
+        "<Path>{roots.state}/specdev/adr/0007-device-owned-durable-automation.md</Path>",
+        "<Path>{roots.state}/specdev/adr/0008-independent-notification-receipts.md</Path>",
+        "<Path>{roots.state}/specdev/adr/0009-isolated-iconic-store.md</Path>",
+        "<Path>{roots.state}/specdev/context/terminal-agent.md</Path>",
+        "<Path>{roots.state}/specdev/context/automations.md</Path>",
+        "<Path>{roots.state}/specdev/context/notifications.md</Path>"
+      ],
+      "rationale": "智能体升级与 #14、#26–#36 修复；长期机制提升；Promise thenable、按钮响应等局部修复及未复现 #33 留历史。"
+    },
+    {
+      "source": "<Path>docs/agent-workbench.md</Path>",
+      "snapshot": "<Path>{roots.state}/specdev/archive/2026-09/2026-09-28-docs-knowledge-consolidation/evidence/original-docs/agent-workbench.md</Path>",
+      "bytes": 4899,
+      "sha256": "b55c58b096969009104fa0e3f95fd00e28cc5ef335502af0f098aad8015f76d8",
+      "public_action": "rewrite-for-users",
+      "graduation": "promoted-in-part",
+      "promotion_targets": [
+        "<Path>{roots.state}/specdev/adr/0003-pty-session-view-lifetimes.md</Path>",
+        "<Path>{roots.state}/specdev/adr/0004-vault-scoped-native-history.md</Path>",
+        "<Path>{roots.state}/specdev/context/terminal-agent.md</Path>"
+      ],
+      "rationale": "终端使用、原生历史、用量与开发安装；用户操作保留；Rust 安装与验收过程留原件，历史/用量语义进入术语。",
+      "public_sha256": "7ac6103507e58b9429b5744cf1631133a8e384c4b12f54d6f6e81c9387e05741"
+    },
+    {
+      "source": "<Path>docs/agent-workbench.png</Path>",
+      "snapshot": "<Path>{roots.state}/specdev/archive/2026-09/2026-09-28-docs-knowledge-consolidation/evidence/original-docs/agent-workbench.png</Path>",
+      "bytes": 54921,
+      "sha256": "6e336baaa4097b5302a4dca08c19516e9ec668d75ca7e026688a858eed485a75",
+      "public_action": "retain",
+      "graduation": "ephemeral",
+      "promotion_targets": [],
+      "rationale": "历史界面截图；不提升为架构决定或词汇，不作为最新构建的验收。公开保留为工作台布局示意。",
+      "public_sha256": "6e336baaa4097b5302a4dca08c19516e9ec668d75ca7e026688a858eed485a75"
+    },
+    {
+      "source": "<Path>docs/architecture-refactor/terminal-1.13.7.png</Path>",
+      "snapshot": "<Path>{roots.state}/specdev/archive/2026-09/2026-09-28-docs-knowledge-consolidation/evidence/original-docs/architecture-refactor/terminal-1.13.7.png</Path>",
+      "bytes": 64802,
+      "sha256": "87bc568eb4239283c03dc380cac49998c034ed2d4dc2885694972f1ff043c29a",
+      "public_action": "remove-after-verified-archive",
+      "graduation": "ephemeral",
+      "promotion_targets": [],
+      "rationale": "历史界面截图；不提升为架构决定或词汇，不作为最新构建的验收。"
+    },
+    {
+      "source": "<Path>docs/architecture-refactor/validation.json</Path>",
+      "snapshot": "<Path>{roots.state}/specdev/archive/2026-09/2026-09-28-docs-knowledge-consolidation/evidence/original-docs/architecture-refactor/validation.json</Path>",
+      "bytes": 5270,
+      "sha256": "ce9207db8b0a3b79c55d4b04b89c7184f3c8bc9be26094e15d2012a254f11ff3",
+      "public_action": "remove-after-verified-archive",
+      "graduation": "ephemeral",
+      "promotion_targets": [],
+      "rationale": "原始运行结果／构建指纹；保留原版本与场景，不能转换为本次运行结果。"
+    },
+    {
+      "source": "<Path>docs/architecture-refactor.md</Path>",
+      "snapshot": "<Path>{roots.state}/specdev/archive/2026-09/2026-09-28-docs-knowledge-consolidation/evidence/original-docs/architecture-refactor.md</Path>",
+      "bytes": 9798,
+      "sha256": "00c6cf0e911c142418a94bf81083b0c56c43017f508aae487a192251941f72bb",
+      "public_action": "remove-after-verified-archive",
+      "graduation": "promoted-in-part",
+      "promotion_targets": [
+        "<Path>{roots.state}/specdev/adr/0001-layered-dependency-boundaries.md</Path>",
+        "<Path>{roots.state}/specdev/adr/0002-native-host-preact-surfaces.md</Path>",
+        "<Path>{roots.state}/specdev/adr/0003-pty-session-view-lifetimes.md</Path>",
+        "<Path>{roots.state}/specdev/adr/0005-contacts-markdown-source.md</Path>",
+        "<Path>{roots.state}/specdev/adr/0006-comment-sidecar-storage.md</Path>",
+        "<Path>{roots.state}/specdev/context/nand-shell.md</Path>",
+        "<Path>{roots.state}/specdev/context/dashboard.md</Path>",
+        "<Path>{roots.state}/specdev/context/context-map.md</Path>"
+      ],
+      "rationale": "分层、渲染、生命周期和完整迁移；架构提炼；组件清单与 49 个测试入口、580 模块等阶段结果留原件。"
+    },
+    {
+      "source": "<Path>docs/automation.md</Path>",
+      "snapshot": "<Path>{roots.state}/specdev/archive/2026-09/2026-09-28-docs-knowledge-consolidation/evidence/original-docs/automation.md</Path>",
+      "bytes": 6775,
+      "sha256": "504ed261a0696260804f8330af9f184c7bf684ff860a9e896b172c3fb1191212",
+      "public_action": "rewrite-for-users",
+      "graduation": "promoted-in-part",
+      "promotion_targets": [
+        "<Path>{roots.state}/specdev/adr/0007-device-owned-durable-automation.md</Path>",
+        "<Path>{roots.state}/specdev/adr/0008-independent-notification-receipts.md</Path>",
+        "<Path>{roots.state}/specdev/context/automations.md</Path>",
+        "<Path>{roots.state}/specdev/context/notifications.md</Path>"
+      ],
+      "rationale": "设备调度、来源数据、运行恢复和通知；使用、备份和能力限制保留；旧源码表、测试与发布过程只归档。",
+      "public_sha256": "0e72751db3f16989c7e653a2519634c5bfac2720b5028dae9f1d36be31e1f54e"
+    },
+    {
+      "source": "<Path>docs/contacts-development.md</Path>",
+      "snapshot": "<Path>{roots.state}/specdev/archive/2026-09/2026-09-28-docs-knowledge-consolidation/evidence/original-docs/contacts-development.md</Path>",
+      "bytes": 7003,
+      "sha256": "8b006f51e839d8422954bb139c02d7a899e8390a7f77037839e4ac97d1505c3b",
+      "public_action": "remove-after-verified-archive",
+      "graduation": "promoted-in-part",
+      "promotion_targets": [
+        "<Path>{roots.state}/specdev/adr/0005-contacts-markdown-source.md</Path>",
+        "<Path>{roots.state}/specdev/context/contacts.md</Path>"
+      ],
+      "rationale": "档案数据流、冲突、维护和验收；稳定数据决定提升；代码导航与未完成实机清单留原件。"
+    },
+    {
+      "source": "<Path>docs/contacts.md</Path>",
+      "snapshot": "<Path>{roots.state}/specdev/archive/2026-09/2026-09-28-docs-knowledge-consolidation/evidence/original-docs/contacts.md</Path>",
+      "bytes": 9730,
+      "sha256": "912608c61d998c8be969943741e3659f187aed1265a0a677e5e48671cd7cdf0a",
+      "public_action": "rewrite-for-users",
+      "graduation": "promoted-in-part",
+      "promotion_targets": [
+        "<Path>{roots.state}/specdev/adr/0005-contacts-markdown-source.md</Path>",
+        "<Path>{roots.state}/specdev/context/contacts.md</Path>"
+      ],
+      "rationale": "档案操作、身份、任职和关系；操作与冲突处理保留；规范术语和数据权威提炼；失效源码链接改为用户目录内格式说明。",
+      "public_sha256": "9da434c497bdb06e70403f3641a4a8306a14faf8c3293a5f9fae217c23667de5"
+    },
+    {
+      "source": "<Path>docs/iconic/picker-popout.png</Path>",
+      "snapshot": "<Path>{roots.state}/specdev/archive/2026-09/2026-09-28-docs-knowledge-consolidation/evidence/original-docs/iconic/picker-popout.png</Path>",
+      "bytes": 97059,
+      "sha256": "46e31dd2f9c23e23388214b3a5da9002c01a1439cae4f963386f4e2d42951eea",
+      "public_action": "remove-after-verified-archive",
+      "graduation": "ephemeral",
+      "promotion_targets": [],
+      "rationale": "历史界面截图；不提升为架构决定或词汇，不作为最新构建的验收。"
+    },
+    {
+      "source": "<Path>docs/iconic/rules.png</Path>",
+      "snapshot": "<Path>{roots.state}/specdev/archive/2026-09/2026-09-28-docs-knowledge-consolidation/evidence/original-docs/iconic/rules.png</Path>",
+      "bytes": 89410,
+      "sha256": "859da0b823e00980876eb1ed3802e0dbc47cfe209adb55f11ad77c9a69cdaaac",
+      "public_action": "remove-after-verified-archive",
+      "graduation": "ephemeral",
+      "promotion_targets": [],
+      "rationale": "历史界面截图；不提升为架构决定或词汇，不作为最新构建的验收。"
+    },
+    {
+      "source": "<Path>docs/iconic/settings-1.12.4.png</Path>",
+      "snapshot": "<Path>{roots.state}/specdev/archive/2026-09/2026-09-28-docs-knowledge-consolidation/evidence/original-docs/iconic/settings-1.12.4.png</Path>",
+      "bytes": 104248,
+      "sha256": "d2dcc5219749fb6a4e6c0cd99bc808dc98f3eeac7e53388f81af44fc30d942d4",
+      "public_action": "remove-after-verified-archive",
+      "graduation": "ephemeral",
+      "promotion_targets": [],
+      "rationale": "历史界面截图；不提升为架构决定或词汇，不作为最新构建的验收。"
+    },
+    {
+      "source": "<Path>docs/iconic/settings-1.13.7.png</Path>",
+      "snapshot": "<Path>{roots.state}/specdev/archive/2026-09/2026-09-28-docs-knowledge-consolidation/evidence/original-docs/iconic/settings-1.13.7.png</Path>",
+      "bytes": 91810,
+      "sha256": "c52d7dd0fb6c6ed9ea2ac7c243fce68c072c7b8fa417ae56d9f8705b5aa07d5f",
+      "public_action": "remove-after-verified-archive",
+      "graduation": "ephemeral",
+      "promotion_targets": [],
+      "rationale": "历史界面截图；不提升为架构决定或词汇，不作为最新构建的验收。"
+    },
+    {
+      "source": "<Path>docs/iconic-port.md</Path>",
+      "snapshot": "<Path>{roots.state}/specdev/archive/2026-09/2026-09-28-docs-knowledge-consolidation/evidence/original-docs/iconic-port.md</Path>",
+      "bytes": 7248,
+      "sha256": "d5a409de44c426852f58676ebb2c868a0f0ef2306ff0312fa28919886cde91a1",
+      "public_action": "remove-after-verified-archive",
+      "graduation": "promoted-in-part",
+      "promotion_targets": [
+        "<Path>{roots.state}/specdev/adr/0009-isolated-iconic-store.md</Path>",
+        "<Path>{roots.state}/specdev/context/icons.md</Path>"
+      ],
+      "rationale": "Iconic 迁入边界、上游 oracle 与兼容差异；稳定隔离决定提升；固定上游对照、22 项配置和桌面验证保留为日期证据。"
+    },
+    {
+      "source": "<Path>docs/icons.md</Path>",
+      "snapshot": "<Path>{roots.state}/specdev/archive/2026-09/2026-09-28-docs-knowledge-consolidation/evidence/original-docs/icons.md</Path>",
+      "bytes": 5984,
+      "sha256": "63366d7ccf2f8c9e2af3fc47499b152dd5752f7cdb821a888d77511b75c34f49",
+      "public_action": "rewrite-for-users",
+      "graduation": "promoted-in-part",
+      "promotion_targets": [
+        "<Path>{roots.state}/specdev/adr/0009-isolated-iconic-store.md</Path>",
+        "<Path>{roots.state}/specdev/context/icons.md</Path>"
+      ],
+      "rationale": "图标操作、规则与备份；操作和恢复保留；移除开发记录入口；语义与独立存储决定提升。",
+      "public_sha256": "2244bc28075bcdb8ace267a970d0669dfcb6411e773efb9e527fa914216bd68e"
+    },
+    {
+      "source": "<Path>docs/issue-23-25/comments-dark-narrow.png</Path>",
+      "snapshot": "<Path>{roots.state}/specdev/archive/2026-09/2026-09-28-docs-knowledge-consolidation/evidence/original-docs/issue-23-25/comments-dark-narrow.png</Path>",
+      "bytes": 61852,
+      "sha256": "9a1ab73f1811651aacf7490630eb9de048d8c873e2759618ce119024568c2c9d",
+      "public_action": "remove-after-verified-archive",
+      "graduation": "ephemeral",
+      "promotion_targets": [],
+      "rationale": "历史界面截图；不提升为架构决定或词汇，不作为最新构建的验收。"
+    },
+    {
+      "source": "<Path>docs/issue-23-25/comments-light.png</Path>",
+      "snapshot": "<Path>{roots.state}/specdev/archive/2026-09/2026-09-28-docs-knowledge-consolidation/evidence/original-docs/issue-23-25/comments-light.png</Path>",
+      "bytes": 176804,
+      "sha256": "c6c3549e208a5f8a94f30920b76a2aa15ad4dca41f427502276ec41e5e491761",
+      "public_action": "remove-after-verified-archive",
+      "graduation": "ephemeral",
+      "promotion_targets": [],
+      "rationale": "历史界面截图；不提升为架构决定或词汇，不作为最新构建的验收。"
+    },
+    {
+      "source": "<Path>docs/issue-23-25/popout-titles.json</Path>",
+      "snapshot": "<Path>{roots.state}/specdev/archive/2026-09/2026-09-28-docs-knowledge-consolidation/evidence/original-docs/issue-23-25/popout-titles.json</Path>",
+      "bytes": 366,
+      "sha256": "47a1aa9147a2af2f1c5aa56ce97331a961904d148e7b32439cd55d9ea9b6b414",
+      "public_action": "remove-after-verified-archive",
+      "graduation": "ephemeral",
+      "promotion_targets": [],
+      "rationale": "原始运行结果／构建指纹；保留原版本与场景，不能转换为本次运行结果。"
+    },
+    {
+      "source": "<Path>docs/issue-23-25/runtime-checks.json</Path>",
+      "snapshot": "<Path>{roots.state}/specdev/archive/2026-09/2026-09-28-docs-knowledge-consolidation/evidence/original-docs/issue-23-25/runtime-checks.json</Path>",
+      "bytes": 1402,
+      "sha256": "ddedb1f859e024d7778ee26a67b8d46a878607527ccbbca67fa62c6d9b3eec8e",
+      "public_action": "remove-after-verified-archive",
+      "graduation": "ephemeral",
+      "promotion_targets": [],
+      "rationale": "原始运行结果／构建指纹；保留原版本与场景，不能转换为本次运行结果。"
+    },
+    {
+      "source": "<Path>docs/issue-23-25-fixes.md</Path>",
+      "snapshot": "<Path>{roots.state}/specdev/archive/2026-09/2026-09-28-docs-knowledge-consolidation/evidence/original-docs/issue-23-25-fixes.md</Path>",
+      "bytes": 5202,
+      "sha256": "86d05e4886a93bf1521fa4b5c043f59b31bee1866abe2813b8eb49ad3f99f18e",
+      "public_action": "remove-after-verified-archive",
+      "graduation": "promoted-in-part",
+      "promotion_targets": [
+        "<Path>{roots.state}/specdev/adr/0006-comment-sidecar-storage.md</Path>",
+        "<Path>{roots.state}/specdev/context/comments.md</Path>"
+      ],
+      "rationale": "评论浮层、无障碍和标题路由；评论来源语义和持久化边界提炼；定位、Scope 与窗口标题修复是可逆实现细节，不另造 ADR。"
+    },
+    {
+      "source": "<Path>docs/issue-fixes-2026-09-27/comments-en.png</Path>",
+      "snapshot": "<Path>{roots.state}/specdev/archive/2026-09/2026-09-28-docs-knowledge-consolidation/evidence/original-docs/issue-fixes-2026-09-27/comments-en.png</Path>",
+      "bytes": 89328,
+      "sha256": "9f7ee0638c02beec86f94e84d7bfa0f2d6e038a2fa793b5c9ffdd901a90079f5",
+      "public_action": "remove-after-verified-archive",
+      "graduation": "ephemeral",
+      "promotion_targets": [],
+      "rationale": "历史界面截图；不提升为架构决定或词汇，不作为最新构建的验收。"
+    },
+    {
+      "source": "<Path>docs/issue-fixes-2026-09-27/settings-sync.png</Path>",
+      "snapshot": "<Path>{roots.state}/specdev/archive/2026-09/2026-09-28-docs-knowledge-consolidation/evidence/original-docs/issue-fixes-2026-09-27/settings-sync.png</Path>",
+      "bytes": 39969,
+      "sha256": "4e242d9c85a445d1d0a1803978136a45869db7937c3321193165507384dd4f77",
+      "public_action": "remove-after-verified-archive",
+      "graduation": "ephemeral",
+      "promotion_targets": [],
+      "rationale": "历史界面截图；不提升为架构决定或词汇，不作为最新构建的验收。"
+    },
+    {
+      "source": "<Path>docs/issue-fixes-2026-09-27.md</Path>",
+      "snapshot": "<Path>{roots.state}/specdev/archive/2026-09/2026-09-28-docs-knowledge-consolidation/evidence/original-docs/issue-fixes-2026-09-27.md</Path>",
+      "bytes": 3623,
+      "sha256": "c51185187a6473fbeb3657357956a0b354ef87437f8a1befb55cb0e103bb569d",
+      "public_action": "remove-after-verified-archive",
+      "graduation": "promoted-in-part",
+      "promotion_targets": [
+        "<Path>{roots.state}/specdev/adr/0006-comment-sidecar-storage.md</Path>",
+        "<Path>{roots.state}/specdev/context/nand-shell.md</Path>",
+        "<Path>{roots.state}/specdev/context/comments.md</Path>"
+      ],
+      "rationale": "早期 #17–#22 路径、语言和设置修复；现行术语提升；早期迁移工具、测试结果和当时 issue 状态只归档。"
+    },
+    {
+      "source": "<Path>docs/issue-review-2026-09-27.md</Path>",
+      "snapshot": "<Path>{roots.state}/specdev/archive/2026-09/2026-09-28-docs-knowledge-consolidation/evidence/original-docs/issue-review-2026-09-27.md</Path>",
+      "bytes": 6989,
+      "sha256": "566544a751109912c03523722abbe54966c13a2a0bb1c8b122ed440c29b3ceef",
+      "public_action": "remove-after-verified-archive",
+      "graduation": "ephemeral",
+      "promotion_targets": [],
+      "rationale": "旧问题状态与已实施的后续计划；ephemeral：被后续实现取代的计划和远程状态快照，不列为当前待办，不重新查询或修改远程。"
+    },
+    {
+      "source": "<Path>docs/third-party/orca-LICENSE.txt</Path>",
+      "snapshot": "<Path>{roots.state}/specdev/archive/2026-09/2026-09-28-docs-knowledge-consolidation/evidence/original-docs/third-party/orca-LICENSE.txt</Path>",
+      "bytes": 1169,
+      "sha256": "fcccd4b4d20ed65d4e2e21d24cb1ee230820c32a4c3a0a0b5c0db481e63f2461",
+      "public_action": "retain",
+      "graduation": "public-license",
+      "promotion_targets": [],
+      "rationale": "Orca 固定来源及完整 MIT 归属；公开与构建用途保留，不作为领域知识。",
+      "public_sha256": "fcccd4b4d20ed65d4e2e21d24cb1ee230820c32a4c3a0a0b5c0db481e63f2461"
+    },
+    {
+      "source": "<Path>docs/ui-review/after-agent-english-dark.png</Path>",
+      "snapshot": "<Path>{roots.state}/specdev/archive/2026-09/2026-09-28-docs-knowledge-consolidation/evidence/original-docs/ui-review/after-agent-english-dark.png</Path>",
+      "bytes": 89058,
+      "sha256": "121841a3c59774a9947f2d9af2566a337af61b583e28c0ca517d4ea8497975cb",
+      "public_action": "remove-after-verified-archive",
+      "graduation": "ephemeral",
+      "promotion_targets": [],
+      "rationale": "历史界面截图；不提升为架构决定或词汇，不作为最新构建的验收。"
+    },
+    {
+      "source": "<Path>docs/ui-review/after-agent-narrow-dark.png</Path>",
+      "snapshot": "<Path>{roots.state}/specdev/archive/2026-09/2026-09-28-docs-knowledge-consolidation/evidence/original-docs/ui-review/after-agent-narrow-dark.png</Path>",
+      "bytes": 75650,
+      "sha256": "2dcd3c2a1e1329360615cd4f00ade987750526cacaa901e10eb9747d4e97f33e",
+      "public_action": "remove-after-verified-archive",
+      "graduation": "ephemeral",
+      "promotion_targets": [],
+      "rationale": "历史界面截图；不提升为架构决定或词汇，不作为最新构建的验收。"
+    },
+    {
+      "source": "<Path>docs/ui-review/after-agent-settings.png</Path>",
+      "snapshot": "<Path>{roots.state}/specdev/archive/2026-09/2026-09-28-docs-knowledge-consolidation/evidence/original-docs/ui-review/after-agent-settings.png</Path>",
+      "bytes": 95589,
+      "sha256": "c625102e1caeeda396536c6b003cda6bb840889619299a4cfdac60009192b3f2",
+      "public_action": "remove-after-verified-archive",
+      "graduation": "ephemeral",
+      "promotion_targets": [],
+      "rationale": "历史界面截图；不提升为架构决定或词汇，不作为最新构建的验收。"
+    },
+    {
+      "source": "<Path>docs/ui-review/after-board.png</Path>",
+      "snapshot": "<Path>{roots.state}/specdev/archive/2026-09/2026-09-28-docs-knowledge-consolidation/evidence/original-docs/ui-review/after-board.png</Path>",
+      "bytes": 226857,
+      "sha256": "021c5df2df0ea14a34f740ad83680de72c49b6a7e4128b5655b863ef41247ce0",
+      "public_action": "remove-after-verified-archive",
+      "graduation": "ephemeral",
+      "promotion_targets": [],
+      "rationale": "历史界面截图；不提升为架构决定或词汇，不作为最新构建的验收。"
+    },
+    {
+      "source": "<Path>docs/ui-review/after-comments-dark.png</Path>",
+      "snapshot": "<Path>{roots.state}/specdev/archive/2026-09/2026-09-28-docs-knowledge-consolidation/evidence/original-docs/ui-review/after-comments-dark.png</Path>",
+      "bytes": 85093,
+      "sha256": "a812d3c8052bf98949b459af99c5ffdda3520d575e2abf9ee08491068d562704",
+      "public_action": "remove-after-verified-archive",
+      "graduation": "ephemeral",
+      "promotion_targets": [],
+      "rationale": "历史界面截图；不提升为架构决定或词汇，不作为最新构建的验收。实际画面含前景用量弹窗，不能仅凭文件名当成完整深色评论验收。"
+    },
+    {
+      "source": "<Path>docs/ui-review/after-comments-english-dark.png</Path>",
+      "snapshot": "<Path>{roots.state}/specdev/archive/2026-09/2026-09-28-docs-knowledge-consolidation/evidence/original-docs/ui-review/after-comments-english-dark.png</Path>",
+      "bytes": 218713,
+      "sha256": "4b3ba792bc2c3bcfed6a186fbb6c2ad760a05fc0bb24a7e523d6fd96a2867eed",
+      "public_action": "remove-after-verified-archive",
+      "graduation": "ephemeral",
+      "promotion_targets": [],
+      "rationale": "历史界面截图；不提升为架构决定或词汇，不作为最新构建的验收。"
+    },
+    {
+      "source": "<Path>docs/ui-review/after-comments-light.png</Path>",
+      "snapshot": "<Path>{roots.state}/specdev/archive/2026-09/2026-09-28-docs-knowledge-consolidation/evidence/original-docs/ui-review/after-comments-light.png</Path>",
+      "bytes": 82377,
+      "sha256": "ac65cee1a85f25fdb6b09740e19b9689b2e7a4dfa06adbb529a962de393232dd",
+      "public_action": "remove-after-verified-archive",
+      "graduation": "ephemeral",
+      "promotion_targets": [],
+      "rationale": "历史界面截图；不提升为架构决定或词汇，不作为最新构建的验收。"
+    },
+    {
+      "source": "<Path>docs/ui-review/after-connection.png</Path>",
+      "snapshot": "<Path>{roots.state}/specdev/archive/2026-09/2026-09-28-docs-knowledge-consolidation/evidence/original-docs/ui-review/after-connection.png</Path>",
+      "bytes": 84028,
+      "sha256": "8ff62a3f4183e757f907bbd88eb2eeea9153312985025498ec1452a5537db9b8",
+      "public_action": "remove-after-verified-archive",
+      "graduation": "ephemeral",
+      "promotion_targets": [],
+      "rationale": "历史界面截图；不提升为架构决定或词汇，不作为最新构建的验收。"
+    },
+    {
+      "source": "<Path>docs/ui-review/after-disabled-editor.png</Path>",
+      "snapshot": "<Path>{roots.state}/specdev/archive/2026-09/2026-09-28-docs-knowledge-consolidation/evidence/original-docs/ui-review/after-disabled-editor.png</Path>",
+      "bytes": 197451,
+      "sha256": "468037093b54fcba2e9f3880cc5aa107da5434daf249b4df13d12e6280b8f15c",
+      "public_action": "remove-after-verified-archive",
+      "graduation": "ephemeral",
+      "promotion_targets": [],
+      "rationale": "历史界面截图；不提升为架构决定或词汇，不作为最新构建的验收。"
+    },
+    {
+      "source": "<Path>docs/ui-review/after-home.png</Path>",
+      "snapshot": "<Path>{roots.state}/specdev/archive/2026-09/2026-09-28-docs-knowledge-consolidation/evidence/original-docs/ui-review/after-home.png</Path>",
+      "bytes": 62954,
+      "sha256": "7de3149c4cad92506395553676fa2361dd4392f5ec9bcd5a19aa3826f0f6da39",
+      "public_action": "remove-after-verified-archive",
+      "graduation": "ephemeral",
+      "promotion_targets": [],
+      "rationale": "历史界面截图；不提升为架构决定或词汇，不作为最新构建的验收。"
+    },
+    {
+      "source": "<Path>docs/ui-review/after-usage.png</Path>",
+      "snapshot": "<Path>{roots.state}/specdev/archive/2026-09/2026-09-28-docs-knowledge-consolidation/evidence/original-docs/ui-review/after-usage.png</Path>",
+      "bytes": 128602,
+      "sha256": "51d1ecd9819218612527ff364ca6cfa2b5bdbf4b63ea7683cbca5e74df9e0fa4",
+      "public_action": "remove-after-verified-archive",
+      "graduation": "ephemeral",
+      "promotion_targets": [],
+      "rationale": "历史界面截图；不提升为架构决定或词汇，不作为最新构建的验收。"
+    },
+    {
+      "source": "<Path>docs/ui-review/before-agent-settings.png</Path>",
+      "snapshot": "<Path>{roots.state}/specdev/archive/2026-09/2026-09-28-docs-knowledge-consolidation/evidence/original-docs/ui-review/before-agent-settings.png</Path>",
+      "bytes": 108994,
+      "sha256": "f8a494442ab9074a391836183bfe40faa2ab3c580a7e92d6d224a4bd4fd0c1ba",
+      "public_action": "remove-after-verified-archive",
+      "graduation": "ephemeral",
+      "promotion_targets": [],
+      "rationale": "历史界面截图；不提升为架构决定或词汇，不作为最新构建的验收。"
+    },
+    {
+      "source": "<Path>docs/ui-review/before-board.png</Path>",
+      "snapshot": "<Path>{roots.state}/specdev/archive/2026-09/2026-09-28-docs-knowledge-consolidation/evidence/original-docs/ui-review/before-board.png</Path>",
+      "bytes": 226016,
+      "sha256": "4e1c80377798ca7521753ff2cf8f494d951e02f2d5d8f51071f51cca3e39825e",
+      "public_action": "remove-after-verified-archive",
+      "graduation": "ephemeral",
+      "promotion_targets": [],
+      "rationale": "历史界面截图；不提升为架构决定或词汇，不作为最新构建的验收。"
+    },
+    {
+      "source": "<Path>docs/ui-review/before-comments.png</Path>",
+      "snapshot": "<Path>{roots.state}/specdev/archive/2026-09/2026-09-28-docs-knowledge-consolidation/evidence/original-docs/ui-review/before-comments.png</Path>",
+      "bytes": 84626,
+      "sha256": "076d11dc3a4739845debeb4dd5dfa335f459553e77f6b9ce6fec47da7c06f412",
+      "public_action": "remove-after-verified-archive",
+      "graduation": "ephemeral",
+      "promotion_targets": [],
+      "rationale": "历史界面截图；不提升为架构决定或词汇，不作为最新构建的验收。"
+    },
+    {
+      "source": "<Path>docs/ui-review/before-connection.png</Path>",
+      "snapshot": "<Path>{roots.state}/specdev/archive/2026-09/2026-09-28-docs-knowledge-consolidation/evidence/original-docs/ui-review/before-connection.png</Path>",
+      "bytes": 90003,
+      "sha256": "292d209a02e93250369b5a341ba8ebb3c7416e9fafce01c5206d9e3fdaa0872d",
+      "public_action": "remove-after-verified-archive",
+      "graduation": "ephemeral",
+      "promotion_targets": [],
+      "rationale": "历史界面截图；不提升为架构决定或词汇，不作为最新构建的验收。"
+    },
+    {
+      "source": "<Path>docs/ui-review/before-disabled-editor.png</Path>",
+      "snapshot": "<Path>{roots.state}/specdev/archive/2026-09/2026-09-28-docs-knowledge-consolidation/evidence/original-docs/ui-review/before-disabled-editor.png</Path>",
+      "bytes": 193687,
+      "sha256": "86e4773c7425cf5b05fba11b99885448a9a17234fedc8fdf7f7c3004fc296d19",
+      "public_action": "remove-after-verified-archive",
+      "graduation": "ephemeral",
+      "promotion_targets": [],
+      "rationale": "历史界面截图；不提升为架构决定或词汇，不作为最新构建的验收。"
+    },
+    {
+      "source": "<Path>docs/ui-review/before-home.png</Path>",
+      "snapshot": "<Path>{roots.state}/specdev/archive/2026-09/2026-09-28-docs-knowledge-consolidation/evidence/original-docs/ui-review/before-home.png</Path>",
+      "bytes": 61367,
+      "sha256": "c6b3d01f51db2df92c18a363e5dae2639b1a057d0f34f6b7c606745dfeaffc4d",
+      "public_action": "remove-after-verified-archive",
+      "graduation": "ephemeral",
+      "promotion_targets": [],
+      "rationale": "历史界面截图；不提升为架构决定或词汇，不作为最新构建的验收。"
+    },
+    {
+      "source": "<Path>docs/ui-review/before-usage.png</Path>",
+      "snapshot": "<Path>{roots.state}/specdev/archive/2026-09/2026-09-28-docs-knowledge-consolidation/evidence/original-docs/ui-review/before-usage.png</Path>",
+      "bytes": 171025,
+      "sha256": "0c47fdca0332303105f0bcdbe5caa2603532ca5dd877f03fc644d2922dd8d171",
+      "public_action": "remove-after-verified-archive",
+      "graduation": "ephemeral",
+      "promotion_targets": [],
+      "rationale": "历史界面截图；不提升为架构决定或词汇，不作为最新构建的验收。"
+    },
+    {
+      "source": "<Path>docs/ui-review-2026-09-26.md</Path>",
+      "snapshot": "<Path>{roots.state}/specdev/archive/2026-09/2026-09-28-docs-knowledge-consolidation/evidence/original-docs/ui-review-2026-09-26.md</Path>",
+      "bytes": 4804,
+      "sha256": "a9564398b16f5c07dd00373781b57cf0a5849bd69791970c6a611da891a1d82e",
+      "public_action": "remove-after-verified-archive",
+      "graduation": "promoted-in-part",
+      "promotion_targets": [
+        "<Path>{roots.state}/specdev/adr/0002-native-host-preact-surfaces.md</Path>",
+        "<Path>{roots.state}/specdev/context/nand-shell.md</Path>",
+        "<Path>{roots.state}/specdev/context/comments.md</Path>"
+      ],
+      "rationale": "模块启停和界面历史评审；宿主/模块边界提炼；布局调整、前后截图和固定用量夹具留历史。"
+    }
+  ]
+}

@@ -12,7 +12,7 @@
 
 | 入口 | 用途 |
 | --- | --- |
-| `docs/automation.md` | 用户操作、时间与恢复策略、Agent 能力边界、存储和交付说明，优先阅读 |
+| `docs/automation.md` | 用户操作、时间与恢复策略、Agent 能力边界和备份说明 |
 | `src/shared/automation/`、`src/shared/json-store.ts` | 公共契约、任务元数据、串行原子写入与损坏恢复 |
 | `src/automation/`、`src/notifications/` | 调度、运行历史、编辑器、自动化中心、通知渠道与收件箱 |
 | `src/plugin/automation-host.ts` | 产品组合、生命周期、来源注入与插件级调度 |
@@ -54,7 +54,7 @@
 
 没有云端／守护进程调度、远程执行、worktree 管理或执行设备转移 UI。原生 hook 会合并用户 CLI 配置并备份，保留 CLI 本身的登录、目录信任和 hook 授权流程；版本兼容性仍需真机验证。部分原生历史布局（例如新版 OpenCode SQLite）需要使用准确会话标识的入口。
 
-下一会话建议先确认当前 Git 状态，按 `docs/automation.md` 在真实 Obsidian 上验收：来源笔记写回、任务完成后停止提醒、关闭看板后继续调度、重启去重、通知权限／收件箱、Agent 快捷操作／定时执行、面板收起与重新打开、明确停止。随后验证四类 hook 与原生会话恢复，以及窗口迁移、手机入口和 Windows／macOS 终端服务。跨平台 CI 已编写，本工作区未执行其远程构建。发现问题后做针对性修复与回归，将结果补入现有文档。
+下一会话建议先确认当前 Git 状态，按 `docs/automation.md` 在真实 Obsidian 上验收：来源笔记写回、任务完成后停止提醒、关闭看板后继续调度、重启去重、通知权限／收件箱、Agent 快捷操作／定时执行、面板收起与重新打开、明确停止。随后验证四类 hook 与原生会话恢复，以及窗口迁移、手机入口和 Windows／macOS 终端服务。跨平台 CI 已编写，本工作区未执行其远程构建。发现问题后做针对性修复与回归，将新的开发验收结果写入对应 SpecDev change 的 Evidence。
 
 ## SpecDev 状态
 
@@ -67,3 +67,5 @@
 - **open-computer-use**：若下一会话采用该工具执行真实 Obsidian UI 验收，再读取并应用。
 
 交接本身不授权发布、推送、向他人发消息或新增功能范围；本会话也未获得子 agent 委派指令。
+
+开发机制与历史验证现由 <Path>{roots.state}/specdev/adr/0007-device-owned-durable-automation.md</Path>、<Path>{roots.state}/specdev/adr/0008-independent-notification-receipts.md</Path> 和 <Path>{roots.state}/specdev/archive/2026-09/2026-09-28-docs-knowledge-consolidation/evidence/source-map.md</Path> 导航。原交接的测试结论保持原日期，不表示最新验收。

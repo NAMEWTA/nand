@@ -2,6 +2,8 @@
 
 Read this before moving files, adding a product, adding a command, adding UI copy, naming a new file, or changing settings pages. Frozen strings live in the SKILL.md identity table. Import prohibitions live in SKILL rules 2 and 3.
 
+Long-term rationale and domain language: [SpecDev documentation index](../../../../speculo/.speculo/specdev/.config/domain-layout.md). The rules below are editing constraints; dated results belong in SpecDev Evidence.
+
 ## Source layers
 
 | Layer | Responsibility | May import |
@@ -30,13 +32,13 @@ The registered view identifiers remain in SKILL.md. Inactive terminal leaves use
 
 `AutomationsPanel`, `ContactsSurface`, `CommentsPanel`, `InboxPanel`, `HabitPanel`, `CountdownPanel`, `AnniversaryPanel`, and terminal panels accept explicit state/actions or host contracts. They can be composed in code without constructing their own ItemView. `TerminalWorkbench` composes session/history/usage slots around a stable xterm container. Settings and native host chrome remain native.
 
-Dashboard UI remains organized under `view/dashboard/<feature>`; parser/model/DQL logic lives in core, Vault persistence and data access in platform. Several dashboard renderers remain imperative and have not yet completed the Preact conversion. Do not disguise an imperative business renderer as a completed Preact component by mounting it inside a one-effect wrapper. New business rendering uses real components.
+Dashboard UI remains organized under `view/dashboard/<feature>`; parser/model/DQL logic lives in core, Vault persistence and data access in platform. Dashboard business panels have completed the Preact conversion; native layout scaffolding and configuration UI retain their host implementations. Do not disguise an imperative business renderer as a completed Preact component by mounting it inside a one-effect wrapper. New business rendering uses real components.
 
 `DashboardRenderContext` belongs to a dashboard root. Detached sections/widgets explicitly retain that context. Charts, panel roots, album timers, drag sources and scanning signatures are per workbench. Dataview actions are per rendered section. Vault indexes and widget service registrations are keyed by App. Never restore a module-global "active" opener, hover parent or service. Timers retain their originating Window; moving a dashboard rebuilds its widgets and closing it unmounts panels before clearing native DOM.
 
 Contacts, habit and expense application services live in core and accept file/storage ports. Native adapters own Component lifecycle, Vault operations, unsaved-editor checks and focus events. Keep atomic process/write semantics and serialized entity saves.
 
-Workspace normalization lives in `core/dashboard/workspace-registry.ts`; dashboard Markdown IO belongs in `platform/obsidian/dashboard`. The sync placeholder is `core/sync`.
+Workspace normalization lives in `core/workspace/workspace-registry.ts`; dashboard Markdown IO belongs in `platform/obsidian/dashboard`. The sync placeholder is `core/sync`.
 
 ## Commands
 
@@ -131,7 +133,7 @@ No namespace migration package or version marker is required. Do not add runtime
 
 `ContactsSettings` is a settings-only DTO in `shared/contacts-settings.ts`. `settings.contacts` stores the root folder and maximum card columns; `modules.contacts` defaults on. Setting a new folder switches the data source without moving/deleting files. Indexes are memory-only and rebuildable. Controller updates and deletions are queued by identity; creates share a separate queue key. Updates use `Vault.process`, creates use `Vault.create`, and deletion uses `FileManager.trashFile`. Module disable drains pending writes and unloads the controller, preserving Markdown files. The shell registers `open-contacts` in `plugin/commands.ts`. Strings live in `shared/i18n/contacts.ts`.
 
-Employment and direct relationships are stored only on people; company membership and inverse relationships are derived. Concurrent edits merge by basic field or whole body region, never by table row. Keep `persist/format-guide.md` consistent with the parser; it is bundled and created in the user's directory only when absent. Usage and maintenance walkthroughs live in `docs/contacts.md` and `docs/contacts-development.md`.
+Employment and direct relationships are stored only on people; company membership and inverse relationships are derived. Concurrent edits merge by basic field or whole body region, never by table row. Keep `persist/format-guide.md` consistent with the parser; it is bundled and created in the user's directory only when absent. User operations live in `docs/contacts.md`. The durable decision is [contacts Markdown ownership](../../../../speculo/.speculo/specdev/adr/0005-contacts-markdown-source.md); dated maintenance and acceptance evidence is indexed in [the source map](../../../../speculo/.speculo/specdev/archive/2026-09/2026-09-28-docs-knowledge-consolidation/evidence/source-map.md).
 
 ## Icons domain
 
@@ -141,7 +143,7 @@ Employment and direct relationships are stored only on people; company membershi
 
 The single NAND settings tab adds 图标 / Icons with the six stacked sections listed in the Settings table. Both fallback and API 1.13 definitions expose 22 preferences, rulebook and usage checker. Commands remain in `src/plugin/modules/icons/commands.ts`; use the upstream ids except the normalized `toggle-minimal-folder-icons` under the NAND plugin prefix. English/Chinese strings live in `shared/i18n/iconic.ts`; the domain accessor resolves the current NAND language and preserves upstream `{#}` placeholders.
 
-For a future upstream update, compare the pinned source and the port's documented adaptations before editing. Keep the committed upstream oracle independent of migrated code, verify both settings renderers write to the domain store, and retain resource license notices in the bundle. User instructions and test evidence live in [the icon guide](../../../../docs/icons.md) and [the port record](../../../../docs/iconic-port.md).
+For a future upstream update, compare the pinned source and the port's documented adaptations before editing. Keep the committed upstream oracle independent of migrated code, verify both settings renderers write to the domain store, and retain resource license notices in the bundle. User instructions and test evidence live in [the icon guide](../../../../docs/icons.md) and [the historical port record](../../../../speculo/.speculo/specdev/archive/2026-09/2026-09-28-docs-knowledge-consolidation/evidence/original-docs/iconic-port.md).
 
 ## Automation ownership
 
@@ -150,8 +152,8 @@ For a future upstream update, compare the pinned source and the port's documente
 
 ### Agent workbench and native history
 
-`src/view/terminal/workbench.tsx` renders the session sidebar, native history and usage footer. `TerminalView` owns the xterm island. Closing a leaf detaches its renderer and preserves the TerminalService process; closing a session destroys that process. Module disable/unload destroys all processes. Leaf restore never resubmits a prompt. Deferred leaves must finish `loadIfDeferred` before testing `instanceof TerminalView`.
+`src/view/terminal/TerminalWorkbench.tsx` renders the session sidebar, native history and usage footer. `TerminalView` owns the xterm island. Closing a leaf detaches its renderer and preserves the TerminalService process; closing a session destroys that process. Module disable/unload destroys all processes. Leaf restore never resubmits a prompt. Deferred leaves must finish `loadIfDeferred` before testing `instanceof TerminalView`.
 
-The public catalog contains Claude Code, Codex, Gemini, OpenCode, Pi and Grok. `automation-catalog.ts` retains the pinned upstream transport reference; it is not the exposed capability list. `history/service.ts` uses `server/agent-data-client.ts` and Rust `agent_data.rs` for cancellable background parsing. Only canonical cwd paths inside the current vault are indexed. OpenCode SQLite is opened read-only. Native transcripts are never renamed or rewritten. `.nand/terminal-agent/<device>/index.sqlite` is a disposable cache; `history.json` stores NAND titles, tags, favorite and archive state. Exported Markdown goes to `.nand/terminal-agent/exports/`.
+The public catalog contains Claude Code, Codex, Gemini, OpenCode, Pi and Grok. `automation-catalog.ts` retains the pinned upstream transport reference; it is not the exposed capability list. `platform/obsidian/ai-vault/service.ts` uses `platform/terminal-server/agent-data-client.ts` and Rust `agent_data.rs` for cancellable background parsing. Only canonical cwd paths inside the current vault are indexed. OpenCode SQLite is opened read-only. Native transcripts are never renamed or rewritten. `.nand/terminal-agent/<device>/index.sqlite` is a disposable cache; `history.json` stores NAND titles, tags, favorite and archive state. Exported Markdown goes to `.nand/terminal-agent/exports/`.
 
 Notification receipts remain separate from visible inbox rows so clearing read notifications cannot replay delivery. Stable ribbon ids come from `plugin/ribbon.ts`; localized titles and command names update without changing ids. Never return an Obsidian control (a chainable thenable) from a Promise callback; use a block callback returning void.

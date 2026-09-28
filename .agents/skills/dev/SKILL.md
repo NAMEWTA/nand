@@ -7,10 +7,6 @@ description: >-
   styles.css, main.js, settings, i18n, esbuild, eslint, or a GitHub release.
   Use when the user mentions NAND, nand, 看板, 仪表盘, 评论, 终端, 图标, 档案, 设置, 发版,
   or Obsidian 插件. Project rules override generic Obsidian plugin advice.
-when-to-use: >-
-  Editing src/, styles.css, manifest.json, main.js, esbuild.config.mjs,
-  eslint.config.mts, package.json scripts, or .github/workflows in this
-  repository. Also /dev. This skill is for this repository only.
 license: GPL-3.0-only
 metadata:
   version: "2.0.0"
@@ -22,10 +18,13 @@ metadata:
 
 This skill is for this repository only. It adapts the Obsidian plugin rules named in `metadata.adapted-from`. When those rules disagree with this file, follow this file. Do not scaffold a new plugin. Do not rename the plugin id. Do not turn this repo into a web app.
 
+Editing src/, styles.css, manifest.json, main.js, esbuild.config.mjs, eslint.config.mts, package.json scripts, or .github/workflows in this repository. Also /dev. This skill is for this repository only.
+
 ## Read before editing
 
 | Before you… | Open |
 |---|---|
+| Consolidate documentation or look up domain terms and architecture decisions | [SpecDev developer documentation index](../../../speculo/.speculo/specdev/.config/domain-layout.md) |
 | Move files, add a product, add a command, add UI copy, or change settings pages | [references/architecture.md](references/architecture.md) |
 | Call the Obsidian API, or edit settings UI, CSS, or DOM | [references/obsidian-api.md](references/obsidian-api.md) |
 | Render a product surface inside a leaf | [../view-render/SKILL.md](../view-render/SKILL.md) |

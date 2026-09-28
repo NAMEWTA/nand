@@ -14,7 +14,7 @@
 | --- | --- |
 | `docs/contacts.md` | 用户操作、筛选语义、关系方向、目录切换、备份恢复及冲突处理；不在交接中重复正文 |
 | `src/contacts/persist/format-guide.md` | 随插件分发的字段与 Markdown 格式协议 |
-| `docs/contacts-development.md` | 实现入口、数据流程、测试命令、验证记录与尚未完成的实机清单 |
+| `<Path>{roots.state}/specdev/archive/2026-09/2026-09-28-docs-knowledge-consolidation/evidence/original-docs/contacts-development.md</Path>` | 实现入口、数据流程、测试命令、验证记录与尚未完成的实机清单 |
 | `.agents/skills/dev/references/architecture.md` | 产品边界、持久化所有权、设置与生命周期约定 |
 | `.agents/skills/dev/references/build-and-release.md` | 构建、回归检查及发布规则 |
 | `README.md`、`CHANGELOG.md` | 对外入口与变更摘要 |
@@ -29,18 +29,18 @@
 
 ## 验证状态与限制
 
-长期验证记录及清单见 `docs/contacts-development.md`。文档完善阶段再次通过档案测试 19/19、生产构建、lint（0 errors、197 warnings），并检查了 34 个本地文档链接、格式说明表格能被解析、说明文件不会被误识别为档案，以及重建后的 `main.js` 包含新版说明。
+长期验证记录及清单见 `<Path>{roots.state}/specdev/archive/2026-09/2026-09-28-docs-knowledge-consolidation/evidence/original-docs/contacts-development.md</Path>`。文档完善阶段再次通过档案测试 19/19、生产构建、lint（0 errors、197 warnings），并检查了 34 个本地文档链接、格式说明表格能被解析、说明文件不会被误识别为档案，以及重建后的 `main.js` 包含新版说明。
 
 这些结果对应当时工作区，不是对当前 HEAD 所有后续提交的重新验证。临时 DOM 冒烟检查不属于已提交的长期测试入口；不要依赖临时文件继续工作。真实 Obsidian 桌面、弹出窗口和手机验收仍未完成，不可将共享／看板的移动稳定性脚本通过写成档案真机验收通过。
 
 ## 下一会话建议
 
-1. 先阅读 `docs/contacts-development.md` 与相关 skills，确认当前分支和工作区，再执行其中的实机验收清单。
+1. 先阅读 `<Path>{roots.state}/specdev/archive/2026-09/2026-09-28-docs-knowledge-consolidation/evidence/original-docs/contacts-development.md</Path>` 与相关 skills，确认当前分支和工作区，再执行其中的实机验收清单。
 2. 优先检查卡片／详情导航、手机菜单、窗口迁移、双窗口编辑冲突、目录切换及停用后的文件可读性；记录应用版本、平台和实际结果。
 3. 如发现问题，按复现场景修复并运行对应回归检查。没有行为变化时不必重写测试；修改运行时格式说明后需要重建 `main.js`。
 4. 把验证结果补回已有开发说明，避免另起一份重复的功能方案。CSV／Excel 导入、通讯录同步、关系图和提醒不属于已实现范围，新增这些功能需要后续任务明确范围。
 
-两个容易遗漏的维护细节：格式说明在用户目录中仅缺失时创建，升级不覆盖旧说明；说明中的 YAML 范例不能让整份说明被解析器初筛成档案。具体规则见 `docs/contacts-development.md`，以代码和格式协议为准。
+两个容易遗漏的维护细节：格式说明在用户目录中仅缺失时创建，升级不覆盖旧说明；说明中的 YAML 范例不能让整份说明被解析器初筛成档案。具体规则见 `<Path>{roots.state}/specdev/archive/2026-09/2026-09-28-docs-knowledge-consolidation/evidence/original-docs/contacts-development.md</Path>`，以代码和格式协议为准。
 
 ## SpecDev 状态
 

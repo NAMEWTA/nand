@@ -35,7 +35,6 @@ NAND 是 NAMEWTA 的通用 Obsidian 工作台。看板、编辑器、图标、�
 
 评论的删除操作位于卡片右下角的“更多”菜单。Agent 设置按 CLI 路径、权限模式和额外参数分行显示；看板主题与已有配置保持兼容。
 
-此前的界面调整见 [UI 验证记录](docs/ui-review-2026-09-26.md)。最新问题修复及验证范围见 [Issue 修复记录](docs/issue-fixes-2026-09-27.md)。
 
 ## 档案面板
 
@@ -45,7 +44,7 @@ NAND 是 NAMEWTA 的通用 Obsidian 工作台。看板、编辑器、图标、�
 2. 点击功能区的通讯录图标，或执行 **NAND：打开档案**，开始新增联系人和企业。
 3. 日常通过面板操作，每份档案保存为独立 Markdown 文件，便于直接阅读、备份或交给 AI 处理。停用或卸载 NAND 后，已保存的文件仍保留。
 
-卡片最多显示 5 或 6 列，随窗口宽度调整。更换资料文件夹只切换读取位置，不自动搬移文件。完整步骤见 [档案使用指南](docs/contacts.md)，维护与验收见 [档案开发说明](docs/contacts-development.md)。
+卡片最多显示 5 或 6 列，随窗口宽度调整。更换资料文件夹只切换读取位置，不自动搬移文件。完整步骤见 [档案使用指南](docs/contacts.md)。
 
 ## 图标
 
@@ -53,11 +52,11 @@ NAND 是 NAMEWTA 的通用 Obsidian 工作台。看板、编辑器、图标、�
 
 先打开笔记，再从命令面板执行 **NAND：更改当前文件的图标**。批量规则从 **设置 → NAND → 图标 → 规则书 → 管理** 打开。
 
-操作步骤、默认设置与备份恢复见 [图标使用指南](docs/icons.md)；领域结构、上游对照和桌面截图见 [迁移实现与验证记录](docs/iconic-port.md)。使用时请停用独立的 Iconic 插件；NAND 不自动导入其数据。
+操作步骤、默认设置与备份恢复见 [图标使用指南](docs/icons.md)。使用时请停用独立的 Iconic 插件；NAND 不自动导入其数据。
 
 ## 开发与变更
 
-当前未发布变更见 [变更日志](CHANGELOG.md)。开发前阅读 [项目开发规范](.agents/skills/dev/SKILL.md)；目录边界、持久化约定和验证命令均由该规范索引。
+当前未发布变更见 [变更日志](CHANGELOG.md)。维护者从 [开发文档索引](speculo/.speculo/specdev/.config/domain-layout.md) 查阅领域术语、架构决策与历史证据。docs 只提供用户使用说明。
 
 ## 参考项目与许可证
 
@@ -65,6 +64,4 @@ NAND 是 NAMEWTA 的通用 Obsidian 工作台。看板、编辑器、图标、�
 
 图标领域移植自 [gfxholo/iconic 1.1.10](https://github.com/gfxholo/iconic/tree/268e133c6f99dcef670cbda0d25a74b8239aa099)（MIT-0）。图标检索数据与 Emoji 数据的许可证见 [NOTICE](src/core/icons/res/NOTICE.txt)，并随构建产物保留。
 
-智能体工作台升级与 issue 回归记录见 [实施记录](docs/agent-upgrade-2026-09-27.md)。Pi 的可选版本检查读取 npm 包 `@mariozechner/pi-coding-agent`；与其他更新检查共用开关。
-
-开发结构与验证范围见 [分层重构记录](docs/architecture-refactor.md)。
+Pi 的可选版本检查读取 npm 包 `@mariozechner/pi-coding-agent`；与其他更新检查共用开关。

@@ -27,7 +27,7 @@
 | Pi | `PI_CODING_AGENT_DIR/sessions` JSONL |
 | Grok | `GROK_HOME/sessions` 中的 `session.json` 与 `chat_history.jsonl` |
 
-NAND 的改名、标签、收藏和归档保存在 `.nand/terminal-agent/<device>/history.json`，不会修改原生日志。索引位于同目录的 `index.sqlite`，导出位于 `.nand/terminal-agent/exports/`。导出后可用 Obsidian 文件浏览器打开 Markdown。历史不会实时自动刷新；需要最新记录时，使用刷新按钮。
+NAND 的改名、标签、收藏和归档保存在 `.nand/terminal-agent/<device>/history.json`，不会修改原生日志。索引位于同目录的 `index.sqlite`，导出位于 `.nand/terminal-agent/exports/`。导出后可用 Obsidian 文件浏览器打开 Markdown。修改过的日志会重新完整解析，未变文件跳过；当前没有按字节偏移续读或文件监视，使用刷新按钮更新历史。
 
 ## 额度与用量
 
@@ -37,8 +37,11 @@ Token 来自原生日志。输入统一包含 cache read/write；缓存数字是
 
 自动化使用运行前后原生累计值的差额。缺少基线或结束时日志尚未落盘，会缺少本次统计；获取用量有等待上限，失败不改变任务的原生完成结果。Pi 或其他没有订阅额度接口的提供方，不会伪造剩余百分比。
 
-## 使用限制
+## 实现与验证边界
 
-先在本机安装并登录所需 CLI，完成它自己的目录信任和权限提示。工作台依赖桌面终端服务；Obsidian 退出后不能继续运行任务。
+索引解析在 Rust 的后台阻塞任务中运行，通过带请求 ID 的 `agent_data` WebSocket 消息返回；不在 Obsidian 渲染线程或 PTY reactor 中解析日志。查询和扫描可以取消，索引写入限制在当前库的 `.nand` 下。
 
-不同 CLI 提供的历史、完成事件和额度信息不同，缺失信息会显示未知或不可用。六种 CLI 的真实账号流程尚未全部验证，Windows、macOS 钥匙串和实际订阅额度仍需要在对应设备上确认。工作台截图用于说明布局，不表示这些场景均已验证。
+当前自动化测试使用本地原生格式样本、生成的 Pi/OpenCode 扩展及真实 Linux PTY 服务。并未完成六个 CLI 的真实账户端到端验证，macOS 钥匙串、Windows 运行与真实订阅接口仍需目标设备验收。具体记录见[实施记录](agent-upgrade-2026-09-27.md)。
+
+
+开发安装需配套本次构建的 Rust 服务：`cargo build --locked --release --manifest-path processes/rust-terminal-servers/Cargo.toml`。Linux x64 产物在 `processes/rust-terminal-servers/target/release/rust-terminal-servers`，复制到测试库插件目录的 `binaries/rust-terminal-servers-linux-x64` 并启用本地离线服务模式。其他平台应使用对应构建产物；本轮没有发布二进制到 GitHub。

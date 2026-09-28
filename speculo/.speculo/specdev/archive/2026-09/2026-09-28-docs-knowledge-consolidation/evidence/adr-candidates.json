@@ -1,0 +1,145 @@
+[
+  {
+    "id": "ADR-0001",
+    "filename": "0001-layered-dependency-boundaries.md",
+    "title": "五层依赖边界",
+    "code": [
+      "scripts/verify-architecture.mjs",
+      "src/plugin/workflows/automation-host.ts",
+      "src/core/contacts/application.ts"
+    ],
+    "originals": [
+      "architecture-refactor.md"
+    ]
+  },
+  {
+    "id": "ADR-0002",
+    "filename": "0002-native-host-preact-surfaces.md",
+    "title": "原生宿主生命周期与 Preact 业务界面",
+    "code": [
+      "src/view/dashboard/renderer/render-context.ts",
+      "src/view/dashboard/ui/panel-modal.ts",
+      "src/view/dashboard/view/lifecycle.ts",
+      "scripts/verify-card-panels.ts"
+    ],
+    "originals": [
+      "architecture-refactor.md",
+      "ui-review-2026-09-26.md"
+    ]
+  },
+  {
+    "id": "ADR-0003",
+    "filename": "0003-pty-session-view-lifetimes.md",
+    "title": "终端会话与叶子生命周期分离",
+    "code": [
+      "src/platform/desktop/terminal/terminal-service.ts",
+      "src/platform/desktop/terminal/pty-session.ts",
+      "src/view/terminal/runtime/terminal-renderers.ts",
+      "src/view/terminal/terminal-view.ts"
+    ],
+    "originals": [
+      "architecture-refactor.md",
+      "agent-workbench.md",
+      "agent-upgrade-2026-09-27.md"
+    ]
+  },
+  {
+    "id": "ADR-0004",
+    "filename": "0004-vault-scoped-native-history.md",
+    "title": "当前库范围内的只读原生历史",
+    "code": [
+      "processes/rust-terminal-servers/src/agent_data.rs",
+      "src/platform/obsidian/ai-vault/service.ts",
+      "src/platform/desktop/ai-vault/canonical-cwd.ts",
+      "src/platform/terminal-server/agent-data-client.ts"
+    ],
+    "originals": [
+      "agent-workbench.md",
+      "agent-upgrade-2026-09-27.md"
+    ]
+  },
+  {
+    "id": "ADR-0005",
+    "filename": "0005-contacts-markdown-source.md",
+    "title": "档案以可见 Markdown 为资料来源",
+    "code": [
+      "src/core/contacts/model.ts",
+      "src/core/contacts/persist/markdown.ts",
+      "src/core/contacts/index-store.ts",
+      "src/core/contacts/application.ts",
+      "src/platform/obsidian/contacts/controller.ts",
+      "scripts/verify-contacts.ts"
+    ],
+    "originals": [
+      "contacts.md",
+      "contacts-development.md",
+      "agent-upgrade-2026-09-27.md"
+    ]
+  },
+  {
+    "id": "ADR-0006",
+    "filename": "0006-comment-sidecar-storage.md",
+    "title": "评论旁路保存且不改写笔记",
+    "code": [
+      "src/core/comments/store.ts",
+      "src/core/comments/anchor.ts",
+      "src/platform/obsidian/comments/vault-fs.ts",
+      "src/view/editor/comments/popover-coordinator.ts",
+      "src/view/editor/comments/selection-popover.ts",
+      "scripts/verify-editor-comments.ts"
+    ],
+    "originals": [
+      "architecture-refactor.md",
+      "issue-23-25-fixes.md",
+      "issue-fixes-2026-09-27.md"
+    ]
+  },
+  {
+    "id": "ADR-0007",
+    "filename": "0007-device-owned-durable-automation.md",
+    "title": "设备所属自动化先持久化再执行",
+    "code": [
+      "src/core/automations/service.ts",
+      "src/plugin/workflows/automation-host.ts",
+      "src/shared/automation/types.ts",
+      "src/platform/desktop/agent-hooks/native-extensions.ts",
+      "scripts/verify-automation.ts"
+    ],
+    "originals": [
+      "automation.md",
+      "agent-upgrade-2026-09-27.md"
+    ]
+  },
+  {
+    "id": "ADR-0008",
+    "filename": "0008-independent-notification-receipts.md",
+    "title": "通知回执独立于可见收件箱",
+    "code": [
+      "src/core/notifications/service.ts",
+      "src/platform/obsidian/notifications/delivery.ts",
+      "scripts/verify-automation.ts"
+    ],
+    "originals": [
+      "automation.md",
+      "agent-upgrade-2026-09-27.md"
+    ]
+  },
+  {
+    "id": "ADR-0009",
+    "filename": "0009-isolated-iconic-store.md",
+    "title": "Iconic 保留独立领域数据与上游语义",
+    "code": [
+      "src/platform/obsidian/icons/persistence/store.ts",
+      "src/platform/obsidian/icons/host/controller.ts",
+      "src/core/icons/settings/model.ts",
+      "scripts/verify-iconic-port.ts",
+      "scripts/fixtures/iconic/README.md",
+      "esbuild.config.mjs"
+    ],
+    "originals": [
+      "iconic-port.md",
+      "icons.md",
+      "agent-upgrade-2026-09-27.md"
+    ]
+  }
+]

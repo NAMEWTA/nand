@@ -28,31 +28,34 @@ Agent 支持每次新建、复用上次仍存活且空闲的会话、指定原�
 
 ## Agent 能力边界
 
-对外支持 Claude Code、Codex、Gemini、OpenCode、Pi 和 Grok。Pi 指 `@mariozechner/pi-coding-agent`，Grok 指 `xai-org/grok-build`。历史只显示当前库及其子目录中的会话，参见[工作台说明](agent-workbench.md)。
+对外支持 Claude Code、Codex、Gemini、OpenCode、Pi 和 Grok。启动、恢复和原生生命周期实现参考 [Orca 固定提交](https://github.com/stablyai/orca/tree/27b823f934f739bc85914dd717b776835f60bcf7)。Pi 指 `@mariozechner/pi-coding-agent`，Grok 指 `xai-org/grok-build`。历史只显示当前库及其子目录中的会话，参见[工作台说明](agent-workbench.md)。
 
 Claude Code、Codex、Gemini 合并原生 hook，保留用户设置与其他 hook，并备份原文件。Grok 使用独立的 `hooks/nand-status.json`；Pi 安装原生扩展，OpenCode 安装原生插件。托管文件在 NAND 启动环境以外不发送事件。Pi 等待真正 idle/settled，OpenCode 忽略子会话和可恢复错误；不把静默时长当作完成。
 
-CLI 自身的工作目录信任、登录和 hook 权限仍由 CLI 管理，需要先手动完成。对没有原生完成事件的 CLI，运行显示“完成状态未知”，直至真实进程退出或用户停止；不使用输出静默推断成功。输入式 CLI 必须发出可识别的输入就绪信号，否则超时失败，提示手动完成初始化。
+CLI 自身的工作目录信任、登录和 hook 权限仍由 CLI 管理，需要先手动完成。对没有原生完成事件的 CLI，运行显示“完成状态未知”，直至真实进程退出或用户停止；不使用输出静默推断成功。输入式 CLI 必须发出可识别的输入就绪信号，否则超时失败，提示手动完成初始化。新版 Rust 服务报告真实退出码；旧服务的固定退出码不会被视为成功依据。
 
-## 数据与备份
+## 数据与实现位置
 
-| 内容 | 库内位置 |
+| 内容 | 位置 |
 |---|---|
-| 看板待办及提醒 | 原看板笔记 |
-| 档案提醒 | 原档案笔记 |
-| 倒计时和纪念日 | NAND 的小组件设置 |
-| 独立定义、调度进度、运行历史 | `.nand/automation/<device-id>.json` |
-| 通知及投递回执 | `.nand/notifications/` |
-| 自动化终端会话关联 | `.nand/automation-sessions/` |
+| 调度、历史、编辑器和自动化视图 | `src/automation/` |
+| 通知渠道、投递记录和收件箱 | `src/notifications/` |
+| 公共数据结构、接口、任务元数据 | `src/shared/automation/` |
+| 产品组合与注入 | `src/plugin/automation-host.ts` |
+| 原生终端运行和 hook 适配 | `src/terminal-agent/launch/automation-*` |
+| 看板待办定义 | 原任务行的 `nand-task` HTML 注释 |
+| 档案提醒定义 | 原笔记的 `nand:reminders` 区域 |
+| 独立定义、游标、运行快照 | `.nand/automation/<device-id>.json` |
+| 通知记录、会话索引 | `.nand/notifications/`、`.nand/automation-sessions/` |
 
-执行设备标识保存在 Obsidian 本机存储中。同步笔记中的提醒只由绑定设备执行；独立定义和运行历史按设备分文件保存。不要复制本机存储来克隆执行设备。备份时保留相关笔记、插件设置和 `.nand` 数据目录；恢复文件不会把运行设备自动改成另一台机器。
+执行设备标识保存在 Obsidian 本机存储中。同步笔记中的提醒只由绑定设备执行；独立定义和运行历史按设备分文件保存。不要复制本机存储来克隆执行设备。JSON 存储串行写入，先备份上次有效快照，再写主文件；不依赖 Obsidian rename 覆盖已有目标；损坏主文件恢复前另存 `.corrupt`。
 
-删除定义会保留运行快照，列表中仍可查看其历史；清理已结束历史不会删除活动运行。收件箱支持全部已读、清理已读及来源跳转，清理后仍保留防止重复投递的依据。
+## 验证与交付
 
-## 使用限制
+`pnpm run test:automation` 验证调度、恢复、通知去重、元数据和 hook 合并；`test:terminal-agent`、`test:settings-nav`、`test:contacts` 和相关看板回归覆盖现有功能。`node scripts/verify-pty-automation.mjs` 对本机 Rust 服务验证输出、快速退出、非零退出码及关闭进程树。
 
-应用内通知需要 Obsidian 运行，系统通知需要操作系统授权。各 CLI 的登录、目录信任和 hook 权限需要先手动完成；六种 CLI 的真实账号流程以及移动端尚未全部验证。
+隔离 Linux Obsidian 1.13.7 已验证连续保存、运行通知动作及“新建待办”目标选择器响应。尚未安装并实跑全部六个 CLI，也未完成移动端真机验证。系统通知权限、各 CLI 原生 hook 版本兼容、浮动窗口和真实登录流程仍需在目标设备验收。
 
-自动化用量取原生会话累计值在运行前后的差额；取不到基线或原生记录时显示缺失，不推算费用。
+发布工作流从同一个提交构建五个平台的 Rust 服务及校验和，不再上传旧的仓库二进制。本地验证为 Linux x64；其它平台由 CI 构建，尚未在本工作区执行。上游许可见 [Orca MIT 许可](third-party/orca-LICENSE.txt)，完整文本也进入 `main.js` 的构建声明。
 
-相关参考项目的归属见 [Orca MIT 许可](third-party/orca-LICENSE.txt)。
+删除定义会保留运行快照，列表中仍可查看其历史；清理已结束历史不会删除活动运行。收件箱支持全部已读、清理已读及来源跳转，通知回执独立保留，清理后仍不会重复投递。自动化用量取原生会话累计值的运行前后差额；取不到基线或原生记录时不推算。

@@ -20,17 +20,17 @@
 | 需要了解 | 权威入口 |
 |---|---|
 | 用户操作、默认配置、规则、备份恢复与常见问题 | `docs/icons.md` |
-| 固定上游版本、迁移边界、宿主适配、验证矩阵与已知差异 | `docs/iconic-port.md` |
-| 桌面实测截图 | `docs/iconic/` |
+| 固定上游版本、迁移边界、宿主适配、验证矩阵与已知差异 | `<Path>{roots.state}/specdev/archive/2026-09/2026-09-28-docs-knowledge-consolidation/evidence/original-docs/iconic-port.md</Path>` |
+| 桌面实测截图 | `<Path>{roots.state}/specdev/archive/2026-09/2026-09-28-docs-knowledge-consolidation/evidence/original-docs/iconic/</Path>` |
 | 产品领域与文档入口 | `README.md` |
 | 待发布变更 | `CHANGELOG.md` 的“未发布”段落 |
 | 领域边界、生命周期、设置页、持久化命名 | `.agents/skills/dev/references/architecture.md` |
 | API、CSS 与私有 API 类型适配规范 | `.agents/skills/dev/references/obsidian-api.md` |
 | 构建、测试、许可证分发及发布规则 | `.agents/skills/dev/references/build-and-release.md` |
 | 上游测试基线及生成来源 | `scripts/fixtures/iconic/README.md`、`scripts/fixtures/iconic/upstream-1.1.10.json` |
-| 历史 Issue 状态快照的修正注记 | `docs/issue-review-2026-09-27.md` |
+| 历史 Issue 状态快照的修正注记 | `<Path>{roots.state}/specdev/archive/2026-09/2026-09-28-docs-knowledge-consolidation/evidence/original-docs/issue-review-2026-09-27.md</Path>` |
 
-远程需求：https://github.com/NAMEWTA/nand/issues/14 。上游固定版本和提交链接见 `docs/iconic-port.md`，不要依据上游主分支重做迁移。
+远程需求：https://github.com/NAMEWTA/nand/issues/14 。上游固定版本和提交链接见 `<Path>{roots.state}/specdev/archive/2026-09/2026-09-28-docs-knowledge-consolidation/evidence/original-docs/iconic-port.md</Path>`，不要依据上游主分支重做迁移。
 
 ## 保持的用户意图
 
@@ -40,7 +40,7 @@
 
 ## 验证证据的范围
 
-历史执行结果记录在 `docs/iconic-port.md`，此处只记录交接需要的时间边界：
+历史执行结果记录在 `<Path>{roots.state}/specdev/archive/2026-09/2026-09-28-docs-knowledge-consolidation/evidence/original-docs/iconic-port.md</Path>`，此处只记录交接需要的时间边界：
 
 - 实现阶段：构建、lint 和对应回归通过；`test:iconic-port` 的 8 项测试包含 137 条固定上游规则输出；另运行了设置导航、编辑器评论、Issue 回归、路径选择器测试。
 - 桌面阶段：隔离库中实测 Obsidian 1.12.4 和 1.13.7，覆盖选择器保存、规则、声明式/旧版设置、独立存储、外部修改重载、反复启停及卸载清理。截图已保存在项目中，不依赖临时测试进程继续运行。
@@ -49,7 +49,7 @@
 
 ## 后续可接续事项
 
-目前没有本轮任务必须完成的剩余实现。用户若要求继续验收，优先核对 `docs/iconic-port.md` 中仍未覆盖的 Android/iOS 真机、精确的 1.12.0 客户端、第三方主题及快速切换插件组合。已有桌面证据不可替代这些场景。
+目前没有本轮任务必须完成的剩余实现。用户若要求继续验收，优先核对 `<Path>{roots.state}/specdev/archive/2026-09/2026-09-28-docs-knowledge-consolidation/evidence/original-docs/iconic-port.md</Path>` 中仍未覆盖的 Android/iOS 真机、精确的 1.12.0 客户端、第三方主题及快速切换插件组合。已有桌面证据不可替代这些场景。
 
 保留的上游差异及外部规则缓存刷新限制已有文档说明；如用户要求修正，应作为明确的后续行为变更，更新相应测试，不能悄悄改写上游对照基线。若需要提交、推送、发布或远程 Issue 操作，应先结合用户新指令确定范围；本 handoff 不是这些操作的授权。
 
