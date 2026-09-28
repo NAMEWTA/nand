@@ -36,7 +36,7 @@ Spec <Path>{roots.state}/specdev/changes/2026-09-28-issue-36-automation-presenta
 | T-01 | <Path>{roots.state}/specdev/changes/2026-09-28-issue-36-automation-presentation/ticket/01-plan.md</Path> | 运行与通知结构化状态按当前语言展示 | — | deep | high | yes | codex-issue-planning | AC-001, AC-002, AC-003 | G1/G2/G3 | done |
 | T-02 | <Path>{roots.state}/specdev/changes/2026-09-28-issue-36-automation-presentation/ticket/02-plan.md</Path> | 清理运行历史后保留准确已处理状态 | T-01 | standard | medium | yes | codex-issue-planning | AC-004, AC-005 | G1/G2/G3 | done |
 | T-03 | <Path>{roots.state}/specdev/changes/2026-09-28-issue-36-automation-presentation/ticket/03-plan.md</Path> | 自动化管理界面有可见筛选与稳定阅读区域 | T-02 | standard | medium | yes | codex-issue-planning | AC-006, AC-007 | G1/G2/G3 | done |
-| T-04 | <Path>{roots.state}/specdev/changes/2026-09-28-issue-36-automation-presentation/ticket/04-plan.md</Path> | 自动化入口命名与帮助说明清晰 | T-03 | standard | medium | yes | codex-issue-planning | AC-008, AC-009 | G1/G2/G3 | ready |
+| T-04 | <Path>{roots.state}/specdev/changes/2026-09-28-issue-36-automation-presentation/ticket/04-plan.md</Path> | 自动化入口命名与帮助说明清晰 | T-03 | standard | medium | yes | codex-issue-planning | AC-008, AC-009 | G1/G2/G3 | done |
 | T-05 | <Path>{roots.state}/specdev/changes/2026-09-28-issue-36-automation-presentation/ticket/05-plan.md</Path> | 首页自动化开关控制执行而保留历史 | T-04 | deep | high | yes | codex-issue-planning | AC-010, AC-011, AC-012, AC-013 | G1/G2/G3 | ready |
 
 frontmatter 是 Ticket 状态权威；本表只作投影。
@@ -62,8 +62,8 @@ frontmatter 是 Ticket 状态权威；本表只作投影。
 | AC-005 | T-02 | 对应 Ticket 行为验证矩阵 | covered | evidence/T-02.md passed |
 | AC-006 | T-03 | 对应 Ticket 行为验证矩阵 | covered | evidence/T-03.md passed |
 | AC-007 | T-03 | 对应 Ticket 行为验证矩阵 | covered | evidence/T-03.md passed |
-| AC-008 | T-04 | 对应 Ticket 行为验证矩阵 | covered | 实施证据尚未产生 |
-| AC-009 | T-04 | 对应 Ticket 行为验证矩阵 | covered | 实施证据尚未产生 |
+| AC-008 | T-04 | 对应 Ticket 行为验证矩阵 | covered | evidence/T-04.md passed |
+| AC-009 | T-04 | 对应 Ticket 行为验证矩阵 | covered | evidence/T-04.md passed |
 | AC-010 | T-05 | 对应 Ticket 行为验证矩阵 | covered | 实施证据尚未产生 |
 | AC-011 | T-05 | 对应 Ticket 行为验证矩阵 | covered | 实施证据尚未产生 |
 | AC-012 | T-05 | 对应 Ticket 行为验证矩阵 | covered | 实施证据尚未产生 |

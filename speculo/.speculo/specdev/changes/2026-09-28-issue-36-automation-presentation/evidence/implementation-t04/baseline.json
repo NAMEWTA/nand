@@ -1,0 +1,20 @@
+{
+  "commands": [
+    {
+      "id": "nand:open-automations",
+      "name": "NAND: 自动化"
+    },
+    {
+      "id": "nand:open-notifications",
+      "name": "NAND: 通知中心"
+    }
+  ],
+  "text": "自动化Obsidian 运行期间执行；收起面板不停止任务。自动化打开通知中心打开通知渠道支持应用内和桌面系统通知。邮件、短信需配置服务商，目前尚未启用。会话方式Claude Code、Codex、Gemini、Grok、Pi、OpenCode 使用原生生命周期事件，并保留已有用户 hook。缺少事件时，在进程退出前显示状态未知。CLI 信任提示需要手动完成。",
+  "headings": [
+    "自动化",
+    "自动化",
+    "通知中心",
+    "通知渠道",
+    "会话方式"
+  ]
+}

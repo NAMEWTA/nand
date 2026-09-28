@@ -39,7 +39,7 @@
     "history": []
   },
   "created_at": "2026-09-28T05:55:43.895113+00:00",
-  "updated_at": "2026-09-28T09:19:17.016690+00:00",
+  "updated_at": "2026-09-28T09:26:37.223986+00:00",
   "completed_at": null,
   "archived": false,
   "archive_path": null,
@@ -171,6 +171,49 @@
           "evidence": "<Path>{roots.state}/specdev/changes/2026-09-28-issue-36-automation-presentation/evidence/T-03.md</Path>"
         },
         "evidence": "<Path>{roots.state}/specdev/changes/2026-09-28-issue-36-automation-presentation/evidence/T-03.md</Path>",
+        "attempts": 1,
+        "promotion_status": "applied"
+      }
+    },
+    {
+      "ticket_id": "T-04",
+      "owner": "codex-issue-planning",
+      "implementation_owner": "codex-issue-planning",
+      "integration_owner": "codex-issue-planning",
+      "provider": "git",
+      "base_sha": "187d1604f1421a1aed899d10a9222574329d5a6d",
+      "parent_branch": "main",
+      "branch": "main",
+      "workspace_ref": "current",
+      "source_checkpoint": "db826cd19d286bda47ac30e90c9885e93b31a4e8",
+      "status": "integrated",
+      "updated_at": "2026-09-28T09:26:37.223986+00:00",
+      "integration": {
+        "status": "passed",
+        "parent_ref": "refs/heads/main",
+        "parent_before_sha": "187d1604f1421a1aed899d10a9222574329d5a6d",
+        "source_sha": "db826cd19d286bda47ac30e90c9885e93b31a4e8",
+        "candidate_sha": null,
+        "candidate_tree_sha": null,
+        "candidate_branch": null,
+        "candidate_workspace_ref": null,
+        "result_sha": "db826cd19d286bda47ac30e90c9885e93b31a4e8",
+        "method": "direct-parent",
+        "conflict_paths": [],
+        "verification": "passed",
+        "full_suite": {
+          "required": true,
+          "status": "passed",
+          "reason": "本票要求的全部测试与匹配回归、build/lint，见命令表",
+          "evidence": "<Path>{roots.state}/specdev/changes/2026-09-28-issue-36-automation-presentation/evidence/T-04.md</Path>"
+        },
+        "e2e": {
+          "required": true,
+          "status": "passed",
+          "reason": "本票所要求的宿主行为逐项验收见 Ticket Evidence",
+          "evidence": "<Path>{roots.state}/specdev/changes/2026-09-28-issue-36-automation-presentation/evidence/T-04.md</Path>"
+        },
+        "evidence": "<Path>{roots.state}/specdev/changes/2026-09-28-issue-36-automation-presentation/evidence/T-04.md</Path>",
         "attempts": 1,
         "promotion_status": "applied"
       }
