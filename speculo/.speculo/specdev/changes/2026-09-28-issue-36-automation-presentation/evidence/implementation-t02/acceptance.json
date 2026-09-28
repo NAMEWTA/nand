@@ -1,0 +1,1178 @@
+{
+  "passed": true,
+  "rows": [
+    {
+      "lang": "zh",
+      "labels": [
+        {
+          "title": "Clear success",
+          "status": "已处理（历史已清理）"
+        },
+        {
+          "title": "Clear failure",
+          "status": "已处理（历史已清理）"
+        },
+        {
+          "title": "Clear skipped",
+          "status": "已处理（历史已清理）"
+        },
+        {
+          "title": "Clear future",
+          "status": "待执行"
+        },
+        {
+          "title": "Clear manual",
+          "status": "待执行"
+        },
+        {
+          "title": "Clear recurring",
+          "status": "待执行"
+        }
+      ],
+      "runs": 0,
+      "cursors": {
+        "widget:ann-target:1767243600000": 1767243600000,
+        "clear-success:1": 1790585961929,
+        "clear-failure:1": 1790585961929,
+        "clear-skipped:1": 1790585766929
+      },
+      "notifications": {
+        "records": [
+          {
+            "id": "e444eff8-7036-447c-b8a0-8db9efbdd587",
+            "title": "synthetic-preserved-zh-0",
+            "body": "失败: 请先手动启动一次该智能体，确认已配置的权限模式",
+            "target": {
+              "runId": "e444eff8-7036-447c-b8a0-8db9efbdd587",
+              "automationId": "974751ac-efcb-450b-8eb0-d232084c66f3"
+            },
+            "channels": [
+              "in-app"
+            ],
+            "createdAt": 1790578109186,
+            "read": false,
+            "deliveries": {
+              "in-app": "sent"
+            }
+          },
+          {
+            "id": "87a1be81-47f1-4d37-b3ad-2761613b5313",
+            "title": "synthetic-preserved-en-1",
+            "body": "Failed: Launch this agent manually once to acknowledge its configured permission mode",
+            "target": {
+              "runId": "87a1be81-47f1-4d37-b3ad-2761613b5313",
+              "automationId": "1a2cbac6-010a-4183-88e8-1b67b885e17e"
+            },
+            "channels": [
+              "in-app"
+            ],
+            "createdAt": 1790578111005,
+            "read": false,
+            "deliveries": {
+              "in-app": "sent"
+            }
+          },
+          {
+            "id": "b8a1ea8e-7e97-4ee0-88df-6e349899e2e0",
+            "title": "synthetic-preserved-zh-2",
+            "body": "失败: 请先手动启动一次该智能体，确认已配置的权限模式",
+            "target": {
+              "runId": "b8a1ea8e-7e97-4ee0-88df-6e349899e2e0",
+              "automationId": "138ce600-2f73-4042-b880-3fff9331a4bc"
+            },
+            "channels": [
+              "in-app"
+            ],
+            "createdAt": 1790578112828,
+            "read": false,
+            "deliveries": {
+              "in-app": "sent"
+            }
+          },
+          {
+            "id": "a2e32693-dd1f-4402-ac1f-97fec01099bf",
+            "title": "synthetic-preserved-zh-0",
+            "body": "已完成: 0",
+            "target": {
+              "runId": "a2e32693-dd1f-4402-ac1f-97fec01099bf",
+              "automationId": "974751ac-efcb-450b-8eb0-d232084c66f3",
+              "terminalId": "terminal-bdf4a25a-2bd1-4579-adb3-6e5c2c41c4ce"
+            },
+            "channels": [
+              "in-app"
+            ],
+            "createdAt": 1790578237069,
+            "read": true,
+            "deliveries": {
+              "in-app": "sent"
+            }
+          },
+          {
+            "id": "aabe0422-075e-49a9-acc1-4ee44112ea8c",
+            "title": "Countdown 100",
+            "body": "倒计时提醒：Countdown 100 还有 95 天！",
+            "source": {
+              "kind": "widget",
+              "path": "dashboard.md",
+              "id": "widget:count-100"
+            },
+            "target": {
+              "runId": "aabe0422-075e-49a9-acc1-4ee44112ea8c",
+              "automationId": "widget:count-100"
+            },
+            "channels": [
+              "in-app"
+            ],
+            "createdAt": 1790579094925,
+            "read": false,
+            "deliveries": {
+              "in-app": "sent"
+            }
+          },
+          {
+            "id": "widget-test-legacy",
+            "title": "Widget test legacy",
+            "body": "Preserved user body legacy",
+            "source": {
+              "kind": "widget",
+              "path": "dashboard",
+              "id": "widget:count-100"
+            },
+            "channels": [
+              "in-app"
+            ],
+            "createdAt": 1790579094933,
+            "read": true,
+            "deliveries": {
+              "in-app": "sent"
+            }
+          },
+          {
+            "id": "widget-test-nested",
+            "title": "Widget test nested",
+            "body": "Preserved user body nested",
+            "source": {
+              "kind": "widget",
+              "path": "Boards/Nested",
+              "id": "widget:ann-target"
+            },
+            "channels": [
+              "in-app"
+            ],
+            "createdAt": 1790579094933,
+            "read": true,
+            "deliveries": {
+              "in-app": "sent"
+            }
+          },
+          {
+            "id": "widget-test-deletedWidget",
+            "title": "Widget test deletedWidget",
+            "body": "Preserved user body deletedWidget",
+            "source": {
+              "kind": "widget",
+              "path": "dashboard.md",
+              "id": "widget:gone"
+            },
+            "channels": [
+              "in-app"
+            ],
+            "createdAt": 1790579094933,
+            "read": false,
+            "deliveries": {
+              "in-app": "sent"
+            }
+          },
+          {
+            "id": "widget-test-deletedFile",
+            "title": "Widget test deletedFile",
+            "body": "Preserved user body deletedFile",
+            "source": {
+              "kind": "widget",
+              "path": "missing.md",
+              "id": "widget:count-100"
+            },
+            "channels": [
+              "in-app"
+            ],
+            "createdAt": 1790579094933,
+            "read": false,
+            "deliveries": {
+              "in-app": "sent"
+            }
+          },
+          {
+            "id": "widget-test-disabled",
+            "title": "Widget test disabled",
+            "body": "Preserved user body disabled",
+            "source": {
+              "kind": "widget",
+              "path": "dashboard.md",
+              "id": "widget:count-100"
+            },
+            "channels": [
+              "in-app"
+            ],
+            "createdAt": 1790579094933,
+            "read": false,
+            "deliveries": {
+              "in-app": "sent"
+            }
+          },
+          {
+            "id": "ca1da208-2aeb-4cd1-b721-18a5c824a93c",
+            "title": "Presentation source failure 原文",
+            "body": "失败：来源不存在或包含重复的任务标识",
+            "presentation": {
+              "kind": "automation-run",
+              "status": "failed",
+              "message": "来源不存在或包含重复的任务标识",
+              "errorCode": "sourceMissing"
+            },
+            "target": {
+              "runId": "ca1da208-2aeb-4cd1-b721-18a5c824a93c",
+              "automationId": "presentation-missing-source"
+            },
+            "channels": [
+              "in-app"
+            ],
+            "createdAt": 1790585469254,
+            "read": false,
+            "deliveries": {
+              "in-app": "sent"
+            }
+          },
+          {
+            "id": "c9be3739-34a8-4603-9490-067283e2b044",
+            "title": "Presentation exact reminder 原文",
+            "body": "Presentation exact reminder 原文",
+            "target": {
+              "runId": "c9be3739-34a8-4603-9490-067283e2b044",
+              "automationId": "presentation-reminder"
+            },
+            "channels": [
+              "in-app"
+            ],
+            "createdAt": 1790585469274,
+            "read": false,
+            "deliveries": {
+              "in-app": "sent"
+            }
+          },
+          {
+            "id": "2ec8776e-3949-4afb-8182-6f41cd6f225b",
+            "title": "Presentation CLI 原文",
+            "body": "已完成：进程已退出，退出码为 0",
+            "presentation": {
+              "kind": "automation-run",
+              "status": "succeeded",
+              "message": "0",
+              "errorCode": "processExit",
+              "errorParams": {
+                "code": 0
+              }
+            },
+            "target": {
+              "runId": "2ec8776e-3949-4afb-8182-6f41cd6f225b",
+              "automationId": "presentation-cli",
+              "terminalId": "terminal-eb45eef4-417e-42e3-99c7-adb0ba4faf18"
+            },
+            "channels": [
+              "in-app"
+            ],
+            "createdAt": 1790585469392,
+            "read": false,
+            "deliveries": {
+              "in-app": "sent"
+            }
+          },
+          {
+            "id": "presentation-legacy-run",
+            "title": "Presentation legacy notification",
+            "body": "Legacy notification English 原文",
+            "createdAt": 1790585469244,
+            "channels": [
+              "in-app"
+            ],
+            "read": false,
+            "deliveries": {
+              "in-app": "sent"
+            }
+          },
+          {
+            "id": "1a471a43-dd77-4c96-b989-21da6cecb4ff",
+            "title": "Clear success",
+            "body": "Clear-history fixture 原文",
+            "target": {
+              "runId": "1a471a43-dd77-4c96-b989-21da6cecb4ff",
+              "automationId": "clear-success"
+            },
+            "channels": [
+              "in-app"
+            ],
+            "createdAt": 1790585967002,
+            "read": false,
+            "deliveries": {
+              "in-app": "sent"
+            }
+          },
+          {
+            "id": "9d2d8061-62c1-4ef3-8d51-e8fac8fd7bca",
+            "title": "Clear failure",
+            "body": "失败：来源不存在或包含重复的任务标识",
+            "presentation": {
+              "kind": "automation-run",
+              "status": "failed",
+              "message": "来源不存在或包含重复的任务标识",
+              "errorCode": "sourceMissing"
+            },
+            "target": {
+              "runId": "9d2d8061-62c1-4ef3-8d51-e8fac8fd7bca",
+              "automationId": "clear-failure"
+            },
+            "channels": [
+              "in-app"
+            ],
+            "createdAt": 1790585967020,
+            "read": false,
+            "deliveries": {
+              "in-app": "sent"
+            }
+          }
+        ],
+        "receipts": {
+          "e444eff8-7036-447c-b8a0-8db9efbdd587": {
+            "in-app": "sent"
+          },
+          "87a1be81-47f1-4d37-b3ad-2761613b5313": {
+            "in-app": "sent"
+          },
+          "b8a1ea8e-7e97-4ee0-88df-6e349899e2e0": {
+            "in-app": "sent"
+          },
+          "a2e32693-dd1f-4402-ac1f-97fec01099bf": {
+            "in-app": "sent"
+          },
+          "aabe0422-075e-49a9-acc1-4ee44112ea8c": {
+            "in-app": "sent"
+          },
+          "widget-test-legacy": {
+            "in-app": "sent"
+          },
+          "widget-test-nested": {
+            "in-app": "sent"
+          },
+          "widget-test-deletedWidget": {
+            "in-app": "sent"
+          },
+          "widget-test-deletedFile": {
+            "in-app": "sent"
+          },
+          "widget-test-disabled": {
+            "in-app": "sent"
+          },
+          "ca1da208-2aeb-4cd1-b721-18a5c824a93c": {
+            "in-app": "sent"
+          },
+          "c9be3739-34a8-4603-9490-067283e2b044": {
+            "in-app": "sent"
+          },
+          "2ec8776e-3949-4afb-8182-6f41cd6f225b": {
+            "in-app": "sent"
+          },
+          "presentation-legacy-run": {
+            "in-app": "sent"
+          },
+          "1a471a43-dd77-4c96-b989-21da6cecb4ff": {
+            "in-app": "sent"
+          },
+          "9d2d8061-62c1-4ef3-8d51-e8fac8fd7bca": {
+            "in-app": "sent"
+          }
+        }
+      }
+    },
+    {
+      "lang": "en",
+      "labels": [
+        {
+          "title": "Clear success",
+          "status": "Processed (history cleared)"
+        },
+        {
+          "title": "Clear failure",
+          "status": "Processed (history cleared)"
+        },
+        {
+          "title": "Clear skipped",
+          "status": "Processed (history cleared)"
+        },
+        {
+          "title": "Clear future",
+          "status": "Pending"
+        },
+        {
+          "title": "Clear manual",
+          "status": "Pending"
+        },
+        {
+          "title": "Clear recurring",
+          "status": "Pending"
+        }
+      ],
+      "runs": 0,
+      "cursors": {
+        "widget:ann-target:1767243600000": 1767243600000,
+        "clear-success:1": 1790585961929,
+        "clear-failure:1": 1790585961929,
+        "clear-skipped:1": 1790585766929
+      },
+      "notifications": {
+        "records": [
+          {
+            "id": "e444eff8-7036-447c-b8a0-8db9efbdd587",
+            "title": "synthetic-preserved-zh-0",
+            "body": "失败: 请先手动启动一次该智能体，确认已配置的权限模式",
+            "target": {
+              "runId": "e444eff8-7036-447c-b8a0-8db9efbdd587",
+              "automationId": "974751ac-efcb-450b-8eb0-d232084c66f3"
+            },
+            "channels": [
+              "in-app"
+            ],
+            "createdAt": 1790578109186,
+            "read": false,
+            "deliveries": {
+              "in-app": "sent"
+            }
+          },
+          {
+            "id": "87a1be81-47f1-4d37-b3ad-2761613b5313",
+            "title": "synthetic-preserved-en-1",
+            "body": "Failed: Launch this agent manually once to acknowledge its configured permission mode",
+            "target": {
+              "runId": "87a1be81-47f1-4d37-b3ad-2761613b5313",
+              "automationId": "1a2cbac6-010a-4183-88e8-1b67b885e17e"
+            },
+            "channels": [
+              "in-app"
+            ],
+            "createdAt": 1790578111005,
+            "read": false,
+            "deliveries": {
+              "in-app": "sent"
+            }
+          },
+          {
+            "id": "b8a1ea8e-7e97-4ee0-88df-6e349899e2e0",
+            "title": "synthetic-preserved-zh-2",
+            "body": "失败: 请先手动启动一次该智能体，确认已配置的权限模式",
+            "target": {
+              "runId": "b8a1ea8e-7e97-4ee0-88df-6e349899e2e0",
+              "automationId": "138ce600-2f73-4042-b880-3fff9331a4bc"
+            },
+            "channels": [
+              "in-app"
+            ],
+            "createdAt": 1790578112828,
+            "read": false,
+            "deliveries": {
+              "in-app": "sent"
+            }
+          },
+          {
+            "id": "a2e32693-dd1f-4402-ac1f-97fec01099bf",
+            "title": "synthetic-preserved-zh-0",
+            "body": "已完成: 0",
+            "target": {
+              "runId": "a2e32693-dd1f-4402-ac1f-97fec01099bf",
+              "automationId": "974751ac-efcb-450b-8eb0-d232084c66f3",
+              "terminalId": "terminal-bdf4a25a-2bd1-4579-adb3-6e5c2c41c4ce"
+            },
+            "channels": [
+              "in-app"
+            ],
+            "createdAt": 1790578237069,
+            "read": true,
+            "deliveries": {
+              "in-app": "sent"
+            }
+          },
+          {
+            "id": "aabe0422-075e-49a9-acc1-4ee44112ea8c",
+            "title": "Countdown 100",
+            "body": "倒计时提醒：Countdown 100 还有 95 天！",
+            "source": {
+              "kind": "widget",
+              "path": "dashboard.md",
+              "id": "widget:count-100"
+            },
+            "target": {
+              "runId": "aabe0422-075e-49a9-acc1-4ee44112ea8c",
+              "automationId": "widget:count-100"
+            },
+            "channels": [
+              "in-app"
+            ],
+            "createdAt": 1790579094925,
+            "read": false,
+            "deliveries": {
+              "in-app": "sent"
+            }
+          },
+          {
+            "id": "widget-test-legacy",
+            "title": "Widget test legacy",
+            "body": "Preserved user body legacy",
+            "source": {
+              "kind": "widget",
+              "path": "dashboard",
+              "id": "widget:count-100"
+            },
+            "channels": [
+              "in-app"
+            ],
+            "createdAt": 1790579094933,
+            "read": true,
+            "deliveries": {
+              "in-app": "sent"
+            }
+          },
+          {
+            "id": "widget-test-nested",
+            "title": "Widget test nested",
+            "body": "Preserved user body nested",
+            "source": {
+              "kind": "widget",
+              "path": "Boards/Nested",
+              "id": "widget:ann-target"
+            },
+            "channels": [
+              "in-app"
+            ],
+            "createdAt": 1790579094933,
+            "read": true,
+            "deliveries": {
+              "in-app": "sent"
+            }
+          },
+          {
+            "id": "widget-test-deletedWidget",
+            "title": "Widget test deletedWidget",
+            "body": "Preserved user body deletedWidget",
+            "source": {
+              "kind": "widget",
+              "path": "dashboard.md",
+              "id": "widget:gone"
+            },
+            "channels": [
+              "in-app"
+            ],
+            "createdAt": 1790579094933,
+            "read": false,
+            "deliveries": {
+              "in-app": "sent"
+            }
+          },
+          {
+            "id": "widget-test-deletedFile",
+            "title": "Widget test deletedFile",
+            "body": "Preserved user body deletedFile",
+            "source": {
+              "kind": "widget",
+              "path": "missing.md",
+              "id": "widget:count-100"
+            },
+            "channels": [
+              "in-app"
+            ],
+            "createdAt": 1790579094933,
+            "read": false,
+            "deliveries": {
+              "in-app": "sent"
+            }
+          },
+          {
+            "id": "widget-test-disabled",
+            "title": "Widget test disabled",
+            "body": "Preserved user body disabled",
+            "source": {
+              "kind": "widget",
+              "path": "dashboard.md",
+              "id": "widget:count-100"
+            },
+            "channels": [
+              "in-app"
+            ],
+            "createdAt": 1790579094933,
+            "read": false,
+            "deliveries": {
+              "in-app": "sent"
+            }
+          },
+          {
+            "id": "ca1da208-2aeb-4cd1-b721-18a5c824a93c",
+            "title": "Presentation source failure 原文",
+            "body": "失败：来源不存在或包含重复的任务标识",
+            "presentation": {
+              "kind": "automation-run",
+              "status": "failed",
+              "message": "来源不存在或包含重复的任务标识",
+              "errorCode": "sourceMissing"
+            },
+            "target": {
+              "runId": "ca1da208-2aeb-4cd1-b721-18a5c824a93c",
+              "automationId": "presentation-missing-source"
+            },
+            "channels": [
+              "in-app"
+            ],
+            "createdAt": 1790585469254,
+            "read": false,
+            "deliveries": {
+              "in-app": "sent"
+            }
+          },
+          {
+            "id": "c9be3739-34a8-4603-9490-067283e2b044",
+            "title": "Presentation exact reminder 原文",
+            "body": "Presentation exact reminder 原文",
+            "target": {
+              "runId": "c9be3739-34a8-4603-9490-067283e2b044",
+              "automationId": "presentation-reminder"
+            },
+            "channels": [
+              "in-app"
+            ],
+            "createdAt": 1790585469274,
+            "read": false,
+            "deliveries": {
+              "in-app": "sent"
+            }
+          },
+          {
+            "id": "2ec8776e-3949-4afb-8182-6f41cd6f225b",
+            "title": "Presentation CLI 原文",
+            "body": "已完成：进程已退出，退出码为 0",
+            "presentation": {
+              "kind": "automation-run",
+              "status": "succeeded",
+              "message": "0",
+              "errorCode": "processExit",
+              "errorParams": {
+                "code": 0
+              }
+            },
+            "target": {
+              "runId": "2ec8776e-3949-4afb-8182-6f41cd6f225b",
+              "automationId": "presentation-cli",
+              "terminalId": "terminal-eb45eef4-417e-42e3-99c7-adb0ba4faf18"
+            },
+            "channels": [
+              "in-app"
+            ],
+            "createdAt": 1790585469392,
+            "read": false,
+            "deliveries": {
+              "in-app": "sent"
+            }
+          },
+          {
+            "id": "presentation-legacy-run",
+            "title": "Presentation legacy notification",
+            "body": "Legacy notification English 原文",
+            "createdAt": 1790585469244,
+            "channels": [
+              "in-app"
+            ],
+            "read": false,
+            "deliveries": {
+              "in-app": "sent"
+            }
+          },
+          {
+            "id": "1a471a43-dd77-4c96-b989-21da6cecb4ff",
+            "title": "Clear success",
+            "body": "Clear-history fixture 原文",
+            "target": {
+              "runId": "1a471a43-dd77-4c96-b989-21da6cecb4ff",
+              "automationId": "clear-success"
+            },
+            "channels": [
+              "in-app"
+            ],
+            "createdAt": 1790585967002,
+            "read": false,
+            "deliveries": {
+              "in-app": "sent"
+            }
+          },
+          {
+            "id": "9d2d8061-62c1-4ef3-8d51-e8fac8fd7bca",
+            "title": "Clear failure",
+            "body": "失败：来源不存在或包含重复的任务标识",
+            "presentation": {
+              "kind": "automation-run",
+              "status": "failed",
+              "message": "来源不存在或包含重复的任务标识",
+              "errorCode": "sourceMissing"
+            },
+            "target": {
+              "runId": "9d2d8061-62c1-4ef3-8d51-e8fac8fd7bca",
+              "automationId": "clear-failure"
+            },
+            "channels": [
+              "in-app"
+            ],
+            "createdAt": 1790585967020,
+            "read": false,
+            "deliveries": {
+              "in-app": "sent"
+            }
+          }
+        ],
+        "receipts": {
+          "e444eff8-7036-447c-b8a0-8db9efbdd587": {
+            "in-app": "sent"
+          },
+          "87a1be81-47f1-4d37-b3ad-2761613b5313": {
+            "in-app": "sent"
+          },
+          "b8a1ea8e-7e97-4ee0-88df-6e349899e2e0": {
+            "in-app": "sent"
+          },
+          "a2e32693-dd1f-4402-ac1f-97fec01099bf": {
+            "in-app": "sent"
+          },
+          "aabe0422-075e-49a9-acc1-4ee44112ea8c": {
+            "in-app": "sent"
+          },
+          "widget-test-legacy": {
+            "in-app": "sent"
+          },
+          "widget-test-nested": {
+            "in-app": "sent"
+          },
+          "widget-test-deletedWidget": {
+            "in-app": "sent"
+          },
+          "widget-test-deletedFile": {
+            "in-app": "sent"
+          },
+          "widget-test-disabled": {
+            "in-app": "sent"
+          },
+          "ca1da208-2aeb-4cd1-b721-18a5c824a93c": {
+            "in-app": "sent"
+          },
+          "c9be3739-34a8-4603-9490-067283e2b044": {
+            "in-app": "sent"
+          },
+          "2ec8776e-3949-4afb-8182-6f41cd6f225b": {
+            "in-app": "sent"
+          },
+          "presentation-legacy-run": {
+            "in-app": "sent"
+          },
+          "1a471a43-dd77-4c96-b989-21da6cecb4ff": {
+            "in-app": "sent"
+          },
+          "9d2d8061-62c1-4ef3-8d51-e8fac8fd7bca": {
+            "in-app": "sent"
+          }
+        }
+      }
+    },
+    {
+      "lang": "zh",
+      "labels": [
+        {
+          "title": "Clear success",
+          "status": "已处理（历史已清理）"
+        },
+        {
+          "title": "Clear failure",
+          "status": "已处理（历史已清理）"
+        },
+        {
+          "title": "Clear skipped",
+          "status": "已处理（历史已清理）"
+        },
+        {
+          "title": "Clear future",
+          "status": "待执行"
+        },
+        {
+          "title": "Clear manual",
+          "status": "待执行"
+        },
+        {
+          "title": "Clear recurring",
+          "status": "待执行"
+        }
+      ],
+      "runs": 0,
+      "cursors": {
+        "widget:ann-target:1767243600000": 1767243600000,
+        "clear-success:1": 1790585961929,
+        "clear-failure:1": 1790585961929,
+        "clear-skipped:1": 1790585766929
+      },
+      "notifications": {
+        "records": [
+          {
+            "id": "e444eff8-7036-447c-b8a0-8db9efbdd587",
+            "title": "synthetic-preserved-zh-0",
+            "body": "失败: 请先手动启动一次该智能体，确认已配置的权限模式",
+            "target": {
+              "runId": "e444eff8-7036-447c-b8a0-8db9efbdd587",
+              "automationId": "974751ac-efcb-450b-8eb0-d232084c66f3"
+            },
+            "channels": [
+              "in-app"
+            ],
+            "createdAt": 1790578109186,
+            "read": false,
+            "deliveries": {
+              "in-app": "sent"
+            }
+          },
+          {
+            "id": "87a1be81-47f1-4d37-b3ad-2761613b5313",
+            "title": "synthetic-preserved-en-1",
+            "body": "Failed: Launch this agent manually once to acknowledge its configured permission mode",
+            "target": {
+              "runId": "87a1be81-47f1-4d37-b3ad-2761613b5313",
+              "automationId": "1a2cbac6-010a-4183-88e8-1b67b885e17e"
+            },
+            "channels": [
+              "in-app"
+            ],
+            "createdAt": 1790578111005,
+            "read": false,
+            "deliveries": {
+              "in-app": "sent"
+            }
+          },
+          {
+            "id": "b8a1ea8e-7e97-4ee0-88df-6e349899e2e0",
+            "title": "synthetic-preserved-zh-2",
+            "body": "失败: 请先手动启动一次该智能体，确认已配置的权限模式",
+            "target": {
+              "runId": "b8a1ea8e-7e97-4ee0-88df-6e349899e2e0",
+              "automationId": "138ce600-2f73-4042-b880-3fff9331a4bc"
+            },
+            "channels": [
+              "in-app"
+            ],
+            "createdAt": 1790578112828,
+            "read": false,
+            "deliveries": {
+              "in-app": "sent"
+            }
+          },
+          {
+            "id": "a2e32693-dd1f-4402-ac1f-97fec01099bf",
+            "title": "synthetic-preserved-zh-0",
+            "body": "已完成: 0",
+            "target": {
+              "runId": "a2e32693-dd1f-4402-ac1f-97fec01099bf",
+              "automationId": "974751ac-efcb-450b-8eb0-d232084c66f3",
+              "terminalId": "terminal-bdf4a25a-2bd1-4579-adb3-6e5c2c41c4ce"
+            },
+            "channels": [
+              "in-app"
+            ],
+            "createdAt": 1790578237069,
+            "read": true,
+            "deliveries": {
+              "in-app": "sent"
+            }
+          },
+          {
+            "id": "aabe0422-075e-49a9-acc1-4ee44112ea8c",
+            "title": "Countdown 100",
+            "body": "倒计时提醒：Countdown 100 还有 95 天！",
+            "source": {
+              "kind": "widget",
+              "path": "dashboard.md",
+              "id": "widget:count-100"
+            },
+            "target": {
+              "runId": "aabe0422-075e-49a9-acc1-4ee44112ea8c",
+              "automationId": "widget:count-100"
+            },
+            "channels": [
+              "in-app"
+            ],
+            "createdAt": 1790579094925,
+            "read": false,
+            "deliveries": {
+              "in-app": "sent"
+            }
+          },
+          {
+            "id": "widget-test-legacy",
+            "title": "Widget test legacy",
+            "body": "Preserved user body legacy",
+            "source": {
+              "kind": "widget",
+              "path": "dashboard",
+              "id": "widget:count-100"
+            },
+            "channels": [
+              "in-app"
+            ],
+            "createdAt": 1790579094933,
+            "read": true,
+            "deliveries": {
+              "in-app": "sent"
+            }
+          },
+          {
+            "id": "widget-test-nested",
+            "title": "Widget test nested",
+            "body": "Preserved user body nested",
+            "source": {
+              "kind": "widget",
+              "path": "Boards/Nested",
+              "id": "widget:ann-target"
+            },
+            "channels": [
+              "in-app"
+            ],
+            "createdAt": 1790579094933,
+            "read": true,
+            "deliveries": {
+              "in-app": "sent"
+            }
+          },
+          {
+            "id": "widget-test-deletedWidget",
+            "title": "Widget test deletedWidget",
+            "body": "Preserved user body deletedWidget",
+            "source": {
+              "kind": "widget",
+              "path": "dashboard.md",
+              "id": "widget:gone"
+            },
+            "channels": [
+              "in-app"
+            ],
+            "createdAt": 1790579094933,
+            "read": false,
+            "deliveries": {
+              "in-app": "sent"
+            }
+          },
+          {
+            "id": "widget-test-deletedFile",
+            "title": "Widget test deletedFile",
+            "body": "Preserved user body deletedFile",
+            "source": {
+              "kind": "widget",
+              "path": "missing.md",
+              "id": "widget:count-100"
+            },
+            "channels": [
+              "in-app"
+            ],
+            "createdAt": 1790579094933,
+            "read": false,
+            "deliveries": {
+              "in-app": "sent"
+            }
+          },
+          {
+            "id": "widget-test-disabled",
+            "title": "Widget test disabled",
+            "body": "Preserved user body disabled",
+            "source": {
+              "kind": "widget",
+              "path": "dashboard.md",
+              "id": "widget:count-100"
+            },
+            "channels": [
+              "in-app"
+            ],
+            "createdAt": 1790579094933,
+            "read": false,
+            "deliveries": {
+              "in-app": "sent"
+            }
+          },
+          {
+            "id": "ca1da208-2aeb-4cd1-b721-18a5c824a93c",
+            "title": "Presentation source failure 原文",
+            "body": "失败：来源不存在或包含重复的任务标识",
+            "presentation": {
+              "kind": "automation-run",
+              "status": "failed",
+              "message": "来源不存在或包含重复的任务标识",
+              "errorCode": "sourceMissing"
+            },
+            "target": {
+              "runId": "ca1da208-2aeb-4cd1-b721-18a5c824a93c",
+              "automationId": "presentation-missing-source"
+            },
+            "channels": [
+              "in-app"
+            ],
+            "createdAt": 1790585469254,
+            "read": false,
+            "deliveries": {
+              "in-app": "sent"
+            }
+          },
+          {
+            "id": "c9be3739-34a8-4603-9490-067283e2b044",
+            "title": "Presentation exact reminder 原文",
+            "body": "Presentation exact reminder 原文",
+            "target": {
+              "runId": "c9be3739-34a8-4603-9490-067283e2b044",
+              "automationId": "presentation-reminder"
+            },
+            "channels": [
+              "in-app"
+            ],
+            "createdAt": 1790585469274,
+            "read": false,
+            "deliveries": {
+              "in-app": "sent"
+            }
+          },
+          {
+            "id": "2ec8776e-3949-4afb-8182-6f41cd6f225b",
+            "title": "Presentation CLI 原文",
+            "body": "已完成：进程已退出，退出码为 0",
+            "presentation": {
+              "kind": "automation-run",
+              "status": "succeeded",
+              "message": "0",
+              "errorCode": "processExit",
+              "errorParams": {
+                "code": 0
+              }
+            },
+            "target": {
+              "runId": "2ec8776e-3949-4afb-8182-6f41cd6f225b",
+              "automationId": "presentation-cli",
+              "terminalId": "terminal-eb45eef4-417e-42e3-99c7-adb0ba4faf18"
+            },
+            "channels": [
+              "in-app"
+            ],
+            "createdAt": 1790585469392,
+            "read": false,
+            "deliveries": {
+              "in-app": "sent"
+            }
+          },
+          {
+            "id": "presentation-legacy-run",
+            "title": "Presentation legacy notification",
+            "body": "Legacy notification English 原文",
+            "createdAt": 1790585469244,
+            "channels": [
+              "in-app"
+            ],
+            "read": false,
+            "deliveries": {
+              "in-app": "sent"
+            }
+          },
+          {
+            "id": "1a471a43-dd77-4c96-b989-21da6cecb4ff",
+            "title": "Clear success",
+            "body": "Clear-history fixture 原文",
+            "target": {
+              "runId": "1a471a43-dd77-4c96-b989-21da6cecb4ff",
+              "automationId": "clear-success"
+            },
+            "channels": [
+              "in-app"
+            ],
+            "createdAt": 1790585967002,
+            "read": false,
+            "deliveries": {
+              "in-app": "sent"
+            }
+          },
+          {
+            "id": "9d2d8061-62c1-4ef3-8d51-e8fac8fd7bca",
+            "title": "Clear failure",
+            "body": "失败：来源不存在或包含重复的任务标识",
+            "presentation": {
+              "kind": "automation-run",
+              "status": "failed",
+              "message": "来源不存在或包含重复的任务标识",
+              "errorCode": "sourceMissing"
+            },
+            "target": {
+              "runId": "9d2d8061-62c1-4ef3-8d51-e8fac8fd7bca",
+              "automationId": "clear-failure"
+            },
+            "channels": [
+              "in-app"
+            ],
+            "createdAt": 1790585967020,
+            "read": false,
+            "deliveries": {
+              "in-app": "sent"
+            }
+          }
+        ],
+        "receipts": {
+          "e444eff8-7036-447c-b8a0-8db9efbdd587": {
+            "in-app": "sent"
+          },
+          "87a1be81-47f1-4d37-b3ad-2761613b5313": {
+            "in-app": "sent"
+          },
+          "b8a1ea8e-7e97-4ee0-88df-6e349899e2e0": {
+            "in-app": "sent"
+          },
+          "a2e32693-dd1f-4402-ac1f-97fec01099bf": {
+            "in-app": "sent"
+          },
+          "aabe0422-075e-49a9-acc1-4ee44112ea8c": {
+            "in-app": "sent"
+          },
+          "widget-test-legacy": {
+            "in-app": "sent"
+          },
+          "widget-test-nested": {
+            "in-app": "sent"
+          },
+          "widget-test-deletedWidget": {
+            "in-app": "sent"
+          },
+          "widget-test-deletedFile": {
+            "in-app": "sent"
+          },
+          "widget-test-disabled": {
+            "in-app": "sent"
+          },
+          "ca1da208-2aeb-4cd1-b721-18a5c824a93c": {
+            "in-app": "sent"
+          },
+          "c9be3739-34a8-4603-9490-067283e2b044": {
+            "in-app": "sent"
+          },
+          "2ec8776e-3949-4afb-8182-6f41cd6f225b": {
+            "in-app": "sent"
+          },
+          "presentation-legacy-run": {
+            "in-app": "sent"
+          },
+          "1a471a43-dd77-4c96-b989-21da6cecb4ff": {
+            "in-app": "sent"
+          },
+          "9d2d8061-62c1-4ef3-8d51-e8fac8fd7bca": {
+            "in-app": "sent"
+          }
+        }
+      }
+    }
+  ]
+}

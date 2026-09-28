@@ -1,0 +1,41 @@
+Already up to date
+Done in 350ms using pnpm v11.1.3
+$ esbuild scripts/verify-automation.ts --bundle --platform=node --format=cjs --outfile=scripts/tmp/verify-automation.cjs --alias:obsidian=./scripts/obsidian-stub.ts --log-level=warning && TZ=America/New_York node --test scripts/tmp/verify-automation.cjs
+✔ agent editor uses the same availability set for defaults, controls and save, without replacing stale choices (19.107782ms)
+✔ runtime preflight orders factual failures before permission and prevents all launch effects on rejection (13.32989ms)
+✔ manual, once, cron and supported RRULE honor start times and reject unsupported rules (3.110873ms)
+✔ daily recurrence remains at local 9am through daylight-saving changes (0.875545ms)
+✔ a due occurrence executes once across concurrent ticks, leaf independence and restart (3.108124ms)
+✔ late occurrences are skipped, foreign devices never execute, recent missed occurrence alone runs (1.475462ms)
+✔ active agents do not overlap; a slow agent startup does not hold reminders (1.248846ms)
+✔ failure committing pending state prevents external task creation (0.419101ms)
+✔ restart marks unconfirmed runs interrupted rather than executing them again (1.513745ms)
+✔ corrupt primary recovers the backup and supports subsequent saves without losing corrupt evidence (0.368915ms)
+✔ notification deliveries are idempotent across concurrent calls and restart (0.744987ms)
+✔ task identities and automation metadata survive nested task serialization (1.93348ms)
+✔ archive reminders preserve note text and malformed regions refuse edits (0.380189ms)
+✔ native hook installation preserves unrelated hooks and remains idempotent (0.465501ms)
+✔ all CLI prompt transports preserve text and the native resume flags stay explicit (0.325112ms)
+✔ native session discovery requires exact metadata and ignores subagent sessions (0.306199ms)
+✔ PTY listeners attach synchronously before immediate exit and legacy status stays unverified (0.871224ms)
+✔ editing the action alone does not replay an already consumed one-time occurrence (0.640035ms)
+✔ completed delivery is not replayed even after notification retention has trimmed its record (0.434043ms)
+✔ dashboard source migrates stable ownership, suppresses completed tasks and creates each run once (2.070445ms)
+✔ failed state commits are invisible and retry preserves scheduler cursors (0.520903ms)
+✔ edits keep list order and deletion retains run snapshots (0.419201ms)
+✔ clearing read notifications preserves delivery receipts across restart (0.512131ms)
+✔ partial primary write recovers last valid data and a later write can succeed (0.256478ms)
+✔ failed inbox load cannot overwrite unreadable receipts and a successful retry emits state (0.328768ms)
+✔ widget sources resolve canonical and legacy dashboard paths without changing reminder identity (2.232716ms)
+✔ inbox renders structured reasons in the current language and deduplicates only exact reminder text (5.584578ms)
+✔ structured failures survive run and inbox persistence, language changes, cleanup and recovery without redelivery (2.081352ms)
+✔ automation panel localizes next/run dates and system reasons while preserving prompt, output and unknown text (5.27612ms)
+✔ cleared once history reads only the matching revision cursor and never replays failed, succeeded or skipped work (11.89488ms)
+ℹ tests 30
+ℹ suites 0
+ℹ pass 30
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 184.462108

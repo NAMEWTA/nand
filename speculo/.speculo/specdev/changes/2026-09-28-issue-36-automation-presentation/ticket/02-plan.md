@@ -8,7 +8,7 @@ artifact: "ticket"
 change: "2026-09-28-issue-36-automation-presentation"
 id: "T-02"
 title: "清理运行历史后保留准确已处理状态"
-status: "ready"
+status: "done"
 kind: "bug"
 planning_depth: "standard"
 planning_depth_reason: "跨入口与领域接缝的可独立验收行为切片"
@@ -17,8 +17,8 @@ risk: "medium"
 blocked_by: ["T-01"]
 contract_ids: ["AC-004", "AC-005"]
 owner: "codex-issue-planning"
-expected_changes: ["<Path>src/view/automations/AutomationsPanel.tsx</Path>", "<Path>src/shared/i18n/automation.ts</Path>", "<Path>scripts/verify-automation.ts</Path>"]
-writable_paths: ["<Path>src/view/automations/AutomationsPanel.tsx</Path>", "<Path>src/shared/i18n/automation.ts</Path>", "<Path>scripts/verify-automation.ts</Path>", "<Path>main.js</Path>"]
+expected_changes: ["<Path>src/view/automations/AutomationsPanel.tsx</Path>", "<Path>src/shared/i18n/automation.ts</Path>", "<Path>scripts/verify-automation.ts</Path>", "<Path>src/core/automations/api.ts</Path>"]
+writable_paths: ["<Path>src/view/automations/AutomationsPanel.tsx</Path>", "<Path>src/shared/i18n/automation.ts</Path>", "<Path>scripts/verify-automation.ts</Path>", "<Path>main.js</Path>", "<Path>src/core/automations/api.ts</Path>"]
 read_only_paths: ["<Path>src/view/automations/editor.ts</Path>", "<Path>src/core/automations/service.ts</Path>", "<Path>src/plugin/workflows/automation-host.ts</Path>", "<Path>src/core/notifications/service.ts</Path>", "<Path>src/view/notifications/InboxPanel.tsx</Path>", "<Path>src/plugin/settings/automation-settings.ts</Path>", "<Path>src/shared/automation/types.ts</Path>", "<Path>src/shared/automation/errors.ts</Path>"]
 shared_paths: ["<Path>src/view/automations/AutomationsPanel.tsx</Path>", "<Path>src/shared/i18n/automation.ts</Path>", "<Path>scripts/verify-automation.ts</Path>", "<Path>main.js</Path>"]
 shared_path_owners: ["<Path>src/view/automations/AutomationsPanel.tsx</Path> => codex-issue-planning (唯一 Lead，按 current Ticket 串行修改)", "<Path>src/shared/i18n/automation.ts</Path> => codex-issue-planning (唯一 Lead，按 current Ticket 串行修改)", "<Path>scripts/verify-automation.ts</Path> => codex-issue-planning (唯一 Lead，按 current Ticket 串行修改)", "<Path>main.js</Path> => codex-issue-planning (唯一 Lead，按 current Ticket 串行修改)"]
@@ -103,12 +103,12 @@ E2E owner/environment：Lead / current-workspace（未创建 worktree）。场�
 
 ## 10. 验收标准
 
-- [ ] AC-004：一次性定义游标已覆盖触发点而历史已清理时显示“已执行（历史已清理）/已处理”，不得标待执行，也不得伪称运行成功。
-- [ ] AC-005：清理后 tick 与重启不再次执行；未触发一次性与循环/手动定义状态仍正确。
-- [ ] Skill Execution Records 完整记录真实调用、摘要、操作、证据与结果。
-- [ ] 路径未越界；所需 E2E 已实际执行。
-- [ ] 授权后形成非空 implementation commit，Lead direct-parent 验证通过并记录 result SHA；当前本地计划不是该证据。
-- [ ] 所有回归/构建/lint通过，未完成项没有伪标 done；无需要改动时取消该票并注明事实，禁止 empty commit。
+- [x] AC-004：一次性定义游标已覆盖触发点而历史已清理时显示“已执行（历史已清理）/已处理”，不得标待执行，也不得伪称运行成功。
+- [x] AC-005：清理后 tick 与重启不再次执行；未触发一次性与循环/手动定义状态仍正确。
+- [x] Skill Execution Records 完整记录真实调用、摘要、操作、证据与结果。
+- [x] 路径未越界；所需 E2E 已实际执行。
+- [x] 授权后形成非空 implementation commit，Lead direct-parent 验证通过并记录 result SHA；当前本地计划不是该证据。
+- [x] 所有回归/构建/lint通过，未完成项没有伪标 done；无需要改动时取消该票并注明事实，禁止 empty commit。
 
 ## 11. SKILL 调用计划
 
@@ -119,3 +119,7 @@ dev implement：先读架构/领域参考，用其依赖与命名/持久化规�
 ## 12. 停止、检查点与交付
 
 用户要求完整分析与计划，未规定固定票数，不能用删合同减票。当前为 plan，不实施。缺 required 接缝/环境、契约偏差、他人写集、源漂移则暂停本票及真实下游；独立票仍可规划。恢复读取 Map/Goal/源HEAD/Skill摘要/最近Evidence，核对未闭合动作再继续。交付所有 AC Evidence 后交回 Goal，不能自动远程评论、关闭或归档。
+
+范围复核：增加现有 AutomationsApi 只读 cursors 类型投影；不修改 service 的游标、清理或执行逻辑。
+
+用户本次实施授权覆盖历史 plan-only；完成证据见 evidence/T-02.md。
