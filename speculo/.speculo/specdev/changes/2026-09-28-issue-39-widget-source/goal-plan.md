@@ -2,7 +2,7 @@
 schema_version: 6
 artifact: "goal-plan"
 change: "2026-09-28-issue-39-widget-source"
-status: "draft"
+status: "completed"
 modes: []
 orchestration: "lead-directed"
 lead: "codex-issue-planning"
@@ -78,3 +78,5 @@ HEAD/输入/Skill摘要漂移：暂停相交分支，返回对应owner修订计�
 ## Parent orchestration
 
 本change现在归属 <Path>{roots.state}/specdev/changes/2026-09-28-open-issues-remediation-goal/implementation-plan.md</Path>；该父Plan拥有跨change串行、共享资源和全局执行边界；本Goal只保留子合同Gate，策略相同不冲突。请从父 <Path>{roots.state}/specdev/changes/2026-09-28-open-issues-remediation-goal/tickets-map.md</Path> 恢复，不独立抢占writer。
+
+本次用户完整实施授权已兑现：T-01 两条合同、required E2E、回归和 direct-parent 均通过，见 evidence/T-01.md。未发布/推送/关闭 issue。

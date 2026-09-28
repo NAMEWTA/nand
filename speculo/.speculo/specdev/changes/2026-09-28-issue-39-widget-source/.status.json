@@ -2,7 +2,7 @@
   "schema_version": 6,
   "artifact": "change-status",
   "change": "2026-09-28-issue-39-widget-source",
-  "change_status": "active",
+  "change_status": "completed",
   "current_work": null,
   "works_run": [
     "specdev/triage",
@@ -14,16 +14,16 @@
   "claimed_investigations": [],
   "execution_authorization": {
     "implementation_commit": {
-      "status": "not-authorized",
-      "source": null,
-      "granted_at": null,
-      "scope": "本轮仅远程只读摄入、诊断和规划"
+      "status": "authorized",
+      "source": "用户本次明确要求按总控完整实现所有 ticket",
+      "granted_at": "2026-09-28T06:53:30.927881+00:00",
+      "scope": "当前工作区串行实现、验证、必要本地提交/direct-parent；不含远程发布"
     },
     "local_candidate_integration": {
-      "status": "not-authorized",
-      "source": null,
-      "granted_at": null,
-      "scope": "本轮仅远程只读摄入、诊断和规划"
+      "status": "authorized",
+      "source": "用户本次明确要求按总控完整实现所有 ticket",
+      "granted_at": "2026-09-28T06:53:30.927881+00:00",
+      "scope": "当前工作区串行实现、验证、必要本地提交/direct-parent；不含远程发布"
     },
     "source_cleanup": {
       "status": "not-authorized",
@@ -39,11 +39,55 @@
     "history": []
   },
   "created_at": "2026-09-28T05:55:43.895113+00:00",
-  "updated_at": "2026-09-28T06:22:59.239765+00:00",
-  "completed_at": null,
+  "updated_at": "2026-09-28T07:19:17.001327+00:00",
+  "completed_at": "2026-09-28T07:19:17.001327+00:00",
   "archived": false,
   "archive_path": null,
   "blockers": [],
   "deviations": [],
-  "worktrees": []
+  "worktrees": [
+    {
+      "ticket_id": "T-01",
+      "owner": "codex-issue-planning",
+      "implementation_owner": "codex-issue-planning",
+      "integration_owner": "codex-issue-planning",
+      "provider": "git",
+      "base_sha": "535699342466bbbc2c50833fa8b970370a3b5b8c",
+      "parent_branch": "main",
+      "branch": "main",
+      "workspace_ref": "current",
+      "source_checkpoint": "c3245439192d518fb8070685b45a390442590c3f",
+      "status": "integrated",
+      "updated_at": "2026-09-28T07:19:17.001327+00:00",
+      "integration": {
+        "status": "passed",
+        "parent_ref": "refs/heads/main",
+        "parent_before_sha": "535699342466bbbc2c50833fa8b970370a3b5b8c",
+        "source_sha": "c3245439192d518fb8070685b45a390442590c3f",
+        "candidate_sha": null,
+        "candidate_tree_sha": null,
+        "candidate_branch": null,
+        "candidate_workspace_ref": null,
+        "result_sha": "c3245439192d518fb8070685b45a390442590c3f",
+        "method": "direct-parent",
+        "conflict_paths": [],
+        "verification": "passed",
+        "full_suite": {
+          "required": true,
+          "status": "passed",
+          "reason": "本票要求的全部测试与匹配回归、build/lint，见命令表",
+          "evidence": "<Path>{roots.state}/specdev/changes/2026-09-28-issue-39-widget-source/evidence/T-01.md</Path>"
+        },
+        "e2e": {
+          "required": true,
+          "status": "passed",
+          "reason": "真实 Obsidian 1.13.7 来源点击、冷启动、窄屏弹窗及生命周期",
+          "evidence": "<Path>{roots.state}/specdev/changes/2026-09-28-issue-39-widget-source/evidence/T-01.md</Path>"
+        },
+        "evidence": "<Path>{roots.state}/specdev/changes/2026-09-28-issue-39-widget-source/evidence/T-01.md</Path>",
+        "attempts": 1,
+        "promotion_status": "applied"
+      }
+    }
+  ]
 }

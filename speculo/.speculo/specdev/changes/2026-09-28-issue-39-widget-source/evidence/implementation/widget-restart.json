@@ -1,0 +1,32 @@
+{
+  "passed": true,
+  "definitions": 102,
+  "unchangedDefinitions": 101,
+  "notificationBodies": [
+    [
+      "widget-test-legacy",
+      "Preserved user body legacy",
+      true
+    ],
+    [
+      "widget-test-nested",
+      "Preserved user body nested",
+      true
+    ],
+    [
+      "widget-test-deletedWidget",
+      "Preserved user body deletedWidget",
+      false
+    ],
+    [
+      "widget-test-deletedFile",
+      "Preserved user body deletedFile",
+      false
+    ],
+    [
+      "widget-test-disabled",
+      "Preserved user body disabled",
+      false
+    ]
+  ]
+}

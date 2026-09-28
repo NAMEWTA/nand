@@ -1,0 +1,2777 @@
+{
+  "result": [
+    {
+      "case": "automation stale widget",
+      "notice": "此小组件不可用，可能已被删除或关闭"
+    },
+    {
+      "case": "deleted file stays deleted",
+      "error": "来源看板已被删除或移出工作区"
+    },
+    {
+      "case": "task source",
+      "dashboard": "dashboard"
+    },
+    {
+      "case": "run notification",
+      "view": "nand-automation-view"
+    }
+  ],
+  "widgetMetadata": [
+    {
+      "id": "widget:count-0",
+      "name": "Countdown 0",
+      "enabled": true,
+      "deviceId": "d2f89b25-f748-43dd-83d4-7e35bfdee51a",
+      "revision": 1798693200000,
+      "schedule": {
+        "kind": "once",
+        "at": 1798693200000
+      },
+      "action": {
+        "kind": "notify",
+        "body": "Countdown 0"
+      },
+      "channels": [
+        "in-app"
+      ],
+      "notifyOn": "always",
+      "graceMinutes": 720,
+      "source": {
+        "kind": "widget",
+        "path": "dashboard.md",
+        "id": "widget:count-0"
+      },
+      "createdAt": 1798693200000,
+      "updatedAt": 1798693200000
+    },
+    {
+      "id": "widget:count-1",
+      "name": "Countdown 1",
+      "enabled": true,
+      "deviceId": "d2f89b25-f748-43dd-83d4-7e35bfdee51a",
+      "revision": 1798693200000,
+      "schedule": {
+        "kind": "once",
+        "at": 1798693200000
+      },
+      "action": {
+        "kind": "notify",
+        "body": "Countdown 1"
+      },
+      "channels": [
+        "in-app"
+      ],
+      "notifyOn": "always",
+      "graceMinutes": 720,
+      "source": {
+        "kind": "widget",
+        "path": "dashboard.md",
+        "id": "widget:count-1"
+      },
+      "createdAt": 1798693200000,
+      "updatedAt": 1798693200000
+    },
+    {
+      "id": "widget:count-2",
+      "name": "Countdown 2",
+      "enabled": true,
+      "deviceId": "d2f89b25-f748-43dd-83d4-7e35bfdee51a",
+      "revision": 1798693200000,
+      "schedule": {
+        "kind": "once",
+        "at": 1798693200000
+      },
+      "action": {
+        "kind": "notify",
+        "body": "Countdown 2"
+      },
+      "channels": [
+        "in-app"
+      ],
+      "notifyOn": "always",
+      "graceMinutes": 720,
+      "source": {
+        "kind": "widget",
+        "path": "dashboard.md",
+        "id": "widget:count-2"
+      },
+      "createdAt": 1798693200000,
+      "updatedAt": 1798693200000
+    },
+    {
+      "id": "widget:count-3",
+      "name": "Countdown 3",
+      "enabled": true,
+      "deviceId": "d2f89b25-f748-43dd-83d4-7e35bfdee51a",
+      "revision": 1798693200000,
+      "schedule": {
+        "kind": "once",
+        "at": 1798693200000
+      },
+      "action": {
+        "kind": "notify",
+        "body": "Countdown 3"
+      },
+      "channels": [
+        "in-app"
+      ],
+      "notifyOn": "always",
+      "graceMinutes": 720,
+      "source": {
+        "kind": "widget",
+        "path": "dashboard.md",
+        "id": "widget:count-3"
+      },
+      "createdAt": 1798693200000,
+      "updatedAt": 1798693200000
+    },
+    {
+      "id": "widget:count-4",
+      "name": "Countdown 4",
+      "enabled": true,
+      "deviceId": "d2f89b25-f748-43dd-83d4-7e35bfdee51a",
+      "revision": 1798693200000,
+      "schedule": {
+        "kind": "once",
+        "at": 1798693200000
+      },
+      "action": {
+        "kind": "notify",
+        "body": "Countdown 4"
+      },
+      "channels": [
+        "in-app"
+      ],
+      "notifyOn": "always",
+      "graceMinutes": 720,
+      "source": {
+        "kind": "widget",
+        "path": "dashboard.md",
+        "id": "widget:count-4"
+      },
+      "createdAt": 1798693200000,
+      "updatedAt": 1798693200000
+    },
+    {
+      "id": "widget:count-5",
+      "name": "Countdown 5",
+      "enabled": true,
+      "deviceId": "d2f89b25-f748-43dd-83d4-7e35bfdee51a",
+      "revision": 1798693200000,
+      "schedule": {
+        "kind": "once",
+        "at": 1798693200000
+      },
+      "action": {
+        "kind": "notify",
+        "body": "Countdown 5"
+      },
+      "channels": [
+        "in-app"
+      ],
+      "notifyOn": "always",
+      "graceMinutes": 720,
+      "source": {
+        "kind": "widget",
+        "path": "dashboard.md",
+        "id": "widget:count-5"
+      },
+      "createdAt": 1798693200000,
+      "updatedAt": 1798693200000
+    },
+    {
+      "id": "widget:count-6",
+      "name": "Countdown 6",
+      "enabled": true,
+      "deviceId": "d2f89b25-f748-43dd-83d4-7e35bfdee51a",
+      "revision": 1798693200000,
+      "schedule": {
+        "kind": "once",
+        "at": 1798693200000
+      },
+      "action": {
+        "kind": "notify",
+        "body": "Countdown 6"
+      },
+      "channels": [
+        "in-app"
+      ],
+      "notifyOn": "always",
+      "graceMinutes": 720,
+      "source": {
+        "kind": "widget",
+        "path": "dashboard.md",
+        "id": "widget:count-6"
+      },
+      "createdAt": 1798693200000,
+      "updatedAt": 1798693200000
+    },
+    {
+      "id": "widget:count-7",
+      "name": "Countdown 7",
+      "enabled": true,
+      "deviceId": "d2f89b25-f748-43dd-83d4-7e35bfdee51a",
+      "revision": 1798693200000,
+      "schedule": {
+        "kind": "once",
+        "at": 1798693200000
+      },
+      "action": {
+        "kind": "notify",
+        "body": "Countdown 7"
+      },
+      "channels": [
+        "in-app"
+      ],
+      "notifyOn": "always",
+      "graceMinutes": 720,
+      "source": {
+        "kind": "widget",
+        "path": "dashboard.md",
+        "id": "widget:count-7"
+      },
+      "createdAt": 1798693200000,
+      "updatedAt": 1798693200000
+    },
+    {
+      "id": "widget:count-8",
+      "name": "Countdown 8",
+      "enabled": true,
+      "deviceId": "d2f89b25-f748-43dd-83d4-7e35bfdee51a",
+      "revision": 1798693200000,
+      "schedule": {
+        "kind": "once",
+        "at": 1798693200000
+      },
+      "action": {
+        "kind": "notify",
+        "body": "Countdown 8"
+      },
+      "channels": [
+        "in-app"
+      ],
+      "notifyOn": "always",
+      "graceMinutes": 720,
+      "source": {
+        "kind": "widget",
+        "path": "dashboard.md",
+        "id": "widget:count-8"
+      },
+      "createdAt": 1798693200000,
+      "updatedAt": 1798693200000
+    },
+    {
+      "id": "widget:count-9",
+      "name": "Countdown 9",
+      "enabled": true,
+      "deviceId": "d2f89b25-f748-43dd-83d4-7e35bfdee51a",
+      "revision": 1798693200000,
+      "schedule": {
+        "kind": "once",
+        "at": 1798693200000
+      },
+      "action": {
+        "kind": "notify",
+        "body": "Countdown 9"
+      },
+      "channels": [
+        "in-app"
+      ],
+      "notifyOn": "always",
+      "graceMinutes": 720,
+      "source": {
+        "kind": "widget",
+        "path": "dashboard.md",
+        "id": "widget:count-9"
+      },
+      "createdAt": 1798693200000,
+      "updatedAt": 1798693200000
+    },
+    {
+      "id": "widget:count-10",
+      "name": "Countdown 10",
+      "enabled": true,
+      "deviceId": "d2f89b25-f748-43dd-83d4-7e35bfdee51a",
+      "revision": 1798693200000,
+      "schedule": {
+        "kind": "once",
+        "at": 1798693200000
+      },
+      "action": {
+        "kind": "notify",
+        "body": "Countdown 10"
+      },
+      "channels": [
+        "in-app"
+      ],
+      "notifyOn": "always",
+      "graceMinutes": 720,
+      "source": {
+        "kind": "widget",
+        "path": "dashboard.md",
+        "id": "widget:count-10"
+      },
+      "createdAt": 1798693200000,
+      "updatedAt": 1798693200000
+    },
+    {
+      "id": "widget:count-11",
+      "name": "Countdown 11",
+      "enabled": true,
+      "deviceId": "d2f89b25-f748-43dd-83d4-7e35bfdee51a",
+      "revision": 1798693200000,
+      "schedule": {
+        "kind": "once",
+        "at": 1798693200000
+      },
+      "action": {
+        "kind": "notify",
+        "body": "Countdown 11"
+      },
+      "channels": [
+        "in-app"
+      ],
+      "notifyOn": "always",
+      "graceMinutes": 720,
+      "source": {
+        "kind": "widget",
+        "path": "dashboard.md",
+        "id": "widget:count-11"
+      },
+      "createdAt": 1798693200000,
+      "updatedAt": 1798693200000
+    },
+    {
+      "id": "widget:count-12",
+      "name": "Countdown 12",
+      "enabled": true,
+      "deviceId": "d2f89b25-f748-43dd-83d4-7e35bfdee51a",
+      "revision": 1798693200000,
+      "schedule": {
+        "kind": "once",
+        "at": 1798693200000
+      },
+      "action": {
+        "kind": "notify",
+        "body": "Countdown 12"
+      },
+      "channels": [
+        "in-app"
+      ],
+      "notifyOn": "always",
+      "graceMinutes": 720,
+      "source": {
+        "kind": "widget",
+        "path": "dashboard.md",
+        "id": "widget:count-12"
+      },
+      "createdAt": 1798693200000,
+      "updatedAt": 1798693200000
+    },
+    {
+      "id": "widget:count-13",
+      "name": "Countdown 13",
+      "enabled": true,
+      "deviceId": "d2f89b25-f748-43dd-83d4-7e35bfdee51a",
+      "revision": 1798693200000,
+      "schedule": {
+        "kind": "once",
+        "at": 1798693200000
+      },
+      "action": {
+        "kind": "notify",
+        "body": "Countdown 13"
+      },
+      "channels": [
+        "in-app"
+      ],
+      "notifyOn": "always",
+      "graceMinutes": 720,
+      "source": {
+        "kind": "widget",
+        "path": "dashboard.md",
+        "id": "widget:count-13"
+      },
+      "createdAt": 1798693200000,
+      "updatedAt": 1798693200000
+    },
+    {
+      "id": "widget:count-14",
+      "name": "Countdown 14",
+      "enabled": true,
+      "deviceId": "d2f89b25-f748-43dd-83d4-7e35bfdee51a",
+      "revision": 1798693200000,
+      "schedule": {
+        "kind": "once",
+        "at": 1798693200000
+      },
+      "action": {
+        "kind": "notify",
+        "body": "Countdown 14"
+      },
+      "channels": [
+        "in-app"
+      ],
+      "notifyOn": "always",
+      "graceMinutes": 720,
+      "source": {
+        "kind": "widget",
+        "path": "dashboard.md",
+        "id": "widget:count-14"
+      },
+      "createdAt": 1798693200000,
+      "updatedAt": 1798693200000
+    },
+    {
+      "id": "widget:count-15",
+      "name": "Countdown 15",
+      "enabled": true,
+      "deviceId": "d2f89b25-f748-43dd-83d4-7e35bfdee51a",
+      "revision": 1798693200000,
+      "schedule": {
+        "kind": "once",
+        "at": 1798693200000
+      },
+      "action": {
+        "kind": "notify",
+        "body": "Countdown 15"
+      },
+      "channels": [
+        "in-app"
+      ],
+      "notifyOn": "always",
+      "graceMinutes": 720,
+      "source": {
+        "kind": "widget",
+        "path": "dashboard.md",
+        "id": "widget:count-15"
+      },
+      "createdAt": 1798693200000,
+      "updatedAt": 1798693200000
+    },
+    {
+      "id": "widget:count-16",
+      "name": "Countdown 16",
+      "enabled": true,
+      "deviceId": "d2f89b25-f748-43dd-83d4-7e35bfdee51a",
+      "revision": 1798693200000,
+      "schedule": {
+        "kind": "once",
+        "at": 1798693200000
+      },
+      "action": {
+        "kind": "notify",
+        "body": "Countdown 16"
+      },
+      "channels": [
+        "in-app"
+      ],
+      "notifyOn": "always",
+      "graceMinutes": 720,
+      "source": {
+        "kind": "widget",
+        "path": "dashboard.md",
+        "id": "widget:count-16"
+      },
+      "createdAt": 1798693200000,
+      "updatedAt": 1798693200000
+    },
+    {
+      "id": "widget:count-17",
+      "name": "Countdown 17",
+      "enabled": true,
+      "deviceId": "d2f89b25-f748-43dd-83d4-7e35bfdee51a",
+      "revision": 1798693200000,
+      "schedule": {
+        "kind": "once",
+        "at": 1798693200000
+      },
+      "action": {
+        "kind": "notify",
+        "body": "Countdown 17"
+      },
+      "channels": [
+        "in-app"
+      ],
+      "notifyOn": "always",
+      "graceMinutes": 720,
+      "source": {
+        "kind": "widget",
+        "path": "dashboard.md",
+        "id": "widget:count-17"
+      },
+      "createdAt": 1798693200000,
+      "updatedAt": 1798693200000
+    },
+    {
+      "id": "widget:count-18",
+      "name": "Countdown 18",
+      "enabled": true,
+      "deviceId": "d2f89b25-f748-43dd-83d4-7e35bfdee51a",
+      "revision": 1798693200000,
+      "schedule": {
+        "kind": "once",
+        "at": 1798693200000
+      },
+      "action": {
+        "kind": "notify",
+        "body": "Countdown 18"
+      },
+      "channels": [
+        "in-app"
+      ],
+      "notifyOn": "always",
+      "graceMinutes": 720,
+      "source": {
+        "kind": "widget",
+        "path": "dashboard.md",
+        "id": "widget:count-18"
+      },
+      "createdAt": 1798693200000,
+      "updatedAt": 1798693200000
+    },
+    {
+      "id": "widget:count-19",
+      "name": "Countdown 19",
+      "enabled": true,
+      "deviceId": "d2f89b25-f748-43dd-83d4-7e35bfdee51a",
+      "revision": 1798693200000,
+      "schedule": {
+        "kind": "once",
+        "at": 1798693200000
+      },
+      "action": {
+        "kind": "notify",
+        "body": "Countdown 19"
+      },
+      "channels": [
+        "in-app"
+      ],
+      "notifyOn": "always",
+      "graceMinutes": 720,
+      "source": {
+        "kind": "widget",
+        "path": "dashboard.md",
+        "id": "widget:count-19"
+      },
+      "createdAt": 1798693200000,
+      "updatedAt": 1798693200000
+    },
+    {
+      "id": "widget:count-20",
+      "name": "Countdown 20",
+      "enabled": true,
+      "deviceId": "d2f89b25-f748-43dd-83d4-7e35bfdee51a",
+      "revision": 1798693200000,
+      "schedule": {
+        "kind": "once",
+        "at": 1798693200000
+      },
+      "action": {
+        "kind": "notify",
+        "body": "Countdown 20"
+      },
+      "channels": [
+        "in-app"
+      ],
+      "notifyOn": "always",
+      "graceMinutes": 720,
+      "source": {
+        "kind": "widget",
+        "path": "dashboard.md",
+        "id": "widget:count-20"
+      },
+      "createdAt": 1798693200000,
+      "updatedAt": 1798693200000
+    },
+    {
+      "id": "widget:count-21",
+      "name": "Countdown 21",
+      "enabled": true,
+      "deviceId": "d2f89b25-f748-43dd-83d4-7e35bfdee51a",
+      "revision": 1798693200000,
+      "schedule": {
+        "kind": "once",
+        "at": 1798693200000
+      },
+      "action": {
+        "kind": "notify",
+        "body": "Countdown 21"
+      },
+      "channels": [
+        "in-app"
+      ],
+      "notifyOn": "always",
+      "graceMinutes": 720,
+      "source": {
+        "kind": "widget",
+        "path": "dashboard.md",
+        "id": "widget:count-21"
+      },
+      "createdAt": 1798693200000,
+      "updatedAt": 1798693200000
+    },
+    {
+      "id": "widget:count-22",
+      "name": "Countdown 22",
+      "enabled": true,
+      "deviceId": "d2f89b25-f748-43dd-83d4-7e35bfdee51a",
+      "revision": 1798693200000,
+      "schedule": {
+        "kind": "once",
+        "at": 1798693200000
+      },
+      "action": {
+        "kind": "notify",
+        "body": "Countdown 22"
+      },
+      "channels": [
+        "in-app"
+      ],
+      "notifyOn": "always",
+      "graceMinutes": 720,
+      "source": {
+        "kind": "widget",
+        "path": "dashboard.md",
+        "id": "widget:count-22"
+      },
+      "createdAt": 1798693200000,
+      "updatedAt": 1798693200000
+    },
+    {
+      "id": "widget:count-23",
+      "name": "Countdown 23",
+      "enabled": true,
+      "deviceId": "d2f89b25-f748-43dd-83d4-7e35bfdee51a",
+      "revision": 1798693200000,
+      "schedule": {
+        "kind": "once",
+        "at": 1798693200000
+      },
+      "action": {
+        "kind": "notify",
+        "body": "Countdown 23"
+      },
+      "channels": [
+        "in-app"
+      ],
+      "notifyOn": "always",
+      "graceMinutes": 720,
+      "source": {
+        "kind": "widget",
+        "path": "dashboard.md",
+        "id": "widget:count-23"
+      },
+      "createdAt": 1798693200000,
+      "updatedAt": 1798693200000
+    },
+    {
+      "id": "widget:count-24",
+      "name": "Countdown 24",
+      "enabled": true,
+      "deviceId": "d2f89b25-f748-43dd-83d4-7e35bfdee51a",
+      "revision": 1798693200000,
+      "schedule": {
+        "kind": "once",
+        "at": 1798693200000
+      },
+      "action": {
+        "kind": "notify",
+        "body": "Countdown 24"
+      },
+      "channels": [
+        "in-app"
+      ],
+      "notifyOn": "always",
+      "graceMinutes": 720,
+      "source": {
+        "kind": "widget",
+        "path": "dashboard.md",
+        "id": "widget:count-24"
+      },
+      "createdAt": 1798693200000,
+      "updatedAt": 1798693200000
+    },
+    {
+      "id": "widget:count-25",
+      "name": "Countdown 25",
+      "enabled": true,
+      "deviceId": "d2f89b25-f748-43dd-83d4-7e35bfdee51a",
+      "revision": 1798693200000,
+      "schedule": {
+        "kind": "once",
+        "at": 1798693200000
+      },
+      "action": {
+        "kind": "notify",
+        "body": "Countdown 25"
+      },
+      "channels": [
+        "in-app"
+      ],
+      "notifyOn": "always",
+      "graceMinutes": 720,
+      "source": {
+        "kind": "widget",
+        "path": "dashboard.md",
+        "id": "widget:count-25"
+      },
+      "createdAt": 1798693200000,
+      "updatedAt": 1798693200000
+    },
+    {
+      "id": "widget:count-26",
+      "name": "Countdown 26",
+      "enabled": true,
+      "deviceId": "d2f89b25-f748-43dd-83d4-7e35bfdee51a",
+      "revision": 1798693200000,
+      "schedule": {
+        "kind": "once",
+        "at": 1798693200000
+      },
+      "action": {
+        "kind": "notify",
+        "body": "Countdown 26"
+      },
+      "channels": [
+        "in-app"
+      ],
+      "notifyOn": "always",
+      "graceMinutes": 720,
+      "source": {
+        "kind": "widget",
+        "path": "dashboard.md",
+        "id": "widget:count-26"
+      },
+      "createdAt": 1798693200000,
+      "updatedAt": 1798693200000
+    },
+    {
+      "id": "widget:count-27",
+      "name": "Countdown 27",
+      "enabled": true,
+      "deviceId": "d2f89b25-f748-43dd-83d4-7e35bfdee51a",
+      "revision": 1798693200000,
+      "schedule": {
+        "kind": "once",
+        "at": 1798693200000
+      },
+      "action": {
+        "kind": "notify",
+        "body": "Countdown 27"
+      },
+      "channels": [
+        "in-app"
+      ],
+      "notifyOn": "always",
+      "graceMinutes": 720,
+      "source": {
+        "kind": "widget",
+        "path": "dashboard.md",
+        "id": "widget:count-27"
+      },
+      "createdAt": 1798693200000,
+      "updatedAt": 1798693200000
+    },
+    {
+      "id": "widget:count-28",
+      "name": "Countdown 28",
+      "enabled": true,
+      "deviceId": "d2f89b25-f748-43dd-83d4-7e35bfdee51a",
+      "revision": 1798693200000,
+      "schedule": {
+        "kind": "once",
+        "at": 1798693200000
+      },
+      "action": {
+        "kind": "notify",
+        "body": "Countdown 28"
+      },
+      "channels": [
+        "in-app"
+      ],
+      "notifyOn": "always",
+      "graceMinutes": 720,
+      "source": {
+        "kind": "widget",
+        "path": "dashboard.md",
+        "id": "widget:count-28"
+      },
+      "createdAt": 1798693200000,
+      "updatedAt": 1798693200000
+    },
+    {
+      "id": "widget:count-29",
+      "name": "Countdown 29",
+      "enabled": true,
+      "deviceId": "d2f89b25-f748-43dd-83d4-7e35bfdee51a",
+      "revision": 1798693200000,
+      "schedule": {
+        "kind": "once",
+        "at": 1798693200000
+      },
+      "action": {
+        "kind": "notify",
+        "body": "Countdown 29"
+      },
+      "channels": [
+        "in-app"
+      ],
+      "notifyOn": "always",
+      "graceMinutes": 720,
+      "source": {
+        "kind": "widget",
+        "path": "dashboard.md",
+        "id": "widget:count-29"
+      },
+      "createdAt": 1798693200000,
+      "updatedAt": 1798693200000
+    },
+    {
+      "id": "widget:count-30",
+      "name": "Countdown 30",
+      "enabled": true,
+      "deviceId": "d2f89b25-f748-43dd-83d4-7e35bfdee51a",
+      "revision": 1798693200000,
+      "schedule": {
+        "kind": "once",
+        "at": 1798693200000
+      },
+      "action": {
+        "kind": "notify",
+        "body": "Countdown 30"
+      },
+      "channels": [
+        "in-app"
+      ],
+      "notifyOn": "always",
+      "graceMinutes": 720,
+      "source": {
+        "kind": "widget",
+        "path": "dashboard.md",
+        "id": "widget:count-30"
+      },
+      "createdAt": 1798693200000,
+      "updatedAt": 1798693200000
+    },
+    {
+      "id": "widget:count-31",
+      "name": "Countdown 31",
+      "enabled": true,
+      "deviceId": "d2f89b25-f748-43dd-83d4-7e35bfdee51a",
+      "revision": 1798693200000,
+      "schedule": {
+        "kind": "once",
+        "at": 1798693200000
+      },
+      "action": {
+        "kind": "notify",
+        "body": "Countdown 31"
+      },
+      "channels": [
+        "in-app"
+      ],
+      "notifyOn": "always",
+      "graceMinutes": 720,
+      "source": {
+        "kind": "widget",
+        "path": "dashboard.md",
+        "id": "widget:count-31"
+      },
+      "createdAt": 1798693200000,
+      "updatedAt": 1798693200000
+    },
+    {
+      "id": "widget:count-32",
+      "name": "Countdown 32",
+      "enabled": true,
+      "deviceId": "d2f89b25-f748-43dd-83d4-7e35bfdee51a",
+      "revision": 1798693200000,
+      "schedule": {
+        "kind": "once",
+        "at": 1798693200000
+      },
+      "action": {
+        "kind": "notify",
+        "body": "Countdown 32"
+      },
+      "channels": [
+        "in-app"
+      ],
+      "notifyOn": "always",
+      "graceMinutes": 720,
+      "source": {
+        "kind": "widget",
+        "path": "dashboard.md",
+        "id": "widget:count-32"
+      },
+      "createdAt": 1798693200000,
+      "updatedAt": 1798693200000
+    },
+    {
+      "id": "widget:count-33",
+      "name": "Countdown 33",
+      "enabled": true,
+      "deviceId": "d2f89b25-f748-43dd-83d4-7e35bfdee51a",
+      "revision": 1798693200000,
+      "schedule": {
+        "kind": "once",
+        "at": 1798693200000
+      },
+      "action": {
+        "kind": "notify",
+        "body": "Countdown 33"
+      },
+      "channels": [
+        "in-app"
+      ],
+      "notifyOn": "always",
+      "graceMinutes": 720,
+      "source": {
+        "kind": "widget",
+        "path": "dashboard.md",
+        "id": "widget:count-33"
+      },
+      "createdAt": 1798693200000,
+      "updatedAt": 1798693200000
+    },
+    {
+      "id": "widget:count-34",
+      "name": "Countdown 34",
+      "enabled": true,
+      "deviceId": "d2f89b25-f748-43dd-83d4-7e35bfdee51a",
+      "revision": 1798693200000,
+      "schedule": {
+        "kind": "once",
+        "at": 1798693200000
+      },
+      "action": {
+        "kind": "notify",
+        "body": "Countdown 34"
+      },
+      "channels": [
+        "in-app"
+      ],
+      "notifyOn": "always",
+      "graceMinutes": 720,
+      "source": {
+        "kind": "widget",
+        "path": "dashboard.md",
+        "id": "widget:count-34"
+      },
+      "createdAt": 1798693200000,
+      "updatedAt": 1798693200000
+    },
+    {
+      "id": "widget:count-35",
+      "name": "Countdown 35",
+      "enabled": true,
+      "deviceId": "d2f89b25-f748-43dd-83d4-7e35bfdee51a",
+      "revision": 1798693200000,
+      "schedule": {
+        "kind": "once",
+        "at": 1798693200000
+      },
+      "action": {
+        "kind": "notify",
+        "body": "Countdown 35"
+      },
+      "channels": [
+        "in-app"
+      ],
+      "notifyOn": "always",
+      "graceMinutes": 720,
+      "source": {
+        "kind": "widget",
+        "path": "dashboard.md",
+        "id": "widget:count-35"
+      },
+      "createdAt": 1798693200000,
+      "updatedAt": 1798693200000
+    },
+    {
+      "id": "widget:count-36",
+      "name": "Countdown 36",
+      "enabled": true,
+      "deviceId": "d2f89b25-f748-43dd-83d4-7e35bfdee51a",
+      "revision": 1798693200000,
+      "schedule": {
+        "kind": "once",
+        "at": 1798693200000
+      },
+      "action": {
+        "kind": "notify",
+        "body": "Countdown 36"
+      },
+      "channels": [
+        "in-app"
+      ],
+      "notifyOn": "always",
+      "graceMinutes": 720,
+      "source": {
+        "kind": "widget",
+        "path": "dashboard.md",
+        "id": "widget:count-36"
+      },
+      "createdAt": 1798693200000,
+      "updatedAt": 1798693200000
+    },
+    {
+      "id": "widget:count-37",
+      "name": "Countdown 37",
+      "enabled": true,
+      "deviceId": "d2f89b25-f748-43dd-83d4-7e35bfdee51a",
+      "revision": 1798693200000,
+      "schedule": {
+        "kind": "once",
+        "at": 1798693200000
+      },
+      "action": {
+        "kind": "notify",
+        "body": "Countdown 37"
+      },
+      "channels": [
+        "in-app"
+      ],
+      "notifyOn": "always",
+      "graceMinutes": 720,
+      "source": {
+        "kind": "widget",
+        "path": "dashboard.md",
+        "id": "widget:count-37"
+      },
+      "createdAt": 1798693200000,
+      "updatedAt": 1798693200000
+    },
+    {
+      "id": "widget:count-38",
+      "name": "Countdown 38",
+      "enabled": true,
+      "deviceId": "d2f89b25-f748-43dd-83d4-7e35bfdee51a",
+      "revision": 1798693200000,
+      "schedule": {
+        "kind": "once",
+        "at": 1798693200000
+      },
+      "action": {
+        "kind": "notify",
+        "body": "Countdown 38"
+      },
+      "channels": [
+        "in-app"
+      ],
+      "notifyOn": "always",
+      "graceMinutes": 720,
+      "source": {
+        "kind": "widget",
+        "path": "dashboard.md",
+        "id": "widget:count-38"
+      },
+      "createdAt": 1798693200000,
+      "updatedAt": 1798693200000
+    },
+    {
+      "id": "widget:count-39",
+      "name": "Countdown 39",
+      "enabled": true,
+      "deviceId": "d2f89b25-f748-43dd-83d4-7e35bfdee51a",
+      "revision": 1798693200000,
+      "schedule": {
+        "kind": "once",
+        "at": 1798693200000
+      },
+      "action": {
+        "kind": "notify",
+        "body": "Countdown 39"
+      },
+      "channels": [
+        "in-app"
+      ],
+      "notifyOn": "always",
+      "graceMinutes": 720,
+      "source": {
+        "kind": "widget",
+        "path": "dashboard.md",
+        "id": "widget:count-39"
+      },
+      "createdAt": 1798693200000,
+      "updatedAt": 1798693200000
+    },
+    {
+      "id": "widget:count-40",
+      "name": "Countdown 40",
+      "enabled": true,
+      "deviceId": "d2f89b25-f748-43dd-83d4-7e35bfdee51a",
+      "revision": 1798693200000,
+      "schedule": {
+        "kind": "once",
+        "at": 1798693200000
+      },
+      "action": {
+        "kind": "notify",
+        "body": "Countdown 40"
+      },
+      "channels": [
+        "in-app"
+      ],
+      "notifyOn": "always",
+      "graceMinutes": 720,
+      "source": {
+        "kind": "widget",
+        "path": "dashboard.md",
+        "id": "widget:count-40"
+      },
+      "createdAt": 1798693200000,
+      "updatedAt": 1798693200000
+    },
+    {
+      "id": "widget:count-41",
+      "name": "Countdown 41",
+      "enabled": true,
+      "deviceId": "d2f89b25-f748-43dd-83d4-7e35bfdee51a",
+      "revision": 1798693200000,
+      "schedule": {
+        "kind": "once",
+        "at": 1798693200000
+      },
+      "action": {
+        "kind": "notify",
+        "body": "Countdown 41"
+      },
+      "channels": [
+        "in-app"
+      ],
+      "notifyOn": "always",
+      "graceMinutes": 720,
+      "source": {
+        "kind": "widget",
+        "path": "dashboard.md",
+        "id": "widget:count-41"
+      },
+      "createdAt": 1798693200000,
+      "updatedAt": 1798693200000
+    },
+    {
+      "id": "widget:count-42",
+      "name": "Countdown 42",
+      "enabled": true,
+      "deviceId": "d2f89b25-f748-43dd-83d4-7e35bfdee51a",
+      "revision": 1798693200000,
+      "schedule": {
+        "kind": "once",
+        "at": 1798693200000
+      },
+      "action": {
+        "kind": "notify",
+        "body": "Countdown 42"
+      },
+      "channels": [
+        "in-app"
+      ],
+      "notifyOn": "always",
+      "graceMinutes": 720,
+      "source": {
+        "kind": "widget",
+        "path": "dashboard.md",
+        "id": "widget:count-42"
+      },
+      "createdAt": 1798693200000,
+      "updatedAt": 1798693200000
+    },
+    {
+      "id": "widget:count-43",
+      "name": "Countdown 43",
+      "enabled": true,
+      "deviceId": "d2f89b25-f748-43dd-83d4-7e35bfdee51a",
+      "revision": 1798693200000,
+      "schedule": {
+        "kind": "once",
+        "at": 1798693200000
+      },
+      "action": {
+        "kind": "notify",
+        "body": "Countdown 43"
+      },
+      "channels": [
+        "in-app"
+      ],
+      "notifyOn": "always",
+      "graceMinutes": 720,
+      "source": {
+        "kind": "widget",
+        "path": "dashboard.md",
+        "id": "widget:count-43"
+      },
+      "createdAt": 1798693200000,
+      "updatedAt": 1798693200000
+    },
+    {
+      "id": "widget:count-44",
+      "name": "Countdown 44",
+      "enabled": true,
+      "deviceId": "d2f89b25-f748-43dd-83d4-7e35bfdee51a",
+      "revision": 1798693200000,
+      "schedule": {
+        "kind": "once",
+        "at": 1798693200000
+      },
+      "action": {
+        "kind": "notify",
+        "body": "Countdown 44"
+      },
+      "channels": [
+        "in-app"
+      ],
+      "notifyOn": "always",
+      "graceMinutes": 720,
+      "source": {
+        "kind": "widget",
+        "path": "dashboard.md",
+        "id": "widget:count-44"
+      },
+      "createdAt": 1798693200000,
+      "updatedAt": 1798693200000
+    },
+    {
+      "id": "widget:count-45",
+      "name": "Countdown 45",
+      "enabled": true,
+      "deviceId": "d2f89b25-f748-43dd-83d4-7e35bfdee51a",
+      "revision": 1798693200000,
+      "schedule": {
+        "kind": "once",
+        "at": 1798693200000
+      },
+      "action": {
+        "kind": "notify",
+        "body": "Countdown 45"
+      },
+      "channels": [
+        "in-app"
+      ],
+      "notifyOn": "always",
+      "graceMinutes": 720,
+      "source": {
+        "kind": "widget",
+        "path": "dashboard.md",
+        "id": "widget:count-45"
+      },
+      "createdAt": 1798693200000,
+      "updatedAt": 1798693200000
+    },
+    {
+      "id": "widget:count-46",
+      "name": "Countdown 46",
+      "enabled": true,
+      "deviceId": "d2f89b25-f748-43dd-83d4-7e35bfdee51a",
+      "revision": 1798693200000,
+      "schedule": {
+        "kind": "once",
+        "at": 1798693200000
+      },
+      "action": {
+        "kind": "notify",
+        "body": "Countdown 46"
+      },
+      "channels": [
+        "in-app"
+      ],
+      "notifyOn": "always",
+      "graceMinutes": 720,
+      "source": {
+        "kind": "widget",
+        "path": "dashboard.md",
+        "id": "widget:count-46"
+      },
+      "createdAt": 1798693200000,
+      "updatedAt": 1798693200000
+    },
+    {
+      "id": "widget:count-47",
+      "name": "Countdown 47",
+      "enabled": true,
+      "deviceId": "d2f89b25-f748-43dd-83d4-7e35bfdee51a",
+      "revision": 1798693200000,
+      "schedule": {
+        "kind": "once",
+        "at": 1798693200000
+      },
+      "action": {
+        "kind": "notify",
+        "body": "Countdown 47"
+      },
+      "channels": [
+        "in-app"
+      ],
+      "notifyOn": "always",
+      "graceMinutes": 720,
+      "source": {
+        "kind": "widget",
+        "path": "dashboard.md",
+        "id": "widget:count-47"
+      },
+      "createdAt": 1798693200000,
+      "updatedAt": 1798693200000
+    },
+    {
+      "id": "widget:count-48",
+      "name": "Countdown 48",
+      "enabled": true,
+      "deviceId": "d2f89b25-f748-43dd-83d4-7e35bfdee51a",
+      "revision": 1798693200000,
+      "schedule": {
+        "kind": "once",
+        "at": 1798693200000
+      },
+      "action": {
+        "kind": "notify",
+        "body": "Countdown 48"
+      },
+      "channels": [
+        "in-app"
+      ],
+      "notifyOn": "always",
+      "graceMinutes": 720,
+      "source": {
+        "kind": "widget",
+        "path": "dashboard.md",
+        "id": "widget:count-48"
+      },
+      "createdAt": 1798693200000,
+      "updatedAt": 1798693200000
+    },
+    {
+      "id": "widget:count-49",
+      "name": "Countdown 49",
+      "enabled": true,
+      "deviceId": "d2f89b25-f748-43dd-83d4-7e35bfdee51a",
+      "revision": 1798693200000,
+      "schedule": {
+        "kind": "once",
+        "at": 1798693200000
+      },
+      "action": {
+        "kind": "notify",
+        "body": "Countdown 49"
+      },
+      "channels": [
+        "in-app"
+      ],
+      "notifyOn": "always",
+      "graceMinutes": 720,
+      "source": {
+        "kind": "widget",
+        "path": "dashboard.md",
+        "id": "widget:count-49"
+      },
+      "createdAt": 1798693200000,
+      "updatedAt": 1798693200000
+    },
+    {
+      "id": "widget:count-50",
+      "name": "Countdown 50",
+      "enabled": true,
+      "deviceId": "d2f89b25-f748-43dd-83d4-7e35bfdee51a",
+      "revision": 1798693200000,
+      "schedule": {
+        "kind": "once",
+        "at": 1798693200000
+      },
+      "action": {
+        "kind": "notify",
+        "body": "Countdown 50"
+      },
+      "channels": [
+        "in-app"
+      ],
+      "notifyOn": "always",
+      "graceMinutes": 720,
+      "source": {
+        "kind": "widget",
+        "path": "dashboard.md",
+        "id": "widget:count-50"
+      },
+      "createdAt": 1798693200000,
+      "updatedAt": 1798693200000
+    },
+    {
+      "id": "widget:count-51",
+      "name": "Countdown 51",
+      "enabled": true,
+      "deviceId": "d2f89b25-f748-43dd-83d4-7e35bfdee51a",
+      "revision": 1798693200000,
+      "schedule": {
+        "kind": "once",
+        "at": 1798693200000
+      },
+      "action": {
+        "kind": "notify",
+        "body": "Countdown 51"
+      },
+      "channels": [
+        "in-app"
+      ],
+      "notifyOn": "always",
+      "graceMinutes": 720,
+      "source": {
+        "kind": "widget",
+        "path": "dashboard.md",
+        "id": "widget:count-51"
+      },
+      "createdAt": 1798693200000,
+      "updatedAt": 1798693200000
+    },
+    {
+      "id": "widget:count-52",
+      "name": "Countdown 52",
+      "enabled": true,
+      "deviceId": "d2f89b25-f748-43dd-83d4-7e35bfdee51a",
+      "revision": 1798693200000,
+      "schedule": {
+        "kind": "once",
+        "at": 1798693200000
+      },
+      "action": {
+        "kind": "notify",
+        "body": "Countdown 52"
+      },
+      "channels": [
+        "in-app"
+      ],
+      "notifyOn": "always",
+      "graceMinutes": 720,
+      "source": {
+        "kind": "widget",
+        "path": "dashboard.md",
+        "id": "widget:count-52"
+      },
+      "createdAt": 1798693200000,
+      "updatedAt": 1798693200000
+    },
+    {
+      "id": "widget:count-53",
+      "name": "Countdown 53",
+      "enabled": true,
+      "deviceId": "d2f89b25-f748-43dd-83d4-7e35bfdee51a",
+      "revision": 1798693200000,
+      "schedule": {
+        "kind": "once",
+        "at": 1798693200000
+      },
+      "action": {
+        "kind": "notify",
+        "body": "Countdown 53"
+      },
+      "channels": [
+        "in-app"
+      ],
+      "notifyOn": "always",
+      "graceMinutes": 720,
+      "source": {
+        "kind": "widget",
+        "path": "dashboard.md",
+        "id": "widget:count-53"
+      },
+      "createdAt": 1798693200000,
+      "updatedAt": 1798693200000
+    },
+    {
+      "id": "widget:count-54",
+      "name": "Countdown 54",
+      "enabled": true,
+      "deviceId": "d2f89b25-f748-43dd-83d4-7e35bfdee51a",
+      "revision": 1798693200000,
+      "schedule": {
+        "kind": "once",
+        "at": 1798693200000
+      },
+      "action": {
+        "kind": "notify",
+        "body": "Countdown 54"
+      },
+      "channels": [
+        "in-app"
+      ],
+      "notifyOn": "always",
+      "graceMinutes": 720,
+      "source": {
+        "kind": "widget",
+        "path": "dashboard.md",
+        "id": "widget:count-54"
+      },
+      "createdAt": 1798693200000,
+      "updatedAt": 1798693200000
+    },
+    {
+      "id": "widget:count-55",
+      "name": "Countdown 55",
+      "enabled": true,
+      "deviceId": "d2f89b25-f748-43dd-83d4-7e35bfdee51a",
+      "revision": 1798693200000,
+      "schedule": {
+        "kind": "once",
+        "at": 1798693200000
+      },
+      "action": {
+        "kind": "notify",
+        "body": "Countdown 55"
+      },
+      "channels": [
+        "in-app"
+      ],
+      "notifyOn": "always",
+      "graceMinutes": 720,
+      "source": {
+        "kind": "widget",
+        "path": "dashboard.md",
+        "id": "widget:count-55"
+      },
+      "createdAt": 1798693200000,
+      "updatedAt": 1798693200000
+    },
+    {
+      "id": "widget:count-56",
+      "name": "Countdown 56",
+      "enabled": true,
+      "deviceId": "d2f89b25-f748-43dd-83d4-7e35bfdee51a",
+      "revision": 1798693200000,
+      "schedule": {
+        "kind": "once",
+        "at": 1798693200000
+      },
+      "action": {
+        "kind": "notify",
+        "body": "Countdown 56"
+      },
+      "channels": [
+        "in-app"
+      ],
+      "notifyOn": "always",
+      "graceMinutes": 720,
+      "source": {
+        "kind": "widget",
+        "path": "dashboard.md",
+        "id": "widget:count-56"
+      },
+      "createdAt": 1798693200000,
+      "updatedAt": 1798693200000
+    },
+    {
+      "id": "widget:count-57",
+      "name": "Countdown 57",
+      "enabled": true,
+      "deviceId": "d2f89b25-f748-43dd-83d4-7e35bfdee51a",
+      "revision": 1798693200000,
+      "schedule": {
+        "kind": "once",
+        "at": 1798693200000
+      },
+      "action": {
+        "kind": "notify",
+        "body": "Countdown 57"
+      },
+      "channels": [
+        "in-app"
+      ],
+      "notifyOn": "always",
+      "graceMinutes": 720,
+      "source": {
+        "kind": "widget",
+        "path": "dashboard.md",
+        "id": "widget:count-57"
+      },
+      "createdAt": 1798693200000,
+      "updatedAt": 1798693200000
+    },
+    {
+      "id": "widget:count-58",
+      "name": "Countdown 58",
+      "enabled": true,
+      "deviceId": "d2f89b25-f748-43dd-83d4-7e35bfdee51a",
+      "revision": 1798693200000,
+      "schedule": {
+        "kind": "once",
+        "at": 1798693200000
+      },
+      "action": {
+        "kind": "notify",
+        "body": "Countdown 58"
+      },
+      "channels": [
+        "in-app"
+      ],
+      "notifyOn": "always",
+      "graceMinutes": 720,
+      "source": {
+        "kind": "widget",
+        "path": "dashboard.md",
+        "id": "widget:count-58"
+      },
+      "createdAt": 1798693200000,
+      "updatedAt": 1798693200000
+    },
+    {
+      "id": "widget:count-59",
+      "name": "Countdown 59",
+      "enabled": true,
+      "deviceId": "d2f89b25-f748-43dd-83d4-7e35bfdee51a",
+      "revision": 1798693200000,
+      "schedule": {
+        "kind": "once",
+        "at": 1798693200000
+      },
+      "action": {
+        "kind": "notify",
+        "body": "Countdown 59"
+      },
+      "channels": [
+        "in-app"
+      ],
+      "notifyOn": "always",
+      "graceMinutes": 720,
+      "source": {
+        "kind": "widget",
+        "path": "dashboard.md",
+        "id": "widget:count-59"
+      },
+      "createdAt": 1798693200000,
+      "updatedAt": 1798693200000
+    },
+    {
+      "id": "widget:count-60",
+      "name": "Countdown 60",
+      "enabled": true,
+      "deviceId": "d2f89b25-f748-43dd-83d4-7e35bfdee51a",
+      "revision": 1798693200000,
+      "schedule": {
+        "kind": "once",
+        "at": 1798693200000
+      },
+      "action": {
+        "kind": "notify",
+        "body": "Countdown 60"
+      },
+      "channels": [
+        "in-app"
+      ],
+      "notifyOn": "always",
+      "graceMinutes": 720,
+      "source": {
+        "kind": "widget",
+        "path": "dashboard.md",
+        "id": "widget:count-60"
+      },
+      "createdAt": 1798693200000,
+      "updatedAt": 1798693200000
+    },
+    {
+      "id": "widget:count-61",
+      "name": "Countdown 61",
+      "enabled": true,
+      "deviceId": "d2f89b25-f748-43dd-83d4-7e35bfdee51a",
+      "revision": 1798693200000,
+      "schedule": {
+        "kind": "once",
+        "at": 1798693200000
+      },
+      "action": {
+        "kind": "notify",
+        "body": "Countdown 61"
+      },
+      "channels": [
+        "in-app"
+      ],
+      "notifyOn": "always",
+      "graceMinutes": 720,
+      "source": {
+        "kind": "widget",
+        "path": "dashboard.md",
+        "id": "widget:count-61"
+      },
+      "createdAt": 1798693200000,
+      "updatedAt": 1798693200000
+    },
+    {
+      "id": "widget:count-62",
+      "name": "Countdown 62",
+      "enabled": true,
+      "deviceId": "d2f89b25-f748-43dd-83d4-7e35bfdee51a",
+      "revision": 1798693200000,
+      "schedule": {
+        "kind": "once",
+        "at": 1798693200000
+      },
+      "action": {
+        "kind": "notify",
+        "body": "Countdown 62"
+      },
+      "channels": [
+        "in-app"
+      ],
+      "notifyOn": "always",
+      "graceMinutes": 720,
+      "source": {
+        "kind": "widget",
+        "path": "dashboard.md",
+        "id": "widget:count-62"
+      },
+      "createdAt": 1798693200000,
+      "updatedAt": 1798693200000
+    },
+    {
+      "id": "widget:count-63",
+      "name": "Countdown 63",
+      "enabled": true,
+      "deviceId": "d2f89b25-f748-43dd-83d4-7e35bfdee51a",
+      "revision": 1798693200000,
+      "schedule": {
+        "kind": "once",
+        "at": 1798693200000
+      },
+      "action": {
+        "kind": "notify",
+        "body": "Countdown 63"
+      },
+      "channels": [
+        "in-app"
+      ],
+      "notifyOn": "always",
+      "graceMinutes": 720,
+      "source": {
+        "kind": "widget",
+        "path": "dashboard.md",
+        "id": "widget:count-63"
+      },
+      "createdAt": 1798693200000,
+      "updatedAt": 1798693200000
+    },
+    {
+      "id": "widget:count-64",
+      "name": "Countdown 64",
+      "enabled": true,
+      "deviceId": "d2f89b25-f748-43dd-83d4-7e35bfdee51a",
+      "revision": 1798693200000,
+      "schedule": {
+        "kind": "once",
+        "at": 1798693200000
+      },
+      "action": {
+        "kind": "notify",
+        "body": "Countdown 64"
+      },
+      "channels": [
+        "in-app"
+      ],
+      "notifyOn": "always",
+      "graceMinutes": 720,
+      "source": {
+        "kind": "widget",
+        "path": "dashboard.md",
+        "id": "widget:count-64"
+      },
+      "createdAt": 1798693200000,
+      "updatedAt": 1798693200000
+    },
+    {
+      "id": "widget:count-65",
+      "name": "Countdown 65",
+      "enabled": true,
+      "deviceId": "d2f89b25-f748-43dd-83d4-7e35bfdee51a",
+      "revision": 1798693200000,
+      "schedule": {
+        "kind": "once",
+        "at": 1798693200000
+      },
+      "action": {
+        "kind": "notify",
+        "body": "Countdown 65"
+      },
+      "channels": [
+        "in-app"
+      ],
+      "notifyOn": "always",
+      "graceMinutes": 720,
+      "source": {
+        "kind": "widget",
+        "path": "dashboard.md",
+        "id": "widget:count-65"
+      },
+      "createdAt": 1798693200000,
+      "updatedAt": 1798693200000
+    },
+    {
+      "id": "widget:count-66",
+      "name": "Countdown 66",
+      "enabled": true,
+      "deviceId": "d2f89b25-f748-43dd-83d4-7e35bfdee51a",
+      "revision": 1798693200000,
+      "schedule": {
+        "kind": "once",
+        "at": 1798693200000
+      },
+      "action": {
+        "kind": "notify",
+        "body": "Countdown 66"
+      },
+      "channels": [
+        "in-app"
+      ],
+      "notifyOn": "always",
+      "graceMinutes": 720,
+      "source": {
+        "kind": "widget",
+        "path": "dashboard.md",
+        "id": "widget:count-66"
+      },
+      "createdAt": 1798693200000,
+      "updatedAt": 1798693200000
+    },
+    {
+      "id": "widget:count-67",
+      "name": "Countdown 67",
+      "enabled": true,
+      "deviceId": "d2f89b25-f748-43dd-83d4-7e35bfdee51a",
+      "revision": 1798693200000,
+      "schedule": {
+        "kind": "once",
+        "at": 1798693200000
+      },
+      "action": {
+        "kind": "notify",
+        "body": "Countdown 67"
+      },
+      "channels": [
+        "in-app"
+      ],
+      "notifyOn": "always",
+      "graceMinutes": 720,
+      "source": {
+        "kind": "widget",
+        "path": "dashboard.md",
+        "id": "widget:count-67"
+      },
+      "createdAt": 1798693200000,
+      "updatedAt": 1798693200000
+    },
+    {
+      "id": "widget:count-68",
+      "name": "Countdown 68",
+      "enabled": true,
+      "deviceId": "d2f89b25-f748-43dd-83d4-7e35bfdee51a",
+      "revision": 1798693200000,
+      "schedule": {
+        "kind": "once",
+        "at": 1798693200000
+      },
+      "action": {
+        "kind": "notify",
+        "body": "Countdown 68"
+      },
+      "channels": [
+        "in-app"
+      ],
+      "notifyOn": "always",
+      "graceMinutes": 720,
+      "source": {
+        "kind": "widget",
+        "path": "dashboard.md",
+        "id": "widget:count-68"
+      },
+      "createdAt": 1798693200000,
+      "updatedAt": 1798693200000
+    },
+    {
+      "id": "widget:count-69",
+      "name": "Countdown 69",
+      "enabled": true,
+      "deviceId": "d2f89b25-f748-43dd-83d4-7e35bfdee51a",
+      "revision": 1798693200000,
+      "schedule": {
+        "kind": "once",
+        "at": 1798693200000
+      },
+      "action": {
+        "kind": "notify",
+        "body": "Countdown 69"
+      },
+      "channels": [
+        "in-app"
+      ],
+      "notifyOn": "always",
+      "graceMinutes": 720,
+      "source": {
+        "kind": "widget",
+        "path": "dashboard.md",
+        "id": "widget:count-69"
+      },
+      "createdAt": 1798693200000,
+      "updatedAt": 1798693200000
+    },
+    {
+      "id": "widget:count-70",
+      "name": "Countdown 70",
+      "enabled": true,
+      "deviceId": "d2f89b25-f748-43dd-83d4-7e35bfdee51a",
+      "revision": 1798693200000,
+      "schedule": {
+        "kind": "once",
+        "at": 1798693200000
+      },
+      "action": {
+        "kind": "notify",
+        "body": "Countdown 70"
+      },
+      "channels": [
+        "in-app"
+      ],
+      "notifyOn": "always",
+      "graceMinutes": 720,
+      "source": {
+        "kind": "widget",
+        "path": "dashboard.md",
+        "id": "widget:count-70"
+      },
+      "createdAt": 1798693200000,
+      "updatedAt": 1798693200000
+    },
+    {
+      "id": "widget:count-71",
+      "name": "Countdown 71",
+      "enabled": true,
+      "deviceId": "d2f89b25-f748-43dd-83d4-7e35bfdee51a",
+      "revision": 1798693200000,
+      "schedule": {
+        "kind": "once",
+        "at": 1798693200000
+      },
+      "action": {
+        "kind": "notify",
+        "body": "Countdown 71"
+      },
+      "channels": [
+        "in-app"
+      ],
+      "notifyOn": "always",
+      "graceMinutes": 720,
+      "source": {
+        "kind": "widget",
+        "path": "dashboard.md",
+        "id": "widget:count-71"
+      },
+      "createdAt": 1798693200000,
+      "updatedAt": 1798693200000
+    },
+    {
+      "id": "widget:count-72",
+      "name": "Countdown 72",
+      "enabled": true,
+      "deviceId": "d2f89b25-f748-43dd-83d4-7e35bfdee51a",
+      "revision": 1798693200000,
+      "schedule": {
+        "kind": "once",
+        "at": 1798693200000
+      },
+      "action": {
+        "kind": "notify",
+        "body": "Countdown 72"
+      },
+      "channels": [
+        "in-app"
+      ],
+      "notifyOn": "always",
+      "graceMinutes": 720,
+      "source": {
+        "kind": "widget",
+        "path": "dashboard.md",
+        "id": "widget:count-72"
+      },
+      "createdAt": 1798693200000,
+      "updatedAt": 1798693200000
+    },
+    {
+      "id": "widget:count-73",
+      "name": "Countdown 73",
+      "enabled": true,
+      "deviceId": "d2f89b25-f748-43dd-83d4-7e35bfdee51a",
+      "revision": 1798693200000,
+      "schedule": {
+        "kind": "once",
+        "at": 1798693200000
+      },
+      "action": {
+        "kind": "notify",
+        "body": "Countdown 73"
+      },
+      "channels": [
+        "in-app"
+      ],
+      "notifyOn": "always",
+      "graceMinutes": 720,
+      "source": {
+        "kind": "widget",
+        "path": "dashboard.md",
+        "id": "widget:count-73"
+      },
+      "createdAt": 1798693200000,
+      "updatedAt": 1798693200000
+    },
+    {
+      "id": "widget:count-74",
+      "name": "Countdown 74",
+      "enabled": true,
+      "deviceId": "d2f89b25-f748-43dd-83d4-7e35bfdee51a",
+      "revision": 1798693200000,
+      "schedule": {
+        "kind": "once",
+        "at": 1798693200000
+      },
+      "action": {
+        "kind": "notify",
+        "body": "Countdown 74"
+      },
+      "channels": [
+        "in-app"
+      ],
+      "notifyOn": "always",
+      "graceMinutes": 720,
+      "source": {
+        "kind": "widget",
+        "path": "dashboard.md",
+        "id": "widget:count-74"
+      },
+      "createdAt": 1798693200000,
+      "updatedAt": 1798693200000
+    },
+    {
+      "id": "widget:count-75",
+      "name": "Countdown 75",
+      "enabled": true,
+      "deviceId": "d2f89b25-f748-43dd-83d4-7e35bfdee51a",
+      "revision": 1798693200000,
+      "schedule": {
+        "kind": "once",
+        "at": 1798693200000
+      },
+      "action": {
+        "kind": "notify",
+        "body": "Countdown 75"
+      },
+      "channels": [
+        "in-app"
+      ],
+      "notifyOn": "always",
+      "graceMinutes": 720,
+      "source": {
+        "kind": "widget",
+        "path": "dashboard.md",
+        "id": "widget:count-75"
+      },
+      "createdAt": 1798693200000,
+      "updatedAt": 1798693200000
+    },
+    {
+      "id": "widget:count-76",
+      "name": "Countdown 76",
+      "enabled": true,
+      "deviceId": "d2f89b25-f748-43dd-83d4-7e35bfdee51a",
+      "revision": 1798693200000,
+      "schedule": {
+        "kind": "once",
+        "at": 1798693200000
+      },
+      "action": {
+        "kind": "notify",
+        "body": "Countdown 76"
+      },
+      "channels": [
+        "in-app"
+      ],
+      "notifyOn": "always",
+      "graceMinutes": 720,
+      "source": {
+        "kind": "widget",
+        "path": "dashboard.md",
+        "id": "widget:count-76"
+      },
+      "createdAt": 1798693200000,
+      "updatedAt": 1798693200000
+    },
+    {
+      "id": "widget:count-77",
+      "name": "Countdown 77",
+      "enabled": true,
+      "deviceId": "d2f89b25-f748-43dd-83d4-7e35bfdee51a",
+      "revision": 1798693200000,
+      "schedule": {
+        "kind": "once",
+        "at": 1798693200000
+      },
+      "action": {
+        "kind": "notify",
+        "body": "Countdown 77"
+      },
+      "channels": [
+        "in-app"
+      ],
+      "notifyOn": "always",
+      "graceMinutes": 720,
+      "source": {
+        "kind": "widget",
+        "path": "dashboard.md",
+        "id": "widget:count-77"
+      },
+      "createdAt": 1798693200000,
+      "updatedAt": 1798693200000
+    },
+    {
+      "id": "widget:count-78",
+      "name": "Countdown 78",
+      "enabled": true,
+      "deviceId": "d2f89b25-f748-43dd-83d4-7e35bfdee51a",
+      "revision": 1798693200000,
+      "schedule": {
+        "kind": "once",
+        "at": 1798693200000
+      },
+      "action": {
+        "kind": "notify",
+        "body": "Countdown 78"
+      },
+      "channels": [
+        "in-app"
+      ],
+      "notifyOn": "always",
+      "graceMinutes": 720,
+      "source": {
+        "kind": "widget",
+        "path": "dashboard.md",
+        "id": "widget:count-78"
+      },
+      "createdAt": 1798693200000,
+      "updatedAt": 1798693200000
+    },
+    {
+      "id": "widget:count-79",
+      "name": "Countdown 79",
+      "enabled": true,
+      "deviceId": "d2f89b25-f748-43dd-83d4-7e35bfdee51a",
+      "revision": 1798693200000,
+      "schedule": {
+        "kind": "once",
+        "at": 1798693200000
+      },
+      "action": {
+        "kind": "notify",
+        "body": "Countdown 79"
+      },
+      "channels": [
+        "in-app"
+      ],
+      "notifyOn": "always",
+      "graceMinutes": 720,
+      "source": {
+        "kind": "widget",
+        "path": "dashboard.md",
+        "id": "widget:count-79"
+      },
+      "createdAt": 1798693200000,
+      "updatedAt": 1798693200000
+    },
+    {
+      "id": "widget:count-80",
+      "name": "Countdown 80",
+      "enabled": true,
+      "deviceId": "d2f89b25-f748-43dd-83d4-7e35bfdee51a",
+      "revision": 1798693200000,
+      "schedule": {
+        "kind": "once",
+        "at": 1798693200000
+      },
+      "action": {
+        "kind": "notify",
+        "body": "Countdown 80"
+      },
+      "channels": [
+        "in-app"
+      ],
+      "notifyOn": "always",
+      "graceMinutes": 720,
+      "source": {
+        "kind": "widget",
+        "path": "dashboard.md",
+        "id": "widget:count-80"
+      },
+      "createdAt": 1798693200000,
+      "updatedAt": 1798693200000
+    },
+    {
+      "id": "widget:count-81",
+      "name": "Countdown 81",
+      "enabled": true,
+      "deviceId": "d2f89b25-f748-43dd-83d4-7e35bfdee51a",
+      "revision": 1798693200000,
+      "schedule": {
+        "kind": "once",
+        "at": 1798693200000
+      },
+      "action": {
+        "kind": "notify",
+        "body": "Countdown 81"
+      },
+      "channels": [
+        "in-app"
+      ],
+      "notifyOn": "always",
+      "graceMinutes": 720,
+      "source": {
+        "kind": "widget",
+        "path": "dashboard.md",
+        "id": "widget:count-81"
+      },
+      "createdAt": 1798693200000,
+      "updatedAt": 1798693200000
+    },
+    {
+      "id": "widget:count-82",
+      "name": "Countdown 82",
+      "enabled": true,
+      "deviceId": "d2f89b25-f748-43dd-83d4-7e35bfdee51a",
+      "revision": 1798693200000,
+      "schedule": {
+        "kind": "once",
+        "at": 1798693200000
+      },
+      "action": {
+        "kind": "notify",
+        "body": "Countdown 82"
+      },
+      "channels": [
+        "in-app"
+      ],
+      "notifyOn": "always",
+      "graceMinutes": 720,
+      "source": {
+        "kind": "widget",
+        "path": "dashboard.md",
+        "id": "widget:count-82"
+      },
+      "createdAt": 1798693200000,
+      "updatedAt": 1798693200000
+    },
+    {
+      "id": "widget:count-83",
+      "name": "Countdown 83",
+      "enabled": true,
+      "deviceId": "d2f89b25-f748-43dd-83d4-7e35bfdee51a",
+      "revision": 1798693200000,
+      "schedule": {
+        "kind": "once",
+        "at": 1798693200000
+      },
+      "action": {
+        "kind": "notify",
+        "body": "Countdown 83"
+      },
+      "channels": [
+        "in-app"
+      ],
+      "notifyOn": "always",
+      "graceMinutes": 720,
+      "source": {
+        "kind": "widget",
+        "path": "dashboard.md",
+        "id": "widget:count-83"
+      },
+      "createdAt": 1798693200000,
+      "updatedAt": 1798693200000
+    },
+    {
+      "id": "widget:count-84",
+      "name": "Countdown 84",
+      "enabled": true,
+      "deviceId": "d2f89b25-f748-43dd-83d4-7e35bfdee51a",
+      "revision": 1798693200000,
+      "schedule": {
+        "kind": "once",
+        "at": 1798693200000
+      },
+      "action": {
+        "kind": "notify",
+        "body": "Countdown 84"
+      },
+      "channels": [
+        "in-app"
+      ],
+      "notifyOn": "always",
+      "graceMinutes": 720,
+      "source": {
+        "kind": "widget",
+        "path": "dashboard.md",
+        "id": "widget:count-84"
+      },
+      "createdAt": 1798693200000,
+      "updatedAt": 1798693200000
+    },
+    {
+      "id": "widget:count-85",
+      "name": "Countdown 85",
+      "enabled": true,
+      "deviceId": "d2f89b25-f748-43dd-83d4-7e35bfdee51a",
+      "revision": 1798693200000,
+      "schedule": {
+        "kind": "once",
+        "at": 1798693200000
+      },
+      "action": {
+        "kind": "notify",
+        "body": "Countdown 85"
+      },
+      "channels": [
+        "in-app"
+      ],
+      "notifyOn": "always",
+      "graceMinutes": 720,
+      "source": {
+        "kind": "widget",
+        "path": "dashboard.md",
+        "id": "widget:count-85"
+      },
+      "createdAt": 1798693200000,
+      "updatedAt": 1798693200000
+    },
+    {
+      "id": "widget:count-86",
+      "name": "Countdown 86",
+      "enabled": true,
+      "deviceId": "d2f89b25-f748-43dd-83d4-7e35bfdee51a",
+      "revision": 1798693200000,
+      "schedule": {
+        "kind": "once",
+        "at": 1798693200000
+      },
+      "action": {
+        "kind": "notify",
+        "body": "Countdown 86"
+      },
+      "channels": [
+        "in-app"
+      ],
+      "notifyOn": "always",
+      "graceMinutes": 720,
+      "source": {
+        "kind": "widget",
+        "path": "dashboard.md",
+        "id": "widget:count-86"
+      },
+      "createdAt": 1798693200000,
+      "updatedAt": 1798693200000
+    },
+    {
+      "id": "widget:count-87",
+      "name": "Countdown 87",
+      "enabled": true,
+      "deviceId": "d2f89b25-f748-43dd-83d4-7e35bfdee51a",
+      "revision": 1798693200000,
+      "schedule": {
+        "kind": "once",
+        "at": 1798693200000
+      },
+      "action": {
+        "kind": "notify",
+        "body": "Countdown 87"
+      },
+      "channels": [
+        "in-app"
+      ],
+      "notifyOn": "always",
+      "graceMinutes": 720,
+      "source": {
+        "kind": "widget",
+        "path": "dashboard.md",
+        "id": "widget:count-87"
+      },
+      "createdAt": 1798693200000,
+      "updatedAt": 1798693200000
+    },
+    {
+      "id": "widget:count-88",
+      "name": "Countdown 88",
+      "enabled": true,
+      "deviceId": "d2f89b25-f748-43dd-83d4-7e35bfdee51a",
+      "revision": 1798693200000,
+      "schedule": {
+        "kind": "once",
+        "at": 1798693200000
+      },
+      "action": {
+        "kind": "notify",
+        "body": "Countdown 88"
+      },
+      "channels": [
+        "in-app"
+      ],
+      "notifyOn": "always",
+      "graceMinutes": 720,
+      "source": {
+        "kind": "widget",
+        "path": "dashboard.md",
+        "id": "widget:count-88"
+      },
+      "createdAt": 1798693200000,
+      "updatedAt": 1798693200000
+    },
+    {
+      "id": "widget:count-89",
+      "name": "Countdown 89",
+      "enabled": true,
+      "deviceId": "d2f89b25-f748-43dd-83d4-7e35bfdee51a",
+      "revision": 1798693200000,
+      "schedule": {
+        "kind": "once",
+        "at": 1798693200000
+      },
+      "action": {
+        "kind": "notify",
+        "body": "Countdown 89"
+      },
+      "channels": [
+        "in-app"
+      ],
+      "notifyOn": "always",
+      "graceMinutes": 720,
+      "source": {
+        "kind": "widget",
+        "path": "dashboard.md",
+        "id": "widget:count-89"
+      },
+      "createdAt": 1798693200000,
+      "updatedAt": 1798693200000
+    },
+    {
+      "id": "widget:count-90",
+      "name": "Countdown 90",
+      "enabled": true,
+      "deviceId": "d2f89b25-f748-43dd-83d4-7e35bfdee51a",
+      "revision": 1798693200000,
+      "schedule": {
+        "kind": "once",
+        "at": 1798693200000
+      },
+      "action": {
+        "kind": "notify",
+        "body": "Countdown 90"
+      },
+      "channels": [
+        "in-app"
+      ],
+      "notifyOn": "always",
+      "graceMinutes": 720,
+      "source": {
+        "kind": "widget",
+        "path": "dashboard.md",
+        "id": "widget:count-90"
+      },
+      "createdAt": 1798693200000,
+      "updatedAt": 1798693200000
+    },
+    {
+      "id": "widget:count-91",
+      "name": "Countdown 91",
+      "enabled": true,
+      "deviceId": "d2f89b25-f748-43dd-83d4-7e35bfdee51a",
+      "revision": 1798693200000,
+      "schedule": {
+        "kind": "once",
+        "at": 1798693200000
+      },
+      "action": {
+        "kind": "notify",
+        "body": "Countdown 91"
+      },
+      "channels": [
+        "in-app"
+      ],
+      "notifyOn": "always",
+      "graceMinutes": 720,
+      "source": {
+        "kind": "widget",
+        "path": "dashboard.md",
+        "id": "widget:count-91"
+      },
+      "createdAt": 1798693200000,
+      "updatedAt": 1798693200000
+    },
+    {
+      "id": "widget:count-92",
+      "name": "Countdown 92",
+      "enabled": true,
+      "deviceId": "d2f89b25-f748-43dd-83d4-7e35bfdee51a",
+      "revision": 1798693200000,
+      "schedule": {
+        "kind": "once",
+        "at": 1798693200000
+      },
+      "action": {
+        "kind": "notify",
+        "body": "Countdown 92"
+      },
+      "channels": [
+        "in-app"
+      ],
+      "notifyOn": "always",
+      "graceMinutes": 720,
+      "source": {
+        "kind": "widget",
+        "path": "dashboard.md",
+        "id": "widget:count-92"
+      },
+      "createdAt": 1798693200000,
+      "updatedAt": 1798693200000
+    },
+    {
+      "id": "widget:count-93",
+      "name": "Countdown 93",
+      "enabled": true,
+      "deviceId": "d2f89b25-f748-43dd-83d4-7e35bfdee51a",
+      "revision": 1798693200000,
+      "schedule": {
+        "kind": "once",
+        "at": 1798693200000
+      },
+      "action": {
+        "kind": "notify",
+        "body": "Countdown 93"
+      },
+      "channels": [
+        "in-app"
+      ],
+      "notifyOn": "always",
+      "graceMinutes": 720,
+      "source": {
+        "kind": "widget",
+        "path": "dashboard.md",
+        "id": "widget:count-93"
+      },
+      "createdAt": 1798693200000,
+      "updatedAt": 1798693200000
+    },
+    {
+      "id": "widget:count-94",
+      "name": "Countdown 94",
+      "enabled": true,
+      "deviceId": "d2f89b25-f748-43dd-83d4-7e35bfdee51a",
+      "revision": 1798693200000,
+      "schedule": {
+        "kind": "once",
+        "at": 1798693200000
+      },
+      "action": {
+        "kind": "notify",
+        "body": "Countdown 94"
+      },
+      "channels": [
+        "in-app"
+      ],
+      "notifyOn": "always",
+      "graceMinutes": 720,
+      "source": {
+        "kind": "widget",
+        "path": "dashboard.md",
+        "id": "widget:count-94"
+      },
+      "createdAt": 1798693200000,
+      "updatedAt": 1798693200000
+    },
+    {
+      "id": "widget:count-95",
+      "name": "Countdown 95",
+      "enabled": true,
+      "deviceId": "d2f89b25-f748-43dd-83d4-7e35bfdee51a",
+      "revision": 1798693200000,
+      "schedule": {
+        "kind": "once",
+        "at": 1798693200000
+      },
+      "action": {
+        "kind": "notify",
+        "body": "Countdown 95"
+      },
+      "channels": [
+        "in-app"
+      ],
+      "notifyOn": "always",
+      "graceMinutes": 720,
+      "source": {
+        "kind": "widget",
+        "path": "dashboard.md",
+        "id": "widget:count-95"
+      },
+      "createdAt": 1798693200000,
+      "updatedAt": 1798693200000
+    },
+    {
+      "id": "widget:count-96",
+      "name": "Countdown 96",
+      "enabled": true,
+      "deviceId": "d2f89b25-f748-43dd-83d4-7e35bfdee51a",
+      "revision": 1798693200000,
+      "schedule": {
+        "kind": "once",
+        "at": 1798693200000
+      },
+      "action": {
+        "kind": "notify",
+        "body": "Countdown 96"
+      },
+      "channels": [
+        "in-app"
+      ],
+      "notifyOn": "always",
+      "graceMinutes": 720,
+      "source": {
+        "kind": "widget",
+        "path": "dashboard.md",
+        "id": "widget:count-96"
+      },
+      "createdAt": 1798693200000,
+      "updatedAt": 1798693200000
+    },
+    {
+      "id": "widget:count-97",
+      "name": "Countdown 97",
+      "enabled": true,
+      "deviceId": "d2f89b25-f748-43dd-83d4-7e35bfdee51a",
+      "revision": 1798693200000,
+      "schedule": {
+        "kind": "once",
+        "at": 1798693200000
+      },
+      "action": {
+        "kind": "notify",
+        "body": "Countdown 97"
+      },
+      "channels": [
+        "in-app"
+      ],
+      "notifyOn": "always",
+      "graceMinutes": 720,
+      "source": {
+        "kind": "widget",
+        "path": "dashboard.md",
+        "id": "widget:count-97"
+      },
+      "createdAt": 1798693200000,
+      "updatedAt": 1798693200000
+    },
+    {
+      "id": "widget:count-98",
+      "name": "Countdown 98",
+      "enabled": true,
+      "deviceId": "d2f89b25-f748-43dd-83d4-7e35bfdee51a",
+      "revision": 1798693200000,
+      "schedule": {
+        "kind": "once",
+        "at": 1798693200000
+      },
+      "action": {
+        "kind": "notify",
+        "body": "Countdown 98"
+      },
+      "channels": [
+        "in-app"
+      ],
+      "notifyOn": "always",
+      "graceMinutes": 720,
+      "source": {
+        "kind": "widget",
+        "path": "dashboard.md",
+        "id": "widget:count-98"
+      },
+      "createdAt": 1798693200000,
+      "updatedAt": 1798693200000
+    },
+    {
+      "id": "widget:count-99",
+      "name": "Countdown 99",
+      "enabled": true,
+      "deviceId": "d2f89b25-f748-43dd-83d4-7e35bfdee51a",
+      "revision": 1798693200000,
+      "schedule": {
+        "kind": "once",
+        "at": 1798693200000
+      },
+      "action": {
+        "kind": "notify",
+        "body": "Countdown 99"
+      },
+      "channels": [
+        "in-app"
+      ],
+      "notifyOn": "always",
+      "graceMinutes": 720,
+      "source": {
+        "kind": "widget",
+        "path": "dashboard.md",
+        "id": "widget:count-99"
+      },
+      "createdAt": 1798693200000,
+      "updatedAt": 1798693200000
+    },
+    {
+      "id": "widget:count-100",
+      "name": "Countdown 100",
+      "enabled": true,
+      "deviceId": "d2f89b25-f748-43dd-83d4-7e35bfdee51a",
+      "revision": 1798693200000,
+      "schedule": {
+        "kind": "once",
+        "at": 1798693200000
+      },
+      "action": {
+        "kind": "notify",
+        "body": "Countdown 100"
+      },
+      "channels": [
+        "in-app"
+      ],
+      "notifyOn": "always",
+      "graceMinutes": 720,
+      "source": {
+        "kind": "widget",
+        "path": "dashboard.md",
+        "id": "widget:count-100"
+      },
+      "createdAt": 1798693200000,
+      "updatedAt": 1798693200000
+    }
+  ],
+  "notificationBodies": [
+    [
+      "widget-test-legacy",
+      "Preserved user body legacy",
+      true
+    ],
+    [
+      "widget-test-nested",
+      "Preserved user body nested",
+      true
+    ],
+    [
+      "widget-test-deletedWidget",
+      "Preserved user body deletedWidget",
+      false
+    ],
+    [
+      "widget-test-deletedFile",
+      "Preserved user body deletedFile",
+      false
+    ],
+    [
+      "widget-test-disabled",
+      "Preserved user body disabled",
+      false
+    ]
+  ],
+  "definitions": 102
+}

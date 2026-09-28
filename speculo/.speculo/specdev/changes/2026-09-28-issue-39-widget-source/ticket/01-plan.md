@@ -8,7 +8,7 @@ artifact: "ticket"
 change: "2026-09-28-issue-39-widget-source"
 id: "T-01"
 title: "小组件来源统一路径并聚焦目标"
-status: "ready"
+status: "done"
 kind: "bug"
 planning_depth: "standard"
 planning_depth_reason: "跨入口与领域接缝的可独立验收行为切片"
@@ -17,8 +17,8 @@ risk: "medium"
 blocked_by: []
 contract_ids: ["AC-001", "AC-002"]
 owner: "codex-issue-planning"
-expected_changes: ["<Path>src/platform/obsidian/dashboard/automation.ts</Path>", "<Path>src/plugin/workflows/automation-host.ts</Path>", "<Path>src/view/automations/view.tsx</Path>", "<Path>src/view/notifications/inbox.ts</Path>", "<Path>src/view/dashboard/view/dashboard-view.ts</Path>", "<Path>scripts/verify-automation.ts</Path>"]
-writable_paths: ["<Path>src/platform/obsidian/dashboard/automation.ts</Path>", "<Path>src/plugin/workflows/automation-host.ts</Path>", "<Path>src/view/automations/view.tsx</Path>", "<Path>src/view/notifications/inbox.ts</Path>", "<Path>src/view/dashboard/view/dashboard-view.ts</Path>", "<Path>scripts/verify-automation.ts</Path>", "<Path>main.js</Path>"]
+expected_changes: ["<Path>src/platform/obsidian/dashboard/automation.ts</Path>", "<Path>src/plugin/workflows/automation-host.ts</Path>", "<Path>src/view/automations/view.tsx</Path>", "<Path>src/view/notifications/inbox.ts</Path>", "<Path>src/view/dashboard/view/dashboard-view.ts</Path>", "<Path>scripts/verify-automation.ts</Path>", "<Path>src/shared/i18n/automation.ts</Path>", "<Path>src/view/dashboard/view/lifecycle.ts</Path>", "<Path>src/view/dashboard/widgets/CountdownPanel.tsx</Path>"]
+writable_paths: ["<Path>src/platform/obsidian/dashboard/automation.ts</Path>", "<Path>src/plugin/workflows/automation-host.ts</Path>", "<Path>src/view/automations/view.tsx</Path>", "<Path>src/view/notifications/inbox.ts</Path>", "<Path>src/view/dashboard/view/dashboard-view.ts</Path>", "<Path>scripts/verify-automation.ts</Path>", "<Path>main.js</Path>", "<Path>src/shared/i18n/automation.ts</Path>", "<Path>src/view/dashboard/view/lifecycle.ts</Path>", "<Path>src/view/dashboard/widgets/CountdownPanel.tsx</Path>"]
 read_only_paths: []
 shared_paths: ["<Path>main.js</Path>"]
 shared_path_owners: ["<Path>main.js</Path> => codex-issue-planning (唯一 Lead，按 current Ticket 串行修改)"]
@@ -107,12 +107,12 @@ E2E owner/environment：Lead / current-workspace（未创建 worktree）。场�
 
 ## 10. 验收标准
 
-- [ ] AC-001：倒计时/纪念日来源带真实可解析看板路径，从通知或自动化点击能打开所属看板并定位对应 widget id。
-- [ ] AC-002：读取旧省略.md的 widget 来源可打开；文件/部件确实被删时提示清楚且无 Error: 前缀；不误报重复任务标识。
-- [ ] Skill Execution Records 完整记录真实调用、摘要、操作、证据与结果。
-- [ ] 路径未越界；所需 E2E 已实际执行。
-- [ ] 授权后形成非空 implementation commit，Lead direct-parent 验证通过并记录 result SHA；当前本地计划不是该证据。
-- [ ] 所有回归/构建/lint通过，未完成项没有伪标 done；无需要改动时取消该票并注明事实，禁止 empty commit。
+- [x] AC-001：倒计时/纪念日来源带真实可解析看板路径，从通知或自动化点击能打开所属看板并定位对应 widget id。
+- [x] AC-002：读取旧省略.md的 widget 来源可打开；文件/部件确实被删时提示清楚且无 Error: 前缀；不误报重复任务标识。
+- [x] Skill Execution Records 完整记录真实调用、摘要、操作、证据与结果。
+- [x] 路径未越界；所需 E2E 已实际执行。
+- [x] 授权后形成非空 implementation commit，Lead direct-parent 验证通过并记录 result SHA；当前本地计划不是该证据。
+- [x] 所有回归/构建/lint通过，未完成项没有伪标 done；无需要改动时取消该票并注明事实，禁止 empty commit。
 
 ## 11. SKILL 调用计划
 
@@ -123,3 +123,5 @@ dev implement：先读架构/领域参考，用其依赖与命名/持久化规�
 ## 12. 停止、检查点与交付
 
 用户要求完整分析与计划，未规定固定票数，不能用删合同减票。当前为 plan，不实施。缺 required 接缝/环境、契约偏差、他人写集、源漂移则暂停本票及真实下游；独立票仍可规划。恢复读取 Map/Goal/源HEAD/Skill摘要/最近Evidence，核对未闭合动作再继续。交付所有 AC Evidence 后交回 Goal，不能自动远程评论、关闭或归档。
+
+实施检查点：用户已明确授权本地实现/必要提交；T-01 已通过真实验收并提交 c3245439192d518fb8070685b45a390442590c3f。历史 plan-only 文案不再代表当前授权；详见 evidence/T-01.md。
