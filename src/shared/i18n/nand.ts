@@ -24,9 +24,9 @@ export const messages = {
 		'main.openHome': 'Open NAND Home',
 		'intro.title': 'NAND',
 		'intro.body':
-			'This is NAND WTA’s general workbench. Home manages the dashboard, editor, agents, icons and contacts; automations and notifications connect them.',
+			'This is NAMEWTA’s general workbench. Home manages the dashboard, editor, agents, icons and contacts; automations and notifications connect them.',
 		'intro.ok': 'Got it',
-		'about.intro1': 'NAND WTA',
+		'about.intro1': 'NAMEWTA',
 		'about.intro2': 'NAMEWTA’s general Obsidian workbench.',
 		'about.intro3':
 			'Manage dashboards, comments, coding agents, icons, contacts, automations and notifications in one vault.',
@@ -98,9 +98,9 @@ export const messages = {
 		'modules.disabledNotice': '这个模块已关闭。请到首页打开。',
 		'main.openHome': '打开 NAND 首页',
 		'intro.title': 'NAND',
-		'intro.body': '这是 NAND WTA 的通用工作台。首页管理看板、编辑器、智能体、图标和档案，自动化与通知连接各模块。',
+		'intro.body': '这是 NAMEWTA 的通用工作台。首页管理看板、编辑器、智能体、图标和档案，自动化与通知连接各模块。',
 		'intro.ok': '知道了',
-		'about.intro1': 'NAND WTA',
+		'about.intro1': 'NAMEWTA',
 		'about.intro2': 'NAMEWTA 的通用 Obsidian 工作台。',
 		'about.intro3': '在一个库中管理看板、评论、编程智能体、图标、档案、自动化和通知。',
 		'about.building': '我在做',

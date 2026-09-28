@@ -80,6 +80,7 @@ test('defaults, all locale values, command ids and resource bytes match pinned u
 	assert.deepEqual(DEFAULT_ICONIC_SETTINGS, fixture.defaults);
 	const locales = structuredClone(fixture.locales);
 	// Reviewed NAND copy changes. The upstream oracle remains immutable.
+	locales.en['iconic.menu.changeIcon'] = 'Change icon…';
 	locales.en['iconic.backups.backupNotice'] = 'NAND could not load icon settings.';
 	for (const key of Object.keys(locales.zh) as Array<keyof typeof locales.zh>) locales.zh[key] = locales.zh[key].replaceAll('……', '…');
 	locales.zh['iconic.backups.backupNotice'] = 'NAND 无法加载图标设置。';

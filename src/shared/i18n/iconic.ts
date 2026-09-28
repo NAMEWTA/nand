@@ -9,7 +9,7 @@ export const iconicTranslations = {
 		'iconic.appItems.maximize': 'Maximize',
 		'iconic.appItems.unmaximize': 'Restore down',
 		'iconic.appItems.close': 'Close window',
-		'iconic.menu.changeIcon': 'Change icon...',
+		'iconic.menu.changeIcon': 'Change icon…',
 		'iconic.menu.changeIcons': 'Change {#} icons...',
 		'iconic.menu.removeIcon': 'Remove icon',
 		'iconic.menu.removeIcons': 'Remove {#} icons',
