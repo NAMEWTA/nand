@@ -1,0 +1,48 @@
+{
+  "passed": true,
+  "viewport": 1280,
+  "result": {
+    "leaf": {
+      "x": 44,
+      "y": 77.9375,
+      "width": 618,
+      "height": 722.0625,
+      "top": 77.9375,
+      "right": 662,
+      "bottom": 800,
+      "left": 44
+    },
+    "list": {
+      "x": 56,
+      "y": 234.3125,
+      "width": 594,
+      "height": 186.78125,
+      "top": 234.3125,
+      "right": 650,
+      "bottom": 421.09375,
+      "left": 56
+    },
+    "detail": {
+      "x": 56,
+      "y": 437.09375,
+      "width": 594,
+      "height": 330.90625,
+      "top": 437.09375,
+      "right": 650,
+      "bottom": 768,
+      "left": 56
+    },
+    "toolbar": {
+      "x": 56,
+      "y": 89.9375,
+      "width": 594,
+      "height": 100.78125,
+      "top": 89.9375,
+      "right": 650,
+      "bottom": 190.71875,
+      "left": 56
+    },
+    "outputFont": "monospace",
+    "rootScroll": 0
+  }
+}

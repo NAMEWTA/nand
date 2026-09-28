@@ -1,0 +1,15 @@
+{
+  "expectedRed": true,
+  "failures": [
+    "1280px: missing visible filter labels",
+    "1280px: toolbar offscreen after root scroll",
+    "1280px: user prompt uses monospace",
+    "800px: missing visible filter labels",
+    "800px: toolbar offscreen after root scroll",
+    "800px: user prompt uses monospace",
+    "500px: missing visible filter labels",
+    "500px: toolbar offscreen after root scroll",
+    "500px: user prompt uses monospace",
+    "New/edit editor headings both 自动化"
+  ]
+}

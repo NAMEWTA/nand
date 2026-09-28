@@ -1,0 +1,2047 @@
+{
+  "passed": true,
+  "cases": 24,
+  "definitionsPreserved": true,
+  "rows": [
+    {
+      "lang": "zh",
+      "theme": "light",
+      "viewportWidth": 800,
+      "edit": false,
+      "heading": "新建自动化",
+      "width": 514,
+      "scroll": 514,
+      "right": 651,
+      "fields": [
+        {
+          "tag": "INPUT",
+          "right": 651
+        },
+        {
+          "tag": "SELECT",
+          "right": 651
+        },
+        {
+          "tag": "SELECT",
+          "right": 651
+        },
+        {
+          "tag": "TEXTAREA",
+          "right": 386
+        },
+        {
+          "tag": "SELECT",
+          "right": 651
+        },
+        {
+          "tag": "SELECT",
+          "right": 651
+        },
+        {
+          "tag": "INPUT",
+          "right": 651
+        },
+        {
+          "tag": "SELECT",
+          "right": 651
+        },
+        {
+          "tag": "SELECT",
+          "right": 651
+        },
+        {
+          "tag": "SELECT",
+          "right": 651
+        },
+        {
+          "tag": "SELECT",
+          "right": 651
+        },
+        {
+          "tag": "INPUT",
+          "right": 651
+        },
+        {
+          "tag": "SELECT",
+          "right": 651
+        },
+        {
+          "tag": "SELECT",
+          "right": 651
+        },
+        {
+          "tag": "INPUT",
+          "right": 626
+        },
+        {
+          "tag": "INPUT",
+          "right": 626
+        },
+        {
+          "tag": "INPUT",
+          "right": 626
+        },
+        {
+          "tag": "INPUT",
+          "right": 626
+        }
+      ],
+      "text": ""
+    },
+    {
+      "lang": "zh",
+      "theme": "light",
+      "viewportWidth": 800,
+      "edit": true,
+      "heading": "编辑自动化",
+      "width": 514,
+      "scroll": 514,
+      "right": 651,
+      "fields": [
+        {
+          "tag": "INPUT",
+          "right": 651
+        },
+        {
+          "tag": "SELECT",
+          "right": 651
+        },
+        {
+          "tag": "SELECT",
+          "right": 651
+        },
+        {
+          "tag": "TEXTAREA",
+          "right": 386
+        },
+        {
+          "tag": "SELECT",
+          "right": 651
+        },
+        {
+          "tag": "SELECT",
+          "right": 651
+        },
+        {
+          "tag": "INPUT",
+          "right": 651
+        },
+        {
+          "tag": "SELECT",
+          "right": 651
+        },
+        {
+          "tag": "SELECT",
+          "right": 651
+        },
+        {
+          "tag": "SELECT",
+          "right": 651
+        },
+        {
+          "tag": "SELECT",
+          "right": 651
+        },
+        {
+          "tag": "INPUT",
+          "right": 651
+        },
+        {
+          "tag": "SELECT",
+          "right": 651
+        },
+        {
+          "tag": "SELECT",
+          "right": 651
+        },
+        {
+          "tag": "INPUT",
+          "right": 626
+        },
+        {
+          "tag": "INPUT",
+          "right": 626
+        },
+        {
+          "tag": "INPUT",
+          "right": 626
+        },
+        {
+          "tag": "INPUT",
+          "right": 626
+        }
+      ],
+      "text": "User prompt 第一行\nSecond line preserved\nLong paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 \nLong paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 \nLong paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 \nLong paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 \nLong paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 \nLong paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 \nLong paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 \nLong paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 \nLong paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 \nLong paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 \nLong paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 \nLong paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 \nLong paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 \nLong paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 \nLong paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 \nLong paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 \nLong paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 \nLong paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 \nLong paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 \nLong paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 "
+    },
+    {
+      "lang": "zh",
+      "theme": "light",
+      "viewportWidth": 500,
+      "edit": false,
+      "heading": "新建自动化",
+      "width": 354,
+      "scroll": 354,
+      "right": 421,
+      "fields": [
+        {
+          "tag": "INPUT",
+          "right": 421
+        },
+        {
+          "tag": "SELECT",
+          "right": 421
+        },
+        {
+          "tag": "SELECT",
+          "right": 421
+        },
+        {
+          "tag": "TEXTAREA",
+          "right": 421
+        },
+        {
+          "tag": "SELECT",
+          "right": 421
+        },
+        {
+          "tag": "SELECT",
+          "right": 421
+        },
+        {
+          "tag": "INPUT",
+          "right": 421
+        },
+        {
+          "tag": "SELECT",
+          "right": 421
+        },
+        {
+          "tag": "SELECT",
+          "right": 421
+        },
+        {
+          "tag": "SELECT",
+          "right": 421
+        },
+        {
+          "tag": "SELECT",
+          "right": 421
+        },
+        {
+          "tag": "INPUT",
+          "right": 421
+        },
+        {
+          "tag": "SELECT",
+          "right": 421
+        },
+        {
+          "tag": "SELECT",
+          "right": 421
+        },
+        {
+          "tag": "INPUT",
+          "right": 396
+        },
+        {
+          "tag": "INPUT",
+          "right": 396
+        },
+        {
+          "tag": "INPUT",
+          "right": 396
+        },
+        {
+          "tag": "INPUT",
+          "right": 396
+        }
+      ],
+      "text": ""
+    },
+    {
+      "lang": "zh",
+      "theme": "light",
+      "viewportWidth": 500,
+      "edit": true,
+      "heading": "编辑自动化",
+      "width": 354,
+      "scroll": 354,
+      "right": 421,
+      "fields": [
+        {
+          "tag": "INPUT",
+          "right": 421
+        },
+        {
+          "tag": "SELECT",
+          "right": 421
+        },
+        {
+          "tag": "SELECT",
+          "right": 421
+        },
+        {
+          "tag": "TEXTAREA",
+          "right": 421
+        },
+        {
+          "tag": "SELECT",
+          "right": 421
+        },
+        {
+          "tag": "SELECT",
+          "right": 421
+        },
+        {
+          "tag": "INPUT",
+          "right": 421
+        },
+        {
+          "tag": "SELECT",
+          "right": 421
+        },
+        {
+          "tag": "SELECT",
+          "right": 421
+        },
+        {
+          "tag": "SELECT",
+          "right": 421
+        },
+        {
+          "tag": "SELECT",
+          "right": 421
+        },
+        {
+          "tag": "INPUT",
+          "right": 421
+        },
+        {
+          "tag": "SELECT",
+          "right": 421
+        },
+        {
+          "tag": "SELECT",
+          "right": 421
+        },
+        {
+          "tag": "INPUT",
+          "right": 396
+        },
+        {
+          "tag": "INPUT",
+          "right": 396
+        },
+        {
+          "tag": "INPUT",
+          "right": 396
+        },
+        {
+          "tag": "INPUT",
+          "right": 396
+        }
+      ],
+      "text": "User prompt 第一行\nSecond line preserved\nLong paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 \nLong paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 \nLong paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 \nLong paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 \nLong paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 \nLong paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 \nLong paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 \nLong paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 \nLong paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 \nLong paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 \nLong paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 \nLong paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 \nLong paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 \nLong paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 \nLong paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 \nLong paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 \nLong paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 \nLong paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 \nLong paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 \nLong paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 "
+    },
+    {
+      "lang": "zh",
+      "theme": "dark",
+      "viewportWidth": 800,
+      "edit": false,
+      "heading": "新建自动化",
+      "width": 514,
+      "scroll": 514,
+      "right": 651,
+      "fields": [
+        {
+          "tag": "INPUT",
+          "right": 651
+        },
+        {
+          "tag": "SELECT",
+          "right": 651
+        },
+        {
+          "tag": "SELECT",
+          "right": 651
+        },
+        {
+          "tag": "TEXTAREA",
+          "right": 386
+        },
+        {
+          "tag": "SELECT",
+          "right": 651
+        },
+        {
+          "tag": "SELECT",
+          "right": 651
+        },
+        {
+          "tag": "INPUT",
+          "right": 651
+        },
+        {
+          "tag": "SELECT",
+          "right": 651
+        },
+        {
+          "tag": "SELECT",
+          "right": 651
+        },
+        {
+          "tag": "SELECT",
+          "right": 651
+        },
+        {
+          "tag": "SELECT",
+          "right": 651
+        },
+        {
+          "tag": "INPUT",
+          "right": 651
+        },
+        {
+          "tag": "SELECT",
+          "right": 651
+        },
+        {
+          "tag": "SELECT",
+          "right": 651
+        },
+        {
+          "tag": "INPUT",
+          "right": 626
+        },
+        {
+          "tag": "INPUT",
+          "right": 626
+        },
+        {
+          "tag": "INPUT",
+          "right": 626
+        },
+        {
+          "tag": "INPUT",
+          "right": 626
+        }
+      ],
+      "text": ""
+    },
+    {
+      "lang": "zh",
+      "theme": "dark",
+      "viewportWidth": 800,
+      "edit": true,
+      "heading": "编辑自动化",
+      "width": 514,
+      "scroll": 514,
+      "right": 651,
+      "fields": [
+        {
+          "tag": "INPUT",
+          "right": 651
+        },
+        {
+          "tag": "SELECT",
+          "right": 651
+        },
+        {
+          "tag": "SELECT",
+          "right": 651
+        },
+        {
+          "tag": "TEXTAREA",
+          "right": 386
+        },
+        {
+          "tag": "SELECT",
+          "right": 651
+        },
+        {
+          "tag": "SELECT",
+          "right": 651
+        },
+        {
+          "tag": "INPUT",
+          "right": 651
+        },
+        {
+          "tag": "SELECT",
+          "right": 651
+        },
+        {
+          "tag": "SELECT",
+          "right": 651
+        },
+        {
+          "tag": "SELECT",
+          "right": 651
+        },
+        {
+          "tag": "SELECT",
+          "right": 651
+        },
+        {
+          "tag": "INPUT",
+          "right": 651
+        },
+        {
+          "tag": "SELECT",
+          "right": 651
+        },
+        {
+          "tag": "SELECT",
+          "right": 651
+        },
+        {
+          "tag": "INPUT",
+          "right": 626
+        },
+        {
+          "tag": "INPUT",
+          "right": 626
+        },
+        {
+          "tag": "INPUT",
+          "right": 626
+        },
+        {
+          "tag": "INPUT",
+          "right": 626
+        }
+      ],
+      "text": "User prompt 第一行\nSecond line preserved\nLong paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 \nLong paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 \nLong paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 \nLong paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 \nLong paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 \nLong paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 \nLong paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 \nLong paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 \nLong paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 \nLong paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 \nLong paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 \nLong paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 \nLong paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 \nLong paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 \nLong paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 \nLong paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 \nLong paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 \nLong paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 \nLong paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 \nLong paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 "
+    },
+    {
+      "lang": "zh",
+      "theme": "dark",
+      "viewportWidth": 500,
+      "edit": false,
+      "heading": "新建自动化",
+      "width": 354,
+      "scroll": 354,
+      "right": 421,
+      "fields": [
+        {
+          "tag": "INPUT",
+          "right": 421
+        },
+        {
+          "tag": "SELECT",
+          "right": 421
+        },
+        {
+          "tag": "SELECT",
+          "right": 421
+        },
+        {
+          "tag": "TEXTAREA",
+          "right": 421
+        },
+        {
+          "tag": "SELECT",
+          "right": 421
+        },
+        {
+          "tag": "SELECT",
+          "right": 421
+        },
+        {
+          "tag": "INPUT",
+          "right": 421
+        },
+        {
+          "tag": "SELECT",
+          "right": 421
+        },
+        {
+          "tag": "SELECT",
+          "right": 421
+        },
+        {
+          "tag": "SELECT",
+          "right": 421
+        },
+        {
+          "tag": "SELECT",
+          "right": 421
+        },
+        {
+          "tag": "INPUT",
+          "right": 421
+        },
+        {
+          "tag": "SELECT",
+          "right": 421
+        },
+        {
+          "tag": "SELECT",
+          "right": 421
+        },
+        {
+          "tag": "INPUT",
+          "right": 396
+        },
+        {
+          "tag": "INPUT",
+          "right": 396
+        },
+        {
+          "tag": "INPUT",
+          "right": 396
+        },
+        {
+          "tag": "INPUT",
+          "right": 396
+        }
+      ],
+      "text": ""
+    },
+    {
+      "lang": "zh",
+      "theme": "dark",
+      "viewportWidth": 500,
+      "edit": true,
+      "heading": "编辑自动化",
+      "width": 354,
+      "scroll": 354,
+      "right": 421,
+      "fields": [
+        {
+          "tag": "INPUT",
+          "right": 421
+        },
+        {
+          "tag": "SELECT",
+          "right": 421
+        },
+        {
+          "tag": "SELECT",
+          "right": 421
+        },
+        {
+          "tag": "TEXTAREA",
+          "right": 421
+        },
+        {
+          "tag": "SELECT",
+          "right": 421
+        },
+        {
+          "tag": "SELECT",
+          "right": 421
+        },
+        {
+          "tag": "INPUT",
+          "right": 421
+        },
+        {
+          "tag": "SELECT",
+          "right": 421
+        },
+        {
+          "tag": "SELECT",
+          "right": 421
+        },
+        {
+          "tag": "SELECT",
+          "right": 421
+        },
+        {
+          "tag": "SELECT",
+          "right": 421
+        },
+        {
+          "tag": "INPUT",
+          "right": 421
+        },
+        {
+          "tag": "SELECT",
+          "right": 421
+        },
+        {
+          "tag": "SELECT",
+          "right": 421
+        },
+        {
+          "tag": "INPUT",
+          "right": 396
+        },
+        {
+          "tag": "INPUT",
+          "right": 396
+        },
+        {
+          "tag": "INPUT",
+          "right": 396
+        },
+        {
+          "tag": "INPUT",
+          "right": 396
+        }
+      ],
+      "text": "User prompt 第一行\nSecond line preserved\nLong paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 \nLong paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 \nLong paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 \nLong paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 \nLong paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 \nLong paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 \nLong paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 \nLong paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 \nLong paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 \nLong paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 \nLong paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 \nLong paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 \nLong paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 \nLong paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 \nLong paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 \nLong paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 \nLong paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 \nLong paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 \nLong paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 \nLong paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 "
+    },
+    {
+      "lang": "en",
+      "theme": "light",
+      "viewportWidth": 800,
+      "edit": false,
+      "heading": "New automation",
+      "width": 514,
+      "scroll": 514,
+      "right": 651,
+      "fields": [
+        {
+          "tag": "INPUT",
+          "right": 651
+        },
+        {
+          "tag": "SELECT",
+          "right": 651
+        },
+        {
+          "tag": "SELECT",
+          "right": 651
+        },
+        {
+          "tag": "TEXTAREA",
+          "right": 386
+        },
+        {
+          "tag": "SELECT",
+          "right": 651
+        },
+        {
+          "tag": "SELECT",
+          "right": 651
+        },
+        {
+          "tag": "INPUT",
+          "right": 651
+        },
+        {
+          "tag": "SELECT",
+          "right": 651
+        },
+        {
+          "tag": "SELECT",
+          "right": 651
+        },
+        {
+          "tag": "SELECT",
+          "right": 651
+        },
+        {
+          "tag": "SELECT",
+          "right": 651
+        },
+        {
+          "tag": "INPUT",
+          "right": 651
+        },
+        {
+          "tag": "SELECT",
+          "right": 651
+        },
+        {
+          "tag": "SELECT",
+          "right": 651
+        },
+        {
+          "tag": "INPUT",
+          "right": 626
+        },
+        {
+          "tag": "INPUT",
+          "right": 626
+        },
+        {
+          "tag": "INPUT",
+          "right": 626
+        },
+        {
+          "tag": "INPUT",
+          "right": 626
+        }
+      ],
+      "text": ""
+    },
+    {
+      "lang": "en",
+      "theme": "light",
+      "viewportWidth": 800,
+      "edit": true,
+      "heading": "Edit automation",
+      "width": 514,
+      "scroll": 514,
+      "right": 651,
+      "fields": [
+        {
+          "tag": "INPUT",
+          "right": 651
+        },
+        {
+          "tag": "SELECT",
+          "right": 651
+        },
+        {
+          "tag": "SELECT",
+          "right": 651
+        },
+        {
+          "tag": "TEXTAREA",
+          "right": 386
+        },
+        {
+          "tag": "SELECT",
+          "right": 651
+        },
+        {
+          "tag": "SELECT",
+          "right": 651
+        },
+        {
+          "tag": "INPUT",
+          "right": 651
+        },
+        {
+          "tag": "SELECT",
+          "right": 651
+        },
+        {
+          "tag": "SELECT",
+          "right": 651
+        },
+        {
+          "tag": "SELECT",
+          "right": 651
+        },
+        {
+          "tag": "SELECT",
+          "right": 651
+        },
+        {
+          "tag": "INPUT",
+          "right": 651
+        },
+        {
+          "tag": "SELECT",
+          "right": 651
+        },
+        {
+          "tag": "SELECT",
+          "right": 651
+        },
+        {
+          "tag": "INPUT",
+          "right": 626
+        },
+        {
+          "tag": "INPUT",
+          "right": 626
+        },
+        {
+          "tag": "INPUT",
+          "right": 626
+        },
+        {
+          "tag": "INPUT",
+          "right": 626
+        }
+      ],
+      "text": "User prompt 第一行\nSecond line preserved\nLong paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 \nLong paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 \nLong paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 \nLong paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 \nLong paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 \nLong paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 \nLong paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 \nLong paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 \nLong paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 \nLong paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 \nLong paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 \nLong paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 \nLong paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 \nLong paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 \nLong paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 \nLong paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 \nLong paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 \nLong paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 \nLong paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 \nLong paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 "
+    },
+    {
+      "lang": "en",
+      "theme": "light",
+      "viewportWidth": 500,
+      "edit": false,
+      "heading": "New automation",
+      "width": 354,
+      "scroll": 354,
+      "right": 421,
+      "fields": [
+        {
+          "tag": "INPUT",
+          "right": 421
+        },
+        {
+          "tag": "SELECT",
+          "right": 421
+        },
+        {
+          "tag": "SELECT",
+          "right": 421
+        },
+        {
+          "tag": "TEXTAREA",
+          "right": 421
+        },
+        {
+          "tag": "SELECT",
+          "right": 421
+        },
+        {
+          "tag": "SELECT",
+          "right": 421
+        },
+        {
+          "tag": "INPUT",
+          "right": 421
+        },
+        {
+          "tag": "SELECT",
+          "right": 421
+        },
+        {
+          "tag": "SELECT",
+          "right": 421
+        },
+        {
+          "tag": "SELECT",
+          "right": 421
+        },
+        {
+          "tag": "SELECT",
+          "right": 421
+        },
+        {
+          "tag": "INPUT",
+          "right": 421
+        },
+        {
+          "tag": "SELECT",
+          "right": 421
+        },
+        {
+          "tag": "SELECT",
+          "right": 421
+        },
+        {
+          "tag": "INPUT",
+          "right": 396
+        },
+        {
+          "tag": "INPUT",
+          "right": 396
+        },
+        {
+          "tag": "INPUT",
+          "right": 396
+        },
+        {
+          "tag": "INPUT",
+          "right": 396
+        }
+      ],
+      "text": ""
+    },
+    {
+      "lang": "en",
+      "theme": "light",
+      "viewportWidth": 500,
+      "edit": true,
+      "heading": "Edit automation",
+      "width": 354,
+      "scroll": 354,
+      "right": 421,
+      "fields": [
+        {
+          "tag": "INPUT",
+          "right": 421
+        },
+        {
+          "tag": "SELECT",
+          "right": 421
+        },
+        {
+          "tag": "SELECT",
+          "right": 421
+        },
+        {
+          "tag": "TEXTAREA",
+          "right": 421
+        },
+        {
+          "tag": "SELECT",
+          "right": 421
+        },
+        {
+          "tag": "SELECT",
+          "right": 421
+        },
+        {
+          "tag": "INPUT",
+          "right": 421
+        },
+        {
+          "tag": "SELECT",
+          "right": 421
+        },
+        {
+          "tag": "SELECT",
+          "right": 421
+        },
+        {
+          "tag": "SELECT",
+          "right": 421
+        },
+        {
+          "tag": "SELECT",
+          "right": 421
+        },
+        {
+          "tag": "INPUT",
+          "right": 421
+        },
+        {
+          "tag": "SELECT",
+          "right": 421
+        },
+        {
+          "tag": "SELECT",
+          "right": 421
+        },
+        {
+          "tag": "INPUT",
+          "right": 396
+        },
+        {
+          "tag": "INPUT",
+          "right": 396
+        },
+        {
+          "tag": "INPUT",
+          "right": 396
+        },
+        {
+          "tag": "INPUT",
+          "right": 396
+        }
+      ],
+      "text": "User prompt 第一行\nSecond line preserved\nLong paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 \nLong paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 \nLong paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 \nLong paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 \nLong paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 \nLong paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 \nLong paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 \nLong paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 \nLong paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 \nLong paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 \nLong paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 \nLong paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 \nLong paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 \nLong paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 \nLong paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 \nLong paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 \nLong paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 \nLong paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 \nLong paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 \nLong paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 "
+    },
+    {
+      "lang": "en",
+      "theme": "dark",
+      "viewportWidth": 800,
+      "edit": false,
+      "heading": "New automation",
+      "width": 514,
+      "scroll": 514,
+      "right": 651,
+      "fields": [
+        {
+          "tag": "INPUT",
+          "right": 651
+        },
+        {
+          "tag": "SELECT",
+          "right": 651
+        },
+        {
+          "tag": "SELECT",
+          "right": 651
+        },
+        {
+          "tag": "TEXTAREA",
+          "right": 386
+        },
+        {
+          "tag": "SELECT",
+          "right": 651
+        },
+        {
+          "tag": "SELECT",
+          "right": 651
+        },
+        {
+          "tag": "INPUT",
+          "right": 651
+        },
+        {
+          "tag": "SELECT",
+          "right": 651
+        },
+        {
+          "tag": "SELECT",
+          "right": 651
+        },
+        {
+          "tag": "SELECT",
+          "right": 651
+        },
+        {
+          "tag": "SELECT",
+          "right": 651
+        },
+        {
+          "tag": "INPUT",
+          "right": 651
+        },
+        {
+          "tag": "SELECT",
+          "right": 651
+        },
+        {
+          "tag": "SELECT",
+          "right": 651
+        },
+        {
+          "tag": "INPUT",
+          "right": 626
+        },
+        {
+          "tag": "INPUT",
+          "right": 626
+        },
+        {
+          "tag": "INPUT",
+          "right": 626
+        },
+        {
+          "tag": "INPUT",
+          "right": 626
+        }
+      ],
+      "text": ""
+    },
+    {
+      "lang": "en",
+      "theme": "dark",
+      "viewportWidth": 800,
+      "edit": true,
+      "heading": "Edit automation",
+      "width": 514,
+      "scroll": 514,
+      "right": 651,
+      "fields": [
+        {
+          "tag": "INPUT",
+          "right": 651
+        },
+        {
+          "tag": "SELECT",
+          "right": 651
+        },
+        {
+          "tag": "SELECT",
+          "right": 651
+        },
+        {
+          "tag": "TEXTAREA",
+          "right": 386
+        },
+        {
+          "tag": "SELECT",
+          "right": 651
+        },
+        {
+          "tag": "SELECT",
+          "right": 651
+        },
+        {
+          "tag": "INPUT",
+          "right": 651
+        },
+        {
+          "tag": "SELECT",
+          "right": 651
+        },
+        {
+          "tag": "SELECT",
+          "right": 651
+        },
+        {
+          "tag": "SELECT",
+          "right": 651
+        },
+        {
+          "tag": "SELECT",
+          "right": 651
+        },
+        {
+          "tag": "INPUT",
+          "right": 651
+        },
+        {
+          "tag": "SELECT",
+          "right": 651
+        },
+        {
+          "tag": "SELECT",
+          "right": 651
+        },
+        {
+          "tag": "INPUT",
+          "right": 626
+        },
+        {
+          "tag": "INPUT",
+          "right": 626
+        },
+        {
+          "tag": "INPUT",
+          "right": 626
+        },
+        {
+          "tag": "INPUT",
+          "right": 626
+        }
+      ],
+      "text": "User prompt 第一行\nSecond line preserved\nLong paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 \nLong paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 \nLong paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 \nLong paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 \nLong paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 \nLong paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 \nLong paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 \nLong paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 \nLong paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 \nLong paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 \nLong paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 \nLong paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 \nLong paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 \nLong paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 \nLong paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 \nLong paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 \nLong paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 \nLong paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 \nLong paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 \nLong paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 "
+    },
+    {
+      "lang": "en",
+      "theme": "dark",
+      "viewportWidth": 500,
+      "edit": false,
+      "heading": "New automation",
+      "width": 354,
+      "scroll": 354,
+      "right": 421,
+      "fields": [
+        {
+          "tag": "INPUT",
+          "right": 421
+        },
+        {
+          "tag": "SELECT",
+          "right": 421
+        },
+        {
+          "tag": "SELECT",
+          "right": 421
+        },
+        {
+          "tag": "TEXTAREA",
+          "right": 421
+        },
+        {
+          "tag": "SELECT",
+          "right": 421
+        },
+        {
+          "tag": "SELECT",
+          "right": 421
+        },
+        {
+          "tag": "INPUT",
+          "right": 421
+        },
+        {
+          "tag": "SELECT",
+          "right": 421
+        },
+        {
+          "tag": "SELECT",
+          "right": 421
+        },
+        {
+          "tag": "SELECT",
+          "right": 421
+        },
+        {
+          "tag": "SELECT",
+          "right": 421
+        },
+        {
+          "tag": "INPUT",
+          "right": 421
+        },
+        {
+          "tag": "SELECT",
+          "right": 421
+        },
+        {
+          "tag": "SELECT",
+          "right": 421
+        },
+        {
+          "tag": "INPUT",
+          "right": 396
+        },
+        {
+          "tag": "INPUT",
+          "right": 396
+        },
+        {
+          "tag": "INPUT",
+          "right": 396
+        },
+        {
+          "tag": "INPUT",
+          "right": 396
+        }
+      ],
+      "text": ""
+    },
+    {
+      "lang": "en",
+      "theme": "dark",
+      "viewportWidth": 500,
+      "edit": true,
+      "heading": "Edit automation",
+      "width": 354,
+      "scroll": 354,
+      "right": 421,
+      "fields": [
+        {
+          "tag": "INPUT",
+          "right": 421
+        },
+        {
+          "tag": "SELECT",
+          "right": 421
+        },
+        {
+          "tag": "SELECT",
+          "right": 421
+        },
+        {
+          "tag": "TEXTAREA",
+          "right": 421
+        },
+        {
+          "tag": "SELECT",
+          "right": 421
+        },
+        {
+          "tag": "SELECT",
+          "right": 421
+        },
+        {
+          "tag": "INPUT",
+          "right": 421
+        },
+        {
+          "tag": "SELECT",
+          "right": 421
+        },
+        {
+          "tag": "SELECT",
+          "right": 421
+        },
+        {
+          "tag": "SELECT",
+          "right": 421
+        },
+        {
+          "tag": "SELECT",
+          "right": 421
+        },
+        {
+          "tag": "INPUT",
+          "right": 421
+        },
+        {
+          "tag": "SELECT",
+          "right": 421
+        },
+        {
+          "tag": "SELECT",
+          "right": 421
+        },
+        {
+          "tag": "INPUT",
+          "right": 396
+        },
+        {
+          "tag": "INPUT",
+          "right": 396
+        },
+        {
+          "tag": "INPUT",
+          "right": 396
+        },
+        {
+          "tag": "INPUT",
+          "right": 396
+        }
+      ],
+      "text": "User prompt 第一行\nSecond line preserved\nLong paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 \nLong paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 \nLong paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 \nLong paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 \nLong paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 \nLong paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 \nLong paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 \nLong paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 \nLong paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 \nLong paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 \nLong paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 \nLong paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 \nLong paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 \nLong paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 \nLong paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 \nLong paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 \nLong paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 \nLong paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 \nLong paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 \nLong paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 "
+    },
+    {
+      "lang": "zh",
+      "theme": "light",
+      "viewportWidth": 800,
+      "edit": false,
+      "heading": "新建自动化",
+      "width": 514,
+      "scroll": 514,
+      "right": 651,
+      "fields": [
+        {
+          "tag": "INPUT",
+          "right": 651
+        },
+        {
+          "tag": "SELECT",
+          "right": 651
+        },
+        {
+          "tag": "SELECT",
+          "right": 651
+        },
+        {
+          "tag": "TEXTAREA",
+          "right": 386
+        },
+        {
+          "tag": "SELECT",
+          "right": 651
+        },
+        {
+          "tag": "SELECT",
+          "right": 651
+        },
+        {
+          "tag": "INPUT",
+          "right": 651
+        },
+        {
+          "tag": "SELECT",
+          "right": 651
+        },
+        {
+          "tag": "SELECT",
+          "right": 651
+        },
+        {
+          "tag": "SELECT",
+          "right": 651
+        },
+        {
+          "tag": "SELECT",
+          "right": 651
+        },
+        {
+          "tag": "INPUT",
+          "right": 651
+        },
+        {
+          "tag": "SELECT",
+          "right": 651
+        },
+        {
+          "tag": "SELECT",
+          "right": 651
+        },
+        {
+          "tag": "INPUT",
+          "right": 626
+        },
+        {
+          "tag": "INPUT",
+          "right": 626
+        },
+        {
+          "tag": "INPUT",
+          "right": 626
+        },
+        {
+          "tag": "INPUT",
+          "right": 626
+        }
+      ],
+      "text": ""
+    },
+    {
+      "lang": "zh",
+      "theme": "light",
+      "viewportWidth": 800,
+      "edit": true,
+      "heading": "编辑自动化",
+      "width": 514,
+      "scroll": 514,
+      "right": 651,
+      "fields": [
+        {
+          "tag": "INPUT",
+          "right": 651
+        },
+        {
+          "tag": "SELECT",
+          "right": 651
+        },
+        {
+          "tag": "SELECT",
+          "right": 651
+        },
+        {
+          "tag": "TEXTAREA",
+          "right": 386
+        },
+        {
+          "tag": "SELECT",
+          "right": 651
+        },
+        {
+          "tag": "SELECT",
+          "right": 651
+        },
+        {
+          "tag": "INPUT",
+          "right": 651
+        },
+        {
+          "tag": "SELECT",
+          "right": 651
+        },
+        {
+          "tag": "SELECT",
+          "right": 651
+        },
+        {
+          "tag": "SELECT",
+          "right": 651
+        },
+        {
+          "tag": "SELECT",
+          "right": 651
+        },
+        {
+          "tag": "INPUT",
+          "right": 651
+        },
+        {
+          "tag": "SELECT",
+          "right": 651
+        },
+        {
+          "tag": "SELECT",
+          "right": 651
+        },
+        {
+          "tag": "INPUT",
+          "right": 626
+        },
+        {
+          "tag": "INPUT",
+          "right": 626
+        },
+        {
+          "tag": "INPUT",
+          "right": 626
+        },
+        {
+          "tag": "INPUT",
+          "right": 626
+        }
+      ],
+      "text": "User prompt 第一行\nSecond line preserved\nLong paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 \nLong paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 \nLong paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 \nLong paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 \nLong paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 \nLong paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 \nLong paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 \nLong paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 \nLong paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 \nLong paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 \nLong paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 \nLong paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 \nLong paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 \nLong paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 \nLong paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 \nLong paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 \nLong paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 \nLong paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 \nLong paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 \nLong paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 "
+    },
+    {
+      "lang": "zh",
+      "theme": "light",
+      "viewportWidth": 500,
+      "edit": false,
+      "heading": "新建自动化",
+      "width": 354,
+      "scroll": 354,
+      "right": 421,
+      "fields": [
+        {
+          "tag": "INPUT",
+          "right": 421
+        },
+        {
+          "tag": "SELECT",
+          "right": 421
+        },
+        {
+          "tag": "SELECT",
+          "right": 421
+        },
+        {
+          "tag": "TEXTAREA",
+          "right": 421
+        },
+        {
+          "tag": "SELECT",
+          "right": 421
+        },
+        {
+          "tag": "SELECT",
+          "right": 421
+        },
+        {
+          "tag": "INPUT",
+          "right": 421
+        },
+        {
+          "tag": "SELECT",
+          "right": 421
+        },
+        {
+          "tag": "SELECT",
+          "right": 421
+        },
+        {
+          "tag": "SELECT",
+          "right": 421
+        },
+        {
+          "tag": "SELECT",
+          "right": 421
+        },
+        {
+          "tag": "INPUT",
+          "right": 421
+        },
+        {
+          "tag": "SELECT",
+          "right": 421
+        },
+        {
+          "tag": "SELECT",
+          "right": 421
+        },
+        {
+          "tag": "INPUT",
+          "right": 396
+        },
+        {
+          "tag": "INPUT",
+          "right": 396
+        },
+        {
+          "tag": "INPUT",
+          "right": 396
+        },
+        {
+          "tag": "INPUT",
+          "right": 396
+        }
+      ],
+      "text": ""
+    },
+    {
+      "lang": "zh",
+      "theme": "light",
+      "viewportWidth": 500,
+      "edit": true,
+      "heading": "编辑自动化",
+      "width": 354,
+      "scroll": 354,
+      "right": 421,
+      "fields": [
+        {
+          "tag": "INPUT",
+          "right": 421
+        },
+        {
+          "tag": "SELECT",
+          "right": 421
+        },
+        {
+          "tag": "SELECT",
+          "right": 421
+        },
+        {
+          "tag": "TEXTAREA",
+          "right": 421
+        },
+        {
+          "tag": "SELECT",
+          "right": 421
+        },
+        {
+          "tag": "SELECT",
+          "right": 421
+        },
+        {
+          "tag": "INPUT",
+          "right": 421
+        },
+        {
+          "tag": "SELECT",
+          "right": 421
+        },
+        {
+          "tag": "SELECT",
+          "right": 421
+        },
+        {
+          "tag": "SELECT",
+          "right": 421
+        },
+        {
+          "tag": "SELECT",
+          "right": 421
+        },
+        {
+          "tag": "INPUT",
+          "right": 421
+        },
+        {
+          "tag": "SELECT",
+          "right": 421
+        },
+        {
+          "tag": "SELECT",
+          "right": 421
+        },
+        {
+          "tag": "INPUT",
+          "right": 396
+        },
+        {
+          "tag": "INPUT",
+          "right": 396
+        },
+        {
+          "tag": "INPUT",
+          "right": 396
+        },
+        {
+          "tag": "INPUT",
+          "right": 396
+        }
+      ],
+      "text": "User prompt 第一行\nSecond line preserved\nLong paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 \nLong paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 \nLong paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 \nLong paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 \nLong paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 \nLong paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 \nLong paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 \nLong paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 \nLong paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 \nLong paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 \nLong paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 \nLong paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 \nLong paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 \nLong paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 \nLong paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 \nLong paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 \nLong paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 \nLong paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 \nLong paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 \nLong paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 "
+    },
+    {
+      "lang": "zh",
+      "theme": "dark",
+      "viewportWidth": 800,
+      "edit": false,
+      "heading": "新建自动化",
+      "width": 514,
+      "scroll": 514,
+      "right": 651,
+      "fields": [
+        {
+          "tag": "INPUT",
+          "right": 651
+        },
+        {
+          "tag": "SELECT",
+          "right": 651
+        },
+        {
+          "tag": "SELECT",
+          "right": 651
+        },
+        {
+          "tag": "TEXTAREA",
+          "right": 386
+        },
+        {
+          "tag": "SELECT",
+          "right": 651
+        },
+        {
+          "tag": "SELECT",
+          "right": 651
+        },
+        {
+          "tag": "INPUT",
+          "right": 651
+        },
+        {
+          "tag": "SELECT",
+          "right": 651
+        },
+        {
+          "tag": "SELECT",
+          "right": 651
+        },
+        {
+          "tag": "SELECT",
+          "right": 651
+        },
+        {
+          "tag": "SELECT",
+          "right": 651
+        },
+        {
+          "tag": "INPUT",
+          "right": 651
+        },
+        {
+          "tag": "SELECT",
+          "right": 651
+        },
+        {
+          "tag": "SELECT",
+          "right": 651
+        },
+        {
+          "tag": "INPUT",
+          "right": 626
+        },
+        {
+          "tag": "INPUT",
+          "right": 626
+        },
+        {
+          "tag": "INPUT",
+          "right": 626
+        },
+        {
+          "tag": "INPUT",
+          "right": 626
+        }
+      ],
+      "text": ""
+    },
+    {
+      "lang": "zh",
+      "theme": "dark",
+      "viewportWidth": 800,
+      "edit": true,
+      "heading": "编辑自动化",
+      "width": 514,
+      "scroll": 514,
+      "right": 651,
+      "fields": [
+        {
+          "tag": "INPUT",
+          "right": 651
+        },
+        {
+          "tag": "SELECT",
+          "right": 651
+        },
+        {
+          "tag": "SELECT",
+          "right": 651
+        },
+        {
+          "tag": "TEXTAREA",
+          "right": 386
+        },
+        {
+          "tag": "SELECT",
+          "right": 651
+        },
+        {
+          "tag": "SELECT",
+          "right": 651
+        },
+        {
+          "tag": "INPUT",
+          "right": 651
+        },
+        {
+          "tag": "SELECT",
+          "right": 651
+        },
+        {
+          "tag": "SELECT",
+          "right": 651
+        },
+        {
+          "tag": "SELECT",
+          "right": 651
+        },
+        {
+          "tag": "SELECT",
+          "right": 651
+        },
+        {
+          "tag": "INPUT",
+          "right": 651
+        },
+        {
+          "tag": "SELECT",
+          "right": 651
+        },
+        {
+          "tag": "SELECT",
+          "right": 651
+        },
+        {
+          "tag": "INPUT",
+          "right": 626
+        },
+        {
+          "tag": "INPUT",
+          "right": 626
+        },
+        {
+          "tag": "INPUT",
+          "right": 626
+        },
+        {
+          "tag": "INPUT",
+          "right": 626
+        }
+      ],
+      "text": "User prompt 第一行\nSecond line preserved\nLong paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 \nLong paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 \nLong paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 \nLong paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 \nLong paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 \nLong paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 \nLong paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 \nLong paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 \nLong paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 \nLong paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 \nLong paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 \nLong paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 \nLong paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 \nLong paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 \nLong paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 \nLong paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 \nLong paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 \nLong paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 \nLong paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 \nLong paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 "
+    },
+    {
+      "lang": "zh",
+      "theme": "dark",
+      "viewportWidth": 500,
+      "edit": false,
+      "heading": "新建自动化",
+      "width": 354,
+      "scroll": 354,
+      "right": 421,
+      "fields": [
+        {
+          "tag": "INPUT",
+          "right": 421
+        },
+        {
+          "tag": "SELECT",
+          "right": 421
+        },
+        {
+          "tag": "SELECT",
+          "right": 421
+        },
+        {
+          "tag": "TEXTAREA",
+          "right": 421
+        },
+        {
+          "tag": "SELECT",
+          "right": 421
+        },
+        {
+          "tag": "SELECT",
+          "right": 421
+        },
+        {
+          "tag": "INPUT",
+          "right": 421
+        },
+        {
+          "tag": "SELECT",
+          "right": 421
+        },
+        {
+          "tag": "SELECT",
+          "right": 421
+        },
+        {
+          "tag": "SELECT",
+          "right": 421
+        },
+        {
+          "tag": "SELECT",
+          "right": 421
+        },
+        {
+          "tag": "INPUT",
+          "right": 421
+        },
+        {
+          "tag": "SELECT",
+          "right": 421
+        },
+        {
+          "tag": "SELECT",
+          "right": 421
+        },
+        {
+          "tag": "INPUT",
+          "right": 396
+        },
+        {
+          "tag": "INPUT",
+          "right": 396
+        },
+        {
+          "tag": "INPUT",
+          "right": 396
+        },
+        {
+          "tag": "INPUT",
+          "right": 396
+        }
+      ],
+      "text": ""
+    },
+    {
+      "lang": "zh",
+      "theme": "dark",
+      "viewportWidth": 500,
+      "edit": true,
+      "heading": "编辑自动化",
+      "width": 354,
+      "scroll": 354,
+      "right": 421,
+      "fields": [
+        {
+          "tag": "INPUT",
+          "right": 421
+        },
+        {
+          "tag": "SELECT",
+          "right": 421
+        },
+        {
+          "tag": "SELECT",
+          "right": 421
+        },
+        {
+          "tag": "TEXTAREA",
+          "right": 421
+        },
+        {
+          "tag": "SELECT",
+          "right": 421
+        },
+        {
+          "tag": "SELECT",
+          "right": 421
+        },
+        {
+          "tag": "INPUT",
+          "right": 421
+        },
+        {
+          "tag": "SELECT",
+          "right": 421
+        },
+        {
+          "tag": "SELECT",
+          "right": 421
+        },
+        {
+          "tag": "SELECT",
+          "right": 421
+        },
+        {
+          "tag": "SELECT",
+          "right": 421
+        },
+        {
+          "tag": "INPUT",
+          "right": 421
+        },
+        {
+          "tag": "SELECT",
+          "right": 421
+        },
+        {
+          "tag": "SELECT",
+          "right": 421
+        },
+        {
+          "tag": "INPUT",
+          "right": 396
+        },
+        {
+          "tag": "INPUT",
+          "right": 396
+        },
+        {
+          "tag": "INPUT",
+          "right": 396
+        },
+        {
+          "tag": "INPUT",
+          "right": 396
+        }
+      ],
+      "text": "User prompt 第一行\nSecond line preserved\nLong paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 \nLong paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 \nLong paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 \nLong paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 \nLong paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 \nLong paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 \nLong paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 \nLong paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 \nLong paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 \nLong paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 \nLong paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 \nLong paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 \nLong paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 \nLong paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 \nLong paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 \nLong paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 \nLong paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 \nLong paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 \nLong paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 \nLong paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 Long paragraph English 中文 "
+    }
+  ]
+}
