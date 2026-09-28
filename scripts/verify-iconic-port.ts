@@ -1,3 +1,4 @@
+import { createIconicDialogs } from '../src/plugin/modules/icons/dialogs';
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import { createHash } from 'node:crypto';
@@ -6,15 +7,15 @@ import type { App, Component as ObsidianComponent, Plugin, Command } from 'obsid
 import { TFile, Menu } from 'obsidian';
 import { Component } from './iconic-obsidian-stub';
 import fixture from './fixtures/iconic/upstream-1.1.10.json';
-import RuleManager, { type RuleItem } from '../src/iconic/managers/rule-manager';
-import MenuManager from '../src/iconic/managers/menu-manager';
-import IconicController from '../src/iconic/host/controller';
-import { IconicStore } from '../src/iconic/persistence/store';
-import { DEFAULT_ICONIC_SETTINGS } from '../src/iconic/settings/model';
-import { IconicSettingsSections } from '../src/iconic/settings/sections';
+import RuleManager, { type RuleItem } from '../src/platform/obsidian/icons/managers/rule-manager';
+import MenuManager from '../src/platform/obsidian/icons/managers/menu-manager';
+import IconicController from '../src/platform/obsidian/icons/host/controller';
+import { IconicStore } from '../src/platform/obsidian/icons/persistence/store';
+import { DEFAULT_ICONIC_SETTINGS } from '../src/core/icons/settings/model';
+import { IconicSettingsSections } from '../src/view/icons/settings/sections';
 import { iconicTranslations } from '../src/shared/i18n/iconic';
-import { setLanguage } from '../src/shared/i18n';
-import type { FileItem } from '../src/iconic/types';
+import { setLanguage } from '../src/shared/i18n/index';
+import type { FileItem } from '../src/core/icons/types';
 
 Object.assign(String, { isString: (value: unknown) => typeof value === 'string' });
 Object.assign(Number, { isNumber: (value: unknown) => typeof value === 'number' });
@@ -88,7 +89,7 @@ test('defaults, all locale values, command ids and resource bytes match pinned u
 	for (const [name, hash] of Object.entries(fixture.hashes))
 		assert.equal(
 			createHash('sha256')
-				.update(readFileSync('src/iconic/res/' + name))
+				.update(readFileSync('src/core/icons/res/' + name))
 				.digest('hex'),
 			hash,
 			name,
@@ -106,7 +107,7 @@ test('defaults, all locale values, command ids and resource bytes match pinned u
 		registerEditorExtension: () => {},
 		registerMarkdownPostProcessor: () => {},
 	} as unknown as Plugin;
-	const controller = new IconicController(host);
+	const controller = new IconicController(host, createIconicDialogs);
 	// Registration happens once even when activation is deferred/cancelled.
 	const internals = controller as unknown as { activate: () => Promise<void> };
 	internals.activate = async () => {};
@@ -150,7 +151,7 @@ test('137 rule outcomes match the original 1.1.10 implementation', () => {
 
 test('declarative settings expose folder icons in both languages and six sections', () => {
 	const f = storage();
-	const controller = new IconicController({ app: f.app, manifest: { id: 'nand' } } as unknown as Plugin);
+	const controller = new IconicController({ app: f.app, manifest: { id: 'nand' } } as unknown as Plugin, createIconicDialogs);
 	for (const language of ['en', 'zh'] as const) {
 		setLanguage(language);
 		const groups = new IconicSettingsSections(controller).getSettingDefinitions();
@@ -287,7 +288,7 @@ test('disable before layout-ready cancels startup; ten restarts keep one editor 
 			};
 		},
 	} as unknown as Plugin;
-	const controller = new IconicController(host);
+	const controller = new IconicController(host, createIconicDialogs);
 	Object.assign(controller, {
 		startManagers: () => {
 			starts++;

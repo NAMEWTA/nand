@@ -1,9 +1,9 @@
-import { SyncEngine } from '../src/dashboard-view/persist/sync';
+import { SyncEngine } from '../src/platform/obsidian/dashboard/sync';
 import { TFile, type App } from 'obsidian';
-import type { DashboardSettings } from '../src/dashboard-view/types';
+import type { DashboardSettings } from '../src/core/dashboard/types/index';
 import { strict as assert } from 'node:assert';
-import { parse, serialize, extractCardParts } from '../src/dashboard-view/parser';
-import { moveDashboardCard, memoCardText } from '../src/dashboard-view/persist/card-move';
+import { parse, serialize, extractCardParts } from '../src/core/dashboard/parser/index';
+import { moveDashboardCard, memoCardText } from '../src/platform/obsidian/dashboard/card-move';
 
 const initial = parse(`---
 columns:

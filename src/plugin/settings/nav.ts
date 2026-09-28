@@ -1,7 +1,8 @@
 /** Settings chrome shared by the declarative tab and the pre-1.13 fallback.
  *  Open products sit on one top row. Section ids are the order stacked on that tab. */
 
-export type SettingsProduct = 'home' | 'dashboard' | 'editor' | 'terminal' | 'iconic' | 'contacts' | 'automation' | 'sync';
+export type SettingsProduct =
+	'home' | 'dashboard' | 'editor' | 'terminal' | 'iconic' | 'contacts' | 'automation' | 'sync';
 
 export type SettingsPage =
 	| 'contacts-storage'
@@ -55,7 +56,15 @@ export function sidePages(product: SettingsProduct): SettingsPage[] {
 	if (product === 'dashboard') return ['general', 'widgets', 'coffee'];
 	if (product === 'editor') return ['comments', 'copy'];
 	if (product === 'contacts') return ['contacts-storage'];
-	if (product === 'iconic') return ['iconic-general', 'iconic-sidebars', 'iconic-editor', 'iconic-menus', 'iconic-picker', 'iconic-advanced'];
+	if (product === 'iconic')
+		return [
+			'iconic-general',
+			'iconic-sidebars',
+			'iconic-editor',
+			'iconic-menus',
+			'iconic-picker',
+			'iconic-advanced',
+		];
 	if (product === 'terminal') {
 		return ['shell', 'instance', 'workflows', 'appearance', 'behavior', 'connection', 'visibility', 'agents'];
 	}

@@ -1,10 +1,13 @@
+import { installPreactMiniDom } from './preact-mini-dom';
+installPreactMiniDom();
+Object.assign(globalThis, { requestAnimationFrame: () => 0, cancelAnimationFrame: () => {} });
 import { strict as assert } from 'node:assert';
 import { TFile, type App } from 'obsidian';
 import { El, findByClass } from './mini-dom';
-import { renderCalendarSection, refreshCalendarSections } from '../src/dashboard-view/calendar/calendar-section';
-import { readCalendarTaskFilter } from '../src/dashboard-view/calendar/calendar-modal';
-import { toIsoDate } from '../src/dashboard-view/calendar/alltasks-scan';
-import type { DashboardSettings } from '../src/dashboard-view/types';
+import { renderCalendarSection, refreshCalendarSections } from '../src/view/dashboard/calendar/calendar-section';
+import { readCalendarTaskFilter } from '../src/view/dashboard/calendar/calendar-preferences';
+import { toIsoDate } from '../src/platform/obsidian/calendar/alltasks-scan';
+import type { DashboardSettings } from '../src/core/dashboard/types/index';
 
 // Calendar section: the sidebar widget's enlarged view embedded as a board
 // section. Scans the vault (respecting calendarExcludeFolders), renders the
@@ -77,6 +80,7 @@ async function main(): Promise<void> {
 		clearTimeout: globalThis.clearTimeout.bind(globalThis),
 	};
 	const previewBody = new El('body');
+Object.assign(document, { body: previewBody, documentElement: { clientWidth: 900, clientHeight: 700 } });
 	(globalThis as { activeDocument?: unknown }).activeDocument = {
 		body: previewBody,
 		querySelector: (): null => null,
@@ -97,6 +101,7 @@ async function main(): Promise<void> {
 		'secret/hidden.md': `# Hidden\n\n- [ ] Omega 📅 ${todayIso}\n`,
 	});
 	const sectionEl = new El('div');
+previewBody.appendChild(sectionEl);
 	renderCalendarSection(sectionEl as unknown as HTMLElement, app, SETTINGS);
 	await flush();
 
@@ -166,6 +171,7 @@ async function main(): Promise<void> {
 
 	store.set('notes/gamma.md', `# Gamma\n\n- [ ] Gamma 📅 ${prevIso}\n`);
 	const kanban = new El('div');
+previewBody.appendChild(kanban);
 	kanban.appendChild(host);
 	assert.equal(refreshCalendarSections(kanban as unknown as HTMLElement), true, '4: refresh found the live section');
 	await flush();
@@ -214,6 +220,7 @@ async function main(): Promise<void> {
 		}
 
 		todayCell.dispatchEvent({ type: 'mouseleave' });
+await flush();
 		assert.equal(findByClass(previewBody, 'dashboard-calendar-day-preview').length, 0, '6: leave closes popup');
 
 		todayCell.dispatchEvent({ type: 'mouseenter' });

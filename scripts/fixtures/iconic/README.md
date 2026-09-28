@@ -6,4 +6,4 @@ The original RuleManager and ObsidianUtils were bundled with esbuild and a minim
 
 Defaults and command IDs were extracted from the original IconicPlugin; locales were flattened directly from upstream i18n/en.json and zh.json. Resource hashes are SHA-256 of the original resource file bytes. Tests never download upstream at runtime.
 
-To update the oracle, first choose and record a new upstream commit, rerun the original implementation against the same inputs, and review changed outputs as a deliberate behavior change. Do not regenerate expectations from src/iconic.
+To update the oracle, first choose and record a new upstream commit, rerun the original implementation against the same inputs, and review changed outputs as a deliberate behavior change. Do not regenerate expectations from the NAND core/icons or platform/obsidian/icons implementation.

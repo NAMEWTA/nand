@@ -1,6 +1,6 @@
 import { strict as assert } from 'node:assert';
-import { dashboardMarkdownPath, planDashboardUpdate } from '../src/dashboard-view/ui/render-update';
-import type { DashboardData } from '../src/dashboard-view/types';
+import { dashboardMarkdownPath, planDashboardUpdate } from '../src/core/dashboard/render-update';
+import type { DashboardData } from '../src/core/dashboard/types/index';
 
 const base: DashboardData = {
 	banner: { quote: '', author: '', image: '', images: [], quotes: [], mode: 'quote' },

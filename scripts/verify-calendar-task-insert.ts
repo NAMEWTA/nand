@@ -1,6 +1,6 @@
 import { strict as assert } from 'node:assert';
 import { TFile, type App } from 'obsidian';
-import { insertTaskForDay, type TaskInsertTarget } from '../src/dashboard-view/calendar/daily-notes';
+import { insertTaskForDay, type TaskInsertTarget } from '../src/platform/obsidian/calendar/daily-notes';
 
 // In-memory vault + core daily-notes plugin mock. TFile instances come from
 // the alias stub, so the `instanceof TFile` checks inside daily-notes see the

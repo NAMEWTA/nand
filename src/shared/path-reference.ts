@@ -16,10 +16,7 @@ export function stripUriSuffix(value: string): string {
 	return query === -1 ? trimmed : trimmed.slice(0, query);
 }
 
-export function formatReference(
-	path: string,
-	selections: readonly ReferenceSelection[] | null | undefined,
-): string {
+export function formatReference(path: string, selections: readonly ReferenceSelection[] | null | undefined): string {
 	const clean = stripUriSuffix(path);
 	if (!clean || !selections || selections.length === 0) return clean;
 	return selections.map((selection) => formatSelection(clean, selection)).join('\n');

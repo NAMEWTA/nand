@@ -13,11 +13,12 @@
  * Run: `pnpm run test:pair-width`
  */
 import { strict as assert } from 'node:assert';
-import { unpartnerAt, moveToOwnRow, moveBeside, normalizeColumnPairs } from '../src/dashboard-view/persist/column-pairs';
-import { parse, serialize } from '../src/dashboard-view/parser';
-import { applyPairWidth } from '../src/dashboard-view/renderer';
+import { unpartnerAt, moveToOwnRow, moveBeside, normalizeColumnPairs } from '../src/core/dashboard/column-pairs';
+import { parse, serialize } from '../src/core/dashboard/parser/index';
+import { applyPairWidth } from '../src/view/dashboard/renderer/index';
 import { El, findByClass } from './mini-dom';
-import type { DashboardColumn, DashboardData, RenderCallbacks } from '../src/dashboard-view/types';
+import type { DashboardColumn, DashboardData } from '../src/core/dashboard/types/index';
+import type { RenderCallbacks } from '../src/view/dashboard/render-contract';
 
 // ---------- 1. column-pairs clears width with half ----------
 

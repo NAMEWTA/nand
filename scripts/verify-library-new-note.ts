@@ -1,3 +1,6 @@
+import { installPreactMiniDom } from './preact-mini-dom';
+import { flushSync } from 'preact/compat';
+installPreactMiniDom();
 /**
  * Verifies the "new note" button for library/folder sections:
  *
@@ -21,16 +24,16 @@
  */
 import { strict as assert } from 'node:assert';
 import { App, Menu, TFile } from 'obsidian';
-import { renderLibrarySection } from '../src/dashboard-view/library';
+import { renderLibrarySection } from '../src/view/dashboard/library/index';
 import {
 	buildNewNoteProps,
 	createNoteWithProps,
 	pickFolderFromMenu,
 	yamlFrontmatter,
-} from '../src/dashboard-view/library/library-new-note';
-import { folderResultToLibraryConfig } from '../src/dashboard-view/library/folder-config-modal';
-import { parse, serialize } from '../src/dashboard-view/parser';
-import { LibraryConfig } from '../src/dashboard-view/types';
+} from '../src/view/dashboard/library/library-new-note';
+import { folderResultToLibraryConfig } from '../src/view/dashboard/library/folder-config-modal';
+import { parse, serialize } from '../src/core/dashboard/parser/index';
+import { LibraryConfig } from '../src/core/dashboard/types/index';
 import { El, findByClass } from './mini-dom';
 
 (globalThis as unknown as Record<string, unknown>).activeDocument = {
@@ -313,7 +316,7 @@ async function main(): Promise<void> {
 			['Inbox', 'Projects'],
 			'menu lists folders in order',
 		);
-		menu.items[1]!.click();
+		flushSync(() => menu.items[1]!.click());
 		assert.equal(await pick, 'Projects', 'item click resolves the folder');
 		menu.dismiss();
 		const dismissed = pickFolderFromMenu(['Inbox'], { x: 0, y: 0 });
@@ -344,7 +347,7 @@ async function main(): Promise<void> {
 		).addEventListener('dashboard-library-new-note', (ev) => {
 			detail = ev.detail;
 		});
-		btn!.click();
+		flushSync(() => btn!.click());
 		assert.equal(detail?.columnName, 'C1', `event carries column name (${sectionType})`);
 	}
 

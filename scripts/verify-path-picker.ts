@@ -1,7 +1,7 @@
 import { strict as assert } from 'node:assert';
 import { TFile, TFolder, type App } from 'obsidian';
 import { El, findByClass } from './mini-dom';
-import { PathPickerModal, attachPathPicker } from '../src/dashboard-view/ui/path-picker-modal';
+import { PathPickerModal, attachPathPicker } from '../src/view/dashboard/ui/path-picker-modal';
 
 // Vault path picker: file/folder listing, fuzzy filter, pick-by-click and
 // keyboard, and the browse button that writes back into an input.

@@ -14,7 +14,7 @@
  */
 import { strict as assert } from 'node:assert';
 import type { App } from 'obsidian';
-import { FolderConfigModal } from '../src/dashboard-view/library/folder-config-modal';
+import { FolderConfigModal } from '../src/view/dashboard/library/folder-config-modal';
 import { findByClass, findTag, orderIndex, type El } from './mini-dom';
 
 // applyModalTheme reads the Obsidian global `activeDocument` (a free variable

@@ -1,7 +1,7 @@
 import { FuzzySuggestModal, Notice, Setting, TFolder, type App } from 'obsidian';
-import type { DashboardSettingTab } from './settings-tab';
 import { validContactsFolder } from '../../shared/contacts-settings';
-import { ct, confirm, errorText } from '../../contacts/view/forms';
+import { confirm, ct, errorText } from '../../view/contacts/forms';
+import type { DashboardSettingTab } from './settings-tab';
 
 class ArchiveFolderPicker extends FuzzySuggestModal<TFolder> {
 	constructor(

@@ -1,19 +1,19 @@
 # 档案开发与验收
 
-面向维护者。用户操作见 [档案使用指南](contacts.md)，字段与 Markdown 协议以 [随插件分发的格式说明](../src/contacts/persist/format-guide.md) 为准。项目边界与生命周期规则见 [架构约定](../.agents/skills/dev/references/architecture.md)，构建与测试规则见 [验证规范](../.agents/skills/dev/references/build-and-release.md)。
+面向维护者。用户操作见 [档案使用指南](contacts.md)，字段与 Markdown 协议以 [随插件分发的格式说明](../src/core/contacts/persist/format-guide.md) 为准。项目边界与生命周期规则见 [架构约定](../.agents/skills/dev/references/architecture.md)，构建与测试规则见 [验证规范](../.agents/skills/dev/references/build-and-release.md)。
 
 ## 实现入口
 
 | 位置 | 职责 |
 | --- | --- |
-| [model.ts](../src/contacts/model.ts) | 人物、企业、任职、关系和日期验证 |
-| [persist/markdown.ts](../src/contacts/persist/markdown.ts) | YAML 与正文解析、序列化、字段／区域级三方合并 |
-| [persist/format-guide.md](../src/contacts/persist/format-guide.md) | 创建资料时写入用户目录的格式说明；作为文本打包，修改后需要重建 `main.js` |
-| [index-store.ts](../src/contacts/index-store.ts) | 内存索引、同名与重复 ID 区分、企业人员统计、反向关系、组合查询 |
-| [controller.ts](../src/contacts/controller.ts) | Vault 文件读取和监听、写入队列、增删改、目录切换与失效读取保护 |
-| [view/view.tsx](../src/contacts/view/view.tsx) | Obsidian leaf 生命周期、窗口迁移、导航和滚动位置 |
-| [view/surface.tsx](../src/contacts/view/surface.tsx) | Preact 卡片、详情、分页及 Markdown 内容展示 |
-| [view/forms.ts](../src/contacts/view/forms.ts) | 原生 Modal／Setting 表单、选择器、筛选、草稿和冲突处理 |
+| [model.ts](../src/core/contacts/model.ts) | 人物、企业、任职、关系和日期验证 |
+| [persist/markdown.ts](../src/core/contacts/persist/markdown.ts) | YAML 与正文解析、序列化、字段／区域级三方合并 |
+| [persist/format-guide.md](../src/core/contacts/persist/format-guide.md) | 创建资料时写入用户目录的格式说明；作为文本打包，修改后需要重建 `main.js` |
+| [index-store.ts](../src/core/contacts/index-store.ts) | 内存索引、同名与重复 ID 区分、企业人员统计、反向关系、组合查询 |
+| [controller.ts](../src/platform/obsidian/contacts/controller.ts) | Vault 文件读取和监听、写入队列、增删改、目录切换与失效读取保护 |
+| [view/view.tsx](../src/view/contacts/view.tsx) | Obsidian leaf 生命周期、窗口迁移、导航和滚动位置 |
+| [view/surface.tsx](../src/view/contacts/surface.tsx) | Preact 卡片、详情、分页及 Markdown 内容展示 |
+| [view/forms.ts](../src/view/contacts/forms.ts) | 原生 Modal／Setting 表单、选择器、筛选、草稿和冲突处理 |
 | [contacts-settings.ts](../src/plugin/settings/contacts-settings.ts) | NAND 设置页的目录预览、应用与列数选择 |
 | [contacts-settings.ts](../src/shared/contacts-settings.ts) | 设置 DTO、默认值与路径校验，不包含档案实体 |
 | [contacts.ts](../src/shared/i18n/contacts.ts) | 中英文界面文案 |

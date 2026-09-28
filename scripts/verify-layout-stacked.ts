@@ -1,3 +1,4 @@
+import { installPreactMiniDom } from './preact-mini-dom';
 /**
  * Verifies the stacked (top-bottom) layout mode:
  *
@@ -25,9 +26,9 @@
  */
 import { strict as assert } from 'node:assert';
 import type { App } from 'obsidian';
-import { renderSidebarWidgets, sidebarWidgetSignature, isStackedLayout } from '../src/dashboard-view/renderer';
-import type { DashboardSettings } from '../src/dashboard-view/types';
-import { El, findByClass } from './mini-dom';
+import type { DashboardSettings } from '../src/core/dashboard/types/index';
+import { isStackedLayout,renderSidebarWidgets,sidebarWidgetSignature } from '../src/view/dashboard/renderer/index';
+import { El,findByClass } from './mini-dom';
 
 const baseSettings = (over: Partial<DashboardSettings>): DashboardSettings =>
 	({
@@ -58,6 +59,8 @@ const stubQuickActions = (host: HTMLElement): void => {
 const inertApp = {} as App;
 
 const run = (): void => {
+ installPreactMiniDom();
+ Object.assign(document, {defaultView:{setInterval:()=>0,clearInterval:()=>{}}});
 	// Globals touched on the render path (modal-theme imports etc.).
 	(globalThis as { activeDocument?: unknown }).activeDocument = {
 		querySelector: (): null => null,

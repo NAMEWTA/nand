@@ -1,34 +1,44 @@
-import { renderAutomationSettings } from './automation-settings';
-import { renderContactsSettings } from './contacts-settings';
-import { IconicSettingsSections, ICONIC_SETTINGS_PAGES } from '../../iconic/settings/sections';
-import { renderGeneralSettings, renderLayoutPicker } from './general';
-import { renderWorkspaceSettings } from './workspace-settings';
-import { renderServiceSettings } from './services';
 import {
-	renderWidgetSettings,
-	renderWeatherSettings,
-	renderLunarSettings,
-	renderYearProgressSettings,
-	attachCitySuggest,
-	suggestCities,
-} from './widgets-settings';
-import { renderCountdownList, editCountdown, applyCountdownUpdate } from './countdown-settings';
-import { renderAlbumSettings, editAlbum, applyAlbumUpdate } from './album-settings';
-import { renderAnniversarySettings, editAnniversary, applyAnniversaryUpdate } from './anniversary-settings';
+	App,
+	Platform,
+	PluginSettingTab,
+	requireApiVersion,
+	setIcon,
+	Setting,
+	type SettingDefinitionItem,
+	type SettingGroup,
+	type SettingGroupItem,
+} from 'obsidian';
+import type { AlbumConfig, AnniversaryConfig, CountdownConfig } from '../../core/dashboard/types/index';
+import { t } from '../../shared/i18n/index';
+import { ICONIC_SETTINGS_PAGES, IconicSettingsSections } from '../../view/icons/settings/sections';
+import { renderStackedTerminalAgentSettings } from '../../view/terminal/settings/sections';
+import type DashboardPlugin from '../main';
+import { applyAlbumUpdate, editAlbum, renderAlbumSettings } from './album-settings';
+import { applyAnniversaryUpdate, editAnniversary, renderAnniversarySettings } from './anniversary-settings';
+import { renderAutomationSettings } from './automation-settings';
 import { renderCalendarSettings } from './calendar-settings';
 import { renderCoffeeSettings } from './coffee';
-import { renderEditorSettings, renderSyncSettings } from './editor-settings';
-import { renderWidgetBackgroundSetting } from './widget-background-setting';
-import { App, Platform, PluginSettingTab, setIcon, Setting, requireApiVersion, type SettingGroup, type SettingGroupItem, type SettingDefinitionItem } from 'obsidian';
-import type DashboardPlugin from '../main';
-import type { DashboardSettings, CountdownConfig, AlbumConfig, AnniversaryConfig } from '../../dashboard-view/types';
-import { t } from '../../shared/i18n';
-import { renderStackedTerminalAgentSettings } from '../../terminal-agent/settings/sections';
-import { renderHomeSettings } from './home';
 import { terminalMenuLabels } from './connection-menu';
+import { renderContactsSettings } from './contacts-settings';
+import { applyCountdownUpdate, editCountdown, renderCountdownList } from './countdown-settings';
+import { renderEditorSettings, renderSyncSettings } from './editor-settings';
+import { renderGeneralSettings, renderLayoutPicker } from './general';
+import { renderHomeSettings } from './home';
 import { defaultPage, sidePages, visibleProducts, type SettingsPage, type SettingsProduct } from './nav';
+import { renderServiceSettings } from './services';
+import { renderWidgetBackgroundSetting } from './widget-background-setting';
+import {
+	attachCitySuggest,
+	renderLunarSettings,
+	renderWeatherSettings,
+	renderWidgetSettings,
+	renderYearProgressSettings,
+	suggestCities,
+} from './widgets-settings';
+import { renderWorkspaceSettings } from './workspace-settings';
 
-export type { DashboardSettings };
+export type { NandSettings } from './model';
 
 /** Settings pages, shared by the declarative (1.13+) navigable
  *  definitions and the pre-1.13 fallback. One product row on top.
@@ -133,8 +143,25 @@ export class DashboardSettingTab extends PluginSettingTab {
 							this.renderHomeSettings(setting.settingEl);
 						},
 					},
-					{ name: t('automation.title'), desc: t('automation.localOnly'), render: (setting) => { asBlock(setting); onProduct('automation', 'automation')(setting); renderAutomationSettings(this.plugin, setting.settingEl); } },
-					{ name: t('contacts.storage'), desc: t('contacts.folderHint'), aliases: [t('contacts.folder'), t('contacts.columns')], render: (setting) => { asBlock(setting); onProduct('contacts', 'contacts-storage')(setting); this.renderContactsSettings(setting.settingEl); } },
+					{
+						name: t('automation.title'),
+						desc: t('automation.localOnly'),
+						render: (setting) => {
+							asBlock(setting);
+							onProduct('automation', 'automation')(setting);
+							renderAutomationSettings(this.plugin, setting.settingEl);
+						},
+					},
+					{
+						name: t('contacts.storage'),
+						desc: t('contacts.folderHint'),
+						aliases: [t('contacts.folder'), t('contacts.columns')],
+						render: (setting) => {
+							asBlock(setting);
+							onProduct('contacts', 'contacts-storage')(setting);
+							this.renderContactsSettings(setting.settingEl);
+						},
+					},
 					...this.iconicDefinitions(),
 					{
 						name: t('settings.general'),
@@ -249,7 +276,11 @@ export class DashboardSettingTab extends PluginSettingTab {
 					{
 						name: t('settings.tabEditor'),
 						desc: t('settings.tabEditorDesc'),
-						aliases: [t('editor.comments.title'), t('settings.editorHighlight'), t('settings.editorPopover')],
+						aliases: [
+							t('editor.comments.title'),
+							t('settings.editorHighlight'),
+							t('settings.editorPopover'),
+						],
 						render: (setting) => {
 							asBlock(setting);
 							onProduct('editor', 'comments')(setting);
@@ -316,23 +347,31 @@ export class DashboardSettingTab extends PluginSettingTab {
 					setting.settingEl.toggleClass('dashboard-settings-page-hidden', this.activeProduct !== 'iconic');
 				};
 				const heading: SettingGroupItem[] = group.heading
-					? [{
-						name: `${t('modules.iconic')} · ${group.heading}`,
-						searchable: false,
-						render: (setting: Setting) => { tag(setting); setting.setHeading(); },
-					}]
+					? [
+							{
+								name: `${t('modules.iconic')} · ${group.heading}`,
+								searchable: false,
+								render: (setting: Setting) => {
+									tag(setting);
+									setting.setHeading();
+								},
+							},
+						]
 					: [];
-				return [...heading, ...(group.items ?? []).map((item) => {
-					if (!('render' in item) || !item.render) return item;
-					const render = item.render;
-					return {
-						...item,
-						render: (setting: Setting, group: SettingGroup) => {
-							tag(setting);
-							return render(setting, group);
-						},
-					};
-				})];
+				return [
+					...heading,
+					...(group.items ?? []).map((item) => {
+						if (!('render' in item) || !item.render) return item;
+						const render = item.render;
+						return {
+							...item,
+							render: (setting: Setting, group: SettingGroup) => {
+								tag(setting);
+								return render(setting, group);
+							},
+						};
+					}),
+				];
 			});
 		}
 		return [];
@@ -363,7 +402,11 @@ export class DashboardSettingTab extends PluginSettingTab {
 			automation: t('automation.title'),
 			sync: t('settings.productSync'),
 		};
-		return visibleProducts(this.plugin.settings.modules).map((key) => ({ key, label: labels[key], icon: icons[key] }));
+		return visibleProducts(this.plugin.settings.modules).map((key) => ({
+			key,
+			label: labels[key],
+			icon: icons[key],
+		}));
 	}
 
 	sectionTabs(): Array<{ key: SettingsPage; label: string; icon: string }> {
@@ -438,8 +481,14 @@ export class DashboardSettingTab extends PluginSettingTab {
 		this.renderChrome(barHost);
 
 		const host = containerEl.createDiv({ cls: 'dashboard-settings-content' });
-		if (this.activeProduct === 'automation') { renderAutomationSettings(this.plugin, host); return; }
-		if (this.activeProduct === 'contacts') { this.renderContactsSettings(host); return; }
+		if (this.activeProduct === 'automation') {
+			renderAutomationSettings(this.plugin, host);
+			return;
+		}
+		if (this.activeProduct === 'contacts') {
+			this.renderContactsSettings(host);
+			return;
+		}
 		if (this.activeProduct === 'home') {
 			this.renderHomeSettings(host);
 			return;
@@ -454,7 +503,8 @@ export class DashboardSettingTab extends PluginSettingTab {
 			return;
 		}
 		if (this.activeProduct === 'iconic') {
-			if (this.plugin.iconicHost?.isActive()) new IconicSettingsSections(this.plugin.iconicHost).renderFallback(host);
+			if (this.plugin.iconicHost?.isActive())
+				new IconicSettingsSections(this.plugin.iconicHost).renderFallback(host);
 			return;
 		}
 		if (this.activeProduct === 'terminal') {

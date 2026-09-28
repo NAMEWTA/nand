@@ -1,3 +1,4 @@
+import { installPreactMiniDom } from './preact-mini-dom';
 /**
  * Verifies the stacked widget span system (src/widget-span.ts + renderer):
  *
@@ -20,22 +21,23 @@
  */
 import { strict as assert } from 'node:assert';
 import type { App } from 'obsidian';
-import { renderSidebarWidgets, sidebarWidgetSignature } from '../src/dashboard-view/renderer';
+import type { AlbumConfig,DashboardSettings } from '../src/core/dashboard/types/index';
+import { registerHabitService } from '../src/platform/obsidian/habit/habit-service';
+import type { ReadingService } from '../src/platform/obsidian/reading/reading-service';
+import { renderSidebarWidgets,sidebarWidgetSignature } from '../src/view/dashboard/renderer/index';
 import {
-	RATIO_SPAN,
-	ALL_TIERS,
-	STACKED_FIXED_SPANS,
-	isTieredWidgetKey,
-	buildStackedSpanSpecs,
-	resolveStackedSpans,
-	clampSidebarWidth,
-	clampWidgetUnitHeight,
-	type StackedRatios,
-} from '../src/dashboard-view/widgets/widget-span';
-import { registerHabitService } from '../src/dashboard-view/habit/habit-service';
-import type { ReadingService } from '../src/dashboard-view/reading/reading-service';
-import type { DashboardSettings, AlbumConfig } from '../src/dashboard-view/types';
-import { El, findByClass } from './mini-dom';
+ALL_TIERS,
+RATIO_SPAN,
+STACKED_FIXED_SPANS,
+buildStackedSpanSpecs,
+clampSidebarWidth,
+clampWidgetUnitHeight,
+isTieredWidgetKey,
+resolveStackedSpans,
+type StackedRatios,
+} from '../src/view/dashboard/widgets/widget-span';
+import { El,findByClass } from './mini-dom';
+
 
 const baseSettings = (over: Partial<DashboardSettings>): DashboardSettings =>
 	({
@@ -95,6 +97,10 @@ const run = (): void => {
 			intervals.delete(id);
 		},
 	};
+ installPreactMiniDom();
+ Object.assign(document, { defaultView:window });
+ Object.assign(window, { requestAnimationFrame:(fn:()=>void)=>setTimeout(fn,0), cancelAnimationFrame:clearTimeout });
+
 	(globalThis as Record<string, unknown>).Image = class {
 		src = '';
 	};
@@ -187,11 +193,12 @@ const run = (): void => {
 	} as unknown as App;
 	// Habit renders through the registered singleton; an empty-habits stub is
 	// enough for the structure (the span lives on the card element).
-	registerHabitService({ getHabits: () => [], getDoneOn: () => [] } as never);
+	registerHabitService(vaultApp, { getHabits: () => [], getDoneOn: () => [] } as never);
 	const readingStub = {
 		getState: () => ({ status: 'idle', elapsedSeconds: 0, currentBook: null }),
 		getActiveBooks: () => [],
-		setOnTick: () => {},
+		subscribe: () => () => {},
+		subscribeTick: () => () => {},
 		getApp: () => vaultApp,
 	} as unknown as ReadingService;
 
@@ -255,7 +262,7 @@ const run = (): void => {
 			);
 		}
 	}
-	registerHabitService(null);
+	registerHabitService(vaultApp, null);
 
 	// --- 4. Signature: ratios in, sizing out -------------------------------
 	{

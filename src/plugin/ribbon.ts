@@ -1,5 +1,5 @@
 import { setTooltip, type Plugin } from 'obsidian';
-import { onLanguageChanged, t } from '../shared/i18n';
+import { onLanguageChanged, t } from '../shared/i18n/index';
 
 const ribbons: Record<string, [string, string]> = {
 	home: ['home', 'main.openHome'],

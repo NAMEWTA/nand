@@ -1,27 +1,28 @@
-import { DashboardAutomationSource } from '../src/dashboard-view/persist/automation';
-import { DEFAULT_SETTINGS } from '../src/dashboard-view/types';
-import { automationArgs, RESUME_FLAGS } from '../src/terminal-agent/launch/automation-runtime';
-import { AUTOMATION_AGENTS } from '../src/terminal-agent/launch/automation-catalog';
-import type { AgentId } from '../src/terminal-agent/launch/types';
-import { parseNativeSession } from '../src/terminal-agent/sessions/automation-scan';
-import { PtyClient } from '../src/terminal-agent/server/pty-client';
+import { createNotificationDelivery } from '../src/platform/obsidian/notifications/delivery';
+import { DashboardAutomationSource } from '../src/platform/obsidian/dashboard/automation';
+import { DEFAULT_SETTINGS } from '../src/plugin/settings/model';
+import { automationArgs, RESUME_FLAGS } from '../src/plugin/workflows/agent-runtime';
+import { AUTOMATION_AGENTS } from '../src/core/agent-launch/automation-catalog';
+import type { AgentId } from '../src/core/agent-launch/types';
+import { parseNativeSession } from '../src/platform/desktop/ai-vault/automation-scan';
+import { PtyClient } from '../src/platform/terminal-server/pty-client';
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import type { App } from 'obsidian';
-import { AutomationService } from '../src/automation/service';
+import { AutomationService } from '../src/core/automations/service';
 import { JsonStore } from '../src/shared/json-store';
-import { NotificationService } from '../src/notifications/service';
-import { latestOccurrence, nextOccurrence, validateSchedule } from '../src/automation/schedule';
+import { NotificationService } from '../src/core/notifications/service';
+import { latestOccurrence, nextOccurrence, validateSchedule } from '../src/core/automations/schedule';
 import { readTaskMeta, taskMetaSuffix } from '../src/shared/automation/metadata';
-import { patchReminders, readReminders } from '../src/contacts/reminders';
-import { parse, serialize } from '../src/dashboard-view/parser';
+import { patchReminders, readReminders } from '../src/core/contacts/reminders';
+import { parse, serialize } from '../src/core/dashboard/parser/index';
 import type {
 	AgentRunHandle,
 	AgentRuntimePort,
 	AutomationDefinition,
 	AutomationSourcePort,
 } from '../src/shared/automation/types';
-import { mergeNativeHooks } from '../src/terminal-agent/launch/automation-hooks';
+import { mergeNativeHooks } from '../src/platform/desktop/agent-hooks/automation-hooks';
 
 function memory() {
 	const files = new Map<string, string>();
@@ -90,7 +91,7 @@ function fixture(agent?: AgentRuntimePort) {
 	};
 	const make = () =>
 		new AutomationService(
-			m.app,
+			m.app.vault.adapter,
 			'.nand/automation/test.json',
 			'device',
 			source,
@@ -238,12 +239,12 @@ test('corrupt primary recovers the backup and supports subsequent saves without 
 	const m = memory();
 	const check = (v: unknown): v is { n: number } =>
 		!!v && typeof v === 'object' && typeof (v as { n: number }).n === 'number';
-	const store = new JsonStore(m.app, '.nand/state.json', check);
+	const store = new JsonStore(m.app.vault.adapter, '.nand/state.json', check);
 	await store.load({ n: 0 });
 	await store.save({ n: 1 });
 	await store.save({ n: 2 });
 	m.files.set('.nand/state.json', 'broken');
-	const recovered = new JsonStore(m.app, '.nand/state.json', check);
+	const recovered = new JsonStore(m.app.vault.adapter, '.nand/state.json', check);
 	assert.deepEqual(await recovered.load({ n: 0 }), { n: 1 });
 	await recovered.save({ n: 3 });
 	assert.equal(m.files.get('.nand/state.json.corrupt'), 'broken');
@@ -252,7 +253,7 @@ test('corrupt primary recovers the backup and supports subsequent saves without 
 
 test('notification deliveries are idempotent across concurrent calls and restart', async () => {
 	const m = memory();
-	const service = new NotificationService(m.app, '.nand/notifications.json', async () => {});
+	const service = new NotificationService(m.app.vault.adapter, '.nand/notifications.json', async () => {}, undefined, createNotificationDelivery(m.app));
 	await service.load();
 	const request = { id: 'run', title: 'title', body: 'body', channels: ['in-app', 'email'] as const };
 	await Promise.all([
@@ -262,7 +263,7 @@ test('notification deliveries are idempotent across concurrent calls and restart
 	assert.equal(service.records.length, 1);
 	assert.equal(service.records[0]?.deliveries['in-app'], 'sent');
 	assert.equal(service.records[0]?.deliveries.email, 'failed');
-	const reloaded = new NotificationService(m.app, '.nand/notifications.json', async () => {});
+	const reloaded = new NotificationService(m.app.vault.adapter, '.nand/notifications.json', async () => {}, undefined, createNotificationDelivery(m.app));
 	await reloaded.load();
 	await reloaded.send({ ...request, channels: [...request.channels] });
 	assert.equal(reloaded.records.length, 1);
@@ -424,9 +425,9 @@ test('dashboard source migrates stable ownership, suppresses completed tasks and
 	const file = { path: 'Board.md', basename: 'Board' };
 	const settings = { ...structuredClone(DEFAULT_SETTINGS), dashboardFile: 'Board', workspaceFiles: [] };
 	const app = { vault: { getFileByPath: (p: string) => p === file.path ? file : null, read: async () => raw, process: async (_: unknown, edit: (text: string) => string) => { raw = edit(raw); return raw; } }, workspace: { getLeavesOfType: () => [] } } as unknown as App;
-	const source = new DashboardAutomationSource(app, () => settings, 'first-device', async () => {});
+	const source = new DashboardAutomationSource(app, () => settings, 'first-device', async () => {}, () => settings.modules.dashboard);
 	const [original] = await source.list(); assert.ok(original?.source?.id); assert.equal(original.deviceId, 'first-device');
-	const other = new DashboardAutomationSource(app, () => settings, 'other-device', async () => {});
+	const other = new DashboardAutomationSource(app, () => settings, 'other-device', async () => {}, () => settings.modules.dashboard);
 	assert.equal((await other.list())[0]?.deviceId, 'first-device');
 	raw = raw.replace('- [ ] Nested', '- [x] Nested'); assert.equal((await source.list()).length, 0);
 	const [target] = await source.targets(); assert.ok(target);
@@ -467,7 +468,7 @@ test('edits keep list order and deletion retains run snapshots', async () => {
 test('clearing read notifications preserves delivery receipts across restart', async () => {
 	const m = memory();
 	const request = { id: 'once', title: 'title', body: 'body', channels: ['in-app' as const] };
-	const first = new NotificationService(m.app, 'inbox.json', async () => {});
+	const first = new NotificationService(m.app.vault.adapter, 'inbox.json', async () => {}, undefined, createNotificationDelivery(m.app));
 	await first.load();
 	m.fail();
 	await assert.rejects(first.send(request));
@@ -476,7 +477,7 @@ test('clearing read notifications preserves delivery receipts across restart', a
 	await first.send(request);
 	await Promise.all([first.markRead(), first.clearRead()]);
 	assert.equal(first.records.length, 0);
-	const second = new NotificationService(m.app, 'inbox.json', async () => {});
+	const second = new NotificationService(m.app.vault.adapter, 'inbox.json', async () => {}, undefined, createNotificationDelivery(m.app));
 	await second.load();
 	await second.send(request);
 	assert.equal(second.records.length, 0);
@@ -485,12 +486,12 @@ test('clearing read notifications preserves delivery receipts across restart', a
 test('partial primary write recovers last valid data and a later write can succeed', async () => {
 	const m = memory();
 	const validate = (v: unknown): v is { revision: number } => !!v && typeof v === 'object' && typeof (v as { revision?: unknown }).revision === 'number';
-	const store = new JsonStore(m.app, 'store.json', validate);
+	const store = new JsonStore(m.app.vault.adapter, 'store.json', validate);
 	await store.load({ revision: 0 });
 	await store.save({ revision: 1 });
 	await store.save({ revision: 2 });
 	m.files.set('store.json', '{"revision":');
-	const restarted = new JsonStore(m.app, 'store.json', validate);
+	const restarted = new JsonStore(m.app.vault.adapter, 'store.json', validate);
 	assert.deepEqual(await restarted.load({ revision: 0 }), { revision: 1 });
 	await restarted.save({ revision: 3 });
 	assert.equal(JSON.parse(m.files.get('store.json')!).revision, 3);
@@ -500,7 +501,7 @@ test('partial primary write recovers last valid data and a later write can succe
 test('failed inbox load cannot overwrite unreadable receipts and a successful retry emits state', async () => {
 	const m = memory();
 	m.files.set('inbox.json', '{broken');
-	const inbox = new NotificationService(m.app, 'inbox.json', async () => {});
+	const inbox = new NotificationService(m.app.vault.adapter, 'inbox.json', async () => {}, undefined, createNotificationDelivery(m.app));
 	await assert.rejects(inbox.load());
 	await assert.rejects(inbox.clearRead());
 	await assert.rejects(inbox.markRead());

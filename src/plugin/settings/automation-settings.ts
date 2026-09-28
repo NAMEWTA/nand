@@ -1,6 +1,6 @@
 import { Setting } from 'obsidian';
+import { t } from '../../shared/i18n/index';
 import type DashboardPlugin from '../main';
-import { t } from '../../shared/i18n';
 
 export function renderAutomationSettings(plugin: DashboardPlugin, el: HTMLElement): void {
 	new Setting(el).setName(t('automation.title')).setDesc(t('automation.localOnly')).setHeading();

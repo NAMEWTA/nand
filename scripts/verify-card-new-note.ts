@@ -1,10 +1,13 @@
+import { installPreactMiniDom } from './preact-mini-dom';
+installPreactMiniDom();
 import { strict as assert } from 'node:assert';
 import type { App } from 'obsidian';
 import { El, findByClass, findTag } from './mini-dom';
-import { renderSection } from '../src/dashboard-view/renderer';
-import { sectionNewNoteFolder } from '../src/dashboard-view/library/library-new-note';
-import { NotesSectionConfigModal } from '../src/dashboard-view/notes/notes-config-modal';
-import type { DashboardCard, DashboardColumn, LibraryConfig, RenderCallbacks } from '../src/dashboard-view/types';
+import { renderSection } from '../src/view/dashboard/renderer/index';
+import { sectionNewNoteFolder } from '../src/view/dashboard/library/library-new-note';
+import { NotesSectionConfigModal } from '../src/view/dashboard/notes/notes-config-modal';
+import type { DashboardCard, DashboardColumn, LibraryConfig } from '../src/core/dashboard/types/index';
+import type { RenderCallbacks } from '../src/view/dashboard/render-contract';
 
 // Per-card "new note" on notes (no cover) and projects (cover) sections: the
 // button renders first in each card's actions row (left of edit + delete),

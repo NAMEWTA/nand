@@ -12,7 +12,9 @@
 export class El {
 	readonly tagName: string;
 	ownerDocument: unknown;
-	instanceOf(type: typeof El): boolean { return this instanceof type; }
+	instanceOf(type: typeof El): boolean {
+		return this instanceof type;
+	}
 	className = '';
 	children: El[] = [];
 	private text = '';
@@ -65,6 +67,9 @@ export class El {
 
 	constructor(tag: string) {
 		this.tagName = tag.toUpperCase();
+		const environment = globalThis as { document?: unknown; activeDocument?: unknown; window?: unknown };
+		this.ownerDocument = environment.document ??
+			environment.activeDocument ?? { defaultView: environment.window, querySelector: () => null };
 	}
 
 	get parentElement(): El | null {
@@ -149,7 +154,8 @@ export class El {
 	}
 
 	setAttribute(name: string, value: string): void {
-		this.attrs.set(name, value);
+		this.attrs.set(name.toLowerCase(), String(value));
+		if (name === 'class') this.className = value;
 	}
 
 	setAttr(name: string, value: string): void {
@@ -157,7 +163,7 @@ export class El {
 	}
 
 	getAttribute(name: string): string | null {
-		return this.attrs.get(name) ?? null;
+		return this.attrs.get(name.toLowerCase()) ?? null;
 	}
 
 	removeAttribute(name: string): void {
@@ -183,6 +189,18 @@ export class El {
 		(this as unknown as { cssProps?: Record<string, string> }).cssProps = { ...props };
 	}
 
+	get data(): string {
+		return this.text;
+	}
+	set data(value: string) {
+		this.text = value;
+	}
+	get nodeValue(): string {
+		return this.tagName === '#TEXT' ? this.text : '';
+	}
+	set nodeValue(value: string) {
+		this.text = value;
+	}
 	get textContent(): string {
 		return this.children.length > 0 ? this.children.map((c) => c.textContent).join('') : this.text;
 	}
@@ -312,7 +330,10 @@ export class El {
 	removeEventListener(type: string, fn: (ev: unknown) => void): void {
 		const list = this.listeners.get(type);
 		if (!list) return;
-		this.listeners.set(type, list.filter((item) => item !== fn));
+		this.listeners.set(
+			type,
+			list.filter((item) => item !== fn),
+		);
 	}
 
 	dispatchEvent(ev: { type: string; target?: El; key?: string; [extra: string]: unknown }): boolean {
@@ -333,7 +354,8 @@ export class El {
 		let cur: El | null = this;
 		while (cur && !stopped) {
 			for (const fn of [...(cur.listeners.get(ev.type) ?? [])]) {
-				fn(full);
+				Object.assign(full, { currentTarget: cur });
+				fn.call(cur, full);
 				if (stopped) break;
 			}
 			cur = cur.parent;
@@ -348,7 +370,9 @@ export class El {
 	// ---- Obsidian HTMLElement helpers ----
 
 	createEl(tag: string, o?: { cls?: string; text?: string; value?: string; attr?: Record<string, string> }): El {
-		const el = (this.ownerDocument as { createElement?: (tag: string) => El } | undefined)?.createElement?.(tag) ?? new El(tag);
+		const el =
+			(this.ownerDocument as { createElement?: (tag: string) => El } | undefined)?.createElement?.(tag) ??
+			new El(tag);
 		this.appendChild(el);
 		if (o?.cls) el.addClass(...o.cls.split(/\s+/));
 		if (o?.text !== undefined) el.textContent = o.text;

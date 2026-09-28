@@ -1,10 +1,10 @@
-import type { DashboardSettingTab } from './settings-tab';
-import { renderMusicAccountSettings } from '../../dashboard-view/music/music-account-settings';
 import { Setting } from 'obsidian';
-import type { WidgetHeightRatio } from '../../dashboard-view/types';
-import { t } from '../../shared/i18n';
-import { geocodeCity } from '../../dashboard-view/widgets/weather-service';
-import { getMusicService } from '../../dashboard-view/music/music-service';
+import type { WidgetHeightRatio } from '../../core/dashboard/types/index';
+import { getMusicService } from '../../platform/obsidian/music/music-service';
+import { geocodeCity } from '../../platform/obsidian/widgets/weather-service';
+import { t } from '../../shared/i18n/index';
+import { renderMusicAccountSettings } from '../../view/dashboard/music/music-account-settings';
+import type { DashboardSettingTab } from './settings-tab';
 
 /** Widgets tab, part 2: pomodoro, reading, habit, expense, countdown.
  *  Countdown renders after the expense card (the tab order is weather →
@@ -285,13 +285,13 @@ export function renderWidgetSettings(this: DashboardSettingTab, containerEl: HTM
 				await this.plugin.saveSettings();
 				// Disabling the widget stops playback too (no zombie audio
 				// behind a hidden UI).
-				if (!value) getMusicService()?.pause();
+				if (!value) getMusicService(this.app)?.pause();
 				this.plugin.refreshAllDashboards();
 				this.refresh();
 			}),
 		);
 
-	renderMusicAccountSettings(musicCard);
+	renderMusicAccountSettings(musicCard, this.app);
 	this.renderWidgetBackgroundSetting(musicCard, 'musicBackground');
 
 	// --- Countdown card ---

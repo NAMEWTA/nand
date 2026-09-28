@@ -1,0 +1,167 @@
+{
+  "date": "2026-09-28",
+  "implementationStatus": "Remaining architecture and dashboard Preact implementation plan completed",
+  "architecture": {
+    "modules": 580,
+    "forbiddenDependencies": 0,
+    "runtimeCycles": 0
+  },
+  "build": "passed",
+  "lint": {
+    "errors": 0,
+    "warnings": 157
+  },
+  "testEntrypoints": [
+    "test:mobile-stability",
+    "test:weather-mapping",
+    "test:folder-tag-search",
+    "test:visible-properties",
+    "test:calendar-task-insert",
+    "test:calendar-daynum",
+    "test:calendar-section",
+    "test:confirm-dialog",
+    "test:path-picker",
+    "test:library-cover",
+    "test:kanban-upgrade",
+    "test:pair-width",
+    "test:layout-stacked",
+    "test:widget-span",
+    "test:library-card-size",
+    "test:media-thumb-size",
+    "test:library-group",
+    "test:countdown-picker",
+    "test:gallery-placeholder",
+    "test:album-widget",
+    "test:doc-bracket-paths",
+    "test:property-operator",
+    "test:library-new-note",
+    "test:weread-progress",
+    "test:weread-stats",
+    "test:web-section",
+    "test:card-move",
+    "test:music-account",
+    "test:music-client",
+    "test:banner-quote-font",
+    "test:theme-studio-colors",
+    "test:card-new-note",
+    "test:memo-markdown",
+    "test:memo-note-template",
+    "test:expense",
+    "test:refresh-scope",
+    "test:scroll-root",
+    "test:editor-comments",
+    "test:settings-nav",
+    "test:terminal-agent",
+    "test:issue-regressions",
+    "test:contacts",
+    "test:iconic-port",
+    "test:automation",
+    "test:promise-callbacks",
+    "test:architecture",
+    "test:panel-composition",
+    "test:dashboard-isolation",
+    "test:card-panels"
+  ],
+  "testResult": {
+    "total": 49,
+    "passed": 49,
+    "failed": [],
+    "execution": "Rerun outside process sandbox after EPERM made some child-process results unreliable; sandbox-only summaries were discarded."
+  },
+  "assertionCounts": {
+    "terminal": 186,
+    "automation": 23,
+    "contacts": 20,
+    "icons": 8,
+    "confirmDialogScenarios": 7
+  },
+  "latestTargetedRerun": [
+    "test:confirm-dialog (native Scope cleanup added after the full run)",
+    "build",
+    "lint"
+  ],
+  "componentRegressionCoverage": [
+    "nested collapse and row identity",
+    "edit cancellation and duplicate submit guard",
+    "per-panel drag isolation and kanban rollback",
+    "stale native Markdown completion and cleanup",
+    "multiple reading service data/tick subscriptions",
+    "video identity, source replacement and decoder cleanup",
+    "ledger filtering, pagination, selection and scroll retention",
+    "DQL result input identity across reload",
+    "native Modal ownership cleanup and plugin teardown",
+    "native dialog Escape scope release"
+  ],
+  "currentBuildGuiValidation": false,
+  "limits": [
+    "No fresh Obsidian GUI run after the full dashboard migration. DOM regression tests do not validate real drag geometry, window layout or media decoding.",
+    "No current Windows/macOS/mobile GUI or authenticated provider quota verification.",
+    "Earlier isolated Linux GUI runs replaced fs.watch inside test processes because host watch resources were exhausted; that override is not product code."
+  ],
+  "buildArtifact": {
+    "path": "main.js",
+    "bytes": 3943131,
+    "sha256": "02d032a30bf39424ba70c982415e286d889c3a236d0dcf61e644c6ea780a954c"
+  },
+  "previousRuntimeEvidence": {
+    "date": "2026-09-27",
+    "buildArtifact": {
+      "path": "main.js",
+      "bytes": 3976112,
+      "sha256": "cfd7c1635d5aff87ae711bcfc0a32d95e4b4a77f3d213c5f213ef116d9b990c5"
+    },
+    "runtime": {
+      "1.13.7": {
+        "views": [
+          "nand-dashboard-view",
+          "nand-editor-view",
+          "terminal-view",
+          "nand-contacts-view",
+          "nand-automation-view"
+        ],
+        "terminalOutput": "NAND_REFACTOR_OK",
+        "refreshPreservesXterm": true,
+        "refreshPreservesSearch": true,
+        "popoutPreservesSession": true,
+        "popoutSearchUsesDestinationDocument": true,
+        "leafClosePreservesSession": true,
+        "closedRootEmpty": true,
+        "reselectRetainedSession": true,
+        "unhandledErrors": []
+      },
+      "1.12.4": {
+        "views": [
+          "nand-dashboard-view",
+          "nand-editor-view",
+          "terminal-view",
+          "nand-contacts-view",
+          "nand-automation-view"
+        ],
+        "unhandledErrors": []
+      }
+    },
+    "continuationRuntime": {
+      "1.13.7": {
+        "allFiveViewsLoaded": true,
+        "headlessSessionHasNoBrowserTerminal": true,
+        "firstAttachRestoresBackgroundOutput": true,
+        "closingLeafKeepsNativeSession": true,
+        "pluginUnloadDisposesAllNativeSessions": true,
+        "rendererCacheEmptyOnUnload": true,
+        "twoDashboardHabitPanelsUpdate": true,
+        "remainingDashboardInteractiveAfterOtherCloses": true,
+        "countdownAndAnniversaryRender": true,
+        "dashboardPopoutRecreatesPanels": true,
+        "dashboardCloseEmptiesRoot": true,
+        "unhandledErrors": []
+      },
+      "1.12.4": {
+        "allFiveViewsLoaded": true,
+        "nativePtySessionAlive": true,
+        "nativeSessionIndependentOfBrowserTerminal": true,
+        "unhandledErrors": [],
+        "terminalOutput": "NAND_112_NATIVE_SPLIT"
+      }
+    }
+  }
+}

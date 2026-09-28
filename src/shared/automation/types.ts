@@ -1,6 +1,11 @@
 export interface AgentUsage {
-	input: number; output: number; cacheRead: number; cacheWrite: number;
-	cost: number | null; known: boolean; partial?: boolean;
+	input: number;
+	output: number;
+	cacheRead: number;
+	cacheWrite: number;
+	cost: number | null;
+	known: boolean;
+	partial?: boolean;
 }
 export type NotificationChannelId = 'in-app' | 'system' | 'email' | 'sms';
 export type ScheduleSpec =

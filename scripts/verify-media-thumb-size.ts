@@ -1,3 +1,5 @@
+import { flushSync } from 'preact/compat';
+import { installPreactMiniDom } from './preact-mini-dom';
 /**
  * Verifies the media section's thumbnail-size (S/M/L) persistence:
  *
@@ -12,7 +14,7 @@
  */
 import { strict as assert } from 'node:assert';
 import { Menu } from 'obsidian';
-import { renderMediaSection } from '../src/dashboard-view/media/image-exts';
+import { renderMediaSection } from '../src/view/dashboard/media/media-section';
 import { El, findByClass } from './mini-dom';
 
 (globalThis as unknown as Record<string, unknown>).activeDocument = {
@@ -20,6 +22,8 @@ import { El, findByClass } from './mini-dom';
 	addEventListener: () => {},
 	removeEventListener: () => {},
 };
+
+installPreactMiniDom();
 
 /** localStorage-backed app stub recording writes into `store`. */
 const makeApp = (store: Record<string, string>) => {
@@ -86,7 +90,7 @@ findByClass(findByClass(c.el, 'dashboard-media-size-toggle')[0]!, 'dashboard-too
 const menu = (Menu as unknown as { last: { items: Array<{ click(): void }> } | null }).last;
 assert.ok(menu, 'dropdown click opens a menu');
 assert.equal(menu!.items.length, 3, 'menu lists the three sizes');
-menu!.items[0]!.click();
+flushSync(() => menu!.items[0]!.click());
 assert.equal(store3['nand.dashboard.media-thumb-size'], 'small', 'menu pick saves to localStorage');
 assert.equal(gridSize(c.el), 'small', 'grid re-renders small');
 assert.equal(activeSize(c.el), 'S', 'S shown on the collapsed button after pick');

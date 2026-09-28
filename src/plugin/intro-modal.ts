@@ -1,5 +1,5 @@
 import { Modal, type App } from 'obsidian';
-import { t } from '../shared/i18n';
+import { t } from '../shared/i18n/index';
 
 /** One intro after install. It does not mention a version and it has no code to scan. */
 export class IntroModal extends Modal {

@@ -19,17 +19,18 @@
  * Run: `pnpm run test:weread-progress`
  */
 import { strict as assert } from 'node:assert';
-import { parseShelf, progressDetailsFromGetProgress, progressFromGetProgress } from '../src/dashboard-view/weread/weread-service';
-import { generateDefaultMarkdown, parse, serialize } from '../src/dashboard-view/parser';
-import type { WereadWidget } from '../src/dashboard-view/types';
+import { parseShelf, progressDetailsFromGetProgress, progressFromGetProgress } from '../src/platform/obsidian/weread/weread-service';
+import { generateDefaultMarkdown } from '../src/core/dashboard/parser/default-document';
+import { parse, serialize } from '../src/core/dashboard/parser/index';
+import type { WereadWidget } from '../src/core/dashboard/types/index';
 import {
 	applyWereadProgressEntry,
 	filterWereadBooks,
 	groupWereadBooks,
 	mergeNotebookStats,
 	needsProgressFetch,
-} from '../src/dashboard-view/weread/weread-shelf-model';
-import { mergeProgressFiles, normalizeProgressFile, PROGRESS_FRESH_MS } from '../src/dashboard-view/weread/weread-progress-store';
+} from '../src/core/weread/weread-shelf-model';
+import { mergeProgressFiles, normalizeProgressFile, PROGRESS_FRESH_MS } from '../src/platform/obsidian/weread/weread-progress-store';
 
 // ---------- 1. progressFromGetProgress ----------
 assert.equal(progressFromGetProgress({ book: { progress: 45 } }), 45, 'nested book.progress is the primary path');

@@ -1,9 +1,11 @@
+import { installPreactMiniDom } from './preact-mini-dom';
 import { strict as assert } from 'node:assert';
 import type { App } from 'obsidian';
 import { El, findByClass } from './mini-dom';
-import { parse, serialize } from '../src/dashboard-view/parser';
-import { renderBanner, QUOTE_FONT_GROUPS, firstFontName } from '../src/dashboard-view/banner/banner';
-import type { BannerData } from '../src/dashboard-view/types';
+installPreactMiniDom();
+import { parse, serialize } from '../src/core/dashboard/parser/index';
+import { renderBanner, QUOTE_FONT_GROUPS, firstFontName } from '../src/view/dashboard/banner/banner';
+import type { BannerData } from '../src/core/dashboard/types/index';
 
 // Banner quote font: frontmatter round-trip (incl. CJK names with quotes)
 // and renderBanner applying quoteFont to both quote and author elements.
@@ -80,7 +82,7 @@ function main(): void {
 		const quote = findByClass(host, 'dashboard-banner-quote')[0];
 		assert.equal(
 			(quote as unknown as { style: { fontFamily?: string } }).style.fontFamily,
-			undefined,
+			'',
 			'5: no inline font when unset',
 		);
 	}

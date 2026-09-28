@@ -69,7 +69,8 @@ export const messages = {
 		'automation.delete': 'Delete',
 		'automation.history': 'Run history',
 		'automation.clearHistory': 'Clear completed history',
-		'automation.clearHistoryConfirm': 'Clear completed runs? Active runs and notification delivery receipts will be kept.',
+		'automation.clearHistoryConfirm':
+			'Clear completed runs? Active runs and notification delivery receipts will be kept.',
 		'automation.empty': 'No automations yet',
 		'automation.search': 'Search name or prompt',
 		'automation.all': 'All',

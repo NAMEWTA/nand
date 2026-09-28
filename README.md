@@ -63,6 +63,8 @@ NAND 是 NAMEWTA 的通用 Obsidian 工作台。看板、编辑器、图标、�
 
 看板参考了 [PandoraReads/apex-dashboard](https://github.com/PandoraReads/apex-dashboard)（MIT）。终端参考了 [ZyphrZero/Termy](https://github.com/ZyphrZero/Termy)（GPL-3.0）。智能体启动与用量参考了 [stablyai/orca](https://github.com/stablyai/orca)（MIT）。感谢这些项目。
 
-图标领域移植自 [gfxholo/iconic 1.1.10](https://github.com/gfxholo/iconic/tree/268e133c6f99dcef670cbda0d25a74b8239aa099)（MIT-0）。图标检索数据与 Emoji 数据的许可证见 [NOTICE](src/iconic/res/NOTICE.txt)，并随构建产物保留。
+图标领域移植自 [gfxholo/iconic 1.1.10](https://github.com/gfxholo/iconic/tree/268e133c6f99dcef670cbda0d25a74b8239aa099)（MIT-0）。图标检索数据与 Emoji 数据的许可证见 [NOTICE](src/core/icons/res/NOTICE.txt)，并随构建产物保留。
 
 智能体工作台升级与 issue 回归记录见 [实施记录](docs/agent-upgrade-2026-09-27.md)。Pi 的可选版本检查读取 npm 包 `@mariozechner/pi-coding-agent`；与其他更新检查共用开关。
+
+开发结构与验证范围见 [分层重构记录](docs/architecture-refactor.md)。

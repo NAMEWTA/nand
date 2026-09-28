@@ -6,7 +6,7 @@
 
 ## 结构和范围
 
-- `src/iconic/host/controller.ts`：领域生命周期及上游条目查询、修改逻辑；壳层通过 `modules.iconic` 启停，缺省开启。
+- `src/platform/obsidian/icons/host/controller.ts`：领域生命周期及上游条目查询、修改逻辑；壳层通过 `modules.iconic` 启停，缺省开启。
 - `managers/`：应用、标签页、文件/文件夹、书签、标签、属性、编辑器、功能区、建议、建议对话框、菜单和规则管理。
 - `dialogs/`、`components/`：原版图标与 Emoji 搜索、颜色、规则编辑与检查、使用情况检查组件。
 - `settings/model.ts`、`settings/sections.ts`：原版默认值、字段与六个设置分组。旧版及 1.13 声明式入口均保留 22 个配置项、规则书和使用情况入口。
@@ -64,6 +64,6 @@
 
 ## 资源与发布
 
-上游 MIT-0、Lucide ISC、Unicode License v3 及来源保存在 `src/iconic/res/NOTICE.txt`。esbuild 将完整通知放入 `main.js` banner，既有仅包含 `main.js`、`manifest.json`、`styles.css` 的发布包也会携带许可证。本次没有改发布流程，也没有创建发布版本。
+上游 MIT-0、Lucide ISC、Unicode License v3 及来源保存在 `src/core/icons/res/NOTICE.txt`。esbuild 将完整通知放入 `main.js` banner，既有仅包含 `main.js`、`manifest.json`、`styles.css` 的发布包也会携带许可证。本次没有改发布流程，也没有创建发布版本。
 
 2026-09-27：修正内联标题的 body 状态选择器；命令 ID 使用 `toggle-minimal-folder-icons`。中文省略号、极简、快速切换器等调整在测试中使用显式覆盖表，固定上游 oracle 不改写。偶发加载失败 #33 未稳定复现，不将这些改动宣称为其根因修复。

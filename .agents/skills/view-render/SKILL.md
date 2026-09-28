@@ -25,23 +25,20 @@ The `dev` skill still owns view-type strings, import boundaries, i18n, the build
 
 ## Where the files go
 
-A rendered surface belongs to one product. The product root is `src/<product>/`, and `<product>` is kebab-case. Do not add `src/components` or `src/views`. Do not put a `.tsx` file in `src/plugin` or `src/shared`.
+A rendered surface belongs to `src/view/<domain>/`. Preact component files use PascalCase; controller/adapter/logic files use kebab-case. Native leaf classes and functional panels are distinct files.
 
 ```
-src/<product>/view/            leaf class: the ItemView. Open, close, window move
-src/<product>/<paint>/         render components, when the leaf already imports a folder that paints it
-src/<product>/<feature>/       a component that belongs to one feature of that product
-src/<product>/view/*.tsx       render components when the product has no paint folder yet
-src/plugin/main.ts             calls the product's mount and unmount only
-src/plugin/settings/           Setting rows. Not next to the leaf components
-styles.css                     the one file at the repo root
+src/view/<domain>/             panels and their related visual components
+src/view/<domain>/host.ts      narrow native capabilities required by the surface
+src/view/primitives/           domain-neutral visual primitives
+src/core/<domain>/             models, application rules and ports
+src/platform/<host>/<domain>/  native/Vault/desktop adapters
+src/plugin/modules/           native registration and assembly
+src/plugin/workflows/         cross-domain coordination
+styles.css                    the one root stylesheet
 ```
 
-`<paint>` is the directory the leaf file already imports to draw itself. New components follow that import. If the leaf does not import a paint directory, the components go in `view/` beside the leaf class. A component that only one feature uses goes in that feature directory, not in `<paint>/`.
-
-File names follow the naming table in the `dev` architecture reference. The class prefix is the one that product already uses; that reference owns the prefix list. Styles go in the root `styles.css`.
-
-Products still do not import each other. That rule stays in `dev`. When a window host must live on the shell, `src/plugin/main.ts` calls a function the product exports. The components stay inside the product.
+Compose panels in code using props and slots, as `view/terminal/TerminalWorkbench.tsx` does. A panel takes state and actions, not the plugin class or an ItemView implementation. Do not add a router, a service container, an end-user workbench configuration format or package publishing. The dev architecture reference owns dependency directions.
 
 ## Read before editing
 
@@ -53,7 +50,7 @@ Products still do not import each other. That rule stays in `dev`. When a window
 
 ## Procedure
 
-1. Confirm the work is a leaf surface. A settings page, modal form, menu, notice, or status-bar item uses `Setting` and the `dev` skill.
+1. Confirm the work is a leaf surface. Settings rows, native menus, notices and status-bar items use native APIs and the `dev` skill. A native Modal may host a Preact business panel; retain its native lifecycle.
 2. Put each new file on the tree above before writing it.
 3. Keep the source of truth in the product's existing state. A component reads that state and emits actions. Ephemeral UI, such as which row is being renamed, may live in component state.
 4. Follow `references/runtime.md`. A surface that stays inside its pane renders into `contentEl`. A surface whose drag preview leaves the pane uses one Preact root per `Window` and portals into `contentEl`. Take the DOM window from the element (`win` / `doc`) or from the second argument of `window-open` / `window-close`. Do not capture `window` or `document` at module scope, and do not call `createRoot` from a component.

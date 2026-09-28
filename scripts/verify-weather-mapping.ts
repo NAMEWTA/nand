@@ -1,5 +1,5 @@
 import { strict as assert } from 'node:assert';
-import { mapMetNoCode } from '../src/dashboard-view/widgets/weather-service';
+import { mapMetNoCode } from '../src/platform/obsidian/widgets/weather-service';
 
 // Every base symbol from Met.no's official weathericon 2.0 legend
 // (github.com/metno/weathericons, weather/legend.csv), the WMO code it must

@@ -1,9 +1,9 @@
 import { strict as assert } from 'node:assert';
 import type { App } from 'obsidian';
 import { El, findByClass, findTag } from './mini-dom';
-import { applyCustomColors, resolveCustomColorValue } from '../src/dashboard-view/appearance/appearance';
-import { ThemeStudioModal } from '../src/dashboard-view/appearance/theme-studio-modal';
-import type { CustomColors, DashboardSettings } from '../src/dashboard-view/types';
+import { applyCustomColors, resolveCustomColorValue } from '../src/view/dashboard/appearance/appearance';
+import { ThemeStudioModal } from '../src/view/dashboard/appearance/theme-studio-modal';
+import type { CustomColors, DashboardSettings } from '../src/core/dashboard/types/index';
 
 // Theme-studio color scheme: per-area mode dropdown (follow theme / light /
 // dark / custom, the widget-background foreground recipe). Checks the preset

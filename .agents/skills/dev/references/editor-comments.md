@@ -26,7 +26,7 @@ Thread ids look like `c-…`, message ids like `m-…`.
 
 ## Locating a quote
 
-`locateAnchor` in `src/editor-view/comments/anchor.ts`:
+`locateAnchor` in `src/core/comments/anchor.ts`:
 
 1. If `doc.slice(start, end) === exact`, keep the offsets.
 2. Else search `prefix + exact + suffix` once.

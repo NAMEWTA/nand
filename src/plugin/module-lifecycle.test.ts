@@ -4,13 +4,19 @@ import { ModuleLifecycle, type ModuleEffects } from './module-lifecycle';
 
 function fixture(active = true) {
 	const calls: string[] = [];
-	const leaves = [{ session: 'one', output: 'keep-one' }, { session: 'two', output: 'keep-two' }];
+	const leaves = [
+		{ session: 'one', output: 'keep-one' },
+		{ session: 'two', output: 'keep-two' },
+	];
 	const original = [...leaves];
 	const flags = { dashboard: true, editor: true, terminal: active, iconic: false, contacts: true };
 	const lifecycle = new ModuleLifecycle();
 	const effects: ModuleEffects = {
-		contacts: async () => {}, iconic: async () => {},
-		dashboard: () => {}, editor: () => {}, terminalActive: () => active,
+		contacts: async () => {},
+		iconic: async () => {},
+		dashboard: () => {},
+		editor: () => {},
+		terminalActive: () => active,
 		terminal: async (enabled) => {
 			calls.push(enabled ? 'activate' : 'deactivate');
 			active = enabled;
@@ -20,7 +26,15 @@ function fixture(active = true) {
 			}
 		},
 	};
-	return { lifecycle, effects, flags, calls, leaves, original, apply: (desktop = true) => lifecycle.apply(() => flags, desktop, effects) };
+	return {
+		lifecycle,
+		effects,
+		flags,
+		calls,
+		leaves,
+		original,
+		apply: (desktop = true) => lifecycle.apply(() => flags, desktop, effects),
+	};
 }
 
 test('board and editor toggles preserve every terminal session and output', async () => {
@@ -59,11 +73,18 @@ test('queued requests read the latest flags and wait for shutdown', async () => 
 	const f = fixture();
 	let release!: () => void;
 	let started!: () => void;
-	const waiting = new Promise<void>((resolve) => { release = resolve; });
-	const entered = new Promise<void>((resolve) => { started = resolve; });
+	const waiting = new Promise<void>((resolve) => {
+		release = resolve;
+	});
+	const entered = new Promise<void>((resolve) => {
+		started = resolve;
+	});
 	const transition = f.effects.terminal;
 	f.effects.terminal = async (enabled) => {
-		if (!enabled) { started(); await waiting; }
+		if (!enabled) {
+			started();
+			await waiting;
+		}
 		await transition(enabled);
 	};
 	f.flags.terminal = false;
@@ -82,7 +103,9 @@ test('a rejected transition does not poison the queue', async () => {
 	const f = fixture(false);
 	f.flags.terminal = true;
 	const transition = f.effects.terminal;
-	f.effects.terminal = async () => { throw new Error('start failed'); };
+	f.effects.terminal = async () => {
+		throw new Error('start failed');
+	};
 	await assert.rejects(f.apply(), /start failed/);
 	f.effects.terminal = transition;
 	await f.apply();
@@ -101,7 +124,9 @@ test('unload prevents pending module work from starting services', async () => {
 test('archive transitions run on mobile without restarting the terminal', async () => {
 	const f = fixture(false);
 	const values: boolean[] = [];
-	f.effects.contacts = async (enabled) => { values.push(enabled); };
+	f.effects.contacts = async (enabled) => {
+		values.push(enabled);
+	};
 	await f.apply(false);
 	f.flags.contacts = false;
 	await f.apply(false);

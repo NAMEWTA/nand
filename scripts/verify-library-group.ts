@@ -1,3 +1,6 @@
+import { installPreactMiniDom } from './preact-mini-dom';
+import { flushSync } from 'preact/compat';
+installPreactMiniDom();
 /**
  * Verifies toolbar grouping for the library section's grid/gallery/list/table
  * views (viewGroupMode/viewGroupBy):
@@ -26,9 +29,10 @@
  */
 import { strict as assert } from 'node:assert';
 import { Menu } from 'obsidian';
-import { parse, serialize } from '../src/dashboard-view/parser';
-import { renderLibrarySection, groupLibraryResults } from '../src/dashboard-view/library';
-import type { LibraryFileResult } from '../src/dashboard-view/library';
+import { parse, serialize } from '../src/core/dashboard/parser/index';
+import { renderLibrarySection } from '../src/view/dashboard/library/index';
+import { groupLibraryResults } from '../src/view/dashboard/library/library-groups';
+import type { LibraryFileResult } from '../src/view/dashboard/library/index';
 import { El, findByClass } from './mini-dom';
 
 (globalThis as unknown as Record<string, unknown>).activeDocument = {
@@ -227,7 +231,7 @@ const groupToggle = findByClass(el, 'dashboard-library-group-toggle')[0] ?? asse
 const groupBtn = (): El =>
 	findByClass(groupToggle, 'dashboard-library-view-btn')[0] ?? assert.fail('group button rendered');
 const openGroupMenu = (): { items: Array<{ title: string; click(): void }> } => {
-	groupBtn().click();
+	flushSync(() => groupBtn().click());
 	// tsc resolves the real obsidian types (no static last there); the runtime
 	// alias points at the stub, whose Menu.last exists — bridge with a cast.
 	return (Menu as unknown as { last: { items: Array<{ title: string; click(): void }> } | null }).last!;
@@ -257,7 +261,7 @@ for (const pseudo of ['modified', 'created', 'path']) {
 }
 
 // Pick 按文件夹: config persists, grouped DOM appears, paging chrome hides.
-menu.items[1]!.click();
+flushSync(() => menu.items[1]!.click());
 assert.equal(saved!.viewGroupMode, 'folder', 'folder pick reported through onConfigChange');
 assert.equal(saved!.viewGroupBy, undefined, 'folder pick clears the property key');
 assert.equal(headers().length, 2, 'two folder groups (a, b)');
@@ -287,20 +291,20 @@ assert.equal(
 );
 
 // Collapse in place: click header → body hides; click again → restores.
-headers()[0]!.click();
+flushSync(() => headers()[0]!.click());
 assert.ok(headers()[0]!.hasClass('is-collapsed'), 'header collapses');
 assert.ok(bodies()[0]!.hasClass('is-hidden'), 'body hides with header');
-headers()[0]!.click();
+flushSync(() => headers()[0]!.click());
 assert.ok(!headers()[0]!.hasClass('is-collapsed'), 'header expands again');
 assert.ok(!bodies()[0]!.hasClass('is-hidden'), 'body shows again');
 
 // Re-picking the already-active option is a no-op: no config write, no
 // re-render (leave 'a' collapsed to prove nothing was rebuilt).
-headers()[0]!.click();
+flushSync(() => headers()[0]!.click());
 assert.ok(headers()[0]!.hasClass('is-collapsed'), 'header collapsed for the guard test');
 const savesBeforeRePick = savedCount;
 menu = openGroupMenu();
-menu.items[1]!.click(); // 按文件夹 — already active
+flushSync(() => menu.items[1]!.click()); // 按文件夹 — already active
 assert.equal(savedCount, savesBeforeRePick, 're-picking the active option writes nothing');
 assert.ok(headers()[0]!.hasClass('is-collapsed'), 'no re-render on re-pick (collapse preserved)');
 
@@ -309,7 +313,7 @@ assert.ok(headers()[0]!.hasClass('is-collapsed'), 'no re-render on re-pick (coll
 // expanded despite folder-group 'a' being collapsed. Groups follow
 // first-occurrence order of the sorted results (mtime 5/4/3).
 menu = openGroupMenu();
-menu.items.find((i) => i.title === 'status')!.click();
+flushSync(() => menu.items.find((i) => i.title === 'status')!.click());
 assert.equal(saved!.viewGroupMode, 'property', 'property pick reported');
 assert.equal(saved!.viewGroupBy, 'status', 'property key reported');
 assert.deepEqual(
@@ -323,10 +327,11 @@ assert.ok(!headers().some((h) => h.hasClass('is-collapsed')), 'collapse set clea
 // Empty-result path: with the search box filtering everything out, a menu
 // pick still re-renders through the early return — the page-size select must
 // stay hidden there too, not only on the populated path.
-const searchEl = findByClass(el, 'dashboard-library-search')[0] as unknown as { value: string };
+const searchEl = findByClass(el, 'dashboard-library-search')[0]!;
 searchEl.value = 'zzz';
+flushSync(() => searchEl.dispatchEvent({ type: 'input', target: searchEl }));
 menu = openGroupMenu();
-menu.items[1]!.click(); // 按文件夹
+flushSync(() => menu.items[1]!.click()); // 按文件夹
 assert.equal(headers().length, 0, 'search filters every group out');
 assert.ok(findByClass(el, 'dashboard-library-empty').length > 0, 'empty state rendered');
 assert.ok(
@@ -334,33 +339,34 @@ assert.ok(
 	'page-size select stays hidden on the empty-result path',
 );
 searchEl.value = '';
+flushSync(() => searchEl.dispatchEvent({ type: 'input', target: searchEl }));
 menu = openGroupMenu();
-menu.items.find((i) => i.title === 'status')!.click();
+flushSync(() => menu.items.find((i) => i.title === 'status')!.click());
 assert.equal(headers().length, 3, 'grouped view restored after clearing the search');
 
 // Grouping persists across a view switch; each table group renders its own table.
 const viewToggle = findByClass(el, 'dashboard-library-view-toggle').find(
 	(t) => !t.hasClass('dashboard-library-size-toggle') && !t.hasClass('dashboard-library-group-toggle'),
 )!;
-findByClass(viewToggle, 'dashboard-toolbar-dropdown')[0]!.click();
+flushSync(() => findByClass(viewToggle, 'dashboard-toolbar-dropdown')[0]!.click());
 const viewMenu = (Menu as unknown as { last: { items: Array<{ click(): void }> } | null }).last!;
-viewMenu.items[3]!.click(); // table
+flushSync(() => viewMenu.items[3]!.click()); // table
 assert.equal(findByClass(el, 'dashboard-library-table').length, 3, 'grouped table view: one table per group');
 
 // Kanban hides the pill; list shows it again and stays grouped.
-findByClass(viewToggle, 'dashboard-toolbar-dropdown')[0]!.click();
+flushSync(() => findByClass(viewToggle, 'dashboard-toolbar-dropdown')[0]!.click());
 const kanbanMenu = (Menu as unknown as { last: { items: Array<{ click(): void }> } | null }).last!;
-kanbanMenu.items[4]!.click(); // kanban
+flushSync(() => kanbanMenu.items[4]!.click()); // kanban
 assert.ok(groupToggle.hasClass('is-hidden'), 'group pill hidden in kanban view');
-findByClass(viewToggle, 'dashboard-toolbar-dropdown')[0]!.click();
+flushSync(() => findByClass(viewToggle, 'dashboard-toolbar-dropdown')[0]!.click());
 const listMenu = (Menu as unknown as { last: { items: Array<{ click(): void }> } | null }).last!;
-listMenu.items[2]!.click(); // list
+flushSync(() => listMenu.items[2]!.click()); // list
 assert.ok(!groupToggle.hasClass('is-hidden'), 'group pill visible in list view');
 assert.equal(findByClass(el, 'dashboard-library-list').length, 3, 'grouped list view: one list per group');
 
 // Pick 不分组: flat view restored, paging chrome back.
 menu = openGroupMenu();
-menu.items[0]!.click();
+flushSync(() => menu.items[0]!.click());
 assert.equal(saved!.viewGroupMode, undefined, "'no grouping' clears the mode");
 assert.equal(headers().length, 0, 'group headers gone');
 assert.equal(findByClass(el, 'dashboard-library-list').length, 1, 'single flat list restored');

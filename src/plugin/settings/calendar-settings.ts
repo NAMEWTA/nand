@@ -1,8 +1,8 @@
-import type { DashboardSettingTab } from './settings-tab';
 import { setIcon, Setting } from 'obsidian';
-import { t } from '../../shared/i18n';
-import { MultiFolderSelectModal } from '../../dashboard-view/library/folder-config-modal';
-import { PathPickerModal } from '../../dashboard-view/ui/path-picker-modal';
+import { t } from '../../shared/i18n/index';
+import { PathPickerModal } from '../../view/dashboard/ui/path-picker-modal';
+import { MultiFolderSelectModal } from '../../view/primitives/folder-select-modal';
+import type { DashboardSettingTab } from './settings-tab';
 
 export function renderCalendarSettings(this: DashboardSettingTab, containerEl: HTMLElement): void {
 	new Setting(containerEl).setName(t('settings.widgetCalendar')).setHeading();

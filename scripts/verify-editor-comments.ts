@@ -1,3 +1,4 @@
+import { parseHTML } from 'linkedom';
 /**
  * Editor comment anchors, sidecar store, and product-boundary checks.
  * Run: pnpm run test:editor-comments
@@ -8,11 +9,11 @@ import path from 'node:path';
 import { EditorState } from '@codemirror/state';
 import { EditorView } from '@codemirror/view';
 import { editorInfoField, Scope } from 'obsidian';
-import { CommentPopoverCoordinator } from '../src/editor-view/comments/popover-coordinator';
-import { locateAnchor, makeAnchor, selectionIsCommentable } from '../src/editor-view/comments/anchor';
-import { commentsCmExtension } from '../src/editor-view/comments/cm-extension';
-import { formatCommentTime, mountCommentsPanel } from '../src/editor-view/comments/panel';
-import { CommentStore, registerCommentStore, type CommentFs } from '../src/editor-view/comments/store';
+import { CommentPopoverCoordinator } from '../src/view/editor/comments/popover-coordinator';
+import { locateAnchor, makeAnchor, selectionIsCommentable } from '../src/core/comments/anchor';
+import { commentsCmExtension } from '../src/view/editor/comments/cm-extension';
+import { formatCommentTime, mountCommentsPanel } from '../src/view/editor/comments/panel';
+import { CommentStore, registerCommentStore, type CommentFs } from '../src/core/comments/store';
 import { El } from './mini-dom';
 import { Menu } from './obsidian-stub';
 import { setLanguage } from '../src/shared/i18n/runtime';
@@ -162,11 +163,16 @@ const panelThread = await panelStore.add('notes/demo.md', {
 });
 await panelStore.flush();
 registerCommentStore(panelStore);
-const host = new El('div') as El & { ownerDocument: { activeElement: null } };
-host.ownerDocument = { activeElement: null };
-mountCommentsPanel(host as unknown as HTMLElement, {
+const panelDom = parseHTML('<html><body></body></html>');
+Object.assign(globalThis, { document: panelDom.document });
+Object.assign(panelDom.HTMLElement.prototype, {
+	empty(this: HTMLElement) { this.replaceChildren(); },
+	addClass(this: HTMLElement, name: string) { this.classList.add(name); },
+});
+const host = panelDom.document.createElement('div');
+panelDom.document.body.appendChild(host);
+const unmountPanel = mountCommentsPanel(host as unknown as HTMLElement, {
 	app: {} as never,
-	plugin: {} as never,
 	file: { path: 'notes/demo.md', extension: 'md' } as never,
 });
 await panelStore.loadFile('notes/demo.md');
@@ -174,7 +180,7 @@ const card = host.querySelector('.nand-editor-comment');
 const list = host.querySelector('.nand-editor-comments-list');
 assert.ok(card, 'comment card is rendered');
 assert.equal(card?.parentElement, list);
-assert.equal(card?.textContent.includes('keep'), true);
+assert.equal(card?.textContent?.includes('keep'), true);
 assert.equal(panelNote, 'Please keep this note byte-for-byte.', 'rendering a card does not touch the note');
 assert.equal(card?.querySelector('.nand-editor-comment-quote')?.tagName, 'BUTTON', 'quote supports keyboard activation');
 await panelStore.resolve(panelThread.id);
@@ -184,7 +190,7 @@ await panelStore.reply(panelThread.id, 'English reply');
 assert.equal(host.querySelector('.nand-editor-comment-status')?.textContent, 'Resolved');
 await panelStore.reopen(panelThread.id);
 assert.equal(host.querySelector('.nand-editor-comment-status'), null);
-host.querySelector('.nand-editor-comment-more')?.click();
+host.querySelector<HTMLButtonElement>('.nand-editor-comment-more')?.click();
 assert.equal(Menu.last?.items[0]?.title, 'Delete');
 Menu.last?.items[0]?.click();
 await panelStore.flush();
@@ -193,6 +199,9 @@ setLanguage('zh');
 await panelStore.add('notes/demo.md', { quote: makeAnchor(panelNote, 7, 11), start: 7, end: 11, text: 'visible' });
 await panelStore.flush();
 
+
+unmountPanel();
+assert.equal(host.childNodes.length, 0, 'Preact root is unmounted on panel disposal');
 
 const frames: FrameRequestCallback[] = [];
 const editorBody = new El('body');
@@ -427,36 +436,13 @@ coldEditor.destroy();
 editor.destroy();
 coordinator.disable();
 
-function walk(dir: string): string[] {
-	const out: string[] = [];
-	for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
-		const full = path.join(dir, entry.name);
-		if (entry.isDirectory()) out.push(...walk(full));
-		else if (entry.name.endsWith('.ts')) out.push(full);
-	}
-	return out;
-}
-
+// Dependency boundaries are enforced by test:architecture, including TSX and lazy imports.
 const root = process.cwd();
-const importFrom = (file: string, spec: string) =>
-	new RegExp(`from\\s+['\"][^'\"]*${spec}[^'\"]*['\"]`).test(fs.readFileSync(file, 'utf8'));
-for (const file of walk(path.join(root, 'src/editor-view'))) {
-	assert.equal(importFrom(file, 'dashboard-view'), false, `${file} must not import dashboard-view`);
-	assert.equal(importFrom(file, 'terminal-agent'), false, `${file} must not import terminal-agent`);
-}
-for (const file of walk(path.join(root, 'src/dashboard-view'))) {
-	assert.equal(importFrom(file, 'editor-view'), false, `${file} must not import editor-view`);
-	assert.equal(importFrom(file, 'terminal-agent'), false, `${file} must not import terminal-agent`);
-}
-for (const file of walk(path.join(root, 'src/terminal-agent'))) {
-	assert.equal(importFrom(file, 'editor-view'), false, `${file} must not import editor-view`);
-	assert.equal(importFrom(file, 'dashboard-view'), false, `${file} must not import dashboard-view`);
-}
-const viewSource = fs.readFileSync(path.join(root, 'src/dashboard-view/view/dashboard-view.ts'), 'utf8');
+const viewSource = fs.readFileSync(path.join(root, 'src/view/dashboard/view/view-type.ts'), 'utf8');
 assert.match(viewSource, /DASHBOARD_VIEW_TYPE = 'nand-dashboard-view'/);
-const editorSource = fs.readFileSync(path.join(root, 'src/editor-view/view/editor-view.ts'), 'utf8');
+const editorSource = fs.readFileSync(path.join(root, 'src/view/editor/view/editor-view.ts'), 'utf8');
 assert.match(editorSource, /EDITOR_VIEW_TYPE = 'nand-editor-view'/);
-const terminalSource = fs.readFileSync(path.join(root, 'src/terminal-agent/view/terminal-view.ts'), 'utf8');
+const terminalSource = fs.readFileSync(path.join(root, 'src/view/terminal/terminal-view.ts'), 'utf8');
 assert.match(terminalSource, /TERMINAL_VIEW_TYPE = 'terminal-view'/);
 
 const commentCss = fs.readFileSync(path.join(root, 'styles.css'), 'utf8');

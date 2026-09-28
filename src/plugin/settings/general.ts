@@ -1,10 +1,10 @@
+import { Setting, type TextComponent } from 'obsidian';
+import type { DashboardLayoutMode } from '../../core/dashboard/types/index';
+import { setLanguage, t, type Language } from '../../shared/i18n/index';
+import { ThemeStudioModal } from '../../view/dashboard/appearance/theme-studio-modal';
+import { QuickNoteConfigModal } from '../../view/dashboard/notes/quick-note-config-modal';
+import { PathPickerModal } from '../../view/dashboard/ui/path-picker-modal';
 import type { DashboardSettingTab } from './settings-tab';
-import { setIcon, Setting, type TextComponent } from 'obsidian';
-import type { DashboardLayoutMode } from '../../dashboard-view/types';
-import { t, setLanguage, type Language } from '../../shared/i18n';
-import { ThemeStudioModal } from '../../dashboard-view/appearance/theme-studio-modal';
-import { QuickNoteConfigModal } from '../../dashboard-view/notes/quick-note-config-modal';
-import { PathPickerModal } from '../../dashboard-view/ui/path-picker-modal';
 
 /** Top block: layout, language, style, quick notes, paths. Shared by
  *  display() (pre-1.13) and the declarative General section (1.13+). */

@@ -13,8 +13,8 @@
  * Run: `pnpm run test:library-cover`
  */
 import { strict as assert } from 'node:assert';
-import { extractCoverValue } from '../src/dashboard-view/library';
-import { parse, serialize } from '../src/dashboard-view/parser';
+import { extractCoverValue } from '../src/view/dashboard/library/library-presentation';
+import { parse, serialize } from '../src/core/dashboard/parser/index';
 
 // ---------- 1. extractCoverValue ----------
 

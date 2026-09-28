@@ -1,8 +1,8 @@
-import { renderEmptyState } from '../shared/empty-state';
 import { ItemView, type WorkspaceLeaf } from 'obsidian';
-import { t } from '../shared/i18n';
-import { TERMINAL_VIEW_TYPE } from '../terminal-agent';
+import { t } from '../shared/i18n/index';
+import { renderEmptyState } from '../view/primitives/empty-state';
 import type DashboardPlugin from './main';
+import { TERMINAL_VIEW_TYPE } from './modules/terminal/index';
 
 /** Shown in an existing terminal leaf while the agent module is off. */
 export class InactiveTerminalView extends ItemView {

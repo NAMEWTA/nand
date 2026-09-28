@@ -14,20 +14,27 @@ const activeDocument = {
 	createElement: () => new El('div'),
 	importNode: (node: El) => node,
 };
-(globalThis as unknown as { activeDocument: typeof activeDocument; DOMParser: typeof DOMParser; SVGSVGElement: typeof SvgElement }).activeDocument = activeDocument;
-(globalThis as unknown as { DOMParser: new () => { parseFromString: () => { documentElement: El } } }).DOMParser = class {
-	parseFromString() {
-		const svg = new El('svg');
-		return { documentElement: Object.assign(svg, { instanceOf: (ctor: unknown) => ctor === SvgElement }) };
+(
+	globalThis as unknown as {
+		activeDocument: typeof activeDocument;
+		DOMParser: typeof DOMParser;
+		SVGSVGElement: typeof SvgElement;
 	}
-};
+).activeDocument = activeDocument;
+(globalThis as unknown as { DOMParser: new () => { parseFromString: () => { documentElement: El } } }).DOMParser =
+	class {
+		parseFromString() {
+			const svg = new El('svg');
+			return { documentElement: Object.assign(svg, { instanceOf: (ctor: unknown) => ctor === SvgElement }) };
+		}
+	};
 (globalThis as unknown as { SVGSVGElement: typeof SvgElement }).SVGSVGElement = SvgElement;
 
 import { Setting } from '../../../scripts/obsidian-stub';
 import { El } from '../../../scripts/mini-dom';
 import { DashboardSettingTab } from './settings-tab';
-import { DEFAULT_TERMINAL_SETTINGS } from '../../terminal-agent/settings/model';
-import type { TerminalAgentController } from '../../terminal-agent/host/controller';
+import { DEFAULT_TERMINAL_SETTINGS } from '../../core/pty/settings';
+import type { TerminalAgentController } from '../modules/terminal/controller';
 import type DashboardPlugin from '../main';
 
 test('stacked terminal sections keep the appearance block, launcher subscription, and offline hint', async () => {
@@ -41,6 +48,7 @@ test('stacked terminal sections keep the appearance block, launcher subscription
 		app: { workspace: { getLeavesOfType: () => [] } },
 		settings,
 		saveSettings: async () => {},
+		refreshUsage: () => {},
 		onAiLauncherSnapshotsChanged(listener: (presetId: string, snapshot: unknown) => void) {
 			listeners.add(listener);
 			return () => {
@@ -70,7 +78,6 @@ test('stacked terminal sections keep the appearance block, launcher subscription
 	const tab = Object.create(DashboardSettingTab.prototype) as DashboardSettingTab;
 	tab.plugin = { terminalHost: plugin } as unknown as DashboardPlugin;
 	tab.renderTerminalProduct(host as unknown as HTMLElement);
-
 
 	const groups = host.querySelectorAll('.terminal-agent-settings-group');
 	assert.equal(groups.length, Object.keys(settings.agentSettings.agents).length);

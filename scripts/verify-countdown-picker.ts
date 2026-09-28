@@ -13,7 +13,7 @@
  */
 import { strict as assert } from 'node:assert';
 import type { App } from 'obsidian';
-import { CountdownSettingsModal } from '../src/dashboard-view/widgets/countdown-modal';
+import { CountdownSettingsModal } from '../src/view/dashboard/widgets/countdown-modal';
 import { El, findByClass, findTag } from './mini-dom';
 
 // The popup mounts on activeDocument.body — give the stub a live El body.

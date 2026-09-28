@@ -4,7 +4,7 @@ import { readFileSync } from "node:fs";
 import path from "path";
 import { builtinModules } from 'node:module';
 
-const iconicNotice = readFileSync(new URL("./src/iconic/res/NOTICE.txt", import.meta.url), "utf8").replaceAll("*/", "* /");
+const iconicNotice = readFileSync(new URL("./src/core/icons/res/NOTICE.txt", import.meta.url), "utf8").replaceAll("*/", "* /");
 
 const orcaNotice = readFileSync(new URL("./docs/third-party/orca-LICENSE.txt", import.meta.url), "utf8").replaceAll("*/", "* /");
 

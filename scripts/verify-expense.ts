@@ -23,14 +23,9 @@
  * Run: `pnpm run test:expense`
  */
 import { strict as assert } from 'node:assert';
-import {
-	EXPENSE_MAX_PRIMARY_CATEGORIES,
-	type ExpenseService,
-	ExpenseService as ExpenseServiceClass,
-	regroupBreakdownByPrimary,
-	UNGROUPED_PRIMARY,
-} from '../src/dashboard-view/expense/expense-service';
-import { addDays, daysInclusive, periodLabel, periodShift, windowFor } from '../src/dashboard-view/expense/expense-period';
+import { type ExpenseService, ExpenseService as ExpenseServiceClass } from '../src/platform/obsidian/expense/expense-service';
+import { EXPENSE_MAX_PRIMARY_CATEGORIES, regroupBreakdownByPrimary, UNGROUPED_PRIMARY } from '../src/core/expense/model';
+import { addDays, daysInclusive, periodLabel, periodShift, windowFor } from '../src/core/expense/expense-period';
 
 // ---- Harness ---------------------------------------------------------------
 

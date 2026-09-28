@@ -1,3 +1,6 @@
+import { installPreactMiniDom } from './preact-mini-dom';
+import { flushSync } from 'preact/compat';
+installPreactMiniDom();
 /**
  * Verifies the gallery placeholder cover:
  *
@@ -11,7 +14,7 @@
  */
 import { strict as assert } from 'node:assert';
 import type { App } from 'obsidian';
-import { renderLibrarySection } from '../src/dashboard-view/library';
+import { renderLibrarySection } from '../src/view/dashboard/library/index';
 import { El, findByClass } from './mini-dom';
 
 const bodyEl = new El('body');

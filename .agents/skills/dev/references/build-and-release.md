@@ -29,15 +29,15 @@ The package manager is pnpm. `package.json` pins `packageManager`. The lockfile 
 - Externals: `obsidian`, `electron`, `@codemirror/*`, `@lezer/*`, Node builtins.
 - `ws` resolves to `node_modules/ws/wrapper.mjs`.
 - `.md` and `.svg` load as text.
-- The generated banner embeds `src/iconic/res/NOTICE.txt` so upstream and resource licenses ship in the existing three-file release.
+- The generated banner embeds `src/core/icons/res/NOTICE.txt` so upstream and resource licenses ship in the existing three-file release.
 
 Do not add a second entry. Do not bundle CodeMirror.
 
 ## Tests
 
-There is no aggregate test script. CI (`.github/workflows/lint.yml`) runs `build` and `lint` on Node 22 and 24 for every branch push. pnpm 11 needs Node 22.13 or newer, so the release workflow uses Node 22 as well. It also runs `test:automation`. Other `test:*` scripts remain local. There is no Obsidian runtime in CI. Name the script you ran; a passing `build` does not verify UI.
+There is no aggregate test script. CI (`.github/workflows/lint.yml`) runs `build` and `lint` on Node 22 and 24 for every branch push. pnpm 11 needs Node 22.13 or newer, so the release workflow uses Node 22 as well. It also runs architecture, automation, terminal, contacts, icon, editor-comment and panel-composition/dashboard-isolation/card-panels tests. Other dashboard regression scripts remain local. There is no Obsidian runtime in CI. Name the script you ran; a passing `build` does not verify UI.
 
-A `*.test.ts` file runs only when a `package.json` script names it. `scripts/verify-*.ts` files are wired as `test:<name>`:
+A `*.test.ts` file runs when a script names it, or when it is under one of the roots discovered by `scripts/run-terminal-tests.mjs`. `scripts/verify-*.ts` files are wired as `test:<name>`:
 
 ```sh
 esbuild scripts/verify-foo.ts --bundle --platform=node --format=cjs \
@@ -51,13 +51,15 @@ Copy the nearest script, including extra aliases such as the music stubs. Do not
 | When you change… | Run |
 |---|---|
 | Comment composer, language subscriptions, dashboard persistence | `pnpm run test:issue-regressions` |
-| Comment anchors, the comment store, or the editor/dashboard import boundary | `pnpm run test:editor-comments` |
+| Comment anchors, the comment store, or comment panel | `pnpm run test:editor-comments` |
 | Automation scheduler, notification delivery, native hooks or reminder metadata | `pnpm run test:automation`; for Rust/PTTY changes also `cargo test --manifest-path processes/rust-terminal-servers/Cargo.toml` and `node scripts/verify-pty-automation.mjs` against a local release build (Linux) |
 | Promise callback handling of Obsidian controls | `pnpm run test:promise-callbacks` (run separately from lint: it creates then removes a temporary typed fixture under src) |
 | Terminal agent behavior covered by its `*.test.ts` files | `pnpm run test:terminal-agent` |
 | Module lifecycle (`src/plugin/module-lifecycle.test.ts`), settings navigation, or settings CSS | `pnpm run test:settings-nav` |
 | Archive model, Markdown format, index or controller | `pnpm run test:contacts`; see Archives checks below |
 | Icon rules, lifecycle, settings or persistence | `pnpm run test:iconic-port`, plus `test:settings-nav` for shell changes |
+| Source moves, ports, dependency direction or composition | `pnpm test:architecture`, `pnpm test:panel-composition`, `pnpm test:dashboard-isolation` |
+| Dashboard Preact cards, media decoder lifetime, ledger state or query refresh | `pnpm test:card-panels` (real Preact DOM: nesting/edit cancellation, drag rollback, Markdown races, shared subscriptions, video cleanup, ledger state, query refresh) |
 | A dashboard behavior that already has a verify script | the matching `test:*` in `package.json` |
 
 `test:terminal-agent` and `test:settings-nav` use:
@@ -130,7 +132,7 @@ Match the log: one short imperative sentence, then a blank line and a short body
 
 `pnpm run test:contacts` bundles `scripts/verify-contacts.ts` into ignored `scripts/tmp/` and runs Node's tests. It covers Markdown round trips, unknown content preservation, write conflicts, malformed documents, stable IDs, relationships, company counts, 5,000-record filtering, and mocked-vault create/save/delete/rebuild/folder switching. It also checks native-editor draft protection, inverse relationship deduplication, and generated versus customized headings. Run `test:settings-nav` and `test:mobile-stability` for archive shell changes too; the latter is shared/dashboard regression coverage, not archive phone UI verification. Actual Obsidian checks are listed in `docs/contacts-development.md`.
 
-The archives leaf introduces Preact: `tsconfig` includes `.tsx`, JSX uses `preact`, and esbuild aliases React compatibility imports to Preact. The existing typed eslint configuration covers both `.ts` and `.tsx`. `src/contacts/persist/format-guide.md` is a runtime text asset: rebuild `main.js` when it changes.
+The archives leaf introduces Preact: `tsconfig` includes `.tsx`, JSX uses `preact`, and esbuild aliases React compatibility imports to Preact. The existing typed eslint configuration covers both `.ts` and `.tsx`. `src/core/contacts/persist/format-guide.md` is a runtime text asset: rebuild `main.js` when it changes.
 
 ## Icons checks
 

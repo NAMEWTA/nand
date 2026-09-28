@@ -1,7 +1,7 @@
+import { Setting } from 'obsidian';
+import { t } from '../../shared/i18n/index';
+import { WidgetBackgroundModal } from '../../view/dashboard/widgets/widget-background';
 import type { DashboardSettingTab } from './settings-tab';
-import { setIcon, Setting } from 'obsidian';
-import { t } from '../../shared/i18n';
-import { WidgetBackgroundModal } from '../../dashboard-view/widgets/widget-background';
 
 /** Shared background row for the singleton widget cards: opens the
  *  background modal and writes the result straight into one of the

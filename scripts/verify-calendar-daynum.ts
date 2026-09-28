@@ -1,8 +1,34 @@
+import { installPreactMiniDom } from './preact-mini-dom';
+installPreactMiniDom();
+Object.assign(globalThis, { requestAnimationFrame: () => 0, cancelAnimationFrame: () => {} });
 import { strict as assert } from 'node:assert';
 import type { App } from 'obsidian';
 import { El, findByClass } from './mini-dom';
-import { renderMonthGrid, renderWeekTimeGrid, mondayOf } from '../src/dashboard-view/calendar/calendar-grid';
-import { toIsoDate } from '../src/dashboard-view/calendar/alltasks-scan';
+import { h } from 'preact';
+import { MonthGrid, WeekTimeGrid } from '../src/view/dashboard/calendar/CalendarGrids';
+import { getRenderContext, mountDashboardPanel } from '../src/view/dashboard/renderer/render-context';
+import type { VaultTask } from '../src/platform/obsidian/calendar/alltasks-scan';
+import type { MonthGridOptions } from '../src/view/dashboard/calendar/calendar-layout';
+function renderMonthGrid(
+	root: HTMLElement,
+	year: number,
+	month: number,
+	byDay: Map<string, VaultTask[]>,
+	opts: MonthGridOptions,
+): void {
+	mountDashboardPanel(root, h(MonthGrid, { year, month, byDay, opts, context: getRenderContext(root) }));
+}
+function renderWeekTimeGrid(
+	root: HTMLElement,
+	weekStart: Date,
+	byDay: Map<string, VaultTask[]>,
+	opts: MonthGridOptions,
+): void {
+	mountDashboardPanel(root, h(WeekTimeGrid, { weekStart, byDay, opts, context: getRenderContext(root) }));
+}
+
+import { mondayOf } from '../src/view/dashboard/calendar/calendar-layout';
+import { toIsoDate } from '../src/platform/obsidian/calendar/alltasks-scan';
 
 // Full-screen month grid: the day NUMBER opens that day's agenda (add-task
 // flow); compact/dot sidebar modes and no-callback callers stay unchanged.

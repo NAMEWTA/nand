@@ -1,6 +1,6 @@
-import type { DashboardSettingTab } from './settings-tab';
 import { Setting } from 'obsidian';
-import { t } from '../../shared/i18n';
+import { t } from '../../shared/i18n/index';
+import type { DashboardSettingTab } from './settings-tab';
 
 /** Data-service sections (Weread): content sources rendered as
  *  their own dashboard sections, NOT sidebar widgets — they live on the

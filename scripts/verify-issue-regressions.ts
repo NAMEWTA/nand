@@ -1,13 +1,13 @@
 import assert from 'node:assert/strict';
 import { Scope, Notice, type App } from 'obsidian';
 import { El } from './mini-dom';
-import { mountCommentComposer } from '../src/editor-view/comments/composer';
-import { createDashboardSettingsAccess } from '../src/dashboard-view/settings-access';
-import { readCalendarTaskFilter, writeCalendarTaskFilter } from '../src/dashboard-view/calendar/calendar-modal';
-import { onLanguageChanged, setLanguage } from '../src/shared/i18n';
-import { intersectRects, placePopover } from '../src/editor-view/comments/popover-position';
-import { refreshLeafTitle } from '../src/shared/workspace-title';
-import type { DashboardSettings } from '../src/dashboard-view/types';
+import { mountCommentComposer } from '../src/view/editor/comments/composer';
+import { createDashboardSettingsAccess } from '../src/view/dashboard/settings-access';
+import { readCalendarTaskFilter, writeCalendarTaskFilter } from '../src/view/dashboard/calendar/calendar-preferences';
+import { onLanguageChanged, setLanguage } from '../src/shared/i18n/index';
+import { intersectRects, placePopover } from '../src/view/editor/comments/popover-position';
+import { refreshLeafTitle } from '../src/platform/obsidian/workspace-title';
+import type { DashboardSettings } from '../src/core/dashboard/types/index';
 
 async function main() {
 	const scopes: Scope[] = [];

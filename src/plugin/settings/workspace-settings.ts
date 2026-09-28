@@ -1,9 +1,9 @@
-import type { DashboardSettingTab } from './settings-tab';
 import { setIcon, Setting } from 'obsidian';
-import { t } from '../../shared/i18n';
-import { showConfirmDialog } from '../../dashboard-view/ui/confirm-dialog';
-import { showPromptDialog } from '../../dashboard-view/ui/prompt-dialog';
-import { normalizeWorkspacePath } from '../../dashboard-view/workspace/workspace-registry';
+import { normalizeWorkspacePath } from '../../core/workspace/workspace-registry';
+import { t } from '../../shared/i18n/index';
+import { showConfirmDialog } from '../../view/dashboard/ui/confirm-dialog';
+import { showPromptDialog } from '../../view/dashboard/ui/prompt-dialog';
+import type { DashboardSettingTab } from './settings-tab';
 
 /** Workspace registry management: draggable rows (reorder), a path input
  *  per workspace (retarget after moving the file outside Obsidian), rename

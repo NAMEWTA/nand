@@ -1,11 +1,12 @@
-import { t, setLanguage } from '../src/shared/i18n';
+import { WriteQueue } from '../src/shared/storage/write-queue';
+import { t, setLanguage } from '../src/shared/i18n/index';
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { TFile, TFolder, MarkdownView, type App } from 'obsidian';
-import { cloneRecord, newRecord, emptyRef, ContactsError, type ArchiveRecord } from '../src/contacts/model';
-import { createMarkdown, parseRecord, patchMarkdown, relativeLink } from '../src/contacts/persist/markdown';
-import { ContactsIndex, emptyQuery } from '../src/contacts/index-store';
-import { ContactsController, WriteQueue } from '../src/contacts/controller';
+import { cloneRecord, newRecord, emptyRef, ContactsError, type ArchiveRecord } from '../src/core/contacts/model';
+import { createMarkdown, parseRecord, patchMarkdown, relativeLink } from '../src/core/contacts/persist/markdown';
+import { ContactsIndex, emptyQuery } from '../src/core/contacts/index-store';
+import { ContactsController } from '../src/platform/obsidian/contacts/controller';
 import { normalizeContactsSettings, validContactsFolder } from '../src/shared/contacts-settings';
 
 function fixture(kind: 'person' | 'company' = 'person', name = '张三'): ArchiveRecord {
@@ -446,15 +447,14 @@ test('renaming updates the generated heading without overwriting a customized he
 	assert.ok(patchMarkdown(customized, base, draft).includes('# 我的客户记录\n'));
 });
 
-
 test('new notes localize headings and tables while language changes preserve parsing', () => {
-  for (const language of ['en', 'zh'] as const) {
-    setLanguage(language);
-    const raw = createMarkdown(fixture());
-    assert.ok(raw.includes(`## ${t('contacts.employments')}`));
-    assert.ok(!raw.includes('website:'));
-    setLanguage(language === 'en' ? 'zh' : 'en');
-    assert.deepEqual(parseRecord(raw, 'person.md')?.errors, []);
-  }
-  setLanguage('zh');
+	for (const language of ['en', 'zh'] as const) {
+		setLanguage(language);
+		const raw = createMarkdown(fixture());
+		assert.ok(raw.includes(`## ${t('contacts.employments')}`));
+		assert.ok(!raw.includes('website:'));
+		setLanguage(language === 'en' ? 'zh' : 'en');
+		assert.deepEqual(parseRecord(raw, 'person.md')?.errors, []);
+	}
+	setLanguage('zh');
 });

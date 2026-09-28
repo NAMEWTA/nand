@@ -1,8 +1,10 @@
+import { installPreactMiniDom } from './preact-mini-dom';
 import { strict as assert } from 'node:assert';
 import { Platform } from 'obsidian';
 import { El, findByClass, findTag } from './mini-dom';
-import { parse, serialize, generateDefaultMarkdown } from '../src/dashboard-view/parser';
-import type { DashboardData, DashboardColumn } from '../src/dashboard-view/types';
+import { generateDefaultMarkdown } from '../src/core/dashboard/parser/default-document';
+import { parse, serialize } from '../src/core/dashboard/parser/index';
+import type { DashboardData, DashboardColumn } from '../src/core/dashboard/types/index';
 import {
 	classifyFramePolicy,
 	clearPrecheckCache,
@@ -12,8 +14,8 @@ import {
 	normalizeWebUrl,
 	precheckEmbed,
 	type HeaderFetcher,
-} from '../src/dashboard-view/web/web-precheck';
-import { renderWebSection } from '../src/dashboard-view/web/web-section';
+} from '../src/view/dashboard/web/web-precheck';
+import { renderWebSection } from '../src/view/dashboard/web/web-section';
 
 // Web section: config persistence round-trips through the hand-rolled YAML
 // serializer; the framing-policy precheck classifies response headers and
@@ -95,6 +97,8 @@ async function main(): Promise<void> {
 			}
 		};
 	}
+	installPreactMiniDom();
+	const doc = document as unknown as { defaultView: unknown; body: El }; doc.defaultView = window; doc.body = new El('body');
 	clearPrecheckCache();
 
 	/* ---------------- A. parser round-trip ---------------- */
@@ -325,6 +329,7 @@ async function main(): Promise<void> {
 	assert.equal(getCachedVerdict('https://deny.com'), 'blocked', '20: verdict cached');
 	refreshing.reload();
 	assert.equal(getCachedVerdict('https://deny.com'), undefined, '20: reload cleared the cache');
+	await Promise.resolve();
 	assert.ok(findTag(refreshing.host, 'iframe')[0], '20: re-render is optimistic again');
 	await flush();
 	assert.ok(findTag(refreshing.host, 'webview')[0], '20: re-probe re-landed the webview');
@@ -335,7 +340,7 @@ async function main(): Promise<void> {
 	clearPrecheckCache();
 	const zoomed = render(webColumn('Z', 'https://zoom.com', 0.75), { fetcher: fakeFetcher([CLEAN]) });
 	const frame21 = findTag(zoomed.host, 'iframe')[0]!;
-	assert.equal((frame21 as unknown as { style: Record<string, string> }).style.zoom, '0.75', '21: css zoom set');
+	assert.equal(String((frame21 as unknown as { style: Record<string, string> }).style.zoom), '0.75', '21: css zoom set');
 
 	// 22. Webview attach timeout escapes to the iframe (and does not loop).
 	clearPrecheckCache();

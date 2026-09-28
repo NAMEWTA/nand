@@ -14,9 +14,9 @@
  */
 import { strict as assert } from 'node:assert';
 import type { App } from 'obsidian';
-import { selectBadgeKeys } from '../src/dashboard-view/library';
-import { VisiblePropertiesEditor } from '../src/dashboard-view/library/visible-properties-editor';
-import { FolderConfigModal } from '../src/dashboard-view/library/folder-config-modal';
+import { selectBadgeKeys } from '../src/view/dashboard/library/library-presentation';
+import { VisiblePropertiesEditor } from '../src/view/dashboard/library/visible-properties-editor';
+import { FolderConfigModal } from '../src/view/dashboard/library/folder-config-modal';
 import { El, findByClass, findTag } from './mini-dom';
 
 (globalThis as unknown as Record<string, unknown>).activeDocument = {

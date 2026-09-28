@@ -1,3 +1,5 @@
+import { installPreactMiniDom } from './preact-mini-dom';
+import { flushSync } from 'preact/compat';
 /**
  * Verifies the sidebar photo-album widget:
  *
@@ -22,9 +24,9 @@ import {
 	renderSidebarAlbumWidget,
 	refreshAlbumWidget,
 	destroyAlbumWidgets,
-	listAlbumImages,
-} from '../src/dashboard-view/widgets/album-widget';
-import type { DashboardSettings } from '../src/dashboard-view/types';
+} from '../src/view/dashboard/widgets/album-widget';
+import { listAlbumImages } from '../src/view/dashboard/widgets/album-model';
+import type { DashboardSettings } from '../src/core/dashboard/types/index';
 import { El, findByClass } from './mini-dom';
 
 interface FakeFile {
@@ -94,6 +96,13 @@ const run = async (): Promise<void> => {
 			intervals.delete(id);
 		},
 	};
+	installPreactMiniDom();
+	Object.assign(document, { defaultView: window });
+	Object.assign(window, {
+		requestAnimationFrame: (fn: () => void) => setTimeout(fn, 0),
+		cancelAnimationFrame: clearTimeout,
+	});
+
 	(globalThis as Record<string, unknown>).Image = class {
 		src = '';
 	};
@@ -185,7 +194,7 @@ const run = async (): Promise<void> => {
 		const img = frontLayer(frame)!;
 		assert.ok(img, 'a --top (front) layer exists');
 		assert.match(
-			String((img as unknown as { src?: string }).src ?? ''),
+			String(img.getAttribute('src') ?? ''),
 			/^appres:\/\/Photos\/(a2|a10)\.png$/,
 			'front layer src resolved via resource path',
 		);
@@ -239,12 +248,13 @@ const run = async (): Promise<void> => {
 			frame.hasClass('dashboard-sidebar-album-frame--slide-left'),
 			'frame carries the slide-left mode class',
 		);
-		const srcOf = (): string => String((frontLayer(widget) as unknown as { src?: string }).src ?? '');
+		const srcOf = (): string => String(frontLayer(widget)?.getAttribute('src') ?? '');
 		const before = srcOf();
 		const other = before.endsWith('a2.png') ? 'appres://Photos/a10.png' : 'appres://Photos/a2.png';
 
 		const nextBtn = findByClass(widget, 'dashboard-sidebar-album-nav--next')[0]!;
-		nextBtn.click();
+		flushSync(() => nextBtn.click());
+		await new Promise((r) => setTimeout(r, 10));
 		// Synchronous post-click state: incoming layer loaded + promoted, old
 		// layer carries the slide-out run class.
 		const afterClick = srcOf();
@@ -255,13 +265,10 @@ const run = async (): Promise<void> => {
 			outgoing.hasClass('dashboard-sidebar-album-layer--run-slide-out-left'),
 			'slide-left runs the old layer out to the left',
 		);
-		assert.equal(
-			String((outgoing as unknown as { src?: string }).src),
-			before,
-			'outgoing layer keeps the previous photo',
-		);
+		assert.equal(String(outgoing.getAttribute('src')), before, 'outgoing layer keeps the previous photo');
 		// Rapid double-click is guarded by the transitioning flag.
-		nextBtn.click();
+		flushSync(() => nextBtn.click());
+		await new Promise((r) => setTimeout(r, 10));
 		assert.equal(srcOf(), other, 'click during a transition is ignored');
 
 		await new Promise((r) => setTimeout(r, 700)); // let the 600ms settle fire
@@ -278,7 +285,9 @@ const run = async (): Promise<void> => {
 		const imgBefore = frontLayer(widget)!;
 		const timerBefore = [...intervals.keys()];
 		assert.equal(
-			refreshAlbumWidget(root as unknown as HTMLElement, albumSettings({ widgetAlbumFolder: 'Photos' }), app),
+			flushSync(() =>
+				refreshAlbumWidget(root as unknown as HTMLElement, albumSettings({ widgetAlbumFolder: 'Photos' }), app),
+			),
 			true,
 			'refresh finds the live widget',
 		);
@@ -295,7 +304,7 @@ const run = async (): Promise<void> => {
 		const settings = albumSettings({ widgetAlbumFolder: 'Photos' });
 		renderSidebarAlbumWidget(root as unknown as HTMLElement, settings, app);
 		const widget = findByClass(root, 'dashboard-sidebar-album')[0]!;
-		const srcOf = (): string => String((frontLayer(widget) as unknown as { src?: string }).src ?? '');
+		const srcOf = (): string => String(frontLayer(widget)?.getAttribute('src') ?? '');
 		const currentSrc = srcOf();
 		assert.match(currentSrc, /^appres:\/\//, 'current src resolves before refresh');
 
@@ -303,7 +312,7 @@ const run = async (): Promise<void> => {
 		const survivingPath = currentSrc.replace(/^appres:\/\//, '');
 		setFiles([survivingPath, 'Photos/zz-new.png']);
 		assert.equal(
-			refreshAlbumWidget(root as unknown as HTMLElement, settings, app),
+			flushSync(() => refreshAlbumWidget(root as unknown as HTMLElement, settings, app)),
 			true,
 			'refresh applies the changed list',
 		);
@@ -312,7 +321,7 @@ const run = async (): Promise<void> => {
 		// Current photo deleted -> clamped onto the new list.
 		setFiles(['Photos/zz-new.png']);
 		assert.equal(
-			refreshAlbumWidget(root as unknown as HTMLElement, settings, app),
+			flushSync(() => refreshAlbumWidget(root as unknown as HTMLElement, settings, app)),
 			true,
 			'refresh applies a shrinking list',
 		);
@@ -321,7 +330,7 @@ const run = async (): Promise<void> => {
 		// List emptied -> placeholder returns.
 		setFiles(['Photos/readme.md']);
 		assert.equal(
-			refreshAlbumWidget(root as unknown as HTMLElement, settings, app),
+			flushSync(() => refreshAlbumWidget(root as unknown as HTMLElement, settings, app)),
 			true,
 			'refresh applies an empty list',
 		);
@@ -329,6 +338,8 @@ const run = async (): Promise<void> => {
 		assert.ok(findByClass(widget, 'dashboard-sidebar-album-placeholder')[0], 'placeholder DOM present');
 	}
 
+	// Finish prior independent roots before testing timer teardown.
+	destroyAlbumWidgets(bodyEl as unknown as HTMLElement);
 	// 7. Timer teardown: destroyAlbumWidgets clears; detached tick self-cleans.
 	{
 		const { app } = makeVault(['Photos/a2.png', 'Photos/a10.png']);
@@ -336,7 +347,7 @@ const run = async (): Promise<void> => {
 		renderSidebarAlbumWidget(root as unknown as HTMLElement, albumSettings({ widgetAlbumFolder: 'Photos' }), app);
 		assert.ok(intervals.size >= 1, 'timer registered');
 
-		destroyAlbumWidgets();
+		destroyAlbumWidgets(root as unknown as HTMLElement);
 		assert.equal(intervals.size, 0, 'destroyAlbumWidgets clears rotation timers');
 
 		// mini-dom's remove() keeps .parent set (real DOM nulls it), so a
@@ -354,7 +365,7 @@ const run = async (): Promise<void> => {
 		assert.equal(intervals.size, 0, 'detached widget tick self-cleans its timer');
 	}
 
-	destroyAlbumWidgets();
+	destroyAlbumWidgets(bodyEl as unknown as HTMLElement);
 };
 
 run().then(

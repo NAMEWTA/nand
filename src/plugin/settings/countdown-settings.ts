@@ -1,8 +1,8 @@
+import { Setting } from 'obsidian';
+import type { CountdownConfig } from '../../core/dashboard/types/index';
+import { t } from '../../shared/i18n/index';
+import { CountdownSettingsModal } from '../../view/dashboard/widgets/countdown-modal';
 import type { DashboardSettingTab } from './settings-tab';
-import { setIcon, Setting } from 'obsidian';
-import type { CountdownConfig } from '../../dashboard-view/types';
-import { t } from '../../shared/i18n';
-import { CountdownSettingsModal } from '../../dashboard-view/widgets/countdown-modal';
 
 export function renderCountdownList(this: DashboardSettingTab, containerEl: HTMLElement): void {
 	const list = this.plugin.settings.countdowns ?? [];

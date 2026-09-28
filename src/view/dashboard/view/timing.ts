@@ -1,0 +1,5 @@
+export const BANNER_QUOTE_ROTATION_MS = 60 * 60 * 1000;
+export const BANNER_IMAGE_ROTATION_MS = 30 * 60 * 1000;
+export const BANNER_QUOTE_OFFSET_MS = 60 * 60 * 1000;
+export const WEATHER_REFRESH_MS = 30 * 60 * 1000;
+export const DAY_ROLLOVER_CHECK_MS = 60 * 1000;

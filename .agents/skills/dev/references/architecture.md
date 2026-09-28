@@ -2,92 +2,41 @@
 
 Read this before moving files, adding a product, adding a command, adding UI copy, naming a new file, or changing settings pages. Frozen strings live in the SKILL.md identity table. Import prohibitions live in SKILL rules 2 and 3.
 
-## Products
+## Source layers
 
-One plugin process, several products. The shell at the entry in the SKILL identity table registers views and long-lived services. It does not own domain logic.
-
-| Product | Root | What the shell imports |
+| Layer | Responsibility | May import |
 |---|---|---|
-| Dashboard | `src/dashboard-view` | Barrel exports `DashboardView`, `DASHBOARD_VIEW_TYPE`, `showModuleDisabled`. The shell also deep-imports services, the workspace registry, and settings modals |
-| Editor | `src/editor-view` | Barrel exports `EditorView`, `EDITOR_VIEW_TYPE`, `createEditorHost`, `EditorHost`, `collectReferences` |
-| Terminal | `src/terminal-agent` | Barrel exports `TerminalAgentController`, `TerminalView`, `TERMINAL_VIEW_TYPE`, `renderStackedTerminalAgentSettings`, `renderTerminalAgentSettings`, `readLegacyTerminalSettings`. Settings deep-imports `renderStackedTerminalAgentSettings` from `settings/sections` |
-| Icons | `src/iconic` | `IconicController`; settings compose `IconicSettingsSections` |
-| Archives | `src/contacts` | `ContactsController`, `ContactsView`, `CONTACTS_VIEW_TYPE`. Settings compose the archive settings rows |
-| Automations | `src/automation` | `AutomationService`, editor and `AutomationView`, composed by `plugin/automation-host.ts` |
-| Notifications | `src/notifications` | `NotificationService` and native inbox; scheduler receives a delivery callback |
-| Sync | `src/sync` | `export {}` plus `README.md`. No view type yet |
+| `plugin` | Obsidian entry, module activation, native registration, settings envelope, workflows | every layer |
+| `view` | Preact panels, workbench composition, native leaf/modal/menu integration | view, platform, core, shared |
+| `platform` | Obsidian/Vault IO, native patches, desktop filesystem, Rust transports | platform, core, shared |
+| `core` | parsing, models, scheduling, state and pure domain rules | core, shared |
+| `shared` | basic utilities, serialization ports, protocol DTOs and i18n | shared |
 
-`src/dashboard-view/persist` writes the dashboard markdown. Leave the directory name `sync` free.
+These rules cover type imports too. Never import a containing barrel from inside its own tree. `scripts/verify-architecture.mjs` checks directions, host dependencies in core/shared and runtime cycles after TypeScript erasure, including literal lazy imports and require calls. No compatibility aliases or old source-tree facades.
 
-## Who may import whom
+Use concrete kebab-case domain directories (`agent-launch`, `ai-vault`, `automations`, `contacts`, `pty`), PascalCase Preact component files and kebab-case logic files. Keep feature-specific visual components beside their panel. `view/primitives` is for domain-neutral UI. This adapts ORCA's domain/main and renderer/app-shell separation to one Obsidian plugin process; there is no Electron preload or IPC layer inside NAND.
 
-```
-plugin shell and plugin/settings ──▶ product barrel or a deep path
-product ──import type──▶ plugin/main.ts
-product ──▶ shared
-shared  ──▶ neither product nor plugin
-product ──✕──▶ other product, including that product's barrel
-```
+## Composition and lifecycle
 
-The one existing break in the shared row is the file named in SKILL rule 2. Do not add a second one, and do not "fix" it by letting `editor-view` import `dashboard-view`.
+`Plugin`, `Component`, `ItemView`, `Modal`, commands, menus, settings and workspace registrations use native Obsidian APIs. Preact manages rendered business content, with `render(null, root)` on disposal. xterm, CodeMirror, Chart.js and MarkdownRenderer own their specialized content inside stable containers. Preact is not a lifecycle or plugin-management framework.
 
-`shared` may contain DTOs that more than one side must serialize (`EditorWorkbenchSettings`, `NAND_EVENTS`, `NAND_COMMANDS`). It must not contain comment threads, dashboard cards, or terminal implementations. `shared/automation` contains only serialized automation/session-reference DTOs and source/runtime ports; `shared/json-store.ts` serializes adapter writes with a durable previous snapshot; it does not assume rename can overwrite an existing file.
+`plugin/modules` assembles domain integrations. `plugin/workflows/automation-host.ts` coordinates scheduler, delivery and source adapters; `agent-runtime.ts` coordinates agent runs. A module can stay active when all of its views are closed. Disabling a module or unloading the plugin releases its owned resources. `TerminalService` owns `PtySession` instances with a DOM-free `@xterm/headless` buffer. `TerminalRenderers` in view lazily creates browser xterm presentations; scheduled automation does not create one. The platform layer never imports a view. Native icon managers receive dialog actions through `IconicDialogs`.
 
-The plugin shell may pass a narrow callback into a product. The terminal host receives `readAbsoluteReference: () => collectReferences(app, 'absolute')` from `main.ts`. That callback is the boundary.
+`NandSettings` and plugin defaults live in `plugin/settings/model.ts`. Domain settings stay in core. `DashboardSettings` contains dashboard fields; it does not own language, module flags, contacts, editor or terminal configuration. Persistent identifiers and the actual data formats are independent of source file paths.
 
-## Lifecycle on the plugin
+The registered view identifiers remain in SKILL.md. Inactive terminal leaves use the native placeholder. Editor extensions are registered once by `createEditorHost`; closing the panel unmounts UI only. Comment bodies stay in sidecars and never rewrite a note.
 
-The shell owns these services and activates them according to module flags. Tear down active services in plugin `onunload`; do not hang them off `ItemView`.
+## Functional panels
 
-| Object | When it exists |
-|---|---|
-| `iconicHost` | Created on first enable and retained for the plugin lifetime. Managers and activation scope exist only while enabled; commands and editor bridges register once |
-| `contactsHost` | While the archives module is on; starts its file index after layout readiness when a view or the automation source adapter requests it. Closing a leaf only removes its subscription |
-| `editorHost` | While the editor module is on. Highlights and the reading post-processor survive closing the side panel |
-| `musicService` | While the dashboard module is on, and never when `Platform.isPhone` |
-| `habitService`, `expenseService`, `mediaTagService` | While the dashboard module is on. Loaded once for that stretch |
-| `automationHost` | Plugin lifetime, independent of leaves. Source adapters respect module gates; terminal actions require an active desktop terminal host |
-| `terminalHost` | While the terminal module is on and `Platform.isDesktopApp` |
+`AutomationsPanel`, `ContactsSurface`, `CommentsPanel`, `InboxPanel`, `HabitPanel`, `CountdownPanel`, `AnniversaryPanel`, and terminal panels accept explicit state/actions or host contracts. They can be composed in code without constructing their own ItemView. `TerminalWorkbench` composes session/history/usage slots around a stable xterm container. Settings and native host chrome remain native.
 
-`onunload` disposes archive surfaces and their controller, stops the module transition queue, then calls `iconicHost.onunload()`, `terminalHost.onunload()`, `editorHost.onunload()` (comment flush, then dispose), and `teardownBasenameIndex`. If dashboard services were started, it then flushes and destroys media tags and destroys habit, expense, and music. Leaf teardown follows `references/obsidian-api.md`.
+Dashboard UI remains organized under `view/dashboard/<feature>`; parser/model/DQL logic lives in core, Vault persistence and data access in platform. Several dashboard renderers remain imperative and have not yet completed the Preact conversion. Do not disguise an imperative business renderer as a completed Preact component by mounting it inside a one-effect wrapper. New business rendering uses real components.
 
-The four existing product view types are registered on every platform; the automation view remains registered even after store load failure and exposes retry. The terminal factory uses `terminalHost.createLeafView` when that host is active, and `InactiveTerminalView` otherwise. `applyModuleFlags` runs after registration. A missing `settings.modules` key stays on.
+`DashboardRenderContext` belongs to a dashboard root. Detached sections/widgets explicitly retain that context. Charts, panel roots, album timers, drag sources and scanning signatures are per workbench. Dataview actions are per rendered section. Vault indexes and widget service registrations are keyed by App. Never restore a module-global "active" opener, hover parent or service. Timers retain their originating Window; moving a dashboard rebuilds its widgets and closing it unmounts panels before clearing native DOM.
 
-`EditorView.onClose` only runs `detachPanel`. `createEditorHost` registers extensions on the first `onload` (`booted`). A later module restart calls `onload` again on the same host and does not register them a second time.
+Contacts, habit and expense application services live in core and accept file/storage ports. Native adapters own Component lifecycle, Vault operations, unsaved-editor checks and focus events. Keep atomic process/write semantics and serialized entity saves.
 
-## Dashboard folders
-
-Add a feature to the folder that already owns that widget. `dataview/` renders query results for the in-repo language in `dql/`. Do not add the Dataview community plugin. Workspace paths are normalized by `src/dashboard-view/workspace/workspace-registry.ts`: no leading slash, no `.md` suffix.
-
-| Folder | Owns |
-|---|---|
-| `appearance` | Theme studio and modal theme |
-| `assets` | Bundled images and the gallery placeholder |
-| `banner` | Banner and banner stats |
-| `calendar` | Calendar widget, grid, daily notes, holidays |
-| `data` | Fortune copy tables |
-| `dataview` | Query result UI (tables, heatmaps) |
-| `dql` | The in-repo query language |
-| `expense` | Expense ledger |
-| `habit` | Habit check-in |
-| `library` | Library cards, folder config, new notes |
-| `media` | Gallery, tags, lightbox |
-| `music` | NetEase player |
-| `notes` | Memos, quick notes, quick actions |
-| `parser` | Board markdown parse and the default document |
-| `persist` | Markdown write-back |
-| `pomodoro` | Pomodoro timer |
-| `reading` | Reading timer and books |
-| `renderer` | Dashboard DOM render and refresh |
-| `types` | `DashboardSettings` and the board model |
-| `ui` | Shared modals, drag-and-drop, dialogs |
-| `view` | The `DashboardView` leaf |
-| `web` | Web section |
-| `weread` | WeRead shelf |
-| `widgets` | Album, anniversary, countdown, fortune, lunar, tracker, weather, year progress |
-| `workspace` | Multi-file dashboard registry |
-
-Editor folders: `comments`, `copy`, `host`, `view`. `writing-stats` and `focus` are the placeholders named in SKILL rule 12. A new domain implements `EditorDomain` from `src/editor-view/host/registry.ts`, adds an i18n title, and is placed in the `domains` array inside `createEditorHost`. Add a settings option only when the task asks for a user-facing toggle.
+Workspace normalization lives in `core/dashboard/workspace-registry.ts`; dashboard Markdown IO belongs in `platform/obsidian/dashboard`. The sync placeholder is `core/sync`.
 
 ## Commands
 
@@ -95,9 +44,9 @@ Editor folders: `comments`, `copy`, `host`, `view`. `writing-stats` and `focus` 
 |---|---|
 | Ids another product must spell | `NAND_COMMANDS` in `src/shared/commands.ts`. Today: `open-dashboard`, `open-editor-view`, `add-comment-to-selection` |
 | Shell commands | `src/plugin/commands.ts`. Commands already passed to `addCommand` inside `main.ts` stay there |
-| Editor commands | The owning domain under `src/editor-view` |
-| Terminal commands | Inside `src/terminal-agent` |
-| Icon commands | `src/iconic/commands.ts`; preserve upstream local IDs under the NAND prefix |
+| Editor commands | The owning domain under `src/view/editor` |
+| Terminal commands | Inside `src/plugin/modules/terminal` |
+| Icon commands | `src/plugin/modules/icons/commands.ts`; preserve upstream local IDs under the NAND prefix |
 
 Registration details that apply to every command are SKILL rule 9.
 
@@ -124,17 +73,17 @@ SKILL rule 8 is where strings live. To add a key:
 
 1. Extend the module under `src/shared/i18n/` that already owns that feature. The object is `{ en: {...}, zh: {...} }`. `section-37.ts`, `section-38.ts`, `section-41.ts`, and `section-42.ts` in that directory are legacy buckets: add a key there only when the surrounding keys already live in that file.
 2. If the module is new, import it in `src/shared/i18n/runtime.ts` and pass both `.en` and `.zh` to `mergeDicts`.
-3. Terminal UI calls `t` from `src/terminal-agent/i18n.ts` with the key minus the prefix in SKILL rule 8. The wrapper adds the prefix. Do not store a string table in that wrapper.
+3. Terminal UI calls `t` from `src/shared/i18n/terminal-accessor.ts` with the key minus the prefix in SKILL rule 8. The wrapper adds the prefix. Do not store a string table in that wrapper.
 
 `setLanguage` follows `settings.language` and emits `onLanguageChanged` only on a change. Views and composers dispose their subscriptions on unmount. Do not read Obsidian's locale. English casing is the UI text rule in `references/obsidian-api.md`.
 
 ## Names
 
-New directories and source files use kebab-case (`library-new-note.ts`, `terminal-agent/`). A class is PascalCase. A module-level constant that other files import as a view type or command list is `SCREAMING_SNAKE`. Functions and locals are camelCase.
+Directories and logic files use kebab-case. Preact component files use PascalCase (`CommentsPanel.tsx`). A class is PascalCase. A module-level constant that other files import as a view type or command list is `SCREAMING_SNAKE`. Functions and locals are camelCase.
 
 | Kind | Shape | Leave alone |
 |---|---|---|
-| Product root | `dashboard-view`, `editor-view`, `terminal-agent`, `iconic`, `contacts`, `plugin`, `shared`, `sync` | Do not fold these into one tree |
+| Domain slice | kebab-case under its owning layer | Keep functional ownership visible |
 | New dashboard CSS | `dashboard-…` | Current theme roots use `nand-dashboard-*` |
 | Editor CSS | `nand-editor-…` | The frozen view type string |
 | New terminal CSS | `terminal-…` | Existing `terminal-…` classes |
@@ -151,7 +100,7 @@ The project is in pre-release development. Keep the current product namespaces c
 | Data | Location | Rule |
 |---|---|---|
 | Plugin settings | `data.json` via `loadData` / `saveData` | Includes `editorWorkbench`. Load settings without requiring a namespace version marker. Normalization order is SKILL rule 10. Never store comment text or the icon-domain payload here |
-| Icons and rules | `<configDir>/plugins/<manifest.id>/iconic.json` and `.backup1` through `.backupN` | Upstream schema; owned by `src/iconic/persistence/store.ts`. Only `modules.iconic` belongs in shell settings |
+| Icons and rules | `<configDir>/plugins/<manifest.id>/iconic.json` and `.backup1` through `.backupN` | Upstream schema; owned by `src/platform/obsidian/icons/persistence/store.ts`. Only `modules.iconic` belongs in shell settings |
 | Comment threads | vault `.nand/editor/comments/` | `references/editor-comments.md` |
 | Weread progress | `.obsidian/plugins/<manifest.id>/weread-progress.json` | `manifestId()` reads `plugins.nand.manifest.id` and otherwise uses the plugin id |
 | Habits, expense, pomodoro, reading | `habits.json`, `expense.json`, `pomodoro.json`, `reading.json` under `plugins/<manifest.id>/` | Resolve the plugin directory using `manifest.id` |
@@ -159,13 +108,13 @@ The project is in pre-release development. Keep the current product namespaces c
 | Vault-local UI state | `nand.dashboard.*` via `App.loadLocalStorage` / `App.saveLocalStorage` | Includes mini-panel positions; never use global storage for new positions |
 | Electron sessions | `persist:nand-dashboard-web`, `persist:nand-dashboard-music-*` | New sessions require signing in again; do not delete previous partition directories |
 | Terminal context | `NAND_CONTEXT_PATH`, `.agents/skills/nand-obsidian-context/` | Native absolute paths; only overwrite plugin-managed skill files |
-| Dashboard markdown | the user's dashboard note | Written only by `dashboard-view/persist` |
+| Dashboard markdown | the user's dashboard note | Written only by `platform/obsidian/dashboard` |
 | Archive markdown | visible vault folder selected by `settings.contacts.rootFolder` | One note per person/company; stable `nand-id`, `nand-type`, named body regions and link identities. Written only by the archive controller |
 | Workspace paths | settings, via `workspace-registry` | No leading `/`, no `.md` suffix |
 
 ## TypeScript
 
-`strictNullChecks`, `noUncheckedIndexedAccess`, `noImplicitReturns`, `useUnknownInCatchVariables`. Index access can be `undefined`. `no-floating-promises` and `no-unnecessary-type-assertion` are errors; prefix a deliberate fire-and-forget with `void`. Prefer `import type` for the plugin class from a product. `@codemirror/state`, `@codemirror/view`, and `@codemirror/language` are direct dependencies; bundling them is covered in `references/build-and-release.md`.
+`strictNullChecks`, `noUncheckedIndexedAccess`, `noImplicitReturns`, `useUnknownInCatchVariables`. Index access can be `undefined`. `no-floating-promises` and `no-unnecessary-type-assertion` are errors; prefix a deliberate fire-and-forget with `void`. Product views use explicit host/action interfaces; importing the plugin class, including with `import type`, is forbidden. `@codemirror/state`, `@codemirror/view`, and `@codemirror/language` are direct dependencies; bundling them is covered in `references/build-and-release.md`.
 
 ## What not to do
 
@@ -178,7 +127,7 @@ No namespace migration package or version marker is required. Do not add runtime
 
 ## Archives
 
-`src/contacts` owns people, companies, employment and direct relationships. `view/` mounts Preact into each leaf's `contentEl`; forms use native Obsidian modals and `Setting`. The source of truth is the configured visible vault folder (default `档案`), with one Markdown note per person/company. Identity is `nand-id`, kind is `nand-type`; employment/relationship tables and prose use named HTML comment boundaries. `persist/markdown.ts` performs three-way field/section updates and retains unrelated text. Never reuse the dashboard persistence engine or put archive entities in `shared`.
+`core/contacts` owns people, companies, employment and direct relationships; `platform/obsidian/contacts` owns Vault IO. `view/contacts` mounts Preact into each leaf's `contentEl`; forms use native Obsidian modals and `Setting`. The source of truth is the configured visible vault folder (default `档案`), with one Markdown note per person/company. Identity is `nand-id`, kind is `nand-type`; employment/relationship tables and prose use named HTML comment boundaries. `persist/markdown.ts` performs three-way field/section updates and retains unrelated text. Never reuse the dashboard persistence engine or put archive entities in `shared`.
 
 `ContactsSettings` is a settings-only DTO in `shared/contacts-settings.ts`. `settings.contacts` stores the root folder and maximum card columns; `modules.contacts` defaults on. Setting a new folder switches the data source without moving/deleting files. Indexes are memory-only and rebuildable. Controller updates and deletions are queued by identity; creates share a separate queue key. Updates use `Vault.process`, creates use `Vault.create`, and deletion uses `FileManager.trashFile`. Module disable drains pending writes and unloads the controller, preserving Markdown files. The shell registers `open-contacts` in `plugin/commands.ts`. Strings live in `shared/i18n/contacts.ts`.
 
@@ -186,22 +135,22 @@ Employment and direct relationships are stored only on people; company membershi
 
 ## Icons domain
 
-`src/iconic` is the isolated Iconic 1.1.10 port. It imports only its own modules, `shared/i18n`, and Obsidian/CodeMirror. Other domains do not import it; the shell owns `iconicHost`. The host keeps command/editor registrations once per plugin lifetime and creates an activation `Component` for events, observers, timers, dialogs, ribbon and prototype patches. Disable flushes the store, restores patches and UI; re-enable reuses the controller. No new leaf type is registered.
+`core/icons`, `platform/obsidian/icons` and `view/icons` contain the Iconic 1.1.10 port. Native managers receive dialog actions from `plugin/modules/icons`. Other domains do not import it; the shell owns `iconicHost`. The host keeps command/editor registrations once per plugin lifetime and creates an activation `Component` for events, observers, timers, dialogs, ribbon and prototype patches. Disable flushes the store, restores patches and UI; re-enable reuses the controller. No new leaf type is registered.
 
 `modules.iconic` defaults to true and is the only icon-domain value in NAND `data.json`. Domain settings, icons, rules and dialog state retain the upstream schema in `<configDir>/plugins/<manifest.id>/iconic.json`, with `.backup1` through `.backupN` siblings. `persistence/store.ts` owns adapter writes, corruption recovery and raw/focus reload. Do not use plugin `saveData` for this store. No automatic import from a separate Iconic installation.
 
-The single NAND settings tab adds 图标 / Icons with the six stacked sections listed in the Settings table. Both fallback and API 1.13 definitions expose 22 preferences, rulebook and usage checker. Commands remain in `src/iconic/commands.ts`; use the upstream ids except the normalized `toggle-minimal-folder-icons` under the NAND plugin prefix. English/Chinese strings live in `shared/i18n/iconic.ts`; the domain accessor resolves the current NAND language and preserves upstream `{#}` placeholders.
+The single NAND settings tab adds 图标 / Icons with the six stacked sections listed in the Settings table. Both fallback and API 1.13 definitions expose 22 preferences, rulebook and usage checker. Commands remain in `src/plugin/modules/icons/commands.ts`; use the upstream ids except the normalized `toggle-minimal-folder-icons` under the NAND plugin prefix. English/Chinese strings live in `shared/i18n/iconic.ts`; the domain accessor resolves the current NAND language and preserves upstream `{#}` placeholders.
 
 For a future upstream update, compare the pinned source and the port's documented adaptations before editing. Keep the committed upstream oracle independent of migrated code, verify both settings renderers write to the domain store, and retain resource license notices in the bundle. User instructions and test evidence live in [the icon guide](../../../../docs/icons.md) and [the port record](../../../../docs/iconic-port.md).
 
 ## Automation ownership
 
-`plugin/automation-host.ts` injects dashboard, contacts, terminal and notification ports; products never import each other. Dashboard task metadata is Markdown-owned, archive reminders occupy a bounded Markdown region, and widget metadata remains with widget settings. Standalone definitions, cursors and run snapshots live in `.nand/automation/<device-id>.json`; notification deliveries and native session references use sibling device-specific directories. Device identity uses Obsidian local storage. The automation view is registered even if loading fails; writes and scheduling remain gated until retry succeeds. Source scanning and the first scheduler tick wait for `workspace.onLayoutReady`; plugin `onload` must not await the contacts index because that index itself waits for layout readiness.
+`plugin/workflows/automation-host.ts` injects dashboard, contacts, terminal and notification ports; products never import each other. Dashboard task metadata is Markdown-owned, archive reminders occupy a bounded Markdown region, and widget metadata remains with widget settings. Standalone definitions, cursors and run snapshots live in `.nand/automation/<device-id>.json`; notification deliveries and native session references use sibling device-specific directories. Device identity uses Obsidian local storage. The automation view is registered even if loading fails; writes and scheduling remain gated until retry succeeds. Source scanning and the first scheduler tick wait for `workspace.onLayoutReady`; plugin `onload` must not await the contacts index because that index itself waits for layout readiness.
 
 
 ### Agent workbench and native history
 
-`terminal-agent/view/workbench.tsx` renders the session sidebar, native history and usage footer. `TerminalView` owns the xterm island. Closing a leaf detaches its renderer and preserves the TerminalService process; closing a session destroys that process. Module disable/unload destroys all processes. Leaf restore never resubmits a prompt. Deferred leaves must finish `loadIfDeferred` before testing `instanceof TerminalView`.
+`src/view/terminal/workbench.tsx` renders the session sidebar, native history and usage footer. `TerminalView` owns the xterm island. Closing a leaf detaches its renderer and preserves the TerminalService process; closing a session destroys that process. Module disable/unload destroys all processes. Leaf restore never resubmits a prompt. Deferred leaves must finish `loadIfDeferred` before testing `instanceof TerminalView`.
 
 The public catalog contains Claude Code, Codex, Gemini, OpenCode, Pi and Grok. `automation-catalog.ts` retains the pinned upstream transport reference; it is not the exposed capability list. `history/service.ts` uses `server/agent-data-client.ts` and Rust `agent_data.rs` for cancellable background parsing. Only canonical cwd paths inside the current vault are indexed. OpenCode SQLite is opened read-only. Native transcripts are never renamed or rewritten. `.nand/terminal-agent/<device>/index.sqlite` is a disposable cache; `history.json` stores NAND titles, tags, favorite and archive state. Exported Markdown goes to `.nand/terminal-agent/exports/`.
 

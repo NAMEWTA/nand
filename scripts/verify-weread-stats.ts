@@ -23,10 +23,10 @@ import {
 	computeReadStreaks,
 	HEATMAP_WINDOW_DAYS,
 	parseReadStats,
-} from '../src/dashboard-view/weread/weread-service';
-import { shelfStateFor } from '../src/dashboard-view/weread/weread-shelf-model';
-import { normalizeStatItems } from '../src/dashboard-view/weread/weread-stats';
-import type { WereadStatItem } from '../src/dashboard-view/types';
+} from '../src/platform/obsidian/weread/weread-service';
+import { shelfStateFor } from '../src/core/weread/weread-shelf-model';
+import { normalizeStatItems } from '../src/view/dashboard/weread/stats-model';
+import type { WereadStatItem } from '../src/core/dashboard/types/index';
 
 // ---------- 1. parseReadStats ----------
 const full = parseReadStats(

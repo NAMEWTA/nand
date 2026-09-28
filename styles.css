@@ -4689,6 +4689,11 @@
 }
 
 .dashboard-pomodoro-stats-close {
+	border: none;
+	box-shadow: none;
+	background: transparent;
+	padding: 0;
+	height: auto;
 	cursor: pointer;
 	color: var(--db-text-muted);
 	width: 24px;
@@ -4761,6 +4766,11 @@
 }
 
 .dashboard-pomodoro-range-btn {
+	border: none;
+	box-shadow: none;
+	background: transparent;
+	padding: 0;
+	height: auto;
 	flex: 1;
 	text-align: center;
 	font-size: 0.82em;
@@ -4929,6 +4939,11 @@
 }
 
 .dashboard-pomodoro-stats-icon-btn {
+	border: none;
+	box-shadow: none;
+	background: transparent;
+	padding: 0;
+	height: auto;
 	cursor: pointer;
 	color: var(--db-text-muted);
 	width: 26px;
@@ -5524,6 +5539,11 @@
 }
 
 .dashboard-pomodoro-tagmanager-action {
+	border: none;
+	box-shadow: none;
+	background: transparent;
+	padding: 0;
+	height: auto;
 	display: flex;
 	align-items: center;
 	gap: 5px;
@@ -5669,6 +5689,11 @@
 }
 
 .dashboard-pomodoro-filterbar-clear {
+	border: none;
+	box-shadow: none;
+	background: transparent;
+	padding: 0;
+	height: auto;
 	cursor: pointer;
 	color: var(--db-text-muted);
 	display: flex;
@@ -5739,6 +5764,11 @@
    corner (was an oversized inline button beside the "/ N" denominator that
    pushed the centered numbers off balance). */
 .dashboard-pomodoro-kpi-hero-edit {
+	border: none;
+	box-shadow: none;
+	background: transparent;
+	padding: 0;
+	height: auto;
 	position: absolute;
 	top: 6px;
 	right: 6px;
@@ -6292,6 +6322,11 @@
 }
 
 .dashboard-expense-range-btn {
+	border: none;
+	box-shadow: none;
+	background: transparent;
+	padding: 0;
+	height: auto;
 	text-align: center;
 	font-size: 0.82em;
 	font-weight: 500;
@@ -6322,6 +6357,11 @@
 }
 
 .dashboard-expense-year-nav-btn {
+	border: none;
+	box-shadow: none;
+	background: transparent;
+	padding: 0;
+	height: auto;
 	width: 24px;
 	height: 24px;
 	display: flex;
@@ -6344,6 +6384,11 @@
 }
 
 .dashboard-expense-year-nav-label {
+	border: none;
+	box-shadow: none;
+	background: transparent;
+	padding: 0;
+	height: auto;
 	font-size: 0.85em;
 	font-weight: 600;
 	color: var(--db-text);
@@ -6399,6 +6444,11 @@
 }
 
 .dashboard-expense-subrange-btn {
+	border: none;
+	box-shadow: none;
+	background: transparent;
+	padding: 0;
+	height: auto;
 	cursor: pointer;
 	padding: 3px 8px;
 	border-radius: 4px;
@@ -6427,6 +6477,11 @@
 }
 
 .dashboard-expense-level-btn {
+	border: none;
+	box-shadow: none;
+	background: transparent;
+	padding: 0;
+	height: auto;
 	cursor: pointer;
 	padding: 2px 7px;
 	border-radius: 4px;
@@ -6455,6 +6510,11 @@
 }
 
 .dashboard-expense-type-btn {
+	border: none;
+	box-shadow: none;
+	background: transparent;
+	padding: 0;
+	height: auto;
 	cursor: pointer;
 	padding: 4px 10px;
 	border-radius: 4px;
@@ -6474,6 +6534,11 @@
 }
 
 .dashboard-expense-stats-close {
+	border: none;
+	box-shadow: none;
+	background: transparent;
+	padding: 0;
+	height: auto;
 	cursor: pointer;
 	color: var(--db-text-muted);
 	width: 24px;
@@ -6628,6 +6693,11 @@
 
 /* "View all" link on the records title row → the full ledger overlay */
 .dashboard-expense-records-viewall {
+	border: none;
+	box-shadow: none;
+	background: transparent;
+	padding: 0;
+	height: auto;
 	display: flex;
 	align-items: center;
 	gap: 1px;
@@ -7024,6 +7094,11 @@
 }
 
 .dashboard-expense-records-delete {
+	border: none;
+	box-shadow: none;
+	background: transparent;
+	padding: 0;
+	height: auto;
 	width: 20px;
 	height: 20px;
 	display: flex;
@@ -7414,6 +7489,11 @@
 }
 
 .dashboard-expense-ledger-action {
+	border: none;
+	box-shadow: none;
+	background: transparent;
+	padding: 0;
+	height: auto;
 	display: inline-flex;
 	align-items: center;
 	justify-content: center;
@@ -16868,8 +16948,7 @@
 	pointer-events: none;
 }
 /* Once a real <video> is lazily mounted into a tile, hide its placeholder. */
-.dashboard-media-item.is-video-mounted > .dashboard-media-thumb--video-placeholder,
-.dashboard-media-list-thumb.is-video-mounted > .dashboard-media-thumb--video-placeholder {
+.dashboard-media-video-frame.is-video-mounted > .dashboard-media-thumb--video-placeholder {
 	display: none;
 }
 /* Size badge hidden inside the tiny list-view thumb (40x40) */
@@ -25512,3 +25591,12 @@ body:where(.nand-iconic-enabled)[data-theme="Ukiyo"] .workspace-leaf > .workspac
 
 .side-dock-ribbon-action[data-nand-unread] { position: relative; }
 .side-dock-ribbon-action[data-nand-unread]::after { content: attr(data-nand-unread); position: absolute; top: 0; right: 0; padding: 0 4px; border-radius: var(--radius-s); background: var(--interactive-accent); color: var(--text-on-accent); font-size: var(--font-ui-smaller); }
+
+/* Native Modal supplies focus and stacking around Preact dashboard panels. */
+.modal.nand-panel-modal { padding: 0; width: fit-content; max-width: 96vw; background: transparent; border: 0; }
+.nand-panel-modal .modal-content { margin: 0; max-height: 90vh; }
+.nand-panel-modal > .modal-close-button { display: none; }
+
+.dashboard-media-video-frame { width: 100%; height: 100%; }
+
+.dashboard-expense-ledger-th > button { width: 100%; height: auto; padding: 0; border: none; background: transparent; box-shadow: none; color: inherit; font: inherit; text-align: inherit; }

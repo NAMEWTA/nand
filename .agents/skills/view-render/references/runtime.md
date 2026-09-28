@@ -86,3 +86,7 @@ If a dependency calls the bare `setTimeout` / `requestAnimationFrame` globals an
 ## Why there is no package manager
 
 A plugin that evals a canvas bundle must hand that bundle the same React object the UI uses, and a popout must not look up a different copy. NAND bundles its UI into `main.js`, so one Preact copy serves every window. The remaining bug is using the wrong `document`. The per-window host above is the fix. Do not add React 19, a private `eval` of a UI library, or `window.React`.
+
+## Dashboard ownership
+
+Incrementally converted dashboard panels mount through `mountDashboardPanel`. The dashboard render context tracks each root and unmounts it on rebuild/close; reused detached widgets retain their owner. Countdown and anniversary clocks use the owning Window and release intervals in hook cleanup. Native `onWindowMigrated` forces widget recreation, so old-window timers cannot survive the move. This lifecycle helper does not make remaining imperative card renderers Preact components.

@@ -17,7 +17,7 @@
  */
 import { strict as assert } from 'node:assert';
 import { El } from './mini-dom';
-import { captureRootScrollState, restoreRootScrollState } from '../src/dashboard-view/ui/scroll-preserve';
+import { captureRootScrollState, restoreRootScrollState } from '../src/view/dashboard/ui/scroll-preserve';
 
 // mini-dom keeps className in a field, so classSignature's getAttribute
 // path needs the attribute set explicitly (the real DOM keeps both in sync).

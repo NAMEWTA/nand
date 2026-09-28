@@ -1,44 +1,44 @@
-import { stableRibbon } from './ribbon';
-import { ContactsController, ContactsView, CONTACTS_VIEW_TYPE } from '../contacts';
-import { createAutomationHost } from './automation-host';
+import { Notice, Platform, Plugin, TAbstractFile, TFile, type Command } from 'obsidian';
+import { type AlbumConfig, type AnniversaryConfig, type CountdownConfig } from '../core/dashboard/types/index';
+import { refreshLeafTitle } from '../platform/obsidian/workspace-title';
 import type { AutomationUiPort } from '../shared/automation/types';
 import { normalizeContactsSettings } from '../shared/contacts-settings';
-import { IconicController } from '../iconic';
-import { refreshLeafTitle } from '../shared/workspace-title';
-import { Notice, Platform, Plugin, TAbstractFile, TFile, type Command } from 'obsidian';
-import {
-	DEFAULT_SETTINGS,
-	type DashboardSettings,
-	type CountdownConfig,
-	type AlbumConfig,
-	type AnniversaryConfig,
-} from '../dashboard-view/types';
-import { normalizeTransition } from '../dashboard-view/widgets/album-widget';
-import { DashboardSettingTab } from './settings';
-import { DashboardView, DASHBOARD_VIEW_TYPE, showModuleDisabled } from '../dashboard-view';
-import { EditorView, EDITOR_VIEW_TYPE, createEditorHost, type EditorHost, collectReferences } from '../editor-view';
-import { TerminalAgentController, TERMINAL_VIEW_TYPE, readLegacyTerminalSettings } from '../terminal-agent';
-import { onLanguageChanged, setLanguage, t } from '../shared/i18n';
 import { normalizeEditorWorkbench } from '../shared/editor-workbench';
-import { IntroModal } from './intro-modal';
+import { onLanguageChanged, setLanguage, t } from '../shared/i18n/index';
+import { closeDashboardPanelModals } from '../view/dashboard/ui/panel-modal';
+import { DASHBOARD_VIEW_TYPE } from '../view/dashboard/view/view-type';
+import { normalizeTransition } from '../view/dashboard/widgets/album-model';
+import { type EditorHost } from '../view/editor/host';
 import { InactiveTerminalView } from './inactive-terminal-view';
-import { terminalLeafKind } from './terminal-leaf-kind';
+import { IntroModal } from './intro-modal';
 import { ModuleLifecycle } from './module-lifecycle';
+import { CONTACTS_VIEW_TYPE, ContactsController, ContactsView } from './modules/contacts/index';
+import { DashboardView, showModuleDisabled } from './modules/dashboard/index';
+import { EDITOR_VIEW_TYPE, EditorView, collectReferences, createEditorHost } from './modules/editor/index';
+import { createIconicDialogs } from './modules/icons/dialogs';
+import { IconicController } from './modules/icons/index';
+import { TERMINAL_VIEW_TYPE, TerminalAgentController, readLegacyTerminalSettings } from './modules/terminal/index';
+import { stableRibbon } from './ribbon';
+import { DashboardSettingTab } from './settings/index';
+import type { NandSettings } from './settings/model';
+import { DEFAULT_SETTINGS } from './settings/model';
+import { terminalLeafKind } from './terminal-leaf-kind';
+import { createAutomationHost } from './workflows/automation-host';
 
-import { teardownBasenameIndex } from '../dashboard-view/renderer';
-import { MediaTagService, sanitizeMediaTags, registerMediaTagService } from '../dashboard-view/media/media-tags';
-import { HabitService, registerHabitService } from '../dashboard-view/habit/habit-service';
-import { ExpenseService, registerExpenseService } from '../dashboard-view/expense/expense-service';
-import { MusicService, registerMusicService } from '../dashboard-view/music/music-service';
-import { generateDefaultMarkdown } from '../dashboard-view/parser';
-import { registerShellCommands } from './commands';
+import { generateDefaultMarkdown } from '../core/dashboard/parser/default-document';
 import {
 	alignWorkspaceNames,
 	migrateWorkspaces,
 	nextWorkspacePath,
 	normalizeWorkspacePath,
 	pruneMissingWorkspaces,
-} from '../dashboard-view/workspace/workspace-registry';
+} from '../core/workspace/workspace-registry';
+import { ExpenseService, registerExpenseService } from '../platform/obsidian/expense/expense-service';
+import { HabitService, registerHabitService } from '../platform/obsidian/habit/habit-service';
+import { MediaTagService, registerMediaTagService, sanitizeMediaTags } from '../platform/obsidian/media/media-tags';
+import { MusicService, registerMusicService } from '../platform/obsidian/music/music-service';
+import { teardownBasenameIndex } from '../view/dashboard/renderer/render-context';
+import { registerShellCommands } from './commands';
 
 /** All valid style preset keys — single source of truth for migration. */
 const VALID_STYLE_PRESETS = [
@@ -149,14 +149,19 @@ function migrateAnniversaries(raw: Record<string, unknown>): AnniversaryConfig[]
 export default class DashboardPlugin extends Plugin {
 	override addCommand(command: Command & { nameKey?: string }): Command {
 		const registered = super.addCommand(command);
-		if (command.nameKey) this.register(onLanguageChanged(() => { registered.name = `${this.manifest.name}: ${t(command.nameKey!)}`; }));
+		if (command.nameKey)
+			this.register(
+				onLanguageChanged(() => {
+					registered.name = `${this.manifest.name}: ${t(command.nameKey!)}`;
+				}),
+			);
 		return registered;
 	}
 	override addRibbonIcon(icon: string, title: string, callback: (evt: MouseEvent) => unknown): HTMLElement {
 		return stableRibbon(this, icon, title, callback, (glyph, id, action) => super.addRibbonIcon(glyph, id, action));
 	}
 	automationHost?: AutomationUiPort & { dispose(): void; inbox(): void };
-	settings!: DashboardSettings;
+	settings!: NandSettings;
 	contactsHost?: ContactsController;
 	mediaTagService!: MediaTagService;
 	habitService!: HabitService;
@@ -183,20 +188,27 @@ export default class DashboardPlugin extends Plugin {
 		});
 
 		await this.applyModuleFlags();
-		try { this.automationHost = await createAutomationHost(this); }
-		catch (error) { console.error('[NAND automation]', error); new Notice(t('automation.failedLoad')); }
+		try {
+			this.automationHost = await createAutomationHost(this);
+		} catch (error) {
+			console.error('[NAND automation]', error);
+			new Notice(t('automation.failedLoad'));
+		}
 
 		this.addRibbonIcon('home', t('main.openHome'), () => this.openHome());
 		this.addRibbonIcon('pen-line', t('editor.openPanel'), () => {
 			void this.openEditorView();
 		});
 
-		this.addRibbonIcon('contact-round', t('contacts.open'), () => { void this.openContacts(); });
+		this.addRibbonIcon('contact-round', t('contacts.open'), () => {
+			void this.openContacts();
+		});
 		registerShellCommands(this);
 
 		this.addCommand({
 			id: 'cycle-theme',
-			nameKey: 'main.cycleTheme', name: t('main.cycleTheme'),
+			nameKey: 'main.cycleTheme',
+			name: t('main.cycleTheme'),
 			callback: async () => {
 				const themes = [
 					'earth',
@@ -223,19 +235,22 @@ export default class DashboardPlugin extends Plugin {
 
 		this.addCommand({
 			id: 'next-workspace',
-			nameKey: 'main.nextWorkspace', name: t('main.nextWorkspace'),
+			nameKey: 'main.nextWorkspace',
+			name: t('main.nextWorkspace'),
 			callback: () => this.cycleWorkspace(1),
 		});
 
 		this.addCommand({
 			id: 'previous-workspace',
-			nameKey: 'main.prevWorkspace', name: t('main.prevWorkspace'),
+			nameKey: 'main.prevWorkspace',
+			name: t('main.prevWorkspace'),
 			callback: () => this.cycleWorkspace(-1),
 		});
 
 		this.addCommand({
 			id: 'toggle-note-popover',
-			nameKey: 'main.toggleNotePopover', name: t('main.toggleNotePopover'),
+			nameKey: 'main.toggleNotePopover',
+			name: t('main.toggleNotePopover'),
 			callback: async () => {
 				const value = !this.settings.disableNotePopover;
 				this.settings = { ...this.settings, disableNotePopover: value };
@@ -246,7 +261,8 @@ export default class DashboardPlugin extends Plugin {
 
 		this.addCommand({
 			id: 'add-section',
-			nameKey: 'main.addSection', name: t('main.addSection'),
+			nameKey: 'main.addSection',
+			name: t('main.addSection'),
 			callback: () => {
 				const leaves = this.app.workspace.getLeavesOfType(DASHBOARD_VIEW_TYPE);
 				if (leaves.length === 0) {
@@ -262,7 +278,8 @@ export default class DashboardPlugin extends Plugin {
 
 		this.addCommand({
 			id: 'toggle-banner-mode',
-			nameKey: 'main.toggleBannerMode', name: t('main.toggleBannerMode'),
+			nameKey: 'main.toggleBannerMode',
+			name: t('main.toggleBannerMode'),
 			callback: () => {
 				const leaves = this.app.workspace.getLeavesOfType(DASHBOARD_VIEW_TYPE);
 				if (leaves.length === 0) {
@@ -351,7 +368,7 @@ export default class DashboardPlugin extends Plugin {
 			await this.iconicHost?.deactivate();
 			return;
 		}
-		if (!this.iconicHost) this.iconicHost = new IconicController(this);
+		if (!this.iconicHost) this.iconicHost = new IconicController(this, createIconicDialogs);
 		await this.iconicHost.onload();
 	}
 
@@ -361,19 +378,28 @@ export default class DashboardPlugin extends Plugin {
 			this.contactsHost.load();
 		} else if (!enabled && this.contactsHost) {
 			await this.contactsHost.queue.settled();
-			this.contactsHost.unload(); this.contactsHost = undefined;
+			this.contactsHost.unload();
+			this.contactsHost = undefined;
 		}
 		this.refreshContactsViews();
 	}
 
 	refreshContactsViews(): void {
-		for (const leaf of this.app.workspace.getLeavesOfType(CONTACTS_VIEW_TYPE)) if (leaf.view instanceof ContactsView) leaf.view.bindController();
+		for (const leaf of this.app.workspace.getLeavesOfType(CONTACTS_VIEW_TYPE))
+			if (leaf.view instanceof ContactsView) leaf.view.bindController();
 	}
 
 	async openContacts(): Promise<void> {
-		if (!this.settings.modules.contacts) { new Notice(t('contacts.disabled')); this.openHome(); return; }
+		if (!this.settings.modules.contacts) {
+			new Notice(t('contacts.disabled'));
+			this.openHome();
+			return;
+		}
 		const existing = this.app.workspace.getLeavesOfType(CONTACTS_VIEW_TYPE)[0];
-		if (existing) { await this.app.workspace.revealLeaf(existing); return; }
+		if (existing) {
+			await this.app.workspace.revealLeaf(existing);
+			return;
+		}
 		await this.app.workspace.getLeaf('tab').setViewState({ type: CONTACTS_VIEW_TYPE, active: true });
 	}
 
@@ -382,34 +408,35 @@ export default class DashboardPlugin extends Plugin {
 		this.dashboardServicesStarted = true;
 		this.mediaTagService = new MediaTagService(this);
 		this.mediaTagService.load();
-		registerMediaTagService(this.mediaTagService);
+		registerMediaTagService(this.app, this.mediaTagService);
 		this.habitService = new HabitService(this);
 		this.expenseService = new ExpenseService(this);
 		await Promise.all([this.habitService.load(), this.expenseService.load()]);
-		registerHabitService(this.habitService);
-		registerExpenseService(this.expenseService);
+		registerHabitService(this.app, this.habitService);
+		registerExpenseService(this.app, this.expenseService);
 		if (!Platform.isPhone) {
 			this.musicService = new MusicService(this);
 			await this.musicService.load();
-			registerMusicService(this.musicService);
+			registerMusicService(this.app, this.musicService);
 		}
 		this.refreshDashboardLeaves();
 	}
 
 	private stopDashboardServices(): void {
+		closeDashboardPanelModals(this.app);
 		if (!this.dashboardServicesStarted) {
 			this.refreshDashboardLeaves();
 			return;
 		}
 		this.dashboardServicesStarted = false;
-		registerMediaTagService(null);
+		registerMediaTagService(this.app, null);
 		void this.mediaTagService.flush();
 		this.mediaTagService.destroy();
-		registerHabitService(null);
+		registerHabitService(this.app, null);
 		this.habitService.destroy();
-		registerExpenseService(null);
+		registerExpenseService(this.app, null);
 		this.expenseService.destroy();
-		registerMusicService(null);
+		registerMusicService(this.app, null);
 		this.musicService?.destroy();
 		this.musicService = undefined;
 		this.refreshDashboardLeaves();
@@ -446,8 +473,10 @@ export default class DashboardPlugin extends Plugin {
 		if (!Platform.isDesktopApp || this.terminalHost?.isActive()) return;
 		if (!this.terminalHost) {
 			this.terminalHost = new TerminalAgentController(this, {
-                openAutomations: async () => { await this.automationHost?.open(); },
-                openNotifications: () => this.automationHost?.inbox(),
+				openAutomations: async () => {
+					await this.automationHost?.open();
+				},
+				openNotifications: () => this.automationHost?.inbox(),
 				readAbsoluteReference: () => collectReferences(this.app, 'absolute'),
 			});
 			try {
@@ -483,8 +512,10 @@ export default class DashboardPlugin extends Plugin {
 	}
 
 	onunload(): void {
+		closeDashboardPanelModals(this.app);
 		this.automationHost?.dispose();
-		for (const leaf of this.app.workspace.getLeavesOfType(CONTACTS_VIEW_TYPE)) if (leaf.view instanceof ContactsView) leaf.view.disposeSurface();
+		for (const leaf of this.app.workspace.getLeavesOfType(CONTACTS_VIEW_TYPE))
+			if (leaf.view instanceof ContactsView) leaf.view.disposeSurface();
 		this.contactsHost?.unload();
 		this.moduleLifecycle.dispose();
 		this.iconicHost?.onunload();
@@ -492,14 +523,14 @@ export default class DashboardPlugin extends Plugin {
 		this.editorHost?.onunload();
 		teardownBasenameIndex(this.app);
 		if (!this.dashboardServicesStarted) return;
-		registerMediaTagService(null);
+		registerMediaTagService(this.app, null);
 		void this.mediaTagService.flush();
 		this.mediaTagService.destroy();
-		registerHabitService(null);
+		registerHabitService(this.app, null);
 		this.habitService.destroy();
-		registerExpenseService(null);
+		registerExpenseService(this.app, null);
 		this.expenseService.destroy();
-		registerMusicService(null);
+		registerMusicService(this.app, null);
 		this.musicService?.destroy();
 	}
 
@@ -550,7 +581,7 @@ export default class DashboardPlugin extends Plugin {
 
 	async loadSettings(): Promise<void> {
 		const loaded: unknown = await this.loadData();
-		const raw = (loaded ?? {}) as Record<string, unknown> & Partial<DashboardSettings>;
+		const raw = (loaded ?? {}) as Record<string, unknown> & Partial<NandSettings>;
 		// Migrate old widgetTheme combo to individual flags
 		if ('widgetTheme' in raw && typeof raw.widgetTheme === 'string') {
 			const theme = raw.widgetTheme;

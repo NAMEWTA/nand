@@ -1,3 +1,6 @@
+import { installPreactMiniDom } from './preact-mini-dom';
+import { flushSync } from 'preact/compat';
+installPreactMiniDom();
 /**
  * Verifies the card-size (S/M/L) toggle for the library and folder sections'
  * card views:
@@ -14,8 +17,8 @@
  */
 import { strict as assert } from 'node:assert';
 import { Menu } from 'obsidian';
-import { parse, serialize } from '../src/dashboard-view/parser';
-import { renderLibrarySection } from '../src/dashboard-view/library';
+import { parse, serialize } from '../src/core/dashboard/parser/index';
+import { renderLibrarySection } from '../src/view/dashboard/library/index';
 import { El, findByClass } from './mini-dom';
 
 type StubMenuItem = { title: string; click(): void };
@@ -117,17 +120,17 @@ const gridHost = (): El =>
 const pickDropdown = (host: El, index: number): void => {
 	const button = findByClass(host, 'dashboard-toolbar-dropdown')[0];
 	assert.ok(button, 'dropdown button');
-	button.click();
+	flushSync(() => button.click());
 	const menu = openedMenu();
 	const item = menu.items[index];
 	assert.ok(item, `menu item ${index}`);
-	item.click();
+	flushSync(() => item.click());
 };
 
 // One collapsed letter, menu still offers S/M/L, medium by default.
 assert.equal(sizeLetter(), 'M', 'medium letter by default');
 assert.ok(!sizeToggle.hasClass('is-hidden'), 'visible in grid view');
-findByClass(sizeToggle, 'dashboard-toolbar-dropdown')[0]!.click();
+flushSync(() => findByClass(sizeToggle, 'dashboard-toolbar-dropdown')[0]!.click());
 const sizeMenu = openedMenu();
 assert.deepEqual(
 	sizeMenu.items.map((item) => item.title),

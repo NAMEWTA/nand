@@ -1,7 +1,7 @@
-import { renderEmptyState } from '../../shared/empty-state';
 import { Setting } from 'obsidian';
 import type { EditorDomainId } from '../../shared/editor-workbench';
-import { t } from '../../shared/i18n';
+import { t } from '../../shared/i18n/index';
+import { renderEmptyState } from '../../view/primitives/empty-state';
 import type { DashboardSettingTab } from './settings-tab';
 
 const DOMAINS: readonly EditorDomainId[] = ['comments', 'writing-stats', 'focus'];

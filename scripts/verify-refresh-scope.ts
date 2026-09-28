@@ -1,3 +1,4 @@
+import { installPreactMiniDom } from './preact-mini-dom';
 /**
  * Verifies the vault-refresh scope filtering and signature skip for scanning
  * (library/folder) sections — the fix for the "workbench refreshes rapidly"
@@ -21,8 +22,14 @@
 import { strict as assert } from 'node:assert';
 import type { App } from 'obsidian';
 import { El } from './mini-dom';
-import { renderSection, refreshScanningSections, invalidateScanningSectionSignatures } from '../src/dashboard-view/renderer';
-import type { DashboardColumn, LibraryConfig, RenderCallbacks } from '../src/dashboard-view/types';
+installPreactMiniDom();
+import {
+	renderSection,
+	refreshScanningSections,
+	invalidateScanningSectionSignatures,
+} from '../src/view/dashboard/renderer/index';
+import type { DashboardColumn, LibraryConfig } from '../src/core/dashboard/types/index';
+import type { RenderCallbacks } from '../src/view/dashboard/render-contract';
 
 // Obsidian globals absent in Node (see verify-card-new-note for the idiom):
 // activeDocument for theme/hover queries, window for blur timers, the bare
@@ -209,7 +216,7 @@ assert.equal(rowOf('News'), newsAfterMtime, 'News skips rebuild for excluded-fol
 console.log('excluded-folder skip: PASS');
 
 // 5. Invalidation forces a rebuild on the next pass despite no change.
-invalidateScanningSectionSignatures();
+invalidateScanningSectionSignatures(kanban as unknown as HTMLElement);
 n = refreshScanningSections(
 	kanban as unknown as HTMLElement,
 	data,

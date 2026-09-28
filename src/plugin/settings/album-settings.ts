@@ -1,8 +1,8 @@
+import { Setting } from 'obsidian';
+import type { AlbumConfig } from '../../core/dashboard/types/index';
+import { t } from '../../shared/i18n/index';
+import { AlbumSettingsModal } from '../../view/dashboard/widgets/album-settings-modal';
 import type { DashboardSettingTab } from './settings-tab';
-import { setIcon, Setting } from 'obsidian';
-import type { AlbumConfig } from '../../dashboard-view/types';
-import { t } from '../../shared/i18n';
-import { AlbumSettingsModal } from '../../dashboard-view/widgets/album-settings-modal';
 
 /** Widgets tab: photo-album cards. Multiple albums are managed as a list
  *  (albums[]); the legacy single-album flat fields are migrated on load. */

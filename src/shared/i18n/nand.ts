@@ -2,7 +2,8 @@
 export const messages = {
 	en: {
 		'modules.iconic': 'Icons',
-		'modules.iconicDesc': 'Customize icons and colors for files, folders, tabs, bookmarks, tags, properties, and the ribbon.',
+		'modules.iconicDesc':
+			'Customize icons and colors for files, folders, tabs, bookmarks, tags, properties, and the ribbon.',
 		'settings.writeFailed': 'Could not save this setting. Please try again.',
 		'modules.changeFailed': 'Could not change the module state. Try turning the module off and on again.',
 		'settings.productHome': 'Home',
@@ -22,11 +23,13 @@ export const messages = {
 		'modules.disabledNotice': 'This module is off. Turn it on from Home.',
 		'main.openHome': 'Open NAND Home',
 		'intro.title': 'NAND',
-		'intro.body': 'This is NAND WTA’s general workbench. Home manages the dashboard, editor, agents, icons and contacts; automations and notifications connect them.',
+		'intro.body':
+			'This is NAND WTA’s general workbench. Home manages the dashboard, editor, agents, icons and contacts; automations and notifications connect them.',
 		'intro.ok': 'Got it',
 		'about.intro1': 'NAND WTA',
 		'about.intro2': 'NAMEWTA’s general Obsidian workbench.',
-		'about.intro3': 'Manage dashboards, comments, coding agents, icons, contacts, automations and notifications in one vault.',
+		'about.intro3':
+			'Manage dashboards, comments, coding agents, icons, contacts, automations and notifications in one vault.',
 		'about.building': 'What I am building',
 		'about.projNand': 'NAND',
 		'about.projNandDesc': 'This plugin',

@@ -1,8 +1,8 @@
+import { Setting } from 'obsidian';
+import type { AnniversaryConfig } from '../../core/dashboard/types/index';
+import { t } from '../../shared/i18n/index';
+import { AnniversarySettingsModal } from '../../view/dashboard/widgets/anniversary-settings-modal';
 import type { DashboardSettingTab } from './settings-tab';
-import { setIcon, Setting } from 'obsidian';
-import type { AnniversaryConfig } from '../../dashboard-view/types';
-import { t } from '../../shared/i18n';
-import { AnniversarySettingsModal } from '../../dashboard-view/widgets/anniversary-settings-modal';
 
 /** Widgets tab: anniversary ("纪念日") cards — the countdown list pattern. */
 export function renderAnniversarySettings(this: DashboardSettingTab, containerEl: HTMLElement): void {

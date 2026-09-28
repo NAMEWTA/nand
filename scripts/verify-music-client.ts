@@ -1,4 +1,4 @@
-import { musicCookieHeader } from '../src/dashboard-view/music/netease-account';
+import { musicCookieHeader } from '../src/platform/obsidian/music/netease-account';
 import { strict as assert } from 'node:assert';
 import {
 	extractPlaylistId,
@@ -10,8 +10,8 @@ import {
 	toHttps,
 	type NeteaseSong,
 	type NeteaseSongUrlEntry,
-} from '../src/dashboard-view/music/netease-client';
-import type { MusicTrack } from '../src/dashboard-view/types';
+} from '../src/platform/obsidian/music/netease-client';
+import type { MusicTrack } from '../src/core/dashboard/types/index';
 
 let checked = 0;
 function ok(cond: boolean, msg: string): void {

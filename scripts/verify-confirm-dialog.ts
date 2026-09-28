@@ -1,6 +1,8 @@
+import { Scope, type App } from 'obsidian';
+import { closeDashboardDialogs } from '../src/view/dashboard/ui/dialog-scope';
 import { strict as assert } from 'node:assert';
 import { El } from './mini-dom';
-import { showConfirmDialog } from '../src/dashboard-view/ui/confirm-dialog';
+import { showConfirmDialog } from '../src/view/dashboard/ui/confirm-dialog';
 
 // Confirm dialog keyboard handling. Regression: the dialog never claimed
 // focus, so the page button that opened it kept DOM focus and every Enter
@@ -72,7 +74,7 @@ async function main(): Promise<void> {
 		const { doc, press, listenerCount } = makeDocument();
 		(globalThis as Record<string, unknown>).activeDocument = doc;
 		const opener = new El('button'); // still-focused section delete button
-		const promise = showConfirmDialog(null, { title: 'T', message: 'M' });
+		const promise = showConfirmDialog(undefined, { title: 'T', message: 'M' });
 		assert.equal(doc.body.children.length, 1, '1: overlay on body');
 		assert.equal(listenerCount(), 1, '1: one keydown listener');
 
@@ -87,7 +89,7 @@ async function main(): Promise<void> {
 	{
 		const { doc, press } = makeDocument();
 		(globalThis as Record<string, unknown>).activeDocument = doc;
-		const promise = showConfirmDialog(null, { title: 'T', message: 'M', destructive: false });
+		const promise = showConfirmDialog(undefined, { title: 'T', message: 'M', destructive: false });
 		const hit = press('Enter');
 		assert.equal(await promise, true, '2: plain confirm default = OK');
 		assert.equal(hit.prevented, true, '2: default suppressed');
@@ -99,7 +101,7 @@ async function main(): Promise<void> {
 	{
 		const { doc, press } = makeDocument();
 		(globalThis as Record<string, unknown>).activeDocument = doc;
-		const state = spy(showConfirmDialog(null, { title: 'T', message: 'M' }));
+		const state = spy(showConfirmDialog(undefined, { title: 'T', message: 'M' }));
 		const hit = press('Enter', { target: cardOf(doc) });
 		assert.equal(hit.prevented, false, '3: in-dialog Enter not intercepted');
 		await new Promise((r) => setTimeout(r, 5));
@@ -113,7 +115,7 @@ async function main(): Promise<void> {
 	{
 		const { doc, press, listenerCount } = makeDocument();
 		(globalThis as Record<string, unknown>).activeDocument = doc;
-		const promise = showConfirmDialog(null, { title: 'T', message: 'M' });
+		const promise = showConfirmDialog(undefined, { title: 'T', message: 'M' });
 		press('Escape');
 		assert.equal(await promise, false, '4: escape cancels');
 		assert.equal(doc.body.children.length, 0, '4: overlay removed');
@@ -125,7 +127,7 @@ async function main(): Promise<void> {
 	{
 		const { doc, press, listenerCount } = makeDocument();
 		(globalThis as Record<string, unknown>).activeDocument = doc;
-		const promise = showConfirmDialog(null, { title: 'T', message: 'M', destructive: false });
+		const promise = showConfirmDialog(undefined, { title: 'T', message: 'M', destructive: false });
 		const actions = cardOf(doc).children[cardOf(doc).children.length - 1]!;
 		const confirmBtn = actions.children[1]!;
 		confirmBtn.click();
@@ -140,7 +142,7 @@ async function main(): Promise<void> {
 	{
 		const { doc, press } = makeDocument();
 		(globalThis as Record<string, unknown>).activeDocument = doc;
-		const state = spy(showConfirmDialog(null, { title: 'T', message: 'M', destructive: false }));
+		const state = spy(showConfirmDialog(undefined, { title: 'T', message: 'M', destructive: false }));
 		const opener = new El('button');
 		const hit = press('Enter', { target: opener, isComposing: true });
 		assert.equal(hit.prevented, false, '6: composing Enter ignored');
@@ -151,7 +153,42 @@ async function main(): Promise<void> {
 		assert.equal(state.value, false, '6: escape still closes');
 	}
 
-	console.log('verify-confirm-dialog: 6 scenarios OK');
+	// 7. Native scopes isolate nested Escape and are removed on plugin teardown.
+	{
+		const { doc, listenerCount } = makeDocument();
+		(globalThis as Record<string, unknown>).activeDocument = doc;
+		const scopes: Scope[] = [];
+		const app = {
+			scope: new Scope(),
+			keymap: {
+				pushScope: (scope: Scope) => scopes.push(scope),
+				popScope: (scope: Scope) => {
+					const i = scopes.indexOf(scope);
+					if (i >= 0) scopes.splice(i, 1);
+				},
+			},
+		} as unknown as App;
+		const result = showConfirmDialog(app, { title: 'Native parent', message: 'Nested confirm' });
+		assert.equal(scopes.length, 1);
+		const scope = scopes[0] as unknown as {
+			handlers: { key: string; callback: (event: KeyboardEvent) => unknown }[];
+		};
+		assert.equal(
+			scope.handlers.find((handler) => handler.key === 'Escape')!.callback({} as KeyboardEvent),
+			false,
+			'native Escape is consumed',
+		);
+		assert.equal(await result, false);
+		assert.equal(scopes.length, 0);
+		assert.equal(listenerCount(), 0);
+		const pending = showConfirmDialog(app, { title: 'Unload', message: 'Cancel on unload' });
+		closeDashboardDialogs(app);
+		assert.equal(await pending, false);
+		assert.equal(scopes.length, 0);
+		assert.equal(listenerCount(), 0);
+	}
+
+	console.log('verify-confirm-dialog: 7 scenarios OK');
 }
 
 void main();

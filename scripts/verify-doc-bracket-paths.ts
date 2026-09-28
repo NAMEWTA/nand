@@ -18,8 +18,8 @@
  * Run: `pnpm run test:doc-bracket-paths`
  */
 import { strict as assert } from 'node:assert';
-import { parse, serialize } from '../src/dashboard-view/parser';
-import type { DashboardData, DocNode } from '../src/dashboard-view/types';
+import { parse, serialize } from '../src/core/dashboard/parser/index';
+import type { DashboardData, DocNode } from '../src/core/dashboard/types/index';
 
 const BRACKET_PDF =
 	'癌生物学 (温伯格, 启敏·詹, 芝华·刘,[美] R. A. Weinberg) (z-library.sk, 1lib.sk, z-lib.sk)(OCR).pdf';

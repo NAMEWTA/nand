@@ -39,7 +39,7 @@ if (node.instanceOf(Text)) {
 
 `instanceof HTMLElement` across windows is the bug `.instanceOf` exists to prevent. `TFile` / `TFolder` stay on `instanceof` (same realm as the app).
 
-No `any`. No `var`. `unknown` plus a narrowing function is the pattern already used in the comment store (`asRecord`). Unpublished `app.commands` is typed in `src/shared/obsidian-internal.ts`. Use that interface.
+No `any`. No `var`. `unknown` plus a narrowing function is the pattern already used in the comment store (`asRecord`). Unpublished `app.commands` is typed in `src/platform/obsidian/obsidian-internal.ts`. Use that interface.
 
 ## Files
 
@@ -111,4 +111,4 @@ This plugin is not submitted through a fresh sample-plugin checklist on every ch
 - Warnings are public if the plugin is ever scored. Don't add `no-unused-vars` warnings.
 - Releases already attest the zip (`actions/attest-build-provenance`). Leave that step in `release.yml`.
 
-The Iconic port retains upstream CSS declarations and `.iconic-*` names for behavioral parity. Every imported selector is gated by `body.nand-iconic-enabled` (using `:where` to preserve specificity); disable removes that body marker in main and floating windows. Treat this as a scoped port exception, not a template for new global CSS. Private Obsidian members used by this port are described locally in `src/iconic/utils/obsidian-internal.ts`; do not add ambient declarations or blanket lint suppressions.
+The Iconic port retains upstream CSS declarations and `.iconic-*` names for behavioral parity. Every imported selector is gated by `body.nand-iconic-enabled` (using `:where` to preserve specificity); disable removes that body marker in main and floating windows. Treat this as a scoped port exception, not a template for new global CSS. Private Obsidian members used by this port are described locally in `src/platform/obsidian/icons/utils/obsidian-internal.ts`; do not add ambient declarations or blanket lint suppressions.

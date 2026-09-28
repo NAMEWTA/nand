@@ -9,17 +9,57 @@ const ALL_ON = { dashboard: true, editor: true, terminal: true, iconic: true, co
 
 test('home is the first primary settings product', () => {
 	assert.equal(productOrder()[0], 'home');
-	assert.deepEqual(productOrder(), ['home', 'dashboard', 'editor', 'terminal', 'iconic', 'contacts', 'automation', 'sync']);
+	assert.deepEqual(productOrder(), [
+		'home',
+		'dashboard',
+		'editor',
+		'terminal',
+		'iconic',
+		'contacts',
+		'automation',
+		'sync',
+	]);
 });
 
 test('top tabs keep home and sync and hide closed domains', () => {
-	assert.deepEqual(visibleProducts(ALL_ON), ['home', 'dashboard', 'editor', 'terminal', 'iconic', 'contacts', 'automation', 'sync']);
-	assert.deepEqual(visibleProducts({ iconic: false, contacts: false, dashboard: false, editor: true, terminal: true }), ['home', 'editor', 'terminal', 'automation', 'sync']);
-	assert.deepEqual(visibleProducts({ iconic: false, contacts: false, dashboard: true, editor: false, terminal: true }), ['home', 'dashboard', 'terminal', 'automation', 'sync']);
-	assert.deepEqual(visibleProducts({ iconic: false, contacts: false, dashboard: true, editor: true, terminal: false }), ['home', 'dashboard', 'editor', 'automation', 'sync']);
-	assert.deepEqual(visibleProducts({ iconic: false, contacts: false, dashboard: false, editor: false, terminal: false }), ['home', 'automation', 'sync']);
-	assert.equal(visibleProducts({ iconic: false, contacts: false, dashboard: false, editor: true, terminal: false }).includes('home'), true);
-	assert.equal(visibleProducts({ iconic: false, contacts: false, dashboard: false, editor: true, terminal: false }).includes('sync'), true);
+	assert.deepEqual(visibleProducts(ALL_ON), [
+		'home',
+		'dashboard',
+		'editor',
+		'terminal',
+		'iconic',
+		'contacts',
+		'automation',
+		'sync',
+	]);
+	assert.deepEqual(
+		visibleProducts({ iconic: false, contacts: false, dashboard: false, editor: true, terminal: true }),
+		['home', 'editor', 'terminal', 'automation', 'sync'],
+	);
+	assert.deepEqual(
+		visibleProducts({ iconic: false, contacts: false, dashboard: true, editor: false, terminal: true }),
+		['home', 'dashboard', 'terminal', 'automation', 'sync'],
+	);
+	assert.deepEqual(
+		visibleProducts({ iconic: false, contacts: false, dashboard: true, editor: true, terminal: false }),
+		['home', 'dashboard', 'editor', 'automation', 'sync'],
+	);
+	assert.deepEqual(
+		visibleProducts({ iconic: false, contacts: false, dashboard: false, editor: false, terminal: false }),
+		['home', 'automation', 'sync'],
+	);
+	assert.equal(
+		visibleProducts({ iconic: false, contacts: false, dashboard: false, editor: true, terminal: false }).includes(
+			'home',
+		),
+		true,
+	);
+	assert.equal(
+		visibleProducts({ iconic: false, contacts: false, dashboard: false, editor: true, terminal: false }).includes(
+			'sync',
+		),
+		true,
+	);
 });
 
 test('domain sections stay in their previous order for stacking on one tab', () => {
@@ -27,7 +67,16 @@ test('domain sections stay in their previous order for stacking on one tab', () 
 	assert.equal(sidePages('sync').length, 0);
 	assert.deepEqual(sidePages('dashboard'), ['general', 'widgets', 'coffee']);
 	assert.deepEqual(sidePages('editor'), ['comments', 'copy']);
-	assert.deepEqual(sidePages('terminal'), ['shell', 'instance', 'workflows', 'appearance', 'behavior', 'connection', 'visibility', 'agents']);
+	assert.deepEqual(sidePages('terminal'), [
+		'shell',
+		'instance',
+		'workflows',
+		'appearance',
+		'behavior',
+		'connection',
+		'visibility',
+		'agents',
+	]);
 	assert.equal(defaultPage('terminal'), 'shell');
 	assert.equal(defaultPage('home'), 'home');
 });

@@ -15,12 +15,13 @@ const activeDocument = {
 	importNode: (node: El) => node,
 };
 (globalThis as unknown as { activeDocument: typeof activeDocument }).activeDocument = activeDocument;
-(globalThis as unknown as { DOMParser: new () => { parseFromString: () => { documentElement: El } } }).DOMParser = class {
-	parseFromString() {
-		const svg = new El('svg');
-		return { documentElement: Object.assign(svg, { instanceOf: (ctor: unknown) => ctor === SvgElement }) };
-	}
-};
+(globalThis as unknown as { DOMParser: new () => { parseFromString: () => { documentElement: El } } }).DOMParser =
+	class {
+		parseFromString() {
+			const svg = new El('svg');
+			return { documentElement: Object.assign(svg, { instanceOf: (ctor: unknown) => ctor === SvgElement }) };
+		}
+	};
 (globalThis as unknown as { SVGSVGElement: typeof SvgElement }).SVGSVGElement = SvgElement;
 
 import { El } from '../../../scripts/mini-dom';

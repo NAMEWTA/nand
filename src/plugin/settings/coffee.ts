@@ -1,6 +1,6 @@
+import { t } from '../../shared/i18n/index';
+import { SUPPORT_IMAGE_DATA_URL } from '../../view/dashboard/assets/support-image';
 import type { DashboardSettingTab } from './settings-tab';
-import { t } from '../../shared/i18n';
-import { SUPPORT_IMAGE_DATA_URL } from '../../dashboard-view/assets/support-image';
 
 /** About page for NAND WTA. A support image appears only after one is added. */
 export function renderCoffeeSettings(this: DashboardSettingTab, containerEl: HTMLElement): void {

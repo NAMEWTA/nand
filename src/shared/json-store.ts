@@ -1,16 +1,16 @@
-import type { App } from 'obsidian';
+import type { TextStorage } from './storage/ports';
 
 /** Serialized writes with a durable previous snapshot for crash recovery. */
 export class JsonStore<T> {
 	private tail: Promise<void> = Promise.resolve();
 	private snapshot?: string;
 	constructor(
-		private app: App,
+		private adapter: TextStorage,
 		private path: string,
 		private validate: (value: unknown) => value is T,
 	) {}
 	async load(fallback: T): Promise<T> {
-		const adapter = this.app.vault.adapter;
+		const adapter = this.adapter;
 		try {
 			if (!(await adapter.exists(this.path))) {
 				if (!(await adapter.exists(`${this.path}.backup`))) return fallback;
@@ -33,7 +33,7 @@ export class JsonStore<T> {
 	save(value: T): Promise<void> {
 		const text = JSON.stringify(value);
 		const operation = this.tail.then(async () => {
-			const adapter = this.app.vault.adapter;
+			const adapter = this.adapter;
 			const parts = this.path.split('/');
 			parts.pop();
 			let dir = '';

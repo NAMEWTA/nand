@@ -18,9 +18,9 @@
  */
 import { strict as assert } from 'node:assert';
 import type { App } from 'obsidian';
-import { queryVaultFiles } from '../src/dashboard-view/library';
-import { LibraryConfigModal } from '../src/dashboard-view/library/library-config-modal';
-import type { LibraryConfig } from '../src/dashboard-view/types';
+import { queryVaultFiles } from '../src/view/dashboard/library/index';
+import { LibraryConfigModal } from '../src/view/dashboard/library/library-config-modal';
+import type { LibraryConfig } from '../src/core/dashboard/types/index';
 import { findByClass, orderIndex, type El } from './mini-dom';
 
 (globalThis as unknown as Record<string, unknown>).activeDocument = {

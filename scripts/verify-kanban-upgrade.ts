@@ -1,3 +1,6 @@
+import { installPreactMiniDom } from './preact-mini-dom';
+import { flushSync } from 'preact/compat';
+installPreactMiniDom();
 /**
  * Verifies the kanban grouped-view upgrades:
  *
@@ -18,8 +21,9 @@
  * Run: `pnpm run test:kanban-upgrade`
  */
 import { strict as assert } from 'node:assert';
-import { nextGroupPropertyValue, renderLibrarySection } from '../src/dashboard-view/library';
-import { parse, serialize } from '../src/dashboard-view/parser';
+import { renderLibrarySection } from '../src/view/dashboard/library/index';
+import { nextGroupPropertyValue } from '../src/view/dashboard/library/library-groups';
+import { parse, serialize } from '../src/core/dashboard/parser/index';
 import { El, findByClass } from './mini-dom';
 
 (globalThis as unknown as Record<string, unknown>).activeDocument = {

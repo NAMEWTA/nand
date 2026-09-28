@@ -19,10 +19,10 @@
  */
 import { strict as assert } from 'node:assert';
 import { Notice } from 'obsidian';
-import { NeteaseAccount } from '../src/dashboard-view/music/netease-account';
-import { fetchSongUrl } from '../src/dashboard-view/music/netease-client';
-import { MusicService } from '../src/dashboard-view/music/music-service';
-import type { MusicTrack } from '../src/dashboard-view/types';
+import { NeteaseAccount } from '../src/platform/obsidian/music/netease-account';
+import { fetchSongUrl } from '../src/platform/obsidian/music/netease-client';
+import { MusicService } from '../src/platform/obsidian/music/music-service';
+import type { MusicTrack } from '../src/core/dashboard/types/index';
 import { resetNetwork, calls } from './music-network-stub';
 import { setCookies, windows, flushes, setFailLoad } from './music-electron-stub';
 

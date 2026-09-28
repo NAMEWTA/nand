@@ -1,9 +1,12 @@
+import { installPreactMiniDom } from './preact-mini-dom';
+installPreactMiniDom();
 import { strict as assert } from 'node:assert';
 import type { App } from 'obsidian';
 import { Component } from 'obsidian';
 import { El, findByClass } from './mini-dom';
-import { memoMarkdownSource, renderMemoMarkdown, renderSection } from '../src/dashboard-view/renderer';
-import type { DashboardCard, DashboardColumn, RenderCallbacks } from '../src/dashboard-view/types';
+import { memoMarkdownSource, renderMemoMarkdown, renderSection } from '../src/view/dashboard/renderer/index';
+import type { DashboardCard, DashboardColumn } from '../src/core/dashboard/types/index';
+import type { RenderCallbacks } from '../src/view/dashboard/render-contract';
 
 // Memo card markdown rendering (memo + sticky sections): the textarea stays
 // plain text; the view paint runs Obsidian's MarkdownRenderer over an adapted
@@ -117,7 +120,7 @@ async function main(): Promise<void> {
 				!view.hasClass('dashboard-memo-view--md'),
 				`4: no markdown class without a component (${sectionType})`,
 			);
-			const ownText = (view as unknown as { text: string }).text;
+			const ownText = view.textContent;
 			assert.ok(
 				ownText.includes('一行') && ownText.includes('两行'),
 				`4: plain paint shows the text (${sectionType})`,

@@ -19,9 +19,9 @@
  */
 import { strict as assert } from 'node:assert';
 import { App, TFile } from 'obsidian';
-import { createMemoNote } from '../src/dashboard-view/notes/memo-note';
-import type { MomentLike } from '../src/shared/datetime';
-import type { DashboardCard } from '../src/dashboard-view/types';
+import { createMemoNote } from '../src/view/dashboard/notes/memo-note';
+import type { MomentLike } from '../src/platform/obsidian/datetime';
+import type { DashboardCard } from '../src/core/dashboard/types/index';
 
 (globalThis as unknown as Record<string, unknown>).activeDocument = {
 	querySelector: () => null,
