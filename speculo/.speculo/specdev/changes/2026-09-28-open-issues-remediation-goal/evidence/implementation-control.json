@@ -6,110 +6,53 @@
   "transaction_gateway_checked": false,
   "workspace_policy": "current",
   "implementation_limit": 1,
-  "input_digest": "6f059e75dc340a782fb4f21f839f45445ed7920b37ae49d842c805a13b063638",
-  "goal_contract_digest": "7a954a671db16dfe64a49770d172f7a72b1ccf5f03e80294ee6ee42d10a89a0e",
+  "input_digest": "490c1ff09d2b287cfaa724f69bf020429b91151fcb0c3738f30b863da4a34965",
+  "goal_contract_digest": "2127e0457a86625e5fa9b0faf580f7c34297cb0743616d5513472fd6781743b4",
   "contract_digests": {
-    "2026-09-28-issue-37-terminal-release::T-01": "421674606b595da2b9b0e9a33164643987345d6d704042f4023dc1a033b33365",
-    "2026-09-28-issue-38-agent-preflight::T-01": "c9ad1bfabfbd4e337095a3af8adc6824453cea2ccd3eab03fd3e112cc68c1c36",
-    "2026-09-28-issue-39-widget-source::T-01": "cffedadf96fa4aeb5c463f730584cef4bc6b07a49fe727dee36d9360ff175a11",
-    "2026-09-28-issue-30-live-language-refresh::T-01": "e02dea71b02d70a51a7ed3ccfc0ed94f508b6bfa7b599bab825a5bf55ea28183",
-    "2026-09-28-issue-30-live-language-refresh::T-02": "5a591be122d6572d41112f1c347087bea4a58cf70227ec169b3106c93f2c4404",
-    "2026-09-28-issue-32-product-copy::T-01": "f001b73e67f5fbe0deabe50e2157f178076732945a4a5f6028d7f53d1d46bc3b",
-    "2026-09-28-issue-31-contacts-polish::T-01": "13e9d48a3fd9fa124781daef0fac82947d7252ae2f79cb9648a3667a85ecff6c",
-    "2026-09-28-issue-31-contacts-polish::T-02": "daf1ad669d30dbb15ba38d06c24b3d43aafed49b0825d17e096c74be61aae771",
-    "2026-09-28-issue-40-visible-export::T-01": "8d045b48717b49865743bb7885d08838c7f1f657938f671e582e6c1830d0b098",
-    "2026-09-28-issue-41-workbench-usability::T-01": "baed21e3b478a7e030274a6d764bac37e77199f1f2c6686352c1fee8c6dcfd22",
-    "2026-09-28-issue-41-workbench-usability::T-02": "91d4938382a0c05140863c9e6a8fef70f6471fd3493cbad747ffe0b1a824b01f",
-    "2026-09-28-issue-36-automation-presentation::T-01": "9efb29e29b64a9434e86a21b3fee9c97f95334eaa08caa22fbd33f83241cc35c",
-    "2026-09-28-issue-36-automation-presentation::T-02": "38e9a294869934f1f0a61f2425fb56e69cad976a43caca77d26c5a1d73c77d65",
-    "2026-09-28-issue-36-automation-presentation::T-03": "e7c64b4c6ceb18902da98b57f2e283f97da5e060535ff499d46fab3e401f16ca",
-    "2026-09-28-issue-36-automation-presentation::T-04": "751914ba5dbf0d51d320487001283fa1a959ba7e62bc6ec576b71240fc045e84",
-    "2026-09-28-issue-36-automation-presentation::T-05": "d60fbe3618bd0f3f556c4cece560d938f4688901746155234ba2709f08c5634d"
+    "2026-09-28-issue-37-terminal-release::T-01": "554d22ef9fc6e411b120048fb612307dc3307297b180847d8a8b335042a9dbea",
+    "2026-09-28-issue-38-agent-preflight::T-01": "1dc581166d1c7269d4145f54e25a3122560350de698a91eb9edf2c9e1ae62fff",
+    "2026-09-28-issue-39-widget-source::T-01": "3239d847afd31be8e7b3fa7ac0c7b2acedd28f39d41cffd71c31dd0a7828cd43",
+    "2026-09-28-issue-30-live-language-refresh::T-01": "7094885754a97481d2df269537ad2ba53395893706e91a9e3bd094a31c18f3cd",
+    "2026-09-28-issue-30-live-language-refresh::T-02": "83ee8939b003835a44b831c8159b3b559893d3f3df63342811ba67f9a154407e",
+    "2026-09-28-issue-32-product-copy::T-01": "728048281b5b5e53e9a1082bbae2c1004ef97b0c1c665c5f2cdc1dc41f4ba8a3",
+    "2026-09-28-issue-31-contacts-polish::T-01": "dc00e6afdbfcd3e7a5d3e74a2d39ab76fab95aabc279be85e9ed64207076272f",
+    "2026-09-28-issue-31-contacts-polish::T-02": "4ee984a946b46dc50411523c6ab7f56dcd22a61c18ffc33ed0180cfc14e91cc7",
+    "2026-09-28-issue-40-visible-export::T-01": "894875efff485f4a027167d0acf22fa1371a6c696a8bbd44288d67ba3ea8c456",
+    "2026-09-28-issue-41-workbench-usability::T-01": "a9c982a6ec80fe1d7eb5cfd20b2ff4782bb82d3676edc9870788f41c8bd15594",
+    "2026-09-28-issue-41-workbench-usability::T-02": "d128c1dc376e071764eb33923dbd24b27f418f16cf2835cd606e182c72293dbc",
+    "2026-09-28-issue-36-automation-presentation::T-01": "c2e4f85a1218dc8e293f9d42f6ce1ef33f817cfbb59b5f9df437908f83e6e3dd",
+    "2026-09-28-issue-36-automation-presentation::T-02": "851ff1c7af2c4925055218bd3907d96a39a8d992f4f65b591f457268182f2585",
+    "2026-09-28-issue-36-automation-presentation::T-03": "469a39c853fa0d83c99dab4697de7ef782d1ca1ec2a77b563622a15894b45dd7",
+    "2026-09-28-issue-36-automation-presentation::T-04": "515923f3a0f31a6465f1fe8a311a7d2a89b01dde185eecab0dc5927d31b9641a",
+    "2026-09-28-issue-36-automation-presentation::T-05": "cd788a35ff5ae00ac237be0ce9d1a2319599c681df05bb6d3072ca82dcf6a4bb"
   },
-  "frontier": [
-    "2026-09-28-issue-30-live-language-refresh::T-01"
-  ],
-  "deferred": [
-    {
-      "id": "2026-09-28-issue-30-live-language-refresh::T-02",
-      "reason": "explicit serialization"
-    },
-    {
-      "id": "2026-09-28-issue-31-contacts-polish::T-01",
-      "reason": "explicit serialization"
-    },
-    {
-      "id": "2026-09-28-issue-31-contacts-polish::T-02",
-      "reason": "explicit serialization"
-    },
-    {
-      "id": "2026-09-28-issue-32-product-copy::T-01",
-      "reason": "explicit serialization"
-    },
-    {
-      "id": "2026-09-28-issue-36-automation-presentation::T-01",
-      "reason": "explicit serialization"
-    },
-    {
-      "id": "2026-09-28-issue-39-widget-source::T-01",
-      "reason": "explicit serialization"
-    },
-    {
-      "id": "2026-09-28-issue-40-visible-export::T-01",
-      "reason": "explicit serialization"
-    },
-    {
-      "id": "2026-09-28-issue-41-workbench-usability::T-01",
-      "reason": "explicit serialization"
-    }
-  ],
-  "in_flight": [],
-  "done": [
-    "2026-09-28-issue-38-agent-preflight::T-01"
-  ],
-  "cancelled": [],
-  "blocked": [
+  "frontier": [],
+  "deferred": [],
+  "in_flight": [
     {
       "id": "2026-09-28-issue-37-terminal-release::T-01",
-      "reasons": [
-        "not Ready: blocked"
-      ]
-    },
-    {
-      "id": "2026-09-28-issue-41-workbench-usability::T-02",
-      "reasons": [
-        "dependency not successfully satisfied: 2026-09-28-issue-41-workbench-usability::T-01",
-        "dependency not successfully satisfied: 2026-09-28-issue-30-live-language-refresh::T-02"
-      ]
-    },
-    {
-      "id": "2026-09-28-issue-36-automation-presentation::T-02",
-      "reasons": [
-        "dependency not successfully satisfied: 2026-09-28-issue-36-automation-presentation::T-01"
-      ]
-    },
-    {
-      "id": "2026-09-28-issue-36-automation-presentation::T-03",
-      "reasons": [
-        "dependency not successfully satisfied: 2026-09-28-issue-36-automation-presentation::T-02",
-        "blocked dependency closure: 2026-09-28-issue-36-automation-presentation::T-02"
-      ]
-    },
-    {
-      "id": "2026-09-28-issue-36-automation-presentation::T-04",
-      "reasons": [
-        "dependency not successfully satisfied: 2026-09-28-issue-36-automation-presentation::T-03",
-        "blocked dependency closure: 2026-09-28-issue-36-automation-presentation::T-03"
-      ]
-    },
-    {
-      "id": "2026-09-28-issue-36-automation-presentation::T-05",
-      "reasons": [
-        "dependency not successfully satisfied: 2026-09-28-issue-36-automation-presentation::T-04",
-        "blocked dependency closure: 2026-09-28-issue-36-automation-presentation::T-04"
-      ]
+      "owner": "codex-issue-planning"
     }
   ],
+  "done": [
+    "2026-09-28-issue-38-agent-preflight::T-01",
+    "2026-09-28-issue-39-widget-source::T-01",
+    "2026-09-28-issue-30-live-language-refresh::T-01",
+    "2026-09-28-issue-30-live-language-refresh::T-02",
+    "2026-09-28-issue-32-product-copy::T-01",
+    "2026-09-28-issue-31-contacts-polish::T-01",
+    "2026-09-28-issue-31-contacts-polish::T-02",
+    "2026-09-28-issue-40-visible-export::T-01",
+    "2026-09-28-issue-41-workbench-usability::T-01",
+    "2026-09-28-issue-41-workbench-usability::T-02",
+    "2026-09-28-issue-36-automation-presentation::T-01",
+    "2026-09-28-issue-36-automation-presentation::T-02",
+    "2026-09-28-issue-36-automation-presentation::T-03",
+    "2026-09-28-issue-36-automation-presentation::T-04",
+    "2026-09-28-issue-36-automation-presentation::T-05"
+  ],
+  "cancelled": [],
+  "blocked": [],
   "invalidated": [],
   "eligible_for_final_verification": false,
   "validation_errors": [],

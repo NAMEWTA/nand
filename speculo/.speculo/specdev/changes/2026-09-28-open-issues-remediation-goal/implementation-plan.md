@@ -23,7 +23,7 @@ Outcome：9条open issue中的确认残留与用户确认的自动化开关全�
 
 ## 2. Ready Frontier and Waves
 
-当前仅plan，授权门关闭，所以可执行frontier为空。结构ready候选以控制器从子票动态计算；下面是满足依赖后的推荐串行队列，每个Wave只有1票：
+本轮已获得完整本地实施授权，15票完成；剩余#37已进入最终候选与公开发行门。结构ready候选以控制器从子票动态计算；下面是满足依赖后的推荐串行队列，每个Wave只有1票：
 
 1. `2026-09-28-issue-37-terminal-release::T-01`
 2. `2026-09-28-issue-38-agent-preflight::T-01`
@@ -50,11 +50,11 @@ current/direct-parent，唯一Lead及实现writer codex-issue-planning，impleme
 
 每票先Map→项目Skill→Ticket→上游事实；读取绑定字节摘要，漂移则由owner审查。运行包只允许当前票writable_paths；当前权限模型若禁止某个必要路径（例如技能目录），该票在执行前登记具体受限路径，不绕过或移动源，独立分支可继续。
 
-授权：本地分析/计划已授权；实现、implementation commit、direct-parent推进、push/tag/release、评论/关闭issue、archive均未授权。run入口根据当时用户指令核对，文件里的权限文字不能授予权限。
+授权：用户本次完整实施请求覆盖本地实现、测试、必要implementation commit和current/direct-parent推进；具体push/tag/release仍按G4单独确认。评论/关闭issue和archive未授权。
 
 ## 4. Repository Integration Queue
 
-repository=NAMEWTA/nand，branch=main（运行前重读），一个integration队列；基线及代码摘要见子Evidence。每票记录parent-before、implementation、result SHA及命令/E2E。当前零commit、零candidate、零dispatch、零locks。不能重置/清理他人工作；当前分支失败时停止启动后继，保留失败修改并按授权纠正。
+repository=NAMEWTA/nand，branch=main（运行前重读），一个integration队列；基线及代码摘要见子Evidence。每票记录parent-before、implementation、result SHA及命令/E2E。本轮生产与证据提交已记录于逐票Evidence；最终生产候选为096c853fb2e08699603f79fef011895b9b9c1703。不能重置/清理他人工作；当前分支失败时停止启动后继，保留失败修改并按授权纠正。
 
 ## 5. Gates and Aggregate Verification
 
@@ -73,9 +73,9 @@ G5：36条AC逐项对账，各member完成其Goal，父聚合Evidence完整；�
 
 ## 7. Progress and Decisions
 
-所有子Spec/16张票已ready，父Map ready；本父Plan使用schema允许的blocked/ready_for_execution=false，准确表示“规划已完成，运行门尚未打开”，不表示本次分析未交付。当前work保留specdev/goal-plan作为父恢复键。下一次用户要求实施时从父tickets-map进入P run，并先做G0。
+15票done、#37 in_progress；34/36AC passed。当前恢复键为本父Goal与evidence/final-audit.json。聚合测试及15个直接父/祖先/写集检查已通过；剩余公开发行门待具体动作授权。
 
-每个child继续拥有自身状态、诊断和验收；本父不得越过Gate。最终聚合Evidence计划写在本父evidence/implementation-orchestration.md，现在不存在，不能引用为已通过。
+每个child继续拥有自身状态、诊断和验收；本父不得越过Gate。实际逐票编排见evidence/implementation-orchestration.md，聚合AC对账见evidence/aggregate-verification.md；历史规划快照保留在evidence/planning-snapshot/。
 
 ## 8. 实施授权更新（2026-09-28）
 

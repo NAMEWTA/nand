@@ -8,11 +8,11 @@ artifact: "ticket"
 change: "2026-09-28-issue-37-terminal-release"
 id: "T-01"
 title: "准备并发布同提交配套终端服务资产"
-status: "blocked"
+status: "in_progress"
 kind: "operations"
 planning_depth: "deep"
 planning_depth_reason: "跨持久化/生命周期或发布边界，要求恢复和集成门"
-ready: false
+ready: true
 risk: "high"
 blocked_by: []
 contract_ids: ["AC-001", "AC-002"]

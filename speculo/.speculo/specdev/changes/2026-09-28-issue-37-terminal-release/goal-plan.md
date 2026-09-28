@@ -78,3 +78,5 @@ HEAD/输入/Skill摘要漂移：暂停相交分支，返回对应owner修订计�
 ## Parent orchestration
 
 本change现在归属 <Path>{roots.state}/specdev/changes/2026-09-28-open-issues-remediation-goal/implementation-plan.md</Path>；该父Plan拥有跨change串行、共享资源和全局执行边界；本Goal只保留子合同Gate，策略相同不冲突。请从父 <Path>{roots.state}/specdev/changes/2026-09-28-open-issues-remediation-goal/tickets-map.md</Path> 恢复，不独立抢占writer。
+
+实施更新：完整本地实施授权已到位，初始release gate提交e7c59b2与最终候选096c853fb2e08699603f79fef011895b9b9c1703已落地；required公开E2E尚未满足，不标completed。具体push/tag/release授权仍为最后发布门。当前宿主环境已可用，见evidence/T-01.md和父聚合验收。

@@ -6,7 +6,7 @@ requested_deliverables: []
 deliverable_policy: "用户要求完整覆盖所有确认问题，未指定固定数量；本 Map 枚举全部切片，不以票数替代验收"
 artifact: "tickets-map"
 change: "2026-09-28-issue-37-terminal-release"
-status: "ready"
+status: "in_progress"
 ---
 
 # Tickets Map: #37 发布与插件匹配的终端服务
@@ -32,7 +32,7 @@ Spec <Path>{roots.state}/specdev/changes/2026-09-28-issue-37-terminal-release/sp
 
 | ID | Ticket | 可观察产出 | Blocked By | Depth | Risk | Ready | Owner | Contract IDs | Wave/Gate | Status |
 |---|---|---|---|---|---|---|---|---|---|---|
-| T-01 | <Path>{roots.state}/specdev/changes/2026-09-28-issue-37-terminal-release/ticket/01-plan.md</Path> | 准备并发布同提交配套终端服务资产 | — | deep | high | yes | codex-issue-planning | AC-001, AC-002 | G1/G2/G3 | ready |
+| T-01 | <Path>{roots.state}/specdev/changes/2026-09-28-issue-37-terminal-release/ticket/01-plan.md</Path> | 准备并发布同提交配套终端服务资产 | — | deep | high | yes | codex-issue-planning | AC-001, AC-002 | G1/G2/G3 | in_progress |
 
 frontmatter 是 Ticket 状态权威；本表只作投影。
 
