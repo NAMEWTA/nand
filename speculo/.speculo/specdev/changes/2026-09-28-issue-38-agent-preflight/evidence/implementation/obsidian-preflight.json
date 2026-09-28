@@ -1,0 +1,77 @@
+{
+  "output": [
+    {
+      "language": "en",
+      "expected": "agentDisabled",
+      "actual": "agentDisabled",
+      "message": "This agent is disabled in settings"
+    },
+    {
+      "language": "en",
+      "expected": "cliMissing",
+      "actual": "cliMissing",
+      "message": "The agent CLI is not installed or its configured path is invalid"
+    },
+    {
+      "language": "en",
+      "expected": "cwdInvalid",
+      "actual": "cwdInvalid",
+      "message": "Choose an existing working directory inside this vault"
+    },
+    {
+      "language": "en",
+      "expected": "cwdInvalid",
+      "actual": "cwdInvalid",
+      "message": "Choose an existing working directory inside this vault"
+    },
+    {
+      "language": "en",
+      "expected": "permissionRequired",
+      "actual": "permissionRequired",
+      "message": "Launch this agent manually once to acknowledge its configured permission mode"
+    },
+    {
+      "language": "en",
+      "expected": "sessionMissing",
+      "actual": "sessionMissing",
+      "message": "The selected session cannot be resumed"
+    },
+    {
+      "language": "zh",
+      "expected": "agentDisabled",
+      "actual": "agentDisabled",
+      "message": "此智能体已在设置中关闭"
+    },
+    {
+      "language": "zh",
+      "expected": "cliMissing",
+      "actual": "cliMissing",
+      "message": "未安装智能体 CLI，或配置的路径无效"
+    },
+    {
+      "language": "zh",
+      "expected": "cwdInvalid",
+      "actual": "cwdInvalid",
+      "message": "请选择当前库内存在的工作目录"
+    },
+    {
+      "language": "zh",
+      "expected": "cwdInvalid",
+      "actual": "cwdInvalid",
+      "message": "请选择当前库内存在的工作目录"
+    },
+    {
+      "language": "zh",
+      "expected": "permissionRequired",
+      "actual": "permissionRequired",
+      "message": "请先手动启动一次该智能体，确认已配置的权限模式"
+    },
+    {
+      "language": "zh",
+      "expected": "sessionMissing",
+      "actual": "sessionMissing",
+      "message": "指定会话无法恢复"
+    }
+  ],
+  "liveSlots": 0
+}

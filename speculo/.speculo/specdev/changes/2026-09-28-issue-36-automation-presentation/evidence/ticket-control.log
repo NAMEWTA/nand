@@ -1,0 +1,69 @@
+{
+  "schema_version": 1,
+  "scope": "2026-09-28-issue-36-automation-presentation",
+  "mode": "read-only-analysis",
+  "authorization_checked": false,
+  "transaction_gateway_checked": false,
+  "workspace_policy": "current",
+  "implementation_limit": 1,
+  "input_digest": "e9b640f98300482907ca0a14343f54c121ab0be685c93b4b9c2b98dfb8514399",
+  "goal_contract_digest": "5b174b9f534c0403e0cbb07a24e1213ff091d37ad4351c27d9d2f40df6aed105",
+  "contract_digests": {
+    "T-01": "912e55fb01c7ea1e24e0b542f4ca9aaf21c8a0dde5313f494c41125847a3d8dd",
+    "T-02": "e0b950397ee4b44ae2cceb09ef71769a89ba6529233e8f462549c8183b722e44",
+    "T-03": "e884dba8272b564ebd6cd4cac6e6a8b0696886065c94b5098c9cd661cd19e517",
+    "T-04": "7b6141f276644a6d44d9c0f06f38ab7bce108468a0ad4084c84482838f47f9fa",
+    "T-05": "b9a9f6ea3a438aa947478c401fa40a062052076e4f4a939b660e2a78a68dda3f"
+  },
+  "frontier": [],
+  "deferred": [],
+  "in_flight": [],
+  "done": [],
+  "cancelled": [],
+  "blocked": [
+    {
+      "id": "T-01",
+      "reasons": [
+        "Goal planning gate is not ready for execution"
+      ]
+    },
+    {
+      "id": "T-02",
+      "reasons": [
+        "Goal planning gate is not ready for execution",
+        "dependency not successfully satisfied: T-01",
+        "blocked dependency closure: T-01"
+      ]
+    },
+    {
+      "id": "T-03",
+      "reasons": [
+        "Goal planning gate is not ready for execution",
+        "dependency not successfully satisfied: T-02",
+        "blocked dependency closure: T-02"
+      ]
+    },
+    {
+      "id": "T-04",
+      "reasons": [
+        "Goal planning gate is not ready for execution",
+        "dependency not successfully satisfied: T-03",
+        "blocked dependency closure: T-03"
+      ]
+    },
+    {
+      "id": "T-05",
+      "reasons": [
+        "Goal planning gate is not ready for execution",
+        "dependency not successfully satisfied: T-04",
+        "blocked dependency closure: T-04"
+      ]
+    }
+  ],
+  "invalidated": [],
+  "eligible_for_final_verification": false,
+  "validation_errors": [],
+  "errors": [],
+  "warnings": [],
+  "next": "Lead must verify real authorization, existing transaction/ownership gateways, Skill execution and Goal acceptance; this output does not execute anything."
+}

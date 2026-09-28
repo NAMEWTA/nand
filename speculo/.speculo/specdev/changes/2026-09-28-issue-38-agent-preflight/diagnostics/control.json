@@ -1,0 +1,6 @@
+{
+  "path": "src/view/automations/editor.ts",
+  "find": ".find((a) => a.enabled)",
+  "replace": ".find((a) => a.enabled && a.installed !== false)",
+  "purpose": "仅使默认选择使用与下拉框一致的可用条件"
+}

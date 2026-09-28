@@ -1,0 +1,49 @@
+{
+  "schema_version": 6,
+  "artifact": "change-status",
+  "change": "2026-09-28-issue-32-product-copy",
+  "change_status": "active",
+  "current_work": null,
+  "works_run": [
+    "specdev/triage",
+    "specdev/diagnose-bugs",
+    "specdev/spec",
+    "specdev/tickets",
+    "specdev/goal-plan"
+  ],
+  "claimed_investigations": [],
+  "execution_authorization": {
+    "implementation_commit": {
+      "status": "not-authorized",
+      "source": null,
+      "granted_at": null,
+      "scope": "本轮仅远程只读摄入、诊断和规划"
+    },
+    "local_candidate_integration": {
+      "status": "not-authorized",
+      "source": null,
+      "granted_at": null,
+      "scope": "本轮仅远程只读摄入、诊断和规划"
+    },
+    "source_cleanup": {
+      "status": "not-authorized",
+      "source": null,
+      "granted_at": null,
+      "scope": "本轮仅远程只读摄入、诊断和规划"
+    }
+  },
+  "leadership": {
+    "current": "codex-issue-planning",
+    "epoch": 1,
+    "assigned_at": "2026-09-28T05:55:43.895113+00:00",
+    "history": []
+  },
+  "created_at": "2026-09-28T05:55:43.895113+00:00",
+  "updated_at": "2026-09-28T06:22:59.239765+00:00",
+  "completed_at": null,
+  "archived": false,
+  "archive_path": null,
+  "blockers": [],
+  "deviations": [],
+  "worktrees": []
+}

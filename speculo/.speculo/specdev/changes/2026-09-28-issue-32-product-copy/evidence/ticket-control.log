@@ -1,0 +1,33 @@
+{
+  "schema_version": 1,
+  "scope": "2026-09-28-issue-32-product-copy",
+  "mode": "read-only-analysis",
+  "authorization_checked": false,
+  "transaction_gateway_checked": false,
+  "workspace_policy": "current",
+  "implementation_limit": 1,
+  "input_digest": "2ec80b9a6189ee804d26b3764baa79bd11e254a0e82ac83e958d0b56022eb2ae",
+  "goal_contract_digest": "50f5ef2c24379017f2b2bfa94a62ff4d2b57c8367aa0372be0632b80c2319834",
+  "contract_digests": {
+    "T-01": "d6bedd9d981b7c09306da28e915234563aedc402ebdf17311b04724b1782da68"
+  },
+  "frontier": [],
+  "deferred": [],
+  "in_flight": [],
+  "done": [],
+  "cancelled": [],
+  "blocked": [
+    {
+      "id": "T-01",
+      "reasons": [
+        "Goal planning gate is not ready for execution"
+      ]
+    }
+  ],
+  "invalidated": [],
+  "eligible_for_final_verification": false,
+  "validation_errors": [],
+  "errors": [],
+  "warnings": [],
+  "next": "Lead must verify real authorization, existing transaction/ownership gateways, Skill execution and Goal acceptance; this output does not execute anything."
+}

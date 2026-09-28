@@ -1,0 +1,2 @@
+WARNING: concurrent Ready Tickets T-01/T-02 share owned paths; an explicit owner or serialization is required
+Summary: 0 error(s), 1 warning(s)

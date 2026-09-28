@@ -1,0 +1,26 @@
+{
+  "language": "zh",
+  "definitions": [
+    {
+      "name": "synthetic-preserved-zh-0",
+      "agentId": "codex",
+      "prompt": "User prompt preserved 中文"
+    },
+    {
+      "name": "synthetic-preserved-en-1",
+      "agentId": "codex",
+      "prompt": "User prompt preserved 中文"
+    },
+    {
+      "name": "synthetic-preserved-zh-2",
+      "agentId": "codex",
+      "prompt": "User prompt preserved 中文"
+    }
+  ],
+  "runCodes": [
+    "permissionRequired",
+    "permissionRequired",
+    "permissionRequired"
+  ],
+  "liveSlots": 0
+}

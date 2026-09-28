@@ -1,0 +1,61 @@
+{
+  "obsidian": "1.13.7",
+  "vault": "/tmp/nand-obsidian-e2e/vault",
+  "output": [
+    {
+      "language": "zh",
+      "emptyNotice": [
+        "请选择已启用的智能体和工作目录"
+      ],
+      "emptyOptions": ""
+    },
+    {
+      "language": "zh",
+      "title": "synthetic-preserved-zh-0",
+      "agent": "codex",
+      "prompt": "User prompt preserved 中文",
+      "runCode": "permissionRequired",
+      "status": "failed"
+    },
+    {
+      "language": "en",
+      "emptyNotice": [
+        "请选择已启用的智能体和工作目录",
+        "所选智能体不可用。请启用并安装其 CLI，或明确选择其他智能体。",
+        "synthetic-preserved-zh-0\n失败: 请先手动启动一次该智能体，确认已配置的权限模式",
+        "Select an enabled agent and working directory"
+      ],
+      "emptyOptions": ""
+    },
+    {
+      "language": "en",
+      "title": "synthetic-preserved-en-1",
+      "agent": "codex",
+      "prompt": "User prompt preserved 中文",
+      "runCode": "permissionRequired",
+      "status": "failed"
+    },
+    {
+      "language": "zh",
+      "emptyNotice": [
+        "请选择已启用的智能体和工作目录",
+        "所选智能体不可用。请启用并安装其 CLI，或明确选择其他智能体。",
+        "synthetic-preserved-zh-0\n失败: 请先手动启动一次该智能体，确认已配置的权限模式",
+        "Select an enabled agent and working directory",
+        "The selected agent is unavailable. Enable it and install its CLI, or select another agent.",
+        "synthetic-preserved-en-1\nFailed: Launch this agent manually once to acknowledge its configured permission mode",
+        "请选择已启用的智能体和工作目录"
+      ],
+      "emptyOptions": ""
+    },
+    {
+      "language": "zh",
+      "title": "synthetic-preserved-zh-2",
+      "agent": "codex",
+      "prompt": "User prompt preserved 中文",
+      "runCode": "permissionRequired",
+      "status": "failed"
+    }
+  ],
+  "persisted": 3
+}

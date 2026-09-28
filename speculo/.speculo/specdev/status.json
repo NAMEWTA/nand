@@ -1,7 +1,38 @@
 {
   "schema_version": 5,
   "workflow": "specdev",
-  "active": [],
+  "active": [
+    {
+      "change": "2026-09-28-issue-30-live-language-refresh"
+    },
+    {
+      "change": "2026-09-28-issue-31-contacts-polish"
+    },
+    {
+      "change": "2026-09-28-issue-32-product-copy"
+    },
+    {
+      "change": "2026-09-28-issue-36-automation-presentation"
+    },
+    {
+      "change": "2026-09-28-issue-37-terminal-release"
+    },
+    {
+      "change": "2026-09-28-issue-38-agent-preflight"
+    },
+    {
+      "change": "2026-09-28-issue-39-widget-source"
+    },
+    {
+      "change": "2026-09-28-issue-40-visible-export"
+    },
+    {
+      "change": "2026-09-28-issue-41-workbench-usability"
+    },
+    {
+      "change": "2026-09-28-open-issues-remediation-goal"
+    }
+  ],
   "archived": [
     "2026-09-25-statusbar-hierarchy-error",
     "2026-09-25-settings-narrow-column",

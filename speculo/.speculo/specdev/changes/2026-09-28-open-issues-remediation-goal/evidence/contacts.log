@@ -1,0 +1,31 @@
+Already up to date
+Done in 310ms using pnpm v11.1.3
+$ esbuild scripts/verify-contacts.ts --bundle --platform=node --format=cjs --outfile=scripts/tmp/verify-contacts.cjs --alias:obsidian=./scripts/obsidian-stub.ts --loader:.md=text --log-level=warning && node --test scripts/tmp/verify-contacts.cjs
+✔ portable Markdown round trip preserves strings, Unicode, links, table escapes and free prose (18.752141ms)
+✔ field-level merge preserves unrelated external edits, unknown properties and untouched body bytes (6.611285ms)
+✔ same-field and same-section conflicts retain the external contents (9.79713ms)
+✔ malformed YAML, duplicate identity and table boundaries never silently truncate a note (4.375233ms)
+✔ manual rows resolve as ordinary Markdown and receive persistent row IDs on save (3.022087ms)
+✔ dates allow month precision and unknown former employment without treating it as current (1.343877ms)
+✔ employment index deduplicates people, supports concurrent jobs and preserves former jobs (3.592816ms)
+✔ direct relationships have computed inverses, no duplicate writes and no inferred friendships (2.109047ms)
+✔ renames preserve identity; duplicate IDs and conflicting visible links block mutation (2.993108ms)
+✔ filters are OR within a dimension and AND across dimensions; 5,000 records paginate from the index (115.919448ms)
+✔ folder preferences reject hidden/external/traversal paths and retain defaults (0.711657ms)
+✔ write queue recovers after failures and keeps saves to the same identity ordered (0.548396ms)
+✔ vault integration: duplicate names, real files, disk failure, external edits, deletion and rebuilding (22.044979ms)
+✔ folder switching rejects stale forms and preserves old files (3.69068ms)
+✔ two windows merge independent fields but reject overlapping edits (7.819377ms)
+✔ unsaved edits in the native Markdown editor prevent panel writes (2.216337ms)
+✔ an unreadable file does not hide other records during a rebuild (4.179738ms)
+✔ a relationship entered from the opposite profile cannot duplicate its computed inverse (0.441128ms)
+✔ renaming updates the generated heading without overwriting a customized heading (2.136363ms)
+✔ new notes localize headings and tables while language changes preserve parsing (1.218482ms)
+ℹ tests 20
+ℹ suites 0
+ℹ pass 20
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 321.650865

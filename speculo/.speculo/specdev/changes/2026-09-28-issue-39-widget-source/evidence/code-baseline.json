@@ -1,0 +1,23 @@
+{
+  "head": "09aade655241fff439d3147a55ec1448a4f93eea",
+  "branch": "main",
+  "captured_at": "2026-09-28T06:18:46.176902+00:00",
+  "files": [
+    {
+      "path": "src/platform/obsidian/dashboard/automation.ts",
+      "sha256": "9baa6beaf2cfa817a4afc98e4d5c65b334ee18c13580d86250ced844fd1c97a6"
+    },
+    {
+      "path": "src/plugin/workflows/automation-host.ts",
+      "sha256": "3ebc35adb46ca7f6428c8acc404753a36597893f2d2a5c8333e6cd327864cb4f"
+    },
+    {
+      "path": "src/view/automations/view.tsx",
+      "sha256": "a788f76b744977d8c2d61d646a1aafe1a9f3cbed366965a8594fc5ee1e7c23cd"
+    },
+    {
+      "path": "src/view/notifications/inbox.ts",
+      "sha256": "a696d5c67e1dfa498a016c3516b05e0114579399b28722fb3f15867e02bce02d"
+    }
+  ]
+}

@@ -1,0 +1,6 @@
+{
+  "path": "src/view/contacts/forms.ts",
+  "find": "ct('clear')",
+  "replace": "'清除'",
+  "purpose": "仅替换关系清除按钮的文字，筛选键保持原值"
+}

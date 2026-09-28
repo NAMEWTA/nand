@@ -1,0 +1,8 @@
+{"error":"Error: 来源不存在或包含重复的任务标识","ref":{"kind":"widget","path":"dashboard","id":"widget:probe"}}
+elapsed_ms=170
+#39 default widget source must open its existing dashboard.md
++ actual - expected
+
++ undefined
+- true
+

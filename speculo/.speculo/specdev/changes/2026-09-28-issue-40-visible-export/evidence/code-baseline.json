@@ -1,0 +1,19 @@
+{
+  "head": "09aade655241fff439d3147a55ec1448a4f93eea",
+  "branch": "main",
+  "captured_at": "2026-09-28T06:18:46.176902+00:00",
+  "files": [
+    {
+      "path": "src/platform/obsidian/ai-vault/service.ts",
+      "sha256": "3069f29aff39de35f0524172b8d4ed2ad0e69c9ed1f7d7e99be7d808ddff0668"
+    },
+    {
+      "path": "src/view/terminal/workbench.tsx",
+      "sha256": "f49a9b5311c07f74375a98549cc9a4d4d88e416ca0d00be641c08a539cc2826e"
+    },
+    {
+      "path": "docs/agent-workbench.md",
+      "sha256": "7ac6103507e58b9429b5744cf1631133a8e384c4b12f54d6f6e81c9387e05741"
+    }
+  ]
+}

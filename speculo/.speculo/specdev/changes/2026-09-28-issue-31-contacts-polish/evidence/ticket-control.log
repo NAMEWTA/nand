@@ -1,0 +1,42 @@
+{
+  "schema_version": 1,
+  "scope": "2026-09-28-issue-31-contacts-polish",
+  "mode": "read-only-analysis",
+  "authorization_checked": false,
+  "transaction_gateway_checked": false,
+  "workspace_policy": "current",
+  "implementation_limit": 1,
+  "input_digest": "a0d86067e813aae166b4aa81737a4918bad305607f839e80fb1adcb3e476b8c9",
+  "goal_contract_digest": "64469e3068ff27be3766dbade77bc3c0a394668fa5f76bc68582cc1a8d5151de",
+  "contract_digests": {
+    "T-01": "b969b2462b8e9bd0c64ceb263ec9a5e4d3cd9ad6bd9899fe72c324b5cc36143d",
+    "T-02": "4a605e53a4967b77ea68b76bad2491e06aebcee39d332de100af40ab5223bb94"
+  },
+  "frontier": [],
+  "deferred": [],
+  "in_flight": [],
+  "done": [],
+  "cancelled": [],
+  "blocked": [
+    {
+      "id": "T-01",
+      "reasons": [
+        "Goal planning gate is not ready for execution"
+      ]
+    },
+    {
+      "id": "T-02",
+      "reasons": [
+        "Goal planning gate is not ready for execution"
+      ]
+    }
+  ],
+  "invalidated": [],
+  "eligible_for_final_verification": false,
+  "validation_errors": [],
+  "errors": [],
+  "warnings": [
+    "concurrent Ready Tickets T-01/T-02 share owned paths; an explicit owner or serialization is required"
+  ],
+  "next": "Lead must verify real authorization, existing transaction/ownership gateways, Skill execution and Goal acceptance; this output does not execute anything."
+}
