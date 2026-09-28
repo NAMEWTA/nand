@@ -1,0 +1,22 @@
+{
+  "id": "nand:copy-relative-reference",
+  "before": [
+    {
+      "modifiers": [
+        "Mod",
+        "Shift"
+      ],
+      "key": "9"
+    }
+  ],
+  "after": [
+    {
+      "modifiers": [
+        "Mod",
+        "Shift"
+      ],
+      "key": "9"
+    }
+  ],
+  "count": 42
+}

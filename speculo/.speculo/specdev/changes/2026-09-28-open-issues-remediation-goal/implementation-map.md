@@ -3,7 +3,7 @@ schema_version: 1
 artifact: "implementation-map"
 change: "2026-09-28-open-issues-remediation-goal"
 status: "in_progress"
-revision: 4
+revision: 5
 members: ["2026-09-28-issue-37-terminal-release", "2026-09-28-issue-38-agent-preflight", "2026-09-28-issue-39-widget-source", "2026-09-28-issue-30-live-language-refresh", "2026-09-28-issue-32-product-copy", "2026-09-28-issue-31-contacts-polish", "2026-09-28-issue-40-visible-export", "2026-09-28-issue-41-workbench-usability", "2026-09-28-issue-36-automation-presentation"]
 tasks: ["2026-09-28-issue-37-terminal-release::T-01", "2026-09-28-issue-38-agent-preflight::T-01", "2026-09-28-issue-39-widget-source::T-01", "2026-09-28-issue-30-live-language-refresh::T-01", "2026-09-28-issue-30-live-language-refresh::T-02", "2026-09-28-issue-32-product-copy::T-01", "2026-09-28-issue-31-contacts-polish::T-01", "2026-09-28-issue-31-contacts-polish::T-02", "2026-09-28-issue-40-visible-export::T-01", "2026-09-28-issue-41-workbench-usability::T-01", "2026-09-28-issue-41-workbench-usability::T-02", "2026-09-28-issue-36-automation-presentation::T-01", "2026-09-28-issue-36-automation-presentation::T-02", "2026-09-28-issue-36-automation-presentation::T-03", "2026-09-28-issue-36-automation-presentation::T-04", "2026-09-28-issue-36-automation-presentation::T-05"]
 dependencies: ["2026-09-28-issue-41-workbench-usability::T-02 <- 2026-09-28-issue-41-workbench-usability::T-01", "2026-09-28-issue-36-automation-presentation::T-02 <- 2026-09-28-issue-36-automation-presentation::T-01", "2026-09-28-issue-36-automation-presentation::T-03 <- 2026-09-28-issue-36-automation-presentation::T-02", "2026-09-28-issue-36-automation-presentation::T-04 <- 2026-09-28-issue-36-automation-presentation::T-03", "2026-09-28-issue-36-automation-presentation::T-05 <- 2026-09-28-issue-36-automation-presentation::T-04", "2026-09-28-issue-36-automation-presentation::T-01 <- 2026-09-28-issue-38-agent-preflight::T-01", "2026-09-28-issue-41-workbench-usability::T-02 <- 2026-09-28-issue-30-live-language-refresh::T-02"]
@@ -70,3 +70,5 @@ revision=2：按用户实施指令启动；#37/T-01 增补发布校验脚本、�
 revision=3：#38/T-01 增补原生控件测试替身写集，仍为当前工作区串行。
 
 revision=4：#39/T-01 增补来源错误翻译及窄屏部件定位/清理写集；唯一写者与 AC 不变。
+
+revision=5：#30/T-01 增补原生命令名称适配器写集，保持串行与相同合同。
