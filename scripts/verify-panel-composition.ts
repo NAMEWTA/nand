@@ -1,3 +1,6 @@
+import { AutomationsPanel } from '../src/view/automations/AutomationsPanel';
+import type { AutomationViewHost } from '../src/view/automations/panel-contract';
+import type { AutomationDefinition } from '../src/shared/automation/types';
 import assert from 'node:assert/strict';
 import { Notice, TFile, TFolder, type App } from 'obsidian';
 import { NativeHistory } from '../src/platform/obsidian/ai-vault/service';
@@ -233,7 +236,7 @@ async function verifyExports() {
 	render(null, panel);
 	console.log('History export: visible Vault files, concurrent collisions, safe names, content, localized failures and actual sidebar open/pending behavior passed.');
 }
-void verifyExports().then(verifyHistoryMatrix).then(verifySessionIdentity).catch((error) => { console.error(error); process.exitCode = 1; });
+void verifyExports().then(verifyHistoryMatrix).then(verifySessionIdentity).then(verifyAutomationFilters).catch((error) => { console.error(error); process.exitCode = 1; });
 
 async function verifySessionIdentity() {
 	const panel = document.createElement('div'); document.body.appendChild(panel);
@@ -361,4 +364,48 @@ async function verifyHistoryMatrix() {
 		render(null, panel);
 	}
 	console.log('History matrix: zh/en/zh dates, 111/101 ranges, search/filter empty states, metadata toggles, page shrink and unknown usage passed.');
+}
+
+async function verifyAutomationFilters() {
+	const panel = document.createElement('div'); document.body.appendChild(panel);
+	const prompt = 'User prompt 第一行\nSecond line 保留';
+	const definitions: AutomationDefinition[] = Array.from({ length: 106 }, (_, i) => ({
+		id: String(i), name: `Automation ${i}`, enabled: i % 2 === 0, deviceId: 'device', revision: 1,
+		schedule: { kind: 'manual' }, action: i % 3 === 0 ? { kind: 'notify', body: prompt } : { kind: 'agent', agentId: i % 2 ? 'codex' : 'claude-code', cwd: '/vault', prompt, sessionMode: 'fresh' },
+		channels: ['in-app'], notifyOn: 'always', graceMinutes: 30, createdAt: 0, updatedAt: 0,
+	}));
+	const host = { service: { deviceId: 'device', definitions, state: { cursors: {}, runs: [{ id: 'run', automationId: '1', revision: 1, status: 'succeeded', startedAt: 0, message: '', output: 'CLI output\n code()' }] }, agent: () => ({ listAgents: () => [{ id: 'codex', title: 'Codex' }, { id: 'claude-code', title: 'Claude Code' }] }) }, edit: () => {}, inbox: () => {} } as unknown as AutomationViewHost;
+	const state = { selected: '1', search: '', filter: '', agentFilter: '' };
+	const actions = { clearHistory: () => {}, remove: () => {}, run: (operation: () => Promise<unknown>) => { void operation(); } };
+	const paint = () => render(h(AutomationsPanel, { host, state, refresh: paint, actions }), panel);
+	const filter = (index: number, value: string) => {
+		const el = panel.querySelectorAll('select')[index]!;
+		Object.defineProperty(el, 'value', { value, writable: true, configurable: true });
+		el.dispatchEvent(new document.defaultView!.Event('change', { bubbles: true }));
+	};
+	const ids = () => Array.from(panel.querySelectorAll('.nand-automation-list strong')).map(el => el.textContent);
+	for (const language of ['zh', 'en', 'zh'] as const) {
+		setLanguage(language); state.search = ''; state.filter = ''; state.agentFilter = ''; state.selected = '1'; paint();
+		assert.equal(ids().length, 106);
+		for (const select of Array.from(panel.querySelectorAll('select'))) assert.equal(select.closest('label')?.querySelector('span')?.textContent, select.getAttribute('aria-label'), 'Visible and accessible filter names agree');
+		assert.deepEqual(Array.from(panel.querySelectorAll('select')).map(el => el.getAttribute('aria-label')), [t('automation.actionFilter'), t('automation.agentFilter')]);
+		assert.equal(panel.querySelector('.nand-automation-prompt')?.textContent, prompt);
+		assert.equal(panel.querySelector('.nand-automation-prompt')?.tagName, 'P');
+		assert.equal(panel.querySelector('.nand-automation-run pre')?.textContent, 'CLI output\n code()');
+		filter(0, 'enabled'); filter(1, 'claude-code');
+		assert.deepEqual(ids(), definitions.filter(d => d.enabled && d.action.kind === 'agent' && d.action.agentId === 'claude-code').map(d => d.name));
+		assert.equal(panel.querySelector('.nand-automation-detail h3')?.textContent, 'Automation 1', 'Filtering preserves the selected detail');
+		const search = panel.querySelector('input')!; search.value = 'no-such-record'; search.dispatchEvent(new document.defaultView!.Event('input', { bubbles: true }));
+		assert.equal(ids().length, 0);
+		assert.ok(panel.querySelector('.nand-automation-list')?.textContent?.includes(t('automation.empty')));
+	}
+	Object.assign(host.service, { loadError: 'Synthetic load failure\n'.repeat(200) });
+	let retried = false;
+	host.retry = async () => { retried = true; };
+	paint();
+	panel.querySelector<HTMLButtonElement>('.nand-automation-load-error button')!.click();
+	await new Promise<void>(resolve => setTimeout(resolve, 0));
+	assert.equal(retried, true, 'Load failure retains a usable retry action');
+	render(null, panel);
+	console.log('Automation panel: visible filter labels, combined filtering, empty result, retained selection and prompt/output semantics passed.');
 }

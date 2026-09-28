@@ -25545,14 +25545,21 @@ body:where(.nand-iconic-enabled)[data-theme="Ukiyo"] .workspace-leaf > .workspac
 }
 
 /* Automation surfaces share the app's visual scale. */
-.nand-automation-view { padding: var(--size-4-4); }
+.workspace-leaf-content[data-type="nand-automation-view"] { container-type: inline-size; container-name: nand-automation; }
+.nand-automation-view { padding: var(--size-4-4); display: flex; flex-direction: column; overflow: hidden; }
+.nand-automation-view > .nand-automation-toolbar, .nand-automation-view > p { flex-shrink: 0; }
+.nand-automation-load-error { min-height: 0; overflow: auto; }
+.nand-automation-load-error pre { white-space: pre-wrap; overflow-wrap: anywhere; }
 .nand-automation-toolbar { display: flex; flex-wrap: wrap; gap: var(--size-4-2); align-items: center; }
-.nand-automation-layout { display: grid; grid-template-columns: minmax(220px, 32%) minmax(0, 1fr); gap: var(--size-4-4); }
-.nand-automation-list { display: flex; flex-direction: column; gap: var(--size-4-2); }
-.nand-automation-list button { height: auto; min-height: 72px; display: flex; flex-direction: column; align-items: start; gap: var(--size-4-1); text-align: start; white-space: normal; }
+.nand-automation-filter { display: flex; flex-direction: column; gap: var(--size-4-1); min-width: 0; max-width: 100%; font-size: var(--font-ui-small); }
+.nand-automation-filter input, .nand-automation-filter select { min-width: 0; max-width: 100%; }
+.nand-automation-layout { flex: 1; min-height: 0; display: grid; grid-template-columns: minmax(220px, 32%) minmax(0, 1fr); grid-template-rows: minmax(0, 1fr); gap: var(--size-4-4); }
+.nand-automation-list { min-width: 0; min-height: 0; overflow: auto; display: flex; flex-direction: column; gap: var(--size-4-2); }
+.nand-automation-list button { flex-shrink: 0; height: auto; min-height: 72px; display: flex; flex-direction: column; align-items: start; gap: var(--size-4-1); text-align: start; white-space: normal; overflow-wrap: anywhere; }
 .nand-automation-list button.is-active { border-color: var(--interactive-accent); }
 .nand-automation-list span, .nand-automation-list small { color: var(--text-muted); }
-.nand-automation-detail { min-width: 0; }
+.nand-automation-detail { min-width: 0; min-height: 0; overflow: auto; }
+.nand-automation-prompt { white-space: pre-wrap; overflow-wrap: anywhere; font-family: var(--font-text); }
 .nand-automation-detail pre { white-space: pre-wrap; overflow-wrap: anywhere; }
 .nand-automation-run { border-bottom: 1px solid var(--background-modifier-border); padding: var(--size-4-2); }
 .nand-automation-editor-body { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: var(--size-4-4); }
@@ -25560,8 +25567,13 @@ body:where(.nand-iconic-enabled)[data-theme="Ukiyo"] .workspace-leaf > .workspac
 .nand-automation-editor .setting-item { flex-wrap: wrap; gap: var(--size-4-2); }
 .nand-automation-editor .setting-item-control { max-width: 100%; }
 @media (max-width: 700px) {
- .nand-automation-layout, .nand-automation-editor-body { grid-template-columns: minmax(0, 1fr); }
+ .nand-automation-editor-body { grid-template-columns: minmax(0, 1fr); }
  .nand-automation-view button, .nand-automation-editor button { min-height: 44px; }
+}
+@container nand-automation (max-width: 700px) {
+ .nand-automation-layout { grid-template-columns: minmax(0, 1fr); grid-template-rows: minmax(0, 1fr); }
+ .nand-automation-layout.has-detail { grid-template-rows: minmax(100px, 35%) minmax(0, 1fr); }
+ .nand-automation-toolbar button { white-space: normal; height: auto; max-width: 100%; }
 }
 
 /* Agent workbench: xterm remains an imperative island owned by TerminalService. */

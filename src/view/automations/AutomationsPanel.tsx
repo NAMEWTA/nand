@@ -18,7 +18,7 @@ export function AutomationsPanel({
 }) {
 	if (host.service.loadError) {
 		return (
-			<div>
+			<div className="nand-automation-load-error">
 				<p>{t('automation.failedLoad')}</p>
 				<pre>{host.service.loadError}</pre>
 				<button
@@ -79,6 +79,8 @@ export function AutomationsPanel({
 				<button onClick={() => host.edit()}>{t('automation.new')}</button>
 				<button onClick={() => host.inbox()}>{t('automation.inbox')}</button>
 				<button onClick={() => actions.clearHistory()}>{t('automation.clearHistory')}</button>
+				<label className="nand-automation-filter">
+					<span>{t('automation.search')}</span>
 				<input
 					aria-label={t('automation.search')}
 					placeholder={t('automation.search')}
@@ -88,8 +90,11 @@ export function AutomationsPanel({
 						refresh();
 					}}
 				/>
+				</label>
+				<label className="nand-automation-filter">
+					<span>{t('automation.actionFilter')}</span>
 				<select
-					aria-label={t('automation.action')}
+					aria-label={t('automation.actionFilter')}
 					value={state.filter}
 					onChange={(e) => {
 						state.filter = e.currentTarget.value;
@@ -102,8 +107,11 @@ export function AutomationsPanel({
 						</option>
 					))}
 				</select>
+				</label>
+				<label className="nand-automation-filter">
+					<span>{t('automation.agentFilter')}</span>
 				<select
-					aria-label={t('automation.agent')}
+					aria-label={t('automation.agentFilter')}
 					value={state.agentFilter}
 					onChange={(e) => {
 						state.agentFilter = e.currentTarget.value;
@@ -120,9 +128,10 @@ export function AutomationsPanel({
 							</option>
 						))}
 				</select>
+				</label>
 			</div>
 			<p className="setting-item-description">{t('automation.localOnly')}</p>
-			<div className="nand-automation-layout">
+			<div className={`nand-automation-layout${selected ? ' has-detail' : ''}`}>
 				<div className="nand-automation-list">
 					{list.length === 0 && <p>{t('automation.empty')}</p>}
 					{list.map((d) => (
@@ -187,13 +196,13 @@ export function AutomationsPanel({
 						<p>
 							{t('automation.next')}{t('automation.colon')}{next(selected)}
 						</p>
-						<pre>
+						<p className="nand-automation-prompt">
 							{selected.action.kind === 'agent'
 								? selected.action.prompt
 								: selected.action.kind === 'notify'
 									? selected.action.body
 									: selected.action.text}
-						</pre>
+						</p>
 						<h4>{t('automation.history')}</h4>
 						{runs.map((run) => (
 							<div className="nand-automation-run" key={run.id}>

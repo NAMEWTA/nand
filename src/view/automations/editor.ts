@@ -12,6 +12,7 @@ export class AutomationEditor extends Modal {
 	private generation = 0;
 	private originalSchedule: string;
 	private runImmediately = false;
+	private readonly editing: boolean;
 	constructor(
 		app: App,
 		private service: AutomationsApi,
@@ -22,6 +23,7 @@ export class AutomationEditor extends Modal {
 		existing?: AutomationDefinition,
 	) {
 		super(app);
+		this.editing = !!existing;
 		this.originalSchedule = JSON.stringify(existing?.schedule);
 		this.draft = existing
 			? structuredClone(existing)
@@ -64,7 +66,7 @@ export class AutomationEditor extends Modal {
 		const el = this.contentEl;
 		el.empty();
 		el.addClass('nand-automation-editor');
-		new Setting(el).setName(t('automation.title')).setHeading();
+		new Setting(el).setName(t(this.editing ? 'automation.editTitle' : 'automation.new')).setHeading();
 		new Setting(el).setName(t('automation.name')).addText((input) =>
 			input.setValue(this.draft.name).onChange((v) => {
 				this.draft.name = v;

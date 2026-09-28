@@ -43,6 +43,9 @@ export const messages = {
 
 		'automation.title': 'Automations',
 		'automation.new': 'New automation',
+		'automation.editTitle': 'Edit automation',
+		'automation.actionFilter': 'Action / status',
+		'automation.agentFilter': 'Agent',
 		'automation.name': 'Name',
 		'automation.prompt': 'Prompt / content',
 		'automation.action': 'Action',
@@ -179,6 +182,9 @@ export const messages = {
 
 		'automation.title': '自动化',
 		'automation.new': '新建自动化',
+		'automation.editTitle': '编辑自动化',
+		'automation.actionFilter': '动作 / 状态',
+		'automation.agentFilter': '智能体',
 		'automation.name': '名称',
 		'automation.prompt': '提示词 / 内容',
 		'automation.action': '执行动作',
