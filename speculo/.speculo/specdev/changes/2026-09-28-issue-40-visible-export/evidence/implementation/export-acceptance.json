@@ -1,0 +1,93 @@
+{
+  "passed": true,
+  "rows": [
+    {
+      "lang": "zh",
+      "created": [
+        "NAND Exports/grok-___export_fixture__ (9).md"
+      ],
+      "active": "NAND Exports/grok-___export_fixture__ (9).md",
+      "content": "# Export custom title 中文\n\n\n## user\n\nSynthetic export prompt 中文\n\n## assistant\n\nSynthetic answer\n\n```text\nkeep bytes\n```\n",
+      "preview": "\n## user\n\nSynthetic export prompt 中文\n\n## assistant\n\nSynthetic answer\n\n```text\nkeep bytes\n```\n",
+      "notice": "已导出并打开：NAND Exports/grok-___export_fixture__ (9).md",
+      "found": {
+        "indexed": true,
+        "browser": true,
+        "name": "grok-___export_fixture__ (9)"
+      },
+      "switcher": [
+        "NAND Exports/grok-___export_fixture__ (9)"
+      ]
+    },
+    {
+      "lang": "en",
+      "created": [
+        "NAND Exports/grok-___export_fixture__ (10).md"
+      ],
+      "active": "NAND Exports/grok-___export_fixture__ (10).md",
+      "content": "# Export custom title 中文\n\n\n## user\n\nSynthetic export prompt 中文\n\n## assistant\n\nSynthetic answer\n\n```text\nkeep bytes\n```\n",
+      "preview": "\n## user\n\nSynthetic export prompt 中文\n\n## assistant\n\nSynthetic answer\n\n```text\nkeep bytes\n```\n",
+      "notice": "Exported and opened: NAND Exports/grok-___export_fixture__ (10).md",
+      "found": {
+        "indexed": true,
+        "browser": true,
+        "name": "grok-___export_fixture__ (10)"
+      },
+      "switcher": [
+        "NAND Exports/grok-___export_fixture__ (10)"
+      ]
+    },
+    {
+      "lang": "zh",
+      "created": [
+        "NAND Exports/grok-___export_fixture__ (11).md"
+      ],
+      "active": "NAND Exports/grok-___export_fixture__ (11).md",
+      "content": "# Export custom title 中文\n\n\n## user\n\nSynthetic export prompt 中文\n\n## assistant\n\nSynthetic answer\n\n```text\nkeep bytes\n```\n",
+      "preview": "\n## user\n\nSynthetic export prompt 中文\n\n## assistant\n\nSynthetic answer\n\n```text\nkeep bytes\n```\n",
+      "notice": "已导出并打开：NAND Exports/grok-___export_fixture__ (11).md",
+      "found": {
+        "indexed": true,
+        "browser": true,
+        "name": "grok-___export_fixture__ (11)"
+      },
+      "switcher": [
+        "NAND Exports/grok-___export_fixture__ (11)"
+      ]
+    }
+  ],
+  "failures": [
+    {
+      "lang": "en",
+      "stage": "read-service-injection",
+      "notice": "Could not read this history for export: synthetic history service failure",
+      "preserved": true,
+      "fileCountUnchanged": true
+    },
+    {
+      "lang": "en",
+      "stage": "write",
+      "notice": "Could not save the exported note: synthetic disk full",
+      "preserved": true,
+      "fileCountUnchanged": true
+    },
+    {
+      "lang": "zh",
+      "stage": "read-service-injection",
+      "notice": "无法读取这条历史以导出：synthetic history service failure",
+      "preserved": true,
+      "fileCountUnchanged": true
+    },
+    {
+      "lang": "zh",
+      "stage": "write",
+      "notice": "无法保存导出的笔记：synthetic disk full",
+      "preserved": true,
+      "fileCountUnchanged": true
+    }
+  ],
+  "nativeHashes": {
+    "session.json": "58009f44ef3205b00ab44c57999c58b262a08f9fc5d86ba2aedf013538e19493",
+    "chat_history.jsonl": "deffb88fa0c908d6bdba7b46d702162053602b6b0acf91fef85edaf2f0cef8b8"
+  }
+}
