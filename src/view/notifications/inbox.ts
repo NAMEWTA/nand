@@ -14,6 +14,7 @@ export class NotificationInbox extends Modal {
 		super(app);
 	}
 	onOpen(): void {
+		this.containerEl.addClass('nand-inbox-modal-container');
 		this.languageCleanup = onLanguageChanged(() => this.draw());
 		this.unsubscribe = this.service.subscribe(() => this.draw());
 		this.draw();
