@@ -11043,7 +11043,7 @@ button.nand-ui-list-item.is-active {
 
 .dashboard-action-tab.active {
 	background: var(--db-accent);
-	color: var(--db-text-on-accent);
+	color: var(--db-text-on-accent, var(--text-on-accent));
 	border-color: var(--db-accent);
 }
 
@@ -13645,7 +13645,7 @@ button.nand-ui-list-item.is-active {
 }
 
 .nand-dashboard-root[data-theme="island"] .dashboard-section-row--drag-over {
-	border-color: #19c8b9;
+	border-color: var(--db-accent);
 	box-shadow: 0 0 0 2px rgba(25, 200, 185, 0.15);
 }
 
@@ -13661,7 +13661,7 @@ button.nand-ui-list-item.is-active {
 }
 
 .nand-dashboard-root[data-theme="island"] .dashboard-add-section:hover {
-	border-color: #19c8b9;
+	border-color: var(--db-accent);
 	background: rgba(25, 200, 185, 0.06);
 	transform: translateY(-1px);
 	box-shadow: 0 4px 0 0 #a8c8a5;
@@ -13756,12 +13756,12 @@ button.nand-ui-list-item.is-active {
 .nand-dashboard-root[data-theme="island"] .dashboard-card-title {
 	font-weight: 600;
 	letter-spacing: 0.02em;
-	color: #4a6741;
+	color: var(--db-text);
 }
 
 /* Island: section headers — forest accent */
 .nand-dashboard-root[data-theme="island"] .dashboard-section-header {
-	color: #4a6741;
+	color: var(--db-text);
 }
 
 /* Island: sidebar links — ocean tint on hover */
@@ -13792,7 +13792,7 @@ button.nand-ui-list-item.is-active {
 
 /* Island: progress bar — teal to grass green gradient */
 .nand-dashboard-root[data-theme="island"] .dashboard-progress-fill {
-	background: linear-gradient(90deg, #19c8b9, #6fba2c);
+	background: linear-gradient(90deg, var(--db-progress-from), var(--db-progress-to));
 }
 
 /* -- Tundra: pill-shaped, warm organic (cloned from Earth) -- */
@@ -13916,21 +13916,21 @@ button.nand-ui-list-item.is-active {
 /* -- Neon: high-contrast buttons (legible in both light & dark) -- */
 /* Pomodoro Start/Stop — solid magenta pill with white text */
 [data-theme="neon"] .dashboard-sidebar-pomodoro-main-btn {
-	background: #ff2e88 !important;
-	background-color: #ff2e88 !important;
+	background: var(--db-accent) !important;
+	background-color: var(--db-accent) !important;
 	color: #ffffff !important;
 	border: none !important;
 	box-shadow: none !important;
 }
 [data-theme="neon"] .dashboard-sidebar-pomodoro-main-btn:hover {
 	opacity: 0.85;
-	background: #ff5ca8 !important;
-	background-color: #ff5ca8 !important;
+	background: color-mix(in srgb, var(--db-accent) 82%, white) !important;
+	background-color: color-mix(in srgb, var(--db-accent) 82%, white) !important;
 }
 [data-theme="neon"] .dashboard-sidebar-pomodoro-main-btn--running {
 	background: rgba(255, 255, 255, 0.10) !important;
 	background-color: rgba(255, 255, 255, 0.10) !important;
-	color: #ff2e88 !important;
+	color: var(--db-accent) !important;
 	border: 1px solid rgba(255, 46, 136, 0.40) !important;
 }
 
@@ -13950,21 +13950,21 @@ button.nand-ui-list-item.is-active {
 /* -- Volt: high-contrast buttons (legible in both light & dark) -- */
 /* Pomodoro Start/Stop — solid cyan pill with black text */
 [data-theme="volt"] .dashboard-sidebar-pomodoro-main-btn {
-	background: #00c2ff !important;
-	background-color: #00c2ff !important;
+	background: var(--db-accent) !important;
+	background-color: var(--db-accent) !important;
 	color: #001018 !important;
 	border: none !important;
 	box-shadow: none !important;
 }
 [data-theme="volt"] .dashboard-sidebar-pomodoro-main-btn:hover {
 	opacity: 0.85;
-	background: #4dd6ff !important;
-	background-color: #4dd6ff !important;
+	background: color-mix(in srgb, var(--db-accent) 82%, white) !important;
+	background-color: color-mix(in srgb, var(--db-accent) 82%, white) !important;
 }
 [data-theme="volt"] .dashboard-sidebar-pomodoro-main-btn--running {
 	background: rgba(255, 255, 255, 0.10) !important;
 	background-color: rgba(255, 255, 255, 0.10) !important;
-	color: #00c2ff !important;
+	color: var(--db-accent) !important;
 	border: 1px solid rgba(0, 194, 255, 0.40) !important;
 }
 
@@ -13984,21 +13984,21 @@ button.nand-ui-list-item.is-active {
 /* -- Magma: high-contrast buttons (legible in both light & dark) -- */
 /* Pomodoro Start/Stop — solid lava-orange pill with black text */
 [data-theme="magma"] .dashboard-sidebar-pomodoro-main-btn {
-	background: #ff6b1a !important;
-	background-color: #ff6b1a !important;
+	background: var(--db-accent) !important;
+	background-color: var(--db-accent) !important;
 	color: #180a00 !important;
 	border: none !important;
 	box-shadow: none !important;
 }
 [data-theme="magma"] .dashboard-sidebar-pomodoro-main-btn:hover {
 	opacity: 0.85;
-	background: #ff9448 !important;
-	background-color: #ff9448 !important;
+	background: color-mix(in srgb, var(--db-accent) 82%, white) !important;
+	background-color: color-mix(in srgb, var(--db-accent) 82%, white) !important;
 }
 [data-theme="magma"] .dashboard-sidebar-pomodoro-main-btn--running {
 	background: rgba(255, 255, 255, 0.10) !important;
 	background-color: rgba(255, 255, 255, 0.10) !important;
-	color: #ff6b1a !important;
+	color: var(--db-accent) !important;
 	border: 1px solid rgba(255, 107, 26, 0.40) !important;
 }
 
@@ -14018,21 +14018,21 @@ button.nand-ui-list-item.is-active {
 /* -- Onyx: high-contrast buttons (legible in both light & dark) -- */
 /* Pomodoro Start/Stop — solid lemon pill with black text */
 [data-theme="onyx"] .dashboard-sidebar-pomodoro-main-btn {
-	background: #e9ff40 !important;
-	background-color: #e9ff40 !important;
+	background: var(--db-accent) !important;
+	background-color: var(--db-accent) !important;
 	color: #000000 !important;
 	border: none !important;
 	box-shadow: none !important;
 }
 [data-theme="onyx"] .dashboard-sidebar-pomodoro-main-btn:hover {
 	opacity: 0.85;
-	background: #f5ff8a !important;
-	background-color: #f5ff8a !important;
+	background: color-mix(in srgb, var(--db-accent) 82%, white) !important;
+	background-color: color-mix(in srgb, var(--db-accent) 82%, white) !important;
 }
 [data-theme="onyx"] .dashboard-sidebar-pomodoro-main-btn--running {
 	background: rgba(255, 255, 255, 0.10) !important;
 	background-color: rgba(255, 255, 255, 0.10) !important;
-	color: #e9ff40 !important;
+	color: var(--db-accent) !important;
 	border: 1px solid rgba(233, 255, 64, 0.40) !important;
 }
 
