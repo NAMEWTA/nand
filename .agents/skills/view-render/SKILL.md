@@ -11,7 +11,7 @@ when-to-use: >-
   Not for settings rows or native Obsidian chrome.
 license: GPL-3.0-only
 metadata:
-  version: "1.1.0"
+  version: "1.2.0"
   short-description: Leaf rendering with Preact
 ---
 
@@ -45,7 +45,7 @@ Compose panels in code using props and slots, as `view/terminal/TerminalWorkbenc
 | Before you… | Open |
 |---|---|
 | Mount, move, or unmount a rendered view | [references/runtime.md](references/runtime.md) |
-| Pick a color, spacing, radius, or UI library | [references/aesthetic.md](references/aesthetic.md) |
+| Pick a color, spacing, radius, component, or UI library | [references/aesthetic.md](references/aesthetic.md) |
 | Touch DOM helpers, touch targets, or CSS bans | [../dev/references/obsidian-api.md](../dev/references/obsidian-api.md) |
 
 ## Procedure
@@ -58,7 +58,7 @@ Compose panels in code using props and slots, as `view/terminal/TerminalWorkbenc
 6. When the leaf moves, `onWindowMigrated` renders it again on the destination window. A window host unregisters the leaf from the old window first.
 7. On plugin unload, unmount every root and remove a window host's node.
 8. Render note markdown with Obsidian's markdown renderer, as a child of the view. Icons use `setIcon`.
-9. Style only with the tokens in `references/aesthetic.md`.
+9. Build from the shared `nand-ui-*` primitives and style only with the tokens in `references/aesthetic.md`. Follow its composition rules: one primary action, neutral by default, one-step hover. Keep existing text nodes and queried class names stable.
 10. Add `preact` in the same change that first renders a view, with the esbuild alias in `references/runtime.md`. Do not add a library that file refuses.
 
 ## Checklist
@@ -67,5 +67,6 @@ Compose panels in code using props and slots, as `view/terminal/TerminalWorkbenc
 - [ ] Settings and chrome still use `Setting` or `createEl`
 - [ ] The root's document is the leaf's window, not a `window` captured at load
 - [ ] Unload unmounts every root
-- [ ] No hardcoded colors, and no library outside `references/aesthetic.md`
+- [ ] Shared primitives reused; no parallel button, card, badge or tab styles
+- [ ] No hardcoded colors or radii, and no library outside `references/aesthetic.md`
 - [ ] `pnpm run build` and `pnpm run lint` still pass if source changed

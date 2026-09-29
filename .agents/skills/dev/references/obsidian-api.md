@@ -75,6 +75,7 @@ Regex lookbehind is illegal here (iOS < 16.4). The plugin is not desktop-only. T
 - Put styles in the one stylesheet named in the SKILL identity table. Do not inject `<style>` or `<link>`. Do not assign large style blobs from TypeScript when a class will do. Coordinates (comment popover `left` / `top`) are the exception.
 - Use Obsidian variables (`var(--background-primary)`, `var(--text-normal)`, `var(--interactive-accent)`, `var(--size-4-2)`, …). Dashboard theme tokens (`--db-*`) are scoped to `.nand-dashboard-root[data-theme]`. Editor UI must not depend on those tokens; it must look right in the sidebar without the dashboard mounted.
 - Scope selectors (`.nand-editor-view`, `.nand-editor-comment-hl`, `.dashboard-…`). No bare `button { }` rules.
+- Product CSS lives in that product's own block of `styles.css`; edit it in place rather than appending overrides at the end of the file. Shared tokens and `nand-ui-*` primitives live in the foundation block at the top, owned by `../view-render/references/aesthetic.md`.
 - Avoid `!important` and `:has`. Toggle a class from TypeScript instead.
 - Icon-only buttons need an accessible name (`aria-label` or `setTooltip`). Interactive targets should be at least 44×44px on touch. Don't remove `:focus-visible` outlines.
 - Keyboard: a control that clicks must also work with Enter / Space if it is not a native `button`.
