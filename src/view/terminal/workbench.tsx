@@ -12,6 +12,7 @@ import type { HistoryPage, NativeSession, NativeUsage } from '../../platform/ter
 import { getLanguage, t as sharedT } from '../../shared/i18n/index';
 import { t } from '../../shared/i18n/terminal-accessor';
 import { UsageModal } from '../agent-usage/usage-modal';
+import { Icon } from '../primitives/Icon';
 import type { WorkbenchHost } from './host';
 
 function report(operation: Promise<unknown>): void {
@@ -21,7 +22,8 @@ function report(operation: Promise<unknown>): void {
 }
 export function confirmSessionClose(app: App, action: () => Promise<void>): void {
 	const modal = new Modal(app);
-	modal.contentEl.createEl('p', { text: t('workbench.closeConfirm') });
+	modal.modalEl.addClass('nand-agent-dialog');
+	modal.contentEl.createEl('p', { cls: 'nand-agent-dialog-message', text: t('workbench.closeConfirm') });
 	new Setting(modal.contentEl)
 		.addButton((b) => b.setButtonText(t('common.cancel')).onClick(() => modal.close()))
 		.addButton((b) =>
@@ -69,38 +71,64 @@ export function SessionSidebar({
 	};
 	return (
 		<>
-			<h3 className="nand-agent-workbench-title">{t('workbench.title')}</h3>
-			<button className="mod-cta" onClick={menu}>
-				＋ {t('workbench.new')}
-			</button>
-			<button onClick={() => report(host.openAutomationCenter())}>{sharedT('automation.title')}</button>
-			<button onClick={() => host.openNotificationCenter()}>{sharedT('automation.inbox')}</button>
-			<h4>{t('workbench.openSessions')}</h4>
-			{service.getAllTerminals().map((terminal) => {
-				const name = terminal.getTitle();
-				const shortId = `#${terminal.id.replace(/^terminal-/, '').slice(0, 8)}`;
-				const status = t(`workbench.status.${terminal.nativeStatus}`);
-				return (
-					<div className="nand-session-row" key={terminal.id}>
-						<button
-							className={terminal.id === active ? 'is-active' : ''}
-							data-terminal-id={terminal.id}
-							title={`${name}\n${shortId}\n${status}`}
-							onClick={() => select(terminal)}
-						>
-							<span>{name}</span>
-							<small>{shortId}</small>
-							<small>{status}</small>
-						</button>
-						<button
-							aria-label={t('workbench.close')}
-							onClick={() => confirmSessionClose(host.app, () => close(terminal))}
-						>
-							×
-						</button>
-					</div>
-				);
-			})}
+			<div className="nand-agent-rail-head">
+				<h3 className="nand-agent-workbench-title">{t('workbench.title')}</h3>
+				<button className="mod-cta nand-ui-btn nand-agent-new-btn" onClick={menu}>
+					＋ {t('workbench.new')}
+				</button>
+			</div>
+			<div className="nand-agent-nav">
+				<button
+					className="nand-ui-btn nand-ui-btn-ghost nand-agent-nav-btn"
+					onClick={() => report(host.openAutomationCenter())}
+				>
+					<Icon name="timer" />
+					{sharedT('automation.title')}
+				</button>
+				<button
+					className="nand-ui-btn nand-ui-btn-ghost nand-agent-nav-btn"
+					onClick={() => host.openNotificationCenter()}
+				>
+					<Icon name="bell" />
+					{sharedT('automation.inbox')}
+				</button>
+			</div>
+			<h4 className="nand-ui-section-label nand-agent-section-label">{t('workbench.openSessions')}</h4>
+			<div className="nand-ui-list nand-session-list">
+				{service.getAllTerminals().map((terminal) => {
+					const name = terminal.getTitle();
+					const shortId = `#${terminal.id.replace(/^terminal-/, '').slice(0, 8)}`;
+					const status = t(`workbench.status.${terminal.nativeStatus}`);
+					return (
+						<div className="nand-session-row" key={terminal.id}>
+							<button
+								className={`nand-ui-list-item${terminal.id === active ? ' is-active' : ''}`}
+								data-terminal-id={terminal.id}
+								title={`${name}\n${shortId}\n${status}`}
+								onClick={() => select(terminal)}
+							>
+								<span className="nand-ui-list-item-title">{name}</span>
+								<span className="nand-session-row-meta">
+									<small className="nand-session-row-id">{shortId}</small>
+									<i
+										aria-hidden="true"
+										className={`nand-ui-dot nand-session-status-dot is-${terminal.nativeStatus}`}
+									/>
+									<small className="nand-session-row-status">{status}</small>
+								</span>
+							</button>
+							<button
+								className="nand-ui-icon-btn nand-session-close"
+								aria-label={t('workbench.close')}
+								title={t('workbench.close')}
+								onClick={() => confirmSessionClose(host.app, () => close(terminal))}
+							>
+								<Icon name="x" />
+							</button>
+						</div>
+					);
+				})}
+			</div>
 		</>
 	);
 }
@@ -182,6 +210,7 @@ export function HistorySidebar({ history, host }: { history: NativeHistory; host
 	const edit = (s: NativeSession) => {
 		const modal = new Modal(app),
 			meta = history.meta(s.key);
+		modal.modalEl.addClass('nand-agent-dialog');
 		let title = meta.title || s.title,
 			tags = (meta.tags ?? []).join(', ');
 		new Setting(modal.contentEl).setName(t('workbench.rename')).addText((input) =>
@@ -210,79 +239,109 @@ export function HistorySidebar({ history, host }: { history: NativeHistory; host
 	};
 	return (
 		<>
-			<h4>
-				{t('workbench.history')}{' '}
-				<button disabled={busy} onClick={() => refresh((v) => v + 1)} aria-label={t('workbench.refresh')}>
-					↻
+			<h4 className="nand-agent-rail-header">
+				<span className="nand-agent-rail-header-title">{t('workbench.history')}</span>{' '}
+				<button
+					className="nand-ui-icon-btn"
+					disabled={busy}
+					onClick={() => refresh((v) => v + 1)}
+					aria-label={t('workbench.refresh')}
+					title={t('workbench.refresh')}
+				>
+					<Icon name="refresh-cw" />
 				</button>
 			</h4>
-			<input
-				type="search"
-				aria-label={t('workbench.search')}
-				placeholder={t('workbench.search')}
-				value={query}
-				onInput={(e) => {
-					setQuery(e.currentTarget.value);
-					setOffset(0);
-				}}
-			/>
-			<select
-				aria-label={t('workbench.filter')}
-				value={filter}
-				onChange={(e) => {
-					setFilter(e.currentTarget.value);
-					setOffset(0);
-				}}
-			>
-				{['', 'favorite', 'archived'].map((key) => (
-					<option key={key} value={key}>
-						{t(`workbench.${key || 'all'}`)}
-					</option>
-				))}
-			</select>
-			{busy && <p>{t('workbench.loading')}</p>}
+			<div className="nand-history-controls">
+				<input
+					type="search"
+					aria-label={t('workbench.search')}
+					placeholder={t('workbench.search')}
+					value={query}
+					onInput={(e) => {
+						setQuery(e.currentTarget.value);
+						setOffset(0);
+					}}
+				/>
+				<select
+					className="dropdown"
+					aria-label={t('workbench.filter')}
+					value={filter}
+					onChange={(e) => {
+						setFilter(e.currentTarget.value);
+						setOffset(0);
+					}}
+				>
+					{['', 'favorite', 'archived'].map((key) => (
+						<option key={key} value={key}>
+							{t(`workbench.${key || 'all'}`)}
+						</option>
+					))}
+				</select>
+			</div>
+			{busy && <p className="nand-history-status">{t('workbench.loading')}</p>}
 			{error && (
-				<details open>
+				<details className="nand-history-issues" open>
 					<summary>{t('workbench.scanIssues')}</summary>
 					<pre>{error}</pre>
 				</details>
 			)}
-			{page &&
-				page.rows.map((session) => (
-					<div key={session.key} className="nand-history-row">
-						<button
-							className={selected?.key === session.key ? 'is-active' : ''}
-							onClick={() => setSelected(session)}
-						>
-							<strong>
-								{history.meta(session.key).favorite ? '★ ' : ''}
-								{history.meta(session.key).title || session.title}
-							</strong>
-							<small>
-								{session.agentId} · {new Date(session.modifiedAtMs).toLocaleDateString(getLanguage() === 'zh' ? 'zh-CN' : 'en-US')}
-							</small>
-							<small>{(history.meta(session.key).tags ?? []).join(' · ')}</small>
-						</button>
-					</div>
-				))}
-			{page && page.total === 0 && !busy && <p>{t(query.trim() || filter ? 'workbench.noMatches' : 'workbench.empty')}</p>}
+			{page && page.rows.length > 0 && (
+				<div className="nand-ui-list nand-history-list">
+					{page.rows.map((session) => (
+						<div key={session.key} className="nand-history-row">
+							<button
+								className={`nand-ui-list-item${selected?.key === session.key ? ' is-active' : ''}`}
+								onClick={() => setSelected(session)}
+							>
+								<strong className="nand-ui-list-item-title">
+									{history.meta(session.key).favorite ? <span className="nand-history-favorite">★ </span> : ''}
+									{history.meta(session.key).title || session.title}
+								</strong>
+								<small className="nand-ui-list-item-meta">
+									{session.agentId} · {new Date(session.modifiedAtMs).toLocaleDateString(getLanguage() === 'zh' ? 'zh-CN' : 'en-US')}
+								</small>
+								<small className="nand-ui-list-item-meta nand-history-tags">
+									{(history.meta(session.key).tags ?? []).join(' · ')}
+								</small>
+							</button>
+						</div>
+					))}
+				</div>
+			)}
+			{page && page.total === 0 && !busy && (
+				<p className="nand-history-empty">{t(query.trim() || filter ? 'workbench.noMatches' : 'workbench.empty')}</p>
+			)}
 			{page && page.total > 100 && (
 				<div className="nand-history-pagination">
-					<button disabled={busy || page.offset === 0} onClick={() => setOffset(Math.max(0, page.offset - 100))} aria-label={t('workbench.previous')}>
-						←
-					</button>
-					<span>
+					{/* Range stays first in DOM (queried as the pager's first span); CSS orders it between the buttons. */}
+					<span className="nand-history-range">
 						{t('workbench.range', { start: page.offset + 1, end: page.offset + page.rows.length, total: page.total })}
 					</span>
-					<button disabled={busy || page.offset + 100 >= page.total} onClick={() => setOffset(page.offset + 100)} aria-label={t('workbench.next')}>
-						→
+					<button
+						className="nand-ui-icon-btn"
+						disabled={busy || page.offset === 0}
+						onClick={() => setOffset(Math.max(0, page.offset - 100))}
+						aria-label={t('workbench.previous')}
+						title={t('workbench.previous')}
+					>
+						<Icon name="chevron-left" />
+					</button>
+					<button
+						className="nand-ui-icon-btn"
+						disabled={busy || page.offset + 100 >= page.total}
+						onClick={() => setOffset(page.offset + 100)}
+						aria-label={t('workbench.next')}
+						title={t('workbench.next')}
+					>
+						<Icon name="chevron-right" />
 					</button>
 				</div>
 			)}
 			{selected && (
-				<section className="nand-history-preview">
+				<section className="nand-ui-card nand-history-preview">
 					<div className="nand-history-actions">
 						<button
+							className="mod-cta nand-ui-btn nand-history-resume"
 							onClick={() =>
 								report(
 									host.resumeSession({
@@ -293,30 +352,49 @@ export function HistorySidebar({ history, host }: { history: NativeHistory; host
 								)
 							}
 						>
+							<Icon name="play" />
 							{t('workbench.resume')}
 						</button>
-						<button onClick={() => edit(selected)}>{t('workbench.rename')}</button>
-						<button aria-pressed={!!history.meta(selected.key).favorite} onClick={() => update(selected, { favorite: !history.meta(selected.key).favorite })}>
+						<button className="nand-ui-btn nand-ui-btn-ghost" onClick={() => edit(selected)}>
+							<Icon name="pencil" />
+							{t('workbench.rename')}
+						</button>
+						<button
+							className="nand-ui-btn nand-ui-btn-ghost"
+							aria-pressed={!!history.meta(selected.key).favorite}
+							onClick={() => update(selected, { favorite: !history.meta(selected.key).favorite })}
+						>
+							<Icon name="star" />
 							{t(history.meta(selected.key).favorite ? 'workbench.unfavorite' : 'workbench.favorite')}
 						</button>
-						<button aria-pressed={!!history.meta(selected.key).archived} onClick={() => update(selected, { archived: !history.meta(selected.key).archived })}>
+						<button
+							className="nand-ui-btn nand-ui-btn-ghost"
+							aria-pressed={!!history.meta(selected.key).archived}
+							onClick={() => update(selected, { archived: !history.meta(selected.key).archived })}
+						>
+							<Icon name="archive" />
 							{t(history.meta(selected.key).archived ? 'workbench.unarchive' : 'workbench.archived')}
 						</button>
-						<button disabled={exporting} onClick={() => void exportSession(selected)}>
+						<button
+							className="nand-ui-btn nand-ui-btn-ghost"
+							disabled={exporting}
+							onClick={() => void exportSession(selected)}
+						>
+							<Icon name="file-output" />
 							{t('workbench.export')}
 						</button>
 					</div>
 					<UsageTotals usage={selected.usage} />
-					<pre>{preview}</pre>
+					<pre className="nand-history-transcript">{preview}</pre>
 				</section>
 			)}
 		</>
 	);
 }
 function UsageTotals({ usage }: { usage?: NativeUsage }) {
-	if (!usage?.known) return <span>{t('workbench.usageUnknown')}</span>;
+	if (!usage?.known) return <span className="nand-agent-usage-totals">{t('workbench.usageUnknown')}</span>;
 	return (
-		<span>
+		<span className="nand-agent-usage-totals">
 			{usage.partial ? `${t('workbench.usagePartial')} · ` : ''}
 			{t('workbench.tokens')}: {usage.input.toLocaleString()} / {usage.output.toLocaleString()} ·{' '}
 			{t('workbench.cache')}: {usage.cacheRead.toLocaleString()} / {usage.cacheWrite.toLocaleString()}
@@ -370,10 +448,11 @@ export function UsageFooter({ host, history }: { host: WorkbenchHost; history: N
 	}, [host, history]);
 	return (
 		<>
-			<span>
+			<span className="nand-agent-usage-summary">
 				{t('workbench.vaultUsage')} · <UsageTotals usage={usage} />
 			</span>
-			<button onClick={() => new UsageModal(host.app, snapshots).open()}>
+			<button className="nand-agent-usage-pill" onClick={() => new UsageModal(host.app, snapshots).open()}>
+				<Icon name="gauge" />
 				{snapshots
 					.map(
 						(s) =>

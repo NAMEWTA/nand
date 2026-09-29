@@ -31,6 +31,7 @@ export function TerminalWorkbench({
 			<div className="nand-agent-sidebar">{sessions}</div>
 			<div className="nand-agent-center">
 				<div className="terminal-search-container" ref={searchRef}>
+					<Icon name="search" className="terminal-search-icon" />
 					<input
 						type="text"
 						className="terminal-search-input"

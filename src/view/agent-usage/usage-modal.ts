@@ -18,11 +18,12 @@ export class UsageModal extends Modal {
 		const { contentEl } = this;
 		contentEl.empty();
 		contentEl.addClass('terminal-usage-modal');
+		this.containerEl.addClass('terminal-usage-modal-host');
 		contentEl.createEl('h2', { text: t('agents.usageTitle') });
-		contentEl.createEl('p', { text: t('agents.usageIntro') });
+		contentEl.createEl('p', { cls: 'terminal-usage-intro', text: t('agents.usageIntro') });
 
 		if (this.snapshots.length === 0) {
-			contentEl.createEl('p', { text: t('agents.usageEmpty') });
+			contentEl.createEl('p', { cls: 'terminal-usage-empty', text: t('agents.usageEmpty') });
 			return;
 		}
 
@@ -30,13 +31,15 @@ export class UsageModal extends Modal {
 			const card = contentEl.createDiv({ cls: 'terminal-usage-card' });
 			const title = snapshot.account ? `${snapshot.provider} · ${snapshot.account}` : snapshot.provider;
 			card.createEl('h3', { text: title });
-			if (snapshot.stale) card.createEl('p', { text: `${t('agents.usageStale')} · ${snapshot.status}` });
+			if (snapshot.stale)
+				card.createEl('p', { cls: 'terminal-usage-stale', text: `${t('agents.usageStale')} · ${snapshot.status}` });
 			if (snapshot.checkedAt)
 				card.createEl('small', {
+					cls: 'terminal-usage-checked',
 					text: `${t('agents.usageUpdated')} ${dateTime(snapshot.checkedAt)}`,
 				});
 			if (snapshot.windows.length === 0) {
-				card.createEl('p', { text: snapshot.status });
+				card.createEl('p', { cls: 'terminal-usage-status', text: snapshot.status });
 				continue;
 			}
 			for (const window of snapshot.windows) {
