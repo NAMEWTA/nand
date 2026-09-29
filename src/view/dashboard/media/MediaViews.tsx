@@ -269,7 +269,7 @@ export function MediaViews({
 						<button
 							class={
 								grid
-									? 'dashboard-qa-remove dashboard-media-delete'
+									? 'dashboard-media-delete dashboard-media-delete--grid'
 									: 'dashboard-media-icon-btn dashboard-media-delete--list'
 							}
 							aria-label={t('media.delete')}

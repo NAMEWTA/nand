@@ -15817,8 +15817,8 @@ button.nand-ui-list-item.is-active {
 }
 .dashboard-library-files::-webkit-scrollbar-thumb {
 	background: color-mix(in srgb, var(--db-accent) 20%, transparent);
-	border-radius: 4px;
-	transition: background 0.2s ease;
+	border-radius: 999px;
+	transition: background var(--nand-duration) var(--nand-ease);
 }
 .dashboard-library-files::-webkit-scrollbar-thumb:hover {
 	background: color-mix(in srgb, var(--db-accent) 38%, transparent);
@@ -15837,17 +15837,20 @@ button.nand-ui-list-item.is-active {
 
 /* Toolbar grouping (grid/gallery/list/table): one collapsible header + body
    per folder/property bucket, mirroring the media section's grouped mode. */
+/* Group header (library + media share this anatomy): a quiet 28px row —
+   chevron, name, count pill — separated by a hairline, tinted on hover. */
 .dashboard-library-group-header {
 	display: flex;
 	align-items: center;
-	gap: 6px;
-	padding: 6px 4px;
-	margin: 10px 0 6px 0;
+	gap: 8px;
+	min-height: 28px;
+	padding: 4px 8px;
+	margin: 12px 0 8px 0;
 	border-bottom: 1px solid var(--db-border, var(--background-modifier-border));
 	cursor: pointer;
 	user-select: none;
-	border-radius: var(--db-radius-sm, 4px);
-	transition: background 0.15s ease;
+	border-radius: var(--db-radius-sm, 6px) var(--db-radius-sm, 6px) 0 0;
+	transition: background var(--nand-duration-fast) var(--nand-ease), opacity var(--nand-duration-fast) var(--nand-ease);
 }
 .dashboard-library-group-header:hover { background: var(--db-bg-hover, rgba(255, 255, 255, 0.05)); }
 .dashboard-library-group-chevron {
@@ -15871,25 +15874,34 @@ button.nand-ui-list-item.is-active {
 .dashboard-library-group-count {
 	margin-left: auto;
 	flex-shrink: 0;
-	font-size: 0.625em;
-	color: var(--db-text-muted, var(--text-muted));
-	background: var(--db-bg-hover, rgba(255, 255, 255, 0.06));
-	padding: 0 7px;
+	min-width: 20px;
+	padding: 0 8px;
 	border-radius: 999px;
+	background: var(--db-bg-hover, rgba(255, 255, 255, 0.06));
+	color: var(--db-text-muted, var(--text-muted));
+	font-size: 0.625em;
+	font-weight: 600;
+	line-height: 18px;
+	text-align: center;
+	font-variant-numeric: tabular-nums;
 }
 .dashboard-library-group-header.is-collapsed { opacity: 0.75; }
 .dashboard-library-group-body.is-hidden { display: none; }
 .dashboard-library-files .dashboard-library-group-header:first-child { margin-top: 0; }
 
-/* Toolbar */
+/* Toolbar — one tinted strip (library, media, alltasks reuse it). Every
+   control inside shares one 28px height and the control radius, so inputs,
+   selects, segmented toggles and icon buttons line up on a single baseline.
+   Groups are separated by 8px; items inside a segmented group by 2px. */
 .dashboard-library-toolbar {
 	display: flex;
 	align-items: center;
 	gap: 8px;
-	padding: 6px 8px;
+	padding: 6px;
 	background: var(--db-bg-card, rgba(255, 255, 255, 0.06));
+	border: 1px solid var(--db-border-card, transparent);
 	border-radius: var(--db-radius-md, 10px);
-	margin-bottom: 8px;
+	margin-bottom: 10px;
 	flex-wrap: wrap;
 }
 
@@ -15897,7 +15909,9 @@ button.nand-ui-list-item.is-active {
 	flex: 1;
 	min-width: 120px;
 	max-width: 240px;
-	padding: 4px 10px;
+	height: 28px;
+	box-sizing: border-box;
+	padding: 0 10px;
 	border: 1px solid var(--db-border-input, rgba(255, 255, 255, 0.08));
 	border-radius: var(--db-radius-sm, 6px);
 	background: var(--db-bg-input, rgba(255, 255, 255, 0.05));
@@ -15905,10 +15919,12 @@ button.nand-ui-list-item.is-active {
 	font-size: 0.75em;
 	font-family: var(--db-font, var(--font-interface));
 	outline: none;
+	transition: border-color var(--nand-duration-fast) var(--nand-ease), box-shadow var(--nand-duration-fast) var(--nand-ease);
 }
 
 .dashboard-library-search:focus {
 	border-color: var(--db-border-input-focus, var(--interactive-accent));
+	box-shadow: 0 0 0 3px color-mix(in srgb, var(--db-accent, var(--interactive-accent)) 16%, transparent);
 }
 
 .dashboard-library-search::placeholder {
@@ -15947,7 +15963,9 @@ button.nand-ui-list-item.is-active {
 }
 
 .dashboard-library-sort {
-	padding: 4px 8px;
+	height: 28px;
+	box-sizing: border-box;
+	padding: 0 8px;
 	border: 1px solid var(--db-border-input, rgba(255, 255, 255, 0.08));
 	border-radius: var(--db-radius-sm, 6px);
 	background: var(--db-bg-input, rgba(255, 255, 255, 0.05));
@@ -15956,44 +15974,81 @@ button.nand-ui-list-item.is-active {
 	font-family: var(--db-font, var(--font-interface));
 	cursor: pointer;
 	outline: none;
+	transition: border-color var(--nand-duration-fast) var(--nand-ease);
+}
+
+.dashboard-library-sort:hover {
+	border-color: color-mix(in srgb, var(--db-accent, var(--interactive-accent)) 35%, var(--db-border-input, transparent));
 }
 
 .dashboard-library-sort:focus {
 	border-color: var(--db-border-input-focus, var(--interactive-accent));
 }
 
-.dashboard-library-sort-dir {
-	cursor: pointer;
-	padding: 4px;
+/* Quiet toolbar icon buttons (sort direction, quick filter, new note,
+   config): one 28px square, control radius, tint on hover, accent-soft when
+   active. Shared recipe so the toolbar reads as one family. */
+.dashboard-library-sort-dir,
+.dashboard-library-filter-btn,
+.dashboard-library-config-btn,
+.dashboard-library-newnote-btn {
+	position: relative;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	flex-shrink: 0;
+	width: 28px;
+	height: 28px;
+	box-sizing: border-box;
+	padding: 0;
 	border-radius: var(--db-radius-sm, 6px);
 	color: var(--db-text-muted, var(--text-muted));
-	display: flex;
-	align-items: center;
+	cursor: pointer;
+	transition: background var(--nand-duration-fast) var(--nand-ease), color var(--nand-duration-fast) var(--nand-ease);
 }
 
-.dashboard-library-sort-dir:hover {
+.dashboard-library-sort-dir svg,
+.dashboard-library-filter-btn svg,
+.dashboard-library-config-btn svg,
+.dashboard-library-newnote-btn svg {
+	width: 15px;
+	height: 15px;
+}
+
+.dashboard-library-sort-dir:hover,
+.dashboard-library-filter-btn:hover,
+.dashboard-library-config-btn:hover,
+.dashboard-library-newnote-btn:hover {
 	color: var(--db-text, var(--text-normal));
 	background: var(--db-bg-hover, rgba(255, 255, 255, 0.05));
 }
 
-/* View toggle */
+/* View toggle — segmented well: 2px inset, inner radius = outer - inset. */
 .dashboard-library-view-toggle {
 	display: flex;
+	align-items: center;
 	gap: 2px;
 	background: var(--db-bg-input, rgba(255, 255, 255, 0.05));
+	border: 1px solid var(--db-border-input, transparent);
 	border-radius: var(--db-radius-sm, 6px);
 	padding: 2px;
+	box-sizing: border-box;
+	min-height: 28px;
 }
 
 .dashboard-library-view-btn {
+	position: relative;
 	cursor: pointer;
-	padding: 4px 8px;
-	border-radius: 4px;
+	min-height: 22px;
+	box-sizing: border-box;
+	padding: 3px 8px;
+	border-radius: max(2px, calc(var(--db-radius-sm, 6px) - 2px));
 	color: var(--db-text-muted, var(--text-muted));
 	display: flex;
 	align-items: center;
+	justify-content: center;
 	font-size: 0.75em;
-	transition: background 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease, color 0.15s ease, transform 0.15s ease;
+	transition: background var(--nand-duration-fast) var(--nand-ease), box-shadow var(--nand-duration-fast) var(--nand-ease), color var(--nand-duration-fast) var(--nand-ease);
 }
 
 .dashboard-library-view-btn:hover {
@@ -16001,9 +16056,25 @@ button.nand-ui-list-item.is-active {
 	background: var(--db-bg-hover, rgba(255, 255, 255, 0.05));
 }
 
+/* Selected segment: raised card surface + accent text, not a filled block. */
 .dashboard-library-view-btn.active {
-	background: var(--db-bg-btn, rgba(139, 92, 246, 0.10));
+	background: var(--db-bg-card-hover, var(--db-bg-btn, rgba(139, 92, 246, 0.10)));
 	color: var(--db-accent, var(--interactive-accent));
+	box-shadow: 0 0 0 1px color-mix(in srgb, var(--db-accent, var(--interactive-accent)) 22%, transparent);
+	font-weight: 600;
+}
+
+/* Keyboard focus for every role=button control in the library/media toolbar,
+   group headers and pagination (they are divs, so no UA ring by default). */
+.dashboard-library-toolbar [role="button"]:focus-visible,
+.dashboard-library-group-header:focus-visible,
+.dashboard-media-group-header:focus-visible,
+.dashboard-library-pagination-nav [role="button"]:focus-visible,
+.dashboard-library-search:focus-visible,
+.dashboard-library-sort:focus-visible,
+.dashboard-library-page-size:focus-visible {
+	outline: 2px solid var(--db-accent, var(--interactive-accent));
+	outline-offset: 1px;
 }
 
 /* Grouping-mode toggle inside a config modal (folder section): the toolbar
@@ -16025,6 +16096,8 @@ button.nand-ui-list-item.is-active {
 	font-size: 0.6875em;
 	color: var(--db-text-muted, var(--text-muted));
 	white-space: nowrap;
+	font-variant-numeric: tabular-nums;
+	padding: 0 2px;
 	/* First element of the toolbar's right cluster (count / page size /
 	   settings). The flex-1 spacer can't cross a wrap line — when the toolbar
 	   narrows and this cluster drops to the second row, the auto margin keeps
@@ -16034,13 +16107,16 @@ button.nand-ui-list-item.is-active {
 }
 
 .dashboard-library-page-size {
-	padding: 3px 6px;
+	height: 28px;
+	box-sizing: border-box;
+	padding: 0 6px;
 	border: 1px solid var(--db-border-input, rgba(255, 255, 255, 0.08));
 	border-radius: var(--db-radius-sm, 6px);
 	background: var(--db-bg-input, rgba(255, 255, 255, 0.05));
 	color: var(--db-text-muted, var(--text-muted));
 	font-size: 0.6875em;
 	font-family: var(--db-font, var(--font-interface));
+	font-variant-numeric: tabular-nums;
 	cursor: pointer;
 	outline: none;
 }
@@ -16049,54 +16125,10 @@ button.nand-ui-list-item.is-active {
 	border-color: var(--db-border-input-focus, var(--interactive-accent));
 }
 
-.dashboard-library-config-btn {
-	cursor: pointer;
-	padding: 4px;
-	border-radius: var(--db-radius-sm, 6px);
-	color: var(--db-text-muted, var(--text-muted));
-	display: flex;
-	align-items: center;
-}
-
-.dashboard-library-config-btn:hover {
-	color: var(--db-text, var(--text-normal));
-	background: var(--db-bg-hover, rgba(255, 255, 255, 0.05));
-}
-
-/* Toolbar "new note" button — same quiet icon affordance as the config gear. */
-.dashboard-library-newnote-btn {
-	cursor: pointer;
-	padding: 4px;
-	border-radius: var(--db-radius-sm, 6px);
-	color: var(--db-text-muted, var(--text-muted));
-	display: flex;
-	align-items: center;
-}
-
-.dashboard-library-newnote-btn:hover {
-	color: var(--db-text, var(--text-normal));
-	background: var(--db-bg-hover, rgba(255, 255, 255, 0.05));
-}
-
-/* Quick filter button */
-.dashboard-library-filter-btn {
-	cursor: pointer;
-	padding: 4px;
-	border-radius: var(--db-radius-sm, 6px);
-	color: var(--db-text-muted, var(--text-muted));
-	display: flex;
-	align-items: center;
-	transition: background 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease, color 0.15s ease, transform 0.15s ease;
-}
-
-.dashboard-library-filter-btn:hover {
-	color: var(--db-text, var(--text-normal));
-	background: var(--db-bg-hover, rgba(255, 255, 255, 0.05));
-}
-
+/* Quick filter button: accent-soft fill while a filter is applied. */
 .dashboard-library-filter-btn.active {
 	color: var(--db-accent, var(--interactive-accent));
-	background: var(--db-bg-btn, rgba(139, 92, 246, 0.10));
+	background: color-mix(in srgb, var(--db-accent, var(--interactive-accent)) 14%, transparent);
 }
 
 /* Filter tags */
@@ -16110,16 +16142,20 @@ button.nand-ui-list-item.is-active {
 	overflow: hidden;
 }
 
+/* Active-filter chip (pill): accent-soft fill + accent-tinted hairline. */
 .dashboard-library-filter-tag {
 	display: inline-flex;
 	align-items: center;
 	gap: 4px;
-	padding: 2px 8px;
-	border-radius: 10px;
+	height: 22px;
+	box-sizing: border-box;
+	padding: 0 6px 0 10px;
+	border-radius: 999px;
 	font-size: 0.6875em;
-	background: var(--db-bg-btn, rgba(139, 92, 246, 0.10));
+	font-weight: 500;
+	background: color-mix(in srgb, var(--db-accent, var(--interactive-accent)) 12%, transparent);
 	color: var(--db-accent, var(--interactive-accent));
-	border: 1px solid transparent;
+	border: 1px solid color-mix(in srgb, var(--db-accent, var(--interactive-accent)) 26%, transparent);
 	white-space: nowrap;
 	max-width: 160px;
 	min-width: 0;
@@ -16133,29 +16169,38 @@ button.nand-ui-list-item.is-active {
 }
 
 .dashboard-library-filter-tag-x {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 14px;
+	height: 14px;
+	border-radius: 50%;
 	cursor: pointer;
 	font-size: 0.875em;
 	line-height: 1;
 	opacity: 0.6;
-	transition: opacity 0.15s ease;
+	transition: opacity var(--nand-duration-fast) var(--nand-ease), background var(--nand-duration-fast) var(--nand-ease);
 }
 
 .dashboard-library-filter-tag-x:hover {
 	opacity: 1;
+	background: color-mix(in srgb, var(--db-accent, var(--interactive-accent)) 18%, transparent);
 }
 
-/* Filter popup */
+/* Filter popup (library quick filter + media filter). Portaled to body;
+   tokens arrive through applyModalTheme. Floating layer: opaque dialog
+   surface, hairline border, theme card shadow. */
 .dashboard-library-filter-popup {
 	position: relative;
 	margin-top: 4px;
-	padding: 12px;
+	padding: 14px;
 	border-radius: var(--db-radius-md, 10px);
-	border: 1px solid var(--db-border-card, #e0e0e0);
+	border: 1px solid var(--db-border-card, var(--background-modifier-border));
 	background: var(--db-bg-modal, var(--db-bg, var(--background-primary)));
 	max-width: 320px;
-	box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+	box-shadow: var(--db-shadow-card-hover, var(--shadow-l));
 	z-index: 10000;
-	color: var(--db-text, #1a1a1a);
+	color: var(--db-text, var(--text-normal));
 }
 
 /* Quick-filter popup internals (title row, property+range row, preset row). */
@@ -16163,18 +16208,50 @@ button.nand-ui-list-item.is-active {
 	font-size: 0.8125em;
 	font-weight: 600;
 	color: var(--db-text, var(--text-normal));
-	margin-bottom: 8px;
+	margin-bottom: 10px;
 }
 
 .dashboard-library-quickfilter-row {
-	margin-bottom: 8px;
+	margin-bottom: 12px;
 }
 
 .dashboard-library-quickfilter-label {
 	display: block;
-	font-size: 0.75em;
+	font-size: 0.6875em;
+	font-weight: 600;
 	color: var(--db-text-muted, var(--text-muted));
-	margin-bottom: 4px;
+	margin-bottom: 6px;
+}
+
+/* Media filter's tag chip group (was unstyled: chips ran together). */
+.dashboard-library-filter-chips {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 4px;
+	max-height: 132px;
+	overflow-y: auto;
+}
+
+/* "Clear" action at the popup foot: quiet ghost text button. */
+.dashboard-library-filter-popup-clear {
+	display: inline-flex;
+	align-items: center;
+	margin-top: 2px;
+	padding: 4px 10px;
+	border: none;
+	border-radius: var(--db-radius-sm, 6px);
+	background: transparent;
+	box-shadow: none;
+	color: var(--db-text-muted, var(--text-muted));
+	font-size: 0.75em;
+	font-family: var(--db-font, var(--font-interface));
+	cursor: pointer;
+	transition: background var(--nand-duration-fast) var(--nand-ease), color var(--nand-duration-fast) var(--nand-ease);
+}
+
+.dashboard-library-filter-popup-clear:hover {
+	background: var(--db-bg-hover, var(--background-modifier-hover));
+	color: var(--db-danger, var(--text-error));
 }
 
 .dashboard-library-quickfilter-row--main {
@@ -16213,43 +16290,57 @@ button.nand-ui-list-item.is-active {
 }
 
 .dashboard-library-filter-popup-prop {
-	padding: 4px 8px;
-	border: 1px solid #ddd;
-	border-radius: 6px;
-	background: #f5f5f5;
-	color: #333;
+	height: 28px;
+	box-sizing: border-box;
+	padding: 0 8px;
+	border: 1px solid var(--db-border-input, var(--background-modifier-border));
+	border-radius: var(--db-radius-sm, 6px);
+	background: var(--db-bg-input, var(--background-modifier-form-field));
+	color: var(--db-text, var(--text-normal));
 	font-size: 0.75em;
+	font-family: var(--db-font, var(--font-interface));
 	outline: none;
 	min-width: 120px;
 }
 
+.dashboard-library-filter-popup-prop:focus {
+	border-color: var(--db-border-input-focus, var(--interactive-accent));
+}
+
 .dashboard-library-filter-popup-dates {
 	display: flex;
+	flex-wrap: wrap;
 	gap: 4px;
 	align-items: center;
 }
 
+/* Date / range / preset buttons: pill chips; accent-soft when selected. */
 .dashboard-library-filter-date-btn {
 	cursor: pointer;
-	padding: 4px 10px;
-	border: 1px solid var(--db-border-card, #ddd);
-	border-radius: 6px;
-	background: var(--db-bg-card, #f5f5f5);
-	color: var(--db-text-muted, #888);
+	height: 28px;
+	box-sizing: border-box;
+	padding: 0 12px;
+	border: 1px solid var(--db-border-card, var(--background-modifier-border));
+	border-radius: 999px;
+	background: var(--db-bg-card, var(--background-secondary));
+	box-shadow: none;
+	color: var(--db-text-muted, var(--text-muted));
 	font-size: 0.75em;
 	font-family: var(--db-font, var(--font-interface));
-	transition: background 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease, color 0.15s ease, transform 0.15s ease;
+	font-variant-numeric: tabular-nums;
+	transition: background var(--nand-duration-fast) var(--nand-ease), border-color var(--nand-duration-fast) var(--nand-ease), color var(--nand-duration-fast) var(--nand-ease);
 }
 
 .dashboard-library-filter-date-btn:hover {
-	border-color: var(--db-accent, var(--interactive-accent, #7c3aed));
-	color: var(--db-text, #333);
+	border-color: color-mix(in srgb, var(--db-accent, var(--interactive-accent)) 45%, transparent);
+	color: var(--db-text, var(--text-normal));
 }
 
 .dashboard-library-filter-date-btn.has-value {
-	color: var(--db-accent, var(--interactive-accent, #7c3aed));
-	border-color: var(--db-accent, var(--interactive-accent, #7c3aed));
-	background: color-mix(in srgb, var(--db-accent, #8b5cf6) 10%, transparent);
+	color: var(--db-accent, var(--interactive-accent));
+	border-color: color-mix(in srgb, var(--db-accent, var(--interactive-accent)) 55%, transparent);
+	background: color-mix(in srgb, var(--db-accent, var(--interactive-accent)) 12%, transparent);
+	font-weight: 600;
 }
 
 .dashboard-library-filter-popup-values {
@@ -16262,7 +16353,7 @@ button.nand-ui-list-item.is-active {
 .dashboard-library-filter-popup-remove {
 	cursor: pointer;
 	padding: 2px;
-	border-radius: 4px;
+	border-radius: var(--db-radius-sm, 6px);
 	color: var(--db-text-muted, var(--text-muted));
 	display: flex;
 	align-items: center;
@@ -16292,19 +16383,26 @@ button.nand-ui-list-item.is-active {
 	color: var(--db-accent, var(--interactive-accent));
 }
 
-/* Empty state */
+/* Empty state (library + media): centered, faint dashed well. */
 .dashboard-library-empty {
-	padding: 40px 20px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	min-height: 120px;
+	padding: 32px 20px;
+	border: 1px dashed color-mix(in srgb, var(--db-text-muted, var(--text-muted)) 22%, transparent);
+	border-radius: var(--db-radius-md, 10px);
 	text-align: center;
 	color: var(--db-text-muted, var(--text-muted));
 	font-size: 0.8125em;
+	line-height: 1.5;
 }
 
 /* ===== Grid View ===== */
 .dashboard-library-grid {
 	display: grid;
 	grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-	gap: 8px;
+	gap: 10px;
 }
 
 /* Card size variants (toolbar S/M/L toggle) shared by grid and gallery.
@@ -16317,23 +16415,46 @@ button.nand-ui-list-item.is-active {
 	grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
 }
 
+/* Card anatomy (grid + gallery): [cover] → title → meta row → preview →
+   property badges. Resting card is a hairline surface with no shadow; hover
+   lifts exactly one tier (accent-tinted border + the theme card shadow).
+   --library-card-pad drives both the padding and the cover's nested radius. */
 .dashboard-library-card {
+	--library-card-pad: 12px;
+	position: relative;
 	background: var(--db-bg-card, rgba(255, 255, 255, 0.06));
 	border: 1px solid var(--db-border-card, rgba(255, 255, 255, 0.10));
 	border-radius: var(--db-radius-md, 10px);
-	padding: 10px 12px;
+	padding: var(--library-card-pad);
 	cursor: pointer;
-	transition: background 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease, color 0.15s ease, transform 0.15s ease;
+	transition: background var(--nand-duration) var(--nand-ease), border-color var(--nand-duration) var(--nand-ease), box-shadow var(--nand-duration) var(--nand-ease);
 	display: flex;
 	flex-direction: column;
-	gap: 4px;
+	gap: 6px;
+	min-width: 0;
 }
 
 /* ===== Gallery view (card grid with frontmatter-driven covers) ===== */
 .dashboard-library-gallery {
 	display: grid;
 	grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-	gap: 10px;
+	gap: 12px;
+}
+
+/* Gallery cards: tighter inset so the cover reads as the hero, and the
+   cover's radius nests inside the card's (outer radius - inset). */
+.dashboard-library-gallery .dashboard-library-card {
+	--library-card-pad: 8px;
+	padding-bottom: 12px;
+}
+
+.dashboard-library-gallery .dashboard-library-card > :not(.dashboard-library-card-cover) {
+	margin-left: 4px;
+	margin-right: 4px;
+}
+
+.dashboard-library-gallery .dashboard-library-card > .dashboard-library-card-cover {
+	margin-bottom: 4px;
 }
 
 .dashboard-library-gallery.dashboard-library-cards--small {
@@ -16367,11 +16488,14 @@ button.nand-ui-list-item.is-active {
 .dashboard-library-card-cover {
 	aspect-ratio: 16 / 10;
 	flex: none;
-	border-radius: var(--db-radius-sm, 6px);
+	/* Nested radius: the card's radius minus its inset, floored at 4px so
+	   sharp-cornered themes (neon/volt/mono) keep a soft edge. */
+	border-radius: max(4px, calc(var(--db-radius-md, 10px) - var(--library-card-pad, 8px)));
 	background-color: var(--db-bg-card-hover, rgba(255, 255, 255, 0.10));
 	background-size: cover;
 	background-position: center;
 	overflow: hidden;
+	box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--db-text, var(--text-normal)) 6%, transparent);
 }
 
 /* Placeholder for notes without any cover info (or whose cover failed to
@@ -16397,15 +16521,15 @@ button.nand-ui-list-item.is-active {
 
 .dashboard-library-card:hover {
 	background: var(--db-bg-card-hover, rgba(255, 255, 255, 0.10));
-	border-color: var(--db-accent, var(--interactive-accent));
-	transform: translateY(-1px);
+	border-color: color-mix(in srgb, var(--db-accent, var(--interactive-accent)) 45%, var(--db-border-card, transparent));
+	box-shadow: var(--db-shadow-card, var(--shadow-s));
 }
 
 .dashboard-library-card-title {
 	font-size: 0.8125em;
 	font-weight: 600;
 	color: var(--db-text, var(--text-normal));
-	line-height: 1.3;
+	line-height: 1.35;
 	overflow: hidden;
 	text-overflow: ellipsis;
 	white-space: nowrap;
@@ -16415,6 +16539,7 @@ button.nand-ui-list-item.is-active {
 	display: flex;
 	align-items: center;
 	gap: 6px;
+	min-height: 18px;
 }
 
 .dashboard-library-card-path {
@@ -16428,10 +16553,12 @@ button.nand-ui-list-item.is-active {
 }
 
 .dashboard-library-card-date {
+	margin-left: auto;
 	font-size: 0.625em;
 	color: var(--db-text-muted, var(--text-muted));
 	white-space: nowrap;
 	flex-shrink: 0;
+	font-variant-numeric: tabular-nums;
 }
 
 .dashboard-library-card-tags {
@@ -16445,9 +16572,9 @@ button.nand-ui-list-item.is-active {
 }
 
 .dashboard-library-card-tag {
-	padding: 1px 6px;
-	border-radius: var(--db-radius-sm, 6px);
-	background: var(--db-bg-card-hover, rgba(255, 255, 255, 0.1));
+	padding: 1px 7px;
+	border-radius: 999px;
+	background: var(--db-bg-hover, var(--db-bg-card-hover, rgba(255, 255, 255, 0.1)));
 	color: var(--db-text-muted, var(--text-muted));
 	font-size: 0.625em;
 	line-height: 16px;
@@ -16469,7 +16596,9 @@ button.nand-ui-list-item.is-active {
 	/* Cap at the toolbar search width so it doesn't stretch across the whole
 	   filter-header row; chips below stay reachable by eye. */
 	max-width: 240px;
-	padding: 4px 8px;
+	height: 28px;
+	box-sizing: border-box;
+	padding: 0 8px;
 	border: 1px solid var(--db-border-input, rgba(255, 255, 255, 0.08));
 	border-radius: var(--db-radius-sm, 6px);
 	background: var(--db-bg-card, rgba(255, 255, 255, 0.06));
@@ -16504,16 +16633,16 @@ button.nand-ui-list-item.is-active {
 .dashboard-library-badges {
 	display: flex;
 	flex-wrap: wrap;
-	gap: 3px;
-	margin-top: 4px;
+	gap: 4px;
+	margin-top: 2px;
 }
 
 .dashboard-library-badge {
 	display: inline-flex;
 	align-items: center;
 	gap: 3px;
-	padding: 1px 6px;
-	border-radius: 10px;
+	padding: 1px 7px;
+	border-radius: 999px;
 	font-size: 0.625em;
 	background: var(--db-bg-btn, rgba(139, 92, 246, 0.10));
 	color: var(--db-text-muted, var(--text-muted));
@@ -16545,18 +16674,21 @@ button.nand-ui-list-item.is-active {
 	gap: 2px;
 }
 
+/* List rows (library + dataview): 36px rows, control radius, hover tint. */
 .dashboard-library-list-item {
 	display: flex;
 	align-items: center;
 	gap: 12px;
+	min-height: 36px;
+	box-sizing: border-box;
 	padding: 6px 10px;
 	border-radius: var(--db-radius-sm, 6px);
 	cursor: pointer;
-	transition: background 0.1s ease;
+	transition: background var(--nand-duration-fast) var(--nand-ease);
 }
 
 .dashboard-library-list-item:hover {
-	background: var(--db-bg-card-hover, rgba(255, 255, 255, 0.10));
+	background: var(--db-bg-hover, var(--db-bg-card-hover, rgba(255, 255, 255, 0.10)));
 }
 
 .dashboard-library-list-name {
@@ -16589,26 +16721,54 @@ button.nand-ui-list-item.is-active {
 	color: var(--db-text-muted, var(--text-muted));
 	white-space: nowrap;
 	flex-shrink: 0;
+	font-variant-numeric: tabular-nums;
 }
 
-/* ===== Table View ===== */
+/* ===== Table View =====
+   Shared by the library and dataview tables. Separate borders (spacing 0)
+   so the sticky header can carry rounded end caps and rows can round their
+   hover band — border-collapse drops border-radius on cells. Rows sit at
+   ~38px (8px vertical padding + one text line); hairline dividers only. */
 .dashboard-library-table {
 	width: 100%;
-	border-collapse: collapse;
+	border-collapse: separate;
+	border-spacing: 0;
 	font-size: 0.75em;
 }
 
 .dashboard-library-table th {
+	position: sticky;
+	top: 0;
+	z-index: 1;
 	text-align: left;
+	height: 32px;
+	box-sizing: border-box;
 	padding: 6px 10px;
 	font-weight: 600;
 	color: var(--db-text-muted, var(--text-muted));
-	border-bottom: 1px solid var(--db-border, rgba(255, 255, 255, 0.08));
+	/* Opaque header: the section token can be translucent, so it is layered
+	   over the page background to keep scrolled rows from bleeding through. */
+	background:
+		linear-gradient(var(--db-bg-hover, transparent), var(--db-bg-hover, transparent)),
+		linear-gradient(var(--db-bg-section, var(--background-secondary)), var(--db-bg-section, var(--background-secondary))),
+		var(--db-bg, var(--background-primary));
+	box-shadow: inset 0 -1px 0 var(--db-border, rgba(255, 255, 255, 0.08));
 	font-size: 0.6875em;
 	text-transform: uppercase;
 	letter-spacing: 0.5px;
 	cursor: pointer;
 	white-space: nowrap;
+	transition: color var(--nand-duration-fast) var(--nand-ease);
+}
+
+.dashboard-library-table thead th:first-child {
+	border-top-left-radius: var(--db-radius-sm, 6px);
+	border-bottom-left-radius: var(--db-radius-sm, 6px);
+}
+
+.dashboard-library-table thead th:last-child {
+	border-top-right-radius: var(--db-radius-sm, 6px);
+	border-bottom-right-radius: var(--db-radius-sm, 6px);
 }
 
 .dashboard-library-table th:hover {
@@ -16616,22 +16776,44 @@ button.nand-ui-list-item.is-active {
 }
 
 .dashboard-library-table td {
-	padding: 6px 10px;
+	height: 38px;
+	box-sizing: border-box;
+	padding: 8px 10px;
 	color: var(--db-text, var(--text-normal));
-	border-bottom: 1px solid var(--db-border, rgba(255, 255, 255, 0.04));
+	border-bottom: 1px solid color-mix(in srgb, var(--db-border, rgba(255, 255, 255, 0.08)) 70%, transparent);
 	overflow: hidden;
 	text-overflow: ellipsis;
 	white-space: nowrap;
 	max-width: 200px;
+	transition: background var(--nand-duration-fast) var(--nand-ease);
+}
+
+.dashboard-library-table tbody tr:last-child td {
+	border-bottom-color: transparent;
 }
 
 .dashboard-library-table tr {
 	cursor: pointer;
-	transition: background 0.1s ease;
 }
 
-.dashboard-library-table tbody tr:hover {
-	background: var(--db-bg-card-hover, rgba(255, 255, 255, 0.10));
+/* Zebra (library always; dataview opt-in via .is-striped below): a faint
+   tint on even rows. Hover wins and rounds its band's end caps. */
+.dashboard-library-table:not(.dashboard-dataview-table) tbody tr:nth-child(even) td {
+	background: color-mix(in srgb, var(--db-bg-hover, rgba(255, 255, 255, 0.04)) 60%, transparent);
+}
+
+.dashboard-library-table tbody tr:hover td {
+	background: var(--db-bg-hover, var(--db-bg-card-hover, rgba(255, 255, 255, 0.10)));
+}
+
+.dashboard-library-table tbody tr:hover td:first-child {
+	border-top-left-radius: var(--db-radius-sm, 6px);
+	border-bottom-left-radius: var(--db-radius-sm, 6px);
+}
+
+.dashboard-library-table tbody tr:hover td:last-child {
+	border-top-right-radius: var(--db-radius-sm, 6px);
+	border-bottom-right-radius: var(--db-radius-sm, 6px);
 }
 
 .dashboard-library-table-name {
@@ -16647,8 +16829,11 @@ button.nand-ui-list-item.is-active {
 	cursor: text;
 }
 
-.dashboard-library-table-editable:hover {
-	background: var(--db-bg-hover, rgba(255, 255, 255, 0.05));
+/* Editable cell: an inset hairline marks the cell under the pointer on top of
+   the row's hover band (double-click to edit). */
+.dashboard-library-table tbody tr:hover td.dashboard-library-table-editable:hover {
+	background: var(--db-bg-hover-strong, var(--db-bg-hover, rgba(255, 255, 255, 0.08)));
+	box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--db-accent, var(--interactive-accent)) 30%, transparent);
 }
 
 /* Action column (delete button) — narrow, non-interactive header */
@@ -16667,20 +16852,24 @@ button.nand-ui-list-item.is-active {
 	white-space: nowrap;
 }
 
+/* Row delete: ghost icon button revealed on row hover / keyboard focus;
+   danger tint (not a solid red disc) when armed. */
 .dashboard-library-table-delete {
-	width: 22px;
-	height: 22px;
+	width: 24px;
+	height: 24px;
 	display: inline-flex;
 	align-items: center;
 	justify-content: center;
-	border-radius: 50%;
+	border: none;
+	border-radius: var(--db-radius-sm, 6px);
 	background: transparent;
+	box-shadow: none;
 	color: var(--db-text-muted, var(--text-muted));
 	padding: 0;
 	min-height: 0;
 	opacity: 0;
 	cursor: pointer;
-	transition: opacity 0.15s ease, background 0.15s ease, color 0.15s ease;
+	transition: opacity var(--nand-duration-fast) var(--nand-ease), background var(--nand-duration-fast) var(--nand-ease), color var(--nand-duration-fast) var(--nand-ease);
 }
 
 .dashboard-library-table-delete svg {
@@ -16688,20 +16877,33 @@ button.nand-ui-list-item.is-active {
 	height: 14px;
 }
 
-.dashboard-library-table tr:hover .dashboard-library-table-delete {
+.dashboard-library-table tr:hover .dashboard-library-table-delete,
+.dashboard-library-table-delete:focus-visible {
 	opacity: 1;
 }
 
+.dashboard-library-table-delete:focus-visible {
+	outline: 2px solid var(--db-accent, var(--interactive-accent));
+	outline-offset: 1px;
+}
+
 .dashboard-library-table-delete:hover {
-	background: rgba(220, 50, 50, 0.85);
-	color: #fff;
+	background: color-mix(in srgb, var(--db-danger, var(--text-error)) 14%, transparent);
+	color: var(--db-danger, var(--text-error));
+}
+
+/* Touch has no hover: keep the delete affordance visible (faint). */
+@media (pointer: coarse) {
+	.dashboard-library-table-delete {
+		opacity: 0.6;
+	}
 }
 
 .dashboard-library-table-edit-input {
 	width: 100%;
-	padding: 2px 4px;
+	padding: 2px 6px;
 	border: 1px solid var(--db-accent, var(--interactive-accent));
-	border-radius: 3px;
+	border-radius: max(4px, calc(var(--db-radius-sm, 6px) - 2px));
 	background: var(--db-bg-input, rgba(255, 255, 255, 0.05));
 	color: var(--db-text, var(--text-normal));
 	font-size: 0.75em;
@@ -16713,10 +16915,10 @@ button.nand-ui-list-item.is-active {
 /* ===== Kanban View ===== */
 .dashboard-library-kanban {
 	display: flex;
-	/* Tight inter-group gutters: the columns' translucent background barely
-	   reads as a box in most themes, so the perceived group gap is padding +
-	   gap + padding — keep all three small. */
-	gap: 5px;
+	/* Inter-group gutter: columns now carry a hairline so they read as boxes
+	   in every theme; the perceived group gap is padding + gap + padding, so
+	   the gap stays modest (8px) while the column padding stays tight. */
+	gap: 8px;
 	overflow-x: auto;
 	/* Cap the board to its bounded-height host (.dashboard-library-files).
 	   Without this the board grows to its tallest column, the host scrolls
@@ -16746,8 +16948,8 @@ button.nand-ui-list-item.is-active {
 
 .dashboard-library-kanban::-webkit-scrollbar-thumb {
 	background: color-mix(in srgb, var(--db-accent) 24%, transparent);
-	border-radius: 2px;
-	transition: background 0.2s ease;
+	border-radius: 999px;
+	transition: background var(--nand-duration) var(--nand-ease);
 }
 
 .dashboard-library-kanban::-webkit-scrollbar-thumb:hover {
@@ -16759,6 +16961,7 @@ button.nand-ui-list-item.is-active {
 	max-width: 260px;
 	flex-shrink: 0;
 	background: var(--db-bg-section, rgba(255, 255, 255, 0.02));
+	border: 1px solid color-mix(in srgb, var(--db-border, rgba(255, 255, 255, 0.08)) 60%, transparent);
 	border-radius: var(--db-radius-md, 10px);
 	/* See the board's gap note: column padding contributes to the perceived
 	   distance between groups, so it stays tight alongside it. */
@@ -16766,6 +16969,7 @@ button.nand-ui-list-item.is-active {
 	display: flex;
 	flex-direction: column;
 	gap: 6px;
+	transition: background var(--nand-duration-fast) var(--nand-ease);
 	/* Trello-style: each column is capped to the board's height and scrolls its
 	   own cards, so a long list no longer pushes the board's horizontal
 	   scrollbar off-screen. min-height:0 lets the column shrink below its
@@ -16786,10 +16990,12 @@ button.nand-ui-list-item.is-active {
 .dashboard-library-kanban-col-title {
 	font-size: 0.75em;
 	font-weight: 600;
-	color: var(--db-text-muted, var(--text-muted));
-	padding: 4px 6px;
-	border-bottom: 2px solid var(--db-accent, var(--interactive-accent));
-	margin-bottom: 4px;
+	color: var(--db-text, var(--text-normal));
+	padding: 6px 8px;
+	border-bottom: 2px solid color-mix(in srgb, var(--db-accent, var(--interactive-accent)) 70%, transparent);
+	border-radius: max(2px, calc(var(--db-radius-md, 10px) - 6px)) max(2px, calc(var(--db-radius-md, 10px) - 6px)) 0 0;
+	margin-bottom: 2px;
+	font-variant-numeric: tabular-nums;
 	/* Stay pinned at the top of the column while its cards scroll. The theme's
 	   section bg can be translucent (rgba) in some themes, which would let
 	   cards bleed through — layer it over the opaque page bg (--db-bg) so the
@@ -16804,22 +17010,25 @@ button.nand-ui-list-item.is-active {
 }
 
 .dashboard-library-kanban-card {
+	flex-shrink: 0;
 	background: var(--db-bg-card, rgba(255, 255, 255, 0.06));
 	border: 1px solid var(--db-border-card, rgba(255, 255, 255, 0.10));
 	border-radius: var(--db-radius-sm, 6px);
 	padding: 8px 10px;
 	cursor: pointer;
-	transition: background 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease, color 0.15s ease, transform 0.15s ease;
+	transition: background var(--nand-duration) var(--nand-ease), border-color var(--nand-duration) var(--nand-ease), box-shadow var(--nand-duration) var(--nand-ease), opacity var(--nand-duration) var(--nand-ease);
 }
 
 .dashboard-library-kanban-card:hover {
 	background: var(--db-bg-card-hover, rgba(255, 255, 255, 0.10));
-	border-color: var(--db-accent, var(--interactive-accent));
+	border-color: color-mix(in srgb, var(--db-accent, var(--interactive-accent)) 45%, var(--db-border-card, transparent));
+	box-shadow: var(--db-shadow-card, var(--shadow-s));
 }
 
 .dashboard-library-kanban-card-title {
 	font-size: 0.75em;
-	font-weight: 500;
+	font-weight: 600;
+	line-height: 1.35;
 	color: var(--db-text, var(--text-normal));
 	overflow: hidden;
 	text-overflow: ellipsis;
@@ -16829,17 +17038,19 @@ button.nand-ui-list-item.is-active {
 .dashboard-library-kanban-card-date {
 	font-size: 0.625em;
 	color: var(--db-text-muted, var(--text-muted));
-	margin-top: 2px;
+	margin-top: 4px;
+	font-variant-numeric: tabular-nums;
 }
 
 /* Optional kanban covers (per-section toggle): the gallery view's
    .dashboard-library-card-cover classes carry the aspect ratio, background
    sizing and the placeholder treatment — the kanban companion class only
    insets the cover inside the card's own padding with a gap before the title
-   and rounds it slightly tighter to match the card. */
+   and nests its radius inside the card's (radius-sm minus the 8px inset,
+   floored so it never goes square). */
 .dashboard-library-kanban-card-cover {
-	margin-bottom: 6px;
-	border-radius: 4px;
+	margin-bottom: 8px;
+	border-radius: max(3px, calc(var(--db-radius-sm, 6px) - 3px));
 }
 
 /* ===== Library folder-kanban drag & drop (desktop) ===== */
@@ -16857,10 +17068,13 @@ button.nand-ui-list-item.is-active {
 	transition: none;
 }
 
+/* Drop target: accent-tinted column with an accent border (solid, not the
+   old dashed outline) so the target reads calmly. */
 .dashboard-library-kanban-col--drag-over {
-	background: color-mix(in srgb, var(--db-accent, var(--interactive-accent)) 10%, var(--db-bg-section, transparent));
-	outline: 2px dashed var(--db-accent, var(--interactive-accent));
-	outline-offset: -2px;
+	background: color-mix(in srgb, var(--db-accent, var(--interactive-accent)) 12%, var(--db-bg-section, transparent));
+	border-color: var(--db-accent, var(--interactive-accent));
+	outline: 1px solid var(--db-accent, var(--interactive-accent));
+	outline-offset: -1px;
 }
 
 /* ===== Library Config Modal ===== */
@@ -16868,8 +17082,15 @@ button.nand-ui-list-item.is-active {
 	padding: 0;
 }
 
+/* Section cards: the shared card surface (tint + hairline + 12px padding)
+   lives with the board modal shell; here only the rhythm between groups
+   (12px, twice the 6px gap inside a group) and the heading hierarchy. */
 .dashboard-library-config-section {
-	margin-bottom: 16px;
+	margin-bottom: 12px;
+}
+
+.dashboard-library-config-section:last-child {
+	margin-bottom: 0;
 }
 
 .dashboard-library-config-section-title {
@@ -16877,6 +17098,7 @@ button.nand-ui-list-item.is-active {
 	font-weight: 600;
 	color: var(--db-text, var(--text-normal));
 	margin-bottom: 8px;
+	line-height: 1.35;
 }
 
 .dashboard-library-config-filters {
@@ -16919,10 +17141,10 @@ button.nand-ui-list-item.is-active {
 .dashboard-library-filter-row {
 	display: flex;
 	flex-direction: column;
-	gap: 6px;
-	padding: 8px;
+	gap: 8px;
+	padding: 10px;
 	background: var(--db-bg-input, rgba(255, 255, 255, 0.05));
-	border-radius: var(--db-radius-sm, 6px);
+	border-radius: var(--db-radius-md, 10px);
 	border: 1px solid var(--db-border, rgba(255, 255, 255, 0.08));
 }
 
@@ -16948,7 +17170,9 @@ button.nand-ui-list-item.is-active {
 }
 
 .dashboard-library-filter-property {
-	padding: 4px 8px;
+	height: 28px;
+	box-sizing: border-box;
+	padding: 0 8px;
 	border: 1px solid var(--db-border-input, rgba(255, 255, 255, 0.08));
 	border-radius: var(--db-radius-sm, 6px);
 	background: var(--db-bg-card, rgba(255, 255, 255, 0.06));
@@ -16969,7 +17193,9 @@ button.nand-ui-list-item.is-active {
 .dashboard-library-filter-operator {
 	flex-shrink: 0;
 	max-width: 96px;
-	padding: 4px 6px;
+	height: 28px;
+	box-sizing: border-box;
+	padding: 0 6px;
 	border: 1px solid var(--db-border-input, rgba(255, 255, 255, 0.08));
 	border-radius: var(--db-radius-sm, 6px);
 	background: var(--db-bg-card, rgba(255, 255, 255, 0.06));
@@ -16992,7 +17218,9 @@ button.nand-ui-list-item.is-active {
 .dashboard-folder-path-input {
 	flex: 1;
 	min-width: 0;
-	padding: 6px 8px;
+	height: 30px;
+	box-sizing: border-box;
+	padding: 0 10px;
 	border: 1px solid var(--db-border-input, rgba(255, 255, 255, 0.08));
 	border-radius: var(--db-radius-sm, 6px);
 	background: var(--db-bg-card, rgba(255, 255, 255, 0.06));
@@ -17008,18 +17236,23 @@ button.nand-ui-list-item.is-active {
 
 .dashboard-folder-browse-btn {
 	flex-shrink: 0;
-	padding: 6px 12px;
+	height: 30px;
+	box-sizing: border-box;
+	padding: 0 12px;
 	border: 1px solid var(--db-border-input, rgba(255, 255, 255, 0.08));
 	border-radius: var(--db-radius-sm, 6px);
 	background: var(--db-bg-card, rgba(255, 255, 255, 0.06));
+	box-shadow: none;
 	color: var(--db-text, var(--text-normal));
 	font-size: 0.75em;
 	font-family: var(--db-font, var(--font-interface));
 	cursor: pointer;
+	transition: background var(--nand-duration-fast) var(--nand-ease), border-color var(--nand-duration-fast) var(--nand-ease);
 }
 
 .dashboard-folder-browse-btn:hover {
 	background: var(--db-bg-card-hover, rgba(255, 255, 255, 0.12));
+	border-color: color-mix(in srgb, var(--db-accent, var(--interactive-accent)) 40%, transparent);
 }
 
 /* Tag-filter search (folder config modal): capped at the toolbar search
@@ -17040,25 +17273,35 @@ button.nand-ui-list-item.is-active {
 	overflow-y: auto;
 }
 
+/* Value / tag chips (library config, media filter): neutral pills; the
+   selected state is accent-soft fill + accent border + accent text (library
+   uses .active, the media filter popup uses .selected). */
 .dashboard-library-filter-chip {
-	padding: 2px 8px;
-	border-radius: 10px;
+	display: inline-flex;
+	align-items: center;
+	min-height: 22px;
+	box-sizing: border-box;
+	padding: 0 10px;
+	border-radius: 999px;
 	font-size: 0.6875em;
-	background: var(--db-bg-btn, rgba(139, 92, 246, 0.10));
+	background: var(--db-bg-hover, var(--db-bg-btn, rgba(139, 92, 246, 0.10)));
 	color: var(--db-text-muted, var(--text-muted));
 	cursor: pointer;
-	transition: background 0.1s ease, border-color 0.1s ease, box-shadow 0.1s ease, color 0.1s ease, transform 0.1s ease;
+	transition: background var(--nand-duration-fast) var(--nand-ease), border-color var(--nand-duration-fast) var(--nand-ease), color var(--nand-duration-fast) var(--nand-ease);
 	border: 1px solid transparent;
 }
 
 .dashboard-library-filter-chip:hover {
-	border-color: var(--db-accent, var(--interactive-accent));
+	color: var(--db-text, var(--text-normal));
+	border-color: color-mix(in srgb, var(--db-accent, var(--interactive-accent)) 40%, transparent);
 }
 
-.dashboard-library-filter-chip.active {
-	background: var(--db-accent, var(--interactive-accent));
-	color: white;
-	border-color: var(--db-accent, var(--interactive-accent));
+.dashboard-library-filter-chip.active,
+.dashboard-library-filter-chip.selected {
+	background: color-mix(in srgb, var(--db-accent, var(--interactive-accent)) 14%, transparent);
+	color: var(--db-accent, var(--interactive-accent));
+	border-color: color-mix(in srgb, var(--db-accent, var(--interactive-accent)) 55%, transparent);
+	font-weight: 600;
 }
 
 .dashboard-library-filter-more,
@@ -17070,23 +17313,32 @@ button.nand-ui-list-item.is-active {
 
 .dashboard-library-filter-remove {
 	align-self: flex-end;
-	padding: 2px 6px;
+	justify-content: center;
+	width: 28px;
+	height: 28px;
+	padding: 0;
 	border: none;
 	background: none;
+	box-shadow: none;
 	color: var(--db-text-muted, var(--text-muted));
 	cursor: pointer;
-	border-radius: 4px;
+	border-radius: var(--db-radius-sm, 6px);
 	display: flex;
 	align-items: center;
+	transition: background var(--nand-duration-fast) var(--nand-ease), color var(--nand-duration-fast) var(--nand-ease);
 }
 
 .dashboard-library-filter-remove:hover {
-	color: var(--db-danger, #ef4444);
-	background: rgba(239, 68, 68, 0.1);
+	color: var(--db-danger, var(--text-error));
+	background: color-mix(in srgb, var(--db-danger, var(--text-error)) 12%, transparent);
 }
 
 .dashboard-library-add-filter-btn {
-	padding: 6px 12px;
+	margin-top: 8px;
+	height: 30px;
+	box-sizing: border-box;
+	padding: 0 12px;
+	box-shadow: none;
 	border: 1px dashed var(--db-border, rgba(255, 255, 255, 0.15));
 	border-radius: var(--db-radius-sm, 6px);
 	background: transparent;
@@ -17102,33 +17354,55 @@ button.nand-ui-list-item.is-active {
 	color: var(--db-accent, var(--interactive-accent));
 }
 
-/* ===== Library Pagination ===== */
+/* ===== Library Pagination =====
+   Compact pill control (library, media, dataview share it): one rounded
+   track holding prev · pages · next; 24px circular-ish page targets; the
+   current page is accent-soft (not a solid block), disabled arrows fade. */
 .dashboard-library-pagination {
-	padding: 4px 0 0 0;
+	padding: 6px 0 0 0;
 }
 
 .dashboard-library-pagination-nav {
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	gap: 4px;
-	padding: 6px 0;
+	gap: 2px;
+	width: fit-content;
+	max-width: 100%;
+	margin: 4px auto;
+	padding: 2px;
+	box-sizing: border-box;
+	border: 1px solid var(--db-border-card, var(--db-border, transparent));
+	border-radius: 999px;
+	background: var(--db-bg-card, rgba(255, 255, 255, 0.06));
+	font-variant-numeric: tabular-nums;
+}
+
+.dashboard-library-pagination-btn,
+.dashboard-library-pagination-page {
+	position: relative;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	min-width: 26px;
+	height: 26px;
+	box-sizing: border-box;
+	padding: 0 8px;
+	border-radius: 999px;
+	font-size: 0.75em;
+	cursor: pointer;
+	user-select: none;
+	transition: background var(--nand-duration-fast) var(--nand-ease), color var(--nand-duration-fast) var(--nand-ease), opacity var(--nand-duration-fast) var(--nand-ease);
 }
 
 .dashboard-library-pagination-btn {
-	cursor: pointer;
-	padding: 4px 10px;
-	border-radius: var(--db-radius-sm, 6px);
-	font-size: 0.75em;
-	font-weight: 500;
+	font-weight: 600;
 	color: var(--db-text, var(--text-normal));
-	background: var(--db-bg-btn, rgba(139, 92, 246, 0.10));
-	transition: background 0.1s ease, border-color 0.1s ease, box-shadow 0.1s ease, color 0.1s ease, transform 0.1s ease;
-	user-select: none;
+	background: transparent;
 }
 
 .dashboard-library-pagination-btn:hover {
-	background: var(--db-bg-btn-hover, rgba(139, 92, 246, 0.18));
+	background: var(--db-bg-hover, var(--db-bg-btn-hover, rgba(139, 92, 246, 0.18)));
 }
 
 .dashboard-library-pagination-btn.disabled {
@@ -17138,35 +17412,47 @@ button.nand-ui-list-item.is-active {
 }
 
 .dashboard-library-pagination-page {
-	cursor: pointer;
-	padding: 4px 8px;
-	border-radius: 4px;
-	font-size: 0.75em;
 	color: var(--db-text-muted, var(--text-muted));
 	background: transparent;
-	transition: background 0.1s ease, border-color 0.1s ease, box-shadow 0.1s ease, color 0.1s ease, transform 0.1s ease;
-	min-width: 28px;
-	text-align: center;
-	user-select: none;
 }
 
 .dashboard-library-pagination-page:hover {
-	background: var(--db-bg-btn, rgba(139, 92, 246, 0.10));
+	background: var(--db-bg-hover, var(--db-bg-btn, rgba(139, 92, 246, 0.10)));
 	color: var(--db-text, var(--text-normal));
 }
 
 .dashboard-library-pagination-page.active {
-	background: var(--db-accent, var(--interactive-accent));
-	color: white;
-	font-weight: 600;
+	background: color-mix(in srgb, var(--db-accent, var(--interactive-accent)) 16%, transparent);
+	color: var(--db-accent, var(--interactive-accent));
+	box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--db-accent, var(--interactive-accent)) 35%, transparent);
+	font-weight: 700;
 	cursor: default;
 }
 
 .dashboard-library-pagination-ellipsis {
-	padding: 4px 4px;
+	padding: 0 2px;
 	font-size: 0.75em;
-	color: var(--db-text-muted, var(--text-muted));
+	color: var(--db-text-faint, var(--text-faint));
 	user-select: none;
+}
+
+/* Touch: grow the pill's targets to the 44px minimum without resizing the
+   visual (an invisible hit area around each 26px chip). */
+@media (pointer: coarse) {
+	.dashboard-library-pagination-nav {
+		gap: 6px;
+	}
+
+	.dashboard-library-pagination-btn::after,
+	.dashboard-library-pagination-page::after,
+	.dashboard-library-sort-dir::after,
+	.dashboard-library-filter-btn::after,
+	.dashboard-library-config-btn::after,
+	.dashboard-library-newnote-btn::after {
+		content: '';
+		position: absolute;
+		inset: -9px -8px;
+	}
 }
 
 /* Library config modal header */
@@ -17275,8 +17561,8 @@ button.nand-ui-list-item.is-active {
 	height: 28px;
 	flex-shrink: 0;
 	border-radius: var(--db-radius-sm, 6px);
-	background: var(--db-accent-soft, rgba(99, 102, 241, 0.15));
-	color: var(--db-accent, #6366f1);
+	background: color-mix(in srgb, var(--db-accent, var(--interactive-accent)) 15%, transparent);
+	color: var(--db-accent, var(--interactive-accent));
 }
 
 .dashboard-quicknote-guide-feature-icon svg {
@@ -17297,33 +17583,38 @@ button.nand-ui-list-item.is-active {
 	justify-content: flex-end;
 }
 
-.dashboard-quicknote-guide-actions button {
-	padding: 6px 16px;
+.dashboard-quicknote-guide-actions button.dashboard-quicknote-guide-dismiss,
+.dashboard-quicknote-guide-actions button.dashboard-quicknote-guide-enable {
+	min-height: 32px;
+	padding: 0 16px;
 	border-radius: var(--db-radius-sm, 6px);
 	border: 1px solid var(--db-border-card, rgba(255, 255, 255, 0.1));
 	background: var(--db-bg-card, rgba(255, 255, 255, 0.06));
+	box-shadow: none;
 	color: var(--db-text, var(--text-normal));
 	font-size: 0.8125em;
 	cursor: pointer;
-	transition: background 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease, color 0.15s ease, transform 0.15s ease;
+	transition: background var(--nand-duration-fast) var(--nand-ease), border-color var(--nand-duration-fast) var(--nand-ease), opacity var(--nand-duration-fast) var(--nand-ease);
 }
 
-.dashboard-quicknote-guide-actions button:hover {
-	background: var(--db-bg-hover, rgba(255, 255, 255, 0.1));
-}
-
-.dashboard-quicknote-guide-dismiss {
+.dashboard-quicknote-guide-actions button.dashboard-quicknote-guide-dismiss {
 	color: var(--db-text-muted, var(--text-muted));
 }
 
-.dashboard-quicknote-guide-enable {
-	background: var(--db-accent, #6366f1) !important;
-	color: #fff !important;
-	border-color: transparent !important;
-	font-weight: 500;}
+.dashboard-quicknote-guide-actions button.dashboard-quicknote-guide-dismiss:hover {
+	background: var(--db-bg-hover, rgba(255, 255, 255, 0.1));
+}
 
-.dashboard-quicknote-guide-enable:hover {
-	opacity: 0.9;
+/* Primary (rightmost): solid accent, theme on-accent text. */
+.dashboard-quicknote-guide-actions button.dashboard-quicknote-guide-enable {
+	background: var(--db-accent, var(--interactive-accent));
+	color: var(--db-text-inverse, var(--text-on-accent));
+	border-color: transparent;
+	font-weight: 500;
+}
+
+.dashboard-quicknote-guide-actions button.dashboard-quicknote-guide-enable:hover {
+	opacity: 0.88;
 }
 
 /* ===== Dataview announcement + community-group modal ===== */
@@ -17369,8 +17660,8 @@ button.nand-ui-list-item.is-active {
 	height: 28px;
 	flex-shrink: 0;
 	border-radius: var(--db-radius-sm, 6px);
-	background: var(--db-accent-soft, rgba(99, 102, 241, 0.15));
-	color: var(--db-accent, #6366f1);
+	background: color-mix(in srgb, var(--db-accent, var(--interactive-accent)) 15%, transparent);
+	color: var(--db-accent, var(--interactive-accent));
 }
 
 .dashboard-dataview-guide-feature-icon svg {
@@ -17425,19 +17716,21 @@ button.nand-ui-list-item.is-active {
 }
 
 .dashboard-dataview-guide-gotit {
-	padding: 6px 16px;
+	min-height: 32px;
+	padding: 0 16px;
 	border-radius: var(--db-radius-sm, 6px);
 	border: 1px solid transparent;
-	background: var(--db-accent, #6366f1);
-	color: #fff;
+	background: var(--db-accent, var(--interactive-accent));
+	box-shadow: none;
+	color: var(--db-text-inverse, var(--text-on-accent));
 	font-size: 0.8125em;
 	font-weight: 500;
 	cursor: pointer;
-	transition: opacity 0.15s ease;
+	transition: opacity var(--nand-duration-fast) var(--nand-ease);
 }
 
 .dashboard-dataview-guide-gotit:hover {
-	opacity: 0.9;
+	opacity: 0.88;
 }
 
 /* ===== Note popover modal — in-place edit popup for hover-previewed links =====
@@ -17594,14 +17887,15 @@ button.nand-ui-list-item.is-active {
 .dashboard-media-group-header {
 	display: flex;
 	align-items: center;
-	gap: 6px;
-	padding: 6px 4px;
-	margin: 10px 0 6px 0;
+	gap: 8px;
+	min-height: 28px;
+	padding: 4px 8px;
+	margin: 12px 0 8px 0;
 	border-bottom: 1px solid var(--db-border, var(--background-modifier-border));
 	cursor: pointer;
 	user-select: none;
-	border-radius: var(--db-radius-sm, 4px);
-	transition: background 0.15s ease;
+	border-radius: var(--db-radius-sm, 6px) var(--db-radius-sm, 6px) 0 0;
+	transition: background var(--nand-duration-fast) var(--nand-ease), opacity var(--nand-duration-fast) var(--nand-ease);
 }
 .dashboard-media-group-header:hover { background: var(--db-bg-hover, rgba(255, 255, 255, 0.05)); }
 .dashboard-media-group-chevron {
@@ -17621,11 +17915,16 @@ button.nand-ui-list-item.is-active {
 .dashboard-media-group-count {
 	margin-left: auto;
 	flex-shrink: 0;
-	font-size: 0.625em;
-	color: var(--db-text-muted, var(--text-muted));
-	background: var(--db-bg-hover, rgba(255, 255, 255, 0.06));
-	padding: 0 7px;
+	min-width: 20px;
+	padding: 0 8px;
 	border-radius: 999px;
+	background: var(--db-bg-hover, rgba(255, 255, 255, 0.06));
+	color: var(--db-text-muted, var(--text-muted));
+	font-size: 0.625em;
+	font-weight: 600;
+	line-height: 18px;
+	text-align: center;
+	font-variant-numeric: tabular-nums;
 }
 .dashboard-media-group-header.is-collapsed { opacity: 0.75; }
 .dashboard-media-group-body.is-hidden { display: none; }
@@ -17647,20 +17946,31 @@ button.nand-ui-list-item.is-active {
 	gap: 10px;
 }
 
+/* Media tile: rounded thumbnail card. The image fills edge-to-edge (the
+   tile clips it to the card radius); a hairline inner ring keeps light
+   photos from dissolving into light themes. Hover lifts one tier (accent-
+   tinted border + theme shadow) and gently zooms the image inside the clip —
+   the tile itself never moves. */
 .dashboard-media-item {
 	position: relative;
 	aspect-ratio: 1 / 1;
-	border-radius: var(--db-radius-md, 8px);
+	border-radius: var(--db-radius-md, 10px);
 	overflow: hidden;
+	isolation: isolate;
 	background: var(--db-bg-card, rgba(255, 255, 255, 0.04));
 	border: 1px solid var(--db-border-card, rgba(255, 255, 255, 0.08));
 	cursor: pointer;
-	transition: transform 0.15s ease, border-color 0.15s ease;
+	transition: border-color var(--nand-duration) var(--nand-ease), box-shadow var(--nand-duration) var(--nand-ease);
 }
 
 .dashboard-media-item:hover {
-	transform: translateY(-2px);
-	border-color: var(--db-accent, var(--interactive-accent));
+	border-color: color-mix(in srgb, var(--db-accent, var(--interactive-accent)) 55%, var(--db-border-card, transparent));
+	box-shadow: var(--db-shadow-card, var(--shadow-s));
+}
+
+.dashboard-media-item:focus-visible {
+	outline: 2px solid var(--db-accent, var(--interactive-accent));
+	outline-offset: 2px;
 }
 
 .dashboard-media-thumb {
@@ -17669,6 +17979,19 @@ button.nand-ui-list-item.is-active {
 	object-fit: cover;
 	display: block;
 	background: var(--db-bg-card-hover, rgba(0, 0, 0, 0.2));
+	transition: transform var(--nand-duration) var(--nand-ease);
+}
+
+.dashboard-media-item:hover .dashboard-media-thumb {
+	transform: scale(1.03);
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.dashboard-media-thumb,
+	.dashboard-media-item:hover .dashboard-media-thumb {
+		transition: none;
+		transform: none;
+	}
 }
 
 .dashboard-media-thumb--broken {
@@ -17689,16 +18012,21 @@ button.nand-ui-list-item.is-active {
 	height: 30%;
 	opacity: 0.7;
 }
+/* Overlay chrome over imagery: scrim + inverse text work in every theme
+   because they sit on the photo, not on the theme surface. */
 .dashboard-media-size-badge {
 	position: absolute;
-	right: 4px;
-	bottom: 4px;
-	padding: 1px 5px;
+	right: 6px;
+	bottom: 6px;
+	padding: 1px 6px;
 	font-size: 0.625em;
 	line-height: 1.4;
-	border-radius: 4px;
-	color: #fff;
-	background: rgba(0, 0, 0, 0.6);
+	font-variant-numeric: tabular-nums;
+	border-radius: 999px;
+	color: rgba(255, 255, 255, 0.95);
+	background: rgba(0, 0, 0, 0.5);
+	backdrop-filter: blur(6px);
+	-webkit-backdrop-filter: blur(6px);
 	pointer-events: none;
 }
 /* Once a real <video> is lazily mounted into a tile, hide its placeholder. */
@@ -17708,16 +18036,20 @@ button.nand-ui-list-item.is-active {
 /* Size badge hidden inside the tiny list-view thumb (40x40) */
 .dashboard-media-list-thumb .dashboard-media-size-badge { display: none; }
 
+/* Caption over the photo: always light text on a dark scrim. (Was
+   --db-text, which went dark-on-dark in the light themes.) */
 .dashboard-media-name {
 	position: absolute;
 	left: 0;
 	right: 0;
 	bottom: 0;
-	padding: 14px 8px 6px;
+	padding: 18px 10px 7px;
 	font-size: 0.6875em;
-	line-height: 1.2;
-	color: var(--db-text, #fff);
-	background: linear-gradient(to top, rgba(0, 0, 0, 0.7), transparent);
+	font-weight: 500;
+	line-height: 1.25;
+	color: rgba(255, 255, 255, 0.96);
+	text-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
+	background: linear-gradient(to top, rgba(0, 0, 0, 0.66), rgba(0, 0, 0, 0.18) 70%, transparent);
 	white-space: nowrap;
 	overflow: hidden;
 	text-overflow: ellipsis;
@@ -17729,14 +18061,17 @@ button.nand-ui-list-item.is-active {
 	top: 50%;
 	left: 50%;
 	transform: translate(-50%, -50%);
-	width: 36px;
-	height: 36px;
+	width: 38px;
+	height: 38px;
 	display: flex;
 	align-items: center;
 	justify-content: center;
 	border-radius: 50%;
-	background: rgba(0, 0, 0, 0.55);
-	color: #fff;
+	background: rgba(0, 0, 0, 0.45);
+	border: 1px solid rgba(255, 255, 255, 0.28);
+	backdrop-filter: blur(8px);
+	-webkit-backdrop-filter: blur(8px);
+	color: rgba(255, 255, 255, 0.96);
 	pointer-events: none;
 }
 
@@ -17746,54 +18081,75 @@ button.nand-ui-list-item.is-active {
 }
 
 /* Grid delete button (top-left of thumbnail, mirrors qa-remove positioning) */
+/* Tile overlay buttons (delete + tag): frosted glass discs on the photo,
+   revealed on hover/focus. They share .dashboard-qa-remove on the delete
+   path, so the rules are qualified by the tile to win its base styles. */
 .dashboard-media-delete {
 	position: absolute;
-	top: 4px;
-	left: 4px;
-	width: 22px;
-	height: 22px;
+	top: 6px;
+	left: 6px;
+	width: 24px;
+	height: 24px;
 	display: flex;
 	align-items: center;
 	justify-content: center;
+	border: 1px solid rgba(255, 255, 255, 0.22);
 	border-radius: 50%;
-	background: rgba(0, 0, 0, 0.55);
-	color: #fff;
+	background: rgba(0, 0, 0, 0.45);
+	backdrop-filter: blur(8px);
+	-webkit-backdrop-filter: blur(8px);
+	color: rgba(255, 255, 255, 0.96);
 	padding: 0;
 	min-height: 0;
 	opacity: 0;
-	transition: opacity 0.15s ease;
+	transition: opacity var(--nand-duration-fast) var(--nand-ease), background var(--nand-duration-fast) var(--nand-ease);
 	z-index: 2;
 }
 .dashboard-media-delete svg { width: 12px; height: 12px; }
-.dashboard-media-item:hover .dashboard-media-delete { opacity: 1; }
-.dashboard-media-item .dashboard-media-delete:hover { background: rgba(220, 50, 50, 0.85); }
+.dashboard-media-item:hover .dashboard-media-delete,
+.dashboard-media-item:focus-within .dashboard-media-delete { opacity: 1; }
+.dashboard-media-item .dashboard-media-delete:focus-visible {
+	outline: 2px solid rgba(255, 255, 255, 0.9);
+	outline-offset: 1px;
+}
+.dashboard-media-item .dashboard-media-delete:hover {
+	background: color-mix(in srgb, var(--db-danger, var(--color-red)) 85%, transparent);
+	border-color: transparent;
+}
 
-/* List view */
-.dashboard-media-list { display: flex; flex-direction: column; gap: 4px; }
+/* List view: 56px rows (40px thumb + 8px inset), hairline card per row. */
+.dashboard-media-list { display: flex; flex-direction: column; gap: 6px; }
 .dashboard-media-list-row {
 	display: flex;
 	align-items: center;
-	gap: 10px;
-	padding: 6px 8px;
-	border-radius: var(--db-radius-sm, 6px);
+	gap: 12px;
+	padding: 8px 10px 8px 8px;
+	border-radius: var(--db-radius-md, 10px);
 	background: var(--db-bg-card, rgba(255, 255, 255, 0.04));
 	border: 1px solid var(--db-border-card, rgba(255, 255, 255, 0.08));
+	transition: background var(--nand-duration-fast) var(--nand-ease), border-color var(--nand-duration-fast) var(--nand-ease);
 }
-.dashboard-media-list-row:hover { background: var(--db-bg-card-hover, rgba(255, 255, 255, 0.08)); }
+.dashboard-media-list-row:hover {
+	background: var(--db-bg-card-hover, rgba(255, 255, 255, 0.08));
+	border-color: color-mix(in srgb, var(--db-accent, var(--interactive-accent)) 30%, var(--db-border-card, transparent));
+}
 .dashboard-media-list-thumb {
 	width: 40px;
 	height: 40px;
 	flex-shrink: 0;
-	border-radius: var(--db-radius-sm, 6px);
+	/* Nested inside the row: row radius minus the 8px inset. */
+	border-radius: max(4px, calc(var(--db-radius-md, 10px) - 4px));
 	overflow: hidden;
 	background: var(--db-bg-card-hover, rgba(0, 0, 0, 0.2));
 	cursor: pointer;
+	transition: box-shadow var(--nand-duration-fast) var(--nand-ease);
 }
 .dashboard-media-list-thumb video { width: 100%; height: 100%; object-fit: cover; }
-.dashboard-media-list-thumb:hover { outline: 2px solid var(--db-accent, var(--interactive-accent)); }
+.dashboard-media-list-thumb:hover { box-shadow: 0 0 0 2px var(--db-accent, var(--interactive-accent)); }
 .dashboard-media-list-info { flex: 1; min-width: 0; }
 .dashboard-media-list-name {
 	font-size: 0.8125em;
+	font-weight: 600;
 	color: var(--db-text, var(--text-normal));
 	white-space: nowrap;
 	overflow: hidden;
@@ -17810,15 +18166,17 @@ button.nand-ui-list-item.is-active {
 	margin-top: 3px;
 }
 .dashboard-media-list .dashboard-media-delete--list:hover {
-	background: rgba(220, 50, 50, 0.12);
-	color: var(--db-danger, rgb(220, 50, 50));
+	background: color-mix(in srgb, var(--db-danger, var(--text-error)) 12%, transparent);
+	color: var(--db-danger, var(--text-error));
 }
 .dashboard-media-list-meta {
+	margin-top: 1px;
 	font-size: 0.6875em;
 	color: var(--db-text-muted, var(--text-muted));
 	white-space: nowrap;
 	overflow: hidden;
 	text-overflow: ellipsis;
+	font-variant-numeric: tabular-nums;
 }
 
 /* Backlink chips (list/table) */
@@ -17829,10 +18187,12 @@ button.nand-ui-list-item.is-active {
 	margin-top: 4px;
 }
 .dashboard-media-backlink {
-	padding: 1px 7px;
-	border-radius: var(--db-radius-sm, 6px);
-	background: var(--db-bg-card-hover, rgba(255, 255, 255, 0.1));
+	padding: 1px 8px;
+	border-radius: 999px;
+	background: var(--db-bg-hover, var(--db-bg-card-hover, rgba(255, 255, 255, 0.1)));
+	border: 1px solid color-mix(in srgb, var(--db-accent, var(--interactive-accent)) 22%, transparent);
 	color: var(--db-accent, var(--interactive-accent));
+	transition: background var(--nand-duration-fast) var(--nand-ease), color var(--nand-duration-fast) var(--nand-ease);
 	font-size: 0.625em;
 	line-height: 16px;
 	white-space: nowrap;
@@ -17842,11 +18202,12 @@ button.nand-ui-list-item.is-active {
 	text-overflow: ellipsis;
 }
 .dashboard-media-backlink:hover {
-	background: var(--db-accent, var(--interactive-accent));
-	color: var(--db-bg, #fff);
+	background: color-mix(in srgb, var(--db-accent, var(--interactive-accent)) 16%, transparent);
+	color: var(--db-accent, var(--interactive-accent));
 }
 .dashboard-media-backlink--more {
 	background: transparent;
+	border-color: transparent;
 	color: var(--db-text-muted, var(--text-muted));
 	cursor: default;
 }
@@ -17865,13 +18226,33 @@ button.nand-ui-list-item.is-active {
 .dashboard-media-tile-tags {
 	display: flex;
 	flex-wrap: wrap;
-	gap: 3px;
-	margin-top: 3px;
+	gap: 4px;
+	margin-top: 4px;
+}
+
+/* On a grid tile the tag row floats over the photo (top-right), so it takes
+   the same glass treatment as the other overlay chrome. */
+.dashboard-media-item .dashboard-media-tile-tags {
+	position: absolute;
+	top: 6px;
+	right: 6px;
+	left: auto;
+	max-width: calc(100% - 72px);
+	margin: 0;
+	justify-content: flex-end;
+	pointer-events: none;
+	z-index: 1;
+}
+.dashboard-media-item .dashboard-media-tile-tag {
+	background: rgba(0, 0, 0, 0.45);
+	backdrop-filter: blur(6px);
+	-webkit-backdrop-filter: blur(6px);
+	color: rgba(255, 255, 255, 0.95);
 }
 .dashboard-media-tile-tag {
-	padding: 0 6px;
-	border-radius: var(--db-radius-sm, 6px);
-	background: var(--db-bg-card-hover, rgba(255, 255, 255, 0.1));
+	padding: 0 7px;
+	border-radius: 999px;
+	background: color-mix(in srgb, var(--db-accent, var(--interactive-accent)) 12%, transparent);
 	color: var(--db-accent, var(--interactive-accent));
 	font-size: 0.625em;
 	line-height: 16px;
@@ -17887,14 +18268,17 @@ button.nand-ui-list-item.is-active {
 
 /* Grid tag button (mirrors the delete button, sits to its right) */
 .dashboard-media-tagbtn {
-	left: 30px;
+	left: 34px;
 }
 .dashboard-media-tagbtn svg { width: 12px; height: 12px; }
-.dashboard-media-tagbtn:hover {
-	background: rgba(0, 0, 0, 0.75);
+.dashboard-media-item .dashboard-media-tagbtn:hover {
+	background: rgba(0, 0, 0, 0.7);
 }
-/* Mobile: hover states don't exist — always show the tag button */
+/* Mobile: hover states don't exist — always show the tag button, and on
+   phones the delete button too (tablets keep the hover reveal, matching the
+   quick-link remove behavior this tile used to borrow). */
 body.is-mobile .dashboard-media-item .dashboard-media-tagbtn { opacity: 1; }
+body.is-mobile:not(.is-tablet) .dashboard-media-item .dashboard-media-delete--grid { opacity: 1; }
 
 /* Unified neutral icon button for list rows and the table's op column
    (open / delete / tag): same 26x26 box, same icon size, so the pairs
@@ -17904,21 +18288,29 @@ body.is-mobile .dashboard-media-item .dashboard-media-tagbtn { opacity: 1; }
 	align-items: center;
 	justify-content: center;
 	flex-shrink: 0;
-	width: 26px;
-	height: 26px;
+	width: 28px;
+	height: 28px;
 	padding: 0;
 	min-height: 0;
 	border: none;
 	border-radius: var(--db-radius-sm, 6px);
 	background: transparent;
+	box-shadow: none;
 	color: var(--db-text-muted, var(--text-muted));
 	cursor: pointer;
-	transition: background 0.15s ease, color 0.15s ease;
+	transition: background var(--nand-duration-fast) var(--nand-ease), color var(--nand-duration-fast) var(--nand-ease);
 }
-.dashboard-media-icon-btn svg { width: 13px; height: 13px; display: block; }
+.dashboard-media-icon-btn svg { width: 14px; height: 14px; display: block; }
 .dashboard-media-icon-btn:hover {
-	background: var(--db-bg-card-hover, rgba(255, 255, 255, 0.1));
+	background: var(--db-bg-hover, var(--db-bg-card-hover, rgba(255, 255, 255, 0.1)));
 	color: var(--db-text, var(--text-normal));
+}
+.dashboard-media-icon-btn:focus-visible {
+	outline: 2px solid var(--db-accent, var(--interactive-accent));
+	outline-offset: 1px;
+}
+@media (pointer: coarse) {
+	.dashboard-media-icon-btn { width: 40px; height: 40px; }
 }
 
 /* Lightbox tag bar — sits below the caption (media above, tags under it),
@@ -17933,11 +18325,16 @@ body.is-mobile .dashboard-media-item .dashboard-media-tagbtn { opacity: 1; }
 	max-width: min(720px, 86vw);
 	padding: 0 16px;
 }
+/* Lightbox chips: frosted pills on the dark stage (inverse text is fixed
+   because the stage is always dark, whatever the theme). */
 .dashboard-media-lightbox-tag {
-	padding: 2px 10px;
-	border-radius: var(--db-radius-sm, 6px);
-	background: rgba(0, 0, 0, 0.5);
-	color: #fff;
+	padding: 3px 12px;
+	border: 1px solid rgba(255, 255, 255, 0.14);
+	border-radius: 999px;
+	background: rgba(255, 255, 255, 0.10);
+	backdrop-filter: blur(10px);
+	-webkit-backdrop-filter: blur(10px);
+	color: rgba(255, 255, 255, 0.92);
 	font-size: 0.75em;
 	line-height: 18px;
 	white-space: nowrap;
@@ -17949,12 +18346,16 @@ body.is-mobile .dashboard-media-item .dashboard-media-tagbtn { opacity: 1; }
 	display: inline-flex;
 	align-items: center;
 	gap: 4px;
-	border: 1px dashed rgba(255, 255, 255, 0.55);
+	border: 1px dashed rgba(255, 255, 255, 0.45);
 	background: transparent;
 	cursor: pointer;
-	color: #fff;
+	color: rgba(255, 255, 255, 0.92);
+	transition: background var(--nand-duration-fast) var(--nand-ease), border-color var(--nand-duration-fast) var(--nand-ease);
 }
-.dashboard-media-lightbox-tag--add:hover { background: rgba(255, 255, 255, 0.15); }
+.dashboard-media-lightbox-tag--add:hover {
+	background: rgba(255, 255, 255, 0.16);
+	border-color: rgba(255, 255, 255, 0.7);
+}
 .dashboard-media-lightbox-tag-icon { display: inline-flex; align-items: center; }
 .dashboard-media-lightbox-tag-icon svg { width: 11px; height: 11px; }
 
@@ -17975,20 +18376,34 @@ body.is-mobile .dashboard-media-item .dashboard-media-tagbtn { opacity: 1; }
 .dashboard-media-tagedit-chip {
 	display: inline-flex;
 	align-items: center;
-	gap: 6px;
-	padding: 3px 10px;
-	border-radius: var(--db-radius-sm, 6px);
-	background: var(--db-bg-card-hover, rgba(255, 255, 255, 0.1));
+	gap: 4px;
+	height: 26px;
+	box-sizing: border-box;
+	padding: 0 6px 0 12px;
+	border: 1px solid color-mix(in srgb, var(--db-accent, var(--interactive-accent)) 26%, transparent);
+	border-radius: 999px;
+	background: color-mix(in srgb, var(--db-accent, var(--interactive-accent)) 12%, transparent);
 	color: var(--db-accent, var(--interactive-accent));
 	font-size: 0.75em;
+	font-weight: 500;
 }
 .dashboard-media-tagedit-chip-x {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 16px;
+	height: 16px;
+	border-radius: 50%;
 	cursor: pointer;
 	font-weight: 700;
+	line-height: 1;
 	color: var(--db-text-muted, var(--text-muted));
-	padding: 0 2px;
+	transition: background var(--nand-duration-fast) var(--nand-ease), color var(--nand-duration-fast) var(--nand-ease);
 }
-.dashboard-media-tagedit-chip-x:hover { color: var(--db-danger, rgb(220, 50, 50)); }
+.dashboard-media-tagedit-chip-x:hover {
+	color: var(--db-danger, var(--text-error));
+	background: color-mix(in srgb, var(--db-danger, var(--text-error)) 14%, transparent);
+}
 .dashboard-media-tagedit-add { margin-top: 6px; }
 .dashboard-media-tagedit-pick {
 	display: flex;
@@ -18000,7 +18415,10 @@ body.is-mobile .dashboard-media-item .dashboard-media-tagbtn { opacity: 1; }
 /* Media filter popup inputs (reuses library filter-popup shell) */
 .dashboard-media-filter-dates { display: flex; gap: 6px; flex-wrap: wrap; }
 .dashboard-media-filter-date {
-	padding: 4px 6px;
+	height: 28px;
+	box-sizing: border-box;
+	padding: 0 6px;
+	font-variant-numeric: tabular-nums;
 	border: 1px solid var(--db-border-input, rgba(255, 255, 255, 0.08));
 	border-radius: var(--db-radius-sm, 6px);
 	background: var(--db-bg-card, rgba(255, 255, 255, 0.06));
@@ -18012,7 +18430,8 @@ body.is-mobile .dashboard-media-item .dashboard-media-tagbtn { opacity: 1; }
 	width: 100%;
 	box-sizing: border-box;
 	margin-top: 4px;
-	padding: 4px 8px;
+	height: 28px;
+	padding: 0 8px;
 	border: 1px solid var(--db-border-input, rgba(255, 255, 255, 0.08));
 	border-radius: var(--db-radius-sm, 6px);
 	background: var(--db-bg-card, rgba(255, 255, 255, 0.06));
@@ -18034,10 +18453,13 @@ body.is-mobile .dashboard-media-item .dashboard-media-tagbtn { opacity: 1; }
 }
 .dashboard-media-folder-browse {
 	flex-shrink: 0;
-	padding: 4px 10px;
+	height: 28px;
+	box-sizing: border-box;
+	padding: 0 10px;
 	border: 1px solid var(--db-border-input, rgba(255, 255, 255, 0.08));
 	border-radius: var(--db-radius-sm, 6px);
 	background: var(--db-bg-card, rgba(255, 255, 255, 0.06));
+	box-shadow: none;
 	color: var(--db-text, var(--text-normal));
 	font-size: 0.75em;
 	cursor: pointer;
@@ -18095,6 +18517,8 @@ body.is-mobile .dashboard-media-item .dashboard-media-tagbtn { opacity: 1; }
 	justify-content: center;
 }
 
+/* Media sits on the dark stage with a soft radius and a deep shadow so it
+   floats; the chrome below (caption, tags, arrows) is frosted glass. */
 .dashboard-media-lightbox-img,
 .dashboard-media-lightbox-video {
 	max-width: 90vw;
@@ -18102,15 +18526,33 @@ body.is-mobile .dashboard-media-item .dashboard-media-tagbtn { opacity: 1; }
 	width: auto;
 	height: auto;
 	object-fit: contain;
-	border-radius: 4px;
+	border-radius: 10px;
+	box-shadow: 0 12px 48px rgba(0, 0, 0, 0.45);
 }
 
+/* Caption: a frosted pill under the media; index digits don't jitter. */
 .dashboard-media-lightbox-caption {
-	color: rgba(255, 255, 255, 0.85);
+	max-width: min(720px, 86vw);
+	margin-top: 14px;
+	padding: 5px 14px;
+	border: 1px solid rgba(255, 255, 255, 0.12);
+	border-radius: 999px;
+	background: rgba(255, 255, 255, 0.08);
+	backdrop-filter: blur(10px);
+	-webkit-backdrop-filter: blur(10px);
+	color: rgba(255, 255, 255, 0.88);
 	font-size: 0.8125em;
+	font-variant-numeric: tabular-nums;
 	text-align: center;
-	margin-top: 10px;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
 	pointer-events: none;
+}
+
+.dashboard-media-lightbox-empty {
+	color: rgba(255, 255, 255, 0.6);
+	font-size: 1.5em;
 }
 
 .dashboard-media-lightbox-nav {
@@ -18122,23 +18564,49 @@ body.is-mobile .dashboard-media-item .dashboard-media-tagbtn { opacity: 1; }
 	display: flex;
 	align-items: center;
 	justify-content: center;
+	border: 1px solid rgba(255, 255, 255, 0.16);
 	border-radius: 50%;
-	background: rgba(255, 255, 255, 0.12);
-	color: #fff;
+	background: rgba(255, 255, 255, 0.10);
+	backdrop-filter: blur(12px);
+	-webkit-backdrop-filter: blur(12px);
+	color: rgba(255, 255, 255, 0.95);
 	cursor: pointer;
+	transition: background var(--nand-duration-fast) var(--nand-ease), border-color var(--nand-duration-fast) var(--nand-ease), opacity var(--nand-duration-fast) var(--nand-ease);
+}
+
+.dashboard-media-lightbox-nav:hover {
+	background: rgba(255, 255, 255, 0.20);
+	border-color: rgba(255, 255, 255, 0.3);
 }
 
 .dashboard-media-lightbox-nav svg {
-	width: 24px;
-	height: 24px;
+	width: 22px;
+	height: 22px;
 }
 
-.dashboard-media-lightbox-nav--prev { left: 20px; }
-.dashboard-media-lightbox-nav--next { right: 20px; }
+.dashboard-media-lightbox-nav--prev { left: 24px; }
+.dashboard-media-lightbox-nav--next { right: 24px; }
 
 .dashboard-media-lightbox-nav.is-disabled {
 	opacity: 0.3;
 	cursor: default;
+}
+
+.dashboard-media-lightbox-nav.is-disabled:hover {
+	background: rgba(255, 255, 255, 0.10);
+	border-color: rgba(255, 255, 255, 0.16);
+}
+
+/* Phones: arrows tuck closer to the edge so they don't cover the media, and
+   the body-level lightbox drops its blur layers (the mobile GPU override at
+   the end of the dashboard block only covers the dashboard root). */
+.is-mobile .dashboard-media-lightbox-nav--prev { left: 8px; }
+.is-mobile .dashboard-media-lightbox-nav--next { right: 8px; }
+.is-mobile:not(.is-tablet) .dashboard-media-lightbox-nav,
+.is-mobile:not(.is-tablet) .dashboard-media-lightbox-caption,
+.is-mobile:not(.is-tablet) .dashboard-media-lightbox-tag {
+	backdrop-filter: none;
+	-webkit-backdrop-filter: none;
 }
 
 /* ---------- All-tasks section (vault task aggregation) ---------- */
@@ -18813,33 +19281,55 @@ body.is-mobile .dashboard-media-item .dashboard-media-tagbtn { opacity: 1; }
 	margin-top: 8px;
 }
 
+/* Shelf pager: the same compact pill control as the library pagination —
+   ghost arrow chips inside one rounded track, tabular page counter. */
+.dashboard-weread-pager {
+	width: fit-content;
+	margin-left: auto;
+	margin-right: auto;
+	gap: 4px;
+	padding: 2px;
+	border: 1px solid var(--db-border-card, var(--db-border, transparent));
+	border-radius: 999px;
+	background: var(--db-bg-card, rgba(255, 255, 255, 0.06));
+}
+
 .dashboard-weread-pager-btn {
 	display: inline-flex;
 	align-items: center;
 	justify-content: center;
 	min-width: 26px;
-	height: 24px;
+	height: 26px;
 	padding: 0 6px;
-	border-radius: var(--db-radius-sm, 6px);
-	background: var(--db-bg-btn, rgba(139, 92, 246, 0.10));
-	border: 1px solid var(--db-border-card, rgba(255, 255, 255, 0.10));
+	border-radius: 999px;
+	background: transparent;
+	border: none;
+	box-shadow: none;
 	color: var(--db-text-muted, var(--text-muted));
 	cursor: pointer;
+	transition: background var(--nand-duration-fast) var(--nand-ease), color var(--nand-duration-fast) var(--nand-ease);
 }
 
 .dashboard-weread-pager-btn:hover:not(:disabled) {
 	color: var(--db-accent, var(--interactive-accent));
-	border-color: var(--db-accent, var(--interactive-accent));
+	background: color-mix(in srgb, var(--db-accent, var(--interactive-accent)) 12%, transparent);
+}
+
+.dashboard-weread-pager-btn:focus-visible {
+	outline: 2px solid var(--db-accent, var(--interactive-accent));
+	outline-offset: 1px;
 }
 
 .dashboard-weread-pager-btn:disabled {
-	opacity: 0.4;
+	opacity: 0.35;
 	cursor: default;
 }
 
 .dashboard-weread-pager-info {
+	padding: 0 4px;
 	font-size: 0.75em;
 	color: var(--db-text-muted, var(--text-muted));
+	font-variant-numeric: tabular-nums;
 }
 
 .dashboard-weread-cfg-list {
@@ -18852,10 +19342,11 @@ body.is-mobile .dashboard-media-item .dashboard-media-tagbtn { opacity: 1; }
 .dashboard-weread-cfg-row {
 	display: flex;
 	align-items: flex-start;
-	gap: 6px;
-	padding: 8px;
-	border-radius: var(--db-radius-sm, 6px);
+	gap: 8px;
+	padding: 10px;
+	border-radius: var(--db-radius-md, 10px);
 	border: 1px solid var(--db-border-card, rgba(255, 255, 255, 0.10));
+	background: var(--db-bg-input, transparent);
 }
 
 .dashboard-weread-cfg-main {
@@ -18900,6 +19391,7 @@ body.is-mobile .dashboard-media-item .dashboard-media-tagbtn { opacity: 1; }
 
 .dashboard-weread-cfg-op:hover:not(:disabled) {
 	color: var(--db-accent, var(--interactive-accent));
+	background: var(--db-bg-hover, var(--background-modifier-hover));
 }
 
 .dashboard-weread-cfg-op:disabled {
@@ -18949,16 +19441,19 @@ body.is-mobile .dashboard-media-item .dashboard-media-tagbtn { opacity: 1; }
 	--weread-group-accent: var(--color-cyan, #318f9f);
 }
 
+/* Shelf group header: a soft tinted band (radius-sm all round) with the
+   group's hue carried by the icon tile and the count pill — no hard left
+   rule, so the header reads as a label rather than a callout. */
 .dashboard-weread-group-head {
 	display: grid;
 	grid-template-columns: 24px minmax(0, 1fr) auto;
 	align-items: center;
-	gap: 7px;
-	min-height: 34px;
-	padding: 5px 9px 5px 7px;
-	border-left: 3px solid var(--weread-group-accent);
-	border-radius: 0 var(--db-radius-sm, 6px) var(--db-radius-sm, 6px) 0;
-	background: linear-gradient(90deg, color-mix(in srgb, var(--weread-group-accent) 12%, transparent), transparent 78%);
+	gap: 8px;
+	min-height: 36px;
+	box-sizing: border-box;
+	padding: 6px 10px 6px 6px;
+	border-radius: var(--db-radius-sm, 6px);
+	background: linear-gradient(90deg, color-mix(in srgb, var(--weread-group-accent) 12%, transparent), transparent 82%);
 }
 
 .dashboard-weread-group-icon {
@@ -18967,9 +19462,9 @@ body.is-mobile .dashboard-media-item .dashboard-media-tagbtn { opacity: 1; }
 	justify-content: center;
 	width: 24px;
 	height: 24px;
-	border-radius: 7px;
+	border-radius: max(4px, calc(var(--db-radius-sm, 6px) - 2px));
 	color: var(--weread-group-accent);
-	background: color-mix(in srgb, var(--weread-group-accent) 12%, transparent);
+	background: color-mix(in srgb, var(--weread-group-accent) 16%, transparent);
 }
 
 .dashboard-weread-group-icon svg {
@@ -18979,17 +19474,20 @@ body.is-mobile .dashboard-media-item .dashboard-media-tagbtn { opacity: 1; }
 
 .dashboard-weread-group-name {
 	font-size: 0.78em;
-	font-weight: 650;
+	font-weight: 600;
 	letter-spacing: 0.01em;
 	color: var(--db-text, var(--text-normal));
 }
 
 .dashboard-weread-group-count {
 	min-width: 22px;
-	padding: 1px 7px;
+	box-sizing: border-box;
+	padding: 1px 8px;
 	border: 1px solid color-mix(in srgb, var(--weread-group-accent) 28%, transparent);
 	border-radius: 999px;
+	background: color-mix(in srgb, var(--weread-group-accent) 8%, transparent);
 	font-size: 0.64em;
+	font-weight: 600;
 	font-variant-numeric: tabular-nums;
 	text-align: center;
 	color: var(--weread-group-accent);
@@ -19002,12 +19500,15 @@ body.is-mobile .dashboard-media-item .dashboard-media-tagbtn { opacity: 1; }
 }
 
 .dashboard-weread-hint {
-	padding: 20px 8px;
+	padding: 24px 12px;
+	border: 1px dashed color-mix(in srgb, var(--db-text-muted, var(--text-muted)) 22%, transparent);
+	border-radius: var(--db-radius-md, 10px);
 	text-align: center;
 }
 
 .dashboard-weread-hint-title {
 	font-size: 0.85em;
+	font-weight: 600;
 	color: var(--db-text, var(--text-normal));
 	margin-bottom: 4px;
 }
@@ -19020,33 +19521,53 @@ body.is-mobile .dashboard-media-item .dashboard-media-tagbtn { opacity: 1; }
 .dashboard-weread-grid {
 	display: grid;
 	grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
-	gap: 10px;
+	gap: 16px 12px;
 }
 
 .dashboard-weread-book {
 	display: flex;
 	flex-direction: column;
-	gap: 4px;
+	gap: 8px;
+	min-width: 0;
 }
 
+/* Book cover: one radius + one resting shadow for every book, plus a faint
+   spine highlight and a hairline edge so pale covers hold their shape on
+   light themes. */
 .dashboard-weread-book-cover {
+	position: relative;
 	width: 100%;
 	aspect-ratio: 3 / 4;
 	background-size: cover;
 	background-position: center;
 	border-radius: var(--db-radius-sm, 6px);
 	background-color: var(--db-bg-btn, rgba(139, 92, 246, 0.10));
+	box-shadow:
+		inset 0 0 0 1px color-mix(in srgb, var(--db-text, var(--text-normal)) 8%, transparent),
+		inset 3px 0 0 rgba(255, 255, 255, 0.10),
+		0 2px 6px rgba(0, 0, 0, 0.14);
+	transition: box-shadow var(--nand-duration) var(--nand-ease);
+}
+
+.dashboard-weread-book:hover .dashboard-weread-book-cover {
+	box-shadow:
+		inset 0 0 0 1px color-mix(in srgb, var(--db-text, var(--text-normal)) 8%, transparent),
+		inset 3px 0 0 rgba(255, 255, 255, 0.10),
+		var(--db-shadow-card-hover, 0 6px 16px rgba(0, 0, 0, 0.2));
 }
 
 .dashboard-weread-book-cover--placeholder {
 	background-image: none;
 	display: flex;
+	background:
+		linear-gradient(160deg, color-mix(in srgb, var(--db-accent, var(--interactive-accent)) 18%, transparent), var(--db-bg-card-hover, var(--background-secondary)));
 }
 
 .dashboard-weread-book-info {
 	display: flex;
 	flex-direction: column;
-	gap: 2px;
+	gap: 3px;
+	min-width: 0;
 }
 
 .dashboard-weread-book-title {
@@ -19070,7 +19591,9 @@ body.is-mobile .dashboard-media-item .dashboard-media-tagbtn { opacity: 1; }
 
 .dashboard-weread-book-pct {
 	font-size: 0.65em;
+	font-weight: 600;
 	color: var(--db-text-muted, var(--text-muted));
+	font-variant-numeric: tabular-nums;
 }
 
 .dashboard-weread-book-meta,
@@ -19090,9 +19613,10 @@ body.is-mobile .dashboard-media-item .dashboard-media-tagbtn { opacity: 1; }
 }
 
 .dashboard-weread-book-kind {
-	padding: 1px 5px;
-	border-radius: 4px;
-	background: var(--db-bg-btn, rgba(139, 92, 246, 0.10));
+	flex-shrink: 0;
+	padding: 1px 6px;
+	border-radius: 999px;
+	background: var(--db-bg-hover, var(--db-bg-btn, rgba(139, 92, 246, 0.10)));
 }
 
 .dashboard-weread-book-notes {
@@ -19101,18 +19625,20 @@ body.is-mobile .dashboard-media-item .dashboard-media-tagbtn { opacity: 1; }
 	text-overflow: ellipsis;
 }
 
+/* Progress: rounded 4px track, pill-capped fill. */
 .dashboard-weread-progress {
-	height: 3px;
-	border-radius: 2px;
-	background: var(--db-bg-btn, rgba(255, 255, 255, 0.10));
+	height: 4px;
+	border-radius: 999px;
+	background: var(--db-bg-hover-strong, var(--db-bg-btn, rgba(255, 255, 255, 0.10)));
 	overflow: hidden;
-	margin-top: 2px;
+	margin-top: 4px;
 }
 
 .dashboard-weread-progress-fill {
 	height: 100%;
 	background: var(--db-accent, var(--interactive-accent));
-	border-radius: 2px;
+	border-radius: 999px;
+	transition: width var(--nand-duration) var(--nand-ease);
 }
 
 /* Integrated stat panel, three columns: shelf-distribution donut (tinted
@@ -19135,8 +19661,8 @@ body.is-mobile .dashboard-media-item .dashboard-media-tagbtn { opacity: 1; }
 	flex-direction: column;
 	align-items: center;
 	justify-content: center;
-	gap: 10px;
-	padding: 14px 12px;
+	gap: 12px;
+	padding: 16px 12px;
 	background: color-mix(in srgb, var(--db-accent, var(--interactive-accent)) 10%, var(--db-bg-card, rgba(255, 255, 255, 0.06)));
 	border-right: 1px solid var(--db-border-card, rgba(255, 255, 255, 0.10));
 }
@@ -19146,8 +19672,8 @@ body.is-mobile .dashboard-media-item .dashboard-media-tagbtn { opacity: 1; }
 	flex-direction: column;
 	align-items: center;
 	justify-content: center;
-	gap: 8px;
-	padding: 14px 14px;
+	gap: 10px;
+	padding: 16px;
 	min-width: 0;
 	border-right: 1px solid var(--db-border-card, rgba(255, 255, 255, 0.10));
 }
@@ -19166,7 +19692,7 @@ body.is-mobile .dashboard-media-item .dashboard-media-tagbtn { opacity: 1; }
 
 .dashboard-weread-heatmap-cell {
 	aspect-ratio: 1;
-	border-radius: 2px;
+	border-radius: 30%;
 	min-width: 0;
 	background: var(--db-bg-hover, rgba(128, 128, 128, 0.12));
 }
@@ -19198,7 +19724,7 @@ body.is-mobile .dashboard-media-item .dashboard-media-tagbtn { opacity: 1; }
 	align-items: center;
 	justify-content: center;
 	gap: 4px;
-	padding: 12px 10px;
+	padding: 14px 12px;
 	min-width: 0;
 }
 
@@ -19229,10 +19755,11 @@ body.is-mobile .dashboard-media-item .dashboard-media-tagbtn { opacity: 1; }
 }
 
 .dashboard-weread-donut-total {
-	font-size: 1.15em;
+	font-size: 1.25em;
 	font-weight: 700;
 	color: var(--db-text, var(--text-normal));
 	line-height: 1.1;
+	font-variant-numeric: tabular-nums;
 }
 
 .dashboard-weread-donut-unit {
@@ -19319,16 +19846,23 @@ body.is-mobile .dashboard-media-item .dashboard-media-tagbtn { opacity: 1; }
 	font-variant-numeric: tabular-nums;
 }
 
+/* KPI hierarchy: big tabular value > muted caption. The value keeps the
+   accent (it is the section's single colored figure). */
 .dashboard-weread-stat-value {
-	font-size: 1.1em;
+	font-size: 1.3em;
 	font-weight: 700;
+	line-height: 1.15;
+	letter-spacing: -0.01em;
 	color: var(--db-accent, var(--interactive-accent));
+	font-variant-numeric: tabular-nums;
 }
 
 .dashboard-weread-stat-label {
 	font-size: 0.68em;
+	font-weight: 500;
 	color: var(--db-text-muted, var(--text-muted));
 	text-align: center;
+	letter-spacing: 0.02em;
 }
 
 /* Narrow panes/phones: the three columns stack vertically; the right zone's
@@ -19389,11 +19923,14 @@ body.is-mobile .dashboard-media-item .dashboard-media-tagbtn { opacity: 1; }
 	container-type: inline-size;
 }
 
+/* Period switch: segmented well (2px inset; inner radius = outer - inset),
+   selected segment raised on the card surface. */
 .dashboard-weread-stats-toggle {
 	display: flex;
 	gap: 2px;
 	background: var(--db-bg-hover, rgba(128, 128, 128, 0.12));
-	border-radius: 8px;
+	border: 1px solid var(--db-border-input, transparent);
+	border-radius: var(--db-radius-sm, 6px);
 	padding: 2px;
 	width: fit-content;
 	/* Right-aligned: the period switch sits at the row's end, out of the
@@ -19402,15 +19939,16 @@ body.is-mobile .dashboard-media-item .dashboard-media-tagbtn { opacity: 1; }
 }
 
 .dashboard-weread-stats-toggle-btn {
+	height: 24px;
 	border: none;
 	background: transparent;
 	color: var(--db-text-muted, var(--text-muted));
 	font-size: 0.72em;
 	font-weight: 500;
-	padding: 4px 12px;
-	border-radius: 6px;
+	padding: 0 12px;
+	border-radius: max(2px, calc(var(--db-radius-sm, 6px) - 2px));
 	cursor: pointer;
-	transition: background 0.15s, color 0.15s;
+	transition: background var(--nand-duration-fast) var(--nand-ease), color var(--nand-duration-fast) var(--nand-ease), box-shadow var(--nand-duration-fast) var(--nand-ease);
 	box-shadow: none;
 }
 
@@ -19418,10 +19956,16 @@ body.is-mobile .dashboard-media-item .dashboard-media-tagbtn { opacity: 1; }
 	color: var(--db-text, var(--text-normal));
 }
 
+.dashboard-weread-stats-toggle-btn:focus-visible {
+	outline: 2px solid var(--db-accent, var(--interactive-accent));
+	outline-offset: 1px;
+}
+
 .dashboard-weread-stats-toggle-btn.active {
 	background: var(--db-bg-card, rgba(255, 255, 255, 0.10));
 	color: var(--db-text, var(--text-normal));
 	font-weight: 600;
+	box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08), 0 0 0 1px var(--db-border-card, transparent);
 }
 
 .dashboard-weread-stats-body {
@@ -19453,22 +19997,24 @@ body.is-mobile .dashboard-media-item .dashboard-media-tagbtn { opacity: 1; }
 	}
 }
 
+/* Period-over-period delta: semantic pill (success / error tone). */
 .dashboard-weread-stat-delta {
 	font-size: 0.62em;
 	font-weight: 600;
-	padding: 1px 6px;
-	border-radius: 4px;
+	padding: 1px 7px;
+	border-radius: 999px;
 	margin-top: 2px;
+	font-variant-numeric: tabular-nums;
 }
 
 .dashboard-weread-stat-delta--up {
-	color: #2ecc71;
-	background: rgba(46, 204, 113, 0.12);
+	color: var(--color-green);
+	background: color-mix(in srgb, var(--color-green) 14%, transparent);
 }
 
 .dashboard-weread-stat-delta--down {
-	color: #e74c3c;
-	background: rgba(231, 76, 60, 0.12);
+	color: var(--color-red);
+	background: color-mix(in srgb, var(--color-red) 14%, transparent);
 }
 
 .dashboard-weread-stats-section {
@@ -19489,6 +20035,7 @@ body.is-mobile .dashboard-media-item .dashboard-media-tagbtn { opacity: 1; }
 	font-size: 0.78em;
 	font-weight: 600;
 	color: var(--db-text, var(--text-normal));
+	line-height: 1.35;
 }
 
 .dashboard-weread-streak {
@@ -19524,7 +20071,9 @@ body.is-mobile .dashboard-media-item .dashboard-media-tagbtn { opacity: 1; }
 	align-items: center;
 	justify-content: space-between;
 	gap: 8px;
-	padding: 6px 8px;
+	min-height: 40px;
+	box-sizing: border-box;
+	padding: 6px 10px;
 	border-radius: var(--db-radius-sm, 6px);
 	background: var(--db-bg-hover, rgba(128, 128, 128, 0.08));
 }
@@ -19581,14 +20130,14 @@ body.is-mobile .dashboard-media-item .dashboard-media-tagbtn { opacity: 1; }
 
 .dashboard-weread-prefercat-bar-wrap {
 	height: 6px;
-	border-radius: 3px;
-	background: var(--db-bg-hover, rgba(128, 128, 128, 0.12));
+	border-radius: 999px;
+	background: var(--db-bg-hover-strong, var(--db-bg-hover, rgba(128, 128, 128, 0.12)));
 	overflow: hidden;
 }
 
 .dashboard-weread-prefercat-bar {
 	height: 100%;
-	border-radius: 3px;
+	border-radius: 999px;
 	background: var(--db-accent, var(--interactive-accent));
 }
 
@@ -19602,22 +20151,34 @@ body.is-mobile .dashboard-media-item .dashboard-media-tagbtn { opacity: 1; }
 .dashboard-weread-notebooks {
 	display: flex;
 	flex-direction: column;
-	gap: 4px;
+	gap: 6px;
 }
 
 .dashboard-weread-notebook {
-	border-radius: var(--db-radius-sm, 6px);
+	border-radius: var(--db-radius-md, 10px);
 	background: var(--db-bg-card, rgba(255, 255, 255, 0.04));
 	border: 1px solid var(--db-border-card, rgba(255, 255, 255, 0.08));
 	overflow: hidden;
+	transition: border-color var(--nand-duration-fast) var(--nand-ease);
+}
+
+.dashboard-weread-notebook:hover {
+	border-color: color-mix(in srgb, var(--db-accent, var(--interactive-accent)) 30%, var(--db-border-card, transparent));
 }
 
 .dashboard-weread-notebook-head {
 	display: flex;
 	align-items: center;
 	gap: 8px;
-	padding: 8px 10px;
+	min-height: 44px;
+	box-sizing: border-box;
+	padding: 8px 12px;
 	cursor: pointer;
+	transition: background var(--nand-duration-fast) var(--nand-ease);
+}
+
+.dashboard-weread-notebook-head:hover {
+	background: var(--db-bg-hover, var(--background-modifier-hover));
 }
 
 .dashboard-weread-notebook-meta {
@@ -19642,8 +20203,9 @@ body.is-mobile .dashboard-media-item .dashboard-media-tagbtn { opacity: 1; }
 .dashboard-weread-notebook-detail {
 	display: none;
 	flex-direction: column;
-	gap: 4px;
-	padding: 6px 10px 10px;
+	gap: 8px;
+	padding: 8px 12px 12px;
+	border-top: 1px solid color-mix(in srgb, var(--db-border-card, rgba(255, 255, 255, 0.08)) 70%, transparent);
 }
 
 .dashboard-weread-notebook-detail--open {
@@ -19652,10 +20214,12 @@ body.is-mobile .dashboard-media-item .dashboard-media-tagbtn { opacity: 1; }
 
 .dashboard-weread-highlight {
 	font-size: 0.75em;
-	line-height: 1.5;
+	line-height: 1.55;
 	color: var(--db-text, var(--text-normal));
-	border-left: 2px solid var(--db-accent, var(--interactive-accent));
-	padding: 2px 0 2px 8px;
+	border-left: 2px solid color-mix(in srgb, var(--db-accent, var(--interactive-accent)) 70%, transparent);
+	border-radius: 0 max(2px, calc(var(--db-radius-sm, 6px) - 2px)) max(2px, calc(var(--db-radius-sm, 6px) - 2px)) 0;
+	background: color-mix(in srgb, var(--db-accent, var(--interactive-accent)) 5%, transparent);
+	padding: 4px 8px 4px 10px;
 }
 
 .dashboard-weread-option {
@@ -19707,6 +20271,12 @@ body.is-mobile .dashboard-media-item .dashboard-media-tagbtn { opacity: 1; }
 
 .dashboard-weread-notebook-import:hover:not(:disabled) {
 	color: var(--db-accent, var(--interactive-accent));
+	background: color-mix(in srgb, var(--db-accent, var(--interactive-accent)) 12%, transparent);
+}
+
+.dashboard-weread-notebook-import:focus-visible {
+	outline: 2px solid var(--db-accent, var(--interactive-accent));
+	outline-offset: 1px;
 }
 
 .dashboard-weread-notebook-import:disabled {
@@ -19734,10 +20304,10 @@ body.is-mobile .dashboard-media-item .dashboard-media-tagbtn { opacity: 1; }
 .dashboard-weread-cfg-filter-panel {
 	display: grid;
 	grid-template-columns: repeat(2, minmax(0, 1fr));
-	gap: 11px 14px;
+	gap: 12px 16px;
 	width: 100%;
 	margin-top: 4px;
-	padding: 10px;
+	padding: 12px;
 	border: 1px solid var(--db-border-card, rgba(255, 255, 255, 0.10));
 	border-radius: var(--db-radius-md, 10px);
 	background: color-mix(in srgb, var(--db-bg-card, var(--background-secondary)) 82%, transparent);
@@ -19746,7 +20316,7 @@ body.is-mobile .dashboard-media-item .dashboard-media-tagbtn { opacity: 1; }
 .dashboard-weread-cfg-filter-panel-title {
 	grid-column: 1 / -1;
 	font-size: 0.72em;
-	font-weight: 650;
+	font-weight: 600;
 	color: var(--db-text, var(--text-normal));
 }
 
@@ -19756,42 +20326,49 @@ body.is-mobile .dashboard-media-item .dashboard-media-tagbtn { opacity: 1; }
 	margin-bottom: 4px;
 }
 
+/* Config chips: same pill + accent-soft selection as the library chips. */
 .dashboard-weread-cfg-chip {
 	display: inline-flex;
 	align-items: center;
-	padding: 2px 9px;
-	border-radius: 10px;
+	min-height: 24px;
+	box-sizing: border-box;
+	padding: 0 10px;
+	border-radius: 999px;
 	font-size: 0.72em;
 	cursor: pointer;
-	background: var(--db-bg-btn, rgba(139, 92, 246, 0.10));
+	background: var(--db-bg-hover, var(--db-bg-btn, rgba(139, 92, 246, 0.10)));
 	color: var(--db-text-muted, var(--text-muted));
 	border: 1px solid transparent;
-	transition: background 0.12s ease, border-color 0.12s ease, box-shadow 0.12s ease, color 0.12s ease, transform 0.12s ease;
+	transition: background var(--nand-duration-fast) var(--nand-ease), border-color var(--nand-duration-fast) var(--nand-ease), color var(--nand-duration-fast) var(--nand-ease);
 }
 
 .dashboard-weread-cfg-chip:hover {
-	border-color: var(--db-accent, var(--interactive-accent));
+	color: var(--db-text, var(--text-normal));
+	border-color: color-mix(in srgb, var(--db-accent, var(--interactive-accent)) 40%, transparent);
 }
 
 .dashboard-weread-cfg-chip.active {
-	background: var(--db-accent, var(--interactive-accent));
-	color: #fff;
-	border-color: var(--db-accent, var(--interactive-accent));
+	background: color-mix(in srgb, var(--db-accent, var(--interactive-accent)) 14%, transparent);
+	color: var(--db-accent, var(--interactive-accent));
+	border-color: color-mix(in srgb, var(--db-accent, var(--interactive-accent)) 55%, transparent);
+	font-weight: 600;
 }
 
 /* Stats-block editor rows: drag handle + checkbox + label, one block each. */
 .dashboard-weread-cfg-stats-list {
 	display: flex;
 	flex-direction: column;
-	gap: 2px;
-	margin-top: 6px;
+	gap: 4px;
+	margin-top: 8px;
 }
 
 .dashboard-weread-cfg-stats-row {
 	display: flex;
 	align-items: center;
 	gap: 8px;
-	padding: 4px 6px;
+	min-height: 32px;
+	box-sizing: border-box;
+	padding: 4px 8px;
 	border-radius: var(--db-radius-sm, 6px);
 	background: var(--db-bg-card, rgba(255, 255, 255, 0.04));
 	position: relative;
@@ -19812,7 +20389,7 @@ body.is-mobile .dashboard-media-item .dashboard-media-tagbtn { opacity: 1; }
 	left: 4px;
 	right: 4px;
 	height: 2px;
-	border-radius: 1px;
+	border-radius: 999px;
 	background: var(--db-accent, var(--interactive-accent));
 }
 
@@ -19998,55 +20575,85 @@ body.is-mobile .dashboard-media-item .dashboard-media-tagbtn { opacity: 1; }
 	color: var(--db-accent, var(--interactive-accent));
 }
 
-/* ===== Appearance Studio (Theme Studio modal) ===== */
+/* ===== Appearance Studio (Theme Studio modal) =====
+   Board modal rhythm: header (title + reset-all ghost) / body (grouped
+   section cards) / footer (primary right). 14px outer radius per the
+   modal scale; each section is a tinted card with a clear heading. */
 .dashboard-theme-studio {
 	max-width: 520px;
+	border-radius: 14px;
 }
 .dashboard-theme-studio-hint {
-	margin: 4px 0 12px;
+	margin: 0 0 14px;
 	font-size: 0.82em;
+	line-height: 1.5;
 	color: var(--db-text-muted, var(--text-muted));
-	opacity: 0.85;
 }
 .dashboard-theme-studio-section {
-	margin-bottom: 18px;
-	padding-bottom: 14px;
-	border-bottom: 1px solid var(--db-border, var(--background-modifier-border));
+	margin-bottom: 12px;
+	padding: 14px;
+	border: 1px solid var(--db-border, var(--background-modifier-border));
+	border-radius: var(--db-radius-md, 10px);
+	background: var(--db-bg-hover, transparent);
 }
 .dashboard-theme-studio-section:last-child {
-	border-bottom: none;
+	margin-bottom: 0;
 }
 .dashboard-theme-studio-section h3 {
 	margin: 0 0 4px;
-	font-size: 1em;
+	font-size: 0.95em;
+	font-weight: 600;
+	line-height: 1.35;
 }
 .dashboard-theme-studio-desc {
-	margin: 0 0 10px;
+	margin: 0 0 12px;
 	font-size: 0.8em;
+	line-height: 1.5;
 	color: var(--db-text-muted, var(--text-muted));
-	opacity: 0.85;
 }
+/* Accent swatch grid: even columns so the ten chips form a tidy 5x2 (or
+   10x1) grid instead of a ragged wrap. */
 .dashboard-theme-studio-swatches {
-	display: flex;
-	flex-wrap: wrap;
-	gap: 8px;
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(30px, 1fr));
+	justify-items: center;
+	gap: 10px 8px;
 	margin-bottom: 14px;
+	padding: 10px;
+	border-radius: var(--db-radius-sm, 6px);
+	background: var(--db-bg-input, transparent);
 }
 .dashboard-theme-studio-swatch {
-	width: 26px;
-	height: 26px;
+	width: 28px;
+	height: 28px;
+	box-sizing: border-box;
 	border-radius: 50%;
 	cursor: pointer;
-	border: 2px solid var(--db-border, var(--background-modifier-border));
-	transition: transform 0.12s ease;
+	border: 1px solid color-mix(in srgb, var(--db-text, var(--text-normal)) 18%, transparent);
+	/* Two-layer ring: a gap in the modal surface color, then the ring color
+	   (neutral on hover, accent when selected). */
+	box-shadow: 0 0 0 0 transparent;
+	transition: box-shadow var(--nand-duration-fast) var(--nand-ease), border-color var(--nand-duration-fast) var(--nand-ease);
 }
 .dashboard-theme-studio-swatch:hover {
-	transform: scale(1.12);
+	box-shadow:
+		0 0 0 2px var(--db-bg-modal, var(--background-primary)),
+		0 0 0 4px color-mix(in srgb, var(--db-text, var(--text-normal)) 22%, transparent);
+}
+.dashboard-theme-studio-swatch.is-selected {
+	border-color: transparent;
+	box-shadow:
+		0 0 0 2px var(--db-bg-modal, var(--background-primary)),
+		0 0 0 4px var(--db-accent, var(--interactive-accent));
+}
+.dashboard-theme-studio-swatch:focus-visible {
+	outline: 2px solid var(--db-accent, var(--interactive-accent));
+	outline-offset: 4px;
 }
 .dashboard-theme-studio-color-list {
 	display: flex;
 	flex-direction: column;
-	gap: 8px;
+	gap: 6px;
 	margin-bottom: 12px;
 }
 .dashboard-theme-studio-color-row,
@@ -20055,22 +20662,35 @@ body.is-mobile .dashboard-media-item .dashboard-media-tagbtn { opacity: 1; }
 .dashboard-theme-studio-fontscale-row {
 	display: flex;
 	align-items: center;
-	gap: 10px;
+	gap: 8px;
+	min-height: 32px;
 }
-/* Text-size segmented control (Small / Medium / Large). */
+/* Color rows sit on hairline dividers, like a settings list. */
+.dashboard-theme-studio-color-row + .dashboard-theme-studio-color-row {
+	padding-top: 6px;
+	border-top: 1px solid color-mix(in srgb, var(--db-border, var(--background-modifier-border)) 60%, transparent);
+}
+/* Text-size segmented control (Small / Medium / Large): one well, raised
+   selected segment (same recipe as the reading-stats period switch). */
 .dashboard-theme-studio-fontscale {
 	display: inline-flex;
-	gap: 4px;
+	gap: 2px;
+	padding: 2px;
+	border: 1px solid var(--db-border-input, var(--db-border, var(--background-modifier-border)));
+	border-radius: var(--db-radius-sm, 6px);
+	background: var(--db-bg-input, transparent);
 }
 .dashboard-theme-studio-fontscale-btn {
-	padding: 4px 12px;
-	border: 1px solid var(--db-border, var(--background-modifier-border));
-	border-radius: 999px;
+	height: 26px;
+	padding: 0 12px;
+	border: none;
+	border-radius: max(2px, calc(var(--db-radius-sm, 6px) - 2px));
 	background: transparent;
+	box-shadow: none;
 	color: var(--db-text-muted, var(--text-muted));
 	font-size: 0.82em;
 	cursor: pointer;
-	transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+	transition: background var(--nand-duration-fast) var(--nand-ease), color var(--nand-duration-fast) var(--nand-ease), box-shadow var(--nand-duration-fast) var(--nand-ease);
 }
 .dashboard-theme-studio-fontscale-btn:hover {
 	color: var(--db-text, var(--text-normal));
@@ -20078,11 +20698,13 @@ body.is-mobile .dashboard-media-item .dashboard-media-tagbtn { opacity: 1; }
 }
 .dashboard-theme-studio-fontscale-btn.active {
 	color: var(--db-accent, var(--interactive-accent));
-	border-color: var(--db-accent, var(--interactive-accent));
-	background: color-mix(in srgb, var(--db-accent, var(--interactive-accent)) 14%, transparent);
+	background: var(--db-bg-card, var(--background-primary));
+	box-shadow: 0 0 0 1px color-mix(in srgb, var(--db-accent, var(--interactive-accent)) 40%, transparent);
+	font-weight: 600;
 }
 .dashboard-theme-studio-color-label {
 	flex: 1;
+	min-width: 96px;
 	font-size: 0.88em;
 }
 
@@ -20125,7 +20747,7 @@ body.is-mobile .dashboard-media-item .dashboard-media-tagbtn { opacity: 1; }
 	appearance: none;
 	-webkit-appearance: none;
 	background: color-mix(in srgb, var(--db-text, var(--text-normal)) 18%, transparent);
-	border-radius: 2px;
+	border-radius: 999px;
 	outline: none;
 	cursor: pointer;
 	flex-shrink: 0;
@@ -20146,10 +20768,11 @@ body.is-mobile .dashboard-media-item .dashboard-media-tagbtn { opacity: 1; }
 	height: 28px;
 	padding: 0;
 	border: 1px solid var(--db-border, var(--background-modifier-border));
-	border-radius: 6px;
+	border-radius: var(--db-radius-sm, 6px);
 	background: transparent;
 	cursor: pointer;
 }
+/* Row reset: quiet ghost icon button (tint on hover), not a boxed tile. */
 .dashboard-theme-studio-color-clear {
 	display: inline-flex;
 	align-items: center;
@@ -20157,18 +20780,44 @@ body.is-mobile .dashboard-media-item .dashboard-media-tagbtn { opacity: 1; }
 	width: 28px;
 	height: 28px;
 	padding: 0;
-	border: 1px solid var(--db-border, var(--background-modifier-border));
-	border-radius: 6px;
+	border: 1px solid transparent;
+	border-radius: var(--db-radius-sm, 6px);
 	background: transparent;
+	box-shadow: none;
 	cursor: pointer;
 	color: var(--db-text-muted, var(--text-muted));
+	transition: background var(--nand-duration-fast) var(--nand-ease), color var(--nand-duration-fast) var(--nand-ease), border-color var(--nand-duration-fast) var(--nand-ease);
+}
+.dashboard-theme-studio-color-clear:hover {
+	background: var(--db-bg-hover, var(--background-modifier-hover));
+	border-color: var(--db-border, var(--background-modifier-border));
+	color: var(--db-text, var(--text-normal));
 }
 .dashboard-theme-studio-color-clear svg {
 	width: 14px;
 	height: 14px;
 }
-.dashboard-theme-studio-reset {
+/* Section-level secondary actions: ghost buttons (one primary per view). */
+.dashboard-theme-studio-reset,
+.dashboard-theme-studio-resetall {
+	height: 28px;
+	padding: 0 10px;
+	border: 1px solid transparent;
+	border-radius: var(--db-radius-sm, 6px);
+	background: transparent;
+	box-shadow: none;
 	font-size: 0.82em;
+	cursor: pointer;
+	transition: background var(--nand-duration-fast) var(--nand-ease), color var(--nand-duration-fast) var(--nand-ease), border-color var(--nand-duration-fast) var(--nand-ease);
+}
+.dashboard-theme-studio-reset {
+	color: var(--db-text-muted, var(--text-muted));
+}
+.dashboard-theme-studio-reset:hover,
+.dashboard-theme-studio-resetall:hover {
+	background: var(--db-bg-hover, var(--background-modifier-hover));
+	border-color: var(--db-border, var(--background-modifier-border));
+	color: var(--db-text, var(--text-normal));
 }
 .dashboard-theme-studio-image-row {
 	display: flex;
@@ -20205,7 +20854,9 @@ body.is-mobile .dashboard-media-item .dashboard-media-tagbtn { opacity: 1; }
 	align-items: center;
 	justify-content: space-between;
 	gap: 12px;
-	margin-bottom: 4px;
+	margin-bottom: 8px;
+	/* Leave room for the modal's close button on the right. */
+	padding-right: 28px;
 }
 .dashboard-theme-studio-header h2 {
 	margin: 0;
@@ -20214,7 +20865,7 @@ body.is-mobile .dashboard-media-item .dashboard-media-tagbtn { opacity: 1; }
 	display: inline-flex;
 	align-items: center;
 	gap: 6px;
-	font-size: 0.82em;
+	flex-shrink: 0;
 	color: var(--db-text-muted, var(--text-muted));
 }
 .dashboard-theme-studio-resetall-icon svg {
@@ -20226,6 +20877,19 @@ body.is-mobile .dashboard-media-item .dashboard-media-tagbtn { opacity: 1; }
 	color: var(--db-text-faint, var(--text-faint));
 	font-style: italic;
 	min-width: 64px;
+	font-variant-numeric: tabular-nums;
+}
+.dashboard-theme-studio-slider {
+	accent-color: var(--db-accent, var(--interactive-accent));
+}
+@media (pointer: coarse) {
+	.dashboard-theme-studio-swatch {
+		width: 36px;
+		height: 36px;
+	}
+	.dashboard-theme-studio-swatches {
+		grid-template-columns: repeat(auto-fill, minmax(40px, 1fr));
+	}
 }
 
 /* ===== Quick Notes region — single-line accent navbar (masthead strip) =====
@@ -20245,8 +20909,8 @@ body.is-mobile .dashboard-media-item .dashboard-media-tagbtn { opacity: 1; }
 	   DOWNWARD only and the chips row stays put, instead of the centered
 	   layout pushing everything up as the box grows. */
 	align-items: center;
-	gap: 10px;
-	padding: 5px 8px;
+	gap: 12px;
+	padding: 5px 8px 5px 12px;
 	min-height: calc(1.6em + 18px);
 	/* No extra margin: the kanban's --db-kanban-gap (10px) is itself the bar-to-
 	   first-section distance, and it deliberately equals the sidebar's
@@ -20306,7 +20970,7 @@ body.is-mobile .dashboard-media-item .dashboard-media-tagbtn { opacity: 1; }
 }
 .dashboard-quicknote-nav::-webkit-scrollbar-thumb {
 	background: transparent;
-	border-radius: 3px;
+	border-radius: 999px;
 	transition: background 0.2s ease;
 }
 .dashboard-quicknote-nav:hover::-webkit-scrollbar-thumb {
@@ -20351,6 +21015,13 @@ body.is-mobile .dashboard-media-item .dashboard-media-tagbtn { opacity: 1; }
 	transition: color 0.15s ease;
 }
 .dashboard-quicknote-chip:hover { color: var(--db-accent) !important; }
+.dashboard-quicknote-chip:focus-visible,
+.dashboard-quicknote-cog:focus-visible,
+.dashboard-quicknote-empty-btn:focus-visible {
+	outline: 2px solid var(--db-accent, var(--interactive-accent));
+	outline-offset: 2px;
+	border-radius: var(--db-radius-sm, 6px);
+}
 /* Flat text-nav look: a thin separator before every chip after the first.
    --db-text-muted is always opaque, so the line stays visible in every theme. */
 .dashboard-quicknote-chip + .dashboard-quicknote-chip::before {
@@ -20474,9 +21145,9 @@ body.is-mobile .dashboard-media-item .dashboard-media-tagbtn { opacity: 1; }
 	background: transparent !important;
 	box-shadow: none !important;
 	color: var(--db-text-muted) !important;
-	opacity: 0.5;
+	opacity: 0.6;
 	cursor: pointer;
-	transition: opacity 0.15s ease, color 0.15s ease, background 0.15s ease;
+	transition: opacity var(--nand-duration-fast) var(--nand-ease), color var(--nand-duration-fast) var(--nand-ease), background var(--nand-duration-fast) var(--nand-ease);
 }
 .dashboard-quicknote-cog:hover {
 	opacity: 1;
@@ -20504,25 +21175,29 @@ body.is-mobile .dashboard-media-item .dashboard-media-tagbtn { opacity: 1; }
 .is-tablet button.dashboard-quicknote-chip { padding: 3px 0; }
 .is-tablet button.dashboard-quicknote-cog { padding: 0; }
 
-/* Quick Notes config modal */
+/* Quick Notes config modal — same grouped-card rhythm as the Appearance
+   Studio: each section is a tinted card; items inside are nested cards. */
 .dashboard-quicknote-config { max-width: 540px; }
 .dashboard-quicknote-cfg-section {
-	margin-bottom: 16px;
-	padding-bottom: 12px;
-	border-bottom: 1px solid var(--db-border, var(--background-modifier-border));
+	margin-bottom: 12px;
+	padding: 14px;
+	border: 1px solid var(--db-border, var(--background-modifier-border));
+	border-radius: var(--db-radius-md, 10px);
+	background: var(--db-bg-hover, transparent);
 }
-.dashboard-quicknote-cfg-section:last-child { border-bottom: none; }
-.dashboard-quicknote-cfg-section h3 { margin: 0 0 4px; font-size: 1em; }
-.dashboard-quicknote-cfg-desc { margin: 0 0 10px; font-size: 0.8em; color: var(--db-text-muted); opacity: 0.85; }
-.dashboard-quicknote-cfg-list { display: flex; flex-direction: column; gap: 10px; margin-bottom: 10px; }
+.dashboard-quicknote-cfg-section:last-child { margin-bottom: 0; }
+.dashboard-quicknote-cfg-section h3 { margin: 0 0 4px; font-size: 0.95em; font-weight: 600; line-height: 1.35; }
+.dashboard-quicknote-cfg-desc { margin: 0 0 12px; font-size: 0.8em; line-height: 1.5; color: var(--db-text-muted); }
+.dashboard-quicknote-cfg-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 12px; }
 .dashboard-quicknote-cfg-item {
 	display: flex;
 	flex-direction: column;
-	gap: 6px;
-	padding: 8px;
+	gap: 8px;
+	padding: 10px;
 	border: 1px solid var(--db-border-input);
-	border-radius: var(--db-radius-sm);
+	border-radius: var(--db-radius-md, 10px);
 	background: var(--db-bg-input);
+	transition: box-shadow var(--nand-duration-fast) var(--nand-ease), opacity var(--nand-duration-fast) var(--nand-ease);
 }
 .dashboard-quicknote-cfg-top { display: flex; gap: 6px; align-items: center; }
 /* Drag handle: arms reordering only when grabbed, so text inputs stay editable. */
@@ -20557,7 +21232,11 @@ body.is-mobile .dashboard-media-item .dashboard-media-tagbtn { opacity: 1; }
 	color: var(--db-text);
 	cursor: pointer;
 }
-.dashboard-quicknote-cfg-icon-btn:hover { color: var(--db-accent); border-color: var(--db-accent); }
+.dashboard-quicknote-cfg-icon-btn:hover {
+	color: var(--db-accent);
+	border-color: color-mix(in srgb, var(--db-accent, var(--interactive-accent)) 55%, transparent);
+	background: color-mix(in srgb, var(--db-accent, var(--interactive-accent)) 8%, var(--db-bg-input, transparent));
+}
 .dashboard-quicknote-cfg-icon-btn svg { width: 16px; height: 16px; }
 
 /* Path input row: text input + the browse button from path-picker-modal */
@@ -20582,16 +21261,25 @@ body.is-mobile .dashboard-media-item .dashboard-media-tagbtn { opacity: 1; }
 }
 .dashboard-pathpicker-item {
 	display: flex;
-	align-items: baseline;
+	align-items: center;
 	justify-content: space-between;
 	gap: 8px;
-	padding: 5px 8px;
+	min-height: 34px;
+	box-sizing: border-box;
+	padding: 6px 10px;
 	border-radius: var(--db-radius-sm, 6px);
 	cursor: pointer;
+	transition: background var(--nand-duration-fast) var(--nand-ease);
 }
-.dashboard-pathpicker-item:hover, .dashboard-pathpicker-item:focus-visible {
+.dashboard-pathpicker-item:hover {
+	background: var(--db-bg-hover, rgba(255, 255, 255, 0.06));
+}
+/* Keyboard focus: tinted like hover plus an inset accent ring (the old
+   rule removed the outline without a replacement). */
+.dashboard-pathpicker-item:focus-visible {
 	background: var(--db-bg-hover, rgba(255, 255, 255, 0.06));
 	outline: none;
+	box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--db-accent, var(--interactive-accent)) 60%, transparent);
 }
 .dashboard-pathpicker-name {
 	font-size: 0.8125em;
@@ -20637,6 +21325,10 @@ body.is-mobile .dashboard-media-item .dashboard-media-tagbtn { opacity: 1; }
 	flex: 0 0 30px;
 	border-radius: var(--db-radius-sm);
 	color: var(--db-danger, var(--db-text-muted));
+	transition: background var(--nand-duration-fast) var(--nand-ease);
+}
+.dashboard-quicknote-cfg-del:hover {
+	background: color-mix(in srgb, var(--db-danger, var(--text-error)) 12%, transparent);
 }
 .dashboard-quicknote-cfg-del svg { width: 15px; height: 15px; }
 .dashboard-quicknote-cfg-add { font-size: 0.85em; }
@@ -21078,7 +21770,7 @@ body.is-mobile .dashboard-media-item .dashboard-media-tagbtn { opacity: 1; }
 }
 .dashboard-dataview-body::-webkit-scrollbar-thumb {
 	background: color-mix(in srgb, var(--db-accent) 20%, transparent);
-	border-radius: 4px;
+	border-radius: 999px;
 }
 .dashboard-dataview-body::-webkit-scrollbar-thumb:hover {
 	background: color-mix(in srgb, var(--db-accent) 38%, transparent);
@@ -21089,12 +21781,15 @@ body.is-mobile .dashboard-media-item .dashboard-media-tagbtn { opacity: 1; }
 	flex-shrink: 0;
 }
 
-/* Result toolbar: count | (spacer) | filter input | page-size select. */
+/* Result toolbar: count | (spacer) | filter input | page-size select. Same
+   28px control height as the library toolbar, without the strip fill (the
+   dataview result sits directly under it). */
 .dashboard-dataview-toolbar {
 	display: flex;
 	align-items: center;
 	gap: 8px;
 	flex-shrink: 0;
+	min-height: 32px;
 	padding: 2px 0;
 }
 .dashboard-dataview-toolbar-spacer {
@@ -21116,16 +21811,27 @@ body.is-mobile .dashboard-media-item .dashboard-media-tagbtn { opacity: 1; }
 .dashboard-dataview-search {
 	width: 110px;
 	flex-shrink: 1;
-	padding: 3px 8px;
+	height: 28px;
+	box-sizing: border-box;
+	padding: 0 10px;
 	border-radius: var(--db-radius-sm, 6px);
 	border: 1px solid var(--db-border-input, rgba(255, 255, 255, 0.08));
 	background: var(--db-bg-input, rgba(255, 255, 255, 0.05));
 	color: var(--db-text, var(--text-normal));
 	font-size: 11.5px;
 	outline: none;
+	transition: border-color var(--nand-duration-fast) var(--nand-ease), box-shadow var(--nand-duration-fast) var(--nand-ease);
 }
 .dashboard-dataview-search:focus {
 	border-color: var(--db-accent, var(--interactive-accent));
+	box-shadow: 0 0 0 3px color-mix(in srgb, var(--db-accent, var(--interactive-accent)) 16%, transparent);
+}
+.dashboard-dataview-toolbar [role="button"]:focus-visible,
+.dashboard-dataview-table th.is-sortable:focus-visible,
+.dashboard-dataview-calendar-nav:focus-visible,
+.dashboard-dataview-calendar-cell.has-dots:focus-visible {
+	outline: 2px solid var(--db-accent, var(--interactive-accent));
+	outline-offset: 1px;
 }
 .dashboard-dataview-search::placeholder {
 	color: var(--db-text-faint, var(--text-faint));
@@ -21155,21 +21861,9 @@ body.is-mobile .dashboard-media-item .dashboard-media-tagbtn { opacity: 1; }
 	color: var(--db-accent, var(--interactive-accent));
 }
 
-/* Sticky table header: stays pinned while the result body scrolls. The theme's
-   section bg can be translucent (rgba) in some themes, which lets rows bleed
-   through — so it is layered over the opaque page bg (--db-bg), giving an
-   opaque result that still looks exactly like the section. Inset bottom
-   shadow replaces the border (collapse + sticky drops borders in some
-   browsers). No backdrop-filter (mobile GPU). */
-.dashboard-dataview-table thead th {
-	position: sticky;
-	top: 0;
-	z-index: 1;
-	background:
-		linear-gradient(var(--db-bg-section, var(--background-secondary)), var(--db-bg-section, var(--background-secondary))),
-		var(--db-bg, var(--background-primary));
-	box-shadow: inset 0 -1px 0 var(--db-border, rgba(255, 255, 255, 0.08));
-}
+/* Sticky header: inherited from .dashboard-library-table th (opaque layered
+   background, inset hairline, rounded end caps). No backdrop-filter (mobile
+   GPU). */
 
 /* Numeric cells right-aligned (classic database layout). */
 .dashboard-dataview-table td.is-numeric {
@@ -21191,27 +21885,30 @@ body.is-mobile .dashboard-media-item .dashboard-media-tagbtn { opacity: 1; }
 	cursor: default;
 }
 
-/* Zebra stripes (opt-in): even rows tinted; hover wins over stripes. */
-.dashboard-dataview-table.is-striped tbody tr:nth-child(even) {
-	background: var(--db-bg-card, rgba(255, 255, 255, 0.03));
+/* Zebra stripes (opt-in): even rows tinted with the same token as the
+   library table; the shared hover band (rounded caps) wins over stripes. */
+.dashboard-dataview-table.is-striped tbody tr:nth-child(even) td {
+	background: color-mix(in srgb, var(--db-bg-hover, rgba(255, 255, 255, 0.04)) 60%, transparent);
 }
-.dashboard-dataview-table.is-striped tbody tr:hover,
-.dashboard-dataview-table tbody tr:hover {
-	background: var(--db-bg-card-hover, rgba(255, 255, 255, 0.10));
+.dashboard-dataview-table.is-striped tbody tr:hover td,
+.dashboard-dataview-table tbody tr:hover td {
+	background: var(--db-bg-hover, var(--db-bg-card-hover, rgba(255, 255, 255, 0.10)));
 }
 .dashboard-dataview-list.is-striped > .dashboard-dataview-list-item:nth-child(even) {
-	background: var(--db-bg-card, rgba(255, 255, 255, 0.03));
+	background: color-mix(in srgb, var(--db-bg-hover, rgba(255, 255, 255, 0.04)) 60%, transparent);
 }
 .dashboard-dataview-tasklist.is-striped > .dashboard-dataview-task:nth-child(even) {
-	background: var(--db-bg-card, rgba(255, 255, 255, 0.03));
+	background: color-mix(in srgb, var(--db-bg-hover, rgba(255, 255, 255, 0.04)) 60%, transparent);
 }
 
-/* Compact density: halved vertical paddings. */
+/* Compact density: ~28px rows. */
 .dashboard-dataview-table.is-compact td {
+	height: 28px;
 	padding-top: 3px;
 	padding-bottom: 3px;
 }
 .dashboard-dataview-table.is-compact th {
+	height: 28px;
 	padding-top: 4px;
 	padding-bottom: 4px;
 }
@@ -21224,15 +21921,18 @@ body.is-mobile .dashboard-media-item .dashboard-media-tagbtn { opacity: 1; }
 	padding-bottom: 2px;
 }
 
-/* Density chips in the config modal (reuses the sample-chip look). */
+/* Density chips in the config modal (reuses the sample-chip look). Selected
+   = accent-soft pill, matching the other chip selectors. */
 .dashboard-dataview-density-chips {
 	display: flex;
 	gap: 6px;
 }
-.dashboard-dataview-density-chip.active {
-	background: var(--db-accent, var(--interactive-accent));
-	color: var(--db-bg, var(--text-on-accent));
-	border-color: transparent;
+.dashboard-dataview-density-chip.active,
+.dashboard-dataview-density-chip.active:hover {
+	background: color-mix(in srgb, var(--db-accent, var(--interactive-accent)) 14%, transparent);
+	color: var(--db-accent, var(--interactive-accent));
+	border-color: color-mix(in srgb, var(--db-accent, var(--interactive-accent)) 55%, transparent);
+	font-weight: 600;
 }
 
 /* TASK checkbox column: narrow fixed slot at the table's start. */
@@ -21327,6 +22027,8 @@ body.is-mobile .dashboard-media-item .dashboard-media-tagbtn { opacity: 1; }
 	max-width: none;
 	vertical-align: top;
 	line-height: 1.5;
+	/* Wrapping cells: height is a floor, content may grow to the 2-line clamp. */
+	height: 38px;
 }
 /* Two-line clamp lives on an INNER div — td must stay display:table-cell or
    the fixed table layout breaks (cells stop aligning to <col> widths). */
@@ -21377,14 +22079,16 @@ body.is-mobile .dashboard-media-item .dashboard-media-tagbtn { opacity: 1; }
 	display: flex;
 	align-items: baseline;
 	gap: 6px;
-	padding: 5px 8px;
+	min-height: 36px;
+	box-sizing: border-box;
+	padding: 7px 10px;
 	border-radius: var(--db-radius-sm, 6px);
 	color: var(--db-text, var(--text-normal));
 	font-size: 0.85em;
-	transition: background 0.1s ease;
+	transition: background var(--nand-duration-fast) var(--nand-ease);
 }
 .dashboard-dataview-list-item:hover {
-	background: var(--db-bg-card-hover, rgba(255, 255, 255, 0.06));
+	background: var(--db-bg-hover, var(--db-bg-card-hover, rgba(255, 255, 255, 0.06)));
 }
 .dashboard-dataview-list-group {
 	font-weight: 600;
@@ -21420,12 +22124,12 @@ body.is-mobile .dashboard-media-item .dashboard-media-tagbtn { opacity: 1; }
 .dashboard-dataview-free-item {
 	display: flex;
 	align-items: baseline;
-	padding: 3px 6px;
+	padding: 4px 8px;
 	border-radius: var(--db-radius-sm, 6px);
-	transition: background 0.1s ease;
+	transition: background var(--nand-duration-fast) var(--nand-ease);
 }
 .dashboard-dataview-free-item:hover {
-	background: var(--db-bg-card-hover, rgba(255, 255, 255, 0.06));
+	background: var(--db-bg-hover, var(--db-bg-card-hover, rgba(255, 255, 255, 0.06)));
 }
 .dashboard-dataview-free-item::before {
 	content: '•';
@@ -21460,7 +22164,7 @@ body.is-mobile .dashboard-media-item .dashboard-media-tagbtn { opacity: 1; }
 	font-family: var(--font-monospace, monospace);
 	font-size: 0.92em;
 	padding: 0 4px;
-	border-radius: 4px;
+	border-radius: max(3px, calc(var(--db-radius-sm, 6px) - 2px));
 	background: var(--db-bg-hover, rgba(255, 255, 255, 0.08));
 	color: var(--db-text, var(--text-normal));
 }
@@ -21468,7 +22172,7 @@ body.is-mobile .dashboard-media-item .dashboard-media-tagbtn { opacity: 1; }
 	background: color-mix(in srgb, var(--db-accent, var(--interactive-accent)) 28%, transparent);
 	color: inherit;
 	padding: 0 2px;
-	border-radius: 3px;
+	border-radius: max(3px, calc(var(--db-radius-sm, 6px) - 2px));
 }
 .dashboard-dataview-cell em { font-style: italic; }
 .dashboard-dataview-cell strong { font-weight: 600; }
@@ -21483,11 +22187,14 @@ body.is-mobile .dashboard-media-item .dashboard-media-tagbtn { opacity: 1; }
 	display: flex;
 	align-items: baseline;
 	gap: 8px;
-	padding: 4px 8px;
+	min-height: 36px;
+	box-sizing: border-box;
+	padding: 7px 10px;
 	border-radius: var(--db-radius-sm, 6px);
+	transition: background var(--nand-duration-fast) var(--nand-ease);
 }
 .dashboard-dataview-task:hover {
-	background: var(--db-bg-card-hover, rgba(255, 255, 255, 0.06));
+	background: var(--db-bg-hover, var(--db-bg-card-hover, rgba(255, 255, 255, 0.06)));
 }
 .dashboard-dataview-task-checkbox {
 	margin: 0;
@@ -21508,10 +22215,15 @@ body.is-mobile .dashboard-media-item .dashboard-media-tagbtn { opacity: 1; }
 	align-items: center;
 	justify-content: center;
 	gap: 8px;
+	min-height: 120px;
+	box-sizing: border-box;
 	padding: 28px 16px;
+	border: 1px dashed color-mix(in srgb, var(--db-text-muted, var(--text-muted)) 22%, transparent);
+	border-radius: var(--db-radius-md, 10px);
 	text-align: center;
 	color: var(--db-text-muted, var(--text-muted));
 	font-size: 0.8125em;
+	line-height: 1.5;
 }
 .dashboard-dataview-empty-icon {
 	width: 32px;
@@ -21526,7 +22238,9 @@ body.is-mobile .dashboard-media-item .dashboard-media-tagbtn { opacity: 1; }
 	opacity: 0.7;
 }
 .dashboard-dataview-error {
-	color: var(--text-error, #e06c75);
+	color: var(--text-error);
+	border-color: color-mix(in srgb, var(--text-error) 35%, transparent);
+	background: color-mix(in srgb, var(--text-error) 5%, transparent);
 }
 .dashboard-dataview-error-icon svg {
 	width: 22px;
@@ -21553,6 +22267,8 @@ body.is-mobile .dashboard-media-item .dashboard-media-tagbtn { opacity: 1; }
 /* Fill the section row's column flex so the frame takes the remaining
    bounded height and scrolls itself (mirrors .dashboard-dataview-content).
    overflow + radius clip the frame's square corners to the theme's. */
+/* Frame: the embedded page sits in a card with the theme's card radius and
+   a hairline edge; overflow clips the page to the rounded corners. */
 .dashboard-web-content {
 	display: flex;
 	flex-direction: column;
@@ -21560,6 +22276,7 @@ body.is-mobile .dashboard-media-item .dashboard-media-tagbtn { opacity: 1; }
 	min-height: 0;
 	min-width: 0;
 	border-radius: var(--db-radius-md);
+	border: 1px solid var(--db-border-card, var(--db-border, transparent));
 	overflow: hidden;
 }
 
@@ -21575,26 +22292,45 @@ body.is-mobile .dashboard-media-item .dashboard-media-tagbtn { opacity: 1; }
 	background: var(--background-primary);
 }
 
-/* Configure-me guide state (no URL yet). */
+/* Configure-me guide state (no URL yet): centered, like the other empty
+   states. */
 .dashboard-web-empty {
 	display: flex;
 	flex-direction: column;
 	align-items: center;
+	justify-content: center;
+	flex: 1;
 	gap: 8px;
 	padding: 32px 12px;
+	text-align: center;
+	color: var(--db-text-muted, var(--text-muted));
+}
+.dashboard-web-empty-icon,
+.dashboard-web-fallback-icon {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 48px;
+	height: 48px;
+	border-radius: 50%;
+	background: var(--db-bg-hover, var(--background-modifier-hover));
 	color: var(--db-text-muted, var(--text-muted));
 }
 .dashboard-web-empty-icon svg,
 .dashboard-web-fallback-icon svg {
-	width: 28px;
-	height: 28px;
+	width: 24px;
+	height: 24px;
 }
 .dashboard-web-empty-text {
 	font-size: 0.95em;
+	font-weight: 600;
+	color: var(--db-text, var(--text-normal));
 }
 .dashboard-web-empty-hint {
+	max-width: 360px;
 	font-size: 0.85em;
-	opacity: 0.75;
+	line-height: 1.5;
+	opacity: 0.8;
 }
 
 /* Fallback card: site refused framing (mobile) or page failed to load. */
@@ -21602,63 +22338,86 @@ body.is-mobile .dashboard-media-item .dashboard-media-tagbtn { opacity: 1; }
 	display: flex;
 	flex-direction: column;
 	align-items: center;
+	justify-content: center;
+	flex: 1;
 	gap: 8px;
 	padding: 28px 16px;
 	color: var(--db-text-muted, var(--text-muted));
 }
 .dashboard-web-fallback-text {
+	max-width: 360px;
 	text-align: center;
+	line-height: 1.5;
+	color: var(--db-text, var(--text-normal));
 }
 .dashboard-web-fallback-host {
 	font-weight: 600;
 	word-break: break-all;
 }
 .dashboard-web-fallback-url {
+	max-width: 420px;
 	font-size: 0.85em;
 	opacity: 0.7;
 	word-break: break-all;
+	text-align: center;
 }
+/* The single action in the empty/fallback state is the view's primary:
+   solid accent with the theme's on-accent text. */
 .dashboard-web-fallback-btn {
 	margin-top: 8px;
-	padding: 6px 14px;
-	border: 1px solid var(--db-accent, var(--text-accent));
-	border-radius: var(--db-radius-sm, 8px);
-	background: transparent;
-	color: var(--db-accent, var(--text-accent));
+	height: 32px;
+	padding: 0 16px;
+	border: 1px solid transparent;
+	border-radius: var(--db-radius-sm, 6px);
+	background: var(--db-accent, var(--interactive-accent));
+	box-shadow: none;
+	color: var(--db-text-inverse, var(--text-on-accent));
 	font-size: 0.9em;
+	font-weight: 500;
 	cursor: pointer;
+	transition: opacity var(--nand-duration-fast) var(--nand-ease);
 }
 .dashboard-web-fallback-btn:hover {
-	background: var(--db-accent, var(--text-accent));
-	color: var(--db-bg-section, var(--background-primary));
+	background: var(--db-accent, var(--interactive-accent));
+	opacity: 0.88;
+}
+.dashboard-web-fallback-btn:focus-visible {
+	outline: 2px solid var(--db-accent, var(--interactive-accent));
+	outline-offset: 2px;
 }
 
 /* Web config modal — zoom preset chips (single-select, with a visible active
    state — the dataview sample chips have none and read as dead buttons when
-   reused as a selector). */
+   reused as a selector). Pill + accent-soft selection like the other chips. */
 .dashboard-web-zoom-chips {
 	display: flex;
 	flex-wrap: wrap;
 	gap: 6px;
 }
 .dashboard-web-zoom-chip {
-	padding: 4px 10px;
-	border-radius: 12px;
+	min-height: 26px;
+	box-sizing: border-box;
+	padding: 0 12px;
+	border-radius: 999px;
 	font-size: 11.5px;
+	font-variant-numeric: tabular-nums;
 	cursor: pointer;
 	color: var(--db-text, var(--text-normal));
 	background: var(--db-bg-card, var(--background-modifier-hover));
 	border: 1px solid var(--db-border-card, var(--background-modifier-border));
-	transition: background 0.12s ease, border-color 0.12s ease;
+	box-shadow: none;
+	transition: background var(--nand-duration-fast) var(--nand-ease), border-color var(--nand-duration-fast) var(--nand-ease), color var(--nand-duration-fast) var(--nand-ease);
 }
 .dashboard-web-zoom-chip:hover {
 	background: var(--db-bg-hover, var(--background-modifier-hover));
-	border-color: var(--db-accent, var(--interactive-accent));
+	border-color: color-mix(in srgb, var(--db-accent, var(--interactive-accent)) 45%, transparent);
 }
-.dashboard-web-zoom-chip.active {
-	background: var(--db-accent, var(--interactive-accent));
-	color: var(--db-bg, var(--text-on-accent));
-	border-color: transparent;
+.dashboard-web-zoom-chip.active,
+.dashboard-web-zoom-chip.active:hover {
+	background: color-mix(in srgb, var(--db-accent, var(--interactive-accent)) 14%, transparent);
+	color: var(--db-accent, var(--interactive-accent));
+	border-color: color-mix(in srgb, var(--db-accent, var(--interactive-accent)) 55%, transparent);
+	font-weight: 600;
 }
 
 /* External (http) links rendered from field values */
@@ -21672,49 +22431,56 @@ body.is-mobile .dashboard-media-item .dashboard-media-tagbtn { opacity: 1; }
 	width: 100%;
 	min-height: 140px;
 	padding: 10px 12px;
-	border-radius: var(--db-radius-sm, 6px);
+	border-radius: var(--db-radius-md, 10px);
 	border: 1px solid var(--db-border-card, var(--background-modifier-border));
-	background: var(--db-bg, var(--background-secondary));
+	background: var(--db-bg-input, var(--db-bg, var(--background-secondary)));
 	color: var(--db-text, var(--text-normal));
 	font-family: var(--font-monospace, monospace);
 	font-size: 12.5px;
 	line-height: 1.6;
 	resize: vertical;
 	box-sizing: border-box;
+	transition: border-color var(--nand-duration-fast) var(--nand-ease), box-shadow var(--nand-duration-fast) var(--nand-ease);
 }
 .dashboard-dataview-query-input:focus {
 	outline: none;
 	border-color: var(--db-accent, var(--interactive-accent));
+	box-shadow: 0 0 0 3px color-mix(in srgb, var(--db-accent, var(--interactive-accent)) 16%, transparent);
 }
 .dashboard-dataview-validation {
 	min-height: 18px;
 	font-size: 11.5px;
 }
 .dashboard-dataview-validation.is-error {
-	color: var(--text-error, #e06c75);
+	color: var(--text-error);
 }
 .dashboard-dataview-validation-ok {
-	color: var(--color-green, #4caf50);
+	color: var(--color-green);
 }
 .dashboard-dataview-sample-chips {
 	display: flex;
 	flex-wrap: wrap;
 	gap: 6px;
 }
+/* Sample queries are one-shot actions (not a selection), so hover shows an
+   accent-soft tint rather than a solid fill. */
 .dashboard-dataview-sample-chip {
-	padding: 4px 10px;
-	border-radius: 12px;
+	min-height: 26px;
+	box-sizing: border-box;
+	padding: 0 12px;
+	border-radius: 999px;
 	font-size: 11.5px;
 	cursor: pointer;
 	color: var(--db-text, var(--text-normal));
 	background: var(--db-bg-card, var(--background-modifier-hover));
 	border: 1px solid var(--db-border-card, var(--background-modifier-border));
-	transition: background 0.12s ease, border-color 0.12s ease;
+	box-shadow: none;
+	transition: background var(--nand-duration-fast) var(--nand-ease), border-color var(--nand-duration-fast) var(--nand-ease), color var(--nand-duration-fast) var(--nand-ease);
 }
 .dashboard-dataview-sample-chip:hover {
-	background: var(--db-accent, var(--interactive-accent));
-	color: var(--db-bg, var(--text-on-accent));
-	border-color: transparent;
+	background: color-mix(in srgb, var(--db-accent, var(--interactive-accent)) 12%, transparent);
+	color: var(--db-accent, var(--interactive-accent));
+	border-color: color-mix(in srgb, var(--db-accent, var(--interactive-accent)) 45%, transparent);
 }
 
 /* Dataview TASK: done state + calendar grid */
@@ -21734,16 +22500,23 @@ body.is-mobile .dashboard-media-item .dashboard-media-tagbtn { opacity: 1; }
 	margin-bottom: 8px;
 }
 .dashboard-dataview-calendar-nav {
+	width: 28px;
+	height: 28px;
+	justify-content: center;
 	background: transparent;
 	border: none;
+	border-radius: var(--db-radius-sm, 6px);
+	box-shadow: none;
 	color: var(--db-text-muted, var(--text-muted));
 	cursor: pointer;
-	padding: 4px;
+	padding: 0;
 	display: flex;
 	align-items: center;
+	transition: background var(--nand-duration-fast) var(--nand-ease), color var(--nand-duration-fast) var(--nand-ease);
 }
 .dashboard-dataview-calendar-nav:hover {
 	color: var(--db-accent, var(--interactive-accent));
+	background: var(--db-bg-hover, var(--background-modifier-hover));
 }
 .dashboard-dataview-calendar-title {
 	font-size: 0.8125em;
@@ -21753,8 +22526,8 @@ body.is-mobile .dashboard-media-item .dashboard-media-tagbtn { opacity: 1; }
 .dashboard-dataview-calendar-weekdays {
 	display: grid;
 	grid-template-columns: repeat(7, 1fr);
-	gap: 2px;
-	margin-bottom: 4px;
+	gap: 4px;
+	margin-bottom: 6px;
 }
 .dashboard-dataview-calendar-wd {
 	text-align: center;
@@ -21766,18 +22539,20 @@ body.is-mobile .dashboard-media-item .dashboard-media-tagbtn { opacity: 1; }
 .dashboard-dataview-calendar-cells {
 	display: grid;
 	grid-template-columns: repeat(7, 1fr);
-	gap: 2px;
+	gap: 4px;
 }
 .dashboard-dataview-calendar-cell {
-	min-height: 36px;
-	padding: 3px 4px;
+	min-height: 40px;
+	box-sizing: border-box;
+	padding: 4px 5px;
 	border-radius: var(--db-radius-sm, 6px);
-	border: 1px solid var(--db-border-card, rgba(255,255,255,0.04));
+	border: 1px solid color-mix(in srgb, var(--db-border-card, rgba(255,255,255,0.08)) 70%, transparent);
 	display: flex;
 	flex-direction: column;
 	align-items: flex-start;
 	justify-content: flex-start;
 	gap: 2px;
+	transition: background var(--nand-duration-fast) var(--nand-ease), border-color var(--nand-duration-fast) var(--nand-ease);
 }
 .dashboard-dataview-calendar-cell.is-blank {
 	border-color: transparent;
@@ -21788,10 +22563,12 @@ body.is-mobile .dashboard-media-item .dashboard-media-tagbtn { opacity: 1; }
 }
 .dashboard-dataview-calendar-cell.has-dots:hover {
 	background: var(--db-bg-card-hover, rgba(255,255,255,0.10));
+	border-color: color-mix(in srgb, var(--db-accent, var(--interactive-accent)) 40%, transparent);
 }
 .dashboard-dataview-calendar-day {
 	font-size: 0.625em;
 	color: var(--db-text-muted, var(--text-muted));
+	font-variant-numeric: tabular-nums;
 }
 .dashboard-dataview-calendar-cell.has-dots .dashboard-dataview-calendar-day {
 	color: var(--db-text, var(--text-normal));
