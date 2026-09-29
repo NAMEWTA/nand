@@ -187,20 +187,42 @@ export class ThemeStudioModal extends Modal {
 
 		// Quick accent swatches — set the accent field directly.
 		const swatchRow = section.createDiv({ cls: 'dashboard-theme-studio-swatches' });
+		const swatches: HTMLElement[] = [];
+		// Presentation only: ring the swatch matching the stored accent.
+		const markSelected = (): void => {
+			const current = (this.colors.accent ?? '').toLowerCase();
+			for (const swatch of swatches) {
+				const on = swatch.getAttribute('title') === current;
+				swatch.toggleClass('is-selected', on);
+				swatch.setAttribute('aria-pressed', String(on));
+			}
+		};
 		for (const hex of ACCENT_SWATCHES) {
 			const chip = swatchRow.createDiv({
 				cls: 'dashboard-theme-studio-swatch',
-				attr: { title: hex, 'aria-label': hex },
+				attr: { title: hex, 'aria-label': hex, role: 'button', tabindex: '0' },
 			});
 			chip.style.background = hex;
+			swatches.push(chip);
 			chip.addEventListener('click', () => {
 				this.colors = { ...this.colors, accent: hex };
 				// Sync the accent row so its dropdown flips to "custom" and the
 				// picker/slider re-enable alongside the new value.
 				this.colorRowSyncs.get('accent')?.();
 				this.scheduleApply();
+				markSelected();
+			});
+			chip.addEventListener('keydown', (event: KeyboardEvent) => {
+				if (event.key !== 'Enter' && event.key !== ' ') return;
+				event.preventDefault();
+				chip.click();
 			});
 		}
+		markSelected();
+		// The accent can also change through its row (picker, mode select, clear)
+		// or the section reset; those handlers run first, then this bubbled
+		// listener re-syncs the ring. Visual only.
+		for (const type of ['input', 'change', 'click']) section.addEventListener(type, markSelected);
 
 		const list = section.createDiv({ cls: 'dashboard-theme-studio-color-list' });
 		for (const field of COLOR_FIELDS) {
