@@ -18,7 +18,11 @@ export function renderEmptyState(parent: HTMLElement, options: EmptyStateOptions
 	root.createDiv({ cls: 'nand-empty-state-description', text: options.description });
 	if (options.action) {
 		const action = options.action;
-		const button = root.createEl('button', { text: action.label, attr: { type: 'button' } });
+		const button = root.createEl('button', {
+			text: action.label,
+			cls: 'nand-empty-state-action mod-cta',
+			attr: { type: 'button' },
+		});
 		button.addEventListener('click', action.run);
 	}
 	return root;

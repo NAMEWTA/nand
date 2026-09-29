@@ -1908,11 +1908,11 @@ button.nand-ui-list-item.is-active {
 
 .dashboard-settings-footer {
 	text-align: center;
-	padding: 30px 0 10px;
-	margin-top: 20px;
-	font-size: 0.8em;
+	padding: var(--size-4-8) 0 var(--size-4-2);
+	margin-top: var(--size-4-5);
+	font-size: var(--nand-text-caption);
 	color: var(--text-faint);
-	opacity: 0.5;
+	opacity: 0.6;
 	letter-spacing: 0.03em;
 	user-select: none;
 	pointer-events: none;
@@ -1921,8 +1921,8 @@ button.nand-ui-list-item.is-active {
 /* ===== Settings: visual layout picker =====
  * Two miniature board diagrams (side rail vs stacked strip) with a centered
  * radio circle under each. The settings pane has no --db-* theme scope, so
- * every token falls back to Obsidian's own variables (the established
- * var(--db-x, var(--obsidian-x)) pattern).
+ * every value comes from the NAND tokens (which resolve to Obsidian's own
+ * variables).
  *
  * The preview mocks read top-down in three zones — banner bar, widget zone
  * (rail / strip, strong accent tint), main sections (soft tint) — so the two
@@ -1931,8 +1931,8 @@ button.nand-ui-list-item.is-active {
  * label row below (the old mock's flex bars could overflow onto it). */
 .dashboard-layout-picker {
 	display: flex;
-	gap: 12px;
-	margin: 4px 0 14px 0;
+	gap: var(--size-4-3);
+	margin: var(--size-4-1) 0 var(--size-4-4);
 	flex-wrap: wrap;
 }
 
@@ -1942,23 +1942,29 @@ button.nand-ui-list-item.is-active {
 	display: flex;
 	flex-direction: column;
 	align-items: center;
-	gap: 8px;
-	padding: 12px 10px 10px 10px;
-	background: var(--db-bg-card, var(--background-primary));
-	border: 1.5px solid var(--db-border-card, var(--background-modifier-border));
-	border-radius: var(--db-radius-md, 10px);
-	transition: border-color 0.15s ease, box-shadow 0.15s ease;
+	gap: var(--size-4-2);
+	padding: var(--size-4-3);
+	box-sizing: border-box;
+	background: var(--nand-surface);
+	border: var(--nand-border);
+	border-radius: var(--nand-radius-md);
+	box-shadow: var(--nand-shadow-xs);
+	transition: border-color var(--nand-duration) var(--nand-ease), box-shadow var(--nand-duration) var(--nand-ease), background-color var(--nand-duration) var(--nand-ease);
 }
 
 .dashboard-layout-option:hover {
-	border-color: var(--db-accent, var(--interactive-accent));
+	border-color: var(--nand-border-color-strong);
+	box-shadow: var(--nand-shadow-sm);
 }
 
-.dashboard-layout-option--active {
-	border-color: var(--db-accent, var(--interactive-accent));
-	box-shadow: 0 0 0 1px var(--db-accent, var(--interactive-accent));
+.dashboard-layout-option--active,
+.dashboard-layout-option--active:hover {
+	border-color: var(--nand-accent-border);
+	background: var(--nand-accent-softer);
+	box-shadow: 0 0 0 1px var(--nand-accent-border);
 }
 
+/* Inner radius = card radius (10px) - inset (12px) floors at the row radius. */
 .dashboard-layout-preview {
 	width: 122px;
 	height: 88px;
@@ -1967,10 +1973,10 @@ button.nand-ui-list-item.is-active {
 	display: flex;
 	flex-direction: column;
 	gap: 5px;
-	border-radius: 6px;
+	border-radius: var(--nand-radius-sm);
 	overflow: hidden;
 	flex: 0 0 auto;
-	background: color-mix(in srgb, var(--db-accent, var(--interactive-accent)) 5%, var(--background-secondary));
+	background: color-mix(in srgb, var(--nand-accent) 5%, var(--nand-surface-muted));
 }
 
 /* Zone 1: the banner bar spanning the full mock width. */
@@ -1978,7 +1984,7 @@ button.nand-ui-list-item.is-active {
 	height: 12px;
 	flex-shrink: 0;
 	border-radius: 3px;
-	background: color-mix(in srgb, var(--db-accent, var(--interactive-accent)) 32%, transparent);
+	background: color-mix(in srgb, var(--nand-accent) 32%, transparent);
 }
 
 /* Zone 2a (side): body row with the widget rail on the LEFT. */
@@ -2001,7 +2007,7 @@ button.nand-ui-list-item.is-active {
 	flex: 1;
 	min-height: 4px;
 	border-radius: 2.5px;
-	background: color-mix(in srgb, var(--db-accent, var(--interactive-accent)) 42%, transparent);
+	background: color-mix(in srgb, var(--nand-accent) 42%, transparent);
 }
 
 /* Zone 2b (stacked): the widget strip under the banner. */
@@ -2030,13 +2036,19 @@ button.nand-ui-list-item.is-active {
 	flex: 1;
 	min-height: 4px;
 	border-radius: 2.5px;
-	background: color-mix(in srgb, var(--db-accent, var(--interactive-accent)) 16%, transparent);
+	background: color-mix(in srgb, var(--nand-accent) 16%, transparent);
 }
 
 .dashboard-layout-option-label {
-	font-size: 0.82em;
-	color: var(--text-normal);
+	font-size: var(--nand-text-body);
+	font-weight: 500;
+	color: var(--text-muted);
 	text-align: center;
+}
+
+.dashboard-layout-option--active .dashboard-layout-option-label {
+	color: var(--text-normal);
+	font-weight: 600;
 }
 
 /* The radio circle is THE click target — a real button element, with theme
@@ -2045,8 +2057,8 @@ button.nand-ui-list-item.is-active {
 .dashboard-layout-radio {
 	appearance: none;
 	-webkit-appearance: none;
-	width: 17px;
-	height: 17px;
+	width: 18px;
+	height: 18px;
 	box-sizing: border-box;
 	border-radius: 50% !important;
 	border: 1.5px solid var(--text-muted) !important;
@@ -2060,27 +2072,32 @@ button.nand-ui-list-item.is-active {
 	justify-content: center;
 	flex-shrink: 0;
 	cursor: pointer;
-	transition: border-color 0.15s ease;
+	transition: border-color var(--nand-duration-fast) var(--nand-ease);
 }
 
 .dashboard-layout-radio:hover {
-	border-color: var(--db-accent, var(--interactive-accent)) !important;
+	border-color: var(--nand-accent) !important;
+}
+
+.dashboard-layout-radio:focus-visible {
+	outline: 2px solid var(--interactive-accent);
+	outline-offset: 2px;
 }
 
 .dashboard-layout-radio-dot {
-	width: 7px;
-	height: 7px;
+	width: 8px;
+	height: 8px;
 	border-radius: 50%;
 	background: transparent;
-	transition: background 0.15s ease;
+	transition: background-color var(--nand-duration-fast) var(--nand-ease);
 }
 
 .dashboard-layout-option--active .dashboard-layout-radio {
-	border-color: var(--db-accent, var(--interactive-accent));
+	border-color: var(--nand-accent);
 }
 
 .dashboard-layout-option--active .dashboard-layout-radio-dot {
-	background: var(--db-accent, var(--interactive-accent));
+	background: var(--nand-accent);
 }
 
 /* ===== Settings fallback tab bar (pre-1.13 builds) =====
@@ -2091,34 +2108,38 @@ button.nand-ui-list-item.is-active {
 	flex-wrap: wrap;
 	gap: 2px;
 	max-width: 100%;
-	padding: 3px;
-	border-radius: var(--db-radius-md, 8px);
-	background: var(--background-modifier-hover);
-	border: 1px solid var(--background-modifier-border);
-	margin-bottom: 16px;
+	padding: 2px;
+	border-radius: var(--nand-radius-pill);
+	background: var(--nand-surface-muted);
+	border: var(--nand-border);
+	margin-bottom: var(--size-4-4);
 }
 
 .dashboard-settings-root {
 	display: flex;
 	flex-direction: column;
-	gap: 12px;
+	gap: var(--size-4-3);
 	min-width: 0;
 }
 
 .dashboard-settings-shell {
 	display: flex;
 	flex-direction: column;
-	gap: 12px;
+	gap: var(--size-4-3);
 	min-width: 0;
 }
 
+/* Product navigation: a row of pill tabs. Scrolls sideways instead of
+   wrapping so the row height never changes between products. */
 .dashboard-settings-products {
 	display: flex;
 	flex-wrap: nowrap;
+	align-items: center;
 	overflow-x: auto;
 	white-space: nowrap;
-	gap: 4px;
+	gap: var(--size-4-1);
 	max-width: 100%;
+	scrollbar-width: thin;
 }
 
 .dashboard-settings-content {
@@ -2149,16 +2170,18 @@ button.nand-ui-list-item.is-active {
 	cursor: pointer;
 	display: inline-flex;
 	align-items: center;
-	gap: var(--size-4-2);
-	padding: var(--size-4-2) var(--size-4-3);
-	border: 0;
+	flex: none;
+	gap: 6px;
+	min-height: var(--nand-control-height);
+	padding: 0 var(--size-4-3);
+	border: 1px solid transparent;
 	box-shadow: none;
-	border-radius: var(--radius-s);
+	border-radius: var(--nand-radius-pill);
 	background: transparent;
-	font-size: var(--font-ui-small);
+	font-size: var(--nand-text-body);
 	font-weight: 500;
 	color: var(--text-muted);
-	transition: color 100ms ease, background 100ms ease;
+	transition: color var(--nand-duration-fast) var(--nand-ease), background-color var(--nand-duration-fast) var(--nand-ease), border-color var(--nand-duration-fast) var(--nand-ease);
 }
 
 /* Icon sized to the tab's text so it never dwarfs the label, and vertically
@@ -2169,19 +2192,20 @@ button.nand-ui-list-item.is-active {
 }
 
 .dashboard-settings-tab-icon svg {
-	width: 1em;
-	height: 1em;
+	width: 15px;
+	height: 15px;
 }
 
 .dashboard-settings-tab:hover {
 	color: var(--text-normal);
+	background: var(--nand-surface-hover);
 }
 
 .dashboard-settings-tab.active {
-	background: var(--background-modifier-hover);
-	color: var(--text-normal);
+	background: var(--nand-accent-soft);
+	border-color: var(--nand-accent-border);
+	color: var(--text-accent);
 	font-weight: 600;
-	box-shadow: inset 0 -2px var(--interactive-accent);
 }
 
 /* ===== About Author page ===== */
@@ -2189,51 +2213,53 @@ button.nand-ui-list-item.is-active {
 	max-width: 520px;
 	margin: 0 auto;
 	text-align: center;
-	padding: 10px 0 24px;
+	padding: var(--size-4-3) 0 var(--size-4-6);
 }
 
 .dashboard-about-intro-line1 {
-	font-size: 0.95em;
+	font-size: var(--nand-text-title);
 	font-weight: 600;
 	color: var(--text-normal);
-	margin-bottom: 4px;
+	margin-bottom: var(--size-4-2);
 }
 
 .dashboard-about-intro-line {
-	font-size: 0.85em;
+	font-size: var(--nand-text-body);
 	color: var(--text-muted);
 	line-height: 1.6;
 }
 
 .dashboard-about-divider {
 	height: 1px;
-	background: var(--background-modifier-border);
-	margin: 20px auto 6px;
+	background: var(--nand-border-color);
+	margin: var(--size-4-5) auto var(--size-4-2);
 	max-width: 320px;
 }
 
 .dashboard-about-section {
-	margin-top: 18px;
+	margin-top: var(--size-4-5);
 }
 
 /* Section headings render as accent-tinted pills — a colored frame that sets
    them apart from the body text below (theme accent, light/dark adaptive). */
 .dashboard-about-section-title {
-	display: inline-block;
-	font-size: 0.75em;
-	font-weight: 700;
-	letter-spacing: 0.08em;
-	padding: 3px 16px;
-	margin-bottom: 12px;
-	border-radius: 999px;
-	color: var(--db-accent, var(--text-accent));
-	background: color-mix(in srgb, var(--db-accent, #8b5cf6) 12%, transparent);
-	border: 1px solid color-mix(in srgb, var(--db-accent, #8b5cf6) 28%, transparent);
+	display: inline-flex;
+	align-items: center;
+	min-height: 22px;
+	font-size: var(--nand-text-caption);
+	font-weight: 600;
+	letter-spacing: 0.06em;
+	padding: 0 var(--size-4-3);
+	margin-bottom: var(--size-4-3);
+	border-radius: var(--nand-radius-pill);
+	color: var(--text-accent);
+	background: var(--nand-accent-soft);
+	border: 1px solid var(--nand-accent-border);
 }
 
 .dashboard-about-project {
 	line-height: 1.9;
-	font-size: 0.85em;
+	font-size: var(--nand-text-body);
 }
 
 .dashboard-about-project-name {
@@ -2251,20 +2277,20 @@ button.nand-ui-list-item.is-active {
 }
 
 .dashboard-about-follow-name {
-	font-size: 0.95em;
+	font-size: var(--nand-text-title);
 	font-weight: 600;
 	color: var(--text-normal);
-	margin-bottom: 4px;
+	margin-bottom: var(--size-4-1);
 }
 
 .dashboard-about-follow-platforms {
-	font-size: 0.8em;
+	font-size: var(--nand-text-caption);
 	color: var(--text-muted);
 }
 
 .dashboard-about-contact-row {
 	line-height: 2;
-	font-size: 0.85em;
+	font-size: var(--nand-text-body);
 }
 
 .dashboard-about-contact-label {
@@ -2273,19 +2299,20 @@ button.nand-ui-list-item.is-active {
 
 .dashboard-about-code {
 	font-family: var(--font-monospace);
-	background: var(--background-modifier-hover);
-	border-radius: 4px;
+	background: var(--nand-surface-hover);
+	border-radius: var(--nand-radius-xs);
 	padding: 1px 6px;
 	cursor: pointer;
 }
 
 .dashboard-about-code:hover {
-	background: var(--background-modifier-active-hover);
+	background: var(--nand-surface-active);
 }
 
 .dashboard-about-link {
-	color: var(--db-accent, var(--text-accent));
+	color: var(--text-accent);
 	text-decoration: none;
+	border-radius: var(--nand-radius-xs);
 }
 
 .dashboard-about-link:hover {
@@ -2293,16 +2320,16 @@ button.nand-ui-list-item.is-active {
 }
 
 .dashboard-about-support-thanks {
-	font-size: 0.85em;
+	font-size: var(--nand-text-body);
 	color: var(--text-muted);
-	margin-bottom: 12px;
+	margin-bottom: var(--size-4-3);
 }
 
 .dashboard-about-support-img {
 	max-width: 100%;
-	border-radius: var(--db-radius-md, 10px);
+	border-radius: var(--nand-radius-md);
 	cursor: zoom-in;
-	border: 1px solid var(--background-modifier-border);
+	border: var(--nand-border);
 }
 
 /* ===== Workspace settings (registry rows) ===== */
@@ -2312,20 +2339,23 @@ button.nand-ui-list-item.is-active {
    spacing under our control. */
 .dashboard-settings-divider {
 	height: 1px;
-	background: var(--background-modifier-border);
-	margin: 18px 0 10px;
+	background: var(--nand-border-color);
+	margin: var(--size-4-5) 0 var(--size-4-3);
 }
 
 .dashboard-workspace-row .dashboard-workspace-drag-handle {
 	align-self: center;
 	display: flex;
 	color: var(--text-faint);
-	opacity: 0.5;
+	opacity: 0.6;
 	cursor: grab;
+	border-radius: var(--nand-radius-xs);
+	transition: opacity var(--nand-duration-fast) var(--nand-ease), color var(--nand-duration-fast) var(--nand-ease);
 }
 
 .dashboard-workspace-row .dashboard-workspace-drag-handle:hover {
 	opacity: 1;
+	color: var(--text-muted);
 }
 
 .dashboard-workspace-row--dragging {
@@ -22078,17 +22108,22 @@ body.is-mobile .dashboard-media-item .dashboard-media-tagbtn { opacity: 1; }
 	outline: 1px dashed var(--text-muted);
 	background: transparent;
 }
+/* Selection popover: a floating card. Collapsed it is a compact pill holding
+   the one primary button; `.is-editing` grows it into the composer card. */
 .nand-editor-comment-popover {
 	position: fixed;
 	z-index: var(--layer-popover, 30);
 	display: flex;
 	flex-direction: column;
-	gap: 6px;
-	padding: 4px;
-	border-radius: 8px;
-	background: var(--background-primary);
-	border: 1px solid var(--background-modifier-border);
-	box-shadow: var(--shadow-s);
+	gap: var(--size-4-2);
+	padding: var(--size-4-1);
+	border-radius: var(--nand-radius-md);
+	background: var(--nand-surface);
+	border: var(--nand-border);
+	box-shadow: var(--nand-shadow-lg);
+}
+.nand-editor-comment-popover.is-editing {
+	padding: var(--size-4-3);
 }
 .nand-editor-comment-popover-btn,
 .nand-editor-tab,
@@ -22096,25 +22131,46 @@ body.is-mobile .dashboard-media-item .dashboard-media-tagbtn { opacity: 1; }
 .nand-editor-comment-prompt-row button {
 	cursor: pointer;
 }
-.nand-editor-comment-popover-btn {
+/* No display here: the [hidden] rule must keep winning while the composer is open. */
+.nand-editor-comment-popover button.nand-editor-comment-popover-btn {
+	min-height: var(--nand-control-height-sm);
 	border: none;
+	box-shadow: none;
 	background: var(--interactive-accent);
 	color: var(--text-on-accent);
-	border-radius: 6px;
-	padding: 4px 10px;
-	font-size: 12px;
+	border-radius: var(--nand-radius-sm);
+	padding: 0 var(--size-4-3);
+	font-size: var(--nand-text-body);
+	font-weight: 500;
+	transition: background-color var(--nand-duration-fast) var(--nand-ease);
 }
+.nand-editor-comment-popover button.nand-editor-comment-popover-btn:hover {
+	background: var(--interactive-accent-hover);
+}
+/* Shared field look for the popover composer and the reply prompt. */
 .nand-editor-comment-popover-input,
 .nand-editor-comment-prompt {
 	width: 220px;
 	min-height: 64px;
 	resize: vertical;
-	border-radius: 6px;
-	border: 1px solid var(--background-modifier-border);
-	background: var(--background-primary);
+	border-radius: var(--nand-radius-sm);
+	border: var(--nand-border);
+	background: var(--nand-surface);
 	color: var(--text-normal);
-	padding: 6px 8px;
+	padding: var(--size-4-2);
 	font: inherit;
+	font-size: var(--nand-text-body);
+	line-height: 1.5;
+	transition: border-color var(--nand-duration-fast) var(--nand-ease), box-shadow var(--nand-duration-fast) var(--nand-ease);
+}
+.nand-editor-comment-popover-input:hover,
+.nand-editor-comment-prompt:hover {
+	border-color: var(--nand-border-color-strong);
+}
+.nand-editor-comment-popover-input:focus,
+.nand-editor-comment-prompt:focus {
+	border-color: var(--nand-accent-border);
+	box-shadow: 0 0 0 2px var(--nand-accent-soft);
 }
 .nand-editor-view {
 	display: flex;
@@ -22124,28 +22180,44 @@ body.is-mobile .dashboard-media-item .dashboard-media-tagbtn { opacity: 1; }
 	gap: var(--size-4-3);
 	color: var(--text-normal);
 }
+/* Domain switcher: the shared segmented control, stretched across the pane. */
 .nand-editor-tabs {
 	display: flex;
-	gap: 4px;
 	flex-wrap: wrap;
+	width: 100%;
+	box-sizing: border-box;
+}
+.nand-editor-tabs.nand-ui-segmented {
+	display: flex;
+	border-radius: var(--nand-radius-pill);
 }
 .nand-editor-tab {
 	display: inline-flex;
 	align-items: center;
-	gap: 4px;
+	justify-content: center;
+	flex: 1 1 0;
+	min-width: 0;
+	gap: 6px;
 	border: none;
 	background: transparent;
 	color: var(--text-muted);
-	border-radius: 6px;
-	padding: 4px 8px;
-	font-size: 12px;
+	border-radius: var(--nand-radius-pill);
+	padding: 0 var(--size-4-2);
+	font-size: var(--nand-text-body);
 }
-.nand-editor-tab.is-active {
-	background: var(--background-modifier-hover);
-	color: var(--text-normal);
+.nand-editor-tab-label {
+	min-width: 0;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
 }
 .nand-editor-tab-icon {
 	display: inline-flex;
+	flex: none;
+	width: 14px;
+	height: 14px;
+}
+.nand-editor-tab-icon svg {
 	width: 14px;
 	height: 14px;
 }
@@ -22153,76 +22225,100 @@ body.is-mobile .dashboard-media-item .dashboard-media-tagbtn { opacity: 1; }
 	min-height: 0;
 	overflow: auto;
 	flex: 1;
+	scrollbar-width: thin;
 }
 .nand-editor-placeholder,
 .nand-editor-comments-empty {
 	color: var(--text-muted);
-	font-size: 13px;
+	font-size: var(--nand-text-body);
 	line-height: 1.5;
-	padding: 8px 2px;
+	padding: var(--size-4-2) 2px;
 }
 .nand-editor-comments-title {
 	font-weight: 600;
-	font-size: 13px;
+	font-size: var(--nand-text-title);
+	line-height: 1.3;
 }
 .nand-editor-comments-path {
 	color: var(--text-muted);
-	font-size: var(--font-ui-smaller);
-	margin-top: var(--size-4-1);
+	font-size: var(--nand-text-caption);
+	margin-top: 2px;
 	overflow: hidden;
 	text-overflow: ellipsis;
 	white-space: nowrap;
 }
-.nand-editor-comment {
-	border: 1px solid var(--background-modifier-border);
-	border-radius: var(--radius-m);
-	padding: var(--size-4-3);
+.nand-editor-comments-list {
+	display: flex;
+	flex-direction: column;
+	gap: var(--size-4-3);
 	margin-top: var(--size-4-3);
-	background: var(--background-primary);
+}
+/* Thread card: a resting card that lifts on hover; focus = accent selection. */
+.nand-editor-comment {
+	border: var(--nand-border);
+	border-radius: var(--nand-radius-md);
+	padding: var(--size-4-3);
+	background: var(--nand-surface);
 	min-width: 0;
 }
-.nand-editor-comment.is-focused {
-	border-color: var(--interactive-accent);
+.nand-editor-comment.nand-ui-card {
+	padding: var(--size-4-3);
+	transition: border-color var(--nand-duration) var(--nand-ease), box-shadow var(--nand-duration) var(--nand-ease), background-color var(--nand-duration) var(--nand-ease);
 }
+.nand-editor-comment.nand-ui-card:hover {
+	border-color: var(--nand-border-color-strong);
+	box-shadow: var(--nand-shadow-sm);
+}
+.nand-editor-comment.is-focused,
+.nand-editor-comment.nand-ui-card.is-focused {
+	border-color: var(--nand-accent-border);
+	background: var(--nand-accent-softer);
+}
+/* Quoted source: an accent-edged quote block; activating it jumps to the note. */
 .nand-editor-comment .nand-editor-comment-quote {
 	display: block;
 	width: 100%;
 	height: auto;
 	text-align: start;
 	font: inherit;
-	font-size: var(--font-ui-small);
+	font-size: var(--nand-text-body);
 	line-height: 1.5;
 	color: var(--text-muted);
-	background: var(--background-secondary);
+	background: var(--nand-surface-muted);
 	border: 0;
-	border-inline-start: 2px solid var(--background-modifier-border);
-	border-radius: var(--radius-s);
+	border-inline-start: 3px solid var(--nand-accent-border);
+	border-radius: var(--nand-radius-xs);
 	box-shadow: none;
-	padding: var(--size-4-2);
+	padding: var(--size-4-2) var(--size-4-3);
 	cursor: pointer;
 	white-space: pre-wrap;
 	overflow-wrap: anywhere;
+	transition: background-color var(--nand-duration-fast) var(--nand-ease), color var(--nand-duration-fast) var(--nand-ease);
 }
+.nand-editor-comment .nand-editor-comment-quote:hover {
+	background: var(--nand-surface-hover);
+	color: var(--text-normal);
+}
+/* Status chip: tone comes from .nand-ui-badge--success / --warning. */
 .nand-editor-comment-status {
 	display: flex;
-	align-items: center;
-	gap: var(--size-4-1);
+	width: fit-content;
+	max-width: 100%;
 	margin-top: var(--size-4-2);
-	font-size: var(--font-ui-smaller);
-	color: var(--text-muted);
 }
 .nand-editor-comment-message {
 	padding-top: var(--size-4-3);
 	line-height: 1.5;
 }
 .nand-editor-comment-text {
-	font-size: var(--font-ui-small);
+	font-size: var(--nand-text-body);
+	color: var(--text-normal);
 	white-space: pre-wrap;
 	overflow-wrap: anywhere;
 }
 .nand-editor-comment-time {
-	font-size: var(--font-ui-smaller);
-	color: var(--text-muted);
+	font-size: var(--nand-text-caption);
+	color: var(--text-faint);
 	margin-top: var(--size-4-1);
 	font-variant-numeric: tabular-nums;
 }
@@ -22230,21 +22326,40 @@ body.is-mobile .dashboard-media-item .dashboard-media-tagbtn { opacity: 1; }
 	display: flex;
 	align-items: center;
 	flex-wrap: wrap;
-	gap: var(--size-4-1);
-	margin-top: var(--size-4-3);
+	gap: 2px;
+	margin-top: var(--size-4-2);
+	margin-inline: calc(-1 * var(--size-4-1));
 }
 .nand-editor-comment-actions button {
 	border: none;
 	box-shadow: none;
 	background: transparent;
 	color: var(--text-muted);
-	border-radius: var(--radius-s);
-	padding: var(--size-4-1) var(--size-4-2);
+	border-radius: var(--nand-radius-sm);
+	padding: 0 var(--size-4-2);
 	min-height: 28px;
-	font-size: var(--font-ui-small);
+	font-size: var(--nand-text-body);
+}
+.nand-editor-comment-actions button.nand-ui-btn {
+	min-height: 28px;
+	padding: 0 var(--size-4-2);
+}
+.nand-editor-comment-actions button.nand-ui-icon-btn {
+	width: 28px;
+	height: 28px;
+	min-width: 28px;
+	padding: 0;
+}
+/* Reply prompt: the native modal, tightened to a small floating card. */
+.nand-editor-comment-prompt-host .modal {
+	width: min(440px, calc(100vw - 32px));
+	border-radius: var(--nand-radius-lg);
+	box-shadow: var(--nand-shadow-lg);
 }
 .nand-editor-comment-prompt-title {
-	margin: 0 0 8px;
+	margin: 0 0 var(--size-4-3);
+	font-size: var(--nand-text-title);
+	font-weight: 600;
 }
 .nand-editor-comment-prompt {
 	width: 100%;
@@ -22253,8 +22368,8 @@ body.is-mobile .dashboard-media-item .dashboard-media-tagbtn { opacity: 1; }
 .nand-editor-comment-prompt-row {
 	display: flex;
 	justify-content: flex-end;
-	gap: 8px;
-	margin-top: 8px;
+	gap: var(--size-4-2);
+	margin-top: var(--size-4-2);
 }
 
 
@@ -22270,16 +22385,16 @@ body.is-mobile .dashboard-media-item .dashboard-media-tagbtn { opacity: 1; }
 .terminal-settings-header {
   display: flex;
   flex-direction: column;
-  margin-bottom: 20px;
-  padding-bottom: 16px;
-  border-bottom: 1px solid var(--background-modifier-border);
+  margin-bottom: var(--size-4-5);
+  padding-bottom: var(--size-4-4);
+  border-bottom: var(--nand-border);
 }
 
 .settings-title-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 16px;
+  gap: var(--size-4-4);
 }
 
 .settings-title-group {
@@ -22313,12 +22428,12 @@ body.is-mobile .dashboard-media-item .dashboard-media-tagbtn { opacity: 1; }
 .settings-actions-group {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: var(--size-4-3);
   flex-shrink: 0;
 }
 
 .settings-feedback {
-  font-size: 13px;
+  font-size: var(--nand-text-body);
   color: var(--text-muted);
   white-space: nowrap;
 }
@@ -22326,7 +22441,7 @@ body.is-mobile .dashboard-media-item .dashboard-media-tagbtn { opacity: 1; }
 .settings-feedback a {
   color: var(--text-accent);
   text-decoration: none;
-  transition: color 0.2s ease;
+  transition: color var(--nand-duration) var(--nand-ease);
 }
 
 .settings-feedback a:hover {
@@ -22337,27 +22452,23 @@ body.is-mobile .dashboard-media-item .dashboard-media-tagbtn { opacity: 1; }
 .settings-header-button {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  height: 32px;
-  padding: 0 12px;
-  border: 1px solid var(--background-modifier-border);
-  border-radius: 999px;
-  background:
-    linear-gradient(
-      180deg,
-      color-mix(in srgb, var(--interactive-accent) 8%, transparent),
-      color-mix(in srgb, var(--background-secondary) 92%, transparent)
-    );
+  gap: var(--size-4-2);
+  height: var(--nand-control-height);
+  padding: 0 var(--size-4-3);
+  border: var(--nand-border);
+  border-radius: var(--nand-radius-pill);
+  background: var(--nand-surface-muted);
+  box-shadow: none;
   color: var(--text-normal);
-  font-size: 12px;
+  font-size: var(--nand-text-caption);
   font-weight: 600;
   cursor: pointer;
-  transition: border-color 0.15s ease, transform 0.1s ease, background-color 0.15s ease;
+  transition: border-color var(--nand-duration) var(--nand-ease), box-shadow var(--nand-duration) var(--nand-ease), background-color var(--nand-duration) var(--nand-ease);
 }
 
 .settings-header-button:hover {
-  border-color: color-mix(in srgb, var(--interactive-accent) 42%, var(--background-modifier-border));
-  transform: translateY(-1px);
+  border-color: var(--nand-border-color-strong);
+  box-shadow: var(--nand-shadow-sm);
 }
 
 .settings-header-button svg {
@@ -22374,7 +22485,7 @@ body.is-mobile .dashboard-media-item .dashboard-media-tagbtn { opacity: 1; }
 }
 
 .terminal-settings-validation {
-  margin-top: 8px;
+  margin-top: var(--size-4-2);
 }
 .terminal-settings-validation.is-valid {
   color: var(--text-success);
@@ -24653,53 +24764,76 @@ body.is-mobile .dashboard-media-item .dashboard-media-tagbtn { opacity: 1; }
 }
 
 /* ===== NAND surface polish: host theme outside the board ===== */
+/* Empty state: a soft circular icon badge, a title, a muted description and
+   an optional primary action. TSX and DOM renderers emit the same tree. */
 .nand-empty-state {
 	display: flex;
 	flex-direction: column;
 	align-items: center;
 	justify-content: center;
-	gap: var(--size-4-3);
+	gap: var(--size-4-2);
 	box-sizing: border-box;
 	width: 100%;
 	min-height: 160px;
 	height: 100%;
-	padding: var(--size-4-6) var(--size-4-4);
+	padding: var(--size-4-8) var(--size-4-4);
 	text-align: center;
 	color: var(--text-muted);
 }
-.nand-empty-state-icon { display: flex; color: var(--text-faint); }
-.nand-empty-state-icon svg { width: 28px; height: 28px; }
-.nand-empty-state-title { color: var(--text-normal); font-size: var(--font-ui-medium); font-weight: 600; }
-.nand-empty-state-description { max-width: 32ch; font-size: var(--font-ui-small); line-height: 1.6; overflow-wrap: anywhere; }
-.nand-empty-state button { flex: none; width: auto; max-width: 100%; margin-top: var(--size-4-1); }
+.nand-empty-state-icon {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	flex: none;
+	width: 48px;
+	height: 48px;
+	margin-bottom: var(--size-4-2);
+	border-radius: 50%;
+	background: var(--nand-accent-softer);
+	color: var(--text-accent);
+}
+.nand-empty-state-icon svg { width: 22px; height: 22px; }
+.nand-empty-state-title { color: var(--text-normal); font-size: var(--nand-text-title); font-weight: 600; line-height: 1.3; }
+.nand-empty-state-description { max-width: 32ch; color: var(--text-muted); font-size: var(--nand-text-body); line-height: 1.6; overflow-wrap: anywhere; }
+.nand-empty-state button { flex: none; width: auto; max-width: 100%; margin-top: var(--size-4-3); }
+.nand-empty-state button.nand-empty-state-action { min-height: var(--nand-control-height); padding: 0 var(--size-4-4); border-radius: var(--nand-radius-sm); }
 .nand-editor-view > .nand-empty-state { flex: 1; min-height: 0; }
-.nand-editor-comments-head { padding: var(--size-4-1) 0 var(--size-4-1); }
-.nand-editor-comment-status svg { display: block; width: 14px; height: 14px; }
-.nand-editor-comment-message + .nand-editor-comment-message { margin-top: var(--size-4-3); border-top: 1px solid var(--background-modifier-border); }
-.nand-editor-comment-actions button:hover { background: var(--background-modifier-hover); color: var(--text-normal); }
+.nand-editor-comments-head { min-width: 0; padding: var(--size-4-1) 2px 0; }
+.nand-editor-comment-status svg { display: block; width: 12px; height: 12px; }
+.nand-editor-comment-message + .nand-editor-comment-message { margin-top: var(--size-4-3); border-top: var(--nand-border); }
+.nand-editor-comment-actions button:hover { background: var(--nand-surface-hover); color: var(--text-normal); }
 .nand-editor-comment-actions .nand-editor-comment-more { margin-inline-start: auto; display: flex; align-items: center; justify-content: center; }
 .nand-editor-comment-more svg { width: 16px; height: 16px; }
-.nand-editor-comment.is-focused .nand-editor-comment-quote { border-inline-start-color: var(--interactive-accent); }
-.nand-editor-comment[data-status="orphaned"] .nand-editor-comment-status { color: var(--text-warning); }
+.nand-editor-comment.is-focused .nand-editor-comment-quote { border-inline-start-color: var(--interactive-accent); background: var(--nand-surface); }
 .nand-editor-tab { box-shadow: none; min-height: 28px; }
-.nand-editor-comment-popover { gap: var(--size-4-2); padding: var(--size-4-2); border-radius: var(--radius-m); }
 .nand-editor-comment-prompt { min-height: 112px; padding: var(--size-4-3); line-height: 1.6; }
 .nand-editor-comment-prompt-row { margin-top: var(--size-4-4); }
 
 :is(.nand-settings, .dashboard-settings-root) { container: nand-settings / inline-size; }
-:is(.nand-settings, .dashboard-settings-root) .dashboard-settings-products { gap: var(--size-4-1); padding-bottom: var(--size-4-3); margin-bottom: var(--size-4-2); border-bottom: 1px solid var(--background-modifier-border); }
+:is(.nand-settings, .dashboard-settings-root) .dashboard-settings-products { gap: var(--size-4-1); padding-bottom: var(--size-4-3); margin-bottom: var(--size-4-3); border-bottom: var(--nand-border); }
 :is(.nand-settings, .dashboard-settings-root) .setting-item:not(.dashboard-settings-section) { gap: var(--size-4-4); flex-wrap: wrap; padding-block: var(--size-4-3); }
 :is(.nand-settings, .dashboard-settings-root) .setting-item-info { min-width: 0; overflow-wrap: anywhere; }
 :is(.nand-settings, .dashboard-settings-root) .setting-item-control { min-width: 0; max-width: 100%; gap: var(--size-4-2); flex-wrap: wrap; }
 :is(.nand-settings, .dashboard-settings-root) .setting-item-description { line-height: 1.5; margin-top: var(--size-4-1); }
 :is(.nand-settings, .dashboard-settings-root) .setting-item-heading { margin-top: var(--size-4-6); border-top: none; }
+:is(.nand-settings, .dashboard-settings-root) .setting-item-heading .setting-item-name { font-size: var(--nand-text-title); font-weight: 600; }
+/* Settings groups share one card shape: 10px radius, hairline, 16px inset. */
+:is(.nand-settings, .dashboard-settings-root) .dashboard-widget-settings-card {
+	box-sizing: border-box;
+	padding: var(--size-4-1) var(--size-4-4);
+	margin-bottom: var(--size-4-3);
+	border: var(--nand-border);
+	border-radius: var(--nand-radius-md);
+	background: var(--nand-surface);
+}
+:is(.nand-settings, .dashboard-settings-root) .dashboard-widget-settings-card > .setting-item { padding-inline: 0; }
 .nand-terminal-settings .settings-card { margin-bottom: var(--size-4-6); }
 .nand-terminal-settings .settings-card:first-child .setting-item-heading { margin-top: 0; }
 .nand-terminal-settings input[type="text"] { width: 16rem; max-width: 100%; min-width: 0; }
-.nand-home-settings .nand-home-module-icon { order: -1; display: flex; align-items: center; color: var(--text-muted); flex: 0 0 20px; }
-.nand-home-module-icon svg { width: 20px; height: 20px; }
+.nand-home-settings .nand-home-module-icon { order: -1; display: flex; align-items: center; justify-content: center; color: var(--text-muted); flex: 0 0 32px; width: 32px; height: 32px; border-radius: var(--nand-radius-sm); background: var(--nand-surface-muted); }
+.nand-home-module-icon svg { width: 18px; height: 18px; }
 .nand-home-settings .setting-item-info { flex: 1; }
-.terminal-agent-settings-group { margin-block: var(--size-4-6); padding: var(--size-4-4); border: 1px solid var(--background-modifier-border); border-radius: var(--radius-m); background: var(--background-primary); }
+.terminal-agent-settings-group { margin-block: var(--size-4-4); padding: var(--size-4-4); border: var(--nand-border); border-radius: var(--nand-radius-md); background: var(--nand-surface); }
 .terminal-agent-settings-group .setting-item-heading { margin-top: 0; padding-top: 0; }
 .terminal-agent-docs { display: inline-block; margin-bottom: var(--size-4-3); font-size: var(--font-ui-smaller); }
 .terminal-agent-command-setting input { font-family: var(--font-monospace); }
@@ -24717,11 +24851,15 @@ body.is-mobile .dashboard-media-item .dashboard-media-tagbtn { opacity: 1; }
 	.nand-terminal-settings .setting-item-control { flex: 1 1 100%; justify-content: flex-start; }
 	.nand-terminal-settings input[type="text"] { width: 100%; flex: 1; }
 	.nand-terminal-settings select { max-width: 100%; }
+	.dashboard-settings-products .dashboard-settings-tab { padding-inline: var(--size-4-2); }
+	.dashboard-widget-settings-card { padding-inline: var(--size-4-3); }
+	.dashboard-layout-picker { gap: var(--size-4-2); }
 }
 
 /* Native button rules are more specific than a single class selector. */
-:is(.nand-settings, .dashboard-settings-root) button.dashboard-settings-tab { border: none; box-shadow: none; background: transparent; }
-:is(.nand-settings, .dashboard-settings-root) button.dashboard-settings-tab.active { background: var(--background-modifier-hover); box-shadow: inset 0 -2px var(--interactive-accent); }
+:is(.nand-settings, .dashboard-settings-root) button.dashboard-settings-tab { border: 1px solid transparent; box-shadow: none; background: transparent; border-radius: var(--nand-radius-pill); }
+:is(.nand-settings, .dashboard-settings-root) button.dashboard-settings-tab:hover:not(.active) { background: var(--nand-surface-hover); color: var(--text-normal); }
+:is(.nand-settings, .dashboard-settings-root) button.dashboard-settings-tab.active { background: var(--nand-accent-soft); border-color: var(--nand-accent-border); color: var(--text-accent); box-shadow: none; }
 :is(.nand-settings, .dashboard-settings-root) .setting-item:not(.dashboard-settings-section) > .setting-item-info { flex: 1; }
 :is(.nand-settings, .dashboard-settings-root) .setting-item:not(.dashboard-settings-section) > .setting-item-control { flex: 0 1 auto; }
 :is(.nand-settings, .dashboard-settings-root) .setting-item.nand-contacts-folder-setting > .setting-item-info {
@@ -24733,14 +24871,16 @@ body.is-mobile .dashboard-media-item .dashboard-media-tagbtn { opacity: 1; }
 	min-width: auto;
 	max-width: 100%;
 }
-.nand-home-settings .setting-item:last-child .setting-item-info { padding-inline-start: 36px; }
+.nand-home-settings .setting-item:last-child .setting-item-info { padding-inline-start: 48px; }
 @container nand-settings (max-width: 520px) {
 	.nand-terminal-settings .setting-item:not(.dashboard-settings-section) > .setting-item-info,
 	.nand-terminal-settings .setting-item:not(.dashboard-settings-section) > .setting-item-control { flex: 1 1 100%; }
 }
 
-.nand-editor-tabs button.nand-editor-tab { border: none; box-shadow: none; background: transparent; }
-.nand-editor-tabs button.nand-editor-tab.is-active { background: var(--background-modifier-hover); }
+.nand-editor-tabs button.nand-editor-tab { border: none; box-shadow: none; background: transparent; min-height: 28px; border-radius: var(--nand-radius-pill); }
+.nand-editor-tabs button.nand-editor-tab:hover:not(.is-active) { background: var(--nand-surface-hover); color: var(--text-normal); }
+.nand-editor-tabs button.nand-editor-tab.is-active { background: var(--nand-surface); color: var(--text-normal); box-shadow: var(--nand-shadow-xs); font-weight: 600; }
+.nand-editor-tabs .nand-editor-tab.is-active .nand-editor-tab-icon { color: var(--text-accent); }
 .nand-terminal-settings .terminal-agent-settings-group .setting-item { padding-inline: 0; }
 .nand-terminal-settings .terminal-agent-settings-group .setting-item-heading { margin: 0; padding-block: 0 var(--size-4-2); }
 
@@ -24763,10 +24903,14 @@ body.is-mobile .dashboard-media-item .dashboard-media-tagbtn { opacity: 1; }
 .nand-dashboard-root .dashboard-section-header-actions { gap: var(--size-4-2); }
 .nand-dashboard-root .dashboard-card-btn:focus-visible { outline: 2px solid var(--db-accent); outline-offset: 2px; }
 :is(.nand-editor-view, .nand-editor-comment-popover, .nand-empty-state, .nand-settings, .dashboard-settings-root) :is(button, a):focus-visible { outline: 2px solid var(--interactive-accent); outline-offset: 2px; }
+.nand-editor-comment .nand-editor-comment-quote:focus-visible { outline: 2px solid var(--interactive-accent); outline-offset: 2px; }
 @media (pointer: coarse) {
 	:is(.nand-editor-view, .nand-editor-comment-popover, .nand-empty-state, .nand-settings, .dashboard-settings-root) button,
 	.nand-dashboard-root .dashboard-card-btn { min-width: 44px; min-height: 44px; }
 	.nand-dashboard-root .dashboard-card-actions { opacity: 1; }
+	.nand-editor-comment-actions :is(button.nand-ui-btn, button.nand-ui-icon-btn),
+	.nand-editor-tabs button.nand-editor-tab,
+	.nand-editor-comment-popover button.nand-editor-comment-popover-btn { min-width: 44px; min-height: 44px; }
 }
 @media (prefers-reduced-motion: reduce) {
 	:is(.nand-editor-view, .nand-settings, .dashboard-settings-root, .nand-dashboard-root) *,
@@ -25070,7 +25214,9 @@ body.is-mobile .dashboard-media-item .dashboard-media-tagbtn { opacity: 1; }
 .nand-empty-state.nand-empty-state--content { height: auto; min-height: 160px; }
 .nand-editor-comment-popover [hidden] { display: none; }
 .nand-editor-comment-composer-actions { display: flex; gap: var(--size-4-2); justify-content: flex-end; }
-.nand-editor-comment-shortcut { color: var(--text-muted); font-size: var(--font-ui-smaller); }
+.nand-editor-comment-composer-actions button.nand-ui-btn { min-height: var(--nand-control-height-sm); padding-inline: var(--size-4-3); font-size: var(--nand-text-body); }
+.nand-editor-comment-shortcut { color: var(--text-faint); font-size: var(--nand-text-caption); }
+.nand-editor-comment-prompt-host .nand-editor-comment-shortcut { margin-top: var(--size-4-2); }
 .nand-editor-comment-popover { max-width: calc(100vw - 16px); }
 .nand-editor-comment-popover textarea { max-width: 100%; }
 
