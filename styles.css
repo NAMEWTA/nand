@@ -4395,11 +4395,6 @@
 	position: relative;
 }
 
-.dashboard-sidebar-pomodoro-top-spacer {
-	width: 20px;
-	flex-shrink: 0;
-}
-
 .dashboard-sidebar-pomodoro-title {
 	font-size: 0.7em;
 	font-weight: 600;
@@ -4431,6 +4426,7 @@
 .dashboard-pomodoro-activity-selector {
 	position: relative;
 	flex: 1;
+	min-width: 0;
 	display: flex;
 	justify-content: center;
 }
@@ -4445,6 +4441,7 @@
 	border-radius: 10px;
 	transition: background 0.15s, opacity 0.15s;
 	max-width: 100%;
+	min-width: 0;
 }
 
 .dashboard-pomodoro-activity-trigger:hover {
@@ -4461,12 +4458,18 @@
 	overflow: hidden;
 	text-overflow: ellipsis;
 	white-space: nowrap;
+	min-width: 0;
 	max-width: 100px;
 }
 
 .dashboard-pomodoro-activity-placeholder {
 	font-size: 0.65em;
 	color: var(--db-accent);
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	min-width: 0;
+	max-width: 100%;
 }
 
 .dashboard-pomodoro-activity-color-dot {
@@ -4541,10 +4544,7 @@
 .dashboard-sidebar-pomodoro-stats-hint {
 	font-size: 0.6em;
 	color: var(--db-text-faint);
-	position: absolute;
-	left: 0;
-	top: 50%;
-	transform: translateY(-50%);
+	flex-shrink: 0;
 	white-space: nowrap;
 	pointer-events: none;
 }
@@ -25602,7 +25602,9 @@ body:where(.nand-iconic-enabled)[data-theme="Ukiyo"] .workspace-leaf > .workspac
 .nand-agent-usage button { max-width: 100%; white-space: normal; height: auto; }
 .nand-agent-workbench button { min-height: 32px; }
 .nand-session-row { display: flex; gap: 4px; }
-.nand-session-row > button:first-child { display: flex; flex-direction: column; align-items: start; gap: 2px; height: auto; padding: 6px 8px; flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+.nand-session-row > button:first-child { display: flex; flex-direction: column; align-items: start; gap: 2px; height: auto; padding: 6px 8px; flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; overflow-wrap: normal; }
+.nand-session-row > button:first-child :is(span, small) { display: block; width: 100%; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; overflow-wrap: normal; }
+.nand-session-row > button:last-child { flex: 0 0 32px; width: 32px; }
 .nand-agent-workbench button.is-active { background: var(--background-modifier-hover); color: var(--text-accent); }
 .nand-history-row > button { display: flex; flex-direction: column; align-items: start; width: 100%; height: auto; padding: 8px; text-align: left; white-space: normal; overflow-wrap: anywhere; }
 .nand-history-row small { color: var(--text-muted); }

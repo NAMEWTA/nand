@@ -1,5 +1,3 @@
-export const CLAUDE_CODE_SSE_PORT_ENV = 'CLAUDE_CODE_SSE_PORT';
-export const OPENCODE_EDITOR_SSE_PORT_ENV = 'OPENCODE_EDITOR_SSE_PORT';
 export const NAND_CONTEXT_PATH_ENV = 'NAND_CONTEXT_PATH';
 export const NAND_CODEX_SKILL_NAME = 'nand-obsidian-context';
 export const NAND_CODEX_SKILL_RELATIVE_PATH = `.agents/skills/${NAND_CODEX_SKILL_NAME}/SKILL.md`;
@@ -9,17 +7,6 @@ export function serializeAgentContextSnapshotState(snapshot: Record<string, unkn
 	const state = { ...snapshot };
 	delete state.updatedAt;
 	return JSON.stringify(state, null, 2);
-}
-
-export function buildIdeBridgeTerminalEnv(port: number | null): Record<string, string> {
-	if (!port) {
-		return {};
-	}
-
-	return {
-		[CLAUDE_CODE_SSE_PORT_ENV]: String(port),
-		[OPENCODE_EDITOR_SSE_PORT_ENV]: String(port),
-	};
 }
 
 export function buildAgentContextTerminalEnv(contextFilePath: string): Record<string, string> {

@@ -32,6 +32,7 @@ export const messages = {
 		'anniversary.monthsPart': '{months} 个月',
 		'anniversary.daysPart': '{days} 天',
 		'anniversary.reminderNotice': '{label}：已经 {years} 年了',
+		'anniversary.reminderNoticeOne': '{label}：已经 {years} 年了',
 		'habit.statsEmpty': '还没有习惯，先在侧栏小组件里添加。',
 		'habit.streakLabel': '连续',
 		'habit.rate30': '近30天',

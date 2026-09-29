@@ -178,7 +178,6 @@ export function renderSidebarPomodoro(
 	onBgChange?: (bg: import('../../../core/dashboard/types/index').WidgetBackground | undefined) => void,
 ): void {
 	const widget = container.createDiv({ cls: 'dashboard-sidebar-widget dashboard-sidebar-pomodoro' });
-	if (app) applyWidgetBackground(widget, settings.pomodoroBackground, app);
 	mountDashboardPanel(
 		widget,
 		h(PomodoroPanel, {
@@ -191,4 +190,5 @@ export function renderSidebarPomodoro(
 					: undefined,
 		}),
 	);
+	if (app) applyWidgetBackground(widget, settings.pomodoroBackground, app);
 }

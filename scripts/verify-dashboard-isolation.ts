@@ -3,6 +3,8 @@ import { collectVaultTasks } from '../src/platform/obsidian/calendar/alltasks-sc
 import { CountdownPanel } from '../src/view/dashboard/widgets/CountdownPanel';
 import { AnniversaryPanel } from '../src/view/dashboard/widgets/AnniversaryPanel';
 import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
 import { parseHTML } from 'linkedom';
 import { h } from 'preact';
 import type { Chart } from 'chart.js';
@@ -18,6 +20,13 @@ import {
 import { bindDataviewContext, getDataviewContext } from '../src/view/dashboard/dataview/context';
 import { InlineValue } from '../src/view/dashboard/dataview/Values';
 import { getHabitService, registerHabitService, type HabitService } from '../src/platform/obsidian/habit/habit-service';
+import { registerMusicService, type MusicService } from '../src/platform/obsidian/music/music-service';
+import { renderSidebarHabitWidget, refreshHabitWidget } from '../src/view/dashboard/habit/habit-widget';
+import { renderSidebarAnniversaryWidget } from '../src/view/dashboard/widgets/anniversary-widget';
+import { renderSidebarCountdown } from '../src/view/dashboard/renderer/render-sidebar-countdown';
+import { renderSidebarPomodoro } from '../src/view/dashboard/renderer/refresh-sidebar-weather-widget';
+import { renderSidebarMusicWidget } from '../src/view/dashboard/music/music-widget';
+import type { WidgetBackground } from '../src/core/dashboard/types';
 
 const { document } = parseHTML('<html><body></body></html>');
 Object.assign(globalThis, { document });
@@ -144,6 +153,139 @@ for (const [i, host] of hosts.entries()) {
 for (const host of hosts) host.querySelector<HTMLElement>('.dashboard-wikilink')!.click();
 assert.deepEqual(opened, [0, 1]);
 
+// Widget photo layers are siblings of the Preact tree. The first render used
+// to delete them; a second habit refresh must leave them in place.
+const widgetWindow = clockWindow().win;
+Object.defineProperty(document, 'defaultView', { configurable: true, get: () => widgetWindow });
+const elementProto = document.createElement('div').constructor.prototype as HTMLElement & {
+	createDiv(this: HTMLElement, o?: { cls?: string }): HTMLElement;
+	addClass(this: HTMLElement, ...names: string[]): void;
+	setCssProps(this: HTMLElement, props: Record<string, string>): void;
+};
+elementProto.createDiv = function (o) {
+	const el = this.ownerDocument.createElement('div');
+	const cls = typeof o === 'string' ? o : o?.cls;
+	if (typeof cls === 'string') el.className = cls;
+	else if (Array.isArray(cls)) el.className = cls.join(' ');
+	this.appendChild(el);
+	return el;
+};
+elementProto.addClass = function (...names) {
+	for (const name of names) this.classList.add(name);
+};
+elementProto.setCssProps = function (props) {
+	for (const [key, value] of Object.entries(props)) this.style.setProperty(key, value);
+};
+const photo: WidgetBackground = {
+	image: 'https://example.test/card.jpg',
+	opacity: 100,
+	dim: 20,
+	blur: 0,
+	foreground: 'light',
+};
+const habitApp = new App();
+registerHabitService(
+	habitApp,
+	{
+		getHabits: () => [],
+		isDone: () => false,
+		getStreak: () => 0,
+		addHabit: () => true,
+		toggle: () => {},
+	} as unknown as HabitService,
+);
+const musicApp = new App();
+registerMusicService(
+	musicApp,
+	{
+		subscribe: () => () => {},
+		getState: () => ({
+			status: 'idle',
+			current: null,
+			currentIndex: -1,
+			playlist: [],
+			volume: 1,
+			mode: 'list',
+			positionSec: 0,
+			durationSec: 0,
+		}),
+	} as unknown as MusicService,
+);
+function hosted(render: (host: HTMLElement) => void): HTMLElement {
+	const host = document.createElement('div');
+	document.body.append(host);
+	render(host);
+	return host;
+}
+function assertPhoto(host: HTMLElement, frame: boolean): void {
+	const card = host.firstElementChild as HTMLElement;
+	assert.ok(card.classList.contains('dashboard-sidebar-widget--has-bg'), card.className);
+	assert.ok(card.classList.contains('dashboard-sidebar-widget--fg-set'));
+	assert.ok(card.querySelector('.dashboard-widget-bg'));
+	assert.equal(card.querySelector('.dashboard-widget-frame') != null, frame);
+}
+const habitHost = hosted((host) => renderSidebarHabitWidget(host, habitApp, photo));
+assertPhoto(habitHost, true);
+refreshHabitWidget(habitHost);
+assertPhoto(habitHost, true);
+const bareHabit = hosted((host) => renderSidebarHabitWidget(host, habitApp));
+assert.equal(bareHabit.firstElementChild?.classList.contains('dashboard-sidebar-widget--has-bg'), false);
+assert.equal(bareHabit.querySelector('.dashboard-widget-bg'), null);
+assertPhoto(
+	hosted((host) =>
+		renderSidebarAnniversaryWidget(host, {
+			id: 'av',
+			label: 'Start',
+			startDate: '2020-01-01',
+			precision: 'ymd',
+			annualReminder: false,
+			background: photo,
+		}, new App()),
+	),
+	true,
+);
+assertPhoto(
+	hosted((host) =>
+		renderSidebarCountdown(
+			host,
+			{
+				id: 'cd',
+				label: 'Deadline',
+				targetDate: '2099-01-01',
+				displayMode: 'days',
+				reminderDays: 0,
+				background: photo,
+			},
+			new App(),
+		),
+	),
+	true,
+);
+assertPhoto(
+	hosted((host) =>
+		renderSidebarPomodoro(
+			host,
+			{
+				subscribe: () => () => {},
+				subscribeTick: () => () => {},
+				getState: () => ({
+					phase: 'work',
+					status: 'paused',
+					remainingSeconds: 1500,
+					totalSeconds: 1500,
+					completedWorkSessions: 0,
+				}),
+				getTodayCount: () => 0,
+				getActivity: () => '',
+			} as never,
+			{ pomodoroLongBreakInterval: 4, pomodoroBackground: photo } as never,
+			new App(),
+		),
+	),
+	true,
+);
+assertPhoto(hosted((host) => renderSidebarMusicWidget(host, photo, musicApp)), true);
+
 async function verifyVaultCaches(): Promise<void> {
 	const makeVault = (title: string) => {
 		const file = Object.assign(new TFile(), {
@@ -173,6 +315,15 @@ async function verifyVaultCaches(): Promise<void> {
 		[],
 		'link changes update cached pages without touching note mtimes',
 	);
+	const css = readFileSync(join(process.cwd(), 'styles.css'), 'utf8');
+	const hint = css.match(/\.dashboard-sidebar-pomodoro-stats-hint\s*\{[^}]*\}/)?.[0] ?? '';
+	assert.match(hint, /flex-shrink:\s*0/);
+	assert.equal(hint.includes('position: absolute'), false, hint);
+	assert.equal(css.includes('.dashboard-sidebar-pomodoro-top-spacer'), false);
+	const selector = css.match(/\.dashboard-pomodoro-activity-selector\s*\{[^}]*\}/)?.[0] ?? '';
+	assert.match(selector, /min-width:\s*0/);
+	const placeholder = css.match(/\.dashboard-pomodoro-activity-placeholder\s*\{[^}]*\}/)?.[0] ?? '';
+	assert.match(placeholder, /text-overflow:\s*ellipsis/);
 	console.log('dashboard isolation: resources, panels, clocks, services, Dataview actions and vault caches passed');
 }
 void verifyVaultCaches().catch((error) => {

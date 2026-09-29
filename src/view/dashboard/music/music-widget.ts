@@ -14,7 +14,6 @@ export function renderSidebarMusicWidget(
 	const service = app ? getMusicService(app) : null;
 	if (!service) return;
 	const root = container.createDiv({ cls: 'dashboard-sidebar-widget dashboard-sidebar-music' });
-	if (app) applyWidgetBackground(root, bg, app);
 	root.addEventListener('dragstart', (e) => {
 		if ((e.target as HTMLElement).closest('input')) e.preventDefault();
 	});
@@ -26,4 +25,5 @@ export function renderSidebarMusicWidget(
 			background: app && onBgChange ? () => new WidgetBackgroundModal(app, bg, onBgChange).open() : undefined,
 		}),
 	);
+	if (app) applyWidgetBackground(root, bg, app);
 }

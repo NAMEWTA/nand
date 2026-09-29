@@ -1,12 +1,19 @@
 import { Notice, Platform, Plugin, TAbstractFile, TFile, type Command } from 'obsidian';
 import { type AlbumConfig, type AnniversaryConfig, type CountdownConfig } from '../core/dashboard/types/index';
-import { refreshLeafTitle } from '../platform/obsidian/workspace-title';
+import {
+	refreshLeafTitle,
+	setDeferredLeafTitle,
+	storedLeafTitle,
+	translatedLeafTitle,
+	type LeafTitlePair,
+} from '../platform/obsidian/workspace-title';
 import { registerLocalizedCommand, type LocalizedCommand } from '../platform/obsidian/localized-command';
 import type { AutomationUiPort } from '../shared/automation/types';
 import { normalizeContactsSettings } from '../shared/contacts-settings';
 import { normalizeEditorWorkbench } from '../shared/editor-workbench';
-import { setLanguage, t } from '../shared/i18n/index';
+import { getLanguage, setLanguage, t, tFor } from '../shared/i18n/index';
 import { closeDashboardPanelModals } from '../view/dashboard/ui/panel-modal';
+import { AUTOMATION_VIEW_TYPE } from '../view/automations/view';
 import { DASHBOARD_VIEW_TYPE } from '../view/dashboard/view/view-type';
 import { normalizeTransition } from '../view/dashboard/widgets/album-model';
 import { type EditorHost } from '../view/editor/host';
@@ -298,6 +305,9 @@ export default class DashboardPlugin extends Plugin {
 			if (!this.settings.modules.dashboard) return;
 			void this.pruneWorkspaceRegistry();
 		});
+		this.app.workspace.onLayoutReady(() => {
+			this.rewriteDeferredLeafTitles();
+		});
 		// Keep the registry following the file explorer: renames/deletes of a
 		// workspace file update the list (and the active entry) so the engine
 		// watchers never point at a path that no longer exists.
@@ -313,6 +323,26 @@ export default class DashboardPlugin extends Plugin {
 				if (file instanceof TFile) void this.handleWorkspaceFileDeleted(file);
 			}),
 		);
+	}
+
+	private rewriteDeferredLeafTitles(): void {
+		const language = getLanguage();
+		const pair = (key: string): LeafTitlePair => ({ en: tFor('en', key), zh: tFor('zh', key) });
+		const byType: Record<string, readonly LeafTitlePair[]> = {
+			[DASHBOARD_VIEW_TYPE]: [pair('main.dashboard')],
+			[AUTOMATION_VIEW_TYPE]: [pair('automation.title')],
+			[EDITOR_VIEW_TYPE]: [pair('editor.viewTitle')],
+			[CONTACTS_VIEW_TYPE]: [pair('contacts.title')],
+			[TERMINAL_VIEW_TYPE]: [pair('terminalAgent.terminal.defaultTitle'), pair('modules.terminalOffTitle')],
+		};
+		for (const [type, pairs] of Object.entries(byType)) {
+			for (const leaf of this.app.workspace.getLeavesOfType(type)) {
+				if (!leaf.isDeferred) continue;
+				const next = translatedLeafTitle(storedLeafTitle(leaf), pairs, language);
+				if (!next || !setDeferredLeafTitle(leaf, next)) continue;
+				refreshLeafTitle(this.app, leaf);
+			}
+		}
 	}
 
 	private maybeShowIntro(): void {

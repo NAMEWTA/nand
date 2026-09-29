@@ -31,6 +31,7 @@ export const messages = {
 		'anniversary.monthsPart': '{months} mo',
 		'anniversary.daysPart': '{days} d',
 		'anniversary.reminderNotice': '{label}: {years} years since that day',
+		'anniversary.reminderNoticeOne': '{label}: {years} year since that day',
 		'habit.statsEmpty': 'No habits yet — add one from the sidebar widget.',
 		'habit.streakLabel': 'Streak',
 		'habit.rate30': 'Last 30d',

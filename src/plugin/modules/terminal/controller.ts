@@ -26,9 +26,10 @@ import {
 	type TerminalSettings,
 } from '../../../core/pty/settings';
 import type { AgentContextBridge } from '../../../platform/desktop/agent-context/agent-context-bridge';
-import type { ClaudeCodeIdeBridge } from '../../../platform/desktop/agent-context/claude-ide-bridge';
+import { isProcessAlive, removeStaleNandIdeLockfiles } from '../../../platform/desktop/agent-context/claude-ide-locks';
 import { sessionAge } from '../../../platform/desktop/ai-vault/scope';
 import { resolvePluginDirectory } from '../../../platform/desktop/filesystem-paths';
+import { getHomeDir } from '../../../platform/desktop/platform';
 import { debugLog, errorLog } from '../../../platform/desktop/logger';
 import {
 	detectCommandAvailability,
@@ -186,7 +187,6 @@ export class TerminalAgentController {
 	// Lazily initialized services
 	private _serverManager: ServerManager | null = null;
 	private _terminalService: TerminalService | null = null;
-	private _claudeCodeIdeBridge: ClaudeCodeIdeBridge | null = null;
 	private _agentContextBridge: AgentContextBridge | null = null;
 	private _active = true;
 
@@ -261,7 +261,6 @@ export class TerminalAgentController {
 	 * Get the terminal service (lazy initialization)
 	 */
 	async getTerminalService(): Promise<TerminalService> {
-		await this.initializeClaudeCodeIdeBridge();
 		await this.initializeAgentContextBridge();
 
 		if (!this._terminalService) {
@@ -274,10 +273,7 @@ export class TerminalAgentController {
 				this.app,
 				this.settings,
 				serverManager,
-				() => ({
-					...(this._claudeCodeIdeBridge?.getTerminalEnv() ?? {}),
-					...(this._agentContextBridge?.getTerminalEnv() ?? {}),
-				}),
+				() => this._agentContextBridge?.getTerminalEnv() ?? {},
 				() => this.saveSettings(),
 			);
 
@@ -314,9 +310,11 @@ export class TerminalAgentController {
 		this.registerCommands();
 		registerOrca(this);
 
-		void this.initializeClaudeCodeIdeBridge().catch((error) => {
-			errorLog('[TerminalAgentController] Failed to initialize Claude Code IDE bridge:', error);
-		});
+		try {
+			this.sweepStaleClaudeIdeLocks();
+		} catch (error) {
+			errorLog('[TerminalAgentController] Failed to remove stale Claude IDE lockfiles:', error);
+		}
 		void this.initializeAgentContextBridge().catch((error) => {
 			errorLog('[TerminalAgentController] Failed to initialize agent context bridge:', error);
 		});
@@ -386,16 +384,6 @@ export class TerminalAgentController {
 			}
 		}
 
-		if (this._claudeCodeIdeBridge) {
-			try {
-				debugLog('[TerminalAgentController] Shutting down Claude Code IDE bridge...');
-				await this._claudeCodeIdeBridge.stop();
-				debugLog('[TerminalAgentController] Claude Code IDE bridge stopped');
-			} catch (error) {
-				errorLog('[TerminalAgentController] Failed to stop Claude Code IDE bridge:', error);
-			}
-		}
-
 		if (this._agentContextBridge) {
 			try {
 				debugLog('[TerminalAgentController] Shutting down agent context bridge...');
@@ -409,13 +397,17 @@ export class TerminalAgentController {
 		debugLog(t('plugin.unloadedMessage'));
 	}
 
-	private async initializeClaudeCodeIdeBridge(): Promise<void> {
-		if (!this._claudeCodeIdeBridge) {
-			const { ClaudeCodeIdeBridge } = await import('../../../platform/desktop/agent-context/claude-ide-bridge');
-			this._claudeCodeIdeBridge = new ClaudeCodeIdeBridge(this.app, this.manifest.version);
-		}
-
-		await this._claudeCodeIdeBridge.start();
+	/** Drop lock files left by the removed Claude Code IDE bridge. Never creates the directory. */
+	private sweepStaleClaudeIdeLocks(): void {
+		if (!Platform.isDesktopApp) return;
+		const fs = window.require('fs') as typeof import('fs');
+		const path = window.require('path') as typeof import('path');
+		removeStaleNandIdeLockfiles(path.join(getHomeDir(), '.claude', 'ide'), {
+			readdirSync: (dir) => fs.readdirSync(dir, 'utf8'),
+			readFileSync: (file, encoding) => fs.readFileSync(file, encoding),
+			unlinkSync: (file) => fs.unlinkSync(file),
+			join: (dir, name) => path.join(dir, name),
+		}, isProcessAlive);
 	}
 
 	private async initializeAgentContextBridge(): Promise<void> {

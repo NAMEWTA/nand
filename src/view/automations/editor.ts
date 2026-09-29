@@ -1,6 +1,7 @@
 import { Modal, Notice, Platform, Setting, type App } from 'obsidian';
 import type { AutomationsApi } from '../../core/automations/api';
 import { validateSchedule } from '../../core/automations/schedule';
+import { switchAutomationAction } from '../../core/automations/switch-action';
 import type { AutomationAction, AutomationDefinition, SourceRef } from '../../shared/automation/types';
 import { t } from '../../shared/i18n/index';
 import { AutomationSessionPicker } from './session-picker';
@@ -76,18 +77,11 @@ export class AutomationEditor extends Modal {
 			new Setting(el).setName(t('automation.action')).addDropdown((input) => {
 				for (const kind of ['agent', 'notify', 'create-task']) input.addOption(kind, t(`automation.${kind}`));
 				input.setValue(this.draft.action.kind).onChange((v) => {
-					this.draft.action =
-						v === 'notify'
-							? { kind: 'notify', body: '' }
-							: v === 'create-task'
-								? { kind: 'create-task', path: '', cardId: '', text: '' }
-								: {
-										kind: 'agent',
-										agentId: this.availableAgents()[0]?.id ?? '',
-										cwd: this.cwd,
-										prompt: '',
-										sessionMode: 'fresh',
-									};
+					this.draft.action = switchAutomationAction(
+						this.draft.action,
+						v as AutomationAction['kind'],
+						{ agentId: this.availableAgents()[0]?.id ?? '', cwd: this.cwd },
+					);
 					this.draw();
 				});
 			});

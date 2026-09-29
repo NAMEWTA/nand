@@ -180,8 +180,12 @@ const translations: Record<Language, Record<string, string>> = {
 	),
 };
 
+export function tFor(language: Language, key: string): string {
+	return translations[language][key] ?? translations.en[key] ?? key;
+}
+
 export function t(key: string, params?: Record<string, string | number>): string {
-	let str = translations[currentLang][key] ?? translations.en[key] ?? key;
+	let str = tFor(currentLang, key);
 	if (params) {
 		for (const [k, v] of Object.entries(params)) {
 			str = str.replaceAll(`{${k}}`, String(v));

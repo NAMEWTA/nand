@@ -3,24 +3,13 @@ import test from 'node:test';
 
 import {
 	buildAgentContextTerminalEnv,
-	buildIdeBridgeTerminalEnv,
 	renderNANDCodexSkill,
 	serializeAgentContextSnapshotState,
-	CLAUDE_CODE_SSE_PORT_ENV,
-	OPENCODE_EDITOR_SSE_PORT_ENV,
 	NAND_CODEX_SKILL_MANAGED_MARKER,
 	NAND_CODEX_SKILL_NAME,
 	NAND_CODEX_SKILL_RELATIVE_PATH,
 	NAND_CONTEXT_PATH_ENV,
 } from './agent-context.ts';
-
-test('buildIdeBridgeTerminalEnv exposes compatible IDE bridge ports when available', () => {
-	assert.deepEqual(buildIdeBridgeTerminalEnv(null), {});
-	assert.deepEqual(buildIdeBridgeTerminalEnv(4312), {
-		[CLAUDE_CODE_SSE_PORT_ENV]: '4312',
-		[OPENCODE_EDITOR_SSE_PORT_ENV]: '4312',
-	});
-});
 
 test('buildAgentContextTerminalEnv exposes the context snapshot path', () => {
 	assert.deepEqual(buildAgentContextTerminalEnv('/tmp/ide-context.json'), {

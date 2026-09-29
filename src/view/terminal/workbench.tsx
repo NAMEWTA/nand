@@ -76,21 +76,31 @@ export function SessionSidebar({
 			<button onClick={() => report(host.openAutomationCenter())}>{sharedT('automation.title')}</button>
 			<button onClick={() => host.openNotificationCenter()}>{sharedT('automation.inbox')}</button>
 			<h4>{t('workbench.openSessions')}</h4>
-			{service.getAllTerminals().map((terminal) => (
-				<div className="nand-session-row" key={terminal.id}>
-					<button className={terminal.id === active ? 'is-active' : ''} title={terminal.id} onClick={() => select(terminal)}>
-						<span>{terminal.getTitle()}</span>
-						<small>#{terminal.id.replace(/^terminal-/, '').slice(0, 8)}</small>
-						<small>{t(`workbench.status.${terminal.nativeStatus}`)}</small>
-					</button>
-					<button
-						aria-label={t('workbench.close')}
-						onClick={() => confirmSessionClose(host.app, () => close(terminal))}
-					>
-						×
-					</button>
-				</div>
-			))}
+			{service.getAllTerminals().map((terminal) => {
+				const name = terminal.getTitle();
+				const shortId = `#${terminal.id.replace(/^terminal-/, '').slice(0, 8)}`;
+				const status = t(`workbench.status.${terminal.nativeStatus}`);
+				return (
+					<div className="nand-session-row" key={terminal.id}>
+						<button
+							className={terminal.id === active ? 'is-active' : ''}
+							data-terminal-id={terminal.id}
+							title={`${name}\n${shortId}\n${status}`}
+							onClick={() => select(terminal)}
+						>
+							<span>{name}</span>
+							<small>{shortId}</small>
+							<small>{status}</small>
+						</button>
+						<button
+							aria-label={t('workbench.close')}
+							onClick={() => confirmSessionClose(host.app, () => close(terminal))}
+						>
+							×
+						</button>
+					</div>
+				);
+			})}
 		</>
 	);
 }

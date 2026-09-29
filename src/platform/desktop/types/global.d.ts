@@ -10,7 +10,6 @@
  * identity surfaces, and our usage is intentionally narrow:
  *
  *   - native PTY backend lifecycle (`<plugin>/binaries/terminal-server-*`),
- *   - Claude Code IDE protocol's required `~/.claude/ide/<port>.lock` path,
  *   - shell-existence probes for the shell selector,
  *   - validating user-supplied filesystem paths in settings and drag/drop.
  *

@@ -13,7 +13,6 @@ export function renderSidebarAnniversaryWidget(
 ): void {
 	const widget = container.createDiv({ cls: 'dashboard-sidebar-widget dashboard-sidebar-anniversary' });
 	if (app && onEdit) widget.addClass('dashboard-sidebar-widget--cfg');
-	if (app) applyWidgetBackground(widget, config.background, app);
 	mountDashboardPanel(
 		widget,
 		h(AnniversaryPanel, {
@@ -27,4 +26,5 @@ export function renderSidebarAnniversaryWidget(
 					: undefined,
 		}),
 	);
+	if (app) applyWidgetBackground(widget, config.background, app);
 }

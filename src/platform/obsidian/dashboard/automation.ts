@@ -182,11 +182,15 @@ export class DashboardAutomationSource {
 				if (!start) continue;
 				const at = anniversaryDateThisYear(start, now).getTime();
 				const label = entry.label || entry.startDate;
+				const years = now.getFullYear() - start.getFullYear();
 				add(
 					entry,
 					label,
 					at,
-					t('anniversary.reminderNotice', { label, years: String(now.getFullYear() - start.getFullYear()) }),
+					t(years === 1 ? 'anniversary.reminderNoticeOne' : 'anniversary.reminderNotice', {
+						label,
+						years: String(years),
+					}),
 				);
 			}
 		if (changed) await this.saveSettings();

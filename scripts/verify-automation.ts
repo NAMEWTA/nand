@@ -32,6 +32,7 @@ import { AutomationService } from '../src/core/automations/service';
 import { JsonStore } from '../src/shared/json-store';
 import { NotificationService, notificationBody } from '../src/core/notifications/service';
 import { latestOccurrence, nextOccurrence, validateSchedule } from '../src/core/automations/schedule';
+import { switchAutomationAction } from '../src/core/automations/switch-action';
 import { readTaskMeta, taskMetaSuffix } from '../src/shared/automation/metadata';
 import { patchReminders, readReminders } from '../src/core/contacts/reminders';
 import { parse, serialize } from '../src/core/dashboard/parser/index';
@@ -1100,4 +1101,88 @@ test('an agent handle arriving during failed cancellation persistence remains ow
  f.fail(false); await service.setExecutionEnabled(true);
  assert.deepEqual(stopped, ['late-owned']); assert.equal(service.state.runs[0]?.terminalId, 'late-owned');
  assert.equal(service.state.runs[0]?.status, 'cancelled'); assert.equal(service.executionEnabled, true);
+});
+
+test('switching an automation action keeps the shared text and drops kind-specific fields', () => {
+	const defaults = { agentId: 'codex', cwd: '/vault' };
+	const agent = switchAutomationAction(
+		{
+			kind: 'agent',
+			agentId: 'claude-code',
+			cwd: '/old',
+			prompt: 'Keep this text',
+			sessionMode: 'specific',
+			session: {
+				agentId: 'claude-code',
+				sessionId: 's1',
+				cwd: '/old',
+				title: 'Old',
+				modifiedAtMs: 1,
+				accountKey: 'a',
+			},
+		},
+		'notify',
+		defaults,
+	);
+	assert.deepEqual(agent, { kind: 'notify', body: 'Keep this text' });
+	const task = switchAutomationAction(agent, 'create-task', defaults);
+	assert.deepEqual(task, { kind: 'create-task', path: '', cardId: '', text: 'Keep this text' });
+	const withTarget = { ...task, path: 'Board.md', cardId: 'card' };
+	const again = switchAutomationAction(withTarget, 'agent', { agentId: 'grok', cwd: '/now' });
+	assert.deepEqual(again, {
+		kind: 'agent',
+		agentId: 'grok',
+		cwd: '/now',
+		prompt: 'Keep this text',
+		sessionMode: 'fresh',
+	});
+	assert.equal('path' in again, false);
+	assert.equal('session' in again, false);
+	assert.deepEqual(switchAutomationAction(withTarget, 'create-task', defaults), withTarget);
+});
+
+test('anniversary reminders use the singular English year only for a difference of one', async () => {
+	const year = new Date().getFullYear();
+	const cases = [
+		{ startDate: `${year - 1}-06-15`, years: 1 },
+		{ startDate: `${year - 2}-06-15`, years: 2 },
+		{ startDate: `${year}-01-01`, years: 0 },
+	];
+	try {
+		for (const language of ['en', 'zh'] as const) {
+			setLanguage(language);
+			for (const item of cases) {
+				const settings = structuredClone(DEFAULT_SETTINGS);
+				settings.dashboardFile = 'dashboard.md';
+				settings.anniversaryEnabled = true;
+				settings.countdownEnabled = false;
+				settings.anniversaries = [
+					{
+						...settings.anniversaries[0]!,
+						id: 'ann',
+						label: 'Day',
+						startDate: item.startDate,
+						annualReminder: true,
+					},
+				];
+				const app = {
+					vault: { getFileByPath: () => null, read: async () => '' },
+					workspace: { getLeavesOfType: () => [] },
+				} as unknown as App;
+				const source = new DashboardAutomationSource(app, () => settings, 'device', async () => {}, () => true);
+				const [row] = await source.list();
+				const body = row?.action.kind === 'notify' ? row.action.body : '';
+				if (language === 'en') {
+					assert.equal(
+						body,
+						item.years === 1 ? 'Day: 1 year since that day' : `Day: ${item.years} years since that day`,
+					);
+				} else {
+					assert.equal(body, `Day：已经 ${item.years} 年了`);
+				}
+			}
+		}
+	} finally {
+		setLanguage('zh');
+	}
 });

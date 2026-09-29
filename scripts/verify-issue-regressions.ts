@@ -13,7 +13,11 @@ import { registerCopyCommands } from '../src/view/editor/copy/commands';
 import type { EditorPluginHost } from '../src/view/editor/host';
 import type { Command, Plugin } from 'obsidian';
 import { intersectRects, placePopover } from '../src/view/editor/comments/popover-position';
-import { refreshLeafTitle } from '../src/platform/obsidian/workspace-title';
+import {
+	refreshLeafTitle,
+	setDeferredLeafTitle,
+	translatedLeafTitle,
+} from '../src/platform/obsidian/workspace-title';
 import type { DashboardSettings } from '../src/core/dashboard/types/index';
 
 async function main() {
@@ -195,11 +199,17 @@ async function main() {
 	assert.deepEqual(placePopover({ left: 110, right: 120, top: 390, bottom: 400 }, bounds, 260, 160), { left: 110, top: 222 });
 	assert.equal(placePopover(bounds, bounds, 390, 290), null, 'too small panes hide the popup');
 	assert.equal(intersectRects(bounds, { left: 510, right: 600, top: 100, bottom: 200 }), null);
-	let mainTitle = '', popoutTitle = '', headerCalls = 0;
+	let mainTitle = '', popoutTitle = '', headerCalls = 0, layoutSaves = 0;
 	let mainActive = 'Note', popupActive = 'Terminal';
 	const root = {};
 	const popupWindow = { updateTitle() { popoutTitle = popupActive; } };
-	const titleApp = { workspace: { rootSplit: root, updateTitle() { mainTitle = mainActive; } } };
+	const titleApp = {
+		workspace: {
+			rootSplit: root,
+			updateTitle() { mainTitle = mainActive; },
+			requestSaveLayout() { layoutSaves++; },
+		},
+	};
 	const mainLeaf = { getContainer: () => root, updateHeader() { headerCalls++; } };
 	const popupLeaf = { getContainer: () => popupWindow, updateHeader() { headerCalls++; } };
 	refreshLeafTitle(titleApp as never, mainLeaf as never);
@@ -217,7 +227,27 @@ async function main() {
 	assert.equal(popoutTitle, 'Renamed');
 	assert.equal(mainTitle, 'Terminal');
 	assert.equal(headerCalls, 5);
+	assert.equal(layoutSaves, 5, 'Each title refresh asks Obsidian to persist the layout');
 	assert.doesNotThrow(() => refreshLeafTitle({ workspace: { rootSplit: root } } as never, mainLeaf as never));
+	assert.equal(layoutSaves, 5, 'A host without requestSaveLayout is left alone');
+	const terminalPairs = [
+		{ en: 'Terminal', zh: '终端' },
+		{ en: 'Agents', zh: '智能体' },
+	];
+	assert.equal(translatedLeafTitle('Terminal', terminalPairs, 'zh'), '终端');
+	assert.equal(translatedLeafTitle('终端', terminalPairs, 'en'), 'Terminal');
+	assert.equal(translatedLeafTitle('Agents', terminalPairs, 'zh'), '智能体');
+	assert.equal(translatedLeafTitle('智能体', terminalPairs, 'en'), 'Agents');
+	assert.equal(translatedLeafTitle('Terminal', terminalPairs, 'en'), undefined);
+	assert.equal(translatedLeafTitle('智能体', terminalPairs, 'zh'), undefined);
+	assert.equal(translatedLeafTitle('My session', terminalPairs, 'zh'), undefined);
+	assert.equal(translatedLeafTitle('Terminal', [{ en: 'Dashboard', zh: '看板' }], 'zh'), undefined);
+	assert.equal(translatedLeafTitle(undefined, terminalPairs, 'zh'), undefined);
+	const deferred = { view: { title: 'Terminal' }, loaded: false, loadIfDeferred() { this.loaded = true; } };
+	assert.equal(setDeferredLeafTitle(deferred as never, '终端'), true);
+	assert.equal(deferred.view.title, '终端');
+	assert.equal(deferred.loaded, false);
+	assert.equal(setDeferredLeafTitle({ view: {} } as never, '看板'), false);
 
 	let disk = '';
 	let refreshes = 0;

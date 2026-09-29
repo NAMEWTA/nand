@@ -21,7 +21,6 @@ export function renderSidebarHabitWidget(
 	const service = getHabitService(app);
 	if (!service) return;
 	const widget = container.createDiv({ cls: 'dashboard-sidebar-widget dashboard-sidebar-habit' });
-	applyWidgetBackground(widget, bg, app);
 	const backgroundSlot = onBgChange
 		? h('span', {
 				ref: (element: HTMLSpanElement | null) => {
@@ -64,6 +63,9 @@ export function renderSidebarHabitWidget(
 		);
 	refreshers.set(widget, refresh);
 	refresh();
+	// Preact's first render drops DOM that existed before it. The photo layer
+	// has to be applied after the panel owns the card.
+	applyWidgetBackground(widget, bg, app);
 }
 export function refreshHabitWidget(root: HTMLElement): void {
 	const widget = root.querySelector<HTMLElement>('.dashboard-sidebar-habit');

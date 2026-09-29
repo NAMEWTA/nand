@@ -18,7 +18,6 @@ export function renderSidebarCountdown(
 	settingsAccess?: DashboardSettingsAccess,
 ): void {
 	const widget = container.createDiv({ cls: 'dashboard-sidebar-widget dashboard-sidebar-countdown' });
-	applyWidgetBackground(widget, cd.background, app);
 	mountDashboardPanel(
 		widget,
 		h(CountdownPanel, {
@@ -34,6 +33,7 @@ export function renderSidebarCountdown(
 			},
 		}),
 	);
+	applyWidgetBackground(widget, cd.background, app);
 }
 export function showPomodoroStats(doc: Document, service: PomodoroService): void {
 	// Landscape stats modal lives in its own module (KPIs, donut, trend,

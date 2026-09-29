@@ -1,5 +1,35 @@
-import type { App, WorkspaceLeaf } from 'obsidian';
-import { onLanguageChanged } from '../../shared/i18n';
+import type { App, View, ViewState, WorkspaceLeaf } from 'obsidian';
+import { onLanguageChanged, type Language } from '../../shared/i18n';
+
+export interface LeafTitlePair {
+	en: string;
+	zh: string;
+}
+
+/** The other language's default, only when `stored` is exactly one known pair and is not already current. */
+export function translatedLeafTitle(
+	stored: string | undefined,
+	pairs: readonly LeafTitlePair[],
+	language: Language,
+): string | undefined {
+	if (!stored) return undefined;
+	const matches = pairs.filter((pair) => stored === pair.en || stored === pair.zh);
+	if (matches.length !== 1) return undefined;
+	const next = matches[0]![language];
+	return next === stored ? undefined : next;
+}
+
+export function storedLeafTitle(leaf: WorkspaceLeaf): string | undefined {
+	return (leaf.getViewState() as ViewState & { title?: string }).title;
+}
+
+/** Deferred views keep the serialized title on the view object. A copy from getViewState() does not. */
+export function setDeferredLeafTitle(leaf: WorkspaceLeaf, next: string): boolean {
+	const view = leaf.view as View & { title?: string };
+	if (!('title' in view)) return false;
+	view.title = next;
+	return true;
+}
 
 /** Repaint in place and notify the leaf's current host window; ownership stays with the view. */
 export function onLeafLanguageChanged(app: App, leaf: WorkspaceLeaf, repaint: () => void): () => void {
@@ -21,4 +51,5 @@ export function refreshLeafTitle(app: App, leaf: WorkspaceLeaf): void {
 	} else {
 		(container as typeof container & { updateTitle?: () => void }).updateTitle?.();
 	}
+	app.workspace.requestSaveLayout?.();
 }

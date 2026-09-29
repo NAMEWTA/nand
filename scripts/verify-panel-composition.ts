@@ -2,6 +2,8 @@ import { AutomationsPanel } from '../src/view/automations/AutomationsPanel';
 import type { AutomationViewHost } from '../src/view/automations/panel-contract';
 import type { AutomationDefinition } from '../src/shared/automation/types';
 import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
 import { Notice, TFile, TFolder, type App } from 'obsidian';
 import { NativeHistory } from '../src/platform/obsidian/ai-vault/service';
 import { HistorySidebar, SessionSidebar } from '../src/view/terminal/workbench';
@@ -250,20 +252,44 @@ async function verifySessionIdentity() {
 	const host = { settings: { agentSettings: { agents: {} }, presetScripts: [] } } as unknown as WorkbenchHost;
 	const paint = () => render(h(SessionSidebar, { host, service, active: selected?.id ?? first.id, select: (session) => { selected = session; }, create: async () => {}, close: async () => {} }), panel);
 	const buttons = () => Array.from(panel.querySelectorAll<HTMLButtonElement>('.nand-session-row > button:first-child'));
+	const sessionId = (button: HTMLButtonElement) => button.dataset.terminalId ?? '';
+	const css = readFileSync(join(process.cwd(), 'styles.css'), 'utf8');
+	const rule = (selector: string) => {
+		const at = css.indexOf(selector);
+		assert.ok(at >= 0, selector);
+		return css.slice(at, css.indexOf('}', at) + 1);
+	};
+	const titleButton = rule('.nand-session-row > button:first-child {');
+	assert.match(titleButton, /overflow-wrap:\s*normal/);
+	assert.equal(titleButton.includes('anywhere'), false);
+	const lines = rule('.nand-session-row > button:first-child :is(span, small)');
+	assert.match(lines, /white-space:\s*nowrap/);
+	assert.match(lines, /text-overflow:\s*ellipsis/);
+	assert.match(lines, /min-width:\s*0/);
+	const closeButton = rule('.nand-session-row > button:last-child');
+	assert.match(closeButton, /flex:\s*0 0 32px/);
+	assert.match(closeButton, /width:\s*32px/);
+	assert.match(rule('.nand-agent-sidebar button {'), /overflow-wrap:\s*anywhere/);
 	const wait = () => new Promise<void>((resolve) => setTimeout(resolve, 160));
 	for (const language of ['zh', 'en', 'zh'] as const) {
 		setLanguage(language); sessions = [first, second]; paint(); await wait();
 		assert.equal(panel.querySelector('h3')?.textContent, language === 'zh' ? '智能体工作台' : 'Agent workbench');
 		assert.equal(t('main.dashboard'), language === 'zh' ? '看板' : 'Dashboard');
-		const before = new Map(buttons().map((button) => [button.title, button.textContent]));
+		const before = new Map(buttons().map((button) => [sessionId(button), button.textContent]));
 		assert.match(before.get(first.id)!, /#12345678/);
 		assert.match(before.get(second.id)!, /#abcdef01/);
-		for (const button of buttons()) assert.match(button.textContent!, new RegExp(t('terminalAgent.workbench.status.unknown')));
+		const status = t('terminalAgent.workbench.status.unknown');
+		for (const button of buttons()) {
+			assert.match(button.textContent!, new RegExp(status));
+			const id = sessionId(button);
+			const shortId = `#${id.replace(/^terminal-/, '').slice(0, 8)}`;
+			assert.equal(button.title, `Same Terminal\n${shortId}\n${status}`);
+		}
 		buttons()[1]!.click(); paint();
 		assert.equal(selected, second, 'Same titles still select the exact session object');
-		assert.equal(panel.querySelector<HTMLButtonElement>('.is-active')?.title, second.id);
+		assert.equal(sessionId(panel.querySelector<HTMLButtonElement>('.is-active')!), second.id);
 		sessions = [second, first]; redraw(); await wait();
-		for (const button of buttons()) assert.equal(button.textContent, before.get(button.title), 'Reordering preserves session labels');
+		for (const button of buttons()) assert.equal(button.textContent, before.get(sessionId(button)), 'Reordering preserves session labels');
 		sessions = [second]; redraw(); await wait();
 		assert.equal(buttons()[0]!.textContent, before.get(second.id), 'Closing another session does not renumber the survivor');
 	}

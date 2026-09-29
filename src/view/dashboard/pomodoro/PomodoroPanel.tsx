@@ -107,7 +107,6 @@ export function PomodoroPanel({
 				<div class="dashboard-sidebar-pomodoro-stats-hint">
 					🍅 {t('pomodoro.today')} {service.getTodayCount()}
 				</div>
-				<div class="dashboard-sidebar-pomodoro-top-spacer" />
 				<Activity service={service} />
 				{background && (
 					<div
