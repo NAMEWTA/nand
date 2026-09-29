@@ -20,6 +20,7 @@ function Header({ title, close, search = false }: { title: string; close: () => 
 			<div
 				class={search ? 'dashboard-reading-book-close' : 'dashboard-reading-end-close'}
 				role="button"
+				aria-label={t('common.close')}
 				onClick={close}
 			>
 				<Icon name="x" />
@@ -389,7 +390,7 @@ export function ReadingStatsPanel({ service, close }: DialogProps) {
 		<>
 			<div class="dashboard-pomodoro-stats-header">
 				<div class="dashboard-pomodoro-stats-header-title">{t('reading.statsTitle')}</div>
-				<div class="dashboard-pomodoro-stats-close" role="button" onClick={close}>
+				<div class="dashboard-pomodoro-stats-close" role="button" aria-label={t('common.close')} onClick={close}>
 					<Icon name="x" />
 				</div>
 			</div>
