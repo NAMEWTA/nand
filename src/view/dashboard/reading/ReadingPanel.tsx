@@ -59,10 +59,10 @@ export function ReadingPanel({
 			<div class="dashboard-reading-title-row">
 				<div class="dashboard-reading-title">{t('reading.title')}</div>
 				<div class="dashboard-reading-title-spacer" />
-				<div class="dashboard-reading-add-btn" role="button" tabIndex={0} onClick={add}>
+				<div class="dashboard-reading-add-btn" role="button" tabIndex={0} aria-label={t('reading.selectBook')} onClick={add}>
 					<Icon name="plus" />
 				</div>
-				<div class="dashboard-reading-stats-btn" role="button" tabIndex={0} onClick={statistics}>
+				<div class="dashboard-reading-stats-btn" role="button" tabIndex={0} aria-label={t('reading.statsTitle')} onClick={statistics}>
 					<Icon name="bar-chart-2" />
 				</div>
 			</div>

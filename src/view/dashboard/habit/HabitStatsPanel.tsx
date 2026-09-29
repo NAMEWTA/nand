@@ -17,7 +17,7 @@ export function HabitStatsPanel({ service, close }: { service: HabitService; clo
 		<>
 			<div class="dashboard-habit-stats-header">
 				<div class="dashboard-habit-stats-title">{t('habit.statsTitle')}</div>
-				<div class="dashboard-habit-stats-close" role="button" onClick={close}>
+				<div class="dashboard-habit-stats-close" role="button" aria-label={t('common.close')} onClick={close}>
 					<Icon name="x" />
 				</div>
 			</div>

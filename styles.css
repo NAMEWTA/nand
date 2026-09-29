@@ -3552,13 +3552,14 @@ button.nand-ui-list-item.is-active {
 	   full 6px applies). */
 	gap: clamp(2px, calc((var(--db-sidebar-w, 220) - 180) / 10 * 1px + 2px), 6px);
 	width: 100%;
-	margin-bottom: 6px;
+	min-height: 20px;
+	margin-bottom: 8px;
 }
 
 .dashboard-sidebar-habit-title {
 	display: flex;
 	align-items: center;
-	gap: 4px;
+	gap: 6px;
 	font-size: 0.7em;
 	font-weight: 600;
 	letter-spacing: 0.08em;
@@ -3593,6 +3594,7 @@ button.nand-ui-list-item.is-active {
 .dashboard-sidebar-habit-count {
 	font-size: 0.65em;
 	color: var(--db-text-muted);
+	font-variant-numeric: tabular-nums;
 	user-select: none;
 }
 
@@ -3607,14 +3609,16 @@ button.nand-ui-list-item.is-active {
 	align-items: center;
 	justify-content: center;
 	cursor: pointer;
+	border-radius: var(--db-radius-sm);
 	opacity: 0.3;
 	color: var(--db-text-muted);
-	transition: opacity 0.15s;
+	transition: opacity var(--nand-duration) var(--nand-ease), background-color var(--nand-duration) var(--nand-ease);
 	flex-shrink: 0;
 }
 
 .dashboard-sidebar-habit-icon-btn:hover {
 	opacity: 0.75;
+	background: var(--db-bg-hover);
 }
 
 .dashboard-sidebar-habit-list {
@@ -3627,10 +3631,15 @@ button.nand-ui-list-item.is-active {
 	display: flex;
 	align-items: center;
 	gap: 8px;
-	padding: 4px 5px;
-	border-radius: 6px;
+	padding: 4px 6px;
+	border-radius: var(--db-radius-sm);
 	cursor: pointer;
-	transition: background 0.15s;
+	transition: background-color var(--nand-duration) var(--nand-ease);
+}
+
+.dashboard-sidebar-habit-item:focus-visible {
+	outline: 2px solid var(--db-accent);
+	outline-offset: -2px;
 }
 
 .dashboard-sidebar-habit-item:hover {
@@ -3646,7 +3655,11 @@ button.nand-ui-list-item.is-active {
 	align-items: center;
 	justify-content: center;
 	flex-shrink: 0;
-	transition: border-color 0.15s, background 0.15s;
+	transition: border-color var(--nand-duration) var(--nand-ease), background-color var(--nand-duration) var(--nand-ease);
+}
+
+.dashboard-sidebar-habit-item:hover .dashboard-sidebar-habit-check:not(.dashboard-sidebar-habit-check--done) {
+	border-color: var(--db-accent);
 }
 
 .dashboard-sidebar-habit-check--done {
@@ -3679,6 +3692,7 @@ button.nand-ui-list-item.is-active {
 .dashboard-sidebar-habit-streak {
 	font-size: 0.62em;
 	color: var(--db-text-muted);
+	font-variant-numeric: tabular-nums;
 	flex-shrink: 0;
 	user-select: none;
 }
@@ -3687,7 +3701,7 @@ button.nand-ui-list-item.is-active {
 	font-size: 0.68em;
 	color: var(--db-text-muted);
 	text-align: center;
-	padding: 8px 0;
+	padding: 12px 8px;
 	opacity: 0.7;
 }
 
@@ -3696,28 +3710,30 @@ button.nand-ui-list-item.is-active {
 .dashboard-habit-backfill-hint {
 	font-size: 0.78em;
 	color: var(--db-text-muted);
-	margin-bottom: 10px;
+	margin-bottom: 12px;
 }
 
 .dashboard-habit-backfill-empty {
 	font-size: 0.85em;
 	color: var(--db-text-muted);
 	text-align: center;
-	padding: 14px 0;
+	padding: 16px 0;
 }
 
 .dashboard-habit-backfill-selectall {
 	background: none;
 	border: none;
 	box-shadow: none;
-	padding: 2px 6px;
+	padding: 2px 8px;
+	border-radius: var(--db-radius-sm);
 	font-size: 0.72em;
 	color: var(--db-accent);
 	cursor: pointer;
+	transition: background-color var(--nand-duration) var(--nand-ease);
 }
 
 .dashboard-habit-backfill-selectall:hover {
-	opacity: 0.8;
+	background: var(--db-bg-hover);
 }
 
 .dashboard-habit-backfill-list {
@@ -3731,11 +3747,11 @@ button.nand-ui-list-item.is-active {
 .dashboard-habit-backfill-item {
 	display: flex;
 	align-items: center;
-	gap: 10px;
-	padding: 6px 8px;
-	border-radius: 6px;
+	gap: 12px;
+	padding: 8px;
+	border-radius: var(--db-radius-sm);
 	cursor: pointer;
-	transition: background 0.15s;
+	transition: background-color var(--nand-duration) var(--nand-ease);
 }
 
 .dashboard-habit-backfill-item:hover {
@@ -3762,7 +3778,7 @@ button.nand-ui-list-item.is-active {
 	align-items: center;
 	justify-content: center;
 	flex-shrink: 0;
-	transition: border-color 0.15s, background 0.15s;
+	transition: border-color var(--nand-duration) var(--nand-ease), background-color var(--nand-duration) var(--nand-ease);
 }
 
 .dashboard-habit-backfill-check--done {
@@ -3799,13 +3815,14 @@ button.nand-ui-list-item.is-active {
 	align-items: center;
 	gap: 6px;
 	width: 100%;
-	margin-bottom: 6px;
+	min-height: 20px;
+	margin-bottom: 8px;
 }
 
 .dashboard-sidebar-expense-title {
 	display: flex;
 	align-items: center;
-	gap: 4px;
+	gap: 6px;
 	font-size: 0.7em;
 	font-weight: 600;
 	letter-spacing: 0.08em;
@@ -3845,20 +3862,22 @@ button.nand-ui-list-item.is-active {
 	align-items: center;
 	justify-content: center;
 	cursor: pointer;
+	border-radius: var(--db-radius-sm);
 	opacity: 0.3;
 	color: var(--db-text-muted);
-	transition: opacity 0.15s;
+	transition: opacity var(--nand-duration) var(--nand-ease), background-color var(--nand-duration) var(--nand-ease);
 	flex-shrink: 0;
 }
 
 .dashboard-sidebar-expense-icon-btn:hover {
 	opacity: 0.75;
+	background: var(--db-bg-hover);
 }
 
 .dashboard-sidebar-expense-form {
 	display: flex;
 	flex-direction: column;
-	gap: 7px;
+	gap: 8px;
 	/* The sidebar marks widgets draggable; the entry form is a form, not a grip. */
 	cursor: default;
 }
@@ -3868,7 +3887,7 @@ button.nand-ui-list-item.is-active {
 .dashboard-sidebar-expense-row-label {
 	display: flex;
 	align-items: center;
-	gap: 3px;
+	gap: 4px;
 	font-size: 0.68em;
 	color: var(--db-text-muted);
 	user-select: none;
@@ -3924,7 +3943,7 @@ button.nand-ui-list-item.is-active {
 	min-width: 0;
 	padding: 0 2px;
 	border-bottom: 1px solid color-mix(in srgb, var(--db-border-card) 85%, transparent);
-	transition: border-color 0.15s;
+	transition: border-color var(--nand-duration) var(--nand-ease);
 }
 
 .dashboard-sidebar-expense-amount-wrap:focus-within {
@@ -4055,7 +4074,12 @@ button.nand-ui-list-item.is-active {
 	cursor: pointer;
 	font-family: var(--db-font);
 	border-radius: var(--db-radius-sm, 6px);
-	transition: color 0.15s ease, background-color 0.15s ease;
+	transition: color var(--nand-duration) var(--nand-ease), background-color var(--nand-duration) var(--nand-ease);
+}
+
+.dashboard-sidebar-expense-submit:focus-visible {
+	outline: 2px solid var(--db-accent);
+	outline-offset: 1px;
 }
 
 .dashboard-sidebar-expense-submit:hover {
@@ -4137,9 +4161,10 @@ button.nand-ui-list-item.is-active {
 	display: flex;
 	align-items: center;
 	justify-content: center;
+	border-radius: var(--db-radius-sm);
 	cursor: pointer;
 	opacity: 0;
-	transition: opacity 0.15s ease, color 0.15s ease;
+	transition: opacity var(--nand-duration) var(--nand-ease), color var(--nand-duration) var(--nand-ease);
 }
 
 .dashboard-sidebar-countdown-settings-btn svg {
@@ -4186,11 +4211,13 @@ button.nand-ui-list-item.is-active {
 	font-weight: 700;
 	line-height: 1.2;
 	color: var(--db-accent);
+	font-variant-numeric: tabular-nums;
 }
 
 .dashboard-sidebar-anniversary-date {
 	font-size: 0.68em;
 	color: var(--db-text-muted);
+	font-variant-numeric: tabular-nums;
 }
 
 .dashboard-sidebar-countdown-until {
@@ -4212,6 +4239,7 @@ button.nand-ui-list-item.is-active {
 	font-weight: 700;
 	line-height: 1;
 	color: var(--db-accent);
+	font-variant-numeric: tabular-nums;
 	transform-origin: center bottom;
 }
 
@@ -4246,8 +4274,14 @@ button.nand-ui-list-item.is-active {
 .dashboard-sidebar-countdown-placeholder {
 	color: var(--db-text-muted);
 	font-size: 0.85em;
-	padding: 12px 0;
+	padding: 12px 8px;
+	border-radius: var(--db-radius-sm);
 	cursor: pointer;
+	transition: background-color var(--nand-duration) var(--nand-ease);
+}
+
+.dashboard-sidebar-countdown-placeholder:hover {
+	background: var(--db-bg-hover);
 }
 
 .dashboard-sidebar-countdown-expired {
@@ -4323,7 +4357,8 @@ button.nand-ui-list-item.is-active {
 	background: rgba(0, 0, 0, 0.45);
 	color: #fff;
 	font-size: 0.65em;
-	padding: 1px 7px;
+	font-variant-numeric: tabular-nums;
+	padding: 2px 8px;
 	border-radius: 999px;
 	pointer-events: none;
 	user-select: none;
@@ -4345,7 +4380,7 @@ button.nand-ui-list-item.is-active {
 	cursor: pointer;
 	opacity: 0;
 	visibility: hidden;
-	transition: opacity 0.15s ease, visibility 0.15s ease;
+	transition: opacity var(--nand-duration) var(--nand-ease), visibility var(--nand-duration) var(--nand-ease), background-color var(--nand-duration) var(--nand-ease);
 	box-shadow: none;
 }
 
@@ -4391,9 +4426,10 @@ button.nand-ui-list-item.is-active {
 	flex-direction: column;
 	align-items: center;
 	justify-content: center;
-	gap: 6px;
+	gap: 8px;
 	border: 1px dashed var(--db-border-card);
 	border-radius: var(--db-radius-sm);
+	background: var(--db-bg-hover);
 	color: var(--db-text-muted);
 	font-size: 0.75em;
 	user-select: none;
@@ -4424,7 +4460,8 @@ button.nand-ui-list-item.is-active {
 
 .dashboard-modal-countdown-label {
 	font-size: 0.85em;
-	color: var(--text-muted);
+	font-weight: 500;
+	color: var(--db-text-muted, var(--text-muted));
 }
 
 .dashboard-modal-countdown-hint {
@@ -4445,10 +4482,13 @@ button.nand-ui-list-item.is-active {
 	justify-content: space-between;
 	cursor: pointer;
 	user-select: none;
+	border-radius: var(--db-radius-sm, 6px);
+	font-variant-numeric: tabular-nums;
+	transition: border-color var(--nand-duration) var(--nand-ease);
 }
 
 .dashboard-countdown-date-trigger:hover {
-	border-color: var(--interactive-accent);
+	border-color: var(--db-border-input-focus, var(--interactive-accent));
 }
 
 .dashboard-countdown-time-wrap {
@@ -4472,7 +4512,13 @@ button.nand-ui-list-item.is-active {
 	color: var(--db-text, var(--text-normal));
 	font-size: 0.95em;
 	font-family: var(--db-font, var(--font-interface));
+	font-variant-numeric: tabular-nums;
 	box-sizing: border-box;
+	transition: border-color var(--nand-duration) var(--nand-ease);
+}
+
+.dashboard-countdown-time-select:focus {
+	border-color: var(--db-border-input-focus, var(--interactive-accent));
 }
 
 .dashboard-countdown-time-sep {
@@ -4498,13 +4544,14 @@ button.nand-ui-list-item.is-active {
 	font-weight: 700;
 	color: var(--db-text);
 	line-height: 1;
+	font-variant-numeric: tabular-nums;
 }
 
 .dashboard-sidebar-weather-info {
 	display: flex;
 	justify-content: space-between;
 	align-items: center;
-	margin-top: 4px;
+	margin-top: 8px;
 	/* Both children shrink-to-ellipsis instead of overflowing the card when
 	   the user drags the sidebar narrow (min-width:0 lifts the flex
 	   min-content floor). */
@@ -4533,8 +4580,8 @@ button.nand-ui-list-item.is-active {
 
 .dashboard-sidebar-weather-details {
 	display: flex;
-	gap: 8px;
-	margin-top: 4px;
+	gap: 4px;
+	margin-top: 8px;
 }
 
 .dashboard-sidebar-weather-detail {
@@ -4545,9 +4592,10 @@ button.nand-ui-list-item.is-active {
 	   widths; the labels wrap (CJK per-character) instead of overflowing. */
 	min-width: 0;
 	text-align: center;
-	padding: 3px 0;
+	padding: 4px 2px;
 	background: var(--db-bg-hover);
 	border-radius: var(--db-radius-sm);
+	font-variant-numeric: tabular-nums;
 }
 
 .dashboard-sidebar-weather-forecast {
@@ -4563,10 +4611,10 @@ button.nand-ui-list-item.is-active {
 	display: flex;
 	flex-direction: column;
 	align-items: center;
-	gap: 3px;
+	gap: 4px;
 	padding: 4px 2px;
 	border-radius: var(--db-radius-sm);
-	transition: background 0.15s;
+	transition: background-color var(--nand-duration) var(--nand-ease);
 }
 
 .dashboard-sidebar-weather-fday:hover {
@@ -4595,11 +4643,13 @@ button.nand-ui-list-item.is-active {
 	font-size: 0.7em;
 	font-weight: 600;
 	color: var(--db-text);
+	font-variant-numeric: tabular-nums;
 }
 
 .dashboard-sidebar-weather-fday-low {
 	font-size: 0.65em;
 	color: var(--db-text-faint);
+	font-variant-numeric: tabular-nums;
 }
 
 .dashboard-sidebar-weather-loading,
@@ -4607,7 +4657,7 @@ button.nand-ui-list-item.is-active {
 	text-align: center;
 	color: var(--db-text-faint);
 	font-size: 0.9em;
-	padding: 8px 0;
+	padding: 12px 0;
 }
 
 /* Heatmap Widget */
@@ -4629,7 +4679,7 @@ button.nand-ui-list-item.is-active {
 	display: flex;
 	align-items: center;
 	gap: 8px;
-	margin-top: 6px;
+	margin-top: 8px;
 }
 
 .dashboard-sidebar-heatmap-summary {
@@ -4637,7 +4687,8 @@ button.nand-ui-list-item.is-active {
 	color: var(--db-text-muted);
 	display: inline-flex;
 	align-items: center;
-	gap: 3px;
+	gap: 4px;
+	font-variant-numeric: tabular-nums;
 }
 
 .dashboard-sidebar-heatmap-icon {
@@ -4648,7 +4699,8 @@ button.nand-ui-list-item.is-active {
 .dashboard-sidebar-heatmap-header {
 	display: flex;
 	align-items: center;
-	margin-bottom: 6px;
+	min-height: 20px;
+	margin-bottom: 8px;
 }
 
 .dashboard-sidebar-heatmap-title {
@@ -4683,6 +4735,7 @@ button.nand-ui-list-item.is-active {
 .dashboard-sidebar-heatmap-month-label {
 	font-size: 0.6em;
 	color: var(--db-text-muted);
+	font-variant-numeric: tabular-nums;
 	width: 28px;
 	flex-shrink: 0;
 }
@@ -4726,14 +4779,16 @@ button.nand-ui-list-item.is-active {
 	align-items: center;
 	justify-content: center;
 	cursor: pointer;
+	border-radius: var(--db-radius-sm);
 	opacity: 0.25;
 	color: var(--db-text-muted);
-	transition: opacity 0.15s;
+	transition: opacity var(--nand-duration) var(--nand-ease), background-color var(--nand-duration) var(--nand-ease);
 	flex-shrink: 0;
 }
 
 .dashboard-sidebar-pomodoro-stats-btn:hover {
 	opacity: 0.7;
+	background: var(--db-bg-hover);
 }
 
 /* ===== Activity Selector (Pomodoro Widget) ===== */
@@ -4749,16 +4804,28 @@ button.nand-ui-list-item.is-active {
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	gap: 5px;
+	gap: 6px;
 	cursor: pointer;
-	padding: 3px 10px;
-	border-radius: 10px;
-	transition: background 0.15s, opacity 0.15s;
+	padding: 2px 10px;
+	min-height: 20px;
+	border: 1px solid transparent;
+	border-radius: 999px;
+	transition: background-color var(--nand-duration) var(--nand-ease), border-color var(--nand-duration) var(--nand-ease), opacity var(--nand-duration) var(--nand-ease);
 	max-width: 100%;
 	min-width: 0;
 }
 
 .dashboard-pomodoro-activity-trigger:hover {
+	background: var(--db-bg-hover);
+	border-color: var(--db-border-card);
+}
+
+.dashboard-pomodoro-activity-trigger:focus-visible {
+	outline: 2px solid var(--db-accent);
+	outline-offset: 1px;
+}
+
+.dashboard-pomodoro-activity-trigger--set {
 	background: var(--db-bg-hover);
 }
 
@@ -4802,51 +4869,62 @@ button.nand-ui-list-item.is-active {
 	z-index: 100;
 	background: var(--db-bg-modal, var(--background-primary, var(--db-bg)));
 	border: 1px solid var(--db-border-card);
-	border-radius: 8px;
+	border-radius: var(--db-radius-md);
 	padding: 8px;
-	width: 180px;
-	box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
-	margin-top: 4px;
+	width: 188px;
+	box-sizing: border-box;
+	box-shadow: var(--db-shadow-card-hover, 0 8px 24px rgba(0, 0, 0, 0.18));
+	margin-top: 6px;
 }
 
 .dashboard-pomodoro-activity-panel-input {
 	width: 100%;
-	background: var(--db-bg-hover);
-	border: 1px solid var(--db-border-card);
-	border-radius: 6px;
-	padding: 5px 8px;
+	box-sizing: border-box;
+	background: var(--db-bg-input, var(--db-bg-hover));
+	border: 1px solid var(--db-border-input, var(--db-border-card));
+	border-radius: var(--db-radius-sm);
+	padding: 6px 10px;
 	font-size: 0.75em;
 	color: var(--db-text);
 	outline: none;
+	transition: border-color var(--nand-duration) var(--nand-ease);
 }
 
 .dashboard-pomodoro-activity-panel-input:focus {
-	border-color: var(--db-accent);
+	border-color: var(--db-border-input-focus, var(--db-accent));
 }
 
 .dashboard-pomodoro-activity-chips {
 	display: flex;
 	flex-wrap: wrap;
 	gap: 4px;
-	margin-top: 6px;
+	margin-top: 8px;
 }
 
 .dashboard-pomodoro-activity-chip {
 	display: flex;
 	align-items: center;
-	gap: 4px;
-	padding: 3px 8px;
-	border-radius: 10px;
+	gap: 6px;
+	padding: 4px 10px;
+	border: 1px solid var(--db-border-card);
+	border-radius: 999px;
 	background: var(--db-bg-hover);
 	font-size: 0.65em;
 	color: var(--db-text);
 	cursor: pointer;
-	transition: opacity 0.15s;
+	transition: background-color var(--nand-duration) var(--nand-ease), border-color var(--nand-duration) var(--nand-ease);
 	max-width: 100%;
+	box-sizing: border-box;
 }
 
 .dashboard-pomodoro-activity-chip:hover {
-	opacity: 0.75;
+	border-color: var(--db-accent);
+	background: var(--db-bg-hover-strong, var(--db-bg-hover));
+}
+
+.dashboard-pomodoro-activity-chip:focus-visible {
+	outline: 2px solid var(--db-accent);
+	outline-offset: 1px;
 }
 
 .dashboard-pomodoro-activity-chip span {
@@ -4858,6 +4936,7 @@ button.nand-ui-list-item.is-active {
 .dashboard-sidebar-pomodoro-stats-hint {
 	font-size: 0.6em;
 	color: var(--db-text-faint);
+	font-variant-numeric: tabular-nums;
 	flex-shrink: 0;
 	white-space: nowrap;
 	pointer-events: none;
@@ -4941,7 +5020,12 @@ button.nand-ui-list-item.is-active {
 	font-size: 0.75em;
 	font-weight: 600;
 	cursor: pointer;
-	transition: opacity 0.15s;
+	transition: opacity var(--nand-duration) var(--nand-ease);
+}
+
+.dashboard-sidebar-pomodoro-main-btn:focus-visible {
+	outline: 2px solid var(--db-accent);
+	outline-offset: 2px;
 }
 
 /* The widget card's 12px padding is shared by every sidebar widget; the
@@ -4976,29 +5060,34 @@ button.nand-ui-list-item.is-active {
 	z-index: 1000;
 }
 
+/* Shared stats-modal rhythm (pomodoro, reading, habit, expense): one 14px-
+   family radius, hairline border, floating shadow, header row → body. */
 .dashboard-pomodoro-stats-modal {
 	background: var(--db-bg-modal, var(--background-primary, var(--db-bg)));
 	border: 1px solid var(--db-border-card);
-	border-radius: var(--db-radius-lg, 12px);
+	border-radius: var(--db-radius-lg, 14px);
 	padding: 20px;
 	max-width: 380px;
 	width: 90%;
 	max-height: 80vh;
 	overflow-y: auto;
-	box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+	box-shadow: var(--nand-shadow-lg, 0 8px 32px rgba(0, 0, 0, 0.2));
+	font-variant-numeric: tabular-nums;
 }
 
 .dashboard-pomodoro-stats-header {
 	display: flex;
 	justify-content: space-between;
 	align-items: center;
-	gap: 10px;
+	gap: 12px;
+	min-height: 28px;
 	margin-bottom: 16px;
 }
 
 .dashboard-pomodoro-stats-header-title {
-	font-size: 1.3em;
-	font-weight: 700;
+	font-size: 1.15em;
+	font-weight: 600;
+	line-height: 1.3;
 	color: var(--db-text);
 }
 
@@ -5010,17 +5099,26 @@ button.nand-ui-list-item.is-active {
 	height: auto;
 	cursor: pointer;
 	color: var(--db-text-muted);
-	width: 24px;
-	height: 24px;
+	width: 28px;
+	height: 28px;
+	flex-shrink: 0;
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	border-radius: 4px;
-	transition: background 0.15s;
+	border-radius: var(--db-radius-sm, 6px);
+	transition: background-color var(--nand-duration) var(--nand-ease), color var(--nand-duration) var(--nand-ease);
 }
 
 .dashboard-pomodoro-stats-close:hover {
 	background: var(--db-bg-hover);
+	color: var(--db-text);
+}
+
+.dashboard-pomodoro-stats-close:focus-visible,
+.dashboard-pomodoro-stats-icon-btn:focus-visible,
+.dashboard-pomodoro-range-btn:focus-visible {
+	outline: 2px solid var(--db-accent);
+	outline-offset: 1px;
 }
 
 .dashboard-pomodoro-stats-summary {
@@ -5029,24 +5127,37 @@ button.nand-ui-list-item.is-active {
 	margin-bottom: 16px;
 }
 
+/* KPI cell: small muted label under a bold tabular value. Inner radius
+   follows the section card it sits in. */
 .dashboard-pomodoro-stats-card {
 	flex: 1;
+	min-width: 0;
 	background: var(--db-bg-hover);
-	border-radius: 8px;
-	padding: 10px 8px;
+	border: 1px solid transparent;
+	border-radius: var(--db-radius-sm, 6px);
+	padding: 12px 8px 10px;
 	text-align: center;
 }
 
 .dashboard-pomodoro-stats-card-value {
-	font-size: 1em;
+	font-size: 1.05em;
 	font-weight: 700;
+	line-height: 1.2;
 	color: var(--db-accent);
+	font-variant-numeric: tabular-nums;
 }
 
 .dashboard-pomodoro-stats-card-label {
 	font-size: 0.65em;
+	font-weight: 500;
 	color: var(--db-text-muted);
-	margin-top: 2px;
+	margin-top: 4px;
+}
+
+/* Section cards inside the stats modals take the theme's card radius
+   (the generic modal-section rule further down pins 10px). */
+.dashboard-pomodoro-stats-modal .dashboard-pomodoro-stats-section {
+	border-radius: var(--db-radius-md, 10px);
 }
 
 .dashboard-pomodoro-stats-section {
@@ -5067,16 +5178,17 @@ button.nand-ui-list-item.is-active {
 	color: var(--db-text-muted);
 	text-transform: uppercase;
 	letter-spacing: 0.06em;
-	margin-bottom: 8px;
+	margin-bottom: 12px;
 }
 
-/* Range toggle */
+/* Range toggle: segmented control (tinted track, raised active segment). */
 .dashboard-pomodoro-range-toggle {
 	display: flex;
 	gap: 2px;
-	background: var(--db-bg-hover);
-	border-radius: 6px;
 	padding: 2px;
+	background: var(--db-bg-hover);
+	border: 1px solid var(--db-border-card);
+	border-radius: calc(var(--db-radius-sm, 6px) + 2px);
 }
 
 .dashboard-pomodoro-range-btn {
@@ -5090,18 +5202,23 @@ button.nand-ui-list-item.is-active {
 	font-size: 0.82em;
 	font-weight: 500;
 	color: var(--db-text-muted);
-	padding: 5px 12px;
-	border-radius: 5px;
+	padding: 4px 12px;
+	min-height: 24px;
+	border-radius: var(--db-radius-sm, 6px);
 	cursor: pointer;
 	white-space: nowrap;
-	transition: background 0.15s, color 0.15s;
+	transition: background-color var(--nand-duration) var(--nand-ease), color var(--nand-duration) var(--nand-ease);
+}
+
+.dashboard-pomodoro-range-btn:hover:not(.dashboard-pomodoro-range-btn--active) {
+	color: var(--db-text);
 }
 
 .dashboard-pomodoro-range-btn--active {
 	background: var(--db-bg-modal-raised, var(--background-primary, var(--db-bg)));
 	color: var(--db-accent);
-	font-weight: 700;
-	box-shadow: 0 1px 4px rgba(0, 0, 0, 0.12);
+	font-weight: 600;
+	box-shadow: var(--nand-shadow-xs, 0 1px 2px rgba(0, 0, 0, 0.08));
 }
 
 /* Donut chart */
@@ -5124,6 +5241,7 @@ button.nand-ui-list-item.is-active {
 	fill: var(--db-text);
 	font-size: 0.875em;
 	font-weight: 700;
+	font-variant-numeric: tabular-nums;
 }
 
 .dashboard-pomodoro-donut-center-label {
@@ -5138,7 +5256,7 @@ button.nand-ui-list-item.is-active {
 	padding: 24px 0;
 }
 
-/* Donut legend */
+/* Donut legend: dot · name · pct · time, all in one baseline row. */
 .dashboard-pomodoro-donut-legend {
 	display: flex;
 	flex-direction: column;
@@ -5149,7 +5267,8 @@ button.nand-ui-list-item.is-active {
 .dashboard-pomodoro-donut-legend-item {
 	display: flex;
 	align-items: center;
-	gap: 6px;
+	gap: 8px;
+	min-width: 0;
 }
 
 .dashboard-pomodoro-donut-legend-dot {
@@ -5175,6 +5294,7 @@ button.nand-ui-list-item.is-active {
 	width: 32px;
 	text-align: right;
 	flex-shrink: 0;
+	font-variant-numeric: tabular-nums;
 }
 
 .dashboard-pomodoro-donut-legend-time {
@@ -5183,6 +5303,7 @@ button.nand-ui-list-item.is-active {
 	width: 48px;
 	text-align: right;
 	flex-shrink: 0;
+	font-variant-numeric: tabular-nums;
 }
 
 .dashboard-pomodoro-stats-record-dot {
@@ -5196,7 +5317,7 @@ button.nand-ui-list-item.is-active {
 	display: flex;
 	align-items: center;
 	gap: 8px;
-	padding: 4px 0;
+	padding: 6px 0;
 	border-bottom: 1px solid var(--db-bg-hover);
 }
 
@@ -5209,6 +5330,7 @@ button.nand-ui-list-item.is-active {
 	color: var(--db-text-faint);
 	width: 65px;
 	flex-shrink: 0;
+	font-variant-numeric: tabular-nums;
 }
 
 .dashboard-pomodoro-stats-record-activity {
@@ -5224,6 +5346,7 @@ button.nand-ui-list-item.is-active {
 	font-size: 0.6em;
 	color: var(--db-text-muted);
 	flex-shrink: 0;
+	font-variant-numeric: tabular-nums;
 }
 
 /* ===== Wide stats modal (landscape) ===== */
@@ -5231,7 +5354,7 @@ button.nand-ui-list-item.is-active {
 	max-width: 1040px;
 	width: 94%;
 	max-height: 86vh;
-	padding: 22px 26px;
+	padding: 20px 24px;
 	display: flex;
 	flex-direction: column;
 	/* Size container for the 1-column collapse below: the breakpoint must
@@ -5245,7 +5368,7 @@ button.nand-ui-list-item.is-active {
 .dashboard-pomodoro-stats-header-right {
 	display: flex;
 	align-items: center;
-	gap: 10px;
+	gap: 8px;
 	/* Desktop: hug the right edge next to the close button (the close moved
 	   out of this group so mobile can drop it below the title — see the
 	   container/media collapse blocks). */
@@ -5260,13 +5383,13 @@ button.nand-ui-list-item.is-active {
 	height: auto;
 	cursor: pointer;
 	color: var(--db-text-muted);
-	width: 26px;
-	height: 26px;
+	width: 28px;
+	height: 28px;
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	border-radius: 6px;
-	transition: background 0.15s, color 0.15s;
+	border-radius: var(--db-radius-sm, 6px);
+	transition: background-color var(--nand-duration) var(--nand-ease), color var(--nand-duration) var(--nand-ease);
 }
 .dashboard-pomodoro-stats-icon-btn:hover {
 	background: var(--db-bg-hover);
@@ -5282,7 +5405,7 @@ button.nand-ui-list-item.is-active {
 	   zero height, and its content paints over the mid column. */
 	grid-template-columns: 230px minmax(0, 1fr) 300px;
 	grid-template-rows: minmax(0, 1fr);
-	gap: 18px;
+	gap: 16px;
 	overflow-y: auto;
 	min-height: 0;
 	flex: 1;
@@ -5293,18 +5416,18 @@ button.nand-ui-list-item.is-active {
 .dashboard-pomodoro-kpi-col {
 	display: flex;
 	flex-direction: column;
-	gap: 8px;
+	gap: 16px;
 	min-width: 0;
 }
 
 .dashboard-pomodoro-kpi-trophy {
 	display: flex;
 	align-items: center;
-	gap: 10px;
+	gap: 12px;
 	background: linear-gradient(135deg, rgba(241, 196, 15, 0.14), rgba(230, 126, 34, 0.10));
 	border: 1px solid rgba(241, 196, 15, 0.25);
-	border-radius: 10px;
-	padding: 10px 12px;
+	border-radius: var(--db-radius-md, 10px);
+	padding: 12px;
 }
 
 .dashboard-pomodoro-kpi-trophy-icon {
@@ -5321,6 +5444,7 @@ button.nand-ui-list-item.is-active {
 	font-size: 0.95em;
 	font-weight: 700;
 	color: var(--db-text);
+	font-variant-numeric: tabular-nums;
 }
 
 .dashboard-pomodoro-kpi-trophy-label {
@@ -5332,7 +5456,7 @@ button.nand-ui-list-item.is-active {
 .dashboard-pomodoro-stats-modal--wide .dashboard-pomodoro-stats-summary {
 	display: grid;
 	grid-template-columns: 1fr 1fr;
-	gap: 6px;
+	gap: 8px;
 	flex-wrap: wrap;
 	margin-bottom: 0;
 }
@@ -5349,23 +5473,24 @@ button.nand-ui-list-item.is-active {
 .dashboard-pomodoro-stats-card-delta {
 	font-size: 0.58em;
 	font-weight: 600;
-	padding: 1px 4px;
-	border-radius: 4px;
+	padding: 1px 6px;
+	border-radius: 999px;
+	font-variant-numeric: tabular-nums;
 }
 .dashboard-pomodoro-stats-card-delta--up {
-	color: #2ecc71;
-	background: rgba(46, 204, 113, 0.12);
+	color: var(--nand-tone-success, var(--color-green));
+	background: color-mix(in srgb, var(--nand-tone-success, var(--color-green)) 14%, transparent);
 }
 .dashboard-pomodoro-stats-card-delta--down {
-	color: #e74c3c;
-	background: rgba(231, 76, 60, 0.12);
+	color: var(--db-danger, var(--color-red));
+	background: color-mix(in srgb, var(--db-danger, var(--color-red)) 14%, transparent);
 }
 
 /* Mid column */
 .dashboard-pomodoro-mid-col {
 	display: flex;
 	flex-direction: column;
-	gap: 6px;
+	gap: 12px;
 	min-width: 0;
 }
 
@@ -5386,7 +5511,7 @@ button.nand-ui-list-item.is-active {
 .dashboard-pomodoro-donut-legend--grid {
 	display: grid;
 	grid-template-columns: 1fr 1fr;
-	gap: 5px 14px;
+	gap: 6px 16px;
 }
 
 .dashboard-pomodoro-trend-container {
@@ -5413,7 +5538,7 @@ button.nand-ui-list-item.is-active {
 .dashboard-pomodoro-right-col {
 	display: flex;
 	flex-direction: column;
-	gap: 6px;
+	gap: 12px;
 	min-width: 0;
 }
 
@@ -5491,18 +5616,19 @@ button.nand-ui-list-item.is-active {
 	font-size: 0.6em;
 	color: var(--db-text-muted);
 	flex-shrink: 0;
+	font-variant-numeric: tabular-nums;
 }
 
 .dashboard-pomodoro-rank-bar-wrap {
 	height: 6px;
-	border-radius: 3px;
+	border-radius: 999px;
 	background: var(--db-bg-hover);
 	overflow: hidden;
 }
 
 .dashboard-pomodoro-rank-bar {
 	height: 100%;
-	border-radius: 3px;
+	border-radius: 999px;
 }
 
 .dashboard-pomodoro-heatmap-container {
@@ -5524,7 +5650,7 @@ button.nand-ui-list-item.is-active {
 }
 
 .dashboard-pomodoro-heatmap-cell {
-	border-radius: 3px;
+	border-radius: var(--nand-radius-xs, 4px);
 	background: var(--db-bg-hover);
 }
 
@@ -5555,42 +5681,54 @@ button.nand-ui-list-item.is-active {
 .dashboard-habit-stats-modal {
 	background: var(--db-bg-modal, var(--background-primary, var(--db-bg)));
 	border: 1px solid var(--db-border-card);
-	border-radius: var(--db-radius-lg, 12px);
+	border-radius: var(--db-radius-lg, 14px);
 	padding: 20px;
 	max-width: 480px;
 	width: 90%;
 	max-height: 80vh;
 	overflow-y: auto;
-	box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+	box-shadow: var(--nand-shadow-lg, 0 8px 32px rgba(0, 0, 0, 0.2));
+	font-variant-numeric: tabular-nums;
 }
 
 .dashboard-habit-stats-header {
 	display: flex;
 	justify-content: space-between;
 	align-items: center;
-	margin-bottom: 14px;
+	gap: 12px;
+	min-height: 28px;
+	margin-bottom: 16px;
 }
 
 .dashboard-habit-stats-title {
-	font-size: 1.2em;
-	font-weight: 700;
+	font-size: 1.15em;
+	font-weight: 600;
+	line-height: 1.3;
 	color: var(--db-text);
 }
 
 .dashboard-habit-stats-close {
 	cursor: pointer;
 	color: var(--db-text-muted);
-	width: 24px;
-	height: 24px;
+	width: 28px;
+	height: 28px;
+	flex-shrink: 0;
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	border-radius: 4px;
-	transition: background 0.15s;
+	border-radius: var(--db-radius-sm, 6px);
+	transition: background-color var(--nand-duration) var(--nand-ease), color var(--nand-duration) var(--nand-ease);
 }
 
 .dashboard-habit-stats-close:hover {
 	background: var(--db-bg-hover);
+	color: var(--db-text);
+}
+
+.dashboard-habit-stats-close:focus-visible,
+.dashboard-habit-stats-icon-btn:focus-visible {
+	outline: 2px solid var(--db-accent);
+	outline-offset: 1px;
 }
 
 .dashboard-habit-stats-body {
@@ -5610,7 +5748,7 @@ button.nand-ui-list-item.is-active {
 .dashboard-habit-stats-card {
 	background: var(--db-bg-hover);
 	border: 1px solid var(--db-border-card);
-	border-radius: 8px;
+	border-radius: var(--db-radius-md, 10px);
 	padding: 12px;
 }
 
@@ -5618,7 +5756,8 @@ button.nand-ui-list-item.is-active {
 	display: flex;
 	align-items: center;
 	gap: 6px;
-	margin-bottom: 10px;
+	min-height: 22px;
+	margin-bottom: 12px;
 }
 
 .dashboard-habit-stats-card-name {
@@ -5662,14 +5801,16 @@ button.nand-ui-list-item.is-active {
 	align-items: center;
 	justify-content: center;
 	cursor: pointer;
+	border-radius: var(--db-radius-sm, 6px);
 	opacity: 0.3;
 	color: var(--db-text-muted);
-	transition: opacity 0.15s;
+	transition: opacity var(--nand-duration) var(--nand-ease), background-color var(--nand-duration) var(--nand-ease), color var(--nand-duration) var(--nand-ease);
 	flex-shrink: 0;
 }
 
 .dashboard-habit-stats-icon-btn:hover {
 	opacity: 0.75;
+	background: var(--db-bg-card);
 }
 
 .dashboard-habit-stats-icon-btn--danger:hover {
@@ -5680,18 +5821,20 @@ button.nand-ui-list-item.is-active {
 .dashboard-habit-stats-chips {
 	display: flex;
 	gap: 8px;
-	margin-bottom: 10px;
+	margin-bottom: 12px;
 }
 
+/* KPI chip: icon + value over label. Inner radius nests inside the card. */
 .dashboard-habit-stats-chip {
 	flex: 1;
+	min-width: 0;
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	gap: 7px;
+	gap: 8px;
 	background: var(--db-bg-card);
-	border-radius: 7px;
-	padding: 6px 8px;
+	border-radius: var(--db-radius-sm, 6px);
+	padding: 8px;
 }
 
 .dashboard-habit-stats-chip-icon {
@@ -5707,16 +5850,18 @@ button.nand-ui-list-item.is-active {
 }
 
 .dashboard-habit-stats-chip-value {
-	font-size: 0.82em;
+	font-size: 0.88em;
 	font-weight: 700;
 	color: var(--db-text);
-	line-height: 1.15;
+	line-height: 1.2;
+	font-variant-numeric: tabular-nums;
 }
 
 .dashboard-habit-stats-chip-label {
 	font-size: 0.6em;
+	font-weight: 500;
 	color: var(--db-text-muted);
-	line-height: 1.15;
+	line-height: 1.3;
 }
 
 .dashboard-habit-stats-heatmap-section {
@@ -5753,8 +5898,8 @@ button.nand-ui-list-item.is-active {
 }
 
 .dashboard-habit-stats-heatmap-cell {
-	border-radius: 3px;
-	background: rgba(128, 128, 128, 0.14);
+	border-radius: var(--nand-radius-xs, 4px);
+	background: color-mix(in srgb, var(--db-text-muted) 14%, transparent);
 }
 
 .dashboard-habit-stats-heatmap-cell--done {
@@ -5804,7 +5949,7 @@ button.nand-ui-list-item.is-active {
 .dashboard-pomodoro-tagmanager-chip {
 	display: inline-flex;
 	align-items: center;
-	gap: 7px;
+	gap: 8px;
 	align-self: flex-start;
 	max-width: 100%;
 	padding: 6px 14px;
@@ -5812,7 +5957,13 @@ button.nand-ui-list-item.is-active {
 	background: var(--db-bg-hover);
 	border: 1px solid var(--db-border-card);
 	cursor: pointer;
-	transition: border-color 0.15s, background 0.15s;
+	transition: border-color var(--nand-duration) var(--nand-ease), background-color var(--nand-duration) var(--nand-ease);
+}
+
+.dashboard-pomodoro-tagmanager-chip:focus-visible,
+.dashboard-pomodoro-tagmanager-action:focus-visible {
+	outline: 2px solid var(--db-accent);
+	outline-offset: 1px;
 }
 
 .dashboard-pomodoro-tagmanager-chip:hover {
@@ -5869,7 +6020,7 @@ button.nand-ui-list-item.is-active {
 	font-weight: 500;
 	color: var(--db-text-muted);
 	cursor: pointer;
-	transition: border-color 0.15s, color 0.15s, background 0.15s;
+	transition: border-color var(--nand-duration) var(--nand-ease), color var(--nand-duration) var(--nand-ease), background-color var(--nand-duration) var(--nand-ease);
 }
 
 .dashboard-pomodoro-tagmanager-action:hover {
@@ -5894,7 +6045,7 @@ button.nand-ui-list-item.is-active {
 	margin-top: 12px;
 	padding: 12px;
 	background: var(--db-bg-hover);
-	border-radius: 10px;
+	border-radius: var(--db-radius-md, 10px);
 	display: flex;
 	flex-direction: column;
 	gap: 8px;
@@ -5908,13 +6059,15 @@ button.nand-ui-list-item.is-active {
 .dashboard-pomodoro-tagmanager-prompt-input,
 .dashboard-pomodoro-tagmanager-prompt-select {
 	background: var(--db-bg-modal-raised, var(--background-primary, var(--db-bg)));
-	border: 1px solid var(--db-border-card);
-	border-radius: 6px;
+	border: 1px solid var(--db-border-input, var(--db-border-card));
+	border-radius: var(--db-radius-sm, 6px);
 	color: var(--db-text);
 	font-size: 0.75em;
-	padding: 6px 8px;
+	padding: 6px 10px;
 	outline: none;
 	width: 100%;
+	box-sizing: border-box;
+	transition: border-color var(--nand-duration) var(--nand-ease);
 }
 .dashboard-pomodoro-tagmanager-prompt-input:focus,
 .dashboard-pomodoro-tagmanager-prompt-select:focus {
@@ -5936,12 +6089,12 @@ button.nand-ui-list-item.is-active {
 .dashboard-pomodoro-tagmanager-prompt-cancel,
 .dashboard-pomodoro-tagmanager-prompt-ok {
 	border: none;
-	border-radius: 6px;
+	border-radius: var(--db-radius-sm, 6px);
 	padding: 6px 14px;
 	font-size: 0.72em;
 	font-weight: 600;
 	cursor: pointer;
-	transition: opacity 0.15s;
+	transition: opacity var(--nand-duration) var(--nand-ease);
 }
 .dashboard-pomodoro-tagmanager-prompt-cancel {
 	background: var(--db-bg-hover);
@@ -5997,7 +6150,7 @@ button.nand-ui-list-item.is-active {
 	background: var(--db-bg-hover);
 	border: 1px solid var(--db-border-card);
 	border-radius: 999px;
-	padding: 3px 10px;
+	padding: 2px 4px 2px 10px;
 	font-size: 0.68em;
 	color: var(--db-text);
 }
@@ -6012,7 +6165,8 @@ button.nand-ui-list-item.is-active {
 	color: var(--db-text-muted);
 	display: flex;
 	padding: 2px;
-	border-radius: 4px;
+	border-radius: 50%;
+	transition: background-color var(--nand-duration) var(--nand-ease), color var(--nand-duration) var(--nand-ease);
 }
 .dashboard-pomodoro-filterbar-clear:hover {
 	color: var(--db-text);
@@ -6032,7 +6186,7 @@ button.nand-ui-list-item.is-active {
 	color: var(--db-text-faint);
 	text-transform: uppercase;
 	letter-spacing: 0.08em;
-	margin-top: 2px;
+	margin-top: 0;
 }
 
 .dashboard-pomodoro-kpi-group--hist {
@@ -6047,8 +6201,8 @@ button.nand-ui-list-item.is-active {
 .dashboard-pomodoro-kpi-hero {
 	position: relative;
 	background: var(--db-bg-hover);
-	border-radius: 10px;
-	padding: 12px 10px;
+	border-radius: var(--db-radius-md, 10px);
+	padding: 12px;
 	display: flex;
 	flex-direction: column;
 	gap: 6px;
@@ -6066,6 +6220,7 @@ button.nand-ui-list-item.is-active {
 	fill: var(--db-text);
 	font-size: 1.15em;
 	font-weight: 800;
+	font-variant-numeric: tabular-nums;
 }
 
 .dashboard-pomodoro-kpi-hero-label {
@@ -6093,8 +6248,8 @@ button.nand-ui-list-item.is-active {
 	justify-content: center;
 	cursor: pointer;
 	color: var(--db-text-faint);
-	border-radius: 5px;
-	transition: color 0.15s, background 0.15s;
+	border-radius: var(--db-radius-sm, 6px);
+	transition: color var(--nand-duration) var(--nand-ease), background-color var(--nand-duration) var(--nand-ease);
 }
 .dashboard-pomodoro-kpi-hero-edit svg { width: 11px; height: 11px; }
 .dashboard-pomodoro-kpi-hero-edit:hover {
@@ -6105,8 +6260,8 @@ button.nand-ui-list-item.is-active {
 .dashboard-pomodoro-goal-editor {
 	background: var(--db-bg-hover);
 	border: 1px solid var(--db-border-card);
-	border-radius: 10px;
-	padding: 10px 12px;
+	border-radius: var(--db-radius-md, 10px);
+	padding: 8px 12px;
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
@@ -6129,14 +6284,14 @@ button.nand-ui-list-item.is-active {
 	border: 1px solid var(--db-border-card);
 	background: var(--db-bg-modal-raised, var(--background-primary, var(--db-bg)));
 	color: var(--db-text);
-	width: 26px;
-	height: 26px;
+	width: 28px;
+	height: 28px;
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	border-radius: 6px;
+	border-radius: var(--db-radius-sm, 6px);
 	cursor: pointer;
-	transition: border-color 0.15s;
+	transition: border-color var(--nand-duration) var(--nand-ease), color var(--nand-duration) var(--nand-ease);
 }
 .dashboard-pomodoro-goal-editor-step:hover {
 	border-color: var(--db-accent);
@@ -6159,8 +6314,8 @@ button.nand-ui-list-item.is-active {
 	gap: 8px;
 	background: linear-gradient(135deg, rgba(231, 124, 47, 0.12), rgba(241, 196, 15, 0.08));
 	border: 1px solid rgba(231, 124, 47, 0.22);
-	border-radius: 10px;
-	padding: 9px 12px;
+	border-radius: var(--db-radius-md, 10px);
+	padding: 8px 12px;
 }
 
 .dashboard-pomodoro-kpi-streak-icon {
@@ -6173,6 +6328,7 @@ button.nand-ui-list-item.is-active {
 	font-weight: 800;
 	color: var(--db-text);
 	line-height: 1;
+	font-variant-numeric: tabular-nums;
 }
 
 .dashboard-pomodoro-kpi-streak-label {
@@ -6202,6 +6358,7 @@ button.nand-ui-list-item.is-active {
 	fill: var(--db-text);
 	font-size: 1.625em;
 	font-weight: 800;
+	font-variant-numeric: tabular-nums;
 }
 
 .dashboard-pomodoro-gauge-hint {
@@ -6257,7 +6414,7 @@ button.nand-ui-list-item.is-active {
 .dashboard-pomodoro-hour-bar {
 	width: 100%;
 	max-width: 14px;
-	border-radius: 2px;
+	border-radius: var(--nand-radius-xs, 4px) var(--nand-radius-xs, 4px) 2px 2px;
 	background: var(--db-accent);
 	opacity: 0.55;
 	transition: opacity 0.12s;
@@ -6285,10 +6442,10 @@ button.nand-ui-list-item.is-active {
 /* Ranking rows clickable/active */
 .dashboard-pomodoro-rank-row {
 	cursor: pointer;
-	border-radius: 6px;
-	padding: 2px 4px;
-	margin: 0 -4px 7px;
-	transition: background 0.12s;
+	border-radius: var(--db-radius-sm, 6px);
+	padding: 4px 6px;
+	margin: 0 -6px 4px;
+	transition: background-color var(--nand-duration) var(--nand-ease);
 }
 
 .dashboard-pomodoro-rank-row:hover {
@@ -6296,8 +6453,8 @@ button.nand-ui-list-item.is-active {
 }
 
 .dashboard-pomodoro-rank-row--active {
-	background: var(--db-bg-hover);
-	outline: 1px solid var(--db-accent);
+	background: color-mix(in srgb, var(--db-accent) 10%, var(--db-bg-hover));
+	outline: 1px solid color-mix(in srgb, var(--db-accent) 60%, transparent);
 }
 
 /* Heatmap gradient + legend + empty hint */
@@ -6308,15 +6465,15 @@ button.nand-ui-list-item.is-active {
 .dashboard-pomodoro-heatmap-legend {
 	display: flex;
 	align-items: center;
-	gap: 3px;
-	margin-top: 5px;
+	gap: 4px;
+	margin-top: 8px;
 	justify-content: flex-end;
 }
 
 .dashboard-pomodoro-heatmap-legend-swatch {
 	width: 10px;
 	height: 10px;
-	border-radius: 2.5px;
+	border-radius: 3px;
 	background: var(--db-bg-hover);
 	border: 1px solid var(--db-border-card);
 }
@@ -6334,7 +6491,7 @@ button.nand-ui-list-item.is-active {
 	align-items: center;
 	justify-content: center;
 	background: color-mix(in srgb, var(--db-bg) 55%, transparent);
-	border-radius: 8px;
+	border-radius: var(--db-radius-sm, 6px);
 	font-size: 0.7em;
 	color: var(--db-text-muted);
 	text-align: center;
@@ -6399,8 +6556,9 @@ button.nand-ui-list-item.is-active {
 	font-size: 0.7em;
 	color: var(--db-text);
 	flex: 1;
+	min-width: 0;
 	overflow: hidden;
-	text-variant: ellipsis;
+	text-overflow: ellipsis;
 	white-space: nowrap;
 }
 
@@ -6414,6 +6572,7 @@ button.nand-ui-list-item.is-active {
 	font-size: 0.62em;
 	color: var(--db-text-muted);
 	flex-shrink: 0;
+	font-variant-numeric: tabular-nums;
 }
 
 .dashboard-pomodoro-timeline-done {
@@ -6456,7 +6615,7 @@ button.nand-ui-list-item.is-active {
 
 .dashboard-pomodoro-timeline-start {
 	border: none;
-	border-radius: 8px;
+	border-radius: 999px;
 	background: var(--db-accent);
 	color: var(--background-primary, #fff);
 	font-size: 0.72em;
@@ -6480,9 +6639,9 @@ button.nand-ui-list-item.is-active {
 	overflow-y: auto;
 	background: var(--db-bg-modal, var(--background-primary, var(--db-bg)));
 	border: 1px solid var(--db-border-card);
-	border-radius: var(--db-radius-lg, 12px);
-	box-shadow: 0 12px 40px rgba(0, 0, 0, 0.28);
-	padding: 14px 16px;
+	border-radius: var(--db-radius-md, 10px);
+	box-shadow: var(--nand-shadow-lg, 0 12px 40px rgba(0, 0, 0, 0.28));
+	padding: 12px 16px;
 	z-index: 10;
 }
 
@@ -6490,6 +6649,7 @@ button.nand-ui-list-item.is-active {
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
+	gap: 8px;
 	margin-bottom: 8px;
 }
 
@@ -6566,20 +6726,21 @@ button.nand-ui-list-item.is-active {
 .dashboard-expense-stats-modal {
 	background: var(--db-bg-modal, var(--background-primary, var(--db-bg)));
 	border: 1px solid var(--db-border-card);
-	border-radius: var(--db-radius-lg, 12px);
+	border-radius: var(--db-radius-lg, 14px);
 	padding: 20px;
 	max-width: 380px;
 	width: 90%;
 	max-height: 80vh;
 	overflow-y: auto;
-	box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+	box-shadow: var(--nand-shadow-lg, 0 8px 32px rgba(0, 0, 0, 0.2));
+	font-variant-numeric: tabular-nums;
 }
 
 .dashboard-expense-stats-modal--wide {
 	max-width: 1040px;
 	width: 94%;
 	max-height: 86vh;
-	padding: 22px 26px;
+	padding: 20px 24px;
 	display: flex;
 	flex-direction: column;
 	/* Size container for the 1-column collapse below: the breakpoint must
@@ -6594,8 +6755,9 @@ button.nand-ui-list-item.is-active {
 	display: flex;
 	justify-content: space-between;
 	align-items: center;
+	min-height: 28px;
 	margin-bottom: 16px;
-	gap: 10px;
+	gap: 12px;
 	flex-wrap: wrap;
 }
 
@@ -6607,8 +6769,9 @@ button.nand-ui-list-item.is-active {
 }
 
 .dashboard-expense-stats-header-title {
-	font-size: 1.3em;
-	font-weight: 700;
+	font-size: 1.15em;
+	font-weight: 600;
+	line-height: 1.3;
 	color: var(--db-text);
 }
 
@@ -6621,7 +6784,7 @@ button.nand-ui-list-item.is-active {
 .dashboard-expense-stats-header-right {
 	display: flex;
 	align-items: center;
-	gap: 10px;
+	gap: 8px;
 	flex-wrap: wrap;
 	justify-content: flex-end;
 }
@@ -6630,9 +6793,10 @@ button.nand-ui-list-item.is-active {
 .dashboard-expense-range-toggle {
 	display: flex;
 	gap: 2px;
-	background: var(--db-bg-hover);
-	border-radius: 6px;
 	padding: 2px;
+	background: var(--db-bg-hover);
+	border: 1px solid var(--db-border-card);
+	border-radius: calc(var(--db-radius-sm, 6px) + 2px);
 }
 
 .dashboard-expense-range-btn {
@@ -6645,18 +6809,34 @@ button.nand-ui-list-item.is-active {
 	font-size: 0.82em;
 	font-weight: 500;
 	color: var(--db-text-muted);
-	padding: 5px 12px;
-	border-radius: 5px;
+	padding: 4px 12px;
+	min-height: 24px;
+	border-radius: var(--db-radius-sm, 6px);
 	cursor: pointer;
 	white-space: nowrap;
-	transition: background 0.15s, color 0.15s;
+	transition: background-color var(--nand-duration) var(--nand-ease), color var(--nand-duration) var(--nand-ease);
+}
+
+.dashboard-expense-range-btn:hover:not(.dashboard-expense-range-btn--active) {
+	color: var(--db-text);
 }
 
 .dashboard-expense-range-btn--active {
 	background: var(--db-bg-modal-raised, var(--background-primary, var(--db-bg)));
 	color: var(--db-accent);
-	font-weight: 700;
-	box-shadow: 0 1px 4px rgba(0, 0, 0, 0.12);
+	font-weight: 600;
+	box-shadow: var(--nand-shadow-xs, 0 1px 2px rgba(0, 0, 0, 0.08));
+}
+
+.dashboard-expense-range-btn:focus-visible,
+.dashboard-expense-subrange-btn:focus-visible,
+.dashboard-expense-level-btn:focus-visible,
+.dashboard-expense-type-btn:focus-visible,
+.dashboard-expense-year-nav-btn:focus-visible,
+.dashboard-expense-year-nav-label:focus-visible,
+.dashboard-expense-stats-close:focus-visible {
+	outline: 2px solid var(--db-accent);
+	outline-offset: 1px;
 }
 
 /* Year navigation (history range only) */
@@ -6683,8 +6863,8 @@ button.nand-ui-list-item.is-active {
 	justify-content: center;
 	cursor: pointer;
 	color: var(--db-text-muted);
-	border-radius: 5px;
-	transition: background 0.15s, color 0.15s;
+	border-radius: var(--db-radius-sm, 6px);
+	transition: background-color var(--nand-duration) var(--nand-ease), color var(--nand-duration) var(--nand-ease);
 }
 
 .dashboard-expense-year-nav-btn:hover {
@@ -6711,11 +6891,11 @@ button.nand-ui-list-item.is-active {
 	font-variant-numeric: tabular-nums;
 	/* Clickable: opens the period dropdown (native Menu). Padding leaves room
 	   for the chevron; border-radius + hover match the ‹ › buttons. */
-	padding: 3px 14px 3px 6px;
-	border-radius: 5px;
+	padding: 3px 16px 3px 8px;
+	border-radius: var(--db-radius-sm, 6px);
 	cursor: pointer;
 	position: relative;
-	transition: background 0.15s;
+	transition: background-color var(--nand-duration) var(--nand-ease);
 }
 
 .dashboard-expense-year-nav-label:hover {
@@ -6748,9 +6928,10 @@ button.nand-ui-list-item.is-active {
 .dashboard-expense-subrange-toggle {
 	display: none;
 	gap: 2px;
-	background: var(--db-bg-input, rgba(128, 128, 128, 0.12));
-	border-radius: var(--db-radius-sm, 6px);
 	padding: 2px;
+	background: var(--db-bg-hover);
+	border: 1px solid var(--db-border-card);
+	border-radius: calc(var(--db-radius-sm, 6px) + 2px);
 }
 
 .dashboard-expense-subrange-toggle--visible {
@@ -6765,10 +6946,10 @@ button.nand-ui-list-item.is-active {
 	height: auto;
 	cursor: pointer;
 	padding: 3px 8px;
-	border-radius: 4px;
+	border-radius: var(--db-radius-sm, 6px);
 	color: var(--db-text-muted);
 	font-size: 0.7em;
-	transition: background 0.15s ease, color 0.15s ease;
+	transition: background-color var(--nand-duration) var(--nand-ease), color var(--nand-duration) var(--nand-ease);
 }
 
 .dashboard-expense-subrange-btn:hover {
@@ -6776,18 +6957,20 @@ button.nand-ui-list-item.is-active {
 }
 
 .dashboard-expense-subrange-btn--active {
-	background: var(--db-bg-btn, rgba(139, 92, 246, 0.10));
+	background: var(--db-bg-modal-raised, var(--background-primary, var(--db-bg)));
 	color: var(--db-accent);
 	font-weight: 600;
+	box-shadow: var(--nand-shadow-xs, 0 1px 2px rgba(0, 0, 0, 0.08));
 }
 
 /* Donut aggregation granularity: plain categories vs primary groups. */
 .dashboard-expense-level-toggle {
 	display: flex;
 	gap: 2px;
-	background: var(--db-bg-input, rgba(128, 128, 128, 0.12));
-	border-radius: var(--db-radius-sm, 6px);
 	padding: 2px;
+	background: var(--db-bg-hover);
+	border: 1px solid var(--db-border-card);
+	border-radius: calc(var(--db-radius-sm, 6px) + 2px);
 }
 
 .dashboard-expense-level-btn {
@@ -6797,11 +6980,11 @@ button.nand-ui-list-item.is-active {
 	padding: 0;
 	height: auto;
 	cursor: pointer;
-	padding: 2px 7px;
-	border-radius: 4px;
+	padding: 2px 8px;
+	border-radius: var(--db-radius-sm, 6px);
 	color: var(--db-text-muted);
 	font-size: 0.66em;
-	transition: background 0.15s ease, color 0.15s ease;
+	transition: background-color var(--nand-duration) var(--nand-ease), color var(--nand-duration) var(--nand-ease);
 }
 
 .dashboard-expense-level-btn:hover {
@@ -6809,18 +6992,20 @@ button.nand-ui-list-item.is-active {
 }
 
 .dashboard-expense-level-btn--active {
-	background: var(--db-bg-btn, rgba(139, 92, 246, 0.10));
+	background: var(--db-bg-modal-raised, var(--background-primary, var(--db-bg)));
 	color: var(--db-accent);
 	font-weight: 600;
+	box-shadow: var(--nand-shadow-xs, 0 1px 2px rgba(0, 0, 0, 0.08));
 }
 
 /* Expense/income type toggle (library view toggle, miniature) */
 .dashboard-expense-type-toggle {
 	display: flex;
 	gap: 2px;
-	background: var(--db-bg-input, rgba(128, 128, 128, 0.12));
-	border-radius: var(--db-radius-sm, 6px);
 	padding: 2px;
+	background: var(--db-bg-hover);
+	border: 1px solid var(--db-border-card);
+	border-radius: calc(var(--db-radius-sm, 6px) + 2px);
 }
 
 .dashboard-expense-type-btn {
@@ -6831,10 +7016,10 @@ button.nand-ui-list-item.is-active {
 	height: auto;
 	cursor: pointer;
 	padding: 4px 10px;
-	border-radius: 4px;
+	border-radius: var(--db-radius-sm, 6px);
 	color: var(--db-text-muted);
 	font-size: 0.75em;
-	transition: background 0.15s ease, color 0.15s ease;
+	transition: background-color var(--nand-duration) var(--nand-ease), color var(--nand-duration) var(--nand-ease);
 }
 
 .dashboard-expense-type-btn:hover {
@@ -6842,9 +7027,10 @@ button.nand-ui-list-item.is-active {
 }
 
 .dashboard-expense-type-btn--active {
-	background: var(--db-bg-btn, rgba(139, 92, 246, 0.10));
+	background: var(--db-bg-modal-raised, var(--background-primary, var(--db-bg)));
 	color: var(--db-accent);
 	font-weight: 600;
+	box-shadow: var(--nand-shadow-xs, 0 1px 2px rgba(0, 0, 0, 0.08));
 }
 
 .dashboard-expense-stats-close {
@@ -6855,18 +7041,19 @@ button.nand-ui-list-item.is-active {
 	height: auto;
 	cursor: pointer;
 	color: var(--db-text-muted);
-	width: 24px;
-	height: 24px;
+	width: 28px;
+	height: 28px;
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	border-radius: 4px;
-	transition: background 0.15s;
+	border-radius: var(--db-radius-sm, 6px);
+	transition: background-color var(--nand-duration) var(--nand-ease), color var(--nand-duration) var(--nand-ease);
 	flex-shrink: 0;
 }
 
 .dashboard-expense-stats-close:hover {
 	background: var(--db-bg-hover);
+	color: var(--db-text);
 }
 
 /* Body grid, two areas: records column left; every chart section right —
@@ -6882,7 +7069,7 @@ button.nand-ui-list-item.is-active {
 	grid-template-areas:
 		"kpi mid"
 		"kpi right";
-	gap: 18px;
+	gap: 16px;
 	overflow-y: auto;
 	/* The tall chart column makes this always scrollable; the bar along the
 	   modal edge reads as clutter — scroll stays, chrome doesn't. */
@@ -6922,19 +7109,21 @@ button.nand-ui-list-item.is-active {
 
 /* A touch more air between the KPI cards and the record list below them. */
 .dashboard-expense-kpi-col > .dashboard-expense-stats-section {
-	margin-top: 6px;
+	margin-top: 8px;
 }
 
 .dashboard-expense-stats-summary {
 	display: grid;
 	grid-template-columns: 1fr 1fr;
-	gap: 6px;
+	gap: 8px;
 }
 
+/* KPI cell: bold tabular value over a small muted label. */
 .dashboard-expense-stats-card {
 	background: var(--db-bg-hover);
-	border-radius: 8px;
-	padding: 10px 8px;
+	border: 1px solid transparent;
+	border-radius: var(--db-radius-sm, 6px);
+	padding: 12px 8px 10px;
 	text-align: center;
 	min-width: 0;
 }
@@ -6950,8 +7139,9 @@ button.nand-ui-list-item.is-active {
 }
 
 .dashboard-expense-stats-card-value {
-	font-size: 1em;
+	font-size: 1.05em;
 	font-weight: 700;
+	line-height: 1.2;
 	color: var(--db-accent);
 	font-variant-numeric: tabular-nums;
 }
@@ -6959,28 +7149,32 @@ button.nand-ui-list-item.is-active {
 .dashboard-expense-stats-card-delta {
 	font-size: 0.58em;
 	font-weight: 600;
-	padding: 1px 4px;
-	border-radius: 4px;
+	padding: 1px 6px;
+	border-radius: 999px;
 	white-space: nowrap;
+	font-variant-numeric: tabular-nums;
 }
+
 .dashboard-expense-stats-card-delta--up {
-	color: #2ecc71;
-	background: rgba(46, 204, 113, 0.12);
+	color: var(--nand-tone-success, var(--color-green));
+	background: color-mix(in srgb, var(--nand-tone-success, var(--color-green)) 14%, transparent);
 }
+
 .dashboard-expense-stats-card-delta--down {
-	color: #e74c3c;
-	background: rgba(231, 76, 60, 0.12);
+	color: var(--db-danger, var(--color-red));
+	background: color-mix(in srgb, var(--db-danger, var(--color-red)) 14%, transparent);
 }
 
 .dashboard-expense-stats-card-label {
 	font-size: 0.65em;
+	font-weight: 500;
 	color: var(--db-text-muted);
-	margin-top: 2px;
+	margin-top: 4px;
 }
 
 /* Sections */
 .dashboard-expense-stats-section {
-	margin-bottom: 14px;
+	margin-bottom: 16px;
 }
 
 .dashboard-expense-stats-section-title {
@@ -6989,7 +7183,7 @@ button.nand-ui-list-item.is-active {
 	color: var(--db-text-muted);
 	text-transform: uppercase;
 	letter-spacing: 0.06em;
-	margin-bottom: 8px;
+	margin-bottom: 12px;
 }
 
 .dashboard-expense-stats-section-title-row {
@@ -7022,11 +7216,20 @@ button.nand-ui-list-item.is-active {
 	white-space: nowrap;
 	flex-shrink: 0;
 	opacity: 0.85;
-	transition: opacity 0.15s;
+	padding: 2px 6px;
+	margin-right: -6px;
+	border-radius: 999px;
+	transition: opacity var(--nand-duration) var(--nand-ease), background-color var(--nand-duration) var(--nand-ease);
+}
+
+.dashboard-expense-records-viewall:focus-visible {
+	outline: 2px solid var(--db-accent);
+	outline-offset: 1px;
 }
 
 .dashboard-expense-records-viewall:hover {
 	opacity: 1;
+	background: var(--db-bg-hover);
 }
 
 .dashboard-expense-records-viewall-icon {
@@ -7090,6 +7293,7 @@ button.nand-ui-list-item.is-active {
 	fill: var(--db-text);
 	font-size: 0.875em;
 	font-weight: 700;
+	font-variant-numeric: tabular-nums;
 }
 
 .dashboard-expense-donut-center-label {
@@ -7114,13 +7318,13 @@ button.nand-ui-list-item.is-active {
 .dashboard-expense-donut-legend--grid {
 	display: grid;
 	grid-template-columns: 1fr 1fr;
-	gap: 6px 12px;
+	gap: 6px 16px;
 }
 
 .dashboard-expense-donut-legend-item {
 	display: flex;
 	align-items: center;
-	gap: 6px;
+	gap: 8px;
 	min-width: 0;
 }
 
@@ -7147,6 +7351,7 @@ button.nand-ui-list-item.is-active {
 	width: 32px;
 	text-align: right;
 	flex-shrink: 0;
+	font-variant-numeric: tabular-nums;
 }
 
 .dashboard-expense-donut-legend-amount {
@@ -7193,11 +7398,11 @@ button.nand-ui-list-item.is-active {
 	display: flex;
 	justify-content: flex-end;
 	gap: 12px;
-	margin-bottom: 4px;
+	margin-bottom: 8px;
 }
 
 .dashboard-expense-lines-legend-item {
-	gap: 5px;
+	gap: 6px;
 }
 
 .dashboard-expense-lines-legend-name {
@@ -7248,10 +7453,11 @@ button.nand-ui-list-item.is-active {
 	color: var(--db-text);
 	font-size: 0.62em;
 	line-height: 1.35;
-	padding: 3px 8px;
-	border-radius: 6px;
+	font-variant-numeric: tabular-nums;
+	padding: 4px 8px;
+	border-radius: var(--db-radius-sm, 6px);
 	border: 1px solid var(--db-border-card);
-	box-shadow: 0 3px 10px rgba(0, 0, 0, 0.18);
+	box-shadow: var(--nand-shadow-sm, 0 3px 10px rgba(0, 0, 0, 0.18));
 	white-space: nowrap;
 	z-index: 5;
 	opacity: 0;
@@ -7291,15 +7497,15 @@ button.nand-ui-list-item.is-active {
 }
 
 .dashboard-expense-rank-bar-wrap {
-	height: 4px;
-	border-radius: 2px;
+	height: 6px;
+	border-radius: 999px;
 	background: var(--db-bg-hover);
 	overflow: hidden;
 }
 
 .dashboard-expense-rank-bar {
 	height: 100%;
-	border-radius: 2px;
+	border-radius: 999px;
 }
 
 /* Record table */
@@ -7420,9 +7626,9 @@ button.nand-ui-list-item.is-active {
 	justify-content: center;
 	cursor: pointer;
 	color: var(--db-text-faint);
-	border-radius: 4px;
+	border-radius: var(--db-radius-sm, 6px);
 	opacity: 0;
-	transition: opacity 0.15s, color 0.15s, background 0.15s;
+	transition: opacity var(--nand-duration) var(--nand-ease), color var(--nand-duration) var(--nand-ease), background-color var(--nand-duration) var(--nand-ease);
 }
 
 .dashboard-expense-records-table tbody tr:hover .dashboard-expense-records-delete,
@@ -7431,8 +7637,8 @@ button.nand-ui-list-item.is-active {
 }
 
 .dashboard-expense-records-delete:hover {
-	color: var(--db-danger, #e74c3c);
-	background: rgba(231, 76, 60, 0.10);
+	color: var(--db-danger, var(--color-red));
+	background: color-mix(in srgb, var(--db-danger, var(--color-red)) 10%, transparent);
 }
 
 .dashboard-expense-records-delete svg {
@@ -7505,21 +7711,22 @@ button.nand-ui-list-item.is-active {
 .dashboard-expense-ledger-modal {
 	background: var(--db-bg-modal, var(--background-primary, var(--db-bg)));
 	border: 1px solid var(--db-border-card);
-	border-radius: var(--db-radius-lg, 12px);
+	border-radius: var(--db-radius-lg, 14px);
 	max-width: 1080px;
 	width: 94%;
 	max-height: 86vh;
-	padding: 18px 20px 14px;
+	padding: 20px 20px 16px;
 	display: flex;
 	flex-direction: column;
-	box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+	box-shadow: var(--nand-shadow-lg, 0 8px 32px rgba(0, 0, 0, 0.2));
+	font-variant-numeric: tabular-nums;
 }
 
 /* Toolbar: filters left, actions right; wraps on narrow panes */
 .dashboard-expense-ledger-toolbar {
 	display: flex;
 	align-items: center;
-	gap: 10px 14px;
+	gap: 8px 16px;
 	flex-wrap: wrap;
 	margin-bottom: 12px;
 }
@@ -7549,10 +7756,12 @@ button.nand-ui-list-item.is-active {
 	color: var(--db-text-muted);
 	font-size: 0.72em;
 	font-family: var(--db-font);
-	padding: 4px 6px;
+	padding: 4px 8px;
+	min-height: 26px;
 	outline: none;
 	cursor: pointer;
 	max-width: 150px;
+	transition: border-color var(--nand-duration) var(--nand-ease);
 }
 
 .dashboard-expense-ledger-select:focus {
@@ -7573,10 +7782,17 @@ button.nand-ui-list-item.is-active {
 	color: var(--db-text-muted);
 	font-size: 0.72em;
 	font-family: var(--db-font);
-	padding: 4px 6px;
+	font-variant-numeric: tabular-nums;
+	padding: 4px 8px;
+	min-height: 26px;
 	outline: none;
 	/* Native calendar picker follows the light/dark mode. */
 	color-scheme: light dark;
+	transition: border-color var(--nand-duration) var(--nand-ease);
+}
+
+.dashboard-expense-ledger-date:focus {
+	border-color: var(--db-accent);
 }
 
 .dashboard-expense-ledger-search {
@@ -7587,8 +7803,10 @@ button.nand-ui-list-item.is-active {
 	color: var(--db-text);
 	font-size: 0.72em;
 	font-family: var(--db-font);
-	padding: 4px 8px;
+	padding: 4px 10px;
+	min-height: 26px;
 	outline: none;
+	transition: border-color var(--nand-duration) var(--nand-ease);
 }
 
 .dashboard-expense-ledger-search:focus {
@@ -7604,9 +7822,17 @@ button.nand-ui-list-item.is-active {
 	font-weight: 600;
 	font-family: var(--db-font);
 	padding: 4px 12px;
+	min-height: 26px;
 	cursor: pointer;
 	white-space: nowrap;
-	transition: background 0.15s, opacity 0.15s;
+	transition: background-color var(--nand-duration) var(--nand-ease), border-color var(--nand-duration) var(--nand-ease), color var(--nand-duration) var(--nand-ease), opacity var(--nand-duration) var(--nand-ease);
+}
+
+.dashboard-expense-ledger-btn:focus-visible,
+.dashboard-expense-ledger-action:focus-visible,
+.dashboard-expense-ledger-th:focus-visible {
+	outline: 2px solid var(--db-accent);
+	outline-offset: 1px;
 }
 
 .dashboard-expense-ledger-btn:hover:not(:disabled) {
@@ -7629,13 +7855,13 @@ button.nand-ui-list-item.is-active {
 }
 
 .dashboard-expense-ledger-btn--danger {
-	background: rgba(231, 76, 60, 0.10);
-	border-color: rgba(231, 76, 60, 0.35);
-	color: var(--db-danger, #e74c3c);
+	background: color-mix(in srgb, var(--db-danger, var(--color-red)) 10%, transparent);
+	border-color: color-mix(in srgb, var(--db-danger, var(--color-red)) 35%, transparent);
+	color: var(--db-danger, var(--color-red));
 }
 
 .dashboard-expense-ledger-btn--danger:hover:not(:disabled) {
-	background: rgba(231, 76, 60, 0.18);
+	background: color-mix(in srgb, var(--db-danger, var(--color-red)) 18%, transparent);
 }
 
 .dashboard-expense-ledger-file {
@@ -7652,7 +7878,7 @@ button.nand-ui-list-item.is-active {
 	overflow: auto;
 	scrollbar-width: thin;
 	border: 1px solid color-mix(in srgb, var(--db-border-card) 70%, transparent);
-	border-radius: var(--db-radius-sm, 6px);
+	border-radius: var(--db-radius-md, 10px);
 }
 
 .dashboard-expense-ledger-table {
@@ -7811,15 +8037,15 @@ button.nand-ui-list-item.is-active {
 	display: inline-flex;
 	align-items: center;
 	justify-content: center;
-	width: 20px;
-	height: 20px;
+	width: 22px;
+	height: 22px;
 	margin-left: 4px;
-	border-radius: 4px;
+	border-radius: var(--db-radius-sm, 6px);
 	cursor: pointer;
 	color: var(--db-text-faint);
 	opacity: 0.55;
 	vertical-align: middle;
-	transition: opacity 0.15s, color 0.15s, background 0.15s;
+	transition: opacity var(--nand-duration) var(--nand-ease), color var(--nand-duration) var(--nand-ease), background-color var(--nand-duration) var(--nand-ease);
 }
 
 .dashboard-expense-ledger-table tbody tr:hover .dashboard-expense-ledger-action,
@@ -7858,9 +8084,9 @@ button.nand-ui-list-item.is-active {
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
-	gap: 10px;
+	gap: 8px 12px;
 	flex-wrap: wrap;
-	margin-top: 10px;
+	margin-top: 12px;
 }
 
 .dashboard-expense-ledger-footer-info {
@@ -7913,10 +8139,10 @@ button.nand-ui-list-item.is-active {
 .dashboard-expense-catmgr-body {
 	display: flex;
 	flex-direction: column;
-	gap: 14px;
+	gap: 16px;
 	max-height: 50vh;
 	overflow-y: auto;
-	margin: 0 0 14px;
+	margin: 0 0 16px;
 }
 
 .dashboard-expense-catmgr-section-title {
@@ -7944,8 +8170,14 @@ button.nand-ui-list-item.is-active {
 	display: flex;
 	align-items: center;
 	gap: 6px;
-	padding: 2px 0;
-	border-radius: 4px;
+	padding: 2px 4px;
+	margin: 0 -4px;
+	border-radius: var(--db-radius-sm, 6px);
+	transition: background-color var(--nand-duration) var(--nand-ease);
+}
+
+.dashboard-expense-catmgr-row:hover {
+	background: var(--db-bg-hover);
 }
 
 /* Drag grip (settings-workspace pattern): the row only turns draggable while
@@ -8021,12 +8253,12 @@ button.nand-ui-list-item.is-active {
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	width: 16px;
-	height: 16px;
-	border-radius: 3px;
+	width: 18px;
+	height: 18px;
+	border-radius: var(--nand-radius-xs, 4px);
 	cursor: pointer;
 	color: var(--db-text-faint);
-	transition: color 0.15s, background 0.15s;
+	transition: color var(--nand-duration) var(--nand-ease), background-color var(--nand-duration) var(--nand-ease);
 }
 
 .dashboard-expense-catmgr-move-btn:hover {
@@ -8048,18 +8280,18 @@ button.nand-ui-list-item.is-active {
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	width: 20px;
-	height: 20px;
+	width: 22px;
+	height: 22px;
 	flex-shrink: 0;
-	border-radius: 4px;
+	border-radius: var(--db-radius-sm, 6px);
 	cursor: pointer;
 	color: var(--db-text-faint);
-	transition: color 0.15s, background 0.15s;
+	transition: color var(--nand-duration) var(--nand-ease), background-color var(--nand-duration) var(--nand-ease);
 }
 
 .dashboard-expense-catmgr-delete:hover {
-	color: var(--db-danger, #e74c3c);
-	background: rgba(231, 76, 60, 0.10);
+	color: var(--db-danger, var(--color-red));
+	background: color-mix(in srgb, var(--db-danger, var(--color-red)) 10%, transparent);
 }
 
 .dashboard-expense-catmgr-delete svg {
@@ -8077,7 +8309,8 @@ button.nand-ui-list-item.is-active {
 	flex: 1;
 	min-width: 0;
 	font-size: 0.8em;
-	padding: 5px 8px;
+	padding: 6px 10px;
+	border-radius: var(--db-radius-sm, 6px);
 	box-sizing: border-box;
 }
 
@@ -8094,23 +8327,60 @@ button.nand-ui-list-item.is-active {
 	display: flex;
 	align-items: center;
 	gap: 4px;
-	padding: 8px 10px 6px;
+	min-height: 20px;
+	padding: 12px 12px 8px;
 }
 
 .dashboard-reading-title {
 	font-size: 0.8em;
 	font-weight: 600;
 	color: var(--db-text);
+	min-width: 0;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
 }
 
 .dashboard-reading-title-spacer {
 	flex: 1;
 }
 
+.dashboard-reading-add-btn,
+.dashboard-reading-stats-btn {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 20px;
+	height: 20px;
+	box-sizing: border-box;
+	flex-shrink: 0;
+	border-radius: var(--db-radius-sm);
+	color: var(--db-text-muted);
+}
+
+.dashboard-reading-add-btn svg,
+.dashboard-reading-stats-btn svg {
+	width: 13px;
+	height: 13px;
+}
+
+.dashboard-reading-add-btn:hover,
+.dashboard-reading-stats-btn:hover {
+	background: var(--db-bg-hover);
+	color: var(--db-accent);
+}
+
+.dashboard-reading-add-btn:focus-visible,
+.dashboard-reading-stats-btn:focus-visible {
+	opacity: 1;
+	outline: 2px solid var(--db-accent);
+	outline-offset: 1px;
+}
+
 .dashboard-reading-add-btn {
 	cursor: pointer;
 	opacity: 0;
-	transition: opacity 0.2s;
+	transition: opacity var(--nand-duration) var(--nand-ease), background-color var(--nand-duration) var(--nand-ease), color var(--nand-duration) var(--nand-ease);
 	padding: 2px;
 }
 .dashboard-sidebar-reading:hover .dashboard-reading-add-btn {
@@ -8123,7 +8393,7 @@ button.nand-ui-list-item.is-active {
 .dashboard-reading-stats-btn {
 	cursor: pointer;
 	opacity: 0;
-	transition: opacity 0.2s;
+	transition: opacity var(--nand-duration) var(--nand-ease), background-color var(--nand-duration) var(--nand-ease), color var(--nand-duration) var(--nand-ease);
 	padding: 2px;
 }
 .dashboard-sidebar-reading:hover .dashboard-reading-stats-btn {
@@ -8137,7 +8407,7 @@ button.nand-ui-list-item.is-active {
 	gap: 8px;
 	max-height: 240px;
 	overflow-y: auto;
-	padding: 0 10px 10px;
+	padding: 0 12px 12px;
 	scrollbar-width: none;
 	-ms-overflow-style: none;
 }
@@ -8146,27 +8416,32 @@ button.nand-ui-list-item.is-active {
 }
 
 /* Individual book card */
+/* Inner card: nested radius (card radius minus the 12px inset → sm). */
 .dashboard-reading-book-card {
 	position: relative;
 	display: flex;
-	gap: 10px;
+	gap: 12px;
 	padding: 10px;
-	border-radius: 10px;
+	border-radius: var(--db-radius-sm);
 	background: var(--db-bg-hover, rgba(0,0,0,0.03));
 	border: 1px solid var(--db-border, rgba(0,0,0,0.06));
-	transition: background 0.2s, border-color 0.2s, box-shadow 0.2s, color 0.2s, transform 0.2s;
+	transition: background-color var(--nand-duration) var(--nand-ease), border-color var(--nand-duration) var(--nand-ease), box-shadow var(--nand-duration) var(--nand-ease), color var(--nand-duration) var(--nand-ease);
+}
+
+.dashboard-reading-book-card:hover {
+	border-color: var(--db-border-card, var(--db-border));
 }
 
 .dashboard-reading-book-card--active {
-	background: var(--db-bg-active, rgba(108, 92, 231, 0.06));
-	border-color: var(--db-accent, #6c5ce7);
+	background: color-mix(in srgb, var(--db-accent) 8%, var(--db-bg-hover));
+	border-color: color-mix(in srgb, var(--db-accent) 60%, transparent);
 }
 
 /* Book cover */
 .dashboard-reading-book-card-cover-wrap {
 	width: 48px;
 	height: 64px;
-	border-radius: 4px;
+	border-radius: var(--nand-radius-xs, 4px);
 	background-size: cover;
 	background-position: center;
 	flex-shrink: 0;
@@ -8176,7 +8451,7 @@ button.nand-ui-list-item.is-active {
 .dashboard-reading-book-card-cover-placeholder {
 	width: 100%;
 	height: 100%;
-	border-radius: 4px;
+	border-radius: inherit;
 	background: linear-gradient(135deg, var(--db-accent, #6c5ce7) 0%, var(--db-accent-dim, #a29bfe) 100%);
 	display: flex;
 	align-items: center;
@@ -8202,6 +8477,11 @@ button.nand-ui-list-item.is-active {
 	min-width: 0;
 }
 
+.dashboard-reading-book-card-sessions,
+.dashboard-reading-book-list-sessions {
+	font-variant-numeric: tabular-nums;
+}
+
 .dashboard-reading-book-card-title {
 	font-size: 0.78em;
 	font-weight: 600;
@@ -8225,7 +8505,7 @@ button.nand-ui-list-item.is-active {
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
-	margin-top: 4px;
+	margin-top: 6px;
 	gap: 6px;
 }
 
@@ -8257,8 +8537,16 @@ button.nand-ui-list-item.is-active {
 	height: 26px;
 	border-radius: 50%;
 	cursor: pointer;
-	transition: background 0.15s, border-color 0.15s, box-shadow 0.15s, color 0.15s, transform 0.15s;
+	transition: background-color var(--nand-duration) var(--nand-ease), border-color var(--nand-duration) var(--nand-ease), box-shadow var(--nand-duration) var(--nand-ease), color var(--nand-duration) var(--nand-ease), opacity var(--nand-duration) var(--nand-ease);
 	flex-shrink: 0;
+}
+
+.dashboard-reading-book-card-btn:focus-visible,
+.dashboard-reading-book-card-edit:focus-visible,
+.dashboard-reading-book-card-remove:focus-visible {
+	opacity: 1;
+	outline: 2px solid var(--db-accent);
+	outline-offset: 1px;
 }
 
 .dashboard-reading-book-card-btn--play {
@@ -8267,7 +8555,6 @@ button.nand-ui-list-item.is-active {
 }
 .dashboard-reading-book-card-btn--play:hover {
 	opacity: 0.85;
-	transform: scale(1.05);
 }
 .dashboard-reading-book-card-btn--play svg {
 	color: #fff;
@@ -8317,8 +8604,14 @@ button.nand-ui-list-item.is-active {
 	border-radius: 50%;
 	cursor: pointer;
 	opacity: 0;
-	transition: opacity 0.2s;
+	transition: opacity var(--nand-duration) var(--nand-ease), background-color var(--nand-duration) var(--nand-ease);
 }
+
+.dashboard-reading-book-card-edit:hover,
+.dashboard-reading-book-card-remove:hover {
+	background: var(--db-bg-card);
+}
+
 .dashboard-reading-book-card-edit {
 	left: 4px;
 }
@@ -8353,27 +8646,62 @@ button.nand-ui-list-item.is-active {
 
 .dashboard-reading-book-modal {
 	background: var(--db-bg-modal, var(--background-secondary, #fff));
-	border-radius: var(--db-radius-lg, 12px);
+	border: 1px solid var(--db-border-card, var(--db-border));
+	border-radius: var(--db-radius-lg, 14px);
 	width: 90%;
 	max-width: 400px;
 	max-height: 70vh;
 	display: flex;
 	flex-direction: column;
 	overflow: hidden;
-	box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+	box-shadow: var(--nand-shadow-lg, 0 8px 32px rgba(0,0,0,0.2));
+}
+
+.dashboard-reading-book-header,
+.dashboard-reading-end-header {
+	gap: 12px;
+	min-height: 28px;
 }
 
 .dashboard-reading-book-header {
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
-	padding: 12px 16px;
+	padding: 16px 16px 12px;
 	border-bottom: 1px solid var(--db-border, rgba(0,0,0,0.1));
 }
 
 .dashboard-reading-book-header-title {
-	font-size: 0.9em;
+	font-size: 0.95em;
 	font-weight: 600;
+	color: var(--db-text);
+}
+
+/* Close buttons share the stats-modal close geometry. */
+.dashboard-reading-book-close,
+.dashboard-reading-end-close {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 28px;
+	height: 28px;
+	box-sizing: border-box;
+	flex-shrink: 0;
+	border-radius: var(--db-radius-sm, 6px);
+	color: var(--db-text-muted);
+	transition: opacity var(--nand-duration) var(--nand-ease), background-color var(--nand-duration) var(--nand-ease);
+}
+
+.dashboard-reading-book-close:hover,
+.dashboard-reading-end-close:hover {
+	background: var(--db-bg-hover);
+}
+
+.dashboard-reading-book-close:focus-visible,
+.dashboard-reading-end-close:focus-visible {
+	opacity: 1;
+	outline: 2px solid var(--db-accent);
+	outline-offset: 1px;
 }
 
 .dashboard-reading-book-close {
@@ -8381,23 +8709,26 @@ button.nand-ui-list-item.is-active {
 	opacity: 0.5;
 	padding: 4px;
 }
+
 .dashboard-reading-book-close:hover {
 	opacity: 1;
 }
 
 .dashboard-reading-book-input-area {
-	padding: 10px 16px;
+	padding: 12px 16px;
 }
 
 .dashboard-reading-book-input {
 	width: 100%;
+	box-sizing: border-box;
 	padding: 8px 12px;
-	border-radius: 8px;
-	border: 1px solid var(--db-border, rgba(0,0,0,0.15));
+	border-radius: var(--db-radius-sm, 6px);
+	border: 1px solid var(--db-border-input, var(--db-border, rgba(0,0,0,0.15)));
 	background: var(--db-bg-modal-raised, var(--background-primary, #fff));
 	color: var(--db-text);
 	font-size: 0.85em;
 	outline: none;
+	transition: border-color var(--nand-duration) var(--nand-ease);
 }
 .dashboard-reading-book-input:focus {
 	border-color: var(--db-accent, #6c5ce7);
@@ -8423,11 +8754,11 @@ button.nand-ui-list-item.is-active {
 .dashboard-reading-book-item {
 	display: flex;
 	align-items: center;
-	gap: 10px;
+	gap: 12px;
 	padding: 8px;
-	border-radius: 8px;
+	border-radius: var(--db-radius-sm, 6px);
 	cursor: pointer;
-	transition: background 0.2s;
+	transition: background-color var(--nand-duration) var(--nand-ease);
 }
 .dashboard-reading-book-item:hover {
 	background: var(--db-bg-hover, rgba(0,0,0,0.04));
@@ -8436,7 +8767,7 @@ button.nand-ui-list-item.is-active {
 .dashboard-reading-book-item-cover {
 	width: 32px;
 	height: 42px;
-	border-radius: 3px;
+	border-radius: var(--nand-radius-xs, 4px);
 	background-size: cover;
 	background-position: center;
 	flex-shrink: 0;
@@ -8446,7 +8777,7 @@ button.nand-ui-list-item.is-active {
 .dashboard-reading-book-item-nocover {
 	width: 32px;
 	height: 42px;
-	border-radius: 3px;
+	border-radius: var(--nand-radius-xs, 4px);
 	background: var(--db-bg-hover, rgba(0,0,0,0.06));
 	flex-shrink: 0;
 }
@@ -8476,8 +8807,8 @@ button.nand-ui-list-item.is-active {
 .dashboard-reading-book-manual {
 	display: flex;
 	align-items: center;
-	gap: 6px;
-	padding-top: 8px;
+	gap: 8px;
+	padding-top: 12px;
 	border-top: 1px solid var(--db-border, rgba(0,0,0,0.08));
 	margin-top: 4px;
 }
@@ -8490,9 +8821,10 @@ button.nand-ui-list-item.is-active {
 
 .dashboard-reading-book-manual-input {
 	flex: 1;
-	padding: 4px 8px;
-	border-radius: 6px;
-	border: 1px solid var(--db-border, rgba(0,0,0,0.15));
+	min-width: 0;
+	padding: 6px 10px;
+	border-radius: var(--db-radius-sm, 6px);
+	border: 1px solid var(--db-border-input, var(--db-border, rgba(0,0,0,0.15)));
 	background: var(--db-bg-modal-raised, var(--background-primary, #fff));
 	color: var(--db-text);
 	font-size: 0.75em;
@@ -8503,8 +8835,8 @@ button.nand-ui-list-item.is-active {
 }
 
 .dashboard-reading-book-manual-btn {
-	padding: 4px 10px;
-	border-radius: 6px;
+	padding: 6px 12px;
+	border-radius: var(--db-radius-sm, 6px);
 	border: none;
 	background: var(--db-accent, #6c5ce7);
 	color: #fff;
@@ -8523,14 +8855,14 @@ button.nand-ui-list-item.is-active {
 .dashboard-reading-book-list-row {
 	display: flex;
 	align-items: center;
-	gap: 8px;
+	gap: 12px;
 	padding: 6px 0;
 }
 
 .dashboard-reading-book-list-cover {
 	width: 24px;
 	height: 32px;
-	border-radius: 2px;
+	border-radius: 3px;
 	background-size: cover;
 	background-position: center;
 	flex-shrink: 0;
@@ -8539,8 +8871,8 @@ button.nand-ui-list-item.is-active {
 .dashboard-reading-book-list-nocover {
 	width: 24px;
 	height: 32px;
-	border-radius: 2px;
-	background: var(--db-bg-hover, rgba(0,0,0,0.06));
+	border-radius: 3px;
+	background: var(--db-bg-card, var(--db-bg-hover));
 	flex-shrink: 0;
 }
 
@@ -8574,7 +8906,8 @@ button.nand-ui-list-item.is-active {
 
 .dashboard-reading-book-list-duration {
 	font-size: 0.7em;
-	font-weight: 500;
+	font-weight: 600;
+	font-variant-numeric: tabular-nums;
 }
 
 .dashboard-reading-book-card-sessions {
@@ -8587,20 +8920,20 @@ button.nand-ui-list-item.is-active {
 	display: flex;
 	align-items: center;
 	gap: 6px;
-	margin-top: 4px;
+	margin-top: 6px;
 }
 
 .dashboard-reading-book-card-progress-bar {
 	flex: 1;
-	height: 3px;
-	border-radius: 2px;
+	height: 4px;
+	border-radius: 999px;
 	background: var(--db-border, rgba(0,0,0,0.08));
 	overflow: hidden;
 }
 
 .dashboard-reading-book-card-progress-fill {
 	height: 100%;
-	border-radius: 2px;
+	border-radius: 999px;
 	background: var(--db-accent, #6c5ce7);
 	transition: width 0.3s ease;
 }
@@ -8615,6 +8948,7 @@ button.nand-ui-list-item.is-active {
 	flex-shrink: 0;
 	min-width: 30px;
 	text-align: right;
+	font-variant-numeric: tabular-nums;
 }
 
 /* End reading modal */
@@ -8630,18 +8964,19 @@ button.nand-ui-list-item.is-active {
 
 .dashboard-reading-end-modal {
 	background: var(--db-bg-modal, var(--background-secondary, #fff));
+	border: 1px solid var(--db-border-card, var(--db-border));
 	border-radius: var(--db-radius-lg, 14px);
 	width: 88%;
 	max-width: 380px;
 	overflow: hidden;
-	box-shadow: 0 12px 40px rgba(0,0,0,0.25);
+	box-shadow: var(--nand-shadow-lg, 0 12px 40px rgba(0,0,0,0.25));
 }
 
 .dashboard-reading-end-header {
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
-	padding: 16px 18px 12px;
+	padding: 16px 20px 12px;
 }
 
 .dashboard-reading-end-title {
@@ -8660,7 +8995,7 @@ button.nand-ui-list-item.is-active {
 }
 
 .dashboard-reading-end-body {
-	padding: 0 18px 16px;
+	padding: 0 20px 16px;
 	display: flex;
 	flex-direction: column;
 	gap: 12px;
@@ -8679,8 +9014,9 @@ button.nand-ui-list-item.is-active {
 
 .dashboard-reading-end-value {
 	font-size: 0.8em;
-	font-weight: 500;
+	font-weight: 600;
 	color: var(--db-text);
+	font-variant-numeric: tabular-nums;
 }
 
 .dashboard-reading-end-section {
@@ -8699,7 +9035,8 @@ button.nand-ui-list-item.is-active {
 	display: flex;
 	gap: 2px;
 	background: var(--db-bg-hover, rgba(0,0,0,0.04));
-	border-radius: 6px;
+	border: 1px solid var(--db-border-card, transparent);
+	border-radius: calc(var(--db-radius-sm, 6px) + 2px);
 	padding: 2px;
 	margin-bottom: 4px;
 }
@@ -8708,18 +9045,29 @@ button.nand-ui-list-item.is-active {
 	flex: 1;
 	text-align: center;
 	padding: 4px 8px;
-	border-radius: 5px;
+	border-radius: var(--db-radius-sm, 6px);
 	font-size: 0.7em;
 	color: var(--db-text-muted);
 	cursor: pointer;
-	transition: background 0.15s, border-color 0.15s, box-shadow 0.15s, color 0.15s, transform 0.15s;
+	transition: background-color var(--nand-duration) var(--nand-ease), box-shadow var(--nand-duration) var(--nand-ease), color var(--nand-duration) var(--nand-ease);
+}
+
+.dashboard-reading-end-mode-btn:hover:not(.dashboard-reading-end-mode-btn--active) {
+	color: var(--db-text);
+}
+
+.dashboard-reading-end-mode-btn:focus-visible,
+.dashboard-reading-stats-range-btn:focus-visible,
+.dashboard-reading-end-btn:focus-visible {
+	outline: 2px solid var(--db-accent);
+	outline-offset: 1px;
 }
 
 .dashboard-reading-end-mode-btn--active {
 	background: var(--db-bg-modal-raised, var(--background-primary, #fff));
-	color: var(--db-text);
-	font-weight: 500;
-	box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+	color: var(--db-accent);
+	font-weight: 600;
+	box-shadow: var(--nand-shadow-xs, 0 1px 3px rgba(0,0,0,0.08));
 }
 
 .dashboard-reading-end-inputs {
@@ -8730,12 +9078,14 @@ button.nand-ui-list-item.is-active {
 
 .dashboard-reading-end-page-readonly {
 	width: 100%;
+	box-sizing: border-box;
 	padding: 8px 10px;
-	border-radius: 8px;
+	border-radius: var(--db-radius-sm, 6px);
 	background: var(--db-bg-hover, rgba(0,0,0,0.04));
 	color: var(--db-text-muted);
 	font-size: 0.85em;
 	text-align: center;
+	font-variant-numeric: tabular-nums;
 }
 
 .dashboard-reading-end-page-row {
@@ -8758,15 +9108,18 @@ button.nand-ui-list-item.is-active {
 
 .dashboard-reading-end-page-input {
 	width: 100%;
+	box-sizing: border-box;
 	padding: 8px 10px;
-	border-radius: 8px;
-	border: 1px solid var(--db-border, rgba(0,0,0,0.15));
+	border-radius: var(--db-radius-sm, 6px);
+	border: 1px solid var(--db-border-input, var(--db-border, rgba(0,0,0,0.15)));
 	background: var(--db-bg-modal-raised, var(--background-primary, #fff));
 	color: var(--db-text);
 	font-size: 0.85em;
+	font-variant-numeric: tabular-nums;
 	text-align: center;
 	outline: none;
 	-moz-appearance: textfield;
+	transition: border-color var(--nand-duration) var(--nand-ease);
 }
 .dashboard-reading-end-page-input::-webkit-inner-spin-button,
 .dashboard-reading-end-page-input::-webkit-outer-spin-button {
@@ -8818,18 +9171,19 @@ button.nand-ui-list-item.is-active {
 	align-items: center;
 	justify-content: flex-end;
 	gap: 8px;
-	padding: 12px 18px 16px;
+	padding: 12px 20px 16px;
 	border-top: 1px solid var(--db-border, rgba(0,0,0,0.06));
 }
 
 .dashboard-reading-end-btn {
-	padding: 7px 16px;
-	border-radius: 8px;
+	padding: 6px 16px;
+	min-height: 30px;
+	border-radius: var(--db-radius-sm, 6px);
 	border: none;
 	font-size: 0.8em;
 	font-weight: 500;
 	cursor: pointer;
-	transition: background 0.15s, border-color 0.15s, box-shadow 0.15s, color 0.15s, transform 0.15s;
+	transition: background-color var(--nand-duration) var(--nand-ease), border-color var(--nand-duration) var(--nand-ease), box-shadow var(--nand-duration) var(--nand-ease), color var(--nand-duration) var(--nand-ease), opacity var(--nand-duration) var(--nand-ease);
 }
 
 .dashboard-reading-end-btn--cancel {
@@ -8853,6 +9207,7 @@ button.nand-ui-list-item.is-active {
 .dashboard-reading-end-btn--confirm {
 	background: var(--db-accent, #6c5ce7);
 	color: #fff;
+	font-weight: 600;
 }
 .dashboard-reading-end-btn--confirm:hover {
 	opacity: 0.9;
@@ -8861,7 +9216,7 @@ button.nand-ui-list-item.is-active {
 .dashboard-reading-end-btn--delete {
 	background: transparent;
 	color: var(--db-danger, #e74c3c);
-	border: 1px solid rgba(231, 76, 60, 0.3);
+	border: 1px solid color-mix(in srgb, var(--db-danger, var(--color-red)) 30%, transparent);
 	margin-left: auto;
 }
 .dashboard-reading-end-btn--delete:hover {
@@ -8874,24 +9229,26 @@ button.nand-ui-list-item.is-active {
 .dashboard-reading-stats-content {
 	display: flex;
 	flex-direction: column;
-	gap: 10px;
-	padding: 0 14px 16px;
+	gap: 12px;
+	padding: 0 4px 4px;
 	overflow-y: auto;
 	max-height: calc(70vh - 52px);
 }
 
 .dashboard-reading-stats-card {
 	background: var(--db-bg-hover, rgba(0,0,0,0.03));
-	border-radius: 10px;
+	border-radius: var(--db-radius-md, 10px);
 	padding: 12px;
 	border: 1px solid var(--db-border, rgba(0,0,0,0.05));
 }
 
 .dashboard-reading-stats-card-title {
-	font-size: 0.78em;
+	font-size: 0.7em;
 	font-weight: 600;
-	color: var(--db-text);
-	margin-bottom: 10px;
+	color: var(--db-text-muted);
+	text-transform: uppercase;
+	letter-spacing: 0.06em;
+	margin-bottom: 12px;
 }
 
 .dashboard-reading-stats-summary {
@@ -8900,25 +9257,29 @@ button.nand-ui-list-item.is-active {
 	gap: 8px;
 }
 
+/* KPI cell: bold tabular value over a muted label (stats-modal family). */
 .dashboard-reading-stats-summary-item {
 	display: flex;
 	flex-direction: column;
 	align-items: center;
-	padding: 8px 4px;
-	border-radius: 8px;
+	padding: 12px 8px 10px;
+	border-radius: var(--db-radius-sm, 6px);
 	background: var(--db-bg-modal-raised, var(--background-primary, #fff));
-	gap: 2px;
+	gap: 4px;
+	min-width: 0;
 }
 
 .dashboard-reading-stats-summary-value {
-	font-size: 1em;
+	font-size: 1.05em;
 	font-weight: 700;
-	color: var(--db-text);
-	line-height: 1.3;
+	color: var(--db-accent);
+	line-height: 1.2;
+	font-variant-numeric: tabular-nums;
 }
 
 .dashboard-reading-stats-summary-label {
-	font-size: 0.6em;
+	font-size: 0.62em;
+	font-weight: 500;
 	color: var(--db-text-muted);
 }
 
@@ -8926,26 +9287,32 @@ button.nand-ui-list-item.is-active {
 	display: flex;
 	gap: 2px;
 	background: var(--db-bg-modal-raised, var(--background-primary, #fff));
-	border-radius: 6px;
+	border: 1px solid var(--db-border-card, transparent);
+	border-radius: calc(var(--db-radius-sm, 6px) + 2px);
 	padding: 2px;
-	margin-bottom: 8px;
+	margin-bottom: 12px;
 }
 
 .dashboard-reading-stats-range-btn {
 	flex: 1;
 	text-align: center;
 	padding: 4px 8px;
-	border-radius: 5px;
+	border-radius: var(--db-radius-sm, 6px);
 	font-size: 0.68em;
 	color: var(--db-text-muted);
 	cursor: pointer;
-	transition: background 0.15s, border-color 0.15s, box-shadow 0.15s, color 0.15s, transform 0.15s;
+	transition: background-color var(--nand-duration) var(--nand-ease), color var(--nand-duration) var(--nand-ease);
+}
+
+.dashboard-reading-stats-range-btn:hover:not(.dashboard-reading-stats-range-btn--active) {
+	color: var(--db-text);
+	background: var(--db-bg-hover);
 }
 
 .dashboard-reading-stats-range-btn--active {
 	background: var(--db-accent, #6c5ce7);
 	color: #fff;
-	font-weight: 500;
+	font-weight: 600;
 }
 
 .dashboard-reading-stats-empty {
@@ -8972,6 +9339,7 @@ button.nand-ui-list-item.is-active {
 	color: var(--db-text-muted);
 	flex-shrink: 0;
 	min-width: 56px;
+	font-variant-numeric: tabular-nums;
 }
 
 .dashboard-reading-stats-record-book {
@@ -8988,6 +9356,7 @@ button.nand-ui-list-item.is-active {
 	font-size: 0.68em;
 	color: var(--db-text-muted);
 	flex-shrink: 0;
+	font-variant-numeric: tabular-nums;
 }
 
 .dashboard-reading-stats-record-del,
@@ -8995,12 +9364,12 @@ button.nand-ui-list-item.is-active {
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	width: 20px;
-	height: 20px;
-	border-radius: 4px;
+	width: 22px;
+	height: 22px;
+	border-radius: var(--db-radius-sm, 6px);
 	cursor: pointer;
 	opacity: 0;
-	transition: opacity 0.15s, background 0.15s;
+	transition: opacity var(--nand-duration) var(--nand-ease), background-color var(--nand-duration) var(--nand-ease);
 	flex-shrink: 0;
 }
 .dashboard-reading-stats-record:hover .dashboard-reading-stats-record-del,
@@ -9041,7 +9410,8 @@ button.nand-ui-list-item.is-active {
 .dashboard-sidebar-year-progress-year {
 	font-size: 1.15em;
 	font-weight: 600;
-	color: var(--db-text-primary);
+	color: var(--db-text-primary, var(--db-text));
+	font-variant-numeric: tabular-nums;
 }
 
 .dashboard-sidebar-year-progress-percent {
@@ -9126,7 +9496,7 @@ button.nand-ui-list-item.is-active {
 	display: inline-flex;
 	align-items: center;
 	padding: 2px 8px;
-	border-radius: var(--db-radius-sm, 8px);
+	border-radius: 999px;
 	font-size: 0.75em;
 	font-weight: 500;
 	line-height: 1.4;
@@ -9183,14 +9553,22 @@ button.nand-ui-list-item.is-active {
 	font-size: 1.1em;
 	cursor: pointer;
 	opacity: 0.6;
-	transition: opacity 0.2s, transform 0.2s;
+	padding: 2px;
+	border-radius: var(--db-radius-sm);
+	transition: opacity var(--nand-duration) var(--nand-ease), background-color var(--nand-duration) var(--nand-ease);
 	line-height: 1;
 	z-index: 1;
 }
 
 .dashboard-sidebar-lunar-fortune-btn:hover {
 	opacity: 1;
-	transform: scale(1.15);
+	background: var(--db-bg-hover);
+}
+
+.dashboard-sidebar-lunar-fortune-btn:focus-visible {
+	opacity: 1;
+	outline: 2px solid var(--db-accent);
+	outline-offset: 1px;
 }
 
 /* ===== Sidebar Calendar Widget ===== */
@@ -9215,7 +9593,8 @@ button.nand-ui-list-item.is-active {
 	display: flex;
 	align-items: center;
 	gap: 2px;
-	margin-bottom: 6px;
+	min-height: 22px;
+	margin-bottom: 8px;
 }
 
 .dashboard-sidebar-calendar .dashboard-calendar-nav-label {
@@ -9244,7 +9623,14 @@ button.nand-ui-list-item.is-active {
 	cursor: pointer;
 	border-radius: var(--db-radius-sm, 6px);
 	color: var(--db-text-muted);
-	transition: background 0.15s ease, color 0.15s ease;
+	transition: background-color var(--nand-duration) var(--nand-ease), color var(--nand-duration) var(--nand-ease);
+}
+
+.dashboard-sidebar-calendar .dashboard-calendar-nav-btn:focus-visible,
+.dashboard-sidebar-calendar .dashboard-calendar-today-btn:focus-visible,
+.dashboard-sidebar-calendar .dashboard-calendar-cell.is-clickable:focus-visible {
+	outline: 2px solid var(--db-accent);
+	outline-offset: -1px;
 }
 
 .dashboard-sidebar-calendar .dashboard-calendar-nav-btn:hover {
@@ -9329,7 +9715,8 @@ button.nand-ui-list-item.is-active {
 }
 
 .dashboard-sidebar-calendar .dashboard-library-view-btn {
-	padding: 3px 5px;
+	padding: 4px 6px;
+	border-radius: var(--db-radius-sm, 6px);
 }
 
 .dashboard-sidebar-calendar .dashboard-library-view-btn svg {
@@ -9359,11 +9746,12 @@ button.nand-ui-list-item.is-active {
 .dashboard-sidebar-calendar .dashboard-calendar.is-compact .dashboard-calendar-cell-num {
 	font-size: 0.78em;
 	line-height: 1;
+	font-variant-numeric: tabular-nums;
 }
 
 .dashboard-sidebar-calendar .dashboard-calendar.is-compact .dashboard-calendar-cell.is-clickable {
 	cursor: pointer;
-	transition: background 0.12s ease;
+	transition: background-color var(--nand-duration) var(--nand-ease);
 }
 
 .dashboard-sidebar-calendar .dashboard-calendar.is-compact .dashboard-calendar-cell.is-clickable:hover {
@@ -9413,7 +9801,7 @@ button.nand-ui-list-item.is-active {
 	background: var(--db-bg-modal, var(--background-primary));
 	border: 1px solid var(--db-border-card, var(--background-modifier-border));
 	border-radius: var(--db-radius-md);
-	box-shadow: 0 10px 32px rgba(0, 0, 0, 0.38);
+	box-shadow: var(--nand-shadow-lg, 0 10px 32px rgba(0, 0, 0, 0.38));
 	color: var(--db-text, var(--text-normal));
 	font-size: 1em;
 	line-height: 1.45;
@@ -9430,7 +9818,7 @@ button.nand-ui-list-item.is-active {
 .dashboard-calendar-day-preview-list {
 	display: flex;
 	flex-direction: column;
-	gap: 3px;
+	gap: 4px;
 	padding: 8px;
 	overflow-y: auto;
 	scrollbar-width: thin;
@@ -9444,7 +9832,7 @@ button.nand-ui-list-item.is-active {
 	align-items: center;
 	gap: 8px;
 	font-size: 0.95em;
-	padding: 5px 7px;
+	padding: 6px 8px;
 	border-radius: var(--db-radius-sm, 6px);
 	border-left: 3px solid transparent;
 }
@@ -9496,7 +9884,7 @@ button.nand-ui-list-item.is-active {
 	display: inline-flex;
 	align-items: center;
 	gap: 4px;
-	padding: 3px 6px 3px 8px;
+	padding: 2px 4px 2px 10px;
 	background: var(--db-bg-input, rgba(255, 255, 255, 0.05));
 	border: 1px solid var(--db-border-card);
 	border-radius: 999px;
@@ -9512,11 +9900,16 @@ button.nand-ui-list-item.is-active {
 	justify-content: center;
 	color: var(--text-muted);
 	padding: 0;
+	width: 18px;
+	height: 18px;
 	border-radius: 50%;
+	box-shadow: none;
+	transition: background-color var(--nand-duration) var(--nand-ease), color var(--nand-duration) var(--nand-ease);
 }
 
 .dashboard-settings-folder-chip-remove:hover {
 	color: var(--text-normal);
+	background: var(--background-modifier-hover);
 }
 
 .dashboard-settings-folder-chip-remove svg {
@@ -9573,7 +9966,7 @@ button.nand-ui-list-item.is-active {
 	margin: 0 auto;
 	background: linear-gradient(160deg, #f7f1e3 0%, #efe6d0 40%, #f2ead8 100%);
 	border: 2px solid #c9a96e;
-	border-radius: 4px;
+	border-radius: var(--nand-radius-md, 10px);
 	box-shadow:
 		0 2px 12px rgba(139, 69, 19, 0.15),
 		inset 0 0 30px rgba(139, 69, 19, 0.04);
@@ -9589,7 +9982,7 @@ button.nand-ui-list-item.is-active {
 	right: 6px;
 	bottom: 6px;
 	border: 1px solid rgba(201, 169, 110, 0.4);
-	border-radius: 2px;
+	border-radius: var(--nand-radius-xs, 4px);
 	pointer-events: none;
 }
 
@@ -9624,7 +10017,7 @@ button.nand-ui-list-item.is-active {
 	align-items: center;
 	gap: 8px;
 	padding: 16px 8px;
-	border-radius: 4px;
+	border-radius: var(--nand-radius-sm, 6px);
 	background: rgba(255, 252, 245, 0.7);
 	border: 1.5px solid #c9a96e;
 	cursor: pointer;
@@ -9798,7 +10191,7 @@ button.nand-ui-list-item.is-active {
 	justify-content: center;
 	padding: 8px 20px;
 	border: 2px solid #B22222;
-	border-radius: 4px;
+	border-radius: var(--nand-radius-sm, 6px);
 	font-size: 0.9em;
 	font-weight: 700;
 	cursor: pointer;
@@ -9841,7 +10234,7 @@ button.nand-ui-list-item.is-active {
 	color: #2c1810;
 	padding: 16px;
 	background: rgba(255, 252, 245, 0.6);
-	border-radius: 4px;
+	border-radius: var(--nand-radius-sm, 6px);
 	border: 1px solid #C41E3A;
 }
 
@@ -9894,7 +10287,7 @@ button.nand-ui-list-item.is-active {
 	align-items: center;
 	padding: 6px 2px 6px;
 	border-radius: var(--db-radius-sm);
-	transition: background 0.15s ease;
+	transition: background-color var(--nand-duration) var(--nand-ease);
 }
 
 .dashboard-sidebar-week-cell--today {
@@ -9919,6 +10312,7 @@ button.nand-ui-list-item.is-active {
 	font-weight: 600;
 	color: var(--db-text);
 	line-height: 1;
+	font-variant-numeric: tabular-nums;
 }
 
 .dashboard-sidebar-week-cell--today .dashboard-sidebar-week-date {
@@ -9938,7 +10332,7 @@ button.nand-ui-list-item.is-active {
 /* Settings widget card */
 .dashboard-widget-settings-card {
 	border: 1px solid var(--background-modifier-border);
-	border-radius: 8px;
+	border-radius: var(--nand-radius-md, 10px);
 	padding: 4px 0;
 	margin-bottom: 12px;
 }
@@ -10092,7 +10486,7 @@ button.nand-ui-list-item.is-active {
 .dashboard-recent-list {
 	display: flex;
 	flex-direction: column;
-	gap: 4px;
+	gap: 2px;
 }
 
 .dashboard-recent-item {
@@ -10102,8 +10496,13 @@ button.nand-ui-list-item.is-active {
 	padding: 8px 10px;
 	border-radius: var(--db-radius-sm);
 	cursor: pointer;
-	transition: background 0.15s ease;
+	transition: background-color var(--nand-duration) var(--nand-ease);
 	gap: 8px;
+}
+
+.dashboard-recent-item:focus-visible {
+	outline: 2px solid var(--db-accent);
+	outline-offset: -2px;
 }
 
 .dashboard-recent-item:hover {
@@ -10112,6 +10511,7 @@ button.nand-ui-list-item.is-active {
 
 .dashboard-recent-name {
 	font-size: 0.9em;
+	min-width: 0;
 	overflow: hidden;
 	text-overflow: ellipsis;
 	white-space: nowrap;
@@ -10120,8 +10520,11 @@ button.nand-ui-list-item.is-active {
 
 .dashboard-recent-time {
 	font-size: 0.78em;
-	opacity: 0.5;
+	color: var(--db-text-muted);
+	opacity: 0.8;
 	white-space: nowrap;
+	flex-shrink: 0;
+	font-variant-numeric: tabular-nums;
 }
 
 /* ===== Quick Links (Glass Buttons) ===== */
@@ -10129,35 +10532,38 @@ button.nand-ui-list-item.is-active {
 	display: flex;
 	flex-direction: row;
 	flex-wrap: wrap;
-	gap: 5px;
+	gap: 6px;
 	margin-bottom: 8px;
 }
 
 .dashboard-qa-item {
 	display: flex;
 	align-items: center;
-	gap: 3px;
-	padding: 6px 7px;
-	border-radius: 50px;
+	gap: 4px;
+	padding: 6px 8px;
+	border-radius: 999px;
 	background: var(--db-bg-btn);
 	border: 1px solid var(--db-border-btn);
-	box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+	box-shadow: none;
 	cursor: pointer;
-	transition: background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease, color 0.2s ease, transform 0.2s ease;
+	transition: background-color var(--nand-duration) var(--nand-ease), border-color var(--nand-duration) var(--nand-ease), box-shadow var(--nand-duration) var(--nand-ease), color var(--nand-duration) var(--nand-ease);
 	position: relative;
 }
 
 .dashboard-qa-item:hover {
 	background: var(--db-bg-btn-hover);
 	border-color: var(--db-accent);
-	transform: translateY(-1px);
-	box-shadow: 0 3px 10px rgba(0, 0, 0, 0.10);
+	box-shadow: var(--nand-shadow-xs, 0 1px 2px rgba(0, 0, 0, 0.06));
 }
 
 .dashboard-qa-item:active {
-	transform: scale(0.95);
-	box-shadow: 0 0 10px color-mix(in srgb, var(--db-accent) 25%, transparent);
+	box-shadow: 0 0 0 2px color-mix(in srgb, var(--db-accent) 25%, transparent);
 	border-color: var(--db-accent);
+}
+
+.dashboard-qa-item:focus-visible {
+	outline: 2px solid var(--db-accent);
+	outline-offset: 1px;
 }
 
 .dashboard-qa-name {
@@ -10402,11 +10808,11 @@ button.nand-ui-list-item.is-active {
 	border-radius: var(--db-radius-sm, 6px);
 	border: 1px solid var(--db-border-card, rgba(128, 128, 128, 0.35));
 	cursor: pointer;
-	transition: transform 0.12s ease, box-shadow 0.12s ease;
+	transition: box-shadow var(--nand-duration) var(--nand-ease), border-color var(--nand-duration) var(--nand-ease);
 }
 
 .dashboard-qa-swatch:hover {
-	transform: scale(1.08);
+	border-color: var(--db-accent, var(--interactive-accent));
 }
 
 .dashboard-qa-swatch.active {
@@ -10505,8 +10911,9 @@ button.nand-ui-list-item.is-active {
 }
 
 .dashboard-sidebar-widgets .dashboard-qa-header {
-	margin: 0 0 2px 0;
-	padding-bottom: 2px;
+	min-height: 20px;
+	margin: 0 0 8px 0;
+	padding-bottom: 4px;
 }
 
 /* Compact widget title: smaller than the stock section title. */
@@ -10517,7 +10924,7 @@ button.nand-ui-list-item.is-active {
 .dashboard-sidebar-widgets .dashboard-qa-list {
 	display: grid;
 	grid-template-columns: repeat(2, 1fr);
-	gap: 5px;
+	gap: 6px;
 	/* Hide the scrollbar: scrollbar-width beats any theme's webkit pseudo
 	   styling on current Chromium. */
 	scrollbar-width: none;
@@ -10529,7 +10936,7 @@ button.nand-ui-list-item.is-active {
 }
 
 .dashboard-sidebar-widgets .dashboard-qa-item {
-	border-radius: 4px;
+	border-radius: var(--db-radius-sm);
 	min-width: 0;
 	/* User-picked button color (palette popup) rides on --qa-btn-bg, set
 	   inline on the widget root; falls back to the theme button color. */
@@ -10556,13 +10963,11 @@ button.nand-ui-list-item.is-active {
 
 .dashboard-qa-item--dragging {
 	opacity: 0.35;
-	transform: scale(0.9);
 }
 
 .dashboard-qa-item--drag-over {
 	border-color: var(--db-accent) !important;
-	box-shadow: 0 0 8px color-mix(in srgb, var(--db-accent) 30%, transparent) !important;
-	transform: scale(1.05);
+	box-shadow: 0 0 0 2px color-mix(in srgb, var(--db-accent) 30%, transparent) !important;
 }
 
 .dashboard-preset-actions {
@@ -10590,7 +10995,12 @@ button.nand-ui-list-item.is-active {
 	cursor: pointer;
 	font-size: 0.85em;
 	text-align: center;
-	transition: background 0.15s ease, color 0.15s ease;
+	transition: background-color var(--nand-duration) var(--nand-ease), color var(--nand-duration) var(--nand-ease), border-color var(--nand-duration) var(--nand-ease);
+}
+
+.dashboard-action-tab:focus-visible {
+	outline: 2px solid var(--db-accent);
+	outline-offset: 1px;
 }
 
 .dashboard-action-tab:hover {
@@ -21422,12 +21832,12 @@ body.is-mobile .dashboard-media-item .dashboard-media-tagbtn { opacity: 1; }
 	z-index: var(--layer-popover, 30);
 	display: flex;
 	align-items: center;
-	gap: 6px;
-	padding: 5px 7px;
+	gap: 8px;
+	padding: 6px 8px 6px 6px;
 	background: var(--db-bg-modal, var(--background-secondary));
 	border: 1px solid var(--db-border-card, var(--background-modifier-border));
-	border-radius: var(--db-radius-lg, 12px);
-	box-shadow: var(--db-shadow-card, 0 4px 16px rgba(0, 0, 0, 0.25));
+	border-radius: 999px;
+	box-shadow: var(--nand-shadow-lg, var(--db-shadow-card, 0 4px 16px rgba(0, 0, 0, 0.25)));
 	font-family: var(--db-font, inherit);
 	color: var(--db-text, var(--text-normal));
 	user-select: none;
@@ -21442,9 +21852,15 @@ body.is-mobile .dashboard-media-item .dashboard-media-tagbtn { opacity: 1; }
 		background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
+.dashboard-pomodoro-mini:focus-within,
+.dashboard-reading-mini:focus-within {
+	border-color: var(--db-border-input-focus, var(--db-accent, var(--interactive-accent)));
+}
+
 .dashboard-floating-mini--dragging {
 	cursor: grabbing;
 	opacity: 0.92;
+	box-shadow: var(--db-shadow-card-hover, var(--nand-shadow-lg, 0 8px 24px rgba(0, 0, 0, 0.3)));
 }
 
 .dashboard-pomodoro-mini-ring-wrap {
@@ -21502,7 +21918,8 @@ body.is-mobile .dashboard-media-item .dashboard-media-tagbtn { opacity: 1; }
 }
 
 .dashboard-pomodoro-mini-phase {
-	font-size: 9px;
+	font-size: 10px;
+	font-weight: 500;
 	color: var(--db-text-muted, var(--text-muted));
 	white-space: nowrap;
 	overflow: hidden;
@@ -21528,15 +21945,23 @@ body.is-mobile .dashboard-media-item .dashboard-media-tagbtn { opacity: 1; }
 	color: var(--db-text, var(--text-normal));
 	cursor: pointer;
 	transition: width 0.2s ease, opacity 0.15s ease, border-width 0.2s ease,
-		background 0.15s ease, transform 0.1s ease, visibility 0s;
+		background 0.15s ease, border-color 0.15s ease, color 0.15s ease, transform 0.1s ease, visibility 0s;
 }
 
 .dashboard-pomodoro-mini-btn:hover {
 	background: var(--db-bg-hover, var(--background-modifier-hover));
+	border-color: var(--db-accent, var(--interactive-accent));
+	color: var(--db-accent, var(--text-accent));
 }
 
 .dashboard-pomodoro-mini-btn:active {
 	transform: scale(0.92);
+}
+
+.dashboard-pomodoro-mini-btn:focus-visible,
+.dashboard-reading-mini-btn:focus-visible {
+	outline: 2px solid var(--db-accent, var(--interactive-accent));
+	outline-offset: 1px;
 }
 
 .dashboard-pomodoro-mini-btn svg {
@@ -21546,7 +21971,13 @@ body.is-mobile .dashboard-media-item .dashboard-media-tagbtn { opacity: 1; }
 
 .dashboard-pomodoro-mini-btn--ghost {
 	border-color: transparent;
+	background: transparent;
 	color: var(--db-text-muted, var(--text-muted));
+}
+
+.dashboard-pomodoro-mini-btn--ghost:hover {
+	border-color: transparent;
+	color: var(--db-text, var(--text-normal));
 }
 
 @media (max-width: 640px) {
@@ -21554,8 +21985,8 @@ body.is-mobile .dashboard-media-item .dashboard-media-tagbtn { opacity: 1; }
 		right: 12px;
 		/* Clear the mobile tab bar plus the home-indicator safe area. */
 		bottom: calc(64px + env(safe-area-inset-bottom, 0px));
-		padding: 4px 6px;
-		gap: 5px;
+		padding: 4px 6px 4px 4px;
+		gap: 6px;
 	}
 
 	.dashboard-pomodoro-mini-time {
@@ -21618,11 +22049,12 @@ body.is-mobile .dashboard-media-item .dashboard-media-tagbtn { opacity: 1; }
 	display: flex;
 	align-items: center;
 	gap: 6px;
-	padding: 4px 6px;
+	padding: 4px 4px 4px 10px;
 	background: var(--db-bg-modal, var(--background-secondary));
 	border: 1px solid var(--db-border-card, var(--background-modifier-border));
-	border-radius: var(--db-radius-md, 8px);
-	box-shadow: var(--db-shadow-card, 0 4px 16px rgba(0, 0, 0, 0.25));
+	border-radius: 999px;
+	box-shadow: var(--nand-shadow-lg, var(--db-shadow-card, 0 4px 16px rgba(0, 0, 0, 0.25)));
+	transition: border-color 0.2s ease, box-shadow 0.2s ease;
 	font-family: var(--db-font, inherit);
 	color: var(--db-text, var(--text-normal));
 	user-select: none;
@@ -21673,11 +22105,13 @@ body.is-mobile .dashboard-media-item .dashboard-media-tagbtn { opacity: 1; }
 	border: 1px solid var(--db-border-btn, var(--background-modifier-border));
 	color: var(--db-text, var(--text-normal));
 	cursor: pointer;
-	transition: background 0.15s ease, transform 0.1s ease;
+	transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease, transform 0.1s ease;
 }
 
 .dashboard-reading-mini-btn:hover {
 	background: var(--db-bg-hover, var(--background-modifier-hover));
+	border-color: var(--db-danger, var(--text-error));
+	color: var(--db-danger, var(--text-error));
 }
 
 .dashboard-reading-mini-btn:active {
@@ -21694,7 +22128,7 @@ body.is-mobile .dashboard-media-item .dashboard-media-tagbtn { opacity: 1; }
 		/* Below the mobile header row (back / title / more-menu). */
 		top: 52px;
 		right: 10px;
-		padding: 4px 6px;
+		padding: 4px 4px 4px 10px;
 	}
 
 	.dashboard-reading-mini-btn {
@@ -21723,6 +22157,7 @@ body.is-mobile .dashboard-media-item .dashboard-media-tagbtn { opacity: 1; }
 	align-items: center;
 	gap: 6px;
 	width: 100%;
+	min-height: 20px;
 	margin-bottom: 8px;
 }
 
@@ -21751,14 +22186,24 @@ body.is-mobile .dashboard-media-item .dashboard-media-tagbtn { opacity: 1; }
 	align-items: center;
 	justify-content: center;
 	cursor: pointer;
+	border-radius: var(--db-radius-sm);
 	opacity: 0.35;
 	color: var(--db-text-muted);
-	transition: opacity 0.15s;
+	transition: opacity var(--nand-duration) var(--nand-ease), background-color var(--nand-duration) var(--nand-ease);
 	flex-shrink: 0;
 }
 
 .dashboard-sidebar-music-icon-btn:hover {
 	opacity: 0.8;
+	background: var(--db-bg-hover);
+}
+
+.dashboard-sidebar-music-icon-btn:focus-visible,
+.dashboard-sidebar-music-row:focus-visible,
+.dashboard-sidebar-music-text-btn:focus-visible {
+	opacity: 1;
+	outline: 2px solid var(--db-accent);
+	outline-offset: 1px;
 }
 
 .dashboard-sidebar-music-icon-btn svg {
@@ -21783,8 +22228,8 @@ body.is-mobile .dashboard-media-item .dashboard-media-tagbtn { opacity: 1; }
 .dashboard-sidebar-music-now {
 	display: flex;
 	align-items: center;
-	gap: 8px;
-	margin-bottom: 6px;
+	gap: 12px;
+	margin-bottom: 8px;
 }
 
 .dashboard-sidebar-music-cover {
@@ -21862,7 +22307,7 @@ body.is-mobile .dashboard-media-item .dashboard-media-tagbtn { opacity: 1; }
 	display: flex;
 	align-items: center;
 	gap: 6px;
-	margin-bottom: 6px;
+	margin-bottom: 8px;
 }
 
 .dashboard-sidebar-music-time {
@@ -21901,10 +22346,11 @@ body.is-mobile .dashboard-media-item .dashboard-media-tagbtn { opacity: 1; }
 .dashboard-sidebar-music-row {
 	display: flex;
 	align-items: center;
-	gap: 6px;
+	gap: 8px;
 	padding: 4px 6px;
 	border-radius: var(--db-radius-sm, 6px);
 	cursor: pointer;
+	transition: background-color var(--nand-duration) var(--nand-ease);
 }
 
 .dashboard-sidebar-music-row:hover {
@@ -21964,8 +22410,8 @@ body.is-mobile .dashboard-media-item .dashboard-media-tagbtn { opacity: 1; }
 	flex-shrink: 0;
 	font-size: 0.55em;
 	font-weight: 700;
-	padding: 1px 4px;
-	border-radius: 4px;
+	padding: 1px 6px;
+	border-radius: 999px;
 	color: var(--db-bg-card, #fff);
 	background: color-mix(in srgb, var(--db-accent) 65%, var(--db-text-muted));
 	user-select: none;
@@ -21979,12 +22425,15 @@ body.is-mobile .dashboard-media-item .dashboard-media-tagbtn { opacity: 1; }
 	justify-content: center;
 	flex-shrink: 0;
 	cursor: pointer;
+	border-radius: var(--nand-radius-xs, 4px);
 	opacity: 0.25;
 	color: var(--db-text-muted);
+	transition: opacity var(--nand-duration) var(--nand-ease), background-color var(--nand-duration) var(--nand-ease);
 }
 
 .dashboard-sidebar-music-row-del:hover {
 	opacity: 0.75;
+	background: var(--db-bg-hover);
 }
 
 .dashboard-sidebar-music-row-del svg {
@@ -22011,8 +22460,9 @@ body.is-mobile .dashboard-media-item .dashboard-media-tagbtn { opacity: 1; }
 	border-radius: var(--db-radius-sm, 6px);
 	color: var(--db-text);
 	font-size: 0.68em;
-	padding: 5px 8px;
+	padding: 6px 10px;
 	outline: none;
+	transition: border-color var(--nand-duration) var(--nand-ease);
 }
 
 .dashboard-sidebar-music-search-input:focus,
@@ -22040,13 +22490,14 @@ body.is-mobile .dashboard-media-item .dashboard-media-tagbtn { opacity: 1; }
 .dashboard-sidebar-music-text-btn {
 	flex-shrink: 0;
 	font-size: 0.62em;
-	padding: 4px 9px;
+	padding: 4px 10px;
 	border-radius: var(--db-radius-sm, 6px);
 	border: 1px solid var(--db-border-card);
 	color: var(--db-text);
 	cursor: pointer;
 	user-select: none;
 	white-space: nowrap;
+	transition: border-color var(--nand-duration) var(--nand-ease), color var(--nand-duration) var(--nand-ease);
 }
 
 .dashboard-sidebar-music-text-btn:hover {
@@ -22057,7 +22508,7 @@ body.is-mobile .dashboard-media-item .dashboard-media-tagbtn { opacity: 1; }
 .dashboard-sidebar-music-empty {
 	font-size: 0.65em;
 	color: var(--db-text-muted);
-	padding: 10px 4px;
+	padding: 12px 4px;
 	text-align: center;
 	user-select: none;
 }

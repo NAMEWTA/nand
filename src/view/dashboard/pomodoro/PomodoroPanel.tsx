@@ -119,7 +119,7 @@ export function PomodoroPanel({
 						<Icon name="settings" />
 					</div>
 				)}
-				<div class="dashboard-sidebar-pomodoro-stats-btn" role="button" tabIndex={0} onClick={statistics}>
+				<div class="dashboard-sidebar-pomodoro-stats-btn" role="button" tabIndex={0} aria-label={t('pomodoro.statsTitle')} onClick={statistics}>
 					<Icon name="bar-chart-2" />
 				</div>
 			</div>
