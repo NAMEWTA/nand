@@ -4,28 +4,46 @@ import type { ArchiveRecord, EntityRef } from '../../core/contacts/model';
 import { ct, relationDescription } from './forms';
 import type { ContactsPanelHost } from './panel-contract';
 
-function Icon({ name }: { name: string }) {
+function Icon({ name, className }: { name: string; className?: string }) {
 	const ref = useRef<HTMLSpanElement>(null);
 	useEffect(() => {
 		if (ref.current) setIcon(ref.current, name);
 	}, [name]);
-	return <span ref={ref} aria-hidden="true" />;
+	return <span ref={ref} className={className} aria-hidden="true" />;
+}
+/**
+ * Round initial avatar. Grid cards keep the initial as a text node (as they
+ * always have); elsewhere `decorative` draws it from a data attribute so the
+ * surrounding button's text content stays unchanged.
+ */
+function Monogram({ name, size, decorative = false }: { name: string; size?: 'sm' | 'lg'; decorative?: boolean }) {
+	const initial = [...name][0] || '?';
+	const className = `nand-contacts-monogram${size ? ` nand-contacts-monogram--${size}` : ''}`;
+	return decorative ? (
+		<span className={className} data-initial={initial} aria-hidden="true" />
+	) : (
+		<span className={className} aria-hidden="true">
+			{initial}
+		</span>
+	);
 }
 function Action({
 	icon,
 	label,
 	action,
 	disabled = false,
+	primary = false,
 }: {
 	icon: string;
 	label: string;
 	action: () => void;
 	disabled?: boolean;
+	primary?: boolean;
 }) {
 	return (
 		<button
 			type="button"
-			className="clickable-icon nand-contacts-action"
+			className={`clickable-icon nand-contacts-action nand-ui-icon-btn${primary ? ' mod-cta nand-contacts-action--primary' : ''}`}
 			aria-label={label}
 			title={label}
 			disabled={disabled}
@@ -47,7 +65,7 @@ function Markdown({ view, text, path }: { view: ContactsPanelHost; text: string;
 }
 function Section({ title, action, children }: { title: string; action?: ReactNode; children: ReactNode }) {
 	return (
-		<section className="nand-contacts-section">
+		<section className="nand-contacts-section nand-ui-card">
 			<div className="nand-contacts-section-title">
 				<h3>{title}</h3>
 				{action}
@@ -66,6 +84,40 @@ function RefLink({ view, source, target }: { view: ContactsPanelHost; source: Ar
 		<span className="nand-contacts-muted" title={ct('missing')}>
 			{target.label || ct('none')} {target.label ? '· ' + ct('missing') : ''}
 		</span>
+	);
+}
+function Pager({
+	page,
+	pages,
+	count,
+	go,
+	live = false,
+	footer = false,
+}: {
+	page: number;
+	pages: number;
+	count: number;
+	go: (page: number) => void;
+	live?: boolean;
+	footer?: boolean;
+}) {
+	const body = (
+		<>
+			<button className="nand-ui-btn nand-ui-btn-ghost" disabled={page === 0} onClick={() => go(page - 1)}>
+				<Icon name="chevron-left" />
+				{ct('previous')}
+			</button>
+			<span aria-live={live ? 'polite' : undefined}>{ct('page', { page: page + 1, total: pages, count })}</span>
+			<button className="nand-ui-btn nand-ui-btn-ghost" disabled={page + 1 >= pages} onClick={() => go(page + 1)}>
+				{ct('next')}
+				<Icon name="chevron-right" />
+			</button>
+		</>
+	);
+	return footer ? (
+		<footer className="nand-contacts-pagination">{body}</footer>
+	) : (
+		<div className="nand-contacts-pagination">{body}</div>
 	);
 }
 function People({
@@ -88,38 +140,31 @@ function People({
 		<>
 			<div className="nand-contacts-people">
 				{records.slice(page * 60, page * 60 + 60).map((r) => (
-					<button key={r.path} onClick={() => view.select(r.path)}>
-						{r.fields.name}
-						<span className="nand-contacts-muted">
-							{r.employments
-								.filter(
-									(job) =>
-										job.company.id === companyId &&
-										job.status === status &&
-										(!keyOnly || !!job.keyRole),
-								)
-								.map((job) =>
-									[job.title, job.keyRole ? ct(job.keyRole) : ''].filter(Boolean).join(' · '),
-								)
-								.join(' / ')}
+					<button className="nand-contacts-person" key={r.path} onClick={() => view.select(r.path)}>
+						<Monogram name={r.fields.name} size="sm" decorative />
+						<span className="nand-contacts-person-text">
+							<span className="nand-contacts-person-name">{r.fields.name}</span>
+							<span className="nand-contacts-muted">
+								{r.employments
+									.filter(
+										(job) =>
+											job.company.id === companyId &&
+											job.status === status &&
+											(!keyOnly || !!job.keyRole),
+									)
+									.map((job) =>
+										[job.title, job.keyRole ? ct(job.keyRole) : ''].filter(Boolean).join(' · '),
+									)
+									.join(' / ')}
+							</span>
 						</span>
 					</button>
 				))}
 			</div>
-			{pages > 1 && (
-				<div className="nand-contacts-pagination">
-					<button disabled={page === 0} onClick={() => setPage(page - 1)}>
-						{ct('previous')}
-					</button>
-					<span>{ct('page', { page: page + 1, total: pages, count: records.length })}</span>
-					<button disabled={page + 1 >= pages} onClick={() => setPage(page + 1)}>
-						{ct('next')}
-					</button>
-				</div>
-			)}
+			{pages > 1 && <Pager page={page} pages={pages} count={records.length} go={setPage} />}
 		</>
 	) : (
-		<p className="nand-contacts-muted">{ct('noDetails')}</p>
+		<p className="nand-contacts-muted nand-contacts-placeholder">{ct('noDetails')}</p>
 	);
 }
 function Detail({ view, record }: { view: ContactsPanelHost; record: ArchiveRecord }) {
@@ -137,21 +182,38 @@ function Detail({ view, record }: { view: ContactsPanelHost; record: ArchiveReco
 	);
 	return (
 		<article className="nand-contacts-detail">
-			<div className="nand-contacts-detail-heading">
-				<h2>{record.fields.name}</h2>
-				<span className="nand-contacts-muted">{ct(record.kind)}</span>
-			</div>
+			<header className="nand-contacts-detail-heading nand-contacts-profile nand-ui-card">
+				<Monogram name={record.fields.name} size="lg" decorative />
+				<div className="nand-contacts-profile-text">
+					<h2>{record.fields.name}</h2>
+					<span className="nand-contacts-muted nand-ui-badge nand-ui-badge--accent">{ct(record.kind)}</span>
+				</div>
+				{/* Same actions and conditions the header toolbar used to show for an open record;
+				    the header-actions class keeps them on the pane menu on phones. */}
+				<div className="nand-contacts-header-actions nand-contacts-profile-actions">
+					<Action
+						icon="pencil"
+						label={ct('edit')}
+						action={() => view.edit(record, 'basic')}
+						disabled={!!index.issues(record).length}
+					/>
+					<Action icon="more-horizontal" label={ct('more')} action={() => view.more(record)} />
+				</div>
+			</header>
 			{blocked && (
-				<div role="alert" className="nand-contacts-error">
-					{ct('problem')}
-					{issues.map((key) => ct(key)).join(' ')}
+				<div role="alert" className="nand-contacts-error nand-contacts-banner">
+					<Icon name="alert-triangle" className="nand-contacts-banner-icon" />
+					<span>
+						{ct('problem')}
+						{issues.map((key) => ct(key)).join(' ')}
+					</span>
 				</div>
 			)}
 			<Section
 				title={ct('basic')}
 				action={<Action icon="pencil" label={ct('edit')} action={() => edit('basic')} disabled={blocked} />}
 			>
-				{!rows.length && <p className="nand-contacts-muted">{ct('noDetails')}</p>}
+				{!rows.length && <p className="nand-contacts-muted nand-contacts-placeholder">{ct('noDetails')}</p>}
 				<dl className="nand-contacts-fields">
 					{rows.map(([key, value]) => (
 						<div key={key}>
@@ -166,25 +228,32 @@ function Detail({ view, record }: { view: ContactsPanelHost; record: ArchiveReco
 					<Section
 						title={ct('employments')}
 						action={
-							<Action
-								icon="plus"
-								label={ct('add')}
-								action={() => edit('employment')}
-								disabled={blocked}
-							/>
+							<Action icon="plus" label={ct('add')} action={() => edit('employment')} disabled={blocked} />
 						}
 					>
-						{!record.employments.length && <p className="nand-contacts-muted">{ct('noDetails')}</p>}
+						{!record.employments.length && (
+							<p className="nand-contacts-muted nand-contacts-placeholder">{ct('noDetails')}</p>
+						)}
 						{[...record.employments]
 							.sort((a, b) => b.start.localeCompare(a.start))
 							.map((job) => (
 								<div className="nand-contacts-entry" key={job.id}>
 									<div>
-										<RefLink view={view} source={record} target={job.company} />
-										<span className="nand-contacts-tag">{ct(job.status)}</span>
-										{job.keyRole && <span className="nand-contacts-tag">{ct(job.keyRole)}</span>}
+										<div className="nand-contacts-entry-head">
+											<RefLink view={view} source={record} target={job.company} />
+											<span
+												className={`nand-contacts-tag nand-ui-badge${job.status === 'current' ? ' nand-ui-badge--accent' : ''}`}
+											>
+												{ct(job.status)}
+											</span>
+											{job.keyRole && (
+												<span className="nand-contacts-tag nand-ui-badge nand-ui-badge--info">
+													{ct(job.keyRole)}
+												</span>
+											)}
+										</div>
 										<p>{[job.department, job.title].filter(Boolean).join(' · ')}</p>
-										<p className="nand-contacts-muted">
+										<p className="nand-contacts-muted nand-contacts-dates">
 											{job.start || '—'} →{' '}
 											{job.end || (job.status === 'current' ? ct('current') : '—')}
 										</p>
@@ -209,12 +278,10 @@ function Detail({ view, record }: { view: ContactsPanelHost; record: ArchiveReco
 					</Section>
 					<Section
 						title={ct('relations')}
-						action={
-							<Action icon="plus" label={ct('add')} action={() => edit('relation')} disabled={blocked} />
-						}
+						action={<Action icon="plus" label={ct('add')} action={() => edit('relation')} disabled={blocked} />}
 					>
 						{!index.relationsFor(record.id).length && (
-							<p className="nand-contacts-muted">{ct('noDetails')}</p>
+							<p className="nand-contacts-muted nand-contacts-placeholder">{ct('noDetails')}</p>
 						)}
 						{index.relationsFor(record.id).map((entry) => (
 							<div
@@ -222,21 +289,23 @@ function Detail({ view, record }: { view: ContactsPanelHost; record: ArchiveReco
 								key={entry.owner.path + entry.relation.id + String(entry.inverse)}
 							>
 								<div>
-									{entry.other ? (
-										<button
-											className="nand-contacts-link"
-											onClick={() => view.select(entry.other!.path)}
-										>
-											{entry.other.fields.name}
-										</button>
-									) : (
-										<span>
-											{entry.relation.person.label} · {ct('missing')}
+									<div className="nand-contacts-entry-head">
+										{entry.other ? (
+											<button
+												className="nand-contacts-link"
+												onClick={() => view.select(entry.other!.path)}
+											>
+												{entry.other.fields.name}
+											</button>
+										) : (
+											<span>
+												{entry.relation.person.label} · {ct('missing')}
+											</span>
+										)}
+										<span className="nand-contacts-tag nand-ui-badge nand-ui-badge--accent">
+											{relationDescription(entry.relation, entry.inverse, entry.owner)}
 										</span>
-									)}
-									<span className="nand-contacts-tag">
-										{relationDescription(entry.relation, entry.inverse, entry.owner)}
-									</span>
+									</div>
 									{entry.inverse && <p className="nand-contacts-muted">{ct('incoming')}</p>}
 									{entry.relation.company.label && (
 										<p>
@@ -299,7 +368,13 @@ function Detail({ view, record }: { view: ContactsPanelHost; record: ArchiveReco
 }
 export function ContactsSurface({ view }: { view: ContactsPanelHost }) {
 	const controller = view.controller;
-	if (!view.enabled || !controller) return <div className="nand-contacts-empty">{ct('disabled')}</div>;
+	if (!view.enabled || !controller)
+		return (
+			<div className="nand-contacts-empty">
+				<Icon name="contact-round" className="nand-contacts-empty-icon" />
+				{ct('disabled')}
+			</div>
+		);
 	const { query, selectedPath } = view.state;
 	const candidate = selectedPath ? controller.index.byPath.get(selectedPath) : undefined;
 	const record =
@@ -312,16 +387,16 @@ export function ContactsSurface({ view }: { view: ContactsPanelHost }) {
 	);
 	return (
 		<div className="nand-contacts-surface">
-			<header className="nand-contacts-header">
+			<header className={`nand-contacts-header nand-ui-toolbar${selectedPath ? ' is-detail' : ''}`}>
 				{selectedPath ? (
 					<Action icon="arrow-left" label={ct('back')} action={() => view.back()} />
 				) : (
-					<div className="nand-contacts-tabs" role="group" aria-label={ct('title')}>
+					<div className="nand-contacts-tabs nand-ui-segmented" role="group" aria-label={ct('title')}>
 						{(['person', 'company'] as const).map((kind) => (
 							<button
 								key={kind}
 								aria-pressed={query.kind === kind}
-								className={query.kind === kind ? 'mod-cta' : ''}
+								className={query.kind === kind ? 'is-active' : ''}
 								onClick={() => view.changeKind(kind)}
 							>
 								{ct(kind)}
@@ -330,46 +405,40 @@ export function ContactsSurface({ view }: { view: ContactsPanelHost }) {
 					</div>
 				)}
 				{!selectedPath && (
-					<input
-						type="search"
-						aria-label={ct('search')}
-						placeholder={ct('search')}
-						value={query.search}
-						onInput={(event) => view.search(event.currentTarget.value)}
-					/>
+					<div className="nand-contacts-search">
+						<Icon name="search" className="nand-contacts-search-icon" />
+						<input
+							type="search"
+							aria-label={ct('search')}
+							placeholder={ct('search')}
+							value={query.search}
+							onInput={(event) => view.search(event.currentTarget.value)}
+						/>
+					</div>
 				)}
-				<div className="nand-contacts-header-actions">
-					{!selectedPath && (
-						<>
-							<Action icon="list-filter" label={ct('filter')} action={() => view.filters()} />
-							<Action
-								icon="arrow-down-wide-narrow"
-								label={ct(query.sort === 'name' ? 'byName' : 'byModified')}
-								action={() => view.sort()}
-							/>
-							<Action icon="plus" label={ct('add')} action={() => view.add(query.kind)} />
-						</>
-					)}
-					{record && (
-						<>
-							<Action
-								icon="pencil"
-								label={ct('edit')}
-								action={() => view.edit(record, 'basic')}
-								disabled={!!controller.index.issues(record).length}
-							/>
-							<Action icon="more-horizontal" label={ct('more')} action={() => view.more(record)} />
-						</>
-					)}
-				</div>
+				{!selectedPath && (
+					<div className="nand-contacts-header-actions">
+						<Action icon="list-filter" label={ct('filter')} action={() => view.filters()} />
+						<Action
+							icon="arrow-down-wide-narrow"
+							label={ct(query.sort === 'name' ? 'byName' : 'byModified')}
+							action={() => view.sort()}
+						/>
+						<Action icon="plus" label={ct('add')} action={() => view.add(query.kind)} primary />
+					</div>
+				)}
 			</header>
 			{controller.error && (
-				<div role="alert" className="nand-contacts-error">
-					{ct(controller.error)} <button onClick={() => void controller.reload()}>{ct('retry')}</button>
+				<div role="alert" className="nand-contacts-error nand-contacts-banner">
+					<Icon name="alert-triangle" className="nand-contacts-banner-icon" />
+					<span>{ct(controller.error)} </span>
+					<button className="nand-ui-btn" onClick={() => void controller.reload()}>
+						{ct('retry')}
+					</button>
 				</div>
 			)}
 			{controller.loading && (
-				<p role="status" className="nand-contacts-muted">
+				<p role="status" className="nand-contacts-muted nand-contacts-status">
 					{ct('loading')}
 				</p>
 			)}
@@ -377,49 +446,65 @@ export function ContactsSurface({ view }: { view: ContactsPanelHost }) {
 				record ? (
 					<Detail view={view} record={record} />
 				) : (
-					!controller.loading && <p>{ct('missing')}</p>
+					!controller.loading && <p className="nand-contacts-status">{ct('missing')}</p>
 				)
 			) : (
 				<>
 					{hasFilter && (
-						<button className="nand-contacts-clear" onClick={() => view.clearFilters()}>
+						<button
+							className="nand-contacts-clear nand-ui-btn nand-ui-btn-ghost"
+							onClick={() => view.clearFilters()}
+						>
+							<Icon name="x" />
 							{ct('clear')}
 						</button>
 					)}
 					<div className={`nand-contacts-grid nand-contacts-columns-${view.columns}`}>
 						{records.slice(page * 60, page * 60 + 60).map((r) => (
-							<button className="nand-contacts-card" key={r.path} onClick={() => view.select(r.path)}>
+							<button
+								className="nand-contacts-card nand-ui-card"
+								key={r.path}
+								onClick={() => view.select(r.path)}
+							>
 								<span className="nand-contacts-card-title">
-									<span className="nand-contacts-monogram">{[...r.fields.name][0] || '?'}</span>
-									<strong>{r.fields.name}</strong>
-								</span>
-								{r.kind === 'person' ? (
-									<>
-										<span>
-											{r.employments
-												.filter((job) => job.status === 'current')
-												.map((job) =>
-													[
-														controller.index.resolve(job.company, r)?.fields.name ??
-															job.company.label,
-														job.title,
-													]
-														.filter(Boolean)
-														.join(' · '),
-												)
-												.join(' / ') || ct('noDetails')}
-										</span>
-										<span className="nand-contacts-muted">
-											{r.fields.mobiles[0] || r.fields.phones[0] || '—'}
-										</span>
-									</>
-								) : (
-									<span>
-										{ct('employees', { count: controller.index.members(r.id, 'current').length })}
+									<Monogram name={r.fields.name} />
+									<span className="nand-contacts-card-heading">
+										<strong>{r.fields.name}</strong>
+										{r.kind === 'person' ? (
+											<span className="nand-contacts-card-subtitle">
+												{r.employments
+													.filter((job) => job.status === 'current')
+													.map((job) =>
+														[
+															controller.index.resolve(job.company, r)?.fields.name ??
+																job.company.label,
+															job.title,
+														]
+															.filter(Boolean)
+															.join(' · '),
+													)
+													.join(' / ') || ct('noDetails')}
+											</span>
+										) : (
+											<span className="nand-contacts-card-subtitle">
+												{ct('employees', { count: controller.index.members(r.id, 'current').length })}
+											</span>
+										)}
 									</span>
-								)}
-								<span className="nand-contacts-muted">{r.fields.region || '—'}</span>
-								<span>
+								</span>
+								<span className="nand-contacts-card-meta">
+									{r.kind === 'person' && (
+										<span className="nand-contacts-muted nand-contacts-meta-row">
+											<Icon name="phone" />
+											<span>{r.fields.mobiles[0] || r.fields.phones[0] || '—'}</span>
+										</span>
+									)}
+									<span className="nand-contacts-muted nand-contacts-meta-row">
+										<Icon name="map-pin" />
+										<span>{r.fields.region || '—'}</span>
+									</span>
+								</span>
+								<span className="nand-contacts-card-tags">
 									{r.fields.tags.slice(0, 4).map((tag) => (
 										<span key={tag} className="nand-contacts-tag">
 											{tag}
@@ -427,31 +512,28 @@ export function ContactsSurface({ view }: { view: ContactsPanelHost }) {
 									))}
 								</span>
 								{!!controller.index.issues(r).length && (
-									<span className="nand-contacts-error">{ct('problem')}</span>
+									<span className="nand-contacts-error nand-ui-badge nand-ui-badge--error">
+										<Icon name="alert-triangle" />
+										{ct('problem')}
+									</span>
 								)}
 							</button>
 						))}
 					</div>
 					{!records.length && !controller.loading && (
 						<div className="nand-contacts-empty">
+							<Icon
+								name={query.search || hasFilter ? 'search-x' : query.kind === 'company' ? 'building-2' : 'contact-round'}
+								className="nand-contacts-empty-icon"
+							/>
 							<p>{ct(query.search || hasFilter ? 'noResults' : 'empty')}</p>
-							<button className="mod-cta" onClick={() => view.add(query.kind)}>
+							<button className="mod-cta nand-ui-btn" onClick={() => view.add(query.kind)}>
 								{ct('add')}
 							</button>
 						</div>
 					)}
 					{records.length > 60 && (
-						<footer className="nand-contacts-pagination">
-							<button disabled={page === 0} onClick={() => view.page(page - 1)}>
-								{ct('previous')}
-							</button>
-							<span aria-live="polite">
-								{ct('page', { page: page + 1, total: pages, count: records.length })}
-							</span>
-							<button disabled={page + 1 >= pages} onClick={() => view.page(page + 1)}>
-								{ct('next')}
-							</button>
-						</footer>
+						<Pager page={page} pages={pages} count={records.length} go={(value) => view.page(value)} live footer />
 					)}
 				</>
 			)}
