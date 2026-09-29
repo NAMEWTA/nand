@@ -453,6 +453,7 @@ export class FilterModal extends Modal {
 		this.draft = structuredClone(query);
 	}
 	onOpen(): void {
+		this.modalEl.addClass('nand-contacts-filter');
 		this.setTitle(ct('filter'));
 		const records = [...this.controller.index.byPath.values()].filter((r) => r.kind === this.draft.kind);
 		const groups: Array<{

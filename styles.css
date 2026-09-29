@@ -25531,6 +25531,15 @@ body:where(.nand-iconic-enabled)[data-theme="Ukiyo"] .workspace-leaf > .workspac
 .nand-contacts-error { color: var(--text-error); overflow-wrap: anywhere; }
 .nand-contacts-clear { margin-bottom: var(--size-4-4); }
 .nand-contacts-markdown > div > :first-child { margin-top: 0; }
+/* Obsidian 1.13 pads every .setting-item-heading by --size-4-4 on both sides
+   so it lines up with a settings card. This modal's option rows are not in a
+   settings card, so that padding puts group titles 16px to the right of the
+   options. Reset only this modal. */
+.modal.nand-contacts-filter .setting-item.setting-item-heading {
+	padding-left: 0;
+	padding-right: 0;
+	padding-inline: 0;
+}
 .nand-contacts-form .setting-item { align-items: start; }
 .nand-contacts-form textarea { min-width: 240px; max-width: 100%; }
 .nand-contacts-phone .nand-contacts-header-actions { display: none; }
