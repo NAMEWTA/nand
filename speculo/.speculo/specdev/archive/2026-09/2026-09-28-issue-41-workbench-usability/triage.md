@@ -2,16 +2,16 @@
 schema_version: 1
 artifact: triage
 change: 2026-09-28-issue-41-workbench-usability
-mode: intake
+mode: reconcile
 source: <Path>{roots.state}/specdev/changes/2026-09-28-issue-41-workbench-usability/source.md</Path>
 classification: mixed
 risk: medium
 route: specdev/diagnose-bugs
 ready_for_implementation: false
-external_action: pending-close
+external_action: closed
 publish_action: not-requested
 publish: null
-updated_at: 2026-09-28T05:55:43.895113+00:00
+updated_at: 2026-09-29T01:25:58.184893+00:00
 ---
 
 # Triage: #41 workbench-usability
@@ -36,7 +36,7 @@ updated_at: 2026-09-28T05:55:43.895113+00:00
 
 ## 外部动作
 
-目标：https://github.com/NAMEWTA/nand/issues/41；关闭能力 supported；external_action pending-close；授权仅 issue-read，远程写入 0 次。本地未实现，不关闭或评论。
+目标：https://github.com/NAMEWTA/nand/issues/41；关闭能力 supported；external_action closed。2026-09-29T01:25:58Z 重读远程状态为 closed，评论含 specdev:2026-09-28-issue-41-workbench-usability:completion。publish_action 仍为 not-requested。
 
 ## 发布投影
 

@@ -1,29 +1,30 @@
 {
   "schema_version": 6,
   "artifact": "change-status",
-  "change": "2026-09-28-issue-37-terminal-release",
-  "change_status": "completed",
+  "change": "2026-09-28-issue-38-agent-preflight",
+  "change_status": "archived",
   "current_work": null,
   "works_run": [
     "specdev/triage",
     "specdev/diagnose-bugs",
     "specdev/spec",
     "specdev/tickets",
-    "specdev/goal-plan"
+    "specdev/goal-plan",
+    "specdev/archive-and-consolidate"
   ],
   "claimed_investigations": [],
   "execution_authorization": {
     "implementation_commit": {
       "status": "authorized",
-      "source": "用户：请你继续完成最后的步骤，给你权限",
+      "source": "用户本次明确要求按总控完整实现所有 ticket",
       "granted_at": "2026-09-28T06:53:30.927881+00:00",
-      "scope": "当前工作区串行实现、验证、必要提交及main/tag公开发布和证据推送"
+      "scope": "当前工作区串行实现、验证、必要本地提交/direct-parent；不含远程发布"
     },
     "local_candidate_integration": {
       "status": "authorized",
-      "source": "用户：请你继续完成最后的步骤，给你权限",
+      "source": "用户本次明确要求按总控完整实现所有 ticket",
       "granted_at": "2026-09-28T06:53:30.927881+00:00",
-      "scope": "当前工作区串行实现、验证、必要提交及main/tag公开发布和证据推送"
+      "scope": "当前工作区串行实现、验证、必要本地提交/direct-parent；不含远程发布"
     },
     "source_cleanup": {
       "status": "not-authorized",
@@ -39,10 +40,10 @@
     "history": []
   },
   "created_at": "2026-09-28T05:55:43.895113+00:00",
-  "updated_at": "2026-09-28T11:55:28.915444+00:00",
-  "completed_at": "2026-09-28T11:55:28.915444+00:00",
-  "archived": false,
-  "archive_path": null,
+  "updated_at": "2026-09-29T01:29:06.336905+00:00",
+  "completed_at": "2026-09-28T06:53:30.927881+00:00",
+  "archived": true,
+  "archive_path": "<Path>{roots.state}/specdev/archive/2026-09/2026-09-28-issue-38-agent-preflight/</Path>",
   "blockers": [],
   "deviations": [],
   "worktrees": [
@@ -52,23 +53,23 @@
       "implementation_owner": "codex-issue-planning",
       "integration_owner": "codex-issue-planning",
       "provider": "git",
-      "base_sha": "3ce79fe2edb3bda424e0a10b98960435200e0f38",
+      "base_sha": "e7c59b2e87a858725874d53530bdacb72918f5ca",
       "parent_branch": "main",
       "branch": "main",
       "workspace_ref": "current",
-      "source_checkpoint": "301b74713b0a2f38d5159aaabbe64debcbda9296",
+      "source_checkpoint": "f18b06a76af7333e9fb68b5e87e36ec2b008ffa3",
       "status": "integrated",
-      "updated_at": "2026-09-28T11:55:28.915444+00:00",
+      "updated_at": "2026-09-28T06:53:30.927881+00:00",
       "integration": {
         "status": "passed",
         "parent_ref": "refs/heads/main",
-        "parent_before_sha": "3ce79fe2edb3bda424e0a10b98960435200e0f38",
-        "source_sha": "301b74713b0a2f38d5159aaabbe64debcbda9296",
+        "parent_before_sha": "e7c59b2e87a858725874d53530bdacb72918f5ca",
+        "source_sha": "f18b06a76af7333e9fb68b5e87e36ec2b008ffa3",
         "candidate_sha": null,
         "candidate_tree_sha": null,
         "candidate_branch": null,
         "candidate_workspace_ref": null,
-        "result_sha": "301b74713b0a2f38d5159aaabbe64debcbda9296",
+        "result_sha": "f18b06a76af7333e9fb68b5e87e36ec2b008ffa3",
         "method": "direct-parent",
         "conflict_paths": [],
         "verification": "passed",
@@ -76,15 +77,15 @@
           "required": true,
           "status": "passed",
           "reason": "本票要求的全部测试与匹配回归、build/lint，见命令表",
-          "evidence": "<Path>{roots.state}/specdev/changes/2026-09-28-issue-37-terminal-release/evidence/T-01.md</Path>"
+          "evidence": "<Path>{roots.state}/specdev/changes/2026-09-28-issue-38-agent-preflight/evidence/T-01.md</Path>"
         },
         "e2e": {
           "required": true,
           "status": "passed",
-          "reason": "公开0.0.3全新配置/Vault默认下载、首次PTY、历史/用量、导出/恢复、模块启停和真实进程重启/清理均passed",
-          "evidence": "<Path>{roots.state}/specdev/changes/2026-09-28-issue-37-terminal-release/evidence/T-01.md</Path>"
+          "reason": "真实 Obsidian 1.13.7 合成库的 UI/运行/重启",
+          "evidence": "<Path>{roots.state}/specdev/changes/2026-09-28-issue-38-agent-preflight/evidence/T-01.md</Path>"
         },
-        "evidence": "<Path>{roots.state}/specdev/changes/2026-09-28-issue-37-terminal-release/evidence/T-01.md</Path>",
+        "evidence": "<Path>{roots.state}/specdev/changes/2026-09-28-issue-38-agent-preflight/evidence/T-01.md</Path>",
         "attempts": 1,
         "promotion_status": "applied"
       }

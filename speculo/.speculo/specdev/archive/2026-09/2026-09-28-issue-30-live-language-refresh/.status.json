@@ -1,15 +1,16 @@
 {
   "schema_version": 6,
   "artifact": "change-status",
-  "change": "2026-09-28-issue-31-contacts-polish",
-  "change_status": "completed",
+  "change": "2026-09-28-issue-30-live-language-refresh",
+  "change_status": "archived",
   "current_work": null,
   "works_run": [
     "specdev/triage",
     "specdev/diagnose-bugs",
     "specdev/spec",
     "specdev/tickets",
-    "specdev/goal-plan"
+    "specdev/goal-plan",
+    "specdev/archive-and-consolidate"
   ],
   "claimed_investigations": [],
   "execution_authorization": {
@@ -39,10 +40,10 @@
     "history": []
   },
   "created_at": "2026-09-28T05:55:43.895113+00:00",
-  "updated_at": "2026-09-28T08:08:33.439761+00:00",
-  "completed_at": "2026-09-28T08:08:33.439761+00:00",
-  "archived": false,
-  "archive_path": null,
+  "updated_at": "2026-09-29T01:29:06.336905+00:00",
+  "completed_at": "2026-09-28T07:50:16.527651+00:00",
+  "archived": true,
+  "archive_path": "<Path>{roots.state}/specdev/archive/2026-09/2026-09-28-issue-30-live-language-refresh/</Path>",
   "blockers": [],
   "deviations": [],
   "worktrees": [
@@ -52,23 +53,23 @@
       "implementation_owner": "codex-issue-planning",
       "integration_owner": "codex-issue-planning",
       "provider": "git",
-      "base_sha": "8cb2a48bd23044c41a7ff28ca058f74a323d7c22",
+      "base_sha": "dd4b9f4e22e21ea5561651ef437654b75c7bfdda",
       "parent_branch": "main",
       "branch": "main",
       "workspace_ref": "current",
-      "source_checkpoint": "15d4a820e4033b8b74bbef8828ccae582665a537",
+      "source_checkpoint": "a56c441752be4af8b931a3c5f3c5f372d5d576ca",
       "status": "integrated",
-      "updated_at": "2026-09-28T08:02:02.646773+00:00",
+      "updated_at": "2026-09-28T07:30:53.235592+00:00",
       "integration": {
         "status": "passed",
         "parent_ref": "refs/heads/main",
-        "parent_before_sha": "8cb2a48bd23044c41a7ff28ca058f74a323d7c22",
-        "source_sha": "15d4a820e4033b8b74bbef8828ccae582665a537",
+        "parent_before_sha": "dd4b9f4e22e21ea5561651ef437654b75c7bfdda",
+        "source_sha": "a56c441752be4af8b931a3c5f3c5f372d5d576ca",
         "candidate_sha": null,
         "candidate_tree_sha": null,
         "candidate_branch": null,
         "candidate_workspace_ref": null,
-        "result_sha": "15d4a820e4033b8b74bbef8828ccae582665a537",
+        "result_sha": "a56c441752be4af8b931a3c5f3c5f372d5d576ca",
         "method": "direct-parent",
         "conflict_paths": [],
         "verification": "passed",
@@ -76,15 +77,15 @@
           "required": true,
           "status": "passed",
           "reason": "本票要求的全部测试与匹配回归、build/lint，见命令表",
-          "evidence": "<Path>{roots.state}/specdev/changes/2026-09-28-issue-31-contacts-polish/evidence/T-01.md</Path>"
+          "evidence": "<Path>{roots.state}/specdev/changes/2026-09-28-issue-30-live-language-refresh/evidence/T-01.md</Path>"
         },
         "e2e": {
           "required": true,
           "status": "passed",
-          "reason": "本票所要求的宿主行为逐项验收见 Ticket Evidence",
-          "evidence": "<Path>{roots.state}/specdev/changes/2026-09-28-issue-31-contacts-polish/evidence/T-01.md</Path>"
+          "reason": "真实 Obsidian 命令面板、中英往返、快捷键、模块循环及进程重启",
+          "evidence": "<Path>{roots.state}/specdev/changes/2026-09-28-issue-30-live-language-refresh/evidence/T-01.md</Path>"
         },
-        "evidence": "<Path>{roots.state}/specdev/changes/2026-09-28-issue-31-contacts-polish/evidence/T-01.md</Path>",
+        "evidence": "<Path>{roots.state}/specdev/changes/2026-09-28-issue-30-live-language-refresh/evidence/T-01.md</Path>",
         "attempts": 1,
         "promotion_status": "applied"
       }
@@ -95,23 +96,23 @@
       "implementation_owner": "codex-issue-planning",
       "integration_owner": "codex-issue-planning",
       "provider": "git",
-      "base_sha": "fed02264e78d493a28755c1f7d5a6dbfe790efef",
+      "base_sha": "c12c44a98cb5c6d907443726bb29f646e5fd2a59",
       "parent_branch": "main",
       "branch": "main",
       "workspace_ref": "current",
-      "source_checkpoint": "161353e8627c20088f8166f0b053080004a6298e",
+      "source_checkpoint": "ce5058781905ad8e5b25faaefc0cec4fa93b2d0f",
       "status": "integrated",
-      "updated_at": "2026-09-28T08:08:33.439761+00:00",
+      "updated_at": "2026-09-28T07:50:16.527651+00:00",
       "integration": {
         "status": "passed",
         "parent_ref": "refs/heads/main",
-        "parent_before_sha": "fed02264e78d493a28755c1f7d5a6dbfe790efef",
-        "source_sha": "161353e8627c20088f8166f0b053080004a6298e",
+        "parent_before_sha": "c12c44a98cb5c6d907443726bb29f646e5fd2a59",
+        "source_sha": "ce5058781905ad8e5b25faaefc0cec4fa93b2d0f",
         "candidate_sha": null,
         "candidate_tree_sha": null,
         "candidate_branch": null,
         "candidate_workspace_ref": null,
-        "result_sha": "161353e8627c20088f8166f0b053080004a6298e",
+        "result_sha": "ce5058781905ad8e5b25faaefc0cec4fa93b2d0f",
         "method": "direct-parent",
         "conflict_paths": [],
         "verification": "passed",
@@ -119,15 +120,15 @@
           "required": true,
           "status": "passed",
           "reason": "本票要求的全部测试与匹配回归、build/lint，见命令表",
-          "evidence": "<Path>{roots.state}/specdev/changes/2026-09-28-issue-31-contacts-polish/evidence/T-02.md</Path>"
+          "evidence": "<Path>{roots.state}/specdev/changes/2026-09-28-issue-30-live-language-refresh/evidence/T-02.md</Path>"
         },
         "e2e": {
-          "required": false,
-          "status": "not-required",
-          "reason": "Ticket 明定资源/本地数据合同不要求 GUI E2E；另完成实际 Obsidian Vault 文件生成与字节比较",
-          "evidence": "<Path>{roots.state}/specdev/changes/2026-09-28-issue-31-contacts-polish/evidence/T-02.md</Path>"
+          "required": true,
+          "status": "passed",
+          "reason": "真实 Obsidian 六叶子、弹出窗口、两个 PTY 引用保持、模块关闭、重启及原生 deferred leaf",
+          "evidence": "<Path>{roots.state}/specdev/changes/2026-09-28-issue-30-live-language-refresh/evidence/T-02.md</Path>"
         },
-        "evidence": "<Path>{roots.state}/specdev/changes/2026-09-28-issue-31-contacts-polish/evidence/T-02.md</Path>",
+        "evidence": "<Path>{roots.state}/specdev/changes/2026-09-28-issue-30-live-language-refresh/evidence/T-02.md</Path>",
         "attempts": 1,
         "promotion_status": "applied"
       }

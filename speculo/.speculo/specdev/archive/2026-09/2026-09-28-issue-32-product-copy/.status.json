@@ -1,15 +1,16 @@
 {
   "schema_version": 6,
   "artifact": "change-status",
-  "change": "2026-09-28-issue-40-visible-export",
-  "change_status": "completed",
+  "change": "2026-09-28-issue-32-product-copy",
+  "change_status": "archived",
   "current_work": null,
   "works_run": [
     "specdev/triage",
     "specdev/diagnose-bugs",
     "specdev/spec",
     "specdev/tickets",
-    "specdev/goal-plan"
+    "specdev/goal-plan",
+    "specdev/archive-and-consolidate"
   ],
   "claimed_investigations": [],
   "execution_authorization": {
@@ -39,10 +40,10 @@
     "history": []
   },
   "created_at": "2026-09-28T05:55:43.895113+00:00",
-  "updated_at": "2026-09-28T08:19:42.612395+00:00",
-  "completed_at": "2026-09-28T08:19:42.612395+00:00",
-  "archived": false,
-  "archive_path": null,
+  "updated_at": "2026-09-29T01:29:06.336905+00:00",
+  "completed_at": "2026-09-28T07:56:04.615261+00:00",
+  "archived": true,
+  "archive_path": "<Path>{roots.state}/specdev/archive/2026-09/2026-09-28-issue-32-product-copy/</Path>",
   "blockers": [],
   "deviations": [],
   "worktrees": [
@@ -52,23 +53,23 @@
       "implementation_owner": "codex-issue-planning",
       "integration_owner": "codex-issue-planning",
       "provider": "git",
-      "base_sha": "c8b5f0dfe35b42603b217807368e3e257dad1acb",
+      "base_sha": "a9d310f855e6a06a2839b6b1f167c18ea3640e97",
       "parent_branch": "main",
       "branch": "main",
       "workspace_ref": "current",
-      "source_checkpoint": "48fef793aedf09a35e3c8afc4c9776219036abdc",
+      "source_checkpoint": "78a658fe36f12b4b0f8e56d8abfe5b62dccec1ac",
       "status": "integrated",
-      "updated_at": "2026-09-28T08:19:42.612395+00:00",
+      "updated_at": "2026-09-28T07:56:04.615261+00:00",
       "integration": {
         "status": "passed",
         "parent_ref": "refs/heads/main",
-        "parent_before_sha": "c8b5f0dfe35b42603b217807368e3e257dad1acb",
-        "source_sha": "48fef793aedf09a35e3c8afc4c9776219036abdc",
+        "parent_before_sha": "a9d310f855e6a06a2839b6b1f167c18ea3640e97",
+        "source_sha": "78a658fe36f12b4b0f8e56d8abfe5b62dccec1ac",
         "candidate_sha": null,
         "candidate_tree_sha": null,
         "candidate_branch": null,
         "candidate_workspace_ref": null,
-        "result_sha": "48fef793aedf09a35e3c8afc4c9776219036abdc",
+        "result_sha": "78a658fe36f12b4b0f8e56d8abfe5b62dccec1ac",
         "method": "direct-parent",
         "conflict_paths": [],
         "verification": "passed",
@@ -76,15 +77,15 @@
           "required": true,
           "status": "passed",
           "reason": "本票要求的全部测试与匹配回归、build/lint，见命令表",
-          "evidence": "<Path>{roots.state}/specdev/changes/2026-09-28-issue-40-visible-export/evidence/T-01.md</Path>"
+          "evidence": "<Path>{roots.state}/specdev/changes/2026-09-28-issue-32-product-copy/evidence/T-01.md</Path>"
         },
         "e2e": {
           "required": true,
           "status": "passed",
-          "reason": "本票所要求的宿主行为逐项验收见 Ticket Evidence",
-          "evidence": "<Path>{roots.state}/specdev/changes/2026-09-28-issue-40-visible-export/evidence/T-01.md</Path>"
+          "reason": "真实 Obsidian 介绍/关于/命令/tooltip/图标菜单中英往返及进程重启",
+          "evidence": "<Path>{roots.state}/specdev/changes/2026-09-28-issue-32-product-copy/evidence/T-01.md</Path>"
         },
-        "evidence": "<Path>{roots.state}/specdev/changes/2026-09-28-issue-40-visible-export/evidence/T-01.md</Path>",
+        "evidence": "<Path>{roots.state}/specdev/changes/2026-09-28-issue-32-product-copy/evidence/T-01.md</Path>",
         "attempts": 1,
         "promotion_status": "applied"
       }

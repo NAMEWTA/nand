@@ -1,25 +1,25 @@
 ---
 schema_version: 1
 artifact: triage
-change: 2026-09-28-issue-37-terminal-release
-mode: intake
-source: <Path>{roots.state}/specdev/changes/2026-09-28-issue-37-terminal-release/source.md</Path>
-classification: operations
-risk: high
+change: 2026-09-28-issue-31-contacts-polish
+mode: reconcile
+source: <Path>{roots.state}/specdev/changes/2026-09-28-issue-31-contacts-polish/source.md</Path>
+classification: mixed
+risk: medium
 route: specdev/diagnose-bugs
 ready_for_implementation: false
-external_action: pending-close
+external_action: closed
 publish_action: not-requested
 publish: null
-updated_at: 2026-09-28T05:55:43.895113+00:00
+updated_at: 2026-09-29T01:25:58.184893+00:00
 ---
 
-# Triage: #37 terminal-release
+# Triage: #31 contacts-polish
 
 ## 当前判定
 
 - 影响：以冻结 Source 的最新复测说明为症状范围；旧标题不等同于当前缺陷。
-- 紧急度：scheduled / P1，默认安装终端与历史不可用。
+- 紧急度：normal；功能缺陷优先于纯文案/布局。
 - 事实：远程仍 open；本地基线 `09aade655241fff439d3147a55ec1448a4f93eea`，初始工作区 clean；报告主要测试节点为 `0dc97e9`，之后已发生 Preact/分层迁移，须重新复现。
 - 风险：诊断使用合成数据和可撤销夹具；不改用户库、生产代码、永久 ADR/context。涉及数据的后续票保留既有文件/运行/会话。
 - 历史相似项：<Path>{roots.state}/specdev/archive/2026-09/2026-09-28-docs-knowledge-consolidation/evidence/original-docs/agent-upgrade-2026-09-27.md</Path> 记录了旧修复；用户此次明确要求当前所有 open issue 的重新核查，因此继续，不能将旧“已修复”当成当前验收。
@@ -36,7 +36,7 @@ updated_at: 2026-09-28T05:55:43.895113+00:00
 
 ## 外部动作
 
-目标：https://github.com/NAMEWTA/nand/issues/37；关闭能力 supported；external_action pending-close；授权仅 issue-read，远程写入 0 次。本地未实现，不关闭或评论。
+目标：https://github.com/NAMEWTA/nand/issues/31；关闭能力 supported；external_action closed。2026-09-29T01:25:58Z 重读远程状态为 closed，评论含 specdev:2026-09-28-issue-31-contacts-polish:completion。publish_action 仍为 not-requested。标题对齐只在本地工作区，无公开 commit。
 
 ## 发布投影
 

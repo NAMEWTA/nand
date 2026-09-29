@@ -2,9 +2,11 @@
   "schema_version": 6,
   "artifact": "change-status",
   "change": "2026-09-28-open-issues-remediation-goal",
-  "change_status": "completed",
+  "change_status": "archived",
   "current_work": null,
-  "works_run": [],
+  "works_run": [
+    "specdev/archive-and-consolidate"
+  ],
   "claimed_investigations": [],
   "execution_authorization": {
     "implementation_commit": {
@@ -33,10 +35,10 @@
     "history": []
   },
   "created_at": "2026-09-28T06:22:59.239765+00:00",
-  "updated_at": "2026-09-28T11:56:42.275693+00:00",
+  "updated_at": "2026-09-29T01:29:06.336905+00:00",
   "completed_at": "2026-09-28T11:56:42.275693+00:00",
-  "archived": false,
-  "archive_path": null,
+  "archived": true,
+  "archive_path": "<Path>{roots.state}/specdev/archive/2026-09/2026-09-28-open-issues-remediation-goal/</Path>",
   "blockers": [],
   "deviations": [],
   "worktrees": []
