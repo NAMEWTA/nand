@@ -3,7 +3,20 @@ import type { AutomationDefinition } from '../../shared/automation/types';
 import { isActiveRun } from '../../shared/automation/types';
 import { automationMessage } from '../../shared/automation/errors';
 import { getLanguage, t } from '../../shared/i18n';
+import { Icon } from '../primitives/Icon';
 import type { AutomationPanelActions, AutomationPanelState, AutomationViewHost } from './panel-contract';
+
+/** Presentation only: maps a run/definition status to a semantic badge tone. */
+const STATUS_TONE: Record<string, string> = {
+	succeeded: 'success',
+	failed: 'error',
+	running: 'info',
+	unknown: 'info',
+	cancelled: 'warning',
+	interrupted: 'warning',
+};
+const badge = (tone?: string) => `nand-ui-badge${tone ? ` nand-ui-badge--${tone}` : ''}`;
+const statusBadge = (status: string) => badge(STATUS_TONE[status]);
 
 export function AutomationsPanel({
 	host,
@@ -18,10 +31,14 @@ export function AutomationsPanel({
 }) {
 	if (host.service.loadError) {
 		return (
-			<div className="nand-automation-load-error">
-				<p>{t('automation.failedLoad')}</p>
+			<div className="nand-automation-load-error nand-ui-card">
+				<p className="nand-automation-load-error-title">
+					<Icon className="nand-automation-load-error-icon" name="alert-triangle" />
+					{t('automation.failedLoad')}
+				</p>
 				<pre>{host.service.loadError}</pre>
 				<button
+					className="mod-cta nand-ui-btn"
 					onClick={() =>
 						actions.run(async () => {
 							await host.retry();
@@ -74,171 +91,271 @@ export function AutomationsPanel({
 			return 'processed';
 		return 'pending';
 	};
+	const editable = !!selected && enabled && currentIds.has(selected.id);
 	return (
 		<>
-			<div className="nand-automation-toolbar">
-				<button disabled={!enabled} onClick={() => host.edit()}>{t('automation.new')}</button>
-				<button onClick={() => host.inbox()}>{t('automation.inbox')}</button>
-				<button disabled={!enabled} onClick={() => actions.clearHistory()}>{t('automation.clearHistory')}</button>
-				<label className="nand-automation-filter">
-					<span>{t('automation.search')}</span>
-				<input
-					aria-label={t('automation.search')}
-					placeholder={t('automation.search')}
-					value={state.search}
-					onInput={(e) => {
-						state.search = e.currentTarget.value;
-						refresh();
-					}}
-				/>
-				</label>
-				<label className="nand-automation-filter">
-					<span>{t('automation.actionFilter')}</span>
-				<select
-					aria-label={t('automation.actionFilter')}
-					value={state.filter}
-					onChange={(e) => {
-						state.filter = e.currentTarget.value;
-						refresh();
-					}}
-				>
-					{['', 'enabled', 'disabled', 'agent', 'notify', 'create-task'].map((key) => (
-						<option key={key} value={key}>
-							{t(`automation.${key || 'all'}`)}
-						</option>
-					))}
-				</select>
-				</label>
-				<label className="nand-automation-filter">
-					<span>{t('automation.agentFilter')}</span>
-				<select
-					aria-label={t('automation.agentFilter')}
-					value={state.agentFilter}
-					onChange={(e) => {
-						state.agentFilter = e.currentTarget.value;
-						refresh();
-					}}
-				>
-					<option value="">{t('automation.all')}</option>
-					{service
-						.agent()
-						?.listAgents()
-						.map((agent) => (
-							<option key={agent.id} value={agent.id}>
-								{agent.title}
-							</option>
-						))}
-				</select>
-				</label>
-			</div>
-			<p className="setting-item-description">{t(enabled ? 'automation.localOnly' : 'automation.moduleOff')}</p>
-			<div className={`nand-automation-layout${selected ? ' has-detail' : ''}`}>
-				<div className="nand-automation-list">
-					{list.length === 0 && <p>{t('automation.empty')}</p>}
-					{list.map((d) => (
-						<button
-							key={d.id}
-							className={state.selected === d.id ? 'is-active' : ''}
-							onClick={() => {
-								state.selected = d.id;
+			<div className="nand-automation-header">
+				<div className="nand-automation-toolbar nand-ui-toolbar">
+					<button className="mod-cta nand-ui-btn" disabled={!enabled} onClick={() => host.edit()}>
+						<Icon name="plus" />
+						{t('automation.new')}
+					</button>
+					<span className="nand-ui-spacer" />
+					<button className="nand-ui-btn nand-ui-btn-ghost" onClick={() => host.inbox()}>
+						<Icon name="bell" />
+						{t('automation.inbox')}
+					</button>
+					<button
+						className="nand-ui-btn nand-ui-btn-ghost"
+						disabled={!enabled}
+						onClick={() => actions.clearHistory()}
+					>
+						<Icon name="history" />
+						{t('automation.clearHistory')}
+					</button>
+				</div>
+				<div className="nand-automation-filters">
+					<label className="nand-automation-filter nand-automation-filter--search nand-ui-field">
+						<span>{t('automation.search')}</span>
+						<input
+							aria-label={t('automation.search')}
+							placeholder={t('automation.search')}
+							value={state.search}
+							onInput={(e) => {
+								state.search = e.currentTarget.value;
+								refresh();
+							}}
+						/>
+					</label>
+					<label className="nand-automation-filter nand-ui-field">
+						<span>{t('automation.actionFilter')}</span>
+						<select
+							className="dropdown"
+							aria-label={t('automation.actionFilter')}
+							value={state.filter}
+							onChange={(e) => {
+								state.filter = e.currentTarget.value;
 								refresh();
 							}}
 						>
-							<strong>
-								{d.name}
-								{!currentIds.has(d.id) ? ` · ${t('automation.history')}` : ''}
-							</strong>
-							<span>
-								{t(`automation.${d.action.kind}`)} ·{' '}
-								{t(`automation.${d.enabled ? 'enabled' : 'disabled'}`)}
-							</span>
-							<small>{next(d)}</small>
-							<small>
-								{t(`automation.${status(d)}`)}
-							</small>
-						</button>
-					))}
+							{['', 'enabled', 'disabled', 'agent', 'notify', 'create-task'].map((key) => (
+								<option key={key} value={key}>
+									{t(`automation.${key || 'all'}`)}
+								</option>
+							))}
+						</select>
+					</label>
+					<label className="nand-automation-filter nand-ui-field">
+						<span>{t('automation.agentFilter')}</span>
+						<select
+							className="dropdown"
+							aria-label={t('automation.agentFilter')}
+							value={state.agentFilter}
+							onChange={(e) => {
+								state.agentFilter = e.currentTarget.value;
+								refresh();
+							}}
+						>
+							<option value="">{t('automation.all')}</option>
+							{service
+								.agent()
+								?.listAgents()
+								.map((agent) => (
+									<option key={agent.id} value={agent.id}>
+										{agent.title}
+									</option>
+								))}
+						</select>
+					</label>
 				</div>
-				{selected && (
-					<div className="nand-automation-detail">
-						<h3>{selected.name}</h3>
-						{selected.source && (
-							<button onClick={() => actions.run(() => service.sources.open(selected.source!))}>
-								{t('automation.source')}
-							</button>
-						)}
-						<p>
-							{selected.deviceId === service.deviceId
-								? t('automation.localDevice')
-								: t('automation.otherDevice')}
+				<p className={`setting-item-description nand-automation-notice${enabled ? '' : ' is-off'}`}>
+					<Icon className="nand-automation-notice-icon" name={enabled ? 'info' : 'alert-triangle'} />
+					<span>{t(enabled ? 'automation.localOnly' : 'automation.moduleOff')}</span>
+				</p>
+			</div>
+			<div className={`nand-automation-layout${selected ? ' has-detail' : ''}`}>
+				<div className="nand-automation-list nand-ui-list nand-ui-scroll">
+					{list.length === 0 && (
+						<p className="nand-automation-empty">
+							<Icon className="nand-automation-empty-icon" name="timer" />
+							<span>{t('automation.empty')}</span>
 						</p>
-						<div className="nand-automation-toolbar">
+					)}
+					{list.map((d) => {
+						const current = currentIds.has(d.id);
+						const rowStatus = status(d);
+						return (
 							<button
-								disabled={!enabled || !currentIds.has(selected.id)}
-								onClick={() => actions.run(() => service.run(selected))}
+								key={d.id}
+								className={`nand-ui-list-item nand-automation-item${state.selected === d.id ? ' is-active' : ''}${current ? '' : ' is-history'}`}
+								onClick={() => {
+									state.selected = d.id;
+									refresh();
+								}}
 							>
-								{t('automation.run')}
-							</button>
-							<button disabled={!enabled || !currentIds.has(selected.id)} onClick={() => host.edit(selected)}>
-								{t('automation.edit')}
-							</button>
-							<button
-								disabled={!enabled || !currentIds.has(selected.id)}
-								onClick={() =>
-									actions.run(() => service.save({ ...selected, enabled: !selected.enabled }))
-								}
-							>
-								{t(`automation.${selected.enabled ? 'pause' : 'resume'}`)}
-							</button>
-							<button disabled={!enabled || !currentIds.has(selected.id)} onClick={() => actions.remove(selected)}>
-								{t('automation.delete')}
-							</button>
-						</div>
-						<p>
-							{t('automation.next')}{t('automation.colon')}{next(selected)}
-						</p>
-						<p className="nand-automation-prompt">
-							{selected.action.kind === 'agent'
-								? selected.action.prompt
-								: selected.action.kind === 'notify'
-									? selected.action.body
-									: selected.action.text}
-						</p>
-						<h4>{t('automation.history')}</h4>
-						{runs.map((run) => (
-							<div className="nand-automation-run" key={run.id}>
-								<span>
-									{new Date(run.startedAt).toLocaleString(getLanguage() === 'zh' ? 'zh-CN' : 'en-US')} · {t(`automation.${run.status}`)}
+								<strong className="nand-ui-list-item-title">
+									{d.name}
+									{!current ? ` · ${t('automation.history')}` : ''}
+								</strong>
+								<span className="nand-automation-item-badges">
+									<span className={badge()}>{t(`automation.${d.action.kind}`)}</span>
+									<span className={badge(d.enabled ? 'success' : undefined)}>
+										<span className="nand-ui-dot" aria-hidden="true" />
+										{t(`automation.${d.enabled ? 'enabled' : 'disabled'}`)}
+									</span>
 								</span>
-								{(run.errorCode || run.message) && (
-									<p>{automationMessage(run)}</p>
-								)}
-								{run.usage?.known && (
-									<p>
-										{t('automation.tokens')}{t('automation.colon')}{run.usage.input} / {run.usage.output}
-										{run.usage.cost !== null ? ` · $${run.usage.cost.toFixed(4)}` : ''}
-									</p>
-								)}
-								{run.output && (
-									<details>
-										<summary>{t('automation.output')}</summary>
-										<pre>{run.output}</pre>
-									</details>
-								)}
-								{run.terminalId && (
+								<small className="nand-ui-list-item-meta nand-automation-item-next">
+									<Icon className="nand-automation-meta-icon" name="clock" />
+									{next(d)}
+								</small>
+								<small className={`${statusBadge(rowStatus)} nand-automation-item-status`}>
+									{t(`automation.${rowStatus}`)}
+								</small>
+							</button>
+						);
+					})}
+				</div>
+				{selected ? (
+					<div className="nand-automation-detail nand-ui-scroll">
+						<section className="nand-automation-detail-card nand-ui-card">
+							<header className="nand-automation-detail-header">
+								<div className="nand-automation-detail-heading">
+									<h3>{selected.name}</h3>
+									<div className="nand-automation-item-badges">
+										<span className={badge()}>{t(`automation.${selected.action.kind}`)}</span>
+										<span className={badge(selected.enabled ? 'success' : undefined)}>
+											<span className="nand-ui-dot" aria-hidden="true" />
+											{t(`automation.${selected.enabled ? 'enabled' : 'disabled'}`)}
+										</span>
+									</div>
+								</div>
+								<div className="nand-automation-toolbar nand-automation-detail-actions nand-ui-toolbar">
 									<button
-										onClick={() => actions.run(async () => service.agent()?.open(run.terminalId!))}
+										className="mod-cta nand-ui-btn"
+										disabled={!editable}
+										onClick={() => actions.run(() => service.run(selected))}
 									>
-										{t('automation.open')}
+										<Icon name="play" />
+										{t('automation.run')}
 									</button>
-								)}
-								{isActiveRun(run) && (
-									<button onClick={() => actions.run(() => service.stop(run))}>
-										{t('automation.stop')}
+									<button className="nand-ui-btn" disabled={!editable} onClick={() => host.edit(selected)}>
+										<Icon name="pencil" />
+										{t('automation.edit')}
+									</button>
+									<button
+										className="nand-ui-btn"
+										disabled={!editable}
+										onClick={() =>
+											actions.run(() => service.save({ ...selected, enabled: !selected.enabled }))
+										}
+									>
+										<Icon name={selected.enabled ? 'pause' : 'play'} />
+										{t(`automation.${selected.enabled ? 'pause' : 'resume'}`)}
+									</button>
+									<button
+										className="nand-ui-btn nand-ui-btn-ghost nand-automation-btn-danger"
+										disabled={!editable}
+										onClick={() => actions.remove(selected)}
+									>
+										<Icon name="trash-2" />
+										{t('automation.delete')}
+									</button>
+								</div>
+							</header>
+							<div className="nand-automation-meta">
+								<p className="nand-automation-meta-row">
+									<Icon className="nand-automation-meta-icon" name="monitor" />
+									<span>
+										{selected.deviceId === service.deviceId
+											? t('automation.localDevice')
+											: t('automation.otherDevice')}
+									</span>
+								</p>
+								<p className="nand-automation-meta-row">
+									<Icon className="nand-automation-meta-icon" name="clock" />
+									<span>
+										{t('automation.next')}{t('automation.colon')}{next(selected)}
+									</span>
+								</p>
+								{selected.source && (
+									<button
+										className="nand-ui-btn nand-ui-btn-ghost nand-automation-source"
+										onClick={() => actions.run(() => service.sources.open(selected.source!))}
+									>
+										<Icon name="file-text" />
+										{t('automation.source')}
 									</button>
 								)}
 							</div>
-						))}
+							<div className="nand-ui-section-label">{t('automation.prompt')}</div>
+							<p className="nand-automation-prompt">
+								{selected.action.kind === 'agent'
+									? selected.action.prompt
+									: selected.action.kind === 'notify'
+										? selected.action.body
+										: selected.action.text}
+							</p>
+						</section>
+						<div className="nand-automation-section-head">
+							<h4>{t('automation.history')}</h4>
+							<span className={`${badge()} nand-automation-count`}>{runs.length}</span>
+						</div>
+						<ol className="nand-automation-timeline">
+							{runs.map((run) => (
+								<li className={`nand-automation-run is-${STATUS_TONE[run.status] ?? 'neutral'}`} key={run.id}>
+									<span className="nand-automation-run-marker" aria-hidden="true" />
+									<div className="nand-automation-run-card">
+										<div className="nand-automation-run-head">
+											<span className="nand-automation-run-time">
+												{new Date(run.startedAt).toLocaleString(getLanguage() === 'zh' ? 'zh-CN' : 'en-US')}
+											</span>
+											<span className={statusBadge(run.status)}>{t(`automation.${run.status}`)}</span>
+											<span className="nand-ui-spacer" />
+											{run.terminalId && (
+												<button
+													className="nand-ui-btn nand-ui-btn-ghost"
+													onClick={() => actions.run(async () => service.agent()?.open(run.terminalId!))}
+												>
+													<Icon name="terminal" />
+													{t('automation.open')}
+												</button>
+											)}
+											{isActiveRun(run) && (
+												<button
+													className="nand-ui-btn nand-ui-btn-ghost nand-automation-btn-danger"
+													onClick={() => actions.run(() => service.stop(run))}
+												>
+													<Icon name="square" />
+													{t('automation.stop')}
+												</button>
+											)}
+										</div>
+										{(run.errorCode || run.message) && (
+											<p className="nand-automation-run-message">{automationMessage(run)}</p>
+										)}
+										{run.usage?.known && (
+											<p className="nand-automation-run-usage">
+												{t('automation.tokens')}{t('automation.colon')}{run.usage.input} / {run.usage.output}
+												{run.usage.cost !== null ? ` · $${run.usage.cost.toFixed(4)}` : ''}
+											</p>
+										)}
+										{run.output && (
+											<details className="nand-automation-output">
+												<summary>
+													<Icon className="nand-automation-output-chevron" name="chevron-right" />
+													{t('automation.output')}
+												</summary>
+												<pre>{run.output}</pre>
+											</details>
+										)}
+									</div>
+								</li>
+							))}
+						</ol>
+					</div>
+				) : (
+					<div className="nand-automation-placeholder" aria-hidden="true">
+						<Icon name="timer" />
 					</div>
 				)}
 			</div>

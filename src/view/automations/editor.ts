@@ -67,6 +67,7 @@ export class AutomationEditor extends Modal {
 		const el = this.contentEl;
 		el.empty();
 		el.addClass('nand-automation-editor');
+		this.containerEl.addClass('nand-automation-editor-container');
 		new Setting(el).setName(t(this.editing ? 'automation.editTitle' : 'automation.new')).setHeading();
 		new Setting(el).setName(t('automation.name')).addText((input) =>
 			input.setValue(this.draft.name).onChange((v) => {
@@ -86,8 +87,8 @@ export class AutomationEditor extends Modal {
 				});
 			});
 		const body = el.createDiv({ cls: 'nand-automation-editor-body' });
-		const main = body.createDiv(),
-			side = body.createDiv();
+		const main = body.createDiv({ cls: 'nand-automation-editor-main' }),
+			side = body.createDiv({ cls: 'nand-automation-editor-side' });
 		const action = this.draft.action;
 		new Setting(main).setName(t('automation.prompt')).addTextArea((input) => {
 			input.inputEl.rows = 12;
@@ -149,6 +150,7 @@ export class AutomationEditor extends Modal {
 					}),
 			);
 		new Setting(el)
+			.setClass('nand-automation-editor-footer')
 			.setDesc(t('automation.localOnly'))
 			.addButton((button) =>
 				button

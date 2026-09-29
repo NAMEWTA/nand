@@ -66,7 +66,7 @@ export class AutomationView extends ItemView {
 		new Setting(modal.contentEl)
 			.addButton((b) => b.setButtonText(t('automation.cancel')).onClick(() => modal.close()))
 			.addButton((b) =>
-				b.setButtonText(t('automation.delete')).onClick(() => {
+				b.setButtonText(t('automation.delete')).setClass('mod-warning').onClick(() => {
 					modal.close();
 					this.run(() => this.host.service.remove(definition));
 				}),
