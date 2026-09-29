@@ -25,8 +25,8 @@ export function mountCommentComposer(
 	const input = parent.createEl('textarea', { cls: 'nand-editor-comment-popover-input' });
 	const hint = parent.createDiv({ cls: 'nand-editor-comment-shortcut' });
 	const actions = parent.createDiv({ cls: 'nand-editor-comment-composer-actions' });
-	const cancel = actions.createEl('button', { attr: { type: 'button' } });
-	const submit = actions.createEl('button', { cls: 'mod-cta', attr: { type: 'button' } });
+	const cancel = actions.createEl('button', { cls: 'nand-ui-btn nand-ui-btn-ghost', attr: { type: 'button' } });
+	const submit = actions.createEl('button', { cls: 'mod-cta nand-ui-btn', attr: { type: 'button' } });
 	const id = `nand-comment-composer-${++composerId}`;
 	const label = parent.createEl('label', { cls: 'nand-editor-comment-label', attr: { for: id } });
 	input.id = id;
@@ -61,6 +61,7 @@ export function mountCommentComposer(
 	};
 	const sync = () => {
 		button.hidden = editing;
+		parent.toggleClass('is-editing', editing);
 		input.hidden = hint.hidden = actions.hidden = !editing;
 		submit.disabled = pending || !input.value.trim();
 		input.disabled = cancel.disabled = pending;

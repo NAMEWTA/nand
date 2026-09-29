@@ -11,6 +11,9 @@ export interface CommentPanelActions {
 	reply(id: string): void;
 	more(thread: CommentThread, button: HTMLButtonElement): void;
 }
+/** Secondary thread actions share the ghost button primitive. */
+const ACTION_CLASS = 'nand-editor-comment-action nand-ui-btn nand-ui-btn-ghost';
+
 export function CommentsPanel({
 	path,
 	threads,
@@ -45,7 +48,7 @@ export function CommentsPanel({
 					{threads.map((thread) => (
 						<div
 							key={thread.id}
-							className={`nand-editor-comment${focusedId === thread.id ? ' is-focused' : ''}`}
+							className={`nand-editor-comment nand-ui-card${focusedId === thread.id ? ' is-focused is-selected' : ''}`}
 							data-comment-id={thread.id}
 							data-status={thread.status}
 						>
@@ -58,7 +61,11 @@ export function CommentsPanel({
 								{thread.target.quote.exact || '…'}
 							</button>
 							{thread.status !== 'open' && (
-								<div className="nand-editor-comment-status">
+								<div
+									className={`nand-editor-comment-status nand-ui-badge ${
+										thread.status === 'resolved' ? 'nand-ui-badge--success' : 'nand-ui-badge--warning'
+									}`}
+								>
 									<Icon name={thread.status === 'resolved' ? 'check-check' : 'unlink'} />
 									<span>
 										{t(
@@ -79,23 +86,26 @@ export function CommentsPanel({
 							</div>
 							<div className="nand-editor-comment-actions">
 								{thread.status === 'orphaned' ? (
-									<button onClick={() => actions.reanchor(thread)}>
+									<button className={ACTION_CLASS} onClick={() => actions.reanchor(thread)}>
 										{t('editor.comments.reanchor')}
 									</button>
 								) : thread.status === 'open' ? (
-									<button onClick={() => actions.resolve(thread.id)}>
+									<button className={ACTION_CLASS} onClick={() => actions.resolve(thread.id)}>
 										{t('editor.comments.resolve')}
 									</button>
 								) : (
-									<button onClick={() => actions.reopen(thread.id)}>
+									<button className={ACTION_CLASS} onClick={() => actions.reopen(thread.id)}>
 										{t('editor.comments.reopen')}
 									</button>
 								)}
-								<button onClick={() => actions.reply(thread.id)}>{t('editor.comments.reply')}</button>
+								<button className={ACTION_CLASS} onClick={() => actions.reply(thread.id)}>
+									{t('editor.comments.reply')}
+								</button>
 								<button
 									type="button"
-									className="nand-editor-comment-more"
+									className="nand-editor-comment-more nand-ui-icon-btn"
 									aria-label={t('editor.comments.more')}
+									title={t('editor.comments.more')}
 									aria-haspopup="menu"
 									onClick={(event) => actions.more(thread, event.currentTarget)}
 								>

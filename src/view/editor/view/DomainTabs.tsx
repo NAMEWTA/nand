@@ -13,18 +13,19 @@ export function DomainTabs({
 	onPick: (id: EditorDomainId) => void;
 }) {
 	return (
-		<div className="nand-editor-tabs">
+		<div className="nand-editor-tabs nand-ui-segmented">
 			{domains.map((domain) => (
 				<button
 					key={domain.id}
 					type="button"
 					className={`nand-editor-tab${domain.id === active ? ' is-active' : ''}`}
+					aria-pressed={domain.id === active}
 					onClick={() => onPick(domain.id)}
 				>
 					<span className="nand-editor-tab-icon">
 						<Icon name={domain.icon} />
 					</span>
-					<span>{t(domain.titleKey)}</span>
+					<span className="nand-editor-tab-label">{t(domain.titleKey)}</span>
 				</button>
 			))}
 		</div>
