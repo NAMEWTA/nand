@@ -13,6 +13,7 @@ import { setupDragAndDrop } from '../ui/dnd';
 import { getRecentDocs, renderRecentDocs } from '../ui/recent';
 import { captureScrollStates, restoreScrollStates } from '../ui/scroll-preserve';
 import { destroyAlbumWidgets, refreshAlbumWidgets } from '../widgets/album-widget';
+import { refreshHabitWidget } from '../habit/habit-widget';
 import { renderSidebarLunarWidget } from '../widgets/lunar-widget';
 import type { DashboardView } from './dashboard-view';
 
@@ -214,6 +215,8 @@ export function refreshSectionsFor(
  *  refresh the habit widget in place + the mobile habit panel, and let the
  *  banner debounce recompute when it shows the habit heatmap. */
 export function onHabitChanged(this: DashboardView): void {
+	const root = this.containerEl.children[1] as HTMLElement | undefined;
+	if (root) refreshHabitWidget(root);
 	this.debouncedRefreshBannerStats();
 }
 

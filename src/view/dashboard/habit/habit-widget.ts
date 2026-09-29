@@ -68,6 +68,7 @@ export function renderSidebarHabitWidget(
 	applyWidgetBackground(widget, bg, app);
 }
 export function refreshHabitWidget(root: HTMLElement): void {
-	const widget = root.querySelector<HTMLElement>('.dashboard-sidebar-habit');
-	if (widget?.isConnected) refreshers.get(widget)?.();
+	root.querySelectorAll<HTMLElement>('.dashboard-sidebar-habit').forEach((widget) => {
+		if (widget.isConnected) refreshers.get(widget)?.();
+	});
 }

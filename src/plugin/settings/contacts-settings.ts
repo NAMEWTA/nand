@@ -27,6 +27,7 @@ export function renderContactsSettings(this: DashboardSettingTab, host: HTMLElem
 	new Setting(host).setName(ct('storage')).setHeading();
 	let candidate = this.plugin.settings.contacts.rootFolder;
 	const setting = new Setting(host).setName(ct('folder')).setDesc(ct('folderHint'));
+	setting.settingEl.addClass('nand-contacts-folder-setting');
 	setting.addText((input) => {
 		input.setValue(candidate).onChange((value) => {
 			candidate = value.trim().replace(/\\/g, '/').replace(/\/$/, '');

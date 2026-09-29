@@ -2,16 +2,14 @@ import { Notice, Platform, Plugin, TAbstractFile, TFile, type Command } from 'ob
 import { type AlbumConfig, type AnniversaryConfig, type CountdownConfig } from '../core/dashboard/types/index';
 import {
 	refreshLeafTitle,
-	setDeferredLeafTitle,
-	storedLeafTitle,
-	translatedLeafTitle,
+	retitleDeferredLeaves,
 	type LeafTitlePair,
 } from '../platform/obsidian/workspace-title';
 import { registerLocalizedCommand, type LocalizedCommand } from '../platform/obsidian/localized-command';
 import type { AutomationUiPort } from '../shared/automation/types';
 import { normalizeContactsSettings } from '../shared/contacts-settings';
 import { normalizeEditorWorkbench } from '../shared/editor-workbench';
-import { getLanguage, setLanguage, t, tFor } from '../shared/i18n/index';
+import { getLanguage, onLanguageChanged, setLanguage, t, tFor } from '../shared/i18n/index';
 import { closeDashboardPanelModals } from '../view/dashboard/ui/panel-modal';
 import { AUTOMATION_VIEW_TYPE } from '../view/automations/view';
 import { DASHBOARD_VIEW_TYPE } from '../view/dashboard/view/view-type';
@@ -179,6 +177,8 @@ export default class DashboardPlugin extends Plugin {
 
 	async onload(): Promise<void> {
 		await this.loadSettings();
+		// loadSettings already called setLanguage, before any leaf exists.
+		this.register(onLanguageChanged(() => this.rewriteDeferredLeafTitles()));
 		this.registerView(CONTACTS_VIEW_TYPE, (leaf) => new ContactsView(leaf, this));
 
 		this.registerView(DASHBOARD_VIEW_TYPE, (leaf) => new DashboardView(leaf, this));
@@ -336,12 +336,9 @@ export default class DashboardPlugin extends Plugin {
 			[TERMINAL_VIEW_TYPE]: [pair('terminalAgent.terminal.defaultTitle'), pair('modules.terminalOffTitle')],
 		};
 		for (const [type, pairs] of Object.entries(byType)) {
-			for (const leaf of this.app.workspace.getLeavesOfType(type)) {
-				if (!leaf.isDeferred) continue;
-				const next = translatedLeafTitle(storedLeafTitle(leaf), pairs, language);
-				if (!next || !setDeferredLeafTitle(leaf, next)) continue;
+			retitleDeferredLeaves(this.app.workspace.getLeavesOfType(type), pairs, language, (leaf) => {
 				refreshLeafTitle(this.app, leaf);
-			}
+			});
 		}
 	}
 

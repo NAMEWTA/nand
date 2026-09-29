@@ -31,6 +31,21 @@ export function setDeferredLeafTitle(leaf: WorkspaceLeaf, next: string): boolean
 	return true;
 }
 
+/** Rewrite deferred leaves whose stored title is exactly the other language's default. */
+export function retitleDeferredLeaves(
+	leaves: readonly WorkspaceLeaf[],
+	pairs: readonly LeafTitlePair[],
+	language: Language,
+	refresh: (leaf: WorkspaceLeaf) => void,
+): void {
+	for (const leaf of leaves) {
+		if (!leaf.isDeferred) continue;
+		const next = translatedLeafTitle(storedLeafTitle(leaf), pairs, language);
+		if (!next || !setDeferredLeafTitle(leaf, next)) continue;
+		refresh(leaf);
+	}
+}
+
 /** Repaint in place and notify the leaf's current host window; ownership stays with the view. */
 export function onLeafLanguageChanged(app: App, leaf: WorkspaceLeaf, repaint: () => void): () => void {
 	return onLanguageChanged(() => {

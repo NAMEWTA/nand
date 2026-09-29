@@ -15,6 +15,7 @@ import type { Command, Plugin } from 'obsidian';
 import { intersectRects, placePopover } from '../src/view/editor/comments/popover-position';
 import {
 	refreshLeafTitle,
+	retitleDeferredLeaves,
 	setDeferredLeafTitle,
 	translatedLeafTitle,
 } from '../src/platform/obsidian/workspace-title';
@@ -248,6 +249,59 @@ async function main() {
 	assert.equal(deferred.view.title, '终端');
 	assert.equal(deferred.loaded, false);
 	assert.equal(setDeferredLeafTitle({ view: {} } as never, '看板'), false);
+	const titleRefreshes = new Map<object, number>();
+	const countRefresh = (leaf: object) => titleRefreshes.set(leaf, (titleRefreshes.get(leaf) ?? 0) + 1);
+	const deferredLeaf = (title: string, isDeferred = true) => {
+		const view: { title?: string } = { title };
+		return {
+			isDeferred,
+			view,
+			loaded: false,
+			loadIfDeferred() {
+				this.loaded = true;
+			},
+			getViewState() {
+				return { title: view.title };
+			},
+		};
+	};
+	const terminalLeaf = deferredLeaf('Terminal');
+	const agentsLeaf = deferredLeaf('Agents');
+	const customLeaf = deferredLeaf('My session');
+	const openLeaf = deferredLeaf('Terminal', false);
+	const missingLeaf = {
+		isDeferred: true,
+		view: {} as { title?: string },
+		loaded: false,
+		loadIfDeferred() {
+			this.loaded = true;
+		},
+		getViewState() {
+			return { title: 'Terminal' };
+		},
+	};
+	const titled = [terminalLeaf, agentsLeaf, customLeaf, openLeaf, missingLeaf];
+	retitleDeferredLeaves(titled as never, terminalPairs, 'zh', countRefresh as never);
+	assert.equal(terminalLeaf.view.title, '终端');
+	assert.notEqual(terminalLeaf.view.title, '智能体');
+	assert.equal(agentsLeaf.view.title, '智能体');
+	assert.equal(customLeaf.view.title, 'My session');
+	assert.equal(openLeaf.view.title, 'Terminal');
+	assert.equal('title' in missingLeaf.view, false);
+	assert.equal(titleRefreshes.get(terminalLeaf), 1);
+	assert.equal(titleRefreshes.get(agentsLeaf), 1);
+	assert.equal(titleRefreshes.has(customLeaf), false);
+	assert.equal(titleRefreshes.has(openLeaf), false);
+	assert.equal(titleRefreshes.has(missingLeaf), false);
+	for (const leaf of titled) assert.equal(leaf.loaded, false);
+	retitleDeferredLeaves([terminalLeaf, agentsLeaf] as never, terminalPairs, 'zh', countRefresh as never);
+	assert.equal(titleRefreshes.get(terminalLeaf), 1);
+	assert.equal(titleRefreshes.get(agentsLeaf), 1);
+	assert.equal(terminalLeaf.view.title, '终端');
+	const englishLeaf = deferredLeaf('终端');
+	retitleDeferredLeaves([englishLeaf] as never, terminalPairs, 'en', countRefresh as never);
+	assert.equal(englishLeaf.view.title, 'Terminal');
+	assert.equal(englishLeaf.loaded, false);
 
 	let disk = '';
 	let refreshes = 0;

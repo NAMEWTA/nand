@@ -24410,6 +24410,15 @@ body.is-mobile .dashboard-media-item .dashboard-media-tagbtn { opacity: 1; }
 :is(.nand-settings, .dashboard-settings-root) button.dashboard-settings-tab.active { background: var(--background-modifier-hover); box-shadow: inset 0 -2px var(--interactive-accent); }
 :is(.nand-settings, .dashboard-settings-root) .setting-item:not(.dashboard-settings-section) > .setting-item-info { flex: 1; }
 :is(.nand-settings, .dashboard-settings-root) .setting-item:not(.dashboard-settings-section) > .setting-item-control { flex: 0 1 auto; }
+:is(.nand-settings, .dashboard-settings-root) .setting-item.nand-contacts-folder-setting > .setting-item-info {
+	flex: 1 1 16rem;
+	min-width: min(100%, 16rem);
+}
+:is(.nand-settings, .dashboard-settings-root) .setting-item.nand-contacts-folder-setting > .setting-item-control {
+	flex: 0 0 auto;
+	min-width: auto;
+	max-width: 100%;
+}
 .nand-home-settings .setting-item:last-child .setting-item-info { padding-inline-start: 36px; }
 @container nand-settings (max-width: 520px) {
 	.nand-terminal-settings .setting-item:not(.dashboard-settings-section) > .setting-item-info,

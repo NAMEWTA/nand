@@ -93,6 +93,21 @@ test('settings stylesheet does not keep a left-hand settings column', () => {
 	assert.equal(source.includes('nand-settings-split'), false);
 });
 
+test('archive folder setting reserves room for its description', () => {
+	const css = fs.readFileSync(path.join(process.cwd(), 'styles.css'), 'utf8');
+	const info = css.match(/\.setting-item\.nand-contacts-folder-setting > \.setting-item-info \{[^}]+\}/);
+	const control = css.match(/\.setting-item\.nand-contacts-folder-setting > \.setting-item-control \{[^}]+\}/);
+	assert.ok(info);
+	assert.ok(control);
+	assert.match(info[0], /min-width:\s*min\(100%,\s*16rem\)/);
+	assert.match(control[0], /min-width:\s*auto/);
+	assert.match(control[0], /flex:\s*0 0 auto/);
+	assert.match(css, /\.setting-item-info \{[^}]*min-width:\s*0/);
+	const globalInfo = css.indexOf('.setting-item:not(.dashboard-settings-section) > .setting-item-info { flex: 1; }');
+	assert.ok(globalInfo >= 0);
+	assert.ok(css.indexOf('.setting-item.nand-contacts-folder-setting > .setting-item-info') > globalInfo);
+});
+
 test('archives has independent navigation and respects its module gate', () => {
 	assert.deepEqual(sidePages('contacts'), ['contacts-storage']);
 	assert.equal(defaultPage('contacts'), 'contacts-storage');

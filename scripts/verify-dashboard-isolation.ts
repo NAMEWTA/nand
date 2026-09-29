@@ -22,6 +22,7 @@ import { InlineValue } from '../src/view/dashboard/dataview/Values';
 import { getHabitService, registerHabitService, type HabitService } from '../src/platform/obsidian/habit/habit-service';
 import { registerMusicService, type MusicService } from '../src/platform/obsidian/music/music-service';
 import { renderSidebarHabitWidget, refreshHabitWidget } from '../src/view/dashboard/habit/habit-widget';
+import { onHabitChanged } from '../src/view/dashboard/view/vault-refresh';
 import { renderSidebarAnniversaryWidget } from '../src/view/dashboard/widgets/anniversary-widget';
 import { renderSidebarCountdown } from '../src/view/dashboard/renderer/render-sidebar-countdown';
 import { renderSidebarPomodoro } from '../src/view/dashboard/renderer/refresh-sidebar-weather-widget';
@@ -184,14 +185,22 @@ const photo: WidgetBackground = {
 	foreground: 'light',
 };
 const habitApp = new App();
+const habits: { id: string; name: string }[] = [];
+const habitDone = new Set<string>();
 registerHabitService(
 	habitApp,
 	{
-		getHabits: () => [],
-		isDone: () => false,
+		getHabits: () => habits.map((habit) => ({ ...habit })),
+		isDone: (id: string) => habitDone.has(id),
 		getStreak: () => 0,
-		addHabit: () => true,
-		toggle: () => {},
+		addHabit: (name: string) => {
+			habits.push({ id: name, name });
+			return true;
+		},
+		toggle: (id: string) => {
+			if (habitDone.has(id)) habitDone.delete(id);
+			else habitDone.add(id);
+		},
 	} as unknown as HabitService,
 );
 const musicApp = new App();
@@ -231,6 +240,33 @@ assertPhoto(habitHost, true);
 const bareHabit = hosted((host) => renderSidebarHabitWidget(host, habitApp));
 assert.equal(bareHabit.firstElementChild?.classList.contains('dashboard-sidebar-widget--has-bg'), false);
 assert.equal(bareHabit.querySelector('.dashboard-widget-bg'), null);
+const habitShell = document.createElement('div');
+const habitRoot = document.createElement('div');
+habitShell.append(document.createElement('div'), habitRoot);
+document.body.append(habitShell);
+renderSidebarHabitWidget(habitRoot, habitApp, photo);
+renderSidebarHabitWidget(habitRoot, habitApp);
+assert.equal(habitRoot.querySelectorAll('.dashboard-sidebar-habit-empty').length, 2);
+let habitBanners = 0;
+const habitView = {
+	containerEl: habitShell,
+	debouncedRefreshBannerStats() {
+		habitBanners++;
+	},
+};
+habits.push({ id: 'water', name: '喝水' });
+onHabitChanged.call(habitView as never);
+assert.equal(habitBanners, 1);
+assert.equal(habitRoot.querySelectorAll('.dashboard-sidebar-habit-empty').length, 0);
+assert.equal(habitRoot.querySelectorAll('.dashboard-sidebar-habit-item').length, 2);
+habitRoot.querySelectorAll('[aria-checked]').forEach((row) => assert.equal(row.getAttribute('aria-checked'), 'false'));
+habitDone.add('water');
+onHabitChanged.call(habitView as never);
+assert.equal(habitBanners, 2);
+habitRoot.querySelectorAll('[aria-checked]').forEach((row) => assert.equal(row.getAttribute('aria-checked'), 'true'));
+assert.equal(habitRoot.textContent?.includes('喝水'), true);
+assertPhoto(habitRoot, true);
+assert.equal(habitRoot.children[1]?.classList.contains('dashboard-sidebar-widget--has-bg'), false);
 assertPhoto(
 	hosted((host) =>
 		renderSidebarAnniversaryWidget(host, {

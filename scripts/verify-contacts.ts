@@ -3,7 +3,8 @@ import { t, setLanguage } from '../src/shared/i18n/index';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { test } from 'node:test';
-import { TFile, TFolder, MarkdownView, type App } from 'obsidian';
+import { Setting, TFile, TFolder, MarkdownView, type App } from 'obsidian';
+import { renderContactsSettings } from '../src/plugin/settings/contacts-settings';
 import { cloneRecord, newRecord, emptyRef, ContactsError, type ArchiveRecord } from '../src/core/contacts/model';
 import { createMarkdown, parseRecord, patchMarkdown, relativeLink } from '../src/core/contacts/persist/markdown';
 import { ContactsIndex, emptyQuery } from '../src/core/contacts/index-store';
@@ -522,4 +523,24 @@ test('both format guides document table headings accepted by the real Markdown p
 			assert.deepEqual(parseRecord(raw, record.path)!.errors, [], `${name}: ${header}`);
 		}
 	}
+});
+
+test('archive folder row is the only contacts setting that reserves description width', () => {
+	setLanguage('zh');
+	const registry = (Setting as unknown as { created: Array<{ name: string; settingEl: { classList: { contains(name: string): boolean } } }> }).created;
+	const before = registry.length;
+	const tab = {
+		plugin: { settings: { contacts: { rootFolder: '档案', maxColumns: 6 } } },
+		app: {},
+		refresh() {},
+		refreshContactsViews() {},
+	};
+	renderContactsSettings.call(tab as never, { appendChild() {} } as never);
+	const created = registry.slice(before);
+	const folder = created.find((row) => row.name === t('contacts.folder'));
+	const columns = created.find((row) => row.name === t('contacts.columns'));
+	assert.ok(folder);
+	assert.equal(folder.settingEl.classList.contains('nand-contacts-folder-setting'), true);
+	assert.ok(columns);
+	assert.equal(columns.settingEl.classList.contains('nand-contacts-folder-setting'), false);
 });
