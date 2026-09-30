@@ -38,6 +38,7 @@ jobs:
         uses: actions/setup-node@v5
         with:
           node-version: 24.x
+          package-manager-cache: false
       - name: Exercise Windows PTY lifecycle and history
         if: matrix.asset == 'win32-x64'
         run: node scripts/verify-pty-windows.mjs processes/rust-terminal-servers/target/${{ matrix.target }}/release/rust-terminal-servers.exe

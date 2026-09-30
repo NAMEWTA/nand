@@ -13,7 +13,11 @@ try {
 	await c.evaluate(
 		`(async()=>{await testHost.openFreshTerminal();window.testSession=testService.getAllTerminals()[0];window.testPty=testSession.sessionId;window.testEmulator=testSession.emulator;window.testChild=testManager.process;testManager.ws.close(1000,'acceptance reconnect');})()`,
 	);
-	await delay(4200);
+	await delay(300);
+	const reconnectDeadline = Date.now() + 15000;
+	while (!(await c.evaluate(`testManager.isConnected()&&!testManager.isShuttingDown`)) && Date.now() < reconnectDeadline) {
+		await delay(150);
+	}
 	const reconnected = await c.evaluate(
 		`(async()=>{window.testPty=testSession.sessionId;testSession.write('echo nand-reconnect-check\\r');return {sameManager:testManager===await testHost.getServerManager(),sameProcess:testManager.process===testChild,connected:testManager.isConnected(),stopping:testManager.isShuttingDown}})()`,
 	);
