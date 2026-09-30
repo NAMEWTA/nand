@@ -1,3 +1,4 @@
+import { verifyCommentStorage } from './verify-comment-storage';
 import { parseHTML } from 'linkedom';
 /**
  * Editor comment anchors, sidecar store, and product-boundary checks.
@@ -73,6 +74,7 @@ function memoryFs(): CommentFs & { files: Map<string, string> } {
 const note = 'Please keep this note byte-for-byte.';
 
 async function main(): Promise<void> {
+	await verifyCommentStorage();
 	if (typeof window === 'undefined') {
 		Object.assign(globalThis, { window: globalThis });
 	}

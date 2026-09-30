@@ -3,7 +3,6 @@ type AutomationSchedulePreset = 'hourly' | 'daily' | 'weekdays' | 'weekly' | 'cu
 import { cronDateMatches, cronMatches, floorToMinute, startOfLocalDay } from './automation-cron-occurrence';
 import { parseSchedule, type ParsedCron, type ParsedRrule } from './automation-schedule-parsing';
 
-const HOUR_MS = 60 * 60 * 1000;
 const MINUTE_MS = 60 * 1000;
 // Why: valid cron expressions like Feb 29 can have an 8-year gap across non-leap centuries.
 const CRON_SCAN_DAYS = 9 * 366;
@@ -123,13 +122,9 @@ export function nextAutomationOccurrenceAfter(rrule: string, dtstart: number, af
 		throw new Error('Unable to compute next automation run.');
 	}
 	if (rule.freq === 'HOURLY') {
-		const start = Math.max(dtstart, after);
-		const base = new Date(start);
-		base.setMinutes(rule.byMinute, 0, 0);
-		let candidate = base.getTime();
-		if (candidate <= after || candidate < dtstart) {
-			candidate += HOUR_MS;
-		}
+		let candidate = floorToMinute(Math.max(dtstart, after));
+		if (candidate <= after || candidate < dtstart) candidate += MINUTE_MS;
+		while (new Date(candidate).getMinutes() !== rule.byMinute) candidate += MINUTE_MS;
 		return candidate;
 	}
 	const candidate = scanDayCandidates(rule, Math.max(dtstart - 1, after), 1);
@@ -148,12 +143,8 @@ export function latestAutomationOccurrenceAtOrBefore(rrule: string, dtstart: num
 		return scanCron(rule, floorToMinute(now), -1, dtstart);
 	}
 	if (rule.freq === 'HOURLY') {
-		const base = new Date(now);
-		base.setMinutes(rule.byMinute, 0, 0);
-		let candidate = base.getTime();
-		if (candidate > now) {
-			candidate -= HOUR_MS;
-		}
+		let candidate = floorToMinute(now);
+		while (candidate >= dtstart && new Date(candidate).getMinutes() !== rule.byMinute) candidate -= MINUTE_MS;
 		return candidate >= dtstart ? candidate : null;
 	}
 	const candidate = scanDayCandidates(rule, now, -1);

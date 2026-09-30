@@ -1,4 +1,4 @@
-import { App, TFile } from 'obsidian';
+import { App, Notice, TFile } from 'obsidian';
 import { moveBeside, moveToOwnRow, unpartnerAt } from '../../../core/dashboard/column-pairs';
 import {
 	type DocPath,
@@ -53,6 +53,18 @@ export class SyncEngine {
 	private debounceTimer: number | null = null;
 	private readonly debounceMs = 300;
 	private writeQueue: Promise<void> = Promise.resolve();
+	private baseline: string | null = null;
+	private localDirty = false;
+	private blocked = false;
+	private conflictSaved = false;
+	private conflict: {
+		id: string;
+		path: string;
+		base: string;
+		local: string;
+		candidate: string;
+		remote: string;
+	} | null = null;
 	private callbacks: DataCallback[] = [];
 	private eventRef: ReturnType<typeof this.app.vault.on> | null = null;
 	private static readonly BACKUP_DIR = '.dashboard-backup';
@@ -118,6 +130,26 @@ export class SyncEngine {
 	 * `this.file` can be stale and must be resolved again before reading.
 	 */
 	async reloadFromDisk(): Promise<void> {
+		await this.writeQueue;
+		if (this.localDirty && !this.conflict && this.file && this.data) {
+			this.conflict = {
+				id: `${Date.now()}-${Math.random().toString(36).slice(2)}`,
+				path: this.file.path,
+				base: this.baseline ?? '',
+				local: serialize(this.data),
+				candidate: serialize(this.data),
+				remote: await this.app.vault.read(this.file),
+			};
+		}
+		if (this.conflict) await this.saveConflict();
+		if (this.deferredWriteTimer) window.clearTimeout(this.deferredWriteTimer);
+		this.deferredWriteTimer = null;
+		if (this.debounceTimer) window.clearTimeout(this.debounceTimer);
+		this.debounceTimer = null;
+		this.blocked = false;
+		this.localDirty = false;
+		this.conflictSaved = false;
+		this.conflict = null;
 		await this.findOrCreateFile();
 		await this.load();
 	}
@@ -126,10 +158,8 @@ export class SyncEngine {
 	 * Re-point this engine at `settings.dashboardFile` after a workspace switch
 	 * (unlike reloadFromDisk, which keeps watching the same file).
 	 *
-	 * Order matters: writeToDisk captures its fileRef at ENQUEUE time but
-	 * serializes `this.data` at EXECUTION time — so any queued write must fully
-	 * drain into the OLD file before `this.file`/`this.data` change, or the new
-	 * workspace's content lands in the old workspace's file. The pending
+	 * Order matters: each queued write captures its file and data. Drain it
+	 * before replacing the current file and baseline. The pending
 	 * deferred (quiet collapse) write is flushed into the queue first, not
 	 * dropped. The modify watcher closure-captures the watched path, so it must
 	 * be re-registered against the new file. `this.data` is nulled before
@@ -147,6 +177,8 @@ export class SyncEngine {
 			this.debounceTimer = null;
 		}
 		await this.writeQueue;
+		if (this.blocked || this.localDirty) throw new Error(t('dashboard.sync.conflict'));
+		this.baseline = null;
 		this.unregisterFileWatchers();
 		this.data = null;
 		await this.findOrCreateFile();
@@ -973,7 +1005,7 @@ export class SyncEngine {
 		}
 
 		this.data = { ...this.data, banner, quickActions, columns };
-		void this.writeToDisk();
+		void this.writeToDisk().catch(() => undefined);
 	}
 
 	/**
@@ -987,40 +1019,49 @@ export class SyncEngine {
 	 * click — the source of the multi-second lag.
 	 */
 	private scheduleDeferredWrite(): void {
+		this.localDirty = true;
 		if (this.deferredWriteTimer) window.clearTimeout(this.deferredWriteTimer);
 		this.deferredWriteTimer = window.setTimeout(() => {
 			this.deferredWriteTimer = null;
 			if (this.data) {
-				void this.writeToDisk(true);
+				void this.writeToDisk(true).catch(() => undefined);
 			}
 		}, 400);
 	}
 
 	private onFileModify(): void {
 		if (this.debounceTimer) window.clearTimeout(this.debounceTimer);
-		// External writers (the calendar's day-agenda insert, task toggles, other
-		// devices via file sync) bypass this engine and write the file directly.
-		// They must be ingested into `this.data` BEFORE the next engine write
-		// serializes over them — otherwise a stale in-memory copy clobbers the
-		// external change (observed: a whole section vanishing ~a minute after
-		// it was created). When our write queue is idle we reload right away;
-		// our own write echoes are cheap no-ops thanks to load()'s
-		// serialize-equality check. While writes are draining we fall back to
-		// the debounce — serialize-at-execution in writeToDisk picks up the
-		// freshest `this.data` anyway.
+		if (this.blocked) return;
 		if (this.writeQueuePending === 0 && this.deferredWriteTimer === null) {
-			void this.load();
+			void this.load().catch(console.error);
 			return;
 		}
 		this.debounceTimer = window.setTimeout(() => {
-			void this.load();
+			this.debounceTimer = null;
+			if (!this.blocked && this.writeQueuePending === 0) void this.load().catch(console.error);
 		}, this.debounceMs);
 	}
 
 	private async load(): Promise<void> {
-		if (!this.file) return;
-
-		const content = await this.app.vault.read(this.file);
+		if (
+			!this.file ||
+			this.blocked ||
+			this.localDirty ||
+			this.writeQueuePending > 0 ||
+			this.deferredWriteTimer !== null
+		)
+			return;
+		const file = this.file;
+		const content = await this.app.vault.read(file);
+		if (
+			this.file !== file ||
+			this.blocked ||
+			this.localDirty ||
+			this.writeQueuePending > 0 ||
+			this.deferredWriteTimer !== null
+		)
+			return;
+		this.baseline = content;
 		const newData = parse(content);
 
 		// Skip the re-render when the on-disk data is logically equivalent to what
@@ -1043,67 +1084,104 @@ export class SyncEngine {
 	 */
 	private async writeToDisk(silent = false): Promise<void> {
 		if (!this.data || !this.file) return;
-
+		this.localDirty = true;
+		if (this.blocked) {
+			await this.saveConflict();
+			throw new Error(t('dashboard.sync.conflict'));
+		}
 		const fileRef = this.file;
+		// Capture each local revision, including quiet edits, before entering the async queue.
+		const content = serialize(this.data);
 		this.writeQueuePending++;
-		this.writeQueue = this.writeQueue.then(async () => {
+		const task = this.writeQueue.then(async () => {
 			try {
-				// Serialize at EXECUTION time, not enqueue time: content captured
-				// earlier can be stale by the time earlier queued writes drain,
-				// and writing it would silently revert everything that changed in
-				// between (external inserts included).
-				const content = serialize(this.data!);
-
-				const current = await this.app.vault.read(fileRef);
-
-				// Safety: skip write if new content is drastically smaller
-				if (current.length > 0 && content.length < current.length * 0.3) {
-					console.warn('Dashboard write skipped: new content significantly smaller than current file');
-					return;
+				if (this.blocked) throw new Error(t('dashboard.sync.conflict'));
+				const base = this.baseline;
+				if (base === null) throw new Error(t('dashboard.sync.conflict'));
+				await this.createBackup(base);
+				let remote = base;
+				let conflict = false;
+				try {
+					await this.app.vault.process(fileRef, (current) => {
+						remote = current;
+						if (current !== base) {
+							conflict = true;
+							throw new Error(t('dashboard.sync.conflict'));
+						}
+						return content;
+					});
+				} catch (error) {
+					if (conflict) {
+						this.blocked = true;
+						this.conflict = {
+							id: `${Date.now()}-${Math.random().toString(36).slice(2)}`,
+							path: fileRef.path,
+							base,
+							local: content,
+							candidate: content,
+							remote,
+						};
+						await this.saveConflict();
+					}
+					throw error;
 				}
-
-				// Backup current file before overwriting
-				await this.createBackup(current);
-
-				await this.app.vault.modify(fileRef, content);
-			} catch (err) {
-				console.error('Dashboard sync write failed:', err);
+				this.baseline = content;
+				if (this.data && serialize(this.data) === content) this.localDirty = false;
+			} catch (error) {
+				new Notice(
+					t(
+						this.blocked
+							? this.conflictSaved
+								? 'dashboard.sync.conflict'
+								: 'dashboard.sync.recoveryFailed'
+							: 'dashboard.sync.saveFailed',
+					),
+					0,
+				);
+				throw error;
 			} finally {
 				this.writeQueuePending--;
 			}
 		});
+		// A failed task must not poison the queue; callers still receive its failure.
+		this.writeQueue = task.catch(() => undefined);
+		if (!silent) this.notifyCallbacks('local');
+		await task;
+	}
 
-		if (!silent) {
-			this.notifyCallbacks('local');
-		}
+	private async saveConflict(): Promise<void> {
+		if (!this.conflict) throw new Error(t('dashboard.sync.recoveryFailed'));
+		const dir = '.dashboard-backup/conflicts';
+		const adapter = this.app.vault.adapter;
+		if (this.data) this.conflict.local = serialize(this.data);
+		this.conflictSaved = false;
+		if (!(await adapter.exists(dir))) await adapter.mkdir(dir);
+		await adapter.write(`${dir}/${this.conflict.id}.json`, JSON.stringify(this.conflict, null, 2));
+		this.conflictSaved = true;
 	}
 
 	private async createBackup(currentContent: string): Promise<void> {
-		try {
-			const adapter = this.app.vault.adapter;
-			const dir = SyncEngine.BACKUP_DIR;
-			if (!(await adapter.exists(dir))) {
-				await adapter.mkdir(dir);
-			}
+		const adapter = this.app.vault.adapter;
+		const dir = SyncEngine.BACKUP_DIR;
+		if (!(await adapter.exists(dir))) {
+			await adapter.mkdir(dir);
+		}
 
-			// Keyed per workspace: each board keeps its own rolling copies and
-			// prunes only its own files (dot separator so 'dashboard.' never
-			// matches 'dashboard-2.<ts>.md').
-			const base = this.file?.basename ?? 'dashboard';
-			const ts = new Date().toISOString().replace(/[:.]/g, '-');
-			const backupPath = `${dir}/${workspaceBackupName(base, ts)}`;
-			await adapter.write(backupPath, currentContent);
+		// Keyed per workspace: each board keeps its own rolling copies and
+		// prunes only its own files (dot separator so 'dashboard.' never
+		// matches 'dashboard-2.<ts>.md').
+		const base = this.file?.basename ?? 'dashboard';
+		const ts = new Date().toISOString().replace(/[:.]/g, '-');
+		const backupPath = `${dir}/${workspaceBackupName(base, ts)}`;
+		await adapter.write(backupPath, currentContent);
 
-			// Prune old backups, keep only MAX_BACKUPS
-			const files = await adapter.list(dir);
-			const backups = files.files
-				.filter((f: string) => f.startsWith(dir + '/' + base + '.') && f.endsWith('.md'))
-				.sort();
-			while (backups.length > SyncEngine.MAX_BACKUPS) {
-				await adapter.remove(backups.shift()!);
-			}
-		} catch {
-			// Backup failure should never block the main write
+		// Prune old backups, keep only MAX_BACKUPS
+		const files = await adapter.list(dir);
+		const backups = files.files
+			.filter((f: string) => f.startsWith(dir + '/' + base + '.') && f.endsWith('.md'))
+			.sort();
+		while (backups.length > SyncEngine.MAX_BACKUPS) {
+			await adapter.remove(backups.shift()!);
 		}
 	}
 

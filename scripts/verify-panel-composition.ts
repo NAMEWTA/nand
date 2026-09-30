@@ -135,7 +135,7 @@ assert.equal(mainUpdates, 2, 'Popout refresh does not alter the main window titl
 offLanguage();
 setLanguage('zh');
 assert.equal(headerUpdates, 3, 'Closed views release both repaint and header subscriptions');
-left.querySelector<HTMLButtonElement>('.nand-agent-sidebar button')!.click();
+left.querySelector<HTMLButtonElement>('.nand-agent-session-controls button')!.click();
 right.querySelector<HTMLButtonElement>('button')!.click();
 assert.deepEqual(read, ['updated', 'right'], 'composed instances dispatch to their own hosts');
 render(null, left);
@@ -276,7 +276,7 @@ async function verifySessionIdentity() {
 	assert.match(rule('.nand-session-row-id {'), /grid-column:\s*1\s*\/\s*-1/);
 	assert.match(rule('.nand-session-row-status {'), /grid-row:\s*2/);
 	assert.match(rule('.nand-session-status-dot {'), /grid-row:\s*2/);
-	assert.match(rule('.nand-agent-sidebar button {'), /overflow-wrap:\s*anywhere/);
+	assert.match(rule('.nand-agent-sidebar button {'), /overflow-wrap:\s*normal/, 'navigation wraps at word boundaries');
 	const wait = () => new Promise<void>((resolve) => setTimeout(resolve, 160));
 	for (const language of ['zh', 'en', 'zh'] as const) {
 		setLanguage(language); sessions = [first, second]; paint(); await wait();

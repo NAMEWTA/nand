@@ -128,17 +128,20 @@ export function commentsCmExtension(plugin: EditorPluginHost, coordinator: Comme
 					: () => undefined;
 				const path = pathOf(this.view.state);
 				if (path && store) {
-					void store.loadFile(path).then(() => {
-						if (
-							this.dead ||
-							!plugin.settings.modules.editor ||
-							getCommentStore() !== store ||
-							pathOf(this.view.state) !== path
-						)
-							return;
-						store.reconcile(path, this.view.state.doc.toString());
-						this.view.dispatch({ effects: bump.of(store.revision) });
-					});
+					void store
+						.loadFile(path)
+						.then(() => {
+							if (
+								this.dead ||
+								!plugin.settings.modules.editor ||
+								getCommentStore() !== store ||
+								pathOf(this.view.state) !== path
+							)
+								return;
+							store.reconcile(path, this.view.state.doc.toString());
+							this.view.dispatch({ effects: bump.of(store.revision) });
+						})
+						.catch(() => undefined);
 				}
 			}
 		},

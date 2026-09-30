@@ -28,6 +28,7 @@ jobs:
             - run: pnpm run lint
             - run: pnpm run test:architecture
             - run: pnpm run test:automation
+            - run: pnpm run test:safety-regressions
             - run: pnpm run test:terminal-agent
             - run: pnpm run test:contacts
             - run: pnpm run test:iconic-port

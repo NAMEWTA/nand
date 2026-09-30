@@ -1,3 +1,4 @@
+import { applyControlContrast } from '../appearance/appearance';
 import { Events, HoverParent, HoverPopover, ItemView, TFile, WorkspaceLeaf } from 'obsidian';
 import { h } from 'preact';
 import type { DashboardUpdateSource } from '../../../core/dashboard/render-update';
@@ -254,6 +255,9 @@ export class DashboardView extends ItemView implements HoverParent {
 	constructor(leaf: WorkspaceLeaf, plugin: DashboardHost) {
 		super(leaf);
 		this.plugin = plugin;
+		this.registerEvent(this.app.workspace.on('css-change', () => {
+			if (this.isOpen) applyControlContrast(this.contentEl);
+		}));
 		this.register(onLeafLanguageChanged(this.app, this.leaf, () => {
 			if (!this.plugin.settings.modules.dashboard) showModuleDisabled.call(this);
 			else if (this.isOpen && this.data) this.render(this.data);

@@ -78,11 +78,10 @@ export class AutomationEditor extends Modal {
 			new Setting(el).setName(t('automation.action')).addDropdown((input) => {
 				for (const kind of ['agent', 'notify', 'create-task']) input.addOption(kind, t(`automation.${kind}`));
 				input.setValue(this.draft.action.kind).onChange((v) => {
-					this.draft.action = switchAutomationAction(
-						this.draft.action,
-						v as AutomationAction['kind'],
-						{ agentId: this.availableAgents()[0]?.id ?? '', cwd: this.cwd },
-					);
+					this.draft.action = switchAutomationAction(this.draft.action, v as AutomationAction['kind'], {
+						agentId: this.availableAgents()[0]?.id ?? '',
+						cwd: this.cwd,
+					});
 					this.draw();
 				});
 			});
@@ -113,9 +112,10 @@ export class AutomationEditor extends Modal {
 						input.addOption('', t('automation.select'));
 						for (const [i, target] of targets.entries()) input.addOption(String(i), target.title);
 						const index = targets.findIndex((v) => v.path === action.path && v.cardId === action.cardId);
+						if (index < 0) Object.assign(action, { path: '', cardId: '' });
 						input.setValue(index < 0 ? '' : String(index)).onChange((v) => {
-							const target = targets[Number(v)];
-							if (v && target) Object.assign(action, { path: target.path, cardId: target.cardId });
+							const target = v === '' ? undefined : targets[Number(v)];
+							Object.assign(action, { path: target?.path ?? '', cardId: target?.cardId ?? '' });
 						});
 					});
 				})
@@ -311,7 +311,14 @@ export class AutomationEditor extends Modal {
 			if (a.kind === 'agent' && !this.availableAgents().some((agent) => agent.id === a.agentId))
 				invalid('agentSelectionUnavailable');
 			if (a.kind === 'agent' && a.sessionMode === 'specific' && !a.session?.sessionId) invalid('sessionMissing');
-			if (a.kind === 'create-task' && (!a.path || !a.cardId)) invalid('targetRequired');
+			if (a.kind === 'create-task') {
+				if (
+					!a.path ||
+					!a.cardId ||
+					!(await this.targets()).some((target) => target.path === a.path && target.cardId === a.cardId)
+				)
+					invalid('targetRequired');
+			}
 			if (!(a.kind === 'agent' ? a.prompt : a.kind === 'notify' ? a.body : a.text).trim())
 				invalid('contentRequired');
 			if (a.kind === 'notify' && !this.draft.channels.length) invalid('channelsRequired');

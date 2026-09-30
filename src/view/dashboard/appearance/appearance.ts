@@ -95,6 +95,7 @@ export function applyAppearance(container: HTMLElement, app: App, settings: Dash
 	applyBackground(container, app, settings);
 	applyCustomColors(container, settings.customColors);
 	applyAdvanced(container, settings);
+	applyControlContrast(container);
 }
 
 /**
@@ -111,6 +112,7 @@ export function refreshAppearanceLive(app: App, settings: DashboardSettings): vo
 		applyBackground(root, app, settings);
 		applyCustomColors(root, settings.customColors);
 		applyAdvanced(root, settings);
+		applyControlContrast(root);
 	});
 }
 
@@ -268,4 +270,32 @@ function clampByte(n: number): number {
 function clampNumber(value: unknown, min: number, max: number, fallback: number): number {
 	if (typeof value !== 'number' || Number.isNaN(value)) return fallback;
 	return Math.max(min, Math.min(max, value));
+}
+
+/** Choose control foregrounds from their actual backgrounds, including custom alpha. */
+export function applyControlContrast(root: HTMLElement): void {
+	const computed = root.ownerDocument?.defaultView?.getComputedStyle(root);
+	if (!computed) return;
+	const surface = parseRgb(computed.getPropertyValue('--db-bg-card'));
+	for (const [background, foreground] of [
+		['--db-accent', '--db-text-on-accent'],
+		['--db-danger', '--db-text-on-danger'],
+		['--db-text-muted', '--db-text-on-muted'],
+	] as const) {
+		const raw = computed.getPropertyValue(background).trim(),
+			color = parseRgb(raw);
+		if (!color) continue;
+		const alpha = raw.startsWith('rgba') ? Number(raw.slice(raw.lastIndexOf(',') + 1).replace(')', '')) : 1;
+		const rgb = [color.r, color.g, color.b].map(
+			(value, i) => value * alpha + (surface ? [surface.r, surface.g, surface.b][i]! : 255) * (1 - alpha),
+		);
+		const luminance = rgb.reduce((sum, value, i) => {
+			const c = value / 255;
+			return sum + (c <= 0.04045 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4) * [0.2126, 0.7152, 0.0722][i]!;
+		}, 0);
+		root.style.setProperty(
+			foreground,
+			(luminance + 0.05) / 0.05 >= 1.05 / (luminance + 0.05) ? '#000000' : '#ffffff',
+		);
+	}
 }

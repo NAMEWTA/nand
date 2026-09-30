@@ -4,6 +4,14 @@ import type { CommentFileDoc, CommentIndex, CommentMessage, CommentThread, NewCo
 const ROOT = '.nand/editor/comments';
 const INDEX_PATH = `${ROOT}/index.json`;
 const FILES_DIR = `${ROOT}/files`;
+const PENDING_PATH = `${ROOT}/pending.json`;
+
+interface CommentWrite {
+	index: CommentIndex;
+	files: Record<string, string>;
+	remove: string[];
+}
+
 const DEFAULT_DEBOUNCE_MS = 300;
 
 export interface CommentFs {
@@ -20,6 +28,7 @@ export interface PosMapper {
 
 export interface CommentStoreOptions {
 	debounceMs?: number;
+	onError?: (error: unknown) => void;
 }
 
 function filePath(hash: string): string {
@@ -74,9 +83,9 @@ function normalizeThread(raw: unknown, path: string): CommentThread | null {
 		return null;
 	}
 	if (typeof target['start'] !== 'number' || typeof target['end'] !== 'number') return null;
-	const messages = Array.isArray(rec['thread'])
-		? rec['thread'].map(normalizeMessage).filter((m): m is CommentMessage => m !== null)
-		: [];
+	if (!Array.isArray(rec['thread'])) return null;
+	const messages = rec['thread'].map(normalizeMessage);
+	if (messages.some((message) => message === null)) return null;
 	return {
 		id: rec['id'],
 		status,
@@ -86,7 +95,7 @@ function normalizeThread(raw: unknown, path: string): CommentThread | null {
 			start: target['start'],
 			end: target['end'],
 		},
-		thread: messages,
+		thread: messages as CommentMessage[],
 		createdAt: typeof rec['createdAt'] === 'string' ? rec['createdAt'] : nowIso(),
 		updatedAt: typeof rec['updatedAt'] === 'string' ? rec['updatedAt'] : nowIso(),
 	};
@@ -94,18 +103,21 @@ function normalizeThread(raw: unknown, path: string): CommentThread | null {
 
 function normalizeFile(raw: unknown, path: string): CommentThread[] {
 	const rec = asRecord(raw);
-	if (!rec || !Array.isArray(rec['comments'])) return [];
-	return rec['comments'].map((item) => normalizeThread(item, path)).filter((t): t is CommentThread => t !== null);
+	if (!rec || rec['version'] !== 1 || !Array.isArray(rec['comments'])) throw new Error('Invalid comment sidecar');
+	const threads = rec['comments'].map((item) => normalizeThread(item, path));
+	if (threads.some((thread) => thread === null)) throw new Error('Invalid comment thread');
+	return threads as CommentThread[];
 }
 
 function normalizeIndex(raw: unknown): CommentIndex {
 	const out = emptyIndex();
 	const rec = asRecord(raw);
 	const files = rec ? asRecord(rec['files']) : null;
-	if (!files) return out;
+	if (!files || rec?.['version'] !== 1) throw new Error('Invalid comment index');
 	for (const [path, value] of Object.entries(files)) {
 		const entry = asRecord(value);
-		if (!entry || typeof entry['hash'] !== 'string') continue;
+		if (!entry || typeof entry['hash'] !== 'string' || !/^[a-f0-9]{16}$/.test(entry['hash']))
+			throw new Error('Invalid comment index entry');
 		out.files[path] = {
 			hash: entry['hash'],
 			open: typeof entry['open'] === 'number' ? entry['open'] : 0,
@@ -129,7 +141,11 @@ export class CommentStore {
 	private readonly cache = new Map<string, CommentThread[]>();
 	/** Paths whose quotes have been checked against the current document. */
 	private readonly reconciled = new Set<string>();
-	private readonly dirty = new Set<string>();
+	private readonly dirty = new Map<string, number>();
+	private change = 0;
+	private readonly obsolete = new Set<string>();
+	private transaction: { write: CommentWrite; versions: Map<string, number>; removals: string[] } | null = null;
+	private readonly onError?: (error: unknown) => void;
 	private indexDirty = false;
 	private timer: ReturnType<typeof globalThis.setTimeout> | null = null;
 	private flushing = false;
@@ -141,6 +157,7 @@ export class CommentStore {
 		opts?: CommentStoreOptions,
 	) {
 		this.debounceMs = opts?.debounceMs ?? DEFAULT_DEBOUNCE_MS;
+		this.onError = opts?.onError;
 	}
 
 	subscribe(cb: () => void): () => void {
@@ -335,7 +352,7 @@ export class CommentStore {
 			if (prev) {
 				const nextHash = await sha16(newPath);
 				if (prev.hash !== nextHash) {
-					await this.fs.remove(filePath(prev.hash)).catch(() => undefined);
+					this.obsolete.add(filePath(prev.hash));
 				}
 			}
 			this.dirty.delete(oldPath);
@@ -352,7 +369,7 @@ export class CommentStore {
 			this.cache.delete(path);
 			this.reconciled.delete(path);
 			this.dirty.delete(path);
-			if (prev) await this.fs.remove(filePath(prev.hash)).catch(() => undefined);
+			if (prev) this.obsolete.add(filePath(prev.hash));
 			this.indexDirty = true;
 			await this.writeDirty();
 			this.emit();
@@ -404,34 +421,38 @@ export class CommentStore {
 	private async readThreads(path: string): Promise<CommentThread[]> {
 		const cached = this.cache.get(path);
 		if (cached) return cached;
-		const index = await this.readIndex();
-		const meta = index.files[path];
-		let threads: CommentThread[] = [];
-		if (meta) {
-			try {
-				const raw = await this.fs.read(filePath(meta.hash));
-				threads = normalizeFile(JSON.parse(raw) as unknown, path);
-			} catch {
-				threads = [];
-			}
-		}
+		const meta = (await this.readIndex()).files[path];
+		// A referenced but missing sidecar is a damaged store, not an empty note.
+		const threads = meta ? normalizeFile(JSON.parse(await this.fs.read(filePath(meta.hash))), path) : [];
 		this.cache.set(path, threads);
 		return threads;
 	}
 
 	private async readIndex(): Promise<CommentIndex> {
 		if (this.index) return this.index;
-		try {
-			const raw = await this.fs.read(INDEX_PATH);
-			this.index = normalizeIndex(JSON.parse(raw) as unknown);
-		} catch {
-			this.index = emptyIndex();
+		if (await this.fs.exists(PENDING_PATH)) {
+			const raw = JSON.parse(await this.fs.read(PENDING_PATH)) as CommentWrite;
+			normalizeIndex(raw.index);
+			if (
+				!raw.files ||
+				!Array.isArray(raw.remove) ||
+				[...Object.keys(raw.files), ...raw.remove].some(
+					(path) => !/^\.nand\/editor\/comments\/files\/[a-f0-9]{16}\.json$/.test(path),
+				)
+			)
+				throw new Error('Invalid pending comment write');
+			for (const body of Object.values(raw.files)) normalizeFile(JSON.parse(body), '');
+			await this.persist(raw);
 		}
+		// exists failures and read/parse failures propagate; only confirmed absence is empty.
+		this.index = (await this.fs.exists(INDEX_PATH))
+			? normalizeIndex(JSON.parse(await this.fs.read(INDEX_PATH)))
+			: emptyIndex();
 		return this.index;
 	}
 
 	private markDirty(path: string): void {
-		this.dirty.add(path);
+		this.dirty.set(path, ++this.change);
 		this.indexDirty = true;
 		if (this.flushing || this.timer != null) return;
 		this.timer = globalThis.setTimeout(() => {
@@ -440,45 +461,64 @@ export class CommentStore {
 		}, this.debounceMs);
 	}
 
-	private async recount(path: string, threads: CommentThread[]): Promise<void> {
-		const index = await this.readIndex();
-		if (threads.length === 0) {
-			const prev = index.files[path];
-			delete index.files[path];
-			if (prev) await this.fs.remove(filePath(prev.hash)).catch(() => undefined);
-			this.indexDirty = true;
-			return;
-		}
-		const open = threads.filter((thread) => thread.status === 'open').length;
-		index.files[path] = {
-			hash: await sha16(path),
-			open,
-			total: threads.length,
-			updatedAt: nowIso(),
-		};
-		this.indexDirty = true;
+	private async persist(write: CommentWrite): Promise<void> {
+		for (const [path, body] of Object.entries(write.files)) await this.fs.write(path, body);
+		await this.fs.write(INDEX_PATH, JSON.stringify(write.index, null, 2));
+		// The journal remains until cleanup succeeds, so interrupted renames replay safely.
+		for (const path of write.remove) if (await this.fs.exists(path)) await this.fs.remove(path);
+		await this.fs.remove(PENDING_PATH);
+	}
+
+	private async commitTransaction(): Promise<void> {
+		const tx = this.transaction;
+		if (!tx) return;
+		await this.persist(tx.write);
+		this.index = tx.write.index;
+		for (const [path, version] of tx.versions) if (this.dirty.get(path) === version) this.dirty.delete(path);
+		for (const path of tx.removals) this.obsolete.delete(path);
+		this.indexDirty = this.dirty.size > 0;
+		this.transaction = null;
 	}
 
 	private async writeDirty(): Promise<void> {
 		this.flushing = true;
 		try {
+			await this.commitTransaction();
 			while (this.dirty.size > 0 || this.indexDirty) {
-				const paths = [...this.dirty];
-				this.dirty.clear();
-				for (const path of paths) {
-					const threads = this.cache.get(path) ?? [];
-					await this.recount(path, threads);
-					if (threads.length === 0) continue;
-					const hash = (await this.readIndex()).files[path]?.hash;
-					if (!hash) continue;
+				const index = structuredClone(await this.readIndex());
+				const versions = new Map(this.dirty);
+				const snapshots = [...versions.keys()].map((path) => ({
+					path,
+					threads: structuredClone(this.cache.get(path) ?? []),
+				}));
+				const files: Record<string, string> = {};
+				const removals = new Set(this.obsolete);
+				for (const { path, threads } of snapshots) {
+					if (threads.length === 0) {
+						if (index.files[path]) removals.add(filePath(index.files[path].hash));
+						delete index.files[path];
+						continue;
+					}
+					const hash = await sha16(path);
+					index.files[path] = {
+						hash,
+						open: threads.filter((t) => t.status === 'open').length,
+						total: threads.length,
+						updatedAt: nowIso(),
+					};
 					const body: CommentFileDoc = { version: 1, path, comments: threads };
-					await this.fs.write(filePath(hash), JSON.stringify(body, null, 2));
+					files[filePath(hash)] = JSON.stringify(body, null, 2);
 				}
-				if (this.indexDirty && this.index) {
-					const snapshot = this.index;
-					this.indexDirty = false;
-					await this.fs.write(INDEX_PATH, JSON.stringify(snapshot, null, 2));
-				}
+				const referenced = new Set(Object.values(index.files).map((entry) => filePath(entry.hash)));
+				const write: CommentWrite = {
+					index,
+					files,
+					remove: [...removals].filter((path) => !referenced.has(path)),
+				};
+				// Save recoverable intent before replacing any existing data.
+				await this.fs.write(PENDING_PATH, JSON.stringify(write));
+				this.transaction = { write, versions, removals: [...removals] };
+				await this.commitTransaction();
 			}
 		} finally {
 			this.flushing = false;
@@ -491,7 +531,13 @@ export class CommentStore {
 	}
 
 	private enqueue<T>(fn: () => Promise<T>): Promise<T> {
-		const run = this.chain.then(fn, fn);
+		const execute = async () => {
+			await this.commitTransaction();
+			return fn();
+		};
+		const run = this.chain.then(execute, execute);
+		// Report background failures and attach a rejection handler even for fire-and-forget callers.
+		void run.catch((error: unknown) => this.onError?.(error));
 		this.chain = run.then(
 			() => undefined,
 			() => undefined,

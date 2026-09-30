@@ -107,8 +107,8 @@ async function verifySync(): Promise<void> {
 		vault: {
 			getFileByPath: () => file,
 			read: async () => disk,
-			modify: async (_file: unknown, text: string) => {
-				disk = text;
+			process: async (_file: unknown, transform: (text: string) => string) => {
+				disk = transform(disk);
 				writes += 1;
 			},
 			on: () => ({}),

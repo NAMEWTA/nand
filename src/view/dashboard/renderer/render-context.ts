@@ -80,7 +80,7 @@ export function isLightColor(color: string): boolean {
 	if (value.startsWith('rgb')) {
 		const nums = value.match(/[\d.]+/g);
 		if (!nums || nums.length < 3) return false;
-		return relativeLuminance(Number(nums[0]), Number(nums[1]), Number(nums[2])) > 0.6;
+		return relativeLuminance(Number(nums[0]), Number(nums[1]), Number(nums[2])) > 0.179;
 	}
 	const hex = value.replace(/^#/, '');
 	if (!/^[0-9a-fA-F]+$/.test(hex)) return false;
@@ -97,7 +97,7 @@ export function isLightColor(color: string): boolean {
 			parseInt(full.slice(0, 2), 16),
 			parseInt(full.slice(2, 4), 16),
 			parseInt(full.slice(4, 6), 16),
-		) > 0.6
+		) > 0.179
 	);
 }
 

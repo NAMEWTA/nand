@@ -108,7 +108,19 @@ interface LiveSession {
 	finish?: (result: RunResult) => void;
 	hookClose?: () => void;
 }
+function accountIdentity(key: string): string {
+	const value = JSON.parse(key) as Record<string, string>;
+	return JSON.stringify(
+		Object.keys(value)
+			.sort()
+			.map((name) => [name, value[name]]),
+	);
+}
+
 export class TerminalAutomationRuntime implements AgentRuntimePort {
+	private readonly reservations = new Set<string>();
+	private disposed = false;
+
 	private live = new Map<string, LiveSession>();
 	private hooks: AutomationHooks;
 	private registry: AgentSessionRef[] = [];
@@ -301,7 +313,7 @@ export class TerminalAutomationRuntime implements AgentRuntimePort {
 					(session) =>
 						session.agentId === id &&
 						session.sessionId === action.session?.sessionId &&
-						session.accountKey === accountKey &&
+						accountIdentity(session.accountKey) === accountIdentity(accountKey) &&
 						session.cwd === action.cwd,
 				)
 			)
@@ -314,159 +326,174 @@ export class TerminalAutomationRuntime implements AgentRuntimePort {
 					v.busy &&
 					(v.session || v.action.session)?.sessionId === action.session?.sessionId &&
 					v.action.agentId === id &&
-					v.accountKey === accountKey,
+					accountIdentity(v.accountKey) === accountIdentity(accountKey),
 			)
 		)
 			throw new AutomationError('busy');
-		const prior =
-			action.sessionMode === 'reuse' && previous?.terminalId ? this.live.get(previous.terminalId) : undefined;
-		const reuse =
-			prior &&
-			!prior.busy &&
-			prior.terminal?.isAlive() &&
-			prior.action.agentId === id &&
-			prior.action.cwd === action.cwd &&
-			prior.accountKey === accountKey
-				? prior
-				: undefined;
-		const slot: LiveSession = reuse ?? {
-			action,
-			accountKey,
-			busy: true,
-			started: false,
-			since: Date.now(),
-			output: '',
-		};
-		slot.action = action;
-		slot.busy = true;
-		slot.started = false;
-		slot.since = Date.now();
-		slot.output = '';
-		const completion = new Promise<RunResult>((resolve) => {
-			slot.finish = resolve;
-		});
-		const priorSession = action.sessionMode === 'specific' ? action.session : reuse?.session;
-		const baseline = priorSession ? await this.sessionUsage(priorSession).catch(() => undefined) : undefined;
-		const measuredCompletion = completion.then(async (result) => {
-			if (!result.session) return result;
-			try {
-				const usage = await this.sessionUsage(result.session);
-				if (usage?.known && (!priorSession || baseline?.known))
-					result.usage = {
-						input: Math.max(0, usage.input - (baseline?.input ?? 0)),
-						output: Math.max(0, usage.output - (baseline?.output ?? 0)),
-						cacheRead: Math.max(0, usage.cacheRead - (baseline?.cacheRead ?? 0)),
-						cacheWrite: Math.max(0, usage.cacheWrite - (baseline?.cacheWrite ?? 0)),
-						cost:
-							usage.cost === null || (baseline && baseline.cost === null)
-								? null
-								: Math.max(0, usage.cost - (baseline?.cost ?? 0)),
-						known: true,
-					};
-			} catch {
-				/* Unavailable native usage must never change the run result. */
-			}
-			return result;
-		});
-		let terminal = slot.terminal;
-		if (reuse && terminal) terminal.write(`\x1b[200~${action.prompt}\x1b[201~\r`);
-		else {
-			const built = automationArgs(
-				id,
-				action.prompt,
-				launchArgs(settings, id),
-				action.sessionMode === 'specific' ? action.session : undefined,
-			);
-			let readyResolve!: () => void;
-			const ready = new Promise<void>((resolve) => {
-				readyResolve = resolve;
+		const reservation =
+			action.sessionMode === 'specific'
+				? JSON.stringify([id, accountIdentity(accountKey), action.session!.sessionId])
+				: null;
+		if (this.disposed) throw new AutomationError('busy');
+		if (reservation && this.reservations.has(reservation)) throw new AutomationError('busy');
+		if (reservation) this.reservations.add(reservation);
+		try {
+			const prior =
+				action.sessionMode === 'reuse' && previous?.terminalId ? this.live.get(previous.terminalId) : undefined;
+			const reuse =
+				prior &&
+				!prior.busy &&
+				prior.terminal?.isAlive() &&
+				prior.action.agentId === id &&
+				prior.action.cwd === action.cwd &&
+				prior.accountKey === accountKey
+					? prior
+					: undefined;
+			const slot: LiveSession = reuse ?? {
+				action,
+				accountKey,
+				busy: true,
+				started: false,
+				since: Date.now(),
+				output: '',
+			};
+			slot.action = action;
+			slot.busy = true;
+			slot.started = false;
+			slot.since = Date.now();
+			slot.output = '';
+			const completion = new Promise<RunResult>((resolve) => {
+				slot.finish = resolve;
 			});
-			let startup = '';
-			const hook = await this.hooks.prepare(id, env, (event) => this.receive(slot, event));
-			slot.hookClose = () => hook.close();
-			try {
-				terminal = await (
-					await this.host.getTerminalService()
-				).createTerminal(
-					{
-						shellType: `custom:${command}`,
-						shellArgs: built.args,
-						cwd: action.cwd,
-						env: { ...env, ...hook.env, TERM: 'xterm-256color', NAND_AUTOMATION_RUN_ID: run.id },
-						title: run.title,
-					},
-					(instance) => {
-						slot.terminal = instance;
-						this.live.set(instance.id, slot);
-						instance.automationManaged = true;
-						instance.observeAutomation((event) => {
-							if (event.kind === 'data') {
-								slot.output = (slot.output + event.text).slice(-8000);
-								startup = (startup + event.text).slice(-16000);
-								const pasteAt = startup.indexOf('\x1b[?2004h');
-								const cursorNeeded = ['opencode', 'opencode2', 'mimo-code'].includes(id);
-								if (pasteAt >= 0 && (!cursorNeeded || startup.indexOf('\x1b[?25h', pasteAt) >= 0))
-									readyResolve();
-								return;
-							}
-							slot.busy = false;
-							slot.finish?.({
-								status:
-									event.kind === 'exit'
-										? event.code === 0
-											? 'succeeded'
-											: event.code < 0
-												? 'interrupted'
-												: 'failed'
-										: event.kind,
-								message: event.kind === 'exit' ? String(event.code) : '',
-								errorCode: event.kind === 'exit' ? 'processExit' : undefined,
-								errorParams: event.kind === 'exit' ? { code: event.code } : undefined,
-								output: slot.output,
-								session: slot.session,
-							});
-							slot.finish = undefined;
-							hook.close();
-							this.live.delete(instance.id);
-						});
-					},
-				);
-				if (built.paste) {
-					const win = this.host.app.workspace.containerEl.win;
-					let timeout: number | undefined;
-					try {
-						await Promise.race([
-							ready,
-							completion.then(() => {
-								throw new AutomationError('sessionMissing');
-							}),
-							new Promise<never>((_, reject) => {
-								timeout = win.setTimeout(() => reject(new AutomationError('inputNotReady')), 20_000);
-							}),
-						]);
-						terminal.write(`\x1b[200~${action.prompt}\x1b[201~\r`);
-					} finally {
-						if (timeout !== undefined) win.clearTimeout(timeout);
-					}
+			const priorSession = action.sessionMode === 'specific' ? action.session : reuse?.session;
+			const baseline = priorSession ? await this.sessionUsage(priorSession).catch(() => undefined) : undefined;
+			const measuredCompletion = completion.then(async (result) => {
+				if (!result.session) return result;
+				try {
+					const usage = await this.sessionUsage(result.session);
+					if (usage?.known && (!priorSession || baseline?.known))
+						result.usage = {
+							input: Math.max(0, usage.input - (baseline?.input ?? 0)),
+							output: Math.max(0, usage.output - (baseline?.output ?? 0)),
+							cacheRead: Math.max(0, usage.cacheRead - (baseline?.cacheRead ?? 0)),
+							cacheWrite: Math.max(0, usage.cacheWrite - (baseline?.cacheWrite ?? 0)),
+							cost:
+								usage.cost === null || (baseline && baseline.cost === null)
+									? null
+									: Math.max(0, usage.cost - (baseline?.cost ?? 0)),
+							known: true,
+						};
+				} catch {
+					/* Unavailable native usage must never change the run result. */
 				}
-			} catch (error) {
-				hook.close();
-				if (slot.terminal) await this.stop(slot.terminal.id);
-				throw error;
+				return result;
+			});
+			let terminal = slot.terminal;
+			if (reuse && terminal) terminal.write(`\x1b[200~${action.prompt}\x1b[201~\r`);
+			else {
+				const built = automationArgs(
+					id,
+					action.prompt,
+					launchArgs(settings, id),
+					action.sessionMode === 'specific' ? action.session : undefined,
+				);
+				let readyResolve!: () => void;
+				const ready = new Promise<void>((resolve) => {
+					readyResolve = resolve;
+				});
+				let startup = '';
+				const hook = await this.hooks.prepare(id, env, (event) => this.receive(slot, event));
+				slot.hookClose = () => hook.close();
+				try {
+					if (this.disposed) throw new AutomationError('busy');
+					const service = await this.host.getTerminalService();
+					if (this.disposed) throw new AutomationError('busy');
+					terminal = await service.createTerminal(
+						{
+							shellType: `custom:${command}`,
+							shellArgs: built.args,
+							cwd: action.cwd,
+							env: { ...env, ...hook.env, TERM: 'xterm-256color', NAND_AUTOMATION_RUN_ID: run.id },
+							title: run.title,
+						},
+						(instance) => {
+							slot.terminal = instance;
+							this.live.set(instance.id, slot);
+							instance.automationManaged = true;
+							instance.observeAutomation((event) => {
+								if (event.kind === 'data') {
+									slot.output = (slot.output + event.text).slice(-8000);
+									startup = (startup + event.text).slice(-16000);
+									const pasteAt = startup.indexOf('\x1b[?2004h');
+									const cursorNeeded = ['opencode', 'opencode2', 'mimo-code'].includes(id);
+									if (pasteAt >= 0 && (!cursorNeeded || startup.indexOf('\x1b[?25h', pasteAt) >= 0))
+										readyResolve();
+									return;
+								}
+								slot.busy = false;
+								slot.finish?.({
+									status:
+										event.kind === 'exit'
+											? event.code === 0
+												? 'succeeded'
+												: event.code < 0
+													? 'interrupted'
+													: 'failed'
+											: event.kind,
+									message: event.kind === 'exit' ? String(event.code) : '',
+									errorCode: event.kind === 'exit' ? 'processExit' : undefined,
+									errorParams: event.kind === 'exit' ? { code: event.code } : undefined,
+									output: slot.output,
+									session: slot.session,
+								});
+								slot.finish = undefined;
+								hook.close();
+								this.live.delete(instance.id);
+							});
+						},
+					);
+					if (built.paste) {
+						const win = this.host.app.workspace.containerEl.win;
+						let timeout: number | undefined;
+						try {
+							await Promise.race([
+								ready,
+								completion.then(() => {
+									throw new AutomationError('sessionMissing');
+								}),
+								new Promise<never>((_, reject) => {
+									timeout = win.setTimeout(
+										() => reject(new AutomationError('inputNotReady')),
+										20_000,
+									);
+								}),
+							]);
+							terminal.write(`\x1b[200~${action.prompt}\x1b[201~\r`);
+						} finally {
+							if (timeout !== undefined) win.clearTimeout(timeout);
+						}
+					}
+				} catch (error) {
+					hook.close();
+					if (slot.terminal) await this.stop(slot.terminal.id);
+					throw error;
+				}
 			}
+			if (run.trigger === 'manual') void this.open(terminal.id).catch(console.error);
+			return {
+				terminalId: terminal.id,
+				session: slot.session ?? action.session,
+				completion: measuredCompletion,
+				onRunning: (listener) => {
+					slot.listeners ??= new Set();
+					slot.listeners.add(listener);
+					if (slot.started) listener();
+					return () => slot.listeners?.delete(listener);
+				},
+			};
+		} finally {
+			if (reservation) this.reservations.delete(reservation);
 		}
-		if (run.trigger === 'manual') void this.open(terminal.id).catch(console.error);
-		return {
-			terminalId: terminal.id,
-			session: slot.session ?? action.session,
-			completion: measuredCompletion,
-			onRunning: (listener) => {
-				slot.listeners ??= new Set();
-				slot.listeners.add(listener);
-				if (slot.started) listener();
-				return () => slot.listeners?.delete(listener);
-			},
-		};
 	}
 	async stop(id: string): Promise<void> {
 		await (await this.host.getTerminalService()).destroyTerminal(id);
@@ -477,6 +504,7 @@ export class TerminalAutomationRuntime implements AgentRuntimePort {
 		await this.host.openAutomationTerminal(id);
 	}
 	dispose(): void {
+		this.disposed = true;
 		this.hooks.dispose();
 	}
 }

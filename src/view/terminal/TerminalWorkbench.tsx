@@ -1,4 +1,5 @@
 import type { ComponentChildren, Ref } from 'preact';
+import { useState } from 'preact/hooks';
 import { t } from '../../shared/i18n/terminal-accessor';
 import { Icon } from '../primitives/Icon';
 
@@ -26,9 +27,20 @@ export function TerminalWorkbench({
 	next: () => void;
 	closeSearch: () => void;
 }) {
+	const [sessionsOpen, setSessionsOpen] = useState(true);
 	return (
 		<>
-			<div className="nand-agent-sidebar">{sessions}</div>
+			<div className="nand-agent-sidebar">
+				<button
+					className="nand-ui-btn nand-agent-session-toggle"
+					aria-expanded={sessionsOpen}
+					onClick={() => setSessionsOpen(!sessionsOpen)}
+				>
+					<Icon name={sessionsOpen ? 'chevron-down' : 'chevron-right'} />
+					{t('workbench.openSessions')}
+				</button>
+				<div className={`nand-agent-session-controls${sessionsOpen ? '' : ' is-collapsed'}`}>{sessions}</div>
+			</div>
 			<div className="nand-agent-center">
 				<div className="terminal-search-container" ref={searchRef}>
 					<Icon name="search" className="terminal-search-icon" />

@@ -1,6 +1,8 @@
 /** Editor product */
 export const messages = {
 	en: {
+		'editor.comments.storageFailed':
+			'Comments could not be loaded or saved. Your existing data is preserved. Retry after storage is available.',
 		'editor.comments.submit': 'Submit',
 		'editor.comments.shortcut': '{modifier}+Enter to submit · Enter for a new line',
 		'editor.comments.saveFailed': 'Could not add the comment. Your draft has been kept.',
@@ -57,6 +59,7 @@ export const messages = {
 			'Which editor tool opens first. Comments, writing stats, and focus share this sidebar.',
 	},
 	zh: {
+		'editor.comments.storageFailed': '评论读取或保存失败，已有数据已保留。请在存储恢复后重试。',
 		'editor.comments.submit': '提交',
 		'editor.comments.shortcut': '{modifier}+Enter 提交 · Enter 换行',
 		'editor.comments.saveFailed': '评论添加失败，草稿已保留。',

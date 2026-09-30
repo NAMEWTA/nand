@@ -55,7 +55,7 @@ export function mountCommentsPanel(el: HTMLElement, ctx: CommentPanelContext): (
 		if (focused >= 0) el.querySelectorAll('button')[focused]?.focus({ preventScroll: true });
 		el.scrollTop = scroll;
 	});
-	if (path) void store.loadFile(path).then(render);
+	if (path) void store.loadFile(path).then(render, () => undefined);
 	else render();
 	return () => {
 		disposed = true;

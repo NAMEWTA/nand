@@ -10,9 +10,7 @@ export function startOfLocalDay(timestamp: number): number {
 }
 
 export function floorToMinute(timestamp: number): number {
-	const date = new Date(timestamp);
-	date.setSeconds(0, 0);
-	return date.getTime();
+	return Math.floor(timestamp / 60_000) * 60_000;
 }
 
 export function cronMatches(rule: ParsedCron, timestamp: number): boolean {

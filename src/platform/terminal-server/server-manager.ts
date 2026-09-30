@@ -89,6 +89,10 @@ export class ServerManager {
 
 	/** Whether shutdown is in progress */
 	private isShuttingDown = false;
+	private generation = 0;
+	private shutdownPromise: Promise<void> | null = null;
+	private restartTimer: number | null = null;
+	private readonly cancelStartup = new Set<() => void>();
 
 	/** Server restart attempt count */
 	private restartAttempts = 0;
@@ -166,19 +170,19 @@ export class ServerManager {
 
    */
 	async ensureServer(): Promise<void> {
-		// If the server is already running, return immediately
-		if (this.port !== null && this.ws?.readyState === WebSocket.OPEN) {
-			return;
+		if (this.shutdownPromise) await this.shutdownPromise;
+		// A failed shutdown still owns its child. Retry cleanup before reopening.
+		if (this.isShuttingDown && this.process) await this.shutdown();
+		if (this.isShuttingDown) this.resetShutdownState();
+		if (this.port !== null && this.ws?.readyState === WebSocket.OPEN) return;
+		if (this.serverStartPromise) return this.serverStartPromise;
+		const operation = this.process && this.port !== null ? this.connectWebSocket() : this.startServer();
+		this.serverStartPromise = operation;
+		try {
+			await operation;
+		} finally {
+			if (this.serverStartPromise === operation) this.serverStartPromise = null;
 		}
-
-		// If startup is already in progress, wait for it to finish
-		if (this.serverStartPromise) {
-			return this.serverStartPromise;
-		}
-
-		// Start the server
-		this.serverStartPromise = this.startServer();
-		return this.serverStartPromise;
 	}
 
 	/**
@@ -220,68 +224,78 @@ export class ServerManager {
    * 
 
    */
-	async shutdown(): Promise<void> {
+	shutdown(): Promise<void> {
+		if (this.shutdownPromise) return this.shutdownPromise;
+		const operation = this.stopServer();
+		this.shutdownPromise = operation;
+		void operation.then(
+			() => {
+				if (this.shutdownPromise === operation) this.shutdownPromise = null;
+			},
+			() => {
+				if (this.shutdownPromise === operation) this.shutdownPromise = null;
+			},
+		);
+		return operation;
+	}
+
+	private async stopServer(): Promise<void> {
 		this.isShuttingDown = true;
-
-		debugLog('[ServerManager] 关闭服务器...');
-
-		// Cancel the reconnect timer
+		this.generation++;
 		this.cancelReconnect();
-
-		// Close the WebSocket connection
-		if (this.ws) {
-			try {
-				this.ws.close(1000, 'Shutdown');
-			} catch (error) {
-				debugWarn('[ServerManager] 关闭 WebSocket 时出错:', error);
-			}
-			this.ws = null;
-		}
-
-		// Stop the server process
-		if (this.process) {
-			try {
-				this.process.kill('SIGTERM');
-
-				// Wait for the process to exit
-				await new Promise<void>((resolve) => {
-					const timeout = window.setTimeout(() => {
-						if (this.process && !this.process.killed) {
-							debugWarn('[ServerManager] 强制终止服务器');
-							this.process.kill('SIGKILL');
-						}
-						resolve();
-					}, 1000);
-
-					if (this.process) {
-						this.process.once('exit', () => {
-							window.clearTimeout(timeout);
-							resolve();
-						});
+		if (this.restartTimer !== null) window.clearTimeout(this.restartTimer);
+		this.restartTimer = null;
+		for (const cancel of [...this.cancelStartup]) cancel();
+		const ws = this.ws;
+		this.ws = null;
+		ws?.close(1000, 'Shutdown');
+		const child = this.process;
+		if (child) {
+			await new Promise<void>((resolve, reject) => {
+				let timer: number | undefined;
+				const exited = () => child.exitCode != null || child.signalCode != null;
+				const done = (error?: Error) => {
+					if (timer !== undefined) window.clearTimeout(timer);
+					child.off('exit', onExit);
+					child.off('close', onExit);
+					if (error) reject(error);
+					else resolve();
+				};
+				const onExit = () => done();
+				if (exited()) {
+					resolve();
+					return;
+				}
+				child.once('exit', onExit);
+				child.once('close', onExit);
+				timer = window.setTimeout(() => {
+					if (exited()) {
+						done();
+						return;
 					}
-				});
-			} catch (error) {
-				errorLog('[ServerManager] 停止服务器时出错:', error);
-			} finally {
-				this.process = null;
-			}
+					timer = window.setTimeout(() => done(new Error('Server process did not exit after SIGKILL')), 5000);
+					try {
+						child.kill('SIGKILL');
+					} catch (error) {
+						done(error instanceof Error ? error : new Error(String(error)));
+					}
+				}, 1000);
+				try {
+					child.kill('SIGTERM');
+				} catch (error) {
+					done(error instanceof Error ? error : new Error(String(error)));
+				}
+			});
+			if (this.process === child) this.process = null;
 		}
-
-		// Clear state
 		this.port = null;
 		this.serverStartPromise = null;
 		this.wsConnectPromise = null;
-
-		// Destroy module clients
 		this._agentDataClient?.destroy();
 		this._agentDataClient = null;
 		this._ptyClient?.destroy();
-
 		this._ptyClient = null;
-
 		this.emit('server-stopped');
-
-		debugLog('[ServerManager] 服务器已关闭');
 	}
 
 	/**
@@ -347,15 +361,21 @@ export class ServerManager {
 	 * Start the server
 	 */
 	private async startServer(): Promise<void> {
+		const generation = this.generation;
+		const check = () => {
+			if (generation !== this.generation || this.isShuttingDown) throw new Error('Server startup cancelled');
+		};
 		try {
 			debugLog('[ServerManager] 启动统一服务器...');
 
 			const binaryPath = this.getBinaryPath();
 
 			await this.ensureBinaryReady();
+			check();
 
 			// Ensure executable permission (Unix)
 			await this.ensureExecutable(binaryPath);
+			check();
 
 			// Start the process
 			this.process = this.spawn(binaryPath, ['--port', '0'], {
@@ -378,6 +398,7 @@ export class ServerManager {
 
 			// Wait for port information
 			const port = await this.waitForServerPort();
+			check();
 			this.port = port;
 			this.restartAttempts = 0;
 
@@ -388,10 +409,12 @@ export class ServerManager {
 
 			// Establish the WebSocket connection
 			await this.connectWebSocket();
+			check();
 
 			this.emit('server-started', port);
 		} catch (error) {
-			this.serverStartPromise = null;
+			if (generation !== this.generation || this.isShuttingDown) throw error;
+			if (this.process && this.port === null) await this.shutdown();
 
 			const errorMessage = error instanceof Error ? error.message : String(error);
 			errorLog('[ServerManager] 启动服务器失败:', errorMessage);
@@ -535,53 +558,38 @@ export class ServerManager {
 	 * Wait for the server to output port information
 	 */
 	private async waitForServerPort(): Promise<number> {
+		const child = this.process;
+		if (!child) throw new ServerManagerError(ServerErrorCode.SERVER_START_FAILED, 'Process not started');
 		return new Promise((resolve, reject) => {
-			if (!this.process || !this.process.stdout) {
-				reject(new ServerManagerError(ServerErrorCode.SERVER_START_FAILED, '进程未启动'));
-				return;
-			}
-
 			let buffer = '';
-
-			const timeout = window.setTimeout(() => {
-				this.process?.stdout?.off('data', onData);
-				reject(new ServerManagerError(ServerErrorCode.SERVER_START_FAILED, '等待端口信息超时'));
-			}, 10000);
-
+			const finish = (error?: Error, port?: number) => {
+				window.clearTimeout(timeout);
+				child.stdout?.off('data', onData);
+				child.off('exit', onExit);
+				child.off('error', onError);
+				this.cancelStartup.delete(cancel);
+				if (error) reject(error);
+				else resolve(port!);
+			};
+			const cancel = () => finish(new Error('Server startup cancelled'));
+			const onExit = () => finish(new Error('Server exited before reporting a port'));
+			const onError = (error: Error) => finish(error);
 			const onData = (chunk: Buffer) => {
 				buffer += chunk.toString();
-
+				const match = buffer.match(/\{[^}]+\}/);
+				if (!match) return;
 				try {
-					const match = buffer.match(/\{[^}]+\}/);
-					if (match) {
-						const info = JSON.parse(match[0]) as ServerInfo;
-						if (info.port && typeof info.port === 'number') {
-							window.clearTimeout(timeout);
-							this.process?.stdout?.off('data', onData);
-							debugLog('[ServerManager] 解析到服务器信息:', info);
-							resolve(info.port);
-						}
-					}
+					const info = JSON.parse(match[0]) as ServerInfo;
+					if (typeof info.port === 'number' && info.port > 0) finish(undefined, info.port);
 				} catch {
-					// JSON parsing failed, keep waiting
+					/* Wait for a complete server announcement. */
 				}
 			};
-
-			this.process.stdout.on('data', onData);
-
-			// Listen to stderr for debugging
-			this.process.stderr?.on('data', (data: Buffer) => {
-				debugLog('[ServerManager] stderr:', data.toString());
-			});
-
-			this.process.on('exit', (code) => {
-				window.clearTimeout(timeout);
-				if (code !== 0 && code !== null) {
-					reject(
-						new ServerManagerError(ServerErrorCode.SERVER_START_FAILED, `服务器启动失败，退出码: ${code}`),
-					);
-				}
-			});
+			const timeout = window.setTimeout(() => finish(new Error('Timed out waiting for server port')), 10000);
+			this.cancelStartup.add(cancel);
+			child.stdout?.on('data', onData);
+			child.once('exit', onExit);
+			child.once('error', onError);
 		});
 	}
 
@@ -589,81 +597,66 @@ export class ServerManager {
 	 * Establish the WebSocket connection
 	 */
 	private async connectWebSocket(): Promise<void> {
-		if (this.wsConnectPromise) {
-			return this.wsConnectPromise;
-		}
-
-		this.wsConnectPromise = new Promise((resolve, reject) => {
-			if (!this.port) {
-				this.wsConnectPromise = null;
-				reject(new ServerManagerError(ServerErrorCode.CONNECTION_FAILED, '服务器端口未知'));
-				return;
-			}
-
-			const wsUrl = `ws://127.0.0.1:${this.port}`;
-			debugLog('[ServerManager] 连接 WebSocket:', wsUrl);
-
-			this.ws = new WebSocket(wsUrl);
-			const ws = this.ws;
-
-			const timeout = window.setTimeout(() => {
-				if (this.ws === ws) {
-					this.wsConnectPromise = null;
-				}
-				reject(new ServerManagerError(ServerErrorCode.CONNECTION_FAILED, 'WebSocket 连接超时'));
-			}, 5000);
-
-			ws.onopen = () => {
+		if (this.ws?.readyState === WebSocket.OPEN) return;
+		if (this.wsConnectPromise) return this.wsConnectPromise;
+		if (!this.port || this.isShuttingDown)
+			throw new ServerManagerError(ServerErrorCode.CONNECTION_FAILED, 'Server unavailable');
+		const generation = this.generation;
+		const ws = new WebSocket(`ws://127.0.0.1:${this.port}`);
+		this.ws = ws;
+		const operation = new Promise<void>((resolve, reject) => {
+			let settled = false;
+			const current = () => this.generation === generation && this.ws === ws && !this.isShuttingDown;
+			const settle = (error?: Error) => {
+				if (settled) return;
+				settled = true;
 				window.clearTimeout(timeout);
-				debugLog('[ServerManager] WebSocket 已连接');
-
-				// Reset the reconnect counter
-				this.wsReconnectAttempts = 0;
-				this.isReconnecting = false;
-
-				// Update the WebSocket on all module clients
-				this.updateClientsWebSocket();
-
-				this.emit('ws-connected');
-				resolve();
+				this.cancelStartup.delete(cancel);
+				if (error) reject(error);
+				else resolve();
 			};
-
-			ws.onclose = (event) => {
-				debugLog('[ServerManager] WebSocket 已断开, code:', event.code, 'reason:', event.reason);
-				if (this.ws === ws) {
-					this.ws = null;
-					this.wsConnectPromise = null;
-				}
-
-				// Clear the WebSocket on module clients
-				this._ptyClient?.setWebSocket(null);
-				this._agentDataClient?.setWebSocket(null);
-
-				if (this.isDevInstallInProgress()) {
-					debugLog('[ServerManager] 开发安装进行中，跳过 WebSocket 重连通知');
+			const cancel = () => settle(new Error('Connection cancelled'));
+			const timeout = window.setTimeout(() => {
+				settle(new ServerManagerError(ServerErrorCode.CONNECTION_FAILED, 'WebSocket connection timed out'));
+				ws.close();
+			}, 5000);
+			this.cancelStartup.add(cancel);
+			ws.onopen = () => {
+				if (!current()) {
+					cancel();
+					ws.close();
 					return;
 				}
-
+				this.wsReconnectAttempts = 0;
+				this.isReconnecting = false;
+				this.updateClientsWebSocket();
+				this.emit('ws-connected');
+				settle();
+			};
+			ws.onerror = () => {
+				settle(new ServerManagerError(ServerErrorCode.CONNECTION_FAILED, 'WebSocket connection failed'));
+				ws.close();
+			};
+			ws.onclose = () => {
+				settle(new ServerManagerError(ServerErrorCode.CONNECTION_FAILED, 'WebSocket closed'));
+				if (!current()) return;
+				this.ws = null;
+				this._ptyClient?.setWebSocket(null);
+				this._agentDataClient?.setWebSocket(null);
+				if (this.isDevInstallInProgress()) return;
 				this.emit('ws-disconnected');
-
-				// If this was not an intentional shutdown, try to reconnect
-				if (!this.isShuttingDown && this.port !== null) {
-					this.scheduleReconnect();
-				}
+				if (this.port !== null) this.scheduleReconnect();
 			};
-
-			ws.onerror = (event) => {
-				window.clearTimeout(timeout);
-				errorLog('[ServerManager] WebSocket 错误:', event);
-				// Do not reject here; let onclose handle it
-			};
-
 			ws.onmessage = (event) => {
-				this.handleWebSocketMessage(event);
+				if (current()) this.handleWebSocketMessage(event);
 			};
 		});
-
-		return this.wsConnectPromise;
+		this.wsConnectPromise = operation;
+		try {
+			await operation;
+		} finally {
+			if (this.wsConnectPromise === operation) this.wsConnectPromise = null;
+		}
 	}
 
 	/**
@@ -754,7 +747,9 @@ export class ServerManager {
 
 		this.emit('ws-reconnecting', this.wsReconnectAttempts, delay);
 
+		const generation = this.generation;
 		this.reconnectTimer = window.setTimeout(() => {
+			if (generation !== this.generation || this.isShuttingDown) return;
 			this.reconnectTimer = null;
 			void this.attemptReconnect();
 		}, delay);
@@ -808,7 +803,9 @@ export class ServerManager {
 		}
 
 		const exitedProcess = this.process;
+		const generation = this.generation;
 		exitedProcess.on('exit', (code, signal) => {
+			if (generation !== this.generation || this.process !== exitedProcess) return;
 			if (this.process === exitedProcess) {
 				this.process = null;
 				this.port = null;
@@ -845,13 +842,17 @@ export class ServerManager {
 	 * Try to automatically restart the server
 	 */
 	private attemptRestart(exitDetails: ServerExitDetails): void {
+		if (this.isShuttingDown || this.restartTimer !== null) return;
+		const generation = this.generation;
 		if (this.restartAttempts < this.maxRestartAttempts) {
 			this.restartAttempts++;
 			debugLog(`[ServerManager] 尝试重启服务器 ` + `(${this.restartAttempts}/${this.maxRestartAttempts})`);
 
 			const delay = 1000 * Math.pow(2, this.restartAttempts - 1);
 
-			window.setTimeout(() => {
+			this.restartTimer = window.setTimeout(() => {
+				this.restartTimer = null;
+				if (generation !== this.generation || this.isShuttingDown) return;
 				this.ensureServer()
 					.then(() => {
 						debugLog('[ServerManager] 服务器自动重启成功');

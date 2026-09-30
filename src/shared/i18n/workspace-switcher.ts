@@ -1,6 +1,12 @@
 /** Workspace switcher */
 export const messages = {
 	en: {
+		'dashboard.sync.conflict':
+			'This dashboard changed outside NAND. Saving is paused. Your edits are kept in .dashboard-backup/conflicts. Review the copies, then use Restore or reopen the dashboard to reload.',
+		'dashboard.sync.recoveryFailed':
+			'Could not save a recovery copy. Keep this dashboard open and retry after storage is available.',
+		'dashboard.sync.saveFailed':
+			'The dashboard could not be saved. Your edits remain in this view. Retry after storage is available.',
 		'workspace.newTitle': 'New workspace',
 		'workspace.namePlaceholder': 'Workspace name',
 		'workspace.defaultName': 'Workspace {n}',
@@ -45,6 +51,10 @@ export const messages = {
 		'settings.languageZh': '中文',
 	},
 	zh: {
+		'dashboard.sync.conflict':
+			'看板已被外部修改，保存已暂停。你的修改保存在 .dashboard-backup/conflicts。请先检查副本，再通过恢复或重新打开看板载入磁盘内容。',
+		'dashboard.sync.recoveryFailed': '恢复副本保存失败。请保持看板打开，在存储恢复后重试。',
+		'dashboard.sync.saveFailed': '看板保存失败，修改仍保留在当前视图中。请在存储恢复后重试。',
 		'workspace.newTitle': '新建工作台',
 		'workspace.namePlaceholder': '工作台名称',
 		'workspace.defaultName': '工作台 {n}',

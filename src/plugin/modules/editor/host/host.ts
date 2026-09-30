@@ -1,4 +1,5 @@
-import { TFile } from 'obsidian';
+import { Notice, TFile } from 'obsidian';
+import { t } from '../../../../shared/i18n/index';
 import { CommentStore, registerCommentStore } from '../../../../core/comments/store';
 import { vaultCommentFs } from '../../../../platform/obsidian/comments/vault-fs';
 import { createCommentsDomain } from '../../../../view/editor/comments/domain';
@@ -13,7 +14,11 @@ import { trackActiveMarkdown } from './active-file';
  * side panel does not remove highlights or the selection popover.
  */
 export function createEditorHost(plugin: DashboardPlugin): EditorHost {
-	const store = new CommentStore(vaultCommentFs(plugin.app));
+	const store = new CommentStore(vaultCommentFs(plugin.app), {
+		onError: () => {
+			new Notice(t('editor.comments.storageFailed'));
+		},
+	});
 	const domains: EditorDomain[] = [createCommentsDomain(plugin)];
 	const listeners = new Set<(file: TFile | null) => void>();
 	const layoutListeners = new Set<() => void>();

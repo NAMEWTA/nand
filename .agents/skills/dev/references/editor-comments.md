@@ -6,14 +6,17 @@ Comments are a sidecar on the vault. The note file is never written by this feat
 
 ```
 .nand/editor/comments/index.json
+.nand/editor/comments/pending.json
 .nand/editor/comments/files/<first 16 hex of sha256(path)>.json
 ```
 
 - Hash the path string, not the file bytes, with `crypto.subtle` SHA-256, first 16 hex chars.
 - `index.json` is `{ version: 1, files: { [path]: { hash, open, total, updatedAt } } }`.
+- `pending.json` is a recoverable write intent containing the complete next index, sidecar bodies and obsolete file paths. Replay it before loading; remove it only after sidecars, index and cleanup succeed.
+- Read/parse/shape errors propagate without caching an empty result. Dirty path revisions survive write failures and synchronous edits during an awaited write. The host reports background failures through `onError`.
 - Each file doc is `{ version: 1, path, comments: CommentThread[] }`.
 - Empty thread list deletes that sidecar file and the index entry.
-- Writes are serialized on one promise chain and debounced (300ms). `flush()` runs on plugin unload and when the editor module turns off.
+- Writes are serialized on one promise chain and debounced (300ms). `flush()` is requested on plugin unload and when the editor module turns off. The host reports rejection; a forced process exit cannot guarantee persistence of data that never reached the journal.
 - `data.json` stores only `editorWorkbench` (`activeDomain`, `highlightEnabled`, `popoverEnabled`, optional `sidebarWidth`). Never a comment body. Normalization order is SKILL rule 10.
 
 ## Model
@@ -64,11 +67,11 @@ Cross-product event names live in `src/shared/events.ts`. `COMMENT_TO_TASK` is r
 
 `pnpm run test:editor-comments` bundles `scripts/verify-editor-comments.ts` with esbuild and the Obsidian stub. The runner shape is in `references/build-and-release.md`.
 
-The script checks anchors, the in-memory filesystem (the note string is unchanged), index hash length 16, reply, resolve, rename, delete, orphan reconcile, the editor/dashboard import boundary, and the view type constants from the identity table.
+The script includes read-failure, journal replay, partial commit, rename cleanup and concurrent-edit recovery cases, all checked through a fresh store. It also checks anchors, the in-memory filesystem (the note string is unchanged), index hash length 16, reply, resolve, rename, delete, orphan reconcile, the editor/dashboard import boundary, and the view type constants from the identity table.
 
 It also exercises the real CM extension with controlled DOM geometry and workspace events: hiding without a CM transaction, scroll clipping, draft restoration, stale submission rejection, and module restart. `test:issue-regressions` covers composer scopes/accessibility, placement boundaries, and routing terminal title refreshes to the correct host window. These Node fixtures do not replace real Obsidian tooltip/window tests.
 
 - The bundle's `__dirname` is `node_modules/.tmp`. Resolve the repo with `process.cwd()`.
-- `CommentStore` uses `window.setTimeout`. The test polyfills `window` on `globalThis` before constructing the store.
+- `CommentStore` uses `globalThis.setTimeout`; UI fixtures also polyfill `window` on `globalThis`.
 
 Add a case to this script when you change locate, serialization, or the boundary. Do not point the test at a real vault.

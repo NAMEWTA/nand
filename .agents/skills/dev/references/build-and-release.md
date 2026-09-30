@@ -72,6 +72,10 @@ New Node tests use that same runner. Verify scripts are excluded from eslint. `t
 
 `test:editor-comments` bundles against `scripts/obsidian-stub.ts`. The bundle's `__dirname` is `node_modules/.tmp`; resolve the repo with `process.cwd()`. What the script asserts is in `references/editor-comments.md`.
 
+## Storage and lifecycle regressions
+
+`pnpm run test:safety-regressions` exercises dashboard write conflicts, DST repeated hours, empty automation targets, native-session launch reservations, and terminal server startup/shutdown with deterministic fixtures and an owned SIGTERM-resistant Node child. It is included in CI. Comment read/write failure and journal recovery cases run in `test:editor-comments`.
+
 ## Lint
 
 `eslint.config.mts` spreads `obsidianmd.configs.recommended` and type-aware TypeScript eslint. Ignored: `node_modules`, `dist`, the esbuild and eslint configs, `version-bump.mjs`, `versions.json`, `main.js`, `scripts/**`, `**/*.test.ts`. Rule severity for production `src/**/*.ts` is in `references/obsidian-api.md`. Warnings do not fail CI. Do not add new warnings.
@@ -149,3 +153,5 @@ History protocol/parser changes require `cargo test --locked --manifest-path pro
 The Rust service now bundles SQLite through rusqlite; rebuild platform binaries from the same commit as main.js. Do not ship an earlier service with the new agent_data protocol. The release workflow builds five target binaries; local Linux success does not verify macOS/Windows execution or authenticated provider quota APIs.
 
 Obsidian 的外置 Node 模块必须在 desktop guard 后使用 `window.require`；esbuild external 的 `import('node:…')` 在渲染进程中可能无法解析。Node 单测与 tsc 不会捕获这一点，历史／hook 加载改动要在真实 Obsidian 中打开工作台验证。
+
+Manual Obsidian issue acceptance: `node scripts/obsidian-acceptance/run.mjs` requires an isolated vault and CDP. See [the repair record](../../../../docs/issue-fixes-2026-09-30.md) for setup, mutations and platform coverage.

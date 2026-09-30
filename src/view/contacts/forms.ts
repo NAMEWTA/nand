@@ -155,13 +155,22 @@ export class RecordEditorModal extends Modal {
 	}
 	onOpen(): void {
 		this.modalEl.addClass('nand-contacts-form');
-		const title = this.editScope === 'relation'
-			? this.addingRow ? 'addRelation' : 'editRelation'
-			: this.editScope === 'employment'
-				? this.addingRow ? 'addEmployment' : 'editEmployment'
-				: this.base.kind === 'person'
-					? this.base.path ? 'editPerson' : 'addPerson'
-					: this.base.path ? 'editCompany' : 'addCompany';
+		const title =
+			this.editScope === 'relation'
+				? this.addingRow
+					? 'addRelation'
+					: 'editRelation'
+				: this.editScope === 'employment'
+					? this.addingRow
+						? 'addEmployment'
+						: 'editEmployment'
+					: this.base.kind === 'person'
+						? this.base.path
+							? 'editPerson'
+							: 'addPerson'
+						: this.base.path
+							? 'editCompany'
+							: 'addCompany';
 		this.setTitle(ct(title));
 		this.renderForm();
 		this.unsubscribe = this.controller.subscribe(() => {
@@ -244,8 +253,13 @@ export class RecordEditorModal extends Modal {
 				const isList = (listFields as readonly string[]).includes(key),
 					value = this.draft.fields[key];
 				this.text(
-					key === 'name' ? this.draft.kind === 'person' ? 'personName' : 'companyName'
-						: key === 'region' && this.draft.kind === 'company' ? 'companyRegion' : key,
+					key === 'name'
+						? this.draft.kind === 'person'
+							? 'personName'
+							: 'companyName'
+						: key === 'region' && this.draft.kind === 'company'
+							? 'companyRegion'
+							: key,
 					Array.isArray(value) ? value.join('\n') : value,
 					(input) => {
 						Object.assign(this.draft.fields, {
@@ -509,15 +523,19 @@ export class FilterModal extends Modal {
 			this.contentEl.createEl('p', { cls: 'nand-contacts-muted', text: ct('filterEmpty') });
 		}
 		for (const group of groups) {
-			new Setting(this.contentEl).setName(ct(group.title)).setHeading();
+			const section = this.contentEl.createEl('section', {
+				cls: 'nand-contacts-filter-group',
+				attr: { 'aria-label': ct(group.title) },
+			});
+			new Setting(section).setName(ct(group.title)).setHeading();
 			if (group.values.length === 0) {
-				this.contentEl.createEl('p', {
+				section.createEl('p', {
 					cls: 'nand-contacts-muted nand-contacts-placeholder',
 					text: ct('noFilterOptions'),
 				});
 			}
 			for (const [value, name] of group.values)
-				new Setting(this.contentEl).setName(name).addToggle((toggle) =>
+				new Setting(section).setName(name).addToggle((toggle) =>
 					toggle.setValue(this.draft[group.key].includes(value)).onChange((enabled) => {
 						this.draft[group.key] = enabled
 							? [...this.draft[group.key], value]

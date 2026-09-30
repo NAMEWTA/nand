@@ -14,9 +14,12 @@ export function commentsReadingProcessor(plugin: EditorPluginHost): MarkdownPost
 		if (!store) return;
 		const path = ctx.sourcePath;
 		if (!store.isLoaded(path)) {
-			void store.loadFile(path).then(() => {
-				refreshReadingViews(plugin, path);
-			});
+			void store
+				.loadFile(path)
+				.then(() => {
+					refreshReadingViews(plugin, path);
+				})
+				.catch(() => undefined);
 			return;
 		}
 		const threads = store.threadsFor(path).filter((thread) => thread.status !== 'orphaned');
