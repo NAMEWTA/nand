@@ -4,7 +4,7 @@ on:
   workflow_call:
   workflow_dispatch:
   pull_request:
-    paths: ['processes/rust-terminal-servers/**', '.github/workflows/terminal-build.yml']
+    paths: ['processes/rust-terminal-servers/**', 'scripts/verify-pty-windows.mjs', '.github/workflows/terminal-build.yml']
 
 permissions:
   contents: read
@@ -33,6 +33,14 @@ jobs:
         run: |
           cargo test --locked --manifest-path processes/rust-terminal-servers/Cargo.toml --target '${{ matrix.target }}'
           cargo build --locked --release --manifest-path processes/rust-terminal-servers/Cargo.toml --target '${{ matrix.target }}'
+      - name: Set up Node for Windows integration
+        if: matrix.asset == 'win32-x64'
+        uses: actions/setup-node@v5
+        with:
+          node-version: 24.x
+      - name: Exercise Windows PTY lifecycle and history
+        if: matrix.asset == 'win32-x64'
+        run: node scripts/verify-pty-windows.mjs processes/rust-terminal-servers/target/${{ matrix.target }}/release/rust-terminal-servers.exe
       - name: Package binary and checksum
         shell: python
         run: |

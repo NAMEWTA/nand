@@ -154,6 +154,8 @@ History protocol/parser changes require `cargo test --locked --manifest-path pro
 
 The Rust service now bundles SQLite through rusqlite; rebuild platform binaries from the same commit as main.js. Do not ship an earlier service with the new agent_data protocol. The release workflow builds five target binaries; local Linux success does not verify macOS/Windows execution or authenticated provider quota APIs.
 
+On Windows, use the installed MSVC toolchain to run locked Rust tests and a matching release build, then run `node scripts/verify-pty-windows.mjs <release-binary.exe>` with Node 24. The native build workflow runs this integration on its Windows target without changing the five release artifact paths. It checks ConPTY device replies, complete output before one real exit event, UTF-8/cwd/env, rapid launch admission, Ctrl+C shell continuity, per-session Job ownership, repeated destroy, startup failure, client disconnect, server termination/restart, and concurrent native history/read/cancellation. Set `NAND_PTY_WINDOWS_ARTIFACT_DIR` to retain isolated fixtures and summarized evidence; otherwise successful runs clean their own temporary fixture. Only fixture-owned process identities are eligible for cleanup.
+
 Obsidian 的外置 Node 模块必须在 desktop guard 后使用 `window.require`；esbuild external 的 `import('node:…')` 在渲染进程中可能无法解析。Node 单测与 tsc 不会捕获这一点，历史／hook 加载改动要在真实 Obsidian 中打开工作台验证。
 
 Manual Obsidian issue acceptance: `node scripts/obsidian-acceptance/run.mjs` requires an isolated vault and CDP. See [the repair record](../../../../docs/issue-fixes-2026-09-30.md) for setup, mutations and platform coverage.

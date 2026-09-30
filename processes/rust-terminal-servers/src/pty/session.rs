@@ -6,8 +6,30 @@ use std::sync::{Arc, Mutex};
 
 /// PTY session
 pub struct PtySession {
-    master: Box<dyn MasterPty + Send>,
+    master: Option<Box<dyn MasterPty + Send>>,
+    #[cfg(windows)]
+    job: Option<super::windows_job::WindowsJob>,
     child: Arc<Mutex<Box<dyn Child + Send + Sync>>>,
+}
+
+// Drop the job first to stop all owned descendants, then close and drain ConPTY.
+// Closing the pseudoconsole can block, so callers drop this off the async reactor.
+#[cfg(windows)]
+pub(super) struct WindowsResources {
+    _job: Option<super::windows_job::WindowsJob>,
+    _master: Option<Box<dyn MasterPty + Send>>,
+}
+
+#[cfg(windows)]
+impl Drop for PtySession {
+    fn drop(&mut self) {
+        let resources = self.take_windows_resources();
+        if resources._job.is_some() || resources._master.is_some() {
+            // Covers initialization/send failures too. Never run ClosePseudoConsole
+            // while dropping a context on the current-thread async runtime.
+            std::thread::spawn(move || drop(resources));
+        }
+    }
 }
 
 /// PTY reader (independent, no lock required)
@@ -96,7 +118,12 @@ impl PtySession {
             }
         }
         // Start the shell process
-        let child = pair.slave.spawn_command(cmd)?;
+        #[cfg(windows)]
+        let launch = super::windows_job::WindowsLaunch::prepare(&mut cmd)?;
+        #[allow(unused_mut)]
+        let mut child = pair.slave.spawn_command(cmd)?;
+        #[cfg(windows)]
+        let job = launch.admit(child.as_mut())?;
         
         // Get the reader and writer (independent, no lock required)
         let reader = PtyReader {
@@ -107,7 +134,9 @@ impl PtySession {
         };
         
         let session = Self {
-            master: pair.master,
+            master: Some(pair.master),
+            #[cfg(windows)]
+            job: Some(job),
             child: Arc::new(Mutex::new(child)),
         };
         
@@ -122,7 +151,7 @@ impl PtySession {
 
     /// Resize the PTY
     pub fn resize(&mut self, cols: u16, rows: u16) -> Result<(), Box<dyn std::error::Error>> {
-        self.master.resize(PtySize {
+        self.master.as_ref().ok_or("PTY process exited")?.resize(PtySize {
             rows,
             cols,
             pixel_width: 0,
@@ -133,10 +162,22 @@ impl PtySession {
     
     /// Terminate the child process
     pub fn kill(&mut self) -> Result<(), Box<dyn std::error::Error>> {
+        #[cfg(windows)]
+        {
+            if let Some(job) = &self.job { job.terminate()?; }
+            return Ok(());
+        }
+        #[cfg(not(windows))]
         if let Ok(mut child) = self.child.lock() {
             child.kill()?;
         }
+        #[cfg(not(windows))]
         Ok(())
+    }
+
+    #[cfg(windows)]
+    pub(super) fn take_windows_resources(&mut self) -> WindowsResources {
+        WindowsResources { _job: self.job.take(), _master: self.master.take() }
     }
 }
 

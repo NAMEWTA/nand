@@ -4,6 +4,10 @@
 mod session;
 mod shell;
 mod osc_scanner;
+#[cfg(windows)]
+mod windows_job;
+#[cfg(windows)]
+pub(crate) use windows_job::run_job_host;
 
 pub use session::{PtySession, PtyReader, PtyWriter};
 pub use shell::{get_shell_by_type, get_default_shell};
@@ -124,14 +128,13 @@ impl PtyHandler {
         );
         
         // Create the PTY session
-        let (pty_session, pty_reader, pty_writer) = PtySession::new(
-            cols,
-            rows,
-            shell_type.as_deref(),
-            shell_args.as_ref().map(|v| v.as_slice()),
-            cwd.as_deref(),
-            env.as_ref(),
-        ).map_err(|e| RouterError::ModuleError(format!("创建 PTY 会话失败: {}", e)))?;
+        let launch_shell = shell_type.clone();
+        let (pty_session, pty_reader, pty_writer) = tokio::task::spawn_blocking(move || {
+            PtySession::new(cols, rows, launch_shell.as_deref(),
+                shell_args.as_ref().map(|v| v.as_slice()), cwd.as_deref(), env.as_ref())
+                .map_err(|error| error.to_string())
+        }).await.map_err(|error| RouterError::ModuleError(error.to_string()))?
+            .map_err(|e| RouterError::ModuleError(format!("创建 PTY 会话失败: {}", e)))?;
         
         // Create the session context
         let pty_session = Arc::new(TokioMutex::new(pty_session));
@@ -148,18 +151,22 @@ impl PtyHandler {
             "success": true, "session_id": session_id, "exit_status": true
         }));
         let sender = self.ws_sender.lock().await.clone().ok_or_else(|| RouterError::ModuleError("WebSocket sender not set".into()))?;
+        // Pump output before sending identity, but gate all delivery until identity
+        // succeeds. If sending fails, the pump discards output while Drop closes
+        // the owned job and ConPTY; no pipe can fill and block console teardown.
+        let (start_tx, start_rx) = tokio::sync::oneshot::channel();
+        let read_task = self.start_read_task(session_id.clone(), pty_reader, pty_writer,
+            shell_type, Arc::clone(&pty_session), start_rx).await?;
+        context.read_task = Some(read_task);
         sender.lock().await.send(Message::Text(response.to_json().into())).await
             .map_err(|error| RouterError::ModuleError(error.to_string()))?;
-
-        // Start the PTY output reader task
-        let read_task = self.start_read_task(session_id.clone(), pty_reader, pty_writer, shell_type, Arc::clone(&pty_session)).await?;
-        context.read_task = Some(read_task);
         
         // Store the session context
         {
             let mut sessions = self.sessions.lock().await;
             sessions.insert(session_id.clone(), context);
         }
+        let _ = start_tx.send(());
         
         log_info!("PTY 会话创建成功: session_id={}", session_id);
         
@@ -176,6 +183,7 @@ impl PtyHandler {
         _writer: Arc<Mutex<PtyWriter>>,
         _shell_type: Option<String>,
         child_session: Arc<TokioMutex<PtySession>>,
+        start_rx: tokio::sync::oneshot::Receiver<()>,
     ) -> Result<tokio::task::JoinHandle<()>, RouterError> {
         const OUTPUT_BATCH_INTERVAL_MS: u64 = 4;
         const READ_BUFFER_SIZE: usize = 8192;
@@ -199,6 +207,7 @@ impl PtyHandler {
             let reader_for_thread = Arc::clone(&reader);
 
             tokio::task::spawn_blocking(move || {
+                let mut forwarding = true;
                 loop {
                     let mut reader = match reader_for_thread.lock() {
                         Ok(guard) => guard,
@@ -212,8 +221,10 @@ impl PtyHandler {
                         }
                         Ok(n) => {
                             local_buf.truncate(n);
-                            if read_tx.blocking_send(ReadEvent::Data(local_buf)).is_err() {
-                                break;
+                            if forwarding && read_tx.blocking_send(ReadEvent::Data(local_buf)).is_err() {
+                                // The client went away. Continue draining until
+                                // console closure, without retaining a dead receiver.
+                                forwarding = false;
                             }
                         }
                         Err(e) => {
@@ -223,15 +234,49 @@ impl PtyHandler {
                     }
                 }
             });
+            if start_rx.await.is_err() { return; }
 
             let mut batch_buffer: Vec<u8> = Vec::new();
             let mut osc_scanner = OscScanner::new();
             let mut pending_shell_events: Vec<OscEvent> = Vec::new();
+            #[cfg(windows)]
+            let mut exit_poll = time::interval(Duration::from_millis(10));
+            #[cfg(windows)]
+            let mut observed_exit = None;
 
             loop {
-                let first_event = match read_rx.recv().await {
-                    Some(event) => event,
-                    None => break,
+                let first_event = {
+                    #[cfg(windows)]
+                    {
+                        tokio::select! {
+                            event = read_rx.recv() => match event {
+                                Some(event) => event,
+                                None => break,
+                            },
+                            _ = exit_poll.tick(), if observed_exit.is_none() => {
+                                let mut session = child_session.lock().await;
+                                match session.exit_code() {
+                                    Ok(Some(code)) => {
+                                        observed_exit = Some(code);
+                                        let resources = session.take_windows_resources();
+                                        drop(session);
+                                        // ConPTY keeps its output pipe open until ClosePseudoConsole.
+                                        // Close off the reactor while this task continues draining data;
+                                        // EOF, rather than a quiet-period timer, marks the final output.
+                                        tokio::task::spawn_blocking(move || drop(resources));
+                                    }
+                                    Ok(None) => {}
+                                    Err(error) => { log_error!("查询 PTY 退出状态失败: {}", error); }
+                                }
+                                continue;
+                            }
+                        }
+                    }
+                    #[cfg(not(windows))]
+                    match read_rx.recv().await {
+                        Some(event) => event,
+                        None => break,
+                    }
                 };
 
                 let mut pending_exit = false;
@@ -330,13 +375,17 @@ impl PtyHandler {
 
                     // Reap the actual child. A PTY EOF can precede waitability briefly.
                     let mut code: i64 = -1;
-                    for _ in 0..100 {
-                        match child_session.lock().await.exit_code() {
-                            Ok(Some(status)) => { code = i64::from(status); break; }
-                            Err(_) => break,
-                            Ok(None) => {}
+                    #[cfg(windows)]
+                    if let Some(status) = observed_exit { code = i64::from(status); }
+                    if code == -1 {
+                        for _ in 0..100 {
+                            match child_session.lock().await.exit_code() {
+                                Ok(Some(status)) => { code = i64::from(status); break; }
+                                Err(_) => break,
+                                Ok(None) => {}
+                            }
+                            time::sleep(Duration::from_millis(10)).await;
                         }
-                        time::sleep(Duration::from_millis(10)).await;
                     }
                     // Send the exit event
                     let exit_response = ServerResponse::new(
@@ -392,12 +441,13 @@ impl PtyHandler {
         log_info!("销毁 PTY 会话: session_id={}", session_id);
         
         let mut sessions = self.sessions.lock().await;
-        if let Some(mut context) = sessions.remove(session_id) {
+        if let Some(context) = sessions.get_mut(session_id) {
             // Terminate the PTY process
             {
                 let mut session = context.session.lock().await;
-                let _ = session.kill();
+                session.kill().map_err(|error| RouterError::ModuleError(format!("销毁 PTY 会话失败: {}", error)))?;
             }
+            let mut context = sessions.remove(session_id).expect("session remains owned until kill succeeds");
             
             // End the reader task asynchronously without waiting for completion
             if let Some(task) = context.read_task.take() {
@@ -410,7 +460,8 @@ impl PtyHandler {
             log_info!("PTY 会话已销毁: session_id={}", session_id);
             Ok(())
         } else {
-            Err(RouterError::ModuleError(format!("SESSION_NOT_FOUND: {}", session_id)))
+            // A closed renderer or connection may repeat a successful destroy.
+            Ok(())
         }
     }
     
