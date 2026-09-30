@@ -65,7 +65,7 @@ export function TerminalWorkbench(props: TerminalWorkbenchProps) {
 				if (event.key === 'Escape') {
 					event.preventDefault(); event.stopPropagation(); closeDrawer();
 				} else if (event.key === 'Tab') {
-					const controls = Array.from(navigation.current?.querySelectorAll<HTMLElement>('button:not(:disabled), input, select, [tabindex="0"]') ?? []).filter((element) => !element.closest('[hidden]'));
+					const controls = Array.from(navigation.current?.querySelectorAll<HTMLElement>('button:not(:disabled), input, select, summary, [tabindex="0"]') ?? []).filter((element) => !element.closest('[hidden]'));
 					const first = controls[0], last = controls[controls.length - 1];
 					if (event.shiftKey && event.currentTarget.ownerDocument.activeElement === first) {
 						event.preventDefault(); last?.focus();

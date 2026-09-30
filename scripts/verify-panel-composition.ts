@@ -620,6 +620,7 @@ async function verifyOrcaRegression() {
 		header: h(TerminalHeader, { title: 'Fixture terminal', cwd: '/vault', status: 'unknown', search: () => {}, more: () => {}, sidebarToggle: () => change(width < 800 ? { drawerOpen: !state.drawerOpen } : { wideSidebarOpen: !state.wideSidebarOpen }) }),
 		history: h(HistorySidebar, { history, state, onStateChange: change }),
 		preview: h(HistoryPreview, { history, host, state, onStateChange: change }),
+		usage: h('details', {}, h('summary', {}, 'Vault consumption'), h('div', {}, 'Usage fixture')),
 	}), panel);
 	paint(); await wait();
 	assert.equal(panel.querySelector('.nand-agent-new-btn')?.closest('[hidden]'), null, 'New conversation remains available in history navigation');
@@ -663,6 +664,28 @@ async function verifyOrcaRegression() {
 	width = 600; activeObserver?.(); await wait();
 	panel.querySelector<HTMLButtonElement>('.terminal-navigation-toggle')!.click(); await wait();
 	assert.equal(state.drawerOpen, true); assert.equal(panel.querySelector('aside')?.getAttribute('role'), 'dialog');
+	const firstControl = panel.querySelector<HTMLButtonElement>('.terminal-drawer-close')!;
+	const usageSummary = panel.querySelector<HTMLElement>('.nand-agent-usage summary')!;
+	const drawerRoot = panel.querySelector<HTMLElement>('.terminal-workbench-shell')!;
+	const previousActive = Object.getOwnPropertyDescriptor(document, 'activeElement');
+	let focused: HTMLElement | undefined;
+	firstControl.focus = () => { focused = firstControl; };
+	usageSummary.focus = () => { focused = usageSummary; };
+	try {
+		Object.defineProperty(document, 'activeElement', { configurable: true, value: firstControl });
+		const backwards = new document.defaultView!.Event('keydown', { bubbles: true, cancelable: true });
+		Object.defineProperties(backwards, { key: { value: 'Tab' }, shiftKey: { value: true } });
+		drawerRoot.dispatchEvent(backwards);
+		assert.ok(focused === usageSummary, 'Shift+Tab from the first drawer control reaches the native usage summary');
+		Object.defineProperty(document, 'activeElement', { configurable: true, value: usageSummary });
+		const forwards = new document.defaultView!.Event('keydown', { bubbles: true, cancelable: true });
+		Object.defineProperty(forwards, 'key', { value: 'Tab' });
+		drawerRoot.dispatchEvent(forwards);
+		assert.ok(focused === firstControl, 'Tab from the native summary wraps to the first drawer control');
+	} finally {
+		if (previousActive) Object.defineProperty(document, 'activeElement', previousActive);
+		else Reflect.deleteProperty(document, 'activeElement');
+	}
 	panel.querySelector<HTMLButtonElement>('.terminal-drawer-close')!.click(); await wait(); assert.equal(state.drawerOpen, false);
 	assert.equal(panel.querySelector('.terminal-container'), xterm); assert.equal(xterm.firstChild, canvas);
 	for (const language of ['zh', 'en', 'zh'] as const) { setLanguage(language); paint(); assert.equal(panel.querySelector('.nand-agent-workbench-title')?.textContent, t('terminalAgent.workbench.title')); assert.equal(panel.querySelector('.terminal-container'), xterm); }
