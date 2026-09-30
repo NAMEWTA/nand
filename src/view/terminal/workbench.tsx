@@ -3,13 +3,13 @@ import { useEffect, useRef, useState } from 'preact/hooks';
 import { AGENT_CATALOG } from '../../core/agent-launch/catalog';
 import type { UsageSnapshot } from '../../core/agent-launch/types';
 import type { VaultSessionAgent } from '../../core/ai-vault/types';
-import { readUsageSnapshots, remainingPercent } from '../../platform/desktop/agents/usage';
+import { readUsageSnapshots, remainingPercent, usageStatusText } from '../../platform/desktop/agents/usage';
 import type { PtySession } from '../../platform/desktop/terminal/pty-session';
 import type { TerminalService } from '../../platform/desktop/terminal/terminal-service';
 import { usageContext } from '../../platform/obsidian/agents/usage-context';
 import type { NativeHistory } from '../../platform/obsidian/ai-vault/service';
 import type { HistoryPage, NativeSession, NativeUsage } from '../../platform/terminal-server/agent-data-client';
-import { getLanguage, t as sharedT } from '../../shared/i18n/index';
+import { getLanguage, onLanguageChanged, t as sharedT } from '../../shared/i18n/index';
 import { t } from '../../shared/i18n/terminal-accessor';
 import { UsageModal } from '../agent-usage/usage-modal';
 import { Icon } from '../primitives/Icon';
@@ -403,6 +403,8 @@ function UsageTotals({ usage }: { usage?: NativeUsage }) {
 	);
 }
 export function UsageFooter({ host, history }: { host: WorkbenchHost; history: NativeHistory }) {
+	const [, redraw] = useState(0);
+	useEffect(() => onLanguageChanged(() => redraw((n) => n + 1)), []);
 	const [snapshots, setSnapshots] = useState<UsageSnapshot[]>([]),
 		[usage, setUsage] = useState<NativeUsage>();
 	useEffect(() => {
@@ -456,7 +458,7 @@ export function UsageFooter({ host, history }: { host: WorkbenchHost; history: N
 				{snapshots
 					.map(
 						(s) =>
-							`${s.provider}: ${s.windows[0]?.usedPct !== null && s.windows[0] ? remainingPercent(s.windows[0]) + '%' : s.status}`,
+							`${s.provider}: ${s.windows[0]?.usedPct !== null && s.windows[0] ? remainingPercent(s.windows[0]) + '%' : usageStatusText(s)}`,
 					)
 					.join(' · ') || t('agents.usageTitle')}
 			</button>

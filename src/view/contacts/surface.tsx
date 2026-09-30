@@ -55,13 +55,16 @@ function Action({
 }
 function Markdown({ view, text, path }: { view: ContactsPanelHost; text: string; path: string }) {
 	const ref = useRef<HTMLDivElement>(null);
-	const markdown = text.trim() ? text : ct('noDetails');
 	useEffect(() => {
 		const host = ref.current;
-		if (!host) return;
-		return view.mountMarkdown(host, markdown, path);
-	}, [view, text, path, markdown]);
-	return <div className="nand-contacts-markdown markdown-rendered" ref={ref} />;
+		if (!host || !text.trim()) return;
+		return view.mountMarkdown(host, text, path);
+	}, [view, text, path]);
+	return text.trim() ? (
+		<div className="nand-contacts-markdown markdown-rendered" ref={ref} />
+	) : (
+		<p className="nand-contacts-muted nand-contacts-placeholder">{ct('noDetails')}</p>
+	);
 }
 function Section({ title, action, children }: { title: string; action?: ReactNode; children: ReactNode }) {
 	return (
@@ -409,8 +412,8 @@ export function ContactsSurface({ view }: { view: ContactsPanelHost }) {
 						<Icon name="search" className="nand-contacts-search-icon" />
 						<input
 							type="search"
-							aria-label={ct('search')}
-							placeholder={ct('search')}
+							aria-label={ct(query.kind === 'person' ? 'searchPeople' : 'searchCompanies')}
+							placeholder={ct(query.kind === 'person' ? 'searchPeople' : 'searchCompanies')}
 							value={query.search}
 							onInput={(event) => view.search(event.currentTarget.value)}
 						/>

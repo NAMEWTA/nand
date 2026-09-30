@@ -1,4 +1,5 @@
 import { useLayoutEffect, useRef, useState } from 'preact/hooks';
+import { resolveWidgetLabel } from '../../../core/dashboard/default-widget-label';
 import type { CountdownConfig } from '../../../core/dashboard/types';
 import { t } from '../../../shared/i18n';
 import { Icon } from '../../primitives/Icon';
@@ -26,6 +27,7 @@ function CountdownValue({ value, win }: { value: number; win: Window }) {
 }
 export function CountdownPanel({ config, win, edit }: CountdownPanelProps) {
 	const now = useWindowClock(win);
+	const label = resolveWidgetLabel(config, 'countdown');
 	const target = config.targetDate
 		? new Date(config.targetDate.includes('T') ? config.targetDate : config.targetDate + 'T00:00:00')
 		: null;
@@ -56,9 +58,9 @@ export function CountdownPanel({ config, win, edit }: CountdownPanelProps) {
 					<div class="dashboard-sidebar-countdown-placeholder">{t('countdown.setTarget')}</div>
 				) : (
 					<>
-						{config.label && (
+						{label && (
 							<div class="dashboard-sidebar-countdown-until">
-								{t('countdown.untilLabel', { label: config.label })}
+								{t('countdown.untilLabel', { label })}
 							</div>
 						)}
 						{value <= 0 ? (

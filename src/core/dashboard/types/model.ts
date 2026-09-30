@@ -624,6 +624,8 @@ export interface CountdownConfig {
 	automation?: AutomationDefinition;
 	id: string;
 	label: string;
+	/** Follow the localized example name until the user edits it. */
+	defaultLabel?: boolean;
 	targetDate: string;
 	displayMode: 'days' | 'hours' | 'minutes';
 	reminderDays: number;
@@ -678,6 +680,8 @@ export interface AnniversaryConfig {
 	automation?: AutomationDefinition;
 	id: string;
 	label: string;
+	/** Follow the localized example name until the user edits it. */
+	defaultLabel?: boolean;
 	/** Historical date the elapsed time is measured from (YYYY-MM-DD or
 	 *  YYYY-MM-DDTHH:mm). */
 	startDate: string;

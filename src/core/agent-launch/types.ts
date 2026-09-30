@@ -39,6 +39,8 @@ export interface UsageWindow {
 	resetAt: string | null;
 }
 
+export type UsageStatusKey = 'quotaUnsupported' | 'notSignedIn' | 'expired' | 'readOk' | 'noNumbers' | 'readFailed';
+
 export interface UsageSnapshot {
 	checkedAt?: number;
 	stale?: boolean;
@@ -47,6 +49,8 @@ export interface UsageSnapshot {
 	provider: string;
 	account: string | null;
 	status: string;
+	/** Known local states are translated when displayed; provider errors retain their original text. */
+	statusKey?: UsageStatusKey;
 	failed: boolean;
 	windows: UsageWindow[];
 }

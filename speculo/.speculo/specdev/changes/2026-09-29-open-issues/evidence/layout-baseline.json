@@ -1,0 +1,50 @@
+{
+  "terminal": {
+    "count": 1,
+    "text": "智能体工作台\n＋ 新建会话\n自动化\n通知中心\n打开的会话\n终端\n#ab840a8c\n状态未知\n拖到这里插入文件的绝对路径\nroot@wta-ubuntu:/tmp/nand-issue-audit/runtime/vault#  \n当前库历史\n未归档历史\n收藏\n归档\n\n当前库暂无会话\n\n当前库消耗 · 原生 token"
+  },
+  "widths": [
+    {
+      "width": 560,
+      "workbench": 516,
+      "terminal": 366,
+      "status": 0
+    },
+    {
+      "width": 640,
+      "workbench": 596,
+      "terminal": 446,
+      "status": 0
+    },
+    {
+      "width": 800,
+      "workbench": 756,
+      "terminal": 198,
+      "status": 79
+    },
+    {
+      "width": 900,
+      "workbench": 856,
+      "terminal": 298,
+      "status": 79
+    },
+    {
+      "width": 1000,
+      "workbench": 956,
+      "terminal": 398,
+      "status": 79
+    },
+    {
+      "width": 1100,
+      "workbench": 1056,
+      "terminal": 498,
+      "status": 79
+    },
+    {
+      "width": 1280,
+      "workbench": 1236,
+      "terminal": 678,
+      "status": 79
+    }
+  ]
+}

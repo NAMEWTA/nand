@@ -684,6 +684,7 @@ export default class DashboardPlugin extends Plugin {
 					{
 						id: 'cd-default',
 						label: t('defaults.countdownLabel'),
+						defaultLabel: true,
 						targetDate: `${new Date().getFullYear()}-12-31T23:55`,
 						displayMode: 'hours',
 						reminderDays: 0,
@@ -705,6 +706,7 @@ export default class DashboardPlugin extends Plugin {
 					{
 						id: 'av-default',
 						label: t('defaults.anniversaryLabel'),
+						defaultLabel: true,
 						startDate: oneYearAgoIso(),
 						precision: 'ymd' as const,
 						annualReminder: false,

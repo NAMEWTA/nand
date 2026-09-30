@@ -28,29 +28,17 @@ export function usageBarVisible(plugin: UsageBarHost): boolean {
 	return enabledUsageAgents(plugin).length > 0;
 }
 
-/**
- * Paint the usage status item. Returns the snapshots that should be kept,
- * or null when the bar is hidden or a result arrived after the host went inactive.
- * The "用量" label is written before the network read.
- */
-export async function paintUsageBar(
+/** Repaint cached data without changing the polling schedule or reading providers. */
+export function renderUsageBar(
 	status: UsageBarElement,
 	plugin: UsageBarHost,
-	readSnapshots: (ids: readonly AgentId[]) => Promise<UsageSnapshot[]>,
-): Promise<UsageSnapshot[] | null> {
+	snapshots: readonly UsageSnapshot[],
+): boolean {
 	const show = usageBarVisible(plugin);
 	status.toggleClass('is-hidden', !show);
 	status.replaceChildren();
-	if (!show) return null;
-	status.createSpan({ cls: 'terminal-usage-rest', text: t('terminalAgent.agents.usageChip') });
-	const latest = await readSnapshots(enabledUsageAgents(plugin));
-	if (plugin.isActive && !plugin.isActive()) {
-		status.toggleClass('is-hidden', true);
-		status.replaceChildren();
-		return null;
-	}
-	status.replaceChildren();
-	const chips = latest.flatMap((snapshot) => {
+	if (!show) return false;
+	const chips = snapshots.flatMap((snapshot) => {
 		const rest = formatUsageChip(snapshot);
 		return rest ? [{ provider: snapshot.provider, rest }] : [];
 	});
@@ -63,5 +51,20 @@ export async function paintUsageBar(
 			item.createSpan({ cls: 'terminal-usage-rest', text: chip.rest });
 		}
 	}
-	return latest;
+	return true;
+}
+
+/**
+ * Paint the usage status item. Returns the snapshots that should be kept,
+ * or null when the bar is hidden or a result arrived after the host went inactive.
+ * The "用量" label is written before the network read.
+ */
+export async function paintUsageBar(
+	status: UsageBarElement,
+	plugin: UsageBarHost,
+	readSnapshots: (ids: readonly AgentId[]) => Promise<UsageSnapshot[]>,
+): Promise<UsageSnapshot[] | null> {
+	if (!renderUsageBar(status, plugin, [])) return null;
+	const latest = await readSnapshots(enabledUsageAgents(plugin));
+	return renderUsageBar(status, plugin, latest) ? latest : null;
 }

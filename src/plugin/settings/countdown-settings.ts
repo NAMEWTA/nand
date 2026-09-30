@@ -1,4 +1,5 @@
 import { Setting } from 'obsidian';
+import { resolveWidgetLabel } from '../../core/dashboard/default-widget-label';
 import type { CountdownConfig } from '../../core/dashboard/types/index';
 import { t } from '../../shared/i18n/index';
 import { CountdownSettingsModal } from '../../view/dashboard/widgets/countdown-modal';
@@ -8,7 +9,7 @@ export function renderCountdownList(this: DashboardSettingTab, containerEl: HTML
 	const list = this.plugin.settings.countdowns ?? [];
 
 	for (const cd of list) {
-		const summary = cd.label || cd.targetDate || t('countdown.untitled');
+		const summary = resolveWidgetLabel(cd, 'countdown') || cd.targetDate || t('countdown.untitled');
 		new Setting(containerEl)
 			.setName(summary)
 			.setDesc(

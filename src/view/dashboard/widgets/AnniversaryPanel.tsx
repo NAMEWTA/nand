@@ -1,4 +1,5 @@
 import { formatElapsed, parseAnniversaryDate } from '../../../core/anniversaries/calendar';
+import { resolveWidgetLabel } from '../../../core/dashboard/default-widget-label';
 import type { AnniversaryConfig } from '../../../core/dashboard/types';
 import { t } from '../../../shared/i18n';
 import { Icon } from '../../primitives/Icon';
@@ -21,7 +22,9 @@ export function AnniversaryPanel({ config, win, edit }: { config: AnniversaryCon
 					<Icon name="settings" />
 				</button>
 			)}
-			<div class="dashboard-sidebar-anniversary-title">{config.label || t('anniversary.unnamed')}</div>
+			<div class="dashboard-sidebar-anniversary-title">
+				{resolveWidgetLabel(config, 'anniversary') || t('anniversary.unnamed')}
+			</div>
 			<div class="dashboard-sidebar-anniversary-value">
 				{start ? formatElapsed(start, now, config.precision) : '--'}
 			</div>

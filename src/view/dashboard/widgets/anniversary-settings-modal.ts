@@ -1,5 +1,6 @@
 import { App, Modal, Setting } from 'obsidian';
 import { formatElapsed, parseAnniversaryDate } from '../../../core/anniversaries/calendar';
+import { resolveWidgetLabel, usesDefaultWidgetLabel } from '../../../core/dashboard/default-widget-label';
 import type { AnniversaryConfig } from '../../../core/dashboard/types/index';
 import { t } from '../../../shared/i18n/index';
 import { applyModalTheme } from '../appearance/modal-theme';
@@ -15,7 +16,11 @@ export class AnniversarySettingsModal extends Modal {
 
 	constructor(app: App, cfg: AnniversaryConfig, onSave: (cfg: AnniversaryConfig) => void) {
 		super(app);
-		this.cfg = { ...cfg };
+		this.cfg = {
+			...cfg,
+			label: resolveWidgetLabel(cfg, 'anniversary'),
+			defaultLabel: usesDefaultWidgetLabel(cfg, 'anniversary'),
+		};
 		this.onSave = onSave;
 	}
 
@@ -41,6 +46,7 @@ export class AnniversarySettingsModal extends Modal {
 					.setValue(this.cfg.label)
 					.onChange((v) => {
 						this.cfg.label = v.trim();
+						this.cfg.defaultLabel = false;
 					}),
 			);
 

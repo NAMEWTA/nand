@@ -4,6 +4,8 @@ import { DEFAULT_BANNER } from './syntax';
 
 export function generateDefaultMarkdown(): string {
 	const today = new Date();
+	const memoName = t('renderer.typeMemo');
+	const todoName = t('renderer.typeTodo');
 	const dateStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
 
 	return serialize({
@@ -11,7 +13,7 @@ export function generateDefaultMarkdown(): string {
 		quickActions: [],
 		columns: [
 			{
-				name: 'Memo',
+				name: memoName,
 				color: '#f59e0b',
 				sectionType: 'memo',
 				cards: [
@@ -19,7 +21,7 @@ export function generateDefaultMarkdown(): string {
 						id: 'demo-memo-1',
 						title: t('default.memoTitle', { date: dateStr }),
 						type: 'generic',
-						column: 'Memo',
+						column: memoName,
 						body: t('default.memoBody'),
 						tasks: [],
 						docs: [],
@@ -42,7 +44,7 @@ export function generateDefaultMarkdown(): string {
 						id: 'demo-memo-path',
 						title: t('default.memoPathTitle'),
 						type: 'generic',
-						column: 'Memo',
+						column: memoName,
 						body: t('default.memoPathBody'),
 						tasks: [],
 						docs: [],
@@ -65,7 +67,7 @@ export function generateDefaultMarkdown(): string {
 						id: 'demo-memo-rename',
 						title: t('default.memoRenameTitle'),
 						type: 'generic',
-						column: 'Memo',
+						column: memoName,
 						body: t('default.memoRenameBody'),
 						tasks: [],
 						docs: [],
@@ -87,7 +89,7 @@ export function generateDefaultMarkdown(): string {
 				],
 			},
 			{
-				name: 'Todo',
+				name: todoName,
 				color: '#6366f1',
 				sectionType: 'todo',
 				cards: [
@@ -95,7 +97,7 @@ export function generateDefaultMarkdown(): string {
 						id: 'demo-todo-1',
 						title: t('default.todoTitle1'),
 						type: 'task',
-						column: 'Todo',
+						column: todoName,
 						body: '',
 						tasks: [
 							{ text: t('default.todo1'), checked: false },
@@ -123,7 +125,7 @@ export function generateDefaultMarkdown(): string {
 						id: 'demo-todo-2',
 						title: t('default.todoTitle2'),
 						type: 'task',
-						column: 'Todo',
+						column: todoName,
 						body: '',
 						tasks: [
 							{ text: t('default.guide1'), checked: false },

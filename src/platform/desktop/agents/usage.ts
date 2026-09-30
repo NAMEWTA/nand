@@ -44,6 +44,7 @@ export async function readUsageSnapshots(
 					provider: agent.title,
 					account: null,
 					status: t('terminalAgent.agents.quotaUnsupported'),
+					statusKey: 'quotaUnsupported',
 					failed: false,
 					windows: [],
 					checkedAt: Date.now(),
@@ -68,7 +69,7 @@ export async function readUsageSnapshots(
 			safeRead(id, () => read(home)).then((snapshot) => {
 				const previous = lastKnown.get(key);
 				if (snapshot.failed && previous)
-					return { ...previous, failed: true, stale: true, status: snapshot.status };
+					return { ...previous, failed: true, stale: true, status: snapshot.status, statusKey: snapshot.statusKey };
 				const next = {
 					...snapshot,
 					account: account || snapshot.account,
@@ -109,19 +110,29 @@ export function formatUsageChip(snapshot: UsageSnapshot): string | null {
 	return `${remainingPercent(quota)}%`;
 }
 
+export function usageStatusText(snapshot: UsageSnapshot): string {
+	return snapshot.statusKey ? t(`terminalAgent.agents.${snapshot.statusKey}`) : snapshot.status;
+}
+
 async function safeRead(agentId: AgentId, read: () => Promise<ProviderSnapshot>): Promise<UsageSnapshot> {
 	const provider = getAgent(agentId).title;
 	try {
 		const snapshot = await read();
 		return { ...snapshot, agentId, provider, failed: false };
 	} catch (error) {
-		const message =
+		const statusKey =
 			error instanceof Error && /HTTP (401|403)/.test(error.message)
-				? t('terminalAgent.agents.expired')
+				? 'expired'
+				: error instanceof Error
+					? undefined
+					: 'readFailed';
+		const message =
+			statusKey
+				? t(`terminalAgent.agents.${statusKey}`)
 				: error instanceof Error
 					? error.message
 					: t('terminalAgent.agents.readFailed');
-		return { agentId, provider, account: null, status: message, failed: true, windows: [] };
+		return { agentId, provider, account: null, status: message, statusKey, failed: true, windows: [] };
 	}
 }
 
@@ -135,7 +146,7 @@ async function readClaudeUsage(home?: string): Promise<ProviderSnapshot> {
 	const oauth = asRecord(credentials?.claudeAiOauth);
 	const token = typeof oauth?.accessToken === 'string' ? oauth.accessToken : '';
 	if (!token) {
-		return { provider: 'Claude', account: null, status: t('terminalAgent.agents.notSignedIn'), windows: [] };
+		return { provider: 'Claude', account: null, status: t('terminalAgent.agents.notSignedIn'), statusKey: 'notSignedIn', windows: [] };
 	}
 	const data = await requestJson('https://api.anthropic.com/api/oauth/usage', {
 		Authorization: `Bearer ${token}`,
@@ -151,6 +162,7 @@ async function readClaudeUsage(home?: string): Promise<ProviderSnapshot> {
 		provider: 'Claude',
 		account: null,
 		status: windows.length > 0 ? t('terminalAgent.agents.readOk') : t('terminalAgent.agents.noNumbers'),
+		statusKey: windows.length > 0 ? 'readOk' : 'noNumbers',
 		windows,
 	};
 }
@@ -198,7 +210,7 @@ async function readCodexUsage(selectedHome?: string): Promise<ProviderSnapshot> 
 	const tokens = asRecord(auth?.tokens);
 	const accessToken = typeof tokens?.access_token === 'string' ? tokens.access_token : '';
 	if (!accessToken) {
-		return { provider: 'Codex', account: null, status: t('terminalAgent.agents.notSignedIn'), windows: [] };
+		return { provider: 'Codex', account: null, status: t('terminalAgent.agents.notSignedIn'), statusKey: 'notSignedIn', windows: [] };
 	}
 	const headers: Record<string, string> = {
 		Authorization: `Bearer ${accessToken}`,
@@ -221,6 +233,7 @@ async function readCodexUsage(selectedHome?: string): Promise<ProviderSnapshot> 
 		provider: 'Codex',
 		account: plan,
 		status: windows.length > 0 ? t('terminalAgent.agents.readOk') : t('terminalAgent.agents.noNumbers'),
+		statusKey: windows.length > 0 ? 'readOk' : 'noNumbers',
 		windows,
 	};
 }
@@ -228,10 +241,10 @@ async function readCodexUsage(selectedHome?: string): Promise<ProviderSnapshot> 
 async function readGrokUsage(): Promise<ProviderSnapshot> {
 	const session = readGrokSession();
 	if (!session) {
-		return { provider: 'Grok', account: null, status: t('terminalAgent.agents.notSignedIn'), windows: [] };
+		return { provider: 'Grok', account: null, status: t('terminalAgent.agents.notSignedIn'), statusKey: 'notSignedIn', windows: [] };
 	}
 	if (session.expiresAtMs !== null && session.expiresAtMs - Date.now() <= 5 * 60 * 1000) {
-		return { provider: 'Grok', account: session.email, status: t('terminalAgent.agents.expired'), windows: [] };
+		return { provider: 'Grok', account: session.email, status: t('terminalAgent.agents.expired'), statusKey: 'expired', windows: [] };
 	}
 	const headers: Record<string, string> = {
 		Authorization: `Bearer ${session.accessToken}`,
@@ -258,6 +271,7 @@ async function readGrokUsage(): Promise<ProviderSnapshot> {
 		provider: 'Grok',
 		account: session.email,
 		status: windows.length > 0 ? t('terminalAgent.agents.readOk') : t('terminalAgent.agents.noNumbers'),
+		statusKey: windows.length > 0 ? 'readOk' : 'noNumbers',
 		windows,
 	};
 }
@@ -459,9 +473,9 @@ async function readGeminiUsage(): Promise<ProviderSnapshot> {
 	const token = typeof creds?.access_token === 'string' ? creds.access_token : '';
 	const expiry = typeof creds?.expiry_date === 'number' ? creds.expiry_date : 0;
 	if (!token)
-		return { provider: 'Gemini', account: null, status: t('terminalAgent.agents.notSignedIn'), windows: [] };
+		return { provider: 'Gemini', account: null, status: t('terminalAgent.agents.notSignedIn'), statusKey: 'notSignedIn', windows: [] };
 	if (expiry > 0 && expiry < Date.now()) {
-		return { provider: 'Gemini', account: null, status: t('terminalAgent.agents.expired'), windows: [] };
+		return { provider: 'Gemini', account: null, status: t('terminalAgent.agents.expired'), statusKey: 'expired', windows: [] };
 	}
 	const headers = {
 		Authorization: `Bearer ${token}`,
@@ -477,7 +491,7 @@ async function readGeminiUsage(): Promise<ProviderSnapshot> {
 	);
 	const project = typeof loaded?.cloudaicompanionProject === 'string' ? loaded.cloudaicompanionProject : '';
 	if (!project)
-		return { provider: 'Gemini', account: null, status: t('terminalAgent.agents.noNumbers'), windows: [] };
+		return { provider: 'Gemini', account: null, status: t('terminalAgent.agents.noNumbers'), statusKey: 'noNumbers', windows: [] };
 	const quota = await requestRaw(
 		'https://cloudcode-pa.googleapis.com/v1internal:retrieveUserQuota',
 		headers,
@@ -502,6 +516,7 @@ async function readGeminiUsage(): Promise<ProviderSnapshot> {
 		provider: 'Gemini',
 		account: null,
 		status: tightest ? t('terminalAgent.agents.readOk') : t('terminalAgent.agents.noNumbers'),
+		statusKey: tightest ? 'readOk' : 'noNumbers',
 		windows,
 	};
 }
@@ -516,9 +531,9 @@ async function readKimiUsage(): Promise<ProviderSnapshot> {
 	const creds = readJson(path.join(home, 'credentials', 'kimi-code.json'));
 	const token = typeof creds?.access_token === 'string' ? creds.access_token : '';
 	const expires = typeof creds?.expires_at === 'number' ? creds.expires_at : 0;
-	if (!token) return { provider: 'Kimi', account: null, status: t('terminalAgent.agents.notSignedIn'), windows: [] };
+	if (!token) return { provider: 'Kimi', account: null, status: t('terminalAgent.agents.notSignedIn'), statusKey: 'notSignedIn', windows: [] };
 	if (expires - Math.floor(Date.now() / 1000) <= 5) {
-		return { provider: 'Kimi', account: null, status: t('terminalAgent.agents.expired'), windows: [] };
+		return { provider: 'Kimi', account: null, status: t('terminalAgent.agents.expired'), statusKey: 'expired', windows: [] };
 	}
 	const base = (runtimeProcess().env.KIMI_CODE_BASE_URL ?? 'https://api.kimi.com/coding/v1').replace(/\/$/, '');
 	const data = asRecord(
@@ -543,6 +558,7 @@ async function readKimiUsage(): Promise<ProviderSnapshot> {
 		provider: 'Kimi',
 		account: null,
 		status: windows.length > 0 ? t('terminalAgent.agents.readOk') : t('terminalAgent.agents.noNumbers'),
+		statusKey: windows.length > 0 ? 'readOk' : 'noNumbers',
 		windows,
 	};
 }
@@ -561,7 +577,7 @@ function kimiWindow(detail: Record<string, unknown> | null, name: string): Usage
 async function readOpenCodeUsage(): Promise<ProviderSnapshot> {
 	const key = readOpenCodeGoKey();
 	if (!key)
-		return { provider: 'OpenCode', account: null, status: t('terminalAgent.agents.notSignedIn'), windows: [] };
+		return { provider: 'OpenCode', account: null, status: t('terminalAgent.agents.notSignedIn'), statusKey: 'notSignedIn', windows: [] };
 	const data = asRecord(
 		await requestRaw('https://opencode.ai/zen/go/v1/usage', {
 			Authorization: `Bearer ${key}`,
@@ -578,6 +594,7 @@ async function readOpenCodeUsage(): Promise<ProviderSnapshot> {
 		provider: 'OpenCode',
 		account: null,
 		status: windows.length > 0 ? t('terminalAgent.agents.readOk') : t('terminalAgent.agents.noNumbers'),
+		statusKey: windows.length > 0 ? 'readOk' : 'noNumbers',
 		windows,
 	};
 }
@@ -611,7 +628,7 @@ function percentWindow(name: string, record: Record<string, unknown> | null): Us
 
 async function readMiniMaxUsage(): Promise<ProviderSnapshot> {
 	const key = readMiniMaxKey();
-	if (!key) return { provider: 'MiniMax', account: null, status: t('terminalAgent.agents.notSignedIn'), windows: [] };
+	if (!key) return { provider: 'MiniMax', account: null, status: t('terminalAgent.agents.notSignedIn'), statusKey: 'notSignedIn', windows: [] };
 	const data = asRecord(
 		await requestRaw('https://platform.minimax.io/v1/api/openplatform/coding_plan/remains', {
 			Authorization: `Bearer ${key}`,
@@ -635,6 +652,7 @@ async function readMiniMaxUsage(): Promise<ProviderSnapshot> {
 		provider: 'MiniMax',
 		account: null,
 		status: windows.length > 0 ? t('terminalAgent.agents.readOk') : t('terminalAgent.agents.noNumbers'),
+		statusKey: windows.length > 0 ? 'readOk' : 'noNumbers',
 		windows,
 	};
 }

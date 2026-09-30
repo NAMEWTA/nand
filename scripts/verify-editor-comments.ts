@@ -17,6 +17,9 @@ import { CommentStore, registerCommentStore, type CommentFs } from '../src/core/
 import { El } from './mini-dom';
 import { Menu } from './obsidian-stub';
 import { setLanguage } from '../src/shared/i18n/runtime';
+import { createEditorHost } from '../src/plugin/modules/editor/host/host';
+import { renderEditorSettings } from '../src/plugin/settings/editor-settings';
+import { Setting } from './obsidian-stub';
 
 const doc = '---\ntitle: x\n---\n\nHello prefix TARGET suffix tail.\n\n```\ncode TARGET\n```\n\nAfter.';
 
@@ -446,6 +449,15 @@ const terminalSource = fs.readFileSync(path.join(root, 'src/view/terminal/termin
 assert.match(terminalSource, /TERMINAL_VIEW_TYPE = 'terminal-view'/);
 
 const commentCss = fs.readFileSync(path.join(root, 'styles.css'), 'utf8');
+const availableDomains = createEditorHost({ app: { vault: { adapter: {} } } } as never).domains();
+assert.deepEqual(availableDomains.map((domain) => domain.id), ['comments'], 'Only implemented editor domains are exposed');
+for (const language of ['zh', 'en'] as const) {
+	setLanguage(language);
+	const before = Setting.created.length;
+	renderEditorSettings.call({ plugin: { settings: { editorWorkbench: { highlightEnabled: true, popoverEnabled: true } } } } as never, new El('div') as never);
+	assert.equal(Setting.created.slice(before).some((setting) => setting.dropdowns.length > 0), false, 'Settings cannot select a hidden placeholder');
+}
+setLanguage('zh');
 const popoverAt = commentCss.indexOf('.nand-editor-comment-popover {');
 assert.equal(popoverAt >= 0, true);
 const popoverRule = commentCss.slice(popoverAt, commentCss.indexOf('}', popoverAt));

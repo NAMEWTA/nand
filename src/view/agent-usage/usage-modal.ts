@@ -1,6 +1,6 @@
 import { Modal, type App } from 'obsidian';
 import type { UsageSnapshot, UsageWindow } from '../../core/agent-launch/types';
-import { remainingPercent } from '../../platform/desktop/agents/usage';
+import { remainingPercent, usageStatusText } from '../../platform/desktop/agents/usage';
 import { t } from '../../shared/i18n/terminal-accessor';
 import { getLanguage } from '../../shared/i18n';
 
@@ -32,14 +32,14 @@ export class UsageModal extends Modal {
 			const title = snapshot.account ? `${snapshot.provider} · ${snapshot.account}` : snapshot.provider;
 			card.createEl('h3', { text: title });
 			if (snapshot.stale)
-				card.createEl('p', { cls: 'terminal-usage-stale', text: `${t('agents.usageStale')} · ${snapshot.status}` });
+				card.createEl('p', { cls: 'terminal-usage-stale', text: `${t('agents.usageStale')} · ${usageStatusText(snapshot)}` });
 			if (snapshot.checkedAt)
 				card.createEl('small', {
 					cls: 'terminal-usage-checked',
 					text: `${t('agents.usageUpdated')} ${dateTime(snapshot.checkedAt)}`,
 				});
 			if (snapshot.windows.length === 0) {
-				card.createEl('p', { cls: 'terminal-usage-status', text: snapshot.status });
+				card.createEl('p', { cls: 'terminal-usage-status', text: usageStatusText(snapshot) });
 				continue;
 			}
 			for (const window of snapshot.windows) {

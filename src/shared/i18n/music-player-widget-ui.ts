@@ -70,8 +70,6 @@ export const messages = {
 		'countdown.days': 'days',
 		'countdown.add': 'Add countdown',
 		'countdown.untitled': 'Untitled countdown',
-		'defaults.countdownLabel': 'Countdown to New Year',
-		'defaults.anniversaryLabel': 'Anniversary',
 		'weread.configure': 'Configure Weread',
 		'weread.viewLabel': 'View',
 		'weread.viewShelf': 'Bookshelf',

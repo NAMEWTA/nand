@@ -1,0 +1,147 @@
+{
+  "passed": true,
+  "rows": [
+    {
+      "issue": 58,
+      "lang": "zh",
+      "defaults": {
+        "file": "Issuedefaultszh.md",
+        "text": "---\ndashboard: true\nbanner:\n  quote: \"The mind is everything. What you think you become.\"\n  author: \"Buddha\"\n  image: \"https://images.pexels.com/photos/2307638/pexels-photo-2307638.jpeg\"\n  quoteFont: \"Didot,\\\"Bodoni MT\\\",Georgia,serif\"\n  images:\n    - \"https://images.pexels.com/photos/2307638/pexels-photo-2307638.jpeg\"\n    - \"https://images.pexels.com/photos/10664504/pexels-photo-10664504.jpeg\"\ncolumns:\n  - name: 备忘\n    color: \"#f59e0b\"\n    type: memo\n  - name: 待办\n    color: \"#6366f1\"\n    type: todo\n  - name: Projects\n    color: \"#10b981\"\n    type: projects\n  - name: Library\n    color: \"#8b5cf6\"\n    type: projects\n---\n\n## 备忘\n\n### 2026-09-29 备忘\nid: demo-memo-1\ntype: generic\n欢迎使用 NAND。点击此处编辑你的第一条备忘。\n\n### 提示：Dashboard 文件路径\nid: demo-memo-path\ntype: generic\n你可以在设置里的 NAND 中修改看板文件路径。\n\n### 提示：重命名分区\nid: demo-memo-rename\ntype: generic\n双击分区标题即可重命名分区。\n\n## 待办\n\n### 快速上手\nid: demo-todo-1\ntype: task\n- [ ] 尝试添加一张新卡片\n- [ ] 在不同分区之间拖拽卡片\n- [ ] 编辑 Banner 区的名言\n- [ ] 添加一个快捷链接\n\n### 界面操作指南\nid: demo-todo-2\ntype: task\n- [ ] 点击左侧隐藏条拉出左侧栏\n- [ ] 点击图钉按钮取消固定左侧栏\n- [ ] 点击 Banner 区的书签按钮收起 Banner\n- [ ] 在设置中开启更多小组件\n\n## Projects\n\n### 我的第一个项目\nid: demo-project-1\ntype: project\n\n## Library\n\n### Reading\nid: demo-lib-reading\ntype: project\n\n### To Read\nid: demo-lib-toread\ntype: project\n\n### Done\nid: demo-lib-done\ntype: project\n",
+        "titles": [
+          "备忘",
+          "待办",
+          "Projects",
+          "Library"
+        ]
+      }
+    },
+    {
+      "issue": 58,
+      "lang": "en",
+      "defaults": {
+        "file": "Issuedefaultsen.md",
+        "text": "---\ndashboard: true\nbanner:\n  quote: \"The mind is everything. What you think you become.\"\n  author: \"Buddha\"\n  image: \"https://images.pexels.com/photos/2307638/pexels-photo-2307638.jpeg\"\n  quoteFont: \"Didot,\\\"Bodoni MT\\\",Georgia,serif\"\n  images:\n    - \"https://images.pexels.com/photos/2307638/pexels-photo-2307638.jpeg\"\n    - \"https://images.pexels.com/photos/10664504/pexels-photo-10664504.jpeg\"\ncolumns:\n  - name: Memo\n    color: \"#f59e0b\"\n    type: memo\n  - name: Todo\n    color: \"#6366f1\"\n    type: todo\n  - name: Projects\n    color: \"#10b981\"\n    type: projects\n  - name: Library\n    color: \"#8b5cf6\"\n    type: projects\n---\n\n## Memo\n\n### 2026-09-29 memo\nid: demo-memo-1\ntype: generic\nWelcome to NAND. Click here to edit your first memo.\n\n### Tip: Dashboard File Path\nid: demo-memo-path\ntype: generic\nYou can change the board file path in Settings > NAND.\n\n### Tip: Rename Sections\nid: demo-memo-rename\ntype: generic\nDouble-click a section title to rename it.\n\n## Todo\n\n### Getting Started\nid: demo-todo-1\ntype: task\n- [ ] Try adding a new card\n- [ ] Drag cards between sections\n- [ ] Edit the banner quote\n- [ ] Add a quick link\n\n### Interface Guide\nid: demo-todo-2\ntype: task\n- [ ] Click the left edge strip to open the sidebar\n- [ ] Click the pin button to unpin the sidebar\n- [ ] Click the bookmark button in Banner to collapse the banner\n- [ ] Enable more widgets in Settings\n\n## Projects\n\n### My First Project\nid: demo-project-1\ntype: project\n\n## Library\n\n### Reading\nid: demo-lib-reading\ntype: project\n\n### To Read\nid: demo-lib-toread\ntype: project\n\n### Done\nid: demo-lib-done\ntype: project\n",
+        "titles": [
+          "Memo",
+          "Todo",
+          "Projects",
+          "Library"
+        ]
+      }
+    },
+    {
+      "issue": 58,
+      "lang": "zh",
+      "custom": {
+        "countdown": {
+          "id": "cd-default",
+          "label": "Personal countdown",
+          "targetDate": "2026-12-31T23:55",
+          "displayMode": "hours",
+          "reminderDays": 0,
+          "background": {
+            "image": "https://images.pexels.com/photos/31409439/pexels-photo-31409439.jpeg",
+            "opacity": 100,
+            "dim": 0,
+            "blur": 0,
+            "foreground": "light"
+          },
+          "defaultLabel": false
+        },
+        "anniversary": {
+          "id": "av-default",
+          "label": "My anniversary",
+          "startDate": "2025-09-29",
+          "precision": "ymd",
+          "annualReminder": false,
+          "background": {
+            "image": "https://images.pexels.com/photos/10254198/pexels-photo-10254198.jpeg",
+            "opacity": 100,
+            "dim": 20,
+            "blur": 0,
+            "foreground": "light"
+          },
+          "defaultLabel": false
+        },
+        "countdownText": "距离Personal countdown还有",
+        "anniversaryText": "My anniversary"
+      }
+    },
+    {
+      "issue": 58,
+      "lang": "en",
+      "custom": {
+        "countdown": {
+          "id": "cd-default",
+          "label": "Personal countdown",
+          "targetDate": "2026-12-31T23:55",
+          "displayMode": "hours",
+          "reminderDays": 0,
+          "background": {
+            "image": "https://images.pexels.com/photos/31409439/pexels-photo-31409439.jpeg",
+            "opacity": 100,
+            "dim": 0,
+            "blur": 0,
+            "foreground": "light"
+          },
+          "defaultLabel": false
+        },
+        "anniversary": {
+          "id": "av-default",
+          "label": "My anniversary",
+          "startDate": "2025-09-29",
+          "precision": "ymd",
+          "annualReminder": false,
+          "background": {
+            "image": "https://images.pexels.com/photos/10254198/pexels-photo-10254198.jpeg",
+            "opacity": 100,
+            "dim": 20,
+            "blur": 0,
+            "foreground": "light"
+          },
+          "defaultLabel": false
+        },
+        "countdownText": "Until Personal countdown",
+        "anniversaryText": "My anniversary"
+      }
+    },
+    {
+      "issue": 58,
+      "lang": "zh",
+      "custom": {
+        "countdown": {
+          "id": "cd-default",
+          "label": "Personal countdown",
+          "targetDate": "2026-12-31T23:55",
+          "displayMode": "hours",
+          "reminderDays": 0,
+          "background": {
+            "image": "https://images.pexels.com/photos/31409439/pexels-photo-31409439.jpeg",
+            "opacity": 100,
+            "dim": 0,
+            "blur": 0,
+            "foreground": "light"
+          },
+          "defaultLabel": false
+        },
+        "anniversary": {
+          "id": "av-default",
+          "label": "My anniversary",
+          "startDate": "2025-09-29",
+          "precision": "ymd",
+          "annualReminder": false,
+          "background": {
+            "image": "https://images.pexels.com/photos/10254198/pexels-photo-10254198.jpeg",
+            "opacity": 100,
+            "dim": 20,
+            "blur": 0,
+            "foreground": "light"
+          },
+          "defaultLabel": false
+        },
+        "countdownText": "距离Personal countdown还有",
+        "anniversaryText": "My anniversary"
+      }
+    }
+  ]
+}

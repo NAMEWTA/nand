@@ -26,33 +26,35 @@ export function HabitPanel({ rows, toggle, add, backfill, statistics, background
 					<span class="dashboard-sidebar-habit-title-text">{t('habit.title')}</span>
 				</div>
 				<div class="dashboard-sidebar-habit-count">{done > 0 ? `${done}/${rows.length}` : ''}</div>
-				<div class="dashboard-sidebar-habit-top-spacer" />
-				{[
-					{ label: 'habit.backfillTitle', icon: 'history', action: backfill },
-					{ label: 'habit.newTitle', icon: 'plus', action: add },
-					{ label: 'habit.statsTitle', icon: 'bar-chart-2', action: statistics },
-				].map((item) => (
-					<div
-						key={item.label}
-						class="dashboard-sidebar-habit-icon-btn"
-						role="button"
-						tabIndex={0}
-						aria-label={t(item.label)}
-						onClick={(e) => {
-							e.stopPropagation();
-							item.action();
-						}}
-						onKeyDown={(e) => {
-							if (e.key === 'Enter' || e.key === ' ') {
-								e.preventDefault();
+				<div class="dashboard-sidebar-habit-tools">
+					<div class="dashboard-sidebar-habit-top-spacer" />
+					{[
+						{ label: 'habit.backfillTitle', icon: 'history', action: backfill },
+						{ label: 'habit.newTitle', icon: 'plus', action: add },
+						{ label: 'habit.statsTitle', icon: 'bar-chart-2', action: statistics },
+					].map((item) => (
+						<div
+							key={item.label}
+							class="dashboard-sidebar-habit-icon-btn"
+							role="button"
+							tabIndex={0}
+							aria-label={t(item.label)}
+							onClick={(e) => {
+								e.stopPropagation();
 								item.action();
-							}
-						}}
-					>
-						<Icon name={item.icon} />
-					</div>
-				))}
-				{backgroundSlot}
+							}}
+							onKeyDown={(e) => {
+								if (e.key === 'Enter' || e.key === ' ') {
+									e.preventDefault();
+									item.action();
+								}
+							}}
+						>
+							<Icon name={item.icon} />
+						</div>
+					))}
+					{backgroundSlot}
+				</div>
 			</div>
 			<div class="dashboard-sidebar-habit-list">
 				{rows.length === 0 ? (

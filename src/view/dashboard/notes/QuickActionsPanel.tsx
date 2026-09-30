@@ -25,7 +25,17 @@ export function QuickActionsPanel({
 	hidden?: string[];
 	edit?: (action: QuickAction) => void;
 }) {
-	const ordered = buildOrderedActions(actions, order, hidden),
+	const ordered = buildOrderedActions(actions, order, hidden).map((item) =>
+		item.isPreset
+			? {
+					...item,
+					action: {
+						...item.action,
+						name: t(item.action.target === 'daily-notes' ? 'quickActions.newJournal' : 'quickActions.newNote'),
+					},
+				}
+			: item,
+	),
 		drag = useRef<string | null>(null),
 		[dragging, setDragging] = useState<string | null>(null),
 		[over, setOver] = useState<string | null>(null);

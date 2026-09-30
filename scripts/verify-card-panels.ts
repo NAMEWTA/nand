@@ -16,6 +16,11 @@ import { ReadingService } from '../src/platform/obsidian/reading/reading-service
 import type { WidgetSettingsHost } from '../src/platform/obsidian/settings-host';
 import { CardPanel } from '../src/view/dashboard/cards/CardPanel';
 import { MemoPanel } from '../src/view/dashboard/cards/MemoPanel';
+import { HabitStatsPanel } from '../src/view/dashboard/habit/HabitStatsPanel';
+import type { HabitService } from '../src/platform/obsidian/habit/habit-service';
+import { QuickActionsPanel } from '../src/view/dashboard/notes/QuickActionsPanel';
+import { LunarPanel } from '../src/view/dashboard/widgets/LunarPanel';
+import { setLanguage } from '../src/shared/i18n';
 import { ProjectPanel } from '../src/view/dashboard/cards/ProjectPanel';
 import { TaskPanel } from '../src/view/dashboard/cards/TaskPanel';
 import { DataviewPanel } from '../src/view/dashboard/dataview/DataviewPanel';
@@ -494,6 +499,40 @@ async function main() {
 	closeDashboardPanelModals(app);
 	assert.equal(mountedModals, 0);
 	assert.equal(modalB.contentEl.textContent, '');
+
+	// Both native Obsidian close-button variants leave one keyboard-reachable panel close.
+	for (const nativeClass of ['modal-header-button', 'modal-close-button']) {
+		const service = { getHabits: () => [], subscribe: () => () => {} } as unknown as HabitService;
+		const modal = new DashboardPanelModal(app, 'dashboard-habit-stats-modal', (close) => h(HabitStatsPanel, { service, close }));
+		const shell = document.createElement('div');
+		const native = document.createElement('button');
+		native.className = nativeClass;
+		const content = document.createElement('div');
+		shell.append(native, content);
+		Object.assign(modal, { modalEl: shell, contentEl: content });
+		modal.close = () => modal.onClose();
+		modal.onOpen();
+		assert.equal(shell.querySelectorAll('button').length, 1, `${nativeClass} does not duplicate the close action`);
+		assert.ok(shell.classList.contains('dashboard-habit-stats-host'));
+		const close = shell.querySelector<HTMLButtonElement>('.dashboard-habit-stats-close')!;
+		assert.equal(close.tagName, 'BUTTON');
+		close.click();
+		assert.equal(content.textContent, '');
+	}
+	const quick = host(), lunar = host();
+	const customAction = { name: 'My New Journal / 用户名字', target: 'daily-notes', type: 'command' as const, icon: 'star' };
+	let executed: unknown;
+	for (const language of ['zh', 'en', 'zh'] as const) {
+		setLanguage(language);
+		mountDashboardPanel(quick.root, h(QuickActionsPanel, { actions: [customAction], execute: (action) => { executed = action; }, remove: () => {}, add: () => {} }));
+		assert.deepEqual(Array.from(quick.root.querySelectorAll('.dashboard-qa-name')).map((node) => node.textContent), language === 'zh' ? ['新建日记', '新建笔记', customAction.name] : ['New journal', 'New note', customAction.name]);
+		quick.root.querySelector<HTMLElement>('[data-qa-key="c:daily-notes"]')!.click();
+		assert.equal(executed, customAction, 'Custom actions retain their saved identity and name');
+		mountDashboardPanel(lunar.root, h(LunarPanel, { holidays: {}, win: window as unknown as Window, fortune: () => {} }));
+		assert.equal(lunar.root.querySelector('.dashboard-sidebar-lunar-almanac') !== null, language === 'zh', 'English omits the Chinese-only daily quote');
+	}
+	destroyDashboardPanels(quick.root);
+	destroyDashboardPanels(lunar.root);
 
 	console.log(
 		'Dashboard panels: editing, drag rollback, async Markdown, subscriptions, video cleanup, ledger/query state and native modal teardown passed',

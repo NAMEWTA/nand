@@ -1,4 +1,5 @@
 import { App, Modal } from 'obsidian';
+import { resolveWidgetLabel, usesDefaultWidgetLabel } from '../../../core/dashboard/default-widget-label';
 import type { CountdownConfig } from '../../../core/dashboard/types/index';
 import { getLanguage, t } from '../../../shared/i18n/index';
 import { applyModalTheme } from '../appearance/modal-theme';
@@ -14,7 +15,11 @@ export class CountdownSettingsModal extends Modal {
 
 	constructor(app: App, config: CountdownConfig, onSave: (config: CountdownConfig) => void) {
 		super(app);
-		this.config = { ...config };
+		this.config = {
+			...config,
+			label: resolveWidgetLabel(config, 'countdown'),
+			defaultLabel: usesDefaultWidgetLabel(config, 'countdown'),
+		};
 		this.onSave = onSave;
 
 		// Parse existing value: "YYYY-MM-DDTHH:mm" or "YYYY-MM-DD"
@@ -93,6 +98,9 @@ export class CountdownSettingsModal extends Modal {
 		const labelInput = labelRow.createEl('input', {
 			cls: 'dashboard-modal-input',
 			attr: { type: 'text', value: this.config.label, placeholder: t('countdown.labelPlaceholder') },
+		});
+		labelInput.addEventListener('input', () => {
+			this.config.defaultLabel = false;
 		});
 
 		// Card background (nested modal mutates this.config in place; the

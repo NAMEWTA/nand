@@ -71,8 +71,6 @@ export const messages = {
 		'countdown.days': '天',
 		'countdown.add': '添加倒计时',
 		'countdown.untitled': '未命名倒计时',
-		'defaults.countdownLabel': 'New Year Countdown',
-		'defaults.anniversaryLabel': '纪念日',
 		'weread.configure': '配置微信读书',
 		'weread.viewLabel': '视图',
 		'weread.viewShelf': '书架',

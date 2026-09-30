@@ -1,4 +1,5 @@
 import { strict as assert } from 'node:assert';
+import { readFileSync } from 'node:fs';
 import type { App } from 'obsidian';
 import { El, findByClass, findTag } from './mini-dom';
 import { applyCustomColors, resolveCustomColorValue } from '../src/view/dashboard/appearance/appearance';
@@ -74,7 +75,65 @@ function optionValues(select: El): string[] {
 	return select.children.map((o) => o.getAttribute('value') ?? '');
 }
 
+type Color = [number, number, number, number];
+function color(value: string): Color {
+	if (/^#[\da-f]{6}$/i.test(value)) return [parseInt(value.slice(1, 3), 16), parseInt(value.slice(3, 5), 16), parseInt(value.slice(5, 7), 16), 1];
+	const channels = value.match(/[\d.]+/g)?.map(Number);
+	assert.ok(channels && channels.length >= 3, `Supported color: ${value}`);
+	return [channels[0]!, channels[1]!, channels[2]!, channels[3] ?? 1];
+}
+function painted(foreground: Color, background: Color): Color {
+	return [0, 1, 2].map((channel) => foreground[channel]! * foreground[3] + background[channel]! * (1 - foreground[3])).concat(1) as Color;
+}
+function contrast(foreground: Color, background: Color): number {
+	const luminance = (value: Color) => value.slice(0, 3).map((channel) => {
+		const normalized = channel / 255;
+		return normalized <= 0.04045 ? normalized / 12.92 : ((normalized + 0.055) / 1.055) ** 2.4;
+	}).reduce((sum, channel, index) => sum + channel * [0.2126, 0.7152, 0.0722][index]!, 0);
+	const a = luminance(painted(foreground, background)), b = luminance(background);
+	return (Math.max(a, b) + 0.05) / (Math.min(a, b) + 0.05);
+}
+function palette(css: string, theme: string, mode: 'light' | 'dark'): Record<string, string> {
+	const tokens: Record<string, string> = {};
+	for (const selector of [`.nand-dashboard-root[data-theme="${theme}"]`, `.theme-${mode} .nand-dashboard-root[data-theme="${theme}"]`]) {
+		const escaped = selector.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+		const blocks = css.matchAll(new RegExp(`(?:^|\\n)\\s*${escaped}\\s*\\{([^}]+)\\}`, 'g'));
+		for (const block of blocks) for (const declaration of block[1]!.matchAll(/(--db-[\w-]+):\s*([^;]+);/g)) tokens[declaration[1]!] = declaration[2]!.trim();
+	}
+	return tokens;
+}
+function verifyThemeContrast(): void {
+	const css = readFileSync('styles.css', 'utf8');
+	for (const theme of ['matcha', 'lilac']) for (const mode of ['light', 'dark'] as const) {
+		const tokens = palette(css, theme, mode);
+		const base = color(tokens['--db-bg']!);
+		const surfaces = [base, painted(color(tokens['--db-bg-card']!), base), color(tokens['--db-bg-modal']!)];
+		if (mode === 'dark') for (const stop of tokens['--db-aurora-bg']!.match(/#[\da-f]{6}/gi) ?? []) surfaces.push(color(stop));
+		for (const surface of surfaces) {
+			for (const text of ['--db-text', '--db-text-muted', '--db-accent']) assert.ok(contrast(color(tokens[text]!), surface) >= 4.5, `${theme}/${mode} ${text} remains readable on ${surface.slice(0, 3)}`);
+		}
+		if (mode === 'dark') {
+			const card = surfaces[1]!;
+			const accent = color(tokens['--db-accent']!);
+			accent[3] = 0.7; // the Start focus button's existing hover opacity
+			assert.ok(contrast(accent, card) >= 4.5, `${theme} Start focus hover remains readable`);
+			assert.ok(color(tokens['--db-text-inverse']!)[0] > 230, `${theme} photo Banner retains its light foreground`);
+			assert.ok(contrast(color(tokens['--db-text-on-accent']!), color(tokens['--db-accent']!)) >= 4.5, `${theme} bright accent controls have their own contrasting foreground`);
+		}
+	}
+	for (const theme of ['onyx', 'volt']) for (const mode of ['light', 'dark'] as const) {
+		const tokens = palette(css, theme, mode);
+		assert.ok(contrast(color(tokens['--db-text-inverse']!), color(tokens['--db-accent']!)) >= 4.5, `${theme}/${mode} current workspace badge contrast`);
+	}
+	const active = css.match(/\.dashboard-workspace-btn\.active\s*\{[^}]*\}/)?.[0] ?? '';
+	assert.match(active, /color:\s*var\(--db-text-on-accent/);
+	assert.match(active, /opacity:\s*1/);
+	const switcher = css.match(/\.dashboard-workspace-switcher\s*\{[^}]*\}/)?.[0] ?? '';
+	assert.doesNotMatch(switcher, /opacity:\s*0\./, 'Ancestor opacity must not erase the selected badge contrast');
+}
+
 function main(): void {
+	verifyThemeContrast();
 	// 1. resolveCustomColorValue: sentinels map per field; everything else
 	//    passes through untouched.
 	{

@@ -1,0 +1,9 @@
+Already up to date
+Done in 376ms using pnpm v11.1.3
+$ esbuild scripts/verify-library-new-note.ts --bundle --platform=node --format=cjs --outfile=node_modules/.tmp/verify-library-new-note.cjs --alias:obsidian=./scripts/obsidian-stub.ts --log-level=warning && node node_modules/.tmp/verify-library-new-note.cjs
+buildNewNoteProps mapping: PASS
+yamlFrontmatter escaping: PASS
+createNoteWithProps + pickFolderFromMenu: PASS
+toolbar button integration: PASS
+template pipeline + folder-config regression: PASS
+library new note: ALL PASS

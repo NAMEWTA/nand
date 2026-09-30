@@ -52,17 +52,19 @@ export function LunarPanel({
 					))}
 				</div>
 			</div>
-			<div class="dashboard-sidebar-lunar-almanac">
-				{comma < 0 ? (
-					<span class="dashboard-sidebar-lunar-almanac-text">{data.almanac}</span>
-				) : (
-					<>
-						<span class="dashboard-sidebar-lunar-almanac-text">{data.almanac.slice(0, comma + 1)}</span>
-						<br />
-						<span class="dashboard-sidebar-lunar-almanac-text">{data.almanac.slice(comma + 1)}</span>
-					</>
-				)}
-			</div>
+			{zh && (
+				<div class="dashboard-sidebar-lunar-almanac">
+					{comma < 0 ? (
+						<span class="dashboard-sidebar-lunar-almanac-text">{data.almanac}</span>
+					) : (
+						<>
+							<span class="dashboard-sidebar-lunar-almanac-text">{data.almanac.slice(0, comma + 1)}</span>
+							<br />
+							<span class="dashboard-sidebar-lunar-almanac-text">{data.almanac.slice(comma + 1)}</span>
+						</>
+					)}
+				</div>
+			)}
 		</>
 	);
 }

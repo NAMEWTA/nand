@@ -2,7 +2,14 @@ import { registerShellCommands } from '../src/plugin/commands';
 import type DashboardPlugin from '../src/plugin/main';
 import assert from 'node:assert/strict';
 import { Scope, Notice, type App } from 'obsidian';
-import { El } from './mini-dom';
+import { El, findTag } from './mini-dom';
+import { Setting as StubSetting } from './obsidian-stub';
+import { resolveWidgetLabel } from '../src/core/dashboard/default-widget-label';
+import { generateDefaultMarkdown } from '../src/core/dashboard/parser/default-document';
+import { parse, serialize } from '../src/core/dashboard/parser';
+import type { AnniversaryConfig, CountdownConfig } from '../src/core/dashboard/types';
+import { CountdownSettingsModal } from '../src/view/dashboard/widgets/countdown-modal';
+import { AnniversarySettingsModal } from '../src/view/dashboard/widgets/anniversary-settings-modal';
 import { mountCommentComposer } from '../src/view/editor/comments/composer';
 import { createDashboardSettingsAccess } from '../src/view/dashboard/settings-access';
 import { readCalendarTaskFilter, writeCalendarTaskFilter } from '../src/view/dashboard/calendar/calendar-preferences';
@@ -22,6 +29,63 @@ import {
 import type { DashboardSettings } from '../src/core/dashboard/types/index';
 
 async function main() {
+	const exampleCountdown: CountdownConfig = { id: 'cd-default', label: 'New Year Countdown', targetDate: '2030-12-31T23:55', displayMode: 'hours', reminderDays: 0 };
+	const exampleAnniversary: AnniversaryConfig = { id: 'av-default', label: '纪念日', startDate: '2025-09-29', precision: 'ymd', annualReminder: false };
+	for (const language of ['zh', 'en', 'zh'] as const) {
+		setLanguage(language);
+		assert.equal(resolveWidgetLabel(exampleCountdown, 'countdown'), language === 'zh' ? '新年' : 'Countdown to New Year');
+		assert.equal(resolveWidgetLabel(exampleAnniversary, 'anniversary'), language === 'zh' ? '纪念日' : 'Anniversary');
+		assert.equal(resolveWidgetLabel({ ...exampleAnniversary, label: 'Wedding / 结婚' }, 'anniversary'), 'Wedding / 结婚');
+		assert.equal(resolveWidgetLabel({ ...exampleAnniversary, id: 'user-entry' }, 'anniversary'), '纪念日');
+		assert.equal(resolveWidgetLabel({ ...exampleCountdown, defaultLabel: false }, 'countdown'), 'New Year Countdown');
+		assert.equal(resolveWidgetLabel({ ...exampleAnniversary, label: 'Anniversary', defaultLabel: false }, 'anniversary'), 'Anniversary', 'Explicitly entered default-looking names remain custom');
+		const fresh = parse(generateDefaultMarkdown());
+		assert.deepEqual(fresh.columns.slice(0, 2).map((column) => column.name), language === 'zh' ? ['备忘', '待办'] : ['Memo', 'Todo']);
+		for (const column of fresh.columns.slice(0, 2)) assert.ok(column.cards.every((card) => card.column === column.name), 'Translated section and card ownership stay aligned');
+		fresh.columns[0]!.name = 'My memo / 自定义';
+		const saved = serialize(fresh);
+		setLanguage(language === 'zh' ? 'en' : 'zh');
+		assert.equal(parse(saved).columns[0]!.name, 'My memo / 自定义', 'Language changes never rewrite saved section names');
+	}
+	setLanguage('en');
+	(globalThis as unknown as { activeDocument: unknown }).activeDocument = { querySelector: () => null };
+	let savedCountdown: CountdownConfig | undefined;
+	const editCountdown = (input: boolean) => {
+		const modal = new CountdownSettingsModal({} as App, exampleCountdown, (updated) => { savedCountdown = updated; });
+		modal.onOpen();
+		const inputs = findTag(modal.contentEl as unknown as El, 'input');
+		const name = inputs.find((field) => field.getAttribute('type') === 'text')!;
+		assert.equal(name.getAttribute('value'), 'Countdown to New Year');
+		// mini-dom keeps the initial value attribute separate from the live input.
+		for (const field of inputs) field.value = field.getAttribute('value') ?? '';
+		if (input) {
+			name.value = 'Anniversary';
+			name.dispatchEvent({ type: 'input' });
+		}
+		findTag(modal.contentEl as unknown as El, 'button').find((button) => button.textContent === t('common.save'))!.click();
+	};
+	editCountdown(false);
+	assert.equal(savedCountdown!.defaultLabel, true, 'Saving another field preserves localized default mode');
+	setLanguage('zh');
+	assert.equal(resolveWidgetLabel(savedCountdown!, 'countdown'), '新年');
+	setLanguage('en');
+	editCountdown(true);
+	setLanguage('zh');
+	assert.equal(savedCountdown!.defaultLabel, false);
+	assert.equal(resolveWidgetLabel(savedCountdown!, 'countdown'), 'Anniversary');
+	let savedAnniversary: AnniversaryConfig | undefined;
+	const anniversaryModal = new AnniversarySettingsModal({} as App, exampleAnniversary, (updated) => { savedAnniversary = updated; });
+	const beforeSettings = StubSetting.created.length;
+	anniversaryModal.onOpen();
+	const labelSetting = StubSetting.created.slice(beforeSettings).find((setting) => setting.name === t('anniversary.label'))!;
+	assert.equal(labelSetting.texts[0]!.value, '纪念日');
+	labelSetting.texts[0]!.fire!('Anniversary');
+	findTag(anniversaryModal.contentEl as unknown as El, 'button').find((button) => button.textContent === t('common.save'))!.click();
+	assert.equal(savedAnniversary!.defaultLabel, false);
+	setLanguage('en');
+	assert.equal(resolveWidgetLabel(savedAnniversary!, 'anniversary'), 'Anniversary');
+	setLanguage('zh');
+	assert.equal(resolveWidgetLabel(savedAnniversary!, 'anniversary'), 'Anniversary', 'Typing an English default name is explicit user intent');
 	const commandCleanups: Array<() => void> = [];
 	const commands: Command[] = [];
 	const commandHost = {
@@ -339,7 +403,7 @@ async function main() {
 	assert.equal(owner.settings, previous);
 	assert.equal(refreshes, 2, 'failed save must not report a successful refresh');
 	assert.equal(await writeCalendarTaskFilter(undefined, 'all'), false, 'missing persistence must be visible');
-	console.log('verify-issue-regressions: composer, language lifecycle and settings persistence passed');
+	console.log('verify-issue-regressions: default-name localization, edit intent, composer, language lifecycle and settings persistence passed');
 }
 void main().catch((error) => {
 	console.error(error);

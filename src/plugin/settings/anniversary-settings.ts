@@ -1,4 +1,5 @@
 import { Setting } from 'obsidian';
+import { resolveWidgetLabel } from '../../core/dashboard/default-widget-label';
 import type { AnniversaryConfig } from '../../core/dashboard/types/index';
 import { t } from '../../shared/i18n/index';
 import { AnniversarySettingsModal } from '../../view/dashboard/widgets/anniversary-settings-modal';
@@ -28,7 +29,7 @@ export function renderAnniversarySettings(this: DashboardSettingTab, containerEl
 
 	const list = this.plugin.settings.anniversaries ?? [];
 	for (const cfg of list) {
-		const summary = cfg.label || cfg.startDate || t('anniversary.unnamed');
+		const summary = resolveWidgetLabel(cfg, 'anniversary') || cfg.startDate || t('anniversary.unnamed');
 		new Setting(card)
 			.setName(summary)
 			.setDesc(

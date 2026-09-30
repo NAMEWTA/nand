@@ -4,6 +4,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 
 import { defaultPage, productOrder, sidePages, visibleProducts } from './nav.ts';
+import { normalizeEditorWorkbench } from '../../shared/editor-workbench.ts';
 
 const ALL_ON = { automation: true, dashboard: true, editor: true, terminal: true, iconic: true, contacts: true };
 
@@ -99,6 +100,7 @@ test('archive folder setting reserves room for its description', () => {
 	const control = css.match(/\.setting-item\.nand-contacts-folder-setting > \.setting-item-control \{[^}]+\}/);
 	assert.ok(info);
 	assert.ok(control);
+	assert.match(info[0], /flex:\s*1 1 0\s*;/);
 	assert.match(info[0], /min-width:\s*min\(100%,\s*16rem\)/);
 	assert.match(control[0], /min-width:\s*auto/);
 	assert.match(control[0], /flex:\s*0 0 auto/);
@@ -106,6 +108,15 @@ test('archive folder setting reserves room for its description', () => {
 	const globalInfo = css.indexOf('.setting-item:not(.dashboard-settings-section) > .setting-item-info { flex: 1; }');
 	assert.ok(globalInfo >= 0);
 	assert.ok(css.indexOf('.setting-item.nand-contacts-folder-setting > .setting-item-info') > globalInfo);
+});
+
+test('stored editor placeholder selections return to comments while preserving preferences', () => {
+	for (const activeDomain of ['comments', 'writing-stats', 'focus', 'unknown']) {
+		assert.deepEqual(
+			normalizeEditorWorkbench({ activeDomain, sidebarWidth: 300, highlightEnabled: false, popoverEnabled: false }),
+			{ activeDomain: 'comments', sidebarWidth: 300, highlightEnabled: false, popoverEnabled: false },
+		);
+	}
 });
 
 test('archives has independent navigation and respects its module gate', () => {

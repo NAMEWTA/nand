@@ -61,10 +61,11 @@ class RecordPicker extends FuzzySuggestModal<ArchiveRecord> {
 	constructor(
 		app: App,
 		private values: ArchiveRecord[],
+		kind: RecordKind,
 		private done: (record?: ArchiveRecord) => void,
 	) {
 		super(app);
-		this.setPlaceholder(ct('search'));
+		this.setPlaceholder(ct(kind === 'person' ? 'searchPeople' : 'searchCompanies'));
 	}
 	getItems(): ArchiveRecord[] {
 		return this.values;
@@ -93,6 +94,7 @@ export function chooseRecord(
 		new RecordPicker(
 			controller.app,
 			controller.choices(kind).filter((r) => r.id !== exclude),
+			kind,
 			resolve,
 		).open(),
 	);
@@ -503,8 +505,17 @@ export class FilterModal extends Modal {
 					.map((v) => [v, relationLabel(v)]),
 			});
 		}
+		if (groups.every((group) => group.values.length === 0)) {
+			this.contentEl.createEl('p', { cls: 'nand-contacts-muted', text: ct('filterEmpty') });
+		}
 		for (const group of groups) {
 			new Setting(this.contentEl).setName(ct(group.title)).setHeading();
+			if (group.values.length === 0) {
+				this.contentEl.createEl('p', {
+					cls: 'nand-contacts-muted nand-contacts-placeholder',
+					text: ct('noFilterOptions'),
+				});
+			}
 			for (const [value, name] of group.values)
 				new Setting(this.contentEl).setName(name).addToggle((toggle) =>
 					toggle.setValue(this.draft[group.key].includes(value)).onChange((enabled) => {

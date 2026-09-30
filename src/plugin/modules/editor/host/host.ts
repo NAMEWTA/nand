@@ -4,9 +4,7 @@ import { vaultCommentFs } from '../../../../platform/obsidian/comments/vault-fs'
 import { createCommentsDomain } from '../../../../view/editor/comments/domain';
 import { registerCopyCommands } from '../../../../view/editor/copy/index';
 import type { EditorDomain } from '../../../../view/editor/domain';
-import { focusDomain } from '../../../../view/editor/focus/index';
 import { EditorHost } from '../../../../view/editor/host';
-import { writingStatsDomain } from '../../../../view/editor/writing-stats/index';
 import type DashboardPlugin from '../../../main';
 import { trackActiveMarkdown } from './active-file';
 
@@ -16,7 +14,7 @@ import { trackActiveMarkdown } from './active-file';
  */
 export function createEditorHost(plugin: DashboardPlugin): EditorHost {
 	const store = new CommentStore(vaultCommentFs(plugin.app));
-	const domains: EditorDomain[] = [createCommentsDomain(plugin), writingStatsDomain, focusDomain];
+	const domains: EditorDomain[] = [createCommentsDomain(plugin)];
 	const listeners = new Set<(file: TFile | null) => void>();
 	const layoutListeners = new Set<() => void>();
 	let active: TFile | null = null;

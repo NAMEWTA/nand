@@ -1,14 +1,7 @@
 import { Setting } from 'obsidian';
-import type { EditorDomainId } from '../../shared/editor-workbench';
 import { t } from '../../shared/i18n/index';
 import { renderEmptyState } from '../../view/primitives/empty-state';
 import type { DashboardSettingTab } from './settings-tab';
-
-const DOMAINS: readonly EditorDomainId[] = ['comments', 'writing-stats', 'focus'];
-
-function isDomain(value: string): value is EditorDomainId {
-	return (DOMAINS as readonly string[]).includes(value);
-}
 
 /** Editor product block. Comment bodies stay in the vault sidecar, not data.json. */
 export function renderEditorSettings(this: DashboardSettingTab, containerEl: HTMLElement): void {
@@ -41,26 +34,6 @@ export function renderEditorSettings(this: DashboardSettingTab, containerEl: HTM
 				this.plugin.editorHost?.notifySettingsChanged();
 			}),
 		);
-
-	new Setting(containerEl)
-		.setName(t('settings.editorDefaultDomain'))
-		.setDesc(t('settings.editorDefaultDomainDesc'))
-		.addDropdown((dropdown) => {
-			dropdown
-				.addOption('comments', t('editor.comments.title'))
-				.addOption('writing-stats', t('editor.writingStats.title'))
-				.addOption('focus', t('editor.focus.title'))
-				.setValue(workbench.activeDomain)
-				.onChange(async (value) => {
-					if (!isDomain(value)) return;
-					this.plugin.settings = {
-						...this.plugin.settings,
-						editorWorkbench: { ...this.plugin.settings.editorWorkbench, activeDomain: value },
-					};
-					await this.plugin.saveSettings();
-					this.plugin.editorHost?.notifyLayoutChanged();
-				});
-		});
 }
 
 /** Sync product is not built yet. One line, so the settings page already has a home for it. */

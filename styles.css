@@ -1264,6 +1264,41 @@ button.nand-ui-list-item.is-active {
 		#f1efe3 100%);
 }
 
+.theme-dark .nand-dashboard-root[data-theme="matcha"] {
+	--db-bg: #1b2018;
+	--db-bg-card: #262d20;
+	--db-bg-card-hover: #303928;
+	--db-bg-input: rgba(180, 214, 127, 0.08);
+	--db-bg-btn: rgba(180, 214, 127, 0.08);
+	--db-bg-btn-hover: rgba(180, 214, 127, 0.14);
+	--db-bg-banner: rgba(180, 214, 127, 0.08);
+	--db-bg-hover: rgba(180, 214, 127, 0.08);
+	--db-bg-hover-strong: rgba(180, 214, 127, 0.14);
+	--db-bg-add-section: rgba(180, 214, 127, 0.06);
+	--db-bg-drop-indicator: rgba(180, 214, 127, 0.14);
+	--db-border: rgba(180, 214, 127, 0.20);
+	--db-border-card: rgba(180, 214, 127, 0.24);
+	--db-border-input: rgba(180, 214, 127, 0.28);
+	--db-border-input-focus: #b4d67f;
+	--db-border-btn: rgba(180, 214, 127, 0.22);
+	--db-border-add-section: rgba(180, 214, 127, 0.30);
+	--db-text: #eff3e5;
+	--db-text-muted: #c4cfb5;
+	--db-text-faint: #9baa88;
+	--db-text-on-accent: rgba(0, 0, 0, 0.90);
+	--db-accent: #b4d67f;
+	--db-accent-light: #cee6a7;
+	--db-danger: #f1869e;
+	--db-progress-from: #b4d67f;
+	--db-progress-to: #dac18a;
+	--db-checkbox: #b4d67f;
+	--db-quote-border: #dac18a;
+	--db-link: #b4d67f;
+	--db-bg-modal: #262d20;
+	--db-bg-modal-raised: rgba(180, 214, 127, 0.08);
+	--db-aurora-bg: linear-gradient(135deg, #1b2018 0%, #25301f 32%, #302a1d 66%, #1b2018 100%);
+}
+
 /* Matcha: slow tea-garden washes drifting behind the cream cards */
 .nand-dashboard-root[data-theme="matcha"] {
 	background: var(--db-aurora-bg);
@@ -1401,6 +1436,41 @@ button.nand-ui-list-item.is-active {
 		rgba(122, 162, 247, 0.14) 58%,
 		rgba(205, 180, 239, 0.16) 78%,
 		#f7f2fb 100%);
+}
+
+.theme-dark .nand-dashboard-root[data-theme="lilac"] {
+	--db-bg: #211b2b;
+	--db-bg-card: #2c2438;
+	--db-bg-card-hover: #392e47;
+	--db-bg-input: rgba(215, 175, 245, 0.08);
+	--db-bg-btn: rgba(215, 175, 245, 0.08);
+	--db-bg-btn-hover: rgba(215, 175, 245, 0.14);
+	--db-bg-banner: rgba(215, 175, 245, 0.08);
+	--db-bg-hover: rgba(215, 175, 245, 0.08);
+	--db-bg-hover-strong: rgba(215, 175, 245, 0.14);
+	--db-bg-add-section: rgba(215, 175, 245, 0.06);
+	--db-bg-drop-indicator: rgba(215, 175, 245, 0.14);
+	--db-border: rgba(215, 175, 245, 0.20);
+	--db-border-card: rgba(215, 175, 245, 0.24);
+	--db-border-input: rgba(215, 175, 245, 0.28);
+	--db-border-input-focus: #d7aff5;
+	--db-border-btn: rgba(215, 175, 245, 0.22);
+	--db-border-add-section: rgba(215, 175, 245, 0.30);
+	--db-text: #f1eafa;
+	--db-text-muted: #cebddc;
+	--db-text-faint: #a991bd;
+	--db-text-on-accent: rgba(0, 0, 0, 0.90);
+	--db-accent: #d7aff5;
+	--db-accent-light: #ead1fc;
+	--db-danger: #f68dab;
+	--db-progress-from: #d7aff5;
+	--db-progress-to: #f3adc7;
+	--db-checkbox: #d7aff5;
+	--db-quote-border: #f3adc7;
+	--db-link: #d7aff5;
+	--db-bg-modal: #2c2438;
+	--db-bg-modal-raised: rgba(215, 175, 245, 0.08);
+	--db-aurora-bg: linear-gradient(135deg, #211b2b 0%, #322439 32%, #28243b 66%, #211b2b 100%);
 }
 
 /* Lilac: slow garden wash drifting behind the ivory cards */
@@ -1843,6 +1913,10 @@ button.nand-ui-list-item.is-active {
 
 /* ===== Root ===== */
 .nand-dashboard-root {
+	--db-text-on-accent: var(--db-text-inverse, var(--text-on-accent));
+	/* Resolve before a photo widget overrides its foreground tokens. */
+	--db-control-bg: var(--db-bg-modal, var(--db-bg-card));
+	--db-control-text: var(--db-text);
 	display: flex;
 	flex-direction: column;
 	height: 100%;
@@ -2133,17 +2207,14 @@ button.nand-ui-list-item.is-active {
 	min-width: 0;
 }
 
-/* Product navigation: a row of pill tabs. Scrolls sideways instead of
-   wrapping so the row height never changes between products. */
+/* Product navigation wraps so every module remains visible in narrow settings. */
 .dashboard-settings-products {
 	display: flex;
-	flex-wrap: nowrap;
+	flex-wrap: wrap;
 	align-items: center;
-	overflow-x: auto;
 	white-space: nowrap;
 	gap: var(--size-4-1);
 	max-width: 100%;
-	scrollbar-width: thin;
 }
 
 .dashboard-settings-content {
@@ -2583,7 +2654,7 @@ button.nand-ui-list-item.is-active {
    compact 14px-tall pill row at top:2 ends exactly at its top edge — the
    numbers neither move nor get covered. nowrap so a long row extends right
    along the same strip instead of wrapping down over the content.
-   Faint at rest (barely-there), full opacity on hover/focus. */
+   Inactive workspaces are faint at rest; the current workspace stays legible. */
 .dashboard-workspace-switcher {
 	position: absolute;
 	top: 2px;
@@ -2594,16 +2665,16 @@ button.nand-ui-list-item.is-active {
 	gap: 3px;
 	padding: 1px 4px;
 	z-index: 10;
-	opacity: 0.25;
-	transition: opacity 0.2s ease;
 }
 
-.dashboard-workspace-switcher:hover,
-.dashboard-workspace-switcher:focus-within {
+.dashboard-workspace-switcher:hover .dashboard-workspace-btn,
+.dashboard-workspace-switcher:focus-within .dashboard-workspace-btn {
 	opacity: 1;
 }
 
 .dashboard-workspace-btn {
+	opacity: 0.25;
+	transition: opacity 0.2s ease;
 	min-width: 14px;
 	height: 14px;
 	padding: 0 3px;
@@ -2629,9 +2700,10 @@ button.nand-ui-list-item.is-active {
 }
 
 .dashboard-workspace-btn.active {
+	opacity: 1;
 	background: var(--db-accent, #6366f1);
 	border-color: transparent;
-	color: #ffffff;
+	color: var(--db-text-on-accent, var(--text-on-accent));
 }
 
 .dashboard-workspace-add-btn {
@@ -2663,6 +2735,9 @@ button.nand-ui-list-item.is-active {
 	.dashboard-banner--collapsed .dashboard-workspace-switcher {
 		top: 2px;
 		left: 36px;
+	}
+
+	.dashboard-banner--collapsed .dashboard-workspace-btn:not(.active) {
 		opacity: 0.85;
 	}
 
@@ -3578,13 +3653,8 @@ button.nand-ui-list-item.is-active {
 .dashboard-sidebar-habit-top {
 	display: flex;
 	align-items: center;
-	/* Never wrap (the four icon buttons stay right-peeking on one line);
-	   instead the row COMPRESSES as the sidebar narrows: the gap ramps
-	   6px -> 2px across the 220 -> 180px drag range (one linear calc off the
-	   same unitless --db-sidebar-w that drives the width and the content
-	   scale; 220 is the default and the stacked/mobile fallback, where the
-	   full 6px applies). */
-	gap: clamp(2px, calc((var(--db-sidebar-w, 220) - 180) / 10 * 1px + 2px), 6px);
+	flex-wrap: wrap;
+	gap: 4px 6px;
 	width: 100%;
 	min-height: 20px;
 	margin-bottom: 8px;
@@ -3600,17 +3670,20 @@ button.nand-ui-list-item.is-active {
 	color: var(--db-accent);
 	user-select: none;
 	white-space: nowrap;
-	/* Yield first in the compression chain: the row's fixed furniture (count
-	   + four buttons) is protected, the title gives back width and its text
-	   ellipsizes (icon never clips — flex-shrink:0 below). */
-	min-width: 0;
-	overflow: hidden;
+	flex: 1;
+	min-width: max-content;
 }
 
 .dashboard-sidebar-habit-title-text {
-	min-width: 0;
-	overflow: hidden;
-	text-overflow: ellipsis;
+	flex-shrink: 0;
+}
+
+/* Tools use their own row so check-in counts never truncate the title. */
+.dashboard-sidebar-habit-tools {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	flex-basis: 100%;
 }
 
 .dashboard-sidebar-habit-title-icon {
@@ -3678,6 +3751,14 @@ button.nand-ui-list-item.is-active {
 
 .dashboard-sidebar-habit-item:hover {
 	background: var(--db-bg-hover);
+}
+
+/* Keep a photo foreground paired with an opaque theme surface on hover. */
+.dashboard-sidebar-widget--has-bg .dashboard-sidebar-habit-item:hover {
+	--db-text: var(--db-control-text);
+	--db-text-muted: var(--db-control-text);
+	--db-accent: var(--db-control-text);
+	background: var(--db-control-bg);
 }
 
 .dashboard-sidebar-habit-check {
@@ -5699,6 +5780,10 @@ button.nand-ui-list-item.is-active {
 }
 
 /* ===== Habit stats modal ===== */
+.modal.nand-panel-modal.dashboard-habit-stats-host {
+	width: min(480px, 90vw);
+}
+
 .dashboard-habit-stats-overlay {
 	position: fixed;
 	top: 0;
@@ -5718,7 +5803,8 @@ button.nand-ui-list-item.is-active {
 	border-radius: var(--db-radius-lg, 14px);
 	padding: 20px;
 	max-width: 480px;
-	width: 90%;
+	width: 100%;
+	box-sizing: border-box;
 	max-height: 80vh;
 	overflow-y: auto;
 	box-shadow: var(--nand-shadow-lg, 0 8px 32px rgba(0, 0, 0, 0.2));
@@ -5742,6 +5828,10 @@ button.nand-ui-list-item.is-active {
 }
 
 .dashboard-habit-stats-close {
+	background: transparent;
+	border: none;
+	box-shadow: none;
+	padding: 0;
 	cursor: pointer;
 	color: var(--db-text-muted);
 	width: 28px;
@@ -5863,6 +5953,7 @@ button.nand-ui-list-item.is-active {
 	flex: 1;
 	min-width: 0;
 	display: flex;
+	flex-wrap: wrap;
 	align-items: center;
 	justify-content: center;
 	gap: 8px;
@@ -5896,6 +5987,7 @@ button.nand-ui-list-item.is-active {
 	font-weight: 500;
 	color: var(--db-text-muted);
 	line-height: 1.3;
+	white-space: nowrap;
 }
 
 .dashboard-habit-stats-heatmap-section {
@@ -10985,6 +11077,24 @@ button.nand-ui-list-item.is-active {
 	flex: 1;
 	min-width: 0;
 	max-width: none;
+	white-space: normal;
+	overflow-wrap: anywhere;
+	overflow: visible;
+}
+
+/* Preserve a readable theme surface/text pair beneath decorative photos. */
+.dashboard-sidebar-widgets .dashboard-sidebar-widget--has-bg .dashboard-qa-item {
+	--db-text: var(--db-control-text);
+	--db-text-muted: var(--db-control-text);
+	--db-accent: var(--db-control-text);
+	background: var(--qa-btn-bg, var(--db-control-bg));
+	color: var(--db-control-text);
+	opacity: 1;
+}
+
+.dashboard-sidebar-widgets .dashboard-sidebar-widget--has-bg .dashboard-qa-item:hover {
+	background: var(--qa-btn-hover, var(--db-control-bg));
+	border-color: var(--db-control-text);
 }
 
 .dashboard-qa-item--preset {
@@ -12855,7 +12965,7 @@ button.nand-ui-list-item.is-active {
 .dashboard-modal-btn--confirm {
 	background: var(--db-accent, var(--interactive-accent));
 	border-color: transparent;
-	color: var(--db-text-inverse, var(--text-on-accent));
+	color: var(--db-text-on-accent, var(--text-on-accent));
 	font-weight: 500;
 }
 
@@ -14197,8 +14307,9 @@ button.nand-ui-list-item.is-active {
 		top: 2px;
 		left: 6px;
 		padding: 1px 3px;
-		opacity: 0.85;
 	}
+
+	.dashboard-workspace-btn:not(.active) { opacity: 0.85; }
 
 	.dashboard-workspace-btn {
 		min-width: 16px;
@@ -14764,7 +14875,7 @@ button.nand-ui-list-item.is-active {
 
 .dashboard-countdown-calendar-popup .dashboard-task-reminder-calendar-day--selected {
 	background: var(--db-accent, var(--interactive-accent)) !important;
-	color: var(--db-text-inverse, var(--text-on-accent)) !important;
+	color: var(--db-text-on-accent, var(--text-on-accent)) !important;
 }
 
 .dashboard-countdown-calendar-popup .dashboard-task-reminder-calendar-day--other-month {
@@ -14820,7 +14931,7 @@ button.nand-ui-list-item.is-active {
 
 .dashboard-countdown-ym-cell.dashboard-task-reminder-calendar-day--selected {
 	background: var(--db-accent, var(--interactive-accent));
-	color: var(--db-text-inverse, var(--text-on-accent));
+	color: var(--db-text-on-accent, var(--text-on-accent));
 	border-color: transparent;
 }
 
@@ -14888,7 +14999,7 @@ button.nand-ui-list-item.is-active {
 	background: var(--db-accent, var(--interactive-accent)) !important;
 	/* Follow the theme's accent-contrast text (bright accents like onyx's
 	   lemon need dark text — a hardcoded #fff was unreadable there). */
-	color: var(--db-text-inverse, var(--text-on-accent)) !important;
+	color: var(--db-text-on-accent, var(--text-on-accent)) !important;
 }
 
 /* Days between the range edges: accent-tinted band, square corners so the
@@ -15013,7 +15124,7 @@ button.nand-ui-list-item.is-active {
 
 .dashboard-task-reminder-calendar-day--selected {
 	background: var(--db-accent) !important;
-	color: var(--db-text-inverse, var(--text-on-accent)) !important;
+	color: var(--db-text-on-accent, var(--text-on-accent)) !important;
 }
 
 .dashboard-task-reminder-calendar-day--other-month {
@@ -15176,7 +15287,7 @@ button.nand-ui-list-item.is-active {
 .dashboard-confirm-primary {
 	background: var(--db-accent, var(--interactive-accent));
 	border: 1px solid transparent;
-	color: var(--db-text-inverse, var(--text-on-accent));
+	color: var(--db-text-on-accent, var(--text-on-accent));
 }
 
 .dashboard-confirm-primary:hover {
@@ -17643,7 +17754,7 @@ button.nand-ui-list-item.is-active {
 /* Primary (rightmost): solid accent, theme on-accent text. */
 .dashboard-quicknote-guide-actions button.dashboard-quicknote-guide-enable {
 	background: var(--db-accent, var(--interactive-accent));
-	color: var(--db-text-inverse, var(--text-on-accent));
+	color: var(--db-text-on-accent, var(--text-on-accent));
 	border-color: transparent;
 	font-weight: 500;
 }
@@ -17757,7 +17868,7 @@ button.nand-ui-list-item.is-active {
 	border: 1px solid transparent;
 	background: var(--db-accent, var(--interactive-accent));
 	box-shadow: none;
-	color: var(--db-text-inverse, var(--text-on-accent));
+	color: var(--db-text-on-accent, var(--text-on-accent));
 	font-size: 0.8125em;
 	font-weight: 500;
 	cursor: pointer;
@@ -22406,7 +22517,7 @@ body.is-mobile:not(.is-tablet) .dashboard-media-item .dashboard-media-delete--gr
 	border-radius: var(--db-radius-sm, 6px);
 	background: var(--db-accent, var(--interactive-accent));
 	box-shadow: none;
-	color: var(--db-text-inverse, var(--text-on-accent));
+	color: var(--db-text-on-accent, var(--text-on-accent));
 	font-size: 0.9em;
 	font-weight: 500;
 	cursor: pointer;
@@ -23458,8 +23569,8 @@ body.is-mobile:not(.is-tablet) .dashboard-media-item .dashboard-media-delete--gr
 	display: inline-flex;
 	align-items: center;
 	justify-content: center;
-	flex: 1 1 0;
-	min-width: 0;
+	flex: 0 0 auto;
+	min-width: max-content;
 	gap: 6px;
 	border: none;
 	background: transparent;
@@ -23469,9 +23580,6 @@ body.is-mobile:not(.is-tablet) .dashboard-media-item .dashboard-media-delete--gr
 	font-size: var(--nand-text-body);
 }
 .nand-editor-tab-label {
-	min-width: 0;
-	overflow: hidden;
-	text-overflow: ellipsis;
 	white-space: nowrap;
 }
 .nand-editor-tab-icon {
@@ -26335,7 +26443,7 @@ body.is-mobile:not(.is-tablet) .dashboard-media-item .dashboard-media-delete--gr
 :is(.nand-settings, .dashboard-settings-root) .setting-item:not(.dashboard-settings-section) > .setting-item-info { flex: 1; }
 :is(.nand-settings, .dashboard-settings-root) .setting-item:not(.dashboard-settings-section) > .setting-item-control { flex: 0 1 auto; }
 :is(.nand-settings, .dashboard-settings-root) .setting-item.nand-contacts-folder-setting > .setting-item-info {
-	flex: 1 1 16rem;
+	flex: 1 1 0;
 	min-width: min(100%, 16rem);
 }
 :is(.nand-settings, .dashboard-settings-root) .setting-item.nand-contacts-folder-setting > .setting-item-control {
@@ -27760,12 +27868,12 @@ body:where(.nand-iconic-enabled)[data-theme="Ukiyo"] .workspace-leaf > .workspac
 }
 
 /* Agent workbench: xterm remains an imperative island owned by TerminalService. */
-/* Three panes: session rail | framed terminal | history rail, with a slim usage strip below. */
+/* The history stays below the terminal so growing the leaf never takes width from xterm. */
 .workspace-leaf-content[data-type="terminal-view"] { container-type: inline-size; container-name: nand-terminal; }
-.workspace-leaf-content[data-type="terminal-view"] .view-content.nand-agent-workbench { display: grid; grid-template-columns: minmax(180px, 240px) minmax(200px, 1fr) minmax(220px, 300px); grid-template-rows: minmax(0, 1fr) auto; gap: 0; padding: 0; overflow: hidden; background: var(--nand-surface-muted); }
+.workspace-leaf-content[data-type="terminal-view"] .view-content.nand-agent-workbench { display: grid; grid-template-columns: clamp(110px, 22cqi, 240px) minmax(0, 1fr); grid-template-rows: minmax(0, 1fr) minmax(0, min(180px, 25%)) auto; gap: 0; padding: 0; overflow: hidden; background: var(--nand-surface-muted); }
 .nand-agent-sidebar, .nand-agent-history { min-width: 0; min-height: 0; overflow: auto; padding: var(--size-4-4) var(--size-4-3); background: var(--nand-surface-muted); display: flex; flex-direction: column; gap: var(--size-4-3); scrollbar-width: thin; }
-.nand-agent-sidebar { border-right: var(--nand-border); }
-.nand-agent-history { border-left: var(--nand-border); }
+.nand-agent-sidebar { grid-column: 1; grid-row: 1 / 3; border-right: var(--nand-border); }
+.nand-agent-history { grid-column: 2; grid-row: 2; border-top: var(--nand-border); }
 .nand-agent-sidebar > *, .nand-agent-history > * { flex-shrink: 0; }
 .nand-agent-sidebar button { white-space: normal; height: auto; overflow-wrap: anywhere; }
 .nand-agent-workbench button { min-height: 32px; }
@@ -27784,10 +27892,10 @@ body:where(.nand-iconic-enabled)[data-theme="Ukiyo"] .workspace-leaf > .workspac
 .nand-session-row > button:first-child :is(span, small) { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; overflow-wrap: normal; }
 .nand-session-row > button:first-child > .nand-ui-list-item-title { display: block; width: 100%; font-weight: 500; }
 .nand-session-row > button.is-active > .nand-ui-list-item-title { font-weight: 600; }
-.nand-session-row-meta { display: flex; align-items: center; gap: 6px; width: 100%; color: var(--text-muted); font-size: var(--nand-text-caption); }
-.nand-session-row-id { flex: none; color: var(--text-faint); font-family: var(--font-monospace); font-size: 0.95em; font-variant-numeric: tabular-nums; }
-.nand-session-row-status { flex: 1 1 auto; }
-.nand-session-status-dot { width: 6px; height: 6px; color: var(--text-faint); }
+.nand-session-row-meta { display: grid; grid-template-columns: 6px minmax(0, 1fr); align-items: center; gap: 2px 6px; width: 100%; color: var(--text-muted); font-size: var(--nand-text-caption); }
+.nand-session-row-id { grid-column: 1 / -1; color: var(--text-faint); font-family: var(--font-monospace); font-size: 0.95em; font-variant-numeric: tabular-nums; }
+.nand-session-row-status { grid-column: 2; grid-row: 2; }
+.nand-session-status-dot { grid-column: 1; grid-row: 2; width: 6px; height: 6px; color: var(--text-faint); }
 .nand-session-status-dot.is-running { color: var(--nand-tone-success); }
 .nand-session-status-dot.is-waiting { color: var(--nand-tone-warning); }
 .nand-session-status-dot.is-idle { color: var(--nand-tone-info); }
@@ -27797,7 +27905,7 @@ body:where(.nand-iconic-enabled)[data-theme="Ukiyo"] .workspace-leaf > .workspac
 .nand-session-row > button.nand-session-close:hover:not(:disabled) { color: var(--text-error); }
 
 /* Center: the terminal is framed as one clean card; the search bar floats over it. */
-.nand-agent-center { position: relative; min-width: 0; min-height: 0; display: flex; flex-direction: column; overflow: hidden; padding: var(--size-4-2); background: var(--nand-surface-muted); }
+.nand-agent-center { grid-column: 2; grid-row: 1; position: relative; min-width: 0; min-height: 0; display: flex; flex-direction: column; overflow: hidden; padding: var(--size-4-2); background: var(--nand-surface-muted); }
 .nand-agent-center > .terminal-container { flex: 1; min-height: 0; border: var(--nand-border); border-radius: var(--nand-radius-md); box-shadow: var(--nand-shadow-xs); }
 
 /* History rail */
@@ -27836,7 +27944,7 @@ body:where(.nand-iconic-enabled)[data-theme="Ukiyo"] .workspace-leaf > .workspac
 .nand-agent-history details pre { margin-top: var(--size-4-1); color: var(--text-muted); }
 
 /* Usage strip. Obsidian's desktop status bar overlays the bottom of the leaf. */
-.nand-agent-usage { grid-column: 1 / -1; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--size-4-1) var(--size-4-3); min-width: 0; padding: var(--size-4-1) var(--size-4-3); padding-bottom: calc(var(--size-4-1) + var(--size-4-8)); border-top: var(--nand-border); background: var(--nand-surface-muted); color: var(--text-muted); font-size: var(--nand-text-caption); font-variant-numeric: tabular-nums; }
+.nand-agent-usage { grid-column: 1 / -1; grid-row: 3; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--size-4-1) var(--size-4-3); min-width: 0; padding: var(--size-4-1) var(--size-4-3); padding-bottom: calc(var(--size-4-1) + var(--size-4-8)); border-top: var(--nand-border); background: var(--nand-surface-muted); color: var(--text-muted); font-size: var(--nand-text-caption); font-variant-numeric: tabular-nums; }
 .nand-agent-usage-summary { min-width: 0; overflow-wrap: anywhere; }
 .nand-agent-usage button { max-width: 100%; white-space: normal; height: auto; }
 .nand-agent-workbench .nand-agent-usage button.nand-agent-usage-pill { display: inline-flex; align-items: center; gap: 6px; min-height: 24px; padding: 2px 10px; border: var(--nand-border); border-radius: var(--nand-radius-pill); background: var(--nand-surface); box-shadow: none; color: var(--text-normal); font-size: var(--nand-text-caption); font-weight: 500; text-align: start; transition: border-color var(--nand-duration-fast) var(--nand-ease), background-color var(--nand-duration-fast) var(--nand-ease); }
@@ -27857,12 +27965,9 @@ body:where(.nand-iconic-enabled)[data-theme="Ukiyo"] .workspace-leaf > .workspac
 }
 @container nand-terminal (max-width: 680px) {
 	.nand-agent-sidebar, .nand-agent-history { padding: var(--size-4-3) var(--size-4-2); gap: var(--size-4-2); }
-	.nand-agent-history { border-left: none; }
-	.nand-agent-center { padding: var(--size-4-1); }
 }
 .nand-notification-description { white-space: pre-line; }
 .nand-settings [data-settings-product="contacts"] input { min-width: 0; max-width: 100%; }
-@container nand-terminal (max-width: 680px) { .workspace-leaf-content[data-type="terminal-view"] .view-content.nand-agent-workbench { grid-template-columns: 140px minmax(120px, 1fr); grid-template-rows: minmax(160px, 1fr) minmax(0, 200px) auto; } .nand-agent-history { grid-column: 1 / -1; max-height: 240px; border-top: 1px solid var(--background-modifier-border); } }
 .is-mobile .nand-agent-workbench button { min-height: 44px; }
 
 .side-dock-ribbon-action[data-nand-unread] { position: relative; }

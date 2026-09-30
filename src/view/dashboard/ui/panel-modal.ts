@@ -1,6 +1,6 @@
 import { App, Modal } from 'obsidian';
 import { render, type ComponentChild } from 'preact';
-import { applyModalTheme } from '../appearance/modal-theme';
+import { applyModalTheme, removeNativeModalCloseButton } from '../appearance/modal-theme';
 import { closeDashboardDialogs } from './dialog-scope';
 const openPanels = new WeakMap<App, Set<DashboardPanelModal>>();
 /** Native Modal owns focus, Escape and stacking. Composition closes its panels when disabling/unloading. */
@@ -21,6 +21,10 @@ export class DashboardPanelModal extends Modal {
 		}
 		panels.add(this);
 		this.modalEl.addClass('nand-panel-modal');
+		if (this.className.split(' ').includes('dashboard-habit-stats-modal')) {
+			this.modalEl.addClass('dashboard-habit-stats-host');
+			removeNativeModalCloseButton(this.modalEl);
+		}
 		this.contentEl.addClass(...this.className.split(' '));
 		applyModalTheme(this.contentEl);
 		render(

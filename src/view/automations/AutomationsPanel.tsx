@@ -118,6 +118,7 @@ export function AutomationsPanel({
 					<label className="nand-automation-filter nand-automation-filter--search nand-ui-field">
 						<span>{t('automation.search')}</span>
 						<input
+							type="search"
 							aria-label={t('automation.search')}
 							placeholder={t('automation.search')}
 							value={state.search}

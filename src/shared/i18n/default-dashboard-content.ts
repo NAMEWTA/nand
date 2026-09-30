@@ -1,6 +1,8 @@
 /** Default dashboard content */
 export const messages = {
 	en: {
+		'defaults.countdownLabel': 'Countdown to New Year',
+		'defaults.anniversaryLabel': 'Anniversary',
 		'default.memoTitle': '{date} memo',
 		'default.memoBody': 'Welcome to NAND. Click here to edit your first memo.',
 		'default.memoPathTitle': 'Tip: Dashboard File Path',
@@ -185,6 +187,8 @@ export const messages = {
 		'renderer.dayStreak': '{count} day streak',
 	},
 	zh: {
+		'defaults.countdownLabel': '新年',
+		'defaults.anniversaryLabel': '纪念日',
 		'default.memoTitle': '{date} 备忘',
 		'default.memoBody': '欢迎使用 NAND。点击此处编辑你的第一条备忘。',
 		'default.memoPathTitle': '提示：Dashboard 文件路径',

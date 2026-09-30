@@ -1,0 +1,145 @@
+{
+  "repository": "https://github.com/NAMEWTA/nand",
+  "base": "53e421ac2d8075b40ae34f8adb6302336babcbfe",
+  "scope": "All 16 open issues and all 24 comments fetched at task start",
+  "execution": {
+    "model": "gpt-6.1-sol",
+    "reasoning_effort": "xhigh",
+    "agents": [
+      "dashboard_fixes",
+      "surface_fixes",
+      "agent_fixes"
+    ],
+    "reviewer": "primary agent"
+  },
+  "issues": [
+    {
+      "number": 46,
+      "url": "https://github.com/NAMEWTA/nand/issues/46",
+      "title": "[智能体] 工作台较窄时（例如两侧边栏都展开），英文界面左侧会话卡片文字逐字母断行、状态被裁掉",
+      "commentsReviewed": 3,
+      "owner": "agent_fixes",
+      "plan": "会话号与状态分行；关闭按钮固定宽度；窄卡片保留可见状态。"
+    },
+    {
+      "number": 51,
+      "url": "https://github.com/NAMEWTA/nand/issues/51",
+      "title": "[设置] 档案页「档案资料文件夹」一行说明文字被挤成窄条（英文每行一两个词）",
+      "commentsReviewed": 3,
+      "owner": "surface_fixes",
+      "plan": "说明区 flex basis 归零，保留横向最小可读宽度，消除纵向195px空白。"
+    },
+    {
+      "number": 52,
+      "url": "https://github.com/NAMEWTA/nand/issues/52",
+      "title": "[看板] 侧栏「习惯打卡」鼠标悬停的那一行变成浅色底，白字几乎看不见；中文标题被截成「习惯…」",
+      "commentsReviewed": 2,
+      "owner": "dashboard_fixes",
+      "plan": "带照片习惯悬停使用可读配色；工具换行，保证中英文标题与计数可见。"
+    },
+    {
+      "number": 53,
+      "url": "https://github.com/NAMEWTA/nand/issues/53",
+      "title": "[看板] 「打卡统计」弹窗太窄：第三个统计块被裁掉、中文说明一字一行，还有两个关闭按钮",
+      "commentsReviewed": 2,
+      "owner": "dashboard_fixes",
+      "plan": "统计弹窗外层明确适应视口的宽度、内层100%；只留一个原生button关闭控件。"
+    },
+    {
+      "number": 54,
+      "url": "https://github.com/NAMEWTA/nand/issues/54",
+      "title": "[设置] 运行中切换插件语言后，状态栏「用量 / Usage」要等 20–40 秒才换成新语言",
+      "commentsReviewed": 2,
+      "owner": "agent_fixes",
+      "plan": "语言事件重绘缓存用量；语义statusKey在显示时翻译；更新终端提示，清理订阅与timer。"
+    },
+    {
+      "number": 55,
+      "url": "https://github.com/NAMEWTA/nand/issues/55",
+      "title": "[档案] 英文界面两侧边栏都展开时（1280 宽），搜索框占位文字被截断",
+      "commentsReviewed": 2,
+      "owner": "surface_fixes",
+      "plan": "联系人和企业采用各自的简短中英文搜索提示。"
+    },
+    {
+      "number": 56,
+      "url": "https://github.com/NAMEWTA/nand/issues/56",
+      "title": "[自动化] 工具栏换行不整齐：搜索框是浏览器默认样式，和旁边的下拉框高度、对齐都不一样（800 宽时明显）",
+      "commentsReviewed": 2,
+      "owner": "surface_fixes",
+      "plan": "自动化搜索设置 type=search，继承宿主输入样式。"
+    },
+    {
+      "number": 57,
+      "url": "https://github.com/NAMEWTA/nand/issues/57",
+      "title": "[编辑器][优化] 编辑器面板「字数」「专注」标签目前只有「还没做」的占位 → 建议实现，或在完成前先隐藏",
+      "commentsReviewed": 2,
+      "owner": "surface_fixes",
+      "plan": "采用方案B隐藏未完成字数/专注入口；旧activeDomain回落评论，移除默认域选择设置。"
+    },
+    {
+      "number": 58,
+      "url": "https://github.com/NAMEWTA/nand/issues/58",
+      "title": "[看板] 示例数据不跟界面语言：English 下「纪念日」和农历名言仍是中文，中文下倒数日显示「距离New Year Countdown还有」",
+      "commentsReviewed": 2,
+      "owner": "dashboard_fixes",
+      "plan": "示例纪念日/倒数日使用defaultLabel标记，显示时翻译；用户编辑后保留名字；快捷按钮翻译、默认分区按创建语言生成、英文隐藏中文名言。"
+    },
+    {
+      "number": 59,
+      "url": "https://github.com/NAMEWTA/nand/issues/59",
+      "title": "[智能体] 窗口 800–1000 宽时工作台变成三栏，终端只剩 190–390px 宽（比 640 宽窗口时还窄）",
+      "commentsReviewed": 1,
+      "owner": "agent_fixes",
+      "plan": "工作台保持连续两栏，历史放终端下方且限高；终端宽度随窗口增长。"
+    },
+    {
+      "number": 60,
+      "url": "https://github.com/NAMEWTA/nand/issues/60",
+      "title": "[回归][编辑器] 英文界面下编辑器面板的三个标签在右侧栏默认宽度被截成「Com… / Writi… / Focus」",
+      "commentsReviewed": 1,
+      "owner": "surface_fixes",
+      "plan": "评论标签按内容宽度显示，去除省略号。"
+    },
+    {
+      "number": 61,
+      "url": "https://github.com/NAMEWTA/nand/issues/61",
+      "title": "[设置] NAND 设置顶部模块标签栏在默认设置窗口里放不下：出现横向滚动条，切换标签后滚动位置复位，选中的「同步 / Sync」被裁掉或完全看不见",
+      "commentsReviewed": 1,
+      "owner": "surface_fixes",
+      "plan": "顶部模块标签允许换行，保持导航顺序和选中同步可见。"
+    },
+    {
+      "number": 62,
+      "url": "https://github.com/NAMEWTA/nand/issues/62",
+      "title": "[档案] 联系人详情里空白小节的「尚未填写」样式不一致：性格与偏好 / 生活习惯 / 备注 是黑色正文，其它小节是灰色占位",
+      "commentsReviewed": 1,
+      "owner": "surface_fixes",
+      "plan": "空白正文直接渲染统一灰色占位；实际用户内容仍使用Markdown渲染。"
+    },
+    {
+      "number": 63,
+      "url": "https://github.com/NAMEWTA/nand/issues/63",
+      "title": "[看板] 「快捷按钮」小组件默认背景图没有压暗：白色按钮文字落在图片亮处看不见（「New Note」约 1.4:1），「New Journal」被截成「New Jou…」",
+      "commentsReviewed": 0,
+      "owner": "dashboard_fixes",
+      "plan": "照片上快捷按钮使用实体主题底色和配对文字色；标签可换行。"
+    },
+    {
+      "number": 64,
+      "url": "https://github.com/NAMEWTA/nand/issues/64",
+      "title": "[档案] 筛选弹窗里没有可选项的分组只显示一个标题：全新库点「筛选」只看到 5 个粗体标题，没有「暂无可选项」之类的提示",
+      "commentsReviewed": 0,
+      "owner": "surface_fixes",
+      "plan": "空筛选分组提示、全空时说明资料如何生成选项；保留选择/应用行为。"
+    },
+    {
+      "number": 65,
+      "url": "https://github.com/NAMEWTA/nand/issues/65",
+      "title": "[看板] 「抹茶 / 丁香」看板主题在 Obsidian 深色模式下看不清：分区标题、侧栏日期、番茄钟「开始专注」对比度只有 1.0–1.3",
+      "commentsReviewed": 0,
+      "owner": "dashboard_fixes",
+      "plan": "补matcha/lilac深色配色；区分照片前景与accent文字，修复onyx/volt角标文字及父层淡化。"
+    }
+  ]
+}

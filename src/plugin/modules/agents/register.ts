@@ -11,9 +11,9 @@ import { runtimeProcess } from '../../../platform/desktop/agents/runtime-process
 import { readUsageSnapshots } from '../../../platform/desktop/agents/usage';
 import type { TerminalService } from '../../../platform/desktop/terminal/terminal-service';
 import { usageContext } from '../../../platform/obsidian/agents/usage-context';
-import { t } from '../../../shared/i18n/index';
+import { onLanguageChanged, t } from '../../../shared/i18n/index';
 import { openUsage } from '../../../view/agent-usage/open-usage';
-import { paintUsageBar, usageBarVisible } from '../../../view/agent-usage/usage-bar';
+import { paintUsageBar, renderUsageBar, usageBarVisible } from '../../../view/agent-usage/usage-bar';
 import { UsageModal } from '../../../view/agent-usage/usage-modal';
 import { launchAgent, launchShell, resumeAgent, type LaunchHost } from './launcher';
 
@@ -48,7 +48,7 @@ export function refreshRegisteredUsage(plugin: OrcaPluginHost): void {
 	refreshers.get(plugin)?.();
 }
 
-export function registerOrca(plugin: OrcaPluginHost): void {
+export function registerOrca(plugin: OrcaPluginHost): () => void {
 	if (resolveCli('pwsh', '', ''))
 		plugin.addCommand({
 			id: 'new-terminal-powershell',
@@ -118,11 +118,15 @@ export function registerOrca(plugin: OrcaPluginHost): void {
 	let inflight = false;
 	let consecutiveFailures = 0;
 	let nextAt = 0;
+	let disposed = false;
 	const render = async () => {
-		if (inflight) return;
+		if (disposed || inflight) return;
 		inflight = true;
 		try {
-			const painted = await paintUsageBar(status, plugin, (ids) => readUsageSnapshots(ids, usageContext(plugin)));
+			const painted = await paintUsageBar(status, {
+				settings: plugin.settings,
+				isActive: () => !disposed && (!plugin.isActive || plugin.isActive()),
+			}, (ids) => readUsageSnapshots(ids, usageContext(plugin)));
 			if (painted) {
 				latest = painted;
 				consecutiveFailures = painted.some((snapshot) => snapshot.failed) ? consecutiveFailures + 1 : 0;
@@ -135,18 +139,31 @@ export function registerOrca(plugin: OrcaPluginHost): void {
 	refreshers.set(plugin, () => {
 		void render();
 	});
-	status.addEventListener('click', () => {
+	const offLanguage = onLanguageChanged(() => renderUsageBar(status, plugin, latest));
+	const onClick = () => {
 		if (!usageBarVisible(plugin)) return;
 		new UsageModal(plugin.app, latest).open();
 		void render();
-	});
+	};
+	status.addEventListener('click', onClick);
 	void render();
-	plugin.registerInterval(
-		window.setInterval(() => {
+	const win = status.win;
+	const timer = plugin.registerInterval(
+		win.setInterval(() => {
 			if (Date.now() < nextAt) return;
 			void render();
 		}, 15_000),
 	);
+	return () => {
+		if (disposed) return;
+		disposed = true;
+		offLanguage();
+		refreshers.delete(plugin);
+		win.clearInterval(timer);
+		status.removeEventListener('click', onClick);
+		status.toggleClass('is-hidden', true);
+		status.replaceChildren();
+	};
 }
 
 function host(plugin: OrcaPluginHost): LaunchHost {

@@ -1,0 +1,4 @@
+Already up to date
+Done in 395ms using pnpm v11.1.3
+$ esbuild scripts/verify-banner-quote-font.ts --bundle --platform=node --format=cjs --outfile=node_modules/.tmp/verify-banner-quote-font.cjs --alias:obsidian=./scripts/obsidian-stub.ts --log-level=warning && node node_modules/.tmp/verify-banner-quote-font.cjs
+verify-banner-quote-font: all 7 checks passed

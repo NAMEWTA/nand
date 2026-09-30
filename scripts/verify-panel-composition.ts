@@ -6,7 +6,10 @@ import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { Notice, TFile, TFolder, type App } from 'obsidian';
 import { NativeHistory } from '../src/platform/obsidian/ai-vault/service';
-import { HistorySidebar, SessionSidebar } from '../src/view/terminal/workbench';
+import { HistorySidebar, SessionSidebar, UsageFooter } from '../src/view/terminal/workbench';
+import { DEFAULT_AGENT_SETTINGS } from '../src/core/agent-launch/defaults';
+import { DEFAULT_TERMINAL_SETTINGS } from '../src/core/pty/settings';
+import { refreshRegisteredUsage, registerOrca, type OrcaPluginHost } from '../src/plugin/modules/agents/register';
 import type { PtySession } from '../src/platform/desktop/terminal/pty-session';
 import type { TerminalService } from '../src/platform/desktop/terminal/terminal-service';
 import { UsageModal } from '../src/view/agent-usage/usage-modal';
@@ -238,7 +241,7 @@ async function verifyExports() {
 	render(null, panel);
 	console.log('History export: visible Vault files, concurrent collisions, safe names, content, localized failures and actual sidebar open/pending behavior passed.');
 }
-void verifyExports().then(verifyHistoryMatrix).then(verifySessionIdentity).then(verifyAutomationFilters).catch((error) => { console.error(error); process.exitCode = 1; });
+void verifyExports().then(verifyHistoryMatrix).then(verifySessionIdentity).then(verifyUsageLanguage).then(verifyAutomationFilters).catch((error) => { console.error(error); process.exitCode = 1; });
 
 async function verifySessionIdentity() {
 	const panel = document.createElement('div'); document.body.appendChild(panel);
@@ -269,6 +272,10 @@ async function verifySessionIdentity() {
 	const closeButton = rule('.nand-session-row > button:last-child');
 	assert.match(closeButton, /flex:\s*0 0 32px/);
 	assert.match(closeButton, /width:\s*32px/);
+	assert.match(rule('.nand-session-row-meta {'), /display:\s*grid/);
+	assert.match(rule('.nand-session-row-id {'), /grid-column:\s*1\s*\/\s*-1/);
+	assert.match(rule('.nand-session-row-status {'), /grid-row:\s*2/);
+	assert.match(rule('.nand-session-status-dot {'), /grid-row:\s*2/);
 	assert.match(rule('.nand-agent-sidebar button {'), /overflow-wrap:\s*anywhere/);
 	const wait = () => new Promise<void>((resolve) => setTimeout(resolve, 160));
 	for (const language of ['zh', 'en', 'zh'] as const) {
@@ -296,6 +303,121 @@ async function verifySessionIdentity() {
 	render(null, panel);
 	assert.equal(unsubscribed, 1, 'Unmount releases the service subscription');
 	console.log('Session sidebar: stable identity, exact selection, reorder/close, unknown status and bilingual surface names passed.');
+}
+
+async function verifyUsageLanguage() {
+	class StatusItem {
+		hidden = false;
+		spans: Array<{ text?: string }> = [];
+		listeners = new Map<string, () => void>();
+		cleared = 0;
+		win = {
+			setInterval: (_callback: () => void, _delay: number) => 42,
+			clearInterval: (id: number) => { this.cleared = id; },
+		};
+		addClass(): void {}
+		toggleClass(name: string, on: boolean): void { if (name === 'is-hidden') this.hidden = on; }
+		replaceChildren(): void { this.spans = []; }
+		createSpan(spec: { text?: string }): StatusItem { this.spans.push(spec); return new StatusItem(); }
+		addEventListener(name: string, callback: () => void): void { this.listeners.set(name, callback); }
+		removeEventListener(name: string, callback: () => void): void {
+			if (this.listeners.get(name) === callback) this.listeners.delete(name);
+		}
+		get text(): string { return this.spans.map((span) => span.text ?? '').join(''); }
+	}
+	const previousWindow = globalThis.window;
+	let runtimeReads = 0;
+	globalThis.window = {
+		require: (name: string) => {
+			assert.equal(name, 'node:process');
+			runtimeReads++;
+			return process;
+		},
+	} as unknown as Window & typeof globalThis;
+	setLanguage('zh');
+	const status = new StatusItem();
+	const agentSettings = structuredClone(DEFAULT_AGENT_SETTINGS);
+	for (const settings of Object.values(agentSettings.agents)) settings.enabled = false;
+	agentSettings.agents.codex.enabled = true;
+	agentSettings.agents.codex.accountId = 'language-fixture';
+	let active = true;
+	const host = {
+		settings: { ...DEFAULT_TERMINAL_SETTINGS, agentSettings },
+		app: { vault: { adapter: { getBasePath: () => '/nand-nonexistent-usage-language-fixture' } } },
+		manifest: { dir: '.obsidian/plugins/nand' },
+		addCommand: () => {},
+		addStatusBarItem: () => status,
+		registerInterval: (id: number) => id,
+		isActive: () => active,
+	} as unknown as OrcaPluginHost;
+	const cleanup = registerOrca(host);
+	const wait = () => new Promise<void>((resolve) => setTimeout(resolve, 160));
+	const panel = document.createElement('div'); document.body.appendChild(panel);
+	try {
+		await wait();
+		assert.equal(status.text, '用量');
+		const before = runtimeReads;
+		for (const language of ['en', 'zh', 'en'] as const) {
+			setLanguage(language);
+			assert.equal(status.text, language === 'zh' ? '用量' : 'Usage');
+			assert.equal(runtimeReads, before, 'Switching language does not read providers or reset the poll');
+		}
+		active = false; setLanguage('zh');
+		assert.equal(status.hidden, true);
+		assert.equal(status.text, '');
+		active = true; cleanup();
+		assert.equal(status.cleared, 42);
+		assert.equal(status.listeners.size, 0);
+		setLanguage('en'); refreshRegisteredUsage(host); await wait();
+		assert.equal(runtimeReads, before, 'Disposed hosts no longer react to language or refresh requests');
+		assert.equal(status.text, '');
+
+		let historyReads = 0, timers = 0, cleared = 0;
+		agentSettings.agents.pi.enabled = true;
+		const footerHost = {
+			...host,
+			app: { ...host.app, workspace: { containerEl: { win: {
+				setInterval: () => { timers++; return 99; },
+				clearInterval: (id: number) => { assert.equal(id, 99); cleared++; },
+			} } } },
+		} as unknown as WorkbenchHost;
+		const history = { query: async () => { historyReads++; return { usage: { known: false } }; } } as unknown as NativeHistory;
+		setLanguage('zh');
+		render(h(UsageFooter, { host: footerHost, history }), panel); await wait();
+		assert.ok(panel.textContent!.includes('未登录'));
+		assert.ok(panel.textContent!.includes('此服务商不提供可读取的订阅额度'));
+		const afterRead = runtimeReads;
+		for (const language of ['en', 'zh', 'en'] as const) {
+			setLanguage(language); await wait();
+			assert.ok(panel.textContent!.includes(t('terminalAgent.agents.notSignedIn')));
+			assert.ok(panel.textContent!.includes(t('terminalAgent.agents.quotaUnsupported')));
+			assert.ok(panel.textContent!.includes(t('terminalAgent.workbench.vaultUsage')));
+			assert.equal(runtimeReads, afterRead, 'Footer repaint uses cached provider states');
+			assert.equal(historyReads, 1, 'Footer language events do not query history');
+			assert.equal(timers, 1, 'Footer language events do not restart polling');
+			const environment = globalThis as { document?: unknown };
+			delete environment.document; // Native Modal stub owns a separate mini-DOM.
+			try {
+				const modal = new UsageModal({} as App, [
+					{ agentId: 'codex', provider: 'Codex', account: null, failed: false, windows: [], status: '未登录', statusKey: 'notSignedIn' },
+					{ agentId: 'pi', provider: 'Pi', account: null, failed: true, windows: [], status: 'Provider response 429: retry after 20s' },
+				]);
+				modal.onOpen();
+				assert.ok(modal.contentEl.textContent!.includes(t('terminalAgent.agents.notSignedIn')), 'Opening cached usage uses the current language');
+				assert.ok(modal.contentEl.textContent!.includes('Provider response 429: retry after 20s'), 'Raw provider diagnostics stay intact');
+				modal.onClose();
+			} finally { environment.document = document; }
+		}
+		render(null, panel); setLanguage('zh'); await wait();
+		assert.equal(cleared, 1);
+		assert.equal(panel.textContent, '');
+		assert.equal(runtimeReads, afterRead);
+	} finally {
+		render(null, panel);
+		cleanup();
+		globalThis.window = previousWindow;
+	}
+	console.log('Usage language: immediate cached status/footer repaint, no provider/history reads or timer restart, inactive and disposed lifecycle passed.');
 }
 
 async function verifyHistoryMatrix() {
@@ -413,6 +535,7 @@ async function verifyAutomationFilters() {
 	for (const language of ['zh', 'en', 'zh'] as const) {
 		setLanguage(language); state.search = ''; state.filter = ''; state.agentFilter = ''; state.selected = '1'; paint();
 		assert.equal(ids().length, 106);
+		assert.equal(panel.querySelector('input')?.getAttribute('type'), 'search', 'Automation search uses Obsidian theme input styling');
 		for (const select of Array.from(panel.querySelectorAll('select'))) assert.equal(select.closest('label')?.querySelector('span')?.textContent, select.getAttribute('aria-label'), 'Visible and accessible filter names agree');
 		assert.deepEqual(Array.from(panel.querySelectorAll('select')).map(el => el.getAttribute('aria-label')), [t('automation.actionFilter'), t('automation.agentFilter')]);
 		assert.equal(panel.querySelector('.nand-automation-prompt')?.textContent, prompt);

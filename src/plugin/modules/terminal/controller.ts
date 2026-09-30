@@ -48,7 +48,7 @@ import type { TerminalService } from '../../../platform/desktop/terminal/termina
 import { refreshLeafTitle } from '../../../platform/obsidian/workspace-title';
 import type { LocalizedCommand } from '../../../platform/obsidian/localized-command';
 import type { ServerManager } from '../../../platform/terminal-server/server-manager';
-import { t as sharedT } from '../../../shared/i18n/index';
+import { onLanguageChanged, t as sharedT } from '../../../shared/i18n/index';
 import { i18n, t } from '../../../shared/i18n/terminal-accessor';
 import { renderEmptyState } from '../../../view/primitives/empty-state';
 import { TERMINAL_RIBBON_ICON_ID } from '../../../view/terminal/icons';
@@ -192,6 +192,8 @@ export class TerminalAgentController {
 
 	// Status bar elements
 	private _statusBarItem: HTMLElement | null = null;
+	private usageCleanup: (() => void) | null = null;
+	private languageCleanup: (() => void) | null = null;
 	private _presetScriptsMenuEl: HTMLElement | null = null;
 	private _presetScriptsMenuCleanup: (() => void) | null = null;
 	private _presetMenuAnchor: DOMRect | null = null;
@@ -308,7 +310,8 @@ export class TerminalAgentController {
 
 		// Register all commands
 		this.registerCommands();
-		registerOrca(this);
+		this.usageCleanup = registerOrca(this);
+		this.languageCleanup = onLanguageChanged(() => this.updateStatusBar());
 
 		try {
 			this.sweepStaleClaudeIdeLocks();
@@ -342,6 +345,10 @@ export class TerminalAgentController {
 	 */
 	onunload(): void {
 		this._active = false;
+		this.languageCleanup?.();
+		this.languageCleanup = null;
+		this.usageCleanup?.();
+		this.usageCleanup = null;
 		void this.handleUnload();
 	}
 
@@ -611,7 +618,6 @@ export class TerminalAgentController {
 		this._statusBarItem = this.addStatusBarItem();
 		this._statusBarItem.addClass('terminal-status-bar');
 		this._statusBarItem.addClass('is-clickable');
-		this._statusBarItem.setAttr('aria-label', t('ribbon.terminalTooltip'));
 
 		const { iconEl } = mountNandStatusBarEntry(this._statusBarItem, activeDocument);
 		setIcon(iconEl, TERMINAL_RIBBON_ICON_ID);
@@ -638,8 +644,11 @@ export class TerminalAgentController {
 	 */
 	private updateStatusBar(): void {
 		if (!this._statusBarItem) return;
+		const tooltip = t('ribbon.terminalTooltip');
+		this._statusBarItem.setAttr('aria-label', tooltip);
+		setTooltip(this._statusBarItem, tooltip);
 
-		const shouldShow = this.settings.visibility.enabled && this.settings.visibility.showInStatusBar;
+		const shouldShow = this._active && this.settings.visibility.enabled && this.settings.visibility.showInStatusBar;
 
 		this._statusBarItem.toggleClass('is-hidden', !shouldShow);
 	}

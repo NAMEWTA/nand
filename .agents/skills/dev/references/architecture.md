@@ -67,7 +67,7 @@ Registration details that apply to every command are SKILL rule 9.
 | `automation` | none. Links to the automation center and notification inbox, with delivery and execution capabilities; always a top tab | `automation` |
 | `sync` | none. One placeholder row from `renderSyncSettings`. Sync is always a top tab and is not a home toggle | `sync` |
 
-There is no left-hand page list. `visibleProducts` in `nav.ts` is the top row. `coffee` is the about screen; the page id stays `coffee`. How a row is rendered in both the declarative list and the fallback is `references/obsidian-api.md`. Editor highlight and popover toggles call `editorHost.notifySettingsChanged()`. The default domain dropdown calls `notifyLayoutChanged()`.
+There is no left-hand page list. `visibleProducts` in `nav.ts` is the top row and wraps when space is limited. `coffee` is the about screen; the page id stays `coffee`. How a row is rendered in both the declarative list and the fallback is `references/obsidian-api.md`. Editor highlight and popover toggles call `editorHost.notifySettingsChanged()`. Comments is the only available editor domain; writing stats and focus have no UI or settings entry until implemented. Stored placeholder selections normalize to comments.
 
 ## i18n
 

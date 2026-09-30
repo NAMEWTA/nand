@@ -165,7 +165,10 @@ export class TerminalView extends ItemView {
 		container.empty();
 		container.addClass('nand-agent-workbench');
 		this.drawWorkbench();
-		this.register(onLeafLanguageChanged(this.app, this.leaf, () => this.drawWorkbench()));
+		this.register(onLeafLanguageChanged(this.app, this.leaf, () => {
+			this.drawWorkbench();
+			this.updateDropHintText();
+		}));
 		this.register(
 			container.onWindowMigrated(() => {
 				this.drawWorkbench();

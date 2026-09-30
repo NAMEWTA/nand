@@ -1,0 +1,247 @@
+[
+  {
+    "script": "test:mobile-stability",
+    "exit": 0,
+    "seconds": 0.84
+  },
+  {
+    "script": "test:weather-mapping",
+    "exit": 0,
+    "seconds": 0.94
+  },
+  {
+    "script": "test:folder-tag-search",
+    "exit": 0,
+    "seconds": 0.88
+  },
+  {
+    "script": "test:visible-properties",
+    "exit": 0,
+    "seconds": 0.83
+  },
+  {
+    "script": "test:calendar-task-insert",
+    "exit": 0,
+    "seconds": 0.81
+  },
+  {
+    "script": "test:calendar-daynum",
+    "exit": 0,
+    "seconds": 0.94
+  },
+  {
+    "script": "test:calendar-section",
+    "exit": 0,
+    "seconds": 1.88
+  },
+  {
+    "script": "test:confirm-dialog",
+    "exit": 0,
+    "seconds": 0.97
+  },
+  {
+    "script": "test:path-picker",
+    "exit": 0,
+    "seconds": 0.92
+  },
+  {
+    "script": "test:library-cover",
+    "exit": 0,
+    "seconds": 0.9
+  },
+  {
+    "script": "test:kanban-upgrade",
+    "exit": 0,
+    "seconds": 1.17
+  },
+  {
+    "script": "test:pair-width",
+    "exit": 0,
+    "seconds": 1.0
+  },
+  {
+    "script": "test:layout-stacked",
+    "exit": 0,
+    "seconds": 0.97
+  },
+  {
+    "script": "test:widget-span",
+    "exit": 0,
+    "seconds": 1.04
+  },
+  {
+    "script": "test:library-card-size",
+    "exit": 0,
+    "seconds": 1.24
+  },
+  {
+    "script": "test:media-thumb-size",
+    "exit": 0,
+    "seconds": 0.97
+  },
+  {
+    "script": "test:library-group",
+    "exit": 0,
+    "seconds": 1.54
+  },
+  {
+    "script": "test:countdown-picker",
+    "exit": 0,
+    "seconds": 1.02
+  },
+  {
+    "script": "test:gallery-placeholder",
+    "exit": 0,
+    "seconds": 1.22
+  },
+  {
+    "script": "test:album-widget",
+    "exit": 0,
+    "seconds": 1.84
+  },
+  {
+    "script": "test:doc-bracket-paths",
+    "exit": 0,
+    "seconds": 0.93
+  },
+  {
+    "script": "test:property-operator",
+    "exit": 0,
+    "seconds": 1.08
+  },
+  {
+    "script": "test:library-new-note",
+    "exit": 0,
+    "seconds": 1.22
+  },
+  {
+    "script": "test:weread-progress",
+    "exit": 0,
+    "seconds": 1.06
+  },
+  {
+    "script": "test:weread-stats",
+    "exit": 0,
+    "seconds": 1.07
+  },
+  {
+    "script": "test:web-section",
+    "exit": 0,
+    "seconds": 4.61
+  },
+  {
+    "script": "test:card-move",
+    "exit": 0,
+    "seconds": 1.16
+  },
+  {
+    "script": "test:music-account",
+    "exit": 0,
+    "seconds": 4.22
+  },
+  {
+    "script": "test:music-client",
+    "exit": 0,
+    "seconds": 0.94
+  },
+  {
+    "script": "test:banner-quote-font",
+    "exit": 0,
+    "seconds": 1.06
+  },
+  {
+    "script": "test:theme-studio-colors",
+    "exit": 0,
+    "seconds": 1.37
+  },
+  {
+    "script": "test:card-new-note",
+    "exit": 0,
+    "seconds": 1.11
+  },
+  {
+    "script": "test:memo-markdown",
+    "exit": 0,
+    "seconds": 1.07
+  },
+  {
+    "script": "test:memo-note-template",
+    "exit": 0,
+    "seconds": 0.96
+  },
+  {
+    "script": "test:expense",
+    "exit": 0,
+    "seconds": 1.08
+  },
+  {
+    "script": "test:refresh-scope",
+    "exit": 0,
+    "seconds": 1.33
+  },
+  {
+    "script": "test:scroll-root",
+    "exit": 0,
+    "seconds": 0.94
+  },
+  {
+    "script": "test:editor-comments",
+    "exit": 0,
+    "seconds": 2.14
+  },
+  {
+    "script": "test:settings-nav",
+    "exit": 0,
+    "seconds": 1.97
+  },
+  {
+    "script": "test:terminal-agent",
+    "exit": 0,
+    "seconds": 2.75
+  },
+  {
+    "script": "test:issue-regressions",
+    "exit": 0,
+    "seconds": 1.07
+  },
+  {
+    "script": "test:contacts",
+    "exit": 0,
+    "seconds": 3.34
+  },
+  {
+    "script": "test:iconic-port",
+    "exit": 0,
+    "seconds": 2.82
+  },
+  {
+    "script": "test:automation",
+    "exit": 0,
+    "seconds": 1.25
+  },
+  {
+    "script": "test:promise-callbacks",
+    "exit": 0,
+    "seconds": 4.4
+  },
+  {
+    "script": "test:architecture",
+    "exit": 0,
+    "seconds": 7.27
+  },
+  {
+    "script": "test:panel-composition",
+    "exit": 0,
+    "seconds": 14.2
+  },
+  {
+    "script": "test:dashboard-isolation",
+    "exit": 0,
+    "seconds": 1.15
+  },
+  {
+    "script": "test:card-panels",
+    "exit": 0,
+    "seconds": 1.2
+  }
+]

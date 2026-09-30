@@ -1,6 +1,7 @@
 import { AutomationError } from '../../../shared/automation/errors';
 import { MarkdownView, normalizePath, type App, type TFile } from 'obsidian';
 import { anniversaryDateThisYear, parseAnniversaryDate } from '../../../core/anniversaries/calendar';
+import { resolveWidgetLabel } from '../../../core/dashboard/default-widget-label';
 import { parse as parseDashboard, serialize as serializeDashboard } from '../../../core/dashboard/parser/index';
 import type { DashboardSettings } from '../../../core/dashboard/types/index';
 import { readTaskMeta, TASK_META_REGEX, taskMetaSuffix } from '../../../shared/automation/metadata';
@@ -164,7 +165,7 @@ export class DashboardAutomationSource {
 				);
 				const due = new Date(target);
 				due.setDate(due.getDate() - entry.reminderDays);
-				const label = entry.label || entry.targetDate;
+				const label = resolveWidgetLabel(entry, 'countdown') || entry.targetDate;
 				add(
 					entry,
 					label,
@@ -181,7 +182,7 @@ export class DashboardAutomationSource {
 				const start = parseAnniversaryDate(entry.startDate);
 				if (!start) continue;
 				const at = anniversaryDateThisYear(start, now).getTime();
-				const label = entry.label || entry.startDate;
+				const label = resolveWidgetLabel(entry, 'anniversary') || entry.startDate;
 				const years = now.getFullYear() - start.getFullYear();
 				add(
 					entry,

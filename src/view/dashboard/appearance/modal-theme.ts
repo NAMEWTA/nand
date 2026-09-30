@@ -39,6 +39,7 @@ const MODAL_THEME_VARS: readonly string[] = [
 	'--db-text-muted',
 	'--db-text-faint',
 	'--db-text-inverse',
+	'--db-text-on-accent',
 	'--db-text-inverse-muted',
 	'--db-border',
 	'--db-border-card',

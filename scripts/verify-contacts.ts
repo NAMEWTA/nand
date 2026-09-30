@@ -10,6 +10,13 @@ import { createMarkdown, parseRecord, patchMarkdown, relativeLink } from '../src
 import { ContactsIndex, emptyQuery } from '../src/core/contacts/index-store';
 import { ContactsController } from '../src/platform/obsidian/contacts/controller';
 import { normalizeContactsSettings, validContactsFolder } from '../src/shared/contacts-settings';
+import { FilterModal } from '../src/view/contacts/forms';
+import { El } from './mini-dom';
+import { Setting as StubSetting } from './obsidian-stub';
+import { parseHTML } from 'linkedom';
+import { h, render } from 'preact';
+import { ContactsSurface } from '../src/view/contacts/surface';
+import type { ContactsPanelHost } from '../src/view/contacts/panel-contract';
 
 function fixture(kind: 'person' | 'company' = 'person', name = '张三'): ArchiveRecord {
 	const record = newRecord(kind);
@@ -543,4 +550,131 @@ test('archive folder row is the only contacts setting that reserves description 
 	assert.equal(folder.settingEl.classList.contains('nand-contacts-folder-setting'), true);
 	assert.ok(columns);
 	assert.equal(columns.settingEl.classList.contains('nand-contacts-folder-setting'), false);
+});
+
+test('empty archive filters explain missing data and preserve existing choices on apply', () => {
+	try {
+		for (const language of ['zh', 'en'] as const) {
+			setLanguage(language);
+			for (const kind of ['person', 'company'] as const) {
+				const index = new ContactsIndex();
+				const controller = { app: {}, index, choices: () => [] } as unknown as ContactsController;
+				const query = { ...emptyQuery(), kind };
+				const empty = new FilterModal(controller, query, () => {});
+				Object.assign(empty, { modalEl: new El('div'), setTitle() {} });
+				empty.onOpen();
+				const emptyContent = empty.contentEl as unknown as El;
+				assert.equal(emptyContent.querySelectorAll('.nand-contacts-placeholder').length, kind === 'person' ? 5 : 2);
+				assert.equal(emptyContent.querySelector('p')?.textContent, t('contacts.filterEmpty'));
+				for (const placeholder of emptyContent.querySelectorAll('.nand-contacts-placeholder')) {
+					assert.equal(placeholder.textContent, t('contacts.noFilterOptions'));
+					assert.ok(placeholder.hasClass('nand-contacts-muted'));
+				}
+				empty.onClose();
+				assert.equal(emptyContent.childElementCount, 0);
+
+				const record = fixture(kind);
+				record.fields.region = '上海';
+				index.set(record);
+				query.regions = ['Previous region'];
+				let applied = { ...emptyQuery(), kind };
+				const before = (Setting as unknown as typeof StubSetting).created.length;
+				const partial = new FilterModal(controller, query, (next) => { applied = next; });
+				Object.assign(partial, { modalEl: new El('div'), setTitle() {} });
+				partial.onOpen();
+				const partialContent = partial.contentEl as unknown as El;
+				assert.equal(partialContent.querySelectorAll('.nand-contacts-placeholder').length, kind === 'person' ? 4 : 1);
+				assert.equal(partialContent.textContent.includes(t('contacts.filterEmpty')), false);
+				const settings = (Setting as unknown as typeof StubSetting).created.slice(before);
+				settings.find((setting) => setting.name === '上海')!.toggles[0]!.fire!(true);
+				assert.deepEqual(query.regions, ['Previous region'], 'Editing the modal does not mutate the original query');
+				settings.at(-1)!.buttons[1]!.click!();
+				assert.deepEqual(applied.regions, ['Previous region', '上海']);
+				partial.onClose();
+			}
+		}
+	} finally {
+		setLanguage('zh');
+	}
+});
+
+test('archive search follows the selected kind and empty prose stays distinct from user text', async () => {
+	const environment = globalThis as { document?: Document };
+	const previousDocument = environment.document;
+	const { document } = parseHTML('<html><body></body></html>');
+	Object.assign(globalThis, { document });
+	const panel = document.createElement('div');
+	document.body.appendChild(panel);
+	const waitForEffects = () => new Promise<void>((resolve) => setTimeout(resolve, 160));
+	const index = new ContactsIndex();
+	const person = fixture();
+	const company = fixture('company', 'Example Company');
+	index.set(person);
+	index.set(company);
+	const mounted: string[] = [];
+	let unmounted = 0;
+	const view: ContactsPanelHost = {
+		state: { query: emptyQuery(), page: 0, selectedPath: '', selectedId: '', scroll: 0 },
+		enabled: true, columns: 6,
+		controller: { index, error: '', loading: false, reload: async () => {} },
+		mountMarkdown(target, text) {
+			mounted.push(text);
+			const p = document.createElement('p');
+			p.textContent = text;
+			target.appendChild(p);
+			return () => { unmounted++; target.textContent = ''; };
+		},
+		select(path) { view.state.selectedPath = path; paint(); },
+		back() { view.state.selectedPath = ''; paint(); },
+		changeKind(kind) { view.state.query.kind = kind; paint(); },
+		search(value) { view.state.query.search = value; paint(); },
+		sort() {}, page() {}, clearFilters() {}, filters() {}, add() {}, edit() {}, deleteRow() {}, more() {},
+	};
+	const paint = () => render(h(ContactsSurface, { view }), panel);
+	try {
+		for (const language of ['zh', 'en'] as const) {
+			setLanguage(language);
+			view.state.query = emptyQuery();
+			view.state.selectedPath = '';
+			paint();
+			const input = panel.querySelector('input')!;
+			assert.equal(input.getAttribute('placeholder'), t('contacts.searchPeople'));
+			panel.querySelectorAll<HTMLButtonElement>('.nand-contacts-tabs button')[1]!.click();
+			assert.equal(panel.querySelector('input'), input, 'Changing archive kind retains the search control');
+			assert.equal(input.getAttribute('placeholder'), t('contacts.searchCompanies'));
+			assert.equal(input.getAttribute('aria-label'), t('contacts.searchCompanies'));
+			input.value = 'Example';
+			input.dispatchEvent(new document.defaultView!.Event('input', { bubbles: true }));
+			assert.equal(view.state.query.search, 'Example');
+			for (const record of [person, company]) {
+				const keys = record.kind === 'person' ? ['traits', 'habits', 'notes'] as const : ['notes'] as const;
+				for (const key of keys) record.prose[key] = ' \n ';
+				view.state.selectedPath = record.path;
+				const before = mounted.length;
+				paint(); await waitForEffects();
+				const proseSections = Array.from(panel.querySelectorAll<HTMLElement>('.nand-contacts-section')).slice(-keys.length);
+				for (const section of proseSections) {
+					const placeholder = section.querySelector('p')!;
+					assert.equal(placeholder.textContent, t('contacts.noDetails'));
+					assert.ok(placeholder.classList.contains('nand-contacts-muted'));
+					assert.ok(placeholder.classList.contains('nand-contacts-placeholder'));
+				}
+				assert.equal(mounted.length, before, 'Empty prose does not invoke the Markdown renderer');
+				const userText = t('contacts.noDetails');
+				for (const key of keys) record.prose[key] = userText;
+				paint(); await waitForEffects();
+				assert.deepEqual(mounted.slice(before), keys.map(() => userText), 'Literal user text matching the placeholder stays real Markdown');
+				for (const section of proseSections) assert.equal(section.querySelector('.nand-contacts-placeholder'), null);
+				const beforeCleanup = unmounted;
+				for (const key of keys) record.prose[key] = '';
+				paint(); await waitForEffects();
+				assert.equal(unmounted - beforeCleanup, keys.length, 'Clearing prose releases its Markdown renderer');
+			}
+		}
+	} finally {
+		render(null, panel);
+		if (previousDocument) environment.document = previousDocument;
+		else delete environment.document;
+		setLanguage('zh');
+	}
 });

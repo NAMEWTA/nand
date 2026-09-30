@@ -1,6 +1,8 @@
 /** Quick Actions */
 export const messages = {
 	en: {
+		'quickActions.newJournal': 'New journal',
+		'quickActions.newNote': 'New note',
 		'quickActions.title': 'Quick Buttons',
 		'quickActions.bgColor': 'Background color',
 		'quickActions.btnColor': 'Button color',
@@ -23,6 +25,8 @@ export const messages = {
 		'quickActions.back': 'Back',
 	},
 	zh: {
+		'quickActions.newJournal': '新建日记',
+		'quickActions.newNote': '新建笔记',
 		'quickActions.title': '快捷按钮',
 		'quickActions.bgColor': '背景色',
 		'quickActions.btnColor': '按钮颜色',
