@@ -54,7 +54,7 @@ try {
  assert.equal(messages.find(m=>m.requestId==='history-scan').error, undefined);
  ws.send(JSON.stringify({module:'agent_data',type:'query',requestId:'history-query',...scope,query:'needle'}));
  await until(() => messages.some(m=>m.requestId==='history-query'));
- const page = messages.find(m=>m.requestId==='history-query'); assert.equal(page.data.total,1); assert.equal(page.data.rows[0].text,'');
+ const page = messages.find(m=>m.requestId==='history-query'); assert.equal(page.data.total,1); assert.equal('text' in page.data.rows[0],false);
  const beforeRead = createHash('sha256').update(await fs.readFile(path.join(source, 'session.jsonl'))).digest('hex');
  ws.send(JSON.stringify({module:'agent_data',type:'read',requestId:'history-read',...scope,key:page.data.rows[0].key}));
  await until(() => messages.some(m=>m.requestId==='history-read'));

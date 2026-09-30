@@ -2,7 +2,7 @@ import { ModuleClient } from './module-client';
 import type { ServerMessage } from './types';
 
 export type NativeUsage = import('../../shared/automation/types').AgentUsage;
-export interface NativeSession {
+export interface NativeSessionSummary {
 	key: string;
 	agentId: string;
 	accountKey: string;
@@ -11,15 +11,25 @@ export interface NativeSession {
 	title: string;
 	transcriptPath: string;
 	modifiedAtMs: number;
-	text: string;
 	usage: NativeUsage;
+}
+export interface NativeSession extends NativeSessionSummary {
+	text: string;
 }
 export interface HistoryPage {
-	rows: NativeSession[];
+	rows: NativeSessionSummary[];
 	total: number;
 	usage: NativeUsage;
+	revision: number;
 }
 export class AgentDataClient extends ModuleClient {
+	private generation = 0;
+	private connectionListeners = new Set<() => void>();
+	get connectionRevision(): number { return this.generation; }
+	subscribeConnection(listener: () => void): () => void {
+		this.connectionListeners.add(listener);
+		return () => this.connectionListeners.delete(listener);
+	}
 	private requests = new Map<
 		string,
 		{ resolve(value: unknown): void; reject(error: Error): void; cleanup(): void }
@@ -68,8 +78,13 @@ export class AgentDataClient extends ModuleClient {
 		else pending.resolve(message.data);
 	}
 	override setWebSocket(ws: WebSocket | null): void {
+		const changed = this.ws !== ws;
+		if (changed) this.rejectPending();
 		super.setWebSocket(ws);
-		if (!ws) this.rejectPending();
+		if (changed) {
+			this.generation++;
+			for (const listener of this.connectionListeners) listener();
+		}
 	}
 	private rejectPending(): void {
 		for (const request of this.requests.values()) {
@@ -79,7 +94,8 @@ export class AgentDataClient extends ModuleClient {
 		this.requests.clear();
 	}
 	override destroy(): void {
-		this.rejectPending();
+		this.setWebSocket(null);
+		this.connectionListeners.clear();
 		super.destroy();
 	}
 }

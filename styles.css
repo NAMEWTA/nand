@@ -27878,68 +27878,70 @@ body:where(.nand-iconic-enabled)[data-theme="Ukiyo"] .workspace-leaf > .workspac
  .nand-inbox-item { transition: none; }
 }
 
-/* Agent workbench: xterm remains an imperative island owned by TerminalService. */
-/* The history stays below the terminal so growing the leaf never takes width from xterm. */
+/* Agent workbench: the xterm island stays mounted while navigation and previews change. */
 .workspace-leaf-content[data-type="terminal-view"] { container-type: inline-size; container-name: nand-terminal; }
-.workspace-leaf-content[data-type="terminal-view"] .view-content.nand-agent-workbench { display: grid; grid-template-columns: minmax(0, 1fr); grid-template-rows: auto minmax(0, 1fr) minmax(0, min(140px, 20%)) auto; gap: 0; padding: 0; overflow: hidden; background: var(--nand-surface-muted); }
-.nand-agent-sidebar, .nand-agent-history { min-width: 0; min-height: 0; overflow: auto; padding: var(--size-4-4) var(--size-4-3); background: var(--nand-surface-muted); display: flex; flex-direction: column; gap: var(--size-4-3); scrollbar-width: thin; }
-.nand-agent-sidebar { grid-column: 1; grid-row: 1; border-bottom: var(--nand-border); max-height: min(210px, 26cqh); }
-.nand-agent-session-toggle { align-self: flex-start; }
-.nand-agent-session-controls { display: grid; grid-template-columns: minmax(180px, 1fr) minmax(180px, 3fr); gap: var(--size-4-2) var(--size-4-4); }
-.nand-agent-session-controls.is-collapsed { display: none; }
-.nand-agent-session-controls .nand-agent-nav { grid-column: 1; }
-.nand-agent-session-controls .nand-agent-section-label { display: none; }
-.nand-agent-session-controls .nand-session-list { grid-column: 2; grid-row: 1 / 3; display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); align-content: start; gap: var(--size-4-2); }
-@container nand-terminal (max-width: 520px) {
- .nand-agent-session-controls { grid-template-columns: minmax(0, 1fr); }
- .nand-agent-session-controls .nand-session-list { grid-column: 1; grid-row: auto; }
- .nand-agent-session-controls .nand-agent-nav { flex-direction: row; flex-wrap: wrap; }
-}
-.nand-agent-history { grid-column: 1; grid-row: 3; border-top: var(--nand-border); }
-.nand-agent-sidebar > *, .nand-agent-history > * { flex-shrink: 0; }
-.nand-agent-sidebar button { white-space: normal; height: auto; overflow-wrap: normal; word-break: normal; }
+.workspace-leaf-content[data-type="terminal-view"] .view-content.nand-agent-workbench { padding: 0; overflow: hidden; background: var(--nand-surface); }
+.terminal-workbench-shell { --terminal-sidebar-width: 272px; position: relative; display: grid; grid-template-columns: var(--terminal-sidebar-width) 5px minmax(0, 1fr); width: 100%; height: 100%; min-width: 0; min-height: 0; overflow: hidden; background: var(--nand-surface); }
+.nand-agent-sidebar { grid-column: 1; min-width: 0; min-height: 0; display: flex; flex-direction: column; gap: var(--size-4-3); padding: var(--size-4-3); background: var(--nand-surface-muted); overflow: hidden; }
+.terminal-navigation-title { display: flex; align-items: center; gap: var(--size-4-2); }
+.nand-agent-workbench-title { margin: 0; flex: 1; min-width: 0; color: var(--text-normal); font-size: var(--nand-text-body); font-weight: 600; line-height: 1.3; }
+.terminal-workbench-shell .terminal-drawer-close, .terminal-drawer-backdrop { display: none; }
+.terminal-navigation-tabs { display: flex; flex: none; }
+.terminal-navigation-tabs > button { flex: 1; min-width: 0; display: flex; align-items: center; justify-content: center; gap: var(--size-4-1); white-space: nowrap; font-size: var(--nand-text-caption); }
+.terminal-navigation-tabs svg { width: 14px; height: 14px; }
+.terminal-navigation-panels { flex: 1; min-height: 0; overflow: auto; scrollbar-width: thin; }
+.nand-agent-session-controls, .nand-agent-history { display: flex; flex-direction: column; gap: var(--size-4-3); min-width: 0; }
+.terminal-navigation-panels > [hidden] { display: none; }
+.nand-agent-sidebar button { white-space: normal; overflow-wrap: normal; word-break: normal; }
 .nand-agent-workbench button { min-height: 32px; }
-
-/* Session rail */
-.nand-agent-rail-head { display: flex; flex-direction: column; gap: var(--size-4-3); padding: 0 var(--size-4-1); }
-.nand-agent-workbench-title { margin: 0; color: var(--text-normal); font-size: var(--nand-text-title); font-weight: 600; line-height: 1.3; }
 .nand-agent-sidebar button.nand-agent-new-btn { width: 100%; justify-content: center; font-weight: 600; }
-.nand-agent-nav { display: flex; flex-direction: column; gap: 2px; }
-.nand-agent-sidebar button.nand-agent-nav-btn { justify-content: flex-start; width: 100%; padding: 0 var(--size-4-2); font-size: var(--nand-text-body); text-align: start; }
-.nand-agent-nav-btn > span { display: flex; color: var(--text-faint); }
-.nand-agent-nav-btn:hover > span { color: var(--text-muted); }
-.nand-agent-section-label { margin: var(--size-4-2) var(--size-4-1) calc(-1 * var(--size-4-2)); }
+.terminal-session-search, .nand-history-controls input { box-sizing: border-box; width: 100%; min-width: 0; height: var(--nand-control-height); font-size: var(--nand-text-body); }
+.terminal-workbench-shell .terminal-sidebar-resizer { grid-column: 2; width: 5px; height: 100%; min-width: 0; min-height: 0; padding: 0; margin: 0; border: 0; border-radius: 0; background: transparent; box-shadow: none; cursor: col-resize; touch-action: none; }
+.terminal-sidebar-resizer:hover, .terminal-sidebar-resizer:active { background: var(--nand-accent-soft); }
+.terminal-workbench-shell.is-sidebar-collapsed { grid-template-columns: 0 0 minmax(0, 1fr); }
+.terminal-workbench-shell.is-sidebar-collapsed > .nand-agent-sidebar { visibility: hidden; padding: 0; }
+.terminal-workbench-shell.is-sidebar-collapsed > .terminal-sidebar-resizer { visibility: hidden; }
+
+/* Running sessions use their names and real status; technical identities live in menus. */
 .nand-session-row { display: flex; align-items: center; gap: 2px; border-radius: var(--nand-radius-sm); }
 .nand-session-row > button:first-child { display: flex; flex-direction: column; align-items: stretch; gap: 2px; height: auto; padding: 7px 10px; flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; overflow-wrap: normal; }
 .nand-session-row > button:first-child :is(span, small) { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; overflow-wrap: normal; }
 .nand-session-row > button:first-child > .nand-ui-list-item-title { display: block; width: 100%; font-weight: 500; }
 .nand-session-row > button.is-active > .nand-ui-list-item-title { font-weight: 600; }
-.nand-session-row-meta { display: grid; grid-template-columns: 6px minmax(0, 1fr); align-items: center; gap: 2px 6px; width: 100%; color: var(--text-muted); font-size: var(--nand-text-caption); }
-.nand-session-row-id { grid-column: 1 / -1; color: var(--text-faint); font-family: var(--font-monospace); font-size: 0.95em; font-variant-numeric: tabular-nums; }
-.nand-session-row-status { grid-column: 2; grid-row: 2; }
-.nand-session-status-dot { grid-column: 1; grid-row: 2; width: 6px; height: 6px; color: var(--text-faint); }
+.nand-session-row-meta { display: grid; grid-template-columns: 6px minmax(0, 1fr); align-items: center; gap: 6px; color: var(--text-muted); font-size: var(--nand-text-caption); }
+.nand-session-row-status { grid-column: 2; }
+.nand-session-status-dot { width: 6px; height: 6px; color: var(--text-faint); }
 .nand-session-status-dot.is-running { color: var(--nand-tone-success); }
 .nand-session-status-dot.is-waiting { color: var(--nand-tone-warning); }
 .nand-session-status-dot.is-idle { color: var(--nand-tone-info); }
 .nand-session-status-dot.is-exited { color: var(--text-faint); opacity: 0.6; }
 .nand-session-row > button:last-child { flex: 0 0 32px; width: 32px; height: 32px; min-width: 32px; opacity: 0.6; }
 .nand-session-row:hover > button:last-child, .nand-session-row:focus-within > button:last-child { opacity: 1; }
-.nand-session-row > button.nand-session-close:hover:not(:disabled) { color: var(--text-error); }
 
-/* Center: the terminal is framed as one clean card; the search bar floats over it. */
-.nand-agent-center { grid-column: 1; grid-row: 2; position: relative; min-width: 0; min-height: 0; display: flex; flex-direction: column; overflow: hidden; padding: var(--size-4-2); background: var(--nand-surface-muted); }
-.nand-agent-center > .terminal-container { flex: 1; min-height: 0; border: var(--nand-border); border-radius: var(--nand-radius-md); box-shadow: var(--nand-shadow-xs); }
+/* A single header row leaves the main area to the terminal or full conversation. */
+.nand-agent-center { grid-column: 3; min-width: 0; min-height: 0; display: flex; flex-direction: column; overflow: hidden; }
+.terminal-workbench-header { display: flex; align-items: center; flex: none; gap: var(--size-4-2); min-width: 0; min-height: 44px; padding: var(--size-4-1) var(--size-4-2); border-bottom: var(--nand-border); background: var(--nand-surface); }
+.terminal-current-title { max-width: 32%; min-width: 0; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; font-size: var(--nand-text-body); font-weight: 600; }
+.terminal-current-cwd { flex: 1; min-width: 0; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; font-size: var(--nand-text-caption); color: var(--text-muted); }
+.terminal-current-status { display: flex; align-items: center; flex: none; gap: 6px; font-size: var(--nand-text-caption); color: var(--text-muted); white-space: nowrap; }
+.terminal-header-actions { display: flex; align-items: center; flex: none; gap: var(--size-4-1); margin-left: auto; }
+.terminal-workbench-main { position: relative; flex: 1; min-width: 0; min-height: 0; overflow: hidden; }
+.terminal-live-pane { position: absolute; inset: 0; display: flex; flex-direction: column; min-width: 0; min-height: 0; padding: var(--size-4-1); }
+.terminal-live-pane > .terminal-container { flex: 1; min-width: 0; min-height: 0; border: 0; border-radius: 0; }
+.terminal-workbench-shell.is-history-preview .terminal-live-pane { visibility: hidden; pointer-events: none; }
+.terminal-live-pane > .terminal-search-container { z-index: 2; }
+.terminal-history-pane { position: absolute; inset: 0; overflow: auto; background: var(--nand-surface); scrollbar-width: thin; }
+.terminal-history-pane[hidden] { display: none; }
 
-/* History rail */
-.nand-agent-rail-header { display: flex; align-items: center; justify-content: space-between; gap: var(--size-4-2); margin: 0; padding: 0 0 0 var(--size-4-1); color: var(--text-normal); font-size: var(--nand-text-title); font-weight: 600; line-height: 1.3; }
-.nand-agent-rail-header-title { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.nand-agent-workbench .nand-agent-rail-header button.nand-ui-icon-btn { min-height: 0; }
+/* History navigation has its own search and metadata filter, with no transcript in the rail. */
 .nand-history-controls { display: flex; flex-direction: column; gap: var(--size-4-2); }
-.nand-agent-history .nand-history-controls :is(input, select) { box-sizing: border-box; width: 100%; min-width: 0; height: var(--nand-control-height); min-height: var(--nand-control-height); border-radius: var(--nand-radius-sm); font-size: var(--nand-text-body); }
+.terminal-history-filter-row { display: flex; align-items: center; gap: var(--size-4-1); }
+.terminal-history-filter-row select { flex: 1; min-width: 0; height: var(--nand-control-height); font-size: var(--nand-text-body); }
 .nand-history-status, .nand-history-empty { margin: 0; padding: var(--size-4-4) var(--size-4-3); color: var(--text-muted); font-size: var(--nand-text-body); text-align: center; }
-.nand-history-empty { border: 1px dashed rgba(var(--text-muted-rgb), 0.25); border-radius: var(--nand-radius-md); }
-.nand-history-issues { padding: var(--size-4-2) var(--size-4-3); border: 1px solid color-mix(in srgb, var(--nand-tone-warning) 35%, transparent); border-radius: var(--nand-radius-md); background: color-mix(in srgb, var(--nand-tone-warning) 8%, transparent); font-size: var(--nand-text-caption); }
-.nand-history-issues > summary { color: var(--nand-tone-warning); font-weight: 600; cursor: pointer; }
+.nand-history-empty { border: var(--nand-border); border-radius: var(--nand-radius-md); }
+.nand-history-issues { padding: var(--size-4-2) var(--size-4-3); border: var(--nand-border); border-radius: var(--nand-radius-md); color: var(--nand-tone-warning); font-size: var(--nand-text-caption); }
+.nand-history-issues > summary { font-weight: 600; cursor: pointer; }
+.nand-history-issues pre { white-space: pre-wrap; overflow-wrap: anywhere; margin: var(--size-4-1) 0 0; }
 .nand-history-row > button { display: flex; flex-direction: column; align-items: stretch; width: 100%; height: auto; padding: var(--size-4-2) 10px; text-align: start; white-space: normal; overflow-wrap: anywhere; }
 .nand-history-row .nand-ui-list-item-title { font-weight: 500; line-height: 1.35; }
 .nand-history-row > button.is-active .nand-ui-list-item-title { font-weight: 600; }
@@ -27949,45 +27951,59 @@ body:where(.nand-iconic-enabled)[data-theme="Ukiyo"] .workspace-leaf > .workspac
 .nand-history-pagination { display: flex; align-items: center; justify-content: center; gap: var(--size-4-2); }
 .nand-history-pagination > .nand-history-range { order: 1; color: var(--text-muted); font-size: var(--nand-text-caption); font-variant-numeric: tabular-nums; text-align: center; }
 .nand-history-pagination > .nand-history-page-next { order: 2; }
-.nand-agent-workbench .nand-history-pagination button.nand-ui-icon-btn { min-height: 0; }
 
-/* Selected history: a card with an action toolbar, usage meta and a soft code block. */
-.nand-agent-history .nand-history-preview { display: flex; flex-direction: column; gap: var(--size-4-3); padding: var(--size-4-3); }
-.nand-history-actions { display: flex; flex-wrap: wrap; gap: var(--size-4-1); }
+/* Full history preview retains readable original transcript text and native actions. */
+.nand-history-preview { display: flex; flex-direction: column; gap: var(--size-4-3); min-height: 100%; padding: var(--size-4-4); box-sizing: border-box; }
+.nand-history-actions { display: flex; flex-wrap: wrap; align-items: center; gap: var(--size-4-1); }
 .nand-history-actions button.nand-ui-btn { min-height: var(--nand-control-height-sm); padding: 0 var(--size-4-2); font-size: var(--nand-text-caption); }
 .nand-history-actions button.nand-ui-btn > span { display: flex; }
 .nand-history-actions button.nand-ui-btn svg { width: 14px; height: 14px; }
-.nand-history-actions button.nand-history-resume { flex: 1 1 100%; min-height: var(--nand-control-height); font-size: var(--nand-text-body); font-weight: 600; }
 .nand-history-actions button.nand-ui-btn-ghost[aria-pressed="true"] { background: var(--nand-accent-soft); color: var(--text-accent); }
-.nand-history-preview > .nand-agent-usage-totals { color: var(--text-muted); font-size: var(--nand-text-caption); font-variant-numeric: tabular-nums; line-height: 1.5; overflow-wrap: anywhere; }
-.nand-history-preview pre, .nand-agent-history details pre { margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; font-size: var(--font-ui-small); }
-.nand-history-preview pre { padding: var(--size-4-2) var(--size-4-3); border-radius: var(--nand-radius-sm); background: var(--nand-surface-muted); color: var(--text-normal); font-family: var(--font-monospace); font-size: var(--nand-text-caption); line-height: 1.55; }
-.nand-history-preview pre:empty { display: none; }
-.nand-agent-history details pre { margin-top: var(--size-4-1); color: var(--text-muted); }
+.terminal-history-back { margin-right: auto; }
+.terminal-history-title { margin: var(--size-4-2) 0 0; color: var(--text-normal); font-size: var(--nand-text-title); line-height: 1.4; overflow-wrap: anywhere; }
+.terminal-history-meta { display: flex; flex-wrap: wrap; gap: var(--size-4-1) var(--size-4-3); color: var(--text-muted); font-size: var(--nand-text-caption); font-variant-numeric: tabular-nums; }
+.terminal-history-meta > span { max-width: 100%; overflow-wrap: anywhere; }
+.nand-history-transcript { flex: 1; margin: 0; padding: var(--size-4-3); border-radius: var(--nand-radius-sm); background: var(--nand-surface-muted); color: var(--text-normal); font-family: var(--font-monospace); font-size: var(--font-ui-small); line-height: 1.6; white-space: pre-wrap; overflow-wrap: anywhere; }
+.nand-history-transcript:empty { display: none; }
 
-/* Usage strip. Obsidian's desktop status bar overlays the bottom of the leaf. */
-.nand-agent-usage { grid-column: 1; grid-row: 4; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--size-4-1) var(--size-4-3); min-width: 0; min-height: 0; max-height: min(100px, 18cqh); overflow: auto; padding: var(--size-4-1) var(--size-4-3); padding-bottom: calc(var(--size-4-1) + var(--size-4-8)); border-top: var(--nand-border); background: var(--nand-surface-muted); color: var(--text-muted); font-size: var(--nand-text-caption); font-variant-numeric: tabular-nums; }
-.nand-agent-usage-summary { min-width: 0; overflow-wrap: anywhere; }
-.nand-agent-usage button { max-width: 100%; white-space: normal; height: auto; }
-.nand-agent-workbench .nand-agent-usage button.nand-agent-usage-pill { display: inline-flex; align-items: center; gap: 6px; min-height: 24px; padding: 2px 10px; border: var(--nand-border); border-radius: var(--nand-radius-pill); background: var(--nand-surface); box-shadow: none; color: var(--text-normal); font-size: var(--nand-text-caption); font-weight: 500; text-align: start; transition: border-color var(--nand-duration-fast) var(--nand-ease), background-color var(--nand-duration-fast) var(--nand-ease); }
-.nand-agent-usage button.nand-agent-usage-pill:hover { border-color: var(--nand-border-color-strong); background: var(--nand-surface-hover); }
-.nand-agent-usage-pill > span { display: flex; color: var(--text-faint); }
-.nand-agent-usage-pill svg { width: 13px; height: 13px; }
+/* Compact usage, automation and inbox entry points stay at the foot of navigation. */
+.nand-agent-usage { display: flex; flex-direction: column; flex: none; gap: var(--size-4-1); min-width: 0; padding-top: var(--size-4-2); border-top: var(--nand-border); color: var(--text-muted); font-size: var(--nand-text-caption); font-variant-numeric: tabular-nums; }
+.terminal-compact-links { display: flex; align-items: center; gap: var(--size-4-1); }
+.nand-agent-usage-pill { flex: 1; }
+.terminal-usage-details { min-width: 0; max-height: 100px; overflow: auto; }
+.terminal-usage-details > summary { cursor: pointer; padding: var(--size-4-1); }
+.terminal-usage-details > span { display: block; padding: var(--size-4-1); overflow-wrap: anywhere; }
 
-/* Workbench dialogs (close confirmation, history rename) */
+/* Native close/rename dialogs and keyboard affordances. */
 .modal.nand-agent-dialog { border-radius: var(--nand-radius-lg); }
 .nand-agent-dialog-message { margin: 0 0 var(--size-4-3); line-height: 1.6; }
 .nand-agent-dialog .setting-item { gap: var(--size-4-3); }
 .nand-agent-dialog .setting-item:last-child .setting-item-control { gap: var(--size-4-2); }
+.terminal-workbench-shell :is(button, input, select, pre):focus-visible { outline: 2px solid var(--interactive-accent); outline-offset: -2px; }
 
-.nand-agent-workbench :is(.nand-agent-sidebar, .nand-agent-history, .nand-agent-usage) :is(button, input, select):focus-visible { outline: 2px solid var(--interactive-accent); outline-offset: 1px; }
+@container nand-terminal (max-width: 799px) {
+ .terminal-workbench-shell, .terminal-workbench-shell.is-sidebar-collapsed { grid-template-columns: minmax(0, 1fr); }
+ .nand-agent-center { grid-column: 1; }
+ .terminal-sidebar-resizer { display: none; }
+ .terminal-workbench-shell > .nand-agent-sidebar, .terminal-workbench-shell.is-sidebar-collapsed > .nand-agent-sidebar { position: absolute; inset: 0 auto 0 0; z-index: 4; width: min(var(--terminal-sidebar-width), calc(100% - 48px)); box-sizing: border-box; padding: var(--size-4-3); visibility: hidden; transform: translateX(-100%); border-right: var(--nand-border); box-shadow: var(--nand-shadow-lg); }
+ .terminal-workbench-shell.is-drawer-open > .nand-agent-sidebar { visibility: visible; transform: translateX(0); }
+ .terminal-workbench-shell.is-drawer-open > .terminal-drawer-backdrop { display: block; position: absolute; inset: 0; z-index: 3; width: 100%; height: 100%; border: 0; border-radius: 0; background: var(--background-modifier-cover); box-shadow: none; }
+ .terminal-workbench-shell .terminal-drawer-close { display: inline-flex; }
+ .terminal-current-title { max-width: 40%; }
+ .terminal-current-status { overflow: hidden; max-width: 100px; text-overflow: ellipsis; }
+}
+@container nand-terminal (max-width: 440px) {
+ .terminal-current-cwd { display: none; }
+ .terminal-current-status { display: none; }
+ .terminal-current-title { flex: 1; max-width: none; }
+ .nand-history-preview { padding: var(--size-4-3); }
+}
 @media (pointer: coarse) {
-	.nand-session-row > button.nand-session-close { flex-basis: var(--nand-touch-target); width: var(--nand-touch-target); height: var(--nand-touch-target); opacity: 1; }
-	.nand-agent-workbench .nand-agent-usage button.nand-agent-usage-pill { min-height: var(--nand-touch-target); }
+ .terminal-workbench-shell :is(button, input, select) { min-height: var(--nand-touch-target); }
+ .nand-session-row > button:last-child { flex-basis: var(--nand-touch-target); width: var(--nand-touch-target); height: var(--nand-touch-target); }
+ .terminal-header-actions .nand-ui-icon-btn { min-width: var(--nand-touch-target); }
 }
-@container nand-terminal (max-width: 680px) {
-	.nand-agent-sidebar, .nand-agent-history { padding: var(--size-4-3) var(--size-4-2); gap: var(--size-4-2); }
-}
+
 .nand-notification-description { white-space: pre-line; }
 .nand-settings [data-settings-product="contacts"] input { min-width: 0; max-width: 100%; }
 .is-mobile .nand-agent-workbench button { min-height: 44px; }

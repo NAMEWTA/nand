@@ -1,4 +1,4 @@
-import { TerminalOptions } from '../../../core/pty/terminal-options';
+import type { TerminalOptions } from '../../../core/pty/terminal-options';
 import type { PtySession } from '../../../platform/desktop/terminal/pty-session';
 /**
  * Terminal instance class - a PtyClient-based implementation built on the unified Rust server
@@ -20,6 +20,9 @@ import type { DefaultShellOption } from '../../../platform/desktop/terminal/term
 import type { ShellEvent } from '../../../platform/terminal-server/types';
 import { t } from '../../../shared/i18n/terminal-accessor';
 import { terminalRendererNotice } from './renderer-fallback';
+import { HiddenRendererRetention } from './hidden-renderer-retention';
+import { StableTerminalFit } from './stable-terminal-fit';
+import { TerminalPresentation } from './terminal-presentation';
 
 // xterm.js module type declarations (for dynamic import)
 type Terminal = import('@xterm/xterm').Terminal;
@@ -110,7 +113,7 @@ type NativeTerminalStatus = 'unknown' | 'running' | 'waiting' | 'idle' | 'exited
 
 export class TerminalInstance {
 	private sessionCleanups: (() => void)[] = [];
-	constructor(readonly session: PtySession) {
+	constructor(readonly session: PtySession, private hiddenRetention = new HiddenRendererRetention()) {
 		this.options = { ...session.getOptions() };
 		this.currentFontSize = this.options.fontSize ?? 14;
 		this.sessionCleanups.push(session.onDispose(() => this.destroy()));
@@ -193,12 +196,40 @@ export class TerminalInstance {
 		);
 		for (const code of [10, 11, 12])
 			this.parserDisposables.push(this.xterm.parser.registerOscHandler(code, (data) => data === '?'));
-		this.sessionCleanups.push(this.session.onOutput((text) => this.enqueueTerminalOutput(text)));
+		this.presentation = new TerminalPresentation({
+			subscribe: (output) => {
+				this.awaitingSnapshot = true;
+				return this.session.onOutput((text) => {
+					if (this.awaitingSnapshot) this.replayNavigation = this.session.getNavigationMarkers();
+					this.awaitingSnapshot = false;
+					output(text);
+				});
+			},
+			reset: () => { this.clearNavigationMarkers(); this.xterm.reset(); },
+			write: (text, parsed) => this.xterm.write(text, parsed),
+			beforeReplay: () => {
+				this.replaying = true;
+				this.replayIntent = this.scrollIntent ?? this.captureScrollIntent();
+			},
+			afterReplay: () => {
+				this.rebuildNavigationMarkers();
+				this.restoreScrollIntent();
+				this.replaying = false;
+			},
+			error: (error) => { this.replaying = false; errorLog('[Terminal] Presentation failed:', error); },
+		});
+		this.parserDisposables.push(this.xterm.onScroll(() => {
+			if (!this.replaying) this.scrollIntent = this.captureScrollIntent();
+		}));
 		this.sessionCleanups.push(
 			this.session.onShellEvent((event) => {
-				if (event.type === 'prompt_start') this.promptMarkers.push(this.xterm.registerMarker(0));
-				if (event.type === 'command_end')
-					this.commandMarkers.push({ marker: this.xterm.registerMarker(0), exitCode: event.exitCode });
+				if (!this.awaitingSnapshot) this.presentation?.afterParsed(() => {
+					const marker = this.xterm.buffer.active.type === 'normal' ? this.xterm.registerMarker(0) : undefined;
+					if (marker && event.type === 'prompt_start') this.promptMarkers.push(marker);
+					else if (marker && event.type === 'command_end') this.commandMarkers.push({ marker, exitCode: event.exitCode });
+					else marker?.dispose();
+					this.pruneNavigationMarkers();
+				});
 				this.shellEventCallback?.(event);
 			}),
 		);
@@ -208,21 +239,24 @@ export class TerminalInstance {
 	destroy(): void {
 		if (this.isDestroyed) return;
 		this.isDestroyed = true;
-		this.outputPaused = true;
-		this.outputQueue = [];
-		this.outputQueueChars = 0;
+		this.presentation?.dispose();
+		this.hiddenRetention.release(this);
 		this.clearPendingInput();
 		for (const off of this.sessionCleanups) off();
 		this.sessionCleanups = [];
 		for (const item of this.parserDisposables) item.dispose();
 		this.parserDisposables = [];
-		this.promptMarkers = [];
-		this.commandMarkers = [];
+		this.clearNavigationMarkers();
 		this.detach();
 		this.renderer?.dispose();
 		this.renderer = null;
 		this.rendererType = null;
 		this.xterm?.dispose();
+		this.searchStateCallbacks.clear();
+		this.fontSizeChangeCallbacks.clear();
+		this.rendererChangeCallbacks.clear();
+		this.shellEventCallback = null;
+		this.contextMenuCallbacks = {};
 	}
 
 	private xterm!: Terminal;
@@ -255,12 +289,34 @@ export class TerminalInstance {
 	private pendingInput: string[] = [];
 	private inputFlushTimer: number | null = null;
 	private readonly inputBatchIntervalMs = 4;
-	private outputQueue: string[] = [];
-	private outputQueueChars = 0;
-	private outputTruncated = false;
-	private outputPaused = false;
-	private outputDraining = false;
-	private readonly maxPendingOutputChars = 2_000_000;
+	private presentation: TerminalPresentation | null = null;
+	private displayOwner: object | null = null;
+	private ownerVisible = false;
+	private readonly legacyOwner = {};
+	private replaying = false;
+	private awaitingSnapshot = false;
+	private scrollRevision = 0;
+	private scrollIntent: { bufferType: string; bottomOffset: number; following: boolean; revision: number } | null = null;
+	private replayIntent: typeof this.scrollIntent = null;
+	private replayNavigation: ReturnType<PtySession['getNavigationMarkers']> = { prompts: [], commands: [] };
+	private readonly fitScheduler = new StableTerminalFit({
+		propose: () => this.fitAddon.proposeDimensions(),
+		current: () => ({ cols: this.xterm.cols, rows: this.xterm.rows }),
+		measurable: () => !!this.containerEl && this.ownerVisible && !this.isDestroyed && this.containerEl.clientWidth > 0 && this.containerEl.clientHeight > 0,
+		apply: (grid) => this.presentation?.afterParsed(() => {
+			if (this.xterm.cols === grid.cols && this.xterm.rows === grid.rows) return;
+			this.xterm.resize(grid.cols, grid.rows);
+			this.sendResize(grid.cols, grid.rows);
+			// Headless may have parsed later chunks using the old grid while browser
+			// writes were pending. Restore its reflowed screen before accepting new deltas.
+			this.presentation?.refresh();
+		}),
+		error: (error) => debugWarn('[Terminal] Fit failed:', error),
+	});
+	private rendererFrame: number | null = null;
+	private attachmentGeneration = 0;
+	private inputFlushWindow: Window | null = null;
+	private hostTimeouts = new Map<number, Window>();
 
 	// Context menu callbacks for actions like split/new terminal that need external handling
 	private contextMenuCallbacks: {
@@ -336,8 +392,10 @@ export class TerminalInstance {
 		const { useObsidianTheme, backgroundColor, foregroundColor } = this.options;
 
 		if (useObsidianTheme) {
-			const isDark = activeDocument.body.classList.contains('theme-dark');
-			const computed = activeDocument.defaultView?.getComputedStyle(activeDocument.body);
+			// A retained renderer can move independently of whichever Obsidian window is active.
+			const doc = this.containerEl?.ownerDocument ?? this.xterm?.element?.ownerDocument;
+			const isDark = doc?.body?.classList.contains('theme-dark') ?? true;
+			const computed = doc?.body ? doc.defaultView?.getComputedStyle(doc.body) : undefined;
 			const bgFromVar = computed?.getPropertyValue('--background-primary').trim();
 			const fgFromVar = computed?.getPropertyValue('--text-normal').trim();
 			const cursorFromVar = computed?.getPropertyValue('--text-normal').trim();
@@ -490,7 +548,10 @@ export class TerminalInstance {
 	}
 
 	private async loadRendererInternal(renderer: 'canvas' | 'webgl'): Promise<void> {
+		const generation = this.attachmentGeneration;
 		const { CanvasAddon, WebglAddon } = await loadXtermModules();
+		if (this.isDestroyed || !this.containerEl || !this.ownerVisible || generation !== this.attachmentGeneration) return;
+		if (this.renderer && this.rendererType === renderer) return;
 
 		const previousRenderer = this.rendererType;
 		this.disposeRenderer();
@@ -558,7 +619,8 @@ export class TerminalInstance {
 
 	private checkRendererSupport(renderer: 'canvas' | 'webgl'): boolean {
 		try {
-			const canvas = activeDocument.createElement('canvas');
+			const canvas = this.containerEl?.ownerDocument.createElement('canvas');
+			if (!canvas) return false;
 			if (renderer === 'canvas') {
 				return !!canvas.getContext('2d');
 			}
@@ -691,49 +753,78 @@ export class TerminalInstance {
 	}
 
 	setOutputPaused(paused: boolean): void {
-		if (this.outputPaused === paused) return;
-		this.outputPaused = paused;
-		if (!paused) this.drainOutputQueue();
+		if (this.displayOwner) this.setOwnerVisible(this.displayOwner, !paused);
 	}
-
-	private enqueueTerminalOutput(text: string): void {
-		if (!text || this.isDestroyed) return;
-		this.outputQueue.push(text);
-		this.outputQueueChars += text.length;
-		while (this.outputQueueChars > this.maxPendingOutputChars && this.outputQueue.length > 1) {
-			const dropped = this.outputQueue.shift() ?? '';
-			this.outputQueueChars -= dropped.length;
-			this.outputTruncated = true;
-		}
-		this.drainOutputQueue();
+	/** Exactly one leaf owns this browser presentation; process ownership is independent. */
+	acquire(owner: object, container: HTMLElement, visible = true): void {
+		if (this.isDestroyed) throw new Error(t('terminalInstance.instanceDestroyed'));
+		if (this.displayOwner && this.displayOwner !== owner) throw new Error('Terminal renderer already owned');
+		this.displayOwner = owner;
+		this.attachContainer(container);
+		this.setOwnerVisible(owner, visible);
 	}
-
-	private drainOutputQueue(): void {
-		if (this.outputDraining || this.outputPaused || this.isDestroyed) return;
-		if (this.outputQueue.length === 0 && !this.outputTruncated) return;
-		this.outputDraining = true;
-		let chunk = '';
-		if (this.outputTruncated) {
-			chunk += '\r\n\x1b[33m[输出已截断]\x1b[0m\r\n';
-			this.outputTruncated = false;
+	release(owner: object): void {
+		if (this.displayOwner !== owner) return;
+		this.setOwnerVisible(owner, false);
+		this.displayOwner = null;
+		this.detachContainer();
+	}
+	setOwnerVisible(owner: object, visible: boolean): void {
+		if (this.displayOwner !== owner || this.isDestroyed || this.ownerVisible === visible) return;
+		if (!visible && this.ownerVisible) this.scrollIntent = this.captureScrollIntent();
+		this.ownerVisible = visible;
+		this.presentation?.setVisible(visible);
+		if (visible) {
+			this.updateTheme();
+			this.hiddenRetention.release(this);
+			this.fit();
+			if (!this.renderer) this.scheduleRendererLoad();
+		} else {
+			this.fitScheduler.cancel();
+			this.xterm.blur();
+			if (this.rendererType === 'webgl') this.hiddenRetention.retain(this, () => this.disposeRenderer());
 		}
-		chunk += this.outputQueue.join('');
-		this.outputQueue = [];
-		this.outputQueueChars = 0;
-		try {
-			this.xterm.write(chunk, () => {
-				try {
-					this.outputDraining = false;
-					if (!this.isDestroyed) this.drainOutputQueue();
-				} catch (error) {
-					this.outputDraining = false;
-					errorLog('[Terminal] write callback failed:', error);
-				}
-			});
-		} catch (error) {
-			this.outputDraining = false;
-			errorLog('[Terminal] write failed:', error);
+	}
+	private captureScrollIntent() {
+		const buffer = this.xterm.buffer.active;
+		return {
+			bufferType: buffer.type,
+			bottomOffset: Math.max(0, buffer.baseY - buffer.viewportY),
+			following: buffer.viewportY >= buffer.baseY,
+			revision: this.scrollRevision,
+		};
+	}
+	private restoreScrollIntent(): void {
+		const intent = this.replayIntent, buffer = this.xterm.buffer.active;
+		if (!intent || intent.bufferType !== buffer.type || intent.revision !== this.scrollRevision) return;
+		if (intent.following) this.xterm.scrollToBottom();
+		else this.xterm.scrollToLine(Math.max(0, buffer.baseY - intent.bottomOffset));
+		this.scrollIntent = this.captureScrollIntent();
+	}
+	private clearNavigationMarkers(): void {
+		for (const marker of this.promptMarkers) marker.dispose();
+		for (const { marker } of this.commandMarkers) marker.dispose();
+		this.promptMarkers = [];
+		this.commandMarkers = [];
+	}
+	private pruneNavigationMarkers(): void {
+		this.promptMarkers = this.promptMarkers.filter((marker) => !marker.isDisposed && marker.line >= 0);
+		this.commandMarkers = this.commandMarkers.filter(({ marker }) => !marker.isDisposed && marker.line >= 0);
+		for (const marker of this.promptMarkers.splice(0, Math.max(0, this.promptMarkers.length - 1000))) marker.dispose();
+		for (const entry of this.commandMarkers.splice(0, Math.max(0, this.commandMarkers.length - 1000))) entry.marker.dispose();
+	}
+	private rebuildNavigationMarkers(): void {
+		const buffer = this.xterm.buffer.active, cursorLine = buffer.baseY + buffer.cursorY;
+		if (buffer.type !== 'normal') return;
+		for (const line of this.replayNavigation.prompts) {
+			const marker = this.xterm.registerMarker(line - cursorLine);
+			if (marker) this.promptMarkers.push(marker);
 		}
+		for (const entry of this.replayNavigation.commands) {
+			const marker = this.xterm.registerMarker(entry.line - cursorLine);
+			if (marker) this.commandMarkers.push({ marker, exitCode: entry.exitCode });
+		}
+		this.pruneNavigationMarkers();
 	}
 
 	private queueInput(data: string): void {
@@ -741,7 +832,10 @@ export class TerminalInstance {
 		this.pendingInput.push(data);
 
 		if (this.inputFlushTimer === null) {
-			this.inputFlushTimer = window.setTimeout(() => {
+			const win = this.hostWindow;
+			if (!win) { this.flushPendingInput(); return; }
+			this.inputFlushWindow = win;
+			this.inputFlushTimer = win.setTimeout(() => {
 				this.flushPendingInput();
 			}, this.inputBatchIntervalMs);
 		}
@@ -749,13 +843,16 @@ export class TerminalInstance {
 
 	private clearPendingInput(): void {
 		if (this.inputFlushTimer !== null) {
-			window.clearTimeout(this.inputFlushTimer);
+			this.inputFlushWindow?.clearTimeout(this.inputFlushTimer);
 			this.inputFlushTimer = null;
 		}
 		this.pendingInput = [];
+		this.inputFlushWindow = null;
 	}
 
 	private flushPendingInput(): void {
+		if (this.inputFlushTimer !== null) this.inputFlushWindow?.clearTimeout(this.inputFlushTimer);
+		this.inputFlushWindow = null;
 		if (this.pendingInput.length === 0) {
 			this.inputFlushTimer = null;
 			return;
@@ -778,20 +875,18 @@ export class TerminalInstance {
 	}
 
 	fit(): void {
-		if (!this.containerEl) return;
-
+		if (!this.containerEl || !this.hostWindow) return;
 		try {
-			const { clientWidth, clientHeight } = this.containerEl;
-			if (clientWidth === 0 || clientHeight === 0) return;
-
-			this.fitAddon.fit();
-			this.sendResize(this.xterm.cols, this.xterm.rows);
+			this.fitScheduler.request(this.hostWindow);
 		} catch (error) {
 			debugWarn('[Terminal] Fit failed:', error);
 		}
 	}
 
 	attachToElement(container: HTMLElement): void {
+		this.acquire(this.legacyOwner, container);
+	}
+	private attachContainer(container: HTMLElement): void {
 		if (this.isDestroyed) {
 			throw new Error(t('terminalInstance.instanceDestroyed'));
 		}
@@ -805,7 +900,11 @@ export class TerminalInstance {
 			return;
 		}
 
-		this.detach();
+		if (this.ownerVisible) this.scrollIntent = this.captureScrollIntent();
+		this.ownerVisible = false;
+		this.presentation?.setVisible(false);
+		if (this.hostWindow && this.hostWindow !== containerWindow) this.disposeRenderer();
+		this.detachContainer();
 		this.containerEl = container;
 		this.hostWindow = containerWindow;
 
@@ -823,10 +922,15 @@ export class TerminalInstance {
 		// Set up the context menu and keyboard shortcuts
 		this.setupDomEventHandlers(container);
 
+	}
+	private scheduleRendererLoad(): void {
+		const win = this.hostWindow;
+		if (!win || this.rendererFrame !== null || !this.ownerVisible) return;
+		const generation = this.attachmentGeneration;
 		const preferredRenderer = this.options.preferredRenderer || 'webgl';
-
-		// Load the renderer asynchronously
-		window.requestAnimationFrame(() => {
+		this.rendererFrame = win.requestAnimationFrame(() => {
+			this.rendererFrame = null;
+			if (generation !== this.attachmentGeneration || !this.ownerVisible || this.isDestroyed) return;
 			void this.loadRenderer(preferredRenderer)
 				.then(() => {
 					this.syncBackgroundLayerStyles();
@@ -834,7 +938,7 @@ export class TerminalInstance {
 				})
 				.catch((error) => {
 					const line = terminalRendererNotice(error);
-					if (line) this.xterm.write(line);
+					if (line && !this.isDestroyed) errorLog(line);
 				});
 		});
 	}
@@ -846,6 +950,11 @@ export class TerminalInstance {
 		this.disposeDomEventHandlers();
 		this.setupKeyboardShortcuts(container);
 		this.setupContextMenu(container);
+		const scrolled = () => { this.scrollRevision++; this.scrollIntent = this.captureScrollIntent(); };
+		this.addDomEventListener(container, 'wheel', scrolled, { passive: true });
+		this.addDomEventListener(container, 'keydown', (event) => {
+			if (['PageUp', 'PageDown', 'Home', 'End'].includes(event.key)) scrolled();
+		});
 
 		// Track IME composition states on the terminal container (using bubbling)
 		const startHandler = () => {
@@ -1239,7 +1348,7 @@ export class TerminalInstance {
 			}
 		};
 
-		window.setTimeout(() => {
+		this.scheduleHostTimeout(() => {
 			menuDocument.addEventListener('click', closeMenu);
 			menuDocument.addEventListener('contextmenu', closeMenu);
 		}, 0);
@@ -1661,10 +1770,31 @@ export class TerminalInstance {
 	}
 
 	detach(): void {
+		if (this.displayOwner) this.release(this.displayOwner);
+		else this.detachContainer();
+	}
+	private detachContainer(): void {
+		this.attachmentGeneration++;
+		this.fitScheduler.cancel();
+		if (this.rendererFrame !== null) this.hostWindow?.cancelAnimationFrame(this.rendererFrame);
+		this.rendererFrame = null;
+		if (!this.isDestroyed) this.flushPendingInput();
+		this.clearPendingInput();
+		for (const [id, win] of this.hostTimeouts) win.clearTimeout(id);
+		this.hostTimeouts.clear();
 		this.disposeDomEventHandlers();
-		this.xterm.element?.remove();
+		this.xterm?.element?.remove();
 		this.containerEl = null;
 		this.hostWindow = null;
+	}
+	private scheduleHostTimeout(run: () => void, delay: number): void {
+		const win = this.hostWindow;
+		if (!win) return;
+		const id = win.setTimeout(() => {
+			this.hostTimeouts.delete(id);
+			if (!this.isDestroyed) run();
+		}, delay);
+		this.hostTimeouts.set(id, win);
 	}
 
 	focus(): void {
@@ -1682,11 +1812,14 @@ export class TerminalInstance {
 		}
 
 		this.xterm.scrollToLine(targetLine);
+		this.scrollRevision++;
+		this.scrollIntent = this.captureScrollIntent();
 		this.focus();
 		return true;
 	}
 
 	navigateToLastFailedCommand(): boolean {
+		this.pruneNavigationMarkers();
 		const marker = [...this.commandMarkers]
 			.reverse()
 			.find((entry) => !entry.marker.isDisposed && entry.marker.line >= 0 && (entry.exitCode ?? 0) !== 0);
@@ -1696,11 +1829,14 @@ export class TerminalInstance {
 		}
 
 		this.xterm.scrollToLine(marker.marker.line);
+		this.scrollRevision++;
+		this.scrollIntent = this.captureScrollIntent();
 		this.focus();
 		return true;
 	}
 
 	private findPromptLine(direction: 'previous' | 'next'): number | null {
+		this.pruneNavigationMarkers();
 		const currentViewportLine = this.xterm.buffer.active.viewportY;
 		const validPromptLines = this.promptMarkers
 			.filter((marker) => !marker.isDisposed && marker.line >= 0)
@@ -1861,7 +1997,7 @@ export class TerminalInstance {
 		this.session.write('\x03');
 
 		// Wait briefly for the interrupt to take effect, then send the clear command
-		window.setTimeout(() => {
+		this.scheduleHostTimeout(() => {
 			const clearCommand = isWindows() ? 'cls\r' : 'clear\r';
 			this.session.write(clearCommand);
 			debugLog('[Terminal] Screen cleared');
@@ -1877,7 +2013,7 @@ export class TerminalInstance {
 		this.session.write('\x03');
 
 		// Wait briefly for the interrupt to take effect
-		window.setTimeout(() => {
+		this.scheduleHostTimeout(() => {
 			// Send the clear command to the shell
 			const clearCommand = isWindows() ? 'cls\r' : 'clear\r';
 			this.session.write(clearCommand);
@@ -1892,6 +2028,7 @@ export class TerminalInstance {
 	}
 
 	updateTheme(): void {
+		if (!this.isInitialized || this.isDestroyed) return;
 		const theme = this.getTheme();
 		this.xterm.options.theme = theme;
 		this.xterm.options.allowTransparency = this.shouldUseTransparentTerminalBackground();

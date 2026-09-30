@@ -46,7 +46,9 @@ async function write(command) {
 	await c.evaluate(`nandE2ETerm.write(${JSON.stringify(command + String.fromCharCode(13))})`);
 }
 async function closeVisibleTerminal() {
-	await c.evaluate(`(()=>{const marker=nandE2ETerm.id.split('-')[1],e=[...document.querySelectorAll('.nand-session-close')].find(e=>e.parentElement?.textContent.includes(marker));if(!e)throw Error('Visible terminal close button missing');e.click()})()`);
+	await c.evaluate(`(()=>{const entry=[...document.querySelectorAll('[data-terminal-id]')].find(e=>e.dataset.terminalId===nandE2ETerm.id),e=entry?.closest('.nand-session-row')?.querySelector('.nand-session-more');if(!e)throw Error('Visible terminal actions button missing');e.click()})()`);
+	await until(`!![...document.querySelectorAll('.menu-item')].find(e=>/^(End session|结束会话)$/.test(e.textContent.trim()))`, 'end-session menu action');
+	await c.evaluate(`[...document.querySelectorAll('.menu-item')].find(e=>/^(End session|结束会话)$/.test(e.textContent.trim())).click()`);
 	await until(`!!document.querySelector('.modal button.mod-warning')`, 'close confirmation');
 	await c.evaluate(`document.querySelector('.modal button.mod-warning').click()`);
 	await until(`(async()=>{const s=await app.plugins.plugins.nand.terminalHost.getTerminalService();return s.getAllTerminals().length===0})()`, 'last terminal closed');

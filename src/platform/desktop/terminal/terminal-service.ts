@@ -291,6 +291,7 @@ export class TerminalService {
 
 			if (this.isShuttingDown) throw new Error('Terminal service stopped');
 			created = terminal;
+			terminal.agentId = pending?.agentId;
 			terminal.onNativeStatusChange(() => this.emit());
 			terminal.observeAutomation((event) => {
 				if (event.kind !== 'data') {
@@ -454,6 +455,9 @@ export class TerminalService {
 		this.isShuttingDown = true;
 
 		debugLog('[TerminalService] 开始关闭终端服务');
+		const history = this.historyStore;
+		this.historyStore = undefined;
+		await history?.dispose();
 
 		// Destroy all terminals
 		this.destroyAllTerminals();

@@ -1,5 +1,5 @@
 import { SerializeAddon } from '@xterm/addon-serialize';
-import type { Terminal } from '@xterm/headless';
+import type { IMarker, Terminal } from '@xterm/headless';
 import Headless from '@xterm/headless';
 import process from 'node:process';
 import {
@@ -21,6 +21,7 @@ import {
 	extractWslPromptCwd,
 } from '../../../core/pty/prompt-cwd-parsers';
 import type { TerminalOptions } from '../../../core/pty/terminal-options';
+import type { AgentId } from '../../../core/agent-launch/types';
 import { TerminalTitleState } from '../../../core/pty/terminal-title-state';
 import { t } from '../../../shared/i18n/terminal-accessor';
 import type { PtyClient } from '../../terminal-server/pty-client';
@@ -32,6 +33,7 @@ type NativeTerminalStatus = 'unknown' | 'running' | 'waiting' | 'idle' | 'exited
 
 /** Process, VT state and automation survive independently of any renderer or leaf. */
 export class PtySession {
+	agentId?: AgentId;
 	private automationObservers = new Set<
 		(
 			event:
@@ -81,6 +83,8 @@ export class PtySession {
 		source: ShellEventSource;
 	}> = [];
 	private activeCommandStart: number | null = null;
+	private promptMarkers: IMarker[] = [];
+	private commandMarkers: { marker: IMarker; exitCode: number | null }[] = [];
 	private claudeCodeSessionState = new ClaudeCodeSessionState();
 	private synchronizedOutputCompatibilityState = createSynchronizedOutputCompatibilityState();
 	getClaudeCodeExtendedKeyboardMode(): ClaudeCodeExtendedKeyboardMode {
@@ -252,6 +256,20 @@ export class PtySession {
 	getCommandHistory() {
 		return [...this.commandHistory];
 	}
+	/** Navigation positions belong to the authoritative screen, including while hidden. */
+	getNavigationMarkers(): { prompts: number[]; commands: { line: number; exitCode: number | null }[] } {
+		this.pruneNavigationMarkers();
+		return {
+			prompts: this.promptMarkers.map((marker) => marker.line),
+			commands: this.commandMarkers.map(({ marker, exitCode }) => ({ line: marker.line, exitCode })),
+		};
+	}
+	private pruneNavigationMarkers(): void {
+		this.promptMarkers = this.promptMarkers.filter((marker) => !marker.isDisposed && marker.line >= 0);
+		this.commandMarkers = this.commandMarkers.filter(({ marker }) => !marker.isDisposed && marker.line >= 0);
+		for (const marker of this.promptMarkers.splice(0, Math.max(0, this.promptMarkers.length - 1000))) marker.dispose();
+		for (const entry of this.commandMarkers.splice(0, Math.max(0, this.commandMarkers.length - 1000))) entry.marker.dispose();
+	}
 	get isDisposed(): boolean {
 		return this.stopped;
 	}
@@ -268,16 +286,23 @@ export class PtySession {
 		if (!this.stopped && !this.exited && this.sessionId) this.client?.writeBinary(this.sessionId, data);
 	}
 	resize(cols: number, rows: number): void {
-		if (this.stopped || cols < 1 || rows < 1) return;
+		if (this.stopped || cols < 1 || rows < 1 || (cols === this.emulator.cols && rows === this.emulator.rows)) return;
 		this.emulator.resize(cols, rows);
 		if (this.sessionId) this.client?.resize(this.sessionId, cols, rows);
 	}
-	/** Subscribe and replay the parsed screen atomically; no prompt is submitted. */
+	/** Replay after a VT parse barrier, then subscribe atomically; no prompt is submitted. */
 	onOutput(listener: (text: string) => void): () => void {
 		if (this.stopped) return () => {};
-		listener(this.serializer.serialize());
-		this.outputs.add(listener);
+		let active = true;
+		// A synchronous serialize can observe half of a yielded write. Its later callback
+		// would then broadcast the whole chunk, duplicating that prefix in the renderer.
+		this.emulator.write('', () => {
+			if (!active || this.stopped) return;
+			listener(this.serializer.serialize());
+			if (active && !this.stopped) this.outputs.add(listener);
+		});
 		return () => {
+			active = false;
 			this.outputs.delete(listener);
 		};
 	}
@@ -367,9 +392,21 @@ export class PtySession {
 								exitCode: event.exitCode,
 								source: event.source,
 							});
+							if (this.commandHistory.length > 1000) this.commandHistory.splice(0, this.commandHistory.length - 1000);
 							this.activeCommandStart = null;
 						}
-						for (const listener of this.shellEvents) listener(event);
+						// Shell events follow queued VT parsing, so marker positions and replay agree.
+						this.emulator.write('', () => {
+							if (this.stopped) return;
+							const marker = event.type === 'prompt_start' || event.type === 'command_end' ? this.emulator.registerMarker(0) : undefined;
+							if (marker) {
+								if (event.type === 'prompt_start') this.promptMarkers.push(marker);
+								else if (event.type === 'command_end') this.commandMarkers.push({ marker, exitCode: event.exitCode });
+								else marker.dispose();
+							}
+							this.pruneNavigationMarkers();
+							for (const listener of this.shellEvents) listener(event);
+						});
 					}),
 				);
 			},
@@ -429,6 +466,8 @@ export class PtySession {
 		this.automationObservers.clear();
 		this.nativeStateListeners.clear();
 		this.titleChangeCallbacks.clear();
+		this.promptMarkers = [];
+		this.commandMarkers = [];
 		this.emulator.dispose();
 	}
 }

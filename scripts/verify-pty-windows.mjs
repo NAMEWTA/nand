@@ -194,7 +194,7 @@ try {
     assert.equal(client.events.find(event => event.requestId === 'scan').error, undefined);
     assert.equal((await client.exit(id)).code, 0); assert.ok(client.output.get(id).includes('CONCURRENT-PTY'));
     const page = await request(client, { module: 'agent_data', type: 'query', requestId: 'query', ...scope, query: 'needle' });
-    assert.equal(page.total, 1); assert.equal(page.rows[0].text, ''); assert.equal(page.usage.known, false);
+    assert.equal(page.total, 1); assert.equal('text' in page.rows[0], false); assert.equal(page.usage.known, false);
     const hash = createHash('sha256').update(await fs.readFile(source)).digest('hex');
     const transcript = await request(client, { module: 'agent_data', type: 'read', requestId: 'read', ...scope, key: page.rows[0].key });
     assert.equal(transcript.sessionId, 'windows-history'); assert.ok(transcript.text.includes('history needle')); assert.ok(transcript.text.length > 32000000);

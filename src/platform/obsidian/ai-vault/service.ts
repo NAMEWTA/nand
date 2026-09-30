@@ -4,7 +4,7 @@ import { t } from '../../../shared/i18n/terminal-accessor';
 import { JsonStore } from '../../../shared/json-store';
 import { absolutePluginDir, accountConfigDir } from '../../desktop/agents/accounts';
 import type { TerminalService } from '../../desktop/terminal/terminal-service';
-import type { HistoryPage, NativeSession } from '../../terminal-server/agent-data-client';
+import type { AgentDataClient, HistoryPage, NativeSession, NativeSessionSummary, NativeUsage } from '../../terminal-server/agent-data-client';
 async function nodeModules() {
 	if (!Platform.isDesktop) throw new Error(t('workbench.sessionMissing'));
 	return Promise.resolve([
@@ -20,11 +20,62 @@ export interface HistoryMetadata {
 	favorite?: boolean;
 	archived?: boolean;
 }
+interface SharedRead<T> {
+	promise: Promise<T>;
+	abort: AbortController;
+	consumers: number;
+	settled: boolean;
+}
+function checkCancelled(signal?: AbortSignal): void {
+	if (signal?.aborted) throw new Error('History request cancelled');
+}
+function consume<T>(read: SharedRead<T>, signal?: AbortSignal): Promise<T> {
+	if (signal?.aborted) {
+		if (!read.settled && !read.consumers) read.abort.abort();
+		return Promise.reject(new Error('History request cancelled'));
+	}
+	read.consumers++;
+	return new Promise<T>((resolve, reject) => {
+		let done = false;
+		const finish = () => {
+			if (done) return false;
+			done = true;
+			signal?.removeEventListener('abort', cancel);
+			read.consumers--;
+			return true;
+		};
+		const cancel = () => {
+			if (!finish()) return;
+			if (!read.settled && !read.consumers) read.abort.abort();
+			reject(new Error('History request cancelled'));
+		};
+		signal?.addEventListener('abort', cancel, { once: true });
+		void read.promise.then(value => { if (finish()) resolve(value); }, (error: unknown) => { if (finish()) reject(error instanceof Error ? error : new Error(String(error))); });
+	});
+}
+function sharedRead<T>(load: (signal: AbortSignal) => Promise<T>): SharedRead<T> {
+	const abort = new AbortController();
+	const read: SharedRead<T> = { abort, consumers: 0, settled: false, promise: Promise.resolve().then(() => { checkCancelled(abort.signal); return load(abort.signal); }) };
+	void read.promise.then(() => { read.settled = true; }, () => { read.settled = true; });
+	return read;
+}
 export class NativeHistory {
 	private metadata: Record<string, HistoryMetadata> = {};
 	private store: JsonStore<Record<string, HistoryMetadata>>;
 	private loaded: Promise<void>;
 	private tail: Promise<void> = Promise.resolve();
+	private listeners = new Set<() => void>();
+	private indexVersion = 0;
+	private scanned = false;
+	private metadataVersion = 0;
+	private version = 0;
+	private scanRead?: { key: string; read: SharedRead<string[]> };
+	private pages = new Map<string, SharedRead<HistoryPage>>();
+	private reads = new Set<AbortController>();
+	private client?: AgentDataClient;
+	private clientRevision = 0;
+	private unsubscribeClient?: () => void;
+	private disposed = false;
 	constructor(
 		private app: App,
 		private service: TerminalService,
@@ -39,17 +90,73 @@ export class NativeHistory {
 		);
 		this.loaded = this.store.load({}).then((rows) => {
 			this.metadata = rows;
+			this.metadataVersion++;
+			this.changed();
 		});
+	}
+	get revision(): number { return this.version; }
+	get indexRevision(): number { return this.indexVersion; }
+	get hasScanned(): boolean { return this.scanned; }
+	get metadataRevision(): number { return this.metadataVersion; }
+	subscribe(listener: () => void): () => void {
+		this.listeners.add(listener);
+		return () => this.listeners.delete(listener);
+	}
+	private changed(notify = true): void {
+		this.version++;
+		this.pages.clear();
+		if (notify) for (const listener of this.listeners) listener();
+	}
+	private active(): void {
+		if (this.disposed) throw new Error('History service disposed');
+	}
+	private createRead<T>(load: (signal: AbortSignal) => Promise<T>): SharedRead<T> {
+		this.active();
+		const read = sharedRead(load);
+		this.reads.add(read.abort);
+		const clear = () => this.reads.delete(read.abort);
+		void read.promise.then(clear, clear);
+		return read;
+	}
+	private observeClient(client: AgentDataClient): void {
+		this.active();
+		if (this.client === client) return;
+		this.unsubscribeClient?.();
+		if (this.client) this.changed();
+		this.client = client;
+		this.clientRevision = client.connectionRevision;
+		this.unsubscribeClient = client.subscribeConnection(() => {
+			this.clientRevision = client.connectionRevision;
+			this.indexVersion = 0;
+			this.scanned = false;
+			// Closing the final terminal deliberately stops the server. Invalidate
+			// cached results now, but publish only a live connection: a subscriber
+			// query must not restart a server while its shutdown is in progress.
+			this.changed(client.isConnected());
+		});
+	}
+	async dispose(): Promise<void> {
+		this.disposed = true;
+		this.listeners.clear();
+		this.unsubscribeClient?.();
+		for (const abort of this.reads) abort.abort();
+		this.reads.clear();
+		this.pages.clear();
+		this.scanRead = undefined;
+		await this.tail;
 	}
 	meta(key: string): HistoryMetadata {
 		return this.metadata[key] ?? {};
 	}
 	update(key: string, patch: HistoryMetadata): Promise<void> {
+		this.active();
 		const result = this.tail.then(async () => {
 			await this.loaded;
 			const next = { ...this.metadata, [key]: { ...this.meta(key), ...patch } };
 			await this.store.save(next);
 			this.metadata = next;
+			this.metadataVersion++;
+			this.changed();
 		});
 		this.tail = result.catch(() => {});
 		return result;
@@ -62,7 +169,7 @@ export class NativeHistory {
 		return { vault, index: path.join(vault, '.nand', 'terminal-agent', device, 'index.sqlite') };
 	}
 
-	async scan(signal?: AbortSignal): Promise<string[]> {
+	private async scanScope() {
 		const [path, os, , process] = await nodeModules();
 		const scope = await this.scope(),
 			home = os.homedir(),
@@ -92,26 +199,77 @@ export class NativeHistory {
 			{ agentId: 'grok', path: path.join(grok, 'sessions'), accountKey: JSON.stringify({ GROK_HOME: grok }) },
 			{ agentId: 'opencode', path: path.join(openCode, 'opencode.db'), accountKey: '{}' },
 		];
-		const client = await this.service.historyClient();
-		const result = await client.request<{ warnings: string[] }>('scan', { ...scope, roots }, signal);
-		return result.warnings;
+		return { ...scope, roots };
+	}
+	async scan(signal?: AbortSignal): Promise<string[]> {
+		this.active();
+		if (signal?.aborted) throw new Error('History request cancelled');
+		const scope = await this.scanScope();
+		checkCancelled(signal);
+		const key = JSON.stringify(scope);
+		if (!this.scanRead || this.scanRead.key !== key || this.scanRead.read.abort.signal.aborted) {
+			const read = this.createRead(async sharedSignal => {
+				const client = await this.service.historyClient();
+				checkCancelled(sharedSignal);
+				this.observeClient(client);
+				const result = await client.request<{ warnings: string[]; revision: number }>('scan', scope, sharedSignal);
+				this.indexVersion = result.revision;
+				this.scanned = true;
+				this.changed();
+				return result.warnings;
+			});
+			this.scanRead = { key, read };
+			const clear = () => { if (this.scanRead?.read === read) this.scanRead = undefined; };
+			void read.promise.then(clear, clear);
+		}
+		return consume(this.scanRead.read, signal);
+	}
+	refresh(signal?: AbortSignal): Promise<string[]> {
+		// Explicit refresh always enumerates every configured root. A concurrent
+		// leaf shares that same scan instead of launching another traversal.
+		return this.scan(signal);
 	}
 	async query(query = '', offset = 0, signal?: AbortSignal, filter = 'all'): Promise<HistoryPage> {
+		this.active();
 		await this.loaded;
-		return (await this.service.historyClient()).request(
-			'query',
-			{ ...(await this.scope()), query, offset, filter, metadata: this.metadata },
-			signal,
-		);
+		if (signal?.aborted) throw new Error('History request cancelled');
+		const scope = await this.scanScope();
+		checkCancelled(signal);
+		const client = await this.service.historyClient();
+		checkCancelled(signal);
+		this.observeClient(client);
+		const key = JSON.stringify([scope, this.revision, this.clientRevision, query, offset, filter]);
+		let read = this.pages.get(key);
+		if (!read || read.abort.signal.aborted) {
+			const metadata = this.metadata;
+			read = this.createRead(async sharedSignal => client.request<HistoryPage>(
+				'query', { vault: scope.vault, index: scope.index, query, offset, filter, metadata }, sharedSignal,
+			));
+			this.pages.set(key, read);
+			const current = read;
+			void read.promise.catch(() => { if (this.pages.get(key) === current) this.pages.delete(key); });
+			if (this.pages.size > 32) {
+				const oldest: unknown = this.pages.keys().next().value;
+				if (typeof oldest === 'string') this.pages.delete(oldest);
+			}
+		}
+		return consume(read, signal);
 	}
-	async read(session: NativeSession, signal?: AbortSignal): Promise<NativeSession> {
-		return (await this.service.historyClient()).request(
-			'read',
-			{ ...(await this.scope()), key: session.key },
-			signal,
-		);
+	async usage(signal?: AbortSignal): Promise<NativeUsage> {
+		return (await this.query('', 0, signal, 'all')).usage;
 	}
-	async export(session: NativeSession): Promise<TFile> {
+	async read(session: NativeSessionSummary, signal?: AbortSignal): Promise<NativeSession> {
+		this.active();
+		const scope = await this.scope();
+		checkCancelled(signal);
+		return consume(this.createRead(async sharedSignal => {
+			const client = await this.service.historyClient();
+			checkCancelled(sharedSignal);
+			this.active();
+			return client.request<NativeSession>('read', { ...scope, key: session.key }, sharedSignal);
+		}), signal);
+	}
+	async export(session: NativeSessionSummary): Promise<TFile> {
 		let full: NativeSession;
 		try {
 			await this.loaded;

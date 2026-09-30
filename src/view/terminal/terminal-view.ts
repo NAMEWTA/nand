@@ -1,14 +1,15 @@
 import { WebLinksAddon } from '@xterm/addon-web-links';
 import { shell, webUtils } from 'electron';
-import type { Menu, WorkspaceLeaf } from 'obsidian';
-import { FileSystemAdapter, ItemView, Notice, TFile, TFolder } from 'obsidian';
+import type { ViewStateResult, WorkspaceLeaf } from 'obsidian';
+import { FileSystemAdapter, ItemView, Menu, Notice, TFile, TFolder } from 'obsidian';
 import { h, render } from 'preact';
 import type { PtySession } from '../../platform/desktop/terminal/pty-session';
 import { onLeafLanguageChanged, refreshLeafTitle } from '../../platform/obsidian/workspace-title';
 import { t as automationT } from '../../shared/i18n/index';
 import type { TerminalViewHost } from './host';
 import { TerminalWorkbench } from './TerminalWorkbench';
-import { HistorySidebar, SessionSidebar, UsageFooter } from './workbench';
+import { confirmSessionClose, HistoryPreview, HistorySidebar, NewConversationButton, SessionSidebar, TerminalHeader, UsageFooter } from './workbench';
+import { createWorkbenchState, sidebarWidth, type WorkbenchState } from './workbench-state';
 
 /**
  * Node built-ins are resolved on demand inside the `TerminalView`
@@ -78,6 +79,42 @@ export class TerminalView extends ItemView {
 	private initPromise: Promise<TerminalInstance> | null = null;
 	private initResolve: ((terminal: TerminalInstance) => void) | null = null;
 	private initReject: ((error: Error) => void) | null = null;
+	private pauseDocumentCleanup: (() => void) | null = null;
+	private themeCleanup: (() => void) | null = null;
+	private attachFrame: { win: Window; id: number } | null = null;
+	private initializeTimer: { win: Window; id: number } | null = null;
+	private workbenchVisible = false;
+	private workbenchState = createWorkbenchState();
+	private workbenchRoot: HTMLElement | null = null;
+	private readonly changeWorkbench = (patch: Partial<WorkbenchState>) => {
+		Object.assign(this.workbenchState, patch);
+		for (const leaf of this.app.workspace.getLeavesOfType(TERMINAL_VIEW_TYPE)) {
+			if (leaf.view instanceof TerminalView && leaf.view.workbenchState === this.workbenchState) {
+				leaf.view.drawWorkbench();
+				leaf.view.syncOutputPause();
+			}
+		}
+		if (!this.closed) this.app.workspace.requestSaveLayout();
+	};
+	copyWorkbenchStateFrom(view: TerminalView): void {
+		this.workbenchState = view.workbenchState;
+		this.drawWorkbench();
+		this.syncOutputPause();
+	}
+	getState(): Record<string, unknown> {
+		const { sidebarWidth, wideSidebarOpen, navigation, sessionQuery, historyQuery, historyFilter, historyOffset } = this.workbenchState;
+		return { sidebarWidth, wideSidebarOpen, navigation, sessionQuery, historyQuery, historyFilter, historyOffset };
+	}
+	async setState(raw: Record<string, unknown>, result: ViewStateResult): Promise<void> {
+		this.workbenchState.sidebarWidth = sidebarWidth(typeof raw.sidebarWidth === 'number' ? raw.sidebarWidth : 272);
+		this.workbenchState.wideSidebarOpen = raw.wideSidebarOpen !== false;
+		this.workbenchState.navigation = raw.navigation === 'history' ? 'history' : 'running';
+		for (const key of ['sessionQuery', 'historyQuery'] as const) this.workbenchState[key] = typeof raw[key] === 'string' ? raw[key] : '';
+		this.workbenchState.historyFilter = raw.historyFilter === 'favorite' || raw.historyFilter === 'archived' ? raw.historyFilter : 'active';
+		this.workbenchState.historyOffset = typeof raw.historyOffset === 'number' && Number.isFinite(raw.historyOffset) ? Math.max(0, Math.floor(raw.historyOffset / 100) * 100) : 0;
+		this.drawWorkbench();
+		await super.setState(raw, result);
+	}
 
 	private readonly fs: FsModule;
 	private readonly path: PathModule;
@@ -156,6 +193,16 @@ export class TerminalView extends ItemView {
 					});
 			});
 		}
+		const session = view.terminalInstance?.session;
+		if (session) {
+			menu.addSeparator();
+			menu.addItem((item) => item.setTitle(t('workbench.copySessionId')).setIcon('copy').onClick(() => {
+				void view.contentEl.win.navigator.clipboard.writeText(session.id).catch((error) => new Notice(String(error)));
+			}));
+			menu.addItem((item) => item.setTitle(t('workbench.close')).setIcon('square').onClick(() => {
+				confirmSessionClose(view.app, () => view.closeSession(session));
+			}));
+		}
 	}
 
 	onOpen(): Promise<void> {
@@ -165,6 +212,7 @@ export class TerminalView extends ItemView {
 		container.empty();
 		container.addClass('nand-agent-workbench');
 		this.drawWorkbench();
+		if (this.terminalService) this.register(this.terminalService.subscribe(() => this.drawWorkbench()));
 		this.register(onLeafLanguageChanged(this.app, this.leaf, () => {
 			this.drawWorkbench();
 			this.updateDropHintText();
@@ -183,11 +231,8 @@ export class TerminalView extends ItemView {
 			this.removeDropHandlers = this.setupDropHandlers();
 		}
 
-		container.win.setTimeout(() => {
-			if (!this.closed && !this.terminalInstance && this.terminalContainer) {
-				void this.initializeTerminal();
-			}
-		}, 0);
+		this.scheduleInitializeTerminal();
+		this.bindThemeChanges();
 		this.bindOutputPause();
 		return Promise.resolve();
 	}
@@ -222,9 +267,16 @@ export class TerminalView extends ItemView {
 		this.terminalInstance?.focus();
 	}
 
-	async onClose(): Promise<void> {
+	onClose(): Promise<void> {
 		this.closed = true;
+		this.selectionRequest++;
+		this.cancelInitializeTimer();
+		this.rejectPendingInitialization(new Error(t('terminal.notInitialized')));
 		this.releaseTerminalInstance();
+		this.themeCleanup?.();
+		this.themeCleanup = null;
+		this.pauseDocumentCleanup?.();
+		this.pauseDocumentCleanup = null;
 		render(null, this.contentEl);
 		this.getTerminalPlugin()?.handleTerminalViewClosed(this);
 
@@ -241,27 +293,23 @@ export class TerminalView extends ItemView {
 		this.dragEnterDepth = 0;
 		this.dropHintEl = null;
 
-		if (this.terminalInstance) {
-			try {
-				await this.terminalService?.destroyTerminal(this.terminalInstance.id);
-			} catch (error) {
-				errorLog('[TerminalView] Destroy failed:', error);
-			}
-			this.terminalInstance = null;
-		}
-
 		this.containerEl.empty();
 		this.disposeAppearanceStyle();
+		return Promise.resolve();
 	}
 
 	releaseTerminalInstance(): TerminalInstance | null {
+		if (this.attachFrame) this.attachFrame.win.cancelAnimationFrame(this.attachFrame.id);
+		this.attachFrame = null;
+		this.resizeObserver?.disconnect();
+		this.resizeObserver = null;
 		const terminal = this.terminalInstance;
 		if (!terminal) return null;
 
 		this.detachTerminalBindings();
 		this.fileUriLinkAddon?.dispose();
 		this.fileUriLinkAddon = null;
-		terminal.detach();
+		terminal.release(this);
 		this.terminalInstance = null;
 		this.initPromise = null;
 		this.initResolve = null;
@@ -270,8 +318,11 @@ export class TerminalView extends ItemView {
 	}
 
 	adoptTerminalInstance(terminal: TerminalInstance, options: TerminalAttachOptions = {}): void {
+		this.cancelInitializeTimer();
+		this.selectionRequest++;
 		this.detachTerminalBindings();
 		this.terminalInstance = terminal;
+		this.terminalHost.recordActiveSession(terminal.id);
 		this.initPromise = Promise.resolve(terminal);
 		this.initResolve?.(terminal);
 		this.initResolve = null;
@@ -290,6 +341,10 @@ export class TerminalView extends ItemView {
 	}
 
 	handleHostWindowChanged(options: TerminalAttachOptions = {}): void {
+		if (this.closed) return;
+		if (this.initializeTimer) this.scheduleInitializeTerminal();
+		this.bindThemeChanges();
+		this.bindPauseDocument();
 		if (!this.terminalInstance || !this.terminalContainer) return;
 
 		this.removeDropHandlers?.();
@@ -304,8 +359,26 @@ export class TerminalView extends ItemView {
 		const service = this.terminalService,
 			host = this.terminalHost;
 		const history = service?.history(() => host.settings.agentSettings, host.manifest.dir ?? '');
+		const state = this.workbenchState;
+		const session = service?.getAllTerminals().find((candidate) => candidate.id === this.terminalInstance?.id);
 		render(
 			h(TerminalWorkbench, {
+				ownerWindow: this.contentEl.win,
+				state,
+				onStateChange: this.changeWorkbench,
+				rootRef: (element) => { this.workbenchRoot = element; },
+				focusTerminal: () => this.focusTerminal(),
+				header: h(TerminalHeader, {
+					title: this.terminalInstance?.getTitle() || t('terminal.defaultTitle'),
+					cwd: session?.getCwd() ?? '',
+					status: session?.nativeStatus ?? 'unknown',
+					search: () => this.showSearch(),
+					more: (event: MouseEvent) => { const menu = new Menu(); this.onPaneMenu(menu); menu.showAtMouseEvent(event); },
+					sidebarToggle: () => this.changeWorkbench((this.workbenchRoot?.clientWidth ?? this.contentEl.clientWidth) < 800 ? { drawerOpen: !state.drawerOpen } : { wideSidebarOpen: !state.wideSidebarOpen }),
+					quickSwitch: () => host.showSessionSwitcher(this),
+					sidebarOpen: (this.workbenchRoot?.clientWidth ?? this.contentEl.clientWidth) < 800 ? state.drawerOpen : state.wideSidebarOpen,
+				}),
+				newConversation: service ? h(NewConversationButton, { host, create: () => this.newSession(), primary: !state.showHistory }) : null,
 				terminalRef: (element) => {
 					this.terminalContainer = element;
 				},
@@ -326,6 +399,8 @@ export class TerminalView extends ItemView {
 				sessions: service
 					? h(SessionSidebar, {
 							host,
+							state,
+							onStateChange: this.changeWorkbench,
 							service,
 							active: this.terminalInstance?.id ?? '',
 							select: (session) => {
@@ -333,20 +408,32 @@ export class TerminalView extends ItemView {
 									new Notice(String(error));
 								});
 							},
-							create: () => this.newSession(),
 							close: (terminal) => this.closeSession(terminal),
 						})
 					: null,
-				history: history ? h(HistorySidebar, { history, host }) : null,
-				usage: history ? h(UsageFooter, { host, history }) : null,
+				history: history ? h(HistorySidebar, { history, host, state, onStateChange: this.changeWorkbench, ownerWindow: this.contentEl.win }) : null,
+				preview: history ? h(HistoryPreview, { history, host, state, onStateChange: this.changeWorkbench, focusTerminal: () => this.focusTerminal() }) : null,
+				usage: history ? h(UsageFooter, { host, history, ownerWindow: this.contentEl.win, visible: this.workbenchVisible }) : null,
 			}),
 			this.contentEl,
 		);
 	}
+	private focusTerminal(): void {
+		this.changeWorkbench({ showHistory: false, drawerOpen: false });
+		this.terminalInstance?.focus();
+	}
 	private selectionRequest = 0;
-	private async selectPtySession(session: PtySession): Promise<void> {
+	async selectPtySession(session: PtySession): Promise<void> {
+		if (this.closed || session.isDisposed) return;
+		this.cancelInitializeTimer();
 		const request = ++this.selectionRequest;
-		const renderer = await this.terminalHost.getTerminalRenderer(session);
+		let renderer: TerminalInstance;
+		try { renderer = await this.terminalHost.getTerminalRenderer(session); }
+		catch (error) {
+			if (this.closed || request !== this.selectionRequest) return;
+			this.rejectPendingInitialization(error instanceof Error ? error : new Error(String(error)));
+			throw error;
+		}
 		if (this.closed || request !== this.selectionRequest) return;
 		this.selectSession(renderer);
 	}
@@ -356,7 +443,8 @@ export class TerminalView extends ItemView {
 			.some((leaf) => leaf.view instanceof TerminalView && leaf.view.getTerminalInstance()?.id === session.id);
 	}
 	selectSession(terminal: TerminalInstance): void {
-		if (terminal === this.terminalInstance) return;
+		if (this.closed) return;
+		if (terminal === this.terminalInstance) { this.terminalHost.recordActiveSession(terminal.id); this.focusTerminal(); return; }
 		const other = this.app.workspace
 			.getLeavesOfType(TERMINAL_VIEW_TYPE)
 			.find(
@@ -366,9 +454,13 @@ export class TerminalView extends ItemView {
 					leaf.view.getTerminalInstance()?.id === terminal.id,
 			);
 		if (other) {
+			this.terminalHost.recordActiveSession(terminal.id);
 			void this.app.workspace.revealLeaf(other);
+			if (other.view instanceof TerminalView) other.view.focusTerminal();
 			return;
 		}
+		this.workbenchState.showHistory = false;
+		this.workbenchState.drawerOpen = false;
 		this.releaseTerminalInstance();
 		this.adoptTerminalInstance(terminal);
 		this.drawWorkbench();
@@ -398,6 +490,7 @@ export class TerminalView extends ItemView {
 	}
 
 	private async initializeTerminal(): Promise<void> {
+		const request = ++this.selectionRequest;
 		try {
 			if (!this.terminalService) {
 				throw new Error('TerminalService not initialized');
@@ -407,14 +500,12 @@ export class TerminalView extends ItemView {
 				? undefined
 				: this.terminalService.getAllTerminals().find((terminal) => !this.sessionIsVisible(terminal));
 			const session = unattached ?? (await this.terminalService.createTerminal());
-			if (this.closed) return;
-			this.terminalInstance = await this.terminalHost.getTerminalRenderer(session);
-			if (this.closed) {
-				this.terminalInstance.detach();
-				this.terminalInstance = null;
-				return;
-			}
+			if (this.closed || request !== this.selectionRequest) return;
+			const renderer = await this.terminalHost.getTerminalRenderer(session);
+			if (this.closed || request !== this.selectionRequest) return;
+			this.terminalInstance = renderer;
 			this.drawWorkbench();
+			this.terminalHost.recordActiveSession(session.id);
 			this.initResolve?.(this.terminalInstance);
 			this.initResolve = null;
 			this.initReject = null;
@@ -429,6 +520,7 @@ export class TerminalView extends ItemView {
 			this.setupResizeObserver();
 			this.syncOutputPause();
 		} catch (error) {
+			if (this.closed || request !== this.selectionRequest) return;
 			const errorMessage = error instanceof Error ? error.message : String(error);
 			errorLog('[TerminalView] Init failed:', errorMessage);
 			if (this.initReject) {
@@ -439,6 +531,25 @@ export class TerminalView extends ItemView {
 			new Notice(t('notices.terminal.initFailed', { message: errorMessage }));
 			this.leaf.detach();
 		}
+	}
+	private cancelInitializeTimer(): void {
+		if (this.initializeTimer) this.initializeTimer.win.clearTimeout(this.initializeTimer.id);
+		this.initializeTimer = null;
+	}
+	private scheduleInitializeTerminal(): void {
+		this.cancelInitializeTimer();
+		const win = this.contentEl.win;
+		this.initializeTimer = { win, id: win.setTimeout(() => {
+			this.initializeTimer = null;
+			if (!this.closed && !this.terminalInstance && this.terminalContainer) void this.initializeTerminal();
+		}, 0) };
+	}
+	private rejectPendingInitialization(error: Error): void {
+		if (!this.initReject) return;
+		this.initReject(error);
+		this.initResolve = null;
+		this.initReject = null;
+		this.initPromise = null;
 	}
 
 	/**
@@ -834,20 +945,69 @@ export class TerminalView extends ItemView {
 	}
 
 	private bindOutputPause(): void {
-		const doc = this.containerEl.ownerDocument;
 		const sync = () => this.syncOutputPause();
 		this.registerEvent(this.app.workspace.on('layout-change', sync));
-		this.registerDomEvent(doc, 'visibilitychange', sync);
-		this.registerInterval(window.setInterval(sync, 1000));
+		this.registerEvent(this.app.workspace.on('active-leaf-change', (leaf) => {
+			if (!this.closed && leaf === this.leaf && this.terminalInstance) this.terminalHost.recordActiveSession(this.terminalInstance.id);
+			sync();
+		}));
+		this.bindPauseDocument();
 		sync();
+	}
+	private bindThemeChanges(): void {
+		this.themeCleanup?.();
+		const workspace = this.app.workspace;
+		const doc = this.contentEl.ownerDocument;
+		const win = doc.defaultView ?? this.contentEl.win;
+		let frame: number | null = null;
+		let disposed = false;
+		const schedule = () => {
+			if (disposed || this.closed || frame !== null || !this.terminalInstance?.getOptions().useObsidianTheme) return;
+			frame = win.requestAnimationFrame(() => {
+				frame = null;
+				const terminal = this.terminalInstance;
+				if (disposed || this.closed || !terminal?.getOptions().useObsidianTheme) return;
+				terminal.updateTheme();
+				this.updateAppearanceStyles();
+			});
+		};
+		// Obsidian propagates a popout's theme class after the main workspace event.
+		// Observe that document and read its computed colors on its own next frame.
+		const MutationObserverCtor = doc.defaultView?.MutationObserver;
+		const observer = doc.body && MutationObserverCtor ? new MutationObserverCtor(schedule) : null;
+		observer?.observe(doc.body, { attributes: true, attributeFilter: ['class'] });
+		const ref = workspace.on('css-change', schedule);
+		this.registerEvent(ref);
+		this.themeCleanup = () => {
+			disposed = true;
+			workspace.offref(ref);
+			observer?.disconnect();
+			if (frame !== null) win.cancelAnimationFrame(frame);
+			frame = null;
+		};
+	}
+	private bindPauseDocument(): void {
+		this.pauseDocumentCleanup?.();
+		const doc = this.containerEl.ownerDocument;
+		const win = doc.defaultView;
+		const sync = () => this.syncOutputPause();
+		doc.addEventListener('visibilitychange', sync);
+		win?.addEventListener('focus', sync);
+		this.pauseDocumentCleanup = () => {
+			doc.removeEventListener('visibilitychange', sync);
+			win?.removeEventListener('focus', sync);
+		};
 	}
 
 	private syncOutputPause(): void {
 		const el = this.containerEl as HTMLElement & { isShown?: () => boolean };
-		const hidden =
-			el.ownerDocument.visibilityState === 'hidden' ||
-			(typeof el.isShown === 'function' ? !el.isShown() : el.offsetParent === null);
-		this.terminalInstance?.setOutputPaused(hidden);
+		const visible = !this.closed && el.ownerDocument.visibilityState !== 'hidden' &&
+			(typeof el.isShown === 'function' ? el.isShown() : el.offsetParent !== null);
+		this.terminalInstance?.setOwnerVisible(this, visible && !this.workbenchState.showHistory);
+		if (visible !== this.workbenchVisible) {
+			this.workbenchVisible = visible;
+			this.drawWorkbench();
+		}
 	}
 
 	private formatDroppedPaths(paths: string[]): string {
@@ -1174,42 +1334,42 @@ export class TerminalView extends ItemView {
 		if (dropHint) this.terminalContainer.appendChild(dropHint);
 
 		try {
-			this.terminalInstance.attachToElement(this.terminalContainer);
+			this.terminalInstance.acquire(this, this.terminalContainer, true);
+			this.updateAppearanceStyles();
+			this.syncOutputPause();
 		} catch (error) {
 			errorLog('[TerminalView] Attach failed:', error);
 			new Notice(t('notices.terminal.renderFailed', { message: String(error) }));
 			return;
 		}
 
-		window.setTimeout(() => {
-			if (this.terminalInstance?.isAlive()) {
-				this.terminalInstance.fit();
+		if (this.attachFrame) this.attachFrame.win.cancelAnimationFrame(this.attachFrame.id);
+		const terminal = this.terminalInstance;
+		const win = this.terminalContainer.win;
+		this.attachFrame = { win, id: win.requestAnimationFrame(() => {
+			this.attachFrame = null;
+			if (!this.closed && this.terminalInstance === terminal) {
+				// Migration may attach before the destination leaf is shown.
+				this.syncOutputPause();
+				terminal.fit();
 				if (options.focus !== false) {
-					this.terminalInstance.focus();
+					terminal.focus();
 				}
 			}
-		}, 100);
+		}) };
 	}
 
 	private setupResizeObserver(): void {
 		if (!this.terminalContainer) return;
 		this.resizeObserver?.disconnect();
 
-		let resizeTimeout: number | null = null;
 		const ResizeObserverCtor = this.terminalContainer.ownerDocument.defaultView?.ResizeObserver ?? ResizeObserver;
 
 		this.resizeObserver = new ResizeObserverCtor((entries) => {
-			if (resizeTimeout) window.clearTimeout(resizeTimeout);
-
-			resizeTimeout = window.setTimeout(() => {
-				const entry = entries[0];
-				if (this.terminalInstance?.isAlive() && entry) {
-					const { width, height } = entry.contentRect;
-					if (width > 0 && height > 0) {
-						this.terminalInstance.fit();
-					}
-				}
-			}, 100);
+			if (this.closed) return;
+			this.syncOutputPause();
+			const entry = entries[0];
+			if (entry && entry.contentRect.width > 0 && entry.contentRect.height > 0) this.terminalInstance?.fit();
 		});
 
 		this.resizeObserver.observe(this.terminalContainer);
@@ -1308,6 +1468,7 @@ export class TerminalView extends ItemView {
 	}
 
 	async waitForTerminalInstance(timeoutMs = 8000): Promise<TerminalInstance> {
+		if (this.closed) throw new Error(t('terminal.notInitialized'));
 		if (this.terminalInstance) return this.terminalInstance;
 		if (!this.initPromise) {
 			throw new Error(t('terminal.notInitialized'));

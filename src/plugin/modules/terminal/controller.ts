@@ -1,4 +1,6 @@
 import { shell } from 'electron';
+import { orderRecentSessions } from '../../../core/pty/recent-sessions';
+import { RecentSessionModal } from '../../../view/terminal/recent-session-modal';
 import type { View, WorkspaceLeaf } from 'obsidian';
 import { FileSystemAdapter, Modal, Notice, Platform, Plugin, normalizePath, setIcon, setTooltip } from 'obsidian';
 import { getAgent } from '../../../core/agent-launch/catalog';
@@ -112,6 +114,19 @@ export class TerminalAgentController {
 		return this.automationRuntime ?? (this.automationRuntime = new TerminalAutomationRuntime(this));
 	}
 	private readonly terminalRenderers = new TerminalRenderers();
+	private recentSessionIds: string[] = [];
+	recordActiveSession(id: string): void {
+		const live = new Set(this._terminalService?.getAllTerminals().map((session) => session.id));
+		this.recentSessionIds = this.recentSessionIds.filter((key) => key !== id && live.has(key));
+		this.recentSessionIds.push(id);
+	}
+	showSessionSwitcher(view: TerminalView): void {
+		const sessions = this._terminalService?.getAllTerminals() ?? [];
+		const ordered = orderRecentSessions(sessions, this.recentSessionIds, view.getTerminalInstance()?.id);
+		new RecentSessionModal(this.app, ordered, (session) => {
+			void view.selectPtySession(session).catch((error: unknown) => new Notice(String(error)));
+		}).open();
+	}
 	getTerminalRenderer(session: PtySession): Promise<TerminalInstance> {
 		return this.terminalRenderers.get(session);
 	}
@@ -866,6 +881,7 @@ export class TerminalAgentController {
 		}
 
 		this.pendingRestoredTerminals.delete(mainLeaf);
+		restoredView.copyWorkbenchStateFrom(terminalView);
 		if (restoredView.getTerminalInstance() !== terminal) {
 			restoredView.adoptTerminalInstance(terminal);
 		}
@@ -1101,6 +1117,17 @@ export class TerminalAgentController {
 	 * Register all commands
 	 */
 	private registerCommands(): void {
+		this.addCommand({
+			id: 'terminal-quick-switch',
+			nameKey: 'terminalAgent.commands.terminalQuickSwitch',
+			name: t('commands.terminalQuickSwitch'),
+			checkCallback: (checking: boolean) => {
+				const view = this.getActiveTerminalView();
+				if (!view || !this.featureVisibilityManager.isVisibleAt('terminal', 'showInCommandPalette')) return false;
+				if (!checking) this.showSessionSwitcher(view);
+				return true;
+			},
+		});
 		// Open terminal
 		this.addCommand({
 			id: 'open-terminal',
@@ -3083,6 +3110,7 @@ class TerminalViewPlaceholder extends TerminalView {
 	private plugin: TerminalAgentController;
 	private initialized = false;
 	private initializing = false;
+	private disposed = false;
 
 	constructor(leaf: WorkspaceLeaf, plugin: TerminalAgentController) {
 		// Inject TerminalService lazily to avoid loading xterm.js at startup
@@ -3091,6 +3119,7 @@ class TerminalViewPlaceholder extends TerminalView {
 	}
 
 	async onOpen() {
+		if (this.disposed) return;
 		if (!this.plugin.isActive()) {
 			this.contentEl.empty();
 			renderEmptyState(this.contentEl, {
@@ -3115,17 +3144,20 @@ class TerminalViewPlaceholder extends TerminalView {
 		try {
 			// Get the real TerminalService
 			const terminalService = await this.plugin.getTerminalService();
+			if (this.disposed) return;
 
 			this.setTerminalService(terminalService);
 
 			// Clear the placeholder content and initialize the terminal view
 			this.contentEl.empty();
 			await super.onOpen();
+			if (this.disposed) return;
 			if (pendingTerminal) {
 				this.adoptTerminalInstance(pendingTerminal);
 			}
 			this.initialized = true;
 		} catch (error) {
+			if (this.disposed) return;
 			errorLog('[TerminalViewPlaceholder] Failed to initialize:', error);
 			this.contentEl.empty();
 			this.contentEl.createEl('div', {
@@ -3138,6 +3170,7 @@ class TerminalViewPlaceholder extends TerminalView {
 	}
 
 	async onClose() {
+		this.disposed = true;
 		await super.onClose();
 	}
 }

@@ -6,7 +6,8 @@ import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { Notice, TFile, TFolder, type App } from 'obsidian';
 import { NativeHistory } from '../src/platform/obsidian/ai-vault/service';
-import { HistorySidebar, SessionSidebar, UsageFooter } from '../src/view/terminal/workbench';
+import { HistoryPreview, HistorySidebar, NewConversationButton, SessionSidebar, TerminalHeader, UsageFooter } from '../src/view/terminal/workbench';
+import { createWorkbenchState, sidebarWidth, type WorkbenchState } from '../src/view/terminal/workbench-state';
 import { DEFAULT_AGENT_SETTINGS } from '../src/core/agent-launch/defaults';
 import { DEFAULT_TERMINAL_SETTINGS } from '../src/core/pty/settings';
 import { refreshRegisteredUsage, registerOrca, type OrcaPluginHost } from '../src/plugin/modules/agents/register';
@@ -35,6 +36,8 @@ let searches = 0,
 let terminal: HTMLDivElement | null = null;
 let input: HTMLInputElement | null = null;
 const refs = {
+	state: createWorkbenchState(),
+	onStateChange: () => {},
 	terminalRef: (node: HTMLDivElement | null) => {
 		terminal = node;
 	},
@@ -145,6 +148,17 @@ assert.ok(right.textContent?.includes('One'), 'unmounting a workbench leaves sep
 render(null, right);
 console.log('Panel composition: independent actions, persistent xterm island/search, clean unmount passed.');
 
+function mountHistoryPanel(panel: HTMLElement, history: NativeHistory, host: WorkbenchHost) {
+	const state = createWorkbenchState(); state.navigation = 'history';
+	const change = (patch: Partial<WorkbenchState>) => { Object.assign(state, patch); paint(); };
+	const paint = () => render(h('div', {},
+		h(HistorySidebar, { history, host, state, onStateChange: change }),
+		h(HistoryPreview, { history, host, state, onStateChange: change }),
+	), panel);
+	paint();
+	return { state, paint };
+}
+
 async function verifyExports() {
 	const files = new Map<string, TFile | TFolder>(), contents = new Map<string, string>();
 	const metadata = new Map<string, string>();
@@ -208,9 +222,9 @@ async function verifyExports() {
 
 	const panel = document.createElement('div'); document.body.appendChild(panel);
 	const host = { app } as WorkbenchHost;
-	const wait = () => new Promise<void>((resolve) => setTimeout(resolve, 100));
+	const wait = () => new Promise<void>((resolve) => setTimeout(resolve, 240));
 	const notices = (Notice as unknown as { messages: string[] }).messages;
-	render(h(HistorySidebar, { history, host }), panel); await wait();
+	const previewPanel = mountHistoryPanel(panel, history, host); await wait();
 	panel.querySelector<HTMLButtonElement>('.nand-history-row button')!.click(); await wait();
 	const preview = panel.querySelector('.nand-history-preview pre')!.textContent;
 	const exportButton = () => Array.from(panel.querySelectorAll<HTMLButtonElement>('.nand-history-actions button')).find((button) => button.textContent === t('terminalAgent.workbench.export'))!;
@@ -224,7 +238,7 @@ async function verifyExports() {
 	assert.ok(notices.at(-1)!.startsWith('已导出并打开：NAND Exports/'));
 	assert.equal(contents.size, 4);
 	for (const language of ['en', 'zh'] as const) {
-		setLanguage(language); render(h(HistorySidebar, { history, host }), panel);
+		setLanguage(language); previewPanel.paint();
 		failRead = true; exportButton().click(); await wait();
 		assert.match(notices.at(-1)!, new RegExp(language === 'en' ? 'Could not read' : '无法读取'));
 		failRead = false; failWrite = true; exportButton().click(); await wait();
@@ -241,19 +255,20 @@ async function verifyExports() {
 	render(null, panel);
 	console.log('History export: visible Vault files, concurrent collisions, safe names, content, localized failures and actual sidebar open/pending behavior passed.');
 }
-void verifyExports().then(verifyHistoryMatrix).then(verifySessionIdentity).then(verifyUsageLanguage).then(verifyAutomationFilters).catch((error) => { console.error(error); process.exitCode = 1; });
+void verifyExports().then(verifyHistoryMatrix).then(verifySessionIdentity).then(verifyUsageLanguage).then(verifyAutomationFilters).then(verifyOrcaRegression).catch((error) => { console.error(error); process.exitCode = 1; });
 
 async function verifySessionIdentity() {
 	const panel = document.createElement('div'); document.body.appendChild(panel);
-	const first = { id: 'terminal-12345678-aaaa', getTitle: () => 'Same Terminal', nativeStatus: 'unknown' } as PtySession;
-	const second = { id: 'terminal-abcdef01-bbbb', getTitle: () => 'Same Terminal', nativeStatus: 'unknown' } as PtySession;
+	const first = { id: 'terminal-12345678-aaaa', getTitle: () => 'Same Terminal', getCwd: () => '/vault', nativeStatus: 'unknown' } as PtySession;
+	const second = { id: 'terminal-abcdef01-bbbb', getTitle: () => 'Same Terminal', getCwd: () => '/vault', nativeStatus: 'unknown' } as PtySession;
 	let sessions = [first, second], selected: PtySession | undefined, redraw = () => {}, unsubscribed = 0;
 	const service = {
 		getAllTerminals: () => sessions,
 		subscribe: (listener: () => void) => { redraw = listener; return () => { unsubscribed++; }; },
 	} as unknown as TerminalService;
 	const host = { settings: { agentSettings: { agents: {} }, presetScripts: [] } } as unknown as WorkbenchHost;
-	const paint = () => render(h(SessionSidebar, { host, service, active: selected?.id ?? first.id, select: (session) => { selected = session; }, create: async () => {}, close: async () => {} }), panel);
+	const state = createWorkbenchState();
+	const paint = () => render(h(SessionSidebar, { host, service, state, onStateChange: (patch) => { Object.assign(state, patch); paint(); }, active: selected?.id ?? first.id, select: (session) => { selected = session; }, close: async () => {} }), panel);
 	const buttons = () => Array.from(panel.querySelectorAll<HTMLButtonElement>('.nand-session-row > button:first-child'));
 	const sessionId = (button: HTMLButtonElement) => button.dataset.terminalId ?? '';
 	const css = readFileSync(join(process.cwd(), 'styles.css'), 'utf8');
@@ -273,24 +288,20 @@ async function verifySessionIdentity() {
 	assert.match(closeButton, /flex:\s*0 0 32px/);
 	assert.match(closeButton, /width:\s*32px/);
 	assert.match(rule('.nand-session-row-meta {'), /display:\s*grid/);
-	assert.match(rule('.nand-session-row-id {'), /grid-column:\s*1\s*\/\s*-1/);
-	assert.match(rule('.nand-session-row-status {'), /grid-row:\s*2/);
-	assert.match(rule('.nand-session-status-dot {'), /grid-row:\s*2/);
+	assert.equal(css.includes('.nand-session-row-id {'), false, 'Technical identity has no visible row styling');
 	assert.match(rule('.nand-agent-sidebar button {'), /overflow-wrap:\s*normal/, 'navigation wraps at word boundaries');
 	const wait = () => new Promise<void>((resolve) => setTimeout(resolve, 160));
 	for (const language of ['zh', 'en', 'zh'] as const) {
 		setLanguage(language); sessions = [first, second]; paint(); await wait();
-		assert.equal(panel.querySelector('h3')?.textContent, language === 'zh' ? '智能体工作台' : 'Agent workbench');
+		assert.equal(panel.querySelector('input')?.getAttribute('aria-label'), t('terminalAgent.workbench.searchSessions'));
 		assert.equal(t('main.dashboard'), language === 'zh' ? '看板' : 'Dashboard');
 		const before = new Map(buttons().map((button) => [sessionId(button), button.textContent]));
-		assert.match(before.get(first.id)!, /#12345678/);
-		assert.match(before.get(second.id)!, /#abcdef01/);
+		assert.equal(panel.querySelector('.nand-session-row-id'), null);
+		assert.ok(!before.get(first.id)!.includes('#12345678'));
 		const status = t('terminalAgent.workbench.status.unknown');
 		for (const button of buttons()) {
 			assert.match(button.textContent!, new RegExp(status));
-			const id = sessionId(button);
-			const shortId = `#${id.replace(/^terminal-/, '').slice(0, 8)}`;
-			assert.equal(button.title, `Same Terminal\n${shortId}\n${status}`);
+			assert.equal(button.title, `Same Terminal\n/vault\n${status}`);
 		}
 		buttons()[1]!.click(); paint();
 		assert.equal(selected, second, 'Same titles still select the exact session object');
@@ -381,7 +392,7 @@ async function verifyUsageLanguage() {
 				clearInterval: (id: number) => { assert.equal(id, 99); cleared++; },
 			} } } },
 		} as unknown as WorkbenchHost;
-		const history = { query: async () => { historyReads++; return { usage: { known: false } }; } } as unknown as NativeHistory;
+		const history = { subscribe: () => () => {}, usage: async () => { historyReads++; return { known: false }; } } as unknown as NativeHistory;
 		setLanguage('zh');
 		render(h(UsageFooter, { host: footerHost, history }), panel); await wait();
 		assert.ok(panel.textContent!.includes('未登录'));
@@ -408,6 +419,10 @@ async function verifyUsageLanguage() {
 				modal.onClose();
 			} finally { environment.document = document; }
 		}
+		render(h(UsageFooter, { host: footerHost, history, visible: false }), panel); await wait();
+		assert.equal(cleared, 1, 'Hiding a leaf releases its usage polling interval');
+		assert.equal(historyReads, 1, 'Hidden leaves do not query native aggregate usage');
+		assert.equal(runtimeReads, afterRead, 'Hidden leaves do not read provider state');
 		render(null, panel); setLanguage('zh'); await wait();
 		assert.equal(cleared, 1);
 		assert.equal(panel.textContent, '');
@@ -430,10 +445,17 @@ async function verifyHistoryMatrix() {
 	let records = all.slice(), failSave = false;
 	const metadata = new Map<string, { favorite?: boolean; archived?: boolean }>();
 	const requests: Array<{ query: string; offset: number; filter: string }> = [];
+	let version = 0, indexVersion = 0;
+	const listeners = new Set<() => void>();
+	const publish = () => { version++; for (const listener of listeners) listener(); };
 	const history = {
-		scan: async () => [], meta: (key: string) => metadata.get(key) ?? {},
+		get hasScanned() { return indexVersion > 0; },
+		get revision() { return version; }, get indexRevision() { return indexVersion; },
+		subscribe: (listener: () => void) => { listeners.add(listener); return () => { listeners.delete(listener); }; },
+		scan: async () => { indexVersion++; return []; }, refresh: async () => { indexVersion++; publish(); return []; },
+		meta: (key: string) => metadata.get(key) ?? {},
 		read: async (session: NativeSession) => session,
-		update: async (key: string, patch: object) => { if (failSave) throw Error('disk full'); metadata.set(key, { ...metadata.get(key), ...patch }); },
+		update: async (key: string, patch: object) => { if (failSave) throw Error('disk full'); metadata.set(key, { ...metadata.get(key), ...patch }); publish(); },
 		query: async (query = '', offset = 0, _signal?: AbortSignal, filter = 'active') => {
 			requests.push({ query, offset, filter });
 			const matches = records.filter((row) => row.title.includes(query) && (filter === 'favorite' ? metadata.get(row.key)?.favorite : filter === 'archived' ? metadata.get(row.key)?.archived : !metadata.get(row.key)?.archived));
@@ -441,7 +463,7 @@ async function verifyHistoryMatrix() {
 		},
 	} as unknown as NativeHistory;
 	const host = { app: {} } as WorkbenchHost;
-	const wait = () => new Promise<void>((resolve) => setTimeout(resolve, 160));
+	const wait = () => new Promise<void>((resolve) => setTimeout(resolve, 320));
 	const button = (key: string) => Array.from(panel.querySelectorAll<HTMLButtonElement>('button')).find((b) => b.textContent === t('terminalAgent.workbench.' + key))!;
 	const range = () => panel.querySelector('.nand-history-pagination span')?.textContent;
 	const paginate = (direction: 'next' | 'previous') => panel.querySelector<HTMLButtonElement>(`[aria-label="${t('terminalAgent.workbench.' + direction)}"]`)!.click();
@@ -456,7 +478,7 @@ async function verifyHistoryMatrix() {
 	};
 	for (const language of ['zh', 'en', 'zh'] as const) {
 		setLanguage(language); records = all.slice(); metadata.clear();
-		render(h(HistorySidebar, { history, host }), panel); await wait();
+		mountHistoryPanel(panel, history, host); await wait();
 		assert.equal(range(), t('terminalAgent.workbench.range', { start: 1, end: 100, total: 111 }));
 		assert.equal(panel.querySelector('.nand-history-row small')!.textContent, `codex · ${new Date(modifiedAtMs).toLocaleDateString(language === 'zh' ? 'zh-CN' : 'en-US')}`);
 		paginate('next'); await wait();
@@ -473,7 +495,7 @@ async function verifyHistoryMatrix() {
 		button('unfavorite').click(); await wait();
 		assert.ok(panel.textContent!.includes(t('terminalAgent.workbench.noMatches')));
 		assert.equal(button('favorite').getAttribute('aria-pressed'), 'false');
-		await changeFilter('');
+		await changeFilter('active');
 		await searchFor('unmatched');
 		assert.ok(panel.textContent!.includes(t('terminalAgent.workbench.noMatches')));
 		await searchFor('');
@@ -495,7 +517,7 @@ async function verifyHistoryMatrix() {
 		failSave = true; button('favorite').click(); await wait();
 		assert.equal(button('favorite').getAttribute('aria-pressed'), 'false', 'Failed metadata writes do not publish a state change');
 		failSave = false;
-		await changeFilter(''); records = [];
+		await changeFilter('active'); records = [];
 		panel.querySelector<HTMLButtonElement>(`[aria-label="${t('terminalAgent.workbench.refresh')}"]`)!.click(); await wait();
 		assert.ok(panel.textContent!.includes(t('terminalAgent.workbench.empty')));
 		assert.ok(!panel.textContent!.includes(t('terminalAgent.workbench.noMatches')));
@@ -557,4 +579,116 @@ async function verifyAutomationFilters() {
 	assert.equal(retried, true, 'Load failure retains a usable retry action');
 	render(null, panel);
 	console.log('Automation panel: visible filter labels, combined filtering, empty result, retained selection and prompt/output semantics passed.');
+}
+
+async function verifyOrcaRegression() {
+	const panel = document.createElement('div'); document.body.appendChild(panel);
+	const state = createWorkbenchState(); state.navigation = 'history';
+	assert.equal(state.sidebarWidth, 272); assert.equal(state.drawerOpen, false); assert.equal(state.wideSidebarOpen, true);
+	assert.deepEqual([sidebarWidth(120), sidebarWidth(480), sidebarWidth(NaN)], [240, 360, 272]);
+	let revision = 0, indexRevision = 1, sourceText = 'Original transcript\n'.repeat(200);
+	const listeners = new Set<() => void>();
+	const requests: string[] = [];
+	let scans = 0, reads = 0, resumes = 0, resumeFailed = false, release!: () => void;
+	let resumeGate = new Promise<void>((resolve) => { release = resolve; });
+	const session = { key: 'orca-fixture', sessionId: 'orca-fixture', agentId: 'codex', accountKey: '{}', cwd: '/vault', title: 'Fixture conversation', modifiedAtMs: 0, transcriptPath: 'fixture', usage: { known: false } } as NativeSession;
+	const history = {
+		get revision() { return revision; }, get indexRevision() { return indexRevision; }, hasScanned: true,
+		subscribe: (listener: () => void) => { listeners.add(listener); return () => { listeners.delete(listener); }; },
+		meta: () => ({}),
+		scan: async () => { scans++; return []; },
+		refresh: async () => { scans++; indexRevision++; revision++; for (const listener of listeners) listener(); return []; },
+		query: async (query = '') => { requests.push(query); return { rows: [session], total: 1 }; },
+		read: async () => { reads++; return { ...session, text: sourceText }; },
+	} as unknown as NativeHistory;
+	const host = { app: {}, resumeSession: async () => { resumes++; await resumeGate; if (resumeFailed) throw Error('Fixture resume failure'); } } as unknown as WorkbenchHost;
+	const wait = (ms = 280) => new Promise<void>((resolve) => setTimeout(resolve, ms));
+	let width = 1000, activeObserver: (() => void) | undefined, disconnected = 0, observed = 0;
+	function ownerWindow(): Window {
+		return { ResizeObserver: class {
+			constructor(private callback: () => void) { activeObserver = callback; }
+			observe() { observed++; this.callback(); }
+			disconnect() { disconnected++; }
+		} } as unknown as Window;
+	}
+	let owner = ownerWindow();
+	const change = (patch: Partial<WorkbenchState>) => { Object.assign(state, patch); paint(); };
+	const paint = () => render(h(TerminalWorkbench, {
+		...refs, ...actions, state, onStateChange: change, ownerWindow: owner,
+		newConversation: h(NewConversationButton, { host, create: async () => {}, primary: !state.showHistory }),
+		rootRef: (element) => { if (element) element.getBoundingClientRect = () => ({ width } as DOMRect); },
+		header: h(TerminalHeader, { title: 'Fixture terminal', cwd: '/vault', status: 'unknown', search: () => {}, more: () => {}, sidebarToggle: () => change(width < 800 ? { drawerOpen: !state.drawerOpen } : { wideSidebarOpen: !state.wideSidebarOpen }) }),
+		history: h(HistorySidebar, { history, state, onStateChange: change }),
+		preview: h(HistoryPreview, { history, host, state, onStateChange: change }),
+		usage: h('details', {}, h('summary', {}, 'Vault consumption'), h('div', {}, 'Usage fixture')),
+	}), panel);
+	paint(); await wait();
+	assert.equal(panel.querySelector('.nand-agent-new-btn')?.closest('[hidden]'), null, 'New conversation remains available in history navigation');
+	const xterm = panel.querySelector('.terminal-container')!;
+	const canvas = document.createElement('canvas'); xterm.appendChild(canvas);
+	const query = panel.querySelector<HTMLInputElement>('.nand-history-controls input')!;
+	const initialRequests = requests.length;
+	for (const value of ['F', 'Fi', 'Fixture']) {
+		query.value = value; query.dispatchEvent(new document.defaultView!.Event('input', { bubbles: true })); await wait(35);
+	}
+	await wait(380);
+	assert.deepEqual(requests.slice(initialRequests), ['Fixture'], 'Queued history search cancels obsolete inputs and requests only the debounced final query');
+	panel.querySelector<HTMLButtonElement>('.nand-history-row button')!.click(); await wait();
+	assert.equal(state.showHistory, true);
+	assert.equal(panel.querySelector('.nand-agent-history .nand-history-preview'), null, 'History navigation never owns the full transcript');
+	assert.equal(panel.querySelector('.terminal-history-pane .nand-history-transcript')?.textContent, sourceText, 'The main preview shows the complete original transcript');
+	assert.equal(panel.querySelector('.terminal-container'), xterm); assert.equal(xterm.firstChild, canvas);
+	sourceText = 'Updated source transcript\n'.repeat(240);
+	const readsBefore = reads;
+	panel.querySelector<HTMLButtonElement>(`[aria-label="${t('terminalAgent.workbench.refresh')}"]`)!.click(); await wait();
+	assert.equal(scans, 1, 'Explicit Refresh scans under a non-empty search');
+	assert.ok(reads > readsBefore, 'Index changes reload the currently selected transcript');
+	assert.equal(panel.querySelector('.nand-history-transcript')?.textContent, sourceText);
+	const resume = () => panel.querySelector<HTMLButtonElement>('.nand-history-resume')!;
+	resume().click(); resume().click(); await wait();
+	assert.equal(resumes, 1); assert.equal(resume().disabled, true); assert.equal(state.resumeKey, session.key);
+	const snapshot = { ...state };
+	owner = ownerWindow(); paint(); await wait();
+	assert.equal(disconnected, 1, 'Migration disconnects the observer on the old window');
+	assert.equal(observed, 2, 'Migration measures using the new window runtime');
+	assert.equal(panel.querySelector('.terminal-container'), xterm); assert.equal(xterm.firstChild, canvas);
+	assert.equal(state.resumeKey, snapshot.resumeKey); resume().click(); await wait(10); assert.equal(resumes, 1, 'Pending Resume survives migration without duplicate launch');
+	release(); await wait(); assert.equal(state.resumeKey, null); assert.equal(state.showHistory, false);
+	change({ showHistory: true }); resumeFailed = true;
+	resumeGate = Promise.resolve(); resume().click(); await wait();
+	assert.equal(state.resumeKey, null); assert.equal(state.showHistory, true, 'Failed resume clears busy state and retains the preview for retry');
+	resumeFailed = false; resume().click(); await wait(); assert.equal(resumes, 3); assert.equal(state.showHistory, false);
+	const separator = panel.querySelector<HTMLButtonElement>('.terminal-sidebar-resizer')!;
+	const key = (name: string) => { const event = new document.defaultView!.Event('keydown', { bubbles: true, cancelable: true }); Object.defineProperty(event, 'key', { value: name }); separator.dispatchEvent(event); };
+	key('End'); assert.equal(state.sidebarWidth, 360); key('Home'); assert.equal(state.sidebarWidth, 240); key('ArrowRight'); assert.equal(state.sidebarWidth, 248);
+	width = 600; activeObserver?.(); await wait();
+	panel.querySelector<HTMLButtonElement>('.terminal-navigation-toggle')!.click(); await wait();
+	assert.equal(state.drawerOpen, true); assert.equal(panel.querySelector('aside')?.getAttribute('role'), 'dialog');
+	const firstControl = panel.querySelector<HTMLButtonElement>('.terminal-drawer-close')!;
+	const usageSummary = panel.querySelector<HTMLElement>('.nand-agent-usage summary')!;
+	const drawerRoot = panel.querySelector<HTMLElement>('.terminal-workbench-shell')!;
+	const previousActive = Object.getOwnPropertyDescriptor(document, 'activeElement');
+	let focused: HTMLElement | undefined;
+	firstControl.focus = () => { focused = firstControl; };
+	usageSummary.focus = () => { focused = usageSummary; };
+	try {
+		Object.defineProperty(document, 'activeElement', { configurable: true, value: firstControl });
+		const backwards = new document.defaultView!.Event('keydown', { bubbles: true, cancelable: true });
+		Object.defineProperties(backwards, { key: { value: 'Tab' }, shiftKey: { value: true } });
+		drawerRoot.dispatchEvent(backwards);
+		assert.ok(focused === usageSummary, 'Shift+Tab from the first drawer control reaches the native usage summary');
+		Object.defineProperty(document, 'activeElement', { configurable: true, value: usageSummary });
+		const forwards = new document.defaultView!.Event('keydown', { bubbles: true, cancelable: true });
+		Object.defineProperty(forwards, 'key', { value: 'Tab' });
+		drawerRoot.dispatchEvent(forwards);
+		assert.ok(focused === firstControl, 'Tab from the native summary wraps to the first drawer control');
+	} finally {
+		if (previousActive) Object.defineProperty(document, 'activeElement', previousActive);
+		else Reflect.deleteProperty(document, 'activeElement');
+	}
+	panel.querySelector<HTMLButtonElement>('.terminal-drawer-close')!.click(); await wait(); assert.equal(state.drawerOpen, false);
+	assert.equal(panel.querySelector('.terminal-container'), xterm); assert.equal(xterm.firstChild, canvas);
+	for (const language of ['zh', 'en', 'zh'] as const) { setLanguage(language); paint(); assert.equal(panel.querySelector('.nand-agent-workbench-title')?.textContent, t('terminalAgent.workbench.title')); assert.equal(panel.querySelector('.terminal-container'), xterm); }
+	render(null, panel); assert.equal(listeners.size, 0); assert.equal(disconnected, 2);
+	console.log('Orca regression: debounce/cancel, searched refresh/full preview, Resume pending/migration/failure retry, 240–360 resize, narrow drawer, bilingual repaint and stable xterm passed.');
 }
