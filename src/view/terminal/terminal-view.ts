@@ -949,6 +949,7 @@ export class TerminalView extends ItemView {
 		this.registerEvent(this.app.workspace.on('layout-change', sync));
 		this.registerEvent(this.app.workspace.on('active-leaf-change', (leaf) => {
 			if (!this.closed && leaf === this.leaf && this.terminalInstance) this.terminalHost.recordActiveSession(this.terminalInstance.id);
+			sync();
 		}));
 		this.bindPauseDocument();
 		sync();
@@ -967,10 +968,15 @@ export class TerminalView extends ItemView {
 	}
 	private bindPauseDocument(): void {
 		this.pauseDocumentCleanup?.();
-		const doc = this.containerEl.doc;
+		const doc = this.containerEl.ownerDocument;
+		const win = doc.defaultView;
 		const sync = () => this.syncOutputPause();
 		doc.addEventListener('visibilitychange', sync);
-		this.pauseDocumentCleanup = () => doc.removeEventListener('visibilitychange', sync);
+		win?.addEventListener('focus', sync);
+		this.pauseDocumentCleanup = () => {
+			doc.removeEventListener('visibilitychange', sync);
+			win?.removeEventListener('focus', sync);
+		};
 	}
 
 	private syncOutputPause(): void {
@@ -1323,6 +1329,8 @@ export class TerminalView extends ItemView {
 		this.attachFrame = { win, id: win.requestAnimationFrame(() => {
 			this.attachFrame = null;
 			if (!this.closed && this.terminalInstance === terminal) {
+				// Migration may attach before the destination leaf is shown.
+				this.syncOutputPause();
 				terminal.fit();
 				if (options.focus !== false) {
 					terminal.focus();
@@ -1338,8 +1346,10 @@ export class TerminalView extends ItemView {
 		const ResizeObserverCtor = this.terminalContainer.ownerDocument.defaultView?.ResizeObserver ?? ResizeObserver;
 
 		this.resizeObserver = new ResizeObserverCtor((entries) => {
+			if (this.closed) return;
+			this.syncOutputPause();
 			const entry = entries[0];
-			if (!this.closed && entry && entry.contentRect.width > 0 && entry.contentRect.height > 0) this.terminalInstance?.fit();
+			if (entry && entry.contentRect.width > 0 && entry.contentRect.height > 0) this.terminalInstance?.fit();
 		});
 
 		this.resizeObserver.observe(this.terminalContainer);

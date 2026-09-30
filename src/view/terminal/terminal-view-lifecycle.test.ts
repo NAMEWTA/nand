@@ -37,11 +37,11 @@ function fixture() {
 	globalThis.window = win as unknown as Window;
 	const el = { win, empty() {}, createEl() {}, addClass() {}, onWindowMigrated: () => () => {}, doc: {}, ownerDocument: {}, style: { removeProperty() {} }, querySelector: () => null };
 	const leaves: any[] = [];
-	const events = new Map<string, Set<() => void>>();
+	const events = new Map<string, Set<(...args: any[]) => void>>();
 	const app = { workspace: {
 		getLeavesOfType: () => leaves, revealLeaf: async () => {},
-		on(name: string, callback: () => void) { const listeners = events.get(name) ?? new Set(); listeners.add(callback); events.set(name, listeners); return { name, callback }; },
-		offref(ref: { name: string; callback: () => void }) { events.get(ref.name)?.delete(ref.callback); },
+		on(name: string, callback: (...args: any[]) => void) { const listeners = events.get(name) ?? new Set(); listeners.add(callback); events.set(name, listeners); return { name, callback }; },
+		offref(ref: { name: string; callback: (...args: any[]) => void }) { events.get(ref.name)?.delete(ref.callback); },
 	} };
 	const leaf = { app, el, detach() {}, view: null as any };
 	const host = { recordActiveSession: (id: string) => active.push(id), handleTerminalViewClosed() {}, getTerminalRenderer: async () => ({ id: 'chosen' }) };
@@ -54,8 +54,85 @@ function fixture() {
 	view.bindOutputPause = () => {};
 	view.terminalContainer = el;
 	view.focusTerminal = () => {};
-	return { view, win, timers, cancelled, active, leaf, leaves, host, events, emit(name: string) { for (const callback of events.get(name) ?? []) callback(); }, tick() { const queued = [...timers.values()]; timers.clear(); for (const timer of queued) timer(); } };
+	return { view, win, timers, cancelled, active, leaf, leaves, host, events, emit(name: string, ...args: any[]) { for (const callback of events.get(name) ?? []) callback(...args); }, tick() { const queued = [...timers.values()]; timers.clear(); for (const timer of queued) timer(); } };
 }
+
+function visibilityFixture() {
+	const f = fixture(), windowEvents = new Map<string, Set<() => void>>(), documentEvents = new Map<string, Set<() => void>>();
+	let shown = false;
+	const win = Object.assign(f.win, {
+		addEventListener(name: string, listener: () => void) { const callbacks = windowEvents.get(name) ?? new Set(); callbacks.add(listener); windowEvents.set(name, callbacks); },
+		removeEventListener(name: string, listener: () => void) { windowEvents.get(name)?.delete(listener); },
+	});
+	const doc = {
+		visibilityState: 'visible', defaultView: win,
+		addEventListener(name: string, listener: () => void) { const callbacks = documentEvents.get(name) ?? new Set(); callbacks.add(listener); documentEvents.set(name, callbacks); },
+		removeEventListener(name: string, listener: () => void) { documentEvents.get(name)?.delete(listener); },
+	};
+	Object.assign(f.leaf.el, { ownerDocument: doc, doc, isShown: () => shown });
+	const renderer = { id: 'visible-session', visible: false, themes: 0, setOwnerVisible(owner: unknown, visible: boolean) { assert.equal(owner, f.view); if (visible && !this.visible) this.themes++; this.visible = visible; }, release() {} };
+	f.view.terminalInstance = renderer;
+	return { ...f, renderer, win, doc, windowEvents, documentEvents, show(value = true) { shown = value; } };
+}
+
+test('activating a shown popout corrects visibility measured while migration was hidden', () => {
+	const f = visibilityFixture();
+	TerminalView.prototype['bindOutputPause'].call(f.view);
+	assert.equal(f.renderer.visible, false);
+	f.show();
+	f.emit('active-leaf-change', f.leaf);
+	assert.equal(f.renderer.visible, true);
+	assert.equal(f.view.workbenchVisible, true);
+	assert.equal(f.renderer.themes, 1);
+	assert.deepEqual(f.active, ['visible-session']);
+});
+
+test('a real container resize resynchronizes hidden and visible renderer ownership', () => {
+	const f = visibilityFixture();
+	let resized: (entries: unknown[]) => void = () => {};
+	Object.assign(f.win, { ResizeObserver: class { constructor(callback: typeof resized) { resized = callback; } observe() {} disconnect() {} } });
+	f.renderer['fit'] = () => {};
+	f.view.setupResizeObserver();
+	f.show();
+	resized([{ contentRect: { width: 1000, height: 760 } }]);
+	assert.equal(f.renderer.visible, true);
+	assert.equal(f.view.workbenchVisible, true);
+	f.show(false);
+	resized([{ contentRect: { width: 0, height: 0 } }]);
+	assert.equal(f.renderer.visible, false);
+	assert.equal(f.view.workbenchVisible, false);
+});
+
+test('attachment rechecks visibility after migrated elements become measurable', () => {
+	const f = visibilityFixture();
+	let frame: () => void = () => {};
+	Object.assign(f.win, { requestAnimationFrame(callback: () => void) { frame = callback; return 1; } });
+	Object.assign(f.renderer, { acquire() {}, fit() {}, focus() {} });
+	f.view.updateAppearanceStyles = () => {};
+	f.view.attachTerminalToContainer();
+	assert.equal(f.renderer.visible, false);
+	f.show(); frame();
+	assert.equal(f.renderer.visible, true);
+	assert.equal(f.view.workbenchVisible, true);
+});
+
+test('owning-window focus corrects stale visibility and listener cleanup follows migration and close', async () => {
+	const f = visibilityFixture();
+	f.view.bindPauseDocument();
+	f.show();
+	for (const listener of f.windowEvents.get('focus') ?? []) listener();
+	assert.equal(f.renderer.visible, true);
+	assert.equal(f.windowEvents.get('focus')?.size, 1);
+	const destination = visibilityFixture();
+	Object.assign(f.leaf.el, { ownerDocument: destination.doc, doc: destination.doc, win: destination.win });
+	f.view.bindPauseDocument();
+	assert.equal(f.windowEvents.get('focus')?.size, 0);
+	assert.equal(f.documentEvents.get('visibilitychange')?.size, 0);
+	assert.equal(destination.windowEvents.get('focus')?.size, 1);
+	await f.view.onClose();
+	assert.equal(destination.windowEvents.get('focus')?.size, 0);
+	assert.equal(destination.documentEvents.get('visibilitychange')?.size, 0);
+});
 
 test('closing before renderer initialization rejects waiting callers immediately', async () => {
 	const f = fixture();
