@@ -24,7 +24,7 @@ try {
 			await c.evaluate(`app.workspace.rightSplit.${sidebars ? 'expand' : 'collapse'}()`);
 			await delay(200);
 			const row = await c.evaluate(
-				`(()=>{const q=s=>document.querySelector(s);return {leaf:auditRect(q('.nand-agent-workbench')),terminal:auditRect(q('.terminal-container')),texts:[...document.querySelectorAll('.nand-agent-nav button,.nand-agent-workbench-title,.nand-session-row-id,.nand-session-row-status,.nand-ui-list-item-title')].map(auditRect),sameTerminal:terminalBefore===app.workspace.getLeavesOfType('terminal-view')[0].view.terminalInstance,sameXterm:xtermBefore===q('.terminal-container .xterm')}})()`,
+				`(()=>{const q=s=>document.querySelector(s),workbench=q('.nand-agent-workbench');return {leaf:auditRect(workbench),terminal:auditRect(q('.terminal-container')),texts:[...workbench.querySelectorAll('.nand-agent-nav button,.nand-agent-workbench-title,.nand-session-row-id,.nand-session-row-status,.nand-ui-list-item-title')].map(auditRect),sameTerminal:terminalBefore===app.workspace.getLeavesOfType('terminal-view')[0].view.terminalInstance,sameXterm:xtermBefore===q('.terminal-container .xterm')}})()`,
 			);
 			delete row.leaf.text;
 			delete row.terminal.text;

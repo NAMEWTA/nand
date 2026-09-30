@@ -1,5 +1,6 @@
 import { Platform, setIcon } from 'obsidian';
 import type { BannerData } from '../../../core/dashboard/types/index';
+import { t } from '../../../shared/i18n/index';
 import { resolveVaultImage } from '../banner/banner';
 import type { DashboardView } from './dashboard-view';
 import { BANNER_IMAGE_ROTATION_MS } from './timing';
@@ -8,7 +9,7 @@ export function setupBannerBehavior(this: DashboardView, bannerEl: HTMLElement):
 	const win = bannerEl.ownerDocument.defaultView!;
 	const pinBtn = bannerEl.createEl('button', {
 		cls: 'dashboard-banner-pin-btn',
-		attr: { 'aria-label': 'Toggle banner' },
+		attr: { 'aria-label': t('banner.toggleCollapse') },
 	});
 	setIcon(pinBtn, 'bookmark');
 
@@ -81,7 +82,7 @@ export function renderBannerPinButton(this: DashboardView, bannerEl: HTMLElement
 	if (Platform.isMobile) return;
 	const pinBtn = bannerEl.createEl('button', {
 		cls: 'dashboard-sidebar-pin-btn',
-		attr: { 'aria-label': 'Toggle sidebar pin' },
+		attr: { 'aria-label': t('banner.toggleSidebarPin') },
 	});
 	const update = () => {
 		setIcon(pinBtn, this.sidebarPinned ? 'pin' : 'pin-off');

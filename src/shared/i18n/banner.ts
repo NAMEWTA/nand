@@ -3,6 +3,8 @@ export const messages = {
 	en: {
 		'banner.editLabel': 'Edit banner',
 		'banner.editTitle': 'Edit banner',
+		'banner.toggleCollapse': 'Toggle banner',
+		'banner.toggleSidebarPin': 'Toggle sidebar pin',
 		'banner.quote': 'Quote',
 		'banner.author': 'Author',
 		'banner.imagePath': 'Background image path (vault relative)',
@@ -73,6 +75,8 @@ export const messages = {
 	zh: {
 		'banner.editLabel': '编辑横幅',
 		'banner.editTitle': '编辑横幅',
+		'banner.toggleCollapse': '展开或折叠横幅',
+		'banner.toggleSidebarPin': '切换侧栏固定状态',
 		'banner.quote': '引言',
 		'banner.author': '作者',
 		'banner.imagePath': '背景图片路径（相对于仓库）',

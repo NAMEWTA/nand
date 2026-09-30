@@ -70,6 +70,8 @@ fn parse_args() -> u16 {
 
 #[tokio::main(flavor = "current_thread")]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    #[cfg(windows)]
+    if let Some(code) = pty::run_job_host() { std::process::exit(code); }
     // Parse command-line arguments
     let port = parse_args();
     log_debug!("启动参数: port={}", port);

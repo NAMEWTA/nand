@@ -476,7 +476,7 @@ test('format guide uses creation-time language and preserves existing documents 
 		setLanguage('en'); // The controller was created before this language change.
 		const company = await f.controller.create(newNamed('company', 'Guide Company'));
 		const english = f.text.get('档案/档案格式说明.md')!;
-		assert.ok(english.startsWith('# Archive format\n'), 'An English first creation needs the complete English guide');
+		assert.match(english, /^# Archive format\r?\n/, 'An English first creation needs the complete English guide');
 		assert.match(english, /Changing the display name does not rename the file/);
 		const original = f.text.get(company.path)!;
 		setLanguage('zh');
@@ -493,7 +493,7 @@ test('format guide uses creation-time language and preserves existing documents 
 		await f.controller.reload();
 		await f.controller.create(newNamed('person', '中文人物'));
 		const chinese = f.text.get('中文档案/档案格式说明.md')!;
-		assert.ok(chinese.startsWith('# 档案格式\n'));
+		assert.match(chinese, /^# 档案格式\r?\n/);
 		assert.match(chinese, /更改显示名称不会自动重命名文件/);
 		for (const guide of [english, chinese]) {
 			for (const marker of ['employments', 'relations', 'traits', 'habits', 'notes']) {

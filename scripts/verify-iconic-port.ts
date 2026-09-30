@@ -87,14 +87,12 @@ test('defaults, all locale values, command ids and resource bytes match pinned u
 	locales.zh['iconic.settings.minimalFolderIcons.name'] = '极简文件夹图标';
 	locales.zh['iconic.commands.toggleQuickSwitcherIcons'] = '切换快速切换器图标';
 	assert.deepEqual(iconicTranslations, locales);
-	for (const [name, hash] of Object.entries(fixture.hashes))
-		assert.equal(
-			createHash('sha256')
-				.update(readFileSync('src/core/icons/res/' + name))
-				.digest('hex'),
-			hash,
-			name,
-		);
+	for (const [name, hash] of Object.entries(fixture.hashes)) {
+		const text = readFileSync('src/core/icons/res/' + name, 'utf8').replaceAll('\r\n', '\n');
+		// The pinned upstream text is LF; checkout line endings may differ.
+		for (const content of [text, text.replaceAll('\n', '\r\n')])
+			assert.equal(createHash('sha256').update(content.replaceAll('\r\n', '\n')).digest('hex'), hash, name);
+	}
 	const ids: string[] = [];
 	const f = storage();
 	const host = {
