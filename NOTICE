@@ -16,6 +16,13 @@ Copyright (c) Lovecast Inc.
 https://github.com/stablyai/orca
 Licensed under the MIT License.
 
+Terminal workbench scheduling, hidden renderer retention, structural replay,
+and recent-session ordering adapted from Orca v1.4.217
+(commit 11d97896628d90c4990365127812667b00e28c82).
+Copyright (c) 2026 Lovecast Inc.
+Source mapping: docs/third-party/orca-terminal-workbench.md
+Full license: docs/third-party/orca-LICENSE.txt
+
 Because this plugin includes Termy-derived code, the combined work is
 distributed under the GNU General Public License v3.0. See LICENSE.
 The Termy code is not relicensed as MIT.

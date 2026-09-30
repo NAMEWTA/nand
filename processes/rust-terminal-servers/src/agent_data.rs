@@ -43,6 +43,7 @@ struct Session {
     title: String,
     transcript_path: String,
     modified_at_ms: u64,
+    #[serde(default)]
     text: String,
     usage: Usage,
 }
@@ -73,13 +74,17 @@ struct Request {
 }
 pub struct AgentData {
     sender: tokio::sync::Mutex<Option<WsSender>>,
-    jobs: Arc<Mutex<HashMap<String, Arc<AtomicBool>>>>,
-    gate: Arc<tokio::sync::Semaphore>,
+    jobs: Arc<Mutex<HashMap<String, Arc<HistoryJob>>>>,
+    scan_gate: Arc<tokio::sync::Semaphore>,
+}
+struct HistoryJob {
+    cancel: AtomicBool,
+    wake: tokio::sync::Notify,
 }
 impl AgentData {
     pub fn new() -> Self {
         Self {
-            gate: Arc::new(tokio::sync::Semaphore::new(1)),
+            scan_gate: Arc::new(tokio::sync::Semaphore::new(1)),
             sender: tokio::sync::Mutex::new(None),
             jobs: Arc::new(Mutex::new(HashMap::new())),
         }
@@ -99,21 +104,41 @@ impl ModuleHandler for AgentData {
             .ok_or_else(|| RouterError::InvalidMessage("requestId".into()))?;
         if msg.msg_type == "cancel" {
             if let Some(flag) = self.jobs.lock().unwrap().get(&id) {
-                flag.store(true, Ordering::Relaxed);
+                flag.cancel.store(true, Ordering::Relaxed);
+                flag.wake.notify_one();
             }
             return Ok(None);
         }
         let request: Request = serde_json::from_value(msg.payload.clone())?;
         let operation = msg.msg_type.clone();
-        let flag = Arc::new(AtomicBool::new(false));
+        let flag = Arc::new(HistoryJob {
+            cancel: AtomicBool::new(false),
+            wake: tokio::sync::Notify::new(),
+        });
         self.jobs.lock().unwrap().insert(id.clone(), flag.clone());
         let sender = self.sender.lock().await.clone();
-        let gate = self.gate.clone();
+        let gate = self.scan_gate.clone();
         let jobs = self.jobs.clone();
         tokio::spawn(async move {
-            let permit = gate.acquire_owned().await;
-            let result =
-                tokio::task::spawn_blocking(move || execute(&operation, &request, &flag)).await;
+            // Only writers queue. Reads own separate SQLite connections and can
+            // observe committed batches while a scan parses its next file.
+            let permit = if operation == "scan" {
+                if flag.cancel.load(Ordering::Relaxed) {
+                    None
+                } else {
+                    tokio::select! {
+                        permit = gate.acquire_owned() => permit.ok(),
+                        _ = flag.wake.notified() => None,
+                    }
+                }
+            } else {
+                None
+            };
+            let result = tokio::task::spawn_blocking(move || {
+                check_cancel(&flag.cancel)?;
+                execute(&operation, &request, &flag.cancel)
+            })
+            .await;
             drop(permit);
             jobs.lock().unwrap().remove(&id);
             let payload = match result {
@@ -136,6 +161,7 @@ impl ModuleHandler for AgentData {
     }
 }
 fn execute(operation: &str, request: &Request, cancel: &AtomicBool) -> Result<Value, String> {
+    check_cancel(cancel)?;
     let vault = fs::canonicalize(&request.vault).map_err(|e| e.to_string())?;
     // Resolve the vault once, then anchor its relative index path to that same
     // representation. Node and Rust differ on Windows verbatim prefixes, and
@@ -176,12 +202,10 @@ fn execute(operation: &str, request: &Request, cancel: &AtomicBool) -> Result<Va
     {
         return Err("index outside vault".into());
     }
-    let db = Connection::open(&index).map_err(|e| e.to_string())?;
-    db.busy_timeout(Duration::from_secs(2))
-        .map_err(|e| e.to_string())?;
-    db.execute_batch("CREATE TABLE IF NOT EXISTS history (key TEXT PRIMARY KEY, source TEXT NOT NULL, stamp TEXT NOT NULL, data TEXT NOT NULL, body TEXT NOT NULL, modified INTEGER NOT NULL);").map_err(|e| e.to_string())?;
+    let mut db = open_index(&index, operation == "scan", cancel)?;
     if operation == "scan" {
         let mut warnings = Vec::new();
+        let mut pending = Vec::new();
         for root in &request.roots {
             if cancel.load(Ordering::Relaxed) {
                 return Err("cancelled".into());
@@ -194,7 +218,8 @@ fn execute(operation: &str, request: &Request, cancel: &AtomicBool) -> Result<Va
                 match opencode(path, root, &vault, cancel) {
                     Ok(rows) => {
                         for row in rows {
-                            save(&db, &row, "sqlite").map_err(|e| e.to_string())?;
+                            pending.push((row, "sqlite".to_owned()));
+                            flush_if_ready(&mut db, &mut pending, cancel)?;
                         }
                     }
                     Err(error) => warnings.push(format!("{}: {}", root.agent_id, error)),
@@ -246,8 +271,8 @@ fn execute(operation: &str, request: &Request, cancel: &AtomicBool) -> Result<Va
                 let source = path.to_string_lossy().to_string();
                 let cached: bool = db
                     .query_row(
-                        "SELECT EXISTS(SELECT 1 FROM history WHERE source=?1 AND stamp=?2)",
-                        params![source, stamp],
+                        "SELECT EXISTS(SELECT 1 FROM history WHERE source=?1 AND stamp=?2 AND json_extract(summary,'$.accountKey')=?3 AND json_extract(summary,'$.agentId')=?4)",
+                        params![source, stamp, root.account_key, root.agent_id],
                         |r| r.get(0),
                     )
                     .unwrap_or(false);
@@ -256,24 +281,27 @@ fn execute(operation: &str, request: &Request, cancel: &AtomicBool) -> Result<Va
                 }
                 match parse(&path, root, &vault, modified, cancel) {
                     Ok(Some(session)) => {
-                        save(&db, &session, &stamp).map_err(|e| e.to_string())?;
+                        pending.push((session, stamp));
+                        flush_if_ready(&mut db, &mut pending, cancel)?;
                     }
                     Ok(None) => {}
                     Err(error) => warnings.push(format!("{}: {}", source, error)),
                 }
             }
         }
-        return Ok(json!({"warnings": warnings}));
+        flush(&mut db, &mut pending, cancel)?;
+        return Ok(json!({"warnings": warnings, "revision": revision(&db)?}));
     }
     if operation == "read" {
-        let raw: String = db
+        let (raw, text): (String, String) = db
             .query_row(
-                "SELECT data FROM history WHERE key=?1",
+                "SELECT h.summary,t.text FROM history h JOIN history_text t ON t.key=h.key WHERE h.key=?1",
                 params![request.key],
-                |r| r.get(0),
+                |r| Ok((r.get(0)?, r.get(1)?)),
             )
             .map_err(|e| e.to_string())?;
-        let session: Session = serde_json::from_str(&raw).map_err(|e| e.to_string())?;
+        let mut session: Session = serde_json::from_str(&raw).map_err(|e| e.to_string())?;
+        session.text = text;
         if !inside(&vault, &session.cwd) {
             return Err("session outside vault".into());
         }
@@ -282,76 +310,254 @@ fn execute(operation: &str, request: &Request, cancel: &AtomicBool) -> Result<Va
     if operation != "query" {
         return Err("unknown history operation".into());
     }
-    let pattern = request.query.to_lowercase();
-    let matches: Vec<&String> = request
-        .metadata
-        .iter()
-        .filter(|(_, value)| value.to_string().to_lowercase().contains(&pattern))
-        .map(|(key, _)| key)
-        .collect();
-    let mut statement = db
-        .prepare("SELECT data FROM history WHERE instr(lower(body),?1)>0 OR key IN (SELECT value FROM json_each(?2)) ORDER BY modified DESC")
-        .map_err(|e| e.to_string())?;
-    let rows = statement
-        .query_map(
-            params![pattern, serde_json::to_string(&matches).unwrap()],
-            |r| r.get::<_, String>(0),
-        )
-        .map_err(|e| e.to_string())?;
-    let mut all = Vec::new();
-    let mut total_usage = Usage::default();
-    let mut unknown_cost = false;
-    for raw in rows {
-        if cancel.load(Ordering::Relaxed) {
-            return Err("cancelled".into());
-        }
-        if let Ok(mut row) = serde_json::from_str::<Session>(&raw.map_err(|e| e.to_string())?) {
-            if !inside(&vault, &row.cwd) {
-                continue;
-            }
-            let meta = request.metadata.get(&row.key);
-            let archived = meta.and_then(|m| m["archived"].as_bool()).unwrap_or(false);
-            let favorite = meta.and_then(|m| m["favorite"].as_bool()).unwrap_or(false);
-            if (request.filter == "active" && archived)
-                || (request.filter == "archived" && !archived)
-                || (request.filter == "favorite" && !favorite)
-            {
-                continue;
-            }
-            total_usage.input += row.usage.input;
-            total_usage.output += row.usage.output;
-            total_usage.cache_read += row.usage.cache_read;
-            total_usage.cache_write += row.usage.cache_write;
-            total_usage.known |= row.usage.known;
-            total_usage.partial |= !row.usage.known;
-            unknown_cost |= row.usage.cost.is_none();
-            if let Some(cost) = row.usage.cost {
-                *total_usage.cost.get_or_insert(0.0) += cost;
-            }
-            row.text.clear();
-            all.push(row);
-        }
-    }
-    if unknown_cost {
-        total_usage.cost = None;
-    }
-    let total = all.len();
-    Ok(
-        json!({"rows": all.into_iter().skip(request.offset).take(100).collect::<Vec<_>>(), "total": total, "usage": total_usage}),
-    )
+    query(&mut db, request, &vault, cancel)
 }
 fn save(db: &Connection, row: &Session, stamp: &str) -> rusqlite::Result<usize> {
+    let mut summary = serde_json::to_value(row).unwrap();
+    summary.as_object_mut().unwrap().remove("text");
     db.execute(
-        "INSERT OR REPLACE INTO history VALUES (?1,?2,?3,?4,?5,?6)",
+        "INSERT OR REPLACE INTO history_text(key,text) VALUES (?1,?2)",
+        params![row.key, row.text],
+    )?;
+    db.execute(
+        "INSERT OR REPLACE INTO history VALUES (?1,?2,?3,?4,?5,?6,?7,?8,?9,?10,?11,?12,?13,?14)",
         params![
             row.key,
             row.transcript_path,
             stamp,
-            serde_json::to_string(row).unwrap(),
-            format!("{}\n{}\n{}", row.title, row.cwd, row.text),
-            row.modified_at_ms
+            summary.to_string(),
+            format!("{}\n{}\n{}", row.title, row.cwd, row.text).to_lowercase(),
+            row.modified_at_ms,
+            row.cwd,
+            row.usage.input,
+            row.usage.output,
+            row.usage.cache_read,
+            row.usage.cache_write,
+            row.usage.cost,
+            row.usage.known,
+            row.usage.partial
         ],
     )
+}
+fn check_cancel(cancel: &AtomicBool) -> Result<(), String> {
+    if cancel.load(Ordering::Relaxed) {
+        Err("cancelled".into())
+    } else {
+        Ok(())
+    }
+}
+const SCHEMA: i64 = 2;
+fn open_index(index: &Path, writer: bool, cancel: &AtomicBool) -> Result<Connection, String> {
+    check_cancel(cancel)?;
+    if index.exists() {
+        let db = Connection::open_with_flags(
+            index,
+            OpenFlags::SQLITE_OPEN_READ_ONLY | OpenFlags::SQLITE_OPEN_NO_MUTEX,
+        )
+        .map_err(|e| e.to_string())?;
+        db.busy_timeout(Duration::from_secs(2))
+            .map_err(|e| e.to_string())?;
+        let version: i64 = db
+            .query_row("PRAGMA user_version", [], |r| r.get(0))
+            .map_err(|e| e.to_string())?;
+        if version > SCHEMA {
+            return Err("history index version is newer than this server".into());
+        }
+        if version == SCHEMA && !writer {
+            return Ok(db);
+        }
+    }
+    let mut db = Connection::open(index).map_err(|e| e.to_string())?;
+    db.busy_timeout(Duration::from_secs(2))
+        .map_err(|e| e.to_string())?;
+    db.execute_batch("PRAGMA journal_mode=WAL; PRAGMA synchronous=NORMAL;")
+        .map_err(|e| e.to_string())?;
+    migrate(&mut db, cancel)?;
+    if writer {
+        Ok(db)
+    } else {
+        drop(db);
+        open_index(index, false, cancel)
+    }
+}
+fn migrate(db: &mut Connection, cancel: &AtomicBool) -> Result<(), String> {
+    check_cancel(cancel)?;
+    let tx = db
+        .transaction_with_behavior(rusqlite::TransactionBehavior::Immediate)
+        .map_err(|e| e.to_string())?;
+    let version: i64 = tx
+        .query_row("PRAGMA user_version", [], |r| r.get(0))
+        .map_err(|e| e.to_string())?;
+    if version == SCHEMA {
+        return Ok(());
+    }
+    if version > SCHEMA {
+        return Err("history index version is newer than this server".into());
+    }
+    let legacy: bool = tx
+        .query_row(
+            "SELECT EXISTS(SELECT 1 FROM sqlite_master WHERE type='table' AND name='history')",
+            [],
+            |r| r.get(0),
+        )
+        .map_err(|e| e.to_string())?;
+    if legacy {
+        tx.execute_batch("ALTER TABLE history RENAME TO history_legacy;")
+            .map_err(|e| e.to_string())?;
+    }
+    tx.execute_batch("CREATE TABLE history(key TEXT PRIMARY KEY,source TEXT NOT NULL,stamp TEXT NOT NULL,summary TEXT NOT NULL,body TEXT NOT NULL,modified INTEGER NOT NULL,cwd TEXT NOT NULL,input INTEGER NOT NULL,output INTEGER NOT NULL,cache_read INTEGER NOT NULL,cache_write INTEGER NOT NULL,cost REAL,known INTEGER NOT NULL,partial INTEGER NOT NULL);
+        CREATE TABLE history_text(key TEXT PRIMARY KEY,text TEXT NOT NULL);
+        CREATE TABLE history_revision(revision INTEGER NOT NULL); INSERT INTO history_revision VALUES (0);").map_err(|e| e.to_string())?;
+    if legacy {
+        let mut stmt = tx
+            .prepare("SELECT data,source,stamp,modified FROM history_legacy")
+            .map_err(|e| e.to_string())?;
+        let rows = stmt
+            .query_map([], |r| {
+                Ok((
+                    r.get::<_, String>(0)?,
+                    r.get::<_, String>(1)?,
+                    r.get::<_, String>(2)?,
+                    r.get::<_, u64>(3)?,
+                ))
+            })
+            .map_err(|e| e.to_string())?;
+        for row in rows {
+            check_cancel(cancel)?;
+            let (raw, source, stamp, modified) = row.map_err(|e| e.to_string())?;
+            let session: Session =
+                serde_json::from_str(&raw).map_err(|e| format!("history migration failed: {e}"))?;
+            save(&tx, &session, &stamp).map_err(|e| e.to_string())?;
+            tx.execute(
+                "UPDATE history SET source=?1,modified=?2 WHERE key=?3",
+                params![source, modified, session.key],
+            )
+            .map_err(|e| e.to_string())?;
+        }
+    }
+    check_cancel(cancel)?;
+    tx.execute_batch("DROP TABLE IF EXISTS history_legacy; CREATE INDEX history_source_stamp ON history(source,stamp); CREATE INDEX history_modified ON history(modified DESC,key ASC); CREATE INDEX history_cwd ON history(cwd); PRAGMA user_version=2;").map_err(|e| e.to_string())?;
+    tx.commit().map_err(|e| e.to_string())
+}
+fn revision(db: &Connection) -> Result<u64, String> {
+    db.query_row("SELECT revision FROM history_revision", [], |r| r.get(0))
+        .map_err(|e| e.to_string())
+}
+fn flush_if_ready(
+    db: &mut Connection,
+    pending: &mut Vec<(Session, String)>,
+    cancel: &AtomicBool,
+) -> Result<(), String> {
+    if pending.len() >= 32 {
+        flush(db, pending, cancel)?;
+    }
+    Ok(())
+}
+fn flush(
+    db: &mut Connection,
+    pending: &mut Vec<(Session, String)>,
+    cancel: &AtomicBool,
+) -> Result<(), String> {
+    check_cancel(cancel)?;
+    if pending.is_empty() {
+        return Ok(());
+    }
+    let tx = db.transaction().map_err(|e| e.to_string())?;
+    for (row, stamp) in pending.iter() {
+        check_cancel(cancel)?;
+        save(&tx, row, stamp).map_err(|e| e.to_string())?;
+    }
+    tx.execute("UPDATE history_revision SET revision=revision+1", [])
+        .map_err(|e| e.to_string())?;
+    check_cancel(cancel)?;
+    tx.commit().map_err(|e| e.to_string())?;
+    pending.clear();
+    Ok(())
+}
+fn query(
+    db: &mut Connection,
+    request: &Request,
+    vault: &Path,
+    cancel: &AtomicBool,
+) -> Result<Value, String> {
+    check_cancel(cancel)?;
+    let tx = db.transaction().map_err(|e| e.to_string())?;
+    // Revalidate each distinct directory, rather than each transcript. This
+    // keeps symlink/moved-directory scope enforcement without N filesystem IOs.
+    let mut allowed = Vec::new();
+    {
+        let mut stmt = tx
+            .prepare("SELECT DISTINCT cwd FROM history")
+            .map_err(|e| e.to_string())?;
+        for cwd in stmt
+            .query_map([], |r| r.get::<_, String>(0))
+            .map_err(|e| e.to_string())?
+        {
+            check_cancel(cancel)?;
+            let cwd = cwd.map_err(|e| e.to_string())?;
+            if inside(vault, &cwd) {
+                allowed.push(cwd);
+            }
+        }
+    }
+    let pattern = request.query.to_lowercase();
+    let mut matching = Vec::new();
+    let mut archived = Vec::new();
+    let mut favorites = Vec::new();
+    for (key, meta) in &request.metadata {
+        if meta.to_string().to_lowercase().contains(&pattern) {
+            matching.push(key);
+        }
+        if meta["archived"].as_bool() == Some(true) {
+            archived.push(key);
+        }
+        if meta["favorite"].as_bool() == Some(true) {
+            favorites.push(key);
+        }
+    }
+    let matching = serde_json::to_string(&matching).unwrap();
+    let allowed = serde_json::to_string(&allowed).unwrap();
+    let archived = serde_json::to_string(&archived).unwrap();
+    let favorites = serde_json::to_string(&favorites).unwrap();
+    let predicate = "FROM history WHERE cwd IN (SELECT value FROM json_each(?3)) AND (?1='' OR instr(body,?1)>0 OR key IN (SELECT value FROM json_each(?2))) AND (CASE ?4 WHEN 'active' THEN key NOT IN (SELECT value FROM json_each(?5)) WHEN 'archived' THEN key IN (SELECT value FROM json_each(?5)) WHEN 'favorite' THEN key IN (SELECT value FROM json_each(?6)) ELSE 1 END)";
+    let bind = params![
+        pattern,
+        matching,
+        allowed,
+        request.filter,
+        archived,
+        favorites
+    ];
+    let (total, usage): (u64, Usage) = tx.query_row(&format!("SELECT COUNT(*),COALESCE(SUM(input),0),COALESCE(SUM(output),0),COALESCE(SUM(cache_read),0),COALESCE(SUM(cache_write),0),CASE WHEN COUNT(cost)=COUNT(*) THEN SUM(cost) ELSE NULL END,COALESCE(MAX(known),0),COALESCE(MAX(partial OR NOT known),0) {predicate}"), bind, |r| Ok((r.get(0)?, Usage { input:r.get(1)?, output:r.get(2)?, cache_read:r.get(3)?, cache_write:r.get(4)?, cost:r.get(5)?, known:r.get(6)?, partial:r.get(7)? }))).map_err(|e| e.to_string())?;
+    check_cancel(cancel)?;
+    let mut stmt = tx
+        .prepare(&format!(
+            "SELECT summary {predicate} ORDER BY modified DESC,key ASC LIMIT 100 OFFSET ?7"
+        ))
+        .map_err(|e| e.to_string())?;
+    let mut page = Vec::new();
+    for raw in stmt
+        .query_map(
+            params![
+                pattern,
+                matching,
+                allowed,
+                request.filter,
+                archived,
+                favorites,
+                request.offset
+            ],
+            |r| r.get::<_, String>(0),
+        )
+        .map_err(|e| e.to_string())?
+    {
+        check_cancel(cancel)?;
+        page.push(
+            serde_json::from_str::<Value>(&raw.map_err(|e| e.to_string())?)
+                .map_err(|e| e.to_string())?,
+        );
+    }
+    Ok(json!({"rows":page,"total":total,"usage":usage,"revision":revision(&tx)?}))
 }
 fn inside(vault: &Path, cwd: &str) -> bool {
     !cwd.is_empty() && fs::canonicalize(cwd).is_ok_and(|p| p.starts_with(vault))
@@ -784,24 +990,39 @@ mod tests {
         }
         assert_eq!(execute("query", &req, &cancel).unwrap()["total"], 0);
         req.index = outside.0.join("outside.sqlite").to_string_lossy().into();
-        assert_eq!(execute("query", &req, &cancel).unwrap_err(), "index outside vault");
+        assert_eq!(
+            execute("query", &req, &cancel).unwrap_err(),
+            "index outside vault"
+        );
         assert!(!Path::new(&req.index).exists());
-        req.index = Path::new(&req.vault).join(".nand/../../escape.sqlite").to_string_lossy().into();
-        assert_eq!(execute("query", &req, &cancel).unwrap_err(), "index outside vault");
+        req.index = Path::new(&req.vault)
+            .join(".nand/../../escape.sqlite")
+            .to_string_lossy()
+            .into();
+        assert_eq!(
+            execute("query", &req, &cancel).unwrap_err(),
+            "index outside vault"
+        );
         #[cfg(unix)]
         {
             let linked = temp.0.join(".nand/escape");
             std::os::unix::fs::symlink(&outside.0, &linked).unwrap();
             req.index = linked.join("linked.sqlite").to_string_lossy().into();
             req.vault = temp.0.to_string_lossy().into();
-            assert_eq!(execute("query", &req, &cancel).unwrap_err(), "index outside vault");
+            assert_eq!(
+                execute("query", &req, &cancel).unwrap_err(),
+                "index outside vault"
+            );
             assert!(!outside.0.join("linked.sqlite").exists());
             let source = outside.0.join("source.sqlite");
             fs::write(&source, b"preserve native file").unwrap();
             let linked = temp.0.join(".nand/linked.sqlite");
             std::os::unix::fs::symlink(&source, &linked).unwrap();
             req.index = linked.to_string_lossy().into();
-            assert_eq!(execute("query", &req, &cancel).unwrap_err(), "symlinked index");
+            assert_eq!(
+                execute("query", &req, &cancel).unwrap_err(),
+                "symlinked index"
+            );
             assert_eq!(fs::read(&source).unwrap(), b"preserve native file");
         }
     }
@@ -1046,5 +1267,181 @@ mod tests {
         assert_eq!(session.usage.output, 7);
         assert_eq!(session.usage.cache_read, 3);
         assert_eq!(session.text.matches("answer").count(), 1);
+    }
+    #[test]
+    fn legacy_migration_preserves_index_and_rolls_back_every_change_on_failure() {
+        let temp = Temp::new();
+        let mut db = Connection::open(temp.0.join("legacy.sqlite")).unwrap();
+        db.execute_batch("CREATE TABLE history(key TEXT PRIMARY KEY,source TEXT,stamp TEXT,data TEXT,body TEXT,modified INTEGER)").unwrap();
+        let row = Session {
+            key: "original".into(),
+            cwd: temp.0.to_string_lossy().into(),
+            text: "full original transcript".into(),
+            modified_at_ms: 17,
+            ..Default::default()
+        };
+        db.execute("INSERT INTO history VALUES ('original','native-source','unchanged-stamp',?1,'body',17)", params![serde_json::to_string(&row).unwrap()]).unwrap();
+        db.execute(
+            "INSERT INTO history VALUES ('invalid','source','stamp','invalid JSON','body',18)",
+            [],
+        )
+        .unwrap();
+        assert!(migrate(&mut db, &AtomicBool::new(false))
+            .unwrap_err()
+            .contains("migration failed"));
+        assert_eq!(
+            db.query_row("SELECT COUNT(*) FROM history", [], |r| r.get::<_, u64>(0))
+                .unwrap(),
+            2
+        );
+        assert_eq!(
+            db.query_row("PRAGMA user_version", [], |r| r.get::<_, i64>(0))
+                .unwrap(),
+            0
+        );
+        assert!(db.prepare("SELECT * FROM history_text").is_err());
+        db.execute("DELETE FROM history WHERE key='invalid'", [])
+            .unwrap();
+        migrate(&mut db, &AtomicBool::new(false)).unwrap();
+        assert_eq!(
+            db.query_row(
+                "SELECT source || ':' || stamp || ':' || modified FROM history",
+                [],
+                |r| r.get::<_, String>(0)
+            )
+            .unwrap(),
+            "native-source:unchanged-stamp:17"
+        );
+        assert_eq!(
+            db.query_row("SELECT text FROM history_text", [], |r| r
+                .get::<_, String>(0))
+                .unwrap(),
+            row.text
+        );
+        assert_eq!(
+            db.query_row("SELECT json_type(summary,'$.text') FROM history", [], |r| r
+                .get::<_, Option<String>>(0))
+                .unwrap(),
+            None
+        );
+        assert_eq!(
+            db.query_row("PRAGMA user_version", [], |r| r.get::<_, i64>(0))
+                .unwrap(),
+            SCHEMA
+        );
+        migrate(&mut db, &AtomicBool::new(false)).unwrap(); // Idempotent reopen.
+    }
+    #[test]
+    fn sql_paging_aggregates_and_literal_substrings_do_not_load_transcript_rows() {
+        let temp = Temp::new();
+        let mut req = request(&temp.0, vec![]);
+        let cancel = AtomicBool::new(false);
+        execute("scan", &req, &cancel).unwrap();
+        let db = Connection::open(&req.index).unwrap();
+        for n in 0..205 {
+            let row = Session {
+                key: format!("key-{n}"),
+                cwd: temp.0.to_string_lossy().into(),
+                title: format!("title-{n}"),
+                modified_at_ms: n,
+                text: format!("MiXeD %_ fragment 中文{}", "x".repeat(10240)),
+                usage: Usage {
+                    input: 2,
+                    output: 3,
+                    known: n != 0,
+                    partial: n == 1,
+                    cost: if n == 0 { None } else { Some(0.5) },
+                    ..Default::default()
+                },
+                ..Default::default()
+            };
+            save(&db, &row, "test").unwrap();
+        }
+        // Query correctness must not depend on a full transcript being readable.
+        db.execute("DELETE FROM history_text", []).unwrap();
+        req.query = "mixed %_ fragment 中文".into();
+        req.offset = 100;
+        let page = execute("query", &req, &cancel).unwrap();
+        assert_eq!(page["total"], 205);
+        assert_eq!(page["rows"].as_array().unwrap().len(), 100);
+        assert_eq!(page["rows"][0]["key"], "key-104");
+        assert!(page["rows"][0].get("text").is_none());
+        assert_eq!(page["usage"]["input"], 410);
+        assert_eq!(page["usage"]["output"], 615);
+        assert_eq!(page["usage"]["partial"], true);
+        assert!(page["usage"]["cost"].is_null());
+        req.metadata.insert(
+            "key-0".into(),
+            json!({"title":"renamedneedle","favorite":true}),
+        );
+        req.query = "namedneed".into();
+        req.offset = 0;
+        req.filter = "favorite".into();
+        let page = execute("query", &req, &cancel).unwrap();
+        assert_eq!(page["total"], 1);
+        assert_eq!(page["rows"][0]["key"], "key-0");
+    }
+    #[test]
+    fn independent_wal_reader_sees_only_committed_batches_without_waiting_for_writer() {
+        let temp = Temp::new();
+        let req = request(&temp.0, vec![]);
+        let cancel = AtomicBool::new(false);
+        execute("scan", &req, &cancel).unwrap();
+        let mut writer = open_index(Path::new(&req.index), true, &cancel).unwrap();
+        let row = Session {
+            key: "committed".into(),
+            cwd: temp.0.to_string_lossy().into(),
+            ..Default::default()
+        };
+        flush(&mut writer, &mut vec![(row.clone(), "one".into())], &cancel).unwrap();
+        let tx = writer
+            .transaction_with_behavior(rusqlite::TransactionBehavior::Immediate)
+            .unwrap();
+        save(
+            &tx,
+            &Session {
+                key: "pending".into(),
+                ..row
+            },
+            "two",
+        )
+        .unwrap();
+        assert_eq!(execute("query", &req, &cancel).unwrap()["total"], 1);
+        tx.commit().unwrap();
+        assert_eq!(execute("query", &req, &cancel).unwrap()["total"], 2);
+        assert_eq!(
+            execute("query", &req, &AtomicBool::new(true)).unwrap_err(),
+            "cancelled"
+        );
+    }
+    #[tokio::test]
+    async fn cancelled_queued_scan_exits_before_its_writer_permit_is_available() {
+        let temp = Temp::new();
+        let agent = AgentData::new();
+        let _held = agent.scan_gate.clone().acquire_owned().await.unwrap();
+        let req = request(&temp.0, vec![]);
+        let message = ModuleMessage {
+            module: ModuleType::AgentData,
+            msg_type: "scan".into(),
+            payload: json!({"requestId":"queued","vault":req.vault,"index":req.index}),
+        };
+        agent.handle(&message).await.unwrap();
+        tokio::task::yield_now().await;
+        agent
+            .handle(&ModuleMessage {
+                module: ModuleType::AgentData,
+                msg_type: "cancel".into(),
+                payload: json!({"requestId":"queued"}),
+            })
+            .await
+            .unwrap();
+        tokio::time::timeout(Duration::from_secs(1), async {
+            while agent.jobs.lock().unwrap().contains_key("queued") {
+                tokio::task::yield_now().await;
+            }
+        })
+        .await
+        .unwrap();
+        assert!(!Path::new(&req.index).exists());
     }
 }

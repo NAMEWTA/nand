@@ -18,6 +18,8 @@ export interface WorkbenchHost {
 }
 export interface TerminalViewHost extends WorkbenchHost {
 	getTerminalRenderer(session: PtySession): Promise<TerminalInstance>;
+	recordActiveSession(id: string): void;
+	showSessionSwitcher(view: TerminalView): void;
 	activateTerminalView(leaf?: WorkspaceLeaf): Promise<void>;
 	toggleAlwaysOnTopTerminal(view?: TerminalView | null): Promise<void>;
 	getAlwaysOnTopTerminalLabel(view?: TerminalView | null): string;

@@ -8,9 +8,11 @@ import type { AgentId, AgentSettings, UsageKind, UsageSnapshot, UsageWindow } fr
 import { t } from '../../../shared/i18n/index';
 import { accountConfigDir } from './accounts';
 import { runtimeProcess } from './runtime-process';
+import { ProviderReadError, ProviderUsageCache } from './usage-cache';
 
 const REQUEST_TIMEOUT_MS = 10_000;
 const lastKnown = new Map<string, UsageSnapshot>();
+const providerReads = new ProviderUsageCache();
 
 type ProviderSnapshot = Omit<UsageSnapshot, 'agentId' | 'failed'>;
 
@@ -64,16 +66,20 @@ export async function readUsageSnapshots(
 				: id === 'codex'
 					? runtimeProcess().env.CODEX_HOME
 					: undefined;
-		const key = `${id}:${home || defaultHome || 'default'}`;
+		const key = `${agent.usage}:${home || defaultHome || 'default'}`;
+		const ttl = Math.max(60, context?.settings.usageRefreshSec ?? 60) * 1000;
 		jobs.push(
-			safeRead(id, () => read(home)).then((snapshot) => {
+			safeRead(id, async () => {
+				const cached = await providerReads.read(key, ttl, () => read(home));
+				return { ...cached.snapshot, checkedAt: cached.checkedAt };
+			}).then((snapshot) => {
 				const previous = lastKnown.get(key);
 				if (snapshot.failed && previous)
 					return { ...previous, failed: true, stale: true, status: snapshot.status, statusKey: snapshot.statusKey };
 				const next = {
 					...snapshot,
 					account: account || snapshot.account,
-					checkedAt: Date.now(),
+					checkedAt: snapshot.checkedAt ?? Date.now(),
 					source: 'provider',
 				};
 				if (!next.failed && next.windows.length) {
@@ -132,7 +138,7 @@ async function safeRead(agentId: AgentId, read: () => Promise<ProviderSnapshot>)
 				: error instanceof Error
 					? error.message
 					: t('terminalAgent.agents.readFailed');
-		return { agentId, provider, account: null, status: message, statusKey, failed: true, windows: [] };
+		return { agentId, provider, account: null, status: message, statusKey, failed: true, windows: [], checkedAt: error instanceof ProviderReadError ? error.checkedAt : Date.now() };
 	}
 }
 
