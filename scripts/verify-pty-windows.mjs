@@ -6,12 +6,14 @@ import fs from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
 import { createHash } from 'node:crypto';
+import { createWindowsFixture, removeWindowsFixture } from './pty-windows-fixture.mjs';
 
 assert.equal(process.platform, 'win32', 'This integration exercises Windows ConPTY and Jobs');
 const binary = path.resolve(process.argv[2] || 'processes/rust-terminal-servers/target/x86_64-pc-windows-msvc/release/rust-terminal-servers.exe');
 const artifactBase = process.env.NAND_PTY_WINDOWS_ARTIFACT_DIR;
 if (artifactBase) await fs.mkdir(artifactBase, { recursive: true });
-const fixture = await fs.mkdtemp(path.join(artifactBase || os.tmpdir(), 'nand-pty-windows-'));
+const ownedFixture = await createWindowsFixture(artifactBase || os.tmpdir());
+const fixture = ownedFixture.directory;
 const powershell = path.join(process.env.SystemRoot, 'System32', 'WindowsPowerShell', 'v1.0', 'powershell.exe');
 const encode = text => Buffer.from(text, 'utf16le').toString('base64');
 const quote = text => "'" + text.replaceAll("'", "''") + "'";
@@ -219,9 +221,7 @@ try {
   await fs.writeFile(path.join(fixture, 'result.json'), JSON.stringify(summary, null, 2));
   console.log(`Windows PTY artifacts: ${fixture}`);
   if (success && !artifactBase) {
-    assert.equal((await fs.lstat(fixture)).isSymbolicLink(), false);
-    assert.equal((await fs.realpath(fixture)).toLowerCase(), fixture.toLowerCase());
-    await fs.rm(fixture, { recursive: true, force: true });
+    await removeWindowsFixture(ownedFixture);
   }
 }
 console.log(`Windows PTY/history integration passed (${checks.length} checks)`);
