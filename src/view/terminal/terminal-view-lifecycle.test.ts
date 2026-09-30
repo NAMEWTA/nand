@@ -27,12 +27,13 @@ const { TerminalView } = await import('./terminal-view.ts');
 const settled = () => new Promise<void>((resolve) => setImmediate(resolve));
 function fixture() {
 	let timerId = 0;
-	const timers = new Map<number, () => void>(), cancelled: number[] = [], active: string[] = [];
+	const timers = new Map<number, () => void>(), frames = new Map<number, () => void>(), cancelled: number[] = [], active: string[] = [];
 	const win = {
 		require: createRequire(import.meta.url),
 		setTimeout(callback: () => void) { timers.set(++timerId, callback); return timerId; },
 		clearTimeout(id: number) { cancelled.push(id); timers.delete(id); },
-		cancelAnimationFrame() {},
+		requestAnimationFrame(callback: () => void) { frames.set(++timerId, callback); return timerId; },
+		cancelAnimationFrame(id: number) { frames.delete(id); },
 	};
 	globalThis.window = win as unknown as Window;
 	const el = { win, empty() {}, createEl() {}, addClass() {}, onWindowMigrated: () => () => {}, doc: {}, ownerDocument: {}, style: { removeProperty() {} }, querySelector: () => null };
@@ -54,7 +55,7 @@ function fixture() {
 	view.bindOutputPause = () => {};
 	view.terminalContainer = el;
 	view.focusTerminal = () => {};
-	return { view, win, timers, cancelled, active, leaf, leaves, host, events, emit(name: string, ...args: any[]) { for (const callback of events.get(name) ?? []) callback(...args); }, tick() { const queued = [...timers.values()]; timers.clear(); for (const timer of queued) timer(); } };
+	return { view, win, timers, frames, cancelled, active, leaf, leaves, host, events, flushFrames() { const queued = [...frames.values()]; frames.clear(); for (const frame of queued) frame(); }, emit(name: string, ...args: any[]) { for (const callback of events.get(name) ?? []) callback(...args); }, tick() { const queued = [...timers.values()]; timers.clear(); for (const timer of queued) timer(); } };
 }
 
 function visibilityFixture() {
@@ -150,6 +151,7 @@ test('CSS changes update the current themed renderer and appearance, with one su
 	f.view.terminalInstance = { getOptions: () => ({ useObsidianTheme: true }), updateTheme: () => themes++, release() {} };
 	f.view.updateAppearanceStyles = () => appearances++;
 	f.emit('css-change');
+	f.flushFrames();
 	assert.deepEqual([themes, appearances], [1, 1]);
 	f.view.bindPauseDocument = () => {};
 	f.view.setupDropHandlers = () => () => {};
@@ -158,6 +160,7 @@ test('CSS changes update the current themed renderer and appearance, with one su
 	f.view.handleHostWindowChanged();
 	assert.equal(f.events.get('css-change')!.size, 1);
 	f.emit('css-change');
+	f.flushFrames();
 	assert.equal(themes, 2);
 	await f.view.onClose();
 	assert.equal(f.events.get('css-change')!.size, 0);
@@ -174,6 +177,56 @@ test('CSS changes preserve a renderer using custom colors', async () => {
 	f.emit('css-change');
 	assert.equal(themes, 0);
 	await f.view.onClose();
+});
+
+function themeFixture() {
+	const f = visibilityFixture();
+	let theme = 'dark', callback: () => void = () => {}, disconnected = 0, observed: unknown;
+	const body = {};
+	Object.assign(f.doc, { body });
+	Object.assign(f.win, { MutationObserver: class {
+		constructor(listener: () => void) { callback = listener; }
+		observe(element: unknown, options: unknown) { assert.equal(element, body); observed = options; }
+		disconnect() { disconnected++; }
+	} });
+	const renderer = Object.assign(f.renderer, { custom: false, color: 'dark', updates: 0, getOptions() { return { useObsidianTheme: !this.custom }; }, updateTheme() { this.color = theme; this.updates++; } });
+	f.view.updateAppearanceStyles = () => {};
+	return { ...f, renderer, setTheme(value: string) { theme = value; callback(); }, get disconnected() { return disconnected; }, get observed() { return observed; } };
+}
+
+test('owner body theme propagation after the workspace event refreshes color on a coalesced owner frame', () => {
+	const f = themeFixture();
+	f.view.bindThemeChanges();
+	f.emit('css-change'); f.emit('css-change');
+	// The popout receives its body class after the main workspace event.
+	f.setTheme('light');
+	f.flushFrames();
+	assert.equal(f.renderer.color, 'light');
+	assert.equal(f.renderer.updates, 1);
+	assert.deepEqual(f.observed, { attributes: true, attributeFilter: ['class'] });
+	f.renderer.custom = true;
+	f.setTheme('dark'); f.emit('css-change'); f.flushFrames();
+	assert.equal(f.renderer.color, 'light');
+	assert.equal(f.renderer.updates, 1);
+});
+
+test('theme observers and queued owner frames are cancelled on migration and close', async () => {
+	const f = themeFixture(), destination = themeFixture();
+	f.view.bindThemeChanges();
+	f.setTheme('light');
+	Object.assign(f.leaf.el, { ownerDocument: destination.doc, doc: destination.doc, win: destination.win });
+	f.view.bindThemeChanges();
+	assert.equal(f.disconnected, 1);
+	assert.equal(f.frames.size, 0);
+	assert.equal(f.events.get('css-change')?.size, 1);
+	destination.setTheme('light');
+	assert.equal(destination.frames.size, 1);
+	await f.view.onClose();
+	assert.equal(destination.disconnected, 1);
+	assert.equal(destination.frames.size, 0);
+	assert.equal(f.events.get('css-change')?.size, 0);
+	f.flushFrames(); destination.flushFrames();
+	assert.equal(f.renderer.updates, 0);
 });
 
 test('an explicit session choice cancels the still-pending automatic initialization timer', async () => {

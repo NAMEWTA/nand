@@ -957,14 +957,34 @@ export class TerminalView extends ItemView {
 	private bindThemeChanges(): void {
 		this.themeCleanup?.();
 		const workspace = this.app.workspace;
-		const ref = workspace.on('css-change', () => {
-			const terminal = this.terminalInstance;
-			if (this.closed || !terminal?.getOptions().useObsidianTheme) return;
-			terminal.updateTheme();
-			this.updateAppearanceStyles();
-		});
+		const doc = this.contentEl.ownerDocument;
+		const win = doc.defaultView ?? this.contentEl.win;
+		let frame: number | null = null;
+		let disposed = false;
+		const schedule = () => {
+			if (disposed || this.closed || frame !== null || !this.terminalInstance?.getOptions().useObsidianTheme) return;
+			frame = win.requestAnimationFrame(() => {
+				frame = null;
+				const terminal = this.terminalInstance;
+				if (disposed || this.closed || !terminal?.getOptions().useObsidianTheme) return;
+				terminal.updateTheme();
+				this.updateAppearanceStyles();
+			});
+		};
+		// Obsidian propagates a popout's theme class after the main workspace event.
+		// Observe that document and read its computed colors on its own next frame.
+		const MutationObserverCtor = doc.defaultView?.MutationObserver;
+		const observer = doc.body && MutationObserverCtor ? new MutationObserverCtor(schedule) : null;
+		observer?.observe(doc.body, { attributes: true, attributeFilter: ['class'] });
+		const ref = workspace.on('css-change', schedule);
 		this.registerEvent(ref);
-		this.themeCleanup = () => workspace.offref(ref);
+		this.themeCleanup = () => {
+			disposed = true;
+			workspace.offref(ref);
+			observer?.disconnect();
+			if (frame !== null) win.cancelAnimationFrame(frame);
+			frame = null;
+		};
 	}
 	private bindPauseDocument(): void {
 		this.pauseDocumentCleanup?.();
