@@ -9,7 +9,7 @@ const require = createRequire(path.resolve('package.json'));
 const { transform } = require('esbuild');
 const file = 'src/platform/terminal-server/server-manager.ts';
 const original = readFileSync(file, 'utf8');
-const importsRemoved = original.replace(/^import[\s\S]*?;\n/gm, '');
+const importsRemoved = original.replace(/^import[\s\S]*?;\r?\n/gm, '');
 const prelude = `
 const AgentDataClient=class {setWebSocket(){} destroy(){}};
 const PtyClient=class {setWebSocket(){} destroy(){}};
@@ -41,7 +41,7 @@ const getCurrentPlatformCustomShellPath=()=>'';
 const getCurrentPlatformShell=()=> 'default';
 const setCurrentPlatformShell=()=>{};
 `;
-const { code: serviceCode } = await transform(servicePrelude + serviceOriginal.replace(/^import[\s\S]*?;\n/gm, ''), {
+const { code: serviceCode } = await transform(servicePrelude + serviceOriginal.replace(/^import[\s\S]*?;\r?\n/gm, ''), {
 	loader: 'ts',
 	format: 'cjs',
 });
@@ -291,12 +291,21 @@ if (process.argv.includes('--native-signal-fixture')) {
 		['-e', "process.on('SIGTERM',()=>{});console.log('fixture-ready');setInterval(()=>{},1000)"],
 		{ env: {}, stdio: ['ignore', 'pipe', 'pipe'] },
 	);
+	const signals = [];
+	const kill = child.kill.bind(child);
+	child.kill = (signal) => {
+		signals.push(signal);
+		return kill(signal);
+	};
 	try {
 		await once(child.stdout, 'data');
 		f.manager.process = child;
 		const stop = f.manager.shutdown();
-		await new Promise((r) => setTimeout(r, 50));
-		await f.fire(1000);
+		// Windows terminates on SIGTERM; POSIX lets this owned child resist it.
+		if (process.platform !== 'win32') {
+			await new Promise((r) => setTimeout(r, 50));
+			await f.fire(1000);
+		}
 		await stop;
 		let alive = false;
 		try {
@@ -305,7 +314,9 @@ if (process.argv.includes('--native-signal-fixture')) {
 		} catch {}
 		assert.equal(alive, false);
 		assert.equal(child.killed, true);
-		assert.equal(child.exitCode, null);
+		assert.deepEqual(signals, process.platform === 'win32' ? ['SIGTERM'] : ['SIGTERM', 'SIGKILL']);
+		assert.ok(child.exitCode !== null || child.signalCode !== null, 'Shutdown confirms the owned process exited');
+		if (process.platform !== 'win32') assert.equal(child.signalCode, 'SIGKILL');
 		assert.equal(f.manager.process, null);
 	} finally {
 		if (child.exitCode === null && child.signalCode === null) {
@@ -316,5 +327,6 @@ if (process.argv.includes('--native-signal-fixture')) {
 	}
 }
 console.log(
-	'Server lifecycle: handshake failure settles, reopen reconnects, shutdown cancels restart, SIGKILL confirms exit',
+	'Server lifecycle: 8 deterministic cases passed' +
+		(process.argv.includes('--native-signal-fixture') ? `; native ${process.platform} process exit confirmed` : ''),
 );

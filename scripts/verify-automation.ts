@@ -145,7 +145,15 @@ test('runtime preflight orders factual failures before permission and prevents a
 	});
 	const nativeFs = createRequire(nodePath.join(process.cwd(), 'package.json'))('node:fs') as typeof nodeFs;
 	const exists = nativeFs.existsSync;
-	nativeFs.existsSync = (file: nodeFs.PathLike) => /(^|[/\\])grok(?:\.exe)?$/.test(String(file)) ? false : exists(file);
+	const pathBefore = process.env.PATH;
+	const extensions = ['.COM', '.EXE', '.BAT', '.CMD', '.PS1', ...(process.env.PATHEXT ?? '').split(';').filter(Boolean)];
+	const grokNames = new Set(['grok', ...extensions.map((extension) => `grok${extension}`)].map((name) => name.toLowerCase()));
+	// Exercise installed wrappers without depending on the developer's CLI setup.
+	for (const name of process.platform === 'win32' ? [...grokNames].map((name) => name.toUpperCase()) : ['grok'])
+		nodeFs.writeFileSync(nodePath.join(root, name), 'synthetic; never executed');
+	process.env.PATH = [root, pathBefore ?? ''].filter(Boolean).join(nodePath.delimiter);
+	nativeFs.existsSync = (file: nodeFs.PathLike) =>
+		grokNames.has(nodePath.basename(String(file)).toLowerCase()) ? false : exists(file);
 	const settings = normalizeAgentSettings({});
 	settings.globalPermissionMode = 'yolo';
 	settings.yoloAcknowledged = false;
@@ -261,6 +269,8 @@ test('runtime preflight orders factual failures before permission and prevents a
 		runtime.dispose();
 		setLanguage('zh');
 		nativeFs.existsSync = exists;
+		if (pathBefore === undefined) delete process.env.PATH;
+		else process.env.PATH = pathBefore;
 		if (previousWindow) Object.defineProperty(globalThis, 'window', previousWindow);
 		else Reflect.deleteProperty(globalThis, 'window');
 		nodeFs.rmSync(root, { recursive: true, force: true });

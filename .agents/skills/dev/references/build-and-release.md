@@ -35,7 +35,7 @@ Do not add a second entry. Do not bundle CodeMirror.
 
 ## Tests
 
-There is no aggregate test script. CI (`.github/workflows/lint.yml`) runs `build` and `lint` on Node 22 and 24 for every branch push. pnpm 11 needs Node 22.13 or newer, so the release workflow uses Node 22 as well. It also runs architecture, automation, terminal, contacts, icon, editor-comment and panel-composition/dashboard-isolation/card-panels tests. Other dashboard regression scripts remain local. There is no Obsidian runtime in CI. Name the script you ran; a passing `build` does not verify UI.
+There is no aggregate test script. CI (`.github/workflows/lint.yml`) runs `build` and `lint` on Linux Node 22/24 and Windows Node 24 for every branch push. pnpm 11 needs Node 22.13 or newer, so the release workflow uses Node 22 as well. Linux also runs architecture, automation, terminal, contacts, icon, editor-comment and panel-composition/dashboard-isolation/card-panels tests. The Windows job checks automation, safety regressions, contacts and icons with CRLF checkout enabled for that job, without changing the machine's Git configuration. Other dashboard regression scripts remain local. There is no Obsidian runtime in CI. Name the script you ran; a passing `build` does not verify UI.
 
 A `*.test.ts` file runs when a script names it, or when it is under one of the roots discovered by `scripts/run-terminal-tests.mjs`. `scripts/verify-*.ts` files are wired as `test:<name>`:
 
@@ -74,7 +74,9 @@ New Node tests use that same runner. Verify scripts are excluded from eslint. `t
 
 ## Storage and lifecycle regressions
 
-`pnpm run test:safety-regressions` exercises dashboard write conflicts, DST repeated hours, empty automation targets, native-session launch reservations, and terminal server startup/shutdown with deterministic fixtures and an owned SIGTERM-resistant Node child. It is included in CI. Comment read/write failure and journal recovery cases run in `test:editor-comments`.
+`pnpm run test:safety-regressions` exercises dashboard write conflicts, DST repeated hours, empty automation targets, native-session launch reservations, and terminal server startup/shutdown with deterministic fixtures and an owned Node child. The native fixture verifies Windows SIGTERM termination and POSIX SIGTERM resistance followed by SIGKILL, confirming actual process exit on both. It is included in CI. Comment read/write failure and journal recovery cases run in `test:editor-comments`.
+
+`test:automation` and `test:iconic-port` use `scripts/run-node-with-tz.mjs` to set the child Node process's timezone on Windows and POSIX. They use `America/New_York` and `UTC` respectively; the caller's environment is unchanged. The automation preflight fixture isolates installed CLI wrappers, including Windows `PATHEXT` suffixes and case differences.
 
 ## Lint
 
@@ -141,7 +143,7 @@ The archives leaf introduces Preact: `tsconfig` includes `.tsx`, JSX uses `preac
 
 ## Icons checks
 
-`test:iconic-port` bundles with `scripts/iconic-obsidian-stub.ts` and runs in UTC. Its fixed 1.1.10 fixture contains outputs produced by the original RuleManager, defaults, commands, locale values and resource hashes. It also checks isolated persistence, backup recovery, external reload and patch restoration. The oracle lives in `scripts/fixtures/iconic/upstream-1.1.10.json`; its README records provenance. Do not generate expected rule outputs from the migrated implementation. See [the archived port record](../../../../speculo/.speculo/specdev/archive/2026-09/2026-09-28-docs-knowledge-consolidation/evidence/original-docs/iconic-port.md) for desktop checks and platform limits.
+`test:iconic-port` bundles with `scripts/iconic-obsidian-stub.ts` and runs in UTC. Its fixed 1.1.10 fixture contains outputs produced by the original RuleManager, defaults, commands, locale values and resource hashes. Text-resource hash checks normalize only CRLF to LF, verify both checkout forms, and retain the immutable upstream hashes. It also checks isolated persistence, backup recovery, external reload and patch restoration. The oracle lives in `scripts/fixtures/iconic/upstream-1.1.10.json`; its README records provenance. Do not generate expected rule outputs from the migrated implementation. See [the archived port record](../../../../speculo/.speculo/specdev/archive/2026-09/2026-09-28-docs-knowledge-consolidation/evidence/original-docs/iconic-port.md) for desktop checks and platform limits.
 
 For changes to icon settings, verify that every declaration routes persistence through the icon controller rather than a shell `control.key`. For lifecycle/CSS changes, check disabled-state cleanup and both main and floating windows; body state classes must remain on the same element as the module gate. Automated stubs do not replace those desktop checks.
 
