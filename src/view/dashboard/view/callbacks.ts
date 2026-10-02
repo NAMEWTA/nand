@@ -22,6 +22,9 @@ import type { DashboardView } from './dashboard-view';
 
 export function createCallbacks(this: DashboardView) {
 	return {
+		onOpenWeb: (url: string, target: 'modal' | 'tab') => {
+			void this.plugin.openBrowser?.({ url, target });
+		},
 		settingsAccess: createDashboardSettingsAccess(this.plugin),
 		onCardEdit: (card: DashboardCard) => this.openCardEditModal(card),
 		onOpenNoteInPopover: (file: TFile, subpath?: string) => this.openNote(file, subpath),

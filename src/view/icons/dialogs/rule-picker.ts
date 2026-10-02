@@ -1,3 +1,5 @@
+import { bindLocalizedOptions } from '../../primitives/localized-dom';
+import { bindLocalizedControl } from '../../primitives/localized-dom';
 import type { Hotkey } from 'obsidian';
 import { Modal, Setting } from 'obsidian';
 import type { Icon, Item } from '../../../core/icons/types';
@@ -84,15 +86,15 @@ export default class RulePicker extends Modal {
 		const { dialogState } = this.plugin.settings;
 		this.containerEl.addClass('mod-confirmation');
 		this.modalEl.addClass('iconic-rule-picker');
-		this.setTitle(STRINGS.settings.rulebook.name);
+		bindLocalizedControl(this.setTitle(STRINGS.settings.rulebook.name), "title", "iconic.settings.rulebook.name");
 
 		// DROPDOWN: Select a page
-		new Setting(this.contentEl).setName(STRINGS.rulePicker.selectPage).addDropdown((dropdown) => {
-			dropdown
+		bindLocalizedControl(new Setting(this.contentEl).setName(STRINGS.rulePicker.selectPage), "name", "iconic.rulePicker.selectPage").addDropdown((dropdown) => {
+			bindLocalizedOptions(dropdown
 				.addOptions({
 					file: STRINGS.rulePicker.fileRules,
 					folder: STRINGS.rulePicker.folderRules,
-				})
+				}), {file: ["iconic.rulePicker.fileRules"], folder: ["iconic.rulePicker.folderRules"]})
 				.onChange((value) => {
 					switch (value) {
 						default:
@@ -111,13 +113,13 @@ export default class RulePicker extends Modal {
 		});
 
 		// HEADING: Rules
-		new Setting(this.contentEl)
+		bindLocalizedControl(new Setting(this.contentEl)
 			.setHeading()
-			.setName(STRINGS.rulePicker.rules)
+			.setName(STRINGS.rulePicker.rules), "name", "iconic.rulePicker.rules")
 			.addExtraButton((button) =>
-				button
+				bindLocalizedControl(button
 					.setIcon('lucide-plus')
-					.setTooltip(STRINGS.rulePicker.addRule)
+					.setTooltip(STRINGS.rulePicker.addRule), "tooltip", "iconic.rulePicker.addRule")
 					.onClick(() => this.newRule()),
 			);
 

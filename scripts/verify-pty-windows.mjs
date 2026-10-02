@@ -5,7 +5,7 @@ import { setTimeout as delay } from 'node:timers/promises';
 import fs from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
-import { createHash } from 'node:crypto';
+import { createHash, randomBytes } from 'node:crypto';
 import { createWindowsFixture, removeWindowsFixture } from './pty-windows-fixture.mjs';
 
 assert.equal(process.platform, 'win32', 'This integration exercises Windows ConPTY and Jobs');
@@ -38,8 +38,10 @@ const descendants = server => {
   return Array.isArray(rows) ? rows : [rows];
 };
 const startServer = async () => {
-  const processHandle = spawn(binary, [], { windowsHide: true, stdio: ['ignore', 'pipe', 'pipe'] });
-  const server = { process: processHandle, pid: processHandle.pid, logs: '' }; servers.push(server);
+  const processHandle = spawn(binary, [], { windowsHide: true, stdio: ['pipe', 'pipe', 'pipe'] });
+  const token = randomBytes(32).toString('hex');
+  processHandle.stdin.end(token + '\n');
+  const server = { process: processHandle, pid: processHandle.pid, token, logs: '' }; servers.push(server);
   processHandle.stderr.on('data', data => { server.logs += data.toString(); });
   const [data] = await Promise.race([once(processHandle.stdout, 'data'), delay(15000, undefined, { ref: false }).then(() => { throw Error('Server startup timed out'); })]);
   Object.assign(server, JSON.parse(data.toString().trim()));
@@ -57,6 +59,7 @@ const connect = async server => {
     } else {
       const frame = Buffer.from(event.data), size = frame[0], id = frame.subarray(1, 1 + size).toString();
       if (!client.decoders.has(id)) client.decoders.set(id, new TextDecoder());
+      client.send({ module: 'pty', type: 'consumed', session_id: id, bytes: frame.length - 1 - size });
       const text = client.decoders.get(id).decode(frame.subarray(1 + size), { stream: true });
       client.output.set(id, (client.output.get(id) || '') + text); client.order.push({ type: 'output', sessionId: id });
       // Match production headless xterm's response to ConPTY's inherited cursor query.
@@ -68,6 +71,8 @@ const connect = async server => {
       client.cursorTail.set(id, pending.slice(-3));
     }
   });
+  client.send({ type: 'auth', protocol: 2, token: server.token });
+  await until(() => client.events.some(event => event.type === 'authenticated'), 'authenticated connection');
   client.init = async (script, extras = {}) => {
     const position = client.events.length;
     client.send({ module: 'pty', type: 'init', shell_type: 'powershell', shell_args: ['-NoLogo', '-NoProfile', '-NonInteractive', '-EncodedCommand', encode(script)], cwd: fixture, ...extras });
@@ -108,6 +113,17 @@ const request = async (client, message) => {
 let success = false;
 try {
   const server = await startServer(); let client = await connect(server);
+  await check('missing, wrong and outdated credentials never admit a PTY request', async () => {
+    for (const message of [{ module: 'pty', type: 'init' }, { type: 'auth', protocol: 2, token: '0'.repeat(64) }, { type: 'auth', protocol: 1, token: server.token }]) {
+      const socket = new WebSocket(`ws://127.0.0.1:${server.port}`), responses = [];
+      socket.addEventListener('message', event => responses.push(event.data));
+      const closed = new Promise(resolve => socket.addEventListener('close', resolve, { once: true }));
+      await new Promise(resolve => socket.addEventListener('open', resolve, { once: true }));
+      socket.send(JSON.stringify(message));
+      await Promise.race([closed, delay(6000).then(() => { socket.close(); throw Error('Unauthenticated connection did not close'); })]);
+      assert.ok(!responses.some(value => String(value).includes('init_complete')));
+    }
+  });
   await check('output before one real exit; complete large final output; repeated destroy', async () => {
     const id = await client.init("[Console]::Write('BEGIN-NAND-OUTPUT'); [Console]::Write('x' * 300000); [Console]::WriteLine('FINAL-NAND-OUTPUT'); exit 23", { cols: 200 });
     assert.equal((await client.exit(id)).code, 23);

@@ -190,7 +190,7 @@ const habitDone = new Set<string>();
 registerHabitService(
 	habitApp,
 	{
-		getHabits: () => habits.map((habit) => ({ ...habit })),
+		saveState: { status: 'saved' }, retrySave: async () => {}, subscribe: () => () => {}, getHabits: () => habits.map((habit) => ({ ...habit })),
 		isDone: (id: string) => habitDone.has(id),
 		getStreak: () => 0,
 		addHabit: (name: string) => {
@@ -207,7 +207,7 @@ const musicApp = new App();
 registerMusicService(
 	musicApp,
 	{
-		subscribe: () => () => {},
+		saveState: { status: 'saved' }, retrySave: async () => {}, subscribe: () => () => {},
 		getState: () => ({
 			status: 'idle',
 			current: null,
@@ -302,7 +302,7 @@ assertPhoto(
 		renderSidebarPomodoro(
 			host,
 			{
-				subscribe: () => () => {},
+				saveState: { status: 'saved' }, retrySave: async () => {}, subscribe: () => () => {},
 				subscribeTick: () => () => {},
 				getState: () => ({
 					phase: 'work',

@@ -276,7 +276,15 @@ function clampNumber(value: unknown, min: number, max: number, fallback: number)
 export function applyControlContrast(root: HTMLElement): void {
 	const computed = root.ownerDocument?.defaultView?.getComputedStyle(root);
 	if (!computed) return;
-	const surface = parseRgb(computed.getPropertyValue('--db-bg-card'));
+	const card = computed.getPropertyValue('--db-bg-card').trim();
+	const base = parseRgb(computed.getPropertyValue('--db-bg')) ?? { r: 255, g: 255, b: 255 };
+	const cardColor = parseRgb(card);
+	const cardAlpha = card.startsWith('rgba') ? Number(card.slice(card.lastIndexOf(',') + 1).replace(')', '')) : 1;
+	const surface = cardColor ? {
+		r: cardColor.r * cardAlpha + base.r * (1 - cardAlpha),
+		g: cardColor.g * cardAlpha + base.g * (1 - cardAlpha),
+		b: cardColor.b * cardAlpha + base.b * (1 - cardAlpha),
+	} : base;
 	for (const [background, foreground] of [
 		['--db-accent', '--db-text-on-accent'],
 		['--db-danger', '--db-text-on-danger'],
@@ -297,5 +305,27 @@ export function applyControlContrast(root: HTMLElement): void {
 			foreground,
 			(luminance + 0.05) / 0.05 >= 1.05 / (luminance + 0.05) ? '#000000' : '#ffffff',
 		);
+	}
+	// Transparent timer buttons need a foreground against the card, rather
+	// than against the accent fill. Preserve the requested hue when readable.
+	if (surface) {
+		const luminance = (rgb: number[]) => rgb.reduce((sum, value, i) => {
+			const c = value / 255;
+			return sum + (c <= 0.04045 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4) * [0.2126, 0.7152, 0.0722][i]!;
+		}, 0);
+		const outlined = ['mono', 'neon', 'volt', 'magma', 'onyx'].includes(root.dataset.theme ?? '');
+		for (const running of [false, true]) {
+			const raw = computed.getPropertyValue(running && !outlined ? '--db-text-muted' : '--db-accent').trim();
+			const color = parseRgb(raw);
+			if (!color) continue;
+			const overlay = running && outlined && root.dataset.theme !== 'mono' ? 0.1 : 0;
+			const background = [surface.r, surface.g, surface.b].map(value => value * (1 - overlay) + 255 * overlay);
+			const alpha = raw.startsWith('rgba') ? Number(raw.slice(raw.lastIndexOf(',') + 1).replace(')', '')) : 1;
+			const bg = luminance(background);
+			const fg = luminance([color.r, color.g, color.b].map((value, i) => value * alpha + background[i]! * (1 - alpha)));
+			const ratio = (Math.max(bg, fg) + 0.05) / (Math.min(bg, fg) + 0.05);
+			root.style.setProperty(running ? '--db-pomodoro-running-text' : '--db-pomodoro-text',
+				ratio >= 4.5 ? raw : (bg + 0.05) / 0.05 >= 1.05 / (bg + 0.05) ? '#000000' : '#ffffff');
+		}
 	}
 }

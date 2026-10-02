@@ -108,7 +108,7 @@ async function main(): Promise<void> {
 	const md1 = serialize(full);
 	assert.ok(md1.includes('type: web'), '1: type line');
 	assert.ok(md1.includes('web:'), '1: web block');
-	assert.ok(md1.includes('url: "https://keep.google.com/u/0/"'), '1: url line');
+	assert.equal(parse(md1).columns[0]!.webConfig?.url, 'https://keep.google.com/u/0/', '1: url value');
 	assert.ok(md1.includes('zoom: 0.75'), '1: zoom line');
 	assert.ok(!/mode:/.test(md1), '1: engine is automatic — no mode line');
 	const back1 = parse(md1).columns[0]!;
@@ -124,8 +124,8 @@ async function main(): Promise<void> {
 	// (round-trip exact): the engine is automatic and old pinned modes drop.
 	const noisy = parse(
 		serialize(dataWith(webColumn('N', 'https://x.com'))).replace(
-			'    web:\n      url: "https://x.com"',
-			'    web:\n      url: "https://x.com"\n      mode: webview\n      zoom: 1',
+			'    web:\n      url: https://x.com',
+			'    web:\n      url: https://x.com\n      mode: webview\n      zoom: 1',
 		),
 	).columns[0]!;
 	assert.equal((noisy.webConfig as unknown as Record<string, unknown>).mode, undefined, '3: legacy mode drops');

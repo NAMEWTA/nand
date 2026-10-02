@@ -77,7 +77,15 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     log_debug!("启动参数: port={}", port);
 
     // Create the server configuration
-    let config = ServerConfig { port };
+    // Delivered over the parent's private pipe, never argv, environment or disk.
+    let mut token = String::new();
+    use std::io::{BufRead, Read};
+    std::io::stdin().lock().take(129).read_line(&mut token)?;
+    let token = token.trim().to_owned();
+    if token.len() != 64 || !token.bytes().all(|b| b.is_ascii_hexdigit()) {
+        return Err("Missing terminal instance authentication".into());
+    }
+    let config = ServerConfig { port, token };
 
     // Create and start the server
     let server = Server::new(config);

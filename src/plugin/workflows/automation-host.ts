@@ -1,5 +1,11 @@
-import { FileSystemAdapter, Notice } from 'obsidian';
+import { FileSystemAdapter, Notice, Platform } from 'obsidian';
+import { MarkdownAutomationDefinitions } from '../../platform/obsidian/automations/definitions';
+import { deviceId as getDeviceId } from '../../platform/obsidian/storage/device-id';
+import type { AppWithCommands } from '../../platform/obsidian/obsidian-internal';
 import { AutomationService } from '../../core/automations/service';
+import { actionAvailability } from '../../core/actions/executor';
+import { isActiveRun } from '../../shared/automation/types';
+import { pinActionModal } from '../../view/automations/pin-action';
 import { NotificationService } from '../../core/notifications/service';
 import { listContactReminders } from '../../platform/obsidian/contacts/reminders-source';
 import { DashboardAutomationSource } from '../../platform/obsidian/dashboard/automation';
@@ -25,11 +31,8 @@ export async function createAutomationHost(
 	plugin: DashboardPlugin,
 ): Promise<AutomationUiPort & { dispose(): void; inbox(): void; service: AutomationService; setExecutionEnabled(enabled: boolean): Promise<void> }> {
 	const app = plugin.app;
-	let deviceId: string = app.loadLocalStorage('nand.automation.device') as string;
-	if (typeof deviceId !== 'string' || !deviceId) {
-		deviceId = crypto.randomUUID();
-		app.saveLocalStorage('nand.automation.device', deviceId);
-	}
+	const deviceId = getDeviceId(app);
+	const definitions = new MarkdownAutomationDefinitions(app);
 	const dashboard = new DashboardAutomationSource(
 		app,
 		() => plugin.settings,
@@ -86,7 +89,7 @@ export async function createAutomationHost(
 	};
 	const notifications = new NotificationService(
 		app.vault.adapter,
-		`.nand/notifications/${deviceId}.json`,
+		`.nand/notifications/${deviceId}/inbox.json`,
 		(source) => sources.open(source),
 		async (target) => {
 			await open();
@@ -98,7 +101,7 @@ export async function createAutomationHost(
 	);
 	const service = new AutomationService(
 		app.vault.adapter,
-		`.nand/automation/${deviceId}.json`,
+		`.nand/automation/${deviceId}/runtime.json`,
 		deviceId,
 		sources,
 		() => (plugin.terminalHost?.isActive() ? plugin.terminalHost.getAutomationRuntime() : undefined),
@@ -125,6 +128,21 @@ export async function createAutomationHost(
 			});
 		},
 		plugin.settings.modules.automation,
+		{
+			definitions, desktop: Platform.isDesktopApp,
+			executor: { execute: async action => {
+				if (action.kind === 'open-file') {
+					if (!app.vault.getFileByPath(action.path)) throw new AutomationError('sourceMissing');
+					await app.workspace.openLinkText(action.path, '', true);
+				} else if (action.kind === 'open-url') await plugin.browserHost.open({ url: action.url, target: 'tab' });
+				else if (action.kind === 'obsidian-command') {
+					if (!(app as AppWithCommands).commands.commands[action.command]) throw new AutomationError('invalid');
+					(app as AppWithCommands).commands.executeCommandById(action.command);
+					return { message: t('automation.invoked') };
+				} else throw new AutomationError('invalid');
+				return { message: '' };
+			} },
+		},
 	);
 	const retry = async () => {
 		try {
@@ -136,6 +154,10 @@ export async function createAutomationHost(
 		}
 	};
 	await retry();
+	const pin = async (definition: AutomationDefinition) => {
+		pinActionModal(app, definition, [...new Set([plugin.settings.dashboardFile, ...plugin.settings.workspaceFiles])],
+			path => dashboard.pinAction(path, definition));
+	};
 	const edit = (source?: SourceRef, title?: string, existing?: AutomationDefinition) => {
 		if (!service.executionEnabled) {
 			new Notice(t('automation.moduleOff'));
@@ -148,12 +170,12 @@ export async function createAutomationHost(
 		const current =
 			existing ?? service.definitions.find((d) => source?.kind === 'dashboard' && d.source?.id === source.id);
 		const cwd = app.vault.adapter instanceof FileSystemAdapter ? app.vault.adapter.getBasePath() : '';
-		new AutomationEditor(app, service, () => dashboard.targets(), cwd, source, title, current).open();
+		new AutomationEditor(app, service, () => dashboard.targets(), cwd, source, title, current, pin).open();
 	};
 	const inbox = () => new NotificationInbox(app, notifications).open();
 	plugin.registerView(
 		AUTOMATION_VIEW_TYPE,
-		(leaf) => new AutomationView(leaf, { service, retry, edit: (d) => edit(d?.source, d?.name, d), inbox }),
+		(leaf) => new AutomationView(leaf, { service, retry, edit: (d) => edit(d?.source, d?.name, d), inbox, pin }),
 	);
 	const open = async () => {
 		let leaf = app.workspace.getLeavesOfType(AUTOMATION_VIEW_TYPE)[0];
@@ -183,21 +205,43 @@ export async function createAutomationHost(
 	plugin.registerInterval(app.workspace.containerEl.win.setInterval(tick, 60_000));
 	plugin.registerDomEvent(app.workspace.containerEl.win, 'focus', tick);
 	let refreshTimer: number | undefined;
-	plugin.registerEvent(
-		app.vault.on('modify', (file) => {
-			if (!file.path.endsWith('.md')) return;
-			if (refreshTimer !== undefined) app.workspace.containerEl.win.clearTimeout(refreshTimer);
-			refreshTimer = app.workspace.containerEl.win.setTimeout(() => {
-				void service.refresh().catch(console.error);
-			}, 500);
-		}),
-	);
+	const changed = (file: { path: string }) => {
+		dashboard.invalidate(file.path);
+		if (!file.path.endsWith('.md')) return;
+		if (refreshTimer !== undefined) app.workspace.containerEl.win.clearTimeout(refreshTimer);
+		refreshTimer = app.workspace.containerEl.win.setTimeout(() => { void service.refresh().catch(console.error); }, 500);
+	};
+	plugin.registerEvent(app.vault.on('modify', changed));
+	plugin.registerEvent(app.vault.on('create', changed));
+	plugin.registerEvent(app.vault.on('delete', changed));
+	plugin.registerEvent(app.vault.on('rename', (file, old) => { changed({ path: old }); changed(file); }));
 	plugin.register(() => {
 		if (refreshTimer !== undefined) app.workspace.containerEl.win.clearTimeout(refreshTimer);
 	});
 	app.workspace.onLayoutReady(tick);
 	return {
 		service,
+		subscribe: listener => service.subscribe(listener),
+		actions: () => service.definitions.map(definition => {
+			const run = [...service.state.runs].reverse().find(row => row.automationId === definition.id);
+			const reason = !service.executionEnabled ? 'automation.moduleOff' : definition.deviceId !== service.deviceId ? 'automation.otherDevice' : actionAvailability(definition.action.kind, 'manual', Platform.isDesktopApp);
+			return { id: definition.id, name: definition.name, status: run?.status, running: !!run && isActiveRun(run), unavailable: reason ? t(reason) : undefined };
+		}),
+		runAction: async id => {
+			await service.refresh();
+			const definition = service.definitions.find(row => row.id === id);
+			if (!definition) throw new Error(t('automation.missingAction'));
+			await service.run(definition);
+		},
+		stopAction: async id => {
+			const run = service.state.runs.find(row => row.automationId === id && isActiveRun(row));
+			if (run) await service.stop(run);
+		},
+		openAction: async id => {
+			const run = [...service.state.runs].reverse().find(row => row.automationId === id && row.terminalId);
+			if (run?.terminalId && isActiveRun(run)) await service.agent()?.open(run.terminalId);
+			else { await open(); if (run) (app.workspace.getLeavesOfType(AUTOMATION_VIEW_TYPE)[0]?.view as AutomationView | undefined)?.showRun(run.id); }
+		},
 		setExecutionEnabled: async (enabled) => {
 			const wasEnabled = service.executionEnabled;
 			await service.setExecutionEnabled(enabled);
@@ -207,8 +251,8 @@ export async function createAutomationHost(
 		open,
 		inbox,
 		dispose: () => {
-			service.dispose();
-			notifications.dispose();
+			void service.shutdown().finally(() => definitions.shutdown()).catch(console.error);
+			void notifications.shutdown().catch(console.error);
 		},
 	};
 }

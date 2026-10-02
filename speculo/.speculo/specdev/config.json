@@ -12,8 +12,8 @@
     "shared_path_owner": "explicit"
   },
   "verification": {
-    "test": null,
-    "typecheck": null,
+    "test": "pnpm test:all",
+    "typecheck": "pnpm exec tsc --noEmit --skipLibCheck",
     "lint": "pnpm run lint",
     "build": "pnpm run build"
   },

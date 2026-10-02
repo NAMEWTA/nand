@@ -31,7 +31,7 @@ try {
 		settings: { agentSettings: settings },
 		manifest: { dir: '.obsidian/plugins/nand' },
 		app: {
-			loadLocalStorage: () => 'fixture',
+			loadLocalStorage: () => '11111111-1111-4111-8111-111111111111',
 			workspace: { containerEl: { win: {} } },
 			vault: { adapter: { exists: async () => false, getBasePath: () => vault } },
 		},

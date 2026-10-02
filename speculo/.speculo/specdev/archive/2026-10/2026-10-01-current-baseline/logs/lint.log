@@ -1,0 +1,221 @@
+Already up to date
+Done in 320ms using pnpm v11.1.3
+$ eslint .
+
+C:\Data\01-Code\nand\src\core\comments\store.ts
+  150:35  warning  Avoid using 'globalThis'. Use 'window' or 'activeWindow' for popout window compatibility  obsidianmd/no-global-this
+  383:4   warning  Avoid using 'globalThis'. Use 'window' or 'activeWindow' for popout window compatibility  obsidianmd/no-global-this
+  404:27  warning  Avoid using 'globalThis'. Use 'window' or 'activeWindow' for popout window compatibility  obsidianmd/no-global-this
+  474:16  warning  Avoid using 'globalThis'. Use 'window' or 'activeWindow' for popout window compatibility  obsidianmd/no-global-this
+
+C:\Data\01-Code\nand\src\platform\desktop\agent-context\agent-context-bridge.ts
+  283:16  warning  'process' is not defined  no-undef
+
+C:\Data\01-Code\nand\src\platform\desktop\agent-context\claude-ide-locks.ts
+  15:3  warning  'process' is not defined  no-undef
+
+C:\Data\01-Code\nand\src\platform\desktop\agents\accounts.ts
+  1:1  warning  Do not import Node.js built-in module "node:fs". Node.js APIs are not available on mobile. Use a dynamic import() or require() guarded by Platform.isDesktop instead    obsidianmd/no-nodejs-modules
+  2:1  warning  Do not import Node.js built-in module "node:os". Node.js APIs are not available on mobile. Use a dynamic import() or require() guarded by Platform.isDesktop instead    obsidianmd/no-nodejs-modules
+  3:1  warning  Do not import Node.js built-in module "node:path". Node.js APIs are not available on mobile. Use a dynamic import() or require() guarded by Platform.isDesktop instead  obsidianmd/no-nodejs-modules
+
+C:\Data\01-Code\nand\src\platform\desktop\agents\resolver.ts
+   1:1   warning  Do not import Node.js built-in module "node:fs". Node.js APIs are not available on mobile. Use a dynamic import() or require() guarded by Platform.isDesktop instead    obsidianmd/no-nodejs-modules
+   2:1   warning  Do not import Node.js built-in module "node:os". Node.js APIs are not available on mobile. Use a dynamic import() or require() guarded by Platform.isDesktop instead    obsidianmd/no-nodejs-modules
+   3:1   warning  Do not import Node.js built-in module "node:path". Node.js APIs are not available on mobile. Use a dynamic import() or require() guarded by Platform.isDesktop instead  obsidianmd/no-nodejs-modules
+  13:32  warning  'process' is not defined                                                                                                                                                no-undef
+  16:3   warning  'process' is not defined                                                                                                                                                no-undef
+  17:7   warning  'process' is not defined                                                                                                                                                no-undef
+  23:39  warning  'process' is not defined                                                                                                                                                no-undef
+  42:6   warning  'process' is not defined                                                                                                                                                no-undef
+  43:17  warning  'process' is not defined                                                                                                                                                no-undef
+
+C:\Data\01-Code\nand\src\platform\desktop\agents\usage.ts
+    1:1   warning  Do not import Node.js built-in module "node:fs". Node.js APIs are not available on mobile. Use a dynamic import() or require() guarded by Platform.isDesktop instead     obsidianmd/no-nodejs-modules
+    2:1   warning  Do not import Node.js built-in module "node:https". Node.js APIs are not available on mobile. Use a dynamic import() or require() guarded by Platform.isDesktop instead  obsidianmd/no-nodejs-modules
+    3:1   warning  Do not import Node.js built-in module "node:os". Node.js APIs are not available on mobile. Use a dynamic import() or require() guarded by Platform.isDesktop instead     obsidianmd/no-nodejs-modules
+    4:1   warning  Do not import Node.js built-in module "node:path". Node.js APIs are not available on mobile. Use a dynamic import() or require() guarded by Platform.isDesktop instead   obsidianmd/no-nodejs-modules
+  414:18  warning  'Buffer' is not defined                                                                                                                                                  no-undef
+  415:32  warning  'Buffer' is not defined                                                                                                                                                  no-undef
+  417:18  warning  'Buffer' is not defined                                                                                                                                                  no-undef
+  452:19  warning  'Buffer' is not defined                                                                                                                                                  no-undef
+  453:33  warning  'Buffer' is not defined                                                                                                                                                  no-undef
+  455:19  warning  'Buffer' is not defined                                                                                                                                                  no-undef
+
+C:\Data\01-Code\nand\src\platform\desktop\ai-vault\scan.ts
+    1:1   warning  Do not import Node.js built-in module "node:crypto". Node.js APIs are not available on mobile. Use a dynamic import() or require() guarded by Platform.isDesktop instead  obsidianmd/no-nodejs-modules
+    2:1   warning  Do not import Node.js built-in module "node:path". Node.js APIs are not available on mobile. Use a dynamic import() or require() guarded by Platform.isDesktop instead    obsidianmd/no-nodejs-modules
+   31:13  warning  'process' is not defined                                                                                                                                                  no-undef
+   33:18  warning  'process' is not defined                                                                                                                                                  no-undef
+   58:20  warning  'Buffer' is not defined                                                                                                                                                   no-undef
+  248:40  warning  'Buffer' is not defined                                                                                                                                                   no-undef
+  333:56  warning  'NodeJS' is not defined                                                                                                                                                   no-undef
+  351:59  warning  'NodeJS' is not defined                                                                                                                                                   no-undef
+  365:28  warning  'NodeJS' is not defined                                                                                                                                                   no-undef
+
+C:\Data\01-Code\nand\src\platform\desktop\ai-vault\scope.ts
+   5:1   warning  Do not import Node.js built-in module "node:path". Node.js APIs are not available on mobile. Use a dynamic import() or require() guarded by Platform.isDesktop instead  obsidianmd/no-nodejs-modules
+  26:12  warning  'NodeJS' is not defined                                                                                                                                                 no-undef
+  36:76  warning  'NodeJS' is not defined                                                                                                                                                 no-undef
+  92:44  warning  'NodeJS' is not defined                                                                                                                                                 no-undef
+
+C:\Data\01-Code\nand\src\platform\desktop\platform.ts
+   1:1   warning  Do not import Node.js built-in module "os". Node.js APIs are not available on mobile. Use a dynamic import() or require() guarded by Platform.isDesktop instead  obsidianmd/no-nodejs-modules
+   4:32  warning  'NodeJS' is not defined                                                                                                                                          no-undef
+   5:9   warning  'process' is not defined                                                                                                                                         no-undef
+  10:9   warning  'process' is not defined                                                                                                                                         no-undef
+  15:9   warning  'process' is not defined                                                                                                                                         no-undef
+  20:9   warning  'process' is not defined                                                                                                                                         no-undef
+
+C:\Data\01-Code\nand\src\platform\desktop\terminal\claude-code-path-references.ts
+   1:1   warning  Do not import Node.js built-in module "node:path". Node.js APIs are not available on mobile. Use a dynamic import() or require() guarded by Platform.isDesktop instead  obsidianmd/no-nodejs-modules
+  37:39  warning  'process' is not defined                                                                                                                                                no-undef
+
+C:\Data\01-Code\nand\src\platform\desktop\terminal\command-availability.ts
+  82:21  warning  'process' is not defined  no-undef
+
+C:\Data\01-Code\nand\src\platform\desktop\terminal\command-version-probe.ts
+   73:49  warning  'Buffer' is not defined   no-undef
+   74:49  warning  'Buffer' is not defined   no-undef
+  152:8   warning  'process' is not defined  no-undef
+
+C:\Data\01-Code\nand\src\platform\desktop\terminal\latest-version-registry.ts
+  53:38  warning  'Buffer' is not defined  no-undef
+
+C:\Data\01-Code\nand\src\platform\desktop\terminal\pty-session.ts
+  4:1  warning  Do not import Node.js built-in module "node:process". Node.js APIs are not available on mobile. Use a dynamic import() or require() guarded by Platform.isDesktop instead  obsidianmd/no-nodejs-modules
+
+C:\Data\01-Code\nand\src\platform\desktop\terminal\shell-profiles.ts
+  30:21  warning  'process' is not defined  no-undef
+  62:20  warning  'process' is not defined  no-undef
+  70:3   warning  'process' is not defined  no-undef
+  70:35  warning  'process' is not defined  no-undef
+  74:39  warning  'process' is not defined  no-undef
+
+C:\Data\01-Code\nand\src\platform\desktop\terminal\shell-settings.ts
+   7:19  warning  'process' is not defined  no-undef
+  21:19  warning  'process' is not defined  no-undef
+  35:19  warning  'process' is not defined  no-undef
+  49:19  warning  'process' is not defined  no-undef
+
+C:\Data\01-Code\nand\src\platform\desktop\terminal\terminal-path-utils.ts
+    1:1   warning  Do not import Node.js built-in module "node:path". Node.js APIs are not available on mobile. Use a dynamic import() or require() guarded by Platform.isDesktop instead  obsidianmd/no-nodejs-modules
+    3:32  warning  'NodeJS' is not defined                                                                                                                                                 no-undef
+   20:31  warning  'process' is not defined                                                                                                                                                no-undef
+   59:76  warning  'process' is not defined                                                                                                                                                no-undef
+   78:84  warning  'process' is not defined                                                                                                                                                no-undef
+   87:89  warning  'process' is not defined                                                                                                                                                no-undef
+  107:87  warning  'process' is not defined                                                                                                                                                no-undef
+  118:31  warning  'process' is not defined                                                                                                                                                no-undef
+  141:31  warning  'process' is not defined                                                                                                                                                no-undef
+  148:81  warning  'process' is not defined                                                                                                                                                no-undef
+  204:31  warning  'process' is not defined                                                                                                                                                no-undef
+  228:31  warning  'process' is not defined                                                                                                                                                no-undef
+  264:31  warning  'process' is not defined                                                                                                                                                no-undef
+
+C:\Data\01-Code\nand\src\platform\desktop\types\global.d.ts
+  21:12  warning  'NodeJS' is not defined  no-undef
+
+C:\Data\01-Code\nand\src\platform\desktop\types\ws.d.ts
+  2:2   warning  Do not import Node.js built-in module "events". Node.js APIs are not available on mobile. Use a dynamic import() or require() guarded by Platform.isDesktop instead  obsidianmd/no-nodejs-modules
+  3:2   warning  Do not import Node.js built-in module "http". Node.js APIs are not available on mobile. Use a dynamic import() or require() guarded by Platform.isDesktop instead    obsidianmd/no-nodejs-modules
+  5:33  warning  'Buffer' is not defined                                                                                                                                              no-undef
+  5:56  warning  'Buffer' is not defined                                                                                                                                              no-undef
+
+C:\Data\01-Code\nand\src\platform\obsidian\weread\widget-data.ts
+  73:28  warning  Use 'window.setTimeout()' instead of 'setTimeout()' for popout window compatibility  obsidianmd/prefer-window-timers
+
+C:\Data\01-Code\nand\src\platform\terminal-server\binary-download-urls.ts
+  18:13  warning  'NodeJS' is not defined   no-undef
+  29:39  warning  'process' is not defined  no-undef
+  30:31  warning  'process' is not defined  no-undef
+
+C:\Data\01-Code\nand\src\platform\terminal-server\binary-downloader.ts
+  187:20  warning  'process' is not defined  no-undef
+  188:16  warning  'process' is not defined  no-undef
+  298:8   warning  'process' is not defined  no-undef
+  421:34  warning  'Buffer' is not defined   no-undef
+  533:26  warning  'NodeJS' is not defined   no-undef
+  591:34  warning  'Buffer' is not defined   no-undef
+  619:38  warning  'Buffer' is not defined   no-undef
+
+C:\Data\01-Code\nand\src\platform\terminal-server\server-manager.ts
+   36:10  warning  'NodeJS' is not defined   no-undef
+  387:9   warning  'process' is not defined  no-undef
+  388:12  warning  'process' is not defined  no-undef
+  437:20  warning  'process' is not defined  no-undef
+  438:16  warning  'process' is not defined  no-undef
+  544:7   warning  'process' is not defined  no-undef
+  581:27  warning  'Buffer' is not defined   no-undef
+  951:31  warning  'NodeJS' is not defined   no-undef
+
+C:\Data\01-Code\nand\src\plugin\modules\terminal\controller.ts
+  1344:27  warning  Use 'activeDocument.createDiv()' instead of 'activeDocument.createElement('div')'            obsidianmd/prefer-create-el
+  1616:16  warning  Use 'activeDocument.createDiv()' instead of 'activeDocument.createElement('div')'            obsidianmd/prefer-create-el
+  1620:18  warning  Use 'activeDocument.createDiv()' instead of 'activeDocument.createElement('div')'            obsidianmd/prefer-create-el
+  1655:23  warning  Use 'activeDocument.createDiv()' instead of 'activeDocument.createElement('div')'            obsidianmd/prefer-create-el
+  1666:20  warning  Use 'activeDocument.createDiv()' instead of 'activeDocument.createElement('div')'            obsidianmd/prefer-create-el
+  1669:19  warning  Use 'activeDocument.createDiv()' instead of 'activeDocument.createElement('div')'            obsidianmd/prefer-create-el
+  1805:18  warning  Use 'activeDocument.createDiv()' instead of 'activeDocument.createElement('div')'            obsidianmd/prefer-create-el
+  1808:19  warning  Use 'activeDocument.createDiv()' instead of 'activeDocument.createElement('div')'            obsidianmd/prefer-create-el
+  1851:15  warning  Use 'activeDocument.createDiv()' instead of 'activeDocument.createElement('div')'            obsidianmd/prefer-create-el
+  1860:16  warning  Use 'activeDocument.createDiv()' instead of 'activeDocument.createElement('div')'            obsidianmd/prefer-create-el
+  1872:16  warning  Use 'activeDocument.createDiv()' instead of 'activeDocument.createElement('div')'            obsidianmd/prefer-create-el
+  1876:18  warning  Use 'activeDocument.createDiv()' instead of 'activeDocument.createElement('div')'            obsidianmd/prefer-create-el
+  1881:19  warning  Use 'activeDocument.createDiv()' instead of 'activeDocument.createElement('div')'            obsidianmd/prefer-create-el
+  1886:16  warning  Use 'activeDocument.createSpan()' instead of 'activeDocument.createElement('span')'          obsidianmd/prefer-create-el
+  1921:16  warning  Use 'activeDocument.createDiv()' instead of 'activeDocument.createElement('div')'            obsidianmd/prefer-create-el
+  1927:18  warning  Use 'activeDocument.createDiv()' instead of 'activeDocument.createElement('div')'            obsidianmd/prefer-create-el
+  1932:19  warning  Use 'activeDocument.createDiv()' instead of 'activeDocument.createElement('div')'            obsidianmd/prefer-create-el
+  1968:21  warning  Use 'activeDocument.createEl('button')' instead of 'activeDocument.createElement('button')'  obsidianmd/prefer-create-el
+  2081:17  warning  Use 'activeDocument.createSpan()' instead of 'activeDocument.createElement('span')'          obsidianmd/prefer-create-el
+  2363:17  warning  Use 'activeDocument.createDiv()' instead of 'activeDocument.createElement('div')'            obsidianmd/prefer-create-el
+  2369:23  warning  Use 'activeDocument.createDiv()' instead of 'activeDocument.createElement('div')'            obsidianmd/prefer-create-el
+  2374:19  warning  Use 'activeDocument.createDiv()' instead of 'activeDocument.createElement('div')'            obsidianmd/prefer-create-el
+  2379:20  warning  Use 'activeDocument.createDiv()' instead of 'activeDocument.createElement('div')'            obsidianmd/prefer-create-el
+  2389:22  warning  Use 'activeDocument.createDiv()' instead of 'activeDocument.createElement('div')'            obsidianmd/prefer-create-el
+  2392:20  warning  Use 'activeDocument.createEl('button')' instead of 'activeDocument.createElement('button')'  obsidianmd/prefer-create-el
+  2405:23  warning  Use 'activeDocument.createEl('button')' instead of 'activeDocument.createElement('button')'  obsidianmd/prefer-create-el
+
+C:\Data\01-Code\nand\src\plugin\modules\terminal\window-navigation.ts
+  351:50  warning  'NodeJS' is not defined   no-undef
+  352:58  warning  'NodeJS' is not defined   no-undef
+  356:31  warning  'NodeJS' is not defined   no-undef
+  358:11  warning  'require' is not defined  no-undef
+  364:54  warning  'NodeJS' is not defined   no-undef
+  373:45  warning  'NodeJS' is not defined   no-undef
+  381:51  warning  'NodeJS' is not defined   no-undef
+
+C:\Data\01-Code\nand\src\view\dashboard\ui\file-suggest.ts
+   92:61  warning  Avoid using 'globalThis'. Use 'window' or 'activeWindow' for popout window compatibility  obsidianmd/no-global-this
+  305:43  warning  Avoid using 'globalThis'. Use 'window' or 'activeWindow' for popout window compatibility  obsidianmd/no-global-this
+
+C:\Data\01-Code\nand\src\view\editor\copy\collect.ts
+   5:35  warning  `activeLeaf` is deprecated. The use of this field is discouraged.
+The recommended alternatives are:
+- If you need information about the current view, use {@link Workspace.getActiveViewOfType}.
+- If you need to open a new file or navigate a view, use {@link Workspace.getLeaf}  @typescript-eslint/no-deprecated
+  65:56  warning  'process' is not defined                                                                                                                                                                                                                                                             no-undef
+
+C:\Data\01-Code\nand\src\view\terminal\preset-script-icons.ts
+  230:14  warning  Use 'activeDocument.createSvg('svg')' instead of 'activeDocument.createElementNS('http://www.w3.org/2000/svg', 'svg')'    obsidianmd/prefer-create-el
+  236:16  warning  Use 'activeDocument.createSvg('path')' instead of 'activeDocument.createElementNS('http://www.w3.org/2000/svg', 'path')'  obsidianmd/prefer-create-el
+  311:15  warning  Use 'activeDocument.createSvg('svg')' instead of 'activeDocument.createElementNS('http://www.w3.org/2000/svg', 'svg')'    obsidianmd/prefer-create-el
+  315:16  warning  Use 'activeDocument.createSvg('path')' instead of 'activeDocument.createElementNS('http://www.w3.org/2000/svg', 'path')'  obsidianmd/prefer-create-el
+
+C:\Data\01-Code\nand\src\view\terminal\runtime\terminal-instance.ts
+  112:6  warning  'NativeTerminalStatus' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Data\01-Code\nand\src\view\terminal\settings\renderer.ts
+   512:7  warning  `setDynamicTooltip` is deprecated. The value is now always shown inline next to the slider  @typescript-eslint/no-deprecated
+  1335:7  warning  `setDynamicTooltip` is deprecated. The value is now always shown inline next to the slider  @typescript-eslint/no-deprecated
+  1424:7  warning  `setDynamicTooltip` is deprecated. The value is now always shown inline next to the slider  @typescript-eslint/no-deprecated
+  1445:7  warning  `setDynamicTooltip` is deprecated. The value is now always shown inline next to the slider  @typescript-eslint/no-deprecated
+
+C:\Data\01-Code\nand\src\view\terminal\terminal-view.ts
+  1047:16  warning  'process' is not defined                                                           no-undef
+  1419:19  warning  Use 'activeDocument.createDiv()' instead of 'activeDocument.createElement('div')'  obsidianmd/prefer-create-el
+
+✖ 149 problems (0 errors, 149 warnings)
+  0 errors and 38 warnings potentially fixable with the `--fix` option.
+

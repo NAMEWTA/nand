@@ -1,3 +1,0 @@
-{"error":"Error: 请先手动启动一次该智能体，确认已配置的权限模式","cwdChecks":0,"configuredCli":"/nonexistent/nand-probe-cli"}
-#38 missing CLI and cwd must not be masked by permission confirmation
-elapsed_ms=141

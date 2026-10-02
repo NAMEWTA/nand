@@ -1,3 +1,4 @@
+import { bindLocalizedElement } from '../../primitives/localized-dom';
 import { App, TFile } from 'obsidian';
 import type { LibraryConfig, PropertyFilter } from '../../../core/dashboard/types/index';
 import { isUnderExcludedFolder, normalizeExcludeFolders } from '../../../shared/exclude-folders';
@@ -72,7 +73,7 @@ export function renderTagsSelector(
 ): void {
 	container.empty();
 	if (allTags.length === 0) {
-		container.createDiv({ cls: 'dashboard-library-filter-empty', text: t('library.noTags') });
+		bindLocalizedElement(container.createDiv({ cls: 'dashboard-library-filter-empty', text: t('library.noTags') }), 'library.noTags');
 		return;
 	}
 	for (const tag of allTags) {
@@ -345,8 +346,8 @@ export function showCalendarPopup(
 	const statusLine = popup.createDiv({ cls: 'dashboard-library-calendar-status' });
 
 	const btnRow = popup.createDiv({ cls: 'dashboard-task-reminder-popup-btns' });
-	btnRow.createEl('button', { cls: 'mod-cta', text: t('common.save') });
-	btnRow.createEl('button', { text: t('common.cancel') });
+	bindLocalizedElement(btnRow.createEl('button', { cls: 'mod-cta', text: t('common.save') }), 'common.save');
+	bindLocalizedElement(btnRow.createEl('button', { text: t('common.cancel') }), 'common.cancel');
 
 	const fmt = (y: number, m: number, d: number) =>
 		`${y}-${String(m + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;

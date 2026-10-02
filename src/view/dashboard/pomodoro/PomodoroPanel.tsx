@@ -1,3 +1,4 @@
+import { SaveStatus } from '../../primitives/SaveStatus';
 import { useLayoutEffect, useRef, useState } from 'preact/hooks';
 import type { DashboardSettings } from '../../../core/dashboard/types/index';
 import { activityColor, type PomodoroService } from '../../../platform/obsidian/pomodoro/pomodoro-service';
@@ -103,6 +104,7 @@ export function PomodoroPanel({
 	const circumference = 2 * Math.PI * 33;
 	return (
 		<>
+			<SaveStatus source={service} />
 			<div class="dashboard-sidebar-pomodoro-top">
 				<div class="dashboard-sidebar-pomodoro-stats-hint">
 					🍅 {t('pomodoro.today')} {service.getTodayCount()}

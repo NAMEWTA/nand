@@ -11,7 +11,9 @@ export function translatedLeafTitle(
 	stored: string | undefined,
 	pairs: readonly LeafTitlePair[],
 	language: Language,
+	placeholder?: { type: string; title: string },
 ): string | undefined {
+	if (placeholder && stored === placeholder.type) return placeholder.title;
 	if (!stored) return undefined;
 	const matches = pairs.filter((pair) => stored === pair.en || stored === pair.zh);
 	if (matches.length !== 1) return undefined;
@@ -37,10 +39,11 @@ export function retitleDeferredLeaves(
 	pairs: readonly LeafTitlePair[],
 	language: Language,
 	refresh: (leaf: WorkspaceLeaf) => void,
+	placeholder?: { type: string; title: string },
 ): void {
 	for (const leaf of leaves) {
 		if (!leaf.isDeferred) continue;
-		const next = translatedLeafTitle(storedLeafTitle(leaf), pairs, language);
+		const next = translatedLeafTitle(storedLeafTitle(leaf), pairs, language, placeholder);
 		if (!next || !setDeferredLeafTitle(leaf, next)) continue;
 		refresh(leaf);
 	}

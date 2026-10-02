@@ -32,6 +32,7 @@ export interface ArchiveRecord {
 	id: string;
 	kind: RecordKind;
 	path: string;
+	folderPath: string;
 	fields: Fields;
 	employments: EmploymentRecord[];
 	relations: PersonRelation[];
@@ -58,6 +59,7 @@ export function newRecord(kind: RecordKind): ArchiveRecord {
 		id: crypto.randomUUID(),
 		kind,
 		path: '',
+		folderPath: '',
 		fields: {
 			name: '',
 			birthday: '',
@@ -103,7 +105,7 @@ export function validateRecord(record: ArchiveRecord): void {
 			(job.start && job.end && job.start.slice(0, 7) > job.end.slice(0, 7)) ||
 			(job.start.length === job.end.length && job.start > job.end && !!job.end)
 		)
-			throw new ContactsError('invalidDate');
+			throw new ContactsError('invalidDate', !validDate(job.start) ? 'start' : 'end');
 		if (job.status === 'current' && job.end) throw new ContactsError('currentEnd');
 	}
 	for (const relation of record.relations) {

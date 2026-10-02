@@ -1,6 +1,7 @@
 import type { ContactsIndex, ContactsQuery } from '../../core/contacts/index-store';
 import type { ArchiveRecord, RecordKind } from '../../core/contacts/model';
 import type { EditScope } from './forms';
+import type { ArchiveResource } from '../../core/contacts/resources';
 
 export interface ContactsPanelState {
 	query: ContactsQuery;
@@ -33,4 +34,9 @@ export interface ContactsPanelHost {
 	edit(record: ArchiveRecord, scope: EditScope, id?: string): void;
 	deleteRow(record: ArchiveRecord, scope: 'employment' | 'relation', id: string): void;
 	more(record: ArchiveRecord): void;
+	resources(record: ArchiveRecord): ArchiveResource[];
+	newNote(record: ArchiveRecord): void;
+	addResources(record: ArchiveRecord, files?: File[]): void;
+	openResource(path: string): void;
+	revealFolder(record: ArchiveRecord): void;
 }

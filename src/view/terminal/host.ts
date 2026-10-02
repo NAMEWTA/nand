@@ -1,4 +1,5 @@
 import type { App, WorkspaceLeaf } from 'obsidian';
+import type { ContextMaterial } from '../../core/agent-launch/session-api';
 import type { AgentId } from '../../core/agent-launch/types';
 import type { VaultSession } from '../../core/ai-vault/types';
 import type { PresetScript, TerminalSettings } from '../../core/pty/settings';
@@ -17,6 +18,8 @@ export interface WorkbenchHost {
 	resumeSession(session: VaultSession): Promise<void>;
 }
 export interface TerminalViewHost extends WorkbenchHost {
+	pickContextMaterial?(): Promise<ContextMaterial | null>;
+	attachContext?(id: string, materials: readonly ContextMaterial[], signal?: AbortSignal): Promise<void>;
 	getTerminalRenderer(session: PtySession): Promise<TerminalInstance>;
 	recordActiveSession(id: string): void;
 	showSessionSwitcher(view: TerminalView): void;

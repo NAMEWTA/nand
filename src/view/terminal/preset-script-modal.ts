@@ -2,10 +2,13 @@
  * Preset workflow edit modal
  */
 
+import { bindLocalizedElement, bindLocalizedControl } from '../primitives/localized-dom';
 import type { App } from 'obsidian';
 import { Modal, Setting, ToggleComponent, setIcon } from 'obsidian';
 import type { PresetScript, PresetWorkflowAction, PresetWorkflowActionType } from '../../core/pty/settings';
 import { t } from '../../shared/i18n/terminal-accessor';
+import { onLanguageChanged } from '../../shared/i18n';
+import { repaintLocalizedForm } from '../primitives/localized-form';
 import {
 	listObsidianCommandOptions,
 	searchObsidianCommandOptions,
@@ -22,24 +25,26 @@ type ActionOption = {
 const ACTION_OPTIONS: ActionOption[] = [
 	{
 		value: 'terminal-command',
-		label: 'Terminal command',
-		placeholder: 'e.g., git status',
+		label: 'workflow.terminalCommand',
+		placeholder: 'workflow.terminalExample',
 	},
 	{
 		value: 'obsidian-command',
-		label: 'Obsidian command ID',
-		placeholder: 'e.g., save / workspace:save',
+		label: 'workflow.obsidianCommand',
+		placeholder: 'workflow.obsidianExample',
 	},
 	{
 		value: 'open-external',
-		label: 'Open external URL',
-		placeholder: 'e.g., https://obsidian.md',
+		label: 'workflow.openExternal',
+		placeholder: 'workflow.urlExample',
 	},
 ];
 
 const COMMAND_SUGGESTION_LIMIT = 50;
 
 export class PresetScriptModal extends Modal {
+	private languageCleanup?: () => void;
+	private focusTimer?: number;
 	private readonly builtInPresetIds = new Set(['claude-code', 'codex', 'opencode']);
 	private draft: PresetScript;
 	private onSubmit: (script: PresetScript) => void;
@@ -69,6 +74,16 @@ export class PresetScriptModal extends Modal {
 	}
 
 	onOpen(): void {
+		this.draw();
+		this.languageCleanup = onLanguageChanged(() => repaintLocalizedForm(this.contentEl, () => this.draw()));
+		this.focusTimer = this.contentEl.win.setTimeout(() => {
+			this.nameInput?.focus();
+			this.nameInput?.select();
+		}, 10);
+	}
+	private draw(): void {
+		if (this.outsideClickHandler) this.contentEl.ownerDocument.removeEventListener('click', this.outsideClickHandler);
+		this.iconPickerButtons.clear();
 		const { contentEl, modalEl } = this;
 		modalEl.addClass('preset-script-modal');
 		contentEl.empty();
@@ -76,15 +91,15 @@ export class PresetScriptModal extends Modal {
 
 		const titleEl = contentEl.createDiv({ cls: 'modal-title' });
 		const titleRow = titleEl.createDiv({ cls: 'preset-script-modal-title-row' });
-		titleRow.createDiv({
+		bindLocalizedElement(titleRow.createDiv({
 			cls: 'modal-title-text',
 			text: this.isNew ? t('modals.presetScript.titleCreate') : t('modals.presetScript.titleEdit'),
-		});
+		}), this.isNew ? ('terminalAgent.modals.presetScript.titleCreate') : ('terminalAgent.modals.presetScript.titleEdit'), (this.isNew) ? (undefined) : (undefined));
 		if (this.isBuiltInPreset()) {
-			titleRow.createDiv({
+			bindLocalizedElement(titleRow.createDiv({
 				cls: 'preset-script-built-in-badge',
 				text: t('common.builtIn'),
-			});
+			}), 'terminalAgent.common.builtIn');
 		}
 
 		const formEl = contentEl.createDiv({ cls: 'preset-script-form' });
@@ -95,10 +110,6 @@ export class PresetScriptModal extends Modal {
 		this.renderToggles(formEl);
 		this.renderButtons(contentEl);
 
-		window.setTimeout(() => {
-			this.nameInput?.focus();
-			this.nameInput?.select();
-		}, 10);
 	}
 
 	private renderNameField(formEl: HTMLElement): void {
@@ -149,17 +160,17 @@ export class PresetScriptModal extends Modal {
 
 	private renderActionsField(formEl: HTMLElement): void {
 		const field = formEl.createDiv({ cls: 'preset-script-field' });
-		field.createEl('label', {
+		bindLocalizedElement(field.createEl('label', {
 			cls: 'preset-script-label',
 			text: t('settingsDetails.terminal.presetScriptCommand'),
-		});
+		}), 'terminalAgent.settingsDetails.terminal.presetScriptCommand');
 		this.actionsContainer = field.createDiv({ cls: 'preset-workflow-actions' });
 		this.renderActionRows();
 
-		const addActionBtn = field.createEl('button', {
+		const addActionBtn = bindLocalizedElement(field.createEl('button', {
 			cls: 'preset-workflow-action-add',
-			text: 'Add action',
-		});
+			text: t('workflow.addAction'),
+		}), 'terminalAgent.workflow.addAction');
 		addActionBtn.setAttribute('type', 'button');
 		addActionBtn.addEventListener('click', () => {
 			this.draft.actions.push(this.createEmptyAction());
@@ -168,27 +179,27 @@ export class PresetScriptModal extends Modal {
 	}
 
 	private renderToggles(formEl: HTMLElement): void {
-		new Setting(formEl)
-			.setName(t('settingsDetails.terminal.presetScriptShowInStatusBar'))
-			.setDesc(t('settingsDetails.terminal.presetScriptShowInStatusBarDesc'))
+		bindLocalizedControl(bindLocalizedControl(new Setting(formEl)
+			.setName(t('settingsDetails.terminal.presetScriptShowInStatusBar')), "name", 'terminalAgent.settingsDetails.terminal.presetScriptShowInStatusBar')
+			.setDesc(t('settingsDetails.terminal.presetScriptShowInStatusBarDesc')), "desc", 'terminalAgent.settingsDetails.terminal.presetScriptShowInStatusBarDesc')
 			.addToggle((toggle) =>
 				toggle.setValue(this.draft.showInStatusBar).onChange((value) => {
 					this.draft.showInStatusBar = value;
 				}),
 			);
 
-		new Setting(formEl)
-			.setName(t('settingsDetails.terminal.presetScriptAutoOpenTerminal'))
-			.setDesc(t('settingsDetails.terminal.presetScriptAutoOpenTerminalDesc'))
+		bindLocalizedControl(bindLocalizedControl(new Setting(formEl)
+			.setName(t('settingsDetails.terminal.presetScriptAutoOpenTerminal')), "name", 'terminalAgent.settingsDetails.terminal.presetScriptAutoOpenTerminal')
+			.setDesc(t('settingsDetails.terminal.presetScriptAutoOpenTerminalDesc')), "desc", 'terminalAgent.settingsDetails.terminal.presetScriptAutoOpenTerminalDesc')
 			.addToggle((toggle) =>
 				toggle.setValue(this.draft.autoOpenTerminal).onChange((value) => {
 					this.draft.autoOpenTerminal = value;
 				}),
 			);
 
-		new Setting(formEl)
-			.setName(t('settingsDetails.terminal.presetScriptRunInNewTerminal'))
-			.setDesc(t('settingsDetails.terminal.presetScriptRunInNewTerminalDesc'))
+		bindLocalizedControl(bindLocalizedControl(new Setting(formEl)
+			.setName(t('settingsDetails.terminal.presetScriptRunInNewTerminal')), "name", 'terminalAgent.settingsDetails.terminal.presetScriptRunInNewTerminal')
+			.setDesc(t('settingsDetails.terminal.presetScriptRunInNewTerminalDesc')), "desc", 'terminalAgent.settingsDetails.terminal.presetScriptRunInNewTerminalDesc')
 			.addToggle((toggle) =>
 				toggle.setValue(this.draft.runInNewTerminal).onChange((value) => {
 					this.draft.runInNewTerminal = value;
@@ -199,16 +210,16 @@ export class PresetScriptModal extends Modal {
 	private renderButtons(contentEl: HTMLElement): void {
 		const buttonContainer = contentEl.createDiv({ cls: 'modal-button-container' });
 
-		const cancelBtn = buttonContainer.createEl('button', {
+		const cancelBtn = bindLocalizedElement(buttonContainer.createEl('button', {
 			cls: 'mod-cancel',
 			text: t('common.cancel'),
-		});
+		}), 'terminalAgent.common.cancel');
 		cancelBtn.addEventListener('click', () => this.close());
 
-		const confirmBtn = buttonContainer.createEl('button', {
+		const confirmBtn = bindLocalizedElement(buttonContainer.createEl('button', {
 			cls: 'mod-cta',
 			text: t('common.save'),
-		});
+		}), 'terminalAgent.common.save');
 		confirmBtn.addEventListener('click', () => this.submit());
 	}
 
@@ -222,10 +233,10 @@ export class PresetScriptModal extends Modal {
 
 		const actions = this.draft.actions;
 		if (actions.length === 0) {
-			this.actionsContainer.createDiv({
+			bindLocalizedElement(this.actionsContainer.createDiv({
 				cls: 'preset-workflow-action-empty',
 				text: t('settingsDetails.terminal.presetScriptsEmptyCommand'),
-			});
+			}), 'terminalAgent.settingsDetails.terminal.presetScriptsEmptyCommand');
 			return;
 		}
 
@@ -281,14 +292,14 @@ export class PresetScriptModal extends Modal {
 	}
 
 	private renderActionNoteInput(row: HTMLElement, action: PresetWorkflowAction): void {
-		const noteInput = row.createEl('textarea', {
+		const noteInput = bindLocalizedElement(bindLocalizedElement(row.createEl('textarea', {
 			cls: 'preset-workflow-action-note',
 			attr: {
 				rows: '2',
 				placeholder: t('settingsDetails.terminal.presetScriptActionNotePlaceholder'),
 				'aria-label': t('settingsDetails.terminal.presetScriptActionNote'),
 			},
-		});
+		}), 'terminalAgent.settingsDetails.terminal.presetScriptActionNotePlaceholder', undefined, "placeholder"), 'terminalAgent.settingsDetails.terminal.presetScriptActionNote', undefined, "aria-label");
 		noteInput.value = action.note ?? '';
 		noteInput.addEventListener('input', () => {
 			action.note = noteInput.value;
@@ -522,7 +533,7 @@ export class PresetScriptModal extends Modal {
 
 	private renderActionTypeOptions(select: HTMLSelectElement, current: PresetWorkflowActionType): void {
 		ACTION_OPTIONS.forEach((option) => {
-			const optionEl = select.createEl('option', { value: option.value, text: option.label });
+			const optionEl = bindLocalizedElement(select.createEl('option', { value: option.value, text: t(option.label) }), "terminalAgent." + (option.label));
 			optionEl.selected = option.value === current;
 		});
 	}
@@ -549,7 +560,7 @@ export class PresetScriptModal extends Modal {
 
 	private getActionPlaceholder(type: PresetWorkflowActionType): string {
 		const matched = ACTION_OPTIONS.find((option) => option.value === type);
-		return matched?.placeholder ?? '';
+		return matched ? t(matched.placeholder) : '';
 	}
 
 	private createEmptyAction(): PresetWorkflowAction {
@@ -661,7 +672,7 @@ export class PresetScriptModal extends Modal {
 				this.closeIconPicker();
 			}
 		};
-		activeDocument.addEventListener('click', this.outsideClickHandler);
+		this.contentEl.ownerDocument.addEventListener('click', this.outsideClickHandler);
 	}
 
 	private updateIconPickerSelection(): void {
@@ -741,6 +752,8 @@ export class PresetScriptModal extends Modal {
 	}
 
 	onClose(): void {
+		this.languageCleanup?.();
+		if (this.focusTimer !== undefined) this.contentEl.win.clearTimeout(this.focusTimer);
 		const { contentEl } = this;
 		contentEl.empty();
 		this.nameInput = null;
@@ -757,7 +770,7 @@ export class PresetScriptModal extends Modal {
 		this.actionsContainer = null;
 		this.obsidianCommandOptions = [];
 		if (this.outsideClickHandler) {
-			activeDocument.removeEventListener('click', this.outsideClickHandler);
+			this.contentEl.ownerDocument.removeEventListener('click', this.outsideClickHandler);
 			this.outsideClickHandler = null;
 		}
 	}

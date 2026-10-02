@@ -1,3 +1,4 @@
+import { SaveStatus } from '../../primitives/SaveStatus';
 import { Notice } from 'obsidian';
 import { useLayoutEffect, useRef, useState } from 'preact/hooks';
 import {
@@ -151,6 +152,7 @@ export function ExpenseLedgerPanel({ service, close }: { service: ExpenseService
 	};
 	return (
 		<>
+			<SaveStatus source={service} />
 			<div class="dashboard-expense-stats-header">
 				<div class="dashboard-expense-stats-header-title">{t('expense.ledger.title')}</div>
 				<button class="dashboard-expense-stats-close" onClick={close} aria-label={t('common.close')}>

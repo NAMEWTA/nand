@@ -1,3 +1,4 @@
+import { bindLocalizedElement } from '../../primitives/localized-dom';
 import type { App } from 'obsidian';
 import { t } from '../../../shared/i18n/index';
 import { applyModalTheme } from '../appearance/modal-theme';
@@ -51,10 +52,10 @@ export function showConfirmDialog(app: App | undefined, options: ConfirmOptions)
 			done(value);
 		};
 
-		const cancelBtn = actions.createEl('button', {
+		const cancelBtn = bindLocalizedElement(actions.createEl('button', {
 			text: t('common.cancel'),
 			cls: 'dashboard-confirm-cancel',
-		});
+		}), 'common.cancel');
 		cancelBtn.addEventListener('click', () => close(false));
 
 		const confirmBtn = actions.createEl('button', {

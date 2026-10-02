@@ -2,9 +2,10 @@
  *  Open products sit on one top row. Section ids are the order stacked on that tab. */
 
 export type SettingsProduct =
-	'home' | 'dashboard' | 'editor' | 'terminal' | 'iconic' | 'contacts' | 'automation' | 'sync';
+	'home' | 'dashboard' | 'browser' | 'editor' | 'terminal' | 'iconic' | 'contacts' | 'automation' | 'sync';
 
 export type SettingsPage =
+	| 'browser-preferences'
 	| 'contacts-storage'
 	| 'home'
 	| 'general'
@@ -32,10 +33,11 @@ export type SettingsPage =
 export const secondaryAxis = 'vertical' as const;
 
 export function productOrder(): SettingsProduct[] {
-	return ['home', 'dashboard', 'editor', 'terminal', 'iconic', 'contacts', 'automation', 'sync'];
+	return ['home', 'dashboard', 'browser', 'editor', 'terminal', 'iconic', 'contacts', 'automation', 'sync'];
 }
 
 export interface ModuleGates {
+	browser: boolean;
 	dashboard: boolean;
 	editor: boolean;
 	terminal: boolean;
@@ -54,6 +56,7 @@ export function visibleProducts(modules: ModuleGates): SettingsProduct[] {
 
 /** Section order stacked on a product tab. Home and sync have no extra sections. */
 export function sidePages(product: SettingsProduct): SettingsPage[] {
+	if (product === 'browser') return ['browser-preferences'];
 	if (product === 'dashboard') return ['general', 'widgets', 'coffee'];
 	if (product === 'editor') return ['comments', 'copy'];
 	if (product === 'contacts') return ['contacts-storage'];
@@ -73,6 +76,7 @@ export function sidePages(product: SettingsProduct): SettingsPage[] {
 }
 
 export function defaultPage(product: SettingsProduct): SettingsPage {
+	if (product === 'browser') return 'browser-preferences';
 	if (product === 'editor') return 'comments';
 	if (product === 'contacts') return 'contacts-storage';
 	if (product === 'terminal') return 'shell';

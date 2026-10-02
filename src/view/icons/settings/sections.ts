@@ -1,3 +1,5 @@
+import { bindLocalizedOptions } from '../../primitives/localized-dom';
+import { bindLocalizedControl } from '../../primitives/localized-dom';
 import { ExtraButtonComponent, Platform, requireApiVersion, SettingDefinitionGroup, SettingGroup } from 'obsidian';
 import type { FileItem } from '../../../core/icons/types';
 import type IconicController from '../../../platform/obsidian/icons/host/controller';
@@ -48,7 +50,7 @@ export class IconicSettingsSections {
 				desc: STRINGS.settings.rulebook.desc,
 				render: (setting) => {
 					setting.addButton((button) => {
-						button.setButtonText(STRINGS.settings.manage).onClick(() => {
+						bindLocalizedControl(button.setButtonText(STRINGS.settings.manage), "buttonText", "iconic.settings.manage").onClick(() => {
 							// Silently no-op if rulebook hasn't finished loading
 							if (!this.plugin.ruleManager) return;
 
@@ -70,13 +72,13 @@ export class IconicSettingsSections {
 							this.biggerIconsIndicator = indicator;
 						})
 						.addDropdown((dropdown) => {
-							dropdown
+							bindLocalizedOptions(dropdown
 								.addOptions({
 									on: STRINGS.settings.values.on,
 									desktop: STRINGS.settings.values.desktop,
 									mobile: STRINGS.settings.values.mobile,
 									off: STRINGS.settings.values.off,
-								})
+								}), {on: ["iconic.settings.values.on"], desktop: ["iconic.settings.values.desktop"], mobile: ["iconic.settings.values.mobile"], off: ["iconic.settings.values.off"]})
 								.setValue(this.plugin.settings.biggerIcons)
 								.onChange((value) => {
 									this.refreshIndicator(this.biggerIconsIndicator, value);
@@ -104,13 +106,13 @@ export class IconicSettingsSections {
 							this.clickableIconsIndicator = indicator;
 						})
 						.addDropdown((dropdown) => {
-							dropdown
+							bindLocalizedOptions(dropdown
 								.addOptions({
 									on: STRINGS.settings.values.on,
 									desktop: STRINGS.settings.values.desktop,
 									mobile: STRINGS.settings.values.mobile,
 									off: STRINGS.settings.values.off,
-								})
+								}), {on: ["iconic.settings.values.on"], desktop: ["iconic.settings.values.desktop"], mobile: ["iconic.settings.values.mobile"], off: ["iconic.settings.values.off"]})
 								.setValue(this.plugin.settings.clickableIcons)
 								.onChange((value) => {
 									this.refreshIndicator(this.clickableIconsIndicator, value);
@@ -309,13 +311,13 @@ export class IconicSettingsSections {
 							this.showItemNameIndicator = indicator;
 						})
 						.addDropdown((dropdown) => {
-							dropdown
+							bindLocalizedOptions(dropdown
 								.addOptions({
 									on: STRINGS.settings.values.on,
 									desktop: STRINGS.settings.values.desktop,
 									mobile: STRINGS.settings.values.mobile,
 									off: STRINGS.settings.values.off,
-								})
+								}), {on: ["iconic.settings.values.on"], desktop: ["iconic.settings.values.desktop"], mobile: ["iconic.settings.values.mobile"], off: ["iconic.settings.values.off"]})
 								.setValue(this.plugin.settings.showItemName)
 								.onChange((value) => {
 									this.refreshIndicator(this.showItemNameIndicator, value);
@@ -338,13 +340,13 @@ export class IconicSettingsSections {
 							this.useSearchKeywordsIndicator = indicator;
 						})
 						.addDropdown((dropdown) => {
-							dropdown
+							bindLocalizedOptions(dropdown
 								.addOptions({
 									on: STRINGS.settings.values.on,
 									desktop: STRINGS.settings.values.desktop,
 									mobile: STRINGS.settings.values.mobile,
 									off: STRINGS.settings.values.off,
-								})
+								}), {on: ["iconic.settings.values.on"], desktop: ["iconic.settings.values.desktop"], mobile: ["iconic.settings.values.mobile"], off: ["iconic.settings.values.off"]})
 								.setValue(this.plugin.settings.useSearchKeywords)
 								.onChange((value) => {
 									this.refreshIndicator(this.useSearchKeywordsIndicator, value);
@@ -387,11 +389,11 @@ export class IconicSettingsSections {
 							this.colorPickerIndicator1 = indicator;
 						})
 						.addDropdown((dropdown) => {
-							dropdown
+							bindLocalizedOptions(dropdown
 								.addOptions({
 									list: STRINGS.settings.values.list,
 									rgb: STRINGS.settings.values.rgb,
-								})
+								}), {list: ["iconic.settings.values.list"], rgb: ["iconic.settings.values.rgb"]})
 								.setValue(this.plugin.settings.colorPicker1)
 								.onChange((value) => {
 									this.refreshIndicator(this.colorPickerIndicator1, value);
@@ -416,11 +418,11 @@ export class IconicSettingsSections {
 							this.colorPickerIndicator2 = indicator;
 						})
 						.addDropdown((dropdown) => {
-							dropdown
+							bindLocalizedOptions(dropdown
 								.addOptions({
 									list: STRINGS.settings.values.list,
 									rgb: STRINGS.settings.values.rgb,
-								})
+								}), {list: ["iconic.settings.values.list"], rgb: ["iconic.settings.values.rgb"]})
 								.setValue(this.plugin.settings.colorPicker2)
 								.onChange((value) => {
 									this.refreshIndicator(this.colorPickerIndicator2, value);
@@ -505,7 +507,7 @@ export class IconicSettingsSections {
 				desc: STRINGS.settings.viewUnusedIcons.desc,
 				render: (setting) => {
 					setting.addButton((button) => {
-						button.setButtonText(STRINGS.settings.manage).onClick(async () => {
+						bindLocalizedControl(button.setButtonText(STRINGS.settings.manage), "buttonText", "iconic.settings.manage").onClick(async () => {
 							const unusedIcons: FileItem[] = [];
 							for (const fileId of Object.keys(this.plugin.settings.fileIcons)) {
 								if (!(await this.app.vault.adapter.exists(fileId))) {
@@ -528,16 +530,16 @@ export class IconicSettingsSections {
 						.then((setting) => {
 							if (Platform.isDesktop)
 								setting.addExtraButton((button) => {
-									button
+									bindLocalizedControl(button
 										.setIcon('lucide-folder-open')
-										.setTooltip(STRINGS.settings.maxBackups.openPluginFolder)
+										.setTooltip(STRINGS.settings.maxBackups.openPluginFolder), "tooltip", "iconic.settings.maxBackups.openPluginFolder")
 										.onClick(() => {
 											internalApp(this.app).openWithDefaultApp(this.plugin.manifest.dir ?? '');
 										});
 								});
 						})
 						.addDropdown((dropdown) => {
-							dropdown
+							bindLocalizedOptions(dropdown
 								.addOptions({
 									0: STRINGS.settings.values.none,
 									1: '1',
@@ -549,7 +551,7 @@ export class IconicSettingsSections {
 									7: '7',
 									8: '8',
 									9: '9',
-								})
+								}), {0: ["iconic.settings.values.none"]})
 								.setValue(this.plugin.settings.maxBackups.toString())
 								.onChange((value) => {
 									this.plugin.settings.maxBackups = Number(value) || 0;
@@ -573,11 +575,11 @@ export class IconicSettingsSections {
 
 		// SETTING: Rulebook
 		groupTop.addSetting((setting) => {
-			setting
-				.setName(STRINGS.settings.rulebook.name)
-				.setDesc(STRINGS.settings.rulebook.desc)
+			bindLocalizedControl(bindLocalizedControl(setting
+				.setName(STRINGS.settings.rulebook.name), "name", "iconic.settings.rulebook.name")
+				.setDesc(STRINGS.settings.rulebook.desc), "desc", "iconic.settings.rulebook.desc")
 				.addButton((button) => {
-					button.setButtonText(STRINGS.settings.manage).onClick(() => {
+					bindLocalizedControl(button.setButtonText(STRINGS.settings.manage), "buttonText", "iconic.settings.manage").onClick(() => {
 						// Silently no-op if rulebook hasn't finished loading
 						if (!this.plugin.ruleManager) return;
 
@@ -589,21 +591,21 @@ export class IconicSettingsSections {
 
 		// SETTING: Bigger icons
 		groupTop.addSetting((setting) => {
-			setting
-				.setName(STRINGS.settings.biggerIcons.name)
-				.setDesc(STRINGS.settings.biggerIcons.desc)
+			bindLocalizedControl(bindLocalizedControl(setting
+				.setName(STRINGS.settings.biggerIcons.name), "name", "iconic.settings.biggerIcons.name")
+				.setDesc(STRINGS.settings.biggerIcons.desc), "desc", "iconic.settings.biggerIcons.desc")
 				.addExtraButton((indicator) => {
 					indicator.extraSettingsEl.addClass('iconic-indicator');
 					this.biggerIconsIndicator = indicator;
 				})
 				.addDropdown((dropdown) => {
-					dropdown
+					bindLocalizedOptions(dropdown
 						.addOptions({
 							on: STRINGS.settings.values.on,
 							desktop: STRINGS.settings.values.desktop,
 							mobile: STRINGS.settings.values.mobile,
 							off: STRINGS.settings.values.off,
-						})
+						}), {on: ["iconic.settings.values.on"], desktop: ["iconic.settings.values.desktop"], mobile: ["iconic.settings.values.mobile"], off: ["iconic.settings.values.off"]})
 						.setValue(this.plugin.settings.biggerIcons)
 						.onChange((value) => {
 							this.refreshIndicator(this.biggerIconsIndicator, value);
@@ -617,29 +619,29 @@ export class IconicSettingsSections {
 
 		// SETTING: Clickable icons
 		groupTop.addSetting((setting) => {
-			setting
+			bindLocalizedControl(bindLocalizedControl(setting
 				.setName(
 					Platform.isDesktop
 						? STRINGS.settings.clickableIcons.nameDesktop
 						: STRINGS.settings.clickableIcons.nameMobile,
-				)
+				), "name", Platform.isDesktop ? ("iconic.settings.clickableIcons.nameDesktop") : ("iconic.settings.clickableIcons.nameMobile"), (Platform.isDesktop) ? (undefined) : (undefined))
 				.setDesc(
 					Platform.isDesktop
 						? STRINGS.settings.clickableIcons.descDesktop
 						: STRINGS.settings.clickableIcons.descMobile,
-				)
+				), "desc", Platform.isDesktop ? ("iconic.settings.clickableIcons.descDesktop") : ("iconic.settings.clickableIcons.descMobile"), (Platform.isDesktop) ? (undefined) : (undefined))
 				.addExtraButton((indicator) => {
 					indicator.extraSettingsEl.addClass('iconic-indicator');
 					this.clickableIconsIndicator = indicator;
 				})
 				.addDropdown((dropdown) => {
-					dropdown
+					bindLocalizedOptions(dropdown
 						.addOptions({
 							on: STRINGS.settings.values.on,
 							desktop: STRINGS.settings.values.desktop,
 							mobile: STRINGS.settings.values.mobile,
 							off: STRINGS.settings.values.off,
-						})
+						}), {on: ["iconic.settings.values.on"], desktop: ["iconic.settings.values.desktop"], mobile: ["iconic.settings.values.mobile"], off: ["iconic.settings.values.off"]})
 						.setValue(this.plugin.settings.clickableIcons)
 						.onChange((value) => {
 							this.refreshIndicator(this.clickableIconsIndicator, value);
@@ -659,9 +661,9 @@ export class IconicSettingsSections {
 
 		// SETTING: Show all file icons
 		groupSidebarsAndTabs.addSetting((setting) => {
-			setting
-				.setName(STRINGS.settings.showAllFileIcons.name)
-				.setDesc(STRINGS.settings.showAllFileIcons.desc)
+			bindLocalizedControl(bindLocalizedControl(setting
+				.setName(STRINGS.settings.showAllFileIcons.name), "name", "iconic.settings.showAllFileIcons.name")
+				.setDesc(STRINGS.settings.showAllFileIcons.desc), "desc", "iconic.settings.showAllFileIcons.desc")
 				.addToggle((toggle) => {
 					toggle.setValue(this.plugin.settings.showAllFileIcons).onChange((value) => {
 						this.plugin.settings.showAllFileIcons = value;
@@ -673,9 +675,9 @@ export class IconicSettingsSections {
 
 		// SETTING: Show all folder icons
 		groupSidebarsAndTabs.addSetting((setting) => {
-			setting
-				.setName(STRINGS.settings.showAllFolderIcons.name)
-				.setDesc(STRINGS.settings.showAllFolderIcons.desc)
+			bindLocalizedControl(bindLocalizedControl(setting
+				.setName(STRINGS.settings.showAllFolderIcons.name), "name", "iconic.settings.showAllFolderIcons.name")
+				.setDesc(STRINGS.settings.showAllFolderIcons.desc), "desc", "iconic.settings.showAllFolderIcons.desc")
 				.addToggle((toggle) => {
 					toggle.setValue(this.plugin.settings.showAllFolderIcons).onChange((value) => {
 						this.plugin.settings.showAllFolderIcons = value;
@@ -687,9 +689,9 @@ export class IconicSettingsSections {
 
 		// SETTING: Minimal folder icons
 		groupSidebarsAndTabs.addSetting((setting) => {
-			setting
-				.setName(STRINGS.settings.minimalFolderIcons.name)
-				.setDesc(STRINGS.settings.minimalFolderIcons.desc)
+			bindLocalizedControl(bindLocalizedControl(setting
+				.setName(STRINGS.settings.minimalFolderIcons.name), "name", "iconic.settings.minimalFolderIcons.name")
+				.setDesc(STRINGS.settings.minimalFolderIcons.desc), "desc", "iconic.settings.minimalFolderIcons.desc")
 				.addToggle((toggle) => {
 					toggle.setValue(this.plugin.settings.minimalFolderIcons).onChange((value) => {
 						this.plugin.settings.minimalFolderIcons = value;
@@ -701,9 +703,9 @@ export class IconicSettingsSections {
 
 		// SETTING: Show Markdown tab icons
 		groupSidebarsAndTabs.addSetting((setting) => {
-			setting
-				.setName(STRINGS.settings.showMarkdownTabIcons.name)
-				.setDesc(STRINGS.settings.showMarkdownTabIcons.desc)
+			bindLocalizedControl(bindLocalizedControl(setting
+				.setName(STRINGS.settings.showMarkdownTabIcons.name), "name", "iconic.settings.showMarkdownTabIcons.name")
+				.setDesc(STRINGS.settings.showMarkdownTabIcons.desc), "desc", "iconic.settings.showMarkdownTabIcons.desc")
 				.addToggle((toggle) => {
 					toggle.setValue(this.plugin.settings.showMarkdownTabIcons).onChange((value) => {
 						this.plugin.settings.showMarkdownTabIcons = value;
@@ -718,9 +720,9 @@ export class IconicSettingsSections {
 
 		// SETTING: Show title icons
 		groupEditor.addSetting((setting) => {
-			setting
-				.setName(STRINGS.settings.showTitleIcons.name)
-				.setDesc(STRINGS.settings.showTitleIcons.desc)
+			bindLocalizedControl(bindLocalizedControl(setting
+				.setName(STRINGS.settings.showTitleIcons.name), "name", "iconic.settings.showTitleIcons.name")
+				.setDesc(STRINGS.settings.showTitleIcons.desc), "desc", "iconic.settings.showTitleIcons.desc")
 				.addToggle((toggle) => {
 					toggle.setValue(this.plugin.settings.showTitleIcons).onChange((value) => {
 						this.plugin.settings.showTitleIcons = value;
@@ -732,9 +734,9 @@ export class IconicSettingsSections {
 
 		// SETTING: Show tag pill icons
 		groupEditor.addSetting((setting) => {
-			setting
-				.setName(STRINGS.settings.showTagPillIcons.name)
-				.setDesc(STRINGS.settings.showTagPillIcons.desc)
+			bindLocalizedControl(bindLocalizedControl(setting
+				.setName(STRINGS.settings.showTagPillIcons.name), "name", "iconic.settings.showTagPillIcons.name")
+				.setDesc(STRINGS.settings.showTagPillIcons.desc), "desc", "iconic.settings.showTagPillIcons.desc")
 				.addToggle((toggle) => {
 					toggle.setValue(this.plugin.settings.showTagPillIcons).onChange((value) => {
 						this.plugin.settings.showTagPillIcons = value;
@@ -751,9 +753,9 @@ export class IconicSettingsSections {
 
 		// SETTING: Show menu actions
 		groupMenusAndDialogs.addSetting((setting) => {
-			setting
-				.setName(STRINGS.settings.showMenuActions.name)
-				.setDesc(STRINGS.settings.showMenuActions.desc)
+			bindLocalizedControl(bindLocalizedControl(setting
+				.setName(STRINGS.settings.showMenuActions.name), "name", "iconic.settings.showMenuActions.name")
+				.setDesc(STRINGS.settings.showMenuActions.desc), "desc", "iconic.settings.showMenuActions.desc")
 				.addToggle((toggle) => {
 					toggle.setValue(this.plugin.settings.showMenuActions).onChange((value) => {
 						this.plugin.settings.showMenuActions = value;
@@ -765,9 +767,9 @@ export class IconicSettingsSections {
 
 		// SETTING: Show suggestion icons
 		groupMenusAndDialogs.addSetting((setting) => {
-			setting
-				.setName(STRINGS.settings.showSuggestionIcons.name)
-				.setDesc(STRINGS.settings.showSuggestionIcons.desc)
+			bindLocalizedControl(bindLocalizedControl(setting
+				.setName(STRINGS.settings.showSuggestionIcons.name), "name", "iconic.settings.showSuggestionIcons.name")
+				.setDesc(STRINGS.settings.showSuggestionIcons.desc), "desc", "iconic.settings.showSuggestionIcons.desc")
 				.addToggle((toggle) => {
 					toggle.setValue(this.plugin.settings.showSuggestionIcons).onChange((value) => {
 						this.plugin.settings.showSuggestionIcons = value;
@@ -778,9 +780,9 @@ export class IconicSettingsSections {
 
 		// SETTING: Show quick switcher icons
 		groupMenusAndDialogs.addSetting((setting) => {
-			setting
-				.setName(STRINGS.settings.showQuickSwitcherIcons.name)
-				.setDesc(STRINGS.settings.showQuickSwitcherIcons.desc)
+			bindLocalizedControl(bindLocalizedControl(setting
+				.setName(STRINGS.settings.showQuickSwitcherIcons.name), "name", "iconic.settings.showQuickSwitcherIcons.name")
+				.setDesc(STRINGS.settings.showQuickSwitcherIcons.desc), "desc", "iconic.settings.showQuickSwitcherIcons.desc")
 				.addToggle((toggle) => {
 					toggle.setValue(this.plugin.settings.showQuickSwitcherIcons).onChange((value) => {
 						this.plugin.settings.showQuickSwitcherIcons = value;
@@ -791,9 +793,9 @@ export class IconicSettingsSections {
 
 		// SETTING: Show “Move file” dialog icons
 		groupMenusAndDialogs.addSetting((setting) => {
-			setting
-				.setName(STRINGS.settings.showMoveFileIcons.name)
-				.setDesc(STRINGS.settings.showMoveFileIcons.desc)
+			bindLocalizedControl(bindLocalizedControl(setting
+				.setName(STRINGS.settings.showMoveFileIcons.name), "name", "iconic.settings.showMoveFileIcons.name")
+				.setDesc(STRINGS.settings.showMoveFileIcons.desc), "desc", "iconic.settings.showMoveFileIcons.desc")
 				.addToggle((toggle) => {
 					toggle.setValue(this.plugin.settings.showMoveFileIcons).onChange((value) => {
 						this.plugin.settings.showMoveFileIcons = value;
@@ -809,21 +811,21 @@ export class IconicSettingsSections {
 
 		// SETTING: Show item name
 		groupIconPicker.addSetting((setting) => {
-			setting
-				.setName(STRINGS.settings.showItemName.name)
-				.setDesc(STRINGS.settings.showItemName.desc)
+			bindLocalizedControl(bindLocalizedControl(setting
+				.setName(STRINGS.settings.showItemName.name), "name", "iconic.settings.showItemName.name")
+				.setDesc(STRINGS.settings.showItemName.desc), "desc", "iconic.settings.showItemName.desc")
 				.addExtraButton((indicator) => {
 					indicator.extraSettingsEl.addClass('iconic-indicator');
 					this.showItemNameIndicator = indicator;
 				})
 				.addDropdown((dropdown) => {
-					dropdown
+					bindLocalizedOptions(dropdown
 						.addOptions({
 							on: STRINGS.settings.values.on,
 							desktop: STRINGS.settings.values.desktop,
 							mobile: STRINGS.settings.values.mobile,
 							off: STRINGS.settings.values.off,
-						})
+						}), {on: ["iconic.settings.values.on"], desktop: ["iconic.settings.values.desktop"], mobile: ["iconic.settings.values.mobile"], off: ["iconic.settings.values.off"]})
 						.setValue(this.plugin.settings.showItemName)
 						.onChange((value) => {
 							this.refreshIndicator(this.showItemNameIndicator, value);
@@ -836,21 +838,21 @@ export class IconicSettingsSections {
 
 		// SETTING: Use search keywords
 		groupIconPicker.addSetting((setting) => {
-			setting
-				.setName(STRINGS.settings.useSearchKeywords.name)
-				.setDesc(STRINGS.settings.useSearchKeywords.desc)
+			bindLocalizedControl(bindLocalizedControl(setting
+				.setName(STRINGS.settings.useSearchKeywords.name), "name", "iconic.settings.useSearchKeywords.name")
+				.setDesc(STRINGS.settings.useSearchKeywords.desc), "desc", "iconic.settings.useSearchKeywords.desc")
 				.addExtraButton((indicator) => {
 					indicator.extraSettingsEl.addClass('iconic-indicator');
 					this.useSearchKeywordsIndicator = indicator;
 				})
 				.addDropdown((dropdown) => {
-					dropdown
+					bindLocalizedOptions(dropdown
 						.addOptions({
 							on: STRINGS.settings.values.on,
 							desktop: STRINGS.settings.values.desktop,
 							mobile: STRINGS.settings.values.mobile,
 							off: STRINGS.settings.values.off,
-						})
+						}), {on: ["iconic.settings.values.on"], desktop: ["iconic.settings.values.desktop"], mobile: ["iconic.settings.values.mobile"], off: ["iconic.settings.values.off"]})
 						.setValue(this.plugin.settings.useSearchKeywords)
 						.onChange((value) => {
 							this.refreshIndicator(this.useSearchKeywordsIndicator, value);
@@ -864,9 +866,9 @@ export class IconicSettingsSections {
 
 		// SETTING: Maximum search results
 		groupIconPicker.addSetting((setting) => {
-			setting
-				.setName(STRINGS.settings.maxSearchResults.name)
-				.setDesc(STRINGS.settings.maxSearchResults.desc)
+			bindLocalizedControl(bindLocalizedControl(setting
+				.setName(STRINGS.settings.maxSearchResults.name), "name", "iconic.settings.maxSearchResults.name")
+				.setDesc(STRINGS.settings.maxSearchResults.desc), "desc", "iconic.settings.maxSearchResults.desc")
 				.addSlider((slider) => {
 					slider
 						.setLimits(50, 500, 10)
@@ -880,23 +882,23 @@ export class IconicSettingsSections {
 
 		// SETTING: Main color picker
 		groupIconPicker.addSetting((setting) => {
-			setting
-				.setName(STRINGS.settings.colorPicker1.name)
+			bindLocalizedControl(bindLocalizedControl(setting
+				.setName(STRINGS.settings.colorPicker1.name), "name", "iconic.settings.colorPicker1.name")
 				.setDesc(
 					Platform.isDesktop
 						? STRINGS.settings.colorPicker1.descDesktop
 						: STRINGS.settings.colorPicker1.descMobile,
-				)
+				), "desc", Platform.isDesktop ? ("iconic.settings.colorPicker1.descDesktop") : ("iconic.settings.colorPicker1.descMobile"), (Platform.isDesktop) ? (undefined) : (undefined))
 				.addExtraButton((indicator) => {
 					indicator.extraSettingsEl.addClass('iconic-indicator');
 					this.colorPickerIndicator1 = indicator;
 				})
 				.addDropdown((dropdown) => {
-					dropdown
+					bindLocalizedOptions(dropdown
 						.addOptions({
 							list: STRINGS.settings.values.list,
 							rgb: STRINGS.settings.values.rgb,
-						})
+						}), {list: ["iconic.settings.values.list"], rgb: ["iconic.settings.values.rgb"]})
 						.setValue(this.plugin.settings.colorPicker1)
 						.onChange((value) => {
 							this.refreshIndicator(this.colorPickerIndicator1, value);
@@ -909,23 +911,23 @@ export class IconicSettingsSections {
 
 		// SETTING: Second color picker
 		groupIconPicker.addSetting((setting) => {
-			setting
-				.setName(STRINGS.settings.colorPicker2.name)
+			bindLocalizedControl(bindLocalizedControl(setting
+				.setName(STRINGS.settings.colorPicker2.name), "name", "iconic.settings.colorPicker2.name")
 				.setDesc(
 					Platform.isDesktop
 						? STRINGS.settings.colorPicker2.descDesktop
 						: STRINGS.settings.colorPicker2.descMobile,
-				)
+				), "desc", Platform.isDesktop ? ("iconic.settings.colorPicker2.descDesktop") : ("iconic.settings.colorPicker2.descMobile"), (Platform.isDesktop) ? (undefined) : (undefined))
 				.addExtraButton((indicator) => {
 					indicator.extraSettingsEl.addClass('iconic-indicator');
 					this.colorPickerIndicator2 = indicator;
 				})
 				.addDropdown((dropdown) => {
-					dropdown
+					bindLocalizedOptions(dropdown
 						.addOptions({
 							list: STRINGS.settings.values.list,
 							rgb: STRINGS.settings.values.rgb,
-						})
+						}), {list: ["iconic.settings.values.list"], rgb: ["iconic.settings.values.rgb"]})
 						.setValue(this.plugin.settings.colorPicker2)
 						.onChange((value) => {
 							this.refreshIndicator(this.colorPickerIndicator2, value);
@@ -943,9 +945,9 @@ export class IconicSettingsSections {
 
 		// SETTING: Colorless hover
 		groupAdvanced.addSetting((setting) => {
-			setting
-				.setName(STRINGS.settings.uncolorHover.name)
-				.setDesc(STRINGS.settings.uncolorHover.desc)
+			bindLocalizedControl(bindLocalizedControl(setting
+				.setName(STRINGS.settings.uncolorHover.name), "name", "iconic.settings.uncolorHover.name")
+				.setDesc(STRINGS.settings.uncolorHover.desc), "desc", "iconic.settings.uncolorHover.desc")
 				.addToggle((toggle) => {
 					toggle.setValue(this.plugin.settings.uncolorHover).onChange((value) => {
 						this.plugin.settings.uncolorHover = value;
@@ -957,9 +959,9 @@ export class IconicSettingsSections {
 
 		// SETTING: Colorless drag
 		groupAdvanced.addSetting((setting) => {
-			setting
-				.setName(STRINGS.settings.uncolorDrag.name)
-				.setDesc(STRINGS.settings.uncolorDrag.desc)
+			bindLocalizedControl(bindLocalizedControl(setting
+				.setName(STRINGS.settings.uncolorDrag.name), "name", "iconic.settings.uncolorDrag.name")
+				.setDesc(STRINGS.settings.uncolorDrag.desc), "desc", "iconic.settings.uncolorDrag.desc")
 				.addToggle((toggle) => {
 					toggle.setValue(this.plugin.settings.uncolorDrag).onChange((value) => {
 						this.plugin.settings.uncolorDrag = value;
@@ -971,9 +973,9 @@ export class IconicSettingsSections {
 
 		// SETTING: Colorless selection
 		groupAdvanced.addSetting((setting) => {
-			setting
-				.setName(STRINGS.settings.uncolorSelect.name)
-				.setDesc(STRINGS.settings.uncolorSelect.desc)
+			bindLocalizedControl(bindLocalizedControl(setting
+				.setName(STRINGS.settings.uncolorSelect.name), "name", "iconic.settings.uncolorSelect.name")
+				.setDesc(STRINGS.settings.uncolorSelect.desc), "desc", "iconic.settings.uncolorSelect.desc")
 				.addToggle((toggle) => {
 					toggle.setValue(this.plugin.settings.uncolorSelect).onChange((value) => {
 						this.plugin.settings.uncolorSelect = value;
@@ -985,9 +987,9 @@ export class IconicSettingsSections {
 
 		// SETTING: Colorless ribbon button
 		groupAdvanced.addSetting((setting) => {
-			setting
-				.setName(STRINGS.settings.uncolorQuick.name)
-				.setDesc(STRINGS.settings.uncolorQuick.desc)
+			bindLocalizedControl(bindLocalizedControl(setting
+				.setName(STRINGS.settings.uncolorQuick.name), "name", "iconic.settings.uncolorQuick.name")
+				.setDesc(STRINGS.settings.uncolorQuick.desc), "desc", "iconic.settings.uncolorQuick.desc")
 				.addToggle((toggle) => {
 					toggle.setValue(this.plugin.settings.uncolorQuick).onChange((value) => {
 						this.plugin.settings.uncolorQuick = value;
@@ -999,11 +1001,11 @@ export class IconicSettingsSections {
 
 		// SETTING: View unused icons
 		groupAdvanced.addSetting((setting) => {
-			setting
-				.setName(STRINGS.settings.viewUnusedIcons.name)
-				.setDesc(STRINGS.settings.viewUnusedIcons.desc)
+			bindLocalizedControl(bindLocalizedControl(setting
+				.setName(STRINGS.settings.viewUnusedIcons.name), "name", "iconic.settings.viewUnusedIcons.name")
+				.setDesc(STRINGS.settings.viewUnusedIcons.desc), "desc", "iconic.settings.viewUnusedIcons.desc")
 				.addButton((button) => {
-					button.setButtonText(STRINGS.settings.manage).onClick(async () => {
+					bindLocalizedControl(button.setButtonText(STRINGS.settings.manage), "buttonText", "iconic.settings.manage").onClick(async () => {
 						const unusedIcons: FileItem[] = [];
 						for (const fileId of Object.keys(this.plugin.settings.fileIcons)) {
 							if (!(await this.app.vault.adapter.exists(fileId))) {
@@ -1018,22 +1020,22 @@ export class IconicSettingsSections {
 
 		// SETTING: Maximum automatic backups
 		groupAdvanced.addSetting((setting) => {
-			setting
-				.setName(STRINGS.settings.maxBackups.name)
-				.setDesc(STRINGS.settings.maxBackups.desc)
+			bindLocalizedControl(bindLocalizedControl(setting
+				.setName(STRINGS.settings.maxBackups.name), "name", "iconic.settings.maxBackups.name")
+				.setDesc(STRINGS.settings.maxBackups.desc), "desc", "iconic.settings.maxBackups.desc")
 				.then((setting) => {
 					if (Platform.isDesktop)
 						setting.addExtraButton((button) => {
-							button
+							bindLocalizedControl(button
 								.setIcon('lucide-folder-open')
-								.setTooltip(STRINGS.settings.maxBackups.openPluginFolder)
+								.setTooltip(STRINGS.settings.maxBackups.openPluginFolder), "tooltip", "iconic.settings.maxBackups.openPluginFolder")
 								.onClick(() => {
 									internalApp(this.app).openWithDefaultApp(this.plugin.manifest.dir ?? '');
 								});
 						});
 				})
 				.addDropdown((dropdown) => {
-					dropdown
+					bindLocalizedOptions(dropdown
 						.addOptions({
 							0: STRINGS.settings.values.none,
 							1: '1',
@@ -1045,7 +1047,7 @@ export class IconicSettingsSections {
 							7: '7',
 							8: '8',
 							9: '9',
-						})
+						}), {0: ["iconic.settings.values.none"]})
 						.setValue(this.plugin.settings.maxBackups.toString())
 						.onChange((value) => {
 							this.plugin.settings.maxBackups = Number(value) || 0;

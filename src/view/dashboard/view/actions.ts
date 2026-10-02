@@ -27,6 +27,7 @@ import { showPromptDialog } from '../ui/prompt-dialog';
 import { captureScrollStates, restoreScrollStates } from '../ui/scroll-preserve';
 import { TemplatePickerModal } from '../ui/template-modal';
 import { WebConfigModal } from '../web/web-config-modal';
+import { WebShortcutModal } from '../web/web-shortcut-modal';
 import { WereadConfigModal } from '../weread/weread-config-modal';
 import { TrackerConfigModal } from '../widgets/tracker-config-modal';
 import { WeatherConfigModal } from '../widgets/weather-config-modal';
@@ -41,6 +42,10 @@ export function openBannerEditModal(this: DashboardView, data: DashboardData): v
 }
 
 export function openCardEditModal(this: DashboardView, card: DashboardCard): void {
+	if (card.type === 'web') {
+		new WebShortcutModal(this.app, card, (updates) => this.sync.updateCard(card.id, updates)).open();
+		return;
+	}
 	const modal = new CardEditModal(this.app, card, (updates) => {
 		void this.sync.updateCard(card.id, updates);
 	});
@@ -116,11 +121,15 @@ export function openWidgetTypeModal(this: DashboardView, colName: string): void 
 	modal.open();
 }
 
-/** Sticky ("便利贴") sections: choose memo or todo before the card is created. */
+/** Sticky ("便利贴") sections: choose memo, todo or web shortcut before creating a card. */
 export function openStickyCardTypeModal(this: DashboardView, colName: string): void {
 	const modal = new StickyCardTypeModal(this.app, (kind) => {
 		this.pendingScrollToLastCardOfColumn = colName;
-		if (kind === 'todo') {
+		if (kind === 'web') {
+			new WebShortcutModal(this.app, {}, (updates) =>
+				this.sync.addCard(colName, { type: 'web', ...updates }),
+			).open();
+		} else if (kind === 'todo') {
 			void this.sync.addCard(colName, { type: 'task', title: t('sync.todoTitle') });
 		} else {
 			const now = new Date();
@@ -550,7 +559,7 @@ export async function handleLibraryNewNote(
 export function openAddActionModal(this: DashboardView): void {
 	const modal = new AddActionModal(this.app, (action) => {
 		void this.sync.addQuickAction(action);
-	});
+	}, undefined, this.plugin.automationHost?.actions?.().map(action => ({ type: 'action', target: action.id, name: action.name, icon: 'play' })));
 	modal.open();
 }
 
@@ -578,6 +587,13 @@ export async function deleteColumn(this: DashboardView, columnName: string, colu
 }
 
 export async function executeAction(this: DashboardView, action: QuickAction): Promise<void> {
+	if (action.type === 'action') {
+		try {
+			if (!this.plugin.automationHost?.runAction) throw new Error(t('automation.moduleOff'));
+			await this.plugin.automationHost.runAction(action.target);
+		} catch (error) { new Notice(String(error)); }
+		return;
+	}
 	if (action.type === 'file') {
 		await this.navigateToPath(action.target);
 	} else if (action.type === 'command') {

@@ -62,11 +62,11 @@ Obsidian 1.12 使用旧版设置界面，1.13 起使用声明式设置界面。�
 
 ## 数据、备份与关闭模块
 
-默认配置目录下，图标数据保存在 `.obsidian/plugins/nand/iconic.json`。如果库自定义了配置目录，文件也位于该配置目录的 `plugins/nand/` 下。
+图标数据保存在库内 `.nand/icons/iconic.json`，备份保存在同一目录。
 
 | 文件 | 内容 |
 |---|---|
-| `data.json` | NAND 的主设置；图标领域只在其中保存模块开关 |
+| `.nand/config/settings.json` | NAND 的主设置；图标领域只在其中保存模块开关 |
 | `iconic.json` | 图标与颜色、文件和文件夹规则、图标偏好、选择器状态 |
 | `iconic.json.backup1`、`.backup2` 等 | 图标数据的自动备份；编号越小越新 |
 
@@ -87,4 +87,4 @@ Obsidian 1.12 使用旧版设置界面，1.13 起使用声明式设置界面。�
 | 删除自定义图标后仍显示图标 | 检查匹配规则及“显示所有文件／文件夹图标”设置 |
 | 同时装有独立 Iconic | 使用 NAND 图标模块时停用独立 Iconic，避免同时修改同一界面；NAND 不会自动导入它的数据 |
 
-桌面实测覆盖 Obsidian 1.12.4 与 1.13.7。Android/iOS 真机、精确的 1.12.0 客户端及第三方主题／快速切换插件组合尚未验证。
+各平台的实际验证范围见[当前基线](../speculo/.speculo/specdev/archive/2026-10/2026-10-01-current-baseline/README.md)；声明支持版本不等于已完成该版本实机验收。

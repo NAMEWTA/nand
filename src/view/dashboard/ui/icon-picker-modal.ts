@@ -1,3 +1,4 @@
+import { bindLocalizedControl } from '../../primitives/localized-dom';
 import { App, FuzzyMatch, FuzzySuggestModal, setIcon } from 'obsidian';
 import { t } from '../../../shared/i18n/index';
 
@@ -99,7 +100,7 @@ export class IconPickerModal extends FuzzySuggestModal<string> {
 	constructor(app: App, onPick: (icon: string) => void) {
 		super(app);
 		this.onPick = onPick;
-		this.setPlaceholder(t('quickNote.iconPickerPlaceholder'));
+		bindLocalizedControl(this.setPlaceholder(t('quickNote.iconPickerPlaceholder')), "placeholder", 'quickNote.iconPickerPlaceholder');
 		this.emptyStateText = t('quickNote.iconPickerEmpty');
 	}
 

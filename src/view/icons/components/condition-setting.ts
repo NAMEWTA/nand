@@ -1,3 +1,4 @@
+import { bindLocalizedControl } from '../../primitives/localized-dom';
 import { DropdownComponent, ExtraButtonComponent, Platform, Setting, TextComponent } from 'obsidian';
 import { ConditionItem } from '../../../platform/obsidian/icons/managers/rule-manager';
 import { STRINGS } from '../../../shared/i18n/icons-accessor';
@@ -67,9 +68,9 @@ export default class ConditionSetting extends Setting {
 		);
 
 		// BUTTON: Remove condition
-		this.removeEl = new ExtraButtonComponent(this.controlEl)
+		this.removeEl = bindLocalizedControl(new ExtraButtonComponent(this.controlEl)
 			.setIcon('lucide-trash-2')
-			.setTooltip(STRINGS.ruleEditor.removeCondition)
+			.setTooltip(STRINGS.ruleEditor.removeCondition), "tooltip", "iconic.ruleEditor.removeCondition")
 			.onClick(() => this.removeCallback?.()).extraSettingsEl;
 
 		// Drag & drop (mouse)

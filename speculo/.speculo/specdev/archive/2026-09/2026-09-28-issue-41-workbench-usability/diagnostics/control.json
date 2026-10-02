@@ -1,6 +1,0 @@
-{
-  "path": "src/view/terminal/workbench.tsx",
-  "find": "{offset + 1} / {page.total}",
-  "replace": "{offset + 1}–{Math.min(offset + 100, page.total)} / {page.total}",
-  "purpose": "只改变翻页显示公式，query、offset、总数保持不变"
-}

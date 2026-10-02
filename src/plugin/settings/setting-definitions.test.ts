@@ -81,3 +81,19 @@ test('declarative setting names are unique in both languages', () => {
 		setLanguage(previous);
 	}
 });
+
+test('language is searchable on Home, independently of dashboard availability', () => {
+	const tab = Object.create(DashboardSettingTab.prototype) as DashboardSettingTab;
+	Object.assign(tab, { plugin: { iconicHost: { isActive: () => false } } });
+	for (const language of ['zh', 'en'] as const) {
+		setLanguage(language);
+		const definitions = tab.getSettingDefinitions() as Array<{ items?: Array<{ name?: string; aliases?: string[]; searchable?: boolean }> }>;
+		const rows = definitions.flatMap((group) => group.items ?? []);
+		const alias = language === 'zh' ? '语言（Language）' : 'Language';
+		const matches = rows.filter((row) => row.aliases?.includes(alias));
+		assert.equal(matches.length, 1);
+		assert.equal(matches[0]?.name, language === 'zh' ? '首页' : 'Home');
+		assert.notEqual(matches[0]?.searchable, false);
+	}
+	setLanguage('zh');
+});

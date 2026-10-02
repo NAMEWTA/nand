@@ -1,6 +1,0 @@
-{
-  "path": "src/view/automations/view.tsx",
-  "find": "onLanguageChanged(() => this.draw())",
-  "replace": "onLanguageChanged(() => { this.draw(); this.leaf.updateHeader(); })",
-  "purpose": "只替换语言监听的副作用，加入 header 通知"
-}

@@ -1,3 +1,4 @@
+import { memoryVault } from './fixtures/memory-vault';
 import { useLayoutEffect } from 'preact/hooks';
 import {
 	DashboardPanelModal,
@@ -21,6 +22,9 @@ import type { HabitService } from '../src/platform/obsidian/habit/habit-service'
 import { QuickActionsPanel } from '../src/view/dashboard/notes/QuickActionsPanel';
 import { LunarPanel } from '../src/view/dashboard/widgets/LunarPanel';
 import { setLanguage } from '../src/shared/i18n';
+import { t } from '../src/shared/i18n';
+import { bindLocalizedControl, localizedAttributes, refreshLocalizedDom, setLocalizedText } from '../src/view/primitives/localized-dom';
+import { QuickNotesPanel } from '../src/view/dashboard/notes/QuickNotesPanel';
 import { ProjectPanel } from '../src/view/dashboard/cards/ProjectPanel';
 import { TaskPanel } from '../src/view/dashboard/cards/TaskPanel';
 import { DataviewPanel } from '../src/view/dashboard/dataview/DataviewPanel';
@@ -35,6 +39,7 @@ import {
 	destroyDashboardPanels,
 	getRenderContext,
 	mountDashboardPanel,
+	refreshDashboardLanguage,
 } from '../src/view/dashboard/renderer/render-context';
 
 const { document, window } = parseHTML('<html><body></body></html>');
@@ -219,19 +224,7 @@ async function main() {
 
 	// One native timer can feed multiple panels; unmounting one only removes its own subscription.
 	Object.assign(globalThis, { activeDocument: document, window });
-	const readingHost = {
-		app: {
-			vault: {
-				adapter: {
-					exists: async () => true,
-					read: async () => JSON.stringify({ activeBooks: [], sessions: [] }),
-					write: async () => {},
-				},
-				configDir: '.obsidian',
-			},
-		},
-		manifest: { id: 'nand' },
-	} as unknown as WidgetSettingsHost;
+	const readingHost = { app: memoryVault({}, window).app, settings: {}, saveSettings: async () => {}, manifest: { id: 'nand' } } as unknown as WidgetSettingsHost;
 	const service = new ReadingService(readingHost);
 	let firstTicks = 0,
 		secondTicks = 0;
@@ -502,7 +495,7 @@ async function main() {
 
 	// Both native Obsidian close-button variants leave one keyboard-reachable panel close.
 	for (const nativeClass of ['modal-header-button', 'modal-close-button']) {
-		const service = { getHabits: () => [], subscribe: () => () => {} } as unknown as HabitService;
+		const service = { getHabits: () => [], saveState: { status: 'saved' }, retrySave: async () => {}, subscribe: () => () => {} } as unknown as HabitService;
 		const modal = new DashboardPanelModal(app, 'dashboard-habit-stats-modal', (close) => h(HabitStatsPanel, { service, close }));
 		const shell = document.createElement('div');
 		const native = document.createElement('button');
@@ -526,13 +519,50 @@ async function main() {
 		setLanguage(language);
 		mountDashboardPanel(quick.root, h(QuickActionsPanel, { actions: [customAction], execute: (action) => { executed = action; }, remove: () => {}, add: () => {} }));
 		assert.deepEqual(Array.from(quick.root.querySelectorAll('.dashboard-qa-name')).map((node) => node.textContent), language === 'zh' ? ['新建日记', '新建笔记', customAction.name] : ['New journal', 'New note', customAction.name]);
-		quick.root.querySelector<HTMLElement>('[data-qa-key="c:daily-notes"]')!.click();
+		quick.root.querySelector<HTMLElement>('[data-qa-key="c:daily-notes"] .dashboard-qa-run')!.click();
 		assert.equal(executed, customAction, 'Custom actions retain their saved identity and name');
 		mountDashboardPanel(lunar.root, h(LunarPanel, { holidays: {}, win: window as unknown as Window, fortune: () => {} }));
 		assert.equal(lunar.root.querySelector('.dashboard-sidebar-lunar-almanac') !== null, language === 'zh', 'English omits the Chinese-only daily quote');
 	}
 	destroyDashboardPanels(quick.root);
 	destroyDashboardPanels(lunar.root);
+
+	// Language changes reconcile existing roots; no draft loss, accidental submit or effect restart.
+	const languageHost = host();
+	const chrome = document.createElement('button');
+	setLocalizedText(chrome, 'renderer.addSection');
+	for (const [key, value] of Object.entries(localizedAttributes('banner.editLabel'))) chrome.setAttribute(key, value);
+	languageHost.root.append(chrome);
+	const noteRoot = document.createElement('div');
+	languageHost.root.append(noteRoot);
+	mountDashboardPanel(noteRoot, h(QuickNotesPanel, {
+		root: noteRoot, settings: { quickCaptureEnabled: true } as never, callbacks: {} as RenderCallbacks,
+	}));
+	const draft = noteRoot.querySelector('textarea')!;
+	draft.value = '未提交 user draft';
+	setLanguage('en');
+	refreshDashboardLanguage(languageHost.root);
+	assert.equal(noteRoot.querySelector('textarea'), draft, 'The existing input node survives');
+	assert.equal(draft.value, '未提交 user draft');
+	assert.equal(chrome.textContent, t('renderer.addSection'));
+	assert.equal(chrome.getAttribute('aria-label'), t('banner.editLabel'));
+	assert.equal(draft.placeholder, t('quickNote.capturePlaceholder'));
+	const nameEl = document.createElement('div'), inputEl = document.createElement('input');
+	languageHost.root.append(nameEl, inputEl);
+	inputEl.value = '草稿';
+	bindLocalizedControl({ nameEl }, 'name', 'common.save');
+	bindLocalizedControl({ inputEl }, 'placeholder', 'quickNote.capturePlaceholder');
+	setLanguage('zh');
+	refreshLocalizedDom(languageHost.root);
+	assert.equal(nameEl.textContent, t('common.save'));
+	assert.equal(inputEl.value, '草稿');
+	assert.equal(inputEl.placeholder, t('quickNote.capturePlaceholder'));
+	nameEl.textContent = 'User-owned result';
+	setLanguage('en');
+	refreshLocalizedDom(languageHost.root);
+	assert.equal(nameEl.textContent, 'User-owned result', 'Retired loading labels cannot replace later content');
+	destroyDashboardPanels(languageHost.root);
+	setLanguage('zh');
 
 	console.log(
 		'Dashboard panels: editing, drag rollback, async Markdown, subscriptions, video cleanup, ledger/query state and native modal teardown passed',

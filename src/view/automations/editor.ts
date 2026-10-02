@@ -1,13 +1,18 @@
+import { bindLocalizedOptions } from '../primitives/localized-dom';
+import { bindLocalizedControl } from '../primitives/localized-dom';
+import { actionDescriptors } from '../../core/actions/executor';
 import { Modal, Notice, Platform, Setting, type App } from 'obsidian';
 import type { AutomationsApi } from '../../core/automations/api';
 import { validateSchedule } from '../../core/automations/schedule';
-import { switchAutomationAction } from '../../core/automations/switch-action';
+import { actionText, setActionText, switchAutomationAction } from '../../core/automations/switch-action';
 import type { AutomationAction, AutomationDefinition, SourceRef } from '../../shared/automation/types';
-import { t } from '../../shared/i18n/index';
+import { onLanguageChanged, t } from '../../shared/i18n/index';
+import { repaintLocalizedForm } from '../primitives/localized-form';
 import { AutomationSessionPicker } from './session-picker';
 
 export type TaskTarget = { path: string; cardId: string; title: string };
 export class AutomationEditor extends Modal {
+	private languageCleanup?: () => void;
 	private draft: AutomationDefinition;
 	private saving = false;
 	private generation = 0;
@@ -22,6 +27,7 @@ export class AutomationEditor extends Modal {
 		source?: SourceRef,
 		title = '',
 		existing?: AutomationDefinition,
+		private pin?: (definition: AutomationDefinition) => Promise<void>,
 	) {
 		super(app);
 		this.editing = !!existing;
@@ -57,8 +63,10 @@ export class AutomationEditor extends Modal {
 	}
 	onOpen(): void {
 		this.draw();
+		this.languageCleanup = onLanguageChanged(() => repaintLocalizedForm(this.contentEl, () => this.draw()));
 	}
 	onClose(): void {
+		this.languageCleanup?.();
 		this.generation++;
 		this.contentEl.empty();
 	}
@@ -68,15 +76,15 @@ export class AutomationEditor extends Modal {
 		el.empty();
 		el.addClass('nand-automation-editor');
 		this.containerEl.addClass('nand-automation-editor-container');
-		new Setting(el).setName(t(this.editing ? 'automation.editTitle' : 'automation.new')).setHeading();
-		new Setting(el).setName(t('automation.name')).addText((input) =>
+		bindLocalizedControl(new Setting(el).setName(t(this.editing ? 'automation.editTitle' : 'automation.new')), "name", this.editing ? 'automation.editTitle' : 'automation.new').setHeading();
+		bindLocalizedControl(new Setting(el).setName(t('automation.name')), "name", 'automation.name').addText((input) =>
 			input.setValue(this.draft.name).onChange((v) => {
 				this.draft.name = v;
 			}),
 		);
 		if (!this.draft.source)
-			new Setting(el).setName(t('automation.action')).addDropdown((input) => {
-				for (const kind of ['agent', 'notify', 'create-task']) input.addOption(kind, t(`automation.${kind}`));
+			bindLocalizedControl(new Setting(el).setName(t('automation.action')), "name", 'automation.action').addDropdown((input) => {
+				for (const descriptor of actionDescriptors) bindLocalizedOptions(input.addOption(descriptor.kind, t(descriptor.name)), {[descriptor.kind]: [descriptor.name]});
 				input.setValue(this.draft.action.kind).onChange((v) => {
 					this.draft.action = switchAutomationAction(this.draft.action, v as AutomationAction['kind'], {
 						agentId: this.availableAgents()[0]?.id ?? '',
@@ -89,27 +97,29 @@ export class AutomationEditor extends Modal {
 		const main = body.createDiv({ cls: 'nand-automation-editor-main' }),
 			side = body.createDiv({ cls: 'nand-automation-editor-side' });
 		const action = this.draft.action;
-		new Setting(main).setName(t('automation.prompt')).addTextArea((input) => {
+		bindLocalizedControl(new Setting(main).setName(t('automation.prompt')), "name", 'automation.prompt').addTextArea((input) => {
 			input.inputEl.rows = 12;
 			input.setDisabled(this.draft.source?.kind === 'widget');
 			input
 				.setValue(
-					action.kind === 'agent' ? action.prompt : action.kind === 'notify' ? action.body : action.text,
+					actionText(action),
 				)
 				.onChange((v) => {
-					if (action.kind === 'agent') action.prompt = v;
-					else if (action.kind === 'notify') action.body = v;
-					else action.text = v;
+					setActionText(action, v);
 				});
 		});
 		if (action.kind === 'agent') this.agentFields(side, action);
+		if (action.kind === 'script') {
+			bindLocalizedControl(new Setting(side).setName(t('automation.cwd')), "name", 'automation.cwd').addText(input => input.setValue(action.cwd).onChange(value => { action.cwd = value; }));
+			bindLocalizedControl(new Setting(side).setName(t('automation.shell')), "name", 'automation.shell').addDropdown(input => input.addOptions({ powershell: 'PowerShell', bash: 'Bash' }).setValue(action.shell).onChange(value => { action.shell = value as 'powershell' | 'bash'; }));
+		}
 		if (action.kind === 'create-task') {
-			const row = new Setting(side).setName(t('automation.target'));
+			const row = bindLocalizedControl(new Setting(side).setName(t('automation.target')), "name", 'automation.target');
 			void this.targets()
 				.then((targets) => {
 					if (generation !== this.generation) return;
 					row.addDropdown((input) => {
-						input.addOption('', t('automation.select'));
+						bindLocalizedOptions(input.addOption('', t('automation.select')), {['']: ['automation.select']});
 						for (const [i, target] of targets.entries()) input.addOption(String(i), target.title);
 						const index = targets.findIndex((v) => v.path === action.path && v.cardId === action.cardId);
 						if (index < 0) Object.assign(action, { path: '', cardId: '' });
@@ -123,21 +133,24 @@ export class AutomationEditor extends Modal {
 					if (generation === this.generation) new Notice(String(error));
 				});
 		}
-		if (this.draft.source?.kind !== 'widget') this.scheduleFields(side);
-		new Setting(side).setName(t('automation.grace')).addText((input) =>
+		if (this.draft.source?.kind !== 'widget') {
+			if (actionDescriptors.find(d => d.kind === action.kind)?.scheduled) this.scheduleFields(side);
+			else { this.draft.schedule = { kind: 'manual' }; bindLocalizedControl(new Setting(side).setDesc(t('automation.manualOnly')), "desc", 'automation.manualOnly'); }
+		}
+		bindLocalizedControl(new Setting(side).setName(t('automation.grace')), "name", 'automation.grace').addText((input) =>
 			input.setValue(String(this.draft.graceMinutes)).onChange((v) => {
 				this.draft.graceMinutes = Number(v);
 			}),
 		);
-		new Setting(side).setName(t('automation.notifyOn')).addDropdown((input) => {
-			for (const key of ['always', 'failure', 'never']) input.addOption(key, t(`automation.${key}`));
+		bindLocalizedControl(new Setting(side).setName(t('automation.notifyOn')), "name", 'automation.notifyOn').addDropdown((input) => {
+			for (const key of ['always', 'failure', 'never']) bindLocalizedOptions(input.addOption(key, t(`automation.${key}`)), {[key]: [`automation.${key}`]});
 			input.setValue(this.draft.notifyOn).onChange((v) => {
 				this.draft.notifyOn = v as AutomationDefinition['notifyOn'];
 			});
 		});
-		new Setting(side).setName(t('automation.channels')).setHeading();
+		bindLocalizedControl(new Setting(side).setName(t('automation.channels')), "name", 'automation.channels').setHeading();
 		for (const channel of ['in-app', 'system', 'email', 'sms'] as const)
-			new Setting(side).setName(t(`automation.${channel}`)).addToggle((input) =>
+			bindLocalizedControl(new Setting(side).setName(t(`automation.${channel}`)), "name", `automation.${channel}`).addToggle((input) =>
 				input
 					.setValue(this.draft.channels.includes(channel))
 					.setDisabled(
@@ -149,24 +162,27 @@ export class AutomationEditor extends Modal {
 							: this.draft.channels.filter((c) => c !== channel);
 					}),
 			);
-		new Setting(el)
+		bindLocalizedControl(new Setting(el)
 			.setClass('nand-automation-editor-footer')
-			.setDesc(t('automation.localOnly'))
+			.setDesc(t('automation.localOnly')), "desc", 'automation.localOnly')
 			.addButton((button) =>
-				button
-					.setButtonText(t('automation.save'))
+				bindLocalizedControl(button
+					.setButtonText(t('automation.save')), "buttonText", 'automation.save')
 					.setCta()
 					.onClick(() => {
 						void this.save();
 					}),
 			)
-			.addButton((button) => button.setButtonText(t('automation.cancel')).onClick(() => this.close()));
+			.addButton((button) => bindLocalizedControl(button.setButtonText(t('automation.cancel')), "buttonText", 'automation.cancel').onClick(() => this.close()));
+		if (this.pin) new Setting(el).addButton(button => bindLocalizedControl(button.setButtonText(t('automation.pin')), "buttonText", 'automation.pin').onClick(() => {
+			void this.save(true);
+		}));
 	}
 	private agentFields(el: HTMLElement, action: Extract<AutomationAction, { kind: 'agent' }>): void {
 		const agents = this.availableAgents();
 		const unavailable = !!action.agentId && !agents.some((agent) => agent.id === action.agentId);
-		new Setting(el)
-			.setName(t('automation.agent'))
+		bindLocalizedControl(new Setting(el)
+			.setName(t('automation.agent')), "name", 'automation.agent')
 			.setDesc(
 				unavailable
 					? t('automation.agentSelectionUnavailable')
@@ -175,7 +191,7 @@ export class AutomationEditor extends Modal {
 						: '',
 			)
 			.addDropdown((input) => {
-				input.addOption('', t('automation.select'));
+				bindLocalizedOptions(input.addOption('', t('automation.select')), {['']: ['automation.select']});
 				if (unavailable) input.addOption(action.agentId, `${action.agentId} (${t('automation.unavailable')})`);
 				for (const agent of agents) input.addOption(agent.id, agent.title);
 				input.setValue(action.agentId).onChange((v) => {
@@ -184,25 +200,25 @@ export class AutomationEditor extends Modal {
 					this.draw();
 				});
 			});
-		new Setting(el).setName(t('automation.cwd')).addText((input) =>
+		bindLocalizedControl(new Setting(el).setName(t('automation.cwd')), "name", 'automation.cwd').addText((input) =>
 			input.setValue(action.cwd).onChange((v) => {
 				action.cwd = v;
 				action.session = undefined;
 			}),
 		);
-		new Setting(el).setName(t('automation.sessionMode')).addDropdown((input) => {
-			input.addOption('fresh', t('automation.fresh')).addOption('reuse', t('automation.reuse'));
+		bindLocalizedControl(new Setting(el).setName(t('automation.sessionMode')), "name", 'automation.sessionMode').addDropdown((input) => {
+			bindLocalizedOptions(bindLocalizedOptions(input.addOption('fresh', t('automation.fresh')), {['fresh']: ['automation.fresh']}).addOption('reuse', t('automation.reuse')), {['reuse']: ['automation.reuse']});
 			if (agents.find((a) => a.id === action.agentId)?.resumable)
-				input.addOption('specific', t('automation.specific'));
+				bindLocalizedOptions(input.addOption('specific', t('automation.specific')), {['specific']: ['automation.specific']});
 			input.setValue(action.sessionMode).onChange((v) => {
 				action.sessionMode = v as typeof action.sessionMode;
 				this.draw();
 			});
 		});
 		if (action.sessionMode === 'specific') {
-			const row = new Setting(el).setName(t('automation.sessions')).setDesc(action.session?.title ?? '');
+			const row = bindLocalizedControl(new Setting(el).setName(t('automation.sessions')), "name", 'automation.sessions').setDesc(action.session?.title ?? '');
 			row.addButton((button) =>
-				button.setButtonText(t('automation.loadSessions')).onClick(async () => {
+				bindLocalizedControl(button.setButtonText(t('automation.loadSessions')), "buttonText", 'automation.loadSessions').onClick(async () => {
 					try {
 						const sessions = ((await this.service.agent()?.listSessions(action.cwd)) ?? []).filter(
 							(s) => s.agentId === action.agentId,
@@ -221,9 +237,9 @@ export class AutomationEditor extends Modal {
 					}
 				}),
 			);
-			new Setting(el)
-				.setName(t('automation.sessionId'))
-				.setDesc(t('automation.sessionIdHelp'))
+			bindLocalizedControl(bindLocalizedControl(new Setting(el)
+				.setName(t('automation.sessionId')), "name", 'automation.sessionId')
+				.setDesc(t('automation.sessionIdHelp')), "desc", 'automation.sessionIdHelp')
 				.addText((input) =>
 					input.setValue(action.session?.sessionId || '').onChange((value) => {
 						action.session = {
@@ -238,7 +254,7 @@ export class AutomationEditor extends Modal {
 					}),
 				);
 			if (['pi', 'omp', 'prime-agent'].includes(action.agentId))
-				new Setting(el).setName(t('automation.transcript')).addText((input) =>
+				bindLocalizedControl(new Setting(el).setName(t('automation.transcript')), "name", 'automation.transcript').addText((input) =>
 					input.setValue(action.session?.transcriptPath || '').onChange((value) => {
 						if (action.session) action.session.transcriptPath = value.trim();
 					}),
@@ -246,8 +262,8 @@ export class AutomationEditor extends Modal {
 		}
 	}
 	private scheduleFields(el: HTMLElement): void {
-		new Setting(el).setName(t('automation.schedule')).addDropdown((input) => {
-			for (const kind of ['manual', 'now', 'once', 'recurring']) input.addOption(kind, t(`automation.${kind}`));
+		bindLocalizedControl(new Setting(el).setName(t('automation.schedule')), "name", 'automation.schedule').addDropdown((input) => {
+			for (const kind of ['manual', 'now', 'once', 'recurring']) bindLocalizedOptions(input.addOption(kind, t(`automation.${kind}`)), {[kind]: [`automation.${kind}`]});
 			input.setValue(this.runImmediately ? 'now' : this.draft.schedule.kind).onChange((v) => {
 				this.runImmediately = v === 'now';
 				this.draft.schedule =
@@ -261,7 +277,7 @@ export class AutomationEditor extends Modal {
 		});
 		const schedule = this.draft.schedule;
 		if (schedule.kind === 'once' && !this.runImmediately)
-			new Setting(el).setName(t('automation.time')).addText((input) => {
+			bindLocalizedControl(new Setting(el).setName(t('automation.time')), "name", 'automation.time').addText((input) => {
 				input.inputEl.type = 'datetime-local';
 				const local = new Date(schedule.at - new Date(schedule.at).getTimezoneOffset() * 60_000)
 					.toISOString()
@@ -271,15 +287,15 @@ export class AutomationEditor extends Modal {
 				});
 			});
 		if (schedule.kind === 'recurring') {
-			new Setting(el).setName(t('automation.preset')).addDropdown((input) => {
+			bindLocalizedControl(new Setting(el).setName(t('automation.preset')), "name", 'automation.preset').addDropdown((input) => {
 				const presets: Record<string, string> = {
 					hourly: '0 * * * *',
 					daily: '0 9 * * *',
 					weekdays: '0 9 * * 1-5',
 					weekly: '0 9 * * 1',
 				};
-				input.addOption('', t('automation.custom'));
-				for (const key of Object.keys(presets)) input.addOption(key, t(`automation.${key}`));
+				bindLocalizedOptions(input.addOption('', t('automation.custom')), {['']: ['automation.custom']});
+				for (const key of Object.keys(presets)) bindLocalizedOptions(input.addOption(key, t(`automation.${key}`)), {[key]: [`automation.${key}`]});
 				input.onChange((v) => {
 					if (presets[v]) {
 						schedule.expression = presets[v];
@@ -287,15 +303,18 @@ export class AutomationEditor extends Modal {
 					}
 				});
 			});
-			new Setting(el).setName(t('automation.expression')).addText((input) =>
+			bindLocalizedControl(new Setting(el).setName(t('automation.expression')), "name", 'automation.expression').addText((input) =>
 				input.setValue(schedule.expression).onChange((v) => {
 					schedule.expression = v;
 				}),
 			);
 		}
-		new Setting(el).setName(t('automation.timezone')).setDesc(Intl.DateTimeFormat().resolvedOptions().timeZone);
+		if (schedule.kind === 'recurring') {
+			schedule.timezone ??= 'America/New_York';
+			bindLocalizedControl(new Setting(el).setName(t('automation.timezone')), "name", 'automation.timezone').addText(input => input.setValue(schedule.timezone!).onChange(zone => { schedule.timezone = zone; }));
+		}
 	}
-	private async save(): Promise<void> {
+	private async save(pin = false): Promise<void> {
 		if (this.saving) return;
 		this.saving = true;
 		try {
@@ -319,7 +338,7 @@ export class AutomationEditor extends Modal {
 				)
 					invalid('targetRequired');
 			}
-			if (!(a.kind === 'agent' ? a.prompt : a.kind === 'notify' ? a.body : a.text).trim())
+			if (!actionText(a).trim())
 				invalid('contentRequired');
 			if (a.kind === 'notify' && !this.draft.channels.length) invalid('channelsRequired');
 			if (
@@ -330,6 +349,7 @@ export class AutomationEditor extends Modal {
 			)
 				invalid('pastTime');
 			await this.service.save(this.draft);
+			if (pin) await this.pin?.(this.draft);
 			this.close();
 			await this.service.tick();
 		} catch (error) {

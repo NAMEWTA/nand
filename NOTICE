@@ -23,6 +23,15 @@ Copyright (c) 2026 Lovecast Inc.
 Source mapping: docs/third-party/orca-terminal-workbench.md
 Full license: docs/third-party/orca-LICENSE.txt
 
+Independent browser snapshot traversal, interactive element discovery and
+screenshot markup model adapted from Orca
+(commit d74388f8a2dad2bd4bbfe3b937aba66e6648258b).
+Browser lifecycle, navigation, popup policy, debugger lease and Design Mode
+interactions are adapted to the Obsidian host and NAND Preact architecture.
+Copyright (c) 2026 Lovecast Inc. Licensed under the MIT License.
+Source mapping: speculo/.speculo/specdev/changes/2026-09-30-browser/evidence/source-map.md
+Full license: docs/third-party/orca-LICENSE.txt
+
 Because this plugin includes Termy-derived code, the combined work is
 distributed under the GNU General Public License v3.0. See LICENSE.
 The Termy code is not relicensed as MIT.

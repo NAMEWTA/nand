@@ -1,3 +1,4 @@
+import { bindLocalizedElement } from './localized-dom';
 import type { App } from 'obsidian';
 import { t } from '../../shared/i18n/index';
 import { MultiFolderSelectModal } from './folder-select-modal';
@@ -26,14 +27,14 @@ export class ExcludeFoldersEditor {
 			cls: 'dashboard-media-filter-folder',
 			attr: { type: 'text', placeholder: opts?.placeholder ?? t('exclude.folderPlaceholder') },
 		});
-		const browseBtn = addRow.createEl('button', {
+		const browseBtn = bindLocalizedElement(addRow.createEl('button', {
 			cls: 'dashboard-media-folder-browse',
 			text: t('folder.browse'),
-		});
-		const addBtn = addRow.createEl('button', {
+		}), 'folder.browse');
+		const addBtn = bindLocalizedElement(addRow.createEl('button', {
 			cls: 'dashboard-modal-btn dashboard-modal-btn--confirm',
 			text: t('common.add'),
-		});
+		}), 'common.add');
 
 		browseBtn.addEventListener('click', () => {
 			// Multi-select picker: manage the whole excluded set in one place.
@@ -69,7 +70,7 @@ export class ExcludeFoldersEditor {
 		const renderChips = (): void => {
 			chipsHost.empty();
 			if (this.folders.length === 0) {
-				chipsHost.createDiv({ cls: 'dashboard-library-filter-empty', text: t('folder.noFolders') });
+				bindLocalizedElement(chipsHost.createDiv({ cls: 'dashboard-library-filter-empty', text: t('folder.noFolders') }), 'folder.noFolders');
 				return;
 			}
 			for (const folder of this.folders) {

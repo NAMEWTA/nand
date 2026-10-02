@@ -13,9 +13,24 @@ import {
 } from './model';
 import { createMarkdown, parseRecord, patchMarkdown, relativeLink } from './persist/markdown';
 import { patchReminders } from './reminders';
+import {
+	archiveCategories,
+	archiveEntryName,
+	archiveLocation,
+	folderFingerprint,
+	safeArchiveName,
+	type ArchiveDeletion,
+	type ArchiveImport,
+	type ArchiveImportResult,
+	type ArchiveResource,
+} from './resources';
 
 /** Application rules; atomic storage and native draft protection are supplied by the host. */
 export class ContactsApplication {
+	private resourceCache = new Map<string, ArchiveResource[]>();
+	private invalidateResources(path: string): void {
+		for (const folder of this.resourceCache.keys()) if (path === folder || path.startsWith(folder + '/') || folder.startsWith(path + '/')) this.resourceCache.delete(folder);
+	}
 	constructor(
 		private readonly files: ContactsFiles,
 		private getSettings: () => ContactsSettings,
@@ -27,6 +42,7 @@ export class ContactsApplication {
 		this.active = false;
 		this.generation++;
 		this.ready = null;
+		this.resourceCache.clear();
 		this.index.clear();
 		this.emit();
 		this.listeners.clear();
@@ -41,9 +57,13 @@ export class ContactsApplication {
 		await this.ready;
 	}
 	fileChanged(file: ContactsFile): void {
-		if (this.active) this.refreshFile(file);
+		this.invalidateResources(file.path);
+		if (!this.active) return;
+		if (this.inside(file.path)) this.refreshFile(file);
+		else if (file.path.startsWith(this.root + '/')) this.emit();
 	}
 	fileDeleted(path: string, folder: boolean): void {
+		this.invalidateResources(path);
 		this.versions.set(path, (this.versions.get(path) ?? 0) + 1);
 		if (!folder) this.index.remove(path);
 		else
@@ -51,10 +71,28 @@ export class ContactsApplication {
 				if (existing.startsWith(path + '/')) this.index.remove(existing);
 		this.emit();
 	}
-	fileRenamed(file: ContactsFile | null, oldPath: string): void {
+	fileRenamed(file: ContactsFile | null, oldPath: string, newPath = file?.path ?? ''): void {
+		this.invalidateResources(oldPath);
+		this.invalidateResources(newPath);
+		if (!this.active) return;
+		// Keep observers on one consistent index, including a folder rename in a split pane.
+		this.batching++;
 		this.fileDeleted(oldPath, !file);
-		if (file) this.refreshFile(file);
-		else void this.reload();
+		const candidates = file
+			? [file]
+			: this.files.getMarkdownFiles().filter((candidate) => candidate.path.startsWith(newPath + '/'));
+		void Promise.allSettled(
+			candidates
+				.filter((candidate) => this.inside(candidate.path))
+				.map((candidate) => this.readFile(candidate, this.generation)),
+		)
+			.then((results) => {
+				if (results.some((result) => result.status === 'rejected')) this.error = 'readFailed';
+			})
+			.finally(() => {
+				this.batching--;
+				this.emit();
+			});
 	}
 	async saveReminder(definition: AutomationDefinition, remove = false): Promise<void> {
 		const source = definition.source;
@@ -82,6 +120,7 @@ export class ContactsApplication {
 	private versions = new Map<string, number>();
 
 	private active = true;
+	private batching = 0;
 	loading = false;
 	error = '';
 	get root(): string {
@@ -92,10 +131,11 @@ export class ContactsApplication {
 		return () => this.listeners.delete(listener);
 	}
 	private emit(): void {
+		if (!this.active || this.batching) return;
 		for (const listener of this.listeners) listener();
 	}
 	private inside(path: string): boolean {
-		return path.startsWith(this.root + '/');
+		return !!archiveLocation(this.root, path);
 	}
 	async reload(): Promise<void> {
 		this.ready = null;
@@ -160,6 +200,7 @@ export class ContactsApplication {
 		)
 			return;
 		const record = parseRecord(raw, path, file.stat.mtime);
+		if (record && record.kind !== archiveLocation(this.root, path)?.kind) record.errors.push('wrongCategory');
 		if (record) {
 			for (const [ref] of this.index.refs(record))
 				if (!ref.id && ref.link) ref.id = this.index.resolve(ref, record)?.id ?? '';
@@ -205,7 +246,12 @@ export class ContactsApplication {
 		const raw = await this.files.read(file);
 		this.files.checkEditor(file, raw);
 		const record = parseRecord(raw, path, file.stat.mtime);
-		if (!record || record.errors.length || this.index.issues(record).length)
+		if (
+			!record ||
+			record.kind !== archiveLocation(this.root, path)?.kind ||
+			record.errors.length ||
+			this.index.issues(record).length
+		)
 			throw new ContactsError('invalidRecord');
 		return record;
 	}
@@ -219,7 +265,7 @@ export class ContactsApplication {
 			if (!indexed || this.index.issues(indexed).length) throw new ContactsError('invalidRecord');
 			const file = this.files.getFileByPath(indexed.path);
 			if (!file) throw new ContactsError('missing');
-			const next = this.prepare({ ...draft, path: file.path });
+			const next = this.prepare({ ...draft, path: file.path, folderPath: indexed.folderPath });
 			this.index.validateRelations(next);
 			if (this.index.issues(next).length) throw new ContactsError('referenceConflict');
 			const current = await this.files.read(file);
@@ -248,21 +294,24 @@ export class ContactsApplication {
 			this.guard();
 			if (root !== this.root) throw new ContactsError('folderChanged');
 			validateRecord(draft);
-			const folder = `${root}/${draft.kind === 'person' ? '联系人' : '企业'}`;
-			await this.files.mkdir(folder);
-			const name =
-				draft.fields.name
-					.trim()
-					.replace(/[\\/:*?"<>|#^[\]\r\n]/g, '-')
-					.replace(/^[. ]+|[. ]+$/g, '') || draft.id;
-			let path = `${folder}/${name}.md`;
-			if (this.files.getAbstractFileByPath(path)) path = `${folder}/${name}-${draft.id.slice(0, 8)}.md`;
-			const next = this.prepare({ ...draft, path });
+			const category = `${root}/${archiveCategories[draft.kind]}`;
+			const name = safeArchiveName(draft.fields.name);
+			let folder = `${category}/${name}`;
+			let suffix = 0;
+			while (this.files.getAbstractFileByPath(folder))
+				folder = `${category}/${name}-${draft.id.slice(0, 8)}${suffix++ ? '-' + suffix : ''}`;
+			const path = `${folder}/${archiveEntryName}`;
+			const next = this.prepare({ ...draft, path, folderPath: folder });
 			this.index.validateRelations(next);
 			this.guard();
 			if (root !== this.root) throw new ContactsError('folderChanged');
 			const content = createMarkdown(next);
 			if (parseRecord(content, path)?.errors.length) throw new ContactsError('invalidRecord');
+			await this.files.mkdir(category);
+			// Exclusive creation: a racing external directory must never become ours.
+			await this.files.createFolder(folder);
+			this.guard();
+			if (root !== this.root) throw new ContactsError('folderChanged');
 			const file = await this.files.create(path, content);
 			const created = parseRecord(content, path, file.stat.mtime)!;
 			if (this.active) this.index.set(created);
@@ -283,15 +332,117 @@ export class ContactsApplication {
 			return created;
 		});
 	}
-	async remove(base: ArchiveRecord): Promise<void> {
+	resources(id: string): ArchiveResource[] {
+		const record = this.current(id);
+		const cached = this.resourceCache.get(record.folderPath);
+		if (cached) return cached.map(entry => ({ ...entry }));
+		const entries = this.files
+			.listFolder(record.folderPath)
+			.filter((entry) => !entry.folder && entry.path !== record.path)
+			.map((entry) => {
+				const name = entry.path.split('/').pop()!;
+				return {
+					path: entry.path,
+					relativePath: entry.path.slice(record.folderPath.length + 1),
+					name,
+					extension: name.includes('.') ? name.split('.').pop()!.toLowerCase() : '',
+					size: entry.size,
+					modified: entry.modified,
+				};
+			});
+		this.resourceCache.set(record.folderPath, entries);
+		return entries.map(entry => ({ ...entry }));
+	}
+	private current(id: string): ArchiveRecord {
+		this.guard();
+		const record = this.index.get(id);
+		if (!record || !this.inside(record.path) || !this.files.getFileByPath(record.path))
+			throw new ContactsError('missing');
+		if (this.index.issues(record).length) throw new ContactsError('invalidRecord');
+		return record;
+	}
+	private freeResourcePath(folder: string, requested: string): string {
+		const name = safeArchiveName(requested);
+		const dot = name.lastIndexOf('.');
+		const stem = dot > 0 ? name.slice(0, dot) : name,
+			extension = dot > 0 ? name.slice(dot) : '';
+		let path = `${folder}/${name}`,
+			suffix = 1;
+		while (this.files.getAbstractFileByPath(path)) path = `${folder}/${stem} (${suffix++})${extension}`;
+		return path;
+	}
+	async createNote(id: string, name: string): Promise<string> {
+		const root = this.root;
+		return this.queue.run(id, async () => {
+			const record = this.current(id);
+			if (root !== this.root) throw new ContactsError('folderChanged');
+			const safe = safeArchiveName(name);
+			const path = this.freeResourcePath(record.folderPath, /\.md$/i.test(safe) ? safe : safe + '.md');
+			await this.files.create(path, '');
+			this.emit();
+			return path;
+		});
+	}
+	async importResources(id: string, sources: ArchiveImport[]): Promise<ArchiveImportResult[]> {
+		const root = this.root;
+		return this.queue.run(id, async () => {
+			const results: ArchiveImportResult[] = [];
+			this.batching++;
+			try {
+				for (const source of sources) {
+					try {
+						const record = this.current(id),
+							folder = record.folderPath;
+						if (root !== this.root) throw new ContactsError('folderChanged');
+						const bytes = await source.read();
+						if (this.current(id).folderPath !== folder || root !== this.root)
+							throw new ContactsError('folderChanged');
+						const path = this.freeResourcePath(folder, source.name);
+						await this.files.createBinary(path, bytes);
+						results.push({ name: source.name, path });
+					} catch (error) {
+						results.push({
+							name: source.name,
+							error: error instanceof ContactsError ? error.code : 'importFailed',
+						});
+					}
+				}
+			} finally {
+				this.batching--;
+				this.emit();
+			}
+			return results;
+		});
+	}
+	async deletion(id: string): Promise<ArchiveDeletion> {
+		return this.queue.run(id, async () => {
+			const latest = await this.snapshot(this.current(id).path);
+			await this.files.checkFolderEditors(latest.folderPath);
+			return {
+				id,
+				path: latest.path,
+				folderPath: latest.folderPath,
+				raw: latest.raw,
+				fingerprint: folderFingerprint(this.files.listFolder(latest.folderPath)),
+				resources: this.resources(id).length,
+			};
+		});
+	}
+	async remove(base: ArchiveDeletion): Promise<void> {
 		await this.queue.run(base.id, async () => {
 			this.guard();
 			if (!this.inside(base.path)) throw new ContactsError('folderChanged');
-			const latest = await this.snapshot(this.index.get(base.id)?.path ?? base.path);
+			const latest = await this.snapshot(this.current(base.id).path);
 			if (latest.raw !== base.raw) throw new ContactsError('conflict');
-			const file = this.files.getFileByPath(latest.path);
-			if (!file) throw new ContactsError('missing');
-			await this.files.trashFile(file);
+			await this.files.checkFolderEditors(latest.folderPath);
+			this.guard();
+			if (
+				latest.path !== base.path ||
+				this.current(base.id).path !== base.path ||
+				folderFingerprint(this.files.listFolder(latest.folderPath)) !== base.fingerprint
+			)
+				throw new ContactsError('deleteChanged');
+			await this.files.trashFolder(latest.folderPath);
 			this.index.remove(latest.path);
 			this.emit();
 		});
@@ -307,7 +458,7 @@ export class ContactsApplication {
 	async countFolder(root: string): Promise<number> {
 		if (!validContactsFolder(root)) throw new ContactsError('invalidFolder');
 		let count = 0;
-		for (const file of this.files.getMarkdownFiles().filter((f) => f.path.startsWith(root + '/')))
+		for (const file of this.files.getMarkdownFiles().filter((f) => archiveLocation(root, f.path)))
 			if (parseRecord(await this.files.cachedRead(file), file.path)) count++;
 		return count;
 	}

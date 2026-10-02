@@ -1,3 +1,4 @@
+import { localizedAttributes, localizedText } from '../../primitives/localized-dom';
 import { setIcon } from 'obsidian';
 import { t } from '../../../shared/i18n/index';
 import { renderSidebarCalendar } from '../calendar/calendar-widget';
@@ -18,7 +19,7 @@ export function renderMobileActions(this: DashboardView, bannerEl: HTMLElement):
 
 	const linksBtn = actions.createEl('button', {
 		cls: 'dashboard-mobile-action-btn',
-		attr: { 'aria-label': t('mobile.quickActions') },
+		attr: { ...localizedAttributes('mobile.quickActions', undefined, 'aria-label') },
 	});
 	setIcon(linksBtn, 'zap');
 	linksBtn.addEventListener('click', (e) => {
@@ -28,7 +29,7 @@ export function renderMobileActions(this: DashboardView, bannerEl: HTMLElement):
 
 	const recentBtn = actions.createEl('button', {
 		cls: 'dashboard-mobile-action-btn',
-		attr: { 'aria-label': t('mobile.recent') },
+		attr: { ...localizedAttributes('mobile.recent', undefined, 'aria-label') },
 	});
 	setIcon(recentBtn, 'clock');
 	recentBtn.addEventListener('click', (e) => {
@@ -97,7 +98,7 @@ export function renderMobileWidgetBar(this: DashboardView, container: HTMLElemen
 	for (const w of widgets) {
 		const btn = tabs.createEl('button', {
 			cls: 'dashboard-mobile-widget-btn',
-			attr: { 'aria-label': w.label },
+			attr: localizedAttributes(`mobile.${w.key}`),
 		});
 		setIcon(btn, w.icon);
 
@@ -185,7 +186,7 @@ export function openMobileDrawer(this: DashboardView, type: 'quickActions' | 're
 	const content = drawer.createDiv({ cls: 'dashboard-mobile-drawer-content' });
 
 	if (type === 'quickActions') {
-		content.createEl('h4', { text: t('mobile.quickActions'), cls: 'dashboard-mobile-drawer-title' });
+		content.createEl('h4', { ...localizedText('mobile.quickActions'), cls: 'dashboard-mobile-drawer-title' });
 		if (this.data) {
 			renderQuickActions(
 				content,
@@ -221,10 +222,12 @@ export function openMobileDrawer(this: DashboardView, type: 'quickActions' | 're
 				},
 				this.data.hiddenPresets,
 				undefined,
+				undefined,
+				this.plugin.automationHost,
 			);
 		}
 	} else {
-		content.createEl('h4', { text: t('mobile.recent'), cls: 'dashboard-mobile-drawer-title' });
+		content.createEl('h4', { ...localizedText('mobile.recent'), cls: 'dashboard-mobile-drawer-title' });
 		const docs = getRecentDocs(this.app, this.plugin.settings.recentDocCount);
 		renderRecentDocs(content, docs, (path) => {
 			void this.navigateToPath(path);
@@ -234,7 +237,7 @@ export function openMobileDrawer(this: DashboardView, type: 'quickActions' | 're
 	const backdrop = drawer.createDiv({ cls: 'dashboard-mobile-drawer-backdrop' });
 	backdrop.addEventListener('click', () => this.closeMobileDrawer());
 
-	window.requestAnimationFrame(() => {
+	root.win.requestAnimationFrame(() => {
 		content.addClass('dashboard-mobile-drawer-content--open');
 	});
 }
@@ -243,5 +246,5 @@ export function closeMobileDrawer(this: DashboardView): void {
 	const root = this.containerEl.children[1] as HTMLElement;
 	if (!root) return;
 	const existing = root.querySelector('.dashboard-mobile-drawer');
-	if (existing) existing.remove();
+	if (existing) { unmountDashboardPanelsIn(existing as HTMLElement); existing.remove(); }
 }

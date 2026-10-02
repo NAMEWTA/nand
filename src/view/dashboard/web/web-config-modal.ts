@@ -1,3 +1,4 @@
+import { bindLocalizedElement } from '../../primitives/localized-dom';
 import { App, Modal } from 'obsidian';
 import type { WebEmbedConfig } from '../../../core/dashboard/types/index';
 import { t } from '../../../shared/i18n/index';
@@ -38,14 +39,14 @@ export class WebConfigModal extends Modal {
 		const container = contentEl.createDiv({ cls: 'dashboard-modal dashboard-modal--compact' });
 
 		const header = container.createDiv({ cls: 'dashboard-modal-header' });
-		header.createDiv({ cls: 'dashboard-modal-title', text: t('web.configure') });
+		bindLocalizedElement(header.createDiv({ cls: 'dashboard-modal-title', text: t('web.configure') }), 'web.configure');
 
 		const body = container.createDiv({ cls: 'dashboard-modal-body' });
 
 		// URL input with live validation.
 		const urlSection = body.createDiv({ cls: 'dashboard-library-config-section' });
-		urlSection.createDiv({ cls: 'dashboard-library-config-section-title', text: t('web.urlLabel') });
-		this.urlInput = urlSection.createEl('input', {
+		bindLocalizedElement(urlSection.createDiv({ cls: 'dashboard-library-config-section-title', text: t('web.urlLabel') }), 'web.urlLabel');
+		this.urlInput = bindLocalizedElement(urlSection.createEl('input', {
 			cls: 'dashboard-task-input',
 			attr: {
 				type: 'text',
@@ -53,7 +54,7 @@ export class WebConfigModal extends Modal {
 				spellcheck: 'false',
 				autocomplete: 'off',
 			},
-		});
+		}), 'web.urlPlaceholder', undefined, "placeholder");
 		this.urlInput.value = this.config.url;
 		this.urlInput.addEventListener('input', () => {
 			this.config = { ...this.config, url: this.urlInput?.value ?? '' };
@@ -66,7 +67,7 @@ export class WebConfigModal extends Modal {
 		// a section, or grow sparse pages. Replaces the old free-form number
 		// input; 100% = native size and persists as no zoom at all.
 		const zoomSection = body.createDiv({ cls: 'dashboard-library-config-section' });
-		zoomSection.createDiv({ cls: 'dashboard-library-config-section-title', text: t('web.zoomLabel') });
+		bindLocalizedElement(zoomSection.createDiv({ cls: 'dashboard-library-config-section-title', text: t('web.zoomLabel') }), 'web.zoomLabel');
 		const chipsHost = zoomSection.createDiv({ cls: 'dashboard-web-zoom-chips' });
 		const currentZoom = this.config.zoom ?? 1;
 		for (const preset of ZOOM_PRESETS) {
@@ -85,17 +86,17 @@ export class WebConfigModal extends Modal {
 		// string and the section renders a configure-me empty state, so a
 		// half-finished config can still be persisted.
 		const footer = container.createDiv({ cls: 'dashboard-modal-footer' });
-		footer
+		bindLocalizedElement(footer
 			.createEl('button', {
 				cls: 'dashboard-modal-btn dashboard-modal-btn--cancel',
 				text: t('common.cancel'),
-			})
+			}), 'common.cancel')
 			.addEventListener('click', () => this.close());
-		footer
+		bindLocalizedElement(footer
 			.createEl('button', {
 				cls: 'dashboard-modal-btn dashboard-modal-btn--confirm',
 				text: t('common.save'),
-			})
+			}), 'common.save')
 			.addEventListener('click', () => {
 				this.onSave({
 					url: this.config.url.trim(),
@@ -118,10 +119,10 @@ export class WebConfigModal extends Modal {
 		}
 		if (isValidWebUrl(normalizeWebUrl(raw))) {
 			this.errorEl.removeClass('is-error');
-			this.errorEl.createSpan({ cls: 'dashboard-dataview-validation-ok', text: t('web.validUrl') });
+			bindLocalizedElement(this.errorEl.createSpan({ cls: 'dashboard-dataview-validation-ok', text: t('web.validUrl') }), 'web.validUrl');
 		} else {
 			this.errorEl.addClass('is-error');
-			this.errorEl.createSpan({ text: t('web.invalidUrl') });
+			bindLocalizedElement(this.errorEl.createSpan({ text: t('web.invalidUrl') }), 'web.invalidUrl');
 		}
 	}
 

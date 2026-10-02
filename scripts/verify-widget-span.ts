@@ -193,11 +193,11 @@ const run = (): void => {
 	} as unknown as App;
 	// Habit renders through the registered singleton; an empty-habits stub is
 	// enough for the structure (the span lives on the card element).
-	registerHabitService(vaultApp, { getHabits: () => [], getDoneOn: () => [] } as never);
+	registerHabitService(vaultApp, { saveState: { status: 'saved' }, retrySave: async () => {}, subscribe: () => () => {}, getHabits: () => [], getDoneOn: () => [] } as never);
 	const readingStub = {
 		getState: () => ({ status: 'idle', elapsedSeconds: 0, currentBook: null }),
 		getActiveBooks: () => [],
-		subscribe: () => () => {},
+		saveState: { status: 'saved' }, retrySave: async () => {}, subscribe: () => () => {},
 		subscribeTick: () => () => {},
 		getApp: () => vaultApp,
 	} as unknown as ReadingService;

@@ -9,7 +9,15 @@ function fixture(active = true) {
 		{ session: 'two', output: 'keep-two' },
 	];
 	const original = [...leaves];
-	const flags = { automation: true, dashboard: true, editor: true, terminal: active, iconic: false, contacts: true };
+	const flags = {
+		browser: true,
+		automation: true,
+		dashboard: true,
+		editor: true,
+		terminal: active,
+		iconic: false,
+		contacts: true,
+	};
 	const lifecycle = new ModuleLifecycle();
 	const effects: ModuleEffects = {
 		automation: async () => {},
@@ -118,6 +126,23 @@ test('unload prevents pending module work from starting services', async () => {
 	f.flags.terminal = true;
 	const pending = f.apply();
 	f.lifecycle.dispose();
+	await pending;
+	assert.deepEqual(f.calls, []);
+});
+
+test('unload during comment handoff cannot start later modules', async () => {
+	const f = fixture(false);
+	f.flags.terminal = true;
+	let release!: () => void;
+	let entered!: () => void;
+	const started = new Promise<void>(resolve => { entered = resolve; });
+	const barrier = new Promise<void>(resolve => { release = resolve; });
+	f.effects.editor = async () => { entered(); await barrier; };
+	f.effects.contacts = async () => { f.calls.push('contacts'); };
+	const pending = f.apply();
+	await started;
+	f.lifecycle.dispose();
+	release();
 	await pending;
 	assert.deepEqual(f.calls, []);
 });

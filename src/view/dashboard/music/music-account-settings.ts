@@ -1,3 +1,4 @@
+import { bindLocalizedControl } from '../../primitives/localized-dom';
 import { App, Notice, Platform, Setting } from 'obsidian';
 import { getMusicService } from '../../../platform/obsidian/music/music-service';
 import { t } from '../../../shared/i18n/index';
@@ -12,12 +13,12 @@ export function renderMusicAccountSettings(container: HTMLElement, app: App): vo
 	let busy = false;
 	const render = (): void => {
 		host.empty();
-		new Setting(host)
-			.setName(t('music.accountTitle'))
-			.setDesc(t(service.account.loggedIn ? 'music.accountSignedIn' : 'music.accountSignedOut'))
+		bindLocalizedControl(bindLocalizedControl(new Setting(host)
+			.setName(t('music.accountTitle')), "name", 'music.accountTitle')
+			.setDesc(t(service.account.loggedIn ? 'music.accountSignedIn' : 'music.accountSignedOut')), "desc", service.account.loggedIn ? 'music.accountSignedIn' : 'music.accountSignedOut')
 			.addButton((button) =>
-				button
-					.setButtonText(t('music.accountLogin'))
+				bindLocalizedControl(button
+					.setButtonText(t('music.accountLogin')), "buttonText", 'music.accountLogin')
 					.setDisabled(busy)
 					.onClick(async () => {
 						if (busy) return;
@@ -36,8 +37,8 @@ export function renderMusicAccountSettings(container: HTMLElement, app: App): vo
 					}),
 			)
 			.addButton((button) =>
-				button
-					.setButtonText(t('music.accountLogout'))
+				bindLocalizedControl(button
+					.setButtonText(t('music.accountLogout')), "buttonText", 'music.accountLogout')
 					.setDisabled(busy)
 					.onClick(async () => {
 						if (busy) return;

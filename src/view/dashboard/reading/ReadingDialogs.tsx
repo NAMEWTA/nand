@@ -222,7 +222,7 @@ export function BookSearchPanel({
 								pick({ title: manual.trim(), author: '', coverUrl: '', isbn: '', source: 'manual' });
 						}}
 					>
-						OK
+						{t('common.confirm')}
 					</button>
 				</div>
 			</div>

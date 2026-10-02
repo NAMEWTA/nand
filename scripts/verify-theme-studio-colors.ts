@@ -2,9 +2,29 @@ import { strict as assert } from 'node:assert';
 import { readFileSync } from 'node:fs';
 import type { App } from 'obsidian';
 import { El, findByClass, findTag } from './mini-dom';
-import { applyCustomColors, resolveCustomColorValue } from '../src/view/dashboard/appearance/appearance';
+import { applyControlContrast, applyCustomColors, resolveCustomColorValue } from '../src/view/dashboard/appearance/appearance';
 import { ThemeStudioModal } from '../src/view/dashboard/appearance/theme-studio-modal';
 import type { CustomColors, DashboardSettings } from '../src/core/dashboard/types/index';
+
+// Transparent timer text must stay readable when the custom accent matches
+// its surface, including almost-transparent foregrounds.
+for (const [theme, surface, accent, expected] of [
+	['mono', '#ffffff', '#eeeeee', '#000000'],
+	['mono', '#ffffff', 'rgba(0, 0, 0, 0.02)', '#000000'],
+	['neon', '#171717', '#171717', '#ffffff'],
+	['mono', '#ffffff', '#000000', '#000000'],
+	['onyx', 'transparent', '#eeeeee', '#eeeeee'],
+] as const) {
+	const tokens = new Map<string, string>([['--db-bg', '#000000'], ['--db-bg-card', surface], ['--db-accent', accent], ['--db-text-muted', accent]]);
+	const computed = { getPropertyValue: (key: string) => tokens.get(key) ?? '' };
+	applyControlContrast({
+		dataset: { theme },
+		ownerDocument: { defaultView: { getComputedStyle: () => computed } },
+		style: { setProperty: (key: string, value: string) => tokens.set(key, value) },
+	} as unknown as HTMLElement);
+	assert.equal(tokens.get('--db-pomodoro-text'), expected);
+	assert.equal(tokens.get('--db-pomodoro-running-text'), expected);
+}
 
 // Theme-studio color scheme: per-area mode dropdown (follow theme / light /
 // dark / custom, the widget-background foreground recipe). Checks the preset

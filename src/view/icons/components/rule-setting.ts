@@ -1,3 +1,4 @@
+import { bindLocalizedControl } from '../../primitives/localized-dom';
 import { ExtraButtonComponent, Menu, Setting, ToggleComponent } from 'obsidian';
 import { RuleItem } from '../../../platform/obsidian/icons/managers/rule-manager';
 import { internalMenuItem } from '../../../platform/obsidian/icons/utils/obsidian-internal';
@@ -41,9 +42,9 @@ export default class RuleSetting extends Setting {
 		this.settingEl.prepend(this.gripEl);
 
 		// BUTTON: Rule icon
-		this.iconEl = new ExtraButtonComponent(this.settingEl)
+		this.iconEl = bindLocalizedControl(new ExtraButtonComponent(this.settingEl)
 			.setIcon(rule.icon ?? rule.iconDefault ?? 'lucide-file')
-			.setTooltip(STRINGS.iconPicker.changeIcon)
+			.setTooltip(STRINGS.iconPicker.changeIcon), "tooltip", "iconic.iconPicker.changeIcon")
 			.onClick(() => this.iconClickCallback?.()).extraSettingsEl;
 		this.gripEl.after(this.iconEl);
 
@@ -65,9 +66,9 @@ export default class RuleSetting extends Setting {
 
 		// BUTTON: Edit rule
 		this.addExtraButton((button) =>
-			button
+			bindLocalizedControl(button
 				.setIcon('lucide-settings')
-				.setTooltip(STRINGS.rulePicker.editRule)
+				.setTooltip(STRINGS.rulePicker.editRule), "tooltip", "iconic.rulePicker.editRule")
 				.onClick(() => this.editClickCallback?.()),
 		);
 
@@ -213,24 +214,24 @@ export default class RuleSetting extends Setting {
 
 		// MENU ITEM: Add rule
 		menu.addItem((item) => {
-			item.setIcon('lucide-plus')
-				.setTitle(STRINGS.rulePicker.addRule)
+			bindLocalizedControl(item.setIcon('lucide-plus')
+				.setTitle(STRINGS.rulePicker.addRule), "title", "iconic.rulePicker.addRule")
 				.setSection('action-primary')
 				.onClick(() => this.addCallback?.());
 		});
 
 		// MENU ITEM: Duplicate rule
 		menu.addItem((item) => {
-			item.setIcon('lucide-files')
-				.setTitle(STRINGS.rulePicker.duplicateRule)
+			bindLocalizedControl(item.setIcon('lucide-files')
+				.setTitle(STRINGS.rulePicker.duplicateRule), "title", "iconic.rulePicker.duplicateRule")
 				.setSection('action-primary')
 				.onClick(() => this.duplicateCallback?.());
 		});
 
 		// MENU ITEM: Move rule to top
 		menu.addItem((item) => {
-			item.setIcon('lucide-arrow-up-to-line')
-				.setTitle(STRINGS.rulePicker.moveRuleToTop)
+			bindLocalizedControl(item.setIcon('lucide-arrow-up-to-line')
+				.setTitle(STRINGS.rulePicker.moveRuleToTop), "title", "iconic.rulePicker.moveRuleToTop")
 				.setSection('move')
 				.onClick(() => this.edgeMoveCallback?.('top'))
 				.setDisabled(this.edgeCheckCallback?.('top') === true);
@@ -238,8 +239,8 @@ export default class RuleSetting extends Setting {
 
 		// MENU ITEM: Move rule to bottom
 		menu.addItem((item) => {
-			item.setIcon('lucide-arrow-down-to-line')
-				.setTitle(STRINGS.rulePicker.moveRuleToBottom)
+			bindLocalizedControl(item.setIcon('lucide-arrow-down-to-line')
+				.setTitle(STRINGS.rulePicker.moveRuleToBottom), "title", "iconic.rulePicker.moveRuleToBottom")
 				.setSection('move')
 				.onClick(() => this.edgeMoveCallback?.('bottom'))
 				.setDisabled(this.edgeCheckCallback?.('bottom') === true);
@@ -247,8 +248,8 @@ export default class RuleSetting extends Setting {
 
 		// MENU ITEM: Remove rule
 		menu.addItem((item) => {
-			item.setIcon('lucide-trash-2')
-				.setTitle(STRINGS.rulePicker.removeRule)
+			bindLocalizedControl(item.setIcon('lucide-trash-2')
+				.setTitle(STRINGS.rulePicker.removeRule), "title", "iconic.rulePicker.removeRule")
 				.setSection('danger')
 				.onClick(() => this.removeCallback?.());
 

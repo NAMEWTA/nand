@@ -1,10 +1,10 @@
+import { setLocalizedAttribute, localizedAttributes, localizedText } from '../../primitives/localized-dom';
 import type { HoverParent } from 'obsidian';
 import { App, Platform, setIcon } from 'obsidian';
 import { partnerIndexOf } from '../../../core/dashboard/column-pairs';
 import type { DashboardColumn, DashboardData, DashboardSettings } from '../../../core/dashboard/types/index';
 import { MEDIA_SECTION_TYPES } from '../../../core/media/section-types';
 import { getMediaTagService } from '../../../platform/obsidian/media/media-tags';
-import { t } from '../../../shared/i18n/index';
 import { renderCalendarSection } from '../calendar/calendar-section';
 import { renderDataviewSection } from '../dataview/render-dataview-section';
 import { renderLibrarySection } from '../library/render-library-section';
@@ -124,8 +124,8 @@ export function applyPairWidth(
 }
 function attachPairWidthHandle(el: HTMLElement, column: DashboardColumn, callbacks: RenderCallbacks): void {
 	const handle = el.createDiv({ cls: 'dashboard-pair-width-handle' });
-	handle.setAttribute('aria-label', t('renderer.pairWidthHint'));
-	handle.setAttribute('aria-label', t('renderer.pairWidthHint'));
+	setLocalizedAttribute(handle, 'aria-label', 'renderer.pairWidthHint');
+	setLocalizedAttribute(handle, 'aria-label', 'renderer.pairWidthHint');
 	handle.addEventListener('pointerdown', (e) => {
 		const board = el.parentElement;
 		const partnerEl = el.nextElementSibling;
@@ -231,7 +231,7 @@ export function renderSection(
 	if (!Platform.isMobile) {
 		const grip = titleWrap.createDiv({ cls: 'dashboard-section-grip' });
 		grip.setAttribute('draggable', 'true');
-		grip.setAttribute('aria-label', t('renderer.dragSection'));
+		setLocalizedAttribute(grip, 'aria-label', 'renderer.dragSection');
 		setIcon(grip, 'grip-vertical');
 	}
 
@@ -278,7 +278,7 @@ export function renderSection(
 	// actions group, whose button count varies per section type).
 	const toggle = titleWrap.createDiv({ cls: 'dashboard-section-toggle' });
 	toggle.setAttribute('role', 'button');
-	toggle.setAttribute('aria-label', t('renderer.toggleSection'));
+	setLocalizedAttribute(toggle, 'aria-label', 'renderer.toggleSection');
 	toggle.addEventListener('click', (e) => {
 		e.stopPropagation();
 		const isNowCollapsed = el.hasClass('dashboard-section-row--collapsed');
@@ -300,7 +300,7 @@ export function renderSection(
 	if (sectionType === 'todo' || sectionType === 'sticky') {
 		const archiveBtn = headerActions.createEl('button', {
 			cls: 'dashboard-section-add-btn',
-			attr: { 'aria-label': t('renderer.archiveTasks') },
+			attr: { ...localizedAttributes('renderer.archiveTasks', undefined, 'aria-label') },
 		});
 		setIcon(archiveBtn, 'archive');
 		archiveBtn.addEventListener('click', () => callbacks.onArchiveTasks(column.name));
@@ -309,7 +309,7 @@ export function renderSection(
 	if (sectionType === 'todo') {
 		const templateBtn = headerActions.createEl('button', {
 			cls: 'dashboard-section-add-btn',
-			attr: { 'aria-label': t('template.addFromTemplate') },
+			attr: { ...localizedAttributes('template.addFromTemplate', undefined, 'aria-label') },
 		});
 		setIcon(templateBtn, 'layout-template');
 		templateBtn.addEventListener('click', () => callbacks.onAddFromTemplate(column.name));
@@ -331,7 +331,7 @@ export function renderSection(
 		if (folderUnconfigured) {
 			const configBtn = headerActions.createEl('button', {
 				cls: 'dashboard-section-add-btn',
-				attr: { 'aria-label': t('folder.configure') },
+				attr: { ...localizedAttributes('folder.configure', undefined, 'aria-label') },
 			});
 			setIcon(configBtn, 'settings');
 			configBtn.addEventListener('click', () => {
@@ -345,7 +345,7 @@ export function renderSection(
 
 		const deleteSectionBtn = headerActions.createEl('button', {
 			cls: 'dashboard-section-add-btn dashboard-section-delete-btn',
-			attr: { 'aria-label': t('renderer.deleteSection', { column: column.name }) },
+			attr: { ...localizedAttributes('renderer.deleteSection', { column: column.name }, 'aria-label') },
 		});
 		setIcon(deleteSectionBtn, 'trash-2');
 		deleteSectionBtn.addEventListener('click', (e) => {
@@ -354,7 +354,7 @@ export function renderSection(
 		});
 
 		if (folderUnconfigured) {
-			el.createDiv({ cls: 'dashboard-library-empty dashboard-folder-empty', text: t('folder.empty') });
+			el.createDiv({ cls: 'dashboard-library-empty dashboard-folder-empty', ...localizedText('folder.empty') });
 			return el;
 		}
 
@@ -376,7 +376,7 @@ export function renderSection(
 	if (sectionType === 'images' || sectionType === 'videos') {
 		const configBtn = headerActions.createEl('button', {
 			cls: 'dashboard-section-add-btn',
-			attr: { 'aria-label': t('media.configure') },
+			attr: { ...localizedAttributes('media.configure', undefined, 'aria-label') },
 		});
 		setIcon(configBtn, 'settings');
 		configBtn.addEventListener('click', () => {
@@ -389,7 +389,7 @@ export function renderSection(
 
 		const deleteSectionBtn = headerActions.createEl('button', {
 			cls: 'dashboard-section-add-btn dashboard-section-delete-btn',
-			attr: { 'aria-label': t('renderer.deleteSection', { column: column.name }) },
+			attr: { ...localizedAttributes('renderer.deleteSection', { column: column.name }, 'aria-label') },
 		});
 		setIcon(deleteSectionBtn, 'trash-2');
 		deleteSectionBtn.addEventListener('click', (e) => {
@@ -415,7 +415,7 @@ export function renderSection(
 	if (sectionType === 'calendar') {
 		const deleteSectionBtn = headerActions.createEl('button', {
 			cls: 'dashboard-section-add-btn dashboard-section-delete-btn',
-			attr: { 'aria-label': t('renderer.deleteSection', { column: column.name }) },
+			attr: { ...localizedAttributes('renderer.deleteSection', { column: column.name }, 'aria-label') },
 		});
 		setIcon(deleteSectionBtn, 'trash-2');
 		deleteSectionBtn.addEventListener('click', (e) => {
@@ -426,7 +426,7 @@ export function renderSection(
 		if (settings) {
 			renderCalendarSection(el, app, settings, callbacks.onOpenNoteAtLine, callbacks.settingsAccess);
 		} else {
-			el.createDiv({ cls: 'dashboard-library-empty', text: t('calendar.noEvents') });
+			el.createDiv({ cls: 'dashboard-library-empty', ...localizedText('calendar.noEvents') });
 		}
 		return el;
 	}
@@ -435,7 +435,7 @@ export function renderSection(
 	if (sectionType === 'weread') {
 		const configBtn = headerActions.createEl('button', {
 			cls: 'dashboard-section-add-btn',
-			attr: { 'aria-label': t('weread.configure') },
+			attr: { ...localizedAttributes('weread.configure', undefined, 'aria-label') },
 		});
 		setIcon(configBtn, 'settings');
 		configBtn.addEventListener('click', () => {
@@ -450,7 +450,7 @@ export function renderSection(
 		// positioned just left of delete.
 		const refreshBtn = headerActions.createEl('button', {
 			cls: 'dashboard-section-add-btn',
-			attr: { 'aria-label': t('weread.refresh') },
+			attr: { ...localizedAttributes('weread.refresh', undefined, 'aria-label') },
 		});
 		setIcon(refreshBtn, 'refresh-cw');
 		let reload: (() => void) | null = null;
@@ -458,7 +458,7 @@ export function renderSection(
 
 		const deleteSectionBtn = headerActions.createEl('button', {
 			cls: 'dashboard-section-add-btn dashboard-section-delete-btn',
-			attr: { 'aria-label': t('renderer.deleteSection', { column: column.name }) },
+			attr: { ...localizedAttributes('renderer.deleteSection', { column: column.name }, 'aria-label') },
 		});
 		setIcon(deleteSectionBtn, 'trash-2');
 		deleteSectionBtn.addEventListener('click', (e) => {
@@ -479,7 +479,7 @@ export function renderSection(
 		// Manual refresh (deliberately NOT wired to the vault-change debounce).
 		const refreshBtn = headerActions.createEl('button', {
 			cls: 'dashboard-section-add-btn',
-			attr: { 'aria-label': t('dataview.refresh') },
+			attr: { ...localizedAttributes('dataview.refresh', undefined, 'aria-label') },
 		});
 		setIcon(refreshBtn, 'refresh-cw');
 		let reload: (() => void) | null = null;
@@ -487,7 +487,7 @@ export function renderSection(
 
 		const configBtn = headerActions.createEl('button', {
 			cls: 'dashboard-section-add-btn',
-			attr: { 'aria-label': t('dataview.configure') },
+			attr: { ...localizedAttributes('dataview.configure', undefined, 'aria-label') },
 		});
 		setIcon(configBtn, 'settings');
 		configBtn.addEventListener('click', () => {
@@ -500,7 +500,7 @@ export function renderSection(
 
 		const deleteSectionBtn = headerActions.createEl('button', {
 			cls: 'dashboard-section-add-btn dashboard-section-delete-btn',
-			attr: { 'aria-label': t('renderer.deleteSection', { column: column.name }) },
+			attr: { ...localizedAttributes('renderer.deleteSection', { column: column.name }, 'aria-label') },
 		});
 		setIcon(deleteSectionBtn, 'trash-2');
 		deleteSectionBtn.addEventListener('click', (e) => {
@@ -525,9 +525,19 @@ export function renderSection(
 	// Web section: an embedded page. Frameable sites load as an iframe; sites
 	// whose headers refuse framing load in a desktop webview (see web-section).
 	if (sectionType === 'web') {
+		for (const target of ['modal', 'tab'] as const) {
+			const button = headerActions.createEl('button', {
+				cls: 'dashboard-section-add-btn',
+				attr: { ...localizedAttributes(`browser.${target}`, undefined, 'aria-label') },
+			});
+			setIcon(button, target === 'tab' ? 'panel-top' : 'app-window');
+			button.addEventListener('click', () => {
+				if (column.webConfig?.url) callbacks.onOpenWeb?.(column.webConfig.url, target);
+			});
+		}
 		const refreshBtn = headerActions.createEl('button', {
 			cls: 'dashboard-section-add-btn',
-			attr: { 'aria-label': t('web.refresh') },
+			attr: { ...localizedAttributes('web.refresh', undefined, 'aria-label') },
 		});
 		setIcon(refreshBtn, 'refresh-cw');
 		let reload: (() => void) | null = null;
@@ -535,7 +545,7 @@ export function renderSection(
 
 		const configBtn = headerActions.createEl('button', {
 			cls: 'dashboard-section-add-btn',
-			attr: { 'aria-label': t('web.configure') },
+			attr: { ...localizedAttributes('web.configure', undefined, 'aria-label') },
 		});
 		setIcon(configBtn, 'settings');
 		configBtn.addEventListener('click', () => {
@@ -548,7 +558,7 @@ export function renderSection(
 
 		const deleteSectionBtn = headerActions.createEl('button', {
 			cls: 'dashboard-section-add-btn dashboard-section-delete-btn',
-			attr: { 'aria-label': t('renderer.deleteSection', { column: column.name }) },
+			attr: { ...localizedAttributes('renderer.deleteSection', { column: column.name }, 'aria-label') },
 		});
 		setIcon(deleteSectionBtn, 'trash-2');
 		deleteSectionBtn.addEventListener('click', (e) => {
@@ -564,7 +574,7 @@ export function renderSection(
 
 	const addCardBtn = headerActions.createEl('button', {
 		cls: 'dashboard-section-add-btn',
-		attr: { 'aria-label': t('renderer.addCardTo', { column: column.name }) },
+		attr: { ...localizedAttributes('renderer.addCardTo', { column: column.name }, 'aria-label') },
 	});
 	setIcon(addCardBtn, 'plus');
 	addCardBtn.addEventListener('click', () => callbacks.onCardAdd(column.name));
@@ -575,7 +585,7 @@ export function renderSection(
 	if (sectionType === 'notes' || sectionType === 'projects') {
 		const notesCfgBtn = headerActions.createEl('button', {
 			cls: 'dashboard-section-add-btn',
-			attr: { 'aria-label': t('notesCfg.title') },
+			attr: { ...localizedAttributes('notesCfg.title', undefined, 'aria-label') },
 		});
 		setIcon(notesCfgBtn, 'settings');
 		notesCfgBtn.addEventListener('click', () => {
@@ -589,7 +599,7 @@ export function renderSection(
 
 	const deleteSectionBtn = headerActions.createEl('button', {
 		cls: 'dashboard-section-add-btn dashboard-section-delete-btn',
-		attr: { 'aria-label': t('renderer.deleteSection', { column: column.name }) },
+		attr: { ...localizedAttributes('renderer.deleteSection', { column: column.name }, 'aria-label') },
 	});
 	setIcon(deleteSectionBtn, 'trash-2');
 	deleteSectionBtn.addEventListener('click', (e) => {

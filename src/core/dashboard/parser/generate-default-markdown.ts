@@ -1,4 +1,4 @@
-import { parse as parseYaml } from 'yaml';
+import { readMarkdownDocument, readYaml } from '../../../shared/storage/markdown-document';
 import { normalizeColumnPairs } from '../column-pairs';
 import type {
 	BannerCenterStat,
@@ -24,20 +24,8 @@ import {
 } from './extract-card-parts';
 import { DEFAULT_BANNER, DEFAULT_COLUMNS } from './syntax';
 export function splitFrontmatter(markdown: string): { frontmatter: Record<string, unknown>; body: string } {
-	const trimmed = markdown.trimStart();
-	if (!trimmed.startsWith('---')) {
-		return { frontmatter: {}, body: trimmed };
-	}
-
-	const end = trimmed.indexOf('---', 3);
-	if (end === -1) {
-		return { frontmatter: {}, body: trimmed };
-	}
-
-	const yaml = trimmed.slice(3, end).trim();
-	const body = trimmed.slice(end + 3).trim();
-
-	return { frontmatter: (parseYaml(yaml) ?? {}) as Record<string, unknown>, body };
+	const { yaml, body } = readMarkdownDocument(markdown);
+	return { frontmatter: (readYaml(yaml).toJSON() ?? {}) as Record<string, unknown>, body };
 }
 export function parseBanner(fm: Record<string, unknown>): BannerData {
 	const raw = fm.banner as Record<string, unknown> | undefined;
@@ -105,7 +93,7 @@ export function parseQuickActions(fm: Record<string, unknown>): QuickAction[] {
 			.map((item: Record<string, string>) => ({
 				name: item.name ?? '',
 				icon: item.icon ?? (item.type === 'command' ? 'terminal' : 'file-text'),
-				type: item.type === 'command' ? ('command' as const) : ('file' as const),
+				type: item.type === 'action' ? ('action' as const) : item.type === 'command' ? ('command' as const) : ('file' as const),
 				target: item.target ?? '',
 			}))
 			.filter((a) => a.name && a.target);

@@ -1,8 +1,0 @@
-Already up to date
-Done in 415ms using pnpm v11.1.3
-$ esbuild scripts/verify-panel-composition.ts --bundle --platform=node --format=cjs --outfile=scripts/tmp/verify-panel-composition.cjs --alias:obsidian=./scripts/obsidian-stub.ts --log-level=warning && node scripts/tmp/verify-panel-composition.cjs
-Panel composition: independent actions, persistent xterm island/search, clean unmount passed.
-History export: visible Vault files, concurrent collisions, safe names, content, localized failures and actual sidebar open/pending behavior passed.
-History matrix: zh/en/zh dates, 111/101 ranges, search/filter empty states, metadata toggles, page shrink and unknown usage passed.
-Session sidebar: stable identity, exact selection, reorder/close, unknown status and bilingual surface names passed.
-Automation panel: visible filter labels, combined filtering, empty result, retained selection and prompt/output semantics passed.

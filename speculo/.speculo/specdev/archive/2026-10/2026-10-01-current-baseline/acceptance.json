@@ -1,0 +1,68 @@
+{
+  "date": "2026-10-01T15:38:28.648Z",
+  "runtime": {
+    "vault": "C:\\Data\\01-Code\\nand\\scripts\\tmp\\e2e-2026-09-30\\vault",
+    "marker": {
+      "nonce": "nand-e2e-2026-09-30-4d658328-43fe-4f5c-bd04-dfd28b22efdc",
+      "vaultPath": "C:\\Data\\01-Code\\nand\\scripts\\tmp\\e2e-2026-09-30\\vault",
+      "kind": "nand-windows-e2e"
+    },
+    "mainSha256": "9b32569f13aecdb44431dc67d5eb8acf6aee34c9af2e35906efbf4b0568e1c26",
+    "electron": "43.3.0",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) obsidian/1.13.7 Chrome/150.0.7871.212 Electron/43.3.0 Safari/537.36",
+    "node": "24.18.1",
+    "platform": "win32",
+    "arch": "x64"
+  },
+  "checks": [
+    {
+      "name": "declarative-home-language",
+      "passed": true
+    },
+    {
+      "name": "fallback-home-with-all-modules-hidden",
+      "passed": true
+    },
+    {
+      "name": "failed-save-retains-language-and-retry",
+      "passed": true
+    },
+    {
+      "name": "light-narrow-dark-wide",
+      "passed": true
+    },
+    {
+      "name": "automation-draft-focus-selection-survive",
+      "passed": true
+    },
+    {
+      "name": "contacts-draft-survives",
+      "passed": true
+    },
+    {
+      "name": "dashboard-keeps-mounted-input-and-draft",
+      "passed": true
+    },
+    {
+      "name": "native-modal-labels-preserve-input-node-and-draft",
+      "passed": true
+    },
+    {
+      "name": "browser-language-keeps-guest-and-navigation",
+      "passed": true
+    },
+    {
+      "name": "language-keeps-native-session",
+      "passed": true
+    },
+    {
+      "name": "split-and-popout-language",
+      "passed": true
+    },
+    {
+      "name": "english-persisted-across-plugin-reload",
+      "passed": true
+    }
+  ],
+  "passed": true
+}

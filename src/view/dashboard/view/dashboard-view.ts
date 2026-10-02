@@ -13,6 +13,7 @@ import type { DashboardHost } from '../host';
 import type { PomodoroMiniPanel } from '../pomodoro/pomodoro-mini-panel';
 import type { ReadingMiniTimer } from '../reading/reading-mini-timer';
 import type { RenderCallbacks } from '../render-contract';
+import { refreshDashboardLanguage } from '../renderer/render-context';
 import { NotePopoverModal } from '../ui/note-popover-modal';
 import { closeOwnedDashboardPanels, DashboardPanelModal } from '../ui/panel-modal';
 import { AnniversaryPanel } from '../widgets/AnniversaryPanel';
@@ -260,7 +261,7 @@ export class DashboardView extends ItemView implements HoverParent {
 		}));
 		this.register(onLeafLanguageChanged(this.app, this.leaf, () => {
 			if (!this.plugin.settings.modules.dashboard) showModuleDisabled.call(this);
-			else if (this.isOpen && this.data) this.render(this.data);
+			else if (this.isOpen && this.data) refreshDashboardLanguage(this.contentEl);
 		}));
 		this.register(
 			this.containerEl.onWindowMigrated(() => {

@@ -6,10 +6,11 @@ import WebSocket from 'ws';
 import fs from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
-import { createHash } from 'node:crypto';
+import { createHash, randomBytes } from 'node:crypto';
 
 const binary = process.argv[2] || 'processes/rust-terminal-servers/target/release/rust-terminal-servers';
-const child = spawn(binary, [], { stdio: ['ignore', 'pipe', 'pipe'] });
+const child = spawn(binary, [], { stdio: ['pipe', 'pipe', 'pipe'] });
+const token=randomBytes(32).toString('hex');child.stdin.end(token+'\n');
 let ws;
 const temporary = await fs.mkdtemp(path.join(os.tmpdir(), 'nand-pty-history-'));
 const timer = setTimeout(() => { child.kill('SIGKILL'); process.exitCode = 1; }, 20000);
@@ -18,8 +19,9 @@ try {
  const { port } = JSON.parse(chunk.toString().trim());
  ws = new WebSocket(`ws://127.0.0.1:${port}`); await once(ws, 'open');
  const messages = []; let output = '';
- ws.on('message', (data, binary) => { if (binary) { const bytes = Buffer.from(data); output += bytes.subarray(1 + bytes[0]).toString(); } else messages.push(JSON.parse(data.toString())); });
+ ws.on('message', (data, binary) => { if (binary) { const bytes = Buffer.from(data); output += bytes.subarray(1 + bytes[0]).toString(); ws.send(JSON.stringify({module:'pty',type:'consumed',session_id:bytes.subarray(1,1+bytes[0]).toString(),bytes:bytes.length-1-bytes[0]})); } else messages.push(JSON.parse(data.toString())); });
  const until = async predicate => { for (let n = 0; n < 300; n++) { if (predicate()) return; await delay(10); } throw Error('timeout: '+JSON.stringify(messages)); };
+ ws.send(JSON.stringify({type:'auth',protocol:2,token})); await until(()=>messages.some(m=>m.type==='authenticated'));
  ws.send(JSON.stringify({ module: 'pty', type: 'init', shell_type: 'custom:/bin/sh', shell_args: ['-c', 'printf automation-test; exit 7'] }));
  await until(() => messages.some(m => m.type === 'exit'));
  const init = messages.find(m => m.type === 'init_complete'), exit = messages.find(m => m.type === 'exit');

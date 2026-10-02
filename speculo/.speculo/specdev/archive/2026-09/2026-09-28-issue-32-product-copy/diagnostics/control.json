@@ -1,6 +1,0 @@
-{
-  "path": "src/shared/i18n/terminal-agent.ts",
-  "find": "打开NAND终端",
-  "replace": "打开 NAND 终端",
-  "purpose": "仅替换中文终端名称字面量；品牌/英文省略号另行核对"
-}

@@ -1,4 +1,0 @@
-{"url":"https://github.com/NAMEWTA/nand/releases/download/0.0.1/rust-terminal-servers-linux-x64","sha256":"b28fa7ee45c72f1a1740840839ec0a52fb455694e598afe7512a0bcc7c75def1"}
-{"messages":[{"module":"pty","type":"error","code":"PARSE_ERROR","message":"消息解析失败: JSON error: unknown variant `agent_data`, expected `pty` at line 1 column 22"},{"module":"pty","type":"init_complete","session_id":"315f113f-57b9-4144-888d-b56455243f71","success":true},{"module":"pty","type":"exit","code":0,"session_id":"315f113f-57b9-4144-888d-b56455243f71"}],"elapsed_ms":51}
-#37 installed release must answer agent_data without a PTY parse error
-probe_exit=1

@@ -1,4 +1,0 @@
-Already up to date
-Done in 359ms using pnpm v11.1.3
-$ esbuild scripts/verify-confirm-dialog.ts --bundle --platform=node --format=cjs --outfile=node_modules/.tmp/verify-confirm-dialog.cjs --alias:obsidian=./scripts/obsidian-stub.ts --log-level=warning && node node_modules/.tmp/verify-confirm-dialog.cjs
-verify-confirm-dialog: 7 scenarios OK

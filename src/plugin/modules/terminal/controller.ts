@@ -1,3 +1,11 @@
+import { RuntimeStartup } from '../../../core/pty/runtime-startup';
+import type { ContextMaterial } from '../../../core/agent-launch/session-api';
+import { agentSessions } from '../../workflows/agent-sessions';
+import { pickContextMaterial } from '../../../view/terminal/context-material-picker';
+import { TerminalWindowNavigation } from './window-navigation';
+import type { CommandAvailability } from '../../../platform/desktop/terminal/command-availability';
+import { probeLauncher } from '../../../platform/desktop/terminal/launcher-status';
+import { TerminalViewPlaceholder } from './view-placeholder';
 import { shell } from 'electron';
 import { orderRecentSessions } from '../../../core/pty/recent-sessions';
 import { RecentSessionModal } from '../../../view/terminal/recent-session-modal';
@@ -16,7 +24,7 @@ import {
 	type AiLauncherStatus,
 } from '../../../core/pty/ai-launcher-catalog';
 import {
-	buildAiLauncherStatusSnapshot,
+
 	readinessToBadge,
 	type AiLauncherStatusSnapshot,
 } from '../../../core/pty/ai-launcher-status';
@@ -34,16 +42,10 @@ import { resolvePluginDirectory } from '../../../platform/desktop/filesystem-pat
 import { getHomeDir } from '../../../platform/desktop/platform';
 import { debugLog, errorLog } from '../../../platform/desktop/logger';
 import {
-	detectCommandAvailability,
-	type CommandAvailability,
-} from '../../../platform/desktop/terminal/command-availability';
-import {
 	clearCommandVersionCache,
-	probeCommandVersion,
 } from '../../../platform/desktop/terminal/command-version-probe';
 import {
 	clearLatestVersionCache,
-	fetchLatestVersion,
 } from '../../../platform/desktop/terminal/latest-version-registry';
 import type { PtySession } from '../../../platform/desktop/terminal/pty-session';
 import type { TerminalService } from '../../../platform/desktop/terminal/terminal-service';
@@ -52,15 +54,10 @@ import type { LocalizedCommand } from '../../../platform/obsidian/localized-comm
 import type { ServerManager } from '../../../platform/terminal-server/server-manager';
 import { onLanguageChanged, t as sharedT } from '../../../shared/i18n/index';
 import { i18n, t } from '../../../shared/i18n/terminal-accessor';
-import { renderEmptyState } from '../../../view/primitives/empty-state';
 import { TERMINAL_RIBBON_ICON_ID } from '../../../view/terminal/icons';
 import { LauncherInstallModal } from '../../../view/terminal/launcher-install-modal';
 import { renderPresetScriptIcon } from '../../../view/terminal/preset-script-icons';
 import { PresetScriptModal } from '../../../view/terminal/preset-script-modal';
-import {
-	getAlwaysOnTopTerminalLabelKey,
-	getAlwaysOnTopTerminalMenuState,
-} from '../../../view/terminal/runtime/always-on-top-terminal-display';
 import type { TerminalInstance } from '../../../view/terminal/runtime/terminal-instance';
 import { TerminalRenderers } from '../../../view/terminal/runtime/terminal-renderers';
 import { FeatureVisibilityManager } from '../../../view/terminal/settings/feature-visibility-manager';
@@ -76,25 +73,8 @@ import {
 } from '../agents/register';
 import { mountNandStatusBarEntry } from './status-bar-entry';
 
-const ALWAYS_ON_TOP_TAB_BADGE_CLASS = 'terminal-always-on-top-tab-badge';
-
-type ElectronBrowserWindowLike = {
-	setAlwaysOnTop: (flag: boolean, level?: string) => void;
-	isAlwaysOnTop?: () => boolean;
-	focus?: () => void;
-};
-
-type ElectronRuntime = {
-	remote?: {
-		getCurrentWindow?: () => ElectronBrowserWindowLike;
-	};
-};
-
-type ElectronRemoteRuntime = {
-	getCurrentWindow?: () => ElectronBrowserWindowLike;
-};
-
 export interface TerminalAgentBridge {
+	getBrowserEnvironment?(): Promise<Record<string, string>>;
 	readAbsoluteReference(): string | null;
 	openAutomations?(): Promise<void>;
 	openNotifications?(): void;
@@ -109,7 +89,12 @@ interface TerminalAgentStore {
  * Main class for the Obsidian Terminal plugin
  */
 export class TerminalAgentController {
+	pickContextMaterial(): Promise<ContextMaterial | null> { return pickContextMaterial(this.app); }
+	async attachContext(id: string, materials: readonly ContextMaterial[], signal?: AbortSignal): Promise<void> {
+		await (await agentSessions(this)).attach(id, materials, signal);
+	}
 	private automationRuntime?: TerminalAutomationRuntime;
+	private startup = new RuntimeStartup();
 	getAutomationRuntime(): TerminalAutomationRuntime {
 		return this.automationRuntime ?? (this.automationRuntime = new TerminalAutomationRuntime(this));
 	}
@@ -141,7 +126,7 @@ export class TerminalAgentController {
 			return;
 		}
 		const leaf = this.app.workspace.getLeaf('tab');
-		this.pendingRestoredTerminals.set(leaf, await this.getTerminalRenderer(terminal));
+		this.navigation.restoreOnOpen(leaf, await this.getTerminalRenderer(terminal));
 		await leaf.setViewState({ type: TERMINAL_VIEW_TYPE, active: true });
 		await this.app.workspace.revealLeaf(leaf);
 	}
@@ -221,7 +206,6 @@ export class TerminalAgentController {
 	 * synchronously so the "hide unavailable launchers" setting can act on a
 	 * known state. The map is refreshed by {@link refreshAiLauncherAvailability}.
 	 */
-	private _aiLauncherAvailability: Map<string, CommandAvailability> = new Map();
 
 	/**
 	 * Combined snapshot per launcher (presetId → snapshot). The snapshot
@@ -238,8 +222,6 @@ export class TerminalAgentController {
 	 */
 	private _aiLauncherSnapshotListeners: Set<(presetId: string, snapshot: AiLauncherStatusSnapshot) => void> =
 		new Set();
-	private _alwaysOnTopTerminalLeaf: WorkspaceLeaf | null = null;
-	private pendingRestoredTerminals: WeakMap<WorkspaceLeaf, TerminalInstance> = new WeakMap();
 
 	// Registered preset script commands
 	private registeredPresetScriptCommandIds: Set<string> = new Set();
@@ -247,7 +229,8 @@ export class TerminalAgentController {
 	/**
 	 * Get the server manager (lazy initialization)
 	 */
-	async getServerManager(): Promise<ServerManager> {
+	getServerManager(): Promise<ServerManager> { return this.startup.run('server', () => this.createServerManager()); }
+	private async createServerManager(): Promise<ServerManager> {
 		if (!this._serverManager) {
 			debugLog('[TerminalAgentController] Initializing ServerManager...');
 
@@ -277,8 +260,15 @@ export class TerminalAgentController {
 	/**
 	 * Get the terminal service (lazy initialization)
 	 */
-	async getTerminalService(): Promise<TerminalService> {
+	private browserEnvironment: Record<string, string> = {};
+	getTerminalService(): Promise<TerminalService> { return this.startup.run('service', () => this.createTerminalService()); }
+	private async createTerminalService(): Promise<TerminalService> {
 		await this.initializeAgentContextBridge();
+		this.browserEnvironment =
+			(await this.bridge.getBrowserEnvironment?.().catch((error: unknown) => {
+				console.warn('[NAND browser]', error);
+				return {};
+			})) ?? {};
 
 		if (!this._terminalService) {
 			debugLog('[TerminalAgentController] Initializing TerminalService...');
@@ -290,7 +280,7 @@ export class TerminalAgentController {
 				this.app,
 				this.settings,
 				serverManager,
-				() => this._agentContextBridge?.getTerminalEnv() ?? {},
+				() => ({ ...this._agentContextBridge?.getTerminalEnv(), ...this.browserEnvironment }),
 				() => this.saveSettings(),
 			);
 
@@ -368,6 +358,7 @@ export class TerminalAgentController {
 	}
 
 	private async handleUnload(): Promise<void> {
+		await this.startup.shutdown();
 		this.automationRuntime?.dispose();
 		debugLog(t('plugin.unloadingMessage'));
 
@@ -470,12 +461,14 @@ export class TerminalAgentController {
 	}
 
 	activate(): void {
+		this.startup.open();
 		this._active = true;
 		this.updateStatusBar();
 		refreshRegisteredUsage(this);
 	}
 
 	async deactivate(): Promise<void> {
+		await this.startup.shutdown();
 		this._active = false;
 		this._statusBarItem?.toggleClass('is-hidden', true);
 		refreshRegisteredUsage(this);
@@ -751,371 +744,14 @@ export class TerminalAgentController {
 		}
 	}
 
-	async toggleAlwaysOnTopTerminal(terminalView?: TerminalView | null): Promise<void> {
-		const existingView = this.getTrackedAlwaysOnTopTerminalView();
-		if (existingView) {
-			if (!terminalView || terminalView.leaf === existingView.leaf) {
-				await this.restoreAlwaysOnTopTerminalToMainWindow(existingView);
-				return;
-			}
+	toggleAlwaysOnTopTerminal(view?: TerminalView | null): Promise<void> { return this.navigation.toggleAlwaysOnTopTerminal(view); }
+	getAlwaysOnTopTerminalLabel(view?: TerminalView | null): string { return this.navigation.getAlwaysOnTopTerminalLabel(view); }
+	isAlwaysOnTopTerminal(view?: TerminalView | null): boolean { return this.navigation.isAlwaysOnTopTerminal(view); }
+	handleTerminalViewClosed(view: TerminalView): void { this.navigation.handleTerminalViewClosed(view); }
+	consumePendingRestoredTerminal(leaf: WorkspaceLeaf): TerminalInstance | null { return this.navigation.consumePendingRestoredTerminal(leaf); }
+	private _navigation?: TerminalWindowNavigation;
+	private get navigation(): TerminalWindowNavigation { return this._navigation ??= new TerminalWindowNavigation(this.app, () => this.getActiveTerminalView(), view => this.isTerminalView(view)); }
 
-			await this.focusAlwaysOnTopTerminal(existingView);
-			return;
-		}
-
-		const sourceView = terminalView ?? this.getActiveTerminalView();
-		if (!sourceView) {
-			new Notice(t('notices.presetScript.terminalUnavailable'));
-			return;
-		}
-
-		const sourceTerminal = await sourceView.waitForTerminalInstance().catch(() => null);
-		if (!sourceTerminal) {
-			new Notice(t('terminal.notInitialized'));
-			return;
-		}
-
-		let targetWindow = sourceView.leaf.getContainer?.().win;
-		if (this.isLeafInMainWindow(sourceView.leaf)) {
-			try {
-				targetWindow = this.app.workspace.moveLeafToPopout(sourceView.leaf, {
-					size: {
-						width: 960,
-						height: 640,
-					},
-				}).win;
-			} catch (error) {
-				errorLog('[TerminalAgentController] Failed to move terminal to popout window:', error);
-				const message = error instanceof Error ? error.message : String(error);
-				new Notice(t('notices.terminal.alwaysOnTopOpenFailed', { message }), 5000);
-				return;
-			}
-		}
-
-		this._alwaysOnTopTerminalLeaf = sourceView.leaf;
-		this.updateAlwaysOnTopTabBadges();
-		await this.waitForTerminalWindowMigration(sourceView, targetWindow);
-		this.app.workspace.setActiveLeaf(sourceView.leaf, { focus: true });
-		targetWindow?.focus();
-		await this.applyAlwaysOnTopToLeaf(sourceView.leaf, targetWindow);
-		this.updateAlwaysOnTopTabBadges();
-		sourceTerminal.focus();
-	}
-
-	getAlwaysOnTopTerminalLabel(terminalView?: TerminalView | null): string {
-		const trackedView = this.getTrackedAlwaysOnTopTerminalView();
-		const state = getAlwaysOnTopTerminalMenuState(
-			!!trackedView,
-			!!terminalView && trackedView?.leaf === terminalView.leaf,
-		);
-		return t(getAlwaysOnTopTerminalLabelKey(state));
-	}
-
-	isAlwaysOnTopTerminal(terminalView?: TerminalView | null): boolean {
-		const trackedView = this.getTrackedAlwaysOnTopTerminalView();
-		return !!terminalView && trackedView?.leaf === terminalView.leaf;
-	}
-
-	handleTerminalViewClosed(terminalView: TerminalView): void {
-		if (this._alwaysOnTopTerminalLeaf === terminalView.leaf) {
-			this._alwaysOnTopTerminalLeaf = null;
-			this.updateAlwaysOnTopTabBadges();
-		}
-	}
-
-	private getTrackedAlwaysOnTopTerminalView(): TerminalView | null {
-		const leaf = this._alwaysOnTopTerminalLeaf;
-		if (leaf && this.isTerminalView(leaf.view)) {
-			return leaf.view;
-		}
-
-		this._alwaysOnTopTerminalLeaf = null;
-		this.updateAlwaysOnTopTabBadges();
-		return null;
-	}
-
-	private async focusAlwaysOnTopTerminal(terminalView: TerminalView): Promise<void> {
-		const targetWindow = terminalView.leaf.getContainer?.().win;
-		await this.waitForTerminalWindowMigration(terminalView, targetWindow);
-		this.app.workspace.setActiveLeaf(terminalView.leaf, { focus: true });
-		targetWindow?.focus();
-		await this.applyAlwaysOnTopToLeaf(terminalView.leaf, targetWindow);
-		this.updateAlwaysOnTopTabBadges();
-		terminalView.getTerminalInstance()?.focus();
-	}
-
-	private async restoreAlwaysOnTopTerminalToMainWindow(terminalView: TerminalView): Promise<void> {
-		const terminal = terminalView.releaseTerminalInstance();
-		if (!terminal) {
-			new Notice(t('terminal.notInitialized'));
-			return;
-		}
-
-		const sourceLeaf = terminalView.leaf;
-		const sourceWindow = sourceLeaf.getContainer?.().win;
-		const browserWindow = await this.waitForBrowserWindowForLeaf(sourceLeaf, sourceWindow, 500);
-		if (browserWindow?.isAlwaysOnTop?.()) {
-			this.setBrowserWindowAlwaysOnTop(browserWindow, false);
-		} else if (browserWindow) {
-			this.setBrowserWindowAlwaysOnTop(browserWindow, false);
-		}
-
-		this._alwaysOnTopTerminalLeaf = null;
-		this.updateAlwaysOnTopTabBadges();
-
-		const { workspace } = this.app;
-		const mainLeaf = this.getLeafForRestoredTerminal();
-		this.pendingRestoredTerminals.set(mainLeaf, terminal);
-		await mainLeaf.setViewState({
-			type: TERMINAL_VIEW_TYPE,
-			active: true,
-		});
-
-		const restoredView = await this.waitForTerminalViewInLeaf(mainLeaf);
-		if (!restoredView) {
-			errorLog('[TerminalAgentController] Failed to restore always-on-top terminal: target view did not load');
-			this.pendingRestoredTerminals.delete(mainLeaf);
-			await this.recoverReleasedTerminalInSourceView(terminalView, terminal, sourceWindow);
-			new Notice(t('notices.terminal.alwaysOnTopRestoreFailed'), 5000);
-			return;
-		}
-
-		this.pendingRestoredTerminals.delete(mainLeaf);
-		restoredView.copyWorkbenchStateFrom(terminalView);
-		if (restoredView.getTerminalInstance() !== terminal) {
-			restoredView.adoptTerminalInstance(terminal);
-		}
-		workspace.setActiveLeaf(mainLeaf, { focus: true });
-		terminal.focus();
-		sourceLeaf.detach();
-	}
-
-	consumePendingRestoredTerminal(leaf: WorkspaceLeaf): TerminalInstance | null {
-		const terminal = this.pendingRestoredTerminals.get(leaf);
-		if (!terminal) {
-			return null;
-		}
-
-		this.pendingRestoredTerminals.delete(leaf);
-		return terminal;
-	}
-
-	private getLeafForRestoredTerminal(): WorkspaceLeaf {
-		const { workspace } = this.app;
-		const previousActiveLeaf = workspace.getMostRecentLeaf();
-		const rootLeaf = workspace.getMostRecentLeaf(workspace.rootSplit);
-		if (rootLeaf) {
-			workspace.setActiveLeaf(rootLeaf, { focus: false });
-		}
-		const leaf = workspace.getLeaf('tab');
-		if (previousActiveLeaf && previousActiveLeaf !== rootLeaf) {
-			workspace.setActiveLeaf(previousActiveLeaf, { focus: false });
-		}
-		return leaf;
-	}
-
-	private async waitForTerminalViewInLeaf(leaf: WorkspaceLeaf, timeoutMs = 2000): Promise<TerminalView | null> {
-		const deadline = Date.now() + timeoutMs;
-		do {
-			await leaf.loadIfDeferred?.();
-			if (this.isTerminalView(leaf.view)) {
-				return leaf.view;
-			}
-			await this.delay(50);
-		} while (Date.now() < deadline);
-
-		return this.isTerminalView(leaf.view) ? leaf.view : null;
-	}
-
-	private async recoverReleasedTerminalInSourceView(
-		terminalView: TerminalView,
-		terminal: TerminalInstance,
-		sourceWindow?: Window,
-	): Promise<void> {
-		terminalView.adoptTerminalInstance(terminal);
-		this._alwaysOnTopTerminalLeaf = terminalView.leaf;
-		this.updateAlwaysOnTopTabBadges();
-		await this.applyAlwaysOnTopToLeaf(terminalView.leaf, sourceWindow);
-		terminal.focus();
-	}
-
-	private updateAlwaysOnTopTabBadges(): void {
-		this.removeAlwaysOnTopTabBadges(activeDocument);
-		for (const leaf of this.app.workspace.getLeavesOfType(TERMINAL_VIEW_TYPE)) {
-			const leafDocument = leaf.view?.containerEl?.ownerDocument;
-			if (leafDocument && leafDocument !== activeDocument) {
-				this.removeAlwaysOnTopTabBadges(leafDocument);
-			}
-		}
-
-		const leaf = this._alwaysOnTopTerminalLeaf;
-		if (!leaf || !this.isTerminalView(leaf.view)) {
-			return;
-		}
-
-		const tabHeader = this.getLeafTabHeader(leaf);
-		if (!tabHeader) {
-			return;
-		}
-
-		const badge = tabHeader.ownerDocument.createElement('span');
-		badge.addClass(ALWAYS_ON_TOP_TAB_BADGE_CLASS);
-		badge.setAttribute('aria-label', t('terminal.contextMenu.alreadyPinnedToTop'));
-		badge.setAttribute('title', t('terminal.contextMenu.alreadyPinnedToTop'));
-		setIcon(badge, 'lock');
-
-		const titleEl = tabHeader.querySelector('.workspace-tab-header-inner-title');
-		if (titleEl) {
-			titleEl.insertAdjacentElement('afterend', badge);
-			return;
-		}
-
-		tabHeader.querySelector('.workspace-tab-header-inner')?.appendChild(badge);
-	}
-
-	private removeAlwaysOnTopTabBadges(targetDocument: Document): void {
-		targetDocument.querySelectorAll(`.${ALWAYS_ON_TOP_TAB_BADGE_CLASS}`).forEach((badge) => badge.remove());
-	}
-
-	private getLeafTabHeader(leaf: WorkspaceLeaf): HTMLElement | null {
-		const leafWithTabHeader = leaf as WorkspaceLeaf & {
-			tabHeaderEl?: HTMLElement;
-			tabHeaderInnerTitleEl?: HTMLElement;
-		};
-		const tabHeader =
-			leafWithTabHeader.tabHeaderEl ??
-			leafWithTabHeader.tabHeaderInnerTitleEl?.closest<HTMLElement>('.workspace-tab-header') ??
-			leaf.view?.containerEl
-				?.closest<HTMLElement>('.workspace-leaf')
-				?.querySelector<HTMLElement>('.workspace-tab-header');
-
-		return tabHeader ?? null;
-	}
-
-	private isLeafInMainWindow(leaf: WorkspaceLeaf): boolean {
-		const leafWindow = leaf.getContainer?.().win;
-		const mainWindow = this.app.workspace.rootSplit?.win;
-		return !leafWindow || !mainWindow || leafWindow === mainWindow;
-	}
-
-	private async waitForTerminalWindowMigration(terminalView: TerminalView, targetWindow?: Window): Promise<void> {
-		const deadline = Date.now() + 1500;
-		do {
-			terminalView.handleHostWindowChanged({ focus: false });
-			const leafWindow = terminalView.leaf.getContainer?.().win;
-			if (!targetWindow || leafWindow === targetWindow) {
-				break;
-			}
-			await this.delay(50);
-		} while (Date.now() < deadline);
-
-		await this.delay(100);
-		terminalView.handleHostWindowChanged({ focus: false });
-	}
-
-	private async applyAlwaysOnTopToLeaf(leaf: WorkspaceLeaf, targetWindow?: Window): Promise<void> {
-		const browserWindow = await this.waitForBrowserWindowForLeaf(leaf, targetWindow);
-		if (!browserWindow) {
-			new Notice(t('notices.terminal.alwaysOnTopUnavailable'), 5000);
-			return;
-		}
-
-		this.setBrowserWindowAlwaysOnTop(browserWindow, true);
-	}
-
-	private async waitForBrowserWindowForLeaf(
-		leaf: WorkspaceLeaf,
-		targetWindow?: Window,
-		timeoutMs = 2000,
-	): Promise<ElectronBrowserWindowLike | null> {
-		const deadline = Date.now() + timeoutMs;
-		do {
-			const browserWindow = this.getBrowserWindowForLeaf(leaf, targetWindow);
-			if (browserWindow) {
-				return browserWindow;
-			}
-			await this.delay(50);
-		} while (Date.now() < deadline);
-
-		return null;
-	}
-
-	private getBrowserWindowForLeaf(leaf: WorkspaceLeaf, targetWindow?: Window): ElectronBrowserWindowLike | null {
-		const containerWindow = targetWindow ?? leaf.getContainer?.().win;
-		return this.getBrowserWindowForDomWindow(containerWindow ?? window);
-	}
-
-	private getBrowserWindowForDomWindow(targetWindow: Window | undefined): ElectronBrowserWindowLike | null {
-		if (!targetWindow) return null;
-
-		const targetRequire = this.getWindowRequire(targetWindow);
-		if (targetRequire) {
-			const browserWindow = this.getBrowserWindowFromRequire(targetRequire);
-			if (browserWindow) return browserWindow;
-		}
-
-		const currentRequire = this.getCurrentRequire();
-		if (targetWindow === window && currentRequire) {
-			return this.getBrowserWindowFromRequire(currentRequire);
-		}
-
-		return null;
-	}
-
-	private getWindowRequire(targetWindow: Window): NodeJS.Require | null {
-		const candidate = targetWindow as Window & { require?: NodeJS.Require };
-		return typeof candidate.require === 'function' ? candidate.require : null;
-	}
-
-	private getCurrentRequire(): NodeJS.Require | null {
-		try {
-			return require;
-		} catch {
-			return null;
-		}
-	}
-
-	private getBrowserWindowFromRequire(runtimeRequire: NodeJS.Require): ElectronBrowserWindowLike | null {
-		const electron = this.getElectronRuntime(runtimeRequire);
-		const browserWindow = electron.remote?.getCurrentWindow?.() ?? null;
-		if (browserWindow) return browserWindow;
-
-		const electronRemote = this.getElectronRemoteRuntime(runtimeRequire);
-		return electronRemote.getCurrentWindow?.() ?? null;
-	}
-
-	private getElectronRuntime(runtimeRequire: NodeJS.Require): ElectronRuntime {
-		try {
-			return runtimeRequire('electron') as ElectronRuntime;
-		} catch {
-			return {};
-		}
-	}
-
-	private getElectronRemoteRuntime(runtimeRequire: NodeJS.Require): ElectronRemoteRuntime {
-		try {
-			return runtimeRequire('@electron/remote') as ElectronRemoteRuntime;
-		} catch {
-			return {};
-		}
-	}
-
-	private setBrowserWindowAlwaysOnTop(browserWindow: ElectronBrowserWindowLike, enabled: boolean): void {
-		try {
-			browserWindow.setAlwaysOnTop(enabled, 'floating');
-		} catch (error) {
-			errorLog('[TerminalAgentController] Failed to set terminal window always-on-top:', error);
-			new Notice(t('notices.terminal.alwaysOnTopUnavailable'), 5000);
-		}
-	}
-
-	private delay(ms: number): Promise<void> {
-		return new Promise((resolve) => window.setTimeout(resolve, ms));
-	}
-
-	/**
-	 * Register all commands
-	 */
 	private registerCommands(): void {
 		this.addCommand({
 			id: 'terminal-quick-switch',
@@ -1155,7 +791,7 @@ export class TerminalAgentController {
 				}
 
 				const terminalView = this.getActiveTerminalView();
-				if (!terminalView && !this._alwaysOnTopTerminalLeaf) {
+				if (!terminalView && !this.navigation.trackedLeaf) {
 					return false;
 				}
 
@@ -1724,7 +1360,7 @@ export class TerminalAgentController {
 	private getLeafForNewTerminal(): WorkspaceLeaf {
 		const routed = getLeafForTerminalRoute(this.app.workspace, this.settings, {
 			terminalViewType: TERMINAL_VIEW_TYPE,
-			excludedLeaf: this._alwaysOnTopTerminalLeaf,
+			excludedLeaf: this.navigation.trackedLeaf,
 		});
 		return avoidOccupiedTerminalLeaf(this.app.workspace, routed, (candidate) =>
 			this.isTerminalView(candidate.view),
@@ -2158,44 +1794,7 @@ export class TerminalAgentController {
 	 *      extra outbound traffic" promise holds out of the box.
 	 */
 	private async refreshAiLauncherAvailability(): Promise<void> {
-		const checkUpdates =
-			this.settings.checkAiLauncherUpdates === true && this.settings.serverConnection?.offlineMode !== true;
-
-		const tasks = AI_LAUNCHER_CATALOG.map(async (entry) => {
-			if (!entry.detectCommand) {
-				return;
-			}
-			const command = entry.detectCommand;
-			const [pathAvailable, localVersion] = await Promise.all([
-				detectCommandAvailability(command).catch((): CommandAvailability => 'unknown'),
-				probeCommandVersion(command).catch(() => ({
-					version: null,
-					resolvedFrom: null,
-					rawOutput: null,
-				})),
-			]);
-
-			this._aiLauncherAvailability.set(command, pathAvailable);
-
-			let latest: { version: string | null; error?: string } | null = null;
-			if (checkUpdates && entry.versionRegistry) {
-				try {
-					latest = await fetchLatestVersion(entry.versionRegistry);
-				} catch (error) {
-					const message = error instanceof Error ? error.message : String(error);
-					latest = { version: null, error: message };
-				}
-			}
-
-			const snapshot = buildAiLauncherStatusSnapshot({
-				pathAvailable,
-				local: { version: localVersion.version, resolvedFrom: localVersion.resolvedFrom },
-				latest,
-			});
-			this.setAiLauncherSnapshot(entry.presetId, snapshot);
-		});
-
-		await Promise.all(tasks);
+		await Promise.all(AI_LAUNCHER_CATALOG.map(entry => this.refreshSingleLauncherSnapshot(entry)));
 	}
 
 	/**
@@ -2445,40 +2044,9 @@ export class TerminalAgentController {
 	 * and update the cached snapshot in place. Returns the new snapshot so
 	 * callers can re-render without re-querying the Map.
 	 */
-	private async refreshSingleLauncherSnapshot(
-		entry: AiLauncherCatalogEntry,
-	): Promise<AiLauncherStatusSnapshot | null> {
-		if (!entry.detectCommand) return null;
-		const command = entry.detectCommand;
-		const checkUpdates =
-			this.settings.checkAiLauncherUpdates === true && this.settings.serverConnection?.offlineMode !== true;
-
-		const [pathAvailable, localVersion] = await Promise.all([
-			detectCommandAvailability(command).catch((): CommandAvailability => 'unknown'),
-			probeCommandVersion(command).catch(() => ({
-				version: null,
-				resolvedFrom: null,
-				rawOutput: null,
-			})),
-		]);
-		this._aiLauncherAvailability.set(command, pathAvailable);
-
-		let latest: { version: string | null; error?: string } | null = null;
-		if (checkUpdates && entry.versionRegistry) {
-			try {
-				latest = await fetchLatestVersion(entry.versionRegistry);
-			} catch (error) {
-				const message = error instanceof Error ? error.message : String(error);
-				latest = { version: null, error: message };
-			}
-		}
-
-		const snapshot = buildAiLauncherStatusSnapshot({
-			pathAvailable,
-			local: { version: localVersion.version, resolvedFrom: localVersion.resolvedFrom },
-			latest,
-		});
-		this.setAiLauncherSnapshot(entry.presetId, snapshot);
+	private async refreshSingleLauncherSnapshot(entry: AiLauncherCatalogEntry): Promise<AiLauncherStatusSnapshot | null> {
+		const snapshot = await probeLauncher(entry, this.settings.checkAiLauncherUpdates === true && this.settings.serverConnection?.offlineMode !== true);
+		if (snapshot && this.isActive()) this.setAiLauncherSnapshot(entry.presetId, snapshot);
 		return snapshot;
 	}
 
@@ -3099,78 +2667,5 @@ export class TerminalAgentController {
 			this.manifest.id,
 			window.require('path') as typeof import('path'),
 		);
-	}
-}
-
-/**
- * Terminal view placeholder
- * Used to lazy-load the terminal view and avoid loading xterm.js at startup
- */
-class TerminalViewPlaceholder extends TerminalView {
-	private plugin: TerminalAgentController;
-	private initialized = false;
-	private initializing = false;
-	private disposed = false;
-
-	constructor(leaf: WorkspaceLeaf, plugin: TerminalAgentController) {
-		// Inject TerminalService lazily to avoid loading xterm.js at startup
-		super(leaf, null, plugin);
-		this.plugin = plugin;
-	}
-
-	async onOpen() {
-		if (this.disposed) return;
-		if (!this.plugin.isActive()) {
-			this.contentEl.empty();
-			renderEmptyState(this.contentEl, {
-				icon: 'terminal',
-				title: sharedT('modules.terminal'),
-				description: sharedT('modules.terminalOff'),
-				action: { label: sharedT('modules.openHome'), run: () => this.plugin.openHome() },
-			});
-			return;
-		}
-		if (this.initialized || this.initializing) return;
-		this.initializing = true;
-		const pendingTerminal = this.plugin.consumePendingRestoredTerminal(this.leaf);
-
-		// Show the loading message
-		this.contentEl.empty();
-		this.contentEl.createEl('div', {
-			text: t('terminal.loading'),
-			cls: 'terminal-loading',
-		});
-
-		try {
-			// Get the real TerminalService
-			const terminalService = await this.plugin.getTerminalService();
-			if (this.disposed) return;
-
-			this.setTerminalService(terminalService);
-
-			// Clear the placeholder content and initialize the terminal view
-			this.contentEl.empty();
-			await super.onOpen();
-			if (this.disposed) return;
-			if (pendingTerminal) {
-				this.adoptTerminalInstance(pendingTerminal);
-			}
-			this.initialized = true;
-		} catch (error) {
-			if (this.disposed) return;
-			errorLog('[TerminalViewPlaceholder] Failed to initialize:', error);
-			this.contentEl.empty();
-			this.contentEl.createEl('div', {
-				text: t('terminal.initFailed', { message: error instanceof Error ? error.message : String(error) }),
-				cls: 'terminal-error',
-			});
-		} finally {
-			this.initializing = false;
-		}
-	}
-
-	async onClose() {
-		this.disposed = true;
-		await super.onClose();
 	}
 }

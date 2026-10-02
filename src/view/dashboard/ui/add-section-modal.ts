@@ -1,3 +1,4 @@
+import { bindLocalizedElement } from '../../primitives/localized-dom';
 import { Modal, setIcon } from 'obsidian';
 import { t } from '../../../shared/i18n/index';
 import { applyModalTheme } from '../appearance/modal-theme';
@@ -55,20 +56,20 @@ export class AddSectionModal extends Modal {
 		const container = contentEl.createDiv({ cls: 'dashboard-modal dashboard-modal--compact' });
 
 		const header = container.createDiv({ cls: 'dashboard-modal-header' });
-		header.createDiv({ cls: 'dashboard-modal-title', text: t('section.addTitle') });
+		bindLocalizedElement(header.createDiv({ cls: 'dashboard-modal-title', text: t('section.addTitle') }), 'section.addTitle');
 
 		const body = container.createDiv({ cls: 'dashboard-modal-body' });
 
-		body.createDiv({ cls: 'dashboard-library-config-section-title', text: t('section.chooseType') });
+		bindLocalizedElement(body.createDiv({ cls: 'dashboard-library-config-section-title', text: t('section.chooseType') }), 'section.chooseType');
 		const grid = body.createDiv({ cls: 'dashboard-add-section-grid' });
 		this.renderTypeGrid(grid);
 
 		const nameRow = body.createDiv({ cls: 'dashboard-library-config-inline-row dashboard-add-section-name-row' });
-		nameRow.createDiv({ cls: 'dashboard-library-config-inline-label', text: t('section.nameLabel') });
-		this.nameInput = nameRow.createEl('input', {
+		bindLocalizedElement(nameRow.createDiv({ cls: 'dashboard-library-config-inline-label', text: t('section.nameLabel') }), 'section.nameLabel');
+		this.nameInput = bindLocalizedElement(nameRow.createEl('input', {
 			cls: 'dashboard-task-input dashboard-section-name-input',
 			attr: { type: 'text', placeholder: t('section.namePlaceholder') },
-		});
+		}), 'section.namePlaceholder', undefined, "placeholder");
 		this.nameInput.addEventListener('keydown', (e) => {
 			if (e.key === 'Enter') {
 				e.preventDefault();
@@ -77,16 +78,16 @@ export class AddSectionModal extends Modal {
 		});
 
 		const footer = container.createDiv({ cls: 'dashboard-modal-footer' });
-		footer
+		bindLocalizedElement(footer
 			.createEl('button', {
 				cls: 'dashboard-modal-btn dashboard-modal-btn--cancel',
 				text: t('common.cancel'),
-			})
+			}), 'common.cancel')
 			.addEventListener('click', () => this.close());
-		const confirmBtn = footer.createEl('button', {
+		const confirmBtn = bindLocalizedElement(footer.createEl('button', {
 			cls: 'dashboard-modal-btn dashboard-modal-btn--confirm',
 			text: t('common.save'),
-		});
+		}), 'common.save');
 		confirmBtn.addEventListener('click', () => this.tryConfirm());
 
 		window.setTimeout(() => this.nameInput?.focus(), 0);
@@ -101,7 +102,7 @@ export class AddSectionModal extends Modal {
 			});
 			const iconEl = card.createDiv({ cls: 'dashboard-add-section-card-icon' });
 			setIcon(iconEl, opt.icon);
-			card.createDiv({ cls: 'dashboard-add-section-card-name', text: t(opt.labelKey) });
+			bindLocalizedElement(card.createDiv({ cls: 'dashboard-add-section-card-name', text: t(opt.labelKey) }), opt.labelKey);
 			card.addEventListener('click', () => {
 				this.selectedType = opt.value;
 				this.renderTypeGrid(grid);

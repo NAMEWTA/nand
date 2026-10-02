@@ -38,7 +38,7 @@ Editing src/, styles.css, manifest.json, main.js, esbuild.config.mjs, eslint.con
 |---|---|
 | Display name | `NAND` |
 | Plugin id | `nand` |
-| View types (frozen) | `nand-dashboard-view`, `nand-editor-view`, `terminal-view`, `nand-contacts-view`, `nand-automation-view` |
+| View types (frozen) | `nand-dashboard-view`, `nand-editor-view`, `terminal-view`, `nand-contacts-view`, `nand-automation-view`, `nand-browser-view` |
 | `minAppVersion` | `1.12.0` |
 | `isDesktopOnly` | `false` |
 | Entry | `src/plugin/main.ts` → committed `main.js` |
@@ -48,11 +48,11 @@ Pinned leaves store the view type string. The project is in pre-release developm
 
 ## Hard rules
 
-1. Keep the view type strings in the identity table. Register the four existing product views on phones and when a module is off. A terminal leaf whose module is off shows `InactiveTerminalView`.
+1. Keep the view type strings in the identity table. Register native product views on phones and when a module is off. A terminal leaf whose module is off shows `InactiveTerminalView`; browser leaves render a disabled/mobile placeholder without creating desktop resources.
 2. Source is layered as `plugin`, `view`, `platform`, `core`, `shared`. The import matrix is in `references/architecture.md` and enforced by `pnpm test:architecture`, including type imports and lazy runtime cycles. Domain logic belongs in `core`; shared is not a dumping ground for feature models.
 3. `plugin/` is the composition root. Views receive explicit host/action contracts; they do not import the plugin class, even with `import type`. Platform adapters never import views or plugin modules. Inject UI actions from composition. TerminalService owns native PTY sessions; views acquire xterm renderers separately.
 4. `src/core/sync/index.ts` stays `export {}`. Dashboard markdown write-back belongs in `src/platform/obsidian/dashboard/`.
-5. Comments never rewrite the note. Bodies live in `.nand/editor/comments/`, not in `data.json` and not in the plugin folder.
+5. User entities and records use Markdown; NAND-owned configuration/runtime JSON belongs under vault `.nand/` by domain/device, never in the plugin installation directory. No legacy migration or dual writes. Comments never rewrite the note. Bodies live in `.nand/editor/comments/`, not in `data.json` and not in the plugin folder.
 6. Construct `TerminalAgentController` only when `Platform.isDesktopApp` and the terminal module is on. Skip music on phones. Destroy music when the dashboard module turns off.
 7. Source files use relative imports. `tsconfig` `baseUrl` is `src`; that does not allow `dashboard-view/...` specifiers.
 8. User-facing copy goes through `src/shared/i18n/`, with `en` and `zh` in the same module, both merged in `runtime.ts`. Terminal strings are keys prefixed `terminalAgent.` in `src/shared/i18n/terminal-agent.ts`. `src/shared/i18n/terminal-accessor.ts` only adds that prefix. Do not add a new `section-NN.ts`. A missing key is echoed by `t()`. Default language is `zh`.

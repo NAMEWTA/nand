@@ -1,1 +1,0 @@
-(async()=>{const old=app.plugins.plugins.nand.automationHost.service;await app.plugins.disablePlugin('nand');await old.writes;await app.plugins.enablePlugin('nand');return {modules:app.plugins.plugins.nand.settings.modules,enabled:app.plugins.plugins.nand.automationHost.service.executionEnabled};})()

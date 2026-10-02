@@ -42,6 +42,7 @@ export function renderSidebarHabitWidget(
 		mountDashboardPanel(
 			widget,
 			h(HabitPanel, {
+				persistence: service,
 				rows: service.getHabits().map((habit) => ({
 					id: habit.id,
 					name: habit.name,

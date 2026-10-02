@@ -1,3 +1,4 @@
+import { bindLocalizedElement } from '../../primitives/localized-dom';
 import { App } from 'obsidian';
 import { t } from '../../../shared/i18n/index';
 import { extractFrontmatterProperties } from './library-file-result';
@@ -48,18 +49,18 @@ export class VisiblePropertiesEditor {
 			...new Set(initial.filter((k) => !COMMON_PROPERTY_KEYS.includes(k) && !scanned.includes(k))),
 		];
 
-		host.createDiv({ cls: 'dashboard-library-config-hint', text: t('library.visiblePropertiesHint') });
+		bindLocalizedElement(host.createDiv({ cls: 'dashboard-library-config-hint', text: t('library.visiblePropertiesHint') }), 'library.visiblePropertiesHint');
 
 		const chipsHost = host.createDiv({ cls: 'dashboard-library-filter-values' });
 		const addRow = host.createDiv({ cls: 'dashboard-media-folder-input-row' });
-		const input = addRow.createEl('input', {
+		const input = bindLocalizedElement(addRow.createEl('input', {
 			cls: 'dashboard-media-filter-folder',
 			attr: { type: 'text', placeholder: t('library.visibleProperties') },
-		});
-		const addBtn = addRow.createEl('button', {
+		}), 'library.visibleProperties', undefined, "placeholder");
+		const addBtn = bindLocalizedElement(addRow.createEl('button', {
 			cls: 'dashboard-modal-btn dashboard-modal-btn--confirm',
 			text: t('library.addProperty'),
-		});
+		}), 'library.addProperty');
 
 		const candidates = (): string[] => [...new Set([...COMMON_PROPERTY_KEYS, ...scanned, ...this.customKeys])];
 

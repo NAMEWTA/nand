@@ -1,8 +1,9 @@
+import type { ArchiveFolderEntry } from './resources';
 /** File identity is stable during a rename; the adapter owns the actual file objects. */
 export interface ContactsFile {
 	readonly path: string;
 	readonly extension: string;
-	readonly stat: { mtime: number };
+	readonly stat: { mtime: number; size: number };
 }
 export interface ContactsFiles {
 	readonly formatGuide: string;
@@ -14,7 +15,11 @@ export interface ContactsFiles {
 	cachedRead(file: ContactsFile): Promise<string>;
 	process(file: ContactsFile, update: (latest: string) => string): Promise<string>;
 	create(path: string, content: string): Promise<ContactsFile>;
-	trashFile(file: ContactsFile): Promise<void>;
+	createBinary(path: string, content: ArrayBuffer): Promise<ContactsFile>;
+	listFolder(path: string): ArchiveFolderEntry[];
+	trashFolder(path: string): Promise<void>;
+	checkFolderEditors(path: string): Promise<void>;
+	createFolder(path: string): Promise<void>;
 	mkdir(path: string): Promise<void>;
 	checkEditor(file: ContactsFile, disk: string): void;
 }

@@ -1,3 +1,4 @@
+import { SaveStatus } from '../../primitives/SaveStatus';
 import { Notice } from 'obsidian';
 import { useLayoutEffect, useRef, useState } from 'preact/hooks';
 import { expenseToday, formatExpenseAmount, sanitizeAmountInput, type ExpenseType } from '../../../core/expense/model';
@@ -71,7 +72,7 @@ export function ExpensePanel({
 		}
 		setAmounts((values) => ({ ...values, [type]: '' }));
 		setNote('');
-		new Notice(
+		void service.flush().then(() => { new Notice(
 			t('expense.added', {
 				type: t(type === 'expense' ? 'expense.expenseLabel' : 'expense.incomeLabel'),
 				amount: `${currency}${formatExpenseAmount(record.amount)}`,
@@ -79,10 +80,12 @@ export function ExpensePanel({
 				date: record.date.slice(5),
 			}),
 		);
+		}).catch(() => { new Notice(t('storage.unsaved')); });
 		inputs.current[type]?.focus();
 	};
 	return (
 		<>
+			<SaveStatus source={service} />
 			<div class="dashboard-sidebar-expense-top">
 				<div class="dashboard-sidebar-expense-title">
 					<Icon className="dashboard-sidebar-expense-title-icon" name="wallet" />

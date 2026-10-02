@@ -1,3 +1,4 @@
+import { bindLocalizedControl } from '../../primitives/localized-dom';
 import { BaseComponent, ButtonComponent, ExtraButtonComponent } from 'obsidian';
 import { STRINGS } from '../../../shared/i18n/icons-accessor';
 
@@ -23,21 +24,21 @@ export default class IconModeButtons extends BaseComponent {
 	constructor(containerEl: HTMLElement) {
 		super();
 
-		this.iconButton = new ButtonComponent(containerEl).setButtonText('Icons');
-		this.emojiButton = new ButtonComponent(containerEl).setButtonText('Emojis');
+		this.iconButton = bindLocalizedControl(new ButtonComponent(containerEl).setButtonText(STRINGS.iconPicker.toggleIcons), "buttonText", "iconic.iconPicker.toggleIcons");
+		this.emojiButton = bindLocalizedControl(new ButtonComponent(containerEl).setButtonText(STRINGS.iconPicker.toggleEmojis), "buttonText", "iconic.iconPicker.toggleEmojis");
 		this.iconButtonEl = this.iconButton.buttonEl;
 		this.emojiButtonEl = this.emojiButton.buttonEl;
 
-		this.iconButton
-			.setTooltip(STRINGS.iconPicker.toggleIcons, { placement: 'top', delay: 300 })
+		bindLocalizedControl(this.iconButton
+			.setTooltip(STRINGS.iconPicker.toggleIcons, { placement: 'top', delay: 300 }), "tooltip", "iconic.iconPicker.toggleIcons")
 			.onClick(() => void this.setIconMode(!this.iconMode))
 			.then(() =>
 				this.iconButtonEl.addEventListener('pointerdown', (event) => {
 					event.preventDefault(); // Will not steal keyboard focus when clicked
 				}),
 			);
-		this.emojiButton
-			.setTooltip(STRINGS.iconPicker.toggleEmojis, { placement: 'top', delay: 300 })
+		bindLocalizedControl(this.emojiButton
+			.setTooltip(STRINGS.iconPicker.toggleEmojis, { placement: 'top', delay: 300 }), "tooltip", "iconic.iconPicker.toggleEmojis")
 			.onClick(() => void this.setEmojiMode(!this.emojiMode))
 			.then(() =>
 				this.emojiButtonEl.addEventListener('pointerdown', (event) => {

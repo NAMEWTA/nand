@@ -1,3 +1,4 @@
+import { bindLocalizedControl } from '../../primitives/localized-dom';
 import { ExtraButtonComponent } from 'obsidian';
 import { STRINGS } from '../../../shared/i18n/icons-accessor';
 
@@ -8,7 +9,7 @@ export default class IconColorResetComponent extends ExtraButtonComponent {
 	constructor(containerEl: HTMLElement) {
 		super(containerEl);
 		super.setIcon('lucide-rotate-ccw');
-		super.setTooltip(STRINGS.iconPicker.resetColor);
+		bindLocalizedControl(super.setTooltip(STRINGS.iconPicker.resetColor), "tooltip", "iconic.iconPicker.resetColor");
 		this.extraSettingsEl.addClass('iconic-reset-color');
 		this.extraSettingsEl.tabIndex = 0;
 	}

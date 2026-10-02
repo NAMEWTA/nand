@@ -1,39 +1,16 @@
 import { Setting, type TextComponent } from 'obsidian';
 import type { DashboardLayoutMode } from '../../core/dashboard/types/index';
-import { setLanguage, t, type Language } from '../../shared/i18n/index';
+import { t } from '../../shared/i18n/index';
 import { ThemeStudioModal } from '../../view/dashboard/appearance/theme-studio-modal';
 import { QuickNoteConfigModal } from '../../view/dashboard/notes/quick-note-config-modal';
 import { PathPickerModal } from '../../view/dashboard/ui/path-picker-modal';
 import type { DashboardSettingTab } from './settings-tab';
 
-/** Top block: layout, language, style, quick notes, paths. Shared by
+/** Dashboard preferences: layout, style, quick notes, paths. Shared by
  *  display() (pre-1.13) and the declarative General section (1.13+). */
 export function renderGeneralSettings(this: DashboardSettingTab, containerEl: HTMLElement): void {
 	new Setting(containerEl).setName(t('settings.layoutMode'));
 	this.renderLayoutPicker(containerEl);
-
-	new Setting(containerEl)
-		.setName(t('settings.language'))
-		.setDesc(t('settings.languageDesc'))
-		.addDropdown((dropdown) =>
-			dropdown
-				.addOptions({
-					en: t('settings.languageEn'),
-					zh: t('settings.languageZh'),
-				})
-				.setValue(this.plugin.settings.language)
-				.onChange(async (value) => {
-					const lang = value as Language;
-					this.plugin.settings = {
-						...this.plugin.settings,
-						language: lang,
-					};
-					setLanguage(lang);
-					await this.plugin.saveSettings();
-					this.refresh();
-					this.plugin.refreshAllDashboards();
-				}),
-		);
 
 	new Setting(containerEl)
 		.setName(t('settings.stylePreset'))

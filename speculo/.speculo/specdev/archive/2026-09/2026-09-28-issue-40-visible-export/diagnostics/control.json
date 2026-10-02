@@ -1,6 +1,0 @@
-{
-  "path": "src/platform/obsidian/ai-vault/service.ts",
-  "find": "'.nand/terminal-agent/exports'",
-  "replace": "'NAND Exports'",
-  "purpose": "只改变导出父目录，内容/会话/存储边界不变"
-}

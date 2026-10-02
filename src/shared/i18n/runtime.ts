@@ -1,6 +1,7 @@
+import { messages as browser } from './browser';
+import { messages as fortune } from './fortune';
+import { messages as calendar } from './calendar';
 import { messages as m26 } from './anniversary-memorial-day-widget';
-import { messages as m40 } from './anniversary-widget';
-import { messages as m36 } from './appearance-studio';
 import { messages as m7 } from './appearance-studio-advanced-global-reset';
 import { messages as m6 } from './appearance-studio-theme-studio';
 import { messages as automation } from './automation';
@@ -31,10 +32,6 @@ import { messages as m8 } from './quick-notes-region';
 import { messages as m34 } from './reading';
 import { messages as m16 } from './recent';
 import { messages as m29 } from './reminder';
-import { messages as m37 } from './section-37';
-import { messages as m38 } from './section-38';
-import { messages as m41 } from './section-41';
-import { messages as m42 } from './section-42';
 import { messages as m1 } from './settings';
 import { messages as m4 } from './sidebar-strip-resize-handles-aria-labels';
 import { messages as m5 } from './style-presets';
@@ -81,6 +78,9 @@ function mergeDicts(...parts: Array<Record<string, string>>): Record<string, str
 
 const translations: Record<Language, Record<string, string>> = {
 	en: mergeDicts(
+		calendar.en,
+		fortune.en,
+		browser.en,
 		iconicTranslations.en,
 		m0.en,
 		m1.en,
@@ -117,12 +117,6 @@ const translations: Record<Language, Record<string, string>> = {
 		m33.en,
 		m34.en,
 		m35.en,
-		m36.en,
-		m37.en,
-		m38.en,
-		m40.en,
-		m41.en,
-		m42.en,
 		m43.en,
 		m44.en,
 		m45.en,
@@ -130,6 +124,9 @@ const translations: Record<Language, Record<string, string>> = {
 		automation.en,
 	),
 	zh: mergeDicts(
+		calendar.zh,
+		fortune.zh,
+		browser.zh,
 		iconicTranslations.zh,
 		m0.zh,
 		m1.zh,
@@ -166,12 +163,6 @@ const translations: Record<Language, Record<string, string>> = {
 		m33.zh,
 		m34.zh,
 		m35.zh,
-		m36.zh,
-		m37.zh,
-		m38.zh,
-		m40.zh,
-		m41.zh,
-		m42.zh,
 		m43.zh,
 		m44.zh,
 		m45.zh,

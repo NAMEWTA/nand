@@ -85,7 +85,7 @@ assert.match(propCase.serialized, /viewGroupBy: "status"/, 'property key persist
 
 const noneCase = roundTrip(['      viewGroupMode: none']);
 assert.equal(noneCase.mode, 'none', "'none' parses as explicit off");
-assert.doesNotMatch(noneCase.serialized, /viewGroupMode/, "'none' (default) writes nothing");
+assert.match(noneCase.serialized, /viewGroupMode: none/, 'explicit default is preserved');
 
 const absentCase = roundTrip(['      viewMode: grid']);
 assert.equal(absentCase.mode, undefined, 'absent mode parses to undefined');
@@ -93,11 +93,11 @@ assert.doesNotMatch(absentCase.serialized, /viewGroup/, 'absent mode writes noth
 
 const garbageCase = roundTrip(['      viewGroupMode: sideways']);
 assert.equal(garbageCase.mode, undefined, 'garbage mode dropped');
-assert.doesNotMatch(garbageCase.serialized, /viewGroup/, 'garbage mode writes nothing');
+assert.match(garbageCase.serialized, /viewGroupMode: sideways/, 'unknown author value is preserved');
 
 const strayByKey = roundTrip(['      viewGroupBy: "status"']);
 assert.equal(strayByKey.by, undefined, 'viewGroupBy without property mode is ignored');
-assert.doesNotMatch(strayByKey.serialized, /viewGroupBy/, 'stray viewGroupBy writes nothing');
+assert.match(strayByKey.serialized, /viewGroupBy/, 'unused author property is preserved');
 
 const folderByKey = roundTrip(['      viewGroupMode: folder', '      viewGroupBy: "status"']);
 assert.equal(folderByKey.by, undefined, 'viewGroupBy under folder mode is ignored');

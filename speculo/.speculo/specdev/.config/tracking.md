@@ -1,13 +1,9 @@
-# 变更追踪约定
+# 当前工作与基线追踪
 
-SpecDev 只使用本地 Markdown/JSON 工件跟踪开发。远程 Issue、URL 或指定内容必须先由 Triage 冻结为 `<Path>{roots.state}/specdev/changes/{change}/source.md</Path>`；远程状态、label、assignee 和 dependency 不替代本地 change、Ticket、Map、Goal Plan 或 Evidence。
+status.json 使用现有 SpecDev v5 全局结构：active 指向仍需实施或验收的 change，archived 指向保留的最新基线。目录与索引必须同步，不能将缺失目录列为活动工作。
 
-- change 根：`<Path>{roots.state}/specdev/changes/</Path>`。
-- 单个 change：`<Path>{roots.state}/specdev/changes/{change}/</Path>`，其中 `{change}` 使用 `<YYYY-MM-DD>-<kebab-topic>`。
-- 一个 change 表示一个可独立说明、实现、验证和归档的目标。
-- `<Path>{roots.state}/specdev/status.json</Path>` 维护全局活动索引；`<Path>{roots.state}/specdev/changes/{change}/.status.json</Path>` 维护单个 change 生命周期。
-- Ticket 文件是 Ticket 状态权威；`<Path>{roots.state}/specdev/changes/{change}/tickets-map.md</Path>` 是同步投影。
-- 工件状态应在同一次操作中同步，避免入口状态、Ticket 状态与 Map 状态漂移。
-- 完成条件：全部必需 Ticket 为 `done` 或有批准的 `cancelled`，证据齐全，无未批准 deviation，change 级验证通过。
-- 归档后的 `<Path>{roots.state}/specdev/archive/YYYY-MM/{change}/</Path>` 默认只读；后续纠正通过新 change 和 supersedes 链完成。
-- 可关闭的远程来源在本地完成后由 Triage reconcile；`closed`、显式 `waived` 或 `not-applicable` 后才归档。完成后若要把 Ticket 记到 GitHub，由 T-triage publish 写入 `<Path>{roots.state}/specdev/changes/{change}/publish.md</Path>`；`pending`/`publish-failed` 不可归档。尚未成 Change 的记事项由 T-triage capture 写入 `<Path>{roots.state}/specdev/capture.md</Path>`（缺失合法），Issue 保持 open，不创建 change。发布计数与 inbox 计数都以对应本地账本为准，标签词表见 T-triage classification-map。远程 Issue 仍不是开发权威。
+changes/<日期>-<主题>/ 记录未完成目标、边界和验收条件；完成的实现结论进入当前 ADR、context 和用户指南。archive/<年月>/<日期>-<主题>/ 保存当前交付基线与有明确适用范围的证据，不重复保存整套文档副本。
+
+本轮文档重建获用户明确授权，清理旧 change、归档和附件并保留当前结论。代码提交、版本发布和远程 Issue 状态不由文档整理推断，不能因此自动提交、发布或关闭 Issue。
+
+每次交付注明源码基准、工作区覆盖范围、构建标识、实际检查与尚未验证项；历史证据保留原适用范围。未完成验收不能通过修改记录变为通过。

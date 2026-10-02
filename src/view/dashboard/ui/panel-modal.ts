@@ -2,9 +2,11 @@ import { App, Modal } from 'obsidian';
 import { render, type ComponentChild } from 'preact';
 import { applyModalTheme, removeNativeModalCloseButton } from '../appearance/modal-theme';
 import { closeDashboardDialogs } from './dialog-scope';
+import { onLanguageChanged } from '../../../shared/i18n';
 const openPanels = new WeakMap<App, Set<DashboardPanelModal>>();
 /** Native Modal owns focus, Escape and stacking. Composition closes its panels when disabling/unloading. */
 export class DashboardPanelModal extends Modal {
+	private languageCleanup?: () => void;
 	constructor(
 		app: App,
 		private readonly className: string,
@@ -27,12 +29,15 @@ export class DashboardPanelModal extends Modal {
 		}
 		this.contentEl.addClass(...this.className.split(' '));
 		applyModalTheme(this.contentEl);
-		render(
+		const paint = () => render(
 			this.panel(() => this.close(), this.contentEl),
 			this.contentEl,
 		);
+		paint();
+		this.languageCleanup = onLanguageChanged(paint);
 	}
 	onClose(): void {
+		this.languageCleanup?.();
 		openPanels.get(this.app)?.delete(this);
 		render(null, this.contentEl);
 		this.contentEl.empty();

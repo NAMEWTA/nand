@@ -1,6 +1,0 @@
-{"saved":[{"id":"2d48bceb-fb33-4574-8752-895d9471f191","name":"probe","enabled":true,"deviceId":"probe","revision":1,"schedule":{"kind":"manual"},"action":{"kind":"agent","agentId":"claude-code","prompt":"probe","cwd":"/synthetic-vault","sessionMode":"fresh"},"channels":["in-app"],"notifyOn":"always","graceMinutes":720,"createdAt":1790575238551,"updatedAt":1790575238551}],"available":0}
-elapsed_ms=137
-#38 empty available-agent list must not save invisible claude-code
-
-1 !== 0
-

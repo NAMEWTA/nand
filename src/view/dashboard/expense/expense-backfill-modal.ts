@@ -1,3 +1,4 @@
+import { bindLocalizedElement } from '../../primitives/localized-dom';
 import { App, Modal, Notice } from 'obsidian';
 import {
 	EXPENSE_MAX_NOTE_LENGTH,
@@ -65,16 +66,16 @@ export class ExpenseBackfillModal extends Modal {
 
 		const container = contentEl.createDiv({ cls: 'dashboard-modal dashboard-modal--compact' });
 		const header = container.createDiv({ cls: 'dashboard-modal-header' });
-		header.createDiv({
+		bindLocalizedElement(header.createDiv({
 			cls: 'dashboard-modal-title',
 			text: t(initial ? 'expense.editTitle' : 'expense.backfillTitle'),
-		});
+		}), initial ? 'expense.editTitle' : 'expense.backfillTitle');
 
 		const body = container.createDiv({ cls: 'dashboard-modal-body' });
 
 		// Date (defaults to today; the native picker caps it at today).
 		const dateSection = body.createDiv({ cls: 'dashboard-library-config-section' });
-		dateSection.createDiv({ cls: 'dashboard-library-config-section-title', text: t('expense.dateLabel') });
+		bindLocalizedElement(dateSection.createDiv({ cls: 'dashboard-library-config-section-title', text: t('expense.dateLabel') }), 'expense.dateLabel');
 		const dateInput = dateSection.createEl('input', {
 			cls: 'dashboard-modal-input dashboard-expense-backfill-date',
 			attr: { type: 'date', value: initial?.date ?? expenseToday(), max: expenseToday() },
@@ -82,7 +83,7 @@ export class ExpenseBackfillModal extends Modal {
 
 		// Expense / income toggle.
 		const typeSection = body.createDiv({ cls: 'dashboard-library-config-section' });
-		typeSection.createDiv({ cls: 'dashboard-library-config-section-title', text: t('expense.colType') });
+		bindLocalizedElement(typeSection.createDiv({ cls: 'dashboard-library-config-section-title', text: t('expense.colType') }), 'expense.colType');
 		const typeRow = typeSection.createDiv({ cls: 'dashboard-library-view-toggle' });
 		const typeOptions: { value: ExpenseType; labelKey: string }[] = [
 			{ value: 'expense', labelKey: 'expense.typeExpense' },
@@ -107,10 +108,10 @@ export class ExpenseBackfillModal extends Modal {
 			const sanitized = sanitizeAmountInput(amountInput.value);
 			if (sanitized !== amountInput.value) amountInput.value = sanitized;
 		});
-		const select = entryRow.createEl('select', {
+		const select = bindLocalizedElement(entryRow.createEl('select', {
 			cls: 'dashboard-modal-input dashboard-expense-backfill-category',
 			attr: { 'aria-label': t('expense.colCategory') },
-		});
+		}), 'expense.colCategory', undefined, "aria-label");
 		this.categorySelect = select;
 
 		/** Rebuild the options when the direction toggle changes (custom
@@ -124,10 +125,10 @@ export class ExpenseBackfillModal extends Modal {
 		if (service) wireCategorySelect(select, service, this.typeValue);
 
 		for (const opt of typeOptions) {
-			const btn = typeRow.createEl('button', {
+			const btn = bindLocalizedElement(typeRow.createEl('button', {
 				cls: 'dashboard-library-view-btn' + (opt.value === this.typeValue ? ' active' : ''),
 				text: t(opt.labelKey),
-			});
+			}), opt.labelKey);
 			btn.addEventListener('click', () => {
 				this.typeValue = opt.value;
 				typeRow.querySelectorAll('.dashboard-library-view-btn').forEach((b) => b.removeClass('active'));
@@ -138,8 +139,8 @@ export class ExpenseBackfillModal extends Modal {
 
 		// Optional note.
 		const noteSection = body.createDiv({ cls: 'dashboard-library-config-section' });
-		noteSection.createDiv({ cls: 'dashboard-library-config-section-title', text: t('expense.colNote') });
-		const noteInput = noteSection.createEl('input', {
+		bindLocalizedElement(noteSection.createDiv({ cls: 'dashboard-library-config-section-title', text: t('expense.colNote') }), 'expense.colNote');
+		const noteInput = bindLocalizedElement(noteSection.createEl('input', {
 			cls: 'dashboard-modal-input',
 			attr: {
 				type: 'text',
@@ -147,19 +148,19 @@ export class ExpenseBackfillModal extends Modal {
 				placeholder: t('expense.notePlaceholder'),
 				...(initial?.note ? { value: initial.note } : {}),
 			},
-		});
+		}), 'expense.notePlaceholder', undefined, "placeholder");
 
 		const footer = container.createDiv({ cls: 'dashboard-modal-footer' });
-		footer
+		bindLocalizedElement(footer
 			.createEl('button', {
 				cls: 'dashboard-modal-btn dashboard-modal-btn--cancel',
 				text: t('common.cancel'),
-			})
+			}), 'common.cancel')
 			.addEventListener('click', () => this.close());
-		const saveBtn = footer.createEl('button', {
+		const saveBtn = bindLocalizedElement(footer.createEl('button', {
 			cls: 'dashboard-modal-btn dashboard-modal-btn--confirm',
 			text: t('common.save'),
-		});
+		}), 'common.save');
 		saveBtn.addEventListener('click', () => this.submit(dateInput, amountInput, noteInput));
 		for (const input of [amountInput, noteInput]) {
 			input.addEventListener('keydown', (e) => {

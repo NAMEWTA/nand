@@ -1,4 +1,3 @@
-export { readLegacyTerminalSettings } from '../../../view/terminal/settings/legacy';
 export {
 	renderStackedTerminalAgentSettings,
 	renderTerminalAgentSettings,

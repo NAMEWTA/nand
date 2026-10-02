@@ -1,8 +1,10 @@
+import { bindLocalizedOptions } from '../../primitives/localized-dom';
 /**
  * Terminal settings renderer
  * Responsible for rendering all terminal-related settings
  */
 
+import { bindLocalizedElement, bindLocalizedControl } from '../../primitives/localized-dom';
 import type { App, ColorComponent, TextComponent } from 'obsidian';
 import { Modal, Notice, Platform, Setting, ToggleComponent, setIcon } from 'obsidian';
 import type { BinaryDownloadSource, PresetScript, ShellType } from '../../../core/pty/settings';
@@ -107,24 +109,24 @@ class ConfirmModal extends Modal {
 		contentEl.empty();
 
 		const titleEl = contentEl.createDiv({ cls: 'modal-title' });
-		titleEl.createDiv({ cls: 'modal-title-text', text: t('common.confirm') });
+		bindLocalizedElement(titleEl.createDiv({ cls: 'modal-title-text', text: t('common.confirm') }), 'terminalAgent.common.confirm');
 
 		contentEl.createEl('p', { text: this.message });
 
 		const buttonContainer = contentEl.createDiv({ cls: 'modal-button-container' });
-		const cancelBtn = buttonContainer.createEl('button', {
+		const cancelBtn = bindLocalizedElement(buttonContainer.createEl('button', {
 			cls: 'mod-cancel',
 			text: t('common.cancel'),
-		});
+		}), 'terminalAgent.common.cancel');
 		cancelBtn.addEventListener('click', () => {
 			this.onCancel();
 			this.close();
 		});
 
-		const confirmBtn = buttonContainer.createEl('button', {
+		const confirmBtn = bindLocalizedElement(buttonContainer.createEl('button', {
 			cls: 'mod-cta',
 			text: t('common.confirm'),
-		});
+		}), 'terminalAgent.common.confirm');
 		confirmBtn.addEventListener('click', () => {
 			this.onConfirm();
 			this.close();
@@ -258,17 +260,17 @@ export class TerminalSettingsRenderer extends BaseSettingsRenderer {
 	private renderShellSettings(containerEl: HTMLElement): void {
 		const shellCard = containerEl.createDiv({ cls: 'settings-card' });
 
-		new Setting(shellCard).setName(t('settingsDetails.terminal.shellSettings')).setHeading();
+		bindLocalizedControl(new Setting(shellCard).setName(t('settingsDetails.terminal.shellSettings')), "name", 'terminalAgent.settingsDetails.terminal.shellSettings').setHeading();
 
 		// Default Shell program selection
 		const currentShell = getCurrentPlatformShell(this.context.plugin.settings);
 
-		const shellDropdownSetting = new Setting(shellCard)
-			.setName(t('settingsDetails.terminal.defaultShell'))
-			.setDesc(t('settingsDetails.terminal.defaultShellDesc'))
+		const shellDropdownSetting = bindLocalizedControl(bindLocalizedControl(new Setting(shellCard)
+			.setName(t('settingsDetails.terminal.defaultShell')), "name", 'terminalAgent.settingsDetails.terminal.defaultShell')
+			.setDesc(t('settingsDetails.terminal.defaultShellDesc')), "desc", 'terminalAgent.settingsDetails.terminal.defaultShellDesc')
 			.addDropdown((dropdown) => {
 				for (const shellType of getSelectableShellTypes(currentShell)) {
-					dropdown.addOption(shellType, t(`shellOptions.${shellType}`));
+					bindLocalizedOptions(dropdown.addOption(shellType, t(`shellOptions.${shellType}`)), {[shellType]: ["terminalAgent." + (`shellOptions.${shellType}`)]});
 				}
 
 				dropdown.setValue(currentShell);
@@ -297,12 +299,12 @@ export class TerminalSettingsRenderer extends BaseSettingsRenderer {
 		);
 
 		// Default launch arguments
-		new Setting(shellCard)
-			.setName(t('settingsDetails.terminal.defaultArgs'))
-			.setDesc(t('settingsDetails.terminal.defaultArgsDesc'))
+		bindLocalizedControl(bindLocalizedControl(new Setting(shellCard)
+			.setName(t('settingsDetails.terminal.defaultArgs')), "name", 'terminalAgent.settingsDetails.terminal.defaultArgs')
+			.setDesc(t('settingsDetails.terminal.defaultArgsDesc')), "desc", 'terminalAgent.settingsDetails.terminal.defaultArgsDesc')
 			.addText((text) =>
-				text
-					.setPlaceholder(t('settingsDetails.terminal.defaultArgsPlaceholder'))
+				bindLocalizedControl(text
+					.setPlaceholder(t('settingsDetails.terminal.defaultArgsPlaceholder')), "placeholder", 'terminalAgent.settingsDetails.terminal.defaultArgsPlaceholder')
 					.setValue(this.context.plugin.settings.shellArgs.join(' '))
 					.onChange((value) => {
 						// Split the string into an array and filter out empty entries
@@ -314,9 +316,9 @@ export class TerminalSettingsRenderer extends BaseSettingsRenderer {
 			);
 
 		// Automatically enter the vault directory
-		new Setting(shellCard)
-			.setName(t('settingsDetails.terminal.autoEnterVault'))
-			.setDesc(t('settingsDetails.terminal.autoEnterVaultDesc'))
+		bindLocalizedControl(bindLocalizedControl(new Setting(shellCard)
+			.setName(t('settingsDetails.terminal.autoEnterVault')), "name", 'terminalAgent.settingsDetails.terminal.autoEnterVault')
+			.setDesc(t('settingsDetails.terminal.autoEnterVaultDesc')), "desc", 'terminalAgent.settingsDetails.terminal.autoEnterVaultDesc')
 			.addToggle((toggle) =>
 				toggle.setValue(this.context.plugin.settings.autoEnterVaultDirectory).onChange((value) => {
 					this.context.plugin.settings.autoEnterVaultDirectory = value;
@@ -332,11 +334,11 @@ export class TerminalSettingsRenderer extends BaseSettingsRenderer {
 	private renderCustomShellPathSetting(container: HTMLElement): void {
 		const currentCustomPath = getCurrentPlatformCustomShellPath(this.context.plugin.settings);
 
-		new Setting(container)
-			.setName(t('settingsDetails.terminal.customShellPath'))
-			.setDesc(t('settingsDetails.terminal.customShellPathDesc'))
+		bindLocalizedControl(bindLocalizedControl(new Setting(container)
+			.setName(t('settingsDetails.terminal.customShellPath')), "name", 'terminalAgent.settingsDetails.terminal.customShellPath')
+			.setDesc(t('settingsDetails.terminal.customShellPathDesc')), "desc", 'terminalAgent.settingsDetails.terminal.customShellPathDesc')
 			.addText((text) => {
-				text.setPlaceholder(t('settingsDetails.terminal.customShellPathPlaceholder'))
+				bindLocalizedControl(text.setPlaceholder(t('settingsDetails.terminal.customShellPathPlaceholder')), "placeholder", 'terminalAgent.settingsDetails.terminal.customShellPathPlaceholder')
 					.setValue(currentCustomPath)
 					.onChange((value) => {
 						setCurrentPlatformCustomShellPath(this.context.plugin.settings, value);
@@ -361,22 +363,22 @@ export class TerminalSettingsRenderer extends BaseSettingsRenderer {
 	private renderInstanceBehaviorSettings(containerEl: HTMLElement): void {
 		const instanceCard = containerEl.createDiv({ cls: 'settings-card' });
 
-		new Setting(instanceCard).setName(t('settingsDetails.terminal.instanceBehavior')).setHeading();
+		bindLocalizedControl(new Setting(instanceCard).setName(t('settingsDetails.terminal.instanceBehavior')), "name", 'terminalAgent.settingsDetails.terminal.instanceBehavior').setHeading();
 
 		// New instance behavior
-		new Setting(instanceCard)
-			.setName(t('settingsDetails.terminal.newInstanceLayout'))
-			.setDesc(t('settingsDetails.terminal.newInstanceLayoutDesc'))
+		bindLocalizedControl(bindLocalizedControl(new Setting(instanceCard)
+			.setName(t('settingsDetails.terminal.newInstanceLayout')), "name", 'terminalAgent.settingsDetails.terminal.newInstanceLayout')
+			.setDesc(t('settingsDetails.terminal.newInstanceLayoutDesc')), "desc", 'terminalAgent.settingsDetails.terminal.newInstanceLayoutDesc')
 			.addDropdown((dropdown) => {
-				dropdown.addOption('replaceTab', t('layoutOptions.replaceTab'));
-				dropdown.addOption('newTab', t('layoutOptions.newTab'));
-				dropdown.addOption('newLeftTab', t('layoutOptions.newLeftTab'));
-				dropdown.addOption('newLeftSplit', t('layoutOptions.newLeftSplit'));
-				dropdown.addOption('newRightTab', t('layoutOptions.newRightTab'));
-				dropdown.addOption('newRightSplit', t('layoutOptions.newRightSplit'));
-				dropdown.addOption('newHorizontalSplit', t('layoutOptions.newHorizontalSplit'));
-				dropdown.addOption('newVerticalSplit', t('layoutOptions.newVerticalSplit'));
-				dropdown.addOption('newWindow', t('layoutOptions.newWindow'));
+				bindLocalizedOptions(dropdown.addOption('replaceTab', t('layoutOptions.replaceTab')), {['replaceTab']: ['terminalAgent.layoutOptions.replaceTab']});
+				bindLocalizedOptions(dropdown.addOption('newTab', t('layoutOptions.newTab')), {['newTab']: ['terminalAgent.layoutOptions.newTab']});
+				bindLocalizedOptions(dropdown.addOption('newLeftTab', t('layoutOptions.newLeftTab')), {['newLeftTab']: ['terminalAgent.layoutOptions.newLeftTab']});
+				bindLocalizedOptions(dropdown.addOption('newLeftSplit', t('layoutOptions.newLeftSplit')), {['newLeftSplit']: ['terminalAgent.layoutOptions.newLeftSplit']});
+				bindLocalizedOptions(dropdown.addOption('newRightTab', t('layoutOptions.newRightTab')), {['newRightTab']: ['terminalAgent.layoutOptions.newRightTab']});
+				bindLocalizedOptions(dropdown.addOption('newRightSplit', t('layoutOptions.newRightSplit')), {['newRightSplit']: ['terminalAgent.layoutOptions.newRightSplit']});
+				bindLocalizedOptions(dropdown.addOption('newHorizontalSplit', t('layoutOptions.newHorizontalSplit')), {['newHorizontalSplit']: ['terminalAgent.layoutOptions.newHorizontalSplit']});
+				bindLocalizedOptions(dropdown.addOption('newVerticalSplit', t('layoutOptions.newVerticalSplit')), {['newVerticalSplit']: ['terminalAgent.layoutOptions.newVerticalSplit']});
+				bindLocalizedOptions(dropdown.addOption('newWindow', t('layoutOptions.newWindow')), {['newWindow']: ['terminalAgent.layoutOptions.newWindow']});
 
 				dropdown.setValue(this.context.plugin.settings.newInstanceBehavior);
 				dropdown.onChange((value) => {
@@ -387,9 +389,9 @@ export class TerminalSettingsRenderer extends BaseSettingsRenderer {
 			});
 
 		// Create near an existing terminal
-		new Setting(instanceCard)
-			.setName(t('settingsDetails.terminal.createNearExisting'))
-			.setDesc(t('settingsDetails.terminal.createNearExistingDesc'))
+		bindLocalizedControl(bindLocalizedControl(new Setting(instanceCard)
+			.setName(t('settingsDetails.terminal.createNearExisting')), "name", 'terminalAgent.settingsDetails.terminal.createNearExisting')
+			.setDesc(t('settingsDetails.terminal.createNearExistingDesc')), "desc", 'terminalAgent.settingsDetails.terminal.createNearExistingDesc')
 			.addToggle((toggle) =>
 				toggle.setValue(this.context.plugin.settings.createInstanceNearExistingOnes).onChange((value) => {
 					this.context.plugin.settings.createInstanceNearExistingOnes = value;
@@ -398,9 +400,9 @@ export class TerminalSettingsRenderer extends BaseSettingsRenderer {
 			);
 
 		// Focus the new instance
-		new Setting(instanceCard)
-			.setName(t('settingsDetails.terminal.focusNewInstance'))
-			.setDesc(t('settingsDetails.terminal.focusNewInstanceDesc'))
+		bindLocalizedControl(bindLocalizedControl(new Setting(instanceCard)
+			.setName(t('settingsDetails.terminal.focusNewInstance')), "name", 'terminalAgent.settingsDetails.terminal.focusNewInstance')
+			.setDesc(t('settingsDetails.terminal.focusNewInstanceDesc')), "desc", 'terminalAgent.settingsDetails.terminal.focusNewInstanceDesc')
 			.addToggle((toggle) =>
 				toggle.setValue(this.context.plugin.settings.focusNewInstance).onChange((value) => {
 					this.context.plugin.settings.focusNewInstance = value;
@@ -409,9 +411,9 @@ export class TerminalSettingsRenderer extends BaseSettingsRenderer {
 			);
 
 		// Lock the new instance
-		new Setting(instanceCard)
-			.setName(t('settingsDetails.terminal.lockNewInstance'))
-			.setDesc(t('settingsDetails.terminal.lockNewInstanceDesc'))
+		bindLocalizedControl(bindLocalizedControl(new Setting(instanceCard)
+			.setName(t('settingsDetails.terminal.lockNewInstance')), "name", 'terminalAgent.settingsDetails.terminal.lockNewInstance')
+			.setDesc(t('settingsDetails.terminal.lockNewInstanceDesc')), "desc", 'terminalAgent.settingsDetails.terminal.lockNewInstanceDesc')
 			.addToggle((toggle) =>
 				toggle.setValue(this.context.plugin.settings.lockNewInstance).onChange((value) => {
 					this.context.plugin.settings.lockNewInstance = value;
@@ -426,21 +428,21 @@ export class TerminalSettingsRenderer extends BaseSettingsRenderer {
 	private renderDisplaySettings(containerEl: HTMLElement): void {
 		const displayCard = containerEl.createDiv({ cls: 'settings-card' });
 
-		new Setting(displayCard).setName(t('settingsDetails.terminal.displaySettings')).setHeading();
+		bindLocalizedControl(new Setting(displayCard).setName(t('settingsDetails.terminal.displaySettings')), "name", 'terminalAgent.settingsDetails.terminal.displaySettings').setHeading();
 
 		// Persistent preview area (always visible regardless of active tab)
 		this.renderThemePreview(displayCard);
 
 		// Tab switcher
 		const tabBar = displayCard.createDiv({ cls: 'terminal-display-tabs' });
-		const themeTabBtn = tabBar.createEl('button', {
+		const themeTabBtn = bindLocalizedElement(tabBar.createEl('button', {
 			cls: 'terminal-display-tab',
 			text: t('settingsDetails.terminal.displayTabTheme'),
-		});
-		const appearanceTabBtn = tabBar.createEl('button', {
+		}), 'terminalAgent.settingsDetails.terminal.displayTabTheme');
+		const appearanceTabBtn = bindLocalizedElement(tabBar.createEl('button', {
 			cls: 'terminal-display-tab',
 			text: t('settingsDetails.terminal.displayTabAppearance'),
-		});
+		}), 'terminalAgent.settingsDetails.terminal.displayTabAppearance');
 
 		// Both panes stay mounted. The renderer dropdown lives on the appearance
 		// pane and updates the theme pane's custom-color block in place.
@@ -479,9 +481,9 @@ export class TerminalSettingsRenderer extends BaseSettingsRenderer {
 	 */
 	private renderThemeTabContent(container: HTMLElement): void {
 		// Use the Obsidian theme
-		const useObsidianThemeSetting = new Setting(container)
-			.setName(t('settingsDetails.terminal.useObsidianTheme'))
-			.setDesc(t('settingsDetails.terminal.useObsidianThemeDesc'))
+		const useObsidianThemeSetting = bindLocalizedControl(bindLocalizedControl(new Setting(container)
+			.setName(t('settingsDetails.terminal.useObsidianTheme')), "name", 'terminalAgent.settingsDetails.terminal.useObsidianTheme')
+			.setDesc(t('settingsDetails.terminal.useObsidianThemeDesc')), "desc", 'terminalAgent.settingsDetails.terminal.useObsidianThemeDesc')
 			.addToggle((toggle) =>
 				toggle.setValue(this.context.plugin.settings.useObsidianTheme).onChange((value) => {
 					void this.updateThemeSetting(() => {
@@ -500,9 +502,9 @@ export class TerminalSettingsRenderer extends BaseSettingsRenderer {
 	 */
 	private renderAppearanceTabContent(container: HTMLElement): void {
 		// Font size
-		new Setting(container)
-			.setName(t('settingsDetails.terminal.fontSize'))
-			.setDesc(t('settingsDetails.terminal.fontSizeDesc'))
+		bindLocalizedControl(bindLocalizedControl(new Setting(container)
+			.setName(t('settingsDetails.terminal.fontSize')), "name", 'terminalAgent.settingsDetails.terminal.fontSize')
+			.setDesc(t('settingsDetails.terminal.fontSizeDesc')), "desc", 'terminalAgent.settingsDetails.terminal.fontSizeDesc')
 			.addSlider((slider) =>
 				slider
 					.setLimits(8, 24, 1)
@@ -516,12 +518,12 @@ export class TerminalSettingsRenderer extends BaseSettingsRenderer {
 			);
 
 		// Font family
-		new Setting(container)
-			.setName(t('settingsDetails.terminal.fontFamily'))
-			.setDesc(t('settingsDetails.terminal.fontFamilyDesc'))
+		bindLocalizedControl(bindLocalizedControl(new Setting(container)
+			.setName(t('settingsDetails.terminal.fontFamily')), "name", 'terminalAgent.settingsDetails.terminal.fontFamily')
+			.setDesc(t('settingsDetails.terminal.fontFamilyDesc')), "desc", 'terminalAgent.settingsDetails.terminal.fontFamilyDesc')
 			.addText((text) =>
-				text
-					.setPlaceholder(t('settingsDetails.terminal.fontFamilyPlaceholder'))
+				bindLocalizedControl(text
+					.setPlaceholder(t('settingsDetails.terminal.fontFamilyPlaceholder')), "placeholder", 'terminalAgent.settingsDetails.terminal.fontFamilyPlaceholder')
 					.setValue(this.context.plugin.settings.fontFamily)
 					.onChange((value) => {
 						void this.updateAppearanceSetting(() => {
@@ -531,13 +533,13 @@ export class TerminalSettingsRenderer extends BaseSettingsRenderer {
 			);
 
 		// Cursor style
-		new Setting(container)
-			.setName(t('settingsDetails.terminal.cursorStyle'))
-			.setDesc(t('settingsDetails.terminal.cursorStyleDesc'))
+		bindLocalizedControl(bindLocalizedControl(new Setting(container)
+			.setName(t('settingsDetails.terminal.cursorStyle')), "name", 'terminalAgent.settingsDetails.terminal.cursorStyle')
+			.setDesc(t('settingsDetails.terminal.cursorStyleDesc')), "desc", 'terminalAgent.settingsDetails.terminal.cursorStyleDesc')
 			.addDropdown((dropdown) => {
-				dropdown.addOption('block', t('cursorStyleOptions.block'));
-				dropdown.addOption('underline', t('cursorStyleOptions.underline'));
-				dropdown.addOption('bar', t('cursorStyleOptions.bar'));
+				bindLocalizedOptions(dropdown.addOption('block', t('cursorStyleOptions.block')), {['block']: ['terminalAgent.cursorStyleOptions.block']});
+				bindLocalizedOptions(dropdown.addOption('underline', t('cursorStyleOptions.underline')), {['underline']: ['terminalAgent.cursorStyleOptions.underline']});
+				bindLocalizedOptions(dropdown.addOption('bar', t('cursorStyleOptions.bar')), {['bar']: ['terminalAgent.cursorStyleOptions.bar']});
 
 				dropdown.setValue(this.context.plugin.settings.cursorStyle);
 				dropdown.onChange((value) => {
@@ -549,9 +551,9 @@ export class TerminalSettingsRenderer extends BaseSettingsRenderer {
 			});
 
 		// Cursor blink
-		new Setting(container)
-			.setName(t('settingsDetails.terminal.cursorBlink'))
-			.setDesc(t('settingsDetails.terminal.cursorBlinkDesc'))
+		bindLocalizedControl(bindLocalizedControl(new Setting(container)
+			.setName(t('settingsDetails.terminal.cursorBlink')), "name", 'terminalAgent.settingsDetails.terminal.cursorBlink')
+			.setDesc(t('settingsDetails.terminal.cursorBlinkDesc')), "desc", 'terminalAgent.settingsDetails.terminal.cursorBlinkDesc')
 			.addToggle((toggle) =>
 				toggle.setValue(this.context.plugin.settings.cursorBlink).onChange((value) => {
 					void this.updateAppearanceSetting(() => {
@@ -561,13 +563,13 @@ export class TerminalSettingsRenderer extends BaseSettingsRenderer {
 			);
 
 		// Renderer type
-		new Setting(container)
-			.setName(t('settingsDetails.terminal.rendererType'))
-			.setDesc(t('settingsDetails.terminal.rendererTypeDesc'))
+		bindLocalizedControl(bindLocalizedControl(new Setting(container)
+			.setName(t('settingsDetails.terminal.rendererType')), "name", 'terminalAgent.settingsDetails.terminal.rendererType')
+			.setDesc(t('settingsDetails.terminal.rendererTypeDesc')), "desc", 'terminalAgent.settingsDetails.terminal.rendererTypeDesc')
 			.addDropdown((dropdown) =>
-				dropdown
-					.addOption('canvas', t('rendererOptions.canvas'))
-					.addOption('webgl', t('rendererOptions.webgl'))
+				bindLocalizedOptions(bindLocalizedOptions(dropdown
+					.addOption('canvas', t('rendererOptions.canvas')), {['canvas']: ['terminalAgent.rendererOptions.canvas']})
+					.addOption('webgl', t('rendererOptions.webgl')), {['webgl']: ['terminalAgent.rendererOptions.webgl']})
 					.setValue(this.context.plugin.settings.preferredRenderer)
 					.onChange((value) => {
 						if (!isPreferredRenderer(value)) {
@@ -591,14 +593,14 @@ export class TerminalSettingsRenderer extends BaseSettingsRenderer {
 
 		const headerEl = scriptCard.createDiv({ cls: 'preset-scripts-header' });
 		const headerText = headerEl.createDiv({ cls: 'preset-scripts-header-text' });
-		headerText.createDiv({
+		bindLocalizedElement(headerText.createDiv({
 			cls: 'preset-scripts-title',
 			text: t('settingsDetails.terminal.presetScripts'),
-		});
-		headerText.createDiv({
+		}), 'terminalAgent.settingsDetails.terminal.presetScripts');
+		bindLocalizedElement(headerText.createDiv({
 			cls: 'preset-scripts-desc',
 			text: t('settingsDetails.terminal.presetScriptsDesc'),
-		});
+		}), 'terminalAgent.settingsDetails.terminal.presetScriptsDesc');
 
 		const headerActions = headerEl.createDiv({ cls: 'preset-scripts-header-actions' });
 		const addBtn = headerActions.createEl('button', { cls: 'preset-scripts-add-btn' });
@@ -632,9 +634,9 @@ export class TerminalSettingsRenderer extends BaseSettingsRenderer {
 		// so power users can declutter their menu after deciding which CLIs they
 		// want to keep around. Default is `false` because a fresh install needs
 		// the install guidance to be visible.
-		new Setting(scriptCard)
-			.setName(t('settingsDetails.terminal.hideUnavailableAiLaunchers'))
-			.setDesc(t('settingsDetails.terminal.hideUnavailableAiLaunchersDesc'))
+		bindLocalizedControl(bindLocalizedControl(new Setting(scriptCard)
+			.setName(t('settingsDetails.terminal.hideUnavailableAiLaunchers')), "name", 'terminalAgent.settingsDetails.terminal.hideUnavailableAiLaunchers')
+			.setDesc(t('settingsDetails.terminal.hideUnavailableAiLaunchersDesc')), "desc", 'terminalAgent.settingsDetails.terminal.hideUnavailableAiLaunchersDesc')
 			.addToggle((toggle) => {
 				toggle.setValue(this.context.plugin.settings.hideUnavailableAiLaunchers === true).onChange((value) => {
 					this.context.plugin.settings.hideUnavailableAiLaunchers = value;
@@ -650,9 +652,9 @@ export class TerminalSettingsRenderer extends BaseSettingsRenderer {
 		// outbound traffic" promise is contractual). Surface that interaction
 		// inline so the user does not silently wonder why the badges stay
 		// green when their CLI is out of date.
-		const updateCheckSetting = new Setting(scriptCard)
-			.setName(t('settingsDetails.terminal.checkAiLauncherUpdates'))
-			.setDesc(t('settingsDetails.terminal.checkAiLauncherUpdatesDesc'))
+		const updateCheckSetting = bindLocalizedControl(bindLocalizedControl(new Setting(scriptCard)
+			.setName(t('settingsDetails.terminal.checkAiLauncherUpdates')), "name", 'terminalAgent.settingsDetails.terminal.checkAiLauncherUpdates')
+			.setDesc(t('settingsDetails.terminal.checkAiLauncherUpdatesDesc')), "desc", 'terminalAgent.settingsDetails.terminal.checkAiLauncherUpdatesDesc')
 			.addToggle((toggle) => {
 				toggle.setValue(this.context.plugin.settings.checkAiLauncherUpdates === true).onChange((value) => {
 					this.context.plugin.settings.checkAiLauncherUpdates = value;
@@ -687,10 +689,10 @@ export class TerminalSettingsRenderer extends BaseSettingsRenderer {
 		const scripts = this.context.plugin.settings.presetScripts ?? [];
 
 		if (scripts.length === 0) {
-			listEl.createDiv({
+			bindLocalizedElement(listEl.createDiv({
 				cls: 'preset-scripts-empty',
 				text: t('settingsDetails.terminal.presetScriptsEmpty'),
-			});
+			}), 'terminalAgent.settingsDetails.terminal.presetScriptsEmpty');
 			return;
 		}
 
@@ -765,10 +767,10 @@ export class TerminalSettingsRenderer extends BaseSettingsRenderer {
 			text: script.name?.trim() || t('settingsDetails.terminal.presetScriptsUnnamed'),
 		});
 		if (launcherEntry?.detectCommand) {
-			const badge = nameRowEl.createDiv({
+			const badge = bindLocalizedElement(nameRowEl.createDiv({
 				cls: 'preset-scripts-menu-status-badge is-checking',
 				text: t('settingsDetails.terminal.aiLauncherStatusChecking'),
-			});
+			}), 'terminalAgent.settingsDetails.terminal.aiLauncherStatusChecking');
 			const versionEl = nameRowEl.createDiv({
 				cls: 'preset-scripts-menu-version is-hidden',
 			});
@@ -1174,9 +1176,9 @@ export class TerminalSettingsRenderer extends BaseSettingsRenderer {
 		let foregroundColorPicker: ColorComponent | null = null;
 
 		// Background color
-		new Setting(container)
-			.setName(t('settingsDetails.terminal.backgroundColor'))
-			.setDesc(t('settingsDetails.terminal.backgroundColorDesc'))
+		bindLocalizedControl(bindLocalizedControl(new Setting(container)
+			.setName(t('settingsDetails.terminal.backgroundColor')), "name", 'terminalAgent.settingsDetails.terminal.backgroundColor')
+			.setDesc(t('settingsDetails.terminal.backgroundColorDesc')), "desc", 'terminalAgent.settingsDetails.terminal.backgroundColorDesc')
 			.addColorPicker((color) => {
 				backgroundColorPicker = color;
 				return color.setValue(this.context.plugin.settings.backgroundColor || '#000000').onChange((value) => {
@@ -1186,9 +1188,9 @@ export class TerminalSettingsRenderer extends BaseSettingsRenderer {
 				});
 			})
 			.addExtraButton((button) =>
-				button
+				bindLocalizedControl(button
 					.setIcon('reset')
-					.setTooltip(t('common.reset'))
+					.setTooltip(t('common.reset')), "tooltip", 'terminalAgent.common.reset')
 					.onClick(() => {
 						void this.updateThemeSetting(() => {
 							this.context.plugin.settings.backgroundColor = undefined;
@@ -1200,9 +1202,9 @@ export class TerminalSettingsRenderer extends BaseSettingsRenderer {
 			);
 
 		// Foreground color
-		new Setting(container)
-			.setName(t('settingsDetails.terminal.foregroundColor'))
-			.setDesc(t('settingsDetails.terminal.foregroundColorDesc'))
+		bindLocalizedControl(bindLocalizedControl(new Setting(container)
+			.setName(t('settingsDetails.terminal.foregroundColor')), "name", 'terminalAgent.settingsDetails.terminal.foregroundColor')
+			.setDesc(t('settingsDetails.terminal.foregroundColorDesc')), "desc", 'terminalAgent.settingsDetails.terminal.foregroundColorDesc')
 			.addColorPicker((color) => {
 				foregroundColorPicker = color;
 				return color.setValue(this.context.plugin.settings.foregroundColor || '#FFFFFF').onChange((value) => {
@@ -1212,9 +1214,9 @@ export class TerminalSettingsRenderer extends BaseSettingsRenderer {
 				});
 			})
 			.addExtraButton((button) =>
-				button
+				bindLocalizedControl(button
 					.setIcon('reset')
-					.setTooltip(t('common.reset'))
+					.setTooltip(t('common.reset')), "tooltip", 'terminalAgent.common.reset')
 					.onClick(() => {
 						void this.updateThemeSetting(() => {
 							this.context.plugin.settings.foregroundColor = undefined;
@@ -1233,9 +1235,9 @@ export class TerminalSettingsRenderer extends BaseSettingsRenderer {
 	 * Render background image settings
 	 */
 	private renderBackgroundImageSettings(container: HTMLElement): void {
-		const bgImageSetting = new Setting(container)
-			.setName(t('settingsDetails.terminal.backgroundImage'))
-			.setDesc(t('settingsDetails.terminal.backgroundImageDesc'));
+		const bgImageSetting = bindLocalizedControl(bindLocalizedControl(new Setting(container)
+			.setName(t('settingsDetails.terminal.backgroundImage')), "name", 'terminalAgent.settingsDetails.terminal.backgroundImage')
+			.setDesc(t('settingsDetails.terminal.backgroundImageDesc')), "desc", 'terminalAgent.settingsDetails.terminal.backgroundImageDesc');
 		bgImageSetting.settingEl.addClass('terminal-background-image-setting');
 
 		this.toggleConditionalSection(
@@ -1244,10 +1246,10 @@ export class TerminalSettingsRenderer extends BaseSettingsRenderer {
 			this.context.plugin.settings.preferredRenderer === 'webgl',
 			(el) => {
 				el.addClass('terminal-background-image-webgl-hint');
-				el.createDiv({
+				bindLocalizedElement(el.createDiv({
 					cls: 'setting-item-description',
 					text: t('settingsDetails.terminal.backgroundImageWebglHint'),
-				});
+				}), 'terminalAgent.settingsDetails.terminal.backgroundImageWebglHint');
 			},
 			bgImageSetting.settingEl,
 		);
@@ -1256,8 +1258,8 @@ export class TerminalSettingsRenderer extends BaseSettingsRenderer {
 
 		bgImageSetting.addText((text) => {
 			backgroundImageInput = text;
-			const inputEl = text
-				.setPlaceholder(t('settingsDetails.terminal.backgroundImagePlaceholder'))
+			const inputEl = bindLocalizedControl(text
+				.setPlaceholder(t('settingsDetails.terminal.backgroundImagePlaceholder')), "placeholder", 'terminalAgent.settingsDetails.terminal.backgroundImagePlaceholder')
 				.setValue(this.context.plugin.settings.backgroundImage || '')
 				.onChange((value) => {
 					this.context.plugin.settings.backgroundImage = value.trim() || undefined;
@@ -1284,9 +1286,9 @@ export class TerminalSettingsRenderer extends BaseSettingsRenderer {
 		});
 
 		bgImageSetting.addExtraButton((button) =>
-			button
+			bindLocalizedControl(button
 				.setIcon('reset')
-				.setTooltip(t('common.reset'))
+				.setTooltip(t('common.reset')), "tooltip", 'terminalAgent.common.reset')
 				.onClick(() => {
 					void this.updateThemeSetting(() => {
 						this.context.plugin.settings.backgroundImage = undefined;
@@ -1323,9 +1325,9 @@ export class TerminalSettingsRenderer extends BaseSettingsRenderer {
 	 */
 	private renderBackgroundImageOptionsContent(container: HTMLElement): void {
 		// Background image opacity
-		new Setting(container)
-			.setName(t('settingsDetails.terminal.backgroundImageOpacity'))
-			.setDesc(t('settingsDetails.terminal.backgroundImageOpacityDesc'))
+		bindLocalizedControl(bindLocalizedControl(new Setting(container)
+			.setName(t('settingsDetails.terminal.backgroundImageOpacity')), "name", 'terminalAgent.settingsDetails.terminal.backgroundImageOpacity')
+			.setDesc(t('settingsDetails.terminal.backgroundImageOpacityDesc')), "desc", 'terminalAgent.settingsDetails.terminal.backgroundImageOpacityDesc')
 			.addSlider((slider) =>
 				slider
 					.setLimits(0, 1, 0.05)
@@ -1339,14 +1341,14 @@ export class TerminalSettingsRenderer extends BaseSettingsRenderer {
 			);
 
 		// Background image size
-		new Setting(container)
-			.setName(t('settingsDetails.terminal.backgroundImageSize'))
-			.setDesc(t('settingsDetails.terminal.backgroundImageSizeDesc'))
+		bindLocalizedControl(bindLocalizedControl(new Setting(container)
+			.setName(t('settingsDetails.terminal.backgroundImageSize')), "name", 'terminalAgent.settingsDetails.terminal.backgroundImageSize')
+			.setDesc(t('settingsDetails.terminal.backgroundImageSizeDesc')), "desc", 'terminalAgent.settingsDetails.terminal.backgroundImageSizeDesc')
 			.addDropdown((dropdown) =>
-				dropdown
-					.addOption('cover', t('backgroundSizeOptions.cover'))
-					.addOption('contain', t('backgroundSizeOptions.contain'))
-					.addOption('auto', t('backgroundSizeOptions.auto'))
+				bindLocalizedOptions(bindLocalizedOptions(bindLocalizedOptions(dropdown
+					.addOption('cover', t('backgroundSizeOptions.cover')), {['cover']: ['terminalAgent.backgroundSizeOptions.cover']})
+					.addOption('contain', t('backgroundSizeOptions.contain')), {['contain']: ['terminalAgent.backgroundSizeOptions.contain']})
+					.addOption('auto', t('backgroundSizeOptions.auto')), {['auto']: ['terminalAgent.backgroundSizeOptions.auto']})
 					.setValue(this.context.plugin.settings.backgroundImageSize || 'cover')
 					.onChange((value) => {
 						if (!isBackgroundImageSize(value)) {
@@ -1359,20 +1361,20 @@ export class TerminalSettingsRenderer extends BaseSettingsRenderer {
 			);
 
 		// Background image position
-		new Setting(container)
-			.setName(t('settingsDetails.terminal.backgroundImagePosition'))
-			.setDesc(t('settingsDetails.terminal.backgroundImagePositionDesc'))
+		bindLocalizedControl(bindLocalizedControl(new Setting(container)
+			.setName(t('settingsDetails.terminal.backgroundImagePosition')), "name", 'terminalAgent.settingsDetails.terminal.backgroundImagePosition')
+			.setDesc(t('settingsDetails.terminal.backgroundImagePositionDesc')), "desc", 'terminalAgent.settingsDetails.terminal.backgroundImagePositionDesc')
 			.addDropdown((dropdown) =>
-				dropdown
-					.addOption('center', t('backgroundPositionOptions.center'))
-					.addOption('top', t('backgroundPositionOptions.top'))
-					.addOption('bottom', t('backgroundPositionOptions.bottom'))
-					.addOption('left', t('backgroundPositionOptions.left'))
-					.addOption('right', t('backgroundPositionOptions.right'))
-					.addOption('top left', t('backgroundPositionOptions.topLeft'))
-					.addOption('top right', t('backgroundPositionOptions.topRight'))
-					.addOption('bottom left', t('backgroundPositionOptions.bottomLeft'))
-					.addOption('bottom right', t('backgroundPositionOptions.bottomRight'))
+				bindLocalizedOptions(bindLocalizedOptions(bindLocalizedOptions(bindLocalizedOptions(bindLocalizedOptions(bindLocalizedOptions(bindLocalizedOptions(bindLocalizedOptions(bindLocalizedOptions(dropdown
+					.addOption('center', t('backgroundPositionOptions.center')), {['center']: ['terminalAgent.backgroundPositionOptions.center']})
+					.addOption('top', t('backgroundPositionOptions.top')), {['top']: ['terminalAgent.backgroundPositionOptions.top']})
+					.addOption('bottom', t('backgroundPositionOptions.bottom')), {['bottom']: ['terminalAgent.backgroundPositionOptions.bottom']})
+					.addOption('left', t('backgroundPositionOptions.left')), {['left']: ['terminalAgent.backgroundPositionOptions.left']})
+					.addOption('right', t('backgroundPositionOptions.right')), {['right']: ['terminalAgent.backgroundPositionOptions.right']})
+					.addOption('top left', t('backgroundPositionOptions.topLeft')), {['top left']: ['terminalAgent.backgroundPositionOptions.topLeft']})
+					.addOption('top right', t('backgroundPositionOptions.topRight')), {['top right']: ['terminalAgent.backgroundPositionOptions.topRight']})
+					.addOption('bottom left', t('backgroundPositionOptions.bottomLeft')), {['bottom left']: ['terminalAgent.backgroundPositionOptions.bottomLeft']})
+					.addOption('bottom right', t('backgroundPositionOptions.bottomRight')), {['bottom right']: ['terminalAgent.backgroundPositionOptions.bottomRight']})
 					.setValue(this.context.plugin.settings.backgroundImagePosition || 'center')
 					.onChange((value) => {
 						void this.updateThemeSetting(() => {
@@ -1382,9 +1384,9 @@ export class TerminalSettingsRenderer extends BaseSettingsRenderer {
 			);
 
 		// Frosted glass effect
-		const blurEffectSetting = new Setting(container)
-			.setName(t('settingsDetails.terminal.blurEffect'))
-			.setDesc(t('settingsDetails.terminal.blurEffectDesc'))
+		const blurEffectSetting = bindLocalizedControl(bindLocalizedControl(new Setting(container)
+			.setName(t('settingsDetails.terminal.blurEffect')), "name", 'terminalAgent.settingsDetails.terminal.blurEffect')
+			.setDesc(t('settingsDetails.terminal.blurEffectDesc')), "desc", 'terminalAgent.settingsDetails.terminal.blurEffectDesc')
 			.addToggle((toggle) =>
 				toggle.setValue(this.context.plugin.settings.enableBlur ?? false).onChange((value) => {
 					void this.updateThemeSetting(() => {
@@ -1412,9 +1414,9 @@ export class TerminalSettingsRenderer extends BaseSettingsRenderer {
 		);
 
 		// Text opacity
-		new Setting(container)
-			.setName(t('settingsDetails.terminal.textOpacity'))
-			.setDesc(t('settingsDetails.terminal.textOpacityDesc'))
+		bindLocalizedControl(bindLocalizedControl(new Setting(container)
+			.setName(t('settingsDetails.terminal.textOpacity')), "name", 'terminalAgent.settingsDetails.terminal.textOpacity')
+			.setDesc(t('settingsDetails.terminal.textOpacityDesc')), "desc", 'terminalAgent.settingsDetails.terminal.textOpacityDesc')
 			.addSlider((slider) =>
 				slider
 					.setLimits(0, 1, 0.05)
@@ -1433,9 +1435,9 @@ export class TerminalSettingsRenderer extends BaseSettingsRenderer {
 	 * Extracted into a separate method for toggleConditionalSection
 	 */
 	private renderBlurAmountSlider(container: HTMLElement): void {
-		new Setting(container)
-			.setName(t('settingsDetails.terminal.blurAmount'))
-			.setDesc(t('settingsDetails.terminal.blurAmountDesc'))
+		bindLocalizedControl(bindLocalizedControl(new Setting(container)
+			.setName(t('settingsDetails.terminal.blurAmount')), "name", 'terminalAgent.settingsDetails.terminal.blurAmount')
+			.setDesc(t('settingsDetails.terminal.blurAmountDesc')), "desc", 'terminalAgent.settingsDetails.terminal.blurAmountDesc')
 			.addSlider((slider) =>
 				slider
 					.setLimits(0, 20, 1)
@@ -1472,10 +1474,10 @@ export class TerminalSettingsRenderer extends BaseSettingsRenderer {
 			this.context.plugin.settings.preferredRenderer === 'webgl',
 			(el) => {
 				el.addClass('terminal-background-image-webgl-hint');
-				el.createDiv({
+				bindLocalizedElement(el.createDiv({
 					cls: 'setting-item-description',
 					text: t('settingsDetails.terminal.backgroundImageWebglHint'),
-				});
+				}), 'terminalAgent.settingsDetails.terminal.backgroundImageWebglHint');
 			},
 			bgImageSettingEl,
 		);
@@ -1528,10 +1530,10 @@ export class TerminalSettingsRenderer extends BaseSettingsRenderer {
 
 	private renderThemePreview(container: HTMLElement): void {
 		const previewSection = container.createDiv({ cls: 'terminal-theme-preview-section' });
-		previewSection.createDiv({
+		bindLocalizedElement(previewSection.createDiv({
 			cls: 'terminal-theme-preview-title',
 			text: t('settingsDetails.terminal.themePreview'),
-		});
+		}), 'terminalAgent.settingsDetails.terminal.themePreview');
 
 		this.themePreviewEl = previewSection.createDiv({ cls: 'terminal-theme-preview' });
 		this.themePreviewEl.createDiv({ cls: 'terminal-theme-preview-bg' });
@@ -1709,12 +1711,12 @@ export class TerminalSettingsRenderer extends BaseSettingsRenderer {
 	private renderBehaviorSettings(containerEl: HTMLElement): void {
 		const behaviorCard = containerEl.createDiv({ cls: 'settings-card' });
 
-		new Setting(behaviorCard).setName(t('settingsDetails.terminal.behaviorSettings')).setHeading();
+		bindLocalizedControl(new Setting(behaviorCard).setName(t('settingsDetails.terminal.behaviorSettings')), "name", 'terminalAgent.settingsDetails.terminal.behaviorSettings').setHeading();
 
 		// Scrollback buffer size
-		new Setting(behaviorCard)
-			.setName(t('settingsDetails.terminal.scrollback'))
-			.setDesc(t('settingsDetails.terminal.scrollbackDesc'))
+		bindLocalizedControl(bindLocalizedControl(new Setting(behaviorCard)
+			.setName(t('settingsDetails.terminal.scrollback')), "name", 'terminalAgent.settingsDetails.terminal.scrollback')
+			.setDesc(t('settingsDetails.terminal.scrollbackDesc')), "desc", 'terminalAgent.settingsDetails.terminal.scrollbackDesc')
 			.addText((text) => {
 				const inputEl = text
 					.setPlaceholder('1000')
@@ -1803,12 +1805,12 @@ export class TerminalSettingsRenderer extends BaseSettingsRenderer {
 	private renderVisibilitySettings(containerEl: HTMLElement): void {
 		const visibilityCard = containerEl.createDiv({ cls: 'settings-card' });
 
-		new Setting(visibilityCard).setName(t('visibility.visibilitySettings')).setHeading();
+		bindLocalizedControl(new Setting(visibilityCard).setName(t('visibility.visibilitySettings')), "name", 'terminalAgent.visibility.visibilitySettings').setHeading();
 
 		// Show in the command palette
-		new Setting(visibilityCard)
-			.setName(t('visibility.showInCommandPalette'))
-			.setDesc(t('visibility.showInCommandPaletteDesc'))
+		bindLocalizedControl(bindLocalizedControl(new Setting(visibilityCard)
+			.setName(t('visibility.showInCommandPalette')), "name", 'terminalAgent.visibility.showInCommandPalette')
+			.setDesc(t('visibility.showInCommandPaletteDesc')), "desc", 'terminalAgent.visibility.showInCommandPaletteDesc')
 			.addToggle((toggle) =>
 				toggle.setValue(this.context.plugin.settings.visibility.showInCommandPalette).onChange((value) => {
 					this.context.plugin.settings.visibility.showInCommandPalette = value;
@@ -1818,9 +1820,9 @@ export class TerminalSettingsRenderer extends BaseSettingsRenderer {
 			);
 
 		// Show the icon in the ribbon
-		new Setting(visibilityCard)
-			.setName(t('visibility.showInRibbon'))
-			.setDesc(t('visibility.showInRibbonDesc'))
+		bindLocalizedControl(bindLocalizedControl(new Setting(visibilityCard)
+			.setName(t('visibility.showInRibbon')), "name", 'terminalAgent.visibility.showInRibbon')
+			.setDesc(t('visibility.showInRibbonDesc')), "desc", 'terminalAgent.visibility.showInRibbonDesc')
 			.addToggle((toggle) =>
 				toggle.setValue(this.context.plugin.settings.visibility.showInRibbon).onChange((value) => {
 					this.context.plugin.settings.visibility.showInRibbon = value;
@@ -1830,9 +1832,9 @@ export class TerminalSettingsRenderer extends BaseSettingsRenderer {
 			);
 
 		// Show in the new tab view
-		new Setting(visibilityCard)
-			.setName(t('visibility.showInNewTab'))
-			.setDesc(t('visibility.showInNewTabDesc'))
+		bindLocalizedControl(bindLocalizedControl(new Setting(visibilityCard)
+			.setName(t('visibility.showInNewTab')), "name", 'terminalAgent.visibility.showInNewTab')
+			.setDesc(t('visibility.showInNewTabDesc')), "desc", 'terminalAgent.visibility.showInNewTabDesc')
 			.addToggle((toggle) =>
 				toggle.setValue(this.context.plugin.settings.visibility.showInNewTab).onChange((value) => {
 					this.context.plugin.settings.visibility.showInNewTab = value;
@@ -1842,9 +1844,9 @@ export class TerminalSettingsRenderer extends BaseSettingsRenderer {
 			);
 
 		// Show in the status bar
-		new Setting(visibilityCard)
-			.setName(t('visibility.showInStatusBar'))
-			.setDesc(t('visibility.showInStatusBarDesc'))
+		bindLocalizedControl(bindLocalizedControl(new Setting(visibilityCard)
+			.setName(t('visibility.showInStatusBar')), "name", 'terminalAgent.visibility.showInStatusBar')
+			.setDesc(t('visibility.showInStatusBarDesc')), "desc", 'terminalAgent.visibility.showInStatusBarDesc')
 			.addToggle((toggle) =>
 				toggle.setValue(this.context.plugin.settings.visibility.showInStatusBar).onChange((value) => {
 					this.context.plugin.settings.visibility.showInStatusBar = value;
@@ -1856,12 +1858,12 @@ export class TerminalSettingsRenderer extends BaseSettingsRenderer {
 		// Debug settings card
 		const debugCard = containerEl.createDiv({ cls: 'settings-card' });
 
-		new Setting(debugCard).setName(t('settingsDetails.advanced.performanceAndDebug')).setHeading();
+		bindLocalizedControl(new Setting(debugCard).setName(t('settingsDetails.advanced.performanceAndDebug')), "name", 'terminalAgent.settingsDetails.advanced.performanceAndDebug').setHeading();
 
 		// Enable debug logging
-		new Setting(debugCard)
-			.setName(t('settingsDetails.advanced.debugMode'))
-			.setDesc(t('settingsDetails.advanced.debugModeDesc'))
+		bindLocalizedControl(bindLocalizedControl(new Setting(debugCard)
+			.setName(t('settingsDetails.advanced.debugMode')), "name", 'terminalAgent.settingsDetails.advanced.debugMode')
+			.setDesc(t('settingsDetails.advanced.debugModeDesc')), "desc", 'terminalAgent.settingsDetails.advanced.debugModeDesc')
 			.addToggle((toggle) =>
 				toggle.setValue(this.context.plugin.settings.enableDebugLog).onChange((value) => {
 					this.context.plugin.settings.enableDebugLog = value;
@@ -1880,9 +1882,9 @@ export class TerminalSettingsRenderer extends BaseSettingsRenderer {
 	private renderServerConnectionSettings(containerEl: HTMLElement): void {
 		const connectionCard = containerEl.createDiv({ cls: 'settings-card' });
 
-		new Setting(connectionCard)
-			.setName(t('settingsDetails.advanced.serverConnection'))
-			.setDesc(t('settingsDetails.advanced.serverConnectionDesc'))
+		bindLocalizedControl(bindLocalizedControl(new Setting(connectionCard)
+			.setName(t('settingsDetails.advanced.serverConnection')), "name", 'terminalAgent.settingsDetails.advanced.serverConnection')
+			.setDesc(t('settingsDetails.advanced.serverConnectionDesc')), "desc", 'terminalAgent.settingsDetails.advanced.serverConnectionDesc')
 			.setHeading();
 
 		// Render the settings content in a conditional section so it can refresh after reset
@@ -1898,12 +1900,12 @@ export class TerminalSettingsRenderer extends BaseSettingsRenderer {
 		const settings = this.context.plugin.settings;
 
 		// Binary download source
-		new Setting(containerEl)
-			.setName(t('settingsDetails.advanced.binaryDownloadSource'))
-			.setDesc(t('settingsDetails.advanced.binaryDownloadSourceDesc'))
+		bindLocalizedControl(bindLocalizedControl(new Setting(containerEl)
+			.setName(t('settingsDetails.advanced.binaryDownloadSource')), "name", 'terminalAgent.settingsDetails.advanced.binaryDownloadSource')
+			.setDesc(t('settingsDetails.advanced.binaryDownloadSourceDesc')), "desc", 'terminalAgent.settingsDetails.advanced.binaryDownloadSourceDesc')
 			.addDropdown((dropdown) => {
-				dropdown.addOption('github-release', t('settingsDetails.advanced.binaryDownloadSourceGithubRelease'));
-				dropdown.addOption('cloudflare-r2', t('settingsDetails.advanced.binaryDownloadSourceCloudflareR2'));
+				bindLocalizedOptions(dropdown.addOption('github-release', t('settingsDetails.advanced.binaryDownloadSourceGithubRelease')), {['github-release']: ['terminalAgent.settingsDetails.advanced.binaryDownloadSourceGithubRelease']});
+				bindLocalizedOptions(dropdown.addOption('cloudflare-r2', t('settingsDetails.advanced.binaryDownloadSourceCloudflareR2')), {['cloudflare-r2']: ['terminalAgent.settingsDetails.advanced.binaryDownloadSourceCloudflareR2']});
 				dropdown.setValue(settings.serverConnection.binaryDownloadSource).onChange((value) => {
 					settings.serverConnection.binaryDownloadSource = value as BinaryDownloadSource;
 					void this.saveSettings();
@@ -1920,10 +1922,10 @@ export class TerminalSettingsRenderer extends BaseSettingsRenderer {
 						});
 				});
 			});
-		new Setting(containerEl).setName(t('settingsDetails.advanced.binaryDownloadNow')).addButton((button) => {
-			button.setButtonText(t('settingsDetails.advanced.binaryDownloadNow')).onClick(async () => {
+		bindLocalizedControl(new Setting(containerEl).setName(t('settingsDetails.advanced.binaryDownloadNow')), "name", 'terminalAgent.settingsDetails.advanced.binaryDownloadNow').addButton((button) => {
+			bindLocalizedControl(button.setButtonText(t('settingsDetails.advanced.binaryDownloadNow')), "buttonText", 'terminalAgent.settingsDetails.advanced.binaryDownloadNow').onClick(async () => {
 				button.setDisabled(true);
-				button.setButtonText(t('settingsDetails.advanced.binaryDownloadNowRunning'));
+				bindLocalizedControl(button.setButtonText(t('settingsDetails.advanced.binaryDownloadNowRunning')), "buttonText", 'terminalAgent.settingsDetails.advanced.binaryDownloadNowRunning');
 
 				try {
 					const serverManager = await this.context.plugin.getServerManager();
@@ -1941,16 +1943,16 @@ export class TerminalSettingsRenderer extends BaseSettingsRenderer {
 					const message = error instanceof Error ? error.message : String(error);
 					new Notice(t('notices.settings.binaryDownloadFailed', { message }), 5000);
 				} finally {
-					button.setButtonText(t('settingsDetails.advanced.binaryDownloadNow'));
+					bindLocalizedControl(button.setButtonText(t('settingsDetails.advanced.binaryDownloadNow')), "buttonText", 'terminalAgent.settingsDetails.advanced.binaryDownloadNow');
 					button.setDisabled(false);
 				}
 			});
 		});
 
 		// Offline mode
-		new Setting(containerEl)
-			.setName(t('settingsDetails.advanced.offlineMode'))
-			.setDesc(t('settingsDetails.advanced.offlineModeDesc'))
+		bindLocalizedControl(bindLocalizedControl(new Setting(containerEl)
+			.setName(t('settingsDetails.advanced.offlineMode')), "name", 'terminalAgent.settingsDetails.advanced.offlineMode')
+			.setDesc(t('settingsDetails.advanced.offlineModeDesc')), "desc", 'terminalAgent.settingsDetails.advanced.offlineModeDesc')
 			.addToggle((toggle) =>
 				toggle.setValue(settings.serverConnection.offlineMode).onChange((value) => {
 					settings.serverConnection.offlineMode = value;
@@ -1983,11 +1985,11 @@ export class TerminalSettingsRenderer extends BaseSettingsRenderer {
 			);
 
 		// Reset button
-		new Setting(containerEl)
-			.setName(t('settingsDetails.advanced.resetToDefaults'))
-			.setDesc(t('settingsDetails.advanced.resetToDefaultsDesc'))
+		bindLocalizedControl(bindLocalizedControl(new Setting(containerEl)
+			.setName(t('settingsDetails.advanced.resetToDefaults')), "name", 'terminalAgent.settingsDetails.advanced.resetToDefaults')
+			.setDesc(t('settingsDetails.advanced.resetToDefaultsDesc')), "desc", 'terminalAgent.settingsDetails.advanced.resetToDefaultsDesc')
 			.addButton((button) =>
-				button.setButtonText(t('common.reset')).onClick(() => {
+				bindLocalizedControl(button.setButtonText(t('common.reset')), "buttonText", 'terminalAgent.common.reset').onClick(() => {
 					this.context.plugin.settings.serverConnection = { ...DEFAULT_SERVER_CONNECTION_SETTINGS };
 					void this.saveSettings();
 

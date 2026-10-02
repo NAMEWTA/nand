@@ -12,6 +12,7 @@ export interface TerminalWorkbenchProps {
 	history?: ComponentChildren;
 	usage?: ComponentChildren;
 	header?: ComponentChildren;
+	context?: ComponentChildren;
 	preview?: ComponentChildren;
 	rootRef?: Ref<HTMLDivElement>;
 	ownerWindow?: Window;
@@ -115,6 +116,7 @@ export function TerminalWorkbench(props: TerminalWorkbenchProps) {
 			/>
 			<div className="nand-agent-center">
 				<div className="terminal-workbench-header">{header}</div>
+				{props.context}
 				<div className="terminal-workbench-main">
 					<div className="terminal-live-pane" aria-hidden={state.showHistory} inert={state.showHistory}>
 						<div className="terminal-search-container" ref={props.searchRef}>

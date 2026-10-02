@@ -1,6 +1,0 @@
-{
-  "path": "src/platform/obsidian/dashboard/automation.ts",
-  "find": "path: settings.dashboardFile, id: `widget:${entry.id}`",
-  "replace": "path: settings.dashboardFile.endsWith('.md') ? settings.dashboardFile : `${settings.dashboardFile}.md`, id: `widget:${entry.id}`",
-  "purpose": "只规范化 widget 路径后缀，其余不变"
-}

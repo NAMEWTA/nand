@@ -51,6 +51,7 @@ function fixture() {
 		sockets = [],
 		processes = [];
 	class FakeWebSocket {
+        send(text) { const message = JSON.parse(text); assert.equal(message.type, 'auth'); assert.equal(message.protocol, 2); this.onmessage?.({ data: JSON.stringify({ type: 'authenticated', protocol: 2 }) }); }
 		static OPEN = 1;
 		readyState = 0;
 		constructor(url) {
@@ -72,6 +73,7 @@ function fixture() {
 		}
 	}
 	class FakeProcess extends EventEmitter {
+		stdin = { end: token => { assert.match(token.trim(), /^[a-f0-9]{64}$/); } };
 		stdout = new EventEmitter();
 		stderr = new EventEmitter();
 		killed = false;
@@ -93,6 +95,7 @@ function fixture() {
 		return p;
 	};
 	const ctx = {
+		crypto,
 		module: { exports: {} },
 		process: { platform: 'linux', arch: 'x64', env: {} },
 		WebSocket: FakeWebSocket,
@@ -126,7 +129,7 @@ function fixture() {
 	};
 	const completeStart = async () => {
 		await tick();
-		processes.at(-1).stdout.emit('data', Buffer.from('{"port":12345,"pid":100}'));
+		processes.at(-1).stdout.emit('data', Buffer.from('{"port":12345,"pid":100,"protocol":2}'));
 		await tick();
 		sockets.at(-1).open();
 		await tick();
@@ -156,7 +159,7 @@ function fixture() {
 		},
 	);
 	await f.tick();
-	f.processes[0].stdout.emit('data', Buffer.from('{"port":12345,"pid":100}'));
+	f.processes[0].stdout.emit('data', Buffer.from('{"port":12345,"pid":100,"protocol":2}'));
 	await f.tick();
 	f.sockets[0].fail();
 	await f.tick();
@@ -164,9 +167,11 @@ function fixture() {
 		[...f.timers.values()].some((t) => t.ms === 5000),
 		false,
 	);
-	await f.fire(3000);
-	f.sockets[1].open();
-	await f.tick();
+	await f.fire(1000);
+	await startup;
+	const retry = f.manager.ensureServer();
+	await f.completeStart();
+	await retry;
 	assert.equal(f.manager.isConnected(), true);
 	assert.equal(settled, true);
 	void startup;
@@ -234,16 +239,17 @@ for (const event of ['close', 'timeout']) {
 	const second = assert.rejects(f.manager.ensureServer());
 	await f.tick();
 	assert.equal(f.processes.length, 1);
-	f.processes[0].stdout.emit('data', Buffer.from('{"port":12345}'));
+	f.processes[0].stdout.emit('data', Buffer.from('{"port":12345,"protocol":2}'));
 	await f.tick();
 	if (event === 'close') f.sockets[0].close();
 	else await f.fire(5000);
+	await f.tick();
+	await f.fire(1000);
 	await Promise.all([first, second]);
 	const retry = f.manager.ensureServer();
-	await f.tick();
-	f.sockets.at(-1).open();
+	await f.completeStart();
 	await retry;
-	assert.equal(f.processes.length, 1);
+	assert.equal(f.processes.length, 2);
 	const current = f.manager.ws;
 	f.sockets[0].onclose();
 	assert.equal(f.manager.ws, current, 'late old close cannot detach a new socket');
@@ -257,7 +263,7 @@ for (const event of ['close', 'timeout']) {
 	assert.equal(f.manager.shutdown(), stopping, 'shutdown shares one operation');
 	await f.fire(1000);
 	await Promise.all([starting, stopping]);
-	f.processes[0].stdout.emit('data', Buffer.from('{"port":12345}'));
+	f.processes[0].stdout.emit('data', Buffer.from('{"port":12345,"protocol":2}'));
 	assert.equal(f.sockets.length, 0);
 	assert.equal(f.manager.process, null);
 }

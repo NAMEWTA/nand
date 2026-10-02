@@ -1,3 +1,4 @@
+import { SaveStatus } from '../../primitives/SaveStatus';
 import { useLayoutEffect, useState } from 'preact/hooks';
 import { resolveCoverAsObjectUrl } from '../../../platform/obsidian/reading/book-service';
 import type { BookInfo, ReadingService } from '../../../platform/obsidian/reading/reading-service';
@@ -56,6 +57,7 @@ export function ReadingPanel({
 	const state = service.getState();
 	return (
 		<>
+			<SaveStatus source={service} />
 			<div class="dashboard-reading-title-row">
 				<div class="dashboard-reading-title">{t('reading.title')}</div>
 				<div class="dashboard-reading-title-spacer" />

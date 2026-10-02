@@ -11,6 +11,8 @@ import { t } from '../../shared/i18n/index';
 import { JsonStore } from '../../shared/json-store';
 import type { TextStorage } from '../../shared/storage/ports';
 import { latestOccurrence, validateSchedule } from './schedule';
+import type { AutomationDefinitionsRepository } from './documents';
+import { actionAvailability, type ActionExecutor } from '../actions/executor';
 
 export interface AutomationState {
 	definitions: AutomationDefinition[];
@@ -32,6 +34,7 @@ export class AutomationService {
 	private loaded = false;
 	state: AutomationState = { definitions: [], runs: [], cursors: {} };
 	private sourceDefinitions: AutomationDefinition[] = [];
+	private savedDefinitions: AutomationDefinition[] = [];
 	private store: JsonStore<AutomationState>;
 	private listeners = new Set<() => void>();
 	private evaluating = false;
@@ -51,6 +54,7 @@ export class AutomationService {
 		readonly agent: () => AgentRuntimePort | undefined,
 		private notify: (run: AutomationRun, definition: AutomationDefinition) => Promise<void>,
 		private enabled = true,
+		private options: { definitions?: AutomationDefinitionsRepository; executor?: ActionExecutor; desktop?: boolean } = {},
 	) {
 		this.store = new JsonStore(storage, path, (value): value is AutomationState => {
 			if (!value || typeof value !== 'object') return false;
@@ -130,7 +134,7 @@ export class AutomationService {
 		}
 	}
 	get definitions(): AutomationDefinition[] {
-		const rows = [...this.state.definitions, ...this.sourceDefinitions];
+		const rows = [...(this.options.definitions ? this.savedDefinitions : this.state.definitions), ...this.sourceDefinitions];
 		const counts = new Map<string, number>();
 		for (const d of rows) counts.set(d.id, (counts.get(d.id) ?? 0) + 1);
 		return rows.filter((d) => counts.get(d.id) === 1);
@@ -145,10 +149,10 @@ export class AutomationService {
 	refresh(): Promise<void> {
 		return (
 			this.refreshing ??
-			(this.refreshing = this.sources
-				.list()
-				.then((rows) => {
+			(this.refreshing = Promise.all([this.sources.list(), this.options.definitions?.list() ?? Promise.resolve([])])
+				.then(([rows, saved]) => {
 					this.sourceDefinitions = rows;
+					this.savedDefinitions = saved;
 					this.emit();
 				})
 				.finally(() => {
@@ -160,6 +164,8 @@ export class AutomationService {
 		this.requireExecution();
 		if (!this.loaded) throw new AutomationError('failedLoad');
 		if (!validDefinition(d)) throw new AutomationError('invalid');
+		const unavailable = actionAvailability(d.action.kind, d.schedule.kind === 'manual' ? 'manual' : 'scheduled', this.options.desktop !== false);
+		if (unavailable) throw new Error(t(unavailable));
 		const old = this.definitions.find((item) => item.id === d.id);
 		if (old && old.deviceId !== this.deviceId) throw new AutomationError('otherDevice');
 		const changed =
@@ -167,6 +173,10 @@ export class AutomationService {
 			JSON.stringify(old.schedule) !== JSON.stringify(d.schedule) ||
 			JSON.stringify(old.action) !== JSON.stringify(d.action);
 		const next = { ...d, revision: old ? old.revision + (changed ? 1 : 0) : 1, updatedAt: Date.now() };
+		if (!next.source && this.options.definitions) {
+			await this.options.definitions.save(next);
+			await this.refresh();
+		}
 		if (next.source) {
 			await this.sources.save(next);
 			if (this.refreshing) await this.refreshing;
@@ -177,7 +187,7 @@ export class AutomationService {
 				const cursor = state.cursors[`${old.id}:${old.revision}`];
 				if (cursor !== undefined) state.cursors[`${next.id}:${next.revision}`] = cursor;
 			}
-			if (!next.source) {
+			if (!next.source && !this.options.definitions) {
 				const index = state.definitions.findIndex((item) => item.id === next.id);
 				if (index < 0) state.definitions.push(next);
 				else state.definitions[index] = next;
@@ -193,6 +203,7 @@ export class AutomationService {
 			await this.sources.remove(d);
 			await this.refresh();
 		}
+		else if (this.options.definitions) { await this.options.definitions.remove(d); await this.refresh(); }
 		await this.commit((state) => {
 			state.definitions = state.definitions.filter((item) => item.id !== d.id);
 		});
@@ -251,6 +262,9 @@ export class AutomationService {
 	): Promise<AutomationRun | undefined> {
 		this.requireExecution();
 		if (!this.loaded || this.stopped || this.launching.has(d.id)) return undefined;
+		if (!validDefinition(d)) throw new AutomationError('invalid');
+		const unavailable = actionAvailability(d.action.kind, trigger, this.options.desktop !== false);
+		if (unavailable) throw new Error(t(unavailable));
 		if (d.deviceId !== this.deviceId) throw new AutomationError('otherDevice');
 		const active = this.state.runs.find((r) => r.automationId === d.id && isActiveRun(r));
 		if (active && trigger === 'manual') {
@@ -292,10 +306,11 @@ export class AutomationService {
 					errorCode: active ? 'busy' : 'missed',
 					endedAt: Date.now(),
 				});
-			} else if (d.action.kind === 'agent') {
+			} else if (d.action.kind === 'agent' || d.action.kind === 'script') {
 				const agent = this.agent();
 				if (!agent) throw new AutomationError('agentUnavailable');
-				const handle = await agent.start(d.action, run, previous);
+				const handle = d.action.kind === 'agent' ? await agent.start(d.action, run, previous) : await agent.startScript?.(d.action, run);
+				if (!handle) throw new AutomationError('agentUnavailable');
 				this.ownedAgents.set(run.id, { agent, terminalId: handle.terminalId });
 				if (!this.executionEnabled && !this.stopped) return run;
 				if (this.stopped || !isActiveRun(run)) {
@@ -330,7 +345,12 @@ export class AutomationService {
 					.catch(console.error);
 			} else {
 				if (d.action.kind === 'create-task') await this.sources.createTask(d.action, run.id);
-				await this.updateRun(run, { status: 'succeeded', endedAt: Date.now() });
+				let message = '';
+				if (d.action.kind !== 'create-task' && d.action.kind !== 'notify') {
+					if (!this.options.executor) throw new AutomationError('invalid');
+					message = (await this.options.executor.execute(d.action, { run, desktop: this.options.desktop !== false })).message;
+				}
+				await this.updateRun(run, { status: 'succeeded', message, endedAt: Date.now() });
 			}
 		} catch (error) {
 			await this.updateRun(run, {
@@ -389,8 +409,9 @@ export class AutomationService {
 				.reverse();
 			await this.store.save(next);
 			// Preserve references held by live completion handlers and callers.
+			const live = new Map(this.state.runs.map(row => [row.id, row]));
 			next.runs = next.runs.map((row) => {
-				const existing = this.state.runs.find((r) => r.id === row.id);
+				const existing = live.get(row.id);
 				return existing ? Object.assign(existing, row) : row;
 			});
 			this.state = next;
@@ -400,15 +421,22 @@ export class AutomationService {
 		return operation;
 	}
 	dispose(): void {
+		void this.shutdown().catch(console.error);
+	}
+	async shutdown(): Promise<void> {
 		this.stopped = true;
 		this.listeners.clear();
 		if (!this.loaded) return;
-		void this.commit((state) => {
+		await Promise.allSettled([...this.launches]);
+		await Promise.all([...this.ownedAgents.values()].map(owned => owned.agent.stop(owned.terminalId)));
+		this.ownedAgents.clear();
+		await this.commit((state) => {
 			for (const run of state.runs)
 				if (isActiveRun(run)) {
 					run.status = 'interrupted';
 					run.endedAt = Date.now();
 				}
-		}).catch(console.error);
+		});
+		await this.store.flush();
 	}
 }

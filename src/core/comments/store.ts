@@ -151,6 +151,8 @@ export class CommentStore {
 	private flushing = false;
 	private chain: Promise<void> = Promise.resolve();
 	private readonly listeners = new Set<() => void>();
+	private closed = false;
+	private closing: Promise<void> | null = null;
 
 	constructor(
 		private readonly fs: CommentFs,
@@ -275,7 +277,7 @@ export class CommentStore {
 	 * during the initial load cannot drag a stale offset.
 	 */
 	applyChanges(path: string | null, mapper: PosMapper, doc: string): void {
-		if (!path || !this.reconciled.has(path)) return;
+		if (this.closed || !path || !this.reconciled.has(path)) return;
 		const threads = this.cache.get(path);
 		if (!threads || threads.length === 0) return;
 		let changed = false;
@@ -381,7 +383,21 @@ export class CommentStore {
 			globalThis.clearTimeout(this.timer);
 			this.timer = null;
 		}
-		return this.enqueue(() => this.writeDirty());
+		return this.enqueue(() => this.writeDirty(), true);
+	}
+
+	/** Seal synchronously, then drain accepted work. A failed drain remains retryable. */
+	close(): Promise<void> {
+		this.closed = true;
+		this.dispose();
+		if (this.closing) return this.closing;
+		const run = this.flush();
+		this.closing = run;
+		void run.then(
+			() => { if (this.closing === run) this.closing = null; },
+			() => { if (this.closing === run) this.closing = null; },
+		);
+		return run;
 	}
 
 	dispose(): void {
@@ -454,7 +470,7 @@ export class CommentStore {
 	private markDirty(path: string): void {
 		this.dirty.set(path, ++this.change);
 		this.indexDirty = true;
-		if (this.flushing || this.timer != null) return;
+		if (this.closed || this.flushing || this.timer != null) return;
 		this.timer = globalThis.setTimeout(() => {
 			this.timer = null;
 			void this.enqueue(() => this.writeDirty());
@@ -530,7 +546,12 @@ export class CommentStore {
 		for (const cb of this.listeners) cb();
 	}
 
-	private enqueue<T>(fn: () => Promise<T>): Promise<T> {
+	private enqueue<T>(fn: () => Promise<T>, allowClosed = false): Promise<T> {
+		if (this.closed && !allowClosed) {
+			const rejected = Promise.reject<T>(new Error('Comment store is closed'));
+			void rejected.catch(() => undefined);
+			return rejected;
+		}
 		const execute = async () => {
 			await this.commitTransaction();
 			return fn();
@@ -550,6 +571,10 @@ let activeStore: CommentStore | null = null;
 
 export function registerCommentStore(store: CommentStore | null): void {
 	activeStore = store;
+}
+
+export function unregisterCommentStore(store: CommentStore): void {
+	if (activeStore === store) activeStore = null;
 }
 
 export function getCommentStore(): CommentStore | null {

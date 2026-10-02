@@ -1,4 +1,4 @@
-import { getLanguage } from '../../../shared/i18n';
+import { t } from '../../../shared/i18n';
 import { useWindowClock } from './use-window-clock';
 export function YearProgressPanel({ win }: { win: Window }) {
 	const now = useWindowClock(win),
@@ -9,13 +9,12 @@ export function YearProgressPanel({ win }: { win: Window }) {
 	const percent = Math.max(0, Math.min(100, Math.round((elapsed / total) * 1000) / 10)),
 		days = Math.round(total / 86400000),
 		day = Math.floor(elapsed / 86400000) + 1,
-		left = Math.max(0, days - day),
-		zh = getLanguage() === 'zh';
+		left = Math.max(0, days - day);
 	return (
 		<>
 			<div class="dashboard-sidebar-year-progress-header">
 				<span class="dashboard-sidebar-year-progress-year">{year}</span>
-				<span class="dashboard-sidebar-year-progress-left">{zh ? `剩 ${left} 天` : `${left} days left`}</span>
+				<span class="dashboard-sidebar-year-progress-left">{t('yearProgress.remaining', { days: left })}</span>
 			</div>
 			<div class="dashboard-progress dashboard-sidebar-year-progress-bar">
 				<div class="dashboard-progress-bar">
@@ -24,7 +23,7 @@ export function YearProgressPanel({ win }: { win: Window }) {
 			</div>
 			<div class="dashboard-sidebar-year-progress-sub">
 				<span class="dashboard-sidebar-year-progress-day">
-					{zh ? `第 ${day} / ${days} 天` : `Day ${day} of ${days}`}
+					{t('yearProgress.dayOfYear', { day, total: days })}
 				</span>
 				<span class="dashboard-sidebar-year-progress-percent">{percent.toFixed(1)}%</span>
 			</div>

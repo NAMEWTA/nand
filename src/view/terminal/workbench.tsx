@@ -1,4 +1,6 @@
 import { Menu, Modal, Notice, Setting, type App } from 'obsidian';
+import { sessionLabel } from './session-label';
+import { copySessionId } from './copy-session-id';
 import { useEffect, useRef, useState } from 'preact/hooks';
 import { AGENT_CATALOG } from '../../core/agent-launch/catalog';
 import type { UsageSnapshot } from '../../core/agent-launch/types';
@@ -41,7 +43,7 @@ export function TerminalHeader({ title, cwd, status, search, more, sidebarToggle
 		{sidebarToggle && <button className="nand-ui-icon-btn terminal-navigation-toggle" aria-label={t('workbench.toggleNavigation')} aria-expanded={sidebarOpen} onClick={sidebarToggle}><Icon name="panel-left" /></button>}
 		<strong className="terminal-current-title" title={`${title}\n${t('workbench.backgroundHelp')}`}>{title}</strong>
 		{cwd && <span className="terminal-current-cwd" title={cwd}>{cwd}</span>}
-		{status && <span className="terminal-current-status"><i aria-hidden="true" className={`nand-ui-dot nand-session-status-dot is-${status}`} />{t(`workbench.status.${status}`)}</span>}
+		{status && <span className="terminal-current-status" title={t(`workbench.status.${status}`)} aria-label={t(`workbench.status.${status}`)}><i aria-hidden="true" className={`nand-ui-dot nand-session-status-dot is-${status}`} /><span className="terminal-current-status-text">{t(`workbench.status.${status}`)}</span></span>}
 		<div className="terminal-header-actions">
 			{quickSwitch && <button className="nand-ui-icon-btn" aria-label={t('workbench.quickSwitch')} title={t('workbench.quickSwitch')} onClick={quickSwitch}><Icon name="list" /></button>}
 			<button className="nand-ui-icon-btn" aria-label={t('terminal.contextMenu.search')} title={t('terminal.contextMenu.search')} onClick={search}><Icon name="search" /></button>
@@ -78,15 +80,15 @@ export function SessionSidebar({ host, service, active, select, close, state, on
 		const clipboard = (event.currentTarget as HTMLElement).ownerDocument.defaultView?.navigator.clipboard;
 		menu.addItem((item) => item.setTitle(t('workbench.sessionId', { id: terminal.id })).setDisabled(true));
 		menu.addItem((item) => item.setTitle(t('workbench.copySessionId')).setIcon('copy').onClick(() => {
-			if (clipboard) report(clipboard.writeText(terminal.id));
-			else new Notice(t('workbench.copyUnavailable'));
+			void copySessionId(terminal.id, clipboard);
 		}));
 		menu.addSeparator();
 		menu.addItem((item) => item.setTitle(t('workbench.close')).setIcon('x').onClick(() => confirmSessionClose(host.app, () => close(terminal))));
 		menu.showAtMouseEvent(event);
 	};
 	const query = state.sessionQuery.trim().toLocaleLowerCase();
-	const terminals = service.getAllTerminals().filter((terminal) => !query || `${terminal.getTitle()} ${terminal.getCwd()} ${terminal.id} ${terminal.agentId ?? ''} ${AGENT_CATALOG.find((agent) => agent.id === terminal.agentId)?.title ?? ''}`.toLocaleLowerCase().includes(query));
+	const allTerminals = service.getAllTerminals();
+	const terminals = allTerminals.filter((terminal) => !query || `${terminal.getTitle()} ${terminal.getCwd()} ${terminal.id} ${sessionLabel(terminal, allTerminals)} ${terminal.agentId ?? ''} ${AGENT_CATALOG.find((agent) => agent.id === terminal.agentId)?.title ?? ''}`.toLocaleLowerCase().includes(query));
 	return <>
 		<input type="search" className="terminal-session-search" aria-label={t('workbench.searchSessions')} placeholder={t('workbench.searchSessions')} value={state.sessionQuery} onInput={(event) => onStateChange({ sessionQuery: event.currentTarget.value })} />
 		<div className="nand-ui-list nand-session-list">
@@ -97,7 +99,7 @@ export function SessionSidebar({ host, service, active, select, close, state, on
 					<button className={`nand-ui-list-item${terminal.id === active && !state.showHistory ? ' is-active' : ''}`} data-terminal-id={terminal.id} title={`${name}\n${terminal.getCwd()}\n${status}`} onClick={() => {
 						onStateChange({ showHistory: false, drawerOpen: false }); select(terminal);
 					}}>
-						<span className="nand-ui-list-item-title">{name}</span>
+						<span className="nand-session-title-row"><span className="nand-ui-list-item-title">{name}</span><small className="nand-session-short-id">{sessionLabel(terminal, allTerminals)}</small></span>
 						<span className="nand-session-row-meta"><i aria-hidden="true" className={`nand-ui-dot nand-session-status-dot is-${terminal.nativeStatus}`} /><small className="nand-session-row-status">{agent} · {status}</small></span>
 					</button>
 					<button className="nand-ui-icon-btn nand-session-more" aria-label={t('workbench.sessionActions', { name })} title={t('workbench.more')} onClick={(event) => sessionMenu(event, terminal)}><Icon name="ellipsis" /></button>

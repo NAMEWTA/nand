@@ -1,1 +1,0 @@
-{"messages":[{"module":"pty","type":"init_complete","exit_status":true,"session_id":"e66c32a2-e2f2-4eff-9c21-ee544080945a","success":true},{"module":"agent_data","type":"result","data":{"warnings":[]},"requestId":"probe-history"},{"module":"pty","type":"exit","code":0,"session_id":"e66c32a2-e2f2-4eff-9c21-ee544080945a"}],"elapsed_ms":59}

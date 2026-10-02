@@ -1,3 +1,5 @@
+import { bindLocalizedOptions } from '../../primitives/localized-dom';
+import { bindLocalizedElement, bindLocalizedControl } from '../../primitives/localized-dom';
 import { App, Modal, Setting } from 'obsidian';
 import { formatElapsed, parseAnniversaryDate } from '../../../core/anniversaries/calendar';
 import { resolveWidgetLabel, usesDefaultWidgetLabel } from '../../../core/dashboard/default-widget-label';
@@ -28,21 +30,21 @@ export class AnniversarySettingsModal extends Modal {
 		const { contentEl, containerEl } = this;
 		contentEl.empty();
 		contentEl.addClass('dashboard-library-config-modal');
-		containerEl.addClass('modal--dashboard');
-		containerEl.parentElement?.addClass('modal-bg--dashboard');
+		this.modalEl.addClass('modal--dashboard');
+		containerEl.addClass('modal-bg--dashboard');
 		applyModalTheme(containerEl);
 
 		const container = contentEl.createDiv({ cls: 'dashboard-modal dashboard-modal--compact' });
-		const title = container.createDiv({ cls: 'dashboard-modal-title', text: t('anniversary.editTitle') });
+		const title = bindLocalizedElement(container.createDiv({ cls: 'dashboard-modal-title', text: t('anniversary.editTitle') }), 'anniversary.editTitle');
 		title.setCssProps({ fontSize: '1em' });
 		const body = container.createDiv({ cls: 'dashboard-modal-body' });
 
-		new Setting(body)
-			.setName(t('anniversary.label'))
-			.setDesc(t('anniversary.labelDesc'))
+		bindLocalizedControl(bindLocalizedControl(new Setting(body)
+			.setName(t('anniversary.label')), "name", 'anniversary.label')
+			.setDesc(t('anniversary.labelDesc')), "desc", 'anniversary.labelDesc')
 			.addText((text) =>
-				text
-					.setPlaceholder(t('anniversary.labelPlaceholder'))
+				bindLocalizedControl(text
+					.setPlaceholder(t('anniversary.labelPlaceholder')), "placeholder", 'anniversary.labelPlaceholder')
 					.setValue(this.cfg.label)
 					.onChange((v) => {
 						this.cfg.label = v.trim();
@@ -50,9 +52,9 @@ export class AnniversarySettingsModal extends Modal {
 					}),
 			);
 
-		new Setting(body)
-			.setName(t('anniversary.startDate'))
-			.setDesc(t('anniversary.startDateDesc'))
+		bindLocalizedControl(bindLocalizedControl(new Setting(body)
+			.setName(t('anniversary.startDate')), "name", 'anniversary.startDate')
+			.setDesc(t('anniversary.startDateDesc')), "desc", 'anniversary.startDateDesc')
 			.addText((text) => {
 				// Native date input: Obsidian's Chromium renders a real
 				// calendar picker, localized by the OS, value always
@@ -66,14 +68,14 @@ export class AnniversarySettingsModal extends Modal {
 				});
 			});
 
-		new Setting(body)
-			.setName(t('anniversary.precision'))
-			.setDesc(t('anniversary.precisionDesc'))
+		bindLocalizedControl(bindLocalizedControl(new Setting(body)
+			.setName(t('anniversary.precision')), "name", 'anniversary.precision')
+			.setDesc(t('anniversary.precisionDesc')), "desc", 'anniversary.precisionDesc')
 			.addDropdown((dropdown) =>
-				dropdown
-					.addOption('ymd', t('anniversary.precisionYmd'))
-					.addOption('days', t('anniversary.precisionDays'))
-					.addOption('hours', t('anniversary.precisionHours'))
+				bindLocalizedOptions(bindLocalizedOptions(bindLocalizedOptions(dropdown
+					.addOption('ymd', t('anniversary.precisionYmd')), {['ymd']: ['anniversary.precisionYmd']})
+					.addOption('days', t('anniversary.precisionDays')), {['days']: ['anniversary.precisionDays']})
+					.addOption('hours', t('anniversary.precisionHours')), {['hours']: ['anniversary.precisionHours']})
 					.setValue(this.cfg.precision)
 					.onChange((v) => {
 						this.cfg.precision = v as AnniversaryConfig['precision'];
@@ -81,9 +83,9 @@ export class AnniversarySettingsModal extends Modal {
 					}),
 			);
 
-		new Setting(body)
-			.setName(t('anniversary.annualReminder'))
-			.setDesc(t('anniversary.annualReminderDesc'))
+		bindLocalizedControl(bindLocalizedControl(new Setting(body)
+			.setName(t('anniversary.annualReminder')), "name", 'anniversary.annualReminder')
+			.setDesc(t('anniversary.annualReminderDesc')), "desc", 'anniversary.annualReminderDesc')
 			.addToggle((toggle) =>
 				toggle.setValue(this.cfg.annualReminder).onChange((v) => {
 					this.cfg.annualReminder = v;
@@ -93,11 +95,11 @@ export class AnniversarySettingsModal extends Modal {
 		// Card background: the nested modal edits this.cfg.background in
 		// place (cfg is a local copy); the parent Save commits it with the
 		// rest of the entry.
-		new Setting(body)
-			.setName(t('wbg.set'))
+		bindLocalizedControl(new Setting(body)
+			.setName(t('wbg.set')), "name", 'wbg.set')
 			.setDesc(this.cfg.background?.image ?? '')
 			.addButton((btn) =>
-				btn.setButtonText(this.cfg.background ? t('common.edit') : t('wbg.set')).onClick(() => {
+				bindLocalizedControl(btn.setButtonText(this.cfg.background ? t('common.edit') : t('wbg.set')), "buttonText", this.cfg.background ? ('common.edit') : ('wbg.set'), (this.cfg.background) ? (undefined) : (undefined)).onClick(() => {
 					new WidgetBackgroundModal(this.app, this.cfg.background, (bg) => {
 						this.cfg.background = bg;
 					}).open();
@@ -105,21 +107,21 @@ export class AnniversarySettingsModal extends Modal {
 			);
 
 		// Live preview of the widget's value line for the current inputs.
-		this.preview = new Setting(body).setName(t('anniversary.preview')).setDesc('--');
+		this.preview = bindLocalizedControl(new Setting(body).setName(t('anniversary.preview')), "name", 'anniversary.preview').setDesc('--');
 		this.updatePreview();
 
 		const footer = container.createDiv({ cls: 'dashboard-modal-footer' });
-		footer
+		bindLocalizedElement(footer
 			.createEl('button', {
 				text: t('common.cancel'),
 				cls: 'dashboard-modal-btn dashboard-modal-btn--cancel',
-			})
+			}), 'common.cancel')
 			.addEventListener('click', () => this.close());
-		footer
+		bindLocalizedElement(footer
 			.createEl('button', {
 				text: t('common.save'),
 				cls: 'dashboard-modal-btn dashboard-modal-btn--confirm',
-			})
+			}), 'common.save')
 			.addEventListener('click', () => {
 				this.close();
 				this.onSave(this.cfg);

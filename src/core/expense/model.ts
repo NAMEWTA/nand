@@ -19,7 +19,7 @@ export interface ExpenseRecord {
 	createdAt: number;
 }
 
-/** v1 data layout, stored at .obsidian/plugins/<manifest.id>/expense.json. */
+/** In-memory domain snapshot; production persistence uses Markdown documents. */
 export interface ExpenseData {
 	version: 1;
 	/** Append-ordered; never pruned (financial history spans years). */
@@ -133,116 +133,6 @@ export function sanitizeAmountInput(raw: string): string {
 		.replace(/\./g, '')
 		.slice(0, 2);
 	return `${int}.${frac}`;
-}
-
-/** Union of two datasets, `session` winning per-record-id conflicts. Used when
- *  a load that failed at startup succeeds on a later retry: the disk copy and
- *  everything changed in-session are merged so neither side is lost. */
-export function mergeData(disk: ExpenseData, session: ExpenseData): ExpenseData {
-	const byId = new Map(disk.records.map((r) => [r.id, r] as const));
-	for (const r of session.records) byId.set(r.id, r);
-	const records = [...byId.values()].sort((a, b) =>
-		a.date === b.date ? a.createdAt - b.createdAt : a.date < b.date ? -1 : 1,
-	);
-	const customCategories = mergeCustomCategories(disk.customCategories, session.customCategories);
-	const categoryOrder = mergeCategoryOrder(disk.categoryOrder, session.categoryOrder);
-	const primaryCategories = mergePrimaryCategories(disk.primaryCategories, session.primaryCategories);
-	const categoryParents = mergeCategoryParents(disk.categoryParents, session.categoryParents, primaryCategories);
-	return {
-		version: 1,
-		records,
-		lastCategory: { ...disk.lastCategory, ...session.lastCategory },
-		...(customCategories ? { customCategories } : {}),
-		...(categoryOrder ? { categoryOrder } : {}),
-		...(primaryCategories ? { primaryCategories } : {}),
-		...(categoryParents ? { categoryParents } : {}),
-	};
-}
-
-/** Union of per-type custom category lists (disk order first, case-insensitive
- *  dedupe); undefined when both sides carry nothing. */
-export function mergeCustomCategories(
-	disk: ExpenseData['customCategories'],
-	session: ExpenseData['customCategories'],
-): ExpenseData['customCategories'] {
-	const out: { expense?: string[]; income?: string[] } = {};
-	for (const type of ['expense', 'income'] as const) {
-		const names: string[] = [];
-		const seen = new Set<string>();
-		for (const name of [...(disk?.[type] ?? []), ...(session?.[type] ?? [])]) {
-			const key = name.toLowerCase();
-			if (seen.has(key)) continue;
-			seen.add(key);
-			names.push(name);
-		}
-		if (names.length > 0) out[type] = names.slice(0, EXPENSE_MAX_CUSTOM_CATEGORIES);
-	}
-	return out.expense === undefined && out.income === undefined ? undefined : out;
-}
-
-// The three merges below are SESSION-FIRST, unlike mergeCustomCategories'
-// disk-first union. Reason: persist() merges whenever the disk content
-// differs from our last write — including when the only external change is
-// another device adding one record. A disk-first order would then put the
-// stale on-disk order ahead of a reorder this session just made, silently
-// reverting it. Session-first keeps local intent; disk contributes only
-// entries the session never touched.
-
-/** Session-first union of per-type order lists (exact-match dedupe — keys
- *  are exact category identifiers, not display names). */
-export function mergeCategoryOrder(
-	disk: ExpenseData['categoryOrder'],
-	session: ExpenseData['categoryOrder'],
-): ExpenseData['categoryOrder'] {
-	const out: { expense?: string[]; income?: string[] } = {};
-	for (const type of ['expense', 'income'] as const) {
-		const keys: string[] = [];
-		for (const v of [...(session?.[type] ?? []), ...(disk?.[type] ?? [])]) {
-			if (keys.includes(v)) continue;
-			keys.push(v);
-		}
-		if (keys.length > 0) out[type] = keys;
-	}
-	return out.expense === undefined && out.income === undefined ? undefined : out;
-}
-
-/** Session-first union of per-type primary-group lists (case-insensitive
- *  dedupe; session's casing wins a clash). */
-export function mergePrimaryCategories(
-	disk: ExpenseData['primaryCategories'],
-	session: ExpenseData['primaryCategories'],
-): ExpenseData['primaryCategories'] {
-	const out: { expense?: string[]; income?: string[] } = {};
-	for (const type of ['expense', 'income'] as const) {
-		const names: string[] = [];
-		const seen = new Set<string>();
-		for (const v of [...(session?.[type] ?? []), ...(disk?.[type] ?? [])]) {
-			const key = v.toLowerCase();
-			if (seen.has(key)) continue;
-			seen.add(key);
-			names.push(v);
-		}
-		if (names.length > 0) out[type] = names.slice(0, EXPENSE_MAX_PRIMARY_CATEGORIES);
-	}
-	return out.expense === undefined && out.income === undefined ? undefined : out;
-}
-
-/** Per-key merge of parent mappings (session wins each key — same semantics
- *  as records), then dangling values whose primary vanished on either side
- *  are dropped. */
-export function mergeCategoryParents(
-	disk: ExpenseData['categoryParents'],
-	session: ExpenseData['categoryParents'],
-	primaries: ExpenseData['primaryCategories'],
-): ExpenseData['categoryParents'] {
-	const out: { expense?: Record<string, string>; income?: Record<string, string> } = {};
-	for (const type of ['expense', 'income'] as const) {
-		const merged = { ...(disk?.[type] ?? {}), ...(session?.[type] ?? {}) };
-		const known = new Set(primaries?.[type] ?? []);
-		const clean = Object.fromEntries(Object.entries(merged).filter(([, primary]) => known.has(primary)));
-		if (Object.keys(clean).length > 0) out[type] = clean;
-	}
-	return out.expense === undefined && out.income === undefined ? undefined : out;
 }
 
 /** Normalize a parsed expense.json: keep only well-formed records so a

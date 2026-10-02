@@ -1,29 +1,21 @@
-## ADR-0004: 当前库范围内的只读原生历史
+# ADR-0004：当前库范围内的只读原生历史
 
-**Status:** accepted
-**Date:** 2026-09-28
-**Source:** LOG-003（<Path>{roots.state}/specdev/archive/2026-09/2026-09-28-docs-knowledge-consolidation/LOG.md</Path>）；USER-DECISION:批准知识沉淀计划并要求实施；原始材料：<Path>{roots.state}/specdev/archive/2026-09/2026-09-28-docs-knowledge-consolidation/evidence/original-docs/agent-workbench.md</Path>、<Path>{roots.state}/specdev/archive/2026-09/2026-09-28-docs-knowledge-consolidation/evidence/original-docs/agent-upgrade-2026-09-27.md</Path>
-**Supersedes:** none
+状态：已接受，当前规范。核对日期：2026-10-01。
 
-### Context
-CLI 已有会话记录和恢复协议。NAND 需要在库中浏览、搜索和标注历史；扫描全局记录或直接改写原生会话会扩大可见范围并干扰 CLI。
+## 问题
 
-### Decision
-只接纳可信工作目录经真实路径解析后属于当前库或其子目录的原生会话。原生日志和 OpenCode SQLite 只读；标题、标签、收藏和归档单独保存在 NAND 元数据中，索引可重建，Markdown 导出独立保存。Rust 后台任务承担解析并支持取消，不在渲染线程或 PTY reactor 中解析日志；恢复前重新核对会话和目录，找不到指定会话时不静默新建。
+CLI 历史与身份由 CLI 管理，工作台不能把全局历史混入当前库。
 
-### Trade-off
-替代方案是全局历史聚合，或导入并接管原生日志。当前选择保留 CLI 的数据与恢复权威，接受缺少可信 cwd 的记录不能显示，以及原生格式适配和独立索引成本。
+## 决策
 
-### Consequences
-符号链接和相似目录名不能扩大库范围。按文件变化跳过未变记录，已变记录重新完整解析；不宣称字节增量索引或实时文件监视。订阅额度、原生 token 与费用是不同语义，缺失值不得推算成已知；原生解析协议要求同提交配套 Rust 服务。
+按真实工作目录筛选当前 Vault 及其子目录的原生会话。CLI 日志保持只读；NAND 标注和可重建索引位于 `.nand/terminal-agent/<device-id>/`。恢复使用准确的原生标识，不存在时报告错误。导出写入可见 NAND Exports/，同名不覆盖。
 
-### Verification / Migration
-Rust 内部测试含真实目录范围、只读数据库和取消场景；本次没有验证认证账号、macOS 钥匙串或 Windows 实机。
+## 取舍与约束
 
-当前源码核验：
-- CODE:<Path>processes/rust-terminal-servers/src/agent_data.rs</Path>
-- CODE:<Path>src/platform/obsidian/ai-vault/service.ts</Path>
-- CODE:<Path>src/platform/desktop/ai-vault/canonical-cwd.ts</Path>
-- CODE:<Path>src/platform/terminal-server/agent-data-client.ts</Path>
+用量以原生日志与提供方状态为来源，缺失显示未知；费用不按模型单价推算。账号认证与日志不复制进 Vault。
 
-本次为现有设计的文档确认，日期不代表最初实施日期。上述替代方案用于本次解释取舍，不声称存在未保存的历史讨论；不引入产品或数据迁移。
+## 验证依据
+
+[当前源码](../../../../src/platform/terminal-server/agent-data-client.ts)。pnpm test:terminal-agent；覆盖真实路径范围、历史分页与搜索、恢复失败、原始用量和导出。
+
+本页描述当前工作区的有效决定，不反写历史实施时间。实际执行结果见[当前基线](../archive/2026-10/2026-10-01-current-baseline/README.md)。

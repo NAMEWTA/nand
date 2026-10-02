@@ -30,7 +30,7 @@ export function renderSidebarExpenseWidget(container: HTMLElement, app: App): vo
 						new Notice(t('expense.invalidAmount'));
 						return;
 					}
-					new Notice(
+					void live.flush().then(() => { new Notice(
 						t('expense.added', {
 							type: t(record.type === 'expense' ? 'expense.expenseLabel' : 'expense.incomeLabel'),
 							amount: `${live.getCurrency()}${formatExpenseAmount(record.amount)}`,
@@ -38,6 +38,7 @@ export function renderSidebarExpenseWidget(container: HTMLElement, app: App): vo
 							date: record.date.slice(5),
 						}),
 					);
+					}).catch(() => { new Notice(t('storage.unsaved')); });
 				}).open();
 			},
 		}),

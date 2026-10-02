@@ -8,6 +8,7 @@ import { ProjectPanel } from './ProjectPanel';
 import { TaskPanel, type CardBodyProps } from './TaskPanel';
 import { TrackerPanel } from './TrackerPanel';
 import { WeatherPanel } from './WeatherPanel';
+import { WebShortcutPanel } from './WebShortcutPanel';
 import { listDrop } from './card-interactions';
 export function cardKind(section: string, type: string) {
 	return section === 'memo' || (section === 'sticky' && (type === 'generic' || type === 'note'))
@@ -20,7 +21,7 @@ export function CardPanel(props: CardBodyProps & { root: HTMLElement; sectionTyp
 	const { card, callbacks, app, context, root, sectionType } = props;
 	const widget = card.type === 'weather' || card.type === 'tracker';
 	const kind = cardKind(sectionType, card.type);
-	const project = !widget && kind === 'project';
+	const project = !widget && card.type !== 'web' && kind === 'project';
 	const cover =
 		project &&
 		sectionType !== 'dashboard' &&
@@ -102,7 +103,7 @@ export function CardPanel(props: CardBodyProps & { root: HTMLElement; sectionTyp
 					{widget && sectionType === 'dashboard' && (
 						<button
 							class="dashboard-card-btn dashboard-card-btn--size"
-							aria-label="Card size"
+						aria-label={t('card.size')}
 							onClick={() =>
 								callbacks.onCardSizeChange(
 									card.id,
@@ -183,7 +184,9 @@ export function CardPanel(props: CardBodyProps & { root: HTMLElement; sectionTyp
 				class="dashboard-card-body"
 				{...(project ? listDrop(context, callbacks, 'doc', card.id, card.docs.length) : {})}
 			>
-				{card.type === 'weather' ? (
+				{card.type === 'web' ? (
+					<WebShortcutPanel {...props} />
+				) : card.type === 'weather' ? (
 					<WeatherPanel config={card.weatherConfig} root={root} />
 				) : card.type === 'tracker' ? (
 					<TrackerPanel card={card} app={app} context={context} />

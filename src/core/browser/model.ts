@@ -1,0 +1,105 @@
+export const BROWSER_VIEW_TYPE = 'nand-browser-view';
+export type BrowserTarget = 'tab' | 'modal';
+export type SearchEngine = 'google' | 'bing' | 'duckduckgo';
+export interface BrowserSettings {
+	searchEngine: SearchEngine;
+}
+export interface BrowserOpenRequest {
+	url?: string;
+	target?: BrowserTarget;
+	reuse?: boolean;
+	zoom?: number;
+	title?: string;
+	scroll?: { x: number; y: number };
+}
+export interface BrowserPageState {
+	id: string;
+	url: string;
+	title: string;
+	zoom: number;
+	loading: boolean;
+	canGoBack: boolean;
+	canGoForward: boolean;
+	error: string | null;
+	favicon: string;
+	scroll?: { x: number; y: number };
+}
+export interface BrowserHistoryEntry {
+	url: string;
+	title: string;
+	visitedAt: number;
+}
+export interface BrowserDownload {
+	id: string;
+	name: string;
+	received: number;
+	total: number;
+	state: string;
+	path: string;
+}
+export interface BrowserSnapshotRef {
+	ref: string;
+	role: string;
+	name: string;
+}
+export interface BrowserRect {
+	x: number;
+	y: number;
+	width: number;
+	height: number;
+}
+export interface BrowserGrab {
+	url: string;
+	title: string;
+	selector: string;
+	text: string;
+	html: string;
+	styles: Record<string, string>;
+	source: string | null;
+	rect: BrowserRect;
+	screenshot: string | null;
+	viewport: { width: number; height: number };
+}
+export interface BrowserAgent {
+	id: string;
+	title: string;
+}
+export interface BrowserAgentDeliveryPort {
+	list(): Promise<BrowserAgent[]>;
+	attach(agentId: string, text: string, files: string[]): Promise<void>;
+}
+export interface BrowserAutomationPort {
+	execute(method: string, params: Record<string, unknown>): Promise<unknown>;
+}
+export class BrowserError extends Error {
+	constructor(
+		public readonly code: string,
+		message = code,
+	) {
+		super(message);
+		this.name = 'BrowserError';
+	}
+}
+export function newPageState(id: string, value: Partial<BrowserPageState> = {}): BrowserPageState {
+	return {
+		id,
+		url: typeof value.url === 'string' ? value.url : 'about:blank',
+		title: typeof value.title === 'string' ? value.title : '',
+		zoom: clampZoom(value.zoom),
+		loading: false,
+		canGoBack: false,
+		canGoForward: false,
+		error: null,
+		favicon: '',
+		...(value.scroll && Number.isFinite(value.scroll.x) && Number.isFinite(value.scroll.y)
+			? { scroll: { x: Math.max(0, value.scroll.x), y: Math.max(0, value.scroll.y) } }
+			: {}),
+	};
+}
+export function clampZoom(value?: number): number {
+	return typeof value === 'number' && Number.isFinite(value) ? Math.min(2, Math.max(0.5, value)) : 1;
+}
+export function normalizeBrowserSettings(raw: unknown): BrowserSettings {
+	const engine = (raw as Partial<BrowserSettings> | null)?.searchEngine;
+	return { searchEngine: engine === 'bing' || engine === 'duckduckgo' ? engine : 'google' };
+}

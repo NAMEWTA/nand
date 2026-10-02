@@ -1,3 +1,5 @@
+import { bindLocalizedElement } from '../../primitives/localized-dom';
+import { localizedAttributes, localizedText } from '../../primitives/localized-dom';
 import { App, Modal, setIcon } from 'obsidian';
 import { h } from 'preact';
 import type { BannerData, BannerStatsConfig, QuoteItem } from '../../../core/dashboard/types/index';
@@ -115,7 +117,7 @@ export function renderBanner(container: HTMLElement, banner: BannerData, onEdit:
 function createBannerEditButton(parent: HTMLElement, onEdit: () => void): HTMLButtonElement {
 	const btn = parent.createEl('button', {
 		cls: 'dashboard-banner-edit-btn',
-		attr: { 'aria-label': t('banner.editLabel') },
+		attr: { ...localizedAttributes('banner.editLabel', undefined, 'aria-label') },
 	});
 	setIcon(btn, 'wand');
 	btn.addEventListener('click', (e) => {
@@ -183,7 +185,7 @@ export class BannerEditModal extends Modal {
 
 		const container = contentEl.createDiv({ cls: 'dashboard-modal dashboard-modal--compact' });
 		const header = container.createDiv({ cls: 'dashboard-modal-header' });
-		header.createDiv({ cls: 'dashboard-modal-title', text: t('banner.editTitle') });
+		header.createDiv({ cls: 'dashboard-modal-title', ...localizedText('banner.editTitle') });
 
 		const body = container.createDiv({ cls: 'dashboard-modal-body' });
 
@@ -197,20 +199,20 @@ export class BannerEditModal extends Modal {
 	/** One-line heading above the mode toggle explaining it switches the view. */
 	private renderModeHeader(host: HTMLElement): void {
 		const header = host.createDiv({ cls: 'dashboard-modal-mode-header' });
-		header.createDiv({ cls: 'dashboard-modal-mode-title', text: t('banner.mode.header') });
-		header.createDiv({ cls: 'dashboard-modal-mode-hint', text: t('banner.mode.hint') });
+		header.createDiv({ cls: 'dashboard-modal-mode-title', ...localizedText('banner.mode.header') });
+		header.createDiv({ cls: 'dashboard-modal-mode-hint', ...localizedText('banner.mode.hint') });
 	}
 
 	/** Segmented Poster/Quotes ↔ Statistics control at the top of the modal. */
 	private renderModeToggle(host: HTMLElement): void {
 		const bar = host.createDiv({ cls: 'dashboard-modal-mode-toggle' });
-		const make = (key: 'quote' | 'stats', icon: string, label: string): void => {
+		const make = (key: 'quote' | 'stats', icon: string, labelKey: string): void => {
 			const btn = bar.createEl('button', {
 				cls: 'dashboard-modal-mode-btn' + (this.mode === key ? ' active' : ''),
 				attr: { type: 'button' },
 			});
 			setIcon(btn, icon);
-			btn.createSpan({ text: label });
+			btn.createSpan(localizedText(labelKey));
 			btn.addEventListener('click', () => {
 				if (this.mode === key) return;
 				this.mode = key;
@@ -219,8 +221,8 @@ export class BannerEditModal extends Modal {
 				this.renderBody();
 			});
 		};
-		make('quote', 'image', t('banner.mode.quote'));
-		make('stats', 'bar-chart-3', t('banner.mode.stats'));
+		make('quote', 'image', 'banner.mode.quote');
+		make('stats', 'bar-chart-3', 'banner.mode.stats');
 	}
 
 	private renderBody(): void {
@@ -235,7 +237,7 @@ export class BannerEditModal extends Modal {
 	private renderQuoteBody(): void {
 		// === Quotes section ===
 		const quotesSection = this.form.createDiv({ cls: 'dashboard-modal-quotes' });
-		quotesSection.createEl('label', { text: t('banner.quotesLabel'), cls: 'dashboard-modal-quotes-label' });
+		quotesSection.createEl('label', { ...localizedText('banner.quotesLabel'), cls: 'dashboard-modal-quotes-label' });
 		const quotesList = quotesSection.createDiv({ cls: 'dashboard-modal-quotes-list' });
 
 		const renderQuotes = () => {
@@ -248,7 +250,7 @@ export class BannerEditModal extends Modal {
 
 				const qInput = fields.createEl('textarea', {
 					cls: 'dashboard-modal-input dashboard-modal-quote-input',
-					attr: { rows: '2', placeholder: t('banner.quote') },
+					attr: { rows: '2', ...localizedAttributes('banner.quote', undefined, 'placeholder') },
 				});
 				qInput.value = item.quote;
 				qInput.addEventListener('input', () => {
@@ -257,7 +259,7 @@ export class BannerEditModal extends Modal {
 
 				const aInput = fields.createEl('input', {
 					cls: 'dashboard-modal-input dashboard-modal-author-input',
-					attr: { type: 'text', placeholder: t('banner.author') },
+					attr: { type: 'text', ...localizedAttributes('banner.author', undefined, 'placeholder') },
 				});
 				aInput.value = item.author;
 				aInput.addEventListener('input', () => {
@@ -267,7 +269,7 @@ export class BannerEditModal extends Modal {
 				if (this.quotes.length > 1) {
 					const delBtn = row.createEl('button', {
 						cls: 'dashboard-modal-quote-delete',
-						attr: { 'aria-label': t('banner.deleteQuote') },
+						attr: { ...localizedAttributes('banner.deleteQuote', undefined, 'aria-label') },
 					});
 					setIcon(delBtn, 'x');
 					delBtn.addEventListener('click', () => {
@@ -282,7 +284,7 @@ export class BannerEditModal extends Modal {
 
 		const addQuoteBtn = quotesSection.createEl('button', {
 			cls: 'dashboard-modal-quote-add',
-			text: t('banner.addQuote'),
+			...localizedText('banner.addQuote'),
 		});
 		addQuoteBtn.addEventListener('click', () => {
 			this.quotes.push({ quote: '', author: '' });
@@ -295,7 +297,7 @@ export class BannerEditModal extends Modal {
 
 		// === Images section ===
 		const imagesSection = this.form.createDiv({ cls: 'dashboard-modal-images' });
-		imagesSection.createEl('label', { text: t('banner.imagesLabel'), cls: 'dashboard-modal-images-label' });
+		imagesSection.createEl('label', { ...localizedText('banner.imagesLabel'), cls: 'dashboard-modal-images-label' });
 		const imagesList = imagesSection.createDiv({ cls: 'dashboard-modal-images-list' });
 
 		const renderImages = () => {
@@ -315,7 +317,7 @@ export class BannerEditModal extends Modal {
 				if (this.images.length > 1) {
 					const delBtn = row.createEl('button', {
 						cls: 'dashboard-modal-image-delete',
-						attr: { 'aria-label': t('banner.deleteImage') },
+						attr: { ...localizedAttributes('banner.deleteImage', undefined, 'aria-label') },
 					});
 					setIcon(delBtn, 'x');
 					delBtn.addEventListener('click', () => {
@@ -330,7 +332,7 @@ export class BannerEditModal extends Modal {
 
 		const addImageBtn = imagesSection.createEl('button', {
 			cls: 'dashboard-modal-image-add',
-			text: t('banner.addImage'),
+			...localizedText('banner.addImage'),
 		});
 		addImageBtn.addEventListener('click', () => {
 			this.images.push('');
@@ -341,7 +343,7 @@ export class BannerEditModal extends Modal {
 
 		// === Quote Color ===
 		const colorSection = this.form.createDiv({ cls: 'dashboard-modal-quote-color' });
-		colorSection.createEl('label', { text: t('banner.quoteColor'), cls: 'dashboard-modal-quote-color-label' });
+		colorSection.createEl('label', { ...localizedText('banner.quoteColor'), cls: 'dashboard-modal-quote-color-label' });
 		const colorRow = colorSection.createDiv({ cls: 'dashboard-modal-quote-color-row' });
 
 		const colorInput = colorRow.createEl('input', {
@@ -355,7 +357,7 @@ export class BannerEditModal extends Modal {
 
 		const colorResetBtn = colorRow.createEl('button', {
 			cls: 'dashboard-modal-color-reset',
-			text: t('banner.resetColor'),
+			...localizedText('banner.resetColor'),
 		});
 		colorResetBtn.addEventListener('click', () => {
 			colorInput.value = '#ffffff';
@@ -365,10 +367,10 @@ export class BannerEditModal extends Modal {
 		// === Quote Font: curated dropdown of cross-platform CSS stacks, applied
 		// to quote + author. A hand-typed value from before the dropdown existed
 		// stays as an extra option instead of silently vanishing. ===
-		colorSection.createEl('label', { text: t('banner.quoteFont'), cls: 'dashboard-modal-quote-color-label' });
+		colorSection.createEl('label', { ...localizedText('banner.quoteFont'), cls: 'dashboard-modal-quote-color-label' });
 		const fontRow = colorSection.createDiv({ cls: 'dashboard-modal-quote-color-row' });
 		const fontSelect = fontRow.createEl('select', { cls: 'dropdown dashboard-modal-quote-font-select' });
-		const defaultOption = fontSelect.createEl('option', { value: '', text: t('banner.quoteFontDefault') });
+		const defaultOption = fontSelect.createEl('option', { value: '', ...localizedText('banner.quoteFontDefault') });
 		defaultOption.selected = !this.quoteFontDraft;
 		const knownValues = new Set<string>(['']);
 		for (const group of QUOTE_FONT_GROUPS) {
@@ -382,7 +384,7 @@ export class BannerEditModal extends Modal {
 		if (this.quoteFontDraft && !knownValues.has(this.quoteFontDraft)) {
 			const o = fontSelect.createEl('option', {
 				value: this.quoteFontDraft,
-				text: t('banner.quoteFontCustom', { name: firstFontName(this.quoteFontDraft) }),
+				...localizedText('banner.quoteFontCustom', { name: firstFontName(this.quoteFontDraft) }),
 			});
 			o.selected = true;
 		}
@@ -392,7 +394,7 @@ export class BannerEditModal extends Modal {
 
 		const fontResetBtn = fontRow.createEl('button', {
 			cls: 'dashboard-modal-color-reset',
-			text: t('banner.resetFont'),
+			...localizedText('banner.resetFont'),
 		});
 		fontResetBtn.addEventListener('click', () => {
 			fontSelect.value = '';
@@ -403,22 +405,22 @@ export class BannerEditModal extends Modal {
 	private renderStatsBody(): void {
 		// === Columns: visibility + per-column stat ===
 		const colsSection = this.form.createDiv({ cls: 'dashboard-modal-stats-cols' });
-		colsSection.createEl('label', { text: t('banner.stats.columns'), cls: 'dashboard-modal-stats-label' });
+		colsSection.createEl('label', { ...localizedText('banner.stats.columns'), cls: 'dashboard-modal-stats-label' });
 
 		const leftRow = colsSection.createDiv({ cls: 'dashboard-modal-stats-col-row' });
-		this.addVisibilityCheckbox(leftRow, 'showLeft', t('banner.stats.colLeft'));
+		this.addVisibilityCheckbox(leftRow, 'showLeft', 'banner.stats.colLeft');
 		this.addStatDropdown(leftRow, 'leftStat', LEFT_STAT_OPTIONS);
 
 		const centerRow = colsSection.createDiv({ cls: 'dashboard-modal-stats-col-row' });
-		this.addVisibilityCheckbox(centerRow, 'showCenter', t('banner.stats.colCenter'));
+		this.addVisibilityCheckbox(centerRow, 'showCenter', 'banner.stats.colCenter');
 		this.addStatDropdown(centerRow, 'centerStat', CENTER_STAT_OPTIONS);
 
 		const rightRow = colsSection.createDiv({
 			cls: 'dashboard-modal-stats-col-row dashboard-modal-stats-col-row--top',
 		});
-		this.addVisibilityCheckbox(rightRow, 'showRight', t('banner.stats.colRight'));
+		this.addVisibilityCheckbox(rightRow, 'showRight', 'banner.stats.colRight');
 		const rightMetrics = rightRow.createDiv({ cls: 'dashboard-modal-stats-right-metrics' });
-		rightMetrics.createDiv({ cls: 'dashboard-modal-stats-right-title', text: t('banner.stats.rightMetrics') });
+		rightMetrics.createDiv({ cls: 'dashboard-modal-stats-right-title', ...localizedText('banner.stats.rightMetrics') });
 		for (const key of RIGHT_STAT_OPTIONS) {
 			const lab = rightMetrics.createEl('label', { cls: 'dashboard-modal-stats-checkbox' });
 			const cb = lab.createEl('input', { attr: { type: 'checkbox' } });
@@ -429,12 +431,12 @@ export class BannerEditModal extends Modal {
 				else set.delete(key);
 				this.statsDraft.rightStats = RIGHT_STAT_OPTIONS.filter((k) => set.has(k));
 			});
-			lab.createSpan({ text: t(`banner.stats.${key}`) });
+			lab.createSpan({ ...localizedText(`banner.stats.${key}`) });
 		}
 
 		// === Heatmap source: note activity or habit check-ins (center column) ===
 		const heatSection = this.form.createDiv({ cls: 'dashboard-modal-stats-cols' });
-		heatSection.createEl('label', { text: t('banner.stats.heatSource'), cls: 'dashboard-modal-stats-label' });
+		heatSection.createEl('label', { ...localizedText('banner.stats.heatSource'), cls: 'dashboard-modal-stats-label' });
 
 		const heatRow = heatSection.createDiv({ cls: 'dashboard-modal-stats-col-row' });
 		const sourceSelect = heatRow.createEl('select', { cls: 'dropdown dashboard-modal-stats-select' });
@@ -443,7 +445,7 @@ export class BannerEditModal extends Modal {
 			['habit', 'banner.stats.heatSourceHabit'],
 		];
 		for (const [value, key] of SOURCE_KEYS) {
-			const o = sourceSelect.createEl('option', { value, text: t(key) });
+			const o = sourceSelect.createEl('option', { value, ...localizedText(key) });
 			if ((this.statsDraft.heatmapSource ?? 'notes') === value) o.selected = true;
 		}
 
@@ -453,7 +455,7 @@ export class BannerEditModal extends Modal {
 		const renderHabitOptions = (): void => {
 			const habits = getHabitService(this.app)?.getHabits() ?? [];
 			habitSelect.empty();
-			habitSelect.createEl('option', { value: 'all', text: t('banner.stats.heatHabitAll') });
+			habitSelect.createEl('option', { value: 'all', ...localizedText('banner.stats.heatHabitAll') });
 			for (const h of habits) {
 				habitSelect.createEl('option', { value: h.id, text: h.name });
 			}
@@ -479,7 +481,7 @@ export class BannerEditModal extends Modal {
 
 		// === Appearance: blur / darkness / accent ===
 		const appearSection = this.form.createDiv({ cls: 'dashboard-modal-stats-appear' });
-		appearSection.createEl('label', { text: t('banner.stats.appearance'), cls: 'dashboard-modal-stats-label' });
+		appearSection.createEl('label', { ...localizedText('banner.stats.appearance'), cls: 'dashboard-modal-stats-label' });
 		this.addSlider(appearSection, 'banner.stats.blur', this.statsDraft.blur ?? 2, 0, 16, (v) => {
 			this.statsDraft.blur = v;
 		});
@@ -488,7 +490,7 @@ export class BannerEditModal extends Modal {
 		});
 
 		const accentRow = appearSection.createDiv({ cls: 'dashboard-modal-stats-accent-row' });
-		accentRow.createDiv({ cls: 'dashboard-modal-stats-inline-label', text: t('banner.stats.accent') });
+		accentRow.createDiv({ cls: 'dashboard-modal-stats-inline-label', ...localizedText('banner.stats.accent') });
 		const accentInput = accentRow.createEl('input', {
 			cls: 'dashboard-modal-color-input',
 			attr: { type: 'color' },
@@ -499,7 +501,7 @@ export class BannerEditModal extends Modal {
 		});
 		const accentReset = accentRow.createEl('button', {
 			cls: 'dashboard-modal-color-reset',
-			text: t('banner.resetColor'),
+			...localizedText('banner.resetColor'),
 		});
 		accentReset.addEventListener('click', () => {
 			accentInput.value = '#bff038';
@@ -508,9 +510,9 @@ export class BannerEditModal extends Modal {
 
 		// === Streak source ===
 		const dailySection = this.form.createDiv({ cls: 'dashboard-modal-stats-daily' });
-		dailySection.createEl('label', { text: t('banner.stats.dailyFolder'), cls: 'dashboard-modal-stats-label' });
+		dailySection.createEl('label', { ...localizedText('banner.stats.dailyFolder'), cls: 'dashboard-modal-stats-label' });
 		const detected = getDailyNotesConfig(this.app);
-		const folderInput = dailySection.createEl('input', {
+		const folderInput = bindLocalizedElement(dailySection.createEl('input', {
 			cls: 'dashboard-modal-input',
 			attr: {
 				type: 'text',
@@ -518,12 +520,12 @@ export class BannerEditModal extends Modal {
 					? t('banner.stats.autoDetected', { folder: detected.folder || '/' })
 					: t('banner.stats.manualHint'),
 			},
-		});
+		}), detected ? ('banner.stats.autoDetected') : ('banner.stats.manualHint'), (detected) ? ({ folder: detected.folder || '/' }) : (undefined), "placeholder");
 		folderInput.value = this.statsDraft.dailyFolder ?? '';
 		folderInput.addEventListener('input', () => {
 			this.statsDraft.dailyFolder = folderInput.value.trim() || undefined;
 		});
-		dailySection.createDiv({ cls: 'dashboard-modal-stats-hint', text: t('banner.stats.dailyFolderHint') });
+		dailySection.createDiv({ cls: 'dashboard-modal-stats-hint', ...localizedText('banner.stats.dailyFolderHint') });
 
 		const useDailyLabel = dailySection.createEl('label', { cls: 'dashboard-modal-stats-checkbox' });
 		const useDailyCheck = useDailyLabel.createEl('input', { attr: { type: 'checkbox' } });
@@ -531,15 +533,15 @@ export class BannerEditModal extends Modal {
 		useDailyCheck.addEventListener('change', () => {
 			this.statsDraft.streakFromDaily = useDailyCheck.checked;
 		});
-		useDailyLabel.createSpan({ text: t('banner.stats.streakFromDaily') });
+		useDailyLabel.createSpan({ ...localizedText('banner.stats.streakFromDaily') });
 
 		// === Excluded folders ===
 		const excludeSection = this.form.createDiv({ cls: 'dashboard-modal-stats-daily' });
 		excludeSection.createEl('label', {
-			text: t('banner.stats.excludeFolders'),
+			...localizedText('banner.stats.excludeFolders'),
 			cls: 'dashboard-modal-stats-label',
 		});
-		excludeSection.createDiv({ cls: 'dashboard-modal-stats-hint', text: t('banner.stats.excludeFoldersHint') });
+		excludeSection.createDiv({ cls: 'dashboard-modal-stats-hint', ...localizedText('banner.stats.excludeFoldersHint') });
 
 		// Chips host is separate from the add row so re-rendering chips on
 		// remove never wipes the manual input/browse controls.
@@ -551,7 +553,7 @@ export class BannerEditModal extends Modal {
 				chip.createSpan({ text: folder });
 				const removeBtn = chip.createEl('button', {
 					cls: 'dashboard-settings-folder-chip-remove',
-					attr: { 'aria-label': t('common.remove', { name: folder }) },
+					attr: { ...localizedAttributes('common.remove', { name: folder }, 'aria-label') },
 				});
 				setIcon(removeBtn, 'x');
 				removeBtn.addEventListener('click', () => {
@@ -568,7 +570,7 @@ export class BannerEditModal extends Modal {
 		const addControl = excludeSection.createDiv({ cls: 'dashboard-settings-folder-add' });
 		const excludeFolderInput = addControl.createEl('input', {
 			cls: 'dashboard-settings-folder-input',
-			attr: { type: 'text', placeholder: t('folder.selectFolder') },
+			attr: { type: 'text', ...localizedAttributes('folder.selectFolder', undefined, 'placeholder') },
 		});
 		const addExcludedFolder = (): void => {
 			const folder = excludeFolderInput.value.trim();
@@ -597,7 +599,7 @@ export class BannerEditModal extends Modal {
 		});
 		const addBtn = addControl.createEl('button', {
 			cls: 'dashboard-settings-folder-add-btn',
-			text: t('common.add'),
+			...localizedText('common.add'),
 		});
 		addBtn.addEventListener('click', addExcludedFolder);
 		excludeFolderInput.addEventListener('keydown', (e) => {
@@ -615,13 +617,13 @@ export class BannerEditModal extends Modal {
 		subCheck.addEventListener('change', () => {
 			this.statsDraft.showDetails = subCheck.checked;
 		});
-		subLabel.createSpan({ text: t('banner.stats.showDetails') });
+		subLabel.createSpan({ ...localizedText('banner.stats.showDetails') });
 	}
 
 	private addVisibilityCheckbox(
 		host: HTMLElement,
 		key: 'showLeft' | 'showCenter' | 'showRight',
-		label: string,
+		labelKey: string,
 	): void {
 		const lab = host.createEl('label', { cls: 'dashboard-modal-stats-vis' });
 		const cb = lab.createEl('input', { attr: { type: 'checkbox' } });
@@ -629,14 +631,14 @@ export class BannerEditModal extends Modal {
 		cb.addEventListener('change', () => {
 			this.statsDraft[key] = cb.checked;
 		});
-		lab.createSpan({ text: label });
+		lab.createSpan(localizedText(labelKey));
 	}
 
 	private addStatDropdown(host: HTMLElement, key: 'leftStat' | 'centerStat', options: readonly string[]): void {
 		const select = host.createEl('select', { cls: 'dropdown dashboard-modal-stats-select' });
 		const current = this.statsDraft[key] as string | undefined;
 		for (const opt of options) {
-			const o = select.createEl('option', { value: opt, text: t(`banner.stats.${opt}`) });
+			const o = select.createEl('option', { value: opt, ...localizedText(`banner.stats.${opt}`) });
 			if (opt === current) o.selected = true;
 		}
 		select.addEventListener('change', () => {
@@ -653,7 +655,7 @@ export class BannerEditModal extends Modal {
 		onChange: (v: number) => void,
 	): void {
 		const row = host.createDiv({ cls: 'dashboard-modal-stats-slider' });
-		row.createDiv({ cls: 'dashboard-modal-stats-inline-label', text: t(labelKey) });
+		row.createDiv({ cls: 'dashboard-modal-stats-inline-label', ...localizedText(labelKey) });
 		const slider = row.createEl('input', {
 			cls: 'dashboard-modal-stats-range',
 			attr: { type: 'range', min: String(min), max: String(max), value: String(value) },
@@ -671,13 +673,13 @@ export class BannerEditModal extends Modal {
 		footer
 			.createEl('button', {
 				cls: 'dashboard-modal-btn dashboard-modal-btn--cancel',
-				text: t('common.cancel'),
+				...localizedText('common.cancel'),
 			})
 			.addEventListener('click', () => this.close());
 		footer
 			.createEl('button', {
 				cls: 'dashboard-modal-btn dashboard-modal-btn--confirm',
-				text: t('common.save'),
+				...localizedText('common.save'),
 			})
 			.addEventListener('click', () => this.save());
 	}

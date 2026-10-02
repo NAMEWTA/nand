@@ -1,23 +1,26 @@
+import { bindLocalizedControl, bindLocalizedElement } from '../primitives/localized-dom';
 import { FuzzySuggestModal, Modal, Notice, Setting, type App } from 'obsidian';
 import { relationKind, type ContactsQuery } from '../../core/contacts/index-store';
 import {
 	ContactsError,
 	cloneRecord,
 	emptyRef,
-	listFields,
 	newRecord,
+	validateRecord,
 	type ArchiveRecord,
 	type EmploymentRecord,
 	type EntityRef,
-	type FieldKey,
-	type PersonRelation,
+
 	type ProseSection,
 	type RecordKind,
 } from '../../core/contacts/model';
 import { type ContactsController } from '../../platform/obsidian/contacts/controller';
-import { t } from '../../shared/i18n/index';
+import { onLanguageChanged } from '../../shared/i18n';
+import { repaintLocalizedForm } from '../primitives/localized-form';
+import { ct, relationLabel } from './labels';
+export { ct, relationDescription } from './labels';
+import { fieldSetting, fieldError, labelInput, multiValueField, type FormField } from './form-fields';
 
-export const ct = (key: string, params?: Record<string, string | number>): string => t('contacts.' + key, params);
 export function errorText(error: unknown): string {
 	return error instanceof ContactsError
 		? ct(error.code)
@@ -36,7 +39,7 @@ export class ConfirmModal extends Modal {
 	onOpen(): void {
 		this.contentEl.createEl('p', { text: this.message });
 		new Setting(this.contentEl)
-			.addButton((b) => b.setButtonText(ct('cancel')).onClick(() => this.close()))
+			.addButton((b) => bindLocalizedControl(b.setButtonText(ct('cancel')), "buttonText", "contacts." + ('cancel')).onClick(() => this.close()))
 			.addButton((b) =>
 				b
 					.setButtonText(this.accept)
@@ -65,7 +68,7 @@ class RecordPicker extends FuzzySuggestModal<ArchiveRecord> {
 		private done: (record?: ArchiveRecord) => void,
 	) {
 		super(app);
-		this.setPlaceholder(ct(kind === 'person' ? 'searchPeople' : 'searchCompanies'));
+		bindLocalizedControl(this.setPlaceholder(ct(kind === 'person' ? 'searchPeople' : 'searchCompanies')), "placeholder", "contacts." + (kind === 'person' ? 'searchPeople' : 'searchCompanies'));
 	}
 	getItems(): ArchiveRecord[] {
 		return this.values;
@@ -101,6 +104,7 @@ export function chooseRecord(
 }
 export type EditScope = 'basic' | ProseSection | 'employment' | 'relation';
 export class RecordEditorModal extends Modal {
+	private languageCleanup?: () => void;
 	private base: ArchiveRecord;
 	private originalRoot: string;
 	private draft: ArchiveRecord;
@@ -112,6 +116,10 @@ export class RecordEditorModal extends Modal {
 	private unsubscribe?: () => void;
 	private statusEl!: HTMLElement;
 	private readonly addingRow: boolean;
+	private bodyEl!: HTMLElement;
+	private fieldsEl!: HTMLElement;
+	private conflictEl!: HTMLElement;
+	private fields = new Map<string, FormField>();
 	constructor(
 		private controller: ContactsController,
 		base: ArchiveRecord,
@@ -171,25 +179,48 @@ export class RecordEditorModal extends Modal {
 						: this.base.path
 							? 'editCompany'
 							: 'addCompany';
-		this.setTitle(ct(title));
+		bindLocalizedControl(this.setTitle(ct(title)), "title", "contacts." + (title));
 		this.renderForm();
+		this.languageCleanup = onLanguageChanged(() => {
+			bindLocalizedControl(this.setTitle(ct(title)), "title", "contacts." + (title));
+			repaintLocalizedForm(this.contentEl, () => this.renderForm());
+		});
 		this.unsubscribe = this.controller.subscribe(() => {
 			if (!this.base.path) return;
 			const record = this.controller.index.get(this.base.id);
-			this.statusEl.setText(record?.raw !== this.base.raw ? ct('external') : '');
+			const external = record?.raw !== this.base.raw;
+			this.statusEl.setText(external ? ct('external') : '');
+			this.conflictEl.hidden = !external;
 		});
 	}
 	private text(key: string, value: string, update: (value: string) => void, multiline = false, hint = ''): void {
-		const setting = new Setting(this.contentEl).setName(ct(key));
+		const setting = fieldSetting(this.fieldsEl, key);
 		if (hint) setting.setDesc(hint);
 		if (multiline)
 			setting.addTextArea((input) => {
-				input.setValue(value).onChange(update);
-				input.inputEl.rows = 5;
+				input.inputEl.rows = 3;
+				const resize = () => {
+					input.inputEl.style.removeProperty('height');
+					input.inputEl.style.height = Math.min(240, Math.max(72, input.inputEl.scrollHeight)) + 'px';
+				};
+				input.setValue(value).onChange((next) => {
+					update(next);
+					resize();
+				});
+				labelInput(setting, input.inputEl);
+				this.fields.set(key, fieldError(setting, input.inputEl));
+				resize();
 			});
 		else
 			setting.addText((input) => {
-				input.setValue(value).onChange(update);
+				if (key === 'birthday') input.inputEl.type = 'date';
+				input.setValue(value).onChange((next) => {
+					update(next);
+					this.clearFieldError(key);
+				});
+				labelInput(setting, input.inputEl);
+				this.fields.set(key, fieldError(setting, input.inputEl));
+				if (key === 'personName' || key === 'companyName') input.inputEl.required = true;
 			});
 	}
 	private reference(
@@ -199,7 +230,7 @@ export class RecordEditorModal extends Modal {
 		update: (ref: EntityRef) => void,
 		optional = false,
 	): void {
-		const setting = new Setting(this.contentEl).setName(ct(key));
+		const setting = bindLocalizedControl(new Setting(this.fieldsEl).setName(ct(key)), "name", "contacts." + (key));
 		const render = () => setting.setDesc(value.label || ct('none'));
 		render();
 		const selected = (r?: ArchiveRecord) => {
@@ -209,20 +240,21 @@ export class RecordEditorModal extends Modal {
 				render();
 			}
 		};
-		setting.addButton((b) =>
-			b.setButtonText(ct('choose')).onClick(() => {
+		setting.addButton((b) => {
+			this.fields.set(key, fieldError(setting, b.buttonEl));
+			bindLocalizedControl(b.setButtonText(ct('choose')), "buttonText", "contacts." + ('choose')).onClick(() => {
 				void chooseRecord(this.controller, kind, this.draft.id).then(selected);
-			}),
-		);
+			});
+		});
 		if (kind === 'company')
 			setting.addButton((b) =>
-				b.setButtonText(ct('addCompany')).onClick(() => {
+				bindLocalizedControl(b.setButtonText(ct('addCompany')), "buttonText", "contacts." + ('addCompany')).onClick(() => {
 					new RecordEditorModal(this.controller, newRecord('company'), 'basic', undefined, selected).open();
 				}),
 			);
 		if (optional)
 			setting.addButton((b) =>
-				b.setButtonText(ct('clearReference')).onClick(() => {
+				bindLocalizedControl(b.setButtonText(ct('clearReference')), "buttonText", "contacts." + ('clearReference')).onClick(() => {
 					value = emptyRef();
 					update(value);
 					render();
@@ -231,53 +263,59 @@ export class RecordEditorModal extends Modal {
 	}
 	private renderForm(): void {
 		this.contentEl.empty();
-		this.errorEl = this.contentEl.createDiv({ cls: 'nand-contacts-error', attr: { role: 'alert' } });
-		this.statusEl = this.contentEl.createDiv({ cls: 'nand-contacts-muted', attr: { 'aria-live': 'polite' } });
+		this.fields.clear();
+		this.bodyEl = this.contentEl.createDiv({ cls: 'nand-contacts-form-body' });
+		this.fieldsEl = this.bodyEl;
+		this.errorEl = this.bodyEl.createDiv({ cls: 'nand-contacts-error', attr: { role: 'alert' } });
+		this.statusEl = this.bodyEl.createDiv({ cls: 'nand-contacts-muted', attr: { 'aria-live': 'polite' } });
 		if (this.editScope === 'basic') {
-			const fields: FieldKey[] =
+			const groups =
 				this.draft.kind === 'person'
 					? [
-							'name',
-							'aliases',
-							'birthday',
-							'birthplace',
-							'region',
-							'mobiles',
-							'phones',
-							'wechat',
-							'emails',
-							'tags',
+							{
+								title: 'identityInfo',
+								fields: ['name', 'aliases', 'birthday', 'birthplace', 'region'] as const,
+							},
+							{ title: 'contactInfo', fields: ['mobiles', 'phones', 'wechat', 'emails'] as const },
+							{ title: 'otherInfo', fields: ['tags'] as const },
 						]
-					: ['name', 'aliases', 'region', 'website', 'tags'];
-			for (const key of fields) {
-				const isList = (listFields as readonly string[]).includes(key),
-					value = this.draft.fields[key];
-				this.text(
-					key === 'name'
-						? this.draft.kind === 'person'
-							? 'personName'
-							: 'companyName'
-						: key === 'region' && this.draft.kind === 'company'
-							? 'companyRegion'
-							: key,
-					Array.isArray(value) ? value.join('\n') : value,
-					(input) => {
-						Object.assign(this.draft.fields, {
-							[key]: isList
-								? [
-										...new Set(
-											input
-												.split('\n')
-												.map((v) => v.trim())
-												.filter(Boolean),
-										),
-									]
-								: input,
-						});
-					},
-					isList,
-					isList ? ct('listHint') : key === 'birthday' ? ct('dateHint') : '',
-				);
+					: [
+							{ title: 'companyInfo', fields: ['name', 'aliases', 'region', 'website', 'tags'] as const },
+							{ title: 'contactInfo', fields: ['phones', 'emails'] as const },
+						];
+			for (const group of groups) {
+				this.fieldsEl = this.bodyEl.createDiv({ cls: 'nand-contacts-form-group' });
+				bindLocalizedControl(new Setting(this.fieldsEl).setName(ct(group.title)), "name", "contacts." + (group.title)).setHeading();
+				for (const key of group.fields) {
+					const value = this.draft.fields[key];
+					if (Array.isArray(value))
+						this.fields.set(
+							key,
+							multiValueField(
+								this.fieldsEl,
+								key,
+								value,
+								(next) => {
+									Object.assign(this.draft.fields, { [key]: next });
+								},
+								key === 'aliases' || key === 'tags',
+							),
+						);
+					else
+						this.text(
+							key === 'name'
+								? this.draft.kind === 'person'
+									? 'personName'
+									: 'companyName'
+								: key === 'region' && this.draft.kind === 'company'
+									? 'companyRegion'
+									: key,
+							value,
+							(next) => {
+								Object.assign(this.draft.fields, { [key]: next });
+							},
+						);
+				}
 			}
 		} else if (this.editScope === 'employment') {
 			const row = this.draft.employments.find((r) => r.id === this.rowId)!;
@@ -300,7 +338,7 @@ export class RecordEditorModal extends Modal {
 					key === 'notes',
 					key === 'start' || key === 'end' ? ct('jobDateHint') : '',
 				);
-			new Setting(this.contentEl).setName(ct('status')).addDropdown((d) =>
+			bindLocalizedControl(new Setting(this.fieldsEl).setName(ct('status')), "name", "contacts." + ('status')).addDropdown((d) =>
 				d
 					.addOption('current', ct('current'))
 					.addOption('past', ct('past'))
@@ -309,7 +347,7 @@ export class RecordEditorModal extends Modal {
 						row.status = v as EmploymentRecord['status'];
 					}),
 			);
-			new Setting(this.contentEl).setName(ct('keyRole')).addDropdown((d) =>
+			bindLocalizedControl(new Setting(this.fieldsEl).setName(ct('keyRole')), "name", "contacts." + ('keyRole')).addDropdown((d) =>
 				d
 					.addOption('', ct('none'))
 					.addOption('leader', ct('leader'))
@@ -325,13 +363,13 @@ export class RecordEditorModal extends Modal {
 				row.person = r;
 			});
 			const builtins = ['leader', 'report', 'colleague', 'friend'];
-			const custom = new Setting(this.contentEl).setName(ct('customKind')).addText((input) =>
+			const custom = bindLocalizedControl(new Setting(this.fieldsEl).setName(ct('customKind')), "name", "contacts." + ('customKind')).addText((input) =>
 				input.setValue(builtins.includes(row.kind) ? '' : row.kind).onChange((v) => {
 					row.kind = v;
 				}),
 			);
 			custom.settingEl.hidden = builtins.includes(row.kind);
-			new Setting(this.contentEl).setName(ct('kind')).addDropdown((d) => {
+			bindLocalizedControl(new Setting(this.fieldsEl).setName(ct('kind')), "name", "contacts." + ('kind')).addDropdown((d) => {
 				for (const key of builtins) d.addOption(key, ct('relation.' + key));
 				d.addOption('custom', ct('custom'))
 					.setValue(builtins.includes(row.kind) ? row.kind : 'custom')
@@ -367,16 +405,25 @@ export class RecordEditorModal extends Modal {
 				},
 				true,
 			);
-		new Setting(this.contentEl)
-			.addButton((b) =>
-				b.setButtonText(ct('copyDraft')).onClick(() => {
-					void this.copyDraft();
+		this.conflictEl = this.bodyEl.createDiv({ cls: 'nand-contacts-conflict-actions' });
+		this.conflictEl.hidden = true;
+		const recovery = new Setting(this.conflictEl).addButton((b) =>
+			bindLocalizedControl(b.setButtonText(ct('copyDraft')), "buttonText", "contacts." + ('copyDraft')).onClick(() => {
+				void this.copyDraft();
+			}),
+		);
+		if (this.base.path)
+			recovery.addButton((b) =>
+				bindLocalizedControl(b.setButtonText(ct('reloadDraft')), "buttonText", "contacts." + ('reloadDraft')).onClick(() => {
+					void this.reload();
 				}),
-			)
-			.addButton((b) => b.setButtonText(ct('cancel')).onClick(() => this.close()))
+			);
+		const footer = this.contentEl.createDiv({ cls: 'nand-contacts-form-footer' });
+		new Setting(footer)
+			.addButton((b) => bindLocalizedControl(b.setButtonText(ct('cancel')), "buttonText", "contacts." + ('cancel')).onClick(() => this.close()))
 			.addButton((b) =>
-				b
-					.setButtonText(ct('save'))
+				bindLocalizedControl(b
+					.setButtonText(ct('save')), "buttonText", "contacts." + ('save'))
 					.setCta()
 					.onClick(() => {
 						b.setDisabled(true);
@@ -385,12 +432,46 @@ export class RecordEditorModal extends Modal {
 						});
 					}),
 			);
-		if (this.base.path)
-			new Setting(this.contentEl).addButton((b) =>
-				b.setButtonText(ct('reloadDraft')).onClick(() => {
-					void this.reload();
-				}),
-			);
+		(this.fields.get('personName') ?? this.fields.get('companyName'))?.input.focus();
+	}
+
+	private showError(error: unknown): void {
+		this.errorEl.setText(errorText(error));
+		this.conflictEl.hidden =
+			error instanceof ContactsError &&
+			!['conflict', 'editorConflict', 'folderChanged', 'missing', 'invalidRecord'].includes(error.code);
+		let key =
+			error instanceof ContactsError
+				? error.detail ||
+					(error.code === 'nameRequired'
+						? this.draft.kind === 'person'
+							? 'personName'
+							: 'companyName'
+						: error.code === 'currentEnd'
+							? 'end'
+							: error.code === 'invalidDate'
+								? 'start'
+								: error.code === 'companyRequired'
+									? 'companySelect'
+									: error.code === 'relationRequired'
+										? 'personSelect'
+										: '')
+				: '';
+		if (key === 'name') key = this.draft.kind === 'person' ? 'personName' : 'companyName';
+		if (key === 'region' && this.draft.kind === 'company') key = 'companyRegion';
+		const field = this.fields.get(key);
+		if (field) {
+			field.error.setText(errorText(error));
+			field.input.setAttribute('aria-invalid', 'true');
+			field.input.focus();
+		}
+	}
+	private clearFieldError(key: string): void {
+		const field = this.fields.get(key);
+		if (!field) return;
+		if (this.errorEl.textContent === field.error.textContent) this.errorEl.setText('');
+		field.error.setText('');
+		field.input.removeAttribute('aria-invalid');
 	}
 	private async reload(): Promise<void> {
 		if (this.saving || !(await confirm(this.app, ct('discard'), ct('reloadDraft')))) return;
@@ -405,7 +486,7 @@ export class RecordEditorModal extends Modal {
 			this.initializeRow();
 			this.renderForm();
 		} catch (error) {
-			this.errorEl.setText(errorText(error));
+			this.showError(error);
 		}
 	}
 	private async copyDraft(): Promise<void> {
@@ -413,13 +494,21 @@ export class RecordEditorModal extends Modal {
 			await this.contentEl.win.navigator.clipboard.writeText(JSON.stringify(this.draft, null, 2));
 			new Notice(ct('copied'));
 		} catch (error) {
-			this.errorEl.setText(errorText(error));
+			this.showError(error);
 		}
 	}
 	private async save(): Promise<void> {
 		if (this.saving) return;
 		this.saving = true;
 		try {
+			this.errorEl.setText('');
+			for (const field of this.fields.values()) {
+				field.error.setText('');
+				field.input.removeAttribute('aria-invalid');
+			}
+			const birthday = this.fields.get('birthday')?.input as HTMLInputElement | undefined;
+			if (birthday?.validity.badInput) throw new ContactsError('invalidDate', 'birthday');
+			validateRecord(this.draft);
 			if (this.controller.root !== this.originalRoot) throw new ContactsError('folderChanged');
 			const record = this.base.path
 				? await this.controller.save(this.base, this.draft)
@@ -429,7 +518,7 @@ export class RecordEditorModal extends Modal {
 			this.done(record);
 			this.close();
 		} catch (error) {
-			this.errorEl.setText(errorText(error));
+			this.showError(error);
 		} finally {
 			this.saving = false;
 		}
@@ -455,10 +544,12 @@ export class RecordEditorModal extends Modal {
 	}
 	onClose(): void {
 		this.unsubscribe?.();
+		this.languageCleanup?.();
 		this.contentEl.empty();
 	}
 }
 export class FilterModal extends Modal {
+	private languageCleanup?: () => void;
 	private draft: ContactsQuery;
 	constructor(
 		private controller: ContactsController,
@@ -469,8 +560,13 @@ export class FilterModal extends Modal {
 		this.draft = structuredClone(query);
 	}
 	onOpen(): void {
+		this.draw();
+		this.languageCleanup = onLanguageChanged(() => repaintLocalizedForm(this.contentEl, () => this.draw()));
+	}
+	private draw(): void {
+		this.contentEl.empty();
 		this.modalEl.addClass('nand-contacts-filter');
-		this.setTitle(ct('filter'));
+		bindLocalizedControl(this.setTitle(ct('filter')), "title", "contacts." + ('filter'));
 		const records = [...this.controller.index.byPath.values()].filter((r) => r.kind === this.draft.kind);
 		const groups: Array<{
 			key: 'current' | 'past' | 'regions' | 'tags' | 'relations';
@@ -520,19 +616,19 @@ export class FilterModal extends Modal {
 			});
 		}
 		if (groups.every((group) => group.values.length === 0)) {
-			this.contentEl.createEl('p', { cls: 'nand-contacts-muted', text: ct('filterEmpty') });
+			bindLocalizedElement(this.contentEl.createEl('p', { cls: 'nand-contacts-muted', text: ct('filterEmpty') }), "contacts." + ('filterEmpty'));
 		}
 		for (const group of groups) {
-			const section = this.contentEl.createEl('section', {
+			const section = bindLocalizedElement(this.contentEl.createEl('section', {
 				cls: 'nand-contacts-filter-group',
 				attr: { 'aria-label': ct(group.title) },
-			});
-			new Setting(section).setName(ct(group.title)).setHeading();
+			}), "contacts." + (group.title), undefined, "aria-label");
+			bindLocalizedControl(new Setting(section).setName(ct(group.title)), "name", "contacts." + (group.title)).setHeading();
 			if (group.values.length === 0) {
-				section.createEl('p', {
+				bindLocalizedElement(section.createEl('p', {
 					cls: 'nand-contacts-muted nand-contacts-placeholder',
 					text: ct('noFilterOptions'),
-				});
+				}), "contacts." + ('noFilterOptions'));
 			}
 			for (const [value, name] of group.values)
 				new Setting(section).setName(name).addToggle((toggle) =>
@@ -544,10 +640,10 @@ export class FilterModal extends Modal {
 				);
 		}
 		new Setting(this.contentEl)
-			.addButton((b) => b.setButtonText(ct('cancel')).onClick(() => this.close()))
+			.addButton((b) => bindLocalizedControl(b.setButtonText(ct('cancel')), "buttonText", "contacts." + ('cancel')).onClick(() => this.close()))
 			.addButton((b) =>
-				b
-					.setButtonText(ct('apply'))
+				bindLocalizedControl(b
+					.setButtonText(ct('apply')), "buttonText", "contacts." + ('apply'))
 					.setCta()
 					.onClick(() => {
 						this.done(this.draft);
@@ -556,12 +652,11 @@ export class FilterModal extends Modal {
 			);
 	}
 	onClose(): void {
+		this.languageCleanup?.();
 		this.contentEl.empty();
 	}
 }
-export function relationLabel(kind: string): string {
-	return ['leader', 'report', 'colleague', 'friend'].includes(kind) ? ct('relation.' + kind) : kind;
-}
+
 export async function editRecord(
 	controller: ContactsController,
 	record: ArchiveRecord,
@@ -598,9 +693,4 @@ export async function deleteRow(
 	} catch (error) {
 		new Notice(errorText(error));
 	}
-}
-export function relationDescription(relation: PersonRelation, inverse: boolean, owner: ArchiveRecord): string {
-	if (!inverse || ['leader', 'report', 'colleague', 'friend'].includes(relation.kind))
-		return relationLabel(relationKind(relation.kind, inverse));
-	return ct('inverse', { name: owner.fields.name, kind: relation.kind });
 }

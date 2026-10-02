@@ -1,3 +1,4 @@
+import { bindLocalizedElement } from '../../primitives/localized-dom';
 import { App, Modal, setIcon } from 'obsidian';
 import type { DashboardCard } from '../../../core/dashboard/types/index';
 import { t } from '../../../shared/i18n/index';
@@ -38,13 +39,13 @@ export class CardEditModal extends Modal {
 
 		const container = contentEl.createDiv({ cls: 'dashboard-modal dashboard-modal--compact' });
 		const header = container.createDiv({ cls: 'dashboard-modal-header' });
-		header.createDiv({ cls: 'dashboard-modal-title', text: t('cardEdit.title') });
+		bindLocalizedElement(header.createDiv({ cls: 'dashboard-modal-title', text: t('cardEdit.title') }), 'cardEdit.title');
 
 		const body = container.createDiv({ cls: 'dashboard-modal-body' });
 		const form = body.createDiv({ cls: 'dashboard-modal-form' });
 
 		const titleField = form.createDiv();
-		titleField.createEl('label', { text: t('cardEdit.titleLabel') });
+		bindLocalizedElement(titleField.createEl('label', { text: t('cardEdit.titleLabel') }), 'cardEdit.titleLabel');
 		const titleInput = titleField.createEl('input', {
 			cls: 'dashboard-modal-input',
 			attr: { type: 'text' },
@@ -52,22 +53,22 @@ export class CardEditModal extends Modal {
 		titleInput.value = this.card.title;
 
 		const coverField = form.createDiv();
-		coverField.createEl('label', { text: t('cardEdit.coverImage') });
-		const coverInput = coverField.createEl('input', {
+		bindLocalizedElement(coverField.createEl('label', { text: t('cardEdit.coverImage') }), 'cardEdit.coverImage');
+		const coverInput = bindLocalizedElement(coverField.createEl('input', {
 			cls: 'dashboard-modal-input',
 			attr: { type: 'text', placeholder: t('cardEdit.coverImagePlaceholder') },
-		});
+		}), 'cardEdit.coverImagePlaceholder', undefined, "placeholder");
 		coverInput.value = this.coverImageValue;
 
 		const docsField = form.createDiv();
-		docsField.createEl('label', { text: t('cardEdit.linkedDocs') });
+		bindLocalizedElement(docsField.createEl('label', { text: t('cardEdit.linkedDocs') }), 'cardEdit.linkedDocs');
 
 		const docsList = docsField.createDiv({ cls: 'dashboard-modal-docs-list' });
 
 		const renderDocs = () => {
 			docsList.empty();
 			if (this.linkedPaths.length === 0) {
-				docsList.createDiv({ cls: 'dashboard-modal-docs-empty', text: t('cardEdit.noDocs') });
+				bindLocalizedElement(docsList.createDiv({ cls: 'dashboard-modal-docs-empty', text: t('cardEdit.noDocs') }), 'cardEdit.noDocs');
 				return;
 			}
 			this.linkedPaths.forEach((docPath, idx) => {
@@ -93,11 +94,11 @@ export class CardEditModal extends Modal {
 
 		// Search with multi-select
 		const searchField = form.createDiv();
-		searchField.createEl('label', { text: t('cardEdit.searchDocs') });
-		const searchInput = searchField.createEl('input', {
+		bindLocalizedElement(searchField.createEl('label', { text: t('cardEdit.searchDocs') }), 'cardEdit.searchDocs');
+		const searchInput = bindLocalizedElement(searchField.createEl('input', {
 			cls: 'dashboard-modal-input',
 			attr: { type: 'text', placeholder: t('quickLinks.typeToSearch') },
-		});
+		}), 'quickLinks.typeToSearch', undefined, "placeholder");
 
 		const searchResults = searchField.createDiv({ cls: 'dashboard-modal-search-results' });
 
@@ -122,7 +123,7 @@ export class CardEditModal extends Modal {
 				.slice(0, 50);
 
 			if (files.length === 0) {
-				searchResults.createDiv({ cls: 'dashboard-modal-search-hint', text: t('quickLinks.noDocsFound') });
+				bindLocalizedElement(searchResults.createDiv({ cls: 'dashboard-modal-search-hint', text: t('quickLinks.noDocsFound') }), 'quickLinks.noDocsFound');
 				return;
 			}
 
@@ -164,10 +165,10 @@ export class CardEditModal extends Modal {
 		});
 
 		// Batch add button
-		const addBtn = form.createEl('button', {
+		const addBtn = bindLocalizedElement(form.createEl('button', {
 			cls: 'dashboard-modal-btn dashboard-modal-btn--confirm dashboard-modal-batch-add',
 			text: t('cardEdit.addSelected'),
-		});
+		}), 'cardEdit.addSelected');
 		addBtn.setCssProps({ display: 'none' });
 
 		const updateAddBtn = () => {
@@ -191,16 +192,16 @@ export class CardEditModal extends Modal {
 		});
 
 		const footer = container.createDiv({ cls: 'dashboard-modal-footer' });
-		footer
+		bindLocalizedElement(footer
 			.createEl('button', {
 				cls: 'dashboard-modal-btn dashboard-modal-btn--cancel',
 				text: t('common.cancel'),
-			})
+			}), 'common.cancel')
 			.addEventListener('click', () => this.close());
-		const saveBtn = footer.createEl('button', {
+		const saveBtn = bindLocalizedElement(footer.createEl('button', {
 			cls: 'dashboard-modal-btn dashboard-modal-btn--confirm',
 			text: t('common.save'),
-		});
+		}), 'common.save');
 		saveBtn.addEventListener('click', () => {
 			const body = this.linkedPaths.map((p) => `[[${p}]]`).join('\n');
 			this.onSave({

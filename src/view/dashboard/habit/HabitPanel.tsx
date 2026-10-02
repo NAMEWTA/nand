@@ -1,3 +1,4 @@
+import { SaveStatus, type SaveStatusSource } from '../../primitives/SaveStatus';
 import { t } from '../../../shared/i18n';
 import { Icon } from '../../primitives/Icon';
 export interface HabitRow {
@@ -7,6 +8,7 @@ export interface HabitRow {
 	streak: number;
 }
 export interface HabitPanelProps {
+	persistence?: SaveStatusSource;
 	rows: HabitRow[];
 	toggle: (id: string) => void;
 	add: () => void;
@@ -14,10 +16,11 @@ export interface HabitPanelProps {
 	statistics: () => void;
 	backgroundSlot?: import('preact').ComponentChildren;
 }
-export function HabitPanel({ rows, toggle, add, backfill, statistics, backgroundSlot }: HabitPanelProps) {
+export function HabitPanel({ rows, toggle, add, backfill, statistics, backgroundSlot, persistence }: HabitPanelProps) {
 	const done = rows.filter((row) => row.done).length;
 	return (
 		<>
+			{persistence && <SaveStatus source={persistence} />}
 			<div class="dashboard-sidebar-habit-top">
 				<div class="dashboard-sidebar-habit-title">
 					<div class="dashboard-sidebar-habit-title-icon">

@@ -1,3 +1,4 @@
+import { bindLocalizedElement } from '../../primitives/localized-dom';
 import { App, Modal, setIcon } from 'obsidian';
 import type { PinnedNote, QuickCommand, QuickNotePreset } from '../../../core/dashboard/types/index';
 import type { AppWithCommands } from '../../../platform/obsidian/obsidian-internal';
@@ -64,7 +65,7 @@ export class QuickNoteConfigModal extends Modal {
 			cls: 'dashboard-modal dashboard-modal--compact dashboard-quicknote-config',
 		});
 		const header = container.createDiv({ cls: 'dashboard-modal-header' });
-		header.createDiv({ cls: 'dashboard-modal-title', text: t('quickNote.configTitle') });
+		bindLocalizedElement(header.createDiv({ cls: 'dashboard-modal-title', text: t('quickNote.configTitle') }), 'quickNote.configTitle');
 		const body = container.createDiv({ cls: 'dashboard-modal-body' });
 		const form = body.createDiv({ cls: 'dashboard-modal-form' });
 		this.renderPresets(form);
@@ -259,7 +260,7 @@ export class QuickNoteConfigModal extends Modal {
 		cb.addEventListener('change', () => {
 			this.captureEnabled = cb.checked;
 		});
-		toggleRow.createEl('label', { attr: { for: 'qn-capture' }, text: t('quickNote.captureEnable') });
+		bindLocalizedElement(toggleRow.createEl('label', { attr: { for: 'qn-capture' }, text: t('quickNote.captureEnable') }), 'quickNote.captureEnable');
 
 		this.pathTextInput(
 			section,
@@ -289,18 +290,18 @@ export class QuickNoteConfigModal extends Modal {
 		// Top vs bottom of the capture target (and of the template in new
 		// fleeting notes). Two mutually exclusive check rows — ticking one
 		// unticks the other; the active one refuses to be unticked.
-		section.createDiv({ cls: 'dashboard-quicknote-cfg-pos-head', text: t('quickNote.capturePosition') });
+		bindLocalizedElement(section.createDiv({ cls: 'dashboard-quicknote-cfg-pos-head', text: t('quickNote.capturePosition') }), 'quickNote.capturePosition');
 		const startRow = section.createDiv({
 			cls: 'dashboard-quicknote-cfg-toggle dashboard-quicknote-cfg-toggle--sub',
 		});
 		const startCb = startRow.createEl('input', { attr: { type: 'checkbox', id: 'qn-capture-pos-start' } });
-		startRow.createEl('label', {
+		bindLocalizedElement(startRow.createEl('label', {
 			attr: { for: 'qn-capture-pos-start' },
 			text: t('quickNote.capturePositionStart'),
-		});
+		}), 'quickNote.capturePositionStart');
 		const endRow = section.createDiv({ cls: 'dashboard-quicknote-cfg-toggle dashboard-quicknote-cfg-toggle--sub' });
 		const endCb = endRow.createEl('input', { attr: { type: 'checkbox', id: 'qn-capture-pos-end' } });
-		endRow.createEl('label', { attr: { for: 'qn-capture-pos-end' }, text: t('quickNote.capturePositionEnd') });
+		bindLocalizedElement(endRow.createEl('label', { attr: { for: 'qn-capture-pos-end' }, text: t('quickNote.capturePositionEnd') }), 'quickNote.capturePositionEnd');
 		startCb.checked = this.capturePosition === 'start';
 		endCb.checked = this.capturePosition === 'end';
 		startCb.addEventListener('change', () => {
@@ -327,24 +328,24 @@ export class QuickNoteConfigModal extends Modal {
 		cb.addEventListener('change', () => {
 			this.dailyEnabled = cb.checked;
 		});
-		toggleRow.createEl('label', { attr: { for: 'qn-daily' }, text: t('quickNote.dailyEnable') });
+		bindLocalizedElement(toggleRow.createEl('label', { attr: { for: 'qn-daily' }, text: t('quickNote.dailyEnable') }), 'quickNote.dailyEnable');
 	}
 
 	// ── Actions ────────────────────────────────────────────────────────────
 
 	private renderActions(container: HTMLElement): void {
 		const footer = container.createDiv({ cls: 'dashboard-modal-footer' });
-		footer
+		bindLocalizedElement(footer
 			.createEl('button', {
 				cls: 'dashboard-modal-btn dashboard-modal-btn--cancel',
 				text: t('common.cancel'),
-			})
+			}), 'common.cancel')
 			.addEventListener('click', () => this.close());
-		footer
+		bindLocalizedElement(footer
 			.createEl('button', {
 				cls: 'dashboard-modal-btn dashboard-modal-btn--confirm',
 				text: t('common.save'),
-			})
+			}), 'common.save')
 			.addEventListener('click', () => {
 				void this.save();
 			});
@@ -408,10 +409,10 @@ export class QuickNoteConfigModal extends Modal {
 	}
 
 	private delBtn(parent: HTMLElement, onClick: () => void): HTMLButtonElement {
-		const btn = parent.createEl('button', {
+		const btn = bindLocalizedElement(bindLocalizedElement(parent.createEl('button', {
 			cls: 'dashboard-quicknote-cfg-del',
 			attr: { 'aria-label': t('common.delete'), title: t('common.delete') },
-		});
+		}), 'common.delete', undefined, "aria-label"), 'common.delete', undefined, "title");
 		setIcon(btn, 'trash-2');
 		btn.addEventListener('click', onClick);
 		return btn;
@@ -419,10 +420,10 @@ export class QuickNoteConfigModal extends Modal {
 
 	/** A square button showing the current icon; opens the icon picker on click. */
 	private iconPickBtn(parent: HTMLElement, currentIcon: string, onPick: (name: string) => void): HTMLButtonElement {
-		const btn = parent.createEl('button', {
+		const btn = bindLocalizedElement(bindLocalizedElement(parent.createEl('button', {
 			cls: 'dashboard-quicknote-cfg-icon-btn',
 			attr: { 'aria-label': t('quickNote.pickIcon'), title: t('quickNote.pickIcon') },
-		});
+		}), 'quickNote.pickIcon', undefined, "aria-label"), 'quickNote.pickIcon', undefined, "title");
 		setIcon(btn, currentIcon);
 		btn.addEventListener('click', () => {
 			new IconPickerModal(this.app, (name) => {
@@ -455,10 +456,10 @@ export class QuickNoteConfigModal extends Modal {
 		onReorder: (from: number, to: number) => void,
 	): void {
 		card.draggable = false;
-		const grip = topBar.createSpan({
+		const grip = bindLocalizedElement(topBar.createSpan({
 			cls: 'dashboard-quicknote-cfg-grip',
 			attr: { 'aria-hidden': 'true', title: t('common.drag') },
-		});
+		}), 'common.drag', undefined, "title");
 		setIcon(grip, 'grip-vertical');
 		// Only the grip arms dragging; releasing without a drag disarms it again.
 		grip.addEventListener('pointerdown', () => {
@@ -569,26 +570,26 @@ class CommandSearchModal extends Modal {
 
 		const container = contentEl.createDiv({ cls: 'dashboard-modal dashboard-modal--compact' });
 		const header = container.createDiv({ cls: 'dashboard-modal-header' });
-		header.createDiv({ cls: 'dashboard-modal-title', text: t('quickNote.commandSearchTitle') });
+		bindLocalizedElement(header.createDiv({ cls: 'dashboard-modal-title', text: t('quickNote.commandSearchTitle') }), 'quickNote.commandSearchTitle');
 		const body = container.createDiv({ cls: 'dashboard-modal-body' });
 
 		const wrap = body.createDiv({ cls: 'dashboard-docsearch' });
-		const input = wrap.createEl('input', {
+		const input = bindLocalizedElement(wrap.createEl('input', {
 			cls: 'dashboard-modal-input dashboard-docsearch-input',
 			attr: { type: 'text', placeholder: t('quickNote.commandSearchPh'), autofocus: 'true' },
-		});
+		}), 'quickNote.commandSearchPh', undefined, "placeholder");
 		const results = wrap.createDiv({ cls: 'dashboard-docsearch-results' });
 
 		const renderResults = (query: string) => {
 			results.empty();
 			const q = query.toLowerCase().trim();
 			if (!q) {
-				results.createDiv({ cls: 'dashboard-docsearch-hint', text: t('quickActions.typeToSearchCmd') });
+				bindLocalizedElement(results.createDiv({ cls: 'dashboard-docsearch-hint', text: t('quickActions.typeToSearchCmd') }), 'quickActions.typeToSearchCmd');
 				return;
 			}
 			const commands = (this.app as AppWithCommands).commands.commands;
 			if (!commands) {
-				results.createDiv({ cls: 'dashboard-docsearch-hint', text: t('quickActions.noResults') });
+				bindLocalizedElement(results.createDiv({ cls: 'dashboard-docsearch-hint', text: t('quickActions.noResults') }), 'quickActions.noResults');
 				return;
 			}
 			// Registry can hold hundreds of entries; filter → sort → top-30
@@ -599,7 +600,7 @@ class CommandSearchModal extends Modal {
 				.sort((a, b) => a.name.localeCompare(b.name))
 				.slice(0, 30);
 			if (entries.length === 0) {
-				results.createDiv({ cls: 'dashboard-docsearch-hint', text: t('quickActions.noResults') });
+				bindLocalizedElement(results.createDiv({ cls: 'dashboard-docsearch-hint', text: t('quickActions.noResults') }), 'quickActions.noResults');
 				return;
 			}
 			for (const e of entries) {
@@ -620,11 +621,11 @@ class CommandSearchModal extends Modal {
 		input.focus();
 
 		const footer = container.createDiv({ cls: 'dashboard-modal-footer' });
-		footer
+		bindLocalizedElement(footer
 			.createEl('button', {
 				cls: 'dashboard-modal-btn dashboard-modal-btn--cancel',
 				text: t('common.cancel'),
-			})
+			}), 'common.cancel')
 			.addEventListener('click', () => this.close());
 	}
 

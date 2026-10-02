@@ -10,6 +10,7 @@ import type {
 } from '../../core/dashboard/types/model';
 
 export interface RenderCallbacks {
+	onOpenWeb?(url: string, target: 'modal' | 'tab'): void;
 	settingsAccess?: import('./settings-access').DashboardSettingsAccess;
 	onCardEdit(card: DashboardCard): void;
 	/** subpath is the raw `#heading` / `#^block` fragment of a wikilink, when present. */

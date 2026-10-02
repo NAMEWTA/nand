@@ -448,7 +448,7 @@ export interface BannerData {
 export interface QuickAction {
 	name: string;
 	icon: string;
-	type: 'file' | 'command';
+	type: 'file' | 'command' | 'action';
 	target: string;
 }
 
@@ -462,7 +462,7 @@ export interface ColumnDef {
 	color: string;
 }
 
-export type CardType = 'task' | 'note' | 'link' | 'project' | 'habit' | 'generic' | 'weather' | 'tracker';
+export type CardType = 'task' | 'note' | 'link' | 'web' | 'project' | 'habit' | 'generic' | 'weather' | 'tracker';
 
 export interface WeatherConfig {
 	latitude: number;
@@ -519,6 +519,8 @@ export interface TaskTemplate {
 export type CardSize = 'S' | 'M' | 'L';
 
 export interface DashboardCard {
+	/** Only web shortcut cards use this; old link cards retain their meaning. */
+	openIn?: 'modal' | 'tab';
 	/** Original note appearance when a note is moved into a mixed sticky section. */
 	noteStyle?: 'cover' | 'plain';
 	id: string;
@@ -819,6 +821,8 @@ export interface DashboardColumn {
 }
 
 export interface DashboardData {
+	/** Original text and its owned projection; retained through immutable UI updates. */
+	document?: { source: string; baseline: string };
 	banner: BannerData;
 	quickActions: QuickAction[];
 	quickActionOrder?: string[];

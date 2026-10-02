@@ -1,6 +1,7 @@
 import { taskMetaSuffix } from '../../../shared/automation/metadata';
 import type { DashboardData, TaskItem } from '../types/model';
 import { escapeYamlString, serializeDocTree } from './extract-card-parts';
+import { preserveDashboardDocument } from './preserve-document';
 import {
 	parseBanner,
 	parseColumnDefs,
@@ -22,9 +23,14 @@ export function parse(markdown: string): DashboardData {
 	if (quickActionOrder) data.quickActionOrder = quickActionOrder;
 	const hiddenPresets = parseHiddenPresets(frontmatter);
 	if (hiddenPresets) data.hiddenPresets = hiddenPresets;
+	data.document = { source: markdown, baseline: serializeManaged(data) };
 	return data;
 }
 export function serialize(data: DashboardData): string {
+	const generated = serializeManaged(data);
+	return data.document ? preserveDashboardDocument(data.document.source, data.document.baseline, generated) : generated;
+}
+function serializeManaged(data: DashboardData): string {
 	const lines: string[] = [];
 
 	lines.push('---');
@@ -111,7 +117,7 @@ export function serialize(data: DashboardData): string {
 
 	lines.push('columns:');
 	for (const col of data.columns) {
-		lines.push(`  - name: ${col.name}`);
+		lines.push(`  - name: "${escapeYamlString(col.name)}"`);
 		lines.push(`    color: "${col.color}"`);
 		if (col.sectionType) {
 			lines.push(`    type: ${col.sectionType}`);
@@ -319,6 +325,7 @@ export function serialize(data: DashboardData): string {
 			if (card.noteStyle) lines.push(`noteStyle: ${card.noteStyle}`);
 
 			if (card.type === 'generic') lines.push('type: generic');
+			if (card.type === 'web') lines.push('type: web', `openIn: ${card.openIn === 'tab' ? 'tab' : 'modal'}`);
 
 			if (card.type === 'task') {
 				lines.push(`type: task`);

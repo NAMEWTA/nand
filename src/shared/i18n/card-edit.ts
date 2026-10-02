@@ -1,6 +1,7 @@
 /** Card Edit */
 export const messages = {
 	en: {
+		'card.size': 'Card size',
 		'cardEdit.title': 'Edit card',
 		'cardEdit.titleLabel': 'Title',
 		'cardEdit.coverImage': 'Cover image path',
@@ -12,6 +13,7 @@ export const messages = {
 		'cardEdit.addSelectedCount': 'Add {count} documents',
 	},
 	zh: {
+		'card.size': '卡片尺寸',
 		'cardEdit.title': '编辑卡片',
 		'cardEdit.titleLabel': '标题',
 		'cardEdit.coverImage': '封面图片路径',

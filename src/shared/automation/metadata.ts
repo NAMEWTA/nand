@@ -29,6 +29,10 @@ export function isDefinition(value: unknown): value is AutomationDefinition {
 	))
 		return false;
 	const action = d.action;
+	if (action.kind === 'script') return typeof action.script === 'string' && typeof action.cwd === 'string' && ['powershell', 'bash'].includes(action.shell);
+	if (action.kind === 'open-file') return typeof action.path === 'string' && !!action.path;
+	if (action.kind === 'open-url') { try { return ['http:', 'https:'].includes(new URL(action.url).protocol); } catch { return false; } }
+	if (action.kind === 'obsidian-command') return typeof action.command === 'string' && !!action.command;
 	if (action.kind === 'notify') return typeof action.body === 'string';
 	if (action.kind === 'create-task')
 		return typeof action.text === 'string' && typeof action.path === 'string' && typeof action.cardId === 'string';

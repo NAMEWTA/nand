@@ -15,6 +15,19 @@ function widgetDashboardPath(path: string): string {
 
 /** Background writes stay in the dashboard persistence domain and always re-read the note. */
 export class DashboardAutomationSource {
+	async pinAction(path: string, definition: AutomationDefinition): Promise<void> {
+		const file = this.app.vault.getFileByPath(widgetDashboardPath(path));
+		if (!file) throw new AutomationError('sourceMissing');
+		await this.app.vault.process(file, raw => {
+			this.checkEditor(file, raw);
+			const data = parseDashboard(raw);
+			if (!data.quickActions.some(action => action.type === 'action' && action.target === definition.id))
+				data.quickActions.push({ type: 'action', target: definition.id, name: definition.name, icon: 'play' });
+			return serializeDashboard(data);
+		});
+	}
+	private cache = new Map<string, { stamp: string; rows: AutomationDefinition[] }>();
+	invalidate(path: string): void { this.cache.delete(path); }
 	constructor(
 		private app: App,
 		private settings: () => DashboardSettings,
@@ -49,39 +62,12 @@ export class DashboardAutomationSource {
 		const result: AutomationDefinition[] = [];
 		for (const file of this.files()) {
 			try {
-				let raw = await this.app.vault.read(file);
+				const stamp = file.stat ? `${file.stat.mtime}:${file.stat.size}` : '';
+				const cached = this.cache.get(file.path);
+				if (cached && cached.stamp === stamp) { result.push(...cached.rows); continue; }
+				const offset = result.length;
+				const raw = await this.app.vault.read(file);
 				// Migrate identity and owner together, so a synced note does not execute on every device.
-				const migrate = (text: string) =>
-					text
-						.split('\n')
-						.map((line) => {
-							if (!/^\s*- \[ \]/.test(line)) return line;
-							const meta = readTaskMeta(line);
-							if (meta.automation) return line;
-							const legacy = /⏰\s*(\d{4}-\d\d-\d\d\s+\d\d:\d\d)/.exec(line)?.[1];
-							if (!legacy) return line;
-							const at = new Date(legacy.replace(' ', 'T')).getTime();
-							if (!Number.isFinite(at)) return line;
-							const id = meta.id || crypto.randomUUID();
-							const name = line
-								.replace(/^\s*- \[ \]\s*/, '')
-								.replace(TASK_META_REGEX, '')
-								.replace(/⏰.*$/, '')
-								.replace(/<!--collapsed-->/g, '')
-								.trim();
-							const automation = this.definition(id, name, at, {
-								kind: 'dashboard',
-								path: file.path,
-								id,
-							});
-							return line.replace(TASK_META_REGEX, '') + taskMetaSuffix({ ...meta, id, automation });
-						})
-						.join('\n');
-				if (migrate(raw) !== raw)
-					raw = await this.app.vault.process(file, (raw) => {
-						this.checkEditor(file, raw);
-						return migrate(raw);
-					});
 				for (const line of raw.split('\n')) {
 					if (!/^\s*- \[ \]/.test(line)) continue;
 					const meta = readTaskMeta(line);
@@ -92,6 +78,7 @@ export class DashboardAutomationSource {
 						continue;
 					}
 				}
+				this.cache.set(file.path, { stamp, rows: result.slice(offset) });
 			} catch (error) {
 				console.error('[NAND reminders]', file.path, error);
 			}

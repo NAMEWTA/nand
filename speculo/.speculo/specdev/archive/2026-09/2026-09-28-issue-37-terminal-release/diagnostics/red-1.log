@@ -1,2 +1,0 @@
-{"messages":[{"module":"pty","type":"error","code":"PARSE_ERROR","message":"消息解析失败: JSON error: unknown variant `agent_data`, expected `pty` at line 1 column 22"},{"module":"pty","type":"init_complete","session_id":"fe880c63-2257-4067-a4b2-79281466d799","success":true},{"module":"pty","type":"exit","code":0,"session_id":"fe880c63-2257-4067-a4b2-79281466d799"}],"elapsed_ms":58}
-#37 installed release must answer agent_data without a PTY parse error

@@ -1,6 +1,0 @@
-{
-  "path": "src/view/automations/AutomationsPanel.tsx",
-  "find": "?.status || 'pending'",
-  "replace": "?.status || (service.state.cursors[`${d.id}:${d.revision}`] !== undefined ? 'succeeded' : 'pending')",
-  "purpose": "只替换无运行日志时的状态投影以确认 cursor 与 UI 的分离；该实验不意味着 cursor 能证明 succeeded，计划必须使用已执行/已处理而非伪造成功"
-}

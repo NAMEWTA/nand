@@ -2,6 +2,7 @@
  * Terminal rename modal
  */
 
+import { bindLocalizedElement } from '../primitives/localized-dom';
 import type { App } from 'obsidian';
 import { Modal } from 'obsidian';
 import { t } from '../../shared/i18n/terminal-accessor';
@@ -28,16 +29,16 @@ export class RenameTerminalModal extends Modal {
 
 		// Title
 		const titleEl = contentEl.createDiv({ cls: 'modal-title' });
-		titleEl.createDiv({ cls: 'modal-title-text', text: t('modals.renameTerminal.title') });
+		bindLocalizedElement(titleEl.createDiv({ cls: 'modal-title-text', text: t('modals.renameTerminal.title') }), 'terminalAgent.modals.renameTerminal.title');
 
 		// Input area container
 		const inputContainer = contentEl.createDiv({ cls: 'rename-input-container' });
 
 		// Label
-		inputContainer.createEl('label', {
+		bindLocalizedElement(inputContainer.createEl('label', {
 			cls: 'rename-input-label',
 			text: t('modals.renameTerminal.placeholder'),
-		});
+		}), 'terminalAgent.modals.renameTerminal.placeholder');
 
 		// Input field
 		this.inputEl = inputContainer.createEl('input', {
@@ -67,17 +68,17 @@ export class RenameTerminalModal extends Modal {
 		const buttonContainer = contentEl.createDiv({ cls: 'modal-button-container' });
 
 		// Cancel button
-		const cancelBtn = buttonContainer.createEl('button', {
+		const cancelBtn = bindLocalizedElement(buttonContainer.createEl('button', {
 			cls: 'mod-cancel',
 			text: t('common.cancel'),
-		});
+		}), 'terminalAgent.common.cancel');
 		cancelBtn.addEventListener('click', () => this.close());
 
 		// Confirm button
-		const confirmBtn = buttonContainer.createEl('button', {
+		const confirmBtn = bindLocalizedElement(buttonContainer.createEl('button', {
 			cls: 'mod-cta',
 			text: t('common.confirm'),
-		});
+		}), 'terminalAgent.common.confirm');
 		confirmBtn.addEventListener('click', () => this.submit());
 
 		// Auto-focus and select the text

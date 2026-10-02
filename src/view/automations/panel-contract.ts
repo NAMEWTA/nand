@@ -3,6 +3,7 @@ import type { AutomationDefinition } from '../../shared/automation/types';
 export interface AutomationViewHost {
 	service: AutomationsApi;
 	edit(definition?: AutomationDefinition): void;
+	pin?(definition: AutomationDefinition): Promise<void>;
 	inbox(): void;
 	retry(): Promise<void>;
 }

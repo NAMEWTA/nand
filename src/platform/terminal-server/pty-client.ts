@@ -112,6 +112,9 @@ export class PtyClient extends ModuleClient {
 	 * @param cols Number of columns
 	 * @param rows Number of rows
 	 */
+	consumed(sessionId: string, bytes: number): void {
+		if (bytes > 0) this.send('consumed', { session_id: sessionId, bytes });
+	}
 	resize(sessionId: string, cols: number, rows: number): void {
 		this.send('resize', { session_id: sessionId, cols, rows });
 	}
@@ -123,20 +126,7 @@ export class PtyClient extends ModuleClient {
 	 * @param data Text data
 	 */
 	write(sessionId: string, data: string): void {
-		if (!this.ws || this.ws.readyState !== WebSocket.OPEN) {
-			return;
-		}
-		// PTY text input: format [session_id_length][session_id][data]
-		const sessionIdBytes = new TextEncoder().encode(sessionId);
-		const dataBytes = new TextEncoder().encode(data);
-
-		// Build the binary frame
-		const frame = new Uint8Array(1 + sessionIdBytes.length + dataBytes.length);
-		frame[0] = sessionIdBytes.length;
-		frame.set(sessionIdBytes, 1);
-		frame.set(dataBytes, 1 + sessionIdBytes.length);
-
-		this.ws.send(frame);
+		this.writeBinary(sessionId, new TextEncoder().encode(data));
 	}
 
 	/**
@@ -153,13 +143,15 @@ export class PtyClient extends ModuleClient {
 		const sessionIdBytes = new TextEncoder().encode(sessionId);
 		const dataArray = data instanceof ArrayBuffer ? new Uint8Array(data) : data;
 
-		// Build the binary frame
-		const frame = new Uint8Array(1 + sessionIdBytes.length + dataArray.length);
-		frame[0] = sessionIdBytes.length;
-		frame.set(sessionIdBytes, 1);
-		frame.set(dataArray, 1 + sessionIdBytes.length);
+		for (let offset = 0; offset < dataArray.length; offset += 8192) {
+			const chunk = dataArray.subarray(offset, offset + 8192);
+			const frame = new Uint8Array(1 + sessionIdBytes.length + chunk.length);
+			frame[0] = sessionIdBytes.length;
+			frame.set(sessionIdBytes, 1);
+			frame.set(chunk, 1 + sessionIdBytes.length);
+			this.ws.send(frame);
+		}
 
-		this.ws.send(frame);
 	}
 
 	/**

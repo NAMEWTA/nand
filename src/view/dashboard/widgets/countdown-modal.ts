@@ -1,4 +1,6 @@
-import { App, Modal } from 'obsidian';
+import { bindLocalizedOptions } from '../../primitives/localized-dom';
+import { bindLocalizedElement, bindLocalizedControl } from '../../primitives/localized-dom';
+import { App, Modal, Setting, setIcon } from 'obsidian';
 import { resolveWidgetLabel, usesDefaultWidgetLabel } from '../../../core/dashboard/default-widget-label';
 import type { CountdownConfig } from '../../../core/dashboard/types/index';
 import { getLanguage, t } from '../../../shared/i18n/index';
@@ -46,89 +48,52 @@ export class CountdownSettingsModal extends Modal {
 		const { contentEl, containerEl } = this;
 		contentEl.empty();
 		contentEl.addClass('dashboard-library-config-modal');
-		containerEl.addClass('modal--dashboard');
-		containerEl.parentElement?.addClass('modal-bg--dashboard');
+		this.modalEl.addClass('modal--dashboard');
+		containerEl.addClass('modal-bg--dashboard');
 		applyModalTheme(containerEl);
 
 		const container = contentEl.createDiv({ cls: 'dashboard-modal dashboard-modal--compact' });
 		const header = container.createDiv({ cls: 'dashboard-modal-header' });
-		header.createDiv({ cls: 'dashboard-modal-title', text: t('countdown.settingsTitle') });
+		bindLocalizedElement(header.createDiv({ cls: 'dashboard-modal-title', text: t('countdown.settingsTitle') }), 'countdown.settingsTitle');
 
 		const body = container.createDiv({ cls: 'dashboard-modal-body' });
 		const form = body.createDiv({ cls: 'dashboard-modal-form' });
 
-		// Date row with calendar picker (time is picked inside the popup too)
-		const dateRow = form.createDiv({ cls: 'dashboard-modal-countdown-row' });
-		dateRow.createEl('label', { text: t('countdown.targetDate'), cls: 'dashboard-modal-countdown-label' });
-
-		const dateTrigger = dateRow.createDiv({ cls: 'dashboard-modal-input dashboard-countdown-date-trigger' });
+		const dateRow = bindLocalizedControl(new Setting(form).setName(t('countdown.targetDate')), "name", 'countdown.targetDate');
+		const dateTrigger = dateRow.controlEl.createEl('button', { cls: 'dashboard-countdown-date-trigger', attr: { type: 'button' } });
 		const dateText = dateTrigger.createSpan({ text: this.selectedDate || t('countdown.setTarget') });
-		dateTrigger.createSpan({ cls: 'dashboard-countdown-date-icon', text: ' \u{1F4C5}' });
-
-		dateTrigger.addEventListener('click', (e) => {
-			e.stopPropagation();
-			this.showCalendarPopup(dateTrigger, dateText);
+		setIcon(dateTrigger.createSpan(), 'calendar');
+		dateTrigger.addEventListener('click', () => this.showCalendarPopup(dateTrigger, dateText));
+		bindLocalizedControl(new Setting(form).setName(t('countdown.displayMode')), "name", 'countdown.displayMode').addDropdown(input => {
+			for (const mode of ['days', 'hours', 'minutes']) bindLocalizedOptions(input.addOption(mode, t('countdown.' + mode)), {[mode]: ['countdown.' + mode]});
+			input.setValue(this.config.displayMode).onChange(value => { this.config.displayMode = value as 'days' | 'hours' | 'minutes'; });
 		});
-
-		// Display mode
-		const modeRow = form.createDiv({ cls: 'dashboard-modal-countdown-row' });
-		modeRow.createEl('label', { text: t('countdown.displayMode'), cls: 'dashboard-modal-countdown-label' });
-		const modeSelect = modeRow.createEl('select', {
-			cls: 'dashboard-modal-input dashboard-modal-countdown-select',
+		bindLocalizedControl(bindLocalizedControl(new Setting(form).setName(t('countdown.reminderDays')), "name", 'countdown.reminderDays').setDesc(t('countdown.reminderDaysDesc')), "desc", 'countdown.reminderDaysDesc').addText(input => {
+			input.inputEl.type = 'number'; input.inputEl.min = '0'; input.inputEl.max = '365';
+			input.setValue(String(this.config.reminderDays)).onChange(value => { this.config.reminderDays = parseInt(value, 10) || 0; });
 		});
-		const daysOpt = modeSelect.createEl('option', { text: t('countdown.days'), attr: { value: 'days' } });
-		const hoursOpt = modeSelect.createEl('option', { text: t('countdown.hours'), attr: { value: 'hours' } });
-		const minutesOpt = modeSelect.createEl('option', { text: t('countdown.minutes'), attr: { value: 'minutes' } });
-		if (this.config.displayMode === 'days') daysOpt.selected = true;
-		else if (this.config.displayMode === 'hours') hoursOpt.selected = true;
-		else minutesOpt.selected = true;
-
-		// Reminder days
-		const reminderRow = form.createDiv({ cls: 'dashboard-modal-countdown-row' });
-		reminderRow.createEl('label', { text: t('countdown.reminderDays'), cls: 'dashboard-modal-countdown-label' });
-		const reminderInput = reminderRow.createEl('input', {
-			cls: 'dashboard-modal-input',
-			attr: { type: 'number', min: '0', max: '365', value: String(this.config.reminderDays), placeholder: '0' },
+		bindLocalizedControl(new Setting(form).setName(t('countdown.label')), "name", 'countdown.label').addText(input => {
+			bindLocalizedControl(input.setValue(this.config.label).setPlaceholder(t('countdown.labelPlaceholder')), "placeholder", 'countdown.labelPlaceholder').onChange(value => {
+				this.config.label = value.trim(); this.config.defaultLabel = false;
+			});
 		});
-		reminderRow.createSpan({ text: t('countdown.reminderDaysDesc'), cls: 'dashboard-modal-countdown-hint' });
-
-		// Label
-		const labelRow = form.createDiv({ cls: 'dashboard-modal-countdown-row' });
-		labelRow.createEl('label', { text: t('countdown.label'), cls: 'dashboard-modal-countdown-label' });
-		const labelInput = labelRow.createEl('input', {
-			cls: 'dashboard-modal-input',
-			attr: { type: 'text', value: this.config.label, placeholder: t('countdown.labelPlaceholder') },
-		});
-		labelInput.addEventListener('input', () => {
-			this.config.defaultLabel = false;
-		});
-
-		// Card background (nested modal mutates this.config in place; the
-		// Save below spreads this.config so the background rides along).
-		const bgRow = form.createDiv({ cls: 'dashboard-modal-countdown-row' });
-		bgRow.createEl('label', { text: t('wbg.set'), cls: 'dashboard-modal-countdown-label' });
-		const bgBtn = bgRow.createEl('button', {
-			cls: 'dashboard-modal-btn',
-			text: this.config.background ? t('common.edit') : t('wbg.set'),
-		});
-		bgBtn.addEventListener('click', () => {
-			new WidgetBackgroundModal(this.app, this.config.background, (bg) => {
-				this.config.background = bg;
-			}).open();
-		});
+		bindLocalizedControl(new Setting(form).setName(t('wbg.set')), "name", 'wbg.set').addButton(button => bindLocalizedControl(button
+			.setButtonText(this.config.background ? t('common.edit') : t('wbg.set')), "buttonText", this.config.background ? ('common.edit') : ('wbg.set'), (this.config.background) ? (undefined) : (undefined)).onClick(() => {
+				new WidgetBackgroundModal(this.app, this.config.background, background => { this.config.background = background; }).open();
+			}));
 
 		// Actions
 		const footer = container.createDiv({ cls: 'dashboard-modal-footer' });
-		footer
+		bindLocalizedElement(footer
 			.createEl('button', {
 				cls: 'dashboard-modal-btn dashboard-modal-btn--cancel',
 				text: t('common.cancel'),
-			})
+			}), 'common.cancel')
 			.addEventListener('click', () => this.close());
-		const saveBtn = footer.createEl('button', {
+		const saveBtn = bindLocalizedElement(footer.createEl('button', {
 			cls: 'dashboard-modal-btn dashboard-modal-btn--confirm',
 			text: t('common.save'),
-		});
+		}), 'common.save');
 		saveBtn.addEventListener('click', () => {
 			// Time lives on the instance (picked inside the calendar popup).
 			const dateTime = this.selectedDate
@@ -137,9 +102,6 @@ export class CountdownSettingsModal extends Modal {
 			this.onSave({
 				...this.config,
 				targetDate: dateTime,
-				displayMode: modeSelect.value as 'days' | 'hours' | 'minutes',
-				reminderDays: parseInt(reminderInput.value, 10) || 0,
-				label: labelInput.value.trim(),
 			});
 			this.close();
 		});
@@ -217,8 +179,8 @@ export class CountdownSettingsModal extends Modal {
 		const calBody = popup.createDiv();
 		const timeRow = popup.createDiv({ cls: 'dashboard-countdown-popup-time' });
 		const btnRow = popup.createDiv({ cls: 'dashboard-task-reminder-popup-btns' });
-		btnRow.createEl('button', { cls: 'dashboard-modal-btn dashboard-modal-btn--confirm', text: t('common.save') });
-		btnRow.createEl('button', { cls: 'dashboard-modal-btn dashboard-modal-btn--cancel', text: t('common.cancel') });
+		bindLocalizedElement(btnRow.createEl('button', { cls: 'dashboard-modal-btn dashboard-modal-btn--confirm', text: t('common.save') }), 'common.save');
+		bindLocalizedElement(btnRow.createEl('button', { cls: 'dashboard-modal-btn dashboard-modal-btn--cancel', text: t('common.cancel') }), 'common.cancel');
 
 		const ymMode = { value: false };
 
@@ -334,7 +296,7 @@ export class CountdownSettingsModal extends Modal {
 
 		// Time row: hour and minute pick inside the popup, so one Save commit
 		// carries both the date and the time.
-		timeRow.createSpan({ cls: 'dashboard-countdown-popup-time-label', text: t('countdown.targetTime') });
+		bindLocalizedElement(timeRow.createSpan({ cls: 'dashboard-countdown-popup-time-label', text: t('countdown.targetTime') }), 'countdown.targetTime');
 		const hourSelect = timeRow.createEl('select', { cls: 'dashboard-countdown-time-select' });
 		for (let h = 0; h < 24; h++) {
 			const opt = hourSelect.createEl('option', { text: String(h).padStart(2, '0'), attr: { value: String(h) } });

@@ -2,9 +2,9 @@
 
 Saved Markdown files are the complete source of archive data. Use the Archives panel to view and edit them. The panel, search and contact counts can be rebuilt from these files without NAND's `data.json`. Copy the whole archive folder to take your records with you; copy any linked attachments outside that folder separately. The original files can also be given to an AI to read. Unsaved form drafts are not in these files.
 
-Each person or company has one Markdown file. `nand-type` is `person` or `company`; `nand-id` is an immutable UUID. Names are not identifiers: people with the same name must remain separate records. The panel recognizes records with these type properties only within the selected folder and its subfolders. Ordinary Markdown notes do not become contacts automatically. Keep the ID when restoring a record; generate a new ID for a different person instead of copying their identity.
+Each person or company owns a folder with a fixed `基本信息.md` entry. `nand-type` is `person` or `company`; `nand-id` is an immutable UUID. Names are not identifiers: people with the same name must remain separate records. The panel recognizes only `<root>/个人档案/<person>/基本信息.md` and `<root>/企业档案/<company>/基本信息.md`, with matching record types. Deeper entry files and related notes are not records. Ordinary Markdown notes do not become contacts automatically. Keep the ID when restoring a record; generate a new ID for a different person instead of copying their identity.
 
-The panel creates records in the `联系人/` (people) and `企业/` (companies) subfolders. The guide filename is `档案格式说明.md`. These path names remain the same in either interface language.
+The panel creates entity folders under `个人档案/` (people) and `企业档案/` (companies). Folder names initially use the display name; collisions receive a short ID suffix. All ordinary files and nested folders belong to that entity. The related-files list excludes the primary entry. There is no JSON master copy or attachment manifest. Old flat records are not indexed, migrated or deleted automatically. The guide filename is `档案格式说明.md`. These path names remain the same in either interface language.
 
 ## Properties
 
@@ -24,7 +24,7 @@ Place properties in YAML frontmatter at the beginning of the file, between two `
 | `wechat`, `emails` | Lists of strings | WeChat IDs and email addresses |
 | `tags` | List of strings | Tags |
 
-Person records do not generate a company website field. Company records do not generate birthdays or personal contact fields. Unknown properties are still preserved. Changing the display name does not rename the file, including when renaming a company. To change the filename, rename it separately in Obsidian and retain `nand-id`.
+Person records do not generate a company website field. Company records include `phones` and `emails`, but do not generate birthdays, mobile numbers or WeChat fields. Unknown properties are still preserved. Changing the display name does not rename the file or folder. Rename the entity folder in Obsidian if needed, retaining `nand-id` and the fixed entry filename `基本信息.md`.
 
 Write telephone numbers as strings, for example `phones: ["057100000000"]`, to preserve leading zeros and `+`. YAML arrays are recommended for lists; a single text value can also be read as one item. Quote birthdays, for example `birthday: "1990-05-20"`.
 
@@ -34,7 +34,7 @@ Place the employment table between `<!-- nand:employments -->` and `<!-- /nand:e
 
 | Companies | Department | Role | Start date | End date | Employment status | Key role | Notes |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| [Company](../企业/Company.md) | Department | Engineer | 2020-01 | | current | leader | Employment notes |
+| [Company](../../企业档案/Company/基本信息.md) | Department | Engineer | 2020-01 | | current | leader | Employment notes |
 
 `status` is `current` or `past`, independent of missing dates. Dates accept `YYYY-MM` or `YYYY-MM-DD`. Concurrent jobs are allowed. A current job must have an empty `end`; a past job may have unknown start and end dates. `key_role` is empty, `leader`, or `contact`. Key people come from the `key_role` values of current jobs.
 
@@ -46,7 +46,7 @@ Place the relationship table between `<!-- nand:relations -->` and `<!-- /nand:r
 
 | People | This person’s… | Companies | Notes |
 | --- | --- | --- | --- |
-| [Alex](Alex.md) | leader | [Company](../企业/Company.md) | Direct manager |
+| [Alex](../Alex/基本信息.md) | leader | [Company](../../企业档案/Company/基本信息.md) | Direct manager |
 
 The linked person is the note owner's `kind`: `leader` (manager), `report` (direct report), `colleague`, `friend`, or a custom label. If this table is in Morgan's record, the example means “Alex is Morgan's manager.” Alex's panel shows Morgan as a direct report. The inverse is calculated, not written to a second file. A shared employer does not establish a direct relationship.
 
@@ -92,6 +92,6 @@ Text between the following markers is ordinary Markdown. Do not translate, dupli
 
 The panel writes changes when you explicitly save. External edits to different basic fields or prose regions can be merged. Concurrent edits to the same field or employment/relationship table report a conflict and retain the form draft. Table conflicts are handled for the whole table, not merged row by row. Copy the draft before reloading the original record if needed. The copied JSON preserves your input; it is not a Markdown export.
 
-Changing the configured folder switches the data source; it does not move or delete the old folder. Deletion follows Obsidian's file deletion settings and keeps references in other records. Disabling or uninstalling NAND does not remove saved archive files. Keep an independent backup for disk failure or accidental deletion.
+Changing the configured folder switches the data source; it does not move or delete the old folder. Deletion confirms the folder, related-file count and affected relationships, then trashes the entire entity folder using Obsidian's deletion setting. Unsaved notes and changes after confirmation stop deletion. Other records keep their references. Restore the whole folder with its original ID to recover the archive. Disabling or uninstalling NAND does not remove saved archive files. Keep an independent backup for disk failure or accidental deletion.
 
 This guide is generated in the current NAND language when a record is created and the folder has no guide yet. Language changes and upgrades never overwrite an existing guide or automatically rewrite existing records.

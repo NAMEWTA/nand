@@ -1,10 +1,10 @@
+import { ensureDirectory } from '../../../shared/storage/durable-state';
 import type { App } from 'obsidian';
 import type { WereadReadingState } from '../../../core/weread/weread-shelf-model';
 
 /**
  * Cross-session persistence for per-book weread progress
- * (`.obsidian/plugins/<manifest.id>/weread-progress.json`, expense.json /
- * habits.json pattern). Without it every Obsidian start re-fired the
+ * (`.nand/cache/weread/weread-progress.json`). Without it every Obsidian start re-fired the
  * /book/getprogress burst for the whole reading subset — the gateway bans for
  * 30-60 min once tripped, so a daily-opened dashboard kept the limit armed
  * permanently.
@@ -16,17 +16,6 @@ import type { WereadReadingState } from '../../../core/weread/weread-shelf-model
  */
 
 const DATA_FILE = 'weread-progress.json';
-
-/** Plugin id from the loaded manifest, never the legacy `nand-dashboard` folder. */
-function manifestId(app: App): string {
-	const plugins = (
-		app as App & {
-			plugins?: { plugins?: Record<string, { manifest?: { id?: string } }> };
-		}
-	).plugins?.plugins;
-	const id = plugins?.nand?.manifest?.id;
-	return id && id.length > 0 ? id : 'nand';
-}
 
 /** How long a persisted progress entry stands in for a network call. */
 export const PROGRESS_FRESH_MS = 6 * 60 * 60_000;
@@ -100,7 +89,7 @@ export class WereadProgressStore {
 	constructor(private readonly app: App) {}
 
 	private get path(): string {
-		return `${this.app.vault.configDir}/plugins/${manifestId(this.app)}/${DATA_FILE}`;
+		return `.nand/cache/weread/${DATA_FILE}`;
 	}
 
 	async load(): Promise<void> {
@@ -158,6 +147,7 @@ export class WereadProgressStore {
 				// No file yet (or unreadable): write our state as-is.
 			}
 			const json = JSON.stringify(this.file);
+			await ensureDirectory(adapter, '.nand/cache/weread');
 			await adapter.write(path, json);
 			this.lastWritten = json;
 		} catch {

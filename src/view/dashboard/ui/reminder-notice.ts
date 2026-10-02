@@ -1,3 +1,4 @@
+import { bindLocalizedElement } from '../../primitives/localized-dom';
 import { App, Modal } from 'obsidian';
 import { t } from '../../../shared/i18n/index';
 import { applyModalTheme } from '../appearance/modal-theme';
@@ -31,20 +32,20 @@ export class ReminderNoticeModal extends Modal {
 		msg.textContent = t('reminder.dueNotice', { task: this.taskText });
 
 		const footer = container.createDiv({ cls: 'dashboard-modal-footer' });
-		footer
+		bindLocalizedElement(footer
 			.createEl('button', {
 				text: t('reminder.dismiss'),
 				cls: 'dashboard-modal-btn dashboard-modal-btn--cancel',
-			})
+			}), 'reminder.dismiss')
 			.addEventListener('click', () => {
 				this.close();
 				this.onDismiss();
 			});
-		footer
+		bindLocalizedElement(footer
 			.createEl('button', {
 				text: t('reminder.snooze'),
 				cls: 'dashboard-modal-btn dashboard-modal-btn--confirm',
-			})
+			}), 'reminder.snooze')
 			.addEventListener('click', () => {
 				this.close();
 				this.onSnooze();

@@ -1,3 +1,4 @@
+import { bindLocalizedElement } from '../../primitives/localized-dom';
 import { App, Modal } from 'obsidian';
 import { onLanguageChanged, t } from '../../../shared/i18n/index';
 import { commentShortcut } from './composer';
@@ -27,17 +28,17 @@ class TextPromptModal extends Modal {
 		const { contentEl } = this;
 		contentEl.empty();
 		this.containerEl.addClass('nand-editor-comment-prompt-host');
-		const title = contentEl.createEl('h3', { text: t(this.titleText), cls: 'nand-editor-comment-prompt-title' });
+		const title = bindLocalizedElement(contentEl.createEl('h3', { text: t(this.titleText), cls: 'nand-editor-comment-prompt-title' }), this.titleText);
 		const input = contentEl.createEl('textarea', { cls: 'nand-editor-comment-prompt' });
 		input.placeholder = t(this.placeholder);
 		input.rows = 4;
 		const hint = contentEl.createDiv({ cls: 'nand-editor-comment-shortcut' });
 		const row = contentEl.createDiv({ cls: 'nand-editor-comment-prompt-row' });
-		const cancel = row.createEl('button', {
+		const cancel = bindLocalizedElement(row.createEl('button', {
 			text: t('editor.comments.cancel'),
 			cls: 'nand-ui-btn nand-ui-btn-ghost',
-		});
-		const ok = row.createEl('button', { text: t('editor.comments.save'), cls: 'mod-cta nand-ui-btn' });
+		}), 'editor.comments.cancel');
+		const ok = bindLocalizedElement(row.createEl('button', { text: t('editor.comments.save'), cls: 'mod-cta nand-ui-btn' }), 'editor.comments.save');
 		cancel.addEventListener('click', () => this.finish(null));
 		const submit = () => {
 			const value = input.value.trim();

@@ -1,3 +1,4 @@
+import { DurableState } from '../../shared/storage/durable-state';
 import type { TextStorage } from '../../shared/storage/ports';
 import {
 	AddCategoryResult,
@@ -17,7 +18,6 @@ import {
 	makeRecordId,
 	MAX_AMOUNT,
 	MAX_NOTE_LENGTH,
-	mergeData,
 	normalizeData,
 	round2,
 } from './model';
@@ -25,135 +25,21 @@ import {
 export class ExpenseApplication {
 	constructor(
 		private storage: TextStorage,
-		private directory: string,
+		directory: string,
 		private currency: () => string,
-	) {}
+	) { this.repository = new DurableState(storage, `${directory}/${DATA_FILE}`, emptyData, normalizeData, () => this.notify()); }
 
-	private data: ExpenseData = emptyData();
-
-	private loaded = false;
-
-	private loadFailed = false;
-
-	/** Raw file content of this instance's last successful write; a disk read
-	 *  that differs means an external writer (sync / another device)
-	 *  intervened and the next write must merge instead of clobber. */
-	private lastWritten: string | null = null;
-
-	private syncInFlight = false;
-
+	private readonly repository: DurableState<ExpenseData>;
+	private get data(): ExpenseData { return this.repository.value; }
+	private set data(value: ExpenseData) { this.repository.value = value; }
 	private listeners = new Set<() => void>();
-
-	async load(): Promise<void> {
-		if (this.loaded) return;
-		this.loaded = true;
-		try {
-			const adapter = this.storage;
-			const path = `${this.directory}/${DATA_FILE}`;
-			if (await adapter.exists(path)) {
-				const raw = await adapter.read(path);
-				this.data = normalizeData(JSON.parse(raw));
-				this.lastWritten = raw;
-			}
-		} catch (error) {
-			// Distinguish the two failure kinds: a JSON parse error means the
-			// file is unusable (start fresh); an adapter/IO error (mobile file
-			// lock, iCloud not yet downloaded) leaves the on-disk file intact —
-			// flag it so the next save cannot overwrite it with the empty state.
-			this.data = emptyData();
-			this.loadFailed = !(error instanceof SyntaxError);
-		}
-	}
-
-	/** Serialized write queue — at most one write is ever in flight. Content
-	 *  serializes at execution time, so a write delayed behind earlier ones
-	 *  still persists the freshest state (see habits.json race notes). */
-	private saveQueue: Promise<void> = Promise.resolve();
-
-	private save(): void {
-		this.saveQueue = this.saveQueue.then(() => this.persist());
-	}
-
-	private async persist(): Promise<void> {
-		// A non-parse load failure must not brick persistence for the whole
-		// session; re-attempt the read and merge before deciding to skip.
-		if (this.loadFailed && !(await this.retryFailedLoad())) return;
-		try {
-			const adapter = this.storage;
-			const dir = `${this.directory}`;
-			const path = `${dir}/${DATA_FILE}`;
-			if (!(await adapter.exists(dir))) {
-				await adapter.mkdir(dir);
-			}
-			// Merge the disk state first when someone else wrote since our
-			// last write — blind full-file saves revert the other device's
-			// entries. Deletions stay deleted: without an external change the
-			// union never runs, so removed records are not resurrected.
-			try {
-				if (await adapter.exists(path)) {
-					const raw = await adapter.read(path);
-					if (raw !== this.lastWritten) {
-						this.data = mergeData(normalizeData(JSON.parse(raw)), this.data);
-					}
-				}
-			} catch {
-				// Disk unreadable at save time: write our state as before.
-			}
-			const json = JSON.stringify(this.data);
-			await adapter.write(path, json);
-			this.lastWritten = json;
-		} catch {
-			// silent fail: an unwriteable expense.json must not break entries in-session
-		}
-	}
-
-	/** Re-attempt the initial read after a non-parse load failure. On success
-	 *  the disk state merges with the in-session state (union by record id);
-	 *  while the file is still unreadable saving stays skipped rather than
-	 *  clobbering a file we cannot see. */
-	private async retryFailedLoad(): Promise<boolean> {
-		try {
-			const adapter = this.storage;
-			const path = `${this.directory}/${DATA_FILE}`;
-			let disk = emptyData();
-			if (await adapter.exists(path)) {
-				const raw = await adapter.read(path);
-				disk = normalizeData(JSON.parse(raw));
-				this.lastWritten = raw;
-			}
-			this.data = mergeData(disk, this.data);
-			this.loadFailed = false;
-			// The merge may resurrect records the UI has not seen yet.
-			this.notify();
-			return true;
-		} catch (error) {
-			this.loadFailed = !(error instanceof SyntaxError);
-			return !this.loadFailed;
-		}
-	}
-
-	/** Re-read the file and union external changes into memory (another
-	 *  device's entries arriving via sync). Notifies listeners when the merge
-	 *  changed anything, and writes the union back so a lagging device heals
-	 *  on its next focus. */
-	async syncFromDisk(): Promise<void> {
-		if (!this.loaded || this.syncInFlight) return;
-		this.syncInFlight = true;
-		try {
-			const adapter = this.storage;
-			const path = `${this.directory}/${DATA_FILE}`;
-			if (!(await adapter.exists(path))) return;
-			const raw = await adapter.read(path);
-			if (raw === this.lastWritten) return;
-			this.data = mergeData(normalizeData(JSON.parse(raw)), this.data);
-			this.notify();
-			this.save();
-		} catch {
-			// Transient read error (file mid-sync): the next focus retries.
-		} finally {
-			this.syncInFlight = false;
-		}
-	}
+	get saveState() { return this.repository.state; }
+	load(): Promise<void> { return this.repository.load(); }
+	private save(): void { this.repository.save(); }
+	flush(): Promise<void> { return this.repository.flush(); }
+	retrySave(): Promise<void> { return this.repository.retry(); }
+	shutdown(): Promise<void> { return this.repository.shutdown(); }
+	syncFromDisk(): Promise<void> { return this.repository.sync(); }
 
 	/** Register a data-changed listener; returns its unsubscribe function. */
 	subscribe(listener: () => void): () => void {

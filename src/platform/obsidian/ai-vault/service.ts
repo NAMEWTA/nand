@@ -1,3 +1,4 @@
+import { deviceId as getDeviceId } from '../storage/device-id';
 import { Platform, TFolder, type App, type TFile } from 'obsidian';
 import type { AgentSettings } from '../../../core/agent-launch/types';
 import { t } from '../../../shared/i18n/terminal-accessor';
@@ -82,7 +83,7 @@ export class NativeHistory {
 		private settings: () => AgentSettings,
 		private pluginDir: string,
 	) {
-		const device = String(app.loadLocalStorage('nand.automation.device') || 'local');
+		const device = getDeviceId(app);
 		this.store = new JsonStore(
 			app.vault.adapter,
 			`.nand/terminal-agent/${device}/history.json`,
@@ -165,7 +166,7 @@ export class NativeHistory {
 		const [path, , fs] = await nodeModules();
 		const adapter = this.app.vault.adapter as unknown as { getBasePath(): string };
 		const vault = await fs.realpath(adapter.getBasePath());
-		const device = String(this.app.loadLocalStorage('nand.automation.device') || 'local');
+		const device = getDeviceId(this.app);
 		return { vault, index: path.join(vault, '.nand', 'terminal-agent', device, 'index.sqlite') };
 	}
 

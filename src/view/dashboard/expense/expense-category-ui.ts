@@ -1,3 +1,4 @@
+import { bindLocalizedElement } from '../../primitives/localized-dom';
 import { Notice, setIcon } from 'obsidian';
 import {
 	categoriesFor,
@@ -49,8 +50,8 @@ export function populateCategorySelect(
 		select.createEl('option', { text: categoryLabel(key), attr: { value: key } });
 	}
 	if (management) {
-		select.createEl('option', { text: t('expense.cat.addOption'), attr: { value: CATEGORY_ADD_OPTION } });
-		select.createEl('option', { text: t('expense.cat.manageOption'), attr: { value: CATEGORY_MANAGE_OPTION } });
+		bindLocalizedElement(select.createEl('option', { text: t('expense.cat.addOption'), attr: { value: CATEGORY_ADD_OPTION } }), 'expense.cat.addOption');
+		bindLocalizedElement(select.createEl('option', { text: t('expense.cat.manageOption'), attr: { value: CATEGORY_MANAGE_OPTION } }), 'expense.cat.manageOption');
 	}
 	const applied = value !== undefined && cats.includes(value) ? value : service.getLastCategory(type);
 	select.value = applied;
@@ -151,7 +152,7 @@ export function showCategoryManager(doc: Document, service: ExpenseService): voi
 	const overlay = doc.body.createDiv({ cls: 'dashboard-confirm-overlay' });
 	const card = overlay.createDiv({ cls: 'dashboard-confirm-card dashboard-expense-catmgr' });
 	applyModalTheme(card);
-	card.createEl('h3', { text: t('expense.cat.manageTitle'), cls: 'dashboard-confirm-title' });
+	bindLocalizedElement(card.createEl('h3', { text: t('expense.cat.manageTitle'), cls: 'dashboard-confirm-title' }), 'expense.cat.manageTitle');
 	const body = card.createDiv({ cls: 'dashboard-expense-catmgr-body' });
 
 	function close(): void {
@@ -177,10 +178,10 @@ export function showCategoryManager(doc: Document, service: ExpenseService): voi
 			row.removeClass('dashboard-expense-catmgr-row--drop-after');
 		};
 		rows.forEach((row, i) => {
-			const handle = row.createSpan({
+			const handle = bindLocalizedElement(bindLocalizedElement(row.createSpan({
 				cls: 'dashboard-expense-catmgr-grip',
 				attr: { 'aria-label': t('common.drag'), title: t('common.drag') },
-			});
+			}), 'common.drag', undefined, "aria-label"), 'common.drag', undefined, "title");
 			setIcon(handle, 'grip-vertical');
 			row.prepend(handle);
 			// The ROW is the drag source but only turns draggable while the
@@ -240,7 +241,7 @@ export function showCategoryManager(doc: Document, service: ExpenseService): voi
 		onMove: (from: number, to: number) => void,
 	): void {
 		const wrap = row.createDiv({ cls: 'dashboard-expense-catmgr-move' });
-		const up = wrap.createDiv({
+		const up = bindLocalizedElement(bindLocalizedElement(wrap.createDiv({
 			cls: 'dashboard-expense-catmgr-move-btn',
 			attr: {
 				role: 'button',
@@ -248,9 +249,9 @@ export function showCategoryManager(doc: Document, service: ExpenseService): voi
 				'aria-label': t('expense.cat.moveUp'),
 				title: t('expense.cat.moveUp'),
 			},
-		});
+		}), 'expense.cat.moveUp', undefined, "aria-label"), 'expense.cat.moveUp', undefined, "title");
 		setIcon(up, 'chevron-up');
-		const down = wrap.createDiv({
+		const down = bindLocalizedElement(bindLocalizedElement(wrap.createDiv({
 			cls: 'dashboard-expense-catmgr-move-btn',
 			attr: {
 				role: 'button',
@@ -258,7 +259,7 @@ export function showCategoryManager(doc: Document, service: ExpenseService): voi
 				'aria-label': t('expense.cat.moveDown'),
 				title: t('expense.cat.moveDown'),
 			},
-		});
+		}), 'expense.cat.moveDown', undefined, "aria-label"), 'expense.cat.moveDown', undefined, "title");
 		setIcon(down, 'chevron-down');
 		if (index > 0) up.addEventListener('click', () => onMove(index, index - 1));
 		else up.addClass('dashboard-expense-catmgr-move-btn--disabled');
@@ -273,7 +274,7 @@ export function showCategoryManager(doc: Document, service: ExpenseService): voi
 			cls: 'dashboard-prompt-input dashboard-expense-catmgr-input',
 			attr: { type: 'text', placeholder, autocomplete: 'off' },
 		});
-		const btn = wrap.createEl('button', { cls: 'dashboard-confirm-confirm', text: t('common.add') });
+		const btn = bindLocalizedElement(wrap.createEl('button', { cls: 'dashboard-confirm-confirm', text: t('common.add') }), 'common.add');
 		const commit = (): void => {
 			const name = input.value.trim().slice(0, EXPENSE_CATEGORY_NAME_MAX);
 			if (name.length === 0) return;
@@ -296,13 +297,13 @@ export function showCategoryManager(doc: Document, service: ExpenseService): voi
 		body.empty();
 		for (const type of ['expense', 'income'] as const) {
 			const section = body.createDiv({ cls: 'dashboard-expense-catmgr-section' });
-			section.createDiv({
+			bindLocalizedElement(section.createDiv({
 				cls: 'dashboard-expense-catmgr-section-title',
 				text: t(type === 'expense' ? 'expense.expenseLabel' : 'expense.incomeLabel'),
-			});
+			}), type === 'expense' ? 'expense.expenseLabel' : 'expense.incomeLabel');
 
 			// --- Categories (presets + customs, user order) ---
-			section.createDiv({ cls: 'dashboard-expense-catmgr-subtitle', text: t('expense.cat.secondarySection') });
+			bindLocalizedElement(section.createDiv({ cls: 'dashboard-expense-catmgr-subtitle', text: t('expense.cat.secondarySection') }), 'expense.cat.secondarySection');
 			const cats = service.getOrderedCategories(type);
 			const catRows = cats.map(() => section.createDiv({ cls: 'dashboard-expense-catmgr-row' }));
 			const commitCatOrder = (from: number, to: number): void => {
@@ -314,18 +315,18 @@ export function showCategoryManager(doc: Document, service: ExpenseService): voi
 				const isCustom = !categoriesFor(type).includes(key);
 				row.createSpan({ cls: 'dashboard-expense-catmgr-name', text: categoryLabel(key) });
 
-				const primarySelect = row.createEl('select', {
+				const primarySelect = bindLocalizedElement(row.createEl('select', {
 					cls: 'dashboard-expense-catmgr-primary',
 					attr: { 'aria-label': t('expense.cat.primarySection') },
-				});
-				primarySelect.createEl('option', { text: t('expense.cat.ungrouped'), attr: { value: '' } });
+				}), 'expense.cat.primarySection', undefined, "aria-label");
+				bindLocalizedElement(primarySelect.createEl('option', { text: t('expense.cat.ungrouped'), attr: { value: '' } }), 'expense.cat.ungrouped');
 				for (const p of service.getPrimaryCategories(type)) {
 					primarySelect.createEl('option', { text: p, attr: { value: p } });
 				}
-				primarySelect.createEl('option', {
+				bindLocalizedElement(primarySelect.createEl('option', {
 					text: t('expense.cat.addPrimaryOption'),
 					attr: { value: PRIMARY_ADD_OPTION },
-				});
+				}), 'expense.cat.addPrimaryOption');
 				primarySelect.value = service.getCategoryParent(type, key) ?? '';
 				let lastGood = primarySelect.value;
 				primarySelect.addEventListener('change', () => {
@@ -345,16 +346,16 @@ export function showCategoryManager(doc: Document, service: ExpenseService): voi
 					render();
 				});
 
-				row.createSpan({
+				bindLocalizedElement(row.createSpan({
 					cls: 'dashboard-expense-catmgr-usage',
 					text: t('expense.cat.usage', { n: service.countCategoryUsage(type, key) }),
-				});
+				}), 'expense.cat.usage', { n: service.countCategoryUsage(type, key) });
 				addMoveButtons(row, i, cats.length, commitCatOrder);
 				if (isCustom) {
-					const del = row.createDiv({
+					const del = bindLocalizedElement(row.createDiv({
 						cls: 'dashboard-expense-catmgr-delete',
 						attr: { role: 'button', tabindex: '0', 'aria-label': t('common.delete') },
-					});
+					}), 'common.delete', undefined, "aria-label");
 					setIcon(del, 'trash-2');
 					const confirmRemove = async (): Promise<void> => {
 						const yes = await showConfirmDialog(service.getApp(), {
@@ -375,10 +376,10 @@ export function showCategoryManager(doc: Document, service: ExpenseService): voi
 			);
 
 			// --- Primary groups ---
-			section.createDiv({ cls: 'dashboard-expense-catmgr-subtitle', text: t('expense.cat.primarySection') });
+			bindLocalizedElement(section.createDiv({ cls: 'dashboard-expense-catmgr-subtitle', text: t('expense.cat.primarySection') }), 'expense.cat.primarySection');
 			const primaries = service.getPrimaryCategories(type);
 			if (primaries.length === 0) {
-				section.createDiv({ cls: 'dashboard-expense-catmgr-empty', text: t('expense.cat.primaryEmpty') });
+				bindLocalizedElement(section.createDiv({ cls: 'dashboard-expense-catmgr-empty', text: t('expense.cat.primaryEmpty') }), 'expense.cat.primaryEmpty');
 			}
 			const primaryRows = primaries.map(() => section.createDiv({ cls: 'dashboard-expense-catmgr-row' }));
 			const commitPrimaryOrder = (from: number, to: number): void => {
@@ -388,15 +389,15 @@ export function showCategoryManager(doc: Document, service: ExpenseService): voi
 			primaries.forEach((name, i) => {
 				const row = primaryRows[i]!;
 				row.createSpan({ cls: 'dashboard-expense-catmgr-name', text: name });
-				row.createSpan({
+				bindLocalizedElement(row.createSpan({
 					cls: 'dashboard-expense-catmgr-usage',
 					text: t('expense.cat.primaryCount', { n: service.countPrimaryUsage(type, name) }),
-				});
+				}), 'expense.cat.primaryCount', { n: service.countPrimaryUsage(type, name) });
 				addMoveButtons(row, i, primaries.length, commitPrimaryOrder);
-				const del = row.createDiv({
+				const del = bindLocalizedElement(row.createDiv({
 					cls: 'dashboard-expense-catmgr-delete',
 					attr: { role: 'button', tabindex: '0', 'aria-label': t('common.delete') },
-				});
+				}), 'common.delete', undefined, "aria-label");
 				setIcon(del, 'trash-2');
 				const confirmRemove = async (): Promise<void> => {
 					const yes = await showConfirmDialog(service.getApp(), {

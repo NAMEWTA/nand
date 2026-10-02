@@ -161,6 +161,7 @@ export function parseRecord(raw: string, path: string, modified = 0): ArchiveRec
 		id: '',
 		kind: 'person',
 		path,
+		folderPath: path.slice(0, Math.max(0, path.lastIndexOf('/'))),
 		fields: {
 			name: path.split('/').pop()?.replace(/\.md$/, '') ?? '',
 			birthday: '',
@@ -239,7 +240,7 @@ export function createMarkdown(record: ArchiveRecord): string {
 		Object.entries(record.fields).filter(([key]) =>
 			record.kind === 'person'
 				? key !== 'website'
-				: ['name', 'aliases', 'region', 'website', 'tags'].includes(key),
+				: ['name', 'aliases', 'region', 'website', 'tags', 'phones', 'emails'].includes(key),
 		),
 	);
 	const values = { 'nand-type': record.kind, 'nand-id': record.id, ...fields };

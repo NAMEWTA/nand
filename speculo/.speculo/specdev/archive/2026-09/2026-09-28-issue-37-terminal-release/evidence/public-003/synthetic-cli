@@ -1,5 +1,0 @@
-#!/bin/sh
-if [ "$1" = '--version' ]; then echo 'synthetic release acceptance CLI 0.0.0'; exit 0; fi
-printf '%s\n' "$@" >> /tmp/nand-public-0.0.3-e2e/cli-args.txt
-printf 'synthetic resumed session ready\n'
-exec sleep 600

@@ -1,3 +1,4 @@
+import { bindLocalizedControl } from '../../primitives/localized-dom';
 import type { Hotkey } from 'obsidian';
 import { ButtonComponent, Modal, Platform, Setting, TextComponent } from 'obsidian';
 import type { Category, FileItem, Icon, Item } from '../../../core/icons/types';
@@ -453,13 +454,13 @@ export default class RuleEditor extends Modal {
 		this.modalEl.addClass('iconic-rule-editor');
 		switch (this.page) {
 			case 'file':
-				this.setTitle(STRINGS.ruleEditor.fileRule);
+				bindLocalizedControl(this.setTitle(STRINGS.ruleEditor.fileRule), "title", "iconic.ruleEditor.fileRule");
 				break;
 			case 'folder':
-				this.setTitle(STRINGS.ruleEditor.folderRule);
+				bindLocalizedControl(this.setTitle(STRINGS.ruleEditor.folderRule), "title", "iconic.ruleEditor.folderRule");
 				break;
 			default:
-				this.setTitle(STRINGS.categories.rule);
+				bindLocalizedControl(this.setTitle(STRINGS.categories.rule), "title", "iconic.categories.rule");
 				break;
 		}
 
@@ -468,9 +469,9 @@ export default class RuleEditor extends Modal {
 
 		// BUTTON: Rule icon
 		nameSetting.addExtraButton((button) => {
-			button
+			bindLocalizedControl(button
 				.setIcon(this.rule.icon ?? this.plugin.ruleManager!.getPageIcon(this.page))
-				.setTooltip(STRINGS.iconPicker.changeIcon)
+				.setTooltip(STRINGS.iconPicker.changeIcon), "tooltip", "iconic.iconPicker.changeIcon")
 				.onClick(() =>
 					IconPicker.openSingle(this.plugin, this.rule, (newIcon, newColor) => {
 						this.iconManager.refreshIcon(
@@ -495,7 +496,7 @@ export default class RuleEditor extends Modal {
 
 		// FIELD: Rule name
 		nameSetting.addText((text) => {
-			text.setValue(this.rule.name).setPlaceholder(STRINGS.ruleEditor.enterName);
+			bindLocalizedControl(text.setValue(this.rule.name).setPlaceholder(STRINGS.ruleEditor.enterName), "placeholder", "iconic.ruleEditor.enterName");
 			this.iconManager.setEventListener(text.inputEl, 'keydown', (event) => {
 				if (event.key === 'Enter') this.closeAndSave(this.rule);
 			});
@@ -510,12 +511,12 @@ export default class RuleEditor extends Modal {
 
 		// BUTTONS: Match conditions
 		const buttonEls: HTMLElement[] = [];
-		new Setting(this.contentEl)
-			.setName(STRINGS.ruleEditor.matchConditions.name)
-			.setDesc(STRINGS.ruleEditor.matchConditions.desc)
+		bindLocalizedControl(bindLocalizedControl(new Setting(this.contentEl)
+			.setName(STRINGS.ruleEditor.matchConditions.name), "name", "iconic.ruleEditor.matchConditions.name")
+			.setDesc(STRINGS.ruleEditor.matchConditions.desc), "desc", "iconic.ruleEditor.matchConditions.desc")
 			.addButton((button) => {
-				button
-					.setButtonText(STRINGS.ruleEditor.matchConditions.all)
+				bindLocalizedControl(button
+					.setButtonText(STRINGS.ruleEditor.matchConditions.all), "buttonText", "iconic.ruleEditor.matchConditions.all")
 					.setTooltip('All conditions must match')
 					.buttonEl.toggleClass('iconic-button-selected', this.rule.match === 'all');
 				this.iconManager.setEventListener(button.buttonEl, 'pointerdown', () => {
@@ -527,8 +528,8 @@ export default class RuleEditor extends Modal {
 				buttonEls.push(button.buttonEl);
 			})
 			.addButton((button) => {
-				button
-					.setButtonText(STRINGS.ruleEditor.matchConditions.any)
+				bindLocalizedControl(button
+					.setButtonText(STRINGS.ruleEditor.matchConditions.any), "buttonText", "iconic.ruleEditor.matchConditions.any")
 					.setTooltip('At least 1 condition must match')
 					.buttonEl.toggleClass('iconic-button-selected', this.rule.match === 'any');
 				this.iconManager.setEventListener(button.buttonEl, 'pointerdown', () => {
@@ -540,7 +541,7 @@ export default class RuleEditor extends Modal {
 				buttonEls.push(button.buttonEl);
 			})
 			.addButton((button) => {
-				button.setButtonText(STRINGS.ruleEditor.matchConditions.none).setTooltip('All conditions must fail');
+				bindLocalizedControl(button.setButtonText(STRINGS.ruleEditor.matchConditions.none), "buttonText", "iconic.ruleEditor.matchConditions.none").setTooltip('All conditions must fail');
 				button.buttonEl.toggleClass('iconic-button-selected', this.rule.match === 'none');
 				this.iconManager.setEventListener(button.buttonEl, 'pointerdown', () => {
 					buttonEls.forEach((buttonEl) => buttonEl.removeClass('iconic-button-selected'));
@@ -552,13 +553,13 @@ export default class RuleEditor extends Modal {
 			});
 
 		// HEADING: Conditions
-		new Setting(this.contentEl)
+		bindLocalizedControl(new Setting(this.contentEl)
 			.setHeading()
-			.setName(STRINGS.ruleEditor.conditions)
+			.setName(STRINGS.ruleEditor.conditions), "name", "iconic.ruleEditor.conditions")
 			.addExtraButton((button) =>
-				button
+				bindLocalizedControl(button
 					.setIcon('lucide-plus')
-					.setTooltip(STRINGS.ruleEditor.addCondition)
+					.setTooltip(STRINGS.ruleEditor.addCondition), "tooltip", "iconic.ruleEditor.addCondition")
 					.onClick(() => this.newCondition()),
 			);
 
@@ -573,27 +574,27 @@ export default class RuleEditor extends Modal {
 		const buttonRowEl = Platform.isMobile ? buttonContainerEl.createDiv({ cls: 'iconic-button-row' }) : null;
 
 		// [Remove rule]
-		new ButtonComponent(buttonRowEl ?? buttonContainerEl)
-			.setButtonText(STRINGS.ruleEditor.removeRule)
+		bindLocalizedControl(new ButtonComponent(buttonRowEl ?? buttonContainerEl)
+			.setButtonText(STRINGS.ruleEditor.removeRule), "buttonText", "iconic.ruleEditor.removeRule")
 			.onClick(() => this.closeAndSave(null))
 			.buttonEl.addClasses(Platform.isPhone ? ['mod-warning'] : ['mod-secondary', 'mod-destructive']);
 
 		// [Matches]
-		this.matchesButton = new ButtonComponent(buttonRowEl ? buttonRowEl : buttonContainerEl)
-			.setButtonText(STRINGS.ruleEditor.buttonNoMatches)
+		this.matchesButton = bindLocalizedControl(new ButtonComponent(buttonRowEl ? buttonRowEl : buttonContainerEl)
+			.setButtonText(STRINGS.ruleEditor.buttonNoMatches), "buttonText", "iconic.ruleEditor.buttonNoMatches")
 			.onClick(() => RuleChecker.open(this.plugin, this.page, this.matches))
 			.setDisabled(this.rule.conditions === null)
 			.setTooltip(this.rule.conditions === null ? 'No conditions added' : '', { placement: 'top', delay: 100 });
 
 		// [Cancel]
-		new ButtonComponent(Platform.isPhone ? this.modalEl : buttonContainerEl)
-			.setButtonText(STRINGS.iconPicker.cancel)
+		bindLocalizedControl(new ButtonComponent(Platform.isPhone ? this.modalEl : buttonContainerEl)
+			.setButtonText(STRINGS.iconPicker.cancel), "buttonText", "iconic.iconPicker.cancel")
 			.onClick(() => this.close())
 			.buttonEl.addClasses(Platform.isPhone ? ['modal-nav-action', 'mod-secondary'] : ['mod-cancel']);
 
 		// [Save]
-		new ButtonComponent(Platform.isPhone ? this.modalEl : buttonContainerEl)
-			.setButtonText(STRINGS.iconPicker.save)
+		bindLocalizedControl(new ButtonComponent(Platform.isPhone ? this.modalEl : buttonContainerEl)
+			.setButtonText(STRINGS.iconPicker.save), "buttonText", "iconic.iconPicker.save")
 			.onClick(() => this.closeAndSave(this.rule))
 			.buttonEl.addClasses(Platform.isPhone ? ['modal-nav-action', 'mod-cta'] : ['mod-cta']);
 
@@ -1019,15 +1020,15 @@ export default class RuleEditor extends Modal {
 		// Update button text
 		switch (this.matches.length) {
 			case 0:
-				this.matchesButton.setButtonText(STRINGS.ruleEditor.buttonNoMatches);
+				bindLocalizedControl(this.matchesButton.setButtonText(STRINGS.ruleEditor.buttonNoMatches), "buttonText", "iconic.ruleEditor.buttonNoMatches");
 				break;
 			case 1:
-				this.matchesButton.setButtonText(STRINGS.ruleEditor.buttonMatch);
+				bindLocalizedControl(this.matchesButton.setButtonText(STRINGS.ruleEditor.buttonMatch), "buttonText", "iconic.ruleEditor.buttonMatch");
 				break;
 			default: {
-				this.matchesButton.setButtonText(
+				bindLocalizedControl(this.matchesButton.setButtonText(
 					STRINGS.ruleEditor.buttonMatches.replace('{#}', this.matches.length.toString()),
-				);
+				), "buttonText", "iconic.ruleEditor.buttonMatches", {"#": this.matches.length.toString()});
 				break;
 			}
 		}

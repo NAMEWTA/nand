@@ -3,10 +3,11 @@ import process from "process";
 import { readFileSync } from "node:fs";
 import path from "path";
 import { builtinModules } from 'node:module';
+import { canonicalTextResources, normalizeBuildText } from './scripts/build-text-resources.mjs';
 
-const iconicNotice = readFileSync(new URL("./src/core/icons/res/NOTICE.txt", import.meta.url), "utf8").replaceAll("*/", "* /");
+const iconicNotice = normalizeBuildText(readFileSync(new URL("./src/core/icons/res/NOTICE.txt", import.meta.url), "utf8")).replaceAll("*/", "* /");
 
-const orcaNotice = readFileSync(new URL("./docs/third-party/orca-LICENSE.txt", import.meta.url), "utf8").replaceAll("*/", "* /");
+const orcaNotice = normalizeBuildText(readFileSync(new URL("./docs/third-party/orca-LICENSE.txt", import.meta.url), "utf8")).replaceAll("*/", "* /");
 
 const banner =
 `/*
@@ -56,6 +57,7 @@ const context = await esbuild.context({
 		...nodeBuiltins,
 	],
 	plugins: [
+		canonicalTextResources,
 		{
 			name: 'ws-node-entry',
 			setup(build) {

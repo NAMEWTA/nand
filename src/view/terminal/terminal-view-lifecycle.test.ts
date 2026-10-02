@@ -8,6 +8,7 @@ import ts from 'typescript';
 const moduleUrl = (source: string) => 'data:text/javascript,' + encodeURIComponent(source);
 registerHooks({
 	resolve(specifier, context, nextResolve) {
+		if (specifier === './ContextPanel') return { shortCircuit: true, url: moduleUrl('export const ContextPanel = () => {};') };
 		if (specifier === 'obsidian') return { shortCircuit: true, url: moduleUrl(`
 			export class ItemView { constructor(leaf) { this.leaf = leaf; this.app = leaf.app; this.contentEl = leaf.el; this.containerEl = leaf.el; } register() {} registerEvent() {} }
 			export class FileSystemAdapter {} export class Menu {} export class Notice {} export class TFile {} export class TFolder {} export class Modal {}`) };
@@ -294,16 +295,17 @@ test('moving a pending initialization timer cancels it on its original window', 
 
 test('the lazy controller placeholder cannot reopen a leaf closed while its service was loading', async () => {
 	const f = fixture();
-	const source = readFileSync(new URL('../../plugin/modules/terminal/controller.ts', import.meta.url), 'utf8');
+	const source = readFileSync(new URL('../../plugin/modules/terminal/view-placeholder.ts', import.meta.url), 'utf8');
 	const ast = ts.createSourceFile('controller.ts', source, ts.ScriptTarget.Latest, true);
 	const declaration = ast.statements.find((node) => ts.isClassDeclaration(node) && node.name?.text === 'TerminalViewPlaceholder');
 	assert.ok(declaration);
 	// Exercise the production class without importing the controller's unrelated native services.
-	const compiled = ts.transpileModule(declaration.getText(ast), { compilerOptions: { target: ts.ScriptTarget.ES2021, module: ts.ModuleKind.None } }).outputText;
+	const compiled = ts.transpileModule(declaration.getText(ast).replace(/^export /, ""), { compilerOptions: { target: ts.ScriptTarget.ES2021, module: ts.ModuleKind.None } }).outputText;
 	const Placeholder = new Function('TerminalView', 'errorLog', 't', 'renderEmptyState', 'sharedT', compiled + '\nreturn TerminalViewPlaceholder;')(TerminalView, () => {}, () => '', () => {}, () => '');
 	let resolveService: (service: object) => void = () => {};
 	const plugin = { ...f.host, isActive: () => true, consumePendingRestoredTerminal: () => null, getTerminalService: () => new Promise((resolve) => { resolveService = resolve; }) };
 	const view = new Placeholder(f.leaf, plugin);
+	view.contentEl.createDiv = (options: unknown) => view.contentEl.createEl('div', options);
 	for (const method of ['drawWorkbench', 'ensureDropHint', 'hideDropHint', 'bindOutputPause']) view[method] = () => {};
 	view.terminalContainer = f.leaf.el;
 	view.removeDropHandlers = () => {};

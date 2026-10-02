@@ -3,7 +3,7 @@ import type { LocalizedCommand } from '../../platform/obsidian/localized-command
 import type { EditorDomain } from './domain';
 
 export interface EditorHost {
-	onload(): void;
+	onload(): Promise<void>;
 	onunload(): void;
 	getActiveFile(): TFile | null;
 	notifyFileChange(file: TFile | null): void;

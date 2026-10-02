@@ -58,8 +58,8 @@ const roundTrip = (size: string | undefined): string | undefined => {
 
 assert.equal(roundTrip('small'), 'small', 'small round-trips');
 assert.equal(roundTrip('large'), 'large', 'large round-trips');
-assert.equal(roundTrip('medium'), undefined, 'medium (default) writes nothing');
-assert.equal(roundTrip('huge'), undefined, 'garbage value dropped');
+assert.equal(roundTrip('medium'), 'medium', 'explicit author default is preserved');
+assert.equal(roundTrip('huge'), 'huge', 'unmanaged author input is preserved');
 
 console.log('cardSize parser round-trip: PASS');
 

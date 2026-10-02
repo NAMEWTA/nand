@@ -1,4 +1,5 @@
 import { verifyCommentStorage } from './verify-comment-storage';
+import { verifyCommentHandoff } from './verify-comment-handoff';
 import { parseHTML } from 'linkedom';
 /**
  * Editor comment anchors, sidecar store, and product-boundary checks.
@@ -75,6 +76,7 @@ const note = 'Please keep this note byte-for-byte.';
 
 async function main(): Promise<void> {
 	await verifyCommentStorage();
+	await verifyCommentHandoff();
 	if (typeof window === 'undefined') {
 		Object.assign(globalThis, { window: globalThis });
 	}

@@ -10,7 +10,7 @@ import {
 } from 'obsidian';
 import { render } from 'preact/compat';
 import { emptyQuery } from '../../core/contacts/index-store';
-import { newRecord, type ArchiveRecord, type RecordKind } from '../../core/contacts/model';
+import { ContactsError, newRecord, type ArchiveRecord, type RecordKind } from '../../core/contacts/model';
 import { type ContactsController } from '../../platform/obsidian/contacts/controller';
 import { t } from '../../shared/i18n/index';
 import { onLeafLanguageChanged } from '../../platform/obsidian/workspace-title';
@@ -18,6 +18,8 @@ import { confirm, ct, deleteRow, editRecord, errorText, FilterModal, RecordEdito
 import type { ContactsHost } from './host';
 import type { ContactsPanelState } from './panel-contract';
 import { ContactsSurface } from './surface';
+import { ArchiveNoteModal } from './note-modal';
+import type { ArchiveResource } from '../../core/contacts/resources';
 
 export const CONTACTS_VIEW_TYPE = 'nand-contacts-view';
 export class ContactsView extends ItemView {
@@ -26,6 +28,7 @@ export class ContactsView extends ItemView {
 	private unsubscribe?: () => void;
 	private history: Array<{ path: string; id: string }> = [];
 	private root?: HTMLElement;
+	private pendingInput?: HTMLInputElement;
 	constructor(
 		leaf: WorkspaceLeaf,
 		private plugin: ContactsHost,
@@ -113,6 +116,8 @@ export class ContactsView extends ItemView {
 		return Promise.resolve();
 	}
 	disposeSurface(): void {
+		this.pendingInput?.remove();
+		this.pendingInput = undefined;
 		this.unsubscribe?.();
 		this.unsubscribe = undefined;
 		if (this.root) {
@@ -235,10 +240,91 @@ export class ContactsView extends ItemView {
 	deleteRow(record: ArchiveRecord, scope: 'employment' | 'relation', id: string): void {
 		if (this.controller) void deleteRow(this.controller, record, scope, id);
 	}
+	resources(record: ArchiveRecord): ArchiveResource[] {
+		try {
+			return this.controller?.resources(record.id) ?? [];
+		} catch {
+			return [];
+		}
+	}
+	newNote(record: ArchiveRecord): void {
+		const controller = this.controller;
+		if (!controller) return;
+		new ArchiveNoteModal(this.app, async (name) => {
+			const path = await controller.createNote(record.id, name);
+			const file = this.app.vault.getFileByPath(path);
+			if (file) {
+				const leaf = this.app.workspace.getLeaf('tab');
+				await leaf.openFile(file, { active: true });
+				await this.app.workspace.revealLeaf(leaf);
+			}
+		}).open();
+	}
+	openResource(path: string): void {
+		const file = this.app.vault.getFileByPath(path);
+		if (file) {
+			const leaf = this.app.workspace.getLeaf('tab');
+			void leaf
+				.openFile(file, { active: true })
+				.then(() => this.app.workspace.revealLeaf(leaf))
+				.catch((error: unknown) => new Notice(errorText(error)));
+		}
+	}
+	revealFolder(record: ArchiveRecord): void {
+		const folder = this.app.vault.getAbstractFileByPath(record.folderPath);
+		const leaf = this.app.workspace.getLeavesOfType('file-explorer')[0];
+		if (!folder || !leaf) {
+			new Notice(ct('folderUnavailable'));
+			return;
+		}
+		const explorer = leaf.view as typeof leaf.view & { revealInFolder?: (file: typeof folder) => void };
+		explorer.revealInFolder?.(folder);
+		void this.app.workspace.revealLeaf(leaf);
+	}
+	addResources(record: ArchiveRecord, files?: File[]): void {
+		const controller = this.controller;
+		if (!controller) return;
+		const importFiles = (selected: File[]) => {
+			void controller
+				.importResources(
+					record.id,
+					selected.map((file) => ({ name: file.name, read: () => file.arrayBuffer() })),
+				)
+				.then((results) => {
+					new Notice(
+						results
+							.map((result) => `${result.name}: ${result.error ? ct(result.error) : ct('imported')}`)
+							.join('\n'),
+						10000,
+					);
+				})
+				.catch((error: unknown) => new Notice(errorText(error)));
+		};
+		if (files) {
+			importFiles(files);
+			return;
+		}
+		this.pendingInput?.remove();
+		const input = this.contentEl.createEl('input', { type: 'file' });
+		this.pendingInput = input;
+		input.hidden = true;
+		input.multiple = true;
+		input.addEventListener(
+			'change',
+			() => {
+				const selected = Array.from(input.files ?? []);
+				input.remove();
+				if (selected.length) importFiles(selected);
+			},
+			{ once: true },
+		);
+		input.addEventListener('cancel', () => input.remove(), { once: true });
+		input.click();
+	}
 	private async remove(record: ArchiveRecord): Promise<void> {
 		if (!this.controller) return;
 		try {
-			const base = await this.controller.snapshot(record.path);
+			const base = await this.controller.deletion(record.id);
 			const index = this.controller.index;
 			const count =
 				record.kind === 'person'
@@ -248,18 +334,53 @@ export class ContactsView extends ItemView {
 								(r) => r.id,
 							),
 						).size;
-			if (!(await confirm(this.app, ct('deletePrompt', { name: record.fields.name, count })))) return;
+			if (
+				!(await confirm(
+					this.app,
+					ct('deleteFolderPrompt', {
+						name: record.fields.name,
+						count,
+						folder: base.folderPath,
+						resources: base.resources,
+					}),
+				))
+			)
+				return;
 			await this.controller.remove(base);
-			this.state.selectedPath = '';
-			this.state.selectedId = '';
-			this.persist();
-			this.history = [];
+			if (this.state.selectedId === record.id) {
+				this.state.selectedPath = '';
+				this.state.selectedId = '';
+				this.persist();
+			}
+			this.history = this.history.filter((entry) => entry.id !== record.id);
 			this.render();
 		} catch (error) {
 			new Notice(errorText(error));
+			if (
+				error instanceof ContactsError &&
+				error.code === 'deleteChanged' &&
+				this.enabled &&
+				this.root?.isConnected
+			) {
+				const current = this.controller?.index.get(record.id);
+				if (current) await this.remove(current);
+			}
 		}
 	}
 	private recordMenu(menu: Menu, record: ArchiveRecord): void {
+		menu.addItem((item) =>
+			item
+				.setTitle(ct('editBasic'))
+				.setIcon('pencil')
+				.setDisabled(!!this.controller?.index.issues(record).length)
+				.onClick(() => this.edit(record, 'basic')),
+		);
+		menu.addItem((item) =>
+			item
+				.setTitle(ct('revealFolder'))
+				.setIcon('folder-open')
+				.onClick(() => this.revealFolder(record)),
+		);
 		menu.addItem((item) =>
 			item
 				.setTitle(t('automation.new'))

@@ -2,6 +2,7 @@ import { Component, MarkdownView, TFile, TFolder, type App } from 'obsidian';
 import { ContactsApplication } from '../../../core/contacts/application';
 import type { ContactsFile, ContactsFiles } from '../../../core/contacts/files';
 import { ContactsError } from '../../../core/contacts/model';
+import type { ArchiveFolderEntry } from '../../../core/contacts/resources';
 import guide from '../../../core/contacts/persist/format-guide.md';
 import englishGuide from '../../../core/contacts/persist/format-guide-en.md';
 import type { ContactsSettings } from '../../../shared/contacts-settings';
@@ -19,7 +20,9 @@ export class ContactsController extends Component {
 			return file;
 		};
 		const files: ContactsFiles = {
-			get formatGuide() { return getLanguage() === 'en' ? englishGuide : guide; },
+			get formatGuide() {
+				return getLanguage() === 'en' ? englishGuide : guide;
+			},
 			ready: async () => {
 				if (!app.workspace.layoutReady)
 					await new Promise<void>((resolve) => app.workspace.onLayoutReady(resolve));
@@ -31,7 +34,17 @@ export class ContactsController extends Component {
 			cachedRead: (file) => app.vault.cachedRead(native(file)),
 			process: (file, update) => app.vault.process(native(file), update),
 			create: (path, content) => app.vault.create(path, content),
-			trashFile: (file) => app.fileManager.trashFile(native(file)),
+			createBinary: (path, content) => app.vault.createBinary(path, content),
+			listFolder: (path) => this.listFolder(path),
+			trashFolder: async (path) => {
+				const folder = app.vault.getAbstractFileByPath(path);
+				if (!(folder instanceof TFolder)) throw new ContactsError('missing');
+				await app.fileManager.trashFile(folder);
+			},
+			checkFolderEditors: (path) => this.checkFolderEditors(path),
+			createFolder: async (path) => {
+				await app.vault.createFolder(path);
+			},
 			mkdir: (path) => this.mkdir(path),
 			checkEditor: (file, disk) => this.checkEditor(native(file), disk),
 		};
@@ -64,7 +77,7 @@ export class ContactsController extends Component {
 		);
 		this.registerEvent(
 			this.app.vault.on('rename', (file, oldPath) =>
-				this.application.fileRenamed(file instanceof TFile ? file : null, oldPath),
+				this.application.fileRenamed(file instanceof TFile ? file : null, oldPath, file.path),
 			),
 		);
 	}
@@ -89,6 +102,11 @@ export class ContactsController extends Component {
 		this.application.create(...args);
 	remove = (...args: Parameters<ContactsApplication['remove']>): ReturnType<ContactsApplication['remove']> =>
 		this.application.remove(...args);
+	deletion = (...args: Parameters<ContactsApplication['deletion']>) => this.application.deletion(...args);
+	resources = (...args: Parameters<ContactsApplication['resources']>) => this.application.resources(...args);
+	createNote = (...args: Parameters<ContactsApplication['createNote']>) => this.application.createNote(...args);
+	importResources = (...args: Parameters<ContactsApplication['importResources']>) =>
+		this.application.importResources(...args);
 	ref = (...args: Parameters<ContactsApplication['ref']>): ReturnType<ContactsApplication['ref']> =>
 		this.application.ref(...args);
 	choices = (...args: Parameters<ContactsApplication['choices']>): ReturnType<ContactsApplication['choices']> =>
@@ -105,6 +123,34 @@ export class ContactsController extends Component {
 				leaf.view.editor.getValue() !== disk
 			)
 				throw new ContactsError('editorConflict');
+		}
+	}
+	private listFolder(path: string): ArchiveFolderEntry[] {
+		const folder = this.app.vault.getAbstractFileByPath(path);
+		if (!(folder instanceof TFolder)) throw new ContactsError('missing');
+		const entries: ArchiveFolderEntry[] = [];
+		const pending = [...folder.children];
+		while (pending.length) {
+			const entry = pending.pop()!;
+			if (entry instanceof TFolder) {
+				entries.push({ path: entry.path, folder: true, size: 0, modified: 0 });
+				pending.push(...entry.children);
+			} else if (entry instanceof TFile)
+				entries.push({ path: entry.path, folder: false, size: entry.stat.size, modified: entry.stat.mtime });
+		}
+		return entries;
+	}
+	private async checkFolderEditors(path: string): Promise<void> {
+		for (const leaf of this.app.workspace.getLeavesOfType('markdown')) {
+			const view = leaf.view;
+			if (
+				!(view instanceof MarkdownView) ||
+				!view.file?.path.startsWith(path + '/') ||
+				view.getMode() !== 'source'
+			)
+				continue;
+			const file = view.file;
+			this.checkEditor(file, await this.app.vault.read(file));
 		}
 	}
 	private async mkdir(path: string): Promise<void> {

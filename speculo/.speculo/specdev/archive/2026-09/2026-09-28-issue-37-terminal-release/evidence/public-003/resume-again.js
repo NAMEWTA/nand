@@ -1,1 +1,0 @@
-(async()=>{app.setting.close();const b=[...activeDocument.querySelectorAll('button')].find(b=>b.textContent==='在终端恢复');b.click();await new Promise(r=>setTimeout(r,800));return app.plugins.plugins.nand.terminalHost._terminalService.getAllTerminals().map(t=>({id:t.id,alive:t.isAlive()}));})()

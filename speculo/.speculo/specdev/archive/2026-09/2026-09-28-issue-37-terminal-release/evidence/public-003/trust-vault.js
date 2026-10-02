@@ -1,1 +1,0 @@
-(()=>{const button=[...document.querySelectorAll('button')].find(b=>b.textContent==='Trust author and enable plugins');if(!button)throw Error('Trust button missing');button.click();return {trustedSyntheticVault:true};})()

@@ -1,5 +1,7 @@
 Orca — https://github.com/stablyai/orca
 Pinned source: 27b823f934f739bc85914dd717b776835f60bcf7
+Terminal workbench source: 11d97896628d90c4990365127812667b00e28c82
+Independent browser source: d74388f8a2dad2bd4bbfe3b937aba66e6648258b
 
 MIT License
 

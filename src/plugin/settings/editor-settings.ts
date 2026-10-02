@@ -3,6 +3,13 @@ import { t } from '../../shared/i18n/index';
 import { renderEmptyState } from '../../view/primitives/empty-state';
 import type { DashboardSettingTab } from './settings-tab';
 
+/** Shared by native definitions and the pre-1.13 fallback settings renderer. */
+export function renderCopyHelp(containerEl: HTMLElement): void {
+	new Setting(containerEl).setName(t('editor.copy.title')).setDesc(t('editor.copy.howTo')).setHeading();
+	new Setting(containerEl).setName(t('editor.copy.relative')).setDesc(t('editor.copy.relativeHelp'));
+	new Setting(containerEl).setName(t('editor.copy.absolute')).setDesc(t('editor.copy.absoluteHelp'));
+}
+
 /** Editor product block. Comment bodies stay in the vault sidecar, not data.json. */
 export function renderEditorSettings(this: DashboardSettingTab, containerEl: HTMLElement): void {
 	const workbench = this.plugin.settings.editorWorkbench;

@@ -1,3 +1,4 @@
+import { bindLocalizedControl } from '../../primitives/localized-dom';
 import type { Hotkey } from 'obsidian';
 import { ButtonComponent, Modal, Setting } from 'obsidian';
 import type { FileItem } from '../../../core/icons/types';
@@ -47,14 +48,14 @@ export default class UsageChecker extends Modal {
 		this.containerEl.addClass('mod-confirmation');
 		this.modalEl.addClass('iconic-rule-checker');
 		this.contentEl.addClass('iconic-highlight-tree');
-		this.setTitle(STRINGS.usageChecker.unusedIcons);
+		bindLocalizedControl(this.setTitle(STRINGS.usageChecker.unusedIcons), "title", "iconic.usageChecker.unusedIcons");
 
 		// BUTTONS: Highlight
 		const buttons: ButtonComponent[] = [];
-		new Setting(this.contentEl)
-			.setName(STRINGS.ruleChecker.highlight)
+		bindLocalizedControl(new Setting(this.contentEl)
+			.setName(STRINGS.ruleChecker.highlight), "name", "iconic.ruleChecker.highlight")
 			.addButton((button) => {
-				button.setButtonText(STRINGS.ruleEditor.source.tree).onClick(() => {
+				bindLocalizedControl(button.setButtonText(STRINGS.ruleEditor.source.tree), "buttonText", "iconic.ruleEditor.source.tree").onClick(() => {
 					buttons.forEach((button) => button.buttonEl.removeClass('iconic-button-selected'));
 					button.buttonEl.addClass('iconic-button-selected');
 					this.contentEl.addClass('iconic-highlight-tree');
@@ -64,7 +65,7 @@ export default class UsageChecker extends Modal {
 				buttons.push(button);
 			})
 			.addButton((button) => {
-				button.setButtonText(STRINGS.ruleEditor.source.name).onClick(() => {
+				bindLocalizedControl(button.setButtonText(STRINGS.ruleEditor.source.name), "buttonText", "iconic.ruleEditor.source.name").onClick(() => {
 					buttons.forEach((button) => button.buttonEl.removeClass('iconic-button-selected'));
 					button.buttonEl.addClass('iconic-button-selected');
 					this.contentEl.removeClasses(['iconic-highlight-tree', 'iconic-highlight-extension']);
@@ -73,7 +74,7 @@ export default class UsageChecker extends Modal {
 				buttons.push(button);
 			})
 			.addButton((button) => {
-				button.setButtonText(STRINGS.ruleEditor.source.extension).onClick(() => {
+				bindLocalizedControl(button.setButtonText(STRINGS.ruleEditor.source.extension), "buttonText", "iconic.ruleEditor.source.extension").onClick(() => {
 					buttons.forEach((button) => button.buttonEl.removeClass('iconic-button-selected'));
 					button.buttonEl.addClass('iconic-button-selected');
 					this.contentEl.removeClasses(['iconic-highlight-tree', 'iconic-highlight-name']);

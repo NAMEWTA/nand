@@ -1,3 +1,4 @@
+import { bindLocalizedElement } from '../../primitives/localized-dom';
 import { App, Modal, setIcon, TFile, TFolder } from 'obsidian';
 import { t } from '../../../shared/i18n/index';
 import { applyModalTheme } from '../appearance/modal-theme';
@@ -85,16 +86,16 @@ export class PathPickerModal extends Modal {
 
 		const container = contentEl.createDiv({ cls: 'dashboard-modal dashboard-modal--compact dashboard-pathpicker' });
 		const header = container.createDiv({ cls: 'dashboard-modal-header' });
-		header.createDiv({
+		bindLocalizedElement(header.createDiv({
 			cls: 'dashboard-modal-title',
 			text: t(this.mode === 'folder' ? 'pathPicker.pickFolder' : 'pathPicker.pickFile'),
-		});
+		}), this.mode === 'folder' ? 'pathPicker.pickFolder' : 'pathPicker.pickFile');
 
 		const body = container.createDiv({ cls: 'dashboard-modal-body dashboard-pathpicker-body' });
-		const search = body.createEl('input', {
+		const search = bindLocalizedElement(body.createEl('input', {
 			cls: 'dashboard-modal-input dashboard-pathpicker-search',
 			attr: { type: 'text', placeholder: t('pathPicker.searchPh') },
-		});
+		}), 'pathPicker.searchPh', undefined, "placeholder");
 		const list = body.createDiv({ cls: 'dashboard-pathpicker-list' });
 		search.focus();
 
@@ -105,7 +106,7 @@ export class PathPickerModal extends Modal {
 				.filter((item) => item.score > 0)
 				.sort((a, b) => b.score - a.score || a.entry.path.localeCompare(b.entry.path));
 			if (scored.length === 0) {
-				list.createDiv({ cls: 'dashboard-library-empty', text: t('pathPicker.empty') });
+				bindLocalizedElement(list.createDiv({ cls: 'dashboard-library-empty', text: t('pathPicker.empty') }), 'pathPicker.empty');
 				return;
 			}
 			for (const { entry } of scored.slice(0, MAX_RENDERED)) {
@@ -129,10 +130,10 @@ export class PathPickerModal extends Modal {
 				});
 			}
 			if (scored.length > MAX_RENDERED) {
-				list.createDiv({
+				bindLocalizedElement(list.createDiv({
 					cls: 'dashboard-pathpicker-more',
 					text: t('pathPicker.moreCount', { count: String(scored.length - MAX_RENDERED) }),
-				});
+				}), 'pathPicker.moreCount', { count: String(scored.length - MAX_RENDERED) });
 			}
 		};
 		search.addEventListener('input', renderList);
@@ -156,14 +157,14 @@ export function attachPathPicker(
 	mode: PathPickerMode,
 	onPick: (path: string) => void,
 ): HTMLButtonElement {
-	const btn = btnParent.createEl('button', {
+	const btn = bindLocalizedElement(bindLocalizedElement(btnParent.createEl('button', {
 		cls: 'dashboard-quicknote-cfg-icon-btn dashboard-pathpicker-btn',
 		attr: {
 			type: 'button',
 			'aria-label': t(mode === 'folder' ? 'pathPicker.pickFolder' : 'pathPicker.pickFile'),
 			title: t(mode === 'folder' ? 'pathPicker.pickFolder' : 'pathPicker.pickFile'),
 		},
-	});
+	}), mode === 'folder' ? 'pathPicker.pickFolder' : 'pathPicker.pickFile', undefined, "aria-label"), mode === 'folder' ? 'pathPicker.pickFolder' : 'pathPicker.pickFile', undefined, "title");
 	setIcon(btn, mode === 'folder' ? 'folder-search' : 'file-search');
 	btn.addEventListener('click', () => {
 		new PathPickerModal(app, mode, (path) => {

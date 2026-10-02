@@ -1,3 +1,5 @@
+import { bindLocalizedElement } from '../../primitives/localized-dom';
+import type { AutomationUiPort } from '../../../shared/automation/types';
 import { App, Modal, setIcon } from 'obsidian';
 import { h } from 'preact';
 import type { QuickAction } from '../../../core/dashboard/types/index';
@@ -118,6 +120,7 @@ export function renderQuickActions(
 	hiddenPresets?: string[],
 	onEdit?: (action: QuickAction) => void,
 	colors?: QuickButtonsColors,
+	automation?: AutomationUiPort,
 ): void {
 	const root = container.createDiv({ cls: 'dashboard-section dashboard-quick-actions' });
 	if (colors?.bg) root.style.background = colors.bg;
@@ -129,6 +132,7 @@ export function renderQuickActions(
 		root,
 		h(QuickActionsPanel, {
 			actions,
+			automation,
 			execute: onExecute,
 			remove: _onRemove,
 			add: onAdd,
@@ -142,12 +146,12 @@ export function renderQuickActions(
 }
 export class AddActionModal extends Modal {
 	private onSelect: (action: QuickAction) => void;
-	private activeTab: 'file' | 'command' = 'file';
+	private activeTab: 'file' | 'command' | 'action' = 'file';
 	private pendingAction: QuickAction | null = null;
 	private lastQuery = '';
 	private isEditMode = false;
 
-	constructor(app: App, onSelect: (action: QuickAction) => void, initialAction?: QuickAction) {
+	constructor(app: App, onSelect: (action: QuickAction) => void, initialAction?: QuickAction, private savedActions: QuickAction[] = []) {
 		super(app);
 		this.onSelect = onSelect;
 		this.pendingAction = initialAction ?? null;
@@ -169,7 +173,7 @@ export class AddActionModal extends Modal {
 		contentEl.empty();
 		const container = contentEl.createDiv({ cls: 'dashboard-modal dashboard-modal--compact' });
 		const header = container.createDiv({ cls: 'dashboard-modal-header' });
-		header.createDiv({ cls: 'dashboard-modal-title', text: t('quickActions.addAction') });
+		bindLocalizedElement(header.createDiv({ cls: 'dashboard-modal-title', text: t('quickActions.addAction') }), 'quickActions.addAction');
 		const body = container.createDiv({ cls: 'dashboard-modal-body' });
 
 		if (this.pendingAction) {
@@ -181,25 +185,26 @@ export class AddActionModal extends Modal {
 
 	private renderSearchView(body: HTMLElement, container: HTMLElement): void {
 		const tabBar = body.createDiv({ cls: 'dashboard-action-tabs' });
-		const fileTab = tabBar.createEl('button', {
+		const fileTab = bindLocalizedElement(tabBar.createEl('button', {
 			cls: 'dashboard-action-tab' + (this.activeTab === 'file' ? ' active' : ''),
 			text: t('quickActions.fileTab'),
-		});
-		const cmdTab = tabBar.createEl('button', {
+		}), 'quickActions.fileTab');
+		const cmdTab = bindLocalizedElement(tabBar.createEl('button', {
 			cls: 'dashboard-action-tab' + (this.activeTab === 'command' ? ' active' : ''),
 			text: t('quickActions.commandTab'),
-		});
+		}), 'quickActions.commandTab');
 
-		const switchTab = (tab: 'file' | 'command') => {
+		const switchTab = (tab: 'file' | 'command' | 'action') => {
 			this.activeTab = tab;
 			this.lastQuery = '';
 			this.render();
 		};
 		fileTab.addEventListener('click', () => switchTab('file'));
 		cmdTab.addEventListener('click', () => switchTab('command'));
+		bindLocalizedElement(tabBar.createEl('button', { cls: 'dashboard-action-tab' + (this.activeTab === 'action' ? ' active' : ''), text: t('automation.savedActions') }), 'automation.savedActions').addEventListener('click', () => switchTab('action'));
 
 		const searchWrap = body.createDiv({ cls: 'dashboard-docsearch' });
-		const input = searchWrap.createEl('input', {
+		const input = bindLocalizedElement(searchWrap.createEl('input', {
 			cls: 'dashboard-modal-input dashboard-docsearch-input',
 			attr: {
 				type: 'text',
@@ -207,13 +212,17 @@ export class AddActionModal extends Modal {
 				autofocus: 'true',
 				value: this.lastQuery,
 			},
-		});
+		}), 'quickActions.searchPlaceholder', undefined, "placeholder");
 		const resultsList = searchWrap.createDiv({ cls: 'dashboard-docsearch-results' });
 
 		const renderResults = (query: string) => {
 			resultsList.empty();
 			const q = query.toLowerCase().trim();
-			if (this.activeTab === 'file') {
+			if (this.activeTab === 'action') {
+				for (const action of this.savedActions.filter(action => action.name.toLowerCase().includes(q))) {
+					resultsList.createEl('button', { text: action.name, cls: 'dashboard-docsearch-result' }).addEventListener('click', () => { this.pendingAction = action; this.render(); });
+				}
+			} else if (this.activeTab === 'file') {
 				this.renderFileResults(resultsList, q);
 			} else {
 				this.renderCommandResults(resultsList, q);
@@ -228,11 +237,11 @@ export class AddActionModal extends Modal {
 		input.focus();
 
 		const footer = container.createDiv({ cls: 'dashboard-modal-footer' });
-		footer
+		bindLocalizedElement(footer
 			.createEl('button', {
 				cls: 'dashboard-modal-btn dashboard-modal-btn--cancel',
 				text: t('common.cancel'),
-			})
+			}), 'common.cancel')
 			.addEventListener('click', () => this.close());
 	}
 
@@ -251,7 +260,7 @@ export class AddActionModal extends Modal {
 
 		// Name field
 		const nameField = body.createDiv({ cls: 'dashboard-qa-confirm-field' });
-		nameField.createEl('label', { text: t('quickActions.displayName'), cls: 'dashboard-qa-confirm-label' });
+		bindLocalizedElement(nameField.createEl('label', { text: t('quickActions.displayName'), cls: 'dashboard-qa-confirm-label' }), 'quickActions.displayName');
 		const nameInput = nameField.createEl('input', {
 			cls: 'dashboard-modal-input',
 			attr: { type: 'text', value: defaultName },
@@ -259,7 +268,7 @@ export class AddActionModal extends Modal {
 
 		// Icon picker: clickable grid of common icons
 		const iconField = body.createDiv({ cls: 'dashboard-qa-confirm-field' });
-		iconField.createEl('label', { text: t('quickActions.icon'), cls: 'dashboard-qa-confirm-label' });
+		bindLocalizedElement(iconField.createEl('label', { text: t('quickActions.icon'), cls: 'dashboard-qa-confirm-label' }), 'quickActions.icon');
 		let selectedIcon = defaultIcon;
 		const grid = iconField.createDiv({ cls: 'dashboard-qa-icon-grid' });
 		const allIcons = COMMON_ICONS.includes(defaultIcon) ? COMMON_ICONS : [defaultIcon, ...COMMON_ICONS];
@@ -302,10 +311,10 @@ export class AddActionModal extends Modal {
 		});
 
 		const footer = container.createDiv({ cls: 'dashboard-modal-footer' });
-		const backBtn = footer.createEl('button', {
+		const backBtn = bindLocalizedElement(footer.createEl('button', {
 			cls: 'dashboard-modal-btn dashboard-modal-btn--cancel',
 			text: this.isEditMode ? t('common.cancel') : t('quickActions.back'),
-		});
+		}), this.isEditMode ? ('common.cancel') : ('quickActions.back'), (this.isEditMode) ? (undefined) : (undefined));
 		backBtn.addEventListener('click', () => {
 			if (this.isEditMode) {
 				this.close();
@@ -314,16 +323,16 @@ export class AddActionModal extends Modal {
 				this.render();
 			}
 		});
-		const confirmBtn = footer.createEl('button', {
+		const confirmBtn = bindLocalizedElement(footer.createEl('button', {
 			cls: 'dashboard-modal-btn dashboard-modal-btn--confirm',
 			text: this.isEditMode ? t('quickActions.saveAction') : t('quickActions.confirmAdd'),
-		});
+		}), this.isEditMode ? ('quickActions.saveAction') : ('quickActions.confirmAdd'), (this.isEditMode) ? (undefined) : (undefined));
 		confirmBtn.addEventListener('click', finish);
 	}
 
 	private renderFileResults(container: HTMLElement, q: string): void {
 		if (!q) {
-			container.createDiv({ cls: 'dashboard-docsearch-hint', text: t('quickActions.typeToSearchFile') });
+			bindLocalizedElement(container.createDiv({ cls: 'dashboard-docsearch-hint', text: t('quickActions.typeToSearchFile') }), 'quickActions.typeToSearchFile');
 			return;
 		}
 
@@ -342,7 +351,7 @@ export class AddActionModal extends Modal {
 			.slice(0, 20);
 
 		if (files.length === 0) {
-			container.createDiv({ cls: 'dashboard-docsearch-hint', text: t('quickActions.noResults') });
+			bindLocalizedElement(container.createDiv({ cls: 'dashboard-docsearch-hint', text: t('quickActions.noResults') }), 'quickActions.noResults');
 			return;
 		}
 
@@ -370,7 +379,7 @@ export class AddActionModal extends Modal {
 		const commands = (this.app as AppWithCommands).commands.commands;
 
 		if (!commands) {
-			container.createDiv({ cls: 'dashboard-docsearch-hint', text: t('quickActions.noResults') });
+			bindLocalizedElement(container.createDiv({ cls: 'dashboard-docsearch-hint', text: t('quickActions.noResults') }), 'quickActions.noResults');
 			return;
 		}
 
@@ -384,12 +393,12 @@ export class AddActionModal extends Modal {
 			.slice(0, 30);
 
 		if (!q) {
-			container.createDiv({ cls: 'dashboard-docsearch-hint', text: t('quickActions.typeToSearchCmd') });
+			bindLocalizedElement(container.createDiv({ cls: 'dashboard-docsearch-hint', text: t('quickActions.typeToSearchCmd') }), 'quickActions.typeToSearchCmd');
 			return;
 		}
 
 		if (entries.length === 0) {
-			container.createDiv({ cls: 'dashboard-docsearch-hint', text: t('quickActions.noResults') });
+			bindLocalizedElement(container.createDiv({ cls: 'dashboard-docsearch-hint', text: t('quickActions.noResults') }), 'quickActions.noResults');
 			return;
 		}
 
@@ -432,14 +441,14 @@ export class DocSearchModal extends Modal {
 
 		const container = contentEl.createDiv({ cls: 'dashboard-modal dashboard-modal--compact' });
 		const header = container.createDiv({ cls: 'dashboard-modal-header' });
-		header.createDiv({ cls: 'dashboard-modal-title', text: t('quickActions.fileTab') });
+		bindLocalizedElement(header.createDiv({ cls: 'dashboard-modal-title', text: t('quickActions.fileTab') }), 'quickActions.fileTab');
 		const body = container.createDiv({ cls: 'dashboard-modal-body' });
 
 		const searchWrap = body.createDiv({ cls: 'dashboard-docsearch' });
-		const input = searchWrap.createEl('input', {
+		const input = bindLocalizedElement(searchWrap.createEl('input', {
 			cls: 'dashboard-modal-input dashboard-docsearch-input',
 			attr: { type: 'text', placeholder: t('quickActions.searchPlaceholder'), autofocus: 'true' },
-		});
+		}), 'quickActions.searchPlaceholder', undefined, "placeholder");
 		const resultsList = searchWrap.createDiv({ cls: 'dashboard-docsearch-results' });
 
 		const renderResults = (query: string) => {
@@ -479,11 +488,11 @@ export class DocSearchModal extends Modal {
 		input.focus();
 
 		const footer = container.createDiv({ cls: 'dashboard-modal-footer' });
-		footer
+		bindLocalizedElement(footer
 			.createEl('button', {
 				cls: 'dashboard-modal-btn dashboard-modal-btn--cancel',
 				text: t('common.cancel'),
-			})
+			}), 'common.cancel')
 			.addEventListener('click', () => this.close());
 	}
 

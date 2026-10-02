@@ -1,3 +1,4 @@
+import { bindLocalizedControl } from '../../primitives/localized-dom';
 import type { Hotkey } from 'obsidian';
 import { ButtonComponent, Modal, Setting } from 'obsidian';
 import type { Category, FileItem } from '../../../core/icons/types';
@@ -49,28 +50,28 @@ export default class RuleChecker extends Modal {
 
 		switch (this.page) {
 			case 'file': {
-				this.setTitle(
+				bindLocalizedControl(this.setTitle(
 					this.matches.length === 1
 						? STRINGS.ruleChecker.fileMatch
 						: STRINGS.ruleChecker.filesMatch.replace('{#}', this.matches.length.toString()),
-				);
+				), "title", this.matches.length === 1 ? ("iconic.ruleChecker.fileMatch") : ("iconic.ruleChecker.filesMatch"), (this.matches.length === 1) ? (undefined) : ({"#": this.matches.length.toString()}));
 				break;
 			}
 			case 'folder': {
-				this.setTitle(
+				bindLocalizedControl(this.setTitle(
 					this.matches.length === 1
 						? STRINGS.ruleChecker.folderMatch
 						: STRINGS.ruleChecker.foldersMatch.replace('{#}', this.matches.length.toString()),
-				);
+				), "title", this.matches.length === 1 ? ("iconic.ruleChecker.folderMatch") : ("iconic.ruleChecker.foldersMatch"), (this.matches.length === 1) ? (undefined) : ({"#": this.matches.length.toString()}));
 			}
 		}
 
 		// BUTTONS: Highlight
 		const buttons: ButtonComponent[] = [];
-		new Setting(this.contentEl)
-			.setName(STRINGS.ruleChecker.highlight)
+		bindLocalizedControl(new Setting(this.contentEl)
+			.setName(STRINGS.ruleChecker.highlight), "name", "iconic.ruleChecker.highlight")
 			.addButton((button) => {
-				button.setButtonText(STRINGS.ruleEditor.source.tree).onClick(() => {
+				bindLocalizedControl(button.setButtonText(STRINGS.ruleEditor.source.tree), "buttonText", "iconic.ruleEditor.source.tree").onClick(() => {
 					buttons.forEach((button) => button.buttonEl.removeClass('iconic-button-selected'));
 					button.buttonEl.addClass('iconic-button-selected');
 					this.contentEl.addClass('iconic-highlight-tree');
@@ -80,7 +81,7 @@ export default class RuleChecker extends Modal {
 				buttons.push(button);
 			})
 			.addButton((button) => {
-				button.setButtonText(STRINGS.ruleEditor.source.name).onClick(() => {
+				bindLocalizedControl(button.setButtonText(STRINGS.ruleEditor.source.name), "buttonText", "iconic.ruleEditor.source.name").onClick(() => {
 					buttons.forEach((button) => button.buttonEl.removeClass('iconic-button-selected'));
 					button.buttonEl.addClass('iconic-button-selected');
 					this.contentEl.removeClasses(['iconic-highlight-tree', 'iconic-highlight-extension']);
@@ -89,8 +90,8 @@ export default class RuleChecker extends Modal {
 				buttons.push(button);
 			})
 			.addButton((button) => {
-				button
-					.setButtonText(STRINGS.ruleEditor.source.extension)
+				bindLocalizedControl(button
+					.setButtonText(STRINGS.ruleEditor.source.extension), "buttonText", "iconic.ruleEditor.source.extension")
 					.setDisabled(this.page !== 'file')
 					.onClick(() => {
 						buttons.forEach((button) => button.buttonEl.removeClass('iconic-button-selected'));

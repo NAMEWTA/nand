@@ -1,3 +1,4 @@
+import { bindLocalizedElement } from '../../primitives/localized-dom';
 import { App, Modal, setIcon } from 'obsidian';
 import type { LibraryConfig, PropertyFilterOperator } from '../../../core/dashboard/types/index';
 import { t } from '../../../shared/i18n/index';
@@ -42,14 +43,14 @@ export class LibraryConfigModal extends Modal {
 
 		// Header
 		const header = container.createDiv({ cls: 'dashboard-modal-header' });
-		header.createDiv({ cls: 'dashboard-modal-title', text: t('library.configTitle') });
+		bindLocalizedElement(header.createDiv({ cls: 'dashboard-modal-title', text: t('library.configTitle') }), 'library.configTitle');
 
 		// Body
 		const body = container.createDiv({ cls: 'dashboard-modal-body' });
 
 		// Filters
 		const filtersSection = body.createDiv({ cls: 'dashboard-library-config-section' });
-		filtersSection.createDiv({ cls: 'dashboard-library-config-section-title', text: t('library.property') });
+		bindLocalizedElement(filtersSection.createDiv({ cls: 'dashboard-library-config-section-title', text: t('library.property') }), 'library.property');
 
 		const filtersContainer = filtersSection.createDiv({ cls: 'dashboard-library-config-filters' });
 
@@ -67,7 +68,7 @@ export class LibraryConfigModal extends Modal {
 				// tags branch (frontmatter + inline tags) and the property
 				// extractor collects tag values, so it filters like any property.
 				const propKeys = [...this.availableProps.keys()].sort();
-				propSelect.createEl('option', { text: t('library.selectProperty'), attr: { value: '' } });
+				bindLocalizedElement(propSelect.createEl('option', { text: t('library.selectProperty'), attr: { value: '' } }), 'library.selectProperty');
 				for (const key of propKeys) {
 					const opt = propSelect.createEl('option', { text: key, attr: { value: key } });
 					if (key === filter.property) opt.selected = true;
@@ -88,10 +89,10 @@ export class LibraryConfigModal extends Modal {
 					const opSelect = header.createEl('select', { cls: 'dashboard-library-filter-operator' });
 					opSelect.title = t('library.filterOperator');
 					for (const op of OPERATORS) {
-						const opt = opSelect.createEl('option', {
+						const opt = bindLocalizedElement(opSelect.createEl('option', {
 							text: t(`library.op${op.charAt(0).toUpperCase()}${op.slice(1)}`),
 							attr: { value: op },
-						});
+						}), `library.op${op.charAt(0).toUpperCase()}${op.slice(1)}`);
 						if (op === operator) opt.selected = true;
 					}
 					opSelect.addEventListener('change', () => {
@@ -105,21 +106,21 @@ export class LibraryConfigModal extends Modal {
 				// custom chip, since a substring usually isn't an existing value.
 				let searchInput: HTMLInputElement | null = null;
 				if (filter.property) {
-					searchInput = header.createEl('input', {
+					searchInput = bindLocalizedElement(header.createEl('input', {
 						cls: 'dashboard-library-value-search',
 						attr: {
 							type: 'text',
 							placeholder:
 								operator === 'contains' ? t('library.searchValuesContains') : t('library.searchValues'),
 						},
-					});
+					}), operator === 'contains' ? ('library.searchValuesContains') : ('library.searchValues'), (operator === 'contains') ? (undefined) : (undefined), "placeholder");
 				}
 
 				// Remove button (far right of the header row)
-				const removeBtn = header.createEl('button', {
+				const removeBtn = bindLocalizedElement(header.createEl('button', {
 					cls: 'dashboard-library-filter-remove',
 					attr: { 'aria-label': t('library.removeFilter') },
-				});
+				}), 'library.removeFilter', undefined, "aria-label");
 				setIcon(removeBtn, 'x');
 				removeBtn.addEventListener('click', () => {
 					this.config.filters = this.config.filters.filter((_, idx) => idx !== i);
@@ -139,20 +140,20 @@ export class LibraryConfigModal extends Modal {
 						const existing = new Set(sorted);
 						const all = [...filter.values.filter((v) => !existing.has(v)), ...sorted];
 						if (all.length === 0) {
-							valuesList.createDiv({
+							bindLocalizedElement(valuesList.createDiv({
 								cls: 'dashboard-library-filter-empty',
 								text: t('library.noValues'),
-							});
+							}), 'library.noValues');
 							return;
 						}
 						if (!searchInput) return;
 						const query = searchInput.value.trim().toLowerCase();
 						const visible = query ? all.filter((v) => v.toLowerCase().includes(query)) : all;
 						if (visible.length === 0) {
-							valuesList.createDiv({
+							bindLocalizedElement(valuesList.createDiv({
 								cls: 'dashboard-library-filter-empty',
 								text: t('library.noMatchingValues'),
-							});
+							}), 'library.noMatchingValues');
 							return;
 						}
 						for (const val of visible) {
@@ -195,10 +196,10 @@ export class LibraryConfigModal extends Modal {
 		renderFilters();
 
 		// Add filter button
-		const addFilterBtn = filtersSection.createEl('button', {
+		const addFilterBtn = bindLocalizedElement(filtersSection.createEl('button', {
 			cls: 'dashboard-library-add-filter-btn',
 			text: t('library.addFilter'),
-		});
+		}), 'library.addFilter');
 		addFilterBtn.addEventListener('click', () => {
 			this.config.filters = [...this.config.filters, { property: '', values: [] }];
 			renderFilters();
@@ -206,11 +207,11 @@ export class LibraryConfigModal extends Modal {
 
 		// Kanban group by
 		const kanbanSection = body.createDiv({ cls: 'dashboard-library-config-section' });
-		kanbanSection.createDiv({ cls: 'dashboard-library-config-section-title', text: t('library.kanbanGroupBy') });
-		kanbanSection.createDiv({ cls: 'dashboard-library-config-hint', text: t('library.kanbanGroupByHint') });
+		bindLocalizedElement(kanbanSection.createDiv({ cls: 'dashboard-library-config-section-title', text: t('library.kanbanGroupBy') }), 'library.kanbanGroupBy');
+		bindLocalizedElement(kanbanSection.createDiv({ cls: 'dashboard-library-config-hint', text: t('library.kanbanGroupByHint') }), 'library.kanbanGroupByHint');
 		const groupSelect = kanbanSection.createEl('select', { cls: 'dashboard-library-filter-property' });
 		const effectiveGroup = this.config.kanbanGroupBy ?? 'tags';
-		groupSelect.createEl('option', { text: t('library.noGroup'), attr: { value: '' } });
+		bindLocalizedElement(groupSelect.createEl('option', { text: t('library.noGroup'), attr: { value: '' } }), 'library.noGroup');
 		for (const key of [...this.availableProps.keys()].sort()) {
 			const opt = groupSelect.createEl('option', { text: key, attr: { value: key } });
 			if (key === effectiveGroup) opt.selected = true;
@@ -229,17 +230,17 @@ export class LibraryConfigModal extends Modal {
 		coversBox.addEventListener('change', () => {
 			this.config.kanbanShowCovers = coversBox.checked ? true : undefined;
 		});
-		coversRow.createDiv({ cls: 'dashboard-library-config-inline-label', text: t('library.kanbanShowCovers') });
+		bindLocalizedElement(coversRow.createDiv({ cls: 'dashboard-library-config-inline-label', text: t('library.kanbanShowCovers') }), 'library.kanbanShowCovers');
 
 		// Excluded folders: files inside them never reach the section's data.
 		const excludeSection = body.createDiv({ cls: 'dashboard-library-config-section' });
-		excludeSection.createDiv({ cls: 'dashboard-library-config-section-title', text: t('exclude.folders') });
-		excludeSection.createDiv({ cls: 'dashboard-library-config-hint', text: t('exclude.foldersHint') });
+		bindLocalizedElement(excludeSection.createDiv({ cls: 'dashboard-library-config-section-title', text: t('exclude.folders') }), 'exclude.folders');
+		bindLocalizedElement(excludeSection.createDiv({ cls: 'dashboard-library-config-hint', text: t('exclude.foldersHint') }), 'exclude.foldersHint');
 		const excludeEditor = new ExcludeFoldersEditor(this.app, excludeSection, this.config.excludeFolders ?? []);
 
 		// Card properties (grid view)
 		const propsSection = body.createDiv({ cls: 'dashboard-library-config-section' });
-		propsSection.createDiv({ cls: 'dashboard-library-config-section-title', text: t('library.cardProperties') });
+		bindLocalizedElement(propsSection.createDiv({ cls: 'dashboard-library-config-section-title', text: t('library.cardProperties') }), 'library.cardProperties');
 
 		const propsRow = propsSection.createDiv({ cls: 'dashboard-library-config-inline-row' });
 		const showPropsBox = propsRow.createEl('input', {
@@ -250,10 +251,10 @@ export class LibraryConfigModal extends Modal {
 		showPropsBox.addEventListener('change', () => {
 			this.config.showProperties = showPropsBox.checked ? undefined : false;
 		});
-		propsRow.createDiv({ cls: 'dashboard-library-config-inline-label', text: t('library.showProperties') });
+		bindLocalizedElement(propsRow.createDiv({ cls: 'dashboard-library-config-inline-label', text: t('library.showProperties') }), 'library.showProperties');
 
 		const limitRow = propsSection.createDiv({ cls: 'dashboard-library-config-inline-row' });
-		limitRow.createDiv({ cls: 'dashboard-library-config-inline-label', text: t('library.propertyLimit') });
+		bindLocalizedElement(limitRow.createDiv({ cls: 'dashboard-library-config-inline-label', text: t('library.propertyLimit') }), 'library.propertyLimit');
 		const limitInput = limitRow.createEl('input', {
 			cls: 'dashboard-library-config-number',
 			attr: { type: 'number', min: '0', max: '20', step: '1' },
@@ -271,40 +272,40 @@ export class LibraryConfigModal extends Modal {
 
 		// Footer
 		const footer = container.createDiv({ cls: 'dashboard-modal-footer' });
-		footer
+		bindLocalizedElement(footer
 			.createEl('button', {
 				cls: 'dashboard-modal-btn dashboard-modal-btn--cancel',
 				text: t('common.cancel'),
-			})
+			}), 'common.cancel')
 			.addEventListener('click', () => this.close());
 
 		// New-note template: body of this note seeds notes created by the
 		// toolbar "+" (frontmatter merged from the section's filter props).
 		const tplSection = body.createDiv({ cls: 'dashboard-library-config-section' });
-		tplSection.createDiv({ cls: 'dashboard-library-config-section-title', text: t('library.newNoteTemplate') });
-		tplSection.createDiv({ cls: 'dashboard-library-config-hint', text: t('library.newNoteTemplateHint') });
+		bindLocalizedElement(tplSection.createDiv({ cls: 'dashboard-library-config-section-title', text: t('library.newNoteTemplate') }), 'library.newNoteTemplate');
+		bindLocalizedElement(tplSection.createDiv({ cls: 'dashboard-library-config-hint', text: t('library.newNoteTemplateHint') }), 'library.newNoteTemplateHint');
 		const tplRow = tplSection.createDiv({ cls: 'dashboard-media-folder-input-row' });
 		const tplInput = tplRow.createEl('input', {
 			cls: 'dashboard-media-filter-folder',
 			attr: { type: 'text', placeholder: 'Templates/note.md' },
 		});
 		tplInput.value = this.config.templatePath ?? '';
-		tplRow
+		bindLocalizedElement(tplRow
 			.createEl('button', {
 				cls: 'dashboard-media-folder-browse',
 				text: t('folder.browse'),
-			})
+			}), 'folder.browse')
 			.addEventListener('click', () => {
 				new PathPickerModal(this.app, 'file', (path) => {
 					tplInput.value = path;
 				}).open();
 			});
 
-		footer
+		bindLocalizedElement(footer
 			.createEl('button', {
 				cls: 'dashboard-modal-btn dashboard-modal-btn--confirm',
 				text: t('common.save'),
-			})
+			}), 'common.save')
 			.addEventListener('click', () => {
 				const folders = excludeEditor.value;
 				const picked = pinnedEditor.value;

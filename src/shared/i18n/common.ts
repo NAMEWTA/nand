@@ -1,6 +1,13 @@
 /** Common */
 export const messages = {
 	en: {
+		'storage.details': 'Save error details',
+		'common.expandSidebar': 'Expand dashboard widgets',
+		'storage.saved': 'Saved',
+		'storage.saving': 'Saving…',
+		'storage.unsaved': 'Not saved — your changes are kept in this session',
+		'storage.conflict': 'Conflicting edits — both versions are retained',
+		'storage.retry': 'Retry saving',
 		'common.save': 'Save',
 		'common.add': 'Add',
 		'common.cancel': 'Cancel',
@@ -24,6 +31,13 @@ export const messages = {
 		'card.deleted': 'Card deleted',
 	},
 	zh: {
+		'storage.details': '保存错误详情',
+		'common.expandSidebar': '展开看板组件',
+		'storage.saved': '已保存',
+		'storage.saving': '保存中…',
+		'storage.unsaved': '未保存，修改仍保留在当前会话',
+		'storage.conflict': '存在冲突，双方内容均已保留',
+		'storage.retry': '重试保存',
 		'common.save': '保存',
 		'common.add': '添加',
 		'common.cancel': '取消',

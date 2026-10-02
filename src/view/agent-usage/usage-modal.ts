@@ -1,12 +1,14 @@
+import { bindLocalizedElement } from '../primitives/localized-dom';
 import { Modal, type App } from 'obsidian';
 import type { UsageSnapshot, UsageWindow } from '../../core/agent-launch/types';
 import { remainingPercent, usageStatusText } from '../../platform/desktop/agents/usage';
 import { t } from '../../shared/i18n/terminal-accessor';
-import { getLanguage } from '../../shared/i18n';
+import { getLanguage, onLanguageChanged } from '../../shared/i18n';
 
 const dateTime = (value: number | string): string => new Date(value).toLocaleString(getLanguage() === 'zh' ? 'zh-CN' : 'en-US');
 
 export class UsageModal extends Modal {
+	private languageCleanup?: () => void;
 	constructor(
 		app: App,
 		private readonly snapshots: UsageSnapshot[],
@@ -15,15 +17,19 @@ export class UsageModal extends Modal {
 	}
 
 	onOpen(): void {
+		this.draw();
+		this.languageCleanup = onLanguageChanged(() => this.draw());
+	}
+	private draw(): void {
 		const { contentEl } = this;
 		contentEl.empty();
 		contentEl.addClass('terminal-usage-modal');
 		this.containerEl.addClass('terminal-usage-modal-host');
-		contentEl.createEl('h2', { text: t('agents.usageTitle') });
-		contentEl.createEl('p', { cls: 'terminal-usage-intro', text: t('agents.usageIntro') });
+		bindLocalizedElement(contentEl.createEl('h2', { text: t('agents.usageTitle') }), 'terminalAgent.agents.usageTitle');
+		bindLocalizedElement(contentEl.createEl('p', { cls: 'terminal-usage-intro', text: t('agents.usageIntro') }), 'terminalAgent.agents.usageIntro');
 
 		if (this.snapshots.length === 0) {
-			contentEl.createEl('p', { cls: 'terminal-usage-empty', text: t('agents.usageEmpty') });
+			bindLocalizedElement(contentEl.createEl('p', { cls: 'terminal-usage-empty', text: t('agents.usageEmpty') }), 'terminalAgent.agents.usageEmpty');
 			return;
 		}
 
@@ -63,6 +69,7 @@ export class UsageModal extends Modal {
 	}
 
 	onClose(): void {
+		this.languageCleanup?.();
 		this.contentEl.empty();
 	}
 }

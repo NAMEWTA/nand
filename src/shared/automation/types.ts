@@ -9,7 +9,7 @@ export interface AgentUsage {
 }
 export type NotificationChannelId = 'in-app' | 'system' | 'email' | 'sms';
 export type ScheduleSpec =
-	{ kind: 'manual' } | { kind: 'once'; at: number } | { kind: 'recurring'; expression: string; start: number };
+	{ kind: 'manual' } | { kind: 'once'; at: number } | { kind: 'recurring'; expression: string; start: number; timezone?: string };
 export interface SourceRef {
 	kind: 'dashboard' | 'contacts' | 'widget';
 	path: string;
@@ -26,6 +26,10 @@ export interface AgentSessionRef {
 	terminalId?: string;
 }
 export type AutomationAction =
+	| { kind: 'script'; script: string; cwd: string; shell: 'powershell' | 'bash' }
+	| { kind: 'obsidian-command'; command: string }
+	| { kind: 'open-file'; path: string }
+	| { kind: 'open-url'; url: string }
 	| { kind: 'notify'; body: string }
 	| { kind: 'create-task'; path: string; cardId: string; text: string }
 	| {
@@ -98,6 +102,7 @@ export interface AgentRunHandle {
 	}>;
 }
 export interface AgentRuntimePort {
+	startScript?(action: Extract<AutomationAction, { kind: 'script' }>, run: AutomationRun): Promise<AgentRunHandle>;
 	listAgents(): AgentDescription[];
 	listSessions(cwd: string): Promise<AgentSessionRef[]>;
 	start(
@@ -116,6 +121,11 @@ export interface AutomationSourcePort {
 	createTask(action: Extract<AutomationAction, { kind: 'create-task' }>, runId: string): Promise<void>;
 }
 export interface AutomationUiPort {
+	actions?(): Array<{ id: string; name: string; status?: string; running: boolean; unavailable?: string }>;
+	subscribe?(listener: () => void): () => void;
+	runAction?(id: string): Promise<void>;
+	stopAction?(id: string): Promise<void>;
+	openAction?(id: string): Promise<void>;
 	edit(source?: SourceRef, title?: string, existing?: AutomationDefinition): void;
 	open(): Promise<void>;
 }

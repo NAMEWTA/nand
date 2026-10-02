@@ -1,3 +1,4 @@
+import { bindLocalizedElement } from '../../primitives/localized-dom';
 import { Modal, setIcon } from 'obsidian';
 import { t } from '../../../shared/i18n/index';
 import { applyModalTheme } from '../appearance/modal-theme';
@@ -22,7 +23,7 @@ export class WidgetTypeModal extends Modal {
 
 		const container = contentEl.createDiv({ cls: 'dashboard-modal dashboard-modal--compact' });
 		const header = container.createDiv({ cls: 'dashboard-modal-header' });
-		header.createDiv({ cls: 'dashboard-modal-title', text: t('widget.selectType') });
+		bindLocalizedElement(header.createDiv({ cls: 'dashboard-modal-title', text: t('widget.selectType') }), 'widget.selectType');
 
 		const body = container.createDiv({ cls: 'dashboard-modal-body' });
 		const row = body.createDiv({ cls: 'widget-type-row' });
@@ -36,8 +37,8 @@ export class WidgetTypeModal extends Modal {
 			const btn = row.createDiv({ cls: 'widget-type-btn' });
 			const iconEl = btn.createDiv({ cls: 'widget-type-btn-icon' });
 			setIcon(iconEl, wt.icon);
-			btn.createDiv({ cls: 'widget-type-btn-name', text: t(wt.labelKey) });
-			btn.createDiv({ cls: 'widget-type-btn-desc', text: t(wt.descKey) });
+			bindLocalizedElement(btn.createDiv({ cls: 'widget-type-btn-name', text: t(wt.labelKey) }), wt.labelKey);
+			bindLocalizedElement(btn.createDiv({ cls: 'widget-type-btn-desc', text: t(wt.descKey) }), wt.descKey);
 			btn.addEventListener('click', () => {
 				this.onSelect(wt.value);
 				this.close();

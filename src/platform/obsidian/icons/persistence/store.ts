@@ -1,3 +1,5 @@
+import { ensureDirectory } from '../../../../shared/storage/durable-state';
+import { threeWayMerge } from '../../../../shared/storage/three-way-merge';
 import {
 	Notice,
 	normalizePath,
@@ -17,6 +19,7 @@ export class IconicStore {
 	settings = structuredClone(DEFAULT_ICONIC_SETTINGS);
 	readonly path: string;
 	private isSaving = false;
+	private saveRevision = 0;
 	private pending: Promise<void> = Promise.resolve();
 	private reloadPending: Promise<void> = Promise.resolve();
 	private lastText: string | null = null;
@@ -26,14 +29,23 @@ export class IconicStore {
 
 	constructor(
 		private readonly app: App,
-		manifest: Pick<PluginManifest, 'id'>,
+		_manifest: Pick<PluginManifest, 'id'>,
 	) {
-		this.path = normalizePath(`${app.vault.configDir}/plugins/${manifest.id}/iconic.json`);
+		this.path = '.nand/icons/iconic.json';
 	}
 
 	save(): Promise<void> {
+		++this.saveRevision;
 		if (this.isSaving) return this.pending;
-		this.pending = this.persist().finally(() => {
+		this.isSaving = true;
+		this.pending = (async () => {
+			let revision: number;
+			do {
+				await new Promise<void>(resolve => window.setTimeout(resolve, 300));
+				revision = this.saveRevision;
+				await this.persist();
+			} while (revision !== this.saveRevision);
+		})().finally(() => {
 			this.isSaving = false;
 		});
 		return this.pending;
@@ -54,9 +66,20 @@ export class IconicStore {
 		return value;
 	}
 	private async saveData(settings: IconicSettings): Promise<void> {
-		const text = JSON.stringify(settings, null, 2);
+		await ensureDirectory(this.app.vault.adapter, '.nand/icons');
+		const local = structuredClone(settings);
+		const remoteText = await this.app.vault.adapter.exists(this.path) ? await this.app.vault.adapter.read(this.path) : null;
+		let merged = local;
+		if (remoteText !== this.lastText) {
+			if (!remoteText) throw new Error('Icon settings removed externally');
+			const remote: unknown = JSON.parse(remoteText);
+			if (!remote || typeof remote !== 'object' || Array.isArray(remote)) throw new Error('Invalid icon settings');
+			merged = threeWayMerge({ ...DEFAULT_ICONIC_SETTINGS, ...JSON.parse(this.lastText ?? '{}') } as IconicSettings, local, { ...DEFAULT_ICONIC_SETTINGS, ...remote });
+		}
+		const text = JSON.stringify(merged, null, 2);
 		await this.app.vault.adapter.write(this.path, text);
 		this.lastText = text;
+		this.settings = threeWayMerge(local, this.settings, merged);
 	}
 
 	/** The config directory is not reported by vault create/modify events. */
@@ -156,11 +179,14 @@ export class IconicStore {
 		const backupStat = await adapter.stat(backupPath + 1);
 		if (!backupStat) return;
 
-		// Overwrite `iconic.json` with the backup
+		// Validate recovery first; keep the damaged original before replacing it.
+		const backup = await adapter.read(backupPath + 1);
+		const value: unknown = JSON.parse(backup);
+		if (!value || typeof value !== 'object' || Array.isArray(value)) throw new Error('Invalid icon backup');
 		if (await adapter.exists(dataPath)) {
-			await adapter.remove(dataPath);
+			await adapter.write(`${dataPath}.corrupt-${Date.now()}`, await adapter.read(dataPath));
 		}
-		await adapter.copy(backupPath + 1, dataPath);
+		await adapter.write(dataPath, backup);
 
 		// Describe how long ago the backup was made
 		const ago = Date.now() - backupStat.mtime;
@@ -187,8 +213,6 @@ export class IconicStore {
 	 * Save settings to storage.
 	 */
 	private async persist(): Promise<void> {
-		if (this.isSaving) return;
-		this.isSaving = true;
 
 		// Sort item IDs for human-readability
 		this.settings.appIcons = Object.fromEntries(Object.entries(this.settings.appIcons).sort());
@@ -198,13 +222,9 @@ export class IconicStore {
 		this.settings.propertyIcons = Object.fromEntries(Object.entries(this.settings.propertyIcons).sort());
 		this.settings.ribbonIcons = Object.fromEntries(Object.entries(this.settings.ribbonIcons).sort());
 
-		// Pause before writing to storage, in case the current state cause an instant crash
-		await new Promise<void>((resolve) => window.setTimeout(resolve, 300));
-
 		// Save and backup settings
 		await this.saveData(this.settings);
 		await this.saveBackup();
-		this.isSaving = false;
 	}
 
 	/**

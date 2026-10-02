@@ -1,3 +1,4 @@
+import { SaveStatus } from '../../primitives/SaveStatus';
 import { Menu, Notice } from 'obsidian';
 import type { ComponentChildren } from 'preact';
 import { useLayoutEffect, useState } from 'preact/hooks';
@@ -136,6 +137,7 @@ export function ExpenseStatsPanel({
 		empty = t('expense.noRecords');
 	return (
 		<>
+			<SaveStatus source={service} />
 			<div class="dashboard-expense-stats-header">
 				<div class="dashboard-expense-stats-header-titlewrap">
 					<div class="dashboard-expense-stats-header-title">{t('expense.statsTitle')}</div>

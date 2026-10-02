@@ -1,3 +1,4 @@
+import { bindLocalizedControl } from '../../primitives/localized-dom';
 import { ButtonComponent, Hotkey, Modal, Platform, Setting } from 'obsidian';
 import type { Category, Item } from '../../../core/icons/types';
 import type IconicController from '../../../platform/obsidian/icons/host/controller';
@@ -193,11 +194,11 @@ export default class IconPicker extends Modal {
 		const { dialogState } = this.plugin.settings;
 		this.containerEl.addClass('mod-confirmation');
 		this.modalEl.addClass('iconic-icon-picker');
-		this.setTitle(
+		bindLocalizedControl(this.setTitle(
 			this.items.length === 1
 				? STRINGS.iconPicker.changeIcon
 				: STRINGS.iconPicker.changeIcons.replace('{#}', this.items.length.toString()),
-		);
+		), "title", this.items.length === 1 ? ("iconic.iconPicker.changeIcon") : ("iconic.iconPicker.changeIcons"), (this.items.length === 1) ? (undefined) : ({"#": this.items.length.toString()}));
 
 		// CALLOUT: Overrule callout
 		this.overruleCallout = new CalloutComponent(this.contentEl);
@@ -220,85 +221,85 @@ export default class IconPicker extends Modal {
 			if (this.items.length === 1)
 				switch (category) {
 					default:
-						setting.setName(STRINGS.categories.item);
+						bindLocalizedControl(setting.setName(STRINGS.categories.item), "name", "iconic.categories.item");
 						break;
 					case 'app':
-						setting.setName(STRINGS.categories.appItem);
+						bindLocalizedControl(setting.setName(STRINGS.categories.appItem), "name", "iconic.categories.appItem");
 						break;
 					case 'tab':
-						setting.setName(STRINGS.categories.tab);
+						bindLocalizedControl(setting.setName(STRINGS.categories.tab), "name", "iconic.categories.tab");
 						break;
 					case 'file':
-						setting.setName(STRINGS.categories.file);
+						bindLocalizedControl(setting.setName(STRINGS.categories.file), "name", "iconic.categories.file");
 						break;
 					case 'folder':
-						setting.setName(STRINGS.categories.folder);
+						bindLocalizedControl(setting.setName(STRINGS.categories.folder), "name", "iconic.categories.folder");
 						break;
 					case 'group':
-						setting.setName(STRINGS.categories.group);
+						bindLocalizedControl(setting.setName(STRINGS.categories.group), "name", "iconic.categories.group");
 						break;
 					case 'search':
-						setting.setName(STRINGS.categories.search);
+						bindLocalizedControl(setting.setName(STRINGS.categories.search), "name", "iconic.categories.search");
 						break;
 					case 'graph':
-						setting.setName(STRINGS.categories.graph);
+						bindLocalizedControl(setting.setName(STRINGS.categories.graph), "name", "iconic.categories.graph");
 						break;
 					case 'url':
-						setting.setName(STRINGS.categories.url);
+						bindLocalizedControl(setting.setName(STRINGS.categories.url), "name", "iconic.categories.url");
 						break;
 					case 'tag':
-						setting.setName(STRINGS.categories.tag);
+						bindLocalizedControl(setting.setName(STRINGS.categories.tag), "name", "iconic.categories.tag");
 						break;
 					case 'property':
-						setting.setName(STRINGS.categories.property);
+						bindLocalizedControl(setting.setName(STRINGS.categories.property), "name", "iconic.categories.property");
 						break;
 					case 'ribbon':
-						setting.setName(STRINGS.categories.ribbonItem);
+						bindLocalizedControl(setting.setName(STRINGS.categories.ribbonItem), "name", "iconic.categories.ribbonItem");
 						break;
 					case 'rule':
-						setting.setName(STRINGS.categories.rule);
+						bindLocalizedControl(setting.setName(STRINGS.categories.rule), "name", "iconic.categories.rule");
 						break;
 				}
 			else
 				switch (category) {
 					default:
-						setting.setName(STRINGS.categories.items);
+						bindLocalizedControl(setting.setName(STRINGS.categories.items), "name", "iconic.categories.items");
 						break;
 					case 'app':
-						setting.setName(STRINGS.categories.appItems);
+						bindLocalizedControl(setting.setName(STRINGS.categories.appItems), "name", "iconic.categories.appItems");
 						break;
 					case 'tab':
-						setting.setName(STRINGS.categories.tabs);
+						bindLocalizedControl(setting.setName(STRINGS.categories.tabs), "name", "iconic.categories.tabs");
 						break;
 					case 'file':
-						setting.setName(STRINGS.categories.files);
+						bindLocalizedControl(setting.setName(STRINGS.categories.files), "name", "iconic.categories.files");
 						break;
 					case 'folder':
-						setting.setName(STRINGS.categories.folders);
+						bindLocalizedControl(setting.setName(STRINGS.categories.folders), "name", "iconic.categories.folders");
 						break;
 					case 'group':
-						setting.setName(STRINGS.categories.groups);
+						bindLocalizedControl(setting.setName(STRINGS.categories.groups), "name", "iconic.categories.groups");
 						break;
 					case 'search':
-						setting.setName(STRINGS.categories.searches);
+						bindLocalizedControl(setting.setName(STRINGS.categories.searches), "name", "iconic.categories.searches");
 						break;
 					case 'graph':
-						setting.setName(STRINGS.categories.graphs);
+						bindLocalizedControl(setting.setName(STRINGS.categories.graphs), "name", "iconic.categories.graphs");
 						break;
 					case 'url':
-						setting.setName(STRINGS.categories.urls);
+						bindLocalizedControl(setting.setName(STRINGS.categories.urls), "name", "iconic.categories.urls");
 						break;
 					case 'tag':
-						setting.setName(STRINGS.categories.tags);
+						bindLocalizedControl(setting.setName(STRINGS.categories.tags), "name", "iconic.categories.tags");
 						break;
 					case 'property':
-						setting.setName(STRINGS.categories.properties);
+						bindLocalizedControl(setting.setName(STRINGS.categories.properties), "name", "iconic.categories.properties");
 						break;
 					case 'ribbon':
-						setting.setName(STRINGS.categories.ribbonItems);
+						bindLocalizedControl(setting.setName(STRINGS.categories.ribbonItems), "name", "iconic.categories.ribbonItems");
 						break;
 					case 'rule':
-						setting.setName(STRINGS.categories.rules);
+						bindLocalizedControl(setting.setName(STRINGS.categories.rules), "name", "iconic.categories.rules");
 						break;
 				}
 		}
@@ -306,8 +307,8 @@ export default class IconPicker extends Modal {
 		// SETTING: Search
 		this.searchSetting = new Setting(this.contentEl)
 			.addComponent((controlEl) =>
-				new IconColorResetComponent(controlEl)
-					.setTooltip(STRINGS.iconPicker.resetColor, { delay: 300 })
+				bindLocalizedControl(new IconColorResetComponent(controlEl)
+					.setTooltip(STRINGS.iconPicker.resetColor, { delay: 300 }), "tooltip", "iconic.iconPicker.resetColor")
 					.onClick(() => this.colorPicker.setColor(null))
 					.then((component) => {
 						component.toggleVisibility(this.color !== null);
@@ -350,8 +351,8 @@ export default class IconPicker extends Modal {
 					}),
 			)
 			.addComponent((controlEl) =>
-				new IconSearchComponent(controlEl)
-					.setPlaceholder(STRINGS.iconPicker.searchIcons)
+				bindLocalizedControl(new IconSearchComponent(controlEl)
+					.setPlaceholder(STRINGS.iconPicker.searchIcons), "placeholder", "iconic.iconPicker.searchIcons")
 					.onSearch((query, results) => {
 						// If query is blank, just show the current icon
 						if (!query && this.icon) {
@@ -363,7 +364,7 @@ export default class IconPicker extends Modal {
 					})
 					.then((component) => (this.searchField = component)),
 			);
-		if (!Platform.isPhone) this.searchSetting.setName(STRINGS.iconPicker.search);
+		if (!Platform.isPhone) bindLocalizedControl(this.searchSetting.setName(STRINGS.iconPicker.search), "name", "iconic.iconPicker.search");
 
 		// SETTING: Search results
 		this.resultsSetting = new IconSearchResultsSetting(this.contentEl)
@@ -419,20 +420,20 @@ export default class IconPicker extends Modal {
 
 		// BUTTON: Remove
 		if (this.icon || this.color) {
-			const removeEl = new ButtonComponent(removeContainerEl)
+			const removeEl = bindLocalizedControl(new ButtonComponent(removeContainerEl)
 				.setButtonText(
 					this.items.length === 1
 						? STRINGS.menu.removeIcon
 						: STRINGS.menu.removeIcons.replace('{#}', this.items.length.toString()),
-				)
+				), "buttonText", this.items.length === 1 ? ("iconic.menu.removeIcon") : ("iconic.menu.removeIcons"), (this.items.length === 1) ? (undefined) : ({"#": this.items.length.toString()}))
 				.onClick(() => this.closeAndSave(null, null)).buttonEl;
 			removeEl.addClasses(Platform.isPhone ? ['mod-warning'] : ['mod-secondary', 'mod-destructive']);
 		}
 
 		// BUTTON: Toggle icons
-		new ToggleButtonComponent(removeContainerEl)
+		bindLocalizedControl(new ToggleButtonComponent(removeContainerEl)
 			.setValue(dialogState.iconMode)
-			.setTooltip(STRINGS.iconPicker.toggleIcons, { delay: 300, placement: 'top' })
+			.setTooltip(STRINGS.iconPicker.toggleIcons, { delay: 300, placement: 'top' }), "tooltip", "iconic.iconPicker.toggleIcons")
 			.setIcons('lucide-image', 'lucide-square')
 			.setClass('iconic-mode-button')
 			.onChange((on) => {
@@ -442,9 +443,9 @@ export default class IconPicker extends Modal {
 			});
 
 		// BUTTON: Toggle emojis
-		new ToggleButtonComponent(removeContainerEl)
+		bindLocalizedControl(new ToggleButtonComponent(removeContainerEl)
 			.setValue(dialogState.emojiMode)
-			.setTooltip(STRINGS.iconPicker.toggleEmojis, { delay: 300, placement: 'top' })
+			.setTooltip(STRINGS.iconPicker.toggleEmojis, { delay: 300, placement: 'top' }), "tooltip", "iconic.iconPicker.toggleEmojis")
 			.setIcons('lucide-smile', 'lucide-circle')
 			.setClass('iconic-mode-button')
 			.onChange((on) => {
@@ -454,14 +455,14 @@ export default class IconPicker extends Modal {
 			});
 
 		// BUTTON: Cancel
-		new ButtonComponent(saveContainerEl)
-			.setButtonText(STRINGS.iconPicker.cancel)
+		bindLocalizedControl(new ButtonComponent(saveContainerEl)
+			.setButtonText(STRINGS.iconPicker.cancel), "buttonText", "iconic.iconPicker.cancel")
 			.onClick(() => this.close())
 			.buttonEl.addClasses(Platform.isPhone ? ['modal-nav-action', 'mod-secondary'] : ['mod-cancel']);
 
 		// BUTTON: Save
-		const saveEl = new ButtonComponent(saveContainerEl)
-			.setButtonText(STRINGS.iconPicker.save)
+		const saveEl = bindLocalizedControl(new ButtonComponent(saveContainerEl)
+			.setButtonText(STRINGS.iconPicker.save), "buttonText", "iconic.iconPicker.save")
 			.onClick(() => this.closeAndSave(this.icon, this.color)).buttonEl;
 		saveEl.addClasses(Platform.isPhone ? ['modal-nav-action', 'mod-cta'] : ['mod-cta']);
 
@@ -474,24 +475,24 @@ export default class IconPicker extends Modal {
 		const isSingular = this.items.length === 1;
 
 		if (dialogState.iconMode && dialogState.emojiMode) {
-			this.setTitle(
+			bindLocalizedControl(this.setTitle(
 				isSingular
 					? STRINGS.iconPicker.changeMix
 					: STRINGS.iconPicker.changeMixes.replace('{#}', this.items.length.toString()),
-			);
+			), "title", isSingular ? ("iconic.iconPicker.changeMix") : ("iconic.iconPicker.changeMixes"), (isSingular) ? (undefined) : ({"#": this.items.length.toString()}));
 		} else if (dialogState.emojiMode) {
-			this.setTitle(
+			bindLocalizedControl(this.setTitle(
 				isSingular
 					? STRINGS.iconPicker.changeEmoji
 					: STRINGS.iconPicker.changeEmojis.replace('{#}', this.items.length.toString()),
-			);
+			), "title", isSingular ? ("iconic.iconPicker.changeEmoji") : ("iconic.iconPicker.changeEmojis"), (isSingular) ? (undefined) : ({"#": this.items.length.toString()}));
 		} else {
-			this.setTitle(
+			bindLocalizedControl(this.setTitle(
 				isSingular
 					? STRINGS.iconPicker.changeIcon
 					: STRINGS.iconPicker.changeIcons.replace('{#}', this.items.length.toString()),
-			);
-			this.searchField.setPlaceholder(STRINGS.iconPicker.searchIcons);
+			), "title", isSingular ? ("iconic.iconPicker.changeIcon") : ("iconic.iconPicker.changeIcons"), (isSingular) ? (undefined) : ({"#": this.items.length.toString()}));
+			bindLocalizedControl(this.searchField.setPlaceholder(STRINGS.iconPicker.searchIcons), "placeholder", "iconic.iconPicker.searchIcons");
 		}
 	}
 
@@ -527,7 +528,7 @@ export default class IconPicker extends Modal {
 
 		// If multiple items are being edited, display a non-specific message
 		if (this.items.length > 1) {
-			this.overruleCallout.setIcon('lucide-book-image').setColor(null).setTitle(STRINGS.iconPicker.overrules);
+			bindLocalizedControl(this.overruleCallout.setIcon('lucide-book-image').setColor(null).setTitle(STRINGS.iconPicker.overrules), "title", "iconic.iconPicker.overrules");
 			// Else, display a clickable link to the specific rule
 		} else {
 			this.overruleCallout.setIcon(rule.icon).setColor(rule.color);

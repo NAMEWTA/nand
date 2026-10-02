@@ -194,10 +194,10 @@ function HabitStatCard({
 							);
 						})}
 					</div>
-					{series.every((value) => value === 0) && (
-						<div class="dashboard-habit-stats-heatmap-empty">{t('habit.heatEmpty')}</div>
-					)}
 				</div>
+				{series.every((value) => value === 0) && (
+					<div class="dashboard-habit-stats-heatmap-empty">{t('habit.heatEmpty')}</div>
+				)}
 			</div>
 		</div>
 	);

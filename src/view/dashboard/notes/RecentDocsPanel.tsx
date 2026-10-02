@@ -1,5 +1,6 @@
 import { t } from '../../../shared/i18n';
 import type { RecentDoc } from '../ui/recent';
+import { formatRelativeTime } from '../ui/recent-time';
 export function RecentDocsPanel({ docs, open }: { docs: RecentDoc[]; open: (path: string) => void }) {
 	return (
 		<>
@@ -17,7 +18,7 @@ export function RecentDocsPanel({ docs, open }: { docs: RecentDoc[]; open: (path
 							onClick={() => open(doc.path)}
 						>
 							<span class="dashboard-recent-name">{doc.name}</span>
-							<span class="dashboard-recent-time">{doc.relativeTime}</span>
+							<span class="dashboard-recent-time">{doc.timestamp === undefined ? doc.relativeTime : formatRelativeTime(doc.timestamp)}</span>
 						</div>
 					))}
 				</div>

@@ -13,7 +13,7 @@ export function usesDefaultWidgetLabel(config: WidgetLabel, kind: ExampleKind): 
 	if (config.defaultLabel !== undefined) return config.defaultLabel;
 	const exampleId = kind === 'countdown' ? 'cd-default' : 'av-default';
 	const key = `defaults.${kind}Label`;
-	const defaults = [tFor('en', key), tFor('zh', key), ...(kind === 'countdown' ? ['New Year Countdown'] : [])];
+	const defaults = [tFor('en', key), tFor('zh', key), ...(kind === 'countdown' ? ['New Year Countdown', 'Countdown to New Year'] : [])];
 	return config.id === exampleId && defaults.includes(config.label);
 }
 

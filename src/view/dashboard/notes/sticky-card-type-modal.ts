@@ -1,13 +1,14 @@
+import { bindLocalizedElement } from '../../primitives/localized-dom';
 import { Modal, setIcon } from 'obsidian';
 import { t } from '../../../shared/i18n/index';
 import { applyModalTheme } from '../appearance/modal-theme';
 
-/** The two card flavors a sticky-notes ("便利贴") section can hold. */
-export type StickyCardKind = 'memo' | 'todo';
+/** The card flavors a sticky-notes ("便利贴") section can hold. */
+export type StickyCardKind = 'memo' | 'todo' | 'web';
 
 /**
  * Chooses which kind of card to create inside a sticky-notes section: a
- * free-form memo card or a checkable todo card. Rendered as icon+label
+ * memo, checkable todo or web shortcut card. Rendered as icon+label
  * buttons (same widget-type-btn styling as the dashboard widget picker).
  */
 export class StickyCardTypeModal extends Modal {
@@ -28,12 +29,13 @@ export class StickyCardTypeModal extends Modal {
 
 		const container = contentEl.createDiv({ cls: 'dashboard-modal dashboard-modal--compact' });
 		const header = container.createDiv({ cls: 'dashboard-modal-header' });
-		header.createDiv({ cls: 'dashboard-modal-title', text: t('sticky.selectType') });
+		bindLocalizedElement(header.createDiv({ cls: 'dashboard-modal-title', text: t('sticky.selectType') }), 'sticky.selectType');
 
 		const body = container.createDiv({ cls: 'dashboard-modal-body' });
 		const row = body.createDiv({ cls: 'widget-type-row' });
 
 		const kinds: { value: StickyCardKind; icon: string; labelKey: string; descKey: string }[] = [
+			{ value: 'web', icon: 'globe', labelKey: 'browser.shortcut', descKey: 'browser.shortcutDesc' },
 			{ value: 'memo', icon: 'sticky-note', labelKey: 'sticky.memoLabel', descKey: 'sticky.memoDesc' },
 			{ value: 'todo', icon: 'check-square', labelKey: 'sticky.todoLabel', descKey: 'sticky.todoDesc' },
 		];
@@ -43,8 +45,8 @@ export class StickyCardTypeModal extends Modal {
 			btn.setAttribute('role', 'button');
 			const iconEl = btn.createDiv({ cls: 'widget-type-btn-icon' });
 			setIcon(iconEl, kind.icon);
-			btn.createDiv({ cls: 'widget-type-btn-name', text: t(kind.labelKey) });
-			btn.createDiv({ cls: 'widget-type-btn-desc', text: t(kind.descKey) });
+			bindLocalizedElement(btn.createDiv({ cls: 'widget-type-btn-name', text: t(kind.labelKey) }), kind.labelKey);
+			bindLocalizedElement(btn.createDiv({ cls: 'widget-type-btn-desc', text: t(kind.descKey) }), kind.descKey);
 			btn.addEventListener('click', () => {
 				this.onSelect(kind.value);
 				this.close();

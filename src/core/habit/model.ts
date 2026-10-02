@@ -6,7 +6,7 @@ export interface Habit {
 	createdAt: string;
 }
 
-/** v1 data layout, stored at .obsidian/plugins/<manifest.id>/habits.json. */
+/** In-memory domain snapshot; production persistence uses Markdown documents. */
 export interface HabitData {
 	version: 1;
 	habits: Habit[];
@@ -15,8 +15,6 @@ export interface HabitData {
 }
 
 export const DATA_FILE = 'habits.json';
-
-export const MAX_RECORD_DAYS = 730;
 
 /** Shared with the widget so its validation Notice matches the service. */
 export const HABIT_MAX_NAME_LENGTH = 50;
@@ -27,32 +25,6 @@ export const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
 
 export function emptyData(): HabitData {
 	return { version: 1, habits: [], records: {} };
-}
-
-/** Union of two datasets, `session` winning per-habit-id conflicts. Used when
- *  a load that failed at startup succeeds on a later retry: the disk copy and
- *  everything changed in-session are merged so neither side is lost. */
-export function mergeData(disk: HabitData, session: HabitData): HabitData {
-	const byId = new Map(disk.habits.map((h) => [h.id, h] as const));
-	for (const h of session.habits) byId.set(h.id, h);
-	const habits = [...byId.values()];
-	const ids = new Set(habits.map((h) => h.id));
-	const seen = new Map<string, Set<string>>();
-	for (const source of [disk, session]) {
-		for (const [date, idList] of Object.entries(source.records)) {
-			if (!DATE_RE.test(date)) continue;
-			const set = seen.get(date) ?? new Set<string>();
-			seen.set(date, set);
-			for (const id of idList) {
-				if (ids.has(id)) set.add(id);
-			}
-		}
-	}
-	const records: Record<string, string[]> = {};
-	for (const [date, set] of seen) {
-		if (set.size > 0) records[date] = [...set];
-	}
-	return { version: 1, habits, records };
 }
 
 /** Normalize a parsed habits.json: keep only well-formed habits and record

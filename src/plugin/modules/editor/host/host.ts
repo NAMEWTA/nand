@@ -1,7 +1,8 @@
 import { Notice, TFile } from 'obsidian';
 import { t } from '../../../../shared/i18n/index';
-import { CommentStore, registerCommentStore } from '../../../../core/comments/store';
+import { CommentStore, registerCommentStore, unregisterCommentStore } from '../../../../core/comments/store';
 import { vaultCommentFs } from '../../../../platform/obsidian/comments/vault-fs';
+import { beginCommentStoreActivation } from '../../../../platform/obsidian/comments/store-handoff';
 import { createCommentsDomain } from '../../../../view/editor/comments/domain';
 import { registerCopyCommands } from '../../../../view/editor/copy/index';
 import type { EditorDomain } from '../../../../view/editor/domain';
@@ -14,11 +15,9 @@ import { trackActiveMarkdown } from './active-file';
  * side panel does not remove highlights or the selection popover.
  */
 export function createEditorHost(plugin: DashboardPlugin): EditorHost {
-	const store = new CommentStore(vaultCommentFs(plugin.app), {
-		onError: () => {
-			new Notice(t('editor.comments.storageFailed'));
-		},
-	});
+	let store: CommentStore | null = null;
+	let activation: ReturnType<typeof beginCommentStoreActivation> | null = null;
+	let loading: Promise<void> | null = null;
 	const domains: EditorDomain[] = [createCommentsDomain(plugin)];
 	const listeners = new Set<(file: TFile | null) => void>();
 	const layoutListeners = new Set<() => void>();
@@ -33,47 +32,69 @@ export function createEditorHost(plugin: DashboardPlugin): EditorHost {
 	};
 
 	return {
-		onload() {
-			if (loaded) return;
-			loaded = true;
-			registerCommentStore(store);
-			for (const domain of domains) domain.onEnable?.();
-			if (!booted) {
-				booted = true;
-				const extensions = domains.flatMap((domain) => domain.getEditorExtensions?.() ?? []);
-				if (extensions.length > 0) plugin.registerEditorExtension(extensions);
-				for (const domain of domains) {
-					const processor = domain.getReadingPostProcessor?.();
-					if (processor) plugin.registerMarkdownPostProcessor(processor);
-					domain.registerCommands?.(plugin);
+		onload(): Promise<void> {
+			if (loaded) return Promise.resolve();
+			if (loading) return loading;
+			const next = beginCommentStoreActivation(plugin.app);
+			activation = next;
+			const run = (async () => {
+				try {
+					await next.ready();
+				} catch {
+					if (next.isCurrent()) new Notice(t('editor.comments.storageFailed'));
+					return;
 				}
-				registerCopyCommands(plugin);
-				active = trackActiveMarkdown(plugin, notify);
-				plugin.registerEvent(
-					plugin.app.vault.on('rename', (file, oldPath) => {
-						if (!(file instanceof TFile) || file.extension !== 'md') return;
-						void store.renamePath(oldPath, file.path);
-						if (active?.path === oldPath) notify(file);
-					}),
-				);
-				plugin.registerEvent(
-					plugin.app.vault.on('delete', (file) => {
-						if (!(file instanceof TFile) || file.extension !== 'md') return;
-						void store.deletePath(file.path);
-						if (active?.path === file.path) notify(null);
-					}),
-				);
-			} else {
-				active = plugin.app.workspace.getActiveFile();
-				if (active && active.extension !== 'md') active = null;
-				notify(active);
-			}
+				if (!next.isCurrent()) return;
+				store = new CommentStore(vaultCommentFs(plugin.app), {
+					onError: () => { new Notice(t('editor.comments.storageFailed')); },
+				});
+				loaded = true;
+				registerCommentStore(store);
+				for (const domain of domains) domain.onEnable?.();
+				if (!booted) {
+					booted = true;
+					const extensions = domains.flatMap((domain) => domain.getEditorExtensions?.() ?? []);
+					if (extensions.length > 0) plugin.registerEditorExtension(extensions);
+					for (const domain of domains) {
+						const processor = domain.getReadingPostProcessor?.();
+						if (processor) plugin.registerMarkdownPostProcessor(processor);
+						domain.registerCommands?.(plugin);
+					}
+					registerCopyCommands(plugin);
+					active = trackActiveMarkdown(plugin, notify);
+					plugin.registerEvent(
+						plugin.app.vault.on('rename', (file, oldPath) => {
+							if (!(file instanceof TFile) || file.extension !== 'md') return;
+							void store?.renamePath(oldPath, file.path);
+							if (active?.path === oldPath) notify(file);
+						}),
+					);
+					plugin.registerEvent(
+						plugin.app.vault.on('delete', (file) => {
+							if (!(file instanceof TFile) || file.extension !== 'md') return;
+							void store?.deletePath(file.path);
+							if (active?.path === file.path) notify(null);
+						}),
+					);
+				} else {
+					active = plugin.app.workspace.getActiveFile();
+					if (active && active.extension !== 'md') active = null;
+					notify(active);
+				}
+			})();
+			loading = run;
+			void run.then(() => { if (loading === run) loading = null; }, () => { if (loading === run) loading = null; });
+			return run;
 		},
 		onunload() {
+			activation?.cancel();
+			loading = null;
 			for (const domain of domains) domain.onDisable?.();
-			void store.flush();
-			store.dispose();
-			registerCommentStore(null);
+			if (store) {
+				unregisterCommentStore(store);
+				activation?.retire(store);
+				store = null;
+			}
 			listeners.clear();
 			layoutListeners.clear();
 			loaded = false;
@@ -85,7 +106,7 @@ export function createEditorHost(plugin: DashboardPlugin): EditorHost {
 			notify(file);
 		},
 		notifySettingsChanged() {
-			store.notify();
+			store?.notify();
 			for (const domain of domains) domain.onSettingsChanged?.();
 		},
 		notifyLayoutChanged() {

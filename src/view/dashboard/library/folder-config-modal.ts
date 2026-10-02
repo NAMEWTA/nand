@@ -1,3 +1,4 @@
+import { bindLocalizedElement } from '../../primitives/localized-dom';
 import { App, Modal } from 'obsidian';
 import type { LibraryConfig } from '../../../core/dashboard/types/index';
 import { t } from '../../../shared/i18n/index';
@@ -125,25 +126,25 @@ export class FolderConfigModal extends Modal {
 
 		// Header
 		const header = container.createDiv({ cls: 'dashboard-modal-header' });
-		header.createDiv({ cls: 'dashboard-modal-title', text: t('folder.configure') });
+		bindLocalizedElement(header.createDiv({ cls: 'dashboard-modal-title', text: t('folder.configure') }), 'folder.configure');
 
 		// Body
 		const body = container.createDiv({ cls: 'dashboard-modal-body' });
 
 		// Folder paths
 		const pathSection = body.createDiv({ cls: 'dashboard-library-config-section' });
-		pathSection.createDiv({ cls: 'dashboard-library-config-section-title', text: t('folder.path') });
+		bindLocalizedElement(pathSection.createDiv({ cls: 'dashboard-library-config-section-title', text: t('folder.path') }), 'folder.path');
 
 		const chipsHost = pathSection.createDiv({ cls: 'dashboard-alltasks-exclude-chips' });
 		const addRow = pathSection.createDiv({ cls: 'dashboard-media-folder-input-row' });
-		const pathInput = addRow.createEl('input', {
+		const pathInput = bindLocalizedElement(addRow.createEl('input', {
 			cls: 'dashboard-media-filter-folder',
 			attr: { type: 'text', placeholder: t('folder.pathPlaceholder') },
-		});
-		const browseBtn = addRow.createEl('button', {
+		}), 'folder.pathPlaceholder', undefined, "placeholder");
+		const browseBtn = bindLocalizedElement(addRow.createEl('button', {
 			cls: 'dashboard-media-folder-browse',
 			text: t('folder.browse'),
-		});
+		}), 'folder.browse');
 		browseBtn.addEventListener('click', () => {
 			// Multi-select: pick every source folder at once. Sources are OR unions,
 			// so parents/children stay independently tickable.
@@ -152,15 +153,15 @@ export class FolderConfigModal extends Modal {
 				renderFolderChips();
 			}).open();
 		});
-		const addBtn = addRow.createEl('button', {
+		const addBtn = bindLocalizedElement(addRow.createEl('button', {
 			cls: 'dashboard-modal-btn dashboard-modal-btn--confirm',
 			text: t('common.add'),
-		});
+		}), 'common.add');
 
 		const renderFolderChips = (): void => {
 			chipsHost.empty();
 			if (this.folders.length === 0) {
-				chipsHost.createDiv({ cls: 'dashboard-library-filter-empty', text: t('folder.noFolders') });
+				bindLocalizedElement(chipsHost.createDiv({ cls: 'dashboard-library-filter-empty', text: t('folder.noFolders') }), 'folder.noFolders');
 				return;
 			}
 			for (const folder of this.folders) {
@@ -193,21 +194,21 @@ export class FolderConfigModal extends Modal {
 		// Excluded folders: files inside them are hidden even when they live
 		// under a scanned source folder above.
 		const excludeSection = body.createDiv({ cls: 'dashboard-library-config-section' });
-		excludeSection.createDiv({ cls: 'dashboard-library-config-section-title', text: t('exclude.folders') });
-		excludeSection.createDiv({ cls: 'dashboard-library-config-hint', text: t('exclude.foldersHint') });
+		bindLocalizedElement(excludeSection.createDiv({ cls: 'dashboard-library-config-section-title', text: t('exclude.folders') }), 'exclude.folders');
+		bindLocalizedElement(excludeSection.createDiv({ cls: 'dashboard-library-config-hint', text: t('exclude.foldersHint') }), 'exclude.foldersHint');
 		const excludeEditor = new ExcludeFoldersEditor(this.app, excludeSection, this.initialExcludeFolders);
 
 		// Tags filter, with a search box to narrow the chip list when the vault
 		// has too many tags to scan by eye.
 		const tagsSection = body.createDiv({ cls: 'dashboard-library-config-section' });
-		tagsSection.createDiv({ cls: 'dashboard-library-config-section-title', text: t('library.tagsFilter') });
+		bindLocalizedElement(tagsSection.createDiv({ cls: 'dashboard-library-config-section-title', text: t('library.tagsFilter') }), 'library.tagsFilter');
 		const tagSearchRow = tagsSection.createDiv({
 			cls: 'dashboard-media-folder-input-row dashboard-library-tag-search-row',
 		});
-		const tagSearchInput = tagSearchRow.createEl('input', {
+		const tagSearchInput = bindLocalizedElement(tagSearchRow.createEl('input', {
 			cls: 'dashboard-media-filter-folder dashboard-library-tag-search',
 			attr: { type: 'text', placeholder: t('library.searchTags') },
-		});
+		}), 'library.searchTags', undefined, "placeholder");
 		const tagsContainer = tagsSection.createDiv({ cls: 'dashboard-library-filter-values' });
 		const allTags = getAllTags(this.app);
 		const renderTags = (): void => {
@@ -217,7 +218,7 @@ export class FolderConfigModal extends Modal {
 			// a search that filters everything out needs a distinct message.
 			if (visible.length === 0 && allTags.length > 0) {
 				tagsContainer.empty();
-				tagsContainer.createDiv({ cls: 'dashboard-library-filter-empty', text: t('library.noMatchingTags') });
+				bindLocalizedElement(tagsContainer.createDiv({ cls: 'dashboard-library-filter-empty', text: t('library.noMatchingTags') }), 'library.noMatchingTags');
 				return;
 			}
 			renderTagsSelector(tagsContainer, visible, this.selectedTags, (tag) => {
@@ -233,25 +234,25 @@ export class FolderConfigModal extends Modal {
 		// Kanban group-by: property vs subfolder mode. The property picker only
 		// applies in property mode, so it hides when subfolder grouping is on.
 		const groupSection = body.createDiv({ cls: 'dashboard-library-config-section' });
-		groupSection.createDiv({ cls: 'dashboard-library-config-section-title', text: t('library.kanbanGroupBy') });
+		bindLocalizedElement(groupSection.createDiv({ cls: 'dashboard-library-config-section-title', text: t('library.kanbanGroupBy') }), 'library.kanbanGroupBy');
 		const modeToggle = groupSection.createDiv({
 			cls: 'dashboard-library-view-toggle dashboard-library-config-view-toggle',
 		});
-		const propertyBtn = modeToggle.createDiv({
+		const propertyBtn = bindLocalizedElement(modeToggle.createDiv({
 			cls: 'dashboard-library-view-btn' + (this.groupMode === 'property' ? ' active' : ''),
 			attr: { 'aria-label': t('library.groupByProperty') },
-		});
-		propertyBtn.createSpan({ text: t('library.groupByProperty') });
-		const folderBtn = modeToggle.createDiv({
+		}), 'library.groupByProperty', undefined, "aria-label");
+		bindLocalizedElement(propertyBtn.createSpan({ text: t('library.groupByProperty') }), 'library.groupByProperty');
+		const folderBtn = bindLocalizedElement(modeToggle.createDiv({
 			cls: 'dashboard-library-view-btn' + (this.groupMode === 'folder' ? ' active' : ''),
 			attr: { 'aria-label': t('library.groupByFolder') },
-		});
-		folderBtn.createSpan({ text: t('library.groupByFolder') });
+		}), 'library.groupByFolder', undefined, "aria-label");
+		bindLocalizedElement(folderBtn.createSpan({ text: t('library.groupByFolder') }), 'library.groupByFolder');
 
 		const propertyControls = groupSection.createDiv({ cls: 'dashboard-library-config-groupby-controls' });
-		propertyControls.createDiv({ cls: 'dashboard-library-config-hint', text: t('library.kanbanGroupByHint') });
+		bindLocalizedElement(propertyControls.createDiv({ cls: 'dashboard-library-config-hint', text: t('library.kanbanGroupByHint') }), 'library.kanbanGroupByHint');
 		const groupSelect = propertyControls.createEl('select', { cls: 'dashboard-library-filter-property' });
-		groupSelect.createEl('option', { text: t('library.noGroup'), attr: { value: '' } });
+		bindLocalizedElement(groupSelect.createEl('option', { text: t('library.noGroup'), attr: { value: '' } }), 'library.noGroup');
 		const propKeys = [...extractFrontmatterProperties(this.app).keys()].sort();
 		for (const key of propKeys) {
 			const opt = groupSelect.createEl('option', { text: key, attr: { value: key } });
@@ -261,10 +262,10 @@ export class FolderConfigModal extends Modal {
 			this.groupBy = groupSelect.value;
 		});
 
-		const folderHint = groupSection.createDiv({
+		const folderHint = bindLocalizedElement(groupSection.createDiv({
 			cls: 'dashboard-library-config-hint',
 			text: t('library.groupByFolderHint'),
-		});
+		}), 'library.groupByFolderHint');
 		const applyMode = (): void => {
 			propertyBtn.toggleClass('active', this.groupMode === 'property');
 			folderBtn.toggleClass('active', this.groupMode === 'folder');
@@ -291,11 +292,11 @@ export class FolderConfigModal extends Modal {
 		coversBox.addEventListener('change', () => {
 			this.kanbanShowCovers = coversBox.checked;
 		});
-		coversRow.createDiv({ cls: 'dashboard-library-config-inline-label', text: t('library.kanbanShowCovers') });
+		bindLocalizedElement(coversRow.createDiv({ cls: 'dashboard-library-config-inline-label', text: t('library.kanbanShowCovers') }), 'library.kanbanShowCovers');
 
 		// Card properties (grid view)
 		const propsSection = body.createDiv({ cls: 'dashboard-library-config-section' });
-		propsSection.createDiv({ cls: 'dashboard-library-config-section-title', text: t('library.cardProperties') });
+		bindLocalizedElement(propsSection.createDiv({ cls: 'dashboard-library-config-section-title', text: t('library.cardProperties') }), 'library.cardProperties');
 
 		const propsRow = propsSection.createDiv({ cls: 'dashboard-library-config-inline-row' });
 		const showPropsBox = propsRow.createEl('input', {
@@ -306,10 +307,10 @@ export class FolderConfigModal extends Modal {
 		showPropsBox.addEventListener('change', () => {
 			this.showProperties = showPropsBox.checked;
 		});
-		propsRow.createDiv({ cls: 'dashboard-library-config-inline-label', text: t('library.showProperties') });
+		bindLocalizedElement(propsRow.createDiv({ cls: 'dashboard-library-config-inline-label', text: t('library.showProperties') }), 'library.showProperties');
 
 		const limitRow = propsSection.createDiv({ cls: 'dashboard-library-config-inline-row' });
-		limitRow.createDiv({ cls: 'dashboard-library-config-inline-label', text: t('library.propertyLimit') });
+		bindLocalizedElement(limitRow.createDiv({ cls: 'dashboard-library-config-inline-label', text: t('library.propertyLimit') }), 'library.propertyLimit');
 		const limitInput = limitRow.createEl('input', {
 			cls: 'dashboard-library-config-number',
 			attr: { type: 'number', min: '0', max: '20', step: '1' },
@@ -328,19 +329,19 @@ export class FolderConfigModal extends Modal {
 		// New-note template: body of this note seeds notes created by the
 		// toolbar "+" (frontmatter merged from the section's filter props).
 		const tplSection = body.createDiv({ cls: 'dashboard-library-config-section' });
-		tplSection.createDiv({ cls: 'dashboard-library-config-section-title', text: t('library.newNoteTemplate') });
-		tplSection.createDiv({ cls: 'dashboard-library-config-hint', text: t('library.newNoteTemplateHint') });
+		bindLocalizedElement(tplSection.createDiv({ cls: 'dashboard-library-config-section-title', text: t('library.newNoteTemplate') }), 'library.newNoteTemplate');
+		bindLocalizedElement(tplSection.createDiv({ cls: 'dashboard-library-config-hint', text: t('library.newNoteTemplateHint') }), 'library.newNoteTemplateHint');
 		const tplRow = tplSection.createDiv({ cls: 'dashboard-media-folder-input-row' });
 		const tplInput = tplRow.createEl('input', {
 			cls: 'dashboard-media-filter-folder',
 			attr: { type: 'text', placeholder: 'Templates/note.md' },
 		});
 		tplInput.value = this.templatePath;
-		tplRow
+		bindLocalizedElement(tplRow
 			.createEl('button', {
 				cls: 'dashboard-media-folder-browse',
 				text: t('folder.browse'),
-			})
+			}), 'folder.browse')
 			.addEventListener('click', () => {
 				new PathPickerModal(this.app, 'file', (path) => {
 					tplInput.value = path;
@@ -351,18 +352,18 @@ export class FolderConfigModal extends Modal {
 			this.templatePath = tplInput.value.trim();
 		});
 
-		footer
+		bindLocalizedElement(footer
 			.createEl('button', {
 				cls: 'dashboard-modal-btn dashboard-modal-btn--cancel',
 				text: t('common.cancel'),
-			})
+			}), 'common.cancel')
 			.addEventListener('click', () => this.close());
 
-		footer
+		bindLocalizedElement(footer
 			.createEl('button', {
 				cls: 'dashboard-modal-btn dashboard-modal-btn--confirm',
 				text: t('common.save'),
-			})
+			}), 'common.save')
 			.addEventListener('click', () => {
 				const picked = pinnedEditor.value;
 				this.onSave({

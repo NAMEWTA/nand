@@ -1,3 +1,4 @@
+import { bindLocalizedElement } from '../../primitives/localized-dom';
 import { Modal } from 'obsidian';
 import { t } from '../../../shared/i18n/index';
 import { applyModalTheme } from '../appearance/modal-theme';
@@ -41,26 +42,26 @@ export class NotesSectionConfigModal extends Modal {
 
 		const container = contentEl.createDiv({ cls: 'dashboard-modal dashboard-modal--compact' });
 		const header = container.createDiv({ cls: 'dashboard-modal-header' });
-		header.createDiv({ cls: 'dashboard-modal-title', text: t('notesCfg.title') });
+		bindLocalizedElement(header.createDiv({ cls: 'dashboard-modal-title', text: t('notesCfg.title') }), 'notesCfg.title');
 
 		const body = container.createDiv({ cls: 'dashboard-modal-body' });
 
 		// New-note template (vault file; body + non-conflicting frontmatter seed
 		// the created note).
 		const tplSection = body.createDiv({ cls: 'dashboard-library-config-section' });
-		tplSection.createDiv({ cls: 'dashboard-library-config-section-title', text: t('library.newNoteTemplate') });
-		tplSection.createDiv({ cls: 'dashboard-library-config-hint', text: t('notesCfg.templateHint') });
+		bindLocalizedElement(tplSection.createDiv({ cls: 'dashboard-library-config-section-title', text: t('library.newNoteTemplate') }), 'library.newNoteTemplate');
+		bindLocalizedElement(tplSection.createDiv({ cls: 'dashboard-library-config-hint', text: t('notesCfg.templateHint') }), 'notesCfg.templateHint');
 		const tplRow = tplSection.createDiv({ cls: 'dashboard-media-folder-input-row' });
 		const tplInput = tplRow.createEl('input', {
 			cls: 'dashboard-media-filter-folder',
 			attr: { type: 'text', placeholder: 'Templates/note.md' },
 		});
 		tplInput.value = this.cfg.templatePath;
-		tplRow
+		bindLocalizedElement(tplRow
 			.createEl('button', {
 				cls: 'dashboard-media-folder-browse',
 				text: t('folder.browse'),
-			})
+			}), 'folder.browse')
 			.addEventListener('click', () => {
 				new PathPickerModal(this.app, 'file', (path) => {
 					this.cfg.templatePath = path;
@@ -73,19 +74,19 @@ export class NotesSectionConfigModal extends Modal {
 
 		// Save folder (created when missing; vault root when unset).
 		const folderSection = body.createDiv({ cls: 'dashboard-library-config-section' });
-		folderSection.createDiv({ cls: 'dashboard-library-config-section-title', text: t('notesCfg.folder') });
-		folderSection.createDiv({ cls: 'dashboard-library-config-hint', text: t('notesCfg.folderHint') });
+		bindLocalizedElement(folderSection.createDiv({ cls: 'dashboard-library-config-section-title', text: t('notesCfg.folder') }), 'notesCfg.folder');
+		bindLocalizedElement(folderSection.createDiv({ cls: 'dashboard-library-config-hint', text: t('notesCfg.folderHint') }), 'notesCfg.folderHint');
 		const folderRow = folderSection.createDiv({ cls: 'dashboard-media-folder-input-row' });
-		const folderInput = folderRow.createEl('input', {
+		const folderInput = bindLocalizedElement(folderRow.createEl('input', {
 			cls: 'dashboard-media-filter-folder',
 			attr: { type: 'text', placeholder: t('notesCfg.folderPlaceholder') },
-		});
+		}), 'notesCfg.folderPlaceholder', undefined, "placeholder");
 		folderInput.value = this.cfg.folder;
-		folderRow
+		bindLocalizedElement(folderRow
 			.createEl('button', {
 				cls: 'dashboard-media-folder-browse',
 				text: t('folder.browse'),
-			})
+			}), 'folder.browse')
 			.addEventListener('click', () => {
 				new PathPickerModal(this.app, 'folder', (path) => {
 					this.cfg.folder = path;
@@ -97,17 +98,17 @@ export class NotesSectionConfigModal extends Modal {
 		});
 
 		const footer = container.createDiv({ cls: 'dashboard-modal-footer' });
-		footer
+		bindLocalizedElement(footer
 			.createEl('button', {
 				cls: 'dashboard-modal-btn dashboard-modal-btn--cancel',
 				text: t('common.cancel'),
-			})
+			}), 'common.cancel')
 			.addEventListener('click', () => this.close());
-		footer
+		bindLocalizedElement(footer
 			.createEl('button', {
 				cls: 'dashboard-modal-btn dashboard-modal-btn--confirm',
 				text: t('common.save'),
-			})
+			}), 'common.save')
 			.addEventListener('click', () => {
 				// Inputs are authoritative (the browse picker writes into them too).
 				this.onSave({

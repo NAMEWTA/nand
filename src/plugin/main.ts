@@ -1,3 +1,6 @@
+import { deviceId } from '../platform/obsidian/storage/device-id';
+import { JsonStore } from '../shared/json-store';
+import { TerminalAgentController, TERMINAL_VIEW_TYPE } from './modules/terminal';
 import { Notice, Platform, Plugin, TAbstractFile, TFile, type Command } from 'obsidian';
 import { type AlbumConfig, type AnniversaryConfig, type CountdownConfig } from '../core/dashboard/types/index';
 import {
@@ -10,10 +13,10 @@ import type { AutomationUiPort } from '../shared/automation/types';
 import { normalizeContactsSettings } from '../shared/contacts-settings';
 import { normalizeEditorWorkbench } from '../shared/editor-workbench';
 import { getLanguage, onLanguageChanged, setLanguage, t, tFor } from '../shared/i18n/index';
+import { refreshLocalizedDom } from '../view/primitives/localized-dom';
 import { closeDashboardPanelModals } from '../view/dashboard/ui/panel-modal';
 import { AUTOMATION_VIEW_TYPE } from '../view/automations/view';
 import { DASHBOARD_VIEW_TYPE } from '../view/dashboard/view/view-type';
-import { normalizeTransition } from '../view/dashboard/widgets/album-model';
 import { type EditorHost } from '../view/editor/host';
 import { InactiveTerminalView } from './inactive-terminal-view';
 import { IntroModal } from './intro-modal';
@@ -23,11 +26,11 @@ import { DashboardView, showModuleDisabled } from './modules/dashboard/index';
 import { EDITOR_VIEW_TYPE, EditorView, collectReferences, createEditorHost } from './modules/editor/index';
 import { createIconicDialogs } from './modules/icons/dialogs';
 import { IconicController } from './modules/icons/index';
-import { TERMINAL_VIEW_TYPE, TerminalAgentController, readLegacyTerminalSettings } from './modules/terminal/index';
 import { stableRibbon } from './ribbon';
 import { DashboardSettingTab } from './settings/index';
 import type { NandSettings } from './settings/model';
 import { DEFAULT_SETTINGS } from './settings/model';
+import { languageUpdater, normalizeLanguage, settingsWriter } from './settings/language';
 import { terminalLeafKind } from './terminal-leaf-kind';
 import { createAutomationHost } from './workflows/automation-host';
 
@@ -45,6 +48,11 @@ import { MediaTagService, registerMediaTagService, sanitizeMediaTags } from '../
 import { MusicService, registerMusicService } from '../platform/obsidian/music/music-service';
 import { teardownBasenameIndex } from '../view/dashboard/renderer/render-context';
 import { registerShellCommands } from './commands';
+import { BROWSER_VIEW_TYPE, normalizeBrowserSettings, type BrowserOpenRequest } from '../core/browser/model';
+import { BrowserModule } from './modules/browser';
+import { BrowserView } from '../view/browser/browser-view';
+import { browserError } from '../view/browser/BrowserPanel';
+import { createBrowserAgentDelivery } from './workflows/browser-agent';
 
 /** All valid style preset keys — single source of truth for migration. */
 const VALID_STYLE_PRESETS = [
@@ -63,34 +71,6 @@ const VALID_STYLE_PRESETS = [
 	'onyx',
 ] as const;
 
-/** Removed or renamed presets mapped to a sensible replacement. */
-const DEPRECATED_STYLE_PRESETS: Readonly<Record<string, string>> = {
-	// Removed in favor of similar themes:
-	prism: 'blossom', // rose glass -> Blossom (rose glass)
-	dusk: 'lilac', // purple twilight -> Lilac (Morandi purple)
-	sakura: 'blossom', // cherry blossom pink -> Blossom
-	moonlight: 'nordic', // silver blue -> Nordic (blue minimal)
-	ember: 'magma', // warm smoke -> Magma (dark + warm orange)
-	haze: 'volt', // dark cyan glow -> Volt (dark + electric cyan)
-	jade: 'matcha', // green bamboo -> Matcha (Morandi green)
-	carbon: 'mono', // industrial monochrome -> Mono (b/w minimal)
-};
-
-/**
- * Normalize a saved style preset: map removed/renamed presets to a valid
- * replacement, and fall back to the default if the value is unknown.
- */
-function migrateStylePreset(preset: string): string {
-	if ((VALID_STYLE_PRESETS as readonly string[]).includes(preset)) {
-		return preset;
-	}
-	return DEPRECATED_STYLE_PRESETS[preset] ?? DEFAULT_SETTINGS.stylePreset;
-}
-
-/**
- * Migrate the legacy single-countdown fields (countdownTargetDate etc.) into
- * the new countdowns[] list. Existing list entries are preserved as-is.
- */
 /** One year before today as YYYY-MM-DD (dynamic so a default anniversary
  *  entry always reads sensibly, never a hardcoded stale year). */
 function oneYearAgoIso(): string {
@@ -100,52 +80,15 @@ function oneYearAgoIso(): string {
 	return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
 }
 
-function migrateCountdowns(raw: Record<string, unknown>): CountdownConfig[] {
-	if (Array.isArray(raw.countdowns)) {
-		return (raw.countdowns as CountdownConfig[]).filter((c) => c && typeof c.id === 'string');
-	}
-	const targetDate = typeof raw.countdownTargetDate === 'string' ? raw.countdownTargetDate : '';
-	if (!targetDate) return [];
-	return [
-		{
-			id: 'migrated',
-			label: typeof raw.countdownLabel === 'string' ? raw.countdownLabel : '',
-			targetDate,
-			displayMode:
-				raw.countdownDisplayMode === 'hours' || raw.countdownDisplayMode === 'minutes'
-					? raw.countdownDisplayMode
-					: 'days',
-			reminderDays: typeof raw.countdownReminderDays === 'number' ? raw.countdownReminderDays : 0,
-		},
-	];
+function normalizeCountdowns(raw: Record<string, unknown>): CountdownConfig[] {
+ return Array.isArray(raw.countdowns) ? (raw.countdowns as CountdownConfig[]).filter(c => c && typeof c.id === 'string') : [];
 }
-
-/** Migrate the legacy single-album flat fields (widgetAlbum*) to the albums[]
- *  list. An existing albums[] wins untouched; the legacy fields stay in
- *  data.json so a downgrade keeps the old single widget working. */
-function migrateAlbums(raw: Record<string, unknown>): AlbumConfig[] {
-	if (Array.isArray(raw.albums)) {
-		return (raw.albums as AlbumConfig[]).filter((a) => a && typeof a.id === 'number');
-	}
-	if (!raw.widgetAlbumEnabled) return [];
-	return [
-		{
-			id: Date.now(),
-			folder: typeof raw.widgetAlbumFolder === 'string' ? raw.widgetAlbumFolder : '',
-			intervalSec:
-				typeof raw.widgetAlbumIntervalSec === 'number' && raw.widgetAlbumIntervalSec > 0
-					? raw.widgetAlbumIntervalSec
-					: 8,
-			recursive: raw.widgetAlbumRecursive !== false,
-			ratio: raw.widgetAlbumRatio === '3:4' ? '3:4' : '1:1',
-			transition: normalizeTransition(raw.widgetAlbumTransition as string | undefined),
-			heightRatio: 'full',
-		},
-	];
+function normalizeAlbums(raw: Record<string, unknown>): AlbumConfig[] {
+ return Array.isArray(raw.albums) ? (raw.albums as AlbumConfig[]).filter(a => a && typeof a.id === 'number') : [];
 }
 
 /** Sanitize the anniversaries[] list (id must be a string); missing key = []. */
-function migrateAnniversaries(raw: Record<string, unknown>): AnniversaryConfig[] {
+function normalizeAnniversaries(raw: Record<string, unknown>): AnniversaryConfig[] {
 	if (!Array.isArray(raw.anniversaries)) return [];
 	return (raw.anniversaries as AnniversaryConfig[]).filter(
 		(a) => a && typeof a.id === 'string' && typeof a.startDate === 'string',
@@ -161,6 +104,7 @@ export default class DashboardPlugin extends Plugin {
 	}
 	automationHost?: AutomationUiPort & { dispose(): void; inbox(): void; setExecutionEnabled(enabled: boolean): Promise<void> };
 	settings!: NandSettings;
+	browserHost!: BrowserModule;
 	contactsHost?: ContactsController;
 	mediaTagService!: MediaTagService;
 	habitService!: HabitService;
@@ -177,8 +121,23 @@ export default class DashboardPlugin extends Plugin {
 
 	async onload(): Promise<void> {
 		await this.loadSettings();
+		this.browserHost = new BrowserModule(
+			this.app,
+			() => this.settings.browser,
+			createBrowserAgentDelivery(() => this.terminalHost),
+		);
+		this.registerView(BROWSER_VIEW_TYPE, (leaf) => new BrowserView(leaf, this.browserHost));
 		// loadSettings already called setLanguage, before any leaf exists.
-		this.register(onLanguageChanged(() => this.rewriteDeferredLeafTitles()));
+		this.register(onLanguageChanged(() => {
+			this.rewriteDeferredLeafTitles();
+			const documents = new Set<Document>([document]);
+			this.app.workspace.iterateAllLeaves((leaf) => { documents.add(leaf.view.containerEl.ownerDocument); });
+			if (this.settingsTab?.containerEl) documents.add(this.settingsTab.containerEl.ownerDocument);
+			for (const owner of documents) refreshLocalizedDom(owner.body);
+		}));
+		// registerView can restore existing leaves after onLayoutReady has run,
+		// particularly hosts initialized asynchronously during plugin reload.
+		this.registerEvent(this.app.workspace.on('layout-change', () => this.rewriteDeferredLeafTitles()));
 		this.registerView(CONTACTS_VIEW_TYPE, (leaf) => new ContactsView(leaf, this));
 
 		this.registerView(DASHBOARD_VIEW_TYPE, (leaf) => new DashboardView(leaf, this));
@@ -197,6 +156,9 @@ export default class DashboardPlugin extends Plugin {
 		}
 
 		this.addRibbonIcon('home', t('main.openHome'), () => this.openHome());
+		this.addRibbonIcon('globe', t('browser.open'), () => {
+			void this.openBrowser({});
+		});
 		this.addRibbonIcon('pen-line', t('editor.openPanel'), () => {
 			void this.openEditorView();
 		});
@@ -334,11 +296,14 @@ export default class DashboardPlugin extends Plugin {
 			[EDITOR_VIEW_TYPE]: [pair('editor.viewTitle')],
 			[CONTACTS_VIEW_TYPE]: [pair('contacts.title')],
 			[TERMINAL_VIEW_TYPE]: [pair('terminalAgent.terminal.defaultTitle'), pair('modules.terminalOffTitle')],
+			[BROWSER_VIEW_TYPE]: [pair('browser.title')],
 		};
 		for (const [type, pairs] of Object.entries(byType)) {
+			const title = type === TERMINAL_VIEW_TYPE && !this.terminalHost?.isActive()
+				? t('modules.terminalOffTitle') : pairs[0]![language];
 			retitleDeferredLeaves(this.app.workspace.getLeavesOfType(type), pairs, language, (leaf) => {
 				refreshLeafTitle(this.app, leaf);
-			});
+			}, { type, title });
 		}
 	}
 
@@ -375,6 +340,7 @@ export default class DashboardPlugin extends Plugin {
 
 	applyModuleFlags(): Promise<void> {
 		return this.moduleLifecycle.apply(() => this.settings.modules, Platform.isDesktopApp, {
+			browser: (enabled) => this.browserHost?.setEnabled(enabled),
 			automation: async (enabled) => { await this.automationHost?.setExecutionEnabled(enabled); },
 			dashboard: (enabled) => (enabled ? this.ensureDashboardServices() : this.stopDashboardServices()),
 			editor: (enabled) => (enabled ? this.ensureEditor() : this.stopEditor()),
@@ -473,9 +439,9 @@ export default class DashboardPlugin extends Plugin {
 		}
 	}
 
-	private ensureEditor(): void {
+	private async ensureEditor(): Promise<void> {
 		if (!this.editorHost) this.editorHost = createEditorHost(this);
-		this.editorHost.onload();
+		await this.editorHost.onload();
 		this.refreshEditorLeaves();
 	}
 
@@ -495,6 +461,7 @@ export default class DashboardPlugin extends Plugin {
 		if (!Platform.isDesktopApp || this.terminalHost?.isActive()) return;
 		if (!this.terminalHost) {
 			this.terminalHost = new TerminalAgentController(this, {
+				getBrowserEnvironment: () => this.browserHost.environment(),
 				openAutomations: async () => {
 					await this.automationHost?.open();
 				},
@@ -534,6 +501,7 @@ export default class DashboardPlugin extends Plugin {
 	}
 
 	onunload(): void {
+		this.browserHost?.dispose();
 		closeDashboardPanelModals(this.app);
 		this.automationHost?.dispose();
 		for (const leaf of this.app.workspace.getLeavesOfType(CONTACTS_VIEW_TYPE))
@@ -554,6 +522,14 @@ export default class DashboardPlugin extends Plugin {
 		this.expenseService.destroy();
 		registerMusicService(this.app, null);
 		this.musicService?.destroy();
+	}
+
+	async openBrowser(request: BrowserOpenRequest): Promise<void> {
+		try {
+			await this.browserHost.open(request);
+		} catch (error) {
+			new Notice(browserError(error));
+		}
 	}
 
 	async openDashboard(): Promise<void> {
@@ -589,36 +565,25 @@ export default class DashboardPlugin extends Plugin {
 		void this.app.workspace.revealLeaf(leaf);
 	}
 
-	private terminalAgentImported = false;
-
-	private async importTerminalAgent(raw: unknown): Promise<Record<string, unknown> | null> {
-		if (raw && typeof raw === 'object') return raw as Record<string, unknown>;
-		const legacy = await readLegacyTerminalSettings(this.app);
-		if (legacy && typeof legacy === 'object') {
-			this.terminalAgentImported = true;
-			return legacy as Record<string, unknown>;
-		}
-		return null;
-	}
+	private settingsStore?: JsonStore<NandSettings | null>;
+	private readonly settingsWrites = settingsWriter();
+	readonly changeLanguage = languageUpdater(async (language) => {
+		if (!this.settingsStore) throw new Error('Settings have not loaded');
+		await this.settingsStore.save({ ...this.settings, language, terminalAgent: null });
+		this.settings.language = language;
+	}, setLanguage, this.settingsWrites);
+	private deviceSettingsStore?: JsonStore<{ terminalAgent: NandSettings["terminalAgent"] }>;
 
 	async loadSettings(): Promise<void> {
-		const loaded: unknown = await this.loadData();
+		this.settingsStore = new JsonStore<NandSettings | null>(this.app.vault.adapter, '.nand/config/settings.json',
+			(value): value is NandSettings => !!value && typeof value === 'object' && !Array.isArray(value));
+		const loaded: unknown = await this.settingsStore.load(null);
+		this.deviceSettingsStore = new JsonStore(this.app.vault.adapter, `.nand/config/devices/${deviceId(this.app)}.json`,
+			(value): value is { terminalAgent: NandSettings['terminalAgent'] } => !!value && typeof value === 'object' && 'terminalAgent' in value);
+		const device = await this.deviceSettingsStore.load({ terminalAgent: null });
 		const raw = (loaded ?? {}) as Record<string, unknown> & Partial<NandSettings>;
-		// Migrate old widgetTheme combo to individual flags
-		if ('widgetTheme' in raw && typeof raw.widgetTheme === 'string') {
-			const theme = raw.widgetTheme;
-			raw.widgetWeatherEnabled = theme !== 'off';
-			delete raw.widgetTheme;
-		}
-		// Migrate removed/renamed style presets so saved settings stay valid
-		if (typeof raw.stylePreset === 'string') {
-			raw.stylePreset = migrateStylePreset(raw.stylePreset);
-		}
-		// Migrate single-countdown flat fields to the countdowns[] list
-		const countdowns = migrateCountdowns(raw);
-		// Migrate the legacy single-album fields to albums[]; sanitize anniversaries
-		const albums = migrateAlbums(raw);
-		const anniversaries = migrateAnniversaries(raw);
+		if (typeof raw.stylePreset !== 'string' || !(VALID_STYLE_PRESETS as readonly string[]).includes(raw.stylePreset)) raw.stylePreset = DEFAULT_SETTINGS.stylePreset;
+		const countdowns = normalizeCountdowns(raw), albums = normalizeAlbums(raw), anniversaries = normalizeAnniversaries(raw);
 		// Sanitize the media tag map (drop malformed entries, empty lists)
 		const mediaTags = sanitizeMediaTags(raw.mediaTags);
 		// Validate the workspace registry (files list + active entry)
@@ -626,6 +591,7 @@ export default class DashboardPlugin extends Plugin {
 		this.settings = {
 			...DEFAULT_SETTINGS,
 			...raw,
+			language: normalizeLanguage(raw.language),
 			countdowns,
 			albums,
 			anniversaries,
@@ -635,9 +601,11 @@ export default class DashboardPlugin extends Plugin {
 			dashboardFile: workspace.active,
 			editorWorkbench: normalizeEditorWorkbench(raw.editorWorkbench),
 			contacts: normalizeContactsSettings(raw.contacts),
-			terminalAgent: await this.importTerminalAgent(raw.terminalAgent),
+			browser: normalizeBrowserSettings(raw.browser),
+			terminalAgent: device.terminalAgent,
 			introSeen: raw.introSeen === true,
 			modules: {
+				browser: raw.modules?.browser !== false,
 				dashboard: raw.modules?.dashboard !== false,
 				editor: raw.modules?.editor !== false,
 				terminal: raw.modules?.terminal !== false,
@@ -646,13 +614,7 @@ export default class DashboardPlugin extends Plugin {
 				automation: raw.modules?.automation !== false,
 			},
 		};
-		// First install only (no data.json has ever existed): start with the
-		// Common Actions bar enabled and the sidebar pinned open. Applied here
-		// instead of DEFAULT_SETTINGS so users upgrading from older versions —
-		// whose data.json may lack these keys — keep their current state.
-		// The widget background presets likewise ship only to fresh installs
-		// (the author's own photo picks) — an upgrade with no saved background
-		// keeps its clean cards.
+		// New workspace defaults. Existing installation-directory data is not imported.
 		if (loaded === null) {
 			this.settings = {
 				...this.settings,
@@ -722,14 +684,16 @@ export default class DashboardPlugin extends Plugin {
 			};
 			this.app.saveLocalStorage('nand.dashboard.sidebar-pinned', 'true');
 			await this.saveSettings();
-		} else if (this.terminalAgentImported) {
-			await this.saveSettings();
 		}
 		setLanguage(this.settings.language);
 	}
 
 	async saveSettings(): Promise<void> {
-		await this.saveData(this.settings);
+		await this.settingsWrites(async () => {
+			if (!this.settingsStore) throw new Error('Settings have not loaded');
+			await this.deviceSettingsStore?.save({ terminalAgent: this.settings.terminalAgent });
+			await this.settingsStore.save({ ...this.settings, terminalAgent: null });
+		});
 	}
 
 	readTerminalAgent(): unknown {

@@ -1,3 +1,4 @@
+import { bindLocalizedControl } from '../../primitives/localized-dom';
 import { SearchComponent, prepareFuzzySearch } from 'obsidian';
 import { EMOJIS, EMOJI_KEYWORDS, ICONS, ICON_KEYWORDS } from '../../../platform/obsidian/icons/resources';
 import { STRINGS } from '../../../shared/i18n/icons-accessor';
@@ -45,11 +46,11 @@ export default class IconSearchComponent extends SearchComponent {
 	 */
 	private updatePlaceholder(): void {
 		if (this.iconMode && this.emojiMode) {
-			this.setPlaceholder(STRINGS.iconPicker.searchMix);
+			bindLocalizedControl(this.setPlaceholder(STRINGS.iconPicker.searchMix), "placeholder", "iconic.iconPicker.searchMix");
 		} else if (this.emojiMode) {
-			this.setPlaceholder(STRINGS.iconPicker.searchEmojis);
+			bindLocalizedControl(this.setPlaceholder(STRINGS.iconPicker.searchEmojis), "placeholder", "iconic.iconPicker.searchEmojis");
 		} else {
-			this.setPlaceholder(STRINGS.iconPicker.searchIcons);
+			bindLocalizedControl(this.setPlaceholder(STRINGS.iconPicker.searchIcons), "placeholder", "iconic.iconPicker.searchIcons");
 		}
 	}
 

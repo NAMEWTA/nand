@@ -1,7 +1,0 @@
-Already up to date
-Done in 310ms using pnpm v11.1.3
-$ esbuild scripts/verify-pair-width.ts --bundle --platform=node --format=cjs --outfile=node_modules/.tmp/verify-pair-width.cjs --alias:obsidian=./scripts/obsidian-stub.ts --log-level=warning && node node_modules/.tmp/verify-pair-width.cjs
-column-pairs width clearing: PASS
-parser width round-trip: PASS
-applyPairWidth rendering: PASS
-verify-pair-width: all assertions passed

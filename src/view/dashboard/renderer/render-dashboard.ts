@@ -1,8 +1,8 @@
+import { setLocalizedText } from '../../primitives/localized-dom';
 import type { HoverParent } from 'obsidian';
 import { App, Component } from 'obsidian';
 import type { DashboardColumn, DashboardData, DashboardSettings } from '../../../core/dashboard/types/index';
 import { isUnderExcludedFolder, normalizeExcludeFolders } from '../../../shared/exclude-folders';
-import { t } from '../../../shared/i18n/index';
 import { renderQuickNoteRegion } from '../notes/quick-note-section';
 import type { RenderCallbacks } from '../render-contract';
 import { captureScrollStates, restoreScrollStates } from '../ui/scroll-preserve';
@@ -42,7 +42,7 @@ export function renderDashboard(
 	}
 
 	const addColBtn = container.createDiv({ cls: 'dashboard-add-section' });
-	addColBtn.setText(t('renderer.addSection'));
+	setLocalizedText(addColBtn, 'renderer.addSection');
 	addColBtn.setAttribute('role', 'button');
 	addColBtn.addEventListener('click', () => {
 		callbacks.onRequestAddSection();

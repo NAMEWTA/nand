@@ -1,4 +1,5 @@
-import { useRef, useState } from 'preact/hooks';
+import type { AutomationUiPort } from '../../../shared/automation/types';
+import { useEffect, useRef, useState } from 'preact/hooks';
 import { buildOrderedActions } from '../../../core/dashboard/quick-actions';
 import type { QuickAction } from '../../../core/dashboard/types';
 import { t } from '../../../shared/i18n';
@@ -7,6 +8,7 @@ import { KANBAN_FILE_DRAG_TYPE } from '../ui/dnd';
 export function QuickActionsPanel({
 	actions,
 	execute,
+	automation,
 	remove,
 	add,
 	order,
@@ -16,6 +18,7 @@ export function QuickActionsPanel({
 	edit,
 }: {
 	actions: QuickAction[];
+	automation?: AutomationUiPort;
 	execute: (action: QuickAction) => void;
 	remove: (index: number) => void;
 	add: () => void;
@@ -25,6 +28,14 @@ export function QuickActionsPanel({
 	hidden?: string[];
 	edit?: (action: QuickAction) => void;
 }) {
+	const [, refresh] = useState(0);
+	const [error, setError] = useState('');
+	const run = (work: () => unknown) => {
+		setError('');
+		void Promise.resolve().then(work).catch((cause: unknown) => setError(cause instanceof Error ? cause.message : String(cause)));
+	};
+	useEffect(() => automation?.subscribe?.(() => refresh(n => n + 1)), [automation]);
+	const saved = new Map(automation?.actions?.().map(action => [action.id, action]) ?? []);
 	const ordered = buildOrderedActions(actions, order, hidden).map((item) =>
 		item.isPreset
 			? {
@@ -50,15 +61,24 @@ export function QuickActionsPanel({
 				</div>
 			</div>
 			<div class="dashboard-qa-list">
-				{ordered.map(({ action, isPreset, key }) => (
+				{ordered.map(({ action, isPreset, key }) => {
+					const current = action.type === 'action' ? saved.get(action.target) : undefined;
+					const name = current?.name ?? action.name;
+					const unavailable = action.type === 'action' ? current?.unavailable ?? (!current ? t('automation.missingAction') : '') : '';
+					return (
 					<div
 						key={key}
 						data-qa-key={key}
-						class={`dashboard-qa-item${isPreset ? ' dashboard-qa-item--preset' : ''}${dragging === key ? ' dashboard-qa-item--dragging' : ''}${over === key ? ' dashboard-qa-item--drag-over' : ''}`}
+						class={`dashboard-qa-item${action.type === 'action' ? ' dashboard-qa-item--saved' : ''}${isPreset ? ' dashboard-qa-item--preset' : ''}${dragging === key ? ' dashboard-qa-item--dragging' : ''}${over === key ? ' dashboard-qa-item--drag-over' : ''}`}
 						draggable
 						title={action.name}
-						role="button"
-						onClick={() => execute(action)}
+						onKeyDown={event => {
+							if (!event.altKey || !reorder || !['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].includes(event.key)) return;
+							event.preventDefault();
+							const keys = ordered.map(item => item.key), index = keys.indexOf(key);
+							const target = Math.max(0, Math.min(keys.length - 1, index + (['ArrowLeft', 'ArrowUp'].includes(event.key) ? -1 : 1)));
+							keys.splice(index, 1); keys.splice(target, 0, key); reorder(keys);
+						}}
 						onDragStart={(e) => {
 							drag.current = key;
 							setDragging(key);
@@ -93,8 +113,14 @@ export function QuickActionsPanel({
 							setDragging(null);
 						}}
 					>
-						<Icon className="dashboard-qa-icon" name={action.icon} />
-						<span class="dashboard-qa-name">{action.name}</span>
+						<button type="button" class="dashboard-qa-run" disabled={!!unavailable || current?.running} title={unavailable || t('automation.reorderKeys')} onClick={() => execute(action)}>
+							<Icon className="dashboard-qa-icon" name={action.icon} />
+							<span class="dashboard-qa-name">{name}</span>
+							{current?.status && <span class="nand-ui-badge">{t(`automation.${current.status}`)}</span>}
+							{unavailable && <span>{unavailable}</span>}
+						</button>
+						{action.type === 'action' && <button type="button" class="nand-ui-icon-btn" aria-label={t('automation.open')} onClick={() => run(() => automation?.openAction?.(action.target))}><Icon name="external-link" /></button>}
+						{current?.running && <button type="button" class="nand-ui-icon-btn" aria-label={t('automation.stop')} onClick={() => run(() => automation?.stopAction?.(action.target))}><Icon name="square" /></button>}
 						<button
 							class="dashboard-qa-remove"
 							aria-label={t('common.remove', { name: action.name })}
@@ -119,9 +145,10 @@ export function QuickActionsPanel({
 							</button>
 						)}
 					</div>
-				))}
+				); })}
 			</div>
 			{!ordered.length && <span class="dashboard-empty">{t('quickActions.empty')}</span>}
+			{error && <span role="alert" class="nand-ui-error">{error}</span>}
 		</>
 	);
 }

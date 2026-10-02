@@ -2,6 +2,8 @@
 // Provides terminal session management
 
 mod session;
+mod flow;
+use flow::{OutputCredits, OUTPUT_BATCH};
 mod shell;
 mod osc_scanner;
 #[cfg(windows)]
@@ -55,7 +57,8 @@ struct PtySessionContext {
     /// PTY session
     session: Arc<TokioMutex<PtySession>>,
     /// PTY writer
-    writer: Arc<Mutex<PtyWriter>>,
+    input: tokio::sync::mpsc::Sender<Vec<u8>>,
+    credits: Arc<OutputCredits>,
     /// Read task handle
     read_task: Option<tokio::task::JoinHandle<()>>,
 }
@@ -66,9 +69,17 @@ impl PtySessionContext {
         session: Arc<TokioMutex<PtySession>>,
         writer: Arc<Mutex<PtyWriter>>,
     ) -> Self {
+        let (input, mut receiver) = tokio::sync::mpsc::channel::<Vec<u8>>(32);
+        tokio::task::spawn_blocking(move || {
+            while let Some(data) = receiver.blocking_recv() {
+                let Ok(mut writer) = writer.lock() else { break; };
+                if writer.write(&data).is_err() { break; }
+            }
+        });
         Self {
             session,
-            writer,
+            input,
+            credits: Arc::new(OutputCredits::new()),
             read_task: None,
         }
     }
@@ -113,6 +124,7 @@ impl PtyHandler {
         cols: Option<u16>,
         rows: Option<u16>,
     ) -> Result<Option<ServerResponse>, RouterError> {
+        if self.sessions.lock().await.len() >= 64 { return Err(RouterError::ModuleError("Session limit reached".into())); }
         // Generate a unique session_id
         let session_id = Uuid::new_v4().to_string();
         let cols = cols.filter(|value| *value > 0).unwrap_or(80);
@@ -156,7 +168,7 @@ impl PtyHandler {
         // the owned job and ConPTY; no pipe can fill and block console teardown.
         let (start_tx, start_rx) = tokio::sync::oneshot::channel();
         let read_task = self.start_read_task(session_id.clone(), pty_reader, pty_writer,
-            shell_type, Arc::clone(&pty_session), start_rx).await?;
+            shell_type, Arc::clone(&pty_session), start_rx, Arc::clone(&context.credits)).await?;
         context.read_task = Some(read_task);
         sender.lock().await.send(Message::Text(response.to_json().into())).await
             .map_err(|error| RouterError::ModuleError(error.to_string()))?;
@@ -184,6 +196,7 @@ impl PtyHandler {
         _shell_type: Option<String>,
         child_session: Arc<TokioMutex<PtySession>>,
         start_rx: tokio::sync::oneshot::Receiver<()>,
+        credits: Arc<OutputCredits>,
     ) -> Result<tokio::task::JoinHandle<()>, RouterError> {
         const OUTPUT_BATCH_INTERVAL_MS: u64 = 4;
         const READ_BUFFER_SIZE: usize = 8192;
@@ -293,7 +306,7 @@ impl PtyHandler {
 
                 if pending_error.is_none() && !pending_exit {
                     let deadline = Instant::now() + Duration::from_millis(OUTPUT_BATCH_INTERVAL_MS);
-                    loop {
+                    while batch_buffer.len() < OUTPUT_BATCH {
                         match time::timeout_at(deadline, read_rx.recv()).await {
                             Ok(Some(ReadEvent::Data(data))) => {
                                 pending_shell_events.extend(osc_scanner.scan(&data));
@@ -324,6 +337,7 @@ impl PtyHandler {
                         batch_buffer.len()
                     );
 
+                    if !credits.reserve(batch_buffer.len()).await { break; }
                     // Build a binary frame prefixed with the session_id
                     // Format: [session_id_length: u8][session_id: bytes][data: bytes]
                     let session_id_bytes = session_id.as_bytes();
@@ -412,26 +426,22 @@ impl PtyHandler {
     async fn handle_resize(&self, session_id: &str, cols: u16, rows: u16) -> Result<Option<ServerResponse>, RouterError> {
         log_info!("调整终端尺寸: session_id={}, {}x{}", session_id, cols, rows);
         
-        let sessions = self.sessions.lock().await;
-        let context = sessions.get(session_id)
+        let session = self.sessions.lock().await.get(session_id).map(|context| Arc::clone(&context.session))
             .ok_or_else(|| RouterError::ModuleError(format!("SESSION_NOT_FOUND: {}", session_id)))?;
-        
-        let mut pty = context.session.lock().await;
-        pty.resize(cols, rows)
-            .map_err(|e| RouterError::ModuleError(format!("调整终端尺寸失败: {}", e)))?;
+        tokio::task::spawn_blocking(move || session.blocking_lock().resize(cols, rows).map_err(|error| error.to_string())).await
+            .map_err(|error| RouterError::ModuleError(error.to_string()))?
+            .map_err(RouterError::ModuleError)?;
         
         Ok(None) // resize does not require a response
     }
     
     /// Write data to the PTY for the specified session
     pub async fn write_data(&self, session_id: &str, data: &[u8]) -> Result<(), RouterError> {
-        let sessions = self.sessions.lock().await;
-        let context = sessions.get(session_id)
+        if data.len() > 8192 { return Err(RouterError::ModuleError("PTY input frame exceeds 8192 bytes".into())); }
+        let input = self.sessions.lock().await.get(session_id)
+            .map(|context| context.input.clone())
             .ok_or_else(|| RouterError::ModuleError(format!("SESSION_NOT_FOUND: {}", session_id)))?;
-        
-        let mut w = context.writer.lock().unwrap();
-        w.write(data)
-            .map_err(|e| RouterError::ModuleError(format!("写入 PTY 失败: {}", e)))?;
+        input.try_send(data.to_vec()).map_err(|e| RouterError::ModuleError(format!("PTY input queue unavailable: {}", e)))?;
         
         Ok(())
     }
@@ -440,29 +450,19 @@ impl PtyHandler {
     pub async fn handle_destroy(&self, session_id: &str) -> Result<(), RouterError> {
         log_info!("销毁 PTY 会话: session_id={}", session_id);
         
-        let mut sessions = self.sessions.lock().await;
-        if let Some(context) = sessions.get_mut(session_id) {
-            // Terminate the PTY process
-            {
-                let mut session = context.session.lock().await;
-                session.kill().map_err(|error| RouterError::ModuleError(format!("销毁 PTY 会话失败: {}", error)))?;
+        let context = self.sessions.lock().await.remove(session_id);
+        if let Some(mut context) = context {
+            context.credits.close();
+            let session = Arc::clone(&context.session);
+            let result = tokio::task::spawn_blocking(move || session.blocking_lock().kill().map_err(|error| error.to_string())).await
+                .map_err(|error| RouterError::ModuleError(error.to_string()))?;
+            if let Err(error) = result {
+                self.sessions.lock().await.insert(session_id.to_owned(), context);
+                return Err(RouterError::ModuleError(error));
             }
-            let mut context = sessions.remove(session_id).expect("session remains owned until kill succeeds");
-            
-            // End the reader task asynchronously without waiting for completion
-            if let Some(task) = context.read_task.take() {
-                tokio::spawn(async move {
-                    let _ = task.await;
-                    log_debug!("读取任务已终止");
-                });
-            }
-            
-            log_info!("PTY 会话已销毁: session_id={}", session_id);
-            Ok(())
-        } else {
-            // A closed renderer or connection may repeat a successful destroy.
-            Ok(())
+            if let Some(task) = context.read_task.take() { tokio::spawn(async move { let _ = task.await; }); }
         }
+        Ok(())
     }
     
     /// Clean up all sessions (called when the connection closes)
@@ -470,14 +470,17 @@ impl PtyHandler {
         log_info!("清理所有 PTY 会话");
         
         let mut sessions = self.sessions.lock().await;
-        for (session_id, mut context) in sessions.drain() {
+        let contexts: Vec<_> = sessions.drain().collect();
+        drop(sessions);
+        for (session_id, mut context) in contexts {
+            context.credits.close();
             log_info!("清理会话: {}", session_id);
             
             // Terminate the PTY process
-            {
-                let mut session = context.session.lock().await;
-                let _ = session.kill();
-            }
+            let session = context.session.clone();
+            let _ = tokio::task::spawn_blocking(move || {
+                let _ = session.blocking_lock().kill();
+            }).await;
             
             // Wait for the reader task to finish
             if let Some(task) = context.read_task.take() {
@@ -520,6 +523,14 @@ impl ModuleHandler for PtyHandler {
                 let rows: Option<u16> = msg.get_field("rows");
                 
                 self.handle_init(shell_type, shell_args, cwd, env, cols, rows).await
+            }
+            "consumed" => {
+                let id: String = msg.get_field("session_id").ok_or_else(|| RouterError::ModuleError("SESSION_ID_REQUIRED".into()))?;
+                let bytes: usize = msg.get_field("bytes").unwrap_or(0);
+                if let Some(context) = self.sessions.lock().await.get(&id) {
+                    context.credits.consumed(bytes).map_err(|e| RouterError::ModuleError(e.into()))?;
+                }
+                Ok(None)
             }
             "resize" => {
                 // resize requires a session_id

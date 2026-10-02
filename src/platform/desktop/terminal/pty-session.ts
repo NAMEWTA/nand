@@ -282,6 +282,12 @@ export class PtySession {
 	sendText(data: string): void {
 		this.write(data);
 	}
+	get acceptsContext(): boolean { return this.isAlive() && this.emulator.modes.bracketedPasteMode; }
+	pasteContext(text: string): void {
+		if (!this.acceptsContext) throw new Error('Agent input is not ready');
+		// Never append Enter. Authority comes from the headless parser, independent of a renderer.
+		this.write(`\x1b[200~${text}\x1b[201~`);
+	}
 	writeBinary(data: Uint8Array): void {
 		if (!this.stopped && !this.exited && this.sessionId) this.client?.writeBinary(this.sessionId, data);
 	}
@@ -322,9 +328,11 @@ export class PtySession {
 			this.disposals.delete(listener);
 		};
 	}
-	private paint(text: string): void {
+	private paint(text: string, consumed?: () => void): void {
 		if (this.stopped) return;
+		if (!text) { consumed?.(); return; }
 		this.emulator.write(text, () => {
+			consumed?.();
 			if (!this.stopped) for (const listener of this.outputs) listener(text);
 		});
 	}
@@ -365,7 +373,7 @@ export class PtySession {
 							this.synchronizedOutputCompatibilityState,
 						);
 						this.extractCwdFromOutput(text);
-						this.paint(text);
+						this.paint(text, () => client.consumed(id, bytes.byteLength));
 					}),
 					client.onSessionExit(id, (code) => {
 						this.exited = true;

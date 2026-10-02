@@ -1,3 +1,4 @@
+import { deviceId as getDeviceId } from '../../platform/obsidian/storage/device-id';
 import { AUTOMATION_AGENTS } from '../../core/agent-launch/automation-catalog';
 import { AGENT_CATALOG, getAgent } from '../../core/agent-launch/catalog';
 import { effectivePermission, launchArgs } from '../../core/agent-launch/flags';
@@ -128,10 +129,10 @@ export class TerminalAutomationRuntime implements AgentRuntimePort {
 	private loaded: Promise<void>;
 	constructor(private host: TerminalAgentController) {
 		this.hooks = new AutomationHooks(host.app.workspace.containerEl.win);
-		const device = String(host.app.loadLocalStorage('nand.automation.device') || 'local');
+		const device = getDeviceId(host.app);
 		this.store = new JsonStore(
 			host.app.vault.adapter,
-			`.nand/automation-sessions/${device}.json`,
+			`.nand/terminal-agent/${device}/automation-sessions.json`,
 			(v): v is AgentSessionRef[] =>
 				Array.isArray(v) &&
 				v.every(
@@ -499,6 +500,33 @@ export class TerminalAutomationRuntime implements AgentRuntimePort {
 		await (await this.host.getTerminalService()).destroyTerminal(id);
 		this.live.get(id)?.hookClose?.();
 		this.live.delete(id);
+	}
+	async startScript(action: Extract<AutomationAction, { kind: 'script' }>, run: AutomationRun): Promise<AgentRunHandle> {
+		if (this.disposed) throw new AutomationError('agentUnavailable');
+		const service = await this.host.getTerminalService();
+		let finish!: (result: RunResult) => void;
+		const completion = new Promise<RunResult>(resolve => { finish = resolve; });
+		let output = '';
+		const terminal = await service.createTerminal({
+			shellType: action.shell,
+			shellArgs: action.shell === 'powershell' ? ['-NoLogo', '-NoProfile', '-NonInteractive', '-Command', action.script] : ['-lc', action.script],
+			cwd: action.cwd,
+			title: run.title,
+			env: { NAND_AUTOMATION_RUN_ID: run.id },
+		}, instance => {
+			instance.automationManaged = true;
+			const unsubscribe = instance.observeAutomation(event => {
+				if (event.kind === 'data') { output = (output + event.text).slice(-8000); return; }
+				unsubscribe();
+				finish({ status: event.kind === 'exit' ? event.code === 0 ? 'succeeded' : 'failed' : 'interrupted', message: event.kind === 'exit' ? `Exit ${event.code}` : '', output });
+			});
+		});
+		if (this.disposed) { await service.destroyTerminal(terminal.id); throw new AutomationError('agentUnavailable'); }
+		if (run.trigger === 'manual') {
+			try { await this.open(terminal.id); }
+			catch (error) { await service.destroyTerminal(terminal.id); throw error; }
+		}
+		return { terminalId: terminal.id, completion, onRunning: listener => { listener(); return () => undefined; } };
 	}
 	async open(id: string): Promise<void> {
 		await this.host.openAutomationTerminal(id);

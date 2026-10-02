@@ -42,6 +42,8 @@ Do not guess a nearby paragraph. Do not auto-reopen an orphaned thread when some
 
 ## Store rules
 
+- Store shutdown seals new operations synchronously and drains accepted operations before a replacement store may load. The App-scoped `Symbol.for('nand.editor.comment-store-handoff')` coordinator survives plugin bundle reloads, retains failed drains for retry, and isolates Vaults. Activation generations prevent late setup or cleanup from replacing a newer store. Editor activation is asynchronous; extensions still register once per plugin instance. No note or sidecar format migration is involved.
+
 - `applyChanges` no-ops until `reconcile()` has run for that path. A keystroke during the initial load must not drag a stale offset.
 - `reconcile` relocates open and resolved threads and marks misses `orphaned`. It does not rewrite quotes that only shifted.
 - `applyChanges` maps offsets with `ChangeSet.mapPos`, refreshes the quote from the new document, and orphans a thread whose range collapses.
@@ -68,6 +70,8 @@ Cross-product event names live in `src/shared/events.ts`. `COMMENT_TO_TASK` is r
 `pnpm run test:editor-comments` bundles `scripts/verify-editor-comments.ts` with esbuild and the Obsidian stub. The runner shape is in `references/build-and-release.md`.
 
 The script includes read-failure, journal replay, partial commit, rename cleanup and concurrent-edit recovery cases, all checked through a fresh store. It also checks anchors, the in-memory filesystem (the note string is unchanged), index hash length 16, reply, resolve, rename, delete, orphan reconcile, the editor/dashboard import boundary, and the view type constants from the identity table.
+
+It also gates journal, sidecar, index and cleanup operations across store generations, including failed shutdown retries, closed-store mutation rejection and App isolation. Real plugin disable/enable must still be checked in Obsidian.
 
 It also exercises the real CM extension with controlled DOM geometry and workspace events: hiding without a CM transaction, scroll clipping, draft restoration, stale submission rejection, and module restart. `test:issue-regressions` covers composer scopes/accessibility, placement boundaries, and routing terminal title refreshes to the correct host window. These Node fixtures do not replace real Obsidian tooltip/window tests.
 

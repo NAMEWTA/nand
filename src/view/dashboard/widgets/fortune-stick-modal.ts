@@ -1,6 +1,11 @@
+import { bindLocalizedElement } from '../../primitives/localized-dom';
 import { type FortuneCategory, type FortuneStick, FORTUNE_CATEGORIES, drawFortuneStick } from './fortune-stick';
+import { onLanguageChanged, t } from '../../../shared/i18n';
 
 export class FortuneStickModal {
+	private languageCleanup?: () => void;
+	private timer: number | null = null;
+	private ownerDocument?: Document;
 	private stick: FortuneStick | null = null;
 	private selectedCategory: FortuneCategory | null = null;
 	private overlay: HTMLElement | null = null;
@@ -8,6 +13,8 @@ export class FortuneStickModal {
 
 	public open(): void {
 		this.overlay = activeDocument.body.createDiv({ cls: 'fortune-overlay' });
+		this.ownerDocument = this.overlay.ownerDocument;
+		this.languageCleanup = onLanguageChanged(() => this.stick ? this.renderFortuneResult() : this.renderCategorySelection());
 
 		// Click overlay (outside card) to close
 		this.overlay.addEventListener('click', (e) => {
@@ -22,14 +29,16 @@ export class FortuneStickModal {
 				this.close();
 			}
 		};
-		activeDocument.addEventListener('keydown', this.handleKeydown);
+		this.ownerDocument.addEventListener('keydown', this.handleKeydown);
 
 		this.renderCategorySelection();
 	}
 
 	public close(): void {
+		this.languageCleanup?.();
+		if (this.timer !== null) this.ownerDocument?.defaultView?.clearTimeout(this.timer);
 		if (this.handleKeydown) {
-			activeDocument.removeEventListener('keydown', this.handleKeydown);
+			this.ownerDocument?.removeEventListener('keydown', this.handleKeydown);
 			this.handleKeydown = null;
 		}
 		if (this.overlay) {
@@ -47,19 +56,19 @@ export class FortuneStickModal {
 		const card = this.overlay.createDiv({ cls: 'fortune-card' });
 
 		const title = card.createDiv({ cls: 'fortune-card-title' });
-		title.setText('每日一签');
+		title.setText(t('fortune.title'));
 
-		card.createDiv({
+		bindLocalizedElement(card.createDiv({
 			cls: 'fortune-card-subtitle',
-			text: '请选择您想求的运势',
-		});
+			text: t('fortune.choose'),
+		}), 'fortune.choose');
 
 		const grid = card.createDiv({ cls: 'fortune-category-grid' });
 
 		for (const cat of FORTUNE_CATEGORIES) {
-			const btn = grid.createDiv({ cls: 'fortune-category-btn' });
+			const btn = grid.createEl('button', { cls: 'fortune-category-btn', attr: { type: 'button' } });
 			btn.createSpan({ cls: 'fortune-category-emoji', text: cat.emoji });
-			btn.createSpan({ cls: 'fortune-category-label', text: cat.label });
+			bindLocalizedElement(btn.createSpan({ cls: 'fortune-category-label', text: t(`fortune.${cat.key}`) }), `fortune.${cat.key}`);
 
 			btn.addEventListener('click', () => {
 				this.selectedCategory = cat.key;
@@ -92,11 +101,7 @@ export class FortuneStickModal {
 		const seal = header.createDiv({
 			cls: `fortune-result-seal fortune-result-seal--${this.stick.level}`,
 		});
-		const titleText = this.stick.title;
-		const midIdx = Math.ceil(titleText.length / 2);
-		seal.createSpan({ text: titleText.slice(0, midIdx) });
-		seal.createEl('br');
-		seal.createSpan({ text: titleText.slice(midIdx) });
+		bindLocalizedElement(seal.createSpan({ text: t(`fortune.${this.stick.level}`) }), `fortune.${this.stick.level}`);
 
 		front.createDiv({ cls: 'fortune-result-divider' });
 
@@ -107,12 +112,14 @@ export class FortuneStickModal {
 
 		// Reveal (flip) button - hidden until verse finishes
 		const verseTotalMs = (0.6 + (verseLen - 1) * 0.08 + 0.3) * 1000;
-		const revealBtn = front.createDiv({
+		const revealBtn = bindLocalizedElement(front.createEl('button', {
 			cls: 'fortune-result-reveal-btn fortune-result-reveal-btn--hidden',
-			text: '解签',
-		});
+			text: t('fortune.reveal'),
+			attr: { type: 'button' },
+		}), 'fortune.reveal');
 
-		window.setTimeout(() => {
+		if (this.timer !== null) this.ownerDocument?.defaultView?.clearTimeout(this.timer);
+		this.timer = this.overlay.win.setTimeout(() => {
 			revealBtn.classList.remove('fortune-result-reveal-btn--hidden');
 			revealBtn.classList.add('fortune-result-reveal-btn--show');
 		}, verseTotalMs);
@@ -124,20 +131,21 @@ export class FortuneStickModal {
 		// === Back face ===
 		const back = flipCard.createDiv({ cls: 'fortune-flip-back' });
 
-		back.createDiv({
+		bindLocalizedElement(back.createDiv({
 			cls: 'fortune-back-title',
-			text: '解签',
-		});
+			text: t('fortune.reveal'),
+		}), 'fortune.reveal');
 
 		const interpretationEl = back.createDiv({
 			cls: 'fortune-back-interpretation',
 		});
 		interpretationEl.createSpan({ text: this.stick.interpretation });
 
-		const backBtn = back.createDiv({
+		const backBtn = bindLocalizedElement(back.createEl('button', {
 			cls: 'fortune-result-back-btn',
-			text: '再求一签',
-		});
+			text: t('fortune.again'),
+			attr: { type: 'button' },
+		}), 'fortune.again');
 
 		backBtn.addEventListener('click', () => {
 			this.stick = null;
@@ -164,6 +172,6 @@ export class FortuneStickModal {
 
 	private getCategoryLabel(category: FortuneCategory): string {
 		const found = FORTUNE_CATEGORIES.find((c) => c.key === category);
-		return found ? found.label : '';
+		return found ? t(`fortune.${found.key}`) : '';
 	}
 }

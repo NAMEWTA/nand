@@ -19,6 +19,8 @@ import type { WorkbenchHost } from '../src/view/terminal/host';
 import { parseHTML } from 'linkedom';
 import { h, render } from 'preact';
 import { TerminalWorkbench } from '../src/view/terminal/TerminalWorkbench';
+import { ContextPanel } from '../src/view/terminal/ContextPanel';
+import type { TerminalViewHost } from '../src/view/terminal/host';
 import { InboxPanel } from '../src/view/notifications/InboxPanel';
 import type { NotificationRecord } from '../src/core/notifications/service';
 import { onLeafLanguageChanged } from '../src/platform/obsidian/workspace-title';
@@ -165,7 +167,7 @@ async function verifyExports() {
 	const opened: TFile[] = [];
 	let failRead = false, failWrite = false, failOpen = false, gate: Promise<void> | undefined;
 	const app = {
-		loadLocalStorage: () => 'export-test',
+		loadLocalStorage: () => '11111111-1111-4111-8111-111111111111',
 		vault: {
 			adapter: {
 				exists: async (path: string) => metadata.has(path), read: async (path: string) => metadata.get(path)!,
@@ -255,7 +257,7 @@ async function verifyExports() {
 	render(null, panel);
 	console.log('History export: visible Vault files, concurrent collisions, safe names, content, localized failures and actual sidebar open/pending behavior passed.');
 }
-void verifyExports().then(verifyHistoryMatrix).then(verifySessionIdentity).then(verifyUsageLanguage).then(verifyAutomationFilters).then(verifyOrcaRegression).catch((error) => { console.error(error); process.exitCode = 1; });
+void verifyExports().then(verifyHistoryMatrix).then(verifySessionIdentity).then(verifyUsageLanguage).then(verifyAutomationFilters).then(verifyOrcaRegression).then(verifyContextPanel).catch((error) => { console.error(error); process.exitCode = 1; });
 
 async function verifySessionIdentity() {
 	const panel = document.createElement('div'); document.body.appendChild(panel);
@@ -691,4 +693,20 @@ async function verifyOrcaRegression() {
 	for (const language of ['zh', 'en', 'zh'] as const) { setLanguage(language); paint(); assert.equal(panel.querySelector('.nand-agent-workbench-title')?.textContent, t('terminalAgent.workbench.title')); assert.equal(panel.querySelector('.terminal-container'), xterm); }
 	render(null, panel); assert.equal(listeners.size, 0); assert.equal(disconnected, 2);
 	console.log('Orca regression: debounce/cancel, searched refresh/full preview, Resume pending/migration/failure retry, 240–360 resize, narrow drawer, bilingual repaint and stable xterm passed.');
+}
+
+async function verifyContextPanel() {
+ const panel = document.createElement('div'); document.body.appendChild(panel);
+ let attached = 0, signal: AbortSignal | undefined;
+ const host = { pickContextMaterial: async () => ({ id: 'note', kind: 'note' as const, title: 'Context note', source: 'Note.md', text: 'Draft text' }),
+  attachContext: async (id: string, materials: Array<{ text: string }>, abort: AbortSignal) => { assert.equal(id, 'session'); assert.equal(materials[0]!.text, 'Draft text'); attached++; signal = abort; await new Promise<void>(resolve => abort.addEventListener('abort', () => resolve(), { once: true })); }
+ } as unknown as TerminalViewHost;
+ render(h(ContextPanel, { host, id: 'session', title: 'Target Agent' }), panel);
+ const tick = () => new Promise(resolve => setTimeout(resolve, 60)); await tick();
+ panel.querySelectorAll<HTMLButtonElement>('button')[0]!.click(); await tick();
+ assert.ok(panel.textContent?.includes('Context note')); assert.ok(panel.textContent?.includes('Target Agent'));
+ panel.querySelectorAll<HTMLButtonElement>('button')[1]!.click(); await tick(); assert.equal(attached, 1);
+ assert.equal(panel.querySelectorAll<HTMLButtonElement>('button')[1]!.disabled, true);
+ render(null, panel); assert.equal(signal?.aborted, true); panel.remove();
+ console.log('Context panel: target preview, note selection, duplicate prevention and cancellation on session change passed.');
 }

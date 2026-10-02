@@ -1,3 +1,4 @@
+import { bindLocalizedElement } from '../../primitives/localized-dom';
 import { Modal, setIcon } from 'obsidian';
 import type { TaskTemplate } from '../../../core/dashboard/types/index';
 import { t } from '../../../shared/i18n/index';
@@ -63,12 +64,12 @@ export class TemplatePickerModal extends Modal {
 		const templates = this.getTemplates();
 
 		const header = container.createDiv({ cls: 'dashboard-modal-header' });
-		header.createDiv({ cls: 'dashboard-modal-title', text: t('template.selectTemplate') });
+		bindLocalizedElement(header.createDiv({ cls: 'dashboard-modal-title', text: t('template.selectTemplate') }), 'template.selectTemplate');
 
-		const manageBtn = header.createEl('button', {
+		const manageBtn = bindLocalizedElement(header.createEl('button', {
 			cls: 'template-modal-manage-btn',
 			text: t('template.manageTemplates'),
-		});
+		}), 'template.manageTemplates');
 		manageBtn.addEventListener('click', () => {
 			this.mode = 'edit';
 			this.editingTemplate = null;
@@ -79,11 +80,11 @@ export class TemplatePickerModal extends Modal {
 
 		if (templates.length === 0) {
 			const empty = body.createDiv({ cls: 'template-modal-empty' });
-			empty.createDiv({ text: t('template.empty') });
-			const createBtn = empty.createEl('button', {
+			bindLocalizedElement(empty.createDiv({ text: t('template.empty') }), 'template.empty');
+			const createBtn = bindLocalizedElement(empty.createEl('button', {
 				cls: 'dashboard-modal-btn dashboard-modal-btn--confirm',
 				text: t('template.createFirst'),
-			});
+			}), 'template.createFirst');
 			createBtn.addEventListener('click', () => {
 				this.editingTemplate = null;
 				this.mode = 'edit';
@@ -102,10 +103,10 @@ export class TemplatePickerModal extends Modal {
 
 			const info = item.createDiv({ cls: 'template-modal-item-info' });
 			info.createDiv({ cls: 'template-modal-item-name', text: tmpl.name });
-			info.createDiv({
+			bindLocalizedElement(info.createDiv({
 				cls: 'template-modal-item-count',
 				text: t('template.taskCount', { count: tmpl.tasks.length }),
-			});
+			}), 'template.taskCount', { count: tmpl.tasks.length });
 
 			// Task preview
 			if (tmpl.tasks.length > 0) {
@@ -132,10 +133,10 @@ export class TemplatePickerModal extends Modal {
 		}
 
 		const footer = container.createDiv({ cls: 'dashboard-modal-footer' });
-		const confirmBtn = footer.createEl('button', {
+		const confirmBtn = bindLocalizedElement(footer.createEl('button', {
 			cls: 'dashboard-modal-btn dashboard-modal-btn--confirm',
 			text: t('template.confirm'),
-		});
+		}), 'template.confirm');
 		confirmBtn.addEventListener('click', () => {
 			if (!selectedId) return;
 			const found = templates.find((tmpl) => tmpl.id === selectedId);
@@ -152,12 +153,12 @@ export class TemplatePickerModal extends Modal {
 		const editing = this.editingTemplate;
 
 		const header = container.createDiv({ cls: 'dashboard-modal-header' });
-		header.createDiv({ cls: 'dashboard-modal-title', text: isNew ? t('template.create') : t('template.edit') });
+		bindLocalizedElement(header.createDiv({ cls: 'dashboard-modal-title', text: isNew ? t('template.create') : t('template.edit') }), isNew ? ('template.create') : ('template.edit'), (isNew) ? (undefined) : (undefined));
 
-		const backBtn = header.createEl('button', {
+		const backBtn = bindLocalizedElement(header.createEl('button', {
 			cls: 'template-modal-back-btn',
 			text: t('template.back'),
-		});
+		}), 'template.back');
 		backBtn.addEventListener('click', () => {
 			this.mode = 'pick';
 			this.editingTemplate = null;
@@ -173,25 +174,25 @@ export class TemplatePickerModal extends Modal {
 				for (const tmpl of templates) {
 					const row = existingList.createDiv({ cls: 'template-modal-manage-row' });
 					row.createDiv({ cls: 'template-modal-manage-name', text: tmpl.name });
-					row.createDiv({
+					bindLocalizedElement(row.createDiv({
 						cls: 'template-modal-manage-count',
 						text: t('template.taskCount', { count: tmpl.tasks.length }),
-					});
+					}), 'template.taskCount', { count: tmpl.tasks.length });
 
-					const editBtn = row.createEl('button', {
+					const editBtn = bindLocalizedElement(row.createEl('button', {
 						cls: 'template-modal-manage-edit',
 						attr: { 'aria-label': t('template.edit') },
-					});
+					}), 'template.edit', undefined, "aria-label");
 					setIcon(editBtn, 'pencil');
 					editBtn.addEventListener('click', () => {
 						this.editingTemplate = { ...tmpl, tasks: [...tmpl.tasks] };
 						this.render();
 					});
 
-					const deleteBtn = row.createEl('button', {
+					const deleteBtn = bindLocalizedElement(row.createEl('button', {
 						cls: 'template-modal-manage-delete',
 						attr: { 'aria-label': t('template.delete') },
-					});
+					}), 'template.delete', undefined, "aria-label");
 					setIcon(deleteBtn, 'trash-2');
 					const tmplId = tmpl.id;
 					deleteBtn.addEventListener('click', () => {
@@ -209,10 +210,10 @@ export class TemplatePickerModal extends Modal {
 				}
 			}
 
-			const createBtn = body.createEl('button', {
+			const createBtn = bindLocalizedElement(body.createEl('button', {
 				cls: 'dashboard-modal-btn dashboard-modal-btn--confirm',
 				text: t('template.create'),
-			});
+			}), 'template.create');
 			createBtn.addEventListener('click', () => {
 				this.editingTemplate = {
 					id: `tmpl-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 6)}`,
@@ -228,18 +229,18 @@ export class TemplatePickerModal extends Modal {
 		const form = body.createDiv({ cls: 'template-modal-form' });
 
 		const nameField = form.createDiv({ cls: 'template-modal-field' });
-		nameField.createEl('label', { text: t('template.nameLabel') });
-		const nameInput = nameField.createEl('input', {
+		bindLocalizedElement(nameField.createEl('label', { text: t('template.nameLabel') }), 'template.nameLabel');
+		const nameInput = bindLocalizedElement(nameField.createEl('input', {
 			cls: 'dashboard-modal-input template-modal-input',
 			attr: {
 				type: 'text',
 				placeholder: t('template.namePlaceholder'),
 				value: editing!.name,
 			},
-		});
+		}), 'template.namePlaceholder', undefined, "placeholder");
 
 		const tasksField = form.createDiv({ cls: 'template-modal-field' });
-		tasksField.createEl('label', { text: t('template.tasksLabel') });
+		bindLocalizedElement(tasksField.createEl('label', { text: t('template.tasksLabel') }), 'template.tasksLabel');
 
 		const taskList = tasksField.createDiv({ cls: 'template-modal-task-list' });
 
@@ -252,14 +253,14 @@ export class TemplatePickerModal extends Modal {
 			const tasks = editing!.tasks;
 			for (let i = 0; i < tasks.length; i++) {
 				const taskRow = taskList.createDiv({ cls: 'template-modal-task-row' });
-				const input = taskRow.createEl('input', {
+				const input = bindLocalizedElement(taskRow.createEl('input', {
 					cls: 'dashboard-modal-input template-modal-input',
 					attr: {
 						type: 'text',
 						placeholder: t('template.taskPlaceholder'),
 						value: tasks[i] ?? '',
 					},
-				});
+				}), 'template.taskPlaceholder', undefined, "placeholder");
 				taskInputs.push(input);
 
 				const taskIndex = i;
@@ -269,10 +270,10 @@ export class TemplatePickerModal extends Modal {
 					editing!.tasks = newTasks;
 				});
 
-				const removeBtn = taskRow.createEl('button', {
+				const removeBtn = bindLocalizedElement(taskRow.createEl('button', {
 					cls: 'template-modal-task-remove',
 					attr: { 'aria-label': t('template.delete') },
-				});
+				}), 'template.delete', undefined, "aria-label");
 				setIcon(removeBtn, 'x');
 				removeBtn.addEventListener('click', () => {
 					const newTasks = editing!.tasks.filter((_, idx) => idx !== taskIndex);
@@ -281,10 +282,10 @@ export class TemplatePickerModal extends Modal {
 				});
 			}
 
-			const addTaskBtn = taskList.createEl('button', {
+			const addTaskBtn = bindLocalizedElement(taskList.createEl('button', {
 				cls: 'template-modal-add-task',
 				text: t('template.addTask'),
-			});
+			}), 'template.addTask');
 			addTaskBtn.addEventListener('click', () => {
 				editing!.tasks = [...editing!.tasks, ''];
 				renderTaskInputs();
@@ -298,10 +299,10 @@ export class TemplatePickerModal extends Modal {
 		renderTaskInputs();
 
 		const footer = container.createDiv({ cls: 'dashboard-modal-footer' });
-		const saveBtn = footer.createEl('button', {
+		const saveBtn = bindLocalizedElement(footer.createEl('button', {
 			cls: 'dashboard-modal-btn dashboard-modal-btn--confirm',
 			text: t('template.save'),
-		});
+		}), 'template.save');
 		saveBtn.addEventListener('click', () => {
 			void (async () => {
 				const name = nameInput.value.trim();

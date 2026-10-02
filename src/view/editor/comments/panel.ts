@@ -1,3 +1,4 @@
+import { bindLocalizedControl } from '../../primitives/localized-dom';
 import { MarkdownView, Menu, TFile, type App } from 'obsidian';
 import { h, render as paint } from 'preact';
 import { makeAnchor, selectionIsCommentable } from '../../../core/comments/anchor';
@@ -93,8 +94,8 @@ function draw(el: HTMLElement, ctx: CommentPanelContext, store: CommentStore, pa
 				more: (thread, button) => {
 					const menu = new Menu();
 					menu.addItem((item) =>
-						item
-							.setTitle(t('editor.comments.delete'))
+						bindLocalizedControl(item
+							.setTitle(t('editor.comments.delete')), "title", 'editor.comments.delete')
 							.setIcon('trash-2')
 							.onClick(() => {
 								void store.remove(thread.id);

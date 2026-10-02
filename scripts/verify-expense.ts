@@ -23,7 +23,7 @@
  * Run: `pnpm run test:expense`
  */
 import { strict as assert } from 'node:assert';
-import { type ExpenseService, ExpenseService as ExpenseServiceClass } from '../src/platform/obsidian/expense/expense-service';
+import { type ExpenseApplication as ExpenseService, ExpenseApplication as ExpenseServiceClass } from '../src/core/expense/application';
 import { EXPENSE_MAX_PRIMARY_CATEGORIES, regroupBreakdownByPrimary, UNGROUPED_PRIMARY } from '../src/core/expense/model';
 import { addDays, daysInclusive, periodLabel, periodShift, windowFor } from '../src/core/expense/expense-period';
 
@@ -56,7 +56,7 @@ const makeAdapter = (files: Record<string, string>) => {
 	};
 };
 
-const DATA_PATH = '.obsidian/plugins/nand-dashboard/expense.json';
+const DATA_PATH = 'test/expense.json';
 
 interface Harness {
 	service: ExpenseService;
@@ -72,17 +72,12 @@ const boot = (file: string): Harness => {
 		addEventListener: (): void => {},
 		removeEventListener: (): void => {},
 	};
-	const plugin = {
-		app: { vault: { configDir: '.obsidian', adapter } },
-		manifest: { id: 'nand-dashboard' },
-		settings: { expenseCurrency: '¥' },
-	} as unknown as ConstructorParameters<typeof ExpenseServiceClass>[0];
-	const service = new ExpenseServiceClass(plugin);
+	const service = new ExpenseServiceClass(adapter, 'test', () => '¥');
 	return {
 		service,
 		h: { disk, written, overwrite },
 		flush: async () => {
-			await (service as unknown as { saveQueue: Promise<void> }).saveQueue;
+			await service.flush();
 		},
 	};
 };
@@ -304,14 +299,11 @@ const serviceChecks = async (): Promise<void> => {
 
 		const merged = JSON.parse(h.disk[DATA_PATH]!);
 		assert.equal(merged.records.length, 3, 'external record unioned in');
-		assert.equal(merged.categoryOrder.expense[0], '咖啡', 'session order survives the merge (session-first)');
-		assert.ok(
-			merged.primaryCategories.expense.includes('生活') && merged.primaryCategories.expense.includes('住行'),
-			'primaries unioned',
-		);
-		assert.equal(merged.categoryParents.expense['咖啡'], '生活', 'session mapping wins the per-key clash');
-		assert.equal(merged.categoryParents.expense['food'], '生活', 'session-only mapping kept');
-		assert.equal(merged.categoryParents.expense['transport'], undefined, 'dangling disk parent dropped');
+		assert.equal(merged.categoryOrder.expense[0], 'food', 'remote order supersedes unchanged baseline');
+		assert.deepEqual(merged.primaryCategories.expense, ['住行'], 'remote removal remains deleted');
+		assert.equal(merged.categoryParents.expense['咖啡'], '住行');
+		assert.equal(merged.categoryParents.expense['food'], undefined, 'remote deletion remains deleted');
+		assert.equal(merged.categoryParents.expense['transport'], undefined);
 	}
 
 	// regroupBreakdownByPrimary pools unmapped into the sentinel bucket.

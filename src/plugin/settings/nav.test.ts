@@ -6,13 +6,22 @@ import path from 'node:path';
 import { defaultPage, productOrder, sidePages, visibleProducts } from './nav.ts';
 import { normalizeEditorWorkbench } from '../../shared/editor-workbench.ts';
 
-const ALL_ON = { automation: true, dashboard: true, editor: true, terminal: true, iconic: true, contacts: true };
+const ALL_ON = {
+	browser: true,
+	automation: true,
+	dashboard: true,
+	editor: true,
+	terminal: true,
+	iconic: true,
+	contacts: true,
+};
 
 test('home is the first primary settings product', () => {
 	assert.equal(productOrder()[0], 'home');
 	assert.deepEqual(productOrder(), [
 		'home',
 		'dashboard',
+		'browser',
 		'editor',
 		'terminal',
 		'iconic',
@@ -26,6 +35,7 @@ test('top tabs keep home and sync and hide closed domains', () => {
 	assert.deepEqual(visibleProducts(ALL_ON), [
 		'home',
 		'dashboard',
+		'browser',
 		'editor',
 		'terminal',
 		'iconic',
@@ -34,31 +44,75 @@ test('top tabs keep home and sync and hide closed domains', () => {
 		'sync',
 	]);
 	assert.deepEqual(
-		visibleProducts({ automation: false, iconic: false, contacts: false, dashboard: false, editor: true, terminal: true }),
+		visibleProducts({
+			browser: false,
+			automation: false,
+			iconic: false,
+			contacts: false,
+			dashboard: false,
+			editor: true,
+			terminal: true,
+		}),
 		['home', 'editor', 'terminal', 'automation', 'sync'],
 	);
 	assert.deepEqual(
-		visibleProducts({ automation: false, iconic: false, contacts: false, dashboard: true, editor: false, terminal: true }),
+		visibleProducts({
+			browser: false,
+			automation: false,
+			iconic: false,
+			contacts: false,
+			dashboard: true,
+			editor: false,
+			terminal: true,
+		}),
 		['home', 'dashboard', 'terminal', 'automation', 'sync'],
 	);
 	assert.deepEqual(
-		visibleProducts({ automation: false, iconic: false, contacts: false, dashboard: true, editor: true, terminal: false }),
+		visibleProducts({
+			browser: false,
+			automation: false,
+			iconic: false,
+			contacts: false,
+			dashboard: true,
+			editor: true,
+			terminal: false,
+		}),
 		['home', 'dashboard', 'editor', 'automation', 'sync'],
 	);
 	assert.deepEqual(
-		visibleProducts({ automation: false, iconic: false, contacts: false, dashboard: false, editor: false, terminal: false }),
+		visibleProducts({
+			browser: false,
+			automation: false,
+			iconic: false,
+			contacts: false,
+			dashboard: false,
+			editor: false,
+			terminal: false,
+		}),
 		['home', 'automation', 'sync'],
 	);
 	assert.equal(
-		visibleProducts({ automation: false, iconic: false, contacts: false, dashboard: false, editor: true, terminal: false }).includes(
-			'home',
-		),
+		visibleProducts({
+			browser: false,
+			automation: false,
+			iconic: false,
+			contacts: false,
+			dashboard: false,
+			editor: true,
+			terminal: false,
+		}).includes('home'),
 		true,
 	);
 	assert.equal(
-		visibleProducts({ automation: false, iconic: false, contacts: false, dashboard: false, editor: true, terminal: false }).includes(
-			'sync',
-		),
+		visibleProducts({
+			browser: false,
+			automation: false,
+			iconic: false,
+			contacts: false,
+			dashboard: false,
+			editor: true,
+			terminal: false,
+		}).includes('sync'),
 		true,
 	);
 });
@@ -124,4 +178,11 @@ test('archives has independent navigation and respects its module gate', () => {
 	assert.equal(defaultPage('contacts'), 'contacts-storage');
 	assert.equal(visibleProducts({ ...ALL_ON, contacts: false }).includes('contacts'), false);
 	assert.equal(visibleProducts({ ...ALL_ON, dashboard: false }).includes('contacts'), true);
+});
+
+
+test('browser settings remain available with dashboard and terminal disabled', () => {
+	assert.equal(defaultPage('browser'), 'browser-preferences');
+	assert.deepEqual(sidePages('browser'), ['browser-preferences']);
+	assert.deepEqual(visibleProducts({ browser: true, dashboard: false, editor: false, terminal: false, contacts: false, iconic: false, automation: false }), ['home', 'browser', 'automation', 'sync']);
 });

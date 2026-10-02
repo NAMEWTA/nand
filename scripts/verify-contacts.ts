@@ -1,3 +1,4 @@
+import { archiveLocation, safeArchiveName, queryResources, normalizeValues } from '../src/core/contacts/resources';
 import { WriteQueue } from '../src/shared/storage/write-queue';
 import { t, setLanguage } from '../src/shared/i18n/index';
 import assert from 'node:assert/strict';
@@ -16,12 +17,14 @@ import { Setting as StubSetting } from './obsidian-stub';
 import { parseHTML } from 'linkedom';
 import { h, render } from 'preact';
 import { ContactsSurface } from '../src/view/contacts/surface';
+import { ResourceList } from '../src/view/contacts/ResourceList';
 import type { ContactsPanelHost } from '../src/view/contacts/panel-contract';
 
 function fixture(kind: 'person' | 'company' = 'person', name = '张三'): ArchiveRecord {
 	const record = newRecord(kind);
 	record.fields.name = name;
-	record.path = `档案/${kind === 'person' ? '联系人' : '企业'}/${name}.md`;
+	record.folderPath = `档案/${kind === 'person' ? '个人档案' : '企业档案'}/${name}`;
+	record.path = record.folderPath + '/基本信息.md';
 	return record;
 }
 function round(record: ArchiveRecord): ArchiveRecord {
@@ -29,13 +32,26 @@ function round(record: ArchiveRecord): ArchiveRecord {
 	assert.deepEqual(parsed.errors, []);
 	return parsed;
 }
+
+test('5,000 archives stay indexed through repeated search and single-record updates', t => {
+	const index = new ContactsIndex(), started = performance.now();
+	for (let i = 0; i < 5000; i++) { const record = fixture('person', `Person ${i}`); record.fields.tags = ['team-' + i % 10]; index.set(record); }
+	const loaded = performance.now();
+	for (let i = 0; i < 20; i++) assert.equal(index.query({ ...emptyQuery(), search: 'Person 4999' }).length, 1);
+	const record = [...index.byPath.values()][4999]!;
+	index.set({ ...record, fields: { ...record.fields, name: 'Updated person' } });
+	assert.equal(index.query({ ...emptyQuery(), search: 'Updated person' }).length, 1);
+	assert.equal(index.byPath.size, 5000);
+	t.diagnostic(JSON.stringify({ records: 5000, indexMs: Math.round(loaded - started), search20AndUpdateMs: Math.round(performance.now() - loaded), vaultReadsDuringSearch: 0 }));
+	index.clear(); assert.equal(index.byPath.size, 0); assert.equal(index.byId.size, 0);
+});
 function job(company: ArchiveRecord, status: 'current' | 'past' = 'current') {
 	return {
 		id: crypto.randomUUID(),
 		company: {
 			id: company.id,
 			label: company.fields.name,
-			link: relativeLink('档案/联系人/张三.md', company.path),
+			link: relativeLink('档案/个人档案/张三/基本信息.md', company.path),
 		},
 		department: '业务部',
 		title: '经理',
@@ -282,20 +298,49 @@ function memoryVault() {
 		cachedRead: async (file: TFile) => text.get(file.path)!,
 		read: async (file: TFile) => text.get(file.path)!,
 		createFolder: async (path: string) => {
-			files.set(path, Object.assign(new TFolder(), { path }));
+			if (files.has(path)) throw new Error('exists');
+			const folder = Object.assign(new TFolder(), { path });
+			Object.defineProperty(folder, 'children', {
+				get: () =>
+					[...files.values()].filter(
+						(f) => f.path !== folder.path && f.path.slice(0, f.path.lastIndexOf('/')) === folder.path,
+					),
+			});
+			files.set(path, folder);
 		},
 		create: async (path: string, value: string) => {
 			if (files.has(path)) throw new Error('exists');
-			const f = Object.assign(new TFile(), { path, extension: 'md', stat: { mtime: Date.now() } });
+			const f = Object.assign(new TFile(), {
+				path,
+				extension: path.split('.').pop()!,
+				stat: { mtime: Date.now(), size: value.length },
+			});
 			files.set(path, f);
 			text.set(path, value);
 			emit('create', f);
 			return f;
 		},
+		rename: async (file: TFile | TFolder, next: string) => {
+			const oldPath = file.path;
+			const moved = [...files.entries()].filter(([path]) => path === oldPath || path.startsWith(oldPath + '/'));
+			for (const [path, value] of moved) {
+				files.delete(path);
+				value.path = next + path.slice(oldPath.length);
+				files.set(value.path, value);
+				if (text.has(path)) {
+					text.set(value.path, text.get(path)!);
+					text.delete(path);
+				}
+			}
+			emit('rename', file, oldPath);
+		},
+		createBinary: async (path: string, bytes: ArrayBuffer) => vault.create(path, new TextDecoder().decode(bytes)),
 		process: async (file: TFile, fn: (raw: string) => string) => {
 			if (fail) throw new Error('disk full');
 			const updated = fn(text.get(file.path)!);
 			text.set(file.path, updated);
+			file.stat.mtime++;
+			file.stat.size = updated.length;
 			emit('modify', file);
 			return updated;
 		},
@@ -305,7 +350,11 @@ function memoryVault() {
 		workspace: { getLeavesOfType: () => [], layoutReady: true },
 		fileManager: {
 			trashFile: async (file: TFile) => {
-				files.delete(file.path);
+				for (const path of files.keys())
+					if (path === file.path || path.startsWith(file.path + '/')) {
+						files.delete(path);
+						text.delete(path);
+					}
 				emit('delete', file);
 			},
 		},
@@ -347,7 +396,7 @@ test('vault integration: duplicate names, real files, disk failure, external edi
 	await f.controller.reload();
 	assert.equal(f.controller.index.byPath.size, 2);
 	const snapshot = await f.controller.snapshot(a.path);
-	await f.controller.remove(snapshot);
+	await f.controller.remove(await f.controller.deletion(snapshot.id));
 	assert.equal(f.controller.index.byPath.size, 1);
 	assert.ok(f.text.has(b.path));
 	f.controller.onunload();
@@ -481,9 +530,14 @@ test('format guide uses creation-time language and preserves existing documents 
 		const original = f.text.get(company.path)!;
 		setLanguage('zh');
 		await f.controller.create(newNamed('person', 'Later Person'));
-		assert.equal(f.text.get('档案/档案格式说明.md'), english, 'Switching language never replaces an existing guide');
+		assert.equal(
+			f.text.get('档案/档案格式说明.md'),
+			english,
+			'Switching language never replaces an existing guide',
+		);
 		assert.equal(f.text.get(company.path), original);
-		const base = await f.controller.snapshot(company.path), draft = cloneRecord(base);
+		const base = await f.controller.snapshot(company.path),
+			draft = cloneRecord(base);
 		draft.fields.name = 'Renamed Company';
 		const renamed = await f.controller.save(base, draft);
 		assert.equal(renamed.id, company.id);
@@ -500,7 +554,21 @@ test('format guide uses creation-time language and preserves existing documents 
 				assert.ok(guide.includes(`<!-- nand:${marker} -->`));
 				assert.ok(guide.includes(`<!-- /nand:${marker} -->`));
 			}
-			for (const field of ['nand-type', 'nand-id', 'birthday', 'birthplace', 'region', 'website', 'aliases', 'mobiles', 'phones', 'wechat', 'emails', 'tags', 'key_role'])
+			for (const field of [
+				'nand-type',
+				'nand-id',
+				'birthday',
+				'birthplace',
+				'region',
+				'website',
+				'aliases',
+				'mobiles',
+				'phones',
+				'wechat',
+				'emails',
+				'tags',
+				'key_role',
+			])
 				assert.ok(guide.includes('`' + field + '`'), field);
 		}
 		const custom = '# My guide\r\nKeep exact bytes: 用户内容\r\n';
@@ -519,7 +587,9 @@ test('format guide uses creation-time language and preserves existing documents 
 test('both format guides document table headings accepted by the real Markdown parser', () => {
 	for (const name of ['format-guide.md', 'format-guide-en.md']) {
 		const guide = readFileSync(`src/core/contacts/persist/${name}`, 'utf8');
-		const headers = guide.split('\n').filter((line) => /^\| (company|Companies|企业|person|People|联系人) \|/.test(line));
+		const headers = guide
+			.split('\n')
+			.filter((line) => /^\| (company|Companies|企业|person|People|联系人) \|/.test(line));
 		assert.ok(headers.length >= 6, 'Each guide documents machine, English and Chinese heading rows');
 		for (const header of headers) {
 			const columns = header.split('|').length - 2;
@@ -534,7 +604,11 @@ test('both format guides document table headings accepted by the real Markdown p
 
 test('archive folder row is the only contacts setting that reserves description width', () => {
 	setLanguage('zh');
-	const registry = (Setting as unknown as { created: Array<{ name: string; settingEl: { classList: { contains(name: string): boolean } } }> }).created;
+	const registry = (
+		Setting as unknown as {
+			created: Array<{ name: string; settingEl: { classList: { contains(name: string): boolean } } }>;
+		}
+	).created;
 	const before = registry.length;
 	const tab = {
 		plugin: { settings: { contacts: { rootFolder: '档案', maxColumns: 6 } } },
@@ -552,6 +626,223 @@ test('archive folder row is the only contacts setting that reserves description 
 	assert.equal(columns.settingEl.classList.contains('nand-contacts-folder-setting'), false);
 });
 
+test('strict folder entry rules exclude flat archives, ordinary material notes and nested fake entries', async () => {
+	const f = memoryVault();
+	const valid = await f.controller.create(newNamed('person', '王天肖'));
+	assert.equal(valid.path, '档案/个人档案/王天肖/基本信息.md');
+	assert.equal(valid.folderPath, '档案/个人档案/王天肖');
+	for (const path of [
+		'档案/联系人/旧档案.md',
+		valid.folderPath + '/沟通记录.md',
+		valid.folderPath + '/资料/基本信息.md',
+	]) {
+		await f.vault.create(path, createMarkdown(newNamed('person', '附件中的档案属性')));
+		assert.equal(archiveLocation('档案', path), null);
+	}
+	await f.controller.reload();
+	assert.equal(f.controller.index.byPath.size, 1);
+	assert.equal(f.controller.resources(valid.id).length, 1); // The unparented fake nested file is not a Vault folder child.
+	f.controller.onunload();
+});
+
+test('portable folder names and collisions never merge with an unrelated existing directory', async () => {
+	assert.equal(safeArchiveName('CON'), '_CON');
+	assert.equal(safeArchiveName('lpt1.txt'), '_lpt1.txt');
+	assert.equal(safeArchiveName(' 王/天:肖. '), '王-天-肖');
+	assert.throws(() => safeArchiveName('...'), /invalidName/);
+	const f = memoryVault();
+	await f.vault.createFolder('档案/个人档案/同名');
+	const record = await f.controller.create(newNamed('person', '同名'));
+	assert.match(record.folderPath, /同名-[\w-]+$/);
+	const edited = cloneRecord(record);
+	edited.fields.name = '改名';
+	assert.equal((await f.controller.save(record, edited)).folderPath, record.folderPath);
+	f.controller.onunload();
+});
+
+test('resources recurse, preserve sources, avoid primary names and report partial import failures', async () => {
+	const f = memoryVault();
+	const record = await f.controller.create(newNamed('company', '企业资料'));
+	await f.vault.createFolder(record.folderPath + '/项目资料');
+	await f.vault.create(record.folderPath + '/项目资料/说明.pdf', 'PDF');
+	const bytes = new ArrayBuffer(12);
+	new Uint8Array(bytes).set(new TextEncoder().encode('source bytes'));
+	const result = await f.controller.importResources(record.id, [
+		{ name: '介绍.pdf', read: async () => bytes },
+		{ name: '介绍.pdf', read: async () => bytes },
+		{
+			name: '坏文件.docx',
+			read: async () => {
+				throw new Error('unreadable');
+			},
+		},
+		{ name: '基本信息.md', read: async () => bytes },
+	]);
+	assert.equal(new TextDecoder().decode(bytes), 'source bytes');
+	assert.ok(result[0]!.path?.endsWith('/介绍.pdf'));
+	assert.ok(result[1]!.path?.endsWith('/介绍 (1).pdf'));
+	assert.equal(result[2]!.error, 'importFailed');
+	assert.ok(result[3]!.path?.endsWith('/基本信息 (1).md'));
+	assert.equal(f.controller.resources(record.id).length, 4);
+	assert.equal(
+		queryResources(f.controller.resources(record.id), '项目资料/', 'name')[0]!.relativePath,
+		'项目资料/说明.pdf',
+	);
+	assert.equal(queryResources(f.controller.resources(record.id), '不存在', 'modified').length, 0);
+	assert.ok((await f.controller.createNote(record.id, '沟通')).endsWith('/沟通.md'));
+	assert.ok((await f.controller.createNote(record.id, '沟通.md')).endsWith('/沟通 (1).md'));
+	assert.equal(f.controller.index.byPath.size, 1);
+	f.controller.onunload();
+});
+
+test('resource events notify without reparsing Markdown and a folder rename retains stable identity', async () => {
+	const f = memoryVault();
+	const record = await f.controller.create(newNamed('person', '晶晶'));
+	let reads = 0,
+		events = 0;
+	const cachedRead = f.vault.cachedRead;
+	f.vault.cachedRead = async (file) => {
+		reads++;
+		return cachedRead(file);
+	};
+	const unsubscribe = f.controller.subscribe(() => {
+		events++;
+	});
+	await f.controller.importResources(
+		record.id,
+		[1, 2, 3].map((n) => ({ name: `${n}.pdf`, read: async () => new ArrayBuffer(2) })),
+	);
+	assert.equal(events, 1);
+	assert.equal(reads, 0);
+	await f.vault.rename(f.vault.getAbstractFileByPath(record.folderPath)!, '档案/个人档案/晶晶新目录');
+	await new Promise((resolve) => setTimeout(resolve, 0));
+	assert.equal(f.controller.index.get(record.id)?.folderPath, '档案/个人档案/晶晶新目录');
+	assert.equal(f.controller.resources(record.id).length, 3);
+	assert.equal(reads, 1);
+	unsubscribe();
+	f.controller.onunload();
+	await assert.rejects(f.controller.createNote(record.id, '停用之后'), /disabled/);
+});
+
+test('whole-folder deletion rejects changed scope and unsaved material notes; unrelated folders survive', async () => {
+	const f = memoryVault();
+	const record = await f.controller.create(newNamed('person', '删除范围'));
+	const keep = await f.controller.create(newNamed('person', '保留'));
+	const ticket = await f.controller.deletion(record.id);
+	const note = await f.controller.createNote(record.id, '新资料');
+	await assert.rejects(f.controller.remove(ticket), /deleteChanged/);
+	const editor = Object.assign(Object.create(MarkdownView.prototype) as MarkdownView, {
+		file: f.vault.getFileByPath(note),
+		getMode: () => 'source',
+		editor: { getValue: () => '未保存' },
+	});
+	Object.assign(f.app.workspace, { getLeavesOfType: () => [{ view: editor }] });
+	await assert.rejects(f.controller.deletion(record.id), /editorConflict/);
+	Object.assign(f.app.workspace, { getLeavesOfType: () => [] });
+	const final = await f.controller.deletion(record.id);
+	assert.equal(final.resources, 1);
+	await f.controller.remove(final);
+	assert.equal(f.vault.getAbstractFileByPath(record.folderPath), undefined);
+	assert.equal(f.vault.getFileByPath(note), null);
+	assert.ok(f.vault.getFileByPath(keep.path));
+	await assert.rejects(f.controller.remove(final), /missing/);
+	f.controller.onunload();
+});
+
+test('delete queues behind imports and refuses the earlier confirmation scope', async () => {
+	const f = memoryVault();
+	const record = await f.controller.create(newNamed('person', '并发'));
+	const ticket = await f.controller.deletion(record.id);
+	let release!: (value: ArrayBuffer) => void;
+	const uploading = f.controller.importResources(record.id, [
+		{
+			name: '延迟.pdf',
+			read: () =>
+				new Promise((resolve) => {
+					release = resolve;
+				}),
+		},
+	]);
+	const removal = f.controller.remove(ticket);
+	await new Promise((resolve) => setTimeout(resolve, 0));
+	release(new ArrayBuffer(3));
+	await uploading;
+	await assert.rejects(removal, /deleteChanged/);
+	assert.ok(f.vault.getFileByPath(record.folderPath + '/延迟.pdf'));
+	f.controller.onunload();
+});
+
+test('company contact fields and normalized pasted values retain string semantics in Markdown', () => {
+	const record = fixture('company');
+	record.fields.phones = normalizeValues(['+1 212', '00123', '', '00123\n 00999 ']);
+	record.fields.emails = ['info@example.com'];
+	assert.deepEqual(round(record).fields.phones, ['+1 212', '00123', '00999']);
+	assert.deepEqual(round(record).fields.emails, ['info@example.com']);
+});
+
+test('resource list paginates at 60 and preserves search on live updates without opening stale rows', async () => {
+	const environment = globalThis as { document?: Document },
+		previous = environment.document;
+	const { document } = parseHTML('<html><body></body></html>');
+	Object.assign(globalThis, { document });
+	const target = document.createElement('div');
+	document.body.appendChild(target);
+	const record = fixture();
+	let files = Array.from({ length: 65 }, (_, index) => ({
+		path: record.folderPath + `/资料${index}.pdf`,
+		relativePath: `资料${index}.pdf`,
+		name: `资料${index}.pdf`,
+		extension: 'pdf',
+		size: index,
+		modified: index,
+	}));
+	let opened = '';
+	const view = {
+		resources: () => files,
+		newNote() {},
+		addResources() {},
+		openResource(path: string) {
+			opened = path;
+		},
+	} as unknown as ContactsPanelHost;
+	const paint = () => render(h(ResourceList, { view, record }), target);
+	const settle = () => new Promise((resolve) => setTimeout(resolve, 50));
+	try {
+		paint();
+		await settle();
+		assert.equal(target.querySelectorAll('button.nand-contacts-resource-row').length, 60);
+		target.querySelectorAll<HTMLButtonElement>('.nand-contacts-pagination button')[1]!.click();
+		await settle();
+		assert.equal(target.querySelectorAll('button.nand-contacts-resource-row').length, 5);
+		const search = target.querySelector('input')!;
+		search.value = '资料64';
+		search.dispatchEvent(new document.defaultView!.Event('input', { bubbles: true }));
+		await settle();
+		assert.equal(target.querySelectorAll('button.nand-contacts-resource-row').length, 1);
+		const added = {
+			...files[0]!,
+			path: record.folderPath + '/项目/资料64.pdf',
+			relativePath: '项目/资料64.pdf',
+			name: '资料64.pdf',
+		};
+		files = [...files, added];
+		paint();
+		await settle();
+		assert.equal(search.value, '资料64');
+		assert.equal(target.querySelectorAll('button.nand-contacts-resource-row').length, 2);
+		target.querySelector<HTMLButtonElement>('button.nand-contacts-resource-row')!.click();
+		assert.equal(opened, record.folderPath + '/资料64.pdf');
+		files = [];
+		paint();
+		await settle();
+		assert.equal(target.querySelectorAll('button.nand-contacts-resource-row').length, 0);
+	} finally {
+		render(null, target);
+		if (previous) environment.document = previous;
+		else delete environment.document;
+	}
+});
+
 test('empty archive filters explain missing data and preserve existing choices on apply', () => {
 	try {
 		for (const language of ['zh', 'en'] as const) {
@@ -561,10 +852,13 @@ test('empty archive filters explain missing data and preserve existing choices o
 				const controller = { app: {}, index, choices: () => [] } as unknown as ContactsController;
 				const query = { ...emptyQuery(), kind };
 				const empty = new FilterModal(controller, query, () => {});
-				Object.assign(empty, { modalEl: new El('div'), setTitle() {} });
+				Object.assign(empty, { modalEl: new El('div'), setTitle() { return empty; } });
 				empty.onOpen();
 				const emptyContent = empty.contentEl as unknown as El;
-				assert.equal(emptyContent.querySelectorAll('.nand-contacts-placeholder').length, kind === 'person' ? 5 : 2);
+				assert.equal(
+					emptyContent.querySelectorAll('.nand-contacts-placeholder').length,
+					kind === 'person' ? 5 : 2,
+				);
 				assert.equal(emptyContent.querySelector('p')?.textContent, t('contacts.filterEmpty'));
 				for (const placeholder of emptyContent.querySelectorAll('.nand-contacts-placeholder')) {
 					assert.equal(placeholder.textContent, t('contacts.noFilterOptions'));
@@ -579,15 +873,24 @@ test('empty archive filters explain missing data and preserve existing choices o
 				query.regions = ['Previous region'];
 				let applied = { ...emptyQuery(), kind };
 				const before = (Setting as unknown as typeof StubSetting).created.length;
-				const partial = new FilterModal(controller, query, (next) => { applied = next; });
-				Object.assign(partial, { modalEl: new El('div'), setTitle() {} });
+				const partial = new FilterModal(controller, query, (next) => {
+					applied = next;
+				});
+				Object.assign(partial, { modalEl: new El('div'), setTitle() { return partial; } });
 				partial.onOpen();
 				const partialContent = partial.contentEl as unknown as El;
-				assert.equal(partialContent.querySelectorAll('.nand-contacts-placeholder').length, kind === 'person' ? 4 : 1);
+				assert.equal(
+					partialContent.querySelectorAll('.nand-contacts-placeholder').length,
+					kind === 'person' ? 4 : 1,
+				);
 				assert.equal(partialContent.textContent.includes(t('contacts.filterEmpty')), false);
 				const settings = (Setting as unknown as typeof StubSetting).created.slice(before);
 				settings.find((setting) => setting.name === '上海')!.toggles[0]!.fire!(true);
-				assert.deepEqual(query.regions, ['Previous region'], 'Editing the modal does not mutate the original query');
+				assert.deepEqual(
+					query.regions,
+					['Previous region'],
+					'Editing the modal does not mutate the original query',
+				);
 				settings.at(-1)!.buttons[1]!.click!();
 				assert.deepEqual(applied.regions, ['Previous region', '上海']);
 				partial.onClose();
@@ -615,20 +918,48 @@ test('archive search follows the selected kind and empty prose stays distinct fr
 	let unmounted = 0;
 	const view: ContactsPanelHost = {
 		state: { query: emptyQuery(), page: 0, selectedPath: '', selectedId: '', scroll: 0 },
-		enabled: true, columns: 6,
+		enabled: true,
+		columns: 6,
 		controller: { index, error: '', loading: false, reload: async () => {} },
 		mountMarkdown(target, text) {
 			mounted.push(text);
 			const p = document.createElement('p');
 			p.textContent = text;
 			target.appendChild(p);
-			return () => { unmounted++; target.textContent = ''; };
+			return () => {
+				unmounted++;
+				target.textContent = '';
+			};
 		},
-		select(path) { view.state.selectedPath = path; paint(); },
-		back() { view.state.selectedPath = ''; paint(); },
-		changeKind(kind) { view.state.query.kind = kind; paint(); },
-		search(value) { view.state.query.search = value; paint(); },
-		sort() {}, page() {}, clearFilters() {}, filters() {}, add() {}, edit() {}, deleteRow() {}, more() {},
+		select(path) {
+			view.state.selectedPath = path;
+			paint();
+		},
+		back() {
+			view.state.selectedPath = '';
+			paint();
+		},
+		changeKind(kind) {
+			view.state.query.kind = kind;
+			paint();
+		},
+		search(value) {
+			view.state.query.search = value;
+			paint();
+		},
+		sort() {},
+		page() {},
+		clearFilters() {},
+		filters() {},
+		add() {},
+		edit() {},
+		deleteRow() {},
+		more() {},
+		resources: () => [],
+		newNote() {},
+		addResources() {},
+		openResource() {},
+		revealFolder() {},
 	};
 	const paint = () => render(h(ContactsSurface, { view }), panel);
 	try {
@@ -647,13 +978,18 @@ test('archive search follows the selected kind and empty prose stays distinct fr
 			input.dispatchEvent(new document.defaultView!.Event('input', { bubbles: true }));
 			assert.equal(view.state.query.search, 'Example');
 			for (const record of [person, company]) {
-				const keys = record.kind === 'person' ? ['traits', 'habits', 'notes'] as const : ['notes'] as const;
+				const keys = record.kind === 'person' ? (['traits', 'habits', 'notes'] as const) : (['notes'] as const);
 				for (const key of keys) record.prose[key] = ' \n ';
 				view.state.selectedPath = record.path;
 				const before = mounted.length;
-				paint(); await waitForEffects();
-				const proseSections = Array.from(panel.querySelectorAll<HTMLElement>('.nand-contacts-section')).slice(-keys.length);
+				paint();
+				await waitForEffects();
+				const proseSections = Array.from(panel.querySelectorAll<HTMLElement>('.nand-contacts-section')).slice(
+					-keys.length,
+				);
 				for (const section of proseSections) {
+					section.querySelector<HTMLButtonElement>('.nand-contacts-section-toggle')!.click();
+					await waitForEffects();
 					const placeholder = section.querySelector('p')!;
 					assert.equal(placeholder.textContent, t('contacts.noDetails'));
 					assert.ok(placeholder.classList.contains('nand-contacts-muted'));
@@ -662,12 +998,19 @@ test('archive search follows the selected kind and empty prose stays distinct fr
 				assert.equal(mounted.length, before, 'Empty prose does not invoke the Markdown renderer');
 				const userText = t('contacts.noDetails');
 				for (const key of keys) record.prose[key] = userText;
-				paint(); await waitForEffects();
-				assert.deepEqual(mounted.slice(before), keys.map(() => userText), 'Literal user text matching the placeholder stays real Markdown');
-				for (const section of proseSections) assert.equal(section.querySelector('.nand-contacts-placeholder'), null);
+				paint();
+				await waitForEffects();
+				assert.deepEqual(
+					mounted.slice(before),
+					keys.map(() => userText),
+					'Literal user text matching the placeholder stays real Markdown',
+				);
+				for (const section of proseSections)
+					assert.equal(section.querySelector('.nand-contacts-placeholder'), null);
 				const beforeCleanup = unmounted;
 				for (const key of keys) record.prose[key] = '';
-				paint(); await waitForEffects();
+				paint();
+				await waitForEffects();
 				assert.equal(unmounted - beforeCleanup, keys.length, 'Clearing prose releases its Markdown renderer');
 			}
 		}

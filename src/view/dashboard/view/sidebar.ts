@@ -1,3 +1,4 @@
+import { localizedAttributes, setLocalizedAttribute } from '../../primitives/localized-dom';
 import { Platform } from 'obsidian';
 import { t } from '../../../shared/i18n/index';
 import { renderQuickActions } from '../notes/quick-actions';
@@ -76,6 +77,7 @@ export function renderSidebar(
 					})();
 				},
 			},
+			this.plugin.automationHost,
 		);
 	};
 
@@ -114,7 +116,18 @@ export function renderSidebar(
 
 export function setupSidebarBehavior(this: DashboardView, sidebar: HTMLElement, root: HTMLElement): void {
 	// Create slim indicator (visible only when collapsed)
-	sidebar.createDiv({ cls: 'dashboard-sidebar-slim-indicator' });
+	const indicator = sidebar.createEl('button', { cls: 'dashboard-sidebar-slim-indicator', attr: { type: 'button', ...localizedAttributes('common.expandSidebar', undefined, 'aria-label') } });
+	indicator.addEventListener('click', () => {
+		sidebar.removeClass('dashboard-sidebar--collapsed'); sidebar.addClass('dashboard-sidebar--expanded'); this.sidebarExpanded = true;
+	});
+	const syncFocus = () => {
+		const scroll = sidebar.querySelector<HTMLElement>('.dashboard-sidebar-scroll');
+		if (scroll) scroll.inert = sidebar.hasClass('dashboard-sidebar--collapsed');
+	};
+	syncFocus();
+	const observer = new (sidebar.win as Window & { MutationObserver: typeof MutationObserver }).MutationObserver(syncFocus);
+	observer.observe(sidebar, { attributes: true, attributeFilter: ['class'] });
+	this.cleanupFns.push(() => observer.disconnect());
 
 	// Use capture phase so child handlers can't stopPropagation before we see it
 	sidebar.addEventListener(
@@ -182,7 +195,7 @@ export function applySidebarSizing(this: DashboardView, sidebar: HTMLElement): v
  *  mid-drag discipline of the section height handle. */
 export function attachStripHeightHandle(this: DashboardView, sidebar: HTMLElement): void {
 	const handle = sidebar.createDiv({ cls: 'dashboard-sidebar-strip-handle' });
-	handle.setAttribute('aria-label', t('view.stripResizeHint'));
+	setLocalizedAttribute(handle, 'aria-label', 'view.stripResizeHint');
 	handle.addEventListener('pointerdown', (e) => {
 		const startY = e.clientY;
 		// Settings anchor, not offsetHeight: the collapsed strip's rendered
@@ -223,7 +236,7 @@ export function attachStripHeightHandle(this: DashboardView, sidebar: HTMLElemen
  *  no JS layout work. */
 export function attachSidebarWidthHandle(this: DashboardView, sidebar: HTMLElement): void {
 	const handle = sidebar.createDiv({ cls: 'dashboard-sidebar-width-handle' });
-	handle.setAttribute('aria-label', t('view.sidebarResizeHint'));
+	setLocalizedAttribute(handle, 'aria-label', 'view.sidebarResizeHint');
 	handle.addEventListener('pointerdown', (e) => {
 		const startX = e.clientX;
 		const startW = clampSidebarWidth(this.plugin.settings.sidebarWidth);

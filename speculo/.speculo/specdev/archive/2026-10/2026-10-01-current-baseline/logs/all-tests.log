@@ -1,0 +1,631 @@
+Already up to date
+Done in 322ms using pnpm v11.1.3
+$ node scripts/run-all-tests.mjs
+$ node scripts/verify-build-text.mjs
+Build text: LF/CRLF assets and license banners are equivalent
+$ esbuild scripts/verify-browser.ts --bundle --platform=node --format=cjs --outfile=scripts/tmp/verify-browser.cjs --alias:obsidian=./scripts/obsidian-stub.ts --log-level=warning && node --test scripts/tmp/verify-browser.cjs
+✔ URL normalization preserves parameters and distinguishes local services, domains and searches (1.8548ms)
+✔ agent attachment strips escape/control sequences, bounds page text and never appends Enter (1.8035ms)
+✔ Agent delivery refuses shell/unready sessions and only pastes into the selected input (10064.6632ms)
+✔ history is local, deduplicated and bounded; restored state clamps invalid values (5.8046ms)
+✔ web shortcuts round trip without changing legacy link and embedded web semantics (5.8307ms)
+✔ same-page mutations are serialized and closing cancels active and queued work (0.6629ms)
+✔ markup geometry, pixel scaling, undo and redo keep immutable history (0.3893ms)
+✔ AX snapshots disambiguate repeated buttons and bind iframe refs to their CDP session (0.6725ms)
+✔ debugger leases detach only the connection they own and only after last release (0.1874ms)
+✔ native popup policy returns synchronously, rejects unsafe navigation and cleans up (2.1659ms)
+✔ authenticated local bridge and generated CLI isolate vaults and remove connection on close (152.4233ms)
+ℹ tests 11
+ℹ suites 0
+ℹ pass 11
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 10380.0862
+$ esbuild scripts/verify-mobile-stability.ts --bundle --platform=node --format=cjs --outfile=node_modules/.tmp/verify-mobile-stability.cjs --log-level=warning && node node_modules/.tmp/verify-mobile-stability.cjs
+mobile interaction stability: 5/5 passed
+$ esbuild scripts/verify-weather-mapping.ts --bundle --platform=node --format=cjs --outfile=node_modules/.tmp/verify-weather-mapping.cjs --alias:obsidian=./scripts/obsidian-stub.ts --log-level=warning && node node_modules/.tmp/verify-weather-mapping.cjs
+verify-weather-mapping: 104 legend symbols + regression and fallback cases OK
+$ esbuild scripts/verify-folder-tag-search.ts --bundle --platform=node --format=cjs --outfile=node_modules/.tmp/verify-folder-tag-search.cjs --alias:obsidian=./scripts/obsidian-stub.ts --log-level=warning && node node_modules/.tmp/verify-folder-tag-search.cjs
+folder tag search: ALL PASS (7 checks)
+$ esbuild scripts/verify-visible-properties.ts --bundle --platform=node --format=cjs --outfile=node_modules/.tmp/verify-visible-properties.cjs --alias:obsidian=./scripts/obsidian-stub.ts --log-level=warning && node node_modules/.tmp/verify-visible-properties.cjs
+selectBadgeKeys semantics: PASS
+VisiblePropertiesEditor UI: PASS
+FolderConfigModal round-trip: PASS
+visible properties: ALL PASS
+$ esbuild scripts/verify-calendar-task-insert.ts --bundle --platform=node --format=cjs --outfile=node_modules/.tmp/verify-calendar-task-insert.cjs --alias:obsidian=./scripts/obsidian-stub.ts --log-level=warning && node node_modules/.tmp/verify-calendar-task-insert.cjs
+verify-calendar-task-insert: 10 scenarios + sanity OK
+$ esbuild scripts/verify-calendar-daynum.ts --bundle --platform=node --format=cjs --outfile=node_modules/.tmp/verify-calendar-daynum.cjs --alias:obsidian=./scripts/obsidian-stub.ts --log-level=warning && node node_modules/.tmp/verify-calendar-daynum.cjs
+verify-calendar-daynum: 6 scenarios OK
+$ esbuild scripts/verify-calendar-section.ts --bundle --platform=node --format=cjs --outfile=node_modules/.tmp/verify-calendar-section.cjs --alias:obsidian=./scripts/obsidian-stub.ts --log-level=warning && node node_modules/.tmp/verify-calendar-section.cjs
+verify-calendar-section: 6 scenarios OK
+$ esbuild scripts/verify-confirm-dialog.ts --bundle --platform=node --format=cjs --outfile=node_modules/.tmp/verify-confirm-dialog.cjs --alias:obsidian=./scripts/obsidian-stub.ts --log-level=warning && node node_modules/.tmp/verify-confirm-dialog.cjs
+verify-confirm-dialog: 7 scenarios OK
+$ esbuild scripts/verify-path-picker.ts --bundle --platform=node --format=cjs --outfile=node_modules/.tmp/verify-path-picker.cjs --alias:obsidian=./scripts/obsidian-stub.ts --log-level=warning && node node_modules/.tmp/verify-path-picker.cjs
+verify-path-picker: 6 scenarios OK
+$ esbuild scripts/verify-library-cover.ts --bundle --platform=node --format=cjs --outfile=node_modules/.tmp/verify-library-cover.cjs --alias:obsidian=./scripts/obsidian-stub.ts --log-level=warning && node node_modules/.tmp/verify-library-cover.cjs
+extractCoverValue semantics: PASS
+viewMode round-trip: PASS
+library cover: ALL PASS
+$ esbuild scripts/verify-kanban-upgrade.ts --bundle --platform=node --format=cjs --outfile=node_modules/.tmp/verify-kanban-upgrade.cjs --alias:obsidian=./scripts/obsidian-stub.ts --log-level=warning && node node_modules/.tmp/verify-kanban-upgrade.cjs
+kanbanShowCovers round-trip: PASS
+kanban property badges: PASS
+verify-kanban-upgrade: all assertions passed
+$ esbuild scripts/verify-pair-width.ts --bundle --platform=node --format=cjs --outfile=node_modules/.tmp/verify-pair-width.cjs --alias:obsidian=./scripts/obsidian-stub.ts --log-level=warning && node node_modules/.tmp/verify-pair-width.cjs
+column-pairs width clearing: PASS
+parser width round-trip: PASS
+applyPairWidth rendering: PASS
+verify-pair-width: all assertions passed
+$ esbuild scripts/verify-layout-stacked.ts --bundle --platform=node --format=cjs --outfile=node_modules/.tmp/verify-layout-stacked.cjs --alias:obsidian=./scripts/obsidian-stub.ts --log-level=warning && node node_modules/.tmp/verify-layout-stacked.cjs
+layout stacked: ALL PASS
+$ esbuild scripts/verify-widget-span.ts --bundle --platform=node --format=cjs --outfile=node_modules/.tmp/verify-widget-span.cjs --alias:obsidian=./scripts/obsidian-stub.ts --log-level=warning && node node_modules/.tmp/verify-widget-span.cjs
+widget span: ALL PASS
+$ esbuild scripts/verify-library-card-size.ts --bundle --platform=node --format=cjs --outfile=node_modules/.tmp/verify-library-card-size.cjs --alias:obsidian=./scripts/obsidian-stub.ts --log-level=warning && node node_modules/.tmp/verify-library-card-size.cjs
+cardSize parser round-trip: PASS
+card size toolbar + rendering: PASS
+library card size: ALL PASS
+$ esbuild scripts/verify-media-thumb-size.ts --bundle --platform=node --format=cjs --outfile=node_modules/.tmp/verify-media-thumb-size.cjs --alias:obsidian=./scripts/obsidian-stub.ts --log-level=warning && node node_modules/.tmp/verify-media-thumb-size.cjs
+media thumb size persistence: ALL PASS
+$ esbuild scripts/verify-library-group.ts --bundle --platform=node --format=cjs --outfile=node_modules/.tmp/verify-library-group.cjs --alias:obsidian=./scripts/obsidian-stub.ts --log-level=warning && node node_modules/.tmp/verify-library-group.cjs
+viewGroup parser round-trip: PASS
+groupLibraryResults: PASS
+group toolbar + rendering: PASS
+library view grouping: ALL PASS
+$ esbuild scripts/verify-countdown-picker.ts --bundle --platform=node --format=cjs --outfile=node_modules/.tmp/verify-countdown-picker.cjs --alias:obsidian=./scripts/obsidian-stub.ts --log-level=warning && node node_modules/.tmp/verify-countdown-picker.cjs
+countdown picker: ALL PASS
+$ esbuild scripts/verify-gallery-placeholder.ts --bundle --platform=node --format=cjs --outfile=node_modules/.tmp/verify-gallery-placeholder.cjs --alias:obsidian=./scripts/obsidian-stub.ts --log-level=warning && node node_modules/.tmp/verify-gallery-placeholder.cjs
+gallery placeholder cover: ALL PASS
+$ esbuild scripts/verify-album-widget.ts --bundle --platform=node --format=cjs --outfile=node_modules/.tmp/verify-album-widget.cjs --alias:obsidian=./scripts/obsidian-stub.ts --log-level=warning && node node_modules/.tmp/verify-album-widget.cjs
+album widget: ALL PASS
+$ esbuild scripts/verify-doc-bracket-paths.ts --bundle --platform=node --format=cjs --outfile=node_modules/.tmp/verify-doc-bracket-paths.cjs --alias:obsidian=./scripts/obsidian-stub.ts --log-level=warning && node node_modules/.tmp/verify-doc-bracket-paths.cjs
+doc bracket paths: ALL PASS
+$ esbuild scripts/verify-property-operator.ts --bundle --platform=node --format=cjs --outfile=node_modules/.tmp/verify-property-operator.cjs --alias:obsidian=./scripts/obsidian-stub.ts --log-level=warning && node node_modules/.tmp/verify-property-operator.cjs
+verify-property-operator: all assertions passed
+$ esbuild scripts/verify-library-new-note.ts --bundle --platform=node --format=cjs --outfile=node_modules/.tmp/verify-library-new-note.cjs --alias:obsidian=./scripts/obsidian-stub.ts --log-level=warning && node node_modules/.tmp/verify-library-new-note.cjs
+buildNewNoteProps mapping: PASS
+yamlFrontmatter escaping: PASS
+createNoteWithProps + pickFolderFromMenu: PASS
+toolbar button integration: PASS
+template pipeline + folder-config regression: PASS
+library new note: ALL PASS
+$ esbuild scripts/verify-weread-progress.ts --bundle --platform=node --format=cjs --outfile=node_modules/.tmp/verify-weread-progress.cjs --alias:obsidian=./scripts/obsidian-stub.ts --log-level=warning && node node_modules/.tmp/verify-weread-progress.cjs
+progressFromGetProgress: PASS
+parseShelf finishReading: PASS
+weread shelf facets: PASS
+needsProgressFetch: PASS
+progress store: PASS
+weread config round-trip: PASS
+weread progress: ALL PASS
+$ esbuild scripts/verify-weread-stats.ts --bundle --platform=node --format=cjs --outfile=node_modules/.tmp/verify-weread-stats.cjs --alias:obsidian=./scripts/obsidian-stub.ts --log-level=warning && node node_modules/.tmp/verify-weread-stats.cjs
+parseReadStats: PASS
+computeReadStreaks: PASS
+bucketLabel: PASS
+heatmap cells + shelf overlay: PASS
+default stats blocks: PASS
+weread stats: ALL PASS
+$ esbuild scripts/verify-web-section.ts --bundle --platform=node --format=cjs --outfile=node_modules/.tmp/verify-web-section.cjs --alias:obsidian=./scripts/obsidian-stub.ts --log-level=warning && node node_modules/.tmp/verify-web-section.cjs
+[Dashboard] web precheck failed: https://flaky.com Error: offline
+    at main (C:\Data\01-Code\nand\node_modules\.tmp\verify-web-section.cjs:19808:33)
+[Dashboard] web precheck failed: https://hang.com Error: precheck timeout
+    at Timeout.<anonymous> (C:\Data\01-Code\nand\node_modules\.tmp\verify-web-section.cjs:19013:48)
+    at listOnTimeout (node:internal/timers:685:17)
+    at process.processTimers (node:internal/timers:618:7)
+verify-web-section: 22 scenarios OK
+$ esbuild scripts/verify-card-move.ts --bundle --platform=node --format=cjs --outfile=node_modules/.tmp/verify-card-move.cjs --alias:obsidian=./scripts/obsidian-stub.ts --log-level=warning && node node_modules/.tmp/verify-card-move.cjs
+verify-card-move: note appearance and linked documents OK
+verify-card-move: move, conversion, content retention and persistence OK
+verify-card-move: sync write, edit and reload integration OK
+$ esbuild scripts/verify-music-account.ts --bundle --platform=node --format=cjs --outfile=node_modules/.tmp/verify-music-account.cjs --alias:obsidian=./scripts/music-network-stub.ts --alias:electron=./scripts/music-electron-stub.ts --alias:@electron/remote=./scripts/music-electron-stub.ts --log-level=warning && node node_modules/.tmp/verify-music-account.cjs
+verify-music-account: login, cancellation, cleanup, account-isolated playback and -110 retry/skip notices OK
+$ esbuild scripts/verify-music-client.ts --bundle --platform=node --format=cjs --outfile=node_modules/.tmp/verify-music-client.cjs --alias:obsidian=./scripts/obsidian-stub.ts --log-level=warning && node node_modules/.tmp/verify-music-client.cjs
+verify-music-client: 54 assertions OK
+$ esbuild scripts/verify-banner-quote-font.ts --bundle --platform=node --format=cjs --outfile=node_modules/.tmp/verify-banner-quote-font.cjs --alias:obsidian=./scripts/obsidian-stub.ts --log-level=warning && node node_modules/.tmp/verify-banner-quote-font.cjs
+verify-banner-quote-font: all 7 checks passed
+$ esbuild scripts/verify-theme-studio-colors.ts --bundle --platform=node --format=cjs --outfile=node_modules/.tmp/verify-theme-studio-colors.cjs --alias:obsidian=./scripts/obsidian-stub.ts --log-level=warning && node node_modules/.tmp/verify-theme-studio-colors.cjs
+verify-theme-studio-colors: all 7 checks passed
+$ esbuild scripts/verify-card-new-note.ts --bundle --platform=node --format=cjs --outfile=node_modules/.tmp/verify-card-new-note.cjs --alias:obsidian=./scripts/obsidian-stub.ts --log-level=warning && node node_modules/.tmp/verify-card-new-note.cjs
+verify-card-new-note: all 7 checks passed
+$ esbuild scripts/verify-memo-markdown.ts --bundle --platform=node --format=cjs --outfile=node_modules/.tmp/verify-memo-markdown.cjs --alias:obsidian=./scripts/obsidian-stub.ts --log-level=warning && node node_modules/.tmp/verify-memo-markdown.cjs
+verify-memo-markdown: all 5 checks passed
+$ esbuild scripts/verify-memo-note-template.ts --bundle --platform=node --format=cjs --outfile=node_modules/.tmp/verify-memo-note-template.cjs --alias:obsidian=./scripts/obsidian-stub.ts --log-level=warning && node node_modules/.tmp/verify-memo-note-template.cjs
+memo note template: ALL PASS
+$ esbuild scripts/verify-expense.ts --bundle --platform=node --format=cjs --outfile=node_modules/.tmp/verify-expense.cjs --alias:obsidian=./scripts/obsidian-stub.ts --log-level=warning && node node_modules/.tmp/verify-expense.cjs
+verify-expense: all assertions passed
+$ esbuild scripts/verify-refresh-scope.ts --bundle --platform=node --format=cjs --outfile=node_modules/.tmp/verify-refresh-scope.cjs --alias:obsidian=./scripts/obsidian-stub.ts --log-level=warning && node node_modules/.tmp/verify-refresh-scope.cjs
+scope predicate filter: PASS
+signature skip: PASS
+mtime rebuild: PASS
+excluded-folder skip: PASS
+signature invalidation: PASS
+scope isolation: PASS
+verify-refresh-scope: ALL PASS
+$ esbuild scripts/verify-scroll-root.ts --bundle --platform=node --format=cjs --outfile=node_modules/.tmp/verify-scroll-root.cjs --alias:obsidian=./scripts/obsidian-stub.ts --log-level=warning && node node_modules/.tmp/verify-scroll-root.cjs
+full-tree capture/replay: PASS
+anchor stability under reorder: PASS
+graceful degradation: PASS
+verify-scroll-root: ALL PASS
+$ esbuild scripts/verify-editor-comments.ts --bundle --platform=node --format=cjs --outfile=node_modules/.tmp/verify-editor-comments.cjs --alias:obsidian=./scripts/obsidian-stub.ts --log-level=warning && node node_modules/.tmp/verify-editor-comments.cjs
+Comment storage: 18 failure/recovery scenarios passed
+Comment handoff: 8 delayed/failing persistence cases and generation isolation passed
+verify-editor-comments: ok
+$ node --experimental-strip-types --import ./scripts/register-ts-hooks.mjs --test src/plugin/settings/nav.test.ts src/plugin/settings/language.test.ts src/plugin/settings/connection-menu.test.ts src/plugin/settings/weather-copy.test.ts src/plugin/terminal-leaf-kind.test.ts src/plugin/module-lifecycle.test.ts && esbuild src/plugin/settings/terminal-sections.test.ts --bundle --platform=node --format=cjs --outfile=scripts/tmp/terminal-sections.test.cjs --alias:obsidian=./scripts/iconic-obsidian-stub.ts --loader:.svg=text --log-level=warning && node --test scripts/tmp/terminal-sections.test.cjs && esbuild src/plugin/settings/setting-definitions.test.ts --bundle --platform=node --format=cjs --outfile=scripts/tmp/setting-definitions.test.cjs --alias:obsidian=./scripts/iconic-obsidian-stub.ts --loader:.svg=text --log-level=warning && node --test scripts/tmp/setting-definitions.test.cjs
+✔ board and editor toggles preserve every terminal session and output (4.4296ms)
+✔ only real terminal transitions replace leaves; repeated flags are no-ops (0.3332ms)
+✔ mobile never activates a terminal (0.1414ms)
+✔ queued requests read the latest flags and wait for shutdown (0.3451ms)
+✔ a rejected transition does not poison the queue (0.4945ms)
+✔ unload prevents pending module work from starting services (0.2873ms)
+✔ unload during comment handoff cannot start later modules (0.1568ms)
+✔ archive transitions run on mobile without restarting the terminal (0.1434ms)
+✔ automation stops before its terminal dependency and repeated toggles preserve independent sessions (0.5135ms)
+✔ connection menu matches the server-connection title in both plugin languages (0.7986ms)
+✔ other terminal menu labels stay on their existing keys (0.2214ms)
+✔ settings tab reads terminal menu labels from the shared helper (0.4269ms)
+✔ missing and invalid language preferences use Chinese; explicit English survives (1.0589ms)
+✔ language requests serialize and publish only after successful persistence (0.9217ms)
+✔ failed persistence keeps the previous language and permits a later retry (0.5617ms)
+✔ ordinary setting saves queued during a language write use the newly committed preference (0.2161ms)
+✔ home is the first primary settings product (1.3828ms)
+✔ top tabs keep home and sync and hide closed domains (0.3477ms)
+✔ domain sections stay in their previous order for stacking on one tab (0.1884ms)
+✔ settings stylesheet does not keep a left-hand settings column (5.3035ms)
+✔ archive folder setting reserves room for its description (5.979ms)
+✔ stored editor placeholder selections return to comments while preserving preferences (0.3391ms)
+✔ archives has independent navigation and respects its module gate (0.1485ms)
+✔ browser settings remain available with dashboard and terminal disabled (0.0941ms)
+✔ weather setting copy is translated in both languages (0.6487ms)
+✔ an active host reopens a terminal leaf (0.7785ms)
+✔ an inactive host reopens the placeholder leaf (0.1912ms)
+ℹ tests 27
+ℹ suites 0
+ℹ pass 27
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 276.0627
+✔ stacked terminal sections keep the appearance block, launcher subscription, and offline hint (23.6899ms)
+ℹ tests 1
+ℹ suites 0
+ℹ pass 1
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 138.4775
+✔ declarative setting names are unique in both languages (1.7814ms)
+✔ language is searchable on Home, independently of dashboard availability (0.2712ms)
+ℹ tests 2
+ℹ suites 0
+ℹ pass 2
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 117.7929
+$ node scripts/run-terminal-tests.mjs
+✔ claude transcripts keep cwd, id, and the first user line (3.8233ms)
+✔ an empty claude file is not a session (0.5697ms)
+✔ codex transcripts read session_meta and the first user message (2.1363ms)
+✔ gemini chat documents use the first user turn (0.9921ms)
+✔ getAiLauncherEntry returns the catalog entry for a known id (2.1252ms)
+✔ getAiLauncherEntry returns undefined for an unknown id (0.3494ms)
+✔ partitionLaunchers groups catalog scripts and leaves regular ones in regular bucket (1.3493ms)
+✔ partitionLaunchers preserves the original order within each bucket (0.3024ms)
+✔ partitionLaunchers handles an empty input gracefully (0.1979ms)
+✔ AI_LAUNCHER_CATALOG only contains coding agent entries today (0.2353ms)
+✔ commandAvailabilityToLauncherStatus maps probe results to badge statuses (0.197ms)
+✔ getInstallCommandForPlatform returns the macOS command for Claude Code (0.3024ms)
+✔ getInstallCommandForPlatform returns the Windows command for Claude Code (0.1712ms)
+✔ getInstallCommandForPlatform falls back to null for unsupported platforms (0.226ms)
+✔ getInstallCommandForPlatform returns null when no install commands exist (0.1863ms)
+✔ every catalog entry advertises an install command for the three major desktop platforms (0.2207ms)
+✔ every catalog entry advertises a version registry source (0.2156ms)
+✔ version registry sources match the documented endpoints (0.2119ms)
+✔ readiness is not-installed when PATH probe failed and no local version was found (1.4671ms)
+✔ readiness is unknown when PATH probe was inconclusive and no local version was found (0.3023ms)
+✔ readiness is ready when PATH probe failed but the fallback scan found a binary (0.2283ms)
+✔ readiness is update-available when local is older than the registry version (0.2856ms)
+✔ readiness stays ready when local matches the latest version (8.3564ms)
+✔ readiness stays ready when registry lookup failed but local probe succeeded (0.4113ms)
+✔ readinessToBadge maps update-available straight through (0.3057ms)
+✔ filterSynchronizedOutputScrollbackPurge strips ED3 only while synchronized output is active (1.6899ms)
+✔ filterSynchronizedOutputScrollbackPurge preserves ED3 outside synchronized output (0.3237ms)
+✔ filterSynchronizedOutputScrollbackPurge handles tracked sequences split across chunks (0.3432ms)
+✔ Claude Code path-reference mode is inactive before observing TUI signals (1.5439ms)
+✔ Claude Code path-reference mode resets when Claude Code disables modifyOtherKeys (0.3486ms)
+✔ Claude Code path-reference mode resets after returning to the shell prompt (0.2066ms)
+✔ buildClaudeCodeTuiEnv declares NAND as an xterm.js host for Claude Code (1.6749ms)
+✔ buildClaudeCodeTuiEnv preserves user overrides (0.4285ms)
+✔ decodeOsc52Clipboard decodes clipboard selection payloads (1.0287ms)
+✔ decodeOsc52Clipboard ignores unsupported selections and queries (0.2853ms)
+✔ decodeTmuxPassthroughOsc52Clipboard unwraps tmux DCS passthrough (0.5643ms)
+✔ encodeClaudeCodeExtendedKey emits modifyOtherKeys sequences (7.1265ms)
+✔ XTVERSION_RESPONSE reports xterm.js to Claude Code (0.8973ms)
+✔ the dom cursor is not absolutely positioned against the terminal (7.6082ms)
+✔ evaluateKeyboardDecision keeps Ctrl+C without selection on the xterm default path (3.8191ms)
+✔ evaluateKeyboardDecision routes Shift+Enter through paste-newline path (0.4027ms)
+✔ evaluateKeyboardDecision routes Ctrl+Enter through paste-newline path (0.2619ms)
+✔ evaluateKeyboardDecision routes Alt+Enter through paste-newline path (0.4022ms)
+✔ evaluateKeyboardDecision routes Ctrl+Shift+letter through modifyOtherKeys when enabled (0.5501ms)
+✔ evaluateKeyboardDecision maps Shift+Enter to paste-newline even in win32-input-mode (0.2411ms)
+✔ handleKeyboardEvent copies the current selection and blocks xterm default handling (0.79ms)
+✔ handleKeyboardEvent pastes clipboard text through the terminal write path (0.3966ms)
+✔ handleKeyboardEvent pastes a newline for Shift+Enter using the bracketed paste path (0.2539ms)
+✔ handleKeyboardEvent pastes a newline for Ctrl+Enter using the bracketed paste path (0.4358ms)
+✔ handleKeyboardEvent pastes a newline for Alt+Enter using the bracketed paste path (0.2691ms)
+✔ handleKeyboardEvent pastes a newline for Shift+Enter even in win32-input-mode (0.3401ms)
+✔ handleKeyboardEvent queues win32-input-mode keyup events when configured (0.8014ms)
+✔ handleKeyboardEvent blocks keypress default handling in win32-input-mode (0.2204ms)
+✔ handleKeyboardEvent lets xterm handle IME composition keydown events in win32-input-mode (0.2824ms)
+✔ handleKeyboardEvent lets xterm handle win32 IME process keys even when browsers keep the physical key value (0.2006ms)
+✔ handleKeyboardEvent suppresses follow-up win32 shortcut events after local paste handling (0.4383ms)
+✔ handleKeyboardEvent allows repeat Ctrl+V keydowns while Ctrl is still held in win32-input-mode (0.2899ms)
+✔ handleKeyboardEvent allows repeat Ctrl+C keydowns while Ctrl is still held in win32-input-mode (0.3851ms)
+✔ handleData and handleBinary use the extracted input pipeline callbacks (0.3204ms)
+✔ decodeBinaryInput preserves literal bytes from xterm onBinary mouse reports (0.2129ms)
+✔ formatPastedTerminalText wraps content only when bracketed paste mode is enabled (0.1506ms)
+✔ drop paths stay absolute and quote only paths with spaces (1.7462ms)
+✔ cursor, columns, and line ranges match the toolbox format (0.538ms)
+✔ absolute references keep the platform path and drop uri suffixes (0.5693ms)
+✔ usage polling backs off and then returns to the base interval (0.2133ms)
+✔ extractCmdCwd returns the latest prompt after `cd` into a subdirectory (2.3618ms)
+✔ extractCmdCwd handles a chunk that is just the bare new prompt (0.4764ms)
+✔ extractCmdCwd handles a chunk that ends with a trailing newline (6.0845ms)
+✔ extractCmdCwd ignores stray ">" in the middle of command output (0.6372ms)
+✔ extractCmdCwd prefers the LAST prompt when a chunk contains stale history (0.6823ms)
+✔ extractCmdCwd returns null when no cmd prompt is present (0.3068ms)
+✔ extractPowerShellCwd captures the latest PS prompt (0.6342ms)
+✔ extractGitBashWindowTitleCwd converts /c/foo paths to Windows format (0.479ms)
+✔ extractGitBashPromptCwd expands ~ against the supplied home directory (0.4811ms)
+✔ extractWslPromptCwd captures /mnt/<drive> style paths (0.5877ms)
+✔ extractCwdFromPromptLines recovers cmd cwd from a single screen line (0.3816ms)
+✔ extractCwdFromPromptLines tolerates trailing whitespace from conpty padding (0.1887ms)
+✔ extractCwdFromPromptLines reads PowerShell prompts from a single screen line (0.0892ms)
+✔ extractCwdFromPromptLines combines a Git Bash MINGW header with the next-line prompt (0.4303ms)
+✔ extractCwdFromPromptLines reads WSL cwd from the prompt line (0.2597ms)
+✔ extractCwdFromPromptLines returns null when neither line looks like a prompt (0.2962ms)
+✔ extractCwdFromPromptLines expands ~ against the supplied home directory (0.2565ms)
+✔ recent sessions discard deleted IDs and duplicates and keep the active session first (2.5457ms)
+✔ Codex built-in launcher starts Codex without prompt injection (3.7258ms)
+✔ OpenCode built-in launcher starts the IDE bridge client directly (0.4585ms)
+✔ built-in workflow order keeps the coding agents from the shared catalog (1.7772ms)
+✔ built-in context-aware workflow marker covers all built-ins (0.5187ms)
+✔ plain shells keep showing the NAND context menu on right-click (1.6222ms)
+✔ Claude Code sessions yield right-click to the TUI without pasting from NAND (0.2802ms)
+✔ Shift+RightClick is a universal escape hatch back to the NAND menu (0.2173ms)
+✔ TerminalTitleState applies automatic titles for default terminals (2.1078ms)
+✔ TerminalTitleState restores the previous title after automatic title clears (0.4831ms)
+✔ TerminalTitleState does not override custom titles with automatic titles (0.284ms)
+✔ TerminalTitleState replaces automatic titles with custom titles (0.1696ms)
+✔ TerminalTitleState localizes only the default source, including after an automatic title clears (0.2219ms)
+✔ encodeWin32InputModeKeyEvent encodes printable lowercase letters (2.2546ms)
+✔ encodeWin32InputModeKeyEvent encodes shifted printable letters with SHIFT state (0.5805ms)
+✔ encodeWin32InputModeKeyEvent encodes Ctrl+letter as a virtual key event without Unicode text (2.8932ms)
+✔ encodeWin32InputModeKeyEvent preserves Unicode text for AltGraph characters (0.6514ms)
+✔ encodeWin32InputModeKeyEvent encodes modifier key presses (5.827ms)
+✔ encodeWin32InputModeKeyEvent encodes modifier key releases (0.5358ms)
+✔ encodeWin32InputModeKeyEvent encodes Shift+Enter as KEY_EVENT_RECORD input (0.2165ms)
+✔ encodeWin32InputModeKeyEvent marks enhanced navigation keys (0.1826ms)
+✔ encodeWin32InputModeKeyEvent encodes function keys (0.366ms)
+✔ encodeWin32InputModeKeyEvent includes lock-key state when available (0.3802ms)
+✔ encodeWin32InputModeKeyEvent ignores keypress events (0.1496ms)
+✔ buildAgentContextTerminalEnv exposes the context snapshot path (2.3385ms)
+✔ renderNANDCodexSkill emits a discoverable managed Codex skill (0.8861ms)
+✔ serializeAgentContextSnapshotState ignores updatedAt for write change detection (0.4015ms)
+✔ removeStaleNandIdeLockfiles deletes only dead NAND locks (4.113ms)
+✔ removeStaleNandIdeLockfiles ignores a missing directory (0.639ms)
+✔ isProcessAlive recognizes this process and rejects a non-pid (0.4694ms)
+✔ Pi reports completion only after a native idle check, and suppresses repeated settlement (130.3636ms)
+✔ OpenCode ignores child idle and recoverable errors but accepts root busy/idle (145.3379ms)
+✔ provider reads share account promises and timestamps, expire, and isolate accounts (1.9726ms)
+✔ a failing endpoint is shared and retries only after expiry (1.0072ms)
+✔ cached local usage states translate at display time while raw provider errors retain their text (2.2588ms)
+✔ vault scan keeps claude, codex, and gemini sessions inside the vault (9.0666ms)
+✔ claude project names keep one dash per separator (1.9187ms)
+✔ claude project names include the NFC spelling when it differs (1.5388ms)
+✔ claude buckets follow the vault and not a sibling prefix (0.4473ms)
+✔ a session cwd must be the vault or a directory inside it (0.6056ms)
+✔ resume args keep permission flags and address the right cli (2.6876ms)
+✔ session age uses minute, hour, and day buckets (0.5557ms)
+✔ plugin paths retain native roots, Unicode, spaces and literal percent escapes (2.1801ms)
+✔ getPlatform mirrors the current Node platform (1.4491ms)
+✔ isWindows / isMacOS / isLinux are mutually exclusive on the current host (0.4357ms)
+✔ getHomeDir mirrors os.homedir() (0.2571ms)
+✔ formatClaudeCodePathReferences emits cwd-relative @ references for Claude Code (3.0801ms)
+✔ formatClaudeCodePathReference quotes paths that Claude Code regular mentions would truncate (0.9744ms)
+✔ formatClaudeCodePathReference quotes non-ascii directory references that need a trailing slash (4.9122ms)
+✔ formatClaudeCodePathReference quotes references that contain spaces (0.6634ms)
+✔ formatClaudeCodePathReference falls back to absolute paths outside cwd (0.3313ms)
+✔ formatClaudeCodePathReference falls back to absolute paths when cwd validation fails (0.3493ms)
+✔ formatClaudeCodePathReference uses slash-separated relative Windows references (0.3652ms)
+✔ extractVersionString pulls a basic semver token (2.0325ms)
+✔ extractVersionString preserves a pre-release suffix (0.433ms)
+✔ extractVersionString returns null when no semver-ish token exists (7.9585ms)
+✔ extractVersionString handles multi-line --version output (0.4415ms)
+✔ compareVersions returns 0 for equal releases (0.588ms)
+✔ compareVersions returns positive when left is newer (0.3559ms)
+✔ compareVersions returns negative when left is older (0.2289ms)
+✔ compareVersions tolerates differing dotted-component counts (0.1578ms)
+✔ compareVersions ranks a release above its pre-release (0.275ms)
+✔ compareVersions falls back to lexicographic order on equal pre-release prefix (0.429ms)
+✔ joinUniqueDroppedTextPayloadParts deduplicates repeated plain-text drag payloads (1.49ms)
+✔ joinUniqueDroppedTextPayloadParts preserves distinct payload order (0.3085ms)
+✔ normalizeDroppedTextPayloadPart keeps leading indentation but removes empty trailing whitespace (0.2878ms)
+✔ collectPreferredDroppedTextPayload reads only lightweight text payload types (2.7855ms)
+✔ collectFallbackDroppedTextPayload keeps fallback types and async string items (1.527ms)
+✔ resolveDroppedTextInput prefers fallback paths over basename-only primary text payloads (0.9736ms)
+✔ headless process consumes split UTF-8 and VT queries without a DOM or renderer (149.2775ms)
+✔ queued output is delivered exactly once when a renderer attaches before parsing completes (43.344ms)
+✔ a renderer attaching during a partially parsed chunk does not replay its prefix twice (75.9127ms)
+✔ hidden prompt and failed-command positions follow headless parsing and survive replay (88.0165ms)
+✔ command history and prompt/command markers are bounded to the latest 1000 (91.0061ms)
+✔ unchanged grids do not send a native resize and an unsubscribed pending snapshot never fires (39.7586ms)
+✔ a grid change between queued browser writes restores the reflowed headless screen (155.5234ms)
+✔ scheduled automation interrupts instead of silently restarting after a disconnect (2.04ms)
+✔ interactive recovery falls back if the current directory was deleted (29.5193ms)
+✔ disposal during native startup destroys the late process without subscriptions (15.4155ms)
+✔ normalizeTerminalToken strips wrappers and decodes escaped drag payload text (1.5981ms)
+✔ normalizeTerminalRawToken strips wrappers without decoding URL separators (0.3838ms)
+✔ normalizeVaultPath canonicalizes vault-style separators and relative segments (0.5635ms)
+✔ normalizeTerminalReferencePath removes diff prefixes and matches the target platform (1.593ms)
+✔ fileUriToPlatformPath converts file URIs into local platform paths (1.1141ms)
+✔ obsidianUriToVaultPath preserves encoded separators and ampersands inside file query values (0.4977ms)
+✔ joinTerminalPaths and getVaultRelativePathFromAbsolute share one canonical path shape (0.5393ms)
+✔ collectTerminalReferenceCandidatePaths builds stable absolute candidates from multiple roots (1.9056ms)
+✔ isAbsoluteTerminalPath detects absolute paths using the target platform rules (0.4005ms)
+✔ normalizeDroppedEntryPath normalizes POSIX drop paths without forcing Windows rules (0.3385ms)
+✔ normalizeDroppedEntryReference preserves vault-relative directory entry paths on Windows (0.5268ms)
+✔ findUniqueTerminalEntryByBasename resolves a unique basename and rejects ambiguous matches (0.3599ms)
+✔ release candidate versions agree and advance beyond the incompatible public service (4.9735ms)
+✔ upgrading the plugin rejects an installed 0.0.1 service and accepts the matching service (67.0086ms)
+✔ release gate rejects wrong tags, missing platforms and corrupt terminal assets (37.6915ms)
+✔ resolveBinaryAssetUrls builds GitHub Release URLs for Unix binaries (0.435ms)
+✔ resolveBinaryAssetUrls ignores the legacy R2 source and still uses GitHub (0.2088ms)
+✔ resolveBinaryAssetUrls builds GitHub latest fallback URLs (0.1548ms)
+✔ native history shares scan/query/usage, revisions invalidate leaves, and aborts are consumer scoped (67.3061ms)
+✔ history requests cancelled while awaiting a client never execute the native operation (35.6393ms)
+✔ a serial queue starts the next task only after the previous one settles (2.4156ms)
+✔ a rejected task still lets the next task run (1.2318ms)
+✔ status bar entry mounts the icon and NAND on the item without a second document element (1.5408ms)
+✔ status bar entry lets a refused child propagate (0.8911ms)
+✔ a closed host does not read usage (1.9601ms)
+✔ an open host shows the usage label before the read finishes (1.4804ms)
+✔ a usage result that arrives after the host closes is dropped (0.6294ms)
+✔ listObsidianCommandOptions prefers the static command registry over listCommands() (19.4478ms)
+✔ listObsidianCommandOptions falls back to listCommands() when the registry is unavailable (0.5504ms)
+✔ always-on-top menu label reflects the current terminal state (1.6051ms)
+✔ webgl2 failure is not written into the terminal (1.8484ms)
+✔ a translated renderer load failure is not written into the terminal (0.485ms)
+✔ an unexpected renderer error can still be written (0.2316ms)
+✔ parseTerminalFileUriLinks detects encoded Claude Code file URLs (2.3624ms)
+✔ parseTerminalFileUriLinks trims common wrapper and sentence punctuation (0.5674ms)
+✔ parseTerminalFileUriLinks ignores non-file URLs (0.1903ms)
+✔ a renderer without a visible owner does not consume browser output (1.7196ms)
+✔ following Obsidian theme reads the renderer owner document instead of another active window (0.7977ms)
+✔ a released renderer reacquires the destination window theme without using its previous window colors (0.2401ms)
+✔ a hidden renderer refreshes current window colors when its visible owner returns (0.2559ms)
+✔ custom terminal colors stay unchanged across a host theme refresh (0.2651ms)
+✔ hidden output restores the authoritative screen without an ANSI suffix (2100000) (3.1115ms)
+✔ hidden output restores the authoritative screen without an ANSI suffix (1100000+1100000) (0.528ms)
+✔ disposed prompt markers are not retained forever (2.0847ms)
+✔ replay, live output and dependent actions wait for each public write callback (10.922ms)
+✔ pausing during a pending write waits for it before resetting to the next snapshot (1.449ms)
+✔ visible overflow resets from a complete screen instead of slicing any escape sequence (1.41ms)
+✔ an asynchronous initial snapshot precedes actions and is exempt from the delta budget (1.5034ms)
+✔ disposing with a discarded xterm callback cancels subsequent writes and restores (0.8878ms)
+✔ fit coalesces requests, waits for two stable grids and avoids unchanged native resizes (1.0691ms)
+✔ fit bounds an unstable layout to eight frames and cancels in its originating window (0.6239ms)
+✔ hidden WebGL retention evicts the least recently hidden renderer with a budget of two (0.5609ms)
+✔ short IDs distinguish identical titles and colliding prefixes without depending on order (3.2454ms)
+✔ OpenAI icons use black-or-white CSS instead of Simple Icons brand color (1.5853ms)
+✔ other Simple Icons keep their brand color when available (0.3457ms)
+✔ terminal routing ignores the tracked always-on-top leaf when creating near existing terminals (3.2092ms)
+✔ terminal routing falls back to normal behavior from the root split when only the always-on-top terminal exists (1.0888ms)
+✔ terminal routing still creates near non-excluded sidebar terminals (0.4857ms)
+✔ occupied terminal leaf is replaced with a new tab (0.5698ms)
+✔ activating a shown popout corrects visibility measured while migration was hidden (2.6394ms)
+✔ a real container resize resynchronizes hidden and visible renderer ownership (0.414ms)
+✔ attachment rechecks visibility after migrated elements become measurable (0.3486ms)
+✔ owning-window focus corrects stale visibility and listener cleanup follows migration and close (0.5386ms)
+✔ closing before renderer initialization rejects waiting callers immediately (6.2477ms)
+✔ CSS changes update the current themed renderer and appearance, with one subscription after migration and none after close (0.8732ms)
+✔ CSS changes preserve a renderer using custom colors (0.2665ms)
+✔ owner body theme propagation after the workspace event refreshes color on a coalesced owner frame (0.4365ms)
+✔ theme observers and queued owner frames are cancelled on migration and close (0.3861ms)
+✔ an explicit session choice cancels the still-pending automatic initialization timer (0.3495ms)
+✔ selecting a session already open in another leaf updates recent-session order (0.2185ms)
+✔ a renderer finishing after the view closes is never adopted (0.2036ms)
+✔ a failed explicit initial selection rejects initialization waiters (0.6093ms)
+✔ moving a pending initialization timer cancels it on its original window (0.2593ms)
+✔ the lazy controller placeholder cannot reopen a leaf closed while its service was loading (10.982ms)
+ℹ tests 235
+ℹ suites 0
+ℹ pass 235
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 2004.2259
+$ esbuild scripts/verify-issue-regressions.ts --bundle --platform=node --format=cjs --outfile=node_modules/.tmp/verify-issue-regressions.cjs --alias:obsidian=./scripts/obsidian-stub.ts --log-level=warning && node node_modules/.tmp/verify-issue-regressions.cjs
+verify-issue-regressions: default-name localization, edit intent, composer, language lifecycle and settings persistence passed
+$ esbuild scripts/verify-contacts.ts --bundle --platform=node --format=cjs --outfile=scripts/tmp/verify-contacts.cjs --alias:obsidian=./scripts/obsidian-stub.ts --loader:.md=text --log-level=warning && node --test scripts/tmp/verify-contacts.cjs
+✔ 5,000 archives stay indexed through repeated search and single-record updates (103.6506ms)
+ℹ {"records":5000,"indexMs":15,"search20AndUpdateMs":87,"vaultReadsDuringSearch":0}
+✔ portable Markdown round trip preserves strings, Unicode, links, table escapes and free prose (9.7276ms)
+✔ field-level merge preserves unrelated external edits, unknown properties and untouched body bytes (3.4686ms)
+✔ same-field and same-section conflicts retain the external contents (4.1864ms)
+✔ malformed YAML, duplicate identity and table boundaries never silently truncate a note (3.5062ms)
+✔ manual rows resolve as ordinary Markdown and receive persistent row IDs on save (2.1476ms)
+✔ dates allow month precision and unknown former employment without treating it as current (1.8048ms)
+✔ employment index deduplicates people, supports concurrent jobs and preserves former jobs (2.3343ms)
+✔ direct relationships have computed inverses, no duplicate writes and no inferred friendships (1.4594ms)
+✔ renames preserve identity; duplicate IDs and conflicting visible links block mutation (3.0236ms)
+✔ filters are OR within a dimension and AND across dimensions; 5,000 records paginate from the index (75.718ms)
+✔ folder preferences reject hidden/external/traversal paths and retain defaults (0.5914ms)
+✔ write queue recovers after failures and keeps saves to the same identity ordered (0.4155ms)
+✔ vault integration: duplicate names, real files, disk failure, external edits, deletion and rebuilding (10.0976ms)
+✔ folder switching rejects stale forms and preserves old files (1.74ms)
+✔ two windows merge independent fields but reject overlapping edits (6.2845ms)
+✔ unsaved edits in the native Markdown editor prevent panel writes (1.9949ms)
+✔ an unreadable file does not hide other records during a rebuild (4.351ms)
+✔ a relationship entered from the opposite profile cannot duplicate its computed inverse (0.3065ms)
+✔ renaming updates the generated heading without overwriting a customized heading (1.8025ms)
+✔ new notes localize headings and tables while language changes preserve parsing (1.3359ms)
+✔ format guide uses creation-time language and preserves existing documents and record identity (8.0055ms)
+✔ both format guides document table headings accepted by the real Markdown parser (6.6092ms)
+✔ archive folder row is the only contacts setting that reserves description width (0.8993ms)
+✔ strict folder entry rules exclude flat archives, ordinary material notes and nested fake entries (1.791ms)
+✔ portable folder names and collisions never merge with an unrelated existing directory (2.3737ms)
+✔ resources recurse, preserve sources, avoid primary names and report partial import failures (1.6989ms)
+✔ resource events notify without reparsing Markdown and a folder rename retains stable identity (7.1869ms)
+✔ whole-folder deletion rejects changed scope and unsaved material notes; unrelated folders survive (4.7615ms)
+✔ delete queues behind imports and refuses the earlier confirmation scope (5.5375ms)
+✔ company contact fields and normalized pasted values retain string semantics in Markdown (1.0019ms)
+✔ resource list paginates at 60 and preserves search on live updates without opening stale rows (317.8865ms)
+✔ empty archive filters explain missing data and preserve existing choices on apply (3.8832ms)
+✔ archive search follows the selected kind and empty prose stays distinct from user text (3411.8671ms)
+ℹ tests 34
+ℹ suites 0
+ℹ pass 34
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 4130.5062
+$ esbuild scripts/verify-iconic-port.ts --bundle --platform=node --format=cjs --outfile=scripts/tmp/verify-iconic-port.cjs --alias:obsidian=./scripts/iconic-obsidian-stub.ts --log-level=warning && node scripts/run-node-with-tz.mjs UTC --test scripts/tmp/verify-iconic-port.cjs
+✔ defaults, all locale values, command ids and resource bytes match pinned upstream (8.1122ms)
+✔ 137 rule outcomes match the original 1.1.10 implementation (1.5514ms)
+✔ declarative settings expose folder icons in both languages and six sections (0.9106ms)
+✔ saves coalesce for 300ms, isolate data.json and own their defaults (301.8894ms)
+✔ backup rotation, 0/2/9 limits, corrupt and missing primary recovery (13.3104ms)
+✔ raw file watcher reloads external edits, ignores own writes, cancels on disable (1386.181ms)
+✔ menu patch restores after ten cycles and preserves later patches (1.3002ms)
+✔ disable before layout-ready cancels startup; ten restarts keep one editor bridge and command set (2.5122ms)
+ℹ tests 8
+ℹ suites 0
+ℹ pass 8
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1899.6559
+$ esbuild scripts/verify-automation.ts --bundle --platform=node --format=cjs --outfile=scripts/tmp/verify-automation.cjs --alias:obsidian=./scripts/obsidian-stub.ts --log-level=warning && node scripts/run-node-with-tz.mjs America/New_York --test scripts/tmp/verify-automation.cjs
+✔ agent editor uses the same availability set for defaults, controls and save, without replacing stale choices (7.9456ms)
+✔ runtime preflight orders factual failures before permission and prevents all launch effects on rejection (28.1459ms)
+✔ Home execution gate survives restart, keeps history and cursors, and resumes only unhandled occurrences (4.3549ms)
+✔ shutdown waits for an in-flight agent start and stops only its returned terminal before resolving (0.8343ms)
+✔ failed shutdown persistence or stop stays disabled and retries without losing owned execution (0.8834ms)
+✔ manual, once, cron and supported RRULE honor start times and reject unsupported rules (2.1656ms)
+✔ daily recurrence remains at local 9am through daylight-saving changes (1.2877ms)
+✔ a due occurrence executes once across concurrent ticks, leaf independence and restart (0.6433ms)
+✔ late occurrences are skipped, foreign devices never execute, recent missed occurrence alone runs (1.405ms)
+✔ active agents do not overlap; a slow agent startup does not hold reminders (1.1796ms)
+✔ failure committing pending state prevents external task creation (0.3155ms)
+✔ restart marks unconfirmed runs interrupted rather than executing them again (0.5407ms)
+✔ corrupt primary recovers the backup and supports subsequent saves without losing corrupt evidence (0.2396ms)
+✔ notification deliveries are idempotent across concurrent calls and restart (0.6751ms)
+✔ task identities and automation metadata survive nested task serialization (4.6594ms)
+✔ archive reminders preserve note text and malformed regions refuse edits (0.3479ms)
+✔ native hook installation preserves unrelated hooks and remains idempotent (0.3149ms)
+✔ all CLI prompt transports preserve text and the native resume flags stay explicit (0.328ms)
+✔ native session discovery requires exact metadata and ignores subagent sessions (0.2819ms)
+✔ PTY listeners attach synchronously before immediate exit and legacy status stays unverified (0.6063ms)
+✔ editing the action alone does not replay an already consumed one-time occurrence (0.5568ms)
+✔ completed delivery is not replayed even after notification retention has trimmed its record (0.4996ms)
+✔ dashboard source indexes explicit ownership, ignores old reminders and creates each run once (7.162ms)
+✔ failed state commits are invisible and retry preserves scheduler cursors (1.1589ms)
+✔ edits keep list order and deletion retains run snapshots (0.678ms)
+✔ clearing read notifications preserves delivery receipts across restart (0.5423ms)
+✔ partial primary write recovers last valid data and a later write can succeed (0.2517ms)
+✔ failed inbox load cannot overwrite unreadable receipts and a successful retry emits state (0.3253ms)
+✔ widget sources resolve canonical and legacy dashboard paths without changing reminder identity (3.2118ms)
+✔ inbox renders structured reasons in the current language and deduplicates only exact reminder text (18.5699ms)
+✔ structured failures survive run and inbox persistence, language changes, cleanup and recovery without redelivery (2.9143ms)
+✔ automation panel localizes next/run dates and system reasons while preserving prompt, output and unknown text (5.2226ms)
+✔ cleared once history reads only the matching revision cursor and never replays failed, succeeded or skipped work (10.4455ms)
+✔ Home toggle saves before applying execution, restores failed saves, and leaves runtime failures retryable (0.9889ms)
+✔ disabled panel retains history and notifications but disables definition and execution mutations (3.3876ms)
+✔ shutdown drains an already-started file effect without undoing it or sending new notifications (0.6539ms)
+✔ an agent handle arriving during failed cancellation persistence remains owned for retry (0.5927ms)
+✔ switching an automation action keeps the shared text and drops kind-specific fields (0.1605ms)
+✔ anniversary reminders use the singular English year only for a difference of one (0.3826ms)
+ℹ tests 39
+ℹ suites 0
+ℹ pass 39
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 229.6157
+$ node scripts/verify-promise-callbacks.mjs
+Promise callback guard passed against real Obsidian control types
+$ node scripts/verify-architecture.mjs
+Architecture: 658 modules, valid layer directions, no host dependencies in core/shared, no enclosing-barrel imports, no runtime cycles.
+$ esbuild scripts/verify-panel-composition.ts --bundle --platform=node --format=cjs --outfile=scripts/tmp/verify-panel-composition.cjs --alias:obsidian=./scripts/obsidian-stub.ts --log-level=warning && node scripts/tmp/verify-panel-composition.cjs
+Panel composition: independent actions, persistent xterm island/search, clean unmount passed.
+History export: visible Vault files, concurrent collisions, safe names, content, localized failures and actual sidebar open/pending behavior passed.
+History matrix: zh/en/zh dates, 111/101 ranges, search/filter empty states, metadata toggles, page shrink and unknown usage passed.
+Session sidebar: stable identity, exact selection, reorder/close, unknown status and bilingual surface names passed.
+Usage language: immediate cached status/footer repaint, no provider/history reads or timer restart, inactive and disposed lifecycle passed.
+Automation panel: visible filter labels, combined filtering, empty result, retained selection and prompt/output semantics passed.
+Orca regression: debounce/cancel, searched refresh/full preview, Resume pending/migration/failure retry, 240–360 resize, narrow drawer, bilingual repaint and stable xterm passed.
+Context panel: target preview, note selection, duplicate prevention and cancellation on session change passed.
+$ esbuild scripts/verify-dashboard-isolation.ts --bundle --platform=node --format=cjs --outfile=node_modules/.tmp/verify-dashboard-isolation.cjs --alias:obsidian=./scripts/obsidian-stub.ts --log-level=warning && node node_modules/.tmp/verify-dashboard-isolation.cjs
+dashboard isolation: resources, panels, clocks, services, Dataview actions and vault caches passed
+$ esbuild scripts/verify-card-panels.ts --bundle --platform=node --format=cjs --outfile=node_modules/.tmp/verify-card-panels.cjs --alias:obsidian=./scripts/obsidian-stub.ts --log-level=warning && node node_modules/.tmp/verify-card-panels.cjs
+[Dashboard] library kanban move failed: Error: expected test failure
+    at Object.processFrontMatter (C:\Data\01-Code\nand\node_modules\.tmp\verify-card-panels.cjs:65407:32)
+    at move (C:\Data\01-Code\nand\node_modules\.tmp\verify-card-panels.cjs:64909:32)
+    at onDrop (C:\Data\01-Code\nand\node_modules\.tmp\verify-card-panels.cjs:64946:29)
+    at HTMLElement2.<anonymous> (C:\Data\01-Code\nand\node_modules\.tmp\verify-card-panels.cjs:13056:14)
+    at dispatch (C:\Data\01-Code\nand\node_modules\.tmp\verify-card-panels.cjs:23651:14)
+    at GlobalEvent.invokeListeners (C:\Data\01-Code\nand\node_modules\.tmp\verify-card-panels.cjs:23670:11)
+    at Array.some (<anonymous>)
+    at HTMLElement2.dispatchEvent (C:\Data\01-Code\nand\node_modules\.tmp\verify-card-panels.cjs:23710:18)
+    at event (C:\Data\01-Code\nand\node_modules\.tmp\verify-card-panels.cjs:65230:11)
+    at drop (C:\Data\01-Code\nand\node_modules\.tmp\verify-card-panels.cjs:65433:5)
+Dashboard panels: editing, drag rollback, async Markdown, subscriptions, video cleanup, ledger/query state and native modal teardown passed
+$ node scripts/run-safety-regressions.mjs
+(node:17208) ExperimentalWarning: Transform Types is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+Automation target: empty selection rejected, re-selection saved
+Automation DST: both repeated hours execute once; next/latest remain monotonic
+Automation DST: Lord Howe half-hour transitions remain monotonic
+(node:10132) ExperimentalWarning: Transform Types is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:16996) ExperimentalWarning: Transform Types is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+Automation session: concurrent duplicate rejected busy; one terminal launched
+(node:16088) ExperimentalWarning: Transform Types is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+Dashboard conflict: external file and local recovery preserved; reload resumes safe writes
+Server lifecycle: 8 deterministic cases passed; native win32 process exit confirmed
+$ esbuild scripts/verify-reliability.ts --bundle --platform=node --format=cjs --outfile=scripts/tmp/verify-reliability.cjs --alias:obsidian=./scripts/obsidian-stub.ts --log-level=warning && node --test scripts/tmp/verify-reliability.cjs
+✔ replacement JSON store drains pending writes and queued inbox changes survive shutdown (3.3863ms)
+✔ unreadable and corrupt data remain untouched; failed writes report unsaved and can retry (4.7948ms)
+✔ concurrent additions do not resurrect deleted habits or check-ins (0.7368ms)
+✔ dashboard preserves unknown YAML, comments, free prose and unchanged cards (12.6015ms)
+✔ closing cancels uncooperative and queued browser operations immediately (0.4809ms)
+✔ managed tables and sections preserve author prose, reject malformed markers and merge independent edits (3.0441ms)
+✔ Markdown collection survives restart, external edits and deletes without reading installation JSON (7.1944ms)
+✔ open editor contents block disk writes and preserve the pending draft (1.2003ms)
+✔ all seven action descriptors round-trip as Markdown; manual-only actions reject scheduling (17.5562ms)
+✔ runtime initialization coalesces callers and shutdown drains admitted work (0.6241ms)
+✔ explicit New York timezone skips spring gap and resolves both repeated hours independent of host TZ (13.7247ms)
+✔ 10,000 ledger records update one daily document without rereading the full collection (789.8074ms)
+ℹ {"records":10000,"documents":101,"initialMs":751,"updateMs":29,"reads":2,"writes":1}
+ℹ tests 12
+ℹ suites 0
+ℹ pass 12
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1016.0007
+$ node scripts/verify-i18n.mjs
+I18N: 44 dictionaries, 2803 keys, matching placeholders and literal references.
+$ node scripts/verify-docs.mjs
+Documentation: 54 Markdown files, 109 local links, code fences and active/archive indexes verified.
+{"total":55,"passed":55,"failed":[]}

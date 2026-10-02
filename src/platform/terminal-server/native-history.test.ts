@@ -23,7 +23,7 @@ test('native history shares scan/query/usage, revisions invalidate leaves, and a
 		let release!: () => void;
 		const wait = new Promise<void>(resolve => { release = resolve; });
 		const settings = normalizeAgentSettings({});
-		const app = { loadLocalStorage: () => 'fixture', vault: { adapter: { getBasePath: () => fixture, exists: async (name: string) => files.has(name), read: async (name: string) => files.get(name), write: async (name: string, body: string) => { files.set(name, body); }, mkdir: async (name: string) => { files.set(name, 'directory'); } } } } as unknown as App;
+		const app = { loadLocalStorage: () => '11111111-1111-4111-8111-111111111111', vault: { adapter: { getBasePath: () => fixture, exists: async (name: string) => files.has(name), read: async (name: string) => files.get(name), write: async (name: string, body: string) => { files.set(name, body); }, mkdir: async (name: string) => { files.set(name, 'directory'); } } } } as unknown as App;
 		let connectionChanged!: () => void;
 		const client = { connected: true, isConnected: () => client.connected, connectionRevision: 1, subscribeConnection: (listener: () => void) => { connectionChanged = listener; return () => {}; }, request: async (operation: string, _payload: unknown, signal: AbortSignal | undefined) => {
 			requests.push({ operation, signal });
@@ -66,7 +66,7 @@ test('native history shares scan/query/usage, revisions invalidate leaves, and a
 test('history requests cancelled while awaiting a client never execute the native operation', async () => {
 	const fixture = await fs.mkdtemp(path.join(os.tmpdir(), 'nand-history-cancel-'));
 	try {
-		const app = { loadLocalStorage: () => 'fixture', vault: { adapter: { getBasePath: () => fixture, exists: async () => false } } } as unknown as App;
+		const app = { loadLocalStorage: () => '11111111-1111-4111-8111-111111111111', vault: { adapter: { getBasePath: () => fixture, exists: async () => false } } } as unknown as App;
 		for (const operation of ['query', 'scan', 'read'] as const) {
 			let entered!: () => void, release!: () => void;
 			const atClient = new Promise<void>(resolve => { entered = resolve; });

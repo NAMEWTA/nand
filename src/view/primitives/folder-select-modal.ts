@@ -1,3 +1,4 @@
+import { bindLocalizedElement } from './localized-dom';
 import { App, Modal, TFolder } from 'obsidian';
 import { t } from '../../shared/i18n/index';
 import { applyModalTheme } from '../dashboard/appearance/modal-theme';
@@ -43,11 +44,11 @@ export class MultiFolderSelectModal extends Modal {
 		const container = contentEl.createDiv({ cls: 'dashboard-modal dashboard-modal--compact' });
 
 		const header = container.createDiv({ cls: 'dashboard-modal-header' });
-		header.createDiv({ cls: 'dashboard-modal-title', text: t('folder.selectFolders') });
+		bindLocalizedElement(header.createDiv({ cls: 'dashboard-modal-title', text: t('folder.selectFolders') }), 'folder.selectFolders');
 
 		const body = container.createDiv({ cls: 'dashboard-modal-body' });
 		if (this.parentCoversChildren) {
-			body.createDiv({ cls: 'dashboard-library-config-hint', text: t('folder.parentExcludesHint') });
+			bindLocalizedElement(body.createDiv({ cls: 'dashboard-library-config-hint', text: t('folder.parentExcludesHint') }), 'folder.parentExcludesHint');
 		}
 
 		// Selection state, keyed by lowercased path (matching is case-insensitive
@@ -75,10 +76,10 @@ export class MultiFolderSelectModal extends Modal {
 		};
 
 		const searchRow = body.createDiv({ cls: 'dashboard-media-folder-input-row' });
-		const searchInput = searchRow.createEl('input', {
+		const searchInput = bindLocalizedElement(searchRow.createEl('input', {
 			cls: 'dashboard-media-filter-folder',
 			attr: { type: 'text', placeholder: t('folder.searchPlaceholder') },
-		});
+		}), 'folder.searchPlaceholder', undefined, "placeholder");
 
 		const listHost = body.createDiv({ cls: 'dashboard-folder-multi-list' });
 		const countEl = body.createDiv({ cls: 'dashboard-folder-multi-count' });
@@ -92,7 +93,7 @@ export class MultiFolderSelectModal extends Modal {
 			const query = searchInput.value.trim().toLowerCase();
 			const visible = query ? allFolders.filter((p) => p.toLowerCase().includes(query)) : allFolders;
 			if (visible.length === 0) {
-				listHost.createDiv({ cls: 'dashboard-library-filter-empty', text: t('folder.noMatches') });
+				bindLocalizedElement(listHost.createDiv({ cls: 'dashboard-library-filter-empty', text: t('folder.noMatches') }), 'folder.noMatches');
 				return;
 			}
 			for (const path of visible) {
@@ -110,7 +111,7 @@ export class MultiFolderSelectModal extends Modal {
 				box.disabled = covered;
 				row.createSpan({ cls: 'dashboard-folder-multi-row-name', text: path });
 				if (covered) {
-					row.createSpan({ cls: 'dashboard-folder-multi-covered-note', text: t('folder.coveredByParent') });
+					bindLocalizedElement(row.createSpan({ cls: 'dashboard-folder-multi-covered-note', text: t('folder.coveredByParent') }), 'folder.coveredByParent');
 				}
 
 				const toggle = (): void => {
@@ -134,11 +135,11 @@ export class MultiFolderSelectModal extends Modal {
 		renderCount();
 
 		const footer = container.createDiv({ cls: 'dashboard-modal-footer' });
-		footer
-			.createEl('button', { cls: 'dashboard-modal-btn dashboard-modal-btn--cancel', text: t('common.cancel') })
+		bindLocalizedElement(footer
+			.createEl('button', { cls: 'dashboard-modal-btn dashboard-modal-btn--cancel', text: t('common.cancel') }), 'common.cancel')
 			.addEventListener('click', () => this.close());
-		footer
-			.createEl('button', { cls: 'dashboard-modal-btn dashboard-modal-btn--confirm', text: t('common.save') })
+		bindLocalizedElement(footer
+			.createEl('button', { cls: 'dashboard-modal-btn dashboard-modal-btn--confirm', text: t('common.save') }), 'common.save')
 			.addEventListener('click', () => {
 				// Map back to display casing; entries without a row (typed by hand,
 				// or folders deleted from the vault) fall back to their stored form.

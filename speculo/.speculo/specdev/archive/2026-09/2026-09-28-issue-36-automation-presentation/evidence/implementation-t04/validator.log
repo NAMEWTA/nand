@@ -1,8 +1,0 @@
-ERROR: T-01: parent branch HEAD must equal recorded result_sha
-ERROR: T-01: repository is dirty while Ticket is recorded as integrated
-ERROR: T-02: parent branch HEAD must equal recorded result_sha
-ERROR: T-02: repository is dirty while Ticket is recorded as integrated
-ERROR: T-03: parent branch HEAD must equal recorded result_sha
-ERROR: T-03: repository is dirty while Ticket is recorded as integrated
-ERROR: T-04: repository is dirty while Ticket is recorded as integrated
-Summary: 7 error(s), 0 warning(s)

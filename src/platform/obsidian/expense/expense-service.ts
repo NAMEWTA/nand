@@ -1,3 +1,5 @@
+import { expenseDocuments } from '../../../core/expense/documents';
+import { MarkdownCollectionStorage } from '../storage/document-collection';
 import type { App } from 'obsidian';
 import { ExpenseApplication } from '../../../core/expense/application';
 import type { WidgetSettingsHost } from '../settings-host';
@@ -11,16 +13,19 @@ export function getExpenseService(app: App): ExpenseService | null {
 }
 /** Native focus synchronization and storage wiring for this application instance. */
 export class ExpenseService extends ExpenseApplication {
+	private readonly storageCleanup: () => void;
 	private focusDoc: Document;
 	private focusHandler = () => {
 		if (this.focusDoc.visibilityState === 'visible') void this.syncFromDisk();
 	};
 	constructor(private plugin: WidgetSettingsHost) {
+		const storage = new MarkdownCollectionStorage(plugin.app, expenseDocuments, 'domain/expense.json');
 		super(
-			plugin.app.vault.adapter,
-			`${plugin.app.vault.configDir}/plugins/${plugin.manifest.id}`,
+			storage,
+			'domain',
 			() => plugin.settings.expenseCurrency,
 		);
+		this.storageCleanup = () => storage.dispose();
 		this.focusDoc = activeDocument;
 		this.focusDoc.addEventListener('visibilitychange', this.focusHandler);
 	}
@@ -29,6 +34,7 @@ export class ExpenseService extends ExpenseApplication {
 	}
 	override destroy(): void {
 		this.focusDoc.removeEventListener('visibilitychange', this.focusHandler);
+		void this.shutdown().catch(() => undefined).finally(this.storageCleanup);
 		super.destroy();
 	}
 }

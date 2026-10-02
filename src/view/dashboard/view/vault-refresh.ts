@@ -1,3 +1,4 @@
+import { bindLocalizedElement } from '../../primitives/localized-dom';
 import { setIcon, TAbstractFile, TFile } from 'obsidian';
 import { dashboardMarkdownPath } from '../../../core/dashboard/render-update';
 import type { DashboardColumn } from '../../../core/dashboard/types/index';
@@ -327,10 +328,10 @@ export function runCleanup(this: DashboardView, preserveSidebarWidgets = false):
  * re-render / close.
  */
 export function renderScrollToTop(this: DashboardView, container: HTMLElement): void {
-	const btn = container.createEl('button', {
+	const btn = bindLocalizedElement(container.createEl('button', {
 		cls: 'dashboard-scroll-top',
 		attr: { 'aria-label': t('renderer.scrollToTop'), type: 'button' },
-	});
+	}), 'renderer.scrollToTop', undefined, "aria-label");
 	setIcon(btn, 'arrow-up');
 
 	// Pick the element that actually scrolls in the current layout.

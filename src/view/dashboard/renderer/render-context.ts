@@ -1,7 +1,8 @@
 import { Chart } from 'chart.js';
 import type { EventRef, HoverParent } from 'obsidian';
 import { App, Component, TFile } from 'obsidian';
-import { render, type ComponentChild } from 'preact';
+import { cloneElement, isValidElement, render, type ComponentChild } from 'preact';
+import { refreshLocalizedDom } from '../../primitives/localized-dom';
 import { SUPPORTED_FILE_EXTS } from '../../../shared/file-types';
 
 /** One resource and interaction scope per dashboard root, including detached render trees. */
@@ -18,6 +19,7 @@ export class DashboardRenderContext {
 	markdownComponent: Component | null = null;
 }
 const contexts = new WeakMap<HTMLElement, DashboardRenderContext>();
+const panelContent = new WeakMap<HTMLElement, ComponentChild>();
 export function bindRenderContext(element: HTMLElement, context: DashboardRenderContext): void {
 	contexts.set(element, context);
 }
@@ -40,7 +42,16 @@ export function destroyChart(element: HTMLElement, cardId: string): void {
 }
 export function mountDashboardPanel(element: HTMLElement, panel: ComponentChild): void {
 	getRenderContext(element).panels.add(element);
+	panelContent.set(element, panel);
 	render(panel, element);
+}
+/** Reconcile existing roots: inputs, component state, guests and effects stay mounted. */
+export function refreshDashboardLanguage(root: HTMLElement): void {
+	refreshLocalizedDom(root);
+	for (const element of getRenderContext(root).panels) {
+		const panel = panelContent.get(element);
+		if (isValidElement(panel)) render(cloneElement(panel, {}), element);
+	}
 }
 /** Release nested panels before a partial DOM replacement (for example a mobile widget tab). */
 export function unmountDashboardPanelsIn(container: HTMLElement): void {

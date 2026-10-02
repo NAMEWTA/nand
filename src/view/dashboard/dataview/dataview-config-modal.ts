@@ -1,3 +1,4 @@
+import { bindLocalizedElement } from '../../primitives/localized-dom';
 import { App, Modal } from 'obsidian';
 import type { DataviewConfig } from '../../../core/dashboard/types/index';
 import { checkSyntax } from '../../../core/dql/index';
@@ -71,17 +72,17 @@ export class DataviewConfigModal extends Modal {
 		const container = contentEl.createDiv({ cls: 'dashboard-modal dashboard-modal--compact' });
 
 		const header = container.createDiv({ cls: 'dashboard-modal-header' });
-		header.createDiv({ cls: 'dashboard-modal-title', text: t('dataview.configure') });
+		bindLocalizedElement(header.createDiv({ cls: 'dashboard-modal-title', text: t('dataview.configure') }), 'dataview.configure');
 
 		const body = container.createDiv({ cls: 'dashboard-modal-body' });
 
 		// Sample query chips (inserted into the textarea on click).
 		const sampleSection = body.createDiv({ cls: 'dashboard-library-config-section' });
-		sampleSection.createDiv({ cls: 'dashboard-library-config-section-title', text: t('dataview.samples') });
+		bindLocalizedElement(sampleSection.createDiv({ cls: 'dashboard-library-config-section-title', text: t('dataview.samples') }), 'dataview.samples');
 		const chipsHost = sampleSection.createDiv({ cls: 'dashboard-dataview-sample-chips' });
 		for (const sample of SAMPLE_QUERIES) {
 			const chip = chipsHost.createDiv({ cls: 'dashboard-dataview-sample-chip' });
-			chip.createSpan({ text: t(sample.key) });
+			bindLocalizedElement(chip.createSpan({ text: t(sample.key) }), sample.key);
 			chip.addEventListener('click', () => {
 				this.config = { ...this.config, query: sample.dql };
 				if (this.queryInput) this.queryInput.value = sample.dql;
@@ -91,8 +92,8 @@ export class DataviewConfigModal extends Modal {
 
 		// DQL query textarea.
 		const querySection = body.createDiv({ cls: 'dashboard-library-config-section' });
-		querySection.createDiv({ cls: 'dashboard-library-config-section-title', text: t('dataview.queryLabel') });
-		this.queryInput = querySection.createEl('textarea', {
+		bindLocalizedElement(querySection.createDiv({ cls: 'dashboard-library-config-section-title', text: t('dataview.queryLabel') }), 'dataview.queryLabel');
+		this.queryInput = bindLocalizedElement(querySection.createEl('textarea', {
 			cls: 'dashboard-dataview-query-input',
 			attr: {
 				placeholder: t('dataview.queryPlaceholder'),
@@ -100,7 +101,7 @@ export class DataviewConfigModal extends Modal {
 				rows: '8',
 				autocomplete: 'off',
 			},
-		});
+		}), 'dataview.queryPlaceholder', undefined, "placeholder");
 		this.queryInput.value = this.config.query;
 		this.queryInput.addEventListener('input', () => {
 			this.config = { ...this.config, query: this.queryInput?.value ?? '' };
@@ -113,11 +114,11 @@ export class DataviewConfigModal extends Modal {
 
 		// Optional title override.
 		const titleSection = body.createDiv({ cls: 'dashboard-library-config-section' });
-		titleSection.createDiv({ cls: 'dashboard-library-config-section-title', text: t('dataview.titleLabel') });
-		const titleInput = titleSection.createEl('input', {
+		bindLocalizedElement(titleSection.createDiv({ cls: 'dashboard-library-config-section-title', text: t('dataview.titleLabel') }), 'dataview.titleLabel');
+		const titleInput = bindLocalizedElement(titleSection.createEl('input', {
 			cls: 'dashboard-task-input',
 			attr: { type: 'text', placeholder: t('dataview.titlePlaceholder'), value: this.config.title ?? '' },
-		});
+		}), 'dataview.titlePlaceholder', undefined, "placeholder");
 		titleInput.addEventListener('change', () => {
 			const value = titleInput.value.trim();
 			this.config = { ...this.config, title: value.length > 0 ? value : undefined };
@@ -126,19 +127,19 @@ export class DataviewConfigModal extends Modal {
 		// Excluded folders: pages inside them are dropped before the query runs,
 		// so FROM / WHERE / GROUP BY never see them.
 		const excludeSection = body.createDiv({ cls: 'dashboard-library-config-section' });
-		excludeSection.createDiv({ cls: 'dashboard-library-config-section-title', text: t('exclude.folders') });
-		excludeSection.createDiv({ cls: 'dashboard-library-config-hint', text: t('exclude.foldersHint') });
+		bindLocalizedElement(excludeSection.createDiv({ cls: 'dashboard-library-config-section-title', text: t('exclude.folders') }), 'exclude.folders');
+		bindLocalizedElement(excludeSection.createDiv({ cls: 'dashboard-library-config-hint', text: t('exclude.foldersHint') }), 'exclude.foldersHint');
 		const excludeEditor = new ExcludeFoldersEditor(this.app, excludeSection, this.config.excludeFolders ?? []);
 
 		// Display settings: density / zebra stripes / row numbers.
 		const displaySection = body.createDiv({ cls: 'dashboard-library-config-section' });
-		displaySection.createDiv({
+		bindLocalizedElement(displaySection.createDiv({
 			cls: 'dashboard-library-config-section-title',
 			text: t('dataview.displaySettings'),
-		});
+		}), 'dataview.displaySettings');
 
 		const densityRow = displaySection.createDiv({ cls: 'dashboard-library-config-inline-row' });
-		densityRow.createDiv({ cls: 'dashboard-library-config-inline-label', text: t('dataview.density') });
+		bindLocalizedElement(densityRow.createDiv({ cls: 'dashboard-library-config-inline-label', text: t('dataview.density') }), 'dataview.density');
 		const densityChips = densityRow.createDiv({ cls: 'dashboard-dataview-density-chips' });
 		const densities: Array<{ value: 'normal' | 'compact'; key: string }> = [
 			{ value: 'normal', key: 'dataview.densityNormal' },
@@ -146,12 +147,12 @@ export class DataviewConfigModal extends Modal {
 		];
 		const currentDensity = this.config.density ?? 'normal';
 		for (const d of densities) {
-			const chip = densityChips.createDiv({
+			const chip = bindLocalizedElement(densityChips.createDiv({
 				cls:
 					'dashboard-dataview-sample-chip dashboard-dataview-density-chip' +
 					(d.value === currentDensity ? ' active' : ''),
 				text: t(d.key),
-			});
+			}), d.key);
 			chip.addEventListener('click', () => {
 				this.config = { ...this.config, density: d.value };
 				densityChips
@@ -170,7 +171,7 @@ export class DataviewConfigModal extends Modal {
 		stripedBox.addEventListener('change', () => {
 			this.config = { ...this.config, striped: stripedBox.checked ? true : undefined };
 		});
-		stripedRow.createDiv({ cls: 'dashboard-library-config-inline-label', text: t('dataview.striped') });
+		bindLocalizedElement(stripedRow.createDiv({ cls: 'dashboard-library-config-inline-label', text: t('dataview.striped') }), 'dataview.striped');
 
 		const rowNumRow = displaySection.createDiv({ cls: 'dashboard-library-config-inline-row' });
 		const rowNumBox = rowNumRow.createEl('input', {
@@ -181,7 +182,7 @@ export class DataviewConfigModal extends Modal {
 		rowNumBox.addEventListener('change', () => {
 			this.config = { ...this.config, rowNumbers: rowNumBox.checked ? true : undefined };
 		});
-		rowNumRow.createDiv({ cls: 'dashboard-library-config-inline-label', text: t('dataview.rowNumbers') });
+		bindLocalizedElement(rowNumRow.createDiv({ cls: 'dashboard-library-config-inline-label', text: t('dataview.rowNumbers') }), 'dataview.rowNumbers');
 
 		const sourceRow = displaySection.createDiv({ cls: 'dashboard-library-config-inline-row' });
 		const sourceBox = sourceRow.createEl('input', {
@@ -192,21 +193,21 @@ export class DataviewConfigModal extends Modal {
 		sourceBox.addEventListener('change', () => {
 			this.config = { ...this.config, showSource: sourceBox.checked ? undefined : false };
 		});
-		sourceRow.createDiv({ cls: 'dashboard-library-config-inline-label', text: t('dataview.showSource') });
+		bindLocalizedElement(sourceRow.createDiv({ cls: 'dashboard-library-config-inline-label', text: t('dataview.showSource') }), 'dataview.showSource');
 
 		// Footer.
 		const footer = container.createDiv({ cls: 'dashboard-modal-footer' });
-		footer
+		bindLocalizedElement(footer
 			.createEl('button', {
 				cls: 'dashboard-modal-btn dashboard-modal-btn--cancel',
 				text: t('common.cancel'),
-			})
+			}), 'common.cancel')
 			.addEventListener('click', () => this.close());
-		footer
+		bindLocalizedElement(footer
 			.createEl('button', {
 				cls: 'dashboard-modal-btn dashboard-modal-btn--confirm',
 				text: t('common.save'),
-			})
+			}), 'common.save')
 			.addEventListener('click', () => {
 				const folders = excludeEditor.value;
 				this.onSave({ ...this.config, excludeFolders: folders.length > 0 ? folders : undefined });
@@ -229,11 +230,11 @@ export class DataviewConfigModal extends Modal {
 		if (result.ok) {
 			this.errorEl.empty();
 			this.errorEl.removeClass('is-error');
-			this.errorEl.createSpan({ cls: 'dashboard-dataview-validation-ok', text: t('dataview.valid') });
+			bindLocalizedElement(this.errorEl.createSpan({ cls: 'dashboard-dataview-validation-ok', text: t('dataview.valid') }), 'dataview.valid');
 		} else {
 			this.errorEl.empty();
 			this.errorEl.addClass('is-error');
-			this.errorEl.createSpan({ text: t('dataview.parseError', { message: result.error.message }) });
+			bindLocalizedElement(this.errorEl.createSpan({ text: t('dataview.parseError', { message: result.error.message }) }), 'dataview.parseError', { message: result.error.message });
 		}
 	}
 

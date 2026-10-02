@@ -27,13 +27,33 @@ import {
 	translatedLeafTitle,
 } from '../src/platform/obsidian/workspace-title';
 import type { DashboardSettings } from '../src/core/dashboard/types/index';
+import { copySessionId } from '../src/view/terminal/copy-session-id';
+import { renderCopyHelp } from '../src/plugin/settings/editor-settings';
 
 async function main() {
+	for (const language of ['zh', 'en'] as const) {
+		setLanguage(language);
+		let copied = '';
+		await copySessionId('fixture-session-id', { writeText: async value => { copied = value; } });
+		assert.equal(copied, 'fixture-session-id');
+		assert.equal((Notice as unknown as { messages: string[] }).messages.slice(-1)[0], t('terminalAgent.workbench.sessionIdCopied'));
+		await copySessionId('fixture-session-id', { writeText: async () => { throw Error('denied'); } });
+		assert.equal((Notice as unknown as { messages: string[] }).messages.slice(-1)[0], t('terminalAgent.workbench.copyFailed'));
+		await copySessionId('fixture-session-id', undefined);
+		assert.equal((Notice as unknown as { messages: string[] }).messages.slice(-1)[0], t('terminalAgent.workbench.copyUnavailable'));
+		const beforeHelp = StubSetting.created.length;
+		renderCopyHelp(new El('div') as never);
+		const help = StubSetting.created.slice(beforeHelp);
+		assert.deepEqual(help.map(row => row.name), ['editor.copy.title', 'editor.copy.relative', 'editor.copy.absolute'].map(key => t(key)));
+		assert.ok(help.every(row => row.desc.length > 20 && row.toggles.length === 0));
+	}
 	const exampleCountdown: CountdownConfig = { id: 'cd-default', label: 'New Year Countdown', targetDate: '2030-12-31T23:55', displayMode: 'hours', reminderDays: 0 };
 	const exampleAnniversary: AnniversaryConfig = { id: 'av-default', label: '纪念日', startDate: '2025-09-29', precision: 'ymd', annualReminder: false };
 	for (const language of ['zh', 'en', 'zh'] as const) {
 		setLanguage(language);
-		assert.equal(resolveWidgetLabel(exampleCountdown, 'countdown'), language === 'zh' ? '新年' : 'Countdown to New Year');
+		assert.equal(resolveWidgetLabel(exampleCountdown, 'countdown'), language === 'zh' ? '新年' : 'New Year');
+		assert.equal(resolveWidgetLabel({ ...exampleCountdown, label: 'Countdown to New Year' }, 'countdown'), language === 'zh' ? '新年' : 'New Year');
+		assert.equal(resolveWidgetLabel({ ...exampleCountdown, label: 'Countdown to New Year', defaultLabel: false }, 'countdown'), 'Countdown to New Year');
 		assert.equal(resolveWidgetLabel(exampleAnniversary, 'anniversary'), language === 'zh' ? '纪念日' : 'Anniversary');
 		assert.equal(resolveWidgetLabel({ ...exampleAnniversary, label: 'Wedding / 结婚' }, 'anniversary'), 'Wedding / 结婚');
 		assert.equal(resolveWidgetLabel({ ...exampleAnniversary, id: 'user-entry' }, 'anniversary'), '纪念日');
@@ -51,17 +71,12 @@ async function main() {
 	(globalThis as unknown as { activeDocument: unknown }).activeDocument = { querySelector: () => null };
 	let savedCountdown: CountdownConfig | undefined;
 	const editCountdown = (input: boolean) => {
+		const before = StubSetting.created.length;
 		const modal = new CountdownSettingsModal({} as App, exampleCountdown, (updated) => { savedCountdown = updated; });
 		modal.onOpen();
-		const inputs = findTag(modal.contentEl as unknown as El, 'input');
-		const name = inputs.find((field) => field.getAttribute('type') === 'text')!;
-		assert.equal(name.getAttribute('value'), 'Countdown to New Year');
-		// mini-dom keeps the initial value attribute separate from the live input.
-		for (const field of inputs) field.value = field.getAttribute('value') ?? '';
-		if (input) {
-			name.value = 'Anniversary';
-			name.dispatchEvent({ type: 'input' });
-		}
+		const name = StubSetting.created.slice(before).find(row => row.name === t('countdown.label'))!.texts[0]!;
+		assert.equal(name.value, 'New Year');
+		if (input) name.fire!('Anniversary');
 		findTag(modal.contentEl as unknown as El, 'button').find((button) => button.textContent === t('common.save'))!.click();
 	};
 	editCountdown(false);
@@ -124,22 +139,29 @@ async function main() {
 	commandCleanups.forEach((off) => off());
 	setLanguage('en');
 	assert.deepEqual(commands.map((command) => command.name), disposedNames, 'Plugin unload releases name subscriptions');
-	let automationOpens = 0, inboxOpens = 0;
-	registerShellCommands({ addCommand, automationHost: { open: async () => { automationOpens++; }, inbox: () => { inboxOpens++; } } } as unknown as DashboardPlugin);
+	let automationOpens = 0, inboxOpens = 0, browserOpens = 0;
+	registerShellCommands({ addCommand, openBrowser: async () => { browserOpens++; }, automationHost: { open: async () => { automationOpens++; }, inbox: () => { inboxOpens++; } } } as unknown as DashboardPlugin);
 	const shellCommands = commands.slice(4);
+	const expectedShellIds = ['open-browser', 'open-automations', 'open-notifications', 'new-automation', 'open-contacts', 'open-dashboard', 'open-editor-view'].map(id => `nand:${id}`).sort();
+	assert.deepEqual(shellCommands.map(command => command.id).sort(), expectedShellIds);
+	const openBrowser = shellCommands.find(command => command.id === 'nand:open-browser')!;
 	const openAutomation = shellCommands.find(command => command.id === 'nand:open-automations')!;
 	const openInbox = shellCommands.find(command => command.id === 'nand:open-notifications')!;
 	const shellCallbacks = shellCommands.map(command => command.callback);
 	for (const language of ['zh', 'en', 'zh'] as const) {
 		setLanguage(language);
+		assert.equal(openBrowser.name, `NAND: ${t('browser.open')}`);
 		assert.equal(openAutomation.name, language === 'zh' ? 'NAND: 打开自动化' : 'NAND: Open automations');
 		assert.equal(openInbox.name, language === 'zh' ? 'NAND: 打开通知中心' : 'NAND: Open notifications');
 		assert.equal(t('automation.title'), language === 'zh' ? '自动化' : 'Automations');
 		assert.equal(t('automation.inbox'), language === 'zh' ? '通知中心' : 'Notifications');
-		openAutomation.callback?.(); openInbox.callback?.();
+		openAutomation.callback?.(); openInbox.callback?.(); openBrowser.callback?.();
 		assert.deepEqual(shellCommands.map(command => command.callback), shellCallbacks);
+		assert.deepEqual(commands.slice(4).map(command => command.id).sort(), expectedShellIds);
+		shellCommands.forEach((command, i) => assert.equal(commands[i + 4], command));
+		assert.equal(commandCleanups.length, commands.length, 'One subscription per command');
 	}
-	assert.deepEqual([automationOpens, inboxOpens, shellCommands.length, commands.length], [3, 3, 6, 10]);
+	assert.deepEqual([automationOpens, inboxOpens, browserOpens], [3, 3, 3]);
 	commandCleanups.slice(4).forEach(off => off());
 	const scopes: Scope[] = [];
 	const app = {
@@ -308,6 +330,14 @@ async function main() {
 	assert.equal(translatedLeafTitle('My session', terminalPairs, 'zh'), undefined);
 	assert.equal(translatedLeafTitle('Terminal', [{ en: 'Dashboard', zh: '看板' }], 'zh'), undefined);
 	assert.equal(translatedLeafTitle(undefined, terminalPairs, 'zh'), undefined);
+	for (const type of ['nand-dashboard-view', 'nand-editor-view', 'nand-contacts-view', 'nand-automation-view', 'terminal-view', 'nand-browser-view']) {
+		for (const language of ['en', 'zh'] as const) {
+			const placeholder = { type, title: language === 'en' ? 'Product' : '产品' };
+			assert.equal(translatedLeafTitle(type, terminalPairs, language, placeholder), placeholder.title);
+			assert.equal(translatedLeafTitle('My custom page', terminalPairs, language, placeholder), undefined);
+			assert.equal(translatedLeafTitle('other-view', terminalPairs, language, placeholder), undefined);
+		}
+	}
 	const deferred = { view: { title: 'Terminal' }, loaded: false, loadIfDeferred() { this.loaded = true; } };
 	assert.equal(setDeferredLeafTitle(deferred as never, '终端'), true);
 	assert.equal(deferred.view.title, '终端');
@@ -366,6 +396,11 @@ async function main() {
 	retitleDeferredLeaves([englishLeaf] as never, terminalPairs, 'en', countRefresh as never);
 	assert.equal(englishLeaf.view.title, 'Terminal');
 	assert.equal(englishLeaf.loaded, false);
+	const rawLeaf = deferredLeaf('terminal-view');
+	retitleDeferredLeaves([rawLeaf] as never, terminalPairs, 'en', countRefresh as never, { type: 'terminal-view', title: 'Agents' });
+	assert.equal(rawLeaf.view.title, 'Agents');
+	assert.equal(rawLeaf.loaded, false);
+	assert.equal(titleRefreshes.get(rawLeaf), 1);
 
 	let disk = '';
 	let refreshes = 0;

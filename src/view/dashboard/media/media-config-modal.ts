@@ -1,3 +1,4 @@
+import { bindLocalizedElement } from '../../primitives/localized-dom';
 import { App, Modal } from 'obsidian';
 import type { LibraryConfig } from '../../../core/dashboard/types/index';
 import { t } from '../../../shared/i18n/index';
@@ -33,39 +34,39 @@ export class MediaConfigModal extends Modal {
 
 		// Header
 		const header = container.createDiv({ cls: 'dashboard-modal-header' });
-		header.createDiv({ cls: 'dashboard-modal-title', text: t('media.configure') });
+		bindLocalizedElement(header.createDiv({ cls: 'dashboard-modal-title', text: t('media.configure') }), 'media.configure');
 
 		// Body
 		const body = container.createDiv({ cls: 'dashboard-modal-body' });
 
 		const excludeSection = body.createDiv({ cls: 'dashboard-library-config-section' });
-		excludeSection.createDiv({ cls: 'dashboard-library-config-section-title', text: t('exclude.folders') });
-		excludeSection.createDiv({ cls: 'dashboard-library-config-hint', text: t('exclude.foldersHint') });
+		bindLocalizedElement(excludeSection.createDiv({ cls: 'dashboard-library-config-section-title', text: t('exclude.folders') }), 'exclude.folders');
+		bindLocalizedElement(excludeSection.createDiv({ cls: 'dashboard-library-config-hint', text: t('exclude.foldersHint') }), 'exclude.foldersHint');
 		const excludeEditor = new ExcludeFoldersEditor(this.app, excludeSection, this.existing?.excludeFolders ?? []);
 
 		// Display scope: when non-empty, only files under these folders reach
 		// the section (excludes still subtract within it); empty = whole vault.
 		const includeSection = body.createDiv({ cls: 'dashboard-library-config-section' });
-		includeSection.createDiv({ cls: 'dashboard-library-config-section-title', text: t('media.includeFolders') });
-		includeSection.createDiv({ cls: 'dashboard-library-config-hint', text: t('media.includeFoldersHint') });
+		bindLocalizedElement(includeSection.createDiv({ cls: 'dashboard-library-config-section-title', text: t('media.includeFolders') }), 'media.includeFolders');
+		bindLocalizedElement(includeSection.createDiv({ cls: 'dashboard-library-config-hint', text: t('media.includeFoldersHint') }), 'media.includeFoldersHint');
 		const includeEditor = new ExcludeFoldersEditor(this.app, includeSection, this.existing?.includeFolders ?? [], {
 			placeholder: t('media.includeFolderPlaceholder'),
 		});
 
 		// Footer
 		const footer = container.createDiv({ cls: 'dashboard-modal-footer' });
-		footer
+		bindLocalizedElement(footer
 			.createEl('button', {
 				cls: 'dashboard-modal-btn dashboard-modal-btn--cancel',
 				text: t('common.cancel'),
-			})
+			}), 'common.cancel')
 			.addEventListener('click', () => this.close());
 
-		footer
+		bindLocalizedElement(footer
 			.createEl('button', {
 				cls: 'dashboard-modal-btn dashboard-modal-btn--confirm',
 				text: t('common.save'),
-			})
+			}), 'common.save')
 			.addEventListener('click', () => {
 				// Media sections only consume excludeFolders; keep a complete
 				// LibraryConfig shape (viewMode/sortBy/... defaults) so the YAML

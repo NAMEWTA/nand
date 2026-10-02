@@ -4,6 +4,7 @@ import type { AutomationUiPort } from '../../shared/automation/types';
 
 /** Capabilities the dashboard asks of the native plugin composition. */
 export interface DashboardHost {
+	openBrowser?(request: import('../../core/browser/model').BrowserOpenRequest): Promise<void>;
 	app: App;
 	manifest: import('obsidian').PluginManifest;
 	settings: DashboardSettings & { modules: { dashboard: boolean } };

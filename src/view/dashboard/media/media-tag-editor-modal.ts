@@ -1,3 +1,4 @@
+import { bindLocalizedElement } from '../../primitives/localized-dom';
 import { App, Modal, Notice, TFile } from 'obsidian';
 import { MEDIA_TAG_MAX_LEN, MEDIA_TAG_MAX_PER_FILE, normalizeTags } from '../../../platform/obsidian/media/media-tags';
 import { t } from '../../../shared/i18n/index';
@@ -38,10 +39,10 @@ export class MediaTagEditModal extends Modal {
 
 		const container = contentEl.createDiv({ cls: 'dashboard-modal dashboard-modal--compact' });
 		const header = container.createDiv({ cls: 'dashboard-modal-header' });
-		header.createDiv({
+		bindLocalizedElement(header.createDiv({
 			cls: 'dashboard-modal-title',
 			text: t('media.editTagsTitle', { name: this.file.basename }),
-		});
+		}), 'media.editTagsTitle', { name: this.file.basename });
 		container.createDiv({ cls: 'dashboard-media-tagedit-path', text: this.file.path });
 
 		const body = container.createDiv({ cls: 'dashboard-modal-body' });
@@ -49,13 +50,13 @@ export class MediaTagEditModal extends Modal {
 
 		// Current tags as removable chips
 		const listField = form.createDiv();
-		listField.createEl('label', { text: t('media.editTags') });
+		bindLocalizedElement(listField.createEl('label', { text: t('media.editTags') }), 'media.editTags');
 		const chipsHost = listField.createDiv({ cls: 'dashboard-media-tagedit-chips' });
 
 		const renderChips = (): void => {
 			chipsHost.empty();
 			if (this.tags.length === 0) {
-				chipsHost.createDiv({ cls: 'dashboard-modal-docs-empty', text: t('library.noTags') });
+				bindLocalizedElement(chipsHost.createDiv({ cls: 'dashboard-modal-docs-empty', text: t('library.noTags') }), 'library.noTags');
 				return;
 			}
 			for (const tag of this.tags) {
@@ -73,11 +74,11 @@ export class MediaTagEditModal extends Modal {
 
 		// Add via input
 		const addField = form.createDiv();
-		addField.createEl('label', { text: t('media.addTagPlaceholder') });
-		const input = addField.createEl('input', {
+		bindLocalizedElement(addField.createEl('label', { text: t('media.addTagPlaceholder') }), 'media.addTagPlaceholder');
+		const input = bindLocalizedElement(addField.createEl('input', {
 			cls: 'dashboard-modal-input',
 			attr: { type: 'text', placeholder: t('media.addTagPlaceholder') },
-		});
+		}), 'media.addTagPlaceholder', undefined, "placeholder");
 
 		const addTag = (): void => {
 			const tag = input.value.trim();
@@ -104,19 +105,19 @@ export class MediaTagEditModal extends Modal {
 				addTag();
 			}
 		});
-		addField
-			.createEl('button', { cls: 'dashboard-media-tagedit-add', text: t('common.add') })
+		bindLocalizedElement(addField
+			.createEl('button', { cls: 'dashboard-media-tagedit-add', text: t('common.add') }), 'common.add')
 			.addEventListener('click', addTag);
 
 		// Quick pick from tags already in use elsewhere
 		const pickField = form.createDiv();
-		pickField.createEl('label', { text: t('media.existingTags') });
+		bindLocalizedElement(pickField.createEl('label', { text: t('media.existingTags') }), 'media.existingTags');
 		const pickHost = pickField.createDiv({ cls: 'dashboard-media-tagedit-pick' });
 		const renderQuickPick = (): void => {
 			pickHost.empty();
 			const candidates = this.allKnownTags.filter((tag) => !this.tags.includes(tag));
 			if (candidates.length === 0) {
-				pickHost.createDiv({ cls: 'dashboard-modal-docs-empty', text: t('library.noTags') });
+				bindLocalizedElement(pickHost.createDiv({ cls: 'dashboard-modal-docs-empty', text: t('library.noTags') }), 'library.noTags');
 				return;
 			}
 			for (const tag of candidates) {
@@ -137,17 +138,17 @@ export class MediaTagEditModal extends Modal {
 
 		// Actions
 		const footer = container.createDiv({ cls: 'dashboard-modal-footer' });
-		footer
+		bindLocalizedElement(footer
 			.createEl('button', {
 				cls: 'dashboard-modal-btn dashboard-modal-btn--cancel',
 				text: t('common.cancel'),
-			})
+			}), 'common.cancel')
 			.addEventListener('click', () => this.close());
-		footer
+		bindLocalizedElement(footer
 			.createEl('button', {
 				cls: 'dashboard-modal-btn dashboard-modal-btn--confirm',
 				text: t('common.save'),
-			})
+			}), 'common.save')
 			.addEventListener('click', () => {
 				this.onSave(normalizeTags(this.tags));
 				this.close();

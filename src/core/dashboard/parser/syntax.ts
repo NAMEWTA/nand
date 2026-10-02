@@ -21,6 +21,7 @@ export const KNOWN_METADATA_KEYS = new Set([
 	'gcol',
 	'grow',
 	'noteStyle',
+	'openIn',
 ]);
 
 export const SECTION_TYPES = new Set([

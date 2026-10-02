@@ -28,6 +28,7 @@ type ChildProcess = import('child_process').ChildProcess;
 
 type BinaryUpdateResult = 'skipped-offline' | 'already-ready' | 'downloaded' | 'updated';
 const DEV_RELOAD_REQUEST_FILE = '.terminal-dev-reload.json';
+const TERMINAL_PROTOCOL = 2;
 const DEV_RELOAD_PHASE_INSTALLING = 'installing';
 
 interface ServerExitDetails {
@@ -174,7 +175,7 @@ export class ServerManager {
 		// A failed shutdown still owns its child. Retry cleanup before reopening.
 		if (this.isShuttingDown && this.process) await this.shutdown();
 		if (this.isShuttingDown) this.resetShutdownState();
-		if (this.port !== null && this.ws?.readyState === WebSocket.OPEN) return;
+		if (this.port !== null && this.authenticated && this.ws?.readyState === WebSocket.OPEN) return;
 		if (this.serverStartPromise) return this.serverStartPromise;
 		const operation = this.process && this.port !== null ? this.connectWebSocket() : this.startServer();
 		this.serverStartPromise = operation;
@@ -204,7 +205,7 @@ export class ServerManager {
 	agentData(): AgentDataClient {
 		if (!this._agentDataClient) {
 			this._agentDataClient = new AgentDataClient();
-			this._agentDataClient.setWebSocket(this.ws);
+			this._agentDataClient.setWebSocket(this.authenticated ? this.ws : null);
 		}
 		return this._agentDataClient;
 	}
@@ -213,7 +214,7 @@ export class ServerManager {
 		if (!this._ptyClient) {
 			this._ptyClient = new PtyClient();
 			if (this.ws) {
-				this._ptyClient.setWebSocket(this.ws);
+				this._ptyClient.setWebSocket(this.authenticated ? this.ws : null);
 			}
 		}
 		return this._ptyClient;
@@ -248,6 +249,7 @@ export class ServerManager {
 		for (const cancel of [...this.cancelStartup]) cancel();
 		const ws = this.ws;
 		this.ws = null;
+		this.authenticated = false;
 		ws?.close(1000, 'Shutdown');
 		const child = this.process;
 		if (child) {
@@ -309,7 +311,7 @@ export class ServerManager {
 	 * Whether the WebSocket is connected
 	 */
 	isConnected(): boolean {
-		return this.ws !== null && this.ws.readyState === WebSocket.OPEN;
+		return this.authenticated && this.ws !== null && this.ws.readyState === WebSocket.OPEN;
 	}
 
 	/**
@@ -377,6 +379,7 @@ export class ServerManager {
 			await this.ensureExecutable(binaryPath);
 			check();
 
+			this.authToken = Array.from(crypto.getRandomValues(new Uint8Array(32)), byte => byte.toString(16).padStart(2, '0')).join('');
 			// Start the process
 			this.process = this.spawn(binaryPath, ['--port', '0'], {
 				stdio: ['pipe', 'pipe', 'pipe'],
@@ -387,6 +390,7 @@ export class ServerManager {
 				windowsHide: true,
 				detached: false,
 			});
+			this.process.stdin?.end(`${this.authToken}\n`);
 
 			debugLog('[ServerManager] 服务器进程已启动, PID:', this.process.pid);
 
@@ -414,7 +418,7 @@ export class ServerManager {
 			this.emit('server-started', port);
 		} catch (error) {
 			if (generation !== this.generation || this.isShuttingDown) throw error;
-			if (this.process && this.port === null) await this.shutdown();
+			if (this.process) await this.shutdown();
 
 			const errorMessage = error instanceof Error ? error.message : String(error);
 			errorLog('[ServerManager] 启动服务器失败:', errorMessage);
@@ -580,7 +584,10 @@ export class ServerManager {
 				if (!match) return;
 				try {
 					const info = JSON.parse(match[0]) as ServerInfo;
-					if (typeof info.port === 'number' && info.port > 0) finish(undefined, info.port);
+					if (typeof info.port === 'number' && info.port > 0) {
+						if (info.protocol !== TERMINAL_PROTOCOL) finish(new Error('Terminal protocol mismatch: rebuild or update the Rust server'));
+						else finish(undefined, info.port);
+					}
 				} catch {
 					/* Wait for a complete server announcement. */
 				}
@@ -596,16 +603,20 @@ export class ServerManager {
 	/**
 	 * Establish the WebSocket connection
 	 */
+	private authToken = '';
+	private authenticated = false;
 	private async connectWebSocket(): Promise<void> {
-		if (this.ws?.readyState === WebSocket.OPEN) return;
+		if (this.authenticated && this.ws?.readyState === WebSocket.OPEN) return;
 		if (this.wsConnectPromise) return this.wsConnectPromise;
 		if (!this.port || this.isShuttingDown)
 			throw new ServerManagerError(ServerErrorCode.CONNECTION_FAILED, 'Server unavailable');
 		const generation = this.generation;
 		const ws = new WebSocket(`ws://127.0.0.1:${this.port}`);
+		ws.binaryType = 'arraybuffer';
 		this.ws = ws;
 		const operation = new Promise<void>((resolve, reject) => {
 			let settled = false;
+			let authenticated = false;
 			const current = () => this.generation === generation && this.ws === ws && !this.isShuttingDown;
 			const settle = (error?: Error) => {
 				if (settled) return;
@@ -627,11 +638,7 @@ export class ServerManager {
 					ws.close();
 					return;
 				}
-				this.wsReconnectAttempts = 0;
-				this.isReconnecting = false;
-				this.updateClientsWebSocket();
-				this.emit('ws-connected');
-				settle();
+				ws.send(JSON.stringify({ type: 'auth', protocol: TERMINAL_PROTOCOL, token: this.authToken }));
 			};
 			ws.onerror = () => {
 				settle(new ServerManagerError(ServerErrorCode.CONNECTION_FAILED, 'WebSocket connection failed'));
@@ -641,6 +648,7 @@ export class ServerManager {
 				settle(new ServerManagerError(ServerErrorCode.CONNECTION_FAILED, 'WebSocket closed'));
 				if (!current()) return;
 				this.ws = null;
+		this.authenticated = false;
 				this._ptyClient?.setWebSocket(null);
 				this._agentDataClient?.setWebSocket(null);
 				if (this.isDevInstallInProgress()) return;
@@ -648,6 +656,24 @@ export class ServerManager {
 				if (this.port !== null) this.scheduleReconnect();
 			};
 			ws.onmessage = (event) => {
+				if (!current()) return;
+				if (!authenticated) {
+					try {
+						const message = JSON.parse(String(event.data)) as { type?: string; protocol?: number };
+						if (message.type !== 'authenticated' || message.protocol !== TERMINAL_PROTOCOL) throw new Error('Terminal authentication rejected');
+						authenticated = true;
+						this.authenticated = true;
+						this.wsReconnectAttempts = 0;
+						this.isReconnecting = false;
+						this.updateClientsWebSocket();
+						this.emit('ws-connected');
+						settle();
+					} catch {
+						settle(new Error('Terminal authentication or protocol mismatch'));
+						ws.close();
+					}
+					return;
+				}
 				if (current()) this.handleWebSocketMessage(event);
 			};
 		});
@@ -977,6 +1003,7 @@ export class ServerManager {
 		if (this.ws) {
 			this.ws.close(1000, 'Manual reconnect');
 			this.ws = null;
+		this.authenticated = false;
 		}
 
 		// If the server is still running, reconnect the WebSocket directly

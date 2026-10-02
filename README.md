@@ -1,70 +1,37 @@
 # NAND
 
-> 0.0.3 需要同版本的终端服务。升级后请允许 NAND 下载配套服务；旧版 0.0.1 服务不支持当前历史协议。若开启离线模式，需先关闭离线模式完成更新。
+面向 Obsidian 的个人工作台：看板、评论、CLI Agent、内置浏览器、档案、图标和自动化共用清晰的领域服务与原生界面。
 
+默认简体中文，可在 **设置 → NAND → 首页 → 通用设置 → 语言** 选择 English。首页同时管理功能模块开关。
 
-NAND 是 NAMEWTA 的通用 Obsidian 工作台。看板、编辑器、图标、档案、自动化和桌面端编程智能体按领域划分为独立模块，在设置首页里分别打开或关闭。关闭自动化会停止其执行并保留历史和通知，不影响独立手动终端。
+## 开始使用
 
-终端和编程智能体只在桌面端启动。其他领域保留移动端入口；图标模块的当前实测覆盖桌面版 Obsidian 1.12.4 与 1.13.7，移动端真机尚未验证。
+将匹配版本的 main.js、manifest.json、styles.css 放入库的 .obsidian/plugins/nand/，启用插件后打开 NAND 设置。最低声明版本为 Obsidian 1.12.0；终端、CLI Agent 与内置浏览器需要桌面宿主。
 
-插件 id 是 `nand`。界面和持久化标识按产品域统一命名。项目处于发布前开发阶段，直接使用当前命名，不提供历史命名迁移工具，也不设置迁移门禁。
+[完整使用指南](docs/README.md)包含设置、看板、自动化、工作台、浏览器、档案、评论、图标、业务记录及恢复操作。
 
-## 功能领域
-
-| 领域 | 用途 |
+| 功能 | 使用入口 |
 |---|---|
-| 看板 | 卡片、小组件、日历与阅读等工作台内容 |
-| 编辑器 | Markdown 评论、高亮与复制入口 |
-| 终端／编程智能体 | 六种编程智能体、原生历史与用量；见 [工作台说明](docs/agent-workbench.md) |
-| 图标 | 文件和界面图标、颜色及批量规则；见 [使用指南](docs/icons.md) |
-| 档案 | 联系人、企业、工作经历与人际关系；见 [档案说明](docs/contacts.md) |
-| 自动化 | 统一提醒、定时创建待办、Agent 定时任务与手动快捷操作；见 [自动化说明](docs/automation.md) |
-| 通知 | 应用内与系统投递、持久化收件箱、未读计数 |
-| 同步 | 预留入口 |
+| 看板 | [栏目、卡片、小组件和快捷操作](docs/dashboard.md) |
+| 自动化 | [手动／定时动作、设备归属和通知](docs/automation.md) |
+| Agent | [运行中的终端、原生历史、用量和上下文](docs/agent-workbench.md) |
+| 浏览器 | [网页、站点权限、CLI 与材料采集](docs/browser.md) |
+| 档案 | [个人、企业、任职、关系和相关资料](docs/contacts.md) |
+| 编辑器 | [不改写笔记正文的评论](docs/comments.md) |
+| 图标 | [文件和界面图标、颜色及规则](docs/icons.md) |
 
-设置页在顶部切换领域，当前领域的设置分组向下排列。首页、自动化和同步入口始终保留，关闭自动化后仍可查看历史和使用通知中心；其他关闭的功能领域隐藏其页签。
+## 数据
 
-## 安装
+用户资料使用 Markdown，必要配置与运行 JSON 位于当前库 .nand/。保存失败和冲突应先处理再关闭界面；不迁移或双写旧格式，也不自动清除旧文件。[数据与恢复](docs/data.md)列出目录、备份与恢复步骤。
 
-需要 Obsidian 1.12.0 或更高版本。
+## 开发
 
-1. 从 [GitHub Releases](https://github.com/NAMEWTA/nand/releases) 下载发布包。
-2. 把其中的 `nand` 文件夹放进库的 `.obsidian/plugins/`；若使用自定义配置目录，放入该目录的 `plugins/`。
-3. 在设置的第三方插件里启用 NAND。
+使用 package.json 指定的 pnpm，运行 pnpm install --frozen-lockfile、pnpm test:all、pnpm build、pnpm lint。构建会更新根目录 main.js。
 
-以前装过旧 id 的库需要重新安装这份插件。设置不会自动迁到新目录。
+[领域与架构入口](speculo/.speculo/specdev/.config/domain-layout.md)是维护规范入口；[当前待验收项](speculo/.speculo/specdev/changes/2026-10-01-remaining-acceptance/spec.md)说明尚未完成的实机范围。[变更说明](CHANGELOG.md)仅描述当前未发布内容。
 
-功能区的首页图标打开设置首页。
+## 来源与许可证
 
-评论的删除操作位于卡片右下角的“更多”菜单。Agent 设置按 CLI 路径、权限模式和额外参数分行显示；看板主题与已有配置保持兼容。
+NAND 使用 GPL-3.0-only，见 [LICENSE](LICENSE)。看板参考 [Leolewis2011/obsidian-dashboard](https://github.com/Leolewis2011/obsidian-dashboard)（MIT），终端参考 [ZyphrZero/Termy](https://github.com/ZyphrZero/Termy)（GPL-3.0）。
 
-
-## 档案面板
-
-档案提供联系人与企业卡片、详情页及可视化编辑，记录联系方式、任职履历、直接人际关系、生活习惯和备注；企业详情汇总已收录的现任人员、曾任人员与关键人物。
-
-1. 在 **设置 → NAND → 档案** 选择库内资料文件夹，默认是 `档案`；点击“预览并应用”确认目录。
-2. 点击功能区的通讯录图标，或执行 **NAND：打开档案**，开始新增联系人和企业。
-3. 日常通过面板操作，每份档案保存为独立 Markdown 文件，便于直接阅读、备份或交给 AI 处理。停用或卸载 NAND 后，已保存的文件仍保留。
-
-卡片最多显示 5 或 6 列，随窗口宽度调整。更换资料文件夹只切换读取位置，不自动搬移文件。完整步骤见 [档案使用指南](docs/contacts.md)。
-
-## 图标
-
-设置首页中的“图标”默认开启，可为文件、文件夹、标签、属性、书签和界面入口设置图标与颜色，并通过规则批量应用。功能按 Iconic 1.1.10 迁入独立领域，数据保存在插件目录的 `iconic.json`，自动备份为 `iconic.json.backup1` 等文件；不写入笔记正文。
-
-先打开笔记，再从命令面板执行 **NAND：更改当前文件的图标**。批量规则从 **设置 → NAND → 图标 → 规则书 → 管理** 打开。
-
-操作步骤、默认设置与备份恢复见 [图标使用指南](docs/icons.md)。使用时请停用独立的 Iconic 插件；NAND 不自动导入其数据。
-
-## 开发与变更
-
-当前未发布变更见 [变更日志](CHANGELOG.md)。维护者从 [开发文档索引](speculo/.speculo/specdev/.config/domain-layout.md) 查阅领域术语、架构决策与历史证据。docs 只提供用户使用说明。
-
-## 参考项目与许可证
-
-看板参考了 [PandoraReads/apex-dashboard](https://github.com/PandoraReads/apex-dashboard)（MIT）。终端参考了 [ZyphrZero/Termy](https://github.com/ZyphrZero/Termy)（GPL-3.0）。智能体启动与用量参考了 [stablyai/orca](https://github.com/stablyai/orca)（MIT）。感谢这些项目。
-
-图标领域移植自 [gfxholo/iconic 1.1.10](https://github.com/gfxholo/iconic/tree/268e133c6f99dcef670cbda0d25a74b8239aa099)（MIT-0）。图标检索数据与 Emoji 数据的许可证见 [NOTICE](src/core/icons/res/NOTICE.txt)，并随构建产物保留。
-
-Pi 的可选版本检查读取 npm 包 `@mariozechner/pi-coding-agent`；与其他更新检查共用开关。
+Orca 的参考提交、适配范围及 MIT 许可见 [来源说明](docs/third-party/orca-terminal-workbench.md)。图标移植自 gfxholo/iconic 1.1.10，固定提交为 268e133c6f99dcef670cbda0d25a74b8239aa099；图标、Emoji 等资源许可见 [NOTICE](src/core/icons/res/NOTICE.txt)，随构建产物保留。

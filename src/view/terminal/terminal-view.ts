@@ -1,3 +1,4 @@
+import { bindLocalizedControl } from '../primitives/localized-dom';
 import { WebLinksAddon } from '@xterm/addon-web-links';
 import { shell, webUtils } from 'electron';
 import type { ViewStateResult, WorkspaceLeaf } from 'obsidian';
@@ -8,6 +9,7 @@ import { onLeafLanguageChanged, refreshLeafTitle } from '../../platform/obsidian
 import { t as automationT } from '../../shared/i18n/index';
 import type { TerminalViewHost } from './host';
 import { TerminalWorkbench } from './TerminalWorkbench';
+import { ContextPanel } from './ContextPanel';
 import { confirmSessionClose, HistoryPreview, HistorySidebar, NewConversationButton, SessionSidebar, TerminalHeader, UsageFooter } from './workbench';
 import { createWorkbenchState, sidebarWidth, type WorkbenchState } from './workbench-state';
 
@@ -48,6 +50,7 @@ import {
 import type { TerminalService } from '../../platform/desktop/terminal/terminal-service';
 import { t } from '../../shared/i18n/terminal-accessor';
 import { RenameTerminalModal } from './rename-terminal-modal';
+import { copySessionId } from './copy-session-id';
 import { TERMINAL_FILE_URI_REGEX } from './runtime/terminal-file-links';
 import type { TerminalInstance } from './runtime/terminal-instance';
 import { clamp, normalizeBackgroundPosition, normalizeBackgroundSize, toCssUrl } from './style-utils';
@@ -152,7 +155,7 @@ export class TerminalView extends ItemView {
 		const view = (this as TerminalView & { realView?: TerminalView }).realView ?? this;
 
 		menu.addItem((item) => {
-			item.setTitle(t('terminal.renameTerminal'))
+			bindLocalizedControl(item.setTitle(t('terminal.renameTerminal')), "title", 'terminalAgent.terminal.renameTerminal')
 				.setIcon('pencil')
 				.onClick(() => {
 					if (!view.terminalInstance) {
@@ -175,8 +178,8 @@ export class TerminalView extends ItemView {
 
 		if (view.terminalInstance?.automationManaged)
 			menu.addItem((item) =>
-				item
-					.setTitle(automationT('automation.hide'))
+				bindLocalizedControl(item
+					.setTitle(automationT('automation.hide')), "title", 'automation.hide')
 					.setIcon('eye-off')
 					.onClick(() => {
 						view.releaseTerminalInstance();
@@ -196,10 +199,10 @@ export class TerminalView extends ItemView {
 		const session = view.terminalInstance?.session;
 		if (session) {
 			menu.addSeparator();
-			menu.addItem((item) => item.setTitle(t('workbench.copySessionId')).setIcon('copy').onClick(() => {
-				void view.contentEl.win.navigator.clipboard.writeText(session.id).catch((error) => new Notice(String(error)));
+			menu.addItem((item) => bindLocalizedControl(item.setTitle(t('workbench.copySessionId')), "title", 'terminalAgent.workbench.copySessionId').setIcon('copy').onClick(() => {
+				void copySessionId(session.id, view.contentEl.win.navigator.clipboard);
 			}));
-			menu.addItem((item) => item.setTitle(t('workbench.close')).setIcon('square').onClick(() => {
+			menu.addItem((item) => bindLocalizedControl(item.setTitle(t('workbench.close')), "title", 'terminalAgent.workbench.close').setIcon('square').onClick(() => {
 				confirmSessionClose(view.app, () => view.closeSession(session));
 			}));
 		}
@@ -363,6 +366,7 @@ export class TerminalView extends ItemView {
 		const session = service?.getAllTerminals().find((candidate) => candidate.id === this.terminalInstance?.id);
 		render(
 			h(TerminalWorkbench, {
+				context: session?.agentId && host.attachContext ? h(ContextPanel, { key: session.id, host, id: session.id, title: session.getTitle() }) : null,
 				ownerWindow: this.contentEl.win,
 				state,
 				onStateChange: this.changeWorkbench,

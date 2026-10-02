@@ -1,3 +1,4 @@
+import { ensureDirectory } from '../../../shared/storage/durable-state';
 import { App, Notice, TFile } from 'obsidian';
 import { moveBeside, moveToOwnRow, unpartnerAt } from '../../../core/dashboard/column-pairs';
 import {
@@ -67,7 +68,7 @@ export class SyncEngine {
 	} | null = null;
 	private callbacks: DataCallback[] = [];
 	private eventRef: ReturnType<typeof this.app.vault.on> | null = null;
-	private static readonly BACKUP_DIR = '.dashboard-backup';
+	private static readonly BACKUP_DIR = '.nand/recovery/dashboard';
 	private static readonly MAX_BACKUPS = 5;
 
 	constructor(app: App, settings: DashboardSettings) {
@@ -1151,11 +1152,11 @@ export class SyncEngine {
 
 	private async saveConflict(): Promise<void> {
 		if (!this.conflict) throw new Error(t('dashboard.sync.recoveryFailed'));
-		const dir = '.dashboard-backup/conflicts';
+		const dir = '.nand/recovery/dashboard/conflicts';
 		const adapter = this.app.vault.adapter;
 		if (this.data) this.conflict.local = serialize(this.data);
 		this.conflictSaved = false;
-		if (!(await adapter.exists(dir))) await adapter.mkdir(dir);
+		await ensureDirectory(adapter, dir);
 		await adapter.write(`${dir}/${this.conflict.id}.json`, JSON.stringify(this.conflict, null, 2));
 		this.conflictSaved = true;
 	}
@@ -1163,9 +1164,7 @@ export class SyncEngine {
 	private async createBackup(currentContent: string): Promise<void> {
 		const adapter = this.app.vault.adapter;
 		const dir = SyncEngine.BACKUP_DIR;
-		if (!(await adapter.exists(dir))) {
-			await adapter.mkdir(dir);
-		}
+		await ensureDirectory(adapter, dir);
 
 		// Keyed per workspace: each board keeps its own rolling copies and
 		// prunes only its own files (dot separator so 'dashboard.' never

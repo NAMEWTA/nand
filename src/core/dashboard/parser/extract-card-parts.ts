@@ -256,6 +256,7 @@ function parseCard(block: { title: string; body: string }, columnName: string): 
 		id: metadata.id ?? generateId(block.title, columnName),
 		title: block.title,
 		type: cardType,
+		...(cardType === 'web' ? { openIn: metadata.openIn === 'tab' ? ('tab' as const) : ('modal' as const) } : {}),
 		noteStyle: metadata.noteStyle === 'cover' || metadata.noteStyle === 'plain' ? metadata.noteStyle : undefined,
 		column: columnName,
 		body: cleanBody,
@@ -393,6 +394,7 @@ export function serializeDocTree(docs: DocNode[]): string[] {
 	return lines;
 }
 function detectCardType(tasks: TaskItem[], blockquote: string, metadata: Record<string, string>): CardType {
+	if (metadata.type === 'web') return 'web';
 	if (metadata.type === 'generic') return 'generic';
 	if (metadata.type === 'task') return 'task';
 	if (metadata.type === 'project') return 'project';

@@ -22,6 +22,7 @@ export type ModuleType = 'pty' | 'agent_data';
  * Server info
  */
 export interface ServerInfo {
+	protocol: number;
 	/** Listening port */
 	port: number;
 	/** Process PID */

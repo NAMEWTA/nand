@@ -17,6 +17,7 @@ export class El {
 	}
 	className = '';
 	children: El[] = [];
+	get options(): El[] { return this.children.filter((child) => child.tagName === 'OPTION'); }
 	private text = '';
 	private readonly attrs = new Map<string, string>();
 	private readonly listeners = new Map<string, Array<(ev: unknown) => void>>();

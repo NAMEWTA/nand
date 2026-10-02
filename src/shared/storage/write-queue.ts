@@ -16,3 +16,13 @@ export class WriteQueue {
 		await Promise.all(this.tails.values());
 	}
 }
+
+const storageQueueKey = Symbol.for('nand.storage.write-queue');
+/** The native storage object survives plugin reload, so admitted writes keep their ordering. */
+export function storageWriteQueue(storage: object): WriteQueue {
+	const existing = Reflect.get(storage, storageQueueKey) as WriteQueue | undefined;
+	if (existing) return existing;
+	const queue = new WriteQueue();
+	Object.defineProperty(storage, storageQueueKey, { value: queue, configurable: true });
+	return queue;
+}

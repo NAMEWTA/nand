@@ -1,3 +1,4 @@
+import { bindLocalizedElement } from '../../primitives/localized-dom';
 import { App, Modal, setIcon } from 'obsidian';
 import type { WereadConfig, WereadStatItem, WereadWidget } from '../../../core/dashboard/types/index';
 import type {
@@ -76,10 +77,10 @@ export class WereadConfigModal extends Modal {
 		const container = contentEl.createDiv({ cls: 'dashboard-modal dashboard-modal--compact' });
 
 		const header = container.createDiv({ cls: 'dashboard-modal-header' });
-		header.createDiv({ cls: 'dashboard-modal-title', text: t('weread.configure') });
+		bindLocalizedElement(header.createDiv({ cls: 'dashboard-modal-title', text: t('weread.configure') }), 'weread.configure');
 
 		const body = container.createDiv({ cls: 'dashboard-modal-body' });
-		body.createDiv({ cls: 'dashboard-library-config-section-title', text: t('weread.widgetsLabel') });
+		bindLocalizedElement(body.createDiv({ cls: 'dashboard-library-config-section-title', text: t('weread.widgetsLabel') }), 'weread.widgetsLabel');
 
 		const list = body.createDiv({ cls: 'dashboard-weread-cfg-list' });
 
@@ -97,10 +98,10 @@ export class WereadConfigModal extends Modal {
 				const main = row.createDiv({ cls: 'dashboard-weread-cfg-main' });
 
 				// Optional title
-				const titleInput = main.createEl('input', {
+				const titleInput = bindLocalizedElement(main.createEl('input', {
 					cls: 'dashboard-weread-cfg-title',
 					attr: { type: 'text', placeholder: t('weread.widgetTitlePlaceholder'), value: w.title ?? '' },
-				});
+				}), 'weread.widgetTitlePlaceholder', undefined, "placeholder");
 				titleInput.addEventListener('change', () => {
 					const v = titleInput.value.trim();
 					update({ title: v.length > 0 ? v : undefined }, false);
@@ -109,7 +110,7 @@ export class WereadConfigModal extends Modal {
 				// View selector
 				const viewSelect = main.createEl('select', { cls: 'dashboard-library-filter-property' });
 				for (const v of VIEW_OPTIONS) {
-					const opt = viewSelect.createEl('option', { text: t(v.labelKey), attr: { value: v.value } });
+					const opt = bindLocalizedElement(viewSelect.createEl('option', { text: t(v.labelKey), attr: { value: v.value } }), v.labelKey);
 					if (w.view === v.value) opt.selected = true;
 				}
 				viewSelect.addEventListener('change', () => {
@@ -119,13 +120,13 @@ export class WereadConfigModal extends Modal {
 				// Shelf facets are independent. Empty selection within a facet means all.
 				if (w.view === 'shelf') {
 					const grouping = main.createDiv({ cls: 'dashboard-weread-cfg-grouping' });
-					grouping.createDiv({ cls: 'dashboard-weread-cfg-filter-label', text: t('weread.groupBy') });
+					bindLocalizedElement(grouping.createDiv({ cls: 'dashboard-weread-cfg-filter-label', text: t('weread.groupBy') }), 'weread.groupBy');
 					const groupSelect = grouping.createEl('select', { cls: 'dashboard-library-filter-property' });
 					for (const option of GROUP_OPTIONS) {
-						const element = groupSelect.createEl('option', {
+						const element = bindLocalizedElement(groupSelect.createEl('option', {
 							text: t(option.labelKey),
 							attr: { value: option.value },
-						});
+						}), option.labelKey);
 						if ((w.groupBy ?? 'readingState') === option.value) element.selected = true;
 					}
 					groupSelect.addEventListener('change', () =>
@@ -133,7 +134,7 @@ export class WereadConfigModal extends Modal {
 					);
 
 					const panel = main.createDiv({ cls: 'dashboard-weread-cfg-filter-panel' });
-					panel.createDiv({ cls: 'dashboard-weread-cfg-filter-panel-title', text: t('weread.filters') });
+					bindLocalizedElement(panel.createDiv({ cls: 'dashboard-weread-cfg-filter-panel-title', text: t('weread.filters') }), 'weread.filters');
 					renderFacet(panel, t('weread.filterProgress'), PROGRESS_OPTIONS, w.progressFilters, (values) =>
 						update({ progressFilters: values }),
 					);
@@ -173,10 +174,10 @@ export class WereadConfigModal extends Modal {
 				setIcon(downBtn, 'chevron-down');
 				downBtn.disabled = i === this.widgets.length - 1;
 				downBtn.addEventListener('click', () => this.swap(i, i + 1, render));
-				const rmBtn = ops.createEl('button', {
+				const rmBtn = bindLocalizedElement(ops.createEl('button', {
 					cls: 'dashboard-weread-cfg-op',
 					attr: { type: 'button', 'aria-label': t('common.delete') },
-				});
+				}), 'common.delete', undefined, "aria-label");
 				setIcon(rmBtn, 'trash-2');
 				rmBtn.addEventListener('click', () => {
 					this.widgets = this.widgets.filter((_, idx) => idx !== i);
@@ -186,31 +187,31 @@ export class WereadConfigModal extends Modal {
 		};
 
 		// Add widget
-		body.createEl('button', {
+		bindLocalizedElement(body.createEl('button', {
 			cls: 'dashboard-modal-btn dashboard-modal-btn--confirm dashboard-weread-cfg-add',
 			text: t('weread.addWidget'),
-		}).addEventListener('click', () => {
+		}), 'weread.addWidget').addEventListener('click', () => {
 			this.widgets = [...this.widgets, { id: `w${Date.now()}`, view: 'shelf', groupBy: 'readingState' }];
 			render();
 		});
 
 		render();
 
-		body.createDiv({ cls: 'dashboard-library-config-hint', text: t('weread.configHint') });
+		bindLocalizedElement(body.createDiv({ cls: 'dashboard-library-config-hint', text: t('weread.configHint') }), 'weread.configHint');
 
 		// Footer
 		const footer = container.createDiv({ cls: 'dashboard-modal-footer' });
-		footer
+		bindLocalizedElement(footer
 			.createEl('button', {
 				cls: 'dashboard-modal-btn dashboard-modal-btn--cancel',
 				text: t('common.cancel'),
-			})
+			}), 'common.cancel')
 			.addEventListener('click', () => this.close());
-		footer
+		bindLocalizedElement(footer
 			.createEl('button', {
 				cls: 'dashboard-modal-btn dashboard-modal-btn--confirm',
 				text: t('common.save'),
-			})
+			}), 'common.save')
 			.addEventListener('click', () => {
 				this.onSave({
 					widgets:
@@ -248,7 +249,7 @@ function renderFacet<T extends string>(
 	for (const option of options) {
 		const active = selected?.includes(option.value) ?? false;
 		const chip = chips.createDiv({ cls: 'dashboard-weread-cfg-chip' + (active ? ' active' : '') });
-		chip.createSpan({ text: t(option.labelKey) });
+		bindLocalizedElement(chip.createSpan({ text: t(option.labelKey) }), option.labelKey);
 		chip.addEventListener('click', () => onChange(toggleValue(selected, option.value)));
 	}
 }
@@ -266,8 +267,8 @@ function renderStatsItemsPanel(
 	onChange: (values: WereadStatItem[] | undefined) => void,
 ): void {
 	const panel = parent.createDiv({ cls: 'dashboard-weread-cfg-filter-panel' });
-	panel.createDiv({ cls: 'dashboard-weread-cfg-filter-panel-title', text: t('weread.statsItems') });
-	panel.createDiv({ cls: 'dashboard-library-config-hint', text: t('weread.statsItemsHint') });
+	bindLocalizedElement(panel.createDiv({ cls: 'dashboard-weread-cfg-filter-panel-title', text: t('weread.statsItems') }), 'weread.statsItems');
+	bindLocalizedElement(panel.createDiv({ cls: 'dashboard-library-config-hint', text: t('weread.statsItemsHint') }), 'weread.statsItemsHint');
 
 	const visible = normalizeStatItems(stored);
 	// Hidden options come from ALL_STAT_ITEMS, not the default set — a
@@ -357,7 +358,7 @@ function appendStatsRowControls(row: HTMLElement, item: WereadStatItem, checked:
 	});
 	check.checked = checked;
 	check.addEventListener('change', onToggle);
-	row.createSpan({ cls: 'dashboard-weread-cfg-stats-label', text: t(STAT_ITEM_LABEL_KEYS[item]) });
+	bindLocalizedElement(row.createSpan({ cls: 'dashboard-weread-cfg-stats-label', text: t(STAT_ITEM_LABEL_KEYS[item]) }), STAT_ITEM_LABEL_KEYS[item]);
 }
 
 function toggleValue<T>(values: readonly T[] | undefined, value: T): T[] | undefined {

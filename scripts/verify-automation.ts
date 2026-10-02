@@ -166,7 +166,7 @@ test('runtime preflight orders factual failures before permission and prevents a
 		settings: { agentSettings: settings },
 		manifest: { dir: '.obsidian/plugins/nand' },
 		app: {
-			loadLocalStorage: () => 'synthetic',
+			loadLocalStorage: () => '11111111-1111-4111-8111-111111111111',
 			workspace: { containerEl: { win: {} } },
 			vault: { adapter: { exists: async () => false, getBasePath: () => vault } },
 		},
@@ -748,16 +748,19 @@ test('completed delivery is not replayed even after notification retention has t
 	assert.equal(f.notified.length, 1);
 });
 
-test('dashboard source migrates stable ownership, suppresses completed tasks and creates each run once', async () => {
+test('dashboard source indexes explicit ownership, ignores old reminders and creates each run once', async () => {
 	let raw = '# Board\n\n## Column\n\n### Tasks\n\n- [ ] Parent\n  - [ ] Nested ⏰ 2026-09-27 09:00\n';
 	const file = { path: 'Board.md', basename: 'Board' };
 	const settings = { ...structuredClone(DEFAULT_SETTINGS), dashboardFile: 'Board', workspaceFiles: [] };
 	const app = { vault: { getFileByPath: (p: string) => p === file.path ? file : null, read: async () => raw, process: async (_: unknown, edit: (text: string) => string) => { raw = edit(raw); return raw; } }, workspace: { getLeavesOfType: () => [] } } as unknown as App;
 	const source = new DashboardAutomationSource(app, () => settings, 'first-device', async () => {}, () => settings.modules.dashboard);
+	assert.equal((await source.list()).length, 0, 'legacy reminder is not migrated');
+	raw = raw.replace('Nested ⏰ 2026-09-27 09:00', 'Nested' + taskMetaSuffix({ id: 'nested-id', automation: definition({ deviceId: 'first-device' }) }));
+	source.invalidate(file.path);
 	const [original] = await source.list(); assert.ok(original?.source?.id); assert.equal(original.deviceId, 'first-device');
 	const other = new DashboardAutomationSource(app, () => settings, 'other-device', async () => {}, () => settings.modules.dashboard);
 	assert.equal((await other.list())[0]?.deviceId, 'first-device');
-	raw = raw.replace('- [ ] Nested', '- [x] Nested'); assert.equal((await source.list()).length, 0);
+	raw = raw.replace('- [ ] Nested', '- [x] Nested'); source.invalidate(file.path); assert.equal((await source.list()).length, 0);
 	const [target] = await source.targets(); assert.ok(target);
 	const action = { kind: 'create-task' as const, ...target, text: 'Scheduled todo' };
 	await source.createTask(action, 'one-run'); await source.createTask(action, 'one-run');

@@ -1,16 +1,41 @@
 import { Notice, Setting, setIcon } from 'obsidian';
 import { t } from '../../shared/i18n/index';
+import { normalizeLanguage } from './language';
 import type { DashboardSettingTab } from './settings-tab';
 
-/** Home is the first settings product. Its only job is to start or stop the others. */
+/** Global preferences remain available even when every product is disabled. */
 export function renderHomeSettings(this: DashboardSettingTab, containerEl: HTMLElement): void {
 	containerEl.addClass('nand-home-settings');
+	new Setting(containerEl).setName(t('settings.homeGeneral')).setHeading();
+	new Setting(containerEl)
+		.setName(t('settings.language'))
+		.setDesc(t('settings.languageDesc'))
+		.addDropdown((dropdown) => {
+			dropdown.selectEl.dataset.nandLanguage = 'true';
+			dropdown.addOptions({ zh: t('settings.languageZh'), en: t('settings.languageEn') })
+				.setValue(this.plugin.settings.language)
+				.onChange(async (value) => {
+					dropdown.setDisabled(true);
+					try {
+						await this.plugin.changeLanguage(normalizeLanguage(value));
+						this.refresh();
+						this.containerEl.querySelector<HTMLSelectElement>('[data-nand-language]')?.focus();
+					} catch {
+						dropdown.setValue(this.plugin.settings.language);
+						new Notice(t('settings.writeFailed'));
+					} finally {
+						dropdown.setDisabled(false);
+					}
+				});
+		});
+	new Setting(containerEl).setName(t('settings.homeModules')).setHeading();
 	const modules = this.plugin.settings.modules;
 	const rows: Array<{
-		key: 'dashboard' | 'editor' | 'terminal' | 'iconic' | 'contacts' | 'automation';
+		key: 'dashboard' | 'browser' | 'editor' | 'terminal' | 'iconic' | 'contacts' | 'automation';
 		name: string;
 		desc: string;
 	}> = [
+		{ key: 'browser', name: t('browser.title'), desc: t('browser.description') },
 		{ key: 'dashboard', name: t('modules.dashboard'), desc: t('modules.dashboardDesc') },
 		{ key: 'editor', name: t('modules.editor'), desc: t('modules.editorDesc') },
 		{ key: 'terminal', name: t('modules.terminal'), desc: t('modules.terminalDesc') },
@@ -49,17 +74,19 @@ export function renderHomeSettings(this: DashboardSettingTab, containerEl: HTMLE
 		const icon = setting.settingEl.createDiv({ cls: 'nand-home-module-icon', attr: { 'aria-hidden': 'true' } });
 		setIcon(
 			icon,
-			row.key === 'automation'
-				? 'timer'
-				: row.key === 'contacts'
-				? 'contact-round'
-				: row.key === 'dashboard'
-					? 'layout-dashboard'
-					: row.key === 'editor'
-						? 'pen-line'
-						: row.key === 'iconic'
-							? 'images'
-							: 'terminal',
+			row.key === 'browser'
+				? 'globe'
+				: row.key === 'automation'
+					? 'timer'
+					: row.key === 'contacts'
+						? 'contact-round'
+						: row.key === 'dashboard'
+							? 'layout-dashboard'
+							: row.key === 'editor'
+								? 'pen-line'
+								: row.key === 'iconic'
+									? 'images'
+									: 'terminal',
 		);
 	}
 	new Setting(containerEl).setName(t('modules.sync')).setDesc(t('modules.syncDesc'));

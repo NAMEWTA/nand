@@ -1,3 +1,5 @@
+import { actionText } from '../../core/automations/switch-action';
+import { actionDescriptors } from '../../core/actions/executor';
 import { nextOccurrence } from '../../core/automations/schedule';
 import type { AutomationDefinition } from '../../shared/automation/types';
 import { isActiveRun } from '../../shared/automation/types';
@@ -139,7 +141,7 @@ export function AutomationsPanel({
 								refresh();
 							}}
 						>
-							{['', 'enabled', 'disabled', 'agent', 'notify', 'create-task'].map((key) => (
+							{['', 'enabled', 'disabled', ...actionDescriptors.map(action => action.kind)].map((key) => (
 								<option key={key} value={key}>
 									{t(`automation.${key || 'all'}`)}
 								</option>
@@ -288,13 +290,10 @@ export function AutomationsPanel({
 									</button>
 								)}
 							</div>
+							{host.pin && currentIds.has(selected.id) && <button type="button" className="nand-ui-btn" onClick={() => actions.run(() => host.pin!(selected))}>{t('automation.pin')}</button>}
 							<div className="nand-ui-section-label">{t('automation.prompt')}</div>
 							<p className="nand-automation-prompt">
-								{selected.action.kind === 'agent'
-									? selected.action.prompt
-									: selected.action.kind === 'notify'
-										? selected.action.body
-										: selected.action.text}
+								{actionText(selected.action)}
 							</p>
 						</section>
 						<div className="nand-automation-section-head">

@@ -1,16 +1,10 @@
-import { setIcon } from 'obsidian';
 import { useEffect, useRef, useState, type ReactNode } from 'preact/compat';
 import type { ArchiveRecord, EntityRef } from '../../core/contacts/model';
-import { ct, relationDescription } from './forms';
+import { ct, relationDescription } from './labels';
 import type { ContactsPanelHost } from './panel-contract';
+import { Icon, Pager } from './ContactsPrimitives';
+import { ResourceList } from './ResourceList';
 
-function Icon({ name, className }: { name: string; className?: string }) {
-	const ref = useRef<HTMLSpanElement>(null);
-	useEffect(() => {
-		if (ref.current) setIcon(ref.current, name);
-	}, [name]);
-	return <span ref={ref} className={className} aria-hidden="true" />;
-}
 /**
  * Round initial avatar. Grid cards keep the initial as a text node (as they
  * always have); elsewhere `decorative` draws it from a data attribute so the
@@ -66,14 +60,41 @@ function Markdown({ view, text, path }: { view: ContactsPanelHost; text: string;
 		<p className="nand-contacts-muted nand-contacts-placeholder">{ct('noDetails')}</p>
 	);
 }
-function Section({ title, action, children }: { title: string; action?: ReactNode; children: ReactNode }) {
+function Section({
+	title,
+	action,
+	children,
+	expanded = false,
+	summary,
+}: {
+	title: string;
+	action?: ReactNode;
+	children: ReactNode;
+	expanded?: boolean;
+	summary?: string;
+}) {
+	const [open, setOpen] = useState(expanded);
 	return (
 		<section className="nand-contacts-section nand-ui-card">
 			<div className="nand-contacts-section-title">
-				<h3>{title}</h3>
+				<h3>
+					{expanded ? (
+						title
+					) : (
+						<button
+							className="nand-contacts-section-toggle"
+							aria-expanded={open}
+							onClick={() => setOpen(!open)}
+						>
+							<Icon name={open ? 'chevron-down' : 'chevron-right'} />
+							{title}
+							{summary && <span className="nand-contacts-section-summary">{summary}</span>}
+						</button>
+					)}
+				</h3>
 				{action}
 			</div>
-			{children}
+			{open && children}
 		</section>
 	);
 }
@@ -87,40 +108,6 @@ function RefLink({ view, source, target }: { view: ContactsPanelHost; source: Ar
 		<span className="nand-contacts-muted" title={ct('missing')}>
 			{target.label || ct('none')} {target.label ? '· ' + ct('missing') : ''}
 		</span>
-	);
-}
-function Pager({
-	page,
-	pages,
-	count,
-	go,
-	live = false,
-	footer = false,
-}: {
-	page: number;
-	pages: number;
-	count: number;
-	go: (page: number) => void;
-	live?: boolean;
-	footer?: boolean;
-}) {
-	const body = (
-		<>
-			<button className="nand-ui-btn nand-ui-btn-ghost" disabled={page === 0} onClick={() => go(page - 1)}>
-				<Icon name="chevron-left" />
-				{ct('previous')}
-			</button>
-			<span aria-live={live ? 'polite' : undefined}>{ct('page', { page: page + 1, total: pages, count })}</span>
-			<button className="nand-ui-btn nand-ui-btn-ghost" disabled={page + 1 >= pages} onClick={() => go(page + 1)}>
-				{ct('next')}
-				<Icon name="chevron-right" />
-			</button>
-		</>
-	);
-	return footer ? (
-		<footer className="nand-contacts-pagination">{body}</footer>
-	) : (
-		<div className="nand-contacts-pagination">{body}</div>
 	);
 }
 function People({
@@ -176,9 +163,22 @@ function Detail({ view, record }: { view: ContactsPanelHost; record: ArchiveReco
 	const issues = index.issues(record),
 		blocked = issues.length > 0;
 	const edit = (scope: Parameters<ContactsPanelHost['edit']>[1], id?: string) => view.edit(record, scope, id);
-	const rows = Object.entries(record.fields).filter(
-		([key, value]) => key !== 'name' && (Array.isArray(value) ? value.length : value),
-	);
+	const rows = (
+		[
+			'mobiles',
+			'phones',
+			'emails',
+			'wechat',
+			'region',
+			'website',
+			'aliases',
+			'birthday',
+			'birthplace',
+			'tags',
+		] as const
+	)
+		.map((key) => [key, record.fields[key]] as const)
+		.filter(([, value]) => (Array.isArray(value) ? value.length : value));
 	const members = record.kind === 'company' ? index.members(record.id, 'current') : [];
 	const keyPeople = members.filter((person) =>
 		person.employments.some((j) => j.company.id === record.id && j.status === 'current' && !!j.keyRole),
@@ -212,10 +212,7 @@ function Detail({ view, record }: { view: ContactsPanelHost; record: ArchiveReco
 					</span>
 				</div>
 			)}
-			<Section
-				title={ct('basic')}
-				action={<Action icon="pencil" label={ct('edit')} action={() => edit('basic')} disabled={blocked} />}
-			>
+			<Section title={ct('basic')} expanded>
 				{!rows.length && <p className="nand-contacts-muted nand-contacts-placeholder">{ct('noDetails')}</p>}
 				<dl className="nand-contacts-fields">
 					{rows.map(([key, value]) => (
@@ -226,12 +223,18 @@ function Detail({ view, record }: { view: ContactsPanelHost; record: ArchiveReco
 					))}
 				</dl>
 			</Section>
+			{!blocked && <ResourceList key={record.id} view={view} record={record} />}
 			{record.kind === 'person' && (
 				<>
 					<Section
-						title={ct('employments')}
+						title={`${ct('employments')} (${record.employments.length})`}
 						action={
-							<Action icon="plus" label={ct('add')} action={() => edit('employment')} disabled={blocked} />
+							<Action
+								icon="plus"
+								label={ct('add')}
+								action={() => edit('employment')}
+								disabled={blocked}
+							/>
 						}
 					>
 						{!record.employments.length && (
@@ -280,8 +283,10 @@ function Detail({ view, record }: { view: ContactsPanelHost; record: ArchiveReco
 							))}
 					</Section>
 					<Section
-						title={ct('relations')}
-						action={<Action icon="plus" label={ct('add')} action={() => edit('relation')} disabled={blocked} />}
+						title={`${ct('relations')} (${index.relationsFor(record.id).length})`}
+						action={
+							<Action icon="plus" label={ct('add')} action={() => edit('relation')} disabled={blocked} />
+						}
 					>
 						{!index.relationsFor(record.id).length && (
 							<p className="nand-contacts-muted nand-contacts-placeholder">{ct('noDetails')}</p>
@@ -340,13 +345,13 @@ function Detail({ view, record }: { view: ContactsPanelHost; record: ArchiveReco
 			)}
 			{record.kind === 'company' && (
 				<>
-					<Section title={ct('keyPeople')}>
+					<Section title={`${ct('keyPeople')} (${keyPeople.length})`}>
 						<People key={record.id} companyId={record.id} keyOnly view={view} records={keyPeople} />
 					</Section>
 					<Section title={ct('employees', { count: members.length })}>
 						<People key={record.id} companyId={record.id} view={view} records={members} />
 					</Section>
-					<Section title={ct('pastPeople')}>
+					<Section title={`${ct('pastPeople')} (${index.members(record.id, 'past').length})`}>
 						<People
 							key={record.id}
 							companyId={record.id}
@@ -361,7 +366,15 @@ function Detail({ view, record }: { view: ContactsPanelHost; record: ArchiveReco
 				<Section
 					key={key}
 					title={ct(key === 'notes' && record.kind === 'company' ? 'companyNotes' : key)}
-					action={<Action icon="pencil" label={ct('edit')} action={() => edit(key)} disabled={blocked} />}
+					summary={record.prose[key].replace(/\s+/g, ' ').trim().slice(0, 40)}
+					action={
+						<Action
+							icon={record.prose[key].trim() ? 'pencil' : 'plus'}
+							label={ct(record.prose[key].trim() ? 'edit' : 'add')}
+							action={() => edit(key)}
+							disabled={blocked}
+						/>
+					}
 				>
 					<Markdown view={view} text={record.prose[key]} path={record.path} />
 				</Section>
@@ -447,7 +460,7 @@ export function ContactsSurface({ view }: { view: ContactsPanelHost }) {
 			)}
 			{selectedPath ? (
 				record ? (
-					<Detail view={view} record={record} />
+					<Detail key={record.id} view={view} record={record} />
 				) : (
 					!controller.loading && <p className="nand-contacts-status">{ct('missing')}</p>
 				)
@@ -490,7 +503,9 @@ export function ContactsSurface({ view }: { view: ContactsPanelHost }) {
 											</span>
 										) : (
 											<span className="nand-contacts-card-subtitle">
-												{ct('employees', { count: controller.index.members(r.id, 'current').length })}
+												{ct('employees', {
+													count: controller.index.members(r.id, 'current').length,
+												})}
 											</span>
 										)}
 									</span>
@@ -526,7 +541,13 @@ export function ContactsSurface({ view }: { view: ContactsPanelHost }) {
 					{!records.length && !controller.loading && (
 						<div className="nand-contacts-empty">
 							<Icon
-								name={query.search || hasFilter ? 'search-x' : query.kind === 'company' ? 'building-2' : 'contact-round'}
+								name={
+									query.search || hasFilter
+										? 'search-x'
+										: query.kind === 'company'
+											? 'building-2'
+											: 'contact-round'
+								}
 								className="nand-contacts-empty-icon"
 							/>
 							<p>{ct(query.search || hasFilter ? 'noResults' : 'empty')}</p>
@@ -536,7 +557,14 @@ export function ContactsSurface({ view }: { view: ContactsPanelHost }) {
 						</div>
 					)}
 					{records.length > 60 && (
-						<Pager page={page} pages={pages} count={records.length} go={(value) => view.page(value)} live footer />
+						<Pager
+							page={page}
+							pages={pages}
+							count={records.length}
+							go={(value) => view.page(value)}
+							live
+							footer
+						/>
 					)}
 				</>
 			)}

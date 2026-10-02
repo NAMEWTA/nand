@@ -40,6 +40,7 @@ function storage() {
 	const win = Object.assign(new EventTarget(), { setTimeout, clearTimeout });
 	const doc = Object.assign(new EventTarget(), { defaultView: win, visibilityState: 'visible' });
 	const adapter = {
+		mkdir: async () => {},
 		exists: async (p: string) => files.has(p),
 		read: async (p: string) => {
 			if (!files.has(p)) throw Error('ENOENT ' + p);
@@ -178,7 +179,7 @@ test('saves coalesce for 300ms, isolate data.json and own their defaults', async
 	assert.equal(f.store.save(), promise);
 	assert.equal(f.writes.length, 0);
 	await promise;
-	assert.deepEqual(Object.keys(JSON.parse(f.files.get(f.store.path)!).fileIcons), ['Z.md', 'A.md']);
+	assert.deepEqual(Object.keys(JSON.parse(f.files.get(f.store.path)!).fileIcons), ['A.md', 'Z.md']);
 	assert.equal(f.files.get('.custom/plugins/nand/data.json'), '{"modules":{"iconic":true}}');
 	assert.deepEqual(f.writes, [f.store.path]);
 	const second = storage();

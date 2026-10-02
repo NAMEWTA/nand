@@ -1,3 +1,6 @@
+import { bindLocalizedOptions } from '../../primitives/localized-dom';
+import { bindLocalizedControl } from '../../primitives/localized-dom';
+import { localizedAttributes, localizedText } from '../../primitives/localized-dom';
 import { App, Modal, Setting, setIcon, type TextComponent } from 'obsidian';
 import { DEFAULT_WIDGET_BACKGROUND, type WidgetBackground } from '../../../core/dashboard/types/index';
 import { t } from '../../../shared/i18n/index';
@@ -8,11 +11,11 @@ import { PathPickerModal } from '../ui/path-picker-modal';
 /** Mount the half-hidden gear button at a card's top-right corner. Revealed
  *  on card hover (the countdown settings-button recipe); the click opens
  *  whatever the call site wires — background editor or full config modal. */
-export function attachWidgetConfigButton(widget: HTMLElement, onOpen: () => void, label: string): void {
+export function attachWidgetConfigButton(widget: HTMLElement, onOpen: () => void, labelKey: string): void {
 	widget.addClass('dashboard-sidebar-widget--cfg');
 	const btn = widget.createEl('button', {
 		cls: 'dashboard-widget-cfg-btn',
-		attr: { 'aria-label': label },
+		attr: localizedAttributes(labelKey),
 	});
 	setIcon(btn, 'settings');
 	btn.addEventListener('click', (e) => {
@@ -33,7 +36,7 @@ export function attachBackgroundConfigButton(
 		() => {
 			new WidgetBackgroundModal(app, bg, onBgChange).open();
 		},
-		t('wbg.title'),
+		'wbg.title',
 	);
 }
 
@@ -50,7 +53,7 @@ export function appendInlineBackgroundButton(
 ): HTMLElement {
 	const btn = parent.createDiv({
 		cls: 'dashboard-widget-inline-cfg-btn',
-		attr: { 'aria-label': t('wbg.title') },
+		attr: { ...localizedAttributes('wbg.title', undefined, 'aria-label') },
 	});
 	setIcon(btn, 'settings');
 	btn.addEventListener('click', (e) => {
@@ -131,26 +134,26 @@ export class WidgetBackgroundModal extends Modal {
 		applyModalTheme(containerEl);
 
 		const container = contentEl.createDiv({ cls: 'dashboard-modal dashboard-modal--compact' });
-		const title = container.createDiv({ cls: 'dashboard-modal-title', text: t('wbg.title') });
+		const title = container.createDiv({ cls: 'dashboard-modal-title', ...localizedText('wbg.title') });
 		title.setCssProps({ fontSize: '1em' });
 		const body = container.createDiv({ cls: 'dashboard-modal-body' });
 
 		let imageInput: TextComponent | undefined;
-		new Setting(body)
-			.setName(t('wbg.image'))
-			.setDesc(t('wbg.imageDesc'))
+		bindLocalizedControl(bindLocalizedControl(new Setting(body)
+			.setName(t('wbg.image')), "name", 'wbg.image')
+			.setDesc(t('wbg.imageDesc')), "desc", 'wbg.imageDesc')
 			.addText((text) => {
 				imageInput = text;
-				text.setPlaceholder(t('wbg.imagePlaceholder'))
+				bindLocalizedControl(text.setPlaceholder(t('wbg.imagePlaceholder')), "placeholder", 'wbg.imagePlaceholder')
 					.setValue(this.cfg.image)
 					.onChange((v) => {
 						this.cfg.image = v.trim();
 					});
 			})
 			.addExtraButton((btn) =>
-				btn
+				bindLocalizedControl(btn
 					.setIcon('file-search')
-					.setTooltip(t('pathPicker.pickFile'))
+					.setTooltip(t('pathPicker.pickFile')), "tooltip", 'pathPicker.pickFile')
 					.onClick(() => {
 						new PathPickerModal(this.app, 'image', (path) => {
 							this.cfg.image = path;
@@ -159,9 +162,9 @@ export class WidgetBackgroundModal extends Modal {
 					}),
 			);
 
-		new Setting(body)
-			.setName(t('wbg.opacity'))
-			.setDesc(t('wbg.opacityDesc'))
+		bindLocalizedControl(bindLocalizedControl(new Setting(body)
+			.setName(t('wbg.opacity')), "name", 'wbg.opacity')
+			.setDesc(t('wbg.opacityDesc')), "desc", 'wbg.opacityDesc')
 			.addSlider((slider) =>
 				slider
 					.setLimits(10, 100, 5)
@@ -171,9 +174,9 @@ export class WidgetBackgroundModal extends Modal {
 					}),
 			);
 
-		new Setting(body)
-			.setName(t('wbg.dim'))
-			.setDesc(t('wbg.dimDesc'))
+		bindLocalizedControl(bindLocalizedControl(new Setting(body)
+			.setName(t('wbg.dim')), "name", 'wbg.dim')
+			.setDesc(t('wbg.dimDesc')), "desc", 'wbg.dimDesc')
 			.addSlider((slider) =>
 				slider
 					.setLimits(0, 100, 5)
@@ -183,9 +186,9 @@ export class WidgetBackgroundModal extends Modal {
 					}),
 			);
 
-		new Setting(body)
-			.setName(t('wbg.blur'))
-			.setDesc(t('wbg.blurDesc'))
+		bindLocalizedControl(bindLocalizedControl(new Setting(body)
+			.setName(t('wbg.blur')), "name", 'wbg.blur')
+			.setDesc(t('wbg.blurDesc')), "desc", 'wbg.blurDesc')
 			.addSlider((slider) =>
 				slider
 					.setLimits(0, 20, 1)
@@ -205,15 +208,15 @@ export class WidgetBackgroundModal extends Modal {
 			if (v === 'light' || v === 'dark') return v;
 			return 'custom';
 		};
-		new Setting(body)
-			.setName(t('wbg.foreground'))
-			.setDesc(t('wbg.foregroundDesc'))
+		bindLocalizedControl(bindLocalizedControl(new Setting(body)
+			.setName(t('wbg.foreground')), "name", 'wbg.foreground')
+			.setDesc(t('wbg.foregroundDesc')), "desc", 'wbg.foregroundDesc')
 			.addDropdown((dropdown) => {
-				dropdown
-					.addOption('theme', t('wbg.fgTheme'))
-					.addOption('light', t('wbg.fgLight'))
-					.addOption('dark', t('wbg.fgDark'))
-					.addOption('custom', t('wbg.fgCustom'))
+				bindLocalizedOptions(bindLocalizedOptions(bindLocalizedOptions(bindLocalizedOptions(dropdown
+					.addOption('theme', t('wbg.fgTheme')), {['theme']: ['wbg.fgTheme']})
+					.addOption('light', t('wbg.fgLight')), {['light']: ['wbg.fgLight']})
+					.addOption('dark', t('wbg.fgDark')), {['dark']: ['wbg.fgDark']})
+					.addOption('custom', t('wbg.fgCustom')), {['custom']: ['wbg.fgCustom']})
 					.setValue(fgMode())
 					.onChange((v) => {
 						if (v === 'theme') this.cfg.foreground = undefined;
@@ -241,7 +244,7 @@ export class WidgetBackgroundModal extends Modal {
 		const footer = container.createDiv({ cls: 'dashboard-modal-footer' });
 		footer
 			.createEl('button', {
-				text: t('wbg.clear'),
+				...localizedText('wbg.clear'),
 				cls: 'dashboard-modal-btn dashboard-modal-btn--cancel',
 			})
 			.addEventListener('click', () => {
@@ -250,7 +253,7 @@ export class WidgetBackgroundModal extends Modal {
 			});
 		footer
 			.createEl('button', {
-				text: t('common.save'),
+				...localizedText('common.save'),
 				cls: 'dashboard-modal-btn dashboard-modal-btn--confirm',
 			})
 			.addEventListener('click', () => {

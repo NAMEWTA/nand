@@ -25,17 +25,9 @@ jobs:
                   cache: pnpm
             - run: pnpm install --frozen-lockfile
             - run: pnpm run build
+            - run: git diff --exit-code -- main.js
             - run: pnpm run lint
-            - run: pnpm run test:architecture
-            - run: pnpm run test:automation
-            - run: pnpm run test:safety-regressions
-            - run: pnpm run test:terminal-agent
-            - run: pnpm run test:contacts
-            - run: pnpm run test:iconic-port
-            - run: pnpm run test:editor-comments
-            - run: pnpm run test:panel-composition
-            - run: pnpm run test:dashboard-isolation
-            - run: pnpm run test:card-panels
+            - run: pnpm run test:all
 
     windows-portability:
         runs-on: windows-latest
@@ -53,8 +45,6 @@ jobs:
                   cache: pnpm
             - run: pnpm install --frozen-lockfile
             - run: pnpm run build
+            - run: git diff --exit-code -- main.js
             - run: pnpm run lint
-            - run: pnpm run test:automation
-            - run: pnpm run test:safety-regressions
-            - run: pnpm run test:contacts
-            - run: pnpm run test:iconic-port
+            - run: pnpm run test:all

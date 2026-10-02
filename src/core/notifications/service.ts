@@ -50,6 +50,7 @@ export class NotificationService {
 	private tail: Promise<void> = Promise.resolve();
 
 	private stopped = false;
+	private sealed = false;
 	private loaded = false;
 	constructor(
 		storage: TextStorage,
@@ -88,6 +89,7 @@ export class NotificationService {
 		for (const listener of this.listeners) listener();
 	}
 	private enqueue(operation: () => Promise<void>): Promise<void> {
+		if (this.sealed) return Promise.reject(new Error('Notification service is shutting down'));
 		const result = this.tail.then(() => {
 			if (!this.loaded) throw new Error(t('automation.failedLoad'));
 			return operation();
@@ -108,7 +110,7 @@ export class NotificationService {
 
 	send(request: NotificationRequest): Promise<void> {
 		return this.enqueue(async () => {
-			if (this.stopped || this.state.receipts[request.id]) return;
+			if (this.state.receipts[request.id]) return;
 			const row: NotificationRecord = {
 				...request,
 				channels: [...new Set(request.channels)],
@@ -170,8 +172,14 @@ export class NotificationService {
 		await this.markRead(record.id);
 	}
 	dispose(): void {
+		void this.shutdown().catch(console.error);
+	}
+	async shutdown(): Promise<void> {
+		this.sealed = true;
 		this.stopped = true;
 		this.deliveryAdapter.dispose();
 		this.listeners.clear();
+		await this.tail;
+		await this.store.flush();
 	}
 }

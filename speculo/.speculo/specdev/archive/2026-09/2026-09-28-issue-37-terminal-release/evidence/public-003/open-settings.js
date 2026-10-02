@@ -1,1 +1,0 @@
-(async()=>{app.plugins.plugins.nand.openHome();await new Promise(r=>setTimeout(r,1200));return {body:activeDocument.body.innerText,container:app.plugins.plugins.nand.settingsTab.containerEl?.innerText,windows:[...electronWindow.webContents.getAllWebContents?.()??[]]};})()

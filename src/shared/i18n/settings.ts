@@ -6,7 +6,7 @@ export const messages = {
 		'settings.widgetTheme': 'Quick actions and weather',
 		'settings.widgetRest': 'Other widgets',
 		'settings.tabGeneral': 'General',
-		'settings.tabGeneralDesc': 'Language, appearance, quick notes, data services',
+		'settings.tabGeneralDesc': 'Dashboard appearance, quick notes and data services',
 		'settings.tabWidgets': 'Widgets',
 		'settings.tabWidgetsDesc':
 			'Sidebar widgets: weather, pomodoro, countdown, reading, habit, expense, lunar, year progress, calendar',
@@ -27,7 +27,7 @@ export const messages = {
 		'settings.widgetTheme': '快捷与天气',
 		'settings.widgetRest': '其余小组件',
 		'settings.tabGeneral': '常规',
-		'settings.tabGeneralDesc': '语言、外观、快捷笔记、数据服务',
+		'settings.tabGeneralDesc': '看板外观、快捷笔记、数据服务',
 		'settings.tabWidgets': '小组件',
 		'settings.tabWidgetsDesc': '侧栏小组件：天气、番茄钟、倒计时、阅读、习惯、记账、农历、年度进度、日历',
 		'settings.tabAbout': '关于',

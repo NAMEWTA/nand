@@ -5,6 +5,14 @@ import type DashboardPlugin from './main';
 /** Shell commands. Products register their own commands from their host. */
 export function registerShellCommands(plugin: DashboardPlugin): void {
 	plugin.addCommand({
+		id: 'open-browser',
+		nameKey: 'browser.open',
+		name: t('browser.open'),
+		callback: () => {
+			void plugin.openBrowser({});
+		},
+	});
+	plugin.addCommand({
 		id: 'open-automations',
 		nameKey: 'automation.openAutomations',
 		name: t('automation.openAutomations'),

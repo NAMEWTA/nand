@@ -17,12 +17,13 @@ import type DashboardPlugin from '../main';
 import { applyAlbumUpdate, editAlbum, renderAlbumSettings } from './album-settings';
 import { applyAnniversaryUpdate, editAnniversary, renderAnniversarySettings } from './anniversary-settings';
 import { renderAutomationSettings } from './automation-settings';
+import { renderBrowserSettings } from './browser-settings';
 import { renderCalendarSettings } from './calendar-settings';
 import { renderCoffeeSettings } from './coffee';
 import { terminalMenuLabels } from './connection-menu';
 import { renderContactsSettings } from './contacts-settings';
 import { applyCountdownUpdate, editCountdown, renderCountdownList } from './countdown-settings';
-import { renderEditorSettings, renderSyncSettings } from './editor-settings';
+import { renderCopyHelp, renderEditorSettings, renderSyncSettings } from './editor-settings';
 import { renderGeneralSettings, renderLayoutPicker } from './general';
 import { renderHomeSettings } from './home';
 import { defaultPage, sidePages, visibleProducts, type SettingsPage, type SettingsProduct } from './nav';
@@ -135,8 +136,8 @@ export class DashboardSettingTab extends PluginSettingTab {
 					},
 					{
 						name: t('settings.productHome'),
-						desc: t('modules.dashboardDesc'),
-						searchable: false,
+						desc: t('settings.homeDesc'),
+						aliases: [t('settings.language'), t('settings.homeGeneral'), t('settings.homeModules')],
 						render: (setting) => {
 							asBlock(setting);
 							onProduct('home', 'home')(setting);
@@ -164,11 +165,19 @@ export class DashboardSettingTab extends PluginSettingTab {
 					},
 					...this.iconicDefinitions(),
 					{
+						name: t('browser.title'),
+						desc: t('browser.description'),
+						render: (setting) => {
+							asBlock(setting);
+							onProduct('browser', 'browser-preferences')(setting);
+							renderBrowserSettings(this.plugin, setting.settingEl);
+						},
+					},
+					{
 						name: t('settings.general'),
-						desc: t('settings.languageDesc'),
+						desc: t('settings.tabGeneralDesc'),
 						aliases: [
 							t('settings.layoutMode'),
-							t('settings.language'),
 							t('settings.stylePreset'),
 							t('settings.recentCount'),
 							t('quickNote.title'),
@@ -294,10 +303,7 @@ export class DashboardSettingTab extends PluginSettingTab {
 						render: (setting) => {
 							asBlock(setting);
 							onProduct('editor', 'copy')(setting);
-							new Setting(setting.settingEl)
-								.setName(t('editor.copy.title'))
-								.setDesc(t('editor.copy.desc'))
-								.setHeading();
+							renderCopyHelp(setting.settingEl);
 						},
 					},
 					{
@@ -383,6 +389,7 @@ export class DashboardSettingTab extends PluginSettingTab {
 
 	productTabs(): Array<{ key: SettingsProduct; label: string; icon: string }> {
 		const icons: Record<SettingsProduct, string> = {
+			browser: 'globe',
 			home: 'house',
 			contacts: 'contact-round',
 			dashboard: 'layout-dashboard',
@@ -393,6 +400,7 @@ export class DashboardSettingTab extends PluginSettingTab {
 			sync: 'refresh-cw',
 		};
 		const labels: Record<SettingsProduct, string> = {
+			browser: t('browser.title'),
 			home: t('settings.productHome'),
 			contacts: t('contacts.title'),
 			dashboard: t('settings.productDashboard'),
@@ -412,6 +420,7 @@ export class DashboardSettingTab extends PluginSettingTab {
 	sectionTabs(): Array<{ key: SettingsPage; label: string; icon: string }> {
 		const terminalLabels = terminalMenuLabels();
 		const meta: Partial<Record<SettingsPage, { label: string; icon: string }>> = {
+			'browser-preferences': { label: t('browser.title'), icon: 'globe' },
 			automation: { label: t('automation.title'), icon: 'timer' },
 			'contacts-storage': { label: t('contacts.storage'), icon: 'contact-round' },
 			general: { label: t('settings.tabGeneral'), icon: 'settings' },
@@ -481,6 +490,10 @@ export class DashboardSettingTab extends PluginSettingTab {
 		this.renderChrome(barHost);
 
 		const host = containerEl.createDiv({ cls: 'dashboard-settings-content' });
+		if (this.activeProduct === 'browser') {
+			renderBrowserSettings(this.plugin, host);
+			return;
+		}
 		if (this.activeProduct === 'automation') {
 			renderAutomationSettings(this.plugin, host);
 			return;
@@ -499,7 +512,7 @@ export class DashboardSettingTab extends PluginSettingTab {
 		}
 		if (this.activeProduct === 'editor') {
 			this.renderEditorSettings(host);
-			new Setting(host).setName(t('editor.copy.title')).setDesc(t('editor.copy.desc')).setHeading();
+			renderCopyHelp(host);
 			return;
 		}
 		if (this.activeProduct === 'iconic') {

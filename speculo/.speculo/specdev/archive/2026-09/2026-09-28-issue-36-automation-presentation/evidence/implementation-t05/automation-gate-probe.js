@@ -1,1 +1,0 @@
-(async()=>{const p=app.plugins.plugins.nand;return {modules:p.settings.modules,files:p.manifest.dir,agent:p.terminalHost.settings.agentSettings.agents.codex,host:!!p.automationHost,flags:p.terminalHost.settings.serverConnection,terminals:(await p.terminalHost.getTerminalService()).getAllTerminals().map(s=>({id:s.id,alive:s.isAlive()}))};})()

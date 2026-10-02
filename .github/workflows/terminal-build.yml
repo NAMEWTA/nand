@@ -4,7 +4,7 @@ on:
   workflow_call:
   workflow_dispatch:
   pull_request:
-    paths: ['processes/rust-terminal-servers/**', 'scripts/verify-pty-windows.mjs', 'scripts/pty-windows-fixture.mjs', '.github/workflows/terminal-build.yml']
+    paths: ['processes/rust-terminal-servers/**', 'src/platform/terminal-server/**', 'src/platform/desktop/terminal/pty-session.ts', 'scripts/verify-pty-automation.mjs', 'scripts/verify-pty-windows.mjs', 'scripts/pty-windows-fixture.mjs', '.github/workflows/terminal-build.yml']
 
 permissions:
   contents: read

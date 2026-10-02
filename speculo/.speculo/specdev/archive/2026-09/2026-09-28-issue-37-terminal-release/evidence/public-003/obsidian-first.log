@@ -1,8 +1,0 @@
-2026-09-28 11:45:30 Loaded main app package /tmp/squashfs-root/resources/obsidian.asar
-
-DevTools listening on ws://127.0.0.1:9229/devtools/browser/79b65927-288f-4a7b-bb0d-6f7a3cffba3f
-Ignored: Error: ENOENT: no such file or directory, open '/tmp/nand-public-0.0.3-e2e/profile/05401aad75fe433c.json'
-2026-09-28 11:45:30 Checking for update using Github
-2026-09-28 11:45:56 Success.
-2026-09-28 11:45:56 Latest version is 1.13.7
-2026-09-28 11:45:56 App is up to date.

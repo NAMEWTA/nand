@@ -2,7 +2,7 @@
 // WebSocket server for the terminal server that handles PTY module messages
 
 use tokio::net::TcpListener;
-use tokio_tungstenite::{accept_async, tungstenite::Message};
+use tokio_tungstenite::{accept_async_with_config, tungstenite::{Message, protocol::WebSocketConfig}};
 use futures_util::{StreamExt, SinkExt};
 use std::sync::Arc;
 use tokio::sync::Mutex as TokioMutex;
@@ -37,6 +37,29 @@ macro_rules! log_debug {
 /// WebSocket server configuration
 pub struct ServerConfig {
     pub port: u16,
+    pub token: String,
+}
+pub const PROTOCOL_VERSION: u64 = 2;
+
+fn authenticated(text: &str, token: &str) -> bool {
+    let Ok(value) = serde_json::from_str::<serde_json::Value>(text) else { return false; };
+    let candidate = value["token"].as_str().unwrap_or("");
+    value["type"] == "auth" && value["protocol"] == PROTOCOL_VERSION &&
+        candidate.len() == token.len() && candidate.as_bytes().iter().zip(token.as_bytes())
+            .fold(0u8, |difference, (a, b)| difference | (a ^ b)) == 0
+}
+
+#[cfg(test)]
+mod authentication_tests {
+    use super::*;
+    #[test]
+    fn refuses_missing_wrong_and_old_protocol_credentials() {
+        let token = "b".repeat(64);
+        assert!(!authenticated(r#"{"module":"pty","type":"init"}"#, &token));
+        assert!(!authenticated(r#"{"type":"auth","protocol":2,"token":"wrong"}"#, &token));
+        assert!(!authenticated(&serde_json::json!({"type":"auth","protocol":1,"token":token}).to_string(), &token));
+        assert!(authenticated(&serde_json::json!({"type":"auth","protocol":2,"token":token}).to_string(), &token));
+    }
 }
 
 /// WebSocket server
@@ -61,18 +84,23 @@ impl Server {
         // Write port information to stdout in JSON format
         // The TypeScript side parses this JSON to get the port number
         println!(
-            r#"{{"port": {}, "pid": {}}}"#,
+            r#"{{"port": {}, "pid": {}, "protocol": 2}}"#,
             port,
             std::process::id()
         );
 
         // Main loop: accept WebSocket connections
+        let token = Arc::new(self.config.token.clone());
+        let connections = Arc::new(tokio::sync::Semaphore::new(16));
         tokio::spawn(async move {
             log_info!("正在监听 WebSocket 连接...");
             while let Ok((stream, addr)) = listener.accept().await {
+                let Ok(permit) = Arc::clone(&connections).try_acquire_owned() else { continue; };
+                let token = Arc::clone(&token);
                 log_debug!("接受来自 {} 的连接", addr);
                 tokio::spawn(async move {
-                    if let Err(e) = handle_connection(stream).await {
+                    let _permit = permit;
+                    if let Err(e) = handle_connection(stream, &token).await {
                         log_error!("连接处理错误: {}", e);
                     }
                 });
@@ -96,9 +124,17 @@ pub type WsSender = Arc<TokioMutex<futures_util::stream::SplitSink<
 /// Handle a single WebSocket connection
 async fn handle_connection(
     stream: tokio::net::TcpStream,
+    token: &str,
 ) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
     // Upgrade to WebSocket
-    let ws_stream = accept_async(stream).await?;
+    let timeout = std::time::Duration::from_secs(5);
+    let config = WebSocketConfig::default().max_message_size(Some(1024 * 1024)).max_frame_size(Some(1024 * 1024));
+    let mut ws_stream = tokio::time::timeout(timeout, accept_async_with_config(stream, Some(config))).await??;
+    match tokio::time::timeout(timeout, ws_stream.next()).await? {
+        Some(Ok(Message::Text(text))) if authenticated(&text, token) => {}
+        _ => { let _ = ws_stream.close(None).await; return Err("Terminal authentication rejected".into()); }
+    }
+    ws_stream.send(Message::Text(r#"{"type":"authenticated","protocol":2}"#.into())).await?;
     
     log_info!("WebSocket 连接已建立");
     
@@ -158,6 +194,8 @@ async fn handle_connection(
                         
                         if let Err(e) = router.pty_handler().write_data(session_id, pty_data).await {
                             log_error!("写入 PTY 失败: session_id={}, {}", session_id, e);
+                            let response = ServerResponse::new(ModuleType::Pty, "error", serde_json::json!({"session_id": session_id, "code": "INPUT_REJECTED", "message": e.to_string()}));
+                            send_response(&ws_sender, &response).await?;
                         }
                     }
                     Message::Close(_) => {

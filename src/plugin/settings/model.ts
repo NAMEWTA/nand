@@ -2,13 +2,16 @@ import { DEFAULT_DASHBOARD_SETTINGS, type DashboardSettings } from '../../core/d
 import { DEFAULT_CONTACTS_SETTINGS, type ContactsSettings } from '../../shared/contacts-settings';
 import { DEFAULT_EDITOR_WORKBENCH, type EditorWorkbenchSettings } from '../../shared/editor-workbench';
 import type { Language } from '../../shared/i18n';
+import type { BrowserSettings } from '../../core/browser/model';
 
 /** Plugin persistence envelope. Each domain owns its own settings shape. */
 export interface NandSettings extends DashboardSettings {
 	contacts: ContactsSettings;
+	browser: BrowserSettings;
 	language: Language;
 	introSeen: boolean;
 	modules: {
+		browser: boolean;
 		dashboard: boolean;
 		editor: boolean;
 		terminal: boolean;
@@ -22,9 +25,11 @@ export interface NandSettings extends DashboardSettings {
 export const DEFAULT_SETTINGS: NandSettings = {
 	...DEFAULT_DASHBOARD_SETTINGS,
 	contacts: { ...DEFAULT_CONTACTS_SETTINGS },
+	browser: { searchEngine: 'google' },
 	language: 'zh',
 	introSeen: false,
 	modules: {
+		browser: true,
 		dashboard: true,
 		editor: true,
 		terminal: true,

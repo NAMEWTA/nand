@@ -17,6 +17,7 @@
  * of Obsidian's "no plugin-driven updates of native dependencies" policy.
  */
 
+import { bindLocalizedElement } from '../primitives/localized-dom';
 import { shell } from 'electron';
 import type { App } from 'obsidian';
 import { Modal, Notice } from 'obsidian';
@@ -82,12 +83,12 @@ export class LauncherInstallModal extends Modal {
 		contentEl.empty();
 
 		const titleEl = contentEl.createDiv({ cls: 'modal-title' });
-		titleEl.createDiv({
+		bindLocalizedElement(titleEl.createDiv({
 			cls: 'modal-title-text',
 			text: this.options.updateAvailable
 				? t('modals.launcherInstall.titleUpdate', { name: this.options.name })
 				: t('modals.launcherInstall.titleNotInstalled', { name: this.options.name }),
-		});
+		}), this.options.updateAvailable ? ('terminalAgent.modals.launcherInstall.titleUpdate') : ('terminalAgent.modals.launcherInstall.titleNotInstalled'), (this.options.updateAvailable) ? ({ name: this.options.name }) : ({ name: this.options.name }));
 
 		const descEl = contentEl.createEl('p', { cls: 'terminal-launcher-install-desc' });
 		descEl.setText(this.buildDescription());
@@ -98,10 +99,10 @@ export class LauncherInstallModal extends Modal {
 			// Fall back to the detected-command hint when the launcher is missing
 			// entirely. We surface the version row separately when known.
 			const detail = contentEl.createDiv({ cls: 'terminal-launcher-install-detail' });
-			detail.createDiv({
+			bindLocalizedElement(detail.createDiv({
 				cls: 'terminal-launcher-install-detail-label',
 				text: t('modals.launcherInstall.detectedCommand'),
-			});
+			}), 'terminalAgent.modals.launcherInstall.detectedCommand');
 			detail.createEl('code', {
 				cls: 'terminal-launcher-install-detail-command',
 				text: this.options.command,
@@ -126,10 +127,10 @@ export class LauncherInstallModal extends Modal {
 			// Primary CTA when an upgrade is on offer: run the upgrade command
 			// in a fresh NAND terminal. Stays beside the docs link so users
 			// who prefer to inspect the change first can still do so.
-			const updateBtn = buttonContainer.createEl('button', {
+			const updateBtn = bindLocalizedElement(buttonContainer.createEl('button', {
 				cls: 'mod-cta',
 				text: t('modals.launcherInstall.buttonUpdateNow'),
-			});
+			}), 'terminalAgent.modals.launcherInstall.buttonUpdateNow');
 			updateBtn.addEventListener('click', () => {
 				this.close();
 				this.options.onRunUpgrade?.();
@@ -139,10 +140,10 @@ export class LauncherInstallModal extends Modal {
 			// install command in a fresh NAND terminal. Symmetric with
 			// "Update now", and avoids the previous footgun where Run anyway
 			// would just spawn the missing launcher binary itself.
-			const installBtn = buttonContainer.createEl('button', {
+			const installBtn = bindLocalizedElement(buttonContainer.createEl('button', {
 				cls: 'mod-cta',
 				text: t('modals.launcherInstall.buttonInstallNow'),
-			});
+			}), 'terminalAgent.modals.launcherInstall.buttonInstallNow');
 			installBtn.addEventListener('click', () => {
 				this.close();
 				this.options.onRunInstall?.();
@@ -150,14 +151,14 @@ export class LauncherInstallModal extends Modal {
 		}
 
 		if (this.options.docsUrl) {
-			const docsBtn = buttonContainer.createEl('button', {
+			const docsBtn = bindLocalizedElement(buttonContainer.createEl('button', {
 				cls:
 					(this.options.updateAvailable && this.options.onRunUpgrade) ||
 					(this.options.onRunInstall && this.options.installCommand)
 						? ''
 						: 'mod-cta',
 				text: t('modals.launcherInstall.buttonOpenDocs'),
-			});
+			}), 'terminalAgent.modals.launcherInstall.buttonOpenDocs');
 			docsBtn.addEventListener('click', () => {
 				const url = this.options.docsUrl;
 				if (url) {
@@ -168,22 +169,22 @@ export class LauncherInstallModal extends Modal {
 		}
 
 		if (this.options.onRunAnyway) {
-			const retryBtn = buttonContainer.createEl('button', {
+			const retryBtn = bindLocalizedElement(buttonContainer.createEl('button', {
 				cls: 'mod-warning',
 				text: this.options.updateAvailable
 					? t('modals.launcherInstall.buttonRunCurrentVersion')
 					: t('modals.launcherInstall.buttonRunAnyway'),
-			});
+			}), this.options.updateAvailable ? ('terminalAgent.modals.launcherInstall.buttonRunCurrentVersion') : ('terminalAgent.modals.launcherInstall.buttonRunAnyway'), (this.options.updateAvailable) ? (undefined) : (undefined));
 			retryBtn.addEventListener('click', () => {
 				this.close();
 				this.options.onRunAnyway?.();
 			});
 		}
 
-		const cancelBtn = buttonContainer.createEl('button', {
+		const cancelBtn = bindLocalizedElement(buttonContainer.createEl('button', {
 			cls: 'mod-cancel',
 			text: t('modals.launcherInstall.buttonClose'),
-		});
+		}), 'terminalAgent.modals.launcherInstall.buttonClose');
 		cancelBtn.addEventListener('click', () => this.close());
 	}
 
@@ -208,10 +209,10 @@ export class LauncherInstallModal extends Modal {
 
 	private renderVersionDelta(contentEl: HTMLElement): void {
 		const detail = contentEl.createDiv({ cls: 'terminal-launcher-install-detail' });
-		detail.createDiv({
+		bindLocalizedElement(detail.createDiv({
 			cls: 'terminal-launcher-install-detail-label',
 			text: t('modals.launcherInstall.versionLabel'),
-		});
+		}), 'terminalAgent.modals.launcherInstall.versionLabel');
 		const local = this.options.localVersion ?? '?';
 		const latest = this.options.latestVersion ?? '?';
 		detail.createEl('code', {
@@ -228,22 +229,22 @@ export class LauncherInstallModal extends Modal {
 	private renderInstallCommand(contentEl: HTMLElement, command: string): void {
 		const showingUpgrade = this.options.updateAvailable === true && this.options.upgradeCommand === command;
 		const card = contentEl.createDiv({ cls: 'terminal-launcher-install-card' });
-		card.createDiv({
+		bindLocalizedElement(card.createDiv({
 			cls: 'terminal-launcher-install-card-title',
 			text: showingUpgrade
 				? t('modals.launcherInstall.cardTitleUpgradeOneClick')
 				: this.options.updateAvailable
 					? t('modals.launcherInstall.cardTitleUpgrade')
 					: t('modals.launcherInstall.cardTitleInstall'),
-		});
-		card.createEl('p', {
+		}), showingUpgrade ? ('terminalAgent.modals.launcherInstall.cardTitleUpgradeOneClick') : (this.options.updateAvailable ? ('terminalAgent.modals.launcherInstall.cardTitleUpgrade') : ('terminalAgent.modals.launcherInstall.cardTitleInstall')), (showingUpgrade) ? (undefined) : ((this.options.updateAvailable) ? (undefined) : (undefined)));
+		bindLocalizedElement(card.createEl('p', {
 			cls: 'terminal-launcher-install-card-desc',
 			text: showingUpgrade
 				? t('modals.launcherInstall.cardDescUpgradeOneClick')
 				: this.options.updateAvailable
 					? t('modals.launcherInstall.cardDescUpgrade')
 					: t('modals.launcherInstall.cardDescInstall'),
-		});
+		}), showingUpgrade ? ('terminalAgent.modals.launcherInstall.cardDescUpgradeOneClick') : (this.options.updateAvailable ? ('terminalAgent.modals.launcherInstall.cardDescUpgrade') : ('terminalAgent.modals.launcherInstall.cardDescInstall')), (showingUpgrade) ? (undefined) : ((this.options.updateAvailable) ? (undefined) : (undefined)));
 
 		const commandRow = card.createDiv({ cls: 'terminal-launcher-install-command-row' });
 		const commandEl = commandRow.createEl('code', {
@@ -251,10 +252,10 @@ export class LauncherInstallModal extends Modal {
 			text: command,
 		});
 
-		const copyBtn = commandRow.createEl('button', {
+		const copyBtn = bindLocalizedElement(commandRow.createEl('button', {
 			cls: 'terminal-launcher-install-command-copy',
 			text: t('modals.launcherInstall.buttonCopy'),
-		});
+		}), 'terminalAgent.modals.launcherInstall.buttonCopy');
 		copyBtn.addEventListener('click', () => {
 			void navigator.clipboard
 				.writeText(command)

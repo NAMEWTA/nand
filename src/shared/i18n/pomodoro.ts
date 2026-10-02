@@ -1,6 +1,7 @@
 /** Pomodoro */
 export const messages = {
 	en: {
+		'pomodoro.tagMergeHint': 'Choose another activity to merge these records into.',
 		'pomodoro.work': 'Focusing',
 		'pomodoro.title': 'Pomodoro',
 		'pomodoro.shortBreak': 'Short Break',
@@ -68,6 +69,7 @@ export const messages = {
 		'pomodoro.tagExists': 'That name already exists',
 	},
 	zh: {
+		'pomodoro.tagMergeHint': '选择另一个活动，将这些记录合并到该活动。',
 		'pomodoro.work': '专注中',
 		'pomodoro.title': '番茄钟',
 		'pomodoro.shortBreak': '短休息',

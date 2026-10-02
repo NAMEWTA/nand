@@ -17,7 +17,9 @@ function transport() {
 		handlers.set(name, cb);
 		return () => handlers.delete(name);
 	};
+	const consumed: number[] = [];
 	const client = {
+		consumed: (_id: string, bytes: number) => consumed.push(bytes),
 		isConnected: () => true,
 		init: async (options: any, ready: (id: string) => void) => {
 			configurations.push(options);
@@ -34,6 +36,7 @@ function transport() {
 	};
 	return {
 		handlers,
+		consumed,
 		writes,
 		destroyed,
 		configurations,
@@ -59,7 +62,9 @@ test('headless process consumes split UTF-8 and VT queries without a DOM or rend
 		io.output(bytes.slice(0, 2));
 		io.output(bytes.slice(2));
 		io.output('\x1b[6n');
+		assert.ok(io.consumed.reduce((a, b) => a + b, 0) < 10, 'Pending headless parsing must not grant all credits');
 		await settled();
+		assert.equal(io.consumed.reduce((a, b) => a + b, 0), 10, 'ACK counts raw UTF-8 and control bytes, not rendered characters');
 		assert.equal(
 			events
 				.filter((e) => e.kind === 'data')

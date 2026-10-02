@@ -1,3 +1,5 @@
+import { bindLocalizedControl } from '../../primitives/localized-dom';
+import { localizedAttributes } from '../../primitives/localized-dom';
 import { Menu, setIcon } from 'obsidian';
 import { normalizeWorkspacePath } from '../../../core/workspace/workspace-registry';
 import { t } from '../../../shared/i18n/index';
@@ -27,7 +29,7 @@ async function promptNewWorkspace(plugin: DashboardHost): Promise<void> {
 function openWorkspaceMenu(plugin: DashboardHost, file: string, name: string, ev: Event): void {
 	const menu = new Menu();
 	menu.addItem((item) => {
-		item.setTitle(t('workspace.renameTitle'))
+		bindLocalizedControl(item.setTitle(t('workspace.renameTitle')), "title", 'workspace.renameTitle')
 			.setIcon('pencil')
 			.onClick(async () => {
 				const next = await showPromptDialog(plugin.app, {
@@ -40,7 +42,7 @@ function openWorkspaceMenu(plugin: DashboardHost, file: string, name: string, ev
 	});
 	menu.addItem((item) => {
 		const canRemove = plugin.settings.workspaceFiles.length > 1;
-		item.setTitle(t('workspace.removeTitle')).setIcon('trash-2').setDisabled(!canRemove);
+		bindLocalizedControl(item.setTitle(t('workspace.removeTitle')), "title", 'workspace.removeTitle').setIcon('trash-2').setDisabled(!canRemove);
 		if (!canRemove) return;
 		item.onClick(async () => {
 			const confirmed = await showConfirmDialog(plugin.app, {
@@ -88,7 +90,7 @@ export function renderWorkspaceSwitcher(container: HTMLElement, plugin: Dashboar
 
 	const addBtn = switcher.createEl('button', {
 		cls: 'dashboard-workspace-btn dashboard-workspace-add-btn',
-		attr: { 'aria-label': t('workspace.newTitle'), title: t('workspace.newTitle') },
+		attr: { ...localizedAttributes('workspace.newTitle', undefined, 'aria-label'), ...localizedAttributes('workspace.newTitle', undefined, 'title') },
 	});
 	setIcon(addBtn, 'plus');
 	addBtn.addEventListener('click', (e) => {

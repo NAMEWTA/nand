@@ -2,7 +2,7 @@
 
 工作台将运行中的终端、原生会话历史、自动化和用量放在同一视图中。支持 Claude Code、Codex、Gemini、OpenCode、Pi（`@mariozechner/pi-coding-agent`）与 Grok（`xai-org/grok-build`）。在设置中启用所需智能体，并先在本机完成 CLI 安装、登录和目录信任。
 
-![Windows Obsidian 中的工作台与历史全文，使用隔离测试数据](agent-workbench.png)
+入口：在首页开启“智能体”，从功能区或命令面板打开工作台。界面语言在首页通用设置中选择。
 
 ## 布局与会话
 
@@ -31,7 +31,7 @@
 | Pi | `PI_CODING_AGENT_DIR/sessions` JSONL |
 | Grok | `GROK_HOME/sessions` 中的 `session.json` 与 `chat_history.jsonl` |
 
-NAND 的改名、标签、收藏和归档保存在 `.nand/terminal-agent/<device>/history.json`，不会修改原生日志。索引位于同目录的 `index.sqlite`，新导出通过 Vault 笔记接口写入可见的 `NAND Exports/`，完成后自动打开；文件浏览器和快速切换（Ctrl/Cmd+O）都可找到。重名会使用编号后缀，不覆盖已有文件。旧的 `.nand/terminal-agent/exports/` 内容保留原位。读取或保存失败会提示原因；若保存成功但打开失败，提示会给出已保存路径。历史不会实时自动刷新；需要最新记录时，使用刷新按钮。
+NAND 的改名、标签、收藏和归档保存在 `.nand/terminal-agent/<device>/history.json`，不会修改原生日志。索引位于同目录的 `index.sqlite`，新导出通过 Vault 笔记接口写入可见的 `NAND Exports/`，完成后自动打开；文件浏览器和快速切换（Ctrl/Cmd+O）都可找到。重名会使用编号后缀，不覆盖已有文件。读取或保存失败会提示原因；若保存成功但打开失败，提示会给出已保存路径。历史不会实时自动刷新；需要最新记录时，使用刷新按钮。
 
 ## 额度与用量
 
@@ -45,4 +45,10 @@ Token 来自原生日志。输入统一包含 cache read/write；缓存数字是
 
 先在本机安装并登录所需 CLI，完成它自己的目录信任和权限提示。工作台依赖桌面终端服务；Obsidian 退出后不能继续运行任务。
 
-不同 CLI 提供的历史、完成事件和额度信息不同，缺失信息会显示未知或不可用。六种 CLI 的真实账号流程、macOS 钥匙串和实际订阅额度尚未全部验证。本轮 Windows 隔离库测试的范围和性能记录见[终端工作台验收记录](terminal-workbench-acceptance-2026-09-30.md)；本地 CLI 替身的恢复验证不代表提供方登录和付费服务已通过。
+不同 CLI 提供的历史、完成事件和额度信息不同，缺失信息会显示未知或不可用。六种 CLI 的真实账号流程、macOS 钥匙串和实际订阅额度尚未全部验证。验证范围见[当前基线](../speculo/.speculo/specdev/archive/2026-10/2026-10-01-current-baseline/README.md)。本地 CLI 替身不代表提供方登录和付费服务已经验证。
+
+## 上下文材料
+
+选中 Agent 会话后展开“上下文材料”，可选择笔记或个人／企业档案。界面显示目标会话及所选资料；确认“附加但不提交”后，等待 Agent 输入就绪再粘贴，默认不发送回车。已打开的笔记使用当前编辑器内容。浏览器采集的文本、元素和截图通过同一会话接口附加。
+
+终端与 Rust 服务使用协议 2，启动时创建临时令牌并通过父子进程管道交付。旧二进制会明确拒绝连接，请同时使用对应版本的原生二进制。

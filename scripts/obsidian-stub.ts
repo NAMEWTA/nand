@@ -14,11 +14,13 @@ export class Modal {
 	app: unknown;
 	contentEl: El;
 	containerEl: El;
+	modalEl: El;
 
 	constructor(app: unknown) {
 		this.app = app;
 		this.contentEl = new El('div');
 		this.containerEl = new El('div');
+		this.modalEl = this.containerEl.createDiv({ cls: 'modal' });
 	}
 
 	open(): void {}
@@ -253,8 +255,10 @@ export interface StubControl {
 	disabled?: boolean;
 	click?: () => void;
 	inputEl: El;
+	selectEl: El;
 	fire: ((value: string | boolean) => void) | null;
 	addOption(value: string, _label?: string): StubControl;
+	addOptions(values: Record<string, string>): StubControl;
 	setValue(_value: unknown): StubControl;
 	setPlaceholder(_value: string): StubControl;
 	setLimits(_min: number, _max: number, _step: number): StubControl;
@@ -272,10 +276,16 @@ function stubControl(): StubControl {
 	const control: StubControl = {
 		options: [],
 		inputEl: new El('input'),
+		selectEl: new El('select'),
 		fire: null,
+		addOptions(values: Record<string, string>) {
+			for (const [value, label] of Object.entries(values)) control.addOption(value, label);
+			return control;
+		},
 		addOption(value: string, label = value) {
 			control.options.push(value);
 			(control.labels ??= {})[value] = label;
+			control.selectEl.createEl('option', { value, text: label });
 			return control;
 		},
 		setValue(value: unknown) {
@@ -325,12 +335,14 @@ export class Setting {
 	readonly buttons: StubControl[] = [];
 	readonly texts: StubControl[] = [];
 	settingEl: El;
+	controlEl: El;
 	readonly toggles: StubControl[] = [];
 	readonly dropdowns: StubControl[] = [];
 
 	constructor(container?: { appendChild?: (child: El) => unknown }) {
 		this.settingEl = new El('div');
 		this.settingEl.addClass('setting-item');
+		this.controlEl = this.settingEl.createDiv({ cls: 'setting-item-control' });
 		container?.appendChild?.(this.settingEl);
 		Setting.created.push(this);
 	}

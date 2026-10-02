@@ -1,7 +1,7 @@
 /** Default dashboard content */
 export const messages = {
 	en: {
-		'defaults.countdownLabel': 'Countdown to New Year',
+		'defaults.countdownLabel': 'New Year',
 		'defaults.anniversaryLabel': 'Anniversary',
 		'default.memoTitle': '{date} memo',
 		'default.memoBody': 'Welcome to NAND. Click here to edit your first memo.',

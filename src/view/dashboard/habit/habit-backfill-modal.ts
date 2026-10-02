@@ -1,3 +1,4 @@
+import { bindLocalizedElement } from '../../primitives/localized-dom';
 import { App, Modal, Notice, setIcon } from 'obsidian';
 import { habitYesterday, type Habit } from '../../../core/habit/model';
 import { nowMoment } from '../../../platform/obsidian/datetime';
@@ -38,17 +39,17 @@ export class HabitBackfillModal extends Modal {
 			cls: 'dashboard-modal dashboard-modal--compact dashboard-habit-backfill',
 		});
 		const header = container.createDiv({ cls: 'dashboard-modal-header' });
-		header.createDiv({ cls: 'dashboard-modal-title', text: t('habit.backfillTitle') });
+		bindLocalizedElement(header.createDiv({ cls: 'dashboard-modal-title', text: t('habit.backfillTitle') }), 'habit.backfillTitle');
 
 		const body = container.createDiv({ cls: 'dashboard-modal-body' });
-		body.createDiv({
+		bindLocalizedElement(body.createDiv({
 			cls: 'dashboard-habit-backfill-hint',
 			text: t('habit.backfillHint', { date: yesterdayLabel }),
-		});
+		}), 'habit.backfillHint', { date: yesterdayLabel });
 
 		const habits = service?.getHabits() ?? [];
 		if (habits.length === 0) {
-			body.createDiv({ cls: 'dashboard-habit-backfill-empty', text: t('habit.statsEmpty') });
+			bindLocalizedElement(body.createDiv({ cls: 'dashboard-habit-backfill-empty', text: t('habit.statsEmpty') }), 'habit.statsEmpty');
 			return;
 		}
 
@@ -58,16 +59,16 @@ export class HabitBackfillModal extends Modal {
 		// Footer first so syncAll (declared below) can update the confirm
 		// button's label and disabled state.
 		const footer = container.createDiv({ cls: 'dashboard-modal-footer' });
-		footer
+		bindLocalizedElement(footer
 			.createEl('button', {
 				cls: 'dashboard-modal-btn dashboard-modal-btn--cancel',
 				text: t('common.cancel'),
-			})
+			}), 'common.cancel')
 			.addEventListener('click', () => this.close());
-		const confirmBtn = footer.createEl('button', {
+		const confirmBtn = bindLocalizedElement(footer.createEl('button', {
 			cls: 'dashboard-modal-btn dashboard-modal-btn--confirm',
 			text: t('habit.backfillConfirm'),
-		});
+		}), 'habit.backfillConfirm');
 		confirmBtn.addEventListener('click', () => {
 			const count = service ? service.markDoneMany([...this.selected], yesterday) : 0;
 			if (count > 0) new Notice(t('habit.backfillDone', { count }));
@@ -95,10 +96,10 @@ export class HabitBackfillModal extends Modal {
 		// Header shortcut for the everything-was-missed case: one tap arms
 		// every open row; it never un-ticks (same add-only rule as saving).
 		if (missed.length > 0) {
-			const selectAllBtn = header.createEl('button', {
+			const selectAllBtn = bindLocalizedElement(header.createEl('button', {
 				cls: 'dashboard-habit-backfill-selectall',
 				text: t('habit.backfillSelectAll'),
-			});
+			}), 'habit.backfillSelectAll');
 			selectAllBtn.addEventListener('click', () => {
 				for (const habit of missed) this.selected.add(habit.id);
 				syncAll();
@@ -142,10 +143,10 @@ function renderBackfillRow(
 	const check = item.createDiv({ cls: 'dashboard-habit-backfill-check' });
 	item.createDiv({ cls: 'dashboard-habit-backfill-name', text: habit.name });
 	if (isDone) {
-		item.createDiv({
+		bindLocalizedElement(item.createDiv({
 			cls: 'dashboard-habit-backfill-done-badge',
 			text: t('habit.backfillDoneYesterday'),
-		});
+		}), 'habit.backfillDoneYesterday');
 	}
 	return { item, check };
 }

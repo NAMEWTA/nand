@@ -9,7 +9,7 @@ const c = await connect(),
 const bundle = (
 	await build({
 		stdin: {
-			contents: `export { h, render } from 'preact'; export { ReminderPicker } from './src/view/dashboard/cards/ReminderPicker';`,
+			contents: `export { h, render } from 'preact'; export { ReminderPicker } from './src/view/dashboard/cards/ReminderPicker'; export { applyControlContrast } from './src/view/dashboard/appearance/appearance';`,
 			resolveDir: process.cwd(),
 			loader: 'ts',
 		},
@@ -63,6 +63,32 @@ try {
 			);
 			assert.ok(banner.worstCaseRatio.every((r) => r >= 4.5));
 			rows.push({ kind: 'banner', mode, preset, ...banner });
+			const button = '.dashboard-sidebar-pomodoro-main-btn';
+			const pomodoro = { idle: await check(button) };
+			const point = await c.evaluate(`(()=>{const e=document.querySelector('${button}');e.scrollIntoView({block:'center'});const r=e.getBoundingClientRect();return {x:r.x+r.width/2,y:r.y+r.height/2}})()`);
+			await c.send('Input.dispatchMouseEvent', { type: 'mouseMoved', ...point });
+			await delay(200);
+			pomodoro.hover = await check(button);
+			await c.evaluate(`document.querySelector('${button}').classList.add('dashboard-sidebar-pomodoro-main-btn--running')`);
+			await delay(200);
+			pomodoro.runningHover = await check(button);
+			await c.send('Input.dispatchMouseEvent', { type: 'mouseMoved', x: 0, y: 0 });
+			await delay(200);
+			pomodoro.running = await check(button);
+			await c.evaluate(`document.querySelector('${button}').classList.remove('dashboard-sidebar-pomodoro-main-btn--running')`);
+			rows.push({ kind: 'pomodoro', mode, preset, ...pomodoro });
+			for (const color of ['#eeeeee', '#171717', '#e05b45', '#ef4f8a']) {
+				await c.evaluate(`board.contentEl.style.setProperty('--db-accent','${color}');NandAudit.applyControlContrast(board.contentEl)`);
+				const states = {};
+				for (const [name, running, hover] of [['idle',false,false],['hover',false,true],['runningHover',true,true],['running',true,false]]) {
+					await c.evaluate(`document.querySelector('${button}').classList.toggle('dashboard-sidebar-pomodoro-main-btn--running',${running})`);
+					await c.send('Input.dispatchMouseEvent', {type:'mouseMoved', ...(hover ? point : {x:0,y:0})});
+					await delay(200);
+					states[name] = await check(button);
+				}
+				rows.push({kind:'custom-accent',mode,preset,color,...states});
+			}
+			await c.evaluate(`document.querySelector('${button}').classList.remove('dashboard-sidebar-pomodoro-main-btn--running');board.render(board.data)`);
 			if (!['matcha', 'lilac'].includes(preset)) continue;
 			const controls = [await check('.dashboard-sidebar-week-cell--today .dashboard-sidebar-week-date')];
 			await c.evaluate(
@@ -127,6 +153,7 @@ try {
 		`${dir}/banner-pattern.png`,
 		Buffer.from((await c.send('Page.captureScreenshot', { format: 'png' })).data, 'base64'),
 	);
+	await c.evaluate(`board.render(board.data)`);
 	await fs.writeFile(`${dir}/colors.json`, JSON.stringify({ passed: true, rows }, null, 2));
 	console.log({ passed: true, cases: rows.length });
 } catch (error) {

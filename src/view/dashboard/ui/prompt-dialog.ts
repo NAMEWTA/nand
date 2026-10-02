@@ -1,3 +1,4 @@
+import { bindLocalizedElement } from '../../primitives/localized-dom';
 import type { App } from 'obsidian';
 import { t } from '../../../shared/i18n/index';
 import { applyModalTheme } from '../appearance/modal-theme';
@@ -58,16 +59,16 @@ export function showPromptDialog(app: App | undefined, options: PromptOptions): 
 
 		const actions = dialog.createDiv({ cls: 'dashboard-confirm-actions' });
 
-		const cancelBtn = actions.createEl('button', {
+		const cancelBtn = bindLocalizedElement(actions.createEl('button', {
 			text: t('common.cancel'),
 			cls: 'dashboard-confirm-cancel',
-		});
+		}), 'common.cancel');
 		cancelBtn.addEventListener('click', () => finish(null));
 
-		const confirmBtn = actions.createEl('button', {
+		const confirmBtn = bindLocalizedElement(actions.createEl('button', {
 			text: t('common.save'),
 			cls: 'dashboard-confirm-confirm',
-		});
+		}), 'common.save');
 		confirmBtn.addEventListener('click', submit);
 
 		overlay.addEventListener('click', (e) => {

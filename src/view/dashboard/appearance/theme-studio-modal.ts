@@ -1,3 +1,4 @@
+import { bindLocalizedElement, bindLocalizedControl } from '../../primitives/localized-dom';
 import { App, FuzzySuggestModal, Modal, setIcon } from 'obsidian';
 import type { BgSize, CustomColors, DashboardSettings } from '../../../core/dashboard/types/index';
 import { t } from '../../../shared/i18n/index';
@@ -154,13 +155,13 @@ export class ThemeStudioModal extends Modal {
 			cls: 'dashboard-modal dashboard-modal--compact dashboard-theme-studio',
 		});
 		const header = container.createDiv({ cls: 'dashboard-modal-header dashboard-theme-studio-header' });
-		header.createDiv({ cls: 'dashboard-modal-title', text: t('themeStudio.modalTitle') });
+		bindLocalizedElement(header.createDiv({ cls: 'dashboard-modal-title', text: t('themeStudio.modalTitle') }), 'themeStudio.modalTitle');
 
 		// Global one-click restore, on the title row (right-aligned) so it's easy to find.
-		const resetAllBtn = header.createEl('button', {
+		const resetAllBtn = bindLocalizedElement(bindLocalizedElement(header.createEl('button', {
 			cls: 'dashboard-theme-studio-resetall',
 			attr: { 'aria-label': t('themeStudio.resetAll'), title: t('themeStudio.resetAll') },
-		});
+		}), 'themeStudio.resetAll', undefined, "aria-label"), 'themeStudio.resetAll', undefined, "title");
 		setIcon(resetAllBtn.createSpan({ cls: 'dashboard-theme-studio-resetall-icon' }), 'rotate-ccw');
 		resetAllBtn.appendText(t('themeStudio.resetAll'));
 		resetAllBtn.addEventListener('click', () => {
@@ -168,7 +169,7 @@ export class ThemeStudioModal extends Modal {
 		});
 
 		const body = container.createDiv({ cls: 'dashboard-modal-body' });
-		body.createEl('p', { cls: 'dashboard-theme-studio-hint', text: t('themeStudio.hint') });
+		bindLocalizedElement(body.createEl('p', { cls: 'dashboard-theme-studio-hint', text: t('themeStudio.hint') }), 'themeStudio.hint');
 
 		const form = body.createDiv({ cls: 'dashboard-modal-form' });
 		this.renderColorsSection(form);
@@ -182,8 +183,8 @@ export class ThemeStudioModal extends Modal {
 	private renderColorsSection(form: HTMLElement): void {
 		this.colorRowSyncs.clear();
 		const section = form.createDiv({ cls: 'dashboard-theme-studio-section' });
-		section.createEl('h3', { text: t('themeStudio.color.title') });
-		section.createEl('p', { cls: 'dashboard-theme-studio-desc', text: t('themeStudio.color.desc') });
+		bindLocalizedElement(section.createEl('h3', { text: t('themeStudio.color.title') }), 'themeStudio.color.title');
+		bindLocalizedElement(section.createEl('p', { cls: 'dashboard-theme-studio-desc', text: t('themeStudio.color.desc') }), 'themeStudio.color.desc');
 
 		// Quick accent swatches — set the accent field directly.
 		const swatchRow = section.createDiv({ cls: 'dashboard-theme-studio-swatches' });
@@ -229,10 +230,10 @@ export class ThemeStudioModal extends Modal {
 			this.renderColorRow(list, field);
 		}
 
-		const resetBtn = section.createEl('button', {
+		const resetBtn = bindLocalizedElement(section.createEl('button', {
 			cls: 'dashboard-theme-studio-reset',
 			text: t('themeStudio.color.reset'),
-		});
+		}), 'themeStudio.color.reset');
 		resetBtn.addEventListener('click', () => {
 			this.colors = {};
 			for (const field of COLOR_FIELDS) {
@@ -244,7 +245,7 @@ export class ThemeStudioModal extends Modal {
 
 	private renderColorRow(list: HTMLElement, field: { key: keyof CustomColors; labelKey: string }): void {
 		const row = list.createDiv({ cls: 'dashboard-theme-studio-color-row' });
-		row.createSpan({ cls: 'dashboard-theme-studio-color-label', text: t(field.labelKey) });
+		bindLocalizedElement(row.createSpan({ cls: 'dashboard-theme-studio-color-label', text: t(field.labelKey) }), field.labelKey);
 
 		// Stored value grammar: '#rrggbb' at full opacity (legacy configs and
 		// the swatches), 'rgba(r, g, b, a)' once the alpha slider moves below
@@ -265,17 +266,17 @@ export class ThemeStudioModal extends Modal {
 			{ value: 'dark', labelKey: 'themeStudio.color.modeDark' },
 			{ value: 'custom', labelKey: 'themeStudio.color.modeCustom' },
 		]) {
-			modeSelect.createEl('option', { value: opt.value, text: t(opt.labelKey) });
+			bindLocalizedElement(modeSelect.createEl('option', { value: opt.value, text: t(opt.labelKey) }), opt.labelKey);
 		}
 
-		const input = row.createEl('input', {
+		const input = bindLocalizedElement(row.createEl('input', {
 			cls: 'dashboard-modal-color-input',
 			attr: { type: 'color', 'aria-label': t(field.labelKey) },
-		});
-		const alphaSlider = row.createEl('input', {
+		}), field.labelKey, undefined, "aria-label");
+		const alphaSlider = bindLocalizedElement(row.createEl('input', {
 			cls: 'dashboard-theme-studio-alpha-slider',
 			attr: { type: 'range', min: '0', max: '100', step: '5', 'aria-label': t('themeStudio.color.alpha') },
-		});
+		}), 'themeStudio.color.alpha', undefined, "aria-label");
 
 		/** What the picker/slider should display now: the stored value with
 		 *  presets resolved (falling back to the theme default when unset). */
@@ -329,10 +330,10 @@ export class ThemeStudioModal extends Modal {
 		});
 		this.colorRowSyncs.set(field.key, sync);
 
-		const clearBtn = row.createEl('button', {
+		const clearBtn = bindLocalizedElement(bindLocalizedElement(row.createEl('button', {
 			cls: 'dashboard-theme-studio-color-clear',
 			attr: { 'aria-label': t('themeStudio.color.clear'), title: t('themeStudio.color.clear') },
-		});
+		}), 'themeStudio.color.clear', undefined, "aria-label"), 'themeStudio.color.clear', undefined, "title");
 		setIcon(clearBtn, 'rotate-ccw');
 		clearBtn.addEventListener('click', () => {
 			const next = { ...this.colors };
@@ -347,8 +348,8 @@ export class ThemeStudioModal extends Modal {
 
 	private renderBackgroundSection(form: HTMLElement): void {
 		const section = form.createDiv({ cls: 'dashboard-theme-studio-section' });
-		section.createEl('h3', { text: t('themeStudio.bg.title') });
-		section.createEl('p', { cls: 'dashboard-theme-studio-desc', text: t('themeStudio.bg.desc') });
+		bindLocalizedElement(section.createEl('h3', { text: t('themeStudio.bg.title') }), 'themeStudio.bg.title');
+		bindLocalizedElement(section.createEl('p', { cls: 'dashboard-theme-studio-desc', text: t('themeStudio.bg.desc') }), 'themeStudio.bg.desc');
 
 		// Image path + browse + clear
 		const imageRow = section.createDiv({ cls: 'dashboard-theme-studio-image-row' });
@@ -362,10 +363,10 @@ export class ThemeStudioModal extends Modal {
 			this.scheduleApply();
 		});
 
-		const browseBtn = imageRow.createEl('button', {
+		const browseBtn = bindLocalizedElement(imageRow.createEl('button', {
 			cls: 'dashboard-theme-studio-browse',
 			text: t('themeStudio.bg.browse'),
-		});
+		}), 'themeStudio.bg.browse');
 		browseBtn.addEventListener('click', () => {
 			new ImageFileSuggestModal(this.app, (path) => {
 				this.bgImage = path;
@@ -374,10 +375,10 @@ export class ThemeStudioModal extends Modal {
 			}).open();
 		});
 
-		const clearImgBtn = imageRow.createEl('button', {
+		const clearImgBtn = bindLocalizedElement(imageRow.createEl('button', {
 			cls: 'dashboard-theme-studio-image-clear',
 			text: t('themeStudio.bg.clear'),
-		});
+		}), 'themeStudio.bg.clear');
 		clearImgBtn.addEventListener('click', () => {
 			this.bgImage = '';
 			input.value = '';
@@ -412,10 +413,10 @@ export class ThemeStudioModal extends Modal {
 
 		// Fill mode
 		const sizeRow = section.createDiv({ cls: 'dashboard-theme-studio-size-row' });
-		sizeRow.createSpan({ cls: 'dashboard-theme-studio-color-label', text: t('themeStudio.bg.size') });
+		bindLocalizedElement(sizeRow.createSpan({ cls: 'dashboard-theme-studio-color-label', text: t('themeStudio.bg.size') }), 'themeStudio.bg.size');
 		const sizeSelect = sizeRow.createEl('select', { cls: 'dashboard-modal-input dashboard-theme-studio-size' });
-		const coverOpt = sizeSelect.createEl('option', { value: 'cover', text: t('themeStudio.bg.sizeCover') });
-		const containOpt = sizeSelect.createEl('option', { value: 'contain', text: t('themeStudio.bg.sizeContain') });
+		const coverOpt = bindLocalizedElement(sizeSelect.createEl('option', { value: 'cover', text: t('themeStudio.bg.sizeCover') }), 'themeStudio.bg.sizeCover');
+		const containOpt = bindLocalizedElement(sizeSelect.createEl('option', { value: 'contain', text: t('themeStudio.bg.sizeContain') }), 'themeStudio.bg.sizeContain');
 		if (this.bgSize === 'contain') containOpt.selected = true;
 		else coverOpt.selected = true;
 		sizeSelect.addEventListener('change', () => {
@@ -428,8 +429,8 @@ export class ThemeStudioModal extends Modal {
 
 	private renderAdvancedSection(form: HTMLElement): void {
 		const section = form.createDiv({ cls: 'dashboard-theme-studio-section' });
-		section.createEl('h3', { text: t('themeStudio.advanced.title') });
-		section.createEl('p', { cls: 'dashboard-theme-studio-desc', text: t('themeStudio.advanced.desc') });
+		bindLocalizedElement(section.createEl('h3', { text: t('themeStudio.advanced.title') }), 'themeStudio.advanced.title');
+		bindLocalizedElement(section.createEl('p', { cls: 'dashboard-theme-studio-desc', text: t('themeStudio.advanced.desc') }), 'themeStudio.advanced.desc');
 
 		this.renderNullableSlider(section, {
 			label: t('themeStudio.advanced.surfaceOpacity'),
@@ -474,7 +475,7 @@ export class ThemeStudioModal extends Modal {
 	 *  reset back to the default ('medium' = inherited base size). */
 	private renderFontScaleRow(section: HTMLElement): void {
 		const row = section.createDiv({ cls: 'dashboard-theme-studio-fontscale-row' });
-		row.createSpan({ cls: 'dashboard-theme-studio-color-label', text: t('themeStudio.fontSize') });
+		bindLocalizedElement(row.createSpan({ cls: 'dashboard-theme-studio-color-label', text: t('themeStudio.fontSize') }), 'themeStudio.fontSize');
 
 		const seg = row.createDiv({ cls: 'dashboard-theme-studio-fontscale' });
 		const options: Array<{ value: DashboardSettings['fontScale']; labelKey: string }> = [
@@ -485,10 +486,10 @@ export class ThemeStudioModal extends Modal {
 		const renderSeg = (): void => {
 			seg.empty();
 			for (const opt of options) {
-				const btn = seg.createEl('button', {
+				const btn = bindLocalizedElement(seg.createEl('button', {
 					cls: 'dashboard-theme-studio-fontscale-btn' + (this.fontScale === opt.value ? ' active' : ''),
 					text: t(opt.labelKey),
-				});
+				}), opt.labelKey);
 				btn.addEventListener('click', () => {
 					if (this.fontScale === opt.value) return;
 					this.fontScale = opt.value;
@@ -500,13 +501,13 @@ export class ThemeStudioModal extends Modal {
 		renderSeg();
 
 		// One-click restore to the default size.
-		const resetBtn = row.createEl('button', {
+		const resetBtn = bindLocalizedElement(bindLocalizedElement(row.createEl('button', {
 			cls: 'dashboard-theme-studio-color-clear',
 			attr: {
 				'aria-label': t('themeStudio.fontSizeReset'),
 				title: t('themeStudio.fontSizeReset'),
 			},
-		});
+		}), 'themeStudio.fontSizeReset', undefined, "aria-label"), 'themeStudio.fontSizeReset', undefined, "title");
 		setIcon(resetBtn, 'rotate-ccw');
 		resetBtn.addEventListener('click', () => {
 			if (this.fontScale === 'medium') return;
@@ -552,13 +553,13 @@ export class ThemeStudioModal extends Modal {
 			paint();
 		});
 
-		const resetBtn = row.createEl('button', {
+		const resetBtn = bindLocalizedElement(bindLocalizedElement(row.createEl('button', {
 			cls: 'dashboard-theme-studio-color-clear',
 			attr: {
 				'aria-label': t('themeStudio.advanced.resetToTheme'),
 				title: t('themeStudio.advanced.resetToTheme'),
 			},
-		});
+		}), 'themeStudio.advanced.resetToTheme', undefined, "aria-label"), 'themeStudio.advanced.resetToTheme', undefined, "title");
 		setIcon(resetBtn, 'rotate-ccw');
 		resetBtn.addEventListener('click', () => {
 			opts.onChange(null);
@@ -592,11 +593,11 @@ export class ThemeStudioModal extends Modal {
 
 	private renderActions(container: HTMLElement): void {
 		const footer = container.createDiv({ cls: 'dashboard-modal-footer' });
-		footer
+		bindLocalizedElement(footer
 			.createEl('button', {
 				cls: 'dashboard-modal-btn dashboard-modal-btn--confirm',
 				text: t('common.done'),
-			})
+			}), 'common.done')
 			.addEventListener('click', () => this.close());
 	}
 
@@ -657,7 +658,7 @@ class ImageFileSuggestModal extends FuzzySuggestModal<TFileStub> {
 	constructor(app: App, onChoosePath: (path: string) => void) {
 		super(app);
 		this.onChoosePath = onChoosePath;
-		this.setPlaceholder(t('themeStudio.bg.browsePlaceholder'));
+		bindLocalizedControl(this.setPlaceholder(t('themeStudio.bg.browsePlaceholder')), "placeholder", 'themeStudio.bg.browsePlaceholder');
 		this.emptyStateText = t('themeStudio.bg.noImages');
 	}
 
