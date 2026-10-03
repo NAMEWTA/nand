@@ -28,7 +28,7 @@
 
 使用 package.json 指定的 pnpm，运行 pnpm install --frozen-lockfile、pnpm test:all、pnpm build、pnpm lint。构建会更新根目录 main.js。
 
-[领域与架构入口](speculo/.speculo/specdev/.config/domain-layout.md)是维护规范入口；[当前待验收项](speculo/.speculo/specdev/changes/2026-10-01-remaining-acceptance/spec.md)说明尚未完成的实机范围。[变更说明](CHANGELOG.md)仅描述当前未发布内容。
+[领域与架构入口](speculo/.speculo/specdev/.config/domain-layout.md)是维护规范入口；[当前待验收项](speculo/.speculo/specdev/changes/2026-10-01-remaining-acceptance/spec.md)说明尚未完成的实机范围。[变更说明](CHANGELOG.md)描述当前预发布 `0.0.1-alpha1`。
 
 ## 来源与许可证
 

@@ -74,3 +74,5 @@ jobs:
                       ${{ steps.package.outputs.zip }}
                       terminal-artifacts/*
                   generate_release_notes: true
+                  prerelease: true
+                  make_latest: false
