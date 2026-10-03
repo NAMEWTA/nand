@@ -11,7 +11,7 @@ export const terminalAssets = [
 export function verifyReleaseArtifacts(root, tag, artifacts) {
 	const readJson = (name) => JSON.parse(readFileSync(path.join(root, name), 'utf8'));
 	const manifest = readJson('manifest.json');
-	assert.match(tag, /^\d+\.\d+\.\d+$/, 'Release requires an unprefixed version tag');
+	assert.match(tag, /^\d+\.\d+\.\d+(?:-[0-9A-Za-z.]+)?$/, 'Release requires an unprefixed version tag');
 	assert.equal(manifest.version, tag, 'Manifest version must equal the release tag');
 	assert.equal(readJson('package.json').version, tag, 'Package version must equal the release tag');
 	assert.equal(readJson('versions.json')[tag], manifest.minAppVersion, 'Version compatibility entry must match');

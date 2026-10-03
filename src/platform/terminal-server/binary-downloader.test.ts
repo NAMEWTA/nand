@@ -59,6 +59,14 @@ test('release gate rejects wrong tags, missing platforms and corrupt terminal as
 		writeFileSync(path.join(root, 'versions.json'), JSON.stringify({ '0.0.2': '1.12.0' }));
 		assert.throws(() => verifyReleaseArtifacts(root, '0.0.3'), /Manifest version/);
 		assert.throws(() => verifyReleaseArtifacts(root, 'v0.0.2'), /unprefixed/);
+		writeFileSync(path.join(root, 'manifest.json'), JSON.stringify({ version: '0.0.1-alpha1', minAppVersion: '1.12.0' }));
+		writeFileSync(path.join(root, 'package.json'), JSON.stringify({ version: '0.0.1-alpha1' }));
+		writeFileSync(path.join(root, 'versions.json'), JSON.stringify({ '0.0.1-alpha1': '1.12.0' }));
+		verifyReleaseArtifacts(root, '0.0.1-alpha1');
+		assert.throws(() => verifyReleaseArtifacts(root, '0.0.1'), /Manifest version/);
+		writeFileSync(path.join(root, 'manifest.json'), JSON.stringify({ version: '0.0.2', minAppVersion: '1.12.0' }));
+		writeFileSync(path.join(root, 'package.json'), JSON.stringify({ version: '0.0.2' }));
+		writeFileSync(path.join(root, 'versions.json'), JSON.stringify({ '0.0.2': '1.12.0' }));
 		for (const name of terminalAssets) {
 			const bytes = Buffer.from(`synthetic ${name}`);
 			writeFileSync(path.join(artifacts, name), bytes);

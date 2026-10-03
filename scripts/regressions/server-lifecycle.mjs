@@ -116,7 +116,7 @@ function fixture() {
 		},
 	};
 	vm.runInNewContext(code, ctx);
-	const manager = new ctx.module.exports.ServerManager('/fixture/plugin', '0.0.3', { source: 'github-release' });
+	const manager = new ctx.module.exports.ServerManager('/fixture/plugin', '0.0.1-alpha1', { source: 'github-release' });
 	const tick = async () => {
 		for (let i = 0; i < 10; i++) await Promise.resolve();
 	};
