@@ -100,7 +100,8 @@ export class IconPickerModal extends FuzzySuggestModal<string> {
 	constructor(app: App, onPick: (icon: string) => void) {
 		super(app);
 		this.onPick = onPick;
-		bindLocalizedControl(this.setPlaceholder(t('quickNote.iconPickerPlaceholder')), "placeholder", 'quickNote.iconPickerPlaceholder');
+		this.setPlaceholder(t('quickNote.iconPickerPlaceholder'));
+		bindLocalizedControl(this, 'placeholder', 'quickNote.iconPickerPlaceholder');
 		this.emptyStateText = t('quickNote.iconPickerEmpty');
 	}
 

@@ -8,7 +8,9 @@ import { sessionLabel } from './session-label';
 export class RecentSessionModal extends SuggestModal<PtySession> {
 	constructor(app: App, private readonly sessions: readonly PtySession[], private readonly select: (session: PtySession) => void) {
 		super(app);
-		bindLocalizedControl(this.setPlaceholder(t('workbench.searchSessions')), "placeholder", 'terminalAgent.workbench.searchSessions');
+		// SuggestModal.setPlaceholder returns void, unlike SearchComponent.
+		this.setPlaceholder(t('workbench.searchSessions'));
+		bindLocalizedControl(this, 'placeholder', 'terminalAgent.workbench.searchSessions');
 	}
 	getSuggestions(query: string): PtySession[] {
 		const needle = query.trim().toLocaleLowerCase();

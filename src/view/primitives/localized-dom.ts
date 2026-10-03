@@ -28,8 +28,10 @@ export function bindLocalizedElement<T extends HTMLElement>(
 	else setLocalizedAttribute(element, attribute, key, params);
 	return element;
 }
-/** Native controls expose their label elements; binding never changes their values or callbacks. */
-export function bindLocalizedControl<T>(
+/** Native controls expose their label elements; binding never changes their values or callbacks.
+ * Pass the control itself: native modal setters can return void rather than this.
+ */
+export function bindLocalizedControl<T extends object>(
 	control: T,
 	field: 'name' | 'desc' | 'buttonText' | 'placeholder' | 'tooltip' | 'title',
 	key: string,

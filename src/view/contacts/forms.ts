@@ -68,7 +68,8 @@ class RecordPicker extends FuzzySuggestModal<ArchiveRecord> {
 		private done: (record?: ArchiveRecord) => void,
 	) {
 		super(app);
-		bindLocalizedControl(this.setPlaceholder(ct(kind === 'person' ? 'searchPeople' : 'searchCompanies')), "placeholder", "contacts." + (kind === 'person' ? 'searchPeople' : 'searchCompanies'));
+		this.setPlaceholder(ct(kind === 'person' ? 'searchPeople' : 'searchCompanies'));
+		bindLocalizedControl(this, 'placeholder', 'contacts.' + (kind === 'person' ? 'searchPeople' : 'searchCompanies'));
 	}
 	getItems(): ArchiveRecord[] {
 		return this.values;

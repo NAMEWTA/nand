@@ -44,7 +44,8 @@ export function pickContextMaterial(app: App): Promise<ContextMaterial | null> {
 			}
 		}
 		const picker = new Picker(app);
-		bindLocalizedControl(picker.setPlaceholder(t('context.add')), "placeholder", 'terminalAgent.context.add');
+		picker.setPlaceholder(t('context.add'));
+		bindLocalizedControl(picker, 'placeholder', 'terminalAgent.context.add');
 		picker.open();
 	});
 }

@@ -10,7 +10,8 @@ export class AutomationSessionPicker extends FuzzySuggestModal<AgentSessionRef> 
 		private choose: (session: AgentSessionRef) => void,
 	) {
 		super(app);
-		bindLocalizedControl(this.setPlaceholder(t('automation.sessions')), "placeholder", 'automation.sessions');
+		this.setPlaceholder(t('automation.sessions'));
+		bindLocalizedControl(this, 'placeholder', 'automation.sessions');
 	}
 	getItems(): AgentSessionRef[] {
 		return this.sessions;

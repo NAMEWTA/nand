@@ -658,7 +658,8 @@ class ImageFileSuggestModal extends FuzzySuggestModal<TFileStub> {
 	constructor(app: App, onChoosePath: (path: string) => void) {
 		super(app);
 		this.onChoosePath = onChoosePath;
-		bindLocalizedControl(this.setPlaceholder(t('themeStudio.bg.browsePlaceholder')), "placeholder", 'themeStudio.bg.browsePlaceholder');
+		this.setPlaceholder(t('themeStudio.bg.browsePlaceholder'));
+		bindLocalizedControl(this, 'placeholder', 'themeStudio.bg.browsePlaceholder');
 		this.emptyStateText = t('themeStudio.bg.noImages');
 	}
 
