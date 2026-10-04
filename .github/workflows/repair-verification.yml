@@ -9,23 +9,23 @@ permissions:
   contents: read
 
 jobs:
-  workspace:
+  desktop-runtime:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
-        with:
-          persist-credentials: false
-      - uses: pnpm/action-setup@v4
-      - uses: actions/setup-node@v5
-        with:
-          node-version: 24.x
-      - run: pnpm install --frozen-lockfile
-      - name: Export source and installed public dependencies without credentials
+      - name: Download public test runtimes and verify release checksums
         run: |
-          git rev-parse HEAD > WORKSPACE_SOURCE_SHA
-          tar --exclude='./.git' --exclude='./processes/rust-terminal-servers/binaries' --exclude='./workspace.tar.gz' -czf "$RUNNER_TEMP/workspace.tar.gz" .
+          mkdir runtime
+          cd runtime
+          curl --fail --location --retry 3 -o Obsidian.AppImage https://github.com/obsidianmd/obsidian-releases/releases/download/v1.13.7/Obsidian-1.13.7.AppImage
+          echo 'e0d8e0a611624de8c9c7dcd8a9e648279fb0a0d552faa1312b7e4f3a5fa72663  Obsidian.AppImage' | sha256sum -c -
+          curl --fail --location --retry 3 -O https://nodejs.org/dist/v24.21.0/node-v24.21.0-linux-x64.tar.xz
+          curl --fail --location --retry 3 -o node-checksums.txt https://nodejs.org/dist/v24.21.0/SHASUMS256.txt
+          grep ' node-v24.21.0-linux-x64.tar.xz$' node-checksums.txt | sha256sum -c -
+          curl --fail --location --retry 3 -O https://github.com/NAMEWTA/nand/releases/download/0.0.1-alpha1/rust-terminal-servers-linux-x64
+          curl --fail --location --retry 3 -O https://github.com/NAMEWTA/nand/releases/download/0.0.1-alpha1/rust-terminal-servers-linux-x64.sha256
+          sha256sum -c rust-terminal-servers-linux-x64.sha256
       - uses: actions/upload-artifact@v4
         with:
-          name: repair-workspace-${{ github.sha }}
-          path: ${{ runner.temp }}/workspace.tar.gz
+          name: repair-desktop-runtimes-${{ github.sha }}
+          path: runtime/
           retention-days: 1
