@@ -24,6 +24,12 @@ jobs:
           node-version: 24.x
           cache: pnpm
       - run: pnpm install --frozen-lockfile
+      - name: Retain offline source and frozen dependencies
+        shell: bash
+        run: |
+          tar --exclude=./.git --exclude=./repair-evidence -czf "$RUNNER_TEMP/nand-workspace.tar.gz" .
+          mkdir -p repair-evidence
+          cp "$RUNNER_TEMP/nand-workspace.tar.gz" repair-evidence/workspace.tar.gz
       - name: Build and test the source candidate
         shell: bash
         run: |
