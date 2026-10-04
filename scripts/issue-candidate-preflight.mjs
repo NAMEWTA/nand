@@ -4,6 +4,7 @@ const file = 'scripts/issue-candidate-patch.mjs';
 let source = fs.readFileSync(file, 'utf8');
 const slash = String.fromCharCode(92);
 source = source.replace('/' + slash + slash + '.tsx?$/', '/' + slash + '.tsx?$/');
+source = source.replaceAll(slash.repeat(2) + '"', '"');
 fs.writeFileSync(file, source);
 let css = fs.readFileSync('styles.css', 'utf8');
 const anchor = '.dashboard-quicknote-empty {';
