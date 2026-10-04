@@ -12,69 +12,114 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  fixture:
-    if: github.event.head_commit.message == 'Prepare native acceptance fixture'
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/setup-node@v5
-        with:
-          node-version: 24.x
-      - name: Download official desktop test runtime
-        shell: bash
-        run: |
-          mkdir fixture
-          cp "$(command -v node)" fixture/node
-          curl --fail --location --retry 2 https://github.com/obsidianmd/obsidian-releases/releases/download/v1.13.7/Obsidian-1.13.7.AppImage -o fixture/Obsidian.AppImage
-          echo 'e0d8e0a611624de8c9c7dcd8a9e648279fb0a0d552faa1312b7e4f3a5fa72663  fixture/Obsidian.AppImage' | sha256sum --check
-          curl --fail --location --retry 2 https://github.com/NAMEWTA/nand/releases/download/0.0.1-alpha1/rust-terminal-servers-linux-x64 -o fixture/rust-terminal-servers-linux-x64
-          curl --fail --location --retry 2 https://github.com/NAMEWTA/nand/releases/download/0.0.1-alpha1/rust-terminal-servers-linux-x64.sha256 -o fixture/rust-terminal-servers-linux-x64.sha256
-          (cd fixture && sha256sum --check rust-terminal-servers-linux-x64.sha256)
-          chmod +x fixture/node fixture/Obsidian.AppImage fixture/rust-terminal-servers-linux-x64
-          tar -czf native-fixture.tar.gz fixture
-      - uses: actions/upload-artifact@v4
-        with:
-          name: repair-native-fixture
-          path: native-fixture.tar.gz
-          compression-level: 0
-          retention-days: 3
   verify:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
         with:
           persist-credentials: false
+      - name: Apply the reviewed source candidate with exact before and after hashes
+        run: |
+          python3 - <<'PY'
+          import json, pathlib, hashlib
+          root = pathlib.Path.cwd()
+          files = []
+          for part in sorted(root.glob('scripts/repair-candidate-*.json')):
+              files.extend(json.loads(part.read_text())['files'])
+          assert files, 'The reviewed repair candidate has not been uploaded yet'
+          seen = set()
+          for record in files:
+              name = record['path']
+              assert name not in seen
+              seen.add(name)
+              path = root / name
+              assert name == 'CHANGELOG.md' or name == 'styles.css' or name.startswith(('src/', 'docs/', 'scripts/obsidian-acceptance/', 'scripts/regressions/', 'scripts/verify-', '.agents/skills/dev/references/'))
+              assert '..' not in pathlib.PurePosixPath(name).parts and not pathlib.PurePosixPath(name).is_absolute()
+              assert not path.is_symlink() and root in path.resolve().parents
+              before = path.read_bytes() if path.exists() else None
+              assert (hashlib.sha256(before).hexdigest() if before is not None else None) == record['before'], name
+              lines = (before or b'').decode('utf-8').splitlines(keepends=True)
+              for start, end, text in reversed(record['edits']):
+                  assert 0 <= start <= end <= len(lines)
+                  lines[start:end] = [text]
+              after = ''.join(lines).encode('utf-8')
+              assert hashlib.sha256(after).hexdigest() == record['after'], name
+              path.parent.mkdir(parents=True, exist_ok=True)
+              path.write_bytes(after)
+          pathlib.Path('repair-paths.json').write_text(json.dumps({record['path']:record['after'] for record in files}))
+          PY
       - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v5
         with:
           node-version: 24.x
           cache: pnpm
       - run: pnpm install --frozen-lockfile
-      - name: Retain offline source and frozen dependencies
-        shell: bash
+      - run: pnpm run build
+      - run: pnpm run lint
+      - run: pnpm run test:all
+      - name: Package only the verified source files and rebuilt bundle
+        env:
+          SOURCE_SHA: ${{ github.sha }}
         run: |
-          tar --exclude=./.git --exclude=./repair-evidence -czf "$RUNNER_TEMP/nand-workspace.tar.gz" .
-          mkdir -p repair-evidence
-          cp "$RUNNER_TEMP/nand-workspace.tar.gz" repair-evidence/workspace.tar.gz
-      - name: Build and test the source candidate
-        shell: bash
-        run: |
-          mkdir -p repair-evidence
-          set +e
-          pnpm run build > repair-evidence/build.log 2>&1
-          build=$?
-          pnpm run lint > repair-evidence/lint.log 2>&1
-          lint=$?
-          pnpm run test:all > repair-evidence/tests.log 2>&1
-          tests=$?
-          printf 'build=%s\nlint=%s\ntests=%s\n' "$build" "$lint" "$tests" | tee repair-evidence/results.txt
-          git rev-parse HEAD > repair-evidence/source-sha.txt
-          cp main.js repair-evidence/main.js
-          sha256sum main.js > repair-evidence/main.sha256
-          test "$build" -eq 0 && test "$lint" -eq 0 && test "$tests" -eq 0
-      - name: Retain diagnostic logs and candidate bundle
-        if: always()
-        uses: actions/upload-artifact@v4
+          python3 - <<'PY'
+          import json, pathlib, hashlib, shutil, os
+          expected=json.loads(pathlib.Path('repair-paths.json').read_text())
+          expected['main.js']='5b926c3cee9df4d8e851e28eceb5035e6752bd919cd4679601127db37e17896a'
+          out=pathlib.Path('repair-publish')
+          for name,digest in expected.items():
+              data=pathlib.Path(name).read_bytes()
+              assert hashlib.sha256(data).hexdigest()==digest, name
+              target=out/'files'/name
+              target.parent.mkdir(parents=True,exist_ok=True)
+              target.write_bytes(data)
+          (out/'manifest.json').write_text(json.dumps({'source':os.environ['SOURCE_SHA'],'files':expected}))
+          PY
+      - uses: actions/upload-artifact@v4
         with:
-          name: repair-evidence-${{ github.sha }}
-          path: repair-evidence/
+          name: verified-repair-${{ github.sha }}
+          path: repair-publish/
+          include-hidden-files: true
+          retention-days: 7
+
+  prepare-blobs:
+    needs: verify
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: verified-repair-${{ github.sha }}
+          path: verified
+      - name: Prepare verified Git blobs without changing any branch or tag
+        env:
+          GH_TOKEN: ${{ github.token }}
+          SOURCE_SHA: ${{ github.sha }}
+        run: |
+          python3 - <<'PY'
+          import pathlib,json,hashlib,base64,urllib.request,os
+          root=pathlib.Path('verified').resolve()
+          manifest=json.loads((root/'manifest.json').read_text())
+          assert manifest['source']==os.environ['SOURCE_SHA']
+          result=[]
+          for name,digest in manifest['files'].items():
+              assert name in ('main.js','styles.css','CHANGELOG.md') or name.startswith(('src/','docs/','scripts/obsidian-acceptance/','scripts/regressions/','scripts/verify-','.agents/skills/dev/references/'))
+              assert '..' not in pathlib.PurePosixPath(name).parts and not pathlib.PurePosixPath(name).is_absolute()
+              file=root/'files'/name
+              assert not file.is_symlink() and root in file.resolve().parents
+              data=file.read_bytes()
+              assert len(data)<8000000 and hashlib.sha256(data).hexdigest()==digest
+              data.decode('utf-8')
+              request=urllib.request.Request('https://api.github.com/repos/NAMEWTA/nand/git/blobs',data=json.dumps({'content':base64.b64encode(data).decode(),'encoding':'base64'}).encode(),headers={'Authorization':'Bearer '+os.environ['GH_TOKEN'],'Accept':'application/vnd.github+json','Content-Type':'application/json'},method='POST')
+              with urllib.request.urlopen(request,timeout=60) as response:
+                  blob=json.load(response)
+              assert blob['sha']==hashlib.sha1(b'blob '+str(len(data)).encode()+b'\0'+data).hexdigest()
+              result.append({'path':name,'mode':'100644','type':'blob','sha':blob['sha'],'sha256':digest})
+          pathlib.Path('repair-blobs.json').write_text(json.dumps({'source':manifest['source'],'tree':result},indent=2))
+          print('Prepared',len(result),'verified blobs. No refs, commits, pull requests or releases were changed.')
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: repair-git-blobs-${{ github.sha }}
+          path: repair-blobs.json
           retention-days: 7
