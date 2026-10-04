@@ -12,6 +12,31 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  fixture:
+    if: github.event.head_commit.message == 'Prepare native acceptance fixture'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24.x
+      - name: Download official desktop test runtime
+        shell: bash
+        run: |
+          mkdir fixture
+          cp "$(command -v node)" fixture/node
+          curl --fail --location --retry 2 https://github.com/obsidianmd/obsidian-releases/releases/download/v1.13.7/Obsidian-1.13.7.AppImage -o fixture/Obsidian.AppImage
+          echo 'e0d8e0a611624de8c9c7dcd8a9e648279fb0a0d552faa1312b7e4f3a5fa72663  fixture/Obsidian.AppImage' | sha256sum --check
+          curl --fail --location --retry 2 https://github.com/NAMEWTA/nand/releases/download/0.0.1-alpha1/rust-terminal-servers-linux-x64 -o fixture/rust-terminal-servers-linux-x64
+          curl --fail --location --retry 2 https://github.com/NAMEWTA/nand/releases/download/0.0.1-alpha1/rust-terminal-servers-linux-x64.sha256 -o fixture/rust-terminal-servers-linux-x64.sha256
+          (cd fixture && sha256sum --check rust-terminal-servers-linux-x64.sha256)
+          chmod +x fixture/node fixture/Obsidian.AppImage fixture/rust-terminal-servers-linux-x64
+          tar -czf native-fixture.tar.gz fixture
+      - uses: actions/upload-artifact@v4
+        with:
+          name: repair-native-fixture
+          path: native-fixture.tar.gz
+          compression-level: 0
+          retention-days: 3
   verify:
     runs-on: ubuntu-latest
     steps:
