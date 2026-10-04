@@ -37,7 +37,7 @@ export const messages = {
 			'Folder where memo cards are saved as notes (e.g. memos or notes/memos). Leave empty for vault root.',
 		'settings.memoTemplate': 'Memo note template',
 		'settings.memoTemplateDesc':
-			'Template note applied when saving a memo card as a note ({{title}} and {{date:…}} are substituted; the card content is appended after the template body; the fixed property keys "创建时间" and "type" are always set). Leave empty for the built-in default with the fixed key "创建时间" and literal "type: memo".',
+			'Template note applied when saving a memo card as a note ({{title}} and {{date:…}} are substituted; the card content is appended after the template body; the fixed property keys `创建时间` and `type` are always set). Leave empty for the built-in default with the fixed key `创建时间` and literal `type: memo`.',
 		'settings.taskArchiveTarget': 'Task archive settings',
 		'settings.taskArchiveTargetDesc':
 			"Where one-click archive writes completed tasks: the fixed file below, or today's daily note (created if it does not exist)",
@@ -95,7 +95,7 @@ export const messages = {
 		'settings.memoSavePathDesc': '备忘录卡片保存为笔记的文件夹（如 memos 或 notes/memos），留空则保存到仓库根目录',
 		'settings.memoTemplate': '备忘录笔记模板',
 		'settings.memoTemplateDesc':
-			'备忘录卡片保存为笔记时使用的模板笔记（自动替换 {{title}} 与 {{date:…}} 变量；卡片内容追加在模板正文之后；创建时间 与 type 始终会写入）。留空使用内置默认模板：创建时间 + type: memo',
+			'备忘录卡片保存为笔记时使用的模板笔记（自动替换 {{title}} 与 {{date:…}} 变量；卡片内容追加在模板正文之后；`创建时间` 与 `type` 始终会写入）。留空使用内置默认模板：`创建时间` + `type: memo`',
 		'settings.taskArchiveTarget': '待办归档设置',
 		'settings.taskArchiveTargetDesc':
 			'一键归档写入已完成事项的位置：下方指定的文件，或当天日记（当天无日记时自动按日记模板创建）',

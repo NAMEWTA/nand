@@ -127,7 +127,7 @@ export function renderGeneralSettings(this: DashboardSettingTab, containerEl: HT
 	let memoTplInput: TextComponent | undefined;
 	new Setting(containerEl)
 		.setName(t('settings.memoTemplate'))
-		.setDesc(t('settings.memoTemplateDesc'))
+		.setDesc(memoTemplateDescription(containerEl))
 		.addText((text) => {
 			memoTplInput = text;
 			text.setPlaceholder('Templates/memo.md')
@@ -323,4 +323,14 @@ export function renderLayoutPicker(this: DashboardSettingTab, containerEl: HTMLE
 	};
 
 	for (const mode of modes) option(mode);
+}
+
+/** These are fixed Markdown property keys, not translated UI labels. */
+function memoTemplateDescription(container: HTMLElement): DocumentFragment {
+	const fragment = container.ownerDocument.createDocumentFragment();
+	for (const part of t('settings.memoTemplateDesc').split(/(`[^`]+`)/g)) {
+		if (part.startsWith('`') && part.endsWith('`')) fragment.createEl('code', { text: part.slice(1, -1) });
+		else fragment.createSpan({ text: part });
+	}
+	return fragment;
 }
