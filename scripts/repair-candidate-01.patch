@@ -1,0 +1,75 @@
+diff --git a/.agents/skills/dev/references/architecture.md b/.agents/skills/dev/references/architecture.md
+index 7b58bf8..39ed22e 100644
+--- a/.agents/skills/dev/references/architecture.md
++++ b/.agents/skills/dev/references/architecture.md
+@@ -41 +41 @@ Dashboard UI remains organized under `view/dashboard/<feature>`; parser/model/DQ
+-Contacts, habit, expense, pomodoro and reading application services live in core and accept file/storage ports. Native adapters own Component lifecycle, Vault operations, unsaved-editor checks and focus events. Keep atomic process/write semantics and serialized entity saves.
++Contacts, habit, expense, pomodoro and reading application services live in core and accept file/storage ports. Native adapters own Component lifecycle, Vault operations, unsaved-editor checks and focus events. Keep atomic process/write semantics and serialized entity saves. Habit storage invalidations trigger coalesced refreshes; the first complete scan runs after layout readiness without blocking plugin onload. DurableState serializes reads and writes on the same storage/path queue and retains three-way merge protection.
+@@ -117 +117 @@ The project is in pre-release development. Keep the current product namespaces c
+-| Browser runtime | Electron userData `nand-browser/<vault-id>/<run-id>/` | Local authenticated CLI connection, bundled Node client and Agent attachments; never put tokens or Cookies into Vault settings |
++| Browser runtime | Electron userData `nand-browser/<vault-id>/<run-id>/`; retained attachments in sibling `artifacts/` | Run-owned connection/CLI files are removed on shutdown and dead runs are swept on next bridge start. Keep referenced attachments; only Agent launches receive browser environment capabilities. Never put tokens or Cookies into Vault settings |
+diff --git a/.agents/skills/dev/references/build-and-release.md b/.agents/skills/dev/references/build-and-release.md
+index 4af8d1b..62ce956 100644
+--- a/.agents/skills/dev/references/build-and-release.md
++++ b/.agents/skills/dev/references/build-and-release.md
+@@ -189,0 +190,8 @@ The workbench acceptance scripts share `terminal-fixture.mjs` and must run seria
++
++## Open-issue repair acceptance
++
++The existing `test:terminal-agent` discovers `localized-picker-contract.test.ts` and the binary downloader regressions. `test:browser` also exercises real local socket teardown, stale-run ownership and ordinary-terminal environment filtering. `test:reliability` covers cold habit indexing and refresh/write ordering. `test:card-panels` includes real Preact saved/loading/error states from `verify-open-issue-panels.ts`. `test:safety-regressions` covers delayed environment shutdown without allocating a new session. These are included in the existing `test:all` gate; no separate test entry is added.
++
++`open-issues.mjs` and `terminal-repair.mjs` under `scripts/obsidian-acceptance/` require `NAND_ALLOW_BROWSER_E2E=1`, a matching `NAND_WINDOWS_E2E_NONCE`, an absolute `NAND_ACCEPTANCE_DIR`, and the isolated Vault marker. `open-issues.mjs` additionally verifies the deployed bundle against `NAND_EXPECT_MAIN_SHA`; it builds a temporary native acceptance plugin from the actual picker sources and removes it after execution. `terminal-repair.mjs` requires an absolute `NAND_ACCEPTANCE_BINARY` pointing to the verified release service. It uses an owned HTTP fault fixture for 404/retry and real PTYs for environment boundaries, never provider credentials. `open-issues.mjs --startup-only` checks the existing habit after a full app restart. These scripts must run serially with other native acceptance. The historical nonce variable name does not establish Windows coverage; record the actual platform.
++
++`scripts/verify-terminal-release-download.mjs` is an explicit online Linux release smoke check, not part of offline `test:all`. Run with the same Node TypeScript hook as terminal tests. It uses the production downloader on a fresh temporary plugin directory, checks the installed version and runs the authenticated PTY/history integration against the downloaded release binary. It does not publish or change a Release.
+diff --git a/CHANGELOG.md b/CHANGELOG.md
+index 7577745..e2c9fb8 100644
+--- a/CHANGELOG.md
++++ b/CHANGELOG.md
+@@ -2,0 +3,12 @@
++## 未发布
++
++- 修复终端、档案、自动化和看板选择弹窗的本地化绑定；切换语言保留搜索内容（#107）。
++- 终端组件固定到对应发布版本，校验失败不安装；修复同实例重试、手工放入匹配发布文件后的识别，以及失败提示叠加和语言混排（#106）。
++- 习惯在布局就绪后补扫并响应文件变更；同步与保存串行合并，加载期间不显示空列表或接受编辑（#112）。
++- 普通终端不再继承浏览器授权；运行文件在停止时清理、异常退出后安全回收，已交付 Agent 的附件单独保留（#110）。
++- 修复浏览器查找焦点与 Esc、地址栏重复焦点框及功能区提示的即时语言切换（#109）。
++- 习惯和番茄钟不再常驻“已保存”，保存失败、冲突与重试仍然可见（#111）。
++- 补充命令注册、评论重载交接和延迟标签标题的回归验收（#97、#98、#99）；旧格式不迁移的产品决定不变（#108）。
++
++这些改动尚未创建新的 Release，安装仓库构建时需同时替换 `main.js` 和 `styles.css`。
++
+diff --git a/docs/agent-workbench.md b/docs/agent-workbench.md
+index 57e70e4..9e9b118 100644
+--- a/docs/agent-workbench.md
++++ b/docs/agent-workbench.md
+@@ -54,0 +55,6 @@ Token 来自原生日志。输入统一包含 cache read/write；缓存数字是
++
++## 终端组件下载与重试
++
++首次使用从插件对应版本的 Release 下载终端组件及 SHA256 校验文件，不回退到其他版本的 `latest`。校验信息缺失、损坏或摘要不匹配时停止安装，并保留之前的文件。版本不存在时应安装具有配套终端资产的插件版本，不要用旧协议文件替换新协议服务。
++
++网络恢复后再次打开终端即可重试，不必重载插件。也可把从同一可信 Release 获取的匹配平台二进制放入插件的 `binaries/`；联网重试会核对该版本的官方摘要并接纳匹配文件，不把未知文件仅凭存在标记为兼容。离线模式仍要求文件存在并通过启动时的协议检查。失败浮动提示有时限，重复尝试会替换旧提示，成功后清除旧错误。
+diff --git a/docs/browser.md b/docs/browser.md
+index dcc8a23..c234bef 100644
+--- a/docs/browser.md
++++ b/docs/browser.md
+@@ -7 +7 @@
+-工具栏提供前进、后退、刷新／停止、查找、缩放、元素选择。更多菜单包含强制刷新、复制地址、系统浏览器打开、开发者工具、截图、整页截图和截图标注。`Ctrl/Cmd+L` 聚焦地址栏，`Ctrl/Cmd+F` 查找。加载失败后可以重试或在系统浏览器打开。
++工具栏提供前进、后退、刷新／停止、查找、缩放、元素选择。更多菜单包含强制刷新、复制地址、系统浏览器打开、开发者工具、截图、整页截图和截图标注。`Ctrl/Cmd+L` 聚焦地址栏，`Ctrl/Cmd+F` 打开并聚焦查找栏；Esc 关闭查找并返回网页。加载失败后可以重试或在系统浏览器打开。
+@@ -38 +38 @@ Obsidian 工作区保存网页地址、标题、缩放和可恢复的滚动位
+-需要本机 Node.js，无需全局安装包。在 NAND 内新启动的 Agent 会继承 `NAND_BROWSER_CLI`、`NAND_BROWSER_CONTEXT`、`NAND_BROWSER_TOKEN` 和 `NAND_BROWSER_GUIDE`。受管 Obsidian 上下文技能会提示 Agent 读取浏览器调用说明。已运行的 Agent 若没有这些变量，可使用下述显式连接方式。
++需要本机 Node.js，无需全局安装包。普通 Shell 和普通终端脚本默认不继承 `NAND_BROWSER_*` 授权变量；只有由 NAND 以 Agent 身份启动的会话按需获得当前连接。在 NAND 内新启动的 Agent 会继承 `NAND_BROWSER_CLI`、`NAND_BROWSER_CONTEXT`、`NAND_BROWSER_TOKEN` 和 `NAND_BROWSER_GUIDE`。受管 Obsidian 上下文技能会提示 Agent 读取浏览器调用说明。已运行的 Agent 若没有这些变量，可使用下述显式连接方式。
+@@ -88,0 +89,6 @@ node $env:NAND_BROWSER_CLI screenshot --page PAGE_ID --full --output screenshot.
++
++## 本地运行文件与附件
++
++临时连接、CLI 和说明文件位于 Obsidian 应用配置目录的 `nand-browser/<vault-id>/<run-id>/`。停用模块、卸载插件或正常退出时清理本次运行文件；异常退出后的失效运行在下次启动桥接时回收，不影响其他 Vault 或仍活动的实例。
++
++已交付 Agent 的图片及说明保存在同一 Vault 目录下的 `artifacts/`，不会随桥接停用而删除。旧运行目录内仍被引用的附件也保留原路径。这些附件不在 Vault 内，需单独备份；确认会话不再需要后可自行清理，不要把包含附件的旧目录当作纯临时缓存递归删除。连接令牌不会写入这些文件。
+diff --git a/docs/data.md b/docs/data.md
+index 017f27f..3ca19f5 100644
+--- a/docs/data.md
++++ b/docs/data.md
+@@ -20 +20 @@
+-CLI 原生日志、认证及 Chromium Cookie 由对应宿主管理，不复制进 Vault。设备身份保存在 Obsidian 本机存储中；复制库不能代替设备归属设置或 CLI 登录。连接令牌仅在运行时使用。
++CLI 原生日志、认证及 Chromium Cookie 由对应宿主管理，不复制进 Vault。设备身份保存在 Obsidian 本机存储中；复制库不能代替设备归属设置或 CLI 登录。连接令牌仅在运行时使用。浏览器交付给 Agent 的截图与说明位于 Obsidian 应用配置目录 `nand-browser/<vault-id>/artifacts/`，不随运行文件清理，也不自动进入 Vault 备份；需要保留时请单独备份。
