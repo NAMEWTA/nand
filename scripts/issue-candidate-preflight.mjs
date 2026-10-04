@@ -1,0 +1,13 @@
+import fs from 'node:fs';
+import assert from 'node:assert/strict';
+const file = 'scripts/issue-candidate-patch.mjs';
+let source = fs.readFileSync(file, 'utf8');
+const slash = String.fromCharCode(92);
+source = source.replace('/' + slash + slash + '.tsx?$/', '/' + slash + '.tsx?$/');
+fs.writeFileSync(file, source);
+let css = fs.readFileSync('styles.css', 'utf8');
+const anchor = '.dashboard-quicknote-empty {';
+assert.ok(css.includes(anchor));
+assert.ok(!css.includes('.dashboard-quicknote-empty-text {'));
+css = css.replace(anchor, '.dashboard-quicknote-empty-text {\n}\n\n' + anchor);
+fs.writeFileSync('styles.css', css);
