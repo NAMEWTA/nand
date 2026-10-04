@@ -2,7 +2,7 @@ name: Issue candidate build (temporary)
 on:
   push:
     branches: [fix/open-issues-97-121]
-    paths: [scripts/issue-candidate-patch.mjs, src/**, styles.css, scripts/verify-issue-repairs.ts]
+    paths: [.github/workflows/issue-candidate-build.yml, scripts/issue-candidate-patch.mjs, scripts/issue-candidate-preflight.mjs, src/**, styles.css, scripts/verify-issue-repairs.ts]
 permissions:
   contents: write
 concurrency:
@@ -25,6 +25,10 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - name: Apply exact candidate patch
         run: |
+          if test -f scripts/issue-candidate-preflight.mjs; then
+            node scripts/issue-candidate-preflight.mjs
+            rm scripts/issue-candidate-preflight.mjs
+          fi
           if test -f scripts/issue-candidate-patch.mjs; then
             node scripts/issue-candidate-patch.mjs
             rm scripts/issue-candidate-patch.mjs
