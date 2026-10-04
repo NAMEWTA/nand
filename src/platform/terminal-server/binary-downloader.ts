@@ -1,3 +1,4 @@
+import { TerminalBinaryError } from './errors';
 /**
  * BinaryDownloader - binary downloader
  *
@@ -9,7 +10,7 @@
  */
 
 import { t } from '../../shared/i18n/terminal-accessor';
-import { debugLog, debugWarn, errorLog } from '../desktop/logger';
+import { debugLog, debugWarn } from '../desktop/logger';
 import type { BinaryDownloadConfig } from './binary-download-urls';
 import { buildBinaryFilename, resolveBinaryAssetUrls } from './binary-download-urls';
 
@@ -49,9 +50,6 @@ export class BinaryDownloader {
 
 	/** Binary download configuration */
 	private downloadConfig: BinaryDownloadConfig;
-
-	/** Installed version cache (avoids repeated process invocations) */
-	private installedVersionCache: string | null | undefined = undefined;
 
 	/** Version cache filename */
 	private readonly versionCacheFileName = '.rust-terminal-servers.version.json';
@@ -124,60 +122,11 @@ export class BinaryDownloader {
 		return installedVersion !== this.version;
 	}
 
-	/**
-	 * Get the installed binary version.
-	 *
-	 * NAND reads the version from a JSON cache file written next to the
-	 * native binary at install time (`<plugin>/binaries/.terminal-server.version.json`).
-	 * The cache stores the binary's size + mtime alongside the version
-	 * string, so an out-of-band binary swap invalidates the cache and we
-	 * fall back to triggering a fresh download. We deliberately do NOT
-	 * spawn the binary with `--version` to read the version: that would
-	 * be an extra `child_process` invocation on every plugin load and
-	 * is unnecessary because the install path always writes the cache.
-	 *
-	 * @param skipExecution kept for backwards compatibility; on a cache
-	 *                      miss we now always fall back to the manifest
-	 *                      version when this flag is set.
+	/** Recheck disk metadata on every explicit readiness check, including prior negative results.
+	 * A manual binary/cache replacement must be visible without reloading the plugin.
 	 */
-	private getInstalledVersion(skipExecution = false): string | null {
-		try {
-			const binaryPath = this.getBinaryPath();
-			if (!this.fs.existsSync(binaryPath)) {
-				this.installedVersionCache = null;
-				return null;
-			}
-
-			if (this.installedVersionCache !== undefined) {
-				return this.installedVersionCache;
-			}
-
-			const cachedVersion = this.readCachedVersion(binaryPath);
-			if (cachedVersion) {
-				this.installedVersionCache = cachedVersion;
-				return cachedVersion;
-			}
-
-			// If execution is skipped, treat the binary as the manifest version.
-			// This branch is also used when offline mode prevents fresh downloads.
-			if (skipExecution) {
-				debugLog('[BinaryDownloader] 跳过版本检测，使用预期版本:', this.version);
-				this.installedVersionCache = this.version;
-				this.writeCachedVersion(binaryPath, this.version);
-				return this.version;
-			}
-
-			// Cache miss with no override: report unknown so callers fall back
-			// to a fresh download, which writes the cache for future loads.
-			debugWarn('[BinaryDownloader] 找不到版本缓存文件，将触发重新下载以重建缓存:', this.getVersionCachePath());
-			this.installedVersionCache = null;
-			return null;
-		} catch (error) {
-			debugWarn('[BinaryDownloader] 获取二进制版本异常:', error);
-		}
-
-		this.installedVersionCache = null;
-		return null;
+	private getInstalledVersion(): string | null {
+		return this.readCachedVersion(this.getBinaryPath());
 	}
 
 	/**
@@ -195,129 +144,37 @@ export class BinaryDownloader {
 	 * Download the binary
 	 */
 	async download(onProgress?: DownloadProgressCallback): Promise<void> {
-		const notify = (progress: DownloadProgress) => {
-			onProgress?.(progress);
-		};
-
 		const binaryPath = this.getBinaryPath();
 		const tempPath = this.getTempBinaryPath(binaryPath);
-
+		const info = this.getBinaryInfo();
+		const notify = (progress: DownloadProgress) => onProgress?.(progress);
 		try {
-			debugLog('[BinaryDownloader] 准备下载二进制:', {
-				version: this.version,
-				source: this.downloadConfig.source,
-				binaryPath,
-				tempPath,
-			});
 			notify({ stage: 'checking', percent: 0 });
-
-			// Get binary info
-			const binaryInfo = this.getBinaryInfo();
-
-			// Ensure the directory exists
-			const binariesDir = this.path.join(this.pluginDir, 'binaries');
-			if (!this.fs.existsSync(binariesDir)) {
-				this.fs.mkdirSync(binariesDir, { recursive: true });
+			// Never fall back to another release and then label it as the requested version.
+			const checksum = (await this.fetchText(info.checksumUrl)).trim().split(/\s+/)[0] ?? '';
+			if (!/^[a-fA-F0-9]{64}$/.test(checksum)) throw new TerminalBinaryError('checksumMissing');
+			const expected = checksum.toLowerCase();
+			// A user may have put the matching release binary in place after a failed download.
+			if (this.fs.existsSync(binaryPath) && await this.calculateSHA256(binaryPath) === expected) {
+				this.writeCachedVersion(binaryPath, this.version);
+				notify({ stage: 'complete', percent: 100 });
+				return;
 			}
-
-			notify({ stage: 'downloading', percent: 10 });
-
-			// Download the binary
-			this.safeUnlink(tempPath);
-
-			try {
-				await this.downloadFile(binaryInfo.url, tempPath, (percent, downloadedBytes, totalBytes) => {
-					// The download stage accounts for 10% - 80%
-					notify({
-						stage: 'downloading',
-						percent: 10 + percent * 0.7,
-						downloadedBytes,
-						totalBytes,
-					});
-				});
-			} catch (downloadError) {
-				// If the download fails, provide detailed error information
-				const errorMsg = downloadError instanceof Error ? downloadError.message : String(downloadError);
-				debugWarn('[BinaryDownloader] 下载失败:', errorMsg);
-
-				if (errorMsg.includes('404') && this.downloadConfig.source === 'github-release') {
-					debugLog('[BinaryDownloader] 指定版本不存在，尝试下载 GitHub latest...');
-					const latestBinaryInfo = this.getBinaryInfo('latest');
-
-					await this.downloadFile(latestBinaryInfo.url, tempPath, (percent, downloadedBytes, totalBytes) => {
-						notify({
-							stage: 'downloading',
-							percent: 10 + percent * 0.7,
-							downloadedBytes,
-							totalBytes,
-						});
-					});
-
-					binaryInfo.checksumUrl = latestBinaryInfo.checksumUrl;
-				} else {
-					throw downloadError;
-				}
-			}
-
+			this.fs.mkdirSync(this.path.dirname(binaryPath), { recursive: true });
+			await this.downloadFile(info.url, tempPath, (percent, downloadedBytes, totalBytes) => {
+				notify({ stage: 'downloading', percent: 10 + percent * 0.7, downloadedBytes, totalBytes });
+			});
 			notify({ stage: 'verifying', percent: 85 });
-
-			// Download and verify the checksum
-			if (binaryInfo.checksumUrl) {
-				try {
-					debugLog('[BinaryDownloader] 拉取校验和:', binaryInfo.checksumUrl);
-					const checksumContent = await this.fetchText(binaryInfo.checksumUrl);
-					const checksumToken = checksumContent.split(/\s+/)[0];
-					if (!checksumToken) {
-						throw new Error('Checksum file is empty');
-					}
-					const expectedHash = checksumToken.toLowerCase();
-
-					const actualHash = await this.calculateSHA256(tempPath);
-					debugLog('[BinaryDownloader] 校验和对比:', {
-						expectedHash,
-						actualHash,
-						file: tempPath,
-					});
-
-					if (actualHash !== expectedHash) {
-						// Delete the corrupted file
-						this.safeUnlink(tempPath);
-						throw new Error(
-							t('notices.checksumMismatch') || `校验和不匹配: 期望 ${expectedHash}, 实际 ${actualHash}`,
-						);
-					}
-
-					debugLog('[BinaryDownloader] SHA256 校验通过');
-				} catch (checksumError) {
-					// If checksum download fails, warn only and do not block usage
-					debugWarn('[BinaryDownloader] 校验和验证失败:', checksumError);
-				}
-			}
-
-			// Set executable permission (Unix)
-			if (process.platform !== 'win32') {
-				this.fs.chmodSync(tempPath, 0o755);
-			}
-
+			if (await this.calculateSHA256(tempPath) !== expected) throw new TerminalBinaryError('checksumMismatch');
+			if (process.platform !== 'win32') this.fs.chmodSync(tempPath, 0o755);
 			await this.replaceBinary(tempPath, binaryPath);
 			this.writeCachedVersion(binaryPath, this.version);
-			this.installedVersionCache = this.version;
-
 			notify({ stage: 'complete', percent: 100 });
-
-			debugLog('[BinaryDownloader] 二进制文件下载完成:', binaryPath);
 		} catch (error) {
-			this.safeUnlink(tempPath);
-			const errorMessage = error instanceof Error ? error.message : String(error);
-			errorLog('[BinaryDownloader] 下载失败:', errorMessage);
-
-			notify({
-				stage: 'error',
-				percent: 0,
-				error: errorMessage,
-			});
-
+			notify({ stage: 'error', percent: 0, error: error instanceof Error ? error.message : String(error) });
 			throw error;
+		} finally {
+			this.safeUnlink(tempPath);
 		}
 	}
 
@@ -325,17 +182,16 @@ export class BinaryDownloader {
 	 * Get binary info
 	 * Build the download URL for the current version
 	 */
-	private getBinaryInfo(releaseChannel: 'version' | 'latest' = 'version'): BinaryInfo {
+	private getBinaryInfo(): BinaryInfo {
 		const binaryInfo = resolveBinaryAssetUrls({
 			version: this.version,
 			source: this.downloadConfig.source,
-			releaseChannel,
 		});
 
 		debugLog(
 			'[BinaryDownloader] 使用二进制下载 URL:',
 			binaryInfo.url,
-			`(source: ${this.downloadConfig.source}, channel: ${releaseChannel})`,
+			`(source: ${this.downloadConfig.source})`,
 		);
 
 		return binaryInfo;
@@ -378,7 +234,7 @@ export class BinaryDownloader {
 					if (statusCode >= 300 && statusCode < 400 && redirectLocation) {
 						response.resume();
 						if (remainingRedirects <= 0) {
-							reject(new Error('下载失败: 重定向次数过多'));
+							reject(new TerminalBinaryError('redirects'));
 							return;
 						}
 						const nextUrl = new URL(redirectLocation, urlObj).toString();
@@ -394,7 +250,7 @@ export class BinaryDownloader {
 
 					if (statusCode !== 200) {
 						response.resume();
-						reject(new Error(`下载失败: HTTP ${statusCode}`));
+						reject(new TerminalBinaryError('http', { status: statusCode }));
 						return;
 					}
 
@@ -442,6 +298,7 @@ export class BinaryDownloader {
 				},
 			);
 
+			request.setTimeout(30000, () => request.destroy(new TerminalBinaryError('timeout')));
 			request.on('error', (error) => reject(error));
 		});
 	}
@@ -501,16 +358,13 @@ export class BinaryDownloader {
 	}
 
 	private getTempBinaryPath(binaryPath: string): string {
-		return `${binaryPath}.download`;
+		return `${binaryPath}.${this.crypto.randomBytes(8).toString('hex')}.download`;
 	}
 
 	private async replaceBinary(tempPath: string, destPath: string): Promise<void> {
 		const maxAttempts = 5;
 		for (let attempt = 1; attempt <= maxAttempts; attempt++) {
 			try {
-				if (this.fs.existsSync(destPath)) {
-					this.fs.unlinkSync(destPath);
-				}
 				this.fs.renameSync(tempPath, destPath);
 				return;
 			} catch (error) {
@@ -552,7 +406,7 @@ export class BinaryDownloader {
 	/**
 	 * Get text content
 	 */
-	private async fetchText(url: string): Promise<string> {
+	private async fetchText(url: string, remainingRedirects = 5): Promise<string> {
 		return new Promise((resolve, reject) => {
 			const urlObj = new URL(url);
 			const client = urlObj.protocol === 'https:' ? this.https : this.http;
@@ -577,19 +431,21 @@ export class BinaryDownloader {
 							to: nextUrl,
 							statusCode,
 						});
-						resolve(this.fetchText(nextUrl));
+						if (remainingRedirects <= 0) { reject(new TerminalBinaryError('redirects')); return; }
+						resolve(this.fetchText(nextUrl, remainingRedirects - 1));
 						return;
 					}
 
 					if (statusCode !== 200) {
 						response.resume();
-						reject(new Error(`获取文本失败: HTTP ${statusCode}`));
+						reject(new TerminalBinaryError('http', { status: statusCode }));
 						return;
 					}
 
 					let data = '';
 					response.on('data', (chunk: Buffer | string) => {
 						data += typeof chunk === 'string' ? chunk : chunk.toString('utf8');
+						if (data.length > 65536) request.destroy(new TerminalBinaryError('tooLarge'));
 					});
 
 					response.on('end', () => {
@@ -604,6 +460,7 @@ export class BinaryDownloader {
 				},
 			);
 
+			request.setTimeout(30000, () => request.destroy(new TerminalBinaryError('timeout')));
 			request.on('error', reject);
 		});
 	}

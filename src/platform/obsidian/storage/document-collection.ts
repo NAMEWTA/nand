@@ -12,6 +12,7 @@ export class MarkdownCollectionStorage<T> implements TextStorage {
 	private revision = 0;
 	private loaded = false;
 	private refs: EventRef[] = [];
+	private readonly listeners = new Set<() => void>();
 	constructor(
 		private app: App,
 		private codec: DocumentCollectionCodec<T>,
@@ -45,7 +46,9 @@ export class MarkdownCollectionStorage<T> implements TextStorage {
 			},
 		});
 		const changed = (file: { path: string }) => {
-			if (this.owns(file.path)) this.dirty.set(file.path, ++this.revision);
+			if (!this.owns(file.path)) return;
+			this.dirty.set(file.path, ++this.revision);
+			for (const listener of this.listeners) listener();
 		};
 		this.refs.push(
 			vault.on('create', changed),
@@ -56,6 +59,15 @@ export class MarkdownCollectionStorage<T> implements TextStorage {
 				changed({ path: old });
 			}),
 		);
+	}
+	subscribeInvalidation(listener: () => void): () => void {
+		this.listeners.add(listener);
+		return () => this.listeners.delete(listener);
+	}
+	/** Reconcile after Vault startup, including files missed before the file index settled. */
+	invalidateAll(): void {
+		this.loaded = false;
+		for (const path of this.documents.keys()) this.dirty.set(path, ++this.revision);
 	}
 	private owns(path: string): boolean {
 		return path.startsWith(`${this.codec.root}/`) && path.endsWith('.md');
@@ -136,6 +148,7 @@ export class MarkdownCollectionStorage<T> implements TextStorage {
 		}
 	}
 	dispose(): void {
+		this.listeners.clear();
 		for (const ref of this.refs.splice(0)) this.app.vault.offref(ref);
 	}
 }

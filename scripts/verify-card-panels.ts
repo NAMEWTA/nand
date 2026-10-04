@@ -1,3 +1,4 @@
+import { verifyOpenIssuePanels } from './verify-open-issue-panels';
 import { memoryVault } from './fixtures/memory-vault';
 import { useLayoutEffect } from 'preact/hooks';
 import {
@@ -564,6 +565,7 @@ async function main() {
 	destroyDashboardPanels(languageHost.root);
 	setLanguage('zh');
 
+	await verifyOpenIssuePanels(document);
 	console.log(
 		'Dashboard panels: editing, drag rollback, async Markdown, subscriptions, video cleanup, ledger/query state and native modal teardown passed',
 	);

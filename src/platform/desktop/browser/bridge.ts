@@ -1,6 +1,7 @@
 type Server = import('node:net').Server;
 type Socket = import('node:net').Socket;
 import { BrowserError, type BrowserAutomationPort } from '../../../core/browser/model';
+import { privateDirectory, removeBrowserRun, sweepBrowserRuns } from './runtime-files';
 import { BROWSER_CLI_SOURCE } from './cli-source';
 import type { ElectronBrowserApi } from './electron-api';
 
@@ -8,6 +9,12 @@ export class BrowserBridge {
 	private server?: Server;
 	private sockets = new Set<Socket>();
 	private disposed = false;
+	private starting?: Promise<void>;
+	private readonly process: typeof import('node:process');
+	private readonly temporary: string;
+	private readonly runtimeRoot: string;
+	private readonly artifactDirectory: string;
+	private readonly exit = () => this.dispose();
 	private readonly fs: typeof import('node:fs');
 	private readonly path: typeof import('node:path');
 	private readonly net: typeof import('node:net');
@@ -20,7 +27,7 @@ export class BrowserBridge {
 	readonly endpoint: string;
 	private readonly token: string;
 	constructor(
-		win: Window,
+		private readonly win: Window,
 		api: ElectronBrowserApi,
 		vaultId: string,
 		private readonly port: BrowserAutomationPort,
@@ -30,21 +37,37 @@ export class BrowserBridge {
 		this.net = win.require('node:net') as typeof import('node:net');
 		this.crypto = win.require('node:crypto') as typeof import('node:crypto');
 		this.buffer = (win.require('node:buffer') as typeof import('node:buffer')).Buffer;
-		const process = win.require('node:process') as typeof import('node:process');
+		const process = this.process = win.require('node:process') as typeof import('node:process');
+		if (!/^[a-z\d_-]+$/i.test(vaultId)) throw new BrowserError('browser_invalid_argument');
+		this.temporary = api.app.getPath('temp');
+		this.runtimeRoot = this.path.join(api.app.getPath('userData'), 'nand-browser', vaultId);
+		this.artifactDirectory = this.path.join(this.runtimeRoot, 'artifacts');
 		this.windows = process.platform === 'win32';
 		const runId = this.crypto.randomUUID();
-		this.directory = this.path.join(api.app.getPath('userData'), 'nand-browser', vaultId, runId);
+		this.directory = this.path.join(this.runtimeRoot, runId);
 		this.contextPath = this.path.join(this.directory, 'connection.json');
 		this.cliPath = this.path.join(this.directory, 'nand-browser.cjs');
 		this.endpoint =
 			process.platform === 'win32'
 				? `\\\\.\\pipe\\nand-browser-${runId}`
-				: this.path.join(api.app.getPath('temp'), `nand-browser-${runId}.sock`);
+				: this.path.join(this.temporary, `nand-browser-${runId}.sock`);
 		this.token = this.crypto.randomBytes(32).toString('hex');
 	}
-	async start(): Promise<void> {
+	start(): Promise<void> {
+		if (this.disposed) return Promise.reject(new BrowserError('browser_disabled'));
+		return this.starting ?? (this.starting = this.startOnce().catch(error => {
+			this.dispose();
+			throw error;
+		}));
+	}
+	private async startOnce(): Promise<void> {
+		privateDirectory(this.fs, this.path.dirname(this.runtimeRoot));
+		await sweepBrowserRuns(this.fs, this.path, this.net, this.process, this.runtimeRoot, this.temporary);
 		if (this.disposed) throw new BrowserError('browser_disabled');
-		this.fs.mkdirSync(this.directory, { recursive: true, mode: 0o700 });
+		privateDirectory(this.fs, this.directory);
+		this.fs.writeFileSync(this.path.join(this.directory, 'owner.json'), JSON.stringify({ pid: this.process.pid }), { mode: 0o600, flag: 'wx' });
+		this.win.addEventListener?.('unload', this.exit);
+		this.process.once('exit', this.exit);
 		this.fs.writeFileSync(this.cliPath, BROWSER_CLI_SOURCE, { mode: 0o600 });
 		this.fs.writeFileSync(
 			this.path.join(this.directory, 'USAGE.md'),
@@ -60,7 +83,8 @@ export class BrowserBridge {
 			});
 		});
 		if (this.disposed) {
-			this.server.close();
+			this.server.close(() => this.cleanupFiles());
+			this.cleanupFiles();
 			throw new BrowserError('browser_disabled');
 		}
 		if (!this.windows) this.fs.chmodSync(this.endpoint, 0o600);
@@ -141,7 +165,9 @@ export class BrowserBridge {
 	}
 	writeArtifact(dataUrl: string, description?: string): string[] {
 		if (!/^data:image\/png;base64,[A-Za-z\d+/=]+$/.test(dataUrl)) throw new BrowserError('browser_invalid_image');
-		const base = this.path.join(this.directory, this.crypto.randomUUID());
+		if (this.disposed) throw new BrowserError('browser_disabled');
+		privateDirectory(this.fs, this.artifactDirectory);
+		const base = this.path.join(this.artifactDirectory, this.crypto.randomUUID());
 		const png = `${base}.png`;
 		this.fs.writeFileSync(png, this.buffer.from(dataUrl.slice(dataUrl.indexOf(',') + 1), 'base64'), {
 			mode: 0o600,
@@ -152,17 +178,18 @@ export class BrowserBridge {
 		this.fs.writeFileSync(metadata, description, { mode: 0o600, flag: 'wx' });
 		return [metadata, png];
 	}
+	private cleanupFiles(): void {
+		removeBrowserRun(this.fs, this.path, this.directory, this.endpoint, this.windows);
+	}
 	dispose(): void {
 		if (this.disposed) return;
 		this.disposed = true;
+		this.win.removeEventListener?.('unload', this.exit);
+		this.process.removeListener('exit', this.exit);
 		for (const socket of this.sockets) socket.destroy();
 		this.sockets.clear();
-		this.server?.close();
-		try {
-			this.fs.unlinkSync(this.contextPath);
-		} catch {
-			/* Not started or already removed. */
-		}
-		// Preserve attachments already referenced by an agent; never recursively delete this directory.
+		this.server?.close(() => this.cleanupFiles());
+		this.cleanupFiles();
+		// Attachments have a separate lifetime and are never swept with a run.
 	}
 }

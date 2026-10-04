@@ -1,3 +1,5 @@
+import { withoutBrowserEnvironment } from '../../core/browser/environment';
+import { TerminalBinaryError, TerminalStartupError } from './errors';
 import { AgentDataClient } from './agent-data-client';
 /**
  * ServerManager - unified server manager
@@ -97,6 +99,7 @@ export class ServerManager {
 
 	/** Server restart attempt count */
 	private restartAttempts = 0;
+	private startFailureNotice: Notice | null = null;
 
 	/** Maximum server restart attempts */
 	private readonly maxRestartAttempts = 3;
@@ -177,6 +180,8 @@ export class ServerManager {
 		if (this.isShuttingDown) this.resetShutdownState();
 		if (this.port !== null && this.authenticated && this.ws?.readyState === WebSocket.OPEN) return;
 		if (this.serverStartPromise) return this.serverStartPromise;
+		this.startFailureNotice?.hide();
+		this.startFailureNotice = null;
 		const operation = this.process && this.port !== null ? this.connectWebSocket() : this.startServer();
 		this.serverStartPromise = operation;
 		try {
@@ -226,6 +231,8 @@ export class ServerManager {
 
    */
 	shutdown(): Promise<void> {
+		this.startFailureNotice?.hide();
+		this.startFailureNotice = null;
 		if (this.shutdownPromise) return this.shutdownPromise;
 		const operation = this.stopServer();
 		this.shutdownPromise = operation;
@@ -384,7 +391,7 @@ export class ServerManager {
 			this.process = this.spawn(binaryPath, ['--port', '0'], {
 				stdio: ['pipe', 'pipe', 'pipe'],
 				env: {
-					...process.env,
+					...withoutBrowserEnvironment(process.env),
 					TERM: process.env.TERM || 'xterm-256color',
 				},
 				windowsHide: true,
@@ -423,10 +430,11 @@ export class ServerManager {
 			const errorMessage = error instanceof Error ? error.message : String(error);
 			errorLog('[ServerManager] 启动服务器失败:', errorMessage);
 
-			new Notice(t('notices.serverStartFailed', { message: errorMessage }), 0);
+			this.startFailureNotice?.hide();
+			this.startFailureNotice = new Notice(t('notices.serverStartFailed', { message: errorMessage }), 6000);
 
 			this.emit('server-error', error instanceof Error ? error : new Error(errorMessage));
-			throw error;
+			throw new TerminalStartupError(error);
 		}
 	}
 
@@ -447,7 +455,7 @@ export class ServerManager {
 			if (!this.fs.existsSync(binaryPath)) {
 				throw new ServerManagerError(
 					ServerErrorCode.BINARY_NOT_FOUND,
-					'离线模式已开启，未进行版本检查与下载，请确保服务器二进制已存在',
+					new TerminalBinaryError('offlineMissing').message,
 				);
 			}
 			return 'skipped-offline';
@@ -521,7 +529,7 @@ export class ServerManager {
 			notice.hide();
 			throw new ServerManagerError(
 				ServerErrorCode.BINARY_NOT_FOUND,
-				`下载二进制文件失败: ${downloadError instanceof Error ? downloadError.message : String(downloadError)}`,
+				downloadError instanceof Error ? downloadError.message : String(downloadError),
 			);
 		} finally {
 			if (shouldRestart) {
@@ -585,7 +593,7 @@ export class ServerManager {
 				try {
 					const info = JSON.parse(match[0]) as ServerInfo;
 					if (typeof info.port === 'number' && info.port > 0) {
-						if (info.protocol !== TERMINAL_PROTOCOL) finish(new Error('Terminal protocol mismatch: rebuild or update the Rust server'));
+						if (info.protocol !== TERMINAL_PROTOCOL) finish(new TerminalBinaryError('protocol'));
 						else finish(undefined, info.port);
 					}
 				} catch {

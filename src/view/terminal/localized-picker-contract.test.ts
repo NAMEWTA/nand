@@ -23,7 +23,8 @@ function fixture() {
 		querySelectorAll() { return []; }
 	}
 	class Modal {
-		constructor(readonly app: unknown) {}
+		readonly app: unknown;
+		constructor(app: unknown) { this.app = app; }
 		onClose() {}
 	}
 	class SuggestModal extends Modal {

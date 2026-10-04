@@ -9,6 +9,8 @@ export interface HabitRow {
 }
 export interface HabitPanelProps {
 	persistence?: SaveStatusSource;
+	loading?: boolean;
+	unavailable?: boolean;
 	rows: HabitRow[];
 	toggle: (id: string) => void;
 	add: () => void;
@@ -16,11 +18,11 @@ export interface HabitPanelProps {
 	statistics: () => void;
 	backgroundSlot?: import('preact').ComponentChildren;
 }
-export function HabitPanel({ rows, toggle, add, backfill, statistics, backgroundSlot, persistence }: HabitPanelProps) {
+export function HabitPanel({ rows, toggle, add, backfill, statistics, backgroundSlot, persistence, loading = false, unavailable = false }: HabitPanelProps) {
 	const done = rows.filter((row) => row.done).length;
 	return (
 		<>
-			{persistence && <SaveStatus source={persistence} />}
+			{persistence && <SaveStatus source={persistence} showSaved={false} />}
 			<div class="dashboard-sidebar-habit-top">
 				<div class="dashboard-sidebar-habit-title">
 					<div class="dashboard-sidebar-habit-title-icon">
@@ -40,16 +42,17 @@ export function HabitPanel({ rows, toggle, add, backfill, statistics, background
 							key={item.label}
 							class="dashboard-sidebar-habit-icon-btn"
 							role="button"
+							aria-disabled={unavailable}
 							tabIndex={0}
 							aria-label={t(item.label)}
 							onClick={(e) => {
 								e.stopPropagation();
-								item.action();
+								if (!unavailable) item.action();
 							}}
 							onKeyDown={(e) => {
 								if (e.key === 'Enter' || e.key === ' ') {
 									e.preventDefault();
-									item.action();
+									if (!unavailable) item.action();
 								}
 							}}
 						>
@@ -60,7 +63,9 @@ export function HabitPanel({ rows, toggle, add, backfill, statistics, background
 				</div>
 			</div>
 			<div class="dashboard-sidebar-habit-list">
-				{rows.length === 0 ? (
+				{loading || (unavailable && rows.length === 0) ? (
+					<div class="dashboard-sidebar-habit-empty" role="status">{t(loading ? 'habit.loading' : 'habit.loadFailed')}</div>
+				) : rows.length === 0 ? (
 					<div class="dashboard-sidebar-habit-empty">{t('habit.emptyHint')}</div>
 				) : (
 					rows.map((row) => (
@@ -69,13 +74,14 @@ export function HabitPanel({ rows, toggle, add, backfill, statistics, background
 							data-habit-id={row.id}
 							class={`dashboard-sidebar-habit-item${row.done ? ' dashboard-sidebar-habit-item--done' : ''}`}
 							role="checkbox"
+							aria-disabled={unavailable}
 							aria-checked={row.done}
 							tabIndex={0}
-							onClick={() => toggle(row.id)}
+							onClick={() => { if (!unavailable) toggle(row.id); }}
 							onKeyDown={(e) => {
 								if (e.key === 'Enter' || e.key === ' ') {
 									e.preventDefault();
-									toggle(row.id);
+									if (!unavailable) toggle(row.id);
 								}
 							}}
 						>

@@ -17,7 +17,7 @@
 | 浏览历史与站点授权 | `.nand/browser/<device-id>/` |
 | 故障草稿、缓存 | `.nand/recovery/`、`.nand/cache/` |
 
-CLI 原生日志、认证及 Chromium Cookie 由对应宿主管理，不复制进 Vault。设备身份保存在 Obsidian 本机存储中；复制库不能代替设备归属设置或 CLI 登录。连接令牌仅在运行时使用。
+CLI 原生日志、认证及 Chromium Cookie 由对应宿主管理，不复制进 Vault。设备身份保存在 Obsidian 本机存储中；复制库不能代替设备归属设置或 CLI 登录。连接令牌仅在运行时使用。浏览器交付给 Agent 的截图与说明位于 Obsidian 应用配置目录 `nand-browser/<vault-id>/artifacts/`，不随运行文件清理，也不自动进入 Vault 备份；需要保留时请单独备份。
 
 ## 日常备份
 

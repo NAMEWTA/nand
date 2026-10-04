@@ -4,7 +4,7 @@
 
 网页使用 Obsidian 原生标签页，可以固定、拖动、分屏及移到新窗口。地址栏支持 `https://example.com`、`example.com` 和 `localhost:3000`；本地地址使用 HTTP，普通域名使用 HTTPS。其他文本交给搜索引擎，默认 Google，可在“浏览器”设置页修改。
 
-工具栏提供前进、后退、刷新／停止、查找、缩放、元素选择。更多菜单包含强制刷新、复制地址、系统浏览器打开、开发者工具、截图、整页截图和截图标注。`Ctrl/Cmd+L` 聚焦地址栏，`Ctrl/Cmd+F` 查找。加载失败后可以重试或在系统浏览器打开。
+工具栏提供前进、后退、刷新／停止、查找、缩放、元素选择。更多菜单包含强制刷新、复制地址、系统浏览器打开、开发者工具、截图、整页截图和截图标注。`Ctrl/Cmd+L` 聚焦地址栏，`Ctrl/Cmd+F` 打开并聚焦查找栏；Esc 关闭查找并返回网页。加载失败后可以重试或在系统浏览器打开。
 
 ## 看板快捷入口
 
@@ -35,7 +35,7 @@ Obsidian 工作区保存网页地址、标题、缩放和可恢复的滚动位�
 
 ## Agent 操作同一网页
 
-需要本机 Node.js，无需全局安装包。在 NAND 内新启动的 Agent 会继承 `NAND_BROWSER_CLI`、`NAND_BROWSER_CONTEXT`、`NAND_BROWSER_TOKEN` 和 `NAND_BROWSER_GUIDE`。受管 Obsidian 上下文技能会提示 Agent 读取浏览器调用说明。已运行的 Agent 若没有这些变量，可使用下述显式连接方式。
+需要本机 Node.js，无需全局安装包。普通 Shell 和普通终端脚本默认不继承 `NAND_BROWSER_*` 授权变量；只有由 NAND 以 Agent 身份启动的会话按需获得当前连接。在 NAND 内新启动的 Agent 会继承 `NAND_BROWSER_CLI`、`NAND_BROWSER_CONTEXT`、`NAND_BROWSER_TOKEN` 和 `NAND_BROWSER_GUIDE`。受管 Obsidian 上下文技能会提示 Agent 读取浏览器调用说明。已运行的 Agent 若没有这些变量，可使用下述显式连接方式。
 
 外部 Agent：在设置 → 浏览器点击“复制 CLI 连接”，将命令交给本机 Agent。命令列出当前 Vault 的网页；连接令牌仅在本次运行有效，通过环境变量交付，不写入连接 JSON；复制的连接命令仅供你信任的本机 Agent 使用。关闭模块或重启 Obsidian 后，应重新复制连接。
 
@@ -86,3 +86,9 @@ node $env:NAND_BROWSER_CLI screenshot --page PAGE_ID --full --output screenshot.
 站点敏感权限默认拒绝。工具栏的盾牌菜单按站点授权摄像头／麦克风、位置、通知、剪贴板读取等权限；登录弹窗使用同一分区与策略。跨来源请求不会继承主页面授权。
 
 导航默认最多等待 30 秒。关闭或取消立即结束调用方等待；无法安全继续的页面会释放原生 guest。点击重试或输入新地址可重新创建页面，旧操作不会写回新页面。
+
+## 本地运行文件与附件
+
+临时连接、CLI 和说明文件位于 Obsidian 应用配置目录的 `nand-browser/<vault-id>/<run-id>/`。停用模块、卸载插件或正常退出时清理本次运行文件；异常退出后的失效运行在下次启动桥接时回收，不影响其他 Vault 或仍活动的实例。
+
+已交付 Agent 的图片及说明保存在同一 Vault 目录下的 `artifacts/`，不会随桥接停用而删除。旧运行目录内仍被引用的附件也保留原路径。这些附件不在 Vault 内，需单独备份；确认会话不再需要后可自行清理，不要把包含附件的旧目录当作纯临时缓存递归删除。连接令牌不会写入这些文件。

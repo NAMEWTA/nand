@@ -104,7 +104,7 @@ export function PomodoroPanel({
 	const circumference = 2 * Math.PI * 33;
 	return (
 		<>
-			<SaveStatus source={service} />
+			<SaveStatus source={service} showSaved={false} />
 			<div class="dashboard-sidebar-pomodoro-top">
 				<div class="dashboard-sidebar-pomodoro-stats-hint">
 					🍅 {t('pomodoro.today')} {service.getTodayCount()}

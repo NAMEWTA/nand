@@ -7,10 +7,11 @@ export interface SaveStatusSource {
 	subscribe(listener: () => void): () => void;
 	retrySave(): Promise<void>;
 }
-export function SaveStatus({ source }: { source: SaveStatusSource }) {
+export function SaveStatus({ source, showSaved = true }: { source: SaveStatusSource; showSaved?: boolean }) {
 	const [, refresh] = useState(0);
 	useEffect(() => source.subscribe(() => refresh((n) => n + 1)), [source]);
 	const { status, error } = source.saveState;
+	if (!showSaved && status === 'saved') return null;
 	return (
 		<div class={`nand-save-status nand-save-status--${status}`} role="status" aria-live="polite" title={error}>
 			<span>{t(`storage.${status}`)}</span>

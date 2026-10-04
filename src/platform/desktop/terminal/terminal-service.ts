@@ -1,3 +1,5 @@
+import { withoutBrowserEnvironment } from '../../../core/browser/environment';
+import { TerminalStartupError } from '../../terminal-server/errors';
 import type { AgentSettings } from '../../../core/agent-launch/types';
 import { NativeHistory } from '../../obsidian/ai-vault/service';
 import { AutomationHooks } from '../agent-hooks/automation-hooks';
@@ -39,7 +41,7 @@ export class TerminalService {
 	private app: App;
 	private settings: TerminalSettings;
 	private serverManager: ServerManager;
-	private getTerminalEnvironment: () => Record<string, string>;
+	private getTerminalEnvironment: (session?: PendingTerminalSession) => Record<string, string> | Promise<Record<string, string>>;
 	private saveSettings: () => Promise<void>;
 
 	// Terminal instance registry
@@ -71,7 +73,7 @@ export class TerminalService {
 		app: App,
 		settings: TerminalSettings,
 		serverManager: ServerManager,
-		getTerminalEnvironment: () => Record<string, string> = () => ({}),
+		getTerminalEnvironment: (session?: PendingTerminalSession) => Record<string, string> | Promise<Record<string, string>> = () => ({}),
 		saveSettings: () => Promise<void> = () => Promise.resolve(),
 	) {
 		this.app = app;
@@ -207,12 +209,14 @@ export class TerminalService {
 		let created: PtySession | undefined;
 		let closeHook: (() => void) | undefined;
 		try {
-			// Ensure the server is running
+			// Do not reopen a stopped service while an asynchronous environment request finishes.
+			if (this.isShuttingDown) throw new Error('Terminal service stopped');
 			await this.serverManager.ensureServer();
 
 			debugLog('[TerminalService] 创建终端');
 
 			const pending = session ?? this.pendingSessions.shift();
+			const terminalEnvironment = await this.getTerminalEnvironment(pending);
 
 			let cwd: string | undefined;
 			let shellType = '';
@@ -223,7 +227,7 @@ export class TerminalService {
 				shellArgs = pending.shellArgs;
 				cwd = pending.cwd ?? this.getVaultPath();
 				env = {
-					...this.getTerminalEnvironment(),
+					...terminalEnvironment,
 					...pending.env,
 				};
 			} else if (this.settings.autoEnterVaultDirectory) {
@@ -243,9 +247,11 @@ export class TerminalService {
 					}
 				}
 				shellArgs = this.settings.shellArgs.length > 0 ? this.settings.shellArgs : undefined;
-				const terminalEnv = this.getTerminalEnvironment();
+				const terminalEnv = terminalEnvironment;
 				env = Object.keys(terminalEnv).length > 0 ? terminalEnv : undefined;
 			}
+
+			if (!pending?.agentId && env) env = withoutBrowserEnvironment(env);
 
 			if (pending?.agentId && !env?.NAND_HOOK_TOKEN) {
 				const hook = await this.hooks.prepare(pending.agentId, env ?? {}, (event) => {
@@ -266,6 +272,7 @@ export class TerminalService {
 				closeHook = () => hook.close();
 				env = { ...env, ...hook.env };
 			}
+			if (this.isShuttingDown) throw new Error('Terminal service stopped');
 			const terminal = new PtySession({
 				shellType,
 				shellArgs,
@@ -289,7 +296,6 @@ export class TerminalService {
 				textOpacity: this.settings.textOpacity,
 			});
 
-			if (this.isShuttingDown) throw new Error('Terminal service stopped');
 			created = terminal;
 			terminal.agentId = pending?.agentId;
 			terminal.onNativeStatusChange(() => this.emit());
@@ -321,7 +327,8 @@ export class TerminalService {
 			const errorMessage = error instanceof Error ? error.message : String(error);
 			errorLog('[TerminalService] 创建终端实例失败:', errorMessage);
 
-			new Notice(t('notices.terminal.createFailed', { message: errorMessage }), 5000);
+			if (!(error instanceof TerminalStartupError))
+				new Notice(t('notices.terminal.createFailed', { message: errorMessage }), 5000);
 
 			throw error;
 		}

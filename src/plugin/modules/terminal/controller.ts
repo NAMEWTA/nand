@@ -260,15 +260,9 @@ export class TerminalAgentController {
 	/**
 	 * Get the terminal service (lazy initialization)
 	 */
-	private browserEnvironment: Record<string, string> = {};
 	getTerminalService(): Promise<TerminalService> { return this.startup.run('service', () => this.createTerminalService()); }
 	private async createTerminalService(): Promise<TerminalService> {
 		await this.initializeAgentContextBridge();
-		this.browserEnvironment =
-			(await this.bridge.getBrowserEnvironment?.().catch((error: unknown) => {
-				console.warn('[NAND browser]', error);
-				return {};
-			})) ?? {};
 
 		if (!this._terminalService) {
 			debugLog('[TerminalAgentController] Initializing TerminalService...');
@@ -280,7 +274,11 @@ export class TerminalAgentController {
 				this.app,
 				this.settings,
 				serverManager,
-				() => ({ ...this._agentContextBridge?.getTerminalEnv(), ...this.browserEnvironment }),
+				async (session) => ({
+					...this._agentContextBridge?.getTerminalEnv(),
+					// Resolve at launch time: a restarted bridge has a new endpoint and token.
+					...(session?.agentId ? await this.bridge.getBrowserEnvironment?.() : {}),
+				}),
 				() => this.saveSettings(),
 			);
 
