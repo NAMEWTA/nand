@@ -8,24 +8,125 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: nand-reviewed-repair-publication
+  cancel-in-progress: false
+
 jobs:
-  desktop-runtime:
+  verify:
+    if: github.repository == 'NAMEWTA/nand' && github.ref == 'refs/heads/fix/open-issues-20261003'
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     steps:
-      - name: Download public test runtimes and verify release checksums
+      - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24.x
+      - name: Verify reviewed patches and apply them to the candidate branch
+        shell: bash
         run: |
-          mkdir runtime
-          cd runtime
-          curl --fail --location --retry 3 -o Obsidian.AppImage https://github.com/obsidianmd/obsidian-releases/releases/download/v1.13.7/Obsidian-1.13.7.AppImage
-          echo 'e0d8e0a611624de8c9c7dcd8a9e648279fb0a0d552faa1312b7e4f3a5fa72663  Obsidian.AppImage' | sha256sum -c -
-          curl --fail --location --retry 3 -O https://nodejs.org/dist/v24.21.0/node-v24.21.0-linux-x64.tar.xz
-          curl --fail --location --retry 3 -o node-checksums.txt https://nodejs.org/dist/v24.21.0/SHASUMS256.txt
-          grep ' node-v24.21.0-linux-x64.tar.xz$' node-checksums.txt | sha256sum -c -
-          curl --fail --location --retry 3 -O https://github.com/NAMEWTA/nand/releases/download/0.0.1-alpha1/rust-terminal-servers-linux-x64
-          curl --fail --location --retry 3 -O https://github.com/NAMEWTA/nand/releases/download/0.0.1-alpha1/rust-terminal-servers-linux-x64.sha256
-          sha256sum -c rust-terminal-servers-linux-x64.sha256
+          set -euo pipefail
+          cat <<'CHECKSUMS' | sha256sum -c -
+          087069ce7e931f446b78130de149560f13e11bc1109922ae632f4a223aa331f0  scripts/repair-candidate-01.patch
+          cad42783426c00536bd8c6cb1b49417263edfc164be94eff0b9c71ddb3377e67  scripts/repair-candidate-02.patch
+          9939b8cd47f9fa4de92634bcbe16df95acf00f4a9ec3a451b8fda96816855094  scripts/repair-candidate-03.patch
+          338f38004a16b9f82e211b285d53673feb673013d738b00b38ef93ac69a7df47  scripts/repair-candidate-04.patch
+          16e376f6db04ec40954e739450035b9fce1425050da4f5524c48e839b6598fc6  scripts/repair-candidate-05.patch
+          a2cd0bd06cbc5789eda6620347b81bacd541afd647177532c2a70e0bb6496866  scripts/repair-candidate-06.patch
+          CHECKSUMS
+          git apply --check --unidiff-zero scripts/repair-candidate-*.patch
+          git apply --index --unidiff-zero scripts/repair-candidate-*.patch
+      - run: pnpm install --frozen-lockfile
+      - name: Build the same bundle exercised in native acceptance
+        run: |
+          pnpm run build
+          echo 'd28a0b9f2d489ba0d892603304aff09a9a9df1f0f559c6a8d0cdc806fbf9440f  main.js' | sha256sum -c -
+      - run: pnpm run lint
+      - run: pnpm run test:all
+      - name: Exercise the real published download and authenticated service
+        run: node --experimental-strip-types --import ./scripts/register-ts-hooks.mjs scripts/verify-terminal-release-download.mjs
+      - name: Package only the tested source changes and regenerated bundle
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo 'd28a0b9f2d489ba0d892603304aff09a9a9df1f0f559c6a8d0cdc806fbf9440f  main.js' | sha256sum -c -
+          git add main.js
+          python - <<'PY'
+          import hashlib,json,os,pathlib,subprocess,tarfile
+          names=subprocess.check_output(['git','diff','--cached','--name-only','-z']).decode().strip('\0').split('\0')
+          assert len(names)==39
+          for name in names:
+              assert not name.startswith('/') and '..' not in pathlib.PurePosixPath(name).parts
+              assert name in ('main.js','styles.css','CHANGELOG.md') or name.startswith(('src/','docs/','scripts/','.agents/skills/dev/references/'))
+              assert 'repair-candidate' not in name and not pathlib.Path(name).is_symlink()
+          out=pathlib.Path(os.environ['RUNNER_TEMP'])/'verified-repair'
+          out.mkdir()
+          manifest={'source':os.environ['GITHUB_SHA'],'files':{name:hashlib.sha256(pathlib.Path(name).read_bytes()).hexdigest() for name in names}}
+          (out/'manifest.json').write_text(json.dumps(manifest,indent=2))
+          with tarfile.open(out/'source.tar','w') as archive:
+              for name in names: archive.add(name,arcname=name,recursive=False)
+          PY
       - uses: actions/upload-artifact@v4
         with:
-          name: repair-desktop-runtimes-${{ github.sha }}
-          path: runtime/
-          retention-days: 1
+          name: tested-repair-${{ github.sha }}
+          path: ${{ runner.temp }}/verified-repair/
+          retention-days: 3
+  publish-branch:
+    needs: verify
+    if: github.repository == 'NAMEWTA/nand' && github.ref == 'refs/heads/fix/open-issues-20261003'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ github.sha }}
+      - uses: actions/download-artifact@v4
+        with:
+          name: tested-repair-${{ github.sha }}
+          path: ${{ runner.temp }}/verified-repair
+      - name: Verify scope and restore tested files without executing project code
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import hashlib,json,os,pathlib,re,subprocess,tarfile
+          root=pathlib.Path(os.environ['RUNNER_TEMP'])/'verified-repair'
+          manifest=json.loads((root/'manifest.json').read_text())
+          assert manifest['source']==os.environ['GITHUB_SHA']
+          expected={'main.js'}
+          for patch in pathlib.Path('scripts').glob('repair-candidate-*.patch'):
+              expected.update(re.findall(r'^\+\+\+ b/(.+)$',patch.read_text(),re.M))
+          assert len(expected)==39 and set(manifest['files'])==expected
+          with tarfile.open(root/'source.tar') as archive:
+              assert len(archive.getmembers())==len(expected)
+              for item in archive.getmembers():
+                  assert item.name in expected and item.isfile() and not item.issym() and not item.islnk()
+                  name=pathlib.Path(item.name)
+                  assert not name.is_absolute() and '..' not in name.parts
+                  assert item.name in ('main.js','styles.css','CHANGELOG.md') or item.name.startswith(('src/','docs/','scripts/','.agents/skills/dev/references/'))
+                  data=archive.extractfile(item).read()
+                  assert hashlib.sha256(data).hexdigest()==manifest['files'][item.name]
+                  name.parent.mkdir(parents=True,exist_ok=True)
+                  name.write_bytes(data)
+          assert manifest['files']['main.js']=='d28a0b9f2d489ba0d892603304aff09a9a9df1f0f559c6a8d0cdc806fbf9440f'
+          subprocess.run(['git','add','--',*sorted(expected)],check=True)
+          PY
+      - name: Commit only to the unchanged repair branch; never force-push or merge main
+        env:
+          EXPECTED_HEAD: ${{ github.sha }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          branch='fix/open-issues-20261003'
+          actual=$(git ls-remote --heads origin "refs/heads/$branch" | cut -f1)
+          test "$actual" = "$EXPECTED_HEAD"
+          git diff --cached --check
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git commit -m 'Fix open issue regressions and rebuild the verified plugin'
+          git push origin "HEAD:refs/heads/$branch"
