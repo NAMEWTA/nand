@@ -1,0 +1,376 @@
+diff --git a/src/platform/obsidian/storage/document-collection.ts b/src/platform/obsidian/storage/document-collection.ts
+index 981f9af..4adc6a3 100644
+--- a/src/platform/obsidian/storage/document-collection.ts
++++ b/src/platform/obsidian/storage/document-collection.ts
+@@ -14,0 +15 @@ export class MarkdownCollectionStorage<T> implements TextStorage {
++	private readonly listeners = new Set<() => void>();
+@@ -48 +49,3 @@ export class MarkdownCollectionStorage<T> implements TextStorage {
+-			if (this.owns(file.path)) this.dirty.set(file.path, ++this.revision);
++			if (!this.owns(file.path)) return;
++			this.dirty.set(file.path, ++this.revision);
++			for (const listener of this.listeners) listener();
+@@ -59,0 +63,9 @@ export class MarkdownCollectionStorage<T> implements TextStorage {
++	subscribeInvalidation(listener: () => void): () => void {
++		this.listeners.add(listener);
++		return () => this.listeners.delete(listener);
++	}
++	/** Reconcile after Vault startup, including files missed before the file index settled. */
++	invalidateAll(): void {
++		this.loaded = false;
++		for (const path of this.documents.keys()) this.dirty.set(path, ++this.revision);
++	}
+@@ -138,0 +151 @@ export class MarkdownCollectionStorage<T> implements TextStorage {
++		this.listeners.clear();
+diff --git a/src/platform/terminal-server/binary-downloader.test.ts b/src/platform/terminal-server/binary-downloader.test.ts
+index f40a6d1..2ed60d9 100644
+--- a/src/platform/terminal-server/binary-downloader.test.ts
++++ b/src/platform/terminal-server/binary-downloader.test.ts
+@@ -128,0 +129,69 @@ test('resolveBinaryAssetUrls builds GitHub latest fallback URLs', () => {
++
++test('a single downloader rechecks negative and stale metadata caches after an external repair', () => {
++	const root = mkdtempSync(path.join(tmpdir(), 'nand-recheck-'));
++	const descriptor = Object.getOwnPropertyDescriptor(globalThis, 'window');
++	Object.defineProperty(globalThis, 'window', { value: { require: createRequire(import.meta.url) }, configurable: true });
++	try {
++		const d = new BinaryDownloader(root, '0.0.1-alpha1', { source: 'github-release' });
++		mkdirSync(path.dirname(d.getBinaryPath()), { recursive: true });
++		writeFileSync(d.getBinaryPath(), 'first');
++		assert.equal(d.binaryExists(), false);
++		const cache = path.join(root, 'binaries', '.rust-terminal-servers.version.json');
++		const metadata = () => { const { size, mtimeMs } = statSync(d.getBinaryPath()); return { version: '0.0.1-alpha1', size, mtimeMs }; };
++		writeFileSync(cache, JSON.stringify(metadata()));
++		assert.equal(d.binaryExists(), true);
++		writeFileSync(d.getBinaryPath(), 'externally replaced binary');
++		assert.equal(d.binaryExists(), false);
++		writeFileSync(cache, JSON.stringify(metadata()));
++		assert.equal(d.binaryExists(), true);
++	} finally {
++		if (descriptor) Object.defineProperty(globalThis, 'window', descriptor); else Reflect.deleteProperty(globalThis, 'window');
++		rmSync(root, { recursive: true, force: true });
++	}
++});
++
++test('downloads fail closed, preserve the old binary, retry and adopt only a checksum-matching local repair', async () => {
++	const root = mkdtempSync(path.join(tmpdir(), 'nand-download-retry-'));
++	const descriptor = Object.getOwnPropertyDescriptor(globalThis, 'window');
++	Object.defineProperty(globalThis, 'window', { value: { require: createRequire(import.meta.url) }, configurable: true });
++	try {
++		const d = new BinaryDownloader(root, '0.0.1-alpha1', { source: 'github-release' });
++		const target = d.getBinaryPath();
++		mkdirSync(path.dirname(target), { recursive: true });
++		writeFileSync(target, 'previous working binary');
++		let checksum: string | Error = new Error('checksum HTTP 404');
++		let payload: string | Error = 'new binary';
++		const urls: string[] = [];
++		const injected = d as unknown as { fetchText(url: string): Promise<string>; downloadFile(url: string, destination: string): Promise<void> };
++		injected.fetchText = async url => { urls.push(url); if (checksum instanceof Error) throw checksum; return checksum; };
++		injected.downloadFile = async (url, destination) => { urls.push(url); if (payload instanceof Error) throw payload; writeFileSync(destination, payload); };
++		const original = readFileSync(target, 'utf8');
++		await assert.rejects(d.download(), /checksum HTTP 404/);
++		assert.equal(readFileSync(target, 'utf8'), original);
++		assert.equal(urls.length, 1, 'Missing integrity data must prevent even downloading the executable');
++		checksum = 'invalid';
++		await assert.rejects(d.download());
++		assert.equal(readFileSync(target, 'utf8'), original);
++		checksum = createHash('sha256').update('expected binary').digest('hex');
++		await assert.rejects(d.download());
++		assert.equal(readFileSync(target, 'utf8'), original, 'A mismatch cannot replace a working binary');
++		payload = new Error('HTTP 404');
++		await assert.rejects(d.download(), /HTTP 404/);
++		assert.ok(urls.every(url => url.includes('/download/0.0.1-alpha1/') && !url.includes('/latest/')));
++		writeFileSync(target, 'expected binary');
++		const before = urls.length;
++		await d.download();
++		assert.equal(urls.length, before + 1, 'A manual repair only needs the trusted release checksum, not another binary download');
++		assert.equal(d.binaryExists(), true);
++		unlinkSync(target);
++		payload = 'expected binary';
++		await d.download();
++		assert.equal(readFileSync(target, 'utf8'), payload);
++		assert.equal(d.binaryExists(), true);
++		const fs = createRequire(import.meta.url)('node:fs') as typeof import('node:fs');
++		assert.ok(fs.readdirSync(path.dirname(target)).every(name => !name.endsWith('.download')));
++	} finally {
++		if (descriptor) Object.defineProperty(globalThis, 'window', descriptor); else Reflect.deleteProperty(globalThis, 'window');
++		rmSync(root, { recursive: true, force: true });
++	}
++});
+diff --git a/src/platform/terminal-server/binary-downloader.ts b/src/platform/terminal-server/binary-downloader.ts
+index ccb0b0c..6a2d236 100644
+--- a/src/platform/terminal-server/binary-downloader.ts
++++ b/src/platform/terminal-server/binary-downloader.ts
+@@ -0,0 +1 @@
++import { TerminalBinaryError } from './errors';
+@@ -12 +13 @@ import { t } from '../../shared/i18n/terminal-accessor';
+-import { debugLog, debugWarn, errorLog } from '../desktop/logger';
++import { debugLog, debugWarn } from '../desktop/logger';
+@@ -53,3 +53,0 @@ export class BinaryDownloader {
+-	/** Installed version cache (avoids repeated process invocations) */
+-	private installedVersionCache: string | null | undefined = undefined;
+-
+@@ -127,15 +125,2 @@ export class BinaryDownloader {
+-	/**
+-	 * Get the installed binary version.
+-	 *
+-	 * NAND reads the version from a JSON cache file written next to the
+-	 * native binary at install time (`<plugin>/binaries/.terminal-server.version.json`).
+-	 * The cache stores the binary's size + mtime alongside the version
+-	 * string, so an out-of-band binary swap invalidates the cache and we
+-	 * fall back to triggering a fresh download. We deliberately do NOT
+-	 * spawn the binary with `--version` to read the version: that would
+-	 * be an extra `child_process` invocation on every plugin load and
+-	 * is unnecessary because the install path always writes the cache.
+-	 *
+-	 * @param skipExecution kept for backwards compatibility; on a cache
+-	 *                      miss we now always fall back to the manifest
+-	 *                      version when this flag is set.
++	/** Recheck disk metadata on every explicit readiness check, including prior negative results.
++	 * A manual binary/cache replacement must be visible without reloading the plugin.
+@@ -143,38 +128,2 @@ export class BinaryDownloader {
+-	private getInstalledVersion(skipExecution = false): string | null {
+-		try {
+-			const binaryPath = this.getBinaryPath();
+-			if (!this.fs.existsSync(binaryPath)) {
+-				this.installedVersionCache = null;
+-				return null;
+-			}
+-
+-			if (this.installedVersionCache !== undefined) {
+-				return this.installedVersionCache;
+-			}
+-
+-			const cachedVersion = this.readCachedVersion(binaryPath);
+-			if (cachedVersion) {
+-				this.installedVersionCache = cachedVersion;
+-				return cachedVersion;
+-			}
+-
+-			// If execution is skipped, treat the binary as the manifest version.
+-			// This branch is also used when offline mode prevents fresh downloads.
+-			if (skipExecution) {
+-				debugLog('[BinaryDownloader] 跳过版本检测，使用预期版本:', this.version);
+-				this.installedVersionCache = this.version;
+-				this.writeCachedVersion(binaryPath, this.version);
+-				return this.version;
+-			}
+-
+-			// Cache miss with no override: report unknown so callers fall back
+-			// to a fresh download, which writes the cache for future loads.
+-			debugWarn('[BinaryDownloader] 找不到版本缓存文件，将触发重新下载以重建缓存:', this.getVersionCachePath());
+-			this.installedVersionCache = null;
+-			return null;
+-		} catch (error) {
+-			debugWarn('[BinaryDownloader] 获取二进制版本异常:', error);
+-		}
+-
+-		this.installedVersionCache = null;
+-		return null;
++	private getInstalledVersion(): string | null {
++		return this.readCachedVersion(this.getBinaryPath());
+@@ -198,4 +146,0 @@ export class BinaryDownloader {
+-		const notify = (progress: DownloadProgress) => {
+-			onProgress?.(progress);
+-		};
+-
+@@ -204 +149,2 @@ export class BinaryDownloader {
+-
++		const info = this.getBinaryInfo();
++		const notify = (progress: DownloadProgress) => onProgress?.(progress);
+@@ -206,6 +151,0 @@ export class BinaryDownloader {
+-			debugLog('[BinaryDownloader] 准备下载二进制:', {
+-				version: this.version,
+-				source: this.downloadConfig.source,
+-				binaryPath,
+-				tempPath,
+-			});
+@@ -213,47 +153,9 @@ export class BinaryDownloader {
+-
+-			// Get binary info
+-			const binaryInfo = this.getBinaryInfo();
+-
+-			// Ensure the directory exists
+-			const binariesDir = this.path.join(this.pluginDir, 'binaries');
+-			if (!this.fs.existsSync(binariesDir)) {
+-				this.fs.mkdirSync(binariesDir, { recursive: true });
+-			}
+-
+-			notify({ stage: 'downloading', percent: 10 });
+-
+-			// Download the binary
+-			this.safeUnlink(tempPath);
+-
+-			try {
+-				await this.downloadFile(binaryInfo.url, tempPath, (percent, downloadedBytes, totalBytes) => {
+-					// The download stage accounts for 10% - 80%
+-					notify({
+-						stage: 'downloading',
+-						percent: 10 + percent * 0.7,
+-						downloadedBytes,
+-						totalBytes,
+-					});
+-				});
+-			} catch (downloadError) {
+-				// If the download fails, provide detailed error information
+-				const errorMsg = downloadError instanceof Error ? downloadError.message : String(downloadError);
+-				debugWarn('[BinaryDownloader] 下载失败:', errorMsg);
+-
+-				if (errorMsg.includes('404') && this.downloadConfig.source === 'github-release') {
+-					debugLog('[BinaryDownloader] 指定版本不存在，尝试下载 GitHub latest...');
+-					const latestBinaryInfo = this.getBinaryInfo('latest');
+-
+-					await this.downloadFile(latestBinaryInfo.url, tempPath, (percent, downloadedBytes, totalBytes) => {
+-						notify({
+-							stage: 'downloading',
+-							percent: 10 + percent * 0.7,
+-							downloadedBytes,
+-							totalBytes,
+-						});
+-					});
+-
+-					binaryInfo.checksumUrl = latestBinaryInfo.checksumUrl;
+-				} else {
+-					throw downloadError;
+-				}
++			// Never fall back to another release and then label it as the requested version.
++			const checksum = (await this.fetchText(info.checksumUrl)).trim().split(/\s+/)[0] ?? '';
++			if (!/^[a-fA-F0-9]{64}$/.test(checksum)) throw new TerminalBinaryError('checksumMissing');
++			const expected = checksum.toLowerCase();
++			// A user may have put the matching release binary in place after a failed download.
++			if (this.fs.existsSync(binaryPath) && await this.calculateSHA256(binaryPath) === expected) {
++				this.writeCachedVersion(binaryPath, this.version);
++				notify({ stage: 'complete', percent: 100 });
++				return;
+@@ -261 +163,4 @@ export class BinaryDownloader {
+-
++			this.fs.mkdirSync(this.path.dirname(binaryPath), { recursive: true });
++			await this.downloadFile(info.url, tempPath, (percent, downloadedBytes, totalBytes) => {
++				notify({ stage: 'downloading', percent: 10 + percent * 0.7, downloadedBytes, totalBytes });
++			});
+@@ -263,39 +168,2 @@ export class BinaryDownloader {
+-
+-			// Download and verify the checksum
+-			if (binaryInfo.checksumUrl) {
+-				try {
+-					debugLog('[BinaryDownloader] 拉取校验和:', binaryInfo.checksumUrl);
+-					const checksumContent = await this.fetchText(binaryInfo.checksumUrl);
+-					const checksumToken = checksumContent.split(/\s+/)[0];
+-					if (!checksumToken) {
+-						throw new Error('Checksum file is empty');
+-					}
+-					const expectedHash = checksumToken.toLowerCase();
+-
+-					const actualHash = await this.calculateSHA256(tempPath);
+-					debugLog('[BinaryDownloader] 校验和对比:', {
+-						expectedHash,
+-						actualHash,
+-						file: tempPath,
+-					});
+-
+-					if (actualHash !== expectedHash) {
+-						// Delete the corrupted file
+-						this.safeUnlink(tempPath);
+-						throw new Error(
+-							t('notices.checksumMismatch') || `校验和不匹配: 期望 ${expectedHash}, 实际 ${actualHash}`,
+-						);
+-					}
+-
+-					debugLog('[BinaryDownloader] SHA256 校验通过');
+-				} catch (checksumError) {
+-					// If checksum download fails, warn only and do not block usage
+-					debugWarn('[BinaryDownloader] 校验和验证失败:', checksumError);
+-				}
+-			}
+-
+-			// Set executable permission (Unix)
+-			if (process.platform !== 'win32') {
+-				this.fs.chmodSync(tempPath, 0o755);
+-			}
+-
++			if (await this.calculateSHA256(tempPath) !== expected) throw new TerminalBinaryError('checksumMismatch');
++			if (process.platform !== 'win32') this.fs.chmodSync(tempPath, 0o755);
+@@ -304,2 +171,0 @@ export class BinaryDownloader {
+-			this.installedVersionCache = this.version;
+-
+@@ -307,2 +172,0 @@ export class BinaryDownloader {
+-
+-			debugLog('[BinaryDownloader] 二进制文件下载完成:', binaryPath);
+@@ -310,10 +174 @@ export class BinaryDownloader {
+-			this.safeUnlink(tempPath);
+-			const errorMessage = error instanceof Error ? error.message : String(error);
+-			errorLog('[BinaryDownloader] 下载失败:', errorMessage);
+-
+-			notify({
+-				stage: 'error',
+-				percent: 0,
+-				error: errorMessage,
+-			});
+-
++			notify({ stage: 'error', percent: 0, error: error instanceof Error ? error.message : String(error) });
+@@ -320,0 +176,2 @@ export class BinaryDownloader {
++		} finally {
++			this.safeUnlink(tempPath);
+@@ -328 +185 @@ export class BinaryDownloader {
+-	private getBinaryInfo(releaseChannel: 'version' | 'latest' = 'version'): BinaryInfo {
++	private getBinaryInfo(): BinaryInfo {
+@@ -332 +188,0 @@ export class BinaryDownloader {
+-			releaseChannel,
+@@ -338 +194 @@ export class BinaryDownloader {
+-			`(source: ${this.downloadConfig.source}, channel: ${releaseChannel})`,
++			`(source: ${this.downloadConfig.source})`,
+@@ -381 +237 @@ export class BinaryDownloader {
+-							reject(new Error('下载失败: 重定向次数过多'));
++							reject(new TerminalBinaryError('redirects'));
+@@ -397 +253 @@ export class BinaryDownloader {
+-						reject(new Error(`下载失败: HTTP ${statusCode}`));
++						reject(new TerminalBinaryError('http', { status: statusCode }));
+@@ -444,0 +301 @@ export class BinaryDownloader {
++			request.setTimeout(30000, () => request.destroy(new TerminalBinaryError('timeout')));
+@@ -504 +361 @@ export class BinaryDownloader {
+-		return `${binaryPath}.download`;
++		return `${binaryPath}.${this.crypto.randomBytes(8).toString('hex')}.download`;
+@@ -511,3 +367,0 @@ export class BinaryDownloader {
+-				if (this.fs.existsSync(destPath)) {
+-					this.fs.unlinkSync(destPath);
+-				}
+@@ -555 +409 @@ export class BinaryDownloader {
+-	private async fetchText(url: string): Promise<string> {
++	private async fetchText(url: string, remainingRedirects = 5): Promise<string> {
+@@ -580 +434,2 @@ export class BinaryDownloader {
+-						resolve(this.fetchText(nextUrl));
++						if (remainingRedirects <= 0) { reject(new TerminalBinaryError('redirects')); return; }
++						resolve(this.fetchText(nextUrl, remainingRedirects - 1));
+@@ -586 +441 @@ export class BinaryDownloader {
+-						reject(new Error(`获取文本失败: HTTP ${statusCode}`));
++						reject(new TerminalBinaryError('http', { status: statusCode }));
+@@ -592,0 +448 @@ export class BinaryDownloader {
++						if (data.length > 65536) request.destroy(new TerminalBinaryError('tooLarge'));
+@@ -606,0 +463 @@ export class BinaryDownloader {
++			request.setTimeout(30000, () => request.destroy(new TerminalBinaryError('timeout')));
+diff --git a/src/platform/terminal-server/errors.ts b/src/platform/terminal-server/errors.ts
+new file mode 100644
+index 0000000..0460442
+--- /dev/null
++++ b/src/platform/terminal-server/errors.ts
+@@ -0,0 +1,22 @@
++import { t } from '../../shared/i18n/terminal-accessor';
++
++export type BinaryFailure = 'http' | 'checksumMissing' | 'checksumMismatch' | 'redirects' | 'timeout' | 'tooLarge' | 'offlineMissing' | 'protocol';
++export class TerminalBinaryError extends Error {
++	readonly code: BinaryFailure;
++	readonly parameters: Record<string, string | number>;
++	constructor(code: BinaryFailure, parameters: Record<string, string | number> = {}) {
++		super(t(`binary.${code}`, parameters));
++		this.name = 'TerminalBinaryError';
++		this.code = code;
++		this.parameters = parameters;
++	}
++}
++/** The server manager has already displayed this error; downstream consumers must not stack notices. */
++export class TerminalStartupError extends Error {
++	readonly original: unknown;
++	constructor(original: unknown) {
++		super(original instanceof Error ? original.message : String(original));
++		this.name = 'TerminalStartupError';
++		this.original = original;
++	}
++}
