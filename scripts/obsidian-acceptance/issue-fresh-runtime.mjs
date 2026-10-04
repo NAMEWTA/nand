@@ -12,7 +12,7 @@ assert.equal(process.env.NAND_ALLOW_FRESH_ISSUE_FIXTURE, '1');
 const root = process.env.NAND_FRESH_FIXTURE_ROOT, executable = process.env.NAND_OBSIDIAN_EXECUTABLE;
 assert.ok(root && path.isAbsolute(root));assert.ok(executable && path.isAbsolute(executable));
 assert.notEqual(path.parse(root).root,root);
-await fs.mkdir(root); // EEXIST deliberately refuses every pre-existing target.
+await fs.mkdir(root);
 const vault=path.join(root,'vault'),profile=path.join(root,'profile'),evidence=path.join(root,'evidence');
 const nonce=randomBytes(16).toString('hex'),manifest=JSON.parse(await fs.readFile('manifest.json','utf8'));
 for(const p of [vault,profile,evidence,path.join(root,'home'),path.join(root,'config'),path.join(root,'runtime'),path.join(vault,'.obsidian','plugins',manifest.id),path.join(vault,'.nand','config')]) await fs.mkdir(p,{recursive:true,mode:0o700});
@@ -35,6 +35,14 @@ async function launch(){
     try{connection=await connect();break;}catch{await delay(250);}
   }
   assert.ok(connection,'Owned runtime did not expose its CDP target');
+  let ready=false;
+  while(Date.now()<deadline){
+    try { ready=await connection.evaluate(`typeof app !== 'undefined' && !!app.vault?.adapter && !!app.workspace`); } catch { ready=false; }
+    if(ready)break;
+    if(app.exitCode!==null)throw Error('Owned Obsidian exited before initializing');
+    await delay(100);
+  }
+  assert.ok(ready,'Native app object did not initialize');
   const state=await connection.evaluate(`({vault:app.vault.adapter.basePath,profile:require('@electron/remote').app.getPath('userData'),platform:process.platform,ua:navigator.userAgent})`);
   assert.equal(path.resolve(state.vault),path.resolve(vault));assert.equal(path.resolve(state.profile),path.resolve(profile));assert.equal(state.platform,process.platform);assert.ok(state.ua.includes('Obsidian/1.13.7'));
   await connection.evaluate(`(()=>{const b=[...document.querySelectorAll('button')].find(b=>b.textContent==='Trust author and enable plugins');b?.click()})()`);
