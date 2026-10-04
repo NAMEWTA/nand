@@ -1,3 +1,4 @@
+# Refresh the exact final candidate for local verification; remove this workflow before merge.
 name: Issue isolated devkit (temporary)
 on:
   push:
@@ -31,15 +32,5 @@ jobs:
         with:
           name: issue-source-devkit
           path: ${{ runner.temp }}/nand-devkit.tar.gz
-          compression-level: 0
-          retention-days: 3
-      - name: Obtain the pinned official Obsidian runtime
-        run: |
-          curl --fail --location --retry 2 'https://github.com/obsidianmd/obsidian-releases/releases/download/v1.13.7/Obsidian-1.13.7.AppImage' -o "$RUNNER_TEMP/Obsidian.AppImage"
-          printf '%s  %s\n' 'e0d8e0a611624de8c9c7dcd8a9e648279fb0a0d552faa1312b7e4f3a5fa72663' "$RUNNER_TEMP/Obsidian.AppImage" | sha256sum --check
-      - uses: actions/upload-artifact@v4
-        with:
-          name: issue-obsidian-runtime
-          path: ${{ runner.temp }}/Obsidian.AppImage
           compression-level: 0
           retention-days: 3
