@@ -1,0 +1,49 @@
+name: Repair verification
+
+on:
+  push:
+    branches: ['fix/open-issues-20261003']
+
+permissions:
+  contents: read
+
+concurrency:
+  group: repair-verification-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24.x
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Build and test the source candidate
+        shell: bash
+        run: |
+          mkdir -p repair-evidence
+          set +e
+          pnpm run build > repair-evidence/build.log 2>&1
+          build=$?
+          pnpm run lint > repair-evidence/lint.log 2>&1
+          lint=$?
+          pnpm run test:all > repair-evidence/tests.log 2>&1
+          tests=$?
+          printf 'build=%s\nlint=%s\ntests=%s\n' "$build" "$lint" "$tests" | tee repair-evidence/results.txt
+          git rev-parse HEAD > repair-evidence/source-sha.txt
+          cp main.js repair-evidence/main.js
+          sha256sum main.js > repair-evidence/main.sha256
+          test "$build" -eq 0 && test "$lint" -eq 0 && test "$tests" -eq 0
+      - name: Retain diagnostic logs and candidate bundle
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: repair-evidence-${{ github.sha }}
+          path: repair-evidence/
+          retention-days: 7
