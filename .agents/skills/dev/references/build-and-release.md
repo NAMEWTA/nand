@@ -41,7 +41,7 @@ Do not add a second entry. Do not bundle CodeMirror.
 
 `test:build-text` verifies identical `.md`/`.svg` text-loader output for LF and CRLF fixtures and normalized license banners. Production builds use `scripts/build-text-resources.mjs`; do not normalize a user's existing files. Linux and Windows CI run this check and `test:issue-regressions`, then require the rebuilt `main.js` to match the committed artifact. Rebuild and include `main.js` with source changes.
 
-`pnpm run test:all` discovers and runs every `test:*` script except itself (currently 55), including browser and reliability regressions. CI (`.github/workflows/lint.yml`) runs this aggregate, build and lint on Linux Node 22/24 and Windows Node 24. New test entries automatically enter the gate. The terminal workflow uses the MSVC target on Windows and the existing Linux/macOS matrix; Windows additionally runs real ConPTY/Job integration. There is no Obsidian runtime in CI. Name the script you ran; a passing build does not verify UI.
+`pnpm run test:all` discovers and runs every `test:*` script except itself, including browser and reliability regressions. CI (`.github/workflows/lint.yml`) runs this aggregate, build and lint on Linux Node 22/24 and Windows Node 24. New test entries automatically enter the gate. The terminal workflow uses the MSVC target on Windows and the existing Linux/macOS matrix; Windows additionally runs real ConPTY/Job integration. There is no Obsidian runtime in CI. Name the script you ran; a passing build does not verify UI.
 
 A `*.test.ts` file runs when a script names it, or when it is under one of the roots discovered by `scripts/run-terminal-tests.mjs`. `scripts/verify-*.ts` files are wired as `test:<name>`:
 
@@ -58,6 +58,7 @@ Copy the nearest script, including extra aliases such as the music stubs. Do not
 |---|---|
 | Comment composer, language subscriptions, dashboard persistence | `pnpm run test:issue-regressions` |
 | Comment anchors, the comment store, or comment panel | `pnpm run test:editor-comments` |
+| Attachment paths, timestamped names, import queue, relative links or relocation decisions | `pnpm run test:editor-attachments`; core tests do not establish Obsidian integration |
 | Automation scheduler, notification delivery, native hooks or reminder metadata | `pnpm run test:automation`; for Rust/PTTY changes also `cargo test --manifest-path processes/rust-terminal-servers/Cargo.toml` and `node scripts/verify-pty-automation.mjs` against a local release build (Linux) |
 | Promise callback handling of Obsidian controls | `pnpm run test:promise-callbacks` (run separately from lint: it creates then removes a temporary typed fixture under src) |
 | Terminal agent behavior covered by its `*.test.ts` files | `pnpm run test:terminal-agent` |
@@ -68,7 +69,7 @@ Copy the nearest script, including extra aliases such as the music stubs. Do not
 | Dashboard Preact cards, media decoder lifetime, ledger state or query refresh | `pnpm test:card-panels` (real Preact DOM: nesting/edit cancellation, drag rollback, Markdown races, shared subscriptions, video cleanup, ledger state, query refresh) |
 | A dashboard behavior that already has a verify script | the matching `test:*` in `package.json` |
 
-`test:terminal-agent` and `test:settings-nav` use:
+`test:terminal-agent`, `test:settings-nav` and `test:editor-attachments` use:
 
 ```sh
 node --experimental-strip-types --import ./scripts/register-ts-hooks.mjs --test <paths>
@@ -159,7 +160,7 @@ The archives leaf introduces Preact: `tsconfig` includes `.tsx`, JSX uses `preac
 
 ## Icons checks
 
-`test:iconic-port` bundles with `scripts/iconic-obsidian-stub.ts` and runs in UTC. Its fixed 1.1.10 fixture contains outputs produced by the original RuleManager, defaults, commands, locale values and resource hashes. Text-resource hash checks normalize only CRLF to LF, verify both checkout forms, and retain the immutable upstream hashes. It also checks isolated persistence, backup recovery, external reload and patch restoration. The oracle lives in `scripts/fixtures/iconic/upstream-1.1.10.json`; its README records provenance. Do not generate expected rule outputs from the migrated implementation. See [current verification baseline](../../../../speculo/.speculo/specdev/archive/2026-10/2026-10-01-current-baseline/README.md) for desktop checks and platform limits.
+`test:iconic-port` bundles `scripts/verify-iconic-port.ts` with esbuild and the Obsidian stub. Its fixed 1.1.10 fixture contains outputs produced by the original RuleManager, defaults, commands, locale values and resource hashes. Text-resource hash checks normalize only CRLF to LF, verify both checkout forms, and retain the immutable upstream hashes. It also checks isolated persistence, backup recovery, external reload and patch restoration. The oracle lives in `scripts/fixtures/iconic/upstream-1.1.10.json`; its README records provenance. Do not generate expected rule outputs from the migrated implementation. See [current verification baseline](../../../../speculo/.speculo/specdev/archive/2026-10/2026-10-01-current-baseline/README.md) for desktop checks and platform limits.
 
 For changes to icon settings, verify that every declaration routes persistence through the icon controller rather than a shell `control.key`. For lifecycle/CSS changes, check disabled-state cleanup and both main and floating windows; body state classes must remain on the same element as the module gate. Automated stubs do not replace those desktop checks.
 

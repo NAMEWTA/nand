@@ -1,0 +1,40 @@
+{
+  "scope": "editor-enhancements-without-ai-writing",
+  "implementationStatus": "partial-core-only-not-integrated",
+  "target": {
+    "repository": "NAMEWTA/nand",
+    "baseBranch": "main",
+    "commit": "3c44be3de7c7d7f8220be39fa3ab30853541933a"
+  },
+  "approvedPlan": {
+    "filename": "NAND_编辑器增强_完整实施计划.md",
+    "sha256": "9b4109ea2d6a1c783570cbcb035044f5904f83d6185a8c25fa685c0752a6abaf",
+    "location": "User-provided conversation attachment; not a runtime dependency"
+  },
+  "references": [
+    {
+      "repository": "Yaozhuwa/easy-typing-obsidian",
+      "commit": "2251a3bf4aa92fff6dc9dd1141420ebc17f0de67",
+      "manifestVersion": "6.0.9",
+      "scope": "typing",
+      "implementationStatus": "not-ported"
+    },
+    {
+      "repository": "PKM-er/obsidian-editing-toolbar",
+      "commit": "8d5daa32277bc84e7726168a276001de5604bc0a",
+      "manifestVersion": "4.1.5",
+      "scope": "non-AI editing features only",
+      "implementationStatus": "not-ported"
+    },
+    {
+      "repository": "platers/obsidian-linter",
+      "commit": "e07b4994503abfa49be12833fcd82cbabd9e9618",
+      "manifestVersion": "1.33.0",
+      "scope": "formatting",
+      "implementationStatus": "not-ported"
+    }
+  ],
+  "currentCodeProvenance": "Original implementation of the approved attachment policy; no upstream plugin source imported.",
+  "upstreamOracleGenerated": false,
+  "fullFeatureEnumerationComplete": false
+}
