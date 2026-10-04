@@ -38,7 +38,7 @@ Dashboard UI remains organized under `view/dashboard/<feature>`; parser/model/DQ
 
 `DashboardRenderContext` belongs to a dashboard root. Detached sections/widgets explicitly retain that context. Charts, panel roots, album timers, drag sources and scanning signatures are per workbench. Dataview actions are per rendered section. Vault indexes and widget service registrations are keyed by App. Never restore a module-global "active" opener, hover parent or service. Timers retain their originating Window; moving a dashboard rebuilds its widgets and closing it unmounts panels before clearing native DOM.
 
-Contacts, habit, expense, pomodoro and reading application services live in core and accept file/storage ports. Native adapters own Component lifecycle, Vault operations, unsaved-editor checks and focus events. Keep atomic process/write semantics and serialized entity saves.
+Contacts, habit, expense, pomodoro and reading application services live in core and accept file/storage ports. Native adapters own Component lifecycle, Vault operations, unsaved-editor checks and focus events. Keep atomic process/write semantics and serialized entity saves. Habit storage invalidations trigger coalesced refreshes; the first complete scan runs after layout readiness without blocking plugin onload. DurableState serializes reads and writes on the same storage/path queue and retains three-way merge protection.
 
 Workspace normalization lives in `core/workspace/workspace-registry.ts`; dashboard Markdown IO belongs in `platform/obsidian/dashboard`. The sync placeholder is `core/sync`.
 
@@ -114,7 +114,7 @@ The project is in pre-release development. Keep the current product namespaces c
 | Vault-local UI state | `nand.dashboard.*` via `App.loadLocalStorage` / `App.saveLocalStorage` | Includes mini-panel positions; never use global storage for new positions |
 | Electron sessions | `persist:nand-dashboard-web`, `persist:nand-dashboard-music-*` | New sessions require signing in again; do not delete previous partition directories |
 | Browser sessions/history | `persist:nand-browser-<vault-local-id>`, `.nand/browser/<device-id>/state.json` | Browser history is capped at 500 entries. Never import old dashboard Cookies automatically |
-| Browser runtime | Electron userData `nand-browser/<vault-id>/<run-id>/` | Local authenticated CLI connection, bundled Node client and Agent attachments; never put tokens or Cookies into Vault settings |
+| Browser runtime | Electron userData `nand-browser/<vault-id>/<run-id>/`; retained attachments in sibling `artifacts/` | Run-owned connection/CLI files are removed on shutdown and dead runs are swept on next bridge start. Keep referenced attachments; only Agent launches receive browser environment capabilities. Never put tokens or Cookies into Vault settings |
 | Terminal context | `NAND_CONTEXT_PATH`, `.agents/skills/nand-obsidian-context/` | Native absolute paths; only overwrite plugin-managed skill files |
 | Dashboard markdown | the user's dashboard note | Written only by `platform/obsidian/dashboard` |
 | Archive markdown | visible vault folder selected by `settings.contacts.rootFolder` | One entity folder per person/company, fixed `个人档案/<name>/基本信息.md` or `企业档案/<name>/基本信息.md` entry; stable `nand-id`, `nand-type`, named body regions and link identities. Written only by the archive controller |

@@ -41,8 +41,10 @@ export function BrowserPanel({
 	close?: () => void;
 	activate?: boolean;
 }) {
-	const mount = useRef<HTMLDivElement>(null),
+	const root = useRef<HTMLDivElement>(null),
+		mount = useRef<HTMLDivElement>(null),
 		address = useRef<HTMLInputElement>(null),
+		findInput = useRef<HTMLInputElement>(null),
 		instance = useRef<BrowserPage>();
 	const [state, setState] = useState(initial),
 		[value, setValue] = useState(initial.url === 'about:blank' ? '' : initial.url);
@@ -57,6 +59,18 @@ export function BrowserPanel({
 	const [agent, setAgent] = useState(''),
 		[, redraw] = useState(0);
 	const [suggestionIndex, setSuggestionIndex] = useState(-1);
+	const [findRequest, requestFindFocus] = useState(0);
+	const findOpen = find !== null;
+	const openFind = () => {
+		setFind((current) => current ?? '');
+		requestFindFocus((request) => request + 1);
+	};
+	// Focus once per open request, not on every keystroke. The ref belongs to this pane/window.
+	useLayoutEffect(() => {
+		if (!findOpen) return;
+		findInput.current?.focus();
+		findInput.current?.select();
+	}, [findOpen, findRequest]);
 	const [epoch, rebuild] = useState(0);
 	const changedRef = useRef(changed);
 	changedRef.current = changed;
@@ -104,9 +118,10 @@ export function BrowserPanel({
 		menu.showAtMouseEvent(event);
 	};
 	useLayoutEffect(() => {
-		const container = mount.current;
+		const container = root.current;
 		if (!container) return;
 		const handler = (e: KeyboardEvent) => {
+			if (e.isComposing) return;
 			if (e.key === 'Escape') {
 				if (design) {
 					run(() => page?.automation?.design());
@@ -115,27 +130,30 @@ export function BrowserPanel({
 				else if (find !== null) {
 					setFind(null);
 					page?.find('');
+					page?.webview.focus();
 				} else return;
 				e.preventDefault();
 				e.stopPropagation();
 			}
 			if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'l') {
 				e.preventDefault();
+				e.stopPropagation();
 				address.current?.focus();
 				address.current?.select();
 			}
 			if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'f') {
 				e.preventDefault();
-				setFind('');
+				e.stopPropagation();
+				openFind();
 			}
 		};
-		container.parentElement?.addEventListener('keydown', handler);
+		container.addEventListener('keydown', handler);
 		if (page)
 			page.shortcut = (key) => {
 				if (key === 'l') {
 					address.current?.focus();
 					address.current?.select();
-				} else if (key === 'f') setFind('');
+				} else if (key === 'f') openFind();
 				else if (key === 'Escape') {
 					run(() => page.automation?.design());
 					setDesign(false);
@@ -144,9 +162,8 @@ export function BrowserPanel({
 					page.find('');
 				}
 			};
-		const parent = container.parentElement;
 		return () => {
-			parent?.removeEventListener('keydown', handler);
+			container.removeEventListener('keydown', handler);
 			if (page) page.shortcut = undefined;
 		};
 	}, [design, grab, find, page]);
@@ -215,7 +232,7 @@ export function BrowserPanel({
 			setAgent(list[0]?.id ?? '');
 		});
 	return (
-		<div class="nand-browser-panel" data-page-id={state.id}>
+		<div ref={root} class="nand-browser-panel" data-page-id={state.id}>
 			<div class="nand-ui-toolbar nand-browser-toolbar">
 				<button type="button" class="nand-ui-icon-btn" aria-label={t('browser.permissions')} title={t('browser.permissions')} onClick={permissions}><Icon name="shield" /></button>
 				{iconButton('back', 'arrow-left', () => run(() => page?.back()), !state.canGoBack)}
@@ -310,7 +327,8 @@ export function BrowserPanel({
 					'search',
 					() => {
 						if (find !== null) page?.find('');
-						setFind(find === null ? '' : null);
+						if (find === null) openFind();
+						else { setFind(null); page?.webview.focus(); }
 					},
 					!ready,
 				)}
@@ -362,7 +380,7 @@ export function BrowserPanel({
 			{find !== null && (
 				<div class="nand-ui-toolbar nand-browser-find">
 					<input
-						autoFocus
+						ref={findInput}
 						aria-label={t('browser.find')}
 						value={find}
 						onInput={(e) => {
@@ -370,7 +388,7 @@ export function BrowserPanel({
 							page?.find(e.currentTarget.value);
 						}}
 						onKeyDown={(e) => {
-							if (e.key === 'Enter') page?.find(find, !e.shiftKey, true);
+							if (e.key === 'Enter' && !e.isComposing) page?.find(find, !e.shiftKey, true);
 						}}
 					/>
 					<span>
@@ -381,6 +399,7 @@ export function BrowserPanel({
 					{iconButton('close', 'x', () => {
 						setFind(null);
 						page?.find('');
+						page?.webview.focus();
 					})}
 				</div>
 			)}

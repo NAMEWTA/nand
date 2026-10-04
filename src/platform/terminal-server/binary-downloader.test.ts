@@ -126,3 +126,72 @@ test('resolveBinaryAssetUrls builds GitHub latest fallback URLs', () => {
 		'https://github.com/NAMEWTA/nand/releases/latest/download/rust-terminal-servers-darwin-arm64',
 	);
 });
+
+test('a single downloader rechecks negative and stale metadata caches after an external repair', () => {
+	const root = mkdtempSync(path.join(tmpdir(), 'nand-recheck-'));
+	const descriptor = Object.getOwnPropertyDescriptor(globalThis, 'window');
+	Object.defineProperty(globalThis, 'window', { value: { require: createRequire(import.meta.url) }, configurable: true });
+	try {
+		const d = new BinaryDownloader(root, '0.0.1-alpha1', { source: 'github-release' });
+		mkdirSync(path.dirname(d.getBinaryPath()), { recursive: true });
+		writeFileSync(d.getBinaryPath(), 'first');
+		assert.equal(d.binaryExists(), false);
+		const cache = path.join(root, 'binaries', '.rust-terminal-servers.version.json');
+		const metadata = () => { const { size, mtimeMs } = statSync(d.getBinaryPath()); return { version: '0.0.1-alpha1', size, mtimeMs }; };
+		writeFileSync(cache, JSON.stringify(metadata()));
+		assert.equal(d.binaryExists(), true);
+		writeFileSync(d.getBinaryPath(), 'externally replaced binary');
+		assert.equal(d.binaryExists(), false);
+		writeFileSync(cache, JSON.stringify(metadata()));
+		assert.equal(d.binaryExists(), true);
+	} finally {
+		if (descriptor) Object.defineProperty(globalThis, 'window', descriptor); else Reflect.deleteProperty(globalThis, 'window');
+		rmSync(root, { recursive: true, force: true });
+	}
+});
+
+test('downloads fail closed, preserve the old binary, retry and adopt only a checksum-matching local repair', async () => {
+	const root = mkdtempSync(path.join(tmpdir(), 'nand-download-retry-'));
+	const descriptor = Object.getOwnPropertyDescriptor(globalThis, 'window');
+	Object.defineProperty(globalThis, 'window', { value: { require: createRequire(import.meta.url) }, configurable: true });
+	try {
+		const d = new BinaryDownloader(root, '0.0.1-alpha1', { source: 'github-release' });
+		const target = d.getBinaryPath();
+		mkdirSync(path.dirname(target), { recursive: true });
+		writeFileSync(target, 'previous working binary');
+		let checksum: string | Error = new Error('checksum HTTP 404');
+		let payload: string | Error = 'new binary';
+		const urls: string[] = [];
+		const injected = d as unknown as { fetchText(url: string): Promise<string>; downloadFile(url: string, destination: string): Promise<void> };
+		injected.fetchText = async url => { urls.push(url); if (checksum instanceof Error) throw checksum; return checksum; };
+		injected.downloadFile = async (url, destination) => { urls.push(url); if (payload instanceof Error) throw payload; writeFileSync(destination, payload); };
+		const original = readFileSync(target, 'utf8');
+		await assert.rejects(d.download(), /checksum HTTP 404/);
+		assert.equal(readFileSync(target, 'utf8'), original);
+		assert.equal(urls.length, 1, 'Missing integrity data must prevent even downloading the executable');
+		checksum = 'invalid';
+		await assert.rejects(d.download());
+		assert.equal(readFileSync(target, 'utf8'), original);
+		checksum = createHash('sha256').update('expected binary').digest('hex');
+		await assert.rejects(d.download());
+		assert.equal(readFileSync(target, 'utf8'), original, 'A mismatch cannot replace a working binary');
+		payload = new Error('HTTP 404');
+		await assert.rejects(d.download(), /HTTP 404/);
+		assert.ok(urls.every(url => url.includes('/download/0.0.1-alpha1/') && !url.includes('/latest/')));
+		writeFileSync(target, 'expected binary');
+		const before = urls.length;
+		await d.download();
+		assert.equal(urls.length, before + 1, 'A manual repair only needs the trusted release checksum, not another binary download');
+		assert.equal(d.binaryExists(), true);
+		unlinkSync(target);
+		payload = 'expected binary';
+		await d.download();
+		assert.equal(readFileSync(target, 'utf8'), payload);
+		assert.equal(d.binaryExists(), true);
+		const fs = createRequire(import.meta.url)('node:fs') as typeof import('node:fs');
+		assert.ok(fs.readdirSync(path.dirname(target)).every(name => !name.endsWith('.download')));
+	} finally {
+		if (descriptor) Object.defineProperty(globalThis, 'window', descriptor); else Reflect.deleteProperty(globalThis, 'window');
+		rmSync(root, { recursive: true, force: true });
+	}
+});

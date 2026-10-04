@@ -390,3 +390,54 @@ test('10,000 ledger records update one daily document without rereading the full
 	);
 	storage.dispose();
 });
+
+test('habit cold startup rescans when layout settles and file events refresh without reopening a view', async () => {
+	const { HabitService } = await import('../src/platform/obsidian/habit/habit-service');
+	const file = 'NAND/习惯/read/习惯.md';
+	const fixture = memoryVault({ [file]: '---\nnand-id: existing\nnand-type: habit\nname: Read\ncreatedAt: 2026-10-01\n---\n' });
+	const scan = fixture.app.vault.getMarkdownFiles;
+	fixture.app.vault.getMarkdownFiles = () => [];
+	let layout!: () => void;
+	const doc = new EventTarget();
+	Object.assign(fixture.app.workspace, { onLayoutReady: (callback: () => void) => { layout = callback; }, containerEl: { ownerDocument: doc } });
+	const service = new HabitService({ app: fixture.app } as never);
+	const tick = () => new Promise<void>(resolve => setTimeout(resolve, 0));
+	try {
+		await service.load();
+		assert.equal(service.getHabits().length, 0);
+		assert.equal(service.isLoading, true, 'The incomplete first scan is not an empty-library state');
+		assert.equal(service.readyForEdits, false);
+		fixture.app.vault.getMarkdownFiles = scan;
+		layout(); await tick(); await service.flush();
+		assert.equal(service.isLoading, false);
+		assert.equal(service.readyForEdits, true);
+		assert.equal(service.getHabits()[0]?.name, 'Read');
+		await fixture.adapter.write(file, fixture.contents.get(file)!.replace('name: Read', 'name: Read daily'));
+		await tick(); await service.flush();
+		assert.equal(service.getHabits()[0]?.name, 'Read daily');
+		service.addHabit('Another'); await service.flush(); await tick();
+		assert.equal(service.getHabits().length, 2);
+		fixture.contents.delete(file); fixture.emit('delete', fixture.file(file));
+		await tick(); await service.flush();
+		assert.deepEqual(service.getHabits().map(h => h.name), ['Another']);
+	} finally { service.destroy(); await tick(); }
+});
+
+test('refresh queued during a write preserves edits made before that write completes', async () => {
+	const disk = new MemoryStorage();
+	const app = new HabitApplication(disk, 'data');
+	await app.load(); const first = app.addHabit('First')!; await app.flush();
+	const write = disk.write.bind(disk);
+	let release!: () => void, entered!: () => void;
+	const blocked = new Promise<void>(r => { release = r; });
+	const started = new Promise<void>(r => { entered = r; });
+	let once = true;
+	disk.write = async (path, text) => { if (once && path === 'data/habits.json') { once = false; entered(); await blocked; } await write(path, text); };
+	app.renameHabit(first.id, 'Renamed'); await started;
+	const sync = app.syncFromDisk();
+	app.addHabit('During write');
+	release(); await sync; await app.flush();
+	assert.deepEqual(app.getHabits().map(h => h.name), ['Renamed', 'During write']);
+	assert.deepEqual(JSON.parse(disk.files.get('data/habits.json')!).habits.map((h: { name: string }) => h.name), ['Renamed', 'During write']);
+	await app.shutdown();
+});

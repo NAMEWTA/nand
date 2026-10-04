@@ -75,18 +75,32 @@ export class DurableState<T> {
 		if (!this.loading) this.loading = this.sync();
 		return this.loading;
 	}
-	async sync(): Promise<void> {
-		await this.tail;
-		try {
+	/** Reads and writes share the same queue; a refresh cannot reset a baseline during a save. */
+	private enqueue(work: () => Promise<void>, onFailure: (error: unknown) => void | Promise<void>): Promise<void> {
+		let queue = queues.get(this.storage);
+		if (!queue) {
+			queue = new Map();
+			queues.set(this.storage, queue);
+		}
+		const settled = (queue.get(this.path) ?? Promise.resolve()).then(work).catch(onFailure);
+		queue.set(this.path, settled);
+		this.tail = settled;
+		void settled.then(() => {
+			if (queue.get(this.path) === settled) queue.delete(this.path);
+		});
+		return settled;
+	}
+	sync(): Promise<void> {
+		if (this.closed) return Promise.resolve();
+		return this.enqueue(async () => {
 			const remote = await this.read();
 			this.value = threeWayMerge(this.baseline, this.value, remote);
 			this.baseline = structuredClone(remote);
-			this.error = undefined;
-			this.state = { status: JSON.stringify(this.value) === JSON.stringify(remote) ? 'saved' : 'unsaved' };
+			const saved = JSON.stringify(this.value) === JSON.stringify(remote);
+			if (saved) this.error = undefined;
+			this.state = { status: saved ? 'saved' : 'unsaved', ...(this.error ? { error: this.error.message } : {}) };
 			this.changed();
-		} catch (error) {
-			this.failure(error);
-		}
+		}, (error) => this.failure(error));
 	}
 	save(): void {
 		if (this.closed) {
@@ -95,12 +109,7 @@ export class DurableState<T> {
 		}
 		this.state = { status: 'saving' };
 		this.changed();
-		let queue = queues.get(this.storage);
-		if (!queue) {
-			queue = new Map();
-			queues.set(this.storage, queue);
-		}
-		const operation = (queue.get(this.path) ?? Promise.resolve()).then(async () => {
+		void this.enqueue(async () => {
 			const remote = await this.read(); // A failed read/parse can never reach write().
 			const local = structuredClone(this.value);
 			const merged = threeWayMerge(this.baseline, local, remote);
@@ -112,16 +121,11 @@ export class DurableState<T> {
 			this.error = undefined;
 			this.state = { status: JSON.stringify(this.value) === JSON.stringify(merged) ? 'saved' : 'saving' };
 			this.changed();
-		});
-		const settled = operation.catch((error) => this.recover(error));
-		queue.set(this.path, settled);
-		this.tail = settled;
-		void settled.then(() => {
-			if (queue.get(this.path) === settled) queue.delete(this.path);
-		});
+		}, (error) => this.recover(error));
 	}
 	async flush(): Promise<void> {
-		await this.tail;
+		let current: Promise<void>;
+		do { current = this.tail; await current; } while (current !== this.tail);
 		if (this.error) throw this.error;
 	}
 	async retry(): Promise<void> {

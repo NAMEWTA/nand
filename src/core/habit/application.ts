@@ -42,7 +42,7 @@ export class HabitApplication {
 		this.listeners.clear();
 	}
 
-	private notify(): void {
+	protected notify(): void {
 		for (const listener of [...this.listeners]) {
 			listener();
 		}

@@ -3,6 +3,7 @@ import { onLanguageChanged, t } from '../shared/i18n/index';
 
 const ribbons: Record<string, [string, string]> = {
 	home: ['home', 'main.openHome'],
+	globe: ['globe', 'browser.open'],
 	'pen-line': ['editor', 'editor.openPanel'],
 	'contact-round': ['contacts', 'contacts.open'],
 	terminal: ['terminal', 'terminalAgent.commands.openTerminal'],

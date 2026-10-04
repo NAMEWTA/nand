@@ -1,3 +1,4 @@
+import { TerminalStartupError } from '../../platform/terminal-server/errors';
 import { bindLocalizedControl } from '../primitives/localized-dom';
 import { WebLinksAddon } from '@xterm/addon-web-links';
 import { shell, webUtils } from 'electron';
@@ -532,7 +533,8 @@ export class TerminalView extends ItemView {
 				this.initResolve = null;
 				this.initReject = null;
 			}
-			new Notice(t('notices.terminal.initFailed', { message: errorMessage }));
+			if (!(error instanceof TerminalStartupError))
+				new Notice(t('notices.terminal.initFailed', { message: errorMessage }));
 			this.leaf.detach();
 		}
 	}

@@ -1,6 +1,14 @@
 /** Terminal agent strings. Chinese and English only. */
 export const messages = {
 	en: {
+		'terminalAgent.binary.http': 'Terminal component request failed (HTTP {status}). Check the release and try again.',
+		'terminalAgent.binary.checksumMissing': 'The terminal component checksum is missing or invalid. Installation was stopped.',
+		'terminalAgent.binary.checksumMismatch': 'The terminal component checksum does not match. The previous installation was preserved.',
+		'terminalAgent.binary.redirects': 'The terminal component request exceeded the redirect limit.',
+		'terminalAgent.binary.timeout': 'The terminal component request timed out. Try again.',
+		'terminalAgent.binary.tooLarge': 'The terminal component checksum response is too large.',
+		'terminalAgent.binary.offlineMissing': 'Offline mode is enabled, but no local terminal component is installed.',
+		'terminalAgent.binary.protocol': 'The terminal component protocol is incompatible. Install the matching release.',
 		'terminalAgent.workflow.addAction': 'Add action',
 		'terminalAgent.workflow.terminalCommand': 'Terminal command',
 		'terminalAgent.workflow.terminalExample': 'For example, git status',
@@ -530,6 +538,14 @@ export const messages = {
 		'terminalAgent.menu.workflows': 'Workflows',
 	},
 	zh: {
+		'terminalAgent.binary.http': '终端组件请求失败（HTTP {status}），请检查发布版本后重试。',
+		'terminalAgent.binary.checksumMissing': '终端组件校验和缺失或无效，已停止安装。',
+		'terminalAgent.binary.checksumMismatch': '终端组件校验和不匹配，已保留原安装文件。',
+		'terminalAgent.binary.redirects': '终端组件请求超过重定向次数限制。',
+		'terminalAgent.binary.timeout': '终端组件请求超时，请重试。',
+		'terminalAgent.binary.tooLarge': '终端组件校验和响应过大。',
+		'terminalAgent.binary.offlineMissing': '已启用离线模式，但本地未安装终端组件。',
+		'terminalAgent.binary.protocol': '终端组件协议不兼容，请安装匹配的发布版本。',
 		'terminalAgent.workflow.addAction': '添加操作',
 		'terminalAgent.workflow.terminalCommand': '终端命令',
 		'terminalAgent.workflow.terminalExample': '例如 git status',

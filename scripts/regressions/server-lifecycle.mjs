@@ -9,6 +9,13 @@ const require = createRequire(path.resolve('package.json'));
 const { transform } = require('esbuild');
 const file = 'src/platform/terminal-server/server-manager.ts';
 const original = readFileSync(file, 'utf8');
+// Execute the production environment filter and shared error types, not permissive substitutes.
+const sharedSource = readFileSync('src/core/browser/environment.ts', 'utf8') + '\n' +
+	readFileSync('src/platform/terminal-server/errors.ts', 'utf8').replace(/^import[^;]+;\r?\n/gm, '');
+const sharedContext = { module: { exports: {} }, t: key => key };
+vm.runInNewContext((await transform(sharedSource, { loader: 'ts', format: 'cjs' })).code, sharedContext);
+const sharedDependencies = sharedContext.module.exports;
+
 const importsRemoved = original.replace(/^import[\s\S]*?;\r?\n/gm, '');
 const prelude = `
 const AgentDataClient=class {setWebSocket(){} destroy(){}};
@@ -95,6 +102,7 @@ function fixture() {
 		return p;
 	};
 	const ctx = {
+		...sharedDependencies,
 		crypto,
 		module: { exports: {} },
 		process: { platform: 'linux', arch: 'x64', env: {} },
@@ -134,7 +142,7 @@ function fixture() {
 		sockets.at(-1).open();
 		await tick();
 	};
-	const serviceContext = { module: { exports: {} } };
+	const serviceContext = { ...sharedDependencies, module: { exports: {} } };
 	vm.runInNewContext(serviceCode, serviceContext);
 	const service = new serviceContext.module.exports.TerminalService(
 		{
@@ -290,6 +298,29 @@ for (const event of ['close', 'timeout']) {
 	assert.equal(f.processes.length, 1);
 	assert.equal(f.manager.process, child);
 }
+// A stopped service cannot start another process, including a delayed environment request.
+{
+ const f = fixture();
+ await f.service.shutdown();
+ await assert.rejects(f.service.createTerminal(), /Terminal service stopped/);
+ assert.equal(f.processes.length, 0);
+}
+{
+ const f = fixture();
+ let release;
+ f.service.getTerminalEnvironment = () => new Promise(resolve => { release = resolve; });
+ const creation = assert.rejects(f.service.createTerminal(), /Terminal service stopped/);
+ await f.completeStart();
+ assert.equal(typeof release, 'function');
+ const stopping = f.service.shutdown();
+ await f.tick();
+ f.processes[0].emit('exit', 0, null);
+ await stopping;
+ release({});
+ await creation;
+ assert.equal(f.service.getAllTerminals().length, 0);
+ assert.equal(f.processes.length, 1);
+}
 if (process.argv.includes('--native-signal-fixture')) {
 	const f = fixture();
 	const child = spawn(
@@ -333,6 +364,6 @@ if (process.argv.includes('--native-signal-fixture')) {
 	}
 }
 console.log(
-	'Server lifecycle: 8 deterministic cases passed' +
+	'Server lifecycle: 10 deterministic cases passed' +
 		(process.argv.includes('--native-signal-fixture') ? `; native ${process.platform} process exit confirmed` : ''),
 );

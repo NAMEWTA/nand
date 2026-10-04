@@ -29,8 +29,9 @@ export function renderSidebarHabitWidget(
 			})
 		: undefined;
 	const add = async () => {
+		if (!service.readyForEdits) return;
 		const name = await showPromptDialog(app, { title: t('habit.newTitle') });
-		if (name === null) return;
+		if (name === null || !service.readyForEdits) return;
 		if (!service.addHabit(name))
 			new Notice(
 				name.trim().length === 0 || name.trim().length > HABIT_MAX_NAME_LENGTH
@@ -43,6 +44,8 @@ export function renderSidebarHabitWidget(
 			widget,
 			h(HabitPanel, {
 				persistence: service,
+				loading: service.isLoading,
+				unavailable: !service.readyForEdits,
 				rows: service.getHabits().map((habit) => ({
 					id: habit.id,
 					name: habit.name,
