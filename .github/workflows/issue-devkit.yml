@@ -1,0 +1,45 @@
+name: Issue isolated devkit (temporary)
+on:
+  push:
+    branches: [fix/open-issues-97-121]
+    paths: [.github/workflows/issue-devkit.yml]
+permissions:
+  contents: read
+jobs:
+  devkit:
+    if: github.repository == 'NAMEWTA/nand' && github.ref == 'refs/heads/fix/open-issues-97-121'
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '22.x'
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Package source and dependencies without credentials or Git configuration
+        run: |
+          mkdir -p "$RUNNER_TEMP/nand-devkit"
+          git archive HEAD | tar -x -C "$RUNNER_TEMP/nand-devkit"
+          cp -a node_modules "$RUNNER_TEMP/nand-devkit/"
+          printf '%s\n' "$GITHUB_SHA" > "$RUNNER_TEMP/nand-devkit/SOURCE_COMMIT"
+          tar -czf "$RUNNER_TEMP/nand-devkit.tar.gz" -C "$RUNNER_TEMP/nand-devkit" .
+      - uses: actions/upload-artifact@v4
+        with:
+          name: issue-source-devkit
+          path: ${{ runner.temp }}/nand-devkit.tar.gz
+          compression-level: 0
+          retention-days: 3
+      - name: Obtain the pinned official Obsidian runtime
+        run: |
+          curl --fail --location --retry 2 'https://github.com/obsidianmd/obsidian-releases/releases/download/v1.13.7/Obsidian-1.13.7.AppImage' -o "$RUNNER_TEMP/Obsidian.AppImage"
+          printf '%s  %s\n' 'e0d8e0a611624de8c9c7dcd8a9e648279fb0a0d552faa1312b7e4f3a5fa72663' "$RUNNER_TEMP/Obsidian.AppImage" | sha256sum --check
+      - uses: actions/upload-artifact@v4
+        with:
+          name: issue-obsidian-runtime
+          path: ${{ runner.temp }}/Obsidian.AppImage
+          compression-level: 0
+          retention-days: 3
