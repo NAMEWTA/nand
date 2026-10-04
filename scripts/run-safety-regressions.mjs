@@ -5,6 +5,7 @@ for (const file of [
 	'automation-session',
 	'dashboard-conflict',
 	'server-lifecycle',
+	'issue-acceptance',
 ]) {
 	const result = spawnSync(
 		process.execPath,
