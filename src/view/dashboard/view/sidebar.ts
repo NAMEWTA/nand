@@ -1,3 +1,4 @@
+import { observeDashboardPromise } from '../save-feedback';
 import { localizedAttributes, setLocalizedAttribute } from '../../primitives/localized-dom';
 import { Platform } from 'obsidian';
 import { t } from '../../../shared/i18n/index';
@@ -44,20 +45,20 @@ export function renderSidebar(
 					title: t('common.confirmDelete'),
 					message: t('common.confirmDeleteMessage'),
 				}).then((confirmed) => {
-					if (confirmed) void this.sync.removeQuickAction(index);
+					if (confirmed) void observeDashboardPromise(this.sync.removeQuickAction(index));
 				});
 			},
 			() => this.openAddActionModal(),
 			this.data.quickActionOrder,
 			(order) => {
-				void this.sync.reorderQuickActions(order);
+				void observeDashboardPromise(this.sync.reorderQuickActions(order));
 			},
 			(key) => {
 				void showConfirmDialog(this.app, {
 					title: t('common.confirmDelete'),
 					message: t('common.confirmDeleteMessage'),
 				}).then((confirmed) => {
-					if (confirmed) void this.sync.removeQuickActionByKey(key);
+					if (confirmed) void observeDashboardPromise(this.sync.removeQuickActionByKey(key));
 				});
 			},
 			this.data.hiddenPresets,
@@ -107,7 +108,7 @@ export function renderSidebar(
 	);
 
 	if (!isStackedLayout(this.plugin.settings)) {
-		const docs = getRecentDocs(this.app, this.plugin.settings.recentDocCount);
+		const docs = getRecentDocs(this.app, this.plugin.settings.recentDocCount, this.plugin.settings);
 		renderRecentDocs(scroll, docs, (path) => {
 			void this.navigateToPath(path);
 		});

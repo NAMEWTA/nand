@@ -1,3 +1,6 @@
+import { observeDashboardPromise } from '../save-feedback';
+import { DEFAULT_TASK_ARCHIVE_PATH } from '../../../core/dashboard/default-paths';
+import { guardDashboardCallbacks } from '../save-feedback';
 import { Notice, TFile } from 'obsidian';
 import { archiveCompleted, serializeTasksForNote } from '../../../core/dashboard/task-tree';
 import type {
@@ -21,7 +24,7 @@ import { showConfirmDialog } from '../ui/confirm-dialog';
 import type { DashboardView } from './dashboard-view';
 
 export function createCallbacks(this: DashboardView) {
-	return {
+	return guardDashboardCallbacks({
 		onOpenWeb: (url: string, target: 'modal' | 'tab') => {
 			void this.plugin.openBrowser?.({ url, target });
 		},
@@ -35,58 +38,58 @@ export function createCallbacks(this: DashboardView) {
 				message: t('common.confirmDeleteMessage'),
 			});
 			if (!confirmed) return;
-			void this.sync.deleteCard(cardId);
+			await observeDashboardPromise(this.sync.deleteCard(cardId));
 			new Notice(t('card.deleted'));
 		},
 		onCheckboxToggle: (cardId: string, taskPath: number[], checked: boolean) =>
-			this.sync.toggleTask(cardId, taskPath, checked),
-		onTaskAdd: (cardId: string, text: string, parentPath?: number[]) => this.sync.addTask(cardId, text, parentPath),
+			observeDashboardPromise(this.sync.toggleTask(cardId, taskPath, checked)),
+		onTaskAdd: (cardId: string, text: string, parentPath?: number[]) => observeDashboardPromise(this.sync.addTask(cardId, text, parentPath)),
 		onTaskDelete: async (cardId: string, taskPath: number[]) => {
 			const confirmed = await showConfirmDialog(this.app, {
 				title: t('common.confirmDelete'),
 				message: t('common.confirmDeleteMessage'),
 			});
 			if (!confirmed) return;
-			void this.sync.deleteTask(cardId, taskPath);
+			await observeDashboardPromise(this.sync.deleteTask(cardId, taskPath));
 		},
 		onTaskReorder: (cardId: string, fromPath: number[], toPath: number[], before: boolean) =>
-			this.sync.reorderTask(cardId, fromPath, toPath, before),
+			observeDashboardPromise(this.sync.reorderTask(cardId, fromPath, toPath, before)),
 		onTaskMoveToCard: (
 			srcCardId: string,
 			fromPath: number[],
 			destCardId: string,
 			destPath: number[],
 			mode: 'before' | 'after' | 'nest',
-		) => this.sync.moveTaskToCard(srcCardId, fromPath, destCardId, destPath, mode),
-		onTaskEdit: (cardId: string, taskPath: number[], text: string) => this.sync.editTask(cardId, taskPath, text),
-		onTaskNest: (cardId: string, taskPath: number[]) => this.sync.nestTask(cardId, taskPath),
+		) => observeDashboardPromise(this.sync.moveTaskToCard(srcCardId, fromPath, destCardId, destPath, mode)),
+		onTaskEdit: (cardId: string, taskPath: number[], text: string) => observeDashboardPromise(this.sync.editTask(cardId, taskPath, text)),
+		onTaskNest: (cardId: string, taskPath: number[]) => observeDashboardPromise(this.sync.nestTask(cardId, taskPath)),
 		onTaskNestInto: (cardId: string, srcPath: number[], destPath: number[]) =>
-			this.sync.nestTaskInto(cardId, srcPath, destPath),
-		onTaskUnnest: (cardId: string, taskPath: number[]) => this.sync.unnestTask(cardId, taskPath),
+			observeDashboardPromise(this.sync.nestTaskInto(cardId, srcPath, destPath)),
+		onTaskUnnest: (cardId: string, taskPath: number[]) => observeDashboardPromise(this.sync.unnestTask(cardId, taskPath)),
 		onTaskToggleCollapse: (cardId: string, taskPath: number[]) =>
 			this.sync.toggleCollapseTaskQuiet(cardId, taskPath),
 		onMemoUpdate: (
 			card: DashboardCard,
 			updates: Pick<DashboardCard, 'body' | 'blockquote'> &
 				Partial<Pick<DashboardCard, 'tasks' | 'docs' | 'wikiLink' | 'url' | 'type'>>,
-		) => this.sync.updateMemoCard(card.id, updates),
+		) => observeDashboardPromise(this.sync.updateMemoCard(card.id, updates)),
 		onMemoSaveAsNote: (card: DashboardCard) => this.saveMemoAsNote(card),
 		onTaskSaveToDaily: (card: DashboardCard) => this.saveTasksToDaily(card),
-		onDocAdd: (cardId: string, path: string) => this.sync.addDocToCard(cardId, path),
+		onDocAdd: (cardId: string, path: string) => observeDashboardPromise(this.sync.addDocToCard(cardId, path)),
 		onCardNewNote: (cardId: string) => {
 			void this.handleCardNewNote(cardId);
 		},
-		onDocDelete: (cardId: string, docPath: number[]) => this.sync.deleteDoc(cardId, docPath),
+		onDocDelete: (cardId: string, docPath: number[]) => observeDashboardPromise(this.sync.deleteDoc(cardId, docPath)),
 		onDocReorder: (cardId: string, fromPath: number[], toPath: number[], before: boolean) =>
-			this.sync.reorderDocs(cardId, fromPath, toPath, before),
+			observeDashboardPromise(this.sync.reorderDocs(cardId, fromPath, toPath, before)),
 		onDocMoveToCard: (
 			srcCardId: string,
 			fromPath: number[],
 			destCardId: string,
 			destPath: number[],
 			mode: 'before' | 'after' | 'nest',
-		) => this.sync.moveDocToCard(srcCardId, fromPath, destCardId, destPath, mode),
-		onDocNest: (cardId: string, docPath: number[]) => this.sync.nestDoc(cardId, docPath),
+		) => observeDashboardPromise(this.sync.moveDocToCard(srcCardId, fromPath, destCardId, destPath, mode)),
+		onDocNest: (cardId: string, docPath: number[]) => observeDashboardPromise(this.sync.nestDoc(cardId, docPath)),
 		onDocToggleCollapse: (cardId: string, docPath: number[]) => this.sync.toggleCollapseDocQuiet(cardId, docPath),
 		onCardAdd: (colName: string) => {
 			const column = this.data?.columns.find((col) => col.name === colName);
@@ -98,7 +101,7 @@ export function createCallbacks(this: DashboardView) {
 				this.openStickyCardTypeModal(colName);
 			} else if (effectiveType === 'memo' || effectiveType === 'todo') {
 				this.pendingScrollToLastCardOfColumn = colName;
-				void this.sync.addCard(colName);
+				void observeDashboardPromise(this.sync.addCard(colName));
 			} else {
 				this.openProjectSearchModal(colName);
 			}
@@ -116,7 +119,7 @@ export function createCallbacks(this: DashboardView) {
 				title: t('common.confirmDelete'),
 				message: t('common.confirmDeleteMessage'),
 			}).then((confirmed) => {
-				if (confirmed) void this.sync.removeQuickAction(index);
+				if (confirmed) void observeDashboardPromise(this.sync.removeQuickAction(index));
 			});
 		},
 		onQuickNoteCreate: (preset: QuickNotePreset) => void createNoteFromPreset(this.app, preset),
@@ -135,38 +138,38 @@ export function createCallbacks(this: DashboardView) {
 		onQuickNoteConfig: () => new QuickNoteConfigModal(this.app, this.plugin).open(),
 		onMoveCard: (cardId: string, targetCol: string, targetIdx: number) =>
 			this.handleMoveCard(cardId, targetCol, targetIdx),
-		onMemoColorChange: (card: DashboardCard, color: string) => this.sync.updateMemoColor(card.id, color),
+		onMemoColorChange: (card: DashboardCard, color: string) => observeDashboardPromise(this.sync.updateMemoColor(card.id, color)),
 		onProjectCoverChange: (card: DashboardCard, imagePath: string) =>
-			this.sync.updateProjectCover(card.id, imagePath),
-		onCardTitleEdit: (cardId: string, newTitle: string) => this.sync.updateCard(cardId, { title: newTitle }),
-		onCardWidthChange: (cardId: string, width: number) => this.sync.updateCardWidth(cardId, width),
+			observeDashboardPromise(this.sync.updateProjectCover(card.id, imagePath)),
+		onCardTitleEdit: (cardId: string, newTitle: string) => observeDashboardPromise(this.sync.updateCard(cardId, { title: newTitle })),
+		onCardWidthChange: (cardId: string, width: number) => observeDashboardPromise(this.sync.updateCardWidth(cardId, width)),
 		onCardSizeChange: (cardId: string, size: string) =>
-			this.sync.updateCardSize(cardId, size as import('../../../core/dashboard/types/index').CardSize),
+			observeDashboardPromise(this.sync.updateCardSize(cardId, size as import('../../../core/dashboard/types/index').CardSize)),
 		onCardGridChange: (cardId: string, gridCols: number, gridRows: number) =>
-			this.sync.updateCardGrid(cardId, gridCols, gridRows),
+			observeDashboardPromise(this.sync.updateCardGrid(cardId, gridCols, gridRows)),
 		onCardGridMove: (cardId: string, gridCol: number, gridRow: number) =>
-			this.sync.updateCardGridMove(cardId, gridCol, gridRow),
+			observeDashboardPromise(this.sync.updateCardGridMove(cardId, gridCol, gridRow)),
 		onFileDrop: (cardId: string, filePath: string) => this.handleFileDrop(cardId, filePath),
 		onColumnRename: (oldName: string, newName: string, columnIndex?: number) => {
-			void this.sync.renameColumn(oldName, newName, columnIndex);
+			void observeDashboardPromise(this.sync.renameColumn(oldName, newName, columnIndex));
 		},
 		onColumnDelete: (columnName: string, columnIndex?: number) => this.deleteColumn(columnName, columnIndex),
 		onColumnMove: (fromIndex: number, toIndex: number) => {
-			void this.sync.moveColumn(fromIndex, toIndex);
+			void observeDashboardPromise(this.sync.moveColumn(fromIndex, toIndex));
 		},
 		onColumnMoveBeside: (fromIndex: number, targetIndex: number, side: 'left' | 'right') => {
-			void this.sync.moveColumnBeside(fromIndex, targetIndex, side);
+			void observeDashboardPromise(this.sync.moveColumnBeside(fromIndex, targetIndex, side));
 		},
 		onColumnHeightChange: (name: string, height: number) => {
-			void this.sync.updateColumnHeight(name, height);
+			void observeDashboardPromise(this.sync.updateColumnHeight(name, height));
 		},
 		onColumnWidthChange: (name: string, widthPct: number) => {
-			void this.sync.updateColumnWidth(name, widthPct);
+			void observeDashboardPromise(this.sync.updateColumnWidth(name, widthPct));
 		},
 		onTaskReminderEdit: (cardId: string, taskPath: number[], reminder: string | undefined) =>
-			this.sync.editTaskReminder(cardId, taskPath, reminder),
+			observeDashboardPromise(this.sync.editTaskReminder(cardId, taskPath, reminder)),
 		onTaskAutomationEdit: (cardId: string, taskPath: number[]) => {
-			void this.sync
+			void observeDashboardPromise(this.sync
 				.taskAutomationSource(cardId, taskPath)
 				.then((source) => {
 					this.plugin.automationHost?.edit(
@@ -174,23 +177,23 @@ export function createCallbacks(this: DashboardView) {
 						source.title,
 					);
 				})
-				.catch((error) => new Notice(String(error)));
+				.catch((error) => new Notice(String(error))));
 		},
 		onAddFromTemplate: (columnName: string) => this.openTemplatePicker(columnName),
 		onArchiveTasks: (columnName: string) => this.archiveCompletedTasks(columnName),
 		onLibraryConfigChange: (columnName: string, config: LibraryConfig) => {
 			this.suppressNextRender = true;
-			void this.sync.updateLibraryConfig(columnName, config).then(() => {
+			void observeDashboardPromise(this.sync.updateLibraryConfig(columnName, config).then(() => {
 				this.refreshSectionInPlace(columnName);
-			});
+			}));
 		},
 		onDataviewConfigChange: (columnName: string, config: DataviewConfig) => {
 			this.suppressNextRender = true;
-			void this.sync.updateDataviewConfig(columnName, config).then(() => {
+			void observeDashboardPromise(this.sync.updateDataviewConfig(columnName, config).then(() => {
 				this.refreshSectionInPlace(columnName);
-			});
+			}));
 		},
-	};
+	});
 }
 
 export function handleFileDrop(this: DashboardView, cardId: string, filePath: string): void {
@@ -207,14 +210,14 @@ export function handleFileDrop(this: DashboardView, cardId: string, filePath: st
 	}
 	if (cardType === 'weather' || cardType === 'tracker') return;
 	if (cardType === 'task' || sectionType === 'todo') {
-		void this.sync.addTask(cardId, `[[${filePath}]]`);
+		void observeDashboardPromise(this.sync.addTask(cardId, `[[${filePath}]]`));
 	} else if (
 		sectionType === 'memo' ||
 		(sectionType === 'sticky' && (cardType === 'generic' || cardType === 'note'))
 	) {
-		void this.sync.addFileLinkToMemo(cardId, filePath);
+		void observeDashboardPromise(this.sync.addFileLinkToMemo(cardId, filePath));
 	} else {
-		void this.sync.addDocToCard(cardId, filePath);
+		void observeDashboardPromise(this.sync.addDocToCard(cardId, filePath));
 	}
 }
 
@@ -325,7 +328,7 @@ export async function archiveCompletedTasks(this: DashboardView, columnName: str
 			destFile = note;
 		} else {
 			const configured = this.plugin.settings.taskArchivePath.trim().replace(/^\/+|\/+$/g, '');
-			const fullPath = configured || '归档/已完成.md';
+			const fullPath = configured || DEFAULT_TASK_ARCHIVE_PATH;
 			const slash = fullPath.lastIndexOf('/');
 			const folder = slash >= 0 ? fullPath.slice(0, slash) : '';
 			if (folder) await ensureFolder(this.app, folder);
@@ -337,7 +340,7 @@ export async function archiveCompletedTasks(this: DashboardView, columnName: str
 		const sep = raw === '' || raw.endsWith('\n') ? '' : '\n';
 		await this.app.vault.modify(destFile, `${raw}${sep}${appendText}`);
 
-		await this.sync.archiveTasks(columnName);
+		await observeDashboardPromise(this.sync.archiveTasks(columnName));
 
 		new Notice(t('notice.archived', { count: entries.length, path: destFile.path }), 4000);
 	} catch (err) {

@@ -1,3 +1,4 @@
+import { DEFAULT_TASK_ARCHIVE_PATH } from '../../core/dashboard/default-paths';
 import { Setting, type TextComponent } from 'obsidian';
 import type { DashboardLayoutMode } from '../../core/dashboard/types/index';
 import { t } from '../../shared/i18n/index';
@@ -127,6 +128,7 @@ export function renderGeneralSettings(this: DashboardSettingTab, containerEl: HT
 	new Setting(containerEl)
 		.setName(t('settings.memoTemplate'))
 		.setDesc(t('settings.memoTemplateDesc'))
+		.then(setting => renderMemoTemplateDescription(setting.descEl))
 		.addText((text) => {
 			memoTplInput = text;
 			text.setPlaceholder('Templates/memo.md')
@@ -185,7 +187,7 @@ export function renderGeneralSettings(this: DashboardSettingTab, containerEl: HT
 			.setDesc(t('settings.taskArchivePathDesc'))
 			.addText((text) => {
 				archiveInput = text;
-				text.setPlaceholder('Archive/Done.md')
+				text.setPlaceholder(DEFAULT_TASK_ARCHIVE_PATH)
 					.setValue(this.plugin.settings.taskArchivePath)
 					.onChange(async (value) => {
 						this.plugin.settings = {
@@ -322,4 +324,13 @@ export function renderLayoutPicker(this: DashboardSettingTab, containerEl: HTMLE
 	};
 
 	for (const mode of modes) option(mode);
+}
+
+/** These are fixed Markdown property keys, not translated UI labels. */
+function renderMemoTemplateDescription(container: HTMLElement): void {
+	container.empty();
+	for (const part of t('settings.memoTemplateDesc').split(/(`[^`]+`)/g)) {
+		if (part.startsWith('`') && part.endsWith('`')) container.createEl('code', { text: part.slice(1, -1) });
+		else container.createSpan({ text: part });
+	}
 }

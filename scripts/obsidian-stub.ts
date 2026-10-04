@@ -59,6 +59,7 @@ export class Notice {
 	constructor(message: string) {
 		Notice.messages.push(message);
 	}
+	setMessage(message: string) { Notice.messages.push(message); return this; }
 	show() {}
 	hide() {}
 }

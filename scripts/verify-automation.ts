@@ -749,7 +749,7 @@ test('completed delivery is not replayed even after notification retention has t
 });
 
 test('dashboard source indexes explicit ownership, ignores old reminders and creates each run once', async () => {
-	let raw = '# Board\n\n## Column\n\n### Tasks\n\n- [ ] Parent\n  - [ ] Nested ⏰ 2026-09-27 09:00\n';
+	let raw = '# Board\n\n## Todo\n\n### Tasks\n\n- [ ] Parent\n  - [ ] Nested ⏰ 2026-09-27 09:00\n';
 	const file = { path: 'Board.md', basename: 'Board' };
 	const settings = { ...structuredClone(DEFAULT_SETTINGS), dashboardFile: 'Board', workspaceFiles: [] };
 	const app = { vault: { getFileByPath: (p: string) => p === file.path ? file : null, read: async () => raw, process: async (_: unknown, edit: (text: string) => string) => { raw = edit(raw); return raw; } }, workspace: { getLeavesOfType: () => [] } } as unknown as App;

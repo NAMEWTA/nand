@@ -118,6 +118,7 @@ export class AutomationEditor extends Modal {
 			void this.targets()
 				.then((targets) => {
 					if (generation !== this.generation) return;
+					if (!targets.length) row.setDesc(t('automation.noTaskTargets'));
 					row.addDropdown((input) => {
 						bindLocalizedOptions(input.addOption('', t('automation.select')), {['']: ['automation.select']});
 						for (const [i, target] of targets.entries()) input.addOption(String(i), target.title);

@@ -1,3 +1,4 @@
+import { observeDashboardPromise } from '../save-feedback';
 import { Notice } from 'obsidian';
 import { planDashboardUpdate, type DashboardUpdateSource } from '../../../core/dashboard/render-update';
 import type { DashboardData } from '../../../core/dashboard/types/index';
@@ -118,8 +119,8 @@ export async function onClose(this: DashboardView): Promise<void> {
 	this.readingService = null;
 	this.habitUnsubscribe?.();
 	this.habitUnsubscribe = null;
-	this.sync.destroy();
 	this.contentEl.empty();
+	await observeDashboardPromise(this.sync.close());
 }
 
 export function handleDataUpdate(this: DashboardView, data: DashboardData, source: DashboardUpdateSource): void {
@@ -168,7 +169,7 @@ export async function refresh(this: DashboardView): Promise<void> {
 /** Reload the dashboard file from disk (e.g. after a backup restore) and
  *  re-render. The sync engine re-reads and notifies, which triggers render. */
 export async function reloadFromDisk(this: DashboardView): Promise<void> {
-	await this.sync.reloadFromDisk();
+	await observeDashboardPromise(this.sync.reloadFromDisk());
 }
 
 /** Re-point this view's engine at the (already-updated) active workspace and
@@ -177,13 +178,13 @@ export async function reloadFromDisk(this: DashboardView): Promise<void> {
  *  reference must be pushed into the engine before it re-resolves the file. */
 export async function applyWorkspaceSwitch(this: DashboardView): Promise<void> {
 	this.sync.updateSettings(this.plugin.settings);
-	await this.sync.switchFile();
+	await observeDashboardPromise(this.sync.switchFile());
 }
 
 export async function addSection(this: DashboardView): Promise<void> {
 	const name = await showPromptDialog(this.app, { title: t('renderer.sectionName') });
 	if (name) {
-		void this.sync.addColumn(name);
+		void observeDashboardPromise(this.sync.addColumn(name));
 	}
 }
 
@@ -193,6 +194,6 @@ export async function toggleBannerMode(this: DashboardView): Promise<void> {
 	const data = this.sync.getData();
 	if (!data) return;
 	const nextMode = data.banner.mode === 'stats' ? 'quote' : 'stats';
-	await this.sync.updateBanner({ mode: nextMode });
+	await observeDashboardPromise(this.sync.updateBanner({ mode: nextMode }));
 	new Notice(nextMode === 'stats' ? t('main.bannerModeStats') : t('main.bannerModeQuote'));
 }

@@ -1,3 +1,4 @@
+import { DEFAULT_HIGHLIGHT_IMPORT_PATH } from '../../../core/dashboard/default-paths';
 import { setLocalizedAttribute, localizedAttributes, localizedText } from '../../primitives/localized-dom';
 import type { HoverParent } from 'obsidian';
 import { App, Platform, setIcon } from 'obsidian';
@@ -467,7 +468,7 @@ export function renderSection(
 		});
 
 		const apiKey = (settings?.wereadApiKey ?? '').trim();
-		const importPath = settings?.wereadImportPath ?? 'Weread/划线';
+		const importPath = settings?.wereadImportPath ?? DEFAULT_HIGHLIGHT_IMPORT_PATH;
 		renderWereadSection(el, column, app, apiKey, importPath, (fn) => {
 			reload = fn;
 		});

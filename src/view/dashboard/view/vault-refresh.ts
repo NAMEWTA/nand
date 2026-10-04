@@ -297,7 +297,7 @@ export function refreshRecentDocs(this: DashboardView): void {
 	if (!parent) return;
 
 	recentSection.remove();
-	const docs = getRecentDocs(this.app, this.plugin.settings.recentDocCount);
+	const docs = getRecentDocs(this.app, this.plugin.settings.recentDocCount, this.plugin.settings);
 	renderRecentDocs(parent, docs, (path) => {
 		void this.navigateToPath(path);
 	});

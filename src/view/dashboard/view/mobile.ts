@@ -1,3 +1,4 @@
+import { observeDashboardPromise } from '../save-feedback';
 import { localizedAttributes, localizedText } from '../../primitives/localized-dom';
 import { setIcon } from 'obsidian';
 import { t } from '../../../shared/i18n/index';
@@ -202,13 +203,13 @@ export function openMobileDrawer(this: DashboardView, type: 'quickActions' | 're
 							message: t('common.confirmDeleteMessage'),
 						});
 						if (!confirmed) return;
-						void this.sync.removeQuickAction(index);
+						void observeDashboardPromise(this.sync.removeQuickAction(index));
 					})();
 				},
 				() => this.openAddActionModal(),
 				this.data.quickActionOrder,
 				(order) => {
-					void this.sync.reorderQuickActions(order);
+					void observeDashboardPromise(this.sync.reorderQuickActions(order));
 				},
 				(key) => {
 					void (async () => {
@@ -217,7 +218,7 @@ export function openMobileDrawer(this: DashboardView, type: 'quickActions' | 're
 							message: t('common.confirmDeleteMessage'),
 						});
 						if (!confirmed) return;
-						void this.sync.removeQuickActionByKey(key);
+						void observeDashboardPromise(this.sync.removeQuickActionByKey(key));
 					})();
 				},
 				this.data.hiddenPresets,
@@ -228,7 +229,7 @@ export function openMobileDrawer(this: DashboardView, type: 'quickActions' | 're
 		}
 	} else {
 		content.createEl('h4', { ...localizedText('mobile.recent'), cls: 'dashboard-mobile-drawer-title' });
-		const docs = getRecentDocs(this.app, this.plugin.settings.recentDocCount);
+		const docs = getRecentDocs(this.app, this.plugin.settings.recentDocCount, this.plugin.settings);
 		renderRecentDocs(content, docs, (path) => {
 			void this.navigateToPath(path);
 		});

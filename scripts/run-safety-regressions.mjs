@@ -6,6 +6,8 @@ for (const file of [
 	'dashboard-conflict',
 	'server-lifecycle',
 	'issue-acceptance',
+	'issue-content-targets',
+	'issue-conflict-revisions',
 ]) {
 	const result = spawnSync(
 		process.execPath,

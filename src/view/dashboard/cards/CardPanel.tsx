@@ -1,3 +1,5 @@
+import { cardKind } from '../../../core/dashboard/card-kind';
+export { cardKind } from '../../../core/dashboard/card-kind';
 import { useLayoutEffect, useRef, useState } from 'preact/hooks';
 import type { CardSize } from '../../../core/dashboard/types/index';
 import { t } from '../../../shared/i18n/index';
@@ -10,13 +12,6 @@ import { TrackerPanel } from './TrackerPanel';
 import { WeatherPanel } from './WeatherPanel';
 import { WebShortcutPanel } from './WebShortcutPanel';
 import { listDrop } from './card-interactions';
-export function cardKind(section: string, type: string) {
-	return section === 'memo' || (section === 'sticky' && (type === 'generic' || type === 'note'))
-		? 'memo'
-		: type === 'task' || section === 'todo'
-			? 'task'
-			: 'project';
-}
 export function CardPanel(props: CardBodyProps & { root: HTMLElement; sectionType: string }) {
 	const { card, callbacks, app, context, root, sectionType } = props;
 	const widget = card.type === 'weather' || card.type === 'tracker';

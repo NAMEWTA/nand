@@ -6,10 +6,12 @@ export function generateDefaultMarkdown(): string {
 	const today = new Date();
 	const memoName = t('renderer.typeMemo');
 	const todoName = t('renderer.typeTodo');
+	const projectsName = t('default.projectsName');
+	const libraryName = t('default.libraryName');
 	const dateStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
 
 	return serialize({
-		banner: DEFAULT_BANNER,
+		banner: { ...DEFAULT_BANNER, images: [...(DEFAULT_BANNER.images ?? [])], quote: t('default.bannerQuote'), author: 'NAND' },
 		quickActions: [],
 		columns: [
 			{
@@ -152,7 +154,7 @@ export function generateDefaultMarkdown(): string {
 				],
 			},
 			{
-				name: 'Projects',
+				name: projectsName,
 				color: '#10b981',
 				sectionType: 'projects',
 				cards: [
@@ -160,7 +162,7 @@ export function generateDefaultMarkdown(): string {
 						id: 'demo-project-1',
 						title: t('default.projectTitle'),
 						type: 'project',
-						column: 'Projects',
+						column: projectsName,
 						body: '',
 						tasks: [],
 						docs: [],
@@ -182,15 +184,15 @@ export function generateDefaultMarkdown(): string {
 				],
 			},
 			{
-				name: 'Library',
+				name: libraryName,
 				color: '#8b5cf6',
 				sectionType: 'projects',
 				cards: [
 					{
 						id: 'demo-lib-reading',
-						title: 'Reading',
+						title: t('default.reading'),
 						type: 'project',
-						column: 'Library',
+						column: libraryName,
 						body: '',
 						tasks: [],
 						docs: [],
@@ -211,9 +213,9 @@ export function generateDefaultMarkdown(): string {
 					},
 					{
 						id: 'demo-lib-toread',
-						title: 'To Read',
+						title: t('default.toRead'),
 						type: 'project',
-						column: 'Library',
+						column: libraryName,
 						body: '',
 						tasks: [],
 						docs: [],
@@ -234,9 +236,9 @@ export function generateDefaultMarkdown(): string {
 					},
 					{
 						id: 'demo-lib-done',
-						title: 'Done',
+						title: t('default.done'),
 						type: 'project',
-						column: 'Library',
+						column: libraryName,
 						body: '',
 						tasks: [],
 						docs: [],
