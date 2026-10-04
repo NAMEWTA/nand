@@ -41,7 +41,7 @@ Do not add a second entry. Do not bundle CodeMirror.
 
 `test:build-text` verifies identical `.md`/`.svg` text-loader output for LF and CRLF fixtures and normalized license banners. Production builds use `scripts/build-text-resources.mjs`; do not normalize a user's existing files. Linux and Windows CI run this check and `test:issue-regressions`, then require the rebuilt `main.js` to match the committed artifact. Rebuild and include `main.js` with source changes.
 
-`pnpm run test:all` discovers and runs every `test:*` script except itself (currently 55), including browser and reliability regressions. CI (`.github/workflows/lint.yml`) runs this aggregate, build and lint on Linux Node 22/24 and Windows Node 24. New test entries automatically enter the gate. The terminal workflow uses the MSVC target on Windows and the existing Linux/macOS matrix; Windows additionally runs real ConPTY/Job integration. There is no Obsidian runtime in CI. Name the script you ran; a passing build does not verify UI.
+`pnpm run test:all` discovers and runs every `test:*` script except itself, including browser and reliability regressions. CI (`.github/workflows/lint.yml`) runs this aggregate, build and lint on Linux Node 22/24 and Windows Node 24. New test entries automatically enter the gate. The terminal workflow uses the MSVC target on Windows and the existing Linux/macOS matrix; Windows additionally runs real ConPTY/Job integration. There is no Obsidian runtime in CI. Name the script you ran; a passing build does not verify UI.
 
 A `*.test.ts` file runs when a script names it, or when it is under one of the roots discovered by `scripts/run-terminal-tests.mjs`. `scripts/verify-*.ts` files are wired as `test:<name>`:
 
@@ -58,6 +58,7 @@ Copy the nearest script, including extra aliases such as the music stubs. Do not
 |---|---|
 | Comment composer, language subscriptions, dashboard persistence | `pnpm run test:issue-regressions` |
 | Comment anchors, the comment store, or comment panel | `pnpm run test:editor-comments` |
+| Attachment paths, timestamped names, import queue, relative links or relocation decisions | `pnpm run test:editor-attachments`; core tests do not establish Obsidian integration |
 | Automation scheduler, notification delivery, native hooks or reminder metadata | `pnpm run test:automation`; for Rust/PTTY changes also `cargo test --manifest-path processes/rust-terminal-servers/Cargo.toml` and `node scripts/verify-pty-automation.mjs` against a local release build (Linux) |
 | Promise callback handling of Obsidian controls | `pnpm run test:promise-callbacks` (run separately from lint: it creates then removes a temporary typed fixture under src) |
 | Terminal agent behavior covered by its `*.test.ts` files | `pnpm run test:terminal-agent` |
@@ -68,7 +69,7 @@ Copy the nearest script, including extra aliases such as the music stubs. Do not
 | Dashboard Preact cards, media decoder lifetime, ledger state or query refresh | `pnpm test:card-panels` (real Preact DOM: nesting/edit cancellation, drag rollback, Markdown races, shared subscriptions, video cleanup, ledger state, query refresh) |
 | A dashboard behavior that already has a verify script | the matching `test:*` in `package.json` |
 
-`test:terminal-agent` and `test:settings-nav` use:
+`test:terminal-agent`, `test:settings-nav` and `test:editor-attachments` use:
 
 ```sh
 node --experimental-strip-types --import ./scripts/register-ts-hooks.mjs --test <paths>
