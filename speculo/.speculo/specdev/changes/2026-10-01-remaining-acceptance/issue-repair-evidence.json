@@ -1,0 +1,50 @@
+{
+  "recordedAt": "2026-10-04",
+  "baseCommit": "3cf0c32c78b1eadfdd51cee306246d111dbbe4a3",
+  "planSha256": "0a17d88130baea8a0abf9b058d491e62bd845e5f82c59cd26d26ba04c4789e0a",
+  "openIssues": [
+    97,
+    98,
+    99,
+    106,
+    107,
+    109,
+    110,
+    111,
+    112
+  ],
+  "baselineCI": {
+    "url": "https://github.com/NAMEWTA/nand/actions/runs/37190060655",
+    "head": "3cf0c32c78b1eadfdd51cee306246d111dbbe4a3",
+    "conclusion": "success",
+    "reviewedLogJob": 111400186045,
+    "testScripts": 56,
+    "failedScripts": 0,
+    "lintErrors": 0,
+    "lintWarnings": 150,
+    "isCandidateCI": false
+  },
+  "localVerification": {
+    "node": "22.16.0",
+    "platform": "linux",
+    "command": "node --test scripts/regressions/issue-acceptance.mjs",
+    "tests": 40,
+    "passed": 40,
+    "failed": 0,
+    "skipped": 0,
+    "scope": "Acceptance helper contracts, actual local system shell and local endpoint; not Obsidian or PTY integration."
+  },
+  "candidateCI": "See final-head run linked in the PR; not preclaimed in this record.",
+  "nativeRuns": [],
+  "independentAppRestarts": 0,
+  "release": null,
+  "issuesClosed": [],
+  "files": {
+    "scripts/obsidian-acceptance/issue-fixture.mjs": "53dd2bdca95a423c3a6a80f78c9a7296c46f92e92a53265ad8c81d68899e9e93",
+    "scripts/obsidian-acceptance/issue-seed.mjs": "774cb0cfa56e05bf6cffa6e521509eba5f6921ea7b3d088c1dfe661195c8aa8c",
+    "scripts/obsidian-acceptance/issue-startup.mjs": "6300610ca2006db8a2a92ad3c8f117619e8d5d75503c8b711c55034b14f54fb2",
+    "scripts/obsidian-acceptance/terminal-repair.mjs": "c5840903b0faba6654aac4bc63a4f3433a8c98b7173b0f90873c22332c887408",
+    "scripts/regressions/issue-acceptance.mjs": "9c93c15cd1c6e3c984db7510a198465803868b7132831d2e61f0eb5a5af02786",
+    "scripts/run-safety-regressions.mjs": "69ccfae7760668feec6a2979c2efaa07771895f59507c440dc1368b0e0fa8d5b"
+  }
+}
