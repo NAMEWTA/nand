@@ -2,17 +2,6 @@
   "recordedAt": "2026-10-04",
   "baseCommit": "3cf0c32c78b1eadfdd51cee306246d111dbbe4a3",
   "planSha256": "0a17d88130baea8a0abf9b058d491e62bd845e5f82c59cd26d26ba04c4789e0a",
-  "openIssues": [
-    97,
-    98,
-    99,
-    106,
-    107,
-    109,
-    110,
-    111,
-    112
-  ],
   "baselineCI": {
     "url": "https://github.com/NAMEWTA/nand/actions/runs/37190060655",
     "head": "3cf0c32c78b1eadfdd51cee306246d111dbbe4a3",
@@ -28,8 +17,8 @@
     "node": "22.16.0",
     "platform": "linux",
     "command": "node --test scripts/regressions/issue-acceptance.mjs",
-    "tests": 40,
-    "passed": 40,
+    "tests": 41,
+    "passed": 41,
     "failed": 0,
     "skipped": 0,
     "scope": "Acceptance helper contracts, actual local system shell and local endpoint; not Obsidian or PTY integration."
@@ -38,13 +27,34 @@
   "nativeRuns": [],
   "independentAppRestarts": 0,
   "release": null,
-  "issuesClosed": [],
   "files": {
-    "scripts/obsidian-acceptance/issue-fixture.mjs": "53dd2bdca95a423c3a6a80f78c9a7296c46f92e92a53265ad8c81d68899e9e93",
+    "scripts/obsidian-acceptance/issue-fixture.mjs": "eb088757ad4f6ac142051b3d1940a8c9102716b871cf8e489b7983a9b7e1731c",
     "scripts/obsidian-acceptance/issue-seed.mjs": "774cb0cfa56e05bf6cffa6e521509eba5f6921ea7b3d088c1dfe661195c8aa8c",
     "scripts/obsidian-acceptance/issue-startup.mjs": "6300610ca2006db8a2a92ad3c8f117619e8d5d75503c8b711c55034b14f54fb2",
     "scripts/obsidian-acceptance/terminal-repair.mjs": "c5840903b0faba6654aac4bc63a4f3433a8c98b7173b0f90873c22332c887408",
-    "scripts/regressions/issue-acceptance.mjs": "9c93c15cd1c6e3c984db7510a198465803868b7132831d2e61f0eb5a5af02786",
+    "scripts/regressions/issue-acceptance.mjs": "c58fa12020fc75216b88c3e342591fb452b25b54cefed72600141eadf5993b19",
     "scripts/run-safety-regressions.mjs": "69ccfae7760668feec6a2979c2efaa07771895f59507c440dc1368b0e0fa8d5b"
-  }
+  },
+  "approvedPlanIssues": [97, 98, 99, 106, 107, 109, 110, 111, 112],
+  "currentOpenIssues": [97, 98, 99, 117, 118, 119, 120, 121],
+  "independentlyClosedPlanIssues": [106, 107, 109, 110, 111, 112],
+  "newIssuesOutsideApprovedPlan": [117, 118, 119, 120, 121],
+  "issuesClosedByThisRun": [],
+  "initialCandidateCI": {
+    "head": "b2b3a1d7e4106e77fd93aa94507b88c66937e94d",
+    "url": "https://github.com/NAMEWTA/nand/actions/runs/37197589354",
+    "linux22": "success",
+    "linux24": "success",
+    "windows24": "failure",
+    "newContracts": { "passed": 34, "failed": 6, "skipped": 0 },
+    "cause": "Canonical root compared to lexical candidate spelling; corrected with regression, final HEAD CI reported separately."
+  },
+  "externalVerificationComments": [
+    "https://github.com/NAMEWTA/nand/issues/106#issuecomment-5978458660",
+    "https://github.com/NAMEWTA/nand/issues/107#issuecomment-5978459374",
+    "https://github.com/NAMEWTA/nand/issues/109#issuecomment-5978460063",
+    "https://github.com/NAMEWTA/nand/issues/110#issuecomment-5978460704",
+    "https://github.com/NAMEWTA/nand/issues/111#issuecomment-5978461377",
+    "https://github.com/NAMEWTA/nand/issues/112#issuecomment-5978462034"
+  ]
 }

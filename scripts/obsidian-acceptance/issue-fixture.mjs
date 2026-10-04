@@ -41,9 +41,11 @@ export const ISSUE_RUNTIME = `(async()=>{
 })()`;
 
 export async function assertInside(root, candidate) {
-	const realRoot = await fs.realpath(root);
+	// Compute containment in one spelling before using a canonical root for IO.
+	// Windows TEMP can contain an 8.3 alias while realpath(root) expands it.
 	const resolved = path.resolve(candidate);
-	const relative = path.relative(realRoot, resolved);
+	const relative = path.relative(path.resolve(root), resolved);
+	const realRoot = await fs.realpath(root);
 	assert.ok(relative && !relative.startsWith(`..${path.sep}`) && relative !== '..' && !path.isAbsolute(relative), 'Target must be inside the authorized directory');
 	let current = realRoot;
 	for (const part of relative.split(path.sep)) {

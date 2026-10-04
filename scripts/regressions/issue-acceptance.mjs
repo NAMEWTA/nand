@@ -106,6 +106,18 @@ test('targets cannot be the root, siblings, or outside the authorized tree', asy
 	for (const target of [f.pluginDir, `${f.pluginDir}-other/file`, path.join(f.pluginDir, '..', 'other', 'file')]) await assert.rejects(assertInside(f.pluginDir, target));
 	assert.equal(await assertInside(f.pluginDir, path.join(f.pluginDir, 'binaries', 'server')), path.join(f.pluginDir, 'binaries', 'server'));
 });
+test('an explicitly authorized aliased root does not mix canonical and lexical path spellings', async t => {
+	const f = await fixture(t), alias = path.join(f.root, 'authorized-root-alias');
+	await fs.symlink(f.pluginDir, alias, 'junction');
+	const target = path.join(alias, 'new-binary');
+	assert.notEqual(await fs.realpath(alias), alias);
+	assert.equal(await assertInside(alias, target), target);
+	const snapshots = await snapshotFiles(alias, [target]);
+	await fs.writeFile(target, 'temporary');
+	await restoreFiles(alias, snapshots);
+	await assert.rejects(fs.stat(target), { code: 'ENOENT' });
+	await assert.rejects(assertInside(alias, path.join(alias, '..', 'outside')));
+});
 test('symlink/junction parents cannot redirect binary snapshots or restoration', async t => {
 	const f = await fixture(t), outside = path.join(f.root, 'outside'); await fs.mkdir(outside);
 	await fs.symlink(outside, path.join(f.pluginDir, 'binaries'), 'junction');
