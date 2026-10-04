@@ -21153,6 +21153,10 @@ body.is-mobile:not(.is-tablet) .dashboard-media-item .dashboard-media-delete--gr
 	overflow-wrap: anywhere;
 }
 
+.dashboard-save-state-host { flex: 0 0 auto; min-width: 0; }
+.dashboard-save-state { display: flex; flex-wrap: wrap; align-items: center; gap: var(--size-4-2); padding: var(--size-4-3); border: 1px solid var(--background-modifier-border); background: var(--background-secondary); color: var(--text-normal); }
+.dashboard-save-state p { flex: 1 0 100%; margin: 0; overflow-wrap: anywhere; }
+.dashboard-save-state code { flex: 1 0 100%; white-space: pre-wrap; overflow-wrap: anywhere; }
 .dashboard-quicknote-empty {
 	display: flex;
 	align-items: center;

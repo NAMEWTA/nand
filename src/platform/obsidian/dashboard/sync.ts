@@ -1,3 +1,4 @@
+import { DASHBOARD_CONFLICT_DIR, DashboardSaveError, dashboardSaveMessage, type DashboardSaveState, type DashboardSaveStatus } from '../../../core/dashboard/save-state';
 import { ensureDirectory } from '../../../shared/storage/durable-state';
 import { App, Notice, TFile } from 'obsidian';
 import { moveBeside, moveToOwnRow, unpartnerAt } from '../../../core/dashboard/column-pairs';
@@ -37,7 +38,7 @@ import type {
 	TaskItem,
 } from '../../../core/dashboard/types/index';
 import { workspaceBackupName } from '../../../core/workspace/workspace-registry';
-import { t } from '../../../shared/i18n/index';
+import { onLanguageChanged, t } from '../../../shared/i18n/index';
 import { moveDashboardCard } from './card-move';
 
 import type { DashboardUpdateSource } from '../../../core/dashboard/render-update';
@@ -47,6 +48,66 @@ type DataCallback = (data: DashboardData, source: DashboardUpdateSource) => void
 type TaskDropMode = 'before' | 'after' | 'nest';
 
 export class SyncEngine {
+	private localRevision = 0;
+	private recoveryRevision = 0;
+	private saveState: Readonly<DashboardSaveState> = Object.freeze({ status: 'saved', localRevision: 0, recoveryRevision: 0, recoveryPath: null, detail: '' });
+	private saveListeners = new Set<(state: Readonly<DashboardSaveState>) => void>();
+	private saveNotice: Notice | null = null;
+	private languageCleanup: (() => void) | null = null;
+	private closingTask: Promise<void> | null = null;
+	private closed = false;
+
+	getSaveState(): Readonly<DashboardSaveState> { return this.saveState; }
+	getLocalDraft(): string { return this.data ? serialize(this.data) : ''; }
+	onSaveStateUpdate(callback: (state: Readonly<DashboardSaveState>) => void): () => void {
+		this.saveListeners.add(callback); callback(this.saveState);
+		return () => this.saveListeners.delete(callback);
+	}
+	private setSaveState(status: DashboardSaveStatus, detail = ''): void {
+		this.saveState = Object.freeze({ status, localRevision: this.localRevision, recoveryRevision: this.recoveryRevision,
+			recoveryPath: this.conflict ? DASHBOARD_CONFLICT_DIR + '/' + this.conflict.id + '.json' : null, detail });
+		for (const callback of this.saveListeners) callback(this.saveState);
+		this.refreshSaveNotice();
+	}
+	private refreshSaveNotice(): void {
+		if (this.saveState.status === 'saved') { this.saveNotice?.hide(); this.saveNotice = null; return; }
+		if (this.saveState.status === 'saving' && !this.saveNotice) return;
+		const message = dashboardSaveMessage(this.saveState);
+		if (this.saveNotice) this.saveNotice.setMessage(message);
+		else this.saveNotice = new Notice(message, 0);
+	}
+	private saveFailure(error: unknown): DashboardSaveError {
+		const detail = error instanceof Error ? error.message : String(error);
+		const recovered = this.recoveryRevision === this.localRevision;
+		const conflict = error instanceof DashboardSaveError && error.code === 'conflict';
+		this.setSaveState(this.blocked ? conflict ? recovered ? 'conflict-saved' : 'conflict-pending' : 'recovery-error' : 'save-error', detail);
+		return error instanceof DashboardSaveError ? error : new DashboardSaveError(this.blocked ? 'recoveryFailed' : 'saveFailed', detail);
+	}
+	private assertOpen(): void {
+		if (this.closed) throw new DashboardSaveError('closed', t('dashboard.sync.closed'));
+	}
+	/** Drains admitted work. A durable recovery copy does not mean the original note was saved. */
+	async flush(): Promise<void> {
+		if (this.deferredWriteTimer !== null) { window.clearTimeout(this.deferredWriteTimer); this.deferredWriteTimer = null; }
+		let queue: Promise<void>;
+		do { queue = this.writeQueue; await queue; } while (queue !== this.writeQueue);
+		if (!this.localDirty) return;
+		try { await this.writeToDisk(true); }
+		catch (error) {
+			if (!(error instanceof DashboardSaveError && error.code === 'conflict' && this.recoveryRevision === this.localRevision)) throw error;
+		}
+	}
+	async retrySave(): Promise<void> { await this.flush(); }
+	close(): Promise<void> {
+		if (this.closingTask) return this.closingTask;
+		this.closed = true;
+		this.unregisterFileWatchers();
+		const closing = this.flush().finally(() => this.destroy());
+		this.closingTask = closing;
+		void closing.then(() => { if (this.closingTask === closing) this.closingTask = null; }, () => { if (this.closingTask === closing) this.closingTask = null; });
+		return closing;
+	}
+
 	private app: App;
 	private settings: DashboardSettings;
 	private file: TFile | null = null;
@@ -57,7 +118,6 @@ export class SyncEngine {
 	private baseline: string | null = null;
 	private localDirty = false;
 	private blocked = false;
-	private conflictSaved = false;
 	private conflict: {
 		id: string;
 		path: string;
@@ -88,12 +148,20 @@ export class SyncEngine {
 	}
 
 	async init(): Promise<void> {
+		if (this.closingTask) await this.closingTask;
+		this.closed = false;
+		this.languageCleanup ??= onLanguageChanged(() => this.refreshSaveNotice());
 		await this.findOrCreateFile();
 		this.registerFileWatcher();
 		await this.load();
 	}
 
 	destroy(): void {
+		this.closed = true;
+		this.languageCleanup?.();
+		this.languageCleanup = null;
+		this.saveListeners.clear();
+		if (this.saveState.status !== 'save-error' && this.saveState.status !== 'recovery-error') { this.saveNotice?.hide(); this.saveNotice = null; }
 		this.unregisterFileWatchers();
 		if (this.debounceTimer) {
 			window.clearTimeout(this.debounceTimer);
@@ -131,28 +199,32 @@ export class SyncEngine {
 	 * `this.file` can be stale and must be resolved again before reading.
 	 */
 	async reloadFromDisk(): Promise<void> {
-		await this.writeQueue;
-		if (this.localDirty && !this.conflict && this.file && this.data) {
-			this.conflict = {
-				id: `${Date.now()}-${Math.random().toString(36).slice(2)}`,
-				path: this.file.path,
-				base: this.baseline ?? '',
-				local: serialize(this.data),
-				candidate: serialize(this.data),
-				remote: await this.app.vault.read(this.file),
-			};
-		}
-		if (this.conflict) await this.saveConflict();
-		if (this.deferredWriteTimer) window.clearTimeout(this.deferredWriteTimer);
-		this.deferredWriteTimer = null;
-		if (this.debounceTimer) window.clearTimeout(this.debounceTimer);
-		this.debounceTimer = null;
-		this.blocked = false;
-		this.localDirty = false;
-		this.conflictSaved = false;
-		this.conflict = null;
-		await this.findOrCreateFile();
-		await this.load();
+		this.assertOpen();
+		if (this.deferredWriteTimer !== null) { window.clearTimeout(this.deferredWriteTimer); this.deferredWriteTimer = null; }
+		this.writeQueuePending++;
+		const task = this.writeQueue.then(async () => {
+			try {
+				const revision = this.localRevision;
+				const file = this.file && this.app.vault.getFileByPath(this.file.path);
+				if (!file) throw new DashboardSaveError('saveFailed', t('dashboard.sync.sourceMissing'));
+				const remote = await this.app.vault.read(file);
+				if (revision !== this.localRevision) throw new DashboardSaveError('changed', t('dashboard.sync.changed'));
+				if (this.localDirty) {
+					this.conflict ??= { id: crypto.randomUUID(), path: file.path, base: this.baseline ?? '', local: this.getLocalDraft(), candidate: this.getLocalDraft(), remote };
+					this.blocked = true;
+					await this.saveConflict(this.getLocalDraft(), revision);
+				}
+				if (revision !== this.localRevision) throw new DashboardSaveError('changed', t('dashboard.sync.changed'));
+				if (this.debounceTimer !== null) window.clearTimeout(this.debounceTimer);
+				this.debounceTimer = null;
+				this.file = file; this.baseline = remote; this.data = parse(remote);
+				this.blocked = false; this.localDirty = false; this.conflict = null; this.recoveryRevision = 0;
+				this.setSaveState('saved'); this.notifyCallbacks('external');
+			} catch (error) { throw this.saveFailure(error); }
+			finally { this.writeQueuePending--; }
+		});
+		this.writeQueue = task.catch(() => undefined);
+		await task;
 	}
 
 	/**
@@ -212,6 +284,7 @@ export class SyncEngine {
 	}
 
 	async archiveTasks(columnName: string): Promise<void> {
+		this.assertOpen();
 		if (!this.data) return;
 
 		this.data = {
@@ -231,6 +304,7 @@ export class SyncEngine {
 	}
 
 	async toggleTask(cardId: string, taskPath: TaskPath, checked: boolean): Promise<void> {
+		this.assertOpen();
 		if (!this.data) return;
 
 		this.data = this.mapCardTasks(this.data, cardId, (tasks) => {
@@ -259,6 +333,7 @@ export class SyncEngine {
 	}
 
 	async reorderTask(cardId: string, fromPath: TaskPath, toPath: TaskPath, before: boolean): Promise<void> {
+		this.assertOpen();
 		if (!this.data) return;
 
 		this.data = this.mapCardTasks(this.data, cardId, (tasks) => moveTaskBeside(tasks, fromPath, toPath, before));
@@ -272,6 +347,7 @@ export class SyncEngine {
 		destPath: TaskPath,
 		mode: TaskDropMode,
 	): Promise<void> {
+		this.assertOpen();
 		if (!this.data) return;
 
 		let movedTask: TaskItem | undefined;
@@ -313,6 +389,7 @@ export class SyncEngine {
 	}
 
 	async editTask(cardId: string, taskPath: TaskPath, newText: string): Promise<void> {
+		this.assertOpen();
 		if (!this.data || !newText) return;
 
 		this.data = this.mapCardTasks(this.data, cardId, (tasks) =>
@@ -322,6 +399,7 @@ export class SyncEngine {
 	}
 
 	async addTask(cardId: string, text: string, parentPath?: TaskPath): Promise<void> {
+		this.assertOpen();
 		if (!this.data || !text.trim()) return;
 
 		const node: TaskItem = { text: text.trim(), checked: false, id: crypto.randomUUID() };
@@ -336,6 +414,7 @@ export class SyncEngine {
 	}
 
 	async deleteTask(cardId: string, taskPath: TaskPath): Promise<void> {
+		this.assertOpen();
 		if (!this.data) return;
 
 		this.data = this.mapCardTasks(this.data, cardId, (tasks) => removeTaskAt(tasks, taskPath).tasks);
@@ -343,6 +422,7 @@ export class SyncEngine {
 	}
 
 	async nestTask(cardId: string, taskPath: TaskPath): Promise<void> {
+		this.assertOpen();
 		if (!this.data) return;
 
 		this.data = this.mapCardTasks(this.data, cardId, (tasks) => demoteToChild(tasks, taskPath));
@@ -350,6 +430,7 @@ export class SyncEngine {
 	}
 
 	async nestTaskInto(cardId: string, srcPath: TaskPath, destPath: TaskPath): Promise<void> {
+		this.assertOpen();
 		if (!this.data) return;
 
 		this.data = this.mapCardTasks(this.data, cardId, (tasks) => nestIntoTarget(tasks, srcPath, destPath));
@@ -357,6 +438,7 @@ export class SyncEngine {
 	}
 
 	async unnestTask(cardId: string, taskPath: TaskPath): Promise<void> {
+		this.assertOpen();
 		if (!this.data) return;
 
 		this.data = this.mapCardTasks(this.data, cardId, (tasks) => promoteToTopLevel(tasks, taskPath));
@@ -372,6 +454,7 @@ export class SyncEngine {
 	 * rebuild the entire dashboard for a single chevron toggle.
 	 */
 	toggleCollapseTaskQuiet(cardId: string, taskPath: TaskPath): void {
+		this.assertOpen();
 		if (!this.data) return;
 
 		this.data = this.mapCardTasks(this.data, cardId, (tasks) =>
@@ -399,6 +482,7 @@ export class SyncEngine {
 			>
 		>,
 	): Promise<void> {
+		this.assertOpen();
 		if (!this.data) return;
 
 		this.data = {
@@ -412,6 +496,7 @@ export class SyncEngine {
 	}
 
 	async editTaskReminder(cardId: string, taskPath: TaskPath, reminder: string | undefined): Promise<void> {
+		this.assertOpen();
 		if (!this.data) return;
 
 		this.data = this.mapCardTasks(this.data, cardId, (tasks) =>
@@ -424,6 +509,7 @@ export class SyncEngine {
 		cardId: string,
 		taskPath: TaskPath,
 	): Promise<{ id: string; path: string; title: string }> {
+		this.assertOpen();
 		if (!this.data || !this.file) throw new Error(t('automation.sourceMissing'));
 		const card = this.data.columns.flatMap((c) => c.cards).find((c) => c.id === cardId);
 		const task = card ? getTaskByPath(card.tasks, taskPath) : undefined;
@@ -439,6 +525,7 @@ export class SyncEngine {
 	}
 
 	async deleteCard(cardId: string): Promise<void> {
+		this.assertOpen();
 		if (!this.data) return;
 
 		this.data = {
@@ -452,6 +539,7 @@ export class SyncEngine {
 	}
 
 	async addCard(columnName: string, overrides?: Partial<DashboardCard>): Promise<void> {
+		this.assertOpen();
 		if (!this.data) return;
 		const column = this.data.columns.find((col) => col.name === columnName);
 		const sectionType = column?.sectionType;
@@ -493,6 +581,7 @@ export class SyncEngine {
 	}
 
 	async addColumn(name: string, sectionType?: string): Promise<void> {
+		this.assertOpen();
 		if (!this.data) return;
 		const uniqueName = this.uniqueColumnName(name);
 
@@ -524,6 +613,7 @@ export class SyncEngine {
 		columnName: string,
 		config: import('../../../core/dashboard/types/index').LibraryConfig,
 	): Promise<void> {
+		this.assertOpen();
 		if (!this.data) return;
 
 		this.data = {
@@ -539,6 +629,7 @@ export class SyncEngine {
 		columnName: string,
 		config: import('../../../core/dashboard/types/index').WereadConfig,
 	): Promise<void> {
+		this.assertOpen();
 		if (!this.data) return;
 
 		this.data = {
@@ -552,6 +643,7 @@ export class SyncEngine {
 		columnName: string,
 		config: import('../../../core/dashboard/types/index').DataviewConfig,
 	): Promise<void> {
+		this.assertOpen();
 		if (!this.data) return;
 
 		this.data = {
@@ -567,6 +659,7 @@ export class SyncEngine {
 		columnName: string,
 		config: import('../../../core/dashboard/types/index').WebEmbedConfig,
 	): Promise<void> {
+		this.assertOpen();
 		if (!this.data) return;
 
 		this.data = {
@@ -581,6 +674,7 @@ export class SyncEngine {
 	 *  and never lands between two partners (see moveToOwnRow). from === to is
 	 *  legal — it unpairs the section in place. */
 	async moveColumn(fromIndex: number, toIndex: number): Promise<void> {
+		this.assertOpen();
 		if (!this.data) return;
 		const cols = this.data.columns;
 		if (fromIndex < 0 || fromIndex >= cols.length || toIndex < 0 || toIndex >= cols.length) return;
@@ -595,6 +689,7 @@ export class SyncEngine {
 	/** Pair the dragged section beside the target (`side` of the target row).
 	 *  The target's ex-partner, if any, falls back to a full-width row. */
 	async moveColumnBeside(fromIndex: number, targetIndex: number, side: 'left' | 'right'): Promise<void> {
+		this.assertOpen();
 		if (!this.data) return;
 		const candidate = { ...this.data, columns: moveBeside(this.data.columns, fromIndex, targetIndex, side) };
 		if (serialize(candidate) === serialize(this.data)) return;
@@ -604,6 +699,7 @@ export class SyncEngine {
 
 	/** Persist a user-dragged section height (px), desktop only. */
 	async updateColumnHeight(columnName: string, height: number): Promise<void> {
+		this.assertOpen();
 		if (!this.data) return;
 		this.data = {
 			...this.data,
@@ -615,6 +711,7 @@ export class SyncEngine {
 	/** Persist a dragged pair-divider split: the left member's share in
 	 *  percent (clamped 20-80). Desktop only. */
 	async updateColumnWidth(columnName: string, widthPct: number): Promise<void> {
+		this.assertOpen();
 		if (!this.data) return;
 		const pct = Math.max(20, Math.min(80, Math.round(widthPct)));
 		this.data = {
@@ -653,6 +750,7 @@ export class SyncEngine {
 	}
 
 	async renameColumn(oldName: string, newName: string, columnIndex?: number): Promise<void> {
+		this.assertOpen();
 		const trimmed = newName.trim();
 		if (!this.data || !trimmed || oldName === trimmed) return;
 		const idx = this.resolveColumnIndex(oldName, columnIndex);
@@ -667,6 +765,7 @@ export class SyncEngine {
 	}
 
 	async deleteColumn(columnName: string, columnIndex?: number): Promise<void> {
+		this.assertOpen();
 		if (!this.data) return;
 		const idx = this.resolveColumnIndex(columnName, columnIndex);
 		if (idx < 0) return;
@@ -680,6 +779,7 @@ export class SyncEngine {
 	}
 
 	async moveCard(cardId: string, targetColumn: string, targetIndex: number): Promise<void> {
+		this.assertOpen();
 		if (!this.data) return;
 
 		const next = moveDashboardCard(this.data, cardId, targetColumn, targetIndex);
@@ -689,6 +789,7 @@ export class SyncEngine {
 	}
 
 	async updateBanner(updates: Partial<BannerData>): Promise<void> {
+		this.assertOpen();
 		if (!this.data) return;
 		this.data = {
 			...this.data,
@@ -698,6 +799,7 @@ export class SyncEngine {
 	}
 
 	async addQuickAction(action: QuickAction): Promise<void> {
+		this.assertOpen();
 		if (!this.data) return;
 		this.data = {
 			...this.data,
@@ -707,6 +809,7 @@ export class SyncEngine {
 	}
 
 	async removeQuickAction(index: number): Promise<void> {
+		this.assertOpen();
 		if (!this.data) return;
 		this.data = {
 			...this.data,
@@ -716,6 +819,7 @@ export class SyncEngine {
 	}
 
 	async updateQuickAction(index: number, updates: Partial<Pick<QuickAction, 'name' | 'icon'>>): Promise<void> {
+		this.assertOpen();
 		if (!this.data) return;
 		const actions = [...this.data.quickActions];
 		if (index < 0 || index >= actions.length) return;
@@ -728,6 +832,7 @@ export class SyncEngine {
 	}
 
 	async reorderQuickActions(order: string[]): Promise<void> {
+		this.assertOpen();
 		if (!this.data) return;
 		this.data = {
 			...this.data,
@@ -737,6 +842,7 @@ export class SyncEngine {
 	}
 
 	async removeQuickActionByKey(key: string): Promise<void> {
+		this.assertOpen();
 		if (!this.data) return;
 		if (key.startsWith('p:')) {
 			// Preset: add to hiddenPresets and remove from order
@@ -764,6 +870,7 @@ export class SyncEngine {
 		updates: Pick<DashboardCard, 'body' | 'blockquote'> &
 			Partial<Pick<DashboardCard, 'tasks' | 'docs' | 'wikiLink' | 'url' | 'type'>>,
 	): Promise<void> {
+		this.assertOpen();
 		if (!this.data) return;
 
 		this.data = {
@@ -777,6 +884,7 @@ export class SyncEngine {
 	}
 
 	async reorderDocs(cardId: string, fromPath: DocPath, toPath: DocPath, before: boolean): Promise<void> {
+		this.assertOpen();
 		if (!this.data) return;
 
 		this.data = this.mapCardDocs(this.data, cardId, (docs) => moveDocBeside(docs, fromPath, toPath, before));
@@ -790,6 +898,7 @@ export class SyncEngine {
 		destPath: DocPath,
 		mode: TaskDropMode,
 	): Promise<void> {
+		this.assertOpen();
 		if (!this.data) return;
 
 		let movedDoc: DocNode | undefined;
@@ -829,6 +938,7 @@ export class SyncEngine {
 	}
 
 	async nestDoc(cardId: string, docPath: DocPath): Promise<void> {
+		this.assertOpen();
 		if (!this.data) return;
 
 		this.data = this.mapCardDocs(this.data, cardId, (docs) => demoteDocToChild(docs, docPath));
@@ -836,6 +946,7 @@ export class SyncEngine {
 	}
 
 	toggleCollapseDocQuiet(cardId: string, docPath: DocPath): void {
+		this.assertOpen();
 		if (!this.data) return;
 
 		this.data = this.mapCardDocs(this.data, cardId, (docs) =>
@@ -845,6 +956,7 @@ export class SyncEngine {
 	}
 
 	async deleteDoc(cardId: string, docPath: DocPath): Promise<void> {
+		this.assertOpen();
 		if (!this.data) return;
 
 		this.data = this.mapCardDocs(this.data, cardId, (docs) => removeDocAt(docs, docPath).docs);
@@ -852,6 +964,7 @@ export class SyncEngine {
 	}
 
 	async addDocToCard(cardId: string, filePath: string): Promise<void> {
+		this.assertOpen();
 		if (!this.data) return;
 
 		this.data = this.mapCardDocs(this.data, cardId, (docs) =>
@@ -861,6 +974,7 @@ export class SyncEngine {
 	}
 
 	async addFileLinkToMemo(cardId: string, filePath: string): Promise<void> {
+		this.assertOpen();
 		if (!this.data) return;
 
 		this.data = {
@@ -880,30 +994,37 @@ export class SyncEngine {
 	}
 
 	async updateMemoColor(cardId: string, color: string): Promise<void> {
+		this.assertOpen();
 		await this.updateCard(cardId, { color });
 	}
 
 	async updateCardWidth(cardId: string, width: number): Promise<void> {
+		this.assertOpen();
 		await this.updateCard(cardId, { width });
 	}
 
 	async updateCardSize(cardId: string, size: import('../../../core/dashboard/types/index').CardSize): Promise<void> {
+		this.assertOpen();
 		await this.updateCard(cardId, { size });
 	}
 
 	async updateCardGrid(cardId: string, gridCols: number, gridRows: number): Promise<void> {
+		this.assertOpen();
 		await this.updateCard(cardId, { gridCols, gridRows });
 	}
 
 	async updateCardGridMove(cardId: string, gridCol: number, gridRow: number): Promise<void> {
+		this.assertOpen();
 		await this.updateCard(cardId, { gridCol, gridRow });
 	}
 
 	async updateProjectCover(cardId: string, coverImage: string): Promise<void> {
+		this.assertOpen();
 		await this.updateCard(cardId, { coverImage });
 	}
 
 	async replaceData(newData: DashboardData): Promise<void> {
+		this.assertOpen();
 		this.data = newData;
 		await this.writeToDisk();
 	}
@@ -1020,7 +1141,9 @@ export class SyncEngine {
 	 * click — the source of the multi-second lag.
 	 */
 	private scheduleDeferredWrite(): void {
+		this.localRevision++;
 		this.localDirty = true;
+		this.setSaveState(this.blocked ? 'conflict-pending' : 'saving');
 		if (this.deferredWriteTimer) window.clearTimeout(this.deferredWriteTimer);
 		this.deferredWriteTimer = window.setTimeout(() => {
 			this.deferredWriteTimer = null;
@@ -1086,79 +1209,56 @@ export class SyncEngine {
 	private async writeToDisk(silent = false): Promise<void> {
 		if (!this.data || !this.file) return;
 		this.localDirty = true;
-		if (this.blocked) {
-			await this.saveConflict();
-			throw new Error(t('dashboard.sync.conflict'));
-		}
-		const fileRef = this.file;
-		// Capture each local revision, including quiet edits, before entering the async queue.
-		const content = serialize(this.data);
+		const fileRef = this.file, content = serialize(this.data), revision = ++this.localRevision;
+		this.setSaveState(this.blocked ? 'conflict-pending' : 'saving');
 		this.writeQueuePending++;
 		const task = this.writeQueue.then(async () => {
 			try {
-				if (this.blocked) throw new Error(t('dashboard.sync.conflict'));
+				if (this.blocked) {
+					await this.saveConflict(content, revision);
+					throw new DashboardSaveError('conflict', dashboardSaveMessage(this.saveState));
+				}
 				const base = this.baseline;
-				if (base === null) throw new Error(t('dashboard.sync.conflict'));
+				if (base === null) throw new DashboardSaveError('saveFailed', t('dashboard.sync.sourceMissing'));
 				await this.createBackup(base);
-				let remote = base;
-				let conflict = false;
+				let remote = base, conflict = false;
 				try {
-					await this.app.vault.process(fileRef, (current) => {
+					await this.app.vault.process(fileRef, current => {
 						remote = current;
-						if (current !== base) {
-							conflict = true;
-							throw new Error(t('dashboard.sync.conflict'));
-						}
+						if (current !== base) { conflict = true; throw new DashboardSaveError('conflict', t('dashboard.sync.conflictPending')); }
 						return content;
 					});
 				} catch (error) {
 					if (conflict) {
 						this.blocked = true;
-						this.conflict = {
-							id: `${Date.now()}-${Math.random().toString(36).slice(2)}`,
-							path: fileRef.path,
-							base,
-							local: content,
-							candidate: content,
-							remote,
-						};
-						await this.saveConflict();
+						this.conflict = { id: crypto.randomUUID(), path: fileRef.path, base, local: content, candidate: content, remote };
+						await this.saveConflict(content, revision);
 					}
 					throw error;
 				}
 				this.baseline = content;
-				if (this.data && serialize(this.data) === content) this.localDirty = false;
-			} catch (error) {
-				new Notice(
-					t(
-						this.blocked
-							? this.conflictSaved
-								? 'dashboard.sync.conflict'
-								: 'dashboard.sync.recoveryFailed'
-							: 'dashboard.sync.saveFailed',
-					),
-					0,
-				);
-				throw error;
-			} finally {
-				this.writeQueuePending--;
-			}
+				if (revision === this.localRevision) { this.localDirty = false; this.setSaveState('saved'); }
+			} catch (error) { throw this.saveFailure(error); }
+			finally { this.writeQueuePending--; }
 		});
-		// A failed task must not poison the queue; callers still receive its failure.
+		// Only the internal queue observes rejection here. Public operations still reject.
 		this.writeQueue = task.catch(() => undefined);
 		if (!silent) this.notifyCallbacks('local');
 		await task;
 	}
 
-	private async saveConflict(): Promise<void> {
-		if (!this.conflict) throw new Error(t('dashboard.sync.recoveryFailed'));
-		const dir = '.nand/recovery/dashboard/conflicts';
+	/** Called only inside the ordered write/reload queue, with an immutable revision snapshot. */
+	private async saveConflict(local: string, revision: number): Promise<void> {
+		const conflict = this.conflict;
+		if (!conflict) throw new DashboardSaveError('recoveryFailed', t('dashboard.sync.recoveryFailed'));
+		this.setSaveState('conflict-pending');
+		const record = { ...conflict, local, revision };
 		const adapter = this.app.vault.adapter;
-		if (this.data) this.conflict.local = serialize(this.data);
-		this.conflictSaved = false;
-		await ensureDirectory(adapter, dir);
-		await adapter.write(`${dir}/${this.conflict.id}.json`, JSON.stringify(this.conflict, null, 2));
-		this.conflictSaved = true;
+		await ensureDirectory(adapter, DASHBOARD_CONFLICT_DIR);
+		await adapter.write(DASHBOARD_CONFLICT_DIR + '/' + conflict.id + '.json', JSON.stringify(record, null, 2));
+		this.conflict = record;
+		this.recoveryRevision = revision;
+		this.setSaveState(revision === this.localRevision ? 'conflict-saved' : 'conflict-pending');
 	}
 
 	private async createBackup(currentContent: string): Promise<void> {

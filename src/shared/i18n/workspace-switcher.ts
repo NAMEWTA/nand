@@ -1,8 +1,19 @@
 /** Workspace switcher */
 export const messages = {
 	en: {
+		"dashboard.sync.saving": "Saving dashboard edits…",
+		"dashboard.sync.conflictPending": "Saving to the original is paused. The latest edits are not yet saved to a recovery copy. Keep this view open.",
+		"dashboard.sync.copyPath": "Copy recovery path",
+		"dashboard.sync.copyDraft": "Copy local draft",
+		"dashboard.sync.retry": "Retry saving",
+		"dashboard.sync.reload": "Reload original",
+		"dashboard.sync.reloadConfirm": "Save the latest local draft to a recovery copy, then replace this view with the original file on disk?",
+		"dashboard.sync.sourceMissing": "The dashboard file is missing. Keep or copy the local draft before continuing.",
+		"dashboard.sync.changed": "New edits arrived while reloading. The local draft was kept; review it and retry.",
+		"dashboard.sync.closed": "This dashboard is closing. Reopen it before editing.",
+		"dashboard.sync.operationFailed": "The dashboard operation failed: {detail}",
 		'dashboard.sync.conflict':
-			'This dashboard changed outside NAND. Saving is paused. Your edits are kept in .dashboard-backup/conflicts. Review the copies, then use Restore or reopen the dashboard to reload.',
+			'Saving to the original dashboard is paused. The current edits are saved in the recovery copy at {path}. Review or copy them before reloading the original.',
 		'dashboard.sync.recoveryFailed':
 			'Could not save a recovery copy. Keep this dashboard open and retry after storage is available.',
 		'dashboard.sync.saveFailed':
@@ -51,8 +62,19 @@ export const messages = {
 		'settings.languageZh': '简体中文',
 	},
 	zh: {
+		"dashboard.sync.saving": "正在保存看板修改…",
+		"dashboard.sync.conflictPending": "原文保存已暂停，最新修改尚未保存到恢复副本。请保持当前视图打开。",
+		"dashboard.sync.copyPath": "复制副本路径",
+		"dashboard.sync.copyDraft": "复制当前草稿",
+		"dashboard.sync.retry": "重试保存",
+		"dashboard.sync.reload": "重新载入原文",
+		"dashboard.sync.reloadConfirm": "将最新草稿保存到恢复副本后，使用磁盘上的原文替换当前视图？",
+		"dashboard.sync.sourceMissing": "看板文件不存在。继续操作前，请保留或复制当前草稿。",
+		"dashboard.sync.changed": "重新载入期间出现了新修改，已保留当前草稿。请检查后重试。",
+		"dashboard.sync.closed": "此看板正在关闭，请重新打开后编辑。",
+		"dashboard.sync.operationFailed": "看板操作失败：{detail}",
 		'dashboard.sync.conflict':
-			'看板已被外部修改，保存已暂停。你的修改保存在 .dashboard-backup/conflicts。请先检查副本，再通过恢复或重新打开看板载入磁盘内容。',
+			'看板原文保存已暂停。当前修改已保存到恢复副本 {path}。请先检查或复制修改，再重新载入原文。',
 		'dashboard.sync.recoveryFailed': '恢复副本保存失败。请保持看板打开，在存储恢复后重试。',
 		'dashboard.sync.saveFailed': '看板保存失败，修改仍保留在当前视图中。请在存储恢复后重试。',
 		'workspace.newTitle': '新建工作台',

@@ -1,3 +1,4 @@
+import { mountSaveState } from '../SaveStatePanel';
 import type { DashboardData } from '../../../core/dashboard/types/index';
 import { applyAppearance } from '../appearance/appearance';
 import { renderBanner } from '../banner/banner';
@@ -93,6 +94,7 @@ export function render(this: DashboardView, data: DashboardData): void {
 
 	this.renderMobileWidgetBar(container);
 
+	this.cleanupFns.push(mountSaveState(container, this.sync, this.app));
 	const mainLayout = container.createDiv({ cls: 'dashboard-main' });
 
 	// Stacked layout: the quick-notes work bar (capture pill, today note,

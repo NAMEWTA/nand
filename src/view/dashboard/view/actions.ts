@@ -1,3 +1,4 @@
+import { observeDashboardPromise } from '../save-feedback';
 import { MarkdownView, Notice, TFile } from 'obsidian';
 import type { DashboardCard, DashboardColumn, DashboardData, QuickAction } from '../../../core/dashboard/types/index';
 import type { AppWithCommands } from '../../../platform/obsidian/obsidian-internal';
@@ -36,18 +37,18 @@ import type { DashboardView } from './dashboard-view';
 
 export function openBannerEditModal(this: DashboardView, data: DashboardData): void {
 	const modal = new BannerEditModal(this.app, data.banner, (updates) => {
-		void this.sync.updateBanner(updates);
+		void observeDashboardPromise(this.sync.updateBanner(updates));
 	});
 	modal.open();
 }
 
 export function openCardEditModal(this: DashboardView, card: DashboardCard): void {
 	if (card.type === 'web') {
-		new WebShortcutModal(this.app, card, (updates) => this.sync.updateCard(card.id, updates)).open();
+		new WebShortcutModal(this.app, card, (updates) => observeDashboardPromise(this.sync.updateCard(card.id, updates))).open();
 		return;
 	}
 	const modal = new CardEditModal(this.app, card, (updates) => {
-		void this.sync.updateCard(card.id, updates);
+		void observeDashboardPromise(this.sync.updateCard(card.id, updates));
 	});
 	modal.open();
 }
@@ -89,7 +90,7 @@ export async function openNoteInTab(this: DashboardView, file: TFile, subpath?: 
 }
 
 export async function addColumnWithType(this: DashboardView, name: string, sectionType?: string): Promise<void> {
-	await this.sync.addColumn(name, sectionType);
+	await observeDashboardPromise(this.sync.addColumn(name, sectionType));
 	if (sectionType === 'library') {
 		this.openLibraryConfigModal(name);
 	} else if (sectionType === 'folder') {
@@ -127,15 +128,15 @@ export function openStickyCardTypeModal(this: DashboardView, colName: string): v
 		this.pendingScrollToLastCardOfColumn = colName;
 		if (kind === 'web') {
 			new WebShortcutModal(this.app, {}, (updates) =>
-				this.sync.addCard(colName, { type: 'web', ...updates }),
+				observeDashboardPromise(this.sync.addCard(colName, { type: 'web', ...updates })),
 			).open();
 		} else if (kind === 'todo') {
-			void this.sync.addCard(colName, { type: 'task', title: t('sync.todoTitle') });
+			void observeDashboardPromise(this.sync.addCard(colName, { type: 'task', title: t('sync.todoTitle') }));
 		} else {
 			const now = new Date();
 			const pad = (n: number) => String(n).padStart(2, '0');
 			const date = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
-			void this.sync.addCard(colName, { type: 'generic', title: t('sync.memoTitle', { date }) });
+			void observeDashboardPromise(this.sync.addCard(colName, { type: 'generic', title: t('sync.memoTitle', { date }) }));
 		}
 	});
 	modal.open();
@@ -143,22 +144,22 @@ export function openStickyCardTypeModal(this: DashboardView, colName: string): v
 
 export function openWeatherConfigModal(this: DashboardView, colName: string): void {
 	const modal = new WeatherConfigModal(this.app, (title, config) => {
-		void this.sync.addCard(colName, {
+		void observeDashboardPromise(this.sync.addCard(colName, {
 			title,
 			type: 'weather',
 			weatherConfig: config,
-		});
+		}));
 	});
 	modal.open();
 }
 
 export function openTrackerConfigModal(this: DashboardView, colName: string): void {
 	const modal = new TrackerConfigModal(this.app, (title, config) => {
-		void this.sync.addCard(colName, {
+		void observeDashboardPromise(this.sync.addCard(colName, {
 			title,
 			type: 'tracker',
 			trackerConfig: config,
-		});
+		}));
 	});
 	modal.open();
 }
@@ -166,11 +167,11 @@ export function openTrackerConfigModal(this: DashboardView, colName: string): vo
 export function openTemplatePicker(this: DashboardView, colName: string): void {
 	const modal = new TemplatePickerModal(this.app, this.plugin, (template) => {
 		this.pendingScrollToLastCardOfColumn = colName;
-		void this.sync.addCard(colName, {
+		void observeDashboardPromise(this.sync.addCard(colName, {
 			title: template.name,
 			type: 'task',
 			tasks: template.tasks.map((text) => ({ text, checked: false })),
-		});
+		}));
 	});
 	modal.open();
 }
@@ -184,7 +185,7 @@ export function openLibraryConfigModal(this: DashboardView, colName: string): vo
 		sortDesc: true,
 	};
 	const modal = new LibraryConfigModal(this.app, existingConfig, (config) => {
-		void this.sync.updateLibraryConfig(colName, config);
+		void observeDashboardPromise(this.sync.updateLibraryConfig(colName, config));
 	});
 	modal.open();
 }
@@ -193,7 +194,7 @@ export function openDataviewConfigModal(this: DashboardView, colName: string): v
 	const column = this.data?.columns.find((col) => col.name === colName);
 	const existing = column?.dataviewConfig ?? { query: '' };
 	const modal = new DataviewConfigModal(this.app, existing, (config) => {
-		void this.sync.updateDataviewConfig(colName, config);
+		void observeDashboardPromise(this.sync.updateDataviewConfig(colName, config));
 	});
 	modal.open();
 }
@@ -205,7 +206,7 @@ export function openWebConfigModal(this: DashboardView, colName: string): void {
 	const column = this.data?.columns.find((col) => col.name === colName);
 	const existing = column?.webConfig ?? { url: '' };
 	const modal = new WebConfigModal(this.app, existing, (config) => {
-		void this.sync.updateWebConfig(colName, config);
+		void observeDashboardPromise(this.sync.updateWebConfig(colName, config));
 	});
 	modal.open();
 }
@@ -215,7 +216,7 @@ export function openWebConfigModal(this: DashboardView, colName: string): void {
 export function openMediaConfigModal(this: DashboardView, colName: string): void {
 	const column = this.data?.columns.find((col) => col.name === colName);
 	const modal = new MediaConfigModal(this.app, column?.libraryConfig, (config) => {
-		void this.sync.updateLibraryConfig(colName, config);
+		void observeDashboardPromise(this.sync.updateLibraryConfig(colName, config));
 	});
 	modal.open();
 }
@@ -226,7 +227,7 @@ export function openWereadConfigModal(this: DashboardView, colName: string): voi
 		widgets: [{ id: 'w1', view: 'shelf' as const, groupBy: 'readingState' as const }],
 	};
 	const modal = new WereadConfigModal(this.app, existing, (config) => {
-		void this.sync.updateWereadConfig(colName, config);
+		void observeDashboardPromise(this.sync.updateWereadConfig(colName, config));
 	});
 	modal.open();
 }
@@ -266,7 +267,7 @@ export async function handleMoveCard(
 
 	this.suppressNextRender = true;
 	try {
-		await this.sync.moveCard(cardId, targetCol, targetIdx);
+		await observeDashboardPromise(this.sync.moveCard(cardId, targetCol, targetIdx));
 	} catch {
 		// moveCard swallows disk I/O itself; guard anything else so a rejection
 		// can't desync the UI from this.data.
@@ -389,7 +390,7 @@ export function openFolderConfigModal(this: DashboardView, colName: string): voi
 		libraryConfig?.showProperties,
 		libraryConfig?.propertyLimit,
 		(result) => {
-			void this.sync.updateLibraryConfig(colName, folderResultToLibraryConfig(libraryConfig, result));
+			void observeDashboardPromise(this.sync.updateLibraryConfig(colName, folderResultToLibraryConfig(libraryConfig, result)));
 		},
 		libraryConfig?.groupMode,
 		libraryConfig?.visibleProperties,
@@ -440,7 +441,7 @@ export async function handleCardNewNote(this: DashboardView, cardId: string): Pr
 					throw err;
 				}
 			}
-			await this.sync.addDocToCard(card.id, file.path);
+			await observeDashboardPromise(this.sync.addDocToCard(card.id, file.path));
 			await this.app.workspace.getLeaf('tab').openFile(file);
 			new Notice(t('quickNote.created', { name: file.basename }));
 		} catch (err) {
@@ -465,7 +466,7 @@ export function openNotesSectionConfigModal(this: DashboardView, colName: string
 			folder: (config?.folders ?? [])[0] ?? '',
 		},
 		(settings) => {
-			void this.sync.updateLibraryConfig(colName, {
+			void observeDashboardPromise(this.sync.updateLibraryConfig(colName, {
 				filters: [],
 				viewMode: 'grid',
 				sortBy: 'modified',
@@ -473,7 +474,7 @@ export function openNotesSectionConfigModal(this: DashboardView, colName: string
 				...config,
 				templatePath: settings.templatePath || undefined,
 				folders: settings.folder ? [settings.folder] : undefined,
-			});
+			}));
 		},
 	);
 	modal.open();
@@ -558,7 +559,7 @@ export async function handleLibraryNewNote(
 
 export function openAddActionModal(this: DashboardView): void {
 	const modal = new AddActionModal(this.app, (action) => {
-		void this.sync.addQuickAction(action);
+		void observeDashboardPromise(this.sync.addQuickAction(action));
 	}, undefined, this.plugin.automationHost?.actions?.().map(action => ({ type: 'action', target: action.id, name: action.name, icon: 'play' })));
 	modal.open();
 }
@@ -569,7 +570,7 @@ export function openEditActionModal(this: DashboardView, action: QuickAction): v
 	const modal = new AddActionModal(
 		this.app,
 		(updated) => {
-			void this.sync.updateQuickAction(index, { name: updated.name, icon: updated.icon });
+			void observeDashboardPromise(this.sync.updateQuickAction(index, { name: updated.name, icon: updated.icon }));
 		},
 		action,
 	);
@@ -582,7 +583,7 @@ export async function deleteColumn(this: DashboardView, columnName: string, colu
 		message: t('renderer.confirmDeleteSection', { column: columnName }),
 	});
 	if (!confirmed) return;
-	await this.sync.deleteColumn(columnName, columnIndex);
+	await observeDashboardPromise(this.sync.deleteColumn(columnName, columnIndex));
 	new Notice(t('renderer.sectionDeleted'));
 }
 
@@ -607,10 +608,10 @@ export async function executeAction(this: DashboardView, action: QuickAction): P
 
 export function openProjectSearchModal(this: DashboardView, colName: string): void {
 	const modal = new DocSearchModal(this.app, (link) => {
-		void this.sync.addCard(colName, {
+		void observeDashboardPromise(this.sync.addCard(colName, {
 			title: link.name,
 			body: `[[${link.path}]]`,
-		});
+		}));
 	});
 	modal.open();
 }
@@ -618,7 +619,7 @@ export function openProjectSearchModal(this: DashboardView, colName: string): vo
 export async function promptAddColumn(this: DashboardView): Promise<void> {
 	const name = await showPromptDialog(this.app, { title: t('renderer.sectionName') });
 	if (name) {
-		void this.sync.addColumn(name);
+		void observeDashboardPromise(this.sync.addColumn(name));
 	}
 }
 
