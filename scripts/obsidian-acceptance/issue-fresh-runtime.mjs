@@ -9,6 +9,8 @@ import { once } from 'node:events';
 import { setTimeout as delay } from 'node:timers/promises';
 import { connect } from './cdp.mjs';
 assert.equal(process.env.NAND_ALLOW_FRESH_ISSUE_FIXTURE, '1');
+const selected = process.env.NAND_ACCEPTANCE_CASE || 'comments';
+assert.ok(['all', 'content', 'layout', 'conflict', 'comments'].includes(selected), 'Unknown issue acceptance case');
 const root = process.env.NAND_FRESH_FIXTURE_ROOT, executable = process.env.NAND_OBSIDIAN_EXECUTABLE;
 assert.ok(root && path.isAbsolute(root));assert.ok(executable && path.isAbsolute(executable));
 assert.notEqual(path.parse(root).root,root);
@@ -31,7 +33,7 @@ async function launch(){
   app=spawn(executable,['--no-sandbox','--disable-gpu','--user-data-dir='+profile,'--remote-debugging-port=9237'],{env,stdio:['ignore',log,log],windowsHide:false});closeSync(log);
   stopped=once(app,'exit');const deadline=Date.now()+90000;
   while(Date.now()<deadline){
-    if(app.exitCode!==null)throw Error('Owned Obsidian exited during startup: '+app.exitCode);
+    if((app.exitCode!==null||app.signalCode!==null))throw Error('Owned Obsidian exited during startup: '+app.exitCode);
     try{connection=await connect();break;}catch{await delay(250);}
   }
   assert.ok(connection,'Owned runtime did not expose its CDP target');
@@ -39,7 +41,7 @@ async function launch(){
   while(Date.now()<deadline){
     try { ready=await connection.evaluate(`typeof app !== 'undefined' && !!app.vault?.adapter && !!app.workspace`); } catch { ready=false; }
     if(ready)break;
-    if(app.exitCode!==null)throw Error('Owned Obsidian exited before initializing');
+    if((app.exitCode!==null||app.signalCode!==null))throw Error('Owned Obsidian exited before initializing');
     await delay(100);
   }
   assert.ok(ready,'Native app object did not initialize');
@@ -54,19 +56,19 @@ async function launch(){
   assert.ok(await connection.evaluate(`!!app.plugins.plugins.nand?.editorHost`),'Plugin failed to initialize');
 }
 async function stop(){
-  if(!app||app.exitCode!==null)return;
+  if(!app||(app.exitCode!==null||app.signalCode!==null))return;
   if(connection){await connection.evaluate(`setTimeout(()=>require('@electron/remote').app.quit(),50);true`);connection.close();connection=null;}
   await Promise.race([stopped,delay(20000).then(()=>{throw Error('Owned application failed to quit normally');})]);
   rows.push({normalExit:true,pid:app.pid,exitCode:app.exitCode});
 }
 async function run(script,folder,args=[]){
   const dir=path.join(evidence,folder);await fs.mkdir(dir,{recursive:true});
-  const child=spawn(process.execPath,[script,...args],{env:{...env,NAND_ACCEPTANCE_DIR:dir,NAND_ACCEPTANCE_CASE:'comments'},stdio:'inherit'});
+  const child=spawn(process.execPath,[script,...args],{env:{...env,NAND_ACCEPTANCE_DIR:dir,NAND_ACCEPTANCE_CASE:selected},stdio:'inherit'});
   const [code]=await once(child,'exit');assert.equal(code,0,script+' failed');
 }
 try{
   await launch();
-  await run('scripts/obsidian-acceptance/issue-round21.mjs','comments');
+  await run('scripts/obsidian-acceptance/issue-round21.mjs',selected);
   await run('scripts/obsidian-acceptance/issue-titles.mjs','titles');
   await delay(1000);await stop();await launch();
   await run('scripts/obsidian-acceptance/issue-titles.mjs','titles',['--verify-restart']);
