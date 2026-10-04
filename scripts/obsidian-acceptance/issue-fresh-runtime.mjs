@@ -43,12 +43,15 @@ async function launch(){
     await delay(100);
   }
   assert.ok(ready,'Native app object did not initialize');
-  const state=await connection.evaluate(`({vault:app.vault.adapter.basePath,profile:require('@electron/remote').app.getPath('userData'),platform:process.platform,ua:navigator.userAgent})`);
-  assert.equal(path.resolve(state.vault),path.resolve(vault));assert.equal(path.resolve(state.profile),path.resolve(profile));assert.equal(state.platform,process.platform);assert.ok(state.ua.includes('Obsidian/1.13.7'));
-  await connection.evaluate(`(()=>{const b=[...document.querySelectorAll('button')].find(b=>b.textContent==='Trust author and enable plugins');b?.click()})()`);
-  while(Date.now()<deadline){if(await connection.evaluate(`!!app.plugins.plugins.nand?.editorHost`))break;await delay(100);}
-  assert.ok(await connection.evaluate(`!!app.plugins.plugins.nand?.editorHost`),'Plugin failed to initialize');
+  const state=await connection.evaluate(`({vault:app.vault.adapter.basePath,profile:require('@electron/remote').app.getPath('userData'),platform:process.platform,ua:navigator.userAgent,version:require('@electron/remote').app.getVersion()})`);
   rows.push({pid:app.pid,...state,mainSha256});
+  assert.equal(path.resolve(state.vault),path.resolve(vault));assert.equal(path.resolve(state.profile),path.resolve(profile));assert.equal(state.platform,process.platform);assert.equal(state.version,'1.13.7');
+  while(Date.now()<deadline){
+    if(await connection.evaluate(`!!app.plugins.plugins.nand?.editorHost`))break;
+    await connection.evaluate(`(()=>{const b=[...document.querySelectorAll('button')].find(b=>b.textContent==='Trust author and enable plugins');b?.click()})()`);
+    await delay(100);
+  }
+  assert.ok(await connection.evaluate(`!!app.plugins.plugins.nand?.editorHost`),'Plugin failed to initialize');
 }
 async function stop(){
   if(!app||app.exitCode!==null)return;
