@@ -16,5 +16,5 @@ const testFile = 'scripts/verify-automation.ts';
 let test = fs.readFileSync(testFile, 'utf8');
 const raw = String.raw`let raw = '# Board\n\n## Column\n\n### Tasks\n\n- [ ] Parent\n  - [ ] Nested ⏰ 2026-09-27 09:00\n';`;
 assert.ok(test.includes(raw), 'The original ownership/idempotence fixture must be present');
-test = test.replace(raw, raw.replace(String.raw`### Tasks\n\n`, String.raw`### Tasks\ntype: task\n\n`));
+test = test.replace(raw, raw.replace('## Column', '## Todo'));
 fs.writeFileSync(testFile, test);
