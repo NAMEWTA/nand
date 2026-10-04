@@ -1,3 +1,4 @@
+import { canReceiveTask } from '../../../core/dashboard/card-kind';
 import { AutomationError } from '../../../shared/automation/errors';
 import { MarkdownView, normalizePath, type App, type TFile } from 'obsidian';
 import { anniversaryDateThisYear, parseAnniversaryDate } from '../../../core/anniversaries/calendar';
@@ -222,9 +223,11 @@ export class DashboardAutomationSource {
 		const result: Array<{ path: string; cardId: string; title: string }> = [];
 		for (const file of this.files()) {
 			const data = parseDashboard(await this.app.vault.read(file));
+			const counts = new Map<string, number>();
+			for (const column of data.columns) for (const card of column.cards) counts.set(card.id, (counts.get(card.id) ?? 0) + 1);
 			for (const column of data.columns)
 				for (const card of column.cards)
-					result.push({
+					if (counts.get(card.id) === 1 && canReceiveTask(column, card)) result.push({
 						path: file.path,
 						cardId: card.id,
 						title: `${file.basename} / ${column.name} / ${card.title}`,
@@ -239,9 +242,11 @@ export class DashboardAutomationSource {
 			this.checkEditor(file, raw);
 			if (raw.split('\n').some((line) => readTaskMeta(line).runId === runId)) return raw;
 			const data = parseDashboard(raw);
-			const matches = data.columns.flatMap((c) => c.cards).filter((c) => c.id === action.cardId);
-			const card = matches.length === 1 ? matches[0] : undefined;
-			if (!card) throw new AutomationError('sourceMissing');
+			const matches = data.columns.flatMap(column => column.cards.map(card => ({ column, card }))).filter(entry => entry.card.id === action.cardId);
+			const target = matches.length === 1 ? matches[0] : undefined;
+			if (!target) throw new AutomationError('sourceMissing');
+			if (!canReceiveTask(target.column, target.card)) throw new AutomationError('taskTargetInvalid');
+			const card = target.card;
 			card.tasks.unshift({ text: action.text, checked: false, id: crypto.randomUUID(), runId });
 			return serializeDashboard(data);
 		});

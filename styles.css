@@ -21107,11 +21107,11 @@ body.is-mobile:not(.is-tablet) .dashboard-media-item .dashboard-media-delete--gr
    squeezed it is the capture field that yields first (see the chain below). */
 .dashboard-quicknote-nav {
 	flex: 1 1 0;
-	min-width: 104px;
+
 	display: flex;
 	align-items: center;
 	gap: 6px;
-	flex-wrap: nowrap;
+
 	overflow-x: auto;
 	/* Scrollbar mirrors the .dashboard-section-cards recipe (~line 8076):
 	   standard props take over on Chromium 121+, which both renders the slim
@@ -21121,6 +21121,9 @@ body.is-mobile:not(.is-tablet) .dashboard-media-item .dashboard-media-delete--gr
 	   Invisible at rest, accent-tinted on hover. */
 	scrollbar-width: thin;
 	scrollbar-color: transparent transparent;
+	min-width: 0;
+	flex-wrap: wrap;
+	overflow: visible;
 }
 .dashboard-quicknote-nav:hover {
 	scrollbar-color: color-mix(in srgb, var(--db-accent) 18%, transparent) transparent;
@@ -21143,6 +21146,13 @@ body.is-mobile:not(.is-tablet) .dashboard-media-item .dashboard-media-delete--gr
 .dashboard-quicknote-nav::-webkit-scrollbar-thumb:hover {
 	background: color-mix(in srgb, var(--db-accent) 30%, transparent);
 }
+.dashboard-quicknote-empty-text {
+	min-width: 0;
+	flex: 1 1 12rem;
+	white-space: normal;
+	overflow-wrap: anywhere;
+}
+
 .dashboard-quicknote-empty {
 	display: flex;
 	align-items: center;
@@ -21150,7 +21160,11 @@ body.is-mobile:not(.is-tablet) .dashboard-media-item .dashboard-media-delete--gr
 	padding: 1px 4px;
 	font-size: 0.85em;
 	color: var(--db-text-muted) !important;
-	white-space: nowrap;
+
+	min-width: 0;
+	max-width: 100%;
+	flex-wrap: wrap;
+	white-space: normal;
 }
 .dashboard-quicknote-empty-btn {
 	font-size: 0.82em;
@@ -21158,6 +21172,9 @@ body.is-mobile:not(.is-tablet) .dashboard-media-item .dashboard-media-delete--gr
 	background: color-mix(in srgb, var(--db-accent) 14%, transparent) !important;
 	border-color: color-mix(in srgb, var(--db-accent) 30%, transparent) !important;
 	color: var(--db-text) !important;
+	flex: 0 0 auto;
+	white-space: nowrap;
+	max-width: 100%;
 }
 .dashboard-quicknote-empty-btn:hover { background: color-mix(in srgb, var(--db-accent) 24%, transparent) !important; }
 .dashboard-quicknote-chip {
@@ -28091,9 +28108,20 @@ body:where(.nand-iconic-enabled)[data-theme="Ukiyo"] .workspace-leaf > .workspac
 .nand-browser-view, .nand-browser-panel { height: 100%; min-height: 0; }
 .nand-browser-view { position: relative; }
 .nand-browser-panel { display: flex; flex-direction: column; background: var(--nand-surface); color: var(--text-normal); }
-.nand-browser-toolbar { flex: 0 0 auto; flex-wrap: nowrap; gap: var(--size-4-1); padding: var(--size-4-2); border-bottom: var(--nand-border); }
+.nand-browser-toolbar { flex: 0 0 auto; gap: var(--size-4-1); padding: var(--size-4-2); border-bottom: var(--nand-border);
+	flex-wrap: wrap;
+	height: auto;
+	max-height: none;
+	flex-shrink: 0;
+	min-width: 0;
+	overflow: visible;
+}
 .nand-browser-toolbar > button { flex-shrink: 0; }
-.nand-browser-address-wrap { flex: 1; min-width: 100px; position: relative; }
+.nand-browser-address-wrap { position: relative;
+	flex: 1 0 min(100%, 18rem);
+	min-width: 0;
+	max-width: 100%;
+}
 .nand-browser-address-wrap form { display: flex; align-items: center; gap: var(--size-4-1); background: var(--nand-surface-muted); border: var(--nand-border); border-radius: var(--nand-radius-sm); padding-inline: var(--size-4-2); }
 .nand-browser-address-wrap form:focus-within { border-color: var(--interactive-accent); outline: 2px solid var(--interactive-accent); outline-offset: 1px; }
 .nand-browser-address-wrap form > svg { width: 14px; height: 14px; color: var(--text-muted); flex-shrink: 0; }

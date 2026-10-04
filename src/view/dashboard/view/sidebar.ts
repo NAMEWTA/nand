@@ -107,7 +107,7 @@ export function renderSidebar(
 	);
 
 	if (!isStackedLayout(this.plugin.settings)) {
-		const docs = getRecentDocs(this.app, this.plugin.settings.recentDocCount);
+		const docs = getRecentDocs(this.app, this.plugin.settings.recentDocCount, this.plugin.settings);
 		renderRecentDocs(scroll, docs, (path) => {
 			void this.navigateToPath(path);
 		});

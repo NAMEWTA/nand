@@ -1,3 +1,4 @@
+import { DEFAULT_TASK_ARCHIVE_PATH } from '../../core/dashboard/default-paths';
 import { Setting, type TextComponent } from 'obsidian';
 import type { DashboardLayoutMode } from '../../core/dashboard/types/index';
 import { t } from '../../shared/i18n/index';
@@ -185,7 +186,7 @@ export function renderGeneralSettings(this: DashboardSettingTab, containerEl: HT
 			.setDesc(t('settings.taskArchivePathDesc'))
 			.addText((text) => {
 				archiveInput = text;
-				text.setPlaceholder('Archive/Done.md')
+				text.setPlaceholder(DEFAULT_TASK_ARCHIVE_PATH)
 					.setValue(this.plugin.settings.taskArchivePath)
 					.onChange(async (value) => {
 						this.plugin.settings = {

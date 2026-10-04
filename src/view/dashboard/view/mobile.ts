@@ -228,7 +228,7 @@ export function openMobileDrawer(this: DashboardView, type: 'quickActions' | 're
 		}
 	} else {
 		content.createEl('h4', { ...localizedText('mobile.recent'), cls: 'dashboard-mobile-drawer-title' });
-		const docs = getRecentDocs(this.app, this.plugin.settings.recentDocCount);
+		const docs = getRecentDocs(this.app, this.plugin.settings.recentDocCount, this.plugin.settings);
 		renderRecentDocs(content, docs, (path) => {
 			void this.navigateToPath(path);
 		});

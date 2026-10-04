@@ -26,7 +26,7 @@ export const messages = {
 			'Folder where memo cards are saved as notes (e.g. memos or notes/memos). Leave empty for vault root.',
 		'settings.memoTemplate': 'Memo note template',
 		'settings.memoTemplateDesc':
-			'Template note applied when saving a memo card as a note ({{title}} and {{date:…}} are substituted; the card content is appended after the template body; 创建时间 and type are always set). Leave empty for the built-in default: 创建时间 + type: memo.',
+			'Template note applied when saving a memo card as a note ({{title}} and {{date:…}} are substituted; the card content is appended after the template body; the fixed property keys "创建时间" and "type" are always set). Leave empty for the built-in default with the fixed key "创建时间" and literal "type: memo".',
 		'settings.taskArchiveTarget': 'Task archive settings',
 		'settings.taskArchiveTargetDesc':
 			"Where one-click archive writes completed tasks: the fixed file below, or today's daily note (created if it does not exist)",
@@ -80,7 +80,7 @@ export const messages = {
 		'settings.taskArchiveTargetFile': '指定文件',
 		'settings.taskArchiveTargetDaily': '当天日记',
 		'settings.taskArchivePath': '待办归档文件路径',
-		'settings.taskArchivePathDesc': '已完成事项追加保存的文件（如 归档/已完成.md），所需文件夹会自动创建',
+		'settings.taskArchivePathDesc': '已完成事项追加保存的文件（如 Archive/Done.md），所需文件夹会自动创建',
 		'settings.libraryNewNotePath': '数据库分区新建笔记保存路径',
 		'settings.libraryNewNotePathDesc':
 			'数据库分区「新建笔记」按钮的保存文件夹（会自动预填匹配分区筛选条件的属性），留空则保存到仓库根目录',

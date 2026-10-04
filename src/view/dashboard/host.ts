@@ -7,7 +7,7 @@ export interface DashboardHost {
 	openBrowser?(request: import('../../core/browser/model').BrowserOpenRequest): Promise<void>;
 	app: App;
 	manifest: import('obsidian').PluginManifest;
-	settings: DashboardSettings & { modules: { dashboard: boolean } };
+	settings: DashboardSettings & { modules: { dashboard: boolean }; contacts?: { rootFolder: string } };
 	automationHost?: AutomationUiPort;
 	saveSettings(): Promise<void>;
 	refreshAllDashboards(): void;

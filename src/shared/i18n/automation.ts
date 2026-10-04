@@ -1,5 +1,7 @@
 export const messages = {
 	en: {
+		"automation.taskTargetInvalid": "This card cannot receive to-dos. Choose a to-do card and save the automation again.",
+		"automation.noTaskTargets": "No to-do cards are available. Add a to-do card to a registered dashboard first.",
 		'automation.script': 'Terminal script',
 		'automation.obsidian-command': 'Obsidian command',
 		'automation.open-file': 'Open note',
@@ -159,6 +161,8 @@ export const messages = {
 		'automation.failedLoad': 'Could not load automation data',
 	},
 	zh: {
+		"automation.taskTargetInvalid": "该卡片不能接收待办。请选择待办卡片后重新保存自动化。",
+		"automation.noTaskTargets": "没有可用的待办卡片。请先在已注册看板中添加待办卡片。",
 		'automation.script': '终端脚本',
 		'automation.obsidian-command': 'Obsidian 命令',
 		'automation.open-file': '打开笔记',

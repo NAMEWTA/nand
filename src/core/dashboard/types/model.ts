@@ -1,3 +1,4 @@
+import { DEFAULT_TASK_ARCHIVE_PATH, DEFAULT_HIGHLIGHT_IMPORT_PATH } from '../default-paths';
 import type { TaskAutomationMeta } from '../../../shared/automation/metadata';
 import type { AutomationDefinition } from '../../../shared/automation/types';
 import type { CalendarTaskFilter } from '../../calendar/task-filter';
@@ -336,7 +337,7 @@ export const DEFAULT_DASHBOARD_SETTINGS: DashboardSettings = {
 		'music',
 	],
 	wereadApiKey: '',
-	wereadImportPath: 'Weread/划线',
+	wereadImportPath: DEFAULT_HIGHLIGHT_IMPORT_PATH,
 	disableNotePopover: false,
 	customColors: {},
 	bgImage: '',
@@ -368,7 +369,7 @@ export const DEFAULT_DASHBOARD_SETTINGS: DashboardSettings = {
 	memoSavePath: '',
 	memoTemplatePath: '',
 	taskArchiveTarget: 'file',
-	taskArchivePath: '归档/已完成.md',
+	taskArchivePath: DEFAULT_TASK_ARCHIVE_PATH,
 	libraryNewNotePath: '',
 };
 

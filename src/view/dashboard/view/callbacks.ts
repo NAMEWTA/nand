@@ -1,3 +1,4 @@
+import { DEFAULT_TASK_ARCHIVE_PATH } from '../../../core/dashboard/default-paths';
 import { Notice, TFile } from 'obsidian';
 import { archiveCompleted, serializeTasksForNote } from '../../../core/dashboard/task-tree';
 import type {
@@ -325,7 +326,7 @@ export async function archiveCompletedTasks(this: DashboardView, columnName: str
 			destFile = note;
 		} else {
 			const configured = this.plugin.settings.taskArchivePath.trim().replace(/^\/+|\/+$/g, '');
-			const fullPath = configured || '归档/已完成.md';
+			const fullPath = configured || DEFAULT_TASK_ARCHIVE_PATH;
 			const slash = fullPath.lastIndexOf('/');
 			const folder = slash >= 0 ? fullPath.slice(0, slash) : '';
 			if (folder) await ensureFolder(this.app, folder);

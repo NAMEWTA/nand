@@ -1,3 +1,4 @@
+import { DEFAULT_HIGHLIGHT_IMPORT_PATH } from '../../core/dashboard/default-paths';
 import { Setting } from 'obsidian';
 import { t } from '../../shared/i18n/index';
 import type { DashboardSettingTab } from './settings-tab';
@@ -31,7 +32,7 @@ export function renderServiceSettings(this: DashboardSettingTab, containerEl: HT
 		.setDesc(t('settings.wereadImportPathDesc'))
 		.addText((text) =>
 			text
-				.setPlaceholder('Weread/划线')
+				.setPlaceholder(DEFAULT_HIGHLIGHT_IMPORT_PATH)
 				.setValue(this.plugin.settings.wereadImportPath)
 				.onChange(async (value) => {
 					this.plugin.settings = {
