@@ -1,0 +1,90 @@
+/* ===== Unified widget header buttons =====
+ * Every icon button on a widget card's top-right — the per-widget header
+ * buttons (habit/music/expense/pomodoro stats, quick-actions palette/add)
+ * plus the config gears — shares one size (20x20 box, 13px glyph) and one
+ * visibility scheme: hidden at rest, half-lit on card hover, full accent on
+ * its own hover. Card-scoped (not layout-scoped): both layouts behave the
+ * same. Specificity beats each widget's own rules; the QA !important chrome
+ * resets are untouched (they only cover background/border/shadow). */
+.dashboard-sidebar-widget .dashboard-sidebar-habit-icon-btn,
+.dashboard-sidebar-widget .dashboard-sidebar-music-icon-btn,
+.dashboard-sidebar-widget .dashboard-sidebar-expense-icon-btn,
+.dashboard-sidebar-widget .dashboard-sidebar-pomodoro-stats-btn,
+.dashboard-sidebar-widget .dashboard-widget-inline-cfg-btn,
+.dashboard-quick-actions .dashboard-qa-btn-group button {
+	width: 20px;
+	height: 20px;
+	box-sizing: border-box;
+	padding: 0;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	flex-shrink: 0;
+	opacity: 0;
+	color: var(--db-text-muted);
+	transition: opacity 0.15s ease, color 0.15s ease;
+}
+
+.dashboard-sidebar-widget .dashboard-sidebar-habit-icon-btn svg,
+.dashboard-sidebar-widget .dashboard-sidebar-music-icon-btn svg,
+.dashboard-sidebar-widget .dashboard-sidebar-expense-icon-btn svg,
+.dashboard-sidebar-widget .dashboard-sidebar-pomodoro-stats-btn svg,
+.dashboard-sidebar-widget .dashboard-widget-inline-cfg-btn svg,
+.dashboard-quick-actions .dashboard-qa-btn-group button svg {
+	width: 13px;
+	height: 13px;
+}
+
+.dashboard-sidebar-widget:hover .dashboard-sidebar-habit-icon-btn,
+.dashboard-sidebar-widget:hover .dashboard-sidebar-music-icon-btn,
+.dashboard-sidebar-widget:hover .dashboard-sidebar-expense-icon-btn,
+.dashboard-sidebar-widget:hover .dashboard-sidebar-pomodoro-stats-btn,
+.dashboard-sidebar-widget:hover .dashboard-widget-inline-cfg-btn,
+.dashboard-quick-actions:hover .dashboard-qa-btn-group button {
+	opacity: 0.5;
+}
+
+.dashboard-sidebar-widget .dashboard-sidebar-habit-icon-btn:hover,
+.dashboard-sidebar-widget .dashboard-sidebar-music-icon-btn:hover,
+.dashboard-sidebar-widget .dashboard-sidebar-expense-icon-btn:hover,
+.dashboard-sidebar-widget .dashboard-sidebar-pomodoro-stats-btn:hover,
+.dashboard-sidebar-widget .dashboard-widget-inline-cfg-btn:hover,
+.dashboard-quick-actions .dashboard-qa-btn-group button:hover {
+	opacity: 1;
+	color: var(--db-accent);
+}
+
+/* Habit card exception: its header keeps buttons ALWAYS visible — the left
+   title + list leave the top-right corner empty otherwise. Covers the icon
+   buttons AND the background-settings gear that joins their cluster. */
+.dashboard-sidebar-habit .dashboard-sidebar-habit-icon-btn,
+.dashboard-sidebar-habit .dashboard-widget-inline-cfg-btn {
+	opacity: 0.55;
+}
+
+/* Inline gear that joins a header row's existing icon-button cluster (habit,
+   music, quick actions) instead of a corner button that would overlap them.
+   Ghost at rest like its siblings, accent on hover. */
+.dashboard-widget-inline-cfg-btn {
+	width: 20px;
+	height: 20px;
+	flex-shrink: 0;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	cursor: pointer;
+	color: var(--db-text-muted);
+	opacity: 0.55;
+	transition: opacity 0.15s ease, color 0.15s ease;
+}
+
+.dashboard-widget-inline-cfg-btn:hover {
+	opacity: 1;
+	color: var(--db-accent);
+}
+
+.dashboard-widget-inline-cfg-btn svg {
+	width: 13px;
+	height: 13px;
+}
+

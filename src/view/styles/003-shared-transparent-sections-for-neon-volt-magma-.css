@@ -1,0 +1,42 @@
+/* ===== Shared: transparent sections for neon, volt, magma, onyx, mono ===== */
+.nand-dashboard-root[data-theme="neon"] .dashboard-section-row,
+.nand-dashboard-root[data-theme="volt"] .dashboard-section-row,
+.nand-dashboard-root[data-theme="magma"] .dashboard-section-row,
+.nand-dashboard-root[data-theme="onyx"] .dashboard-section-row,
+.nand-dashboard-root[data-theme="mono"] .dashboard-section-row {
+	background: transparent;
+	border: none;
+	backdrop-filter: none;
+	-webkit-backdrop-filter: none;
+	padding: 6px;
+}
+
+.nand-dashboard-root[data-theme="neon"] .dashboard-section,
+.nand-dashboard-root[data-theme="volt"] .dashboard-section,
+.nand-dashboard-root[data-theme="magma"] .dashboard-section,
+.nand-dashboard-root[data-theme="onyx"] .dashboard-section,
+.nand-dashboard-root[data-theme="mono"] .dashboard-section {
+	background: transparent;
+	border: none;
+	backdrop-filter: none;
+	-webkit-backdrop-filter: none;
+}
+
+/* Tighter kanban gap for neon, volt, magma, onyx */
+.nand-dashboard-root[data-theme="neon"] .dashboard-kanban,
+.nand-dashboard-root[data-theme="volt"] .dashboard-kanban,
+.nand-dashboard-root[data-theme="magma"] .dashboard-kanban,
+.nand-dashboard-root[data-theme="onyx"] .dashboard-kanban,
+.nand-dashboard-root[data-theme="mono"] .dashboard-kanban {
+	gap: 8px;
+}
+
+/* =================================================================
+   COMPONENT STYLES
+   ================================================================= */
+
+/* Reset Obsidian view-content padding for dashboard */
+.workspace-leaf-content[data-type="nand-dashboard-view"] .view-content {
+	padding: 0 !important;
+}
+

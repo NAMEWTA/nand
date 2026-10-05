@@ -1,0 +1,118 @@
+/* ==================== Settings Header ==================== */
+.terminal-settings-container {
+  display: flex;
+  flex-direction: column;
+}
+
+.terminal-settings-header {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: var(--size-4-5);
+  padding-bottom: var(--size-4-4);
+  border-bottom: var(--nand-border);
+}
+
+.settings-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--size-4-4);
+}
+
+.settings-title-group {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex: 1;
+  flex-wrap: wrap;
+}
+
+.settings-title-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.settings-title-icon svg {
+  display: block;
+  color: var(--text-accent);
+}
+
+.settings-title {
+  margin: 0;
+  padding: 0;
+  font-weight: 700;
+  font-size: 1.5em;
+  line-height: 1;
+}
+
+.settings-actions-group {
+  display: flex;
+  align-items: center;
+  gap: var(--size-4-3);
+  flex-shrink: 0;
+}
+
+.settings-feedback {
+  font-size: var(--nand-text-body);
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+.settings-feedback a {
+  color: var(--text-accent);
+  text-decoration: none;
+  transition: color var(--nand-duration) var(--nand-ease);
+}
+
+.settings-feedback a:hover {
+  color: var(--text-accent-hover);
+  text-decoration: underline;
+}
+
+.settings-header-button {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--size-4-2);
+  height: var(--nand-control-height);
+  padding: 0 var(--size-4-3);
+  border: var(--nand-border);
+  border-radius: var(--nand-radius-pill);
+  background: var(--nand-surface-muted);
+  box-shadow: none;
+  color: var(--text-normal);
+  font-size: var(--nand-text-caption);
+  font-weight: 600;
+  cursor: pointer;
+  transition: border-color var(--nand-duration) var(--nand-ease), box-shadow var(--nand-duration) var(--nand-ease), background-color var(--nand-duration) var(--nand-ease);
+}
+
+.settings-header-button:hover {
+  border-color: var(--nand-border-color-strong);
+  box-shadow: var(--nand-shadow-sm);
+}
+
+.settings-header-button svg {
+  width: 14px;
+  height: 14px;
+}
+
+.settings-title-changelog-button {
+  margin-left: 6px;
+}
+
+.terminal-settings-content {
+  flex: 1;
+}
+
+.terminal-settings-validation {
+  margin-top: var(--size-4-2);
+}
+.terminal-settings-validation.is-valid {
+  color: var(--text-success);
+}
+.terminal-settings-validation.is-invalid {
+  color: var(--text-error);
+}
+

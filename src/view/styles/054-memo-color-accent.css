@@ -1,0 +1,15 @@
+/* ===== Memo Color Accent ===== */
+.dashboard-card[data-has-color="true"] {
+	position: relative;
+}
+
+.dashboard-card[data-has-color="true"]::before {
+	content: '';
+	position: absolute;
+	inset: 0;
+	border-radius: inherit;
+	background: var(--db-card-accent, var(--db-accent));
+	opacity: 0.12;
+	pointer-events: none;
+}
+

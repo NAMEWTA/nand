@@ -1,0 +1,185 @@
+/* ===== Expense category manager (confirm-card overlay) ===== */
+.dashboard-expense-catmgr {
+	text-align: left;
+	max-width: 460px;
+	align-items: stretch;
+}
+
+.dashboard-expense-catmgr-body {
+	display: flex;
+	flex-direction: column;
+	gap: 16px;
+	max-height: 50vh;
+	overflow-y: auto;
+	margin: 0 0 16px;
+}
+
+.dashboard-expense-catmgr-section-title {
+	font-size: 0.72em;
+	font-weight: 600;
+	color: var(--db-text-muted);
+	margin-bottom: 6px;
+}
+
+/* Subsection labels: categories (secondary) vs primary groups. */
+.dashboard-expense-catmgr-subtitle {
+	font-size: 0.66em;
+	font-weight: 600;
+	color: var(--db-text-faint);
+	margin: 8px 0 2px;
+}
+
+.dashboard-expense-catmgr-empty {
+	font-size: 0.72em;
+	color: var(--db-text-faint);
+	margin-bottom: 6px;
+}
+
+.dashboard-expense-catmgr-row {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	padding: 2px 4px;
+	margin: 0 -4px;
+	border-radius: var(--db-radius-sm, 6px);
+	transition: background-color var(--nand-duration) var(--nand-ease);
+}
+
+.dashboard-expense-catmgr-row:hover {
+	background: var(--db-bg-hover);
+}
+
+/* Drag grip (settings-workspace pattern): the row only turns draggable while
+   the grip is held, so the row's select and buttons stay interactive. */
+.dashboard-expense-catmgr-grip {
+	display: flex;
+	align-items: center;
+	color: var(--db-text-faint);
+	opacity: 0.5;
+	cursor: grab;
+	flex-shrink: 0;
+}
+
+.dashboard-expense-catmgr-grip:hover {
+	opacity: 1;
+}
+
+.dashboard-expense-catmgr-grip svg {
+	width: 12px;
+	height: 12px;
+}
+
+.dashboard-expense-catmgr-row--dragging {
+	opacity: 0.45;
+}
+
+/* Drop indicators: box-shadow instead of border so row layout is untouched. */
+.dashboard-expense-catmgr-row--drop-before {
+	box-shadow: 0 -2px 0 0 var(--db-accent);
+}
+
+.dashboard-expense-catmgr-row--drop-after {
+	box-shadow: 0 2px 0 0 var(--db-accent);
+}
+
+.dashboard-expense-catmgr-name {
+	flex: 1;
+	min-width: 0;
+	font-size: 0.8em;
+	color: var(--db-text);
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+/* Per-row primary-group select (compact; new groups arrive via its trailing
+   "+ New primary…" sentinel). */
+.dashboard-expense-catmgr-primary {
+	flex-shrink: 0;
+	max-width: 118px;
+	font-size: 0.68em;
+	padding: 2px 4px;
+	box-sizing: border-box;
+	color: var(--db-text-muted);
+}
+
+.dashboard-expense-catmgr-usage {
+	flex-shrink: 0;
+	font-size: 0.66em;
+	color: var(--db-text-faint);
+	font-variant-numeric: tabular-nums;
+}
+
+/* Up/down movers: touch fallback (HTML5 drag never fires on mobile); they
+   commit through the same reorder path as dragging. */
+.dashboard-expense-catmgr-move {
+	display: flex;
+	gap: 1px;
+	flex-shrink: 0;
+}
+
+.dashboard-expense-catmgr-move-btn {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 18px;
+	height: 18px;
+	border-radius: var(--nand-radius-xs, 4px);
+	cursor: pointer;
+	color: var(--db-text-faint);
+	transition: color var(--nand-duration) var(--nand-ease), background-color var(--nand-duration) var(--nand-ease);
+}
+
+.dashboard-expense-catmgr-move-btn:hover {
+	color: var(--db-text);
+	background: var(--db-bg-hover);
+}
+
+.dashboard-expense-catmgr-move-btn svg {
+	width: 11px;
+	height: 11px;
+}
+
+.dashboard-expense-catmgr-move-btn--disabled {
+	opacity: 0.2;
+	pointer-events: none;
+}
+
+.dashboard-expense-catmgr-delete {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 22px;
+	height: 22px;
+	flex-shrink: 0;
+	border-radius: var(--db-radius-sm, 6px);
+	cursor: pointer;
+	color: var(--db-text-faint);
+	transition: color var(--nand-duration) var(--nand-ease), background-color var(--nand-duration) var(--nand-ease);
+}
+
+.dashboard-expense-catmgr-delete:hover {
+	color: var(--db-danger, var(--color-red));
+	background: color-mix(in srgb, var(--db-danger, var(--color-red)) 10%, transparent);
+}
+
+.dashboard-expense-catmgr-delete svg {
+	width: 12px;
+	height: 12px;
+}
+
+.dashboard-expense-catmgr-add {
+	display: flex;
+	gap: 6px;
+	margin-top: 6px;
+}
+
+.dashboard-expense-catmgr-input {
+	flex: 1;
+	min-width: 0;
+	font-size: 0.8em;
+	padding: 6px 10px;
+	border-radius: var(--db-radius-sm, 6px);
+	box-sizing: border-box;
+}
+

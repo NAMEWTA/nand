@@ -1,0 +1,154 @@
+/* ==================== Rename Terminal Modal Styles ==================== */
+/* Terminal dialogs share one geometry: 14px modal, 10px inner cards, 6px controls.
+   The product class sits on modalEl itself, so selectors are compound (.modal.x). */
+.modal.rename-terminal-modal,
+.modal.preset-script-modal,
+.modal.terminal-launcher-install-modal,
+.modal-container.terminal-usage-modal-host .modal {
+  border-radius: var(--nand-radius-lg);
+}
+
+.modal.rename-terminal-modal {
+  width: min(440px, calc(100vw - 32px));
+  max-width: 440px;
+  padding: var(--size-4-6);
+}
+
+/* Title section */
+.rename-terminal-modal .modal-title {
+  margin-bottom: var(--size-4-4);
+}
+
+.modal-title-text {
+  margin: 0;
+  font-size: var(--font-ui-large);
+  font-weight: 600;
+  color: var(--text-normal);
+  line-height: 1.35;
+}
+
+/* Input section container */
+.rename-terminal-modal .rename-input-container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--size-4-1);
+}
+
+/* Input label */
+.rename-terminal-modal .rename-input-label {
+  display: block;
+  font-size: var(--nand-text-caption);
+  font-weight: 500;
+  color: var(--text-muted);
+}
+
+/* Input field */
+.rename-terminal-modal .rename-input {
+  box-sizing: border-box;
+  width: 100%;
+  height: auto;
+  min-height: var(--nand-control-height);
+  padding: var(--size-4-2) var(--size-4-3);
+  font-size: var(--font-ui-medium);
+  line-height: 1.5;
+  color: var(--text-normal);
+  background-color: var(--background-primary);
+  border: var(--nand-border);
+  border-radius: var(--nand-radius-sm);
+  outline: none;
+  transition: border-color var(--nand-duration) var(--nand-ease), box-shadow var(--nand-duration) var(--nand-ease);
+}
+
+.rename-terminal-modal .rename-input:hover {
+  border-color: var(--nand-border-color-strong);
+}
+
+.rename-terminal-modal .rename-input:focus {
+  border-color: var(--interactive-accent);
+  box-shadow: 0 0 0 3px var(--nand-accent-soft);
+}
+
+.rename-terminal-modal .rename-input::placeholder {
+  color: var(--text-faint);
+}
+
+/* Footer button row (shared by the terminal dialogs) */
+.rename-terminal-modal .modal-button-container,
+.terminal-launcher-install-modal .modal-button-container {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: var(--size-4-2);
+  margin-top: var(--size-4-6);
+}
+
+.rename-terminal-modal .modal-button-container button,
+.terminal-launcher-install-modal .modal-button-container button {
+  min-width: 72px;
+  min-height: var(--nand-control-height);
+  margin: 0;
+  padding: 0 var(--size-4-4);
+  font-size: var(--nand-text-body);
+  font-weight: 500;
+  border-radius: var(--nand-radius-sm);
+  cursor: pointer;
+  transition: background-color var(--nand-duration-fast) var(--nand-ease), box-shadow var(--nand-duration-fast) var(--nand-ease);
+}
+
+.rename-terminal-modal .modal-button-container button {
+  border: none;
+}
+
+/* Cancel button */
+.rename-terminal-modal .modal-button-container button.mod-cancel {
+  color: var(--text-normal);
+  background-color: var(--background-modifier-form-field);
+  box-shadow: inset 0 0 0 1px var(--nand-border-color);
+}
+
+.rename-terminal-modal .modal-button-container button.mod-cancel:hover {
+  background-color: var(--nand-surface-hover);
+}
+
+/* Confirm button */
+.rename-terminal-modal .modal-button-container button.mod-cta {
+  color: var(--text-on-accent);
+  background-color: var(--interactive-accent);
+}
+
+.rename-terminal-modal .modal-button-container button.mod-cta:hover {
+  background-color: var(--interactive-accent-hover);
+}
+
+:is(.rename-terminal-modal, .terminal-launcher-install-modal, .preset-script-modal) .modal-button-container button:focus-visible {
+  outline: 2px solid var(--interactive-accent);
+  outline-offset: 2px;
+}
+
+/* Dark theme adjustments */
+.theme-dark .rename-terminal-modal .rename-input {
+  background-color: var(--background-primary-alt);
+}
+
+/* Animation effects */
+.rename-terminal-modal .modal-content {
+  animation: rename-modal-fade-in var(--nand-duration) var(--nand-ease);
+}
+
+@keyframes rename-modal-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rename-terminal-modal .modal-content {
+    animation: none;
+  }
+}
+

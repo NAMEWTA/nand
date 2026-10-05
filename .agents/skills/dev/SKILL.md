@@ -42,7 +42,7 @@ Editing src/, styles.css, manifest.json, main.js, esbuild.config.mjs, eslint.con
 | `minAppVersion` | `1.12.0` |
 | `isDesktopOnly` | `false` |
 | Entry | `src/plugin/main.ts` → committed `main.js` |
-| Styles | one `styles.css` at the repo root |
+| Styles | one `styles.css` at the repo root. Author files are ordered by `src/view/styles/order.json`, not by filename |
 
 Pinned leaves store the view type string. The project is in pre-release development: use the current namespace directly, without migration tools, compatibility aliases, or a namespace startup gate. See `references/architecture.md` for persisted names.
 

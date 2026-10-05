@@ -1,0 +1,21 @@
+/* ==================== Error and Status Messages ==================== */
+.terminal-error-message {
+  padding: 12px;
+  margin: 8px;
+  background-color: var(--background-modifier-error);
+  border: 1px solid var(--background-modifier-error-border);
+  border-radius: 4px;
+  color: var(--text-error);
+  font-family: var(--font-monospace);
+  font-size: 13px;
+}
+.terminal-exit-message {
+  padding: 12px;
+  margin: 8px;
+  background-color: var(--background-secondary);
+  border: 1px solid var(--background-modifier-border);
+  border-radius: 4px;
+  color: var(--text-muted);
+  font-family: var(--font-monospace);
+  font-size: 13px;
+}

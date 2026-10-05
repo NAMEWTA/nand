@@ -1,0 +1,233 @@
+/* ===== Gallery view (card grid with frontmatter-driven covers) ===== */
+.dashboard-library-gallery {
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+	gap: 12px;
+}
+
+/* Gallery cards: tighter inset so the cover reads as the hero, and the
+   cover's radius nests inside the card's (outer radius - inset). */
+.dashboard-library-gallery .dashboard-library-card {
+	--library-card-pad: 8px;
+	padding-bottom: 12px;
+}
+
+.dashboard-library-gallery .dashboard-library-card > :not(.dashboard-library-card-cover) {
+	margin-left: 4px;
+	margin-right: 4px;
+}
+
+.dashboard-library-gallery .dashboard-library-card > .dashboard-library-card-cover {
+	margin-bottom: 4px;
+}
+
+.dashboard-library-gallery.dashboard-library-cards--small {
+	grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+}
+
+/* Small gallery cards square their covers (1:1) for a tighter, uniform wall;
+   medium/large keep the wider 16:10 default set on .dashboard-library-card-cover. */
+.dashboard-library-gallery.dashboard-library-cards--small .dashboard-library-card-cover {
+	aspect-ratio: 1 / 1;
+}
+
+.dashboard-library-gallery.dashboard-library-cards--large {
+	grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+}
+
+/* The S/M/L selector only applies to the card views; hidden elsewhere. */
+.dashboard-library-size-toggle.is-hidden {
+	display: none;
+}
+
+/* Group pill is meaningless in kanban (it has its own config-modal grouping);
+   page-size is meaningless while grouped (pagination is skipped). */
+.dashboard-library-group-toggle.is-hidden,
+.dashboard-library-collapse-toggle.is-hidden,
+.dashboard-media-collapse-toggle.is-hidden,
+.dashboard-library-page-size.is-hidden {
+	display: none;
+}
+
+.dashboard-library-card-cover {
+	aspect-ratio: 16 / 10;
+	flex: none;
+	/* Nested radius: the card's radius minus its inset, floored at 4px so
+	   sharp-cornered themes (neon/volt/mono) keep a soft edge. */
+	border-radius: max(4px, calc(var(--db-radius-md, 10px) - var(--library-card-pad, 8px)));
+	background-color: var(--db-bg-card-hover, rgba(255, 255, 255, 0.10));
+	background-size: cover;
+	background-position: center;
+	overflow: hidden;
+	box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--db-text, var(--text-normal)) 6%, transparent);
+}
+
+/* Placeholder for notes without any cover info (or whose cover failed to
+   resolve): the bundled default image when present, otherwise a faint image
+   icon over a soft accent wash — both follow the theme tokens. */
+.dashboard-library-card-cover--placeholder {
+	background: linear-gradient(
+		135deg,
+		color-mix(in srgb, var(--db-accent, #8b5cf6) 14%, transparent),
+		var(--db-bg-card-hover, rgba(127, 127, 127, 0.10))
+	);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	color: var(--db-text-faint, var(--text-faint));
+}
+
+.dashboard-library-card-cover--placeholder svg {
+	width: 26%;
+	height: 26%;
+	opacity: 0.5;
+}
+
+.dashboard-library-card:hover {
+	background: var(--db-bg-card-hover, rgba(255, 255, 255, 0.10));
+	border-color: color-mix(in srgb, var(--db-accent, var(--interactive-accent)) 45%, var(--db-border-card, transparent));
+	box-shadow: var(--db-shadow-card, var(--shadow-s));
+}
+
+.dashboard-library-card-title {
+	font-size: 0.8125em;
+	font-weight: 600;
+	color: var(--db-text, var(--text-normal));
+	line-height: 1.35;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.dashboard-library-card-meta {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	min-height: 18px;
+}
+
+.dashboard-library-card-path {
+	font-size: 0.625em;
+	color: var(--db-text-muted, var(--text-muted));
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	flex: 1;
+	min-width: 0;
+}
+
+.dashboard-library-card-date {
+	margin-left: auto;
+	font-size: 0.625em;
+	color: var(--db-text-muted, var(--text-muted));
+	white-space: nowrap;
+	flex-shrink: 0;
+	font-variant-numeric: tabular-nums;
+}
+
+.dashboard-library-card-tags {
+	display: flex;
+	flex-wrap: nowrap;
+	align-items: center;
+	gap: 4px;
+	flex: 1;
+	min-width: 0;
+	overflow: hidden;
+}
+
+.dashboard-library-card-tag {
+	padding: 1px 7px;
+	border-radius: 999px;
+	background: var(--db-bg-hover, var(--db-bg-card-hover, rgba(255, 255, 255, 0.1)));
+	color: var(--db-text-muted, var(--text-muted));
+	font-size: 0.625em;
+	line-height: 16px;
+	white-space: nowrap;
+	flex-shrink: 0;
+	max-width: 70px;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+.dashboard-library-card-tag--more {
+	background: transparent;
+	padding: 1px 0;
+	max-width: none;
+}
+
+.dashboard-library-value-search {
+	width: 100%;
+	/* Cap at the toolbar search width so it doesn't stretch across the whole
+	   filter-header row; chips below stay reachable by eye. */
+	max-width: 240px;
+	height: 28px;
+	box-sizing: border-box;
+	padding: 0 8px;
+	border: 1px solid var(--db-border-input, rgba(255, 255, 255, 0.08));
+	border-radius: var(--db-radius-sm, 6px);
+	background: var(--db-bg-card, rgba(255, 255, 255, 0.06));
+	color: var(--db-text, var(--text-normal));
+	font-size: 0.75em;
+	outline: none;
+}
+
+.dashboard-library-value-search:focus {
+	border-color: var(--db-border-input-focus, var(--interactive-accent));
+}
+
+.dashboard-library-config-hint {
+	font-size: 0.6875em;
+	color: var(--db-text-muted, var(--text-muted));
+	margin-bottom: 6px;
+}
+
+.dashboard-library-card-preview {
+	font-size: 0.6875em;
+	color: var(--db-text-muted, var(--text-muted));
+	line-height: 1.4;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	display: -webkit-box;
+	-webkit-line-clamp: 2;
+	-webkit-box-orient: vertical;
+	margin-top: 2px;
+}
+
+/* Badges */
+.dashboard-library-badges {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 4px;
+	margin-top: 2px;
+}
+
+.dashboard-library-badge {
+	display: inline-flex;
+	align-items: center;
+	gap: 3px;
+	padding: 1px 7px;
+	border-radius: 999px;
+	font-size: 0.625em;
+	background: var(--db-bg-btn, rgba(139, 92, 246, 0.10));
+	color: var(--db-text-muted, var(--text-muted));
+	max-width: 100%;
+	overflow: hidden;
+}
+
+.dashboard-library-badge-key {
+	font-weight: 500;
+	color: var(--db-accent, var(--interactive-accent));
+	white-space: nowrap;
+}
+
+.dashboard-library-badge-key::after {
+	content: ':';
+	margin-right: 2px;
+}
+
+.dashboard-library-badge-val {
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+

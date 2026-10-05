@@ -1,0 +1,22 @@
+/* ===== Root ===== */
+.nand-dashboard-root {
+	--db-text-on-accent: var(--db-text-inverse, var(--text-on-accent));
+	--db-text-on-danger: #fff;
+	--db-text-on-muted: #fff;
+	--db-photo-text: rgba(255, 255, 255, 0.96);
+	--db-banner-scrim: linear-gradient(180deg, rgba(0, 0, 0, 0.62), rgba(0, 0, 0, 0.72));
+	/* Resolve before a photo widget overrides its foreground tokens. */
+	--db-control-bg: var(--db-bg-modal, var(--db-bg-card));
+	--db-control-text: var(--db-text);
+	display: flex;
+	flex-direction: column;
+	height: 100%;
+	overflow: hidden;
+	position: relative;
+	isolation: isolate;
+	background: var(--db-bg);
+	color: var(--db-text);
+	font-family: var(--db-font);
+	transition: background 0.3s ease, color 0.3s ease;
+}
+

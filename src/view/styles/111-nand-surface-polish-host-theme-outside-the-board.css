@@ -1,0 +1,490 @@
+/* ===== NAND surface polish: host theme outside the board ===== */
+/* Empty state: a soft circular icon badge, a title, a muted description and
+   an optional primary action. TSX and DOM renderers emit the same tree. */
+.nand-empty-state {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	gap: var(--size-4-2);
+	box-sizing: border-box;
+	width: 100%;
+	min-height: 160px;
+	height: 100%;
+	padding: var(--size-4-8) var(--size-4-4);
+	text-align: center;
+	color: var(--text-muted);
+}
+.nand-empty-state-icon {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	flex: none;
+	width: 48px;
+	height: 48px;
+	margin-bottom: var(--size-4-2);
+	border-radius: 50%;
+	background: var(--nand-accent-softer);
+	color: var(--text-accent);
+}
+.nand-empty-state-icon svg { width: 22px; height: 22px; }
+.nand-empty-state-title { color: var(--text-normal); font-size: var(--nand-text-title); font-weight: 600; line-height: 1.3; }
+.nand-empty-state-description { max-width: 32ch; color: var(--text-muted); font-size: var(--nand-text-body); line-height: 1.6; overflow-wrap: anywhere; }
+.nand-empty-state button { flex: none; width: auto; max-width: 100%; margin-top: var(--size-4-3); }
+.nand-empty-state button.nand-empty-state-action { min-height: var(--nand-control-height); padding: 0 var(--size-4-4); border-radius: var(--nand-radius-sm); }
+.nand-editor-view > .nand-empty-state { flex: 1; min-height: 0; }
+.nand-editor-comments-head { min-width: 0; padding: var(--size-4-1) 2px 0; }
+.nand-editor-comment-status svg { display: block; width: 12px; height: 12px; }
+.nand-editor-comment-message + .nand-editor-comment-message { margin-top: var(--size-4-3); border-top: var(--nand-border); }
+.nand-editor-comment-actions button:hover { background: var(--nand-surface-hover); color: var(--text-normal); }
+.nand-editor-comment-actions .nand-editor-comment-more { margin-inline-start: auto; display: flex; align-items: center; justify-content: center; }
+.nand-editor-comment-more svg { width: 16px; height: 16px; }
+.nand-editor-comment.is-focused .nand-editor-comment-quote { border-inline-start-color: var(--interactive-accent); background: var(--nand-surface); }
+.nand-editor-tab { box-shadow: none; min-height: 28px; }
+.nand-editor-comment-prompt { min-height: 112px; padding: var(--size-4-3); line-height: 1.6; }
+.nand-editor-comment-prompt-row { margin-top: var(--size-4-4); }
+
+:is(.nand-settings, .dashboard-settings-root) { container: nand-settings / inline-size; }
+:is(.nand-settings, .dashboard-settings-root) .dashboard-settings-products { gap: var(--size-4-1); padding-bottom: var(--size-4-3); margin-bottom: var(--size-4-3); border-bottom: var(--nand-border); }
+:is(.nand-settings, .dashboard-settings-root) .setting-item:not(.dashboard-settings-section) { gap: var(--size-4-4); flex-wrap: wrap; padding-block: var(--size-4-3); }
+:is(.nand-settings, .dashboard-settings-root) .setting-item-info { min-width: 0; overflow-wrap: anywhere; }
+:is(.nand-settings, .dashboard-settings-root) .setting-item-control { min-width: 0; max-width: 100%; gap: var(--size-4-2); flex-wrap: wrap; }
+:is(.nand-settings, .dashboard-settings-root) .setting-item-description { line-height: 1.5; margin-top: var(--size-4-1); }
+:is(.nand-settings, .dashboard-settings-root) .setting-item-heading { margin-top: var(--size-4-6); border-top: none; }
+:is(.nand-settings, .dashboard-settings-root) .setting-item-heading .setting-item-name { font-size: var(--nand-text-title); font-weight: 600; }
+/* Settings groups share one card shape: 10px radius, hairline, 16px inset. */
+:is(.nand-settings, .dashboard-settings-root) .dashboard-widget-settings-card {
+	box-sizing: border-box;
+	padding: var(--size-4-1) var(--size-4-4);
+	margin-bottom: var(--size-4-3);
+	border: var(--nand-border);
+	border-radius: var(--nand-radius-md);
+	background: var(--nand-surface);
+}
+:is(.nand-settings, .dashboard-settings-root) .dashboard-widget-settings-card > .setting-item { padding-inline: 0; }
+.nand-terminal-settings .settings-card { margin-bottom: var(--size-4-6); }
+.nand-terminal-settings .settings-card:first-child .setting-item-heading { margin-top: 0; }
+.nand-terminal-settings input[type="text"] { width: 16rem; max-width: 100%; min-width: 0; }
+.nand-home-settings .nand-home-module-icon { order: -1; display: flex; align-items: center; justify-content: center; color: var(--text-muted); flex: 0 0 32px; width: 32px; height: 32px; border-radius: var(--nand-radius-sm); background: var(--nand-surface-muted); }
+.nand-home-module-icon svg { width: 18px; height: 18px; }
+.nand-home-settings .setting-item-info { flex: 1; }
+.terminal-agent-settings-group { margin-block: var(--size-4-4); padding: var(--size-4-4); border: var(--nand-border); border-radius: var(--nand-radius-md); background: var(--nand-surface); }
+.terminal-agent-settings-group .setting-item-heading { margin-top: 0; padding-top: 0; }
+.terminal-agent-docs { display: inline-block; margin-bottom: var(--size-4-3); font-size: var(--font-ui-smaller); }
+.terminal-agent-command-setting input { font-family: var(--font-monospace); }
+.terminal-usage-modal h2 { font-size: var(--font-ui-large); }
+.terminal-usage-card h3 { margin: 0 0 var(--size-4-3); font-size: var(--font-ui-medium); overflow-wrap: anywhere; }
+.terminal-usage-reset { line-height: 1.5; overflow-wrap: anywhere; }
+.terminal-usage-pct { white-space: nowrap; }
+.terminal-search-container { gap: var(--size-4-2); }
+.preset-script-modal .setting-item { gap: var(--size-4-3); flex-wrap: wrap; }
+.preset-scripts-menu-item { min-height: 32px; }
+.preset-scripts-menu-item:focus-within .preset-scripts-menu-actions { opacity: 1; }
+
+@container nand-settings (max-width: 520px) {
+	.nand-terminal-settings .setting-item-info { flex-basis: 100%; margin-inline-end: 0; }
+	.nand-terminal-settings .setting-item-control { flex: 1 1 100%; justify-content: flex-start; }
+	.nand-terminal-settings input[type="text"] { width: 100%; flex: 1; }
+	.nand-terminal-settings select { max-width: 100%; }
+	.dashboard-settings-products .dashboard-settings-tab { padding-inline: var(--size-4-2); }
+	.dashboard-widget-settings-card { padding-inline: var(--size-4-3); }
+	.dashboard-layout-picker { gap: var(--size-4-2); }
+}
+
+/* Native button rules are more specific than a single class selector. */
+:is(.nand-settings, .dashboard-settings-root) button.dashboard-settings-tab { border: 1px solid transparent; box-shadow: none; background: transparent; border-radius: var(--nand-radius-pill); }
+:is(.nand-settings, .dashboard-settings-root) button.dashboard-settings-tab:hover:not(.active) { background: var(--nand-surface-hover); color: var(--text-normal); }
+:is(.nand-settings, .dashboard-settings-root) button.dashboard-settings-tab.active { background: var(--nand-accent-soft); border-color: var(--nand-accent-border); color: var(--text-accent); box-shadow: none; }
+:is(.nand-settings, .dashboard-settings-root) .setting-item:not(.dashboard-settings-section) > .setting-item-info { flex: 1; }
+:is(.nand-settings, .dashboard-settings-root) .setting-item:not(.dashboard-settings-section) > .setting-item-control { flex: 0 1 auto; }
+:is(.nand-settings, .dashboard-settings-root) .setting-item.nand-contacts-folder-setting > .setting-item-info {
+	flex: 1 1 0;
+	min-width: min(100%, 16rem);
+}
+:is(.nand-settings, .dashboard-settings-root) .setting-item.nand-contacts-folder-setting > .setting-item-control {
+	flex: 0 0 auto;
+	min-width: auto;
+	max-width: 100%;
+}
+.nand-home-settings .setting-item:last-child .setting-item-info { padding-inline-start: 48px; }
+@container nand-settings (max-width: 520px) {
+	.nand-terminal-settings .setting-item:not(.dashboard-settings-section) > .setting-item-info,
+	.nand-terminal-settings .setting-item:not(.dashboard-settings-section) > .setting-item-control { flex: 1 1 100%; }
+}
+
+.nand-editor-tabs button.nand-editor-tab { border: none; box-shadow: none; background: transparent; min-height: 28px; border-radius: var(--nand-radius-pill); }
+.nand-editor-tabs button.nand-editor-tab:hover:not(.is-active) { background: var(--nand-surface-hover); color: var(--text-normal); }
+.nand-editor-tabs button.nand-editor-tab.is-active { background: var(--nand-surface); color: var(--text-normal); box-shadow: var(--nand-shadow-xs); font-weight: 600; }
+.nand-editor-tabs .nand-editor-tab.is-active .nand-editor-tab-icon { color: var(--text-accent); }
+.nand-terminal-settings .terminal-agent-settings-group .setting-item { padding-inline: 0; }
+.nand-terminal-settings .terminal-agent-settings-group .setting-item-heading { margin: 0; padding-block: 0 var(--size-4-2); }
+
+/* Existing configuration dialogs keep their board palette. */
+.modal--dashboard :is(.setting-item, .dashboard-modal-field) { gap: var(--size-4-3); }
+.modal--dashboard .setting-item-description { line-height: 1.5; }
+.modal--dashboard .dashboard-modal-btn { min-height: 32px; padding-inline: var(--size-4-4); }
+.modal--dashboard :is(input, textarea, button):focus-visible { outline: 2px solid var(--db-accent, var(--interactive-accent)); outline-offset: 2px; }
+.preset-script-modal .modal-button-container { gap: var(--size-4-2); padding-top: var(--size-4-4); }
+.preset-script-modal .modal-button-container button { border-radius: var(--radius-s); }
+
+/* Board geometry stays independent of its thirteen color palettes. */
+.nand-dashboard-root .dashboard-section-header { gap: var(--size-4-3); margin-bottom: var(--size-4-3); }
+.nand-dashboard-root .dashboard-section-title-wrap { min-width: 0; gap: var(--size-4-2); }
+.nand-dashboard-root .dashboard-card-header { align-items: center; gap: var(--size-4-2); margin-bottom: var(--size-4-2); }
+.nand-dashboard-root .dashboard-card-title { min-width: 0; overflow-wrap: anywhere; line-height: 1.5; }
+.nand-dashboard-root .dashboard-card-btn { min-width: 28px; min-height: 28px; border-radius: var(--db-radius-sm); }
+.nand-dashboard-root .dashboard-card:focus-within .dashboard-card-actions { opacity: 1; }
+.nand-dashboard-root .dashboard-card-body { line-height: 1.5; overflow-wrap: anywhere; }
+.nand-dashboard-root .dashboard-section-header-actions { gap: var(--size-4-2); }
+.nand-dashboard-root .dashboard-card-btn:focus-visible { outline: 2px solid var(--db-accent); outline-offset: 2px; }
+:is(.nand-editor-view, .nand-editor-comment-popover, .nand-empty-state, .nand-settings, .dashboard-settings-root) :is(button, a):focus-visible { outline: 2px solid var(--interactive-accent); outline-offset: 2px; }
+.nand-editor-comment .nand-editor-comment-quote:focus-visible { outline: 2px solid var(--interactive-accent); outline-offset: 2px; }
+@media (pointer: coarse) {
+	:is(.nand-editor-view, .nand-editor-comment-popover, .nand-empty-state, .nand-settings, .dashboard-settings-root) button,
+	.nand-dashboard-root .dashboard-card-btn { min-width: 44px; min-height: 44px; }
+	.nand-dashboard-root .dashboard-card-actions { opacity: 1; }
+	.nand-editor-comment-actions :is(button.nand-ui-btn, button.nand-ui-icon-btn),
+	.nand-editor-tabs button.nand-editor-tab,
+	.nand-editor-comment-popover button.nand-editor-comment-popover-btn { min-width: 44px; min-height: 44px; }
+}
+@media (prefers-reduced-motion: reduce) {
+	:is(.nand-editor-view, .nand-settings, .dashboard-settings-root, .nand-dashboard-root) *,
+	.nand-editor-comment-popover { animation-duration: 0.01ms; animation-iteration-count: 1; transition-duration: 0.01ms; }
+}
+
+/* xterm */
+/**
+ * Copyright (c) 2014 The xterm.js authors. All rights reserved.
+ * Copyright (c) 2012-2013, Christopher Jeffrey (MIT License)
+ * https://github.com/chjj/term.js
+ * @license MIT
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ *
+ * Originally forked from (with the author's permission):
+ *   Fabrice Bellard's javascript vt100 for jslinux:
+ *   http://bellard.org/jslinux/
+ *   Copyright (c) 2011 Fabrice Bellard
+ *   The original design remains. The terminal itself
+ *   has been extended to include xterm CSI codes, among
+ *   other features.
+ */
+
+/**
+ *  Default styles for xterm.js
+ */
+
+.xterm {
+    cursor: text;
+    position: relative;
+    user-select: none;
+    -ms-user-select: none;
+    -webkit-user-select: none;
+}
+
+.xterm.focus,
+.xterm:focus {
+    outline: none;
+}
+
+.xterm .xterm-helpers {
+    position: absolute;
+    top: 0;
+    /**
+     * The z-index of the helpers must be higher than the canvases in order for
+     * IMEs to appear on top.
+     */
+    z-index: 5;
+}
+
+.xterm .xterm-helper-textarea {
+    padding: 0;
+    border: 0;
+    margin: 0;
+    /* Move textarea out of the screen to the far left, so that the cursor is not visible */
+    position: absolute;
+    opacity: 0;
+    left: -9999em;
+    top: 0;
+    width: 0;
+    height: 0;
+    z-index: -5;
+    /** Prevent wrapping so the IME appears against the textarea at the correct position */
+    white-space: nowrap;
+    overflow: hidden;
+    resize: none;
+}
+
+.xterm .composition-view {
+    /* TODO: Composition position got messed up somewhere */
+    background: #000;
+    color: #FFF;
+    display: none;
+    position: absolute;
+    white-space: nowrap;
+    z-index: 1;
+}
+
+.xterm .composition-view.active {
+    display: block;
+}
+
+.xterm .xterm-viewport {
+    /* On OS X this is required in order for the scroll bar to appear fully opaque */
+    background-color: #000;
+    overflow-y: scroll;
+    cursor: default;
+    position: absolute;
+    right: 0;
+    left: 0;
+    top: 0;
+    bottom: 0;
+}
+
+.xterm .xterm-screen {
+    position: relative;
+}
+
+.xterm .xterm-screen canvas {
+    position: absolute;
+    left: 0;
+    top: 0;
+}
+
+.xterm-char-measure-element {
+    display: inline-block;
+    visibility: hidden;
+    position: absolute;
+    top: 0;
+    left: -9999em;
+    line-height: normal;
+}
+
+.xterm.enable-mouse-events {
+    /* When mouse events are enabled (eg. tmux), revert to the standard pointer cursor */
+    cursor: default;
+}
+
+.xterm.xterm-cursor-pointer,
+.xterm .xterm-cursor-pointer {
+    cursor: pointer;
+}
+
+.xterm.column-select.focus {
+    /* Column selection mode */
+    cursor: crosshair;
+}
+
+.xterm .xterm-accessibility:not(.debug),
+.xterm .xterm-message {
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    right: 0;
+    z-index: 10;
+    color: transparent;
+    pointer-events: none;
+}
+
+.xterm .xterm-accessibility-tree:not(.debug) *::selection {
+  color: transparent;
+}
+
+.xterm .xterm-accessibility-tree {
+  font-family: monospace;
+  user-select: text;
+  white-space: pre;
+}
+
+.xterm .xterm-accessibility-tree > div {
+  transform-origin: left;
+  width: fit-content;
+}
+
+.xterm .live-region {
+    position: absolute;
+    left: -9999px;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+}
+
+.xterm-dim {
+    /* Dim should not apply to background, so the opacity of the foreground color is applied
+     * explicitly in the generated class and reset to 1 here */
+    opacity: 1 !important;
+}
+
+.xterm-underline-1 { text-decoration: underline; }
+.xterm-underline-2 { text-decoration: double underline; }
+.xterm-underline-3 { text-decoration: wavy underline; }
+.xterm-underline-4 { text-decoration: dotted underline; }
+.xterm-underline-5 { text-decoration: dashed underline; }
+
+.xterm-overline {
+    text-decoration: overline;
+}
+
+.xterm-overline.xterm-underline-1 { text-decoration: overline underline; }
+.xterm-overline.xterm-underline-2 { text-decoration: overline double underline; }
+.xterm-overline.xterm-underline-3 { text-decoration: overline wavy underline; }
+.xterm-overline.xterm-underline-4 { text-decoration: overline dotted underline; }
+.xterm-overline.xterm-underline-5 { text-decoration: overline dashed underline; }
+
+.xterm-strikethrough {
+    text-decoration: line-through;
+}
+
+.xterm-screen .xterm-decoration-container .xterm-decoration {
+	z-index: 6;
+	position: absolute;
+}
+
+.xterm-screen .xterm-decoration-container .xterm-decoration.xterm-decoration-top-layer {
+	z-index: 7;
+}
+
+.xterm-decoration-overview-ruler {
+    z-index: 8;
+    position: absolute;
+    top: 0;
+    right: 0;
+    pointer-events: none;
+}
+
+.xterm-decoration-top {
+    z-index: 2;
+    position: relative;
+}
+
+
+
+/* Derived from vs/base/browser/ui/scrollbar/media/scrollbar.css */
+
+/* xterm.js customization: Override xterm's cursor style */
+.xterm .xterm-scrollable-element > .scrollbar {
+    cursor: default;
+}
+
+/* Arrows */
+.xterm .xterm-scrollable-element > .scrollbar > .scra {
+	cursor: pointer;
+	font-size: 11px !important;
+}
+
+.xterm .xterm-scrollable-element > .visible {
+	opacity: 1;
+
+	/* Background rule added for IE9 - to allow clicks on dom node */
+	background:rgba(0,0,0,0);
+
+	transition: opacity 100ms linear;
+	/* In front of peek view */
+	z-index: 11;
+}
+.xterm .xterm-scrollable-element > .invisible {
+	opacity: 0;
+	pointer-events: none;
+}
+.xterm .xterm-scrollable-element > .invisible.fade {
+	transition: opacity 800ms linear;
+}
+
+/* Scrollable Content Inset Shadow */
+.xterm .xterm-scrollable-element > .shadow {
+	position: absolute;
+	display: none;
+}
+.xterm .xterm-scrollable-element > .shadow.top {
+	display: block;
+	top: 0;
+	left: 3px;
+	height: 3px;
+	width: 100%;
+	box-shadow: var(--vscode-scrollbar-shadow, #000) 0 6px 6px -6px inset;
+}
+.xterm .xterm-scrollable-element > .shadow.left {
+	display: block;
+	top: 3px;
+	left: 0;
+	height: 100%;
+	width: 3px;
+	box-shadow: var(--vscode-scrollbar-shadow, #000) 6px 0 6px -6px inset;
+}
+.xterm .xterm-scrollable-element > .shadow.top-left-corner {
+	display: block;
+	top: 0;
+	left: 0;
+	height: 3px;
+	width: 3px;
+}
+.xterm .xterm-scrollable-element > .shadow.top.left {
+	box-shadow: var(--vscode-scrollbar-shadow, #000) 6px 0 6px -6px inset;
+}
+
+/* NAND wrappers are layout containers, not native setting rows. */
+.nand-settings .setting-group .setting-item.dashboard-settings-section {
+ padding: 0;
+ border: none;
+ background: transparent;
+}
+.nand-settings .setting-group .setting-item.dashboard-settings-section::before { content: none; }
+.nand-empty-state.nand-empty-state--content { height: auto; min-height: 160px; }
+.nand-editor-comment-popover [hidden] { display: none; }
+.nand-editor-comment-composer-actions { display: flex; gap: var(--size-4-2); justify-content: flex-end; }
+.nand-editor-comment-composer-actions button.nand-ui-btn { min-height: var(--nand-control-height-sm); padding-inline: var(--size-4-3); font-size: var(--nand-text-body); }
+.nand-editor-comment-shortcut { color: var(--text-faint); font-size: var(--nand-text-caption); }
+.nand-editor-comment-prompt-host .nand-editor-comment-shortcut { margin-top: var(--size-4-2); }
+.nand-editor-comment-popover { max-width: calc(100vw - 16px); }
+.nand-editor-comment-popover textarea { max-width: 100%; }
+
+/* Keep comment actions inside the source pane, including short split panes. */
+.nand-editor-comment-popover[hidden] { display: none; }
+.nand-editor-comment-popover.is-measuring { visibility: hidden; }
+.nand-editor-comment-popover {
+	box-sizing: border-box;
+	max-width: min(calc(100vw - 16px), var(--nand-comment-width, 100vw));
+	max-height: var(--nand-comment-height, calc(100vh - 16px));
+}
+.nand-editor-comment-popover-input {
+	box-sizing: border-box;
+	width: 260px;
+	height: 96px;
+	min-height: 44px;
+	flex: 1 1 auto;
+	overflow: auto;
+}
+.nand-editor-comment-shortcut,
+.nand-editor-comment-composer-actions,
+.nand-editor-comment-popover-btn { flex-shrink: 0; }
+.nand-editor-comment-shortcut { overflow-wrap: anywhere; }
+.nand-editor-comment-composer-actions { flex-wrap: wrap; }
+.nand-editor-comment-label {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	padding: 0;
+	margin: -1px;
+	overflow: hidden;
+	clip-path: inset(50%);
+	white-space: nowrap;
+	border: 0;
+}
+

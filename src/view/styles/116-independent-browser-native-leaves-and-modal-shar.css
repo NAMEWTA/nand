@@ -1,0 +1,99 @@
+/* Independent browser: native leaves and modal share one stable guest surface. */
+.workspace-leaf-content[data-type="nand-browser-view"] .view-content { padding: 0; overflow: hidden; }
+.nand-browser-view, .nand-browser-panel { height: 100%; min-height: 0; }
+.nand-browser-view { position: relative; }
+.nand-browser-panel { display: flex; flex-direction: column; background: var(--nand-surface); color: var(--text-normal); }
+.nand-browser-toolbar { flex: 0 0 auto; gap: var(--size-4-1); padding: var(--size-4-2); border-bottom: var(--nand-border);
+	flex-wrap: wrap;
+	height: auto;
+	max-height: none;
+	flex-shrink: 0;
+	min-width: 0;
+	overflow: visible;
+}
+.nand-browser-toolbar > button { flex-shrink: 0; }
+.nand-browser-address-wrap { position: relative;
+	flex: 1 0 min(100%, 18rem);
+	min-width: 0;
+	max-width: 100%;
+}
+.nand-browser-address-wrap form { display: flex; align-items: center; gap: var(--size-4-1); background: var(--nand-surface-muted); border: var(--nand-border); border-radius: var(--nand-radius-sm); padding-inline: var(--size-4-2); }
+.nand-browser-address-wrap form:focus-within { border-color: var(--interactive-accent); outline: 2px solid var(--interactive-accent); outline-offset: 1px; }
+.nand-browser-address-wrap form > svg { width: 14px; height: 14px; color: var(--text-muted); flex-shrink: 0; }
+.nand-browser-address-wrap input.nand-browser-address { width: 100%; min-width: 0; background: transparent; border: 0; box-shadow: none; padding-inline: 0; }
+/* The rounded form owns the visible keyboard/mouse focus indicator. */
+.nand-browser-address-wrap input.nand-browser-address:focus,
+.nand-browser-address-wrap input.nand-browser-address:focus-visible { outline: none; box-shadow: none; }
+.nand-browser-suggestions { position: absolute; z-index: 5; top: calc(100% + 4px); left: 0; right: 0; border: var(--nand-border); background: var(--nand-surface); border-radius: var(--nand-radius-sm); box-shadow: var(--nand-shadow-lg); overflow: hidden; }
+.nand-browser-suggestions:empty { display: none; }
+.nand-browser-suggestions button { display: flex; flex-direction: column; align-items: start; width: 100%; height: auto; padding: var(--size-4-2); text-align: left; }
+.nand-browser-suggestions span, .nand-browser-suggestions small { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.nand-browser-suggestions small { color: var(--text-muted); }
+.nand-browser-zoom { max-width: 80px; font-variant-numeric: tabular-nums; }
+.nand-browser-viewport { position: relative; flex: 1; min-height: 0; overflow: hidden; }
+.nand-browser-guest, .nand-browser-webview { width: 100%; height: 100%; }
+.nand-browser-webview { display: flex; }
+.nand-browser-empty { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: var(--size-4-3); padding: var(--size-4-6); background: var(--nand-surface); color: var(--text-muted); text-align: center; }
+.nand-browser-empty > svg { width: 32px; height: 32px; }
+.nand-browser-empty p { max-width: 520px; overflow-wrap: anywhere; }
+.nand-browser-loading { position: absolute; bottom: 0; left: 0; max-width: 100%; padding: var(--size-4-1) var(--size-4-2); color: var(--text-muted); background: var(--nand-surface-muted); font-size: var(--nand-text-caption); pointer-events: none; }
+.nand-browser-find, .nand-browser-hint, .nand-browser-downloads { padding: var(--size-4-2); border-bottom: var(--nand-border); }
+.nand-browser-find input { flex: 1; min-width: 0; }
+.nand-browser-hint { display: flex; align-items: center; justify-content: space-between; background: var(--nand-accent-soft); }
+.nand-browser-downloads { max-height: 150px; overflow: auto; }
+.nand-browser-downloads span { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.nand-browser-downloads progress { max-width: 100px; }
+.modal.nand-browser-modal { width: min(1400px, 94vw); max-width: 94vw; height: 90vh; padding: 0; overflow: hidden; }
+.nand-browser-modal .modal-content { margin: 0; height: 100%; min-height: 0; }
+.nand-browser-modal .modal-title, .nand-browser-modal .modal-close-button { display: none; }
+.nand-browser-overlay { position: absolute; inset: 0; z-index: 6; padding: var(--size-4-3); background: var(--nand-surface); overflow: auto; }
+.nand-browser-grab { display: flex; flex-direction: column; gap: var(--size-4-3); }
+.nand-browser-grab > img { max-width: 100%; max-height: 35%; object-fit: contain; align-self: flex-start; border: var(--nand-border); }
+.nand-browser-grab pre { flex: 1; min-height: 80px; overflow: auto; white-space: pre-wrap; overflow-wrap: anywhere; margin: 0; background: var(--nand-surface-muted); border-radius: var(--nand-radius-sm); padding: var(--size-4-3); font-size: var(--nand-text-caption); }
+.nand-browser-markup { display: flex; flex-direction: column; gap: var(--size-4-3); }
+.nand-browser-markup-tools { flex-wrap: wrap; }
+.nand-browser-markup-tools .is-active { background: var(--nand-accent-soft); color: var(--text-accent); }
+.nand-browser-markup-canvas { min-height: 0; flex: 1; overflow: auto; }
+.nand-browser-markup-canvas canvas { display: block; max-width: 100%; touch-action: none; cursor: crosshair; }
+.nand-browser-shortcut { display: flex; align-items: center; gap: var(--size-4-1); }
+.nand-browser-shortcut-open { flex: 1; min-width: 0; justify-content: start; text-align: left; }
+.nand-browser-shortcut-open span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+@media (max-width: 600px) {
+	.nand-browser-toolbar { flex-wrap: wrap; }
+	.nand-browser-address-wrap { order: -1; flex-basis: 100%; }
+	.nand-browser-grab .nand-ui-toolbar { flex-wrap: wrap; }
+}
+
+/* Shared persistence feedback. */
+.nand-save-status { display: flex; gap: var(--size-4-2); align-items: center; font-size: var(--font-smallest); color: var(--text-muted); padding: var(--size-2-2) var(--size-4-2); }
+.nand-save-status--unsaved, .nand-save-status--conflict { color: var(--text-warning); flex-wrap: wrap; }
+.dashboard-sidebar-widget > .nand-save-status { position: relative; z-index: 1; background: var(--background-primary); border-radius: var(--nand-radius-sm); }
+.nand-save-status button { font-size: inherit; }
+.nand-save-status button:focus-visible { outline: 2px solid var(--interactive-accent); outline-offset: 2px; }
+
+.dashboard-qa-run { display: flex; align-items: center; gap: var(--size-4-2); flex: 1; min-width: 0; height: auto; padding: 0; border: 0; background: transparent; box-shadow: none; color: inherit; text-align: start; }
+.dashboard-qa-run:focus-visible { outline: 2px solid var(--interactive-accent); outline-offset: 3px; }
+.is-mobile .dashboard-qa-run { min-height: 44px; }
+
+.terminal-context-panel { padding: var(--size-4-2); border-bottom: 1px solid var(--background-modifier-border); max-height: 35%; overflow: auto; }
+.terminal-context-panel summary { cursor: pointer; padding: var(--size-4-1); }
+.terminal-context-panel small { overflow-wrap: anywhere; color: var(--text-muted); }
+
+.dashboard-sidebar-slim-indicator { padding: 0; border: 0; box-shadow: none; }
+.dashboard-sidebar--collapsed .dashboard-sidebar-slim-indicator { pointer-events: auto; }
+.dashboard-sidebar-slim-indicator:focus-visible { outline: 2px solid var(--interactive-accent); outline-offset: 3px; }
+@media (max-width: 641px), (pointer: coarse) {
+ .dashboard-mobile-drawer-content .dashboard-qa-run, .dashboard-mobile-drawer-content .dashboard-qa-add-btn { min-height: 44px; }
+ .dashboard-mobile-drawer-content .dashboard-qa-name { max-width: none; white-space: normal; }
+ .dashboard-mobile-drawer-content .dashboard-qa-add-btn > span { display: none; }
+}
+
+.dashboard-sidebar-widgets .dashboard-qa-item--saved { grid-column: 1 / -1; }
+.dashboard-qa-item--saved .dashboard-qa-run { display: grid; grid-template-columns: auto minmax(0, 1fr); row-gap: var(--size-2-1); }
+.dashboard-qa-item--saved .dashboard-qa-run > span:not(.dashboard-qa-icon) { grid-column: 2; min-width: 0; white-space: normal; overflow-wrap: anywhere; }
+.dashboard-qa-item--saved .nand-ui-badge { justify-self: start; max-width: 100%; }
+
+.nand-dashboard-root .dashboard-qa-item > button.dashboard-qa-run { background: transparent; box-shadow: none; }
+.dashboard-qa-item--saved .dashboard-qa-icon { grid-column: 1; grid-row: 1 / 3; }
+
+

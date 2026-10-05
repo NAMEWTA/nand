@@ -1,0 +1,482 @@
+/* ===== Floating Reading Mini Timer ===== */
+/* Tiny top-right pill mirroring the pomodoro mini panel conventions: theme
+ * vars via applyModalTheme, stock-theme fallbacks, no backdrop-filter. */
+.dashboard-reading-mini {
+	position: fixed;
+	/* Below the workspace header's per-pane action buttons (top-right). */
+	top: 46px;
+	right: 12px;
+	z-index: var(--layer-popover, 30);
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	padding: 4px 4px 4px 10px;
+	background: var(--db-bg-modal, var(--background-secondary));
+	border: 1px solid var(--db-border-card, var(--background-modifier-border));
+	border-radius: 999px;
+	box-shadow: var(--nand-shadow-lg, var(--db-shadow-card, 0 4px 16px rgba(0, 0, 0, 0.25)));
+	transition: border-color 0.2s ease, box-shadow 0.2s ease;
+	font-family: var(--db-font, inherit);
+	color: var(--db-text, var(--text-normal));
+	user-select: none;
+	cursor: grab;
+	/* Claim the gesture so dragging never scrolls the page behind. */
+	touch-action: none;
+	/* Size is frozen in JS at mount; never let content spill it. */
+	overflow: hidden;
+}
+
+.dashboard-reading-mini-icon {
+	display: flex;
+	align-items: center;
+	color: var(--db-accent, var(--interactive-accent));
+	flex-shrink: 0;
+}
+
+.dashboard-reading-mini-icon svg {
+	width: 12px;
+	height: 12px;
+}
+
+.dashboard-reading-mini-time {
+	font-size: 12px;
+	font-weight: 700;
+	letter-spacing: 0.4px;
+	font-variant-numeric: tabular-nums;
+	line-height: 1.2;
+	white-space: nowrap;
+	/* Cell width is frozen in JS at the h:mm:ss size; keep digits centered
+	 * while sessions shorter than an hour show the narrower m:ss form. */
+	text-align: center;
+}
+
+.dashboard-reading-mini--paused .dashboard-reading-mini-time {
+	opacity: 0.6;
+}
+
+.dashboard-reading-mini-btn {
+	width: 20px;
+	height: 20px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	flex-shrink: 0;
+	border-radius: 50%;
+	background: var(--db-bg-btn, transparent);
+	border: 1px solid var(--db-border-btn, var(--background-modifier-border));
+	color: var(--db-text, var(--text-normal));
+	cursor: pointer;
+	transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease, transform 0.1s ease;
+}
+
+.dashboard-reading-mini-btn:hover {
+	background: var(--db-bg-hover, var(--background-modifier-hover));
+	border-color: var(--db-danger, var(--text-error));
+	color: var(--db-danger, var(--text-error));
+}
+
+.dashboard-reading-mini-btn:active {
+	transform: scale(0.92);
+}
+
+.dashboard-reading-mini-btn svg {
+	width: 9px;
+	height: 9px;
+}
+
+@media (max-width: 640px) {
+	.dashboard-reading-mini {
+		/* Below the mobile header row (back / title / more-menu). */
+		top: 52px;
+		right: 10px;
+		padding: 4px 4px 4px 10px;
+	}
+
+	.dashboard-reading-mini-btn {
+		width: 26px;
+		height: 26px;
+	}
+
+	.dashboard-reading-mini-btn svg {
+		width: 11px;
+		height: 11px;
+	}
+}
+
+/* Dragged floating panels switch from their stylesheet right/bottom anchor
+ * to inline left/top. This class cancels the anchors; it must stay AFTER the
+ * .dashboard-*-mini blocks (including their mobile media queries) so it wins
+ * the same-specificity cascade everywhere. */
+.dashboard-floating-mini--pinned {
+	right: auto;
+	bottom: auto;
+}
+
+/* Music Widget (NetEase free playback, desktop only) */
+.dashboard-sidebar-music-top {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	width: 100%;
+	min-height: 20px;
+	margin-bottom: 8px;
+}
+
+.dashboard-sidebar-music-title-icon {
+	display: flex;
+	align-items: center;
+	flex-shrink: 0;
+	opacity: 0.85;
+	/* Theme accent, matching the other widgets' title icons (habit etc.). */
+	color: var(--db-accent);
+}
+
+.dashboard-sidebar-music-title-icon svg {
+	width: 12px;
+	height: 12px;
+}
+
+.dashboard-sidebar-music-top-spacer {
+	flex: 1;
+}
+
+.dashboard-sidebar-music-icon-btn {
+	width: 20px;
+	height: 20px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	cursor: pointer;
+	border-radius: var(--db-radius-sm);
+	opacity: 0.35;
+	color: var(--db-text-muted);
+	transition: opacity var(--nand-duration) var(--nand-ease), background-color var(--nand-duration) var(--nand-ease);
+	flex-shrink: 0;
+}
+
+.dashboard-sidebar-music-icon-btn:hover {
+	opacity: 0.8;
+	background: var(--db-bg-hover);
+}
+
+.dashboard-sidebar-music-icon-btn:focus-visible,
+.dashboard-sidebar-music-row:focus-visible,
+.dashboard-sidebar-music-text-btn:focus-visible {
+	opacity: 1;
+	outline: 2px solid var(--db-accent);
+	outline-offset: 1px;
+}
+
+.dashboard-sidebar-music-icon-btn svg {
+	width: 13px;
+	height: 13px;
+}
+
+.dashboard-sidebar-music-play {
+	opacity: 0.65;
+	color: var(--db-text);
+}
+
+.dashboard-sidebar-music-play:hover {
+	opacity: 0.95;
+}
+
+.dashboard-sidebar-music-play svg {
+	width: 16px;
+	height: 16px;
+}
+
+.dashboard-sidebar-music-now {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	margin-bottom: 8px;
+}
+
+.dashboard-sidebar-music-cover {
+	position: relative;
+	width: 44px;
+	height: 44px;
+	flex-shrink: 0;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	border-radius: var(--db-radius-sm, 6px);
+	overflow: hidden;
+	background: var(--db-bg-section, rgba(127, 127, 127, 0.08));
+}
+
+.dashboard-sidebar-music-cover-img {
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+	display: block;
+}
+
+.dashboard-sidebar-music-cover-glyph {
+	position: absolute;
+	inset: 0;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	color: var(--db-text-muted);
+	opacity: 0.4;
+}
+
+.dashboard-sidebar-music-cover-glyph svg {
+	width: 18px;
+	height: 18px;
+}
+
+.dashboard-sidebar-music-info {
+	flex: 1;
+	min-width: 0;
+	display: flex;
+	flex-direction: column;
+	gap: 2px;
+}
+
+.dashboard-sidebar-music-name {
+	font-size: 0.78em;
+	font-weight: 600;
+	color: var(--db-text);
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+.dashboard-sidebar-music-artist {
+	font-size: 0.65em;
+	color: var(--db-text-muted);
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+.dashboard-sidebar-music-lyric {
+	flex: 1;
+	min-width: 0;
+	font-size: 0.68em;
+	color: var(--db-text-muted);
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	user-select: none;
+}
+
+.dashboard-sidebar-music-progress {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	margin-bottom: 8px;
+}
+
+.dashboard-sidebar-music-time {
+	font-size: 0.6em;
+	color: var(--db-text-muted);
+	min-width: 28px;
+	user-select: none;
+	font-variant-numeric: tabular-nums;
+}
+
+.dashboard-sidebar-music-progress .dashboard-sidebar-music-time:last-child {
+	text-align: right;
+}
+
+.dashboard-sidebar-music-bar {
+	flex: 1;
+	cursor: pointer;
+	min-width: 0;
+}
+
+.dashboard-sidebar-music-controls {
+	display: flex;
+	align-items: center;
+	gap: 4px;
+}
+
+.dashboard-sidebar-music-vol-area input[type='range'] {
+	width: 58px;
+	accent-color: var(--db-accent);
+}
+
+.dashboard-sidebar-music-panel {
+	margin-top: 6px;
+}
+
+.dashboard-sidebar-music-row {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	padding: 4px 6px;
+	border-radius: var(--db-radius-sm, 6px);
+	cursor: pointer;
+	transition: background-color var(--nand-duration) var(--nand-ease);
+}
+
+.dashboard-sidebar-music-row:hover {
+	background: var(--db-bg-card-hover, rgba(127, 127, 127, 0.1));
+}
+
+.dashboard-sidebar-music-row--active {
+	background: color-mix(in srgb, var(--db-accent) 12%, transparent);
+}
+
+.dashboard-sidebar-music-row--active .dashboard-sidebar-music-row-name {
+	color: var(--db-accent);
+}
+
+.dashboard-sidebar-music-row--vip {
+	opacity: 0.45;
+	cursor: default;
+}
+
+.dashboard-sidebar-music-row-play {
+	display: flex;
+	align-items: center;
+	flex-shrink: 0;
+	color: var(--db-accent);
+}
+
+.dashboard-sidebar-music-row-play svg {
+	width: 10px;
+	height: 10px;
+}
+
+.dashboard-sidebar-music-row-label {
+	flex: 1;
+	min-width: 0;
+	display: flex;
+	flex-direction: column;
+	gap: 1px;
+}
+
+.dashboard-sidebar-music-row-name {
+	font-size: 0.7em;
+	color: var(--db-text);
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+.dashboard-sidebar-music-row-sub {
+	font-size: 0.6em;
+	color: var(--db-text-muted);
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+.dashboard-sidebar-music-vip-badge {
+	flex-shrink: 0;
+	font-size: 0.55em;
+	font-weight: 700;
+	padding: 1px 6px;
+	border-radius: 999px;
+	color: var(--db-bg-card, #fff);
+	background: color-mix(in srgb, var(--db-accent) 65%, var(--db-text-muted));
+	user-select: none;
+}
+
+.dashboard-sidebar-music-row-del {
+	width: 18px;
+	height: 18px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	flex-shrink: 0;
+	cursor: pointer;
+	border-radius: var(--nand-radius-xs, 4px);
+	opacity: 0.25;
+	color: var(--db-text-muted);
+	transition: opacity var(--nand-duration) var(--nand-ease), background-color var(--nand-duration) var(--nand-ease);
+}
+
+.dashboard-sidebar-music-row-del:hover {
+	opacity: 0.75;
+	background: var(--db-bg-hover);
+}
+
+.dashboard-sidebar-music-row-del svg {
+	width: 11px;
+	height: 11px;
+}
+
+.dashboard-sidebar-music-results {
+	max-height: 200px;
+	overflow-y: auto;
+	display: flex;
+	flex-direction: column;
+	gap: 1px;
+	margin-top: 4px;
+}
+
+.dashboard-sidebar-music-search-input,
+.dashboard-sidebar-music-import-input {
+	width: 100%;
+	min-width: 0;
+	box-sizing: border-box;
+	background: var(--db-bg-section, rgba(127, 127, 127, 0.08));
+	border: 1px solid var(--db-border-card);
+	border-radius: var(--db-radius-sm, 6px);
+	color: var(--db-text);
+	font-size: 0.68em;
+	padding: 6px 10px;
+	outline: none;
+	transition: border-color var(--nand-duration) var(--nand-ease);
+}
+
+.dashboard-sidebar-music-search-input:focus,
+.dashboard-sidebar-music-import-input:focus {
+	border-color: var(--db-accent);
+}
+
+.dashboard-sidebar-music-search-input::placeholder,
+.dashboard-sidebar-music-import-input::placeholder {
+	color: var(--db-text-muted);
+}
+
+.dashboard-sidebar-music-import-row {
+	display: flex;
+	align-items: center;
+	gap: 4px;
+	margin-top: 6px;
+}
+
+.dashboard-sidebar-music-import-input {
+	flex: 1;
+	width: auto;
+}
+
+.dashboard-sidebar-music-text-btn {
+	flex-shrink: 0;
+	font-size: 0.62em;
+	padding: 4px 10px;
+	border-radius: var(--db-radius-sm, 6px);
+	border: 1px solid var(--db-border-card);
+	color: var(--db-text);
+	cursor: pointer;
+	user-select: none;
+	white-space: nowrap;
+	transition: border-color var(--nand-duration) var(--nand-ease), color var(--nand-duration) var(--nand-ease);
+}
+
+.dashboard-sidebar-music-text-btn:hover {
+	border-color: var(--db-accent);
+	color: var(--db-accent);
+}
+
+.dashboard-sidebar-music-empty {
+	font-size: 0.65em;
+	color: var(--db-text-muted);
+	padding: 12px 4px;
+	text-align: center;
+	user-select: none;
+}
+
+.dashboard-sidebar-music-panel-foot {
+	display: flex;
+	justify-content: flex-end;
+	margin-top: 4px;
+}
+

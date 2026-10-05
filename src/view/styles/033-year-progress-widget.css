@@ -1,0 +1,162 @@
+/* ===== Year Progress widget ===== */
+.dashboard-sidebar-year-progress {
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+}
+
+.dashboard-sidebar-year-progress-header {
+	display: flex;
+	align-items: baseline;
+	justify-content: space-between;
+	gap: 8px;
+}
+
+.dashboard-sidebar-year-progress-year {
+	font-size: 1.15em;
+	font-weight: 600;
+	color: var(--db-text-primary, var(--db-text));
+	font-variant-numeric: tabular-nums;
+}
+
+.dashboard-sidebar-year-progress-percent {
+	font-size: 0.95em;
+	font-weight: 600;
+	color: var(--db-accent);
+	font-variant-numeric: tabular-nums;
+}
+
+/* "Days left" label sits in the header (top-right); keep it a quiet secondary
+   label so it doesn't compete with the year. */
+.dashboard-sidebar-year-progress-left {
+	font-size: 0.8em;
+	color: var(--db-text-muted);
+	font-variant-numeric: tabular-nums;
+}
+
+.dashboard-sidebar-year-progress-bar {
+	margin-bottom: 0;
+}
+
+.dashboard-sidebar-year-progress-bar .dashboard-progress-bar {
+	height: 8px;
+}
+
+.dashboard-sidebar-year-progress-sub {
+	display: flex;
+	justify-content: space-between;
+	gap: 8px;
+	font-size: 0.78em;
+	color: var(--db-text-muted);
+	font-variant-numeric: tabular-nums;
+}
+
+.dashboard-sidebar-lunar-header {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 4px;
+}
+
+.dashboard-sidebar-lunar-meta {
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: center;
+	gap: 4px 8px;
+	font-size: 0.8em;
+	color: var(--db-text-muted);
+}
+
+.dashboard-sidebar-lunar-ganzhi,
+.dashboard-sidebar-lunar-zodiac {
+	opacity: 0.85;
+}
+
+.dashboard-sidebar-lunar-jieqi {
+	color: var(--db-accent);
+	font-weight: 500;
+	opacity: 1;
+}
+
+.dashboard-sidebar-lunar-date {
+	font-size: 1.3em;
+	font-weight: 700;
+	color: var(--db-accent);
+	letter-spacing: 0.04em;
+	text-align: center;
+	margin-top: 2px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 6px;
+}
+
+.dashboard-sidebar-lunar-badges {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 4px;
+}
+
+.dashboard-sidebar-lunar-badge {
+	display: inline-flex;
+	align-items: center;
+	padding: 2px 8px;
+	border-radius: 999px;
+	font-size: 0.75em;
+	font-weight: 500;
+	line-height: 1.4;
+}
+
+.dashboard-sidebar-lunar-badge--holiday {
+	background: rgba(239, 68, 68, 0.12);
+	color: #ef4444;
+}
+
+.dashboard-sidebar-lunar-badge--inline {
+	font-size: 0.55em;
+	flex-shrink: 0;
+}
+
+.dashboard-sidebar-lunar-badge--festival {
+	background: rgba(245, 158, 11, 0.12);
+	color: #f59e0b;
+}
+
+.dashboard-sidebar-lunar-badge--work {
+	background: rgba(99, 102, 241, 0.12);
+	color: var(--db-accent);
+}
+
+.dashboard-sidebar-lunar-badge--weekend {
+	background: rgba(34, 197, 94, 0.12);
+	color: #22c55e;
+}
+
+/* Light cards make the 400-level badge inks fall under 4.5:1.
+   Neon, volt, magma, and onyx stay near-black in either app mode, so they keep the brighter inks. */
+.theme-light .nand-dashboard-root:not([data-theme="neon"]):not([data-theme="volt"]):not([data-theme="magma"]):not([data-theme="onyx"]) .dashboard-sidebar-lunar-badge--holiday {
+	color: #b91c1c;
+}
+
+.theme-light .nand-dashboard-root:not([data-theme="neon"]):not([data-theme="volt"]):not([data-theme="magma"]):not([data-theme="onyx"]) .dashboard-sidebar-lunar-badge--festival {
+	color: #92400e;
+}
+
+.theme-light .nand-dashboard-root:not([data-theme="neon"]):not([data-theme="volt"]):not([data-theme="magma"]):not([data-theme="onyx"]) .dashboard-sidebar-lunar-badge--weekend {
+	color: #166534;
+}
+
+.dashboard-sidebar-lunar-almanac {
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: center;
+}
+
+.dashboard-sidebar-lunar-almanac-text {
+	font-size: 0.85em;
+	color: var(--db-text-muted);
+	font-weight: 400;
+	line-height: 1.5;
+	text-align: center;
+}
+

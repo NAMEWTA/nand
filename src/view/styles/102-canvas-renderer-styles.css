@@ -1,0 +1,15 @@
+/* ==================== Canvas Renderer Styles ==================== */
+.xterm-canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  opacity: var(--terminal-text-opacity, 1);
+}
+/* When there is a background image, the Canvas renderer also needs a transparent background */
+.terminal-container.has-background-image .xterm-canvas,
+.terminal-container.has-background-image canvas {
+  background-color: transparent;
+}
+.terminal-container.has-background-image .xterm .xterm-screen canvas {
+  background-color: transparent;
+}

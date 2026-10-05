@@ -1,0 +1,7 @@
+/* ===== Lunar Calendar Widget ===== */
+.dashboard-sidebar-lunar {
+	display: flex;
+	flex-direction: column;
+	gap: 6px;
+}
+

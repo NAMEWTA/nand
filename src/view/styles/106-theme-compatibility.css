@@ -1,0 +1,16 @@
+/* ==================== Theme Compatibility ==================== */
+/* Ensure styles update correctly when switching between light and dark themes */
+/* When the "Use Obsidian theme" option is enabled, the terminal automatically adapts to theme colors */
+/* When using a custom color scheme, these styles are dynamically overridden by JavaScript */
+.theme-dark .terminal-view,
+.theme-dark .terminal-view-container,
+.theme-dark .terminal-container {
+  background-color: var(--terminal-bg-color, var(--background-primary));
+  color: var(--text-normal);
+}
+.theme-light .terminal-view,
+.theme-light .terminal-view-container,
+.theme-light .terminal-container {
+  background-color: var(--terminal-bg-color, var(--background-primary));
+  color: var(--text-normal);
+}

@@ -1,0 +1,303 @@
+/* ===== Pomodoro Stats Modal ===== */
+.dashboard-pomodoro-stats-overlay {
+	position: fixed;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	background: rgba(0, 0, 0, 0.5);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	z-index: 1000;
+}
+
+/* Shared stats-modal rhythm (pomodoro, reading, habit, expense): one 14px-
+   family radius, hairline border, floating shadow, header row → body. */
+.dashboard-pomodoro-stats-modal {
+	background: var(--db-bg-modal, var(--background-primary, var(--db-bg)));
+	border: 1px solid var(--db-border-card);
+	border-radius: var(--db-radius-lg, 14px);
+	padding: 20px;
+	max-width: 380px;
+	width: 90%;
+	max-height: 80vh;
+	overflow-y: auto;
+	box-shadow: var(--nand-shadow-lg, 0 8px 32px rgba(0, 0, 0, 0.2));
+	font-variant-numeric: tabular-nums;
+}
+
+.dashboard-pomodoro-stats-header {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	gap: 12px;
+	min-height: 28px;
+	margin-bottom: 16px;
+}
+
+.dashboard-pomodoro-stats-header-title {
+	font-size: 1.15em;
+	font-weight: 600;
+	line-height: 1.3;
+	color: var(--db-text);
+}
+
+.dashboard-pomodoro-stats-close {
+	border: none;
+	box-shadow: none;
+	background: transparent;
+	padding: 0;
+	height: auto;
+	cursor: pointer;
+	color: var(--db-text-muted);
+	width: 28px;
+	height: 28px;
+	flex-shrink: 0;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	border-radius: var(--db-radius-sm, 6px);
+	transition: background-color var(--nand-duration) var(--nand-ease), color var(--nand-duration) var(--nand-ease);
+}
+
+.dashboard-pomodoro-stats-close:hover {
+	background: var(--db-bg-hover);
+	color: var(--db-text);
+}
+
+.dashboard-pomodoro-stats-close:focus-visible,
+.dashboard-pomodoro-stats-icon-btn:focus-visible,
+.dashboard-pomodoro-range-btn:focus-visible {
+	outline: 2px solid var(--db-accent);
+	outline-offset: 1px;
+}
+
+.dashboard-pomodoro-stats-summary {
+	display: flex;
+	gap: 8px;
+	margin-bottom: 16px;
+}
+
+/* KPI cell: small muted label under a bold tabular value. Inner radius
+   follows the section card it sits in. */
+.dashboard-pomodoro-stats-card {
+	flex: 1;
+	min-width: 0;
+	background: var(--db-bg-hover);
+	border: 1px solid transparent;
+	border-radius: var(--db-radius-sm, 6px);
+	padding: 12px 8px 10px;
+	text-align: center;
+}
+
+.dashboard-pomodoro-stats-card-value {
+	font-size: 1.05em;
+	font-weight: 700;
+	line-height: 1.2;
+	color: var(--db-accent);
+	font-variant-numeric: tabular-nums;
+}
+
+.dashboard-pomodoro-stats-card-label {
+	font-size: 0.65em;
+	font-weight: 500;
+	color: var(--db-text-muted);
+	margin-top: 4px;
+}
+
+/* Section cards inside the stats modals take the theme's card radius
+   (the generic modal-section rule further down pins 10px). */
+.dashboard-pomodoro-stats-modal .dashboard-pomodoro-stats-section {
+	border-radius: var(--db-radius-md, 10px);
+}
+
+.dashboard-pomodoro-stats-section {
+	/* Spacing between cards comes from the column flex gap alone (see
+	 * .dashboard-pomodoro-mid-col / -right-col) — no extra bottom margin. */
+	margin-bottom: 0;
+}
+
+/* Sections whose content is data-dependent (e.g. the time-distribution
+ * donut hides when there is nothing to distribute). */
+.dashboard-pomodoro-stats-section--hidden {
+	display: none;
+}
+
+.dashboard-pomodoro-stats-section-title {
+	font-size: 0.7em;
+	font-weight: 600;
+	color: var(--db-text-muted);
+	text-transform: uppercase;
+	letter-spacing: 0.06em;
+	margin-bottom: 12px;
+}
+
+/* Range toggle: segmented control (tinted track, raised active segment). */
+.dashboard-pomodoro-range-toggle {
+	display: flex;
+	gap: 2px;
+	padding: 2px;
+	background: var(--db-bg-hover);
+	border: 1px solid var(--db-border-card);
+	border-radius: calc(var(--db-radius-sm, 6px) + 2px);
+}
+
+.dashboard-pomodoro-range-btn {
+	border: none;
+	box-shadow: none;
+	background: transparent;
+	padding: 0;
+	height: auto;
+	flex: 1;
+	text-align: center;
+	font-size: 0.82em;
+	font-weight: 500;
+	color: var(--db-text-muted);
+	padding: 4px 12px;
+	min-height: 24px;
+	border-radius: var(--db-radius-sm, 6px);
+	cursor: pointer;
+	white-space: nowrap;
+	transition: background-color var(--nand-duration) var(--nand-ease), color var(--nand-duration) var(--nand-ease);
+}
+
+.dashboard-pomodoro-range-btn:hover:not(.dashboard-pomodoro-range-btn--active) {
+	color: var(--db-text);
+}
+
+.dashboard-pomodoro-range-btn--active {
+	background: var(--db-bg-modal-raised, var(--background-primary, var(--db-bg)));
+	color: var(--db-accent);
+	font-weight: 600;
+	box-shadow: var(--nand-shadow-xs, 0 1px 2px rgba(0, 0, 0, 0.08));
+}
+
+/* Donut chart */
+.dashboard-pomodoro-donut-container {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 12px;
+}
+
+.dashboard-pomodoro-donut-svg {
+	display: block;
+}
+
+.dashboard-pomodoro-donut-bg {
+	stroke: var(--db-bg-hover);
+}
+
+.dashboard-pomodoro-donut-center-value {
+	fill: var(--db-text);
+	font-size: 0.875em;
+	font-weight: 700;
+	font-variant-numeric: tabular-nums;
+}
+
+.dashboard-pomodoro-donut-center-label {
+	fill: var(--db-text-muted);
+	font-size: 0.5625em;
+}
+
+.dashboard-pomodoro-donut-empty {
+	font-size: 0.75em;
+	color: var(--db-text-faint);
+	text-align: center;
+	padding: 24px 0;
+}
+
+/* Donut legend: dot · name · pct · time, all in one baseline row. */
+.dashboard-pomodoro-donut-legend {
+	display: flex;
+	flex-direction: column;
+	gap: 6px;
+	width: 100%;
+}
+
+.dashboard-pomodoro-donut-legend-item {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	min-width: 0;
+}
+
+.dashboard-pomodoro-donut-legend-dot {
+	width: 8px;
+	height: 8px;
+	border-radius: 50%;
+	flex-shrink: 0;
+}
+
+.dashboard-pomodoro-donut-legend-name {
+	font-size: 0.7em;
+	color: var(--db-text);
+	flex: 1;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.dashboard-pomodoro-donut-legend-pct {
+	font-size: 0.65em;
+	font-weight: 600;
+	color: var(--db-text);
+	width: 32px;
+	text-align: right;
+	flex-shrink: 0;
+	font-variant-numeric: tabular-nums;
+}
+
+.dashboard-pomodoro-donut-legend-time {
+	font-size: 0.6em;
+	color: var(--db-text-muted);
+	width: 48px;
+	text-align: right;
+	flex-shrink: 0;
+	font-variant-numeric: tabular-nums;
+}
+
+.dashboard-pomodoro-stats-record-dot {
+	width: 6px;
+	height: 6px;
+	border-radius: 50%;
+	flex-shrink: 0;
+}
+
+.dashboard-pomodoro-stats-record-row {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	padding: 6px 0;
+	border-bottom: 1px solid var(--db-bg-hover);
+}
+
+.dashboard-pomodoro-stats-record-row:last-child {
+	border-bottom: none;
+}
+
+.dashboard-pomodoro-stats-record-date {
+	font-size: 0.6em;
+	color: var(--db-text-faint);
+	width: 65px;
+	flex-shrink: 0;
+	font-variant-numeric: tabular-nums;
+}
+
+.dashboard-pomodoro-stats-record-activity {
+	font-size: 0.7em;
+	color: var(--db-text);
+	flex: 1;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.dashboard-pomodoro-stats-record-duration {
+	font-size: 0.6em;
+	color: var(--db-text-muted);
+	flex-shrink: 0;
+	font-variant-numeric: tabular-nums;
+}
+

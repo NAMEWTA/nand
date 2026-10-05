@@ -1,0 +1,85 @@
+/* ===== Tracker Heatmap ===== */
+.dashboard-tracker-heatmap {
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+}
+
+.dashboard-tracker-heatmap-grid {
+	display: grid;
+	overflow: hidden;
+}
+
+.dashboard-tracker-heatmap-cell {
+	transition: opacity 0.15s ease, transform 0.15s ease;
+}
+
+.dashboard-tracker-heatmap-cell:hover {
+	transform: scale(1.3);
+	z-index: 1;
+	position: relative;
+}
+
+.dashboard-tracker-heatmap-cell--empty {
+	background-color: var(--db-bg-hover) !important;
+	opacity: 0.3 !important;
+}
+
+.dashboard-tracker-heatmap-labels {
+	display: grid;
+	grid-template-rows: repeat(7, 14px);
+	gap: 2px;
+	margin-right: 4px;
+}
+
+.dashboard-tracker-heatmap-day-label {
+	font-size: 0.5em;
+	color: var(--db-text-faint);
+	display: flex;
+	align-items: center;
+	line-height: 1;
+}
+
+/* Tracker Config Modal */
+.tracker-key-hint {
+	font-size: 0.6875em;
+	color: var(--text-faint);
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 4px;
+	margin-top: 2px;
+}
+
+.tracker-key-tag {
+	padding: 1px 8px;
+	border-radius: var(--nand-radius-pill);
+	background: var(--db-bg-modal-raised, var(--background-modifier-hover));
+	color: var(--db-text-muted, var(--text-muted));
+	font-size: 0.6875em;
+	cursor: pointer;
+	border: none;
+	line-height: 1.6;
+	transition: background 0.15s, border-color 0.15s, box-shadow 0.15s, color 0.15s, transform 0.15s;
+}
+
+.tracker-key-tag:hover {
+	background: var(--interactive-accent);
+	color: var(--text-on-accent);
+}
+
+/* Dashboard Section: CSS Grid Layout */
+.dashboard-section-row[data-section-type="dashboard"] .dashboard-section-cards {
+	display: grid;
+	grid-template-columns: repeat(4, 1fr);
+	grid-auto-rows: auto;
+	gap: 12px;
+	overflow: visible;
+}
+
+.dashboard-section-row[data-section-type="dashboard"] .dashboard-section-cards > .dashboard-card {
+	min-width: 0;
+	min-height: 0;
+	flex: none;
+}
+

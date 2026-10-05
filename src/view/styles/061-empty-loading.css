@@ -1,0 +1,14 @@
+/* ===== Empty & Loading ===== */
+.dashboard-empty {
+	opacity: 0.5;
+	font-size: 0.85em;
+}
+
+.dashboard-loading {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	height: 100%;
+	opacity: 0.5;
+}
+

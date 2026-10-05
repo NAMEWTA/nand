@@ -1,0 +1,139 @@
+/* ===== Note popover modal — in-place edit popup for hover-previewed links =====
+   The modal lives on document.body (outside .nand-dashboard-root), so it uses
+   Obsidian's global theme vars rather than the dashboard's --db-* vars. The
+   embedded MarkdownView renders with the app's native note theme. */
+
+.note-popover-modal-wrap {
+	width: calc(var(--file-line-width, 700px) + 56px);
+	max-width: 94vw;
+	height: 80vh;
+	max-height: 86vh;
+	padding: 0;
+	overflow: hidden;
+	display: flex;
+	flex-direction: column;
+}
+
+/* The popover header has its own close button in the actions row; hide the
+   native modal close button so only one is shown. Obsidian 1.13+ desktop
+   renders it as .modal-header-button (older/mobile builds: .modal-close-button)
+   — the TS side also removes the node (removeNativeModalCloseButton); this CSS
+   is the belt-and-suspenders fallback. */
+.note-popover-modal-wrap .modal-close-button,
+.note-popover-modal-wrap .modal-header-button {
+	display: none;
+}
+
+.note-popover-modal {
+	width: 100%;
+	height: 100%;
+	padding: 0;
+	display: flex;
+	flex-direction: column;
+	min-height: 0;
+}
+
+.note-popover-header {
+	flex-shrink: 0;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 8px;
+	padding: 10px 12px;
+	border-bottom: 1px solid var(--background-modifier-border);
+	background: var(--background-secondary);
+}
+
+.note-popover-title {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	min-width: 0;
+	font-weight: 600;
+	font-size: var(--font-ui-medium);
+	color: var(--text-normal);
+}
+
+.note-popover-title span {
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.note-popover-title svg {
+	flex-shrink: 0;
+	width: 16px;
+	height: 16px;
+	color: var(--text-muted);
+}
+
+.note-popover-actions {
+	display: flex;
+	align-items: center;
+	gap: 4px;
+	flex-shrink: 0;
+}
+
+.note-popover-btn {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 30px;
+	height: 30px;
+	padding: 0;
+	border: 1px solid transparent;
+	border-radius: var(--radius-s);
+	background: transparent;
+	color: var(--text-muted);
+	cursor: pointer;
+}
+
+.note-popover-btn:hover {
+	background: var(--background-modifier-hover);
+	color: var(--text-normal);
+}
+
+.note-popover-btn svg {
+	width: 16px;
+	height: 16px;
+}
+
+.note-popover-editor {
+	flex: 1;
+	min-height: 0;
+	overflow: hidden;
+	display: flex;
+	flex-direction: column;
+}
+
+/* A detached leaf has no inherent height, so every level from the host down to
+   CodeMirror / the reading view must stretch to fill the modal. */
+.note-popover-editor > .workspace-leaf,
+.note-popover-editor .workspace-leaf-content,
+.note-popover-editor .view-content {
+	height: 100%;
+	flex: 1;
+	min-height: 0;
+	display: flex;
+	flex-direction: column;
+}
+
+.note-popover-editor .markdown-source-view,
+.note-popover-editor .cm-editor,
+.note-popover-editor .markdown-reading-view {
+	height: 100%;
+	flex: 1;
+	min-height: 0;
+}
+
+.note-popover-editor .cm-scroller {
+	overflow: auto;
+}
+
+/* Comfortable inset so the readable-width text isn't flush to the edges. The
+   modal width itself tracks Obsidian's --file-line-width, so readable line
+   length is left on and the text width is unchanged. */
+.note-popover-editor .view-content {
+	padding: 12px 20px 20px;
+}
+

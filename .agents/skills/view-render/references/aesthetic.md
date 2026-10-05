@@ -1,6 +1,6 @@
 # Visual scale, primitives and libraries
 
-A rendered leaf looks like the rest of Obsidian and like every other NAND product. Color comes from the app's CSS variables, so community themes still win. Geometry, motion and the shared building blocks come from the NAND design foundation at the top of `styles.css`. Do not bring a second design system.
+A rendered leaf looks like the rest of Obsidian and like every other NAND product. Color comes from the app's CSS variables, so community themes still win. Geometry, motion and the shared building blocks come from the NAND design foundation, the first file in `src/view/styles/order.json`. Do not bring a second design system.
 
 Touch targets, focus rings, `!important`, and `:has` stay in `../../dev/references/obsidian-api.md`. Class prefixes stay in that skill's architecture reference: use the prefix the product already has. This file owns the leaf scale, the shared primitives and the library list. The directories for the files are the tree in `../SKILL.md`.
 

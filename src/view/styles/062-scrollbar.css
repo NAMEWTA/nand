@@ -1,0 +1,44 @@
+/* ===== Scrollbar ===== */
+.dashboard-kanban::-webkit-scrollbar,
+.dashboard-sidebar::-webkit-scrollbar {
+	width: 0;
+	height: 0;
+}
+
+.dashboard-section-cards::-webkit-scrollbar {
+	width: 0;
+	height: 4px;
+}
+
+.dashboard-kanban::-webkit-scrollbar-track,
+.dashboard-sidebar::-webkit-scrollbar-track,
+.dashboard-section-cards::-webkit-scrollbar-track {
+	background: transparent;
+}
+
+.dashboard-kanban::-webkit-scrollbar-thumb,
+.dashboard-sidebar::-webkit-scrollbar-thumb,
+.dashboard-section-cards::-webkit-scrollbar-thumb {
+	background: transparent;
+	border-radius: 3px;
+	transition: background 0.2s ease;
+}
+
+.dashboard-section-cards:hover::-webkit-scrollbar-thumb {
+	background: color-mix(in srgb, var(--db-accent) 18%, transparent);
+}
+
+.dashboard-section-cards::-webkit-scrollbar-thumb:hover {
+	background: color-mix(in srgb, var(--db-accent) 30%, transparent);
+}
+
+/* Firefox */
+.dashboard-section-cards {
+	scrollbar-width: thin;
+	scrollbar-color: transparent transparent;
+}
+
+.dashboard-section-cards:hover {
+	scrollbar-color: color-mix(in srgb, var(--db-accent) 18%, transparent) transparent;
+}
+

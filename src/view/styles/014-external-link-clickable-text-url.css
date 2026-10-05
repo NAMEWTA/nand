@@ -1,0 +1,12 @@
+/* ===== External Link (clickable [text](url)) ===== */
+.dashboard-external-link {
+	color: var(--db-accent, #6366f1);
+	cursor: pointer;
+	text-decoration: underline;
+	text-underline-offset: 2px;
+}
+
+.dashboard-external-link:hover {
+	color: var(--db-accent-light, #818cf8);
+}
+

@@ -7,14 +7,17 @@ The commands to run before finishing an edit are in SKILL.md. This file is what 
 | Script | What it does |
 |---|---|
 | `dev` | esbuild watch, inline sourcemap, no minify |
-| `build` | `tsc -noEmit -skipLibCheck`, then esbuild production. Writes the repo-root `main.js` |
+| `build` | `tsc -noEmit -skipLibCheck`, then `scripts/build-styles.mjs --check`, then esbuild production. Writes the repo-root `main.js`. Does not rewrite `styles.css` |
 | `lint` | `eslint .` |
 | `test:all` | All discovered test scripts, including browser and fault-injection/storage regressions |
 | `test:reliability` | Read/write failures, conflicts, Markdown fidelity, cancellation, action documents, DST and 10,000 records |
 | `test:i18n` | Paired Chinese/English keys, interpolation parameters and literal translation references |
 | `test:docs` | Current Markdown links, code fences and SpecDev active/archive indexes |
+| `test:styles` | `styles.css` is the byte-for-byte join of `src/view/styles/order.json`. Filename order is not the source of truth |
 
 `main.js` is committed. A source change that is not rebuilt ships the old bundle to anyone who installs from the repo. Commit the rebuilt file with the source.
+
+`styles.css` is also committed. Edit the author file in `src/view/styles/`, keep its place in `order.json`, then run `node scripts/build-styles.mjs --write`. `--check` fails when the root file differs. Do not sort the author files by name, and do not rename selectors just to split the file.
 
 The package manager is pnpm. `package.json` pins `packageManager`. The lockfile is `pnpm-lock.yaml`. CI runs `pnpm install --frozen-lockfile`.
 

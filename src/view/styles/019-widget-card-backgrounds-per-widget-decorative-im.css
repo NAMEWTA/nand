@@ -1,0 +1,125 @@
+/* ===== Widget card backgrounds (per-widget decorative images) ===== */
+/* The layer is absolutely positioned with z-index:-1 inside an isolation
+   context on the card: it paints above the card's own background (which
+   shows through the image's opacity) but below all content, without
+   repositioning any child. ::before carries the image (blurred + over-scaled
+   so the blur edge never bleeds visibly); ::after is the black dimming
+   overlay that keeps text readable over busy photos. */
+.dashboard-sidebar-widget--has-bg {
+	isolation: isolate;
+}
+
+/* Foreground scheme: redirect the card's theme text tokens to the chosen
+   color so text AND icons (accent-driven) flip together over the photo.
+   Muted/faint derive from the same color so the hierarchy survives. */
+.dashboard-sidebar-widget--has-bg.dashboard-sidebar-widget--fg-set {
+	--db-text: var(--wbg-fg, var(--db-text));
+	--db-text-muted: color-mix(in srgb, var(--wbg-fg, var(--db-text)) 72%, transparent);
+	--db-text-faint: color-mix(in srgb, var(--wbg-fg, var(--db-text)) 50%, transparent);
+	--db-accent: var(--wbg-fg, var(--db-accent));
+	/* Re-anchor INHERITED text color on the card: descendants without their
+	   own color rule (quick-action labels, titles) inherit the ancestor's
+	   already-resolved color, which bypasses the token overrides above —
+	   setting `color` here makes the flip reach them too. */
+	color: var(--db-text);
+}
+
+.dashboard-widget-bg {
+	position: absolute;
+	inset: 0;
+	z-index: -1;
+	overflow: hidden;
+	border-radius: inherit;
+	pointer-events: none;
+}
+
+.dashboard-widget-bg::before {
+	content: '';
+	position: absolute;
+	inset: 0;
+	background-image: var(--wbg-image);
+	background-size: cover;
+	background-position: center;
+	opacity: var(--wbg-opacity, 1);
+	filter: blur(var(--wbg-blur, 0px));
+	transform: scale(var(--wbg-scale, 1));
+}
+
+.dashboard-widget-bg::after {
+	content: '';
+	position: absolute;
+	inset: 0;
+	background: rgb(0 0 0 / var(--wbg-dim, 0));
+}
+
+/* Glass inner frame on background-image cards (not the quick-actions card —
+   its buttons already wear that treatment). The pane must read as a SEPARATE
+   sheet of glass PRESSED ONTO the photo ("glass is glass, image is image"),
+   not a tint fused with it, so unlike the buttons it carries:
+   - its own frost (blur+saturate) instead of the theme's button blur (mostly
+     none) — the photo visibly refracts under the pane;
+   - a substantial fill: the theme's CARD surface token (much more present
+     than the ~6% button tint), softened to 65% so the photo still shows;
+   - a lit top edge + soft drop shadow — the classic glass-sheet highlight.
+   Theme tokens keep every theme adapted; the phone CSS block disables
+   backdrop-filter wholesale, where this degrades to the tinted fill. */
+.dashboard-widget-frame {
+	position: absolute;
+	inset: 6px;
+	z-index: -1;
+	pointer-events: none;
+	border-radius: calc(var(--db-radius-md, 10px) - 4px);
+	background: color-mix(in srgb, var(--db-bg-card, rgba(127, 127, 127, 0.25)) 65%, transparent);
+	border: 1px solid color-mix(in srgb, var(--db-accent, var(--interactive-accent)) 28%, transparent);
+	box-shadow:
+		inset 0 1px 0 rgba(255, 255, 255, 0.16),
+		0 2px 10px rgba(0, 0, 0, 0.14);
+	backdrop-filter: blur(7px) saturate(1.15);
+	-webkit-backdrop-filter: blur(7px) saturate(1.15);
+}
+
+/* Half-hidden gear button at a card's top-right corner (the countdown
+   settings-button recipe): invisible at rest, faint on card hover, full on
+   its own hover. */
+.dashboard-sidebar-widget--cfg,
+.dashboard-sidebar-widget--has-bg {
+	position: relative;
+}
+
+.dashboard-widget-cfg-btn {
+	position: absolute;
+	top: 8px;
+	right: 8px;
+	z-index: 2;
+	visibility: hidden;
+	background: none !important;
+	border: none !important;
+	box-shadow: none !important;
+	color: var(--db-text-muted);
+	width: 20px;
+	height: 20px;
+	box-sizing: border-box;
+	padding: 0;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	cursor: pointer;
+	opacity: 0;
+	transition: opacity 0.15s ease, color 0.15s ease;
+}
+
+.dashboard-sidebar-widget:hover .dashboard-widget-cfg-btn {
+	visibility: visible;
+	opacity: 0.5;
+}
+
+.dashboard-sidebar-widget:hover .dashboard-widget-cfg-btn:hover {
+	opacity: 1;
+	color: var(--db-accent);
+}
+
+.dashboard-widget-cfg-btn svg {
+	width: 13px;
+	height: 13px;
+}
+
