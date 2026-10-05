@@ -1,0 +1,30 @@
+name: Workbench baseline assets
+# Temporary read-only verification assets, removed before final review.
+on:
+  push:
+    branches: [refactor/unified-workbench-v2]
+    paths: [.github/workflows/workbench-baseline-assets.yml]
+permissions:
+  contents: read
+jobs:
+  assets:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: c8230ad07f0110583ea3cfe92496e2b84f65be2c
+          persist-credentials: false
+      - run: |
+          set -eu
+          mkdir -p "$RUNNER_TEMP/workbench-baseline"
+          git archive --format=tar.gz HEAD > "$RUNNER_TEMP/workbench-baseline/main-c8230ad.tar.gz"
+          curl --fail --location --retry 3 'https://github.com/obsidianmd/obsidian-releases/releases/download/v1.12.4/Obsidian-1.12.4.AppImage' -o "$RUNNER_TEMP/workbench-baseline/Obsidian-1.12.4.AppImage"
+          cd "$RUNNER_TEMP/workbench-baseline"
+          echo '0e9d2e5a56f32d92ee4f809574f94ea4f789c9c0fd742d4c19a4fe744e232718  Obsidian-1.12.4.AppImage' | sha256sum -c -
+          sha256sum * > SHA256SUMS
+      - uses: actions/upload-artifact@v4
+        with:
+          name: workbench-baseline-and-1.12.4
+          path: ${{ runner.temp }}/workbench-baseline/
+          retention-days: 3
