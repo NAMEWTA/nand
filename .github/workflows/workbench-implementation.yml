@@ -1,5 +1,5 @@
 name: Workbench implementation build
-# Temporary branch-only harness; remove before final review.
+# Temporary implementation harness; remove before final review.
 on:
   push:
     branches: [refactor/unified-workbench-v2]
@@ -27,22 +27,6 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - name: Apply the reviewed implementation stage
         run: node scripts/workbench-stage.mjs
-      - name: Prepare isolated validation bundle
-        run: |
-          set -eu
-          mkdir -p "$RUNNER_TEMP/nand-tools/bin"
-          cp "$(command -v node)" "$RUNNER_TEMP/nand-tools/bin/node"
-          cp -R "$(dirname "$(readlink -f "$(command -v pnpm)")")/.." "$RUNNER_TEMP/nand-tools/pnpm"
-          tar -czf "$RUNNER_TEMP/nand-source.tgz" --exclude=.git --exclude=scripts/tmp --exclude=node_modules/.tmp --exclude=.git-credentials .
-          tar -czf "$RUNNER_TEMP/nand-tools.tgz" -C "$RUNNER_TEMP/nand-tools" .
-      - uses: actions/upload-artifact@v4
-        with:
-          name: nand-workbench-validation-source
-          path: |
-            ${{ runner.temp }}/nand-source.tgz
-            ${{ runner.temp }}/nand-tools.tgz
-          compression-level: 0
-          retention-days: 3
       - run: pnpm run build
         id: build
       - name: Commit built implementation to this branch only
