@@ -10,6 +10,8 @@ import {
 } from 'obsidian';
 import { render } from 'preact/compat';
 import { emptyQuery } from '../../core/contacts/index-store';
+import type { ContactsLayoutMode } from './panel-contract';
+import { applyLayout, emptyPanelState, restoreContactsState } from './panel-state';
 import { ContactsError, newRecord, type ArchiveRecord, type RecordKind } from '../../core/contacts/model';
 import { type ContactsController } from '../../platform/obsidian/contacts/controller';
 import { t } from '../../shared/i18n/index';
@@ -23,7 +25,7 @@ import type { ArchiveResource } from '../../core/contacts/resources';
 
 export const CONTACTS_VIEW_TYPE = 'nand-contacts-view';
 export class ContactsView extends ItemView {
-	state: ContactsPanelState = { query: emptyQuery(), page: 0, selectedPath: '', selectedId: '', scroll: 0 };
+	state: ContactsPanelState = emptyPanelState();
 	controller?: ContactsController;
 	private unsubscribe?: () => void;
 	private history: Array<{ path: string; id: string }> = [];
@@ -85,7 +87,12 @@ export class ContactsView extends ItemView {
 			}),
 		);
 		this.registerDomEvent(this.contentEl, 'scroll', () => {
-			if (!this.state.selectedPath) this.state.scroll = this.contentEl.scrollTop;
+			if (this.state.selectedPath) return;
+			this.state.scroll = this.contentEl.scrollTop;
+			const path = this.firstVisible();
+			if (!path) return;
+			const kind = this.state.query.kind;
+			this.state.anchors[kind][this.state.layout[kind]] = path;
 		});
 		this.bindController();
 		return Promise.resolve();
@@ -130,20 +137,7 @@ export class ContactsView extends ItemView {
 		return { ...this.state };
 	}
 	async setState(raw: Record<string, unknown>, result: ViewStateResult): Promise<void> {
-		const q = raw.query && typeof raw.query === 'object' ? (raw.query as Record<string, unknown>) : {};
-		const query = emptyQuery();
-		query.kind = q.kind === 'company' ? 'company' : 'person';
-		query.sort = q.sort === 'modified' ? 'modified' : 'name';
-		query.search = typeof q.search === 'string' ? q.search : '';
-		for (const key of ['current', 'past', 'regions', 'tags', 'relations'] as const)
-			query[key] = Array.isArray(q[key]) ? q[key].filter((v): v is string => typeof v === 'string') : [];
-		this.state = {
-			query,
-			page: typeof raw.page === 'number' && Number.isFinite(raw.page) ? Math.max(0, Math.floor(raw.page)) : 0,
-			selectedPath: typeof raw.selectedPath === 'string' ? raw.selectedPath : '',
-			selectedId: typeof raw.selectedId === 'string' ? raw.selectedId : '',
-			scroll: typeof raw.scroll === 'number' && Number.isFinite(raw.scroll) ? Math.max(0, raw.scroll) : 0,
-		};
+		this.state = restoreContactsState(raw);
 		if (this.app.workspace.layoutReady) await this.controller?.ensureLoaded();
 		if (
 			this.app.workspace.layoutReady &&
@@ -158,18 +152,38 @@ export class ContactsView extends ItemView {
 		}
 		this.render();
 		await super.setState(raw, result);
-		if (!this.state.selectedPath)
-			this.contentEl.win.requestAnimationFrame(() => {
-				this.contentEl.scrollTop = this.state.scroll;
-			});
+		if (!this.state.selectedPath) this.restoreScroll();
+	}
+	private firstVisible(): string {
+		const top = this.contentEl.getBoundingClientRect().top;
+		const nodes = this.contentEl.querySelectorAll<HTMLElement>('[data-path]');
+		for (let index = 0; index < nodes.length; index++) {
+			const node = nodes[index]!;
+			if (node.getBoundingClientRect().bottom > top + 1) return node.dataset.path ?? '';
+		}
+		return '';
+	}
+	private scrollToPath(path: string): void {
+		if (!path) return;
+		const node = this.contentEl.querySelector<HTMLElement>(`[data-path="${CSS.escape(path)}"]`);
+		node?.scrollIntoView({ block: 'start' });
+	}
+	private restoreScroll(): void {
+		const kind = this.state.query.kind;
+		const anchor = this.state.anchors[kind][this.state.layout[kind]];
+		this.contentEl.win.requestAnimationFrame(() => {
+			if (anchor) this.scrollToPath(anchor);
+			else this.contentEl.scrollTop = this.state.scroll;
+		});
 	}
 	private persist(): void {
 		this.app.workspace.requestSaveLayout();
 	}
-	select(path: string): void {
+	select(path: string, focus = ''): void {
 		if (this.state.selectedPath) this.history.push({ path: this.state.selectedPath, id: this.state.selectedId });
 		this.state.selectedPath = path;
 		this.state.selectedId = this.controller?.index.byPath.get(path)?.id ?? '';
+		this.state.focus = focus;
 		this.contentEl.scrollTop = 0;
 		this.render();
 		this.persist();
@@ -178,10 +192,25 @@ export class ContactsView extends ItemView {
 		const previous = this.history.pop();
 		this.state.selectedPath = previous?.path ?? '';
 		this.state.selectedId = previous?.id ?? '';
+		this.state.focus = '';
 		this.render();
-		this.contentEl.win.requestAnimationFrame(() => {
-			this.contentEl.scrollTop = this.state.selectedPath ? 0 : this.state.scroll;
-		});
+		if (this.state.selectedPath) this.contentEl.scrollTop = 0;
+		else this.restoreScroll();
+		this.persist();
+	}
+	layout(mode: ContactsLayoutMode): void {
+		const next = applyLayout(this.state, mode, this.firstVisible());
+		if (next === this.state) return;
+		this.state = next;
+		this.render();
+		this.scrollToPath(this.state.anchors[this.state.query.kind][mode]);
+		this.persist();
+	}
+	setScope(value: 'record' | 'fields'): void {
+		if (this.state.query.scope === value) return;
+		this.state.query = { ...this.state.query, scope: value };
+		this.state.page = 0;
+		this.render();
 		this.persist();
 	}
 	changeKind(kind: RecordKind): void {
@@ -214,6 +243,7 @@ export class ContactsView extends ItemView {
 			kind: this.state.query.kind,
 			search: this.state.query.search,
 			sort: this.state.query.sort,
+			scope: this.state.query.scope,
 		};
 		this.state.page = 0;
 		this.render();

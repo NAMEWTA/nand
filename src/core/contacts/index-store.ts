@@ -1,5 +1,6 @@
 import { ContactsError, type ArchiveRecord, type EntityRef, type PersonRelation } from './model';
 import { resolveRelative } from './persist/markdown';
+import { buildSearchDocument, searchHit, type SearchDocument, type SearchHit } from './search-text';
 
 export interface RelationEntry {
 	owner: ArchiveRecord;
@@ -16,24 +17,67 @@ export interface ContactsQuery {
 	tags: string[];
 	relations: string[];
 	sort: 'name' | 'modified';
+	/** `record` searches the entry note. `fields` keeps the previous field, title, and company-name match. */
+	scope: 'record' | 'fields';
 }
 export function emptyQuery(): ContactsQuery {
-	return { kind: 'person', search: '', current: [], past: [], regions: [], tags: [], relations: [], sort: 'name' };
+	return {
+		kind: 'person',
+		search: '',
+		current: [],
+		past: [],
+		regions: [],
+		tags: [],
+		relations: [],
+		sort: 'name',
+		scope: 'record',
+	};
 }
 export class ContactsIndex {
 	readonly byPath = new Map<string, ArchiveRecord>();
 	readonly byId = new Map<string, ArchiveRecord[]>();
 	private memberships = new Map<string, Set<string>>();
 	private relationships = new Map<string, RelationEntry[]>();
-	private contributions = new Map<string, { companies: string[]; people: string[] }>();
+	private contributions = new Map<string, { companies: string[]; people: string[]; companyMentions: string[] }>();
+	private companyMentions = new Map<string, Set<string>>();
+	private docs = new Map<string, SearchDocument>();
+	/** Name and id as last indexed. Callers may mutate the stored record before the next set. */
+	private indexedIdentity = new Map<string, { id: string; name: string }>();
 	clear(): void {
 		this.byPath.clear();
 		this.byId.clear();
 		this.memberships.clear();
 		this.relationships.clear();
 		this.contributions.clear();
+		this.companyMentions.clear();
+		this.docs.clear();
+		this.indexedIdentity.clear();
 	}
-	remove(path: string): void {
+	/** Paths whose search text copies this record's name. Collected before the record's own links are dropped. */
+	private dependents(id: string): string[] {
+		if (!id) return [];
+		const paths = new Set<string>();
+		for (const path of this.memberships.get(id) ?? []) paths.add(path);
+		for (const entry of this.relationships.get(id) ?? []) paths.add(entry.owner.path);
+		for (const path of this.companyMentions.get(id) ?? []) paths.add(path);
+		return [...paths];
+	}
+	private writeDoc(record: ArchiveRecord): void {
+		this.docs.set(
+			record.path,
+			buildSearchDocument(record, {
+				company: (ref) => this.resolve(ref, record)?.fields.name || ref.label,
+				person: (ref) => this.resolve(ref, record)?.fields.name || ref.label,
+			}),
+		);
+	}
+	private rebuild(paths: Iterable<string>): void {
+		for (const path of paths) {
+			const record = this.byPath.get(path);
+			if (record) this.writeDoc(record);
+		}
+	}
+	private detach(path: string): void {
 		const previous = this.byPath.get(path);
 		if (!previous) return;
 		this.byPath.delete(path);
@@ -41,18 +85,31 @@ export class ContactsIndex {
 		if (rest.length) this.byId.set(previous.id, rest);
 		else this.byId.delete(previous.id);
 		const contribution = this.contributions.get(path);
-		for (const company of contribution?.companies ?? []) {
-			this.memberships.get(company)?.delete(path);
-		}
+		for (const company of contribution?.companies ?? []) this.memberships.get(company)?.delete(path);
 		for (const person of contribution?.people ?? [])
 			this.relationships.set(
 				person,
 				(this.relationships.get(person) ?? []).filter((e) => e.owner.path !== path),
 			);
+		for (const id of contribution?.companyMentions ?? []) this.companyMentions.get(id)?.delete(path);
 		this.contributions.delete(path);
+		this.docs.delete(path);
+		this.indexedIdentity.delete(path);
+	}
+	remove(path: string): void {
+		const previous = this.byPath.get(path);
+		if (!previous) return;
+		const refresh = this.dependents(previous.id).filter((item) => item !== path);
+		this.detach(path);
+		this.rebuild(refresh);
 	}
 	set(record: ArchiveRecord): void {
-		this.remove(record.path);
+		const previous = this.indexedIdentity.get(record.path);
+		const refresh = new Set<string>();
+		if (!previous || previous.name !== record.fields.name || previous.id !== record.id)
+			for (const id of new Set([previous?.id, record.id].filter((id): id is string => !!id)))
+				for (const path of this.dependents(id)) refresh.add(path);
+		this.detach(record.path);
 		this.byPath.set(record.path, record);
 		this.byId.set(record.id, [...(this.byId.get(record.id) ?? []), record]);
 		const companies = record.employments.map((e) => e.company.id).filter(Boolean);
@@ -74,7 +131,17 @@ export class ContactsIndex {
 				this.relationships.set(id, list);
 			}
 		}
-		this.contributions.set(record.path, { companies, people });
+		const companyMentions = [...new Set(record.relations.map((relation) => relation.company.id).filter(Boolean))];
+		for (const id of companyMentions) {
+			const mentions = this.companyMentions.get(id) ?? new Set<string>();
+			mentions.add(record.path);
+			this.companyMentions.set(id, mentions);
+		}
+		this.contributions.set(record.path, { companies, people, companyMentions });
+		this.indexedIdentity.set(record.path, { id: record.id, name: record.fields.name });
+		this.writeDoc(record);
+		refresh.delete(record.path);
+		this.rebuild(refresh);
 	}
 	get(id: string): ArchiveRecord | undefined {
 		const entries = this.byId.get(id);
@@ -146,6 +213,10 @@ export class ContactsIndex {
 			if (duplicate) throw new ContactsError('duplicateRelation');
 		}
 	}
+	hit(record: ArchiveRecord, search: string, scope: ContactsQuery['scope'] = 'record'): SearchHit | undefined {
+		const doc = this.docs.get(record.path);
+		return doc ? searchHit(doc, search, scope === 'fields' ? 'fields' : 'record') : undefined;
+	}
 	query(q: ContactsQuery): ArchiveRecord[] {
 		const needle = q.search.trim().toLocaleLowerCase();
 		const matches = (selected: string[], values: string[]) =>
@@ -170,15 +241,8 @@ export class ContactsIndex {
 						))
 				)
 					return false;
-				const text = [
-					...Object.values(r.fields).flat(),
-					...r.employments.flatMap((j) => [
-						j.title,
-						this.resolve(j.company, r)?.fields.name ?? j.company.label,
-					]),
-				]
-					.join(' ')
-					.toLocaleLowerCase();
+				const doc = this.docs.get(r.path);
+				const text = doc ? (q.scope === 'fields' ? doc.fields : doc.record) : '';
 				return !needle || text.includes(needle);
 			})
 			.sort((a, b) =>

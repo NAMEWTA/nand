@@ -65,15 +65,17 @@ function Section({
 	action,
 	children,
 	expanded = false,
+	initialOpen = false,
 	summary,
 }: {
 	title: string;
 	action?: ReactNode;
 	children: ReactNode;
 	expanded?: boolean;
+	initialOpen?: boolean;
 	summary?: string;
 }) {
-	const [open, setOpen] = useState(expanded);
+	const [open, setOpen] = useState(expanded || initialOpen);
 	return (
 		<section className="nand-contacts-section nand-ui-card">
 			<div className="nand-contacts-section-title">
@@ -203,6 +205,16 @@ function Detail({ view, record }: { view: ContactsPanelHost; record: ArchiveReco
 					<Action icon="more-horizontal" label={ct('more')} action={() => view.more(record)} />
 				</div>
 			</header>
+			{view.state.focus === 'body' && (
+				<p className="nand-contacts-hit">
+					{ct('bodyHint', {
+						line: index.hit(record, view.state.query.search, view.state.query.scope)?.line ?? 1,
+					})}{' '}
+					<button type="button" className="nand-ui-btn" onClick={() => view.openResource(record.path)}>
+						{ct('source')}
+					</button>
+				</p>
+			)}
 			{blocked && (
 				<div role="alert" className="nand-contacts-error nand-contacts-banner">
 					<Icon name="alert-triangle" className="nand-contacts-banner-icon" />
@@ -227,6 +239,7 @@ function Detail({ view, record }: { view: ContactsPanelHost; record: ArchiveReco
 			{record.kind === 'person' && (
 				<>
 					<Section
+						initialOpen={view.state.focus === 'employments'}
 						title={`${ct('employments')} (${record.employments.length})`}
 						action={
 							<Action
@@ -283,6 +296,7 @@ function Detail({ view, record }: { view: ContactsPanelHost; record: ArchiveReco
 							))}
 					</Section>
 					<Section
+						initialOpen={view.state.focus === 'relations'}
 						title={`${ct('relations')} (${index.relationsFor(record.id).length})`}
 						action={
 							<Action icon="plus" label={ct('add')} action={() => edit('relation')} disabled={blocked} />
@@ -365,6 +379,7 @@ function Detail({ view, record }: { view: ContactsPanelHost; record: ArchiveReco
 			{(record.kind === 'person' ? (['traits', 'habits', 'notes'] as const) : (['notes'] as const)).map((key) => (
 				<Section
 					key={key}
+					initialOpen={view.state.focus === key}
 					title={ct(key === 'notes' && record.kind === 'company' ? 'companyNotes' : key)}
 					summary={record.prose[key].replace(/\s+/g, ' ').trim().slice(0, 40)}
 					action={
@@ -380,6 +395,88 @@ function Detail({ view, record }: { view: ContactsPanelHost; record: ArchiveReco
 				</Section>
 			))}
 		</article>
+	);
+}
+function currentJobs(view: ContactsPanelHost, record: ArchiveRecord): string {
+	return record.employments
+		.filter((job) => job.status === 'current')
+		.map((job) =>
+			[view.controller?.index.resolve(job.company, record)?.fields.name ?? job.company.label, job.title]
+				.filter(Boolean)
+				.join(' · '),
+		)
+		.filter(Boolean)
+		.join(' / ');
+}
+function copyText(value: string): void {
+	const clipboard = navigator.clipboard;
+	if (clipboard) void clipboard.writeText(value);
+}
+function HitLine({ view, record, plain = false }: { view: ContactsPanelHost; record: ArchiveRecord; plain?: boolean }) {
+	const { search, scope } = view.state.query;
+	const hit = search.trim() ? view.controller?.index.hit(record, search, scope) : undefined;
+	if (!hit) return null;
+	const label = `${ct('hit', { source: ct(`hit.${hit.source}`) })} ${hit.snippet}`;
+	return plain ? (
+		<span className="nand-contacts-hit">{label}</span>
+	) : (
+		<button type="button" className="nand-contacts-hit" onClick={() => view.select(record.path, hit.source)}>
+			{label}
+		</button>
+	);
+}
+function RecordRow({ view, record }: { view: ContactsPanelHost; record: ArchiveRecord }) {
+	const email = record.kind === 'person' ? record.fields.emails[0] : '';
+	const extra = record.kind === 'person' ? Math.max(0, record.fields.emails.length - 1) : 0;
+	const jobs = record.kind === 'person' ? currentJobs(view, record) : '';
+	const indexed =
+		record.kind === 'company' ? ct('indexed', { count: view.controller?.index.members(record.id, 'current').length ?? 0 }) : '';
+	const secondary = record.kind === 'person' ? [jobs, record.fields.region] : [record.fields.region, record.fields.website];
+	const emailText = email ? (extra > 0 ? `${email} +${extra}` : email) : '';
+	return (
+		<div className="nand-contacts-row nand-ui-card" role="listitem" data-path={record.path}>
+			<button type="button" className="nand-contacts-row-name" onClick={() => view.select(record.path)}>
+				{record.fields.name}
+			</button>
+			<div className="nand-contacts-row-wide">
+				<span className="nand-contacts-muted">{record.kind === 'person' ? jobs || ct('noDetails') : record.fields.region || '—'}</span>
+				<span className="nand-contacts-muted">{record.kind === 'person' ? record.fields.region || '—' : record.fields.website || '—'}</span>
+				<span>
+					{record.kind === 'person' ? (
+						emailText ? (
+							<>
+								<span>{email}</span>
+								{extra > 0 && <span className="nand-contacts-muted"> +{extra}</span>}
+							</>
+						) : (
+							<span className="nand-contacts-muted">—</span>
+						)
+					) : (
+						<span className="nand-contacts-muted">{indexed}</span>
+					)}
+				</span>
+				<span className="nand-contacts-card-tags">
+					{record.fields.tags.map((tag) => (
+						<span key={tag} className="nand-contacts-tag">
+							{tag}
+						</span>
+					))}
+				</span>
+			</div>
+			<span className="nand-contacts-row-narrow nand-contacts-muted">
+				<span>{secondary[0] || ct('noDetails')}</span>
+				<span>{record.kind === 'person' ? [record.fields.region, emailText].filter(Boolean).join(' · ') || '—' : [record.fields.website, indexed].filter(Boolean).join(' · ')}</span>
+			</span>
+			{email && (
+				<button type="button" className="nand-ui-btn nand-ui-btn-ghost nand-contacts-row-copy" aria-label={ct('copyEmail')} onClick={() => copyText(email)}>
+					{ct('copyEmail')}
+				</button>
+			)}
+			<HitLine view={view} record={record} />
+			{!!view.controller?.index.issues(record).length && (
+				<span className="nand-contacts-error nand-ui-badge nand-ui-badge--error">{ct('problem')}</span>
+			)}
+		</div>
 	);
 }
 export function ContactsSurface({ view }: { view: ContactsPanelHost }) {
@@ -421,6 +518,21 @@ export function ContactsSurface({ view }: { view: ContactsPanelHost }) {
 					</div>
 				)}
 				{!selectedPath && (
+					<div className="nand-contacts-layout nand-ui-segmented" role="group" aria-label={ct('layout')}>
+						{(['list', 'card'] as const).map((mode) => (
+							<button
+								key={mode}
+								type="button"
+								aria-pressed={view.state.layout[query.kind] === mode}
+								className={view.state.layout[query.kind] === mode ? 'is-active' : ''}
+								onClick={() => view.layout(mode)}
+							>
+								{ct(mode)}
+							</button>
+						))}
+					</div>
+				)}
+				{!selectedPath && (
 					<div className="nand-contacts-search">
 						<Icon name="search" className="nand-contacts-search-icon" />
 						<input
@@ -431,6 +543,16 @@ export function ContactsSurface({ view }: { view: ContactsPanelHost }) {
 							onInput={(event) => view.search(event.currentTarget.value)}
 						/>
 					</div>
+				)}
+				{!selectedPath && (
+					<button
+						type="button"
+						className="nand-ui-btn nand-ui-btn-ghost nand-contacts-scope"
+						aria-pressed={query.scope === 'fields'}
+						onClick={() => view.setScope(query.scope === 'fields' ? 'record' : 'fields')}
+					>
+						{ct(query.scope === 'fields' ? 'scopeFields' : 'scopeRecord')}
+					</button>
 				)}
 				{!selectedPath && (
 					<div className="nand-contacts-header-actions">
@@ -475,12 +597,20 @@ export function ContactsSurface({ view }: { view: ContactsPanelHost }) {
 							{ct('clear')}
 						</button>
 					)}
+					{view.state.layout[query.kind] === 'list' ? (
+						<div className="nand-contacts-list" role="list">
+							{records.slice(page * 60, page * 60 + 60).map((r) => (
+								<RecordRow key={r.path} view={view} record={r} />
+							))}
+						</div>
+					) : (
 					<div className={`nand-contacts-grid nand-contacts-columns-${view.columns}`}>
 						{records.slice(page * 60, page * 60 + 60).map((r) => (
 							<button
 								className="nand-contacts-card nand-ui-card"
 								key={r.path}
-								onClick={() => view.select(r.path)}
+								data-path={r.path}
+								onClick={() => view.select(r.path, view.controller?.index.hit(r, query.search, query.scope)?.source)}
 							>
 								<span className="nand-contacts-card-title">
 									<Monogram name={r.fields.name} />
@@ -535,9 +665,11 @@ export function ContactsSurface({ view }: { view: ContactsPanelHost }) {
 										{ct('problem')}
 									</span>
 								)}
+								<HitLine view={view} record={r} plain />
 							</button>
 						))}
 					</div>
+					)}
 					{!records.length && !controller.loading && (
 						<div className="nand-contacts-empty">
 							<Icon
