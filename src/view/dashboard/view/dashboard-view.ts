@@ -1,3 +1,5 @@
+import { DASHBOARD_VIEW_TYPE } from './view-type';
+import { t } from '../../../shared/i18n';
 import { ItemView, type WorkspaceLeaf, type ViewStateResult } from 'obsidian';
 import { DashboardSurface } from './dashboard-surface';
 import type { DashboardHost } from '../host';
@@ -13,10 +15,10 @@ export class DashboardView extends ItemView {
 			close: () => this.leaf.detach(),
 		}, host));
 	}
-	getNativeSurfaces(): readonly DashboardSurface[] { return [this.surface]; }
+	getNativeSurfaces(): readonly DashboardSurface[] { return this.surface ? [this.surface] : []; }
 	onOpen(): Promise<void> { return this.surface.onOpen(); }
 	onClose(): Promise<void> { return this.surface.onClose(); }
-	getState(): Record<string, unknown> { return this.surface.getState(); }
+	getState(): Record<string, unknown> { return this.surface?.getState() ?? {}; }
 	async setState(state: Record<string, unknown>, result: ViewStateResult): Promise<void> {
 		await this.surface.setState(state, result);
 		await super.setState(state, result);
@@ -183,8 +185,11 @@ export class DashboardView extends ItemView {
 	startDayRolloverChecker(...args: Parameters<DashboardSurface['startDayRolloverChecker']>): ReturnType<DashboardSurface['startDayRolloverChecker']> { return this.surface.startDayRolloverChecker(...args); }
 	stopDayRolloverChecker(...args: Parameters<DashboardSurface['stopDayRolloverChecker']>): ReturnType<DashboardSurface['stopDayRolloverChecker']> { return this.surface.stopDayRolloverChecker(...args); }
 	checkDayRollover(...args: Parameters<DashboardSurface['checkDayRollover']>): ReturnType<DashboardSurface['checkDayRollover']> { return this.surface.checkDayRollover(...args); }
-	getViewType(...args: Parameters<DashboardSurface['getViewType']>): ReturnType<DashboardSurface['getViewType']> { return this.surface.getViewType(...args); }
-	getDisplayText(...args: Parameters<DashboardSurface['getDisplayText']>): ReturnType<DashboardSurface['getDisplayText']> { return this.surface.getDisplayText(...args); }
-	getIcon(...args: Parameters<DashboardSurface['getIcon']>): ReturnType<DashboardSurface['getIcon']> { return this.surface.getIcon(...args); }
+
+	getViewType(): string { return DASHBOARD_VIEW_TYPE; }
+
+	getDisplayText(): string { return this.surface?.getDisplayText() ?? t('main.dashboard'); }
+
+	getIcon(): string { return 'home'; }
 	focusWidget(...args: Parameters<DashboardSurface['focusWidget']>): ReturnType<DashboardSurface['focusWidget']> { return this.surface.focusWidget(...args); }
 }

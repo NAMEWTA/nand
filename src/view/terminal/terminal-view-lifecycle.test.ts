@@ -12,7 +12,7 @@ registerHooks({
 		if (specifier === 'obsidian') return { shortCircuit: true, url: moduleUrl(`
 			export class Component { register() {} registerEvent() {} addChild(child) { return child; } removeChild() {} }
 			export function setIcon() {} export function setTooltip() {}
-			export class ItemView extends Component { constructor(leaf) { super(); this.leaf = leaf; this.app = leaf.app; this.contentEl = leaf.el; this.containerEl = leaf.el; } }
+			export class ItemView extends Component { constructor(leaf) { super(); this.leaf = leaf; this.app = leaf.app; this.contentEl = leaf.el; this.containerEl = leaf.el; this.getViewType(); this.getDisplayText(); this.getIcon(); } }
 			export class FileSystemAdapter {} export class Menu {} export class Notice {} export class TFile {} export class TFolder {} export class Modal {}`) };
 		if (specifier === 'electron') return { shortCircuit: true, url: moduleUrl('export const shell = {}, webUtils = {};') };
 		if (specifier === 'preact') return { shortCircuit: true, url: moduleUrl('export const h = () => null, render = () => {};') };

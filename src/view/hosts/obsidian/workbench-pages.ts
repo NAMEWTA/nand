@@ -1,13 +1,13 @@
 import { t } from '../../../shared/i18n';
 import type { ItemView, ViewStateResult } from 'obsidian';
 import type { WorkbenchFeature, WorkbenchTarget } from '../../contracts/workbench';
-import { normalizeTarget } from '../../workbench/navigation-state';
+import { cleanPageState, normalizeTarget } from '../../workbench/navigation-state';
 import type { NativeSurface } from './native-surface';
 import type { WorkbenchContribution, WorkbenchPageBinding } from './workbench-host';
 
 export interface SavedPage { target: WorkbenchTarget; state: Record<string, unknown>; }
 interface PageEntry {
- key: string; target: WorkbenchTarget; element: HTMLElement; alive: boolean;
+ key: string; target: WorkbenchTarget; element: HTMLElement; navigationElement?: HTMLElement; alive: boolean;
  controller: AbortController; initialized?: boolean; visited?: number; binding?: WorkbenchPageBinding; ready: Promise<void>; closing?: Promise<void>;
 }
 /** The native owner controls DOM lifetimes; modules continue owning data and background work. */
@@ -18,7 +18,7 @@ export class WorkbenchPages {
  private disposed = false;
  private visits = 0;
  private active?: PageEntry;
- constructor(private readonly owner: ItemView, private readonly root: HTMLElement, private readonly contributions: readonly WorkbenchContribution[], private readonly navigate: (target: WorkbenchTarget) => Promise<void>, private readonly report: (error: unknown) => void, private readonly changed: () => void = () => {}) {}
+ constructor(private readonly owner: ItemView, private readonly root: HTMLElement, private readonly contributions: readonly WorkbenchContribution[], private readonly navigate: (target: WorkbenchTarget) => Promise<void>, private readonly report: (error: unknown) => void, private readonly changed: () => void = () => {}, private readonly navigationRoot?: HTMLElement, private readonly openNavigation?: () => void) {}
  contribution(feature: WorkbenchFeature): WorkbenchContribution | undefined { return this.contributions.find((item) => item.id === feature); }
  resolve(raw: WorkbenchTarget): WorkbenchTarget {
   const target = normalizeTarget(raw), contribution = this.contribution(target.feature);
@@ -30,15 +30,14 @@ export class WorkbenchPages {
  }
  private key(target: WorkbenchTarget): string { return JSON.stringify([target.feature, this.contribution(target.feature)?.resourcePages ? target.resourceId ?? '' : '']); }
  private cleanState(contribution: WorkbenchContribution, raw: unknown): Record<string, unknown> {
-  const value = raw && typeof raw === 'object' && !Array.isArray(raw) ? raw as Record<string, unknown> : {};
-  return Object.fromEntries(contribution.stateKeys.filter((key) => Object.prototype.hasOwnProperty.call(value, key)).map((key) => [key, value[key]]));
+  return cleanPageState(raw, contribution.stateKeys);
  }
  restore(raw: unknown): void {
   if (!Array.isArray(raw)) return;
   for (const item of raw.slice(0, 100)) {
    if (!item || typeof item !== 'object') continue;
    const value = item as Record<string, unknown>, target = normalizeTarget(value.target), contribution = this.contribution(target.feature);
-   if (!contribution || (contribution.resourcePages && !target.resourceId)) continue;
+   if (!contribution || !value.target || typeof value.target !== 'object' || (value.target as Record<string, unknown>).feature !== target.feature || (contribution.resourcePages && !target.resourceId)) continue;
    const key = this.key(target);
    this.saved.set(key, { target, state: this.cleanState(contribution, value.state) });
    this.last.set(target.feature, key);
@@ -48,7 +47,7 @@ export class WorkbenchPages {
   const result = new Map(this.saved);
   for (const entry of this.entries.values()) {
    if (!entry.binding || !entry.alive) continue;
-   result.set(entry.key, { target: entry.binding.getTarget?.() ?? entry.target, state: entry.binding.getState?.() ?? entry.binding.surface.getState() });
+   result.set(entry.key, { target: entry.binding.getTarget?.() ?? entry.target, state: this.cleanState(this.contribution(entry.target.feature)!, entry.binding.getState?.() ?? entry.binding.surface.getState()) });
   }
   return [...result.values()];
  }
@@ -61,57 +60,76 @@ export class WorkbenchPages {
   if (!contribution) return undefined;
   const key = this.key(target);
   let entry = this.entries.get(key);
+  const created = !entry;
   if (!entry) {
    if (contribution.resourcePages && !this.saved.has(key) && this.list(target.feature).length >= 50) throw new Error(t('workbench.pageLimit'));
    const element = this.root.createDiv({ cls: 'nand-workbench-page' }); element.hidden = true; element.inert = true;
+   const navigationElement = contribution.navigationContext ? this.navigationRoot?.createDiv({ cls: 'nand-workbench-context-page' }) : undefined;
+   if (navigationElement) { navigationElement.hidden = true; navigationElement.inert = true; }
    const controller = new AbortController();
-   const next: PageEntry = { key, target, element, alive: true, controller, ready: Promise.resolve() };
+   const next: PageEntry = { key, target, element, navigationElement, alive: true, controller, ready: Promise.resolve() };
    this.entries.set(key, next); entry = next;
    const state = this.cleanState(contribution, initial ?? this.saved.get(key)?.state);
    next.ready = Promise.resolve().then(async () => {
-    const binding = await contribution.create({ app: this.owner.app, leaf: this.owner.leaf, contentEl: element, containerEl: element, embedded: true, changed: () => { if (next.alive && this.active === next) this.changed(); }, close: () => this.close(next.key), activate: () => this.navigate(binding.getTarget?.() ?? next.target) }, target, state, controller.signal);
+    const binding = await contribution.create({ app: this.owner.app, leaf: this.owner.leaf, contentEl: element, containerEl: element, embedded: true, navigationEl: navigationElement, openNavigation: this.openNavigation, changed: () => { if (next.alive && this.active === next) this.changed(); }, close: () => this.close(next.key), activate: () => this.navigate(binding.getTarget?.() ?? next.target) }, target, state, controller.signal);
     next.binding = binding;
     const actual = binding.getTarget?.() ?? next.target;
     const actualKey = this.key(actual);
-    if (actualKey !== next.key) {
+    if (next.alive && !this.disposed && actualKey !== next.key) {
+     if (this.entries.has(actualKey)) throw new Error(t('workbench.missing'));
      this.entries.delete(next.key); this.saved.delete(next.key);
      next.key = actualKey; next.target = actual; this.entries.set(actualKey, next);
     }
     this.owner.addChild(binding.surface);
-    if (!next.alive || this.disposed) return;
+    if (!next.alive || this.disposed || controller.signal.aborted) return;
     await binding.surface.onOpen();
-    if (!next.alive || this.disposed) return;
+    if (!next.alive || this.disposed || controller.signal.aborted) return;
     if (binding.restore) await binding.restore(state);
     else if (Object.keys(state).length) await binding.surface.setState(state, {} as ViewStateResult);
     next.initialized = true;
    });
   }
+  const prepared = entry;
+  const cancelOpening = (): void => {
+   // A navigation owns only the presentation it just allocated. Cancelling a lookup
+   // on an existing editor must never discard that editor's draft or running session.
+   if (created && !prepared.visited) void this.closeEntry(prepared, this.saved.has(prepared.key)).catch(this.report);
+  };
+  signal.addEventListener('abort', cancelOpening, { once: true });
   try {
-   await entry.ready;
+   if (signal.aborted) cancelOpening();
+   await prepared.ready;
+   if (!prepared.alive || this.disposed || signal.aborted) return undefined;
+   await prepared.binding?.navigate(target, signal);
+   if (!prepared.alive || this.disposed || signal.aborted) return undefined;
+   prepared.target = prepared.binding?.getTarget?.() ?? target;
+   return prepared;
   } catch (error) {
-   await this.closeEntry(entry, true);
+   if (created) await this.closeEntry(prepared, this.saved.has(prepared.key));
+   if (signal.aborted) return undefined;
    throw error;
+  } finally {
+   signal.removeEventListener('abort', cancelOpening);
   }
-  if (!entry.alive || this.disposed || signal.aborted) return undefined;
-  // A target lookup failure must not unmount an existing editor or destroy its draft.
-  await entry.binding?.navigate(target, signal);
-   if (!entry.alive || this.disposed || signal.aborted) return undefined;
-   entry.target = entry.binding?.getTarget?.() ?? target;
-   return entry;
  }
  show(entry: PageEntry | undefined): void {
   if (this.active && this.active !== entry) {
-   this.active.element.hidden = true; this.active.element.inert = true; this.active.binding?.surface.setVisible(false);
+   const previous = this.active;
+   previous.element.hidden = true; previous.element.inert = true; previous.binding?.surface.setVisible(false);
+   if (previous.navigationElement) { previous.navigationElement.hidden = true; previous.navigationElement.inert = true; }
+   if (this.contribution(previous.target.feature)?.releaseWhenHidden) void this.closeEntry(previous, true).catch(this.report);
   }
   this.active = entry;
+  if (this.navigationRoot) this.navigationRoot.hidden = !entry?.navigationElement;
   if (!entry || !entry.alive) return;
   this.last.set(entry.target.feature, entry.key);
   entry.visited = ++this.visits;
-  entry.element.hidden = false; entry.element.inert = false; entry.binding?.surface.setVisible(true);
-  // A page is not a guest keep-alive promise. Keep current + two hidden browser guests warm.
-  const hidden = [...this.entries.values()].filter((candidate) => candidate !== this.active && candidate.target.feature === 'browser' && candidate.initialized).sort((a, b) => (b.visited ?? 0) - (a.visited ?? 0));
-  const keep = this.active?.target.feature === 'browser' ? 2 : 3;
-  for (const candidate of hidden.slice(keep)) void this.closeEntry(candidate, true).catch(this.report);
+  entry.element.hidden = false; entry.element.inert = false;
+  if (entry.navigationElement) { entry.navigationElement.hidden = false; entry.navigationElement.inert = false; }
+  entry.binding?.surface.setVisible(true);
+  // A browser guest may own a form, download or collection operation. Never silently
+  // evict it based only on visibility; explicit page close owns that destructive action.
+  // Stateless inbox projections opt in to releaseWhenHidden instead.
 
  }
  async close(key: string): Promise<void> {
@@ -134,15 +152,16 @@ export class WorkbenchPages {
  private closeEntry(entry: PageEntry, retain: boolean): Promise<void> {
   if (entry.closing) return entry.closing;
   entry.alive = false; entry.controller.abort();
+  if (entry.navigationElement) { entry.navigationElement.hidden = true; entry.navigationElement.inert = true; }
   if (this.active === entry) this.active = undefined;
   this.entries.delete(entry.key);
   entry.closing = (async () => {
    if (!entry.initialized) { try { await entry.ready; } catch { /* The opening caller receives the original error. */ } }
    if (entry.binding) {
-    if (retain) this.saved.set(entry.key, { target: entry.binding.getTarget?.() ?? entry.target, state: entry.binding.getState?.() ?? entry.binding.surface.getState() });
-    else this.saved.delete(entry.key);
-    try { await entry.binding.surface.onClose(); } finally { this.owner.removeChild(entry.binding.surface); entry.element.remove(); }
-   } else entry.element.remove();
+    if (retain && entry.initialized) this.saved.set(entry.key, { target: entry.binding.getTarget?.() ?? entry.target, state: this.cleanState(this.contribution(entry.target.feature)!, entry.binding.getState?.() ?? entry.binding.surface.getState()) });
+    else if (!retain) this.saved.delete(entry.key);
+    try { await entry.binding.surface.onClose(); } finally { this.owner.removeChild(entry.binding.surface); entry.element.remove(); entry.navigationElement?.remove(); }
+   } else { entry.element.remove(); entry.navigationElement?.remove(); }
    if (!retain && this.last.get(entry.target.feature) === entry.key) this.last.delete(entry.target.feature);
   })();
   return entry.closing;

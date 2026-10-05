@@ -31,7 +31,7 @@ export function composeWorkbench(plugin: DashboardPlugin) {
    { id: 'terminal-running', labelKey: 'workbench.running', icon: 'terminal', target: { feature: 'terminal', section: 'running' } },
    { id: 'terminal-history', labelKey: 'workbench.history', icon: 'history', target: { feature: 'terminal', section: 'history' } },
    { id: 'terminal-usage', labelKey: 'workbench.usage', icon: 'chart-no-axes-column', target: { feature: 'terminal', section: 'usage' } },
-  ] }, availability: () => ({ ...ready(), enabled: plugin.settings.modules.terminal, supported: Platform.isDesktopApp, ready: plugin.terminalHost?.isActive() === true }), stateKeys: ['sidebarWidth', 'wideSidebarOpen', 'navigation', 'sessionQuery', 'historyQuery', 'historyFilter', 'historyOffset', 'sessionId', 'section'], create: createTerminalPage(() => plugin.terminalHost) },
+  ] }, availability: () => ({ ...ready(), enabled: plugin.settings.modules.terminal, supported: Platform.isDesktopApp, ready: plugin.terminalHost?.isActive() === true }), navigationContext: true, stateKeys: ['sidebarWidth', 'wideSidebarOpen', 'navigation', 'sessionQuery', 'historyQuery', 'historyFilter', 'historyOffset', 'sessionId', 'section'], create: createTerminalPage(() => plugin.terminalHost) },
   { id: 'browser', navigation: { id: 'browser', labelKey: 'workbench.browser', icon: 'globe', target: { feature: 'browser' } }, availability: () => ({ ...ready(), enabled: plugin.settings.modules.browser, supported: Platform.isDesktopApp }), stateKeys: ['id', 'url', 'title', 'zoom', 'scroll'], resourcePages: true, create: createBrowserPage(plugin.browserHost) },
   { id: 'contacts', navigation: { id: 'contacts', labelKey: 'workbench.contacts', icon: 'contact-round', target: { feature: 'contacts' }, children: [
    { id: 'contacts-person', labelKey: 'workbench.people', icon: 'user', target: { feature: 'contacts', section: 'person' } },
@@ -57,14 +57,15 @@ export function composeWorkbench(plugin: DashboardPlugin) {
    const surface = new AutomationPresentation(context, plugin.automationHost.panelHost);
    return { surface, getTarget: () => surface.getTarget(), navigate: async (target, signal) => { if (signal.aborted) return; if (target.resourceId) surface.showRun(target.resourceId); else surface.showSection(target.section); } };
   } },
-  { id: 'notifications', navigation: { id: 'notifications', labelKey: 'workbench.notifications', icon: 'bell', target: { feature: 'notifications' } }, availability: () => ({ ...ready(), ready: !!plugin.automationHost }), stateKeys: [], create: async (context) => {
+  { id: 'notifications', navigation: { id: 'notifications', labelKey: 'workbench.notifications', icon: 'bell', target: { feature: 'notifications' } }, availability: () => ({ ...ready(), ready: !!plugin.automationHost }), stateKeys: [], releaseWhenHidden: true, create: async (context) => {
    if (!plugin.automationHost) throw new Error(t('automation.failedLoad'));
    return { surface: new NotificationPresentation(context, plugin.automationHost.notifications, report), navigate: async () => {} };
   } },
  ];
  const host: WorkbenchHost = {
   contributions, subscribe: (listener) => { listeners.add(listener); return () => { listeners.delete(listener); }; },
-  openSettings: () => plugin.openSettings(), report,
+  openSettings: (feature) => plugin.openSettings(feature === 'automations' || feature === 'notifications' ? 'automation' : feature === 'habit' || feature === 'expense' ? 'home' : feature ?? 'home'),
+  manageFeatures: () => plugin.openSettings('home'), report,
   openStandalone: async (target, state, ownerWindow) => {
    const anchor = plugin.app.workspace.getMostRecentLeaf();
    if (anchor && anchor.view.containerEl.win === ownerWindow) plugin.app.workspace.setActiveLeaf(anchor, { focus: false });
@@ -80,7 +81,9 @@ export function composeWorkbench(plugin: DashboardPlugin) {
  const open = async (target?: WorkbenchTarget, ownerWindow?: Window, initial?: Record<string, unknown>): Promise<void> => {
   const workspace = plugin.app.workspace;
   const win = ownerWindow ?? workspace.getMostRecentLeaf()?.view.containerEl.win ?? workspace.containerEl.win;
-  const existing = workspace.getLeavesOfType(WORKBENCH_VIEW_TYPE).find((leaf) => leaf.view.containerEl.win === win);
+  const active = workspace.getMostRecentLeaf();
+  const candidates = workspace.getLeavesOfType(WORKBENCH_VIEW_TYPE).filter((leaf) => leaf.view.containerEl.win === win);
+  const existing = candidates.includes(active!) ? active : candidates.sort((left, right) => (right.view instanceof WorkbenchView ? right.view.lastActivatedAt : 0) - (left.view instanceof WorkbenchView ? left.view.lastActivatedAt : 0))[0];
   if (existing) await existing.loadIfDeferred();
   let view = existing?.view;
   if (!(view instanceof WorkbenchView)) {

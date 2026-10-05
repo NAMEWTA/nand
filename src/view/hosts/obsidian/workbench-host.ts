@@ -14,12 +14,15 @@ export interface WorkbenchContribution {
  availability(): FeatureAvailability;
  stateKeys: readonly string[];
  resourcePages?: boolean;
+ navigationContext?: boolean;
+ releaseWhenHidden?: boolean;
  create(context: NativeSurfaceContext, target: WorkbenchTarget, state: Record<string, unknown>, signal: AbortSignal): Promise<WorkbenchPageBinding>;
 }
 export interface WorkbenchHost {
  contributions: readonly WorkbenchContribution[];
  subscribe(listener: () => void): () => void;
- openSettings: () => void;
+ openSettings: (feature?: WorkbenchFeature) => void;
+ manageFeatures: () => void;
  openStandalone: (target: WorkbenchTarget, state: Record<string, unknown>, ownerWindow: Window) => Promise<void>;
  report: (error: unknown) => void;
 }

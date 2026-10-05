@@ -1,3 +1,5 @@
+import { TERMINAL_VIEW_TYPE } from './view-type';
+import { t } from '../../shared/i18n/terminal-accessor';
 import { ItemView, type WorkspaceLeaf, type ViewStateResult } from 'obsidian';
 import type { TerminalService } from '../../platform/desktop/terminal/terminal-service';
 import type { TerminalViewHost } from './host';
@@ -11,15 +13,18 @@ export class TerminalView extends ItemView {
   super(leaf);
   this.surface = this.addChild(new TerminalSurface({ app: this.app, leaf, contentEl: this.contentEl, containerEl: this.contentEl, close: () => this.leaf.detach() }, service, host));
  }
- getNativeSurfaces(): readonly TerminalSurface[] { return [this.surface]; }
+ getNativeSurfaces(): readonly TerminalSurface[] { return this.surface ? [this.surface] : []; }
  copyWorkbenchStateFrom(view: TerminalView): void { this.surface.copyWorkbenchStateFrom(view.surface); }
  onOpen(): Promise<void> { return this.surface.onOpen(); }
  onClose(): Promise<void> { return this.surface.onClose(); }
- getState(): Record<string, unknown> { return this.surface.getState(); }
+ getState(): Record<string, unknown> { return this.surface?.getState() ?? {}; }
  async setState(state: Record<string, unknown>, result: ViewStateResult): Promise<void> { await this.surface.setState(state, result); await super.setState(state, result); }
-	getViewType(...args: Parameters<TerminalSurface['getViewType']>): ReturnType<TerminalSurface['getViewType']> { return this.surface.getViewType(...args); }
-	getDisplayText(...args: Parameters<TerminalSurface['getDisplayText']>): ReturnType<TerminalSurface['getDisplayText']> { return this.surface.getDisplayText(...args); }
-	getIcon(...args: Parameters<TerminalSurface['getIcon']>): ReturnType<TerminalSurface['getIcon']> { return this.surface.getIcon(...args); }
+
+	getViewType(): string { return TERMINAL_VIEW_TYPE; }
+
+	getDisplayText(): string { return this.surface?.getDisplayText() ?? t('terminal.defaultTitle'); }
+
+	getIcon(): string { return 'terminal'; }
 	onPaneMenu(...args: Parameters<TerminalSurface['onPaneMenu']>): ReturnType<TerminalSurface['onPaneMenu']> { return this.surface.onPaneMenu(...args); }
 	showSearch(...args: Parameters<TerminalSurface['showSearch']>): ReturnType<TerminalSurface['showSearch']> { return this.surface.showSearch(...args); }
 	hideSearch(...args: Parameters<TerminalSurface['hideSearch']>): ReturnType<TerminalSurface['hideSearch']> { return this.surface.hideSearch(...args); }

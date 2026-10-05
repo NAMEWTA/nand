@@ -20,6 +20,7 @@ export interface NavigationItem {
 	target?: WorkbenchTarget;
 	children?: readonly NavigationItem[];
 	badge?: number;
+	aliases?: readonly string[];
 }
 export interface WorkbenchPage {
 	/** May change the selected object, but must not implicitly start a session. */

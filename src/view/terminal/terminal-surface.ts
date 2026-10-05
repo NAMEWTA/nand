@@ -371,6 +371,7 @@ export class TerminalSurface extends NativeSurface {
 				context: session?.agentId && host.attachContext ? h(ContextPanel, { key: session.id, host, id: session.id, title: session.getTitle() }) : null,
 				ownerWindow: this.contentEl.win,
 				embedded: this.embedded,
+				navigationContainer: this.context.navigationEl,
 				usageOnly: this.section === 'usage',
 				state,
 				onStateChange: this.changeWorkbench,
@@ -382,7 +383,7 @@ export class TerminalSurface extends NativeSurface {
 					status: session?.nativeStatus ?? 'unknown',
 					search: () => this.showSearch(),
 					more: (event: MouseEvent) => { const menu = new Menu(); this.onPaneMenu(menu); menu.showAtMouseEvent(event); },
-					sidebarToggle: () => this.changeWorkbench(this.embedded || (this.workbenchRoot?.clientWidth ?? this.contentEl.clientWidth) < 800 ? { drawerOpen: !state.drawerOpen } : { wideSidebarOpen: !state.wideSidebarOpen }),
+					sidebarToggle: () => { if (this.context.openNavigation) this.context.openNavigation(); else this.changeWorkbench((this.workbenchRoot?.clientWidth ?? this.contentEl.clientWidth) < 800 ? { drawerOpen: !state.drawerOpen } : { wideSidebarOpen: !state.wideSidebarOpen }); },
 					quickSwitch: () => host.showSessionSwitcher(this),
 					sidebarOpen: this.embedded || (this.workbenchRoot?.clientWidth ?? this.contentEl.clientWidth) < 800 ? state.drawerOpen : state.wideSidebarOpen,
 				}),
@@ -431,7 +432,7 @@ export class TerminalSurface extends NativeSurface {
 	showSection(section?: string): void {
 		if (!section) return;
 		this.section = section === 'history' || section === 'usage' ? section : 'running';
-		this.changeWorkbench({ navigation: this.section === 'history' ? 'history' : 'running', drawerOpen: this.embedded && this.section !== 'usage', showHistory: this.section === 'history' && this.workbenchState.showHistory });
+		this.changeWorkbench({ navigation: this.section === 'history' ? 'history' : 'running', drawerOpen: this.embedded && !this.context.navigationEl && this.section !== 'usage', showHistory: this.section === 'history' && this.workbenchState.showHistory });
 	}
 	setVisible(visible: boolean): void { if (visible) this.onResize(); this.syncOutputPause(); this.drawWorkbench(); }
 	private focusTerminal(): void {

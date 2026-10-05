@@ -1,4 +1,5 @@
 import type { ComponentChildren, Ref } from 'preact';
+import { createPortal } from 'preact/compat';
 import { useEffect, useRef, useState } from 'preact/hooks';
 import { t } from '../../shared/i18n/terminal-accessor';
 import { Icon } from '../primitives/Icon';
@@ -7,6 +8,7 @@ import { sidebarWidth, type WorkbenchChange, type WorkbenchState } from './workb
 export interface TerminalWorkbenchProps {
 	state: WorkbenchState;
 	embedded?: boolean;
+	navigationContainer?: HTMLElement;
 	usageOnly?: boolean;
 	onStateChange: WorkbenchChange;
 	sessions?: ComponentChildren;
@@ -35,7 +37,8 @@ export function TerminalWorkbench(props: TerminalWorkbenchProps) {
 	const navigation = useRef<HTMLElement>(null);
 	const drag = useRef<{ x: number; width: number }>();
 	const [compact, setCompact] = useState(props.embedded === true);
-	const drawerVisible = compact && state.drawerOpen;
+	const sharedNavigation = props.embedded && !!props.navigationContainer;
+	const drawerVisible = !sharedNavigation && compact && state.drawerOpen;
 	useEffect(() => {
 		const element = root.current;
 		const win = props.ownerWindow ?? element?.ownerDocument.defaultView;
@@ -54,6 +57,15 @@ export function TerminalWorkbench(props: TerminalWorkbenchProps) {
 		return () => { if (previous?.isConnected) previous.focus(); };
 	}, [drawerVisible, props.ownerWindow]);
 	const closeDrawer = () => onStateChange({ drawerOpen: false });
+ const objects = <section className="nand-agent-sidebar nand-workbench-agent-objects" aria-label={t(state.navigation === 'history' ? 'workbench.history' : 'workbench.openSessions')}>
+  {!props.usageOnly && <>
+   {state.navigation === 'running' && newConversation}
+   <div className="terminal-navigation-panels">
+    <div className="nand-agent-session-controls" hidden={state.navigation !== 'running'}>{sessions}</div>
+    <div className="nand-agent-history" hidden={state.navigation !== 'history'}>{history}</div>
+   </div>
+  </>}
+ </section>;
 	return (
 		<div
 			className={`terminal-workbench-shell${props.embedded ? ' is-workbench-embedded' : ''}${props.usageOnly ? ' is-usage-page' : ''}${state.wideSidebarOpen ? '' : ' is-sidebar-collapsed'}${state.drawerOpen ? ' is-drawer-open' : ''}${state.showHistory ? ' is-history-preview' : ''}`}
@@ -78,6 +90,8 @@ export function TerminalWorkbench(props: TerminalWorkbenchProps) {
 				}
 			}}
 		>
+			{sharedNavigation && props.navigationContainer && createPortal(objects, props.navigationContainer)}
+			{!sharedNavigation && <>
 			<button className="terminal-drawer-backdrop" tabIndex={-1} aria-label={t('workbench.closeNavigation')} onClick={closeDrawer} />
 			<aside className="nand-agent-sidebar" ref={navigation} aria-label={t('workbench.navigation')} role={drawerVisible ? 'dialog' : undefined} aria-modal={drawerVisible ? true : undefined} inert={compact ? !state.drawerOpen : !state.wideSidebarOpen}>
 				<div className="terminal-navigation-title" hidden={props.embedded}>
@@ -116,6 +130,7 @@ export function TerminalWorkbench(props: TerminalWorkbenchProps) {
 				onPointerUp={() => { drag.current = undefined; }} onPointerCancel={() => { drag.current = undefined; }}
 				onLostPointerCapture={() => { drag.current = undefined; }}
 			/>
+			</>}
 			<div className="nand-agent-center">
 				<div className="terminal-workbench-header">{header}</div>
 				{props.context}

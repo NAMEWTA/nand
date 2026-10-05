@@ -7,6 +7,9 @@ export interface NativeSurfaceContext {
 	contentEl: HTMLElement;
 	containerEl: HTMLElement;
 	embedded?: boolean;
+	/** Same-window object navigation, owned and hidden by the workbench. */
+	navigationEl?: HTMLElement;
+	openNavigation?: () => void;
 	changed?: () => void;
 	addAction?: (icon: string, title: string, callback: (event: MouseEvent) => void) => HTMLElement;
 	close: () => void | Promise<void>;

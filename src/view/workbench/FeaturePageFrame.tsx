@@ -4,6 +4,8 @@ import { Icon } from '../primitives/Icon';
 
 export interface FeaturePageFrameProps {
  title: string;
+ navigationId?: string;
+ navigationOpen?: boolean;
  busy: boolean;
  error?: string;
  unavailable?: string;
@@ -18,8 +20,8 @@ export interface FeaturePageFrameProps {
 export function FeaturePageFrame(props: FeaturePageFrameProps) {
  return <main className="nand-workbench-main" inert={props.inert}>
   <header className="nand-workbench-header">
-   <button type="button" className="nand-ui-icon-btn" aria-label={t('workbench.toggleNavigation')} onClick={props.toggleNavigation}><Icon name="panel-left" /></button>
-   <h2>{props.title}</h2><span className="nand-ui-spacer" />
+   <button type="button" className="nand-ui-icon-btn" aria-label={t('workbench.toggleNavigation')} aria-controls={props.navigationId} aria-expanded={props.navigationOpen} onClick={props.toggleNavigation}><Icon name="panel-left" /></button>
+   <h2 tabIndex={-1} data-workbench-focus="title">{props.title}</h2><span className="nand-ui-spacer" />
    {props.busy && <span role="status" className="nand-workbench-progress">{t('workbench.loading')}</span>}
    {props.actions}
    <button type="button" className="nand-ui-icon-btn" aria-label={t('workbench.more')} onClick={props.more}><Icon name="ellipsis" /></button>

@@ -1,3 +1,5 @@
+import { CONTACTS_VIEW_TYPE } from './contacts-presentation';
+import { t } from '../../shared/i18n';
 import { ItemView, type WorkspaceLeaf, type ViewStateResult } from 'obsidian';
 import { ContactsPresentation } from './contacts-presentation';
 import type { ContactsHost } from './host';
@@ -14,10 +16,10 @@ export class ContactsView extends ItemView {
 			close: () => this.leaf.detach(),
 		}, host));
 	}
-	getNativeSurfaces(): readonly ContactsPresentation[] { return [this.surface]; }
+	getNativeSurfaces(): readonly ContactsPresentation[] { return this.surface ? [this.surface] : []; }
 	onOpen(): Promise<void> { return this.surface.onOpen(); }
 	onClose(): Promise<void> { return this.surface.onClose(); }
-	getState(): Record<string, unknown> { return this.surface.getState(); }
+	getState(): Record<string, unknown> { return this.surface?.getState() ?? {}; }
 	async setState(state: Record<string, unknown>, result: ViewStateResult): Promise<void> {
 		await this.surface.setState(state, result);
 		await super.setState(state, result);
@@ -29,9 +31,12 @@ export class ContactsView extends ItemView {
 	get enabled(): ContactsPresentation['enabled'] { return this.surface.enabled; }
 	get columns(): ContactsPresentation['columns'] { return this.surface.columns; }
 	mountMarkdown(...args: Parameters<ContactsPresentation['mountMarkdown']>): ReturnType<ContactsPresentation['mountMarkdown']> { return this.surface.mountMarkdown(...args); }
-	getViewType(...args: Parameters<ContactsPresentation['getViewType']>): ReturnType<ContactsPresentation['getViewType']> { return this.surface.getViewType(...args); }
-	getDisplayText(...args: Parameters<ContactsPresentation['getDisplayText']>): ReturnType<ContactsPresentation['getDisplayText']> { return this.surface.getDisplayText(...args); }
-	getIcon(...args: Parameters<ContactsPresentation['getIcon']>): ReturnType<ContactsPresentation['getIcon']> { return this.surface.getIcon(...args); }
+
+	getViewType(): string { return CONTACTS_VIEW_TYPE; }
+
+	getDisplayText(): string { return this.surface?.getDisplayText() ?? t('contacts.title'); }
+
+	getIcon(): string { return 'contact-round'; }
 	bindController(...args: Parameters<ContactsPresentation['bindController']>): ReturnType<ContactsPresentation['bindController']> { return this.surface.bindController(...args); }
 	render(...args: Parameters<ContactsPresentation['render']>): ReturnType<ContactsPresentation['render']> { return this.surface.render(...args); }
 	disposeSurface(...args: Parameters<ContactsPresentation['disposeSurface']>): ReturnType<ContactsPresentation['disposeSurface']> { return this.surface.disposeSurface(...args); }

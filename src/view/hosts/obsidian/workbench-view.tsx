@@ -21,6 +21,9 @@ export class WorkbenchView extends ItemView {
  private unavailable?: string;
  private savedPages: unknown;
  private revision = 0;
+ private navigationRoot?: HTMLElement;
+ private revealNavigation?: () => void;
+ lastActivatedAt = 0;
  constructor(leaf: WorkspaceLeaf, private readonly host: WorkbenchHost) { super(leaf); }
  getViewType(): string { return WORKBENCH_VIEW_TYPE; }
  getDisplayText(): string { return t('workbench.title'); }
@@ -48,9 +51,10 @@ export class WorkbenchView extends ItemView {
   this.register(onLanguageChanged(() => this.draw()));
   this.register(this.host.subscribe(() => { void this.refreshAvailability().catch(this.host.report); }));
   this.register(this.contentEl.onWindowMigrated(() => this.draw()));
+  this.registerEvent(this.app.workspace.on('active-leaf-change', (leaf) => { if (leaf === this.leaf) this.lastActivatedAt = Date.now(); }));
   return Promise.resolve();
  }
- async navigate(raw: WorkbenchTarget, initial?: Record<string, unknown>): Promise<void> {
+ async navigate(raw: WorkbenchTarget, initial?: Record<string, unknown>, keyboard = false): Promise<void> {
   if (!this.opened || !this.pages) return;
   const target = this.pages.resolve(raw), revision = ++this.revision;
   this.pending = target; this.busy = true; this.error = undefined; this.draw();
@@ -67,6 +71,7 @@ export class WorkbenchView extends ItemView {
     else page = await this.pages?.prepare(target, signal, initial);
    }, () => {
     this.pages?.show(page); this.unavailable = unavailable;
+    this.lastActivatedAt = Date.now();
     this.state = { ...this.state, target: page?.target ?? target };
     this.app.workspace.requestSaveLayout();
    });
@@ -74,7 +79,12 @@ export class WorkbenchView extends ItemView {
    if (revision === this.revision) this.error = error instanceof Error ? error.message : String(error);
    throw error;
   } finally {
-   if (revision === this.revision) { this.busy = false; this.draw(); }
+   if (revision === this.revision) {
+    this.busy = false; this.draw();
+    if (keyboard && !this.error) this.contentEl.win.requestAnimationFrame(() => {
+     if (this.opened && revision === this.revision) this.contentEl.querySelector<HTMLElement>('[data-workbench-focus="title"]')?.focus({ preventScroll: true });
+    });
+   }
   }
  }
  async prepareModuleChanges(disabled: ReadonlySet<WorkbenchFeature>): Promise<void> {
@@ -120,16 +130,19 @@ export class WorkbenchView extends ItemView {
  private change = (patch: Partial<WorkbenchState>): void => {
   this.state = normalizeWorkbenchState({ ...this.state, ...patch }); this.draw(); this.app.workspace.requestSaveLayout();
  };
- private requestNavigation = (target: WorkbenchTarget): void => { void this.navigate(target).catch(this.host.report); };
+ private requestNavigation = (target: WorkbenchTarget, keyboard = false): void => { void this.navigate(target, undefined, keyboard).catch(this.host.report); };
+ private navigationContent = (element: HTMLDivElement | null): void => { this.navigationRoot = element ?? undefined; };
+ private navigationControl = (open: (() => void) | undefined): void => { this.revealNavigation = open; };
+ private settings = (): void => { this.host.openSettings(this.state.target.feature); };
  private retry = (): void => { this.transition.invalidate(); this.requestNavigation(this.pending); };
  private content = (element: HTMLDivElement | null): void => {
-  if (element && !this.pages) this.pages = new WorkbenchPages(this, element, this.host.contributions, (target) => this.navigate(target), this.host.report, () => { this.state = { ...this.state, target: this.pages?.getCurrent()?.getTarget?.() ?? this.state.target }; this.draw(); this.app.workspace.requestSaveLayout(); });
+  if (element && !this.pages) this.pages = new WorkbenchPages(this, element, this.host.contributions, (target) => this.navigate(target), this.host.report, () => { this.state = { ...this.state, target: this.pages?.getCurrent()?.getTarget?.() ?? this.state.target }; this.draw(); this.app.workspace.requestSaveLayout(); }, this.navigationRoot, () => this.revealNavigation?.());
  };
  private draw(): void {
   if (!this.opened) return;
   const contributions = this.host.contributions;
   const items = contributions.filter((item) => item.id === 'dashboard' || (item.availability().enabled && item.availability().supported)).map((item) => item.navigation);
   const current = contributions.find((item) => item.id === this.state.target.feature);
-  render(<WorkbenchShell state={this.state} items={items} title={t(current?.navigation.labelKey ?? 'workbench.title')} busy={this.busy} error={this.error} unavailable={this.unavailable} ownerWindow={this.contentEl.win} change={this.change} navigate={this.requestNavigation} settings={this.host.openSettings} more={this.more} retry={this.retry} contentRef={this.content} />, this.contentEl);
+  render(<WorkbenchShell state={this.state} items={items} title={t(current?.navigation.labelKey ?? 'workbench.title')} busy={this.busy} error={this.error} unavailable={this.unavailable} ownerWindow={this.contentEl.win} change={this.change} navigate={this.requestNavigation} settings={this.settings} manageFeatures={this.host.manageFeatures} navigationRef={this.navigationContent} navigationControl={this.navigationControl} more={this.more} retry={this.retry} contentRef={this.content} />, this.contentEl);
  }
 }

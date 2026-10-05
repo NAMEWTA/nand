@@ -1,3 +1,5 @@
+import { AUTOMATION_VIEW_TYPE } from './automation-presentation';
+import { t } from '../../shared/i18n';
 import { ItemView, type WorkspaceLeaf, type ViewStateResult } from 'obsidian';
 import { AutomationPresentation } from './automation-presentation';
 import type { AutomationViewHost } from './panel-contract';
@@ -14,17 +16,19 @@ export class AutomationView extends ItemView {
 			close: () => this.leaf.detach(),
 		}, host));
 	}
-	getNativeSurfaces(): readonly AutomationPresentation[] { return [this.surface]; }
+	getNativeSurfaces(): readonly AutomationPresentation[] { return this.surface ? [this.surface] : []; }
 	onOpen(): Promise<void> { return this.surface.onOpen(); }
 	onClose(): Promise<void> { return this.surface.onClose(); }
-	getState(): Record<string, unknown> { return this.surface.getState(); }
+	getState(): Record<string, unknown> { return this.surface?.getState() ?? {}; }
 	async setState(state: Record<string, unknown>, result: ViewStateResult): Promise<void> {
 		await this.surface.setState(state, result);
 		await super.setState(state, result);
 	}
 
-	getViewType(...args: Parameters<AutomationPresentation['getViewType']>): ReturnType<AutomationPresentation['getViewType']> { return this.surface.getViewType(...args); }
-	getDisplayText(...args: Parameters<AutomationPresentation['getDisplayText']>): ReturnType<AutomationPresentation['getDisplayText']> { return this.surface.getDisplayText(...args); }
-	getIcon(...args: Parameters<AutomationPresentation['getIcon']>): ReturnType<AutomationPresentation['getIcon']> { return this.surface.getIcon(...args); }
+	getViewType(): string { return AUTOMATION_VIEW_TYPE; }
+
+	getDisplayText(): string { return this.surface?.getDisplayText() ?? t('automation.title'); }
+
+	getIcon(): string { return 'timer'; }
 	showRun(...args: Parameters<AutomationPresentation['showRun']>): ReturnType<AutomationPresentation['showRun']> { return this.surface.showRun(...args); }
 }

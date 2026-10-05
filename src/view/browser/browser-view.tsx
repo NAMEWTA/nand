@@ -1,3 +1,5 @@
+import { BROWSER_VIEW_TYPE } from '../../core/browser/model';
+import { t } from '../../shared/i18n';
 import { ItemView, type ViewStateResult, type WorkspaceLeaf } from 'obsidian';
 import type { BrowserPageState } from '../../core/browser/model';
 import type { BrowserHost } from './host';
@@ -12,11 +14,14 @@ export class BrowserView extends ItemView {
  }
  get state(): BrowserPageState { return this.surface.state; }
  set state(value: BrowserPageState) { this.surface.state = value; }
- getNativeSurfaces(): readonly BrowserPresentation[] { return [this.surface]; }
- getViewType(): string { return this.surface.getViewType(); }
- getDisplayText(): string { return this.surface.getDisplayText(); }
- getIcon(): string { return this.surface.getIcon(); }
- getState(): Record<string, unknown> { return this.surface.getState(); }
+ getNativeSurfaces(): readonly BrowserPresentation[] { return this.surface ? [this.surface] : []; }
+
+	getViewType(): string { return BROWSER_VIEW_TYPE; }
+
+	getDisplayText(): string { return this.surface?.getDisplayText() ?? t('browser.title'); }
+
+	getIcon(): string { return 'globe'; }
+ getState(): Record<string, unknown> { return this.surface?.getState() ?? {}; }
  async setState(state: Record<string, unknown>, result: ViewStateResult): Promise<void> {
   await this.surface.setState(state, result); await super.setState(state, result);
  }

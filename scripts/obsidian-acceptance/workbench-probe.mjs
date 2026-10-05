@@ -14,7 +14,11 @@ assert.ok(process.env.NAND_WINDOWS_E2E_NONCE);
 const dir = process.env.NAND_ACCEPTANCE_DIR, c = await connect(), checks = [];
 const restart = process.argv.includes('--verify-restart');
 let server;
-const call = (expression) => Promise.race([c.evaluate(expression), delay(20000).then(() => { throw Error('Native evaluation timeout: ' + expression.slice(0, 100)); })]);
+async function call(expression) {
+ let timeout;
+ try { return await Promise.race([c.evaluate(expression), new Promise((_, reject) => { timeout = setTimeout(() => reject(Error('Native evaluation timeout: ' + expression.slice(0, 100))), 20000); })]); }
+ finally { clearTimeout(timeout); }
+}
 async function until(expression, label) {
  const end = Date.now() + 15000;
  while (Date.now() < end) { const result = await call(expression); if (result) return result; await delay(75); }
@@ -34,9 +38,11 @@ try {
  assert.equal(createHash('sha256').update(await fs.readFile('main.js')).digest('hex'), runtime.mainSha256);
  assert.equal(runtime.version, '1.13.7');
  await call(`(()=>{window.nandWorkbenchErrors=[];window.nandWorkbenchErrorHandler=e=>nandWorkbenchErrors.push(String(e.reason??e.error??e.message));window.addEventListener('unhandledrejection',nandWorkbenchErrorHandler);window.addEventListener('error',nandWorkbenchErrorHandler);app.setting.close();})()`);
+ await call(`require('@electron/remote').getCurrentWindow().setSize(1440,1000)`);
+ await delay(150);
  if (restart) {
   await until(`${wb}?.getState().target?.feature==='contacts'`, 'persisted workbench page');
-  await until(`!!${wb}?.contentEl.querySelector('.nand-contacts')`, 'restored archive presentation');
+  await until(`!!${wb}?.contentEl.querySelector('.nand-contacts-surface')`, 'restored archive presentation');
   check('native-normal-restart-restores-workbench-and-selected-feature');
   await shot('restart-restored-archives');
  } else {
@@ -46,6 +52,7 @@ try {
   check('home-is-real-dashboard-without-overwriting-the-note', initial);
   const ribbons = await call(`app.workspace.leftRibbon.items.filter(i=>i.id.startsWith('nand:')).map(i=>({id:i.id,title:i.title}))`);
   assert.equal(ribbons.length, 1); assert.equal(ribbons[0].id, 'nand:ribbon-home'); check('one-native-ribbon-registration', { ribbons });
+  assert.ok(await call(`${wb}.contentEl.querySelector('.nand-workbench').clientWidth>=960`), 'The wide fixture must really be wide');
   await shot('home-zh-wide');
   for (const target of [{feature:'contacts',section:'person'}, {feature:'contacts',section:'company'}, {feature:'automations',section:'tasks'}, {feature:'automations',section:'runs'}, {feature:'notifications'}, {feature:'dashboard'}]) {
    await call(`app.plugins.plugins.nand.openWorkbench(${JSON.stringify(target)})`);
@@ -59,6 +66,9 @@ try {
    const count = await call(`app.plugins.plugins.nand.terminalHost.getRuntimeStatus().length`);
    assert.equal(count, 0); check('agent-navigation-does-not-create-pty-' + section);
   }
+  const agentNavigation = await call(`(()=>{const root=${wb}.contentEl;return {objects:root.querySelectorAll('.nand-workbench-context .nand-agent-sidebar').length,duplicates:root.querySelectorAll('.nand-workbench-page .nand-agent-sidebar').length,globalNavigation:root.querySelectorAll('.nand-workbench-nav').length}})()`);
+  assert.equal(agentNavigation.objects,1);assert.equal(agentNavigation.duplicates,0);assert.equal(agentNavigation.globalNavigation,1);
+  check('agent-object-list-shares-workbench-navigation',agentNavigation);
   await shot('agent-no-implicit-session');
   const saved = await call(`(async()=>{const v=${wb};for(let i=0;i<8;i++){const a=v.navigate({feature:'contacts',section:'person'});const b=v.navigate({feature:'automations',section:'runs'});await Promise.all([a,b]);}return v.getState().target})()`);
   assert.equal(saved.feature, 'automations'); check('rapid-navigation-latest-target-wins', saved);
@@ -86,6 +96,7 @@ try {
    for (const width of [1120,640,448,288]) {
     await call(`(()=>{const v=${wb};v.contentEl.style.width='${width}px';v.contentEl.style.maxWidth='100%';})()`); await delay(120);
     const layout = await call(`(()=>{const root=${wb}.contentEl.querySelector('.nand-workbench');const header=root.querySelector('.nand-workbench-header');return {width:root.clientWidth,compact:root.classList.contains('is-compact'),headerWidth:header.scrollWidth,headerClient:header.clientWidth,labels:[...root.querySelectorAll('.nand-workbench-nav-row>.nand-workbench-nav-link')].map(e=>e.textContent)}})()`);
+    if(width===1120)assert.ok(layout.width>=960,'Wide layout was not exercised');
     assert.ok(layout.headerWidth <= layout.headerClient + 2); assert.equal(layout.compact, layout.width < 760);
     check('native-layout-' + lang + '-' + width, layout); await shot('archives-' + lang + '-' + width);
    }
@@ -94,10 +105,10 @@ try {
   assert.equal(await call(`${wb}.getState().target.feature`), 'contacts'); check('settings-do-not-replace-home-or-selected-content');
   await call(`app.setting.close()`);
   for (const type of ['nand-dashboard-view','nand-contacts-view','nand-automation-view','nand-editor-view','nand-browser-view']) {
-   const actual = await call(`(async()=>{const leaf=app.workspace.getLeaf('tab');await leaf.setViewState({type:${JSON.stringify(type)},active:true});const result={type:leaf.view.getViewType(),title:leaf.view.getDisplayText()};leaf.detach();return result})()`);
-   assert.equal(actual.type, type); check('original-native-view-remains-real-' + type, actual);
+   const actual = await call(`(async()=>{const leaf=app.workspace.getLeaf('tab');await leaf.setViewState({type:${JSON.stringify(type)},active:true,state:{}});await app.workspace.revealLeaf(leaf);await leaf.loadIfDeferred();const result={type:leaf.view.getViewType(),title:leaf.view.getDisplayText(),surfaces:leaf.view.getNativeSurfaces?.().length??0,placeholder:leaf.isDeferred};leaf.detach();return result})()`);
+   assert.equal(actual.type, type); assert.equal(actual.placeholder,false); if(type!=='nand-editor-view')assert.equal(actual.surfaces,1,'Original type must instantiate a real shared presentation'); check('original-native-view-remains-real-' + type, actual);
   }
-  await call(`(async()=>{const p=app.plugins.plugins.nand;p.settings.modules.terminal=false;await p.saveSettings();await p.applyModuleFlags();const leaf=app.workspace.getLeaf('tab');await leaf.setViewState({type:'terminal-view',active:true});if(leaf.view.getViewType()!=='terminal-view')throw Error('Lost terminal identity');leaf.detach();await p.openWorkbench({feature:'contacts',section:'person'});app.workspace.requestSaveLayout();})()`);
+  await call(`(async()=>{const p=app.plugins.plugins.nand;p.settings.modules.terminal=false;await p.saveSettings();await p.applyModuleFlags();const leaf=app.workspace.getLeaf('tab');await leaf.setViewState({type:'terminal-view',active:true,state:{}});await app.workspace.revealLeaf(leaf);await leaf.loadIfDeferred();if(leaf.view.getViewType()!=='terminal-view')throw Error('Lost terminal identity');if(leaf.isDeferred||!leaf.view.contentEl.querySelector('button')||leaf.view.getDisplayText()==='terminal-view')throw Error('Inactive terminal must render its native recovery controls');leaf.detach();await p.openWorkbench({feature:'contacts',section:'person'});app.workspace.requestSaveLayout();})()`);
   check('original-disabled-terminal-identity-and-safe-placeholder');
   await delay(1500);
  }

@@ -5,6 +5,7 @@ export interface WorkbenchState {
 	sidebarWidth: number;
 	sidebarOpen: boolean;
 	expanded: string[];
+	collapsed: string[];
 }
 const sections: Record<WorkbenchFeature, readonly string[]> = {
 	dashboard: [], terminal: ['running', 'history', 'usage'], browser: [],
@@ -37,6 +38,35 @@ export function normalizeWorkbenchState(raw: unknown): WorkbenchState {
 		target: normalizeTarget(value.target),
 		sidebarWidth: navigationWidth(value.sidebarWidth),
 		sidebarOpen: value.sidebarOpen !== false,
-		expanded: Array.isArray(value.expanded) ? [...new Set(value.expanded.filter((id): id is string => typeof id === 'string' && WORKBENCH_FEATURES.some((feature) => feature === id)))] : [],
+		expanded: normalizeGroups(value.expanded),
+		collapsed: normalizeGroups(value.collapsed),
 	};
+}
+
+function normalizeGroups(raw: unknown): string[] {
+ return Array.isArray(raw) ? [...new Set(raw.filter((id): id is string => typeof id === 'string' && WORKBENCH_FEATURES.some((feature) => feature === id)))] : [];
+}
+
+/** Workspace state is a bounded projection, never a second business store. */
+export function cleanPageState(raw: unknown, keys: readonly string[]): Record<string, unknown> {
+ const value = raw && typeof raw === 'object' && !Array.isArray(raw) ? raw as Record<string, unknown> : {};
+ const forbidden = /^(?:__proto__|prototype|constructor|password|cookie|cookies|token|accessToken|refreshToken|authorization|credentials|secret)$/i;
+ const clean = (item: unknown, depth: number): unknown => {
+  if (item === null || typeof item === 'boolean') return item;
+  if (typeof item === 'string') return item.slice(0, 8192);
+  if (typeof item === 'number') return Number.isFinite(item) ? item : undefined;
+  if (depth > 3 || !item || typeof item !== 'object') return undefined;
+  if (Array.isArray(item)) return item.slice(0, 100).map((entry) => clean(entry, depth + 1)).filter((entry) => entry !== undefined);
+  if (Object.prototype.toString.call(item) !== '[object Object]') return undefined;
+  return Object.fromEntries(Object.entries(item).slice(0, 32).flatMap(([key, entry]) => {
+   if (forbidden.test(key)) return [];
+   const safe = clean(entry, depth + 1);
+   return safe === undefined ? [] : [[key, safe]];
+  }));
+ };
+ return Object.fromEntries(keys.flatMap((key) => {
+  if (forbidden.test(key) || !Object.prototype.hasOwnProperty.call(value, key)) return [];
+  const safe = clean(value[key], 0);
+  return safe === undefined ? [] : [[key, safe]];
+ }));
 }
