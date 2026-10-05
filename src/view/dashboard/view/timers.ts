@@ -1,10 +1,10 @@
 import { clearWeatherCache } from '../../../platform/obsidian/widgets/weather-service';
 import { refreshWeatherCards } from '../cards/WeatherPanel';
 import { refreshSidebarWeatherWidget } from '../renderer/refresh-sidebar-weather-widget';
-import type { DashboardView } from './dashboard-view';
+import type { DashboardSurface } from './dashboard-surface';
 import { DAY_ROLLOVER_CHECK_MS, WEATHER_REFRESH_MS } from './timing';
 
-export function startWeatherRefresh(this: DashboardView): void {
+export function startWeatherRefresh(this: DashboardSurface): void {
 	this.weatherRefreshTimer = window.setInterval(() => {
 		if (!this.data) return;
 		const hasWeather = this.data.columns.some((col) => col.cards.some((c) => c.type === 'weather'));
@@ -18,14 +18,14 @@ export function startWeatherRefresh(this: DashboardView): void {
 		// render() here was the main source of periodic jank on mobile - it
 		// emptied and rebuilt every card/section.
 		clearWeatherCache();
-		const root = this.containerEl.children[1] as HTMLElement | undefined;
+		const root = this.contentEl as HTMLElement | undefined;
 		if (!root) return;
 		if (hasWeather) refreshWeatherCards(root, this.data);
 		if (hasSidebarWeather) refreshSidebarWeatherWidget(root, this.plugin.settings, this.app);
 	}, WEATHER_REFRESH_MS);
 }
 
-export function stopWeatherRefresh(this: DashboardView): void {
+export function stopWeatherRefresh(this: DashboardSurface): void {
 	if (this.weatherRefreshTimer) {
 		window.clearInterval(this.weatherRefreshTimer);
 		this.weatherRefreshTimer = null;
@@ -33,18 +33,18 @@ export function stopWeatherRefresh(this: DashboardView): void {
 	clearWeatherCache();
 }
 
-export function startDayRolloverChecker(this: DashboardView): void {
+export function startDayRolloverChecker(this: DashboardSurface): void {
 	this.dayRolloverTimer = window.setInterval(() => this.checkDayRollover(), DAY_ROLLOVER_CHECK_MS);
 }
 
-export function stopDayRolloverChecker(this: DashboardView): void {
+export function stopDayRolloverChecker(this: DashboardSurface): void {
 	if (this.dayRolloverTimer) {
 		window.clearInterval(this.dayRolloverTimer);
 		this.dayRolloverTimer = null;
 	}
 }
 
-export function checkDayRollover(this: DashboardView): void {
+export function checkDayRollover(this: DashboardSurface): void {
 	if (!this.data) return;
 	const todayKey = new Date().toDateString();
 	if (todayKey === this.lastRenderedDay) return;

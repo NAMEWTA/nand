@@ -9,11 +9,11 @@ import { showConfirmDialog } from '../ui/confirm-dialog';
 import { startGuardedDrag } from '../ui/drag-guard';
 import { getRecentDocs, renderRecentDocs } from '../ui/recent';
 import { clampSidebarWidth, clampWidgetUnitHeight } from '../widgets/widget-span';
-import type { DashboardView } from './dashboard-view';
-import { DASHBOARD_VIEW_TYPE } from './view-type';
+import type { DashboardSurface } from './dashboard-surface';
+import { nativeSurfaces } from '../../hosts/obsidian/native-surface';
 
 export function renderSidebar(
-	this: DashboardView,
+	this: DashboardSurface,
 	sidebar: HTMLElement,
 	root: HTMLElement,
 	reuseWidgets: HTMLElement | null,
@@ -115,7 +115,7 @@ export function renderSidebar(
 	}
 }
 
-export function setupSidebarBehavior(this: DashboardView, sidebar: HTMLElement, root: HTMLElement): void {
+export function setupSidebarBehavior(this: DashboardSurface, sidebar: HTMLElement, root: HTMLElement): void {
 	// Create slim indicator (visible only when collapsed)
 	const indicator = sidebar.createEl('button', { cls: 'dashboard-sidebar-slim-indicator', attr: { type: 'button', ...localizedAttributes('common.expandSidebar', undefined, 'aria-label') } });
 	indicator.addEventListener('click', () => {
@@ -178,7 +178,7 @@ export function setupSidebarBehavior(this: DashboardView, sidebar: HTMLElement, 
  *  DOM (live timers and listeners survive). Writing on the OUTER sidebar
  *  also covers the widgets-reuse path, where the inner strip is a
  *  re-attached node from a previous render. */
-export function applySidebarSizing(this: DashboardView, sidebar: HTMLElement): void {
+export function applySidebarSizing(this: DashboardSurface, sidebar: HTMLElement): void {
 	const s = this.plugin.settings;
 	if (isStackedLayout(s)) {
 		sidebar.setCssProps({ '--db-widget-unit-h': `${clampWidgetUnitHeight(s.widgetUnitHeight)}px` });
@@ -194,7 +194,7 @@ export function applySidebarSizing(this: DashboardView, sidebar: HTMLElement): v
  *  whole strip grows/shrinks proportionally. Live frames write the CSS
  *  variable only; the value is persisted on release — the zero-writes-
  *  mid-drag discipline of the section height handle. */
-export function attachStripHeightHandle(this: DashboardView, sidebar: HTMLElement): void {
+export function attachStripHeightHandle(this: DashboardSurface, sidebar: HTMLElement): void {
 	const handle = sidebar.createDiv({ cls: 'dashboard-sidebar-strip-handle' });
 	setLocalizedAttribute(handle, 'aria-label', 'view.stripResizeHint');
 	handle.addEventListener('pointerdown', (e) => {
@@ -235,7 +235,7 @@ export function attachStripHeightHandle(this: DashboardView, sidebar: HTMLElemen
  *  widgets area scales its em-based root font-size with the width ratio
  *  and the fluid internals (flex/percent/ellipsis) reflow — no re-render,
  *  no JS layout work. */
-export function attachSidebarWidthHandle(this: DashboardView, sidebar: HTMLElement): void {
+export function attachSidebarWidthHandle(this: DashboardSurface, sidebar: HTMLElement): void {
 	const handle = sidebar.createDiv({ cls: 'dashboard-sidebar-width-handle' });
 	setLocalizedAttribute(handle, 'aria-label', 'view.sidebarResizeHint');
 	handle.addEventListener('pointerdown', (e) => {
@@ -272,15 +272,14 @@ export function attachSidebarWidthHandle(this: DashboardView, sidebar: HTMLEleme
  *  refreshAllDashboards would rebuild boards for a pure CSS change. Other
  *  views also pick the value up on their next render from settings. */
 export function commitSidebarSizing(
-	this: DashboardView,
+	this: DashboardSurface,
 	patch: { sidebarWidth?: number; widgetUnitHeight?: number },
 	cssVar: string,
 	value: string,
 ): void {
 	this.plugin.settings = { ...this.plugin.settings, ...patch };
 	void this.plugin.saveSettings();
-	for (const leaf of this.app.workspace.getLeavesOfType(DASHBOARD_VIEW_TYPE)) {
-		const other = leaf.view as DashboardView | undefined;
+	for (const other of nativeSurfaces(this.app)) {
 		if (!other || other === this) continue;
 		other.containerEl
 			.querySelectorAll<HTMLElement>('.dashboard-sidebar')

@@ -16,9 +16,9 @@ import { captureScrollStates, restoreScrollStates } from '../ui/scroll-preserve'
 import { destroyAlbumWidgets, refreshAlbumWidgets } from '../widgets/album-widget';
 import { refreshHabitWidget } from '../habit/habit-widget';
 import { renderSidebarLunarWidget } from '../widgets/lunar-widget';
-import type { DashboardView } from './dashboard-view';
+import type { DashboardSurface } from './dashboard-surface';
 
-export function registerVaultListeners(this: DashboardView): void {
+export function registerVaultListeners(this: DashboardSurface): void {
 	this.unregisterVaultListeners();
 	const events = this.app.vault;
 	const dashboardPath = dashboardMarkdownPath(this.plugin.settings.dashboardFile);
@@ -56,7 +56,7 @@ export function registerVaultListeners(this: DashboardView): void {
 	];
 }
 
-export function unregisterVaultListeners(this: DashboardView): void {
+export function unregisterVaultListeners(this: DashboardSurface): void {
 	for (const { evt, ref } of this.vaultEventRefs) {
 		evt.offref(ref as Parameters<typeof evt.offref>[0]);
 	}
@@ -75,7 +75,7 @@ export function unregisterVaultListeners(this: DashboardView): void {
 
 /** One trailing debounce for every vault event. A burst of edits costs a
  *  single fan-out pass instead of five independently-reset timers. */
-export function scheduleVaultRefresh(this: DashboardView): void {
+export function scheduleVaultRefresh(this: DashboardSurface): void {
 	if (this.vaultRefreshTimer) window.clearTimeout(this.vaultRefreshTimer);
 	this.vaultRefreshTimer = window.setTimeout(() => {
 		this.vaultRefreshTimer = null;
@@ -92,7 +92,7 @@ export function scheduleVaultRefresh(this: DashboardView): void {
  *  calendar sections need an .md change, album slideshows and media
  *  sections an image/audio/video one, and scanning sections a change
  *  inside their scan scope. */
-export function flushVaultRefresh(this: DashboardView, paths: ReadonlySet<string>, broad: boolean): void {
+export function flushVaultRefresh(this: DashboardSurface, paths: ReadonlySet<string>, broad: boolean): void {
 	const lowerPaths = [...paths].map((p) => p.toLowerCase());
 	const changedMd = broad || lowerPaths.some((p) => p.endsWith('.md'));
 	const changedMedia =
@@ -118,18 +118,18 @@ export function flushVaultRefresh(this: DashboardView, paths: ReadonlySet<string
 /** Re-scan the sidebar task calendar in place (task dots). The widget DOM
  *  is preserved across full re-renders, so without this the dots would
  *  never update. */
-export function refreshSidebarCalendarNow(this: DashboardView): void {
+export function refreshSidebarCalendarNow(this: DashboardSurface): void {
 	if (!this.plugin.settings.widgetCalendarEnabled) return;
-	const root = this.containerEl.children[1] as HTMLElement | undefined;
+	const root = this.contentEl as HTMLElement | undefined;
 	if (root) refreshSidebarTaskCalendar(root);
 }
 
 /** Re-scan the album folders in place via the widget's controller: an
  *  unchanged path list leaves the slideshow position and timer untouched. */
-export function refreshAlbumWidgetsNow(this: DashboardView): void {
+export function refreshAlbumWidgetsNow(this: DashboardSurface): void {
 	const albums = this.plugin.settings.albums ?? [];
 	if (!albums.some((a) => a.folder.trim())) return;
-	const root = this.containerEl.children[1] as HTMLElement | undefined;
+	const root = this.contentEl as HTMLElement | undefined;
 	if (root) refreshAlbumWidgets(root, albums, this.app);
 }
 
@@ -140,7 +140,7 @@ export function refreshAlbumWidgetsNow(this: DashboardView): void {
  *  .md change qualifies; media sections react to media-file changes.
  *  `broad` (folder-level events) conservatively refreshes everything. */
 export function refreshSectionsFor(
-	this: DashboardView,
+	this: DashboardSurface,
 	lowerPaths: readonly string[],
 	broad: boolean,
 	changedMd: boolean,
@@ -159,7 +159,7 @@ export function refreshSectionsFor(
 	});
 	if (!hasScanning && !hasMedia) return;
 
-	const root = this.containerEl.children[1] as HTMLElement | undefined;
+	const root = this.contentEl as HTMLElement | undefined;
 	const kanban = root?.querySelector('.dashboard-kanban') as HTMLElement | null;
 	if (!kanban) {
 		// View not laid out yet — fall back to a full render.
@@ -215,8 +215,8 @@ export function refreshSectionsFor(
 /** Habit data changed (toggle/add/rename/remove from any view or overlay):
  *  refresh the habit widget in place + the mobile habit panel, and let the
  *  banner debounce recompute when it shows the habit heatmap. */
-export function onHabitChanged(this: DashboardView): void {
-	const root = this.containerEl.children[1] as HTMLElement | undefined;
+export function onHabitChanged(this: DashboardSurface): void {
+	const root = this.contentEl as HTMLElement | undefined;
 	if (root) refreshHabitWidget(root);
 	this.debouncedRefreshBannerStats();
 }
@@ -224,11 +224,11 @@ export function onHabitChanged(this: DashboardView): void {
 /** Holiday data can arrive over the network after the first mobile paint.
  *  Update only the lunar widget/panel; a second full dashboard render here
  *  was one of the startup memory spikes that could trigger a WebView reload. */
-export function refreshLunarWidgetsInPlace(this: DashboardView): void {
+export function refreshLunarWidgetsInPlace(this: DashboardSurface): void {
 	this.refreshDataWidget('.dashboard-sidebar-lunar', (container) =>
 		renderSidebarLunarWidget(container, this.holidayData, this.app),
 	);
-	const root = this.containerEl.children[1] as HTMLElement | undefined;
+	const root = this.contentEl as HTMLElement | undefined;
 	const panel = root?.querySelector<HTMLElement>('.dashboard-mobile-widget-panel');
 	if (panel && this.mobileWidgetExpanded === 'lunar') {
 		unmountDashboardPanelsIn(panel);
@@ -244,11 +244,11 @@ export function refreshLunarWidgetsInPlace(this: DashboardView): void {
  *  internal scroll (habit list, music playlist) carries over the swap so
  *  a data refresh elsewhere never yanks the widget's viewport. */
 export function refreshDataWidget(
-	this: DashboardView,
+	this: DashboardSurface,
 	selector: string,
 	render: (container: HTMLElement) => void,
 ): void {
-	const root = this.containerEl.children[1] as HTMLElement | undefined;
+	const root = this.contentEl as HTMLElement | undefined;
 	const widget = root?.querySelector<HTMLElement>(selector);
 	if (!widget || !widget.isConnected) return;
 	const parent = widget.parentElement;
@@ -275,7 +275,7 @@ export function refreshDataWidget(
  *  Refresh regardless of whether a statsConfig is saved — defaults resolve
  *  at render time, so an absent config must not skip the refresh (that would
  *  freeze the stats after first paint). */
-export function debouncedRefreshBannerStats(this: DashboardView): void {
+export function debouncedRefreshBannerStats(this: DashboardSurface): void {
 	if (!this.data || this.data.banner.mode !== 'stats') return;
 	if (this.bannerStatsTimer) window.clearTimeout(this.bannerStatsTimer);
 	this.bannerStatsTimer = window.setTimeout(() => {
@@ -286,8 +286,8 @@ export function debouncedRefreshBannerStats(this: DashboardView): void {
 	}, this.BANNER_STATS_DEBOUNCE);
 }
 
-export function refreshRecentDocs(this: DashboardView): void {
-	const root = this.containerEl.children[1] as HTMLElement;
+export function refreshRecentDocs(this: DashboardSurface): void {
+	const root = this.contentEl as HTMLElement;
 	if (!root) return;
 
 	const recentSection = root.querySelector('.dashboard-recent');
@@ -307,7 +307,7 @@ export function refreshRecentDocs(this: DashboardView): void {
  *  widgets DOM is being re-attached (signature unchanged): its countdown
  *  timers and the pomodoro/reading services' onTick wiring (which reference
  *  live DOM inside it) must survive; a fresh widgets render re-wires them. */
-export function runCleanup(this: DashboardView, preserveSidebarWidgets = false): void {
+export function runCleanup(this: DashboardSurface, preserveSidebarWidgets = false): void {
 	destroyDashboardPanels(this.contentEl, preserveSidebarWidgets ? this.sidebarWidgetsEl : null);
 	destroyAllCharts(this.contentEl, preserveSidebarWidgets ? this.sidebarWidgetsEl : null);
 	destroyAlbumWidgets(this.contentEl, preserveSidebarWidgets ? this.sidebarWidgetsEl : null);
@@ -327,7 +327,7 @@ export function runCleanup(this: DashboardView, preserveSidebarWidgets = false):
  * user has scrolled down. Cleanup is registered so listeners are torn down on
  * re-render / close.
  */
-export function renderScrollToTop(this: DashboardView, container: HTMLElement): void {
+export function renderScrollToTop(this: DashboardSurface, container: HTMLElement): void {
 	const btn = bindLocalizedElement(container.createEl('button', {
 		cls: 'dashboard-scroll-top',
 		attr: { 'aria-label': t('renderer.scrollToTop'), type: 'button' },

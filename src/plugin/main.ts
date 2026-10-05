@@ -435,7 +435,7 @@ export default class DashboardPlugin extends Plugin {
 		for (const leaf of this.app.workspace.getLeavesOfType(DASHBOARD_VIEW_TYPE)) {
 			if (!(leaf.view instanceof DashboardView)) continue;
 			if (this.settings.modules.dashboard) void leaf.view.onOpen();
-			else showModuleDisabled.call(leaf.view);
+			else showModuleDisabled.call(leaf.view.surface);
 		}
 	}
 

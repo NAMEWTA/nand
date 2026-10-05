@@ -2,10 +2,10 @@ import { localizedAttributes } from '../../primitives/localized-dom';
 import { Platform, setIcon } from 'obsidian';
 import type { BannerData } from '../../../core/dashboard/types/index';
 import { resolveVaultImage } from '../banner/banner';
-import type { DashboardView } from './dashboard-view';
+import type { DashboardSurface } from './dashboard-surface';
 import { BANNER_IMAGE_ROTATION_MS } from './timing';
 
-export function setupBannerBehavior(this: DashboardView, bannerEl: HTMLElement): void {
+export function setupBannerBehavior(this: DashboardSurface, bannerEl: HTMLElement): void {
 	const win = bannerEl.ownerDocument.defaultView!;
 	const pinBtn = bannerEl.createEl('button', {
 		cls: 'dashboard-banner-pin-btn',
@@ -32,7 +32,7 @@ export function setupBannerBehavior(this: DashboardView, bannerEl: HTMLElement):
 	this.cleanupFns.push(() => win.removeEventListener('resize', onResize));
 }
 
-export function setupBannerRotation(this: DashboardView, container: HTMLElement, banner: BannerData): void {
+export function setupBannerRotation(this: DashboardSurface, container: HTMLElement, banner: BannerData): void {
 	// Image rotation — applies to both quote and stats modes (stats uses the
 	// same .dashboard-banner background, so it rotates identically).
 	const win = container.ownerDocument.defaultView!;
@@ -78,7 +78,7 @@ export function setupBannerRotation(this: DashboardView, container: HTMLElement,
  *  .dashboard-banner-pin-btn): this one pins/unpins the sidebar. Works in
  *  both layouts — in stacked mode it pins the widget strip open instead of
  *  the left rail. */
-export function renderBannerPinButton(this: DashboardView, bannerEl: HTMLElement): void {
+export function renderBannerPinButton(this: DashboardSurface, bannerEl: HTMLElement): void {
 	if (Platform.isMobile) return;
 	const pinBtn = bannerEl.createEl('button', {
 		cls: 'dashboard-sidebar-pin-btn',

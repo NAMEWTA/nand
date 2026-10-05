@@ -12,7 +12,7 @@ const sections: Record<WorkbenchFeature, readonly string[]> = {
 	notifications: [], habit: [], expense: [],
 };
 const safeText = (value: unknown, max: number): string | undefined =>
-	typeof value === 'string' && value.length > 0 && value.length <= max && !/[\u0000-\u001f]/.test(value) ? value : undefined;
+	typeof value === 'string' && value.length > 0 && value.length <= max && ![...value].some((character) => character.charCodeAt(0) < 32) ? value : undefined;
 export function normalizeTarget(raw: unknown): WorkbenchTarget {
 	if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return { feature: 'dashboard' };
 	const value = raw as Record<string, unknown>;
