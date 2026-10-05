@@ -1,5 +1,5 @@
 name: Workbench isolated source export
-# Temporary read-only handoff for the authorized PR implementation; removed before final review.
+# Temporary read-only handoff for final PR completion; removed before final review.
 on:
   push:
     branches: [refactor/unified-workbench-v2]
