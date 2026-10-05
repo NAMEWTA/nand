@@ -1,0 +1,31 @@
+name: Workbench isolated source export
+# Temporary read-only handoff for the authorized PR implementation; removed before final review.
+on:
+  push:
+    branches: [refactor/unified-workbench-v2]
+    paths: [.github/workflows/workbench-export.yml]
+permissions:
+  contents: read
+jobs:
+  export:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+      - name: Export tracked source and fixed official test host
+        run: |
+          set -eu
+          mkdir -p "$RUNNER_TEMP/nand-export"
+          git archive --format=tar.gz HEAD > "$RUNNER_TEMP/nand-export/source.tar.gz"
+          git rev-parse HEAD > "$RUNNER_TEMP/nand-export/source-sha.txt"
+          curl --fail --location --retry 3 'https://github.com/obsidianmd/obsidian-releases/releases/download/v1.13.7/Obsidian-1.13.7.AppImage' -o "$RUNNER_TEMP/nand-export/Obsidian.AppImage"
+          cd "$RUNNER_TEMP/nand-export"
+          echo 'e0d8e0a611624de8c9c7dcd8a9e648279fb0a0d552faa1312b7e4f3a5fa72663  Obsidian.AppImage' | sha256sum -c -
+          sha256sum source.tar.gz Obsidian.AppImage > SHA256SUMS
+      - uses: actions/upload-artifact@v4
+        with:
+          name: nand-workbench-source-host
+          path: ${{ runner.temp }}/nand-export/
+          retention-days: 3
