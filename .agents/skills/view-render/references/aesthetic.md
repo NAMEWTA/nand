@@ -63,7 +63,7 @@ A generic primitive that more than one product needs goes into the foundation bl
 
 The board (`.nand-dashboard-root[data-theme]`) keeps its thirteen palettes. Inside the board, color comes from `--db-*` tokens, never from `--nand-surface*`. Geometry follows the same family through the theme's `--db-radius-sm` / `-md` / `-lg` (floor 6 / 10 / 12). Motion and pill radius may use the `--nand-*` tokens. Per-theme component overrides read `var(--db-accent)` and friends instead of repeating a palette hex. Body text on a card stays at or above 4.5:1 and muted text at 3:1 in both light and dark. Check new palette values against the painted card, not the token alone.
 
-Editor, contacts, automation, workbench, inbox and settings UI must not depend on `--db-*`; they must look right with the board unmounted.
+Editor, contacts, automation, workbench, inbox and settings UI must not depend on `--db-*`; they must look right with the board unmounted. Workbench body, helper, and placeholder text target 4.5:1. Do not relax that to 3:1 because a style is named muted.
 
 ## Density
 

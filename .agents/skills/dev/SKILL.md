@@ -38,7 +38,7 @@ Editing src/, styles.css, manifest.json, main.js, esbuild.config.mjs, eslint.con
 |---|---|
 | Display name | `NAND` |
 | Plugin id | `nand` |
-| View types (frozen) | `nand-dashboard-view`, `nand-editor-view`, `terminal-view`, `nand-contacts-view`, `nand-automation-view`, `nand-browser-view` |
+| View types (frozen) | `nand-dashboard-view`, `nand-editor-view`, `terminal-view`, `nand-contacts-view`, `nand-automation-view`, `nand-browser-view`, `nand-workbench-view` |
 | `minAppVersion` | `1.12.0` |
 | `isDesktopOnly` | `false` |
 | Entry | `src/plugin/main.ts` → committed `main.js` |
@@ -48,7 +48,7 @@ Pinned leaves store the view type string. The project is in pre-release developm
 
 ## Hard rules
 
-1. Keep the view type strings in the identity table. Register native product views on phones and when a module is off. A terminal leaf whose module is off shows `InactiveTerminalView`; browser leaves render a disabled/mobile placeholder without creating desktop resources.
+1. Keep the view type strings in the identity table. `nand-workbench-view` is the shell; the six product view types stay registered for native tabs and restore. Register native product views on phones and when a module is off. A terminal leaf whose module is off shows `InactiveTerminalView`; browser leaves render a disabled/mobile placeholder without creating desktop resources.
 2. Source is layered as `plugin`, `view`, `platform`, `core`, `shared`. The import matrix is in `references/architecture.md` and enforced by `pnpm test:architecture`, including type imports and lazy runtime cycles. Domain logic belongs in `core`; shared is not a dumping ground for feature models.
 3. `plugin/` is the composition root. Views receive explicit host/action contracts; they do not import the plugin class, even with `import type`. Platform adapters never import views or plugin modules. Inject UI actions from composition. TerminalService owns native PTY sessions; views acquire xterm renderers separately.
 4. `src/core/sync/index.ts` stays `export {}`. Dashboard markdown write-back belongs in `src/platform/obsidian/dashboard/`.
