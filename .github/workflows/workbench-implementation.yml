@@ -25,11 +25,14 @@ jobs:
           node-version: 24.x
           cache: pnpm
       - run: pnpm install --frozen-lockfile
-      - name: Apply the reviewed implementation stage
+      - name: Apply the hash-verified implementation stage
         run: node scripts/workbench-stage.mjs
       - run: pnpm run build
-        id: build
-      - name: Commit built implementation to this branch only
+      - name: Verify build identity
+        run: node scripts/workbench-stage.mjs --verify-build
+      - run: pnpm run lint
+      - run: pnpm run test:all
+      - name: Commit verified source and build to this branch only
         env:
           IMPLEMENTATION_BRANCH: refactor/unified-workbench-v2
         run: |
@@ -40,10 +43,18 @@ jobs:
           test "$remote_head" = "$GITHUB_SHA"
           git add src scripts docs speculo .agents styles.css main.js package.json esbuild.config.mjs
           if ! git diff --cached --quiet; then
-            git commit -m 'Implement and build the reviewed workbench stage'
+            git commit -m 'fix: verify workbench lifecycle, shared Agent navigation and native compatibility'
             git push origin "HEAD:refs/heads/$IMPLEMENTATION_BRANCH"
           fi
-      - run: pnpm run lint
-      - name: Run all existing and new tests
-        if: ${{ !cancelled() && steps.build.outcome == 'success' }}
-        run: pnpm run test:all
+          git rev-parse HEAD > implementation-source-sha.txt
+          sha256sum main.js styles.css manifest.json > implementation-SHA256SUMS
+      - uses: actions/upload-artifact@v4
+        with:
+          name: nand-workbench-verified-stage
+          path: |
+            implementation-source-sha.txt
+            implementation-SHA256SUMS
+            main.js
+            styles.css
+            manifest.json
+          retention-days: 7
