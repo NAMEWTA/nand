@@ -1,0 +1,53 @@
+name: Workbench implementation build
+
+# Temporary, branch-scoped implementation harness. Remove before final review.
+# It only applies reviewed repository-local edits on this implementation branch;
+# it cannot publish, tag, or update main and receives no external credentials.
+on:
+  push:
+    branches: [refactor/unified-workbench-v2]
+    paths: [scripts/workbench-stage.mjs]
+
+permissions:
+  contents: write
+
+concurrency:
+  group: workbench-implementation
+  cancel-in-progress: false
+
+jobs:
+  implement:
+    if: github.ref == 'refs/heads/refactor/unified-workbench-v2'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 1
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24.x
+          cache: pnpm
+      - name: Apply the reviewed implementation stage
+        run: node scripts/workbench-stage.mjs
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm run build
+      - name: Commit built implementation to this branch only
+        env:
+          IMPLEMENTATION_BRANCH: refactor/unified-workbench-v2
+        run: |
+          set -eu
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          # Do not overwrite any concurrent author commit.
+          remote_head=$(git ls-remote origin "refs/heads/$IMPLEMENTATION_BRANCH" | cut -f1)
+          test "$remote_head" = "$GITHUB_SHA"
+          git add src scripts docs speculo .agents styles.css main.js package.json esbuild.config.mjs
+          if ! git diff --cached --quiet; then
+            git commit -m 'Implement and build the reviewed workbench stage'
+            git push origin "HEAD:refs/heads/$IMPLEMENTATION_BRANCH"
+          fi
+      - run: pnpm run lint
+      - run: pnpm run test:all
