@@ -46,6 +46,7 @@ export function pickContextMaterial(app: App): Promise<ContextMaterial | null> {
 		const picker = new Picker(app);
 		picker.setPlaceholder(t('context.add'));
 		bindLocalizedControl(picker, 'placeholder', 'terminalAgent.context.add');
+		picker.emptyStateText = t('context.noMatchingNotes');
 		picker.open();
 	});
 }

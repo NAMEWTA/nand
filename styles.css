@@ -9661,6 +9661,20 @@ button.nand-ui-list-item.is-active {
 	color: #22c55e;
 }
 
+/* Light cards make the 400-level badge inks fall under 4.5:1.
+   Neon, volt, magma, and onyx stay near-black in either app mode, so they keep the brighter inks. */
+.theme-light .nand-dashboard-root:not([data-theme="neon"]):not([data-theme="volt"]):not([data-theme="magma"]):not([data-theme="onyx"]) .dashboard-sidebar-lunar-badge--holiday {
+	color: #b91c1c;
+}
+
+.theme-light .nand-dashboard-root:not([data-theme="neon"]):not([data-theme="volt"]):not([data-theme="magma"]):not([data-theme="onyx"]) .dashboard-sidebar-lunar-badge--festival {
+	color: #92400e;
+}
+
+.theme-light .nand-dashboard-root:not([data-theme="neon"]):not([data-theme="volt"]):not([data-theme="magma"]):not([data-theme="onyx"]) .dashboard-sidebar-lunar-badge--weekend {
+	color: #166534;
+}
+
 .dashboard-sidebar-lunar-almanac {
 	display: flex;
 	flex-wrap: wrap;

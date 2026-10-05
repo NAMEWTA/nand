@@ -14,7 +14,12 @@ export function SaveStatePanel({ engine, app, owner }: { engine: SyncEngine; app
 	if (state.status === 'saved' || state.status === 'saving') return null;
 	const copy = (text: string) => { const clipboard = owner.defaultView?.navigator.clipboard; if (clipboard) void observeDashboardPromise(clipboard.writeText(text)); };
 	const reload = async () => {
-		if (await showConfirmDialog(app, { title: t('dashboard.sync.reload'), message: t('dashboard.sync.reloadConfirm') })) await engine.reloadFromDisk();
+		if (await showConfirmDialog(app, {
+			title: t('dashboard.sync.reload'),
+			message: t('dashboard.sync.reloadConfirm'),
+			confirmLabel: t('dashboard.sync.reloadAction'),
+			destructive: false,
+		})) await engine.reloadFromDisk();
 	};
 	return <div class="dashboard-save-state" role="status" aria-live="polite" data-save-status={state.status}>
 		<p>{dashboardSaveMessage(state)}</p>

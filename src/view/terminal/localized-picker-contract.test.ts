@@ -47,7 +47,7 @@ function fixture() {
 				if (name.endsWith('/localized-dom')) return bindings;
 				if (name.endsWith('/terminal-accessor')) return { t: (key: string) => translate(`terminalAgent.${key}`) };
 				if (/\/shared\/i18n(?:\/index)?$/.test(name)) return { t: translate };
-				if (name === './labels') return { ct: (key: string) => translate(`contacts.${key}`) };
+				if (name === './labels' || name.endsWith('/forms')) return { ct: (key: string) => translate(`contacts.${key}`) };
 				if (name === './session-label') return { sessionLabel: () => 'session' };
 				return {};
 			},
@@ -59,24 +59,27 @@ function fixture() {
 }
 
 const cases = [
-	['src/view/terminal/recent-session-modal.ts', 'RecentSessionModal', 'terminalAgent.workbench.searchSessions', []],
-	['src/view/automations/session-picker.ts', 'AutomationSessionPicker', 'automation.sessions', []],
-	['src/view/dashboard/ui/icon-picker-modal.ts', 'IconPickerModal', 'quickNote.iconPickerPlaceholder', null],
-	['src/view/contacts/forms.ts', 'RecordPicker', 'contacts.searchPeople', ['person']],
-	['src/view/contacts/forms.ts', 'RecordPicker', 'contacts.searchCompanies', ['company']],
-	['src/view/dashboard/appearance/theme-studio-modal.ts', 'ImageFileSuggestModal', 'themeStudio.bg.browsePlaceholder', null],
+	['src/view/terminal/recent-session-modal.ts', 'RecentSessionModal', 'terminalAgent.workbench.searchSessions', 'terminalAgent.workbench.noMatchingSessions', []],
+	['src/view/automations/session-picker.ts', 'AutomationSessionPicker', 'automation.sessions', 'automation.noMatchingSessions', []],
+	['src/view/dashboard/ui/icon-picker-modal.ts', 'IconPickerModal', 'quickNote.iconPickerPlaceholder', 'quickNote.iconPickerEmpty', null],
+	['src/view/contacts/forms.ts', 'RecordPicker', 'contacts.searchPeople', 'contacts.noMatchingPeople', ['person']],
+	['src/view/contacts/forms.ts', 'RecordPicker', 'contacts.searchCompanies', 'contacts.noMatchingCompanies', ['company']],
+	['src/view/dashboard/appearance/theme-studio-modal.ts', 'ImageFileSuggestModal', 'themeStudio.bg.browsePlaceholder', 'themeStudio.bg.noImages', null],
+	['src/plugin/settings/contacts-settings.ts', 'ArchiveFolderPicker', 'contacts.folder', 'contacts.noMatchingFolders', 'folder'],
 ] as const;
 
-for (const [file, name, key, kind] of cases) {
+for (const [file, name, key, emptyKey, kind] of cases) {
 	test(`${name} ${key}: constructor and live placeholder respect the native API contract`, () => {
 		const f = fixture();
-		const extra = name === 'RecordPicker' || name === 'ImageFileSuggestModal' ? `\nexport { ${name} };\n` : '';
+		const extra = name === 'RecordPicker' || name === 'ImageFileSuggestModal' || name === 'ArchiveFolderPicker' ? `\nexport { ${name} };\n` : '';
 		const Picker = f.load(file, extra)[name];
 		const choose = () => {};
 		const picker = kind === null ? new Picker({}, choose)
 			: name === 'RecordPicker' ? new Picker({}, [], kind[0], choose)
-				: new Picker({}, [], choose);
+				: name === 'ArchiveFolderPicker' ? new Picker({}, choose)
+					: new Picker({}, [], choose);
 		assert.equal(picker.inputEl.getAttribute('placeholder'), f.translate(key));
+		assert.equal(picker.emptyStateText, f.translate(emptyKey), 'Empty results follow the plugin language, not Obsidian');
 		assert.equal(picker.setPlaceholder(f.translate(key)), undefined, 'The fixture must not invent a chainable setter');
 		picker.inputEl.value = 'user search 中文';
 		for (const language of ['en', 'zh']) {
@@ -95,6 +98,7 @@ test('context material picker opens and cancellation settles without a selection
 	assert.equal(f.opened.length, 1);
 	const picker = f.opened[0]!;
 	assert.equal(picker.inputEl.getAttribute('placeholder'), f.translate('terminalAgent.context.add'));
+	assert.equal(picker.emptyStateText, f.translate('terminalAgent.context.noMatchingNotes'));
 	picker.inputEl.value = 'draft search';
 	f.language('en');
 	f.bindings.refreshLocalizedDom(picker.inputEl);
