@@ -7,6 +7,7 @@ export interface NativeSurfaceContext {
 	contentEl: HTMLElement;
 	containerEl: HTMLElement;
 	embedded?: boolean;
+	changed?: () => void;
 	addAction?: (icon: string, title: string, callback: (event: MouseEvent) => void) => HTMLElement;
 	close: () => void | Promise<void>;
 	activate?: () => Promise<void>;
@@ -19,6 +20,7 @@ export abstract class NativeSurface extends Component {
 	get leaf(): WorkspaceLeaf { return this.context.leaf; }
 	get contentEl(): HTMLElement { return this.context.contentEl; }
 	get containerEl(): HTMLElement { return this.context.containerEl; }
+	activate(): Promise<void> { return this.context.activate?.() ?? this.app.workspace.revealLeaf(this.leaf); }
 	get embedded(): boolean { return this.context.embedded === true; }
 	abstract getViewType(): string;
 	abstract getDisplayText(): string;

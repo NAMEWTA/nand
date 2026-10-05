@@ -27,7 +27,7 @@ class Bar implements UsageBarElement {
 function host(active: boolean): UsageBarHost {
 	return {
 		isActive: () => active,
-		settings: { agentSettings: structuredClone(DEFAULT_AGENT_SETTINGS) },
+		settings: { agentSettings: { ...structuredClone(DEFAULT_AGENT_SETTINGS), showUsageInStatusBar: true } },
 	};
 }
 

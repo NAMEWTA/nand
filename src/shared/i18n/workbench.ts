@@ -1,5 +1,13 @@
 export const messages = {
  en: {
+  'workbench.pageLimit': 'Close an existing browser page before opening another (50-page limit).',
+  'workbench.runStatus': 'Run status', 'workbench.noRuns': 'No matching runs', 'workbench.previous': 'Previous', 'workbench.next': 'Next',
+  'workbench.statusSetting': 'Bottom status', 'workbench.statusSettingDesc': 'Show running work and items needing attention. Other information stays on its feature page.',
+  'workbench.statusAutomatic': 'Show when needed', 'workbench.statusHidden': 'Hide',
+  'workbench.statusAttention': 'Needs attention: {count}', 'workbench.statusRunning': 'Running: {count}',
+  'workbench.statusSessions': 'Agent running: {count}', 'workbench.statusWaiting': 'Waiting for input: {count}',
+  'workbench.statusMore': 'More status items',
+
   'workbench.title': 'NAND', 'workbench.open': 'Open workbench', 'workbench.home': 'Home',
   'workbench.navigation': 'Workbench navigation', 'workbench.search': 'Find a feature',
   'workbench.toggleNavigation': 'Toggle navigation', 'workbench.closeNavigation': 'Close navigation',
@@ -15,6 +23,14 @@ export const messages = {
   'workbench.closePage': 'Close this page', 'workbench.pages': 'Open pages', 'workbench.newPage': 'New page',
  },
  zh: {
+  'workbench.pageLimit': '请先关闭一个已有浏览器页面，再打开新页面（上限 50 页）。',
+  'workbench.runStatus': '运行状态', 'workbench.noRuns': '没有匹配的运行记录', 'workbench.previous': '上一页', 'workbench.next': '下一页',
+  'workbench.statusSetting': '底部状态', 'workbench.statusSettingDesc': '按需展示运行中或需要处理的事项，其他信息保留在所属功能页。',
+  'workbench.statusAutomatic': '需要时展示', 'workbench.statusHidden': '隐藏',
+  'workbench.statusAttention': '需要处理：{count}', 'workbench.statusRunning': '运行中：{count}',
+  'workbench.statusSessions': 'Agent 运行中：{count}', 'workbench.statusWaiting': '等待输入：{count}',
+  'workbench.statusMore': '更多状态',
+
   'workbench.title': 'NAND', 'workbench.open': '打开工作台', 'workbench.home': '首页',
   'workbench.navigation': '工作台导航', 'workbench.search': '查找功能',
   'workbench.toggleNavigation': '切换导航栏', 'workbench.closeNavigation': '关闭导航栏',

@@ -29,7 +29,7 @@ export class TerminalViewPlaceholder extends TerminalView {
 				icon: 'terminal',
 				title: sharedT('modules.terminal'),
 				description: sharedT('modules.terminalOff'),
-				action: { label: sharedT('modules.openHome'), run: () => this.plugin.openHome() },
+				action: { label: sharedT('modules.openHome'), run: () => this.plugin.openSettings() },
 			});
 			return;
 		}

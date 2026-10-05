@@ -135,7 +135,7 @@ export class EditorView extends ItemView {
 				icon: 'pen-line',
 				title: t('modules.editor'),
 				description: t('modules.editorOff'),
-				action: { label: t('modules.openHome'), run: () => this.plugin.openHome() },
+				action: { label: t('modules.openHome'), run: () => this.plugin.openSettings() },
 			}),
 			this.contentEl,
 		);

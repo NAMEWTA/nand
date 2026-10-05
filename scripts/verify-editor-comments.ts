@@ -449,7 +449,7 @@ const viewSource = fs.readFileSync(path.join(root, 'src/view/dashboard/view/view
 assert.match(viewSource, /DASHBOARD_VIEW_TYPE = 'nand-dashboard-view'/);
 const editorSource = fs.readFileSync(path.join(root, 'src/view/editor/view/editor-view.ts'), 'utf8');
 assert.match(editorSource, /EDITOR_VIEW_TYPE = 'nand-editor-view'/);
-const terminalSource = fs.readFileSync(path.join(root, 'src/view/terminal/terminal-view.ts'), 'utf8');
+const terminalSource = fs.readFileSync(path.join(root, 'src/view/terminal/view-type.ts'), 'utf8');
 assert.match(terminalSource, /TERMINAL_VIEW_TYPE = 'terminal-view'/);
 
 const commentCss = fs.readFileSync(path.join(root, 'styles.css'), 'utf8');

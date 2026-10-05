@@ -6,6 +6,8 @@ import { sidebarWidth, type WorkbenchChange, type WorkbenchState } from './workb
 
 export interface TerminalWorkbenchProps {
 	state: WorkbenchState;
+	embedded?: boolean;
+	usageOnly?: boolean;
 	onStateChange: WorkbenchChange;
 	sessions?: ComponentChildren;
 	newConversation?: ComponentChildren;
@@ -32,19 +34,19 @@ export function TerminalWorkbench(props: TerminalWorkbenchProps) {
 	const root = useRef<HTMLDivElement>(null);
 	const navigation = useRef<HTMLElement>(null);
 	const drag = useRef<{ x: number; width: number }>();
-	const [compact, setCompact] = useState(false);
+	const [compact, setCompact] = useState(props.embedded === true);
 	const drawerVisible = compact && state.drawerOpen;
 	useEffect(() => {
 		const element = root.current;
 		const win = props.ownerWindow ?? element?.ownerDocument.defaultView;
 		const Observer = (win as Window & { ResizeObserver?: typeof ResizeObserver } | null)?.ResizeObserver;
 		if (!element || !Observer) return;
-		const measure = () => setCompact(element.getBoundingClientRect().width < 800);
+		const measure = () => setCompact(props.embedded === true || element.getBoundingClientRect().width < 800);
 		measure();
 		const observer = new Observer(measure);
 		observer.observe(element);
 		return () => observer.disconnect();
-	}, [props.ownerWindow]);
+	}, [props.ownerWindow, props.embedded]);
 	useEffect(() => {
 		if (!drawerVisible) return;
 		const previous = root.current?.ownerDocument.activeElement as HTMLElement | null;
@@ -54,7 +56,7 @@ export function TerminalWorkbench(props: TerminalWorkbenchProps) {
 	const closeDrawer = () => onStateChange({ drawerOpen: false });
 	return (
 		<div
-			className={`terminal-workbench-shell${state.wideSidebarOpen ? '' : ' is-sidebar-collapsed'}${state.drawerOpen ? ' is-drawer-open' : ''}${state.showHistory ? ' is-history-preview' : ''}`}
+			className={`terminal-workbench-shell${props.embedded ? ' is-workbench-embedded' : ''}${props.usageOnly ? ' is-usage-page' : ''}${state.wideSidebarOpen ? '' : ' is-sidebar-collapsed'}${state.drawerOpen ? ' is-drawer-open' : ''}${state.showHistory ? ' is-history-preview' : ''}`}
 			style={{ '--terminal-sidebar-width': `${sidebarWidth(state.sidebarWidth)}px` }}
 			ref={(element) => {
 				root.current = element;
@@ -62,7 +64,7 @@ export function TerminalWorkbench(props: TerminalWorkbenchProps) {
 				else if (props.rootRef) props.rootRef.current = element;
 			}}
 			onKeyDown={(event) => {
-				if (!drawerVisible) return;
+				if (!drawerVisible || event.isComposing) return;
 				if (event.key === 'Escape') {
 					event.preventDefault(); event.stopPropagation(); closeDrawer();
 				} else if (event.key === 'Tab') {
@@ -78,7 +80,7 @@ export function TerminalWorkbench(props: TerminalWorkbenchProps) {
 		>
 			<button className="terminal-drawer-backdrop" tabIndex={-1} aria-label={t('workbench.closeNavigation')} onClick={closeDrawer} />
 			<aside className="nand-agent-sidebar" ref={navigation} aria-label={t('workbench.navigation')} role={drawerVisible ? 'dialog' : undefined} aria-modal={drawerVisible ? true : undefined} inert={compact ? !state.drawerOpen : !state.wideSidebarOpen}>
-				<div className="terminal-navigation-title">
+				<div className="terminal-navigation-title" hidden={props.embedded}>
 					<h3 className="nand-agent-workbench-title">{t('workbench.title')}</h3>
 					<button className="nand-ui-icon-btn terminal-drawer-close" aria-label={t('workbench.closeNavigation')} onClick={closeDrawer}><Icon name="x" /></button>
 				</div>
@@ -92,7 +94,7 @@ export function TerminalWorkbench(props: TerminalWorkbenchProps) {
 					<div className="nand-agent-session-controls" hidden={state.navigation !== 'running'}>{sessions}</div>
 					<div className="nand-agent-history" hidden={state.navigation !== 'history'}>{history}</div>
 				</div>
-				<div className="nand-agent-usage">{usage}</div>
+				<div className="nand-agent-usage">{!props.usageOnly && usage}</div>
 			</aside>
 			<button
 				className="terminal-sidebar-resizer" role="separator" aria-orientation="vertical" aria-label={t('workbench.resizeNavigation')} aria-valuemin={240} aria-valuemax={360} aria-valuenow={sidebarWidth(state.sidebarWidth)}
@@ -118,7 +120,7 @@ export function TerminalWorkbench(props: TerminalWorkbenchProps) {
 				<div className="terminal-workbench-header">{header}</div>
 				{props.context}
 				<div className="terminal-workbench-main">
-					<div className="terminal-live-pane" aria-hidden={state.showHistory} inert={state.showHistory}>
+					<div className="terminal-live-pane" aria-hidden={state.showHistory || props.usageOnly} inert={state.showHistory || props.usageOnly}>
 						<div className="terminal-search-container" ref={props.searchRef}>
 							<Icon name="search" className="terminal-search-icon" />
 							<input type="text" className="terminal-search-input" placeholder={t('terminal.search.placeholder')} aria-label={t('terminal.search.placeholder')} ref={props.inputRef} onInput={props.search} onKeyDown={(event) => {
@@ -131,7 +133,8 @@ export function TerminalWorkbench(props: TerminalWorkbenchProps) {
 						</div>
 						<div className="terminal-container" ref={props.terminalRef} />
 					</div>
-					<div className="terminal-history-pane" hidden={!state.showHistory}>{preview}</div>
+					<div className="terminal-history-pane" hidden={!state.showHistory || props.usageOnly}>{preview}</div>
+					{props.usageOnly && <div className="terminal-usage-page">{usage}</div>}
 				</div>
 			</div>
 		</div>

@@ -11,7 +11,7 @@ export interface DashboardHost {
 	automationHost?: AutomationUiPort;
 	saveSettings(): Promise<void>;
 	refreshAllDashboards(): void;
-	openHome(): void;
+	openSettings(): void;
 	switchWorkspace(path: string): Promise<void>;
 	createWorkspace(name: string): Promise<void>;
 	renameWorkspace(path: string, name: string): Promise<void>;

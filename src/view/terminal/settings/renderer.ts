@@ -1819,18 +1819,6 @@ export class TerminalSettingsRenderer extends BaseSettingsRenderer {
 				}),
 			);
 
-		// Show the icon in the ribbon
-		bindLocalizedControl(bindLocalizedControl(new Setting(visibilityCard)
-			.setName(t('visibility.showInRibbon')), "name", 'terminalAgent.visibility.showInRibbon')
-			.setDesc(t('visibility.showInRibbonDesc')), "desc", 'terminalAgent.visibility.showInRibbonDesc')
-			.addToggle((toggle) =>
-				toggle.setValue(this.context.plugin.settings.visibility.showInRibbon).onChange((value) => {
-					this.context.plugin.settings.visibility.showInRibbon = value;
-					void this.saveSettings();
-					this.context.plugin.updateFeatureVisibility();
-				}),
-			);
-
 		// Show in the new tab view
 		bindLocalizedControl(bindLocalizedControl(new Setting(visibilityCard)
 			.setName(t('visibility.showInNewTab')), "name", 'terminalAgent.visibility.showInNewTab')
@@ -1838,18 +1826,6 @@ export class TerminalSettingsRenderer extends BaseSettingsRenderer {
 			.addToggle((toggle) =>
 				toggle.setValue(this.context.plugin.settings.visibility.showInNewTab).onChange((value) => {
 					this.context.plugin.settings.visibility.showInNewTab = value;
-					void this.saveSettings();
-					this.context.plugin.updateFeatureVisibility();
-				}),
-			);
-
-		// Show in the status bar
-		bindLocalizedControl(bindLocalizedControl(new Setting(visibilityCard)
-			.setName(t('visibility.showInStatusBar')), "name", 'terminalAgent.visibility.showInStatusBar')
-			.setDesc(t('visibility.showInStatusBarDesc')), "desc", 'terminalAgent.visibility.showInStatusBarDesc')
-			.addToggle((toggle) =>
-				toggle.setValue(this.context.plugin.settings.visibility.showInStatusBar).onChange((value) => {
-					this.context.plugin.settings.visibility.showInStatusBar = value;
 					void this.saveSettings();
 					this.context.plugin.updateFeatureVisibility();
 				}),

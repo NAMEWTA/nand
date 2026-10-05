@@ -1,6 +1,6 @@
 import { AGENT_CATALOG } from '../../core/agent-launch/catalog';
 import type { AgentId, AgentSettings, UsageSnapshot } from '../../core/agent-launch/types';
-import { formatUsageChip } from '../../platform/desktop/agents/usage';
+import { formatUsageChip } from '../../core/agent-launch/usage-format';
 import { t } from '../../shared/i18n/index';
 
 export interface UsageBarHost {

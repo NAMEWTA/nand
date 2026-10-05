@@ -1,3 +1,5 @@
+import type { AgentUsageSource } from '../../../core/agent-launch/usage-source';
+import { TerminalSurface, terminalSurfaces } from '../../../view/terminal/terminal-surface';
 import { RuntimeStartup } from '../../../core/pty/runtime-startup';
 import type { ContextMaterial } from '../../../core/agent-launch/session-api';
 import { agentSessions } from '../../workflows/agent-sessions';
@@ -52,9 +54,8 @@ import type { TerminalService } from '../../../platform/desktop/terminal/termina
 import { refreshLeafTitle } from '../../../platform/obsidian/workspace-title';
 import type { LocalizedCommand } from '../../../platform/obsidian/localized-command';
 import type { ServerManager } from '../../../platform/terminal-server/server-manager';
-import { onLanguageChanged, t as sharedT } from '../../../shared/i18n/index';
+import { t as sharedT } from '../../../shared/i18n/index';
 import { i18n, t } from '../../../shared/i18n/terminal-accessor';
-import { TERMINAL_RIBBON_ICON_ID } from '../../../view/terminal/icons';
 import { LauncherInstallModal } from '../../../view/terminal/launcher-install-modal';
 import { renderPresetScriptIcon } from '../../../view/terminal/preset-script-icons';
 import { PresetScriptModal } from '../../../view/terminal/preset-script-modal';
@@ -71,13 +72,13 @@ import {
 	registerOrca,
 	resumeRegisteredSession,
 } from '../agents/register';
-import { mountNandStatusBarEntry } from './status-bar-entry';
 
 export interface TerminalAgentBridge {
 	getBrowserEnvironment?(): Promise<Record<string, string>>;
 	readAbsoluteReference(): string | null;
 	openAutomations?(): Promise<void>;
 	openNotifications?(): void;
+	openWorkbench?(section?: string, sessionId?: string, ownerWindow?: Window): Promise<void>;
 }
 
 interface TerminalAgentStore {
@@ -100,12 +101,21 @@ export class TerminalAgentController {
 	}
 	private readonly terminalRenderers = new TerminalRenderers();
 	private recentSessionIds: string[] = [];
+	private readonly runtimeListeners = new Set<() => void>();
+	private runtimeUnsubscribe?: () => void;
+	getRuntimeStatus(): readonly { id: string; status: string; automated: boolean }[] {
+		if (!this._active) return [];
+		return this._terminalService?.getAllTerminals().map((session) => ({ id: session.id, status: session.nativeStatus, automated: session.automationManaged })) ?? [];
+	}
+	subscribeRuntime(listener: () => void): () => void { this.runtimeListeners.add(listener); return () => { this.runtimeListeners.delete(listener); }; }
+	private publishRuntime(): void { for (const listener of this.runtimeListeners) listener(); }
+
 	recordActiveSession(id: string): void {
 		const live = new Set(this._terminalService?.getAllTerminals().map((session) => session.id));
 		this.recentSessionIds = this.recentSessionIds.filter((key) => key !== id && live.has(key));
 		this.recentSessionIds.push(id);
 	}
-	showSessionSwitcher(view: TerminalView): void {
+	showSessionSwitcher(view: TerminalSurface): void {
 		const sessions = this._terminalService?.getAllTerminals() ?? [];
 		const ordered = orderRecentSessions(sessions, this.recentSessionIds, view.getTerminalInstance()?.id);
 		new RecentSessionModal(this.app, ordered, (session) => {
@@ -118,6 +128,9 @@ export class TerminalAgentController {
 	async openAutomationTerminal(id: string): Promise<void> {
 		const terminal = (await this.getTerminalService()).getTerminal(id);
 		if (!terminal) throw new Error(sharedT('automation.sessionMissing'));
+		const owned = terminalSurfaces(this.app).find((surface) => surface.getTerminalInstance()?.id === id);
+		if (owned) { await owned.activate(); return; }
+		if (this.bridge.openWorkbench) { await this.bridge.openWorkbench('running', id); return; }
 		const existing = this.app.workspace
 			.getLeavesOfType(TERMINAL_VIEW_TYPE)
 			.find((leaf) => leaf.view instanceof TerminalView && leaf.view.getTerminalInstance()?.id === id);
@@ -157,18 +170,6 @@ export class TerminalAgentController {
 		return this.host.addCommand(command);
 	}
 
-	addRibbonIcon(icon: string, title: string, callback: (evt: MouseEvent) => unknown): HTMLElement {
-		return this.host.addRibbonIcon(icon, title, callback);
-	}
-
-	addStatusBarItem(): HTMLElement {
-		return this.host.addStatusBarItem();
-	}
-
-	registerInterval(id: number): number {
-		return this.host.registerInterval(id);
-	}
-
 	readAbsoluteReference(): string | null {
 		return this.bridge.readAbsoluteReference();
 	}
@@ -191,9 +192,10 @@ export class TerminalAgentController {
 	private _active = true;
 
 	// Status bar elements
-	private _statusBarItem: HTMLElement | null = null;
+	usageSource?: AgentUsageSource;
+	getUsageSource(): AgentUsageSource | undefined { return this.usageSource; }
+	readonly openUsagePage = (): Promise<void> => this.bridge.openWorkbench?.('usage') ?? Promise.resolve();
 	private usageCleanup: (() => void) | null = null;
-	private languageCleanup: (() => void) | null = null;
 	private _presetScriptsMenuEl: HTMLElement | null = null;
 	private _presetScriptsMenuCleanup: (() => void) | null = null;
 	private _presetMenuAnchor: DOMRect | null = null;
@@ -282,6 +284,9 @@ export class TerminalAgentController {
 				() => this.saveSettings(),
 			);
 
+			this.runtimeUnsubscribe?.();
+			this.runtimeUnsubscribe = this._terminalService.subscribe(() => this.publishRuntime());
+			this.publishRuntime();
 			debugLog('[TerminalAgentController] TerminalService initialized');
 		}
 		return this._terminalService;
@@ -304,7 +309,7 @@ export class TerminalAgentController {
 		setDebugMode(this.settings.enableDebugLog);
 
 		// Initialize the feature visibility manager
-		this.featureVisibilityManager = new FeatureVisibilityManager(this);
+		this.featureVisibilityManager = new FeatureVisibilityManager();
 
 		// Register feature visibility configuration
 		this.registerFeatureVisibility();
@@ -314,7 +319,6 @@ export class TerminalAgentController {
 		// Register all commands
 		this.registerCommands();
 		this.usageCleanup = registerOrca(this);
-		this.languageCleanup = onLanguageChanged(() => this.updateStatusBar());
 
 		try {
 			this.sweepStaleClaudeIdeLocks();
@@ -327,7 +331,6 @@ export class TerminalAgentController {
 
 		// Delay UI initialization until the layout is ready whenever possible
 		this.app.workspace.onLayoutReady(() => {
-			this.initStatusBar();
 			if (this.settings.visibility.showInNewTab) {
 				this.registerNewTabTerminalAction();
 			}
@@ -348,8 +351,8 @@ export class TerminalAgentController {
 	 */
 	onunload(): void {
 		this._active = false;
-		this.languageCleanup?.();
-		this.languageCleanup = null;
+		this.runtimeUnsubscribe?.(); this.runtimeUnsubscribe = undefined;
+		this.runtimeListeners.clear();
 		this.usageCleanup?.();
 		this.usageCleanup = null;
 		void this.handleUnload();
@@ -438,10 +441,6 @@ export class TerminalAgentController {
 		refreshRegisteredUsage(this);
 	}
 
-	openHome(): void {
-		const owner = this.host as Plugin & { openHome?: () => void };
-		owner.openHome?.();
-	}
 
 	createLeafView(leaf: WorkspaceLeaf): TerminalView {
 		return new TerminalViewPlaceholder(leaf, this);
@@ -461,14 +460,15 @@ export class TerminalAgentController {
 	activate(): void {
 		this.startup.open();
 		this._active = true;
-		this.updateStatusBar();
+		this.publishRuntime();
 		refreshRegisteredUsage(this);
 	}
 
 	async deactivate(): Promise<void> {
 		await this.startup.shutdown();
 		this._active = false;
-		this._statusBarItem?.toggleClass('is-hidden', true);
+		this.publishRuntime();
+		this.runtimeUnsubscribe?.(); this.runtimeUnsubscribe = undefined;
 		refreshRegisteredUsage(this);
 		this.closePresetScriptsMenu();
 		if (this._terminalService) {
@@ -593,19 +593,11 @@ export class TerminalAgentController {
 		this.featureVisibilityManager.registerFeature({
 			id: 'terminal',
 			getVisibility: () => this.settings.visibility,
-			ribbon: {
-				icon: TERMINAL_RIBBON_ICON_ID,
-				tooltip: t('ribbon.terminalTooltip'),
-				callback: () => {
-					void this.activateTerminalView();
-				},
-			},
 			onVisibilityChange: () => {
 				// Update the terminal button in new tabs when terminal visibility settings change
 				this.injectTerminalButtonToEmptyViews();
 				// Update the status bar display
-				this.updateStatusBar();
-			},
+					},
 		});
 	}
 
@@ -617,55 +609,14 @@ export class TerminalAgentController {
 		this.featureVisibilityManager.updateAllVisibility();
 	}
 
-	/**
-	 * Initialize the status bar
-	 */
-	private initStatusBar(): void {
-		this._statusBarItem = this.addStatusBarItem();
-		this._statusBarItem.addClass('terminal-status-bar');
-		this._statusBarItem.addClass('is-clickable');
-
-		const { iconEl } = mountNandStatusBarEntry(this._statusBarItem, activeDocument);
-		setIcon(iconEl, TERMINAL_RIBBON_ICON_ID);
-
-		// Add click handler
-		this._statusBarItem.addEventListener('click', (event: MouseEvent) => {
-			event.preventDefault();
-			event.stopPropagation();
-			this.togglePresetScriptsMenu(event);
-		});
-
-		// Context menu: preset scripts
-		this._statusBarItem.addEventListener('contextmenu', (event: MouseEvent) => {
-			event.preventDefault();
-			this.togglePresetScriptsMenu(event);
-		});
-
-		// Show or hide based on settings
-		this.updateStatusBar();
-	}
-
-	/**
-	 * Update the status bar visibility
-	 */
-	private updateStatusBar(): void {
-		if (!this._statusBarItem) return;
-		const tooltip = t('ribbon.terminalTooltip');
-		this._statusBarItem.setAttr('aria-label', tooltip);
-		setTooltip(this._statusBarItem, tooltip);
-
-		const shouldShow = this._active && this.settings.visibility.enabled && this.settings.visibility.showInStatusBar;
-
-		this._statusBarItem.toggleClass('is-hidden', !shouldShow);
-	}
-
 	async openFreshTerminal(): Promise<void> {
-		const view = this.getActiveTerminalView();
+		let view = this.getActiveTerminalView();
+		if (!view && this.bridge.openWorkbench) { await this.bridge.openWorkbench(); view = this.getActiveTerminalView(); }
 		if (view) {
 			const initializing = view.isInitializing();
 			if (initializing) await view.waitForTerminalInstance();
 			if (!initializing || (await this.getTerminalService()).hasPendingSession()) await view.newSession();
-			await this.app.workspace.revealLeaf(view.leaf);
+			await view.activate();
 			return;
 		}
 		await this.activateTerminalView(this.getLeafForNewTerminal());
@@ -688,7 +639,7 @@ export class TerminalAgentController {
 		if (!terminalView) {
 			const leaf = this.app.workspace.getLeavesOfType(TERMINAL_VIEW_TYPE)[0];
 			await leaf?.loadIfDeferred();
-			if (leaf && this.isTerminalView(leaf.view)) terminalView = leaf.view;
+			if (leaf && this.isTerminalView(leaf.view)) terminalView = leaf.view.surface;
 		}
 		const terminal = await terminalView?.waitForTerminalInstance();
 		if (!terminalView || !terminal) {
@@ -716,6 +667,7 @@ export class TerminalAgentController {
 	async activateTerminalView(targetLeaf?: WorkspaceLeaf): Promise<void> {
 		const { workspace } = this.app;
 
+		if (!targetLeaf && this.bridge.openWorkbench) { await this.bridge.openWorkbench(); return; }
 		if (!targetLeaf) {
 			const existing = workspace.getLeavesOfType(TERMINAL_VIEW_TYPE)[0];
 			if (existing) {
@@ -742,13 +694,39 @@ export class TerminalAgentController {
 		}
 	}
 
-	toggleAlwaysOnTopTerminal(view?: TerminalView | null): Promise<void> { return this.navigation.toggleAlwaysOnTopTerminal(view); }
-	getAlwaysOnTopTerminalLabel(view?: TerminalView | null): string { return this.navigation.getAlwaysOnTopTerminalLabel(view); }
-	isAlwaysOnTopTerminal(view?: TerminalView | null): boolean { return this.navigation.isAlwaysOnTopTerminal(view); }
-	handleTerminalViewClosed(view: TerminalView): void { this.navigation.handleTerminalViewClosed(view); }
+
+	private nativeView(surface?: TerminalSurface | null): TerminalView | null {
+		if (!surface) return null;
+		const view = surface.leaf.view;
+		return view instanceof TerminalView && view.surface === surface ? view : null;
+	}
+	async toggleAlwaysOnTopTerminal(surface?: TerminalSurface | null): Promise<void> {
+		const source = surface ?? this.getActiveTerminalView();
+		let native = this.nativeView(source);
+		if (source?.embedded && !native) {
+			const renderer = source.getTerminalInstance();
+			if (!renderer) { new Notice(t('terminal.notInitialized')); return; }
+			this.app.workspace.setActiveLeaf(source.leaf, { focus: false });
+			const leaf = this.app.workspace.getLeaf('tab');
+			source.releaseTerminalInstance();
+			this.navigation.restoreOnOpen(leaf, renderer);
+			try {
+				await leaf.setViewState({ type: TERMINAL_VIEW_TYPE, active: true });
+				if (!(leaf.view instanceof TerminalView)) throw new Error(t('terminal.notInitialized'));
+				native = leaf.view;
+			} catch (error) {
+				this.navigation.consumePendingRestoredTerminal(leaf);
+				source.adoptTerminalInstance(renderer); leaf.detach(); throw error;
+			}
+		}
+		await this.navigation.toggleAlwaysOnTopTerminal(native);
+	}
+	getAlwaysOnTopTerminalLabel(surface?: TerminalSurface | null): string { return this.navigation.getAlwaysOnTopTerminalLabel(this.nativeView(surface)); }
+	isAlwaysOnTopTerminal(surface?: TerminalSurface | null): boolean { return this.navigation.isAlwaysOnTopTerminal(this.nativeView(surface)); }
+	handleTerminalViewClosed(surface: TerminalSurface): void { const native = this.nativeView(surface); if (native) this.navigation.handleTerminalViewClosed(native); }
 	consumePendingRestoredTerminal(leaf: WorkspaceLeaf): TerminalInstance | null { return this.navigation.consumePendingRestoredTerminal(leaf); }
 	private _navigation?: TerminalWindowNavigation;
-	private get navigation(): TerminalWindowNavigation { return this._navigation ??= new TerminalWindowNavigation(this.app, () => this.getActiveTerminalView(), view => this.isTerminalView(view)); }
+	private get navigation(): TerminalWindowNavigation { return this._navigation ??= new TerminalWindowNavigation(this.app, () => this.nativeView(this.getActiveTerminalView()), view => this.isTerminalView(view)); }
 
 	private registerCommands(): void {
 		this.addCommand({
@@ -1165,27 +1143,20 @@ export class TerminalAgentController {
 	/**
 	 * Get the currently active terminal view
 	 */
-	private getActiveTerminalView(): TerminalView | null {
-		const activeView = this.app.workspace.getActiveViewOfType(TerminalView);
 
-		// Prefer the currently active terminal view
-		if (activeView) {
-			return activeView;
-		}
-
-		// Otherwise return the first terminal view
-		const leaves = this.app.workspace.getLeavesOfType(TERMINAL_VIEW_TYPE);
-		const view = leaves.map((item) => item.view).find((item) => this.isTerminalView(item));
-		return view ?? null;
+	private getActiveTerminalView(): TerminalSurface | null {
+		const active = this.app.workspace.getMostRecentLeaf();
+		const win = active?.view.containerEl.win ?? this.app.workspace.containerEl.win;
+		const views = terminalSurfaces(this.app).filter((surface) => surface.contentEl.win === win);
+		return views.find((surface) => surface.leaf === active && !surface.contentEl.hidden) ?? views.find((surface) => surface.leaf === active) ?? views.find((surface) => !surface.contentEl.hidden) ?? views[0] ?? null;
 	}
 
 	private getActiveTerminalInstance(): TerminalInstance | null {
 		return this.getActiveTerminalView()?.getTerminalInstance() ?? null;
 	}
 
-	private focusTerminalView(terminalView: TerminalView, terminal: TerminalInstance): void {
-		this.app.workspace.setActiveLeaf(terminalView.leaf, { focus: true });
-		terminal.focus();
+	private focusTerminalView(terminalView: TerminalSurface, terminal: TerminalInstance): void {
+		void terminalView.activate().then(() => terminal.focus()).catch((error: unknown) => new Notice(String(error)));
 	}
 
 	private getActiveEditorContext(): {
@@ -1535,7 +1506,7 @@ export class TerminalAgentController {
 		// immediately using the most recent snapshot; the badges update in place
 		// once new probe results arrive.
 		void this.refreshAiLauncherAvailability();
-		const anchorRect = this._statusBarItem?.getBoundingClientRect();
+		const anchorRect = this._presetMenuAnchor ?? undefined;
 		if (anchorRect) {
 			this.showPresetScriptsMenuAtRect(anchorRect);
 		} else {
@@ -2201,7 +2172,7 @@ export class TerminalAgentController {
 		intent: 'install' | 'upgrade',
 	): Promise<void> {
 		try {
-			await this.activateTerminalView(this.getLeafForNewTerminal());
+			await this.openFreshTerminal();
 			const terminalView = this.getActiveTerminalView();
 			if (!terminalView) {
 				new Notice(t('notices.presetScript.terminalUnavailable'));
@@ -2506,7 +2477,7 @@ export class TerminalAgentController {
 		void this.saveSettings();
 		// Rebuild the menu to reflect new order
 		this.closePresetScriptsMenu();
-		const anchorRect = this._statusBarItem?.getBoundingClientRect();
+		const anchorRect = this._presetMenuAnchor ?? undefined;
 		if (anchorRect) {
 			this.showPresetScriptsMenuAtRect(anchorRect);
 		}
@@ -2553,10 +2524,10 @@ export class TerminalAgentController {
 
 		let terminalView = this.getActiveTerminalView();
 		if (normalizedScript.runInNewTerminal) {
-			await this.activateTerminalView(this.getLeafForNewTerminal());
+			await this.openFreshTerminal();
 			terminalView = this.getActiveTerminalView();
-		} else if (normalizedScript.autoOpenTerminal && !terminalView) {
-			await this.activateTerminalView();
+		} else if (normalizedScript.autoOpenTerminal && !terminalView?.getTerminalInstance()) {
+			await this.openFreshTerminal();
 			terminalView = this.getActiveTerminalView();
 		}
 

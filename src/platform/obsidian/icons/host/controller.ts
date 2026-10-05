@@ -85,7 +85,6 @@ export default class IconicController {
 	private disposed = false;
 	private booted = false;
 	private generation = 0;
-	private ribbon?: HTMLElement;
 	private readonly dialogs = new Set<Modal>();
 	private readonly bodies = new Set<HTMLElement>();
 	private readonly bodyThemes = new Map<HTMLElement, { original: string | null; applied: string | null }>();
@@ -191,11 +190,7 @@ export default class IconicController {
 			this.refreshManagers();
 			this.refreshBody();
 		});
-		this.register(
-			onLanguageChanged(() => {
-				if (this.ribbon) this.ribbon.setAttribute('aria-label', STRINGS.commands.openRulebook);
-			}),
-		);
+
 		this.registerEvent(
 			this.app.workspace.on('window-open', (_workspaceWindow, win) => {
 				this.bodies.add(win.document.body);
@@ -278,10 +273,7 @@ export default class IconicController {
 			}),
 		);
 
-		// RIBBON: Open rulebook
-		this.ribbon = this.host.addRibbonIcon('lucide-book-image', STRINGS.commands.openRulebook, () =>
-			this.dialogsPort.openRulePicker(),
-		);
+		// Rule management remains in its native commands and settings, not another Ribbon entry.
 	}
 	async deactivate(): Promise<void> {
 		this.stop();
@@ -304,8 +296,6 @@ export default class IconicController {
 		for (const dialog of this.dialogs) dialog.close();
 		this.dialogs.clear();
 		this.stopManagers();
-		this.ribbon?.remove();
-		this.ribbon = undefined;
 		this.bodies.clear();
 		this.bodyThemes.clear();
 	}

@@ -77,7 +77,14 @@ export class WorkbenchView extends ItemView {
    if (revision === this.revision) { this.busy = false; this.draw(); }
   }
  }
- private async refreshAvailability(): Promise<void> {
+ async prepareModuleChanges(disabled: ReadonlySet<WorkbenchFeature>): Promise<void> {
+  if (!this.opened) return;
+  this.transition.invalidate(); this.revision++; this.busy = false;
+  const closed = await this.pages?.refreshAvailability(disabled);
+  if (closed) this.unavailable = t('workbench.disabled');
+  this.draw();
+ }
+ async refreshAvailability(): Promise<void> {
   if (!this.opened) return;
   const changed = await this.pages?.refreshAvailability();
   if (changed || this.unavailable) { this.transition.invalidate(); await this.navigate(this.state.target); }
@@ -116,7 +123,7 @@ export class WorkbenchView extends ItemView {
  private open = (target: WorkbenchTarget): void => { void this.navigate(target).catch(this.host.report); };
  private retry = (): void => { this.transition.invalidate(); this.open(this.pending); };
  private content = (element: HTMLDivElement | null): void => {
-  if (element && !this.pages) this.pages = new WorkbenchPages(this, element, this.host.contributions, (target) => this.navigate(target), this.host.report);
+  if (element && !this.pages) this.pages = new WorkbenchPages(this, element, this.host.contributions, (target) => this.navigate(target), this.host.report, () => { this.state = { ...this.state, target: this.pages?.getCurrent()?.getTarget?.() ?? this.state.target }; this.draw(); this.app.workspace.requestSaveLayout(); });
  };
  private draw(): void {
   if (!this.opened) return;

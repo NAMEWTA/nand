@@ -1,10 +1,12 @@
+import { defaultPage, visibleProducts, sidePages, type SettingsProduct, type SettingsPage } from './settings/nav';
 import { composeWorkbench } from './workbench/compose-workbench';
 import type { WorkbenchTarget } from '../view/contracts/workbench';
 import { nativeSurfaces } from '../view/hosts/obsidian/native-surface';
 import { DashboardSurface } from '../view/dashboard/view/dashboard-surface';
 import { deviceId } from '../platform/obsidian/storage/device-id';
 import { JsonStore } from '../shared/json-store';
-import { TerminalAgentController, TERMINAL_VIEW_TYPE } from './modules/terminal';
+import type { TerminalAgentController } from './modules/terminal/controller';
+import { TERMINAL_VIEW_TYPE } from '../view/terminal/view-type';
 import { Notice, Platform, Plugin, TAbstractFile, TFile, type Command } from 'obsidian';
 import { type AlbumConfig, type AnniversaryConfig, type CountdownConfig } from '../core/dashboard/types/index';
 import {
@@ -29,7 +31,6 @@ import { DashboardView, showModuleDisabled } from './modules/dashboard/index';
 import { EDITOR_VIEW_TYPE, EditorView, collectReferences, createEditorHost } from './modules/editor/index';
 import { createIconicDialogs } from './modules/icons/dialogs';
 import { IconicController } from './modules/icons/index';
-import { stableRibbon } from './ribbon';
 import { DashboardSettingTab } from './settings/index';
 import type { NandSettings } from './settings/model';
 import { DEFAULT_SETTINGS } from './settings/model';
@@ -102,9 +103,7 @@ export default class DashboardPlugin extends Plugin {
 	override addCommand(command: LocalizedCommand): Command {
 		return registerLocalizedCommand(this, command, (native) => super.addCommand(native));
 	}
-	override addRibbonIcon(icon: string, title: string, callback: (evt: MouseEvent) => unknown): HTMLElement {
-		return stableRibbon(this, icon, title, callback, (glyph, id, action) => super.addRibbonIcon(glyph, id, action));
-	}
+
 	automationHost?: Awaited<ReturnType<typeof createAutomationHost>>;
 	private workbench?: ReturnType<typeof composeWorkbench>;
 	settings!: NandSettings;
@@ -159,17 +158,6 @@ export default class DashboardPlugin extends Plugin {
 			new Notice(t('automation.failedLoad'));
 		}
 
-		this.addRibbonIcon('home', t('main.openHome'), () => this.openHome());
-		this.addRibbonIcon('globe', t('browser.open'), () => {
-			void this.openBrowser({});
-		});
-		this.addRibbonIcon('pen-line', t('editor.openPanel'), () => {
-			void this.openEditorView();
-		});
-
-		this.addRibbonIcon('contact-round', t('contacts.open'), () => {
-			void this.openContacts();
-		});
 		registerShellCommands(this);
 
 		this.addCommand({
@@ -231,15 +219,9 @@ export default class DashboardPlugin extends Plugin {
 			nameKey: 'main.addSection',
 			name: t('main.addSection'),
 			callback: () => {
-				const leaves = this.app.workspace.getLeavesOfType(DASHBOARD_VIEW_TYPE);
-				if (leaves.length === 0) {
-					new Notice(t('main.openDashboard'));
-					return;
-				}
-				const leaf = leaves[0]!;
-				if (leaf.view instanceof DashboardView) {
-					void leaf.view.addSection();
-				}
+				const surface = this.activeDashboard();
+				if (!surface) { new Notice(t('main.openDashboard')); return; }
+				void surface.addSection().catch((error: unknown) => { console.error('[NAND dashboard]', error); new Notice(t('storage.unsaved')); });
 			},
 		});
 
@@ -248,15 +230,9 @@ export default class DashboardPlugin extends Plugin {
 			nameKey: 'main.toggleBannerMode',
 			name: t('main.toggleBannerMode'),
 			callback: () => {
-				const leaves = this.app.workspace.getLeavesOfType(DASHBOARD_VIEW_TYPE);
-				if (leaves.length === 0) {
-					new Notice(t('main.openDashboard'));
-					return;
-				}
-				const leaf = leaves[0]!;
-				if (leaf.view instanceof DashboardView) {
-					void leaf.view.toggleBannerMode();
-				}
+				const surface = this.activeDashboard();
+				if (!surface) { new Notice(t('main.openDashboard')); return; }
+				void surface.toggleBannerMode().catch((error: unknown) => { console.error('[NAND dashboard]', error); new Notice(t('storage.unsaved')); });
 			},
 		});
 
@@ -333,9 +309,10 @@ export default class DashboardPlugin extends Plugin {
 		return this.workbench?.open(target, ownerWindow, state) ?? Promise.reject(new Error(t('workbench.notReady')));
 	}
 
-	openHome(): void {
-		this.settingsTab.activeProduct = 'home';
-		this.settingsTab.activePage = 'home';
+	openSettings(product: SettingsProduct = 'home', section?: SettingsPage): void {
+		const available = visibleProducts(this.settings.modules).includes(product) ? product : 'home';
+		this.settingsTab.activeProduct = available;
+		this.settingsTab.activePage = section && sidePages(available).includes(section) ? section : defaultPage(available);
 		const setting = (
 			this.app as unknown as {
 				setting: { open: () => void; openTabById: (id: string) => void };
@@ -348,8 +325,9 @@ export default class DashboardPlugin extends Plugin {
 
 	private readonly moduleLifecycle = new ModuleLifecycle();
 
-	applyModuleFlags(): Promise<void> {
-		return this.moduleLifecycle.apply(() => this.settings.modules, Platform.isDesktopApp, {
+	async applyModuleFlags(): Promise<void> {
+		await this.moduleLifecycle.apply(() => this.settings.modules, Platform.isDesktopApp, {
+			before: async (flags) => { await this.workbench?.prepareModuleChanges(flags); },
 			browser: (enabled) => this.browserHost?.setEnabled(enabled),
 			automation: async (enabled) => { await this.automationHost?.setExecutionEnabled(enabled); },
 			dashboard: (enabled) => (enabled ? this.ensureDashboardServices() : this.stopDashboardServices()),
@@ -359,6 +337,7 @@ export default class DashboardPlugin extends Plugin {
 			terminalActive: () => this.terminalHost?.isActive() === true,
 			terminal: (enabled) => (enabled ? this.ensureTerminal() : this.stopTerminal()),
 		});
+		this.workbench?.refresh();
 	}
 
 	private async setIconicEnabled(enabled: boolean): Promise<void> {
@@ -387,19 +366,7 @@ export default class DashboardPlugin extends Plugin {
 			if (leaf.view instanceof ContactsView) leaf.view.bindController();
 	}
 
-	async openContacts(): Promise<void> {
-		if (!this.settings.modules.contacts) {
-			new Notice(t('contacts.disabled'));
-			this.openHome();
-			return;
-		}
-		const existing = this.app.workspace.getLeavesOfType(CONTACTS_VIEW_TYPE)[0];
-		if (existing) {
-			await this.app.workspace.revealLeaf(existing);
-			return;
-		}
-		await this.app.workspace.getLeaf('tab').setViewState({ type: CONTACTS_VIEW_TYPE, active: true });
-	}
+	openContacts(): Promise<void> { return this.openWorkbench({ feature: 'contacts' }); }
 
 	private async ensureDashboardServices(): Promise<void> {
 		if (this.dashboardServicesStarted) return;
@@ -470,8 +437,11 @@ export default class DashboardPlugin extends Plugin {
 	private async ensureTerminal(): Promise<void> {
 		if (!Platform.isDesktopApp || this.terminalHost?.isActive()) return;
 		if (!this.terminalHost) {
+			const { TerminalAgentController } = await import('./modules/terminal/controller');
+			if (!this.settings.modules.terminal) return;
 			this.terminalHost = new TerminalAgentController(this, {
 				getBrowserEnvironment: () => this.browserHost.environment(),
+				openWorkbench: (section, resourceId, ownerWindow) => this.openWorkbench({ feature: 'terminal', section, resourceId }, ownerWindow),
 				openAutomations: async () => {
 					await this.automationHost?.open();
 				},
@@ -511,6 +481,7 @@ export default class DashboardPlugin extends Plugin {
 	}
 
 	onunload(): void {
+		this.workbench?.dispose();
 		this.browserHost?.dispose();
 		closeDashboardPanelModals(this.app);
 		this.automationHost?.dispose();
@@ -536,31 +507,19 @@ export default class DashboardPlugin extends Plugin {
 
 	async openBrowser(request: BrowserOpenRequest): Promise<void> {
 		try {
-			await this.browserHost.open(request);
+			if (!request.url && !request.target) await this.openWorkbench({ feature: 'browser' });
+			else await this.browserHost.open(request);
 		} catch (error) {
 			new Notice(browserError(error));
 		}
 	}
 
-	async openDashboard(): Promise<void> {
-		if (!this.settings.modules.dashboard) {
-			new Notice(t('modules.disabledNotice'));
-			this.openHome();
-			return;
-		}
-		const existing = this.app.workspace.getLeavesOfType(DASHBOARD_VIEW_TYPE);
-		if (existing.length > 0) {
-			this.app.workspace.setActiveLeaf(existing[0]!, { focus: true });
-			return;
-		}
-		const leaf = this.app.workspace.getLeaf('tab');
-		await leaf.setViewState({ type: DASHBOARD_VIEW_TYPE, active: true });
-	}
+	openDashboard(): Promise<void> { return this.openWorkbench({ feature: 'dashboard' }); }
 
 	async openEditorView(): Promise<void> {
 		if (!this.settings.modules.editor) {
 			new Notice(t('modules.disabledNotice'));
-			this.openHome();
+			this.openSettings();
 			return;
 		}
 		const existing = this.app.workspace.getLeavesOfType(EDITOR_VIEW_TYPE);
@@ -614,6 +573,7 @@ export default class DashboardPlugin extends Plugin {
 			browser: normalizeBrowserSettings(raw.browser),
 			terminalAgent: device.terminalAgent,
 			introSeen: raw.introSeen === true,
+			workbenchStatus: raw.workbenchStatus === 'hidden' ? 'hidden' : 'automatic',
 			modules: {
 				browser: raw.modules?.browser !== false,
 				dashboard: raw.modules?.dashboard !== false,
@@ -719,6 +679,12 @@ export default class DashboardPlugin extends Plugin {
 		return this.saveSettings();
 	}
 
+	private activeDashboard(): DashboardSurface | undefined {
+		const leaf = this.app.workspace.getMostRecentLeaf();
+		const win = leaf?.view.containerEl.win ?? this.app.workspace.containerEl.win;
+		const candidates = nativeSurfaces(this.app).filter((surface): surface is DashboardSurface => surface instanceof DashboardSurface && surface.contentEl.win === win && !surface.contentEl.hidden);
+		return candidates.find((surface) => surface.leaf === leaf) ?? candidates[0];
+	}
 	refreshAllDashboards(): void {
 		for (const surface of nativeSurfaces(this.app)) if (surface instanceof DashboardSurface && surface.embedded) void surface.refresh();
 		const leaves = this.app.workspace.getLeavesOfType(DASHBOARD_VIEW_TYPE);
@@ -731,12 +697,7 @@ export default class DashboardPlugin extends Plugin {
 
 	/** Reload every open dashboard view from disk (used after a backup restore). */
 	async reloadAllDashboards(): Promise<void> {
-		const leaves = this.app.workspace.getLeavesOfType(DASHBOARD_VIEW_TYPE);
-		for (const leaf of leaves) {
-			if (leaf.view instanceof DashboardView) {
-				await leaf.view.reloadFromDisk();
-			}
-		}
+		for (const surface of nativeSurfaces(this.app)) if (surface instanceof DashboardSurface) await surface.reloadFromDisk();
 	}
 
 	// --- Multi-workspace orchestration -------------------------------------
@@ -925,10 +886,11 @@ export default class DashboardPlugin extends Plugin {
 	private cycleWorkspace(delta: 1 | -1): void {
 		const files = this.settings.workspaceFiles;
 		if (files.length < 2) return;
-		const active = normalizeWorkspacePath(this.settings.dashboardFile);
+		const surface = this.activeDashboard();
+		const active = normalizeWorkspacePath(surface?.plugin.settings.dashboardFile ?? this.settings.dashboardFile);
 		const idx = Math.max(0, files.indexOf(active));
 		const next = files[(idx + delta + files.length) % files.length]!;
-		void this.switchWorkspace(next);
+		void (surface?.plugin.switchWorkspace(next) ?? this.switchWorkspace(next)).catch((error: unknown) => { console.error('[NAND workspace]', error); new Notice(t('storage.unsaved')); });
 	}
 
 	/** Drop registry entries whose board file no longer exists. The active

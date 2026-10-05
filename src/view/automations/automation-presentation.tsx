@@ -1,3 +1,5 @@
+import { AutomationRunsPanel, type RunHistoryState } from './AutomationRunsPanel';
+import type { ViewStateResult } from 'obsidian';
 import { NativeSurface, type NativeSurfaceContext } from '../hosts/obsidian/native-surface';
 import { Modal, Notice, Setting, } from 'obsidian';
 import { render } from 'preact/compat';
@@ -11,6 +13,9 @@ export const AUTOMATION_VIEW_TYPE = 'nand-automation-view';
 
 export class AutomationPresentation extends NativeSurface {
 	private unsubscribe?: () => void;
+	private section: 'tasks' | 'runs' = 'tasks';
+	private runState: RunHistoryState = { search: '', status: '', offset: 0, selected: '' };
+	private focusId?: string;
 	private panelState: AutomationPanelState = { selected: '', search: '', filter: '', agentFilter: '' };
 	constructor(
 		context: NativeSurfaceContext,
@@ -74,19 +79,45 @@ export class AutomationPresentation extends NativeSurface {
 			);
 		modal.open();
 	}
-	showRun(id: string): void {
-		this.panelState.selected = this.host.service.state.runs.find((r) => r.id === id)?.automationId ?? '';
-		this.draw();
+	getState(): Record<string, unknown> { return { ...this.panelState, section: this.section, runHistory: { ...this.runState } }; }
+	setState(raw: Record<string, unknown>, result: ViewStateResult): Promise<void> {
+		const text = (value: unknown) => typeof value === 'string' ? value.slice(0, 2048) : '';
+		this.panelState = { selected: text(raw.selected), search: text(raw.search), filter: text(raw.filter), agentFilter: text(raw.agentFilter) };
+		this.section = raw.section === 'runs' ? 'runs' : 'tasks';
+		const history = raw.runHistory && typeof raw.runHistory === 'object' ? raw.runHistory as Record<string, unknown> : {};
+		this.runState = { search: text(history.search), status: text(history.status), selected: text(history.selected), offset: typeof history.offset === 'number' && Number.isFinite(history.offset) ? Math.max(0, Math.floor(history.offset / 50) * 50) : 0 };
+		this.draw(); return super.setState(raw, result);
 	}
+	getTarget(): { feature: 'automations'; section: string; resourceId?: string } {
+		return { feature: 'automations', section: this.section, resourceId: this.section === 'runs' && this.runState.selected ? this.runState.selected : undefined };
+	}
+	showSection(section?: string): void { this.section = section === 'runs' ? 'runs' : 'tasks'; this.changed(); }
+	showRun(id: string): void {
+		const run = this.host.service.state.runs.find((item) => item.id === id);
+		if (!run) throw new Error(t('workbench.missing'));
+		this.panelState.selected = run.automationId;
+		this.section = 'runs';
+		const index = [...this.host.service.state.runs].reverse().findIndex((item) => item.id === id);
+		this.runState = { search: '', status: '', selected: id, offset: Math.floor(index / 50) * 50 };
+		this.focusId = id; this.changed();
+	}
+	setVisible(visible: boolean): void { super.setVisible(visible); if (visible) this.focusRun(); }
+	private changed(): void { this.draw(); this.context.changed?.(); this.app.workspace.requestSaveLayout(); }
+	private focusRun(): void {
+		if (!this.focusId || this.contentEl.hidden) return;
+		const row = Array.from(this.contentEl.querySelectorAll<HTMLElement>('[data-nand-run-id]')).find((element) => element.dataset.nandRunId === this.focusId);
+		if (row) { row.scrollIntoView({ block: 'nearest' }); row.focus({ preventScroll: true }); this.focusId = undefined; }
+	}
+
 	private run(operation: () => Promise<unknown>): void {
 		void operation().catch((error) => new Notice(error instanceof Error ? error.message : String(error)));
 	}
 	private draw(): void {
 		render(
-			<AutomationsPanel
+			this.section === 'runs' && !this.host.service.loadError ? <AutomationRunsPanel host={this.host} state={this.runState} changed={() => this.changed()} actions={{ clearHistory: () => this.clearHistory(), remove: (definition) => this.remove(definition), run: (operation) => this.run(operation) }} /> : <AutomationsPanel
 				host={this.host}
 				state={this.panelState}
-				refresh={() => this.draw()}
+				refresh={() => this.changed()}
 				actions={{
 					clearHistory: () => this.clearHistory(),
 					remove: (definition) => this.remove(definition),

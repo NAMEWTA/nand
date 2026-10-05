@@ -10,6 +10,7 @@ export interface NandSettings extends DashboardSettings {
 	browser: BrowserSettings;
 	language: Language;
 	introSeen: boolean;
+	workbenchStatus?: 'automatic' | 'hidden';
 	modules: {
 		browser: boolean;
 		dashboard: boolean;
@@ -28,6 +29,7 @@ export const DEFAULT_SETTINGS: NandSettings = {
 	browser: { searchEngine: 'google' },
 	language: 'zh',
 	introSeen: false,
+	workbenchStatus: 'automatic',
 	modules: {
 		browser: true,
 		dashboard: true,

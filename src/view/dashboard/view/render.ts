@@ -1,3 +1,4 @@
+import { getRecentDocs, renderRecentDocs } from '../ui/recent';
 import { mountSaveState } from '../SaveStatePanel';
 import type { DashboardData } from '../../../core/dashboard/types/index';
 import { applyAppearance } from '../appearance/appearance';
@@ -5,7 +6,7 @@ import { renderBanner } from '../banner/banner';
 import { renderQuickNoteRegion } from '../notes/quick-note-section';
 import { bindRenderContext, getRenderContext } from '../renderer/render-context';
 import { renderDashboard } from '../renderer/render-dashboard';
-import { isStackedLayout, sidebarWidgetSignature } from '../renderer/render-sidebar-widgets';
+import { isStackedLayout, sidebarWidgetSignature, renderSidebarWeekCalendar } from '../renderer/render-sidebar-widgets';
 import { setupDragAndDrop } from '../ui/dnd';
 import { captureRootScrollState, restoreRootScrollState } from '../ui/scroll-preserve';
 import { renderWorkspaceSwitcher } from '../workspace/workspace-switcher';
@@ -112,6 +113,13 @@ export function render(this: DashboardSurface, data: DashboardData): void {
 		renderQuickNoteRegion(mainLayout, this.plugin.settings, this.createCallbacks());
 	}
 	const contentHost = stacked ? mainLayout.createDiv({ cls: 'dashboard-scroll-region' }) : mainLayout;
+	if (this.embedded && stacked) {
+		const overview = contentHost.createDiv({ cls: 'nand-workbench-home-overview' });
+		renderSidebarWeekCalendar(overview.createDiv({ cls: 'nand-workbench-home-calendar' }));
+		const recent = overview.createDiv({ cls: 'nand-workbench-home-recent' });
+		renderRecentDocs(recent, getRecentDocs(this.app, this.plugin.settings.recentDocCount, this.plugin.settings), (path) => { void this.navigateToPath(path); });
+	}
+
 
 	// Rail state classes apply in BOTH layouts: in stacked mode they carry
 	// strip semantics instead (collapse to a slim bar, expand on click,

@@ -2,23 +2,12 @@ import { actionText } from '../../core/automations/switch-action';
 import { actionDescriptors } from '../../core/actions/executor';
 import { nextOccurrence } from '../../core/automations/schedule';
 import type { AutomationDefinition } from '../../shared/automation/types';
-import { isActiveRun } from '../../shared/automation/types';
-import { automationMessage } from '../../shared/automation/errors';
 import { getLanguage, t } from '../../shared/i18n';
 import { Icon } from '../primitives/Icon';
 import type { AutomationPanelActions, AutomationPanelState, AutomationViewHost } from './panel-contract';
 
-/** Presentation only: maps a run/definition status to a semantic badge tone. */
-const STATUS_TONE: Record<string, string> = {
-	succeeded: 'success',
-	failed: 'error',
-	running: 'info',
-	unknown: 'info',
-	cancelled: 'warning',
-	interrupted: 'warning',
-};
-const badge = (tone?: string) => `nand-ui-badge${tone ? ` nand-ui-badge--${tone}` : ''}`;
-const statusBadge = (status: string) => badge(STATUS_TONE[status]);
+import { badge, statusBadge } from './status-presentation';
+import { AutomationRunList } from './AutomationRunList';
 
 export function AutomationsPanel({
 	host,
@@ -234,7 +223,7 @@ export function AutomationsPanel({
 								</div>
 								<div className="nand-automation-toolbar nand-automation-detail-actions nand-ui-toolbar">
 									<button
-										className="mod-cta nand-ui-btn"
+										className="nand-ui-btn"
 										disabled={!editable}
 										onClick={() => actions.run(() => service.run(selected))}
 									>
@@ -300,58 +289,7 @@ export function AutomationsPanel({
 							<h4>{t('automation.history')}</h4>
 							<span className={`${badge()} nand-automation-count`}>{runs.length}</span>
 						</div>
-						<ol className="nand-automation-timeline">
-							{runs.map((run) => (
-								<li className={`nand-automation-run is-${STATUS_TONE[run.status] ?? 'neutral'}`} key={run.id}>
-									<span className="nand-automation-run-marker" aria-hidden="true" />
-									<div className="nand-automation-run-card">
-										<div className="nand-automation-run-head">
-											<span className="nand-automation-run-time">
-												{new Date(run.startedAt).toLocaleString(getLanguage() === 'zh' ? 'zh-CN' : 'en-US')}
-											</span>
-											<span className={statusBadge(run.status)}>{t(`automation.${run.status}`)}</span>
-											<span className="nand-ui-spacer" />
-											{run.terminalId && (
-												<button
-													className="nand-ui-btn nand-ui-btn-ghost"
-													onClick={() => actions.run(async () => service.agent()?.open(run.terminalId!))}
-												>
-													<Icon name="terminal" />
-													{t('automation.open')}
-												</button>
-											)}
-											{isActiveRun(run) && (
-												<button
-													className="nand-ui-btn nand-ui-btn-ghost nand-automation-btn-danger"
-													onClick={() => actions.run(() => service.stop(run))}
-												>
-													<Icon name="square" />
-													{t('automation.stop')}
-												</button>
-											)}
-										</div>
-										{(run.errorCode || run.message) && (
-											<p className="nand-automation-run-message">{automationMessage(run)}</p>
-										)}
-										{run.usage?.known && (
-											<p className="nand-automation-run-usage">
-												{t('automation.tokens')}{t('automation.colon')}{run.usage.input} / {run.usage.output}
-												{run.usage.cost !== null ? ` · $${run.usage.cost.toFixed(4)}` : ''}
-											</p>
-										)}
-										{run.output && (
-											<details className="nand-automation-output">
-												<summary>
-													<Icon className="nand-automation-output-chevron" name="chevron-right" />
-													{t('automation.output')}
-												</summary>
-												<pre>{run.output}</pre>
-											</details>
-										)}
-									</div>
-								</li>
-							))}
-						</ol>
+						<AutomationRunList runs={runs} service={service} actions={actions} />
 					</div>
 				) : (
 					<div className="nand-automation-placeholder" aria-hidden="true">

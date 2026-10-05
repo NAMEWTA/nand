@@ -3,7 +3,7 @@ import test from 'node:test';
 
 import type { UsageSnapshot, UsageStatusKey } from '../../../core/agent-launch/types.ts';
 import { setLanguage, t } from '../../../shared/i18n/runtime.ts';
-import { usageStatusText } from './usage.ts';
+import { usageStatusText } from '../../../core/agent-launch/usage-format.ts';
 
 test('cached local usage states translate at display time while raw provider errors retain their text', () => {
 	const snapshot: UsageSnapshot = {

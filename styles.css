@@ -28242,3 +28242,32 @@ body:where(.nand-iconic-enabled)[data-theme="Ukiyo"] .workspace-leaf > .workspac
 .nand-workbench.is-compact .nand-workbench-nav-link, .nand-workbench.is-compact .nand-ui-icon-btn { min-height: var(--nand-touch-target); }
 .nand-workbench.is-compact .nand-workbench-progress { display: none; }
 @media (prefers-reduced-motion: reduce) { .nand-workbench * { scroll-behavior: auto; transition-duration: 0s; animation-duration: 0s; } }
+
+
+/* Embedded Agent uses an object drawer, not a second fixed global sidebar. */
+.terminal-workbench-shell.is-workbench-embedded { position: relative; grid-template-columns: minmax(0, 1fr); }
+.terminal-workbench-shell.is-workbench-embedded > .nand-agent-sidebar { position: absolute; inset-block: 0; inset-inline-start: 0; z-index: 5; width: min(var(--terminal-sidebar-width), 85%); max-width: 85%; transform: translateX(-110%); visibility: hidden; box-shadow: var(--nand-shadow-lg); }
+.terminal-workbench-shell.is-workbench-embedded.is-drawer-open > .nand-agent-sidebar { transform: none; visibility: visible; }
+.terminal-workbench-shell.is-workbench-embedded > .terminal-sidebar-resizer { display: none; }
+.terminal-workbench-shell.is-workbench-embedded > .terminal-drawer-backdrop { position: absolute; inset: 0; z-index: 4; width: 100%; height: 100%; background: var(--background-modifier-cover); border: 0; border-radius: 0; display: none; }
+.terminal-workbench-shell.is-workbench-embedded.is-drawer-open > .terminal-drawer-backdrop { display: block; }
+.terminal-workbench-shell.is-usage-page .terminal-live-pane { visibility: hidden; pointer-events: none; }
+.terminal-usage-page { position: absolute; inset: 0; overflow: auto; padding: var(--size-4-6); background: var(--nand-surface); }
+
+/* Native status actions remain compact; no idle launcher row. */
+.nand-workbench-status { display: flex; align-items: center; gap: var(--size-4-2); }
+.nand-workbench-status[hidden] { display: none; }
+.nand-workbench-status-action { display: inline-flex; align-items: center; gap: var(--size-4-1); padding: 0 var(--size-4-1); border: none; box-shadow: none; background: transparent; height: auto; max-width: 28ch; overflow: hidden; color: var(--text-muted); font-size: var(--font-ui-smaller); }
+.nand-workbench-status-action > span:last-child { overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+.nand-workbench-status-action svg { width: var(--icon-xs); height: var(--icon-xs); }
+.nand-workbench-status-action:hover { background: var(--background-modifier-hover); color: var(--text-normal); }
+
+.nand-automation-run-history { padding: var(--size-4-4); height: 100%; }
+.nand-automation-run.is-selected { background: var(--nand-accent-soft); border-radius: var(--nand-radius-sm); }
+.nand-automation-run:focus-visible { outline: 2px solid var(--interactive-accent); outline-offset: 2px; }
+
+.nand-workbench-home-overview { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 2fr); gap: var(--size-4-4); padding: var(--size-4-4); }
+.nand-workbench-home-calendar, .nand-workbench-home-recent { min-width: 0; border: 1px solid var(--db-border); border-radius: var(--db-radius-md); padding: var(--size-4-3); }
+.nand-workbench-home-recent .dashboard-recent { margin: 0; }
+@container (max-width: 560px) { .nand-workbench-home-overview { grid-template-columns: 1fr; } }
+.nand-workbench-page { container-type: inline-size; }

@@ -1,10 +1,9 @@
-import { readUsageSnapshots } from '../../platform/desktop/agents/usage';
-import { usageContext } from '../../platform/obsidian/agents/usage-context';
-import { enabledUsageAgents, usageBarVisible } from './usage-bar';
+import type { App } from 'obsidian';
+import type { AgentUsageSource } from '../../core/agent-launch/usage-source';
 import { UsageModal } from './usage-modal';
 
-export async function openUsage(plugin: Parameters<typeof usageContext>[0]): Promise<void> {
-	if (!usageBarVisible(plugin)) return;
-	const snapshots = await readUsageSnapshots(enabledUsageAgents(plugin), usageContext(plugin));
-	new UsageModal(plugin.app, snapshots).open();
+export async function openUsage(host: { app: App; usageSource?: AgentUsageSource; openUsagePage?: () => Promise<void> }): Promise<void> {
+ if (host.openUsagePage) { await host.openUsagePage(); return; }
+ const source = host.usageSource;
+ new UsageModal(host.app, source?.getState().snapshots ?? [], source).open();
 }

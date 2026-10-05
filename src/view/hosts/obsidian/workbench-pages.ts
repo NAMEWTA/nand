@@ -1,3 +1,4 @@
+import { t } from '../../../shared/i18n';
 import type { ItemView, ViewStateResult } from 'obsidian';
 import type { WorkbenchFeature, WorkbenchTarget } from '../../contracts/workbench';
 import { normalizeTarget } from '../../workbench/navigation-state';
@@ -7,7 +8,7 @@ import type { WorkbenchContribution, WorkbenchPageBinding } from './workbench-ho
 export interface SavedPage { target: WorkbenchTarget; state: Record<string, unknown>; }
 interface PageEntry {
  key: string; target: WorkbenchTarget; element: HTMLElement; alive: boolean;
- controller: AbortController; binding?: WorkbenchPageBinding; ready: Promise<void>; closing?: Promise<void>;
+ controller: AbortController; initialized?: boolean; visited?: number; binding?: WorkbenchPageBinding; ready: Promise<void>; closing?: Promise<void>;
 }
 /** The native owner controls DOM lifetimes; modules continue owning data and background work. */
 export class WorkbenchPages {
@@ -15,8 +16,9 @@ export class WorkbenchPages {
  private readonly saved = new Map<string, SavedPage>();
  private readonly last = new Map<WorkbenchFeature, string>();
  private disposed = false;
+ private visits = 0;
  private active?: PageEntry;
- constructor(private readonly owner: ItemView, private readonly root: HTMLElement, private readonly contributions: readonly WorkbenchContribution[], private readonly navigate: (target: WorkbenchTarget) => Promise<void>, private readonly report: (error: unknown) => void) {}
+ constructor(private readonly owner: ItemView, private readonly root: HTMLElement, private readonly contributions: readonly WorkbenchContribution[], private readonly navigate: (target: WorkbenchTarget) => Promise<void>, private readonly report: (error: unknown) => void, private readonly changed: () => void = () => {}) {}
  contribution(feature: WorkbenchFeature): WorkbenchContribution | undefined { return this.contributions.find((item) => item.id === feature); }
  resolve(raw: WorkbenchTarget): WorkbenchTarget {
   const target = normalizeTarget(raw), contribution = this.contribution(target.feature);
@@ -60,13 +62,14 @@ export class WorkbenchPages {
   const key = this.key(target);
   let entry = this.entries.get(key);
   if (!entry) {
+   if (contribution.resourcePages && !this.saved.has(key) && this.list(target.feature).length >= 50) throw new Error(t('workbench.pageLimit'));
    const element = this.root.createDiv({ cls: 'nand-workbench-page' }); element.hidden = true; element.inert = true;
    const controller = new AbortController();
    const next: PageEntry = { key, target, element, alive: true, controller, ready: Promise.resolve() };
    this.entries.set(key, next); entry = next;
    const state = this.cleanState(contribution, initial ?? this.saved.get(key)?.state);
    next.ready = Promise.resolve().then(async () => {
-    const binding = await contribution.create({ app: this.owner.app, leaf: this.owner.leaf, contentEl: element, containerEl: element, embedded: true, close: () => this.close(next.key), activate: () => this.navigate(binding.getTarget?.() ?? next.target) }, target, state, controller.signal);
+    const binding = await contribution.create({ app: this.owner.app, leaf: this.owner.leaf, contentEl: element, containerEl: element, embedded: true, changed: () => { if (next.alive && this.active === next) this.changed(); }, close: () => this.close(next.key), activate: () => this.navigate(binding.getTarget?.() ?? next.target) }, target, state, controller.signal);
     next.binding = binding;
     const actual = binding.getTarget?.() ?? next.target;
     const actualKey = this.key(actual);
@@ -80,6 +83,7 @@ export class WorkbenchPages {
     if (!next.alive || this.disposed) return;
     if (binding.restore) await binding.restore(state);
     else if (Object.keys(state).length) await binding.surface.setState(state, {} as ViewStateResult);
+    next.initialized = true;
    });
   }
   try {
@@ -102,7 +106,13 @@ export class WorkbenchPages {
   this.active = entry;
   if (!entry || !entry.alive) return;
   this.last.set(entry.target.feature, entry.key);
+  entry.visited = ++this.visits;
   entry.element.hidden = false; entry.element.inert = false; entry.binding?.surface.setVisible(true);
+  // A page is not a guest keep-alive promise. Keep current + two hidden browser guests warm.
+  const hidden = [...this.entries.values()].filter((candidate) => candidate !== this.active && candidate.target.feature === 'browser' && candidate.initialized).sort((a, b) => (b.visited ?? 0) - (a.visited ?? 0));
+  const keep = this.active?.target.feature === 'browser' ? 2 : 3;
+  for (const candidate of hidden.slice(keep)) void this.closeEntry(candidate, true).catch(this.report);
+
  }
  async close(key: string): Promise<void> {
   const entry = this.entries.get(key);
@@ -111,11 +121,11 @@ export class WorkbenchPages {
   await this.closeEntry(entry, false);
   if (wasActive && !this.disposed) await this.navigate({ feature: 'dashboard' });
  }
- async refreshAvailability(): Promise<boolean> {
+ async refreshAvailability(disabled?: ReadonlySet<WorkbenchFeature>): Promise<boolean> {
   let changed = false;
   for (const entry of [...this.entries.values()]) {
    const available = this.contribution(entry.target.feature)?.availability();
-   if (available?.enabled && available.supported && available.ready) continue;
+   if (!disabled?.has(entry.target.feature) && available?.enabled && available.supported && available.ready) continue;
    changed ||= this.active === entry;
    await this.closeEntry(entry, true);
   }
@@ -127,7 +137,7 @@ export class WorkbenchPages {
   if (this.active === entry) this.active = undefined;
   this.entries.delete(entry.key);
   entry.closing = (async () => {
-   try { await entry.ready; } catch { /* The opening caller receives the original error. */ }
+   if (!entry.initialized) { try { await entry.ready; } catch { /* The opening caller receives the original error. */ } }
    if (entry.binding) {
     if (retain) this.saved.set(entry.key, { target: entry.binding.getTarget?.() ?? entry.target, state: entry.binding.getState?.() ?? entry.binding.surface.getState() });
     else this.saved.delete(entry.key);

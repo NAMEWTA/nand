@@ -18,7 +18,7 @@ export const DEFAULT_AGENT_SETTINGS: AgentSettings = {
 	globalPermissionMode: 'yolo',
 	yoloAcknowledged: false,
 	usageRefreshSec: 45,
-	showUsageInStatusBar: true,
+	showUsageInStatusBar: false,
 	agents: Object.fromEntries(AGENT_IDS.map((id) => [id, entry()])) as Record<AgentId, AgentEntrySettings>,
 };
 
@@ -43,7 +43,7 @@ export function normalizeAgentSettings(value: Partial<AgentSettings> | null | un
 		globalPermissionMode: mode,
 		yoloAcknowledged: Boolean(value?.yoloAcknowledged),
 		usageRefreshSec: Number.isFinite(refresh) && refresh >= 15 ? refresh : 45,
-		showUsageInStatusBar: value?.showUsageInStatusBar !== false,
+		showUsageInStatusBar: value?.showUsageInStatusBar === true,
 		agents,
 	};
 }

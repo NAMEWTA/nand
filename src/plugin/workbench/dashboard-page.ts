@@ -10,6 +10,7 @@ import type DashboardPlugin from '../main';
 /** Each workbench keeps its own board pointer; the global registry remains authoritative. */
 export function createDashboardPage(plugin: DashboardPlugin, context: NativeSurfaceContext, target: WorkbenchTarget, state: Record<string, unknown>): WorkbenchPageBinding {
  let path = normalizeWorkspacePath(target.resourceId ?? (typeof state.dashboardFile === 'string' ? state.dashboardFile : plugin.settings.dashboardFile));
+ if ((target.resourceId || typeof state.dashboardFile === 'string') && !plugin.app.vault.getFileByPath(path + '.md')) throw new Error(t('workbench.missing'));
  let switching: Promise<void> = Promise.resolve();
  let surface: DashboardSurface;
  const switchPath = (requested: string): Promise<void> => {
@@ -27,11 +28,11 @@ export function createDashboardPage(plugin: DashboardPlugin, context: NativeSurf
  };
  const host: DashboardHost = {
   app: plugin.app, manifest: plugin.manifest,
-  get settings() { return { ...plugin.settings, dashboardFile: path }; },
-  set settings(value) { const { dashboardFile, modules, ...rest } = value; path = normalizeWorkspacePath(dashboardFile); void modules; plugin.settings = { ...plugin.settings, ...rest }; },
+  get settings() { return { ...plugin.settings, dashboardFile: path, layoutMode: 'stacked' as const }; },
+  set settings(value) { const { dashboardFile, modules, layoutMode, ...rest } = value; void layoutMode; path = normalizeWorkspacePath(dashboardFile); void modules; plugin.settings = { ...plugin.settings, ...rest }; },
   get automationHost() { return plugin.automationHost; },
   saveSettings: () => plugin.saveSettings(), refreshAllDashboards: () => plugin.refreshAllDashboards(),
-  openHome: () => plugin.openHome(), openBrowser: (request) => plugin.openBrowser(request),
+  openSettings: () => plugin.openSettings(), openBrowser: (request) => plugin.openBrowser(request),
   switchWorkspace: switchPath,
   createWorkspace: async (name) => { await plugin.createWorkspace(name); await switchPath(plugin.settings.dashboardFile); },
   renameWorkspace: (file, name) => plugin.renameWorkspace(file, name),

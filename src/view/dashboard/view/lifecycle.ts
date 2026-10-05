@@ -27,7 +27,7 @@ export function showModuleDisabled(this: DashboardSurface): void {
 		icon: 'layout-dashboard',
 		title: t('modules.dashboard'),
 		description: t('modules.dashboardOff'),
-		action: { label: t('modules.openHome'), run: () => this.plugin.openHome() },
+		action: { label: t('modules.openHome'), run: () => this.plugin.openSettings() },
 	});
 }
 

@@ -1,14 +1,13 @@
+import { UsagePanel } from '../agent-usage/UsagePanel';
 import { Menu, Modal, Notice, Setting, type App } from 'obsidian';
 import { sessionLabel } from './session-label';
 import { copySessionId } from './copy-session-id';
 import { useEffect, useRef, useState } from 'preact/hooks';
 import { AGENT_CATALOG } from '../../core/agent-launch/catalog';
-import type { UsageSnapshot } from '../../core/agent-launch/types';
 import type { VaultSessionAgent } from '../../core/ai-vault/types';
-import { readUsageSnapshots, remainingPercent, usageStatusText } from '../../platform/desktop/agents/usage';
+import { remainingPercent, usageStatusText } from '../../core/agent-launch/usage-format';
 import type { PtySession } from '../../platform/desktop/terminal/pty-session';
 import type { TerminalService } from '../../platform/desktop/terminal/terminal-service';
-import { usageContext } from '../../platform/obsidian/agents/usage-context';
 import type { NativeHistory } from '../../platform/obsidian/ai-vault/service';
 import type { HistoryPage, NativeSessionSummary, NativeUsage } from '../../platform/terminal-server/agent-data-client';
 import { getLanguage, onLanguageChanged, t as sharedT } from '../../shared/i18n/index';
@@ -256,48 +255,39 @@ function UsageTotals({ usage }: { usage?: NativeUsage }) {
 	</span>;
 }
 
-export function UsageFooter({ host, history, ownerWindow, visible = true }: { host: WorkbenchHost; history: NativeHistory; ownerWindow?: Window; visible?: boolean }) {
-	const [, redraw] = useState(0);
-	useEffect(() => onLanguageChanged(() => redraw((n) => n + 1)), []);
-	const [snapshots, setSnapshots] = useState<UsageSnapshot[]>([]), [usage, setUsage] = useState<NativeUsage>();
-	useEffect(() => {
-		if (!visible) return;
-		let alive = true, busy = false;
-		const win = ownerWindow ?? host.app.workspace.containerEl.win;
-		const shown = () => win.document?.visibilityState !== 'hidden';
-		const refresh = async () => {
-			if (busy || !shown()) return; busy = true;
-			try {
-				const [next, aggregate] = await Promise.all([
-					readUsageSnapshots(AGENT_CATALOG.filter((agent) => host.settings.agentSettings.agents[agent.id]?.enabled && host.settings.agentSettings.agents[agent.id]?.showUsage).map((agent) => agent.id), usageContext(host)),
-					history.usage(),
-				]);
-				if (alive) { setSnapshots(next); setUsage(aggregate); }
-			} catch { /* History navigation exposes native errors. */ }
-			finally { busy = false; }
-		};
-		void refresh();
-		const timer = win.setInterval(() => { void refresh(); }, Math.max(60, host.settings.agentSettings.usageRefreshSec) * 1000);
-		const onVisibility = () => { if (shown()) void refresh(); };
-		win.document?.addEventListener('visibilitychange', onVisibility);
-		return () => { alive = false; win.clearInterval(timer); win.document?.removeEventListener('visibilitychange', onVisibility); };
-	}, [host, history, ownerWindow, visible]);
-	useEffect(() => {
-		if (!visible) return;
-		let alive = true;
-		const off = history.subscribe(() => {
-			if ((ownerWindow ?? host.app.workspace.containerEl.win).document?.visibilityState === 'hidden') return;
-			void history.usage().then((next) => { if (alive) setUsage(next); }).catch(() => {});
-		});
-		return () => { alive = false; off(); };
-	}, [history, host, ownerWindow, visible]);
-	const providerText = snapshots.map((snapshot) => `${snapshot.provider}: ${snapshot.windows[0]?.usedPct !== null && snapshot.windows[0] ? remainingPercent(snapshot.windows[0]) + '%' : usageStatusText(snapshot)}`).join(' · ');
-	return <>
-		<div className="terminal-compact-links">
-			<button className="nand-ui-btn nand-ui-btn-ghost nand-agent-usage-pill" title={providerText || t('agents.usageTitle')} onClick={() => new UsageModal(host.app, snapshots).open()}><Icon name="gauge" />{t('agents.usageTitle')}</button>
-			<button className="nand-ui-icon-btn" aria-label={sharedT('automation.title')} title={sharedT('automation.title')} onClick={() => report(host.openAutomationCenter())}><Icon name="timer" /></button>
-			<button className="nand-ui-icon-btn" aria-label={sharedT('automation.inbox')} title={sharedT('automation.inbox')} onClick={() => host.openNotificationCenter()}><Icon name="bell" /></button>
-		</div>
-		<details className="terminal-usage-details"><summary>{t('workbench.vaultUsage')}</summary><UsageTotals usage={usage} /><span className="terminal-provider-usage">{providerText}</span></details>
-	</>;
+
+export function UsageFooter({ host, history, ownerWindow, visible = true, detailed = false }: { host: WorkbenchHost; history: NativeHistory; ownerWindow?: Window; visible?: boolean; detailed?: boolean }) {
+ const [, redraw] = useState(0);
+ const source = host.getUsageSource?.();
+ const [usage, setUsage] = useState<NativeUsage>();
+ useEffect(() => onLanguageChanged(() => redraw((n) => n + 1)), []);
+ useEffect(() => {
+  if (!visible || !source) return;
+  const off = source.subscribe(() => redraw((n) => n + 1));
+  const release = source.retain();
+  return () => { off(); release(); };
+ }, [source, visible]);
+ useEffect(() => {
+  if (!visible) return;
+  let alive = true, busy = false;
+  const win = ownerWindow ?? host.app.workspace.containerEl.win;
+  const refresh = () => {
+   if (busy || win.document?.visibilityState === 'hidden') return;
+   busy = true;
+   void history.usage().then((next) => { if (alive) setUsage(next); }).catch(() => {}).finally(() => { busy = false; });
+  };
+  refresh(); const off = history.subscribe(refresh);
+  return () => { alive = false; off(); };
+ }, [history, host, ownerWindow, visible]);
+ const snapshots = source?.getState().snapshots ?? [];
+ const providerText = snapshots.map((snapshot) => snapshot.provider + ': ' + (snapshot.windows[0]?.usedPct !== null && snapshot.windows[0] ? remainingPercent(snapshot.windows[0]) + '%' : usageStatusText(snapshot))).join(' · ');
+ return <>
+  {detailed ? <UsagePanel snapshots={snapshots} /> : <div className="terminal-compact-links">
+   <button className="nand-ui-btn nand-ui-btn-ghost nand-agent-usage-pill" title={providerText || t('agents.usageTitle')} onClick={() => new UsageModal(host.app, snapshots, source).open()}><Icon name="gauge" />{t('agents.usageTitle')}</button>
+   <button className="nand-ui-icon-btn" aria-label={sharedT('automation.title')} title={sharedT('automation.title')} onClick={() => report(host.openAutomationCenter())}><Icon name="timer" /></button>
+   <button className="nand-ui-icon-btn" aria-label={sharedT('automation.inbox')} title={sharedT('automation.inbox')} onClick={() => host.openNotificationCenter()}><Icon name="bell" /></button>
+  </div>}
+  {source?.getState().error && <p role="alert">{source.getState().error}</p>}
+  <details className="terminal-usage-details"><summary>{t('workbench.vaultUsage')}</summary><UsageTotals usage={usage} /><span className="terminal-provider-usage">{providerText}</span></details>
+ </>;
 }
