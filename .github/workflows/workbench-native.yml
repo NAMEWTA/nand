@@ -1,0 +1,61 @@
+name: Workbench native acceptance
+# Temporary execution wrapper; the reusable probes remain after final cleanup.
+on:
+  push:
+    branches: [refactor/unified-workbench-v2]
+    paths: [scripts/obsidian-acceptance/workbench-probe.mjs]
+permissions:
+  contents: read
+concurrency:
+  group: workbench-native
+  cancel-in-progress: false
+jobs:
+  native:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v5
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24.x
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm run build
+      - run: git diff --exit-code -- main.js
+      - name: Install the display required by real Obsidian
+        run: sudo apt-get update -qq && sudo apt-get install -y xvfb libnss3 libatk-bridge2.0-0 libasound2t64
+      - name: Fetch the fixed official native host
+        run: |
+          set -eu
+          mkdir -p "$RUNNER_TEMP/obsidian-host"
+          cd "$RUNNER_TEMP/obsidian-host"
+          curl --fail --location --retry 3 'https://github.com/obsidianmd/obsidian-releases/releases/download/v1.13.7/Obsidian-1.13.7.AppImage' -o Obsidian.AppImage
+          echo 'e0d8e0a611624de8c9c7dcd8a9e648279fb0a0d552faa1312b7e4f3a5fa72663  Obsidian.AppImage' | sha256sum -c -
+          chmod +x Obsidian.AppImage
+          ./Obsidian.AppImage --appimage-extract >/dev/null
+      - name: Select workbench checks in the existing safe fresh-Vault launcher
+        run: |
+          node --input-type=module <<'NODE'
+          import { readFileSync, writeFileSync } from 'node:fs';
+          let text = readFileSync('scripts/obsidian-acceptance/issue-fresh-runtime.mjs', 'utf8');
+          text = text.replace("await run('scripts/obsidian-acceptance/issue-round21.mjs',selected);", "await run('scripts/obsidian-acceptance/workbench-probe.mjs','workbench');");
+          text = text.replace("await run('scripts/obsidian-acceptance/issue-titles.mjs','titles');", '');
+          text = text.replace("await run('scripts/obsidian-acceptance/issue-titles.mjs','titles',['--verify-restart']);", "await run('scripts/obsidian-acceptance/workbench-probe.mjs','restart',['--verify-restart']);");
+          writeFileSync('scripts/obsidian-acceptance/workbench-fresh-runtime.mjs', text);
+          NODE
+      - name: Run native host in a newly created isolated Vault
+        env:
+          NAND_ALLOW_FRESH_ISSUE_FIXTURE: '1'
+          NAND_FRESH_FIXTURE_ROOT: ${{ runner.temp }}/workbench-fixture-${{ github.run_id }}
+          NAND_OBSIDIAN_EXECUTABLE: ${{ runner.temp }}/obsidian-host/squashfs-root/obsidian
+          NAND_ACCEPTANCE_CASE: all
+        run: xvfb-run -a --server-args='-screen 0 1440x1000x24' node scripts/obsidian-acceptance/workbench-fresh-runtime.mjs
+      - name: Preserve native evidence, including failures
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: workbench-native-${{ github.sha }}
+          path: ${{ runner.temp }}/workbench-fixture-${{ github.run_id }}/evidence
+          if-no-files-found: warn
+          retention-days: 7
