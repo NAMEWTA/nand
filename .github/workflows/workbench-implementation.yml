@@ -1,20 +1,16 @@
 name: Workbench implementation build
 
-# Temporary, branch-scoped implementation harness. Remove before final review.
-# It only applies reviewed repository-local edits on this implementation branch;
-# it cannot publish, tag, or update main and receives no external credentials.
+# Temporary implementation harness; remove before final review.
+# Only this branch is writable. No releases, tags or external credentials.
 on:
   push:
     branches: [refactor/unified-workbench-v2]
     paths: [scripts/workbench-stage.mjs]
-
 permissions:
   contents: write
-
 concurrency:
   group: workbench-implementation
   cancel-in-progress: false
-
 jobs:
   implement:
     if: github.ref == 'refs/heads/refactor/unified-workbench-v2'
@@ -30,10 +26,11 @@ jobs:
         with:
           node-version: 24.x
           cache: pnpm
+      - run: pnpm install --frozen-lockfile
       - name: Apply the reviewed implementation stage
         run: node scripts/workbench-stage.mjs
-      - run: pnpm install --frozen-lockfile
       - run: pnpm run build
+        id: build
       - name: Commit built implementation to this branch only
         env:
           IMPLEMENTATION_BRANCH: refactor/unified-workbench-v2
@@ -41,7 +38,6 @@ jobs:
           set -eu
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          # Do not overwrite any concurrent author commit.
           remote_head=$(git ls-remote origin "refs/heads/$IMPLEMENTATION_BRANCH" | cut -f1)
           test "$remote_head" = "$GITHUB_SHA"
           git add src scripts docs speculo .agents styles.css main.js package.json esbuild.config.mjs
@@ -50,4 +46,6 @@ jobs:
             git push origin "HEAD:refs/heads/$IMPLEMENTATION_BRANCH"
           fi
       - run: pnpm run lint
-      - run: pnpm run test:all
+      - name: Run all existing and new tests
+        if: ${{ !cancelled() && steps.build.outcome == 'success' }}
+        run: pnpm run test:all
