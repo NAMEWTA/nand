@@ -260,7 +260,7 @@ export async function handleMoveCard(
 	targetCol: string,
 	targetIdx: number,
 ): Promise<void> {
-	const kanban = (this.contentEl as HTMLElement)?.querySelector<HTMLElement>('.dashboard-kanban');
+	const kanban = (this.contentEl)?.querySelector<HTMLElement>('.dashboard-kanban');
 	const draggedEl =
 		kanban?.querySelector<HTMLElement>(`.dashboard-card[data-card-id="${CSS.escape(cardId)}"]`) ?? null;
 	const sourceCol = this.data?.columns.find((c) => c.cards.some((card) => card.id === cardId))?.name;
@@ -316,7 +316,7 @@ export async function handleMoveCard(
  */
 export function reorderCardsInDOM(this: DashboardSurface, columnName: string): boolean {
 	if (!this.data) return false;
-	const kanban = (this.contentEl as HTMLElement)?.querySelector<HTMLElement>('.dashboard-kanban');
+	const kanban = (this.contentEl)?.querySelector<HTMLElement>('.dashboard-kanban');
 	const section = kanban?.querySelector<HTMLElement>(`:scope > [data-column="${CSS.escape(columnName)}"]`);
 	const cardsContainer = section?.querySelector<HTMLElement>('.dashboard-section-cards');
 	if (!cardsContainer) return false;
@@ -347,7 +347,7 @@ export function reorderCardsInDOM(this: DashboardSurface, columnName: string): b
 
 export function refreshSectionInPlace(this: DashboardSurface, columnName: string): boolean {
 	if (!this.data) return false;
-	const kanban = (this.contentEl as HTMLElement)?.querySelector<HTMLElement>('.dashboard-kanban');
+	const kanban = (this.contentEl)?.querySelector<HTMLElement>('.dashboard-kanban');
 	if (!kanban) return false;
 	const oldEl = kanban.querySelector(`:scope > [data-column="${CSS.escape(columnName)}"]`);
 	if (!oldEl) return false;

@@ -250,6 +250,7 @@ assert.equal(habitRoot.querySelectorAll('.dashboard-sidebar-habit-empty').length
 let habitBanners = 0;
 const habitView = {
 	containerEl: habitShell,
+	contentEl: habitRoot,
 	debouncedRefreshBannerStats() {
 		habitBanners++;
 	},

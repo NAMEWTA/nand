@@ -21,7 +21,7 @@ export function render(this: DashboardSurface, data: DashboardData): void {
 	// every re-render jumped the deck back to its first column. This must
 	// run BEFORE the widgets detach below, while the deck is still in the
 	// tree.
-	const prevRoot = this.contentEl as HTMLElement | undefined;
+	const prevRoot = this.contentEl;
 	const savedRootScroll = captureRootScrollState(prevRoot ?? createDiv());
 	// Detach the sidebar widgets before tearing the rest down. If their
 	// inputs (signature below) are unchanged, this exact node is re-attached
@@ -47,7 +47,7 @@ export function render(this: DashboardSurface, data: DashboardData): void {
 	this.data = data;
 	this.sidebarWidgetsSig = widgetSig;
 
-	const container = this.contentEl as HTMLElement;
+	const container = this.contentEl;
 
 	// Sweep any touch-drag ghost clones stranded on activeDocument.body from a prior
 	// interrupted drag (touchcancel). They live outside the container, so

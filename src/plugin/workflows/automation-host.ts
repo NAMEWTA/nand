@@ -1,3 +1,4 @@
+import type { AutomationViewHost } from '../../view/automations/panel-contract';
 import { FileSystemAdapter, Notice, Platform } from 'obsidian';
 import { MarkdownAutomationDefinitions } from '../../platform/obsidian/automations/definitions';
 import { deviceId as getDeviceId } from '../../platform/obsidian/storage/device-id';
@@ -29,7 +30,7 @@ import { CONTACTS_VIEW_TYPE, ContactsView } from '../modules/contacts/index';
 /** Composition only: every source read/write stays in its owning product. */
 export async function createAutomationHost(
 	plugin: DashboardPlugin,
-): Promise<AutomationUiPort & { dispose(): void; inbox(): void; service: AutomationService; setExecutionEnabled(enabled: boolean): Promise<void> }> {
+): Promise<AutomationUiPort & { dispose(): void; inbox(): void; service: AutomationService; panelHost: AutomationViewHost; notifications: NotificationService; setExecutionEnabled(enabled: boolean): Promise<void> }> {
 	const app = plugin.app;
 	const deviceId = getDeviceId(app);
 	const definitions = new MarkdownAutomationDefinitions(app);
@@ -173,10 +174,8 @@ export async function createAutomationHost(
 		new AutomationEditor(app, service, () => dashboard.targets(), cwd, source, title, current, pin).open();
 	};
 	const inbox = () => new NotificationInbox(app, notifications).open();
-	plugin.registerView(
-		AUTOMATION_VIEW_TYPE,
-		(leaf) => new AutomationView(leaf, { service, retry, edit: (d) => edit(d?.source, d?.name, d), inbox, pin }),
-	);
+	const panelHost: AutomationViewHost = { service, retry, edit: (d) => edit(d?.source, d?.name, d), inbox, pin };
+	plugin.registerView(AUTOMATION_VIEW_TYPE, (leaf) => new AutomationView(leaf, panelHost));
 	const open = async () => {
 		let leaf = app.workspace.getLeavesOfType(AUTOMATION_VIEW_TYPE)[0];
 		if (!leaf) {
@@ -220,7 +219,7 @@ export async function createAutomationHost(
 	});
 	app.workspace.onLayoutReady(tick);
 	return {
-		service,
+		service, panelHost, notifications,
 		subscribe: listener => service.subscribe(listener),
 		actions: () => service.definitions.map(definition => {
 			const run = [...service.state.runs].reverse().find(row => row.automationId === definition.id);

@@ -120,7 +120,7 @@ export function flushVaultRefresh(this: DashboardSurface, paths: ReadonlySet<str
  *  never update. */
 export function refreshSidebarCalendarNow(this: DashboardSurface): void {
 	if (!this.plugin.settings.widgetCalendarEnabled) return;
-	const root = this.contentEl as HTMLElement | undefined;
+	const root = this.contentEl;
 	if (root) refreshSidebarTaskCalendar(root);
 }
 
@@ -129,7 +129,7 @@ export function refreshSidebarCalendarNow(this: DashboardSurface): void {
 export function refreshAlbumWidgetsNow(this: DashboardSurface): void {
 	const albums = this.plugin.settings.albums ?? [];
 	if (!albums.some((a) => a.folder.trim())) return;
-	const root = this.contentEl as HTMLElement | undefined;
+	const root = this.contentEl;
 	if (root) refreshAlbumWidgets(root, albums, this.app);
 }
 
@@ -159,7 +159,7 @@ export function refreshSectionsFor(
 	});
 	if (!hasScanning && !hasMedia) return;
 
-	const root = this.contentEl as HTMLElement | undefined;
+	const root = this.contentEl;
 	const kanban = root?.querySelector('.dashboard-kanban') as HTMLElement | null;
 	if (!kanban) {
 		// View not laid out yet — fall back to a full render.
@@ -216,7 +216,7 @@ export function refreshSectionsFor(
  *  refresh the habit widget in place + the mobile habit panel, and let the
  *  banner debounce recompute when it shows the habit heatmap. */
 export function onHabitChanged(this: DashboardSurface): void {
-	const root = this.contentEl as HTMLElement | undefined;
+	const root = this.contentEl;
 	if (root) refreshHabitWidget(root);
 	this.debouncedRefreshBannerStats();
 }
@@ -228,7 +228,7 @@ export function refreshLunarWidgetsInPlace(this: DashboardSurface): void {
 	this.refreshDataWidget('.dashboard-sidebar-lunar', (container) =>
 		renderSidebarLunarWidget(container, this.holidayData, this.app),
 	);
-	const root = this.contentEl as HTMLElement | undefined;
+	const root = this.contentEl;
 	const panel = root?.querySelector<HTMLElement>('.dashboard-mobile-widget-panel');
 	if (panel && this.mobileWidgetExpanded === 'lunar') {
 		unmountDashboardPanelsIn(panel);
@@ -248,7 +248,7 @@ export function refreshDataWidget(
 	selector: string,
 	render: (container: HTMLElement) => void,
 ): void {
-	const root = this.contentEl as HTMLElement | undefined;
+	const root = this.contentEl;
 	const widget = root?.querySelector<HTMLElement>(selector);
 	if (!widget || !widget.isConnected) return;
 	const parent = widget.parentElement;
@@ -287,7 +287,7 @@ export function debouncedRefreshBannerStats(this: DashboardSurface): void {
 }
 
 export function refreshRecentDocs(this: DashboardSurface): void {
-	const root = this.contentEl as HTMLElement;
+	const root = this.contentEl;
 	if (!root) return;
 
 	const recentSection = root.querySelector('.dashboard-recent');

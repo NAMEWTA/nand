@@ -1,3 +1,7 @@
+import { composeWorkbench } from './workbench/compose-workbench';
+import type { WorkbenchTarget } from '../view/contracts/workbench';
+import { nativeSurfaces } from '../view/hosts/obsidian/native-surface';
+import { DashboardSurface } from '../view/dashboard/view/dashboard-surface';
 import { deviceId } from '../platform/obsidian/storage/device-id';
 import { JsonStore } from '../shared/json-store';
 import { TerminalAgentController, TERMINAL_VIEW_TYPE } from './modules/terminal';
@@ -102,7 +106,8 @@ export default class DashboardPlugin extends Plugin {
 	override addRibbonIcon(icon: string, title: string, callback: (evt: MouseEvent) => unknown): HTMLElement {
 		return stableRibbon(this, icon, title, callback, (glyph, id, action) => super.addRibbonIcon(glyph, id, action));
 	}
-	automationHost?: AutomationUiPort & { dispose(): void; inbox(): void; setExecutionEnabled(enabled: boolean): Promise<void> };
+	automationHost?: Awaited<ReturnType<typeof createAutomationHost>>;
+	private workbench?: ReturnType<typeof composeWorkbench>;
 	settings!: NandSettings;
 	browserHost!: BrowserModule;
 	contactsHost?: ContactsController;
@@ -258,6 +263,8 @@ export default class DashboardPlugin extends Plugin {
 
 		this.settingsTab = new DashboardSettingTab(this.app, this);
 		this.addSettingTab(this.settingsTab);
+		this.workbench = composeWorkbench(this);
+		this.register(() => this.workbench?.dispose());
 
 		this.maybeShowIntro();
 
@@ -321,6 +328,10 @@ export default class DashboardPlugin extends Plugin {
 		if (this.settings.introSeen) return;
 		this.settings = { ...this.settings, introSeen: true };
 		await this.saveSettings();
+	}
+
+	openWorkbench(target?: WorkbenchTarget, ownerWindow?: Window, state?: Record<string, unknown>): Promise<void> {
+		return this.workbench?.open(target, ownerWindow, state) ?? Promise.reject(new Error(t('workbench.notReady')));
 	}
 
 	openHome(): void {
@@ -694,6 +705,7 @@ export default class DashboardPlugin extends Plugin {
 			await this.deviceSettingsStore?.save({ terminalAgent: this.settings.terminalAgent });
 			await this.settingsStore.save({ ...this.settings, terminalAgent: null });
 		});
+		this.workbench?.refresh();
 	}
 
 	readTerminalAgent(): unknown {
@@ -709,6 +721,7 @@ export default class DashboardPlugin extends Plugin {
 	}
 
 	refreshAllDashboards(): void {
+		for (const surface of nativeSurfaces(this.app)) if (surface instanceof DashboardSurface && surface.embedded) void surface.refresh();
 		const leaves = this.app.workspace.getLeavesOfType(DASHBOARD_VIEW_TYPE);
 		for (const leaf of leaves) {
 			if (leaf.view instanceof DashboardView) {

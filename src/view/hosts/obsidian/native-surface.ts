@@ -9,6 +9,7 @@ export interface NativeSurfaceContext {
 	embedded?: boolean;
 	addAction?: (icon: string, title: string, callback: (event: MouseEvent) => void) => HTMLElement;
 	close: () => void;
+	activate?: () => Promise<void>;
 }
 
 /** Native rendering lifetime shared by standalone leaves and workbench pages. */
@@ -24,6 +25,7 @@ export abstract class NativeSurface extends Component {
 	abstract getIcon(): string;
 	onOpen(): Promise<void> { return Promise.resolve(); }
 	onClose(): Promise<void> { return Promise.resolve(); }
+	setVisible(visible: boolean): void { if (visible) this.onResize(); }
 	onResize(): void { /* A presentation can opt in to native resize notification. */ }
 	onPaneMenu(menu: Menu, source = ''): void { void menu; void source; }
 	getState(): Record<string, unknown> { return {}; }

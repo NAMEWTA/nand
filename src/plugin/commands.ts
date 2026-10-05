@@ -4,6 +4,7 @@ import type DashboardPlugin from './main';
 
 /** Shell commands. Products register their own commands from their host. */
 export function registerShellCommands(plugin: DashboardPlugin): void {
+	plugin.addCommand({ id: 'open-workbench', nameKey: 'workbench.open', name: t('workbench.open'), callback: () => { void plugin.openWorkbench().catch(console.error); } });
 	plugin.addCommand({
 		id: 'open-browser',
 		nameKey: 'browser.open',

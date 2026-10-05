@@ -175,7 +175,7 @@ export function refreshMobileWidgetPanel(this: DashboardSurface, bar: HTMLElemen
 export function openMobileDrawer(this: DashboardSurface, type: 'quickActions' | 'recent'): void {
 	this.closeMobileDrawer();
 
-	const root = this.contentEl as HTMLElement;
+	const root = this.contentEl;
 	if (!root) return;
 
 	const firstSection = root.querySelector('.dashboard-section-row') as HTMLElement;
@@ -244,7 +244,7 @@ export function openMobileDrawer(this: DashboardSurface, type: 'quickActions' | 
 }
 
 export function closeMobileDrawer(this: DashboardSurface): void {
-	const root = this.contentEl as HTMLElement;
+	const root = this.contentEl;
 	if (!root) return;
 	const existing = root.querySelector('.dashboard-mobile-drawer');
 	if (existing) { unmountDashboardPanelsIn(existing as HTMLElement); existing.remove(); }

@@ -19,7 +19,7 @@ export function showModuleDisabled(this: DashboardSurface): void {
 	if (this.isOpen || this.isOpening) {
 		void onClose.call(this);
 	}
-	const root = this.contentEl as HTMLElement | undefined;
+	const root = this.contentEl;
 	if (!root) return;
 	root.empty();
 	root.addClass('nand-module-off');

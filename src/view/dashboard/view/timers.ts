@@ -18,7 +18,7 @@ export function startWeatherRefresh(this: DashboardSurface): void {
 		// render() here was the main source of periodic jank on mobile - it
 		// emptied and rebuilt every card/section.
 		clearWeatherCache();
-		const root = this.contentEl as HTMLElement | undefined;
+		const root = this.contentEl;
 		if (!root) return;
 		if (hasWeather) refreshWeatherCards(root, this.data);
 		if (hasSidebarWeather) refreshSidebarWeatherWidget(root, this.plugin.settings, this.app);

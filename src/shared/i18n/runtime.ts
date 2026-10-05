@@ -1,3 +1,4 @@
+import { messages as workbench } from './workbench';
 import { messages as browser } from './browser';
 import { messages as fortune } from './fortune';
 import { messages as calendar } from './calendar';
@@ -78,6 +79,7 @@ function mergeDicts(...parts: Array<Record<string, string>>): Record<string, str
 
 const translations: Record<Language, Record<string, string>> = {
 	en: mergeDicts(
+		workbench.en,
 		calendar.en,
 		fortune.en,
 		browser.en,
@@ -124,6 +126,7 @@ const translations: Record<Language, Record<string, string>> = {
 		automation.en,
 	),
 	zh: mergeDicts(
+		workbench.zh,
 		calendar.zh,
 		fortune.zh,
 		browser.zh,
