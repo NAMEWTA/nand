@@ -53,7 +53,7 @@ try {
    assert.equal(state.id, initial.id); assert.equal(state.count, 1); assert.equal(state.target.feature, target.feature);
    check('same-native-leaf-' + target.feature + '-' + (target.section || 'root'), state);
   }
-  await call(`(async()=>{const p=app.plugins.plugins.nand;p.settings.modules.terminal=true;await p.saveSettings();await p.openWorkbench({feature:'terminal',section:'running'});})()`);
+  await call(`(async()=>{const p=app.plugins.plugins.nand;p.settings.modules.terminal=true;await p.saveSettings();await p.applyModuleFlags();await p.openWorkbench({feature:'terminal',section:'running'});})()`);
   for (const section of ['running','history','usage','running']) {
    await call(`app.plugins.plugins.nand.openWorkbench({feature:'terminal',section:${JSON.stringify(section)}})`);
    const count = await call(`app.plugins.plugins.nand.terminalHost.getRuntimeStatus().length`);
@@ -62,10 +62,10 @@ try {
   await shot('agent-no-implicit-session');
   const saved = await call(`(async()=>{const v=${wb};for(let i=0;i<8;i++){const a=v.navigate({feature:'contacts',section:'person'});const b=v.navigate({feature:'automations',section:'runs'});await Promise.all([a,b]);}return v.getState().target})()`);
   assert.equal(saved.feature, 'automations'); check('rapid-navigation-latest-target-wins', saved);
-  await call(`(async()=>{const p=app.plugins.plugins.nand;await p.openWorkbench({feature:'contacts'});p.settings.modules.contacts=false;await p.saveSettings();})()`);
+  await call(`(async()=>{const p=app.plugins.plugins.nand;await p.openWorkbench({feature:'contacts'});p.settings.modules.contacts=false;await p.saveSettings();await p.applyModuleFlags();})()`);
   assert.equal(await call(`${wb}.getNativeSurfaces().filter(s=>s.getViewType()==='nand-contacts-view').length`), 0);
   assert.ok(await call(`!!${wb}.contentEl.querySelector('.nand-workbench-unavailable')`));
-  await call(`(async()=>{const p=app.plugins.plugins.nand;p.settings.modules.contacts=true;await p.saveSettings();await p.openWorkbench({feature:'contacts'});})()`);
+  await call(`(async()=>{const p=app.plugins.plugins.nand;p.settings.modules.contacts=true;await p.saveSettings();await p.applyModuleFlags();await p.openWorkbench({feature:'contacts'});})()`);
   assert.equal(await call(`${wb}.getNativeSurfaces().filter(s=>s.getViewType()==='nand-contacts-view').length`), 1);
   check('module-disable-releases-presentation-reenable-restores-once');
   server = createServer((_request, response) => { response.writeHead(200, {'Content-Type':'text/html; charset=utf-8'}); response.end('<!doctype html><title>NAND owned workbench fixture</title><h1>Native browser fixture</h1><input aria-label="Fixture draft" value="unsent draft">'); });
@@ -97,7 +97,7 @@ try {
    const actual = await call(`(async()=>{const leaf=app.workspace.getLeaf('tab');await leaf.setViewState({type:${JSON.stringify(type)},active:true});const result={type:leaf.view.getViewType(),title:leaf.view.getDisplayText()};leaf.detach();return result})()`);
    assert.equal(actual.type, type); check('original-native-view-remains-real-' + type, actual);
   }
-  await call(`(async()=>{const p=app.plugins.plugins.nand;p.settings.modules.terminal=false;await p.saveSettings();const leaf=app.workspace.getLeaf('tab');await leaf.setViewState({type:'terminal-view',active:true});if(leaf.view.getViewType()!=='terminal-view')throw Error('Lost terminal identity');leaf.detach();await p.openWorkbench({feature:'contacts',section:'person'});app.workspace.requestSaveLayout();})()`);
+  await call(`(async()=>{const p=app.plugins.plugins.nand;p.settings.modules.terminal=false;await p.saveSettings();await p.applyModuleFlags();const leaf=app.workspace.getLeaf('tab');await leaf.setViewState({type:'terminal-view',active:true});if(leaf.view.getViewType()!=='terminal-view')throw Error('Lost terminal identity');leaf.detach();await p.openWorkbench({feature:'contacts',section:'person'});app.workspace.requestSaveLayout();})()`);
   check('original-disabled-terminal-identity-and-safe-placeholder');
   await delay(1500);
  }
@@ -105,7 +105,7 @@ try {
  check('no-unhandled-native-errors');
  await fs.writeFile(path.join(dir, 'result.json'), JSON.stringify({passed:true,restart,runtime,sourceCommit:process.env.GITHUB_SHA,checks},null,2));
 } catch (error) {
- try { await shot('failure'); } catch {}
+ try { await shot('failure'); await fs.writeFile(path.join(dir,'diagnostic.json'),JSON.stringify(await call(`(()=>{const v=${wb};return {errors:window.nandWorkbenchErrors,state:v?.getState(),keys:v?Object.keys(v):[],html:v?.contentEl?.innerHTML?.slice(0,12000)}})()`),null,2)); } catch {}
  await fs.writeFile(path.join(dir,'result.json'),JSON.stringify({passed:false,restart,runtime,checks,error:String(error)},null,2));
  throw error;
 } finally {

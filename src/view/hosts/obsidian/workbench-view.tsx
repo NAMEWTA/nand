@@ -103,10 +103,10 @@ export class WorkbenchView extends ItemView {
 
   const binding = this.pages?.getCurrent();
   if (this.state.target.feature === 'browser') {
-   menu.addItem((item) => item.setTitle(t('workbench.newPage')).setIcon('plus').onClick(() => this.open({ feature: 'browser', resourceId: crypto.randomUUID() })));
+   menu.addItem((item) => item.setTitle(t('workbench.newPage')).setIcon('plus').onClick(() => this.requestNavigation({ feature: 'browser', resourceId: crypto.randomUUID() })));
    for (const page of this.getSavedPages('browser')) {
     const title = typeof page.state.title === 'string' && page.state.title ? page.state.title : typeof page.state.url === 'string' ? page.state.url : t('workbench.browser');
-    menu.addItem((item) => item.setTitle(title).setChecked(page.target.resourceId === this.state.target.resourceId).onClick(() => this.open(page.target)));
+    menu.addItem((item) => item.setTitle(title).setChecked(page.target.resourceId === this.state.target.resourceId).onClick(() => this.requestNavigation(page.target)));
    }
    if (binding) menu.addItem((item) => item.setTitle(t('workbench.closePage')).setIcon('x').onClick(() => { void Promise.resolve(binding.surface.context.close()).catch(this.host.report); }));
    menu.addSeparator();
@@ -120,8 +120,8 @@ export class WorkbenchView extends ItemView {
  private change = (patch: Partial<WorkbenchState>): void => {
   this.state = normalizeWorkbenchState({ ...this.state, ...patch }); this.draw(); this.app.workspace.requestSaveLayout();
  };
- private open = (target: WorkbenchTarget): void => { void this.navigate(target).catch(this.host.report); };
- private retry = (): void => { this.transition.invalidate(); this.open(this.pending); };
+ private requestNavigation = (target: WorkbenchTarget): void => { void this.navigate(target).catch(this.host.report); };
+ private retry = (): void => { this.transition.invalidate(); this.requestNavigation(this.pending); };
  private content = (element: HTMLDivElement | null): void => {
   if (element && !this.pages) this.pages = new WorkbenchPages(this, element, this.host.contributions, (target) => this.navigate(target), this.host.report, () => { this.state = { ...this.state, target: this.pages?.getCurrent()?.getTarget?.() ?? this.state.target }; this.draw(); this.app.workspace.requestSaveLayout(); });
  };
@@ -130,6 +130,6 @@ export class WorkbenchView extends ItemView {
   const contributions = this.host.contributions;
   const items = contributions.filter((item) => item.id === 'dashboard' || (item.availability().enabled && item.availability().supported)).map((item) => item.navigation);
   const current = contributions.find((item) => item.id === this.state.target.feature);
-  render(<WorkbenchShell state={this.state} items={items} title={t(current?.navigation.labelKey ?? 'workbench.title')} busy={this.busy} error={this.error} unavailable={this.unavailable} ownerWindow={this.contentEl.win} change={this.change} navigate={this.open} settings={this.host.openSettings} more={this.more} retry={this.retry} contentRef={this.content} />, this.contentEl);
+  render(<WorkbenchShell state={this.state} items={items} title={t(current?.navigation.labelKey ?? 'workbench.title')} busy={this.busy} error={this.error} unavailable={this.unavailable} ownerWindow={this.contentEl.win} change={this.change} navigate={this.requestNavigation} settings={this.host.openSettings} more={this.more} retry={this.retry} contentRef={this.content} />, this.contentEl);
  }
 }
