@@ -1,6 +1,6 @@
 # NAND 统一工作台实施
 
-状态：P1–P4 已在分支 `refactor/unified-workbench-v2` 实现；P5 未做；样式作者源已按显式顺序拼回根 `styles.css`，与拆分前字节一致；临时实现脚手架已删除；P7 尚未执行。未做独立 Vault 验收。实施前基线：c8230ad07f0110583ea3cfe92496e2b84f65be2c。
+状态：P1–P4 已在分支 `refactor/unified-workbench-v2` 实现；P5 未做；P6 已完成。P7 的本地 `pnpm run build`、`pnpm run lint` 和 `pnpm test:all`（60/60）已通过。独立 Vault 探针在 Obsidian 1.13.7 通过，核对的 `main.js` sha256 为 `eaa38f7be25f64b699c049e350eda0b61331f6502c9b6ea7ac99149e7f8f06f0`。标准跨平台 CI 以本分支 `lint.yml` 的结果为准，不在这里改写成已通过。实施前基线：c8230ad07f0110583ea3cfe92496e2b84f65be2c。
 
 依据：用户批准的《NAND 统一工作台与前端结构重构实施计划 V2》（2026-10-05）。一个默认入口；首页复用现有看板；工作台内部导航和同页切换；按需状态栏。保留六个既有视图类型、命令 ID、Markdown、设备状态、保存冲突和原生窗口语义。
 
@@ -17,6 +17,6 @@
 | P4 | 按需状态与上下文 | 已实现。状态只显示需要处理或正在运行的项；用量一个数据源 |
 | P5 | 习惯/记账等领域独立增强 | 未做。仍是看板小组件，不能当作核心导航的空页面 |
 | P6 | 样式作者组织、架构守卫、收尾 | 文档与 [ADR-0014](../../adr/0014-unified-workbench-entry.md) 已同步。样式作者源按 `src/view/styles/order.json` 拼回根 `styles.css`，字节与拆分前一致。临时工作流和阶段脚本已删除。保留入口、生命周期和导航测试，以及可重复的独立 Vault 探针 |
-| P7 | 构建、完整测试、真实宿主验收 | 待执行。不得用历史 PR #123 或 DOM 测试代替 |
+| P7 | 构建、完整测试、真实宿主验收 | 本地 build、lint（0 error）和 test:all 60/60 已通过，含嵌入式 Agent 不隐式启动 PTY。Obsidian 1.13.7 独立 Vault 探针通过，并在正常重启后恢复工作台。`main.js` sha256：`eaa38f7be25f64b699c049e350eda0b61331f6502c9b6ea7ac99149e7f8f06f0`。标准 CI 仍看 `lint.yml` |
 
 历史 PR #123 的证据不等于本分支验证结果。移动端、最低版本、真实 CLI、磁盘规模、输入法和长期并发仍按原有待验收范围处理。此改动不发布版本，不自动关闭既有 Issue。
