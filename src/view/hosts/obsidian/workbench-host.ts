@@ -1,4 +1,4 @@
-import type { FeatureAvailability, NavigationItem, WorkbenchFeature, WorkbenchTarget } from '../../contracts/workbench';
+import type { FeatureAvailability, NavigationItem, WorkbenchFeature, WorkbenchStatus, WorkbenchTarget } from '../../contracts/workbench';
 import type { NativeSurface, NativeSurfaceContext } from './native-surface';
 
 export interface WorkbenchPageBinding {
@@ -24,5 +24,7 @@ export interface WorkbenchHost {
  openSettings: (feature?: WorkbenchFeature) => void;
  manageFeatures: () => void;
  openStandalone: (target: WorkbenchTarget, state: Record<string, unknown>, ownerWindow: Window) => Promise<void>;
+ openSplit?: (target: WorkbenchTarget, state: Record<string, unknown>, ownerWindow: Window) => Promise<void>;
+ statuses?: () => readonly WorkbenchStatus[];
  report: (error: unknown) => void;
 }

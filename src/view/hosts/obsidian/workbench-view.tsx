@@ -1,4 +1,4 @@
-import { ItemView, Menu, type ViewStateResult, type WorkspaceLeaf } from 'obsidian';
+import { ItemView, Menu, Platform, type ViewStateResult, type WorkspaceLeaf } from 'obsidian';
 import { render } from 'preact';
 import { onLanguageChanged, t } from '../../../shared/i18n';
 import type { WorkbenchFeature, WorkbenchTarget } from '../../contracts/workbench';
@@ -124,6 +124,9 @@ export class WorkbenchView extends ItemView {
   menu.addItem((item) => item.setTitle(t('workbench.openStandalone')).setIcon('external-link').onClick(() => {
    void this.host.openStandalone(binding?.getTarget?.() ?? this.state.target, binding?.getState?.() ?? binding?.surface.getState() ?? {}, this.contentEl.win).catch(this.host.report);
   }));
+  if (this.host.openSplit) menu.addItem((item) => item.setTitle(t('workbench.openSplit')).setIcon('columns-2').onClick(() => {
+   void this.host.openSplit?.(binding?.getTarget?.() ?? this.state.target, binding?.getState?.() ?? binding?.surface.getState() ?? {}, this.contentEl.win).catch(this.host.report);
+  }));
   binding?.surface.onPaneMenu(menu, source);
  }
  private more = (event: MouseEvent): void => { const menu = new Menu(); this.onPaneMenu(menu, 'workbench'); menu.showAtMouseEvent(event); };
@@ -143,6 +146,7 @@ export class WorkbenchView extends ItemView {
   const contributions = this.host.contributions;
   const items = contributions.filter((item) => item.id === 'dashboard' || (item.availability().enabled && item.availability().supported)).map((item) => item.navigation);
   const current = contributions.find((item) => item.id === this.state.target.feature);
-  render(<WorkbenchShell state={this.state} items={items} title={t(current?.navigation.labelKey ?? 'workbench.title')} busy={this.busy} error={this.error} unavailable={this.unavailable} ownerWindow={this.contentEl.win} change={this.change} navigate={this.requestNavigation} settings={this.settings} manageFeatures={this.host.manageFeatures} navigationRef={this.navigationContent} navigationControl={this.navigationControl} more={this.more} retry={this.retry} contentRef={this.content} />, this.contentEl);
+  const statuses = Platform.isDesktopApp ? [] : this.host.statuses?.() ?? [];
+  render(<WorkbenchShell state={this.state} items={items} title={t(current?.navigation.labelKey ?? 'workbench.title')} busy={this.busy} error={this.error} unavailable={this.unavailable} statuses={statuses} ownerWindow={this.contentEl.win} change={this.change} navigate={this.requestNavigation} settings={this.settings} manageFeatures={this.host.manageFeatures} navigationRef={this.navigationContent} navigationControl={this.navigationControl} more={this.more} retry={this.retry} contentRef={this.content} />, this.contentEl);
  }
 }

@@ -636,8 +636,12 @@ export class TerminalAgentController {
 
 	async insertIntoActiveTerminal(text: string): Promise<boolean> {
 		let terminalView = this.getActiveTerminalView();
-		if (!terminalView) {
-			const leaf = this.app.workspace.getLeavesOfType(TERMINAL_VIEW_TYPE)[0];
+		if (!terminalView && this.bridge.openWorkbench) {
+			await this.bridge.openWorkbench();
+			terminalView = this.getActiveTerminalView();
+		} else if (!terminalView) {
+			const win = this.app.workspace.getMostRecentLeaf()?.view.containerEl.win ?? this.app.workspace.containerEl.win;
+			const leaf = this.app.workspace.getLeavesOfType(TERMINAL_VIEW_TYPE).find((item) => item.view.containerEl.win === win);
 			await leaf?.loadIfDeferred();
 			if (leaf && this.isTerminalView(leaf.view)) terminalView = leaf.view.surface;
 		}
@@ -669,7 +673,8 @@ export class TerminalAgentController {
 
 		if (!targetLeaf && this.bridge.openWorkbench) { await this.bridge.openWorkbench(); return; }
 		if (!targetLeaf) {
-			const existing = workspace.getLeavesOfType(TERMINAL_VIEW_TYPE)[0];
+			const win = workspace.getMostRecentLeaf()?.view.containerEl.win ?? workspace.containerEl.win;
+			const existing = workspace.getLeavesOfType(TERMINAL_VIEW_TYPE).find((item) => item.view.containerEl.win === win);
 			if (existing) {
 				await existing.loadIfDeferred();
 				await workspace.revealLeaf(existing);

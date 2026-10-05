@@ -2,7 +2,7 @@ import { useEffect, useId, useRef, useState } from 'preact/hooks';
 import type { Ref } from 'preact';
 import { t } from '../../shared/i18n';
 import { Icon } from '../primitives/Icon';
-import type { NavigationItem, WorkbenchTarget } from '../contracts/workbench';
+import type { NavigationItem, WorkbenchStatus, WorkbenchTarget } from '../contracts/workbench';
 import { navigationWidth, type WorkbenchState } from './navigation-state';
 import { FeatureNavigator } from './FeatureNavigator';
 import { FeaturePageFrame } from './FeaturePageFrame';
@@ -11,6 +11,7 @@ export interface WorkbenchShellProps {
  state: WorkbenchState;
  items: readonly NavigationItem[];
  title: string;
+ statuses?: readonly WorkbenchStatus[];
  busy: boolean;
  error?: string;
  unavailable?: string;
@@ -70,6 +71,6 @@ export function WorkbenchShell(props: WorkbenchShellProps) {
    const width = event.key === 'Home' ? 208 : event.key === 'End' ? 280 : event.key === 'ArrowLeft' ? props.state.sidebarWidth - 8 : event.key === 'ArrowRight' ? props.state.sidebarWidth + 8 : undefined;
    if (width !== undefined) { event.preventDefault(); event.stopPropagation(); props.change({ sidebarWidth: navigationWidth(width) }); }
   }} onPointerDown={(event) => { if (event.button !== 0) return; drag.current = { x: event.clientX, width: props.state.sidebarWidth }; event.currentTarget.setPointerCapture(event.pointerId); event.preventDefault(); }} onPointerMove={(event) => { if (drag.current) props.change({ sidebarWidth: navigationWidth(drag.current.width + event.clientX - drag.current.x) }); }} onPointerUp={() => { drag.current = null; }} onPointerCancel={() => { drag.current = null; }} onLostPointerCapture={() => { drag.current = null; }} />}
-  <FeaturePageFrame navigationId={navigationId} navigationOpen={visible} title={props.title} busy={props.busy} error={props.error} unavailable={props.unavailable} inert={compact && drawerOpen} contentRef={props.contentRef} more={props.more} retry={props.retry} settings={props.settings} toggleNavigation={() => { if (compact) setDrawerOpen(!drawerOpen); else props.change({ sidebarOpen: !props.state.sidebarOpen }); }} />
+  <FeaturePageFrame navigationId={navigationId} navigationOpen={visible} title={props.title} busy={props.busy} error={props.error} unavailable={props.unavailable} statuses={props.statuses} inert={compact && drawerOpen} contentRef={props.contentRef} more={props.more} retry={props.retry} settings={props.settings} openStatus={(target) => open(target)} toggleNavigation={() => { if (compact) setDrawerOpen(!drawerOpen); else props.change({ sidebarOpen: !props.state.sidebarOpen }); }} />
  </div>;
 }

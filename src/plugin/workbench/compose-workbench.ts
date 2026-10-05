@@ -14,6 +14,7 @@ import { WorkbenchView } from '../../view/hosts/obsidian/workbench-view';
 import type { WorkbenchContribution, WorkbenchHost } from '../../view/hosts/obsidian/workbench-host';
 import type { WorkbenchTarget } from '../../view/contracts/workbench';
 import { WORKBENCH_VIEW_TYPE } from '../../view/workbench/view-type';
+import { visibleStatuses } from '../../view/workbench/status-policy';
 import { ContactsPresentation } from '../../view/contacts/contacts-presentation';
 import { AutomationPresentation } from '../../view/automations/automation-presentation';
 import { NotificationPresentation } from '../../view/notifications/notification-presentation';
@@ -62,6 +63,21 @@ export function composeWorkbench(plugin: DashboardPlugin) {
    return { surface: new NotificationPresentation(context, plugin.automationHost.notifications, report), navigate: async () => {} };
   } },
  ];
+ const statusRows = (): WorkbenchStatus[] => {
+  const rows: WorkbenchStatus[] = [];
+  const automation = plugin.automationHost;
+  if (automation?.service.loadError) rows.push({ id: 'automation-load', kind: 'error', label: t('automation.failedLoad'), target: { feature: 'automations' } });
+  const attention = automation?.notifications.records.filter((record) => !record.read && (record.presentation?.status === 'failed' || record.presentation?.status === 'interrupted' || Object.values(record.deliveries).includes('failed'))) ?? [];
+  if (attention.length) rows.push({ id: 'attention', kind: 'error', label: t('workbench.statusAttention', { count: attention.length }), target: { feature: 'notifications' } });
+  const runs = automation?.service.state.runs.filter((run) => run.status === 'running' || run.status === 'pending') ?? [];
+  if (runs.length) rows.push({ id: 'automations-running', kind: 'running', label: t('workbench.statusRunning', { count: runs.length }), target: { feature: 'automations', section: 'runs', resourceId: runs.length === 1 ? runs[0]?.id : undefined } });
+  const sessions = plugin.terminalHost?.getRuntimeStatus().filter((session) => !session.automated) ?? [];
+  for (const kind of ['waiting', 'running'] as const) {
+   const items = sessions.filter((session) => session.status === kind);
+   if (items.length) rows.push({ id: 'terminal-' + kind, kind: kind === 'waiting' ? 'error' : 'running', label: t(kind === 'waiting' ? 'workbench.statusWaiting' : 'workbench.statusSessions', { count: items.length }), target: { feature: 'terminal', section: 'running', resourceId: items.length === 1 ? items[0]?.id : undefined } });
+  }
+  return rows;
+ };
  const host: WorkbenchHost = {
   contributions, subscribe: (listener) => { listeners.add(listener); return () => { listeners.delete(listener); }; },
   openSettings: (feature) => plugin.openSettings(feature === 'automations' || feature === 'notifications' ? 'automation' : feature === 'habit' || feature === 'expense' ? 'home' : feature ?? 'home'),
@@ -76,6 +92,14 @@ export function composeWorkbench(plugin: DashboardPlugin) {
    // A copied browser page is a new resource, not another owner of the same guest.
    await leaf.setViewState({ type, active: true, state: target.feature === 'browser' ? { ...state, id: crypto.randomUUID() } : state }); await plugin.app.workspace.revealLeaf(leaf);
   },
+  openSplit: async (target, _state, ownerWindow) => {
+   const anchor = plugin.app.workspace.getMostRecentLeaf();
+   if (anchor && anchor.view.containerEl.win === ownerWindow) plugin.app.workspace.setActiveLeaf(anchor, { focus: false });
+   const leaf = plugin.app.workspace.getLeaf('split');
+   await leaf.setViewState({ type: WORKBENCH_VIEW_TYPE, active: true, state: { target } });
+   await plugin.app.workspace.revealLeaf(leaf);
+  },
+  statuses: () => visibleStatuses(statusRows(), false),
  };
  plugin.registerView(WORKBENCH_VIEW_TYPE, (leaf) => new WorkbenchView(leaf, host));
  const open = async (target?: WorkbenchTarget, ownerWindow?: Window, initial?: Record<string, unknown>): Promise<void> => {
@@ -137,21 +161,7 @@ export function composeWorkbench(plugin: DashboardPlugin) {
  const status = registerWorkbenchStatus(plugin, {
   enabled: () => plugin.settings.workbenchStatus !== 'hidden',
   quota: () => ({ source: plugin.terminalHost?.getUsageSource(), pinned: !!plugin.settings.modules.terminal && plugin.terminalHost?.isActive() === true && plugin.terminalHost.settings.agentSettings.showUsageInStatusBar }),
-  read: () => {
-   const rows: WorkbenchStatus[] = [];
-   const automation = plugin.automationHost;
-   if (automation?.service.loadError) rows.push({ id: 'automation-load', kind: 'error', label: t('automation.failedLoad'), target: { feature: 'automations' } });
-   const attention = automation?.notifications.records.filter((record) => !record.read && (record.presentation?.status === 'failed' || record.presentation?.status === 'interrupted' || Object.values(record.deliveries).includes('failed'))) ?? [];
-   if (attention.length) rows.push({ id: 'attention', kind: 'error', label: t('workbench.statusAttention', { count: attention.length }), target: { feature: 'notifications' } });
-   const runs = automation?.service.state.runs.filter((run) => run.status === 'running' || run.status === 'pending') ?? [];
-   if (runs.length) rows.push({ id: 'automations-running', kind: 'running', label: t('workbench.statusRunning', { count: runs.length }), target: { feature: 'automations', section: 'runs', resourceId: runs.length === 1 ? runs[0]?.id : undefined } });
-   const sessions = plugin.terminalHost?.getRuntimeStatus().filter((session) => !session.automated) ?? [];
-   for (const kind of ['waiting', 'running'] as const) {
-    const items = sessions.filter((session) => session.status === kind);
-    if (items.length) rows.push({ id: 'terminal-' + kind, kind: kind === 'waiting' ? 'error' : 'running', label: t(kind === 'waiting' ? 'workbench.statusWaiting' : 'workbench.statusSessions', { count: items.length }), target: { feature: 'terminal', section: 'running', resourceId: items.length === 1 ? items[0]?.id : undefined } });
-   }
-   return rows;
-  }, open: (target, ownerWindow) => open(target, ownerWindow), report,
+  read: statusRows, open: (target, ownerWindow) => open(target, ownerWindow), report,
  });
  let runtimeHost = plugin.terminalHost;
  let offRuntime = runtimeHost?.subscribeRuntime(status.refresh);

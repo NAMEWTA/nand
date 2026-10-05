@@ -742,11 +742,20 @@ export default class DashboardPlugin extends Plugin {
 	 *  its own queued writes into the OLD file before re-pointing, so two open
 	 *  views never cross-write between workspace files. */
 	private async repointAllViews(): Promise<void> {
+		const owned = new Set<DashboardSurface>();
 		const leaves = this.app.workspace.getLeavesOfType(DASHBOARD_VIEW_TYPE);
 		for (const leaf of leaves) {
 			if (leaf.view instanceof DashboardView) {
+				owned.add(leaf.view.surface);
 				await leaf.view.applyWorkspaceSwitch();
 			}
+		}
+		const active = normalizeWorkspacePath(this.settings.dashboardFile);
+		for (const surface of nativeSurfaces(this.app)) {
+			if (!(surface instanceof DashboardSurface) || owned.has(surface) || !surface.embedded) continue;
+			const current = normalizeWorkspacePath(surface.plugin.settings.dashboardFile);
+			if (!this.settings.workspaceFiles.includes(current)) await surface.plugin.switchWorkspace(active);
+			else await surface.applyWorkspaceSwitch();
 		}
 	}
 

@@ -1,5 +1,6 @@
 import type { ComponentChildren, Ref } from 'preact';
 import { t } from '../../shared/i18n';
+import type { WorkbenchStatus, WorkbenchTarget } from '../contracts/workbench';
 import { Icon } from '../primitives/Icon';
 
 export interface FeaturePageFrameProps {
@@ -7,6 +8,8 @@ export interface FeaturePageFrameProps {
  navigationId?: string;
  navigationOpen?: boolean;
  busy: boolean;
+ statuses?: readonly WorkbenchStatus[];
+ openStatus?: (target: WorkbenchTarget) => void;
  error?: string;
  unavailable?: string;
  toggleNavigation: () => void;
@@ -23,6 +26,7 @@ export function FeaturePageFrame(props: FeaturePageFrameProps) {
    <button type="button" className="nand-ui-icon-btn" aria-label={t('workbench.toggleNavigation')} aria-controls={props.navigationId} aria-expanded={props.navigationOpen} onClick={props.toggleNavigation}><Icon name="panel-left" /></button>
    <h2 tabIndex={-1} data-workbench-focus="title">{props.title}</h2><span className="nand-ui-spacer" />
    {props.busy && <span role="status" className="nand-workbench-progress">{t('workbench.loading')}</span>}
+   {props.statuses?.map((status) => <button type="button" className="nand-workbench-status-action" key={status.id} onClick={() => props.openStatus?.(status.target)}>{status.label}</button>)}
    {props.actions}
    <button type="button" className="nand-ui-icon-btn" aria-label={t('workbench.more')} onClick={props.more}><Icon name="ellipsis" /></button>
   </header>
