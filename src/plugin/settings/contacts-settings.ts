@@ -1,6 +1,7 @@
 import { FuzzySuggestModal, Notice, Setting, TFolder, type App } from 'obsidian';
 import { validContactsFolder } from '../../shared/contacts-settings';
 import { confirm, ct, errorText } from '../../view/contacts/forms';
+import { bindLocalizedControl } from '../../view/primitives/localized-dom';
 import type { DashboardSettingTab } from './settings-tab';
 
 class ArchiveFolderPicker extends FuzzySuggestModal<TFolder> {
@@ -10,6 +11,8 @@ class ArchiveFolderPicker extends FuzzySuggestModal<TFolder> {
 	) {
 		super(app);
 		this.setPlaceholder(ct('folder'));
+		bindLocalizedControl(this, 'placeholder', 'contacts.folder');
+		this.emptyStateText = ct('noMatchingFolders');
 	}
 	getItems(): TFolder[] {
 		return this.app.vault

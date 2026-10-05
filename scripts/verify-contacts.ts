@@ -19,6 +19,7 @@ import { h, render } from 'preact';
 import { ContactsSurface } from '../src/view/contacts/surface';
 import { ResourceList } from '../src/view/contacts/ResourceList';
 import type { ContactsPanelHost } from '../src/view/contacts/panel-contract';
+import { applyLayout, emptyPanelState, layoutsFor, restoreContactsState } from '../src/view/contacts/panel-state';
 
 function fixture(kind: 'person' | 'company' = 'person', name = '张三'): ArchiveRecord {
 	const record = newRecord(kind);
@@ -917,7 +918,7 @@ test('archive search follows the selected kind and empty prose stays distinct fr
 	const mounted: string[] = [];
 	let unmounted = 0;
 	const view: ContactsPanelHost = {
-		state: { query: emptyQuery(), page: 0, selectedPath: '', selectedId: '', scroll: 0 },
+		state: emptyPanelState(),
 		enabled: true,
 		columns: 6,
 		controller: { index, error: '', loading: false, reload: async () => {} },
@@ -941,6 +942,14 @@ test('archive search follows the selected kind and empty prose stays distinct fr
 		},
 		changeKind(kind) {
 			view.state.query.kind = kind;
+			paint();
+		},
+		layout(mode) {
+			view.state = applyLayout(view.state, mode);
+			paint();
+		},
+		setScope(value) {
+			view.state.query = { ...view.state.query, scope: value };
 			paint();
 		},
 		search(value) {
@@ -1020,4 +1029,195 @@ test('archive search follows the selected kind and empty prose stays distinct fr
 		else delete environment.document;
 		setLanguage('zh');
 	}
+});
+
+test('new and restored archive leaves pick layouts without throwing on bad values', () => {
+	assert.deepEqual(layoutsFor({}), { person: 'list', company: 'card' });
+	assert.deepEqual(layoutsFor({ query: { kind: 'person' } }), { person: 'card', company: 'card' });
+	assert.deepEqual(layoutsFor({ page: 1, layout: { person: 'list', company: 'sideways' } }), {
+		person: 'list',
+		company: 'card',
+	});
+	assert.deepEqual(layoutsFor({ layout: { person: 'grid' } }), { person: 'list', company: 'card' });
+	assert.equal(restoreContactsState({}).query.scope, 'record');
+	assert.equal(restoreContactsState({ query: { scope: 'nope' } }).query.scope, 'record');
+	assert.equal(restoreContactsState({ query: { scope: 'fields' } }).query.scope, 'fields');
+	const state = emptyPanelState();
+	state.query.search = 'kept';
+	state.page = 2;
+	state.selectedPath = '档案/a.md';
+	const next = applyLayout(state, 'card', '档案/a.md');
+	assert.equal(next.query, state.query);
+	assert.equal(next.page, 2);
+	assert.equal(next.selectedPath, state.selectedPath);
+	assert.equal(next.layout.person, 'card');
+	assert.equal(next.anchors.person.list, '档案/a.md');
+	assert.equal(next.anchors.person.card, '档案/a.md');
+	assert.equal(applyLayout(next, 'card', 'other'), next);
+});
+
+test('entry-note search keeps both records that share an email and reports the hit source', () => {
+	const index = new ContactsIndex();
+	const company = fixture('company', '旧企业');
+	const person = fixture('person', '王五');
+	const other = fixture('person', '赵六');
+	person.fields.emails = ['shared@example.com', 'second@example.com'];
+	other.fields.emails = ['shared@example.com'];
+	person.employments = [{ ...job(company), notes: '任职暗语' }];
+	person.relations = [
+		{
+			id: crypto.randomUUID(),
+			person: { id: other.id, label: other.fields.name, link: relativeLink(person.path, other.path) },
+			kind: 'friend',
+			company: { id: company.id, label: company.fields.name, link: relativeLink(person.path, company.path) },
+			notes: '关系暗语',
+		},
+	];
+	person.prose.notes = '<script>alert(1)</script>紫薇星';
+	person.raw = `${createMarkdown(person)}\n\n自由段落 青龙\n`;
+	company.prose.notes = '特别情况词';
+	company.raw = createMarkdown(company);
+	const duplicate = fixture('person', '同号的另一个人');
+	duplicate.id = person.id;
+	duplicate.path = '档案/个人档案/同号/基本信息.md';
+	index.set(company);
+	index.set(other);
+	index.set(person);
+	index.set(duplicate);
+	assert.equal(index.byPath.size, 4);
+	assert.equal(index.query({ ...emptyQuery(), search: 'shared@example.com' }).length, 2);
+	assert.equal(index.query({ ...emptyQuery(), search: '紫薇星' }).length, 1);
+	assert.equal(index.hit(person, '紫薇星')?.source, 'notes');
+	assert.equal(index.hit(person, '紫薇星')?.snippet.includes('<'), false);
+	assert.equal(index.query({ ...emptyQuery(), search: '紫薇星', scope: 'fields' }).length, 0);
+	assert.equal(index.hit(person, '任职暗语')?.source, 'employment');
+	assert.equal(index.query({ ...emptyQuery(), search: '任职暗语', scope: 'fields' }).length, 0);
+	assert.equal(index.hit(person, '关系暗语')?.source, 'relation');
+	assert.equal(index.hit(person, '青龙')?.source, 'body');
+	assert.equal(index.hit(company, '特别情况词')?.source, 'notes');
+	assert.equal(index.query({ ...emptyQuery(), search: person.id }).length, 0);
+	assert.equal(index.query({ ...emptyQuery(), search: 'nand:notes' }).length, 0);
+	assert.equal(index.query({ ...emptyQuery(), search: '<!-- nand:notes -->' }).length, 0);
+	assert.equal(index.query({ ...emptyQuery(), kind: 'person', search: '旧企业' }).some((record) => record.path === person.path), true);
+	company.fields.name = '新企业';
+	index.set(company);
+	assert.equal(index.query({ ...emptyQuery(), kind: 'person', search: '新企业' }).some((record) => record.path === person.path), true);
+	assert.equal(index.query({ ...emptyQuery(), kind: 'person', search: '旧企业' }).some((record) => record.path === person.path), false);
+	const moved = { ...person, path: '档案/个人档案/搬迁/基本信息.md' };
+	index.remove(person.path);
+	index.set(moved);
+	assert.equal(index.byPath.has(person.path), false);
+	assert.equal(index.query({ ...emptyQuery(), search: '青龙' }).some((record) => record.path === moved.path), true);
+	const broken = fixture('person', '边界');
+	broken.raw = `${createMarkdown(broken).replace('<!-- /nand:notes -->', '')}\n未闭合之后 玄武\n`;
+	index.set(broken);
+	assert.equal(index.query({ ...emptyQuery(), search: 'nand:notes' }).some((record) => record.path === broken.path), false);
+	assert.equal(index.hit(broken, '玄武')?.source, 'body');
+	const current = createMarkdown(person) + '\n自由段落保持\n';
+	const parsed = parseRecord(current, person.path)!;
+	assert.deepEqual(parsed.errors, []);
+	const edited = cloneRecord(parsed);
+	edited.fields.region = '杭州';
+	const patched = patchMarkdown(current, parsed, edited);
+	assert.equal(patched.includes('自由段落保持'), true);
+	assert.equal(patched.includes('杭州'), true);
+});
+
+test('list and card render the same paths, and switching layout does not reload', async () => {
+	const environment = globalThis as { document?: Document };
+	const previousDocument = environment.document;
+	const { document } = parseHTML('<html><body></body></html>');
+	Object.assign(globalThis, { document });
+	const panel = document.createElement('div');
+	document.body.appendChild(panel);
+	const index = new ContactsIndex();
+	const person = fixture('person', '列表甲');
+	person.fields.emails = ['a@example.com', 'b@example.com'];
+	person.fields.region = '杭州';
+	person.prose.notes = '只在备注';
+	index.set(person);
+	index.set(fixture('person', '列表乙'));
+	let reloads = 0;
+	const view: ContactsPanelHost = {
+		state: emptyPanelState(),
+		enabled: true,
+		columns: 6,
+		controller: { index, error: '', loading: false, reload: async () => { reloads += 1; } },
+		mountMarkdown: () => () => {},
+		select() {},
+		back() {},
+		changeKind() {},
+		search() {},
+		sort() {},
+		page() {},
+		clearFilters() {},
+		filters() {},
+		add() {},
+		edit() {},
+		deleteRow() {},
+		more() {},
+		resources: () => [],
+		newNote() {},
+		addResources() {},
+		openResource() {},
+		revealFolder() {},
+		layout(mode) {
+			const query = view.state.query;
+			const page = view.state.page;
+			const selectedPath = view.state.selectedPath;
+			view.state = applyLayout(view.state, mode);
+			assert.equal(view.state.query, query);
+			assert.equal(view.state.page, page);
+			assert.equal(view.state.selectedPath, selectedPath);
+			paint();
+		},
+		setScope() {},
+	};
+	const paint = () => render(h(ContactsSurface, { view }), panel);
+	const paths = () => Array.from(panel.querySelectorAll<HTMLElement>('[data-path]'), (node) => node.dataset.path);
+	try {
+		view.state.query.search = '只在备注';
+		paint();
+		const listed = paths();
+		assert.deepEqual(listed, index.query(view.state.query).map((record) => record.path));
+		assert.equal(panel.querySelector('.nand-contacts-hit')?.textContent?.includes('<'), false);
+		assert.ok(panel.querySelector('.nand-contacts-row-copy'));
+		assert.equal(panel.querySelector('button.nand-contacts-row-name button'), null);
+		panel.querySelectorAll<HTMLButtonElement>('.nand-contacts-layout button')[1]!.click();
+		assert.equal(reloads, 0);
+		assert.deepEqual(paths(), listed);
+		assert.equal(view.state.layout.person, 'card');
+	} finally {
+		render(null, panel);
+		if (previousDocument) environment.document = previousDocument;
+		else delete environment.document;
+	}
+});
+
+test('hot entry-note queries stay in memory', (t) => {
+	const samples: Array<{ count: number; bytes: number; p95: number }> = [];
+	for (const count of [100, 1000, 5000]) {
+		for (const bytes of [0, 2000, 20000]) {
+			const index = new ContactsIndex();
+			const body = bytes ? `${'甲'.repeat(40)}\n`.repeat(Math.ceil(bytes / 41)).slice(0, bytes) : '';
+			for (let i = 0; i < count; i++) {
+				const record = fixture('person', `Timed ${i}`);
+				record.path = `档案/个人档案/timed-${i}/基本信息.md`;
+				record.raw = body ? `\n\n${body} token-${i}\n` : '';
+				index.set(record);
+			}
+			const timings: number[] = [];
+			for (let n = 0; n < 20; n++) {
+				const started = performance.now();
+				index.query({ ...emptyQuery(), search: `missing-${n}` });
+				timings.push(performance.now() - started);
+			}
+			timings.sort((a, b) => a - b);
+			samples.push({ count, bytes, p95: Math.round((timings[Math.ceil(timings.length * 0.95) - 1] ?? 0) * 100) / 100 });
+			index.clear();
+		}
+	}
+	t.diagnostic(JSON.stringify(samples));
+	const target = samples.find((sample) => sample.count === 1000 && sample.bytes === 2000);
+	assert.ok(target && target.p95 <= 100, `1,000 records of about 2KB should stay within 100ms, measured ${target?.p95}`);
 });

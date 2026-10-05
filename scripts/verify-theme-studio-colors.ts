@@ -97,6 +97,7 @@ function optionValues(select: El): string[] {
 
 type Color = [number, number, number, number];
 function color(value: string): Color {
+	if (value === 'transparent') return [0, 0, 0, 0];
 	if (/^#[\da-f]{6}$/i.test(value)) return [parseInt(value.slice(1, 3), 16), parseInt(value.slice(3, 5), 16), parseInt(value.slice(5, 7), 16), 1];
 	const channels = value.match(/[\d.]+/g)?.map(Number);
 	assert.ok(channels && channels.length >= 3, `Supported color: ${value}`);
@@ -150,6 +151,56 @@ function verifyThemeContrast(): void {
 	assert.match(active, /opacity:\s*1/);
 	const switcher = css.match(/\.dashboard-workspace-switcher\s*\{[^}]*\}/)?.[0] ?? '';
 	assert.doesNotMatch(switcher, /opacity:\s*0\./, 'Ancestor opacity must not erase the selected badge contrast');
+	verifyLunarBadgeContrast(css);
+}
+
+/** Light lunar capsules use a 12% tint. Their ink must stay at least 4.5:1 on every light theme surface. */
+function verifyLunarBadgeContrast(css: string): void {
+	const inks: Record<string, string> = {
+		holiday: '#b91c1c',
+		festival: '#92400e',
+		weekend: '#166534',
+	};
+	const tints: Record<string, string> = {
+		holiday: 'rgba(239, 68, 68, 0.12)',
+		festival: 'rgba(245, 158, 11, 0.12)',
+		weekend: 'rgba(34, 197, 94, 0.12)',
+	};
+	const alwaysDark = ['neon', 'volt', 'magma', 'onyx'];
+	for (const kind of Object.keys(inks)) {
+		const rule = css.match(new RegExp(`\\.dashboard-sidebar-lunar-badge--${kind}\\s*\\{([^}]+)\\}`))?.[1] ?? '';
+		assert.match(rule, new RegExp(`background:\\s*${tints[kind]!.replace(/[().]/g, '\\$&')}`));
+		const light = css.match(new RegExp(`\\.theme-light \\.nand-dashboard-root((?::not\\(\\[data-theme="(?:${alwaysDark.join('|')})"\\]\\))+) \\.dashboard-sidebar-lunar-badge--${kind}\\s*\\{([^}]+)\\}`));
+		assert.ok(light, `${kind} light ink is scoped away from always-dark themes`);
+		for (const theme of alwaysDark) assert.match(light![1]!, new RegExp(`data-theme="${theme}"`));
+		assert.match(light![2]!, new RegExp(`color:\\s*${inks[kind]}`));
+		assert.doesNotMatch(light![2]!, /background:/, `${kind} light rule only darkens the ink`);
+	}
+	const themes = [...css.matchAll(/\.nand-dashboard-root\[data-theme="([^"]+)"\]/g)].map((match) => match[1]!);
+	assert.ok(new Set(themes).size >= 13, 'lunar badges are checked on every dashboard theme');
+	for (const theme of new Set(themes)) {
+		if (alwaysDark.includes(theme)) continue;
+		const tokens = palette(css, theme, 'light');
+		const base = color(tokens['--db-bg']!);
+		const card = tokens['--db-bg-card'] ? painted(color(tokens['--db-bg-card']!), base) : base;
+		const sidebar = tokens['--db-bg-sidebar'] ? painted(color(tokens['--db-bg-sidebar']!), base) : card;
+		for (const surface of [card, sidebar]) {
+			for (const [kind, ink] of Object.entries(inks)) {
+				const capsule = painted(color(tints[kind]!), surface);
+				const ratio = contrast(color(ink), capsule);
+				assert.ok(ratio >= 4.5, `${theme} light ${kind} lunar badge contrast ${ratio.toFixed(2)}`);
+			}
+		}
+	}
+	const darkInks: Record<string, string> = {
+		holiday: '#ef4444',
+		festival: '#f59e0b',
+		weekend: '#22c55e',
+	};
+	for (const [kind, ink] of Object.entries(darkInks)) {
+		const darkRule = css.match(new RegExp(`\\.dashboard-sidebar-lunar-badge--${kind}\\s*\\{([^}]+)\\}`))?.[1] ?? '';
+		assert.match(darkRule, new RegExp(`color:\\s*${ink}`), `${kind} keeps its shared dark-mode ink`);
+	}
 }
 
 function main(): void {

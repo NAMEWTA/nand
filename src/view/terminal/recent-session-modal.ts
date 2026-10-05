@@ -11,6 +11,7 @@ export class RecentSessionModal extends SuggestModal<PtySession> {
 		// SuggestModal.setPlaceholder returns void, unlike SearchComponent.
 		this.setPlaceholder(t('workbench.searchSessions'));
 		bindLocalizedControl(this, 'placeholder', 'terminalAgent.workbench.searchSessions');
+		this.emptyStateText = t('workbench.noMatchingSessions');
 	}
 	getSuggestions(query: string): PtySession[] {
 		const needle = query.trim().toLocaleLowerCase();

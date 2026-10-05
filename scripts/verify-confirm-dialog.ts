@@ -85,6 +85,25 @@ async function main(): Promise<void> {
 		assert.equal(listenerCount(), 0, '1: listener detached');
 	}
 
+	// 1b. A caller-supplied action label replaces the destructive "Delete" default.
+	{
+		const { doc, press } = makeDocument();
+		(globalThis as Record<string, unknown>).activeDocument = doc;
+		const promise = showConfirmDialog(undefined, {
+			title: 'T',
+			message: 'M',
+			confirmLabel: 'Reload',
+			destructive: false,
+		});
+		const actions = cardOf(doc).children[cardOf(doc).children.length - 1]!;
+		const confirmBtn = actions.children[1]!;
+		assert.equal(confirmBtn.textContent, 'Reload', '1b: confirm button uses the action, not Delete');
+		assert.equal(confirmBtn.hasClass('dashboard-confirm-primary'), true, '1b: non-destructive style');
+		assert.equal(confirmBtn.hasClass('dashboard-confirm-delete'), false, '1b: not a delete button');
+		press('Escape');
+		assert.equal(await promise, false, '1b: escape still cancels');
+	}
+
 	// 2. Non-destructive confirms: Enter outside the dialog confirms (OK).
 	{
 		const { doc, press } = makeDocument();

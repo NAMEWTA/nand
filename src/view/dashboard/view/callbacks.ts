@@ -305,6 +305,8 @@ export async function archiveCompletedTasks(this: DashboardSurface, columnName: 
 		const confirmed = await showConfirmDialog(this.app, {
 			title: t('renderer.archiveTasks'),
 			message: t('notice.archiveConfirm', { count: entries.length }),
+			confirmLabel: t('renderer.archiveAction'),
+			destructive: false,
 		});
 		if (!confirmed) return;
 

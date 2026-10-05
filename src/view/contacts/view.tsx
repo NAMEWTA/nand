@@ -41,6 +41,8 @@ export class ContactsView extends ItemView {
 	render(...args: Parameters<ContactsPresentation['render']>): ReturnType<ContactsPresentation['render']> { return this.surface.render(...args); }
 	disposeSurface(...args: Parameters<ContactsPresentation['disposeSurface']>): ReturnType<ContactsPresentation['disposeSurface']> { return this.surface.disposeSurface(...args); }
 	select(...args: Parameters<ContactsPresentation['select']>): ReturnType<ContactsPresentation['select']> { return this.surface.select(...args); }
+	layout(...args: Parameters<ContactsPresentation['layout']>): ReturnType<ContactsPresentation['layout']> { return this.surface.layout(...args); }
+	setScope(...args: Parameters<ContactsPresentation['setScope']>): ReturnType<ContactsPresentation['setScope']> { return this.surface.setScope(...args); }
 	back(...args: Parameters<ContactsPresentation['back']>): ReturnType<ContactsPresentation['back']> { return this.surface.back(...args); }
 	changeKind(...args: Parameters<ContactsPresentation['changeKind']>): ReturnType<ContactsPresentation['changeKind']> { return this.surface.changeKind(...args); }
 	search(...args: Parameters<ContactsPresentation['search']>): ReturnType<ContactsPresentation['search']> { return this.surface.search(...args); }
