@@ -453,29 +453,33 @@ export class TerminalSurface extends NativeSurface {
 			throw error;
 		}
 		if (this.closed || request !== this.selectionRequest || options.signal?.aborted) return;
-		this.selectSession(renderer, options.focus !== false);
+		await this.selectSession(renderer, options.focus !== false);
 	}
 	private sessionIsVisible(session: PtySession): boolean {
 		return terminalSurfaces(this.app).some((surface) => surface.getTerminalInstance()?.id === session.id);
 	}
-	selectSession(terminal: TerminalInstance, focus = true): void {
-		if (this.closed) return;
-		if (terminal === this.terminalInstance) { if (focus) { this.terminalHost.recordActiveSession(terminal.id); this.focusTerminal(); } return; }
+	selectSession(terminal: TerminalInstance, focus = true): Promise<void> {
+		if (this.closed) return Promise.resolve();
+		if (terminal === this.terminalInstance) {
+			if (focus) { this.terminalHost.recordActiveSession(terminal.id); this.focusTerminal(); }
+			return Promise.resolve();
+		}
 
 		const other = terminalSurfaces(this.app).find((surface) => surface !== this && surface.getTerminalInstance()?.id === terminal.id);
 		if (other) {
-			if (!focus) return;
-			// A renderer has one native owner. Explicit session selection reveals it;
-			// plain global navigation never transfers or creates a running process.
+			// Focus and ownership are different. The owner is revealed either way.
+			// This surface does not copy the renderer or start another PTY.
 			this.terminalHost.recordActiveSession(terminal.id);
-			void other.activate().then(() => other.focusTerminal()).catch(errorLog);
-			return;
+			return Promise.all([this.app.workspace.revealLeaf(other.leaf), other.activate()]).then(() => {
+				if (focus) other.focusTerminal();
+			});
 		}
 		this.workbenchState.showHistory = false;
 		this.workbenchState.drawerOpen = false;
 		this.releaseTerminalInstance();
 		this.adoptTerminalInstance(terminal);
 		this.drawWorkbench();
+		return Promise.resolve();
 	}
 	async newSession(): Promise<void> {
 		if (!this.terminalService || this.closed) return;

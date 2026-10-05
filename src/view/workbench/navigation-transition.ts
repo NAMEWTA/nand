@@ -9,15 +9,20 @@ export class NavigationTransition {
 	private pending?: { key: string; promise: Promise<boolean> };
 	private disposed = false;
 
-	navigate(target: WorkbenchTarget, prepare: (signal: AbortSignal) => Promise<void>, commit: () => void): Promise<boolean> {
+	navigate(target: WorkbenchTarget, prepare: (signal: AbortSignal) => Promise<void>, commit: () => void, live?: () => string | undefined): Promise<boolean> {
 		if (this.disposed) return Promise.resolve(false);
 		const key = targetKey(target);
 		if (this.pending?.key === key) return this.pending.promise;
-		// A -> B (pending) -> A must cancel B, even though A is still visible.
+		// A -> B (pending) -> A must cancel B and run A's prepare again. Matching the
+		// historical key is not enough while a different request is still in flight,
+		// and a domain selection that moved without a new request is not "already here".
+		const displaced = this.pending !== undefined;
 		this.controller?.abort();
 		const generation = ++this.generation;
-		if (this.current === key) {
+		const actual = live?.() ?? this.current;
+		if (!displaced && actual === key) {
 			this.pending = undefined;
+			this.current = key;
 			return Promise.resolve(true);
 		}
 		const controller = new AbortController();

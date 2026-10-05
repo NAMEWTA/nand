@@ -10,7 +10,7 @@ import {
 import { render } from 'preact/compat';
 import { emptyQuery } from '../../core/contacts/index-store';
 import type { ContactsLayoutMode } from './panel-contract';
-import { applyLayout, emptyPanelState, restoreContactsState } from './panel-state';
+import { applyLayout, contactsTarget, emptyPanelState, restoreContactsState, showContactKind } from './panel-state';
 import { ContactsError, newRecord, type ArchiveRecord, type RecordKind } from '../../core/contacts/model';
 import { type ContactsController } from '../../platform/obsidian/contacts/controller';
 import { t } from '../../shared/i18n/index';
@@ -135,6 +135,9 @@ export class ContactsPresentation extends NativeSurface {
 	getState(): Record<string, unknown> {
 		return { ...this.state };
 	}
+	getTarget() {
+		return contactsTarget(this.state);
+	}
 	async setState(raw: Record<string, unknown>, result: ViewStateResult): Promise<void> {
 		this.state = restoreContactsState(raw);
 		if (this.app.workspace.layoutReady) await this.controller?.ensureLoaded();
@@ -186,6 +189,7 @@ export class ContactsPresentation extends NativeSurface {
 		this.contentEl.scrollTop = 0;
 		this.render();
 		this.persist();
+		this.context.changed?.();
 	}
 	back(): void {
 		const previous = this.history.pop();
@@ -196,6 +200,7 @@ export class ContactsPresentation extends NativeSurface {
 		if (this.state.selectedPath) this.contentEl.scrollTop = 0;
 		else this.restoreScroll();
 		this.persist();
+		this.context.changed?.();
 	}
 	layout(mode: ContactsLayoutMode): void {
 		const next = applyLayout(this.state, mode, this.firstVisible());
@@ -213,10 +218,11 @@ export class ContactsPresentation extends NativeSurface {
 		this.persist();
 	}
 	changeKind(kind: RecordKind): void {
-		this.state.query = { ...emptyQuery(), kind };
-		this.state.page = 0;
+		this.history = [];
+		this.state = showContactKind(this.state, kind);
 		this.render();
 		this.persist();
+		this.context.changed?.();
 	}
 	search(value: string): void {
 		this.state.query.search = value;

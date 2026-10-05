@@ -3,8 +3,9 @@ import { render } from 'preact';
 import { onLanguageChanged, t } from '../../../shared/i18n';
 import type { WorkbenchFeature, WorkbenchTarget } from '../../contracts/workbench';
 import { WorkbenchShell } from '../../workbench/WorkbenchShell';
-import { normalizeWorkbenchState, type WorkbenchState } from '../../workbench/navigation-state';
+import { normalizeWorkbenchState, targetKey, type WorkbenchState } from '../../workbench/navigation-state';
 import { NavigationTransition } from '../../workbench/navigation-transition';
+import { headerStatuses } from '../../workbench/status-policy';
 import { WORKBENCH_VIEW_TYPE } from '../../workbench/view-type';
 import type { WorkbenchHost } from './workbench-host';
 import type { NativeSurface } from './native-surface';
@@ -74,6 +75,9 @@ export class WorkbenchView extends ItemView {
     this.lastActivatedAt = Date.now();
     this.state = { ...this.state, target: page?.target ?? target };
     this.app.workspace.requestSaveLayout();
+   }, () => {
+    const actual = this.pages?.getCurrent()?.getTarget?.();
+    return actual ? targetKey(actual) : undefined;
    });
   } catch (error) {
    if (revision === this.revision) this.error = error instanceof Error ? error.message : String(error);
@@ -146,7 +150,8 @@ export class WorkbenchView extends ItemView {
   const contributions = this.host.contributions;
   const items = contributions.filter((item) => item.id === 'dashboard' || (item.availability().enabled && item.availability().supported)).map((item) => item.navigation);
   const current = contributions.find((item) => item.id === this.state.target.feature);
-  const statuses = Platform.isDesktopApp ? [] : this.host.statuses?.() ?? [];
+  const hasNativeStatusBar = Platform.isDesktopApp && !!this.contentEl.doc.querySelector('.status-bar');
+  const statuses = headerStatuses(hasNativeStatusBar, this.host.statuses?.() ?? []);
   render(<WorkbenchShell state={this.state} items={items} title={t(current?.navigation.labelKey ?? 'workbench.title')} busy={this.busy} error={this.error} unavailable={this.unavailable} statuses={statuses} ownerWindow={this.contentEl.win} change={this.change} navigate={this.requestNavigation} settings={this.settings} manageFeatures={this.host.manageFeatures} navigationRef={this.navigationContent} navigationControl={this.navigationControl} more={this.more} retry={this.retry} contentRef={this.content} />, this.contentEl);
  }
 }

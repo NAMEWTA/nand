@@ -16,8 +16,14 @@ import type { WorkbenchTarget } from '../../view/contracts/workbench';
 import { WORKBENCH_VIEW_TYPE } from '../../view/workbench/view-type';
 import { visibleStatuses } from '../../view/workbench/status-policy';
 import { ContactsPresentation } from '../../view/contacts/contacts-presentation';
+import { CONTACTS_PAGE_STATE_KEYS } from '../../view/contacts/panel-state';
+import { navigateContacts } from '../../view/contacts/navigate';
 import { AutomationPresentation } from '../../view/automations/automation-presentation';
 import { NotificationPresentation } from '../../view/notifications/notification-presentation';
+import { DashboardSurface } from '../../view/dashboard/view/dashboard-surface';
+import { dashboardSaveMessage } from '../../core/dashboard/save-state';
+import { dashboardSaveStatuses } from '../../view/workbench/status-policy';
+import { splitLeafState } from '../../view/workbench/split-state';
 import { createDashboardPage } from './dashboard-page';
 
 export function composeWorkbench(plugin: DashboardPlugin) {
@@ -26,7 +32,7 @@ export function composeWorkbench(plugin: DashboardPlugin) {
  const report = (error: unknown): void => { console.error('[NAND workbench]', error); new Notice(error instanceof Error ? error.message : String(error)); };
  const ready = () => ({ enabled: true, supported: true, ready: true });
  const contributions: WorkbenchContribution[] = [
-  { id: 'dashboard', navigation: { id: 'dashboard', labelKey: 'workbench.home', icon: 'home', target: { feature: 'dashboard' } }, availability: () => ({ ...ready(), enabled: plugin.settings.modules.dashboard }), stateKeys: ['dashboardFile'], create: async (context, target, state) => createDashboardPage(plugin, context, target, state) },
+  { id: 'dashboard', navigation: { id: 'dashboard', labelKey: 'workbench.home', icon: 'home', target: { feature: 'dashboard' } }, availability: () => ({ ...ready(), enabled: plugin.settings.modules.dashboard }), stateKeys: ['dashboardFile'], create: async (context, target, state) => createDashboardPage(plugin, context, target, state, () => refresh()) },
 
   { id: 'terminal', navigation: { id: 'terminal', labelKey: 'workbench.agent', icon: 'terminal', target: { feature: 'terminal' }, children: [
    { id: 'terminal-running', labelKey: 'workbench.running', icon: 'terminal', target: { feature: 'terminal', section: 'running' } },
@@ -37,18 +43,9 @@ export function composeWorkbench(plugin: DashboardPlugin) {
   { id: 'contacts', navigation: { id: 'contacts', labelKey: 'workbench.contacts', icon: 'contact-round', target: { feature: 'contacts' }, children: [
    { id: 'contacts-person', labelKey: 'workbench.people', icon: 'user', target: { feature: 'contacts', section: 'person' } },
    { id: 'contacts-company', labelKey: 'workbench.companies', icon: 'building-2', target: { feature: 'contacts', section: 'company' } },
-  ] }, availability: () => ({ ...ready(), enabled: plugin.settings.modules.contacts, ready: !!plugin.contactsHost }), stateKeys: ['query', 'page', 'selectedPath', 'selectedId', 'scroll'], create: async (context) => {
+  ] }, availability: () => ({ ...ready(), enabled: plugin.settings.modules.contacts, ready: !!plugin.contactsHost }), stateKeys: CONTACTS_PAGE_STATE_KEYS, create: async (context) => {
    const surface = new ContactsPresentation(context, plugin);
-   return { surface, navigate: async (target, signal) => {
-    if (signal.aborted) return;
-    if (target.section === 'person' || target.section === 'company') surface.changeKind(target.section);
-    if (target.resourceId) {
-     await surface.controller?.ensureLoaded(); if (signal.aborted) return;
-     const record = surface.controller?.index.get(target.resourceId) ?? surface.controller?.index.byPath.get(target.resourceId);
-     if (!record) throw new Error(t('workbench.missing'));
-     surface.select(record.path);
-    }
-   } };
+   return { surface, getTarget: () => surface.getTarget(), navigate: (target, signal) => navigateContacts(surface, target, signal) };
   } },
   { id: 'automations', navigation: { id: 'automations', labelKey: 'workbench.automations', icon: 'workflow', target: { feature: 'automations' }, children: [
    { id: 'automations-tasks', labelKey: 'workbench.tasks', icon: 'list', target: { feature: 'automations', section: 'tasks' } },
@@ -76,6 +73,16 @@ export function composeWorkbench(plugin: DashboardPlugin) {
    const items = sessions.filter((session) => session.status === kind);
    if (items.length) rows.push({ id: 'terminal-' + kind, kind: kind === 'waiting' ? 'error' : 'running', label: t(kind === 'waiting' ? 'workbench.statusWaiting' : 'workbench.statusSessions', { count: items.length }), target: { feature: 'terminal', section: 'running', resourceId: items.length === 1 ? items[0]?.id : undefined } });
   }
+  const saves: { path: string; status: string; message: string }[] = [];
+  for (const leaf of plugin.app.workspace.getLeavesOfType(WORKBENCH_VIEW_TYPE)) {
+   if (!(leaf.view instanceof WorkbenchView)) continue;
+   for (const surface of leaf.view.getNativeSurfaces()) {
+    if (!(surface instanceof DashboardSurface)) continue;
+    const save = surface.sync.getSaveState();
+    saves.push({ path: surface.plugin.settings.dashboardFile, status: save.status, message: dashboardSaveMessage(save) });
+   }
+  }
+  rows.push(...dashboardSaveStatuses(saves));
   return rows;
  };
  const host: WorkbenchHost = {
@@ -92,11 +99,11 @@ export function composeWorkbench(plugin: DashboardPlugin) {
    // A copied browser page is a new resource, not another owner of the same guest.
    await leaf.setViewState({ type, active: true, state: target.feature === 'browser' ? { ...state, id: crypto.randomUUID() } : state }); await plugin.app.workspace.revealLeaf(leaf);
   },
-  openSplit: async (target, _state, ownerWindow) => {
+  openSplit: async (target, state, ownerWindow) => {
    const anchor = plugin.app.workspace.getMostRecentLeaf();
    if (anchor && anchor.view.containerEl.win === ownerWindow) plugin.app.workspace.setActiveLeaf(anchor, { focus: false });
    const leaf = plugin.app.workspace.getLeaf('split');
-   await leaf.setViewState({ type: WORKBENCH_VIEW_TYPE, active: true, state: { target } });
+   await leaf.setViewState({ type: WORKBENCH_VIEW_TYPE, active: true, state: splitLeafState(target, state) });
    await plugin.app.workspace.revealLeaf(leaf);
   },
   statuses: () => visibleStatuses(statusRows(), false),
@@ -164,19 +171,20 @@ export function composeWorkbench(plugin: DashboardPlugin) {
   read: statusRows, open: (target, ownerWindow) => open(target, ownerWindow), report,
  });
  let runtimeHost = plugin.terminalHost;
- let offRuntime = runtimeHost?.subscribeRuntime(status.refresh);
- plugin.register(() => { offRuntime?.(); status.dispose(); });
- registerWorkbenchRibbon(plugin, (ownerWindow) => open(undefined, ownerWindow), report);
+ let offRuntime: (() => void) | undefined;
  const refresh = (): void => {
-  if (runtimeHost !== plugin.terminalHost) { offRuntime?.(); runtimeHost = plugin.terminalHost; offRuntime = runtimeHost?.subscribeRuntime(status.refresh); }
+  if (runtimeHost !== plugin.terminalHost) { offRuntime?.(); runtimeHost = plugin.terminalHost; offRuntime = runtimeHost?.subscribeRuntime(refresh); }
   status.refresh();
   const notifications = contributions.find((item) => item.id === 'notifications');
   if (notifications) notifications.navigation.badge = plugin.automationHost?.notifications.unread ?? 0;
   for (const listener of listeners) listener();
  };
+ offRuntime = runtimeHost?.subscribeRuntime(refresh);
+ plugin.register(() => { offRuntime?.(); status.dispose(); });
+ registerWorkbenchRibbon(plugin, (ownerWindow) => open(undefined, ownerWindow), report);
  if (plugin.automationHost) {
   plugin.register(plugin.automationHost.notifications.subscribe(refresh));
-  plugin.register(plugin.automationHost.service.subscribe(status.refresh));
+  plugin.register(plugin.automationHost.service.subscribe(refresh));
  }
  refresh();
  const prepareModuleChanges = async (flags: Readonly<ModuleGates>): Promise<void> => {

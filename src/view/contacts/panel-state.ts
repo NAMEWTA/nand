@@ -1,5 +1,28 @@
 import { emptyQuery } from '../../core/contacts/index-store';
+import type { WorkbenchTarget } from '../contracts/workbench';
 import type { ContactsLayoutMode, ContactsPanelState } from './panel-contract';
+
+/** Fields the workbench may persist for an archive page. Runtime focus and history stay out. */
+export const CONTACTS_PAGE_STATE_KEYS = ['query', 'page', 'selectedPath', 'selectedId', 'scroll', 'layout', 'anchors'] as const;
+
+export function contactsTarget(state: ContactsPanelState): WorkbenchTarget {
+	const resourceId = state.selectedId || state.selectedPath || undefined;
+	return resourceId
+		? { feature: 'contacts', section: state.query.kind, resourceId }
+		: { feature: 'contacts', section: state.query.kind };
+}
+
+/** Enter one archive group. Detail, history and filters belong to the previous group. */
+export function showContactKind(state: ContactsPanelState, kind: ContactsPanelState['query']['kind']): ContactsPanelState {
+	return {
+		...state,
+		query: { ...emptyQuery(), kind },
+		page: 0,
+		selectedPath: '',
+		selectedId: '',
+		focus: '',
+	};
+}
 
 const modes = ['list', 'card'] as const;
 

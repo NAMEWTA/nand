@@ -247,12 +247,34 @@ test('an explicit session choice cancels the still-pending automatic initializat
 	await selection;
 });
 
-test('selecting a session already open in another leaf updates recent-session order', () => {
+test('selecting a session already open in another leaf updates recent-session order', async () => {
 	const f = fixture(), other = fixture(), renderer = { id: 'existing' };
+	let focused = 0;
 	other.view.terminalInstance = renderer;
+	other.view.focusTerminal = () => { focused++; };
 	f.leaves.push(other.leaf);
-	f.view.selectSession(renderer);
+	await f.view.selectSession(renderer);
 	assert.deepEqual(f.active, ['existing']);
+	assert.equal(focused, 1);
+	assert.equal(f.view.terminalInstance, null);
+	assert.equal(other.view.terminalInstance, renderer);
+});
+
+test('focus false reveals the owner of a session held elsewhere without taking its input', async () => {
+	const f = fixture(), other = fixture(), renderer = { id: 'existing' };
+	let focused = 0, revealed = 0, ownerRevealed = 0;
+	other.view.terminalInstance = renderer;
+	other.view.focusTerminal = () => { focused++; };
+	f.leaves.push(other.leaf);
+	f.view.app.workspace.revealLeaf = async (leaf: unknown) => { revealed++; assert.equal(leaf, other.leaf); };
+	other.view.app.workspace.revealLeaf = async () => { ownerRevealed++; };
+	await f.view.selectSession(renderer, false);
+	assert.deepEqual(f.active, ['existing']);
+	assert.equal(revealed, 1);
+	assert.equal(ownerRevealed, 1);
+	assert.equal(focused, 0);
+	assert.equal(f.view.terminalInstance, null);
+	assert.equal(other.view.terminalInstance, renderer);
 });
 
 test('a renderer finishing after the view closes is never adopted', async () => {
