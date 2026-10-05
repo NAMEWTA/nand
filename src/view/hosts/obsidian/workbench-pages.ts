@@ -4,7 +4,7 @@ import { normalizeTarget } from '../../workbench/navigation-state';
 import type { NativeSurface } from './native-surface';
 import type { WorkbenchContribution, WorkbenchPageBinding } from './workbench-host';
 
-interface SavedPage { target: WorkbenchTarget; state: Record<string, unknown>; }
+export interface SavedPage { target: WorkbenchTarget; state: Record<string, unknown>; }
 interface PageEntry {
  key: string; target: WorkbenchTarget; element: HTMLElement; alive: boolean;
  controller: AbortController; binding?: WorkbenchPageBinding; ready: Promise<void>; closing?: Promise<void>;
@@ -50,6 +50,7 @@ export class WorkbenchPages {
   }
   return [...result.values()];
  }
+ list(feature?: WorkbenchFeature): SavedPage[] { return this.getState().filter((page) => !feature || page.target.feature === feature); }
  getSurfaces(): NativeSurface[] { return [...this.entries.values()].flatMap((entry) => entry.alive && entry.binding ? [entry.binding.surface] : []); }
  getCurrent(): WorkbenchPageBinding | undefined { return this.active?.binding; }
  async prepare(target: WorkbenchTarget, signal: AbortSignal, initial?: Record<string, unknown>): Promise<PageEntry | undefined> {
@@ -65,8 +66,14 @@ export class WorkbenchPages {
    this.entries.set(key, next); entry = next;
    const state = this.cleanState(contribution, initial ?? this.saved.get(key)?.state);
    next.ready = Promise.resolve().then(async () => {
-    const binding = await contribution.create({ app: this.owner.app, leaf: this.owner.leaf, contentEl: element, containerEl: element, embedded: true, close: () => { void this.close(key).catch(this.report); }, activate: () => this.navigate(binding.getTarget?.() ?? next.target) }, target, state, controller.signal);
+    const binding = await contribution.create({ app: this.owner.app, leaf: this.owner.leaf, contentEl: element, containerEl: element, embedded: true, close: () => this.close(next.key), activate: () => this.navigate(binding.getTarget?.() ?? next.target) }, target, state, controller.signal);
     next.binding = binding;
+    const actual = binding.getTarget?.() ?? next.target;
+    const actualKey = this.key(actual);
+    if (actualKey !== next.key) {
+     this.entries.delete(next.key); this.saved.delete(next.key);
+     next.key = actualKey; next.target = actual; this.entries.set(actualKey, next);
+    }
     this.owner.addChild(binding.surface);
     if (!next.alive || this.disposed) return;
     await binding.surface.onOpen();
@@ -77,15 +84,16 @@ export class WorkbenchPages {
   }
   try {
    await entry.ready;
-   if (!entry.alive || this.disposed || signal.aborted) return undefined;
-   await entry.binding?.navigate(target, signal);
-   if (!entry.alive || this.disposed || signal.aborted) return undefined;
-   entry.target = entry.binding?.getTarget?.() ?? target;
-   return entry;
   } catch (error) {
    await this.closeEntry(entry, true);
    throw error;
   }
+  if (!entry.alive || this.disposed || signal.aborted) return undefined;
+  // A target lookup failure must not unmount an existing editor or destroy its draft.
+  await entry.binding?.navigate(target, signal);
+   if (!entry.alive || this.disposed || signal.aborted) return undefined;
+   entry.target = entry.binding?.getTarget?.() ?? target;
+   return entry;
  }
  show(entry: PageEntry | undefined): void {
   if (this.active && this.active !== entry) {

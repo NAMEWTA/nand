@@ -1,14 +1,14 @@
 import { ItemView, Menu, type ViewStateResult, type WorkspaceLeaf } from 'obsidian';
 import { render } from 'preact';
 import { onLanguageChanged, t } from '../../../shared/i18n';
-import type { WorkbenchTarget } from '../../contracts/workbench';
+import type { WorkbenchFeature, WorkbenchTarget } from '../../contracts/workbench';
 import { WorkbenchShell } from '../../workbench/WorkbenchShell';
 import { normalizeWorkbenchState, type WorkbenchState } from '../../workbench/navigation-state';
 import { NavigationTransition } from '../../workbench/navigation-transition';
 import { WORKBENCH_VIEW_TYPE } from '../../workbench/view-type';
 import type { WorkbenchHost } from './workbench-host';
 import type { NativeSurface } from './native-surface';
-import { WorkbenchPages } from './workbench-pages';
+import { WorkbenchPages, type SavedPage } from './workbench-pages';
 
 export class WorkbenchView extends ItemView {
  private state = normalizeWorkbenchState({});
@@ -25,6 +25,15 @@ export class WorkbenchView extends ItemView {
  getViewType(): string { return WORKBENCH_VIEW_TYPE; }
  getDisplayText(): string { return t('workbench.title'); }
  getIcon(): string { return 'panels-top-left'; }
+
+ ensureActivePage(): Promise<void> { return this.navigate(this.state.target); }
+ getSavedPages(feature?: WorkbenchFeature): SavedPage[] { return this.pages?.list(feature) ?? []; }
+ async activateResource(feature: WorkbenchFeature, id: string): Promise<boolean> {
+  const saved = this.getSavedPages(feature).find((page) => page.target.resourceId === id);
+  if (!saved) return false;
+  await this.app.workspace.revealLeaf(this.leaf);
+  await this.navigate(saved.target); return true;
+ }
  getNativeSurfaces(): readonly NativeSurface[] { return this.pages?.getSurfaces() ?? []; }
  getState(): Record<string, unknown> { return { ...this.state, pages: this.pages?.getState() ?? this.savedPages }; }
  async setState(raw: Record<string, unknown>, result: ViewStateResult): Promise<void> {
@@ -39,7 +48,7 @@ export class WorkbenchView extends ItemView {
   this.register(onLanguageChanged(() => this.draw()));
   this.register(this.host.subscribe(() => { void this.refreshAvailability().catch(this.host.report); }));
   this.register(this.contentEl.onWindowMigrated(() => this.draw()));
-  return this.navigate(this.state.target);
+  return Promise.resolve();
  }
  async navigate(raw: WorkbenchTarget, initial?: Record<string, unknown>): Promise<void> {
   if (!this.opened || !this.pages) return;
@@ -58,7 +67,7 @@ export class WorkbenchView extends ItemView {
     else page = await this.pages?.prepare(target, signal, initial);
    }, () => {
     this.pages?.show(page); this.unavailable = unavailable;
-    this.state = { ...this.state, target };
+    this.state = { ...this.state, target: page?.target ?? target };
     this.app.workspace.requestSaveLayout();
    });
   } catch (error) {
@@ -75,6 +84,8 @@ export class WorkbenchView extends ItemView {
   else this.draw();
  }
  async disposeSurface(): Promise<void> {
+  if (!this.opened) return;
+  this.savedPages = this.pages?.getState() ?? this.savedPages;
   this.opened = false; this.revision++; this.transition.dispose();
   await this.pages?.dispose(); this.pages = undefined;
   render(null, this.contentEl);
@@ -82,7 +93,17 @@ export class WorkbenchView extends ItemView {
  onClose(): Promise<void> { return this.disposeSurface(); }
  onResize(): void { this.pages?.getCurrent()?.surface.onResize(); }
  onPaneMenu(menu: Menu, source: string): void {
+
   const binding = this.pages?.getCurrent();
+  if (this.state.target.feature === 'browser') {
+   menu.addItem((item) => item.setTitle(t('workbench.newPage')).setIcon('plus').onClick(() => this.open({ feature: 'browser', resourceId: crypto.randomUUID() })));
+   for (const page of this.getSavedPages('browser')) {
+    const title = typeof page.state.title === 'string' && page.state.title ? page.state.title : typeof page.state.url === 'string' ? page.state.url : t('workbench.browser');
+    menu.addItem((item) => item.setTitle(title).setChecked(page.target.resourceId === this.state.target.resourceId).onClick(() => this.open(page.target)));
+   }
+   if (binding) menu.addItem((item) => item.setTitle(t('workbench.closePage')).setIcon('x').onClick(() => { void Promise.resolve(binding.surface.context.close()).catch(this.host.report); }));
+   menu.addSeparator();
+  }
   menu.addItem((item) => item.setTitle(t('workbench.openStandalone')).setIcon('external-link').onClick(() => {
    void this.host.openStandalone(binding?.getTarget?.() ?? this.state.target, binding?.getState?.() ?? binding?.surface.getState() ?? {}, this.contentEl.win).catch(this.host.report);
   }));

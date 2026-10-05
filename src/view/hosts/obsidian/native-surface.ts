@@ -8,7 +8,7 @@ export interface NativeSurfaceContext {
 	containerEl: HTMLElement;
 	embedded?: boolean;
 	addAction?: (icon: string, title: string, callback: (event: MouseEvent) => void) => HTMLElement;
-	close: () => void;
+	close: () => void | Promise<void>;
 	activate?: () => Promise<void>;
 }
 

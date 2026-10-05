@@ -30,7 +30,7 @@ export function render(this: DashboardSurface, data: DashboardData): void {
 	// countdowns keep ticking, no vault re-scan).
 	const oldWidgets = prevRoot?.querySelector('.dashboard-sidebar-widgets');
 	if (oldWidgets instanceof HTMLElement) {
-		bindRenderContext(oldWidgets, getRenderContext(prevRoot!));
+		bindRenderContext(oldWidgets, getRenderContext(prevRoot));
 		oldWidgets.remove();
 		this.sidebarWidgetsEl = oldWidgets;
 	}

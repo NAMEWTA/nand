@@ -14,7 +14,7 @@ registerHooks({
 			export class FileSystemAdapter {} export class Menu {} export class Notice {} export class TFile {} export class TFolder {} export class Modal {}`) };
 		if (specifier === 'electron') return { shortCircuit: true, url: moduleUrl('export const shell = {}, webUtils = {};') };
 		if (specifier === 'preact') return { shortCircuit: true, url: moduleUrl('export const h = () => null, render = () => {};') };
-		if (specifier === './TerminalWorkbench' || specifier === './workbench') return { shortCircuit: true, url: moduleUrl('export const TerminalWorkbench = () => {}, confirmSessionClose = () => {}, HistoryPreview = () => {}, HistorySidebar = () => {}, NewConversationButton = () => {}, SessionSidebar = () => {}, TerminalHeader = () => {}, UsageFooter = () => {};') };
+		if (context.parentURL?.endsWith('/terminal-view.ts') && (specifier === './TerminalWorkbench' || specifier === './workbench')) return { shortCircuit: true, url: moduleUrl('export const TerminalWorkbench = () => {}, confirmSessionClose = () => {}, HistoryPreview = () => {}, HistorySidebar = () => {}, NewConversationButton = () => {}, SessionSidebar = () => {}, TerminalHeader = () => {}, UsageFooter = () => {};') };
 		return nextResolve(specifier, context);
 	},
 	load(url, context, nextLoad) {

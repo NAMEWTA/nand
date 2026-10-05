@@ -160,7 +160,7 @@ export function refreshSectionsFor(
 	if (!hasScanning && !hasMedia) return;
 
 	const root = this.contentEl;
-	const kanban = root?.querySelector('.dashboard-kanban') as HTMLElement | null;
+	const kanban = root.querySelector<HTMLElement>('.dashboard-kanban');
 	if (!kanban) {
 		// View not laid out yet — fall back to a full render.
 		this.render(data);

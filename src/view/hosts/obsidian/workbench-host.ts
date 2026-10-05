@@ -19,7 +19,7 @@ export interface WorkbenchContribution {
 export interface WorkbenchHost {
  contributions: readonly WorkbenchContribution[];
  subscribe(listener: () => void): () => void;
- openSettings(): void;
- openStandalone(target: WorkbenchTarget, state: Record<string, unknown>, ownerWindow: Window): Promise<void>;
- report(error: unknown): void;
+ openSettings: () => void;
+ openStandalone: (target: WorkbenchTarget, state: Record<string, unknown>, ownerWindow: Window) => Promise<void>;
+ report: (error: unknown) => void;
 }

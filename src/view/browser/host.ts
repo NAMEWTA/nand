@@ -23,7 +23,8 @@ export interface BrowserHost {
 	releasePage(id: string): void;
 	open(request: BrowserOpenRequest): Promise<string>;
 	activate(id: string): Promise<void>;
-	registerPresentation(id: string, activate: () => Promise<void>, close: () => void): () => void;
+	registerPresentation(id: string, activate: () => Promise<void>, close: () => void | Promise<void>, state?: () => BrowserPageState): () => void;
+	presentationExists?(id: string): boolean;
 	copyText(text: string): void;
 	copyImage(data: string): void;
 	saveImage(data: string, context?: string): Promise<string[]>;

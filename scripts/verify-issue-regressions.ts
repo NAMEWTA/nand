@@ -142,7 +142,7 @@ async function main() {
 	let automationOpens = 0, inboxOpens = 0, browserOpens = 0;
 	registerShellCommands({ addCommand, openBrowser: async () => { browserOpens++; }, automationHost: { open: async () => { automationOpens++; }, inbox: () => { inboxOpens++; } } } as unknown as DashboardPlugin);
 	const shellCommands = commands.slice(4);
-	const expectedShellIds = ['open-browser', 'open-automations', 'open-notifications', 'new-automation', 'open-contacts', 'open-dashboard', 'open-editor-view'].map(id => `nand:${id}`).sort();
+	const expectedShellIds = ['open-workbench', 'open-browser', 'open-automations', 'open-notifications', 'new-automation', 'open-contacts', 'open-dashboard', 'open-editor-view'].map(id => `nand:${id}`).sort();
 	assert.deepEqual(shellCommands.map(command => command.id).sort(), expectedShellIds);
 	const openBrowser = shellCommands.find(command => command.id === 'nand:open-browser')!;
 	const openAutomation = shellCommands.find(command => command.id === 'nand:open-automations')!;

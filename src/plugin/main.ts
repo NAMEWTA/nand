@@ -13,7 +13,6 @@ import {
 	type LeafTitlePair,
 } from '../platform/obsidian/workspace-title';
 import { registerLocalizedCommand, type LocalizedCommand } from '../platform/obsidian/localized-command';
-import type { AutomationUiPort } from '../shared/automation/types';
 import { normalizeContactsSettings } from '../shared/contacts-settings';
 import { normalizeEditorWorkbench } from '../shared/editor-workbench';
 import { getLanguage, onLanguageChanged, setLanguage, t, tFor } from '../shared/i18n/index';
