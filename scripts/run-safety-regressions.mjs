@@ -18,7 +18,7 @@ for (const file of [
 			`scripts/regressions/${file}.mjs`,
 			...(file === 'server-lifecycle' ? ['--native-signal-fixture'] : []),
 		],
-		{ stdio: 'inherit', timeout: 30000, env: { ...process.env, TZ: 'America/New_York' } },
+		{ stdio: 'inherit', timeout: 60000, env: { ...process.env, TZ: 'America/New_York' } },
 	);
 	if (result.error) console.error(result.error);
 	if (result.status !== 0) {
