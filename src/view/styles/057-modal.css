@@ -1,0 +1,140 @@
+/* ===== Modal ===== */
+.dashboard-modal {
+	border-radius: var(--db-radius-lg, 12px);
+	border: 1px solid var(--db-border-card, var(--background-modifier-border));
+	/* --db-bg-modal is the opaque dialog surface for themes whose --db-bg-card
+	   is transparent (neon/volt/magma/onyx rely on the root's near-black
+	   gradient, which doesn't exist behind body-level dialogs). */
+	background: var(--db-bg-modal, var(--db-bg-card, var(--background-secondary))) !important;
+	backdrop-filter: var(--db-backdrop-blur, blur(24px));
+	-webkit-backdrop-filter: var(--db-backdrop-blur, blur(24px));
+	color: var(--db-text, var(--text-normal));
+	padding: var(--size-4-6) var(--size-4-8) var(--size-4-6);
+	box-shadow: var(--db-shadow-card-hover, var(--nand-shadow-lg));
+}
+
+/* Tighter padding for modals whose content is grouped into cards (e.g. the
+   library/database config and banner editor), so the card layout doesn't sit
+   inside an oversized white margin. */
+.dashboard-modal.dashboard-modal--compact {
+	padding: var(--size-4-4) var(--size-4-5, 20px) var(--size-4-4);
+}
+
+.dashboard-modal.modal {
+	background: transparent !important;
+	border: none !important;
+	box-shadow: none !important;
+}
+
+/* Glass modal: override Obsidian's .modal container */
+.modal.modal--dashboard {
+	background: transparent !important;
+	border: none !important;
+	box-shadow: none !important;
+	backdrop-filter: none !important;
+	border-radius: var(--db-radius-lg, 12px);
+	overflow-y: auto;
+	max-height: 85vh;
+	scrollbar-width: thin;
+	scrollbar-color: color-mix(in srgb, var(--db-accent, var(--interactive-accent)) 18%, transparent) transparent;
+}
+
+.modal.modal--dashboard::-webkit-scrollbar {
+	width: 4px;
+}
+
+.modal.modal--dashboard::-webkit-scrollbar-track {
+	background: transparent;
+}
+
+.modal.modal--dashboard::-webkit-scrollbar-thumb {
+	background: color-mix(in srgb, var(--db-accent, var(--interactive-accent)) 18%, transparent);
+	border-radius: 4px;
+}
+
+.modal.modal--dashboard::-webkit-scrollbar-thumb:hover {
+	background: color-mix(in srgb, var(--db-accent, var(--interactive-accent)) 35%, transparent);
+}
+
+.modal-bg.modal-bg--dashboard {
+	background: rgba(0, 0, 0, 0.42) !important;
+	backdrop-filter: blur(6px);
+	-webkit-backdrop-filter: blur(4px);
+}
+
+.modal.modal--dashboard > .modal-close-button,
+.modal.modal--dashboard .modal-close-button {
+	color: var(--db-text-muted) !important;
+}
+
+/* Dialog title: body text color with weight for hierarchy; the accent is
+   reserved for actions and selection. */
+.dashboard-modal h2 {
+	color: var(--db-text, var(--text-normal));
+	font-size: 1.15em;
+	font-weight: 650;
+	letter-spacing: -0.01em;
+	border-bottom: 1px solid var(--db-border, var(--background-modifier-border));
+	padding-bottom: var(--size-4-3);
+	margin: 0 0 var(--size-4-1);
+}
+
+.dashboard-modal .dashboard-modal-form {
+	display: flex;
+	flex-direction: column;
+	gap: 16px;
+	margin-top: 16px;
+}
+
+/* Card-style module backgrounds inside configuration/stats modals.
+   Mirrors the reading-stats card treatment so grouped settings feel separated
+   which uses its own fortune-* classes. */
+.dashboard-library-config-section,
+.dashboard-pomodoro-stats-section,
+.dashboard-modal-quotes,
+.dashboard-modal-images,
+.dashboard-modal-quote-color {
+	background: var(--db-bg-hover, rgba(0, 0, 0, 0.03));
+	border: 1px solid var(--db-border, rgba(0, 0, 0, 0.05));
+	border-radius: var(--db-radius-md, 10px);
+	padding: var(--size-4-3);
+}
+
+.dashboard-modal-form label {
+	font-size: 0.9em;
+	font-weight: 500;
+	display: block;
+	margin-bottom: 4px;
+	color: var(--db-text, var(--text-normal));
+}
+
+.dashboard-modal-input {
+	width: 100%;
+	padding: 8px 12px;
+	border: 1px solid var(--db-border-input, var(--background-modifier-border));
+	border-radius: var(--db-radius-sm, 6px);
+	background: var(--db-bg-input, var(--background-modifier-form-field));
+	color: var(--db-text, var(--text-normal));
+	font-size: 0.95em;
+	font-family: var(--db-font, var(--font-interface));
+	transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.dashboard-modal-input:focus {
+	outline: none;
+	border-color: var(--db-border-input-focus, var(--interactive-accent));
+	box-shadow: 0 0 0 3px color-mix(in srgb, var(--db-accent, var(--interactive-accent)) 16%, transparent);
+}
+
+.dashboard-modal-actions {
+	display: flex;
+	gap: 8px;
+	justify-content: flex-end;
+	margin-top: var(--size-4-3);
+}
+
+.dashboard-modal-actions button {
+	border-radius: var(--db-radius-sm, 6px);
+	font-family: var(--db-font, var(--font-interface));
+}
+

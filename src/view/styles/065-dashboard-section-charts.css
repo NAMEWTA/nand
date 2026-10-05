@@ -1,0 +1,19 @@
+/* ===== Dashboard Section (Charts) ===== */
+.dashboard-section-row[data-section-type="dashboard"] .dashboard-section-cards {
+	flex-wrap: wrap;
+	gap: 12px;
+}
+
+.dashboard-section-row[data-section-type="dashboard"] .dashboard-section-cards > .dashboard-card {
+	flex: 0 0 200px;
+	min-width: 180px;
+	max-width: 240px;
+	cursor: default;
+	padding: 16px;
+}
+
+.dashboard-section-row[data-section-type="dashboard"] .dashboard-card:hover {
+	transform: none;
+	box-shadow: var(--db-shadow-card);
+}
+

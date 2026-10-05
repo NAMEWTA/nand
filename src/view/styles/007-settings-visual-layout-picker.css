@@ -1,0 +1,182 @@
+/* ===== Settings: visual layout picker =====
+ * Two miniature board diagrams (side rail vs stacked strip) with a centered
+ * radio circle under each. The settings pane has no --db-* theme scope, so
+ * every value comes from the NAND tokens (which resolve to Obsidian's own
+ * variables).
+ *
+ * The preview mocks read top-down in three zones — banner bar, widget zone
+ * (rail / strip, strong accent tint), main sections (soft tint) — so the two
+ * layouts differ at a glance. The preview box is fixed-height with overflow
+ * hidden and generous bottom clearance: nothing inside may ever crowd the
+ * label row below (the old mock's flex bars could overflow onto it). */
+.dashboard-layout-picker {
+	display: flex;
+	gap: var(--size-4-3);
+	margin: var(--size-4-1) 0 var(--size-4-4);
+	flex-wrap: wrap;
+}
+
+.dashboard-layout-option {
+	flex: 1 1 150px;
+	min-width: 150px;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: var(--size-4-2);
+	padding: var(--size-4-3);
+	box-sizing: border-box;
+	background: var(--nand-surface);
+	border: var(--nand-border);
+	border-radius: var(--nand-radius-md);
+	box-shadow: var(--nand-shadow-xs);
+	transition: border-color var(--nand-duration) var(--nand-ease), box-shadow var(--nand-duration) var(--nand-ease), background-color var(--nand-duration) var(--nand-ease);
+}
+
+.dashboard-layout-option:hover {
+	border-color: var(--nand-border-color-strong);
+	box-shadow: var(--nand-shadow-sm);
+}
+
+.dashboard-layout-option--active,
+.dashboard-layout-option--active:hover {
+	border-color: var(--nand-accent-border);
+	background: var(--nand-accent-softer);
+	box-shadow: 0 0 0 1px var(--nand-accent-border);
+}
+
+/* Inner radius = card radius (10px) - inset (12px) floors at the row radius. */
+.dashboard-layout-preview {
+	width: 122px;
+	height: 88px;
+	box-sizing: border-box;
+	padding: 6px;
+	display: flex;
+	flex-direction: column;
+	gap: 5px;
+	border-radius: var(--nand-radius-sm);
+	overflow: hidden;
+	flex: 0 0 auto;
+	background: color-mix(in srgb, var(--nand-accent) 5%, var(--nand-surface-muted));
+}
+
+/* Zone 1: the banner bar spanning the full mock width. */
+.dashboard-layout-preview .lp-banner {
+	height: 12px;
+	flex-shrink: 0;
+	border-radius: 3px;
+	background: color-mix(in srgb, var(--nand-accent) 32%, transparent);
+}
+
+/* Zone 2a (side): body row with the widget rail on the LEFT. */
+.dashboard-layout-preview .lp-main {
+	flex: 1;
+	min-height: 0;
+	display: flex;
+	gap: 5px;
+}
+
+.dashboard-layout-preview .lp-rail {
+	width: 26%;
+	display: flex;
+	flex-direction: column;
+	gap: 3px;
+}
+
+/* Widget blocks — the strong tint, so the widget zone pops from the sections. */
+.dashboard-layout-preview .lp-widget {
+	flex: 1;
+	min-height: 4px;
+	border-radius: 2.5px;
+	background: color-mix(in srgb, var(--nand-accent) 42%, transparent);
+}
+
+/* Zone 2b (stacked): the widget strip under the banner. */
+.dashboard-layout-preview--stacked .lp-strip {
+	height: 18px;
+	flex-shrink: 0;
+	display: flex;
+	gap: 3px;
+}
+
+.dashboard-layout-preview--stacked .lp-strip .lp-widget {
+	flex: 1;
+	min-height: 0;
+}
+
+/* Zone 3: main sections — the soft tint, stacked as rows. */
+.dashboard-layout-preview .lp-board {
+	flex: 1;
+	min-height: 0;
+	display: flex;
+	flex-direction: column;
+	gap: 3px;
+}
+
+.dashboard-layout-preview .lp-board .lp-section {
+	flex: 1;
+	min-height: 4px;
+	border-radius: 2.5px;
+	background: color-mix(in srgb, var(--nand-accent) 16%, transparent);
+}
+
+.dashboard-layout-option-label {
+	font-size: var(--nand-text-body);
+	font-weight: 500;
+	color: var(--text-muted);
+	text-align: center;
+}
+
+.dashboard-layout-option--active .dashboard-layout-option-label {
+	color: var(--text-normal);
+	font-weight: 600;
+}
+
+/* The radio circle is THE click target — a real button element, with theme
+   button chrome fully reset so no theme can give it a box or a fixed height
+   that overflows the card (the failure mode of the old button-bar card). */
+.dashboard-layout-radio {
+	appearance: none;
+	-webkit-appearance: none;
+	width: 18px;
+	height: 18px;
+	box-sizing: border-box;
+	border-radius: 50% !important;
+	border: 1.5px solid var(--text-muted) !important;
+	background: none !important;
+	background-color: transparent !important;
+	box-shadow: none !important;
+	padding: 0 !important;
+	margin: 0;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	flex-shrink: 0;
+	cursor: pointer;
+	transition: border-color var(--nand-duration-fast) var(--nand-ease);
+}
+
+.dashboard-layout-radio:hover {
+	border-color: var(--nand-accent) !important;
+}
+
+.dashboard-layout-radio:focus-visible {
+	outline: 2px solid var(--interactive-accent);
+	outline-offset: 2px;
+}
+
+.dashboard-layout-radio-dot {
+	width: 8px;
+	height: 8px;
+	border-radius: 50%;
+	background: transparent;
+	transition: background-color var(--nand-duration-fast) var(--nand-ease);
+}
+
+.dashboard-layout-option--active .dashboard-layout-radio {
+	border-color: var(--nand-accent);
+}
+
+.dashboard-layout-option--active .dashboard-layout-radio-dot {
+	background: var(--nand-accent);
+}
+

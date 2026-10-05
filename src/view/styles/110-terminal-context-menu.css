@@ -1,0 +1,545 @@
+/* ==================== Terminal Context Menu ==================== */
+.terminal-context-menu {
+  position: fixed;
+  z-index: 10000;
+  background: var(--background-primary);
+  border: var(--nand-border);
+  border-radius: var(--nand-radius-md);
+  padding: var(--size-4-1);
+  box-shadow: var(--nand-shadow-lg);
+  min-width: 200px;
+}
+.terminal-context-menu-item {
+  display: flex;
+  align-items: center;
+  min-height: 28px;
+  padding: 0 var(--size-4-2);
+  border-radius: var(--nand-radius-sm);
+  font-size: var(--nand-text-body);
+  gap: var(--size-4-2);
+  color: var(--text-normal);
+}
+.terminal-context-menu-item:not(.is-disabled) {
+  cursor: pointer;
+}
+.terminal-context-menu-item:not(.is-disabled):hover {
+  background: var(--background-modifier-hover);
+}
+.terminal-context-menu-item.is-disabled {
+  color: var(--text-muted);
+}
+.terminal-context-menu-icon {
+  width: 16px;
+  height: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-muted);
+}
+.terminal-context-menu-icon svg {
+  width: 15px;
+  height: 15px;
+}
+.terminal-context-menu-icon.is-disabled {
+  opacity: 0.5;
+}
+.terminal-context-menu-text {
+  flex: 1;
+}
+.terminal-context-menu-shortcut {
+  color: var(--text-faint);
+  font-size: var(--nand-text-caption);
+  font-variant-numeric: tabular-nums;
+  margin-left: var(--size-4-3);
+}
+.terminal-context-submenu-container {
+  position: relative;
+}
+.terminal-context-submenu {
+  position: absolute;
+  left: 100%;
+  top: calc(-1 * var(--size-4-1) - 1px);
+  background: var(--background-primary);
+  border: var(--nand-border);
+  border-radius: var(--nand-radius-md);
+  padding: var(--size-4-1);
+  box-shadow: var(--nand-shadow-lg);
+  min-width: 200px;
+  max-height: min(60vh, 420px);
+  display: none;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  z-index: 10001;
+  white-space: nowrap;
+}
+.terminal-context-submenu.is-visible {
+  display: block;
+}
+.terminal-context-submenu.is-flipped {
+  left: auto;
+  right: 100%;
+}
+.terminal-context-submenu-arrow {
+  width: 12px;
+  height: 12px;
+  display: flex;
+  align-items: center;
+  color: var(--text-faint);
+}
+.terminal-context-separator {
+  height: 1px;
+  background: var(--nand-border-color);
+  margin: var(--size-4-1) var(--size-4-2);
+}
+
+
+/* AI launcher menu — section headers and readiness badges */
+.preset-scripts-menu-section-header {
+  padding: var(--size-4-2) var(--size-4-2) var(--size-4-1);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  user-select: none;
+  pointer-events: none;
+}
+
+.preset-scripts-menu-section-header + .preset-scripts-menu-section-header {
+  margin-top: 4px;
+}
+
+.preset-scripts-menu-section-title {
+  font-size: var(--nand-text-caption);
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+}
+
+.preset-scripts-menu-section-desc {
+  font-size: var(--nand-text-caption);
+  line-height: 1.35;
+  color: var(--text-faint);
+}
+
+.preset-scripts-menu-launcher {
+  position: relative;
+}
+
+.preset-scripts-menu-launcher .preset-scripts-menu-label {
+  font-weight: 500;
+}
+
+.preset-scripts-menu-status-badge {
+  display: inline-flex;
+  align-items: center;
+  height: 18px;
+  padding: 0 8px;
+  margin-left: 8px;
+  border-radius: var(--nand-radius-pill);
+  font-size: var(--nand-text-caption);
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+  background: var(--nand-surface-muted);
+  color: var(--text-muted);
+}
+
+.preset-scripts-menu-status-badge.is-ready {
+  background: color-mix(in srgb, var(--nand-tone-success) 15%, transparent);
+  color: var(--nand-tone-success);
+}
+
+.preset-scripts-menu-status-badge.is-not-installed {
+  background: color-mix(in srgb, var(--nand-tone-warning) 15%, transparent);
+  color: var(--nand-tone-warning);
+}
+
+.preset-scripts-menu-status-badge.is-update-available {
+  background: var(--nand-accent-soft);
+  color: var(--text-accent);
+}
+
+.preset-scripts-menu-status-badge.is-checking {
+  background: var(--nand-surface-muted);
+  color: var(--text-faint);
+}
+
+.preset-scripts-menu .preset-scripts-menu-status-badge.is-dot {
+  width: 8px;
+  height: 8px;
+  min-width: 8px;
+  padding: 0;
+  border-radius: 50%;
+  font-size: 0;
+  background: var(--text-faint);
+}
+
+.preset-scripts-menu .preset-scripts-menu-status-badge.is-dot.is-ready {
+  background: var(--color-green);
+}
+
+.preset-scripts-menu .preset-scripts-menu-status-badge.is-dot.is-not-installed {
+  background: var(--color-orange);
+}
+
+.preset-scripts-menu .preset-scripts-menu-status-badge.is-dot.is-update-available {
+  background: var(--interactive-accent);
+}
+
+.preset-scripts-menu .preset-scripts-menu-status-badge.is-dot.is-checking {
+  background: var(--text-faint);
+}
+
+.preset-scripts-menu-session-meta {
+  margin-left: auto;
+  color: var(--text-faint);
+  font-size: 11px;
+  flex-shrink: 0;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Inline launcher version label rendered next to the readiness badge in
+   both the status bar menu and the settings page. Hidden until a probe
+   has resolved a local version. */
+.preset-scripts-menu-version {
+  display: inline-flex;
+  align-items: center;
+  margin-left: 8px;
+  font-family: var(--font-monospace);
+  font-size: 11px;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+.preset-scripts-menu-version.is-hidden {
+  display: none;
+}
+
+.preset-scripts-menu-version.is-update-available {
+  color: var(--interactive-accent);
+}
+
+/* Inline hint shown beneath the "Check for AI launcher updates" toggle
+   when offline mode is on. The toggle still works (so the user can
+   pre-arm it for when they go back online) but is dimmed to signal
+   that the update check itself is suppressed. */
+.setting-item.is-offline-suppressed .setting-item-control {
+  opacity: 0.55;
+}
+
+.setting-item.is-offline-suppressed .setting-item-name,
+.setting-item.is-offline-suppressed .setting-item-description {
+  color: var(--text-muted);
+}
+
+.ai-launcher-offline-hint {
+  margin: calc(-1 * var(--size-4-1)) 0 var(--size-4-3);
+  padding: var(--size-4-2) var(--size-4-3);
+  border: 1px solid color-mix(in srgb, var(--nand-tone-warning) 30%, transparent);
+  border-radius: var(--nand-radius-md);
+  background: color-mix(in srgb, var(--nand-tone-warning) 8%, transparent);
+  color: var(--text-normal);
+  font-size: var(--nand-text-caption);
+  line-height: 1.5;
+}
+
+.ai-launcher-offline-hint.is-hidden {
+  display: none;
+}
+
+/* Launcher install modal — content layout */
+.modal.terminal-launcher-install-modal {
+  width: min(560px, calc(100vw - 32px));
+  padding: var(--size-4-6);
+}
+
+.terminal-launcher-install-modal .modal-title {
+  margin-bottom: var(--size-4-3);
+}
+
+.terminal-launcher-install-modal .terminal-launcher-install-desc {
+  margin: 0 0 var(--size-4-4);
+  font-size: var(--nand-text-body);
+  line-height: 1.6;
+  color: var(--text-normal);
+}
+
+.terminal-launcher-install-modal .terminal-launcher-install-detail {
+  display: flex;
+  flex-direction: column;
+  gap: var(--size-4-1);
+  padding: 10px var(--size-4-3);
+  margin-bottom: var(--size-4-3);
+  border-radius: var(--nand-radius-md);
+  background: var(--nand-surface-muted);
+}
+
+.terminal-launcher-install-modal .terminal-launcher-install-detail-label {
+  font-size: var(--nand-text-caption);
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+}
+
+.terminal-launcher-install-modal .terminal-launcher-install-detail-command {
+  padding: 0;
+  background: transparent;
+  font-family: var(--font-monospace);
+  font-size: var(--nand-text-body);
+  font-variant-numeric: tabular-nums;
+  color: var(--text-normal);
+  overflow-wrap: anywhere;
+}
+
+/* Install command card — copy-paste friendly install one-liner. */
+.terminal-launcher-install-modal .terminal-launcher-install-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--size-4-2);
+  padding: var(--size-4-4);
+  margin-bottom: var(--size-4-3);
+  border: var(--nand-border);
+  border-radius: var(--nand-radius-md);
+  background: var(--background-primary);
+  box-shadow: var(--nand-shadow-xs);
+}
+
+.terminal-launcher-install-modal .terminal-launcher-install-card-title {
+  font-weight: 600;
+  font-size: var(--nand-text-body);
+  color: var(--text-normal);
+}
+
+.terminal-launcher-install-modal .terminal-launcher-install-card-desc {
+  margin: 0;
+  font-size: var(--nand-text-caption);
+  line-height: 1.5;
+  color: var(--text-muted);
+}
+
+.terminal-launcher-install-modal .terminal-launcher-install-command-row {
+  display: flex;
+  align-items: stretch;
+  gap: var(--size-4-2);
+  margin-top: var(--size-4-1);
+}
+
+.terminal-launcher-install-modal .terminal-launcher-install-command {
+  flex: 1 1 auto;
+  min-width: 0;
+  padding: var(--size-4-2) var(--size-4-3);
+  border-radius: var(--nand-radius-sm);
+  background: var(--nand-surface-muted);
+  font-family: var(--font-monospace);
+  font-size: var(--nand-text-caption);
+  line-height: 1.55;
+  color: var(--text-normal);
+  word-break: break-all;
+  white-space: pre-wrap;
+}
+
+.terminal-launcher-install-modal .terminal-launcher-install-command-copy {
+  flex: 0 0 auto;
+  align-self: flex-start;
+  min-height: var(--nand-control-height);
+  padding: 0 var(--size-4-3);
+  border-radius: var(--nand-radius-sm);
+  border: var(--nand-border);
+  background: var(--background-primary);
+  box-shadow: none;
+  color: var(--text-normal);
+  font-size: var(--nand-text-body);
+  cursor: pointer;
+  transition: border-color var(--nand-duration-fast) var(--nand-ease), background-color var(--nand-duration-fast) var(--nand-ease);
+}
+
+.terminal-launcher-install-modal .terminal-launcher-install-command-copy:hover {
+  border-color: var(--nand-border-color-strong);
+  background: var(--nand-surface-hover);
+}
+
+.terminal-launcher-install-modal .terminal-launcher-install-command-copy:focus-visible {
+  outline: 2px solid var(--interactive-accent);
+  outline-offset: 2px;
+}
+
+
+/* AI launcher settings — section headers and preview row */
+.preset-scripts-list-section-header {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: var(--size-4-3) var(--size-4-1) var(--size-4-1);
+  user-select: none;
+}
+
+.preset-scripts-list-section-header:first-child {
+  padding-top: var(--size-4-1);
+}
+
+.preset-scripts-list-section-title {
+  font-size: var(--nand-text-caption);
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+}
+
+.preset-scripts-list-section-desc {
+  font-size: var(--nand-text-caption);
+  line-height: 1.4;
+  color: var(--text-faint);
+}
+
+.preset-script-row.preset-script-row-preview {
+  opacity: 0.7;
+  cursor: default;
+}
+
+.preset-script-row.preset-script-row-preview .preset-script-drag-handle.is-disabled {
+  opacity: 0.3;
+  pointer-events: none;
+}
+
+.preset-script-row .preset-scripts-menu-status-badge {
+  margin-left: 8px;
+}
+
+
+
+/* Force show the terminal-internal CJK composition text with proper coloring and styling */
+.xterm .xterm-composition {
+  display: inline-block !important;
+  color: var(--text-normal) !important;
+  border-bottom: 2px solid var(--interactive-accent) !important;
+  background: transparent !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+.terminal-usage.is-hidden {
+	display: none;
+}
+
+.terminal-usage.is-clickable {
+  cursor: pointer;
+}
+
+.terminal-usage-item {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 4px;
+  margin-left: 6px;
+  padding: 0 8px;
+  border-radius: var(--nand-radius-pill);
+  background: var(--nand-surface-hover);
+  font-variant-numeric: tabular-nums;
+}
+
+.terminal-usage-agent {
+  font-weight: 600;
+}
+
+.terminal-usage-rest {
+  color: var(--text-muted);
+}
+
+.terminal-usage-modal-host .modal {
+  width: min(560px, calc(100vw - 32px));
+}
+
+.terminal-usage-modal > h2 {
+  margin: 0 0 var(--size-4-1);
+  font-weight: 600;
+}
+
+.terminal-usage-modal > .terminal-usage-intro,
+.terminal-usage-modal > .terminal-usage-empty {
+  margin: 0 0 var(--size-4-4);
+  color: var(--text-muted);
+  font-size: var(--nand-text-body);
+  line-height: 1.6;
+}
+
+.terminal-usage-modal > .terminal-usage-empty {
+  padding: var(--size-4-6) var(--size-4-4);
+  border: 1px dashed rgba(var(--text-muted-rgb), 0.25);
+  border-radius: var(--nand-radius-md);
+  text-align: center;
+}
+
+.terminal-usage-card {
+  margin: 0 0 var(--size-4-3);
+  padding: var(--size-4-4);
+  border: var(--nand-border);
+  border-radius: var(--nand-radius-md);
+  background: var(--background-primary);
+  box-shadow: var(--nand-shadow-xs);
+}
+
+.terminal-usage-card > .terminal-usage-stale,
+.terminal-usage-card > .terminal-usage-status {
+  margin: 0 0 var(--size-4-2);
+  color: var(--text-muted);
+  font-size: var(--nand-text-caption);
+}
+
+.terminal-usage-card > .terminal-usage-stale {
+  color: var(--nand-tone-warning);
+}
+
+.terminal-usage-card > .terminal-usage-checked {
+  display: block;
+  color: var(--text-faint);
+  font-size: var(--nand-text-caption);
+  font-variant-numeric: tabular-nums;
+}
+
+.terminal-usage-row {
+  display: grid;
+  grid-template-columns: minmax(3rem, auto) minmax(2rem, 1fr) auto;
+  gap: var(--size-4-1) var(--size-4-3);
+  align-items: center;
+  margin-top: var(--size-4-3);
+  font-size: var(--nand-text-body);
+  font-variant-numeric: tabular-nums;
+}
+
+.terminal-usage-name {
+  font-weight: 500;
+}
+
+.terminal-usage-track {
+  height: 6px;
+  border-radius: var(--nand-radius-pill);
+  background: var(--nand-surface-muted);
+  box-shadow: inset 0 0 0 1px var(--nand-border-color);
+  overflow: hidden;
+}
+
+.terminal-usage-fill {
+  height: 100%;
+  border-radius: inherit;
+  background: var(--interactive-accent);
+}
+
+.terminal-usage-fill.is-mid {
+  background: var(--nand-tone-warning);
+}
+
+.terminal-usage-fill.is-high {
+  background: var(--nand-tone-error);
+}
+
+.terminal-usage-pct,
+.terminal-usage-reset {
+  color: var(--text-muted);
+  font-size: var(--font-ui-smaller);
+}
+
+.terminal-usage-reset {
+  grid-column: 1 / -1;
+}
+

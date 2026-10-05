@@ -1,0 +1,596 @@
+/* ===== Media sections (images / videos) ===== */
+.dashboard-media-content {
+	padding: 4px 0;
+	min-height: 540px;
+}
+
+.dashboard-media-area {
+	min-height: 460px;
+}
+
+/* Grouped rendering (toolbar group-by): one collapsible header + body per
+   folder/tag bucket. Header mirrors the kanban column title's size level. */
+.dashboard-media-group-header {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	min-height: 28px;
+	padding: 4px 8px;
+	margin: 12px 0 8px 0;
+	border-bottom: 1px solid var(--db-border, var(--background-modifier-border));
+	cursor: pointer;
+	user-select: none;
+	border-radius: var(--db-radius-sm, 6px) var(--db-radius-sm, 6px) 0 0;
+	transition: background var(--nand-duration-fast) var(--nand-ease), opacity var(--nand-duration-fast) var(--nand-ease);
+}
+.dashboard-media-group-header:hover { background: var(--db-bg-hover, rgba(255, 255, 255, 0.05)); }
+.dashboard-media-group-chevron {
+	display: flex;
+	color: var(--db-text-faint, var(--text-faint));
+	flex-shrink: 0;
+}
+.dashboard-media-group-chevron svg { width: 12px; height: 12px; }
+.dashboard-media-group-name {
+	font-size: 0.75em;
+	font-weight: 600;
+	color: var(--db-text, var(--text-normal));
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+.dashboard-media-group-count {
+	margin-left: auto;
+	flex-shrink: 0;
+	min-width: 20px;
+	padding: 0 8px;
+	border-radius: 999px;
+	background: var(--db-bg-hover, rgba(255, 255, 255, 0.06));
+	color: var(--db-text-muted, var(--text-muted));
+	font-size: 0.625em;
+	font-weight: 600;
+	line-height: 18px;
+	text-align: center;
+	font-variant-numeric: tabular-nums;
+}
+.dashboard-media-group-header.is-collapsed { opacity: 0.75; }
+.dashboard-media-group-body.is-hidden { display: none; }
+.dashboard-media-area .dashboard-media-group-header:first-child { margin-top: 0; }
+/* The empty-state min-height applies to the flat wall; grouped mode sizes by content. */
+.dashboard-media-area:has(.dashboard-media-group-header) { min-height: 0; }
+
+.dashboard-media-grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+	gap: 8px;
+}
+.dashboard-media-grid--small {
+	grid-template-columns: repeat(auto-fill, minmax(92px, 1fr));
+	gap: 6px;
+}
+.dashboard-media-grid--large {
+	grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+	gap: 10px;
+}
+
+/* Media tile: rounded thumbnail card. The image fills edge-to-edge (the
+   tile clips it to the card radius); a hairline inner ring keeps light
+   photos from dissolving into light themes. Hover lifts one tier (accent-
+   tinted border + theme shadow) and gently zooms the image inside the clip —
+   the tile itself never moves. */
+.dashboard-media-item {
+	position: relative;
+	aspect-ratio: 1 / 1;
+	border-radius: var(--db-radius-md, 10px);
+	overflow: hidden;
+	isolation: isolate;
+	background: var(--db-bg-card, rgba(255, 255, 255, 0.04));
+	border: 1px solid var(--db-border-card, rgba(255, 255, 255, 0.08));
+	cursor: pointer;
+	transition: border-color var(--nand-duration) var(--nand-ease), box-shadow var(--nand-duration) var(--nand-ease);
+}
+
+.dashboard-media-item:hover {
+	border-color: color-mix(in srgb, var(--db-accent, var(--interactive-accent)) 55%, var(--db-border-card, transparent));
+	box-shadow: var(--db-shadow-card, var(--shadow-s));
+}
+
+.dashboard-media-item:focus-visible {
+	outline: 2px solid var(--db-accent, var(--interactive-accent));
+	outline-offset: 2px;
+}
+
+.dashboard-media-thumb {
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+	display: block;
+	background: var(--db-bg-card-hover, rgba(0, 0, 0, 0.2));
+	transition: transform var(--nand-duration) var(--nand-ease);
+}
+
+.dashboard-media-item:hover .dashboard-media-thumb {
+	transform: scale(1.03);
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.dashboard-media-thumb,
+	.dashboard-media-item:hover .dashboard-media-thumb {
+		transition: none;
+		transform: none;
+	}
+}
+
+.dashboard-media-thumb--broken {
+	background: var(--db-bg-card-hover, rgba(255, 255, 255, 0.06));
+}
+
+/* Static placeholder for video tiles (mobile always; desktop until the lazy
+   <video> mounts). Avoids creating a media decoder per thumbnail. */
+.dashboard-media-thumb--video-placeholder {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	background: var(--db-bg-card-hover, rgba(0, 0, 0, 0.25));
+	color: var(--db-text-muted, rgba(255, 255, 255, 0.55));
+}
+.dashboard-media-thumb-icon svg {
+	width: 30%;
+	height: 30%;
+	opacity: 0.7;
+}
+/* Overlay chrome over imagery: scrim + inverse text work in every theme
+   because they sit on the photo, not on the theme surface. */
+.dashboard-media-size-badge {
+	position: absolute;
+	right: 6px;
+	bottom: 6px;
+	padding: 1px 6px;
+	font-size: 0.625em;
+	line-height: 1.4;
+	font-variant-numeric: tabular-nums;
+	border-radius: 999px;
+	color: rgba(255, 255, 255, 0.95);
+	background: rgba(0, 0, 0, 0.5);
+	backdrop-filter: blur(6px);
+	-webkit-backdrop-filter: blur(6px);
+	pointer-events: none;
+}
+/* Once a real <video> is lazily mounted into a tile, hide its placeholder. */
+.dashboard-media-video-frame.is-video-mounted > .dashboard-media-thumb--video-placeholder {
+	display: none;
+}
+/* Size badge hidden inside the tiny list-view thumb (40x40) */
+.dashboard-media-list-thumb .dashboard-media-size-badge { display: none; }
+
+/* Caption over the photo: always light text on a dark scrim. (Was
+   --db-text, which went dark-on-dark in the light themes.) */
+.dashboard-media-name {
+	position: absolute;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	padding: 18px 10px 7px;
+	font-size: 0.6875em;
+	font-weight: 500;
+	line-height: 1.25;
+	color: rgba(255, 255, 255, 0.96);
+	text-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
+	background: linear-gradient(to top, rgba(0, 0, 0, 0.66), rgba(0, 0, 0, 0.18) 70%, transparent);
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	pointer-events: none;
+}
+
+.dashboard-media-play {
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%, -50%);
+	width: 38px;
+	height: 38px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	border-radius: 50%;
+	background: rgba(0, 0, 0, 0.45);
+	border: 1px solid rgba(255, 255, 255, 0.28);
+	backdrop-filter: blur(8px);
+	-webkit-backdrop-filter: blur(8px);
+	color: rgba(255, 255, 255, 0.96);
+	pointer-events: none;
+}
+
+.dashboard-media-play svg {
+	width: 18px;
+	height: 18px;
+}
+
+/* Grid delete button (top-left of thumbnail, mirrors qa-remove positioning) */
+/* Tile overlay buttons (delete + tag): frosted glass discs on the photo,
+   revealed on hover/focus. They share .dashboard-qa-remove on the delete
+   path, so the rules are qualified by the tile to win its base styles. */
+.dashboard-media-delete {
+	position: absolute;
+	top: 6px;
+	left: 6px;
+	width: 24px;
+	height: 24px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	border: 1px solid rgba(255, 255, 255, 0.22);
+	border-radius: 50%;
+	background: rgba(0, 0, 0, 0.45);
+	backdrop-filter: blur(8px);
+	-webkit-backdrop-filter: blur(8px);
+	color: rgba(255, 255, 255, 0.96);
+	padding: 0;
+	min-height: 0;
+	opacity: 0;
+	transition: opacity var(--nand-duration-fast) var(--nand-ease), background var(--nand-duration-fast) var(--nand-ease);
+	z-index: 2;
+}
+.dashboard-media-delete svg { width: 12px; height: 12px; }
+.dashboard-media-item:hover .dashboard-media-delete,
+.dashboard-media-item:focus-within .dashboard-media-delete { opacity: 1; }
+.dashboard-media-item .dashboard-media-delete:focus-visible {
+	outline: 2px solid rgba(255, 255, 255, 0.9);
+	outline-offset: 1px;
+}
+.dashboard-media-item .dashboard-media-delete:hover {
+	background: color-mix(in srgb, var(--db-danger, var(--color-red)) 85%, transparent);
+	border-color: transparent;
+}
+
+/* List view: 56px rows (40px thumb + 8px inset), hairline card per row. */
+.dashboard-media-list { display: flex; flex-direction: column; gap: 6px; }
+.dashboard-media-list-row {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	padding: 8px 10px 8px 8px;
+	border-radius: var(--db-radius-md, 10px);
+	background: var(--db-bg-card, rgba(255, 255, 255, 0.04));
+	border: 1px solid var(--db-border-card, rgba(255, 255, 255, 0.08));
+	transition: background var(--nand-duration-fast) var(--nand-ease), border-color var(--nand-duration-fast) var(--nand-ease);
+}
+.dashboard-media-list-row:hover {
+	background: var(--db-bg-card-hover, rgba(255, 255, 255, 0.08));
+	border-color: color-mix(in srgb, var(--db-accent, var(--interactive-accent)) 30%, var(--db-border-card, transparent));
+}
+.dashboard-media-list-thumb {
+	width: 40px;
+	height: 40px;
+	flex-shrink: 0;
+	/* Nested inside the row: row radius minus the 8px inset. */
+	border-radius: max(4px, calc(var(--db-radius-md, 10px) - 4px));
+	overflow: hidden;
+	background: var(--db-bg-card-hover, rgba(0, 0, 0, 0.2));
+	cursor: pointer;
+	transition: box-shadow var(--nand-duration-fast) var(--nand-ease);
+}
+.dashboard-media-list-thumb video { width: 100%; height: 100%; object-fit: cover; }
+.dashboard-media-list-thumb:hover { box-shadow: 0 0 0 2px var(--db-accent, var(--interactive-accent)); }
+.dashboard-media-list-info { flex: 1; min-width: 0; }
+.dashboard-media-list-name {
+	font-size: 0.8125em;
+	font-weight: 600;
+	color: var(--db-text, var(--text-normal));
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	cursor: text;
+}
+.dashboard-media-list-name.dashboard-media-table-name-cell:hover {
+	color: var(--db-accent, var(--interactive-accent));
+}
+.dashboard-media-list-tags {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 3px;
+	margin-top: 3px;
+}
+.dashboard-media-list .dashboard-media-delete--list:hover {
+	background: color-mix(in srgb, var(--db-danger, var(--text-error)) 12%, transparent);
+	color: var(--db-danger, var(--text-error));
+}
+.dashboard-media-list-meta {
+	margin-top: 1px;
+	font-size: 0.6875em;
+	color: var(--db-text-muted, var(--text-muted));
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	font-variant-numeric: tabular-nums;
+}
+
+/* Backlink chips (list/table) */
+.dashboard-media-backlinks {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 4px;
+	margin-top: 4px;
+}
+.dashboard-media-backlink {
+	padding: 1px 8px;
+	border-radius: 999px;
+	background: var(--db-bg-hover, var(--db-bg-card-hover, rgba(255, 255, 255, 0.1)));
+	border: 1px solid color-mix(in srgb, var(--db-accent, var(--interactive-accent)) 22%, transparent);
+	color: var(--db-accent, var(--interactive-accent));
+	transition: background var(--nand-duration-fast) var(--nand-ease), color var(--nand-duration-fast) var(--nand-ease);
+	font-size: 0.625em;
+	line-height: 16px;
+	white-space: nowrap;
+	cursor: pointer;
+	max-width: 140px;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+.dashboard-media-backlink:hover {
+	background: color-mix(in srgb, var(--db-accent, var(--interactive-accent)) 16%, transparent);
+	color: var(--db-accent, var(--interactive-accent));
+}
+.dashboard-media-backlink--more {
+	background: transparent;
+	border-color: transparent;
+	color: var(--db-text-muted, var(--text-muted));
+	cursor: default;
+}
+.dashboard-media-backlink--more:hover {
+	background: transparent;
+	color: var(--db-text-muted, var(--text-muted));
+}
+.dashboard-media-no-links {
+	font-size: 0.625em;
+	color: var(--db-text-muted, var(--text-muted));
+}
+
+/* ---- Media tags ---- */
+
+/* Tile/list/table tag chips */
+.dashboard-media-tile-tags {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 4px;
+	margin-top: 4px;
+}
+
+/* On a grid tile the tag row floats over the photo (top-right), so it takes
+   the same glass treatment as the other overlay chrome. */
+.dashboard-media-item .dashboard-media-tile-tags {
+	position: absolute;
+	top: 6px;
+	right: 6px;
+	left: auto;
+	max-width: calc(100% - 72px);
+	margin: 0;
+	justify-content: flex-end;
+	pointer-events: none;
+	z-index: 1;
+}
+.dashboard-media-item .dashboard-media-tile-tag {
+	background: rgba(0, 0, 0, 0.45);
+	backdrop-filter: blur(6px);
+	-webkit-backdrop-filter: blur(6px);
+	color: rgba(255, 255, 255, 0.95);
+}
+.dashboard-media-tile-tag {
+	padding: 0 7px;
+	border-radius: 999px;
+	background: color-mix(in srgb, var(--db-accent, var(--interactive-accent)) 12%, transparent);
+	color: var(--db-accent, var(--interactive-accent));
+	font-size: 0.625em;
+	line-height: 16px;
+	white-space: nowrap;
+	max-width: 90px;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+.dashboard-media-tile-tag--more {
+	background: transparent;
+	color: var(--db-text-muted, var(--text-muted));
+}
+
+/* Grid tag button (mirrors the delete button, sits to its right) */
+.dashboard-media-tagbtn {
+	left: 34px;
+}
+.dashboard-media-tagbtn svg { width: 12px; height: 12px; }
+.dashboard-media-item .dashboard-media-tagbtn:hover {
+	background: rgba(0, 0, 0, 0.7);
+}
+/* Mobile: hover states don't exist — always show the tag button, and on
+   phones the delete button too (tablets keep the hover reveal, matching the
+   quick-link remove behavior this tile used to borrow). */
+body.is-mobile .dashboard-media-item .dashboard-media-tagbtn { opacity: 1; }
+body.is-mobile:not(.is-tablet) .dashboard-media-item .dashboard-media-delete--grid { opacity: 1; }
+
+/* Unified neutral icon button for list rows and the table's op column
+   (open / delete / tag): same 26x26 box, same icon size, so the pairs
+   always render consistently. */
+.dashboard-media-icon-btn {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	flex-shrink: 0;
+	width: 28px;
+	height: 28px;
+	padding: 0;
+	min-height: 0;
+	border: none;
+	border-radius: var(--db-radius-sm, 6px);
+	background: transparent;
+	box-shadow: none;
+	color: var(--db-text-muted, var(--text-muted));
+	cursor: pointer;
+	transition: background var(--nand-duration-fast) var(--nand-ease), color var(--nand-duration-fast) var(--nand-ease);
+}
+.dashboard-media-icon-btn svg { width: 14px; height: 14px; display: block; }
+.dashboard-media-icon-btn:hover {
+	background: var(--db-bg-hover, var(--db-bg-card-hover, rgba(255, 255, 255, 0.1)));
+	color: var(--db-text, var(--text-normal));
+}
+.dashboard-media-icon-btn:focus-visible {
+	outline: 2px solid var(--db-accent, var(--interactive-accent));
+	outline-offset: 1px;
+}
+@media (pointer: coarse) {
+	.dashboard-media-icon-btn { width: 40px; height: 40px; }
+}
+
+/* Lightbox tag bar — sits below the caption (media above, tags under it),
+   wrapping onto multiple rows when the pills don't fit one line. */
+.dashboard-media-lightbox-tags {
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: center;
+	align-items: center;
+	gap: 6px;
+	margin-top: 8px;
+	max-width: min(720px, 86vw);
+	padding: 0 16px;
+}
+/* Lightbox chips: frosted pills on the dark stage (inverse text is fixed
+   because the stage is always dark, whatever the theme). */
+.dashboard-media-lightbox-tag {
+	padding: 3px 12px;
+	border: 1px solid rgba(255, 255, 255, 0.14);
+	border-radius: 999px;
+	background: rgba(255, 255, 255, 0.10);
+	backdrop-filter: blur(10px);
+	-webkit-backdrop-filter: blur(10px);
+	color: rgba(255, 255, 255, 0.92);
+	font-size: 0.75em;
+	line-height: 18px;
+	white-space: nowrap;
+	max-width: 160px;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+.dashboard-media-lightbox-tag--add {
+	display: inline-flex;
+	align-items: center;
+	gap: 4px;
+	border: 1px dashed rgba(255, 255, 255, 0.45);
+	background: transparent;
+	cursor: pointer;
+	color: rgba(255, 255, 255, 0.92);
+	transition: background var(--nand-duration-fast) var(--nand-ease), border-color var(--nand-duration-fast) var(--nand-ease);
+}
+.dashboard-media-lightbox-tag--add:hover {
+	background: rgba(255, 255, 255, 0.16);
+	border-color: rgba(255, 255, 255, 0.7);
+}
+.dashboard-media-lightbox-tag-icon { display: inline-flex; align-items: center; }
+.dashboard-media-lightbox-tag-icon svg { width: 11px; height: 11px; }
+
+/* Tag edit modal */
+.dashboard-media-tagedit-path {
+	font-size: 0.6875em;
+	color: var(--db-text-muted, var(--text-muted));
+	margin-top: -6px;
+	margin-bottom: 10px;
+	word-break: break-all;
+}
+.dashboard-media-tagedit-chips {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 6px;
+	margin: 6px 0;
+}
+.dashboard-media-tagedit-chip {
+	display: inline-flex;
+	align-items: center;
+	gap: 4px;
+	height: 26px;
+	box-sizing: border-box;
+	padding: 0 6px 0 12px;
+	border: 1px solid color-mix(in srgb, var(--db-accent, var(--interactive-accent)) 26%, transparent);
+	border-radius: 999px;
+	background: color-mix(in srgb, var(--db-accent, var(--interactive-accent)) 12%, transparent);
+	color: var(--db-accent, var(--interactive-accent));
+	font-size: 0.75em;
+	font-weight: 500;
+}
+.dashboard-media-tagedit-chip-x {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 16px;
+	height: 16px;
+	border-radius: 50%;
+	cursor: pointer;
+	font-weight: 700;
+	line-height: 1;
+	color: var(--db-text-muted, var(--text-muted));
+	transition: background var(--nand-duration-fast) var(--nand-ease), color var(--nand-duration-fast) var(--nand-ease);
+}
+.dashboard-media-tagedit-chip-x:hover {
+	color: var(--db-danger, var(--text-error));
+	background: color-mix(in srgb, var(--db-danger, var(--text-error)) 14%, transparent);
+}
+.dashboard-media-tagedit-add { margin-top: 6px; }
+.dashboard-media-tagedit-pick {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 6px;
+	margin: 6px 0;
+}
+
+/* Media filter popup inputs (reuses library filter-popup shell) */
+.dashboard-media-filter-dates { display: flex; gap: 6px; flex-wrap: wrap; }
+.dashboard-media-filter-date {
+	height: 28px;
+	box-sizing: border-box;
+	padding: 0 6px;
+	font-variant-numeric: tabular-nums;
+	border: 1px solid var(--db-border-input, rgba(255, 255, 255, 0.08));
+	border-radius: var(--db-radius-sm, 6px);
+	background: var(--db-bg-card, rgba(255, 255, 255, 0.06));
+	color: var(--db-text, var(--text-normal));
+	font-size: 0.75em;
+	outline: none;
+}
+.dashboard-media-filter-folder {
+	width: 100%;
+	box-sizing: border-box;
+	margin-top: 4px;
+	height: 28px;
+	padding: 0 8px;
+	border: 1px solid var(--db-border-input, rgba(255, 255, 255, 0.08));
+	border-radius: var(--db-radius-sm, 6px);
+	background: var(--db-bg-card, rgba(255, 255, 255, 0.06));
+	color: var(--db-text, var(--text-normal));
+	font-size: 0.75em;
+	outline: none;
+}
+.dashboard-media-folder-input-row {
+	display: flex;
+	gap: 6px;
+	align-items: center;
+	margin-top: 4px;
+}
+.dashboard-media-folder-input-row .dashboard-media-filter-folder {
+	flex: 1;
+	min-width: 0;
+	width: auto;
+	margin-top: 0;
+}
+.dashboard-media-folder-browse {
+	flex-shrink: 0;
+	height: 28px;
+	box-sizing: border-box;
+	padding: 0 10px;
+	border: 1px solid var(--db-border-input, rgba(255, 255, 255, 0.08));
+	border-radius: var(--db-radius-sm, 6px);
+	background: var(--db-bg-card, rgba(255, 255, 255, 0.06));
+	box-shadow: none;
+	color: var(--db-text, var(--text-normal));
+	font-size: 0.75em;
+	cursor: pointer;
+}
+.dashboard-media-folder-browse:hover {
+	background: var(--db-bg-card-hover, rgba(255, 255, 255, 0.12));
+}
+

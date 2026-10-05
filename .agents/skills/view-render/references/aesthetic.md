@@ -1,6 +1,6 @@
 # Visual scale, primitives and libraries
 
-A rendered leaf looks like the rest of Obsidian and like every other NAND product. Color comes from the app's CSS variables, so community themes still win. Geometry, motion and the shared building blocks come from the NAND design foundation at the top of `styles.css`. Do not bring a second design system.
+A rendered leaf looks like the rest of Obsidian and like every other NAND product. Color comes from the app's CSS variables, so community themes still win. Geometry, motion and the shared building blocks come from the NAND design foundation, the first file in `src/view/styles/order.json`. Do not bring a second design system.
 
 Touch targets, focus rings, `!important`, and `:has` stay in `../../dev/references/obsidian-api.md`. Class prefixes stay in that skill's architecture reference: use the prefix the product already has. This file owns the leaf scale, the shared primitives and the library list. The directories for the files are the tree in `../SKILL.md`.
 
@@ -63,7 +63,7 @@ A generic primitive that more than one product needs goes into the foundation bl
 
 The board (`.nand-dashboard-root[data-theme]`) keeps its thirteen palettes. Inside the board, color comes from `--db-*` tokens, never from `--nand-surface*`. Geometry follows the same family through the theme's `--db-radius-sm` / `-md` / `-lg` (floor 6 / 10 / 12). Motion and pill radius may use the `--nand-*` tokens. Per-theme component overrides read `var(--db-accent)` and friends instead of repeating a palette hex. Body text on a card stays at or above 4.5:1 and muted text at 3:1 in both light and dark. Check new palette values against the painted card, not the token alone.
 
-Editor, contacts, automation, workbench, inbox and settings UI must not depend on `--db-*`; they must look right with the board unmounted.
+Editor, contacts, automation, workbench, inbox and settings UI must not depend on `--db-*`; they must look right with the board unmounted. Workbench body, helper, and placeholder text target 4.5:1. Do not relax that to 3:1 because a style is named muted.
 
 ## Density
 

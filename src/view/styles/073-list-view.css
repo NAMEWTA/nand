@@ -1,0 +1,57 @@
+/* ===== List View ===== */
+.dashboard-library-list {
+	display: flex;
+	flex-direction: column;
+	gap: 2px;
+}
+
+/* List rows (library + dataview): 36px rows, control radius, hover tint. */
+.dashboard-library-list-item {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	min-height: 36px;
+	box-sizing: border-box;
+	padding: 6px 10px;
+	border-radius: var(--db-radius-sm, 6px);
+	cursor: pointer;
+	transition: background var(--nand-duration-fast) var(--nand-ease);
+}
+
+.dashboard-library-list-item:hover {
+	background: var(--db-bg-hover, var(--db-bg-card-hover, rgba(255, 255, 255, 0.10)));
+}
+
+.dashboard-library-list-name {
+	font-size: 0.8125em;
+	font-weight: 500;
+	color: var(--db-text, var(--text-normal));
+	flex-shrink: 1;
+	min-width: 0;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.dashboard-library-list-props {
+	font-size: 0.6875em;
+	color: var(--db-text-muted, var(--text-muted));
+	flex: 1;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.dashboard-library-list-spacer {
+	flex: 1;
+	min-width: 20px;
+}
+
+.dashboard-library-list-date {
+	font-size: 0.6875em;
+	color: var(--db-text-muted, var(--text-muted));
+	white-space: nowrap;
+	flex-shrink: 0;
+	font-variant-numeric: tabular-nums;
+}
+

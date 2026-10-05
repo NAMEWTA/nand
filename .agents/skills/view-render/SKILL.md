@@ -35,10 +35,11 @@ src/core/<domain>/             models, application rules and ports
 src/platform/<host>/<domain>/  native/Vault/desktop adapters
 src/plugin/modules/           native registration and assembly
 src/plugin/workflows/         cross-domain coordination
-styles.css                    the one root stylesheet
+src/view/styles/              ordered author sources; order.json is the sequence
+styles.css                    the one emitted root stylesheet
 ```
 
-Compose panels in code using props and slots, as `view/terminal/TerminalWorkbench.tsx` does. A panel takes state and actions, not the plugin class or an ItemView implementation. Do not add a router, a service container, an end-user workbench configuration format or package publishing. The dev architecture reference owns dependency directions.
+Compose panels in code using props and slots, as `view/terminal/TerminalWorkbench.tsx` does. A panel takes state and actions, not the plugin class or an ItemView implementation. Do not add a router, a service container, an end-user workbench configuration format or package publishing. Workbench navigation is a page slot inside `WorkbenchShell`, not a second router. The dev architecture reference owns dependency directions. The emitted stylesheet remains the one root `styles.css`.
 
 ## Read before editing
 

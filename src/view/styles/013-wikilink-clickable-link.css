@@ -1,0 +1,12 @@
+/* ===== Wikilink (clickable [[link]]) ===== */
+.dashboard-wikilink {
+	color: var(--db-accent, #6366f1);
+	cursor: pointer;
+	text-decoration: none;
+	border-bottom: 1px dotted currentColor;
+}
+
+.dashboard-wikilink:hover {
+	color: var(--db-accent-light, #818cf8);
+}
+

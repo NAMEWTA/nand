@@ -13,9 +13,9 @@ import { createDashboardSettingsAccess } from '../settings-access';
 import { showConfirmDialog } from '../ui/confirm-dialog';
 import { getRecentDocs, renderRecentDocs } from '../ui/recent';
 import { renderSidebarLunarWidget } from '../widgets/lunar-widget';
-import type { DashboardView } from './dashboard-view';
+import type { DashboardSurface } from './dashboard-surface';
 
-export function renderMobileActions(this: DashboardView, bannerEl: HTMLElement): void {
+export function renderMobileActions(this: DashboardSurface, bannerEl: HTMLElement): void {
 	const actions = bannerEl.createDiv({ cls: 'dashboard-mobile-actions' });
 
 	const linksBtn = actions.createEl('button', {
@@ -54,7 +54,7 @@ export function renderMobileActions(this: DashboardView, bannerEl: HTMLElement):
 	}
 }
 
-export function renderMobileWidgetBar(this: DashboardView, container: HTMLElement): void {
+export function renderMobileWidgetBar(this: DashboardSurface, container: HTMLElement): void {
 	this.mobileWidgetTabsOpen = false;
 	this.mobileWidgetExpanded = null;
 
@@ -119,7 +119,7 @@ export function renderMobileWidgetBar(this: DashboardView, container: HTMLElemen
 	this.refreshMobileWidgetPanel(bar);
 }
 
-export function refreshMobileWidgetPanel(this: DashboardView, bar: HTMLElement): void {
+export function refreshMobileWidgetPanel(this: DashboardSurface, bar: HTMLElement): void {
 	const strip = bar.querySelector('.dashboard-mobile-widget-strip');
 	const tabs = bar.querySelector('.dashboard-mobile-widget-tabs');
 	const panel = bar.querySelector<HTMLElement>('.dashboard-mobile-widget-panel');
@@ -172,10 +172,10 @@ export function refreshMobileWidgetPanel(this: DashboardView, bar: HTMLElement):
 	}
 }
 
-export function openMobileDrawer(this: DashboardView, type: 'quickActions' | 'recent'): void {
+export function openMobileDrawer(this: DashboardSurface, type: 'quickActions' | 'recent'): void {
 	this.closeMobileDrawer();
 
-	const root = this.containerEl.children[1] as HTMLElement;
+	const root = this.contentEl;
 	if (!root) return;
 
 	const firstSection = root.querySelector('.dashboard-section-row') as HTMLElement;
@@ -243,8 +243,8 @@ export function openMobileDrawer(this: DashboardView, type: 'quickActions' | 're
 	});
 }
 
-export function closeMobileDrawer(this: DashboardView): void {
-	const root = this.containerEl.children[1] as HTMLElement;
+export function closeMobileDrawer(this: DashboardSurface): void {
+	const root = this.contentEl;
 	if (!root) return;
 	const existing = root.querySelector('.dashboard-mobile-drawer');
 	if (existing) { unmountDashboardPanelsIn(existing as HTMLElement); existing.remove(); }

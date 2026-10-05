@@ -1,0 +1,7 @@
+/* ===== Chart.js Canvas Base ===== */
+.dashboard-chart-canvas {
+	display: block;
+	width: 100% !important;
+	max-width: 100%;
+}
+

@@ -1,0 +1,277 @@
+/* ===== Library Config Modal ===== */
+.dashboard-library-config-modal {
+	padding: 0;
+}
+
+/* Section cards: the shared card surface (tint + hairline + 12px padding)
+   lives with the board modal shell; here only the rhythm between groups
+   (12px, twice the 6px gap inside a group) and the heading hierarchy. */
+.dashboard-library-config-section {
+	margin-bottom: 12px;
+}
+
+.dashboard-library-config-section:last-child {
+	margin-bottom: 0;
+}
+
+.dashboard-library-config-section-title {
+	font-size: 0.8125em;
+	font-weight: 600;
+	color: var(--db-text, var(--text-normal));
+	margin-bottom: 8px;
+	line-height: 1.35;
+}
+
+.dashboard-library-config-filters {
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+}
+
+.dashboard-library-config-inline-row {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	margin-top: 6px;
+}
+
+.dashboard-library-config-inline-label {
+	font-size: 0.75em;
+	color: var(--db-text, var(--text-normal));
+}
+
+.dashboard-library-config-checkbox {
+	margin: 0;
+	cursor: pointer;
+}
+
+.dashboard-library-config-number {
+	width: 64px;
+	/* Explicit height: Obsidian's app.css inflates native number inputs past
+	   the compact select/text controls these sit beside in the config modals. */
+	height: 26px;
+	padding: 0 6px;
+	box-sizing: border-box;
+	font-size: 0.75em;
+	background: var(--db-bg-input, var(--background-modifier-form-field));
+	border: 1px solid var(--db-border-card, var(--background-modifier-border));
+	border-radius: var(--db-radius-sm, 6px);
+	color: var(--db-text, var(--text-normal));
+}
+
+.dashboard-library-filter-row {
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+	padding: 10px;
+	background: var(--db-bg-input, rgba(255, 255, 255, 0.05));
+	border-radius: var(--db-radius-md, 10px);
+	border: 1px solid var(--db-border, rgba(255, 255, 255, 0.08));
+}
+
+.dashboard-library-filter-header {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+}
+
+.dashboard-library-filter-header .dashboard-library-filter-property {
+	max-width: 160px;
+	flex-shrink: 0;
+}
+
+.dashboard-library-filter-header .dashboard-library-value-search {
+	flex: 1;
+	min-width: 0;
+	margin-bottom: 0;
+}
+
+.dashboard-library-filter-header .dashboard-library-filter-remove {
+	flex-shrink: 0;
+}
+
+.dashboard-library-filter-property {
+	height: 28px;
+	box-sizing: border-box;
+	padding: 0 8px;
+	border: 1px solid var(--db-border-input, rgba(255, 255, 255, 0.08));
+	border-radius: var(--db-radius-sm, 6px);
+	background: var(--db-bg-card, rgba(255, 255, 255, 0.06));
+	color: var(--db-text, var(--text-normal));
+	font-size: 0.75em;
+	font-family: var(--db-font, var(--font-interface));
+	outline: none;
+	max-width: 200px;
+}
+
+.dashboard-library-filter-property:focus {
+	border-color: var(--db-border-input-focus, var(--interactive-accent));
+}
+
+/* Operator select (equals / contains / not equals): same input skin as the
+   property select, but compact — it shares a row with the property select,
+   the value search box and the remove button. */
+.dashboard-library-filter-operator {
+	flex-shrink: 0;
+	max-width: 96px;
+	height: 28px;
+	box-sizing: border-box;
+	padding: 0 6px;
+	border: 1px solid var(--db-border-input, rgba(255, 255, 255, 0.08));
+	border-radius: var(--db-radius-sm, 6px);
+	background: var(--db-bg-card, rgba(255, 255, 255, 0.06));
+	color: var(--db-text, var(--text-normal));
+	font-size: 0.75em;
+	font-family: var(--db-font, var(--font-interface));
+	outline: none;
+}
+
+.dashboard-library-filter-operator:focus {
+	border-color: var(--db-border-input-focus, var(--interactive-accent));
+}
+
+.dashboard-folder-input-row {
+	display: flex;
+	gap: 8px;
+	align-items: center;
+}
+
+.dashboard-folder-path-input {
+	flex: 1;
+	min-width: 0;
+	height: 30px;
+	box-sizing: border-box;
+	padding: 0 10px;
+	border: 1px solid var(--db-border-input, rgba(255, 255, 255, 0.08));
+	border-radius: var(--db-radius-sm, 6px);
+	background: var(--db-bg-card, rgba(255, 255, 255, 0.06));
+	color: var(--db-text, var(--text-normal));
+	font-size: 0.8125em;
+	font-family: var(--db-font, var(--font-interface));
+	outline: none;
+}
+
+.dashboard-folder-path-input:focus {
+	border-color: var(--db-border-input-focus, var(--interactive-accent));
+}
+
+.dashboard-folder-browse-btn {
+	flex-shrink: 0;
+	height: 30px;
+	box-sizing: border-box;
+	padding: 0 12px;
+	border: 1px solid var(--db-border-input, rgba(255, 255, 255, 0.08));
+	border-radius: var(--db-radius-sm, 6px);
+	background: var(--db-bg-card, rgba(255, 255, 255, 0.06));
+	box-shadow: none;
+	color: var(--db-text, var(--text-normal));
+	font-size: 0.75em;
+	font-family: var(--db-font, var(--font-interface));
+	cursor: pointer;
+	transition: background var(--nand-duration-fast) var(--nand-ease), border-color var(--nand-duration-fast) var(--nand-ease);
+}
+
+.dashboard-folder-browse-btn:hover {
+	background: var(--db-bg-card-hover, rgba(255, 255, 255, 0.12));
+	border-color: color-mix(in srgb, var(--db-accent, var(--interactive-accent)) 40%, transparent);
+}
+
+/* Tag-filter search (folder config modal): capped at the toolbar search
+   width instead of stretching full-row, with breathing room before chips. */
+.dashboard-library-tag-search-row {
+	margin-bottom: 8px;
+}
+
+.dashboard-library-tag-search {
+	max-width: 240px;
+}
+
+.dashboard-library-filter-values {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 4px;
+	max-height: 120px;
+	overflow-y: auto;
+}
+
+/* Value / tag chips (library config, media filter): neutral pills; the
+   selected state is accent-soft fill + accent border + accent text (library
+   uses .active, the media filter popup uses .selected). */
+.dashboard-library-filter-chip {
+	display: inline-flex;
+	align-items: center;
+	min-height: 22px;
+	box-sizing: border-box;
+	padding: 0 10px;
+	border-radius: 999px;
+	font-size: 0.6875em;
+	background: var(--db-bg-hover, var(--db-bg-btn, rgba(139, 92, 246, 0.10)));
+	color: var(--db-text-muted, var(--text-muted));
+	cursor: pointer;
+	transition: background var(--nand-duration-fast) var(--nand-ease), border-color var(--nand-duration-fast) var(--nand-ease), color var(--nand-duration-fast) var(--nand-ease);
+	border: 1px solid transparent;
+}
+
+.dashboard-library-filter-chip:hover {
+	color: var(--db-text, var(--text-normal));
+	border-color: color-mix(in srgb, var(--db-accent, var(--interactive-accent)) 40%, transparent);
+}
+
+.dashboard-library-filter-chip.active,
+.dashboard-library-filter-chip.selected {
+	background: color-mix(in srgb, var(--db-accent, var(--interactive-accent)) 14%, transparent);
+	color: var(--db-accent, var(--interactive-accent));
+	border-color: color-mix(in srgb, var(--db-accent, var(--interactive-accent)) 55%, transparent);
+	font-weight: 600;
+}
+
+.dashboard-library-filter-more,
+.dashboard-library-filter-empty {
+	font-size: 0.6875em;
+	color: var(--db-text-muted, var(--text-muted));
+	padding: 2px 4px;
+}
+
+.dashboard-library-filter-remove {
+	align-self: flex-end;
+	justify-content: center;
+	width: 28px;
+	height: 28px;
+	padding: 0;
+	border: none;
+	background: none;
+	box-shadow: none;
+	color: var(--db-text-muted, var(--text-muted));
+	cursor: pointer;
+	border-radius: var(--db-radius-sm, 6px);
+	display: flex;
+	align-items: center;
+	transition: background var(--nand-duration-fast) var(--nand-ease), color var(--nand-duration-fast) var(--nand-ease);
+}
+
+.dashboard-library-filter-remove:hover {
+	color: var(--db-danger, var(--text-error));
+	background: color-mix(in srgb, var(--db-danger, var(--text-error)) 12%, transparent);
+}
+
+.dashboard-library-add-filter-btn {
+	margin-top: 8px;
+	height: 30px;
+	box-sizing: border-box;
+	padding: 0 12px;
+	box-shadow: none;
+	border: 1px dashed var(--db-border, rgba(255, 255, 255, 0.15));
+	border-radius: var(--db-radius-sm, 6px);
+	background: transparent;
+	color: var(--db-text-muted, var(--text-muted));
+	cursor: pointer;
+	font-size: 0.75em;
+	font-family: var(--db-font, var(--font-interface));
+	transition: background 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease, color 0.15s ease, transform 0.15s ease;
+}
+
+.dashboard-library-add-filter-btn:hover {
+	border-color: var(--db-accent, var(--interactive-accent));
+	color: var(--db-accent, var(--interactive-accent));
+}
+

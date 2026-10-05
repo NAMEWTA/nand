@@ -21,9 +21,9 @@ import { QuickNoteConfigModal } from '../notes/quick-note-config-modal';
 import { captureThought, createNoteFromPreset, openPinnedNote, openTodayNote } from '../notes/quick-note-section';
 import { createDashboardSettingsAccess } from '../settings-access';
 import { showConfirmDialog } from '../ui/confirm-dialog';
-import type { DashboardView } from './dashboard-view';
+import type { DashboardSurface } from './dashboard-surface';
 
-export function createCallbacks(this: DashboardView) {
+export function createCallbacks(this: DashboardSurface) {
 	return guardDashboardCallbacks({
 		onOpenWeb: (url: string, target: 'modal' | 'tab') => {
 			void this.plugin.openBrowser?.({ url, target });
@@ -196,7 +196,7 @@ export function createCallbacks(this: DashboardView) {
 	});
 }
 
-export function handleFileDrop(this: DashboardView, cardId: string, filePath: string): void {
+export function handleFileDrop(this: DashboardSurface, cardId: string, filePath: string): void {
 	if (!this.data) return;
 	let sectionType = 'projects';
 	let cardType = 'generic';
@@ -221,7 +221,7 @@ export function handleFileDrop(this: DashboardView, cardId: string, filePath: st
 	}
 }
 
-export async function saveMemoAsNote(this: DashboardView, card: DashboardCard): Promise<void> {
+export async function saveMemoAsNote(this: DashboardSurface, card: DashboardCard): Promise<void> {
 	try {
 		const { path, templateMissing } = await createMemoNote(this.app, {
 			folder: this.plugin.settings.memoSavePath,
@@ -237,7 +237,7 @@ export async function saveMemoAsNote(this: DashboardView, card: DashboardCard): 
 	}
 }
 
-export async function saveTasksToDaily(this: DashboardView, card: DashboardCard): Promise<void> {
+export async function saveTasksToDaily(this: DashboardSurface, card: DashboardCard): Promise<void> {
 	try {
 		if (!card.tasks || card.tasks.length === 0) {
 			new Notice(t('notice.noTasksToSave'));
@@ -277,7 +277,7 @@ export async function saveTasksToDaily(this: DashboardView, card: DashboardCard)
 	}
 }
 
-export async function archiveCompletedTasks(this: DashboardView, columnName: string): Promise<void> {
+export async function archiveCompletedTasks(this: DashboardSurface, columnName: string): Promise<void> {
 	try {
 		if (!this.data) return;
 		const column = this.data.columns.find((c) => c.name === columnName);

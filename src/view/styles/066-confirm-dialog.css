@@ -1,0 +1,311 @@
+/* ===== Confirm Dialog ===== */
+.dashboard-confirm-overlay {
+	position: fixed;
+	inset: 0;
+	z-index: 9999;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	background: rgba(0, 0, 0, 0.5);
+	backdrop-filter: blur(4px);
+	-webkit-backdrop-filter: blur(4px);
+}
+
+.dashboard-confirm-card {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	max-width: 340px;
+	width: 90%;
+	padding: 24px 28px 20px;
+	text-align: center;
+	/* Opaque theme-aware background guarantees readable text. The previous
+	   rgba(255,255,255,0.06) glass relied entirely on backdrop-filter and became
+	   an unreadable transparent card wherever blur is unavailable/disabled.
+	   --db-bg-modal is the opaque dialog surface the dark constant themes
+	   (neon/volt/magma/onyx) define; other themes keep Obsidian's surface. */
+	background: var(--db-bg-modal, var(--background-secondary, #1e1e1e));
+	border: 1px solid var(--db-border-card, var(--background-modifier-border, rgba(255, 255, 255, 0.1)));
+	border-radius: var(--db-radius-lg, 12px);
+	color: var(--db-text, var(--text-normal));
+	box-shadow: 0 8px 32px rgba(0, 0, 0, 0.35);
+}
+
+.dashboard-confirm-title {
+	margin: 0 0 8px;
+	font-size: 1.1em;
+	color: var(--db-text, var(--text-normal));
+	border-bottom: none;
+}
+
+.dashboard-confirm-message {
+	margin: 0 0 20px;
+	font-size: 0.9em;
+	color: var(--db-text-muted, var(--text-muted, var(--text-normal)));
+	line-height: 1.5;
+}
+
+.dashboard-confirm-actions {
+	display: flex;
+	gap: 10px;
+	justify-content: center;
+}
+
+.dashboard-confirm-cancel,
+.dashboard-confirm-delete {
+	padding: 7px 20px;
+	border-radius: var(--db-radius-lg);
+	font-size: 0.9em;
+	cursor: pointer;
+	transition: background 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease, color 0.15s ease, transform 0.15s ease;
+}
+
+.dashboard-confirm-cancel {
+	background: var(--db-bg-modal-raised, var(--background-modifier-hover, rgba(255, 255, 255, 0.06)));
+	border: 1px solid var(--db-border, var(--background-modifier-border, rgba(255, 255, 255, 0.10)));
+	color: var(--db-text, var(--text-normal));
+}
+
+.dashboard-confirm-cancel:hover {
+	background: var(--db-bg-hover-strong, var(--background-modifier-border-hover, var(--background-modifier-hover)));
+}
+
+.dashboard-confirm-delete {
+	background: var(--db-danger, #f43f5e);
+	border: 1px solid transparent;
+	color: var(--db-text-on-danger);
+}
+
+.dashboard-confirm-delete:hover {
+	filter: brightness(0.96);
+}
+
+.dashboard-confirm-primary {
+	background: var(--db-accent, var(--interactive-accent));
+	border: 1px solid transparent;
+	color: var(--db-text-on-accent, var(--text-on-accent));
+}
+
+.dashboard-confirm-primary:hover {
+	opacity: 0.88;
+}
+
+/* Widget Type Selector Modal */
+.widget-type-row {
+	display: flex;
+	gap: 12px;
+	padding: 16px 0;
+}
+
+.widget-type-btn {
+	flex: 1;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 8px;
+	padding: 20px 12px;
+	border-radius: var(--db-radius-md, 12px);
+	background: var(--db-bg-hover);
+	border: 2px solid transparent;
+	cursor: pointer;
+	transition: background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease, color 0.2s ease, transform 0.2s ease;
+}
+
+.widget-type-btn:hover {
+	border-color: var(--db-accent);
+	transform: translateY(-2px);
+}
+
+.widget-type-btn-icon {
+	color: var(--db-accent);
+	width: 28px;
+	height: 28px;
+}
+
+.widget-type-btn-name {
+	font-weight: 600;
+	font-size: 0.875em;
+	color: var(--db-text);
+}
+
+.widget-type-btn-desc {
+	font-size: 0.6875em;
+	color: var(--db-text-faint);
+	text-align: center;
+	line-height: 1.4;
+}
+
+/* Weather Card */
+.dashboard-weather {
+	padding: 4px 0;
+}
+
+.dashboard-weather-current {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	margin-bottom: 12px;
+}
+
+.dashboard-weather-temp-wrap {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+}
+
+.dashboard-weather-temp {
+	font-size: 2em;
+	font-weight: 700;
+	color: var(--db-accent);
+	line-height: 1;
+}
+
+.dashboard-weather-icon {
+	font-size: 1.75em;
+	line-height: 1;
+}
+
+.dashboard-weather-details {
+	display: flex;
+	flex-direction: column;
+	gap: 2px;
+}
+
+.dashboard-weather-city {
+	font-size: 0.8125em;
+	font-weight: 600;
+	color: var(--db-text);
+}
+
+.dashboard-weather-desc {
+	font-size: 0.75em;
+	color: var(--db-text-muted);
+}
+
+.dashboard-weather-wind {
+	font-size: 0.6875em;
+	color: var(--db-text-faint);
+}
+
+.dashboard-weather-forecast {
+	display: flex;
+	gap: 4px;
+	border-top: 1px solid var(--db-border);
+	padding-top: 10px;
+}
+
+.dashboard-weather-day {
+	flex: 1;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 4px;
+	padding: 4px 2px;
+	border-radius: var(--db-radius-sm);
+	transition: background 0.15s;
+}
+
+.dashboard-weather-day:hover {
+	background: var(--db-bg-hover);
+}
+
+.dashboard-weather-day-name {
+	font-size: 0.625em;
+	color: var(--db-text-faint);
+	font-weight: 500;
+}
+
+.dashboard-weather-day-icon {
+	font-size: 1em;
+	line-height: 1;
+}
+
+.dashboard-weather-day-temps {
+	font-size: 0.625em;
+	color: var(--db-text-muted);
+	white-space: nowrap;
+}
+
+.dashboard-weather-loading {
+	text-align: center;
+	padding: 24px;
+	color: var(--db-text-faint);
+	font-size: 0.8125em;
+}
+
+.dashboard-weather-error {
+	text-align: center;
+	padding: 16px;
+	color: var(--db-text-faint);
+	font-size: 0.75em;
+}
+
+/* Weather Config Modal */
+.weather-city-results {
+	margin-top: 4px;
+	max-height: 160px;
+	overflow-y: auto;
+	border-radius: var(--db-radius-md);
+}
+
+.weather-city-result-item {
+	padding: 8px 10px;
+	cursor: pointer;
+	font-size: 0.8125em;
+	color: var(--db-text);
+	border-radius: var(--db-radius-sm);
+	transition: background 0.15s;
+}
+
+.weather-city-result-item:hover {
+	background: var(--db-bg-hover);
+}
+
+.weather-coords-wrap {
+	margin-top: 8px;
+}
+
+/* Tracker Card */
+.dashboard-tracker {
+	padding: 4px 0;
+}
+
+.dashboard-tracker-sparkline {
+	display: flex;
+	justify-content: center;
+	margin-bottom: 8px;
+}
+
+.dashboard-tracker-stats {
+	display: flex;
+	gap: 8px;
+	justify-content: space-between;
+}
+
+.dashboard-tracker-stat {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 2px;
+}
+
+.dashboard-tracker-stat-label {
+	font-size: 0.625em;
+	color: var(--db-text-faint);
+	text-transform: uppercase;
+	letter-spacing: 0.5px;
+}
+
+.dashboard-tracker-stat-value {
+	font-size: 0.875em;
+	font-weight: 600;
+	color: var(--db-accent);
+}
+
+.dashboard-tracker-empty {
+	text-align: center;
+	padding: 20px;
+	color: var(--db-text-faint);
+	font-size: 0.75em;
+}
+

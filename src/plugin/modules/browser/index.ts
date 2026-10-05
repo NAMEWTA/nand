@@ -1,3 +1,4 @@
+import type { BrowserWorkbenchPort } from './workbench-port';
 import { Platform, type App } from 'obsidian';
 import {
 	BROWSER_VIEW_TYPE,
@@ -22,7 +23,10 @@ export class BrowserModule implements BrowserHost, BrowserAutomationPort {
 	private active = false;
 	private listeners = new Set<() => void>();
 	private pages = new Map<string, BrowserPage>();
-	private presentations = new Map<string, { activate: () => Promise<void>; close: () => void }>();
+	private presentations = new Map<string, { activate: () => Promise<void>; close: () => void | Promise<void>; state?: () => BrowserPageState }>();
+	private workbench?: BrowserWorkbenchPort;
+	setWorkbench(port: BrowserWorkbenchPort | undefined): void { this.workbench = port; }
+	presentationExists(id: string): boolean { return this.presentations.has(id); }
 	private modals = new Set<BrowserModal>();
 	private bridge?: BrowserBridge;
 	private bridgeReady?: Promise<BrowserBridge>;
@@ -121,7 +125,7 @@ export class BrowserModule implements BrowserHost, BrowserAutomationPort {
 			changed,
 			visited: (url, title) => this.store.record(url, title),
 			open: (url) => {
-				void this.open({ url }).catch((error: unknown) => {
+				void this.openInWindow({ url }, container.win).catch((error: unknown) => {
 					page.state.error = String(error);
 					page.emit();
 				});
@@ -134,17 +138,19 @@ export class BrowserModule implements BrowserHost, BrowserAutomationPort {
 		this.pages.get(id)?.dispose();
 		this.pages.delete(id);
 	}
-	registerPresentation(id: string, activate: () => Promise<void>, close: () => void): () => void {
-		const value = { activate, close };
+	registerPresentation(id: string, activate: () => Promise<void>, close: () => void | Promise<void>, state?: () => BrowserPageState): () => void {
+		if (this.presentations.has(id)) throw new BrowserError('browser_duplicate_page');
+		const value = { activate, close, state };
 		this.presentations.set(id, value);
 		return () => {
 			if (this.presentations.get(id) === value) this.presentations.delete(id);
 		};
 	}
-	async open(request: BrowserOpenRequest): Promise<string> {
+	open(request: BrowserOpenRequest): Promise<string> { return this.openInWindow(request); }
+	async openInWindow(request: BrowserOpenRequest, ownerWindow?: Window): Promise<string> {
 		const url = normalizeBrowserUrl(request.url ?? '', this.settings().searchEngine);
 		if (!Platform.isDesktopApp) {
-			if (url !== 'about:blank') this.app.workspace.containerEl.win.open(url, '_blank');
+			if (url !== 'about:blank') (ownerWindow ?? this.app.workspace.containerEl.win).open(url, '_blank');
 			return '';
 		}
 		if (!this.active) throw new BrowserError('browser_disabled');
@@ -165,6 +171,8 @@ export class BrowserModule implements BrowserHost, BrowserAutomationPort {
 			const modal = new BrowserModal(this, state, () => this.modals.delete(modal));
 			this.modals.add(modal);
 			modal.open();
+		} else if (this.workbench && request.target !== 'tab') {
+			await this.workbench.open(state, ownerWindow);
 		} else {
 			const leaf = this.app.workspace.getLeaf('tab');
 			await leaf.setViewState({ type: BROWSER_VIEW_TYPE, active: true, state: { ...state } });
@@ -195,6 +203,7 @@ export class BrowserModule implements BrowserHost, BrowserAutomationPort {
 		if (!this.active) throw new BrowserError('browser_disabled');
 		if (method === 'tab.list') {
 			const live = [...this.pages.values()].map((page) => ({ ...page.state }));
+			for (const state of this.workbench?.list() ?? []) if (!live.some((row) => row.id === state.id)) live.push(state);
 			for (const leaf of this.app.workspace.getLeavesOfType(BROWSER_VIEW_TYPE)) {
 				const state = leaf.getViewState().state as Partial<BrowserPageState> | undefined;
 				if (state?.id && !live.some((row) => row.id === state.id)) live.push(newPageState(state.id, state));
@@ -205,6 +214,7 @@ export class BrowserModule implements BrowserHost, BrowserAutomationPort {
 			return { page: await this.open({ url: typeof params.url === 'string' ? params.url : '' }) };
 		const id = typeof params.page === 'string' ? params.page : '';
 		if (!id) throw new BrowserError('browser_page_required');
+		if (!this.presentations.has(id)) await this.workbench?.activate(id);
 		if (!this.presentations.has(id)) {
 			const leaf = this.app.workspace
 				.getLeavesOfType(BROWSER_VIEW_TYPE)
@@ -217,7 +227,7 @@ export class BrowserModule implements BrowserHost, BrowserAutomationPort {
 		if (method === 'tab.close') {
 			const presentation = this.presentations.get(id);
 			if (!presentation) throw new BrowserError('browser_tab_not_found');
-			presentation.close();
+			await presentation.close();
 			return { closed: id };
 		}
 		await this.activate(id);
@@ -232,6 +242,7 @@ export class BrowserModule implements BrowserHost, BrowserAutomationPort {
 		this.setEnabled(false);
 		this.listeners.clear();
 		this.presentations.clear();
+		this.workbench = undefined;
 		void this.store.shutdown().catch(error => console.error('[NAND browser storage]', error));
 	}
 }

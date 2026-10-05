@@ -1,6 +1,7 @@
 import type { ModuleGates } from './settings/nav';
 
 export interface ModuleEffects {
+	before?: (flags: Readonly<ModuleGates>) => Promise<void>;
 	browser?: (enabled: boolean) => void;
 	automation: (enabled: boolean) => Promise<void>;
 	contacts: (enabled: boolean) => Promise<void>;
@@ -20,6 +21,8 @@ export class ModuleLifecycle {
 		const next = this.pending.then(async () => {
 			if (this.disposed) return;
 			const flags = { ...readFlags() };
+			await effects.before?.(flags);
+			if (this.disposed) return;
 			effects.browser?.(flags.browser);
 			// Stop owned automation work before another module can remove its runtime.
 			if (!flags.automation) await effects.automation(false);

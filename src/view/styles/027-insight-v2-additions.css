@@ -1,0 +1,597 @@
+/* ===== Insight v2 additions ===== */
+
+/* Header insight line */
+.dashboard-pomodoro-stats-header-titlewrap {
+	display: flex;
+	flex-direction: column;
+	gap: 2px;
+	min-width: 0;
+}
+
+.dashboard-pomodoro-insight {
+	font-size: 0.8em;
+	color: var(--db-text-muted);
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	max-width: 520px;
+}
+
+/* Activity filter bar */
+.dashboard-pomodoro-filterbar {
+	display: none;
+	align-items: center;
+	gap: 8px;
+	margin: 4px 0 0;
+}
+
+.dashboard-pomodoro-filterbar--visible {
+	display: flex;
+}
+
+.dashboard-pomodoro-filterbar-chip {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	background: var(--db-bg-hover);
+	border: 1px solid var(--db-border-card);
+	border-radius: 999px;
+	padding: 2px 4px 2px 10px;
+	font-size: 0.68em;
+	color: var(--db-text);
+}
+
+.dashboard-pomodoro-filterbar-clear {
+	border: none;
+	box-shadow: none;
+	background: transparent;
+	padding: 0;
+	height: auto;
+	cursor: pointer;
+	color: var(--db-text-muted);
+	display: flex;
+	padding: 2px;
+	border-radius: 50%;
+	transition: background-color var(--nand-duration) var(--nand-ease), color var(--nand-duration) var(--nand-ease);
+}
+.dashboard-pomodoro-filterbar-clear:hover {
+	color: var(--db-text);
+	background: var(--db-bg-hover);
+}
+
+/* KPI groups */
+.dashboard-pomodoro-kpi-group {
+	display: flex;
+	flex-direction: column;
+	gap: 6px;
+}
+
+.dashboard-pomodoro-kpi-group-title {
+	font-size: 0.6em;
+	font-weight: 700;
+	color: var(--db-text-faint);
+	text-transform: uppercase;
+	letter-spacing: 0.08em;
+	margin-top: 0;
+}
+
+.dashboard-pomodoro-kpi-group--hist {
+	opacity: 0.92;
+}
+
+.dashboard-pomodoro-kpi-group--hist .dashboard-pomodoro-stats-card-value {
+	font-size: 0.85em;
+}
+
+/* Hero goal card */
+.dashboard-pomodoro-kpi-hero {
+	position: relative;
+	background: var(--db-bg-hover);
+	border-radius: var(--db-radius-md, 10px);
+	padding: 12px;
+	display: flex;
+	flex-direction: column;
+	gap: 6px;
+}
+
+.dashboard-pomodoro-kpi-hero--gauge {
+	align-items: center;
+}
+
+.dashboard-pomodoro-kpi-hero-gauge {
+	display: block;
+}
+
+.dashboard-pomodoro-kpi-hero-gauge-value {
+	fill: var(--db-text);
+	font-size: 1.15em;
+	font-weight: 800;
+	font-variant-numeric: tabular-nums;
+}
+
+.dashboard-pomodoro-kpi-hero-label {
+	font-size: 0.62em;
+	color: var(--db-text-muted);
+	text-align: center;
+}
+
+/* Goal editor entry: a small pencil pinned to the hero card's top-right
+   corner (was an oversized inline button beside the "/ N" denominator that
+   pushed the centered numbers off balance). */
+.dashboard-pomodoro-kpi-hero-edit {
+	border: none;
+	box-shadow: none;
+	background: transparent;
+	padding: 0;
+	height: auto;
+	position: absolute;
+	top: 6px;
+	right: 6px;
+	width: 20px;
+	height: 20px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	cursor: pointer;
+	color: var(--db-text-faint);
+	border-radius: var(--db-radius-sm, 6px);
+	transition: color var(--nand-duration) var(--nand-ease), background-color var(--nand-duration) var(--nand-ease);
+}
+.dashboard-pomodoro-kpi-hero-edit svg { width: 11px; height: 11px; }
+.dashboard-pomodoro-kpi-hero-edit:hover {
+	color: var(--db-accent);
+	background: var(--db-bg);
+}
+
+.dashboard-pomodoro-goal-editor {
+	background: var(--db-bg-hover);
+	border: 1px solid var(--db-border-card);
+	border-radius: var(--db-radius-md, 10px);
+	padding: 8px 12px;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 8px;
+}
+
+.dashboard-pomodoro-goal-editor-label {
+	font-size: 0.68em;
+	color: var(--db-text);
+	font-weight: 600;
+}
+
+.dashboard-pomodoro-goal-editor-controls {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+}
+
+.dashboard-pomodoro-goal-editor-step {
+	border: 1px solid var(--db-border-card);
+	background: var(--db-bg-modal-raised, var(--background-primary, var(--db-bg)));
+	color: var(--db-text);
+	width: 28px;
+	height: 28px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	border-radius: var(--db-radius-sm, 6px);
+	cursor: pointer;
+	transition: border-color var(--nand-duration) var(--nand-ease), color var(--nand-duration) var(--nand-ease);
+}
+.dashboard-pomodoro-goal-editor-step:hover {
+	border-color: var(--db-accent);
+	color: var(--db-accent);
+}
+
+.dashboard-pomodoro-goal-editor-value {
+	font-size: 1em;
+	font-weight: 800;
+	color: var(--db-accent);
+	min-width: 26px;
+	text-align: center;
+	font-variant-numeric: tabular-nums;
+}
+
+/* Streak row with encouragement */
+.dashboard-pomodoro-kpi-streak {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	background: linear-gradient(135deg, rgba(231, 124, 47, 0.12), rgba(241, 196, 15, 0.08));
+	border: 1px solid rgba(231, 124, 47, 0.22);
+	border-radius: var(--db-radius-md, 10px);
+	padding: 8px 12px;
+}
+
+.dashboard-pomodoro-kpi-streak-icon {
+	color: #e67e22;
+	display: flex;
+}
+
+.dashboard-pomodoro-kpi-streak-value {
+	font-size: 1.15em;
+	font-weight: 800;
+	color: var(--db-text);
+	line-height: 1;
+	font-variant-numeric: tabular-nums;
+}
+
+.dashboard-pomodoro-kpi-streak-label {
+	font-size: 0.62em;
+	color: var(--db-text-muted);
+}
+
+.dashboard-pomodoro-kpi-streak-hint {
+	font-size: 0.62em;
+	color: #e67e22;
+	margin-left: auto;
+	text-align: right;
+	white-space: nowrap;
+}
+
+/* Card state modifiers */
+.dashboard-pomodoro-stats-card--good .dashboard-pomodoro-stats-card-value {
+	color: #2ecc71;
+}
+
+.dashboard-pomodoro-stats-card--warn .dashboard-pomodoro-stats-card-value {
+	color: #e67e22;
+}
+
+/* Goal gauge */
+.dashboard-pomodoro-gauge-value {
+	fill: var(--db-text);
+	font-size: 1.625em;
+	font-weight: 800;
+	font-variant-numeric: tabular-nums;
+}
+
+.dashboard-pomodoro-gauge-hint {
+	text-align: center;
+	font-size: 0.7em;
+	color: var(--db-text-muted);
+	margin-top: 6px;
+}
+
+.dashboard-pomodoro-gauge-hint--good {
+	color: #2ecc71;
+	font-weight: 600;
+}
+
+/* Trend goal baseline + drill-down */
+.dashboard-pomodoro-trend-goal-line {
+	stroke: var(--db-text-faint);
+	stroke-width: 1;
+	opacity: 0.7;
+}
+
+.dashboard-pomodoro-trend-goal-label {
+	fill: var(--db-text-faint);
+	font-size: 0.5625em;
+}
+
+.dashboard-pomodoro-trend-bar--clickable {
+	cursor: pointer;
+}
+
+/* Hour distribution strip */
+.dashboard-pomodoro-hour-section {
+	margin-bottom: 0;
+}
+
+.dashboard-pomodoro-hour-container {
+	display: flex;
+	align-items: flex-end;
+	gap: 2px;
+	height: 68px;
+	padding-top: 4px;
+}
+
+.dashboard-pomodoro-hour-cell {
+	flex: 1;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 2px;
+	min-width: 0;
+}
+
+.dashboard-pomodoro-hour-bar {
+	width: 100%;
+	max-width: 14px;
+	border-radius: var(--nand-radius-xs, 4px) var(--nand-radius-xs, 4px) 2px 2px;
+	background: var(--db-accent);
+	opacity: 0.55;
+	transition: opacity 0.12s;
+}
+
+.dashboard-pomodoro-hour-cell--peak .dashboard-pomodoro-hour-bar {
+	opacity: 1;
+	box-shadow: 0 0 0 1px color-mix(in srgb, var(--db-accent) 40%, transparent);
+}
+
+.dashboard-pomodoro-hour-bar--empty {
+	background: var(--db-bg-hover);
+}
+
+.dashboard-pomodoro-hour-cell:hover .dashboard-pomodoro-hour-bar {
+	opacity: 1;
+}
+
+.dashboard-pomodoro-hour-tick {
+	font-size: 0.52em;
+	color: var(--db-text-faint);
+	height: 10px;
+}
+
+/* Ranking rows clickable/active */
+.dashboard-pomodoro-rank-row {
+	cursor: pointer;
+	border-radius: var(--db-radius-sm, 6px);
+	padding: 4px 6px;
+	margin: 0 -6px 4px;
+	transition: background-color var(--nand-duration) var(--nand-ease);
+}
+
+.dashboard-pomodoro-rank-row:hover {
+	background: var(--db-bg-hover);
+}
+
+.dashboard-pomodoro-rank-row--active {
+	background: color-mix(in srgb, var(--db-accent) 10%, var(--db-bg-hover));
+	outline: 1px solid color-mix(in srgb, var(--db-accent) 60%, transparent);
+}
+
+/* Heatmap gradient + legend + empty hint */
+.dashboard-pomodoro-heatmap-wrap {
+	position: relative;
+}
+
+.dashboard-pomodoro-heatmap-legend {
+	display: flex;
+	align-items: center;
+	gap: 4px;
+	margin-top: 8px;
+	justify-content: flex-end;
+}
+
+.dashboard-pomodoro-heatmap-legend-swatch {
+	width: 10px;
+	height: 10px;
+	border-radius: 3px;
+	background: var(--db-bg-hover);
+	border: 1px solid var(--db-border-card);
+}
+
+.dashboard-pomodoro-heatmap-legend-label {
+	font-size: 0.55em;
+	color: var(--db-text-faint);
+	margin: 0 2px;
+}
+
+.dashboard-pomodoro-heatmap-empty {
+	position: absolute;
+	inset: 0;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	background: color-mix(in srgb, var(--db-bg) 55%, transparent);
+	border-radius: var(--db-radius-sm, 6px);
+	font-size: 0.7em;
+	color: var(--db-text-muted);
+	text-align: center;
+	padding: 0 12px;
+}
+
+/* Today timeline */
+.dashboard-pomodoro-timeline-container {
+	display: flex;
+	flex-direction: column;
+	max-height: 230px;
+	overflow-y: auto;
+	scrollbar-width: none;
+	-ms-overflow-style: none;
+}
+.dashboard-pomodoro-timeline-container::-webkit-scrollbar {
+	display: none;
+}
+
+.dashboard-pomodoro-timeline-item {
+	position: relative;
+	padding: 0 0 10px 0;
+	margin-left: 5px;
+	border-left: 2px solid var(--db-bg-hover);
+	padding-left: 12px;
+}
+
+.dashboard-pomodoro-timeline-item:last-child {
+	padding-bottom: 0;
+	border-left-color: transparent;
+}
+
+.dashboard-pomodoro-timeline-item::before {
+	content: '';
+	position: absolute;
+	left: -5px;
+	top: 3px;
+	width: 8px;
+	height: 8px;
+	border-radius: 50%;
+	background: var(--db-accent);
+}
+
+.dashboard-pomodoro-timeline-head {
+	display: flex;
+	align-items: center;
+	gap: 7px;
+}
+
+.dashboard-pomodoro-timeline-time {
+	font-size: 0.62em;
+	color: var(--db-text-faint);
+	width: 38px;
+	flex-shrink: 0;
+	font-variant-numeric: tabular-nums;
+}
+
+.dashboard-pomodoro-timeline-activity {
+	display: flex;
+	align-items: center;
+	gap: 5px;
+	font-size: 0.7em;
+	color: var(--db-text);
+	flex: 1;
+	min-width: 0;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.dashboard-pomodoro-timeline-activity span {
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.dashboard-pomodoro-timeline-duration {
+	font-size: 0.62em;
+	color: var(--db-text-muted);
+	flex-shrink: 0;
+	font-variant-numeric: tabular-nums;
+}
+
+.dashboard-pomodoro-timeline-done {
+	color: #2ecc71;
+	display: flex;
+	flex-shrink: 0;
+}
+
+.dashboard-pomodoro-timeline-sub {
+	display: flex;
+	align-items: center;
+	gap: 4px;
+	font-size: 0.6em;
+	color: var(--db-text-muted);
+	margin-top: 3px;
+	padding-left: 45px;
+}
+
+.dashboard-pomodoro-timeline-sub-icon {
+	display: flex;
+	opacity: 0.7;
+}
+
+.dashboard-pomodoro-timeline-interruptions {
+	color: #e67e22;
+}
+
+.dashboard-pomodoro-timeline-empty {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 10px;
+	padding: 18px 0 12px;
+}
+
+.dashboard-pomodoro-timeline-empty-text {
+	font-size: 0.7em;
+	color: var(--db-text-faint);
+}
+
+.dashboard-pomodoro-timeline-start {
+	border: none;
+	border-radius: 999px;
+	background: var(--db-accent);
+	color: var(--background-primary, #fff);
+	font-size: 0.72em;
+	font-weight: 600;
+	padding: 7px 18px;
+	cursor: pointer;
+	transition: opacity 0.15s;
+}
+.dashboard-pomodoro-timeline-start:hover {
+	opacity: 0.85;
+}
+
+/* Day drill-down floating panel */
+.dashboard-pomodoro-drilldown {
+	position: absolute;
+	top: 60px;
+	left: 50%;
+	transform: translateX(-50%);
+	width: min(420px, 90%);
+	max-height: 60%;
+	overflow-y: auto;
+	background: var(--db-bg-modal, var(--background-primary, var(--db-bg)));
+	border: 1px solid var(--db-border-card);
+	border-radius: var(--db-radius-md, 10px);
+	box-shadow: var(--nand-shadow-lg, 0 12px 40px rgba(0, 0, 0, 0.28));
+	padding: 12px 16px;
+	z-index: 10;
+}
+
+.dashboard-pomodoro-drilldown-head {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 8px;
+	margin-bottom: 8px;
+}
+
+.dashboard-pomodoro-drilldown-title {
+	font-size: 0.8em;
+	font-weight: 700;
+	color: var(--db-text);
+}
+
+.dashboard-pomodoro-stats-record-interruptions {
+	font-size: 0.6em;
+	color: #e67e22;
+	flex-shrink: 0;
+}
+
+/* Responsive fallback: below 900px VIEWPORT (phones, and narrow desktop
+   panes on old engines without container queries) collapse to one column.
+   grid-template-rows: auto is the load-bearing part — the single 1fr row
+   from the desktop layout makes the KPI column collapse to zero height and
+   its content overlap the mid column once the columns stack. */
+@media (max-width: 900px) {
+	/* Header wraps: title + close on the first line, the range toggle and
+	   settings button drop to a full-width row below (mirror of the
+	   container-query block above for engines without container queries). */
+	.dashboard-pomodoro-stats-header {
+		flex-wrap: wrap;
+	}
+
+	.dashboard-pomodoro-stats-header-titlewrap {
+		order: 1;
+		flex: 1;
+	}
+
+	.dashboard-pomodoro-stats-header .dashboard-pomodoro-stats-close {
+		order: 2;
+	}
+
+	.dashboard-pomodoro-stats-header-right {
+		order: 3;
+		flex-basis: 100%;
+		justify-content: flex-start;
+		margin-left: 0;
+	}
+
+	.dashboard-pomodoro-stats-body {
+		grid-template-columns: 1fr;
+		grid-template-rows: auto;
+	}
+
+	.dashboard-pomodoro-stats-modal--wide {
+		max-width: 420px;
+		max-height: 80vh;
+	}
+
+	.dashboard-pomodoro-donut-legend--grid {
+		grid-template-columns: 1fr;
+	}
+}
+

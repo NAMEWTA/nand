@@ -163,7 +163,8 @@ test('actual local shell emits only a count, including mixed-case reserved names
 	const command = countBrowserEnvironmentCommand(process.platform).trimEnd();
 	const shell = issueShell({ platform: process.platform, systemRoot: process.env.SystemRoot });
 	const args = [...shell.shellArgs, process.platform === 'win32' ? '-Command' : '-c', command];
-	const output = execFileSync(shell.shellType.slice('custom:'.length), args, { env: environment, encoding: 'utf8', timeout: 8000 });
+	// Cold powershell.exe on a loaded GitHub-hosted Windows runner can exceed 8s. The parent runner allows 60s for this file.
+	const output = execFileSync(shell.shellType.slice('custom:'.length), args, { env: environment, encoding: 'utf8', timeout: 20000 });
 	assert.equal(parseBrowserEnvironmentCount(output), 2); assert.doesNotMatch(output, /fixture-value-not-to-print/);
 });
 test('endpoint check rejects an accepting socket/pipe and accepts a closed one', async t => {

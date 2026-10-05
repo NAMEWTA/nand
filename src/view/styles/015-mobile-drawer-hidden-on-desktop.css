@@ -1,0 +1,13 @@
+/* ===== Mobile Drawer (hidden on desktop) ===== */
+.dashboard-mobile-actions {
+	display: none;
+}
+
+.dashboard-mobile-widget-bar {
+	display: none;
+}
+
+.dashboard-mobile-drawer {
+	display: none;
+}
+

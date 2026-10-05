@@ -28,6 +28,18 @@ export function renderHomeSettings(this: DashboardSettingTab, containerEl: HTMLE
 					}
 				});
 		});
+	new Setting(containerEl)
+		.setName(t('workbench.statusSetting')).setDesc(t('workbench.statusSettingDesc'))
+		.addDropdown((dropdown) => {
+			dropdown.addOptions({ automatic: t('workbench.statusAutomatic'), hidden: t('workbench.statusHidden') })
+				.setValue(this.plugin.settings.workbenchStatus ?? 'automatic').onChange(async (value) => {
+					const previous = this.plugin.settings.workbenchStatus;
+					dropdown.setDisabled(true);
+					try { this.plugin.settings.workbenchStatus = value === 'hidden' ? 'hidden' : 'automatic'; await this.plugin.saveSettings(); }
+					catch { this.plugin.settings.workbenchStatus = previous; dropdown.setValue(previous ?? 'automatic'); new Notice(t('settings.writeFailed')); }
+					finally { dropdown.setDisabled(false); }
+				});
+		});
 	new Setting(containerEl).setName(t('settings.homeModules')).setHeading();
 	const modules = this.plugin.settings.modules;
 	const rows: Array<{

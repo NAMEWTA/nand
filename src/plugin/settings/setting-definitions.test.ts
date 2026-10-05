@@ -92,7 +92,7 @@ test('language is searchable on Home, independently of dashboard availability', 
 		const alias = language === 'zh' ? '语言（Language）' : 'Language';
 		const matches = rows.filter((row) => row.aliases?.includes(alias));
 		assert.equal(matches.length, 1);
-		assert.equal(matches[0]?.name, language === 'zh' ? '首页' : 'Home');
+		assert.equal(matches[0]?.name, language === 'zh' ? '全局设置' : 'Global settings');
 		assert.notEqual(matches[0]?.searchable, false);
 	}
 	setLanguage('zh');

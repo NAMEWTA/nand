@@ -1,0 +1,88 @@
+/* ===== Doc Search ===== */
+.dashboard-docsearch {
+	display: flex;
+	flex-direction: column;
+	gap: 12px;
+	margin-top: 16px;
+}
+
+.dashboard-docsearch-input {
+	font-size: 1em;
+	padding: 10px 14px;
+}
+
+.dashboard-docsearch-results {
+	display: flex;
+	flex-direction: column;
+	gap: 2px;
+	max-height: 300px;
+	overflow-y: auto;
+	border: 1px solid var(--db-border);
+	border-radius: var(--db-radius-sm);
+	scrollbar-width: thin;
+	scrollbar-color: color-mix(in srgb, var(--db-accent, var(--interactive-accent)) 18%, transparent) transparent;
+}
+
+.dashboard-docsearch-results::-webkit-scrollbar {
+	width: 4px;
+}
+
+.dashboard-docsearch-results::-webkit-scrollbar-track {
+	background: transparent;
+}
+
+.dashboard-docsearch-results::-webkit-scrollbar-thumb {
+	background: color-mix(in srgb, var(--db-accent, var(--interactive-accent)) 18%, transparent);
+	border-radius: 4px;
+}
+
+.dashboard-docsearch-hint {
+	padding: 16px;
+	text-align: center;
+	color: var(--db-text-faint);
+	font-size: 0.9em;
+}
+
+.dashboard-docsearch-item {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	padding: 8px 12px;
+	cursor: pointer;
+	transition: background 0.1s ease;
+}
+
+.dashboard-docsearch-item:hover {
+	background: var(--db-bg-hover);
+}
+
+.dashboard-docsearch-icon {
+	font-size: 1em;
+	flex-shrink: 0;
+}
+
+.dashboard-docsearch-info {
+	flex: 1;
+	overflow: hidden;
+}
+
+.dashboard-docsearch-name {
+	font-size: 0.9em;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+.dashboard-docsearch-path {
+	font-size: 0.78em;
+	color: var(--db-text-faint);
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+.dashboard-docsearch-cancel {
+	margin-top: 8px;
+	align-self: flex-end;
+}
+

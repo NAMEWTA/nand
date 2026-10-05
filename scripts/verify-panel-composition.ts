@@ -1,3 +1,4 @@
+import { AgentUsageSource } from '../src/core/agent-launch/usage-source';
 import { AutomationsPanel } from '../src/view/automations/AutomationsPanel';
 import type { AutomationViewHost } from '../src/view/automations/panel-contract';
 import type { AutomationDefinition } from '../src/shared/automation/types';
@@ -318,123 +319,91 @@ async function verifySessionIdentity() {
 	console.log('Session sidebar: stable identity, exact selection, reorder/close, unknown status and bilingual surface names passed.');
 }
 
-async function verifyUsageLanguage() {
-	class StatusItem {
-		hidden = false;
-		spans: Array<{ text?: string }> = [];
-		listeners = new Map<string, () => void>();
-		cleared = 0;
-		win = {
-			setInterval: (_callback: () => void, _delay: number) => 42,
-			clearInterval: (id: number) => { this.cleared = id; },
-		};
-		addClass(): void {}
-		toggleClass(name: string, on: boolean): void { if (name === 'is-hidden') this.hidden = on; }
-		replaceChildren(): void { this.spans = []; }
-		createSpan(spec: { text?: string }): StatusItem { this.spans.push(spec); return new StatusItem(); }
-		addEventListener(name: string, callback: () => void): void { this.listeners.set(name, callback); }
-		removeEventListener(name: string, callback: () => void): void {
-			if (this.listeners.get(name) === callback) this.listeners.delete(name);
-		}
-		get text(): string { return this.spans.map((span) => span.text ?? '').join(''); }
-	}
-	const previousWindow = globalThis.window;
-	let runtimeReads = 0;
-	globalThis.window = {
-		require: (name: string) => {
-			assert.equal(name, 'node:process');
-			runtimeReads++;
-			return process;
-		},
-	} as unknown as Window & typeof globalThis;
-	setLanguage('zh');
-	const status = new StatusItem();
-	const agentSettings = structuredClone(DEFAULT_AGENT_SETTINGS);
-	for (const settings of Object.values(agentSettings.agents)) settings.enabled = false;
-	agentSettings.agents.codex.enabled = true;
-	agentSettings.agents.codex.accountId = 'language-fixture';
-	let active = true;
-	const host = {
-		settings: { ...DEFAULT_TERMINAL_SETTINGS, agentSettings },
-		app: { vault: { adapter: { getBasePath: () => '/nand-nonexistent-usage-language-fixture' } } },
-		manifest: { dir: '.obsidian/plugins/nand' },
-		addCommand: () => {},
-		addStatusBarItem: () => status,
-		registerInterval: (id: number) => id,
-		isActive: () => active,
-	} as unknown as OrcaPluginHost;
-	const cleanup = registerOrca(host);
-	const wait = () => new Promise<void>((resolve) => setTimeout(resolve, 160));
-	const panel = document.createElement('div'); document.body.appendChild(panel);
-	try {
-		await wait();
-		assert.equal(status.text, '用量');
-		const before = runtimeReads;
-		for (const language of ['en', 'zh', 'en'] as const) {
-			setLanguage(language);
-			assert.equal(status.text, language === 'zh' ? '用量' : 'Usage');
-			assert.equal(runtimeReads, before, 'Switching language does not read providers or reset the poll');
-		}
-		active = false; setLanguage('zh');
-		assert.equal(status.hidden, true);
-		assert.equal(status.text, '');
-		active = true; cleanup();
-		assert.equal(status.cleared, 42);
-		assert.equal(status.listeners.size, 0);
-		setLanguage('en'); refreshRegisteredUsage(host); await wait();
-		assert.equal(runtimeReads, before, 'Disposed hosts no longer react to language or refresh requests');
-		assert.equal(status.text, '');
+/** Native Modal stub allocation and Preact content use separate, explicit test adapters. */
+function usageModalFixture(...args: ConstructorParameters<typeof UsageModal>): UsageModal {
+ const environment = globalThis as { document?: Document };
+ const current = environment.document;
+ let modal: UsageModal;
+ delete environment.document;
+ try { modal = new UsageModal(...args); } finally { environment.document = current; }
+ const element = () => {
+  const node = document.createElement('div');
+  Object.assign(node, { addClass: (...names: string[]) => node.classList.add(...names) });
+  return node;
+ };
+ Object.assign(modal, { contentEl: element(), containerEl: element() });
+ return modal;
+}
 
-		let historyReads = 0, timers = 0, cleared = 0;
-		agentSettings.agents.pi.enabled = true;
-		const footerHost = {
-			...host,
-			app: { ...host.app, workspace: { containerEl: { win: {
-				setInterval: () => { timers++; return 99; },
-				clearInterval: (id: number) => { assert.equal(id, 99); cleared++; },
-			} } } },
-		} as unknown as WorkbenchHost;
-		const history = { subscribe: () => () => {}, usage: async () => { historyReads++; return { known: false }; } } as unknown as NativeHistory;
-		setLanguage('zh');
-		render(h(UsageFooter, { host: footerHost, history }), panel); await wait();
-		assert.ok(panel.textContent!.includes('未登录'));
-		assert.ok(panel.textContent!.includes('此服务商不提供可读取的订阅额度'));
-		const afterRead = runtimeReads;
-		for (const language of ['en', 'zh', 'en'] as const) {
-			setLanguage(language); await wait();
-			assert.ok(panel.textContent!.includes(t('terminalAgent.agents.notSignedIn')));
-			assert.ok(panel.textContent!.includes(t('terminalAgent.agents.quotaUnsupported')));
-			assert.ok(panel.textContent!.includes(t('terminalAgent.workbench.vaultUsage')));
-			assert.equal(runtimeReads, afterRead, 'Footer repaint uses cached provider states');
-			assert.equal(historyReads, 1, 'Footer language events do not query history');
-			assert.equal(timers, 1, 'Footer language events do not restart polling');
-			const environment = globalThis as { document?: unknown };
-			delete environment.document; // Native Modal stub owns a separate mini-DOM.
-			try {
-				const modal = new UsageModal({} as App, [
-					{ agentId: 'codex', provider: 'Codex', account: null, failed: false, windows: [], status: '未登录', statusKey: 'notSignedIn' },
-					{ agentId: 'pi', provider: 'Pi', account: null, failed: true, windows: [], status: 'Provider response 429: retry after 20s' },
-				]);
-				modal.onOpen();
-				assert.ok(modal.contentEl.textContent!.includes(t('terminalAgent.agents.notSignedIn')), 'Opening cached usage uses the current language');
-				assert.ok(modal.contentEl.textContent!.includes('Provider response 429: retry after 20s'), 'Raw provider diagnostics stay intact');
-				modal.onClose();
-			} finally { environment.document = document; }
-		}
-		render(h(UsageFooter, { host: footerHost, history, visible: false }), panel); await wait();
-		assert.equal(cleared, 1, 'Hiding a leaf releases its usage polling interval');
-		assert.equal(historyReads, 1, 'Hidden leaves do not query native aggregate usage');
-		assert.equal(runtimeReads, afterRead, 'Hidden leaves do not read provider state');
-		render(null, panel); setLanguage('zh'); await wait();
-		assert.equal(cleared, 1);
-		assert.equal(panel.textContent, '');
-		assert.equal(runtimeReads, afterRead);
-	} finally {
-		render(null, panel);
-		cleanup();
-		globalThis.window = previousWindow;
-	}
-	console.log('Usage language: immediate cached status/footer repaint, no provider/history reads or timer restart, inactive and disposed lifecycle passed.');
+async function verifyUsageLanguage() {
+ const previousWindow = globalThis.window;
+ let runtimeReads = 0, scheduled = 0, cancelled = 0;
+ const timers = new Map<number, () => void>();
+ const win = { setTimeout: (callback: () => void) => { timers.set(++scheduled, callback); return scheduled; }, clearTimeout: (id: number) => { timers.delete(id); cancelled++; }, document };
+ globalThis.window = { require: (name: string) => { assert.equal(name, 'node:process'); runtimeReads++; return process; } } as unknown as Window & typeof globalThis;
+ const agentSettings = structuredClone(DEFAULT_AGENT_SETTINGS);
+ for (const settings of Object.values(agentSettings.agents)) settings.enabled = false;
+ agentSettings.agents.codex.enabled = true;
+ agentSettings.agents.codex.accountId = 'language-fixture';
+ agentSettings.showUsageInStatusBar = false;
+ let active = true;
+ const host = {
+  settings: { ...DEFAULT_TERMINAL_SETTINGS, agentSettings },
+  app: { vault: { adapter: { getBasePath: () => '/nand-nonexistent-usage-language-fixture' } }, workspace: { containerEl: { win } } },
+  manifest: { dir: '.obsidian/plugins/nand' }, addCommand: () => {}, isActive: () => active,
+ } as unknown as OrcaPluginHost;
+ const cleanup = registerOrca(host);
+ const panel = document.createElement('div'); document.body.appendChild(panel);
+ const wait = () => new Promise<void>((resolve) => setTimeout(resolve, 160));
+ try {
+  assert.ok(host.usageSource);
+  assert.equal(timers.size, 0, 'Hidden usage does not start a provider poll');
+  const before = runtimeReads;
+  for (const language of ['en','zh','en'] as const) setLanguage(language);
+  assert.equal(runtimeReads, before, 'Language changes never query providers');
+  const release = host.usageSource.retain();
+  assert.equal(timers.size, 1, 'A real consumer schedules the module-owned source');
+  await host.usageSource.refresh(true);
+  release(); active = false;
+  const after = runtimeReads;
+  cleanup(); refreshRegisteredUsage(host); await wait();
+  assert.equal(runtimeReads, after, 'Disposed hosts cannot read providers');
+  assert.equal(host.usageSource, undefined);
+  assert.equal(timers.size, 0);
+  assert.ok(cancelled > 0);
+
+  let providerReads = 0, historyReads = 0;
+  const snapshots = [
+   { agentId: 'codex' as const, provider: 'Codex', account: null, failed: false, windows: [], status: '未登录', statusKey: 'notSignedIn' as const },
+   { agentId: 'pi' as const, provider: 'Pi', account: null, failed: false, windows: [], status: 'Unsupported', statusKey: 'quotaUnsupported' as const },
+  ];
+  const source = new AgentUsageSource({ read: async () => { providerReads++; return snapshots; }, active: () => true, now: () => 0, delay: () => 60000, schedule: win.setTimeout, cancel: win.clearTimeout });
+  const footerHost = { ...host, getUsageSource: () => source } as unknown as WorkbenchHost;
+  const history = { subscribe: () => () => {}, usage: async () => { historyReads++; return { known: false }; } } as unknown as NativeHistory;
+  setLanguage('zh'); render(h(UsageFooter, { host: footerHost, history }), panel); await wait();
+  await source.refresh(true); await wait();
+  assert.equal(providerReads, 1);
+  const scheduleCount = scheduled;
+  for (const language of ['en','zh','en'] as const) {
+   setLanguage(language); await wait();
+   assert.ok(panel.textContent!.includes(t('terminalAgent.agents.notSignedIn')));
+   assert.ok(panel.textContent!.includes(t('terminalAgent.agents.quotaUnsupported')));
+   assert.ok(panel.textContent!.includes(t('terminalAgent.workbench.vaultUsage')));
+   assert.equal(providerReads, 1, 'Footer paints cached provider state');
+   assert.equal(historyReads, 1, 'Language does not query native history');
+   assert.equal(scheduled, scheduleCount, 'Language never restarts source polling');
+   const modal = usageModalFixture({} as App, [snapshots[0]!, { ...snapshots[1]!, failed: true, statusKey: undefined, status: 'Provider response 429: retry after 20s' }]);
+   modal.onOpen();
+   assert.ok(modal.contentEl.textContent!.includes(t('terminalAgent.agents.notSignedIn')));
+   assert.ok(modal.contentEl.textContent!.includes('Provider response 429: retry after 20s'));
+   modal.onClose();
+  }
+  render(h(UsageFooter, { host: footerHost, history, visible: false }), panel); await wait();
+  assert.equal(timers.size, 0, 'Hiding the last consumer stops the single source timer');
+  assert.equal(historyReads, 1); assert.equal(providerReads, 1);
+  render(null, panel); source.dispose();
+ } finally { render(null, panel); cleanup(); globalThis.window = previousWindow; }
+ console.log('Usage: one demand-driven source, cached bilingual panels, no hidden reads, raw diagnostics and cleanup passed.');
 }
 
 async function verifyHistoryMatrix() {
@@ -524,9 +493,9 @@ async function verifyHistoryMatrix() {
 		assert.ok(panel.textContent!.includes(t('terminalAgent.workbench.empty')));
 		assert.ok(!panel.textContent!.includes(t('terminalAgent.workbench.noMatches')));
 		const environment = globalThis as { document?: unknown };
-		delete environment.document; // Native Modal stub owns its mini-DOM, separate from Preact's document.
+		// UsageModal now composes Preact into the real test document.
 		try {
-			const usage = new UsageModal({} as App, [{ provider: 'Synthetic', checkedAt: modifiedAtMs, status: 'unknown', stale: true, windows: [{ name: '每月', usedPct: null, resetAt: modifiedAtMs }] } as never]);
+			const usage = usageModalFixture({} as App, [{ provider: 'Synthetic', checkedAt: modifiedAtMs, status: 'unknown', stale: true, windows: [{ name: '每月', usedPct: null, resetAt: modifiedAtMs }] } as never]);
 			usage.onOpen();
 			const localizedTime = new Date(modifiedAtMs).toLocaleString(language === 'zh' ? 'zh-CN' : 'en-US');
 			assert.equal(usage.contentEl.textContent!.split(localizedTime).length - 1, 2, 'Checked and reset dates use the NAND language');

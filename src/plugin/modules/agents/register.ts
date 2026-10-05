@@ -1,7 +1,8 @@
+import { AgentUsageSource } from '../../../core/agent-launch/usage-source';
 import { Notice, type App } from 'obsidian';
 import { AGENT_CATALOG } from '../../../core/agent-launch/catalog';
 import { normalizeAgentSettings } from '../../../core/agent-launch/defaults';
-import type { AgentId, AgentSettings, UsageSnapshot } from '../../../core/agent-launch/types';
+import type { AgentId, AgentSettings } from '../../../core/agent-launch/types';
 import type { VaultSession } from '../../../core/ai-vault/types';
 import { nextUsageDelayMs } from '../../../core/pty/path-reference';
 import type { TerminalSettings } from '../../../core/pty/settings';
@@ -11,10 +12,9 @@ import { runtimeProcess } from '../../../platform/desktop/agents/runtime-process
 import { readUsageSnapshots } from '../../../platform/desktop/agents/usage';
 import type { TerminalService } from '../../../platform/desktop/terminal/terminal-service';
 import { usageContext } from '../../../platform/obsidian/agents/usage-context';
-import { onLanguageChanged, t } from '../../../shared/i18n/index';
+import { t } from '../../../shared/i18n/index';
 import { openUsage } from '../../../view/agent-usage/open-usage';
-import { paintUsageBar, renderUsageBar, usageBarVisible } from '../../../view/agent-usage/usage-bar';
-import { UsageModal } from '../../../view/agent-usage/usage-modal';
+import { enabledUsageAgents, usageBarVisible } from '../../../view/agent-usage/usage-bar';
 import { launchAgent, launchShell, resumeAgent, type LaunchHost } from './launcher';
 
 export interface OrcaPluginHost {
@@ -23,8 +23,6 @@ export interface OrcaPluginHost {
 	manifest: { dir?: string };
 	saveSettings: () => Promise<void>;
 	addCommand: (command: { id: string; nameKey?: string; name: string; callback: () => void }) => void;
-	addStatusBarItem: () => HTMLElement;
-	registerInterval: (id: number) => number;
 	getTerminalService: () => Promise<TerminalService>;
 	openFreshTerminal: () => Promise<void>;
 	insertIntoActiveTerminal: (text: string) => Promise<boolean>;
@@ -32,6 +30,8 @@ export interface OrcaPluginHost {
 	readAbsoluteReference: () => string | null;
 	noteLocalVersion?: (agentId: AgentId, version: string | null) => void;
 	isActive?: () => boolean;
+	usageSource?: AgentUsageSource;
+	openUsagePage?: () => Promise<void>;
 }
 
 const refreshers = new WeakMap<OrcaPluginHost, () => void>();
@@ -111,58 +111,22 @@ export function registerOrca(plugin: OrcaPluginHost): () => void {
 		callback: () => plugin.openSettings(),
 	});
 
-	const status = plugin.addStatusBarItem();
-	status.addClass('terminal-usage');
-	status.addClass('is-clickable');
-	let latest: UsageSnapshot[] = [];
-	let inflight = false;
-	let consecutiveFailures = 0;
-	let nextAt = 0;
-	let disposed = false;
-	const render = async () => {
-		if (disposed || inflight) return;
-		inflight = true;
-		try {
-			const painted = await paintUsageBar(status, {
-				settings: plugin.settings,
-				isActive: () => !disposed && (!plugin.isActive || plugin.isActive()),
-			}, (ids) => readUsageSnapshots(ids, usageContext(plugin)));
-			if (painted) {
-				latest = painted;
-				consecutiveFailures = painted.some((snapshot) => snapshot.failed) ? consecutiveFailures + 1 : 0;
-			}
-		} finally {
-			inflight = false;
-			nextAt = Date.now() + nextUsageDelayMs(plugin.settings.agentSettings.usageRefreshSec, consecutiveFailures);
-		}
-	};
-	refreshers.set(plugin, () => {
-		void render();
+
+	const win = plugin.app.workspace.containerEl.win;
+	const source = new AgentUsageSource({
+		read: () => readUsageSnapshots(enabledUsageAgents(plugin), usageContext(plugin)),
+		active: () => !plugin.isActive || plugin.isActive(),
+		delay: (failures) => nextUsageDelayMs(plugin.settings.agentSettings.usageRefreshSec, failures),
+		now: () => Date.now(),
+		schedule: (callback, delay) => win.setTimeout(callback, delay),
+		cancel: (timer) => win.clearTimeout(timer),
 	});
-	const offLanguage = onLanguageChanged(() => renderUsageBar(status, plugin, latest));
-	const onClick = () => {
-		if (!usageBarVisible(plugin)) return;
-		new UsageModal(plugin.app, latest).open();
-		void render();
-	};
-	status.addEventListener('click', onClick);
-	void render();
-	const win = status.win;
-	const timer = plugin.registerInterval(
-		win.setInterval(() => {
-			if (Date.now() < nextAt) return;
-			void render();
-		}, 15_000),
-	);
+	plugin.usageSource = source;
+	const refresh = () => { source.setPinned(usageBarVisible(plugin)); source.invalidate(); };
+	refreshers.set(plugin, refresh); refresh();
 	return () => {
-		if (disposed) return;
-		disposed = true;
-		offLanguage();
-		refreshers.delete(plugin);
-		win.clearInterval(timer);
-		status.removeEventListener('click', onClick);
-		status.toggleClass('is-hidden', true);
-		status.replaceChildren();
+		refreshers.delete(plugin); source.dispose();
+		if (plugin.usageSource === source) plugin.usageSource = undefined;
 	};
 }
 

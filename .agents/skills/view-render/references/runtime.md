@@ -90,3 +90,5 @@ A plugin that evals a canvas bundle must hand that bundle the same React object 
 ## Dashboard ownership
 
 Incrementally converted dashboard panels mount through `mountDashboardPanel`. The dashboard render context tracks each root and unmounts it on rebuild/close; reused detached widgets retain their owner. Countdown and anniversary clocks use the owning Window and release intervals in hook cleanup. Native `onWindowMigrated` forces widget recreation, so old-window timers cannot survive the move. This lifecycle helper does not make remaining imperative card renderers Preact components.
+
+The unified workbench leaf renders one shell into `contentEl`. Changing its page slot does not create a leaf, a router, or a PTY. A split or a native tab is an explicit host action.

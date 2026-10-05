@@ -22,5 +22,5 @@ export interface EditorPluginHost {
 	editorHost?: EditorHost;
 	addCommand(command: LocalizedCommand): import('obsidian').Command;
 	saveSettings(): Promise<void>;
-	openHome(): void;
+	openSettings(): void;
 }

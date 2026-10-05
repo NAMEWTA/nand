@@ -1,3 +1,4 @@
+import type { AutomationViewHost } from '../../view/automations/panel-contract';
 import { FileSystemAdapter, Notice, Platform } from 'obsidian';
 import { MarkdownAutomationDefinitions } from '../../platform/obsidian/automations/definitions';
 import { deviceId as getDeviceId } from '../../platform/obsidian/storage/device-id';
@@ -20,16 +21,12 @@ import type {
 import { t } from '../../shared/i18n/index';
 import { AutomationEditor } from '../../view/automations/editor';
 import { AUTOMATION_VIEW_TYPE, AutomationView } from '../../view/automations/view';
-import { NotificationInbox } from '../../view/notifications/inbox';
-import { DashboardView } from '../../view/dashboard/view/dashboard-view';
-import { DASHBOARD_VIEW_TYPE } from '../../view/dashboard/view/view-type';
 import type DashboardPlugin from '../main';
-import { CONTACTS_VIEW_TYPE, ContactsView } from '../modules/contacts/index';
 
 /** Composition only: every source read/write stays in its owning product. */
 export async function createAutomationHost(
 	plugin: DashboardPlugin,
-): Promise<AutomationUiPort & { dispose(): void; inbox(): void; service: AutomationService; setExecutionEnabled(enabled: boolean): Promise<void> }> {
+): Promise<AutomationUiPort & { dispose(): void; inbox(): void; service: AutomationService; panelHost: AutomationViewHost; notifications: NotificationService; setExecutionEnabled(enabled: boolean): Promise<void> }> {
 	const app = plugin.app;
 	const deviceId = getDeviceId(app);
 	const definitions = new MarkdownAutomationDefinitions(app);
@@ -62,27 +59,19 @@ export async function createAutomationHost(
 				await plugin.contactsHost.saveReminder(d, true);
 			else throw new AutomationError('invalid');
 		},
+
 		open: async (source) => {
+			// Capture the requesting window before any asynchronous lookup.
+			const ownerWindow = app.workspace.getMostRecentLeaf()?.view.containerEl.win ?? app.workspace.containerEl.win;
 			if (source.kind === 'contacts') {
-				await plugin.openContacts();
-				const leaf = app.workspace.getLeavesOfType(CONTACTS_VIEW_TYPE)[0];
-				await leaf?.loadIfDeferred();
-				await plugin.contactsHost?.ensureLoaded();
-				if (leaf?.view instanceof ContactsView) leaf.view.select(source.path);
+				await plugin.openWorkbench({ feature: 'contacts', resourceId: source.id || source.path }, ownerWindow);
 			} else if (source.kind === 'widget') {
 				const file = dashboard.resolveWidgetSource(source);
-				await plugin.switchWorkspace(file.path);
-				await plugin.openDashboard();
-				const leaf = app.workspace.getLeavesOfType(DASHBOARD_VIEW_TYPE)[0];
-				await leaf?.loadIfDeferred();
-				if (leaf) await app.workspace.revealLeaf(leaf);
-				if (!(leaf?.view instanceof DashboardView) || !(await leaf.view.focusWidget(source.id)))
-					throw new AutomationError('widgetMissing');
+				await plugin.openWorkbench({ feature: 'dashboard', resourceId: file.path, focusId: source.id }, ownerWindow);
 			} else {
 				const file = app.vault.getFileByPath(source.path);
 				if (!file) throw new AutomationError('sourceMissing');
-				await plugin.switchWorkspace(file.path);
-				await plugin.openDashboard();
+				await plugin.openWorkbench({ feature: 'dashboard', resourceId: file.path }, ownerWindow);
 			}
 		},
 		createTask: (action, runId) => dashboard.createTask(action, runId),
@@ -91,12 +80,7 @@ export async function createAutomationHost(
 		app.vault.adapter,
 		`.nand/notifications/${deviceId}/inbox.json`,
 		(source) => sources.open(source),
-		async (target) => {
-			await open();
-			const leaf = app.workspace.getLeavesOfType(AUTOMATION_VIEW_TYPE)[0];
-			await leaf?.loadIfDeferred();
-			if (leaf?.view instanceof AutomationView) leaf.view.showRun(target.runId);
-		},
+		(target) => plugin.openWorkbench({ feature: 'automations', section: 'runs', resourceId: target.runId }),
 		createNotificationDelivery(app),
 	);
 	const service = new AutomationService(
@@ -172,30 +156,11 @@ export async function createAutomationHost(
 		const cwd = app.vault.adapter instanceof FileSystemAdapter ? app.vault.adapter.getBasePath() : '';
 		new AutomationEditor(app, service, () => dashboard.targets(), cwd, source, title, current, pin).open();
 	};
-	const inbox = () => new NotificationInbox(app, notifications).open();
-	plugin.registerView(
-		AUTOMATION_VIEW_TYPE,
-		(leaf) => new AutomationView(leaf, { service, retry, edit: (d) => edit(d?.source, d?.name, d), inbox, pin }),
-	);
-	const open = async () => {
-		let leaf = app.workspace.getLeavesOfType(AUTOMATION_VIEW_TYPE)[0];
-		if (!leaf) {
-			leaf = app.workspace.getLeaf('tab');
-			await leaf.setViewState({ type: AUTOMATION_VIEW_TYPE, active: true });
-		}
-		await app.workspace.revealLeaf(leaf);
-		app.workspace.setActiveLeaf(leaf, { focus: true });
-	};
-	plugin.addRibbonIcon('timer', t('automation.title'), () => {
-		void open();
-	});
-	const bell = plugin.addRibbonIcon('bell', t('automation.inbox'), inbox);
-	const updateUnread = () => {
-		if (notifications.unread) bell.dataset.nandUnread = String(notifications.unread);
-		else delete bell.dataset.nandUnread;
-	};
-	updateUnread();
-	plugin.register(notifications.subscribe(updateUnread));
+	const inbox = () => { void plugin.openWorkbench({ feature: 'notifications' }).catch((error: unknown) => new Notice(String(error))); };
+	const panelHost: AutomationViewHost = { service, retry, edit: (d) => edit(d?.source, d?.name, d), inbox, pin };
+	plugin.registerView(AUTOMATION_VIEW_TYPE, (leaf) => new AutomationView(leaf, panelHost));
+	const open = () => plugin.openWorkbench({ feature: 'automations' });
+
 	const tick = () => {
 		if (!app.workspace.layoutReady) return;
 		void service.tick().catch((error) => {
@@ -220,7 +185,7 @@ export async function createAutomationHost(
 	});
 	app.workspace.onLayoutReady(tick);
 	return {
-		service,
+		service, panelHost, notifications,
 		subscribe: listener => service.subscribe(listener),
 		actions: () => service.definitions.map(definition => {
 			const run = [...service.state.runs].reverse().find(row => row.automationId === definition.id);
@@ -240,7 +205,7 @@ export async function createAutomationHost(
 		openAction: async id => {
 			const run = [...service.state.runs].reverse().find(row => row.automationId === id && row.terminalId);
 			if (run?.terminalId && isActiveRun(run)) await service.agent()?.open(run.terminalId);
-			else { await open(); if (run) (app.workspace.getLeavesOfType(AUTOMATION_VIEW_TYPE)[0]?.view as AutomationView | undefined)?.showRun(run.id); }
+			else await plugin.openWorkbench({ feature: 'automations', section: run ? 'runs' : 'tasks', resourceId: run?.id }, app.workspace.getMostRecentLeaf()?.view.containerEl.win);
 		},
 		setExecutionEnabled: async (enabled) => {
 			const wasEnabled = service.executionEnabled;

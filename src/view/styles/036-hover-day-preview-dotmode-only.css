@@ -1,0 +1,166 @@
+/* ===== Hover day preview (dotMode only) =====
+   Lives on document.body, positioned by JS next to the hovered cell. High
+   z-index so it floats over the sidebar and kanban; no backdrop-filter to stay
+   safe on mobile/iOS crash-prone contexts (the popup only ever shows on desktop). */
+.dashboard-calendar-day-preview {
+	position: fixed;
+	z-index: 9000;
+	min-width: 180px;
+	max-width: 360px;
+	max-height: min(60vh, 420px);
+	display: flex;
+	flex-direction: column;
+	/* Guaranteed-opaque surface. --db-bg-card is translucent on most themes
+	   (cards float over a bg image) and color-mix with it still let the dashboard
+	   bg bleed through, making the text unreadable. --background-primary is
+	   Obsidian's own opaque editor surface, so it stays solid regardless of theme
+	   or user background image. Themes whose --db-bg-card is transparent
+	   (neon/volt/magma/onyx) define an opaque --db-bg-modal for exactly this
+	   case; it reaches this body-level popup via applyModalTheme mirroring.
+	   We avoid backdrop-filter here (crash-prone on iOS,
+	   and this popup is desktop-only anyway). */
+	background: var(--db-bg-modal, var(--background-primary));
+	border: 1px solid var(--db-border-card, var(--background-modifier-border));
+	border-radius: var(--db-radius-md);
+	box-shadow: var(--nand-shadow-lg, 0 10px 32px rgba(0, 0, 0, 0.38));
+	color: var(--db-text, var(--text-normal));
+	font-size: 1em;
+	line-height: 1.45;
+	overflow: hidden;
+	pointer-events: none;
+	animation: dashboard-day-preview-in 0.12s ease;
+}
+
+@keyframes dashboard-day-preview-in {
+	from { opacity: 0; transform: translateY(2px); }
+	to   { opacity: 1; transform: translateY(0); }
+}
+
+.dashboard-calendar-day-preview-list {
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+	padding: 8px;
+	overflow-y: auto;
+	scrollbar-width: thin;
+}
+
+/* Reuse the calendar event-row look inside the preview — but readable: the
+ * base .dashboard-calendar-event font (0.5625em) is sized for compact sidebar
+ * grid cells, way too small for this body-level popup. */
+.dashboard-calendar-day-preview-list .dashboard-calendar-event {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	font-size: 0.95em;
+	padding: 6px 8px;
+	border-radius: var(--db-radius-sm, 6px);
+	border-left: 3px solid transparent;
+}
+
+.dashboard-calendar-day-preview-list .dashboard-calendar-event.prio-high { border-left-color: var(--db-prio-high, #ef4444); }
+.dashboard-calendar-day-preview-list .dashboard-calendar-event.prio-medium { border-left-color: var(--db-prio-medium, #f59e0b); }
+.dashboard-calendar-day-preview-list .dashboard-calendar-event.prio-low { border-left-color: var(--db-prio-low, #3b82f6); }
+
+.dashboard-calendar-day-preview-list .dashboard-calendar-event.is-overdue {
+	background: color-mix(in srgb, var(--db-prio-high, #ef4444) 16%, transparent);
+}
+
+.dashboard-calendar-day-preview-list .dashboard-calendar-event.is-done .dashboard-calendar-event-text {
+	text-decoration: line-through;
+	opacity: 0.6;
+}
+
+.dashboard-calendar-day-preview-list .dashboard-calendar-event-time {
+	font-size: 0.92em;
+	font-weight: 600;
+	color: var(--db-text-muted, var(--text-muted));
+	flex-shrink: 0;
+	font-variant-numeric: tabular-nums;
+}
+
+.dashboard-calendar-day-preview-list .dashboard-calendar-event-text {
+	flex: 1;
+	min-width: 0;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.dashboard-calendar.is-compact .dashboard-calendar-cell-list,
+.dashboard-sidebar-calendar .dashboard-calendar.is-compact .dashboard-calendar-more {
+	display: none;
+}
+
+/* Settings panel: excluded-folder chips + add row (shared, lightweight) */
+.dashboard-settings-folder-chips {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 6px;
+	align-items: center;
+	margin-top: 6px;
+}
+
+.dashboard-settings-folder-chip {
+	display: inline-flex;
+	align-items: center;
+	gap: 4px;
+	padding: 2px 4px 2px 10px;
+	background: var(--db-bg-input, rgba(255, 255, 255, 0.05));
+	border: 1px solid var(--db-border-card);
+	border-radius: 999px;
+	font-size: var(--font-ui-smaller);
+}
+
+.dashboard-settings-folder-chip-remove {
+	background: transparent;
+	border: none;
+	cursor: pointer;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	color: var(--text-muted);
+	padding: 0;
+	width: 18px;
+	height: 18px;
+	border-radius: 50%;
+	box-shadow: none;
+	transition: background-color var(--nand-duration) var(--nand-ease), color var(--nand-duration) var(--nand-ease);
+}
+
+.dashboard-settings-folder-chip-remove:hover {
+	color: var(--text-normal);
+	background: var(--background-modifier-hover);
+}
+
+.dashboard-settings-folder-chip-remove svg {
+	width: 12px;
+	height: 12px;
+}
+
+.dashboard-settings-folder-add {
+	display: flex;
+	gap: 4px;
+	align-items: center;
+	width: 100%;
+	margin-top: 4px;
+}
+
+.dashboard-settings-folder-input {
+	flex: 1;
+	min-width: 0;
+}
+
+.dashboard-settings-folder-browse,
+.dashboard-settings-folder-add-btn {
+	flex-shrink: 0;
+	display: flex;
+	align-items: center;
+	gap: 4px;
+}
+
+.dashboard-settings-folder-browse svg {
+	width: 14px;
+	height: 14px;
+}
+

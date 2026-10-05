@@ -1,0 +1,980 @@
+/* ===== Expense Stats Modal ===== */
+.dashboard-expense-stats-overlay {
+	position: fixed;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	background: rgba(0, 0, 0, 0.5);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	z-index: 1000;
+}
+
+.dashboard-expense-stats-modal {
+	background: var(--db-bg-modal, var(--background-primary, var(--db-bg)));
+	border: 1px solid var(--db-border-card);
+	border-radius: var(--db-radius-lg, 14px);
+	padding: 20px;
+	max-width: 380px;
+	width: 90%;
+	max-height: 80vh;
+	overflow-y: auto;
+	box-shadow: var(--nand-shadow-lg, 0 8px 32px rgba(0, 0, 0, 0.2));
+	font-variant-numeric: tabular-nums;
+}
+
+.dashboard-expense-stats-modal--wide {
+	max-width: 1040px;
+	width: 94%;
+	max-height: 86vh;
+	padding: 20px 24px;
+	display: flex;
+	flex-direction: column;
+	/* Size container for the 1-column collapse below: the breakpoint must
+	   track the MODAL's own width, which follows the pane the dashboard lives
+	   in (split panes, sidebars) — a viewport @media never fires there. Old
+	   engines without container queries keep the @media fallback at the
+	   bottom of this block. */
+	container-type: inline-size;
+}
+
+.dashboard-expense-stats-header {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	min-height: 28px;
+	margin-bottom: 16px;
+	gap: 12px;
+	flex-wrap: wrap;
+}
+
+.dashboard-expense-stats-header-titlewrap {
+	display: flex;
+	flex-direction: column;
+	gap: 2px;
+	min-width: 0;
+}
+
+.dashboard-expense-stats-header-title {
+	font-size: 1.15em;
+	font-weight: 600;
+	line-height: 1.3;
+	color: var(--db-text);
+}
+
+.dashboard-expense-insight {
+	font-size: 0.72em;
+	color: var(--db-text-muted);
+	font-variant-numeric: tabular-nums;
+}
+
+.dashboard-expense-stats-header-right {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	flex-wrap: wrap;
+	justify-content: flex-end;
+}
+
+/* Range toggle (week/month/year/history) */
+.dashboard-expense-range-toggle {
+	display: flex;
+	gap: 2px;
+	padding: 2px;
+	background: var(--db-bg-hover);
+	border: 1px solid var(--db-border-card);
+	border-radius: calc(var(--db-radius-sm, 6px) + 2px);
+}
+
+.dashboard-expense-range-btn {
+	border: none;
+	box-shadow: none;
+	background: transparent;
+	padding: 0;
+	height: auto;
+	text-align: center;
+	font-size: 0.82em;
+	font-weight: 500;
+	color: var(--db-text-muted);
+	padding: 4px 12px;
+	min-height: 24px;
+	border-radius: var(--db-radius-sm, 6px);
+	cursor: pointer;
+	white-space: nowrap;
+	transition: background-color var(--nand-duration) var(--nand-ease), color var(--nand-duration) var(--nand-ease);
+}
+
+.dashboard-expense-range-btn:hover:not(.dashboard-expense-range-btn--active) {
+	color: var(--db-text);
+}
+
+.dashboard-expense-range-btn--active {
+	background: var(--db-bg-modal-raised, var(--background-primary, var(--db-bg)));
+	color: var(--db-accent);
+	font-weight: 600;
+	box-shadow: var(--nand-shadow-xs, 0 1px 2px rgba(0, 0, 0, 0.08));
+}
+
+.dashboard-expense-range-btn:focus-visible,
+.dashboard-expense-subrange-btn:focus-visible,
+.dashboard-expense-level-btn:focus-visible,
+.dashboard-expense-type-btn:focus-visible,
+.dashboard-expense-year-nav-btn:focus-visible,
+.dashboard-expense-year-nav-label:focus-visible,
+.dashboard-expense-stats-close:focus-visible {
+	outline: 2px solid var(--db-accent);
+	outline-offset: 1px;
+}
+
+/* Year navigation (history range only) */
+.dashboard-expense-year-nav {
+	display: none;
+	align-items: center;
+	gap: 2px;
+}
+
+.dashboard-expense-year-nav--visible {
+	display: flex;
+}
+
+.dashboard-expense-year-nav-btn {
+	border: none;
+	box-shadow: none;
+	background: transparent;
+	padding: 0;
+	height: auto;
+	width: 24px;
+	height: 24px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	cursor: pointer;
+	color: var(--db-text-muted);
+	border-radius: var(--db-radius-sm, 6px);
+	transition: background-color var(--nand-duration) var(--nand-ease), color var(--nand-duration) var(--nand-ease);
+}
+
+.dashboard-expense-year-nav-btn:hover {
+	background: var(--db-bg-hover);
+	color: var(--db-text);
+}
+
+.dashboard-expense-year-nav-btn--disabled {
+	opacity: 0.25;
+	pointer-events: none;
+}
+
+.dashboard-expense-year-nav-label {
+	border: none;
+	box-shadow: none;
+	background: transparent;
+	padding: 0;
+	height: auto;
+	font-size: 0.85em;
+	font-weight: 600;
+	color: var(--db-text);
+	min-width: 48px;
+	text-align: center;
+	font-variant-numeric: tabular-nums;
+	/* Clickable: opens the period dropdown (native Menu). Padding leaves room
+	   for the chevron; border-radius + hover match the ‹ › buttons. */
+	padding: 3px 16px 3px 8px;
+	border-radius: var(--db-radius-sm, 6px);
+	cursor: pointer;
+	position: relative;
+	transition: background-color var(--nand-duration) var(--nand-ease);
+}
+
+.dashboard-expense-year-nav-label:hover {
+	background: var(--db-bg-hover);
+}
+
+/* Dropdown affordance chevron, drawn with borders so no icon node is needed
+   (the label's centered text geometry stays untouched). */
+.dashboard-expense-year-nav-label::after {
+	content: '';
+	position: absolute;
+	right: 4px;
+	top: 50%;
+	transform: translateY(-65%);
+	border: 4px solid transparent;
+	border-top-color: var(--db-text-muted);
+	border-bottom-width: 0;
+	pointer-events: none;
+}
+
+/* Wide variant for the week span (e.g. 2026-09-14 ~ 2026-09-20); the
+   header-right row wraps, so a long label never squeezes the toggles. */
+.dashboard-expense-year-nav-label--wide {
+	min-width: 172px;
+	white-space: nowrap;
+}
+
+/* History granularity sub-toggle: week/month/year inside the history range
+   (type-toggle in miniature). */
+.dashboard-expense-subrange-toggle {
+	display: none;
+	gap: 2px;
+	padding: 2px;
+	background: var(--db-bg-hover);
+	border: 1px solid var(--db-border-card);
+	border-radius: calc(var(--db-radius-sm, 6px) + 2px);
+}
+
+.dashboard-expense-subrange-toggle--visible {
+	display: flex;
+}
+
+.dashboard-expense-subrange-btn {
+	border: none;
+	box-shadow: none;
+	background: transparent;
+	padding: 0;
+	height: auto;
+	cursor: pointer;
+	padding: 3px 8px;
+	border-radius: var(--db-radius-sm, 6px);
+	color: var(--db-text-muted);
+	font-size: 0.7em;
+	transition: background-color var(--nand-duration) var(--nand-ease), color var(--nand-duration) var(--nand-ease);
+}
+
+.dashboard-expense-subrange-btn:hover {
+	color: var(--db-text);
+}
+
+.dashboard-expense-subrange-btn--active {
+	background: var(--db-bg-modal-raised, var(--background-primary, var(--db-bg)));
+	color: var(--db-accent);
+	font-weight: 600;
+	box-shadow: var(--nand-shadow-xs, 0 1px 2px rgba(0, 0, 0, 0.08));
+}
+
+/* Donut aggregation granularity: plain categories vs primary groups. */
+.dashboard-expense-level-toggle {
+	display: flex;
+	gap: 2px;
+	padding: 2px;
+	background: var(--db-bg-hover);
+	border: 1px solid var(--db-border-card);
+	border-radius: calc(var(--db-radius-sm, 6px) + 2px);
+}
+
+.dashboard-expense-level-btn {
+	border: none;
+	box-shadow: none;
+	background: transparent;
+	padding: 0;
+	height: auto;
+	cursor: pointer;
+	padding: 2px 8px;
+	border-radius: var(--db-radius-sm, 6px);
+	color: var(--db-text-muted);
+	font-size: 0.66em;
+	transition: background-color var(--nand-duration) var(--nand-ease), color var(--nand-duration) var(--nand-ease);
+}
+
+.dashboard-expense-level-btn:hover {
+	color: var(--db-text);
+}
+
+.dashboard-expense-level-btn--active {
+	background: var(--db-bg-modal-raised, var(--background-primary, var(--db-bg)));
+	color: var(--db-accent);
+	font-weight: 600;
+	box-shadow: var(--nand-shadow-xs, 0 1px 2px rgba(0, 0, 0, 0.08));
+}
+
+/* Expense/income type toggle (library view toggle, miniature) */
+.dashboard-expense-type-toggle {
+	display: flex;
+	gap: 2px;
+	padding: 2px;
+	background: var(--db-bg-hover);
+	border: 1px solid var(--db-border-card);
+	border-radius: calc(var(--db-radius-sm, 6px) + 2px);
+}
+
+.dashboard-expense-type-btn {
+	border: none;
+	box-shadow: none;
+	background: transparent;
+	padding: 0;
+	height: auto;
+	cursor: pointer;
+	padding: 4px 10px;
+	border-radius: var(--db-radius-sm, 6px);
+	color: var(--db-text-muted);
+	font-size: 0.75em;
+	transition: background-color var(--nand-duration) var(--nand-ease), color var(--nand-duration) var(--nand-ease);
+}
+
+.dashboard-expense-type-btn:hover {
+	color: var(--db-text);
+}
+
+.dashboard-expense-type-btn--active {
+	background: var(--db-bg-modal-raised, var(--background-primary, var(--db-bg)));
+	color: var(--db-accent);
+	font-weight: 600;
+	box-shadow: var(--nand-shadow-xs, 0 1px 2px rgba(0, 0, 0, 0.08));
+}
+
+.dashboard-expense-stats-close {
+	border: none;
+	box-shadow: none;
+	background: transparent;
+	padding: 0;
+	height: auto;
+	cursor: pointer;
+	color: var(--db-text-muted);
+	width: 28px;
+	height: 28px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	border-radius: var(--db-radius-sm, 6px);
+	transition: background-color var(--nand-duration) var(--nand-ease), color var(--nand-duration) var(--nand-ease);
+	flex-shrink: 0;
+}
+
+.dashboard-expense-stats-close:hover {
+	background: var(--db-bg-hover);
+	color: var(--db-text);
+}
+
+/* Body grid, two areas: records column left; every chart section right —
+   分类占比 → 分类排名 (mid) then 每日趋势 → 收支对比 (right) stack in the
+   second column, so all sections share one straight edge. Rows are auto: each
+   track sizes to its content (the old minmax(0,1fr) row compressed tracks
+   below their content and let one zone paint over the next); the body itself
+   scrolls when the whole thing outgrows the modal. */
+.dashboard-expense-stats-body {
+	display: grid;
+	grid-template-columns: minmax(250px, 300px) minmax(0, 1fr);
+	grid-template-rows: auto auto;
+	grid-template-areas:
+		"kpi mid"
+		"kpi right";
+	gap: 16px;
+	overflow-y: auto;
+	/* The tall chart column makes this always scrollable; the bar along the
+	   modal edge reads as clutter — scroll stays, chrome doesn't. */
+	scrollbar-width: none;
+	min-height: 0;
+	flex: 1;
+	padding-top: 4px;
+}
+
+.dashboard-expense-stats-body::-webkit-scrollbar {
+	width: 0;
+	height: 0;
+}
+
+/* Collapse to one column when the modal itself gets narrow (narrow panes,
+   phones): the chart column drops below the records column. Breakpoint in
+   container px (content-box of the modal). */
+@container (max-width: 700px) {
+	.dashboard-expense-stats-body {
+		grid-template-columns: 1fr;
+		grid-template-rows: auto;
+		grid-template-areas:
+			"kpi"
+			"mid"
+			"right";
+	}
+}
+
+/* Left column — KPIs + record table */
+.dashboard-expense-kpi-col {
+	grid-area: kpi;
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+	min-width: 0;
+}
+
+/* A touch more air between the KPI cards and the record list below them. */
+.dashboard-expense-kpi-col > .dashboard-expense-stats-section {
+	margin-top: 8px;
+}
+
+.dashboard-expense-stats-summary {
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	gap: 8px;
+}
+
+/* KPI cell: bold tabular value over a small muted label. */
+.dashboard-expense-stats-card {
+	background: var(--db-bg-hover);
+	border: 1px solid transparent;
+	border-radius: var(--db-radius-sm, 6px);
+	padding: 12px 8px 10px;
+	text-align: center;
+	min-width: 0;
+}
+
+/* Value on its own centered line; the comparison chip wraps to a second
+   centered line — it never squeezes the number and never leaves the card
+   (same layout as the pomodoro stats cards). */
+.dashboard-expense-stats-card-value-row {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 2px;
+}
+
+.dashboard-expense-stats-card-value {
+	font-size: 1.05em;
+	font-weight: 700;
+	line-height: 1.2;
+	color: var(--db-accent);
+	font-variant-numeric: tabular-nums;
+}
+
+.dashboard-expense-stats-card-delta {
+	font-size: 0.58em;
+	font-weight: 600;
+	padding: 1px 6px;
+	border-radius: 999px;
+	white-space: nowrap;
+	font-variant-numeric: tabular-nums;
+}
+
+.dashboard-expense-stats-card-delta--up {
+	color: var(--nand-tone-success, var(--color-green));
+	background: color-mix(in srgb, var(--nand-tone-success, var(--color-green)) 14%, transparent);
+}
+
+.dashboard-expense-stats-card-delta--down {
+	color: var(--db-danger, var(--color-red));
+	background: color-mix(in srgb, var(--db-danger, var(--color-red)) 14%, transparent);
+}
+
+.dashboard-expense-stats-card-label {
+	font-size: 0.65em;
+	font-weight: 500;
+	color: var(--db-text-muted);
+	margin-top: 4px;
+}
+
+/* Sections */
+.dashboard-expense-stats-section {
+	margin-bottom: 16px;
+}
+
+.dashboard-expense-stats-section-title {
+	font-size: 0.7em;
+	font-weight: 600;
+	color: var(--db-text-muted);
+	text-transform: uppercase;
+	letter-spacing: 0.06em;
+	margin-bottom: 12px;
+}
+
+.dashboard-expense-stats-section-title-row {
+	display: flex;
+	align-items: baseline;
+	justify-content: space-between;
+	gap: 6px;
+}
+
+.dashboard-expense-stats-section-hint {
+	font-size: 0.6em;
+	color: var(--db-text-faint);
+	white-space: nowrap;
+}
+
+/* "View all" link on the records title row → the full ledger overlay */
+.dashboard-expense-records-viewall {
+	border: none;
+	box-shadow: none;
+	background: transparent;
+	padding: 0;
+	height: auto;
+	display: flex;
+	align-items: center;
+	gap: 1px;
+	font-size: 0.62em;
+	font-weight: 600;
+	color: var(--db-accent);
+	cursor: pointer;
+	white-space: nowrap;
+	flex-shrink: 0;
+	opacity: 0.85;
+	padding: 2px 6px;
+	margin-right: -6px;
+	border-radius: 999px;
+	transition: opacity var(--nand-duration) var(--nand-ease), background-color var(--nand-duration) var(--nand-ease);
+}
+
+.dashboard-expense-records-viewall:focus-visible {
+	outline: 2px solid var(--db-accent);
+	outline-offset: 1px;
+}
+
+.dashboard-expense-records-viewall:hover {
+	opacity: 1;
+	background: var(--db-bg-hover);
+}
+
+.dashboard-expense-records-viewall-icon {
+	display: flex;
+	align-items: center;
+}
+
+.dashboard-expense-records-viewall-icon svg {
+	width: 12px;
+	height: 12px;
+}
+
+/* Mid + right columns (both live in the second grid area's column) */
+.dashboard-expense-mid-col {
+	grid-area: mid;
+	display: flex;
+	flex-direction: column;
+	gap: 12px;
+	min-width: 0;
+}
+
+.dashboard-expense-right-col {
+	grid-area: right;
+	display: flex;
+	flex-direction: column;
+	gap: 12px;
+	min-width: 0;
+}
+
+/* Donut chart */
+.dashboard-expense-donut-container {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 12px;
+}
+
+.dashboard-expense-donut-wrap {
+	display: flex;
+	justify-content: center;
+}
+
+.dashboard-expense-donut-svg {
+	display: block;
+	/* Shrink with the column instead of overflowing into the neighbours
+	   (fixed 200px attrs stay as the cap/aspect source via viewBox). */
+	width: 100%;
+	max-width: 200px;
+	height: auto;
+}
+
+.dashboard-expense-donut-bg {
+	stroke: var(--db-bg-hover);
+}
+
+.dashboard-expense-donut-segment {
+	cursor: pointer;
+}
+
+.dashboard-expense-donut-center-value {
+	fill: var(--db-text);
+	font-size: 0.875em;
+	font-weight: 700;
+	font-variant-numeric: tabular-nums;
+}
+
+.dashboard-expense-donut-center-label {
+	fill: var(--db-text-muted);
+	font-size: 0.5625em;
+}
+
+.dashboard-expense-donut-empty {
+	font-size: 0.75em;
+	color: var(--db-text-faint);
+	text-align: center;
+	padding: 24px 0;
+}
+
+.dashboard-expense-donut-legend {
+	display: flex;
+	flex-direction: column;
+	gap: 6px;
+	width: 100%;
+}
+
+.dashboard-expense-donut-legend--grid {
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	gap: 6px 16px;
+}
+
+.dashboard-expense-donut-legend-item {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	min-width: 0;
+}
+
+.dashboard-expense-donut-legend-dot {
+	width: 8px;
+	height: 8px;
+	border-radius: 50%;
+	flex-shrink: 0;
+}
+
+.dashboard-expense-donut-legend-name {
+	font-size: 0.7em;
+	color: var(--db-text);
+	flex: 1;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.dashboard-expense-donut-legend-pct {
+	font-size: 0.65em;
+	font-weight: 600;
+	color: var(--db-text);
+	width: 32px;
+	text-align: right;
+	flex-shrink: 0;
+	font-variant-numeric: tabular-nums;
+}
+
+.dashboard-expense-donut-legend-amount {
+	font-size: 0.6em;
+	color: var(--db-text-muted);
+	text-align: right;
+	flex-shrink: 0;
+	font-variant-numeric: tabular-nums;
+}
+
+/* Trend bars */
+.dashboard-expense-trend-container {
+	min-height: 140px;
+	position: relative;
+}
+
+.dashboard-expense-trend-svg {
+	display: block;
+}
+
+.dashboard-expense-trend-bar {
+	transition: opacity 0.12s;
+}
+.dashboard-expense-trend-bar:hover {
+	opacity: 0.75;
+}
+
+.dashboard-expense-trend-tick {
+	fill: var(--db-text-faint);
+	font-size: 0.5em;
+}
+
+/* Comparison line chart (income vs expense) */
+.dashboard-expense-lines-container {
+	min-height: 140px;
+	position: relative;
+}
+
+.dashboard-expense-lines-svg {
+	display: block;
+}
+
+.dashboard-expense-lines-legend {
+	display: flex;
+	justify-content: flex-end;
+	gap: 12px;
+	margin-bottom: 8px;
+}
+
+.dashboard-expense-lines-legend-item {
+	gap: 6px;
+}
+
+.dashboard-expense-lines-legend-name {
+	font-size: 0.65em;
+	color: var(--db-text-muted);
+	white-space: nowrap;
+}
+
+.dashboard-expense-lines-baseline {
+	stroke: var(--db-border-card);
+	stroke-width: 1;
+}
+
+.dashboard-expense-lines-line {
+	fill: none;
+	stroke-width: 1.5;
+	stroke-linejoin: round;
+	stroke-linecap: round;
+}
+
+.dashboard-expense-lines-dot {
+	stroke: none;
+}
+
+.dashboard-expense-lines-slot {
+	fill: transparent;
+	/* Guarantee hit-testing even where the UA treats transparent as unpainted. */
+	pointer-events: all;
+}
+
+.dashboard-expense-lines-guide {
+	stroke: var(--db-text-faint);
+	stroke-width: 1;
+	stroke-dasharray: 3 3;
+	opacity: 0;
+	transition: opacity 0.1s;
+}
+
+.dashboard-expense-lines-guide--visible {
+	opacity: 0.7;
+}
+
+/* Shared hover tooltip for the hand-rolled charts */
+.dashboard-expense-chart-tip {
+	position: absolute;
+	pointer-events: none;
+	background: var(--db-bg-modal-raised, var(--background-primary, var(--db-bg)));
+	color: var(--db-text);
+	font-size: 0.62em;
+	line-height: 1.35;
+	font-variant-numeric: tabular-nums;
+	padding: 4px 8px;
+	border-radius: var(--db-radius-sm, 6px);
+	border: 1px solid var(--db-border-card);
+	box-shadow: var(--nand-shadow-sm, 0 3px 10px rgba(0, 0, 0, 0.18));
+	white-space: nowrap;
+	z-index: 5;
+	opacity: 0;
+	transition: opacity 0.1s;
+}
+
+.dashboard-expense-chart-tip--visible {
+	opacity: 1;
+}
+
+/* Category ranking */
+.dashboard-expense-rank-row {
+	margin-bottom: 7px;
+}
+
+.dashboard-expense-rank-head {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	margin-bottom: 3px;
+}
+
+.dashboard-expense-rank-name {
+	font-size: 0.68em;
+	color: var(--db-text);
+	flex: 1;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.dashboard-expense-rank-amount {
+	font-size: 0.62em;
+	color: var(--db-text-muted);
+	flex-shrink: 0;
+	font-variant-numeric: tabular-nums;
+}
+
+.dashboard-expense-rank-bar-wrap {
+	height: 6px;
+	border-radius: 999px;
+	background: var(--db-bg-hover);
+	overflow: hidden;
+}
+
+.dashboard-expense-rank-bar {
+	height: 100%;
+	border-radius: 999px;
+}
+
+/* Record table */
+.dashboard-expense-records-scroll {
+	max-height: 500px;
+	overflow: auto;
+	scrollbar-width: thin;
+}
+
+.dashboard-expense-records-table {
+	width: 100%;
+	border-collapse: collapse;
+}
+
+.dashboard-expense-records-table th {
+	position: sticky;
+	top: 0;
+	z-index: 1;
+	background: var(--db-bg-modal, var(--background-primary, var(--db-bg)));
+	font-size: 0.6em;
+	font-weight: 600;
+	color: var(--db-text-muted);
+	text-transform: uppercase;
+	letter-spacing: 0.05em;
+	text-align: left;
+	padding: 4px 6px;
+	border-bottom: 1px solid var(--db-border-card);
+	white-space: nowrap;
+}
+
+.dashboard-expense-records-table th:nth-child(2) {
+	text-align: right;
+}
+
+.dashboard-expense-records-table td {
+	font-size: 0.68em;
+	padding: 5px 6px;
+	border-bottom: 1px solid color-mix(in srgb, var(--db-border-card) 50%, transparent);
+	vertical-align: middle;
+	white-space: nowrap;
+}
+
+.dashboard-expense-records-table tbody tr:hover td {
+	background: var(--db-bg-hover);
+}
+
+.dashboard-expense-records-type {
+	width: 20px;
+}
+
+.dashboard-expense-records-type > div {
+	display: flex;
+	align-items: center;
+}
+
+.dashboard-expense-records-type svg {
+	width: 12px;
+	height: 12px;
+}
+
+.dashboard-expense-records-type--expense {
+	color: var(--db-danger, #e74c3c);
+}
+
+.dashboard-expense-records-type--income {
+	color: #2ecc71;
+}
+
+.dashboard-expense-records-amount {
+	text-align: right;
+	font-weight: 600;
+	color: var(--db-text);
+	font-variant-numeric: tabular-nums;
+}
+
+.dashboard-expense-records-amount--income {
+	color: #2ecc71;
+}
+
+.dashboard-expense-records-category {
+	color: var(--db-text-muted);
+	/* Wide enough for 4-6 character custom category names; the date column
+	   below shrinks to its content (MM-DD) to fund the width. */
+	max-width: 100px;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+.dashboard-expense-records-note {
+	max-width: 80px;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	color: var(--db-text-faint);
+}
+
+.dashboard-expense-records-date {
+	color: var(--db-text-muted);
+	font-variant-numeric: tabular-nums;
+	/* Shrink-to-content hint: the usual MM-DD stays as narrow as its digits,
+	   leaving the spare width to the category column. */
+	width: 1%;
+}
+
+.dashboard-expense-records-actions {
+	width: 26px;
+}
+
+.dashboard-expense-records-delete {
+	border: none;
+	box-shadow: none;
+	background: transparent;
+	padding: 0;
+	height: auto;
+	width: 20px;
+	height: 20px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	cursor: pointer;
+	color: var(--db-text-faint);
+	border-radius: var(--db-radius-sm, 6px);
+	opacity: 0;
+	transition: opacity var(--nand-duration) var(--nand-ease), color var(--nand-duration) var(--nand-ease), background-color var(--nand-duration) var(--nand-ease);
+}
+
+.dashboard-expense-records-table tbody tr:hover .dashboard-expense-records-delete,
+.dashboard-expense-records-delete:focus-visible {
+	opacity: 1;
+}
+
+.dashboard-expense-records-delete:hover {
+	color: var(--db-danger, var(--color-red));
+	background: color-mix(in srgb, var(--db-danger, var(--color-red)) 10%, transparent);
+}
+
+.dashboard-expense-records-delete svg {
+	width: 12px;
+	height: 12px;
+}
+
+/* Responsive: old-engine fallback for the container collapse above (no
+   container-query support → collapse on narrow VIEWPORTS instead; narrow
+   panes on old engines keep the squeezed two-column behavior). */
+@media (max-width: 900px) {
+	.dashboard-expense-stats-body {
+		grid-template-columns: 1fr;
+		grid-template-rows: auto;
+		grid-template-areas:
+			"kpi"
+			"mid"
+			"right";
+	}
+
+	.dashboard-expense-stats-modal--wide {
+		max-width: 420px;
+		max-height: 80vh;
+	}
+
+	.dashboard-expense-donut-legend--grid {
+		grid-template-columns: 1fr;
+	}
+
+	/* Touch has no hover: keep delete buttons visible. */
+	.dashboard-expense-records-delete {
+		opacity: 0.6;
+	}
+}
+
+@media (max-width: 640px) {
+	.dashboard-expense-stats-modal--wide {
+		width: 96%;
+		padding: 16px;
+	}
+
+	.dashboard-expense-stats-header {
+		justify-content: flex-start;
+	}
+
+	.dashboard-expense-records-note {
+		max-width: 90px;
+	}
+}
+

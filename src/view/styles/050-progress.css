@@ -1,0 +1,31 @@
+/* ===== Progress ===== */
+.dashboard-progress {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	margin-bottom: 6px;
+}
+
+.dashboard-progress-bar {
+	flex: 1;
+	height: 6px;
+	background: var(--db-bg-hover);
+	border-radius: var(--nand-radius-pill);
+	overflow: hidden;
+}
+
+.dashboard-progress-fill {
+	height: 100%;
+	background: linear-gradient(90deg, var(--db-progress-from), var(--db-progress-to));
+	border-radius: var(--nand-radius-pill);
+	transition: width 0.3s ease;
+}
+
+.dashboard-progress-text {
+	font-size: 0.82em;
+	opacity: 0.7;
+	min-width: 36px;
+	text-align: right;
+	font-variant-numeric: tabular-nums;
+}
+

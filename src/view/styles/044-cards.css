@@ -1,0 +1,165 @@
+/* ===== Cards ===== */
+.dashboard-card {
+	background: var(--db-bg-card);
+	border: 1px solid var(--db-border-card);
+	border-radius: var(--db-radius-md);
+	padding: var(--size-4-3) var(--size-4-4) var(--size-4-4);
+	box-shadow: var(--db-shadow-card);
+	transition: transform var(--nand-duration) var(--nand-ease), box-shadow var(--nand-duration) var(--nand-ease), background-color var(--nand-duration) var(--nand-ease), border-color var(--nand-duration) var(--nand-ease);
+	cursor: grab;
+	position: relative;
+	backdrop-filter: var(--db-backdrop-blur);
+	-webkit-backdrop-filter: var(--db-backdrop-blur);
+	overflow: hidden;
+	display: flex;
+	flex-direction: column;
+}
+
+.dashboard-card:hover {
+	transform: translateY(-1px);
+	box-shadow: var(--db-shadow-card-hover);
+	background: var(--db-bg-card-hover);
+}
+
+.dashboard-card[draggable="true"]:active {
+	cursor: grabbing;
+}
+
+.dashboard-card--dragging {
+	opacity: 0.4;
+	transform: rotate(2deg);
+	transition: none;
+}
+
+.dashboard-card--ghost,
+.dashboard-card--ghost * {
+	transition: none;
+}
+
+.dashboard-section-row--drag-over {
+	border-color: var(--db-accent);
+	background: var(--db-bg-drop-indicator);
+}
+
+.dashboard-card-header {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	/* User-tuned: one step below the section title's size — was 1.0em/10px,
+	   which read as heavy and left a wide band above the card's items. */
+	margin-bottom: 6px;
+	flex-shrink: 0;
+}
+
+.dashboard-card-title {
+	font-size: 0.875em;
+	font-weight: 600;
+	margin: 0;
+	flex: 1;
+	line-height: 1.3;
+}
+
+.dashboard-title-edit-input {
+	width: 100%;
+	background: var(--db-bg-input);
+	border: 1px solid var(--db-border-input-focus);
+	border-radius: var(--db-radius-sm);
+	color: var(--db-text);
+	font-size: 1em;
+	font-weight: 600;
+	font-family: var(--db-font);
+	padding: 2px 6px;
+	outline: none;
+}
+
+.dashboard-section-rename-input {
+	width: 100%;
+	background: var(--db-bg-input);
+	border: 1px solid var(--db-border-input-focus);
+	border-radius: var(--db-radius-sm);
+	color: var(--db-text);
+	font-size: 1em;
+	font-weight: 700;
+	font-family: var(--db-font);
+	padding: 2px 6px;
+	outline: none;
+}
+
+.dashboard-card-actions {
+	display: flex;
+	align-items: center;
+	gap: 2px;
+	opacity: 0;
+	transition: opacity var(--nand-duration-fast) var(--nand-ease);
+}
+
+.dashboard-card:hover .dashboard-card-actions {
+	opacity: 1;
+}
+
+/* Card header icon buttons: a quiet square that tints on hover, matching the
+   section header and widget header buttons. */
+.dashboard-card-btn {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	background: none !important;
+	border: none !important;
+	box-shadow: none !important;
+	color: var(--db-text-muted);
+	cursor: pointer;
+	padding: 2px;
+	font-size: 0.85em;
+	border-radius: var(--db-radius-sm);
+	transition: color var(--nand-duration-fast) var(--nand-ease), background-color var(--nand-duration-fast) var(--nand-ease);
+	line-height: 1;
+	outline: none;
+}
+
+.dashboard-card-btn svg {
+	width: 15px;
+	height: 15px;
+}
+
+.dashboard-card-btn:hover {
+	color: var(--db-text) !important;
+	background-color: var(--db-bg-hover) !important;
+}
+
+.dashboard-card-btn--danger:hover {
+	color: var(--db-danger) !important;
+}
+
+/* Per-card "new note" (notes/projects sections): accent tint on hover so it
+   reads as a create action next to neutral edit and danger delete. */
+.dashboard-card-btn--newnote:hover {
+	color: var(--db-accent) !important;
+}
+
+.dashboard-card-body {
+	font-size: 0.95em;
+	color: var(--db-text-muted);
+	line-height: 1.3;
+	flex: 1;
+	min-height: 0;
+	overflow-y: auto;
+	scrollbar-width: none;
+}
+
+.dashboard-card-body--doc-drop {
+	outline: 2px dashed var(--db-border-accent);
+	outline-offset: -2px;
+	border-radius: var(--db-radius-sm);
+	background: var(--db-bg-card-hover);
+}
+
+.dashboard-card--file-drop {
+	outline: 2px dashed var(--db-border-accent);
+	outline-offset: -4px;
+	background: var(--db-bg-card-hover);
+}
+
+.dashboard-card-body::-webkit-scrollbar {
+	width: 0;
+}
+

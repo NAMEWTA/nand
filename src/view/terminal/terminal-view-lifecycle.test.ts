@@ -10,23 +10,26 @@ registerHooks({
 	resolve(specifier, context, nextResolve) {
 		if (specifier === './ContextPanel') return { shortCircuit: true, url: moduleUrl('export const ContextPanel = () => {};') };
 		if (specifier === 'obsidian') return { shortCircuit: true, url: moduleUrl(`
-			export class ItemView { constructor(leaf) { this.leaf = leaf; this.app = leaf.app; this.contentEl = leaf.el; this.containerEl = leaf.el; } register() {} registerEvent() {} }
+			export class Component { register() {} registerEvent() {} addChild(child) { return child; } removeChild() {} }
+			export function setIcon() {} export function setTooltip() {}
+			export class ItemView extends Component { constructor(leaf) { super(); this.leaf = leaf; this.app = leaf.app; this.contentEl = leaf.el; this.containerEl = leaf.el; this.getViewType(); this.getDisplayText(); this.getIcon(); } }
 			export class FileSystemAdapter {} export class Menu {} export class Notice {} export class TFile {} export class TFolder {} export class Modal {}`) };
 		if (specifier === 'electron') return { shortCircuit: true, url: moduleUrl('export const shell = {}, webUtils = {};') };
 		if (specifier === 'preact') return { shortCircuit: true, url: moduleUrl('export const h = () => null, render = () => {};') };
-		if (specifier === './TerminalWorkbench' || specifier === './workbench') return { shortCircuit: true, url: moduleUrl('export const TerminalWorkbench = () => {}, confirmSessionClose = () => {}, HistoryPreview = () => {}, HistorySidebar = () => {}, NewConversationButton = () => {}, SessionSidebar = () => {}, TerminalHeader = () => {}, UsageFooter = () => {};') };
+		if (context.parentURL?.endsWith('/terminal-surface.ts') && (specifier === './TerminalWorkbench' || specifier === './workbench')) return { shortCircuit: true, url: moduleUrl('export const TerminalWorkbench = () => {}, confirmSessionClose = () => {}, HistoryPreview = () => {}, HistorySidebar = () => {}, NewConversationButton = () => {}, SessionSidebar = () => {}, TerminalHeader = () => {}, UsageFooter = () => {};') };
 		return nextResolve(specifier, context);
 	},
 	load(url, context, nextLoad) {
-		if (!url.endsWith('/terminal-view.ts')) return nextLoad(url, context);
+		if (!url.endsWith('/terminal-view.ts') && !url.endsWith('/terminal-surface.ts') && !url.endsWith('/native-surface.ts')) return nextLoad(url, context);
 		return { format: 'module', shortCircuit: true, source: ts.transpileModule(readFileSync(fileURLToPath(url), 'utf8'), {
 			compilerOptions: { module: ts.ModuleKind.ESNext, target: ts.ScriptTarget.ES2021 },
 		}).outputText };
 	},
 });
+const { TerminalSurface } = await import('./terminal-surface.ts');
 const { TerminalView } = await import('./terminal-view.ts');
 const settled = () => new Promise<void>((resolve) => setImmediate(resolve));
-function fixture() {
+function fixture(embedded = false) {
 	let timerId = 0;
 	const timers = new Map<number, () => void>(), frames = new Map<number, () => void>(), cancelled: number[] = [], active: string[] = [];
 	const win = {
@@ -41,14 +44,14 @@ function fixture() {
 	const leaves: any[] = [];
 	const events = new Map<string, Set<(...args: any[]) => void>>();
 	const app = { workspace: {
-		getLeavesOfType: () => leaves, revealLeaf: async () => {},
+		getLeavesOfType: () => leaves, revealLeaf: async () => {}, iterateAllLeaves: (visit: (leaf: unknown) => void) => leaves.forEach(visit), requestSaveLayout() {},
 		on(name: string, callback: (...args: any[]) => void) { const listeners = events.get(name) ?? new Set(); listeners.add(callback); events.set(name, listeners); return { name, callback }; },
 		offref(ref: { name: string; callback: (...args: any[]) => void }) { events.get(ref.name)?.delete(ref.callback); },
 	} };
 	const leaf = { app, el, detach() {}, view: null as any };
 	const host = { recordActiveSession: (id: string) => active.push(id), handleTerminalViewClosed() {}, getTerminalRenderer: async () => ({ id: 'chosen' }) };
-	const view = new TerminalView(leaf as never, { subscribe: () => () => {} } as never, host as never) as any;
-	leaf.view = view; leaves.push(leaf);
+	const view = new TerminalSurface({ app, leaf, contentEl: el, containerEl: el, embedded, close: () => leaf.detach() } as never, { subscribe: () => () => {} } as never, host as never) as any;
+	leaf.view = { getNativeSurfaces: () => [view] }; leaves.push(leaf);
 	view.drawWorkbench = () => {};
 	view.ensureDropHint = () => {};
 	view.hideDropHint = () => {};
@@ -79,7 +82,7 @@ function visibilityFixture() {
 
 test('activating a shown popout corrects visibility measured while migration was hidden', () => {
 	const f = visibilityFixture();
-	TerminalView.prototype['bindOutputPause'].call(f.view);
+	TerminalSurface.prototype['bindOutputPause'].call(f.view);
 	assert.equal(f.renderer.visible, false);
 	f.show();
 	f.emit('active-leaf-change', f.leaf);
@@ -244,12 +247,34 @@ test('an explicit session choice cancels the still-pending automatic initializat
 	await selection;
 });
 
-test('selecting a session already open in another leaf updates recent-session order', () => {
+test('selecting a session already open in another leaf updates recent-session order', async () => {
 	const f = fixture(), other = fixture(), renderer = { id: 'existing' };
+	let focused = 0;
 	other.view.terminalInstance = renderer;
+	other.view.focusTerminal = () => { focused++; };
 	f.leaves.push(other.leaf);
-	f.view.selectSession(renderer);
+	await f.view.selectSession(renderer);
 	assert.deepEqual(f.active, ['existing']);
+	assert.equal(focused, 1);
+	assert.equal(f.view.terminalInstance, null);
+	assert.equal(other.view.terminalInstance, renderer);
+});
+
+test('focus false reveals the owner of a session held elsewhere without taking its input', async () => {
+	const f = fixture(), other = fixture(), renderer = { id: 'existing' };
+	let focused = 0, revealed = 0, ownerRevealed = 0;
+	other.view.terminalInstance = renderer;
+	other.view.focusTerminal = () => { focused++; };
+	f.leaves.push(other.leaf);
+	f.view.app.workspace.revealLeaf = async (leaf: unknown) => { revealed++; assert.equal(leaf, other.leaf); };
+	other.view.app.workspace.revealLeaf = async () => { ownerRevealed++; };
+	await f.view.selectSession(renderer, false);
+	assert.deepEqual(f.active, ['existing']);
+	assert.equal(revealed, 1);
+	assert.equal(ownerRevealed, 1);
+	assert.equal(focused, 0);
+	assert.equal(f.view.terminalInstance, null);
+	assert.equal(other.view.terminalInstance, renderer);
 });
 
 test('a renderer finishing after the view closes is never adopted', async () => {
@@ -306,13 +331,37 @@ test('the lazy controller placeholder cannot reopen a leaf closed while its serv
 	const plugin = { ...f.host, isActive: () => true, consumePendingRestoredTerminal: () => null, getTerminalService: () => new Promise((resolve) => { resolveService = resolve; }) };
 	const view = new Placeholder(f.leaf, plugin);
 	view.contentEl.createDiv = (options: unknown) => view.contentEl.createEl('div', options);
-	for (const method of ['drawWorkbench', 'ensureDropHint', 'hideDropHint', 'bindOutputPause']) view[method] = () => {};
-	view.terminalContainer = f.leaf.el;
-	view.removeDropHandlers = () => {};
+	for (const method of ['drawWorkbench', 'ensureDropHint', 'hideDropHint', 'bindOutputPause']) view.surface[method] = () => {};
+	view.surface.terminalContainer = f.leaf.el;
+	view.surface.removeDropHandlers = () => {};
 	const opening = view.onOpen();
 	await view.onClose();
 	resolveService({ subscribe: () => () => {} });
 	await opening;
-	assert.equal(view.closed, true);
+	assert.equal(view.surface.closed, true);
 	assert.equal(f.timers.size, 0);
+});
+
+
+test('opening and revisiting an embedded Agent never schedules an implicit PTY', async () => {
+ const f = fixture(true); let created = 0;
+ f.view.initializeTerminal = async () => { created++; };
+ await f.view.onOpen(); f.tick();
+ assert.equal(created, 0); assert.equal(f.view.isInitializing(), false); assert.equal(f.timers.size, 0);
+ f.view.setVisible(false); f.view.setVisible(true); f.tick();
+ assert.equal(created, 0); assert.equal(f.timers.size, 0);
+ await f.view.onClose();
+});
+test('closing an embedded presentation releases its renderer but never terminates the process', async () => {
+ const f = fixture(true); let releases = 0, destroys = 0;
+ f.view.terminalService = { destroyTerminal() { destroys++; } };
+ f.view.terminalInstance = { id: 'retained-session', release() { releases++; } };
+ await f.view.onClose();
+ assert.equal(releases, 1); assert.equal(destroys, 0);
+});
+test('workbench navigation sections never invoke session creation', () => {
+ const f = fixture(true); let creates = 0;
+ f.view.newSession = async () => { creates++; };
+ for (const section of ['running', 'history', 'usage']) { f.view.showSection(section); assert.equal(f.view.getSection(), section); }
+ assert.equal(creates, 0);
 });

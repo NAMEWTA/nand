@@ -1,0 +1,67 @@
+/* ===== Sidebar Widgets ===== */
+.dashboard-sidebar-widgets {
+	display: flex;
+	flex-direction: column;
+	gap: 6px;
+	padding: 0 4px;
+}
+
+/* Proportional content scaling (side layout): widget internals are em-based,
+   so tying the area's root font-size to the dragged sidebar width scales
+   every card's type together — 220 (the default width) is exactly the 1.0
+   baseline, so the stock render is pixel-identical. The clamp keeps the
+   smallest labels (0.65em tiers) legible at the 180 floor and stops
+   headlines ballooning at the 420 ceiling. Fixed-px internals (book covers,
+   the pomodoro ring, paddings) deliberately stay put — only type breathes.
+   The stacked strip ignores this: its columns are a fixed 240px and the
+   ratio input (--db-sidebar-w) only moves in the side layout. */
+.dashboard-sidebar-widgets[data-layout="side"] {
+	font-size: calc(1em * clamp(0.92, var(--db-sidebar-w, 220) / 220, 1.12));
+}
+
+.dashboard-sidebar-widget {
+	background: var(--db-bg-card);
+	border: 1px solid var(--db-border-card);
+	border-radius: var(--db-radius-md);
+	padding: 12px;
+	backdrop-filter: var(--db-backdrop-blur);
+	-webkit-backdrop-filter: var(--db-backdrop-blur);
+	cursor: grab;
+}
+
+.dashboard-sidebar-widget--dragging {
+	opacity: 0.4;
+}
+
+.dashboard-sidebar-widget--drag-over-top {
+	border-top: 2px solid var(--db-accent) !important;
+}
+
+.dashboard-sidebar-widget--drag-over-bottom {
+	border-bottom: 2px solid var(--db-accent) !important;
+}
+
+/* Single-button toolbar dropdown (view switcher / card size): pill shows the
+ * current selection (icon or letter) plus a tiny caret hinting the menu. */
+.dashboard-toolbar-dropdown {
+	display: inline-flex;
+	align-items: center;
+	gap: 2px;
+}
+
+.dashboard-toolbar-dropdown {
+	/* Both dropdown flavors share one box: the icon glyphs render 16px tall
+	   (setIcon default), so the button gets that fixed content height — the
+	   S/M/L letter button then matches the view button's size exactly. */
+	min-height: 16px;
+}
+
+.dashboard-toolbar-dropdown-text {
+	font-size: 0.82em;
+	font-weight: 700;
+	height: 16px;
+	line-height: 16px;
+	min-width: 16px;
+	text-align: center;
+}
+

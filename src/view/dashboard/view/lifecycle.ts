@@ -13,13 +13,13 @@ import { invalidateScanningSectionSignatures } from '../renderer/render-dashboar
 import { closeOwnedDashboardPanels } from '../ui/panel-modal';
 import { showPromptDialog } from '../ui/prompt-dialog';
 import { loadHolidayData } from '../widgets/lunar-model';
-import type { DashboardView } from './dashboard-view';
+import type { DashboardSurface } from './dashboard-surface';
 
-export function showModuleDisabled(this: DashboardView): void {
+export function showModuleDisabled(this: DashboardSurface): void {
 	if (this.isOpen || this.isOpening) {
 		void onClose.call(this);
 	}
-	const root = this.containerEl.children[1] as HTMLElement | undefined;
+	const root = this.contentEl;
 	if (!root) return;
 	root.empty();
 	root.addClass('nand-module-off');
@@ -27,11 +27,11 @@ export function showModuleDisabled(this: DashboardView): void {
 		icon: 'layout-dashboard',
 		title: t('modules.dashboard'),
 		description: t('modules.dashboardOff'),
-		action: { label: t('modules.openHome'), run: () => this.plugin.openHome() },
+		action: { label: t('modules.openHome'), run: () => this.plugin.openSettings() },
 	});
 }
 
-export async function onOpen(this: DashboardView): Promise<void> {
+export async function onOpen(this: DashboardSurface): Promise<void> {
 	if (!this.plugin.settings.modules.dashboard) {
 		showModuleDisabled.call(this);
 		return;
@@ -95,7 +95,7 @@ export async function onOpen(this: DashboardView): Promise<void> {
 	});
 }
 
-export async function onClose(this: DashboardView): Promise<void> {
+export async function onClose(this: DashboardSurface): Promise<void> {
 	closeOwnedDashboardPanels(this.app, this);
 	this.lifecycleRevision++;
 	this.isOpening = false;
@@ -123,7 +123,7 @@ export async function onClose(this: DashboardView): Promise<void> {
 	await observeDashboardPromise(this.sync.close());
 }
 
-export function handleDataUpdate(this: DashboardView, data: DashboardData, source: DashboardUpdateSource): void {
+export function handleDataUpdate(this: DashboardSurface, data: DashboardData, source: DashboardUpdateSource): void {
 	const previous = this.data;
 	this.data = data;
 	if (this.isOpening || !this.isOpen) {
@@ -158,7 +158,7 @@ export function handleDataUpdate(this: DashboardView, data: DashboardData, sourc
 	this.render(data);
 }
 
-export async function refresh(this: DashboardView): Promise<void> {
+export async function refresh(this: DashboardSurface): Promise<void> {
 	this.sync.updateSettings(this.plugin.settings);
 	const data = this.sync.getData();
 	if (data) {
@@ -168,7 +168,7 @@ export async function refresh(this: DashboardView): Promise<void> {
 
 /** Reload the dashboard file from disk (e.g. after a backup restore) and
  *  re-render. The sync engine re-reads and notifies, which triggers render. */
-export async function reloadFromDisk(this: DashboardView): Promise<void> {
+export async function reloadFromDisk(this: DashboardSurface): Promise<void> {
 	await observeDashboardPromise(this.sync.reloadFromDisk());
 }
 
@@ -176,12 +176,12 @@ export async function reloadFromDisk(this: DashboardView): Promise<void> {
  *  reload. Called by the plugin after any workspace switch/registry change.
  *  Settings objects are replaced (not mutated) on every save, so the fresh
  *  reference must be pushed into the engine before it re-resolves the file. */
-export async function applyWorkspaceSwitch(this: DashboardView): Promise<void> {
+export async function applyWorkspaceSwitch(this: DashboardSurface): Promise<void> {
 	this.sync.updateSettings(this.plugin.settings);
 	await observeDashboardPromise(this.sync.switchFile());
 }
 
-export async function addSection(this: DashboardView): Promise<void> {
+export async function addSection(this: DashboardSurface): Promise<void> {
 	const name = await showPromptDialog(this.app, { title: t('renderer.sectionName') });
 	if (name) {
 		void observeDashboardPromise(this.sync.addColumn(name));
@@ -190,7 +190,7 @@ export async function addSection(this: DashboardView): Promise<void> {
 
 /** Flip the banner between poster & quotes and the stats dashboard.
  *  updateBanner persists the new mode and re-renders via the sync callback. */
-export async function toggleBannerMode(this: DashboardView): Promise<void> {
+export async function toggleBannerMode(this: DashboardSurface): Promise<void> {
 	const data = this.sync.getData();
 	if (!data) return;
 	const nextMode = data.banner.mode === 'stats' ? 'quote' : 'stats';

@@ -1,3 +1,4 @@
+import { getRecentDocs, renderRecentDocs } from '../ui/recent';
 import { mountSaveState } from '../SaveStatePanel';
 import type { DashboardData } from '../../../core/dashboard/types/index';
 import { applyAppearance } from '../appearance/appearance';
@@ -5,13 +6,13 @@ import { renderBanner } from '../banner/banner';
 import { renderQuickNoteRegion } from '../notes/quick-note-section';
 import { bindRenderContext, getRenderContext } from '../renderer/render-context';
 import { renderDashboard } from '../renderer/render-dashboard';
-import { isStackedLayout, sidebarWidgetSignature } from '../renderer/render-sidebar-widgets';
+import { isStackedLayout, sidebarWidgetSignature, renderSidebarWeekCalendar } from '../renderer/render-sidebar-widgets';
 import { setupDragAndDrop } from '../ui/dnd';
 import { captureRootScrollState, restoreRootScrollState } from '../ui/scroll-preserve';
 import { renderWorkspaceSwitcher } from '../workspace/workspace-switcher';
-import type { DashboardView } from './dashboard-view';
+import type { DashboardSurface } from './dashboard-surface';
 
-export function render(this: DashboardView, data: DashboardData): void {
+export function render(this: DashboardSurface, data: DashboardData): void {
 	// Snapshot EVERY scrolled container (stacked region, board, sidebar
 	// rail, widget deck, card decks, task lists, widget internals — and the
 	// root itself, which scrolls on mobile) before any teardown. Keyed by
@@ -21,7 +22,7 @@ export function render(this: DashboardView, data: DashboardData): void {
 	// every re-render jumped the deck back to its first column. This must
 	// run BEFORE the widgets detach below, while the deck is still in the
 	// tree.
-	const prevRoot = this.containerEl.children[1] as HTMLElement | undefined;
+	const prevRoot = this.contentEl;
 	const savedRootScroll = captureRootScrollState(prevRoot ?? createDiv());
 	// Detach the sidebar widgets before tearing the rest down. If their
 	// inputs (signature below) are unchanged, this exact node is re-attached
@@ -30,7 +31,7 @@ export function render(this: DashboardView, data: DashboardData): void {
 	// countdowns keep ticking, no vault re-scan).
 	const oldWidgets = prevRoot?.querySelector('.dashboard-sidebar-widgets');
 	if (oldWidgets instanceof HTMLElement) {
-		bindRenderContext(oldWidgets, getRenderContext(prevRoot!));
+		bindRenderContext(oldWidgets, getRenderContext(prevRoot));
 		oldWidgets.remove();
 		this.sidebarWidgetsEl = oldWidgets;
 	}
@@ -47,7 +48,7 @@ export function render(this: DashboardView, data: DashboardData): void {
 	this.data = data;
 	this.sidebarWidgetsSig = widgetSig;
 
-	const container = this.containerEl.children[1] as HTMLElement;
+	const container = this.contentEl;
 
 	// Sweep any touch-drag ghost clones stranded on activeDocument.body from a prior
 	// interrupted drag (touchcancel). They live outside the container, so
@@ -112,6 +113,13 @@ export function render(this: DashboardView, data: DashboardData): void {
 		renderQuickNoteRegion(mainLayout, this.plugin.settings, this.createCallbacks());
 	}
 	const contentHost = stacked ? mainLayout.createDiv({ cls: 'dashboard-scroll-region' }) : mainLayout;
+	if (this.embedded && stacked) {
+		const overview = contentHost.createDiv({ cls: 'nand-workbench-home-overview' });
+		renderSidebarWeekCalendar(overview.createDiv({ cls: 'nand-workbench-home-calendar' }));
+		const recent = overview.createDiv({ cls: 'nand-workbench-home-recent' });
+		renderRecentDocs(recent, getRecentDocs(this.app, this.plugin.settings.recentDocCount, this.plugin.settings), (path) => { void this.navigateToPath(path); });
+	}
+
 
 	// Rail state classes apply in BOTH layouts: in stacked mode they carry
 	// strip semantics instead (collapse to a slim bar, expand on click,

@@ -1,0 +1,91 @@
+/* ===== Sticky ("便利贴") section: memo + todo cards in one todo-style row =====
+   Container follows the todo section (see the grouped rules above); these only
+   restore each card flavor's internals, which the memo/todo section-scoped
+   rules would otherwise provide. */
+.dashboard-section-row[data-section-type="sticky"] .dashboard-card--generic,
+.dashboard-section-row[data-section-type="sticky"] .dashboard-card--note {
+	overflow: hidden;
+	display: flex;
+	flex-direction: column;
+	padding: 10px 16px 10px 12px;
+	flex-shrink: 0;
+	min-height: 200px;
+}
+
+.dashboard-section-row[data-section-type="sticky"] .dashboard-card--generic .dashboard-card-body,
+.dashboard-section-row[data-section-type="sticky"] .dashboard-card--note .dashboard-card-body {
+	flex: 1;
+	min-height: 0;
+	display: flex;
+	flex-direction: column;
+}
+
+.dashboard-section-row[data-section-type="sticky"] .dashboard-card--generic .dashboard-memo-textarea,
+.dashboard-section-row[data-section-type="sticky"] .dashboard-card--note .dashboard-memo-textarea {
+	resize: none;
+	flex: 1;
+	min-height: 0;
+}
+
+.dashboard-section-row[data-section-type="sticky"] .dashboard-card--generic .dashboard-card-header,
+.dashboard-section-row[data-section-type="sticky"] .dashboard-card--note .dashboard-card-header {
+	flex-shrink: 0;
+}
+
+.dashboard-section-row[data-section-type="sticky"] .dashboard-card--task .dashboard-card-body {
+	flex: 1;
+	min-height: 0;
+	display: flex;
+	flex-direction: column;
+	overflow: hidden;
+}
+
+.dashboard-section-row[data-section-type="sticky"] .dashboard-card--task .dashboard-task-list {
+	flex: 1;
+	min-height: 0;
+	overflow-y: auto;
+}
+
+.dashboard-section-row[data-section-type="sticky"] .dashboard-card--task .dashboard-task-add,
+.dashboard-section-row[data-section-type="sticky"] .dashboard-card--task .dashboard-progress {
+	flex-shrink: 0;
+}
+
+/* Full-line anchor: these are flex items of the wrap kanban now and would
+   otherwise shrink to content width. position+z-index keep the button
+   clickable/painted above an embedded web frame in edge cases where the
+   frame's surface ends up over the line below it. */
+.dashboard-add-section {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	padding: 12px;
+	box-sizing: border-box;
+	flex: 0 0 100%;
+	/* At least 1.5x the button height of breathing room below, so the button
+	   lifts clear of the Obsidian mobile native bottom bar when scrolled to the end. */
+	margin-bottom: 60px;
+	background: var(--db-bg-add-section);
+	border: 1.5px dashed var(--db-border-add-section);
+	border-radius: var(--db-radius-lg);
+	color: var(--db-text-muted);
+	font-size: 0.82em;
+	font-weight: 500;
+	gap: var(--size-4-2);
+	cursor: pointer;
+	transition: background-color var(--nand-duration) var(--nand-ease), border-color var(--nand-duration) var(--nand-ease), color var(--nand-duration) var(--nand-ease);
+	position: relative;
+	z-index: 2;
+}
+
+.dashboard-add-section:hover {
+	background: var(--db-bg-hover-strong);
+	border-color: var(--db-accent);
+	color: var(--db-text);
+}
+
+.dashboard-add-section:focus-visible {
+	outline: 2px solid var(--db-accent);
+	outline-offset: 2px;
+}
+

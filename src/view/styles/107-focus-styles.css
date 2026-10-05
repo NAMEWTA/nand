@@ -1,0 +1,10 @@
+/* ==================== Focus Styles ==================== */
+.xterm:focus {
+  outline: none;
+}
+.xterm.focus .xterm-cursor {
+  opacity: 1;
+}
+.xterm:not(.focus) .xterm-cursor {
+  opacity: 0.5;
+}

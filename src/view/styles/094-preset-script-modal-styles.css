@@ -1,0 +1,26 @@
+/* ==================== Preset Script Modal Styles ==================== */
+/* The form scrolls; the title and footer stay pinned. */
+.modal.preset-script-modal {
+  width: min(860px, calc(100vw - 48px));
+  max-width: 860px;
+  max-height: min(90vh, 850px);
+  padding: var(--size-4-6);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.preset-script-modal .modal > .modal-close-button,
+.modal.preset-script-modal > .modal-close-button {
+  flex-shrink: 0;
+}
+
+.preset-script-modal .modal-title {
+  flex-shrink: 0;
+  margin-bottom: var(--size-4-4);
+}
+
+.preset-script-modal .modal-button-container {
+  flex-shrink: 0;
+}
+

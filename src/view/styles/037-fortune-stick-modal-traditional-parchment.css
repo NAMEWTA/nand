@@ -1,0 +1,101 @@
+/* ===== Fortune Stick Modal — Traditional Parchment ===== */
+.fortune-overlay {
+	position: fixed;
+	inset: 0;
+	z-index: 9999;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	background: rgba(0, 0, 0, 0.55);
+	backdrop-filter: blur(2px);
+	-webkit-backdrop-filter: blur(2px);
+}
+
+.fortune-card {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	padding: 36px 28px 28px;
+	min-width: 260px;
+	max-width: 300px;
+	margin: 0 auto;
+	background: linear-gradient(160deg, #f7f1e3 0%, #efe6d0 40%, #f2ead8 100%);
+	border: 2px solid #c9a96e;
+	border-radius: var(--nand-radius-md, 10px);
+	box-shadow:
+		0 2px 12px rgba(139, 69, 19, 0.15),
+		inset 0 0 30px rgba(139, 69, 19, 0.04);
+	color: #2c1810;
+	position: relative;
+}
+
+.fortune-card::before {
+	content: '';
+	position: absolute;
+	top: 6px;
+	left: 6px;
+	right: 6px;
+	bottom: 6px;
+	border: 1px solid rgba(201, 169, 110, 0.4);
+	border-radius: var(--nand-radius-xs, 4px);
+	pointer-events: none;
+}
+
+.fortune-card-title {
+	font-size: 1.5em;
+	font-weight: 700;
+	color: #8B2500;
+	margin-bottom: 6px;
+	letter-spacing: 0.12em;
+	text-align: center;
+}
+
+.fortune-card-subtitle {
+	font-size: 0.85em;
+	color: #6b5a42;
+	margin-bottom: 24px;
+	letter-spacing: 0.04em;
+	text-align: center;
+}
+
+/* Category Grid */
+.fortune-category-grid {
+	display: grid;
+	grid-template-columns: repeat(3, 1fr);
+	gap: 10px;
+	width: 100%;
+}
+
+.fortune-category-btn {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 8px;
+	padding: 16px 8px;
+	border-radius: var(--nand-radius-sm, 6px);
+	background: rgba(255, 252, 245, 0.7);
+	border: 1.5px solid #c9a96e;
+	cursor: pointer;
+	transition: background 0.2s, border-color 0.2s, box-shadow 0.2s, color 0.2s, transform 0.2s;
+	color: #2c1810;
+}
+
+.fortune-category-btn:hover {
+	background: rgba(196, 30, 58, 0.08);
+	border-color: #8B2500;
+	transform: translateY(-2px);
+	box-shadow: 0 2px 8px rgba(139, 37, 0, 0.12);
+}
+
+.fortune-category-emoji {
+	font-size: 1.5em;
+	line-height: 1;
+}
+
+.fortune-category-label {
+	font-size: 0.9em;
+	color: #2c1810;
+	font-weight: 600;
+	letter-spacing: 0.06em;
+}
+

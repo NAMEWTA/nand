@@ -1,0 +1,391 @@
+/* ===== Task Reminder ===== */
+.dashboard-task-reminder-btn {
+	background: none !important;
+	border: none !important;
+	box-shadow: none !important;
+	color: var(--db-text-muted);
+	cursor: pointer;
+	padding: 0 2px;
+	min-height: 0;
+	line-height: 1;
+	opacity: 0;
+	transition: opacity 0.15s ease, color 0.15s ease;
+	display: flex;
+	align-items: center;
+	flex-shrink: 0;
+}
+
+.dashboard-task-reminder-btn svg {
+	width: 14px;
+	height: 14px;
+}
+
+.dashboard-task-item:hover .dashboard-task-reminder-btn {
+	opacity: 1;
+}
+
+.dashboard-task-reminder-btn:hover {
+	color: var(--db-text) !important;
+}
+
+.dashboard-task-reminder-btn--active {
+	opacity: 0.6;
+	color: var(--db-accent) !important;
+}
+
+.dashboard-task-item:hover .dashboard-task-reminder-btn--active {
+	opacity: 0.8;
+}
+
+.dashboard-task-reminder-btn--overdue {
+	opacity: 1 !important;
+	color: var(--db-danger, #ef4444) !important;
+	animation: reminder-pulse 2s ease-in-out infinite;
+}
+
+@keyframes reminder-pulse {
+	0%, 100% { opacity: 1; }
+	50% { opacity: 0.5; }
+}
+
+.dashboard-task-reminder-popup {
+	background: var(--db-bg, #1e1e2e);
+	border: 1px solid var(--db-border-card, rgba(255, 255, 255, 0.10));
+	border-radius: var(--db-radius-md, 10px);
+	padding: 12px;
+	z-index: 10000;
+	box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+	min-width: 240px;
+	font-size: 0.8125em;
+	color: var(--db-text, var(--text-normal));
+}
+
+/* Countdown calendar popup — body-level, themed via applyModalTheme mirroring
+   (see countdown-modal.ts), so --db-* tokens resolve on it. */
+.dashboard-countdown-calendar-popup {
+	background: var(--db-bg-modal, var(--background-primary));
+	color: var(--db-text, var(--text-normal));
+	border-color: var(--db-border-card, var(--background-modifier-border));
+}
+
+.dashboard-countdown-calendar-popup .dashboard-task-reminder-calendar-day {
+	color: var(--db-text, var(--text-normal));
+}
+
+.dashboard-countdown-calendar-popup .dashboard-task-reminder-calendar-day--today {
+	color: var(--db-accent, var(--interactive-accent));
+}
+
+.dashboard-countdown-calendar-popup .dashboard-task-reminder-calendar-day--selected {
+	background: var(--db-accent, var(--interactive-accent)) !important;
+	color: var(--db-text-on-accent, var(--text-on-accent)) !important;
+}
+
+.dashboard-countdown-calendar-popup .dashboard-task-reminder-calendar-day--other-month {
+	color: var(--db-text-faint, var(--text-faint));
+}
+
+.dashboard-countdown-calendar-popup .dashboard-task-reminder-calendar-nav span {
+	color: var(--db-text, var(--text-normal));
+}
+
+/* The month label doubles as a button toggling the year-month panel. */
+.dashboard-countdown-calendar-popup .dashboard-countdown-cal-label {
+	flex: 1;
+	text-align: center;
+	color: var(--db-text, var(--text-normal));
+	background: transparent;
+	border: none;
+	cursor: pointer;
+	padding: 2px 8px;
+	border-radius: var(--db-radius-sm, 6px);
+}
+
+.dashboard-countdown-calendar-popup .dashboard-countdown-cal-label:hover {
+	background: var(--db-bg-hover, var(--background-modifier-hover));
+}
+
+/* Year-month panel: 12 month cells in a 3-column grid. The top nav above it
+   shows the year and its arrows step by years while this panel is open. */
+.dashboard-countdown-ym-panel {
+	padding: 2px 0 4px;
+}
+
+.dashboard-countdown-ym-grid {
+	display: grid;
+	grid-template-columns: repeat(3, 1fr);
+	gap: 4px;
+	padding: 4px 0;
+}
+
+.dashboard-countdown-ym-cell {
+	padding: 6px 4px;
+	border: 1px solid var(--db-border-card, var(--background-modifier-border));
+	border-radius: var(--db-radius-sm, 6px);
+	background: var(--db-bg-card, var(--background-secondary));
+	color: var(--db-text, var(--text-normal));
+	font-size: 0.75em;
+	cursor: pointer;
+}
+
+.dashboard-countdown-ym-cell:hover {
+	border-color: var(--db-accent, var(--interactive-accent));
+}
+
+.dashboard-countdown-ym-cell.dashboard-task-reminder-calendar-day--selected {
+	background: var(--db-accent, var(--interactive-accent));
+	color: var(--db-text-on-accent, var(--text-on-accent));
+	border-color: transparent;
+}
+
+/* Time row inside the calendar popup (date and time commit together). */
+.dashboard-countdown-popup-time {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	padding: 4px 0 6px;
+}
+
+.dashboard-countdown-popup-time-label {
+	color: var(--db-text-muted, var(--text-muted));
+	font-size: 0.75em;
+}
+
+.dashboard-countdown-popup-time .dashboard-countdown-time-sep {
+	color: var(--db-text-muted, var(--text-muted));
+}
+
+.dashboard-countdown-calendar-popup .dashboard-task-reminder-calendar-nav button {
+	color: var(--db-text-muted, var(--text-muted));
+}
+
+.dashboard-countdown-calendar-popup .dashboard-task-reminder-calendar-nav button:hover {
+	color: var(--db-text, var(--text-normal));
+	background: var(--db-bg-hover, var(--background-modifier-hover));
+}
+
+.dashboard-countdown-calendar-popup .dashboard-task-reminder-popup-btns button {
+	color: var(--db-text, var(--text-normal));
+	background: var(--db-bg-modal-raised, var(--background-secondary));
+	border-color: var(--db-border, var(--background-modifier-border));
+}
+
+.dashboard-countdown-calendar-popup .dashboard-task-reminder-popup-btns button:hover {
+	background: var(--background-modifier-hover);
+}
+
+.dashboard-countdown-calendar-popup .dashboard-task-reminder-popup-btns button.mod-cta {
+	background: var(--interactive-accent);
+	color: var(--db-text-on-accent);
+	border-color: var(--interactive-accent);
+}
+
+/* Calendar popup on body (outside theme scope) */
+.dashboard-library-calendar-popup,
+.dashboard-task-reminder-popup.dashboard-library-calendar-popup {
+	/* Opaque surface chain, kept in sync with the inline style TS sets — the
+	   old glass --db-bg-card let the page bleed through behind the dates. */
+	background: var(--db-bg-modal, var(--db-bg, var(--background-primary)));
+	color: var(--db-text, var(--text-normal));
+	border-color: var(--db-border-card, var(--background-modifier-border));
+}
+
+.dashboard-library-calendar-popup .dashboard-task-reminder-calendar-day {
+	color: var(--db-text, var(--text-normal)) !important;
+}
+
+.dashboard-library-calendar-popup .dashboard-task-reminder-calendar-day--today {
+	color: var(--db-accent, var(--interactive-accent));
+}
+
+.dashboard-library-calendar-popup .dashboard-task-reminder-calendar-day--selected {
+	background: var(--db-accent, var(--interactive-accent)) !important;
+	/* Follow the theme's accent-contrast text (bright accents like onyx's
+	   lemon need dark text — a hardcoded #fff was unreadable there). */
+	color: var(--db-text-on-accent, var(--text-on-accent)) !important;
+}
+
+/* Days between the range edges: accent-tinted band, square corners so the
+   highlight reads as one continuous strip between the two selected days. */
+.dashboard-library-calendar-popup .dashboard-task-reminder-calendar-day--in-range {
+	background: color-mix(in srgb, var(--db-accent, #8b5cf6) 20%, transparent) !important;
+	border-radius: 0;
+}
+
+/* Current pick state under the grid ("start ~ …" while choosing). */
+.dashboard-library-calendar-status {
+	font-size: 0.6875em;
+	color: var(--db-text-muted, var(--text-muted));
+	text-align: center;
+}
+
+/* Config-modal filter value chips: cap the chip cloud so a property with many
+   distinct values scrolls instead of stretching the modal. */
+.dashboard-library-value-list {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 4px;
+	max-height: 200px;
+	overflow-y: auto;
+}
+
+.dashboard-library-calendar-popup .dashboard-task-reminder-calendar-day--other-month {
+	color: var(--db-text-muted, var(--text-faint));
+}
+
+.dashboard-library-calendar-popup .dashboard-task-reminder-calendar-nav span {
+	color: var(--db-text, var(--text-normal)) !important;
+}
+
+.dashboard-library-calendar-popup .dashboard-task-reminder-calendar-nav button {
+	color: var(--db-text-muted, var(--text-muted)) !important;
+}
+
+.dashboard-library-calendar-popup .dashboard-task-reminder-calendar-nav button:hover {
+	color: var(--db-text, var(--text-normal));
+	background: var(--db-bg-card-hover, rgba(255, 255, 255, 0.08));
+}
+
+.dashboard-library-calendar-popup .dashboard-task-reminder-popup-btns button {
+	color: var(--db-text, var(--text-normal)) !important;
+}
+
+.dashboard-library-calendar-popup .dashboard-task-reminder-popup-btns button.mod-cta {
+	color: var(--db-text-on-accent);
+}
+
+.dashboard-library-calendar-popup .dashboard-task-reminder-time {
+	color: var(--db-text, var(--text-normal));
+}
+
+.dashboard-library-calendar-popup .dashboard-task-reminder-time select {
+	background: var(--db-bg-input, var(--db-bg-card));
+	color: var(--db-text, var(--text-normal));
+	border-color: var(--db-border-input, var(--db-border-card));
+}
+
+.dashboard-task-reminder-calendar-nav {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	margin-bottom: 4px;
+}
+
+.dashboard-task-reminder-calendar-nav span {
+	font-size: 0.75em;
+	font-weight: 500;
+}
+
+.dashboard-task-reminder-calendar-nav button {
+	background: none;
+	border: none;
+	cursor: pointer;
+	color: var(--db-text-muted);
+	padding: 2px 6px;
+	border-radius: var(--db-radius-sm);
+	font-size: 0.875em;
+}
+
+.dashboard-task-reminder-calendar-nav button:hover {
+	color: var(--db-text);
+	background: var(--db-bg-card-hover);
+}
+
+.dashboard-task-reminder-calendar {
+	display: grid;
+	grid-template-columns: repeat(7, 1fr);
+	gap: 2px;
+	text-align: center;
+}
+
+.dashboard-task-reminder-calendar-header {
+	font-size: 0.6875em;
+	color: var(--db-text-muted, var(--text-faint));
+	padding: 4px 0;
+	font-weight: 500;
+}
+
+.dashboard-task-reminder-calendar-day {
+	font-size: 0.75em;
+	padding: 5px 2px;
+	border-radius: var(--db-radius-sm);
+	cursor: pointer;
+	border: none;
+	background: none;
+	color: var(--db-text);
+	transition: background 0.1s;
+}
+
+.dashboard-task-reminder-calendar-day:hover {
+	background: var(--db-bg-card-hover);
+}
+
+.dashboard-task-reminder-calendar-day--today {
+	font-weight: 700;
+	color: var(--db-accent);
+}
+
+.dashboard-task-reminder-calendar-day--selected {
+	background: var(--db-accent) !important;
+	color: var(--db-text-on-accent, var(--text-on-accent)) !important;
+}
+
+.dashboard-task-reminder-calendar-day--other-month {
+	opacity: 0.3;
+}
+
+.dashboard-task-reminder-time {
+	display: flex;
+	gap: 4px;
+	align-items: center;
+	font-size: 0.75em;
+	margin-top: 4px;
+}
+
+.dashboard-task-reminder-time select {
+	padding: 4px 6px;
+	border: 1px solid var(--db-border-card);
+	border-radius: var(--db-radius-sm);
+	background: var(--db-bg-card);
+	color: var(--db-text);
+	font-size: 0.75em;
+}
+
+.dashboard-task-reminder-popup-btns {
+	display: flex;
+	gap: 6px;
+	margin-top: 4px;
+}
+
+.dashboard-task-reminder-popup-btns button {
+	padding: 5px 12px;
+	border-radius: var(--db-radius-sm);
+	border: 1px solid var(--db-border-card);
+	background: var(--db-bg-card);
+	color: var(--db-text);
+	cursor: pointer;
+	font-size: 0.75em;
+	transition: background 0.1s;
+}
+
+.dashboard-task-reminder-popup-btns button:hover {
+	background: var(--db-bg-card-hover);
+}
+
+.dashboard-task-reminder-popup-btns button.mod-cta {
+	background: var(--db-accent);
+	color: var(--db-text-on-accent);
+	border-color: var(--db-accent);
+}
+
+.dashboard-task-reminder-popup-btns button.mod-cta:hover {
+	filter: brightness(0.96);
+}
+
+.dashboard-task-reminder-popup-btns .dashboard-task-reminder-clear {
+	color: var(--db-text-muted);
+}
+

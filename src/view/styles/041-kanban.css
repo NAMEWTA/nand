@@ -1,0 +1,597 @@
+/* ===== Kanban ===== */
+.dashboard-kanban-wrapper {
+	flex: 1;
+	overflow: hidden;
+	display: flex;
+	flex-direction: column;
+	min-height: 0;
+	position: relative; /* anchor for the floating workspace switcher */
+}
+
+/* Row + wrap (not column): full-width rows (flex-basis 100%) stack one per
+   line exactly as before, while paired half-width rows share a line. The
+   section DOM order still equals the columns array order — no wrapper
+   elements, so :scope > [data-column] queries and dnd index math hold.
+   align-content flex-start keeps wrapped lines top-anchored (default stretch
+   would grow the rows to eat leftover vertical space). inline-size container
+   so paired rows can fall back to full width in narrow panes (split panes
+   track the pane, not the viewport — same rationale as the quicknote bar). */
+.dashboard-kanban {
+	--db-kanban-gap: 10px;
+	display: flex;
+	flex-direction: row;
+	flex-wrap: wrap;
+	align-content: flex-start;
+	gap: var(--db-kanban-gap);
+	flex: 1;
+	overflow-y: auto;
+	scrollbar-width: none;
+	padding: 0;
+	container-type: inline-size;
+}
+
+.dashboard-kanban::-webkit-scrollbar {
+	width: 0;
+}
+
+.dashboard-section-row {
+	background: var(--db-bg-section);
+	border: 1px solid var(--db-border-section);
+	border-radius: var(--db-radius-lg);
+	/* Vertical padding tightened from 16px (title-to-edge, content-to-handle)
+	   to buy content space; horizontal stays 16px so the half-row pairing
+	   basis and card gutters are untouched. */
+	padding: 12px 16px;
+	transition: border-color var(--nand-duration) var(--nand-ease), background-color var(--nand-duration) var(--nand-ease);
+	backdrop-filter: var(--db-backdrop-blur);
+	-webkit-backdrop-filter: var(--db-backdrop-blur);
+	max-height: 500px;
+	display: flex;
+	flex-direction: column;
+	/* One full-width row per line in the wrap container; the shorthand's 0
+	   shrink also keeps a resized sibling from squishing others (the kanban
+	   scrolls instead). border-box is load bearing: without it the 16px padding
+	   + 1px border ride on top of the percentage basis and two halves would no
+	   longer fit one line. */
+	box-sizing: border-box;
+	flex: 0 0 100%;
+	/* Load bearing since the board went row+wrap (section pairing): a row-main
+	   flex item defaults to min-width:auto = content min-size, so a nowrap
+	   card deck (sticky/memo/todo/projects) inflated the row past its 100%
+	   basis — the cards area stopped overflowing (its horizontal scrollbar
+	   vanished) and the whole board stretched instead. 0 clamps the row back
+	   to its basis so the card area owns the overflow again. */
+	min-width: 0;
+}
+
+/* Paired half row (drag a section beside another). Grow fills the line when
+   an orphan half slips through (hand-edited file mid-normalization); with a
+   partner the two bases exactly fill the line, so grow never engages.
+   --db-pair-basis carries a dragged split (left member's share, set inline by
+   renderer.ts); 50% default keeps the historical even split. */
+.dashboard-section-row--half {
+	/* The 0.5px-per-side slack is load-bearing: bases summing to EXACTLY the
+	   line (x% + (100-x)% - gap + gap) sit on the wrap razor edge, and
+	   subpixel rounding (Windows 125-150% scaling, odd splits like 39/61)
+	   tips them over into stacked full-width rows — the "pair drag breaks"
+	   bug. Staying 1px under lets flex-grow (1 1 above) absorb the slack
+	   invisibly while the pair can never wrap. */
+	flex: 1 1 calc(var(--db-pair-basis, 50%) - var(--db-kanban-gap, 10px) / 2 - 0.5px);
+	min-width: 0;
+}
+
+/* The left half member anchors the pair's divider handle (absolute, spanning
+   the gutter between the halves). */
+.dashboard-section-row--pair-left {
+	position: relative;
+}
+
+/* Pair divider: invisible col-resize strip straddling the board gutter; a
+   centered accent line surfaces on hover and for the whole drag. */
+.dashboard-pair-width-handle {
+	position: absolute;
+	top: 0;
+	bottom: 0;
+	/* Half the gutter plus half the strip: the strip's center sits exactly in
+	   the gutter's center. */
+	right: calc(-1 * (var(--db-kanban-gap, 10px) / 2 + 5px));
+	width: 10px;
+	cursor: col-resize;
+	z-index: 6;
+}
+
+.dashboard-pair-width-handle::before {
+	content: '';
+	position: absolute;
+	top: 8px;
+	bottom: 8px;
+	left: 50%;
+	transform: translateX(-50%);
+	width: 2px;
+	border-radius: 2px;
+	background: transparent;
+	transition: background 0.2s ease;
+}
+
+.dashboard-section-row:hover > .dashboard-pair-width-handle::before,
+.dashboard-section-row--resizing > .dashboard-pair-width-handle::before {
+	background: color-mix(in srgb, var(--db-accent, #6366f1) 55%, transparent);
+}
+
+/* Narrow pane (split view, side-by-side panes): two cramped 40%-width rows
+   read worse than stacked full rows. Queries the kanban container itself —
+   the pane width, not the viewport. */
+@container (max-width: 620px) {
+	.dashboard-section-row--half {
+		flex-basis: 100%;
+	}
+
+	/* Halves stack here — a width divider has nothing to divide. */
+	.dashboard-pair-width-handle {
+		display: none;
+	}
+}
+
+.dashboard-section-row[data-section-type="notes"],
+.dashboard-section-row[data-section-type="projects"] {
+	max-height: none;
+}
+
+.dashboard-section-row[data-section-type="library"] {
+	max-height: 800px;
+}
+
+/* Web section: definite height (memo's fixed-height pattern) so the embedded
+   frame fills the row and drag-resize can GROW it, not just clamp it —
+   content-sized rows cannot be enlarged via max-height alone. Mobile
+   overrides this with 70vh in the mobile media block. */
+.dashboard-section-row[data-section-type="web"] {
+	height: 480px;
+}
+
+.dashboard-section-row[data-section-type="images"],
+.dashboard-section-row[data-section-type="videos"] {
+	max-height: none;
+}
+
+.dashboard-section-header {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	margin-bottom: 8px;
+	flex-shrink: 0;
+}
+
+.dashboard-section-title-wrap {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+}
+
+.dashboard-section-toggle {
+	width: 26px;
+	height: 24px;
+	flex-shrink: 0;
+	cursor: pointer;
+	position: relative;
+	transition: transform var(--nand-duration) var(--nand-ease), opacity var(--nand-duration-fast) var(--nand-ease);
+	opacity: 0.7;
+	border-radius: var(--db-radius-sm);
+}
+
+.dashboard-section-toggle::before {
+	content: '';
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%, -60%);
+	width: 0;
+	height: 0;
+	border-left: 5px solid transparent;
+	border-right: 5px solid transparent;
+	border-top: 8px solid var(--section-color, var(--db-text-muted));
+	transition: border-top-color 0.15s ease;
+}
+
+.dashboard-section-toggle:hover {
+	opacity: 1;
+}
+
+/* The collapse caret wears the theme's section hue (aurora sets one per
+   section type) and falls back to the board accent — never a fixed color. */
+.dashboard-section-row .dashboard-section-toggle::before {
+	border-top-color: var(--db-sec-hue, var(--db-accent));
+}
+
+.dashboard-section-row--collapsed > .dashboard-section-header .dashboard-section-toggle {
+	transform: rotate(-90deg);
+}
+
+/* Section reorder grip handle (desktop only) */
+.dashboard-section-grip {
+	display: flex;
+	align-items: center;
+	cursor: grab;
+	color: var(--db-text-faint, var(--text-faint));
+	opacity: 0.4;
+	transition: opacity 0.15s ease, color 0.15s ease;
+	padding: 0 2px;
+}
+
+.dashboard-section-grip:hover {
+	opacity: 1;
+	color: var(--db-text-muted, var(--text-muted));
+}
+
+.dashboard-section-grip:active {
+	cursor: grabbing;
+}
+
+.dashboard-section-grip svg {
+	width: 16px;
+	height: 16px;
+}
+
+.dashboard-section-row--dragging {
+	opacity: 0.5;
+}
+
+.dashboard-section-row--section-drag-over {
+	box-shadow: 0 -2px 0 0 var(--db-accent, var(--interactive-accent));
+}
+
+.dashboard-section-row--section-drag-over[data-section-drop-pos="after"] {
+	box-shadow: 0 2px 0 0 var(--db-accent, var(--interactive-accent));
+}
+
+/* Side drops (pairing): vertical accent line on the target's near edge. */
+.dashboard-section-row--section-drag-over[data-section-drop-pos="left"] {
+	box-shadow: -3px 0 0 0 var(--db-accent, var(--interactive-accent));
+}
+
+.dashboard-section-row--section-drag-over[data-section-drop-pos="right"] {
+	box-shadow: 3px 0 0 0 var(--db-accent, var(--interactive-accent));
+}
+
+/* Section resize handle (desktop only) — transparent border revealed on hover,
+   mirroring the memo card resize handle. Sits at the bottom via flex order.
+   position+z-index keep the strip hit-testable above an embedded web frame in
+   edge cases where the frame's surface ends up over the row's bottom edge. */
+.dashboard-section-resize-handle {
+	order: 999;
+	align-self: stretch;
+	height: 8px;
+	margin-top: 2px;
+	cursor: ns-resize;
+	border-bottom: 2px solid transparent;
+	transition: border-color 0.2s ease;
+	position: relative;
+	z-index: 2;
+}
+
+/* Drag shield: while any section is being height-dragged, embedded frames
+   must not eat pointer input — the OS routes mouse events over an
+   iframe/webview to the guest page, so mousemove/mouseup on the document
+   stop arriving the moment the cursor crosses one, freezing the drag. */
+.dashboard-frames-muted iframe,
+.dashboard-frames-muted webview {
+	pointer-events: none;
+}
+
+/* Viewport-wide drag shield mounted on body for the lifetime of a guarded
+   drag (pair divider, section height): sits above the entire app so every
+   pointermove/pointerup lands in this document — embedded frames and
+   Windows webview surface overflow included — while pointer capture on it
+   makes the stream hit-test-proof. */
+.dashboard-drag-shield {
+	position: fixed;
+	inset: 0;
+	z-index: var(--layer-drag-shield, 9999);
+	background: transparent;
+	touch-action: none;
+}
+
+.dashboard-section-row:hover > .dashboard-section-resize-handle,
+.dashboard-section-row--resizing > .dashboard-section-resize-handle {
+	border-bottom-color: var(--db-border-card, rgba(255, 255, 255, 0.10));
+}
+
+.dashboard-section-resize-handle:hover {
+	border-bottom-color: var(--db-text-muted, var(--text-muted)) !important;
+}
+
+.dashboard-section-row--resizing {
+	user-select: none;
+}
+
+/* When collapsed, hide every direct child except the header (covers cards,
+   library content, media/calendar/heatmap/weread bodies, and the resize handle). */
+.dashboard-section-row--collapsed > *:not(.dashboard-section-header) {
+	display: none;
+}
+
+.dashboard-section-row--collapsed {
+	height: auto !important;
+	/* A collapsed member of a pair opts out of the line's equal-height
+	   stretch — otherwise it renders as a tall empty box next to its
+	   expanded partner. */
+	align-self: flex-start;
+}
+
+.dashboard-section-row .dashboard-section-title {
+	font-size: 1em;
+	font-weight: 700;
+	margin: 0;
+	border-bottom: none;
+	padding-bottom: 0;
+}
+
+.dashboard-section-add-btn {
+	background: none !important;
+	border: none !important;
+	box-shadow: none !important;
+	color: var(--db-text-faint);
+	cursor: pointer;
+	padding: 4px 6px;
+	font-size: 0.65em;
+	display: flex;
+	align-items: center;
+	gap: 3px;
+	border-radius: var(--db-radius-sm);
+	transition: opacity var(--nand-duration) var(--nand-ease), color var(--nand-duration-fast) var(--nand-ease), background-color var(--nand-duration-fast) var(--nand-ease);
+	line-height: 1;
+	opacity: 0;
+	outline: none;
+}
+
+.dashboard-section-add-btn:focus-visible {
+	opacity: 1;
+	outline: 2px solid var(--db-accent);
+	outline-offset: 1px;
+}
+
+.dashboard-section-header:hover .dashboard-section-add-btn {
+	opacity: 1;
+}
+
+.dashboard-section-add-btn:hover {
+	color: var(--db-text) !important;
+	background-color: var(--db-bg-hover) !important;
+}
+
+.dashboard-section-header-actions {
+	display: flex;
+	align-items: center;
+	gap: 2px;
+	flex-shrink: 0;
+}
+
+.dashboard-add-section-row {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+}
+
+.dashboard-add-section-row .dashboard-task-input {
+	flex: 1;
+	min-width: 0;
+}
+
+.dashboard-section-type-picker {
+	display: flex;
+	gap: 4px;
+	flex-shrink: 0;
+}
+
+.dashboard-section-type-btn {
+	padding: 4px 8px;
+	border-radius: var(--db-radius-sm);
+	font-size: 0.7em;
+	cursor: pointer;
+	background: transparent !important;
+	color: var(--db-text-faint);
+	border: 1px solid var(--db-border) !important;
+	box-shadow: none !important;
+	transition: background 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease, color 0.15s ease, transform 0.15s ease;
+	outline: none;
+	white-space: nowrap;
+}
+
+.dashboard-section-type-btn:hover {
+	color: var(--db-text);
+	border-color: var(--db-accent) !important;
+}
+
+.dashboard-section-type-btn.active {
+	color: var(--db-accent) !important;
+	border-color: var(--db-accent) !important;
+	background: color-mix(in srgb, var(--db-accent) 10%, transparent) !important;
+}
+
+.dashboard-section-confirm-btn {
+	flex-shrink: 0;
+	display: flex;
+	align-items: center;	justify-content: center;
+	width: 28px;
+	height: 28px;
+	border-radius: var(--db-radius-sm);
+	cursor: pointer;
+	background: transparent !important;
+	color: var(--db-text-faint);
+	border: 1px solid var(--db-border) !important;
+	box-shadow: none !important;
+	transition: background 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease, color 0.15s ease, transform 0.15s ease;
+	outline: none;
+	padding: 0;
+}
+
+.dashboard-section-confirm-btn:hover {
+	color: var(--db-accent) !important;
+	border-color: var(--db-accent) !important;
+}
+
+.dashboard-section-cards {
+	display: flex;
+	gap: 12px;
+	flex-wrap: wrap;
+	flex: 1;
+	min-height: 0;
+	overflow: hidden;
+}
+
+.dashboard-section-cards > .dashboard-card {
+	flex: 1 1 200px;
+	min-width: 200px;
+	max-height: 100%;
+}
+
+/* Notes, Memo, Todo, Sticky & Projects: horizontal scroll, no wrap */
+.dashboard-section-row[data-section-type="notes"] .dashboard-section-cards,
+.dashboard-section-row[data-section-type="memo"] .dashboard-section-cards,
+.dashboard-section-row[data-section-type="todo"] .dashboard-section-cards,
+.dashboard-section-row[data-section-type="sticky"] .dashboard-section-cards,
+.dashboard-section-row[data-section-type="projects"] .dashboard-section-cards {
+	flex-wrap: nowrap;
+	overflow-x: auto;
+	scrollbar-width: thin;
+}
+
+/* Notes (no cover) & Projects: fixed card width, overflow scrolls horizontally */
+.dashboard-section-row[data-section-type="notes"] .dashboard-section-cards > .dashboard-card,
+.dashboard-section-row[data-section-type="projects"] .dashboard-section-cards > .dashboard-card {
+	flex: 0 0 280px;
+	min-width: 200px;
+	max-width: 500px;
+}
+
+.dashboard-section-row[data-section-type="memo"] .dashboard-section-cards > .dashboard-card {
+	flex: 0 0 260px;
+	min-width: 200px;
+	max-width: 600px;
+}
+
+.dashboard-section-row[data-section-type="todo"] .dashboard-section-cards > .dashboard-card,
+.dashboard-section-row[data-section-type="sticky"] .dashboard-section-cards > .dashboard-card {
+	flex: 0 0 260px;
+	min-width: 200px;
+	max-width: 500px;
+}
+
+/* Memo section: fixed height to align with Quick Links */
+.dashboard-section-row[data-section-type="memo"] {
+	height: 250px;
+	display: flex;
+	flex-direction: column;
+	flex-shrink: 0;
+	overflow: hidden;
+}
+
+.dashboard-section-row[data-section-type="memo"] > .dashboard-section-header {
+	flex-shrink: 0;
+}
+
+.dashboard-section-row[data-section-type="memo"] > .dashboard-section-cards {
+	flex: 1;
+	min-height: 0;
+	align-items: stretch;
+}
+
+.dashboard-section-row[data-section-type="memo"] .dashboard-card {
+	overflow: hidden;
+	display: flex;
+	flex-direction: column;
+	/* Right inset clears the 8px resize strip on the card's edge. */
+	padding: var(--size-4-3) var(--size-4-4) var(--size-4-3) var(--size-4-3);
+	flex-shrink: 0;
+}
+
+.dashboard-section-row[data-section-type="memo"] .dashboard-card:hover {
+	overflow: hidden;
+}
+
+.dashboard-section-row[data-section-type="memo"] .dashboard-card-body {
+	flex: 1;
+	min-height: 0;
+	display: flex;
+	flex-direction: column;
+}
+
+.dashboard-section-row[data-section-type="memo"] .dashboard-memo-textarea {
+	resize: none;
+	flex: 1;
+	min-height: 0;
+}
+
+.dashboard-section-row[data-section-type="memo"] .dashboard-card-header {
+	flex-shrink: 0;
+}
+
+/* Card size button (dashboard widgets only) */
+.dashboard-card-btn--size {
+	font-size: 0.7em;
+	font-weight: 600;
+	min-width: 22px;
+	padding: 2px 5px;
+	text-align: center;
+	line-height: 1;
+	letter-spacing: 0.02em;
+}
+
+/* Memo card resize handle (desktop only) */
+.dashboard-card-resize-handle {
+	position: absolute;
+	top: 4px;
+	right: 0;
+	bottom: 4px;
+	width: 8px;
+	cursor: ew-resize;
+	z-index: 10;
+	border-right: 2px solid transparent;
+	transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.dashboard-section-row[data-section-type="memo"] .dashboard-card:hover {
+	overflow: hidden;
+}
+
+.dashboard-section-row[data-section-type="memo"] .dashboard-card:hover .dashboard-card-resize-handle,
+.dashboard-section-row[data-section-type="memo"] .dashboard-card--resizing .dashboard-card-resize-handle,
+.dashboard-section-row[data-section-type="todo"] .dashboard-card:hover .dashboard-card-resize-handle,
+.dashboard-section-row[data-section-type="todo"] .dashboard-card--resizing .dashboard-card-resize-handle,
+.dashboard-section-row[data-section-type="sticky"] .dashboard-card:hover .dashboard-card-resize-handle,
+.dashboard-section-row[data-section-type="sticky"] .dashboard-card--resizing .dashboard-card-resize-handle,
+.dashboard-section-row[data-section-type="projects"] .dashboard-card:hover .dashboard-card-resize-handle,
+.dashboard-section-row[data-section-type="projects"] .dashboard-card--resizing .dashboard-card-resize-handle {
+	border-right-color: var(--db-border-card);
+	box-shadow: 2px 0 6px rgba(0, 0, 0, 0.15);
+}
+
+.dashboard-card-resize-handle:hover {
+	border-right-color: var(--db-text-muted) !important;
+	box-shadow: 2px 0 8px rgba(0, 0, 0, 0.25) !important;
+}
+
+.dashboard-card--resizing {
+	user-select: none;
+}
+
+/* Todo cards: body uses flex column so task-list scrolls inside */
+.dashboard-section-row[data-section-type="todo"] .dashboard-card-body {
+	flex: 1;
+	min-height: 0;
+	display: flex;
+	flex-direction: column;
+	overflow: hidden;
+}
+
+.dashboard-section-row[data-section-type="todo"] .dashboard-task-list {
+	flex: 1;
+	min-height: 0;
+	overflow-y: auto;
+}
+
+.dashboard-section-row[data-section-type="todo"] .dashboard-task-add,
+.dashboard-section-row[data-section-type="todo"] .dashboard-progress {
+	flex-shrink: 0;
+}
+

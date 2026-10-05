@@ -1,429 +1,195 @@
-import { applyControlContrast } from '../appearance/appearance';
-import { Events, HoverParent, HoverPopover, ItemView, TFile, WorkspaceLeaf } from 'obsidian';
-import { h } from 'preact';
-import type { DashboardUpdateSource } from '../../../core/dashboard/render-update';
-import type { BannerData, DashboardCard, DashboardData, QuickAction } from '../../../core/dashboard/types/index';
-import type { HolidayInfo } from '../../../platform/obsidian/calendar/holiday-service';
-import { SyncEngine } from '../../../platform/obsidian/dashboard/sync';
-import { PomodoroService } from '../../../platform/obsidian/pomodoro/pomodoro-service';
-import { ReadingService } from '../../../platform/obsidian/reading/reading-service';
-import { onLeafLanguageChanged } from '../../../platform/obsidian/workspace-title';
-import { t } from '../../../shared/i18n/index';
-import type { DashboardHost } from '../host';
-import type { PomodoroMiniPanel } from '../pomodoro/pomodoro-mini-panel';
-import type { ReadingMiniTimer } from '../reading/reading-mini-timer';
-import type { RenderCallbacks } from '../render-contract';
-import { refreshDashboardLanguage } from '../renderer/render-context';
-import { NotePopoverModal } from '../ui/note-popover-modal';
-import { closeOwnedDashboardPanels, DashboardPanelModal } from '../ui/panel-modal';
-import { AnniversaryPanel } from '../widgets/AnniversaryPanel';
-import { CountdownPanel } from '../widgets/CountdownPanel';
-import {
-	addColumnWithType,
-	deleteColumn,
-	executeAction,
-	handleCardNewNote,
-	handleLibraryNewNote,
-	handleMoveCard,
-	navigateToPath,
-	openAddActionModal,
-	openAddSectionModal,
-	openBannerEditModal,
-	openCardEditModal,
-	openDataviewConfigModal,
-	openEditActionModal,
-	openFolderConfigModal,
-	openLibraryConfigModal,
-	openMediaConfigModal,
-	openNote,
-	openNoteInTab,
-	openNotePopover,
-	openNotesSectionConfigModal,
-	openProjectSearchModal,
-	openStickyCardTypeModal,
-	openTemplatePicker,
-	openTrackerConfigModal,
-	openWeatherConfigModal,
-	openWebConfigModal,
-	openWereadConfigModal,
-	openWidgetTypeModal,
-	promptAddColumn,
-	refreshSectionInPlace,
-	reorderCardsInDOM,
-} from './actions';
-import { renderBannerPinButton, setupBannerBehavior, setupBannerRotation } from './banner-behavior';
-import { archiveCompletedTasks, createCallbacks, handleFileDrop, saveMemoAsNote, saveTasksToDaily } from './callbacks';
-import {
-	addSection,
-	applyWorkspaceSwitch,
-	handleDataUpdate,
-	onClose,
-	onOpen,
-	refresh,
-	reloadFromDisk,
-	showModuleDisabled,
-	toggleBannerMode,
-} from './lifecycle';
-import {
-	closeMobileDrawer,
-	openMobileDrawer,
-	refreshMobileWidgetPanel,
-	renderMobileActions,
-	renderMobileWidgetBar,
-} from './mobile';
-import { render } from './render';
-import {
-	applySidebarSizing,
-	attachSidebarWidthHandle,
-	attachStripHeightHandle,
-	commitSidebarSizing,
-	renderSidebar,
-	setupSidebarBehavior,
-} from './sidebar';
-import {
-	checkDayRollover,
-	startDayRolloverChecker,
-	startWeatherRefresh,
-	stopDayRolloverChecker,
-	stopWeatherRefresh,
-} from './timers';
-import {
-	debouncedRefreshBannerStats,
-	flushVaultRefresh,
-	onHabitChanged,
-	refreshAlbumWidgetsNow,
-	refreshDataWidget,
-	refreshLunarWidgetsInPlace,
-	refreshRecentDocs,
-	refreshSectionsFor,
-	refreshSidebarCalendarNow,
-	registerVaultListeners,
-	renderScrollToTop,
-	runCleanup,
-	scheduleVaultRefresh,
-	unregisterVaultListeners,
-} from './vault-refresh';
 import { DASHBOARD_VIEW_TYPE } from './view-type';
+import { t } from '../../../shared/i18n';
+import { ItemView, type WorkspaceLeaf, type ViewStateResult } from 'obsidian';
+import { DashboardSurface } from './dashboard-surface';
+import type { DashboardHost } from '../host';
 
-export class DashboardView extends ItemView implements HoverParent {
-	declare onOpen: () => Promise<void>;
-	declare onClose: () => Promise<void>;
-	declare handleDataUpdate: (data: DashboardData, source: DashboardUpdateSource) => void;
-	declare refresh: () => Promise<void>;
-	declare reloadFromDisk: () => Promise<void>;
-	declare applyWorkspaceSwitch: () => Promise<void>;
-	declare addSection: () => Promise<void>;
-	declare toggleBannerMode: () => Promise<void>;
-	declare render: (data: DashboardData) => void;
-	declare renderMobileActions: (bannerEl: HTMLElement) => void;
-	declare renderMobileWidgetBar: (container: HTMLElement) => void;
-	declare refreshMobileWidgetPanel: (bar: HTMLElement) => void;
-	declare openMobileDrawer: (type: 'quickActions' | 'recent') => void;
-	declare closeMobileDrawer: () => void;
-	declare setupBannerBehavior: (bannerEl: HTMLElement) => void;
-	declare setupBannerRotation: (container: HTMLElement, banner: BannerData) => void;
-	declare renderBannerPinButton: (bannerEl: HTMLElement) => void;
-	declare renderSidebar: (sidebar: HTMLElement, root: HTMLElement, reuseWidgets: HTMLElement | null) => void;
-	declare setupSidebarBehavior: (sidebar: HTMLElement, root: HTMLElement) => void;
-	declare applySidebarSizing: (sidebar: HTMLElement) => void;
-	declare attachStripHeightHandle: (sidebar: HTMLElement) => void;
-	declare attachSidebarWidthHandle: (sidebar: HTMLElement) => void;
-	declare commitSidebarSizing: (
-		patch: { sidebarWidth?: number; widgetUnitHeight?: number },
-		cssVar: string,
-		value: string,
-	) => void;
-	declare createCallbacks: () => RenderCallbacks;
-	declare handleFileDrop: (cardId: string, filePath: string) => void;
-	declare saveMemoAsNote: (card: DashboardCard) => Promise<void>;
-	declare saveTasksToDaily: (card: DashboardCard) => Promise<void>;
-	declare archiveCompletedTasks: (columnName: string) => Promise<void>;
-	declare openBannerEditModal: (data: DashboardData) => void;
-	declare openCardEditModal: (card: DashboardCard) => void;
-	declare openNotePopover: (file: TFile, subpath?: string, line?: number) => void;
-	declare openNote: (file: TFile, subpath?: string, line?: number) => void;
-	declare openNoteInTab: (file: TFile, subpath?: string, line?: number) => Promise<void>;
-	declare addColumnWithType: (name: string, sectionType?: string) => Promise<void>;
-	declare openAddSectionModal: () => void;
-	declare openWidgetTypeModal: (colName: string) => void;
-	declare openStickyCardTypeModal: (colName: string) => void;
-	declare openWeatherConfigModal: (colName: string) => void;
-	declare openTrackerConfigModal: (colName: string) => void;
-	declare openTemplatePicker: (colName: string) => void;
-	declare openLibraryConfigModal: (colName: string) => void;
-	declare openDataviewConfigModal: (colName: string) => void;
-	declare openWebConfigModal: (colName: string) => void;
-	declare openMediaConfigModal: (colName: string) => void;
-	declare openWereadConfigModal: (colName: string) => void;
-	declare handleMoveCard: (cardId: string, targetCol: string, targetIdx: number) => Promise<void>;
-	declare reorderCardsInDOM: (columnName: string) => boolean;
-	declare refreshSectionInPlace: (columnName: string) => boolean;
-	declare openFolderConfigModal: (colName: string) => void;
-	declare handleCardNewNote: (cardId: string) => Promise<void>;
-	declare openNotesSectionConfigModal: (colName: string) => void;
-	declare handleLibraryNewNote: (columnName: string, pos?: { x: number; y: number }) => Promise<void>;
-	declare openAddActionModal: () => void;
-	declare openEditActionModal: (action: QuickAction) => void;
-	declare deleteColumn: (columnName: string, columnIndex?: number) => Promise<void>;
-	declare executeAction: (action: QuickAction) => Promise<void>;
-	declare openProjectSearchModal: (colName: string) => void;
-	declare promptAddColumn: () => Promise<void>;
-	declare navigateToPath: (path: string) => Promise<void>;
-	declare registerVaultListeners: () => void;
-	declare unregisterVaultListeners: () => void;
-	declare scheduleVaultRefresh: () => void;
-	declare flushVaultRefresh: (paths: ReadonlySet<string>, broad: boolean) => void;
-	declare refreshSidebarCalendarNow: () => void;
-	declare refreshAlbumWidgetsNow: () => void;
-	declare refreshSectionsFor: (
-		lowerPaths: readonly string[],
-		broad: boolean,
-		changedMd: boolean,
-		changedMedia: boolean,
-	) => void;
-	declare onHabitChanged: () => void;
-	declare refreshLunarWidgetsInPlace: () => void;
-	declare refreshDataWidget: (selector: string, render: (container: HTMLElement) => void) => void;
-	declare debouncedRefreshBannerStats: () => void;
-	declare refreshRecentDocs: () => void;
-	declare runCleanup: (preserveSidebarWidgets?: boolean) => void;
-	declare renderScrollToTop: (container: HTMLElement) => void;
-	declare startWeatherRefresh: () => void;
-	declare stopWeatherRefresh: () => void;
-	declare startDayRolloverChecker: () => void;
-	declare stopDayRolloverChecker: () => void;
-	declare checkDayRollover: () => void;
-
-	plugin: DashboardHost;
-	sync: SyncEngine;
-	data: DashboardData | null = null;
-	cleanupFns: Array<() => void> = [];
-	dndCleanupFns: Array<() => void> = [];
-	suppressNextRender = false;
-	vaultEventRefs: Array<{ evt: Events; ref: unknown }> = [];
-	bannerStatsTimer: number | null = null;
-	bannerStatsEl: HTMLElement | null = null;
-	/** Vault changes accumulated across one debounce window: every changed
-	 *  file path (renames contribute old AND new), plus a broad flag for
-	 *  folder-level events whose own path carries no section-scope meaning.
-	 *  One shared trailing debounce fans them out — see scheduleVaultRefresh. */
-	vaultChangePaths = new Set<string>();
-	vaultChangeBroad = false;
-	vaultRefreshTimer: number | null = null;
-	readonly VAULT_REFRESH_DEBOUNCE = 500;
-	readonly BANNER_STATS_DEBOUNCE = 800;
-	/** True after the first `metadataCache` `resolved` event corrected the
-	 *  banner stats following startup. One-shot to avoid repeat recomputes. */
-	bannerStatsResolvedOnce = false;
-	bannerQuoteIndex = 0;
-	bannerImageIndex = 0;
-	sidebarPinned = this.app.loadLocalStorage('nand.dashboard.sidebar-pinned') === 'true';
-	sidebarExpanded = false;
-	bannerCollapsed = this.app.loadLocalStorage('nand.dashboard.banner-collapsed') === 'true';
-	pendingScrollCardId: string | null = null;
-	pendingScrollToLastCardOfColumn: string | null = null;
-	pomodoroService: PomodoroService | null = null;
-	pomodoroMiniPanel: PomodoroMiniPanel | null = null;
-	readingMiniTimer: ReadingMiniTimer | null = null;
-	readingService: ReadingService | null = null;
-	habitUnsubscribe: (() => void) | null = null;
-	holidayData: Record<string, HolidayInfo> = {};
-	mobileWidgetExpanded: 'pomodoro' | 'reading' | 'lunar' | 'calendar' | 'habit' | 'expense' | null = null;
-	mobileWidgetTabsOpen: boolean = false;
-	weatherRefreshTimer: number | null = null;
-	dayRolloverTimer: number | null = null;
-	lastRenderedDay = new Date().toDateString();
-	/** Sidebar widgets DOM detached from the previous render, re-attached when the
-	 *  widget signature (see sidebarWidgetSignature) is unchanged - so dashboard
-	 *  data mutations never rebuild the widgets. Null right after consumption. */
-	sidebarWidgetsEl: HTMLElement | null = null;
-	sidebarWidgetsSig: string | null = null;
-	isOpening = false;
-	openingPromise: Promise<void> | null = null;
-	isOpen = false;
-	lifecycleRevision = 0;
-	pendingInitialData: DashboardData | null = null;
-
-	// HoverParent contract: Obsidian assigns/clears this when showing a Page
-	// Preview popover over a dashboard link. Declared so the dashboard can act as
-	// the hover owner for `hover-link` events.
-	hoverPopover: HoverPopover | null = null;
-
-	// The currently-open centered note editor popover, if any. Tracked so it can
-	// be torn down (detaching its embedded leaf) when the view closes.
-	popoverModal: NotePopoverModal | null = null;
-
-	constructor(leaf: WorkspaceLeaf, plugin: DashboardHost) {
+/** Original native identity; business presentation is shared with the workbench. */
+export class DashboardView extends ItemView {
+	readonly surface: DashboardSurface;
+	constructor(leaf: WorkspaceLeaf, host: DashboardHost) {
 		super(leaf);
-		this.plugin = plugin;
-		this.registerEvent(this.app.workspace.on('css-change', () => {
-			if (this.isOpen) applyControlContrast(this.contentEl);
-		}));
-		this.register(onLeafLanguageChanged(this.app, this.leaf, () => {
-			if (!this.plugin.settings.modules.dashboard) showModuleDisabled.call(this);
-			else if (this.isOpen && this.data) refreshDashboardLanguage(this.contentEl);
-		}));
-		this.register(
-			this.containerEl.onWindowMigrated(() => {
-				if (!this.isOpen || !this.data) return;
-				this.sidebarWidgetsSig = '';
-				this.render(this.data);
-			}),
-		);
-		this.sync = new SyncEngine(this.app, this.plugin.settings);
-		this.sync.onDataUpdate((data, source) => {
-			this.handleDataUpdate(data, source);
-		});
+		this.surface = this.addChild(new DashboardSurface({
+			app: this.app, leaf, contentEl: this.contentEl, containerEl: this.contentEl,
+			addAction: (icon, title, callback) => this.addAction(icon, title, callback),
+			close: () => this.leaf.detach(),
+		}, host));
 	}
-
-	getViewType(): string {
-		return DASHBOARD_VIEW_TYPE;
+	getNativeSurfaces(): readonly DashboardSurface[] { return this.surface ? [this.surface] : []; }
+	onOpen(): Promise<void> { return this.surface.onOpen(); }
+	onClose(): Promise<void> { return this.surface.onClose(); }
+	getState(): Record<string, unknown> { return this.surface?.getState() ?? {}; }
+	async setState(state: Record<string, unknown>, result: ViewStateResult): Promise<void> {
+		await this.surface.setState(state, result);
+		await super.setState(state, result);
 	}
+	get plugin(): DashboardSurface['plugin'] { return this.surface.plugin; }
+	set plugin(value: DashboardSurface['plugin']) { this.surface.plugin = value; }
+	get sync(): DashboardSurface['sync'] { return this.surface.sync; }
+	set sync(value: DashboardSurface['sync']) { this.surface.sync = value; }
+	get data(): DashboardSurface['data'] { return this.surface.data; }
+	set data(value: DashboardSurface['data']) { this.surface.data = value; }
+	get cleanupFns(): DashboardSurface['cleanupFns'] { return this.surface.cleanupFns; }
+	set cleanupFns(value: DashboardSurface['cleanupFns']) { this.surface.cleanupFns = value; }
+	get dndCleanupFns(): DashboardSurface['dndCleanupFns'] { return this.surface.dndCleanupFns; }
+	set dndCleanupFns(value: DashboardSurface['dndCleanupFns']) { this.surface.dndCleanupFns = value; }
+	get suppressNextRender(): DashboardSurface['suppressNextRender'] { return this.surface.suppressNextRender; }
+	set suppressNextRender(value: DashboardSurface['suppressNextRender']) { this.surface.suppressNextRender = value; }
+	get vaultEventRefs(): DashboardSurface['vaultEventRefs'] { return this.surface.vaultEventRefs; }
+	set vaultEventRefs(value: DashboardSurface['vaultEventRefs']) { this.surface.vaultEventRefs = value; }
+	get bannerStatsTimer(): DashboardSurface['bannerStatsTimer'] { return this.surface.bannerStatsTimer; }
+	set bannerStatsTimer(value: DashboardSurface['bannerStatsTimer']) { this.surface.bannerStatsTimer = value; }
+	get bannerStatsEl(): DashboardSurface['bannerStatsEl'] { return this.surface.bannerStatsEl; }
+	set bannerStatsEl(value: DashboardSurface['bannerStatsEl']) { this.surface.bannerStatsEl = value; }
+	get vaultChangePaths(): DashboardSurface['vaultChangePaths'] { return this.surface.vaultChangePaths; }
+	set vaultChangePaths(value: DashboardSurface['vaultChangePaths']) { this.surface.vaultChangePaths = value; }
+	get vaultChangeBroad(): DashboardSurface['vaultChangeBroad'] { return this.surface.vaultChangeBroad; }
+	set vaultChangeBroad(value: DashboardSurface['vaultChangeBroad']) { this.surface.vaultChangeBroad = value; }
+	get vaultRefreshTimer(): DashboardSurface['vaultRefreshTimer'] { return this.surface.vaultRefreshTimer; }
+	set vaultRefreshTimer(value: DashboardSurface['vaultRefreshTimer']) { this.surface.vaultRefreshTimer = value; }
+	get VAULT_REFRESH_DEBOUNCE(): DashboardSurface['VAULT_REFRESH_DEBOUNCE'] { return this.surface.VAULT_REFRESH_DEBOUNCE; }
+	get BANNER_STATS_DEBOUNCE(): DashboardSurface['BANNER_STATS_DEBOUNCE'] { return this.surface.BANNER_STATS_DEBOUNCE; }
+	get bannerStatsResolvedOnce(): DashboardSurface['bannerStatsResolvedOnce'] { return this.surface.bannerStatsResolvedOnce; }
+	set bannerStatsResolvedOnce(value: DashboardSurface['bannerStatsResolvedOnce']) { this.surface.bannerStatsResolvedOnce = value; }
+	get bannerQuoteIndex(): DashboardSurface['bannerQuoteIndex'] { return this.surface.bannerQuoteIndex; }
+	set bannerQuoteIndex(value: DashboardSurface['bannerQuoteIndex']) { this.surface.bannerQuoteIndex = value; }
+	get bannerImageIndex(): DashboardSurface['bannerImageIndex'] { return this.surface.bannerImageIndex; }
+	set bannerImageIndex(value: DashboardSurface['bannerImageIndex']) { this.surface.bannerImageIndex = value; }
+	get sidebarPinned(): DashboardSurface['sidebarPinned'] { return this.surface.sidebarPinned; }
+	set sidebarPinned(value: DashboardSurface['sidebarPinned']) { this.surface.sidebarPinned = value; }
+	get sidebarExpanded(): DashboardSurface['sidebarExpanded'] { return this.surface.sidebarExpanded; }
+	set sidebarExpanded(value: DashboardSurface['sidebarExpanded']) { this.surface.sidebarExpanded = value; }
+	get bannerCollapsed(): DashboardSurface['bannerCollapsed'] { return this.surface.bannerCollapsed; }
+	set bannerCollapsed(value: DashboardSurface['bannerCollapsed']) { this.surface.bannerCollapsed = value; }
+	get pendingScrollCardId(): DashboardSurface['pendingScrollCardId'] { return this.surface.pendingScrollCardId; }
+	set pendingScrollCardId(value: DashboardSurface['pendingScrollCardId']) { this.surface.pendingScrollCardId = value; }
+	get pendingScrollToLastCardOfColumn(): DashboardSurface['pendingScrollToLastCardOfColumn'] { return this.surface.pendingScrollToLastCardOfColumn; }
+	set pendingScrollToLastCardOfColumn(value: DashboardSurface['pendingScrollToLastCardOfColumn']) { this.surface.pendingScrollToLastCardOfColumn = value; }
+	get pomodoroService(): DashboardSurface['pomodoroService'] { return this.surface.pomodoroService; }
+	set pomodoroService(value: DashboardSurface['pomodoroService']) { this.surface.pomodoroService = value; }
+	get pomodoroMiniPanel(): DashboardSurface['pomodoroMiniPanel'] { return this.surface.pomodoroMiniPanel; }
+	set pomodoroMiniPanel(value: DashboardSurface['pomodoroMiniPanel']) { this.surface.pomodoroMiniPanel = value; }
+	get readingMiniTimer(): DashboardSurface['readingMiniTimer'] { return this.surface.readingMiniTimer; }
+	set readingMiniTimer(value: DashboardSurface['readingMiniTimer']) { this.surface.readingMiniTimer = value; }
+	get readingService(): DashboardSurface['readingService'] { return this.surface.readingService; }
+	set readingService(value: DashboardSurface['readingService']) { this.surface.readingService = value; }
+	get habitUnsubscribe(): DashboardSurface['habitUnsubscribe'] { return this.surface.habitUnsubscribe; }
+	set habitUnsubscribe(value: DashboardSurface['habitUnsubscribe']) { this.surface.habitUnsubscribe = value; }
+	get holidayData(): DashboardSurface['holidayData'] { return this.surface.holidayData; }
+	set holidayData(value: DashboardSurface['holidayData']) { this.surface.holidayData = value; }
+	get mobileWidgetExpanded(): DashboardSurface['mobileWidgetExpanded'] { return this.surface.mobileWidgetExpanded; }
+	set mobileWidgetExpanded(value: DashboardSurface['mobileWidgetExpanded']) { this.surface.mobileWidgetExpanded = value; }
+	get mobileWidgetTabsOpen(): DashboardSurface['mobileWidgetTabsOpen'] { return this.surface.mobileWidgetTabsOpen; }
+	set mobileWidgetTabsOpen(value: DashboardSurface['mobileWidgetTabsOpen']) { this.surface.mobileWidgetTabsOpen = value; }
+	get weatherRefreshTimer(): DashboardSurface['weatherRefreshTimer'] { return this.surface.weatherRefreshTimer; }
+	set weatherRefreshTimer(value: DashboardSurface['weatherRefreshTimer']) { this.surface.weatherRefreshTimer = value; }
+	get dayRolloverTimer(): DashboardSurface['dayRolloverTimer'] { return this.surface.dayRolloverTimer; }
+	set dayRolloverTimer(value: DashboardSurface['dayRolloverTimer']) { this.surface.dayRolloverTimer = value; }
+	get lastRenderedDay(): DashboardSurface['lastRenderedDay'] { return this.surface.lastRenderedDay; }
+	set lastRenderedDay(value: DashboardSurface['lastRenderedDay']) { this.surface.lastRenderedDay = value; }
+	get sidebarWidgetsEl(): DashboardSurface['sidebarWidgetsEl'] { return this.surface.sidebarWidgetsEl; }
+	set sidebarWidgetsEl(value: DashboardSurface['sidebarWidgetsEl']) { this.surface.sidebarWidgetsEl = value; }
+	get sidebarWidgetsSig(): DashboardSurface['sidebarWidgetsSig'] { return this.surface.sidebarWidgetsSig; }
+	set sidebarWidgetsSig(value: DashboardSurface['sidebarWidgetsSig']) { this.surface.sidebarWidgetsSig = value; }
+	get isOpening(): DashboardSurface['isOpening'] { return this.surface.isOpening; }
+	set isOpening(value: DashboardSurface['isOpening']) { this.surface.isOpening = value; }
+	get openingPromise(): DashboardSurface['openingPromise'] { return this.surface.openingPromise; }
+	set openingPromise(value: DashboardSurface['openingPromise']) { this.surface.openingPromise = value; }
+	get isOpen(): DashboardSurface['isOpen'] { return this.surface.isOpen; }
+	set isOpen(value: DashboardSurface['isOpen']) { this.surface.isOpen = value; }
+	get lifecycleRevision(): DashboardSurface['lifecycleRevision'] { return this.surface.lifecycleRevision; }
+	set lifecycleRevision(value: DashboardSurface['lifecycleRevision']) { this.surface.lifecycleRevision = value; }
+	get pendingInitialData(): DashboardSurface['pendingInitialData'] { return this.surface.pendingInitialData; }
+	set pendingInitialData(value: DashboardSurface['pendingInitialData']) { this.surface.pendingInitialData = value; }
+	get hoverPopover(): DashboardSurface['hoverPopover'] { return this.surface.hoverPopover; }
+	set hoverPopover(value: DashboardSurface['hoverPopover']) { this.surface.hoverPopover = value; }
+	get popoverModal(): DashboardSurface['popoverModal'] { return this.surface.popoverModal; }
+	set popoverModal(value: DashboardSurface['popoverModal']) { this.surface.popoverModal = value; }
+	get libraryNewNoteInFlight(): DashboardSurface['libraryNewNoteInFlight'] { return this.surface.libraryNewNoteInFlight; }
+	set libraryNewNoteInFlight(value: DashboardSurface['libraryNewNoteInFlight']) { this.surface.libraryNewNoteInFlight = value; }
+	get cardNewNoteInFlight(): DashboardSurface['cardNewNoteInFlight'] { return this.surface.cardNewNoteInFlight; }
+	set cardNewNoteInFlight(value: DashboardSurface['cardNewNoteInFlight']) { this.surface.cardNewNoteInFlight = value; }
+	handleDataUpdate(...args: Parameters<DashboardSurface['handleDataUpdate']>): ReturnType<DashboardSurface['handleDataUpdate']> { return this.surface.handleDataUpdate(...args); }
+	refresh(...args: Parameters<DashboardSurface['refresh']>): ReturnType<DashboardSurface['refresh']> { return this.surface.refresh(...args); }
+	reloadFromDisk(...args: Parameters<DashboardSurface['reloadFromDisk']>): ReturnType<DashboardSurface['reloadFromDisk']> { return this.surface.reloadFromDisk(...args); }
+	applyWorkspaceSwitch(...args: Parameters<DashboardSurface['applyWorkspaceSwitch']>): ReturnType<DashboardSurface['applyWorkspaceSwitch']> { return this.surface.applyWorkspaceSwitch(...args); }
+	addSection(...args: Parameters<DashboardSurface['addSection']>): ReturnType<DashboardSurface['addSection']> { return this.surface.addSection(...args); }
+	toggleBannerMode(...args: Parameters<DashboardSurface['toggleBannerMode']>): ReturnType<DashboardSurface['toggleBannerMode']> { return this.surface.toggleBannerMode(...args); }
+	render(...args: Parameters<DashboardSurface['render']>): ReturnType<DashboardSurface['render']> { return this.surface.render(...args); }
+	renderMobileActions(...args: Parameters<DashboardSurface['renderMobileActions']>): ReturnType<DashboardSurface['renderMobileActions']> { return this.surface.renderMobileActions(...args); }
+	renderMobileWidgetBar(...args: Parameters<DashboardSurface['renderMobileWidgetBar']>): ReturnType<DashboardSurface['renderMobileWidgetBar']> { return this.surface.renderMobileWidgetBar(...args); }
+	refreshMobileWidgetPanel(...args: Parameters<DashboardSurface['refreshMobileWidgetPanel']>): ReturnType<DashboardSurface['refreshMobileWidgetPanel']> { return this.surface.refreshMobileWidgetPanel(...args); }
+	openMobileDrawer(...args: Parameters<DashboardSurface['openMobileDrawer']>): ReturnType<DashboardSurface['openMobileDrawer']> { return this.surface.openMobileDrawer(...args); }
+	closeMobileDrawer(...args: Parameters<DashboardSurface['closeMobileDrawer']>): ReturnType<DashboardSurface['closeMobileDrawer']> { return this.surface.closeMobileDrawer(...args); }
+	setupBannerBehavior(...args: Parameters<DashboardSurface['setupBannerBehavior']>): ReturnType<DashboardSurface['setupBannerBehavior']> { return this.surface.setupBannerBehavior(...args); }
+	setupBannerRotation(...args: Parameters<DashboardSurface['setupBannerRotation']>): ReturnType<DashboardSurface['setupBannerRotation']> { return this.surface.setupBannerRotation(...args); }
+	renderBannerPinButton(...args: Parameters<DashboardSurface['renderBannerPinButton']>): ReturnType<DashboardSurface['renderBannerPinButton']> { return this.surface.renderBannerPinButton(...args); }
+	renderSidebar(...args: Parameters<DashboardSurface['renderSidebar']>): ReturnType<DashboardSurface['renderSidebar']> { return this.surface.renderSidebar(...args); }
+	setupSidebarBehavior(...args: Parameters<DashboardSurface['setupSidebarBehavior']>): ReturnType<DashboardSurface['setupSidebarBehavior']> { return this.surface.setupSidebarBehavior(...args); }
+	applySidebarSizing(...args: Parameters<DashboardSurface['applySidebarSizing']>): ReturnType<DashboardSurface['applySidebarSizing']> { return this.surface.applySidebarSizing(...args); }
+	attachStripHeightHandle(...args: Parameters<DashboardSurface['attachStripHeightHandle']>): ReturnType<DashboardSurface['attachStripHeightHandle']> { return this.surface.attachStripHeightHandle(...args); }
+	attachSidebarWidthHandle(...args: Parameters<DashboardSurface['attachSidebarWidthHandle']>): ReturnType<DashboardSurface['attachSidebarWidthHandle']> { return this.surface.attachSidebarWidthHandle(...args); }
+	commitSidebarSizing(...args: Parameters<DashboardSurface['commitSidebarSizing']>): ReturnType<DashboardSurface['commitSidebarSizing']> { return this.surface.commitSidebarSizing(...args); }
+	createCallbacks(...args: Parameters<DashboardSurface['createCallbacks']>): ReturnType<DashboardSurface['createCallbacks']> { return this.surface.createCallbacks(...args); }
+	handleFileDrop(...args: Parameters<DashboardSurface['handleFileDrop']>): ReturnType<DashboardSurface['handleFileDrop']> { return this.surface.handleFileDrop(...args); }
+	saveMemoAsNote(...args: Parameters<DashboardSurface['saveMemoAsNote']>): ReturnType<DashboardSurface['saveMemoAsNote']> { return this.surface.saveMemoAsNote(...args); }
+	saveTasksToDaily(...args: Parameters<DashboardSurface['saveTasksToDaily']>): ReturnType<DashboardSurface['saveTasksToDaily']> { return this.surface.saveTasksToDaily(...args); }
+	archiveCompletedTasks(...args: Parameters<DashboardSurface['archiveCompletedTasks']>): ReturnType<DashboardSurface['archiveCompletedTasks']> { return this.surface.archiveCompletedTasks(...args); }
+	openBannerEditModal(...args: Parameters<DashboardSurface['openBannerEditModal']>): ReturnType<DashboardSurface['openBannerEditModal']> { return this.surface.openBannerEditModal(...args); }
+	openCardEditModal(...args: Parameters<DashboardSurface['openCardEditModal']>): ReturnType<DashboardSurface['openCardEditModal']> { return this.surface.openCardEditModal(...args); }
+	openNotePopover(...args: Parameters<DashboardSurface['openNotePopover']>): ReturnType<DashboardSurface['openNotePopover']> { return this.surface.openNotePopover(...args); }
+	openNote(...args: Parameters<DashboardSurface['openNote']>): ReturnType<DashboardSurface['openNote']> { return this.surface.openNote(...args); }
+	openNoteInTab(...args: Parameters<DashboardSurface['openNoteInTab']>): ReturnType<DashboardSurface['openNoteInTab']> { return this.surface.openNoteInTab(...args); }
+	addColumnWithType(...args: Parameters<DashboardSurface['addColumnWithType']>): ReturnType<DashboardSurface['addColumnWithType']> { return this.surface.addColumnWithType(...args); }
+	openAddSectionModal(...args: Parameters<DashboardSurface['openAddSectionModal']>): ReturnType<DashboardSurface['openAddSectionModal']> { return this.surface.openAddSectionModal(...args); }
+	openWidgetTypeModal(...args: Parameters<DashboardSurface['openWidgetTypeModal']>): ReturnType<DashboardSurface['openWidgetTypeModal']> { return this.surface.openWidgetTypeModal(...args); }
+	openStickyCardTypeModal(...args: Parameters<DashboardSurface['openStickyCardTypeModal']>): ReturnType<DashboardSurface['openStickyCardTypeModal']> { return this.surface.openStickyCardTypeModal(...args); }
+	openWeatherConfigModal(...args: Parameters<DashboardSurface['openWeatherConfigModal']>): ReturnType<DashboardSurface['openWeatherConfigModal']> { return this.surface.openWeatherConfigModal(...args); }
+	openTrackerConfigModal(...args: Parameters<DashboardSurface['openTrackerConfigModal']>): ReturnType<DashboardSurface['openTrackerConfigModal']> { return this.surface.openTrackerConfigModal(...args); }
+	openTemplatePicker(...args: Parameters<DashboardSurface['openTemplatePicker']>): ReturnType<DashboardSurface['openTemplatePicker']> { return this.surface.openTemplatePicker(...args); }
+	openLibraryConfigModal(...args: Parameters<DashboardSurface['openLibraryConfigModal']>): ReturnType<DashboardSurface['openLibraryConfigModal']> { return this.surface.openLibraryConfigModal(...args); }
+	openDataviewConfigModal(...args: Parameters<DashboardSurface['openDataviewConfigModal']>): ReturnType<DashboardSurface['openDataviewConfigModal']> { return this.surface.openDataviewConfigModal(...args); }
+	openWebConfigModal(...args: Parameters<DashboardSurface['openWebConfigModal']>): ReturnType<DashboardSurface['openWebConfigModal']> { return this.surface.openWebConfigModal(...args); }
+	openMediaConfigModal(...args: Parameters<DashboardSurface['openMediaConfigModal']>): ReturnType<DashboardSurface['openMediaConfigModal']> { return this.surface.openMediaConfigModal(...args); }
+	openWereadConfigModal(...args: Parameters<DashboardSurface['openWereadConfigModal']>): ReturnType<DashboardSurface['openWereadConfigModal']> { return this.surface.openWereadConfigModal(...args); }
+	handleMoveCard(...args: Parameters<DashboardSurface['handleMoveCard']>): ReturnType<DashboardSurface['handleMoveCard']> { return this.surface.handleMoveCard(...args); }
+	reorderCardsInDOM(...args: Parameters<DashboardSurface['reorderCardsInDOM']>): ReturnType<DashboardSurface['reorderCardsInDOM']> { return this.surface.reorderCardsInDOM(...args); }
+	refreshSectionInPlace(...args: Parameters<DashboardSurface['refreshSectionInPlace']>): ReturnType<DashboardSurface['refreshSectionInPlace']> { return this.surface.refreshSectionInPlace(...args); }
+	openFolderConfigModal(...args: Parameters<DashboardSurface['openFolderConfigModal']>): ReturnType<DashboardSurface['openFolderConfigModal']> { return this.surface.openFolderConfigModal(...args); }
+	handleCardNewNote(...args: Parameters<DashboardSurface['handleCardNewNote']>): ReturnType<DashboardSurface['handleCardNewNote']> { return this.surface.handleCardNewNote(...args); }
+	openNotesSectionConfigModal(...args: Parameters<DashboardSurface['openNotesSectionConfigModal']>): ReturnType<DashboardSurface['openNotesSectionConfigModal']> { return this.surface.openNotesSectionConfigModal(...args); }
+	handleLibraryNewNote(...args: Parameters<DashboardSurface['handleLibraryNewNote']>): ReturnType<DashboardSurface['handleLibraryNewNote']> { return this.surface.handleLibraryNewNote(...args); }
+	openAddActionModal(...args: Parameters<DashboardSurface['openAddActionModal']>): ReturnType<DashboardSurface['openAddActionModal']> { return this.surface.openAddActionModal(...args); }
+	openEditActionModal(...args: Parameters<DashboardSurface['openEditActionModal']>): ReturnType<DashboardSurface['openEditActionModal']> { return this.surface.openEditActionModal(...args); }
+	deleteColumn(...args: Parameters<DashboardSurface['deleteColumn']>): ReturnType<DashboardSurface['deleteColumn']> { return this.surface.deleteColumn(...args); }
+	executeAction(...args: Parameters<DashboardSurface['executeAction']>): ReturnType<DashboardSurface['executeAction']> { return this.surface.executeAction(...args); }
+	openProjectSearchModal(...args: Parameters<DashboardSurface['openProjectSearchModal']>): ReturnType<DashboardSurface['openProjectSearchModal']> { return this.surface.openProjectSearchModal(...args); }
+	promptAddColumn(...args: Parameters<DashboardSurface['promptAddColumn']>): ReturnType<DashboardSurface['promptAddColumn']> { return this.surface.promptAddColumn(...args); }
+	navigateToPath(...args: Parameters<DashboardSurface['navigateToPath']>): ReturnType<DashboardSurface['navigateToPath']> { return this.surface.navigateToPath(...args); }
+	registerVaultListeners(...args: Parameters<DashboardSurface['registerVaultListeners']>): ReturnType<DashboardSurface['registerVaultListeners']> { return this.surface.registerVaultListeners(...args); }
+	unregisterVaultListeners(...args: Parameters<DashboardSurface['unregisterVaultListeners']>): ReturnType<DashboardSurface['unregisterVaultListeners']> { return this.surface.unregisterVaultListeners(...args); }
+	scheduleVaultRefresh(...args: Parameters<DashboardSurface['scheduleVaultRefresh']>): ReturnType<DashboardSurface['scheduleVaultRefresh']> { return this.surface.scheduleVaultRefresh(...args); }
+	flushVaultRefresh(...args: Parameters<DashboardSurface['flushVaultRefresh']>): ReturnType<DashboardSurface['flushVaultRefresh']> { return this.surface.flushVaultRefresh(...args); }
+	refreshSidebarCalendarNow(...args: Parameters<DashboardSurface['refreshSidebarCalendarNow']>): ReturnType<DashboardSurface['refreshSidebarCalendarNow']> { return this.surface.refreshSidebarCalendarNow(...args); }
+	refreshAlbumWidgetsNow(...args: Parameters<DashboardSurface['refreshAlbumWidgetsNow']>): ReturnType<DashboardSurface['refreshAlbumWidgetsNow']> { return this.surface.refreshAlbumWidgetsNow(...args); }
+	refreshSectionsFor(...args: Parameters<DashboardSurface['refreshSectionsFor']>): ReturnType<DashboardSurface['refreshSectionsFor']> { return this.surface.refreshSectionsFor(...args); }
+	onHabitChanged(...args: Parameters<DashboardSurface['onHabitChanged']>): ReturnType<DashboardSurface['onHabitChanged']> { return this.surface.onHabitChanged(...args); }
+	refreshLunarWidgetsInPlace(...args: Parameters<DashboardSurface['refreshLunarWidgetsInPlace']>): ReturnType<DashboardSurface['refreshLunarWidgetsInPlace']> { return this.surface.refreshLunarWidgetsInPlace(...args); }
+	refreshDataWidget(...args: Parameters<DashboardSurface['refreshDataWidget']>): ReturnType<DashboardSurface['refreshDataWidget']> { return this.surface.refreshDataWidget(...args); }
+	debouncedRefreshBannerStats(...args: Parameters<DashboardSurface['debouncedRefreshBannerStats']>): ReturnType<DashboardSurface['debouncedRefreshBannerStats']> { return this.surface.debouncedRefreshBannerStats(...args); }
+	refreshRecentDocs(...args: Parameters<DashboardSurface['refreshRecentDocs']>): ReturnType<DashboardSurface['refreshRecentDocs']> { return this.surface.refreshRecentDocs(...args); }
+	runCleanup(...args: Parameters<DashboardSurface['runCleanup']>): ReturnType<DashboardSurface['runCleanup']> { return this.surface.runCleanup(...args); }
+	renderScrollToTop(...args: Parameters<DashboardSurface['renderScrollToTop']>): ReturnType<DashboardSurface['renderScrollToTop']> { return this.surface.renderScrollToTop(...args); }
+	startWeatherRefresh(...args: Parameters<DashboardSurface['startWeatherRefresh']>): ReturnType<DashboardSurface['startWeatherRefresh']> { return this.surface.startWeatherRefresh(...args); }
+	stopWeatherRefresh(...args: Parameters<DashboardSurface['stopWeatherRefresh']>): ReturnType<DashboardSurface['stopWeatherRefresh']> { return this.surface.stopWeatherRefresh(...args); }
+	startDayRolloverChecker(...args: Parameters<DashboardSurface['startDayRolloverChecker']>): ReturnType<DashboardSurface['startDayRolloverChecker']> { return this.surface.startDayRolloverChecker(...args); }
+	stopDayRolloverChecker(...args: Parameters<DashboardSurface['stopDayRolloverChecker']>): ReturnType<DashboardSurface['stopDayRolloverChecker']> { return this.surface.stopDayRolloverChecker(...args); }
+	checkDayRollover(...args: Parameters<DashboardSurface['checkDayRollover']>): ReturnType<DashboardSurface['checkDayRollover']> { return this.surface.checkDayRollover(...args); }
 
-	getDisplayText(): string {
-		return t('main.dashboard');
-	}
+	getViewType(): string { return DASHBOARD_VIEW_TYPE; }
 
-	getIcon(): string {
-		return 'home';
-	}
+	getDisplayText(): string { return this.surface?.getDisplayText() ?? t('main.dashboard'); }
 
-	/** Source identities survive reordering and do not depend on translated labels. */
-	async focusWidget(sourceId: string): Promise<boolean> {
-		await this.openingPromise;
-		if (!this.isOpen || !this.plugin.settings.modules.dashboard) return false;
-		const settings = this.plugin.settings;
-		const countdown = settings.countdownEnabled
-			? settings.countdowns.find((entry) => `widget:${entry.id}` === sourceId)
-			: undefined;
-		const anniversary = settings.anniversaryEnabled
-			? settings.anniversaries.find((entry) => `widget:${entry.id}` === sourceId)
-			: undefined;
-		if (!countdown && !anniversary) return false;
-		const key = countdown ? `countdown-${countdown.id}` : `anniversary-${anniversary!.id}`;
-		const widget = Array.from(this.contentEl.querySelectorAll<HTMLElement>('[data-widget-key]')).find(
-			(el) => el.dataset.widgetKey === key,
-		);
-		closeOwnedDashboardPanels(this.app, this);
-		const sidebar = widget?.closest<HTMLElement>('.dashboard-sidebar');
-		if (sidebar) {
-			this.sidebarExpanded = true;
-			sidebar.classList.remove('dashboard-sidebar--collapsed');
-			sidebar.classList.add('dashboard-sidebar--expanded');
-		}
-		if (widget && widget.getClientRects().length > 0) {
-			widget.tabIndex = -1;
-			widget.scrollIntoView({ block: 'center', inline: 'nearest' });
-			widget.focus({ preventScroll: true });
-			return true;
-		}
-		// The sidebar is hidden on phones/narrow panes; show the same panel in native chrome.
-		const modal = new DashboardPanelModal(
-			this.app,
-			`dashboard-sidebar-widget dashboard-sidebar-${countdown ? 'countdown' : 'anniversary'}`,
-			(_close, root) => {
-				root.dataset.widgetKey = key;
-				const win = root.ownerDocument.defaultView!;
-				return countdown
-					? h(CountdownPanel, { config: countdown, win })
-					: h(AnniversaryPanel, { config: anniversary!, win });
-			},
-			this,
-		);
-		modal.open();
-		modal.contentEl.tabIndex = -1;
-		modal.contentEl.focus({ preventScroll: true });
-		return true;
-	}
-
-	/** Reentrancy guard: a second toolbar click while the title prompt is open
-	 *  must not stack a second dialog (overlay stacking is a known bug class). */
-	libraryNewNoteInFlight = false;
-	cardNewNoteInFlight = false;
+	getIcon(): string { return 'home'; }
+	focusWidget(...args: Parameters<DashboardSurface['focusWidget']>): ReturnType<DashboardSurface['focusWidget']> { return this.surface.focusWidget(...args); }
 }
-
-DashboardView.prototype.onOpen = function () {
-	if (this.isOpening && this.openingPromise) return this.openingPromise;
-	const opening = onOpen.call(this).finally(() => {
-		if (this.openingPromise === opening) this.openingPromise = null;
-	});
-	this.openingPromise = opening;
-	return opening;
-};
-DashboardView.prototype.onClose = onClose;
-DashboardView.prototype.handleDataUpdate = handleDataUpdate;
-DashboardView.prototype.refresh = refresh;
-DashboardView.prototype.reloadFromDisk = reloadFromDisk;
-DashboardView.prototype.applyWorkspaceSwitch = applyWorkspaceSwitch;
-DashboardView.prototype.addSection = addSection;
-DashboardView.prototype.toggleBannerMode = toggleBannerMode;
-DashboardView.prototype.render = render;
-DashboardView.prototype.renderMobileActions = renderMobileActions;
-DashboardView.prototype.renderMobileWidgetBar = renderMobileWidgetBar;
-DashboardView.prototype.refreshMobileWidgetPanel = refreshMobileWidgetPanel;
-DashboardView.prototype.openMobileDrawer = openMobileDrawer;
-DashboardView.prototype.closeMobileDrawer = closeMobileDrawer;
-DashboardView.prototype.setupBannerBehavior = setupBannerBehavior;
-DashboardView.prototype.setupBannerRotation = setupBannerRotation;
-DashboardView.prototype.renderBannerPinButton = renderBannerPinButton;
-DashboardView.prototype.renderSidebar = renderSidebar;
-DashboardView.prototype.setupSidebarBehavior = setupSidebarBehavior;
-DashboardView.prototype.applySidebarSizing = applySidebarSizing;
-DashboardView.prototype.attachStripHeightHandle = attachStripHeightHandle;
-DashboardView.prototype.attachSidebarWidthHandle = attachSidebarWidthHandle;
-DashboardView.prototype.commitSidebarSizing = commitSidebarSizing;
-DashboardView.prototype.createCallbacks = createCallbacks;
-DashboardView.prototype.handleFileDrop = handleFileDrop;
-DashboardView.prototype.saveMemoAsNote = saveMemoAsNote;
-DashboardView.prototype.saveTasksToDaily = saveTasksToDaily;
-DashboardView.prototype.archiveCompletedTasks = archiveCompletedTasks;
-DashboardView.prototype.openBannerEditModal = openBannerEditModal;
-DashboardView.prototype.openCardEditModal = openCardEditModal;
-DashboardView.prototype.openNotePopover = openNotePopover;
-DashboardView.prototype.openNote = openNote;
-DashboardView.prototype.openNoteInTab = openNoteInTab;
-DashboardView.prototype.addColumnWithType = addColumnWithType;
-DashboardView.prototype.openAddSectionModal = openAddSectionModal;
-DashboardView.prototype.openWidgetTypeModal = openWidgetTypeModal;
-DashboardView.prototype.openStickyCardTypeModal = openStickyCardTypeModal;
-DashboardView.prototype.openWeatherConfigModal = openWeatherConfigModal;
-DashboardView.prototype.openTrackerConfigModal = openTrackerConfigModal;
-DashboardView.prototype.openTemplatePicker = openTemplatePicker;
-DashboardView.prototype.openLibraryConfigModal = openLibraryConfigModal;
-DashboardView.prototype.openDataviewConfigModal = openDataviewConfigModal;
-DashboardView.prototype.openWebConfigModal = openWebConfigModal;
-DashboardView.prototype.openMediaConfigModal = openMediaConfigModal;
-DashboardView.prototype.openWereadConfigModal = openWereadConfigModal;
-DashboardView.prototype.handleMoveCard = handleMoveCard;
-DashboardView.prototype.reorderCardsInDOM = reorderCardsInDOM;
-DashboardView.prototype.refreshSectionInPlace = refreshSectionInPlace;
-DashboardView.prototype.openFolderConfigModal = openFolderConfigModal;
-DashboardView.prototype.handleCardNewNote = handleCardNewNote;
-DashboardView.prototype.openNotesSectionConfigModal = openNotesSectionConfigModal;
-DashboardView.prototype.handleLibraryNewNote = handleLibraryNewNote;
-DashboardView.prototype.openAddActionModal = openAddActionModal;
-DashboardView.prototype.openEditActionModal = openEditActionModal;
-DashboardView.prototype.deleteColumn = deleteColumn;
-DashboardView.prototype.executeAction = executeAction;
-DashboardView.prototype.openProjectSearchModal = openProjectSearchModal;
-DashboardView.prototype.promptAddColumn = promptAddColumn;
-DashboardView.prototype.navigateToPath = navigateToPath;
-DashboardView.prototype.registerVaultListeners = registerVaultListeners;
-DashboardView.prototype.unregisterVaultListeners = unregisterVaultListeners;
-DashboardView.prototype.scheduleVaultRefresh = scheduleVaultRefresh;
-DashboardView.prototype.flushVaultRefresh = flushVaultRefresh;
-DashboardView.prototype.refreshSidebarCalendarNow = refreshSidebarCalendarNow;
-DashboardView.prototype.refreshAlbumWidgetsNow = refreshAlbumWidgetsNow;
-DashboardView.prototype.refreshSectionsFor = refreshSectionsFor;
-DashboardView.prototype.onHabitChanged = onHabitChanged;
-DashboardView.prototype.refreshLunarWidgetsInPlace = refreshLunarWidgetsInPlace;
-DashboardView.prototype.refreshDataWidget = refreshDataWidget;
-DashboardView.prototype.debouncedRefreshBannerStats = debouncedRefreshBannerStats;
-DashboardView.prototype.refreshRecentDocs = refreshRecentDocs;
-DashboardView.prototype.runCleanup = runCleanup;
-DashboardView.prototype.renderScrollToTop = renderScrollToTop;
-DashboardView.prototype.startWeatherRefresh = startWeatherRefresh;
-DashboardView.prototype.stopWeatherRefresh = stopWeatherRefresh;
-DashboardView.prototype.startDayRolloverChecker = startDayRolloverChecker;
-DashboardView.prototype.stopDayRolloverChecker = stopDayRolloverChecker;
-DashboardView.prototype.checkDayRollover = checkDayRollover;

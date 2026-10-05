@@ -1,0 +1,10 @@
+/* ==================== Link Styles ==================== */
+.xterm-link {
+  cursor: pointer;
+  text-decoration: underline;
+  color: var(--text-accent);
+}
+.xterm-link:hover {
+  text-decoration: underline;
+  color: var(--text-accent-hover);
+}

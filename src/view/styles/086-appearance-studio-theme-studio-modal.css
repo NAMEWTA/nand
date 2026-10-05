@@ -1,0 +1,317 @@
+/* ===== Appearance Studio (Theme Studio modal) =====
+   Board modal rhythm: header (title + reset-all ghost) / body (grouped
+   section cards) / footer (primary right). 14px outer radius per the
+   modal scale; each section is a tinted card with a clear heading. */
+.dashboard-theme-studio {
+	max-width: 520px;
+	border-radius: 14px;
+}
+.dashboard-theme-studio-hint {
+	margin: 0 0 14px;
+	font-size: 0.82em;
+	line-height: 1.5;
+	color: var(--db-text-muted, var(--text-muted));
+}
+.dashboard-theme-studio-section {
+	margin-bottom: 12px;
+	padding: 14px;
+	border: 1px solid var(--db-border, var(--background-modifier-border));
+	border-radius: var(--db-radius-md, 10px);
+	background: var(--db-bg-hover, transparent);
+}
+.dashboard-theme-studio-section:last-child {
+	margin-bottom: 0;
+}
+.dashboard-theme-studio-section h3 {
+	margin: 0 0 4px;
+	font-size: 0.95em;
+	font-weight: 600;
+	line-height: 1.35;
+}
+.dashboard-theme-studio-desc {
+	margin: 0 0 12px;
+	font-size: 0.8em;
+	line-height: 1.5;
+	color: var(--db-text-muted, var(--text-muted));
+}
+/* Accent swatch grid: even columns so the ten chips form a tidy 5x2 (or
+   10x1) grid instead of a ragged wrap. */
+.dashboard-theme-studio-swatches {
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(30px, 1fr));
+	justify-items: center;
+	gap: 10px 8px;
+	margin-bottom: 14px;
+	padding: 10px;
+	border-radius: var(--db-radius-sm, 6px);
+	background: var(--db-bg-input, transparent);
+}
+.dashboard-theme-studio-swatch {
+	width: 28px;
+	height: 28px;
+	box-sizing: border-box;
+	border-radius: 50%;
+	cursor: pointer;
+	border: 1px solid color-mix(in srgb, var(--db-text, var(--text-normal)) 18%, transparent);
+	/* Two-layer ring: a gap in the modal surface color, then the ring color
+	   (neutral on hover, accent when selected). */
+	box-shadow: 0 0 0 0 transparent;
+	transition: box-shadow var(--nand-duration-fast) var(--nand-ease), border-color var(--nand-duration-fast) var(--nand-ease);
+}
+.dashboard-theme-studio-swatch:hover {
+	box-shadow:
+		0 0 0 2px var(--db-bg-modal, var(--background-primary)),
+		0 0 0 4px color-mix(in srgb, var(--db-text, var(--text-normal)) 22%, transparent);
+}
+.dashboard-theme-studio-swatch.is-selected {
+	border-color: transparent;
+	box-shadow:
+		0 0 0 2px var(--db-bg-modal, var(--background-primary)),
+		0 0 0 4px var(--db-accent, var(--interactive-accent));
+}
+.dashboard-theme-studio-swatch:focus-visible {
+	outline: 2px solid var(--db-accent, var(--interactive-accent));
+	outline-offset: 4px;
+}
+.dashboard-theme-studio-color-list {
+	display: flex;
+	flex-direction: column;
+	gap: 6px;
+	margin-bottom: 12px;
+}
+.dashboard-theme-studio-color-row,
+.dashboard-theme-studio-slider-row,
+.dashboard-theme-studio-size-row,
+.dashboard-theme-studio-fontscale-row {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	min-height: 32px;
+}
+/* Color rows sit on hairline dividers, like a settings list. */
+.dashboard-theme-studio-color-row + .dashboard-theme-studio-color-row {
+	padding-top: 6px;
+	border-top: 1px solid color-mix(in srgb, var(--db-border, var(--background-modifier-border)) 60%, transparent);
+}
+/* Text-size segmented control (Small / Medium / Large): one well, raised
+   selected segment (same recipe as the reading-stats period switch). */
+.dashboard-theme-studio-fontscale {
+	display: inline-flex;
+	gap: 2px;
+	padding: 2px;
+	border: 1px solid var(--db-border-input, var(--db-border, var(--background-modifier-border)));
+	border-radius: var(--db-radius-sm, 6px);
+	background: var(--db-bg-input, transparent);
+}
+.dashboard-theme-studio-fontscale-btn {
+	height: 26px;
+	padding: 0 12px;
+	border: none;
+	border-radius: max(2px, calc(var(--db-radius-sm, 6px) - 2px));
+	background: transparent;
+	box-shadow: none;
+	color: var(--db-text-muted, var(--text-muted));
+	font-size: 0.82em;
+	cursor: pointer;
+	transition: background var(--nand-duration-fast) var(--nand-ease), color var(--nand-duration-fast) var(--nand-ease), box-shadow var(--nand-duration-fast) var(--nand-ease);
+}
+.dashboard-theme-studio-fontscale-btn:hover {
+	color: var(--db-text, var(--text-normal));
+	background: var(--db-bg-hover, rgba(255, 255, 255, 0.05));
+}
+.dashboard-theme-studio-fontscale-btn.active {
+	color: var(--db-accent, var(--interactive-accent));
+	background: var(--db-bg-card, var(--background-primary));
+	box-shadow: 0 0 0 1px color-mix(in srgb, var(--db-accent, var(--interactive-accent)) 40%, transparent);
+	font-weight: 600;
+}
+.dashboard-theme-studio-color-label {
+	flex: 1;
+	min-width: 96px;
+	font-size: 0.88em;
+}
+
+/* Color rows carry an extra mode dropdown (follow theme / light / dark /
+   custom); let the controls wrap under the label when the compact modal
+   gets too narrow instead of overflowing. */
+.dashboard-theme-studio-color-row {
+	flex-wrap: wrap;
+}
+
+/* Mode dropdown per color row: same recipe as .dashboard-theme-studio-size —
+   auto width so the closed state never clips, explicit height + line-height +
+   appearance:menulist so raw <select> renders fully under Obsidian/Electron —
+   but sized to the picker/slider row (28px). */
+.dashboard-theme-studio-color-mode {
+	flex: 0 0 auto;
+	width: auto;
+	min-width: 84px;
+	height: 28px;
+	padding: 0 8px;
+	line-height: 26px;
+	box-sizing: border-box;
+	font-size: 0.82em;
+	-webkit-appearance: menulist;
+	appearance: menulist;
+}
+
+/* Follow-theme / light / dark modes drive the value, so the picker + alpha
+   slider sit disabled-but-visible as a preview of the resulting color. */
+.dashboard-theme-studio-color-row input:disabled {
+	opacity: 0.45;
+	cursor: not-allowed;
+}
+
+/* Alpha slider rides between the swatch and the clear button: slim, accent-
+   tinted, with a small fixed span so eight rows align. */
+.dashboard-theme-studio-alpha-slider {
+	width: 90px;
+	height: 4px;
+	appearance: none;
+	-webkit-appearance: none;
+	background: color-mix(in srgb, var(--db-text, var(--text-normal)) 18%, transparent);
+	border-radius: 999px;
+	outline: none;
+	cursor: pointer;
+	flex-shrink: 0;
+}
+
+.dashboard-theme-studio-alpha-slider::-webkit-slider-thumb {
+	appearance: none;
+	-webkit-appearance: none;
+	width: 12px;
+	height: 12px;
+	border-radius: 50%;
+	background: var(--db-accent, var(--interactive-accent));
+	border: none;
+	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
+}
+.dashboard-modal-color-input {
+	width: 38px;
+	height: 28px;
+	padding: 0;
+	border: 1px solid var(--db-border, var(--background-modifier-border));
+	border-radius: var(--db-radius-sm, 6px);
+	background: transparent;
+	cursor: pointer;
+}
+/* Row reset: quiet ghost icon button (tint on hover), not a boxed tile. */
+.dashboard-theme-studio-color-clear {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 28px;
+	height: 28px;
+	padding: 0;
+	border: 1px solid transparent;
+	border-radius: var(--db-radius-sm, 6px);
+	background: transparent;
+	box-shadow: none;
+	cursor: pointer;
+	color: var(--db-text-muted, var(--text-muted));
+	transition: background var(--nand-duration-fast) var(--nand-ease), color var(--nand-duration-fast) var(--nand-ease), border-color var(--nand-duration-fast) var(--nand-ease);
+}
+.dashboard-theme-studio-color-clear:hover {
+	background: var(--db-bg-hover, var(--background-modifier-hover));
+	border-color: var(--db-border, var(--background-modifier-border));
+	color: var(--db-text, var(--text-normal));
+}
+.dashboard-theme-studio-color-clear svg {
+	width: 14px;
+	height: 14px;
+}
+/* Section-level secondary actions: ghost buttons (one primary per view). */
+.dashboard-theme-studio-reset,
+.dashboard-theme-studio-resetall {
+	height: 28px;
+	padding: 0 10px;
+	border: 1px solid transparent;
+	border-radius: var(--db-radius-sm, 6px);
+	background: transparent;
+	box-shadow: none;
+	font-size: 0.82em;
+	cursor: pointer;
+	transition: background var(--nand-duration-fast) var(--nand-ease), color var(--nand-duration-fast) var(--nand-ease), border-color var(--nand-duration-fast) var(--nand-ease);
+}
+.dashboard-theme-studio-reset {
+	color: var(--db-text-muted, var(--text-muted));
+}
+.dashboard-theme-studio-reset:hover,
+.dashboard-theme-studio-resetall:hover {
+	background: var(--db-bg-hover, var(--background-modifier-hover));
+	border-color: var(--db-border, var(--background-modifier-border));
+	color: var(--db-text, var(--text-normal));
+}
+.dashboard-theme-studio-image-row {
+	display: flex;
+	gap: 8px;
+	margin-bottom: 14px;
+}
+.dashboard-theme-studio-image-input {
+	flex: 1;
+}
+.dashboard-theme-studio-browse,
+.dashboard-theme-studio-image-clear {
+	white-space: nowrap;
+}
+.dashboard-theme-studio-slider {
+	flex: 2;
+}
+.dashboard-theme-studio-size {
+	/* Auto-size to the widest option so closed-state text isn't clipped
+	   (overrides .dashboard-modal-input width:100%). Explicit height +
+	   line-height + appearance:menulist keep the selected value fully
+	   visible (raw <select> under Obsidian/Electron clips vertically without them). */
+	flex: 0 0 auto;
+	width: auto;
+	min-width: 150px;
+	height: 36px;
+	padding: 0 10px;
+	line-height: 36px;
+	box-sizing: border-box;
+	-webkit-appearance: menulist;
+	appearance: menulist;
+}
+.dashboard-theme-studio-header {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 12px;
+	margin-bottom: 8px;
+	/* Leave room for the modal's close button on the right. */
+	padding-right: 28px;
+}
+.dashboard-theme-studio-header h2 {
+	margin: 0;
+}
+.dashboard-theme-studio-resetall {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	flex-shrink: 0;
+	color: var(--db-text-muted, var(--text-muted));
+}
+.dashboard-theme-studio-resetall-icon svg {
+	width: 13px;
+	height: 13px;
+}
+.dashboard-theme-studio-slider-hint {
+	font-size: 0.72em;
+	color: var(--db-text-faint, var(--text-faint));
+	font-style: italic;
+	min-width: 64px;
+	font-variant-numeric: tabular-nums;
+}
+.dashboard-theme-studio-slider {
+	accent-color: var(--db-accent, var(--interactive-accent));
+}
+@media (pointer: coarse) {
+	.dashboard-theme-studio-swatch {
+		width: 36px;
+		height: 36px;
+	}
+	.dashboard-theme-studio-swatches {
+		grid-template-columns: repeat(auto-fill, minmax(40px, 1fr));
+	}
+}
+

@@ -137,7 +137,7 @@ export class DashboardSettingTab extends PluginSettingTab {
 					{
 						name: t('settings.productHome'),
 						desc: t('settings.homeDesc'),
-						aliases: [t('settings.language'), t('settings.homeGeneral'), t('settings.homeModules')],
+						aliases: [t('workbench.statusSetting'), t('settings.language'), t('settings.homeGeneral'), t('settings.homeModules')],
 						render: (setting) => {
 							asBlock(setting);
 							onProduct('home', 'home')(setting);

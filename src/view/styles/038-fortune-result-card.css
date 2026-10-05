@@ -1,0 +1,438 @@
+/* ===== Fortune Result Card ===== */
+.fortune-card--result {
+	padding: 32px 24px 24px;
+	min-width: 240px;
+	max-width: 280px;
+	animation: fortune-fade-in 0.3s ease;
+}
+
+/* Seal Stamp Badge */
+.fortune-result-header {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 8px;
+	width: 100%;
+	margin-bottom: 16px;
+}
+
+.fortune-result-seal {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 56px;
+	height: 56px;
+	border: 2.5px solid #B22222;
+	border-radius: 50%;
+	color: #B22222;
+	font-size: 0.85em;
+	font-weight: 800;
+	letter-spacing: 0.04em;
+	line-height: 1.2;
+	text-align: center;
+	transform: rotate(-8deg);
+	position: relative;
+}
+
+.fortune-result-seal::after {
+	content: '';
+	position: absolute;
+	inset: 3px;
+	border: 1px solid rgba(178, 34, 34, 0.3);
+	border-radius: 50%;
+	pointer-events: none;
+}
+
+.fortune-result-seal--super {
+	background: rgba(178, 34, 34, 0.08);
+}
+
+.fortune-result-seal--good {
+	background: rgba(178, 34, 34, 0.05);
+	border-color: #C41E3A;
+	color: #C41E3A;
+}
+
+.fortune-result-seal--good::after {
+	border-color: rgba(196, 30, 58, 0.3);
+}
+
+.fortune-result-seal--medium {
+	background: rgba(107, 90, 66, 0.08);
+	border-color: #6b5a42;
+	color: #6b5a42;
+}
+
+.fortune-result-seal--medium::after {
+	border-color: rgba(107, 90, 66, 0.3);
+}
+
+.fortune-result-category {
+	position: absolute;
+	top: 10px;
+	right: 10px;
+	font-size: 0.75em;
+	color: #8b7355;
+	font-weight: 500;
+	letter-spacing: 0.04em;
+	z-index: 2;
+}
+
+.fortune-result-divider {
+	width: 80%;
+	height: 1px;
+	background: linear-gradient(90deg, transparent, #c9a96e, transparent);
+	margin: 0 auto 20px;
+}
+
+/* Vertical Verse */
+.fortune-result-verse {
+	writing-mode: vertical-rl;
+	text-orientation: mixed;
+	font-size: 1.2em;
+	line-height: 2.2;
+	color: #2c1810;
+	font-weight: 600;
+	letter-spacing: 0.08em;
+	height: 180px;
+	margin: 0 auto 20px;
+	text-align: start;
+	padding: 0 8px;
+}
+
+/* Flip Card */
+.fortune-flip-container {
+	perspective: 1000px;
+	width: 100%;
+}
+
+.fortune-flip-card {
+	position: relative;
+	width: 100%;
+	transform-style: preserve-3d;
+	transition: transform 0.6s ease;
+}
+
+.fortune-flip-card--flipped {
+	transform: rotateY(180deg);
+}
+
+.fortune-flip-front {
+	backface-visibility: hidden;
+}
+
+.fortune-flip-back {
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	backface-visibility: hidden;
+	transform: rotateY(180deg);
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	gap: 16px;
+	padding: 0 4px;
+	overflow-y: auto;
+}
+
+/* Reveal Button */
+.fortune-result-reveal-btn {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	padding: 8px 20px;
+	border: 2px solid #B22222;
+	border-radius: var(--nand-radius-sm, 6px);
+	font-size: 0.9em;
+	font-weight: 700;
+	cursor: pointer;
+	background: transparent;
+	color: #B22222;
+	letter-spacing: 0.1em;
+	transition: background 0.2s, border-color 0.2s, box-shadow 0.2s, color 0.2s, transform 0.2s;
+	transform: rotate(-2deg);
+}
+
+.fortune-result-reveal-btn:hover {
+	background: #B22222;
+	color: #f7f1e3;
+}
+
+.fortune-result-reveal-btn--hidden {
+	opacity: 0;
+	pointer-events: none;
+}
+
+.fortune-result-reveal-btn--show {
+	opacity: 1;
+	pointer-events: auto;
+	transition: opacity 0.5s ease;
+}
+
+/* Back Face Content */
+.fortune-back-title {
+	font-size: 1.1em;
+	font-weight: 700;
+	color: #8B2500;
+	letter-spacing: 0.1em;
+	margin-bottom: 4px;
+}
+
+.fortune-back-interpretation {
+	width: 100%;
+	font-size: 0.95em;
+	line-height: 2;
+	color: #2c1810;
+	padding: 16px;
+	background: rgba(255, 252, 245, 0.6);
+	border-radius: var(--nand-radius-sm, 6px);
+	border: 1px solid #C41E3A;
+}
+
+/* Typewriter Effect */
+.fortune-verse-char {
+	opacity: 0;
+	animation: fortune-char-appear 0.3s ease forwards;
+}
+
+@keyframes fortune-char-appear {
+	from { opacity: 0; }
+	to { opacity: 1; }
+}
+
+.fortune-result-back-btn {
+	margin-top: 20px;
+	font-size: 0.8em;
+	color: #8b7355;
+	cursor: pointer;
+	opacity: 0.7;
+	transition: opacity 0.2s;
+	text-decoration: underline;
+	text-underline-offset: 2px;
+	letter-spacing: 0.04em;
+}
+
+.fortune-result-back-btn:hover {
+	opacity: 1;
+	color: #8B2500;
+}
+
+@keyframes fortune-fade-in {
+	from { opacity: 0; transform: translateY(-6px); }
+	to { opacity: 1; transform: translateY(0); }
+}
+
+/* Week Calendar Strip */
+.dashboard-sidebar-week-calendar {
+	display: flex;
+	align-items: center;
+	gap: 2px;
+	padding: 0 4px;
+	min-height: calc(1.6em + 16px);
+}
+
+.dashboard-sidebar-week-cell {
+	flex: 1;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	padding: 6px 2px 6px;
+	border-radius: var(--db-radius-sm);
+	transition: background-color var(--nand-duration) var(--nand-ease);
+}
+
+.dashboard-sidebar-week-cell--today {
+	background: var(--db-accent);
+	border-radius: var(--db-radius-sm);
+}
+
+.dashboard-sidebar-week-day {
+	font-size: 0.65em;
+	color: var(--db-text-faint);
+	line-height: 1;
+	margin-bottom: 4px;
+	letter-spacing: 0.02em;
+}
+
+.dashboard-sidebar-week-cell--today .dashboard-sidebar-week-day {
+	color: var(--db-text-on-accent);
+}
+
+.dashboard-sidebar-week-date {
+	font-size: 0.9em;
+	font-weight: 600;
+	color: var(--db-text);
+	line-height: 1;
+	font-variant-numeric: tabular-nums;
+}
+
+.dashboard-sidebar-week-cell--today .dashboard-sidebar-week-date {
+	color: var(--db-text-on-accent);
+}
+
+/* On light accents (e.g. 墨白/mono, 曜黑/onyx) white text is unreadable, so use the
+   theme's body text color for contrast instead. */
+.dashboard-sidebar-week-cell--today-on-light .dashboard-sidebar-week-day {
+	color: var(--db-text-on-accent);
+}
+
+.dashboard-sidebar-week-cell--today-on-light .dashboard-sidebar-week-date {
+	color: var(--db-text-on-accent);
+}
+
+/* Settings widget card */
+.dashboard-widget-settings-card {
+	border: 1px solid var(--background-modifier-border);
+	border-radius: var(--nand-radius-md, 10px);
+	padding: 4px 0;
+	margin-bottom: 12px;
+}
+
+.dashboard-widget-settings-card > .setting-item:first-child {
+	padding-top: 12px;
+}
+
+.dashboard-widget-settings-card > .setting-item:last-child {
+	padding-bottom: 12px;
+}
+
+/* --- Collapsed: clean slim bar --- */
+.dashboard-sidebar--collapsed {
+	width: 15px;
+	cursor: pointer;
+	overflow: hidden;
+}
+
+.dashboard-sidebar--collapsed > *:not(.dashboard-sidebar-slim-indicator) {
+	opacity: 0;
+	pointer-events: none;
+	visibility: hidden;
+}
+
+.dashboard-sidebar--collapsed:hover {
+	background: var(--db-bg-hover);
+}
+
+/* Slim indicator: a subtle vertical line that hints the bar is interactive */
+.dashboard-sidebar-slim-indicator {
+	display: none;
+}
+
+.dashboard-sidebar--collapsed .dashboard-sidebar-slim-indicator {
+	display: block;
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%, -50%);
+	width: 4px;
+	height: 40px;
+	border-radius: 2px;
+	/* Always-visible resting state: use the readable text color at full strength
+	   so the grip is obvious even without hovering. */
+	background: var(--db-text-faint);
+	opacity: 0.65;
+	transition: opacity 0.2s ease, background 0.2s ease;
+	pointer-events: none;
+}
+
+.dashboard-sidebar--collapsed:hover .dashboard-sidebar-slim-indicator {
+	opacity: 0.95;
+}
+
+/* --- Expanded --- */
+.dashboard-sidebar--expanded {
+	width: calc(var(--db-sidebar-w, 220) * 1px);
+	opacity: 1;
+	cursor: default;
+	overflow-y: auto;
+}
+
+/* --- Pinned: permanent sidebar --- */
+.dashboard-sidebar--pinned {
+	width: calc(var(--db-sidebar-w, 220) * 1px);
+	opacity: 1;
+}
+
+/* --- Sidebar pin button (banner bottom-left corner) ---
+   Desktop-only. The quick-buttons block became a hideable sidebar widget, so
+   the sidebar pin moved out of its header to the banner's bottom-left corner.
+   Distinct from .dashboard-banner-pin-btn (the top-right banner-collapse
+   bookmark). Faint at rest, full opacity on hover, accent when the sidebar is
+   pinned. */
+.dashboard-sidebar-pin-btn {
+	position: absolute;
+	left: 10px;
+	bottom: 8px;
+	z-index: 5; /* above the stats panel (z-index 1) */
+	background: none !important;
+	border: none !important;
+	box-shadow: none !important;
+	color: rgba(255, 255, 255, 0.45);
+	cursor: pointer;
+	padding: 4px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	opacity: 0;
+	transition: opacity 0.2s ease, color 0.2s ease, transform 0.2s ease;
+	line-height: 1;
+	outline: none;
+}
+
+.dashboard-sidebar-pin-btn svg {
+	width: 15px;
+	height: 15px;
+}
+
+.dashboard-banner:hover .dashboard-sidebar-pin-btn {
+	opacity: 1;
+	color: rgba(255, 255, 255, 0.85);
+}
+
+.dashboard-sidebar-pin-btn:hover,
+.dashboard-sidebar-pin-btn:active {
+	background: none !important;
+	border: none !important;
+	box-shadow: none !important;
+	color: #ffffff !important;
+	transform: scale(1.15);
+}
+
+.dashboard-sidebar-pin-btn--active {
+	opacity: 0.6;
+	color: var(--db-accent, #ffffff);
+}
+
+/* Collapsed banner keeps the pin reachable, tucked at the thin bar's left edge. */
+@media (min-width: 641px) {
+	.dashboard-banner--collapsed > .dashboard-sidebar-pin-btn {
+		opacity: 0.5;
+		bottom: auto;
+		top: -3px;
+		padding: 2px;
+	}
+}
+
+.dashboard-section {
+	background: var(--db-bg-sidebar);
+	border: 1px solid var(--db-border-sidebar);
+	border-radius: var(--db-radius-lg);
+	padding: 16px;
+	backdrop-filter: var(--db-backdrop-blur);
+	-webkit-backdrop-filter: var(--db-backdrop-blur);
+}
+
+.dashboard-section > .dashboard-section-title {
+	font-size: 0.85em;
+	font-weight: 600;
+	margin: 0 0 12px 0;
+	padding-bottom: 8px;
+	border-bottom: 1px solid var(--db-border);
+	text-transform: uppercase;
+	letter-spacing: 0.05em;
+	opacity: 0.7;
+}
+

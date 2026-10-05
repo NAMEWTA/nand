@@ -28236,3 +28236,77 @@ button.nand-contacts-hit { cursor: pointer; }
 
 .nand-dashboard-root .dashboard-qa-item > button.dashboard-qa-run { background: transparent; box-shadow: none; }
 .dashboard-qa-item--saved .dashboard-qa-icon { grid-column: 1; grid-row: 1 / 3; }
+
+
+/* NAND unified workbench: neutral shell, isolated from dashboard palettes. */
+.nand-workbench-view { padding: 0; overflow: hidden; }
+.nand-workbench { display: flex; position: relative; width: 100%; height: 100%; min-width: 0; min-height: 0; color: var(--text-normal); background: var(--nand-surface); }
+.nand-workbench-nav { width: var(--nand-workbench-nav-width, 232px); flex: 0 0 var(--nand-workbench-nav-width, 232px); min-height: 0; display: flex; flex-direction: column; background: var(--nand-surface-muted); }
+.nand-workbench-nav[hidden], .nand-workbench-page[hidden], .nand-workbench-nav-children[hidden] { display: none; }
+.nand-workbench-brand { display: flex; align-items: center; gap: var(--size-4-2); padding: var(--size-4-4); min-height: var(--nand-touch-target); }
+.nand-workbench-brand strong { font-weight: 600; }
+.nand-workbench-navigation { flex: 1 1 auto; min-height: 0; overflow: auto; padding: 0 var(--size-4-2); }
+.nand-workbench-search { margin: 0 var(--size-4-1) var(--size-4-4); }
+.nand-workbench-search input { width: 100%; }
+.nand-workbench-nav-list, .nand-workbench-nav-children { list-style: none; padding: 0; margin: 0; }
+.nand-workbench-nav-children { margin-inline-start: var(--size-4-6); padding-block: var(--size-4-1); }
+.nand-workbench-nav-row { display: flex; align-items: center; border-radius: var(--nand-radius-sm); margin-block: var(--size-4-1); }
+.nand-workbench-nav-link { display: flex; align-items: center; gap: var(--size-4-2); width: 100%; min-height: 36px; padding: var(--size-4-2) var(--size-4-3); border: 0; border-radius: var(--nand-radius-sm); background: transparent; box-shadow: none; color: var(--text-normal); text-align: start; justify-content: flex-start; cursor: pointer; }
+.nand-workbench-nav-link > span:not(.nand-ui-badge) { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.nand-workbench-nav-link .nand-ui-badge { margin-inline-start: auto; }
+.nand-workbench-nav-link:hover, .nand-workbench-nav-row:hover { background: var(--nand-surface-hover); }
+.nand-workbench-nav-row.is-active, .nand-workbench-nav-link[aria-current="page"] { background: var(--nand-accent-soft); color: var(--text-accent); }
+.nand-workbench-nav-link:focus-visible, .nand-workbench-resizer:focus-visible { outline: 2px solid var(--interactive-accent); outline-offset: -2px; }
+.nand-workbench-context { flex: 1 1 45%; min-height: 0; overflow: hidden; border-top: var(--nand-border); }
+.nand-workbench-context[hidden], .nand-workbench-context:empty, .nand-workbench-context-page[hidden] { display: none; }
+.nand-workbench-context-page { height: 100%; min-height: 0; }
+.nand-workbench-agent-objects { height: 100%; box-sizing: border-box; gap: var(--size-4-2); }
+.nand-workbench-agent-objects:empty { display: none; }
+.nand-workbench-context :is(button, input, select):focus-visible { outline: 2px solid var(--interactive-accent); outline-offset: -2px; }
+.nand-workbench-nav-footer { padding: var(--size-4-3) var(--size-4-2); border-top: var(--nand-border); }
+.nand-workbench-nav-empty { padding: var(--size-4-3); color: var(--text-muted); }
+.nand-workbench-resizer { width: 4px; flex: 0 0 4px; padding: 0; margin: 0; border: 0; border-radius: 0; box-shadow: none; background: var(--nand-border); cursor: col-resize; touch-action: none; }
+.nand-workbench-main { display: flex; flex-direction: column; flex: 1; min-width: 0; min-height: 0; overflow: hidden; }
+.nand-workbench-header { display: flex; align-items: center; flex: 0 0 auto; gap: var(--size-4-2); padding: var(--size-4-2) var(--size-4-3); border-bottom: var(--nand-border); min-height: var(--nand-touch-target); }
+.nand-workbench-header h2:focus-visible { outline: 2px solid var(--interactive-accent); outline-offset: 3px; }
+.nand-workbench-header h2 { font-size: var(--nand-text-body); font-weight: 600; margin: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.nand-workbench-progress { font-size: var(--nand-text-caption); color: var(--text-muted); }
+.nand-workbench-pages { flex: 1; position: relative; min-width: 0; min-height: 0; overflow: hidden; }
+.nand-workbench-page { width: 100%; height: 100%; min-height: 0; min-width: 0; overflow: auto; }
+.nand-workbench-error { display: flex; align-items: center; gap: var(--size-4-2); flex-wrap: wrap; padding: var(--size-4-3); color: var(--text-normal); border-bottom: 1px solid var(--nand-tone-error); }
+.nand-workbench-error span { overflow-wrap: anywhere; }
+.nand-workbench-unavailable { padding: var(--size-4-8); text-align: center; }
+.nand-workbench-backdrop { position: absolute; inset: 0; z-index: 9; width: 100%; height: 100%; border: 0; border-radius: 0; background: var(--background-modifier-cover); box-shadow: none; }
+.nand-workbench.is-compact > .nand-workbench-nav { position: absolute; inset-block: 0; inset-inline-start: 0; max-width: 85%; z-index: 10; box-shadow: var(--nand-shadow-lg); }
+.nand-workbench.is-compact .nand-workbench-nav-link, .nand-workbench.is-compact .nand-ui-icon-btn { min-height: var(--nand-touch-target); }
+.nand-workbench.is-compact .nand-workbench-progress { display: none; }
+@media (prefers-reduced-motion: reduce) { .nand-workbench * { scroll-behavior: auto; transition-duration: 0s; animation-duration: 0s; } }
+
+
+/* Embedded Agent uses an object drawer, not a second fixed global sidebar. */
+.terminal-workbench-shell.is-workbench-embedded { position: relative; grid-template-columns: minmax(0, 1fr); }
+.terminal-workbench-shell.is-workbench-embedded > .nand-agent-sidebar { position: absolute; inset-block: 0; inset-inline-start: 0; z-index: 5; width: min(var(--terminal-sidebar-width), 85%); max-width: 85%; transform: translateX(-110%); visibility: hidden; box-shadow: var(--nand-shadow-lg); }
+.terminal-workbench-shell.is-workbench-embedded.is-drawer-open > .nand-agent-sidebar { transform: none; visibility: visible; }
+.terminal-workbench-shell.is-workbench-embedded > .terminal-sidebar-resizer { display: none; }
+.terminal-workbench-shell.is-workbench-embedded > .terminal-drawer-backdrop { position: absolute; inset: 0; z-index: 4; width: 100%; height: 100%; background: var(--background-modifier-cover); border: 0; border-radius: 0; display: none; }
+.terminal-workbench-shell.is-workbench-embedded.is-drawer-open > .terminal-drawer-backdrop { display: block; }
+.terminal-workbench-shell.is-usage-page .terminal-live-pane { visibility: hidden; pointer-events: none; }
+.terminal-usage-page { position: absolute; inset: 0; overflow: auto; padding: var(--size-4-6); background: var(--nand-surface); }
+
+/* Native status actions remain compact; no idle launcher row. */
+.nand-workbench-status { display: flex; align-items: center; gap: var(--size-4-2); }
+.nand-workbench-status[hidden] { display: none; }
+.nand-workbench-status-action { display: inline-flex; align-items: center; gap: var(--size-4-1); padding: 0 var(--size-4-1); border: none; box-shadow: none; background: transparent; height: auto; max-width: 28ch; overflow: hidden; color: var(--text-muted); font-size: var(--font-ui-smaller); }
+.nand-workbench-status-action > span:last-child { overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+.nand-workbench-status-action svg { width: var(--icon-xs); height: var(--icon-xs); }
+.nand-workbench-status-action:hover { background: var(--background-modifier-hover); color: var(--text-normal); }
+
+.nand-automation-run-history { padding: var(--size-4-4); height: 100%; }
+.nand-automation-run.is-selected { background: var(--nand-accent-soft); border-radius: var(--nand-radius-sm); }
+.nand-automation-run:focus-visible { outline: 2px solid var(--interactive-accent); outline-offset: 2px; }
+
+.nand-workbench-home-overview { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 2fr); gap: var(--size-4-4); padding: var(--size-4-4); }
+.nand-workbench-home-calendar, .nand-workbench-home-recent { min-width: 0; border: 1px solid var(--db-border); border-radius: var(--db-radius-md); padding: var(--size-4-3); }
+.nand-workbench-home-recent .dashboard-recent { margin: 0; }
+@container (max-width: 560px) { .nand-workbench-home-overview { grid-template-columns: 1fr; } }
+.nand-workbench-page { container-type: inline-size; }

@@ -1,0 +1,71 @@
+/* ==================== Cursor Styles ==================== */
+/* Cursor layer - ensure it stays on top */
+.xterm-cursor-layer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 3;
+  pointer-events: none;
+}
+/* Canvas and WebGL draw the cursor in this layer. The DOM renderer uses an
+   in-flow span, so absolute positioning stays on the layer only. */
+.xterm-cursor-layer .xterm-cursor {
+  position: absolute;
+}
+/* Cursor - block cursor */
+.xterm-cursor {
+  background-color: var(--text-accent);
+  opacity: 1;
+  z-index: 3;
+  font-family: inherit;
+  font-size: inherit;
+  line-height: inherit;
+}
+/* Cursor blink animation */
+.xterm-cursor.xterm-cursor-blink {
+  animation: xterm-cursor-blink 1.2s steps(2, start) infinite;
+}
+@keyframes xterm-cursor-blink {
+  0%,
+  49% {
+    opacity: 1;
+  }
+  50%,
+  100% {
+    opacity: 0;
+  }
+}
+/* Cursor style variants */
+.xterm-cursor.xterm-cursor-block {
+  background-color: var(--text-accent);
+  height: 1.2em;
+  width: 1ch;
+}
+.xterm-cursor.xterm-cursor-outline {
+  background-color: transparent;
+  border: 1px solid var(--text-accent);
+  box-sizing: border-box;
+  height: 1.2em;
+  width: 1ch;
+}
+.xterm-cursor.xterm-cursor-bar {
+  background-color: var(--text-accent);
+  width: 1px;
+  height: 1.2em;
+}
+.xterm-cursor.xterm-cursor-underline {
+  background-color: transparent;
+  border-bottom: 1px solid var(--text-accent);
+  height: 1px;
+  bottom: 0;
+  width: 1ch;
+}
+/* The DOM renderer sets span height to 100% of the terminal. These four
+   classes outrank that rule so the cursor stays one cell tall. */
+.terminal-container .xterm-rows .xterm-cursor.xterm-cursor-block,
+.terminal-container .xterm-rows .xterm-cursor.xterm-cursor-outline,
+.terminal-container .xterm-rows .xterm-cursor.xterm-cursor-bar,
+.terminal-container .xterm-rows .xterm-cursor.xterm-cursor-underline {
+  position: static;
+  height: 1.2em;
+}

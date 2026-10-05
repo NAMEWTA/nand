@@ -1,0 +1,1147 @@
+/* ===== Theme-specific enhancements ===== */
+
+/* Aurora: modal — frosted glass with cyan glow */
+
+/* Earth: modal — warm organic, rounded */
+
+/* Nordic: modal — clean minimal with blue accent */
+
+/* -- Aurora: rainbow glow, soft rounded -- */
+/* The memo textarea lives inside a section row, so --db-sec-glow resolves to
+   that section's pony hue. Modal inputs live OUTSIDE the dashboard root —
+   --db-sec-* is not in the applyModalTheme mirror list there, so they derive
+   the glow from --db-accent (which is mirrored) instead. */
+.nand-dashboard-root[data-theme="aurora"] .dashboard-memo-textarea:focus {
+	border-color: var(--db-border-input-focus);
+	box-shadow: 0 0 16px var(--db-sec-glow);
+}
+
+.nand-dashboard-root[data-theme="aurora"] .dashboard-modal-input:focus {
+	border-color: var(--db-border-input-focus);
+	box-shadow: 0 0 16px color-mix(in srgb, var(--db-accent) 18%, transparent);
+}
+
+.nand-dashboard-root[data-theme="aurora"] .dashboard-section-row--drag-over {
+	border-color: var(--db-border-input-focus);
+	box-shadow: 0 0 20px var(--db-sec-glow);
+}
+
+.nand-dashboard-root[data-theme="aurora"] .dashboard-add-section {
+	border-radius: var(--db-radius-lg, 14px);
+	border-color: var(--db-border-add-section);
+}
+
+.nand-dashboard-root[data-theme="aurora"] .dashboard-add-section:hover {
+	border-color: var(--db-border-input-focus);
+	box-shadow: 0 0 12px var(--db-sec-glow);
+}
+
+/* -- Earth: pill-shaped, warm terracotta -- */
+
+.nand-dashboard-root[data-theme="earth"] .dashboard-add-section {
+	border-radius: 16px;
+	border-color: rgba(188, 90, 52, 0.35);
+}
+
+.nand-dashboard-root[data-theme="earth"] .dashboard-add-section:hover {
+	border-color: #bc5a34;
+	box-shadow: 0 0 12px rgba(217, 119, 6, 0.12);
+}
+
+/* -- Nordic: clean minimal with subtle accent border -- */
+.nand-dashboard-root[data-theme="nordic"] .dashboard-card {
+	border: 1px solid rgba(43, 187, 215, 0.14);
+}
+
+.theme-dark .nand-dashboard-root[data-theme="nordic"] .dashboard-card {
+	border-color: rgba(43, 187, 215, 0.18);
+}
+
+.nand-dashboard-root[data-theme="nordic"] .dashboard-add-section {
+	border-color: rgba(100, 125, 165, 0.4);
+	border-radius: 8px;
+}
+
+.theme-dark .nand-dashboard-root[data-theme="nordic"] .dashboard-add-section {
+	border-color: rgba(88, 130, 190, 0.35);
+}
+
+.nand-dashboard-root[data-theme="nordic"] .dashboard-add-section:hover {
+	border-color: #177d95;
+}
+
+/* -- Island: Animal Crossing — forest greens, ocean accents, 3D press -- */
+.nand-dashboard-root[data-theme="island"] .dashboard-card {
+	border: 2px solid var(--db-border-card);
+	box-shadow: 0 4px 0 0 #a8c8a5;
+	transition: background 0.25s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.25s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.25s cubic-bezier(0.4, 0, 0.2, 1), transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.nand-dashboard-root[data-theme="island"] .dashboard-card:hover {
+	box-shadow: 0 5px 0 0 #98b894, 0 8px 24px rgba(74, 103, 65, 0.15);
+	transform: translateY(-2px);
+	border-color: #82b87e;
+}
+
+.theme-dark .nand-dashboard-root[data-theme="island"] .dashboard-card {
+	box-shadow: 0 4px 0 0 #2a4a2e;
+}
+
+.theme-dark .nand-dashboard-root[data-theme="island"] .dashboard-card:hover {
+	box-shadow: 0 5px 0 0 #2a4a2e, 0 6px 16px rgba(0, 0, 0, 0.2);
+}
+
+.nand-dashboard-root[data-theme="island"] .dashboard-memo-textarea:focus {
+	border-color: #ffcc00;
+	box-shadow: 0 3px 0 0 #e0b800, 0 0 0 3px rgba(255, 204, 0, 0.15);
+}
+
+.nand-dashboard-root[data-theme="island"] .dashboard-modal-input:focus {
+	border-color: #ffcc00;
+	box-shadow: 0 3px 0 0 #e0b800, 0 0 0 3px rgba(255, 204, 0, 0.15);
+}
+
+.nand-dashboard-root[data-theme="island"] .dashboard-section-row--drag-over {
+	border-color: var(--db-accent);
+	box-shadow: 0 0 0 2px rgba(25, 200, 185, 0.15);
+}
+
+.nand-dashboard-root[data-theme="island"] .dashboard-note-quote {
+	border-left-color: #82d5bb;
+}
+
+.nand-dashboard-root[data-theme="island"] .dashboard-add-section {
+	border-radius: 50px;
+	border: 2px dashed rgba(25, 200, 185, 0.35);
+	font-weight: 600;
+	letter-spacing: 0.02em;
+}
+
+.nand-dashboard-root[data-theme="island"] .dashboard-add-section:hover {
+	border-color: var(--db-accent);
+	background: rgba(25, 200, 185, 0.06);
+	transform: translateY(-1px);
+	box-shadow: 0 4px 0 0 #a8c8a5;
+}
+
+.theme-dark .nand-dashboard-root[data-theme="island"] .dashboard-add-section:hover {
+	box-shadow: 0 4px 0 0 #2a4a2e;
+}
+
+/* Island: modal — cream parchment, green-tinted */
+
+/* Island: checkbox — grass green */
+.nand-dashboard-root[data-theme="island"] .task-checkbox:checked {
+	accent-color: #6fba2c;
+}
+
+/* Island: banner — forest frame */
+.nand-dashboard-root[data-theme="island"] .dashboard-banner {
+	border-radius: 20px;
+	border: 2px solid #b5d4b0;
+}
+
+/* Neon: banner — solid dark frame + scrim so the image and white quote read clearly */
+.nand-dashboard-root[data-theme="neon"] .dashboard-banner {
+	background-color: #0a0a0c;
+	border: 1px solid rgba(255, 46, 136, 0.16);
+}
+.nand-dashboard-root[data-theme="neon"] .dashboard-banner-overlay {
+	background: var(--db-banner-scrim);
+}
+.nand-dashboard-root[data-theme="neon"] .dashboard-banner-quote {
+	color: var(--db-photo-text);
+	text-shadow: 0 1px 4px rgba(0, 0, 0, 0.7), 0 0 16px rgba(0, 0, 0, 0.4);
+}
+.nand-dashboard-root[data-theme="neon"] .dashboard-banner-author {
+	color: var(--db-photo-text);
+	text-shadow: 0 1px 3px rgba(0, 0, 0, 0.6);
+}
+
+/* Volt: banner — solid dark frame + scrim so the image and white quote read clearly */
+.nand-dashboard-root[data-theme="volt"] .dashboard-banner {
+	background-color: #090a0e;
+	border: 1px solid rgba(0, 194, 255, 0.16);
+}
+.nand-dashboard-root[data-theme="volt"] .dashboard-banner-overlay {
+	background: var(--db-banner-scrim);
+}
+.nand-dashboard-root[data-theme="volt"] .dashboard-banner-quote {
+	color: var(--db-photo-text);
+	text-shadow: 0 1px 4px rgba(0, 0, 0, 0.7), 0 0 16px rgba(0, 0, 0, 0.4);
+}
+.nand-dashboard-root[data-theme="volt"] .dashboard-banner-author {
+	color: var(--db-photo-text);
+	text-shadow: 0 1px 3px rgba(0, 0, 0, 0.6);
+}
+
+/* Magma: banner — solid dark frame + scrim so the image and white quote read clearly */
+.nand-dashboard-root[data-theme="magma"] .dashboard-banner {
+	background-color: #0c0a08;
+	border: 1px solid rgba(255, 107, 26, 0.16);
+}
+.nand-dashboard-root[data-theme="magma"] .dashboard-banner-overlay {
+	background: var(--db-banner-scrim);
+}
+.nand-dashboard-root[data-theme="magma"] .dashboard-banner-quote {
+	color: var(--db-photo-text);
+	text-shadow: 0 1px 4px rgba(0, 0, 0, 0.7), 0 0 16px rgba(0, 0, 0, 0.4);
+}
+.nand-dashboard-root[data-theme="magma"] .dashboard-banner-author {
+	color: var(--db-photo-text);
+	text-shadow: 0 1px 3px rgba(0, 0, 0, 0.6);
+}
+
+/* Onyx: banner — solid dark frame + scrim so the image and white quote read clearly */
+.nand-dashboard-root[data-theme="onyx"] .dashboard-banner {
+	background-color: #0a0a0a;
+	border: 1px solid rgba(233, 255, 64, 0.16);
+}
+.nand-dashboard-root[data-theme="onyx"] .dashboard-banner-overlay {
+	background: var(--db-banner-scrim);
+}
+.nand-dashboard-root[data-theme="onyx"] .dashboard-banner-quote {
+	color: var(--db-photo-text);
+	text-shadow: 0 1px 4px rgba(0, 0, 0, 0.7), 0 0 16px rgba(0, 0, 0, 0.4);
+}
+.nand-dashboard-root[data-theme="onyx"] .dashboard-banner-author {
+	color: var(--db-photo-text);
+	text-shadow: 0 1px 3px rgba(0, 0, 0, 0.6);
+}
+
+/* Island: card title — round, friendly */
+.nand-dashboard-root[data-theme="island"] .dashboard-card-title {
+	font-weight: 600;
+	letter-spacing: 0.02em;
+	color: var(--db-text);
+}
+
+/* Island: section headers — forest accent */
+.nand-dashboard-root[data-theme="island"] .dashboard-section-header {
+	color: var(--db-text);
+}
+
+/* Island: sidebar links — ocean tint on hover */
+.nand-dashboard-root[data-theme="island"] .dashboard-quick-link:hover {
+	background: #e4f0f8;
+}
+
+/* Island: NookPhone-style pastel tints on memo cards */
+.nand-dashboard-root[data-theme="island"] .dashboard-card[data-type="memo"] {
+	border-left: 4px solid #82d5bb;
+}
+
+.nand-dashboard-root[data-theme="island"] .dashboard-card[data-type="todo"] {
+	border-left: 4px solid #6fba2c;
+}
+
+.nand-dashboard-root[data-theme="island"] .dashboard-card[data-type="project"] {
+	border-left: 4px solid #889df0;
+}
+
+.nand-dashboard-root[data-theme="island"] .dashboard-card[data-type="link"] {
+	border-left: 4px solid #f8a6b2;
+}
+
+.nand-dashboard-root[data-theme="island"] .dashboard-card[data-type="notes"] {
+	border-left: 4px solid #f7cd67;
+}
+
+/* Island: progress bar — teal to grass green gradient */
+.nand-dashboard-root[data-theme="island"] .dashboard-progress-fill {
+	background: linear-gradient(90deg, var(--db-progress-from), var(--db-progress-to));
+}
+
+/* -- Tundra: pill-shaped, warm organic (cloned from Earth) -- */
+
+.nand-dashboard-root[data-theme="tundra"] .dashboard-add-section {
+	border-radius: 16px;
+	border-color: rgba(217, 119, 6, 0.25);
+}
+
+.nand-dashboard-root[data-theme="tundra"] .dashboard-add-section:hover {
+	border-color: #d97706;
+}
+
+/* Tundra: modal — warm organic, rounded */
+
+/* -- Blossom: rose glass glow (cloned from Prism) -- */
+.nand-dashboard-root[data-theme="blossom"] .dashboard-card:hover {
+	box-shadow: 0 6px 24px rgba(244, 63, 94, 0.12), 0 0 16px rgba(168, 85, 247, 0.06);
+	border-color: rgba(244, 63, 94, 0.2);
+}
+
+.nand-dashboard-root[data-theme="blossom"] .dashboard-memo-textarea:focus {
+	border-color: rgba(244, 63, 94, 0.4);
+	box-shadow: 0 0 16px rgba(244, 63, 94, 0.08);
+}
+
+.nand-dashboard-root[data-theme="blossom"] .dashboard-modal-input:focus {
+	border-color: rgba(244, 63, 94, 0.4);
+	box-shadow: 0 0 16px rgba(244, 63, 94, 0.08);
+}
+
+.nand-dashboard-root[data-theme="blossom"] .dashboard-section-row--drag-over {
+	border-color: rgba(244, 63, 94, 0.4);
+	box-shadow: 0 0 20px rgba(244, 63, 94, 0.06);
+}
+
+.nand-dashboard-root[data-theme="blossom"] .dashboard-add-section {
+	border-radius: var(--db-radius-lg, 14px);
+	border-color: rgba(244, 63, 94, 0.15);
+}
+
+.nand-dashboard-root[data-theme="blossom"] .dashboard-add-section:hover {
+	border-color: rgba(244, 63, 94, 0.4);
+	box-shadow: 0 0 12px rgba(244, 63, 94, 0.06);
+}
+
+/* Blossom: modal — rose glass with warm glow */
+
+/* -- Matcha: deep matcha + gold tea glow -- */
+.nand-dashboard-root[data-theme="matcha"] .dashboard-card:hover {
+	box-shadow: 0 6px 24px rgba(80, 95, 55, 0.18), 0 0 16px rgba(110, 148, 52, 0.12);
+	border-color: rgba(110, 148, 52, 0.30);
+}
+.nand-dashboard-root[data-theme="matcha"] .dashboard-memo-textarea:focus {
+	border-color: rgba(79, 112, 40, 0.45);
+	box-shadow: 0 0 16px rgba(110, 148, 52, 0.12);
+}
+.nand-dashboard-root[data-theme="matcha"] .dashboard-modal-input:focus {
+	border-color: var(--db-border-input-focus);
+	box-shadow: 0 0 16px color-mix(in srgb, var(--db-accent) 18%, transparent);
+}
+.nand-dashboard-root[data-theme="matcha"] .dashboard-section-row--drag-over {
+	border-color: var(--db-border-input-focus);
+	box-shadow: 0 0 20px color-mix(in srgb, var(--db-accent) 14%, transparent);
+}
+.nand-dashboard-root[data-theme="matcha"] .dashboard-add-section {
+	border-radius: var(--db-radius-lg, 14px);
+	border-color: rgba(79, 112, 40, 0.30);
+}
+.nand-dashboard-root[data-theme="matcha"] .dashboard-add-section:hover {
+	border-color: #4a6a24;
+	box-shadow: 0 0 12px rgba(110, 148, 52, 0.14);
+}
+/* Matcha: modal — soft green glass */
+
+/* -- Lilac: wisteria + rose garden glow -- */
+.nand-dashboard-root[data-theme="lilac"] .dashboard-card:hover {
+	box-shadow: 0 6px 24px rgba(94, 61, 122, 0.20), 0 0 16px rgba(230, 73, 128, 0.10);
+	border-color: rgba(157, 78, 221, 0.35);
+}
+.nand-dashboard-root[data-theme="lilac"] .dashboard-memo-textarea:focus {
+	border-color: rgba(157, 78, 221, 0.45);
+	box-shadow: 0 0 16px rgba(157, 78, 221, 0.10);
+}
+.nand-dashboard-root[data-theme="lilac"] .dashboard-modal-input:focus {
+	border-color: var(--db-border-input-focus);
+	box-shadow: 0 0 16px color-mix(in srgb, var(--db-accent) 18%, transparent);
+}
+.nand-dashboard-root[data-theme="lilac"] .dashboard-section-row--drag-over {
+	border-color: var(--db-border-input-focus);
+	box-shadow: 0 0 20px color-mix(in srgb, var(--db-accent) 14%, transparent);
+}
+.nand-dashboard-root[data-theme="lilac"] .dashboard-add-section {
+	border-radius: var(--db-radius-lg, 14px);
+	border-color: var(--db-border-add-section);
+}
+.nand-dashboard-root[data-theme="lilac"] .dashboard-add-section:hover {
+	border-color: var(--db-border-input-focus);
+	box-shadow: 0 0 12px color-mix(in srgb, var(--db-accent) 16%, transparent);
+}
+
+/* Lilac: modal — soft purple glass */
+
+/* -- Dusk: dreamy cloud-soft modal -- */
+
+/* -- Sakura: soft petal glow modal -- */
+
+/* -- Moonlight: ethereal silver modal -- */
+
+/* -- Neon: near-black + neon magenta modal (same in light & dark) -- */
+[data-theme="neon"] .dashboard-add-section {
+	border-radius: 6px;
+	border-color: rgba(255, 46, 136, 0.20);
+	letter-spacing: 0.02em;
+}
+[data-theme="neon"] .dashboard-add-section:hover {
+	border-color: rgba(255, 46, 136, 0.45);
+	box-shadow: 0 0 10px rgba(255, 46, 136, 0.08);
+}
+
+/* -- Neon: high-contrast buttons (legible in both light & dark) -- */
+/* Pomodoro Start/Stop — solid magenta pill with white text */
+[data-theme="neon"] .dashboard-sidebar-pomodoro-main-btn {
+	background: var(--db-accent) !important;
+	background-color: var(--db-accent) !important;
+	color: var(--db-text-on-accent) !important;
+	border: none !important;
+	box-shadow: none !important;
+}
+[data-theme="neon"] .dashboard-sidebar-pomodoro-main-btn:hover:not(.dashboard-sidebar-pomodoro-main-btn--running) {
+	opacity: 1;
+	background: var(--db-accent) !important;
+	background-color: var(--db-accent) !important;
+	outline: 1px solid var(--db-accent);
+	outline-offset: 2px;
+}
+[data-theme="neon"] .dashboard-sidebar-pomodoro-main-btn--running {
+	background: rgba(255, 255, 255, 0.10) !important;
+	background-color: rgba(255, 255, 255, 0.10) !important;
+	color: var(--db-pomodoro-running-text, var(--db-accent)) !important;
+	border: 1px solid rgba(255, 46, 136, 0.40) !important;
+}
+
+/* Banner modal Add-Quote / Add-Image — magenta text on a dark chip */
+
+/* -- Volt: near-black + electric cyan modal (same in light & dark) -- */
+[data-theme="volt"] .dashboard-add-section {
+	border-radius: 6px;
+	border-color: rgba(0, 194, 255, 0.20);
+	letter-spacing: 0.02em;
+}
+[data-theme="volt"] .dashboard-add-section:hover {
+	border-color: rgba(0, 194, 255, 0.45);
+	box-shadow: 0 0 10px rgba(0, 194, 255, 0.08);
+}
+
+/* -- Volt: high-contrast buttons (legible in both light & dark) -- */
+/* Pomodoro Start/Stop — solid cyan pill with black text */
+[data-theme="volt"] .dashboard-sidebar-pomodoro-main-btn {
+	background: var(--db-accent) !important;
+	background-color: var(--db-accent) !important;
+	color: var(--db-text-on-accent) !important;
+	border: none !important;
+	box-shadow: none !important;
+}
+[data-theme="volt"] .dashboard-sidebar-pomodoro-main-btn:hover:not(.dashboard-sidebar-pomodoro-main-btn--running) {
+	opacity: 1;
+	background: var(--db-accent) !important;
+	background-color: var(--db-accent) !important;
+	outline: 1px solid var(--db-accent);
+	outline-offset: 2px;
+}
+[data-theme="volt"] .dashboard-sidebar-pomodoro-main-btn--running {
+	background: rgba(255, 255, 255, 0.10) !important;
+	background-color: rgba(255, 255, 255, 0.10) !important;
+	color: var(--db-pomodoro-running-text, var(--db-accent)) !important;
+	border: 1px solid rgba(0, 194, 255, 0.40) !important;
+}
+
+/* Banner modal Add-Quote / Add-Image — cyan text on a dark chip */
+
+/* -- Magma: warm near-black + lava orange modal (same in light & dark) -- */
+[data-theme="magma"] .dashboard-add-section {
+	border-radius: 6px;
+	border-color: rgba(255, 107, 26, 0.20);
+	letter-spacing: 0.02em;
+}
+[data-theme="magma"] .dashboard-add-section:hover {
+	border-color: rgba(255, 107, 26, 0.45);
+	box-shadow: 0 0 10px rgba(255, 107, 26, 0.08);
+}
+
+/* -- Magma: high-contrast buttons (legible in both light & dark) -- */
+/* Pomodoro Start/Stop — solid lava-orange pill with black text */
+[data-theme="magma"] .dashboard-sidebar-pomodoro-main-btn {
+	background: var(--db-accent) !important;
+	background-color: var(--db-accent) !important;
+	color: var(--db-text-on-accent) !important;
+	border: none !important;
+	box-shadow: none !important;
+}
+[data-theme="magma"] .dashboard-sidebar-pomodoro-main-btn:hover:not(.dashboard-sidebar-pomodoro-main-btn--running) {
+	opacity: 1;
+	background: var(--db-accent) !important;
+	background-color: var(--db-accent) !important;
+	outline: 1px solid var(--db-accent);
+	outline-offset: 2px;
+}
+[data-theme="magma"] .dashboard-sidebar-pomodoro-main-btn--running {
+	background: rgba(255, 255, 255, 0.10) !important;
+	background-color: rgba(255, 255, 255, 0.10) !important;
+	color: var(--db-pomodoro-running-text, var(--db-accent)) !important;
+	border: 1px solid rgba(255, 107, 26, 0.40) !important;
+}
+
+/* Banner modal Add-Quote / Add-Image — orange text on a dark chip */
+
+/* -- Onyx: pure black + lemon modal (same in light & dark) -- */
+[data-theme="onyx"] .dashboard-add-section {
+	border-radius: 6px;
+	border-color: rgba(233, 255, 64, 0.20);
+	letter-spacing: 0.02em;
+}
+[data-theme="onyx"] .dashboard-add-section:hover {
+	border-color: rgba(233, 255, 64, 0.45);
+	box-shadow: 0 0 10px rgba(233, 255, 64, 0.08);
+}
+
+/* -- Onyx: high-contrast buttons (legible in both light & dark) -- */
+/* Pomodoro Start/Stop — solid lemon pill with black text */
+[data-theme="onyx"] .dashboard-sidebar-pomodoro-main-btn {
+	background: var(--db-accent) !important;
+	background-color: var(--db-accent) !important;
+	color: var(--db-text-on-accent) !important;
+	border: none !important;
+	box-shadow: none !important;
+}
+[data-theme="onyx"] .dashboard-sidebar-pomodoro-main-btn:hover:not(.dashboard-sidebar-pomodoro-main-btn--running) {
+	opacity: 1;
+	background: var(--db-accent) !important;
+	background-color: var(--db-accent) !important;
+	outline: 1px solid var(--db-accent);
+	outline-offset: 2px;
+}
+[data-theme="onyx"] .dashboard-sidebar-pomodoro-main-btn--running {
+	background: rgba(255, 255, 255, 0.10) !important;
+	background-color: rgba(255, 255, 255, 0.10) !important;
+	color: var(--db-pomodoro-running-text, var(--db-accent)) !important;
+	border: 1px solid rgba(233, 255, 64, 0.40) !important;
+}
+
+/* Banner modal Add-Quote / Add-Image — lemon text on a dark chip */
+
+/* ===================================================================
+   MONO (墨白) overrides — solid, no glass/gradient/shadow
+   =================================================================== */
+/* Mono: banner — solid dark frame + flat scrim, white quote (both modes) */
+[data-theme="mono"] .dashboard-banner {
+	border-radius: var(--db-radius-lg, 12px);
+	border: 1px solid var(--db-border-card);
+}
+[data-theme="mono"] .dashboard-banner-overlay {
+	background: var(--db-banner-scrim);
+}
+[data-theme="mono"] .dashboard-banner-quote {
+	color: var(--db-photo-text);
+	text-shadow: 0 1px 4px rgba(0, 0, 0, 0.7);
+}
+[data-theme="mono"] .dashboard-banner-author {
+	color: var(--db-photo-text);
+	text-shadow: 0 1px 3px rgba(0, 0, 0, 0.6);
+}
+
+/* Mono: modal — flat, line-bordered, no blur */
+[data-theme="mono"] .dashboard-add-section {
+	border-radius: var(--db-radius-md, 10px);
+	border: 1px solid var(--db-border-add-section);
+}
+[data-theme="mono"] .dashboard-add-section:hover {
+	border-color: var(--db-accent);
+	box-shadow: none;
+}
+
+/* Mono: pomodoro Start/Stop — solid accent pill with inverse text */
+[data-theme="mono"] .dashboard-sidebar-pomodoro-main-btn {
+	background: var(--db-accent) !important;
+	background-color: var(--db-accent) !important;
+	color: var(--db-text-on-accent) !important;
+	border: none !important;
+	box-shadow: none !important;
+}
+[data-theme="mono"] .dashboard-sidebar-pomodoro-main-btn:hover:not(.dashboard-sidebar-pomodoro-main-btn--running) {
+	opacity: 1;
+	outline: 1px solid var(--db-accent);
+	outline-offset: 2px;
+}
+[data-theme="mono"] .dashboard-sidebar-pomodoro-main-btn--running {
+	background: transparent !important;
+	background-color: transparent !important;
+	color: var(--db-pomodoro-running-text, var(--db-accent)) !important;
+	border: 1px solid var(--db-accent) !important;
+}
+
+/* Mono: banner modal Add-Quote / Add-Image — flat chip, monochrome */
+
+/* =================================================================
+   MOBILE LAYOUT (phones only, <=640px)
+   Tablets (>=641px) keep the desktop layout unchanged.
+   ================================================================= */
+/* Hide memo color picker on Obsidian mobile app (color input doesn't work) */
+.is-mobile .dashboard-card-btn--color {
+	display: none;
+}
+
+@media (max-width: 640px) {
+	/* Disable ALL backdrop blur on mobile. backdrop-filter is iOS WKWebView's
+	   heaviest GPU/memory operation; a single first-tap :hover repaint across
+	   many stacked blur layers can crash the render process (Obsidian then
+	   restarts). The var covers panels referencing --db-backdrop-blur; the
+	   wildcard catches hardcoded blur() that ignores the var (file-suggest,
+	   heatmap popup, etc.); the modal rules catch body-mounted modals and
+	   theme overrides. Frost degrades to flat translucent fills; desktop is
+	   completely untouched. */
+	.nand-dashboard-root[data-theme] {
+		--db-backdrop-blur: none;
+	}
+	.nand-dashboard-root,
+	.nand-dashboard-root * {
+		backdrop-filter: none !important;
+		-webkit-backdrop-filter: none !important;
+	}
+	.dashboard-modal,
+	[data-theme] .dashboard-modal,
+	.theme-light [data-theme] .dashboard-modal,
+	.theme-dark [data-theme] .dashboard-modal,
+	.modal--dashboard,
+	.modal-bg--dashboard {
+		backdrop-filter: none !important;
+		-webkit-backdrop-filter: none !important;
+	}
+
+	/* Hide sidebar widgets on mobile */
+	.dashboard-sidebar-widgets {
+		display: none !important;
+	}
+
+	/* Sidebar pin follows the sidebar onto mobile: hidden. Platform.isMobile
+	   already skips rendering it; this also covers narrow desktop windows. */
+	.dashboard-sidebar-pin-btn {
+		display: none !important;
+	}
+
+	/* Root: allow vertical scrolling */
+	.nand-dashboard-root {
+		overflow-y: auto;
+		overflow-x: hidden;
+	}
+
+	/* Banner: compact */
+	.dashboard-banner {
+		height: 90px;
+		margin: 8px;
+		border-radius: var(--db-radius-md);
+	}
+
+	.dashboard-banner-overlay {
+		padding: 12px 20px;
+	}
+
+	.dashboard-banner-quote {
+		font-size: 0.95em;
+		margin: 0 0 4px 0;
+	}
+
+	.dashboard-banner-quote-decor {
+		font-size: 2em;
+		top: -12px;
+		left: -14px;
+	}
+
+	.dashboard-banner-author {
+		font-size: 0.7em;
+	}
+
+	/* Main: stack vertically, allow scroll */
+	.dashboard-main {
+		flex-direction: column;
+		gap: 8px;
+		padding: 8px;
+		overflow: visible;
+	}
+
+	/* Sidebar: hidden on phone */
+	.dashboard-sidebar {
+		display: none;
+	}
+
+	/* Mobile action buttons on banner */
+	.dashboard-mobile-actions {
+		display: flex;
+		gap: 8px;
+		position: absolute;
+		bottom: 4px;
+		left: 10px;
+		z-index: 1;
+	}
+
+	/* Workspace switcher pills: same top-left strip, slightly larger for
+	   touch targets; no hover on touch, so keep them visible. */
+	.dashboard-workspace-switcher {
+		gap: 3px;
+		top: 2px;
+		left: 6px;
+		padding: 1px 3px;
+	}
+
+	.dashboard-workspace-btn:not(.active) { opacity: 0.85; }
+
+	.dashboard-workspace-btn {
+		min-width: 16px;
+		height: 16px;
+		font-size: 0.55em;
+	}
+
+	.dashboard-workspace-add-btn {
+		width: 16px;
+	}
+
+	.dashboard-mobile-action-btn {
+		background: none !important;
+		border: none !important;
+		box-shadow: none !important;
+		color: rgba(255, 255, 255, 0.35);
+		padding: 2px;
+		cursor: pointer;
+		transition: opacity 0.2s ease;
+		outline: none;
+	}
+
+	.dashboard-mobile-action-btn:active {
+		color: rgba(255, 255, 255, 0.7);
+	}
+
+		/* Mobile widget bar: sits below the banner */
+		.dashboard-mobile-widget-bar {
+			display: block;
+			position: relative;
+			z-index: 5;
+			margin-top: 0;
+			margin-bottom: 0;
+			padding: 0 16px;
+		}
+
+		/* Collapsed strip: thin interactive bar below the banner */
+		.dashboard-mobile-widget-strip {
+			height: 8px;
+			cursor: pointer;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			transition: background 0.2s ease;
+		}
+
+		.dashboard-mobile-widget-strip-hint {
+			width: 32px;
+			height: 3px;
+			border-radius: 1.5px;
+			background: var(--db-border-card);
+			opacity: 0.5;
+			transition: opacity 0.2s ease, width 0.2s ease, background 0.2s ease;
+			pointer-events: none;
+		}
+
+		.dashboard-mobile-widget-strip:active .dashboard-mobile-widget-strip-hint,
+		.dashboard-mobile-widget-strip--active .dashboard-mobile-widget-strip-hint {
+			opacity: 0.9;
+			width: 40px;
+			background: var(--db-text-faint);
+		}
+
+		/* Tab row: hidden by default, drops down when strip is tapped */
+		.dashboard-mobile-widget-tabs {
+			display: flex;
+			gap: 6px;
+			justify-content: center;
+			max-height: 0;
+			overflow: hidden;
+			opacity: 0;
+			transition: max-height 0.25s cubic-bezier(0.4, 0, 0.2, 1),
+			            opacity 0.2s ease,
+			            padding 0.25s ease;
+			padding: 0;
+		}
+
+		.dashboard-mobile-widget-tabs--open {
+			max-height: 50px;
+			opacity: 1;
+			padding: 4px 0 2px 0;
+		}
+
+		.dashboard-mobile-widget-btn {
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			width: 52px;
+			height: 28px;
+			background: var(--db-bg-card) !important;
+			border: 1px solid var(--db-border-card) !important;
+			border-radius: var(--db-radius-sm);
+			padding: 0;
+			color: var(--db-text-faint);
+			cursor: pointer;
+			transition: background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease, color 0.2s ease, transform 0.2s ease;
+			outline: none;
+			box-shadow: none;
+			line-height: 1;
+		}
+
+		.dashboard-mobile-widget-btn svg {
+			width: 16px;
+			height: 16px;
+		}
+
+		.dashboard-mobile-widget-btn.active {
+			color: var(--db-text);
+			background: var(--db-bg-card-hover) !important;
+			border-color: var(--db-border) !important;
+			height: 30px;
+		}
+
+		/* Expandable widget panel */
+		.dashboard-mobile-widget-panel {
+			max-height: 0;
+			overflow: hidden;
+			transition: max-height 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+		}
+
+		.dashboard-mobile-widget-panel--open {
+			max-height: 400px;
+			overflow-y: auto;
+			margin-top: 4px;
+			-webkit-overflow-scrolling: touch;
+		}
+
+		.dashboard-mobile-widget-panel .dashboard-sidebar-widget {
+			background: var(--db-bg-card);
+			border: 1px solid var(--db-border-card);
+			border-radius: var(--db-radius-md);
+			backdrop-filter: var(--db-backdrop-blur);
+			-webkit-backdrop-filter: var(--db-backdrop-blur);
+		}
+
+		/* Hide banner edit btn on mobile by default */
+	.dashboard-banner .dashboard-banner-edit-btn {
+		opacity: 0 !important;
+		pointer-events: none;
+	}
+
+	/* Show edit btn only when hovering/tapping right half of banner on mobile */
+	.dashboard-banner-overlay:hover .dashboard-banner-edit-btn {
+		opacity: 0 !important;
+		pointer-events: none;
+	}
+
+	.dashboard-banner-edit-btn--mobile-visible {
+		opacity: 1 !important;
+		pointer-events: auto !important;
+		color: rgba(255, 255, 255, 0.8) !important;
+	}
+
+	/* Banner collapse: never on mobile */
+	.dashboard-banner-pin-btn {
+		display: none !important;
+	}
+
+	.dashboard-banner--collapsed {
+		height: 90px !important;
+		min-height: 90px !important;
+		overflow: hidden !important;
+		background-image: revert !important;
+		background-color: revert !important;
+	}
+
+	.dashboard-banner--collapsed > * {
+		opacity: revert !important;
+		pointer-events: revert !important;
+		visibility: revert !important;
+	}
+
+	/* Mobile drawer overlay */
+	.dashboard-mobile-drawer {
+		position: fixed;
+		left: 0;
+		right: 0;
+		bottom: 0;
+		z-index: 100;
+		display: flex;
+		pointer-events: auto;
+	}
+
+	.dashboard-mobile-drawer-content {
+		width: 80%;
+		height: 100%;
+		background: var(--db-bg);
+		border-right: 1px solid var(--db-border);
+		border-top: 1px solid var(--db-border);
+		border-top-right-radius: 12px;
+		overflow-y: auto;
+		padding: 16px;
+		transform: translateX(-100%);
+		transition: transform 0.25s ease-out;
+	}
+
+	.dashboard-mobile-drawer-content--open {
+		transform: translateX(0);
+	}
+
+	.dashboard-mobile-drawer-title {
+		font-size: 0.85em;
+		font-weight: 700;
+		margin: 0 0 12px 0;
+		color: var(--db-text);
+	}
+
+		/* Mobile drawer: quick actions fill available space */
+		.dashboard-mobile-drawer-content .dashboard-quick-actions {
+			height: auto;
+			flex: 1;
+		}
+
+		/* Mobile drawer: style add button as dashed-border row */
+		.dashboard-mobile-drawer-content .dashboard-qa-header {
+			border-bottom: none;
+			margin: 0 0 6px 0;
+			justify-content: center;
+		}
+
+		.dashboard-mobile-drawer-content .dashboard-qa-header .dashboard-section-title {
+			display: none;
+		}
+
+		.dashboard-mobile-drawer-content .dashboard-qa-header .dashboard-qa-btn-group {
+			width: 100%;
+		}
+
+		.dashboard-mobile-drawer-content .dashboard-qa-header .dashboard-qa-add-btn {
+			opacity: 1;
+			width: 100%;
+			padding: 10px 0;
+			font-size: 0.85em;
+			border: 1px dashed var(--db-border) !important;
+			border-radius: 8px;
+			justify-content: center;
+			color: var(--db-text-faint);
+		}
+
+		.dashboard-mobile-drawer-content .dashboard-qa-header .dashboard-qa-add-btn::after {
+			content: attr(aria-label);
+			margin-left: 6px;
+		}
+
+		.dashboard-mobile-drawer-content .dashboard-qa-header .dashboard-qa-add-btn:hover,
+		.dashboard-mobile-drawer-content .dashboard-qa-header .dashboard-qa-add-btn:active {
+			background: var(--db-bg-secondary) !important;
+			color: var(--db-text) !important;
+		}
+
+		.dashboard-mobile-drawer-content > .dashboard-recent > .dashboard-section-title {
+			display: none;
+		}
+
+		.dashboard-mobile-drawer-content .dashboard-qa-list {
+			max-height: none;
+			overflow-y: auto;
+			-webkit-overflow-scrolling: touch;
+		}
+
+	.dashboard-mobile-drawer-backdrop {
+		width: 20%;
+		height: 100%;
+		background: rgba(0, 0, 0, 0.2);
+	}
+
+	/* Kanban: full width, allow scroll */
+	.dashboard-kanban-wrapper {
+		overflow: visible;
+		flex: none;
+		width: 100%;
+	}
+
+	.dashboard-kanban {
+		overflow: visible;
+		gap: 8px;
+	}
+
+	/* Section rows: fixed height at 50vh (Memo keeps 30vh via own rule) */
+	.dashboard-section-row {
+		height: 50vh;
+		flex-shrink: 0;
+		overflow: hidden;
+		display: flex;
+		flex-direction: column;
+		padding: 10px;
+	}
+
+	/* Web sections: taller than the default row — the frame IS the content,
+	 * and the desktop drag-height is ignored on mobile (see renderer), so the
+	 * height must come from CSS here. */
+	.dashboard-section-row[data-section-type="web"] {
+		height: 70vh;
+	}
+
+	/* Library/folder: taller than the default row — these are the
+	 * vault-browsing workhorses. At 50vh the toolbar (search + controls)
+	 * leaves room for barely two grid cards on mainstream phones; 60vh
+	 * clears three to four (cards run 80-100px with property badges).
+	 * max-height:none lifts the desktop 500px generic clamp (folder) and
+	 * the 800px library clamp so the 60vh height is the only ruler. */
+	.dashboard-section-row[data-section-type="library"],
+	.dashboard-section-row[data-section-type="folder"] {
+		height: 60vh;
+		max-height: none;
+	}
+
+	.dashboard-section-header {
+		flex-shrink: 0;
+		margin-bottom: 8px;
+	}
+
+	/* All section cards: horizontal scroll */
+	.dashboard-section-cards {
+		flex-wrap: nowrap !important;
+		overflow-x: auto !important;
+		overflow-y: hidden !important;
+		flex: 1;
+		min-height: 0;
+		gap: 10px;
+		-webkit-overflow-scrolling: touch;
+		scrollbar-width: none;
+	}
+
+	.dashboard-section-cards::-webkit-scrollbar {
+		display: none;
+	}
+
+	/* All cards: fixed width for horizontal scroll */
+	.dashboard-section-cards > .dashboard-card {
+		flex: 0 0 70vw !important;
+		min-width: 70vw !important;
+		max-width: 70vw !important;
+		overflow-y: auto;
+		scrollbar-width: thin;
+	}
+
+	/* Memo section: override fixed height — use same 30vh */
+	.dashboard-section-row[data-section-type="memo"] {
+		height: 30vh;
+		flex-shrink: 0;
+	}
+
+	.dashboard-section-row[data-section-type="memo"] .dashboard-section-cards > .dashboard-card {
+		flex: 0 0 70vw !important;
+		min-width: 70vw !important;
+		max-width: 70vw !important;
+	}
+
+	/* Todo section cards: match mobile width */
+	.dashboard-section-row[data-section-type="todo"] .dashboard-section-cards > .dashboard-card {
+		flex: 0 0 60vw !important;
+		min-width: 60vw !important;
+		max-width: 60vw !important;
+	}
+
+	/* Sticky: mixed memo/todo cards — todo lists need a bit less than the
+	   generic 50vh (compact memo cards dominate), tuned to 45vh. Desktop drag
+	   heights don't clamp it here; renderSection skips them on mobile. */
+	.dashboard-section-row[data-section-type="sticky"] {
+		height: 45vh;
+	}
+
+	/* Cards: compact */
+	.dashboard-card {
+		padding: 12px;
+	}
+
+	.dashboard-card:hover {
+		transform: none;
+	}
+
+	/* Card actions: hidden by default on mobile, shown on tap */
+	.dashboard-card-actions {
+		opacity: 0;
+		pointer-events: none;
+		transition: opacity 0.15s ease;
+	}
+
+	.dashboard-card-header--touched .dashboard-card-actions {
+		opacity: 1;
+		pointer-events: auto;
+	}
+
+	/* Project cover: shorter */
+	.dashboard-project-cover {
+		height: 70px;
+		margin: -12px -12px 8px -12px;
+		border-radius: var(--db-radius-md) var(--db-radius-md) 0 0;
+	}
+
+	/* Add section: compact + extra bottom clearance for the native bottom bar */
+	.dashboard-add-section {
+		padding: 10px;
+		flex-shrink: 0;
+		margin-bottom: calc(90px + env(safe-area-inset-bottom, 0px));
+	}
+
+	/* Scroll-to-top: lift clear of the Obsidian mobile bottom action bar */
+	.dashboard-scroll-top {
+		bottom: calc(80px + env(safe-area-inset-bottom, 0px));
+		width: 38px;
+		height: 38px;
+	}
+
+	/* Memo textarea: compact */
+	.dashboard-memo-textarea {
+		font-size: 0.88em;
+		padding: 8px;
+	}
+
+	/* Task items: compact */
+	.dashboard-task-item {
+		padding: 2px 8px;
+		gap: 4px;
+	}
+
+	.dashboard-task-delete {
+		opacity: 1;
+	}
+
+	/* Task input: compact */
+	.dashboard-task-input {
+		font-size: 0.85em;
+		padding: 3px 0;
+	}
+
+	/* Project doc items: compact */
+	.dashboard-project-doc-item {
+		padding: 2px 8px;
+	}
+
+	.dashboard-project-doc-remove {
+		opacity: 1;
+	}
+
+	/* Section add button: always visible */
+	.dashboard-section-add-btn {
+		opacity: 1;
+	}
+
+	/* Modal: full width on mobile */
+	.dashboard-modal {
+		border-radius: var(--db-radius-md);
+	}
+
+	/* Quick link remove: always visible on touch-sized layouts, but tablets
+	   (even in a narrow split pane) keep the hover reveal. */
+	body:not(.is-tablet) .dashboard-qa-remove {
+		opacity: 1;
+	}
+
+	/* Quick action buttons: compact but touch-friendly */
+	.dashboard-qa-item {
+		padding: 6px 12px;
+	}
+
+	/* Hide memo resize handle on mobile */
+	.dashboard-card-resize-handle {
+		display: none;
+	}
+
+	/* Hide section reorder grip and resize handle on mobile (desktop only) */
+	.dashboard-section-grip,
+	.dashboard-section-resize-handle {
+		display: none;
+	}
+
+	/* Hide memo color picker on mobile (color input doesn't work on mobile) */
+	.dashboard-card-btn--color {
+		display: none;
+	}
+
+	.dashboard-section-row[data-section-type="memo"] .dashboard-card:hover {
+		overflow: hidden;
+	}
+}
+

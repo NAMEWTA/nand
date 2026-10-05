@@ -1,98 +1,34 @@
-import { ItemView, Modal, Notice, Setting, type WorkspaceLeaf } from 'obsidian';
-import { render } from 'preact/compat';
-import { onLeafLanguageChanged } from '../../platform/obsidian/workspace-title';
-import { type AutomationDefinition } from '../../shared/automation/types';
-import { t } from '../../shared/i18n/index';
-import { AutomationsPanel } from './AutomationsPanel';
-import type { AutomationPanelState, AutomationViewHost } from './panel-contract';
+import { AUTOMATION_VIEW_TYPE } from './automation-presentation';
+import { t } from '../../shared/i18n';
+import { ItemView, type WorkspaceLeaf, type ViewStateResult } from 'obsidian';
+import { AutomationPresentation } from './automation-presentation';
+import type { AutomationViewHost } from './panel-contract';
+export { AUTOMATION_VIEW_TYPE } from './automation-presentation';
 
-export const AUTOMATION_VIEW_TYPE = 'nand-automation-view';
-
+/** Original native identity; business presentation is shared with the workbench. */
 export class AutomationView extends ItemView {
-	private unsubscribe?: () => void;
-	private panelState: AutomationPanelState = { selected: '', search: '', filter: '', agentFilter: '' };
-	constructor(
-		leaf: WorkspaceLeaf,
-		private host: AutomationViewHost,
-	) {
+	readonly surface: AutomationPresentation;
+	constructor(leaf: WorkspaceLeaf, host: AutomationViewHost) {
 		super(leaf);
+		this.surface = this.addChild(new AutomationPresentation({
+			app: this.app, leaf, contentEl: this.contentEl, containerEl: this.contentEl,
+			addAction: (icon, title, callback) => this.addAction(icon, title, callback),
+			close: () => this.leaf.detach(),
+		}, host));
 	}
-	getViewType(): string {
-		return AUTOMATION_VIEW_TYPE;
+	getNativeSurfaces(): readonly AutomationPresentation[] { return this.surface ? [this.surface] : []; }
+	onOpen(): Promise<void> { return this.surface.onOpen(); }
+	onClose(): Promise<void> { return this.surface.onClose(); }
+	getState(): Record<string, unknown> { return this.surface?.getState() ?? {}; }
+	async setState(state: Record<string, unknown>, result: ViewStateResult): Promise<void> {
+		await this.surface.setState(state, result);
+		await super.setState(state, result);
 	}
-	getDisplayText(): string {
-		return t('automation.title');
-	}
-	getIcon(): string {
-		return 'timer';
-	}
-	onOpen(): Promise<void> {
-		this.contentEl.addClass('nand-automation-view');
-		this.unsubscribe = this.host.service.subscribe(() => this.draw());
-		this.register(onLeafLanguageChanged(this.app, this.leaf, () => this.draw()));
-		this.register(
-			this.contentEl.onWindowMigrated(() => {
-				render(null, this.contentEl);
-				this.draw();
-			}),
-		);
-		this.draw();
-		return Promise.resolve();
-	}
-	onClose(): Promise<void> {
-		this.unsubscribe?.();
-		render(null, this.contentEl);
-		return Promise.resolve();
-	}
-	private clearHistory(): void {
-		const modal = new Modal(this.app);
-		modal.contentEl.createEl('p', { text: t('automation.clearHistoryConfirm') });
-		new Setting(modal.contentEl)
-			.addButton((b) => b.setButtonText(t('automation.cancel')).onClick(() => modal.close()))
-			.addButton((b) =>
-				b
-					.setButtonText(t('automation.clearHistory'))
-					.setClass('mod-warning')
-					.onClick(() => {
-						modal.close();
-						this.run(() => this.host.service.clearHistory());
-					}),
-			);
-		modal.open();
-	}
-	private remove(definition: AutomationDefinition): void {
-		const modal = new Modal(this.app);
-		modal.contentEl.createEl('p', { text: t('automation.deleteConfirm') });
-		new Setting(modal.contentEl)
-			.addButton((b) => b.setButtonText(t('automation.cancel')).onClick(() => modal.close()))
-			.addButton((b) =>
-				b.setButtonText(t('automation.delete')).setClass('mod-warning').onClick(() => {
-					modal.close();
-					this.run(() => this.host.service.remove(definition));
-				}),
-			);
-		modal.open();
-	}
-	showRun(id: string): void {
-		this.panelState.selected = this.host.service.state.runs.find((r) => r.id === id)?.automationId ?? '';
-		this.draw();
-	}
-	private run(operation: () => Promise<unknown>): void {
-		void operation().catch((error) => new Notice(error instanceof Error ? error.message : String(error)));
-	}
-	private draw(): void {
-		render(
-			<AutomationsPanel
-				host={this.host}
-				state={this.panelState}
-				refresh={() => this.draw()}
-				actions={{
-					clearHistory: () => this.clearHistory(),
-					remove: (definition) => this.remove(definition),
-					run: (operation) => this.run(operation),
-				}}
-			/>,
-			this.contentEl,
-		);
-	}
+
+	getViewType(): string { return AUTOMATION_VIEW_TYPE; }
+
+	getDisplayText(): string { return this.surface?.getDisplayText() ?? t('automation.title'); }
+
+	getIcon(): string { return 'timer'; }
+	showRun(...args: Parameters<AutomationPresentation['showRun']>): ReturnType<AutomationPresentation['showRun']> { return this.surface.showRun(...args); }
 }

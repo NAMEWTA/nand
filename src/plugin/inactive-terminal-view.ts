@@ -3,7 +3,7 @@ import { onLeafLanguageChanged } from '../platform/obsidian/workspace-title';
 import { t } from '../shared/i18n/index';
 import { renderEmptyState } from '../view/primitives/empty-state';
 import type DashboardPlugin from './main';
-import { TERMINAL_VIEW_TYPE } from './modules/terminal/index';
+import { TERMINAL_VIEW_TYPE } from '../view/terminal/view-type';
 
 /** Shown in an existing terminal leaf while the agent module is off. */
 export class InactiveTerminalView extends ItemView {
@@ -37,7 +37,7 @@ export class InactiveTerminalView extends ItemView {
 			icon: 'terminal',
 			title: t('modules.terminal'),
 			description: t('modules.terminalOff'),
-			action: { label: t('modules.openHome'), run: () => this.plugin.openHome() },
+			action: { label: t('modules.openHome'), run: () => this.plugin.openSettings() },
 		});
 	}
 }

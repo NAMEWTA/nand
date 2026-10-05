@@ -33,16 +33,16 @@ import { WereadConfigModal } from '../weread/weread-config-modal';
 import { TrackerConfigModal } from '../widgets/tracker-config-modal';
 import { WeatherConfigModal } from '../widgets/weather-config-modal';
 import { WidgetTypeModal, type WidgetType } from '../widgets/widget-type-modal';
-import type { DashboardView } from './dashboard-view';
+import type { DashboardSurface } from './dashboard-surface';
 
-export function openBannerEditModal(this: DashboardView, data: DashboardData): void {
+export function openBannerEditModal(this: DashboardSurface, data: DashboardData): void {
 	const modal = new BannerEditModal(this.app, data.banner, (updates) => {
 		void observeDashboardPromise(this.sync.updateBanner(updates));
 	});
 	modal.open();
 }
 
-export function openCardEditModal(this: DashboardView, card: DashboardCard): void {
+export function openCardEditModal(this: DashboardSurface, card: DashboardCard): void {
 	if (card.type === 'web') {
 		new WebShortcutModal(this.app, card, (updates) => observeDashboardPromise(this.sync.updateCard(card.id, updates))).open();
 		return;
@@ -53,7 +53,7 @@ export function openCardEditModal(this: DashboardView, card: DashboardCard): voi
 	modal.open();
 }
 
-export function openNotePopover(this: DashboardView, file: TFile, subpath?: string, line?: number): void {
+export function openNotePopover(this: DashboardSurface, file: TFile, subpath?: string, line?: number): void {
 	// Close any previously open popover so its embedded leaf is detached
 	// before we open a fresh one.
 	this.popoverModal?.close();
@@ -73,7 +73,7 @@ export function openNotePopover(this: DashboardView, file: TFile, subpath?: stri
  *  Non-markdown files (canvas whiteboards, base databases, pdf, media) are
  *  always opened in a real tab — the in-dashboard popover only hosts a
  *  MarkdownView and would render them broken. */
-export function openNote(this: DashboardView, file: TFile, subpath?: string, line?: number): void {
+export function openNote(this: DashboardSurface, file: TFile, subpath?: string, line?: number): void {
 	if (this.plugin.settings.disableNotePopover || file.extension !== 'md') {
 		void this.openNoteInTab(file, subpath, line);
 		return;
@@ -82,14 +82,14 @@ export function openNote(this: DashboardView, file: TFile, subpath?: string, lin
 }
 
 /** Tab-path open with an optional line reveal once the view is active. */
-export async function openNoteInTab(this: DashboardView, file: TFile, subpath?: string, line?: number): Promise<void> {
+export async function openNoteInTab(this: DashboardSurface, file: TFile, subpath?: string, line?: number): Promise<void> {
 	await this.app.workspace.openLinkText(subpath ? `${file.path}${subpath}` : file.path, '');
 	if (line === undefined) return;
 	const view = this.app.workspace.getActiveViewOfType(MarkdownView);
 	if (view && view.file?.path === file.path) revealMarkdownLine(view, line);
 }
 
-export async function addColumnWithType(this: DashboardView, name: string, sectionType?: string): Promise<void> {
+export async function addColumnWithType(this: DashboardSurface, name: string, sectionType?: string): Promise<void> {
 	await observeDashboardPromise(this.sync.addColumn(name, sectionType));
 	if (sectionType === 'library') {
 		this.openLibraryConfigModal(name);
@@ -104,14 +104,14 @@ export async function addColumnWithType(this: DashboardView, name: string, secti
 	}
 }
 
-export function openAddSectionModal(this: DashboardView): void {
+export function openAddSectionModal(this: DashboardSurface): void {
 	const modal = new AddSectionModal(this.app, (name, sectionType) => {
 		void this.addColumnWithType(name, sectionType);
 	});
 	modal.open();
 }
 
-export function openWidgetTypeModal(this: DashboardView, colName: string): void {
+export function openWidgetTypeModal(this: DashboardSurface, colName: string): void {
 	const modal = new WidgetTypeModal(this.app, (type: WidgetType) => {
 		if (type === 'weather') {
 			this.openWeatherConfigModal(colName);
@@ -123,7 +123,7 @@ export function openWidgetTypeModal(this: DashboardView, colName: string): void 
 }
 
 /** Sticky ("便利贴") sections: choose memo, todo or web shortcut before creating a card. */
-export function openStickyCardTypeModal(this: DashboardView, colName: string): void {
+export function openStickyCardTypeModal(this: DashboardSurface, colName: string): void {
 	const modal = new StickyCardTypeModal(this.app, (kind) => {
 		this.pendingScrollToLastCardOfColumn = colName;
 		if (kind === 'web') {
@@ -142,7 +142,7 @@ export function openStickyCardTypeModal(this: DashboardView, colName: string): v
 	modal.open();
 }
 
-export function openWeatherConfigModal(this: DashboardView, colName: string): void {
+export function openWeatherConfigModal(this: DashboardSurface, colName: string): void {
 	const modal = new WeatherConfigModal(this.app, (title, config) => {
 		void observeDashboardPromise(this.sync.addCard(colName, {
 			title,
@@ -153,7 +153,7 @@ export function openWeatherConfigModal(this: DashboardView, colName: string): vo
 	modal.open();
 }
 
-export function openTrackerConfigModal(this: DashboardView, colName: string): void {
+export function openTrackerConfigModal(this: DashboardSurface, colName: string): void {
 	const modal = new TrackerConfigModal(this.app, (title, config) => {
 		void observeDashboardPromise(this.sync.addCard(colName, {
 			title,
@@ -164,7 +164,7 @@ export function openTrackerConfigModal(this: DashboardView, colName: string): vo
 	modal.open();
 }
 
-export function openTemplatePicker(this: DashboardView, colName: string): void {
+export function openTemplatePicker(this: DashboardSurface, colName: string): void {
 	const modal = new TemplatePickerModal(this.app, this.plugin, (template) => {
 		this.pendingScrollToLastCardOfColumn = colName;
 		void observeDashboardPromise(this.sync.addCard(colName, {
@@ -176,7 +176,7 @@ export function openTemplatePicker(this: DashboardView, colName: string): void {
 	modal.open();
 }
 
-export function openLibraryConfigModal(this: DashboardView, colName: string): void {
+export function openLibraryConfigModal(this: DashboardSurface, colName: string): void {
 	const column = this.data?.columns.find((col) => col.name === colName);
 	const existingConfig = column?.libraryConfig ?? {
 		filters: [],
@@ -190,7 +190,7 @@ export function openLibraryConfigModal(this: DashboardView, colName: string): vo
 	modal.open();
 }
 
-export function openDataviewConfigModal(this: DashboardView, colName: string): void {
+export function openDataviewConfigModal(this: DashboardSurface, colName: string): void {
 	const column = this.data?.columns.find((col) => col.name === colName);
 	const existing = column?.dataviewConfig ?? { query: '' };
 	const modal = new DataviewConfigModal(this.app, existing, (config) => {
@@ -202,7 +202,7 @@ export function openDataviewConfigModal(this: DashboardView, colName: string): v
 /** Web section: URL + engine mode + zoom. Saving goes through the plain
  *  sync path — handleDataUpdate('local') rebuilds the section in place,
  *  reloading the frame with the new URL. */
-export function openWebConfigModal(this: DashboardView, colName: string): void {
+export function openWebConfigModal(this: DashboardSurface, colName: string): void {
 	const column = this.data?.columns.find((col) => col.name === colName);
 	const existing = column?.webConfig ?? { url: '' };
 	const modal = new WebConfigModal(this.app, existing, (config) => {
@@ -213,7 +213,7 @@ export function openWebConfigModal(this: DashboardView, colName: string): void {
 
 /** Images/videos sections: the config currently manages the excluded-folder
  *  set, persisted via the column's libraryConfig. */
-export function openMediaConfigModal(this: DashboardView, colName: string): void {
+export function openMediaConfigModal(this: DashboardSurface, colName: string): void {
 	const column = this.data?.columns.find((col) => col.name === colName);
 	const modal = new MediaConfigModal(this.app, column?.libraryConfig, (config) => {
 		void observeDashboardPromise(this.sync.updateLibraryConfig(colName, config));
@@ -221,7 +221,7 @@ export function openMediaConfigModal(this: DashboardView, colName: string): void
 	modal.open();
 }
 
-export function openWereadConfigModal(this: DashboardView, colName: string): void {
+export function openWereadConfigModal(this: DashboardSurface, colName: string): void {
 	const column = this.data?.columns.find((col) => col.name === colName);
 	const existing = column?.wereadConfig ?? {
 		widgets: [{ id: 'w1', view: 'shelf' as const, groupBy: 'readingState' as const }],
@@ -255,12 +255,12 @@ export function openWereadConfigModal(this: DashboardView, colName: string): voi
  * until cleanupDrag (touch); we clear it here in case dragend lands after us.
  */
 export async function handleMoveCard(
-	this: DashboardView,
+	this: DashboardSurface,
 	cardId: string,
 	targetCol: string,
 	targetIdx: number,
 ): Promise<void> {
-	const kanban = (this.containerEl.children[1] as HTMLElement)?.querySelector<HTMLElement>('.dashboard-kanban');
+	const kanban = (this.contentEl)?.querySelector<HTMLElement>('.dashboard-kanban');
 	const draggedEl =
 		kanban?.querySelector<HTMLElement>(`.dashboard-card[data-card-id="${CSS.escape(cardId)}"]`) ?? null;
 	const sourceCol = this.data?.columns.find((c) => c.cards.some((card) => card.id === cardId))?.name;
@@ -314,9 +314,9 @@ export async function handleMoveCard(
  * memo cards keep their already-parsed links and hover bindings. Returns
  * false if the section's DOM can't be located.
  */
-export function reorderCardsInDOM(this: DashboardView, columnName: string): boolean {
+export function reorderCardsInDOM(this: DashboardSurface, columnName: string): boolean {
 	if (!this.data) return false;
-	const kanban = (this.containerEl.children[1] as HTMLElement)?.querySelector<HTMLElement>('.dashboard-kanban');
+	const kanban = (this.contentEl)?.querySelector<HTMLElement>('.dashboard-kanban');
 	const section = kanban?.querySelector<HTMLElement>(`:scope > [data-column="${CSS.escape(columnName)}"]`);
 	const cardsContainer = section?.querySelector<HTMLElement>('.dashboard-section-cards');
 	if (!cardsContainer) return false;
@@ -345,9 +345,9 @@ export function reorderCardsInDOM(this: DashboardView, columnName: string): bool
 	return true;
 }
 
-export function refreshSectionInPlace(this: DashboardView, columnName: string): boolean {
+export function refreshSectionInPlace(this: DashboardSurface, columnName: string): boolean {
 	if (!this.data) return false;
-	const kanban = (this.containerEl.children[1] as HTMLElement)?.querySelector<HTMLElement>('.dashboard-kanban');
+	const kanban = (this.contentEl)?.querySelector<HTMLElement>('.dashboard-kanban');
 	if (!kanban) return false;
 	const oldEl = kanban.querySelector(`:scope > [data-column="${CSS.escape(columnName)}"]`);
 	if (!oldEl) return false;
@@ -375,7 +375,7 @@ export function refreshSectionInPlace(this: DashboardView, columnName: string): 
 	return true;
 }
 
-export function openFolderConfigModal(this: DashboardView, colName: string): void {
+export function openFolderConfigModal(this: DashboardSurface, colName: string): void {
 	const column = this.data?.columns.find((col) => col.name === colName);
 	const libraryConfig = column?.libraryConfig;
 	const currentFolders = libraryConfig?.folders ?? [];
@@ -404,7 +404,7 @@ export function openFolderConfigModal(this: DashboardView, colName: string): voi
  *  the note from the section's settings (template + save folder; vault root
  *  when no folder is configured), attach it to the card's doc list, and
  *  open it. */
-export async function handleCardNewNote(this: DashboardView, cardId: string): Promise<void> {
+export async function handleCardNewNote(this: DashboardSurface, cardId: string): Promise<void> {
 	if (this.cardNewNoteInFlight) return;
 	this.cardNewNoteInFlight = true;
 	try {
@@ -455,7 +455,7 @@ export async function handleCardNewNote(this: DashboardView, cardId: string): Pr
 
 /** Notes (cover / no-cover) section settings: new-note template + save
  *  folder, persisted through the column's libraryConfig. */
-export function openNotesSectionConfigModal(this: DashboardView, colName: string): void {
+export function openNotesSectionConfigModal(this: DashboardSurface, colName: string): void {
 	const column = this.data?.columns.find((col) => col.name === colName);
 	if (!column) return;
 	const config = column.libraryConfig;
@@ -491,7 +491,7 @@ export function openNotesSectionConfigModal(this: DashboardView, colName: string
  *  metadataCache indexing and briefly render the section without the new
  *  note. */
 export async function handleLibraryNewNote(
-	this: DashboardView,
+	this: DashboardSurface,
 	columnName: string,
 	pos?: { x: number; y: number },
 ): Promise<void> {
@@ -557,14 +557,14 @@ export async function handleLibraryNewNote(
 	}
 }
 
-export function openAddActionModal(this: DashboardView): void {
+export function openAddActionModal(this: DashboardSurface): void {
 	const modal = new AddActionModal(this.app, (action) => {
 		void observeDashboardPromise(this.sync.addQuickAction(action));
 	}, undefined, this.plugin.automationHost?.actions?.().map(action => ({ type: 'action', target: action.id, name: action.name, icon: 'play' })));
 	modal.open();
 }
 
-export function openEditActionModal(this: DashboardView, action: QuickAction): void {
+export function openEditActionModal(this: DashboardSurface, action: QuickAction): void {
 	const index = this.data?.quickActions.findIndex((a) => a.target === action.target) ?? -1;
 	if (index < 0) return;
 	const modal = new AddActionModal(
@@ -577,7 +577,7 @@ export function openEditActionModal(this: DashboardView, action: QuickAction): v
 	modal.open();
 }
 
-export async function deleteColumn(this: DashboardView, columnName: string, columnIndex?: number): Promise<void> {
+export async function deleteColumn(this: DashboardSurface, columnName: string, columnIndex?: number): Promise<void> {
 	const confirmed = await showConfirmDialog(this.app, {
 		title: t('common.confirmDelete'),
 		message: t('renderer.confirmDeleteSection', { column: columnName }),
@@ -587,7 +587,7 @@ export async function deleteColumn(this: DashboardView, columnName: string, colu
 	new Notice(t('renderer.sectionDeleted'));
 }
 
-export async function executeAction(this: DashboardView, action: QuickAction): Promise<void> {
+export async function executeAction(this: DashboardSurface, action: QuickAction): Promise<void> {
 	if (action.type === 'action') {
 		try {
 			if (!this.plugin.automationHost?.runAction) throw new Error(t('automation.moduleOff'));
@@ -606,7 +606,7 @@ export async function executeAction(this: DashboardView, action: QuickAction): P
 	}
 }
 
-export function openProjectSearchModal(this: DashboardView, colName: string): void {
+export function openProjectSearchModal(this: DashboardSurface, colName: string): void {
 	const modal = new DocSearchModal(this.app, (link) => {
 		void observeDashboardPromise(this.sync.addCard(colName, {
 			title: link.name,
@@ -616,14 +616,14 @@ export function openProjectSearchModal(this: DashboardView, colName: string): vo
 	modal.open();
 }
 
-export async function promptAddColumn(this: DashboardView): Promise<void> {
+export async function promptAddColumn(this: DashboardSurface): Promise<void> {
 	const name = await showPromptDialog(this.app, { title: t('renderer.sectionName') });
 	if (name) {
 		void observeDashboardPromise(this.sync.addColumn(name));
 	}
 }
 
-export async function navigateToPath(this: DashboardView, path: string): Promise<void> {
+export async function navigateToPath(this: DashboardSurface, path: string): Promise<void> {
 	let file = this.app.vault.getFileByPath(path);
 	if (!file && !path.endsWith('.md')) {
 		file = this.app.vault.getFileByPath(`${path}.md`);

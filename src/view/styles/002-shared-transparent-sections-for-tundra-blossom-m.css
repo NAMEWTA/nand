@@ -1,0 +1,780 @@
+/* ===== Shared: transparent sections for tundra, blossom, matcha, lilac ===== */
+.nand-dashboard-root[data-theme="tundra"] .dashboard-section-row,
+.nand-dashboard-root[data-theme="blossom"] .dashboard-section-row,
+.nand-dashboard-root[data-theme="matcha"] .dashboard-section-row,
+.nand-dashboard-root[data-theme="lilac"] .dashboard-section-row {
+	background: transparent;
+	border: none;
+	backdrop-filter: none;
+	-webkit-backdrop-filter: none;
+	padding: 6px;
+}
+
+.nand-dashboard-root[data-theme="tundra"] .dashboard-section,
+.nand-dashboard-root[data-theme="blossom"] .dashboard-section,
+.nand-dashboard-root[data-theme="matcha"] .dashboard-section,
+.nand-dashboard-root[data-theme="lilac"] .dashboard-section {
+	background: transparent;
+	border: none;
+	backdrop-filter: none;
+	-webkit-backdrop-filter: none;
+}
+
+/* Tighter kanban gap for transparent-section themes */
+.nand-dashboard-root[data-theme="tundra"] .dashboard-kanban,
+.nand-dashboard-root[data-theme="blossom"] .dashboard-kanban,
+.nand-dashboard-root[data-theme="matcha"] .dashboard-kanban,
+.nand-dashboard-root[data-theme="lilac"] .dashboard-kanban {
+	--db-kanban-gap: 8px;
+}
+
+/* Allow card hover translate without clipping top border */
+.nand-dashboard-root[data-theme="tundra"] .dashboard-section-cards,
+.nand-dashboard-root[data-theme="blossom"] .dashboard-section-cards,
+.nand-dashboard-root[data-theme="matcha"] .dashboard-section-cards,
+.nand-dashboard-root[data-theme="lilac"] .dashboard-section-cards,
+.nand-dashboard-root[data-theme="neon"] .dashboard-section-cards,
+.nand-dashboard-root[data-theme="volt"] .dashboard-section-cards,
+.nand-dashboard-root[data-theme="magma"] .dashboard-section-cards,
+.nand-dashboard-root[data-theme="onyx"] .dashboard-section-cards,
+.nand-dashboard-root[data-theme="mono"] .dashboard-section-cards {
+	overflow: visible;
+}
+
+	/* ----- 13. MATCHA (抹茶·茶碗) — cream ceramic bowl, deep matcha accent ----- */
+/* The old sage-on-sage palette collapsed bg into accent. Now the bowl itself
+   is warm sage/cream and the tea is DEEP matcha green with gold notes —
+   distinct lightness, distinct role. Washes drift at tea-ceremony pace. */
+.nand-dashboard-root[data-theme="matcha"] {
+	--db-bg: #98a184;
+	--db-bg-section: transparent;
+	--db-bg-card: rgba(243, 239, 226, 0.88);
+	--db-bg-card-hover: rgba(248, 245, 235, 0.96);
+	--db-bg-sidebar: transparent;
+	--db-bg-input: rgba(79, 112, 40, 0.06);
+	--db-bg-btn: rgba(74, 106, 36, 0.08);
+	--db-bg-btn-hover: rgba(74, 106, 36, 0.14);
+	--db-bg-banner: rgba(200, 169, 106, 0.12);
+	--db-bg-overlay: linear-gradient(135deg, rgba(0,0,0,0.65) 0%, rgba(0,0,0,0.3) 100%);
+	--db-bg-hover: rgba(79, 112, 40, 0.06);
+	--db-bg-hover-strong: rgba(79, 112, 40, 0.11);
+	--db-bg-add-section: rgba(243, 239, 226, 0.25);
+	--db-bg-drop-indicator: rgba(110, 148, 52, 0.14);
+
+	--db-border: rgba(90, 100, 65, 0.20);
+	--db-border-card: rgba(90, 100, 65, 0.24);
+	--db-border-section: transparent;
+	--db-border-sidebar: transparent;
+	--db-border-input: rgba(90, 100, 65, 0.28);
+	--db-border-input-focus: #4f7028;
+	--db-border-btn: rgba(90, 100, 65, 0.22);
+	--db-border-add-section: rgba(79, 112, 40, 0.30);
+
+	--db-text: #28301d;
+	--db-text-muted: #424d2e;
+	--db-text-faint: #7e876c;
+	--db-text-inverse: rgba(255, 255, 255, 0.95);
+	--db-text-inverse-muted: rgba(255, 255, 255, 0.55);
+
+	/* Deep matcha — clearly darker and yellower than the sage bowl */
+	--db-accent: #4a6a24;
+	--db-accent-light: #688d2c;
+	--db-danger: #c71448;
+
+	--db-shadow-card: 0 1px 2px rgba(60, 75, 40, 0.08), 0 2px 8px rgba(60, 75, 40, 0.08), 0 8px 20px rgba(60, 75, 40, 0.06);
+	--db-shadow-card-hover: 0 2px 4px rgba(60, 75, 40, 0.1), 0 8px 18px rgba(60, 75, 40, 0.12), 0 14px 32px rgba(110, 148, 52, 0.1);
+	--db-backdrop-blur: none;
+
+	--db-radius-sm: 10px;
+	--db-radius-md: 14px;
+	--db-radius-lg: 18px;
+
+	--db-font: 'Nunito', 'LXGW WenKai', var(--font-interface);
+	/* Tea-ceremony duo: matcha into gold */
+	--db-progress-from: #6e9434;
+	--db-progress-to: #c8a96a;
+	--db-checkbox: #4f7028;
+	--db-quote-border: #b08d4f;
+	--db-link: #4e6f27;
+
+	/* Opaque modal surfaces matching the cream cards */
+	--db-bg-modal: #f1edde;
+	--db-bg-modal-raised: rgba(79, 112, 40, 0.05);
+
+	/* Tea garden washes: matcha, gold, cream, deep tea */
+	--db-aurora-bg: linear-gradient(135deg,
+		#98a184 0%,
+		rgba(110, 148, 52, 0.12) 16%,
+		rgba(200, 169, 106, 0.16) 34%,
+		rgba(245, 240, 222, 0.10) 52%,
+		rgba(79, 112, 40, 0.07) 70%,
+		rgba(200, 169, 106, 0.12) 86%,
+		#98a184 100%);
+	--db-aurora-size: 250% 250%;
+	--db-aurora-speed: 26s;
+}
+
+/* Morning matcha latte — rice-paper base, green only where the tea is */
+.theme-light .nand-dashboard-root[data-theme="matcha"] {
+	--db-bg: #f1efe3;
+	--db-bg-section: transparent;
+	--db-bg-card: rgba(255, 254, 248, 0.85);
+	--db-bg-card-hover: rgba(250, 248, 236, 0.95);
+	--db-bg-sidebar: transparent;
+	--db-bg-input: rgba(79, 112, 40, 0.05);
+	--db-bg-btn: rgba(74, 106, 36, 0.08);
+	--db-bg-btn-hover: rgba(74, 106, 36, 0.14);
+	--db-bg-banner: rgba(110, 148, 52, 0.08);
+	--db-bg-overlay: linear-gradient(135deg, rgba(30,40,30,0.4) 0%, rgba(30,40,30,0.15) 100%);
+	--db-bg-hover: rgba(79, 112, 40, 0.05);
+	--db-bg-hover-strong: rgba(79, 112, 40, 0.09);
+	--db-bg-add-section: rgba(255, 254, 248, 0.50);
+	--db-bg-drop-indicator: rgba(79, 112, 40, 0.10);
+
+	--db-border: rgba(70, 84, 50, 0.14);
+	--db-border-card: rgba(70, 84, 50, 0.18);
+	--db-border-section: transparent;
+	--db-border-sidebar: transparent;
+	--db-border-input: rgba(70, 84, 50, 0.22);
+	--db-border-input-focus: #4f7028;
+	--db-border-btn: rgba(70, 84, 50, 0.16);
+	--db-border-add-section: rgba(70, 84, 50, 0.25);
+
+	--db-text: #2c3520;
+	--db-text-muted: #57624a;
+	--db-text-faint: #89957d;
+
+	--db-accent: #4a6a24;
+	--db-accent-light: #6e9434;
+	--db-danger: #d3306a;
+
+	--db-shadow-card: 0 1px 2px rgba(70, 84, 50, 0.05), 0 2px 8px rgba(70, 84, 50, 0.05), 0 8px 20px rgba(70, 84, 50, 0.04);
+	--db-shadow-card-hover: 0 2px 4px rgba(70, 84, 50, 0.06), 0 8px 18px rgba(70, 84, 50, 0.08), 0 14px 32px rgba(110, 148, 52, 0.07);
+
+	--db-progress-from: #4f7028;
+	--db-progress-to: #c8a96a;
+	--db-checkbox: #4f7028;
+	--db-quote-border: #b08d4f;
+	--db-link: #4f7028;
+
+	--db-bg-modal: #ffffff;
+	--db-bg-modal-raised: rgba(79, 112, 40, 0.05);
+
+	--db-aurora-bg: linear-gradient(135deg,
+		#f1efe3 0%,
+		rgba(110, 148, 52, 0.14) 18%,
+		rgba(200, 169, 106, 0.12) 38%,
+		rgba(150, 162, 132, 0.12) 58%,
+		rgba(245, 240, 222, 0.18) 78%,
+		#f1efe3 100%);
+}
+
+.theme-dark .nand-dashboard-root[data-theme="matcha"] {
+	--db-bg: #1b2018;
+	--db-bg-card: #262d20;
+	--db-bg-card-hover: #303928;
+	--db-bg-input: rgba(180, 214, 127, 0.08);
+	--db-bg-btn: rgba(180, 214, 127, 0.08);
+	--db-bg-btn-hover: rgba(180, 214, 127, 0.14);
+	--db-bg-banner: rgba(180, 214, 127, 0.08);
+	--db-bg-hover: rgba(180, 214, 127, 0.08);
+	--db-bg-hover-strong: rgba(180, 214, 127, 0.14);
+	--db-bg-add-section: rgba(180, 214, 127, 0.06);
+	--db-bg-drop-indicator: rgba(180, 214, 127, 0.14);
+	--db-border: rgba(180, 214, 127, 0.20);
+	--db-border-card: rgba(180, 214, 127, 0.24);
+	--db-border-input: rgba(180, 214, 127, 0.28);
+	--db-border-input-focus: #b4d67f;
+	--db-border-btn: rgba(180, 214, 127, 0.22);
+	--db-border-add-section: rgba(180, 214, 127, 0.30);
+	--db-text: #eff3e5;
+	--db-text-muted: #c4cfb5;
+	--db-text-faint: #9baa88;
+	--db-text-on-accent: rgba(0, 0, 0, 0.90);
+	--db-text-on-danger: #000;
+	--db-text-on-muted: #000;
+	--db-accent: #b4d67f;
+	--db-accent-light: #cee6a7;
+	--db-danger: #f1869e;
+	--db-progress-from: #b4d67f;
+	--db-progress-to: #dac18a;
+	--db-checkbox: #b4d67f;
+	--db-quote-border: #dac18a;
+	--db-link: #b4d67f;
+	--db-bg-modal: #262d20;
+	--db-bg-modal-raised: rgba(180, 214, 127, 0.08);
+	--db-aurora-bg: linear-gradient(135deg, #1b2018 0%, #25301f 32%, #302a1d 66%, #1b2018 100%);
+}
+
+/* Matcha: slow tea-garden washes drifting behind the cream cards */
+.nand-dashboard-root[data-theme="matcha"] {
+	background: var(--db-aurora-bg);
+	background-size: var(--db-aurora-size);
+	animation: db-aurora-shift var(--db-aurora-speed) ease-in-out infinite;
+	transition: color 0.3s ease;
+	will-change: background-position;
+	backface-visibility: hidden;
+}
+
+
+/* ----- 14. LILAC (丁香) — impressionist garden, ivory blooms ----- */
+/* The washes drift slowly (28s) behind solid ivory cards: a living lilac bed
+   instead of the old flat Morandi slab. Motion guards live with the aurora
+   ones (reduced-motion + mobile pin). */
+.nand-dashboard-root[data-theme="lilac"] {
+	--db-bg: #9b87b4;
+	--db-bg-section: transparent;
+	--db-bg-card: rgba(248, 243, 251, 0.75);
+	--db-bg-card-hover: rgba(252, 248, 254, 0.86);
+	--db-bg-sidebar: transparent;
+	--db-bg-input: rgba(122, 88, 168, 0.08);
+	--db-bg-btn: rgba(157, 78, 221, 0.08);
+	--db-bg-btn-hover: rgba(157, 78, 221, 0.14);
+	--db-bg-banner: rgba(255, 143, 171, 0.10);
+	--db-bg-overlay: linear-gradient(135deg, rgba(0,0,0,0.65) 0%, rgba(0,0,0,0.3) 100%);
+	--db-bg-hover: rgba(122, 88, 168, 0.08);
+	--db-bg-hover-strong: rgba(122, 88, 168, 0.14);
+	--db-bg-add-section: rgba(255, 255, 255, 0.10);
+	--db-bg-drop-indicator: rgba(157, 78, 221, 0.15);
+
+	--db-border: rgba(58, 44, 74, 0.10);
+	--db-border-card: rgba(122, 88, 168, 0.22);
+	--db-border-section: transparent;
+	--db-border-sidebar: transparent;
+	--db-border-input: rgba(122, 88, 168, 0.20);
+	--db-border-input-focus: #8634c3;
+	--db-border-btn: rgba(58, 44, 74, 0.10);
+	--db-border-add-section: rgba(243, 237, 248, 0.45);
+
+	--db-text: #291b38;
+	--db-text-muted: #4b375c;
+	--db-text-faint: #877691;
+	--db-text-inverse: rgba(255, 255, 255, 0.95);
+	--db-text-inverse-muted: rgba(255, 255, 255, 0.55);
+
+	/* Wisteria violet — clearly distinct from the lavender bed */
+	--db-accent: #8634c3;
+	--db-accent-light: #a45ad9;
+	--db-danger: #b61f45;
+
+	--db-shadow-card: 0 1px 2px rgba(60, 40, 90, 0.1), 0 2px 8px rgba(60, 40, 90, 0.08), 0 8px 20px rgba(60, 40, 90, 0.06);
+	--db-shadow-card-hover: 0 2px 4px rgba(60, 40, 90, 0.12), 0 8px 18px rgba(60, 40, 90, 0.12), 0 14px 32px rgba(230, 73, 128, 0.1);
+	--db-backdrop-blur: none;
+
+	--db-radius-sm: 10px;
+	--db-radius-md: 14px;
+	--db-radius-lg: 18px;
+
+	--db-font: 'Nunito', 'LXGW WenKai', var(--font-interface);
+	/* Candy gradient: pale wisteria into rose */
+	--db-progress-from: #c77dff;
+	--db-progress-to: #ff8fab;
+	--db-checkbox: #8634c3;
+	--db-quote-border: #e64980;
+	--db-link: #8634c3;
+
+	/* Opaque modal surfaces matching the ivory cards */
+	--db-bg-modal: #f3edf8;
+	--db-bg-modal-raised: rgba(157, 78, 221, 0.06);
+
+	/* Garden washes: dusty rose, wisteria, ivory glow, deep violet */
+	--db-aurora-bg: linear-gradient(135deg,
+		#9b87b4 0%,
+		rgba(205, 141, 161, 0.30) 16%,
+		rgba(157, 123, 216, 0.20) 33%,
+		rgba(255, 240, 245, 0.10) 50%,
+		rgba(122, 88, 168, 0.14) 66%,
+		rgba(255, 143, 171, 0.22) 82%,
+		#9b87b4 100%);
+	--db-aurora-size: 260% 260%;
+	--db-aurora-speed: 28s;
+}
+
+/* Morning lilac — watercolor paper with blush and periwinkle washes */
+.theme-light .nand-dashboard-root[data-theme="lilac"] {
+	--db-bg: #f7f2fb;
+	--db-bg-section: transparent;
+	--db-bg-card: rgba(255, 255, 255, 0.72);
+	--db-bg-card-hover: rgba(250, 244, 254, 0.90);
+	--db-bg-sidebar: transparent;
+	--db-bg-input: rgba(125, 44, 191, 0.06);
+	--db-bg-btn: rgba(123, 44, 191, 0.08);
+	--db-bg-btn-hover: rgba(123, 44, 191, 0.14);
+	--db-bg-banner: rgba(125, 44, 191, 0.05);
+	--db-bg-overlay: linear-gradient(135deg, rgba(40,20,40,0.4) 0%, rgba(40,20,40,0.15) 100%);
+	--db-bg-hover: rgba(125, 44, 191, 0.06);
+	--db-bg-hover-strong: rgba(125, 44, 191, 0.10);
+	--db-bg-add-section: rgba(255, 255, 255, 0.50);
+	--db-bg-drop-indicator: rgba(125, 44, 191, 0.12);
+
+	--db-border: rgba(61, 42, 94, 0.10);
+	--db-border-card: rgba(61, 42, 94, 0.12);
+	--db-border-section: transparent;
+	--db-border-sidebar: transparent;
+	--db-border-input: rgba(61, 42, 94, 0.16);
+	--db-border-input-focus: #7b2cbf;
+	--db-border-btn: rgba(61, 42, 94, 0.10);
+	--db-border-add-section: rgba(61, 42, 94, 0.20);
+
+	--db-text: #241b33;
+	--db-text-muted: #5d4a72;
+	--db-text-faint: #9488a3;
+
+	--db-accent: #7b2cbf;
+	--db-accent-light: #9d4edd;
+	--db-danger: #d3306a;
+
+	--db-shadow-card: 0 1px 2px rgba(90, 60, 130, 0.05), 0 2px 8px rgba(90, 60, 130, 0.05), 0 8px 20px rgba(90, 60, 130, 0.04);
+	--db-shadow-card-hover: 0 2px 4px rgba(90, 60, 130, 0.06), 0 8px 18px rgba(90, 60, 130, 0.08), 0 14px 32px rgba(230, 73, 128, 0.07);
+
+	--db-progress-from: #9d4edd;
+	--db-progress-to: #e64980;
+	--db-checkbox: #7b2cbf;
+	--db-quote-border: #d6336c;
+	--db-link: #7b2cbf;
+
+	--db-bg-modal: #ffffff;
+	--db-bg-modal-raised: rgba(125, 44, 191, 0.05);
+
+	--db-aurora-bg: linear-gradient(135deg,
+		#f7f2fb 0%,
+		rgba(157, 123, 216, 0.18) 18%,
+		rgba(255, 143, 171, 0.16) 38%,
+		rgba(122, 162, 247, 0.14) 58%,
+		rgba(205, 180, 239, 0.16) 78%,
+		#f7f2fb 100%);
+}
+
+.theme-dark .nand-dashboard-root[data-theme="lilac"] {
+	--db-bg: #211b2b;
+	--db-bg-card: #2c2438;
+	--db-bg-card-hover: #392e47;
+	--db-bg-input: rgba(215, 175, 245, 0.08);
+	--db-bg-btn: rgba(215, 175, 245, 0.08);
+	--db-bg-btn-hover: rgba(215, 175, 245, 0.14);
+	--db-bg-banner: rgba(215, 175, 245, 0.08);
+	--db-bg-hover: rgba(215, 175, 245, 0.08);
+	--db-bg-hover-strong: rgba(215, 175, 245, 0.14);
+	--db-bg-add-section: rgba(215, 175, 245, 0.06);
+	--db-bg-drop-indicator: rgba(215, 175, 245, 0.14);
+	--db-border: rgba(215, 175, 245, 0.20);
+	--db-border-card: rgba(215, 175, 245, 0.24);
+	--db-border-input: rgba(215, 175, 245, 0.28);
+	--db-border-input-focus: #d7aff5;
+	--db-border-btn: rgba(215, 175, 245, 0.22);
+	--db-border-add-section: rgba(215, 175, 245, 0.30);
+	--db-text: #f1eafa;
+	--db-text-muted: #cebddc;
+	--db-text-faint: #a991bd;
+	--db-text-on-accent: rgba(0, 0, 0, 0.90);
+	--db-text-on-danger: #000;
+	--db-text-on-muted: #000;
+	--db-accent: #d7aff5;
+	--db-accent-light: #ead1fc;
+	--db-danger: #f68dab;
+	--db-progress-from: #d7aff5;
+	--db-progress-to: #f3adc7;
+	--db-checkbox: #d7aff5;
+	--db-quote-border: #f3adc7;
+	--db-link: #d7aff5;
+	--db-bg-modal: #2c2438;
+	--db-bg-modal-raised: rgba(215, 175, 245, 0.08);
+	--db-aurora-bg: linear-gradient(135deg, #211b2b 0%, #322439 32%, #28243b 66%, #211b2b 100%);
+}
+
+/* Lilac: slow garden wash drifting behind the ivory cards */
+.nand-dashboard-root[data-theme="lilac"] {
+	background: var(--db-aurora-bg);
+	background-size: var(--db-aurora-size);
+	animation: db-aurora-shift var(--db-aurora-speed) ease-in-out infinite;
+	transition: color 0.3s ease;
+	will-change: background-position;
+	backface-visibility: hidden;
+}
+
+
+/* ----- 15. NEON (霓虹) — Near-black + neon magenta, identical in light & dark ----- */
+	.nand-dashboard-root[data-theme="neon"] {
+		--db-bg: #0a0a0c;
+		/* Opaque modal-layer surface: dialogs render outside this root where the
+		   near-black gradient behind doesn't exist, so --db-bg-card (transparent)
+		   would leave them floating on the scrim alone. */
+		--db-bg-modal: #130f17;
+		--db-bg-modal-raised: rgba(255, 255, 255, 0.06);
+		--db-bg-section: transparent;
+		--db-bg-card: transparent;
+		--db-bg-card-hover: rgba(239, 79, 138, 0.05);
+		--db-bg-sidebar: transparent;
+		--db-bg-input: rgba(239, 79, 138, 0.04);
+		--db-bg-btn: rgba(239, 79, 138, 0.06);
+		--db-bg-btn-hover: rgba(239, 79, 138, 0.12);
+		--db-bg-banner: rgba(239, 79, 138, 0.05);
+		--db-bg-overlay: linear-gradient(135deg, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.4) 100%);
+		--db-bg-hover: rgba(255, 255, 255, 0.04);
+		--db-bg-hover-strong: rgba(255, 255, 255, 0.07);
+		--db-bg-add-section: rgba(239, 79, 138, 0.03);
+		--db-bg-drop-indicator: rgba(239, 79, 138, 0.10);
+
+		--db-border: rgba(255, 255, 255, 0.08);
+		--db-border-card: rgba(239, 79, 138, 0.22);
+		--db-border-section: transparent;
+		--db-border-sidebar: transparent;
+		--db-border-input: rgba(239, 79, 138, 0.18);
+		--db-border-input-focus: #ef4f8a;
+		--db-border-btn: rgba(239, 79, 138, 0.16);
+		--db-border-add-section: rgba(239, 79, 138, 0.18);
+
+		--db-text: #FAFAFA;
+		--db-text-muted: #A8A8A8;
+		--db-text-faint: #666666;
+		--db-text-inverse: rgba(255, 255, 255, 0.96);
+		--db-text-inverse-muted: rgba(255, 255, 255, 0.6);
+
+		--db-accent: #ef4f8a;
+		--db-accent-light: #f48cab;
+		--db-danger: #e36e30;
+
+		--db-shadow-card: 0 1px 2px rgba(0, 0, 0, 0.40), 0 4px 12px rgba(0, 0, 0, 0.28), 0 10px 24px rgba(239, 79, 138, 0.03);
+		--db-shadow-card-hover: 0 0 0 1px rgba(239, 79, 138, 0.22), 0 8px 20px rgba(0, 0, 0, 0.45), 0 16px 36px rgba(239, 79, 138, 0.07);
+		--db-backdrop-blur: none;
+
+		--db-radius-sm: 6px;
+		--db-radius-md: 10px;
+		--db-radius-lg: 12px;
+
+		--db-font: 'Inter', 'DM Sans', 'Noto Sans SC', var(--font-interface);
+		--db-progress-from: #ef4f8a;
+		--db-progress-to: #f48cab;
+		--db-checkbox: #ef4f8a;
+		--db-quote-border: #ef4f8a;
+		--db-link: #f06a9c;
+	}
+	/* Neon: near-black with a whisper of magenta at the top — identical in light & dark */
+	.nand-dashboard-root[data-theme="neon"] {
+		background:
+			radial-gradient(ellipse at 50% 0%, rgba(239, 79, 138, 0.05) 0%, transparent 45%),
+			linear-gradient(180deg, #0d0a0f 0%, #0a0a0c 70%);
+		transition: color 0.3s ease;
+	}
+
+	/* ----- 16. VOLT (电光) — Near-black + electric cyan, identical in light & dark ----- */
+	.nand-dashboard-root[data-theme="volt"] {
+		--db-bg: #090a0e;
+		--db-bg-modal: #0e1218;
+		--db-bg-modal-raised: rgba(255, 255, 255, 0.06);
+		--db-bg-section: transparent;
+		--db-bg-card: transparent;
+		--db-bg-card-hover: rgba(62, 193, 246, 0.05);
+		--db-bg-sidebar: transparent;
+		--db-bg-input: rgba(62, 193, 246, 0.04);
+		--db-bg-btn: rgba(62, 193, 246, 0.06);
+		--db-bg-btn-hover: rgba(62, 193, 246, 0.12);
+		--db-bg-banner: rgba(62, 193, 246, 0.05);
+		--db-bg-overlay: linear-gradient(135deg, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.4) 100%);
+		--db-bg-hover: rgba(255, 255, 255, 0.04);
+		--db-bg-hover-strong: rgba(255, 255, 255, 0.07);
+		--db-bg-add-section: rgba(62, 193, 246, 0.03);
+		--db-bg-drop-indicator: rgba(62, 193, 246, 0.10);
+
+		--db-border: rgba(255, 255, 255, 0.08);
+		--db-border-card: rgba(62, 193, 246, 0.20);
+		--db-border-section: transparent;
+		--db-border-sidebar: transparent;
+		--db-border-input: rgba(62, 193, 246, 0.16);
+		--db-border-input-focus: #3ec1f6;
+		--db-border-btn: rgba(62, 193, 246, 0.16);
+		--db-border-add-section: rgba(62, 193, 246, 0.18);
+
+		--db-text: #FAFAFA;
+		--db-text-muted: #A8A8A8;
+		--db-text-faint: #666666;
+		--db-text-inverse: rgba(0, 0, 0, 0.85);
+		--db-text-inverse-muted: rgba(255, 255, 255, 0.6);
+
+		--db-accent: #3ec1f6;
+		--db-accent-light: #6bcbf7;
+		--db-danger: #ed5d5c;
+
+		--db-shadow-card: 0 1px 2px rgba(0, 0, 0, 0.40), 0 4px 12px rgba(0, 0, 0, 0.28), 0 10px 24px rgba(62, 193, 246, 0.03);
+		--db-shadow-card-hover: 0 0 0 1px rgba(62, 193, 246, 0.22), 0 8px 20px rgba(0, 0, 0, 0.45), 0 16px 36px rgba(62, 193, 246, 0.07);
+		--db-backdrop-blur: none;
+
+		--db-radius-sm: 6px;
+		--db-radius-md: 10px;
+		--db-radius-lg: 12px;
+
+		--db-font: 'Inter', 'DM Sans', 'Noto Sans SC', var(--font-interface);
+		--db-progress-from: #3ec1f6;
+		--db-progress-to: #6bcbf7;
+		--db-checkbox: #3ec1f6;
+		--db-quote-border: #3ec1f6;
+		--db-link: #3ec1f6;
+	}
+	/* Volt: cool near-black with a whisper of cyan at the top — identical in light & dark */
+	.nand-dashboard-root[data-theme="volt"] {
+		background:
+			radial-gradient(ellipse at 50% 0%, rgba(62, 193, 246, 0.05) 0%, transparent 45%),
+			linear-gradient(180deg, #0b0e14 0%, #090a0e 70%);
+		transition: color 0.3s ease;
+	}
+
+	/* ----- 17. MAGMA (熔岩) — Warm near-black + lava orange, identical in light & dark ----- */
+	.nand-dashboard-root[data-theme="magma"] {
+		--db-bg: #0c0a08;
+		--db-bg-modal: #161009;
+		--db-bg-modal-raised: rgba(255, 255, 255, 0.06);
+		--db-bg-section: transparent;
+		--db-bg-card: transparent;
+		--db-bg-card-hover: rgba(229, 106, 48, 0.05);
+		--db-bg-sidebar: transparent;
+		--db-bg-input: rgba(229, 106, 48, 0.04);
+		--db-bg-btn: rgba(229, 106, 48, 0.06);
+		--db-bg-btn-hover: rgba(229, 106, 48, 0.12);
+		--db-bg-banner: rgba(229, 106, 48, 0.05);
+		--db-bg-overlay: linear-gradient(135deg, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.4) 100%);
+		--db-bg-hover: rgba(255, 255, 255, 0.04);
+		--db-bg-hover-strong: rgba(255, 255, 255, 0.07);
+		--db-bg-add-section: rgba(229, 106, 48, 0.03);
+		--db-bg-drop-indicator: rgba(229, 106, 48, 0.10);
+
+		--db-border: rgba(255, 255, 255, 0.08);
+		--db-border-card: rgba(229, 106, 48, 0.22);
+		--db-border-section: transparent;
+		--db-border-sidebar: transparent;
+		--db-border-input: rgba(229, 106, 48, 0.18);
+		--db-border-input-focus: #e56a30;
+		--db-border-btn: rgba(229, 106, 48, 0.16);
+		--db-border-add-section: rgba(229, 106, 48, 0.18);
+
+		--db-text: #FAFAFA;
+		--db-text-muted: #A8A8A8;
+		--db-text-faint: #666666;
+		--db-text-inverse: rgba(255, 255, 255, 0.96);
+		--db-text-inverse-muted: rgba(255, 255, 255, 0.6);
+
+		--db-accent: #e56a30;
+		--db-accent-light: #f79a67;
+		--db-danger: #e85a72;
+
+		--db-shadow-card: 0 1px 2px rgba(0, 0, 0, 0.40), 0 4px 12px rgba(0, 0, 0, 0.28), 0 10px 24px rgba(229, 106, 48, 0.03);
+		--db-shadow-card-hover: 0 0 0 1px rgba(229, 106, 48, 0.22), 0 8px 20px rgba(0, 0, 0, 0.45), 0 16px 36px rgba(229, 106, 48, 0.07);
+		--db-backdrop-blur: none;
+
+		--db-radius-sm: 6px;
+		--db-radius-md: 10px;
+		--db-radius-lg: 12px;
+
+		--db-font: 'Inter', 'DM Sans', 'Noto Sans SC', var(--font-interface);
+		--db-progress-from: #e56a30;
+		--db-progress-to: #f79a67;
+		--db-checkbox: #e56a30;
+		--db-quote-border: #e56a30;
+		--db-link: #f5844f;
+	}
+	/* Magma: warm near-black with a whisper of lava glow at the top — identical in light & dark */
+	.nand-dashboard-root[data-theme="magma"] {
+		background:
+			radial-gradient(ellipse at 50% 0%, rgba(229, 106, 48, 0.05) 0%, transparent 45%),
+			linear-gradient(180deg, #120d09 0%, #0c0a08 70%);
+		transition: color 0.3s ease;
+	}
+
+	/* ----- 18. ONYX (曜黑) — Pure black + lemon, identical in light & dark ----- */
+	.nand-dashboard-root[data-theme="onyx"] {
+		--db-bg: #000000;
+		--db-bg-modal: #0e0e0e;
+		--db-bg-modal-raised: rgba(255, 255, 255, 0.06);
+		--db-bg-section: transparent;
+		--db-bg-card: transparent;
+		--db-bg-card-hover: rgba(230, 249, 102, 0.05);
+		--db-bg-sidebar: transparent;
+		--db-bg-input: rgba(230, 249, 102, 0.04);
+		--db-bg-btn: rgba(230, 249, 102, 0.06);
+		--db-bg-btn-hover: rgba(230, 249, 102, 0.12);
+		--db-bg-banner: rgba(230, 249, 102, 0.05);
+		--db-bg-overlay: linear-gradient(135deg, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.4) 100%);
+		--db-bg-hover: rgba(255, 255, 255, 0.04);
+		--db-bg-hover-strong: rgba(255, 255, 255, 0.07);
+		--db-bg-add-section: rgba(230, 249, 102, 0.03);
+		--db-bg-drop-indicator: rgba(230, 249, 102, 0.10);
+
+		--db-border: rgba(255, 255, 255, 0.08);
+		--db-border-card: rgba(230, 249, 102, 0.18);
+		--db-border-section: transparent;
+		--db-border-sidebar: transparent;
+		--db-border-input: rgba(230, 249, 102, 0.16);
+		--db-border-input-focus: #e6f966;
+		--db-border-btn: rgba(230, 249, 102, 0.16);
+		--db-border-add-section: rgba(230, 249, 102, 0.18);
+
+		--db-text: #FAFAFA;
+		--db-text-muted: #A8A8A8;
+		--db-text-faint: #666666;
+		--db-text-inverse: rgba(0, 0, 0, 0.85);
+		--db-text-inverse-muted: rgba(255, 255, 255, 0.6);
+
+		--db-accent: #e6f966;
+		--db-accent-light: #f1ffa9;
+		--db-danger: #ed5d5c;
+
+		--db-shadow-card: 0 1px 2px rgba(0, 0, 0, 0.40), 0 4px 12px rgba(0, 0, 0, 0.28), 0 10px 24px rgba(230, 249, 102, 0.02);
+		--db-shadow-card-hover: 0 0 0 1px rgba(230, 249, 102, 0.20), 0 8px 20px rgba(0, 0, 0, 0.45), 0 16px 36px rgba(230, 249, 102, 0.05);
+		--db-backdrop-blur: none;
+
+		--db-radius-sm: 6px;
+		--db-radius-md: 10px;
+		--db-radius-lg: 12px;
+
+		--db-font: 'Inter', 'DM Sans', 'Noto Sans SC', var(--font-interface);
+		--db-progress-from: #e6f966;
+		--db-progress-to: #f1ffa9;
+		--db-checkbox: #e6f966;
+		--db-quote-border: #e6f966;
+		--db-link: #e6f966;
+	}
+	/* Onyx: pure black with a whisper of lemon at the top — identical in light & dark */
+	.nand-dashboard-root[data-theme="onyx"] {
+		background:
+			radial-gradient(ellipse at 50% 0%, rgba(230, 249, 102, 0.04) 0%, transparent 45%),
+			linear-gradient(180deg, #0A0A0A 0%, #000000 70%);
+		transition: color 0.3s ease;
+	}
+
+	/* ----- 19. MONO (朱砂 / Vermilion) — sumi ink on rice paper, seal-red accent ----- */
+/* Pure neutral black/white read funereal. The fix keeps the ink/paper pairing:
+   warm rice-paper ground, blue-undertone sumi ink, a whisper of ink-wash
+   drift, and ONE cinnabar seal accent like the red stamp on a scroll. */
+.nand-dashboard-root[data-theme="mono"] {
+	--db-bg: #faf9f4;
+	--db-bg-section: transparent;
+	--db-bg-card: #fefdf9;
+	--db-bg-card-hover: #f5f3ea;
+	--db-bg-sidebar: transparent;
+	--db-bg-input: #f3f1e8;
+	--db-bg-btn: rgba(192, 68, 46, 0.08);
+	--db-bg-btn-hover: rgba(192, 68, 46, 0.14);
+	--db-bg-banner: #f1efe6;
+	--db-bg-overlay: linear-gradient(135deg, rgba(20,24,28,0.55) 0%, rgba(20,24,28,0.25) 100%);
+	--db-bg-hover: #f2f0e7;
+	--db-bg-hover-strong: #e9e7dc;
+	--db-bg-add-section: #f6f4ec;
+	--db-bg-drop-indicator: rgba(192, 68, 46, 0.08);
+
+	--db-border: #dedcd2;
+	--db-border-card: #dedcd2;
+	--db-border-section: transparent;
+	--db-border-sidebar: transparent;
+	--db-border-input: #dedcd2;
+	--db-border-input-focus: #c0442e;
+	--db-border-btn: rgba(192, 68, 46, 0.22);
+	--db-border-add-section: #cfcdc2;
+
+	--db-text: #1d2126;
+	--db-text-muted: #4e5658;
+	--db-text-faint: #8a9396;
+	--db-text-inverse: #ffffff;
+	--db-text-inverse-muted: rgba(255, 255, 255, 0.6);
+
+	/* Cinnabar seal — the single red stamp on the ink painting */
+	--db-accent: #c0442e;
+	--db-accent-light: #d96a4f;
+	--db-danger: #dc2626;
+
+	--db-shadow-card: 0 1px 2px rgba(29, 33, 38, 0.05), 0 2px 8px rgba(29, 33, 38, 0.05), 0 8px 20px rgba(29, 33, 38, 0.04);
+	--db-shadow-card-hover: 0 2px 4px rgba(29, 33, 38, 0.06), 0 8px 18px rgba(29, 33, 38, 0.08), 0 14px 32px rgba(29, 33, 38, 0.07);
+	--db-backdrop-blur: none;
+
+	--db-radius-sm: 6px;
+	--db-radius-md: 10px;
+	--db-radius-lg: 12px;
+
+	--db-font: 'Inter', 'DM Sans', 'Noto Sans SC', var(--font-interface);
+	/* Seal vermilion dissolving into ink */
+	--db-progress-from: #c0442e;
+	--db-progress-to: #4e5658;
+	--db-checkbox: #c0442e;
+	--db-quote-border: #1d2126;
+	--db-link: #c0442e;
+
+	/* Opaque modal surfaces */
+	--db-bg-modal: #fefdf9;
+	--db-bg-modal-raised: rgba(29, 33, 38, 0.04);
+
+	/* 墨分五色: barely-there ink stains diffusing across the paper */
+	--db-aurora-bg: linear-gradient(135deg,
+		#faf9f4 0%,
+		rgba(78, 86, 88, 0.045) 18%,
+		rgba(29, 33, 38, 0.03) 40%,
+		rgba(157, 163, 166, 0.05) 58%,
+		rgba(29, 33, 38, 0.035) 80%,
+		#faf9f4 100%);
+	--db-aurora-size: 250% 250%;
+	--db-aurora-speed: 40s;
+}
+.theme-dark .nand-dashboard-root[data-theme="mono"] {
+	/* Night ink — lifted off pure black, warm paper-white text */
+	--db-bg: #111417;
+	--db-bg-section: transparent;
+	--db-bg-card: #171b1f;
+	--db-bg-card-hover: #1f2429;
+	--db-bg-sidebar: transparent;
+	--db-bg-input: #1a1f24;
+	--db-bg-btn: rgba(224, 91, 69, 0.06);
+	--db-bg-btn-hover: rgba(224, 91, 69, 0.12);
+	--db-bg-banner: #16191d;
+	--db-bg-overlay: linear-gradient(135deg, rgba(0,0,0,0.65) 0%, rgba(0,0,0,0.35) 100%);
+	--db-bg-hover: #1c2126;
+	--db-bg-hover-strong: #262c32;
+	--db-bg-add-section: #16191d;
+	--db-bg-drop-indicator: rgba(224, 91, 69, 0.10);
+
+	--db-border: #2d3338;
+	--db-border-card: #2d3338;
+	--db-border-section: transparent;
+	--db-border-sidebar: transparent;
+	--db-border-input: #2d3338;
+	--db-border-input-focus: #e05b45;
+	--db-border-btn: rgba(224, 91, 69, 0.22);
+	--db-border-add-section: #2e343a;
+
+	--db-text: #f4f2ea;
+	--db-text-muted: #b8b5aa;
+	--db-text-faint: #6b6f73;
+	--db-text-inverse: #ffffff;
+	--db-text-inverse-muted: rgba(255, 255, 255, 0.55);
+
+	--db-accent: #e05b45;
+	--db-accent-light: #ef8a70;
+	--db-danger: #ef4444;
+
+	--db-shadow-card: 0 1px 2px rgba(0, 0, 0, 0.3), 0 2px 8px rgba(0, 0, 0, 0.22), 0 8px 20px rgba(0, 0, 0, 0.16);
+	--db-shadow-card-hover: 0 2px 4px rgba(0, 0, 0, 0.32), 0 8px 18px rgba(0, 0, 0, 0.28), 0 14px 32px rgba(0, 0, 0, 0.12);
+
+	--db-progress-from: #e05b45;
+	--db-progress-to: #b8b5aa;
+	--db-checkbox: #e05b45;
+	--db-quote-border: #f4f2ea;
+	--db-link: #e05b45;
+
+	--db-bg-modal: #171b1f;
+	--db-bg-modal-raised: rgba(244, 242, 234, 0.05);
+
+	--db-aurora-bg: linear-gradient(135deg,
+		#111417 0%,
+		rgba(244, 242, 234, 0.05) 20%,
+		rgba(157, 163, 166, 0.04) 45%,
+		rgba(244, 242, 234, 0.035) 70%,
+		#111417 100%);
+}
+
+/* Mono: ink-wash drift — monochrome, the slowest of all themes */
+.nand-dashboard-root[data-theme="mono"] {
+	background: var(--db-aurora-bg);
+	background-size: var(--db-aurora-size);
+	animation: db-aurora-shift var(--db-aurora-speed) ease-in-out infinite;
+	transition: color 0.3s ease;
+	will-change: background-position;
+	backface-visibility: hidden;
+}
+
+
