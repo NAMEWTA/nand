@@ -17,6 +17,7 @@ import {
 import { registerLocalizedCommand, type LocalizedCommand } from '../platform/obsidian/localized-command';
 import { normalizeContactsSettings } from '../shared/contacts-settings';
 import { normalizeEditorWorkbench } from '../shared/editor-workbench';
+import { setDiagnosticRoots } from '../shared/diagnostics/redact';
 import { getLanguage, onLanguageChanged, setLanguage, t, tFor } from '../shared/i18n/index';
 import { refreshLocalizedDom } from '../view/primitives/localized-dom';
 import { closeDashboardPanelModals } from '../view/dashboard/ui/panel-modal';
@@ -124,6 +125,8 @@ export default class DashboardPlugin extends Plugin {
 
 	async onload(): Promise<void> {
 		await this.loadSettings();
+		const adapter = this.app.vault.adapter as { getBasePath?: () => string };
+		setDiagnosticRoots({ vault: typeof adapter.getBasePath === 'function' ? adapter.getBasePath() : undefined });
 		this.browserHost = new BrowserModule(
 			this.app,
 			() => this.settings.browser,

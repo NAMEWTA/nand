@@ -1,8 +1,15 @@
 /**
- * Logging utilities - only output logs in debug mode
+ * Logging utilities - only output logs in debug mode.
+ * Every argument is redacted. This is not a place to record terminal output or note text.
  */
 
+import { redactDiagnostic } from '../../shared/diagnostics/redact';
+
 let debugMode = false;
+
+function emit(write: (...args: unknown[]) => void, args: unknown[]): void {
+	write(...args.map((arg) => redactDiagnostic(arg)));
+}
 
 /**
  * Set debug mode
@@ -22,23 +29,19 @@ export function isDebugMode(): boolean {
  * Debug logs - only output in debug mode
  */
 export function debugLog(...args: unknown[]): void {
-	if (debugMode) {
-		console.debug(...args);
-	}
+	if (debugMode) emit(console.debug, args);
 }
 
 /**
  * Debug warnings - only output in debug mode
  */
 export function debugWarn(...args: unknown[]): void {
-	if (debugMode) {
-		console.warn(...args);
-	}
+	if (debugMode) emit(console.warn, args);
 }
 
 /**
  * Error logs - always output (error messages are important)
  */
 export function errorLog(...args: unknown[]): void {
-	console.error(...args);
+	emit(console.error, args);
 }
