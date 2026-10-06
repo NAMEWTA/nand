@@ -1,6 +1,7 @@
 import { Platform, type ViewStateResult } from 'obsidian';
 import { t } from '../../shared/i18n';
 import type { WorkbenchContribution } from '../../view/hosts/obsidian/workbench-host';
+import { planTerminalNavigation } from '../../view/workbench/terminal-resource';
 import type { TerminalAgentController } from '../modules/terminal/controller';
 
 export const createTerminalPage = (controller: () => TerminalAgentController | undefined): WorkbenchContribution['create'] => async (context, target, state, signal) => {
@@ -21,9 +22,9 @@ export const createTerminalPage = (controller: () => TerminalAgentController | u
   getTarget: () => ({ feature: 'terminal', section: surface.getSection(), resourceId: surface.getTerminalInstance()?.id }),
   restore: async (raw) => { await surface.setState(raw, {} as ViewStateResult); await select(typeof raw.sessionId === 'string' ? raw.sessionId : undefined, false); },
   navigate: async (next, navigationSignal) => {
-   if (navigationSignal.aborted) return;
-   if (next.resourceId) await select(next.resourceId, true, navigationSignal);
-   if (!navigationSignal.aborted) surface.showSection(next.section);
+   const plan = planTerminalNavigation(next.resourceId, !!service.getTerminal(next.resourceId), navigationSignal.aborted);
+   if (plan.selectId) await select(plan.selectId, false, navigationSignal);
+   if (plan.openSection && !navigationSignal.aborted) surface.showSection(next.section);
   },
  };
 };

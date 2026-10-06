@@ -6,9 +6,15 @@ import { createBoardSwitchQueue } from './board-switch';
 import { workbenchBoardSettings, workbenchBoardSettingsPatch } from './board-settings';
 import { dashboardSaveStatuses, headerStatuses, visibleStatuses } from './status-policy';
 import { splitLeafState } from './split-state';
+import { planTerminalNavigation } from './terminal-resource';
 
 
 const deferred = () => { let resolve!: () => void; const promise = new Promise<void>((done) => { resolve = done; }); return { promise, resolve }; };
+test('a missing terminal session opens the section and does not fail the page', () => {
+	assert.deepEqual(planTerminalNavigation('terminal-dead', false, false), { selectId: undefined, openSection: true });
+	assert.deepEqual(planTerminalNavigation('terminal-live', true, false), { selectId: 'terminal-live', openSection: true });
+	assert.deepEqual(planTerminalNavigation('terminal-live', true, true), { openSection: false });
+});
 test('home is the dashboard, not a second product or settings page', () => {
 	for (const value of [null, [], {}, { feature: 'home' }, { feature: 'settings' }]) assert.deepEqual(normalizeTarget(value), { feature: 'dashboard' });
 });
