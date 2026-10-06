@@ -28030,6 +28030,9 @@ button.nand-contacts-hit { cursor: pointer; }
 .nand-session-status-dot.is-waiting { color: var(--nand-tone-warning); }
 .nand-session-status-dot.is-idle { color: var(--nand-tone-info); }
 .nand-session-status-dot.is-exited { color: var(--text-faint); opacity: 0.6; }
+.nand-session-status-dot.is-connected { color: var(--nand-tone-success); }
+.nand-session-status-dot.is-starting, .nand-session-status-dot.is-reconnecting { color: var(--nand-tone-warning); }
+.nand-session-status-dot.is-failed, .nand-session-status-dot.is-disconnected { color: var(--nand-tone-danger, var(--text-error)); }
 .nand-session-row > button:last-child { flex: 0 0 32px; width: 32px; height: 32px; min-width: 32px; opacity: 0.6; }
 .nand-session-row:hover > button:last-child, .nand-session-row:focus-within > button:last-child { opacity: 1; }
 
@@ -28288,6 +28291,7 @@ button.nand-contacts-hit { cursor: pointer; }
 .terminal-workbench-shell.is-workbench-embedded > .nand-agent-sidebar { position: absolute; inset-block: 0; inset-inline-start: 0; z-index: 5; width: min(var(--terminal-sidebar-width), 85%); max-width: 85%; transform: translateX(-110%); visibility: hidden; box-shadow: var(--nand-shadow-lg); }
 .terminal-workbench-shell.is-workbench-embedded.is-drawer-open > .nand-agent-sidebar { transform: none; visibility: visible; }
 .terminal-workbench-shell.is-workbench-embedded > .terminal-sidebar-resizer { display: none; }
+.terminal-workbench-shell.is-workbench-embedded > .nand-agent-center { grid-column: 1; }
 .terminal-workbench-shell.is-workbench-embedded > .terminal-drawer-backdrop { position: absolute; inset: 0; z-index: 4; width: 100%; height: 100%; background: var(--background-modifier-cover); border: 0; border-radius: 0; display: none; }
 .terminal-workbench-shell.is-workbench-embedded.is-drawer-open > .terminal-drawer-backdrop { display: block; }
 .terminal-workbench-shell.is-usage-page .terminal-live-pane { visibility: hidden; pointer-events: none; }
@@ -28308,5 +28312,8 @@ button.nand-contacts-hit { cursor: pointer; }
 .nand-workbench-home-overview { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 2fr); gap: var(--size-4-4); padding: var(--size-4-4); }
 .nand-workbench-home-calendar, .nand-workbench-home-recent { min-width: 0; border: 1px solid var(--db-border); border-radius: var(--db-radius-md); padding: var(--size-4-3); }
 .nand-workbench-home-recent .dashboard-recent { margin: 0; }
+/* Stacked layout hides these classes in the sidebar. The home overview is the place they stay visible. */
+.nand-workbench-home-overview .nand-workbench-home-calendar .dashboard-sidebar-week-calendar { display: flex; }
+.nand-workbench-home-overview .nand-workbench-home-recent .dashboard-recent { display: block; }
 @container (max-width: 560px) { .nand-workbench-home-overview { grid-template-columns: 1fr; } }
 .nand-workbench-page { container-type: inline-size; }
