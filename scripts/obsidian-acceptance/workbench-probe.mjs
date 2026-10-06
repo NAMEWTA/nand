@@ -120,12 +120,12 @@ try {
   assert.ok(opened.includes('Welcome'));
   check('home-overview-calendar-and-recent-visible', overview);
   await shot('home-overview-1280');
+  await call(`(()=>{const v=${wb};v.contentEl.style.width='1280px';v.contentEl.style.maxWidth='none';})()`);
   await call(`(async()=>{const p=app.plugins.plugins.nand;p.settings.modules.terminal=true;await p.saveSettings();await p.applyModuleFlags();await p.openWorkbench({feature:'terminal',section:'running'});})()`);
-  await delay(200);
-  const fill = await call(`(()=>{const shell=${wb}.contentEl.querySelector('.terminal-workbench-shell.is-workbench-embedded');const center=shell?.querySelector(':scope > .nand-agent-center');if(!shell||!center)return null;const s=shell.getBoundingClientRect();const c=center.getBoundingClientRect();return {shell:Math.round(s.width),center:Math.round(c.width),left:Math.round(c.left-s.left)}})()`);
-  assert.ok(fill && fill.shell >= 1000, 'embedded terminal shell was not wide');
-  assert.ok(fill.center >= fill.shell - 24, 'embedded terminal did not fill the content column');
-  assert.ok(fill.left <= 8);
+  const fill = await until(`(()=>{const page=${wb}.contentEl.querySelector('.nand-workbench-page');const shell=page?.querySelector('.terminal-workbench-shell.is-workbench-embedded');const center=shell?.querySelector(':scope > .nand-agent-center');if(!shell||!center||shell.getBoundingClientRect().width<200)return null;const s=shell.getBoundingClientRect();const c=center.getBoundingClientRect();const p=page.getBoundingClientRect();return {page:Math.round(p.width),shell:Math.round(s.width),center:Math.round(c.width),left:Math.round(c.left-s.left)}})()`, 'embedded terminal shell');
+  assert.ok(fill.center >= fill.shell - 24, 'embedded terminal did not fill the content column ' + JSON.stringify(fill));
+  assert.ok(fill.shell >= fill.page - 32, 'embedded terminal did not use the page ' + JSON.stringify(fill));
+  assert.ok(fill.left <= 8, JSON.stringify(fill));
   check('embedded-terminal-fills-1280', fill);
   await shot('terminal-embedded-1280');
   const dead = await call(`(async()=>{const p=app.plugins.plugins.nand;await p.openWorkbench({feature:'terminal',section:'running',resourceId:'terminal-dead'});const v=${wb};return {feature:v.getState().target.feature,resourceId:v.getState().target.resourceId??'',unavailable:!!v.contentEl.querySelector('.nand-workbench-unavailable'),sessions:p.terminalHost.getRuntimeStatus().length}})()`);
