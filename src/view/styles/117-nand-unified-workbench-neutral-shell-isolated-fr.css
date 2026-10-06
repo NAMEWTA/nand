@@ -48,6 +48,7 @@
 .terminal-workbench-shell.is-workbench-embedded > .nand-agent-sidebar { position: absolute; inset-block: 0; inset-inline-start: 0; z-index: 5; width: min(var(--terminal-sidebar-width), 85%); max-width: 85%; transform: translateX(-110%); visibility: hidden; box-shadow: var(--nand-shadow-lg); }
 .terminal-workbench-shell.is-workbench-embedded.is-drawer-open > .nand-agent-sidebar { transform: none; visibility: visible; }
 .terminal-workbench-shell.is-workbench-embedded > .terminal-sidebar-resizer { display: none; }
+.terminal-workbench-shell.is-workbench-embedded > .nand-agent-center { grid-column: 1; }
 .terminal-workbench-shell.is-workbench-embedded > .terminal-drawer-backdrop { position: absolute; inset: 0; z-index: 4; width: 100%; height: 100%; background: var(--background-modifier-cover); border: 0; border-radius: 0; display: none; }
 .terminal-workbench-shell.is-workbench-embedded.is-drawer-open > .terminal-drawer-backdrop { display: block; }
 .terminal-workbench-shell.is-usage-page .terminal-live-pane { visibility: hidden; pointer-events: none; }
@@ -68,5 +69,8 @@
 .nand-workbench-home-overview { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 2fr); gap: var(--size-4-4); padding: var(--size-4-4); }
 .nand-workbench-home-calendar, .nand-workbench-home-recent { min-width: 0; border: 1px solid var(--db-border); border-radius: var(--db-radius-md); padding: var(--size-4-3); }
 .nand-workbench-home-recent .dashboard-recent { margin: 0; }
+/* Stacked layout hides these classes in the sidebar. The home overview is the place they stay visible. */
+.nand-workbench-home-overview .nand-workbench-home-calendar .dashboard-sidebar-week-calendar { display: flex; }
+.nand-workbench-home-overview .nand-workbench-home-recent .dashboard-recent { display: block; }
 @container (max-width: 560px) { .nand-workbench-home-overview { grid-template-columns: 1fr; } }
 .nand-workbench-page { container-type: inline-size; }
