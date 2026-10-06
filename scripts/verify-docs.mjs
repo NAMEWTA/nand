@@ -7,12 +7,17 @@ const state = 'speculo/.speculo/specdev';
 const failures = [];
 const files = [];
 
+// Inventory keys stay forward-slash even when Windows reports backslash paths.
+function posix(rel) {
+	return rel.split(path.sep).join('/');
+}
+
 function walk(directory) {
 	for (const entry of fs.readdirSync(directory, { withFileTypes: true })) {
 		if (entry.name === 'node_modules' || entry.name === '.git' || entry.name === 'dist' || entry.name === 'target') continue;
 		const file = path.join(directory, entry.name);
-		const rel = path.relative(root, file);
-		if (rel === 'scripts/tmp' || rel.startsWith(`scripts${path.sep}tmp${path.sep}`)) continue;
+		const rel = posix(path.relative(root, file));
+		if (rel === 'scripts/tmp' || rel.startsWith('scripts/tmp/')) continue;
 		if (entry.isDirectory()) {
 			if (entry.name === 'legacy' || entry.name === 'old' || entry.name === 'backup-docs') failures.push(`forbidden documentation directory ${rel}`);
 			walk(file);
@@ -22,16 +27,16 @@ function walk(directory) {
 walk(root);
 
 function classify(rel) {
-	if (rel === 'NOTICE' || rel.endsWith(`${path.sep}NOTICE.txt`) || rel.startsWith(`docs${path.sep}third-party${path.sep}`)) return 'license';
-	if (rel.startsWith(`docs${path.sep}`)) return 'user-doc';
+	if (rel === 'NOTICE' || rel.endsWith('/NOTICE.txt') || rel.startsWith('docs/third-party/')) return 'license';
+	if (rel.startsWith('docs/')) return 'user-doc';
 	if (['README.md', 'CHANGELOG.md', 'CLAUDE.md', 'SECURITY.md', 'dashboard-template.md'].includes(rel)) return 'root-entry';
-	if (rel.startsWith(`.agents${path.sep}`)) return 'skill';
-	if (rel.startsWith(`speculo${path.sep}.speculo${path.sep}specdev${path.sep}`)) return 'specdev';
-	if (rel.startsWith(`speculo${path.sep}`)) return 'speculo-tooling';
-	if (rel.startsWith(`src${path.sep}`)) return 'source-template';
-	if (rel.startsWith(`scripts${path.sep}`)) return 'script-doc';
-	if (rel.startsWith(`processes${path.sep}`)) return 'process-doc';
-	if (rel.startsWith(`.github${path.sep}`)) return 'workflow-doc';
+	if (rel.startsWith('.agents/')) return 'skill';
+	if (rel.startsWith('speculo/.speculo/specdev/')) return 'specdev';
+	if (rel.startsWith('speculo/')) return 'speculo-tooling';
+	if (rel.startsWith('src/')) return 'source-template';
+	if (rel.startsWith('scripts/')) return 'script-doc';
+	if (rel.startsWith('processes/')) return 'process-doc';
+	if (rel.startsWith('.github/')) return 'workflow-doc';
 	return '';
 }
 
@@ -139,13 +144,13 @@ function checkTarget(fromFile, raw) {
 	const resolved = destination
 		? path.resolve(root, path.dirname(fromFile), destination)
 		: path.resolve(root, fromFile);
-	const relative = path.relative(root, resolved);
+	const relative = posix(path.relative(root, resolved));
 	if (destination) {
 		links += 1;
 		const missing = relative.startsWith('..') || path.isAbsolute(relative) || !fs.existsSync(resolved);
 		// Format guides show archive-relative examples such as ../李四/基本信息.md.
 		// Those paths exist in a user vault, not in this repository.
-		const vaultExample = fromFile.startsWith(`src${path.sep}core${path.sep}contacts${path.sep}persist${path.sep}format-guide`);
+		const vaultExample = fromFile.startsWith('src/core/contacts/persist/format-guide');
 		if (missing && !vaultExample) {
 			failures.push(`${fromFile}: missing local link ${target}`);
 			return;
