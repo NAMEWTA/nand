@@ -72,7 +72,7 @@ test('Agent delivery refuses shell/unready sessions and only pastes into the sel
 	const pasted: string[] = [];
 	const selected: string[] = [];
 	const sessions = [
-		{ id: 'agent', agentId: 'codex', getTitle: () => 'Agent', getCwd: () => '.', nativeStatus: 'idle', isDisposed: false, get acceptsContext() { return ready; }, pasteContext: (text: string) => pasted.push(text) },
+		{ id: 'agent', agentId: 'codex', getTitle: () => 'Agent', getCwd: () => '.', nativeStatus: 'idle', isDisposed: false, statusSnapshot: () => ({ generation: 1, connection: 'connected' as const, agentActivity: 'unknown' as const, agent: true }), get acceptsContext() { return ready; }, pasteContext: (text: string) => pasted.push(text) },
 		{ id: 'shell', getTitle: () => 'Shell' },
 	];
 	const host = {

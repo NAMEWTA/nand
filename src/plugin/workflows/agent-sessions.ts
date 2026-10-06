@@ -1,4 +1,5 @@
 import type { AgentSessionApi } from '../../core/agent-launch/session-api';
+import { runtimeActivity } from '../../core/pty/session-status';
 import { formatContextMaterials } from '../../core/agent-launch/context-material';
 import type { TerminalAgentController } from '../modules/terminal';
 
@@ -17,7 +18,7 @@ export async function agentSessions(host: TerminalAgentController): Promise<Agen
 									agent: session.agentId,
 									title: session.getTitle(),
 									cwd: session.getCwd(),
-									status: session.nativeStatus,
+									status: runtimeActivity(session.statusSnapshot()),
 								},
 							]
 						: [],

@@ -53,6 +53,7 @@ import type { TerminalService } from '../../platform/desktop/terminal/terminal-s
 import { t } from '../../shared/i18n/terminal-accessor';
 import { RenameTerminalModal } from './rename-terminal-modal';
 import { copySessionId } from './copy-session-id';
+import { statusLabel } from './status-label';
 import { TERMINAL_FILE_URI_REGEX } from './runtime/terminal-file-links';
 import type { TerminalInstance } from './runtime/terminal-instance';
 import { clamp, normalizeBackgroundPosition, normalizeBackgroundSize, toCssUrl } from './style-utils';
@@ -380,7 +381,7 @@ export class TerminalSurface extends NativeSurface {
 				header: h(TerminalHeader, {
 					title: this.terminalInstance?.getTitle() || t('terminal.defaultTitle'),
 					cwd: session?.getCwd() ?? '',
-					status: session?.nativeStatus ?? 'unknown',
+					status: session ? statusLabel(session.statusSnapshot()) : { text: t('workbench.status.unknown'), className: 'unknown' },
 					search: () => this.showSearch(),
 					more: (event: MouseEvent) => { const menu = new Menu(); this.onPaneMenu(menu); menu.showAtMouseEvent(event); },
 					sidebarToggle: () => { if (this.context.openNavigation) this.context.openNavigation(); else this.changeWorkbench((this.workbenchRoot?.clientWidth ?? this.contentEl.clientWidth) < 800 ? { drawerOpen: !state.drawerOpen } : { wideSidebarOpen: !state.wideSidebarOpen }); },

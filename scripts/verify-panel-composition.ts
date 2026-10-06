@@ -262,8 +262,9 @@ void verifyExports().then(verifyHistoryMatrix).then(verifySessionIdentity).then(
 
 async function verifySessionIdentity() {
 	const panel = document.createElement('div'); document.body.appendChild(panel);
-	const first = { id: 'terminal-12345678-aaaa', getTitle: () => 'Same Terminal', getCwd: () => '/vault', nativeStatus: 'unknown' } as PtySession;
-	const second = { id: 'terminal-abcdef01-bbbb', getTitle: () => 'Same Terminal', getCwd: () => '/vault', nativeStatus: 'unknown' } as PtySession;
+	const connectedShell = () => ({ generation: 1, connection: 'connected' as const, agentActivity: 'unknown' as const, agent: false });
+	const first = { id: 'terminal-12345678-aaaa', getTitle: () => 'Same Terminal', getCwd: () => '/vault', statusSnapshot: connectedShell } as PtySession;
+	const second = { id: 'terminal-abcdef01-bbbb', getTitle: () => 'Same Terminal', getCwd: () => '/vault', statusSnapshot: connectedShell } as PtySession;
 	let sessions = [first, second], selected: PtySession | undefined, redraw = () => {}, unsubscribed = 0;
 	const service = {
 		getAllTerminals: () => sessions,
@@ -301,7 +302,7 @@ async function verifySessionIdentity() {
 		const before = new Map(buttons().map((button) => [sessionId(button), button.textContent]));
 		assert.equal(panel.querySelector('.nand-session-row-id'), null);
 		assert.ok(!before.get(first.id)!.includes('#12345678'));
-		const status = t('terminalAgent.workbench.status.unknown');
+		const status = t('terminalAgent.workbench.connection.connected');
 		for (const button of buttons()) {
 			assert.match(button.textContent!, new RegExp(status));
 			assert.equal(button.title, `Same Terminal\n/vault\n${status}`);
@@ -316,7 +317,7 @@ async function verifySessionIdentity() {
 	}
 	render(null, panel);
 	assert.equal(unsubscribed, 1, 'Unmount releases the service subscription');
-	console.log('Session sidebar: stable identity, exact selection, reorder/close, unknown status and bilingual surface names passed.');
+	console.log('Session sidebar: stable identity, exact selection, reorder/close, connected shell status and bilingual surface names passed.');
 }
 
 /** Native Modal stub allocation and Preact content use separate, explicit test adapters. */

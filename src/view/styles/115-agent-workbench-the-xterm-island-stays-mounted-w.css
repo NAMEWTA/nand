@@ -35,6 +35,9 @@
 .nand-session-status-dot.is-waiting { color: var(--nand-tone-warning); }
 .nand-session-status-dot.is-idle { color: var(--nand-tone-info); }
 .nand-session-status-dot.is-exited { color: var(--text-faint); opacity: 0.6; }
+.nand-session-status-dot.is-connected { color: var(--nand-tone-success); }
+.nand-session-status-dot.is-starting, .nand-session-status-dot.is-reconnecting { color: var(--nand-tone-warning); }
+.nand-session-status-dot.is-failed, .nand-session-status-dot.is-disconnected { color: var(--nand-tone-danger, var(--text-error)); }
 .nand-session-row > button:last-child { flex: 0 0 32px; width: 32px; height: 32px; min-width: 32px; opacity: 0.6; }
 .nand-session-row:hover > button:last-child, .nand-session-row:focus-within > button:last-child { opacity: 1; }
 

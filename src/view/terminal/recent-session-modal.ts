@@ -3,6 +3,7 @@ import { SuggestModal, type App } from 'obsidian';
 import type { PtySession } from '../../platform/desktop/terminal/pty-session';
 import { t } from '../../shared/i18n/terminal-accessor';
 import { sessionLabel } from './session-label';
+import { statusLabel } from './status-label';
 
 /** The ordered snapshot stays fixed while the user types or moves through results. */
 export class RecentSessionModal extends SuggestModal<PtySession> {
@@ -21,7 +22,7 @@ export class RecentSessionModal extends SuggestModal<PtySession> {
 		const title = element.createDiv({ cls: 'nand-session-title-row' });
 		title.createSpan({ cls: 'nand-ui-list-item-title', text: session.getTitle() });
 		title.createEl('small', { cls: 'nand-session-short-id', text: sessionLabel(session, this.sessions) });
-		element.createDiv({ cls: 'nand-ui-list-item-meta', text: `${t(`workbench.status.${session.nativeStatus}`)} · ${session.getCwd()}` });
+		element.createDiv({ cls: 'nand-ui-list-item-meta', text: `${statusLabel(session.statusSnapshot()).text} · ${session.getCwd()}` });
 	}
 	onChooseSuggestion(session: PtySession): void {
 		this.select(session);

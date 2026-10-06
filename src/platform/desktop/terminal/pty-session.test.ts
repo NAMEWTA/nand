@@ -268,6 +268,31 @@ test('interactive recovery falls back if the current directory was deleted', asy
 	}
 });
 
+test('a ready shell is connected without becoming an agent activity', async () => {
+	const io = transport(),
+		session = new PtySession({ cwd: '/tmp' });
+	try {
+		assert.equal(session.statusSnapshot().connection, 'disconnected');
+		await session.initializeWithServerManager(io.manager);
+		assert.equal(session.statusSnapshot().connection, 'connected');
+		assert.equal(session.nativeStatus, 'unknown');
+		assert.equal(session.statusSnapshot().agent, false);
+		session.handleWebSocketDisconnected();
+		assert.equal(session.statusSnapshot().connection, 'reconnecting');
+		assert.equal(session.nativeStatus, 'unknown');
+		io.handlers.get('exit')?.(0);
+		assert.equal(session.statusSnapshot().connection, 'reconnecting', 'a stale exit cannot overwrite the new connection');
+		await session.handleWebSocketConnected(io.manager);
+		assert.equal(session.statusSnapshot().connection, 'connected');
+		io.handlers.get('exit')?.(0);
+		assert.equal(session.statusSnapshot().connection, 'exited');
+		assert.equal(session.statusSnapshot().exitCode, 0);
+		assert.equal(session.nativeStatus, 'exited');
+	} finally {
+		session.destroy();
+	}
+});
+
 test('disposal during native startup destroys the late process without subscriptions', async () => {
 	const io = transport(),
 		session = new PtySession();

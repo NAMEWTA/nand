@@ -10,6 +10,7 @@ import { probeLauncher } from '../../../platform/desktop/terminal/launcher-statu
 import { TerminalViewPlaceholder } from './view-placeholder';
 import { shell } from 'electron';
 import { orderRecentSessions } from '../../../core/pty/recent-sessions';
+import { runtimeActivity } from '../../../core/pty/session-status';
 import { RecentSessionModal } from '../../../view/terminal/recent-session-modal';
 import type { View, WorkspaceLeaf } from 'obsidian';
 import { FileSystemAdapter, Modal, Notice, Platform, Plugin, normalizePath, setIcon, setTooltip } from 'obsidian';
@@ -105,7 +106,7 @@ export class TerminalAgentController {
 	private runtimeUnsubscribe?: () => void;
 	getRuntimeStatus(): readonly { id: string; status: string; automated: boolean }[] {
 		if (!this._active) return [];
-		return this._terminalService?.getAllTerminals().map((session) => ({ id: session.id, status: session.nativeStatus, automated: session.automationManaged })) ?? [];
+		return this._terminalService?.getAllTerminals().map((session) => ({ id: session.id, status: runtimeActivity(session.statusSnapshot()), automated: session.automationManaged })) ?? [];
 	}
 	subscribeRuntime(listener: () => void): () => void { this.runtimeListeners.add(listener); return () => { this.runtimeListeners.delete(listener); }; }
 	private publishRuntime(): void { for (const listener of this.runtimeListeners) listener(); }

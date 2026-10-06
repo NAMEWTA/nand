@@ -22,6 +22,7 @@ import {
 } from '../../../core/pty/prompt-cwd-parsers';
 import type { TerminalOptions } from '../../../core/pty/terminal-options';
 import type { AgentId } from '../../../core/agent-launch/types';
+import type { ConnectionState, SessionStatusSnapshot } from '../../../core/pty/session-status';
 import { TerminalTitleState } from '../../../core/pty/terminal-title-state';
 import { t } from '../../../shared/i18n/terminal-accessor';
 import type { PtyClient } from '../../terminal-server/pty-client';
@@ -56,6 +57,9 @@ export class PtySession {
 		for (const observer of this.automationObservers) observer(event);
 	}
 	private nativeState: NativeTerminalStatus = 'unknown';
+	private connection: ConnectionState = 'disconnected';
+	private connectionGeneration = 0;
+	private exitCode: number | undefined;
 	private nativeStateListeners = new Set<() => void>();
 	get nativeStatus(): NativeTerminalStatus {
 		return this.nativeState;
@@ -63,7 +67,32 @@ export class PtySession {
 	set nativeStatus(value: NativeTerminalStatus) {
 		if (this.nativeState === value) return;
 		this.nativeState = value;
+		this.notifyStatus();
+	}
+	statusSnapshot(): SessionStatusSnapshot {
+		return {
+			generation: this.connectionGeneration,
+			connection: this.connection,
+			agentActivity: this.nativeState,
+			exitCode: this.exitCode,
+			agent: !!this.agentId,
+		};
+	}
+	private notifyStatus(): void {
 		for (const listener of this.nativeStateListeners) listener();
+	}
+	private beginConnection(state: ConnectionState): number {
+		this.connectionGeneration += 1;
+		this.connection = state;
+		this.notifyStatus();
+		return this.connectionGeneration;
+	}
+	private commitConnection(state: ConnectionState, generation: number, exitCode?: number): void {
+		if (generation !== this.connectionGeneration) return;
+		if (exitCode !== undefined) this.exitCode = exitCode;
+		if (this.connection === state) return;
+		this.connection = state;
+		this.notifyStatus();
 	}
 	onNativeStatusChange(listener: () => void): () => void {
 		this.nativeStateListeners.add(listener);
@@ -338,15 +367,17 @@ export class PtySession {
 	}
 	async initializeWithServerManager(manager: ServerManager): Promise<void> {
 		if (this.stopped || this.sessionId) return;
+		const generation = this.beginConnection('starting');
 		await manager.ensureServer();
-		if (this.stopped) return;
-		await this.initialize(manager, this.options.cwd);
+		if (this.stopped || generation !== this.connectionGeneration) return;
+		await this.initialize(manager, this.options.cwd, generation);
 	}
-	private async initialize(manager: ServerManager, cwd?: string): Promise<void> {
+	private async initialize(manager: ServerManager, cwd: string | undefined, generation = this.connectionGeneration): Promise<void> {
 		const client = manager.pty();
 		this.decoder = new TextDecoder();
 		this.claudeCodeSessionState.reset();
 		this.synchronizedOutputCompatibilityState = createSynchronizedOutputCompatibilityState();
+		try {
 		await client.init(
 			{
 				shell_type: this.shellType === 'default' ? undefined : this.shellType,
@@ -357,13 +388,15 @@ export class PtySession {
 				rows: this.emulator.rows,
 			},
 			(id) => {
-				if (this.stopped) {
+				if (this.stopped || generation !== this.connectionGeneration) {
 					client.destroySession(id);
 					return;
 				}
 				this.client = client;
 				this.sessionId = id;
 				this.exited = false;
+				this.exitCode = undefined;
+				this.commitConnection('connected', generation);
 				this.subscriptions.push(
 					client.onSessionOutput(id, (bytes) => {
 						const raw = this.decoder.decode(bytes, { stream: true });
@@ -376,8 +409,10 @@ export class PtySession {
 						this.paint(text, () => client.consumed(id, bytes.byteLength));
 					}),
 					client.onSessionExit(id, (code) => {
+						if (generation !== this.connectionGeneration) return;
 						this.exited = true;
 						this.nativeStatus = 'exited';
+						this.commitConnection('exited', generation, code);
 						const tail = this.decoder.decode();
 						if (tail) {
 							this.emitAutomation({ kind: 'data', text: tail });
@@ -419,6 +454,10 @@ export class PtySession {
 				);
 			},
 		);
+		} catch (error) {
+			this.commitConnection('failed', generation);
+			throw error;
+		}
 	}
 	private disconnect(): void {
 		for (const off of this.subscriptions) off();
@@ -437,7 +476,7 @@ export class PtySession {
 		}
 		if (!this.needsRecovery) this.paint('\r\n' + t('notices.terminal.reconnecting') + '\r\n');
 		this.needsRecovery = true;
-		this.nativeStatus = 'unknown';
+		this.beginConnection('reconnecting');
 		this.disconnect();
 	}
 	async handleWebSocketConnected(manager: ServerManager): Promise<void> {
@@ -464,6 +503,8 @@ export class PtySession {
 		this.stopped = true;
 		if (!this.exited) this.emitAutomation({ kind: 'cancelled' });
 		this.nativeStatus = 'exited';
+		this.commitConnection('exited', this.connectionGeneration);
+		this.connectionGeneration += 1;
 		if (this.sessionId) this.client?.destroySession(this.sessionId);
 		this.disconnect();
 		this.client = null;
