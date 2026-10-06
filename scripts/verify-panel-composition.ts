@@ -589,7 +589,7 @@ async function verifyOrcaRegression() {
 		...refs, ...actions, state, onStateChange: change, ownerWindow: owner,
 		newConversation: h(NewConversationButton, { host, create: async () => {}, primary: !state.showHistory }),
 		rootRef: (element) => { if (element) element.getBoundingClientRect = () => ({ width } as DOMRect); },
-		header: h(TerminalHeader, { title: 'Fixture terminal', cwd: '/vault', status: 'unknown', search: () => {}, more: () => {}, sidebarToggle: () => change(width < 800 ? { drawerOpen: !state.drawerOpen } : { wideSidebarOpen: !state.wideSidebarOpen }) }),
+		header: h(TerminalHeader, { title: 'Fixture terminal', cwd: '/vault', status: { text: 'unknown', className: 'unknown' }, search: () => {}, more: () => {}, sidebarToggle: () => change(width < 800 ? { drawerOpen: !state.drawerOpen } : { wideSidebarOpen: !state.wideSidebarOpen }) }),
 		history: h(HistorySidebar, { history, state, onStateChange: change }),
 		preview: h(HistoryPreview, { history, host, state, onStateChange: change }),
 		usage: h('details', {}, h('summary', {}, 'Vault consumption'), h('div', {}, 'Usage fixture')),

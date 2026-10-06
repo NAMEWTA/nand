@@ -22,7 +22,7 @@ export const createTerminalPage = (controller: () => TerminalAgentController | u
   getTarget: () => ({ feature: 'terminal', section: surface.getSection(), resourceId: surface.getTerminalInstance()?.id }),
   restore: async (raw) => { await surface.setState(raw, {} as ViewStateResult); await select(typeof raw.sessionId === 'string' ? raw.sessionId : undefined, false); },
   navigate: async (next, navigationSignal) => {
-   const plan = planTerminalNavigation(next.resourceId, !!service.getTerminal(next.resourceId), navigationSignal.aborted);
+   const plan = planTerminalNavigation(next.resourceId, !!next.resourceId && !!service.getTerminal(next.resourceId), navigationSignal.aborted);
    if (plan.selectId) await select(plan.selectId, false, navigationSignal);
    if (plan.openSection && !navigationSignal.aborted) surface.showSection(next.section);
   },
