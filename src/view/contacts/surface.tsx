@@ -181,6 +181,7 @@ function Detail({ view, record }: { view: ContactsPanelHost; record: ArchiveReco
 	)
 		.map((key) => [key, record.fields[key]] as const)
 		.filter(([, value]) => (Array.isArray(value) ? value.length : value));
+	const bodyLine = index.hit(record, view.state.query.search, view.state.query.scope)?.line;
 	const members = record.kind === 'company' ? index.members(record.id, 'current') : [];
 	const keyPeople = members.filter((person) =>
 		person.employments.some((j) => j.company.id === record.id && j.status === 'current' && !!j.keyRole),
@@ -207,9 +208,7 @@ function Detail({ view, record }: { view: ContactsPanelHost; record: ArchiveReco
 			</header>
 			{view.state.focus === 'body' && (
 				<p className="nand-contacts-hit">
-					{ct('bodyHint', {
-						line: index.hit(record, view.state.query.search, view.state.query.scope)?.line ?? 1,
-					})}{' '}
+					{bodyLine ? ct('bodyHint', { line: bodyLine }) : ct('bodyHintUnmapped')}{' '}
 					<button type="button" className="nand-ui-btn" onClick={() => view.openResource(record.path)}>
 						{ct('source')}
 					</button>
@@ -408,6 +407,31 @@ function currentJobs(view: ContactsPanelHost, record: ArchiveRecord): string {
 		.filter(Boolean)
 		.join(' / ');
 }
+function SearchField({ label, value, onSearch }: { label: string; value: string; onSearch: (value: string) => void }) {
+	const composing = useRef(false);
+	return (
+		<div className="nand-contacts-search">
+			<Icon name="search" className="nand-contacts-search-icon" />
+			<input
+				type="search"
+				aria-label={label}
+				placeholder={label}
+				value={value}
+				onCompositionStart={() => {
+					composing.current = true;
+				}}
+				onCompositionEnd={(event) => {
+					composing.current = false;
+					onSearch(event.currentTarget.value);
+				}}
+				onInput={(event) => {
+					if (composing.current) return;
+					onSearch(event.currentTarget.value);
+				}}
+			/>
+		</div>
+	);
+}
 function copyText(value: string): void {
 	const clipboard = navigator.clipboard;
 	if (clipboard) void clipboard.writeText(value);
@@ -533,16 +557,11 @@ export function ContactsSurface({ view }: { view: ContactsPanelHost }) {
 					</div>
 				)}
 				{!selectedPath && (
-					<div className="nand-contacts-search">
-						<Icon name="search" className="nand-contacts-search-icon" />
-						<input
-							type="search"
-							aria-label={ct(query.kind === 'person' ? 'searchPeople' : 'searchCompanies')}
-							placeholder={ct(query.kind === 'person' ? 'searchPeople' : 'searchCompanies')}
-							value={query.search}
-							onInput={(event) => view.search(event.currentTarget.value)}
-						/>
-					</div>
+					<SearchField
+						label={ct(query.kind === 'person' ? 'searchPeople' : 'searchCompanies')}
+						value={query.search}
+						onSearch={(value) => view.search(value)}
+					/>
 				)}
 				{!selectedPath && (
 					<button

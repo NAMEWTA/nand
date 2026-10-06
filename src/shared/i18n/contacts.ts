@@ -77,6 +77,7 @@ export const messages = {
 		'contacts.hit.relation': '关系',
 		'contacts.hit.body': '正文',
 		'contacts.bodyHint': '这段文字在原始笔记正文中，大约第 {line} 行。详情页不会展示全部自由正文。',
+		'contacts.bodyHintUnmapped': '这段文字在原始笔记正文中。详情页不会展示全部自由正文。',
 		'contacts.filter': '筛选',
 		'contacts.noFilterOptions': '暂无可选项',
 		'contacts.filterEmpty': '暂无筛选选项。填写档案中的地区、标签等资料后，相应选项会出现在这里。',
@@ -271,6 +272,7 @@ export const messages = {
 		'contacts.hit.relation': 'Relationship',
 		'contacts.hit.body': 'Body',
 		'contacts.bodyHint': 'This text is in the original note body, around line {line}. The detail view does not render the whole free-form body.',
+		'contacts.bodyHintUnmapped': 'This text is in the original note body. The detail view does not render the whole free-form body.',
 		'contacts.filter': 'Filter',
 		'contacts.noFilterOptions': 'No options yet',
 		'contacts.filterEmpty':

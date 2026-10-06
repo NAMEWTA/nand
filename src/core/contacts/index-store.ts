@@ -1,6 +1,6 @@
 import { ContactsError, type ArchiveRecord, type EntityRef, type PersonRelation } from './model';
 import { resolveRelative } from './persist/markdown';
-import { buildSearchDocument, searchHit, type SearchDocument, type SearchHit } from './search-text';
+import { buildSearchDocument, documentMatches, searchHit, type SearchDocument, type SearchHit } from './search-text';
 
 export interface RelationEntry {
 	owner: ArchiveRecord;
@@ -38,8 +38,10 @@ export class ContactsIndex {
 	readonly byId = new Map<string, ArchiveRecord[]>();
 	private memberships = new Map<string, Set<string>>();
 	private relationships = new Map<string, RelationEntry[]>();
-	private contributions = new Map<string, { companies: string[]; people: string[]; companyMentions: string[] }>();
+	private contributions = new Map<string, { companies: string[]; people: string[]; companyMentions: string[]; pathTargets: string[] }>();
 	private companyMentions = new Map<string, Set<string>>();
+	/** Records that cite this path with an empty id. Refreshed with the id index, not by scanning every record. */
+	private pathDependents = new Map<string, Set<string>>();
 	private docs = new Map<string, SearchDocument>();
 	/** Name and id as last indexed. Callers may mutate the stored record before the next set. */
 	private indexedIdentity = new Map<string, { id: string; name: string }>();
@@ -50,6 +52,7 @@ export class ContactsIndex {
 		this.relationships.clear();
 		this.contributions.clear();
 		this.companyMentions.clear();
+		this.pathDependents.clear();
 		this.docs.clear();
 		this.indexedIdentity.clear();
 	}
@@ -92,23 +95,49 @@ export class ContactsIndex {
 				(this.relationships.get(person) ?? []).filter((e) => e.owner.path !== path),
 			);
 		for (const id of contribution?.companyMentions ?? []) this.companyMentions.get(id)?.delete(path);
+		for (const target of contribution?.pathTargets ?? []) {
+			const owners = this.pathDependents.get(target);
+			owners?.delete(path);
+			if (owners && !owners.size) this.pathDependents.delete(target);
+		}
 		this.contributions.delete(path);
 		this.docs.delete(path);
 		this.indexedIdentity.delete(path);
 	}
+	/** Id dependents plus records that cite this path with an empty id. */
+	private affected(path: string, ids: Array<string | undefined>): Set<string> {
+		const refresh = new Set<string>();
+		for (const id of ids) if (id) for (const owner of this.dependents(id)) refresh.add(owner);
+		for (const owner of this.pathDependents.get(path) ?? []) refresh.add(owner);
+		refresh.delete(path);
+		return refresh;
+	}
+	private linkPaths(record: ArchiveRecord): string[] {
+		const targets = new Set<string>();
+		for (const [ref] of this.refs(record)) {
+			if (ref.id || !ref.link) continue;
+			const target = resolveRelative(record.path, ref.link);
+			if (!target || target === record.path) continue;
+			targets.add(target);
+			const owners = this.pathDependents.get(target) ?? new Set<string>();
+			owners.add(record.path);
+			this.pathDependents.set(target, owners);
+		}
+		return [...targets];
+	}
 	remove(path: string): void {
 		const previous = this.byPath.get(path);
 		if (!previous) return;
-		const refresh = this.dependents(previous.id).filter((item) => item !== path);
+		const refresh = this.affected(path, [previous.id]);
 		this.detach(path);
 		this.rebuild(refresh);
 	}
 	set(record: ArchiveRecord): void {
 		const previous = this.indexedIdentity.get(record.path);
-		const refresh = new Set<string>();
-		if (!previous || previous.name !== record.fields.name || previous.id !== record.id)
-			for (const id of new Set([previous?.id, record.id].filter((id): id is string => !!id)))
-				for (const path of this.dependents(id)) refresh.add(path);
+		const refresh =
+			!previous || previous.name !== record.fields.name || previous.id !== record.id
+				? this.affected(record.path, [previous?.id, record.id])
+				: new Set<string>();
 		this.detach(record.path);
 		this.byPath.set(record.path, record);
 		this.byId.set(record.id, [...(this.byId.get(record.id) ?? []), record]);
@@ -137,10 +166,9 @@ export class ContactsIndex {
 			mentions.add(record.path);
 			this.companyMentions.set(id, mentions);
 		}
-		this.contributions.set(record.path, { companies, people, companyMentions });
+		this.contributions.set(record.path, { companies, people, companyMentions, pathTargets: this.linkPaths(record) });
 		this.indexedIdentity.set(record.path, { id: record.id, name: record.fields.name });
 		this.writeDoc(record);
-		refresh.delete(record.path);
 		this.rebuild(refresh);
 	}
 	get(id: string): ArchiveRecord | undefined {
@@ -242,8 +270,7 @@ export class ContactsIndex {
 				)
 					return false;
 				const doc = this.docs.get(r.path);
-				const text = doc ? (q.scope === 'fields' ? doc.fields : doc.record) : '';
-				return !needle || text.includes(needle);
+				return !needle || (!!doc && documentMatches(doc, needle, q.scope === 'fields' ? 'fields' : 'record'));
 			})
 			.sort((a, b) =>
 				q.sort === 'modified'

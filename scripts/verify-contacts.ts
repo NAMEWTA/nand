@@ -424,6 +424,55 @@ test('folder switching rejects stale forms and preserves old files', async () =>
 	assert.ok(f.text.has(a.path));
 });
 
+test('a late read cannot publish into a newer folder or a disposed archive', async () => {
+	const blockNext = (vault: { cachedRead: (file: TFile) => Promise<string> }) => {
+		let release = () => {};
+		let opened = () => {};
+		const started = new Promise<void>((resolve) => {
+			opened = resolve;
+		});
+		const gate = new Promise<void>((resolve) => {
+			release = resolve;
+		});
+		const read = vault.cachedRead.bind(vault);
+		let armed = true;
+		vault.cachedRead = async (file: TFile) => {
+			const value = await read(file);
+			if (armed) {
+				armed = false;
+				opened();
+				await gate;
+			}
+			return value;
+		};
+		return { started, release: () => release() };
+	};
+	const folder = memoryVault();
+	await folder.controller.ensureLoaded();
+	const person = await folder.controller.create(newNamed('person', '旧根目录的人'));
+	const held = blockNext(folder.vault);
+	const first = folder.controller.reload();
+	await held.started;
+	folder.settings.rootFolder = '其他档案';
+	const second = folder.controller.reload();
+	held.release();
+	await first;
+	await second;
+	assert.equal(folder.controller.index.byPath.has(person.path), false);
+	assert.equal([...folder.controller.index.byPath.keys()].some((path) => path.startsWith('档案/')), false);
+
+	const disposed = memoryVault();
+	await disposed.controller.ensureLoaded();
+	await disposed.controller.create(newNamed('person', '卸载前的人'));
+	const unloading = blockNext(disposed.vault);
+	const pending = disposed.controller.reload();
+	await unloading.started;
+	disposed.controller.onunload();
+	unloading.release();
+	await pending;
+	assert.equal(disposed.controller.index.byPath.size, 0);
+});
+
 test('two windows merge independent fields but reject overlapping edits', async () => {
 	const f = memoryVault();
 	await f.controller.ensureLoaded();
@@ -1191,6 +1240,118 @@ test('entry-note search keeps both records that share an email and reports the h
 	assert.equal(patched.includes('杭州'), true);
 });
 
+function fileLine(raw: string, needle: string): number {
+	const line = raw.split(/\r?\n/).findIndex((item) => item.includes(needle));
+	assert.ok(line >= 0, needle);
+	return line + 1;
+}
+function loneSurrogate(value: string): boolean {
+	for (let i = 0; i < value.length; i++) {
+		const code = value.charCodeAt(i);
+		if (code >= 0xd800 && code <= 0xdbff) {
+			const next = value.charCodeAt(i + 1);
+			if (next < 0xdc00 || next > 0xdfff) return true;
+			i++;
+		} else if (code >= 0xdc00 && code <= 0xdfff) return true;
+	}
+	return false;
+}
+
+test('record search matches one fragment, keeps foreign UUIDs, and maps body lines to the file', () => {
+	const index = new ContactsIndex();
+	const person = fixture('person', '检索甲');
+	const business = '123e4567-e89b-12d3-a456-426614174000';
+	const row = '123e4567-e89b-12d3-a456-426614174111';
+	assert.notEqual(person.id, business);
+	person.prose.traits = '乙段开头';
+	person.prose.notes = `甲段末尾 订单 ${business} [显示文字](https://example.com/secret-token) ![风景图](https://cdn.example/token.png)`;
+	person.raw = `${createMarkdown(person)}\n\n见 [正文链接](https://example.com/body-token) <img alt="正文图" src="https://cdn.example/img-token.png">\n<!-- nand:row ${row} -->\n${person.id}\n自由段落 青龙\n`;
+	index.set(person);
+	assert.equal(index.query({ ...emptyQuery(), search: business }).some((record) => record.path === person.path), true);
+	assert.equal(index.hit(person, business)?.source, 'notes');
+	assert.equal(index.query({ ...emptyQuery(), search: person.id }).length, 0);
+	assert.equal(index.query({ ...emptyQuery(), search: row }).length, 0);
+	assert.equal(index.query({ ...emptyQuery(), search: '乙段开头 甲段末尾' }).length, 0);
+	assert.equal(index.query({ ...emptyQuery(), search: '显示文字' }).length, 1);
+	assert.equal(index.query({ ...emptyQuery(), search: '风景图' }).length, 1);
+	assert.equal(index.query({ ...emptyQuery(), search: 'secret-token' }).length, 0);
+	assert.equal(index.query({ ...emptyQuery(), search: 'cdn.example' }).length, 0);
+	assert.equal(index.hit(person, '正文链接')?.source, 'body');
+	assert.equal(index.hit(person, '正文图')?.source, 'body');
+	assert.equal(index.query({ ...emptyQuery(), search: 'body-token' }).length, 0);
+	assert.equal(index.query({ ...emptyQuery(), search: 'img-token' }).length, 0);
+	assert.equal(index.hit(person, '青龙')?.line, fileLine(person.raw, '青龙'));
+	assert.equal(index.hit(person, '青龙')?.snippet.includes('<'), false);
+	const crlf = fixture('person', '回车');
+	crlf.raw = createMarkdown(crlf).replace(/\n/g, '\r\n') + '\r\n\r\n自由段落 朱雀\r\n';
+	index.set(crlf);
+	assert.equal(index.hit(crlf, '朱雀')?.line, fileLine(crlf.raw, '朱雀'));
+	const wrapped = fixture('person', '跨行');
+	wrapped.raw = `${createMarkdown(wrapped)}\n跨行甲\n乙尾\n`;
+	index.set(wrapped);
+	assert.equal(index.query({ ...emptyQuery(), search: '跨行甲 乙尾' }).some((record) => record.path === wrapped.path), true);
+	assert.equal(index.hit(wrapped, '跨行甲 乙尾')?.line, undefined);
+	assert.equal(index.hit(wrapped, '跨行甲')?.line, fileLine(wrapped.raw, '跨行甲'));
+	const emoji = fixture('person', '表情');
+	emoji.prose.notes = `😀${'测'.repeat(23)}界标`;
+	index.set(emoji);
+	const snippet = index.hit(emoji, '界标')?.snippet ?? '';
+	assert.equal(loneSurrogate(snippet), false);
+	assert.equal(snippet.includes('😀'), true);
+	assert.equal(index.query({ ...emptyQuery(), search: '甲段末尾', scope: 'fields' }).length, 0);
+});
+
+test('a path-only reference refreshes when the target is renamed in place or removed', () => {
+	const index = new ContactsIndex();
+	const company = fixture('company', '路径企业');
+	const person = fixture('person', '路径的人');
+	person.employments = [
+		{
+			...job(company),
+			company: { id: '', label: '手写标签', link: relativeLink(person.path, company.path) },
+		},
+	];
+	index.set(person);
+	index.set(company);
+	const named = (search: string) => index.query({ ...emptyQuery(), kind: 'person', search }).some((record) => record.path === person.path);
+	assert.equal(index.resolve(person.employments[0]!.company, person)?.path, company.path);
+	assert.equal(named('路径企业'), true);
+	company.fields.name = '路径新名';
+	index.set(company);
+	assert.equal(named('路径新名'), true);
+	assert.equal(named('路径企业'), false);
+	const stored = index.byPath.get(company.path)!;
+	stored.fields.name = '原地新名';
+	index.set(stored);
+	assert.equal(named('原地新名'), true);
+	assert.equal(named('路径新名'), false);
+	index.remove(company.path);
+	assert.equal(named('手写标签'), true);
+	assert.equal(named('原地新名'), false);
+});
+
+test('hot queries answer from the index after the note text is gone', () => {
+	const index = new ContactsIndex();
+	const records: ArchiveRecord[] = [];
+	for (let i = 0; i < 100; i++) {
+		const record = fixture('person', `热查询 ${i}`);
+		record.prose.notes = `备注词-${i}`;
+		record.raw = `自由 ${record.id} 不应被读`;
+		index.set(record);
+		records.push(record);
+	}
+	for (const record of records) {
+		record.raw = '磁盘上的另一个词';
+		record.prose = { traits: '磁盘性格', habits: '磁盘习惯', notes: '磁盘备注' };
+		record.fields = { ...record.fields, name: '磁盘姓名' };
+	}
+	assert.equal(index.query({ ...emptyQuery(), search: '备注词-42' }).length, 1);
+	assert.equal(index.hit(records[42]!, '备注词-42')?.source, 'notes');
+	assert.equal(index.query({ ...emptyQuery(), search: '磁盘备注' }).length, 0);
+	assert.equal(index.query({ ...emptyQuery(), search: '磁盘姓名' }).length, 0);
+	assert.equal(index.query({ ...emptyQuery(), search: records[42]!.id }).length, 0);
+});
+
 test('list and card render the same paths, and switching layout does not reload', async () => {
 	const environment = globalThis as { document?: Document };
 	const previousDocument = environment.document;
@@ -1247,14 +1408,37 @@ test('list and card render the same paths, and switching layout does not reload'
 		view.state.query.search = '只在备注';
 		paint();
 		const listed = paths();
+		const hitText = () => panel.querySelector('.nand-contacts-hit')?.textContent ?? '';
 		assert.deepEqual(listed, index.query(view.state.query).map((record) => record.path));
-		assert.equal(panel.querySelector('.nand-contacts-hit')?.textContent?.includes('<'), false);
+		assert.equal(hitText().includes('<'), false);
+		assert.equal(hitText().includes(t('contacts.hit.notes')), true);
 		assert.ok(panel.querySelector('.nand-contacts-row-copy'));
 		assert.equal(panel.querySelector('button.nand-contacts-row-name button'), null);
 		panel.querySelectorAll<HTMLButtonElement>('.nand-contacts-layout button')[1]!.click();
 		assert.equal(reloads, 0);
 		assert.deepEqual(paths(), listed);
 		assert.equal(view.state.layout.person, 'card');
+		assert.equal(hitText().includes('<'), false);
+		assert.equal(hitText().includes(t('contacts.hit.notes')), true);
+		const searches: string[] = [];
+		view.search = (value: string) => {
+			searches.push(value);
+		};
+		const input = panel.querySelector<HTMLInputElement>('input[type=search]');
+		assert.ok(input);
+		const ViewEvent = input.ownerDocument.defaultView!.Event;
+		const fire = (type: string) => input.dispatchEvent(new ViewEvent(type, { bubbles: true }));
+		input.value = '王';
+		fire('input');
+		assert.deepEqual(searches, ['王']);
+		searches.length = 0;
+		input.value = 'zhong';
+		fire('compositionstart');
+		fire('input');
+		assert.deepEqual(searches, []);
+		input.value = '中';
+		fire('compositionend');
+		assert.deepEqual(searches, ['中']);
 	} finally {
 		render(null, panel);
 		if (previousDocument) environment.document = previousDocument;
