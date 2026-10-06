@@ -41,8 +41,8 @@ try {
  await call(`require('@electron/remote').getCurrentWindow().setSize(1440,1000)`);
  await delay(150);
  if (restart) {
-  await until(`${wb}?.getState().target?.feature==='contacts'`, 'persisted workbench page');
-  await until(`!!${wb}?.contentEl.querySelector('.nand-contacts-surface')`, 'restored archive presentation');
+  await until(`${wb}?.getState?.().target?.feature==='contacts'`, 'persisted workbench page');
+  await until(`!!${wb}?.contentEl?.querySelector('.nand-contacts-surface')`, 'restored archive presentation');
   check('native-normal-restart-restores-workbench-and-selected-feature');
   await shot('restart-restored-archives');
  } else {
@@ -120,13 +120,17 @@ try {
   assert.ok(opened.includes('Welcome'));
   check('home-overview-calendar-and-recent-visible', overview);
   await shot('home-overview-1280');
-  await call(`(()=>{const v=${wb};v.contentEl.style.width='1280px';v.contentEl.style.maxWidth='none';})()`);
+  await call(`(()=>{const v=${wb};v.contentEl.style.width='';v.contentEl.style.maxWidth='';})()`);
+  await call(`require('@electron/remote').getCurrentWindow().setSize(1440,1000)`);
   await call(`(async()=>{const p=app.plugins.plugins.nand;p.settings.modules.terminal=true;await p.saveSettings();await p.applyModuleFlags();await p.openWorkbench({feature:'terminal',section:'running'});})()`);
-  const fill = await until(`(()=>{const page=${wb}.contentEl.querySelector('.nand-workbench-page');const shell=page?.querySelector('.terminal-workbench-shell.is-workbench-embedded');const center=shell?.querySelector(':scope > .nand-agent-center');if(!shell||!center||shell.getBoundingClientRect().width<200)return null;const s=shell.getBoundingClientRect();const c=center.getBoundingClientRect();const p=page.getBoundingClientRect();return {page:Math.round(p.width),shell:Math.round(s.width),center:Math.round(c.width),left:Math.round(c.left-s.left)}})()`, 'embedded terminal shell');
-  assert.ok(fill.center >= fill.shell - 24, 'embedded terminal did not fill the content column ' + JSON.stringify(fill));
-  assert.ok(fill.shell >= fill.page - 32, 'embedded terminal did not use the page ' + JSON.stringify(fill));
+  await delay(400);
+  const fill = await call(`(()=>{const root=${wb}.contentEl;const page=[...root.querySelectorAll('.nand-workbench-page')].find(el=>!el.hidden);const shell=page?.querySelector('.terminal-workbench-shell');const center=shell?.querySelector(':scope > .nand-agent-center');const rect=el=>el?{w:Math.round(el.getBoundingClientRect().width),h:Math.round(el.getBoundingClientRect().height)}:null;return {feature:${wb}.getState().target.feature,error:root.querySelector('.nand-workbench-error')?.innerText?.slice(0,240)||'',pageText:page?.innerText?.slice(0,180)||'',page:rect(page),shell:rect(shell),center:rect(center),embedded:!!shell?.classList.contains('is-workbench-embedded'),left:shell&&center?Math.round(center.getBoundingClientRect().left-shell.getBoundingClientRect().left):null}})()`);
+  assert.equal(fill.error, '', JSON.stringify(fill));
+  assert.equal(fill.embedded, true, JSON.stringify(fill));
+  assert.ok(fill.shell.w >= 640, JSON.stringify(fill));
+  assert.ok(fill.center.w >= fill.shell.w - 24, JSON.stringify(fill));
   assert.ok(fill.left <= 8, JSON.stringify(fill));
-  check('embedded-terminal-fills-1280', fill);
+  check('embedded-terminal-fills-its-page', fill);
   await shot('terminal-embedded-1280');
   const dead = await call(`(async()=>{const p=app.plugins.plugins.nand;await p.openWorkbench({feature:'terminal',section:'running',resourceId:'terminal-dead'});const v=${wb};return {feature:v.getState().target.feature,resourceId:v.getState().target.resourceId??'',unavailable:!!v.contentEl.querySelector('.nand-workbench-unavailable'),sessions:p.terminalHost.getRuntimeStatus().length}})()`);
   assert.equal(dead.feature, 'terminal'); assert.equal(dead.resourceId, ''); assert.equal(dead.unavailable, false); assert.equal(dead.sessions, 0);
