@@ -150,16 +150,16 @@ test('hidden prompt and failed-command positions follow headless parsing and sur
 		io.output('first prompt'); shell('prompt_start');
 		io.output('\r\ncommand output'); shell('command_start'); shell('command_end', 7);
 		io.output('\r\nsecond prompt'); shell('prompt_start');
-		await settled();
+		await new Promise<void>((resolve) => (session as any).emulator.write('', resolve));
 		assert.deepEqual(session.getNavigationMarkers(), { prompts: [0, 2], commands: [{ line: 1, exitCode: 7 }] });
 		let screen = '';
 		const off = session.onOutput((text) => { screen = text; });
-		await settled();
+		await new Promise<void>((resolve) => (session as any).emulator.write('', resolve));
 		assert.match(screen, /second prompt/);
 		assert.deepEqual(session.getNavigationMarkers().prompts, [0, 2]);
 		off();
 		io.output('\r\n' + 'line\r\n'.repeat(2100));
-		await settled();
+		await new Promise<void>((resolve) => (session as any).emulator.write('', resolve));
 		assert.deepEqual(session.getNavigationMarkers(), { prompts: [], commands: [] });
 	} finally { session.destroy(); }
 });
