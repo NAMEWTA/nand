@@ -14,9 +14,9 @@ assert.ok(process.env.NAND_WINDOWS_E2E_NONCE);
 const dir = process.env.NAND_ACCEPTANCE_DIR, c = await connect(), checks = [];
 const restart = process.argv.includes('--verify-restart');
 let server;
-async function call(expression) {
+async function call(expression, ms = 20000) {
  let timeout;
- try { return await Promise.race([c.evaluate(expression), new Promise((_, reject) => { timeout = setTimeout(() => reject(Error('Native evaluation timeout: ' + expression.slice(0, 100))), 20000); })]); }
+ try { return await Promise.race([c.evaluate(expression), new Promise((_, reject) => { timeout = setTimeout(() => reject(Error('Native evaluation timeout: ' + expression.slice(0, 100))), ms); })]); }
  finally { clearTimeout(timeout); }
 }
 async function until(expression, label) {
@@ -108,6 +108,48 @@ try {
    const actual = await call(`(async()=>{const leaf=app.workspace.getLeaf('tab');await leaf.setViewState({type:${JSON.stringify(type)},active:true,state:{}});await app.workspace.revealLeaf(leaf);await leaf.loadIfDeferred();const result={type:leaf.view.getViewType(),title:leaf.view.getDisplayText(),surfaces:leaf.view.getNativeSurfaces?.().length??0,placeholder:leaf.isDeferred};leaf.detach();return result})()`);
    assert.equal(actual.type, type); assert.equal(actual.placeholder,false); if(type!=='nand-editor-view')assert.equal(actual.surfaces,1,'Original type must instantiate a real shared presentation'); check('original-native-view-remains-real-' + type, actual);
   }
+  await call(`require('@electron/remote').getCurrentWindow().setSize(1280,1000)`);
+  await call(`app.plugins.plugins.nand.openWorkbench({feature:'dashboard'})`);
+  await delay(250);
+  const overview = await call(`(()=>{const root=${wb}.contentEl;const box=root.querySelector('.nand-workbench-home-overview');const calendar=box?.querySelector('.dashboard-sidebar-week-calendar');const recent=box?.querySelector('.dashboard-recent');const shown=el=>!!el&&el.getClientRects().length>0&&getComputedStyle(el).display!=='none'&&getComputedStyle(el).visibility!=='hidden'&&getComputedStyle(el).pointerEvents!=='none';const hit=el=>{if(!el)return false;const r=el.getBoundingClientRect();const target=document.elementFromPoint(r.left+r.width/2,r.top+Math.min(12,r.height/2));return !!target&&el.contains(target)};const sideCal=root.querySelector('.dashboard-sidebar .dashboard-sidebar-week-calendar');const sideRecent=root.querySelector('.dashboard-sidebar .dashboard-recent');return {calendar:shown(calendar),recent:shown(recent),calendarHit:hit(calendar),recentHit:hit(recent),calendarHeight:calendar?.getBoundingClientRect().height??0,recentHeight:recent?.getBoundingClientRect().height??0,cells:calendar?.querySelectorAll('.dashboard-sidebar-week-cell').length??0,recentItem:!!recent?.querySelector('.dashboard-recent-item'),sidebarCalendarHidden:!sideCal||getComputedStyle(sideCal).display==='none',sidebarRecentHidden:!sideRecent||getComputedStyle(sideRecent).display==='none'}})()`);
+  assert.equal(overview.calendar, true); assert.equal(overview.recent, true);
+  assert.equal(overview.calendarHit, true); assert.equal(overview.recentHit, true);
+  assert.equal(overview.cells, 7); assert.equal(overview.recentItem, true);
+  assert.equal(overview.sidebarCalendarHidden, true); assert.equal(overview.sidebarRecentHidden, true);
+  const opened = await call(`(()=>{const item=${wb}.contentEl.querySelector('.nand-workbench-home-overview .dashboard-recent-item');item?.click();return item?.getAttribute('aria-label')||''})()`);
+  assert.ok(opened.includes('Welcome'));
+  check('home-overview-calendar-and-recent-visible', overview);
+  await shot('home-overview-1280');
+  await call(`(async()=>{const p=app.plugins.plugins.nand;p.settings.modules.terminal=true;await p.saveSettings();await p.applyModuleFlags();await p.openWorkbench({feature:'terminal',section:'running'});})()`);
+  await delay(200);
+  const fill = await call(`(()=>{const shell=${wb}.contentEl.querySelector('.terminal-workbench-shell.is-workbench-embedded');const center=shell?.querySelector(':scope > .nand-agent-center');if(!shell||!center)return null;const s=shell.getBoundingClientRect();const c=center.getBoundingClientRect();return {shell:Math.round(s.width),center:Math.round(c.width),left:Math.round(c.left-s.left)}})()`);
+  assert.ok(fill && fill.shell >= 1000, 'embedded terminal shell was not wide');
+  assert.ok(fill.center >= fill.shell - 24, 'embedded terminal did not fill the content column');
+  assert.ok(fill.left <= 8);
+  check('embedded-terminal-fills-1280', fill);
+  await shot('terminal-embedded-1280');
+  const dead = await call(`(async()=>{const p=app.plugins.plugins.nand;await p.openWorkbench({feature:'terminal',section:'running',resourceId:'terminal-dead'});const v=${wb};return {feature:v.getState().target.feature,resourceId:v.getState().target.resourceId??'',unavailable:!!v.contentEl.querySelector('.nand-workbench-unavailable'),sessions:p.terminalHost.getRuntimeStatus().length}})()`);
+  assert.equal(dead.feature, 'terminal'); assert.equal(dead.resourceId, ''); assert.equal(dead.unavailable, false); assert.equal(dead.sessions, 0);
+  check('dead-terminal-id-opens-section', dead);
+  await call(`(async()=>{const host=app.plugins.plugins.nand.terminalHost;await host.openFreshTerminal();if(!await host.insertIntoActiveTerminal('echo nand-qa-$((6*7))\\n'))throw Error('shell did not accept input')})()`, 90000);
+  let echoed = false; let shellStatus = '';
+  for (let i = 0; i < 40 && !echoed; i++) {
+   await delay(250);
+   const sample = await call(`(async()=>{const p=app.plugins.plugins.nand;const service=await p.terminalHost.getTerminalService();const session=service.getAllTerminals().find(s=>!s.agentId);let text='';if(session)await new Promise(resolve=>{const stop=session.onOutput(chunk=>{text+=chunk;if(text.includes('nand-qa-42')){stop();resolve()}});setTimeout(()=>{stop();resolve()},300)});const snap=session?.statusSnapshot();return {text:text.includes('nand-qa-42'),connection:snap?.connection,activity:snap?.agentActivity,running:p.terminalHost.getRuntimeStatus().some(s=>s.status==='running'||s.status==='waiting')}})()`);
+   echoed = sample.text; shellStatus = JSON.stringify(sample);
+   if (sample.text) {
+    assert.equal(sample.connection, 'connected'); assert.equal(sample.activity, 'unknown'); assert.equal(sample.running, false);
+   }
+  }
+  assert.equal(echoed, true, shellStatus);
+  for (const lang of ['zh', 'en']) {
+   await call(`app.plugins.plugins.nand.changeLanguage(${JSON.stringify(lang)})`);
+   const label = await call(`${wb}.contentEl.querySelector('.terminal-current-status-text')?.textContent||''`);
+   assert.equal(label, lang === 'zh' ? '已连接' : 'Connected', label);
+   assert.equal(label.includes('状态未知') || label.includes('Unknown') || label.includes('执行中') || label === 'Running', false);
+  }
+  check('connected-shell-echoes-without-agent-activity', { shellStatus });
+  await shot('shell-connected-echo');
   await call(`(async()=>{const p=app.plugins.plugins.nand;p.settings.modules.terminal=false;await p.saveSettings();await p.applyModuleFlags();const leaf=app.workspace.getLeaf('tab');await leaf.setViewState({type:'terminal-view',active:true,state:{}});await app.workspace.revealLeaf(leaf);await leaf.loadIfDeferred();if(leaf.view.getViewType()!=='terminal-view')throw Error('Lost terminal identity');if(leaf.isDeferred||!leaf.view.contentEl.querySelector('button')||leaf.view.getDisplayText()==='terminal-view')throw Error('Inactive terminal must render its native recovery controls');leaf.detach();await p.openWorkbench({feature:'contacts',section:'person'});app.workspace.requestSaveLayout();})()`);
   check('original-disabled-terminal-identity-and-safe-placeholder');
   await delay(1500);

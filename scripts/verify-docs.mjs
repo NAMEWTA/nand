@@ -4,41 +4,229 @@ import path from 'node:path';
 
 const root = process.cwd();
 const state = 'speculo/.speculo/specdev';
-const files = ['README.md', 'CHANGELOG.md', 'CLAUDE.md'];
+const failures = [];
+const files = [];
+
 function walk(directory) {
 	for (const entry of fs.readdirSync(directory, { withFileTypes: true })) {
+		if (entry.name === 'node_modules' || entry.name === '.git' || entry.name === 'dist' || entry.name === 'target') continue;
 		const file = path.join(directory, entry.name);
-		if (entry.isDirectory()) walk(file);
-		else if (entry.name.endsWith('.md')) files.push(file);
+		const rel = path.relative(root, file);
+		if (rel === 'scripts/tmp' || rel.startsWith(`scripts${path.sep}tmp${path.sep}`)) continue;
+		if (entry.isDirectory()) {
+			if (entry.name === 'legacy' || entry.name === 'old' || entry.name === 'backup-docs') failures.push(`forbidden documentation directory ${rel}`);
+			walk(file);
+		} else if (entry.name.endsWith('.md')) files.push(rel);
 	}
 }
-for (const directory of ['docs', '.agents/skills', ...['adr', 'context', 'changes', 'archive', '.config'].map((name) => `${state}/${name}`)]) walk(directory);
-const failures = [];
-let links = 0;
+walk(root);
+
+function classify(rel) {
+	if (rel === 'NOTICE' || rel.endsWith(`${path.sep}NOTICE.txt`) || rel.startsWith(`docs${path.sep}third-party${path.sep}`)) return 'license';
+	if (rel.startsWith(`docs${path.sep}`)) return 'user-doc';
+	if (['README.md', 'CHANGELOG.md', 'CLAUDE.md', 'SECURITY.md', 'dashboard-template.md'].includes(rel)) return 'root-entry';
+	if (rel.startsWith(`.agents${path.sep}`)) return 'skill';
+	if (rel.startsWith(`speculo${path.sep}.speculo${path.sep}specdev${path.sep}`)) return 'specdev';
+	if (rel.startsWith(`speculo${path.sep}`)) return 'speculo-tooling';
+	if (rel.startsWith(`src${path.sep}`)) return 'source-template';
+	if (rel.startsWith(`scripts${path.sep}`)) return 'script-doc';
+	if (rel.startsWith(`processes${path.sep}`)) return 'process-doc';
+	if (rel.startsWith(`.github${path.sep}`)) return 'workflow-doc';
+	return '';
+}
+
+const counts = new Map();
 for (const file of files) {
-	const text = fs.readFileSync(file, 'utf8');
-	let fence = '', body = '';
+	const kind = classify(file);
+	if (!kind) failures.push(`unclassified markdown ${file}`);
+	else counts.set(kind, (counts.get(kind) ?? 0) + 1);
+}
+
+for (const required of [
+	'docs/workbench.md',
+	'docs/privacy.md',
+	'SECURITY.md',
+	`${state}/context/current-baseline.md`,
+	`${state}/context/validation.md`,
+	'LICENSE',
+	'NOTICE',
+	'src/core/icons/res/NOTICE.txt',
+]) {
+	if (!fs.existsSync(path.join(root, required))) failures.push(`missing required documentation asset ${required}`);
+}
+
+const strict = new Set(['user-doc', 'root-entry', 'skill', 'specdev', 'source-template']);
+let links = 0;
+let external = 0;
+const headings = new Map();
+const bodies = new Map();
+
+function fenceBody(text) {
+	let fence = '';
+	const kept = [];
 	for (const line of text.split(/\r?\n/)) {
 		const marker = line.match(/^\s*(`{3,}|~{3,})/);
-		if (marker) { if (!fence) fence = marker[1][0]; else if (marker[1][0] === fence) fence = ''; continue; }
-		if (!fence) body += line + '\n';
+		if (marker) {
+			if (!fence) fence = marker[1][0];
+			else if (marker[1][0] === fence) fence = '';
+			continue;
+		}
+		if (!fence) kept.push(line);
 	}
-	if (fence) failures.push(`${file}: unclosed code fence`);
-	for (const match of body.matchAll(/!?\[[^\]\n]*\]\(([^)\n]+)\)/g)) {
-		const target = match[1].trim().replace(/^<|>$/g, '').split(/\s+"/)[0];
-		if (/^[a-z][a-z\d+.-]*:/i.test(target) || target.startsWith('#')) continue;
-		const destination = decodeURIComponent(target.split('#')[0]);
-		if (!destination) continue;
-		links++;
-		const resolved = path.resolve(path.dirname(file), destination);
-		if (!resolved.startsWith(root + path.sep) || !fs.existsSync(resolved)) failures.push(`${file}: missing local link ${target}`);
+	return { unclosed: Boolean(fence), body: kept.join('\n') };
+}
+
+function githubSlug(text) {
+	const plain = text
+		.replace(/`([^`]*)`/g, '$1')
+		.replace(/!\[[^\]]*\]\([^)\n]*\)/g, '')
+		.replace(/\[([^\]]*)\]\([^)\n]*\)/g, '$1')
+		.replace(/<[^>\n]+>/g, '');
+	return plain
+		.toLowerCase()
+		.replace(/[\u0000-\u001f]/g, '')
+		.replace(/[\u2000-\u206F\u2E00-\u2E7F\\'!"#$%&()*+,./:;<=>?@[\]^`{|}~]/g, '')
+		.replace(/\s/g, '-');
+}
+
+function rememberHeading(file, slug, seen) {
+	if (!slug) return;
+	const count = seen.get(slug) ?? 0;
+	const actual = count === 0 ? slug : `${slug}-${count}`;
+	seen.set(slug, count + 1);
+	headings.get(file).add(actual);
+}
+
+function labelKey(value) {
+	return value.trim().replace(/\s+/g, ' ').toLowerCase();
+}
+
+for (const file of files) {
+	if (!strict.has(classify(file))) continue;
+	const text = fs.readFileSync(path.join(root, file), 'utf8');
+	const { unclosed, body } = fenceBody(text);
+	if (unclosed) failures.push(`${file}: unclosed code fence`);
+	if (body.includes('通讯录图标')) failures.push(`${file}: stale contacts ribbon wording`);
+	bodies.set(file, body);
+	const slugs = new Set();
+	const seen = new Map();
+	headings.set(file, slugs);
+	for (const line of body.split('\n')) {
+		const heading = line.match(/^#{1,6}\s+(.+?)\s*#*\s*$/);
+		if (heading) rememberHeading(file, githubSlug(heading[1]), seen);
+	}
+	for (const match of body.matchAll(/ghp_[A-Za-z0-9]{20,}|github_pat_[A-Za-z0-9_]{20,}|sk-(?:proj-)?[A-Za-z0-9]{20,}|-----BEGIN (?:RSA |OPENSSH |EC )?PRIVATE KEY-----|AKIA[0-9A-Z]{16}|xox[baprs]-[A-Za-z0-9-]{10,}/g)) {
+		failures.push(`${file}: secret-like token ${match[0].slice(0, 6)}…`);
 	}
 }
-const status = JSON.parse(fs.readFileSync(`${state}/status.json`, 'utf8'));
+
+function checkTarget(fromFile, raw) {
+	let target = raw.trim().replace(/^<|>$/g, '');
+	const title = target.match(/\s+(?:"[^"]*"|'[^']*'|\([^)]*\))\s*$/);
+	if (title) target = target.slice(0, title.index).trim();
+	if (!target) return;
+	if (/^[a-z][a-z\d+.-]*:/i.test(target) || target.startsWith('//')) {
+		external += 1;
+		return;
+	}
+	const hash = target.indexOf('#');
+	const destination = hash === -1 ? target : target.slice(0, hash);
+	let fragment = '';
+	if (hash !== -1) {
+		try { fragment = decodeURIComponent(target.slice(hash + 1)); }
+		catch { failures.push(`${fromFile}: bad link fragment ${target}`); return; }
+	}
+	const resolved = destination
+		? path.resolve(root, path.dirname(fromFile), destination)
+		: path.resolve(root, fromFile);
+	const relative = path.relative(root, resolved);
+	if (destination) {
+		links += 1;
+		const missing = relative.startsWith('..') || path.isAbsolute(relative) || !fs.existsSync(resolved);
+		// Format guides show archive-relative examples such as ../李四/基本信息.md.
+		// Those paths exist in a user vault, not in this repository.
+		const vaultExample = fromFile.startsWith(`src${path.sep}core${path.sep}contacts${path.sep}persist${path.sep}format-guide`);
+		if (missing && !vaultExample) {
+			failures.push(`${fromFile}: missing local link ${target}`);
+			return;
+		}
+		if (missing) return;
+	}
+	if (fragment && !headings.get(relative)?.has(fragment)) failures.push(`${fromFile}: missing heading anchor ${target}`);
+}
+
+for (const [file, body] of bodies) {
+	const definitions = new Map();
+	for (const line of body.split('\n')) {
+		const defined = line.match(/^ {0,3}\[([^\]\n]+)\]:[ \t]+(\S+)(?:[ \t]+(?:"[^"\n]*"|'[^'\n]*'|\([^)\n]*\)))?\s*$/);
+		if (!defined) continue;
+		definitions.set(labelKey(defined[1]), defined[2].replace(/^<|>$/g, ''));
+	}
+	for (const destination of definitions.values()) checkTarget(file, destination);
+	for (const match of body.matchAll(/!?\[[^\]\n]*\]\(([^)\n]+)\)/g)) checkTarget(file, match[1]);
+	for (const match of body.matchAll(/!?\[([^\]\n]*)\]\[([^\]\n]*)\]/g)) {
+		const key = labelKey(match[2] || match[1]);
+		const destination = definitions.get(key);
+		if (!destination) failures.push(`${file}: unresolved reference link [${match[1]}][${match[2]}]`);
+		else checkTarget(file, destination);
+	}
+}
+
+function readSource(directory, into) {
+	for (const entry of fs.readdirSync(directory, { withFileTypes: true })) {
+		const file = path.join(directory, entry.name);
+		if (entry.isDirectory()) readSource(file, into);
+		else if (/\.(ts|tsx)$/.test(entry.name) && !entry.name.endsWith('.test.ts')) into.push(fs.readFileSync(file, 'utf8'));
+	}
+}
+const sources = [];
+readSource(path.join(root, 'src'), sources);
+const sourceText = sources.join('\n');
+
+const viewTypes = new Set();
+for (const match of sourceText.matchAll(/export const [A-Z0-9_]*VIEW_TYPE = '([^']+)'/g)) viewTypes.add(match[1]);
+const workbench = bodies.get('docs/workbench.md') ?? '';
+const documentedViews = new Set([...workbench.matchAll(/`(nand-[a-z0-9-]+-view|terminal-view)`/g)].map((match) => match[1]));
+for (const viewType of viewTypes) if (!documentedViews.has(viewType)) failures.push(`docs/workbench.md: missing view type ${viewType}`);
+for (const viewType of documentedViews) if (!viewTypes.has(viewType)) failures.push(`docs/workbench.md: unknown view type ${viewType}`);
+
+const features = new Set([...sourceText.matchAll(/feature: '([a-z0-9-]+)'/g)].map((match) => match[1]));
+const documentedFeatures = new Set([...workbench.matchAll(/\| `([a-z0-9-]+)` \|/g)].map((match) => match[1]));
+for (const feature of documentedFeatures) {
+	if (viewTypes.has(feature)) continue;
+	if (!features.has(feature)) failures.push(`docs/workbench.md: unknown feature ${feature}`);
+}
+if (!workbench.includes('open-workbench') || !sourceText.includes("id: 'open-workbench'")) failures.push('open-workbench command is not documented against source');
+if (!workbench.includes('不是独立的工作台页面')) failures.push('docs/workbench.md: habits and expenses must stay off the page list');
+const settingsNav = fs.readFileSync(path.join(root, 'src/plugin/settings/nav.ts'), 'utf8');
+if (!settingsNav.includes("'home'") || !workbench.includes('`home`')) failures.push('settings product home is missing from source or docs/workbench.md');
+
+for (const file of ['docs/data.md', 'docs/privacy.md', 'docs/records.md', 'docs/agent-workbench.md']) {
+	const body = bodies.get(file) ?? '';
+	for (const match of body.matchAll(/\.nand\/[A-Za-z0-9_./<>\-]+/g)) {
+		const prefix = match[0].split('<')[0].replace(/\/+$/g, '');
+		if (prefix === '.nand' || sourceText.includes(prefix)) continue;
+		failures.push(`${file}: data path ${match[0]} is not in source`);
+	}
+}
+if ((bodies.get('docs/privacy.md') ?? '').includes('connection.json') && !sourceText.includes('connection.json')) {
+	failures.push('docs/privacy.md: connection.json is not in source');
+}
+
+const readme = fs.readFileSync(path.join(root, 'README.md'), 'utf8');
+const docsIndex = fs.readFileSync(path.join(root, 'docs/README.md'), 'utf8');
+if (!readme.includes('docs/workbench.md') || !readme.includes('docs/privacy.md')) failures.push('README.md: missing workbench or privacy link');
+if (!docsIndex.includes('workbench.md') || !docsIndex.includes('privacy.md')) failures.push('docs/README.md: missing workbench or privacy link');
+const layout = fs.readFileSync(path.join(root, `${state}/.config/domain-layout.md`), 'utf8');
+if (!layout.includes('context/current-baseline.md') || !layout.includes('context/validation.md')) failures.push('domain-layout.md: current baseline links missing');
+if (layout.includes('最新基线')) failures.push('domain-layout.md: archive is still labeled as the latest baseline');
+
+const status = JSON.parse(fs.readFileSync(path.join(root, `${state}/status.json`), 'utf8'));
 assert.equal(status.schema_version, 5);
-for (const { change } of status.active) assert.ok(fs.existsSync(`${state}/changes/${change}/spec.md`), `Missing active change ${change}`);
-for (const change of status.archived) assert.ok(fs.existsSync(`${state}/archive/${change.slice(0, 7)}/${change}/README.md`), `Missing archive ${change}`);
-const actual = fs.readdirSync(`${state}/changes`, { withFileTypes: true }).filter((entry) => entry.isDirectory()).map((entry) => entry.name).sort();
+for (const { change } of status.active) assert.ok(fs.existsSync(path.join(root, `${state}/changes/${change}/spec.md`)), `Missing active change ${change}`);
+for (const change of status.archived) assert.ok(fs.existsSync(path.join(root, `${state}/archive/${change.slice(0, 7)}/${change}/README.md`)), `Missing archive ${change}`);
+const actual = fs.readdirSync(path.join(root, `${state}/changes`), { withFileTypes: true }).filter((entry) => entry.isDirectory()).map((entry) => entry.name).sort();
 assert.deepEqual(actual, status.active.map((entry) => entry.change).sort(), 'Active index and directories must match');
-assert.deepEqual(failures, [], 'Documentation links and fences');
-console.log(`Documentation: ${files.length} Markdown files, ${links} local links, code fences and active/archive indexes verified.`);
+assert.deepEqual(failures, [], 'Documentation links, anchors, contracts, and inventory');
+const summary = [...counts.entries()].map(([kind, count]) => `${kind}=${count}`).join(', ');
+console.log(`Documentation: ${files.length} Markdown files (${summary}), ${links} local links, ${external} external links (fetch not requested).`);

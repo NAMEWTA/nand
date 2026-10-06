@@ -5,7 +5,9 @@
 - [用户指南](../../../../docs/README.md)：安装、设置、操作、备份、恢复和使用限制。
 - [领域关系](../context/context-map.md)：规范术语、数据所有权及协作关系。
 - adr/：当前有效架构决策，保留稳定编号；源码和验证结果支持结论。
-- [最新基线](../archive/2026-10/2026-10-01-current-baseline/README.md)：当前成果、证据适用范围、产物标识及本轮文档清理记录。
+- [当前基线](../context/current-baseline.md)：当前实现和声明范围。声明不是已经测得的结果。
+- [验证记录](../context/validation.md)：仍未验收的宿主、移动端、真实 CLI、长期运行和档案规模。
+- [2026-10-01 归档基线](../archive/2026-10/2026-10-01-current-baseline/README.md)：当时的证据，不是此后 `main.js` 的产物标识。
 - [待验收工作](../changes/2026-10-01-remaining-acceptance/spec.md)：未完成项及通过条件，不能写成已验收。
 - [开发规则](../../../../.agents/skills/dev/SKILL.md)：分层、原生宿主、构建与维护要求；渲染细节归 view-render。
 
