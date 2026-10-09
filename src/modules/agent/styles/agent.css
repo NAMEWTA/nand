@@ -1,0 +1,247 @@
+/* Agent page: terminal tabs with split panes, the history browser and usage. */
+.nand-agent-page {
+	display: flex;
+	flex-direction: column;
+	height: 100%;
+	min-height: 0;
+}
+.nand-agent-page .is-hidden { display: none; }
+
+.nand-agent-running {
+	display: flex;
+	flex-direction: column;
+	flex: 1;
+	min-height: 0;
+}
+.nand-agent-tabs { flex: 0 0 auto; border-bottom: var(--nand-border); }
+
+.nand-agent-search {
+	display: flex;
+	align-items: center;
+	gap: var(--nand-space-1);
+	padding: var(--nand-space-1) var(--nand-space-2);
+	border-bottom: var(--nand-border);
+}
+.nand-agent-search-input { flex: 1; min-width: 0; }
+.nand-agent-search-input.is-missing { border-color: var(--nand-tone-error); }
+.nand-agent-search .clickable-icon.is-active { color: var(--text-accent); background: var(--nand-accent-soft); }
+
+.nand-agent-panes {
+	display: flex;
+	flex: 1;
+	min-height: 0;
+	padding: var(--nand-space-1);
+}
+.nand-agent-split {
+	display: flex;
+	flex: 1;
+	min-width: 0;
+	min-height: 0;
+}
+.nand-agent-split--row { flex-direction: row; }
+.nand-agent-split--column { flex-direction: column; }
+.nand-agent-split-cell {
+	display: flex;
+	flex-grow: 0;
+	flex-shrink: 1;
+	min-width: 0;
+	min-height: 0;
+}
+.nand-agent-split-handle {
+	flex: 0 0 6px;
+	border-radius: var(--nand-radius-sm);
+	background: transparent;
+	transition: background-color var(--nand-duration-fast, 120ms) ease;
+}
+.nand-agent-split--row > .nand-agent-split-handle { cursor: col-resize; }
+.nand-agent-split--column > .nand-agent-split-handle { cursor: row-resize; }
+.nand-agent-split-handle:hover,
+.nand-agent-split-handle:focus-visible { background: var(--nand-accent-soft); outline: none; }
+
+.nand-agent-pane {
+	display: flex;
+	flex-direction: column;
+	flex: 1;
+	min-width: 0;
+	min-height: 0;
+	border: 1px solid transparent;
+	border-radius: var(--nand-radius-sm);
+}
+.nand-agent-pane.is-focused { border-color: var(--nand-accent-border); }
+.nand-agent-pane-bar {
+	display: flex;
+	align-items: center;
+	gap: var(--nand-space-2);
+	min-height: 28px;
+	padding: 0 var(--nand-space-1) 0 var(--nand-space-2);
+	color: var(--text-muted);
+	font-size: var(--nand-text-caption);
+}
+.nand-agent-pane-title {
+	color: var(--text-normal);
+	font-weight: var(--font-semibold);
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	max-width: 40%;
+}
+.nand-agent-pane-status { white-space: nowrap; }
+.nand-agent-pane-cwd {
+	flex: 1;
+	min-width: 0;
+	color: var(--text-faint);
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+.nand-agent-pane-actions { display: flex; flex: 0 0 auto; gap: 2px; }
+.nand-agent-pane-body {
+	position: relative;
+	flex: 1;
+	min-width: 0;
+	min-height: 0;
+}
+
+.nand-agent-dot {
+	flex: 0 0 8px;
+	width: 8px;
+	height: 8px;
+	border-radius: 50%;
+	background: var(--text-faint);
+}
+.nand-agent-dot.is-connected,
+.nand-agent-dot.is-idle { background: var(--nand-tone-success); }
+.nand-agent-dot.is-running { background: var(--interactive-accent); }
+.nand-agent-dot.is-waiting { background: var(--nand-tone-warning); }
+.nand-agent-dot:is(.is-failed, .is-disconnected) { background: var(--nand-tone-error); }
+
+.nand-terminal-view {
+	position: absolute;
+	inset: 0;
+	padding: var(--nand-space-1) 0 0 var(--nand-space-2);
+	overflow: hidden;
+	background: var(--nand-terminal-background, var(--background-primary));
+}
+/* xterm paints its own rows; the leftover viewport and the IME preview follow the terminal colors. */
+.nand-terminal-view .xterm .xterm-viewport { background-color: transparent; }
+.nand-terminal-view .xterm .composition-view {
+	background: var(--nand-terminal-background, var(--background-primary));
+	color: var(--text-normal);
+}
+.nand-terminal-view.is-hidden { display: none; }
+.nand-terminal-view .xterm { height: 100%; }
+
+.nand-agent-empty {
+	display: flex;
+	flex: 1;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	gap: var(--nand-space-4);
+}
+.nand-agent-empty-actions {
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: center;
+	gap: var(--nand-space-2);
+	max-width: 560px;
+}
+.nand-agent-empty-button {
+	display: inline-flex;
+	align-items: center;
+	gap: var(--nand-space-2);
+}
+
+.nand-agent-section {
+	height: 100%;
+	overflow-y: auto;
+	padding: var(--nand-space-4) var(--nand-space-6);
+}
+
+.nand-agent-history,
+.nand-agent-preview,
+.nand-agent-usage { max-width: 960px; margin: 0 auto; }
+.nand-agent-history-toolbar,
+.nand-agent-preview-toolbar,
+.nand-agent-usage-toolbar {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: var(--nand-space-2);
+	margin-bottom: var(--nand-space-3);
+}
+.nand-agent-history-search { flex: 1; min-width: 12rem; }
+.nand-agent-history-usage,
+.nand-agent-preview-meta {
+	color: var(--text-muted);
+	font-size: var(--nand-text-caption);
+}
+.nand-agent-history-warning { color: var(--nand-tone-warning); }
+.nand-agent-history-error { color: var(--nand-tone-error); }
+.nand-agent-history-loading { color: var(--text-muted); }
+.nand-agent-history-list {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+}
+.nand-agent-history-row {
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+	gap: 2px;
+	width: 100%;
+	height: auto;
+	padding: var(--nand-space-2) var(--nand-space-3);
+	border: none;
+	border-radius: var(--nand-radius-sm);
+	background: transparent;
+	box-shadow: none;
+	text-align: start;
+}
+.nand-agent-history-row:hover { background: var(--nand-surface-hover); }
+.nand-agent-history-title { color: var(--text-normal); font-weight: var(--font-semibold); }
+.nand-agent-history-meta { color: var(--text-muted); font-size: var(--nand-text-caption); }
+.nand-agent-history-pages {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: var(--nand-space-3);
+	margin-top: var(--nand-space-3);
+	color: var(--text-muted);
+}
+
+.nand-agent-preview-title { margin: var(--nand-space-2) 0 var(--nand-space-1); }
+.nand-agent-preview-text {
+	margin-top: var(--nand-space-3);
+	padding: var(--nand-space-3);
+	border: var(--nand-border);
+	border-radius: var(--nand-radius-sm);
+	background: var(--background-secondary);
+	font-family: var(--font-monospace);
+	font-size: var(--nand-text-caption);
+	white-space: pre-wrap;
+	overflow-wrap: anywhere;
+	user-select: text;
+}
+
+.nand-agent-usage-vault { margin-top: var(--nand-space-4); }
+
+.nand-agent-switch-meta { color: var(--text-muted); }
+.nand-agent-preset-form {
+	display: flex;
+	flex-direction: column;
+	gap: var(--nand-space-2);
+}
+.nand-agent-preset-shell {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: var(--nand-space-3);
+}
+.nand-agent-settings-agent {
+	margin-block: var(--nand-space-3);
+	padding: 0 var(--nand-space-4);
+	border: var(--nand-border);
+	border-radius: var(--nand-radius-md);
+	background: var(--nand-surface);
+}

@@ -1,0 +1,32 @@
+/* Notification inbox page: a toolbar and the list of notification rows (width limited like other reading pages). */
+.nand-inbox-page { height: 100%; overflow-y: auto; padding: var(--nand-space-4) var(--nand-space-6); }
+.nand-inbox { display: flex; flex-direction: column; gap: var(--size-4-3); min-width: 0; max-width: 960px; margin-inline: auto; }
+.nand-inbox-header { display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: var(--size-4-2); padding-bottom: var(--size-4-3); border-bottom: var(--nand-border); }
+.nand-inbox-actions { gap: var(--size-4-1); }
+.nand-inbox .nand-empty-state-description:empty { display: none; }
+.nand-inbox-list { display: flex; flex-direction: column; gap: var(--size-4-2); margin: 0; padding: 0; list-style: none; }
+.nand-inbox-item { display: grid; grid-template-columns: 8px minmax(0, 1fr) auto; align-items: start; gap: var(--size-4-3); margin: 0; padding: var(--size-4-3); border: var(--nand-border); border-radius: var(--nand-radius-md); background: var(--nand-surface); transition: border-color var(--nand-duration) var(--nand-ease), box-shadow var(--nand-duration) var(--nand-ease); }
+.nand-inbox-item:hover { border-color: var(--nand-border-color-strong); box-shadow: var(--nand-shadow-sm); }
+.nand-inbox-item.is-unread { border-color: var(--nand-accent-border); background: var(--nand-accent-softer); }
+.nand-inbox-dot { width: 8px; height: 8px; margin-top: 6px; border-radius: 50%; background: transparent; }
+.nand-inbox-item.is-unread .nand-inbox-dot { background: var(--nand-accent); }
+.nand-inbox-item-main { display: flex; flex-direction: column; gap: var(--size-4-1); min-width: 0; }
+.nand-inbox-item-title { color: var(--text-normal); font-size: var(--nand-text-body); font-weight: 600; line-height: 1.4; overflow-wrap: anywhere; }
+.nand-inbox-item.is-read .nand-inbox-item-title { font-weight: 500; }
+.nand-inbox-item-body { color: var(--text-muted); font-size: var(--nand-text-body); line-height: 1.5; overflow-wrap: anywhere; }
+.nand-inbox-item-meta { display: flex; flex-wrap: wrap; align-items: center; gap: var(--size-4-1) var(--size-4-2); margin-top: 2px; color: var(--text-muted); font-size: var(--nand-text-caption); }
+.nand-inbox-item-time { display: inline-flex; align-items: center; gap: 4px; font-variant-numeric: tabular-nums; }
+.nand-inbox-meta-icon { display: flex; color: var(--text-faint); }
+.nand-inbox-meta-icon svg { width: 12px; height: 12px; }
+.nand-inbox-item-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: var(--size-4-1); }
+.nand-inbox-item-actions button.nand-ui-btn { min-height: var(--nand-control-height-sm); padding: 0 var(--size-4-2); font-size: var(--nand-text-caption); }
+@media (max-width: 480px) {
+ .nand-inbox-item { grid-template-columns: 8px minmax(0, 1fr); }
+ .nand-inbox-item-actions { grid-column: 2; justify-content: flex-start; }
+}
+@media (pointer: coarse) {
+ .nand-inbox button.nand-ui-btn, .nand-inbox-item-actions button.nand-ui-btn { min-height: var(--nand-touch-target); }
+}
+@media (prefers-reduced-motion: reduce) {
+ .nand-inbox-item { transition: none; }
+}

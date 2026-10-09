@@ -1,0 +1,13 @@
+/* ===== Habit ===== */
+.dashboard-habit-streak {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	font-size: 0.95em;
+	margin-bottom: 6px;
+}
+
+.dashboard-habit-icon {
+	font-size: 1.1em;
+}
+

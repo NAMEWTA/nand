@@ -1,0 +1,193 @@
+/* ===== Tag manager modal ===== */
+.dashboard-pomodoro-tagmanager {
+	max-width: 560px;
+}
+
+.dashboard-pomodoro-tagmanager-hint {
+	font-size: 0.7em;
+	color: var(--db-text-muted);
+	margin: -8px 0 12px;
+}
+
+.dashboard-pomodoro-tagmanager-list {
+	display: flex;
+	flex-direction: column;
+	gap: 6px;
+	max-height: 46vh;
+	overflow-y: auto;
+	padding-right: 2px;
+}
+
+.dashboard-pomodoro-tagmanager-row {
+	display: flex;
+	flex-direction: column;
+	gap: 6px;
+}
+
+/* Bubble chip */
+.dashboard-pomodoro-tagmanager-chip {
+	display: inline-flex;
+	align-items: center;
+	gap: 8px;
+	align-self: flex-start;
+	max-width: 100%;
+	padding: 6px 14px;
+	border-radius: 999px;
+	background: var(--db-bg-hover);
+	border: 1px solid var(--db-border-card);
+	cursor: pointer;
+	transition: border-color var(--nand-duration) var(--nand-ease), background-color var(--nand-duration) var(--nand-ease);
+}
+
+.dashboard-pomodoro-tagmanager-chip:focus-visible,
+.dashboard-pomodoro-tagmanager-action:focus-visible {
+	outline: 2px solid var(--db-accent);
+	outline-offset: 1px;
+}
+
+.dashboard-pomodoro-tagmanager-chip:hover {
+	border-color: var(--db-accent);
+	background: var(--db-bg-hover-strong, var(--db-bg-hover));
+}
+
+.dashboard-pomodoro-tagmanager-chip--pinned {
+	border-color: color-mix(in srgb, var(--db-accent) 45%, transparent);
+	background: color-mix(in srgb, var(--db-accent) 10%, var(--db-bg-hover));
+}
+
+.dashboard-pomodoro-tagmanager-chip-name {
+	font-size: 0.8em;
+	font-weight: 600;
+	color: var(--db-text);
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.dashboard-pomodoro-tagmanager-chip-pin {
+	color: var(--db-accent);
+	display: flex;
+	opacity: 0.85;
+}
+
+/* Action bar — revealed when the row is open */
+.dashboard-pomodoro-tagmanager-actions {
+	display: none;
+	gap: 6px;
+	flex-wrap: wrap;
+	padding-left: 4px;
+}
+
+.dashboard-pomodoro-tagmanager-row--open .dashboard-pomodoro-tagmanager-actions {
+	display: flex;
+}
+
+.dashboard-pomodoro-tagmanager-action {
+	border: none;
+	box-shadow: none;
+	background: transparent;
+	padding: 0;
+	height: auto;
+	display: flex;
+	align-items: center;
+	gap: 5px;
+	padding: 5px 11px;
+	border-radius: 999px;
+	border: 1px solid var(--db-border-card);
+	background: var(--db-bg-modal-raised, var(--background-primary, var(--db-bg)));
+	font-size: 0.68em;
+	font-weight: 500;
+	color: var(--db-text-muted);
+	cursor: pointer;
+	transition: border-color var(--nand-duration) var(--nand-ease), color var(--nand-duration) var(--nand-ease), background-color var(--nand-duration) var(--nand-ease);
+}
+
+.dashboard-pomodoro-tagmanager-action:hover {
+	border-color: var(--db-accent);
+	color: var(--db-text);
+}
+
+.dashboard-pomodoro-tagmanager-action--danger:hover {
+	border-color: var(--db-danger, #e74c3c);
+	color: var(--db-danger, #e74c3c);
+}
+
+.dashboard-pomodoro-tagmanager-action-icon {
+	display: flex;
+}
+
+.dashboard-pomodoro-tagmanager-action-label {
+	white-space: nowrap;
+}
+
+.dashboard-pomodoro-tagmanager-prompt {
+	margin-top: 12px;
+	padding: 12px;
+	background: var(--db-bg-hover);
+	border-radius: var(--db-radius-md, 10px);
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+}
+
+.dashboard-pomodoro-tagmanager-prompt-label {
+	font-size: 0.72em;
+	color: var(--db-text);
+}
+
+.dashboard-pomodoro-tagmanager-prompt-input,
+.dashboard-pomodoro-tagmanager-prompt-select {
+	background: var(--db-bg-modal-raised, var(--background-primary, var(--db-bg)));
+	border: 1px solid var(--db-border-input, var(--db-border-card));
+	border-radius: var(--db-radius-sm, 6px);
+	color: var(--db-text);
+	font-size: 0.75em;
+	padding: 6px 10px;
+	outline: none;
+	width: 100%;
+	box-sizing: border-box;
+	transition: border-color var(--nand-duration) var(--nand-ease);
+}
+.dashboard-pomodoro-tagmanager-prompt-input:focus,
+.dashboard-pomodoro-tagmanager-prompt-select:focus {
+	border-color: var(--db-accent);
+}
+
+.dashboard-pomodoro-tagmanager-prompt-error {
+	font-size: 0.65em;
+	color: var(--db-danger, #e74c3c);
+	min-height: 0;
+}
+
+.dashboard-pomodoro-tagmanager-prompt-btns {
+	display: flex;
+	gap: 8px;
+	justify-content: flex-end;
+}
+
+.dashboard-pomodoro-tagmanager-prompt-cancel,
+.dashboard-pomodoro-tagmanager-prompt-ok {
+	border: none;
+	border-radius: var(--db-radius-sm, 6px);
+	padding: 6px 14px;
+	font-size: 0.72em;
+	font-weight: 600;
+	cursor: pointer;
+	transition: opacity var(--nand-duration) var(--nand-ease);
+}
+.dashboard-pomodoro-tagmanager-prompt-cancel {
+	background: var(--db-bg-hover);
+	color: var(--db-text-muted);
+}
+.dashboard-pomodoro-tagmanager-prompt-ok {
+	background: var(--db-accent);
+	color: var(--background-primary, #fff);
+}
+.dashboard-pomodoro-tagmanager-prompt-ok--danger {
+	background: var(--db-danger, #e74c3c);
+}
+.dashboard-pomodoro-tagmanager-prompt-cancel:hover,
+.dashboard-pomodoro-tagmanager-prompt-ok:hover {
+	opacity: 0.85;
+}
+

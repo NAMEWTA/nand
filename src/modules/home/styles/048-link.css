@@ -1,0 +1,12 @@
+/* ===== Link ===== */
+.dashboard-link-url {
+	color: var(--db-link);
+	text-decoration: none;
+	font-size: 0.95em;
+	word-break: break-all;
+}
+
+.dashboard-link-url:hover {
+	text-decoration: underline;
+}
+

@@ -1,0 +1,19 @@
+/* ===== Type Badges ===== */
+.dashboard-card-type-badge {
+	position: absolute;
+	bottom: 6px;
+	right: 8px;
+	font-size: 0.6em;
+	text-transform: uppercase;
+	letter-spacing: 0.08em;
+	opacity: 0.3;
+	font-weight: 500;
+}
+
+.dashboard-card-type-badge--task { color: var(--db-accent); }
+.dashboard-card-type-badge--note { color: var(--db-accent-light); }
+.dashboard-card-type-badge--link { color: var(--db-link); }
+.dashboard-card-type-badge--project { color: var(--db-progress-from); }
+.dashboard-card-type-badge--habit { color: var(--db-checkbox); }
+.dashboard-card-type-badge--generic { color: var(--db-text-muted); }
+

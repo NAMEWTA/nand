@@ -1,0 +1,783 @@
+/* ===== Media lightbox ===== */
+.dashboard-media-lightbox-container {
+	background: rgba(0, 0, 0, 0.92) !important;
+	padding: 0 !important;
+	opacity: 1 !important;
+}
+
+/* The modal layer (Obsidian's .modal) — override default max-width/padding/border
+   so the lightbox truly fills the viewport and centers its media. */
+.dashboard-media-lightbox-modal {
+	width: 100vw !important;
+	max-width: 100vw !important;
+	height: 100vh !important;
+	max-height: 100vh !important;
+	padding: 0 !important;
+	margin: 0 !important;
+	border: none !important;
+	border-radius: 0 !important;
+	background: transparent !important;
+	box-shadow: none !important;
+	display: flex !important;
+	align-items: center !important;
+	justify-content: center !important;
+}
+
+.dashboard-media-lightbox {
+	width: 100vw !important;
+	max-width: 100vw !important;
+	height: 100vh !important;
+	max-height: 100vh !important;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	position: relative;
+	background: transparent !important;
+	border: none !important;
+	box-shadow: none !important;
+	padding: 0 !important;
+}
+
+.dashboard-media-lightbox-stage {
+	max-width: 90vw;
+	max-height: 78vh;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+/* Media sits on the dark stage with a soft radius and a deep shadow so it
+   floats; the chrome below (caption, tags, arrows) is frosted glass. */
+.dashboard-media-lightbox-img,
+.dashboard-media-lightbox-video {
+	max-width: 90vw;
+	max-height: 74vh;
+	width: auto;
+	height: auto;
+	object-fit: contain;
+	border-radius: 10px;
+	box-shadow: 0 12px 48px rgba(0, 0, 0, 0.45);
+}
+
+/* Caption: a frosted pill under the media; index digits don't jitter. */
+.dashboard-media-lightbox-caption {
+	max-width: min(720px, 86vw);
+	margin-top: 14px;
+	padding: 5px 14px;
+	border: 1px solid rgba(255, 255, 255, 0.12);
+	border-radius: 999px;
+	background: rgba(255, 255, 255, 0.08);
+	backdrop-filter: blur(10px);
+	-webkit-backdrop-filter: blur(10px);
+	color: rgba(255, 255, 255, 0.88);
+	font-size: 0.8125em;
+	font-variant-numeric: tabular-nums;
+	text-align: center;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	pointer-events: none;
+}
+
+.dashboard-media-lightbox-empty {
+	color: rgba(255, 255, 255, 0.6);
+	font-size: 1.5em;
+}
+
+.dashboard-media-lightbox-nav {
+	position: absolute;
+	top: 50%;
+	transform: translateY(-50%);
+	width: 44px;
+	height: 44px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	border: 1px solid rgba(255, 255, 255, 0.16);
+	border-radius: 50%;
+	background: rgba(255, 255, 255, 0.10);
+	backdrop-filter: blur(12px);
+	-webkit-backdrop-filter: blur(12px);
+	color: rgba(255, 255, 255, 0.95);
+	cursor: pointer;
+	transition: background var(--nand-duration-fast) var(--nand-ease), border-color var(--nand-duration-fast) var(--nand-ease), opacity var(--nand-duration-fast) var(--nand-ease);
+}
+
+.dashboard-media-lightbox-nav:hover {
+	background: rgba(255, 255, 255, 0.20);
+	border-color: rgba(255, 255, 255, 0.3);
+}
+
+.dashboard-media-lightbox-nav svg {
+	width: 22px;
+	height: 22px;
+}
+
+.dashboard-media-lightbox-nav--prev { left: 24px; }
+.dashboard-media-lightbox-nav--next { right: 24px; }
+
+.dashboard-media-lightbox-nav.is-disabled {
+	opacity: 0.3;
+	cursor: default;
+}
+
+.dashboard-media-lightbox-nav.is-disabled:hover {
+	background: rgba(255, 255, 255, 0.10);
+	border-color: rgba(255, 255, 255, 0.16);
+}
+
+/* Phones: arrows tuck closer to the edge so they don't cover the media, and
+   the body-level lightbox drops its blur layers (the mobile GPU override at
+   the end of the dashboard block only covers the dashboard root). */
+.is-mobile .dashboard-media-lightbox-nav--prev { left: 8px; }
+.is-mobile .dashboard-media-lightbox-nav--next { right: 8px; }
+.is-mobile:not(.is-tablet) .dashboard-media-lightbox-nav,
+.is-mobile:not(.is-tablet) .dashboard-media-lightbox-caption,
+.is-mobile:not(.is-tablet) .dashboard-media-lightbox-tag {
+	backdrop-filter: none;
+	-webkit-backdrop-filter: none;
+}
+
+/* ---------- All-tasks section (vault task aggregation) ---------- */
+.dashboard-alltasks-content { display: flex; flex-direction: column; gap: 10px; }
+.dashboard-alltasks-area { display: flex; flex-direction: column; gap: 6px; max-height: 560px; overflow-y: auto; }
+
+.dashboard-alltasks-status .dashboard-library-view-btn {
+	font-size: 0.6875em;
+	padding: 2px 8px;
+}
+
+.dashboard-alltasks-list { display: flex; flex-direction: column; gap: 4px; }
+
+.dashboard-alltasks-row {
+	display: flex;
+	align-items: flex-start;
+	gap: 10px;
+	padding: 6px 10px;
+	border-radius: var(--db-radius-sm, 6px);
+	background: var(--db-bg-card, rgba(255, 255, 255, 0.04));
+	border: 1px solid var(--db-border-card, rgba(255, 255, 255, 0.08));
+}
+.dashboard-alltasks-row:hover { background: var(--db-bg-card-hover, rgba(255, 255, 255, 0.08)); }
+.dashboard-alltasks-row.is-done .dashboard-alltasks-text { text-decoration: line-through; opacity: 0.55; }
+
+.dashboard-alltasks-check {
+	flex-shrink: 0;
+	margin-top: 3px;
+	cursor: pointer;
+	accent-color: var(--db-accent, var(--interactive-accent));
+}
+
+.dashboard-alltasks-body { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.dashboard-alltasks-text {
+	font-size: 0.8125em;
+	color: var(--db-text, var(--text-normal));
+	word-break: break-word;
+	line-height: 1.4;
+}
+.dashboard-alltasks-text .dashboard-wikilink,
+.dashboard-alltasks-text a {
+	color: var(--db-accent, var(--text-accent));
+	cursor: pointer;
+}
+.dashboard-alltasks-reminder {
+	font-size: 0.6875em;
+	color: var(--db-text-muted, var(--text-muted));
+}
+
+.dashboard-alltasks-source {
+	flex-shrink: 0;
+	display: flex;
+	flex-direction: column;
+	align-items: flex-end;
+	gap: 2px;
+}
+.dashboard-alltasks-chip {
+	font-size: 0.6875em;
+	padding: 1px 8px;
+	border-radius: 999px;
+	background: var(--db-bg-hover, rgba(255, 255, 255, 0.08));
+	color: var(--db-text-muted, var(--text-muted));
+	max-width: 160px;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+.dashboard-alltasks-chip:hover { color: var(--db-accent, var(--text-accent)); }
+.dashboard-alltasks-date { font-size: 0.625em; color: var(--db-text-muted, var(--text-muted)); opacity: 0.7; }
+
+/* Priority badge */
+.dashboard-alltasks-prio {
+	flex-shrink: 0;
+	margin-top: 3px;
+	width: 18px;
+	height: 18px;
+	border-radius: 999px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	font-size: 0.625em;
+	font-weight: 700;
+	color: #fff;
+}
+.dashboard-alltasks-prio--high { background: #ef4444; }
+.dashboard-alltasks-prio--medium { background: #f59e0b; }
+.dashboard-alltasks-prio--low { background: #64748b; }
+
+/* Due date pill */
+.dashboard-alltasks-due {
+	font-size: 0.625em;
+	color: var(--db-text-muted, var(--text-muted));
+	background: var(--db-bg-hover, rgba(255, 255, 255, 0.06));
+	padding: 1px 6px;
+	border-radius: 999px;
+}
+.dashboard-alltasks-due.is-overdue { color: #fff; background: #ef4444; }
+
+/* Grouped list (date / priority buckets) */
+.dashboard-alltasks-groups { display: flex; flex-direction: column; gap: 8px; }
+.dashboard-alltasks-group { display: flex; flex-direction: column; gap: 4px; }
+.dashboard-alltasks-group-header {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	padding: 3px 4px;
+	cursor: pointer;
+	user-select: none;
+	border-radius: var(--db-radius-sm, 6px);
+}
+.dashboard-alltasks-group-header:hover { background: var(--db-bg-hover, rgba(255, 255, 255, 0.05)); }
+.dashboard-alltasks-group-chevron { color: var(--db-text-muted, var(--text-muted)); display: flex; }
+.dashboard-alltasks-group-chevron svg { width: 14px; height: 14px; }
+.dashboard-alltasks-group-title { font-size: 0.75em; font-weight: 600; color: var(--db-text, var(--text-normal)); }
+.dashboard-alltasks-group-count {
+	font-size: 0.6875em;
+	color: var(--db-text-muted, var(--text-muted));
+	background: var(--db-bg-hover, rgba(255, 255, 255, 0.06));
+	padding: 0 6px;
+	border-radius: 999px;
+}
+.dashboard-alltasks-group.is-collapsed .dashboard-alltasks-list { display: none; }
+
+/* "+N more" hint (grouped view hit the render cap) */
+.dashboard-alltasks-group-more {
+	padding: 4px 8px;
+	font-size: 0.6875em;
+	color: var(--db-text-muted, var(--text-muted));
+	font-style: italic;
+}
+.dashboard-alltasks-kanban-more {
+	margin-top: 4px;
+	font-size: 0.6875em;
+	text-align: center;
+	color: var(--db-text-muted, var(--text-muted));
+	font-style: italic;
+}
+/* Cap notice shown when the grouped view exceeds the render cap */
+.dashboard-alltasks-cap-notice {
+	margin-top: 8px;
+	padding: 6px 10px;
+	font-size: 0.75em;
+	text-align: center;
+	color: var(--db-text-muted, var(--text-muted));
+	background: var(--db-bg-hover, rgba(255, 255, 255, 0.04));
+	border-radius: var(--db-radius-sm, 6px);
+}
+
+/* Kanban board (alltasks) */
+.dashboard-alltasks-kanban {
+	display: flex;
+	/* Matches the library board's tight group gutters (shared columns). */
+	gap: 5px;
+	overflow-x: auto;
+	min-width: 0;
+	padding-bottom: 4px;
+	/* Thin, ALWAYS-visible themed bar (see .dashboard-library-kanban). */
+	scrollbar-width: thin;
+	scrollbar-color: color-mix(in srgb, var(--db-accent) 24%, transparent) transparent;
+}
+
+.dashboard-alltasks-kanban::-webkit-scrollbar {
+	height: 3px;
+}
+.dashboard-alltasks-kanban::-webkit-scrollbar-track {
+	background: transparent;
+}
+.dashboard-alltasks-kanban::-webkit-scrollbar-thumb {
+	background: color-mix(in srgb, var(--db-accent) 24%, transparent);
+	border-radius: 2px;
+	transition: background 0.2s ease;
+}
+.dashboard-alltasks-kanban::-webkit-scrollbar-thumb:hover {
+	background: color-mix(in srgb, var(--db-accent) 38%, transparent);
+}
+.dashboard-alltasks-kanban .dashboard-library-kanban-col { min-width: 200px; flex: 1; max-width: 280px; }
+.dashboard-alltasks-kanban-empty {
+	justify-content: center;
+	color: var(--db-text-muted, var(--text-muted));
+	font-size: 0.75em;
+	opacity: 0.5;
+}
+.dashboard-alltasks-card { padding: 6px 8px; }
+.dashboard-alltasks-card.is-done .dashboard-alltasks-card-title { text-decoration: line-through; opacity: 0.55; }
+.dashboard-alltasks-card-top { display: flex; align-items: center; gap: 6px; margin-bottom: 3px; }
+.dashboard-alltasks-card-title { font-size: 0.75em; line-height: 1.35; word-break: break-word; }
+.dashboard-alltasks-card-open {
+	margin-left: auto;
+	color: var(--db-text-muted, var(--text-muted));
+	display: flex;
+	cursor: pointer;
+}
+.dashboard-alltasks-card-open svg { width: 13px; height: 13px; }
+.dashboard-alltasks-card-open:hover { color: var(--db-accent, var(--text-accent)); }
+.dashboard-alltasks-card-source {
+	font-size: 0.625em;
+	color: var(--db-text-muted, var(--text-muted));
+	opacity: 0.7;
+	margin-left: 6px;
+}
+
+/* Config modal: exclude-folders chips */
+.dashboard-alltasks-exclude-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px; }
+.dashboard-alltasks-exclude-chip {
+	display: inline-flex;
+	align-items: center;
+	gap: 4px;
+	font-size: 0.75em;
+	padding: 2px 8px;
+	border-radius: 999px;
+	background: var(--db-bg-hover, rgba(255, 255, 255, 0.08));
+	color: var(--db-text, var(--text-normal));
+}
+.dashboard-alltasks-exclude-chip-x { cursor: pointer; opacity: 0.6; font-weight: 700; }
+.dashboard-alltasks-exclude-chip-x:hover { opacity: 1; color: #ef4444; }
+
+/* ---------- Multi-select folder picker (calendar excluded folders etc.) ---------- */
+.dashboard-folder-multi-list {
+	max-height: 300px;
+	overflow-y: auto;
+	border: 1px solid var(--db-border-input, rgba(255, 255, 255, 0.08));
+	border-radius: var(--db-radius-sm, 6px);
+	margin-top: 8px;
+}
+.dashboard-folder-multi-row {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	padding: 5px 8px;
+	cursor: pointer;
+	border-radius: var(--db-radius-sm, 6px);
+}
+.dashboard-folder-multi-row:hover { background: var(--db-bg-hover, rgba(255, 255, 255, 0.08)); }
+.dashboard-folder-multi-row.is-checked .dashboard-folder-multi-row-name {
+	color: var(--db-accent, var(--interactive-accent));
+	font-weight: 600;
+}
+.dashboard-folder-multi-row.is-covered { opacity: 0.45; cursor: default; }
+.dashboard-folder-multi-row.is-covered:hover { background: transparent; }
+.dashboard-folder-multi-row input[type='checkbox'] { pointer-events: none; flex-shrink: 0; margin: 0; }
+.dashboard-folder-multi-row-name {
+	flex: 1;
+	min-width: 0;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	font-size: 0.75em;
+	color: var(--db-text, var(--text-normal));
+}
+.dashboard-folder-multi-covered-note {
+	flex-shrink: 0;
+	font-size: 0.6875em;
+	color: var(--db-text-muted, var(--text-muted));
+}
+.dashboard-folder-multi-count {
+	margin-top: 6px;
+	font-size: 0.6875em;
+	color: var(--db-text-muted, var(--text-muted));
+}
+
+/* ---------- Calendar section (month grid) ---------- */
+.dashboard-calendar-content { display: flex; flex-direction: column; gap: 8px; }
+.dashboard-calendar-nav { display: flex; align-items: center; gap: 6px; }
+.dashboard-calendar-nav-btn {
+	display: flex; align-items: center; justify-content: center;
+	width: 26px; height: 26px; border-radius: var(--db-radius-sm, 6px);
+	cursor: pointer; color: var(--db-text-muted, var(--text-muted));
+}
+.dashboard-calendar-nav-btn:hover { background: var(--db-bg-hover, rgba(255,255,255,0.08)); color: var(--db-text, var(--text-normal)); }
+.dashboard-calendar-nav-btn svg { width: 16px; height: 16px; }
+.dashboard-calendar-nav-label { font-size: 0.8125em; font-weight: 600; color: var(--db-text, var(--text-normal)); min-width: 90px; text-align: center; }
+.dashboard-calendar-today-btn {
+	font-size: 0.6875em; padding: 3px 10px; border-radius: 999px;
+	background: var(--db-bg-hover, rgba(255,255,255,0.08)); color: var(--db-text-muted, var(--text-muted));
+	cursor: pointer; display: flex; align-items: center;
+}
+.dashboard-calendar-today-btn:hover { color: var(--db-accent, var(--text-accent)); }
+.dashboard-calendar-today-btn svg { width: 13px; height: 13px; }
+.dashboard-calendar-host { overflow-x: auto; }
+
+.dashboard-calendar { display: flex; flex-direction: column; gap: 4px; }
+.dashboard-calendar-weekdays { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; }
+.dashboard-calendar-weekday { font-size: 0.625em; text-align: center; color: var(--db-text-muted, var(--text-muted)); padding: 2px 0; }
+.dashboard-calendar-body { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; }
+
+/* Full-screen month with continuous multi-day bars: the body becomes a stack of
+   week blocks, each a bar strip (same 7-column template as the day cells below
+   it, so bars and cells share exact column edges) + the day cells. */
+.dashboard-calendar-body--bars { display: flex; flex-direction: column; gap: 2px; }
+.dashboard-calendar-week { display: flex; flex-direction: column; gap: 2px; }
+.dashboard-calendar-barlayer {
+	display: grid;
+	grid-template-columns: repeat(7, 1fr);
+	column-gap: 2px;
+	row-gap: 2px;
+	/* Keep in sync with MAX_BAR_LANES sizing: one lane = 20px bar + 2px row gap. */
+	--dashboard-bar-lane: 22px;
+	height: calc(var(--bar-lanes, 0) * var(--dashboard-bar-lane));
+}
+.dashboard-calendar-barlayer:empty { height: 0 !important; }
+.dashboard-calendar-week-days { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; }
+
+.dashboard-calendar-bar {
+	display: flex; align-items: center; gap: 3px; min-width: 0;
+	height: 20px; padding: 0 6px;
+	grid-column: var(--bar-cs, 1) / span var(--bar-len, 1);
+	grid-row: var(--bar-row, 1);
+	border-radius: 999px; overflow: hidden;
+	background: var(--db-bg-hover, rgba(255, 255, 255, 0.08));
+	border: 1px solid color-mix(in srgb, var(--db-accent, var(--interactive-accent)) 40%, transparent);
+	color: var(--db-text, var(--text-normal));
+	font-size: 0.5625em; line-height: 1.2; white-space: nowrap;
+	cursor: pointer; user-select: none;
+}
+.dashboard-calendar-bar:hover { background: var(--db-bg-hover-strong, var(--db-bg-hover, rgba(255, 255, 255, 0.14))); }
+.dashboard-calendar-bar:focus-visible { outline: 1px solid var(--db-accent, var(--interactive-accent)); outline-offset: 1px; }
+.dashboard-calendar-bar-time { flex-shrink: 0; font-weight: 600; color: var(--db-text-muted, var(--text-muted)); }
+.dashboard-calendar-bar-text { overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+.dashboard-calendar-bar.is-done { opacity: 0.5; }
+.dashboard-calendar-bar.is-done .dashboard-calendar-bar-text { text-decoration: line-through; }
+.dashboard-calendar-bar.prio-high { background: color-mix(in srgb, var(--db-prio-high, #ef4444) 18%, transparent); border-color: color-mix(in srgb, var(--db-prio-high, #ef4444) 55%, transparent); }
+.dashboard-calendar-bar.prio-medium { background: color-mix(in srgb, var(--db-prio-medium, #f59e0b) 18%, transparent); border-color: color-mix(in srgb, var(--db-prio-medium, #f59e0b) 55%, transparent); }
+.dashboard-calendar-bar.prio-low { background: color-mix(in srgb, var(--db-prio-low, #3b82f6) 18%, transparent); border-color: color-mix(in srgb, var(--db-prio-low, #3b82f6) 55%, transparent); }
+.dashboard-calendar-bar.is-cont-left { border-top-left-radius: 0; border-bottom-left-radius: 0; border-left-style: dashed; margin-left: -1px; }
+.dashboard-calendar-bar.is-cont-right { border-top-right-radius: 0; border-bottom-right-radius: 0; border-right-style: dashed; margin-right: -1px; }
+
+/* Day-origin markers (scheduled ⏳ / completed ✅) on calendar task rows. */
+.dashboard-calendar-mark { display: flex; flex-shrink: 0; color: var(--db-text-muted, var(--text-muted)); opacity: 0.7; }
+.dashboard-calendar-mark svg { width: 11px; height: 11px; }
+.dashboard-calendar-mark--done { opacity: 0.8; }
+
+/* Dot mode: a day whose only entries are completed tasks gets a muted dot. */
+.dashboard-calendar-cell-dot.is-done { background: var(--db-text-faint, var(--db-text-muted, var(--text-muted))); opacity: 0.55; }
+
+/* Phones: keep bars tappable and readable at narrow widths. */
+.is-phone .dashboard-calendar-bar { font-size: 0.5rem; padding: 0 4px; gap: 2px; }
+.is-phone .dashboard-calendar-bar-time { display: none; }
+
+.dashboard-calendar-cell {
+	min-width: 0; border-radius: var(--db-radius-sm, 6px);
+	background: var(--db-bg-card, rgba(255,255,255,0.03));
+	border: 1px solid var(--db-border-card, rgba(255,255,255,0.06));
+	padding: 3px; display: flex; flex-direction: column; gap: 2px;
+}
+.dashboard-calendar-cell.is-outside { opacity: 0.4; }
+.dashboard-calendar-cell.is-today { border-color: var(--db-accent, var(--interactive-accent)); box-shadow: 0 0 0 1px var(--db-accent, var(--interactive-accent)) inset; }
+.dashboard-calendar-cell-num { font-size: 0.625em; font-weight: 600; color: var(--db-text-muted, var(--text-muted)); }
+.dashboard-calendar-cell.is-today .dashboard-calendar-cell-num { color: var(--db-accent, var(--text-accent)); }
+.dashboard-calendar-cell-list { display: flex; flex-direction: column; gap: 2px; min-height: 0; }
+
+/* Compact (in-column) sizing */
+.dashboard-calendar.is-compact .dashboard-calendar-cell { min-height: 64px; }
+.dashboard-calendar.is-compact .dashboard-calendar-cell.has-tasks { cursor: pointer; }
+.dashboard-calendar.is-compact .dashboard-calendar-cell.has-tasks:hover { background: var(--db-bg-card-hover, rgba(255,255,255,0.08)); }
+
+/* Full (modal) sizing. Every cell gets an explicit light border (mixed from the
+   theme's text color, so it stays light-on-dark and dark-on-light across
+   palettes); today's cell takes an accent-tinted background with an
+   accent-colored, bolder date number. The --db-* vars resolve via the copy onto
+   the modal box in calendar-modal.ts (the modal sits outside the theme root).
+   Cells cap at a viewport-scaled height so a busy day scrolls inside its list
+   instead of stretching the cell (and its whole week row). */
+.dashboard-calendar.is-full .dashboard-calendar-cell {
+	height: clamp(104px, 16vh, 200px);
+	border-color: color-mix(in srgb, var(--db-text, rgba(232, 240, 248, 0.9)) 16%, transparent);
+}
+.dashboard-calendar.is-full .dashboard-calendar-cell.is-today {
+	background: color-mix(in srgb, var(--db-accent, var(--interactive-accent)) 16%, transparent);
+	border-color: var(--db-accent, var(--interactive-accent));
+}
+.dashboard-calendar.is-full .dashboard-calendar-cell.is-today .dashboard-calendar-cell-num {
+	color: var(--db-accent, var(--text-accent));
+	font-weight: 700;
+}
+/* Full-screen month: the day number opens the day agenda (add tasks) */
+.dashboard-calendar.is-full .dashboard-calendar-cell-num.is-clickable {
+	cursor: pointer; border-radius: 4px; margin: -2px -5px; padding: 2px 5px;
+	align-self: flex-start;
+}
+.dashboard-calendar.is-full .dashboard-calendar-cell-num.is-clickable:hover {
+	background: var(--db-bg-hover, rgba(255,255,255,0.06));
+	color: var(--db-text, var(--text-normal));
+}
+.dashboard-calendar.is-full .dashboard-calendar-cell-num.is-clickable:focus-visible {
+	outline: 2px solid var(--db-accent, var(--interactive-accent));
+	outline-offset: 1px;
+}
+
+/* Week view: vertical list of 7 day rows (distinct from the month grid) */
+.dashboard-calendar.dashboard-calendar--week { display: flex; flex-direction: column; gap: 4px; }
+.dashboard-calendar-week-row {
+	border-radius: var(--db-radius-sm, 6px);
+	background: var(--db-bg-card, rgba(255,255,255,0.03));
+	border: 1px solid var(--db-border-card, rgba(255,255,255,0.06));
+	padding: 4px 6px;
+}
+.dashboard-calendar-week-row.is-today {
+	border-color: var(--db-accent, var(--interactive-accent));
+	box-shadow: 0 0 0 1px var(--db-accent, var(--interactive-accent)) inset;
+}
+.dashboard-calendar-week-row-head { display: flex; align-items: center; gap: 6px; margin-bottom: 3px; }
+.dashboard-calendar-week-row-namewrap { display: flex; align-items: baseline; gap: 5px; }
+.dashboard-calendar-week-row-name { font-size: 0.6875em; font-weight: 600; color: var(--db-text, var(--text-normal)); }
+.dashboard-calendar-week-row.is-today .dashboard-calendar-week-row-name { color: var(--db-accent, var(--text-accent)); }
+.dashboard-calendar-week-row-date { font-size: 0.625em; color: var(--db-text-muted, var(--text-muted)); }
+.dashboard-calendar-week-row-count {
+	margin-left: auto;
+	font-size: 0.625em; color: var(--db-text-muted, var(--text-muted));
+	background: var(--db-bg-hover, rgba(255,255,255,0.06));
+	padding: 0 6px; border-radius: 999px;
+}
+.dashboard-calendar-week-row-list { gap: 3px; }
+.dashboard-calendar-week-row-head.is-clickable { cursor: pointer; border-radius: 4px; margin: -2px -4px; padding: 2px 4px; }
+.dashboard-calendar-week-row-head.is-clickable:hover { background: var(--db-bg-hover, rgba(255,255,255,0.06)); }
+
+.dashboard-calendar-event {
+	display: flex; align-items: center; gap: 3px;
+	font-size: 0.5625em; line-height: 1.2;
+	padding: 1px 4px; border-radius: 4px;
+	background: var(--db-bg-hover, rgba(255,255,255,0.06));
+	color: var(--db-text, var(--text-normal));
+	overflow: hidden; white-space: nowrap; text-overflow: ellipsis;
+}
+.dashboard-calendar.is-full .dashboard-calendar-event { font-size: 0.8125em; padding: 3px 6px; line-height: 1.45; }
+.dashboard-calendar-event.is-done { opacity: 0.5; text-decoration: line-through; }
+/* Time-of-day label shown on week-view tasks and the day agenda */
+.dashboard-calendar-event-time {
+	flex-shrink: 0;
+	font-size: 0.5625em;
+	font-variant-numeric: tabular-nums;
+	color: var(--db-text-muted, var(--text-muted));
+	background: rgba(0, 0, 0, 0.2);
+	padding: 0 3px;
+	border-radius: 3px;
+	min-width: 28px;
+	text-align: center;
+}
+.dashboard-calendar.is-full .dashboard-calendar-event-time { font-size: 0.8125em; }
+.dashboard-alltasks-row .dashboard-calendar-event-time { font-size: 0.6875em; }
+
+/* Add-task row in the day agenda modal (time + title + Add -> daily note) */
+.dashboard-cal-day-add { display: flex; gap: 6px; align-items: center; margin-bottom: 10px; }
+/* Equal heights for the add-task row: Chromium renders input[type=time]
+   intrinsically taller than the sibling text input; pin both to the button
+   height so the row lines up. */
+.dashboard-cal-day-add-time,
+.dashboard-cal-day-add-title {
+	height: 34px;
+	padding: 0 10px;
+	box-sizing: border-box;
+}
+.dashboard-cal-day-add-time { width: 92px; flex-shrink: 0; }
+.dashboard-cal-day-add-title { flex: 1; min-width: 0; }
+.dashboard-cal-day-add-btn { flex-shrink: 0; }
+
+/* Google-style week time grid (full-screen modal). Hour rows are 48px; day
+   column height is 24*48 = 1152px — keep in sync with TIMEGRID_HOUR_PX. */
+.dashboard-calgrid { display: flex; flex-direction: column; height: 100%; min-height: 0; }
+.dashboard-calgrid-head {
+	display: grid; grid-template-columns: 52px repeat(7, 1fr);
+	border-bottom: 1px solid var(--db-border-card, rgba(255,255,255,0.08));
+}
+.dashboard-calgrid-dayhead { text-align: center; padding: 6px 0 4px; }
+.dashboard-calgrid-dayhead-wd { font-size: 0.6875em; color: var(--db-text-muted, var(--text-muted)); }
+.dashboard-calgrid-dayhead-date { font-size: 0.9375em; font-weight: 600; color: var(--db-text, var(--text-normal)); }
+.dashboard-calgrid-dayhead.is-today .dashboard-calgrid-dayhead-date { color: var(--db-accent, var(--interactive-accent)); }
+/* Week time grid: the day header opens the day agenda (add tasks) */
+.dashboard-calgrid-dayhead.is-clickable { cursor: pointer; border-radius: 4px; }
+.dashboard-calgrid-dayhead.is-clickable:hover { background: var(--db-bg-hover, rgba(255,255,255,0.06)); }
+.dashboard-calgrid-dayhead.is-clickable:focus-visible {
+	outline: 2px solid var(--db-accent, var(--interactive-accent));
+	outline-offset: 1px;
+}
+.dashboard-calgrid-allday {
+	display: grid; grid-template-columns: 52px repeat(7, 1fr);
+	border-bottom: 1px solid var(--db-border-card, rgba(255,255,255,0.08));
+	min-height: 22px;
+}
+.dashboard-calgrid-allday-corner { font-size: 0.5625em; color: var(--db-text-muted, var(--text-muted)); padding: 3px 4px; align-self: center; }
+.dashboard-calgrid-allday-cell { padding: 2px 1px; display: flex; flex-direction: column; gap: 1px; min-width: 0; }
+.dashboard-calgrid-allday-chip {
+	font-size: 0.5625em; line-height: 1.2;
+	background: var(--db-bg-hover, rgba(255,255,255,0.06));
+	border-radius: 3px; padding: 0 3px;
+	white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.dashboard-calgrid-allday-chip.is-done { opacity: 0.5; text-decoration: line-through; }
+.dashboard-calgrid-allday-more { font-size: 0.5625em; color: var(--db-text-muted, var(--text-muted)); }
+.dashboard-calgrid-scroll { flex: 1; min-height: 0; overflow-y: auto; max-height: calc(100vh - 180px); }
+.dashboard-calgrid-body { display: grid; grid-template-columns: 52px repeat(7, 1fr); position: relative; }
+.dashboard-calgrid-hours { border-right: 1px solid var(--db-border-card, rgba(255,255,255,0.08)); }
+.dashboard-calgrid-hour {
+	height: 48px; font-size: 0.625em; color: var(--db-text-muted, var(--text-muted));
+	text-align: right; padding: 0 4px; box-sizing: border-box;
+}
+.dashboard-calgrid-daycol {
+	position: relative; height: 1152px; min-width: 0;
+	border-right: 1px solid var(--db-border-card, rgba(255,255,255,0.06));
+	background-image: linear-gradient(to bottom, var(--db-border-card, rgba(255,255,255,0.06)) 1px, transparent 1px);
+	background-size: 100% 48px; background-position: 0 0;
+}
+.dashboard-calgrid-daycol.is-today { background-color: var(--db-bg-banner, rgba(168,85,247,0.06)); }
+.dashboard-calgrid-event {
+	position: absolute; left: 2px; right: 2px;
+	border-radius: 5px; padding: 3px 6px; overflow: hidden;
+	background: var(--db-bg-card-hover, rgba(255,255,255,0.08));
+	border-left: 3px solid var(--db-accent, var(--interactive-accent));
+	font-size: 0.6875em; line-height: 1.25; cursor: pointer;
+	color: var(--db-text, var(--text-normal));
+}
+.dashboard-calgrid-event.is-done { opacity: 0.5; text-decoration: line-through; }
+.dashboard-calgrid-event.prio-high { border-left-color: var(--db-danger, #f43f5e); }
+.dashboard-calgrid-event.prio-medium { border-left-color: var(--db-accent-light, #6366f1); }
+.dashboard-calgrid-event-check { margin-right: 3px; }
+.dashboard-calgrid-event-time { font-size: 0.5625em; color: var(--db-text-muted, var(--text-muted)); font-variant-numeric: tabular-nums; }
+.dashboard-calgrid-event-title { font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.dashboard-calgrid-nowline {
+	position: absolute; left: 52px; right: 0; height: 2px;
+	background: var(--db-danger, #f43f5e); z-index: 5; pointer-events: none;
+}
+.dashboard-calgrid-nowline::before {
+	content: ''; position: absolute; left: -4px; top: -3px;
+	width: 8px; height: 8px; border-radius: 50%; background: var(--db-danger, #f43f5e);
+}
+.dashboard-calendar-event.is-overdue { background: rgba(239,68,68,0.25); }
+.dashboard-calendar-event.prio-high { border-left: 2px solid #ef4444; }
+.dashboard-calendar-event.prio-medium { border-left: 2px solid #f59e0b; }
+.dashboard-calendar-event.prio-low { border-left: 2px solid #64748b; }
+.dashboard-calendar-event.is-multi { background: var(--db-bg-hover, rgba(255,255,255,0.1)); }
+.dashboard-calendar-event-text { overflow: hidden; text-overflow: ellipsis; }
+.dashboard-calendar.is-full .dashboard-calendar-event-text .dashboard-wikilink { pointer-events: none; }
+.dashboard-calendar-event.is-multi .dashboard-calendar-multi-mark { margin-left: auto; flex-shrink: 0; display: flex; opacity: 0.7; }
+.dashboard-calendar-event.is-multi .dashboard-calendar-multi-mark svg { width: 9px; height: 9px; }
+.dashboard-calendar-check { width: 11px; height: 11px; flex-shrink: 0; margin: 0; accent-color: var(--db-accent, var(--interactive-accent)); }
+.dashboard-calendar-more { font-size: 0.5625em; color: var(--db-text-muted, var(--text-muted)); padding: 0 4px; }
+/* Click-to-jump affordances (calendar task rows/chips wired to onOpenNote) */
+.dashboard-calendar-event.is-jumpable { cursor: pointer; }
+.dashboard-calgrid-allday-chip.is-jumpable { cursor: pointer; }
+.dashboard-calgrid-allday-chip.is-jumpable:hover { background: var(--db-bg-card-hover, rgba(255,255,255,0.14)); }
+.dashboard-alltasks-row.is-jumpable { cursor: pointer; }
+
+/* Fullscreen modal */
+.dashboard-calendar-fullscreen-modal { width: 92vw; max-width: 1100px; height: 88vh; }
+.dashboard-calendar-fullscreen-inner { width: 100%; height: 100%; display: flex; flex-direction: column; }
+.dashboard-calendar-fullscreen-body { flex: 1; min-height: 0; overflow: auto; }
+/* Fullscreen calendar: task filter button (header). Active (non-'all') filters
+   tint icon + label with the accent so the narrowed state is visible at a glance. */
+.dashboard-calendar-filter-btn { display: inline-flex; align-items: center; gap: 4px; }
+.dashboard-calendar-filter-btn svg { width: 13px; height: 13px; }
+.dashboard-calendar-filter-btn.is-filtered {
+	color: var(--db-accent, var(--interactive-accent));
+	border-color: var(--db-accent, var(--interactive-accent));
+}
+.dashboard-calendar-filter-caret { display: inline-flex; align-items: center; }
+.dashboard-calendar-filter-caret svg { width: 12px; height: 12px; }
+/* Narrow screens: the header now carries nav + view toggle + today + filter —
+   let it wrap instead of clipping controls. */
+.dashboard-calendar-fullscreen-inner .dashboard-modal-header { flex-wrap: wrap; row-gap: 8px; }
+/* Busy days scroll inside their capped cell. Standard scrollbar properties only
+   (theme hijacks ::-webkit-scrollbar pseudo-elements on some setups). */
+.dashboard-calendar-fullscreen-body .dashboard-calendar.is-full .dashboard-calendar-cell-list {
+	flex: 1;
+	gap: 4px;
+	overflow-y: auto;
+	overscroll-behavior: contain;
+	scrollbar-width: thin;
+	scrollbar-color: color-mix(in srgb, var(--db-accent, var(--interactive-accent)) 30%, transparent) transparent;
+}
+
+/* Calendar section: the full-screen calendar embedded as a board section.
+   Mirrors the modal's inner layout (wrap-capable nav row + scrollable grid
+   body); grid internals reuse the global calendar/calgrid styles above. */
+.dashboard-section-row[data-section-type="calendar"] {
+	max-height: 800px;
+}
+.dashboard-calendar-section {
+	flex: 1;
+	min-height: 0;
+	display: flex;
+	flex-direction: column;
+}
+.dashboard-calendar-section-nav {
+	flex-wrap: wrap;
+	row-gap: 8px;
+	margin-bottom: 8px;
+}
+.dashboard-calendar-section-nav .dashboard-calendar-nav-label {
+	flex: 1;
+	text-align: center;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+.dashboard-calendar-section-body {
+	flex: 1;
+	min-height: 0;
+	overflow: auto;
+}
+/* Section month view: shorter day cells than the full-screen modal. The modal
+   is 88vh tall, so its clamp(104px, 16vh, 200px) rows fit; the section caps at
+   800px, where those rows push the grid deep into scrolling. A tighter clamp
+   lets the whole month fit inside the section. */
+.dashboard-calendar-section-body .dashboard-calendar.is-full .dashboard-calendar-cell {
+	height: clamp(64px, 9vh, 120px);
+}
+/* Busy days scroll inside their capped cell (same recipe as the modal). */
+.dashboard-calendar-section-body .dashboard-calendar.is-full .dashboard-calendar-cell-list {
+	flex: 1;
+	gap: 4px;
+	overflow-y: auto;
+	overscroll-behavior: contain;
+	scrollbar-width: thin;
+	scrollbar-color: color-mix(in srgb, var(--db-accent, var(--interactive-accent)) 30%, transparent) transparent;
+}
+
+/* Prompt dialog (text-input variant of the confirm dialog) */
+.dashboard-prompt-input {
+	width: 100%;
+	margin: 0 0 20px;
+	padding: 8px 12px;
+	font-size: 0.95em;
+	color: var(--text-normal);
+	background: rgba(255, 255, 255, 0.06);
+	border: 1px solid rgba(255, 255, 255, 0.12);
+	border-radius: 8px;
+}
+.dashboard-prompt-input:focus {
+	outline: none;
+	border-color: var(--interactive-accent);
+}
+.dashboard-confirm-confirm {
+	padding: 7px 20px;
+	border-radius: 8px;
+	font-size: 0.9em;
+	cursor: pointer;
+	background: var(--interactive-accent);
+	border: 1px solid transparent;
+	color: var(--text-on-accent);
+	transition: background 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease, color 0.15s ease, transform 0.15s ease;
+}
+.dashboard-confirm-confirm:hover {
+	opacity: 0.85;
+}
+

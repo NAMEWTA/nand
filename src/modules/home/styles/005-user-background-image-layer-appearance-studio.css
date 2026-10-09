@@ -1,0 +1,28 @@
+/* ===== User background-image layer (Appearance Studio) =====
+   Painted directly on the root, behind all content. Glass surfaces
+   (backdrop-filter: var(--db-backdrop-blur)) auto-frost over it. */
+.nand-dashboard-bg {
+	position: absolute;
+	inset: 0;
+	z-index: 0;
+	pointer-events: none;
+	background-position: center;
+	background-repeat: no-repeat;
+}
+.nand-dashboard-bg-scrim {
+	position: absolute;
+	inset: 0;
+}
+/* Lift dashboard content above the background layer.
+   Banner sits one level above main so its collapsed bookmark tab — which pokes
+   downward past the 4px collapsed banner into main's area — stays clickable. */
+.nand-dashboard-root > .dashboard-banner {
+	position: relative;
+	z-index: 2;
+}
+.nand-dashboard-root > .dashboard-main,
+.nand-dashboard-root > .dashboard-mobile-widget-bar {
+	position: relative;
+	z-index: 1;
+}
+

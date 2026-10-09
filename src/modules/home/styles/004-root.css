@@ -1,0 +1,95 @@
+/* ===== Board tokens =====
+   The board's semantic aliases, defined once from the global NAND tokens and Obsidian variables so
+   the board follows Obsidian, community themes and NAND theme presets. Board appearance options
+   (background image, glass, radius, surface opacity, font scale) override them inline on the root. */
+body {
+	--db-bg: var(--background-primary);
+	--db-bg-secondary: var(--background-secondary);
+	--db-bg-section: transparent;
+	--db-bg-card: var(--background-primary);
+	--db-bg-card-hover: var(--nand-surface-hover);
+	--db-bg-sidebar: transparent;
+	--db-bg-input: var(--background-modifier-form-field);
+	--db-bg-btn: var(--nand-accent-softer);
+	--db-bg-btn-hover: var(--nand-accent-soft);
+	--db-bg-banner: var(--background-secondary);
+	--db-bg-overlay: linear-gradient(135deg, rgba(0, 0, 0, 0.55) 0%, rgba(0, 0, 0, 0.25) 100%);
+	--db-bg-hover: var(--nand-surface-hover);
+	--db-bg-hover-strong: var(--nand-surface-active);
+	--db-bg-add-section: var(--background-secondary);
+	--db-bg-drop-indicator: var(--nand-accent-softer);
+	--db-bg-modal: var(--background-primary);
+	--db-bg-modal-raised: var(--background-secondary);
+
+	--db-border: var(--nand-border-color);
+	--db-border-card: var(--nand-border-color);
+	--db-border-section: transparent;
+	--db-border-sidebar: transparent;
+	--db-border-input: var(--nand-border-color);
+	--db-border-input-focus: var(--interactive-accent);
+	--db-border-btn: var(--nand-accent-border);
+	--db-border-btn-hover: var(--interactive-accent);
+	--db-border-add-section: var(--nand-border-color-strong);
+	--db-border-accent: var(--nand-accent-border);
+
+	--db-text: var(--text-normal);
+	--db-text-primary: var(--text-normal);
+	--db-text-secondary: var(--text-muted);
+	--db-text-muted: var(--text-muted);
+	--db-text-faint: var(--text-faint);
+	--db-text-inverse: #ffffff;
+	--db-text-inverse-muted: rgba(255, 255, 255, 0.6);
+
+	--db-accent: var(--interactive-accent);
+	--db-accent-light: var(--interactive-accent-hover);
+	--db-accent-dim: var(--nand-accent-soft);
+	--db-card-accent: var(--interactive-accent);
+	--db-danger: var(--nand-tone-error);
+	--db-prio-high: var(--nand-tone-error);
+	--db-prio-medium: var(--nand-tone-warning);
+	--db-prio-low: var(--nand-tone-info);
+
+	--db-shadow-card: var(--nand-shadow-xs);
+	--db-shadow-card-hover: var(--nand-shadow-sm);
+	--db-backdrop-blur: none;
+	--db-radius-sm: var(--nand-radius-sm);
+	--db-radius-md: var(--nand-radius-md);
+	--db-radius-lg: var(--nand-radius-lg);
+	--db-font: var(--font-interface);
+
+	--db-progress-from: var(--interactive-accent);
+	--db-progress-to: var(--interactive-accent-hover);
+	--db-checkbox: var(--interactive-accent);
+	--db-quote-border: var(--blockquote-border-color, var(--interactive-accent));
+	--db-link: var(--link-color, var(--text-accent));
+	--db-sec-hue: var(--interactive-accent);
+	--db-sec-glow: var(--nand-accent-soft);
+	--db-aurora-bg: var(--db-bg);
+	--db-aurora-size: 100% 100%;
+	--db-aurora-speed: 0s;
+	--db-pomodoro-text: var(--text-normal);
+	--db-pomodoro-running-text: var(--text-on-accent);
+}
+
+/* ===== Root ===== */
+.nand-dashboard-root {
+	--db-text-on-accent: var(--db-text-inverse, var(--text-on-accent));
+	--db-text-on-danger: #fff;
+	--db-text-on-muted: #fff;
+	--db-photo-text: rgba(255, 255, 255, 0.96);
+	--db-banner-scrim: linear-gradient(180deg, rgba(0, 0, 0, 0.62), rgba(0, 0, 0, 0.72));
+	/* Resolve before a photo widget overrides its foreground tokens. */
+	--db-control-bg: var(--db-bg-modal, var(--db-bg-card));
+	--db-control-text: var(--db-text);
+	display: flex;
+	flex-direction: column;
+	height: 100%;
+	overflow: hidden;
+	position: relative;
+	isolation: isolate;
+	background: var(--db-bg);
+	color: var(--db-text);
+	font-family: var(--db-font);
+	transition: background 0.3s ease, color 0.3s ease;
+}
+

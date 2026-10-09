@@ -1,0 +1,2321 @@
+{
+  "commit": "268e133c6f99dcef670cbda0d25a74b8239aa099",
+  "now": "2026-09-27T12:30:00.000Z",
+  "file": {
+    "id": "Projects/Alpha.md",
+    "name": "Alpha",
+    "category": "file",
+    "iconDefault": "lucide-file",
+    "icon": "lucide-star",
+    "color": "#aabbcc"
+  },
+  "metadata": {
+    "headings": [
+      {
+        "heading": "Roadmap"
+      },
+      {
+        "heading": "Tasks"
+      }
+    ],
+    "links": [
+      {
+        "link": "Beta"
+      }
+    ],
+    "embeds": [
+      {
+        "link": "image.png"
+      }
+    ],
+    "tags": [
+      {
+        "tag": "#work"
+      }
+    ],
+    "frontmatter": {
+      "tags": [
+        "work",
+        "active"
+      ],
+      "Status": "Ready",
+      "Score": 12,
+      "Done": false,
+      "Due": "2026-09-28",
+      "People": [
+        "Alice",
+        "Bob"
+      ],
+      "Empty": null
+    }
+  },
+  "stat": {
+    "ctime": 1789907400000,
+    "mtime": 1790512200000
+  },
+  "defaults": {
+    "biggerIcons": "mobile",
+    "clickableIcons": "desktop",
+    "showAllFileIcons": false,
+    "showAllFolderIcons": false,
+    "minimalFolderIcons": true,
+    "showMarkdownTabIcons": true,
+    "showTitleIcons": true,
+    "showTagPillIcons": false,
+    "showMenuActions": true,
+    "showSuggestionIcons": false,
+    "showQuickSwitcherIcons": true,
+    "showMoveFileIcons": true,
+    "showItemName": "desktop",
+    "useSearchKeywords": "on",
+    "maxSearchResults": 100,
+    "colorPicker1": "list",
+    "colorPicker2": "rgb",
+    "uncolorHover": false,
+    "uncolorDrag": false,
+    "uncolorSelect": false,
+    "uncolorQuick": false,
+    "maxBackups": 2,
+    "dialogState": {
+      "iconMode": true,
+      "emojiMode": false,
+      "rulePage": "file"
+    },
+    "appIcons": {},
+    "tabIcons": {},
+    "fileIcons": {},
+    "bookmarkIcons": {},
+    "tagIcons": {},
+    "propertyIcons": {},
+    "ribbonIcons": {},
+    "fileRules": [],
+    "folderRules": []
+  },
+  "commands": [
+    "open-rulebook",
+    "toggle-bigger-icons",
+    "toggle-clickable-icons",
+    "toggle-all-file-icons",
+    "toggle-all-folder-icons",
+    "toggle-minimal.folder-icons",
+    "toggle-markdown-tab-icons",
+    "toggle-title-icons",
+    "toggle-tag-pill-icons",
+    "toggle-menu-actions",
+    "toggle-suggestion-icons",
+    "toggle-quick-switcher-icons",
+    "toggle-move-file-icons",
+    "change-icon-current-file"
+  ],
+  "hashes": {
+    "lucide-names.json": "4999733ec5d82eba5257a94cfd3eeb8aba40109c59aa29b42ea66f5989977058",
+    "lucide-keywords.json": "23096d2ee6c639647339662e8ddd0b396cd05999fe0d49f8fe4eac254d7b3baf",
+    "emojis.json": "b776bf3d122e48e7ce0356eaa42af3cd09cfa82feeb095a14161b06f266c20a2"
+  },
+  "locales": {
+    "en": {
+      "iconic.appItems.help": "Open help",
+      "iconic.appItems.settings": "Open settings",
+      "iconic.appItems.pin": "Toggle pin",
+      "iconic.appItems.sidebarLeft": "Toggle left sidebar",
+      "iconic.appItems.sidebarRight": "Toggle right sidebar",
+      "iconic.appItems.minimize": "Minimize",
+      "iconic.appItems.maximize": "Maximize",
+      "iconic.appItems.unmaximize": "Restore down",
+      "iconic.appItems.close": "Close window",
+      "iconic.menu.changeIcon": "Change icon...",
+      "iconic.menu.changeIcons": "Change {#} icons...",
+      "iconic.menu.removeIcon": "Remove icon",
+      "iconic.menu.removeIcons": "Remove {#} icons",
+      "iconic.menu.resetColor": "Reset color",
+      "iconic.menu.resetColors": "Reset {#} colors",
+      "iconic.menu.editRule": "Edit rule...",
+      "iconic.iconPicker.changeIcon": "Change icon",
+      "iconic.iconPicker.changeIcons": "Change {#} icons",
+      "iconic.iconPicker.changeEmoji": "Change emoji",
+      "iconic.iconPicker.changeEmojis": "Change {#} emojis",
+      "iconic.iconPicker.changeMix": "Change icon / emoji",
+      "iconic.iconPicker.changeMixes": "Change {#} icons / emojis",
+      "iconic.iconPicker.overrulePrefix": "Your rule ",
+      "iconic.iconPicker.overruleSuffix": " is overruling this icon.",
+      "iconic.iconPicker.overrules": "Your rulebook is overruling some of these icons.",
+      "iconic.iconPicker.search": "Search",
+      "iconic.iconPicker.searchIcons": "Search icons...",
+      "iconic.iconPicker.searchEmojis": "Search emojis...",
+      "iconic.iconPicker.searchMix": "Search icons / emojis...",
+      "iconic.iconPicker.changeColor": "Change color",
+      "iconic.iconPicker.resetColor": "Reset color",
+      "iconic.iconPicker.toggleIcons": "Toggle icons",
+      "iconic.iconPicker.toggleEmojis": "Toggle emojis",
+      "iconic.iconPicker.icons": "Icons",
+      "iconic.iconPicker.emojis": "Emojis",
+      "iconic.iconPicker.mixed": "Mixed",
+      "iconic.iconPicker.cancel": "Cancel",
+      "iconic.iconPicker.save": "Save",
+      "iconic.iconPicker.colors.red": "Red",
+      "iconic.iconPicker.colors.orange": "Orange",
+      "iconic.iconPicker.colors.yellow": "Yellow",
+      "iconic.iconPicker.colors.green": "Green",
+      "iconic.iconPicker.colors.cyan": "Cyan",
+      "iconic.iconPicker.colors.blue": "Blue",
+      "iconic.iconPicker.colors.purple": "Purple",
+      "iconic.iconPicker.colors.pink": "Pink",
+      "iconic.iconPicker.colors.gray": "Gray",
+      "iconic.usageChecker.unusedIcons": "Unused icons",
+      "iconic.usageChecker.noUnusedIconsFound": "No unused icons found.",
+      "iconic.categories.item": "Item",
+      "iconic.categories.items": "Items",
+      "iconic.categories.appItem": "Button",
+      "iconic.categories.appItems": "Buttons",
+      "iconic.categories.tab": "Tab",
+      "iconic.categories.tabs": "Tabs",
+      "iconic.categories.file": "File",
+      "iconic.categories.files": "Files",
+      "iconic.categories.folder": "Folder",
+      "iconic.categories.folders": "Folders",
+      "iconic.categories.group": "Group",
+      "iconic.categories.groups": "Groups",
+      "iconic.categories.search": "Query",
+      "iconic.categories.searches": "Queries",
+      "iconic.categories.graph": "Graph",
+      "iconic.categories.graphs": "Graphs",
+      "iconic.categories.url": "URL",
+      "iconic.categories.urls": "URLs",
+      "iconic.categories.tag": "Tag",
+      "iconic.categories.tags": "Tags",
+      "iconic.categories.property": "Property",
+      "iconic.categories.properties": "Properties",
+      "iconic.categories.ribbonItem": "Ribbon command",
+      "iconic.categories.ribbonItems": "Ribbon commands",
+      "iconic.categories.rule": "Rule",
+      "iconic.categories.rules": "Rules",
+      "iconic.rulePicker.selectPage": "Select a page",
+      "iconic.rulePicker.fileRules": "File rules",
+      "iconic.rulePicker.folderRules": "Folder rules",
+      "iconic.rulePicker.rules": "Rules",
+      "iconic.rulePicker.addRule": "Add rule",
+      "iconic.rulePicker.duplicateRule": "Duplicate rule",
+      "iconic.rulePicker.editRule": "Edit rule",
+      "iconic.rulePicker.moveRuleToTop": "Move rule to top",
+      "iconic.rulePicker.moveRuleToBottom": "Move rule to bottom",
+      "iconic.rulePicker.removeRule": "Remove rule",
+      "iconic.rulePicker.untitledRule": "Untitled rule",
+      "iconic.rulePicker.drag": "Drag to rearrange",
+      "iconic.ruleEditor.fileRule": "File rule",
+      "iconic.ruleEditor.folderRule": "Folder rule",
+      "iconic.ruleEditor.conditions": "Conditions",
+      "iconic.ruleEditor.addCondition": "Add condition",
+      "iconic.ruleEditor.resetCondition": "Reset condition",
+      "iconic.ruleEditor.removeCondition": "Remove condition",
+      "iconic.ruleEditor.removeRule": "Remove rule",
+      "iconic.ruleEditor.buttonMatch": "1 match",
+      "iconic.ruleEditor.buttonMatches": "{#} matches",
+      "iconic.ruleEditor.buttonNoMatches": "No matches",
+      "iconic.ruleEditor.enterName": "Give this rule a name",
+      "iconic.ruleEditor.enterValue": "Enter a value",
+      "iconic.ruleEditor.enterRegex": "Enter a regex",
+      "iconic.ruleEditor.enterHexCode": "Enter a #hexcode",
+      "iconic.ruleEditor.enterNumber": "Enter a number",
+      "iconic.ruleEditor.matchConditions.name": "Match conditions",
+      "iconic.ruleEditor.matchConditions.desc": "Choose how many conditions need to match.",
+      "iconic.ruleEditor.matchConditions.all": "All",
+      "iconic.ruleEditor.matchConditions.any": "Any",
+      "iconic.ruleEditor.matchConditions.none": "None",
+      "iconic.ruleEditor.source.icon": "Icon",
+      "iconic.ruleEditor.source.color": "Color",
+      "iconic.ruleEditor.source.name": "Name",
+      "iconic.ruleEditor.source.filename": "Filename",
+      "iconic.ruleEditor.source.extension": "Extension",
+      "iconic.ruleEditor.source.tree": "Folder path",
+      "iconic.ruleEditor.source.path": "Path",
+      "iconic.ruleEditor.source.headings": "Headings",
+      "iconic.ruleEditor.source.links": "Links",
+      "iconic.ruleEditor.source.embeds": "Embeds",
+      "iconic.ruleEditor.source.tags": "Tags",
+      "iconic.ruleEditor.source.properties": "Properties...",
+      "iconic.ruleEditor.source.created": "Created time",
+      "iconic.ruleEditor.source.modified": "Modified time",
+      "iconic.ruleEditor.source.clock": "System clock",
+      "iconic.ruleEditor.operator.is": "is",
+      "iconic.ruleEditor.operator.!is": "is not",
+      "iconic.ruleEditor.operator.contains": "contains",
+      "iconic.ruleEditor.operator.startsWith": "starts with",
+      "iconic.ruleEditor.operator.endsWith": "ends with",
+      "iconic.ruleEditor.operator.matches": "matches regex",
+      "iconic.ruleEditor.operator.!contains": "does not contain",
+      "iconic.ruleEditor.operator.!startsWith": "does not start with",
+      "iconic.ruleEditor.operator.!endsWith": "does not end with",
+      "iconic.ruleEditor.operator.!matches": "does not match regex",
+      "iconic.ruleEditor.operator.includes": "includes item",
+      "iconic.ruleEditor.operator.!includes": "does not include item",
+      "iconic.ruleEditor.operator.allAre": "all are",
+      "iconic.ruleEditor.operator.allContain": "all contain",
+      "iconic.ruleEditor.operator.allStartWith": "all start with",
+      "iconic.ruleEditor.operator.allEndWith": "all end with",
+      "iconic.ruleEditor.operator.allMatch": "all match regex",
+      "iconic.ruleEditor.operator.anyContain": "any contain",
+      "iconic.ruleEditor.operator.anyStartWith": "any start with",
+      "iconic.ruleEditor.operator.anyEndWith": "any end with",
+      "iconic.ruleEditor.operator.anyMatch": "any match regex",
+      "iconic.ruleEditor.operator.noneContain": "none contain",
+      "iconic.ruleEditor.operator.noneStartWith": "none start with",
+      "iconic.ruleEditor.operator.noneEndWith": "none end with",
+      "iconic.ruleEditor.operator.noneMatch": "none match regex",
+      "iconic.ruleEditor.operator.countIs": "count is",
+      "iconic.ruleEditor.operator.!countIs": "count is not",
+      "iconic.ruleEditor.operator.countIsLess": "count is less than",
+      "iconic.ruleEditor.operator.countIsMore": "count is more than",
+      "iconic.ruleEditor.operator.isTrue": "is true",
+      "iconic.ruleEditor.operator.!isTrue": "is not true",
+      "iconic.ruleEditor.operator.isFalse": "is false",
+      "iconic.ruleEditor.operator.!isFalse": "is not false",
+      "iconic.ruleEditor.operator.equals": "=",
+      "iconic.ruleEditor.operator.!equals": "≠",
+      "iconic.ruleEditor.operator.isLess": "<",
+      "iconic.ruleEditor.operator.isMore": ">",
+      "iconic.ruleEditor.operator.isDivisible": "is divisible by",
+      "iconic.ruleEditor.operator.!isLess": "≥",
+      "iconic.ruleEditor.operator.!isMore": "≤",
+      "iconic.ruleEditor.operator.!isDivisible": "is not divisible by",
+      "iconic.ruleEditor.operator.isBefore": "is before",
+      "iconic.ruleEditor.operator.isAfter": "is after",
+      "iconic.ruleEditor.operator.isNow": "is now",
+      "iconic.ruleEditor.operator.!isNow": "is not now",
+      "iconic.ruleEditor.operator.isBeforeNow": "is before now",
+      "iconic.ruleEditor.operator.isAfterNow": "is after now",
+      "iconic.ruleEditor.operator.timeIs": "time is",
+      "iconic.ruleEditor.operator.!timeIs": "time is not",
+      "iconic.ruleEditor.operator.timeIsBefore": "time is before",
+      "iconic.ruleEditor.operator.timeIsAfter": "time is after",
+      "iconic.ruleEditor.operator.timeIsNow": "time is now",
+      "iconic.ruleEditor.operator.!timeIsNow": "time is not now",
+      "iconic.ruleEditor.operator.timeIsBeforeNow": "time is before now",
+      "iconic.ruleEditor.operator.timeIsAfterNow": "time is after now",
+      "iconic.ruleEditor.operator.dateIs": "date is",
+      "iconic.ruleEditor.operator.!dateIs": "date is not",
+      "iconic.ruleEditor.operator.dateIsBefore": "date is before",
+      "iconic.ruleEditor.operator.dateIsAfter": "date is after",
+      "iconic.ruleEditor.operator.isToday": "date is today",
+      "iconic.ruleEditor.operator.!isToday": "date is not today",
+      "iconic.ruleEditor.operator.isBeforeToday": "date is before today",
+      "iconic.ruleEditor.operator.isAfterToday": "date is after today",
+      "iconic.ruleEditor.operator.isLessDaysAgo": "is under X days ago",
+      "iconic.ruleEditor.operator.isLessDaysAway": "is under X days away",
+      "iconic.ruleEditor.operator.isMoreDaysAgo": "is over X days ago",
+      "iconic.ruleEditor.operator.isMoreDaysAway": "is over X days away",
+      "iconic.ruleEditor.operator.datetimeIs": "is",
+      "iconic.ruleEditor.operator.!datetimeIs": "is not",
+      "iconic.ruleEditor.operator.datetimeIsBefore": "is before",
+      "iconic.ruleEditor.operator.datetimeIsAfter": "is after",
+      "iconic.ruleEditor.operator.weekdayIs": "day of week is",
+      "iconic.ruleEditor.operator.!weekdayIs": "day of week is not",
+      "iconic.ruleEditor.operator.weekdayIsBefore": "day of week is before",
+      "iconic.ruleEditor.operator.weekdayIsAfter": "day of week is after",
+      "iconic.ruleEditor.operator.monthdayIs": "day of month is",
+      "iconic.ruleEditor.operator.!monthdayIs": "day of month is not",
+      "iconic.ruleEditor.operator.monthdayIsBefore": "day of month is before",
+      "iconic.ruleEditor.operator.monthdayIsAfter": "day of month is after",
+      "iconic.ruleEditor.operator.monthIs": "month is",
+      "iconic.ruleEditor.operator.!monthIs": "month is not",
+      "iconic.ruleEditor.operator.monthIsBefore": "month is before",
+      "iconic.ruleEditor.operator.monthIsAfter": "month is after",
+      "iconic.ruleEditor.operator.yearIs": "year is",
+      "iconic.ruleEditor.operator.!yearIs": "year is not",
+      "iconic.ruleEditor.operator.yearIsBefore": "year is before",
+      "iconic.ruleEditor.operator.yearIsAfter": "year is after",
+      "iconic.ruleEditor.operator.iconIs": "ID is",
+      "iconic.ruleEditor.operator.!iconIs": "ID is not",
+      "iconic.ruleEditor.operator.nameIs": "name is",
+      "iconic.ruleEditor.operator.!nameIs": "name is not",
+      "iconic.ruleEditor.operator.nameContains": "name contains",
+      "iconic.ruleEditor.operator.nameStartsWith": "name starts with",
+      "iconic.ruleEditor.operator.nameEndsWith": "name ends with",
+      "iconic.ruleEditor.operator.nameMatches": "name matches regex",
+      "iconic.ruleEditor.operator.!nameContains": "name does not contain",
+      "iconic.ruleEditor.operator.!nameStartsWith": "name does not start with",
+      "iconic.ruleEditor.operator.!nameEndsWith": "name does not end with",
+      "iconic.ruleEditor.operator.!nameMatches": "name does not match regex",
+      "iconic.ruleEditor.operator.colorIs": "is",
+      "iconic.ruleEditor.operator.!colorIs": "is not",
+      "iconic.ruleEditor.operator.hexIs": "hexcode is",
+      "iconic.ruleEditor.operator.!hexIs": "hexcode is not",
+      "iconic.ruleEditor.operator.hasValue": "has any value",
+      "iconic.ruleEditor.operator.!hasValue": "has no value",
+      "iconic.ruleEditor.operator.hasProperty": "property is present",
+      "iconic.ruleEditor.operator.!hasProperty": "property is missing",
+      "iconic.ruleEditor.weekday.1": "Monday",
+      "iconic.ruleEditor.weekday.2": "Tuesday",
+      "iconic.ruleEditor.weekday.3": "Wednesday",
+      "iconic.ruleEditor.weekday.4": "Thursday",
+      "iconic.ruleEditor.weekday.5": "Friday",
+      "iconic.ruleEditor.weekday.6": "Saturday",
+      "iconic.ruleEditor.weekday.7": "Sunday",
+      "iconic.ruleEditor.month.1": "January",
+      "iconic.ruleEditor.month.2": "February",
+      "iconic.ruleEditor.month.3": "March",
+      "iconic.ruleEditor.month.4": "April",
+      "iconic.ruleEditor.month.5": "May",
+      "iconic.ruleEditor.month.6": "June",
+      "iconic.ruleEditor.month.7": "July",
+      "iconic.ruleEditor.month.8": "August",
+      "iconic.ruleEditor.month.9": "September",
+      "iconic.ruleEditor.month.10": "October",
+      "iconic.ruleEditor.month.11": "November",
+      "iconic.ruleEditor.month.12": "December",
+      "iconic.ruleChecker.fileMatch": "1 matching file",
+      "iconic.ruleChecker.folderMatch": "1 matching folder",
+      "iconic.ruleChecker.filesMatch": "{#} matching files",
+      "iconic.ruleChecker.foldersMatch": "{#} matching folders",
+      "iconic.ruleChecker.highlight": "Highlight",
+      "iconic.commands.openRulebook": "Open rulebook",
+      "iconic.commands.toggleBiggerIcons": "Toggle bigger icons",
+      "iconic.commands.toggleClickableIcons.desktop": "Toggle clickable icons",
+      "iconic.commands.toggleClickableIcons.mobile": "Toggle tappable icons",
+      "iconic.commands.toggleAllFileIcons": "Toggle all file icons",
+      "iconic.commands.toggleAllFolderIcons": "Toggle all folder icons",
+      "iconic.commands.toggleMinimalFolderIcons": "Toggle minimal folder icons",
+      "iconic.commands.toggleMarkdownTabIcons": "Toggle Markdown tab icons",
+      "iconic.commands.toggleTitleIcons": "Toggle title icons",
+      "iconic.commands.toggleTagPillIcons": "Toggle tag pill icons",
+      "iconic.commands.toggleMenuActions": "Toggle menu actions",
+      "iconic.commands.toggleSuggestionIcons": "Toggle suggestion icons",
+      "iconic.commands.toggleQuickSwitcherIcons": "Toggle quick switcher icons",
+      "iconic.commands.toggleMoveFileIcons": "Toggle “Move file” dialog icons",
+      "iconic.commands.changeIconCurrentFile": "Change icon of the current file",
+      "iconic.settings.manage": "Manage",
+      "iconic.settings.values.on": "On",
+      "iconic.settings.values.off": "Off",
+      "iconic.settings.values.desktop": "Desktop only",
+      "iconic.settings.values.mobile": "Mobile only",
+      "iconic.settings.values.list": "List of colors",
+      "iconic.settings.values.rgb": "RGB picker",
+      "iconic.settings.values.none": "None",
+      "iconic.settings.rulebook.name": "Rulebook",
+      "iconic.settings.rulebook.desc": "Set up automated rules for file and folder icons.",
+      "iconic.settings.biggerIcons.name": "Bigger icons",
+      "iconic.settings.biggerIcons.desc": "Show bigger icons than the default UI.",
+      "iconic.settings.clickableIcons.nameDesktop": "Clickable icons",
+      "iconic.settings.clickableIcons.nameMobile": "Tappable icons",
+      "iconic.settings.clickableIcons.descDesktop": "Click an icon to open the icon picker.",
+      "iconic.settings.clickableIcons.descMobile": "Tap an icon to open the icon picker.",
+      "iconic.settings.headingSidebarsAndTabs": "Sidebars & tabs",
+      "iconic.settings.showAllFileIcons.name": "Show all file icons",
+      "iconic.settings.showAllFileIcons.desc": "Show icons for files that have no custom icon.",
+      "iconic.settings.showAllFolderIcons.name": "Show all folder icons",
+      "iconic.settings.showAllFolderIcons.desc": "Show icons for folders that have no custom icon.",
+      "iconic.settings.minimalFolderIcons.name": "Minimal folder icons",
+      "iconic.settings.minimalFolderIcons.desc": "Replace folder arrows with your folder icons.",
+      "iconic.settings.showMarkdownTabIcons.name": "Show Markdown tab icons",
+      "iconic.settings.showMarkdownTabIcons.desc": "Show tab icons for Markdown files.",
+      "iconic.settings.headingEditor": "Editor",
+      "iconic.settings.showTitleIcons.name": "Show title icons",
+      "iconic.settings.showTitleIcons.desc": "Show icons in note titles, if inline titles are enabled.",
+      "iconic.settings.showTagPillIcons.name": "Show tag pill icons",
+      "iconic.settings.showTagPillIcons.desc": "Show icons in #hashtags and the tags property.",
+      "iconic.settings.headingMenusAndDialogs": "Menus & dialogs",
+      "iconic.settings.showMenuActions.name": "Show menu actions",
+      "iconic.settings.showMenuActions.desc": "Show icon-related actions in context menus.",
+      "iconic.settings.showSuggestionIcons.name": "Show suggestion icons",
+      "iconic.settings.showSuggestionIcons.desc": "Show icons in suggestion pop-ups for links, tags, and properties.",
+      "iconic.settings.showQuickSwitcherIcons.name": "Show quick switcher icons",
+      "iconic.settings.showQuickSwitcherIcons.desc": "Show icons in search results of quick switchers.",
+      "iconic.settings.showMoveFileIcons.name": "Show “Move file” icons",
+      "iconic.settings.showMoveFileIcons.desc": "Show folder icons in “Move file” dialogs.",
+      "iconic.settings.headingIconPicker": "Icon picker",
+      "iconic.settings.showItemName.name": "Show item name",
+      "iconic.settings.showItemName.desc": "Show the name of the item being edited.",
+      "iconic.settings.useSearchKeywords.name": "Use search keywords",
+      "iconic.settings.useSearchKeywords.desc": "Search for icons using descriptive words like “food” or “music”.",
+      "iconic.settings.maxSearchResults.name": "Maximum search results",
+      "iconic.settings.maxSearchResults.desc": "Choose how many icons to show at once.",
+      "iconic.settings.colorPicker1.name": "Main color picker",
+      "iconic.settings.colorPicker1.descDesktop": "Appears when you click the color bubble.",
+      "iconic.settings.colorPicker1.descMobile": "Appears when you tap the color bubble.",
+      "iconic.settings.colorPicker2.name": "Second color picker",
+      "iconic.settings.colorPicker2.descDesktop": "Appears when you secondary-click the color bubble.",
+      "iconic.settings.colorPicker2.descMobile": "Appears when you press & hold the color bubble.",
+      "iconic.settings.headingAdvanced": "Advanced",
+      "iconic.settings.uncolorHover.name": "Colorless hover",
+      "iconic.settings.uncolorHover.desc": "Disable icon color while hovering an item.",
+      "iconic.settings.uncolorDrag.name": "Colorless drag",
+      "iconic.settings.uncolorDrag.desc": "Disable icon color while dragging an item.",
+      "iconic.settings.uncolorSelect.name": "Colorless selection",
+      "iconic.settings.uncolorSelect.desc": "Disable icon color while item is selected.",
+      "iconic.settings.uncolorQuick.name": "Colorless ribbon button",
+      "iconic.settings.uncolorQuick.desc": "Disable icon color for the quick access ribbon button on mobile.",
+      "iconic.settings.viewUnusedIcons.name": "View unused icons",
+      "iconic.settings.viewUnusedIcons.desc": "Clean up icons assigned to files or folders that are no longer in your vault.",
+      "iconic.settings.maxBackups.name": "Maximum automatic backups",
+      "iconic.settings.maxBackups.desc": "Choose how many backups to keep of your icon settings. Backups are spaced 3 hours apart.",
+      "iconic.settings.maxBackups.openPluginFolder": "Open plugin folder",
+      "iconic.backups.backupNotice": "Iconic had a problem loading its icon settings.",
+      "iconic.backups.backupSecondsAgo": "Your icons have been restored from a backup saved {#} seconds ago.",
+      "iconic.backups.backupMinutesAgo": "Your icons have been restored from a backup saved {#} minutes ago.",
+      "iconic.backups.backupHoursAgo": "Your icons have been restored from a backup saved {#} hours ago.",
+      "iconic.backups.backupDate": "Your icons have been restored from a backup saved on {#}."
+    },
+    "zh": {
+      "iconic.appItems.help": "查看帮助",
+      "iconic.appItems.settings": "打开设置",
+      "iconic.appItems.pin": "解锁/锁定",
+      "iconic.appItems.sidebarLeft": "折叠/展开左侧边栏",
+      "iconic.appItems.sidebarRight": "折叠/展开右侧边栏",
+      "iconic.appItems.minimize": "最小化",
+      "iconic.appItems.maximize": "最大化",
+      "iconic.appItems.unmaximize": "向下还原",
+      "iconic.appItems.close": "关闭",
+      "iconic.menu.changeIcon": "更改图标……",
+      "iconic.menu.changeIcons": "更改 {#} 个图标……",
+      "iconic.menu.removeIcon": "删除图标",
+      "iconic.menu.removeIcons": "删除 {#} 个图标",
+      "iconic.menu.resetColor": "重置颜色",
+      "iconic.menu.resetColors": "重置 {#} 种颜色",
+      "iconic.menu.editRule": "编辑规则……",
+      "iconic.iconPicker.changeIcon": "更改图标",
+      "iconic.iconPicker.changeIcons": "更改 {#} 个图标",
+      "iconic.iconPicker.changeEmoji": "更改表情符号",
+      "iconic.iconPicker.changeEmojis": "更换 {#} 个表情符号",
+      "iconic.iconPicker.changeMix": "更改图标/表情符号",
+      "iconic.iconPicker.changeMixes": "更改 {#} 个图标/表情符号",
+      "iconic.iconPicker.overrulePrefix": "覆盖",
+      "iconic.iconPicker.overruleSuffix": " 覆盖",
+      "iconic.iconPicker.overrules": "您的规则书正在覆盖这些图标中的一些。",
+      "iconic.iconPicker.search": "搜索",
+      "iconic.iconPicker.searchIcons": "搜索图标……",
+      "iconic.iconPicker.searchEmojis": "搜索表情符号……",
+      "iconic.iconPicker.searchMix": "搜索图标/表情符号……",
+      "iconic.iconPicker.changeColor": "换颜色",
+      "iconic.iconPicker.resetColor": "重置颜色",
+      "iconic.iconPicker.toggleIcons": "切换图标",
+      "iconic.iconPicker.toggleEmojis": "切换表情符号",
+      "iconic.iconPicker.icons": "图标",
+      "iconic.iconPicker.emojis": "表情符号",
+      "iconic.iconPicker.mixed": "混合",
+      "iconic.iconPicker.cancel": "取消",
+      "iconic.iconPicker.save": "保存",
+      "iconic.iconPicker.colors.red": "红色",
+      "iconic.iconPicker.colors.orange": "橙色",
+      "iconic.iconPicker.colors.yellow": "黄色",
+      "iconic.iconPicker.colors.green": "绿色",
+      "iconic.iconPicker.colors.cyan": "青色",
+      "iconic.iconPicker.colors.blue": "蓝色",
+      "iconic.iconPicker.colors.purple": "紫色",
+      "iconic.iconPicker.colors.pink": "粉红色",
+      "iconic.iconPicker.colors.gray": "灰色",
+      "iconic.usageChecker.unusedIcons": "未使用的图标",
+      "iconic.usageChecker.noUnusedIconsFound": "未找到未使用的图标。",
+      "iconic.categories.item": "项",
+      "iconic.categories.items": "项",
+      "iconic.categories.appItem": "按钮",
+      "iconic.categories.appItems": "按钮",
+      "iconic.categories.tab": "标签",
+      "iconic.categories.tabs": "标签",
+      "iconic.categories.file": "文件",
+      "iconic.categories.files": "文件",
+      "iconic.categories.folder": "文件夹",
+      "iconic.categories.folders": "文件夹",
+      "iconic.categories.group": "书签组",
+      "iconic.categories.groups": "书签组",
+      "iconic.categories.search": "查询",
+      "iconic.categories.searches": "查询",
+      "iconic.categories.graph": "关系图谱",
+      "iconic.categories.graphs": "关系图谱",
+      "iconic.categories.url": "URL",
+      "iconic.categories.urls": "URL",
+      "iconic.categories.tag": "标签",
+      "iconic.categories.tags": "标签",
+      "iconic.categories.property": "文档属性",
+      "iconic.categories.properties": "文档属性",
+      "iconic.categories.ribbonItem": "工具栏命令",
+      "iconic.categories.ribbonItems": "工具栏命令",
+      "iconic.categories.rule": "规则",
+      "iconic.categories.rules": "规则",
+      "iconic.rulePicker.selectPage": "选择页面",
+      "iconic.rulePicker.fileRules": "文件规则",
+      "iconic.rulePicker.folderRules": "文件夹规则",
+      "iconic.rulePicker.rules": "规则",
+      "iconic.rulePicker.addRule": "添加规则",
+      "iconic.rulePicker.duplicateRule": "重复规则",
+      "iconic.rulePicker.editRule": "编辑规则",
+      "iconic.rulePicker.moveRuleToTop": "将规则移到顶部",
+      "iconic.rulePicker.moveRuleToBottom": "将规则移到底部",
+      "iconic.rulePicker.removeRule": "删除规则",
+      "iconic.rulePicker.untitledRule": "无标题规则",
+      "iconic.rulePicker.drag": "拖动可调整布局",
+      "iconic.ruleEditor.fileRule": "文件规则",
+      "iconic.ruleEditor.folderRule": "文件夹规则",
+      "iconic.ruleEditor.conditions": "条件",
+      "iconic.ruleEditor.addCondition": "添加条件",
+      "iconic.ruleEditor.resetCondition": "重置条件",
+      "iconic.ruleEditor.removeCondition": "删除条件",
+      "iconic.ruleEditor.removeRule": "删除规则",
+      "iconic.ruleEditor.buttonMatch": "1 个匹配",
+      "iconic.ruleEditor.buttonMatches": "{#} 个匹配",
+      "iconic.ruleEditor.buttonNoMatches": "无匹配",
+      "iconic.ruleEditor.enterName": "为该规则命名",
+      "iconic.ruleEditor.enterValue": "输入一个值",
+      "iconic.ruleEditor.enterRegex": "输入一个正则表达式",
+      "iconic.ruleEditor.enterHexCode": "输入一个十六进制代码",
+      "iconic.ruleEditor.enterNumber": "输入一个数字",
+      "iconic.ruleEditor.matchConditions.name": "匹配条件",
+      "iconic.ruleEditor.matchConditions.desc": "选择需要匹配的条件数量。",
+      "iconic.ruleEditor.matchConditions.all": "全部",
+      "iconic.ruleEditor.matchConditions.any": "任意",
+      "iconic.ruleEditor.matchConditions.none": "无",
+      "iconic.ruleEditor.source.icon": "图标",
+      "iconic.ruleEditor.source.color": "颜色",
+      "iconic.ruleEditor.source.name": "名称",
+      "iconic.ruleEditor.source.filename": "文件名",
+      "iconic.ruleEditor.source.extension": "扩展名",
+      "iconic.ruleEditor.source.tree": "文件夹树",
+      "iconic.ruleEditor.source.path": "文件库中的路径",
+      "iconic.ruleEditor.source.headings": "标题",
+      "iconic.ruleEditor.source.links": "链接",
+      "iconic.ruleEditor.source.embeds": "嵌入链接",
+      "iconic.ruleEditor.source.tags": "标签",
+      "iconic.ruleEditor.source.properties": "属性……",
+      "iconic.ruleEditor.source.created": "创建时间",
+      "iconic.ruleEditor.source.modified": "修改时间",
+      "iconic.ruleEditor.source.clock": "系统时钟",
+      "iconic.ruleEditor.operator.is": "是",
+      "iconic.ruleEditor.operator.!is": "不是",
+      "iconic.ruleEditor.operator.contains": "包含",
+      "iconic.ruleEditor.operator.startsWith": "以...开头",
+      "iconic.ruleEditor.operator.endsWith": "以...结尾",
+      "iconic.ruleEditor.operator.matches": "匹配正则表达式",
+      "iconic.ruleEditor.operator.!contains": "不包含",
+      "iconic.ruleEditor.operator.!startsWith": "不以...开头",
+      "iconic.ruleEditor.operator.!endsWith": "不以...结尾",
+      "iconic.ruleEditor.operator.!matches": "不匹配正则表达式",
+      "iconic.ruleEditor.operator.includes": "包含项目",
+      "iconic.ruleEditor.operator.!includes": "不包括项目",
+      "iconic.ruleEditor.operator.allAre": "全部是",
+      "iconic.ruleEditor.operator.allContain": "全部包含",
+      "iconic.ruleEditor.operator.allStartWith": "全部以...开头",
+      "iconic.ruleEditor.operator.allEndWith": "全部以...结尾",
+      "iconic.ruleEditor.operator.allMatch": "全部匹配正则表达式",
+      "iconic.ruleEditor.operator.anyContain": "任何包含",
+      "iconic.ruleEditor.operator.anyStartWith": "任何以...开头",
+      "iconic.ruleEditor.operator.anyEndWith": "任何以...结尾",
+      "iconic.ruleEditor.operator.anyMatch": "任何匹配正则表达式",
+      "iconic.ruleEditor.operator.noneContain": "不包含",
+      "iconic.ruleEditor.operator.noneStartWith": "不以...开头",
+      "iconic.ruleEditor.operator.noneEndWith": "不以...结尾",
+      "iconic.ruleEditor.operator.noneMatch": "不匹配正则表达式",
+      "iconic.ruleEditor.operator.countIs": "计数是",
+      "iconic.ruleEditor.operator.!countIs": "计数不是",
+      "iconic.ruleEditor.operator.countIsLess": "计数小于",
+      "iconic.ruleEditor.operator.countIsMore": "计数大于",
+      "iconic.ruleEditor.operator.isTrue": "为真",
+      "iconic.ruleEditor.operator.!isTrue": "不为真",
+      "iconic.ruleEditor.operator.isFalse": "为假",
+      "iconic.ruleEditor.operator.!isFalse": "不为假",
+      "iconic.ruleEditor.operator.equals": "=",
+      "iconic.ruleEditor.operator.!equals": "≠",
+      "iconic.ruleEditor.operator.isLess": "<",
+      "iconic.ruleEditor.operator.isMore": ">",
+      "iconic.ruleEditor.operator.isDivisible": "能被...整除",
+      "iconic.ruleEditor.operator.!isLess": "不小于",
+      "iconic.ruleEditor.operator.!isMore": "不大于",
+      "iconic.ruleEditor.operator.!isDivisible": "不能被...整除",
+      "iconic.ruleEditor.operator.isBefore": "在...之前",
+      "iconic.ruleEditor.operator.isAfter": "在...之后",
+      "iconic.ruleEditor.operator.isNow": "是现在的",
+      "iconic.ruleEditor.operator.!isNow": "不是现在的",
+      "iconic.ruleEditor.operator.isBeforeNow": "在现在之前",
+      "iconic.ruleEditor.operator.isAfterNow": "在现在之后",
+      "iconic.ruleEditor.operator.timeIs": "时间是",
+      "iconic.ruleEditor.operator.!timeIs": "时间不是",
+      "iconic.ruleEditor.operator.timeIsBefore": "时间在之前",
+      "iconic.ruleEditor.operator.timeIsAfter": "时间在之后",
+      "iconic.ruleEditor.operator.timeIsNow": "时间是现在",
+      "iconic.ruleEditor.operator.!timeIsNow": "时间不是现在",
+      "iconic.ruleEditor.operator.timeIsBeforeNow": "时间在现在之前",
+      "iconic.ruleEditor.operator.timeIsAfterNow": "时间在现在之后",
+      "iconic.ruleEditor.operator.dateIs": "日期是",
+      "iconic.ruleEditor.operator.!dateIs": "日期不是",
+      "iconic.ruleEditor.operator.dateIsBefore": "日期在之前",
+      "iconic.ruleEditor.operator.dateIsAfter": "日期在之后",
+      "iconic.ruleEditor.operator.isToday": "日期是今天",
+      "iconic.ruleEditor.operator.!isToday": "日期不是今天",
+      "iconic.ruleEditor.operator.isBeforeToday": "日期在今天之前",
+      "iconic.ruleEditor.operator.isAfterToday": "日期在今天之后",
+      "iconic.ruleEditor.operator.isLessDaysAgo": "少于...天前",
+      "iconic.ruleEditor.operator.isLessDaysAway": "距离...天还不到",
+      "iconic.ruleEditor.operator.isMoreDaysAgo": "超过...天前",
+      "iconic.ruleEditor.operator.isMoreDaysAway": "距离...天还超过",
+      "iconic.ruleEditor.operator.datetimeIs": "是",
+      "iconic.ruleEditor.operator.!datetimeIs": "不是",
+      "iconic.ruleEditor.operator.datetimeIsBefore": "是之前",
+      "iconic.ruleEditor.operator.datetimeIsAfter": "是之后",
+      "iconic.ruleEditor.operator.weekdayIs": "星期几是",
+      "iconic.ruleEditor.operator.!weekdayIs": "星期几不是",
+      "iconic.ruleEditor.operator.weekdayIsBefore": "星期几在之前",
+      "iconic.ruleEditor.operator.weekdayIsAfter": "星期几在之后",
+      "iconic.ruleEditor.operator.monthdayIs": "月份的日期是",
+      "iconic.ruleEditor.operator.!monthdayIs": "月份的日期不是",
+      "iconic.ruleEditor.operator.monthdayIsBefore": "月份的日期是之前",
+      "iconic.ruleEditor.operator.monthdayIsAfter": "月份的日期是之后",
+      "iconic.ruleEditor.operator.monthIs": "月份是",
+      "iconic.ruleEditor.operator.!monthIs": "月份不是",
+      "iconic.ruleEditor.operator.monthIsBefore": "月份在之前",
+      "iconic.ruleEditor.operator.monthIsAfter": "月份在之后",
+      "iconic.ruleEditor.operator.yearIs": "年份在",
+      "iconic.ruleEditor.operator.!yearIs": "年份不在",
+      "iconic.ruleEditor.operator.yearIsBefore": "年份在之前",
+      "iconic.ruleEditor.operator.yearIsAfter": "年份在之后",
+      "iconic.ruleEditor.operator.iconIs": "图标是",
+      "iconic.ruleEditor.operator.!iconIs": "图标不是",
+      "iconic.ruleEditor.operator.nameIs": "名称是",
+      "iconic.ruleEditor.operator.!nameIs": "名称不是",
+      "iconic.ruleEditor.operator.nameContains": "名称包含",
+      "iconic.ruleEditor.operator.nameStartsWith": "名称以...开头",
+      "iconic.ruleEditor.operator.nameEndsWith": "名称以...结尾",
+      "iconic.ruleEditor.operator.nameMatches": "名称与正则表达式匹配",
+      "iconic.ruleEditor.operator.!nameContains": "名称不包含",
+      "iconic.ruleEditor.operator.!nameStartsWith": "名称不以...开头",
+      "iconic.ruleEditor.operator.!nameEndsWith": "名称不以...结尾",
+      "iconic.ruleEditor.operator.!nameMatches": "名称与正则表达式不匹配",
+      "iconic.ruleEditor.operator.colorIs": "是",
+      "iconic.ruleEditor.operator.!colorIs": "不是",
+      "iconic.ruleEditor.operator.hexIs": "十六进制颜色是",
+      "iconic.ruleEditor.operator.!hexIs": "十六进制颜色不是",
+      "iconic.ruleEditor.operator.hasValue": "有任何值",
+      "iconic.ruleEditor.operator.!hasValue": "没有值",
+      "iconic.ruleEditor.operator.hasProperty": "有属性",
+      "iconic.ruleEditor.operator.!hasProperty": "没有属性",
+      "iconic.ruleEditor.weekday.1": "星期一",
+      "iconic.ruleEditor.weekday.2": "星期二",
+      "iconic.ruleEditor.weekday.3": "星期三",
+      "iconic.ruleEditor.weekday.4": "星期四",
+      "iconic.ruleEditor.weekday.5": "星期五",
+      "iconic.ruleEditor.weekday.6": "星期六",
+      "iconic.ruleEditor.weekday.7": "星期日",
+      "iconic.ruleEditor.month.1": "一月",
+      "iconic.ruleEditor.month.2": "二月",
+      "iconic.ruleEditor.month.3": "三月",
+      "iconic.ruleEditor.month.4": "四月",
+      "iconic.ruleEditor.month.5": "五月",
+      "iconic.ruleEditor.month.6": "六月",
+      "iconic.ruleEditor.month.7": "七月",
+      "iconic.ruleEditor.month.8": "八月",
+      "iconic.ruleEditor.month.9": "九月",
+      "iconic.ruleEditor.month.10": "十月",
+      "iconic.ruleEditor.month.11": "十一月",
+      "iconic.ruleEditor.month.12": "十二月",
+      "iconic.ruleChecker.fileMatch": "1 个匹配文件",
+      "iconic.ruleChecker.folderMatch": "1 个匹配文件夹",
+      "iconic.ruleChecker.filesMatch": "{#} 个匹配文件",
+      "iconic.ruleChecker.foldersMatch": "{#} 个匹配文件夹",
+      "iconic.ruleChecker.highlight": "突出显示",
+      "iconic.commands.openRulebook": "打开规则书",
+      "iconic.commands.toggleBiggerIcons": "切换更大图标",
+      "iconic.commands.toggleClickableIcons.desktop": "切换可点击图标",
+      "iconic.commands.toggleClickableIcons.mobile": "切换可触摸图标",
+      "iconic.commands.toggleAllFileIcons": "切换所有文件图标",
+      "iconic.commands.toggleAllFolderIcons": "切换所有文件夹图标",
+      "iconic.commands.toggleMinimalFolderIcons": "切换极简文件夹图标",
+      "iconic.commands.toggleMarkdownTabIcons": "切换 Markdown 标签图标",
+      "iconic.commands.toggleTitleIcons": "切换标题图标",
+      "iconic.commands.toggleTagPillIcons": "切换标签胶囊图标",
+      "iconic.commands.toggleMenuActions": "切换菜单操作",
+      "iconic.commands.toggleSuggestionIcons": "切换建议图标",
+      "iconic.commands.toggleQuickSwitcherIcons": "切换快速切换图标",
+      "iconic.commands.toggleMoveFileIcons": "切换「将文件移动」图标",
+      "iconic.commands.changeIconCurrentFile": "更改当前文件的图标",
+      "iconic.settings.manage": "管理",
+      "iconic.settings.values.on": "开启",
+      "iconic.settings.values.off": "关闭",
+      "iconic.settings.values.desktop": "仅限桌面",
+      "iconic.settings.values.mobile": "仅限移动设备",
+      "iconic.settings.values.list": "颜色列表",
+      "iconic.settings.values.rgb": "RGB 选择器",
+      "iconic.settings.values.none": "无",
+      "iconic.settings.rulebook.name": "规则书",
+      "iconic.settings.rulebook.desc": "为文件和文件夹图标设置自动规则。",
+      "iconic.settings.biggerIcons.name": "更大的图标",
+      "iconic.settings.biggerIcons.desc": "显示比默认 UI 更大的图标。",
+      "iconic.settings.clickableIcons.nameDesktop": "可点击的图标",
+      "iconic.settings.clickableIcons.nameMobile": "可触摸图标",
+      "iconic.settings.clickableIcons.descDesktop": "单击图标以打开图标选择器。",
+      "iconic.settings.clickableIcons.descMobile": "点击图标以打开图标选择器。",
+      "iconic.settings.headingSidebarsAndTabs": "侧边栏和标签页标题",
+      "iconic.settings.showAllFileIcons.name": "显示所有文件图标",
+      "iconic.settings.showAllFileIcons.desc": "显示没有自定义图标的文件图标。",
+      "iconic.settings.showAllFolderIcons.name": "显示所有文件夹图标",
+      "iconic.settings.showAllFolderIcons.desc": "显示没有自定义图标的文件夹图标。",
+      "iconic.settings.minimalFolderIcons.name": "最小文件夹图标",
+      "iconic.settings.minimalFolderIcons.desc": "用您的文件夹图标替换文件夹箭头。",
+      "iconic.settings.showMarkdownTabIcons.name": "显示 Markdown 标签图标",
+      "iconic.settings.showMarkdownTabIcons.desc": "显示 Markdown 文件的标签图标。",
+      "iconic.settings.headingEditor": "编辑器",
+      "iconic.settings.showTitleIcons.name": "显示标题图标",
+      "iconic.settings.showTitleIcons.desc": "如果启用了页内标题，则显示笔记标题中的图标。",
+      "iconic.settings.showTagPillIcons.name": "显示标签胶囊图标",
+      "iconic.settings.showTagPillIcons.desc": "显示 #标签 和 tags 属性中的图标。",
+      "iconic.settings.headingMenusAndDialogs": "菜单和对话框",
+      "iconic.settings.showMenuActions.name": "显示菜单操作",
+      "iconic.settings.showMenuActions.desc": "在上下文菜单中显示与图标相关的操作。",
+      "iconic.settings.showSuggestionIcons.name": "显示建议图标",
+      "iconic.settings.showSuggestionIcons.desc": "在链接、标签和属性的建议弹出窗口中显示图标。",
+      "iconic.settings.showQuickSwitcherIcons.name": "显示快速切换器图标",
+      "iconic.settings.showQuickSwitcherIcons.desc": "在快速切换器的搜索结果中显示图标。",
+      "iconic.settings.showMoveFileIcons.name": "显示「将文件移动」图标",
+      "iconic.settings.showMoveFileIcons.desc": "在「将文件移动」对话框中显示文件夹图标",
+      "iconic.settings.headingIconPicker": "图标选择器",
+      "iconic.settings.showItemName.name": "显示项目名称",
+      "iconic.settings.showItemName.desc": "显示正在编辑的项目的名称。",
+      "iconic.settings.useSearchKeywords.name": "使用搜索关键词",
+      "iconic.settings.useSearchKeywords.desc": "使用「food」或「music」等描述性词语搜索图标。",
+      "iconic.settings.maxSearchResults.name": "最大搜索结果",
+      "iconic.settings.maxSearchResults.desc": "选择一次显示多少个图标。",
+      "iconic.settings.colorPicker1.name": "主颜色选择器",
+      "iconic.settings.colorPicker1.descDesktop": "单击颜色气泡时显示。",
+      "iconic.settings.colorPicker1.descMobile": "触摸颜色气泡时显示。",
+      "iconic.settings.colorPicker2.name": "第二个颜色选择器",
+      "iconic.settings.colorPicker2.descDesktop": "当您双击颜色气泡时显示。",
+      "iconic.settings.colorPicker2.descMobile": "当您按住颜色气泡时显示。",
+      "iconic.settings.headingAdvanced": "高级",
+      "iconic.settings.uncolorHover.name": "无色悬停",
+      "iconic.settings.uncolorHover.desc": "悬停项目时禁用图标颜色。",
+      "iconic.settings.uncolorDrag.name": "无色拖动",
+      "iconic.settings.uncolorDrag.desc": "拖动项目时禁用图标颜色。",
+      "iconic.settings.uncolorSelect.name": "无色选择",
+      "iconic.settings.uncolorSelect.desc": "选择项目时禁用图标颜色。",
+      "iconic.settings.uncolorQuick.name": "无色功能区按钮",
+      "iconic.settings.uncolorQuick.desc": "禁用移动设备上快速访问功能区按钮的图标颜色。",
+      "iconic.settings.viewUnusedIcons.name": "查看未使用的图标",
+      "iconic.settings.viewUnusedIcons.desc": "清理分配给不再位于您的库中的文件或文件夹的图标。",
+      "iconic.settings.maxBackups.name": "最大自动备份次数",
+      "iconic.settings.maxBackups.desc": "选择要保留的图标设置备份数量。备份间隔为 3 小时。",
+      "iconic.settings.maxBackups.openPluginFolder": "打开插件文件夹",
+      "iconic.backups.backupNotice": "Iconic 加载图标设置时出现问题。",
+      "iconic.backups.backupSecondsAgo": "您的图标已从 {#} 秒前保存的备份中恢复。",
+      "iconic.backups.backupMinutesAgo": "您的图标已从 {#} 分钟前保存的备份中恢复。",
+      "iconic.backups.backupHoursAgo": "您的图标已从 {#} 小时前保存的备份中恢复。",
+      "iconic.backups.backupDate": "您的图标已从 {#} 日保存的备份中恢复。"
+    }
+  },
+  "cases": [
+    {
+      "label": "name is alpha",
+      "conditions": [
+        {
+          "source": "name",
+          "operator": "is",
+          "value": "alpha"
+        }
+      ],
+      "expected": true
+    },
+    {
+      "label": "name is Al",
+      "conditions": [
+        {
+          "source": "name",
+          "operator": "is",
+          "value": "Al"
+        }
+      ],
+      "expected": false
+    },
+    {
+      "label": "name is /alpha/i",
+      "conditions": [
+        {
+          "source": "name",
+          "operator": "is",
+          "value": "/alpha/i"
+        }
+      ],
+      "expected": false
+    },
+    {
+      "label": "name is [",
+      "conditions": [
+        {
+          "source": "name",
+          "operator": "is",
+          "value": "["
+        }
+      ],
+      "expected": false
+    },
+    {
+      "label": "name contains alpha",
+      "conditions": [
+        {
+          "source": "name",
+          "operator": "contains",
+          "value": "alpha"
+        }
+      ],
+      "expected": true
+    },
+    {
+      "label": "name contains Al",
+      "conditions": [
+        {
+          "source": "name",
+          "operator": "contains",
+          "value": "Al"
+        }
+      ],
+      "expected": true
+    },
+    {
+      "label": "name contains /alpha/i",
+      "conditions": [
+        {
+          "source": "name",
+          "operator": "contains",
+          "value": "/alpha/i"
+        }
+      ],
+      "expected": false
+    },
+    {
+      "label": "name contains [",
+      "conditions": [
+        {
+          "source": "name",
+          "operator": "contains",
+          "value": "["
+        }
+      ],
+      "expected": false
+    },
+    {
+      "label": "name startsWith alpha",
+      "conditions": [
+        {
+          "source": "name",
+          "operator": "startsWith",
+          "value": "alpha"
+        }
+      ],
+      "expected": true
+    },
+    {
+      "label": "name startsWith Al",
+      "conditions": [
+        {
+          "source": "name",
+          "operator": "startsWith",
+          "value": "Al"
+        }
+      ],
+      "expected": true
+    },
+    {
+      "label": "name startsWith /alpha/i",
+      "conditions": [
+        {
+          "source": "name",
+          "operator": "startsWith",
+          "value": "/alpha/i"
+        }
+      ],
+      "expected": false
+    },
+    {
+      "label": "name startsWith [",
+      "conditions": [
+        {
+          "source": "name",
+          "operator": "startsWith",
+          "value": "["
+        }
+      ],
+      "expected": false
+    },
+    {
+      "label": "name endsWith alpha",
+      "conditions": [
+        {
+          "source": "name",
+          "operator": "endsWith",
+          "value": "alpha"
+        }
+      ],
+      "expected": true
+    },
+    {
+      "label": "name endsWith Al",
+      "conditions": [
+        {
+          "source": "name",
+          "operator": "endsWith",
+          "value": "Al"
+        }
+      ],
+      "expected": false
+    },
+    {
+      "label": "name endsWith /alpha/i",
+      "conditions": [
+        {
+          "source": "name",
+          "operator": "endsWith",
+          "value": "/alpha/i"
+        }
+      ],
+      "expected": false
+    },
+    {
+      "label": "name endsWith [",
+      "conditions": [
+        {
+          "source": "name",
+          "operator": "endsWith",
+          "value": "["
+        }
+      ],
+      "expected": false
+    },
+    {
+      "label": "name matches alpha",
+      "conditions": [
+        {
+          "source": "name",
+          "operator": "matches",
+          "value": "alpha"
+        }
+      ],
+      "expected": false
+    },
+    {
+      "label": "name matches Al",
+      "conditions": [
+        {
+          "source": "name",
+          "operator": "matches",
+          "value": "Al"
+        }
+      ],
+      "expected": true
+    },
+    {
+      "label": "name matches /alpha/i",
+      "conditions": [
+        {
+          "source": "name",
+          "operator": "matches",
+          "value": "/alpha/i"
+        }
+      ],
+      "expected": false
+    },
+    {
+      "label": "name matches [",
+      "conditions": [
+        {
+          "source": "name",
+          "operator": "matches",
+          "value": "["
+        }
+      ],
+      "expected": false
+    },
+    {
+      "label": "name !contains alpha",
+      "conditions": [
+        {
+          "source": "name",
+          "operator": "!contains",
+          "value": "alpha"
+        }
+      ],
+      "expected": false
+    },
+    {
+      "label": "name !contains Al",
+      "conditions": [
+        {
+          "source": "name",
+          "operator": "!contains",
+          "value": "Al"
+        }
+      ],
+      "expected": false
+    },
+    {
+      "label": "name !contains /alpha/i",
+      "conditions": [
+        {
+          "source": "name",
+          "operator": "!contains",
+          "value": "/alpha/i"
+        }
+      ],
+      "expected": true
+    },
+    {
+      "label": "name !contains [",
+      "conditions": [
+        {
+          "source": "name",
+          "operator": "!contains",
+          "value": "["
+        }
+      ],
+      "expected": true
+    },
+    {
+      "label": "filename is Alpha.md",
+      "conditions": [
+        {
+          "source": "filename",
+          "operator": "is",
+          "value": "Alpha.md"
+        }
+      ],
+      "expected": true
+    },
+    {
+      "label": "filename is .md",
+      "conditions": [
+        {
+          "source": "filename",
+          "operator": "is",
+          "value": ".md"
+        }
+      ],
+      "expected": false
+    },
+    {
+      "label": "filename endsWith Alpha.md",
+      "conditions": [
+        {
+          "source": "filename",
+          "operator": "endsWith",
+          "value": "Alpha.md"
+        }
+      ],
+      "expected": true
+    },
+    {
+      "label": "filename endsWith .md",
+      "conditions": [
+        {
+          "source": "filename",
+          "operator": "endsWith",
+          "value": ".md"
+        }
+      ],
+      "expected": true
+    },
+    {
+      "label": "extension is md",
+      "conditions": [
+        {
+          "source": "extension",
+          "operator": "is",
+          "value": "md"
+        }
+      ],
+      "expected": true
+    },
+    {
+      "label": "extension is pdf",
+      "conditions": [
+        {
+          "source": "extension",
+          "operator": "is",
+          "value": "pdf"
+        }
+      ],
+      "expected": false
+    },
+    {
+      "label": "tree contains Projects",
+      "conditions": [
+        {
+          "source": "tree",
+          "operator": "contains",
+          "value": "Projects"
+        }
+      ],
+      "expected": true
+    },
+    {
+      "label": "tree contains Archive",
+      "conditions": [
+        {
+          "source": "tree",
+          "operator": "contains",
+          "value": "Archive"
+        }
+      ],
+      "expected": false
+    },
+    {
+      "label": "path contains Alpha",
+      "conditions": [
+        {
+          "source": "path",
+          "operator": "contains",
+          "value": "Alpha"
+        }
+      ],
+      "expected": true
+    },
+    {
+      "label": "path contains Beta",
+      "conditions": [
+        {
+          "source": "path",
+          "operator": "contains",
+          "value": "Beta"
+        }
+      ],
+      "expected": false
+    },
+    {
+      "label": "headings includes Roadmap",
+      "conditions": [
+        {
+          "source": "headings",
+          "operator": "includes",
+          "value": "Roadmap"
+        }
+      ],
+      "expected": true
+    },
+    {
+      "label": "headings includes a",
+      "conditions": [
+        {
+          "source": "headings",
+          "operator": "includes",
+          "value": "a"
+        }
+      ],
+      "expected": false
+    },
+    {
+      "label": "headings includes 2",
+      "conditions": [
+        {
+          "source": "headings",
+          "operator": "includes",
+          "value": "2"
+        }
+      ],
+      "expected": false
+    },
+    {
+      "label": "headings anyContain Roadmap",
+      "conditions": [
+        {
+          "source": "headings",
+          "operator": "anyContain",
+          "value": "Roadmap"
+        }
+      ],
+      "expected": true
+    },
+    {
+      "label": "headings anyContain a",
+      "conditions": [
+        {
+          "source": "headings",
+          "operator": "anyContain",
+          "value": "a"
+        }
+      ],
+      "expected": true
+    },
+    {
+      "label": "headings anyContain 2",
+      "conditions": [
+        {
+          "source": "headings",
+          "operator": "anyContain",
+          "value": "2"
+        }
+      ],
+      "expected": false
+    },
+    {
+      "label": "headings allContain Roadmap",
+      "conditions": [
+        {
+          "source": "headings",
+          "operator": "allContain",
+          "value": "Roadmap"
+        }
+      ],
+      "expected": false
+    },
+    {
+      "label": "headings allContain a",
+      "conditions": [
+        {
+          "source": "headings",
+          "operator": "allContain",
+          "value": "a"
+        }
+      ],
+      "expected": true
+    },
+    {
+      "label": "headings allContain 2",
+      "conditions": [
+        {
+          "source": "headings",
+          "operator": "allContain",
+          "value": "2"
+        }
+      ],
+      "expected": false
+    },
+    {
+      "label": "headings noneContain Roadmap",
+      "conditions": [
+        {
+          "source": "headings",
+          "operator": "noneContain",
+          "value": "Roadmap"
+        }
+      ],
+      "expected": true
+    },
+    {
+      "label": "headings noneContain a",
+      "conditions": [
+        {
+          "source": "headings",
+          "operator": "noneContain",
+          "value": "a"
+        }
+      ],
+      "expected": false
+    },
+    {
+      "label": "headings noneContain 2",
+      "conditions": [
+        {
+          "source": "headings",
+          "operator": "noneContain",
+          "value": "2"
+        }
+      ],
+      "expected": true
+    },
+    {
+      "label": "headings countIs Roadmap",
+      "conditions": [
+        {
+          "source": "headings",
+          "operator": "countIs",
+          "value": "Roadmap"
+        }
+      ],
+      "expected": false
+    },
+    {
+      "label": "headings countIs a",
+      "conditions": [
+        {
+          "source": "headings",
+          "operator": "countIs",
+          "value": "a"
+        }
+      ],
+      "expected": false
+    },
+    {
+      "label": "headings countIs 2",
+      "conditions": [
+        {
+          "source": "headings",
+          "operator": "countIs",
+          "value": "2"
+        }
+      ],
+      "expected": true
+    },
+    {
+      "label": "tags includes work",
+      "conditions": [
+        {
+          "source": "tags",
+          "operator": "includes",
+          "value": "work"
+        }
+      ],
+      "expected": true
+    },
+    {
+      "label": "tags includes active",
+      "conditions": [
+        {
+          "source": "tags",
+          "operator": "includes",
+          "value": "active"
+        }
+      ],
+      "expected": true
+    },
+    {
+      "label": "tags includes 2",
+      "conditions": [
+        {
+          "source": "tags",
+          "operator": "includes",
+          "value": "2"
+        }
+      ],
+      "expected": false
+    },
+    {
+      "label": "tags includes 3",
+      "conditions": [
+        {
+          "source": "tags",
+          "operator": "includes",
+          "value": "3"
+        }
+      ],
+      "expected": false
+    },
+    {
+      "label": "tags countIs work",
+      "conditions": [
+        {
+          "source": "tags",
+          "operator": "countIs",
+          "value": "work"
+        }
+      ],
+      "expected": false
+    },
+    {
+      "label": "tags countIs active",
+      "conditions": [
+        {
+          "source": "tags",
+          "operator": "countIs",
+          "value": "active"
+        }
+      ],
+      "expected": false
+    },
+    {
+      "label": "tags countIs 2",
+      "conditions": [
+        {
+          "source": "tags",
+          "operator": "countIs",
+          "value": "2"
+        }
+      ],
+      "expected": true
+    },
+    {
+      "label": "tags countIs 3",
+      "conditions": [
+        {
+          "source": "tags",
+          "operator": "countIs",
+          "value": "3"
+        }
+      ],
+      "expected": false
+    },
+    {
+      "label": "links includes Beta",
+      "conditions": [
+        {
+          "source": "links",
+          "operator": "includes",
+          "value": "Beta"
+        }
+      ],
+      "expected": true
+    },
+    {
+      "label": "embeds includes image.png",
+      "conditions": [
+        {
+          "source": "embeds",
+          "operator": "includes",
+          "value": "image.png"
+        }
+      ],
+      "expected": true
+    },
+    {
+      "label": "property:Status is ready",
+      "conditions": [
+        {
+          "source": "property:Status",
+          "operator": "is",
+          "value": "ready"
+        }
+      ],
+      "expected": true
+    },
+    {
+      "label": "property:Status is draft",
+      "conditions": [
+        {
+          "source": "property:Status",
+          "operator": "is",
+          "value": "draft"
+        }
+      ],
+      "expected": false
+    },
+    {
+      "label": "property:Status hasValue ready",
+      "conditions": [
+        {
+          "source": "property:Status",
+          "operator": "hasValue",
+          "value": "ready"
+        }
+      ],
+      "expected": true
+    },
+    {
+      "label": "property:Status hasValue draft",
+      "conditions": [
+        {
+          "source": "property:Status",
+          "operator": "hasValue",
+          "value": "draft"
+        }
+      ],
+      "expected": true
+    },
+    {
+      "label": "property:Score equals 12",
+      "conditions": [
+        {
+          "source": "property:Score",
+          "operator": "equals",
+          "value": "12"
+        }
+      ],
+      "expected": true
+    },
+    {
+      "label": "property:Score equals 6",
+      "conditions": [
+        {
+          "source": "property:Score",
+          "operator": "equals",
+          "value": "6"
+        }
+      ],
+      "expected": false
+    },
+    {
+      "label": "property:Score equals 0",
+      "conditions": [
+        {
+          "source": "property:Score",
+          "operator": "equals",
+          "value": "0"
+        }
+      ],
+      "expected": false
+    },
+    {
+      "label": "property:Score isLess 12",
+      "conditions": [
+        {
+          "source": "property:Score",
+          "operator": "isLess",
+          "value": "12"
+        }
+      ],
+      "expected": false
+    },
+    {
+      "label": "property:Score isLess 6",
+      "conditions": [
+        {
+          "source": "property:Score",
+          "operator": "isLess",
+          "value": "6"
+        }
+      ],
+      "expected": false
+    },
+    {
+      "label": "property:Score isLess 0",
+      "conditions": [
+        {
+          "source": "property:Score",
+          "operator": "isLess",
+          "value": "0"
+        }
+      ],
+      "expected": false
+    },
+    {
+      "label": "property:Score isMore 12",
+      "conditions": [
+        {
+          "source": "property:Score",
+          "operator": "isMore",
+          "value": "12"
+        }
+      ],
+      "expected": false
+    },
+    {
+      "label": "property:Score isMore 6",
+      "conditions": [
+        {
+          "source": "property:Score",
+          "operator": "isMore",
+          "value": "6"
+        }
+      ],
+      "expected": true
+    },
+    {
+      "label": "property:Score isMore 0",
+      "conditions": [
+        {
+          "source": "property:Score",
+          "operator": "isMore",
+          "value": "0"
+        }
+      ],
+      "expected": true
+    },
+    {
+      "label": "property:Score isDivisible 12",
+      "conditions": [
+        {
+          "source": "property:Score",
+          "operator": "isDivisible",
+          "value": "12"
+        }
+      ],
+      "expected": true
+    },
+    {
+      "label": "property:Score isDivisible 6",
+      "conditions": [
+        {
+          "source": "property:Score",
+          "operator": "isDivisible",
+          "value": "6"
+        }
+      ],
+      "expected": true
+    },
+    {
+      "label": "property:Score isDivisible 0",
+      "conditions": [
+        {
+          "source": "property:Score",
+          "operator": "isDivisible",
+          "value": "0"
+        }
+      ],
+      "expected": false
+    },
+    {
+      "label": "property:Done isFalse ",
+      "conditions": [
+        {
+          "source": "property:Done",
+          "operator": "isFalse",
+          "value": ""
+        }
+      ],
+      "expected": true
+    },
+    {
+      "label": "property:Done isTrue ",
+      "conditions": [
+        {
+          "source": "property:Done",
+          "operator": "isTrue",
+          "value": ""
+        }
+      ],
+      "expected": false
+    },
+    {
+      "label": "property:People allStartWith A",
+      "conditions": [
+        {
+          "source": "property:People",
+          "operator": "allStartWith",
+          "value": "A"
+        }
+      ],
+      "expected": false
+    },
+    {
+      "label": "property:People allStartWith b",
+      "conditions": [
+        {
+          "source": "property:People",
+          "operator": "allStartWith",
+          "value": "b"
+        }
+      ],
+      "expected": false
+    },
+    {
+      "label": "property:People allStartWith /^C/",
+      "conditions": [
+        {
+          "source": "property:People",
+          "operator": "allStartWith",
+          "value": "/^C/"
+        }
+      ],
+      "expected": false
+    },
+    {
+      "label": "property:People anyEndWith A",
+      "conditions": [
+        {
+          "source": "property:People",
+          "operator": "anyEndWith",
+          "value": "A"
+        }
+      ],
+      "expected": false
+    },
+    {
+      "label": "property:People anyEndWith b",
+      "conditions": [
+        {
+          "source": "property:People",
+          "operator": "anyEndWith",
+          "value": "b"
+        }
+      ],
+      "expected": true
+    },
+    {
+      "label": "property:People anyEndWith /^C/",
+      "conditions": [
+        {
+          "source": "property:People",
+          "operator": "anyEndWith",
+          "value": "/^C/"
+        }
+      ],
+      "expected": false
+    },
+    {
+      "label": "property:People noneMatch A",
+      "conditions": [
+        {
+          "source": "property:People",
+          "operator": "noneMatch",
+          "value": "A"
+        }
+      ],
+      "expected": false
+    },
+    {
+      "label": "property:People noneMatch b",
+      "conditions": [
+        {
+          "source": "property:People",
+          "operator": "noneMatch",
+          "value": "b"
+        }
+      ],
+      "expected": false
+    },
+    {
+      "label": "property:People noneMatch /^C/",
+      "conditions": [
+        {
+          "source": "property:People",
+          "operator": "noneMatch",
+          "value": "/^C/"
+        }
+      ],
+      "expected": true
+    },
+    {
+      "label": "property:Empty hasProperty ",
+      "conditions": [
+        {
+          "source": "property:Empty",
+          "operator": "hasProperty",
+          "value": ""
+        }
+      ],
+      "expected": true
+    },
+    {
+      "label": "property:Empty hasValue ",
+      "conditions": [
+        {
+          "source": "property:Empty",
+          "operator": "hasValue",
+          "value": ""
+        }
+      ],
+      "expected": false
+    },
+    {
+      "label": "property:Missing hasProperty ",
+      "conditions": [
+        {
+          "source": "property:Missing",
+          "operator": "hasProperty",
+          "value": ""
+        }
+      ],
+      "expected": false
+    },
+    {
+      "label": "property:Missing !hasProperty ",
+      "conditions": [
+        {
+          "source": "property:Missing",
+          "operator": "!hasProperty",
+          "value": ""
+        }
+      ],
+      "expected": true
+    },
+    {
+      "label": "property:Missing hasValue ",
+      "conditions": [
+        {
+          "source": "property:Missing",
+          "operator": "hasValue",
+          "value": ""
+        }
+      ],
+      "expected": false
+    },
+    {
+      "label": "icon iconIs lucide-star",
+      "conditions": [
+        {
+          "source": "icon",
+          "operator": "iconIs",
+          "value": "lucide-star"
+        }
+      ],
+      "expected": true
+    },
+    {
+      "label": "icon iconIs Star",
+      "conditions": [
+        {
+          "source": "icon",
+          "operator": "iconIs",
+          "value": "Star"
+        }
+      ],
+      "expected": false
+    },
+    {
+      "label": "icon nameIs lucide-star",
+      "conditions": [
+        {
+          "source": "icon",
+          "operator": "nameIs",
+          "value": "lucide-star"
+        }
+      ],
+      "expected": false
+    },
+    {
+      "label": "icon nameIs Star",
+      "conditions": [
+        {
+          "source": "icon",
+          "operator": "nameIs",
+          "value": "Star"
+        }
+      ],
+      "expected": true
+    },
+    {
+      "label": "color hexIs #aabbcc",
+      "conditions": [
+        {
+          "source": "color",
+          "operator": "hexIs",
+          "value": "#aabbcc"
+        }
+      ],
+      "expected": true
+    },
+    {
+      "label": "color hexIs #000000",
+      "conditions": [
+        {
+          "source": "color",
+          "operator": "hexIs",
+          "value": "#000000"
+        }
+      ],
+      "expected": false
+    },
+    {
+      "label": "created dateIs 2026-09-20",
+      "conditions": [
+        {
+          "source": "created",
+          "operator": "dateIs",
+          "value": "2026-09-20"
+        }
+      ],
+      "expected": true
+    },
+    {
+      "label": "created dateIs 3",
+      "conditions": [
+        {
+          "source": "created",
+          "operator": "dateIs",
+          "value": "3"
+        }
+      ],
+      "expected": false
+    },
+    {
+      "label": "created dateIs 0",
+      "conditions": [
+        {
+          "source": "created",
+          "operator": "dateIs",
+          "value": "0"
+        }
+      ],
+      "expected": false
+    },
+    {
+      "label": "created dateIs 9",
+      "conditions": [
+        {
+          "source": "created",
+          "operator": "dateIs",
+          "value": "9"
+        }
+      ],
+      "expected": false
+    },
+    {
+      "label": "created dateIs 2026",
+      "conditions": [
+        {
+          "source": "created",
+          "operator": "dateIs",
+          "value": "2026"
+        }
+      ],
+      "expected": false
+    },
+    {
+      "label": "created isMoreDaysAgo 2026-09-20",
+      "conditions": [
+        {
+          "source": "created",
+          "operator": "isMoreDaysAgo",
+          "value": "2026-09-20"
+        }
+      ],
+      "expected": false
+    },
+    {
+      "label": "created isMoreDaysAgo 3",
+      "conditions": [
+        {
+          "source": "created",
+          "operator": "isMoreDaysAgo",
+          "value": "3"
+        }
+      ],
+      "expected": true
+    },
+    {
+      "label": "created isMoreDaysAgo 0",
+      "conditions": [
+        {
+          "source": "created",
+          "operator": "isMoreDaysAgo",
+          "value": "0"
+        }
+      ],
+      "expected": true
+    },
+    {
+      "label": "created isMoreDaysAgo 9",
+      "conditions": [
+        {
+          "source": "created",
+          "operator": "isMoreDaysAgo",
+          "value": "9"
+        }
+      ],
+      "expected": false
+    },
+    {
+      "label": "created isMoreDaysAgo 2026",
+      "conditions": [
+        {
+          "source": "created",
+          "operator": "isMoreDaysAgo",
+          "value": "2026"
+        }
+      ],
+      "expected": false
+    },
+    {
+      "label": "created weekdayIs 2026-09-20",
+      "conditions": [
+        {
+          "source": "created",
+          "operator": "weekdayIs",
+          "value": "2026-09-20"
+        }
+      ],
+      "expected": false
+    },
+    {
+      "label": "created weekdayIs 3",
+      "conditions": [
+        {
+          "source": "created",
+          "operator": "weekdayIs",
+          "value": "3"
+        }
+      ],
+      "expected": false
+    },
+    {
+      "label": "created weekdayIs 0",
+      "conditions": [
+        {
+          "source": "created",
+          "operator": "weekdayIs",
+          "value": "0"
+        }
+      ],
+      "expected": false
+    },
+    {
+      "label": "created weekdayIs 9",
+      "conditions": [
+        {
+          "source": "created",
+          "operator": "weekdayIs",
+          "value": "9"
+        }
+      ],
+      "expected": false
+    },
+    {
+      "label": "created weekdayIs 2026",
+      "conditions": [
+        {
+          "source": "created",
+          "operator": "weekdayIs",
+          "value": "2026"
+        }
+      ],
+      "expected": false
+    },
+    {
+      "label": "created monthIs 2026-09-20",
+      "conditions": [
+        {
+          "source": "created",
+          "operator": "monthIs",
+          "value": "2026-09-20"
+        }
+      ],
+      "expected": false
+    },
+    {
+      "label": "created monthIs 3",
+      "conditions": [
+        {
+          "source": "created",
+          "operator": "monthIs",
+          "value": "3"
+        }
+      ],
+      "expected": false
+    },
+    {
+      "label": "created monthIs 0",
+      "conditions": [
+        {
+          "source": "created",
+          "operator": "monthIs",
+          "value": "0"
+        }
+      ],
+      "expected": false
+    },
+    {
+      "label": "created monthIs 9",
+      "conditions": [
+        {
+          "source": "created",
+          "operator": "monthIs",
+          "value": "9"
+        }
+      ],
+      "expected": true
+    },
+    {
+      "label": "created monthIs 2026",
+      "conditions": [
+        {
+          "source": "created",
+          "operator": "monthIs",
+          "value": "2026"
+        }
+      ],
+      "expected": false
+    },
+    {
+      "label": "created yearIs 2026-09-20",
+      "conditions": [
+        {
+          "source": "created",
+          "operator": "yearIs",
+          "value": "2026-09-20"
+        }
+      ],
+      "expected": false
+    },
+    {
+      "label": "created yearIs 3",
+      "conditions": [
+        {
+          "source": "created",
+          "operator": "yearIs",
+          "value": "3"
+        }
+      ],
+      "expected": false
+    },
+    {
+      "label": "created yearIs 0",
+      "conditions": [
+        {
+          "source": "created",
+          "operator": "yearIs",
+          "value": "0"
+        }
+      ],
+      "expected": false
+    },
+    {
+      "label": "created yearIs 9",
+      "conditions": [
+        {
+          "source": "created",
+          "operator": "yearIs",
+          "value": "9"
+        }
+      ],
+      "expected": false
+    },
+    {
+      "label": "created yearIs 2026",
+      "conditions": [
+        {
+          "source": "created",
+          "operator": "yearIs",
+          "value": "2026"
+        }
+      ],
+      "expected": true
+    },
+    {
+      "label": "modified isToday ",
+      "conditions": [
+        {
+          "source": "modified",
+          "operator": "isToday",
+          "value": ""
+        }
+      ],
+      "expected": true
+    },
+    {
+      "label": "modified isToday 12:30",
+      "conditions": [
+        {
+          "source": "modified",
+          "operator": "isToday",
+          "value": "12:30"
+        }
+      ],
+      "expected": true
+    },
+    {
+      "label": "modified isBeforeNow ",
+      "conditions": [
+        {
+          "source": "modified",
+          "operator": "isBeforeNow",
+          "value": ""
+        }
+      ],
+      "expected": false
+    },
+    {
+      "label": "modified isBeforeNow 12:30",
+      "conditions": [
+        {
+          "source": "modified",
+          "operator": "isBeforeNow",
+          "value": "12:30"
+        }
+      ],
+      "expected": false
+    },
+    {
+      "label": "modified timeIs ",
+      "conditions": [
+        {
+          "source": "modified",
+          "operator": "timeIs",
+          "value": ""
+        }
+      ],
+      "expected": false
+    },
+    {
+      "label": "modified timeIs 12:30",
+      "conditions": [
+        {
+          "source": "modified",
+          "operator": "timeIs",
+          "value": "12:30"
+        }
+      ],
+      "expected": true
+    },
+    {
+      "label": "property:Due dateIsAfter 2026-09-27",
+      "conditions": [
+        {
+          "source": "property:Due",
+          "operator": "dateIsAfter",
+          "value": "2026-09-27"
+        }
+      ],
+      "expected": true
+    },
+    {
+      "label": "property:Due dateIsAfter 2",
+      "conditions": [
+        {
+          "source": "property:Due",
+          "operator": "dateIsAfter",
+          "value": "2"
+        }
+      ],
+      "expected": true
+    },
+    {
+      "label": "property:Due isLessDaysAway 2026-09-27",
+      "conditions": [
+        {
+          "source": "property:Due",
+          "operator": "isLessDaysAway",
+          "value": "2026-09-27"
+        }
+      ],
+      "expected": false
+    },
+    {
+      "label": "property:Due isLessDaysAway 2",
+      "conditions": [
+        {
+          "source": "property:Due",
+          "operator": "isLessDaysAway",
+          "value": "2"
+        }
+      ],
+      "expected": true
+    },
+    {
+      "label": "all combined",
+      "match": "all",
+      "conditions": [
+        {
+          "source": "name",
+          "operator": "is",
+          "value": "alpha"
+        },
+        {
+          "source": "extension",
+          "operator": "is",
+          "value": "pdf"
+        }
+      ],
+      "expected": false
+    },
+    {
+      "label": "any combined",
+      "match": "any",
+      "conditions": [
+        {
+          "source": "name",
+          "operator": "is",
+          "value": "alpha"
+        },
+        {
+          "source": "extension",
+          "operator": "is",
+          "value": "pdf"
+        }
+      ],
+      "expected": true
+    },
+    {
+      "label": "none combined",
+      "match": "none",
+      "conditions": [
+        {
+          "source": "name",
+          "operator": "is",
+          "value": "alpha"
+        },
+        {
+          "source": "extension",
+          "operator": "is",
+          "value": "pdf"
+        }
+      ],
+      "expected": false
+    },
+    {
+      "label": "disabled",
+      "enabled": false,
+      "conditions": [
+        {
+          "source": "name",
+          "operator": "is",
+          "value": "alpha"
+        }
+      ],
+      "expected": false
+    },
+    {
+      "label": "empty",
+      "conditions": [],
+      "expected": false
+    }
+  ]
+}

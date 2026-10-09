@@ -1,0 +1,188 @@
+/* ===== Table View =====
+   Shared by the library and dataview tables. Separate borders (spacing 0)
+   so the sticky header can carry rounded end caps and rows can round their
+   hover band — border-collapse drops border-radius on cells. Rows sit at
+   ~38px (8px vertical padding + one text line); hairline dividers only. */
+.dashboard-library-table {
+	width: 100%;
+	border-collapse: separate;
+	border-spacing: 0;
+	font-size: 0.75em;
+}
+
+.dashboard-library-table th {
+	position: sticky;
+	top: 0;
+	z-index: 1;
+	text-align: left;
+	height: 32px;
+	box-sizing: border-box;
+	padding: 6px 10px;
+	font-weight: 600;
+	color: var(--db-text-muted, var(--text-muted));
+	/* Opaque header: the section token can be translucent, so it is layered
+	   over the page background to keep scrolled rows from bleeding through. */
+	background:
+		linear-gradient(var(--db-bg-hover, transparent), var(--db-bg-hover, transparent)),
+		linear-gradient(var(--db-bg-section, var(--background-secondary)), var(--db-bg-section, var(--background-secondary))),
+		var(--db-bg, var(--background-primary));
+	box-shadow: inset 0 -1px 0 var(--db-border, rgba(255, 255, 255, 0.08));
+	font-size: 0.6875em;
+	text-transform: uppercase;
+	letter-spacing: 0.5px;
+	cursor: pointer;
+	white-space: nowrap;
+	transition: color var(--nand-duration-fast) var(--nand-ease);
+}
+
+.dashboard-library-table thead th:first-child {
+	border-top-left-radius: var(--db-radius-sm, 6px);
+	border-bottom-left-radius: var(--db-radius-sm, 6px);
+}
+
+.dashboard-library-table thead th:last-child {
+	border-top-right-radius: var(--db-radius-sm, 6px);
+	border-bottom-right-radius: var(--db-radius-sm, 6px);
+}
+
+.dashboard-library-table th:hover {
+	color: var(--db-text, var(--text-normal));
+}
+
+.dashboard-library-table td {
+	height: 38px;
+	box-sizing: border-box;
+	padding: 8px 10px;
+	color: var(--db-text, var(--text-normal));
+	border-bottom: 1px solid color-mix(in srgb, var(--db-border, rgba(255, 255, 255, 0.08)) 70%, transparent);
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	max-width: 200px;
+	transition: background var(--nand-duration-fast) var(--nand-ease);
+}
+
+.dashboard-library-table tbody tr:last-child td {
+	border-bottom-color: transparent;
+}
+
+.dashboard-library-table tr {
+	cursor: pointer;
+}
+
+/* Zebra (library always; dataview opt-in via .is-striped below): a faint
+   tint on even rows. Hover wins and rounds its band's end caps. */
+.dashboard-library-table:not(.dashboard-dataview-table) tbody tr:nth-child(even) td {
+	background: color-mix(in srgb, var(--db-bg-hover, rgba(255, 255, 255, 0.04)) 60%, transparent);
+}
+
+.dashboard-library-table tbody tr:hover td {
+	background: var(--db-bg-hover, var(--db-bg-card-hover, rgba(255, 255, 255, 0.10)));
+}
+
+.dashboard-library-table tbody tr:hover td:first-child {
+	border-top-left-radius: var(--db-radius-sm, 6px);
+	border-bottom-left-radius: var(--db-radius-sm, 6px);
+}
+
+.dashboard-library-table tbody tr:hover td:last-child {
+	border-top-right-radius: var(--db-radius-sm, 6px);
+	border-bottom-right-radius: var(--db-radius-sm, 6px);
+}
+
+.dashboard-library-table-name {
+	font-weight: 500;
+}
+
+.dashboard-library-table-empty {
+	color: var(--db-text-muted, var(--text-muted));
+	opacity: 0.4;
+}
+
+.dashboard-library-table-editable {
+	cursor: text;
+}
+
+/* Editable cell: an inset hairline marks the cell under the pointer on top of
+   the row's hover band (double-click to edit). */
+.dashboard-library-table tbody tr:hover td.dashboard-library-table-editable:hover {
+	background: var(--db-bg-hover-strong, var(--db-bg-hover, rgba(255, 255, 255, 0.08)));
+	box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--db-accent, var(--interactive-accent)) 30%, transparent);
+}
+
+/* Action column (delete button) — narrow, non-interactive header */
+.dashboard-library-table-op-col {
+	width: 34px;
+	padding: 6px 4px;
+	cursor: default;
+}
+
+.dashboard-library-table-op {
+	padding: 4px;
+	text-align: center;
+	/* Override the default td clamping so the round button isn't clipped */
+	max-width: none;
+	overflow: visible;
+	white-space: nowrap;
+}
+
+/* Row delete: ghost icon button revealed on row hover / keyboard focus;
+   danger tint (not a solid red disc) when armed. */
+.dashboard-library-table-delete {
+	width: 24px;
+	height: 24px;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	border: none;
+	border-radius: var(--db-radius-sm, 6px);
+	background: transparent;
+	box-shadow: none;
+	color: var(--db-text-muted, var(--text-muted));
+	padding: 0;
+	min-height: 0;
+	opacity: 0;
+	cursor: pointer;
+	transition: opacity var(--nand-duration-fast) var(--nand-ease), background var(--nand-duration-fast) var(--nand-ease), color var(--nand-duration-fast) var(--nand-ease);
+}
+
+.dashboard-library-table-delete svg {
+	width: 14px;
+	height: 14px;
+}
+
+.dashboard-library-table tr:hover .dashboard-library-table-delete,
+.dashboard-library-table-delete:focus-visible {
+	opacity: 1;
+}
+
+.dashboard-library-table-delete:focus-visible {
+	outline: 2px solid var(--db-accent, var(--interactive-accent));
+	outline-offset: 1px;
+}
+
+.dashboard-library-table-delete:hover {
+	background: color-mix(in srgb, var(--db-danger, var(--text-error)) 14%, transparent);
+	color: var(--db-danger, var(--text-error));
+}
+
+/* Touch has no hover: keep the delete affordance visible (faint). */
+@media (pointer: coarse) {
+	.dashboard-library-table-delete {
+		opacity: 0.6;
+	}
+}
+
+.dashboard-library-table-edit-input {
+	width: 100%;
+	padding: 2px 6px;
+	border: 1px solid var(--db-accent, var(--interactive-accent));
+	border-radius: max(4px, calc(var(--db-radius-sm, 6px) - 2px));
+	background: var(--db-bg-input, rgba(255, 255, 255, 0.05));
+	color: var(--db-text, var(--text-normal));
+	font-size: 0.75em;
+	font-family: var(--db-font, var(--font-interface));
+	outline: none;
+	box-sizing: border-box;
+}
+

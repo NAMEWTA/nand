@@ -1,0 +1,139 @@
+NAND
+Copyright (c) 2026 NAMEWTA
+Licensed under the MIT License (see LICENSE).
+
+NAND includes or adapts the following works. Each keeps its own license.
+Bundled npm packages and the Rust crates of the terminal helper are listed with
+their license texts in THIRD-PARTY-NOTICES.md.
+
+--------------------------------------------------------------------------------
+Dashboard (Home module)
+--------------------------------------------------------------------------------
+
+The board design (banner, sections and widgets persisted as Markdown) derives
+from apex-dashboard and from obsidian-dashboard.
+
+apex-dashboard
+https://github.com/PandoraReads/apex-dashboard
+
+MIT License
+
+Copyright (c) 2025 PandoraReads
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+obsidian-dashboard
+https://github.com/Leolewis2011/obsidian-dashboard (published under the MIT
+License; the repository is no longer available, so the notice below uses the
+project's published license with its author's name)
+
+MIT License
+
+Copyright (c) Leolewis2011
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+--------------------------------------------------------------------------------
+Orca (stablyai/orca), MIT License, Copyright (c) 2026 Lovecast Inc.
+--------------------------------------------------------------------------------
+
+https://github.com/stablyai/orca
+
+Adapted parts, with the upstream commits they are taken from:
+- Agent catalog, launch and permission flags, native resume flags, native
+  history formats and usage readers, and automation schedule and cron parsing:
+  commit 27b823f934f739bc85914dd717b776835f60bcf7.
+- Terminal recent-session ordering, stable grid fitting, hidden renderer
+  retention and structural replay: Orca v1.4.217, commit
+  11d97896628d90c4990365127812667b00e28c82
+  (mapping: docs/third-party/orca-terminal-workbench.md).
+- Browser snapshot traversal, interactive element discovery, screenshot
+  markup, element grab context, debugger lease, popup and URL classification:
+  commit d74388f8a2dad2bd4bbfe3b937aba66e6648258b.
+Full license text: docs/third-party/orca-LICENSE.txt
+
+--------------------------------------------------------------------------------
+Iconic (gfxholo/iconic) 1.1.10, MIT No Attribution, Copyright 2024-2026 Holo
+--------------------------------------------------------------------------------
+
+https://github.com/gfxholo/iconic
+
+The icon rules engine and managers are ported from Iconic at commit
+268e133c6f99dcef670cbda0d25a74b8239aa099. The icon data ships with its own
+notices (Lucide icons, ISC, with Feather-derived icons under MIT; Unicode emoji
+and CLDR data, Unicode License v3): src/modules/icons/core/res/NOTICE.txt.
+
+--------------------------------------------------------------------------------
+obsidian-git (Vinzent03/obsidian-git), MIT License
+--------------------------------------------------------------------------------
+
+https://github.com/Vinzent03/obsidian-git
+
+Git sync (src/modules/sync) follows obsidian-git's behaviour, studied at
+NAMEWTA/obsidian-git-zh commit bde2d06edf2cac28f90cba796afc51bdbf73f160 (branch
+wta): commit modes (src/main.ts resolveCommitMode), the commit-and-sync order,
+the serial operation queue (src/promiseQueue.ts), automatic routines
+(src/automaticsManager.ts) and conflict blocks (src/editor/conflicts). The
+conflict block parser and commit modes are adapted from it; the rest is written
+for NAND.
+
+MIT License
+
+Copyright (c) 2020 Vinzent03, Denis Olehov
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+--------------------------------------------------------------------------------
+Terminal
+--------------------------------------------------------------------------------
+
+The terminal (src/modules/agent) and its native helper (native/pty-server) are
+written for NAND.

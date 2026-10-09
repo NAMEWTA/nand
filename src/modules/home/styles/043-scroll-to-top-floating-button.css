@@ -1,0 +1,148 @@
+/* ===== Scroll-to-top floating button ===== */
+/* position:fixed anchors to the viewport. Kept below the mobile drawer/modal
+   stacks (z-index 100/9999) so overlays correctly cover it. The .nand-dashboard-root
+   has isolation:isolate, so this sits in the view's own stacking context. */
+.dashboard-scroll-top {
+	position: fixed;
+	right: 20px;
+	bottom: calc(20px + env(safe-area-inset-bottom, 0px));
+	z-index: 50;
+	width: 36px;
+	height: 36px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	padding: 0;
+	border: 1px solid color-mix(in srgb, var(--db-accent) 45%, transparent);
+	border-radius: 50%;
+	background: color-mix(in srgb, var(--db-accent) 45%, transparent);
+	color: var(--db-text);
+	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+	cursor: pointer;
+	opacity: 0;
+	visibility: hidden;
+	transform: translateY(8px) scale(0.9);
+	pointer-events: none;
+	transition: opacity 0.2s ease, transform 0.2s ease, visibility 0s linear 0.2s, background 0.15s ease;
+}
+
+.dashboard-scroll-top--visible {
+	opacity: 0.82;
+	visibility: visible;
+	transform: translateY(0) scale(1);
+	pointer-events: auto;
+	transition: opacity 0.2s ease, transform 0.2s ease, visibility 0s, background 0.15s ease;
+}
+
+.dashboard-scroll-top:hover {
+	opacity: 1;
+	background: color-mix(in srgb, var(--db-accent) 70%, transparent);
+}
+
+.dashboard-scroll-top:active {
+	transform: translateY(1px) scale(0.96);
+}
+
+.dashboard-scroll-top svg {
+	width: 16px;
+	height: 16px;
+}
+
+/* Tablet fix: Obsidian's own stylesheet ships `.is-tablet button:not(.clickable-icon)
+   { padding: 4px 20px }` — specificity 0,2,1, since :not() counts its argument.
+   That beats this plugin's plain-class `padding: 0` (0,1,0), inflating the 36px
+   round scroll-top button into a wide pill that pushes its arrow glyph out of
+   view, and eating ~80px of task-text width on every todo row (delete +
+   reminder buttons). Qualify with `button` to reach 0,2,1 and win by source
+   desktop matches neither — both stay on the base styles. */
+.is-tablet button.dashboard-scroll-top,
+.is-tablet button.dashboard-task-delete,
+.is-tablet button.dashboard-task-reminder-btn,
+.is-tablet button.dashboard-calendar-refresh-btn,
+.is-tablet button.dashboard-calendar-today-btn {
+	padding: 0;
+}
+
+/* Todo action buttons keep their intended 2px side padding (14px glyph +
+   padding = compact footprint), instead of Obsidian's 20px tablet padding. */
+.is-tablet button.dashboard-task-delete,
+.is-tablet button.dashboard-task-reminder-btn {
+	padding: 0 2px;
+}
+
+/* Add-section modal type picker (icon+label grid, mobile-friendly) */
+.dashboard-add-section-grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(88px, 1fr));
+	gap: 8px;
+	margin-bottom: 12px;
+}
+
+.dashboard-add-section-card {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	gap: 6px;
+	padding: 12px 6px;
+	border-radius: var(--db-radius-md, 10px);
+	border: 1px solid var(--db-border-card, rgba(255, 255, 255, 0.10));
+	background: var(--db-bg-card, rgba(255, 255, 255, 0.06));
+	color: var(--db-text, var(--text-normal));
+	cursor: pointer;
+	text-align: center;
+	transition: transform 0.15s ease, border-color 0.15s ease, background 0.15s ease;
+}
+
+.dashboard-add-section-card:hover {
+	border-color: var(--db-accent, var(--interactive-accent));
+	transform: translateY(-1px);
+}
+
+.dashboard-add-section-card.active {
+	border-color: var(--db-accent, var(--interactive-accent));
+	background: color-mix(in srgb, var(--db-accent, var(--interactive-accent)) 12%, transparent);
+}
+
+.dashboard-add-section-card-icon svg {
+	width: 20px;
+	height: 20px;
+	color: var(--db-text-muted, var(--text-muted));
+}
+
+.dashboard-add-section-card.active .dashboard-add-section-card-icon svg {
+	color: var(--db-accent, var(--interactive-accent));
+}
+
+.dashboard-add-section-card-name {
+	font-size: 0.6875em;
+	line-height: 1.2;
+}
+
+.dashboard-add-section-card.active .dashboard-add-section-card-name {
+	color: var(--db-accent, var(--interactive-accent));
+	font-weight: 600;
+}
+
+.dashboard-section-name-input {
+	flex: 1;
+	min-width: 0;
+	box-sizing: border-box;
+	padding: 7px 10px;
+	border: 1px solid var(--db-border-card, rgba(255, 255, 255, 0.18));
+	border-radius: var(--db-radius-sm, 6px);
+	background: var(--db-bg-input, var(--background-modifier-form-field));
+	color: var(--db-text, var(--text-normal));
+	font-size: 0.9em;
+}
+
+.dashboard-section-name-input:focus {
+	outline: none;
+	border-color: var(--db-accent, var(--interactive-accent));
+}
+
+.dashboard-modal-btn.is-disabled {
+	opacity: 0.45;
+	pointer-events: none;
+}
+

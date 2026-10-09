@@ -1,0 +1,191 @@
+import { observeDashboardPromise } from '../save-feedback';
+import { Notice } from 'obsidian';
+import { planDashboardUpdate, type DashboardUpdateSource } from '../../core/board/render-update';
+import type { DashboardData } from '../../core/board/types/index';
+import { homeServices } from '../../services/instances';
+import { t } from '../../../../shared/i18n/index';
+import { renderEmptyState } from '../../../../ui/primitives/empty-state';
+import { createPomodoroMiniPanel } from '../pomodoro/pomodoro-mini-panel';
+import { createReadingMiniTimer } from '../reading/reading-mini-timer';
+import { invalidateScanningSectionSignatures } from '../renderer/render-dashboard';
+import { closeOwnedDashboardPanels } from '../ui/panel-modal';
+import { showPromptDialog } from '../ui/prompt-dialog';
+import { loadHolidayData } from '../widgets/lunar-model';
+import type { DashboardSurface } from './dashboard-surface';
+
+export function showModuleDisabled(this: DashboardSurface): void {
+	if (this.isOpen || this.isOpening) {
+		void onClose.call(this);
+	}
+	const root = this.contentEl;
+	if (!root) return;
+	root.empty();
+	root.addClass('nand-module-off');
+	renderEmptyState(root, {
+		icon: 'layout-dashboard',
+		title: t('modules.dashboard'),
+		description: t('modules.dashboardOff'),
+		action: { label: t('modules.openHome'), run: () => this.plugin.openSettings() },
+	});
+}
+
+export async function onOpen(this: DashboardSurface): Promise<void> {
+	if (!this.plugin.settings.modules.dashboard) {
+		showModuleDisabled.call(this);
+		return;
+	}
+	if (this.isOpening || this.isOpen) return;
+	this.isOpening = true;
+	const revision = ++this.lifecycleRevision;
+	this.sync.updateSettings(this.plugin.settings);
+	await this.sync.init();
+	if (revision !== this.lifecycleRevision) return;
+	// The banner "streak" auto-detects the Daily Notes core plugin, whose
+	// internal-plugins state may report as not-yet-enabled during the very
+	// first render. Re-compute once the metadata cache has fully resolved so
+	// the number never flashes an incorrect value from the startup race.
+	// One-shot guard: `resolved` can fire repeatedly on large vaults.
+	this.registerEvent(
+		this.app.metadataCache.on('resolved', () => {
+			if (this.bannerStatsResolvedOnce) return;
+			this.bannerStatsResolvedOnce = true;
+			// Sections rendered before the cache resolved may hold partially
+			// indexed frontmatter; their path+mtime signatures cannot see that,
+			// so drop them to force a rebuild on the next vault event.
+			invalidateScanningSectionSignatures(this.contentEl);
+			this.debouncedRefreshBannerStats();
+		}),
+	);
+	// The timers belong to the home module (loaded once); every board shares them.
+	this.pomodoroService = homeServices.pomodoro ?? null;
+	this.readingService = homeServices.reading ?? null;
+	// Holiday data may require a network request, so it must never hold the first dashboard render hostage.
+	const holidayDataPromise = loadHolidayData(this.app);
+	if (revision !== this.lifecycleRevision) return;
+	// Body-level floating countdown pill; polls the service on its own so
+	// it survives sidebar re-renders and stays up while other tabs show.
+	if (this.pomodoroService) this.pomodoroMiniPanel = createPomodoroMiniPanel(this.plugin, this.pomodoroService, this.containerEl.ownerDocument);
+	// Tiny top-right elapsed-time pill while a reading session runs; its
+	// stop button opens the same end-of-reading flow as the sidebar card.
+	if (this.readingService) this.readingMiniTimer = createReadingMiniTimer(this.readingService, this.containerEl.ownerDocument);
+	// Habit data is plugin-level: every open view subscribes so a check-in
+	// in one view refreshes the widget and banner in all of them.
+	this.habitUnsubscribe = (homeServices.habit ?? null)?.subscribe(() => this.onHabitChanged()) ?? null;
+	// Music is desktop-only (no service on mobile → null subscription).
+	// Focus re-sync merges another device's records and notifies — refresh
+	// the pomodoro/reading widgets without restarting the timers.
+	this.registerVaultListeners();
+	// Reminders are owned by the plugin automation service.
+	this.startWeatherRefresh();
+	this.startDayRolloverChecker();
+	this.isOpen = true;
+	this.isOpening = false;
+	const initialData = this.pendingInitialData ?? this.sync.getData();
+	this.pendingInitialData = null;
+	if (initialData) this.render(initialData);
+	void holidayDataPromise.then((data) => {
+		if (revision !== this.lifecycleRevision || !this.isOpen) return;
+		this.holidayData = data;
+		this.refreshLunarWidgetsInPlace();
+	});
+}
+
+export async function onClose(this: DashboardSurface): Promise<void> {
+	closeOwnedDashboardPanels(this.app, this);
+	this.lifecycleRevision++;
+	this.isOpening = false;
+	this.isOpen = false;
+	this.pendingInitialData = null;
+	this.popoverModal?.close();
+	this.popoverModal = null;
+	this.runCleanup();
+	this.unregisterVaultListeners();
+	this.stopWeatherRefresh();
+	this.stopDayRolloverChecker();
+	this.pomodoroMiniPanel?.destroy();
+	this.pomodoroMiniPanel = null;
+	this.readingMiniTimer?.destroy();
+	this.readingMiniTimer = null;
+	// Shared timers keep running for other boards; the home module disposes them.
+	this.pomodoroService = null;
+	this.readingService = null;
+	this.habitUnsubscribe?.();
+	this.habitUnsubscribe = null;
+	this.contentEl.empty();
+	await observeDashboardPromise(this.sync.close());
+}
+
+export function handleDataUpdate(this: DashboardSurface, data: DashboardData, source: DashboardUpdateSource): void {
+	const previous = this.data;
+	this.data = data;
+	if (this.isOpening || !this.isOpen) {
+		this.pendingInitialData = data;
+		return;
+	}
+	if (this.suppressNextRender) {
+		this.suppressNextRender = false;
+		return;
+	}
+
+	const plan = planDashboardUpdate(previous, data, source);
+	if (plan.kind === 'none') return;
+	if (plan.kind === 'sections') {
+		// A height-only change on a calendar or web section is already live
+		// in the DOM (the resize handle writes the inline height as it
+		// drags); rebuilding would reset the calendar's month/week navigation
+		// or reload the web section's embedded page for no gain.
+		// Skip those; every other change re-renders as usual.
+		const buildable = plan.names.filter((name) => {
+			if (!previous) return true;
+			const idx = data.columns.findIndex((c) => c.name === name);
+			const before = previous.columns[idx];
+			const after = data.columns[idx];
+			if (!before || !after || (after.sectionType !== 'calendar' && after.sectionType !== 'web')) return true;
+			return JSON.stringify({ ...before, height: undefined }) !== JSON.stringify({ ...after, height: undefined });
+		});
+		if (buildable.length === 0) return;
+		const refreshed = buildable.every((name) => this.refreshSectionInPlace(name));
+		if (refreshed) return;
+	}
+	this.render(data);
+}
+
+export async function refresh(this: DashboardSurface): Promise<void> {
+	this.sync.updateSettings(this.plugin.settings);
+	const data = this.sync.getData();
+	if (data) {
+		this.render(data);
+	}
+}
+
+/** Reload the dashboard file from disk (e.g. after a backup restore) and
+ *  re-render. The sync engine re-reads and notifies, which triggers render. */
+export async function reloadFromDisk(this: DashboardSurface): Promise<void> {
+	await observeDashboardPromise(this.sync.reloadFromDisk());
+}
+
+/** Re-point this view's engine at the (already-updated) active workspace and
+ *  reload. Called by the plugin after any workspace switch/registry change.
+ *  Settings objects are replaced (not mutated) on every save, so the fresh
+ *  reference must be pushed into the engine before it re-resolves the file. */
+export async function applyWorkspaceSwitch(this: DashboardSurface): Promise<void> {
+	this.sync.updateSettings(this.plugin.settings);
+	await observeDashboardPromise(this.sync.switchFile());
+}
+
+export async function addSection(this: DashboardSurface): Promise<void> {
+	const name = await showPromptDialog(this.app, { title: t('renderer.sectionName') });
+	if (name) {
+		void observeDashboardPromise(this.sync.addColumn(name));
+	}
+}
+
+/** Flip the banner between poster & quotes and the stats dashboard.
+ *  updateBanner persists the new mode and re-renders via the sync callback. */
+export async function toggleBannerMode(this: DashboardSurface): Promise<void> {
+	const data = this.sync.getData();
+	if (!data) return;
+	const nextMode = data.banner.mode === 'stats' ? 'quote' : 'stats';
+	await observeDashboardPromise(this.sync.updateBanner({ mode: nextMode }));
+	new Notice(nextMode === 'stats' ? t('main.bannerModeStats') : t('main.bannerModeQuote'));
+}

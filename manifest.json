@@ -1,0 +1,9 @@
+{
+	"id": "nand",
+	"name": "NAND",
+	"minAppVersion": "1.13.0",
+	"version": "0.0.1-alpha.1",
+	"description": "NAND \u2014 dashboards, comments, coding agents, icons, contacts, automations and notifications.",
+	"author": "NAMEWTA",
+	"isDesktopOnly": false
+}

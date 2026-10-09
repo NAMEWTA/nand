@@ -1,0 +1,504 @@
+/* ===== Quick Links (Glass Buttons) ===== */
+.dashboard-qa-list {
+	display: flex;
+	flex-direction: row;
+	flex-wrap: wrap;
+	gap: 6px;
+	margin-bottom: 8px;
+}
+
+.dashboard-qa-item {
+	display: flex;
+	align-items: center;
+	gap: 4px;
+	padding: 6px 8px;
+	border-radius: 999px;
+	background: var(--db-bg-btn);
+	border: 1px solid var(--db-border-btn);
+	box-shadow: none;
+	cursor: pointer;
+	transition: background-color var(--nand-duration) var(--nand-ease), border-color var(--nand-duration) var(--nand-ease), box-shadow var(--nand-duration) var(--nand-ease), color var(--nand-duration) var(--nand-ease);
+	position: relative;
+}
+
+.dashboard-qa-item:hover {
+	background: var(--db-bg-btn-hover);
+	border-color: var(--db-accent);
+	box-shadow: var(--nand-shadow-xs, 0 1px 2px rgba(0, 0, 0, 0.06));
+}
+
+.dashboard-qa-item:active {
+	box-shadow: 0 0 0 2px color-mix(in srgb, var(--db-accent) 25%, transparent);
+	border-color: var(--db-accent);
+}
+
+.dashboard-qa-item:focus-visible {
+	outline: 2px solid var(--db-accent);
+	outline-offset: 1px;
+}
+
+.dashboard-qa-name {
+	font-size: 0.75em;
+	flex-shrink: 0;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	line-height: 1.2;
+	max-width: 70px;
+}
+
+.dashboard-qa-remove {
+	background: var(--db-bg-btn) !important;
+	border: none !important;
+	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15) !important;
+	color: var(--db-text-muted);
+	cursor: pointer;
+	padding: 0;
+	min-height: 0;
+	line-height: 1;
+	opacity: 0;
+	transition: opacity 0.15s ease, color 0.15s ease;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	box-sizing: border-box;
+	position: absolute;
+	top: -5px;
+	right: -5px;
+	border-radius: 50%;
+	width: 18px;
+	height: 18px;
+}
+
+.dashboard-qa-remove:hover {
+	color: var(--db-danger);
+}
+
+.dashboard-qa-remove svg {
+	width: 11px;
+	height: 11px;
+	display: block;
+}
+
+.dashboard-qa-item:hover .dashboard-qa-remove {
+	opacity: 1;
+}
+
+.dashboard-qa-edit {
+	background: var(--db-bg-btn) !important;
+	border: none !important;
+	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15) !important;
+	color: var(--db-text-muted);
+	cursor: pointer;
+	padding: 0;
+	min-height: 0;
+	line-height: 1;
+	opacity: 0;
+	transition: opacity 0.15s ease, color 0.15s ease;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	box-sizing: border-box;
+	position: absolute;
+	top: -5px;
+	left: -5px;
+	border-radius: 50%;
+	width: 18px;
+	height: 18px;
+}
+
+.dashboard-qa-edit:hover {
+	color: var(--db-accent);
+}
+
+.dashboard-qa-edit svg {
+	width: 11px;
+	height: 11px;
+	display: block;
+}
+
+.dashboard-qa-item:hover .dashboard-qa-edit {
+	opacity: 1;
+}
+
+/* Phones only: Obsidian adds .is-mobile on phones AND tablets, but tablets
+   carry .is-tablet and drive a pointer (trackpad/mouse), so they keep the
+   desktop hover-reveal. Phones have no reliable hover, so keep the
+   edit/remove affordances visible instead of stranding them at opacity:0
+   (which read as empty deformed blobs). */
+.is-mobile:not(.is-tablet) .dashboard-qa-edit,
+.is-mobile:not(.is-tablet) .dashboard-qa-remove {
+	opacity: 1;
+}
+
+/* Tablet reset — same trap as the scroll-top / quicknote-chip fixes elsewhere
+   in this file: Obsidian ships `.is-tablet button:not(.clickable-icon)
+   { padding: var(--size-4-1) var(--size-4-5) }` (specificity 0,2,1 since
+   :not() counts its argument), which beats every plain-class `padding` below
+   (0,1,0). Under the app stylesheet's global border-box, any compact icon
+   button narrower than the 40px combined padding gets inflated into a pill
+   and its flex-centered svg (default flex-shrink) collapses to zero width —
+   the blank-icon-button bug seen on tablets: deformed ovals for quick-action
+   edit/remove, empty browse buttons in the path-picker rows, and the same
+   crush for every other fixed-width icon button below. Qualify with `button`
+   to tie at 0,2,1 and win by source order (plugin styles load after app.css).
+   Phones carry .is-mobile without .is-tablet and desktop matches neither, so
+   both keep the base styles. */
+.is-tablet button.dashboard-qa-remove,
+.is-tablet button.dashboard-qa-edit,
+.is-tablet button.dashboard-quicknote-cfg-icon-btn,
+.is-tablet button.dashboard-quicknote-cfg-del,
+.is-tablet button.dashboard-library-table-delete,
+.is-tablet button.dashboard-media-delete,
+.is-tablet button.dashboard-media-icon-btn,
+.is-tablet button.dashboard-weread-cfg-op,
+.is-tablet button.dashboard-weread-notebook-import,
+.is-tablet button.dashboard-theme-studio-color-clear,
+.is-tablet button.note-popover-btn {
+	padding: 0;
+}
+
+/* Compact buttons whose intended padding is non-zero: restore each inset
+   rather than flattening to 0. Card action buttons (edit/save/color/delete,
+   top-right of todo and memo cards) were the reported tablet gap: Obsidian's
+   20px side padding turned each into a wide pill, spacing the icons far
+   apart; restoring the base 2px keeps them tight and right-aligned. */
+.is-tablet button.dashboard-card-btn { padding: 2px; }
+.is-tablet button.dashboard-card-btn--size { padding: 2px 5px; }
+.is-tablet button.dashboard-section-add-btn { padding: 2px 4px; }
+.is-tablet button.dashboard-qa-add-btn,
+.is-tablet button.dashboard-qa-palette-btn { padding: 2px 4px; }
+.is-tablet button.dashboard-weread-pager-btn { padding: 0 6px; }
+.is-tablet button.dashboard-workspace-btn { padding: 0 3px; }
+.is-tablet button.dashboard-workspace-add-btn { padding: 0; }
+.is-tablet button.dashboard-banner-pin-btn { padding: 4px; }
+
+.dashboard-qa-header {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	margin: 0 0 6px 0;
+	padding-bottom: 6px;
+	border-bottom: 1px solid var(--db-border);
+}
+
+.dashboard-qa-btn-group {
+	display: flex;
+	align-items: center;
+	gap: 4px;
+	flex-shrink: 0;
+}
+
+.dashboard-qa-header .dashboard-section-title {
+	font-size: 0.85em;
+	font-weight: 600;
+	margin: 0;
+	padding-bottom: 0;
+	border-bottom: none;
+	text-transform: uppercase;
+	letter-spacing: 0.05em;
+	opacity: 0.7;
+}
+
+.dashboard-qa-add-btn {
+	background: none !important;
+	border: none !important;
+	box-shadow: none !important;
+	color: var(--db-text-faint);
+	cursor: pointer;
+	padding: 2px 4px;
+	font-size: 0.65em;
+	display: flex;
+	align-items: center;
+	gap: 3px;
+	transition: opacity 0.2s ease, color 0.15s ease;
+	line-height: 1;
+	opacity: 0;
+	outline: none;
+}
+
+/* Palette button (background-color picker), same hover-reveal idiom as add. */
+.dashboard-qa-palette-btn {
+	background: none !important;
+	border: none !important;
+	box-shadow: none !important;
+	color: var(--db-text-faint);
+	cursor: pointer;
+	padding: 2px 4px;
+	font-size: 0.65em;
+	display: flex;
+	align-items: center;
+	transition: opacity 0.2s ease, color 0.15s ease;
+	line-height: 1;
+	opacity: 0;
+	outline: none;
+}
+
+.dashboard-qa-header:hover .dashboard-qa-btn-group .dashboard-qa-palette-btn {
+	opacity: 1;
+}
+
+.dashboard-qa-palette-btn:hover {
+	color: var(--db-text) !important;
+}
+
+.dashboard-qa-palette-btn svg {
+	width: 13px;
+	height: 13px;
+}
+
+/* Palette popup: preset swatches, custom color input, reset. */
+.dashboard-qa-palette-popup {
+	padding: 10px;
+	gap: 6px;
+	min-width: 224px;
+}
+
+.dashboard-qa-picker-label {
+	font-size: 0.65em;
+	font-weight: 600;
+	color: var(--db-text-muted, var(--text-muted));
+	text-transform: uppercase;
+	letter-spacing: 0.05em;
+}
+
+.dashboard-qa-picker-divider {
+	height: 1px;
+	background: var(--db-border-card, rgba(128, 128, 128, 0.25));
+	margin: 2px 0;
+}
+
+.dashboard-qa-swatch-row {
+	display: grid;
+	grid-template-columns: repeat(5, 1fr);
+	gap: 6px;
+}
+
+.dashboard-qa-swatch {
+	height: 22px;
+	border-radius: var(--db-radius-sm, 6px);
+	border: 1px solid var(--db-border-card, rgba(128, 128, 128, 0.35));
+	cursor: pointer;
+	transition: box-shadow var(--nand-duration) var(--nand-ease), border-color var(--nand-duration) var(--nand-ease);
+}
+
+.dashboard-qa-swatch:hover {
+	border-color: var(--db-accent, var(--interactive-accent));
+}
+
+.dashboard-qa-swatch.active {
+	box-shadow: 0 0 0 2px var(--db-accent, #6366f1);
+}
+
+.dashboard-qa-swatch-custom {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+}
+
+.dashboard-qa-color-input {
+	width: 34px;
+	height: 24px;
+	padding: 0;
+	border: 1px solid var(--db-border-card, rgba(128, 128, 128, 0.35));
+	border-radius: var(--db-radius-sm, 6px);
+	background: none;
+	cursor: pointer;
+}
+
+.dashboard-qa-swatch-custom-label {
+	font-size: 0.7em;
+	color: var(--db-text-muted, var(--text-muted));
+}
+
+.dashboard-qa-swatch-reset {
+	margin-top: 2px;
+	padding: 4px 10px;
+	border-radius: var(--db-radius-sm, 6px);
+	border: 1px solid var(--db-border-card, rgba(128, 128, 128, 0.35));
+	background: none;
+	color: var(--db-text-muted, var(--text-muted));
+	font-size: 0.7em;
+	cursor: pointer;
+	transition: color 0.15s ease, border-color 0.15s ease;
+}
+
+.dashboard-qa-swatch-reset:hover {
+	color: var(--db-text, var(--text-normal));
+	border-color: var(--db-accent, #6366f1);
+}
+
+.dashboard-qa-header:hover .dashboard-qa-btn-group .dashboard-qa-add-btn {
+	opacity: 1;
+}
+
+.dashboard-qa-add-btn:hover {
+	color: var(--db-text) !important;
+}
+
+.dashboard-sidebar--collapsed .dashboard-qa-add-btn {
+	display: none;
+}
+
+/* Quick Links: fixed height with internal scroll */
+.dashboard-quick-actions {
+	height: 180px;
+	display: flex;
+	flex-direction: column;
+	flex-shrink: 0;
+}
+
+.dashboard-quick-actions .dashboard-qa-list {
+	overflow-x: clip;
+	overflow-y: auto;
+	margin-bottom: 0;
+}
+
+.dashboard-qa-list::-webkit-scrollbar {
+	width: 0;
+	display: none;
+}
+
+/* Quick Actions: icon, badge, preset */
+.dashboard-qa-icon {
+	display: flex;
+	align-items: center;
+	color: var(--db-accent);
+	flex-shrink: 0;
+	opacity: 0.7;
+}
+
+.dashboard-qa-icon svg {
+	width: 12px;
+	height: 12px;
+}
+
+/* --- Quick-buttons sidebar widget: compact grid styling ---
+   Scoped to .dashboard-sidebar-widgets so the mobile drawer keeps its
+   historical layout: 2 equal columns, minimal radius, hidden scrollbar,
+   tightened header spacing. */
+.dashboard-sidebar-widgets .dashboard-quick-actions {
+	padding: 8px 12px 14px;
+}
+
+.dashboard-sidebar-widgets .dashboard-qa-header {
+	min-height: 20px;
+	margin: 0 0 8px 0;
+	padding-bottom: 4px;
+}
+
+/* Compact widget title: smaller than the stock section title. */
+.dashboard-sidebar-widgets .dashboard-qa-header .dashboard-section-title {
+	font-size: 0.72em;
+}
+
+.dashboard-sidebar-widgets .dashboard-qa-list {
+	display: grid;
+	grid-template-columns: repeat(2, 1fr);
+	gap: 6px;
+	/* Hide the scrollbar: scrollbar-width beats any theme's webkit pseudo
+	   styling on current Chromium. */
+	scrollbar-width: none;
+}
+
+.dashboard-sidebar-widgets .dashboard-qa-list::-webkit-scrollbar {
+	display: none !important;
+	width: 0 !important;
+}
+
+.dashboard-sidebar-widgets .dashboard-qa-item {
+	border-radius: var(--db-radius-sm);
+	min-width: 0;
+	/* User-picked button color (palette popup) rides on --qa-btn-bg, set
+	   inline on the widget root; falls back to the theme button color. */
+	background: var(--qa-btn-bg, var(--db-bg-btn));
+}
+
+.dashboard-sidebar-widgets .dashboard-qa-item:hover {
+	background: var(--qa-btn-hover, var(--db-bg-btn-hover));
+}
+
+.dashboard-sidebar-widgets .dashboard-qa-name {
+	flex: 1;
+	min-width: 0;
+	max-width: none;
+	white-space: normal;
+	overflow-wrap: anywhere;
+	overflow: visible;
+}
+
+/* Preserve a readable theme surface/text pair beneath decorative photos. */
+.dashboard-sidebar-widgets .dashboard-sidebar-widget--has-bg .dashboard-qa-item {
+	--db-text: var(--db-control-text);
+	--db-text-muted: var(--db-control-text);
+	--db-accent: var(--db-control-text);
+	background: var(--qa-btn-bg, var(--db-control-bg));
+	color: var(--db-control-text);
+	opacity: 1;
+}
+
+.dashboard-sidebar-widgets .dashboard-sidebar-widget--has-bg .dashboard-qa-item:hover {
+	background: var(--qa-btn-hover, var(--db-control-bg));
+	border-color: var(--db-control-text);
+}
+
+.dashboard-qa-item--preset {
+	opacity: 0.85;
+}
+
+.dashboard-qa-item--preset:hover {
+	opacity: 1;
+}
+
+.dashboard-qa-item--dragging {
+	opacity: 0.35;
+}
+
+.dashboard-qa-item--drag-over {
+	border-color: var(--db-accent) !important;
+	box-shadow: 0 0 0 2px color-mix(in srgb, var(--db-accent) 30%, transparent) !important;
+}
+
+.dashboard-preset-actions {
+	flex-shrink: 0;
+}
+
+.dashboard-preset-actions .dashboard-qa-list {
+	margin-bottom: 0;
+}
+
+/* Quick Actions: Add Action Modal tabs */
+.dashboard-action-tabs {
+	display: flex;
+	gap: 4px;
+	margin-bottom: 12px;
+}
+
+.dashboard-action-tab {
+	flex: 1;
+	padding: 8px;
+	border: 1px solid var(--db-border-btn);
+	border-radius: var(--db-radius-sm);
+	background: var(--db-bg-btn);
+	color: var(--db-text-muted);
+	cursor: pointer;
+	font-size: 0.85em;
+	text-align: center;
+	transition: background-color var(--nand-duration) var(--nand-ease), color var(--nand-duration) var(--nand-ease), border-color var(--nand-duration) var(--nand-ease);
+}
+
+.dashboard-action-tab:focus-visible {
+	outline: 2px solid var(--db-accent);
+	outline-offset: 1px;
+}
+
+.dashboard-action-tab:hover {
+	background: var(--db-bg-btn-hover);
+}
+
+.dashboard-action-tab.active {
+	background: var(--db-accent);
+	color: var(--db-text-on-accent, var(--text-on-accent));
+	border-color: var(--db-accent);
+}
+

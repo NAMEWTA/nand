@@ -1,0 +1,262 @@
+/* ===== Habit stats modal ===== */
+.modal.nand-panel-modal.dashboard-habit-stats-host {
+	width: min(480px, 90vw);
+}
+
+.dashboard-habit-stats-overlay {
+	position: fixed;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	background: rgba(0, 0, 0, 0.5);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	z-index: 1000;
+}
+
+.dashboard-habit-stats-modal {
+	background: var(--db-bg-modal, var(--background-primary, var(--db-bg)));
+	border: 1px solid var(--db-border-card);
+	border-radius: var(--db-radius-lg, 14px);
+	padding: 20px;
+	max-width: 480px;
+	width: 100%;
+	box-sizing: border-box;
+	max-height: 80vh;
+	overflow-y: auto;
+	box-shadow: var(--nand-shadow-lg, 0 8px 32px rgba(0, 0, 0, 0.2));
+	font-variant-numeric: tabular-nums;
+}
+
+.dashboard-habit-stats-header {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	gap: 12px;
+	min-height: 28px;
+	margin-bottom: 16px;
+}
+
+.dashboard-habit-stats-title {
+	font-size: 1.15em;
+	font-weight: 600;
+	line-height: 1.3;
+	color: var(--db-text);
+}
+
+.dashboard-habit-stats-close {
+	background: transparent;
+	border: none;
+	box-shadow: none;
+	padding: 0;
+	cursor: pointer;
+	color: var(--db-text-muted);
+	width: 28px;
+	height: 28px;
+	flex-shrink: 0;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	border-radius: var(--db-radius-sm, 6px);
+	transition: background-color var(--nand-duration) var(--nand-ease), color var(--nand-duration) var(--nand-ease);
+}
+
+.dashboard-habit-stats-close:hover {
+	background: var(--db-bg-hover);
+	color: var(--db-text);
+}
+
+.dashboard-habit-stats-close:focus-visible,
+.dashboard-habit-stats-icon-btn:focus-visible {
+	outline: 2px solid var(--db-accent);
+	outline-offset: 1px;
+}
+
+.dashboard-habit-stats-body {
+	display: flex;
+	flex-direction: column;
+	gap: 12px;
+}
+
+.dashboard-habit-stats-empty {
+	font-size: 0.85em;
+	color: var(--db-text-muted);
+	text-align: center;
+	padding: 24px 0;
+	opacity: 0.75;
+}
+
+.dashboard-habit-stats-card {
+	background: var(--db-bg-hover);
+	border: 1px solid var(--db-border-card);
+	border-radius: var(--db-radius-md, 10px);
+	padding: 12px;
+}
+
+.dashboard-habit-stats-card-head {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	min-height: 22px;
+	margin-bottom: 12px;
+}
+
+.dashboard-habit-stats-card-name {
+	font-size: 0.9em;
+	font-weight: 600;
+	color: var(--db-text);
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.dashboard-habit-stats-card-head-spacer {
+	flex: 1;
+}
+
+/* Drag handle: arms reordering only when grabbed, so the head buttons and
+   name stay clickable (quick-note cfg grip pattern). */
+.dashboard-habit-stats-grip {
+	display: inline-flex;
+	align-items: center;
+	flex-shrink: 0;
+	width: 16px;
+	cursor: grab;
+	color: var(--db-text-muted);
+	opacity: 0.45;
+	touch-action: none;
+	transition: opacity 0.15s ease, color 0.15s ease;
+}
+.dashboard-habit-stats-grip:hover { opacity: 1; color: var(--db-text); }
+.dashboard-habit-stats-grip:active { cursor: grabbing; }
+.dashboard-habit-stats-grip svg { width: 14px; height: 14px; display: block; }
+.dashboard-habit-stats-card--dragging { opacity: 0.4; }
+.dashboard-habit-stats-card--drop-before { box-shadow: 0 -2px 0 0 var(--db-accent); }
+.dashboard-habit-stats-card--drop-after { box-shadow: 0 2px 0 0 var(--db-accent); }
+.dashboard-habit-stats-card--ghost { pointer-events: none; }
+
+.dashboard-habit-stats-icon-btn {
+	width: 22px;
+	height: 22px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	cursor: pointer;
+	border-radius: var(--db-radius-sm, 6px);
+	opacity: 0.3;
+	color: var(--db-text-muted);
+	transition: opacity var(--nand-duration) var(--nand-ease), background-color var(--nand-duration) var(--nand-ease), color var(--nand-duration) var(--nand-ease);
+	flex-shrink: 0;
+}
+
+.dashboard-habit-stats-icon-btn:hover {
+	opacity: 0.75;
+	background: var(--db-bg-card);
+}
+
+.dashboard-habit-stats-icon-btn--danger:hover {
+	color: var(--text-error, #e5484d);
+	opacity: 0.9;
+}
+
+.dashboard-habit-stats-chips {
+	display: flex;
+	gap: 8px;
+	margin-bottom: 12px;
+}
+
+/* KPI chip: icon + value over label. Inner radius nests inside the card. */
+.dashboard-habit-stats-chip {
+	flex: 1;
+	min-width: 0;
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	justify-content: center;
+	gap: 8px;
+	background: var(--db-bg-card);
+	border-radius: var(--db-radius-sm, 6px);
+	padding: 8px;
+}
+
+.dashboard-habit-stats-chip-icon {
+	display: flex;
+	align-items: center;
+	color: var(--db-accent);
+	flex-shrink: 0;
+}
+
+.dashboard-habit-stats-chip-icon svg {
+	width: 13px;
+	height: 13px;
+}
+
+.dashboard-habit-stats-chip-value {
+	font-size: 0.88em;
+	font-weight: 700;
+	color: var(--db-text);
+	line-height: 1.2;
+	font-variant-numeric: tabular-nums;
+}
+
+.dashboard-habit-stats-chip-label {
+	font-size: 0.6em;
+	font-weight: 500;
+	color: var(--db-text-muted);
+	line-height: 1.3;
+	white-space: nowrap;
+}
+
+.dashboard-habit-stats-heatmap-section {
+	display: flex;
+	flex-direction: column;
+	gap: 6px;
+}
+
+.dashboard-habit-stats-heatmap-head {
+	display: flex;
+	justify-content: flex-end;
+}
+
+.dashboard-habit-stats-heatmap-hint {
+	font-size: 0.62em;
+	color: var(--db-text-muted);
+	opacity: 0.7;
+}
+
+.dashboard-habit-stats-heatmap-wrap {
+	position: relative;
+	width: 100%;
+}
+
+/* Twelve rolling weeks, oldest to newest down each seven-day column. */
+.dashboard-habit-stats-heatmap-grid {
+	display: grid;
+	grid-template-columns: repeat(12, minmax(0, 12px));
+	grid-template-rows: repeat(7, 12px);
+	grid-auto-flow: column;
+	grid-auto-rows: 12px;
+	gap: 3px;
+	justify-content: center;
+	width: 100%;
+}
+
+.dashboard-habit-stats-heatmap-cell {
+	border-radius: var(--nand-radius-xs, 4px);
+	background: color-mix(in srgb, var(--db-text-muted) 14%, transparent);
+}
+
+.dashboard-habit-stats-heatmap-cell--done {
+	background: var(--db-accent);
+}
+
+.dashboard-habit-stats-heatmap-empty {
+	margin-top: var(--size-4-2);
+	font-size: var(--nand-text-caption);
+	color: var(--db-text-muted);
+	text-align: center;
+	pointer-events: none;
+}
+

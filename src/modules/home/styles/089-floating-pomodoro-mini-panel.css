@@ -1,0 +1,216 @@
+/* ===== Floating Pomodoro Mini Panel ===== */
+/* Body-level pill: theme vars arrive via applyModalTheme, so every rule
+ * carries a stock-theme fallback for when no dashboard root is active.
+ * No backdrop-filter on purpose (mobile crash history + readability). */
+.dashboard-pomodoro-mini {
+	position: fixed;
+	right: 16px;
+	bottom: 40px;
+	z-index: var(--layer-popover, 30);
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	padding: 6px 8px 6px 6px;
+	background: var(--db-bg-modal, var(--background-secondary));
+	border: 1px solid var(--db-border-card, var(--background-modifier-border));
+	border-radius: 999px;
+	box-shadow: var(--nand-shadow-lg, var(--db-shadow-card, 0 4px 16px rgba(0, 0, 0, 0.25)));
+	font-family: var(--db-font, inherit);
+	color: var(--db-text, var(--text-normal));
+	user-select: none;
+	cursor: grab;
+	/* Claim the gesture so dragging never scrolls the page behind. */
+	touch-action: none;
+	/* Size is frozen in JS at mount; never let content spill it. */
+	overflow: hidden;
+	/* Idle-fold: gap/padding/chrome animate toward the silent tomato-only
+	 * state (.dashboard-pomodoro-mini--silent) and back. */
+	transition: gap 0.2s ease, padding 0.2s ease, border-radius 0.2s ease,
+		background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.dashboard-pomodoro-mini:focus-within,
+.dashboard-reading-mini:focus-within {
+	border-color: var(--db-border-input-focus, var(--db-accent, var(--interactive-accent)));
+}
+
+.dashboard-floating-mini--dragging {
+	cursor: grabbing;
+	opacity: 0.92;
+	box-shadow: var(--db-shadow-card-hover, var(--nand-shadow-lg, 0 8px 24px rgba(0, 0, 0, 0.3)));
+}
+
+.dashboard-pomodoro-mini-ring-wrap {
+	position: relative;
+	width: 28px;
+	height: 28px;
+	flex-shrink: 0;
+}
+
+.dashboard-pomodoro-mini-ring {
+	width: 28px;
+	height: 28px;
+	display: block;
+}
+
+.dashboard-pomodoro-mini-ring-bg {
+	stroke: var(--db-border-card, var(--background-modifier-border));
+	opacity: 0.8;
+}
+
+.dashboard-pomodoro-mini-ring-progress {
+	stroke: var(--db-accent, var(--interactive-accent));
+	transition: stroke-dashoffset 0.9s linear;
+}
+
+.dashboard-pomodoro-mini--break .dashboard-pomodoro-mini-ring-progress {
+	stroke: var(--db-accent-light, var(--db-accent, var(--interactive-accent)));
+}
+
+.dashboard-pomodoro-mini-tomato {
+	position: absolute;
+	inset: 0;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	font-size: 10px;
+	line-height: 1;
+}
+
+.dashboard-pomodoro-mini-info {
+	display: flex;
+	flex-direction: column;
+	gap: 1px;
+	min-width: 44px;
+	overflow: hidden;
+	transition: width 0.2s ease, opacity 0.15s ease, visibility 0s;
+}
+
+.dashboard-pomodoro-mini-time {
+	font-size: 13px;
+	font-weight: 700;
+	letter-spacing: 0.4px;
+	font-variant-numeric: tabular-nums;
+	line-height: 1.2;
+}
+
+.dashboard-pomodoro-mini-phase {
+	font-size: 10px;
+	font-weight: 500;
+	color: var(--db-text-muted, var(--text-muted));
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	line-height: 1.2;
+}
+
+.dashboard-pomodoro-mini--paused .dashboard-pomodoro-mini-time {
+	opacity: 0.65;
+}
+
+.dashboard-pomodoro-mini-btn {
+	width: 22px;
+	height: 22px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	flex-shrink: 0;
+	overflow: hidden;
+	border-radius: 50%;
+	background: var(--db-bg-btn, transparent);
+	border: 1px solid var(--db-border-btn, var(--background-modifier-border));
+	color: var(--db-text, var(--text-normal));
+	cursor: pointer;
+	transition: width 0.2s ease, opacity 0.15s ease, border-width 0.2s ease,
+		background 0.15s ease, border-color 0.15s ease, color 0.15s ease, transform 0.1s ease, visibility 0s;
+}
+
+.dashboard-pomodoro-mini-btn:hover {
+	background: var(--db-bg-hover, var(--background-modifier-hover));
+	border-color: var(--db-accent, var(--interactive-accent));
+	color: var(--db-accent, var(--text-accent));
+}
+
+.dashboard-pomodoro-mini-btn:active {
+	transform: scale(0.92);
+}
+
+.dashboard-pomodoro-mini-btn:focus-visible,
+.dashboard-reading-mini-btn:focus-visible {
+	outline: 2px solid var(--db-accent, var(--interactive-accent));
+	outline-offset: 1px;
+}
+
+.dashboard-pomodoro-mini-btn svg {
+	width: 10px;
+	height: 10px;
+}
+
+.dashboard-pomodoro-mini-btn--ghost {
+	border-color: transparent;
+	background: transparent;
+	color: var(--db-text-muted, var(--text-muted));
+}
+
+.dashboard-pomodoro-mini-btn--ghost:hover {
+	border-color: transparent;
+	color: var(--db-text, var(--text-normal));
+}
+
+@media (max-width: 640px) {
+	.dashboard-pomodoro-mini {
+		right: 12px;
+		/* Clear the mobile tab bar plus the home-indicator safe area. */
+		bottom: calc(64px + env(safe-area-inset-bottom, 0px));
+		padding: 4px 6px 4px 4px;
+		gap: 6px;
+	}
+
+	.dashboard-pomodoro-mini-time {
+		font-size: 13px;
+	}
+
+	.dashboard-pomodoro-mini-btn {
+		width: 28px;
+		height: 28px;
+	}
+
+	.dashboard-pomodoro-mini-btn svg {
+		width: 13px;
+		height: 13px;
+	}
+}
+
+/* Idle-fold ("silent") state: after ~10s without pointer activity on the
+ * pill it collapses to just the tomato + its progress ring (the ring keeps
+ * ticking); any hover, tap or key focus unfolds it again. Double-class
+ * selectors so these override the mobile block above. */
+.dashboard-pomodoro-mini.dashboard-pomodoro-mini--silent {
+	gap: 0;
+	padding: 5px;
+	border-radius: 999px;
+	background: transparent;
+	border-color: transparent;
+	box-shadow: none;
+}
+
+.dashboard-pomodoro-mini.dashboard-pomodoro-mini--silent .dashboard-pomodoro-mini-info {
+	width: 0 !important; /* overrides the mount-time frozen inline width */
+	min-width: 0;
+	opacity: 0;
+	visibility: hidden;
+	/* Stay in the a11y tree until the fold finishes; unfold shows instantly. */
+	transition: width 0.2s ease, opacity 0.15s ease, visibility 0s 0.2s;
+}
+
+.dashboard-pomodoro-mini.dashboard-pomodoro-mini--silent .dashboard-pomodoro-mini-btn {
+	width: 0;
+	min-width: 0;
+	border-width: 0;
+	opacity: 0;
+	visibility: hidden;
+	pointer-events: none;
+	transition: width 0.2s ease, opacity 0.15s ease, border-width 0.2s ease,
+		visibility 0s 0.2s;
+}
+

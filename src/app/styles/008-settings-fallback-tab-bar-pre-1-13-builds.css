@@ -1,0 +1,105 @@
+/* ===== Settings fallback tab bar (pre-1.13 builds) =====
+ * 1.13+ renders the three pages via Obsidian's native navigable definitions;
+ * this bar only exists in the display() fallback. */
+.dashboard-settings-tabs {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 2px;
+	max-width: 100%;
+	padding: 2px;
+	border-radius: var(--nand-radius-pill);
+	background: var(--nand-surface-muted);
+	border: var(--nand-border);
+	margin-bottom: var(--size-4-4);
+}
+
+.dashboard-settings-root {
+	display: flex;
+	flex-direction: column;
+	gap: var(--size-4-3);
+	min-width: 0;
+}
+
+.dashboard-settings-shell {
+	display: flex;
+	flex-direction: column;
+	gap: var(--size-4-3);
+	min-width: 0;
+}
+
+/* Product navigation wraps so every module remains visible in narrow settings. */
+.dashboard-settings-products {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	white-space: nowrap;
+	gap: var(--size-4-1);
+	max-width: 100%;
+}
+
+.dashboard-settings-content {
+	flex: 1 1 auto;
+	min-width: 0;
+}
+
+.nand-settings {
+	display: block;
+	min-width: 0;
+}
+
+.nand-settings .nand-settings-chrome,
+.nand-settings .dashboard-settings-shell {
+	display: contents;
+}
+
+.nand-settings .dashboard-settings-products {
+	grid-column: 1 / -1;
+}
+
+.nand-settings > .setting-item.dashboard-settings-section:not(.nand-settings-chrome):not(.dashboard-settings-page-hidden) {
+	grid-column: 1 / -1;
+	min-width: 0;
+}
+
+.dashboard-settings-tab {
+	cursor: pointer;
+	display: inline-flex;
+	align-items: center;
+	flex: none;
+	gap: 6px;
+	min-height: var(--nand-control-height);
+	padding: 0 var(--size-4-3);
+	border: 1px solid transparent;
+	box-shadow: none;
+	border-radius: var(--nand-radius-pill);
+	background: transparent;
+	font-size: var(--nand-text-body);
+	font-weight: 500;
+	color: var(--text-muted);
+	transition: color var(--nand-duration-fast) var(--nand-ease), background-color var(--nand-duration-fast) var(--nand-ease), border-color var(--nand-duration-fast) var(--nand-ease);
+}
+
+/* Icon sized to the tab's text so it never dwarfs the label, and vertically
+   centered by the flex row above. */
+.dashboard-settings-tab-icon {
+	display: inline-flex;
+	align-items: center;
+}
+
+.dashboard-settings-tab-icon svg {
+	width: 15px;
+	height: 15px;
+}
+
+.dashboard-settings-tab:hover {
+	color: var(--text-normal);
+	background: var(--nand-surface-hover);
+}
+
+.dashboard-settings-tab.active {
+	background: var(--nand-accent-soft);
+	border-color: var(--nand-accent-border);
+	color: var(--text-accent);
+	font-weight: 600;
+}
+

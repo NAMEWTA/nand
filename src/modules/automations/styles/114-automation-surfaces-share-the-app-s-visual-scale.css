@@ -1,0 +1,130 @@
+/* Automation surfaces share the app's visual scale. */
+/* The automations page holds the list (`.nand-automation-view`) or the inline editor (`.nand-automation-editor-page`). */
+.nand-automation-page { display: flex; flex-direction: column; height: 100%; min-height: 0; container-type: inline-size; container-name: nand-automation; }
+.nand-automation-page > .nand-automation-view { flex: 1 1 auto; min-height: 0; }
+.nand-automation-editor-page { flex: 1 1 auto; min-height: 0; overflow-y: auto; padding: var(--size-4-4) var(--size-4-6); }
+.nand-automation-editor-page > .nand-automation-editor { max-width: 960px; margin-inline: auto; }
+.nand-automation-view { padding: var(--size-4-4); display: flex; flex-direction: column; gap: var(--size-4-4); overflow: hidden; }
+.nand-automation-view > .nand-automation-header { flex-shrink: 0; }
+
+/* Load failure: a centered card with one primary retry action. */
+.nand-automation-load-error { display: flex; flex-direction: column; align-items: flex-start; gap: var(--size-4-3); min-height: 0; max-width: 720px; overflow: auto; }
+.nand-automation-load-error-title { display: flex; align-items: center; gap: var(--size-4-2); margin: 0; color: var(--text-normal); font-size: var(--nand-text-title); font-weight: 600; }
+.nand-automation-load-error-icon { display: flex; color: var(--nand-tone-error); }
+.nand-automation-load-error-icon svg { width: 18px; height: 18px; }
+.nand-automation-load-error pre { box-sizing: border-box; width: 100%; max-height: 40vh; margin: 0; padding: var(--size-4-3); overflow: auto; border-radius: var(--nand-radius-sm); background: var(--nand-surface-muted); font-size: var(--nand-text-caption); white-space: pre-wrap; overflow-wrap: anywhere; }
+
+/* Header: toolbar, filter row and the local-only notice. */
+.nand-automation-header { display: flex; flex-direction: column; gap: var(--size-4-3); min-width: 0; }
+.nand-automation-toolbar { gap: var(--size-4-2); }
+.nand-automation-filters { display: flex; flex-wrap: wrap; align-items: flex-end; gap: var(--size-4-3); min-width: 0; }
+.nand-automation-filter { flex: 1 1 160px; max-width: 100%; }
+.nand-automation-filter.nand-automation-filter--search { flex: 2 1 220px; }
+.nand-automation-filter :is(input, select) { width: 100%; min-height: var(--nand-control-height); }
+.nand-automation-notice { display: flex; align-items: flex-start; gap: var(--size-4-2); margin: 0; padding: var(--size-4-2) var(--size-4-3); border-radius: var(--nand-radius-sm); background: var(--nand-surface-muted); color: var(--text-muted); font-size: var(--nand-text-caption); line-height: 1.5; }
+.nand-automation-notice.is-off { background: color-mix(in srgb, var(--nand-tone-warning) 10%, transparent); color: var(--text-normal); }
+.nand-automation-notice-icon { display: flex; flex: none; padding-top: 1px; color: var(--text-faint); }
+.nand-automation-notice.is-off .nand-automation-notice-icon { color: var(--nand-tone-warning); }
+.nand-automation-notice-icon svg { width: 14px; height: 14px; }
+
+/* Master/detail layout. */
+.nand-automation-layout { flex: 1; min-height: 0; display: grid; grid-template-columns: minmax(240px, 32%) minmax(0, 1fr); grid-template-rows: minmax(0, 1fr); gap: var(--size-4-4); }
+.nand-automation-list { min-height: 0; padding: var(--size-4-1); border-radius: var(--nand-radius-md); background: var(--nand-surface-muted); }
+.nand-automation-list > button.nand-automation-item { flex-shrink: 0; display: grid; grid-template-columns: minmax(0, 1fr) auto; grid-template-areas: "title status" "badges badges" "next next"; align-items: center; gap: 6px var(--size-4-2); padding: 10px var(--size-4-3); overflow-wrap: anywhere; }
+.nand-automation-list > button.nand-automation-item:hover:not(.is-active) { background: var(--nand-surface); }
+.nand-automation-list > button.nand-automation-item.is-history .nand-ui-list-item-title { color: var(--text-muted); font-weight: 500; }
+.nand-automation-item .nand-ui-list-item-title { grid-area: title; line-height: 1.35; }
+.nand-automation-item-status { grid-area: status; justify-self: end; }
+.nand-automation-list .nand-automation-item-badges { grid-area: badges; }
+.nand-automation-item-next { grid-area: next; display: flex; align-items: center; gap: 6px; font-variant-numeric: tabular-nums; }
+.nand-automation-item-badges { display: flex; flex-wrap: wrap; gap: var(--size-4-1); min-width: 0; }
+.nand-automation-item-badges .nand-ui-dot { width: 6px; height: 6px; }
+.nand-automation-meta-icon { display: flex; flex: none; color: var(--text-faint); }
+.nand-automation-meta-icon svg { width: 13px; height: 13px; }
+.nand-automation-empty { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: var(--size-4-2); margin: 0; padding: var(--size-4-8) var(--size-4-4); color: var(--text-muted); font-size: var(--nand-text-body); text-align: center; }
+.nand-automation-empty-icon { display: flex; color: var(--text-faint); }
+.nand-automation-empty-icon svg { width: 28px; height: 28px; }
+.nand-automation-placeholder { display: flex; align-items: center; justify-content: center; min-height: 0; border: 1px dashed var(--nand-border-color); border-radius: var(--nand-radius-md); color: var(--text-faint); opacity: 0.6; }
+.nand-automation-placeholder svg { width: 40px; height: 40px; }
+
+/* Detail: a card with header actions, meta rows and the prompt block. */
+.nand-automation-detail { min-width: 0; display: flex; flex-direction: column; gap: var(--size-4-3); padding-inline-end: var(--size-4-1); }
+.nand-automation-detail > * { flex-shrink: 0; }
+.nand-automation-detail-card { display: flex; flex-direction: column; gap: var(--size-4-3); }
+.nand-automation-detail-header { display: flex; flex-wrap: wrap; align-items: flex-start; justify-content: space-between; gap: var(--size-4-3); }
+.nand-automation-detail-heading { display: flex; flex-direction: column; gap: 6px; min-width: 0; flex: 1 1 200px; }
+.nand-automation-detail-heading h3 { margin: 0; color: var(--text-normal); font-size: var(--font-ui-large); font-weight: 600; line-height: 1.3; overflow-wrap: anywhere; }
+.nand-automation-detail-actions { justify-content: flex-end; }
+.nand-automation-view button.nand-automation-btn-danger:hover:not(:disabled) { background: color-mix(in srgb, var(--nand-tone-error) 12%, transparent); color: var(--nand-tone-error); }
+.nand-automation-meta { display: flex; flex-wrap: wrap; align-items: center; gap: var(--size-4-1) var(--size-4-4); color: var(--text-muted); font-size: var(--nand-text-body); }
+.nand-automation-meta-row { display: flex; align-items: center; gap: 6px; margin: 0; min-width: 0; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+.nand-automation-view button.nand-automation-source { min-height: var(--nand-control-height-sm); padding: 0 var(--size-4-2); }
+.nand-automation-detail-card .nand-ui-section-label { margin: var(--size-4-1) 0 0; }
+.nand-automation-prompt { margin: 0; padding: var(--size-4-3); border: var(--nand-border); border-radius: var(--nand-radius-sm); background: var(--nand-surface-muted); color: var(--text-normal); font-family: var(--font-monospace); font-size: var(--nand-text-body); line-height: 1.55; white-space: pre-wrap; overflow-wrap: anywhere; }
+
+/* History: a timeline of run cards. */
+.nand-automation-section-head { display: flex; align-items: center; gap: var(--size-4-2); margin-top: var(--size-4-2); }
+.nand-automation-section-head h4 { margin: 0; color: var(--text-normal); font-size: var(--nand-text-title); font-weight: 600; }
+.nand-automation-count { font-variant-numeric: tabular-nums; }
+.nand-automation-timeline { position: relative; display: flex; flex-direction: column; gap: var(--size-4-2); margin: 0; padding: 0 0 var(--size-4-2); list-style: none; }
+.nand-automation-timeline::before { content: ""; position: absolute; top: var(--size-4-2); bottom: var(--size-4-2); left: 5px; width: 2px; border-radius: var(--nand-radius-pill); background: var(--nand-border-color); }
+.nand-automation-run { position: relative; display: grid; grid-template-columns: 12px minmax(0, 1fr); gap: var(--size-4-3); margin: 0; padding: 0; }
+.nand-automation-run-marker { position: relative; z-index: 1; width: 12px; height: 12px; margin-top: 14px; box-sizing: border-box; border: 2px solid var(--background-primary); border-radius: 50%; background: var(--text-faint); }
+.nand-automation-run.is-success .nand-automation-run-marker { background: var(--nand-tone-success); }
+.nand-automation-run.is-error .nand-automation-run-marker { background: var(--nand-tone-error); }
+.nand-automation-run.is-warning .nand-automation-run-marker { background: var(--nand-tone-warning); }
+.nand-automation-run.is-info .nand-automation-run-marker { background: var(--nand-tone-info); }
+.nand-automation-run-card { display: flex; flex-direction: column; gap: var(--size-4-2); min-width: 0; padding: 10px var(--size-4-3); border: var(--nand-border); border-radius: var(--nand-radius-md); background: var(--nand-surface); transition: border-color var(--nand-duration) var(--nand-ease); }
+.nand-automation-run-card:hover { border-color: var(--nand-border-color-strong); }
+.nand-automation-run-head { display: flex; flex-wrap: wrap; align-items: center; gap: var(--size-4-2); min-width: 0; }
+.nand-automation-run-time { color: var(--text-normal); font-size: var(--nand-text-body); font-weight: 500; font-variant-numeric: tabular-nums; }
+.nand-automation-run-head button.nand-ui-btn { min-height: var(--nand-control-height-sm); padding: 0 var(--size-4-2); font-size: var(--nand-text-caption); }
+.nand-automation-run-message { margin: 0; color: var(--text-normal); font-size: var(--nand-text-body); line-height: 1.5; overflow-wrap: anywhere; }
+.nand-automation-run.is-error .nand-automation-run-message { color: var(--text-error); }
+.nand-automation-run-usage { margin: 0; color: var(--text-muted); font-size: var(--nand-text-caption); font-variant-numeric: tabular-nums; }
+.nand-automation-output { border-radius: var(--nand-radius-sm); background: var(--nand-surface-muted); }
+.nand-automation-output > summary { display: flex; align-items: center; gap: 6px; min-height: 28px; padding: 0 var(--size-4-2); border-radius: var(--nand-radius-sm); color: var(--text-muted); font-size: var(--nand-text-caption); font-weight: 500; cursor: pointer; list-style: none; user-select: none; }
+.nand-automation-output > summary::-webkit-details-marker { display: none; }
+.nand-automation-output > summary:hover { color: var(--text-normal); background: var(--nand-surface-hover); }
+.nand-automation-output > summary:focus-visible { outline: 2px solid var(--interactive-accent); outline-offset: 2px; }
+.nand-automation-output-chevron { display: flex; transition: transform var(--nand-duration-fast) var(--nand-ease); }
+.nand-automation-output-chevron svg { width: 12px; height: 12px; }
+.nand-automation-output[open] .nand-automation-output-chevron { transform: rotate(90deg); }
+.nand-automation-output pre { max-height: 320px; margin: 0; padding: var(--size-4-2) var(--size-4-3) var(--size-4-3); overflow: auto; font-size: var(--nand-text-caption); line-height: 1.5; white-space: pre-wrap; overflow-wrap: anywhere; }
+
+/* Editor modal: two tidy columns, side column as a soft panel. */
+.nand-automation-editor { display: flex; flex-direction: column; gap: var(--size-4-2); }
+.nand-automation-editor .setting-item { flex-wrap: wrap; gap: var(--size-4-2); }
+.nand-automation-editor .setting-item-control { max-width: 100%; }
+.nand-automation-editor .setting-item-control :is(input, select, textarea) { border-radius: var(--nand-radius-sm); }
+.nand-automation-editor-body { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); gap: var(--size-4-4); align-items: start; }
+.nand-automation-editor-main .setting-item { flex-direction: column; align-items: stretch; border-top: none; }
+.nand-automation-editor-main .setting-item-control { width: 100%; }
+.nand-automation-editor textarea { box-sizing: border-box; width: 100%; min-height: 240px; padding: var(--size-4-3); border-radius: var(--nand-radius-sm); font-family: var(--font-monospace); font-size: var(--nand-text-body); line-height: 1.55; resize: vertical; }
+.nand-automation-editor-side { padding: var(--size-4-3); border-radius: var(--nand-radius-md); background: var(--nand-surface-muted); }
+.nand-automation-editor-side .setting-item-heading { padding: var(--size-4-4) 0 0; }
+.nand-automation-editor-footer { border-top: var(--nand-border); padding-top: var(--size-4-3); }
+.nand-automation-editor-footer .setting-item-control { gap: var(--size-4-2); }
+
+@media (max-width: 700px) {
+ .nand-automation-editor-body { grid-template-columns: minmax(0, 1fr); }
+ .nand-automation-view button, .nand-automation-editor button { min-height: 44px; }
+ .nand-automation-view .nand-automation-filter :is(input, select) { min-height: 44px; }
+}
+@media (pointer: coarse) {
+ .nand-automation-view button, .nand-automation-view .nand-automation-output > summary, .nand-automation-editor button { min-height: var(--nand-touch-target); }
+}
+@media (prefers-reduced-motion: reduce) {
+ .nand-automation-run-card, .nand-automation-output-chevron { transition: none; }
+}
+@container nand-automation (max-width: 700px) {
+ .nand-automation-layout { grid-template-columns: minmax(0, 1fr); grid-template-rows: minmax(0, 1fr); }
+ .nand-automation-layout.has-detail { grid-template-rows: minmax(100px, 35%) minmax(0, 1fr); }
+ .nand-automation-placeholder { display: none; }
+ .nand-automation-toolbar button { white-space: normal; height: auto; max-width: 100%; }
+ .nand-automation-detail-actions { justify-content: flex-start; }
+}
+@container nand-automation (max-width: 420px) {
+ .nand-automation-toolbar .nand-ui-spacer { display: none; }
+ .nand-automation-filter, .nand-automation-filter.nand-automation-filter--search { flex-basis: 100%; }
+}

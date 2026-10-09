@@ -1,0 +1,59 @@
+/* ===== Workspace settings (registry rows) ===== */
+/* Standalone divider before the workspace group. NOT a border on the heading
+   .setting-item — themes give setting items rounded backgrounds and clip any
+   border we draw there; a separate element keeps a straight, square line with
+   spacing under our control. */
+.dashboard-settings-divider {
+	height: 1px;
+	background: var(--nand-border-color);
+	margin: var(--size-4-5) 0 var(--size-4-3);
+}
+
+.dashboard-workspace-row .dashboard-workspace-drag-handle {
+	align-self: center;
+	display: flex;
+	color: var(--text-faint);
+	opacity: 0.6;
+	cursor: grab;
+	border-radius: var(--nand-radius-xs);
+	transition: opacity var(--nand-duration-fast) var(--nand-ease), color var(--nand-duration-fast) var(--nand-ease);
+}
+
+.dashboard-workspace-row .dashboard-workspace-drag-handle:hover {
+	opacity: 1;
+	color: var(--text-muted);
+}
+
+.dashboard-workspace-row--dragging {
+	opacity: 0.45;
+}
+
+/* Drop indicators: box-shadow instead of border so native row separators
+   and layout are untouched. */
+.dashboard-workspace-row--drop-before {
+	box-shadow: 0 -2px 0 0 var(--interactive-accent);
+}
+
+.dashboard-workspace-row--drop-after {
+	box-shadow: 0 2px 0 0 var(--interactive-accent);
+}
+
+.dashboard-workspace-path-input {
+	width: 160px;
+}
+
+/* Aurora gradient animation for aurora theme only */
+
+/* Respect reduced-motion: stop the aurora drift for users who disable animation */
+
+/* Mobile: stop the aurora background drift. The animated background-position
+   forces a full-root repaint every frame; on phones (iOS WKWebView in
+   particular) this competes with scrolling and janks the whole dashboard.
+   Pinning the gradient to the animation's start frame keeps the theme's look
+   (the glow band sits exactly where the drift starts); desktop keeps the drift. */
+
+/* Aurora: disable card backdrop-blur.
+   The animated gradient root behind translucent cards forces the browser to
+   re-blur every frame, which strobes/flickers on many systems. Removing the
+   blur eliminates the strobe while keeping the gradient look. */
+

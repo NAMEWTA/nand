@@ -1,0 +1,346 @@
+/* =================================================================
+   NAND design tokens. Every value derives from Obsidian variables (or the
+   active NAND theme preset, which sets those variables), so community themes
+   and presets flow through every NAND surface.
+   ================================================================= */
+body {
+	/* Spacing: 4px grid */
+	--nand-space-1: 4px;
+	--nand-space-2: 8px;
+	--nand-space-3: 12px;
+	--nand-space-4: 16px;
+	--nand-space-5: 20px;
+	--nand-space-6: 24px;
+	--nand-space-7: 32px;
+	--nand-space-8: 40px;
+
+	/* Radius: controls 6, cards and popovers 8, dialogs 12 */
+	--nand-radius-xs: 4px;
+	--nand-radius-sm: 6px;
+	--nand-radius-md: 8px;
+	--nand-radius-lg: 12px;
+	--nand-radius-pill: 999px;
+
+	/* Surfaces */
+	--nand-surface: var(--background-primary);
+	--nand-surface-muted: var(--background-secondary);
+	--nand-surface-hover: var(--background-modifier-hover);
+	--nand-surface-active: var(--background-modifier-active-hover);
+	--nand-border-color: var(--background-modifier-border);
+	--nand-border-color-strong: var(--background-modifier-border-hover);
+	--nand-border: 1px solid var(--nand-border-color);
+
+	/* Accent tints: selection, active rows, soft badges */
+	--nand-accent: var(--interactive-accent);
+	--nand-accent-soft: color-mix(in srgb, var(--interactive-accent) 14%, transparent);
+	--nand-accent-softer: color-mix(in srgb, var(--interactive-accent) 7%, transparent);
+	--nand-accent-border: color-mix(in srgb, var(--interactive-accent) 50%, transparent);
+	--nand-focus-ring: 0 0 0 2px color-mix(in srgb, var(--interactive-accent) 45%, transparent);
+
+	/* Semantic tones: used only for their meaning */
+	--nand-tone-success: var(--color-green);
+	--nand-tone-warning: var(--color-orange);
+	--nand-tone-error: var(--color-red);
+	--nand-tone-info: var(--color-blue);
+
+	/* Elevation */
+	--nand-shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.05);
+	--nand-shadow-sm: var(--shadow-s);
+	--nand-shadow-md: 0 4px 16px rgba(0, 0, 0, 0.12);
+	--nand-shadow-lg: var(--shadow-l);
+
+	/* Layers (never above 50; Obsidian's own modals and menus sit above) */
+	--nand-z-base: 0;
+	--nand-z-sticky: 10;
+	--nand-z-overlay: 20;
+	--nand-z-popover: 30;
+	--nand-z-modal: 40;
+	--nand-z-toast: 50;
+
+	/* Motion */
+	--nand-ease: cubic-bezier(0.2, 0, 0, 1);
+	--nand-duration-fast: 120ms;
+	--nand-duration: 180ms;
+	--nand-duration-slow: 240ms;
+
+	/* Controls */
+	--nand-control-height: 32px;
+	--nand-control-height-sm: 28px;
+	--nand-control-height-lg: 36px;
+	--nand-touch-target: 44px;
+	--nand-icon-size: 16px;
+
+	/* Type */
+	--nand-text-caption: var(--font-ui-smaller);
+	--nand-text-body: var(--font-ui-small);
+	--nand-text-title: var(--font-ui-medium);
+	--nand-text-heading: var(--font-ui-large);
+
+	/* Workbench shell */
+	--nand-rail-width: 52px;
+	--nand-panel-width: 260px;
+	--nand-header-height: 44px;
+	--nand-list-row-height: 32px;
+}
+
+/* ----- Card: one resting surface; interactive cards lift one tier ----- */
+.nand-ui-card {
+	box-sizing: border-box;
+	padding: var(--size-4-4);
+	background: var(--nand-surface);
+	border: var(--nand-border);
+	border-radius: var(--nand-radius-md);
+	box-shadow: var(--nand-shadow-xs);
+}
+.nand-ui-card.is-interactive,
+button.nand-ui-card {
+	cursor: pointer;
+	transition: border-color var(--nand-duration) var(--nand-ease), box-shadow var(--nand-duration) var(--nand-ease), background-color var(--nand-duration) var(--nand-ease);
+}
+.nand-ui-card.is-interactive:hover,
+button.nand-ui-card:hover {
+	border-color: var(--nand-border-color-strong);
+	box-shadow: var(--nand-shadow-sm);
+}
+.nand-ui-card.is-selected {
+	border-color: var(--nand-accent-border);
+	background: var(--nand-accent-softer);
+}
+.nand-ui-panel-muted {
+	background: var(--nand-surface-muted);
+}
+
+/* ----- Layout helpers ----- */
+.nand-ui-toolbar {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: var(--size-4-2);
+	min-width: 0;
+}
+.nand-ui-spacer { flex: 1 1 auto; }
+.nand-ui-stack {
+	display: flex;
+	flex-direction: column;
+	gap: var(--size-4-2);
+	min-width: 0;
+}
+.nand-ui-divider {
+	height: 1px;
+	margin: var(--size-4-2) 0;
+	border: 0;
+	background: var(--nand-border-color);
+}
+
+/* ----- Buttons ----- */
+button.nand-ui-btn {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	gap: 6px;
+	min-height: var(--nand-control-height);
+	padding: 0 var(--size-4-3);
+	border-radius: var(--nand-radius-sm);
+	white-space: nowrap;
+}
+button.nand-ui-btn svg { width: 15px; height: 15px; flex: none; }
+button.nand-ui-btn-ghost {
+	background: transparent;
+	box-shadow: none;
+	border: none;
+	color: var(--text-muted);
+}
+button.nand-ui-btn-ghost:hover:not(:disabled) {
+	background: var(--nand-surface-hover);
+	color: var(--text-normal);
+}
+button.nand-ui-icon-btn {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	flex: none;
+	width: var(--nand-control-height);
+	height: var(--nand-control-height);
+	min-width: var(--nand-control-height);
+	padding: 0;
+	border: none;
+	border-radius: var(--nand-radius-sm);
+	background: transparent;
+	box-shadow: none;
+	color: var(--text-muted);
+	transition: background-color var(--nand-duration-fast) var(--nand-ease), color var(--nand-duration-fast) var(--nand-ease);
+}
+button.nand-ui-icon-btn:hover:not(:disabled) {
+	background: var(--nand-surface-hover);
+	color: var(--text-normal);
+}
+button.nand-ui-icon-btn.is-active {
+	background: var(--nand-accent-soft);
+	color: var(--text-accent);
+}
+button.nand-ui-icon-btn:disabled { opacity: 0.4; cursor: default; }
+button.nand-ui-icon-btn svg { width: 16px; height: 16px; }
+button.nand-ui-icon-btn > span { display: flex; }
+
+/* ----- Segmented control: a group of aria-pressed buttons ----- */
+.nand-ui-segmented {
+	display: inline-flex;
+	align-items: center;
+	gap: 2px;
+	padding: 2px;
+	border: var(--nand-border);
+	border-radius: calc(var(--nand-radius-sm) + 2px);
+	background: var(--nand-surface-muted);
+}
+.nand-ui-segmented > button {
+	min-height: calc(var(--nand-control-height) - 6px);
+	padding: 0 var(--size-4-3);
+	border: none;
+	border-radius: var(--nand-radius-sm);
+	background: transparent;
+	box-shadow: none;
+	color: var(--text-muted);
+	font-size: var(--nand-text-body);
+	font-weight: 500;
+	transition: background-color var(--nand-duration-fast) var(--nand-ease), color var(--nand-duration-fast) var(--nand-ease);
+}
+.nand-ui-segmented > button:hover:not([aria-pressed="true"]):not(.is-active) {
+	background: var(--nand-surface-hover);
+	color: var(--text-normal);
+}
+.nand-ui-segmented > button[aria-pressed="true"],
+.nand-ui-segmented > button.is-active {
+	background: var(--nand-surface);
+	color: var(--text-normal);
+	box-shadow: var(--nand-shadow-xs);
+	font-weight: 600;
+}
+
+/* ----- Form field: caption label above a control ----- */
+.nand-ui-field {
+	display: flex;
+	flex-direction: column;
+	gap: var(--size-4-1);
+	min-width: 0;
+}
+.nand-ui-field > span:first-child {
+	color: var(--text-muted);
+	font-size: var(--nand-text-caption);
+	font-weight: 500;
+}
+.nand-ui-field :is(input, select) {
+	min-width: 0;
+	max-width: 100%;
+	border-radius: var(--nand-radius-sm);
+}
+
+/* ----- Badge / status chip ----- */
+.nand-ui-badge {
+	display: inline-flex;
+	align-items: center;
+	gap: 4px;
+	min-height: 20px;
+	padding: 0 8px;
+	border-radius: var(--nand-radius-pill);
+	background: var(--nand-surface-muted);
+	color: var(--text-muted);
+	font-size: var(--nand-text-caption);
+	font-weight: 500;
+	line-height: 20px;
+	white-space: nowrap;
+	vertical-align: middle;
+}
+.nand-ui-badge--accent { background: var(--nand-accent-soft); color: var(--text-accent); }
+.nand-ui-badge--success { background: color-mix(in srgb, var(--nand-tone-success) 15%, transparent); color: var(--nand-tone-success); }
+.nand-ui-badge--warning { background: color-mix(in srgb, var(--nand-tone-warning) 15%, transparent); color: var(--nand-tone-warning); }
+.nand-ui-badge--error { background: color-mix(in srgb, var(--nand-tone-error) 15%, transparent); color: var(--nand-tone-error); }
+.nand-ui-badge--info { background: color-mix(in srgb, var(--nand-tone-info) 15%, transparent); color: var(--nand-tone-info); }
+.nand-ui-dot {
+	display: inline-block;
+	flex: none;
+	width: 7px;
+	height: 7px;
+	border-radius: 50%;
+	background: currentColor;
+}
+
+/* ----- List rows: selectable navigation items ----- */
+.nand-ui-list {
+	display: flex;
+	flex-direction: column;
+	gap: 2px;
+	min-width: 0;
+}
+button.nand-ui-list-item {
+	display: flex;
+	flex-direction: column;
+	align-items: stretch;
+	gap: 2px;
+	width: 100%;
+	height: auto;
+	min-height: 0;
+	padding: var(--size-4-2) 10px;
+	border: 1px solid transparent;
+	border-radius: var(--nand-radius-sm);
+	background: transparent;
+	box-shadow: none;
+	color: var(--text-normal);
+	font-weight: 400;
+	text-align: start;
+	white-space: normal;
+	transition: background-color var(--nand-duration-fast) var(--nand-ease), border-color var(--nand-duration-fast) var(--nand-ease);
+}
+button.nand-ui-list-item:hover { background: var(--nand-surface-hover); }
+button.nand-ui-list-item.is-active {
+	background: var(--nand-accent-soft);
+	border-color: var(--nand-accent-border);
+}
+.nand-ui-list-item-title {
+	min-width: 0;
+	overflow: hidden;
+	color: var(--text-normal);
+	font-size: var(--nand-text-body);
+	font-weight: 600;
+	text-overflow: ellipsis;
+}
+.nand-ui-list-item-meta {
+	min-width: 0;
+	color: var(--text-muted);
+	font-size: var(--nand-text-caption);
+}
+
+/* ----- Section label: small heading above a group ----- */
+.nand-ui-section-label {
+	margin: var(--size-4-3) 0 var(--size-4-1);
+	color: var(--text-faint);
+	font-size: var(--nand-text-caption);
+	font-weight: 600;
+	letter-spacing: 0.04em;
+	text-transform: uppercase;
+}
+
+/* ----- Scroll container ----- */
+.nand-ui-scroll {
+	min-height: 0;
+	overflow: auto;
+	scrollbar-width: thin;
+	scrollbar-gutter: stable;
+}
+
+:where(.nand-ui-card, .nand-ui-segmented, .nand-ui-list, .nand-ui-toolbar) :focus-visible,
+:where(button.nand-ui-icon-btn, button.nand-ui-btn, button.nand-ui-list-item, button.nand-ui-card):focus-visible {
+	outline: 2px solid var(--interactive-accent);
+	outline-offset: 2px;
+}
+@media (pointer: coarse) {
+	button.nand-ui-icon-btn { width: var(--nand-touch-target); height: var(--nand-touch-target); min-width: var(--nand-touch-target); }
+	button.nand-ui-btn, .nand-ui-segmented > button { min-height: var(--nand-touch-target); }
+}
+@media (prefers-reduced-motion: reduce) {
+	:is(.nand-ui-card, button.nand-ui-icon-btn, button.nand-ui-list-item, .nand-ui-segmented > button) { transition: none; }
+}
+
+/* =================================================================
+   Dashboard Plugin — Multi-Theme Design System
+   ================================================================= */
+

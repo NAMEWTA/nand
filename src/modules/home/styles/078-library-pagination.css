@@ -1,0 +1,164 @@
+/* ===== Library Pagination =====
+   Compact pill control (library, media, dataview share it): one rounded
+   track holding prev · pages · next; 24px circular-ish page targets; the
+   current page is accent-soft (not a solid block), disabled arrows fade. */
+.dashboard-library-pagination {
+	padding: 6px 0 0 0;
+}
+
+.dashboard-library-pagination-nav {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 2px;
+	width: fit-content;
+	max-width: 100%;
+	margin: 4px auto;
+	padding: 2px;
+	box-sizing: border-box;
+	border: 1px solid var(--db-border-card, var(--db-border, transparent));
+	border-radius: 999px;
+	background: var(--db-bg-card, rgba(255, 255, 255, 0.06));
+	font-variant-numeric: tabular-nums;
+}
+
+.dashboard-library-pagination-btn,
+.dashboard-library-pagination-page {
+	position: relative;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	min-width: 26px;
+	height: 26px;
+	box-sizing: border-box;
+	padding: 0 8px;
+	border-radius: 999px;
+	font-size: 0.75em;
+	cursor: pointer;
+	user-select: none;
+	transition: background var(--nand-duration-fast) var(--nand-ease), color var(--nand-duration-fast) var(--nand-ease), opacity var(--nand-duration-fast) var(--nand-ease);
+}
+
+.dashboard-library-pagination-btn {
+	font-weight: 600;
+	color: var(--db-text, var(--text-normal));
+	background: transparent;
+}
+
+.dashboard-library-pagination-btn:hover {
+	background: var(--db-bg-hover, var(--db-bg-btn-hover, rgba(139, 92, 246, 0.18)));
+}
+
+.dashboard-library-pagination-btn.disabled {
+	opacity: 0.3;
+	cursor: default;
+	pointer-events: none;
+}
+
+.dashboard-library-pagination-page {
+	color: var(--db-text-muted, var(--text-muted));
+	background: transparent;
+}
+
+.dashboard-library-pagination-page:hover {
+	background: var(--db-bg-hover, var(--db-bg-btn, rgba(139, 92, 246, 0.10)));
+	color: var(--db-text, var(--text-normal));
+}
+
+.dashboard-library-pagination-page.active {
+	background: color-mix(in srgb, var(--db-accent, var(--interactive-accent)) 16%, transparent);
+	color: var(--db-accent, var(--interactive-accent));
+	box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--db-accent, var(--interactive-accent)) 35%, transparent);
+	font-weight: 700;
+	cursor: default;
+}
+
+.dashboard-library-pagination-ellipsis {
+	padding: 0 2px;
+	font-size: 0.75em;
+	color: var(--db-text-faint, var(--text-faint));
+	user-select: none;
+}
+
+/* Touch: grow the pill's targets to the 44px minimum without resizing the
+   visual (an invisible hit area around each 26px chip). */
+@media (pointer: coarse) {
+	.dashboard-library-pagination-nav {
+		gap: 6px;
+	}
+
+	.dashboard-library-pagination-btn::after,
+	.dashboard-library-pagination-page::after,
+	.dashboard-library-sort-dir::after,
+	.dashboard-library-filter-btn::after,
+	.dashboard-library-config-btn::after,
+	.dashboard-library-newnote-btn::after {
+		content: '';
+		position: absolute;
+		inset: -9px -8px;
+	}
+}
+
+/* Library config modal header */
+.dashboard-modal-header {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	margin-bottom: 16px;
+}
+
+.dashboard-modal-title {
+	font-size: 1em;
+	font-weight: 600;
+}
+
+/* Reminder notice modal */
+.dashboard-reminder-modal {
+	padding: 24px 28px 20px;
+	min-width: 280px;
+}
+
+.dashboard-reminder-message {
+	font-size: 0.9375em;
+	font-weight: 500;
+	color: var(--db-text, var(--text-normal));
+	margin-bottom: 20px;
+	line-height: 1.5;
+}
+
+.dashboard-reminder-actions {
+	display: flex;
+	gap: 10px;
+	justify-content: flex-end;
+}
+
+.dashboard-reminder-actions button {
+	padding: 6px 16px;
+	border-radius: var(--db-radius-sm, 6px);
+	border: 1px solid var(--db-border-card, rgba(255, 255, 255, 0.1));
+	background: var(--db-bg-card, rgba(255, 255, 255, 0.06));
+	color: var(--db-text, var(--text-normal));
+	font-size: 0.8125em;
+	cursor: pointer;
+	transition: background 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease, color 0.15s ease, transform 0.15s ease;
+}
+
+.dashboard-reminder-actions button:hover {
+	background: var(--db-bg-hover, rgba(255, 255, 255, 0.1));
+}
+
+.dashboard-reminder-dismiss {
+	color: var(--db-text-muted, var(--text-muted));
+}
+
+.dashboard-reminder-snooze {
+	background: var(--db-accent, #6366f1) !important;
+	color: #fff !important;
+	border-color: transparent !important;
+	font-weight: 500;
+}
+
+.dashboard-reminder-snooze:hover {
+	opacity: 0.9;
+}
+

@@ -1,0 +1,91 @@
+/* ===== Sidebar ===== */
+.dashboard-sidebar {
+	/* Width is user-draggable (side layout): the render applies the persisted
+	   value as an inline --db-sidebar-w on this element, the stylesheet
+	   default below keeps hand-built DOM and pre-feature data at 220. The
+	   variable is UNITLESS so one value drives both the width (× 1px) and the
+	   proportional content scale (÷ 220, see .dashboard-sidebar-widgets) with
+	   no twin to keep in sync. The collapsed state overrides the width with a
+	   literal 15px (source order wins). */
+	--db-sidebar-w: 220;
+	width: calc(var(--db-sidebar-w, 220) * 1px);
+	flex-shrink: 0;
+	display: flex;
+	flex-direction: column;
+	position: relative;
+	transition: width 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.25s ease;
+}
+
+/* While a resize drag is live: kill the width/max-height transitions (the
+   rail's 0.4s spring would lag every pointer frame) and stop text selection
+   from painting across the board. Added/removed by the drag handlers. */
+.dashboard-sidebar--resizing {
+	transition: none !important;
+	user-select: none;
+}
+
+/* Side-layout width drag handle: a slim col-resize strip riding the sidebar's
+   right edge. INSIDE the box (right: 0, not -5px): the expanded state is
+   overflow-y: auto, which computes overflow-x to auto too and would clip a
+   negative offset. As a direct sidebar child it is auto-hidden in the
+   collapsed state by the `> *:not(.slim-indicator)` rule, so the 15px rail
+   stays click-to-expand. */
+.dashboard-sidebar-width-handle {
+	position: absolute;
+	top: 0;
+	bottom: 0;
+	right: 0;
+	width: 8px;
+	cursor: col-resize;
+	z-index: 6;
+	touch-action: none;
+}
+
+.dashboard-sidebar-width-handle::before {
+	content: '';
+	position: absolute;
+	top: 50%;
+	/* Flush with the sidebar's right edge (into the widgets-area's 4px dead
+	   zone), NOT further in: the cards' right borders sit 4px from the edge
+	   (padding 0 4px on .dashboard-sidebar-widgets), so a 2px offset landed
+	   the pill ON TOP of them. At right:0 the pill clears the border band and
+	   reads as the pane divider. It cannot go past the edge — the expanded
+	   sidebar's overflow-y:auto computes overflow-x to auto, which clips
+	   anything beyond the padding box. */
+	right: 0;
+	transform: translateY(-50%);
+	width: 3px;
+	height: 40px;
+	border-radius: 2px;
+	background: var(--db-text-faint);
+	opacity: 0;
+	transition: opacity 0.2s ease, background 0.2s ease;
+	pointer-events: none;
+}
+
+.dashboard-sidebar-width-handle:hover::before,
+.dashboard-sidebar--resizing .dashboard-sidebar-width-handle::before {
+	opacity: 0.65;
+	background: var(--db-accent, var(--interactive-accent));
+}
+
+@media (max-width: 640px) {
+	.dashboard-sidebar-width-handle {
+		display: none;
+	}
+}
+
+.dashboard-sidebar-scroll {
+	flex: 1;
+	overflow-y: auto;
+	scrollbar-width: none;
+	display: flex;
+	flex-direction: column;
+	gap: 10px;
+	padding-top: 0;
+}
+
+.dashboard-sidebar-scroll::-webkit-scrollbar {
+	width: 0;
+}
+

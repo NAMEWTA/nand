@@ -1,0 +1,67 @@
+/* =================================================================
+   Markdown structure: headings and emphasis read differently at a glance.
+   Applies to Reading view (.markdown-rendered), Live Preview and Source
+   mode (.HyperMD-header-N / .cm-header-N, .cm-strong). Driven by Obsidian's
+   heading and emphasis variables wherever they exist.
+   ================================================================= */
+
+/* ----- Accented headings: H1 rule, H2 accent bar, H3 accent tint ----- */
+body.nand-md-headings--accented {
+	--h1-size: 1.75em;
+	--h1-weight: 700;
+	--h1-line-height: 1.25;
+	--h2-size: 1.45em;
+	--h2-weight: 650;
+	--h3-size: 1.22em;
+	--h3-weight: 650;
+	--h3-color: var(--text-accent);
+	--h4-size: 1.08em;
+	--h4-weight: 650;
+	--h5-size: 1em;
+	--h5-weight: 650;
+	--h5-color: var(--text-muted);
+	--h6-size: 0.94em;
+	--h6-weight: 650;
+	--h6-color: var(--text-muted);
+}
+body.nand-md-headings--accented .markdown-rendered h1,
+body.nand-md-headings--accented .markdown-source-view .HyperMD-header-1 {
+	padding-bottom: 0.3em;
+	border-bottom: 2px solid color-mix(in srgb, var(--interactive-accent) 45%, transparent);
+}
+body.nand-md-headings--accented .markdown-rendered h2,
+body.nand-md-headings--accented .markdown-source-view .HyperMD-header-2 {
+	padding-inline-start: 0.6em;
+	border-inline-start: 4px solid var(--interactive-accent);
+}
+body.nand-md-headings--accented .markdown-rendered h3,
+body.nand-md-headings--accented .markdown-source-view .cm-header-3 {
+	letter-spacing: 0.01em;
+}
+body.nand-md-headings--accented .markdown-rendered h6,
+body.nand-md-headings--accented .markdown-source-view .cm-header-6 {
+	text-transform: uppercase;
+	letter-spacing: 0.06em;
+}
+
+/* ----- Emphasis ----- */
+body.nand-md-emphasis--accent {
+	--bold-weight: 700;
+	--bold-color: var(--text-accent);
+	--italic-color: var(--text-muted);
+}
+body.nand-md-emphasis--highlight {
+	--bold-weight: 700;
+	--italic-color: var(--text-muted);
+}
+body.nand-md-emphasis--highlight .markdown-rendered strong,
+body.nand-md-emphasis--highlight .markdown-source-view .cm-strong {
+	background: linear-gradient(transparent 58%, color-mix(in srgb, var(--interactive-accent) 26%, transparent) 58%);
+	border-radius: 2px;
+}
+
+/* ----- Blockquotes and inline code follow the active accent in any enhanced style ----- */
+body.nand-md-headings--accented .markdown-rendered blockquote {
+	background: color-mix(in srgb, var(--interactive-accent) 6%, transparent);
+	border-radius: 0 var(--radius-s) var(--radius-s) 0;
+}

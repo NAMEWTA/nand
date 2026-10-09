@@ -1,0 +1,286 @@
+{
+	"src/app/styles/006-settings-footer.css": [
+		"declaration-no-important"
+	],
+	"src/ui/styles/111-nand-surface-polish-host-theme-outside-the-board.css": [
+		"no-duplicate-selectors"
+	],
+	"src/modules/archives/styles/113-independent-archive-surface.css": [
+		"no-duplicate-selectors"
+	],
+	"src/modules/browser/styles/116-independent-browser-native-leaves-and-modal-shar.css": [
+		"declaration-property-value-allowed-list"
+	],
+	"src/modules/comments/styles/091-editor-product-comments-does-not-use-dashboard-t.css": [
+		"declaration-property-value-allowed-list"
+	],
+	"src/modules/home/styles/003-shared-transparent-sections-for-neon-volt-magma-.css": [
+		"declaration-no-important"
+	],
+	"src/modules/home/styles/005-user-background-image-layer-appearance-studio.css": [
+		"declaration-property-value-allowed-list"
+	],
+	"src/modules/home/styles/007-settings-visual-layout-picker.css": [
+		"declaration-no-important"
+	],
+	"src/modules/home/styles/011-banner.css": [
+		"color-no-hex",
+		"declaration-no-important",
+		"declaration-property-value-allowed-list",
+		"function-disallowed-list",
+		"no-duplicate-selectors"
+	],
+	"src/modules/home/styles/012-file-suggest-dropdown.css": [
+		"color-no-hex",
+		"declaration-property-value-allowed-list",
+		"function-disallowed-list"
+	],
+	"src/modules/home/styles/013-wikilink-clickable-link.css": [
+		"color-no-hex"
+	],
+	"src/modules/home/styles/014-external-link-clickable-text-url.css": [
+		"color-no-hex"
+	],
+	"src/modules/home/styles/017-sidebar.css": [
+		"declaration-no-important",
+		"declaration-property-value-allowed-list"
+	],
+	"src/modules/home/styles/018-sidebar-widgets.css": [
+		"declaration-no-important",
+		"no-duplicate-selectors"
+	],
+	"src/modules/home/styles/019-widget-card-backgrounds-per-widget-decorative-im.css": [
+		"declaration-no-important",
+		"declaration-property-value-allowed-list",
+		"function-disallowed-list"
+	],
+	"src/modules/home/styles/021-stacked-layout-desktop-tablet-only.css": [
+		"color-no-hex",
+		"declaration-no-important",
+		"declaration-property-value-allowed-list",
+		"function-disallowed-list"
+	],
+	"src/modules/home/styles/022-activity-selector-pomodoro-widget.css": [
+		"declaration-no-important",
+		"declaration-property-value-allowed-list",
+		"function-disallowed-list",
+		"no-duplicate-selectors"
+	],
+	"src/modules/home/styles/023-pomodoro-stats-modal.css": [
+		"declaration-property-value-allowed-list",
+		"function-disallowed-list"
+	],
+	"src/modules/home/styles/024-wide-stats-modal-landscape.css": [
+		"color-no-hex",
+		"function-disallowed-list"
+	],
+	"src/modules/home/styles/025-habit-stats-modal.css": [
+		"color-no-hex",
+		"declaration-property-value-allowed-list",
+		"function-disallowed-list"
+	],
+	"src/modules/home/styles/026-tag-manager-modal.css": [
+		"color-no-hex"
+	],
+	"src/modules/home/styles/027-insight-v2-additions.css": [
+		"color-no-hex",
+		"declaration-property-value-allowed-list",
+		"function-disallowed-list"
+	],
+	"src/modules/home/styles/028-expense-stats-modal.css": [
+		"color-no-hex",
+		"declaration-property-value-allowed-list",
+		"function-disallowed-list"
+	],
+	"src/modules/home/styles/029-expense-ledger-overlay-view-all-full-table.css": [
+		"declaration-no-important",
+		"declaration-property-value-allowed-list",
+		"function-disallowed-list"
+	],
+	"src/modules/home/styles/031-reading-widget.css": [
+		"color-no-hex",
+		"declaration-no-important",
+		"declaration-property-value-allowed-list",
+		"function-disallowed-list",
+		"no-duplicate-selectors"
+	],
+	"src/modules/home/styles/033-year-progress-widget.css": [
+		"color-no-hex",
+		"function-disallowed-list"
+	],
+	"src/modules/home/styles/035-sidebar-calendar-widget.css": [
+		"declaration-no-important"
+	],
+	"src/modules/home/styles/036-hover-day-preview-dotmode-only.css": [
+		"color-no-hex",
+		"declaration-property-value-allowed-list",
+		"function-disallowed-list"
+	],
+	"src/modules/home/styles/037-fortune-stick-modal-traditional-parchment.css": [
+		"color-no-hex",
+		"declaration-property-value-allowed-list",
+		"function-disallowed-list"
+	],
+	"src/modules/home/styles/038-fortune-result-card.css": [
+		"color-no-hex",
+		"declaration-no-important",
+		"declaration-property-value-allowed-list",
+		"function-disallowed-list"
+	],
+	"src/modules/home/styles/040-quick-links-glass-buttons.css": [
+		"color-no-hex",
+		"declaration-no-important",
+		"function-disallowed-list"
+	],
+	"src/modules/home/styles/041-kanban.css": [
+		"color-no-hex",
+		"declaration-no-important",
+		"declaration-property-value-allowed-list",
+		"function-disallowed-list",
+		"no-duplicate-selectors"
+	],
+	"src/modules/home/styles/042-sticky-section-memo-todo-cards-in-one-todo-style.css": [
+		"declaration-property-value-allowed-list"
+	],
+	"src/modules/home/styles/043-scroll-to-top-floating-button.css": [
+		"declaration-property-value-allowed-list",
+		"function-disallowed-list"
+	],
+	"src/modules/home/styles/044-cards.css": [
+		"declaration-no-important"
+	],
+	"src/modules/home/styles/045-tasks.css": [
+		"declaration-no-important",
+		"no-duplicate-selectors"
+	],
+	"src/modules/home/styles/049-project.css": [
+		"declaration-no-important",
+		"no-duplicate-selectors"
+	],
+	"src/modules/home/styles/055-project-cover-image.css": [
+		"function-disallowed-list"
+	],
+	"src/modules/home/styles/057-modal.css": [
+		"declaration-no-important",
+		"function-disallowed-list"
+	],
+	"src/modules/home/styles/058-library-dialect-footer-buttons.css": [
+		"color-no-hex",
+		"declaration-no-important",
+		"function-disallowed-list"
+	],
+	"src/modules/home/styles/060-add-action-confirm-view-custom-name-icon.css": [
+		"color-no-hex",
+		"function-disallowed-list"
+	],
+	"src/modules/home/styles/063-theme-specific-enhancements.css": [
+		"declaration-no-important",
+		"declaration-property-value-allowed-list",
+		"function-disallowed-list"
+	],
+	"src/modules/home/styles/064-task-reminder.css": [
+		"color-no-hex",
+		"declaration-no-important",
+		"declaration-property-value-allowed-list",
+		"function-disallowed-list"
+	],
+	"src/modules/home/styles/066-confirm-dialog.css": [
+		"color-no-hex",
+		"declaration-property-value-allowed-list",
+		"function-disallowed-list"
+	],
+	"src/modules/home/styles/067-chart-js-canvas-base.css": [
+		"declaration-no-important"
+	],
+	"src/modules/home/styles/068-tracker-widget-size-variants.css": [
+		"color-no-hex"
+	],
+	"src/modules/home/styles/069-tracker-heatmap.css": [
+		"declaration-no-important"
+	],
+	"src/modules/home/styles/070-template-modal.css": [
+		"color-no-hex",
+		"declaration-property-value-allowed-list",
+		"function-disallowed-list"
+	],
+	"src/modules/home/styles/071-grid-view.css": [
+		"function-disallowed-list"
+	],
+	"src/modules/home/styles/072-gallery-view-card-grid-with-frontmatter-driven-c.css": [
+		"color-no-hex",
+		"function-disallowed-list"
+	],
+	"src/modules/home/styles/073-list-view.css": [
+		"function-disallowed-list"
+	],
+	"src/modules/home/styles/074-table-view.css": [
+		"function-disallowed-list"
+	],
+	"src/modules/home/styles/075-kanban-view.css": [
+		"function-disallowed-list"
+	],
+	"src/modules/home/styles/077-library-config-modal.css": [
+		"function-disallowed-list"
+	],
+	"src/modules/home/styles/078-library-pagination.css": [
+		"color-no-hex",
+		"declaration-no-important",
+		"function-disallowed-list"
+	],
+	"src/modules/home/styles/079-quick-notes-first-run-guide-modal.css": [
+		"function-disallowed-list"
+	],
+	"src/modules/home/styles/080-dataview-announcement-community-group-modal.css": [
+		"function-disallowed-list"
+	],
+	"src/modules/home/styles/082-media-sections-images-videos.css": [
+		"declaration-property-value-allowed-list",
+		"function-disallowed-list",
+		"selector-pseudo-class-disallowed-list"
+	],
+	"src/modules/home/styles/083-media-lightbox.css": [
+		"color-no-hex",
+		"declaration-no-important",
+		"declaration-property-value-allowed-list",
+		"function-disallowed-list"
+	],
+	"src/modules/home/styles/084-weread-section.css": [
+		"color-no-hex",
+		"function-disallowed-list",
+		"no-duplicate-selectors"
+	],
+	"src/modules/home/styles/085-reading-stats-widget-period-toggle-6-kpis-trend-.css": [
+		"declaration-no-important",
+		"function-disallowed-list"
+	],
+	"src/modules/home/styles/086-appearance-studio-theme-studio-modal.css": [
+		"function-disallowed-list",
+		"no-duplicate-selectors"
+	],
+	"src/modules/home/styles/087-quick-notes-region-single-line-accent-navbar-mas.css": [
+		"color-no-hex",
+		"declaration-no-important",
+		"declaration-property-value-allowed-list",
+		"function-disallowed-list",
+		"no-duplicate-selectors"
+	],
+	"src/modules/home/styles/088-web-section-embedded-page-iframe-desktop-webview.css": [
+		"declaration-no-important",
+		"function-disallowed-list"
+	],
+	"src/modules/home/styles/089-floating-pomodoro-mini-panel.css": [
+		"declaration-no-important",
+		"declaration-property-value-allowed-list",
+		"function-disallowed-list"
+	],
+	"src/modules/home/styles/090-floating-reading-mini-timer.css": [
+		"color-no-hex",
+		"declaration-property-value-allowed-list",
+		"function-disallowed-list"
+	],
+	"src/modules/icons/styles/112-iconic-1-1-10-268e133c-mit-0-declarations-preser.css": [
+		"declaration-no-important",
+		"function-disallowed-list",
+		"selector-pseudo-class-disallowed-list"
+	]
+}

@@ -1,0 +1,56 @@
+/* Git sync page: summary, commit box, file groups with inline diffs, history; conflict buttons in the editor. */
+.nand-sync-page { height: 100%; overflow-y: auto; padding: var(--nand-space-4) var(--nand-space-6); }
+.nand-sync-body { display: flex; flex-direction: column; gap: var(--nand-space-4); min-width: 0; max-width: 960px; margin-inline: auto; }
+.nand-sync-muted { color: var(--text-muted); font-size: var(--nand-text-caption); }
+.nand-sync-summary { display: flex; flex-direction: column; gap: var(--nand-space-2); padding-bottom: var(--nand-space-3); border-bottom: var(--nand-border); }
+.nand-sync-branch { display: flex; flex-wrap: wrap; align-items: baseline; gap: var(--nand-space-2); }
+.nand-sync-branch-name { font-size: var(--nand-text-title); font-weight: 600; overflow-wrap: anywhere; }
+.nand-sync-last { color: var(--text-normal); font-size: var(--nand-text-body); }
+.nand-sync-last.is-error { color: var(--nand-tone-error); }
+.nand-sync-detail { margin: 0; padding: var(--nand-space-2) var(--nand-space-3); border-radius: var(--nand-radius-sm); background: var(--nand-surface-muted); color: var(--text-muted); font-size: var(--nand-text-caption); white-space: pre-wrap; overflow-wrap: anywhere; }
+.nand-sync-banner { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--nand-space-2); padding: var(--nand-space-2) var(--nand-space-3); border: var(--nand-border); border-radius: var(--nand-radius-md); background: var(--nand-surface-muted); font-size: var(--nand-text-body); }
+.nand-sync-banner.is-error { border-color: var(--nand-tone-error); }
+.nand-sync-conflict p { margin: var(--nand-space-1) 0 0; color: var(--text-muted); }
+.nand-sync-actions { display: flex; flex-wrap: wrap; align-items: center; gap: var(--nand-space-2); }
+.nand-sync-spacer { flex: 1 1 auto; }
+.nand-sync-changes { display: flex; flex-direction: column; gap: var(--nand-space-4); }
+.nand-sync-commit { display: flex; flex-direction: column; gap: var(--nand-space-2); }
+.nand-sync-message { width: 100%; min-height: calc(var(--nand-control-height) * 2); resize: vertical; font-size: var(--nand-text-body); }
+.nand-sync-clean { margin: 0; }
+.nand-sync-group { display: flex; flex-direction: column; gap: var(--nand-space-1); }
+.nand-sync-group-header { display: flex; align-items: center; gap: var(--nand-space-2); }
+.nand-sync-group-header h3 { margin: 0; font-size: var(--nand-text-body); font-weight: 600; }
+.nand-sync-count { padding: 0 var(--nand-space-2); border-radius: var(--nand-radius-pill); background: var(--nand-surface-muted); color: var(--text-muted); font-size: var(--nand-text-caption); }
+.nand-sync-files { display: flex; flex-direction: column; margin: 0; padding: 0; list-style: none; }
+.nand-sync-file { border-radius: var(--nand-radius-sm); }
+.nand-sync-file-row { display: flex; align-items: center; gap: var(--nand-space-2); min-height: var(--nand-control-height); padding: 0 var(--nand-space-1); border-radius: var(--nand-radius-sm); }
+.nand-sync-file-row:hover { background: var(--nand-surface-hover); }
+.nand-sync-code { flex: 0 0 auto; min-width: 1.6em; color: var(--text-muted); font-family: var(--font-monospace); font-size: var(--nand-text-caption); text-align: center; }
+.nand-sync-code.is-A, .nand-sync-code.is-U { color: var(--nand-tone-success); }
+.nand-sync-code.is-D { color: var(--nand-tone-error); }
+.nand-sync-file.is-conflict .nand-sync-code { color: var(--nand-tone-error); }
+.nand-sync-file-row button.nand-sync-file-name { display: block; flex: 1 1 auto; min-width: 0; height: auto; overflow: hidden; padding: 2px 0; border: 0; background: transparent; box-shadow: none; color: var(--text-normal); font-size: var(--nand-text-body); text-align: start; text-overflow: ellipsis; white-space: nowrap; cursor: pointer; }
+.nand-sync-file-row button.nand-sync-file-name:focus-visible { box-shadow: var(--nand-focus-ring); }
+.nand-sync-file-actions { display: flex; flex: 0 0 auto; gap: var(--nand-space-1); opacity: 0.6; }
+.nand-sync-file-row:hover .nand-sync-file-actions, .nand-sync-file-row:focus-within .nand-sync-file-actions { opacity: 1; }
+.nand-sync-diff { max-height: 420px; margin: var(--nand-space-1) 0 var(--nand-space-2); padding: var(--nand-space-2) var(--nand-space-3); overflow: auto; border-radius: var(--nand-radius-sm); background: var(--nand-surface-muted); font-family: var(--font-monospace); font-size: var(--nand-text-caption); white-space: pre; }
+.nand-sync-diff .is-add { color: var(--nand-tone-success); }
+.nand-sync-diff .is-del { color: var(--nand-tone-error); }
+.nand-sync-diff .is-hunk { color: var(--nand-tone-info); }
+.nand-sync-setup { align-items: center; text-align: center; }
+.nand-sync-check { display: inline-flex; align-items: center; gap: var(--nand-space-2); font-size: var(--nand-text-body); }
+.nand-sync-history { display: flex; flex-direction: column; gap: var(--nand-space-2); }
+.nand-sync-commits { display: flex; flex-direction: column; margin: 0; padding: 0; list-style: none; }
+.nand-sync-commits button.nand-sync-commit-row { display: flex; flex-direction: column; align-items: flex-start; gap: 2px; width: 100%; height: auto; padding: var(--nand-space-2); border: 0; border-radius: var(--nand-radius-sm); background: none; box-shadow: none; text-align: start; cursor: pointer; }
+.nand-sync-commits button.nand-sync-commit-row:hover { background: var(--nand-surface-hover); }
+.nand-sync-commit-subject { color: var(--text-normal); font-size: var(--nand-text-body); overflow-wrap: anywhere; white-space: normal; }
+.nand-sync-dialog-text { white-space: pre-wrap; overflow-wrap: anywhere; }
+.nand-sync-conflict-actions { display: inline-flex; flex-wrap: wrap; gap: var(--nand-space-1); margin-inline-start: var(--nand-space-2); vertical-align: middle; }
+.nand-sync-conflict-button { height: auto; padding: 0 var(--nand-space-2); font-family: var(--font-interface); font-size: var(--nand-text-caption); }
+@media (max-width: 600px) {
+ .nand-sync-page { padding: var(--nand-space-3); }
+ .nand-sync-file-actions { opacity: 1; }
+}
+@media (pointer: coarse) {
+ .nand-sync-file-row { min-height: var(--nand-touch-target); }
+}

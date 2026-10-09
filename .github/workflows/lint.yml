@@ -1,0 +1,55 @@
+name: Node.js build
+
+on:
+    push:
+        branches: ["**"]
+    pull_request:
+        branches: ["**"]
+
+jobs:
+    build:
+        runs-on: ubuntu-latest
+
+        strategy:
+            matrix:
+                node-version: [22.x, 24.x]
+                # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
+
+        steps:
+            - uses: actions/checkout@v5
+            - uses: pnpm/action-setup@v4
+            - name: Use Node.js ${{ matrix.node-version }}
+              uses: actions/setup-node@v5
+              with:
+                  node-version: ${{ matrix.node-version }}
+                  cache: pnpm
+            - run: pnpm install --frozen-lockfile
+            - run: pnpm run build
+            - run: pnpm run check:bundle
+            - run: git diff --exit-code -- main.js
+            - run: pnpm run lint
+            - run: pnpm run lint:css
+            - run: pnpm run test:all
+            - run: pnpm run check:notices
+            - run: pnpm run check:native
+
+    windows-portability:
+        runs-on: windows-latest
+        env:
+            GIT_CONFIG_COUNT: "1"
+            GIT_CONFIG_KEY_0: core.autocrlf
+            GIT_CONFIG_VALUE_0: "true"
+        steps:
+            - uses: actions/checkout@v5
+            - uses: pnpm/action-setup@v4
+            - name: Use Node.js 24
+              uses: actions/setup-node@v5
+              with:
+                  node-version: 24.x
+                  cache: pnpm
+            - run: pnpm install --frozen-lockfile
+            - run: pnpm run build
+            - run: git diff --exit-code -- main.js
+            - run: pnpm run lint
+            - run: pnpm run lint:css
+            - run: pnpm run test:all

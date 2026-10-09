@@ -1,0 +1,174 @@
+/* =================================================================
+   NAND theme presets. "Follow system" adds no class and changes nothing.
+   Presets override Obsidian's own variables, so the editor, reading view,
+   sidebars and every NAND surface follow together. Values are tuned for
+   WCAG AA contrast (see src/theme/presets.test.ts).
+   ================================================================= */
+
+/* ----- Claude Code: ivory paper, charcoal ink, terracotta accent ----- */
+body.nand-theme--claude-code {
+	--nand-font-heading: "Tiempos Headline", "Iowan Old Style", Charter, Georgia, "Noto Serif SC", "Songti SC", serif;
+	--h1-font: var(--nand-font-heading);
+	--h2-font: var(--nand-font-heading);
+	--h3-font: var(--nand-font-heading);
+	--radius-s: 6px;
+	--radius-m: 10px;
+	--radius-l: 14px;
+}
+body.nand-theme--claude-code.theme-light {
+	--background-primary: #faf9f5;
+	--background-primary-alt: #f5f3ec;
+	--background-secondary: #f0eee6;
+	--background-secondary-alt: #e8e5da;
+	--background-modifier-border: #e3dfd3;
+	--background-modifier-border-hover: #d2cdbf;
+	--background-modifier-border-focus: #b4532f;
+	--background-modifier-hover: rgba(31, 30, 29, 0.05);
+	--background-modifier-active-hover: rgba(193, 95, 60, 0.12);
+	--background-modifier-form-field: #fffefb;
+	--text-normal: #1f1e1d;
+	--text-muted: #5c5a55;
+	--text-faint: #858178;
+	--text-accent: #b14f2c;
+	--text-accent-hover: #963f20;
+	--text-on-accent: #ffffff;
+	--text-selection: rgba(217, 119, 87, 0.24);
+	--text-highlight-bg: rgba(217, 119, 87, 0.22);
+	--interactive-accent: #b14f2c;
+	--interactive-accent-hover: #963f20;
+	--color-accent: #b14f2c;
+	--color-accent-1: #c15f3c;
+	--color-accent-2: #963f20;
+	--link-color: #b14f2c;
+	--link-color-hover: #963f20;
+	--link-external-color: #b14f2c;
+	--blockquote-border-color: #d97757;
+	--code-background: #f0eee6;
+	--hr-color: #e3dfd3;
+	--titlebar-background: #f0eee6;
+	--titlebar-background-focused: #e8e5da;
+}
+body.nand-theme--claude-code.theme-dark {
+	--background-primary: #262624;
+	--background-primary-alt: #2c2b28;
+	--background-secondary: #1f1e1d;
+	--background-secondary-alt: #1a1918;
+	--background-modifier-border: #3a3935;
+	--background-modifier-border-hover: #4b4943;
+	--background-modifier-border-focus: #d97757;
+	--background-modifier-hover: rgba(250, 249, 245, 0.06);
+	--background-modifier-active-hover: rgba(217, 119, 87, 0.16);
+	--background-modifier-form-field: #1f1e1d;
+	--text-normal: #f2f0ea;
+	--text-muted: #b8b5ad;
+	--text-faint: #8d8a83;
+	--text-accent: #e5906f;
+	--text-accent-hover: #edaa90;
+	--text-on-accent: #1f1e1d;
+	--text-selection: rgba(217, 119, 87, 0.3);
+	--text-highlight-bg: rgba(217, 119, 87, 0.3);
+	--interactive-accent: #d97757;
+	--interactive-accent-hover: #e38a6c;
+	--color-accent: #d97757;
+	--color-accent-1: #e38a6c;
+	--color-accent-2: #c15f3c;
+	--link-color: #e5906f;
+	--link-color-hover: #edaa90;
+	--link-external-color: #e5906f;
+	--blockquote-border-color: #d97757;
+	--code-background: #1f1e1d;
+	--hr-color: #3a3935;
+	--titlebar-background: #1f1e1d;
+	--titlebar-background-focused: #1a1918;
+}
+
+/* ----- Eye care: soft green paper, low glare ----- */
+body.nand-theme--eye-care {
+	--line-height-normal: 1.75;
+	--radius-s: 6px;
+	--radius-m: 10px;
+	--radius-l: 14px;
+}
+body.nand-theme--eye-care.theme-light {
+	--background-primary: #c7edcc;
+	--background-primary-alt: #bfe6c4;
+	--background-secondary: #b7dfbd;
+	--background-secondary-alt: #acd6b3;
+	--background-modifier-border: #98c7a1;
+	--background-modifier-border-hover: #85b98f;
+	--background-modifier-border-focus: #245f3c;
+	--background-modifier-hover: rgba(20, 60, 32, 0.07);
+	--background-modifier-active-hover: rgba(36, 95, 60, 0.14);
+	--background-modifier-form-field: #d3f2d7;
+	--text-normal: #1a3023;
+	--text-muted: #3a5643;
+	--text-faint: #557161;
+	--text-accent: #1f5a37;
+	--text-accent-hover: #164829;
+	--text-on-accent: #ffffff;
+	--text-selection: rgba(36, 95, 60, 0.2);
+	--text-highlight-bg: rgba(250, 204, 92, 0.5);
+	--interactive-accent: #245f3c;
+	--interactive-accent-hover: #1b4d30;
+	--color-accent: #245f3c;
+	--color-accent-1: #2e7149;
+	--color-accent-2: #1b4d30;
+	--link-color: #1f5a37;
+	--link-color-hover: #164829;
+	--link-external-color: #1f5a37;
+	--blockquote-border-color: #2e7149;
+	--code-background: #b7dfbd;
+	--hr-color: #98c7a1;
+	--titlebar-background: #b7dfbd;
+	--titlebar-background-focused: #acd6b3;
+}
+body.nand-theme--eye-care.theme-dark {
+	--background-primary: #1b2620;
+	--background-primary-alt: #1f2c25;
+	--background-secondary: #16201b;
+	--background-secondary-alt: #121a16;
+	--background-modifier-border: #2e3d33;
+	--background-modifier-border-hover: #3b4d41;
+	--background-modifier-border-focus: #6fbf8b;
+	--background-modifier-hover: rgba(214, 230, 217, 0.06);
+	--background-modifier-active-hover: rgba(111, 191, 139, 0.16);
+	--background-modifier-form-field: #16201b;
+	--text-normal: #d6e6d9;
+	--text-muted: #a2b8a7;
+	--text-faint: #7d927f;
+	--text-accent: #82cc9b;
+	--text-accent-hover: #9bd8af;
+	--text-on-accent: #10261a;
+	--text-selection: rgba(111, 191, 139, 0.26);
+	--text-highlight-bg: rgba(250, 204, 92, 0.28);
+	--interactive-accent: #6fbf8b;
+	--interactive-accent-hover: #82cc9b;
+	--color-accent: #6fbf8b;
+	--color-accent-1: #82cc9b;
+	--color-accent-2: #5aa874;
+	--link-color: #82cc9b;
+	--link-color-hover: #9bd8af;
+	--link-external-color: #82cc9b;
+	--blockquote-border-color: #5aa874;
+	--code-background: #16201b;
+	--hr-color: #2e3d33;
+	--titlebar-background: #16201b;
+	--titlebar-background-focused: #121a16;
+}
+
+/* ----- User accent overrides (any preset, including Follow system) ----- */
+body.nand-theme-accent-light.theme-light,
+body.nand-theme-accent-dark.theme-dark {
+	--interactive-accent: var(--nand-user-accent);
+	--interactive-accent-hover: color-mix(in srgb, var(--nand-user-accent) 86%, var(--text-normal));
+	--color-accent: var(--nand-user-accent);
+	--text-accent: var(--nand-user-accent);
+	--text-accent-hover: color-mix(in srgb, var(--nand-user-accent) 80%, var(--text-normal));
+	--link-color: var(--nand-user-accent);
+	--background-modifier-border-focus: var(--nand-user-accent);
+}
+body.nand-theme-accent-light.theme-light { --nand-user-accent: var(--nand-user-accent-light); }
+body.nand-theme-accent-dark.theme-dark { --nand-user-accent: var(--nand-user-accent-dark); }
+body.nand-theme-line-height {
+	--line-height-normal: var(--nand-user-line-height);
+}

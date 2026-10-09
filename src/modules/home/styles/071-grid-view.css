@@ -1,0 +1,36 @@
+/* ===== Grid View ===== */
+.dashboard-library-grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+	gap: 10px;
+}
+
+/* Card size variants (toolbar S/M/L toggle) shared by grid and gallery.
+   'medium' is the un-suffixed default above. */
+.dashboard-library-grid.dashboard-library-cards--small {
+	grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+}
+
+.dashboard-library-grid.dashboard-library-cards--large {
+	grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+}
+
+/* Card anatomy (grid + gallery): [cover] → title → meta row → preview →
+   property badges. Resting card is a hairline surface with no shadow; hover
+   lifts exactly one tier (accent-tinted border + the theme card shadow).
+   --library-card-pad drives both the padding and the cover's nested radius. */
+.dashboard-library-card {
+	--library-card-pad: 12px;
+	position: relative;
+	background: var(--db-bg-card, rgba(255, 255, 255, 0.06));
+	border: 1px solid var(--db-border-card, rgba(255, 255, 255, 0.10));
+	border-radius: var(--db-radius-md, 10px);
+	padding: var(--library-card-pad);
+	cursor: pointer;
+	transition: background var(--nand-duration) var(--nand-ease), border-color var(--nand-duration) var(--nand-ease), box-shadow var(--nand-duration) var(--nand-ease);
+	display: flex;
+	flex-direction: column;
+	gap: 6px;
+	min-width: 0;
+}
+

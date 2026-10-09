@@ -1,0 +1,363 @@
+/* ==== Web section — embedded page (iframe / desktop webview) ==== */
+
+/* Fill the section row's column flex so the frame takes the remaining
+   bounded height and scrolls itself (mirrors .dashboard-dataview-content).
+   overflow + radius clip the frame's square corners to the theme's. */
+/* Frame: the embedded page sits in a card with the theme's card radius and
+   a hairline edge; overflow clips the page to the rounded corners. */
+.dashboard-web-content {
+	display: flex;
+	flex-direction: column;
+	flex: 1;
+	min-height: 0;
+	min-width: 0;
+	border-radius: var(--db-radius-md);
+	border: 1px solid var(--db-border-card, var(--db-border, transparent));
+	overflow: hidden;
+}
+
+/* Painted backdrop avoids a transparent flash in dark themes while the frame
+   loads. No sandbox is set on the frame itself (login-walled apps need
+   cookies) — that lives in web-section.ts. */
+.dashboard-web-frame {
+	flex: 1 1 auto;
+	width: 100%;
+	min-height: 0;
+	border: 0;
+	display: block;
+	background: var(--background-primary);
+}
+
+/* Configure-me guide state (no URL yet): centered, like the other empty
+   states. */
+.dashboard-web-empty {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	flex: 1;
+	gap: 8px;
+	padding: 32px 12px;
+	text-align: center;
+	color: var(--db-text-muted, var(--text-muted));
+}
+.dashboard-web-empty-icon,
+.dashboard-web-fallback-icon {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 48px;
+	height: 48px;
+	border-radius: 50%;
+	background: var(--db-bg-hover, var(--background-modifier-hover));
+	color: var(--db-text-muted, var(--text-muted));
+}
+.dashboard-web-empty-icon svg,
+.dashboard-web-fallback-icon svg {
+	width: 24px;
+	height: 24px;
+}
+.dashboard-web-empty-text {
+	font-size: 0.95em;
+	font-weight: 600;
+	color: var(--db-text, var(--text-normal));
+}
+.dashboard-web-empty-hint {
+	max-width: 360px;
+	font-size: 0.85em;
+	line-height: 1.5;
+	opacity: 0.8;
+}
+
+/* Fallback card: site refused framing (mobile) or page failed to load. */
+.dashboard-web-fallback {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	flex: 1;
+	gap: 8px;
+	padding: 28px 16px;
+	color: var(--db-text-muted, var(--text-muted));
+}
+.dashboard-web-fallback-text {
+	max-width: 360px;
+	text-align: center;
+	line-height: 1.5;
+	color: var(--db-text, var(--text-normal));
+}
+.dashboard-web-fallback-host {
+	font-weight: 600;
+	word-break: break-all;
+}
+.dashboard-web-fallback-url {
+	max-width: 420px;
+	font-size: 0.85em;
+	opacity: 0.7;
+	word-break: break-all;
+	text-align: center;
+}
+/* The single action in the empty/fallback state is the view's primary:
+   solid accent with the theme's on-accent text. */
+.dashboard-web-fallback-btn {
+	margin-top: 8px;
+	height: 32px;
+	padding: 0 16px;
+	border: 1px solid transparent;
+	border-radius: var(--db-radius-sm, 6px);
+	background: var(--db-accent, var(--interactive-accent));
+	box-shadow: none;
+	color: var(--db-text-on-accent, var(--text-on-accent));
+	font-size: 0.9em;
+	font-weight: 500;
+	cursor: pointer;
+	transition: opacity var(--nand-duration-fast) var(--nand-ease);
+}
+.dashboard-web-fallback-btn:hover {
+	background: var(--db-accent, var(--interactive-accent));
+	opacity: 0.88;
+}
+.dashboard-web-fallback-btn:focus-visible {
+	outline: 2px solid var(--db-accent, var(--interactive-accent));
+	outline-offset: 2px;
+}
+
+/* Web config modal — zoom preset chips (single-select, with a visible active
+   state — the dataview sample chips have none and read as dead buttons when
+   reused as a selector). Pill + accent-soft selection like the other chips. */
+.dashboard-web-zoom-chips {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 6px;
+}
+.dashboard-web-zoom-chip {
+	min-height: 26px;
+	box-sizing: border-box;
+	padding: 0 12px;
+	border-radius: 999px;
+	font-size: 11.5px;
+	font-variant-numeric: tabular-nums;
+	cursor: pointer;
+	color: var(--db-text, var(--text-normal));
+	background: var(--db-bg-card, var(--background-modifier-hover));
+	border: 1px solid var(--db-border-card, var(--background-modifier-border));
+	box-shadow: none;
+	transition: background var(--nand-duration-fast) var(--nand-ease), border-color var(--nand-duration-fast) var(--nand-ease), color var(--nand-duration-fast) var(--nand-ease);
+}
+.dashboard-web-zoom-chip:hover {
+	background: var(--db-bg-hover, var(--background-modifier-hover));
+	border-color: color-mix(in srgb, var(--db-accent, var(--interactive-accent)) 45%, transparent);
+}
+.dashboard-web-zoom-chip.active,
+.dashboard-web-zoom-chip.active:hover {
+	background: color-mix(in srgb, var(--db-accent, var(--interactive-accent)) 14%, transparent);
+	color: var(--db-accent, var(--interactive-accent));
+	border-color: color-mix(in srgb, var(--db-accent, var(--interactive-accent)) 55%, transparent);
+	font-weight: 600;
+}
+
+/* External (http) links rendered from field values */
+.dashboard-dataview-extlink {
+	color: var(--db-accent, var(--text-accent));
+	text-decoration: underline;
+}
+
+/* Config modal */
+.dashboard-dataview-query-input {
+	width: 100%;
+	min-height: 140px;
+	padding: 10px 12px;
+	border-radius: var(--db-radius-md, 10px);
+	border: 1px solid var(--db-border-card, var(--background-modifier-border));
+	background: var(--db-bg-input, var(--db-bg, var(--background-secondary)));
+	color: var(--db-text, var(--text-normal));
+	font-family: var(--font-monospace, monospace);
+	font-size: 12.5px;
+	line-height: 1.6;
+	resize: vertical;
+	box-sizing: border-box;
+	transition: border-color var(--nand-duration-fast) var(--nand-ease), box-shadow var(--nand-duration-fast) var(--nand-ease);
+}
+.dashboard-dataview-query-input:focus {
+	outline: none;
+	border-color: var(--db-accent, var(--interactive-accent));
+	box-shadow: 0 0 0 3px color-mix(in srgb, var(--db-accent, var(--interactive-accent)) 16%, transparent);
+}
+.dashboard-dataview-validation {
+	min-height: 18px;
+	font-size: 11.5px;
+}
+.dashboard-dataview-validation.is-error {
+	color: var(--text-error);
+}
+.dashboard-dataview-validation-ok {
+	color: var(--color-green);
+}
+.dashboard-dataview-sample-chips {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 6px;
+}
+/* Sample queries are one-shot actions (not a selection), so hover shows an
+   accent-soft tint rather than a solid fill. */
+.dashboard-dataview-sample-chip {
+	min-height: 26px;
+	box-sizing: border-box;
+	padding: 0 12px;
+	border-radius: 999px;
+	font-size: 11.5px;
+	cursor: pointer;
+	color: var(--db-text, var(--text-normal));
+	background: var(--db-bg-card, var(--background-modifier-hover));
+	border: 1px solid var(--db-border-card, var(--background-modifier-border));
+	box-shadow: none;
+	transition: background var(--nand-duration-fast) var(--nand-ease), border-color var(--nand-duration-fast) var(--nand-ease), color var(--nand-duration-fast) var(--nand-ease);
+}
+.dashboard-dataview-sample-chip:hover {
+	background: color-mix(in srgb, var(--db-accent, var(--interactive-accent)) 12%, transparent);
+	color: var(--db-accent, var(--interactive-accent));
+	border-color: color-mix(in srgb, var(--db-accent, var(--interactive-accent)) 45%, transparent);
+}
+
+/* Dataview TASK: done state + calendar grid */
+.dashboard-dataview-task.is-done .dashboard-dataview-task-text {
+	text-decoration: line-through;
+	opacity: 0.55;
+}
+
+/* CALENDAR query — month grid */
+.dashboard-dataview-calendar {
+	padding: 4px 2px;
+}
+.dashboard-dataview-calendar-header {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	margin-bottom: 8px;
+}
+.dashboard-dataview-calendar-nav {
+	width: 28px;
+	height: 28px;
+	justify-content: center;
+	background: transparent;
+	border: none;
+	border-radius: var(--db-radius-sm, 6px);
+	box-shadow: none;
+	color: var(--db-text-muted, var(--text-muted));
+	cursor: pointer;
+	padding: 0;
+	display: flex;
+	align-items: center;
+	transition: background var(--nand-duration-fast) var(--nand-ease), color var(--nand-duration-fast) var(--nand-ease);
+}
+.dashboard-dataview-calendar-nav:hover {
+	color: var(--db-accent, var(--interactive-accent));
+	background: var(--db-bg-hover, var(--background-modifier-hover));
+}
+.dashboard-dataview-calendar-title {
+	font-size: 0.8125em;
+	font-weight: 600;
+	color: var(--db-text, var(--text-normal));
+}
+.dashboard-dataview-calendar-weekdays {
+	display: grid;
+	grid-template-columns: repeat(7, 1fr);
+	gap: 4px;
+	margin-bottom: 6px;
+}
+.dashboard-dataview-calendar-wd {
+	text-align: center;
+	font-size: 0.625em;
+	font-weight: 600;
+	color: var(--db-text-muted, var(--text-muted));
+	text-transform: uppercase;
+}
+.dashboard-dataview-calendar-cells {
+	display: grid;
+	grid-template-columns: repeat(7, 1fr);
+	gap: 4px;
+}
+.dashboard-dataview-calendar-cell {
+	min-height: 40px;
+	box-sizing: border-box;
+	padding: 4px 5px;
+	border-radius: var(--db-radius-sm, 6px);
+	border: 1px solid color-mix(in srgb, var(--db-border-card, rgba(255,255,255,0.08)) 70%, transparent);
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+	justify-content: flex-start;
+	gap: 2px;
+	transition: background var(--nand-duration-fast) var(--nand-ease), border-color var(--nand-duration-fast) var(--nand-ease);
+}
+.dashboard-dataview-calendar-cell.is-blank {
+	border-color: transparent;
+}
+.dashboard-dataview-calendar-cell.has-dots {
+	cursor: pointer;
+	background: var(--db-bg-card, rgba(255,255,255,0.04));
+}
+.dashboard-dataview-calendar-cell.has-dots:hover {
+	background: var(--db-bg-card-hover, rgba(255,255,255,0.10));
+	border-color: color-mix(in srgb, var(--db-accent, var(--interactive-accent)) 40%, transparent);
+}
+.dashboard-dataview-calendar-day {
+	font-size: 0.625em;
+	color: var(--db-text-muted, var(--text-muted));
+	font-variant-numeric: tabular-nums;
+}
+.dashboard-dataview-calendar-cell.has-dots .dashboard-dataview-calendar-day {
+	color: var(--db-text, var(--text-normal));
+	font-weight: 600;
+}
+.dashboard-dataview-calendar-dots {
+	display: flex;
+	align-items: center;
+	gap: 2px;
+}
+.dashboard-dataview-calendar-dot {
+	width: 5px;
+	height: 5px;
+	border-radius: 50%;
+	background: var(--db-accent, var(--interactive-accent));
+}
+.dashboard-dataview-calendar-more {
+	font-size: 0.5625em;
+	color: var(--db-text-muted, var(--text-muted));
+}
+
+/* Mobile GPU safety override.
+   Keep this near the end of the stylesheet so later feature/theme blocks cannot
+   re-enable expensive blur/filter layers on iOS/Android WebView. Obsidian
+   reloads plugins after a renderer crash, so these effects can look like
+   repeated plugin loads on phones. Desktop/tablet-wide layouts keep the full
+   glass treatment. */
+@media (max-width: 640px) {
+	.is-mobile .nand-dashboard-root,
+	.is-mobile .nand-dashboard-root *,
+	.is-mobile .dashboard-modal,
+	.is-mobile .modal--dashboard,
+	.is-mobile .modal-bg--dashboard,
+	.is-mobile .dashboard-banner--stats::before,
+	.is-mobile .dashboard-heatmap-stats-popup,
+	.is-mobile .dashboard-pomodoro-stats-overlay,
+	.is-mobile .dashboard-habit-stats-overlay,
+	.is-mobile .dashboard-confirm-overlay,
+	.is-mobile .fortune-overlay,
+	.is-mobile .file-suggest-container,
+	.is-mobile .suggestion-container {
+		backdrop-filter: none !important;
+		-webkit-backdrop-filter: none !important;
+		filter: none !important;
+	}
+
+	.is-mobile .nand-dashboard-root {
+		--db-backdrop-blur: none !important;
+	}
+
+	.is-mobile .nand-dashboard-bg {
+		filter: none !important;
+		transform: none !important;
+	}
+}
+

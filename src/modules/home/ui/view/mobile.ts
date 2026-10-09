@@ -1,0 +1,251 @@
+import { observeDashboardPromise } from '../save-feedback';
+import { localizedAttributes, localizedText } from '../../../../ui/primitives/localized-dom';
+import { setIcon } from 'obsidian';
+import { t } from '../../../../shared/i18n/index';
+import { renderSidebarCalendar } from '../calendar/calendar-widget';
+import { renderSidebarExpenseWidget } from '../expense/expense-widget';
+import { renderSidebarHabitWidget } from '../habit/habit-widget';
+import { renderQuickActions } from '../notes/quick-actions';
+import { renderSidebarPomodoro } from '../renderer/refresh-sidebar-weather-widget';
+import { unmountDashboardPanelsIn } from '../renderer/render-context';
+import { renderSidebarReading } from '../renderer/render-sidebar-countdown';
+import { createDashboardSettingsAccess } from '../settings-access';
+import { showConfirmDialog } from '../ui/confirm-dialog';
+import { getRecentDocs, renderRecentDocs } from '../ui/recent';
+import { renderSidebarLunarWidget } from '../widgets/lunar-widget';
+import type { DashboardSurface } from './dashboard-surface';
+
+export function renderMobileActions(this: DashboardSurface, bannerEl: HTMLElement): void {
+	const actions = bannerEl.createDiv({ cls: 'dashboard-mobile-actions' });
+
+	const linksBtn = actions.createEl('button', {
+		cls: 'dashboard-mobile-action-btn',
+		attr: { ...localizedAttributes('mobile.quickActions', undefined, 'aria-label') },
+	});
+	setIcon(linksBtn, 'zap');
+	linksBtn.addEventListener('click', (e) => {
+		e.stopPropagation();
+		this.openMobileDrawer('quickActions');
+	});
+
+	const recentBtn = actions.createEl('button', {
+		cls: 'dashboard-mobile-action-btn',
+		attr: { ...localizedAttributes('mobile.recent', undefined, 'aria-label') },
+	});
+	setIcon(recentBtn, 'clock');
+	recentBtn.addEventListener('click', (e) => {
+		e.stopPropagation();
+		this.openMobileDrawer('recent');
+	});
+
+	// On mobile, tapping right half of banner reveals the edit button
+	const overlay = bannerEl.querySelector('.dashboard-banner-overlay') as HTMLElement;
+	if (overlay) {
+		overlay.addEventListener('click', (e) => {
+			const rect = overlay.getBoundingClientRect();
+			const tapX = e.clientX - rect.left;
+			if (tapX > rect.width * 0.5) {
+				const editBtn = overlay.querySelector('.dashboard-banner-edit-btn') as HTMLElement;
+				if (editBtn) {
+					editBtn.addClass('dashboard-banner-edit-btn--mobile-visible');
+				}
+			}
+		});
+	}
+}
+
+export function renderMobileWidgetBar(this: DashboardSurface, container: HTMLElement): void {
+	this.mobileWidgetTabsOpen = false;
+	this.mobileWidgetExpanded = null;
+
+	const bar = container.createDiv({ cls: 'dashboard-mobile-widget-bar' });
+
+	// Thin strip: collapsed state, tap to expand tabs
+	const strip = bar.createDiv({ cls: 'dashboard-mobile-widget-strip' });
+	strip.createDiv({ cls: 'dashboard-mobile-widget-strip-hint' });
+	strip.addEventListener('click', (e) => {
+		e.stopPropagation();
+		this.mobileWidgetTabsOpen = !this.mobileWidgetTabsOpen;
+		if (!this.mobileWidgetTabsOpen) {
+			this.mobileWidgetExpanded = null;
+		}
+		this.refreshMobileWidgetPanel(bar);
+	});
+
+	// Tab row: hidden by default, revealed by tapping strip
+	const tabs = bar.createDiv({ cls: 'dashboard-mobile-widget-tabs' });
+
+	const widgets: Array<{
+		key: 'pomodoro' | 'reading' | 'lunar' | 'calendar' | 'habit' | 'expense';
+		label: string;
+		icon: string;
+	}> = [
+		{ key: 'lunar', label: t('mobile.lunar'), icon: 'moon' },
+		...(this.plugin.settings.widgetCalendarEnabled
+			? [{ key: 'calendar' as const, label: t('mobile.calendar'), icon: 'calendar' }]
+			: []),
+		{ key: 'pomodoro', label: t('mobile.pomodoro'), icon: 'hourglass' },
+		...(this.plugin.settings.widgetHabitEnabled
+			? [{ key: 'habit' as const, label: t('mobile.habit'), icon: 'check-circle-2' }]
+			: []),
+		...(this.plugin.settings.widgetExpenseEnabled
+			? [{ key: 'expense' as const, label: t('mobile.expense'), icon: 'wallet' }]
+			: []),
+		{ key: 'reading', label: t('mobile.reading'), icon: 'book-open' },
+	];
+
+	bar.createDiv({ cls: 'dashboard-mobile-widget-panel' });
+
+	for (const w of widgets) {
+		const btn = tabs.createEl('button', {
+			cls: 'dashboard-mobile-widget-btn',
+			attr: localizedAttributes(`mobile.${w.key}`),
+		});
+		setIcon(btn, w.icon);
+
+		btn.addEventListener('click', (e) => {
+			e.stopPropagation();
+			if (this.mobileWidgetExpanded === w.key) {
+				this.mobileWidgetExpanded = null;
+			} else {
+				this.mobileWidgetExpanded = w.key;
+			}
+			this.refreshMobileWidgetPanel(bar);
+		});
+
+		btn.dataset.widgetKey = w.key;
+	}
+
+	this.refreshMobileWidgetPanel(bar);
+}
+
+export function refreshMobileWidgetPanel(this: DashboardSurface, bar: HTMLElement): void {
+	const strip = bar.querySelector('.dashboard-mobile-widget-strip');
+	const tabs = bar.querySelector('.dashboard-mobile-widget-tabs');
+	const panel = bar.querySelector<HTMLElement>('.dashboard-mobile-widget-panel');
+	if (!strip || !tabs || !panel) return;
+
+	// Toggle strip active state
+	strip.classList.toggle('dashboard-mobile-widget-strip--active', this.mobileWidgetTabsOpen);
+
+	// Toggle tabs visibility
+	tabs.classList.toggle('dashboard-mobile-widget-tabs--open', this.mobileWidgetTabsOpen);
+
+	// Update button active states
+	tabs.querySelectorAll('.dashboard-mobile-widget-btn').forEach((btn) => {
+		const el = btn as HTMLElement;
+		el.classList.toggle('active', el.dataset.widgetKey === this.mobileWidgetExpanded);
+	});
+
+	// Render panel content
+	unmountDashboardPanelsIn(panel);
+	panel.empty();
+
+	if (!this.mobileWidgetExpanded) {
+		panel.removeClass('dashboard-mobile-widget-panel--open');
+		return;
+	}
+
+	panel.addClass('dashboard-mobile-widget-panel--open');
+
+	if (this.mobileWidgetExpanded === 'pomodoro' && this.pomodoroService) {
+		renderSidebarPomodoro(panel, this.pomodoroService, this.plugin.settings, this.app);
+	} else if (this.mobileWidgetExpanded === 'reading' && this.readingService) {
+		renderSidebarReading(panel, this.readingService);
+	} else if (this.mobileWidgetExpanded === 'lunar') {
+		renderSidebarLunarWidget(panel, this.holidayData, this.app);
+	} else if (this.mobileWidgetExpanded === 'calendar') {
+		// The tab tap is explicit intent: autoLoad skips the phone deferred-scan
+		// placeholder so the grid (and its dots) appear without a second tap.
+		renderSidebarCalendar(
+			panel,
+			this.plugin.settings,
+			this.app,
+			(file, line) => this.openNote(file, undefined, line),
+			{ autoLoad: true },
+			createDashboardSettingsAccess(this.plugin),
+		);
+	} else if (this.mobileWidgetExpanded === 'habit') {
+		renderSidebarHabitWidget(panel, this.app);
+	} else if (this.mobileWidgetExpanded === 'expense') {
+		renderSidebarExpenseWidget(panel, this.app);
+	}
+}
+
+export function openMobileDrawer(this: DashboardSurface, type: 'quickActions' | 'recent'): void {
+	this.closeMobileDrawer();
+
+	const root = this.contentEl;
+	if (!root) return;
+
+	const firstSection = root.querySelector('.dashboard-section-row') as HTMLElement;
+	const drawerTop = firstSection ? firstSection.getBoundingClientRect().top : 0;
+
+	const drawer = root.createDiv({ cls: 'dashboard-mobile-drawer' });
+	drawer.style.top = `${drawerTop}px`;
+
+	const content = drawer.createDiv({ cls: 'dashboard-mobile-drawer-content' });
+
+	if (type === 'quickActions') {
+		content.createEl('h4', { ...localizedText('mobile.quickActions'), cls: 'dashboard-mobile-drawer-title' });
+		if (this.data) {
+			renderQuickActions(
+				content,
+				this.data.quickActions,
+				(action) => {
+					void this.executeAction(action);
+					this.closeMobileDrawer();
+				},
+				(index) => {
+					void (async () => {
+						const confirmed = await showConfirmDialog(this.app, {
+							title: t('common.confirmDelete'),
+							message: t('common.confirmDeleteMessage'),
+						});
+						if (!confirmed) return;
+						void observeDashboardPromise(this.sync.removeQuickAction(index));
+					})();
+				},
+				() => this.openAddActionModal(),
+				this.data.quickActionOrder,
+				(order) => {
+					void observeDashboardPromise(this.sync.reorderQuickActions(order));
+				},
+				(key) => {
+					void (async () => {
+						const confirmed = await showConfirmDialog(this.app, {
+							title: t('common.confirmDelete'),
+							message: t('common.confirmDeleteMessage'),
+						});
+						if (!confirmed) return;
+						void observeDashboardPromise(this.sync.removeQuickActionByKey(key));
+					})();
+				},
+				this.data.hiddenPresets,
+				undefined,
+				undefined,
+				this.plugin.automationHost,
+			);
+		}
+	} else {
+		content.createEl('h4', { ...localizedText('mobile.recent'), cls: 'dashboard-mobile-drawer-title' });
+		const docs = getRecentDocs(this.app, this.plugin.settings.recentDocCount, this.plugin.settings);
+		renderRecentDocs(content, docs, (path) => {
+			void this.navigateToPath(path);
+		});
+	}
+
+	const backdrop = drawer.createDiv({ cls: 'dashboard-mobile-drawer-backdrop' });
+	backdrop.addEventListener('click', () => this.closeMobileDrawer());
+
+	root.win.requestAnimationFrame(() => {
+		content.addClass('dashboard-mobile-drawer-content--open');
+	});
+}
+
+export function closeMobileDrawer(this: DashboardSurface): void {
+	const root = this.contentEl;
+	if (!root) return;
+	const existing = root.querySelector('.dashboard-mobile-drawer');
+	if (existing) { unmountDashboardPanelsIn(existing as HTMLElement); existing.remove(); }
+}

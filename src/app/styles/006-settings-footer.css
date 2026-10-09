@@ -1,0 +1,39 @@
+/* ===== Settings Footer ===== */
+/* Section host in the declarative (1.13+) settings tab: one definition row
+ * turned into a plain block container so its many Setting rows stack
+ * vertically, matching the pre-1.13 fallback layout. Higher specificity than
+ * the stock .setting-item flex rules. */
+.setting-item.dashboard-settings-section {
+	display: block;
+	padding: 0;
+	border: none;
+}
+
+/* Obsidian's app.css gives every .setting-item's first child a 16px
+ * inline-end margin (spacing for the standard info|control row). Our section
+ * rows start with full-width blocks — the first card / first setting row —
+ * which that margin shrinks by 16px and pushes 16px off the right edge.
+ * Neutralize it so the first card (微信读书 / 番茄钟) and the first setting
+ * (language dropdown) line up with everything below. */
+.setting-item.dashboard-settings-section > *:first-child {
+	margin-inline-end: 0;
+}
+
+/* Sections on an inactive tab. !important: themes restyle .setting-item with
+ * their own display rules, which would resurrect hidden rows. */
+.setting-item[data-settings-product].dashboard-settings-page-hidden {
+	display: none !important;
+}
+
+.dashboard-settings-footer {
+	text-align: center;
+	padding: var(--size-4-8) 0 var(--size-4-2);
+	margin-top: var(--size-4-5);
+	font-size: var(--nand-text-caption);
+	color: var(--text-faint);
+	opacity: 0.6;
+	letter-spacing: 0.03em;
+	user-select: none;
+	pointer-events: none;
+}
+

@@ -1,0 +1,1391 @@
+/* ===== Quick Notes region — single-line accent navbar (masthead strip) =====
+   One equal-height bar split into two zones, both vertically centered:
+   · left  — .dashboard-quicknote-nav      : scrollable chip group
+   · right — .dashboard-quicknote-actions   : capture pill + config cog
+   Border/background use theme tokens (auto dark/light); no hardcoded gray.
+   Every interactive control shares one radius (--db-radius-sm) and one
+   accent-tinted hover, so chips and the capture pill read as one family. */
+.dashboard-quicknote {
+	display: flex;
+	/* Vertically centered at rest so the capture pill sits mid-bar beside the
+	   chips (on phones the bar's em-based min-height outgrows the fixed 26px
+	   pill, and top-anchoring left the pill floating at the bar's upper edge).
+	   While the capture field auto-grows past one line, the JS-toggled
+	   --capture-expanded class re-anchors to flex-start: the box then extends
+	   DOWNWARD only and the chips row stays put, instead of the centered
+	   layout pushing everything up as the box grows. */
+	align-items: center;
+	gap: 12px;
+	padding: 5px 8px 5px 12px;
+	min-height: calc(1.6em + 18px);
+	/* No extra margin: the kanban's --db-kanban-gap (10px) is itself the bar-to-
+	   first-section distance, and it deliberately equals the sidebar's
+	   inter-widget gap so the first section top aligns with the first sidebar
+	   widget top. (Was margin-bottom: -6px to shave the old 16px gap down to
+	   10px — if the kanban gap ever changes again, revisit this comment.) */
+	box-sizing: border-box;
+	flex: 0 0 100%;
+	background: color-mix(in srgb, var(--db-accent) 6%, var(--db-bg-section));
+	border: 1px solid color-mix(in srgb, var(--db-accent) 14%, var(--db-border-section));
+	border-radius: var(--db-radius-md);
+	backdrop-filter: var(--db-backdrop-blur);
+	-webkit-backdrop-filter: var(--db-backdrop-blur);
+}
+/* Auto-grow state (mirrored from the capture field by resize()): top-anchor
+   so the growing box extends downward and the first line keeps its place. */
+.dashboard-quicknote--capture-expanded {
+	align-items: flex-start;
+}
+/* Size container for the capture field's cqw widths: they must track the
+   PANE (this bar's width — split panes, sidebars, tablets), not the viewport
+   that vw tracks. inline-size only, so the auto-growing block axis still
+   depends on content. Old engines without container queries simply keep the
+   vw fallback row below. */
+.dashboard-quicknote {
+	container-type: inline-size;
+}
+/* Left zone: chip group — fills remaining width and scrolls when crowded.
+   basis 0 + a 104px floor: the chips never fully vanish, and when the bar is
+   squeezed it is the capture field that yields first (see the chain below). */
+.dashboard-quicknote-nav {
+	flex: 1 1 0;
+
+	display: flex;
+	align-items: center;
+	gap: 6px;
+
+	overflow-x: auto;
+	/* Scrollbar mirrors the .dashboard-section-cards recipe (~line 8076):
+	   standard props take over on Chromium 121+, which both renders the slim
+	   native pill AND neutralizes theme-level ::-webkit-scrollbar hijacks
+	   (e.g. Border) — those rules simply stop applying to this element.
+	   ::-webkit rules below are the old-engine fallback, same as sections.
+	   Invisible at rest, accent-tinted on hover. */
+	scrollbar-width: thin;
+	scrollbar-color: transparent transparent;
+	min-width: 0;
+	flex-wrap: wrap;
+	overflow: visible;
+}
+.dashboard-quicknote-nav:hover {
+	scrollbar-color: color-mix(in srgb, var(--db-accent) 18%, transparent) transparent;
+}
+.dashboard-quicknote-nav::-webkit-scrollbar {
+	width: 0;
+	height: 4px;
+}
+.dashboard-quicknote-nav::-webkit-scrollbar-track {
+	background: transparent;
+}
+.dashboard-quicknote-nav::-webkit-scrollbar-thumb {
+	background: transparent;
+	border-radius: 999px;
+	transition: background 0.2s ease;
+}
+.dashboard-quicknote-nav:hover::-webkit-scrollbar-thumb {
+	background: color-mix(in srgb, var(--db-accent) 18%, transparent);
+}
+.dashboard-quicknote-nav::-webkit-scrollbar-thumb:hover {
+	background: color-mix(in srgb, var(--db-accent) 30%, transparent);
+}
+.dashboard-quicknote-empty-text {
+	min-width: 0;
+	flex: 1 1 12rem;
+	white-space: normal;
+	overflow-wrap: anywhere;
+}
+
+.dashboard-save-state-host { flex: 0 0 auto; min-width: 0; }
+.dashboard-save-state { display: flex; flex-wrap: wrap; align-items: center; gap: var(--size-4-2); padding: var(--size-4-3); border: 1px solid var(--background-modifier-border); background: var(--background-secondary); color: var(--text-normal); }
+.dashboard-save-state p { flex: 1 0 100%; margin: 0; overflow-wrap: anywhere; }
+.dashboard-save-state code { flex: 1 0 100%; white-space: pre-wrap; overflow-wrap: anywhere; }
+.dashboard-quicknote-empty {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	padding: 1px 4px;
+	font-size: 0.85em;
+	color: var(--db-text-muted) !important;
+
+	min-width: 0;
+	max-width: 100%;
+	flex-wrap: wrap;
+	white-space: normal;
+}
+.dashboard-quicknote-empty-btn {
+	font-size: 0.82em;
+	flex-shrink: 0;
+	background: color-mix(in srgb, var(--db-accent) 14%, transparent) !important;
+	border-color: color-mix(in srgb, var(--db-accent) 30%, transparent) !important;
+	color: var(--db-text) !important;
+	flex: 0 0 auto;
+	white-space: nowrap;
+	max-width: 100%;
+}
+.dashboard-quicknote-empty-btn:hover { background: color-mix(in srgb, var(--db-accent) 24%, transparent) !important; }
+.dashboard-quicknote-chip {
+	flex-shrink: 0;
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	padding: 3px 0;
+	font-size: 0.85em;
+	white-space: nowrap;
+	border: none;
+	background: transparent !important;
+	box-shadow: none !important;
+	/* !important: chips are <button>s, and Obsidian's button color would
+	   otherwise win over the theme token (cards work only because they're
+	   <div>s that inherit). Matches the token the readable card text uses. */
+	color: var(--db-text) !important;
+	cursor: pointer;
+	transition: color 0.15s ease;
+}
+.dashboard-quicknote-chip:hover { color: var(--db-accent) !important; }
+.dashboard-quicknote-chip:focus-visible,
+.dashboard-quicknote-cog:focus-visible,
+.dashboard-quicknote-empty-btn:focus-visible {
+	outline: 2px solid var(--db-accent, var(--interactive-accent));
+	outline-offset: 2px;
+	border-radius: var(--db-radius-sm, 6px);
+}
+/* Flat text-nav look: a thin separator before every chip after the first.
+   --db-text-muted is always opaque, so the line stays visible in every theme. */
+.dashboard-quicknote-chip + .dashboard-quicknote-chip::before {
+	content: "";
+	width: 1px;
+	height: 13px;
+	background: color-mix(in srgb, var(--db-text-muted) 30%, transparent);
+}
+.dashboard-quicknote-icon { display: inline-flex; flex-shrink: 0; color: var(--db-text-muted) !important; transition: color 0.15s ease; }
+.dashboard-quicknote-icon svg { width: 13px; height: 13px; }
+.dashboard-quicknote-chip:hover .dashboard-quicknote-icon { color: var(--db-accent) !important; }
+.dashboard-quicknote-today { color: var(--db-accent) !important; font-weight: 600; }
+.dashboard-quicknote-today .dashboard-quicknote-icon { color: var(--db-accent) !important; }
+.dashboard-quicknote-pin .dashboard-quicknote-icon svg { color: var(--db-text-muted) !important; }
+
+/* Right zone: groups the capture field and the config cog. Top-anchored so
+   the cog stays beside the FIRST line when the capture field grows tall.
+   Shrinkable (was flex-shrink: 0): under squeeze this zone yields before the
+   chips' 104px floor, via the chain actions → capture → input. */
+.dashboard-quicknote-actions {
+	flex-shrink: 1;
+	min-width: 0;
+	display: flex;
+	align-items: flex-start;
+	gap: 4px;
+}
+/* Cog (22px) aligns with the 26px single-line pill; margin keeps it centered
+   against the first line instead of hugging the row's top edge. */
+.dashboard-quicknote-cog {
+	margin-top: 2px;
+}
+/* Capture field — no wrapper chrome: the pencil sits *inside* the input
+   (absolutely positioned over its left padding), so the field is one box.
+   flex chain: won't grow past its content, but yields (down to the input's
+   26px pencil-only floor) when the bar is narrower than everything at rest. */
+.dashboard-quicknote-capture {
+	position: relative;
+	display: inline-flex;
+	align-items: center;
+	flex: 0 1 auto;
+	min-width: 0;
+}
+.dashboard-quicknote-capture-icon {
+	position: absolute;
+	left: 8px;
+	top: 50%;
+	transform: translateY(-50%);
+	display: inline-flex;
+	pointer-events: none;
+	color: var(--db-text-muted) !important;
+	transition: color 0.15s ease, top 0.18s ease, transform 0.18s ease;
+}
+.dashboard-quicknote-capture-icon svg { width: 13px; height: 13px; display: block; }
+.dashboard-quicknote-capture:focus-within .dashboard-quicknote-capture-icon { color: var(--db-accent) !important; }
+/* When the field grows past one line, pin the pencil to the first line
+   instead of floating mid-box; the transition above animates the move. */
+.dashboard-quicknote-capture--expanded .dashboard-quicknote-capture-icon {
+	top: 8px;
+	transform: none;
+}
+.dashboard-quicknote-capture-input {
+	/* Two-row width (vw fallback first, cqw override second): old engines
+	   without container queries keep the viewport-relative row and behave as
+	   before; modern engines size the field against the PANE (cqw resolves
+	   against .dashboard-quicknote's inline size), so a tablet split pane or
+	   dashboard sidebar no longer keeps a viewport-wide field starving the
+	   chip zone. Full 160px from ~890px of PANE width up; 96px floor on
+	   narrow panes before the flex chain below takes over. */
+	width: clamp(108px, 18vw, 160px);
+	width: clamp(96px, 18cqw, 160px);
+	/* Extreme-squeeze floor: flex shrink (capture box min-width: 0) can push
+	   the field down to a bare 26px pencil — still tappable; focusing expands
+	   it again via the :focus width below. Never shrinks to nothing. */
+	min-width: 26px;
+	height: 26px;
+	min-height: 26px;
+	max-height: 160px;
+	line-height: 26px;
+	resize: none;
+	overflow-y: auto;
+	/* !important defeats Obsidian's input[type=text] padding so the pencil keeps
+	   its clearance. box-sizing keeps the 160px width padding-inclusive. */
+	padding: 0 10px 0 32px !important;
+	box-sizing: border-box;
+	border: none;
+	border-radius: var(--db-radius-sm);
+	background: var(--db-bg-input, rgba(255, 255, 255, 0.05));
+	color: var(--db-text) !important;
+	font-size: 0.82em;
+	font-family: var(--db-font, var(--font-interface));
+	transition: background 0.15s ease, box-shadow 0.15s ease, height 0.18s ease, width 0.18s ease;
+}
+.dashboard-quicknote-capture-input:focus {
+	outline: none;
+	/* Widen while typing so wrapped lines stay readable; height itself is driven
+	   by JS (auto-grow) and animates via the height transition above. Same
+	   vw-then-cqw two-row pattern as the resting width. Cap 220px — 320 made
+	   the focused field swallow the bar; it only needs room for a wrapped
+	   thought, and Enter captures right away. */
+	width: min(220px, 40vw);
+	width: min(220px, 45cqw);
+	background: color-mix(in srgb, var(--db-accent) 12%, var(--db-bg-input, rgba(255, 255, 255, 0.05)));
+	box-shadow: 0 0 0 1px color-mix(in srgb, var(--db-accent) 42%, transparent);
+}
+/* Full-opacity muted token keeps placeholder contrast WCAG-friendly and lets
+   the theme brighten it automatically in dark mode (no faint default). */
+.dashboard-quicknote-capture-input::placeholder {
+	color: var(--db-text-muted) !important;
+	opacity: 1;
+}
+.dashboard-quicknote-cog {
+	flex-shrink: 0;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 22px;
+	height: 22px;
+	padding: 0;
+	border: none;
+	border-radius: var(--db-radius-sm);
+	background: transparent !important;
+	box-shadow: none !important;
+	color: var(--db-text-muted) !important;
+	opacity: 0.6;
+	cursor: pointer;
+	transition: opacity var(--nand-duration-fast) var(--nand-ease), color var(--nand-duration-fast) var(--nand-ease), background var(--nand-duration-fast) var(--nand-ease);
+}
+.dashboard-quicknote-cog:hover {
+	opacity: 1;
+	color: var(--db-accent) !important;
+	background: color-mix(in srgb, var(--db-accent) 14%, transparent);
+}
+.dashboard-quicknote-cog svg { width: 14px; height: 14px; }
+
+/* ── Mobile bar corrections ────────────────────────────────────────────
+   Phones and tablets keep the single-row layout: crowded chips scroll
+   sideways inside the nav (the base .dashboard-quicknote-nav already sets
+   flex-wrap: nowrap + overflow-x: auto) instead of wrapping the bar onto
+   multiple lines. The capture field's responsive width (clamp above) keeps
+   the chip zone a usable share of a narrow screen, so no phone-specific
+   overrides are needed anymore.
+
+   Tablet-only reset: Obsidian's own stylesheet ships `.is-tablet
+   since :not() counts its argument — which beats the chips' plain
+   `padding: 3px 0` (0,1,0) and the cog's `padding: 0`, inflating every chip
+   into a ~40px-wider pill that starves the row down to a couple of buttons.
+   Same trap as the scroll-top / task-button fix earlier in this file:
+   qualify with `button` to tie at 0,2,1 and win by source order (plugin
+   styles load after app.css). Phones have no .is-tablet class and desktop
+   matches neither — both stay on the base styles. */
+.is-tablet button.dashboard-quicknote-chip { padding: 3px 0; }
+.is-tablet button.dashboard-quicknote-cog { padding: 0; }
+
+/* Quick Notes config modal — same grouped-card rhythm as the Appearance
+   Studio: each section is a tinted card; items inside are nested cards. */
+.dashboard-quicknote-config { max-width: 540px; }
+.dashboard-quicknote-cfg-section {
+	margin-bottom: 12px;
+	padding: 14px;
+	border: 1px solid var(--db-border, var(--background-modifier-border));
+	border-radius: var(--db-radius-md, 10px);
+	background: var(--db-bg-hover, transparent);
+}
+.dashboard-quicknote-cfg-section:last-child { margin-bottom: 0; }
+.dashboard-quicknote-cfg-section h3 { margin: 0 0 4px; font-size: 0.95em; font-weight: 600; line-height: 1.35; }
+.dashboard-quicknote-cfg-desc { margin: 0 0 12px; font-size: 0.8em; line-height: 1.5; color: var(--db-text-muted); }
+.dashboard-quicknote-cfg-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 12px; }
+.dashboard-quicknote-cfg-item {
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+	padding: 10px;
+	border: 1px solid var(--db-border-input);
+	border-radius: var(--db-radius-md, 10px);
+	background: var(--db-bg-input);
+	transition: box-shadow var(--nand-duration-fast) var(--nand-ease), opacity var(--nand-duration-fast) var(--nand-ease);
+}
+.dashboard-quicknote-cfg-top { display: flex; gap: 6px; align-items: center; }
+/* Drag handle: arms reordering only when grabbed, so text inputs stay editable. */
+.dashboard-quicknote-cfg-grip {
+	display: inline-flex;
+	align-items: center;
+	flex-shrink: 0;
+	width: 16px;
+	cursor: grab;
+	color: var(--db-text-muted);
+	opacity: 0.45;
+	touch-action: none;
+	transition: opacity 0.15s ease, color 0.15s ease;
+}
+.dashboard-quicknote-cfg-grip:hover { opacity: 1; color: var(--db-text); }
+.dashboard-quicknote-cfg-grip:active { cursor: grabbing; }
+.dashboard-quicknote-cfg-grip svg { width: 14px; height: 14px; display: block; }
+.dashboard-quicknote-cfg-item--dragging { opacity: 0.4; }
+.dashboard-quicknote-cfg-item--drop-before { box-shadow: 0 -2px 0 0 var(--db-accent); }
+.dashboard-quicknote-cfg-item--drop-after { box-shadow: 0 2px 0 0 var(--db-accent); }
+.dashboard-quicknote-cfg-icon-btn {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 36px;
+	height: 30px;
+	padding: 0;
+	flex: 0 0 36px;
+	border: 1px solid var(--db-border-input);
+	border-radius: var(--db-radius-sm);
+	background: var(--db-bg-input);
+	color: var(--db-text);
+	cursor: pointer;
+}
+.dashboard-quicknote-cfg-icon-btn:hover {
+	color: var(--db-accent);
+	border-color: color-mix(in srgb, var(--db-accent, var(--interactive-accent)) 55%, transparent);
+	background: color-mix(in srgb, var(--db-accent, var(--interactive-accent)) 8%, var(--db-bg-input, transparent));
+}
+.dashboard-quicknote-cfg-icon-btn svg { width: 16px; height: 16px; }
+
+/* Path input row: text input + the browse button from path-picker-modal */
+.dashboard-quicknote-cfg-path-row {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	width: 100%;
+}
+.dashboard-quicknote-cfg-path-row .dashboard-modal-input { flex: 1; min-width: 0; }
+.dashboard-pathpicker-btn { flex: 0 0 36px; }
+
+/* Vault path picker modal (compact) */
+.dashboard-pathpicker-body { display: flex; flex-direction: column; gap: 8px; }
+.dashboard-pathpicker-search { width: 100%; }
+.dashboard-pathpicker-list {
+	display: flex;
+	flex-direction: column;
+	gap: 2px;
+	max-height: 320px;
+	overflow-y: auto;
+}
+.dashboard-pathpicker-item {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 8px;
+	min-height: 34px;
+	box-sizing: border-box;
+	padding: 6px 10px;
+	border-radius: var(--db-radius-sm, 6px);
+	cursor: pointer;
+	transition: background var(--nand-duration-fast) var(--nand-ease);
+}
+.dashboard-pathpicker-item:hover {
+	background: var(--db-bg-hover, rgba(255, 255, 255, 0.06));
+}
+/* Keyboard focus: tinted like hover plus an inset accent ring (the old
+   rule removed the outline without a replacement). */
+.dashboard-pathpicker-item:focus-visible {
+	background: var(--db-bg-hover, rgba(255, 255, 255, 0.06));
+	outline: none;
+	box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--db-accent, var(--interactive-accent)) 60%, transparent);
+}
+.dashboard-pathpicker-name {
+	font-size: 0.8125em;
+	color: var(--db-text, var(--text-normal));
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+.dashboard-pathpicker-parent {
+	font-size: 0.6875em;
+	color: var(--db-text-muted, var(--text-muted));
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	flex-shrink: 1;
+}
+.dashboard-pathpicker-more {
+	font-size: 0.6875em;
+	color: var(--db-text-muted, var(--text-muted));
+	padding: 4px 8px;
+}
+
+/* Icon picker (FuzzySuggestModal suggestions) */
+.dashboard-icon-picker-item {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+}
+.dashboard-icon-picker-glyph {
+	display: inline-flex;
+	color: var(--db-text);
+}
+.dashboard-icon-picker-glyph svg { width: 18px; height: 18px; }
+.dashboard-icon-picker-name { font-family: var(--db-font, monospace); font-size: 0.9em; }
+.dashboard-quicknote-cfg-label { flex: 1; }
+.dashboard-quicknote-cfg-del {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 30px;
+	height: 30px;
+	padding: 0;
+	flex: 0 0 30px;
+	border-radius: var(--db-radius-sm);
+	color: var(--db-danger, var(--db-text-muted));
+	transition: background var(--nand-duration-fast) var(--nand-ease);
+}
+.dashboard-quicknote-cfg-del:hover {
+	background: color-mix(in srgb, var(--db-danger, var(--text-error)) 12%, transparent);
+}
+.dashboard-quicknote-cfg-del svg { width: 15px; height: 15px; }
+.dashboard-quicknote-cfg-add { font-size: 0.85em; }
+.dashboard-quicknote-cfg-toggle { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
+.dashboard-quicknote-cfg-toggle label { font-size: 0.88em; cursor: pointer; }
+/* Insert-position options: small heading + indented check rows (the old
+   <select> clipped its closed-state text in the narrow modal). */
+.dashboard-quicknote-cfg-pos-head { font-size: 0.88em; margin: 2px 0 6px; }
+.dashboard-quicknote-cfg-toggle--sub { margin: 0 0 2px 18px; }
+.dashboard-quicknote-cfg-cmd-id {
+	font-size: 0.78em;
+	color: var(--db-text-muted);
+	word-break: break-all;
+	margin-top: 2px;
+}
+
+/* ==========================================================================
+   Banner — Statistics mode (three-column data panel)
+   ========================================================================== */
+.dashboard-banner--stats {
+	/* Dark fallback base when no poster image is set. With an image, the inline
+	   background-image shows through the blur scrim below. */
+	background-color: #16161d;
+	background-size: cover;
+	background-position: center;
+}
+.dashboard-banner--stats .dashboard-banner-overlay { display: none; }
+
+/* Blur + darken scrim over the poster image so white text reads clearly while
+   the photo stays visible (blurred). Falls back to a plain dark gradient where
+   backdrop-filter is unavailable.
+   NOTE: border-radius: inherit is required — Chromium does not clip a
+   backdrop-filter layer by the ancestor's overflow:hidden + border-radius
+   (the composited blur surface escapes the rounded clip), so without this the
+   scrim shows as square corners sticking out past the rounded poster. */
+.dashboard-banner--stats::before {
+	content: '';
+	position: absolute;
+	inset: 0;
+	border-radius: inherit;
+	background: rgba(10, 10, 18, var(--banner-scrim, 0.55));
+	backdrop-filter: blur(var(--banner-blur, 6px)) brightness(var(--banner-bright, 0.6));
+	-webkit-backdrop-filter: blur(var(--banner-blur, 6px)) brightness(var(--banner-bright, 0.6));
+	pointer-events: none;
+	z-index: 0;
+}
+/* Accent tint on top of the scrim. Same radius inheritance so the gradient
+   never overhangs the poster's rounded corners either. */
+.dashboard-banner--stats::after {
+	content: '';
+	position: absolute;
+	inset: 0;
+	border-radius: inherit;
+	background: linear-gradient(120deg, var(--banner-stat-accent, var(--db-accent, #a78bfa)), transparent 62%);
+	opacity: 0.22;
+	pointer-events: none;
+	z-index: 0;
+}
+
+.dashboard-banner-stats {
+	position: absolute;
+	inset: 0;
+	z-index: 1; /* above the ::before/::after scrim pseudos (z-index:0) */
+	display: flex;
+	align-items: stretch;
+	justify-content: center;
+	/* Outer gutters = the visible left/right margins (20px / 35px). The outer
+	   columns zero their outer-side padding so this is exact; the right gutter
+	   also houses the hover edit/pin buttons. */
+	padding: 10px 35px 10px 20px;
+	color: var(--db-text-inverse);
+	pointer-events: none; /* let clicks fall through to the corner buttons */
+}
+/* Keep the corner buttons above the stats content. */
+.dashboard-banner--stats .dashboard-banner-pin-btn { z-index: 2; }
+
+/* ---- Column shell (shared) ---- */
+.dashboard-banner-stat-col {
+	min-width: 0;
+	display: flex;
+	flex-direction: column;
+	position: relative;
+	padding: 8px 10px;
+	pointer-events: auto;
+}
+.dashboard-banner-stat-col--left   { flex: 1 1 0; align-items: flex-start; justify-content: flex-start; text-align: left; padding-left: 0; }
+.dashboard-banner-stat-col--center { flex: 3 1 0; align-items: center;     justify-content: flex-start; text-align: center; }
+.dashboard-banner-stat-col--right  { flex: 1 1 0; align-items: stretch;    justify-content: center;     text-align: left; gap: 5px; padding-right: 0; }
+
+/* Vertical gradient divider between columns. */
+.dashboard-banner-stat-col + .dashboard-banner-stat-col::before {
+	content: '';
+	position: absolute;
+	left: 0;
+	top: 18%;
+	bottom: 18%;
+	width: 1px;
+	background: linear-gradient(to bottom, transparent, rgba(255, 255, 255, 0.22), transparent);
+}
+
+/* ---- Numbers / labels (shared) ---- */
+.dashboard-banner-stat-num {
+	font-weight: 700;
+	font-variant-numeric: tabular-nums;
+	color: #ffffff;
+	text-shadow: 0 1px 4px rgba(0, 0, 0, 0.5);
+	line-height: 1;
+}
+.dashboard-banner-stat-label {
+	font-size: 0.7em;
+	margin-top: 4px;
+	color: rgba(255, 255, 255, 0.82);
+	letter-spacing: 0.02em;
+}
+.dashboard-banner-stat-col:hover .dashboard-banner-stat-num { transform: translateY(-1px); transition: transform 0.2s ease; }
+
+/* ---- Left column: big number + bottom strip ---- */
+.dashboard-banner-stat-col--left .dashboard-banner-stat-num { font-size: 1.7em; }
+.dashboard-banner-stat-label--inline { margin-top: 0; } /* label inline next to the number */
+.dashboard-banner-stat-strip {
+	margin-top: auto; /* push to the bottom, mirroring the center heatmap */
+	display: flex;
+	flex-direction: column;
+	gap: 3px;
+	font-size: 0.62em;
+	color: rgba(255, 255, 255, 0.62);
+	line-height: 1.2;
+}
+.dashboard-banner-stat-strip-item {
+	display: flex;
+	align-items: center;
+	gap: 4px;
+}
+.dashboard-banner-stat-strip-icon {
+	color: var(--banner-stat-accent, var(--db-accent, #a78bfa));
+	display: flex;
+	align-items: center;
+	opacity: 0.85;
+}
+.dashboard-banner-stat-strip-icon svg { width: 12px; height: 12px; }
+
+/* ---- Center column: streak hero + 14-day chart ---- */
+.dashboard-banner-stat-hero {
+	display: flex;
+	align-items: baseline;
+	gap: 6px;
+	line-height: 1;
+}
+.dashboard-banner-stat-col--center .dashboard-banner-stat-num { font-size: 1.7em; }
+.dashboard-banner-stat-icon {
+	color: var(--banner-stat-accent, var(--db-accent, #a78bfa));
+	display: flex;
+	align-items: center;
+	filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.4));
+}
+.dashboard-banner-stat-icon svg { width: 20px; height: 20px; }
+.dashboard-banner-stat-sub {
+	margin-top: 4px;
+	font-size: 0.62em;
+	color: rgba(255, 255, 255, 0.62);
+}
+.dashboard-banner-stat-chart {
+	margin-top: auto; /* pin heatmap to the bottom, aligning with the left strip */
+	width: 100%;
+	display: flex;
+	justify-content: center;
+}
+/* Horizontal contribution strip: cells flow left→right and wrap, filling the
+   center column width so the heatmap is wide and short. */
+.dashboard-banner-heatmap {
+	display: grid;
+	grid-template-columns: repeat(auto-fill, 9px);
+	grid-auto-rows: 9px;
+	gap: 2px;
+	justify-content: center;
+	width: 100%;
+}
+.dashboard-banner-heatmap-cell {
+	width: 9px;
+	height: 9px;
+	border-radius: 2px;
+	background: rgba(255, 255, 255, 0.1);
+}
+.dashboard-banner-heatmap-cell--l1 { background: var(--banner-stat-accent, var(--db-accent, #a78bfa)); opacity: 0.35; }
+.dashboard-banner-heatmap-cell--l2 { background: var(--banner-stat-accent, var(--db-accent, #a78bfa)); opacity: 0.55; }
+.dashboard-banner-heatmap-cell--l3 { background: var(--banner-stat-accent, var(--db-accent, #a78bfa)); opacity: 0.78; }
+.dashboard-banner-heatmap-cell--l4 { background: var(--banner-stat-accent, var(--db-accent, #a78bfa)); opacity: 1; }
+.dashboard-banner-heatmap-cell--today { box-shadow: 0 0 0 1.5px rgba(255, 255, 255, 0.75); }
+
+/* ---- Right column: progress rows ---- */
+.dashboard-banner-stat-prog {
+	display: flex;
+	flex-direction: column;
+	gap: 2px;
+}
+.dashboard-banner-stat-prog-head {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 6px;
+}
+.dashboard-banner-stat-prog-title {
+	display: flex;
+	align-items: center;
+	gap: 5px;
+	font-size: 0.64em;
+	color: rgba(255, 255, 255, 0.78);
+}
+.dashboard-banner-stat-prog-icon {
+	color: var(--banner-stat-accent, var(--db-accent, #a78bfa));
+	display: flex;
+	align-items: center;
+}
+.dashboard-banner-stat-prog-icon svg { width: 14px; height: 14px; }
+.dashboard-banner-stat-prog-val {
+	font-size: 0.82em;
+	font-weight: 700;
+	color: #ffffff;
+	font-variant-numeric: tabular-nums;
+}
+.dashboard-banner-stat-prog-label {
+	font-size: 0.6em;
+	color: rgba(255, 255, 255, 0.65);
+}
+.dashboard-banner-stat-prog-track {
+	height: 4px;
+	margin-top: 2px;
+	border-radius: 2px;
+	background: rgba(255, 255, 255, 0.18);
+	overflow: hidden;
+}
+.dashboard-banner-stat-prog-fill {
+	height: 100%;
+	border-radius: 2px;
+	background: var(--banner-stat-accent, var(--db-accent, #a78bfa));
+	transition: width 0.6s ease;
+}
+
+@media (max-width: 640px) {
+	.dashboard-banner-stats {
+		padding: 8px 12px;
+		justify-content: center;
+		gap: 4px;
+		overflow-x: auto;
+		scrollbar-width: none;
+	}
+	.dashboard-banner-stats::-webkit-scrollbar { display: none; }
+	/* On phones only the center (Activity) column fits — the left/right columns
+	   would clip at this width, so hide them and let the center fill the banner. */
+	.dashboard-banner-stat-col--left,
+	.dashboard-banner-stat-col--right { display: none; }
+	.dashboard-banner-stat-col--center { flex: 1 1 auto; max-width: none; }
+	/* Drop the dividers on narrow screens. */
+	.dashboard-banner-stat-col + .dashboard-banner-stat-col::before { display: none; }
+	.dashboard-banner-stat-col--center .dashboard-banner-stat-num { font-size: 1.5em; }
+	/* Denser heatmap cells on narrow screens so it wraps to fewer rows. */
+	.dashboard-banner-heatmap { grid-template-columns: repeat(auto-fill, 7px); grid-auto-rows: 7px; gap: 1px; }
+	.dashboard-banner-heatmap-cell { width: 7px; height: 7px; }
+	/* Stats mode has no overlay, so the tap-to-reveal path is gone; keep the
+	   edit button discoverable on touch. */
+	.dashboard-banner--stats .dashboard-banner-edit-btn { opacity: 0.55; }
+}
+
+/* Collapsed banner (stats) — hide the scrim pseudos too (the rest is hidden by
+   the shared collapsed rule). */
+@media (min-width: 641px) {
+	.dashboard-banner--collapsed.dashboard-banner--stats::before,
+	.dashboard-banner--collapsed.dashboard-banner--stats::after { opacity: 0; }
+}
+
+/* ==========================================================================
+   Banner edit modal — mode toggle + statistics config
+   ========================================================================== */
+/* Mode header — explains the toggle below it. */
+.dashboard-modal-mode-header { margin-bottom: 8px; }
+.dashboard-modal-mode-title { font-weight: 600; font-size: 0.95em; color: var(--db-text, var(--text-normal)); }
+.dashboard-modal-mode-hint { font-size: 0.8em; color: var(--db-text-faint, var(--text-faint)); margin-top: 2px; }
+
+.dashboard-modal-mode-toggle {
+	display: flex;
+	gap: 6px;
+	margin-bottom: 16px;
+	padding: 4px;
+	background: var(--db-bg-hover, rgba(0, 0, 0, 0.05));
+	border-radius: 10px;
+}
+.dashboard-modal-mode-btn {
+	flex: 1;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 6px;
+	padding: 8px 10px;
+	border: none;
+	border-radius: 7px;
+	background: transparent;
+	color: var(--db-text-muted, var(--text-muted));
+	cursor: pointer;
+	font-size: 0.92em;
+	transition: background 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
+}
+.dashboard-modal-mode-btn svg { width: 16px; height: 16px; }
+.dashboard-modal-mode-btn.active {
+	background: var(--db-bg-modal-raised, var(--db-bg-card, var(--background-primary)));
+	color: var(--db-accent, var(--text-normal));
+	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+	font-weight: 600;
+}
+
+.dashboard-modal-stats-cols,
+.dashboard-modal-stats-appear,
+.dashboard-modal-stats-daily,
+.dashboard-modal-stats-sub {
+	margin-bottom: 16px;
+}
+.dashboard-modal-stats-label {
+	display: block;
+	font-weight: 600;
+	margin-bottom: 8px;
+	color: var(--db-text, var(--text-normal));
+}
+.dashboard-modal-stats-inline-label {
+	flex: 0 0 auto;
+	font-size: 0.88em;
+	color: var(--db-text-muted, var(--text-muted));
+	min-width: 48px;
+}
+
+/* Column visibility + per-column stat picker. */
+.dashboard-modal-stats-col-row {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	margin-bottom: 8px;
+}
+.dashboard-modal-stats-col-row--top { align-items: flex-start; }
+.dashboard-modal-stats-vis {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	cursor: pointer;
+	font-size: 0.9em;
+	color: var(--db-text, var(--text-normal));
+	flex: 0 0 auto;
+	min-width: 56px;
+}
+.dashboard-modal-stats-vis input { margin: 0; }
+.dashboard-modal-stats-select { flex: 1; width: 100%; min-width: 0; }
+.dashboard-modal-stats-right-metrics {
+	flex: 1;
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+}
+.dashboard-modal-stats-right-title {
+	font-size: 0.8em;
+	color: var(--db-text-faint, var(--text-faint));
+	margin-bottom: 2px;
+}
+
+/* Appearance: sliders + accent. */
+.dashboard-modal-stats-slider {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	margin-bottom: 10px;
+}
+.dashboard-modal-stats-range {
+	flex: 1;
+	margin: 0;
+	accent-color: var(--db-accent, #a78bfa);
+}
+.dashboard-modal-stats-slider-val {
+	flex: 0 0 auto;
+	min-width: 34px;
+	text-align: right;
+	font-size: 0.82em;
+	font-variant-numeric: tabular-nums;
+	color: var(--db-text-muted, var(--text-muted));
+}
+.dashboard-modal-stats-accent-row {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+}
+.dashboard-modal-stats-hint {
+	margin-top: 6px;
+	font-size: 0.8em;
+	color: var(--db-text-faint, var(--text-faint));
+}
+.dashboard-modal-stats-checkbox {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	cursor: pointer;
+	font-size: 0.92em;
+	color: var(--db-text, var(--text-normal));
+}
+.dashboard-modal-stats-checkbox input { margin: 0; }
+
+/* =========================================================================
+   Dataview Section — DQL query results (TABLE / LIST / TASK / CALENDAR).
+   Reuses the library-section table & list tokens for visual consistency.
+   ========================================================================= */
+
+.dashboard-dataview-content {
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+	padding: 4px 0;
+	/* Fill the section row's column flex so the result body can take the
+	   remaining bounded height and scroll (mirrors .dashboard-library-content). */
+	flex: 1;
+	min-height: 0;
+	min-width: 0;
+}
+
+/* Paginated layout: count header pinned, body scrolls, pagination pinned. */
+.dashboard-dataview-pages {
+	display: flex;
+	flex-direction: column;
+	flex: 1;
+	min-height: 0;
+}
+
+.dashboard-dataview-body {
+	flex: 1;
+	min-height: 0;
+	overflow-y: auto;
+	scrollbar-width: thin;
+	scrollbar-color: color-mix(in srgb, var(--db-accent) 25%, transparent) transparent;
+}
+
+.dashboard-dataview-body::-webkit-scrollbar {
+	width: 8px;
+}
+.dashboard-dataview-body::-webkit-scrollbar-track {
+	background: transparent;
+}
+.dashboard-dataview-body::-webkit-scrollbar-thumb {
+	background: color-mix(in srgb, var(--db-accent) 20%, transparent);
+	border-radius: 999px;
+}
+.dashboard-dataview-body::-webkit-scrollbar-thumb:hover {
+	background: color-mix(in srgb, var(--db-accent) 38%, transparent);
+}
+
+.dashboard-dataview-count,
+.dashboard-dataview-pagination {
+	flex-shrink: 0;
+}
+
+/* Result toolbar: count | (spacer) | filter input | page-size select. Same
+   28px control height as the library toolbar, without the strip fill (the
+   dataview result sits directly under it). */
+.dashboard-dataview-toolbar {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	flex-shrink: 0;
+	min-height: 32px;
+	padding: 2px 0;
+}
+.dashboard-dataview-toolbar-spacer {
+	flex: 1;
+}
+
+.dashboard-dataview-count {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	font-size: 0.6875em;
+	color: var(--db-text-muted, var(--text-muted));
+	text-transform: uppercase;
+	letter-spacing: 0.5px;
+	padding: 0 2px;
+	white-space: nowrap;
+}
+
+.dashboard-dataview-search {
+	width: 110px;
+	flex-shrink: 1;
+	height: 28px;
+	box-sizing: border-box;
+	padding: 0 10px;
+	border-radius: var(--db-radius-sm, 6px);
+	border: 1px solid var(--db-border-input, rgba(255, 255, 255, 0.08));
+	background: var(--db-bg-input, rgba(255, 255, 255, 0.05));
+	color: var(--db-text, var(--text-normal));
+	font-size: 11.5px;
+	outline: none;
+	transition: border-color var(--nand-duration-fast) var(--nand-ease), box-shadow var(--nand-duration-fast) var(--nand-ease);
+}
+.dashboard-dataview-search:focus {
+	border-color: var(--db-accent, var(--interactive-accent));
+	box-shadow: 0 0 0 3px color-mix(in srgb, var(--db-accent, var(--interactive-accent)) 16%, transparent);
+}
+.dashboard-dataview-toolbar [role="button"]:focus-visible,
+.dashboard-dataview-table th.is-sortable:focus-visible,
+.dashboard-dataview-calendar-nav:focus-visible,
+.dashboard-dataview-calendar-cell.has-dots:focus-visible {
+	outline: 2px solid var(--db-accent, var(--interactive-accent));
+	outline-offset: 1px;
+}
+.dashboard-dataview-search::placeholder {
+	color: var(--db-text-faint, var(--text-faint));
+}
+
+/* TABLE header sort: clickable th with a direction indicator. */
+.dashboard-dataview-table th.is-sortable {
+	cursor: pointer;
+	user-select: none;
+}
+.dashboard-dataview-table th.is-sortable:hover {
+	color: var(--db-text, var(--text-normal));
+}
+.dashboard-dataview-sort-ind {
+	display: inline-flex;
+	vertical-align: middle;
+	margin-left: 4px;
+	opacity: 0.45;
+}
+.dashboard-dataview-sort-ind svg {
+	width: 11px;
+	height: 11px;
+}
+.dashboard-dataview-table th.is-sorted-asc .dashboard-dataview-sort-ind,
+.dashboard-dataview-table th.is-sorted-desc .dashboard-dataview-sort-ind {
+	opacity: 1;
+	color: var(--db-accent, var(--interactive-accent));
+}
+
+/* Sticky header: inherited from .dashboard-library-table th (opaque layered
+   background, inset hairline, rounded end caps). No backdrop-filter (mobile
+   GPU). */
+
+/* Numeric cells right-aligned (classic database layout). */
+.dashboard-dataview-table td.is-numeric {
+	text-align: right;
+	font-variant-numeric: tabular-nums;
+}
+
+/* Row-number column: narrow, muted, right-aligned. */
+.dashboard-dataview-rownum-head,
+.dashboard-dataview-rownum {
+	width: 34px;
+	min-width: 34px;
+	max-width: 34px;
+	padding-left: 4px;
+	padding-right: 8px;
+	text-align: right;
+	color: var(--db-text-faint, var(--text-faint));
+	font-variant-numeric: tabular-nums;
+	cursor: default;
+}
+
+/* Zebra stripes (opt-in): even rows tinted with the same token as the
+   library table; the shared hover band (rounded caps) wins over stripes. */
+.dashboard-dataview-table.is-striped tbody tr:nth-child(even) td {
+	background: color-mix(in srgb, var(--db-bg-hover, rgba(255, 255, 255, 0.04)) 60%, transparent);
+}
+.dashboard-dataview-table.is-striped tbody tr:hover td,
+.dashboard-dataview-table tbody tr:hover td {
+	background: var(--db-bg-hover, var(--db-bg-card-hover, rgba(255, 255, 255, 0.10)));
+}
+.dashboard-dataview-list.is-striped > .dashboard-dataview-list-item:nth-child(even) {
+	background: color-mix(in srgb, var(--db-bg-hover, rgba(255, 255, 255, 0.04)) 60%, transparent);
+}
+.dashboard-dataview-tasklist.is-striped > .dashboard-dataview-task:nth-child(even) {
+	background: color-mix(in srgb, var(--db-bg-hover, rgba(255, 255, 255, 0.04)) 60%, transparent);
+}
+
+/* Compact density: ~28px rows. */
+.dashboard-dataview-table.is-compact td {
+	height: 28px;
+	padding-top: 3px;
+	padding-bottom: 3px;
+}
+.dashboard-dataview-table.is-compact th {
+	height: 28px;
+	padding-top: 4px;
+	padding-bottom: 4px;
+}
+.dashboard-dataview-list.is-compact > .dashboard-dataview-list-item {
+	padding-top: 2px;
+	padding-bottom: 2px;
+}
+.dashboard-dataview-tasklist.is-compact > .dashboard-dataview-task {
+	padding-top: 2px;
+	padding-bottom: 2px;
+}
+
+/* Density chips in the config modal (reuses the sample-chip look). Selected
+   = accent-soft pill, matching the other chip selectors. */
+.dashboard-dataview-density-chips {
+	display: flex;
+	gap: 6px;
+}
+.dashboard-dataview-density-chip.active,
+.dashboard-dataview-density-chip.active:hover {
+	background: color-mix(in srgb, var(--db-accent, var(--interactive-accent)) 14%, transparent);
+	color: var(--db-accent, var(--interactive-accent));
+	border-color: color-mix(in srgb, var(--db-accent, var(--interactive-accent)) 55%, transparent);
+	font-weight: 600;
+}
+
+/* TASK checkbox column: narrow fixed slot at the table's start. */
+.dashboard-dataview-check-col {
+	width: 30px;
+	min-width: 30px;
+	max-width: 30px;
+	padding: 4px 0 4px 6px;
+	vertical-align: top;
+}
+.dashboard-dataview-table thead th.dashboard-dataview-check-head {
+	width: 30px;
+	min-width: 30px;
+	max-width: 30px;
+	padding: 4px 0 4px 6px;
+}
+
+/* Source-note columns (table mode): muted path/date, note keeps link styling. */
+.dashboard-dataview-table th.is-source-col {
+	cursor: default;
+}
+.dashboard-dataview-src-path,
+.dashboard-dataview-src-created {
+	color: var(--db-text-muted, var(--text-muted));
+	font-size: 12.5px;
+	max-width: 220px;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+/* Source summary line under each list item (list mode). */
+.dashboard-dataview-list-item {
+	flex-direction: column;
+	align-items: stretch;
+	gap: 2px;
+}
+.dashboard-dataview-list-main {
+	display: flex;
+	align-items: baseline;
+	gap: 6px;
+	flex-wrap: wrap;
+	min-width: 0;
+}
+.dashboard-dataview-list-main.dashboard-dataview-task-row {
+	align-items: center;
+}
+.dashboard-dataview-list-source {
+	font-size: 11px;
+	color: var(--db-text-faint, var(--text-faint));
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	padding-left: 2px;
+}
+.dashboard-dataview-list-sep {
+	color: var(--db-text-faint, var(--text-faint));
+	margin: 0 2px;
+}
+
+/* View-mode segmented toggle in the dataview toolbar (reuses library classes;
+   tightened for the compact toolbar). */
+.dashboard-dataview-view-toggle {
+	display: flex;
+	align-items: center;
+	gap: 2px;
+	flex-shrink: 0;
+}
+
+/* Result count header */
+.dashboard-dataview-capped {
+	text-transform: none;
+	letter-spacing: 0;
+	opacity: 0.7;
+}
+
+/* TABLE — extends the library table look.
+   Fixed layout: column widths are deterministic instead of content-driven, so
+   a long path or title can never squeeze the date column into wrapping.
+   Narrow utility columns (rownum, checkbox) get fixed px; source columns get
+   capped widths; value columns share the remainder equally. */
+.dashboard-dataview-table {
+	table-layout: fixed;
+	word-break: break-word;
+	/* Lift cells off the inherited library-table 0.75em: that sat a step below
+	   every other section's row text (0.85em typical). Scoped to the dataview
+	   table so the library section's own table keeps its size. */
+	font-size: 0.85em;
+}
+.dashboard-dataview-table td {
+	white-space: normal;
+	max-width: none;
+	vertical-align: top;
+	line-height: 1.5;
+	/* Wrapping cells: height is a floor, content may grow to the 2-line clamp. */
+	height: 38px;
+}
+/* Two-line clamp lives on an INNER div — td must stay display:table-cell or
+   the fixed table layout breaks (cells stop aligning to <col> widths). */
+.dashboard-dataview-table td .dashboard-dataview-cell {
+	display: -webkit-box;
+	-webkit-box-orient: vertical;
+	-webkit-line-clamp: 2;
+	overflow: hidden;
+}
+/* Created-date column: single line, never wraps (dates break ugly). Left-
+   aligned like the other text columns; tabular-nums keeps digits even. */
+.dashboard-dataview-table td.dashboard-dataview-src-created,
+.dashboard-dataview-table th.is-datetime {
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	font-variant-numeric: tabular-nums;
+}
+.dashboard-dataview-table th {
+	cursor: default;
+	/* Library headers compound their ratio against the table base (0.6875em x
+	   0.75em = ~8px here). Keep the muted-uppercase look but at a legible size
+	   relative to the larger cell font. */
+	font-size: 0.75em;
+}
+.dashboard-dataview-table tr:not(.is-clickable) {
+	cursor: default;
+}
+.dashboard-dataview-null {
+	color: var(--db-text-muted, var(--text-muted));
+	opacity: 0.4;
+}
+.dashboard-dataview-group-key {
+	font-weight: 600;
+	color: var(--db-accent, var(--interactive-accent));
+}
+.dashboard-dataview-group-member {
+	padding: 1px 0;
+}
+
+/* LIST */
+.dashboard-dataview-list {
+	display: flex;
+	flex-direction: column;
+	gap: 2px;
+}
+.dashboard-dataview-list-item {
+	display: flex;
+	align-items: baseline;
+	gap: 6px;
+	min-height: 36px;
+	box-sizing: border-box;
+	padding: 7px 10px;
+	border-radius: var(--db-radius-sm, 6px);
+	color: var(--db-text, var(--text-normal));
+	font-size: 0.85em;
+	transition: background var(--nand-duration-fast) var(--nand-ease);
+}
+.dashboard-dataview-list-item:hover {
+	background: var(--db-bg-hover, var(--db-bg-card-hover, rgba(255, 255, 255, 0.06)));
+}
+.dashboard-dataview-list-group {
+	font-weight: 600;
+	color: var(--db-accent, var(--interactive-accent));
+	margin-bottom: 2px;
+}
+.dashboard-dataview-list-members {
+	display: flex;
+	flex-direction: column;
+	gap: 2px;
+	padding-left: 12px;
+}
+.dashboard-dataview-list-member {
+	color: var(--db-text, var(--text-normal));
+	opacity: 0.9;
+}
+
+/* ---------- FREE view (native Dataview shape: bullet list + group headers) ---------- */
+.dashboard-dataview-free-list {
+	margin: 0;
+	padding: 2px 4px;
+	list-style: none;
+	display: flex;
+	flex-direction: column;
+	gap: 3px;
+	color: var(--db-text, var(--text-normal));
+	font-size: 0.85em;
+}
+.dashboard-dataview-free-list.is-nested {
+	padding-left: 14px;
+	margin-top: 3px;
+}
+.dashboard-dataview-free-item {
+	display: flex;
+	align-items: baseline;
+	padding: 4px 8px;
+	border-radius: var(--db-radius-sm, 6px);
+	transition: background var(--nand-duration-fast) var(--nand-ease);
+}
+.dashboard-dataview-free-item:hover {
+	background: var(--db-bg-hover, var(--db-bg-card-hover, rgba(255, 255, 255, 0.06)));
+}
+.dashboard-dataview-free-item::before {
+	content: '•';
+	flex-shrink: 0;
+	margin-right: 7px;
+	color: var(--db-accent, var(--interactive-accent));
+	line-height: 1;
+}
+.dashboard-dataview-free-main {
+	display: inline-flex;
+	flex-wrap: wrap;
+	align-items: baseline;
+	gap: 2px 6px;
+	min-width: 0;
+}
+.dashboard-dataview-free-sep {
+	color: var(--db-text-muted, var(--text-muted));
+	opacity: 0.7;
+}
+.dashboard-dataview-free-group {
+	display: flex;
+	flex-direction: column;
+}
+.dashboard-dataview-free-group-title {
+	font-weight: 600;
+	color: var(--db-accent, var(--interactive-accent));
+	padding: 3px 6px;
+}
+
+/* Inline markdown inside dataview values */
+.dashboard-dataview-code {
+	font-family: var(--font-monospace, monospace);
+	font-size: 0.92em;
+	padding: 0 4px;
+	border-radius: max(3px, calc(var(--db-radius-sm, 6px) - 2px));
+	background: var(--db-bg-hover, rgba(255, 255, 255, 0.08));
+	color: var(--db-text, var(--text-normal));
+}
+.dashboard-dataview-mark {
+	background: color-mix(in srgb, var(--db-accent, var(--interactive-accent)) 28%, transparent);
+	color: inherit;
+	padding: 0 2px;
+	border-radius: max(3px, calc(var(--db-radius-sm, 6px) - 2px));
+}
+.dashboard-dataview-cell em { font-style: italic; }
+.dashboard-dataview-cell strong { font-weight: 600; }
+
+/* TASK (Phase 3 — read-only for now) */
+.dashboard-dataview-tasklist {
+	display: flex;
+	flex-direction: column;
+	gap: 2px;
+}
+.dashboard-dataview-task {
+	display: flex;
+	align-items: baseline;
+	gap: 8px;
+	min-height: 36px;
+	box-sizing: border-box;
+	padding: 7px 10px;
+	border-radius: var(--db-radius-sm, 6px);
+	transition: background var(--nand-duration-fast) var(--nand-ease);
+}
+.dashboard-dataview-task:hover {
+	background: var(--db-bg-hover, var(--db-bg-card-hover, rgba(255, 255, 255, 0.06)));
+}
+.dashboard-dataview-task-checkbox {
+	margin: 0;
+	flex-shrink: 0;
+	transform: translateY(1px);
+}
+.dashboard-dataview-task-text {
+	font-size: 0.85em;
+	color: var(--db-text, var(--text-normal));
+}
+
+/* Empty + error + scanning states */
+.dashboard-dataview-empty,
+.dashboard-dataview-error,
+.dashboard-dataview-scanning {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	gap: 8px;
+	min-height: 120px;
+	box-sizing: border-box;
+	padding: 28px 16px;
+	border: 1px dashed color-mix(in srgb, var(--db-text-muted, var(--text-muted)) 22%, transparent);
+	border-radius: var(--db-radius-md, 10px);
+	text-align: center;
+	color: var(--db-text-muted, var(--text-muted));
+	font-size: 0.8125em;
+	line-height: 1.5;
+}
+.dashboard-dataview-empty-icon {
+	width: 32px;
+	height: 32px;
+	opacity: 0.3;
+	background: currentColor;
+	-webkit-mask: var(--icon-search) center / contain no-repeat;
+	mask: var(--icon-search) center / contain no-repeat;
+}
+.dashboard-dataview-empty-hint {
+	font-size: 0.6875em;
+	opacity: 0.7;
+}
+.dashboard-dataview-error {
+	color: var(--text-error);
+	border-color: color-mix(in srgb, var(--text-error) 35%, transparent);
+	background: color-mix(in srgb, var(--text-error) 5%, transparent);
+}
+.dashboard-dataview-error-icon svg {
+	width: 22px;
+	height: 22px;
+}
+.dashboard-dataview-error-text {
+	max-width: 360px;
+	word-break: break-word;
+}
+.dashboard-dataview-spinner {
+	animation: dashboard-dataview-spin 0.9s linear infinite;
+}
+.dashboard-dataview-spinner svg {
+	width: 18px;
+	height: 18px;
+}
+@keyframes dashboard-dataview-spin {
+	from { transform: rotate(0deg); }
+	to { transform: rotate(360deg); }
+}
+

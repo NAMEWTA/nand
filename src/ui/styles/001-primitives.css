@@ -1,0 +1,219 @@
+/* =================================================================
+   Primitive controls (src/ui/primitives). Sizes follow the token scale;
+   colors come only from tokens.
+   ================================================================= */
+
+/* ----- Buttons ----- */
+button.nand-btn {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	gap: var(--nand-space-2);
+	height: var(--nand-control-height);
+	padding: 0 var(--nand-space-3);
+	border: 1px solid var(--nand-border-color);
+	border-radius: var(--nand-radius-sm);
+	background: var(--nand-surface);
+	box-shadow: none;
+	color: var(--text-normal);
+	font-size: var(--nand-text-body);
+	font-weight: var(--font-medium);
+	white-space: nowrap;
+	cursor: pointer;
+	transition: background-color var(--nand-duration-fast) var(--nand-ease), border-color var(--nand-duration-fast) var(--nand-ease), color var(--nand-duration-fast) var(--nand-ease);
+}
+button.nand-btn:hover:not(:disabled) { background: var(--nand-surface-hover); border-color: var(--nand-border-color-strong); }
+button.nand-btn:focus-visible { box-shadow: var(--nand-focus-ring); outline: none; }
+button.nand-btn:disabled { opacity: 0.5; cursor: default; }
+button.nand-btn svg { width: var(--nand-icon-size); height: var(--nand-icon-size); flex: none; }
+button.nand-btn--sm { height: var(--nand-control-height-sm); padding: 0 var(--nand-space-2); font-size: var(--nand-text-caption); }
+button.nand-btn--primary { background: var(--interactive-accent); border-color: transparent; color: var(--text-on-accent); }
+button.nand-btn--primary:hover:not(:disabled) { background: var(--interactive-accent-hover); border-color: transparent; }
+button.nand-btn--ghost { background: transparent; border-color: transparent; color: var(--text-muted); }
+button.nand-btn--ghost:hover:not(:disabled) { background: var(--nand-surface-hover); border-color: transparent; color: var(--text-normal); }
+button.nand-btn--danger { color: var(--nand-tone-error); }
+button.nand-btn--danger:hover:not(:disabled) { background: color-mix(in srgb, var(--nand-tone-error) 10%, transparent); border-color: color-mix(in srgb, var(--nand-tone-error) 40%, transparent); }
+
+button.nand-icon-btn {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	flex: none;
+	width: var(--nand-control-height);
+	height: var(--nand-control-height);
+	padding: 0;
+	border: none;
+	border-radius: var(--nand-radius-sm);
+	background: transparent;
+	box-shadow: none;
+	color: var(--text-muted);
+	cursor: pointer;
+	transition: background-color var(--nand-duration-fast) var(--nand-ease), color var(--nand-duration-fast) var(--nand-ease);
+}
+button.nand-icon-btn:hover:not(:disabled) { background: var(--nand-surface-hover); color: var(--text-normal); }
+button.nand-icon-btn:focus-visible { box-shadow: var(--nand-focus-ring); outline: none; }
+button.nand-icon-btn.is-active,
+button.nand-icon-btn[aria-pressed="true"] { background: var(--nand-surface-active); color: var(--text-normal); }
+button.nand-icon-btn:disabled { opacity: 0.4; cursor: default; }
+button.nand-icon-btn--sm { width: var(--nand-control-height-sm); height: var(--nand-control-height-sm); }
+button.nand-icon-btn svg { width: var(--nand-icon-size); height: var(--nand-icon-size); }
+
+/* ----- Text fields ----- */
+.nand-field {
+	display: flex;
+	flex-direction: column;
+	gap: var(--nand-space-1);
+	min-width: 0;
+}
+.nand-field-label { color: var(--text-muted); font-size: var(--nand-text-caption); font-weight: var(--font-medium); }
+.nand-field-hint { color: var(--text-faint); font-size: var(--nand-text-caption); }
+input.nand-input,
+textarea.nand-input,
+select.nand-input {
+	width: 100%;
+	min-height: var(--nand-control-height);
+	padding: 0 var(--nand-space-3);
+	border: 1px solid var(--nand-border-color);
+	border-radius: var(--nand-radius-sm);
+	background: var(--background-modifier-form-field);
+	color: var(--text-normal);
+	font-size: var(--nand-text-body);
+}
+textarea.nand-input { padding: var(--nand-space-2) var(--nand-space-3); line-height: 1.5; resize: vertical; }
+input.nand-input:focus,
+textarea.nand-input:focus,
+select.nand-input:focus { border-color: var(--interactive-accent); box-shadow: var(--nand-focus-ring); outline: none; }
+
+.nand-search {
+	position: relative;
+	display: flex;
+	align-items: center;
+	min-width: 0;
+}
+.nand-search-icon {
+	position: absolute;
+	inset-inline-start: var(--nand-space-2);
+	display: flex;
+	color: var(--text-faint);
+	pointer-events: none;
+}
+.nand-search-icon svg { width: 14px; height: 14px; }
+.nand-search input.nand-input { padding-inline-start: calc(var(--nand-space-2) + 20px); }
+
+/* ----- Tabs (pill tabs inside a page) ----- */
+.nand-tabs {
+	display: inline-flex;
+	gap: 2px;
+	padding: 2px;
+	border-radius: var(--nand-radius-md);
+	background: var(--nand-surface-muted);
+}
+.nand-tabs > button {
+	height: var(--nand-control-height-sm);
+	padding: 0 var(--nand-space-3);
+	border: none;
+	border-radius: var(--nand-radius-sm);
+	background: transparent;
+	box-shadow: none;
+	color: var(--text-muted);
+	font-size: var(--nand-text-body);
+	cursor: pointer;
+}
+.nand-tabs > button:hover:not([aria-selected="true"]) { color: var(--text-normal); }
+.nand-tabs > button[aria-selected="true"] { background: var(--nand-surface); box-shadow: var(--nand-shadow-xs); color: var(--text-normal); font-weight: var(--font-medium); }
+.nand-tabs > button:focus-visible { box-shadow: var(--nand-focus-ring); outline: none; }
+
+/* ----- Badge ----- */
+.nand-badge {
+	display: inline-flex;
+	align-items: center;
+	gap: var(--nand-space-1);
+	min-width: 18px;
+	height: 18px;
+	padding: 0 6px;
+	border-radius: var(--nand-radius-pill);
+	background: var(--nand-surface-muted);
+	color: var(--text-muted);
+	font-size: 11px;
+	font-weight: var(--font-semibold);
+	line-height: 1;
+	justify-content: center;
+}
+.nand-badge--accent { background: var(--interactive-accent); color: var(--text-on-accent); }
+.nand-badge--error { background: var(--nand-tone-error); color: var(--text-on-accent); }
+.nand-badge--success { background: color-mix(in srgb, var(--nand-tone-success) 16%, transparent); color: var(--nand-tone-success); }
+.nand-badge--warning { background: color-mix(in srgb, var(--nand-tone-warning) 16%, transparent); color: var(--nand-tone-warning); }
+
+/* ----- List rows (side panel, list-detail) ----- */
+.nand-list { display: flex; flex-direction: column; gap: 1px; margin: 0; padding: 0; list-style: none; }
+.nand-list-item {
+	position: relative;
+	display: flex;
+	align-items: center;
+	gap: var(--nand-space-2);
+	min-height: var(--nand-list-row-height);
+	padding: 0 var(--nand-space-2);
+	border-radius: var(--nand-radius-md);
+	color: var(--text-normal);
+	font-size: var(--nand-text-body);
+	cursor: pointer;
+	user-select: none;
+}
+.nand-list-item:hover { background: var(--nand-surface-hover); }
+.nand-list-item:focus-visible { box-shadow: var(--nand-focus-ring); outline: none; }
+.nand-list-item.is-active { background: var(--nand-surface-active); font-weight: var(--font-medium); }
+.nand-list-item-icon { display: flex; flex: none; color: var(--text-muted); }
+.nand-list-item-icon svg { width: var(--nand-icon-size); height: var(--nand-icon-size); }
+.nand-list-item-label { flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.nand-list-item-meta { flex: none; color: var(--text-faint); font-size: var(--nand-text-caption); }
+.nand-list-item-actions { display: none; flex: none; }
+.nand-list-item:hover .nand-list-item-actions,
+.nand-list-item:focus-within .nand-list-item-actions,
+.nand-list-item.is-active .nand-list-item-actions { display: flex; }
+.nand-list-item:hover .nand-list-item-meta,
+.nand-list-item:focus-within .nand-list-item-meta { display: none; }
+.nand-list-section-title {
+	padding: var(--nand-space-3) var(--nand-space-2) var(--nand-space-1);
+	color: var(--text-faint);
+	font-size: var(--nand-text-caption);
+	font-weight: var(--font-semibold);
+}
+
+/* ----- Skeleton (loading placeholder) ----- */
+.nand-skeleton {
+	border-radius: var(--nand-radius-sm);
+	background: linear-gradient(90deg, var(--nand-surface-muted) 25%, var(--nand-surface-hover) 50%, var(--nand-surface-muted) 75%);
+	background-size: 200% 100%;
+	animation: nand-skeleton 1.2s ease-in-out infinite;
+}
+@keyframes nand-skeleton {
+	from { background-position: 200% 0; }
+	to { background-position: -200% 0; }
+}
+
+/* ----- Dialog body (Obsidian Modal hosting a Preact view) ----- */
+.nand-dialog .modal-content { padding: 0; }
+.nand-dialog-body { display: flex; flex-direction: column; gap: var(--nand-space-4); padding: var(--nand-space-4) var(--nand-space-5); }
+.nand-dialog-footer { display: flex; justify-content: flex-end; gap: var(--nand-space-2); padding: var(--nand-space-3) var(--nand-space-5) var(--nand-space-4); border-top: var(--nand-border); }
+
+@media (prefers-reduced-motion: reduce) {
+	.nand-skeleton { animation: none; }
+}
+@media (pointer: coarse) {
+	button.nand-btn,
+	button.nand-icon-btn,
+	input.nand-input,
+	select.nand-input { min-height: var(--nand-touch-target); }
+	button.nand-icon-btn { min-width: var(--nand-touch-target); }
+	.nand-list-item { min-height: var(--nand-touch-target); }
+}
+
+/* Screen-reader-only text (also used to label containers without `aria-label`, which Obsidian turns into hover tooltips). */
+.nand-visually-hidden {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	overflow: hidden;
+	clip-path: inset(50%);
+	white-space: nowrap;
+}

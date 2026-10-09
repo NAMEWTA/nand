@@ -1,0 +1,9 @@
+/* ===== Drop Indicator ===== */
+.dashboard-drop-indicator {
+	height: 3px;
+	background: var(--db-accent);
+	border-radius: var(--nand-radius-pill);
+	margin: 2px 0;
+	opacity: 0.6;
+}
+

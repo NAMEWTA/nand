@@ -1,0 +1,17 @@
+{
+	"extends": "./tsconfig.json",
+	"compilerOptions": {
+		"target": "ES2022",
+		"allowImportingTsExtensions": true,
+		"noEmit": true,
+		"useDefineForClassFields": false
+	},
+	"include": [
+		"src/**/*.test.ts",
+		"src/**/*.test.tsx",
+		"test/**/*.ts",
+		"src/**/*.d.ts",
+		"vitest.config.ts"
+	],
+	"exclude": []
+}

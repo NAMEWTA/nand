@@ -1,0 +1,141 @@
+/* ===== Kanban View ===== */
+.dashboard-library-kanban {
+	display: flex;
+	/* Inter-group gutter: columns now carry a hairline so they read as boxes
+	   in every theme; the perceived group gap is padding + gap + padding, so
+	   the gap stays modest (8px) while the column padding stays tight. */
+	gap: 8px;
+	overflow-x: auto;
+	/* Cap the board to its bounded-height host (.dashboard-library-files).
+	   Without this the board grows to its tallest column, the host scrolls
+	   the whole board instead, and each column never scrolls internally —
+	   which strands the columns' sticky titles (position: sticky sticks to
+	   the column's own scrollport; a column that never scrolls never pins
+	   them, so titles scroll away with the board). */
+	max-height: 100%;
+	/* Lets the row shrink inside its parent so the columns actually overflow and
+	   the horizontal scrollbar engages. */
+	min-width: 0;
+	padding-bottom: 8px;
+	/* Thin, ALWAYS-visible themed bar — the kanban's horizontal scroll is a
+	   primary affordance, so it stays visible (unlike the hover-reveal bars used
+	   by the todo section and other views). */
+	scrollbar-width: thin;
+	scrollbar-color: color-mix(in srgb, var(--db-accent) 24%, transparent) transparent;
+}
+
+.dashboard-library-kanban::-webkit-scrollbar {
+	height: 3px;
+}
+
+.dashboard-library-kanban::-webkit-scrollbar-track {
+	background: transparent;
+}
+
+.dashboard-library-kanban::-webkit-scrollbar-thumb {
+	background: color-mix(in srgb, var(--db-accent) 24%, transparent);
+	border-radius: 999px;
+	transition: background var(--nand-duration) var(--nand-ease);
+}
+
+.dashboard-library-kanban::-webkit-scrollbar-thumb:hover {
+	background: color-mix(in srgb, var(--db-accent) 38%, transparent);
+}
+
+.dashboard-library-kanban-col {
+	min-width: 180px;
+	max-width: 260px;
+	flex-shrink: 0;
+	background: var(--db-bg-section, rgba(255, 255, 255, 0.02));
+	border: 1px solid color-mix(in srgb, var(--db-border, rgba(255, 255, 255, 0.08)) 60%, transparent);
+	border-radius: var(--db-radius-md, 10px);
+	/* See the board's gap note: column padding contributes to the perceived
+	   distance between groups, so it stays tight alongside it. */
+	padding: 6px;
+	display: flex;
+	flex-direction: column;
+	gap: 6px;
+	transition: background var(--nand-duration-fast) var(--nand-ease);
+	/* Trello-style: each column is capped to the board's height and scrolls its
+	   own cards, so a long list no longer pushes the board's horizontal
+	   scrollbar off-screen. min-height:0 lets the column shrink below its
+	   content so overflow engages. */
+	min-height: 0;
+	overflow-y: auto;
+	/* Hide the per-column vertical scrollbar (wheel/trackpad still scroll) so a
+	   row of many groups doesn't show a clutter of gutters. */
+	scrollbar-width: none;
+}
+
+.dashboard-library-kanban-col::-webkit-scrollbar {
+	width: 0;
+	height: 0;
+	display: none;
+}
+
+.dashboard-library-kanban-col-title {
+	font-size: 0.75em;
+	font-weight: 600;
+	color: var(--db-text, var(--text-normal));
+	padding: 6px 8px;
+	border-bottom: 2px solid color-mix(in srgb, var(--db-accent, var(--interactive-accent)) 70%, transparent);
+	border-radius: max(2px, calc(var(--db-radius-md, 10px) - 6px)) max(2px, calc(var(--db-radius-md, 10px) - 6px)) 0 0;
+	margin-bottom: 2px;
+	font-variant-numeric: tabular-nums;
+	/* Stay pinned at the top of the column while its cards scroll. The theme's
+	   section bg can be translucent (rgba) in some themes, which would let
+	   cards bleed through — layer it over the opaque page bg (--db-bg) so the
+	   pinned title looks identical to the column but is fully opaque. */
+	position: sticky;
+	top: 0;
+	z-index: 1;
+	background:
+		linear-gradient(var(--db-bg-section, rgba(255, 255, 255, 0.02)), var(--db-bg-section, rgba(255, 255, 255, 0.02))),
+		var(--db-bg, var(--background-primary));
+	flex-shrink: 0;
+}
+
+.dashboard-library-kanban-card {
+	flex-shrink: 0;
+	background: var(--db-bg-card, rgba(255, 255, 255, 0.06));
+	border: 1px solid var(--db-border-card, rgba(255, 255, 255, 0.10));
+	border-radius: var(--db-radius-sm, 6px);
+	padding: 8px 10px;
+	cursor: pointer;
+	transition: background var(--nand-duration) var(--nand-ease), border-color var(--nand-duration) var(--nand-ease), box-shadow var(--nand-duration) var(--nand-ease), opacity var(--nand-duration) var(--nand-ease);
+}
+
+.dashboard-library-kanban-card:hover {
+	background: var(--db-bg-card-hover, rgba(255, 255, 255, 0.10));
+	border-color: color-mix(in srgb, var(--db-accent, var(--interactive-accent)) 45%, var(--db-border-card, transparent));
+	box-shadow: var(--db-shadow-card, var(--shadow-s));
+}
+
+.dashboard-library-kanban-card-title {
+	font-size: 0.75em;
+	font-weight: 600;
+	line-height: 1.35;
+	color: var(--db-text, var(--text-normal));
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.dashboard-library-kanban-card-date {
+	font-size: 0.625em;
+	color: var(--db-text-muted, var(--text-muted));
+	margin-top: 4px;
+	font-variant-numeric: tabular-nums;
+}
+
+/* Optional kanban covers (per-section toggle): the gallery view's
+   .dashboard-library-card-cover classes carry the aspect ratio, background
+   sizing and the placeholder treatment — the kanban companion class only
+   insets the cover inside the card's own padding with a gap before the title
+   and nests its radius inside the card's (radius-sm minus the 8px inset,
+   floored so it never goes square). */
+.dashboard-library-kanban-card-cover {
+	margin-bottom: 8px;
+	border-radius: max(3px, calc(var(--db-radius-sm, 6px) - 3px));
+}
+

@@ -1,0 +1,129 @@
+import { bindLocalizedControl } from '../../../../ui/primitives/localized-dom';
+import type { Hotkey } from 'obsidian';
+import { ButtonComponent, Modal, Setting } from 'obsidian';
+import type { FileItem } from '../../core/types';
+import type IconicController from '../../platform/host/controller';
+import { internalApp } from '../../platform/utils/obsidian-internal';
+import { t } from '../../../../shared/i18n';
+import PathListComponent from '../components/path-list-component';
+import IconPicker from './icon-picker';
+
+/**
+ * Dialog for viewing unused icons found in the data file.
+ */
+export default class UsageChecker extends Modal {
+	private readonly plugin: IconicController;
+	private readonly unusedIcons: Set<FileItem>;
+
+	// Components
+	private pathList!: PathListComponent;
+
+	private constructor(plugin: IconicController, unusedIcons: FileItem[]) {
+		super(plugin.app);
+		this.plugin = plugin;
+		plugin.trackDialog(this);
+		this.unusedIcons = new Set(unusedIcons);
+
+		// Allow hotkeys in dialog
+		for (const command of this.plugin.dialogCommands)
+			if (command.callback) {
+				const hotkeys: Hotkey[] = internalApp(this.app).hotkeyManager?.customKeys?.[command.id] ?? [];
+				for (const hotkey of hotkeys) {
+					this.scope.register(hotkey.modifiers, hotkey.key, command.callback);
+				}
+			}
+	}
+
+	/**
+	 * Open a dialog to view a list of unused icons.
+	 */
+	static open(plugin: IconicController, unusedIcons: FileItem[]): void {
+		new UsageChecker(plugin, unusedIcons).open();
+	}
+
+	/**
+	 * @override
+	 */
+	async onOpen(): Promise<void> {
+		this.containerEl.addClass('mod-confirmation');
+		this.modalEl.addClass('iconic-rule-checker');
+		this.contentEl.addClass('iconic-highlight-tree');
+		bindLocalizedControl(this.setTitle(t('iconic.usageChecker.unusedIcons')), "title", "iconic.usageChecker.unusedIcons");
+
+		// BUTTONS: Highlight
+		const buttons: ButtonComponent[] = [];
+		bindLocalizedControl(new Setting(this.contentEl)
+			.setName(t('iconic.ruleChecker.highlight')), "name", "iconic.ruleChecker.highlight")
+			.addButton((button) => {
+				bindLocalizedControl(button.setButtonText(t('iconic.ruleEditor.source.tree')), "buttonText", "iconic.ruleEditor.source.tree").onClick(() => {
+					buttons.forEach((button) => button.buttonEl.removeClass('iconic-button-selected'));
+					button.buttonEl.addClass('iconic-button-selected');
+					this.contentEl.addClass('iconic-highlight-tree');
+					this.contentEl.removeClasses(['iconic-highlight-name', 'iconic-highlight-extension']);
+				});
+				button.buttonEl.addClass('iconic-button-selected');
+				buttons.push(button);
+			})
+			.addButton((button) => {
+				bindLocalizedControl(button.setButtonText(t('iconic.ruleEditor.source.name')), "buttonText", "iconic.ruleEditor.source.name").onClick(() => {
+					buttons.forEach((button) => button.buttonEl.removeClass('iconic-button-selected'));
+					button.buttonEl.addClass('iconic-button-selected');
+					this.contentEl.removeClasses(['iconic-highlight-tree', 'iconic-highlight-extension']);
+					this.contentEl.addClass('iconic-highlight-name');
+				});
+				buttons.push(button);
+			})
+			.addButton((button) => {
+				bindLocalizedControl(button.setButtonText(t('iconic.ruleEditor.source.extension')), "buttonText", "iconic.ruleEditor.source.extension").onClick(() => {
+					buttons.forEach((button) => button.buttonEl.removeClass('iconic-button-selected'));
+					button.buttonEl.addClass('iconic-button-selected');
+					this.contentEl.removeClasses(['iconic-highlight-tree', 'iconic-highlight-name']);
+					this.contentEl.addClass('iconic-highlight-extension');
+				});
+				buttons.push(button);
+			});
+
+		// LIST: Unused icons
+		this.pathList = new PathListComponent(this.contentEl);
+		for (const file of this.unusedIcons) {
+			const { tree, basename, extension } = this.plugin.splitFilePath(file.id);
+			this.pathList.addPath((path) =>
+				path
+					.setIcon(file.icon ?? null)
+					.setIconColor(file.color ?? null)
+					.setIconTooltip(t('iconic.iconPicker.changeIcon'))
+					.onIconClick(() =>
+						IconPicker.openSingle(this.plugin, file, (newIcon, newColor) => {
+							this.plugin.saveFileIcon(file, newIcon, newColor);
+							file.icon = newIcon;
+							file.color = newColor;
+							path.setIcon(newIcon);
+							path.setIconColor(newColor);
+						}),
+					)
+					.setPathText(tree, basename, extension)
+					.setRemoveTooltip(t('iconic.menu.removeIcon'))
+					.onRemoveClick(() => {
+						this.plugin.saveFileIcon(file, null, null);
+						this.unusedIcons.delete(file);
+						path.pathEl.remove();
+						if (this.unusedIcons.size === 0) this.addPlaceholderItem();
+					}),
+			);
+		}
+
+		if (this.unusedIcons.size === 0) this.addPlaceholderItem();
+	}
+
+	private addPlaceholderItem(): void {
+		this.pathList.addPath((path) =>
+			path
+				.setIcon('lucide-check')
+				.setPathText('', t('iconic.usageChecker.noUnusedIconsFound'))
+				.setClass('iconic-placeholder'),
+		);
+	}
+	onClose(): void {
+		this.plugin.forgetDialog(this);
+	}
+}

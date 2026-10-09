@@ -1,0 +1,2 @@
+# Golden fixtures lock the exact bytes emitted by the Markdown writers.
+test/golden/** text eol=lf

@@ -1,0 +1,342 @@
+/* =================================================================
+   NAND workbench shell: (1) rail · (2) side panel · (3) page.
+   Sizes come from the shell tokens in src/ui/styles/000-foundation.css.
+   ================================================================= */
+
+.workspace-leaf-content[data-type="nand-workbench-view"] > .view-content {
+	padding: 0;
+	overflow: hidden;
+}
+body:not(.is-mobile) .workspace-leaf-content[data-type="nand-workbench-view"] > .view-header {
+	display: none;
+}
+
+.nand-shell {
+	position: relative;
+	display: grid;
+	grid-template-columns: var(--nand-rail-width) auto minmax(0, 1fr);
+	height: 100%;
+	min-height: 0;
+	background: var(--background-primary);
+	color: var(--text-normal);
+}
+.nand-shell--medium { grid-template-columns: var(--nand-rail-width) minmax(0, 1fr); }
+.nand-shell--narrow,
+.nand-shell.is-focus { grid-template-columns: minmax(0, 1fr); }
+.nand-shell.is-resizing { cursor: col-resize; user-select: none; }
+
+/* ----- (1) Rail ----- */
+.nand-rail {
+	display: flex;
+	flex-direction: column;
+	justify-content: space-between;
+	align-items: center;
+	min-height: 0;
+	padding: var(--nand-space-2) 0;
+	background: var(--background-secondary);
+	border-inline-end: var(--nand-border);
+}
+.nand-rail-group {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: var(--nand-space-1);
+}
+.nand-rail-item { position: relative; }
+.nand-rail-item.is-active::before {
+	content: "";
+	position: absolute;
+	inset-block: 8px;
+	inset-inline-start: calc((var(--nand-rail-width) - 36px) / -2);
+	width: 3px;
+	border-radius: 0 3px 3px 0;
+	background: var(--interactive-accent);
+}
+button.nand-rail-button {
+	width: 36px;
+	height: 36px;
+	border-radius: 10px;
+}
+button.nand-rail-button svg { width: 20px; height: 20px; }
+.nand-rail-item.is-active button.nand-rail-button {
+	background: var(--nand-surface-active);
+	color: var(--interactive-accent);
+}
+.nand-rail-badge {
+	position: absolute;
+	top: 1px;
+	inset-inline-end: -2px;
+	min-width: 16px;
+	height: 16px;
+	padding: 0 4px;
+	border-radius: var(--nand-radius-pill);
+	background: var(--interactive-accent);
+	color: var(--text-on-accent);
+	font-size: 10px;
+	font-weight: var(--font-semibold);
+	line-height: 16px;
+	text-align: center;
+	pointer-events: none;
+}
+.nand-rail-warning {
+	position: absolute;
+	top: 4px;
+	inset-inline-end: 4px;
+	width: 8px;
+	height: 8px;
+	border-radius: 50%;
+	background: var(--nand-tone-error);
+	box-shadow: 0 0 0 2px var(--background-secondary);
+	pointer-events: none;
+}
+.nand-rail--horizontal {
+	flex-direction: row;
+	padding: var(--nand-space-2);
+	border-inline-end: none;
+	border-bottom: var(--nand-border);
+	overflow-x: auto;
+}
+.nand-rail--horizontal .nand-rail-group { flex-direction: row; }
+.nand-rail--horizontal .nand-rail-item.is-active::before {
+	inset-block: auto -8px;
+	inset-inline: 8px;
+	width: auto;
+	height: 3px;
+	border-radius: 3px 3px 0 0;
+}
+
+/* ----- (2) Side panel ----- */
+.nand-panel {
+	display: flex;
+	flex-direction: column;
+	width: var(--nand-panel-width);
+	min-width: 0;
+	min-height: 0;
+	background: var(--background-secondary);
+	border-inline-end: var(--nand-border);
+}
+.nand-panel-header {
+	display: flex;
+	align-items: center;
+	gap: var(--nand-space-1);
+	flex: none;
+	height: var(--nand-header-height);
+	padding: 0 var(--nand-space-2) 0 var(--nand-space-4);
+}
+.nand-panel-title {
+	flex: 1 1 auto;
+	min-width: 0;
+	margin: 0;
+	overflow: hidden;
+	font-size: var(--nand-text-title);
+	font-weight: var(--font-semibold);
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+.nand-panel-primary,
+.nand-panel-search { flex: none; padding: 0 var(--nand-space-3) var(--nand-space-2); }
+button.nand-panel-primary-button { justify-content: flex-start; width: 100%; }
+.nand-panel-body {
+	flex: 1 1 auto;
+	min-height: 0;
+	overflow-y: auto;
+	padding: 0 var(--nand-space-2) var(--nand-space-3);
+}
+.nand-panel-section + .nand-panel-section { margin-top: var(--nand-space-2); }
+.nand-panel-empty {
+	padding: var(--nand-space-2);
+	color: var(--text-faint);
+	font-size: var(--nand-text-caption);
+}
+.nand-panel-custom .nand-workbench-context { border-top: var(--nand-border); margin-top: var(--nand-space-2); padding-top: var(--nand-space-2); }
+.nand-panel-custom .nand-workbench-context:empty { display: none; }
+.nand-shell-resizer {
+	position: absolute;
+	top: 0;
+	bottom: 0;
+	inset-inline-start: calc(var(--nand-rail-width) + var(--nand-panel-width) - 3px);
+	z-index: var(--nand-z-sticky);
+	width: 6px;
+	cursor: col-resize;
+}
+.nand-shell-resizer:hover::after,
+.nand-shell-resizer:focus-visible::after,
+.nand-shell.is-resizing .nand-shell-resizer::after {
+	content: "";
+	position: absolute;
+	inset-block: 0;
+	inset-inline-start: 2px;
+	width: 2px;
+	background: var(--interactive-accent);
+}
+.nand-shell-resizer:focus-visible { outline: none; }
+
+/* ----- Overlay panel (medium) and combined drawer (narrow) ----- */
+/* `.nand-shell >` outranks Obsidian's `button:not(.clickable-icon)` sizing. */
+.nand-shell > .nand-shell-scrim {
+	position: absolute;
+	inset: 0;
+	z-index: var(--nand-z-overlay);
+	width: auto;
+	height: auto;
+	padding: 0;
+	border: none;
+	border-radius: 0;
+	background: color-mix(in srgb, black 28%, transparent);
+	box-shadow: none;
+	animation: nand-fade-in var(--nand-duration) var(--nand-ease);
+}
+.nand-shell-overlay {
+	position: absolute;
+	top: 0;
+	bottom: 0;
+	z-index: var(--nand-z-popover);
+	display: flex;
+	flex-direction: column;
+	background: var(--background-secondary);
+	box-shadow: var(--nand-shadow-lg);
+	animation: nand-slide-in var(--nand-duration) var(--nand-ease);
+}
+.nand-shell-overlay--medium { inset-inline-start: var(--nand-rail-width); width: min(var(--nand-panel-width), 85%); }
+.nand-shell-overlay--narrow { inset-inline-start: 0; width: min(320px, 88%); }
+.nand-shell-overlay .nand-panel { flex: 1 1 auto; width: 100%; border-inline-end: none; }
+
+/* ----- (3) Page ----- */
+/* Always the last column: with the panel closed (or no rail) it must not fall into the panel's `auto` track. */
+.nand-shell-main {
+	position: relative;
+	grid-row: 1;
+	grid-column: -2 / -1;
+	display: flex;
+	flex-direction: column;
+	min-width: 0;
+	min-height: 0;
+	background: var(--background-primary);
+}
+.nand-page-header {
+	display: flex;
+	align-items: center;
+	gap: var(--nand-space-2);
+	flex: none;
+	height: var(--nand-header-height);
+	padding: 0 var(--nand-space-3);
+	border-bottom: var(--nand-border);
+}
+.nand-page-title {
+	min-width: 0;
+	margin: 0;
+	overflow: hidden;
+	font-size: var(--nand-text-title);
+	font-weight: var(--font-semibold);
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+.nand-page-title:focus-visible { outline: none; box-shadow: var(--nand-focus-ring); border-radius: var(--nand-radius-xs); }
+.nand-page-busy {
+	flex: none;
+	width: 14px;
+	height: 14px;
+	border: 2px solid var(--nand-border-color);
+	border-top-color: var(--interactive-accent);
+	border-radius: 50%;
+	animation: nand-spin 0.8s linear infinite;
+}
+.nand-page-statuses { display: flex; gap: var(--nand-space-1); min-width: 0; overflow: hidden; }
+button.nand-status-chip {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	height: 24px;
+	padding: 0 var(--nand-space-2);
+	border: none;
+	border-radius: var(--nand-radius-pill);
+	background: var(--nand-surface-muted);
+	box-shadow: none;
+	color: var(--text-muted);
+	font-size: var(--nand-text-caption);
+	white-space: nowrap;
+	cursor: pointer;
+}
+button.nand-status-chip:hover { color: var(--text-normal); }
+.nand-status-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--text-faint); }
+.nand-status-chip.is-running .nand-status-dot { background: var(--interactive-accent); }
+.nand-status-chip.is-error .nand-status-dot { background: var(--nand-tone-error); }
+
+.nand-tabstrip {
+	display: flex;
+	align-items: center;
+	gap: var(--nand-space-1);
+	flex: none;
+	height: 36px;
+	padding: 0 var(--nand-space-2);
+	border-bottom: var(--nand-border);
+	background: var(--background-secondary);
+}
+.nand-tabstrip-tabs {
+	display: flex;
+	gap: 2px;
+	min-width: 0;
+	overflow-x: auto;
+	scrollbar-width: none;
+}
+.nand-tab {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	flex: none;
+	width: 180px;
+	height: 28px;
+	padding: 0 2px 0 var(--nand-space-2);
+	border-radius: var(--nand-radius-sm);
+	color: var(--text-muted);
+	font-size: var(--nand-text-body);
+	cursor: pointer;
+}
+.nand-tab:hover { background: var(--nand-surface-hover); color: var(--text-normal); }
+.nand-tab.is-active { background: var(--background-primary); box-shadow: var(--nand-shadow-xs); color: var(--text-normal); }
+.nand-tab:focus-visible { outline: none; box-shadow: var(--nand-focus-ring); }
+.nand-tab-icon { display: flex; flex: none; }
+.nand-tab-icon svg { width: 14px; height: 14px; }
+.nand-tab-title { flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.nand-tab-close { display: flex; opacity: 0; }
+.nand-tab:hover .nand-tab-close,
+.nand-tab.is-active .nand-tab-close { opacity: 1; }
+
+.nand-shell-message {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: var(--nand-space-3);
+	margin: var(--nand-space-3) var(--nand-space-4) 0;
+	padding: var(--nand-space-3) var(--nand-space-4);
+	border-radius: var(--nand-radius-md);
+	background: var(--nand-surface-muted);
+	color: var(--text-muted);
+}
+.nand-shell-message.is-error { background: color-mix(in srgb, var(--nand-tone-error) 10%, transparent); color: var(--text-error); }
+.nand-shell-pages { position: relative; flex: 1 1 auto; min-height: 0; }
+
+/* ----- Settings and icons pages (single readable column) ----- */
+.nand-settings-page-host { overflow-y: auto; }
+.nand-settings-page {
+	box-sizing: border-box;
+	max-width: 760px;
+	margin: 0 auto;
+	padding: var(--nand-space-6) var(--nand-space-6) var(--nand-space-8);
+}
+.nand-settings-page-title { margin: 0 0 var(--nand-space-4); font-size: var(--nand-text-heading); font-weight: var(--font-semibold); }
+
+/* ----- Motion: layout changes once; only transforms animate (terminals re-fit once) ----- */
+.nand-shell.is-opening .nand-panel { animation: nand-panel-in var(--nand-duration) var(--nand-ease); }
+.nand-shell.is-opening > .nand-shell-main { animation: nand-main-from-start var(--nand-duration) var(--nand-ease); }
+.nand-shell.is-closing > .nand-shell-main { animation: nand-main-from-end var(--nand-duration) var(--nand-ease); }
+@keyframes nand-panel-in { from { opacity: 0; transform: translateX(-16px); } }
+@keyframes nand-main-from-start { from { transform: translateX(calc(-1 * var(--nand-panel-width))); } }
+@keyframes nand-main-from-end { from { transform: translateX(var(--nand-panel-width)); } }
+@keyframes nand-slide-in { from { opacity: 0; transform: translateX(-24px); } }
+@keyframes nand-fade-in { from { opacity: 0; } }
+@keyframes nand-spin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) {
+	.nand-shell *,
+	.nand-shell { animation: none; }
+}

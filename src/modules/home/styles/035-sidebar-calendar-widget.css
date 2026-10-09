@@ -1,0 +1,206 @@
+/* ===== Sidebar Calendar Widget ===== */
+.dashboard-sidebar-calendar {
+	position: relative;
+	overflow: hidden;
+}
+
+/* The nav's toolbar spacer fights the label's flex:1 for the leftover width,
+   carving a wide dead gap between the view toggle and the today button (right
+   side reads asymmetric against the left). The label alone owns the slack:
+   [prev][label stretches][next][toggle][today] packs both edges evenly. */
+.dashboard-sidebar-calendar .dashboard-library-toolbar-spacer {
+	display: none;
+}
+
+.dashboard-sidebar-calendar .dashboard-calendar-content {
+	padding: 0;
+}
+
+.dashboard-sidebar-calendar .dashboard-calendar-nav {
+	display: flex;
+	align-items: center;
+	gap: 2px;
+	min-height: 22px;
+	margin-bottom: 8px;
+}
+
+.dashboard-sidebar-calendar .dashboard-calendar-nav-label {
+	flex: 1;
+	/* flex:1 alone floors at min-content — with nowrap the month label ("2026
+	   年 9 月") refuses to shrink below its text and pushes the nav 20px past
+	   the card at the 180px sidebar floor. min-width:0 lets the ellipsis do
+	   its job. */
+	min-width: 0;
+	text-align: center;
+	font-size: 0.85em;
+	font-weight: 600;
+	color: var(--db-text);
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+.dashboard-sidebar-calendar .dashboard-calendar-nav-btn {
+	flex-shrink: 0;
+	width: 22px;
+	height: 22px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	cursor: pointer;
+	border-radius: var(--db-radius-sm, 6px);
+	color: var(--db-text-muted);
+	transition: background-color var(--nand-duration) var(--nand-ease), color var(--nand-duration) var(--nand-ease);
+}
+
+.dashboard-sidebar-calendar .dashboard-calendar-nav-btn:focus-visible,
+.dashboard-sidebar-calendar .dashboard-calendar-today-btn:focus-visible,
+.dashboard-sidebar-calendar .dashboard-calendar-cell.is-clickable:focus-visible {
+	outline: 2px solid var(--db-accent);
+	outline-offset: -1px;
+}
+
+.dashboard-sidebar-calendar .dashboard-calendar-nav-btn:hover {
+	background: var(--db-bg-hover);
+	color: var(--db-text);
+}
+
+.dashboard-sidebar-calendar .dashboard-calendar-nav-btn svg {
+	width: 14px;
+	height: 14px;
+}
+
+/* Icon-only button (maximize): strip Obsidian's default `button` chrome —
+   background-color + inset box-shadow read as a filled, bordered chip next to
+   the div-based view toggle, which never receives that chrome. Same
+   !important reset pattern as .dashboard-qa-pin-btn / .dashboard-qa-add-btn. */
+.dashboard-sidebar-calendar .dashboard-calendar-today-btn {
+	flex-shrink: 0;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 22px;
+	height: 22px;
+	padding: 0;
+	background: none !important;
+	background-color: transparent !important;
+	border: none !important;
+	box-shadow: none !important;
+	cursor: pointer;
+	border-radius: var(--db-radius-sm, 6px);
+	color: var(--db-text-muted);
+	transition: background 0.15s ease, color 0.15s ease;
+}
+
+.dashboard-sidebar-calendar .dashboard-calendar-today-btn:hover {
+	/* !important to clear the base rule's !important reset, keeping the same
+	   hover tint as the nav/view buttons. */
+	background: var(--db-bg-hover) !important;
+	color: var(--db-accent);
+}
+
+.dashboard-sidebar-calendar .dashboard-calendar-today-btn svg {
+	width: 14px;
+	height: 14px;
+}
+
+/* Phone manual-load state: refresh button under the hint text. Mirrors the
+   today-btn styling; resets Obsidian's `.is-tablet button` padding (harmless
+   on phones — no .is-tablet there) and the base `button` padding/height so
+   it stays a compact square. */
+.dashboard-calendar-refresh-btn {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 30px;
+	height: 30px;
+	margin-top: 4px;
+	padding: 0;
+	background: transparent;
+	border: 1px solid var(--db-border-card, var(--background-modifier-border));
+	border-radius: var(--db-radius-sm, 6px);
+	cursor: pointer;
+	color: var(--db-text-muted);
+	transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+
+.dashboard-calendar-refresh-btn:hover {
+	background: var(--db-bg-hover);
+	color: var(--db-accent);
+	border-color: var(--db-accent);
+}
+
+.dashboard-calendar-refresh-btn svg {
+	width: 14px;
+	height: 14px;
+}
+
+/* Compact the month/week toggle for the narrow sidebar. Single switch button:
+   shows the view you'd switch TO (no active state needed). */
+.dashboard-sidebar-calendar .dashboard-calendar-view-toggle {
+	flex-shrink: 0;
+}
+
+.dashboard-sidebar-calendar .dashboard-library-view-btn {
+	padding: 4px 6px;
+	border-radius: var(--db-radius-sm, 6px);
+}
+
+.dashboard-sidebar-calendar .dashboard-library-view-btn svg {
+	width: 13px;
+	height: 13px;
+}
+
+/* Dot-mode month grid: equal square-ish cells, number + a single accent dot */
+.dashboard-sidebar-calendar .dashboard-calendar.is-compact .dashboard-calendar-body {
+	display: grid;
+	grid-template-columns: repeat(7, 1fr);
+	gap: 2px;
+}
+
+.dashboard-sidebar-calendar .dashboard-calendar.is-compact .dashboard-calendar-cell {
+	aspect-ratio: 1 / 1;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	gap: 2px;
+	padding: 0;
+	min-height: 0;
+	border-radius: var(--db-radius-sm, 6px);
+}
+
+.dashboard-sidebar-calendar .dashboard-calendar.is-compact .dashboard-calendar-cell-num {
+	font-size: 0.78em;
+	line-height: 1;
+	font-variant-numeric: tabular-nums;
+}
+
+.dashboard-sidebar-calendar .dashboard-calendar.is-compact .dashboard-calendar-cell.is-clickable {
+	cursor: pointer;
+	transition: background-color var(--nand-duration) var(--nand-ease);
+}
+
+.dashboard-sidebar-calendar .dashboard-calendar.is-compact .dashboard-calendar-cell.is-clickable:hover {
+	background: var(--db-bg-hover);
+}
+
+.dashboard-sidebar-calendar .dashboard-calendar.is-compact .dashboard-calendar-cell.is-today {
+	background: color-mix(in srgb, var(--db-accent) 22%, transparent);
+	color: var(--db-text);
+	font-weight: 700;
+}
+
+.dashboard-sidebar-calendar .dashboard-calendar.is-compact .dashboard-calendar-cell.is-outside {
+	opacity: 0.4;
+}
+
+/* The dot shown under the day number when the day has tasks (dotMode only) */
+.dashboard-calendar-cell-dot {
+	width: 5px;
+	height: 5px;
+	border-radius: 50%;
+	background: var(--db-accent);
+	flex-shrink: 0;
+}
+

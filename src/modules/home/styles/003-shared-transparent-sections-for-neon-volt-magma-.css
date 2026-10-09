@@ -1,0 +1,13 @@
+/* ===== Shared: transparent sections for neon, volt, magma, onyx, mono ===== */
+
+/* Tighter kanban gap for neon, volt, magma, onyx */
+
+/* =================================================================
+   COMPONENT STYLES
+   ================================================================= */
+
+/* Reset Obsidian view-content padding for dashboard */
+.workspace-leaf-content[data-type="nand-dashboard-view"] .view-content {
+	padding: 0 !important;
+}
+

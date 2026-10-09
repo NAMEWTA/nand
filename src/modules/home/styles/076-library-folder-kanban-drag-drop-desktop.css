@@ -1,0 +1,24 @@
+/* ===== Library folder-kanban drag & drop (desktop) ===== */
+.dashboard-library-kanban-card[draggable="true"] {
+	cursor: grab;
+}
+
+.dashboard-library-kanban-card[draggable="true"]:active {
+	cursor: grabbing;
+}
+
+.dashboard-library-kanban-card--dragging {
+	opacity: 0.4;
+	transform: rotate(2deg);
+	transition: none;
+}
+
+/* Drop target: accent-tinted column with an accent border (solid, not the
+   old dashed outline) so the target reads calmly. */
+.dashboard-library-kanban-col--drag-over {
+	background: color-mix(in srgb, var(--db-accent, var(--interactive-accent)) 12%, var(--db-bg-section, transparent));
+	border-color: var(--db-accent, var(--interactive-accent));
+	outline: 1px solid var(--db-accent, var(--interactive-accent));
+	outline-offset: -1px;
+}
+

@@ -1,0 +1,16 @@
+/* Records pages (habits, expenses, Pomodoro, reading): the former statistics dialogs as workbench pages. */
+.nand-records-page { height: 100%; overflow-y: auto; padding: var(--nand-space-4) var(--nand-space-6); }
+
+/* The panels keep their dialog classes for their inner layout; the page drops the floating frame. */
+.nand-records-page .nand-records-page-body {
+	width: 100%;
+	max-width: 1040px;
+	max-height: none;
+	margin: 0 auto;
+	padding: 0;
+	overflow: visible;
+	background: transparent;
+	border: none;
+	border-radius: 0;
+	box-shadow: none;
+}

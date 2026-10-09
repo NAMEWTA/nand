@@ -1,0 +1,94 @@
+name: Release
+
+on:
+    push:
+        tags:
+            - "*"
+
+permissions:
+    contents: write
+    id-token: write
+    attestations: write
+
+jobs:
+    terminal:
+        uses: ./.github/workflows/terminal-build.yml
+    release:
+        needs: terminal
+        runs-on: ubuntu-latest
+
+        steps:
+            - uses: actions/checkout@v5
+
+            - uses: pnpm/action-setup@v4
+
+            - uses: actions/setup-node@v5
+              with:
+                  node-version: 22.x
+                  cache: pnpm
+
+            - run: pnpm install --frozen-lockfile
+            - name: Verify versions and changelog
+              env:
+                  RELEASE_TAG: ${{ github.ref_name }}
+              run: node scripts/verify-release-artifacts.mjs "$RELEASE_TAG"
+            - run: pnpm run build
+            - name: The tagged commit carries its own build
+              run: git diff --exit-code -- main.js styles.css
+            - run: pnpm run check:bundle
+
+            - name: Package plugin files
+              id: package
+              env:
+                  RELEASE_TAG: ${{ github.ref_name }}
+              run: |
+                  id=$(node -p "require('./manifest.json').id")
+                  rm -rf dist release-assets
+                  mkdir -p "dist/$id" release-assets
+                  cp main.js manifest.json styles.css "dist/$id/"
+                  cp main.js manifest.json styles.css release-assets/
+                  zip_name="${id}-${RELEASE_TAG}.zip"
+                  (cd dist && zip -r "../release-assets/$zip_name" "$id")
+                  echo "zip=release-assets/$zip_name" >> "$GITHUB_OUTPUT"
+                  node scripts/verify-release-artifacts.mjs "$RELEASE_TAG" --plugin release-assets
+
+            - name: Generate build provenance attestation
+              uses: actions/attest-build-provenance@v2
+              with:
+                  subject-path: |
+                      ${{ steps.package.outputs.zip }}
+                      release-assets/main.js
+                      release-assets/styles.css
+
+            - uses: actions/download-artifact@v4
+              with:
+                  pattern: terminal-*
+                  merge-multiple: true
+                  path: terminal-artifacts
+
+            - name: Verify all terminal assets and checksums
+              env:
+                  RELEASE_TAG: ${{ github.ref_name }}
+              run: node scripts/verify-release-artifacts.mjs "$RELEASE_TAG" terminal-artifacts
+
+            - name: Exercise packaged Linux helper
+              run: |
+                  chmod +x terminal-artifacts/nand-pty-linux-x64
+                  node scripts/verify-pty-helper.mjs terminal-artifacts/nand-pty-linux-x64
+
+            - name: Checksums for every asset
+              env:
+                  RELEASE_TAG: ${{ github.ref_name }}
+              run: |
+                  cp terminal-artifacts/* release-assets/
+                  cp LICENSE NOTICE THIRD-PARTY-NOTICES.md release-assets/
+                  node scripts/verify-release-artifacts.mjs "$RELEASE_TAG" --sums release-assets
+
+            - name: Create GitHub release
+              uses: softprops/action-gh-release@v2
+              with:
+                  files: |
+                      release-assets/*
+                  generate_release_notes: true
+                  prerelease: ${{ contains(github.ref_name, '-') }}
+                  make_latest: ${{ !contains(github.ref_name, '-') }}

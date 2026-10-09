@@ -1,0 +1,1642 @@
+/* ===== Stacked layout (desktop/tablet only) ===== */
+/* Top-bottom board: widget strip under the banner, sections below. Guarded by
+   the exact inverse of the phone block's @media (max-width: 640px) so the two
+   ranges are disjoint and phone CSS keeps winning by construction. Phones
+   render data-layout="side" anyway (isStackedLayout excludes them). Not a
+   container query on purpose: laying containment on the root would affect its
+   position:fixed descendants (.dashboard-scroll-top); narrow desktop PANES are
+   fine — the strip scrolls horizontally at any pane width and the board adapts
+   via its own container query. (At viewport widths <=640px the phone treatment
+   takes over instead: the sidebar is hidden and widgets live in the mobile
+   bar.) */
+@media (min-width: 641px) {
+	/* Column board: widget strip on top, sections below. */
+	[data-layout="stacked"] .dashboard-main {
+		flex-direction: column;
+	}
+
+	/* The quick-notes work bar (hoisted out of the kanban by view.ts) rides
+	   above the widget strip. Its base flex-basis 100% means WIDTH inside the
+	   kanban's row layout but HEIGHT in this column layout — neutralize to
+	   auto so the bar keeps its natural single-row height. */
+	[data-layout="stacked"] .dashboard-main > .dashboard-quicknote {
+		flex: 0 0 auto;
+	}
+
+	/* Shared scroll region: the quick-notes bar above stays pinned while the
+	   widget deck AND the board scroll together through this one viewport.
+	   Thin auto-hiding scrollbar, same recipe as the sections. */
+	[data-layout="stacked"] .dashboard-scroll-region {
+		flex: 1;
+		min-height: 0;
+		display: flex;
+		flex-direction: column;
+		gap: 10px;
+		overflow-y: auto;
+		scrollbar-width: thin;
+		scrollbar-color: transparent transparent;
+	}
+	[data-layout="stacked"] .dashboard-scroll-region:hover {
+		scrollbar-color: color-mix(in srgb, var(--db-accent, var(--interactive-accent)) 18%, transparent) transparent;
+	}
+
+	/* The sidebar stops being a fixed-width hover rail and becomes a full-width
+	   strip host INSIDE the scroll region: natural height (the deck's grid
+	   caps itself), no internal scrolling. The rail state classes keep strip
+	   semantics: collapsed = slim horizontal bar, pinned = always open. The
+	   generous max-height cap exists so the collapse animation has a numeric
+	   start value (none->16px cannot interpolate). */
+	[data-layout="stacked"] .dashboard-sidebar {
+		width: auto;
+		flex-shrink: 0;
+		max-height: 2000px;
+		overflow: hidden;
+		transition: max-height 0.3s cubic-bezier(0.34, 1.2, 0.64, 1), opacity 0.25s ease;
+		/* Widget strip unit height (the 6-row grid unit). Declared HERE, not on
+		   the strip row: a custom property declared on the row itself would
+		   shadow the value the drag handle / render writes inline on the
+		   sidebar, and the row's grid-template-rows reads it through
+		   inheritance. The renderer (view.applySidebarSizing) and the strip
+		   height drag both write this same property on this same element.
+		   Below ~300px the calendar card grows an internal scrollbar (cards
+		   scroll internally by design); the drag floor is 240px. */
+		--db-widget-unit-h: 300px;
+	}
+
+	[data-layout="stacked"] .dashboard-sidebar-scroll {
+		overflow: visible;
+		padding: 0;
+	}
+
+	/* Strip height drag handle: a centered pill riding the strip's bottom
+	   edge. INSIDE the sidebar box (bottom: 0, not -5px) because the stacked
+	   sidebar is overflow: hidden — a negative offset would be clipped. As a
+	   direct sidebar child it is auto-hidden in the collapsed state by the
+	   rail's `> *:not(.slim-indicator)` rule. The 72px center zone overlaps a
+	   sliver of the strip's hover scrollbar — an accepted trade for keeping
+	   the grip out of the cards' click area. */
+	[data-layout="stacked"] .dashboard-sidebar-strip-handle {
+		position: absolute;
+		left: 50%;
+		transform: translateX(-50%);
+		bottom: 0;
+		width: 72px;
+		height: 10px;
+		cursor: ns-resize;
+		z-index: 6;
+		touch-action: none;
+	}
+
+	[data-layout="stacked"] .dashboard-sidebar-strip-handle::before {
+		content: '';
+		position: absolute;
+		left: 50%;
+		bottom: 2px;
+		transform: translateX(-50%);
+		width: 40px;
+		height: 3px;
+		border-radius: 2px;
+		background: var(--db-text-faint);
+		opacity: 0.45;
+		transition: opacity 0.2s ease, background 0.2s ease;
+	}
+
+	[data-layout="stacked"] .dashboard-sidebar-strip-handle:hover::before {
+		opacity: 0.95;
+		background: var(--db-accent, var(--interactive-accent));
+	}
+
+	/* The board unrolls to natural height inside the region — the kanban's
+	   own scroller (base rule) is neutralized; sections keep their per-type
+	   max-heights and internal card scrolling. */
+	[data-layout="stacked"] .dashboard-kanban-wrapper {
+		overflow: visible;
+	}
+
+	[data-layout="stacked"] .dashboard-kanban {
+		overflow: visible;
+		flex: 0 0 auto;
+	}
+
+	/* Collapsed strip: slim bar mirroring the rail's 15px sliver. The rail's
+	   child-hiding rule (> *:not(slim-indicator)) applies unchanged. */
+	[data-layout="stacked"] .dashboard-sidebar--collapsed {
+		max-height: 16px;
+		cursor: pointer;
+		overflow: hidden;
+	}
+
+	/* Slim indicator becomes a horizontal pill on the strip. */
+	[data-layout="stacked"] .dashboard-sidebar--collapsed .dashboard-sidebar-slim-indicator {
+		width: 40px;
+		height: 4px;
+	}
+
+	/* Stacked mode hides the week-calendar row and the recent-docs block. */
+	[data-layout="stacked"] .dashboard-sidebar-week-calendar,
+	[data-layout="stacked"] .dashboard-recent {
+		display: none;
+	}
+
+	/* Quick actions as the pinned leftmost card in the strip grid: neutralize
+	   the base fixed 180px height (the grid span owns sizing) and lay the
+	   buttons out VERTICALLY (single column). It exits the reorder system in
+	   stacked mode (renderer skips its DnD wiring), hence the default cursor. */
+	[data-layout="stacked"] .dashboard-sidebar-widgets-row > [data-widget-key="quickActions"] {
+		grid-row: span 6;
+		height: auto;
+		cursor: default;
+	}
+
+	[data-layout="stacked"] .dashboard-sidebar-widgets-row .dashboard-quick-actions .dashboard-qa-list {
+		grid-template-columns: repeat(2, 1fr);
+	}
+
+	/* The widget deck (built by renderSidebarWidgets in stacked mode): a
+	   6-row grid flowing COLUMN-MAJOR. Height ratios are exact fractions of
+	   one unit: full = 6 rows, two-thirds = 4, half = 3, third = 2 — 4+2,
+	   3+3 and 2+2+2 all tile one column exactly. Columns are a fixed width
+	   so cards stay uniform at any window size; overflow columns scroll
+	   horizontally. Row heights derive from the unit so the fractions never
+	   drift: 6 rows of calc((unit-h - 5*gap) / 6). Cards scroll internally
+	   when their content outgrows the fraction (habit lists, music panel).
+
+	   Per-type rules key off [data-widget-key], NOT the widget class: the
+	   in-place data-widget refresh (view.refreshDataWidget) re-mounts
+	   lunar/pomodoro/reading inside a bare wrapper that inherits the key, so
+	   class-keyed child selectors would silently lose their span after a
+	   refresh and collapse the card to one row.
+
+	   TIERED cards (habit / reading / album-*) read their span from the
+	   inline --db-widget-span variable the renderer writes after adaptive
+	   column packing ("preferred tier, downshift to exactly fill a column
+	   when it would otherwise misfit" — see src/widget-span.ts). The fallback
+	   in each var() is the card's historical default tier, so a missing
+	   variable reproduces the pre-feature layout. FIXED cards keep the
+	   hardcoded spans below, mirrored by STACKED_FIXED_SPANS in
+	   src/widget-span.ts — update both together. */
+	[data-layout="stacked"] .dashboard-sidebar-widgets-row {
+		--db-widget-unit: 240px;
+		display: grid;
+		grid-auto-flow: column;
+		grid-auto-columns: var(--db-widget-unit);
+		/* --db-widget-unit-h is declared on the stacked sidebar (see the
+		   comment there): the drag handle and render write it inline on the
+		   sidebar and the row inherits it. The 300px fallback covers a missing
+		   variable (e.g. hand-built DOM in tests). */
+		grid-template-rows: repeat(6, calc((var(--db-widget-unit-h, 300px) - 30px) / 6));
+		grid-row-gap: 6px;
+		grid-column-gap: 6px;
+		overflow-x: auto;
+		overflow-y: hidden;
+		/* Scrollbar mirrors the .dashboard-section-cards / quicknote-nav
+		   recipe: standard props on Chromium 121+ render the slim native pill
+		   and neutralize theme-level ::-webkit-scrollbar hijacks. Invisible at
+		   rest, accent-tinted on hover — the strip stays quiet until aimed at. */
+		scrollbar-width: thin;
+		scrollbar-color: transparent transparent;
+	}
+	[data-layout="stacked"] .dashboard-sidebar-widgets-row:hover {
+		scrollbar-color: color-mix(in srgb, var(--db-accent) 18%, transparent) transparent;
+	}
+	[data-layout="stacked"] .dashboard-sidebar-widgets-row::-webkit-scrollbar {
+		width: 0;
+		height: 4px;
+	}
+	[data-layout="stacked"] .dashboard-sidebar-widgets-row::-webkit-scrollbar-track {
+		background: transparent;
+	}
+	[data-layout="stacked"] .dashboard-sidebar-widgets-row::-webkit-scrollbar-thumb {
+		background: transparent;
+		border-radius: 3px;
+		transition: background 0.2s ease;
+	}
+	[data-layout="stacked"] .dashboard-sidebar-widgets-row:hover::-webkit-scrollbar-thumb {
+		background: color-mix(in srgb, var(--db-accent) 18%, transparent);
+	}
+
+	[data-layout="stacked"] .dashboard-sidebar-widgets-row > [data-widget-key] {
+		box-sizing: border-box;
+		grid-row: span 6;
+		overflow-y: auto;
+		overflow-x: hidden;
+		/* Fully invisible card scrollbar (hover/wheel still scrolls): the
+		   standard property both hides the bar and frees its gutter on
+		   Chromium 121+, and — the reason this beats a ::-webkit override —
+		   neutralizes theme-level scrollbar hijacks (the project recipe, see
+		   the quicknote bar). Inner scrollers (reading scroll) already hide
+		   their own. */
+		scrollbar-width: none;
+	}
+
+	/* Descendant (not child) so a refresh mount's inner widget keeps the
+	   tightened padding and fills the mount's grid slot. */
+	[data-layout="stacked"] .dashboard-sidebar-widgets-row .dashboard-sidebar-widget {
+		padding: 10px;
+	}
+
+	[data-layout="stacked"] .dashboard-sidebar-widgets-row > .dashboard-sidebar-widget-mount > .dashboard-sidebar-widget {
+		height: 100%;
+		box-sizing: border-box;
+	}
+
+	/* Two-thirds height: pairs with a third below to tile one column. */
+	[data-layout="stacked"] .dashboard-sidebar-widgets-row > [data-widget-key="weather"] {
+		grid-row: span 4;
+	}
+
+	/* Tiered: the renderer writes the packed span inline; the fallback is the
+	   historical default tier (two-thirds pairs with a third to tile a column). */
+	[data-layout="stacked"] .dashboard-sidebar-widgets-row > [data-widget-key="habit"] {
+		grid-row: span var(--db-widget-span, 4);
+	}
+
+	/* Half height: two stack to fill one column. */
+	[data-layout="stacked"] .dashboard-sidebar-widgets-row > [data-widget-key="pomodoro"],
+	[data-layout="stacked"] .dashboard-sidebar-widgets-row > [data-widget-key="expense"],
+	[data-layout="stacked"] .dashboard-sidebar-widgets-row > [data-widget-key="music"] {
+		grid-row: span 3;
+	}
+
+	/* Tiered: fallback = the historical half-height default. */
+	[data-layout="stacked"] .dashboard-sidebar-widgets-row > [data-widget-key="reading"] {
+		grid-row: span var(--db-widget-span, 3);
+	}
+
+	/* Third height: three stack to fill one column. */
+	[data-layout="stacked"] .dashboard-sidebar-widgets-row > [data-widget-key="lunar"],
+	[data-layout="stacked"] .dashboard-sidebar-widgets-row > [data-widget-key^="countdown-"],
+	[data-layout="stacked"] .dashboard-sidebar-widgets-row > [data-widget-key="yearProgress"],
+	[data-layout="stacked"] .dashboard-sidebar-widgets-row > [data-widget-key^="anniversary-"] {
+		grid-row: span 2;
+	}
+
+	/* Album cards take their span from the per-instance --db-widget-span
+	   (set inline by the renderer from each entry's heightRatio, carried onto
+	   the refresh mount by refreshDataWidget). Inside the fixed-height card
+	   the frame fills the body instead of keeping its aspect-ratio box, so
+	   smaller fractions crop the photos (layers are object-fit: cover)
+	   rather than overflowing. */
+	[data-layout="stacked"] .dashboard-sidebar-widgets-row > [data-widget-key^="album-"] {
+		grid-row: span var(--db-widget-span, 6);
+		display: flex;
+		flex-direction: column;
+		overflow: hidden;
+	}
+
+	[data-layout="stacked"] .dashboard-sidebar-widgets-row .dashboard-sidebar-album-body {
+		flex: 1;
+		min-height: 0;
+		display: flex;
+		flex-direction: column;
+	}
+
+	[data-layout="stacked"] .dashboard-sidebar-widgets-row .dashboard-sidebar-album-frame,
+	[data-layout="stacked"] .dashboard-sidebar-widgets-row .dashboard-sidebar-album-placeholder {
+		aspect-ratio: auto;
+		flex: 1;
+		min-height: 0;
+	}
+
+	/* The calendar defines the unit height but must never pay for it with an
+	   internal scrollbar: its content flexes to fill the fixed card (nav and
+	   weekday rows stay fixed, the month grid host takes the rest and only
+	   scrolls if a theme inflates it past the card). */
+	[data-layout="stacked"] .dashboard-sidebar-widgets-row > [data-widget-key="calendar"] {
+		display: flex;
+		flex-direction: column;
+		overflow: hidden;
+	}
+
+	/* Pomodoro compacted for the half-height card (content was ~44px over):
+	   smaller progress ring, tighter gaps and button padding. Side layout
+	   keeps the roomy proportions. */
+	[data-layout="stacked"] .dashboard-sidebar-widgets-row .dashboard-sidebar-pomodoro {
+		gap: 2px;
+		/* Center the cluster vertically: the compact content leaves slack and
+		   top-anchoring read head-heavy with a dead band at the bottom. */
+		justify-content: center;
+	}
+
+	[data-layout="stacked"] .dashboard-sidebar-widgets-row .dashboard-sidebar-pomodoro-ring-wrap {
+		width: 62px;
+		height: 62px;
+	}
+
+	/* Size the svg through the wrap (attribute width=72 would otherwise win
+	   in engines that drop the class) and keep it fully inside. */
+	[data-layout="stacked"] .dashboard-sidebar-widgets-row .dashboard-sidebar-pomodoro-ring-wrap svg {
+		width: 100%;
+		height: 100%;
+		display: block;
+	}
+
+	[data-layout="stacked"] .dashboard-sidebar-widgets-row .dashboard-sidebar-pomodoro-time {
+		font-size: 0.95em;
+	}
+
+	[data-layout="stacked"] .dashboard-sidebar-widgets-row .dashboard-sidebar-pomodoro-dots {
+		bottom: 7px;
+	}
+
+	[data-layout="stacked"] .dashboard-sidebar-widgets-row .dashboard-sidebar-pomodoro-main-btn {
+		padding: 1px 14px 0;
+		font-size: 0.7em;
+	}
+
+	[data-layout="stacked"] .dashboard-sidebar-widgets-row .dashboard-sidebar-widget.dashboard-sidebar-pomodoro {
+		padding-top: 8px;
+		padding-bottom: 4px;
+	}
+
+	/* Expense compacted for the half-height card: tighter paddings/gaps and
+	   slightly smaller form text/buttons so a titled card with entries fits
+	   without an internal scrollbar. Side layout keeps the roomy spacing. */
+	[data-layout="stacked"] .dashboard-sidebar-widgets-row .dashboard-sidebar-expense-top {
+		margin-bottom: 4px;
+	}
+
+	[data-layout="stacked"] .dashboard-sidebar-widgets-row .dashboard-sidebar-expense-form {
+		gap: 4px;
+		font-size: 0.92em;
+	}
+
+	[data-layout="stacked"] .dashboard-sidebar-widgets-row .dashboard-sidebar-widget.dashboard-sidebar-expense {
+		padding-top: 8px;
+		padding-bottom: 6px;
+	}
+
+	[data-layout="stacked"] .dashboard-sidebar-widgets-row .dashboard-sidebar-expense-row-main {
+		gap: 4px;
+	}
+
+	[data-layout="stacked"] .dashboard-sidebar-widgets-row [data-widget-key="calendar"] > .dashboard-calendar-content,
+	[data-layout="stacked"] .dashboard-sidebar-widgets-row > .dashboard-sidebar-calendar > .dashboard-calendar-content {
+		flex: 1;
+		min-height: 0;
+	}
+
+	[data-layout="stacked"] .dashboard-sidebar-widgets-row .dashboard-calendar-host {
+		flex: 1;
+		min-height: 0;
+		overflow-y: auto;
+	}
+}
+
+/* Habit Widget */
+.dashboard-sidebar-habit-top {
+	display: flex;
+	align-items: center;
+	flex-wrap: wrap;
+	gap: 4px 6px;
+	width: 100%;
+	min-height: 20px;
+	margin-bottom: 8px;
+}
+
+.dashboard-sidebar-habit-title {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	font-size: 0.7em;
+	font-weight: 600;
+	letter-spacing: 0.08em;
+	color: var(--db-accent);
+	user-select: none;
+	white-space: nowrap;
+	flex: 1;
+	min-width: max-content;
+}
+
+.dashboard-sidebar-habit-title-text {
+	flex-shrink: 0;
+}
+
+/* Tools use their own row so check-in counts never truncate the title. */
+.dashboard-sidebar-habit-tools {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	flex-basis: 100%;
+}
+
+.dashboard-sidebar-habit-title-icon {
+	display: flex;
+	align-items: center;
+	flex-shrink: 0;
+	opacity: 0.85;
+}
+
+.dashboard-sidebar-habit-title-icon svg {
+	width: 12px;
+	height: 12px;
+}
+
+.dashboard-sidebar-habit-count {
+	font-size: 0.65em;
+	color: var(--db-text-muted);
+	font-variant-numeric: tabular-nums;
+	user-select: none;
+}
+
+.dashboard-sidebar-habit-top-spacer {
+	flex: 1;
+}
+
+.dashboard-sidebar-habit-icon-btn {
+	width: 20px;
+	height: 20px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	cursor: pointer;
+	border-radius: var(--db-radius-sm);
+	opacity: 0.3;
+	color: var(--db-text-muted);
+	transition: opacity var(--nand-duration) var(--nand-ease), background-color var(--nand-duration) var(--nand-ease);
+	flex-shrink: 0;
+}
+
+.dashboard-sidebar-habit-icon-btn:hover {
+	opacity: 0.75;
+	background: var(--db-bg-hover);
+}
+
+.dashboard-sidebar-habit-list {
+	display: flex;
+	flex-direction: column;
+	gap: 2px;
+}
+
+.dashboard-sidebar-habit-item {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	padding: 4px 6px;
+	border-radius: var(--db-radius-sm);
+	cursor: pointer;
+	transition: background-color var(--nand-duration) var(--nand-ease);
+}
+
+.dashboard-sidebar-habit-item:focus-visible {
+	outline: 2px solid var(--db-accent);
+	outline-offset: -2px;
+}
+
+.dashboard-sidebar-habit-item:hover {
+	background: var(--db-bg-hover);
+}
+
+/* Keep a photo foreground paired with an opaque theme surface on hover. */
+.dashboard-sidebar-widget--has-bg .dashboard-sidebar-habit-item:hover {
+	--db-text: var(--db-control-text);
+	--db-text-muted: var(--db-control-text);
+	--db-accent: var(--db-control-text);
+	background: var(--db-control-bg);
+}
+
+.dashboard-sidebar-habit-check {
+	width: 16px;
+	height: 16px;
+	border: 1.5px solid var(--db-text-muted);
+	border-radius: 50%;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	flex-shrink: 0;
+	transition: border-color var(--nand-duration) var(--nand-ease), background-color var(--nand-duration) var(--nand-ease);
+}
+
+.dashboard-sidebar-habit-item:hover .dashboard-sidebar-habit-check:not(.dashboard-sidebar-habit-check--done) {
+	border-color: var(--db-accent);
+}
+
+.dashboard-sidebar-habit-check--done {
+	background: var(--db-accent);
+	border-color: var(--db-accent);
+	/* Check glyph tinted with the panel base so it contrasts with both
+	   bright (dark themes) and deep (light themes) accents. */
+	color: var(--db-bg);
+}
+
+.dashboard-sidebar-habit-check--done svg {
+	width: 10px;
+	height: 10px;
+}
+
+.dashboard-sidebar-habit-name {
+	flex: 1;
+	font-size: 0.75em;
+	color: var(--db-text);
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.dashboard-sidebar-habit-item--done .dashboard-sidebar-habit-name {
+	color: var(--db-text-muted);
+	text-decoration: line-through;
+}
+
+.dashboard-sidebar-habit-streak {
+	font-size: 0.62em;
+	color: var(--db-text-muted);
+	font-variant-numeric: tabular-nums;
+	flex-shrink: 0;
+	user-select: none;
+}
+
+.dashboard-sidebar-habit-empty {
+	font-size: 0.68em;
+	color: var(--db-text-muted);
+	text-align: center;
+	padding: 12px 8px;
+	opacity: 0.7;
+}
+
+/* Habit backfill modal (retro check-in, yesterday only). Row/check styling
+   mirrors the sidebar widget's tap-to-toggle language inside a modal. */
+.dashboard-habit-backfill-hint {
+	font-size: 0.78em;
+	color: var(--db-text-muted);
+	margin-bottom: 12px;
+}
+
+.dashboard-habit-backfill-empty {
+	font-size: 0.85em;
+	color: var(--db-text-muted);
+	text-align: center;
+	padding: 16px 0;
+}
+
+.dashboard-habit-backfill-selectall {
+	background: none;
+	border: none;
+	box-shadow: none;
+	padding: 2px 8px;
+	border-radius: var(--db-radius-sm);
+	font-size: 0.72em;
+	color: var(--db-accent);
+	cursor: pointer;
+	transition: background-color var(--nand-duration) var(--nand-ease);
+}
+
+.dashboard-habit-backfill-selectall:hover {
+	background: var(--db-bg-hover);
+}
+
+.dashboard-habit-backfill-list {
+	display: flex;
+	flex-direction: column;
+	gap: 2px;
+	max-height: 320px;
+	overflow-y: auto;
+}
+
+.dashboard-habit-backfill-item {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	padding: 8px;
+	border-radius: var(--db-radius-sm);
+	cursor: pointer;
+	transition: background-color var(--nand-duration) var(--nand-ease);
+}
+
+.dashboard-habit-backfill-item:hover {
+	background: var(--db-bg-hover);
+}
+
+/* Locked rows (already done yesterday): informational only — no hover, no
+   pointer, dimmed so the tickable rows read as the actionable set. */
+.dashboard-habit-backfill-item--locked {
+	cursor: default;
+	opacity: 0.6;
+}
+
+.dashboard-habit-backfill-item--locked:hover {
+	background: none;
+}
+
+.dashboard-habit-backfill-check {
+	width: 16px;
+	height: 16px;
+	border: 1.5px solid var(--db-text-muted);
+	border-radius: 50%;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	flex-shrink: 0;
+	transition: border-color var(--nand-duration) var(--nand-ease), background-color var(--nand-duration) var(--nand-ease);
+}
+
+.dashboard-habit-backfill-check--done {
+	background: var(--db-accent);
+	border-color: var(--db-accent);
+	/* Check glyph tinted with the panel base so it contrasts with both
+	   bright (dark themes) and deep (light themes) accents. */
+	color: var(--db-bg);
+}
+
+.dashboard-habit-backfill-check--done svg {
+	width: 10px;
+	height: 10px;
+}
+
+.dashboard-habit-backfill-name {
+	flex: 1;
+	font-size: 0.85em;
+	color: var(--db-text);
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.dashboard-habit-backfill-done-badge {
+	font-size: 0.68em;
+	color: var(--db-text-muted);
+	flex-shrink: 0;
+}
+
+/* Expense Widget */
+.dashboard-sidebar-expense-top {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	width: 100%;
+	min-height: 20px;
+	margin-bottom: 8px;
+}
+
+.dashboard-sidebar-expense-title {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	font-size: 0.7em;
+	font-weight: 600;
+	letter-spacing: 0.08em;
+	color: var(--db-accent);
+	user-select: none;
+	white-space: nowrap;
+}
+
+.dashboard-sidebar-expense-title-icon {
+	display: flex;
+	align-items: center;
+	flex-shrink: 0;
+	opacity: 0.85;
+}
+
+.dashboard-sidebar-expense-title-icon svg {
+	width: 12px;
+	height: 12px;
+}
+
+.dashboard-sidebar-expense-count {
+	font-size: 0.65em;
+	color: var(--db-text-muted);
+	user-select: none;
+	font-variant-numeric: tabular-nums;
+	white-space: nowrap;
+}
+
+.dashboard-sidebar-expense-top-spacer {
+	flex: 1;
+}
+
+.dashboard-sidebar-expense-icon-btn {
+	width: 20px;
+	height: 20px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	cursor: pointer;
+	border-radius: var(--db-radius-sm);
+	opacity: 0.3;
+	color: var(--db-text-muted);
+	transition: opacity var(--nand-duration) var(--nand-ease), background-color var(--nand-duration) var(--nand-ease);
+	flex-shrink: 0;
+}
+
+.dashboard-sidebar-expense-icon-btn:hover {
+	opacity: 0.75;
+	background: var(--db-bg-hover);
+}
+
+.dashboard-sidebar-expense-form {
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+	/* The sidebar marks widgets draggable; the entry form is a form, not a grip. */
+	cursor: default;
+}
+
+/* Single-line row: label leads the amount, today's total trails the
+   category select (the former two-line head+main doubled the height). */
+.dashboard-sidebar-expense-row-label {
+	display: flex;
+	align-items: center;
+	gap: 4px;
+	font-size: 0.68em;
+	color: var(--db-text-muted);
+	user-select: none;
+	flex-shrink: 0;
+}
+
+.dashboard-sidebar-expense-row-label-icon {
+	display: flex;
+	align-items: center;
+	flex-shrink: 0;
+}
+
+.dashboard-sidebar-expense-row-label-icon svg {
+	width: 11px;
+	height: 11px;
+}
+
+.dashboard-sidebar-expense-row--expense .dashboard-sidebar-expense-row-label-icon {
+	color: var(--db-danger, #e74c3c);
+}
+
+.dashboard-sidebar-expense-row--income .dashboard-sidebar-expense-row-label-icon {
+	color: #2ecc71;
+}
+
+/* Tighter floor than the shared widget card: the note row is the form's
+   last line and shouldn't float (user-tuned). */
+.dashboard-sidebar-widget.dashboard-sidebar-expense {
+	padding-bottom: 6px;
+}
+
+.dashboard-sidebar-expense-row-main {
+	display: flex;
+	align-items: center;
+	gap: 4px;
+	min-width: 0;
+}
+
+.dashboard-sidebar-expense-currency {
+	font-size: 0.7em;
+	color: var(--db-text-muted);
+	flex-shrink: 0;
+	user-select: none;
+}
+
+/* Ledger-style underline beneath ¥ + amount: the number reads as written on
+   a line. Accent-tinted while typing (focus-within), faint rule at rest. */
+.dashboard-sidebar-expense-amount-wrap {
+	display: flex;
+	align-items: center;
+	gap: 4px;
+	flex: 1 1 auto;
+	min-width: 0;
+	padding: 0 2px;
+	border-bottom: 1px solid color-mix(in srgb, var(--db-border-card) 85%, transparent);
+	transition: border-color var(--nand-duration) var(--nand-ease);
+}
+
+.dashboard-sidebar-expense-amount-wrap:focus-within {
+	border-bottom-color: var(--db-accent);
+}
+
+.dashboard-sidebar-expense-amount {
+	/* Kill the native input chrome: iOS WKWebView draws its own rounded field
+	   background from -webkit-appearance even when background/border are none
+	   (desktop Chromium doesn't). Any author-side appearance declaration beats
+	   the UA sheet, so no !important needed here. */
+	-webkit-appearance: none;
+	appearance: none;
+	background: none !important;
+	border: none !important;
+	box-shadow: none !important;
+	color: var(--db-text);
+	font-size: 0.82em;
+	padding: 3px 0;
+	outline: none;
+	font-family: var(--db-font);
+	font-variant-numeric: tabular-nums;
+	flex: 1 1 auto;
+	min-width: 0;
+	width: 0;
+	text-align: left;
+}
+
+.dashboard-sidebar-expense-amount::placeholder {
+	color: var(--db-text-faint);
+	opacity: 0.5;
+}
+
+.dashboard-sidebar-expense-invalid {
+	color: var(--db-danger, #e74c3c) !important;
+	animation: dashboard-expense-shake 0.3s;
+}
+
+@keyframes dashboard-expense-shake {
+	0%, 100% { transform: translateX(0); }
+	25% { transform: translateX(-3px); }
+	75% { transform: translateX(3px); }
+}
+
+.dashboard-sidebar-expense-category {
+	/* Borderless, shadowless and backgroundless to match the panel's underline
+	   minimalism; the chevron is painted as a background SVG since a styled
+	   <select> can't hold pseudo-elements. iOS falls back to menulist further
+	   down (see there). */
+	-webkit-appearance: none;
+	appearance: none;
+	background-color: transparent;
+	border: none;
+	box-shadow: none;
+	background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='5' viewBox='0 0 8 5'%3E%3Cpath d='M1 1l3 3 3-3' fill='none' stroke='rgba(128, 128, 128, 0.65)' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+	background-repeat: no-repeat;
+	background-position: right 3px center;
+	padding: 3px 14px 3px 4px;
+	border-radius: var(--db-radius-sm, 6px);
+	color: var(--db-text-muted);
+	font-size: 0.68em;
+	font-family: var(--db-font);
+	outline: none;
+	flex: 0 1 auto;
+	max-width: 42%;
+	min-width: 0;
+	/* Clip long category names inside the box: a styled <select> cannot
+	   ellipsize its selected option, so hidden overflow is the safe stop when
+	   the sidebar is dragged narrow. */
+	overflow: hidden;
+	text-overflow: ellipsis;
+	cursor: pointer;
+}
+
+/* iOS WKWebView renders an appearance:none <select> arrow-less (see the
+   countdown time select); keep the native menulist look there. */
+@supports (-webkit-touch-callout: none) {
+	.dashboard-sidebar-expense-category {
+		-webkit-appearance: menulist;
+		appearance: menulist;
+		background-image: none;
+		padding-right: 4px;
+	}
+}
+
+.dashboard-sidebar-expense-category:focus {
+	color: var(--db-text);
+}
+
+/* Note input + Log button share one line: input stretches, button hugs right. */
+.dashboard-sidebar-expense-note-wrap {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+}
+
+.dashboard-sidebar-expense-note {
+	flex: 1;
+	min-width: 0;
+	-webkit-appearance: none;
+	appearance: none;
+	background: none !important;
+	border: none !important;
+	box-shadow: none !important;
+	color: var(--db-text-muted);
+	font-size: 0.72em;
+	padding: 3px 0;
+	outline: none;
+	font-family: var(--db-font);
+}
+
+/* Flat text button (quicknote-chip idiom): Obsidian's native button styles
+   would otherwise win over theme tokens on a <button>, so background/shadow/
+   border are forced off. Accent text stays readable on the panel surface in
+   every theme — no accent-fill contrast handling needed. */
+.dashboard-sidebar-expense-submit {
+	flex-shrink: 0;
+	-webkit-appearance: none;
+	appearance: none;
+	border: none !important;
+	background: transparent !important;
+	box-shadow: none !important;
+	color: var(--db-accent) !important;
+	font-size: 0.72em;
+	font-weight: 600;
+	line-height: 1.4;
+	padding: 3px 8px;
+	cursor: pointer;
+	font-family: var(--db-font);
+	border-radius: var(--db-radius-sm, 6px);
+	transition: color var(--nand-duration) var(--nand-ease), background-color var(--nand-duration) var(--nand-ease);
+}
+
+.dashboard-sidebar-expense-submit:focus-visible {
+	outline: 2px solid var(--db-accent);
+	outline-offset: 1px;
+}
+
+.dashboard-sidebar-expense-submit:hover {
+	background-color: var(--db-bg-hover, rgba(128, 128, 128, 0.1)) !important;
+}
+
+.dashboard-sidebar-expense-submit:active {
+	background-color: var(--db-bg-hover-strong, rgba(128, 128, 128, 0.16)) !important;
+}
+
+.dashboard-sidebar-expense-note::placeholder {
+	color: var(--db-text-faint);
+	opacity: 0.5;
+}
+
+.dashboard-sidebar-expense-note:focus {
+	color: var(--db-text);
+}
+
+@media (max-width: 640px) {
+	.dashboard-sidebar-expense-category {
+		max-width: 45%;
+	}
+}
+
+/* Expense backfill dialog (themed config-modal skeleton) */
+.dashboard-expense-backfill-date {
+	width: 140px;
+	box-sizing: border-box;
+	/* Native calendar picker follows the light/dark mode. */
+	color-scheme: light dark;
+}
+
+.dashboard-expense-backfill-row {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	min-width: 0;
+}
+
+.dashboard-expense-backfill-currency {
+	flex-shrink: 0;
+	color: var(--db-text-muted);
+}
+
+.dashboard-expense-backfill-amount {
+	flex: 1 1 auto;
+	min-width: 0;
+}
+
+.dashboard-expense-backfill-category {
+	/* menulist keeps the native dropdown arrow on iOS WKWebView. */
+	-webkit-appearance: menulist;
+	appearance: menulist;
+	flex: 0 1 auto;
+	width: 38%;
+	min-width: 0;
+}
+
+/* Countdown Widget */
+.dashboard-sidebar-countdown {
+	position: relative;
+	text-align: center;
+}
+
+.dashboard-sidebar-countdown-settings-btn {
+	position: absolute;
+	top: 8px;
+	right: 8px;
+	visibility: hidden;
+	background: none !important;
+	border: none !important;
+	box-shadow: none !important;
+	color: var(--db-text-muted);
+	width: 20px;
+	height: 20px;
+	box-sizing: border-box;
+	padding: 0;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	border-radius: var(--db-radius-sm);
+	cursor: pointer;
+	opacity: 0;
+	transition: opacity var(--nand-duration) var(--nand-ease), color var(--nand-duration) var(--nand-ease);
+}
+
+.dashboard-sidebar-countdown-settings-btn svg {
+	width: 13px;
+	height: 13px;
+}
+
+.dashboard-sidebar-countdown:hover .dashboard-sidebar-countdown-settings-btn {
+	visibility: visible;
+	opacity: 0.5;
+}
+
+.dashboard-sidebar-countdown-settings-btn:hover {
+	opacity: 1 !important;
+}
+
+.dashboard-sidebar-countdown-content {
+	padding: 4px 0;
+}
+
+/* Anniversary widget: a compact title + elapsed value + source date. Same
+   family as the countdown card (muted label, accent value); centered — the
+   card is narrow in the stacked deck and centered reads like a keepsake. */
+.dashboard-sidebar-anniversary {
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+	text-align: center;
+	gap: 2px;
+}
+
+.dashboard-sidebar-anniversary-title {
+	font-size: 0.8em;
+	font-weight: 600;
+	color: var(--db-text);
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+.dashboard-sidebar-anniversary-value {
+	font-size: 1.6em;
+	font-weight: 700;
+	line-height: 1.2;
+	color: var(--db-accent);
+	font-variant-numeric: tabular-nums;
+}
+
+.dashboard-sidebar-anniversary-date {
+	font-size: 0.68em;
+	color: var(--db-text-muted);
+	font-variant-numeric: tabular-nums;
+}
+
+.dashboard-sidebar-countdown-until {
+	font-size: 0.8em;
+	color: var(--db-text-muted);
+	margin-bottom: 6px;
+}
+
+.dashboard-sidebar-countdown-flip {
+	display: flex;
+	align-items: baseline;
+	justify-content: center;
+	gap: 6px;
+	perspective: 200px;
+}
+
+.dashboard-sidebar-countdown-value {
+	font-size: 2.5em;
+	font-weight: 700;
+	line-height: 1;
+	color: var(--db-accent);
+	font-variant-numeric: tabular-nums;
+	transform-origin: center bottom;
+}
+
+.dashboard-sidebar-countdown-value--flip {
+	animation: countdown-flip 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes countdown-flip {
+	0% {
+		transform: rotateX(0deg);
+		opacity: 1;
+	}
+	40% {
+		transform: rotateX(-90deg);
+		opacity: 0;
+	}
+	60% {
+		transform: rotateX(90deg);
+		opacity: 0;
+	}
+	100% {
+		transform: rotateX(0deg);
+		opacity: 1;
+	}
+}
+
+.dashboard-sidebar-countdown-unit {
+	font-size: 0.85em;
+	color: var(--db-text-muted);
+}
+
+.dashboard-sidebar-countdown-placeholder {
+	color: var(--db-text-muted);
+	font-size: 0.85em;
+	padding: 12px 8px;
+	border-radius: var(--db-radius-sm);
+	cursor: pointer;
+	transition: background-color var(--nand-duration) var(--nand-ease);
+}
+
+.dashboard-sidebar-countdown-placeholder:hover {
+	background: var(--db-bg-hover);
+}
+
+.dashboard-sidebar-countdown-expired {
+	font-size: 1.2em;
+	font-weight: 600;
+	color: var(--db-text-secondary);
+	padding: 8px 0;
+}
+
+/* Album Widget */
+.dashboard-sidebar-album-frame {
+	position: relative;
+	aspect-ratio: 1 / 1;
+	border-radius: var(--db-radius-sm);
+	overflow: hidden;
+}
+
+/* Two ping-pong photo layers. The transition lives on the base layer (banner
+   house pattern); per-mode start states pin the incoming layer before the run
+   pass, --instant suppresses transitions during that setup. */
+.dashboard-sidebar-album-layer {
+	position: absolute;
+	inset: 0;
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+	transition: opacity 0.6s ease, transform 0.6s ease;
+	user-select: none;
+	pointer-events: none;
+}
+
+.dashboard-sidebar-album-layer--instant {
+	transition: none !important;
+}
+
+.dashboard-sidebar-album-layer--top {
+	z-index: 2;
+}
+
+.dashboard-sidebar-album-layer--bottom {
+	z-index: 1;
+}
+
+.dashboard-sidebar-album-layer--start-fade {
+	opacity: 0;
+}
+
+.dashboard-sidebar-album-layer--start-zoom {
+	opacity: 0;
+	transform: scale(1.06);
+}
+
+.dashboard-sidebar-album-layer--start-slide-in-right {
+	transform: translateX(100%);
+}
+
+.dashboard-sidebar-album-layer--start-slide-in-left {
+	transform: translateX(-100%);
+}
+
+.dashboard-sidebar-album-layer--run-slide-out-left {
+	transform: translateX(-100%);
+}
+
+.dashboard-sidebar-album-layer--run-slide-out-right {
+	transform: translateX(100%);
+}
+
+.dashboard-sidebar-album-index {
+	position: absolute;
+	right: 6px;
+	bottom: 6px;
+	background: rgba(0, 0, 0, 0.45);
+	color: #fff;
+	font-size: 0.65em;
+	font-variant-numeric: tabular-nums;
+	padding: 2px 8px;
+	border-radius: 999px;
+	pointer-events: none;
+	user-select: none;
+}
+
+.dashboard-sidebar-album-nav {
+	position: absolute;
+	top: 50%;
+	transform: translateY(-50%);
+	width: 24px;
+	height: 32px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	padding: 0;
+	border: none;
+	background: rgba(0, 0, 0, 0.35);
+	color: #fff;
+	cursor: pointer;
+	opacity: 0;
+	visibility: hidden;
+	transition: opacity var(--nand-duration) var(--nand-ease), visibility var(--nand-duration) var(--nand-ease), background-color var(--nand-duration) var(--nand-ease);
+	box-shadow: none;
+}
+
+.dashboard-sidebar-album-nav:hover {
+	background: rgba(0, 0, 0, 0.6);
+}
+
+.dashboard-sidebar-album-nav svg {
+	width: 14px;
+	height: 14px;
+}
+
+.dashboard-sidebar-album-nav--prev {
+	left: 0;
+	border-radius: 0 var(--db-radius-sm) var(--db-radius-sm) 0;
+}
+
+.dashboard-sidebar-album-nav--next {
+	right: 0;
+	border-radius: var(--db-radius-sm) 0 0 var(--db-radius-sm);
+}
+
+.dashboard-sidebar-album-frame:hover .dashboard-sidebar-album-nav {
+	opacity: 0.9;
+	visibility: visible;
+}
+
+/* Single photo: no rotation, hide the nav buttons and index badge. */
+.dashboard-sidebar-album--single .dashboard-sidebar-album-nav,
+.dashboard-sidebar-album--single .dashboard-sidebar-album-index {
+	display: none;
+}
+
+/* Portrait panels: 3:4 frame and placeholder instead of the 1:1 default. */
+.dashboard-sidebar-album--ratio-3-4 .dashboard-sidebar-album-frame,
+.dashboard-sidebar-album--ratio-3-4 .dashboard-sidebar-album-placeholder {
+	aspect-ratio: 3 / 4;
+}
+
+.dashboard-sidebar-album-placeholder {
+	aspect-ratio: 1 / 1;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	gap: 8px;
+	border: 1px dashed var(--db-border-card);
+	border-radius: var(--db-radius-sm);
+	background: var(--db-bg-hover);
+	color: var(--db-text-muted);
+	font-size: 0.75em;
+	user-select: none;
+}
+
+.dashboard-sidebar-album-placeholder-icon {
+	display: flex;
+	opacity: 0.5;
+}
+
+.dashboard-sidebar-album-placeholder-icon svg {
+	width: 22px;
+	height: 22px;
+}
+
+.dashboard-sidebar-album-placeholder-text {
+	padding: 0 10px;
+	text-align: center;
+}
+
+/* Countdown Modal */
+.dashboard-modal-countdown-row {
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+	margin-bottom: 16px;
+}
+
+.dashboard-modal-countdown-label {
+	font-size: 0.85em;
+	font-weight: 500;
+	color: var(--db-text-muted, var(--text-muted));
+}
+
+.dashboard-modal-countdown-hint {
+	font-size: 0.75em;
+	color: var(--text-faint);
+}
+
+.dashboard-modal-countdown-select {
+	height: auto;
+	min-height: 36px;
+	-webkit-appearance: menulist;
+	appearance: menulist;
+}
+
+.dashboard-countdown-date-trigger {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	cursor: pointer;
+	user-select: none;
+	border-radius: var(--db-radius-sm, 6px);
+	font-variant-numeric: tabular-nums;
+	transition: border-color var(--nand-duration) var(--nand-ease);
+}
+
+.dashboard-countdown-date-trigger:hover {
+	border-color: var(--db-border-input-focus, var(--interactive-accent));
+}
+
+.dashboard-countdown-time-wrap {
+	display: flex;
+	align-items: center;
+	gap: 4px;
+}
+
+.dashboard-countdown-time-select {
+	width: 70px;
+	min-width: 70px;
+	height: 36px;
+	padding: 0 4px;
+	line-height: 36px;
+	text-align: center;
+	-webkit-appearance: menulist;
+	appearance: menulist;
+	border: 1px solid var(--db-border-input, rgba(255, 255, 255, 0.08));
+	border-radius: var(--db-radius-sm, 6px);
+	background: var(--db-bg-input, rgba(255, 255, 255, 0.04));
+	color: var(--db-text, var(--text-normal));
+	font-size: 0.95em;
+	font-family: var(--db-font, var(--font-interface));
+	font-variant-numeric: tabular-nums;
+	box-sizing: border-box;
+	transition: border-color var(--nand-duration) var(--nand-ease);
+}
+
+.dashboard-countdown-time-select:focus {
+	border-color: var(--db-border-input-focus, var(--interactive-accent));
+}
+
+.dashboard-countdown-time-sep {
+	font-size: 1.1em;
+	font-weight: 700;
+	padding: 0 2px;
+}
+
+/* Weather Widget */
+.dashboard-sidebar-weather-top {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+}
+
+.dashboard-sidebar-weather-icon {
+	font-size: 2em;
+	line-height: 1;
+}
+
+.dashboard-sidebar-weather-temp {
+	font-size: 1.8em;
+	font-weight: 700;
+	color: var(--db-text);
+	line-height: 1;
+	font-variant-numeric: tabular-nums;
+}
+
+.dashboard-sidebar-weather-info {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	margin-top: 8px;
+	/* Both children shrink-to-ellipsis instead of overflowing the card when
+	   the user drags the sidebar narrow (min-width:0 lifts the flex
+	   min-content floor). */
+	min-width: 0;
+	gap: 6px;
+}
+
+.dashboard-sidebar-weather-city {
+	font-size: 0.85em;
+	font-weight: 600;
+	color: var(--db-text);
+	min-width: 0;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.dashboard-sidebar-weather-desc {
+	font-size: 0.75em;
+	color: var(--db-text-faint);
+	min-width: 0;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.dashboard-sidebar-weather-details {
+	display: flex;
+	gap: 4px;
+	margin-top: 8px;
+}
+
+.dashboard-sidebar-weather-detail {
+	font-size: 0.7em;
+	color: var(--db-text-muted);
+	flex: 1;
+	/* Let the three columns shrink below their longest word at narrow sidebar
+	   widths; the labels wrap (CJK per-character) instead of overflowing. */
+	min-width: 0;
+	text-align: center;
+	padding: 4px 2px;
+	background: var(--db-bg-hover);
+	border-radius: var(--db-radius-sm);
+	font-variant-numeric: tabular-nums;
+}
+
+.dashboard-sidebar-weather-forecast {
+	display: flex;
+	gap: 4px;
+	border-top: 1px solid var(--db-border);
+	margin-top: 8px;
+	padding-top: 8px;
+}
+
+.dashboard-sidebar-weather-fday {
+	flex: 1;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 4px;
+	padding: 4px 2px;
+	border-radius: var(--db-radius-sm);
+	transition: background-color var(--nand-duration) var(--nand-ease);
+}
+
+.dashboard-sidebar-weather-fday:hover {
+	background: var(--db-bg-hover);
+}
+
+.dashboard-sidebar-weather-fday-name {
+	font-size: 0.65em;
+	color: var(--db-text-faint);
+	font-weight: 500;
+}
+
+.dashboard-sidebar-weather-fday-icon {
+	font-size: 0.875em;
+	line-height: 1;
+}
+
+.dashboard-sidebar-weather-fday-temps {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 1px;
+}
+
+.dashboard-sidebar-weather-fday-high {
+	font-size: 0.7em;
+	font-weight: 600;
+	color: var(--db-text);
+	font-variant-numeric: tabular-nums;
+}
+
+.dashboard-sidebar-weather-fday-low {
+	font-size: 0.65em;
+	color: var(--db-text-faint);
+	font-variant-numeric: tabular-nums;
+}
+
+.dashboard-sidebar-weather-loading,
+.dashboard-sidebar-weather-error {
+	text-align: center;
+	color: var(--db-text-faint);
+	font-size: 0.9em;
+	padding: 12px 0;
+}
+
+/* Heatmap Widget */
+.dashboard-sidebar-heatmap {
+	overflow: hidden;
+}
+
+.dashboard-sidebar-heatmap-grid {
+	display: grid;
+	overflow: hidden;
+}
+
+.dashboard-sidebar-heatmap-cell--empty {
+	background-color: var(--db-bg-hover) !important;
+	opacity: 0.3 !important;
+}
+
+.dashboard-sidebar-heatmap-stats {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	margin-top: 8px;
+}
+
+.dashboard-sidebar-heatmap-summary {
+	font-size: 0.7em;
+	color: var(--db-text-muted);
+	display: inline-flex;
+	align-items: center;
+	gap: 4px;
+	font-variant-numeric: tabular-nums;
+}
+
+.dashboard-sidebar-heatmap-icon {
+	font-size: 0.9em;
+	line-height: 1;
+}
+
+.dashboard-sidebar-heatmap-header {
+	display: flex;
+	align-items: center;
+	min-height: 20px;
+	margin-bottom: 8px;
+}
+
+.dashboard-sidebar-heatmap-title {
+	font-size: 0.8em;
+	font-weight: 600;
+	cursor: pointer;
+}
+
+.dashboard-heatmap-title-edit {
+	font-size: 0.8em;
+	width: 100%;
+	max-width: 160px;
+}
+
+.dashboard-sidebar-heatmap-scroll {
+	overflow-x: auto;
+	padding-bottom: 2px;
+}
+
+.dashboard-sidebar-heatmap-months {
+	display: flex;
+	flex-direction: column;
+	gap: 3px;
+}
+
+.dashboard-sidebar-heatmap-month-row {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+}
+
+.dashboard-sidebar-heatmap-month-label {
+	font-size: 0.6em;
+	color: var(--db-text-muted);
+	font-variant-numeric: tabular-nums;
+	width: 28px;
+	flex-shrink: 0;
+}
+
+.dashboard-sidebar-heatmap-month-cells {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 3px;
+}
+
+/* Pomodoro Timer Widget */
+.dashboard-sidebar-pomodoro {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 4px;
+}
+
+.dashboard-sidebar-pomodoro-top {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	width: 100%;
+	position: relative;
+}
+
+.dashboard-sidebar-pomodoro-title {
+	font-size: 0.7em;
+	font-weight: 600;
+	letter-spacing: 0.08em;
+	color: var(--db-accent);
+	text-align: center;
+	flex: 1;
+	user-select: none;
+}
+
+.dashboard-sidebar-pomodoro-stats-btn {
+	width: 20px;
+	height: 20px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	cursor: pointer;
+	border-radius: var(--db-radius-sm);
+	opacity: 0.25;
+	color: var(--db-text-muted);
+	transition: opacity var(--nand-duration) var(--nand-ease), background-color var(--nand-duration) var(--nand-ease);
+	flex-shrink: 0;
+}
+
+.dashboard-sidebar-pomodoro-stats-btn:hover {
+	opacity: 0.7;
+	background: var(--db-bg-hover);
+}
+

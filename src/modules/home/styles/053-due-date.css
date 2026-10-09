@@ -1,0 +1,8 @@
+/* ===== Due Date ===== */
+.dashboard-card-due {
+	font-size: 0.82em;
+	opacity: 0.6;
+	margin-top: 8px;
+	flex-shrink: 0;
+}
+

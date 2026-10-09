@@ -1,0 +1,12 @@
+/* ===== Main Layout ===== */
+.dashboard-main {
+	display: flex;
+	flex: 1;
+	overflow: hidden;
+	gap: 10px;
+	/* Top gap is intentionally tighter than the sides: banner already carries
+	   an 8px bottom margin (clearance for the collapsed state's hanging pills),
+	   so 8px here reads as one ~16px gap instead of the old 20px band. */
+	padding: 8px 16px 0 16px;
+}
+

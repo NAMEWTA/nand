@@ -1,0 +1,271 @@
+/* ===== Editor product: comments (does not use dashboard theme classes) ===== */
+.nand-editor-comment-hl {
+	background: color-mix(in srgb, var(--text-highlight-bg) 70%, transparent);
+	border-radius: 2px;
+	cursor: pointer;
+}
+.nand-editor-comment-hl.is-orphaned {
+	outline: 1px dashed var(--text-muted);
+	background: transparent;
+}
+/* Selection popover: a floating card. Collapsed it is a compact pill holding
+   the one primary button; `.is-editing` grows it into the composer card. */
+.nand-editor-comment-popover {
+	position: fixed;
+	z-index: var(--layer-popover, 30);
+	display: flex;
+	flex-direction: column;
+	gap: var(--size-4-2);
+	padding: var(--size-4-1);
+	border-radius: var(--nand-radius-md);
+	background: var(--nand-surface);
+	border: var(--nand-border);
+	box-shadow: var(--nand-shadow-lg);
+}
+.nand-editor-comment-popover.is-editing {
+	padding: var(--size-4-3);
+}
+.nand-editor-comment-popover-btn,
+.nand-editor-tab,
+.nand-editor-comment-actions button,
+.nand-editor-comment-prompt-row button {
+	cursor: pointer;
+}
+/* No display here: the [hidden] rule must keep winning while the composer is open. */
+.nand-editor-comment-popover button.nand-editor-comment-popover-btn {
+	min-height: var(--nand-control-height-sm);
+	border: none;
+	box-shadow: none;
+	background: var(--interactive-accent);
+	color: var(--text-on-accent);
+	border-radius: var(--nand-radius-sm);
+	padding: 0 var(--size-4-3);
+	font-size: var(--nand-text-body);
+	font-weight: 500;
+	transition: background-color var(--nand-duration-fast) var(--nand-ease);
+}
+.nand-editor-comment-popover button.nand-editor-comment-popover-btn:hover {
+	background: var(--interactive-accent-hover);
+}
+/* Shared field look for the popover composer and the reply prompt. */
+.nand-editor-comment-popover-input,
+.nand-editor-comment-prompt {
+	width: 220px;
+	min-height: 64px;
+	resize: vertical;
+	border-radius: var(--nand-radius-sm);
+	border: var(--nand-border);
+	background: var(--nand-surface);
+	color: var(--text-normal);
+	padding: var(--size-4-2);
+	font: inherit;
+	font-size: var(--nand-text-body);
+	line-height: 1.5;
+	transition: border-color var(--nand-duration-fast) var(--nand-ease), box-shadow var(--nand-duration-fast) var(--nand-ease);
+}
+.nand-editor-comment-popover-input:hover,
+.nand-editor-comment-prompt:hover {
+	border-color: var(--nand-border-color-strong);
+}
+.nand-editor-comment-popover-input:focus,
+.nand-editor-comment-prompt:focus {
+	border-color: var(--nand-accent-border);
+	box-shadow: 0 0 0 2px var(--nand-accent-soft);
+}
+.nand-editor-view {
+	display: flex;
+	flex-direction: column;
+	height: 100%;
+	padding: var(--size-4-3);
+	gap: var(--size-4-3);
+	color: var(--text-normal);
+}
+.nand-editor-tab {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	flex: 0 0 auto;
+	min-width: max-content;
+	gap: 6px;
+	border: none;
+	background: transparent;
+	color: var(--text-muted);
+	border-radius: var(--nand-radius-pill);
+	padding: 0 var(--size-4-2);
+	font-size: var(--nand-text-body);
+}
+.nand-editor-tab-label {
+	white-space: nowrap;
+}
+.nand-editor-tab-icon {
+	display: inline-flex;
+	flex: none;
+	width: 14px;
+	height: 14px;
+}
+.nand-editor-tab-icon svg {
+	width: 14px;
+	height: 14px;
+}
+.nand-editor-body {
+	min-height: 0;
+	overflow: auto;
+	flex: 1;
+	scrollbar-width: thin;
+}
+.nand-editor-placeholder,
+.nand-editor-comments-empty {
+	color: var(--text-muted);
+	font-size: var(--nand-text-body);
+	line-height: 1.5;
+	padding: var(--size-4-2) 2px;
+}
+.nand-editor-comments-title {
+	font-weight: 600;
+	font-size: var(--nand-text-title);
+	line-height: 1.3;
+}
+.nand-editor-comments-path {
+	color: var(--text-muted);
+	font-size: var(--nand-text-caption);
+	margin-top: 2px;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+.nand-editor-comments-list {
+	display: flex;
+	flex-direction: column;
+	gap: var(--size-4-3);
+	margin-top: var(--size-4-3);
+}
+/* Thread card: a resting card that lifts on hover; focus = accent selection. */
+.nand-editor-comment {
+	border: var(--nand-border);
+	border-radius: var(--nand-radius-md);
+	padding: var(--size-4-3);
+	background: var(--nand-surface);
+	min-width: 0;
+}
+.nand-editor-comment.nand-ui-card {
+	padding: var(--size-4-3);
+	transition: border-color var(--nand-duration) var(--nand-ease), box-shadow var(--nand-duration) var(--nand-ease), background-color var(--nand-duration) var(--nand-ease);
+}
+.nand-editor-comment.nand-ui-card:hover {
+	border-color: var(--nand-border-color-strong);
+	box-shadow: var(--nand-shadow-sm);
+}
+.nand-editor-comment.is-focused,
+.nand-editor-comment.nand-ui-card.is-focused {
+	border-color: var(--nand-accent-border);
+	background: var(--nand-accent-softer);
+}
+/* Quoted source: an accent-edged quote block; activating it jumps to the note. */
+.nand-editor-comment .nand-editor-comment-quote {
+	display: block;
+	width: 100%;
+	height: auto;
+	text-align: start;
+	font: inherit;
+	font-size: var(--nand-text-body);
+	line-height: 1.5;
+	color: var(--text-muted);
+	background: var(--nand-surface-muted);
+	border: 0;
+	border-inline-start: 3px solid var(--nand-accent-border);
+	border-radius: var(--nand-radius-xs);
+	box-shadow: none;
+	padding: var(--size-4-2) var(--size-4-3);
+	cursor: pointer;
+	white-space: pre-wrap;
+	overflow-wrap: anywhere;
+	transition: background-color var(--nand-duration-fast) var(--nand-ease), color var(--nand-duration-fast) var(--nand-ease);
+}
+.nand-editor-comment .nand-editor-comment-quote:hover {
+	background: var(--nand-surface-hover);
+	color: var(--text-normal);
+}
+/* Status chip: tone comes from .nand-ui-badge--success / --warning. */
+.nand-editor-comment-status {
+	display: flex;
+	width: fit-content;
+	max-width: 100%;
+	margin-top: var(--size-4-2);
+}
+.nand-editor-comment-message {
+	padding-top: var(--size-4-3);
+	line-height: 1.5;
+}
+.nand-editor-comment-text {
+	font-size: var(--nand-text-body);
+	color: var(--text-normal);
+	white-space: pre-wrap;
+	overflow-wrap: anywhere;
+}
+.nand-editor-comment-time {
+	font-size: var(--nand-text-caption);
+	color: var(--text-faint);
+	margin-top: var(--size-4-1);
+	font-variant-numeric: tabular-nums;
+}
+.nand-editor-comment-actions {
+	display: flex;
+	align-items: center;
+	flex-wrap: wrap;
+	gap: 2px;
+	margin-top: var(--size-4-2);
+	margin-inline: calc(-1 * var(--size-4-1));
+}
+.nand-editor-comment-actions button {
+	border: none;
+	box-shadow: none;
+	background: transparent;
+	color: var(--text-muted);
+	border-radius: var(--nand-radius-sm);
+	padding: 0 var(--size-4-2);
+	min-height: 28px;
+	font-size: var(--nand-text-body);
+}
+.nand-editor-comment-actions button.nand-ui-btn {
+	min-height: 28px;
+	padding: 0 var(--size-4-2);
+}
+.nand-editor-comment-actions button.nand-ui-icon-btn {
+	width: 28px;
+	height: 28px;
+	min-width: 28px;
+	padding: 0;
+}
+/* Reply prompt: the native modal, tightened to a small floating card. */
+.nand-editor-comment-prompt-host .modal {
+	width: min(440px, calc(100vw - 32px));
+	border-radius: var(--nand-radius-lg);
+	box-shadow: var(--nand-shadow-lg);
+}
+.nand-editor-comment-prompt-title {
+	margin: 0 0 var(--size-4-3);
+	font-size: var(--nand-text-title);
+	font-weight: 600;
+}
+.nand-editor-comment-prompt {
+	width: 100%;
+	box-sizing: border-box;
+}
+.nand-editor-comment-prompt-row {
+	display: flex;
+	justify-content: flex-end;
+	gap: var(--size-4-2);
+	margin-top: var(--size-4-2);
+}
+
+
+/* terminal agent */
+/* Obsidian Terminal Styles */
+
+
+/* Workbench comments page: the selected note's threads, width limited like other reading pages. */
+.nand-comments-overview { height: 100%; overflow-y: auto; padding: var(--nand-space-4) var(--nand-space-6); }
+.nand-comments-overview-header { display: flex; align-items: center; justify-content: space-between; gap: var(--nand-space-3); max-width: 760px; margin: 0 auto var(--nand-space-3); }
+.nand-comments-overview-title { margin: 0; font-size: var(--nand-text-heading); font-weight: var(--font-semibold); overflow-wrap: anywhere; }
+.nand-comments-overview-body { max-width: 760px; margin: 0 auto; }
+.nand-comments-overview-body .nand-editor-comments-head { display: none; }

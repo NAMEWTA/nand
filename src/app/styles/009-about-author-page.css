@@ -1,0 +1,110 @@
+/* ===== About Author page ===== */
+.dashboard-about {
+	max-width: 520px;
+	margin: 0 auto;
+	text-align: center;
+	padding: var(--size-4-3) 0 var(--size-4-6);
+}
+
+.dashboard-about-intro-line1 {
+	font-size: var(--nand-text-title);
+	font-weight: 600;
+	color: var(--text-normal);
+	margin-bottom: var(--size-4-2);
+}
+
+.dashboard-about-intro-line {
+	font-size: var(--nand-text-body);
+	color: var(--text-muted);
+	line-height: 1.6;
+}
+
+.dashboard-about-divider {
+	height: 1px;
+	background: var(--nand-border-color);
+	margin: var(--size-4-5) auto var(--size-4-2);
+	max-width: 320px;
+}
+
+.dashboard-about-section {
+	margin-top: var(--size-4-5);
+}
+
+/* Section headings render as accent-tinted pills — a colored frame that sets
+   them apart from the body text below (theme accent, light/dark adaptive). */
+.dashboard-about-section-title {
+	display: inline-flex;
+	align-items: center;
+	min-height: 22px;
+	font-size: var(--nand-text-caption);
+	font-weight: 600;
+	letter-spacing: 0.06em;
+	padding: 0 var(--size-4-3);
+	margin-bottom: var(--size-4-3);
+	border-radius: var(--nand-radius-pill);
+	color: var(--text-accent);
+	background: var(--nand-accent-soft);
+	border: 1px solid var(--nand-accent-border);
+}
+
+.dashboard-about-project {
+	line-height: 1.9;
+	font-size: var(--nand-text-body);
+}
+
+.dashboard-about-project-name {
+	font-weight: 600;
+	color: var(--text-normal);
+}
+
+.dashboard-about-project-sep {
+	color: var(--text-faint);
+	margin: 0 6px;
+}
+
+.dashboard-about-project-desc {
+	color: var(--text-muted);
+}
+
+.dashboard-about-follow-name {
+	font-size: var(--nand-text-title);
+	font-weight: 600;
+	color: var(--text-normal);
+	margin-bottom: var(--size-4-1);
+}
+
+.dashboard-about-follow-platforms {
+	font-size: var(--nand-text-caption);
+	color: var(--text-muted);
+}
+
+.dashboard-about-contact-row {
+	line-height: 2;
+	font-size: var(--nand-text-body);
+}
+
+.dashboard-about-contact-label {
+	color: var(--text-muted);
+}
+
+.dashboard-about-code {
+	font-family: var(--font-monospace);
+	background: var(--nand-surface-hover);
+	border-radius: var(--nand-radius-xs);
+	padding: 1px 6px;
+	cursor: pointer;
+}
+
+.dashboard-about-code:hover {
+	background: var(--nand-surface-active);
+}
+
+.dashboard-about-link {
+	color: var(--text-accent);
+	text-decoration: none;
+	border-radius: var(--nand-radius-xs);
+}
+
+.dashboard-about-link:hover {
+	text-decoration: underline;
+}
