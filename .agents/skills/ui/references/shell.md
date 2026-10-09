@@ -1,65 +1,63 @@
-English | [简体中文](shell.ZH.md)
+# 工作台 shell
 
-# The workbench shell
+代码：`src/app/workbench/workbench-leaf.ts`（注册的视图；打开时加载 shell）、`src/shell/host/workbench-surface.tsx`（状态、导航、渲染）、`src/shell/host/workbench-pages.ts`（页面生命周期）、`src/shell/Shell.tsx`、`Rail.tsx`、`SidePanel.tsx`、`PageHeader.tsx`、`layout.ts`、`navigation-state.ts`、`navigation-transition.ts`。图标轨条目在 `src/app/workbench/compose-workbench.ts` 里声明。
 
-Code: `src/app/workbench/workbench-leaf.ts` (the registered view; loads the shell on open), `src/shell/host/workbench-surface.tsx` (state, navigation, rendering), `src/shell/host/workbench-pages.ts` (page lifetime), `src/shell/Shell.tsx`, `Rail.tsx`, `SidePanel.tsx`, `PageHeader.tsx`, `layout.ts`, `navigation-state.ts`, `navigation-transition.ts`. Rail entries are declared in `src/app/workbench/compose-workbench.ts`.
-
-## Layout
+## 布局
 
 ```
 ┌────┬────────────────┬──────────────────────────────────────────┐
-│ ①  │ ② side panel   │ ③ page header 44px: ⟨panel⟩ title · status · ⋯ │
-│rail│ title + primary│ tab strip (resource pages only)           │
-│52px│ search         │ page content                              │
-│    │ sections/rows  │                                           │
-│ 🔔 │ (220–360px,    │                                           │
-│ ⚙  │  default 260)  │                                           │
+│ ①  │ ② 侧栏         │ ③ 页头 44px：⟨侧栏⟩ 标题 · 状态 · ⋯        │
+│图标│ 标题 + 主操作   │ 标签条（仅资源页面）                       │
+│轨  │ 搜索           │ 页面内容                                  │
+│52px│ 分区／行        │                                           │
+│ 🔔 │ （220–360px，   │                                           │
+│ ⚙  │  默认 260）     │                                           │
 └────┴────────────────┴──────────────────────────────────────────┘
 ```
 
-| Width of the leaf | Layout |
+| 叶子宽度 | 布局 |
 |---|---|
-| ≥ 960px (`wide`) | three columns; the panel is inline |
-| 600–960px (`medium`) | rail stays; the panel opens as an overlay (scrim, Esc closes, focus moves in and back) |
-| < 600px or phone (`narrow`) | rail and panel merge into one drawer opened from the header |
+| ≥ 960px（`wide`） | 三栏；侧栏内联显示 |
+| 600–960px（`medium`） | 图标轨保留；侧栏作为覆盖层打开（有遮罩，Esc 关闭，焦点进入并在关闭后返回） |
+| < 600px 或手机（`narrow`） | 图标轨和侧栏合成一个抽屉，从页头打开 |
 
-The layout follows the leaf's own width (container measurement), not the window's. On desktop the native view header is hidden and the page header replaces it; its `⋯` menu calls the page's `onPaneMenu` and adds "open in a native tab", "open in a split" and, for resource pages, "close page".
+布局跟随叶子自己的宽度（容器测量），而不是窗口宽度。桌面端隐藏原生视图头部，由页头代替；页头的 `⋯` 菜单调用页面的 `onPaneMenu`，并添加「在原生标签页中打开」「在分屏中打开」，资源页面还有「关闭当前页面」。
 
-## Rail and panel behavior
+## 图标轨与侧栏行为
 
-- Clicking the active module's icon toggles the panel. Clicking another icon returns to that module's last route in this leaf (`lastTargets`) and leaves the panel open or closed as it was.
-- Top slot: home, agent (desktop), browser (desktop), archives, automations, git sync (desktop), icons, comments. Bottom slot: notifications (unread badge), settings. A module that is off disappears from the rail; one that failed shows a warning mark.
-- Records pages (habits, expenses, pomodoro, reading) belong to home (`railParent: 'dashboard'`), so the home icon stays highlighted.
-- Panel width: dragging changes only the `--nand-panel-width` CSS variable; the value is committed on pointer release and saved with the leaf. Double-click resets to 260px; the separator also takes the arrow keys, Home and End.
-- The panel model (`PanelModel` in `src/app/contracts/workbench.ts`): an optional primary action, optional search over row labels, and sections of rows (`label`, `icon`, `meta`, `badge`, `target` or `select`, `menu`, `active`). Rows show `⋯` on hover; right click opens the same menu. Sections have an `emptyText`. A module may instead render a custom panel into `navigationEl` (agent sessions, archives filters).
+- 点击当前模块的图标切换侧栏。点击另一个图标回到该模块在这个叶子里的上次路由（`lastTargets`），侧栏保持原来的开或关。
+- 上部：首页、智能体（桌面）、浏览器（桌面）、档案、自动化、Git 同步（桌面）、图标、评论。下部：通知（带未读徽标）、设置。关闭的模块从图标轨消失；失败的模块显示警告标记。
+- 记录页面（习惯、记账、番茄钟、阅读）属于首页（`railParent: 'dashboard'`），所以首页图标保持高亮。
+- 侧栏宽度：拖动只改变 CSS 变量 `--nand-panel-width`；松开指针时提交该值并随叶子保存。双击重置为 260px；分隔条也响应方向键、Home 和 End。
+- 面板模型（`src/app/contracts/workbench.ts` 里的 `PanelModel`）：可选的主操作、可选的行标签搜索，以及由行组成的分区（`label`、`icon`、`meta`、`badge`、`target` 或 `select`、`menu`、`active`）。悬停时行显示 `⋯`；右键打开同一个菜单。分区有 `emptyText`。模块也可以改为把自定义面板渲染到 `navigationEl`（智能体会话、档案筛选）。
 
-## Pages
+## 页面
 
-A page is created by the contribution's `create(context, target, state, signal)` and returns a binding:
+页面由贡献的 `create(context, target, state, signal)` 创建，并返回一个绑定：
 
-| Member | Meaning |
+| 成员 | 含义 |
 |---|---|
-| `surface` | a `NativeSurface` (`src/ui/native-surface.ts`) rendering into `context.contentEl` |
-| `navigate(target, signal)` | change section or resource without recreating the page; must not start sessions or other side effects |
-| `getTarget()` | the route actually shown (for header title and restore) |
-| `getState()` / `restore(state)` | bounded state saved in the leaf; only keys in `stateKeys` survive (`cleanPageState`) |
+| `surface` | 渲染到 `context.contentEl` 的 `NativeSurface`（`src/ui/native-surface.ts`） |
+| `navigate(target, signal)` | 不重建页面就切换分区或资源；不得启动会话或其他副作用 |
+| `getTarget()` | 实际显示的路由（用于页头标题和恢复） |
+| `getState()` / `restore(state)` | 保存在叶子里的有界状态；只有 `stateKeys` 里的键会保留（`cleanPageState`） |
 
-Rules:
+规则：
 
-- Creation is abortable: honor `signal` and return quickly; heavy work continues after the first paint.
-- Pages are kept while hidden (`hidden` + `inert`, `setVisible(false)`); on reveal they get `setVisible(true)` and one resize. A contribution with `releaseWhenHidden` (the inbox) is closed when left. Resource pages (`resourcePages: true`, browser tabs, agent sessions) stay until closed.
-- An unknown section falls back to the module's default page; a disabled module shows an "enable the module" state instead of redirecting; a missing resource shows a recoverable message.
-- `context.changed()` tells the shell the page's route or title changed (header, panel highlight, leaf state).
-- Header status: `WorkbenchStatus` rows come from module services through compose-workbench; the header shows them only when Obsidian's status bar is absent (mobile).
+- 创建可以中止：遵守 `signal` 并快速返回；重活在首次绘制之后继续。
+- 页面隐藏时保留（`hidden` + `inert`，`setVisible(false)`）；重新显示时调用 `setVisible(true)` 并触发一次 resize。带 `releaseWhenHidden` 的贡献（收件箱）离开时关闭。资源页面（`resourcePages: true`，浏览器标签、智能体会话）保留到被关闭。
+- 未知分区回退到模块的默认页面；已停用的模块显示「开启模块」状态而不是重定向；缺失的资源显示可恢复的消息。
+- `context.changed()` 告诉 shell 页面的路由或标题变了（页头、侧栏高亮、叶子状态）。
+- 页头状态：`WorkbenchStatus` 行由模块服务经 compose-workbench 提供；只有 Obsidian 状态栏不存在（移动端）时页头才显示它们。
 
-## Focus mode, tabs and restore
+## 专注模式、标签与恢复
 
-- "Open in a native tab" and "Open in a split" create another workbench leaf with `focus: true` and that page's state: no rail or panel, plus an "Open in workbench" action. Browser pages get a new page id when copied.
-- The tab strip (`TabStrip` primitive) appears for resource pages: select, close, middle-click close, keyboard arrows, Home, End and Delete, reorder by drag, `+` for a new resource.
-- The leaf state is the shell state `{ target, focus, panelOpen, panelWidth, lastTargets }` plus the kept pages with their bounded state, normalized on load (`normalizeWorkbenchState`). Restoring a route whose resource no longer exists opens the section instead of failing.
+- 「在原生标签页中打开」和「在分屏中打开」会创建另一个 `focus: true` 的工作台叶子，带着该页面的状态：没有图标轨和侧栏，另有「在工作台中打开」操作。浏览器页面复制时获得新的页面 id。
+- 标签条（`TabStrip` 原语）出现在资源页面：选择、关闭、中键关闭、键盘方向键、Home、End 和 Delete，拖动排序，`+` 新建资源。
+- 叶子状态是 shell 状态 `{ target, focus, panelOpen, panelWidth, lastTargets }` 加上保留的页面及其有界状态，加载时规范化（`normalizeWorkbenchState`）。恢复一个资源已不存在的路由时，打开对应分区而不是失败。
 
-## Do not
+## 不要
 
-- Do not add a router, history stack or tab system inside a module.
-- Do not nest an `ItemView` or open a new leaf type to show a page.
-- Do not start a terminal, guest page or network request just because a page or panel was rendered; wait for an explicit action.
+- 不要在模块里加路由、历史栈或标签系统。
+- 不要嵌套 `ItemView`，也不要为显示一个页面而打开新的叶子类型。
+- 不要仅仅因为渲染了页面或面板就启动终端、网页或网络请求；等待明确的操作。

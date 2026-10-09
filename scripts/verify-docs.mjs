@@ -38,6 +38,7 @@ function classify(rel) {
 	if (rel === 'NOTICE' || rel === 'THIRD-PARTY-NOTICES.md' || rel.endsWith('/NOTICE.txt') || rel.startsWith('docs/third-party/') || rel.startsWith('docs/licensing/')) return 'license';
 	if (rel.startsWith('docs/')) return 'user-doc';
 	if (/^(README|CHANGELOG|CLAUDE|SECURITY)(\.ZH)?\.md$/.test(rel)) return 'root-entry';
+	if (rel === 'AGENTS.md') return 'agent-handbook';
 	if (rel.startsWith('.agents/')) return 'skill';
 	if (rel.startsWith('speculo/.speculo/specdev/')) return 'specdev';
 	if (rel.startsWith('speculo/')) return 'speculo-tooling';
@@ -69,7 +70,7 @@ for (const required of [
 	if (!fs.existsSync(path.join(root, required))) failures.push(`missing required documentation asset ${required}`);
 }
 
-const strict = new Set(['user-doc', 'root-entry', 'skill', 'specdev', 'source-template']);
+const strict = new Set(['user-doc', 'root-entry', 'skill', 'specdev', 'source-template', 'agent-handbook']);
 let links = 0;
 let external = 0;
 const headings = new Map();
@@ -223,8 +224,8 @@ for (const file of ['docs/data.md', 'docs/privacy.md', 'docs/records.md', 'docs/
 		failures.push(`${file}: data path ${match[0]} is not in source`);
 	}
 }
-// Every document has an English version (the plain name) and a Chinese one (`.ZH.md`), each opening with a language switch.
-const bilingual = new Set(['user-doc', 'root-entry', 'skill', 'specdev']);
+// User docs, root entries and SpecDev stay bilingual. Skills under `.agents/` are Chinese only.
+const bilingual = new Set(['user-doc', 'root-entry', 'specdev']);
 const english = '[English](';
 const chinese = '[简体中文](';
 for (const file of files) {

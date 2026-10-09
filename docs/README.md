@@ -42,4 +42,4 @@ NAND is a pre-release. Checks that run automatically (type check, lint, unit and
 
 ## Licenses
 
-NAND is MIT licensed. See [LICENSE](../LICENSE), [NOTICE](../NOTICE) and [THIRD-PARTY-NOTICES.md](../THIRD-PARTY-NOTICES.md). The parts of the browser, terminal and automation scheduler adapted from Orca are listed in [Orca sources and adapted parts](third-party/orca-terminal-workbench.md). Developers start at [CLAUDE.md](../CLAUDE.md).
+NAND is MIT licensed. See [LICENSE](../LICENSE), [NOTICE](../NOTICE) and [THIRD-PARTY-NOTICES.md](../THIRD-PARTY-NOTICES.md). The parts of the browser, terminal and automation scheduler adapted from Orca are listed in [Orca sources and adapted parts](third-party/orca-terminal-workbench.md). Developers start at [AGENTS.md](../AGENTS.md).

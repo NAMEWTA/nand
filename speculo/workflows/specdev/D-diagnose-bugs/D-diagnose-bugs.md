@@ -13,12 +13,7 @@ keywords: [bug, 诊断, 红灯, tight-loop, 根因, 复现, 假设]
 
 D 的主导词是**红灯**：没有一条已执行且能在此 bug 上变红的紧凑命令，就没有可进入的假设阶段。D 默认只读项目代码，可以创建 change 诊断工件和经授权的临时可撤销探针；生产修复由 Implement 拥有。
 
-## 读取范围
-
-1. 先读取 `<Path>{roots.workflows}/specdev/README.md</Path>` 与当前 Work 的状态入口。
-2. 再读取 `<Path>{roots.workflows}/specdev/common/rules/activation-and-memory.md</Path>`，按当前分支、状态和关键词定位最小相关工件。
-3. 只在本 Work 明确要求恢复、冲突、执行安全或归档证据时扩展为全量读取；缺少匹配证据或 owner/gateway 时停止受影响分支。
-
+激活时读取 `<Path>{roots.workflows}/specdev/common/rules/activation-and-memory.md</Path>`，按当前步骤定位输入和证据。
 
 ## 输入与所有权
 
@@ -75,19 +70,8 @@ node <Path>{roots.workflows}/specdev/common/tools/validate-specdev.mjs</Path> \
 
 根因确认后将本 Work 加入 `works_run` 并清空 `current_work`，返回 diagnosis 和下一 Work：局部修复进入 Tickets/I，公共行为或高风险进入 S/Tickets，缺 seam 进入 R，仍无根因则保持 blocked 或进入 W。
 
-## 完成标准
+## 脱敏与强制变异证据
 
-- 红灯回路硬门有已执行证据；
-- 最小复现的剩余元素都有负载作用；
-- 假设有排名、预测和反证；
-- 根因解释触发、机制、漏检和影响；
-- 修复契约决策完备但未夹带生产修复；
-- debug 插桩已清理或有明确 owner；
-- diagnosis、状态、验证证据和下一 Work 路径一致。
+在日志、报告和重现材料中移除 token、Cookie、认证头、秘密配置、个人数据及机器绝对路径；保留项目相对定位和必要错误形态。原始敏感数据不进入长期工件。
 
-## 子文件引用
-
-- 反馈回路：`<Path>{roots.workflows}/specdev/D-diagnose-bugs/feedback-loop.md</Path>`
-- 假设与插桩：`<Path>{roots.workflows}/specdev/D-diagnose-bugs/hypothesis-and-instrumentation.md</Path>`
-- 诊断模板：`<Path>{roots.workflows}/specdev/D-diagnose-bugs/diagnosis-template.md</Path>`
-- HITL 模板：`<Path>{roots.workflows}/specdev/D-diagnose-bugs/scripts/hitl-loop.template.sh</Path>`
+如果使用强制变异检验测试敏感性，先记录未变异文件的 hash/diff，实际修改目标后读取 git diff 与运行路径，证明变异已落到执行文件。只有测试因预期行为断言失败才算有效 red；编译错误、未选中测试、变异未落地均为无效证据。恢复原内容，复跑基线并核对 diff。D 输出诊断及修复不变量，正式修复仍交 I。

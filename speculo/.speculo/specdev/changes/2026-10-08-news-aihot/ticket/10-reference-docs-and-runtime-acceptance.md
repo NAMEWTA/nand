@@ -1,0 +1,130 @@
+---
+schema_version: 3
+plan_contract_version: 1
+skill_scan: "已扫描 .agents/skills/dev 与 ui 的真实入口、AGENTS和命中reference；下列绑定是实际适用项，不是allowlist。"
+skill_bindings: [{"id":"dev","path":"<Path>.agents/skills/dev/SKILL.md</Path>","sha256":"c56ddb21a429408d523d139f3c5c8dc637187a0f18ab65dfe1f8cc180e63ef89","phase":"implement","operation":"apply-project-rules","inputs":["<Path>{roots.state}/specdev/changes/2026-10-08-news-aihot/tickets-map.md</Path>","T-10 路径、合同和本次diff"],"outputs":["符合分层/生命周期/存储/双语/构建要求的实现和可回读验证记录"],"required":true,"on_failure":"block-ticket","references":[{"path":"<Path>.agents/skills/dev/references/architecture.md</Path>","sha256":"94a69cfa15eefec76596e82b3a37b34b2acc2cebef7df129879b609bad9a909b","when":"本票命中结构/数据或验证"},{"path":"<Path>.agents/skills/dev/references/testing.md</Path>","sha256":"a073cad17a5bb3d782eae6157e7e110683ae6a8dbfca4c54970c8ab275252978","when":"本票命中结构/数据或验证"},{"path":"<Path>.agents/skills/dev/references/build-and-release.md</Path>","sha256":"185a8191984ecb4fadf8d1d39f197ed05d56398b78ccf8ac43f87ca01e049193","when":"本票命中结构/数据或验证"},{"path":"<Path>.agents/skills/dev/references/obsidian-api.md</Path>","sha256":"c515700efbe2ea4d57f58852e9225beb7ee17ad58484328450112068de13de7b","when":"本票命中结构/数据或验证"},{"path":"<Path>.agents/skills/dev/references/licensing.md</Path>","sha256":"309783d96aca6bdf6287ae9a7e84619286300e06c3a08c776576c613387ccfbb","when":"本票命中结构/数据或验证"},{"path":"<Path>.agents/skills/dev/references/skill-maintenance.md</Path>","sha256":"2689e1c377a34da0a76e8091ea08140c252c8907ef40fc1a3ad39a0ae2c0091a","when":"本票命中结构/数据或验证"}]},{"id":"ui","path":"<Path>.agents/skills/ui/SKILL.md</Path>","sha256":"f78f3e974ff373077a66c78144be01ff7c4ca1775ca75f94186b4ce65bdc1723","phase":"implement","operation":"apply-project-rules","inputs":["<Path>{roots.state}/specdev/changes/2026-10-08-news-aihot/tickets-map.md</Path>","T-10 路径、合同和本次diff"],"outputs":["满足tokens/三栏/键盘/多窗/响应式的界面与真实宿主观察"],"required":true,"on_failure":"block-ticket","references":[{"path":"<Path>.agents/skills/ui/references/design-system.md</Path>","sha256":"3320b960e15b308a2f5fa0573e00c80ec91bef911bbc5497f4bbc8d7dc10d59c","when":"本票命中页面/组件或CSS"},{"path":"<Path>.agents/skills/ui/references/shell.md</Path>","sha256":"7331476350f3b0bb8dfa25186b7557914a4ad34c21410c60a95e152ff680c128","when":"本票命中页面/组件或CSS"},{"path":"<Path>.agents/skills/ui/references/motion-a11y.md</Path>","sha256":"afc7b79fc9844989f7d295acdcbe5b4a6c31f5cb7add3b1e53e51c2a75f1980c","when":"本票命中页面/组件或CSS"}]}]
+resource_claims: ["nand:news-aihot:reference-docs-and-runtime-acceptance","repository:NAMEWTA/nand:current-single-writer"]
+artifact: "ticket"
+change: "2026-10-08-news-aihot"
+id: "T-10"
+title: "完成参考归因、用户文档与宿主验收"
+status: "ready"
+kind: "feature"
+planning_depth: "deep"
+planning_depth_reason: "涉及持久数据/公共接口/进程或权限的跨边界合同，必须记录恢复与兼容。"
+ready: true
+risk: "high"
+blocked_by: ["T-07","T-08","T-09"]
+contract_ids: ["AC-027","AC-028"]
+owner: "Lead（current串行；执行时可动态分配单writer）"
+expected_changes: ["<Path>docs/news.md</Path>","<Path>docs/news.ZH.md</Path>","<Path>docs/data.md</Path>","<Path>docs/data.ZH.md</Path>","<Path>docs/README.md</Path>","<Path>docs/README.ZH.md</Path>","<Path>docs/third-party/aihot-news.md</Path>","<Path>docs/third-party/aihot-news.ZH.md</Path>","<Path>docs/third-party/aihot-LICENSE.txt</Path>","<Path>NOTICE</Path>","<Path>.agents/skills/dev/SKILL.md</Path>","<Path>.agents/skills/dev/references/architecture.md</Path>","<Path>.agents/skills/ui/references/shell.md</Path>","<Path>scripts/obsidian-acceptance/workbench-probe.mjs</Path>","<Path>scripts/bundle-budget.json</Path>","<Path>main.js</Path>","<Path>styles.css</Path>"]
+writable_paths: ["<Path>docs/news.md</Path>","<Path>docs/news.ZH.md</Path>","<Path>docs/data.md</Path>","<Path>docs/data.ZH.md</Path>","<Path>docs/README.md</Path>","<Path>docs/README.ZH.md</Path>","<Path>docs/third-party/aihot-news.md</Path>","<Path>docs/third-party/aihot-news.ZH.md</Path>","<Path>docs/third-party/aihot-LICENSE.txt</Path>","<Path>NOTICE</Path>","<Path>.agents/skills/dev/SKILL.md</Path>","<Path>.agents/skills/dev/references/architecture.md</Path>","<Path>.agents/skills/ui/references/shell.md</Path>","<Path>scripts/obsidian-acceptance/workbench-probe.mjs</Path>","<Path>scripts/bundle-budget.json</Path>"]
+read_only_paths: ["<Path>{roots.state}/specdev/changes/2026-10-08-news-aihot/spec.md</Path>","<Path>{roots.state}/specdev/changes/2026-10-08-news-aihot/ADR.md</Path>","<Path>{roots.state}/specdev/changes/2026-10-08-news-aihot/reference-analysis.md</Path>"]
+shared_paths: ["<Path>main.js</Path>","<Path>styles.css</Path>"]
+shared_path_owners: ["<Path>main.js</Path> => 2026-10-08-news-aihot::T-10（本票生成物专用owner；Lead从本票已审核源重建）","<Path>styles.css</Path> => 2026-10-08-news-aihot::T-10（本票生成物专用owner；Lead从本票已审核源重建）"]
+---
+
+# Ticket T-10: 完成参考归因、用户文档与宿主验收
+
+- Ticket：<Path>{roots.state}/specdev/changes/2026-10-08-news-aihot/ticket/10-reference-docs-and-runtime-acceptance.md</Path>
+- 总控Map：<Path>{roots.state}/specdev/changes/2026-10-08-news-aihot/tickets-map.md</Path>
+- Spec：<Path>{roots.state}/specdev/changes/2026-10-08-news-aihot/spec.md</Path>
+- Evidence：<Path>{roots.state}/specdev/changes/2026-10-08-news-aihot/evidence/T-10.md</Path>
+
+实现者必须先完整读取Tickets Map，再读取项目Skill入口与适用ALL/本票reference，最后读取本票与依赖Evidence。Skill矩阵是最低必读集合；新增命中项先由Lead重绑并验证。
+
+## 1. 战略与来源
+
+**目标与可观察产出：** 一名读者按文档可完成新闻全流程，维护者能审查参考/差异和真实运行证据。
+
+**当前事实：** 研究已固定上游SHA与源码映射，但实现/账号/主题矩阵尚未验证；已有docs双语和Obsidian probe可扩展。
+
+**来源：** AC-027, AC-028；issue #136；<Path>{roots.state}/specdev/changes/2026-10-08-news-aihot/reference-analysis.md</Path>。深度 deep：涉及持久数据/公共接口/进程或权限的跨边界合同，必须记录恢复与兼容。
+
+## 2. 决策状态
+
+### 已锁定决策
+
+把实际交付行为写入en/zh用户/数据/支持表，保留完整参考映射/许可证/来源头；不把未测平台或账号写verified。仅更新各skill拥有事实及其ZH伴随文件，不复制文档。最终一次综合gates验证，main.js/styles.css重建；后续发现新失败再有针对复测。 T-07、T-08、T-09是本change各分支终端节点，最终交付验收须等待三者完成；推荐执行顺序另由goal-plan记录，不以顺序伪造DAG。
+
+### 已采用的低影响假设
+
+沿用项目命名、现有工具和组件；新增实现文件路径可按已授权目录细化，不改变功能边界。
+
+### 未决问题
+
+无。
+
+## 3. 范围边界
+
+| IN（本票） | REUSE | OUT |
+|---|---|---|
+| 一名读者按文档可完成新闻全流程，维护者能审查参考/差异和真实运行证据。 | ModuleContext lifetime/settings/services/contributions、ModuleRegistry、现有两个view types、NativeSurface/PageCreate/stateKeys。; home统一组件注册表和公共Agent目录/派发contract；agent现有CLI解析、账户环境、canonicalVaultCwd、PTY会话、native hooks、原生用量。; AGENT_SESSIONS.attachMaterial（只粘贴不发送）、BROWSER_OPEN、NOTIFICATION_INBOX及NOTIFICATION_OPENERS。; JsonStore/三方合并/写队列/backup、现有vault文档写入及golden样本；requestUrl；Preact/primitives/tokens及t(en/zh)。 | 不搭建服务端、PostgreSQL、独立队列、公开网站、RSS/API/MCP输出或后台。; 不直连模型API、不保存模型密钥，不支持首版排除的X/微信/Jina付费采集或向量检索。; 不把新闻刷新建成自动化中心定义/cron，不默认开启YOLO或绕过CLI登录/信任/权限。; 不自动全文转载、不使用AIHOT名称Logo、不在news change重做home看板。; 周/月报仅需按第三节公式完成参考映射，#136实施与验收只要求今日要闻，本轮不建立周/月报产品入口。 |
+
+## 4. 要构建什么
+
+一名读者按文档可完成新闻全流程，维护者能审查参考/差异和真实运行证据。
+
+把实际交付行为写入en/zh用户/数据/支持表，保留完整参考映射/许可证/来源头；不把未测平台或账号写verified。仅更新各skill拥有事实及其ZH伴随文件，不复制文档。最终一次综合gates验证，main.js/styles.css重建；后续发现新失败再有针对复测。 T-07、T-08、T-09是本change各分支终端节点，最终交付验收须等待三者完成；推荐执行顺序另由goal-plan记录，不以顺序伪造DAG。
+
+## 5. 实现契约
+
+- **入口、输入输出、状态和错误：** 把实际交付行为写入en/zh用户/数据/支持表，保留完整参考映射/许可证/来源头；不把未测平台或账号写verified。仅更新各skill拥有事实及其ZH伴随文件，不复制文档。最终一次综合gates验证，main.js/styles.css重建；后续发现新失败再有针对复测。 T-07、T-08、T-09是本change各分支终端节点，最终交付验收须等待三者完成；推荐执行顺序另由goal-plan记录，不以顺序伪造DAG。
+- **不变量/兼容：** 本票AC全部成立，既有用户数据和非目标能力保持；跨模块仅api，Node/Electron仅desktop。
+- **依赖合同：** T-07, T-08, T-09；跨change消费者还须读取父Implementation Map真实边与Gate，不能仅凭本地ready启动。
+- **安全与隐私：** 不输出凭据/不自动扩大文件或网络授权，具体风险按本票恢复说明。
+
+## 6. 执行路线
+
+1. 按实现逐项对照AIHOT第三节与P5，填具体file/function/差异/验证映射，审核NOTICE与license。
+2. 更新news指南、数据位置、目录/模块事实及对应ZH，说明手机仅Markdown与CLI限制。 技能主文件及所改reference的.ZH.md伴随文件均显式同步。
+3. 扩现有workbench probe覆盖news入口/设置/七section/widgets/lifetime/restart。
+4. 构建并跑必要领域/受影响回归，再汇总build/lint/CSS/i18n/docs/architecture/budget。
+5. 真实Obsidian深浅/三preset/三width/keyboard/popout/关闭重开/重启；保留截图与账号支持矩阵。
+6. 逐AC记录证据与未验证外部事实，只有全部完成才交付，不用静态build宣称UI通过。
+
+## 7. 路径访问契约
+
+预计修改点、可写/只读/共享路径以frontmatter为硬边界。共享生成物main.js/styles.css归本票专用owner，由Lead从本票源构建。共享源码按父序列在票开始前登记owner交接；本票只修改自身合同负责的部分，消费者只读生产者已冻结合同。任何需要改动生产者合同的工作回到该owner，不能借共享文件授权越权。新增测试只能写已授权同域路径；若发现未授权引用/技能/文件先报告精确越界并由Lead修订票。保留用户已存在的speculo工作流改动，不格式化全仓。
+
+## 8. 验证矩阵
+
+| 行为或风险 | 验证接缝与命令/步骤 | 预期结果 | Evidence |
+|---|---|---|---|
+| 工程 | pnpm run build && pnpm run lint && pnpm run lint:css && pnpm test:i18n && pnpm test:docs && pnpm test:architecture && pnpm run check:bundle && pnpm vitest run src/modules/news src/modules/agent src/modules/automations src/modules/notifications test/golden/user-formats.test.ts | 零警告/架构预算通过，生成文件同步，必要回归通过。 | <Path>{roots.state}/specdev/changes/2026-10-08-news-aihot/evidence/T-10.md</Path> |
+| 宿主 | 按 .agents/skills/dev/references/testing.md 使用新disposable vault运行 scripts/obsidian-acceptance/workbench-fresh-runtime.mjs；真实helper，记录截图，验证restart；另做Claude/Codex真实账号与手机Markdown阅读。 | 三宽度/深浅/presets/键盘/popout/关闭与恢复无残留；所有支持声明有证据。 | <Path>{roots.state}/specdev/changes/2026-10-08-news-aihot/evidence/T-10.md</Path> |
+
+- **Workspace checks：** current-workspace执行本票定向检查及build/lint；结构变更再architecture/bundle，CSS再lint:css/styles，文案再i18n，文档再docs。不逐票重复无关全量测试。
+- **E2E disposition：** required: 真实Obsidian桌面用户闭环并记录未实测平台。
+- **E2E owner/environment：** Lead / current-workspace；真实宿主前置条件和步骤以上表为准；未可用则保留未验证，不代填通过。
+- **Integration evidence：** 获得后续实施/提交授权后记录base、非空implementation/source commit、direct-parent验证、result SHA和父分支包含关系。本轮不创建Evidence假装执行。
+
+## 9. 发布、迁移与恢复
+
+本票文档/归因可按git回退；生成物必须与对应源一同回退。真实probe仅disposable vault，不改真实用户笔记或CLI权限偏好。 改动适用技能或引用会改变skill摘要；恢复或前进时必须重读受影响技能、重算摘要，并对尚未执行且绑定旧摘要的下游ticket/goal-plan显式rebind与重新校验后再current，不沿用旧绑定。
+
+发布/推送/远程写入未授权；不存在必需迁移的局部票只记录可回退代码/文档。公共schema改动采用扩展→迁移→收缩，旧调用归零前不删。
+
+## 10. 验收标准
+
+- [ ] **AC-027**：build/lint/i18n/architecture/budget/CSS/docs通过；main.js/styles.css重建；三宽度/深浅/presets/键盘/popout/重启/关闭无残留；手机Markdown可读
+- [ ] **AC-028**：第三节全规则有来源SHA/函数/NAND落点/差异/用例；MIT版权license保留，界面无AIHOT品牌；P5无缺漏，未实测能力不宣称验证
+- [ ] Map → 适用项目Skill → Ticket按序读取并实际应用，绑定摘要未漂移。
+- [ ] 验证矩阵的结果、命令、环境、未运行项写入 <Path>{roots.state}/specdev/changes/2026-10-08-news-aihot/evidence/T-10.md</Path>。
+- [ ] 修改未越出writable/shared owner；用户原有改动完整保留。
+- [ ] 非空implementation/source commit及direct-parent/result SHA可核对；必需E2E由Lead完成。
+- [ ] 所有scope/数据/参考差异已获决定，Ticket/Map/Evidence同步，不用空提交或只写“done”关闭。
+
+## 11. SKILL 调用计划
+
+- dev：<Path>.agents/skills/dev/SKILL.md</Path>，implement阶段调用 apply-project-rules。输入为当前Map、本票和真实diff；按命中reference完成分层/界面和验证步骤，输出用于下一步Lead验收。sha256固定为 c56ddb21a429408d523d139f3c5c8dc637187a0f18ab65dfe1f8cc180e63ef89；缺失或摘要漂移 block-ticket，由Lead审查后重新绑定，不能自动信任新内容。
+- ui：<Path>.agents/skills/ui/SKILL.md</Path>，implement阶段调用 apply-project-rules。输入为当前Map、本票和真实diff；按命中reference完成分层/界面和验证步骤，输出用于下一步Lead验收。sha256固定为 f78f3e974ff373077a66c78144be01ff7c4ca1775ca75f94186b4ce65bdc1723；缺失或摘要漂移 block-ticket，由Lead审查后重新绑定，不能自动信任新内容。
+
+
+## 12. 停止、检查点与交付
+
+交付本票全部AC和上表可观察产出；用户没有指定票数，但13个issue及每个change Spec/Tickets/Goal和整体Goal不得遗漏。缺必需Skill/验证条件阻塞本票，继续不相关已授权分支；路径/公共合同改变返回真正owner。记录HEAD、已完成步骤、当前失败和 <Path>{roots.state}/specdev/changes/2026-10-08-news-aihot/evidence/T-10.md</Path> 恢复位置；本轮只规划、未实施、无发布权限。
+
+### 当前技能版本补充
+
+工作区规范已更新：.agents/skills仅中文.md，使用指南和仓库入口仍中英双份。本票不重建已移除的Skill .ZH.md；实际引用及摘要已在规划发布前由Lead重新读取并绑定。授权边界不变。

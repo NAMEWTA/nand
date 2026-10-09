@@ -1,135 +1,133 @@
-English | [简体中文](architecture.ZH.md)
+# 架构
 
-# Architecture
+移动文件、跨区导入、添加命令或重命名任何持久化内容之前先读本文。这些规则背后的原因见[开发文档索引](../../../../speculo/.speculo/specdev/.config/domain-layout.ZH.md)里列出的架构决定。
 
-Read this before moving files, importing across zones, adding a command, or renaming anything persisted. The reasons behind these rules are the architecture decisions indexed in the [development documentation](../../../../speculo/.speculo/specdev/.config/domain-layout.md).
-
-## Zones
+## 分区
 
 ```
-src/app/            plugin entry (main.ts), module registry, settings runtime, commands, ribbon,
-                    workbench leaf and composition (app/workbench), contracts (app/contracts)
-src/shell/          workbench UI: rail, side panel, page header, page manager (loaded with import())
-src/ui/             design system: tokens, primitives, native Modal/Menu wrappers
-src/theme/          theme presets, Markdown styles, runtime that applies them to every window
-src/host/           Obsidian and desktop adapters used by several modules
-src/shared/         utilities, settings DSL and store, storage helpers, i18n runtime and startup dictionaries
-src/types/          ambient declarations
+src/app/            插件入口（main.ts）、模块注册表、设置运行时、命令、功能区、
+                    工作台叶子与组合（app/workbench）、契约（app/contracts）
+src/shell/          工作台界面：图标轨、侧栏、页头、页面管理（用 import() 加载）
+src/ui/             设计系统：令牌、原语、原生 Modal/Menu 封装
+src/theme/          主题样式、Markdown 样式、把它们应用到每个窗口的运行时
+src/host/           多个模块共用的 Obsidian 与桌面适配器
+src/shared/         工具函数、设置 DSL 与存储、存储辅助、i18n 运行时与启动词典
+src/types/          环境类型声明
 src/modules/<id>/   home | agent | browser | archives | automations | notifications | icons | comments | sync
-  manifest.ts       data-only description, loaded at startup
-  api.ts            types and serviceKey()/contributionPoint() constants other modules may import
-  module.ts         the lazy entry: creates the ModuleInstance
-  settings.ts       the module's settings schema
-  i18n.ts           the module's strings
-  core/             models, parsing, scheduling, pure rules (no host packages)
-  platform/         Obsidian and vault IO; platform/desktop/ for Node and Electron
-  services/         wiring inside the module
-  contrib/          contributions to other modules' contribution points
-  ui/               pages, panels, settings pages, dialogs
-  styles/           the module's CSS (listed in src/styles.json)
-native/pty-server/  the Rust terminal helper (stdio frames)
-test/               shared fixtures and cross-module tests (user-format golden samples)
+  manifest.ts       纯数据描述，启动时加载
+  api.ts            其他模块可导入的类型和 serviceKey()/contributionPoint() 常量
+  module.ts         懒加载入口：创建 ModuleInstance
+  settings.ts       模块的设置模式
+  i18n.ts           模块的文案
+  core/             模型、解析、调度、纯规则（不用宿主包）
+  platform/         Obsidian 与库的读写；platform/desktop/ 放 Node 与 Electron 代码
+  services/         模块内部的装配
+  contrib/          对其他模块贡献点的贡献
+  ui/               页面、面板、设置页、对话框
+  styles/           模块的 CSS（列在 src/styles.json）
+native/pty-server/  Rust 终端辅助程序（stdio 帧）
+test/               共用样本与跨模块测试（用户格式黄金样本）
 ```
 
-## Import matrix
+## 导入矩阵
 
-Checked by `scripts/verify-architecture.mjs` (`pnpm test:architecture`) for value and type imports, after TypeScript erasure, including literal `import()` and runtime cycles. There is no baseline: any violation fails.
+由 `scripts/verify-architecture.mjs`（`pnpm test:architecture`）检查，覆盖值导入和类型导入，在 TypeScript 擦除之后检查，包括字面量 `import()` 与运行时循环。没有基线：任何违规都会失败。
 
-`src/app/contracts/` may be imported from every zone except `shared` and `host`; the rows below leave it out.
+`src/app/contracts/` 可被除 `shared` 和 `host` 之外的所有区导入；下表省略了它。
 
-| From | May import |
+| 来自 | 可以导入 |
 |---|---|
 | `shared` | `shared` |
-| `host` | `shared`, `host` |
-| `theme` | `shared`, `theme` |
-| `ui` | `shared`, `theme`, `ui` |
-| `shell` | `shared`, `theme`, `ui`, `shell`, `host` |
-| `app` | `shared`, `host`, `theme`, `ui`, `app`; module `manifest.ts`, `api.ts`, `settings.ts`; `shell` and module `module.ts` only through `import()` |
-| module `core` | own `core` and `api.ts`, `shared`, other modules' `api.ts` |
-| module `platform` | own `core`, `platform`, `api.ts`; `shared`, `host`; other `api.ts` |
-| module `services` | own `core`, `platform`, `services`, `contrib`, `api.ts`, `settings.ts`, `i18n.ts`; `shared`, `host`, `theme`; other `api.ts` |
-| module `contrib` | own `core`, `platform`, `contrib`, `api.ts`; `shared`, `host`; other `api.ts` |
-| module `ui` | the whole module (except `module.ts` and `manifest.ts`); `shared`, `host`, `theme`, `ui`, `shell`; other `api.ts` |
-| `module.ts` | own `core`, `platform`, `services`, `contrib`, `api.ts`, `settings.ts`, `i18n.ts`, `manifest.ts`; `shared`, `host`, `theme`; other `api.ts`; own `ui` only through `import()` |
-| `manifest.ts` | own `api.ts`, other `api.ts`; own `module.ts` only through `import()` in `load()` |
-| `api.ts` | own `core` (types), other `api.ts`; it exports only types and key constants |
-| `settings.ts` | own `core`, own `api.ts`; `shared`, `host`, `theme`; other `api.ts` |
-| `i18n.ts` | no module code |
+| `host` | `shared`、`host` |
+| `theme` | `shared`、`theme` |
+| `ui` | `shared`、`theme`、`ui` |
+| `shell` | `shared`、`theme`、`ui`、`shell`、`host` |
+| `app` | `shared`、`host`、`theme`、`ui`、`app`；模块的 `manifest.ts`、`api.ts`、`settings.ts`；`shell` 和模块的 `module.ts` 只能通过 `import()` |
+| 模块 `core` | 自己的 `core` 和 `api.ts`、`shared`、其他模块的 `api.ts` |
+| 模块 `platform` | 自己的 `core`、`platform`、`api.ts`；`shared`、`host`；其他模块的 `api.ts` |
+| 模块 `services` | 自己的 `core`、`platform`、`services`、`contrib`、`api.ts`、`settings.ts`、`i18n.ts`；`shared`、`host`、`theme`；其他模块的 `api.ts` |
+| 模块 `contrib` | 自己的 `core`、`platform`、`contrib`、`api.ts`；`shared`、`host`；其他模块的 `api.ts` |
+| 模块 `ui` | 整个模块（除 `module.ts` 和 `manifest.ts`）；`shared`、`host`、`theme`、`ui`、`shell`；其他模块的 `api.ts` |
+| `module.ts` | 自己的 `core`、`platform`、`services`、`contrib`、`api.ts`、`settings.ts`、`i18n.ts`、`manifest.ts`；`shared`、`host`、`theme`；其他模块的 `api.ts`；自己的 `ui` 只能通过 `import()` |
+| `manifest.ts` | 自己的 `api.ts`、其他模块的 `api.ts`；自己的 `module.ts` 只能在 `load()` 里通过 `import()` |
+| `api.ts` | 自己的 `core`（类型）、其他模块的 `api.ts`；只导出类型和键常量 |
+| `settings.ts` | 自己的 `core`、自己的 `api.ts`；`shared`、`host`、`theme`；其他模块的 `api.ts` |
+| `i18n.ts` | 不导入模块代码 |
 
-Other rules the checker enforces:
+检查器还强制以下规则：
 
-- `electron`, Node built-ins and `window.require(...)` appear only under a `desktop/` folder. Core and shared code use no host package (`obsidian`, `electron`, `preact`, `react`, `@codemirror/*`, `@xterm/*`) and no host globals such as `window`, `document`, `navigator`, `process` or `HTMLElement`.
-- Never import a containing barrel (`index.ts`) from inside its own tree.
-- Runtime import cycles, including cycles through lazy imports, fail.
+- `electron`、Node 内置模块和 `window.require(...)` 只能出现在 `desktop/` 文件夹下。core 和 shared 代码不使用任何宿主包（`obsidian`、`electron`、`preact`、`react`、`@codemirror/*`、`@xterm/*`），也不使用 `window`、`document`、`navigator`、`process`、`HTMLElement` 这类宿主全局。
+- 不要在自己的目录树内部导入包含它的桶文件（`index.ts`）。
+- 运行时导入循环（包括经过懒加载导入形成的循环）会失败。
 
-ESLint adds: no `process`, `Buffer`, `__dirname`, `__filename` or `global` outside `desktop/` folders.
+ESLint 另外规定：`desktop/` 文件夹之外不得使用 `process`、`Buffer`、`__dirname`、`__filename`、`global`。
 
-## Startup and lazy loading
+## 启动与懒加载
 
-esbuild builds one CommonJS `main.js` without code splitting. A file reachable only through `import()` is wrapped in a lazy initializer and runs on first import; one static edge from startup code pulls its whole closure into the startup set. So:
+esbuild 构建一个不拆分代码的 CommonJS `main.js`。只能通过 `import()` 到达的文件被包进懒初始化器，首次导入时才运行；启动代码里只要有一条静态边，就会把它的整个闭包拉进启动集合。因此：
 
-- Startup code is `src/app/main.ts` and what it imports statically: the registry, settings runtime, manifests, `api.ts` files, settings schemas, the workbench leaf (`app/workbench/workbench-leaf.ts`), the comments leaf, theme runtime and startup dictionaries.
-- The shell loads when a workbench leaf opens (`import('../../shell/host/workbench-surface')`).
-- Module code loads through `manifest.load()`; pages and settings pages load on first use from `pages` / `settingsPage` loaders; heavy libraries (chart.js, lunar, xterm, icon data) load behind a second `import()` inside the module.
-- Specifiers are literals. Do not rely on import side effects to register anything.
-- `pnpm run check:bundle` reports the startup set and each module's activation closure and fails over budget (`scripts/bundle-budget.json`). `--files` lists every startup input by size.
+- 启动代码是 `src/app/main.ts` 及它静态导入的内容：注册表、设置运行时、清单、`api.ts` 文件、设置模式、工作台叶子（`app/workbench/workbench-leaf.ts`）、评论叶子、主题运行时和启动词典。
+- 打开工作台叶子时才加载 shell（`import('../../shell/host/workbench-surface')`）。
+- 模块代码通过 `manifest.load()` 加载；页面和设置页在首次使用时从 `pages` / `settingsPage` 加载器加载；体积大的库（chart.js、lunar、xterm、图标数据）放在模块内部的第二层 `import()` 之后。
+- 说明符必须是字面量。不要依赖导入的副作用来注册任何东西。
+- `pnpm run check:bundle` 报告启动集合和每个模块的激活闭包，超出预算（`scripts/bundle-budget.json`）就失败。`--files` 按大小列出每个启动输入。
 
-## Module system
+## 模块系统
 
-`src/app/manifests.ts` lists the manifests; `ModuleRegistry` (`src/app/modules/registry.ts`) creates a module when its switch in the `app` namespace is on and the platform is supported, enables in manifest `order`, disables in reverse, and isolates failures (a module whose load, `activate` or `dispose` throws is `failed`, shown on its rail icon and in settings; the others continue). A switch starts from the manifest's `defaultEnabled`. States: `off`, `unsupported`, `idle`, `loading`, `active`, `disposing`, `failed`. Re-enabling creates a new instance.
+`src/app/manifests.ts` 列出所有清单；`ModuleRegistry`（`src/app/modules/registry.ts`）在 `app` 命名空间里的开关打开且平台受支持时创建模块，按清单的 `order` 启用、反向停用，并隔离失败（加载、`activate` 或 `dispose` 抛错的模块进入 `failed`，在图标轨和设置里显示；其他模块继续）。开关的初始值来自清单的 `defaultEnabled`。状态有：`off`、`unsupported`、`idle`、`loading`、`active`、`disposing`、`failed`。重新启用会创建新实例。
 
-Modules talk through:
+模块之间通过以下方式通信：
 
-- **Services** (`ServiceKey<T>` in the owner's `api.ts`): `peek` returns the value only if the owner is active and never activates it; `acquire` activates the owner and returns a lease whose `revoked` signal aborts when the owner stops; `watch` follows availability.
-- **Contribution points** (`ContributionPoint<T>`): for example automation sources contributed by home and archives, and notification openers contributed by automations.
+- **服务**（所有者 `api.ts` 里的 `ServiceKey<T>`）：`peek` 只在所有者处于激活状态时返回值，从不激活它；`acquire` 激活所有者并返回租约，所有者停止时租约的 `revoked` 信号中止；`watch` 跟随可用性变化。
+- **贡献点**（`ContributionPoint<T>`）：例如首页和档案贡献的自动化来源，自动化贡献的通知打开器。
 
-The contract is `src/app/contracts/module.ts`; how to write a module is `module-authoring.md`.
+契约是 `src/app/contracts/module.ts`；怎样编写模块见 `module-authoring.md`。
 
-## Workbench
+## 工作台
 
-One workbench view (`WORKBENCH_VIEW_TYPE` in `app/workbench/workbench-leaf.ts`). The leaf keeps its state and loads the shell surface on open. `app/workbench/compose-workbench.ts` declares the rail entries (features, icons, panels, availability) and maps each feature to a module page through `plugin.activateModule(id)` and `ModuleInstance.pages`. Features and their owning modules are `WORKBENCH_FEATURES` / `FEATURE_MODULES` in `app/contracts/workbench.ts`. Shell behavior and page contracts are the ui skill.
+只有一个工作台视图（`app/workbench/workbench-leaf.ts` 里的 `WORKBENCH_VIEW_TYPE`）。叶子保存自己的状态，打开时加载 shell 表面。`app/workbench/compose-workbench.ts` 声明图标轨条目（功能、图标、面板、可用性），并通过 `plugin.activateModule(id)` 和 `ModuleInstance.pages` 把每个功能对应到模块页面。功能及其所属模块是 `app/contracts/workbench.ts` 里的 `WORKBENCH_FEATURES` / `FEATURE_MODULES`。shell 行为和页面契约属于 ui 技能。
 
-The comments side panel (`app/workbench/comments-leaf.ts`) is the only other view; it shows the comments module's panel service or an "enable the module" state.
+评论侧栏（`app/workbench/comments-leaf.ts`）是唯一的另一种视图；它显示评论模块的面板服务，或「开启模块」的提示状态。
 
-## Commands
+## 命令
 
-| Kind | Home |
+| 种类 | 位置 |
 |---|---|
-| Shell commands (open workbench, open a module's page, cycle theme preset, copy references) | `src/app/commands.ts`, `src/app/copy-commands.ts`; a module's command uses `checkCallback` on `plugin.moduleState(id) === 'active'` |
-| Module commands | `context.commands.add(...)` inside the module (removed on dispose); pass `nameKey` so the name follows the language |
-| Ids another module must spell | `NAND_COMMANDS` in `src/shared/commands.ts` |
+| shell 命令（打开工作台、打开某个模块的页面、切换主题样式、复制引用） | `src/app/commands.ts`、`src/app/copy-commands.ts`；模块的命令用 `checkCallback` 判断 `plugin.moduleState(id) === 'active'` |
+| 模块命令 | 在模块内部用 `context.commands.add(...)`（停用时自动移除）；传入 `nameKey` 让名称跟随语言 |
+| 其他模块必须写出的 id | `src/shared/commands.ts` 里的 `NAND_COMMANDS` |
 
-Ids omit the plugin id; names omit the word "command"; there are no default hotkeys.
+id 不带插件 id 前缀；名称里不写「命令」二字；没有默认快捷键。
 
-## Persisted names
+## 持久化名称
 
-Do not rename these without a recorded decision; they are user data or user configuration.
+没有记录在案的决定，不要重命名它们；它们是用户数据或用户配置。
 
-| Data | Location | Owner |
+| 数据 | 位置 | 负责方 |
 |---|---|---|
-| Settings (vault) | `.nand/config/settings.json` (`{ version: 1, namespaces: { app, theme, home, … } }`) | `app/settings/runtime.ts` |
-| Settings (device) | `.nand/config/devices/<device-id>.json` | same; device-scoped fields (agent shells and paths, music volume, panel sizes) |
-| Device id | Obsidian local storage key `nand.device-id`, never in the vault | `host/obsidian/storage/device-id.ts` |
-| Comment threads | `.nand/editor/comments/` | comments (`editor-comments.md`) |
-| Icons and rules | `.nand/icons/iconic.json` + `.backupN` (upstream Iconic schema) | icons |
-| Automation runtime | `.nand/automation/<device-id>/runtime.json`; definitions in `NAND/自动化/<name>-<id>/操作.md` | automations |
-| Notifications | `.nand/notifications/<device-id>/inbox.json` | notifications |
-| Git sync device state | `<git dir>/nand-sync.json` (automatic-sync clock and pause; inside `.git`, never committed) | sync |
-| Agent history labels, automation sessions and cache | `.nand/terminal-agent/<device-id>/` (`history.json`, `automation-sessions.json`; `index.sqlite` is a rebuildable cache) | agent |
-| Agent lifecycle hook script | `~/.nand/hooks/nand-automation-hook.cjs`, registered in each CLI's own settings with a `.nand-backup` copy | agent |
-| Terminal helper binary | `<plugin folder>/binaries/nand-pty-<platform>-<arch>[.exe]` and `nand-pty.json` (version and digest) | agent |
-| Browser history and site permissions | `.nand/browser/<device-id>/state.json` | browser |
-| Recovery drafts and board conflicts | `.nand/recovery/drafts/`, `.nand/recovery/dashboard/conflicts/` | shared storage, home |
-| Caches | `.nand/cache/` (WeRead progress) | home |
-| Records | `NAND/习惯/`, `NAND/记账/`, `NAND/番茄钟/`, `NAND/阅读/` Markdown | home |
-| Archives | the configured visible folder (default `档案`), `个人档案/<name>/基本信息.md`, `企业档案/<name>/基本信息.md` | archives |
-| Boards | the user's board notes | home (`platform/board/`) |
-| Electron partitions | `persist:nand-browser-<vault-local-id>`, `persist:nand-dashboard-music-<vault name>`, `persist:nand-dashboard-web` | browser, home |
-| Vault-local UI state | `App.saveLocalStorage` keys `nand.*` | owning module |
-| Ribbon ids | `ribbon-<id>` from `src/app/ribbon.ts` (ids are stable; labels are translated) | app |
+| 设置（整个库） | `.nand/config/settings.json`（`{ version: 1, namespaces: { app, theme, home, … } }`） | `app/settings/runtime.ts` |
+| 设置（本机） | `.nand/config/devices/<device-id>.json` | 同上；设备范围的字段（智能体 Shell 与路径、音乐音量、面板尺寸） |
+| 设备 id | Obsidian 本地存储键 `nand.device-id`，从不在库里 | `host/obsidian/storage/device-id.ts` |
+| 评论线程 | `.nand/editor/comments/` | 评论（`editor-comments.md`） |
+| 图标与规则 | `.nand/icons/iconic.json` + `.backupN`（上游 Iconic 的模式） | 图标 |
+| 自动化运行 | `.nand/automation/<device-id>/runtime.json`；定义在 `NAND/自动化/<名称>-<id>/操作.md` | 自动化 |
+| 通知 | `.nand/notifications/<device-id>/inbox.json` | 通知 |
+| Git 同步的设备状态 | `<git dir>/nand-sync.json`（自动同步的时钟与暂停；在 `.git` 内，从不提交） | 同步 |
+| 智能体历史标注、自动化会话与缓存 | `.nand/terminal-agent/<device-id>/`（`history.json`、`automation-sessions.json`；`index.sqlite` 是可重建的缓存） | 智能体 |
+| 智能体生命周期钩子脚本 | `~/.nand/hooks/nand-automation-hook.cjs`，注册在各 CLI 自己的设置里，并留有 `.nand-backup` 副本 | 智能体 |
+| 终端辅助程序 | `<插件目录>/binaries/nand-pty-<平台>-<架构>[.exe]` 和 `nand-pty.json`（版本与摘要） | 智能体 |
+| 浏览历史与站点授权 | `.nand/browser/<device-id>/state.json` | 浏览器 |
+| 恢复草稿与看板冲突 | `.nand/recovery/drafts/`、`.nand/recovery/dashboard/conflicts/` | 共享存储、首页 |
+| 缓存 | `.nand/cache/`（微信读书进度） | 首页 |
+| 记录 | `NAND/习惯/`、`NAND/记账/`、`NAND/番茄钟/`、`NAND/阅读/` 下的 Markdown | 首页 |
+| 档案 | 配置的可见文件夹（默认 `档案`）、`个人档案/<姓名>/基本信息.md`、`企业档案/<名称>/基本信息.md` | 档案 |
+| 看板 | 用户的看板笔记 | 首页（`platform/board/`） |
+| Electron 分区 | `persist:nand-browser-<库本地 id>`、`persist:nand-dashboard-music-<库名>`、`persist:nand-dashboard-web` | 浏览器、首页 |
+| 库本地的界面状态 | `App.saveLocalStorage` 键 `nand.*` | 所属模块 |
+| 功能区 id | `src/app/ribbon.ts` 里的 `ribbon-<id>`（id 稳定，标签会翻译） | app |
 
-Obsidian Sync does not sync dot-folders, so `.nand/` needs Git, iCloud, Syncthing or similar; the user guides say so.
+Obsidian Sync 不同步以点开头的文件夹，所以 `.nand/` 需要 Git、iCloud、Syncthing 等；使用指南里会说明。
 
 ## TypeScript
 
-`strict`, `noUncheckedIndexedAccess`, `noImplicitReturns`, `useUnknownInCatchVariables`, target ES2021. Floating promises are errors (`void` a deliberate fire-and-forget). Never return an Obsidian chainable control from a Promise callback (`nand/no-obsidian-thenable`). Files and folders use kebab-case; Preact component files PascalCase; constants other files import (view types, keys) `SCREAMING_SNAKE`. Relative imports only.
+`strict`、`noUncheckedIndexedAccess`、`noImplicitReturns`、`useUnknownInCatchVariables`，目标 ES2021。未处理的 Promise 是错误（有意不等待时用 `void`）。不要在 Promise 回调里返回 Obsidian 的链式控件（`nand/no-obsidian-thenable`）。文件和文件夹用 kebab-case；Preact 组件文件用 PascalCase；其他文件导入的常量（视图类型、键）用 `SCREAMING_SNAKE`。只用相对路径导入。

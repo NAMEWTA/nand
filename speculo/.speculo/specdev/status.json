@@ -1,6 +1,34 @@
 {
   "schema_version": 5,
   "workflow": "specdev",
-  "active": [],
+  "active": [
+    {
+      "change": "2026-10-08-workbench-regressions"
+    },
+    {
+      "change": "2026-10-08-terminal-reliability"
+    },
+    {
+      "change": "2026-10-08-private-storage-permissions"
+    },
+    {
+      "change": "2026-10-08-archives-completion"
+    },
+    {
+      "change": "2026-10-08-git-sync-parity"
+    },
+    {
+      "change": "2026-10-08-home-grid-rebuild"
+    },
+    {
+      "change": "2026-10-08-news-aihot"
+    },
+    {
+      "change": "2026-10-08-browser-ai-workbench"
+    },
+    {
+      "change": "2026-10-08-all-open-issues"
+    }
+  ],
   "archived": []
 }

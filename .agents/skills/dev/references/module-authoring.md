@@ -1,68 +1,66 @@
-English | [简体中文](module-authoring.ZH.md)
+# 编写模块
 
-# Writing a module
+模块是有自己生命周期的懒加载功能。契约是 `src/app/contracts/module.ts`；`src/modules/notifications/` 是最小的完整示例，`src/modules/comments/` 展示编辑器集成，`src/modules/sync/` 是默认关闭的桌面专属模块，`src/modules/home/` 是大型模块。
 
-A module is a lazily loaded feature with its own lifetime. The contract is `src/app/contracts/module.ts`; `src/modules/notifications/` is the smallest complete example, `src/modules/comments/` shows editor integrations, `src/modules/sync/` a desktop-only module that is off by default, and `src/modules/home/` a large one.
+## 文件
 
-## Files
-
-| File | Holds | Loaded |
+| 文件 | 内容 | 加载时机 |
 |---|---|---|
-| `manifest.ts` | `ModuleManifest`: id, order, icon, title and description keys, platforms, `defaultEnabled`, activation, provided and contributed points, `load: () => import('./module')` | at startup (keep it data only) |
-| `api.ts` | types other modules may use and `serviceKey()` / `contributionPoint()` constants | at startup (types and keys only) |
-| `module.ts` | `export default function create<Name>Module(context): ModuleInstance` | when the module is enabled |
-| `settings.ts` | the namespace schema (`defineSettings` or `domainSettings`) | at startup if `app` binds it, otherwise with the module |
-| `i18n.ts` | `export const messages = { en: {…}, zh: {…} }` | with `module.ts` |
-| `core/`, `platform/`, `services/`, `contrib/`, `ui/`, `styles/` | see the zone table in `architecture.md` | with the module or later |
+| `manifest.ts` | `ModuleManifest`：id、order、图标、标题与描述的键、平台、`defaultEnabled`、激活方式、提供和贡献的点、`load: () => import('./module')` | 启动时（只放数据） |
+| `api.ts` | 其他模块可以使用的类型，以及 `serviceKey()` / `contributionPoint()` 常量 | 启动时（只放类型和键） |
+| `module.ts` | `export default function create<Name>Module(context): ModuleInstance` | 模块启用时 |
+| `settings.ts` | 命名空间的模式（`defineSettings` 或 `domainSettings`） | `app` 绑定它时在启动时，否则随模块 |
+| `i18n.ts` | `export const messages = { en: {…}, zh: {…} }` | 随 `module.ts` |
+| `core/`、`platform/`、`services/`、`contrib/`、`ui/`、`styles/` | 见 `architecture.md` 的分区表 | 随模块或更晚 |
 
-Manifest fields worth knowing:
+值得了解的清单字段：
 
-- `platforms`: `{ desktop, mobile }`. Set `mobile: false` for anything that needs Node or Electron. An unsupported module is `unsupported` and never loads.
-- `defaultEnabled`: the initial value of the module switch in the `app` namespace. Use `false` for a module that starts processes or talks to a remote (sync).
-- `activation`: `startup` (during plugin load; a failure only marks this module failed), `layout-ready` (after the workspace layout is ready) or `on-demand` (the first time a page, command or service needs it).
+- `platforms`：`{ desktop, mobile }`。需要 Node 或 Electron 的功能设 `mobile: false`。不受支持的模块状态是 `unsupported`，永不加载。
+- `defaultEnabled`：`app` 命名空间里模块开关的初始值。会启动进程或联系远端的模块（同步）用 `false`。
+- `activation`：`startup`（插件加载期间；失败只把这个模块标为失败）、`layout-ready`（工作区布局就绪之后）或 `on-demand`（页面、命令或服务第一次需要它时）。
 
-## Adding a module
+## 添加模块
 
-1. Add the id to `ModuleId` and `MODULE_IDS` (`src/app/contracts/module.ts`). The module switch in the `app` namespace is generated from that list (`src/app/settings/app-schema.ts`).
-2. Write `manifest.ts` and add it to `MANIFESTS` (`src/app/manifests.ts`). `order` decides enable order (reverse on disable).
-3. Write `module.ts`. At the top, `registerMessages(messages)` (and any `shared/i18n/lazy/*` dictionary it reads). The factory may do cheap setup; IO and listeners go into `activate()`. Return:
-   - `services` / `contributions` as `[key, value]` pairs (getters are fine when values exist only after `activate()`),
-   - `pages`: `{ <page>: async () => (await import('./ui/<page>-page')).create…(…) }`,
-   - `settingsPage`: `async () => (await import('./ui/settings-page')).…`,
-   - `activate(signal)` and `dispose(reason)` (`'disabled' | 'unload'`).
-4. Use the context instead of the plugin:
-   - `context.settings.bind(name, schema)` for settings (`settings-and-i18n.md`),
-   - `context.lifetime` (`registerEvent`, `registerDomEvent`, `register`) for anything that must end with the module,
-   - `context.commands.add({ id, name, nameKey, … })` for palette commands,
-   - `context.editor.addExtension(…)` / `addPostProcessor(…)` for editor features,
-   - `context.services` (`peek`, `acquire`, `watch`) and `context.contributions` for other modules,
-   - `context.shell.open(target)` to show a workbench page, `context.shell.refresh()` after state the rail or panel shows changes,
-   - `context.env` (`desktop`, `mobile`, `phone`) for platform choices.
-5. Add `i18n.ts` to `scripts/module-strings.ts` so tests and verify scripts see the strings.
-6. Add the module's CSS under `styles/`, list each file in `src/styles.json`, then `node scripts/build-styles.mjs --write`. Scope selectors under the module's own class prefix (ui skill).
-7. Add a budget for its activation closure under `moduleActivationBytes` in `scripts/bundle-budget.json`.
+1. 把 id 加入 `ModuleId` 和 `MODULE_IDS`（`src/app/contracts/module.ts`）。`app` 命名空间里的模块开关由这个列表生成（`src/app/settings/app-schema.ts`）。
+2. 编写 `manifest.ts`，并加入 `MANIFESTS`（`src/app/manifests.ts`）。`order` 决定启用顺序（停用时反向）。
+3. 编写 `module.ts`。在文件顶部调用 `registerMessages(messages)`（以及它读取的 `shared/i18n/lazy/*` 词典）。工厂函数可以做轻量准备；读写和监听器放进 `activate()`。返回：
+   - `services` / `contributions`，形式为 `[key, value]` 对（值只在 `activate()` 之后才存在时可以用 getter），
+   - `pages`：`{ <page>: async () => (await import('./ui/<page>-page')).create…(…) }`，
+   - `settingsPage`：`async () => (await import('./ui/settings-page')).…`，
+   - `activate(signal)` 和 `dispose(reason)`（`'disabled' | 'unload'`）。
+4. 使用 context 而不是插件实例：
+   - 设置用 `context.settings.bind(name, schema)`（见 `settings-and-i18n.md`），
+   - 必须随模块结束的东西用 `context.lifetime`（`registerEvent`、`registerDomEvent`、`register`），
+   - 命令面板命令用 `context.commands.add({ id, name, nameKey, … })`，
+   - 编辑器功能用 `context.editor.addExtension(…)` / `addPostProcessor(…)`，
+   - 与其他模块交互用 `context.services`（`peek`、`acquire`、`watch`）和 `context.contributions`，
+   - 显示工作台页面用 `context.shell.open(target)`，图标轨或面板显示的状态变化后调用 `context.shell.refresh()`，
+   - 平台选择用 `context.env`（`desktop`、`mobile`、`phone`）。
+5. 把 `i18n.ts` 加入 `scripts/module-strings.ts`，让测试和验证脚本看得到这些文案。
+6. 把模块的 CSS 放在 `styles/` 下，在 `src/styles.json` 里列出每个文件，然后运行 `node scripts/build-styles.mjs --write`。选择器限定在模块自己的类名前缀下（见 ui 技能）。
+7. 在 `scripts/bundle-budget.json` 的 `moduleActivationBytes` 下为它的激活闭包添加预算。
 
-## A workbench page
+## 工作台页面
 
-1. Add the feature id to `WORKBENCH_FEATURES` and its owner to `FEATURE_MODULES` (`src/app/contracts/workbench.ts`), and its sections to `sections` in `src/shell/navigation-state.ts` if it has any.
-2. Add a contribution in `src/app/workbench/compose-workbench.ts`: rail slot, navigation (label key, icon, child sections), `panel` (from a service the module provides, read with `peek`), `availability` (enabled, supported, ready), `stateKeys` (what the page may save in the leaf), and `create: modulePage('<module>', '<page>')`.
-3. Implement the page loader in `ui/<page>-page.ts`. It returns a `PageCreate`: given the native surface context, target, saved state and an abort signal, it returns `{ surface, navigate, getTarget?, getState?, restore? }`. The surface is a `NativeSurface` subclass. Rendering rules are the ui skill.
-4. If the panel or title reads module state, expose it through a service in `api.ts` (for example `HOME_WORKBENCH`, `AGENT_WORKBENCH`, `SYNC_WORKBENCH`) and have compose-workbench `watch` it so the shell refreshes when the service appears, changes or goes away.
+1. 把功能 id 加入 `WORKBENCH_FEATURES`，把它的所属模块加入 `FEATURE_MODULES`（`src/app/contracts/workbench.ts`）；如果有分区，还要加到 `src/shell/navigation-state.ts` 的 `sections`。
+2. 在 `src/app/workbench/compose-workbench.ts` 里添加一个贡献：图标轨位置、导航（标签键、图标、子分区）、`panel`（来自模块提供的服务，用 `peek` 读取）、`availability`（是否启用、是否受支持、是否就绪）、`stateKeys`（页面可以保存在叶子里的内容），以及 `create: modulePage('<module>', '<page>')`。
+3. 在 `ui/<page>-page.ts` 里实现页面加载器。它返回 `PageCreate`：给定原生表面上下文、目标、已保存状态和中止信号，返回 `{ surface, navigate, getTarget?, getState?, restore? }`。表面是 `NativeSurface` 的子类。渲染规则属于 ui 技能。
+4. 如果面板或标题要读取模块状态，通过 `api.ts` 里的服务暴露（例如 `HOME_WORKBENCH`、`AGENT_WORKBENCH`、`SYNC_WORKBENCH`），并让 compose-workbench `watch` 它，这样服务出现、变化或消失时 shell 会刷新。
 
-## A settings page
+## 设置页
 
-`settingsPage` returns a renderer `(container, host) => void`; `host.refresh()` redraws, `host.keep(off)` keeps a subscription while the page is shown. To list it in workbench settings, add the product to `src/app/settings/nav.ts` (`SettingsProduct`, `ORDER`, `ModuleGates`, `PRODUCT_MODULES`) and its label and icon to `src/app/workbench/settings-categories.ts`. Use native `Setting` rows bound to the settings handle; the Obsidian settings tab only carries the entry rows (`src/app/settings/entry-tab.ts`).
+`settingsPage` 返回渲染函数 `(container, host) => void`；`host.refresh()` 重绘，`host.keep(off)` 在页面显示期间保持一个订阅。要把它列进工作台设置，把产品加入 `src/app/settings/nav.ts`（`SettingsProduct`、`ORDER`、`ModuleGates`、`PRODUCT_MODULES`），把它的标签和图标加入 `src/app/workbench/settings-categories.ts`。使用绑定到设置句柄的原生 `Setting` 行；Obsidian 设置页只放入口行（`src/app/settings/entry-tab.ts`）。
 
-## Talking to other modules
+## 与其他模块交互
 
-- Need something another module does: import its key from its `api.ts`; `peek` when the feature is optional and must not turn the other module on (status, panel data), `acquire` when the user asked for it (the lease's `revoked` signal tells you the owner stopped).
-- Offer something: put the interface and key in your `api.ts`, return the value in `services`, and list the key in the manifest's `provides`.
-- Let others plug in: declare a `contributionPoint` in your `api.ts`; contributors return `[point, value]` in `contributions` and list it under `contributes`. Collect with `context.contributions.collect(point)`.
-- Never import another module's internals, and never reach the plugin instance.
+- 需要另一个模块的能力：从它的 `api.ts` 导入键；功能可选且不应因此开启对方时用 `peek`（状态、面板数据），用户主动要求时用 `acquire`（租约的 `revoked` 信号告诉你所有者已停止）。
+- 提供能力：把接口和键放进自己的 `api.ts`，在 `services` 里返回值，并在清单的 `provides` 里列出键。
+- 让别人接入：在自己的 `api.ts` 里声明 `contributionPoint`；贡献者在 `contributions` 里返回 `[point, value]`，并在 `contributes` 下列出。用 `context.contributions.collect(point)` 收集。
+- 永远不要导入另一个模块的内部实现，也不要去碰插件实例。
 
-## Lifetime checklist
+## 生命周期检查清单
 
-- [ ] `dispose()` releases timers, listeners, processes, DOM outside the leaf and body classes; `dispose('unload')` does not prompt the user
-- [ ] Commands and editor extensions go through `context.commands` / `context.editor`
-- [ ] Turning the module off and on again in a running vault works (the probe and the module's tests cover it)
-- [ ] Startup set unchanged (`pnpm run check:bundle`), architecture check clean
+- [ ] `dispose()` 释放计时器、监听器、进程、叶子之外的 DOM 和 body 类名；`dispose('unload')` 不向用户弹出提示
+- [ ] 命令和编辑器扩展都通过 `context.commands` / `context.editor`
+- [ ] 在运行的库里关闭再开启模块可用（探针和模块自己的测试覆盖它）
+- [ ] 启动集合不变（`pnpm run check:bundle`），架构检查通过

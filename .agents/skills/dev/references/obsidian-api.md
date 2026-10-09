@@ -1,110 +1,108 @@
-English | [简体中文](obsidian-api.ZH.md)
+# Obsidian API 规则（本仓库的用法）
 
-# Obsidian API rules, as applied here
+改编自 SKILL.md `metadata.adapted-from` 所列的技能，以及本仓库在 `eslint.config.mts` 里启用的 `eslint-plugin-obsidianmd` 的 `recommended` 规则。
 
-Adapted from the skill named in SKILL.md `metadata.adapted-from` and from `eslint-plugin-obsidianmd` `recommended`, which this repo enables in `eslint.config.mts`.
+生产代码 `src/**/*.ts(x)` 用 `--max-warnings 0` 检查：警告和错误一样会失败。`scripts/**`、测试和配置文件被忽略（`eslint.config.mts`）。该文件里的局部例外都写明了理由（TypeScript 文件关闭核心规则 `no-undef`；`desktop/` 文件夹可以使用 Node）。
 
-Production `src/**/*.ts(x)` is linted with `--max-warnings 0`: a warning fails like an error. `scripts/**`, tests and config files are ignored (`eslint.config.mts`). Scoped overrides in that file carry their reason (TypeScript files turn off core `no-undef`; `desktop/` folders may use Node).
+`minAppVersion` 是 1.13.0（见 SKILL.md 的身份表），所以 Obsidian 设置页只用声明式的 `getSettingDefinitions()`，没有 `display()` 后备。
 
-`minAppVersion` is 1.13.0 (SKILL.md identity table), so the Obsidian settings tab is declarative only (`getSettingDefinitions()`), with no `display()` fallback.
+## 内存与生命周期
 
-## Memory and lifecycle
-
-| Do | Don't |
+| 应该 | 不应该 |
 |---|---|
-| `this.registerEvent(app.vault.on / workspace.on / …)` | Subscribe and forget, or only `off()` in `onunload` if `registerEvent` can do it |
-| `registerDomEvent` on the plugin or the owning `Component` | `addEventListener` now and `removeEventListener` later on `activeDocument` — focus may have moved, so you remove it from a different document |
-| `registerInterval` for periodic work | A bare interval that survives plugin unload |
-| Return views from the `registerView` factory | Store `ItemView` instances on the plugin or in module globals; enumerate leaves when you need them |
-| Let Obsidian detach leaves | `detachLeavesOfType()` in `onunload` |
+| `this.registerEvent(app.vault.on / workspace.on / …)` | 订阅后不管，或在 `registerEvent` 能做到时只在 `onunload` 里 `off()` |
+| 在插件或所属 `Component` 上用 `registerDomEvent` | 现在 `addEventListener`，之后在 `activeDocument` 上 `removeEventListener`——焦点可能已经移动，会从另一个文档上移除 |
+| 周期性工作用 `registerInterval` | 插件卸载后仍然存活的裸计时器 |
+| 在 `registerView` 工厂里返回视图 | 把 `ItemView` 实例存在插件上或模块全局变量里；需要时遍历叶子 |
+| 让 Obsidian 分离叶子 | 在 `onunload` 里调用 `detachLeavesOfType()` |
 
-`activeDocument` and `activeWindow` follow focus. Capture the document in a local if setup and cleanup must hit the same one.
+`activeDocument` 和 `activeWindow` 跟随焦点。设置和清理必须作用于同一个文档时，把文档保存在局部变量里。
 
-Long-lived services belong to a module and end with it (`module-authoring.md`). Views and pages are not services.
+长期运行的服务属于模块，随模块结束（见 `module-authoring.md`）。视图和页面不是服务。
 
-Popovers and modals that create DOM outside a component must remove that DOM in `destroy` / `onClose`. The comment popover is appended to `view.dom.ownerDocument.body` and removed in the CodeMirror plugin `destroy()`.
+在组件之外创建 DOM 的浮层和对话框，必须在 `destroy` / `onClose` 里移除这些 DOM。评论浮层被追加到 `view.dom.ownerDocument.body`，并在 CodeMirror 插件的 `destroy()` 里移除。
 
-## Types
+## 类型
 
 ```ts
-// Files and folders — instanceof, never a cast
+// 文件和文件夹——用 instanceof，不要强制转换
 const file = app.vault.getAbstractFileByPath(path);
 if (file instanceof TFile) {
   // ...
 }
 
-// DOM nodes and UI events — instanceOf, because popouts have a different realm
+// DOM 节点和界面事件——用 instanceOf，因为弹出窗口属于另一个 realm
 if (node.instanceOf(Text)) {
   // ...
 }
 ```
 
-`instanceof HTMLElement` across windows is the bug `.instanceOf` exists to prevent. `TFile` / `TFolder` stay on `instanceof` (same realm as the app).
+跨窗口的 `instanceof HTMLElement` 正是 `.instanceOf` 要防止的缺陷。`TFile` / `TFolder` 仍用 `instanceof`（与应用在同一个 realm）。
 
-No `any`. No `var`. `unknown` plus a narrowing function is the pattern used in the comment store (`asRecord`). Unpublished `app.commands` is typed in `src/host/obsidian/obsidian-internal.ts`. Use that interface.
+不用 `any`，不用 `var`。评论存储里使用的模式是 `unknown` 加一个收窄函数（`asRecord`）。未公开的 `app.commands` 在 `src/host/obsidian/obsidian-internal.ts` 里有类型。使用那个接口。
 
-## Files
+## 文件
 
-| Situation | API |
+| 情形 | API |
 |---|---|
-| Edit the note the user is typing in | Editor API (`editor.replaceSelection`, CodeMirror). Not `Vault.modify` |
-| Edit a note in the background | `Vault.process` |
-| Delete | `FileManager.trashFile` |
-| Look up a path | `Vault.getAbstractFileByPath` or `getFileByPath`. Not `getFiles().find` |
-| Vault-relative paths | `normalizePath` |
-| Desktop filesystem paths | Native `path.resolve` / `path.join`; retain absolute roots, UNC prefixes, spaces and literal `%20` |
-| Network | `requestUrl`. Not `fetch` |
-| OS / form factor | `Platform.isPhone`, `Platform.isDesktopApp`, `Platform.isDesktop`. Not `navigator.userAgent` |
-| Language | The plugin's own i18n. Do not read `localStorage.language` |
+| 编辑用户正在输入的笔记 | 编辑器 API（`editor.replaceSelection`、CodeMirror）。不要用 `Vault.modify` |
+| 在后台编辑笔记 | `Vault.process` |
+| 删除 | `FileManager.trashFile` |
+| 查找路径 | `Vault.getAbstractFileByPath` 或 `getFileByPath`。不要用 `getFiles().find` |
+| 库内相对路径 | `normalizePath` |
+| 桌面文件系统路径 | 原生 `path.resolve` / `path.join`；保留绝对根、UNC 前缀、空格和字面量 `%20` |
+| 网络 | `requestUrl`。不要用 `fetch` |
+| 系统／设备形态 | `Platform.isPhone`、`Platform.isDesktopApp`、`Platform.isDesktop`。不要用 `navigator.userAgent` |
+| 语言 | 插件自己的 i18n。不要读取 `localStorage.language` |
 
-Plugin-folder paths use `manifest.id`. Persisted names that must stay are the data table in `architecture.md`.
+插件目录路径使用 `manifest.id`。必须保持不变的持久化名称见 `architecture.md` 的数据表。
 
-Regex lookbehind is illegal here (iOS < 16.4). The plugin is not desktop-only (`isDesktopOnly` in the SKILL.md identity table).
+这里不允许正则后行断言（iOS < 16.4）。插件不是仅桌面版（见 SKILL.md 身份表的 `isDesktopOnly`）。
 
-## UI text, commands, settings
+## 界面文字、命令、设置
 
-- Sentence case in English UI and in `t()` values. Proper nouns stay capitalized. Where strings live is `settings-and-i18n.md`.
-- Command ids and names follow the Commands section of `architecture.md`. Register with `addCommand`, or `context.commands.add` inside a module.
-- Settings headings use `Setting.setHeading()`, not a hand-built `<h2>`, and are not named "General", "Settings", or the display name.
-- Settings go into a namespace of the settings store (`settings-and-i18n.md`); never `saveData`. Domain stores such as comments and icons own their documented files.
-- Put a new setting on its module's workbench settings page (or General / Appearance). Obsidian's tab (`src/app/settings/entry-tab.ts`, declarative `getSettingDefinitions()` only) carries the entry rows: open workbench settings, language, status, theme preset, module switches.
-- Redraw the Obsidian tab with its `refresh()`; redraw a workbench settings page with `host.refresh()`. Do not call `display()`.
-- From a settings callback, `activeDocument` is the settings window. To touch the main workspace, use `this.app.workspace.containerEl.ownerDocument`.
+- 英文界面和 `t()` 的值用句首大写。专有名词保持大写。文案放在哪里见 `settings-and-i18n.md`。
+- 命令 id 与名称遵循 `architecture.md` 的「命令」一节。用 `addCommand` 注册，在模块内部用 `context.commands.add`。
+- 设置标题用 `Setting.setHeading()`，不要手写 `<h2>`，也不要命名为「General」「Settings」或显示名称。
+- 设置放进设置存储的命名空间（见 `settings-and-i18n.md`）；绝不用 `saveData`。评论、图标这类领域存储拥有自己记录在案的文件。
+- 新设置放在所属模块的工作台设置页（或「常规」／「外观」）。Obsidian 的设置页（`src/app/settings/entry-tab.ts`，只用声明式的 `getSettingDefinitions()`）只放入口行：打开工作台设置、语言、状态、主题样式、模块开关。
+- 用设置页自己的 `refresh()` 重绘 Obsidian 设置页；用 `host.refresh()` 重绘工作台设置页。不要调用 `display()`。
+- 在设置回调里，`activeDocument` 是设置窗口。要操作主工作区，用 `this.app.workspace.containerEl.ownerDocument`。
 
-## DOM and CSS
+## DOM 与 CSS
 
-- Build UI with `createEl` / `createDiv` / `createSpan` / `createSvg` on a parent `HTMLElement`. Do not `document.createElement`.
-- Put styles in the one stylesheet named in the SKILL.md identity table. Do not inject `<style>` or `<link>`. Do not assign large style blobs from TypeScript when a class will do. Coordinates (comment popover `left` / `top`) are the exception.
-- Use the NAND tokens and Obsidian variables; colors live only in `src/theme/` and the token layer (`../../ui/references/design-system.md`). `pnpm run lint:css` rejects literal colors, `!important`, `:has`, raw z-index values and duplicate selectors outside the baseline.
-- Scope selectors to the module's classes (`.nand-editor-…`, `.nand-contacts-…`, `.dashboard-…`). No bare `button { }` rules. Rules that style Obsidian's own DOM hang off a body class the module adds while active.
-- Edit the module's author file under its `styles/` folder in place rather than appending overrides elsewhere.
-- Toggle a class from TypeScript instead of reaching for `!important` or `:has`.
-- Icon-only buttons need an accessible name (`aria-label` or `setTooltip`). Interactive targets should be at least 44×44px on touch. Don't remove `:focus-visible` outlines.
-- Keyboard: a control that clicks must also work with Enter / Space if it is not a native `button`.
+- 在父 `HTMLElement` 上用 `createEl` / `createDiv` / `createSpan` / `createSvg` 构建界面。不要用 `document.createElement`。
+- 样式放在 SKILL.md 身份表所列的唯一样式表里。不要注入 `<style>` 或 `<link>`。能用类名时不要在 TypeScript 里赋大段样式。坐标（评论浮层的 `left` / `top`）是例外。
+- 使用 NAND 令牌和 Obsidian 变量；颜色只存在于 `src/theme/` 和令牌层（`../../ui/references/design-system.md`）。`pnpm run lint:css` 会拒绝基线之外的字面量颜色、`!important`、`:has`、原始 z-index 值和重复选择器。
+- 选择器限定在模块的类名下（`.nand-editor-…`、`.nand-contacts-…`、`.dashboard-…`）。不写裸的 `button { }` 规则。给 Obsidian 自身 DOM 设样式的规则挂在模块激活期间添加的 body 类名下。
+- 直接编辑模块 `styles/` 文件夹下的作者文件，不要在别处追加覆盖。
+- 用 TypeScript 切换类名，而不是去用 `!important` 或 `:has`。
+- 只有图标的按钮需要可访问名称（`aria-label` 或 `setTooltip`）。触屏上的可交互目标至少 44×44px。不要去掉 `:focus-visible` 轮廓。
+- 键盘：不是原生 `button` 的可点击控件，也必须支持 Enter / Space。
 
-## Timers and promises
+## 计时器与 Promise
 
-`eslint-plugin-obsidianmd` wants `window.setTimeout` / `window.clearTimeout` (better: the owning element's `win`) rather than bare timers or `globalThis`. Core code that needs timers takes them as an injected `{ set, clear }` pair (settings store, comment store) so tests can pass Node timers and the host picks the window.
+`eslint-plugin-obsidianmd` 要求用 `window.setTimeout` / `window.clearTimeout`（更好的是所属元素的 `win`），而不是裸计时器或 `globalThis`。需要计时器的 core 代码把它们作为注入的 `{ set, clear }` 对接收（设置存储、评论存储），这样测试可以传入 Node 计时器，宿主选择窗口。
 
-Every `Promise` is awaited, returned, or explicitly `void`ed. `workspace.revealLeaf` is a promise.
+每个 `Promise` 都要等待、返回，或显式 `void`。`workspace.revealLeaf` 是一个 Promise。
 
-## Logging and platform modules
+## 日志与平台模块
 
-No `console.log` in `onload` / `onunload`; report errors with `console.error('[NAND <area>]', error)` and a Notice when the user must act.
+不要在 `onload` / `onunload` 里 `console.log`；用 `console.error('[NAND <area>]', error)` 报告错误，需要用户处理时再加一个 Notice。
 
-`electron`, Node built-ins and `window.require` live only in `desktop/` folders (architecture rule), reached from modules whose manifest has `platforms.mobile: false` or behind `Platform.isDesktopApp`, so the phone never evaluates them.
+`electron`、Node 内置模块和 `window.require` 只存在于 `desktop/` 文件夹（架构规则），只从清单里 `platforms.mobile: false` 的模块或 `Platform.isDesktopApp` 之后到达，因此手机永远不会执行它们。
 
-## Manifest naming
+## 清单命名
 
-The plugin id does not contain `obsidian` and does not end with `plugin`. The display name does not contain `Obsidian` or end with `Plugin`. The description does not say "This plugin" or "Obsidian", and it ends with punctuation. Keep it that way.
+插件 id 不含 `obsidian`，也不以 `plugin` 结尾。显示名称不含 `Obsidian`，也不以 `Plugin` 结尾。描述不写「This plugin」或「Obsidian」，并以标点结尾。保持这样。
 
-## Accessibility bar
+## 无障碍底线
 
-Match surrounding UI. New buttons and icon buttons are keyboard reachable, named, and visible on `:focus-visible`. Do not ship a click-only `div` when `button` works.
+与周围界面保持一致。新的按钮和图标按钮可通过键盘到达、有名称，并在 `:focus-visible` 时可见。能用 `button` 时不要发布只能点击的 `div`。
 
-## Release hygiene
+## 发布卫生
 
-- Lint is clean with zero warnings (CI runs `pnpm run lint`).
-- Releases attest the zip, `main.js` and `styles.css` (`actions/attest-build-provenance`); leave that step in `release.yml`.
+- 代码检查零警告（CI 运行 `pnpm run lint`）。
+- Release 为 zip、`main.js` 和 `styles.css` 生成来源证明（`actions/attest-build-provenance`）；把这一步留在 `release.yml` 里。
 
-The Iconic port keeps upstream CSS declarations and `.iconic-*` names for behavioral parity. Every imported selector is gated by `body.nand-iconic-enabled` (using `:where` to preserve specificity); disable removes that body marker in main and floating windows. Treat this as a scoped port exception, not a template for new global CSS. Private Obsidian members used by this port are described locally in `src/modules/icons/platform/utils/obsidian-internal.ts`; do not add ambient declarations or blanket lint suppressions.
+Iconic 移植保留上游的 CSS 声明和 `.iconic-*` 名称以保持行为一致。每个导入的选择器都由 `body.nand-iconic-enabled` 把关（用 `:where` 保持特异性）；关闭模块会在主窗口和浮动窗口里移除这个 body 标记。把它当作有范围的移植例外，不要当作新增全局 CSS 的模板。这次移植用到的 Obsidian 私有成员在 `src/modules/icons/platform/utils/obsidian-internal.ts` 里就地描述；不要添加环境声明或笼统的 lint 抑制。

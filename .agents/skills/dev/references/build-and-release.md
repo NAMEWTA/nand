@@ -1,74 +1,72 @@
-English | [简体中文](build-and-release.ZH.md)
+# 构建与发版
 
-# Build and release
+## 脚本
 
-## Scripts
-
-| Script | What it does |
+| 脚本 | 作用 |
 |---|---|
-| `dev` | esbuild watch, inline sourcemap, no minify |
-| `build` | `tsc` (source), `tsc -p tsconfig.test.json` (tests), `build-styles.mjs --check`, esbuild production → repo-root `main.js` |
-| `lint` | ESLint with `--max-warnings 0` |
-| `lint:css` | stylelint over `src/**/*.css` with a shrink-only file baseline (`scripts/stylelint-baseline.json`); new violations fail |
-| `check:bundle` | startup set and per-module activation closures from the esbuild metafile, compared with `scripts/bundle-budget.json`; fails over budget (`--files` lists startup inputs) |
-| `check:styles` | size, `!important`, literal colors, z-index and duplicate selectors report |
-| `check:native` | `cargo test --locked` for `native/pty-server` |
-| `check:notices` | `THIRD-PARTY-NOTICES.md` matches the bundle and crate graph (`pnpm run notices` rewrites it) |
-| `check:similarity` | k-gram similarity of the tree against reference projects (`licensing.md`) |
-| `format`, `format:check` | prettier over `src/**/*.{ts,tsx}` and `scripts/**/*.ts`; not part of CI |
-| `test`, `test:*`, `test:all` | `testing.md` |
+| `dev` | esbuild 监听模式，内联 sourcemap，不压缩 |
+| `build` | `tsc`（源码）、`tsc -p tsconfig.test.json`（测试）、`build-styles.mjs --check`、esbuild 生产构建 → 仓库根目录的 `main.js` |
+| `lint` | ESLint，`--max-warnings 0` |
+| `lint:css` | 用 stylelint 检查 `src/**/*.css`，文件级基线只减不增（`scripts/stylelint-baseline.json`）；新违规会失败 |
+| `check:bundle` | 从 esbuild 元数据得到启动集合和各模块的激活闭包，与 `scripts/bundle-budget.json` 比较；超预算失败（`--files` 列出启动输入） |
+| `check:styles` | 报告体积、`!important`、字面量颜色、z-index 和重复选择器 |
+| `check:native` | 对 `native/pty-server` 运行 `cargo test --locked` |
+| `check:notices` | `THIRD-PARTY-NOTICES.md` 与打包内容和 crate 依赖图一致（`pnpm run notices` 会重写它） |
+| `check:similarity` | 对照参考项目计算源码树的 k-gram 相似度（见 `licensing.md`） |
+| `format`、`format:check` | 用 prettier 处理 `src/**/*.{ts,tsx}` 和 `scripts/**/*.ts`；不属于 CI |
+| `test`、`test:*`、`test:all` | 见 `testing.md` |
 
-`main.js` and `styles.css` are committed. Rebuild and commit them with the source; CI fails when the rebuilt `main.js` differs.
+`main.js` 和 `styles.css` 提交到仓库。重建后与源码一起提交；重建的 `main.js` 与提交的不同时 CI 会失败。
 
-## Styles
+## 样式
 
-Edit the author file in its owner's `styles/` folder (`src/ui`, `src/theme`, `src/shell`, `src/app`, `src/modules/<id>`), keep its place in `src/styles.json`, then `node scripts/build-styles.mjs --write`. The order in `src/styles.json` is the cascade; do not sort by filename. CSS cannot load lazily (Obsidian allows one stylesheet), so module CSS is scoped to the module's classes or to body classes the module adds while active.
+在所属方的 `styles/` 文件夹里编辑作者文件（`src/ui`、`src/theme`、`src/shell`、`src/app`、`src/modules/<id>`），保持它在 `src/styles.json` 中的位置，然后运行 `node scripts/build-styles.mjs --write`。`src/styles.json` 里的顺序就是层叠顺序，不要按文件名排序。CSS 不能懒加载（Obsidian 只允许一个样式表），所以模块 CSS 限定在模块自己的类名下，或限定在模块激活期间添加的 body 类名下。
 
-The styles builder normalizes CRLF to LF in every source, including package stylesheets. `--write` emits LF; `--check` also normalizes the checked-out `styles.css`, so Windows checkout settings do not affect the result.
+样式构建器把每个源文件（包括依赖包的样式表）的 CRLF 统一为 LF。`--write` 输出 LF；`--check` 也会归一化检出的 `styles.css`，因此 Windows 的检出设置不会影响结果。
 
 ## esbuild
 
-`esbuild.config.mjs` uses `scripts/esbuild-options.mjs` (shared with `check:bundle` and `notices`): one entry (`src/app/main.ts`), CommonJS, ES2021, minified in production, `.md`/`.svg` as text, Preact aliased for `react`. Externals: `obsidian`, `electron`, `@codemirror/*`, `@lezer/*`, Node built-ins. The banner embeds `LICENSE`, `NOTICE`, the icon resource notices, the Orca license and the licenses of bundled packages. Do not add a second entry and do not bundle CodeMirror.
+`esbuild.config.mjs` 使用 `scripts/esbuild-options.mjs`（与 `check:bundle` 和 `notices` 共用）：单一入口（`src/app/main.ts`）、CommonJS、ES2021、生产构建压缩、`.md`/`.svg` 作为文本、把 `react` 别名到 Preact。外部依赖：`obsidian`、`electron`、`@codemirror/*`、`@lezer/*`、Node 内置模块。横幅内嵌 `LICENSE`、`NOTICE`、图标资源声明、Orca 许可证和打包依赖的许可证。不要增加第二个入口，也不要打包 CodeMirror。
 
-## Budgets
+## 预算
 
-`scripts/bundle-budget.json`:
+`scripts/bundle-budget.json`：
 
-- `eagerBytes`: what runs at plugin load (120 KiB).
-- `moduleActivationBytes`: what each module evaluates when it turns on (pages, settings pages and second-level `import()`s are excluded).
-- `forbiddenEagerAreas`: libraries that must never be in the startup set.
-- `outputBytes`, `stylesBytes`: ceilings on total `main.js` and `styles.css`. Lower them when code shrinks; never raise a budget without recording why.
+- `eagerBytes`：插件加载时运行的内容（120 KiB）。
+- `moduleActivationBytes`：每个模块开启时执行的内容（不含页面、设置页和第二层 `import()`）。
+- `forbiddenEagerAreas`：绝不能进入启动集合的库。
+- `outputBytes`、`stylesBytes`：`main.js` 和 `styles.css` 总大小的上限。代码变小时调低；没有记录原因不要调高。
 
 ## CI
 
-`.github/workflows/lint.yml` on every push and PR: Linux (Node 22 and 24) runs install, build, `check:bundle`, `git diff --exit-code -- main.js`, lint, `lint:css`, `test:all`, `check:notices`, `check:native`; Windows (Node 24) runs build, the `main.js` diff, lint, `lint:css` and `test:all`. `.github/workflows/terminal-build.yml` builds and tests the helper for linux-x64, linux-arm64, darwin-x64, darwin-arm64 and win32-x64 and runs `scripts/verify-pty-helper.mjs` on each.
+`.github/workflows/lint.yml` 在每次推送和 PR 时运行：Linux（Node 22 和 24）执行安装、构建、`check:bundle`、`git diff --exit-code -- main.js`、lint、`lint:css`、`test:all`、`check:notices`、`check:native`；Windows（Node 24）执行构建、`main.js` 差异检查、lint、`lint:css` 和 `test:all`。`.github/workflows/terminal-build.yml` 为 linux-x64、linux-arm64、darwin-x64、darwin-arm64 和 win32-x64 构建并测试辅助程序，并在每个平台运行 `scripts/verify-pty-helper.mjs`。
 
-pnpm is pinned in `package.json`; CI uses `pnpm install --frozen-lockfile`.
+pnpm 版本固定在 `package.json`；CI 使用 `pnpm install --frozen-lockfile`。
 
-## Version bump
+## 升版本
 
-Bump together, in one commit, or do not release:
+在同一次提交里一起修改，否则不要发版：
 
-| File | Change |
+| 文件 | 修改 |
 |---|---|
-| `manifest.json` `version` | the new version, no `v` prefix |
-| `package.json` `version` | the same |
+| `manifest.json` 的 `version` | 新版本号，不带 `v` 前缀 |
+| `package.json` 的 `version` | 相同 |
 | `versions.json` | `"<version>": "<minAppVersion>"` |
-| `CHANGELOG.md`, `CHANGELOG.ZH.md` | a `## <version>` section in each, and no Unreleased section |
-| `main.js` | rebuilt from that commit |
+| `CHANGELOG.md`、`CHANGELOG.ZH.md` | 各有一个 `## <version>` 小节，且没有「未发布」小节 |
+| `main.js` | 用该提交重建 |
 
-`scripts/verify-release-artifacts.mjs <version>` checks the first four against the tag, and fails when `CHANGELOG.md` has an `## Unreleased` section. Raising `minAppVersion` drops users; only do it with a recorded reason.
+`scripts/verify-release-artifacts.mjs <version>` 把前四项与标签核对，`CHANGELOG.md` 里有 `## Unreleased` 小节时失败。提高 `minAppVersion` 会让部分用户无法升级；只有在有记录的理由时才这样做。
 
-The current version is `0.0.1-alpha.1`, a pre-release. A tag with a suffix after `-` becomes a GitHub pre-release and is not marked latest.
+当前版本是 `0.0.1-alpha.1`，是预发布版。标签中 `-` 之后带后缀的版本会成为 GitHub 预发布，不会标为最新版。
 
-## Release
+## 发版
 
-Push `main`, then push the tag (`git tag <version> && git push origin <version>`). `.github/workflows/release.yml` is the only release creator:
+推送 `main`，再推送标签（`git tag <version> && git push origin <version>`）。`.github/workflows/release.yml` 是唯一创建 Release 的地方：
 
-1. Builds the helper for five targets (`terminal-build.yml`).
-2. Verifies the tag against `manifest.json`, `package.json`, `versions.json` and `CHANGELOG.md`, builds, and fails if the built `main.js` or `styles.css` differs from the committed one.
-3. Collects `main.js`, `manifest.json`, `styles.css` and `nand-<version>.zip`, checks them with `scripts/verify-release-artifacts.mjs --plugin`, and attests the zip, `main.js` and `styles.css`.
-4. Verifies the five `nand-pty-<platform>-<arch>[.exe]` binaries against their `.sha256` files and runs the Linux one through `scripts/verify-pty-helper.mjs`.
-5. Writes `SHA256SUMS.txt` for every asset and creates the GitHub release with the plugin files, zip, helpers, checksums, `LICENSE`, `NOTICE` and `THIRD-PARTY-NOTICES.md`.
+1. 为五个目标构建辅助程序（`terminal-build.yml`）。
+2. 把标签与 `manifest.json`、`package.json`、`versions.json`、`CHANGELOG.md` 核对，构建，并在构建出的 `main.js` 或 `styles.css` 与提交的不同时失败。
+3. 收集 `main.js`、`manifest.json`、`styles.css` 和 `nand-<version>.zip`，用 `scripts/verify-release-artifacts.mjs --plugin` 检查，并为 zip、`main.js` 和 `styles.css` 生成来源证明。
+4. 用各自的 `.sha256` 文件核对五个 `nand-pty-<平台>-<架构>[.exe]` 二进制，并用 `scripts/verify-pty-helper.mjs` 运行 Linux 版本。
+5. 为所有附件写入 `SHA256SUMS.txt`，并创建带插件文件、zip、辅助程序、校验和、`LICENSE`、`NOTICE` 和 `THIRD-PARTY-NOTICES.md` 的 GitHub Release。
 
-Obsidian installs `main.js`, `manifest.json` and `styles.css` from the release. The plugin downloads the helper for the current platform from the release of its own version on first terminal use, checks its SHA-256 and stores it in the plugin folder (`NAND_PTY_BINARY` overrides it in development). Never commit helper binaries.
+Obsidian 从 Release 安装 `main.js`、`manifest.json` 和 `styles.css`。第一次使用终端时，插件从自己版本的 Release 下载当前平台的辅助程序，校验 SHA-256 并保存在插件目录（开发时可用 `NAND_PTY_BINARY` 覆盖）。永远不要提交辅助程序的二进制文件。

@@ -1,0 +1,117 @@
+{
+  "schema_version": 1,
+  "artifact": "design-tree",
+  "change": "2026-10-08-browser-ai-workbench",
+  "status": "consensus",
+  "round": 2,
+  "nodes": [
+    {
+      "id": "D-001",
+      "title": "完整产品阶段",
+      "question": "是否采用以下合同：按可交付源码三站 PoC → 八站完整适配 → 可靠历史与迁移 → 可选综合/受限助手 → 用户指认/可复用流程与本地外接推进；最终不缩为研究或三站。PoC Gate 只决定后续 readiness，不删除后续票。",
+      "depends_on": [],
+      "recommendation": "按可交付源码三站 PoC → 八站完整适配 → 可靠历史与迁移 → 可选综合/受限助手 → 用户指认/可复用流程与本地外接推进；最终不缩为研究或三站。PoC Gate 只决定后续 readiness，不删除后续票。",
+      "status": "answered",
+      "round": 1,
+      "answer": "按可交付源码三站 PoC → 八站完整适配 → 可靠历史与迁移 → 可选综合/受限助手 → 用户指认/可复用流程与本地外接推进；最终不缩为研究或三站。PoC Gate 只决定后续 readiness，不删除后续票。",
+      "log_ref": "LOG-001"
+    },
+    {
+      "id": "D-002",
+      "title": "首批三站",
+      "question": "是否采用以下合同：DeepSeek、Kimi、ChatGPT；真实登录三轮、长回答、新会话、重启、单站失败必须测。账号由用户在受控测试 vault 登录，不创建付费账号、不抓取现有个人 Chrome 凭据。",
+      "depends_on": [],
+      "recommendation": "DeepSeek、Kimi、ChatGPT；真实登录三轮、长回答、新会话、重启、单站失败必须测。账号由用户在受控测试 vault 登录，不创建付费账号、不抓取现有个人 Chrome 凭据。",
+      "status": "answered",
+      "round": 1,
+      "answer": "DeepSeek、Kimi、ChatGPT；真实登录三轮、长回答、新会话、重启、单站失败必须测。账号由用户在受控测试 vault 登录，不创建付费账号、不抓取现有个人 Chrome 凭据。",
+      "log_ref": "LOG-002"
+    },
+    {
+      "id": "D-003",
+      "title": "账号组织",
+      "question": "是否采用以下合同：保留现有 default shared profile；首版加入显式 isolated profiles 支持同站多账号。隔离 profile 创建新 guest 分区，禁止对运行中 guest 换 partition；当前change ADR扩展可选能力，永久 ADR-0010 只读，实施后再按 A 流程提升。",
+      "depends_on": [],
+      "recommendation": "保留现有 default shared profile；首版加入显式 isolated profiles 支持同站多账号。隔离 profile 创建新 guest 分区，禁止对运行中 guest 换 partition；当前change ADR扩展可选能力，永久 ADR-0010 只读，实施后再按 A 流程提升。",
+      "status": "answered",
+      "round": 1,
+      "answer": "保留现有 default shared profile；首版加入显式 isolated profiles 支持同站多账号。隔离 profile 创建新 guest 分区，禁止对运行中 guest 换 partition；当前change ADR扩展可选能力，永久 ADR-0010 只读，实施后再按 A 流程提升。",
+      "log_ref": "LOG-003"
+    },
+    {
+      "id": "D-004",
+      "title": "保存与迁移",
+      "question": "是否采用以下合同：可见 Markdown 保存 task/turn 问题、模板不可变快照、当前轮原文及来源；maiw v3 映射导入导出。默认不镜像全部官网历史、附件、全部分支或 cookies。",
+      "depends_on": [],
+      "recommendation": "可见 Markdown 保存 task/turn 问题、模板不可变快照、当前轮原文及来源；maiw v3 映射导入导出。默认不镜像全部官网历史、附件、全部分支或 cookies。",
+      "status": "answered",
+      "round": 1,
+      "answer": "可见 Markdown 保存 task/turn 问题、模板不可变快照、当前轮原文及来源；maiw v3 映射导入导出。默认不镜像全部官网历史、附件、全部分支或 cookies。",
+      "log_ref": "LOG-004"
+    },
+    {
+      "id": "D-005",
+      "title": "失败恢复",
+      "question": "是否采用以下合同：保留已成功结果；unknown 只观察核对或人工确认，不自动整组重发。recollect/save retry/resend 为不同明确动作；持久 intent 成功后才能提交。",
+      "depends_on": [],
+      "recommendation": "保留已成功结果；unknown 只观察核对或人工确认，不自动整组重发。recollect/save retry/resend 为不同明确动作；持久 intent 成功后才能提交。",
+      "status": "answered",
+      "round": 1,
+      "answer": "保留已成功结果；unknown 只观察核对或人工确认，不自动整组重发。recollect/save retry/resend 为不同明确动作；持久 intent 成功后才能提交。",
+      "log_ref": "LOG-005"
+    },
+    {
+      "id": "D-006",
+      "title": "额外模型与外接",
+      "question": "是否采用以下合同：统一发送/站点采集不调用额外模型；综合和助手独立 opt-in，显式选择 agent 会话/能力与材料范围。复用 home owner 提供的 agent dispatch / automation receipt API；外接走现有本地 token IPC 的 scoped grant。",
+      "depends_on": [],
+      "recommendation": "统一发送/站点采集不调用额外模型；综合和助手独立 opt-in，显式选择 agent 会话/能力与材料范围。复用 home owner 提供的 agent dispatch / automation receipt API；外接走现有本地 token IPC 的 scoped grant。",
+      "status": "answered",
+      "round": 1,
+      "answer": "统一发送/站点采集不调用额外模型；综合和助手独立 opt-in，显式选择 agent 会话/能力与材料范围。复用 home owner 提供的 agent dispatch / automation receipt API；外接走现有本地 token IPC 的 scoped grant。",
+      "log_ref": "LOG-006"
+    },
+    {
+      "id": "D-007",
+      "title": "规范与参考使用",
+      "question": "是否采用以下合同：按 dev/ui 技能与目录规则实施，运行时规划中文由用户特批；产品 en/zh 和双语文档继续遵守。主参考固定 SHA 的 MIT 代码可按许可适配；AGPL/混合许可仅公开行为比较。依赖引入必须证明现有 CDP 不够，不能因参考就捆绑整个浏览器框架。",
+      "depends_on": [],
+      "recommendation": "按 dev/ui 技能与目录规则实施，运行时规划中文由用户特批；产品 en/zh 和双语文档继续遵守。主参考固定 SHA 的 MIT 代码可按许可适配；AGPL/混合许可仅公开行为比较。依赖引入必须证明现有 CDP 不够，不能因参考就捆绑整个浏览器框架。",
+      "status": "answered",
+      "round": 1,
+      "answer": "按 dev/ui 技能与目录规则实施，运行时规划中文由用户特批；产品 en/zh 和双语文档继续遵守。主参考固定 SHA 的 MIT 代码可按许可适配；AGPL/混合许可仅公开行为比较。依赖引入必须证明现有 CDP 不够，不能因参考就捆绑整个浏览器框架。",
+      "log_ref": "LOG-007"
+    },
+    {
+      "id": "D-008",
+      "title": "研究记录与最终批准状态",
+      "question": "是否采用以下合同：browser-ai-research.md先于用户确认，其中“未决/条件/仅研究”是当时状态；本JSON用户已确认的完整产品阶段与五项选择覆盖旧建议，不把旧报告文字当缩scope授权。研究事实/固定源码证据继续有效，真实运行仍未完成。",
+      "depends_on": [],
+      "recommendation": "browser-ai-research.md先于用户确认，其中“未决/条件/仅研究”是当时状态；本JSON用户已确认的完整产品阶段与五项选择覆盖旧建议，不把旧报告文字当缩scope授权。研究事实/固定源码证据继续有效，真实运行仍未完成。",
+      "status": "answered",
+      "round": 1,
+      "answer": "browser-ai-research.md先于用户确认，其中“未决/条件/仅研究”是当时状态；本JSON用户已确认的完整产品阶段与五项选择覆盖旧建议，不把旧报告文字当缩scope授权。研究事实/固定源码证据继续有效，真实运行仍未完成。",
+      "log_ref": "LOG-008"
+    },
+    {
+      "id": "D-009",
+      "title": "全部设计分支最终共识",
+      "question": "按8域完整保留13个issue和已确认规则，本轮止于成熟Spec/Tickets及各域与整体Goal，是否确认各设计分支已收束？",
+      "depends_on": [
+        "D-001",
+        "D-002",
+        "D-003",
+        "D-004",
+        "D-005",
+        "D-006",
+        "D-007",
+        "D-008"
+      ],
+      "recommendation": "确认，完成全部规划",
+      "status": "answered",
+      "round": 2,
+      "answer": "用户明确回答：确认，完成全部规划（推荐）",
+      "log_ref": "LOG-009"
+    }
+  ]
+}

@@ -1,27 +1,31 @@
 {
-  "schema_version": 5,
-  "interaction_language": "zh-CN",
   "artifact_language": "zh-CN",
+  "execution": {
+    "deep_ticket_human_approval": true,
+    "max_implementation_agents": 3,
+    "max_integration_attempts": 3,
+    "shared_path_owner": "explicit"
+  },
   "git": {
     "default_branch": "main"
   },
-  "execution": {
-    "max_implementation_agents": 3,
-    "max_integration_attempts": 3,
-    "deep_ticket_human_approval": true,
-    "shared_path_owner": "explicit"
+  "github": {
+    "include_external_prs": false,
+    "labels": {}
   },
-  "verification": {
-    "test": "pnpm test:all",
-    "typecheck": "pnpm exec tsc --noEmit --skipLibCheck",
-    "lint": "pnpm run lint",
-    "build": "pnpm run build"
-  },
+  "interaction_language": "zh-CN",
   "planning": {
     "default_depth": "standard",
-    "require_ready_gate": true,
     "require_evidence": true,
+    "require_ready_gate": true,
     "ui_design_default_candidates": 3,
     "ui_design_max_candidates": 4
+  },
+  "schema_version": 6,
+  "verification": {
+    "build": "pnpm run build",
+    "lint": "pnpm run lint",
+    "test": "pnpm test:all",
+    "typecheck": "pnpm exec tsc --noEmit --skipLibCheck"
   }
 }

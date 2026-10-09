@@ -1,74 +1,72 @@
-English | [简体中文](design-system.ZH.md)
+# 设计系统
 
-# Design system
+代码：`src/ui/styles/000-foundation.css`（令牌）、`src/ui/styles/001-primitives.css`（`nand-ui-*` 类名）、`src/ui/primitives/`（Preact 组件和原生封装）。一切都派生自 Obsidian 变量，所以当前的 Obsidian 主题、社区主题和 NAND 主题样式都能贯通。不要在模块里重新定义令牌。
 
-Code: `src/ui/styles/000-foundation.css` (tokens), `src/ui/styles/001-primitives.css` (`nand-ui-*` classes), `src/ui/primitives/` (Preact components and native wrappers). Everything derives from Obsidian variables, so the active Obsidian theme, community themes and the NAND presets all flow through. Do not redefine tokens in a module.
+## 令牌
 
-## Tokens
-
-| Use | Token |
+| 用途 | 令牌 |
 |---|---|
-| Spacing (4px base) | `--nand-space-1` … `--nand-space-8` |
-| Radius | `--nand-radius-xs` 4px (chips, tracks), `-sm` 6px (controls, rows), `-md` 8px (cards, popovers), `-lg` 12px (dialogs), `-pill` |
-| Surfaces | `--nand-surface`, `--nand-surface-muted`, `--nand-surface-hover`, `--nand-surface-active` |
-| Borders | `--nand-border`, `--nand-border-color`, `--nand-border-color-strong` |
-| Accent | `--nand-accent`, `--nand-accent-soft` (selection fill), `--nand-accent-softer` (drop targets), `--nand-accent-border`, text in `--text-accent` |
-| Status (meaning only) | `--nand-tone-success`, `-warning`, `-error`, `-info` |
-| Elevation | `--nand-shadow-xs` resting, `-sm` hover, `-md` popover, `-lg` floating |
-| Type | `--nand-text-caption`, `-body`, `-title`, `-heading`; text colors `--text-normal`, `--text-muted`, `--text-faint` |
-| Controls | `--nand-control-height-sm` 28px, `--nand-control-height` 32px, `-lg` 36px, `--nand-touch-target` 44px, `--nand-icon-size` 16px |
-| Shell | `--nand-rail-width` 52px, `--nand-panel-width`, `--nand-header-height` 44px, `--nand-list-row-height` 32px |
-| Layers | `--nand-z-base`, `-sticky`, `-overlay`, `-popover`, `-modal`, `-toast` (highest 50) |
-| Motion | `--nand-duration-fast` 120ms, `--nand-duration` 180ms, `--nand-duration-slow` 240ms, `--nand-ease` |
-| Focus | `--nand-focus-ring` |
+| 间距（4px 基准） | `--nand-space-1` … `--nand-space-8` |
+| 圆角 | `--nand-radius-xs` 4px（小标签、轨道）、`-sm` 6px（控件、行）、`-md` 8px（卡片、浮层）、`-lg` 12px（对话框）、`-pill` |
+| 表面 | `--nand-surface`、`--nand-surface-muted`、`--nand-surface-hover`、`--nand-surface-active` |
+| 边框 | `--nand-border`、`--nand-border-color`、`--nand-border-color-strong` |
+| 强调色 | `--nand-accent`、`--nand-accent-soft`（选中填充）、`--nand-accent-softer`（放置目标）、`--nand-accent-border`，文字用 `--text-accent` |
+| 状态（仅表达含义） | `--nand-tone-success`、`-warning`、`-error`、`-info` |
+| 层级阴影 | `--nand-shadow-xs` 静止、`-sm` 悬停、`-md` 浮层、`-lg` 悬浮 |
+| 字号 | `--nand-text-caption`、`-body`、`-title`、`-heading`；文字颜色 `--text-normal`、`--text-muted`、`--text-faint` |
+| 控件 | `--nand-control-height-sm` 28px、`--nand-control-height` 32px、`-lg` 36px、`--nand-touch-target` 44px、`--nand-icon-size` 16px |
+| 外壳 | `--nand-rail-width` 52px、`--nand-panel-width`、`--nand-header-height` 44px、`--nand-list-row-height` 32px |
+| 层 | `--nand-z-base`、`-sticky`、`-overlay`、`-popover`、`-modal`、`-toast`（最高 50） |
+| 动效 | `--nand-duration-fast` 120ms、`--nand-duration` 180ms、`--nand-duration-slow` 240ms、`--nand-ease` |
+| 焦点 | `--nand-focus-ring` |
 
-Numbers that line up (counts, money, times) use `font-variant-numeric: tabular-nums`. Nested radius is the outer radius minus the inset.
+需要对齐的数字（计数、金额、时间）使用 `font-variant-numeric: tabular-nums`。嵌套圆角等于外层圆角减去内边距。
 
-## Primitives
+## 原语
 
-Preact components in `src/ui/primitives/`:
+`src/ui/primitives/` 里的 Preact 组件：
 
-| Component | For |
+| 组件 | 用途 |
 |---|---|
-| `Button` (variants default/primary/ghost/danger, sizes sm/md), `IconButton` | actions; `IconButton` needs `label` (it becomes `aria-label` and the tooltip) |
-| `TextField`, `SearchField` | labeled input / textarea; panel and list search |
-| `Tabs` (segmented, `aria-pressed`), `TabStrip` | small exclusive choice; resource tabs in the page area |
-| `ListItem` | selectable rows with icon, meta, badge and hover actions |
-| `Badge`, `SaveStatus`, `Skeleton`, `EmptyState` / `renderEmptyState` | status chip, saving/saved/error, loading placeholder, empty/disabled/error states |
-| `Icon` | Obsidian `setIcon` in a component |
-| `openDialog`, `promptText` | an Obsidian `Modal` with a Preact body; a one-field prompt |
-| `showMenu` | an Obsidian `Menu` from entries |
-| `localized-dom`, `localized-form` | native labels that follow the language without a rerender |
+| `Button`（变体 default/primary/ghost/danger，尺寸 sm/md）、`IconButton` | 操作；`IconButton` 需要 `label`（它会成为 `aria-label` 和提示） |
+| `TextField`、`SearchField` | 带标签的输入框／文本域；面板和列表搜索 |
+| `Tabs`（分段式，`aria-pressed`）、`TabStrip` | 小范围的互斥选择；页面区的资源标签 |
+| `ListItem` | 可选中的行，带图标、元信息、徽标和悬停操作 |
+| `Badge`、`SaveStatus`、`Skeleton`、`EmptyState` / `renderEmptyState` | 状态标签、保存中／已保存／错误、加载占位、空／停用／错误状态 |
+| `Icon` | 组件里的 Obsidian `setIcon` |
+| `openDialog`、`promptText` | 带 Preact 内容的 Obsidian `Modal`；单字段输入框 |
+| `showMenu` | 由条目生成的 Obsidian `Menu` |
+| `localized-dom`、`localized-form` | 无需重绘就能跟随语言的原生标签 |
 
-CSS-only building blocks in `001-primitives.css`: `nand-ui-card` (`is-interactive`, `is-selected`), `nand-ui-btn`, `nand-ui-btn-ghost`, `nand-ui-icon-btn`, `nand-ui-segmented`, `nand-ui-field`, `nand-ui-badge` (`--accent`, `--success`, `--warning`, `--error`, `--info`), `nand-ui-dot`, `nand-ui-list`, `nand-ui-list-item` (`-title`, `-meta`), `nand-ui-section-label`, `nand-ui-toolbar`, `nand-ui-spacer`, `nand-ui-stack`, `nand-ui-divider`, `nand-ui-scroll`, `nand-ui-panel-muted`.
+`001-primitives.css` 里只有 CSS 的构件：`nand-ui-card`（`is-interactive`、`is-selected`）、`nand-ui-btn`、`nand-ui-btn-ghost`、`nand-ui-icon-btn`、`nand-ui-segmented`、`nand-ui-field`、`nand-ui-badge`（`--accent`、`--success`、`--warning`、`--error`、`--info`）、`nand-ui-dot`、`nand-ui-list`、`nand-ui-list-item`（`-title`、`-meta`）、`nand-ui-section-label`、`nand-ui-toolbar`、`nand-ui-spacer`、`nand-ui-stack`、`nand-ui-divider`、`nand-ui-scroll`、`nand-ui-panel-muted`。
 
-Shell patterns (`src/shell/`): `Rail`, `SidePanel`, `PageHeader`. Settings pages use native `Setting` rows with `setHeading()` groups.
+shell 模式（`src/shell/`）：`Rail`、`SidePanel`、`PageHeader`。设置页使用原生 `Setting` 行，并用 `setHeading()` 分组。
 
-## Composition
+## 组合
 
-- One primary action per page or dialog. Secondary actions are ghost or icon buttons; destructive ones use the danger variant or `mod-warning`.
-- Separate with whitespace first, then a muted surface, then a hairline border. A resting card never has both a strong border and a heavy shadow.
-- Hover changes one step (fill, border or one shadow tier). No scale jumps.
-- Neutral by default; color marks selection and meaning, never decoration.
-- Hierarchy is weight and size: titles 600, body regular, meta in `--text-muted` caption.
-- Gaps between groups are at least twice the gaps inside them. Card padding 12–16px.
-- Reading and form pages limit their width (760–960px); boards, terminal and browser use the full width.
-- Empty, loading and error states are designed and centered, with the same tokens.
+- 每个页面或对话框只有一个主操作。次要操作用 ghost 或图标按钮；破坏性操作用 danger 变体或 `mod-warning`。
+- 先用留白分隔，其次用弱化的表面，最后才用细边框。静止的卡片不同时使用强边框和重阴影。
+- 悬停只变化一级（填充、边框或一级阴影）。不做缩放跳变。
+- 默认中性；颜色用来标记选中和含义，从不用于装饰。
+- 层级靠字重和字号：标题 600，正文常规，元信息用 `--text-muted` 的小字。
+- 组与组之间的间距至少是组内间距的两倍。卡片内边距 12–16px。
+- 阅读和表单页面限制宽度（760–960px）；看板、终端和浏览器使用全宽。
+- 空、加载和错误状态要经过设计并居中，使用同样的令牌。
 
-## CSS rules
+## CSS 规则
 
-Enforced by `pnpm run lint:css` (stylelint, `stylelint.config.mjs`; files listed in the shrink-only baseline `scripts/stylelint-baseline.json` may keep the violations listed for them):
+由 `pnpm run lint:css` 强制（stylelint，`stylelint.config.mjs`；列在只减不增的基线 `scripts/stylelint-baseline.json` 里的文件，可以保留为它们列出的违规）：
 
-- No literal colors (hex, `rgb()`, `hsl()`…) outside `src/theme/` and the token layer.
-- No `!important`, no `:has`.
-- `z-index` only through `--nand-z-*` tokens.
-- No duplicate selectors.
-- Scope to the module's classes; rules for Obsidian's own DOM hang off a body class the module adds while active (`body.nand-iconic-enabled`, `body.nand-theme--…`).
+- 除 `src/theme/` 和令牌层之外，不用字面量颜色（十六进制、`rgb()`、`hsl()`……）。
+- 不用 `!important`，不用 `:has`。
+- `z-index` 只通过 `--nand-z-*` 令牌。
+- 没有重复选择器。
+- 限定在模块的类名下；给 Obsidian 自身 DOM 设样式的规则挂在模块激活期间添加的 body 类名下（`body.nand-iconic-enabled`、`body.nand-theme--…`）。
 
-The board's `--db-*` variables are aliases defined once from the global tokens (`src/modules/home/styles/004-root.css`). They belong to the board and its dialogs; new UI uses the `--nand-*` tokens.
+看板的 `--db-*` 变量是在全局令牌基础上一次性定义的别名（`src/modules/home/styles/004-root.css`）。它们属于看板及其对话框；新的界面使用 `--nand-*` 令牌。
 
-## Libraries
+## 库
 
-Allowed: `preact` (with `preact/compat` for `react` imports), Obsidian's own controls (`Setting`, `Menu`, `Modal`, `SuggestModal`, `setIcon`, `setTooltip`), pointer events for dragging within one window, chart.js (lazy, home charts), xterm.js (agent).
+允许：`preact`（`react` 导入用 `preact/compat`）、Obsidian 自带的控件（`Setting`、`Menu`、`Modal`、`SuggestModal`、`setIcon`、`setTooltip`）、在单个窗口内拖动用的指针事件、chart.js（懒加载，首页图表）、xterm.js（智能体）。
 
-Refused: React 19 / `react-dom`, MUI, Chakra, Ant Design, shadcn, Tailwind, Bootstrap, styled-components, Emotion, dnd-kit, react-beautiful-dnd, flatpickr, choices.js, color-picker packages. If something cannot be done with these, stop and say so.
+拒绝：React 19 / `react-dom`、MUI、Chakra、Ant Design、shadcn、Tailwind、Bootstrap、styled-components、Emotion、dnd-kit、react-beautiful-dnd、flatpickr、choices.js、取色器包。如果用这些做不到，就停下来说明。

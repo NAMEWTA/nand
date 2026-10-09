@@ -1,0 +1,45 @@
+{
+  "schema_version": 1,
+  "artifact": "design-tree",
+  "change": "2026-10-08-private-storage-permissions",
+  "status": "consensus",
+  "round": 2,
+  "nodes": [
+    {
+      "id": "D-001",
+      "title": "限定平台与根",
+      "question": "是否采用以下合同：仅桌面FileSystemAdapter且POSIX；目录0700文件0600；Windows/mobile/nonfilesystem保持原行为。",
+      "depends_on": [],
+      "recommendation": "仅桌面FileSystemAdapter且POSIX；目录0700文件0600；Windows/mobile/nonfilesystem保持原行为。",
+      "status": "answered",
+      "round": 1,
+      "answer": "仅桌面FileSystemAdapter且POSIX；目录0700文件0600；Windows/mobile/nonfilesystem保持原行为。",
+      "log_ref": "LOG-001"
+    },
+    {
+      "id": "D-002",
+      "title": "升级兼容",
+      "question": "是否采用以下合同：加载时收紧.nand根及管理子路径；不跟随symlink、不修改根外对象，失败日志非致命。",
+      "depends_on": [],
+      "recommendation": "加载时收紧.nand根及管理子路径；不跟随symlink、不修改根外对象，失败日志非致命。",
+      "status": "answered",
+      "round": 1,
+      "answer": "加载时收紧.nand根及管理子路径；不跟随symlink、不修改根外对象，失败日志非致命。",
+      "log_ref": "LOG-002"
+    },
+    {
+      "id": "D-003",
+      "title": "全部设计分支最终共识",
+      "question": "按8域完整保留13个issue和已确认规则，本轮止于成熟Spec/Tickets及各域与整体Goal，是否确认各设计分支已收束？",
+      "depends_on": [
+        "D-001",
+        "D-002"
+      ],
+      "recommendation": "确认，完成全部规划",
+      "status": "answered",
+      "round": 2,
+      "answer": "用户明确回答：确认，完成全部规划（推荐）",
+      "log_ref": "LOG-003"
+    }
+  ]
+}

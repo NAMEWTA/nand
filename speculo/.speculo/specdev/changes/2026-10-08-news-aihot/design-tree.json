@@ -1,0 +1,129 @@
+{
+  "schema_version": 1,
+  "artifact": "design-tree",
+  "change": "2026-10-08-news-aihot",
+  "status": "consensus",
+  "round": 2,
+  "nodes": [
+    {
+      "id": "D-001",
+      "title": "平台与默认开关",
+      "question": "是否采用以下合同：news 默认关闭；桌面提供完整采集和 Agent 分析；手机通过 Obsidian 阅读同步的收藏、日报和简报 Markdown，不承诺设备缓存自动跨设备共享或手机CLI。",
+      "depends_on": [],
+      "recommendation": "news 默认关闭；桌面提供完整采集和 Agent 分析；手机通过 Obsidian 阅读同步的收藏、日报和简报 Markdown，不承诺设备缓存自动跨设备共享或手机CLI。",
+      "status": "answered",
+      "round": 1,
+      "answer": "news 默认关闭；桌面提供完整采集和 Agent 分析；手机通过 Obsidian 阅读同步的收藏、日报和简报 Markdown，不承诺设备缓存自动跨设备共享或手机CLI。",
+      "log_ref": "LOG-001"
+    },
+    {
+      "id": "D-002",
+      "title": "刷新授权与周期",
+      "question": "是否采用以下合同：保留手动刷新；过期打开刷新与启动刷新均为 opt-in；运行期间周期采集默认关闭，若用户启用只能由 news 自有调度，不建自动化定义或cron。UI render/navigate保持纯读，已启用策略由服务处理可见事件并去重。",
+      "depends_on": [],
+      "recommendation": "保留手动刷新；过期打开刷新与启动刷新均为 opt-in；运行期间周期采集默认关闭，若用户启用只能由 news 自有调度，不建自动化定义或cron。UI render/navigate保持纯读，已启用策略由服务处理可见事件并去重。",
+      "status": "answered",
+      "round": 1,
+      "answer": "保留手动刷新；过期打开刷新与启动刷新均为 opt-in；运行期间周期采集默认关闭，若用户启用只能由 news 自有调度，不建自动化定义或cron。UI render/navigate保持纯读，已启用策略由服务处理可见事件并去重。",
+      "log_ref": "LOG-002"
+    },
+    {
+      "id": "D-003",
+      "title": "双评分",
+      "question": "是否采用以下合同：提供两次独立评分，默认关闭；开启后两次实际调用且第二次不带第一次结果，均计调用预算；显示floor平均，入选按原始分数和。",
+      "depends_on": [],
+      "recommendation": "提供两次独立评分，默认关闭；开启后两次实际调用且第二次不带第一次结果，均计调用预算；显示floor平均，入选按原始分数和。",
+      "status": "answered",
+      "round": 1,
+      "answer": "提供两次独立评分，默认关闭；开启后两次实际调用且第二次不带第一次结果，均计调用预算；显示floor平均，入选按原始分数和。",
+      "log_ref": "LOG-003"
+    },
+    {
+      "id": "D-004",
+      "title": "中断结果未知",
+      "question": "是否采用以下合同：已启动但结果未知的AI批次重启后标中断，只能手动重试；未启动资料可在下次授权刷新排队；已收到原始结果可继续本地应用，不能重叫CLI。",
+      "depends_on": [],
+      "recommendation": "已启动但结果未知的AI批次重启后标中断，只能手动重试；未启动资料可在下次授权刷新排队；已收到原始结果可继续本地应用，不能重叫CLI。",
+      "status": "answered",
+      "round": 1,
+      "answer": "已启动但结果未知的AI批次重启后标中断，只能手动重试；未启动资料可在下次授权刷新排队；已收到原始结果可继续本地应用，不能重叫CLI。",
+      "log_ref": "LOG-004"
+    },
+    {
+      "id": "D-005",
+      "title": "完整后段功能",
+      "question": "是否采用以下合同：OPML、静态网页列表、双评分、7天曲线均在本change完整范围；不是以首版为由移除。",
+      "depends_on": [],
+      "recommendation": "OPML、静态网页列表、双评分、7天曲线均在本change完整范围；不是以首版为由移除。",
+      "status": "answered",
+      "round": 1,
+      "answer": "OPML、静态网页列表、双评分、7天曲线均在本change完整范围；不是以首版为由移除。",
+      "log_ref": "LOG-005"
+    },
+    {
+      "id": "D-006",
+      "title": "Agent与home共享接口owner",
+      "question": "是否采用以下合同：依赖home change提供的公共Agent目录/派发入口；新闻仅新增AGENT_PROMPT_RUNNER结构化一次性执行接口，内部复用agent现有runtime，不伪造AutomationRun，不重复定义公共目录。首页小组件依赖home统一注册表，不同时造临时注册路径。",
+      "depends_on": [],
+      "recommendation": "依赖home change提供的公共Agent目录/派发入口；新闻仅新增AGENT_PROMPT_RUNNER结构化一次性执行接口，内部复用agent现有runtime，不伪造AutomationRun，不重复定义公共目录。首页小组件依赖home统一注册表，不同时造临时注册路径。",
+      "status": "answered",
+      "round": 1,
+      "answer": "依赖home change提供的公共Agent目录/派发入口；新闻仅新增AGENT_PROMPT_RUNNER结构化一次性执行接口，内部复用agent现有runtime，不伪造AutomationRun，不重复定义公共目录。首页小组件依赖home统一注册表，不同时造临时注册路径。",
+      "log_ref": "LOG-006"
+    },
+    {
+      "id": "D-007",
+      "title": "事件/发生两层身份",
+      "question": "是否采用以下合同：Event内保留occurrences而不是只Material→Event。SAME_OCCURRENCE合发生，SAME_STORY关联根发生形成进展，ROUNDUP只引用不桥接；代表稿和日报按发生身份计算。",
+      "depends_on": [],
+      "recommendation": "Event内保留occurrences而不是只Material→Event。SAME_OCCURRENCE合发生，SAME_STORY关联根发生形成进展，ROUNDUP只引用不桥接；代表稿和日报按发生身份计算。",
+      "status": "answered",
+      "round": 1,
+      "answer": "Event内保留occurrences而不是只Material→Event。SAME_OCCURRENCE合发生，SAME_STORY关联根发生形成进展，ROUNDUP只引用不桥接；代表稿和日报按发生身份计算。",
+      "log_ref": "LOG-007"
+    },
+    {
+      "id": "D-008",
+      "title": "本地数据与许可",
+      "question": "是否采用以下合同：配置namespace和设备JsonStore，用户收藏/日报/简报为可见Markdown；自主重写算法/提示词时保留MIT版权和SHA映射；不使用AIHOT名称Logo、Postgres/服务端/模型API。",
+      "depends_on": [],
+      "recommendation": "配置namespace和设备JsonStore，用户收藏/日报/简报为可见Markdown；自主重写算法/提示词时保留MIT版权和SHA映射；不使用AIHOT名称Logo、Postgres/服务端/模型API。",
+      "status": "answered",
+      "round": 1,
+      "answer": "配置namespace和设备JsonStore，用户收藏/日报/简报为可见Markdown；自主重写算法/提示词时保留MIT版权和SHA映射；不使用AIHOT名称Logo、Postgres/服务端/模型API。",
+      "log_ref": "LOG-008"
+    },
+    {
+      "id": "D-009",
+      "title": "本轮工作边界",
+      "question": "是否采用以下合同：本轮完成分组、参考研究、change/spec/tickets/goal-plan；不把文档规划标为代码完成。所有必要修复有执行票及验收；后续current严格串行。",
+      "depends_on": [],
+      "recommendation": "本轮完成分组、参考研究、change/spec/tickets/goal-plan；不把文档规划标为代码完成。所有必要修复有执行票及验收；后续current严格串行。",
+      "status": "answered",
+      "round": 1,
+      "answer": "本轮完成分组、参考研究、change/spec/tickets/goal-plan；不把文档规划标为代码完成。所有必要修复有执行票及验收；后续current严格串行。",
+      "log_ref": "LOG-009"
+    },
+    {
+      "id": "D-010",
+      "title": "全部设计分支最终共识",
+      "question": "按8域完整保留13个issue和已确认规则，本轮止于成熟Spec/Tickets及各域与整体Goal，是否确认各设计分支已收束？",
+      "depends_on": [
+        "D-001",
+        "D-002",
+        "D-003",
+        "D-004",
+        "D-005",
+        "D-006",
+        "D-007",
+        "D-008",
+        "D-009"
+      ],
+      "recommendation": "确认，完成全部规划",
+      "status": "answered",
+      "round": 2,
+      "answer": "用户明确回答：确认，完成全部规划（推荐）",
+      "log_ref": "LOG-010"
+    }
+  ]
+}

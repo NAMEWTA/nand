@@ -20,7 +20,6 @@ data.json
 *.iml
 
 # AI / Dev helpers
-AGENTS.md
 300句经典句子.md
 # DQL test fixtures (local only)
 dataview-test/

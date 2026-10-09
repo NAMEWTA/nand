@@ -45,7 +45,7 @@ Your content is Markdown in visible folders. NAND's configuration and runtime da
 
 ## Development
 
-Coding agents and contributors start at [CLAUDE.md](CLAUDE.md), which points to the [development rules](.agents/skills/dev/SKILL.md) and the [interface rules](.agents/skills/ui/SKILL.md). Domain terms, architecture decisions and the current baseline are indexed in the [development documentation](speculo/.speculo/specdev/.config/domain-layout.md).
+Coding agents and contributors start at [AGENTS.md](AGENTS.md), which points to the [development rules](.agents/skills/dev/SKILL.md) and the [interface rules](.agents/skills/ui/SKILL.md). Domain terms, architecture decisions and the current baseline are indexed in the [development documentation](speculo/.speculo/specdev/.config/domain-layout.md).
 
 Use the pnpm version pinned in `package.json`: `pnpm install --frozen-lockfile`, then `pnpm build`, `pnpm lint` and `pnpm test:all`. The build updates `main.js` and `styles.css` in the repository root. The terminal helper is the Rust project in `native/pty-server`; test it with `pnpm check:native`.
 

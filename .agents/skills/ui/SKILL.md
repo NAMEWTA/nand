@@ -14,60 +14,58 @@ metadata:
   short-description: Workbench UI, design system and theme
 ---
 
-English | [简体中文](SKILL.ZH.md)
+# 工作台界面
 
-# Workbench UI
+本技能只适用于本仓库。`dev` 技能负责分区、模块装配、设置存储、文案和构建；本技能负责界面在屏幕上的样子和行为。
 
-This skill is for this repository only. The `dev` skill owns zones, module wiring, settings storage, strings and builds; this skill owns how things look and behave on screen.
+## 修改前先读
 
-## Read before editing
-
-| Before you… | Open |
+| 要做的事 | 打开 |
 |---|---|
-| Add a page, change the rail, side panel, header, tabs or focus mode | [references/shell.md](references/shell.md) |
-| Pick a color, spacing, radius, component or CSS approach | [references/design-system.md](references/design-system.md) |
-| Touch presets, Markdown styling or Settings → Appearance | [references/theme.md](references/theme.md) |
-| Animate anything, or handle keyboard, focus or screen readers | [references/motion-a11y.md](references/motion-a11y.md) |
-| Call an Obsidian DOM API or write CSS | [../dev/references/obsidian-api.md](../dev/references/obsidian-api.md) |
+| 添加页面，或修改图标轨、侧栏、页头、标签或专注模式 | [references/shell.md](references/shell.md) |
+| 选择颜色、间距、圆角、组件或 CSS 做法 | [references/design-system.md](references/design-system.md) |
+| 涉及主题样式、Markdown 样式或 设置 → 外观 | [references/theme.md](references/theme.md) |
+| 做任何动画，或处理键盘、焦点、读屏 | [references/motion-a11y.md](references/motion-a11y.md) |
+| 调用 Obsidian 的 DOM API 或编写 CSS | [../dev/references/obsidian-api.md](../dev/references/obsidian-api.md) |
 
-## The shape
+## 整体形态
 
-NAND registers one workbench view. Its leaf shows ① a 52px icon rail, ② a side panel for the current module (lists, sections, search, primary action) and ③ the page with its header. Modules contribute pages; the shell (`src/shell/`) owns layout, navigation, panel state, page lifetime and motion. A module never builds its own leaf, router or tab system.
+NAND 只注册一个工作台视图。它的叶子显示 ① 52px 的图标轨、② 当前模块的侧栏（列表、分区、搜索、主操作）和 ③ 带页头的页面。模块贡献页面；shell（`src/shell/`）负责布局、导航、侧栏状态、页面生命周期和动效。模块不自己建叶子、路由或标签系统。
 
-| Need | Use |
+| 需要 | 使用 |
 |---|---|
-| A screen the user navigates to | a workbench page (`PageCreate` → `NativeSurface`) |
-| A list of things to pick in column ② | the contribution's `panel` model (`PanelModel`), fed by a module service |
-| Settings | the module's `settingsPage` renderer with native `Setting` rows |
-| A short decision or one input (confirm, rename, pick) | `openDialog` / `promptText` (`src/ui/primitives/`), or an Obsidian `SuggestModal` |
-| An action menu | `showMenu` (Obsidian `Menu`) |
-| A transient message | `Notice` |
-| Editing a record, rules, long forms | inline in the page, not a dialog |
+| 用户导航到的一个界面 | 工作台页面（`PageCreate` → `NativeSurface`） |
+| 第 ② 栏里供选择的一组对象 | 贡献的 `panel` 模型（`PanelModel`），由模块服务提供数据 |
+| 设置 | 模块的 `settingsPage` 渲染函数，使用原生 `Setting` 行 |
+| 简短的决定或一个输入（确认、重命名、选择） | `openDialog` / `promptText`（`src/ui/primitives/`），或 Obsidian 的 `SuggestModal` |
+| 操作菜单 | `showMenu`（Obsidian 的 `Menu`） |
+| 临时消息 | `Notice` |
+| 编辑记录、规则、长表单 | 在页面里就地编辑，不用对话框 |
 
-## Rules
+## 规则
 
-1. Render business content with Preact into the element the host gives you (`contentEl` of the surface, the panel's custom slot) and unmount with `render(null, root)` on close. Native chrome (settings rows, menus, notices, the status bar) uses Obsidian APIs.
-2. Pages read state from their module and emit actions; they do not own durable data. Ephemeral UI state (a rename box, an open menu) may live in components; anything that must survive a window move or restart goes into `getState()` with keys listed in the contribution's `stateKeys`.
-3. Take the window from the element (`el.win`, `el.doc`); never capture `window` or `document` at module scope. Popout windows have their own document.
-4. Build from the primitives and tokens in `references/design-system.md`. No second design system, no CSS-in-JS, no UI library outside the allowed list.
-5. Colors come from tokens that derive from Obsidian variables, so community themes and the NAND presets both work. Literal colors exist only in `src/theme/` and the token layer. No `!important`, no `:has`, z-index only through tokens.
-6. Every interactive element is a real button or input with an accessible name, reachable by keyboard and visible on `:focus-visible`. Targets are at least 32px (44px on touch).
-7. Motion uses only `transform` and `opacity`, the duration tokens and `--nand-ease`, and is off under `prefers-reduced-motion`.
-8. Text nodes are part of tests: keep wording and structure stable when restyling.
+1. 业务内容用 Preact 渲染到宿主给你的元素里（表面的 `contentEl`、侧栏的自定义槽位），关闭时用 `render(null, root)` 卸载。原生外壳（设置行、菜单、通知、状态栏）用 Obsidian API。
+2. 页面从所属模块读取状态并发出动作；不拥有持久数据。临时的界面状态（重命名输入框、打开的菜单）可以放在组件里；需要在窗口移动或重启后保留的内容，放进 `getState()`，键列在贡献的 `stateKeys` 里。
+3. 从元素取得窗口（`el.win`、`el.doc`）；绝不在模块顶层捕获 `window` 或 `document`。弹出窗口有自己的 document。
+4. 用 `references/design-system.md` 里的原语和令牌构建。不要有第二套设计系统，不用 CSS-in-JS，不用允许列表之外的界面库。
+5. 颜色来自派生自 Obsidian 变量的令牌，所以社区主题和 NAND 样式都能用。字面量颜色只存在于 `src/theme/` 和令牌层。不用 `!important`，不用 `:has`，z-index 只通过令牌。
+6. 每个可交互元素都是真正的按钮或输入框，有可访问名称，可通过键盘到达，并在 `:focus-visible` 时可见。目标至少 32px（触屏 44px）。
+7. 动效只用 `transform` 和 `opacity`、时长令牌和 `--nand-ease`，并在 `prefers-reduced-motion` 下关闭。
+8. 文字节点是测试的一部分：改样式时保持措辞和结构稳定。
 
-## Procedure
+## 流程
 
-1. Decide where it goes using the table above. If it is a page, follow `references/shell.md` and the page steps in `../dev/references/module-authoring.md`.
-2. Put files in the module's `ui/` folder: PascalCase for components (`InboxPanel.tsx`), kebab-case for logic and loaders (`workbench-page.ts`).
-3. Compose primitives; add the module's own class next to them for layout. A generic primitive that two modules need goes to `src/ui/`.
-4. Write CSS in the module's `styles/` file, scoped to its classes; rebuild `styles.css` (`node scripts/build-styles.mjs --write`) and run `pnpm run lint:css`.
-5. Check light and dark, the three presets, and the three widths (≥960, 600–960, <600 / phone). The real-Obsidian probe covers the workbench at several widths; take screenshots for visual changes.
+1. 按上面的表格决定放在哪里。如果是页面，按 `references/shell.md` 和 `../dev/references/module-authoring.md` 里的页面步骤做。
+2. 文件放进模块的 `ui/` 文件夹：组件用 PascalCase（`InboxPanel.tsx`），逻辑和加载器用 kebab-case（`workbench-page.ts`）。
+3. 组合原语；在它们旁边加模块自己的类名来做布局。两个模块都需要的通用原语放进 `src/ui/`。
+4. 在模块的 `styles/` 文件里写 CSS，限定在它的类名下；重建 `styles.css`（`node scripts/build-styles.mjs --write`）并运行 `pnpm run lint:css`。
+5. 检查浅色与深色、三种主题样式，以及三种宽度（≥960、600–960、<600／手机）。真实 Obsidian 探针覆盖多种宽度下的工作台；视觉改动要截图。
 
-## Checklist
+## 检查清单
 
-- [ ] Lives in the shell's page/panel slots; no new leaf, router or tab bar
-- [ ] Unmounts on close; uses the element's window
-- [ ] Primitives and tokens only; no literal colors, `!important`, `:has` or raw z-index
-- [ ] Keyboard reachable, named, visible focus; reduced motion respected
-- [ ] Looks right in light/dark, all presets and all three widths
-- [ ] `pnpm run build`, `pnpm run lint` and `pnpm run lint:css` pass
+- [ ] 在 shell 的页面／侧栏槽位里；没有新叶子、路由或标签栏
+- [ ] 关闭时卸载；使用元素所在的窗口
+- [ ] 只用原语和令牌；没有字面量颜色、`!important`、`:has` 或原始 z-index
+- [ ] 键盘可达、有名称、焦点可见；遵守减少动效
+- [ ] 在浅色／深色、所有主题样式和三种宽度下都正常
+- [ ] `pnpm run build`、`pnpm run lint` 和 `pnpm run lint:css` 通过

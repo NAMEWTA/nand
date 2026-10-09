@@ -45,7 +45,7 @@ NAND 当前版本为 0.0.1-alpha.1，是第一个公开预发布版。
 
 ## 开发
 
-编程智能体和贡献者从 [CLAUDE.ZH.md](CLAUDE.ZH.md) 开始，它指向[开发规则](.agents/skills/dev/SKILL.ZH.md)与[界面规则](.agents/skills/ui/SKILL.ZH.md)。领域术语、架构决定与当前基线见[开发文档索引](speculo/.speculo/specdev/.config/domain-layout.ZH.md)。
+编程智能体和贡献者从 [AGENTS.md](AGENTS.md) 开始，它指向[开发规则](.agents/skills/dev/SKILL.md)与[界面规则](.agents/skills/ui/SKILL.md)。领域术语、架构决定与当前基线见[开发文档索引](speculo/.speculo/specdev/.config/domain-layout.ZH.md)。
 
 使用 `package.json` 指定的 pnpm 版本：`pnpm install --frozen-lockfile`，然后 `pnpm build`、`pnpm lint`、`pnpm test:all`。构建会更新仓库根目录的 `main.js` 和 `styles.css`。终端辅助程序是 `native/pty-server` 里的 Rust 项目，用 `pnpm check:native` 测试。
 

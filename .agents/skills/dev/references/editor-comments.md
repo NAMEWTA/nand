@@ -1,80 +1,78 @@
-English | [简体中文](editor-comments.ZH.md)
+# 编辑器评论
 
-# Editor comments
+评论是库上的旁路文件。这项功能从不写入笔记文件。没有 PDF 入口：扩展只对 Markdown 运行。代码在 `src/modules/comments/`（`core/` 是模型、锚点和存储；`platform/` 是库文件系统和存储交接；`ui/` 是编辑器扩展、浮层、侧栏、工作台页面和设置页）。
 
-Comments are a sidecar on the vault. The note file is never written by this feature. There is no PDF entry: extensions only run for Markdown. The code is `src/modules/comments/` (`core/` model, anchors and store; `platform/` vault filesystem and store handoff; `ui/` editor extension, popover, side panel, workbench page and settings page).
-
-## On-disk layout
+## 磁盘布局
 
 ```
 .nand/editor/comments/index.json
 .nand/editor/comments/pending.json
-.nand/editor/comments/files/<first 16 hex of sha256(path)>.json
+.nand/editor/comments/files/<sha256(路径) 的前 16 位十六进制>.json
 ```
 
-- Hash the path string, not the file bytes, with `crypto.subtle` SHA-256, first 16 hex chars.
-- `index.json` is `{ version: 1, files: { [path]: { hash, open, total, updatedAt } } }`.
-- `pending.json` is a recoverable write intent containing the complete next index, sidecar bodies and obsolete file paths. Replay it before loading; remove it only after sidecars, index and cleanup succeed.
-- Read, parse and shape errors propagate without caching an empty result. Dirty path revisions survive write failures and synchronous edits during an awaited write. The host reports background failures through `onError`.
-- Each file doc is `{ version: 1, path, comments: CommentThread[] }`.
-- An empty thread list deletes that sidecar file and the index entry.
-- Writes are serialized on one promise chain and debounced (300 ms) with timers the host injects (`CommentStoreOptions.timers`; core reads no globals). The store is closed (sealed and flushed) when the module turns off or the plugin unloads. The host reports rejection; a forced process exit cannot guarantee persistence of data that never reached the journal.
-- The `comments` settings namespace (`src/modules/comments/settings.ts`) stores only `highlightEnabled`, `popoverEnabled` and an optional `sidebarWidth`. Never a comment body.
+- 对路径字符串（不是文件内容）用 `crypto.subtle` 的 SHA-256 计算哈希，取前 16 位十六进制。
+- `index.json` 是 `{ version: 1, files: { [path]: { hash, open, total, updatedAt } } }`。
+- `pending.json` 是可恢复的写入意图，包含完整的下一份索引、旁路文件内容和过时的文件路径。加载前先重放它；只有旁路文件、索引和清理都成功之后才移除。
+- 读取、解析和形状错误向上传播，不缓存空结果。脏路径的修订号在写入失败和写入等待期间的同步编辑中保持。宿主通过 `onError` 报告后台失败。
+- 每个文件文档是 `{ version: 1, path, comments: CommentThread[] }`。
+- 线程列表为空时，删除该旁路文件和索引条目。
+- 写入在一条 Promise 链上串行，并用宿主注入的计时器防抖（300 毫秒）（`CommentStoreOptions.timers`；core 不读取任何全局变量）。模块关闭或插件卸载时存储被关闭（封存并写完）。宿主报告拒绝；进程被强制退出时，无法保证尚未写入日志的数据被持久化。
+- `comments` 设置命名空间（`src/modules/comments/settings.ts`）只保存 `highlightEnabled`、`popoverEnabled` 和可选的 `sidebarWidth`，绝不保存评论正文。
 
-## Model
+## 模型
 
-`CommentStatus`: `open` | `resolved` | `orphaned`.
+`CommentStatus`：`open` | `resolved` | `orphaned`。
 
-`TextQuoteAnchor`: `exact`, `prefix`, `suffix`. Prefix and suffix are 24 characters. The quote is the source of truth. Offsets are a cache.
+`TextQuoteAnchor`：`exact`、`prefix`、`suffix`。前缀和后缀各 24 个字符。引用文本是事实来源，偏移量只是缓存。
 
-Thread ids look like `c-…`, message ids like `m-…`.
+线程 id 形如 `c-…`，消息 id 形如 `m-…`。
 
-## Locating a quote
+## 定位引用
 
-`locateAnchor` in `src/modules/comments/core/anchor.ts`:
+`src/modules/comments/core/anchor.ts` 里的 `locateAnchor`：
 
-1. If `doc.slice(start, end) === exact`, keep the offsets.
-2. Else search `prefix + exact + suffix` once.
-3. Else search `exact` and take the hit nearest the old start.
-4. Else the caller sets `orphaned`.
+1. 如果 `doc.slice(start, end) === exact`，保留偏移量。
+2. 否则搜索一次 `prefix + exact + suffix`。
+3. 否则搜索 `exact`，取离原起点最近的命中。
+4. 否则由调用方设为 `orphaned`。
 
-Do not guess a nearby paragraph. Do not auto-reopen an orphaned thread when some later text happens to match. `reopen()` refuses orphaned threads. `reanchor()` is the explicit user action that binds a new selection and sets `open`.
+不要猜测附近的段落。不要因为后来的文字碰巧匹配就自动重新打开失效线程。`reopen()` 拒绝失效线程。`reanchor()` 是用户的显式操作，绑定新的选区并设为 `open`。
 
-`selectionIsCommentable` rejects a selection that starts inside YAML frontmatter or sits inside a fenced code block. Reading-mode highlights also skip `pre`, `code`, `script`, `style`, and existing `.nand-editor-comment-hl` nodes.
+`selectionIsCommentable` 拒绝起点在 YAML 前置数据内、或位于围栏代码块内的选区。阅读模式的高亮也会跳过 `pre`、`code`、`script`、`style` 和已有的 `.nand-editor-comment-hl` 节点。
 
-## Store rules
+## 存储规则
 
-- Store shutdown seals new operations synchronously and drains accepted operations before a replacement store may load. The App-scoped `Symbol.for('nand.editor.comment-store-handoff')` coordinator (`platform/store-handoff.ts`) survives plugin bundle reloads, retains failed drains for retry, and isolates vaults. Activation generations prevent late setup or cleanup from replacing a newer store. Editor activation is asynchronous; extensions still register once per plugin instance.
-- `applyChanges` no-ops until `reconcile()` has run for that path. A keystroke during the initial load must not drag a stale offset.
-- `reconcile` relocates open and resolved threads and marks misses `orphaned`. It does not rewrite quotes that only shifted.
-- `applyChanges` maps offsets with `ChangeSet.mapPos`, refreshes the quote from the new document, and orphans a thread whose range collapses.
-- Overlapping CodeMirror marks are dropped (advance the cursor to the end of the accepted mark). A mark is drawn only when `doc.slice` still equals `exact`.
-- `renamePath` moves threads to the new path and rewrites the sidecar under the new hash.
-- `deletePath` removes the index entry and the sidecar.
-- Mutations go through the queue. `applyChanges` is synchronous on the cache and marks the path dirty.
+- 存储关闭时同步封存新操作，并在替代存储加载之前写完已接受的操作。以 App 为范围的 `Symbol.for('nand.editor.comment-store-handoff')` 协调者（`platform/store-handoff.ts`）在插件包重载后依然存在，保留失败的写完操作以便重试，并隔离不同的库。激活代数防止迟到的设置或清理替换较新的存储。编辑器激活是异步的；扩展仍然每个插件实例只注册一次。
+- `applyChanges` 在该路径的 `reconcile()` 运行之前什么都不做。初始加载期间的按键不能拖动过期的偏移量。
+- `reconcile` 重新定位 open 和 resolved 线程，并把未命中的标为 `orphaned`。它不改写只是发生位移的引用文本。
+- `applyChanges` 用 `ChangeSet.mapPos` 映射偏移量，从新文档刷新引用文本，并把范围塌缩的线程标为失效。
+- 重叠的 CodeMirror 标记会被丢弃（游标前进到已接受标记的末尾）。只有 `doc.slice` 仍等于 `exact` 时才绘制标记。
+- `renamePath` 把线程移到新路径，并用新哈希重写旁路文件。
+- `deletePath` 移除索引条目和旁路文件。
+- 修改都经过队列。`applyChanges` 对缓存是同步的，并把路径标为脏。
 
-## UI
+## 界面
 
-- Source and live preview: CodeMirror `ViewPlugin` from `commentsCmExtension`. Highlights obey `highlightEnabled`. The selection popover obeys `popoverEnabled`. The add-comment command still works when the popover is off.
-- Reading mode: `registerMarkdownPostProcessor`. If the file is not loaded yet, `loadFile` then rerender that preview once. Do not rerender again when the cache is already warm (that loops).
-- Side panel: reply, resolve, reopen, delete, jump, reanchor. Jump switches preview to source, then `setSelection` and `scrollIntoView`.
-- The runtime (`ui/runtime.ts`) is created on each activation. It adds the CodeMirror extension and the reading post-processor through `context.editor`, so turning the module off removes them from every open editor; closing the side panel only unmounts panel DOM.
-- Clicking a highlight focuses that thread (`store.focus`). It does not edit the note.
-- The runtime owns `CommentPopoverCoordinator` and disables it on dispose. Workspace activation and layout changes hide overlays independently of CodeMirror transactions. There is at most one visible selection popover per document and window.
-- `SelectionPopover` keeps a transient draft for the same valid selection. It measures the actual selection against the source pane, suspends its composer and key scope while hidden, and validates the source again before writing. Module and leaf teardown dispose drafts, observers and listeners. Restarting the module rebinds store subscriptions on existing CodeMirror views.
-- Composer textareas use an associated label and `aria-describedby` for shortcut help; do not add an `aria-label` tooltip that covers the help. Small panes constrain the input and wrap the action row so submission controls remain visible.
+- 源码模式和实时预览：来自 `commentsCmExtension` 的 CodeMirror `ViewPlugin`。高亮遵守 `highlightEnabled`，选区浮层遵守 `popoverEnabled`。浮层关闭时添加评论命令仍然可用。
+- 阅读模式：`registerMarkdownPostProcessor`。如果文件还没加载，先 `loadFile`，再重渲染该预览一次。缓存已就绪时不要再次重渲染（会死循环）。
+- 侧栏：回复、解决、重新打开、删除、跳转、重新挂接。跳转先把预览切到源码，然后 `setSelection` 和 `scrollIntoView`。
+- 运行时（`ui/runtime.ts`）在每次激活时创建。它通过 `context.editor` 添加 CodeMirror 扩展和阅读后处理器，所以关闭模块会把它们从每个打开的编辑器里移除；关闭侧栏只卸载面板 DOM。
+- 点击高亮会聚焦该线程（`store.focus`），不会编辑笔记。
+- 运行时拥有 `CommentPopoverCoordinator`，并在 dispose 时停用它。工作区激活和布局变化会独立于 CodeMirror 事务隐藏浮层。每个文档和窗口最多有一个可见的选区浮层。
+- `SelectionPopover` 为同一个有效选区保留临时草稿。它对照源码面板测量实际选区，隐藏期间暂停它的输入框和按键作用域，写入前再次校验源码。模块和叶子销毁时释放草稿、观察者和监听器。重启模块会在已有的 CodeMirror 视图上重新绑定存储订阅。
+- 输入框使用关联的 label 和 `aria-describedby` 提供快捷键帮助；不要再加会盖住帮助的 `aria-label` 提示。小面板会约束输入框并让操作行换行，使提交控件保持可见。
 
-Other modules see comments only through `src/modules/comments/api.ts`: the side panel (`COMMENTS_PANEL`, mounted by `app/workbench/comments-leaf.ts`) and the index of commented notes (`COMMENTS_INDEX`, used by the workbench panel). `src/shared/events.ts` reserves two event names nothing emits; do not start emitting them unless the task says so.
+其他模块只通过 `src/modules/comments/api.ts` 看到评论：侧栏（`COMMENTS_PANEL`，由 `app/workbench/comments-leaf.ts` 挂载）和有评论的笔记索引（`COMMENTS_INDEX`，供工作台面板使用）。`src/shared/events.ts` 预留了两个没有任何代码发出的事件名；除非任务要求，不要开始发出它们。
 
-## Tests
+## 测试
 
-`src/modules/comments/comments.test.ts` (vitest, part of `pnpm test`) runs the suite with the Obsidian stub; storage and handoff cases live in `scripts/verify-comment-storage.ts` and `scripts/verify-comment-handoff.ts`, which it imports.
+`src/modules/comments/comments.test.ts`（vitest，属于 `pnpm test`）用 Obsidian 桩运行测试套件；存储和交接用例在它导入的 `scripts/verify-comment-storage.ts` 和 `scripts/verify-comment-handoff.ts` 里。
 
-The storage cases cover read failure, journal replay, partial commit, rename cleanup and concurrent-edit recovery, all checked through a fresh store. The suite also checks anchors, the in-memory filesystem (the note string is unchanged), index hash length 16, reply, resolve, rename, delete, orphan reconcile and the view type constants from the identity table. It gates journal, sidecar, index and cleanup operations across store generations, including failed shutdown retries, closed-store mutation rejection and App isolation.
+存储用例覆盖读取失败、日志重放、部分提交、重命名清理和并发编辑恢复，全部通过全新的存储检查。测试套件还检查锚点、内存文件系统（笔记字符串不变）、索引哈希长度 16、回复、解决、重命名、删除、失效线程的调和，以及身份表里的视图类型常量。它把日志、旁路文件、索引和清理操作跨存储代数把关，包括关闭失败后的重试、已关闭存储拒绝修改和 App 隔离。
 
-It exercises the real CodeMirror extension with controlled DOM geometry and workspace events: hiding without a CodeMirror transaction, scroll clipping, draft restoration, stale submission rejection, and module restart. `test:issue-regressions` covers composer scopes and accessibility, placement boundaries, and routing terminal title refreshes to the correct host window. These Node fixtures do not replace real Obsidian tooltip and window tests; check a real plugin disable and enable in Obsidian.
+它用受控的 DOM 几何和工作区事件运行真实的 CodeMirror 扩展：没有 CodeMirror 事务时隐藏、滚动裁剪、草稿恢复、过期提交被拒绝以及模块重启。`test:issue-regressions` 覆盖输入框作用域与无障碍、浮层位置边界，以及把终端标题刷新路由到正确的宿主窗口。这些 Node 夹具不能代替真实 Obsidian 里的提示和窗口测试；请在 Obsidian 里实际检查一次插件停用再启用。
 
-- Resolve repo files with `process.cwd()`.
-- Tests pass Node timers to `CommentStore` (`{ set: setTimeout, clear: clearTimeout }`); UI fixtures polyfill `window` on `globalThis`.
+- 用 `process.cwd()` 解析仓库文件。
+- 测试把 Node 计时器传给 `CommentStore`（`{ set: setTimeout, clear: clearTimeout }`）；界面夹具在 `globalThis` 上补上 `window`。
 
-Add a case to the suite when you change locate, serialization, or the boundary. Do not point a test at a real vault.
+修改定位、序列化或边界时，向测试套件添加用例。不要让测试指向真实的库。

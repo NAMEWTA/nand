@@ -1,0 +1,991 @@
+{
+  "child_stage_checks": [
+    {
+      "change": "2026-10-08-archives-completion",
+      "stage": "triage",
+      "exit": 0,
+      "errors": 0,
+      "warnings": 0,
+      "command": [
+        "node",
+        "speculo/workflows/specdev/common/tools/validate-specdev.mjs",
+        "--stage",
+        "triage",
+        "--repo",
+        "/home/wta/projects/nand",
+        "/home/wta/projects/nand/speculo/.speculo/specdev/changes/2026-10-08-archives-completion"
+      ],
+      "output_sha256": "c52e4bb0b8dec29fb5f33436a07342af1af3fd17e3056a78dc9096dc39cab8bc"
+    },
+    {
+      "change": "2026-10-08-archives-completion",
+      "stage": "grill",
+      "exit": 0,
+      "errors": 0,
+      "warnings": 0,
+      "command": [
+        "node",
+        "speculo/workflows/specdev/common/tools/validate-specdev.mjs",
+        "--stage",
+        "grill",
+        "--repo",
+        "/home/wta/projects/nand",
+        "/home/wta/projects/nand/speculo/.speculo/specdev/changes/2026-10-08-archives-completion"
+      ],
+      "output_sha256": "c52e4bb0b8dec29fb5f33436a07342af1af3fd17e3056a78dc9096dc39cab8bc"
+    },
+    {
+      "change": "2026-10-08-archives-completion",
+      "stage": "spec",
+      "exit": 0,
+      "errors": 0,
+      "warnings": 0,
+      "command": [
+        "node",
+        "speculo/workflows/specdev/common/tools/validate-specdev.mjs",
+        "--stage",
+        "spec",
+        "--repo",
+        "/home/wta/projects/nand",
+        "/home/wta/projects/nand/speculo/.speculo/specdev/changes/2026-10-08-archives-completion"
+      ],
+      "output_sha256": "c52e4bb0b8dec29fb5f33436a07342af1af3fd17e3056a78dc9096dc39cab8bc"
+    },
+    {
+      "change": "2026-10-08-archives-completion",
+      "stage": "tickets",
+      "exit": 0,
+      "errors": 0,
+      "warnings": 0,
+      "command": [
+        "node",
+        "speculo/workflows/specdev/common/tools/validate-specdev.mjs",
+        "--stage",
+        "tickets",
+        "--repo",
+        "/home/wta/projects/nand",
+        "/home/wta/projects/nand/speculo/.speculo/specdev/changes/2026-10-08-archives-completion"
+      ],
+      "output_sha256": "c52e4bb0b8dec29fb5f33436a07342af1af3fd17e3056a78dc9096dc39cab8bc"
+    },
+    {
+      "change": "2026-10-08-archives-completion",
+      "stage": "goal-plan",
+      "exit": 0,
+      "errors": 0,
+      "warnings": 0,
+      "command": [
+        "node",
+        "speculo/workflows/specdev/common/tools/validate-specdev.mjs",
+        "--stage",
+        "goal-plan",
+        "--repo",
+        "/home/wta/projects/nand",
+        "/home/wta/projects/nand/speculo/.speculo/specdev/changes/2026-10-08-archives-completion"
+      ],
+      "output_sha256": "c52e4bb0b8dec29fb5f33436a07342af1af3fd17e3056a78dc9096dc39cab8bc"
+    },
+    {
+      "change": "2026-10-08-browser-ai-workbench",
+      "stage": "triage",
+      "exit": 0,
+      "errors": 0,
+      "warnings": 78,
+      "command": [
+        "node",
+        "speculo/workflows/specdev/common/tools/validate-specdev.mjs",
+        "--stage",
+        "triage",
+        "--repo",
+        "/home/wta/projects/nand",
+        "/home/wta/projects/nand/speculo/.speculo/specdev/changes/2026-10-08-browser-ai-workbench"
+      ],
+      "output_sha256": "1b9cd178bee9acde97fee992c1b264c5ae78dd39d7ee5f4a7f3e217fbf0cb2a0"
+    },
+    {
+      "change": "2026-10-08-browser-ai-workbench",
+      "stage": "grill",
+      "exit": 0,
+      "errors": 0,
+      "warnings": 78,
+      "command": [
+        "node",
+        "speculo/workflows/specdev/common/tools/validate-specdev.mjs",
+        "--stage",
+        "grill",
+        "--repo",
+        "/home/wta/projects/nand",
+        "/home/wta/projects/nand/speculo/.speculo/specdev/changes/2026-10-08-browser-ai-workbench"
+      ],
+      "output_sha256": "1b9cd178bee9acde97fee992c1b264c5ae78dd39d7ee5f4a7f3e217fbf0cb2a0"
+    },
+    {
+      "change": "2026-10-08-browser-ai-workbench",
+      "stage": "spec",
+      "exit": 0,
+      "errors": 0,
+      "warnings": 78,
+      "command": [
+        "node",
+        "speculo/workflows/specdev/common/tools/validate-specdev.mjs",
+        "--stage",
+        "spec",
+        "--repo",
+        "/home/wta/projects/nand",
+        "/home/wta/projects/nand/speculo/.speculo/specdev/changes/2026-10-08-browser-ai-workbench"
+      ],
+      "output_sha256": "1b9cd178bee9acde97fee992c1b264c5ae78dd39d7ee5f4a7f3e217fbf0cb2a0"
+    },
+    {
+      "change": "2026-10-08-browser-ai-workbench",
+      "stage": "tickets",
+      "exit": 0,
+      "errors": 0,
+      "warnings": 78,
+      "command": [
+        "node",
+        "speculo/workflows/specdev/common/tools/validate-specdev.mjs",
+        "--stage",
+        "tickets",
+        "--repo",
+        "/home/wta/projects/nand",
+        "/home/wta/projects/nand/speculo/.speculo/specdev/changes/2026-10-08-browser-ai-workbench"
+      ],
+      "output_sha256": "1b9cd178bee9acde97fee992c1b264c5ae78dd39d7ee5f4a7f3e217fbf0cb2a0"
+    },
+    {
+      "change": "2026-10-08-browser-ai-workbench",
+      "stage": "goal-plan",
+      "exit": 0,
+      "errors": 0,
+      "warnings": 78,
+      "command": [
+        "node",
+        "speculo/workflows/specdev/common/tools/validate-specdev.mjs",
+        "--stage",
+        "goal-plan",
+        "--repo",
+        "/home/wta/projects/nand",
+        "/home/wta/projects/nand/speculo/.speculo/specdev/changes/2026-10-08-browser-ai-workbench"
+      ],
+      "output_sha256": "1b9cd178bee9acde97fee992c1b264c5ae78dd39d7ee5f4a7f3e217fbf0cb2a0"
+    },
+    {
+      "change": "2026-10-08-git-sync-parity",
+      "stage": "triage",
+      "exit": 0,
+      "errors": 0,
+      "warnings": 3,
+      "command": [
+        "node",
+        "speculo/workflows/specdev/common/tools/validate-specdev.mjs",
+        "--stage",
+        "triage",
+        "--repo",
+        "/home/wta/projects/nand",
+        "/home/wta/projects/nand/speculo/.speculo/specdev/changes/2026-10-08-git-sync-parity"
+      ],
+      "output_sha256": "6515bb858f147bc7ec624b12e72fe61865dde1bf4c71c2258612f7ef5921a61f"
+    },
+    {
+      "change": "2026-10-08-git-sync-parity",
+      "stage": "grill",
+      "exit": 0,
+      "errors": 0,
+      "warnings": 3,
+      "command": [
+        "node",
+        "speculo/workflows/specdev/common/tools/validate-specdev.mjs",
+        "--stage",
+        "grill",
+        "--repo",
+        "/home/wta/projects/nand",
+        "/home/wta/projects/nand/speculo/.speculo/specdev/changes/2026-10-08-git-sync-parity"
+      ],
+      "output_sha256": "6515bb858f147bc7ec624b12e72fe61865dde1bf4c71c2258612f7ef5921a61f"
+    },
+    {
+      "change": "2026-10-08-git-sync-parity",
+      "stage": "spec",
+      "exit": 0,
+      "errors": 0,
+      "warnings": 3,
+      "command": [
+        "node",
+        "speculo/workflows/specdev/common/tools/validate-specdev.mjs",
+        "--stage",
+        "spec",
+        "--repo",
+        "/home/wta/projects/nand",
+        "/home/wta/projects/nand/speculo/.speculo/specdev/changes/2026-10-08-git-sync-parity"
+      ],
+      "output_sha256": "6515bb858f147bc7ec624b12e72fe61865dde1bf4c71c2258612f7ef5921a61f"
+    },
+    {
+      "change": "2026-10-08-git-sync-parity",
+      "stage": "tickets",
+      "exit": 0,
+      "errors": 0,
+      "warnings": 3,
+      "command": [
+        "node",
+        "speculo/workflows/specdev/common/tools/validate-specdev.mjs",
+        "--stage",
+        "tickets",
+        "--repo",
+        "/home/wta/projects/nand",
+        "/home/wta/projects/nand/speculo/.speculo/specdev/changes/2026-10-08-git-sync-parity"
+      ],
+      "output_sha256": "6515bb858f147bc7ec624b12e72fe61865dde1bf4c71c2258612f7ef5921a61f"
+    },
+    {
+      "change": "2026-10-08-git-sync-parity",
+      "stage": "goal-plan",
+      "exit": 0,
+      "errors": 0,
+      "warnings": 3,
+      "command": [
+        "node",
+        "speculo/workflows/specdev/common/tools/validate-specdev.mjs",
+        "--stage",
+        "goal-plan",
+        "--repo",
+        "/home/wta/projects/nand",
+        "/home/wta/projects/nand/speculo/.speculo/specdev/changes/2026-10-08-git-sync-parity"
+      ],
+      "output_sha256": "6515bb858f147bc7ec624b12e72fe61865dde1bf4c71c2258612f7ef5921a61f"
+    },
+    {
+      "change": "2026-10-08-home-grid-rebuild",
+      "stage": "triage",
+      "exit": 0,
+      "errors": 0,
+      "warnings": 82,
+      "command": [
+        "node",
+        "speculo/workflows/specdev/common/tools/validate-specdev.mjs",
+        "--stage",
+        "triage",
+        "--repo",
+        "/home/wta/projects/nand",
+        "/home/wta/projects/nand/speculo/.speculo/specdev/changes/2026-10-08-home-grid-rebuild"
+      ],
+      "output_sha256": "5a2d9052305679668515829ca1596a8b576dae373f4852e5aa4fbfc3a2a02c99"
+    },
+    {
+      "change": "2026-10-08-home-grid-rebuild",
+      "stage": "grill",
+      "exit": 0,
+      "errors": 0,
+      "warnings": 82,
+      "command": [
+        "node",
+        "speculo/workflows/specdev/common/tools/validate-specdev.mjs",
+        "--stage",
+        "grill",
+        "--repo",
+        "/home/wta/projects/nand",
+        "/home/wta/projects/nand/speculo/.speculo/specdev/changes/2026-10-08-home-grid-rebuild"
+      ],
+      "output_sha256": "5a2d9052305679668515829ca1596a8b576dae373f4852e5aa4fbfc3a2a02c99"
+    },
+    {
+      "change": "2026-10-08-home-grid-rebuild",
+      "stage": "spec",
+      "exit": 0,
+      "errors": 0,
+      "warnings": 82,
+      "command": [
+        "node",
+        "speculo/workflows/specdev/common/tools/validate-specdev.mjs",
+        "--stage",
+        "spec",
+        "--repo",
+        "/home/wta/projects/nand",
+        "/home/wta/projects/nand/speculo/.speculo/specdev/changes/2026-10-08-home-grid-rebuild"
+      ],
+      "output_sha256": "5a2d9052305679668515829ca1596a8b576dae373f4852e5aa4fbfc3a2a02c99"
+    },
+    {
+      "change": "2026-10-08-home-grid-rebuild",
+      "stage": "tickets",
+      "exit": 0,
+      "errors": 0,
+      "warnings": 82,
+      "command": [
+        "node",
+        "speculo/workflows/specdev/common/tools/validate-specdev.mjs",
+        "--stage",
+        "tickets",
+        "--repo",
+        "/home/wta/projects/nand",
+        "/home/wta/projects/nand/speculo/.speculo/specdev/changes/2026-10-08-home-grid-rebuild"
+      ],
+      "output_sha256": "5a2d9052305679668515829ca1596a8b576dae373f4852e5aa4fbfc3a2a02c99"
+    },
+    {
+      "change": "2026-10-08-home-grid-rebuild",
+      "stage": "goal-plan",
+      "exit": 0,
+      "errors": 0,
+      "warnings": 82,
+      "command": [
+        "node",
+        "speculo/workflows/specdev/common/tools/validate-specdev.mjs",
+        "--stage",
+        "goal-plan",
+        "--repo",
+        "/home/wta/projects/nand",
+        "/home/wta/projects/nand/speculo/.speculo/specdev/changes/2026-10-08-home-grid-rebuild"
+      ],
+      "output_sha256": "5a2d9052305679668515829ca1596a8b576dae373f4852e5aa4fbfc3a2a02c99"
+    },
+    {
+      "change": "2026-10-08-news-aihot",
+      "stage": "triage",
+      "exit": 0,
+      "errors": 0,
+      "warnings": 8,
+      "command": [
+        "node",
+        "speculo/workflows/specdev/common/tools/validate-specdev.mjs",
+        "--stage",
+        "triage",
+        "--repo",
+        "/home/wta/projects/nand",
+        "/home/wta/projects/nand/speculo/.speculo/specdev/changes/2026-10-08-news-aihot"
+      ],
+      "output_sha256": "d1b3a6a41948b6af1a29c37aa29b58f99696240f25830e8fb9a34d26795bc97d"
+    },
+    {
+      "change": "2026-10-08-news-aihot",
+      "stage": "grill",
+      "exit": 0,
+      "errors": 0,
+      "warnings": 8,
+      "command": [
+        "node",
+        "speculo/workflows/specdev/common/tools/validate-specdev.mjs",
+        "--stage",
+        "grill",
+        "--repo",
+        "/home/wta/projects/nand",
+        "/home/wta/projects/nand/speculo/.speculo/specdev/changes/2026-10-08-news-aihot"
+      ],
+      "output_sha256": "d1b3a6a41948b6af1a29c37aa29b58f99696240f25830e8fb9a34d26795bc97d"
+    },
+    {
+      "change": "2026-10-08-news-aihot",
+      "stage": "spec",
+      "exit": 0,
+      "errors": 0,
+      "warnings": 8,
+      "command": [
+        "node",
+        "speculo/workflows/specdev/common/tools/validate-specdev.mjs",
+        "--stage",
+        "spec",
+        "--repo",
+        "/home/wta/projects/nand",
+        "/home/wta/projects/nand/speculo/.speculo/specdev/changes/2026-10-08-news-aihot"
+      ],
+      "output_sha256": "d1b3a6a41948b6af1a29c37aa29b58f99696240f25830e8fb9a34d26795bc97d"
+    },
+    {
+      "change": "2026-10-08-news-aihot",
+      "stage": "tickets",
+      "exit": 0,
+      "errors": 0,
+      "warnings": 8,
+      "command": [
+        "node",
+        "speculo/workflows/specdev/common/tools/validate-specdev.mjs",
+        "--stage",
+        "tickets",
+        "--repo",
+        "/home/wta/projects/nand",
+        "/home/wta/projects/nand/speculo/.speculo/specdev/changes/2026-10-08-news-aihot"
+      ],
+      "output_sha256": "d1b3a6a41948b6af1a29c37aa29b58f99696240f25830e8fb9a34d26795bc97d"
+    },
+    {
+      "change": "2026-10-08-news-aihot",
+      "stage": "goal-plan",
+      "exit": 0,
+      "errors": 0,
+      "warnings": 8,
+      "command": [
+        "node",
+        "speculo/workflows/specdev/common/tools/validate-specdev.mjs",
+        "--stage",
+        "goal-plan",
+        "--repo",
+        "/home/wta/projects/nand",
+        "/home/wta/projects/nand/speculo/.speculo/specdev/changes/2026-10-08-news-aihot"
+      ],
+      "output_sha256": "d1b3a6a41948b6af1a29c37aa29b58f99696240f25830e8fb9a34d26795bc97d"
+    },
+    {
+      "change": "2026-10-08-private-storage-permissions",
+      "stage": "triage",
+      "exit": 0,
+      "errors": 0,
+      "warnings": 0,
+      "command": [
+        "node",
+        "speculo/workflows/specdev/common/tools/validate-specdev.mjs",
+        "--stage",
+        "triage",
+        "--repo",
+        "/home/wta/projects/nand",
+        "/home/wta/projects/nand/speculo/.speculo/specdev/changes/2026-10-08-private-storage-permissions"
+      ],
+      "output_sha256": "c52e4bb0b8dec29fb5f33436a07342af1af3fd17e3056a78dc9096dc39cab8bc"
+    },
+    {
+      "change": "2026-10-08-private-storage-permissions",
+      "stage": "grill",
+      "exit": 0,
+      "errors": 0,
+      "warnings": 0,
+      "command": [
+        "node",
+        "speculo/workflows/specdev/common/tools/validate-specdev.mjs",
+        "--stage",
+        "grill",
+        "--repo",
+        "/home/wta/projects/nand",
+        "/home/wta/projects/nand/speculo/.speculo/specdev/changes/2026-10-08-private-storage-permissions"
+      ],
+      "output_sha256": "c52e4bb0b8dec29fb5f33436a07342af1af3fd17e3056a78dc9096dc39cab8bc"
+    },
+    {
+      "change": "2026-10-08-private-storage-permissions",
+      "stage": "spec",
+      "exit": 0,
+      "errors": 0,
+      "warnings": 0,
+      "command": [
+        "node",
+        "speculo/workflows/specdev/common/tools/validate-specdev.mjs",
+        "--stage",
+        "spec",
+        "--repo",
+        "/home/wta/projects/nand",
+        "/home/wta/projects/nand/speculo/.speculo/specdev/changes/2026-10-08-private-storage-permissions"
+      ],
+      "output_sha256": "c52e4bb0b8dec29fb5f33436a07342af1af3fd17e3056a78dc9096dc39cab8bc"
+    },
+    {
+      "change": "2026-10-08-private-storage-permissions",
+      "stage": "tickets",
+      "exit": 0,
+      "errors": 0,
+      "warnings": 0,
+      "command": [
+        "node",
+        "speculo/workflows/specdev/common/tools/validate-specdev.mjs",
+        "--stage",
+        "tickets",
+        "--repo",
+        "/home/wta/projects/nand",
+        "/home/wta/projects/nand/speculo/.speculo/specdev/changes/2026-10-08-private-storage-permissions"
+      ],
+      "output_sha256": "c52e4bb0b8dec29fb5f33436a07342af1af3fd17e3056a78dc9096dc39cab8bc"
+    },
+    {
+      "change": "2026-10-08-private-storage-permissions",
+      "stage": "goal-plan",
+      "exit": 0,
+      "errors": 0,
+      "warnings": 0,
+      "command": [
+        "node",
+        "speculo/workflows/specdev/common/tools/validate-specdev.mjs",
+        "--stage",
+        "goal-plan",
+        "--repo",
+        "/home/wta/projects/nand",
+        "/home/wta/projects/nand/speculo/.speculo/specdev/changes/2026-10-08-private-storage-permissions"
+      ],
+      "output_sha256": "c52e4bb0b8dec29fb5f33436a07342af1af3fd17e3056a78dc9096dc39cab8bc"
+    },
+    {
+      "change": "2026-10-08-terminal-reliability",
+      "stage": "triage",
+      "exit": 0,
+      "errors": 0,
+      "warnings": 0,
+      "command": [
+        "node",
+        "speculo/workflows/specdev/common/tools/validate-specdev.mjs",
+        "--stage",
+        "triage",
+        "--repo",
+        "/home/wta/projects/nand",
+        "/home/wta/projects/nand/speculo/.speculo/specdev/changes/2026-10-08-terminal-reliability"
+      ],
+      "output_sha256": "c52e4bb0b8dec29fb5f33436a07342af1af3fd17e3056a78dc9096dc39cab8bc"
+    },
+    {
+      "change": "2026-10-08-terminal-reliability",
+      "stage": "grill",
+      "exit": 0,
+      "errors": 0,
+      "warnings": 0,
+      "command": [
+        "node",
+        "speculo/workflows/specdev/common/tools/validate-specdev.mjs",
+        "--stage",
+        "grill",
+        "--repo",
+        "/home/wta/projects/nand",
+        "/home/wta/projects/nand/speculo/.speculo/specdev/changes/2026-10-08-terminal-reliability"
+      ],
+      "output_sha256": "c52e4bb0b8dec29fb5f33436a07342af1af3fd17e3056a78dc9096dc39cab8bc"
+    },
+    {
+      "change": "2026-10-08-terminal-reliability",
+      "stage": "spec",
+      "exit": 0,
+      "errors": 0,
+      "warnings": 0,
+      "command": [
+        "node",
+        "speculo/workflows/specdev/common/tools/validate-specdev.mjs",
+        "--stage",
+        "spec",
+        "--repo",
+        "/home/wta/projects/nand",
+        "/home/wta/projects/nand/speculo/.speculo/specdev/changes/2026-10-08-terminal-reliability"
+      ],
+      "output_sha256": "c52e4bb0b8dec29fb5f33436a07342af1af3fd17e3056a78dc9096dc39cab8bc"
+    },
+    {
+      "change": "2026-10-08-terminal-reliability",
+      "stage": "tickets",
+      "exit": 0,
+      "errors": 0,
+      "warnings": 0,
+      "command": [
+        "node",
+        "speculo/workflows/specdev/common/tools/validate-specdev.mjs",
+        "--stage",
+        "tickets",
+        "--repo",
+        "/home/wta/projects/nand",
+        "/home/wta/projects/nand/speculo/.speculo/specdev/changes/2026-10-08-terminal-reliability"
+      ],
+      "output_sha256": "c52e4bb0b8dec29fb5f33436a07342af1af3fd17e3056a78dc9096dc39cab8bc"
+    },
+    {
+      "change": "2026-10-08-terminal-reliability",
+      "stage": "goal-plan",
+      "exit": 0,
+      "errors": 0,
+      "warnings": 0,
+      "command": [
+        "node",
+        "speculo/workflows/specdev/common/tools/validate-specdev.mjs",
+        "--stage",
+        "goal-plan",
+        "--repo",
+        "/home/wta/projects/nand",
+        "/home/wta/projects/nand/speculo/.speculo/specdev/changes/2026-10-08-terminal-reliability"
+      ],
+      "output_sha256": "c52e4bb0b8dec29fb5f33436a07342af1af3fd17e3056a78dc9096dc39cab8bc"
+    },
+    {
+      "change": "2026-10-08-workbench-regressions",
+      "stage": "triage",
+      "exit": 0,
+      "errors": 0,
+      "warnings": 0,
+      "command": [
+        "node",
+        "speculo/workflows/specdev/common/tools/validate-specdev.mjs",
+        "--stage",
+        "triage",
+        "--repo",
+        "/home/wta/projects/nand",
+        "/home/wta/projects/nand/speculo/.speculo/specdev/changes/2026-10-08-workbench-regressions"
+      ],
+      "output_sha256": "c52e4bb0b8dec29fb5f33436a07342af1af3fd17e3056a78dc9096dc39cab8bc"
+    },
+    {
+      "change": "2026-10-08-workbench-regressions",
+      "stage": "grill",
+      "exit": 0,
+      "errors": 0,
+      "warnings": 0,
+      "command": [
+        "node",
+        "speculo/workflows/specdev/common/tools/validate-specdev.mjs",
+        "--stage",
+        "grill",
+        "--repo",
+        "/home/wta/projects/nand",
+        "/home/wta/projects/nand/speculo/.speculo/specdev/changes/2026-10-08-workbench-regressions"
+      ],
+      "output_sha256": "c52e4bb0b8dec29fb5f33436a07342af1af3fd17e3056a78dc9096dc39cab8bc"
+    },
+    {
+      "change": "2026-10-08-workbench-regressions",
+      "stage": "spec",
+      "exit": 0,
+      "errors": 0,
+      "warnings": 0,
+      "command": [
+        "node",
+        "speculo/workflows/specdev/common/tools/validate-specdev.mjs",
+        "--stage",
+        "spec",
+        "--repo",
+        "/home/wta/projects/nand",
+        "/home/wta/projects/nand/speculo/.speculo/specdev/changes/2026-10-08-workbench-regressions"
+      ],
+      "output_sha256": "c52e4bb0b8dec29fb5f33436a07342af1af3fd17e3056a78dc9096dc39cab8bc"
+    },
+    {
+      "change": "2026-10-08-workbench-regressions",
+      "stage": "tickets",
+      "exit": 0,
+      "errors": 0,
+      "warnings": 0,
+      "command": [
+        "node",
+        "speculo/workflows/specdev/common/tools/validate-specdev.mjs",
+        "--stage",
+        "tickets",
+        "--repo",
+        "/home/wta/projects/nand",
+        "/home/wta/projects/nand/speculo/.speculo/specdev/changes/2026-10-08-workbench-regressions"
+      ],
+      "output_sha256": "c52e4bb0b8dec29fb5f33436a07342af1af3fd17e3056a78dc9096dc39cab8bc"
+    },
+    {
+      "change": "2026-10-08-workbench-regressions",
+      "stage": "goal-plan",
+      "exit": 0,
+      "errors": 0,
+      "warnings": 0,
+      "command": [
+        "node",
+        "speculo/workflows/specdev/common/tools/validate-specdev.mjs",
+        "--stage",
+        "goal-plan",
+        "--repo",
+        "/home/wta/projects/nand",
+        "/home/wta/projects/nand/speculo/.speculo/specdev/changes/2026-10-08-workbench-regressions"
+      ],
+      "output_sha256": "c52e4bb0b8dec29fb5f33436a07342af1af3fd17e3056a78dc9096dc39cab8bc"
+    }
+  ],
+  "controllers": [
+    {
+      "change": "2026-10-08-all-open-issues",
+      "exit": 0,
+      "mode": "read-only-analysis",
+      "errors": [],
+      "validation_errors": [],
+      "warnings": [],
+      "frontier": [],
+      "blocked_count": 61,
+      "input_digest": "b23819790e2a534791eb7ee5ed443aad1bc62e6bf0332c1726f07a894a50c5bc",
+      "goal_contract_digest": "ad0d1b81440039f646d372c7729c50501c6a93c53f649d72200ad3860675e91d",
+      "authorization_checked": false
+    },
+    {
+      "change": "2026-10-08-archives-completion",
+      "exit": 0,
+      "mode": "read-only-analysis",
+      "errors": [],
+      "validation_errors": [],
+      "warnings": [],
+      "frontier": [],
+      "blocked_count": 1,
+      "input_digest": "271414358d6e68276a18502666d0e4c54a597372b5dc11034b22d0597d42c589",
+      "goal_contract_digest": "14e2539062709385a46d0b13fd3847950c25059c0410d697804ef2fbc4978ea4",
+      "authorization_checked": false
+    },
+    {
+      "change": "2026-10-08-browser-ai-workbench",
+      "exit": 0,
+      "mode": "read-only-analysis",
+      "errors": [],
+      "validation_errors": [],
+      "warnings": [
+        "concurrent Ready Tickets T-01/T-02 share owned paths; an explicit owner or serialization is required",
+        "concurrent Ready Tickets T-01/T-06 share owned paths; an explicit owner or serialization is required",
+        "concurrent Ready Tickets T-01/T-17 share owned paths; an explicit owner or serialization is required",
+        "concurrent Ready Tickets T-01/T-20 share owned paths; an explicit owner or serialization is required",
+        "concurrent Ready Tickets T-04/T-05 share owned paths; an explicit owner or serialization is required",
+        "concurrent Ready Tickets T-07/T-09 share owned paths; an explicit owner or serialization is required",
+        "concurrent Ready Tickets T-07/T-10 share owned paths; an explicit owner or serialization is required",
+        "concurrent Ready Tickets T-07/T-11 share owned paths; an explicit owner or serialization is required",
+        "concurrent Ready Tickets T-07/T-12 share owned paths; an explicit owner or serialization is required",
+        "concurrent Ready Tickets T-07/T-13 share owned paths; an explicit owner or serialization is required",
+        "concurrent Ready Tickets T-08/T-09 share owned paths; an explicit owner or serialization is required",
+        "concurrent Ready Tickets T-08/T-10 share owned paths; an explicit owner or serialization is required",
+        "concurrent Ready Tickets T-08/T-11 share owned paths; an explicit owner or serialization is required",
+        "concurrent Ready Tickets T-08/T-12 share owned paths; an explicit owner or serialization is required",
+        "concurrent Ready Tickets T-08/T-13 share owned paths; an explicit owner or serialization is required",
+        "concurrent Ready Tickets T-08/T-15 share owned paths; an explicit owner or serialization is required",
+        "concurrent Ready Tickets T-08/T-17 share owned paths; an explicit owner or serialization is required",
+        "concurrent Ready Tickets T-09/T-10 share owned paths; an explicit owner or serialization is required",
+        "concurrent Ready Tickets T-09/T-11 share owned paths; an explicit owner or serialization is required",
+        "concurrent Ready Tickets T-09/T-12 share owned paths; an explicit owner or serialization is required",
+        "concurrent Ready Tickets T-09/T-13 share owned paths; an explicit owner or serialization is required",
+        "concurrent Ready Tickets T-09/T-14 share owned paths; an explicit owner or serialization is required",
+        "concurrent Ready Tickets T-09/T-15 share owned paths; an explicit owner or serialization is required",
+        "concurrent Ready Tickets T-09/T-16 share owned paths; an explicit owner or serialization is required",
+        "concurrent Ready Tickets T-09/T-17 share owned paths; an explicit owner or serialization is required",
+        "concurrent Ready Tickets T-09/T-18 share owned paths; an explicit owner or serialization is required",
+        "concurrent Ready Tickets T-09/T-19 share owned paths; an explicit owner or serialization is required",
+        "concurrent Ready Tickets T-09/T-20 share owned paths; an explicit owner or serialization is required",
+        "concurrent Ready Tickets T-10/T-11 share owned paths; an explicit owner or serialization is required",
+        "concurrent Ready Tickets T-10/T-12 share owned paths; an explicit owner or serialization is required",
+        "concurrent Ready Tickets T-10/T-13 share owned paths; an explicit owner or serialization is required",
+        "concurrent Ready Tickets T-10/T-14 share owned paths; an explicit owner or serialization is required",
+        "concurrent Ready Tickets T-10/T-15 share owned paths; an explicit owner or serialization is required",
+        "concurrent Ready Tickets T-10/T-16 share owned paths; an explicit owner or serialization is required",
+        "concurrent Ready Tickets T-10/T-17 share owned paths; an explicit owner or serialization is required",
+        "concurrent Ready Tickets T-10/T-18 share owned paths; an explicit owner or serialization is required",
+        "concurrent Ready Tickets T-10/T-19 share owned paths; an explicit owner or serialization is required",
+        "concurrent Ready Tickets T-10/T-20 share owned paths; an explicit owner or serialization is required",
+        "concurrent Ready Tickets T-11/T-12 share owned paths; an explicit owner or serialization is required",
+        "concurrent Ready Tickets T-11/T-13 share owned paths; an explicit owner or serialization is required",
+        "concurrent Ready Tickets T-11/T-14 share owned paths; an explicit owner or serialization is required",
+        "concurrent Ready Tickets T-11/T-15 share owned paths; an explicit owner or serialization is required",
+        "concurrent Ready Tickets T-11/T-16 share owned paths; an explicit owner or serialization is required",
+        "concurrent Ready Tickets T-11/T-17 share owned paths; an explicit owner or serialization is required",
+        "concurrent Ready Tickets T-11/T-18 share owned paths; an explicit owner or serialization is required",
+        "concurrent Ready Tickets T-11/T-19 share owned paths; an explicit owner or serialization is required",
+        "concurrent Ready Tickets T-11/T-20 share owned paths; an explicit owner or serialization is required",
+        "concurrent Ready Tickets T-12/T-13 share owned paths; an explicit owner or serialization is required",
+        "concurrent Ready Tickets T-12/T-14 share owned paths; an explicit owner or serialization is required",
+        "concurrent Ready Tickets T-12/T-15 share owned paths; an explicit owner or serialization is required",
+        "concurrent Ready Tickets T-12/T-16 share owned paths; an explicit owner or serialization is required",
+        "concurrent Ready Tickets T-12/T-17 share owned paths; an explicit owner or serialization is required",
+        "concurrent Ready Tickets T-12/T-18 share owned paths; an explicit owner or serialization is required",
+        "concurrent Ready Tickets T-12/T-19 share owned paths; an explicit owner or serialization is required",
+        "concurrent Ready Tickets T-12/T-20 share owned paths; an explicit owner or serialization is required",
+        "concurrent Ready Tickets T-13/T-14 share owned paths; an explicit owner or serialization is required",
+        "concurrent Ready Tickets T-13/T-15 share owned paths; an explicit owner or serialization is required",
+        "concurrent Ready Tickets T-13/T-16 share owned paths; an explicit owner or serialization is required",
+        "concurrent Ready Tickets T-13/T-17 share owned paths; an explicit owner or serialization is required",
+        "concurrent Ready Tickets T-13/T-18 share owned paths; an explicit owner or serialization is required",
+        "concurrent Ready Tickets T-13/T-19 share owned paths; an explicit owner or serialization is required",
+        "concurrent Ready Tickets T-13/T-20 share owned paths; an explicit owner or serialization is required",
+        "concurrent Ready Tickets T-14/T-15 share owned paths; an explicit owner or serialization is required",
+        "concurrent Ready Tickets T-14/T-16 share owned paths; an explicit owner or serialization is required",
+        "concurrent Ready Tickets T-14/T-17 share owned paths; an explicit owner or serialization is required",
+        "concurrent Ready Tickets T-14/T-18 share owned paths; an explicit owner or serialization is required",
+        "concurrent Ready Tickets T-14/T-19 share owned paths; an explicit owner or serialization is required",
+        "concurrent Ready Tickets T-14/T-20 share owned paths; an explicit owner or serialization is required",
+        "concurrent Ready Tickets T-15/T-16 share owned paths; an explicit owner or serialization is required",
+        "concurrent Ready Tickets T-15/T-18 share owned paths; an explicit owner or serialization is required",
+        "concurrent Ready Tickets T-15/T-19 share owned paths; an explicit owner or serialization is required",
+        "concurrent Ready Tickets T-15/T-20 share owned paths; an explicit owner or serialization is required",
+        "concurrent Ready Tickets T-16/T-17 share owned paths; an explicit owner or serialization is required",
+        "concurrent Ready Tickets T-17/T-18 share owned paths; an explicit owner or serialization is required",
+        "concurrent Ready Tickets T-17/T-19 share owned paths; an explicit owner or serialization is required",
+        "concurrent Ready Tickets T-17/T-20 share owned paths; an explicit owner or serialization is required",
+        "concurrent Ready Tickets T-18/T-20 share owned paths; an explicit owner or serialization is required",
+        "concurrent Ready Tickets T-19/T-20 share owned paths; an explicit owner or serialization is required"
+      ],
+      "frontier": [],
+      "blocked_count": 21,
+      "input_digest": "fd0f5e074503d16661225d9c279830aa3c285cb573aaea72a3f3d86c4666675b",
+      "goal_contract_digest": "c7e70eb7a06616b86c84c11007d4631b84584f88a6885c41d71e6f53d6c227ec",
+      "authorization_checked": false
+    },
+    {
+      "change": "2026-10-08-git-sync-parity",
+      "exit": 0,
+      "mode": "read-only-analysis",
+      "errors": [],
+      "validation_errors": [],
+      "warnings": [
+        "concurrent Ready Tickets T-01/T-02 share owned paths; an explicit owner or serialization is required",
+        "concurrent Ready Tickets T-01/T-03 share owned paths; an explicit owner or serialization is required",
+        "concurrent Ready Tickets T-02/T-03 share owned paths; an explicit owner or serialization is required"
+      ],
+      "frontier": [],
+      "blocked_count": 4,
+      "input_digest": "21f08bd4de33166d5965beca20374070929004c55f8c4d993b8f3b447d827c8b",
+      "goal_contract_digest": "0a5c5bc6f51c7b9401ed27354935c0a78e0437807be063d14299d5ce80a96502",
+      "authorization_checked": false
+    },
+    {
+      "change": "2026-10-08-home-grid-rebuild",
+      "exit": 0,
+      "mode": "read-only-analysis",
+      "errors": [],
+      "validation_errors": [],
+      "warnings": [
+        "concurrent Ready Tickets T-02/T-13 share owned paths; an explicit owner or serialization is required",
+        "concurrent Ready Tickets T-02/T-14 share owned paths; an explicit owner or serialization is required",
+        "concurrent Ready Tickets T-02/T-16 share owned paths; an explicit owner or serialization is required",
+        "concurrent Ready Tickets T-02/T-17 share owned paths; an explicit owner or serialization is required",
+        "concurrent Ready Tickets T-03/T-11 share owned paths; an explicit owner or serialization is required",
+        "concurrent Ready Tickets T-03/T-12 share owned paths; an explicit owner or serialization is required",
+        "concurrent Ready Tickets T-03/T-13 share owned paths; an explicit owner or serialization is required",
+        "concurrent Ready Tickets T-03/T-14 share owned paths; an explicit owner or serialization is required",
+        "concurrent Ready Tickets T-03/T-15 share owned paths; an explicit owner or serialization is required",
+        "concurrent Ready Tickets T-03/T-16 share owned paths; an explicit owner or serialization is required",
+        "concurrent Ready Tickets T-03/T-17 share owned paths; an explicit owner or serialization is required",
+        "concurrent Ready Tickets T-04/T-07 share owned paths; an explicit owner or serialization is required",
+        "concurrent Ready Tickets T-04/T-08 share owned paths; an explicit owner or serialization is required",
+        "concurrent Ready Tickets T-04/T-11 share owned paths; an explicit owner or serialization is required",
+        "concurrent Ready Tickets T-04/T-12 share owned paths; an explicit owner or serialization is required",
+        "concurrent Ready Tickets T-04/T-14 share owned paths; an explicit owner or serialization is required",
+        "concurrent Ready Tickets T-04/T-15 share owned paths; an explicit owner or serialization is required",
+        "concurrent Ready Tickets T-04/T-16 share owned paths; an explicit owner or serialization is required",
+        "concurrent Ready Tickets T-05/T-06 share owned paths; an explicit owner or serialization is required",
+        "concurrent Ready Tickets T-05/T-07 share owned paths; an explicit owner or serialization is required",
+        "concurrent Ready Tickets T-05/T-08 share owned paths; an explicit owner or serialization is required",
+        "concurrent Ready Tickets T-05/T-10 share owned paths; an explicit owner or serialization is required",
+        "concurrent Ready Tickets T-05/T-11 share owned paths; an explicit owner or serialization is required",
+        "concurrent Ready Tickets T-05/T-12 share owned paths; an explicit owner or serialization is required",
+        "concurrent Ready Tickets T-05/T-13 share owned paths; an explicit owner or serialization is required",
+        "concurrent Ready Tickets T-05/T-14 share owned paths; an explicit owner or serialization is required",
+        "concurrent Ready Tickets T-05/T-15 share owned paths; an explicit owner or serialization is required",
+        "concurrent Ready Tickets T-05/T-16 share owned paths; an explicit owner or serialization is required",
+        "concurrent Ready Tickets T-05/T-17 share owned paths; an explicit owner or serialization is required",
+        "concurrent Ready Tickets T-06/T-07 share owned paths; an explicit owner or serialization is required",
+        "concurrent Ready Tickets T-06/T-08 share owned paths; an explicit owner or serialization is required",
+        "concurrent Ready Tickets T-06/T-10 share owned paths; an explicit owner or serialization is required",
+        "concurrent Ready Tickets T-06/T-11 share owned paths; an explicit owner or serialization is required",
+        "concurrent Ready Tickets T-06/T-12 share owned paths; an explicit owner or serialization is required",
+        "concurrent Ready Tickets T-06/T-13 share owned paths; an explicit owner or serialization is required",
+        "concurrent Ready Tickets T-06/T-14 share owned paths; an explicit owner or serialization is required",
+        "concurrent Ready Tickets T-06/T-15 share owned paths; an explicit owner or serialization is required",
+        "concurrent Ready Tickets T-06/T-16 share owned paths; an explicit owner or serialization is required",
+        "concurrent Ready Tickets T-06/T-17 share owned paths; an explicit owner or serialization is required",
+        "concurrent Ready Tickets T-07/T-11 share owned paths; an explicit owner or serialization is required",
+        "concurrent Ready Tickets T-07/T-12 share owned paths; an explicit owner or serialization is required",
+        "concurrent Ready Tickets T-07/T-13 share owned paths; an explicit owner or serialization is required",
+        "concurrent Ready Tickets T-07/T-14 share owned paths; an explicit owner or serialization is required",
+        "concurrent Ready Tickets T-07/T-15 share owned paths; an explicit owner or serialization is required",
+        "concurrent Ready Tickets T-07/T-16 share owned paths; an explicit owner or serialization is required",
+        "concurrent Ready Tickets T-07/T-17 share owned paths; an explicit owner or serialization is required",
+        "concurrent Ready Tickets T-08/T-09 share owned paths; an explicit owner or serialization is required",
+        "concurrent Ready Tickets T-08/T-11 share owned paths; an explicit owner or serialization is required",
+        "concurrent Ready Tickets T-08/T-12 share owned paths; an explicit owner or serialization is required",
+        "concurrent Ready Tickets T-08/T-13 share owned paths; an explicit owner or serialization is required",
+        "concurrent Ready Tickets T-08/T-14 share owned paths; an explicit owner or serialization is required",
+        "concurrent Ready Tickets T-08/T-15 share owned paths; an explicit owner or serialization is required",
+        "concurrent Ready Tickets T-08/T-16 share owned paths; an explicit owner or serialization is required",
+        "concurrent Ready Tickets T-08/T-17 share owned paths; an explicit owner or serialization is required",
+        "concurrent Ready Tickets T-10/T-11 share owned paths; an explicit owner or serialization is required",
+        "concurrent Ready Tickets T-10/T-12 share owned paths; an explicit owner or serialization is required",
+        "concurrent Ready Tickets T-10/T-13 share owned paths; an explicit owner or serialization is required",
+        "concurrent Ready Tickets T-10/T-14 share owned paths; an explicit owner or serialization is required",
+        "concurrent Ready Tickets T-10/T-15 share owned paths; an explicit owner or serialization is required",
+        "concurrent Ready Tickets T-10/T-16 share owned paths; an explicit owner or serialization is required",
+        "concurrent Ready Tickets T-10/T-17 share owned paths; an explicit owner or serialization is required",
+        "concurrent Ready Tickets T-11/T-12 share owned paths; an explicit owner or serialization is required",
+        "concurrent Ready Tickets T-11/T-13 share owned paths; an explicit owner or serialization is required",
+        "concurrent Ready Tickets T-11/T-14 share owned paths; an explicit owner or serialization is required",
+        "concurrent Ready Tickets T-11/T-15 share owned paths; an explicit owner or serialization is required",
+        "concurrent Ready Tickets T-11/T-16 share owned paths; an explicit owner or serialization is required",
+        "concurrent Ready Tickets T-11/T-17 share owned paths; an explicit owner or serialization is required",
+        "concurrent Ready Tickets T-12/T-13 share owned paths; an explicit owner or serialization is required",
+        "concurrent Ready Tickets T-12/T-14 share owned paths; an explicit owner or serialization is required",
+        "concurrent Ready Tickets T-12/T-15 share owned paths; an explicit owner or serialization is required",
+        "concurrent Ready Tickets T-12/T-16 share owned paths; an explicit owner or serialization is required",
+        "concurrent Ready Tickets T-12/T-17 share owned paths; an explicit owner or serialization is required",
+        "concurrent Ready Tickets T-13/T-14 share owned paths; an explicit owner or serialization is required",
+        "concurrent Ready Tickets T-13/T-15 share owned paths; an explicit owner or serialization is required",
+        "concurrent Ready Tickets T-13/T-16 share owned paths; an explicit owner or serialization is required",
+        "concurrent Ready Tickets T-13/T-17 share owned paths; an explicit owner or serialization is required",
+        "concurrent Ready Tickets T-14/T-15 share owned paths; an explicit owner or serialization is required",
+        "concurrent Ready Tickets T-14/T-16 share owned paths; an explicit owner or serialization is required",
+        "concurrent Ready Tickets T-14/T-17 share owned paths; an explicit owner or serialization is required",
+        "concurrent Ready Tickets T-15/T-16 share owned paths; an explicit owner or serialization is required",
+        "concurrent Ready Tickets T-15/T-17 share owned paths; an explicit owner or serialization is required",
+        "concurrent Ready Tickets T-16/T-17 share owned paths; an explicit owner or serialization is required"
+      ],
+      "frontier": [],
+      "blocked_count": 18,
+      "input_digest": "d8b2d304beb6ccd47acb4c2b2c6a0748dd90b606d87274bf3d07464da658a6eb",
+      "goal_contract_digest": "314f382e126a10ee071ddf5e6acff9aed1c385351361a1a8e086e26f072cfc46",
+      "authorization_checked": false
+    },
+    {
+      "change": "2026-10-08-news-aihot",
+      "exit": 0,
+      "mode": "read-only-analysis",
+      "errors": [],
+      "validation_errors": [],
+      "warnings": [
+        "concurrent Ready Tickets T-03/T-09 share owned paths; an explicit owner or serialization is required",
+        "concurrent Ready Tickets T-04/T-09 share owned paths; an explicit owner or serialization is required",
+        "concurrent Ready Tickets T-05/T-07 share owned paths; an explicit owner or serialization is required",
+        "concurrent Ready Tickets T-05/T-09 share owned paths; an explicit owner or serialization is required",
+        "concurrent Ready Tickets T-06/T-07 share owned paths; an explicit owner or serialization is required",
+        "concurrent Ready Tickets T-06/T-09 share owned paths; an explicit owner or serialization is required",
+        "concurrent Ready Tickets T-07/T-08 share owned paths; an explicit owner or serialization is required",
+        "concurrent Ready Tickets T-07/T-09 share owned paths; an explicit owner or serialization is required"
+      ],
+      "frontier": [],
+      "blocked_count": 10,
+      "input_digest": "4f15a33132ab50d8ab4dabdfc6ea96c6b4ad22bf14edb2f5ee189c84bb7dd016",
+      "goal_contract_digest": "8a22746b3a70c0025a35be2914f9e79d3051340a3ba21341713aaa2871cd0956",
+      "authorization_checked": false
+    },
+    {
+      "change": "2026-10-08-private-storage-permissions",
+      "exit": 0,
+      "mode": "read-only-analysis",
+      "errors": [],
+      "validation_errors": [],
+      "warnings": [],
+      "frontier": [],
+      "blocked_count": 2,
+      "input_digest": "4fb9fa3ffc465e51528e0046ebb3528f4ba493c4e755ca4c08029ef20218c1c2",
+      "goal_contract_digest": "e18488f200036dece7fc81fa692b22d8730d540ba3b068f7c0fc7e19ff6f2761",
+      "authorization_checked": false
+    },
+    {
+      "change": "2026-10-08-terminal-reliability",
+      "exit": 0,
+      "mode": "read-only-analysis",
+      "errors": [],
+      "validation_errors": [],
+      "warnings": [],
+      "frontier": [],
+      "blocked_count": 2,
+      "input_digest": "2fcc27a6289cbaf52dd545bfc8ef50d57652c7b427617133010c56ccaf1df3e0",
+      "goal_contract_digest": "4c30741283ab32904185b85db2edcc13e99df3e7efbbcc4d66da6f7b74f7bec6",
+      "authorization_checked": false
+    },
+    {
+      "change": "2026-10-08-workbench-regressions",
+      "exit": 0,
+      "mode": "read-only-analysis",
+      "errors": [],
+      "validation_errors": [],
+      "warnings": [],
+      "frontier": [],
+      "blocked_count": 3,
+      "input_digest": "f86c22a88151500de0c685e09888e8f3f3e0346d7e07020b13910eebf99a1439",
+      "goal_contract_digest": "79ccd667dad3bee660b52d7df6e8ada8cd1e194078c599446fc7e0777cc35ccc",
+      "authorization_checked": false
+    }
+  ],
+  "parent_stage": {
+    "command": [
+      "node",
+      "speculo/workflows/specdev/common/tools/validate-specdev.mjs",
+      "--stage",
+      "goal-plan",
+      "--repo",
+      "/home/wta/projects/nand",
+      "/home/wta/projects/nand/speculo/.speculo/specdev/changes/2026-10-08-all-open-issues"
+    ],
+    "exit": 0,
+    "output": "Summary: 0 error(s), 0 warning(s)\n"
+  }
+}

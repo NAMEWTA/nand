@@ -42,4 +42,4 @@ NAND 是预发布版本。自动运行的检查（类型检查、lint、单元�
 
 ## 许可证
 
-NAND 使用 MIT 许可证，见 [LICENSE](../LICENSE)、[NOTICE](../NOTICE) 和 [THIRD-PARTY-NOTICES.md](../THIRD-PARTY-NOTICES.md)。浏览器、终端和自动化调度中参考 Orca 的部分见 [Orca 来源与适配范围](third-party/orca-terminal-workbench.ZH.md)。开发者从 [CLAUDE.ZH.md](../CLAUDE.ZH.md) 开始阅读。
+NAND 使用 MIT 许可证，见 [LICENSE](../LICENSE)、[NOTICE](../NOTICE) 和 [THIRD-PARTY-NOTICES.md](../THIRD-PARTY-NOTICES.md)。浏览器、终端和自动化调度中参考 Orca 的部分见 [Orca 来源与适配范围](third-party/orca-terminal-workbench.ZH.md)。开发者从 [AGENTS.md](../AGENTS.md) 开始阅读。

@@ -1,0 +1,129 @@
+{
+  "schema_version": 1,
+  "artifact": "design-tree",
+  "change": "2026-10-08-home-grid-rebuild",
+  "status": "consensus",
+  "round": 2,
+  "nodes": [
+    {
+      "id": "D-001",
+      "title": "主参考与许可",
+      "question": "是否采用以下合同：使用 apex-dashboard @ db9d2892032c27f5f8899a72c0dca61d72572a9a，manifest 3.7.5；以 root MIT LICENSE 为准，保留 PandoraReads 版权、完整许可、源文件注释和双语映射。GPL home-pages @ 2f98a7c44432a5e077977535f94093487417c735 仅参考公开 README 行为，不读取/改写其实现源码。",
+      "depends_on": [],
+      "recommendation": "使用 apex-dashboard @ db9d2892032c27f5f8899a72c0dca61d72572a9a，manifest 3.7.5；以 root MIT LICENSE 为准，保留 PandoraReads 版权、完整许可、源文件注释和双语映射。GPL home-pages @ 2f98a7c44432a5e077977535f94093487417c735 仅参考公开 README 行为，不读取/改写其实现源码。",
+      "status": "answered",
+      "round": 1,
+      "answer": "使用 apex-dashboard @ db9d2892032c27f5f8899a72c0dca61d72572a9a，manifest 3.7.5；以 root MIT LICENSE 为准，保留 PandoraReads 版权、完整许可、源文件注释和双语映射。GPL home-pages @ 2f98a7c44432a5e077977535f94093487417c735 仅参考公开 README 行为，不读取/改写其实现源码。",
+      "log_ref": "LOG-001"
+    },
+    {
+      "id": "D-002",
+      "title": "存量兼容与默认",
+      "question": "是否采用以下合同：无新字段的存量看板保持当前可见布局；读取可投影历史 layoutMode 和 widgetOrder，但首次编辑前不写回。新建默认保持 stacked，用户可显式选择三种布局。canonical 网格不因窄屏或手机 reflow 改写。",
+      "depends_on": [],
+      "recommendation": "无新字段的存量看板保持当前可见布局；读取可投影历史 layoutMode 和 widgetOrder，但首次编辑前不写回。新建默认保持 stacked，用户可显式选择三种布局。canonical 网格不因窄屏或手机 reflow 改写。",
+      "status": "answered",
+      "round": 1,
+      "answer": "无新字段的存量看板保持当前可见布局；读取可投影历史 layoutMode 和 widgetOrder，但首次编辑前不写回。新建默认保持 stacked，用户可显式选择三种布局。canonical 网格不因窄屏或手机 reflow 改写。",
+      "log_ref": "LOG-002"
+    },
+    {
+      "id": "D-003",
+      "title": "组件成员和数据归属",
+      "question": "是否采用以下合同：看板特有 layout/members/immersive/skills 存于该 Markdown YAML；实例配置由提供方现有命名空间/文档拥有。member 的 provider+kind+instanceId 保持稳定，禁用模块保留成员和位置，只显示可恢复占位。",
+      "depends_on": [],
+      "recommendation": "看板特有 layout/members/immersive/skills 存于该 Markdown YAML；实例配置由提供方现有命名空间/文档拥有。member 的 provider+kind+instanceId 保持稳定，禁用模块保留成员和位置，只显示可恢复占位。",
+      "status": "answered",
+      "round": 1,
+      "answer": "看板特有 layout/members/immersive/skills 存于该 Markdown YAML；实例配置由提供方现有命名空间/文档拥有。member 的 provider+kind+instanceId 保持稳定，禁用模块保留成员和位置，只显示可恢复占位。",
+      "log_ref": "LOG-003"
+    },
+    {
+      "id": "D-004",
+      "title": "技能新建与既有会话",
+      "question": "是否采用以下合同：新会话由 agent 公开派发端口最终进入 AgentRuntimePort.start 并复用自动化记录；已有 interactive 会话调用 AGENT_SESSIONS.attachMaterial 一次粘贴，不自动回车。所有入口共享本 change 所有的公共契约，news/browser 依赖它，不能另写平行派发层。",
+      "depends_on": [],
+      "recommendation": "新会话由 agent 公开派发端口最终进入 AgentRuntimePort.start 并复用自动化记录；已有 interactive 会话调用 AGENT_SESSIONS.attachMaterial 一次粘贴，不自动回车。所有入口共享本 change 所有的公共契约，news/browser 依赖它，不能另写平行派发层。",
+      "status": "answered",
+      "round": 1,
+      "answer": "新会话由 agent 公开派发端口最终进入 AgentRuntimePort.start 并复用自动化记录；已有 interactive 会话调用 AGENT_SESSIONS.attachMaterial 一次粘贴，不自动回车。所有入口共享本 change 所有的公共契约，news/browser 依赖它，不能另写平行派发层。",
+      "log_ref": "LOG-004"
+    },
+    {
+      "id": "D-005",
+      "title": "农历缺失日期规则",
+      "question": "是否采用以下合同：原始闰月在目标年不存在时映射同名普通农历月；目标月没有原日期时取该月月末。存储仍为原始阳历日期+calendar 标志，提示映射规则，绝不回退公历周年。",
+      "depends_on": [],
+      "recommendation": "原始闰月在目标年不存在时映射同名普通农历月；目标月没有原日期时取该月月末。存储仍为原始阳历日期+calendar 标志，提示映射规则，绝不回退公历周年。",
+      "status": "answered",
+      "round": 1,
+      "answer": "原始闰月在目标年不存在时映射同名普通农历月；目标月没有原日期时取该月月末。存储仍为原始阳历日期+calendar 标志，提示映射规则，绝不回退公历周年。",
+      "log_ref": "LOG-005"
+    },
+    {
+      "id": "D-006",
+      "title": "命名外观范围",
+      "question": "是否采用以下合同：保存全局 theme + home 外观的组合快照；应用到所有看板、编辑器及弹出窗口，各字段仍由 theme/home 命名空间拥有。禁止按看板私有颜色/主题。",
+      "depends_on": [],
+      "recommendation": "保存全局 theme + home 外观的组合快照；应用到所有看板、编辑器及弹出窗口，各字段仍由 theme/home 命名空间拥有。禁止按看板私有颜色/主题。",
+      "status": "answered",
+      "round": 1,
+      "answer": "保存全局 theme + home 外观的组合快照；应用到所有看板、编辑器及弹出窗口，各字段仍由 theme/home 命名空间拥有。禁止按看板私有颜色/主题。",
+      "log_ref": "LOG-006"
+    },
+    {
+      "id": "D-007",
+      "title": "列头技能范围",
+      "question": "是否采用以下合同：列头默认打开预览，用户可选择本次文件子集；每按钮可显式 directSend，直发时展开整列当前适用文件为完整 paths，不隐含沿用上次选区。空列不得默默扩大到全库。",
+      "depends_on": [],
+      "recommendation": "列头默认打开预览，用户可选择本次文件子集；每按钮可显式 directSend，直发时展开整列当前适用文件为完整 paths，不隐含沿用上次选区。空列不得默默扩大到全库。",
+      "status": "answered",
+      "round": 1,
+      "answer": "列头默认打开预览，用户可选择本次文件子集；每按钮可显式 directSend，直发时展开整列当前适用文件为完整 paths，不隐含沿用上次选区。空列不得默默扩大到全库。",
+      "log_ref": "LOG-007"
+    },
+    {
+      "id": "D-008",
+      "title": "顺序与发布边界",
+      "question": "是否采用以下合同：#141 是 T-01 独立首修，不等待重构；后续执行严格串行，公共接口由本 change 拥有，最终集成序列由父 goal-plan 编排。本轮仅规划，P0-P6 的未来 PR 分组不等于授权当前发布。",
+      "depends_on": [],
+      "recommendation": "#141 是 T-01 独立首修，不等待重构；后续执行严格串行，公共接口由本 change 拥有，最终集成序列由父 goal-plan 编排。本轮仅规划，P0-P6 的未来 PR 分组不等于授权当前发布。",
+      "status": "answered",
+      "round": 1,
+      "answer": "#141 是 T-01 独立首修，不等待重构；后续执行严格串行，公共接口由本 change 拥有，最终集成序列由父 goal-plan 编排。本轮仅规划，P0-P6 的未来 PR 分组不等于授权当前发布。",
+      "log_ref": "LOG-008"
+    },
+    {
+      "id": "D-009",
+      "title": "验证力度",
+      "question": "是否采用以下合同：优先完成可用功能和规范结构；新增测试只锁定纯算法、格式、派发语义、真实错误路径等关键风险。复用现有 Vitest/golden/真实 Obsidian 探针，不建新测试平台、不添加广泛兜底或实现镜像断言。",
+      "depends_on": [],
+      "recommendation": "优先完成可用功能和规范结构；新增测试只锁定纯算法、格式、派发语义、真实错误路径等关键风险。复用现有 Vitest/golden/真实 Obsidian 探针，不建新测试平台、不添加广泛兜底或实现镜像断言。",
+      "status": "answered",
+      "round": 1,
+      "answer": "优先完成可用功能和规范结构；新增测试只锁定纯算法、格式、派发语义、真实错误路径等关键风险。复用现有 Vitest/golden/真实 Obsidian 探针，不建新测试平台、不添加广泛兜底或实现镜像断言。",
+      "log_ref": "LOG-009"
+    },
+    {
+      "id": "D-010",
+      "title": "全部设计分支最终共识",
+      "question": "按8域完整保留13个issue和已确认规则，本轮止于成熟Spec/Tickets及各域与整体Goal，是否确认各设计分支已收束？",
+      "depends_on": [
+        "D-001",
+        "D-002",
+        "D-003",
+        "D-004",
+        "D-005",
+        "D-006",
+        "D-007",
+        "D-008",
+        "D-009"
+      ],
+      "recommendation": "确认，完成全部规划",
+      "status": "answered",
+      "round": 2,
+      "answer": "用户明确回答：确认，完成全部规划（推荐）",
+      "log_ref": "LOG-010"
+    }
+  ]
+}

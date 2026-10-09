@@ -1,0 +1,132 @@
+[
+  {
+    "issue": 138,
+    "url": "https://github.com/NAMEWTA/nand/issues/138",
+    "fetched_at": "2026-10-09T03:56:52.731Z",
+    "updated_at": "2026-10-08T14:55:14Z",
+    "comments": 0,
+    "pagination_complete": true,
+    "source": "<Path>{roots.state}/specdev/changes/2026-10-08-workbench-regressions/source.md</Path>",
+    "body_sha256": "656f68c4d62be4b3565eff8652d13608b99d827f9c8c5305e1d322b57e0e1172"
+  },
+  {
+    "issue": 139,
+    "url": "https://github.com/NAMEWTA/nand/issues/139",
+    "fetched_at": "2026-10-09T03:56:52.605Z",
+    "updated_at": "2026-10-08T14:55:17Z",
+    "comments": 0,
+    "pagination_complete": true,
+    "source": "<Path>{roots.state}/specdev/changes/2026-10-08-workbench-regressions/sources/SRC-139.md</Path>",
+    "body_sha256": "2432e2d225c0c90ca950f686651b29c0522e385bbc5ea7dcec67c39066f9a9b1"
+  },
+  {
+    "issue": 140,
+    "url": "https://github.com/NAMEWTA/nand/issues/140",
+    "fetched_at": "2026-10-09T03:56:48.860Z",
+    "updated_at": "2026-10-08T14:55:20Z",
+    "comments": 0,
+    "pagination_complete": true,
+    "source": "<Path>{roots.state}/specdev/changes/2026-10-08-workbench-regressions/sources/SRC-140.md</Path>",
+    "body_sha256": "23f5ac7af4af8e86ba061c0c46600f083b39590a21c884dd71a047a96dab4d37"
+  },
+  {
+    "issue": 135,
+    "url": "https://github.com/NAMEWTA/nand/issues/135",
+    "fetched_at": "2026-10-09T03:57:00.257Z",
+    "updated_at": "2026-10-08T14:34:39Z",
+    "comments": 0,
+    "pagination_complete": true,
+    "source": "<Path>{roots.state}/specdev/changes/2026-10-08-terminal-reliability/source.md</Path>",
+    "body_sha256": "f2d6c40d3c3be691aa9e8d62c3a81c4d71fee277f87a39137b54cf44435b476b"
+  },
+  {
+    "issue": 143,
+    "url": "https://github.com/NAMEWTA/nand/issues/143",
+    "fetched_at": "2026-10-09T03:56:45.114Z",
+    "updated_at": "2026-10-08T22:06:40Z",
+    "comments": 0,
+    "pagination_complete": true,
+    "source": "<Path>{roots.state}/specdev/changes/2026-10-08-terminal-reliability/sources/SRC-143.md</Path>",
+    "body_sha256": "1a6569401dedfe47812b78d29db51227ec5afdc8574798d03ff4e4ec96bc802e"
+  },
+  {
+    "issue": 144,
+    "url": "https://github.com/NAMEWTA/nand/issues/144",
+    "fetched_at": "2026-10-09T03:56:44.592Z",
+    "updated_at": "2026-10-08T22:06:44Z",
+    "comments": 0,
+    "pagination_complete": true,
+    "source": "<Path>{roots.state}/specdev/changes/2026-10-08-private-storage-permissions/source.md</Path>",
+    "body_sha256": "059a7a3d740bd6d22dae8bf508d20c6f575b34931f1fa1c1c2878e756909764d"
+  },
+  {
+    "issue": 124,
+    "url": "https://github.com/NAMEWTA/nand/issues/124",
+    "fetched_at": "2026-10-09T03:57:05.401Z",
+    "updated_at": "2026-10-05T01:37:59Z",
+    "comments": 0,
+    "pagination_complete": true,
+    "source": "<Path>{roots.state}/specdev/changes/2026-10-08-archives-completion/source.md</Path>",
+    "body_sha256": "53563bd8d3c763475aba4e84dcb139aba0f59f8b1c1d0149bb24200e20c842c3"
+  },
+  {
+    "issue": 134,
+    "url": "https://github.com/NAMEWTA/nand/issues/134",
+    "fetched_at": "2026-10-09T03:57:01.425Z",
+    "updated_at": "2026-10-08T01:36:49Z",
+    "comments": 0,
+    "pagination_complete": true,
+    "source": "<Path>{roots.state}/specdev/changes/2026-10-08-git-sync-parity/source.md</Path>",
+    "body_sha256": "52ddc28907a801028693457c79e4c4eb1198494b75840c7ccd05381a895ef6b7"
+  },
+  {
+    "issue": 137,
+    "url": "https://github.com/NAMEWTA/nand/issues/137",
+    "fetched_at": "2026-10-09T03:56:57.011Z",
+    "updated_at": "2026-10-08T14:54:24Z",
+    "comments": 0,
+    "pagination_complete": true,
+    "source": "<Path>{roots.state}/specdev/changes/2026-10-08-home-grid-rebuild/source.md</Path>",
+    "body_sha256": "5b6d36319a5c940d2e660328cd1a36b0627f076e7a5a3e7dc6411a0948aeda92"
+  },
+  {
+    "issue": 141,
+    "url": "https://github.com/NAMEWTA/nand/issues/141",
+    "fetched_at": "2026-10-09T03:56:48.708Z",
+    "updated_at": "2026-10-08T15:09:21Z",
+    "comments": 0,
+    "pagination_complete": true,
+    "source": "<Path>{roots.state}/specdev/changes/2026-10-08-home-grid-rebuild/sources/SRC-141.md</Path>",
+    "body_sha256": "80ad7e6989919b79e581b01b125b471139bba5e1d45a71d73f256b3de84024ab"
+  },
+  {
+    "issue": 136,
+    "url": "https://github.com/NAMEWTA/nand/issues/136",
+    "fetched_at": "2026-10-09T03:57:00.913Z",
+    "updated_at": "2026-10-08T14:47:22Z",
+    "comments": 0,
+    "pagination_complete": true,
+    "source": "<Path>{roots.state}/specdev/changes/2026-10-08-news-aihot/source.md</Path>",
+    "body_sha256": "60b19bba806a903082fde398297375421803913d3007e8e511dc6084ad6be46a"
+  },
+  {
+    "issue": 142,
+    "url": "https://github.com/NAMEWTA/nand/issues/142",
+    "fetched_at": "2026-10-09T03:56:48.709Z",
+    "updated_at": "2026-10-08T15:12:34Z",
+    "comments": 0,
+    "pagination_complete": true,
+    "source": "<Path>{roots.state}/specdev/changes/2026-10-08-browser-ai-workbench/source.md</Path>",
+    "body_sha256": "1320241288806c2baccd808d683c5b385c9f821eca31a88ba22d4570a2a5e625"
+  },
+  {
+    "issue": 145,
+    "url": "https://github.com/NAMEWTA/nand/issues/145",
+    "fetched_at": "2026-10-09T03:56:45.539Z",
+    "updated_at": "2026-10-09T02:23:05Z",
+    "comments": 0,
+    "pagination_complete": true,
+    "source": "<Path>{roots.state}/specdev/changes/2026-10-08-browser-ai-workbench/sources/SRC-145.md</Path>",
+    "body_sha256": "9395cee0ebd0fe6c53fd78079ad6eac469a731f8737e37a71f25b9bd57889083"
+  }
+]
