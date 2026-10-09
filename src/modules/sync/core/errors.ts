@@ -20,6 +20,7 @@ export type GitErrorKind =
 	| 'no-upstream'
 	| 'detached'
 	| 'empty-message'
+	| 'outside-index'
 	| 'unknown';
 
 export class GitError extends Error {

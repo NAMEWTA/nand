@@ -1,4 +1,5 @@
 import { Platform, type App } from 'obsidian';
+import { displayFocal } from '../../core/board/board-experience';
 import type { DashboardSettings } from '../../core/board/types/index';
 import { resolveVaultImage } from '../banner/banner';
 
@@ -64,9 +65,10 @@ function applyBackground(container: HTMLElement, app: App, settings: DashboardSe
 	if (!resolved) return;
 
 	const layer = container.createDiv({ cls: 'nand-dashboard-bg' });
+	const focal = displayFocal(settings.bgFocal);
 	layer.style.backgroundImage = `url("${resolved}")`;
 	layer.style.backgroundSize = settings.bgSize === 'contain' ? 'contain' : 'cover';
-	// background-position/repeat come from the .nand-dashboard-bg CSS class.
+	layer.style.backgroundPosition = `${focal.x}% ${focal.y}%`;
 
 	const blur = Platform.isMobile ? 0 : clampNumber(settings.bgBlur, 0, 30, 0);
 	if (blur > 0) {

@@ -35,6 +35,24 @@ export interface RepoPlace {
 	toVault(repoPath: string): string | null;
 	/** The repository path of a vault path, or null when it is outside the repository. */
 	toRepo(vaultPath: string): string | null;
+	/** Repository-relative scope containing the vault. `.` when the repository is the vault. */
+	scope?: string;
+}
+
+/** Reject absolute paths and traversal before passing a path to git. */
+export function safeRepoPath(value: string): string | null {
+	const normalized = value.replaceAll('\\', '/').replace(/^\.\//, '');
+	if (!normalized || normalized.startsWith('/') || normalized === '..' || normalized.startsWith('../') || normalized.includes('/../')) return null;
+	return normalized;
+}
+
+/** True when a repository-relative path is inside the vault scope. `.` means the repository is the vault. */
+export function pathWithinScope(repoPath: string, scope: string): boolean {
+	const safe = safeRepoPath(repoPath);
+	if (!safe) return false;
+	if (!scope || scope === '.') return true;
+	const prefix = scope.replace(/\/$/, '');
+	return safe === prefix || safe.startsWith(`${prefix}/`);
 }
 
 /** This device's automatic-sync bookkeeping. Kept inside the git directory, so it is never committed or synced. */

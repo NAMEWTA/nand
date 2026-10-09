@@ -4,6 +4,7 @@ import { guardDashboardCallbacks } from '../save-feedback';
 import { Notice, TFile } from 'obsidian';
 import { archiveCompleted, serializeTasksForNote } from '../../core/board/task-tree';
 import type {
+	BoardLayout,
 	DashboardCard,
 	DataviewConfig,
 	LibraryConfig,
@@ -149,6 +150,7 @@ export function createCallbacks(this: DashboardSurface) {
 			observeDashboardPromise(this.sync.updateCardGrid(cardId, gridCols, gridRows)),
 		onCardGridMove: (cardId: string, gridCol: number, gridRow: number) =>
 			observeDashboardPromise(this.sync.updateCardGridMove(cardId, gridCol, gridRow)),
+		onBoardLayout: (layout: BoardLayout) => observeDashboardPromise(this.sync.setBoardLayout(layout)),
 		onFileDrop: (cardId: string, filePath: string) => this.handleFileDrop(cardId, filePath),
 		onColumnRename: (oldName: string, newName: string, columnIndex?: number) => {
 			void observeDashboardPromise(this.sync.renameColumn(oldName, newName, columnIndex));

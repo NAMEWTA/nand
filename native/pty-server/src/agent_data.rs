@@ -106,7 +106,10 @@ pub(crate) fn execute(operation: &str, request: &Request, cancel: &AtomicBool) -
     {
         return Err("index outside vault".into());
     }
+    secure_private_path(parent, &index)?;
     let mut db = open_index(&index, operation == "scan", cancel)?;
+    // WAL sidecars appear only after open. A chmod miss does not delete the index.
+    tighten_private_modes(parent, &index);
     if operation == "scan" {
         let mut warnings = Vec::new();
         let mut pending = Vec::new();
@@ -215,6 +218,62 @@ pub(crate) fn execute(operation: &str, request: &Request, cancel: &AtomicBool) -
         return Err("unknown history operation".into());
     }
     query(&mut db, request, &vault, cancel)
+}
+
+/// History is private vault metadata. Tighten only NAND-owned paths and never
+/// follow a symlink while doing so.
+fn secure_private_path(parent: &Path, index: &Path) -> Result<(), String> {
+    let mut current = PathBuf::new();
+    let mut private = false;
+    for component in parent.components() {
+        current.push(component);
+        if component.as_os_str() == ".nand" { private = true; }
+        let metadata = fs::symlink_metadata(&current).map_err(|e| e.to_string())?;
+        if metadata.file_type().is_symlink() { return Err("symlinked history directory".into()); }
+        #[cfg(unix)] if private {
+            use std::os::unix::fs::PermissionsExt;
+            fs::set_permissions(&current, fs::Permissions::from_mode(0o700)).map_err(|e| e.to_string())?;
+        }
+    }
+    if index.exists() {
+        if fs::symlink_metadata(index).map_err(|e| e.to_string())?.file_type().is_symlink() { return Err("symlinked index".into()); }
+        #[cfg(unix)] {
+            use std::os::unix::fs::PermissionsExt;
+            fs::set_permissions(index, fs::Permissions::from_mode(0o600)).map_err(|e| e.to_string())?;
+            for suffix in ["-wal", "-shm"] {
+                let sidecar = PathBuf::from(format!("{}{}", index.display(), suffix));
+                if sidecar.exists() { fs::set_permissions(sidecar, fs::Permissions::from_mode(0o600)).map_err(|e| e.to_string())?; }
+            }
+        }
+    }
+    Ok(())
+}
+
+/// Tighten modes after SQLite has created the index and its sidecars.
+/// Symlinks are skipped. A permission error is ignored and nothing is deleted.
+fn tighten_private_modes(parent: &Path, index: &Path) {
+    #[cfg(unix)]
+    {
+        use std::os::unix::fs::PermissionsExt;
+        let mode = |path: &Path, bits: u32| {
+            if fs::symlink_metadata(path).ok().is_some_and(|meta| meta.file_type().is_symlink()) {
+                return;
+            }
+            let _ = fs::set_permissions(path, fs::Permissions::from_mode(bits));
+        };
+        mode(parent, 0o700);
+        mode(index, 0o600);
+        for suffix in ["-wal", "-shm"] {
+            let sidecar = PathBuf::from(format!("{}{}", index.display(), suffix));
+            if sidecar.exists() {
+                mode(&sidecar, 0o600);
+            }
+        }
+    }
+    #[cfg(not(unix))]
+    {
+        let _ = (parent, index);
+    }
 }
 fn save(db: &Connection, row: &Session, stamp: &str) -> rusqlite::Result<usize> {
     let mut summary = serde_json::to_value(row).unwrap();
@@ -1135,6 +1194,42 @@ mod tests {
         assert_eq!(session.usage.output, 7);
         assert_eq!(session.usage.cache_read, 3);
         assert_eq!(session.text.matches("answer").count(), 1);
+    }
+    #[cfg(unix)]
+    #[test]
+    fn history_index_is_0700_and_0600_and_a_sidecar_symlink_is_not_followed() {
+        use std::os::unix::fs::PermissionsExt;
+        let temp = Temp::new();
+        let cancel = AtomicBool::new(false);
+        let req = request(&temp.0, vec![]);
+        execute("scan", &req, &cancel).expect("scan");
+        let index = PathBuf::from(&req.index);
+        let parent = index.parent().unwrap().to_path_buf();
+        let nand = temp.0.join(".nand");
+        let mode = |path: &Path| fs::symlink_metadata(path).unwrap().permissions().mode() & 0o777;
+        assert_eq!(mode(&nand), 0o700);
+        assert_eq!(mode(&parent), 0o700);
+        assert_eq!(mode(&index), 0o600);
+        let wal = PathBuf::from(format!("{}-wal", index.display()));
+        let shm = PathBuf::from(format!("{}-shm", index.display()));
+        fs::write(&wal, b"wal").unwrap();
+        fs::write(&shm, b"shm").unwrap();
+        fs::set_permissions(&wal, fs::Permissions::from_mode(0o644)).unwrap();
+        fs::set_permissions(&shm, fs::Permissions::from_mode(0o644)).unwrap();
+        tighten_private_modes(&parent, &index);
+        assert_eq!(mode(&wal), 0o600);
+        assert_eq!(mode(&shm), 0o600);
+        let outside = Temp::new();
+        let secret = outside.0.join("secret");
+        fs::write(&secret, b"keep").unwrap();
+        let before = mode(&secret);
+        fs::remove_file(&shm).unwrap();
+        std::os::unix::fs::symlink(&secret, &shm).unwrap();
+        tighten_private_modes(&parent, &index);
+        assert!(fs::symlink_metadata(&shm).unwrap().file_type().is_symlink());
+        assert_eq!(fs::read(&secret).unwrap(), b"keep");
+        assert_eq!(mode(&secret), before);
+        println!("posix dir={:03o} file={:03o} wal={:03o}", mode(&nand), mode(&index), mode(&wal));
     }
     #[test]
     fn new_index_gets_the_current_schema_and_a_newer_index_is_refused() {

@@ -31,12 +31,18 @@ export function refreshAlbumWidgets(root: HTMLElement, albums: AlbumConfig[], ap
 	}
 }
 
-export function renderSidebarAlbumWidget(container: HTMLElement, settings: DashboardSettings, app: App): void {
+export function renderSidebarAlbumWidget(
+	container: HTMLElement,
+	settings: DashboardSettings,
+	app: App,
+	album?: AlbumConfig,
+	onFocal?: (focal: { x: number; y: number }) => void,
+): void {
 	const root = container.createDiv({ cls: 'dashboard-sidebar-widget dashboard-sidebar-album' });
 	root.addClass(
 		settings.widgetAlbumRatio === '3:4'
 			? 'dashboard-sidebar-album--ratio-3-4'
 			: 'dashboard-sidebar-album--ratio-1-1',
 	);
-	mountDashboardPanel(root, h(AlbumPanel, { root, settings, app }));
+	mountDashboardPanel(root, h(AlbumPanel, { root, settings, app, focal: album?.focal, onFocal }));
 }

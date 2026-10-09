@@ -91,6 +91,28 @@ function Preview({ app, result }: { app: App; result: LibraryFileResult }) {
 		</div>
 	);
 }
+/** The table, cards, list and kanban share this control. It confirms through the panel. */
+export function LibraryDeleteButton({ file, onDelete }: { file: TFile; onDelete?: (file: TFile) => void }) {
+	return (
+		<button
+			type="button"
+			class="dashboard-library-table-delete"
+			title={t('library.delete')}
+			aria-label={t('library.delete')}
+			onClick={(event) => {
+				event.preventDefault();
+				event.stopPropagation();
+				onDelete?.(file);
+			}}
+			onDragStart={(event) => {
+				event.preventDefault();
+				event.stopPropagation();
+			}}
+		>
+			<Icon name="trash-2" />
+		</button>
+	);
+}
 export function FileCards({
 	results,
 	app,
@@ -98,6 +120,7 @@ export function FileCards({
 	context,
 	showTags,
 	covers = false,
+	onDelete,
 }: LibraryViewProps & { covers?: boolean }) {
 	const size = config.cardSize && config.cardSize !== 'medium' ? ` dashboard-library-cards--${config.cardSize}` : '';
 	return (
@@ -110,8 +133,12 @@ export function FileCards({
 						key={result.file.path}
 						class="dashboard-library-card"
 						onMouseOver={(event) => noteHover(app, context, result.file, event)}
-						onClick={(event) => openFile(app, result.file, event.currentTarget)}
+						onClick={(event) => {
+							if ((event.target as HTMLElement).closest('.dashboard-library-table-delete')) return;
+							openFile(app, result.file, event.currentTarget);
+						}}
 					>
+						<LibraryDeleteButton file={result.file} onDelete={onDelete} />
 						{covers && <Cover app={app} result={result} />}
 						<div class="dashboard-library-card-title">{result.basename}</div>
 						<div class="dashboard-library-card-meta">
@@ -144,7 +171,7 @@ export function FileCards({
 		</div>
 	);
 }
-export function FileList({ results, app, context }: Pick<LibraryViewProps, 'results' | 'app' | 'context'>) {
+export function FileList({ results, app, context, onDelete }: Pick<LibraryViewProps, 'results' | 'app' | 'context' | 'onDelete'>) {
 	return (
 		<div class="dashboard-library-list">
 			{results.map((result) => (
@@ -152,10 +179,14 @@ export function FileList({ results, app, context }: Pick<LibraryViewProps, 'resu
 					key={result.file.path}
 					class="dashboard-library-list-item"
 					onMouseOver={(event) => noteHover(app, context, result.file, event)}
-					onClick={(event) => openFile(app, result.file, event.currentTarget)}
+					onClick={(event) => {
+						if ((event.target as HTMLElement).closest('.dashboard-library-table-delete')) return;
+						openFile(app, result.file, event.currentTarget);
+					}}
 				>
 					<div class="dashboard-library-list-name">{result.basename}</div>
 					<div class="dashboard-library-list-spacer" />
+					<LibraryDeleteButton file={result.file} onDelete={onDelete} />
 					<div class="dashboard-library-list-date">{formatDate(result.ctime)}</div>
 				</div>
 			))}
@@ -298,17 +329,7 @@ export function FileTable({ results, app, config, context, onDelete }: LibraryVi
 							/>
 						))}
 						<td class="dashboard-library-table-op">
-							<button
-								class="dashboard-library-table-delete"
-								title={t('library.delete')}
-								aria-label={t('library.delete')}
-								onClick={(event) => {
-									event.stopPropagation();
-									onDelete?.(result.file);
-								}}
-							>
-								<Icon name="trash-2" />
-							</button>
+							<LibraryDeleteButton file={result.file} onDelete={onDelete} />
 						</td>
 					</tr>
 				))}

@@ -6,6 +6,7 @@ import { isUnderExcludedFolder, normalizeExcludeFolders } from '../../../../shar
 import { renderQuickNoteRegion } from '../notes/quick-note-section';
 import type { RenderCallbacks } from '../render-contract';
 import { captureScrollStates, restoreScrollStates } from '../ui/scroll-preserve';
+import { renderImmersiveBoard } from './render-immersive';
 import { renderSection } from './refresh-media-sections';
 import { getRenderContext } from './render-context';
 import { getSectionType } from './render-text-with-links';
@@ -27,6 +28,16 @@ export function renderDashboard(
 
 	container.empty();
 	container.addClass('dashboard-kanban');
+	const layoutButton = container.createDiv({ cls: 'nand-board-layout', attr: { role: 'button', tabindex: '0' } });
+	setLocalizedText(layoutButton, data.layout === 'immersive' ? 'renderer.layoutStacked' : 'renderer.layoutImmersive');
+	const chooseLayout = () => callbacks.onBoardLayout?.(data.layout === 'immersive' ? 'stacked' : 'immersive');
+	layoutButton.addEventListener('click', chooseLayout);
+	layoutButton.addEventListener('keydown', (event) => {
+		if (event.key === 'Enter' || event.key === ' ') {
+			event.preventDefault();
+			chooseLayout();
+		}
+	});
 
 	// Quick Notes region: pinned at the top, above all sections (non-reorderable).
 	// Stacked layout hoists it out of the kanban entirely — the view renders it
@@ -34,6 +45,11 @@ export function renderDashboard(
 	// below the strip there and the bar must stay directly under the banner.
 	if (settings?.quickNotesEnabled && !opts?.skipQuickNotes) {
 		renderQuickNoteRegion(container, settings, callbacks);
+	}
+
+	if (data.layout === 'immersive') {
+		renderImmersiveBoard(container, data, callbacks);
+		return;
 	}
 
 	for (const column of data.columns) {

@@ -1,5 +1,6 @@
 import { bindLocalizedElement } from '../../../../ui/primitives/localized-dom';
 import { Modal, setIcon } from 'obsidian';
+import { selectTemplate, templateChoices } from '../../core/board/board-experience';
 import type { TaskTemplate } from '../../core/board/types/index';
 import { t } from '../../../../shared/i18n/index';
 import { applyModalTheme } from '../appearance/modal-theme';
@@ -138,12 +139,13 @@ export class TemplatePickerModal extends Modal {
 			text: t('template.confirm'),
 		}), 'template.confirm');
 		confirmBtn.addEventListener('click', () => {
-			if (!selectedId) return;
-			const found = templates.find((tmpl) => tmpl.id === selectedId);
-			if (found) {
-				this.onSelect(found);
-				this.close();
-			}
+			const choices = templateChoices(undefined, templates.map((tmpl) => tmpl.id));
+			const index = selectedId ? choices.indexOf(selectedId) : -1;
+			const chosen = selectTemplate(choices, index < 0 ? null : index);
+			const found = templates.find((tmpl) => tmpl.id === chosen);
+			if (!found) return;
+			this.onSelect(found);
+			this.close();
 		});
 	}
 

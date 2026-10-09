@@ -20,6 +20,9 @@ export function planDashboardUpdate(
 	source: DashboardUpdateSource,
 ): DashboardRenderPlan {
 	if (!previous || source === 'external') return { kind: 'full' };
+	// The immersive grid replaces the section board. A section refresh would
+	// leave the old columns on screen after the file already says immersive.
+	if (previous.layout !== next.layout || previous.gridPacked !== next.gridPacked) return { kind: 'full' };
 	if (!sameValue(previous.banner, next.banner)) return { kind: 'full' };
 	if (!sameValue(previous.quickActions, next.quickActions)) return { kind: 'full' };
 	if (!sameValue(previous.quickActionOrder, next.quickActionOrder)) return { kind: 'full' };

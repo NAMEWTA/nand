@@ -1,7 +1,7 @@
 import { Notice } from 'obsidian';
 import type { ModuleContext, ModuleInstance } from '../../app/contracts/module';
 import { registerMessages, t } from '../../shared/i18n';
-import { AGENT_SESSIONS } from '../agent/api';
+import { AGENT_PROMPT_RUNNER, AGENT_SESSIONS } from '../agent/api';
 import { BROWSER_AGENT_BRIDGE, BROWSER_OPEN, type BrowserAgentBridge, type BrowserOpener } from './api';
 import { BrowserError, newPageState, type BrowserAgentDeliveryPort } from './core/model';
 import { browserError } from './core/text';
@@ -70,6 +70,7 @@ export default function createBrowserModule(context: ModuleContext): ModuleInsta
 				modal.open();
 				return modal;
 			});
+			host.promptRunner = () => context.services.peek(AGENT_PROMPT_RUNNER);
 			host.setEnabled(true);
 		},
 		dispose() {

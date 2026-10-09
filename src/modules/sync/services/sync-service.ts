@@ -133,7 +133,7 @@ export class SyncService {
 			this.snapshot = { ...this.snapshot, phase: 'no-repo', gitVersion: found.version, place, status: undefined, error: undefined };
 			return this.emit();
 		}
-		this.repo = new GitRepo(this.runner);
+		this.repo = new GitRepo(this.runner, place.scope ?? '.');
 		try {
 			const relative = (await this.repo.git(['rev-parse', '--git-path', STATE_FILE])).stdout.trim();
 			this.statePath = this.deps.host.resolve(place.cwd, relative);

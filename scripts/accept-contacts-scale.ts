@@ -14,7 +14,7 @@ async function main(): Promise<void> {
 const counts = [100, 1000, 5000];
 const body = `${'甲'.repeat(40)}\n`.repeat(50).slice(0, 2000);
 const root = await mkdtemp(join(tmpdir(), 'nand-contacts-scale-'));
-const samples: Array<{ count: number; bytes: number; indexMs: number; p95: number }> = [];
+const samples: Array<{ count: number; bytes: number; indexMs: number; p50: number; p95: number }> = [];
 try {
 	for (const count of counts) {
 		const dir = join(root, String(count));
@@ -53,6 +53,7 @@ try {
 			count,
 			bytes,
 			indexMs,
+			p50: Math.round((timings[Math.ceil(timings.length * 0.5) - 1] ?? 0) * 100) / 100,
 			p95: Math.round((timings[Math.ceil(timings.length * 0.95) - 1] ?? 0) * 100) / 100,
 		});
 		index.clear();
@@ -60,7 +61,7 @@ try {
 } finally {
 	await rm(root, { recursive: true, force: true });
 }
-console.log(JSON.stringify({ samples, note: 'Files were removed before the timed queries. P95 is a measurement, not a pass line.' }));
+console.log(JSON.stringify({ samples, note: 'Files were removed before the timed queries. P50 and P95 are measurements, not a pass line.' }));
 }
 main().catch((error: unknown) => {
 	console.error(error);

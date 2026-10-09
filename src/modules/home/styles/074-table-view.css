@@ -151,7 +151,17 @@
 	height: 14px;
 }
 
+.dashboard-library-card > .dashboard-library-table-delete,
+.dashboard-library-kanban-card > .dashboard-library-table-delete {
+	position: absolute;
+	top: 6px;
+	right: 6px;
+}
+
 .dashboard-library-table tr:hover .dashboard-library-table-delete,
+.dashboard-library-card:hover .dashboard-library-table-delete,
+.dashboard-library-list-item:hover .dashboard-library-table-delete,
+.dashboard-library-kanban-card:hover .dashboard-library-table-delete,
 .dashboard-library-table-delete:focus-visible {
 	opacity: 1;
 }

@@ -73,6 +73,7 @@
 		"src/modules/home/styles/069-tracker-heatmap.css",
 		"src/modules/home/styles/070-template-modal.css",
 		"src/modules/home/styles/071-grid-view.css",
+		"src/modules/home/styles/071b-immersive-grid.css",
 		"src/modules/home/styles/072-gallery-view-card-grid-with-frontmatter-driven-c.css",
 		"src/modules/home/styles/073-list-view.css",
 		"src/modules/home/styles/074-table-view.css",
@@ -104,6 +105,7 @@
 		"src/modules/sync/styles/sync.css",
 		"src/modules/browser/styles/116-independent-browser-native-leaves-and-modal-shar.css",
 		"src/shell/styles/shell.css",
-		"src/shell/styles/workbench-pages.css"
+		"src/shell/styles/workbench-pages.css",
+		"src/modules/news/styles/news.css"
 	]
 }

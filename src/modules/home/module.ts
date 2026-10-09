@@ -1,7 +1,10 @@
 import type { ModuleContext, ModuleInstance } from '../../app/contracts/module';
 import { deviceId } from '../../host/obsidian/storage/device-id';
+import { AGENT_DISPATCH } from '../agent/api';
 import { AUTOMATION_SOURCES, type AutomationSource } from '../automations/api';
-import { HOME_WORKBENCH, type HomeWorkbench } from './api';
+import { NEWS_READ } from '../news/api';
+import { HOME_WIDGETS, HOME_WORKBENCH, type HomeWorkbench } from './api';
+import { builtinHomeWidgets, indexWidgetProviders } from './core/board/widget-registry';
 import { dashboardAutomationSource } from './contrib/automation-source';
 import { ExpenseService } from './platform/expense/expense-service';
 import { HabitService } from './platform/habit/habit-service';
@@ -47,7 +50,8 @@ export default function createHomeModule(context: ModuleContext): ModuleInstance
 			return workbench ? [[HOME_WORKBENCH, workbench] as const] : [];
 		},
 		get contributions() {
-			return automationSource ? [[AUTOMATION_SOURCES, automationSource] as const] : [];
+			const widgets = [HOME_WIDGETS, builtinHomeWidgets] as const;
+			return automationSource ? [widgets, [AUTOMATION_SOURCES, automationSource] as const] : [widgets];
 		},
 		pages: {
 			board: async () => (await import('./ui/workbench-page')).boardPage(host),
@@ -73,6 +77,25 @@ export default function createHomeModule(context: ModuleContext): ModuleInstance
 			owned = { mediaTags: media, habit, expense, pomodoro, reading, music };
 			await Promise.all([habit.load(), expense.load(), pomodoro.loadSessions(), reading.loadSessions(), music?.load()]);
 			Object.assign(homeServices, owned);
+			homeServices.news = () => context.services.peek(NEWS_READ);
+			homeServices.acquireDispatch = async () => (await context.services.acquire(AGENT_DISPATCH))?.value;
+			const publishWidgets = async () => {
+				try {
+					const contributed = await context.contributions.collect(HOME_WIDGETS);
+					const next = indexWidgetProviders([
+						{ module: 'home', bundle: builtinHomeWidgets },
+						...contributed.filter((item) => item.module !== 'home').map((item) => ({ module: item.module, bundle: item.value })),
+					]);
+					const previous = [...(homeServices.widgets?.byKey.keys() ?? [])].sort().join();
+					homeServices.widgets = next;
+					const keys = [...next.byKey.keys()].sort().join();
+					if (previous && previous !== keys) host.refreshAllDashboards();
+				} catch {
+					homeServices.widgets = indexWidgetProviders([{ module: 'home', bundle: builtinHomeWidgets }]);
+				}
+			};
+			homeServices.widgets = indexWidgetProviders([{ module: 'home', bundle: builtinHomeWidgets }]);
+			context.lifetime.register(context.contributions.watch(HOME_WIDGETS, () => { void publishWidgets(); }));
 			homePages.openRecords = (section) => { void context.shell.open({ feature: 'records', section }); };
 			const boards = new BoardRegistry({
 				app,

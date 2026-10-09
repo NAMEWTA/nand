@@ -1,9 +1,9 @@
 /** Settings products (one per module plus Home) and their order in the workbench settings list. */
 import type { ModuleId } from '../contracts/module';
 
-export type SettingsProduct = 'home' | 'dashboard' | 'browser' | 'editor' | 'terminal' | 'iconic' | 'contacts' | 'automation' | 'sync';
+export type SettingsProduct = 'home' | 'dashboard' | 'browser' | 'editor' | 'terminal' | 'iconic' | 'contacts' | 'automation' | 'sync' | 'news';
 
-const ORDER: readonly SettingsProduct[] = ['home', 'dashboard', 'browser', 'editor', 'terminal', 'iconic', 'contacts', 'automation', 'sync'];
+const ORDER: readonly SettingsProduct[] = ['home', 'dashboard', 'browser', 'editor', 'terminal', 'iconic', 'contacts', 'automation', 'sync', 'news'];
 
 export interface ModuleGates {
 	browser: boolean;
@@ -14,6 +14,7 @@ export interface ModuleGates {
 	iconic: boolean;
 	automation: boolean;
 	sync: boolean;
+	news?: boolean;
 }
 
 /** Products shown in settings: Home always, the others while their module is on. */
@@ -31,6 +32,7 @@ export const PRODUCT_MODULES = {
 	iconic: 'icons',
 	automation: 'automations',
 	sync: 'sync',
+	news: 'news',
 } as const satisfies Record<keyof ModuleGates, ModuleId>;
 
 /** Product gates from the module switches. */

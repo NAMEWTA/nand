@@ -5,8 +5,8 @@ import type { PageCreate } from './workbench-host';
 import type { SavedPage, WorkbenchFeature, WorkbenchTarget } from './workbench';
 
 /** Feature modules shipped in NAND. */
-export type ModuleId = 'home' | 'agent' | 'browser' | 'archives' | 'automations' | 'notifications' | 'icons' | 'comments' | 'sync';
-export const MODULE_IDS: readonly ModuleId[] = ['home', 'agent', 'browser', 'archives', 'automations', 'notifications', 'icons', 'comments', 'sync'];
+export type ModuleId = 'home' | 'agent' | 'browser' | 'archives' | 'automations' | 'notifications' | 'icons' | 'comments' | 'sync' | 'news';
+export const MODULE_IDS: readonly ModuleId[] = ['home', 'agent', 'browser', 'archives', 'automations', 'notifications', 'icons', 'comments', 'sync', 'news'];
 
 /**
  * When a module is created:

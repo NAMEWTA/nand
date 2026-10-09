@@ -21,7 +21,8 @@
 	flex-direction: column;
 	justify-content: center;
 	align-items: center;
-	padding: 20px 48px;
+	/* 22px clears the 14px workspace pills that sit at top: 2px. */
+	padding: 22px 48px 16px;
 }
 
 .dashboard-banner-content {

@@ -14,6 +14,7 @@ export function settingsCategories(plugin: DashboardPlugin): Array<{ id: string;
 		contacts: { labelKey: 'contacts.title', icon: 'contact-round' },
 		automation: { labelKey: 'automation.title', icon: 'workflow' },
 		sync: { labelKey: 'workbench.sync', icon: 'git-branch' },
+		news: { labelKey: 'news.title', icon: 'newspaper' },
 	};
 	return [
 		{ id: 'general', label: t('settings.tabGeneral'), icon: 'settings' },

@@ -13,7 +13,10 @@ import { normalizeBrowserUrl } from '../core/url';
 import { BrowserBridge } from '../platform/desktop/bridge';
 import { electronBrowserApi } from '../platform/desktop/electron-api';
 import { BrowserPage } from '../platform/desktop/page';
+import { pageSitePort } from '../platform/desktop/site-port';
 import { BrowserStore } from '../platform/store';
+import type { AgentPromptRunner } from '../../agent/api';
+import { AiWorkspace } from './ai-workspace';
 import type { BrowserHost } from './page-host';
 
 export class BrowserModule implements BrowserHost, BrowserAutomationPort {
@@ -27,6 +30,8 @@ export class BrowserModule implements BrowserHost, BrowserAutomationPort {
 	private bridgeReady?: Promise<BrowserBridge>;
 	private generation = 0;
 	private readonly store: BrowserStore;
+	readonly workspace: AiWorkspace;
+	promptRunner?: () => AgentPromptRunner | undefined;
 	constructor(
 		readonly app: App,
 		readonly settings: () => BrowserSettings,
@@ -40,6 +45,10 @@ export class BrowserModule implements BrowserHost, BrowserAutomationPort {
 			for (const page of this.pages.values()) page.updatePermissions();
 			for (const listener of this.listeners) listener();
 		});
+		this.workspace = new AiWorkspace(pageSitePort(() => this.latestPage()), () => this.promptRunner?.());
+	}
+	private latestPage(): BrowserPage | undefined {
+		return [...this.pages.values()].at(-1);
 	}
 	permissions(): Record<string, boolean> { return { ...this.store.permissions }; }
 	async grantPermission(origin: string, permission: string, allowed: boolean): Promise<void> {
@@ -120,7 +129,9 @@ export class BrowserModule implements BrowserHost, BrowserAutomationPort {
 	): BrowserPage {
 		if (!this.active) throw new BrowserError('browser_disabled');
 		if (this.pages.has(state.id)) throw new BrowserError('browser_duplicate_page');
-		const page = new BrowserPage({ ...state }, container, `persist:nand-browser-${this.store.vaultId}`, {
+		const profile = this.workspace.activeProfile();
+		const partition = profile.kind === 'isolated' ? profile.partition : `persist:nand-browser-${this.store.vaultId}`;
+		const page = new BrowserPage({ ...state }, container, partition, {
 			permissions: () => this.store.permissions,
 			changed,
 			visited: (url, title) => this.store.record(url, title),

@@ -1,7 +1,7 @@
 /** Rendering and navigation contracts; no Plugin, Vault, PTY or service locator. */
 import type { ModuleId } from './module';
 
-export const WORKBENCH_FEATURES = ['dashboard', 'terminal', 'browser', 'contacts', 'automations', 'notifications', 'icons', 'comments', 'records', 'sync', 'settings'] as const;
+export const WORKBENCH_FEATURES = ['dashboard', 'terminal', 'browser', 'contacts', 'automations', 'notifications', 'icons', 'comments', 'records', 'sync', 'news', 'settings'] as const;
 export type WorkbenchFeature = typeof WORKBENCH_FEATURES[number];
 
 /** The module that owns each workbench feature (`settings` belongs to the app). */
@@ -17,6 +17,7 @@ export const FEATURE_MODULES: Readonly<Record<WorkbenchFeature, ModuleId | 'app'
 	records: 'home',
 	sync: 'sync',
 	settings: 'app',
+	news: 'news',
 };
 
 export interface WorkbenchTarget {

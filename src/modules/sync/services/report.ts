@@ -16,7 +16,10 @@ export function stepText(step: StepResult): string {
 			if (step.step === 'commit') return t('sync.step.committed', { count });
 			if (step.step === 'pull') return step.count === undefined ? t('sync.step.pulledDone') : t('sync.step.pulled', { count });
 			if (step.upstreamSet) return t('sync.step.pushedUpstream', { count });
-			return step.count === undefined ? t('sync.step.pushedDone') : step.squash === 'squashed' ? t('sync.step.pushedSquashed') : t('sync.step.pushed', { count });
+			if (step.count === undefined) return t('sync.step.pushedDone');
+			if (step.squash === 'squashed') return t('sync.step.pushedSquashed');
+			if (step.squash === 'target-mismatch') return t('sync.step.pushedTargetMismatch', { count });
+			return t('sync.step.pushed', { count });
 		case 'nothing':
 			return t(`sync.step.nothing.${step.step}`);
 		case 'conflict':

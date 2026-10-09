@@ -1,5 +1,6 @@
 import type { App } from 'obsidian';
 import { useLayoutEffect, useRef, useState } from 'preact/hooks';
+import { displayFocal, focalForWrite } from '../../core/board/board-experience';
 import type { DashboardSettings } from '../../core/board/types';
 import { t } from '../../../../shared/i18n';
 import { Icon } from '../../../../ui/primitives/Icon';
@@ -14,7 +15,19 @@ import {
 	normalizeTransition,
 } from './album-model';
 export const albumControllers = new WeakMap<HTMLElement, { setImages: (images: string[]) => void }>();
-export function AlbumPanel({ root, settings, app }: { root: HTMLElement; settings: DashboardSettings; app: App }) {
+export function AlbumPanel({
+	root,
+	settings,
+	app,
+	focal,
+	onFocal,
+}: {
+	root: HTMLElement;
+	settings: DashboardSettings;
+	app: App;
+	focal?: { x: number; y: number };
+	onFocal?: (focal: { x: number; y: number }) => void;
+}) {
 	const interval = clampIntervalSec(settings.widgetAlbumIntervalSec) * 1000,
 		transition = normalizeTransition(settings.widgetAlbumTransition);
 	const [images, setImages] = useState(() =>
@@ -102,6 +115,15 @@ export function AlbumPanel({ root, settings, app }: { root: HTMLElement; setting
 		}
 	}, [src, images, index, root]);
 	const anim = TRANSITION_CLASSES[transition];
+	const point = displayFocal(focal);
+	const place = `${point.x}% ${point.y}%`;
+	const chooseFocal = (event: { currentTarget: HTMLElement; clientX: number; clientY: number }) => {
+		if (!onFocal) return;
+		const rect = event.currentTarget.getBoundingClientRect();
+		if (!rect.width || !rect.height) return;
+		const next = focalForWrite({ x: ((event.clientX - rect.left) / rect.width) * 100, y: ((event.clientY - rect.top) / rect.height) * 100 });
+		if (next) onFocal(next);
+	};
 	return (
 		<div class="dashboard-sidebar-album-body">
 			{!src ? (
@@ -130,11 +152,14 @@ export function AlbumPanel({ root, settings, app }: { root: HTMLElement; setting
 						src={src}
 						alt={basename(current!)}
 						draggable={false}
+						style={{ objectPosition: place }}
+						onClick={chooseFocal}
 					/>
 					<img
 						class={`dashboard-sidebar-album-layer dashboard-sidebar-album-layer--bottom${previous ? (phase === 'run' && anim.out ? ` ${anim.out}` : '') : ' dashboard-sidebar-album-layer--instant dashboard-sidebar-album-layer--start-fade'}`}
 						src={previous ? (resolveVaultImage(app, previous) ?? undefined) : undefined}
 						draggable={false}
+						style={{ objectPosition: place }}
 					/>
 					<div class="dashboard-sidebar-album-index">
 						{index + 1}/{images.length}

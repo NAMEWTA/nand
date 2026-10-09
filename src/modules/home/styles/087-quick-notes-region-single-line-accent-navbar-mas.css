@@ -5,6 +5,15 @@
    Border/background use theme tokens (auto dark/light); no hardcoded gray.
    Every interactive control shares one radius (--db-radius-sm) and one
    accent-tinted hover, so chips and the capture pill read as one family. */
+/* A column flex parent treats the 100% basis as height. The bar follows its content. */
+.dashboard-main > .dashboard-quicknote {
+	flex: 0 0 auto;
+	width: 100%;
+	height: auto;
+	max-height: none;
+	position: relative;
+	z-index: 1;
+}
 .dashboard-quicknote {
 	display: flex;
 	/* Vertically centered at rest so the capture pill sits mid-bar beside the

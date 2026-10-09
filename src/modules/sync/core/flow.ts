@@ -27,7 +27,7 @@ export interface StepResult {
 	squash?: SquashOutcome;
 }
 
-export type SquashOutcome = 'squashed' | 'diverged' | 'staged' | 'single' | 'merges' | 'referenced';
+export type SquashOutcome = 'squashed' | 'diverged' | 'staged' | 'single' | 'merges' | 'referenced' | 'target-mismatch';
 
 export interface SyncOptions {
 	mode: CommitMode;
@@ -40,6 +40,8 @@ export interface SyncOptions {
 	squash: boolean;
 	/** Asked before the first push sets an upstream. Absent for automatic runs: they never ask and never set one. */
 	confirmUpstream?: (remote: string, branch: string) => Promise<boolean>;
+	/** Squash rewrites history only when this is the unique push remote and ref git will use. Absent: read that target from git. */
+	pushTarget?: { remote: string; ref: string };
 }
 
 /** Why the repository cannot be synced right now, or null. Checked before anything is changed. */
@@ -120,8 +122,11 @@ export async function pullStep(repo: GitRepo, method: 'merge' | 'rebase'): Promi
 	}
 }
 
-/** Push the current branch to its upstream; without one, push with `-u` after the caller agrees. */
-export async function pushStep(repo: GitRepo, options: Pick<SyncOptions, 'squash' | 'confirmUpstream'>): Promise<StepResult> {
+const sameTarget = (left: { remote: string; ref: string } | null | undefined, right: { remote: string; ref: string } | null | undefined): boolean =>
+	!!left && !!right && left.remote === right.remote && left.ref === right.ref;
+
+/** Push the current branch to the resolved push target. Without an upstream, push with `-u` after the caller agrees. */
+export async function pushStep(repo: GitRepo, options: Pick<SyncOptions, 'squash' | 'confirmUpstream' | 'pushTarget'>): Promise<StepResult> {
 	try {
 		const status = await repo.status();
 		const { operation } = await repo.state();
@@ -146,35 +151,46 @@ export async function pushStep(repo: GitRepo, options: Pick<SyncOptions, 'squash
 			await repo.push(upstream.remote, `HEAD:${upstream.ref}`);
 			return { step: 'push', state: 'done' };
 		}
-		let ahead = await repo.revCount('@{u}..HEAD');
-		if (!ahead) return { step: 'push', state: 'nothing' };
+		const destination = await repo.pushTarget(branch);
+		const tracksUpstream = sameTarget(destination, upstream);
+		const aheadBase = tracksUpstream || !destination ? '@{u}' : await repo.remoteTip(destination.remote, destination.ref);
+		const ahead = aheadBase ? await repo.revCount(`${aheadBase}..HEAD`) : await repo.revCount('HEAD');
+		if ((tracksUpstream || !destination) && !ahead) return { step: 'push', state: 'nothing' };
 		let squash: SquashOutcome | undefined;
 		if (options.squash) {
-			squash = await squashUnpushed(repo, branch);
-			if (squash === 'squashed') ahead = 1;
+			const declared = options.pushTarget ?? destination;
+			if (!destination || !sameTarget(declared, destination)) squash = 'target-mismatch';
+			else if (tracksUpstream) squash = await squashUnpushed(repo, branch);
+			else {
+				const tip = await repo.remoteTip(destination.remote, destination.ref);
+				squash = tip ? await squashUnpushed(repo, branch, tip) : 'target-mismatch';
+			}
 		}
-		await repo.push(upstream.remote, `HEAD:${upstream.ref}`);
-		return { step: 'push', state: 'done', count: ahead, squash };
+		if (destination) await repo.push(destination.remote, `HEAD:${destination.ref}`);
+		else await repo.pushConfigured();
+		return { step: 'push', state: 'done', count: squash === 'squashed' ? 1 : ahead, squash };
 	} catch (error) {
 		return failed('push', error);
 	}
 }
 
 /**
- * Squash the commits that are not on the upstream yet into one, keeping the newest commit's message. Only when
- * that cannot lose or rewrite anything else: the upstream is an ancestor of HEAD, nothing is staged, there are
- * at least two such commits, none is a merge, and no other branch or tag contains them.
+ * Squash the commits that are not on `base` yet into one, keeping the newest commit's message. `base` is the
+ * pinned push tip, or the upstream when the push target is that upstream. Only when that cannot lose or rewrite
+ * anything else: `base` is an ancestor of HEAD, nothing is staged, there are at least two such commits, none is
+ * a merge, and no other branch or tag contains them.
  */
-export async function squashUnpushed(repo: GitRepo, branch: string): Promise<SquashOutcome> {
-	if (!(await repo.isAncestor('@{u}', 'HEAD'))) return 'diverged';
+export async function squashUnpushed(repo: GitRepo, branch: string, base = '@{u}'): Promise<SquashOutcome> {
+	if (!(await repo.isAncestor(base, 'HEAD'))) return 'diverged';
 	if ((await repo.stagedPaths()).length) return 'staged';
-	const commits = await repo.listRange('@{u}..HEAD');
+	const range = `${base}..HEAD`;
+	const commits = await repo.listRange(range);
 	if (commits.length < 2) return 'single';
-	if ((await repo.listRange('@{u}..HEAD', true)).length) return 'merges';
+	if ((await repo.listRange(range, true)).length) return 'merges';
 	const oldest = commits[commits.length - 1]!;
 	if ((await repo.otherRefsContaining(oldest, branch)).length) return 'referenced';
 	const head = commits[0]!;
-	await repo.resetSoft('@{u}');
+	await repo.resetSoft(base);
 	try {
 		await repo.commitReusing(head);
 	} catch (error) {

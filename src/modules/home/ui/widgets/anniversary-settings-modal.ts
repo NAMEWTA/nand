@@ -68,6 +68,19 @@ export class AnniversarySettingsModal extends Modal {
 				});
 			});
 
+		bindLocalizedControl(new Setting(body).setName(t('anniversary.calendar')), 'name', 'anniversary.calendar').addDropdown((dropdown) =>
+			bindLocalizedOptions(
+				dropdown
+					.addOption('solar', t('anniversary.solar'))
+					.addOption('lunar', t('anniversary.lunar'))
+					.setValue(this.cfg.calendar === 'lunar' ? 'lunar' : 'solar')
+					.onChange((value) => {
+						this.cfg.calendar = value === 'lunar' ? 'lunar' : 'solar';
+					}),
+				{ solar: ['anniversary.solar'], lunar: ['anniversary.lunar'] },
+			),
+		);
+
 		bindLocalizedControl(bindLocalizedControl(new Setting(body)
 			.setName(t('anniversary.precision')), "name", 'anniversary.precision')
 			.setDesc(t('anniversary.precisionDesc')), "desc", 'anniversary.precisionDesc')

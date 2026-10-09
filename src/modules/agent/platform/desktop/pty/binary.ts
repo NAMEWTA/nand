@@ -1,5 +1,6 @@
 import { createHash } from 'node:crypto';
 import * as fs from 'node:fs';
+import * as http from 'node:http';
 import * as https from 'node:https';
 import * as path from 'node:path';
 
@@ -10,10 +11,10 @@ const DIGEST_LIMIT = 4096;
 const REQUEST_TIMEOUT = 60_000;
 const STAMP = 'nand-pty.json';
 
-export type BinaryErrorCode = 'unsupported' | 'offlineMissing' | 'http' | 'redirects' | 'timeout' | 'tooLarge' | 'checksumMissing' | 'checksumMismatch' | 'inUse';
+export type BinaryErrorCode = 'unsupported' | 'offlineMissing' | 'http' | 'network' | 'redirects' | 'timeout' | 'tooLarge' | 'checksumMissing' | 'checksumMismatch' | 'inUse';
 
 export class BinaryError extends Error {
-	constructor(readonly code: BinaryErrorCode, message: string) {
+	constructor(readonly code: BinaryErrorCode, message: string, readonly detail?: { status?: number; url?: string; version?: string }) {
 		super(message);
 	}
 }
@@ -36,8 +37,9 @@ function sha256(file: string): string {
 }
 
 function get(url: string, limit: number, redirects = 0): Promise<Buffer> {
+	const lib = new URL(url).protocol === 'http:' ? http : https;
 	return new Promise((resolve, reject) => {
-		const request = https.get(url, { headers: { 'User-Agent': 'NAND' } }, (response) => {
+		const request = lib.get(url, { headers: { 'User-Agent': 'NAND' } }, (response) => {
 			const status = response.statusCode ?? 0;
 			if (status >= 300 && status < 400 && response.headers.location) {
 				response.resume();
@@ -46,7 +48,7 @@ function get(url: string, limit: number, redirects = 0): Promise<Buffer> {
 			}
 			if (status !== 200) {
 				response.resume();
-				return reject(new BinaryError('http', `HTTP ${status} for ${url}`));
+				return reject(new BinaryError('http', `HTTP ${status} for ${url}`, { status, url }));
 			}
 			const chunks: Buffer[] = [];
 			let size = 0;
@@ -66,8 +68,13 @@ function get(url: string, limit: number, redirects = 0): Promise<Buffer> {
 			request.destroy();
 			reject(new BinaryError('timeout', `Timed out downloading ${url}`));
 		});
-		request.on('error', reject);
+		request.on('error', (error) => reject(new BinaryError('network', `Network error downloading ${url}: ${error.message}`, { url })));
 	});
+}
+
+/** Download one helper URL. HTTP status and network failure stay different errors. */
+export function downloadHelperBytes(url: string, limit: number): Promise<Buffer> {
+	return get(url, limit);
 }
 
 interface Stamp {

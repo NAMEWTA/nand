@@ -1,5 +1,6 @@
 import type { TFile } from 'obsidian';
 import type {
+	BoardLayout,
 	CardSize,
 	DashboardCard,
 	DataviewConfig,
@@ -73,6 +74,8 @@ export interface RenderCallbacks {
 	onCardSizeChange(cardId: string, size: CardSize): void;
 	onCardGridChange(cardId: string, gridCols: number, gridRows: number): void;
 	onCardGridMove(cardId: string, gridCol: number, gridRow: number): void;
+	/** Persisted only after the user picks a layout. Absent means the historical board. */
+	onBoardLayout?(layout: BoardLayout): void;
 	onFileDrop(cardId: string, filePath: string): void;
 	/** columnIndex is the identity of the exact section the user acted on; with
 	 *  duplicate names it disambiguates which same-named column is meant. */

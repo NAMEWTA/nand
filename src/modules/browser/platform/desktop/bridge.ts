@@ -1,5 +1,6 @@
 type Server = import('node:net').Server;
 type Socket = import('node:net').Socket;
+import { admitBridge, BRIDGE_SCOPE } from '../../core/ai-workbench';
 import { BrowserError, type BrowserAutomationPort } from '../../core/model';
 import { privateDirectory, removeBrowserRun, sweepBrowserRuns } from './runtime-files';
 import { BROWSER_CLI_SOURCE } from './cli-source';
@@ -26,6 +27,8 @@ export class BrowserBridge {
 	readonly cliPath: string;
 	readonly endpoint: string;
 	private readonly token: string;
+	private readonly expiresAt: number;
+	private revoked = false;
 	constructor(
 		private readonly win: Window,
 		api: ElectronBrowserApi,
@@ -52,6 +55,7 @@ export class BrowserBridge {
 				? `\\\\.\\pipe\\nand-browser-${runId}`
 				: this.path.join(this.temporary, `nand-browser-${runId}.sock`);
 		this.token = this.crypto.randomBytes(32).toString('hex');
+		this.expiresAt = Date.now() + 12 * 60 * 60 * 1000;
 	}
 	start(): Promise<void> {
 		if (this.disposed) return Promise.reject(new BrowserError('browser_disabled'));
@@ -130,6 +134,16 @@ export class BrowserBridge {
 					)
 						throw new BrowserError('browser_unauthorized');
 					if (this.disposed) throw new BrowserError('browser_disabled');
+					const decision = admitBridge({
+						enabled: true,
+						tokenOk: true,
+						scope: BRIDGE_SCOPE,
+						method: String(request.method),
+						expiresAt: this.expiresAt,
+						revoked: this.revoked,
+						now: Date.now(),
+					});
+					if (!decision.allowed) throw new BrowserError('browser_unauthorized');
 					if (
 						typeof request.method !== 'string' ||
 						!request.params ||
@@ -184,6 +198,7 @@ export class BrowserBridge {
 	dispose(): void {
 		if (this.disposed) return;
 		this.disposed = true;
+		this.revoked = true;
 		this.win.removeEventListener?.('unload', this.exit);
 		this.process.removeListener('exit', this.exit);
 		for (const socket of this.sockets) socket.destroy();

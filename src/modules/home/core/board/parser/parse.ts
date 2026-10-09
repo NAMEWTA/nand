@@ -20,6 +20,9 @@ export function parse(markdown: string): DashboardData {
 	const columns = parseColumns(body, columnDefs);
 
 	const data: DashboardData = { banner, quickActions, columns };
+	const layout = frontmatter.layout;
+	if (layout === 'side' || layout === 'stacked' || layout === 'immersive') data.layout = layout;
+	if (frontmatter.gridPacked === true) data.gridPacked = true;
 	if (quickActionOrder) data.quickActionOrder = quickActionOrder;
 	const hiddenPresets = parseHiddenPresets(frontmatter);
 	if (hiddenPresets) data.hiddenPresets = hiddenPresets;
@@ -35,6 +38,8 @@ function serializeManaged(data: DashboardData): string {
 
 	lines.push('---');
 	lines.push('dashboard: true');
+	if (data.layout) lines.push(`layout: ${data.layout}`);
+	if (data.gridPacked) lines.push('gridPacked: true');
 
 	lines.push('banner:');
 	lines.push(`  quote: "${escapeYamlString(data.banner.quote)}"`);

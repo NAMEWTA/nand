@@ -121,6 +121,16 @@ export function composeWorkbench(plugin: DashboardPlugin) {
 			create: modulePage('sync', 'sync'),
 		},
 		{
+			id: 'news',
+			rail: { slot: 'top' },
+			navigation: { id: 'news', labelKey: 'news.title', icon: 'newspaper', target: { feature: 'news' }, children: [
+				{ id: 'news-latest', labelKey: 'news.title', icon: 'list', target: { feature: 'news', section: 'latest' } },
+			] },
+			availability: () => ({ ...ready(), enabled: plugin.moduleEnabled('news'), ready: plugin.moduleState('news') === 'active' }),
+			stateKeys: ['section', 'selected', 'view'],
+			create: modulePage('news', 'news'),
+		},
+		{
 			id: 'icons',
 			rail: { slot: 'top' },
 			navigation: { id: 'icons', labelKey: 'modules.iconic', icon: 'images', target: { feature: 'icons' } },
@@ -244,7 +254,7 @@ export function composeWorkbench(plugin: DashboardPlugin) {
 			return () => { listeners.delete(listener); };
 		},
 		openSettings: (feature) => {
-			const product = { dashboard: 'dashboard', terminal: 'terminal', browser: 'browser', contacts: 'contacts', automations: 'automation', notifications: 'general', icons: 'iconic', comments: 'editor', records: 'dashboard', sync: 'sync', settings: 'general' } as const;
+			const product = { dashboard: 'dashboard', terminal: 'terminal', browser: 'browser', contacts: 'contacts', automations: 'automation', notifications: 'general', icons: 'iconic', comments: 'editor', records: 'dashboard', sync: 'sync', news: 'news', settings: 'general' } as const;
 			void plugin.openWorkbenchSettings(feature ? product[feature] : 'general').catch(report);
 		},
 		openFocus: async (target, state, placement, ownerWindow) => {

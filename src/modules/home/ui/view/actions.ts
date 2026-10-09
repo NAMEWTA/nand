@@ -1,3 +1,5 @@
+import { homeServices } from '../../services/instances';
+import { runSkillCommand } from '../../services/skill-command';
 import { observeDashboardPromise } from '../save-feedback';
 import { MarkdownView, Notice, TFile } from 'obsidian';
 import type { DashboardCard, DashboardColumn, DashboardData, QuickAction } from '../../core/board/types/index';
@@ -597,6 +599,8 @@ export async function executeAction(this: DashboardSurface, action: QuickAction)
 	}
 	if (action.type === 'file') {
 		await this.navigateToPath(action.target);
+	} else if (action.type === 'command' && action.target.startsWith('skill:')) {
+		await runSkillCommand(action.target, homeServices.acquireDispatch ?? (async () => undefined), (message) => new Notice(message));
 	} else if (action.type === 'command') {
 		// Route every command (including 'daily-notes') through Obsidian's command
 		// system so the core Daily notes plugin honors its folder/format/template

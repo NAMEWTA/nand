@@ -136,6 +136,8 @@ export interface DashboardSettings {
 	bgBlur: number;
 	/** Background fill mode. */
 	bgSize: BgSize;
+	/** Focal point of the board background, written only after the user clicks the preview. */
+	bgFocal?: { x: number; y: number };
 	/** Surface (card/section/sidebar) opacity 0-100. null = theme default. */
 	surfaceOpacity: number | null;
 	/** Frosted-glass blur in px 0-20. null = theme default. */
@@ -627,6 +629,8 @@ export interface AlbumConfig {
 	transition: 'fade' | 'slide-left' | 'slide-right' | 'zoom';
 	/** Stacked-layout card height ratio (side layout ignores it). */
 	heightRatio: WidgetHeightRatio;
+	/** Focal point of the current slide, written only after the user clicks the photo. */
+	focal?: { x: number; y: number };
 }
 
 /** One anniversary ("纪念日") entry: elapsed time since a historical date,
@@ -645,6 +649,8 @@ export interface AnniversaryConfig {
 	precision: 'ymd' | 'days' | 'hours';
 	/** Fire a reminder once a year on the anniversary's month/day. */
 	annualReminder: boolean;
+	/** Solar repeats the month and day. Lunar repeats the lunar month and day. */
+	calendar?: 'solar' | 'lunar';
 	/** Optional decorative card background. */
 	background?: WidgetBackground;
 }
@@ -729,6 +735,10 @@ export interface DataviewConfig {
 	striped?: boolean;
 	/** Prepend a row-number column to TABLE results (default off). */
 	rowNumbers?: boolean;
+	/** Preferred column order. Missing fields stay visible at the end. */
+	columnOrder?: string[];
+	/** Columns kept in the preference but omitted from the table. */
+	hiddenColumns?: string[];
 	/** Vault folders excluded from the query's page set (matched by path prefix,
 	 *  case-insensitive). Pages under them are dropped before the query runs, so
 	 *  FROM / WHERE / GROUP BY never see them. */
@@ -773,9 +783,15 @@ export interface DashboardColumn {
 	width?: number;
 }
 
+export type BoardLayout = 'side' | 'stacked' | 'immersive';
+
 export interface DashboardData {
 	/** Original text and its owned projection; retained through immutable UI updates. */
 	document?: { source: string; baseline: string };
+	/** Absent on older boards. Written only when the user picks a layout. */
+	layout?: BoardLayout;
+	/** Set after the one-time immersive pack. Opening a board does not set it. */
+	gridPacked?: boolean;
 	banner: BannerData;
 	quickActions: QuickAction[];
 	quickActionOrder?: string[];

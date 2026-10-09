@@ -161,12 +161,15 @@ export class DashboardAutomationSource {
 					}),
 				);
 			}
-		if (settings.anniversaryEnabled)
+		if (settings.anniversaryEnabled) {
+			const lookup = settings.anniversaries.some((entry) => entry.calendar === 'lunar' && entry.annualReminder)
+				? await (await import('../calendar/lunar-lookup')).createLunarLookup()
+				: undefined;
 			for (const entry of settings.anniversaries) {
 				if (!entry.annualReminder) continue;
 				const start = parseAnniversaryDate(entry.startDate);
 				if (!start) continue;
-				const at = anniversaryDateThisYear(start, now).getTime();
+				const at = anniversaryDateThisYear(start, now, entry.calendar, lookup).getTime();
 				const label = resolveWidgetLabel(entry, 'anniversary') || entry.startDate;
 				const years = now.getFullYear() - start.getFullYear();
 				add(
@@ -179,6 +182,7 @@ export class DashboardAutomationSource {
 					}),
 				);
 			}
+		}
 		if (changed) await this.saveSettings();
 		return result;
 	}

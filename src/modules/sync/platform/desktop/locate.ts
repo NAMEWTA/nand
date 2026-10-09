@@ -52,5 +52,6 @@ export async function locateRepo(binary: string, vaultRoot: string, subPath: str
 		const relative = posix(path.relative(root, path.resolve(vault, vaultPath)));
 		return relative.startsWith('../') || relative === '..' || path.isAbsolute(relative) ? null : relative;
 	};
-	return { cwd, root, toVault, toRepo };
+	const relativeScope = toRepo('');
+	return { cwd, root, toVault, toRepo, scope: relativeScope || '.' };
 }

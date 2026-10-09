@@ -1,6 +1,13 @@
+import { nextWindow, renderWindow } from '../../core/board/board-experience';
 import type { QueryResult, ResultRow } from '../../core/dql/types';
 import { dqlCompare, formatValue } from '../../core/dql/values';
 import { sourceInfoOf } from './table-model';
+
+/** The rows a dataview panel draws: 50, then 50 more, capped at 500. */
+export function visibleRowWindow(total: number, shown: number): { count: number; total: number; truncated: boolean; next: number } {
+	const windowed = renderWindow(total, shown);
+	return { ...windowed, next: nextWindow(windowed.count, total) };
+}
 
 export const MAX_ROWS = 500;
 

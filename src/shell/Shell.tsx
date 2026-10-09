@@ -4,6 +4,7 @@ import type { PanelModel, WorkbenchFeature, WorkbenchStatus, WorkbenchTarget } f
 import { t } from '../shared/i18n';
 import { Button } from '../ui/primitives/Button';
 import { layoutFor, type ShellLayout } from './layout';
+import { overlayAfterRail } from './rail-overlay';
 import { PANEL_DEFAULT, panelWidth, PANEL_MAX, PANEL_MIN, type WorkbenchState } from './navigation-state';
 import { PageHeader } from './PageHeader';
 import { Rail, type RailItem } from './Rail';
@@ -98,8 +99,9 @@ export function Shell(props: ShellProps) {
 	};
 	const selectRail = (feature: WorkbenchFeature) => {
 		const result = props.onRail(feature);
-		if (result === 'toggled') togglePanel();
-		else if (!inline && layout === 'narrow') setOverlay(true);
+		const next = overlayAfterRail(layout, inline, result === 'toggled' ? 'toggled' : 'navigated', overlay);
+		if (next === 'toggle') togglePanel();
+		else setOverlay(next);
 	};
 	const navigate = (target: WorkbenchTarget) => {
 		if (!inline) setOverlay(false);

@@ -1,3 +1,6 @@
+import type { AgentDispatch } from '../../agent/api';
+import type { NewsReadService } from '../../news/api';
+import type { IndexedWidgets } from '../core/board/widget-registry';
 import type { ExpenseService } from '../platform/expense/expense-service';
 import type { HabitService } from '../platform/habit/habit-service';
 import type { MediaTagService } from '../platform/media/media-tags';
@@ -17,6 +20,9 @@ export const homeServices: {
 	music?: MusicService;
 	pomodoro?: PomodoroService;
 	reading?: ReadingService;
+	widgets?: IndexedWidgets;
+	news?: () => NewsReadService | undefined;
+	acquireDispatch?: () => Promise<AgentDispatch | undefined>;
 } = {};
 
 /** Opens a records page (habits, expenses, Pomodoro, reading) in the workbench; set while the home module is active. */

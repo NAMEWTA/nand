@@ -96,7 +96,7 @@ try {
 		const shell = await call(`({layout:nandProbe.layout(),rail:nandProbe.rail(),panel:nandProbe.panel(),header:nandProbe.header(),nativeHeader:getComputedStyle(${wbExpr}.containerEl.querySelector('.view-header')).display})`);
 		assert.equal(shell.layout.kind, 'wide'); assert.equal(shell.layout.panelOpen, true); assert.ok(shell.layout.width >= 960);
 		assert.ok(Math.abs(shell.layout.main - (shell.layout.width - 52 - shell.layout.panel)) <= 2, JSON.stringify(shell.layout));
-		assert.deepEqual(shell.rail.filter((r) => r.slot === 'top').map((r) => r.id), ['dashboard', 'browser', 'contacts', 'automations', 'comments']);
+		assert.deepEqual(shell.rail.filter((r) => r.slot === 'top').map((r) => r.id), ['dashboard', 'browser', 'contacts', 'automations', 'news', 'comments']);
 		assert.deepEqual(shell.rail.filter((r) => r.slot === 'bottom').map((r) => r.id), ['notifications', 'settings']);
 		assert.deepEqual(shell.rail.filter((r) => r.active).map((r) => r.id), ['dashboard']);
 		assert.equal(shell.rail.find((r) => r.active).expanded, 'true');
@@ -369,7 +369,7 @@ try {
 		assert.ok(ownedSettings.dashboard >= 10, JSON.stringify(ownedSettings));
 		check('board-automation-and-about-settings-pages-render', ownedSettings);
 		const native = await call(`(async()=>{app.setting.open();app.setting.openTabById('nand');await new Promise(r=>setTimeout(r,200));const names=[...app.setting.activeTab.containerEl.querySelectorAll('.setting-item-name')].map(e=>e.textContent);app.setting.close();return names})()`);
-		assert.ok(native.length >= 5 && native.length <= 16 && !native.includes('Markdown'), JSON.stringify(native));
+		assert.ok(native.length >= 5 && native.length <= 17 && !native.includes('Markdown'), JSON.stringify(native));
 		check('obsidian-settings-tab-is-slim', { native });
 
 		// ---- Layouts --------------------------------------------------------------------------------

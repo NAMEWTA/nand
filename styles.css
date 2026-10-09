@@ -1458,7 +1458,8 @@ body {
 	flex-direction: column;
 	justify-content: center;
 	align-items: center;
-	padding: 20px 48px;
+	/* 22px clears the 14px workspace pills that sit at top: 2px. */
+	padding: 22px 48px 16px;
 }
 
 .dashboard-banner-content {
@@ -14930,6 +14931,56 @@ body {
 	min-width: 0;
 }
 
+.nand-board-layout {
+	display: inline-flex;
+	align-items: center;
+	min-height: 32px;
+	margin: 0 0 8px;
+	padding: 0 10px;
+	cursor: pointer;
+}
+
+.nand-dashboard-root[data-board='immersive'] .dashboard-kanban {
+	display: block;
+	width: 100%;
+}
+
+.nand-immersive-grid {
+	display: grid;
+	width: 100%;
+	grid-auto-rows: 10px;
+	gap: 10px;
+	align-content: start;
+}
+
+.nand-immersive-tile {
+	position: relative;
+	min-width: 0;
+	min-height: 0;
+	overflow: hidden;
+}
+
+.nand-immersive-grip,
+.nand-immersive-resize {
+	font: inherit;
+	color: inherit;
+}
+
+.nand-immersive-grip {
+	display: block;
+	width: 100%;
+	height: 100%;
+	text-align: start;
+	cursor: grab;
+}
+
+.nand-immersive-resize {
+	position: absolute;
+	right: 2px;
+	bottom: 2px;
+	z-index: 1;
+	cursor: nwse-resize;
+}
 /* ===== Gallery view (card grid with frontmatter-driven covers) ===== */
 .dashboard-library-gallery {
 	display: grid;
@@ -15372,7 +15423,17 @@ body {
 	height: 14px;
 }
 
+.dashboard-library-card > .dashboard-library-table-delete,
+.dashboard-library-kanban-card > .dashboard-library-table-delete {
+	position: absolute;
+	top: 6px;
+	right: 6px;
+}
+
 .dashboard-library-table tr:hover .dashboard-library-table-delete,
+.dashboard-library-card:hover .dashboard-library-table-delete,
+.dashboard-library-list-item:hover .dashboard-library-table-delete,
+.dashboard-library-kanban-card:hover .dashboard-library-table-delete,
 .dashboard-library-table-delete:focus-visible {
 	opacity: 1;
 }
@@ -15505,6 +15566,7 @@ body {
 }
 
 .dashboard-library-kanban-card {
+	position: relative;
 	flex-shrink: 0;
 	background: var(--db-bg-card, rgba(255, 255, 255, 0.06));
 	border: 1px solid var(--db-border-card, rgba(255, 255, 255, 0.10));
@@ -19394,6 +19456,15 @@ body.is-mobile:not(.is-tablet) .dashboard-media-item .dashboard-media-delete--gr
    Border/background use theme tokens (auto dark/light); no hardcoded gray.
    Every interactive control shares one radius (--db-radius-sm) and one
    accent-tinted hover, so chips and the capture pill read as one family. */
+/* A column flex parent treats the 100% basis as height. The bar follows its content. */
+.dashboard-main > .dashboard-quicknote {
+	flex: 0 0 auto;
+	width: 100%;
+	height: auto;
+	max-height: none;
+	position: relative;
+	z-index: 1;
+}
 .dashboard-quicknote {
 	display: flex;
 	/* Vertically centered at rest so the capture pill sits mid-bar beside the
@@ -22722,7 +22793,8 @@ body.is-mobile:not(.is-tablet) .dashboard-media-item .dashboard-media-delete--gr
 	background: var(--nand-surface);
 }
 :is(.nand-settings, .dashboard-settings-root) .dashboard-widget-settings-card > .setting-item { padding-inline: 0; }
-.nand-home-settings .nand-home-module-icon { order: -1; display: flex; align-items: center; justify-content: center; color: var(--text-muted); flex: 0 0 32px; width: 32px; height: 32px; border-radius: var(--nand-radius-sm); background: var(--nand-surface-muted); }
+.nand-home-settings .nand-home-module-icon,
+.nand-settings-page .nand-home-module-icon { order: -1; display: flex; align-items: center; justify-content: center; color: var(--text-muted); flex: 0 0 32px; width: 32px; height: 32px; border-radius: var(--nand-radius-sm); background: var(--nand-surface-muted); }
 .nand-home-module-icon svg { width: 18px; height: 18px; }
 .nand-home-settings .setting-item-info { flex: 1; }
 .terminal-usage-card h3 { margin: 0 0 var(--size-4-3); font-size: var(--font-ui-medium); overflow-wrap: anywhere; }
@@ -24285,6 +24357,13 @@ button.nand-panel-primary-button { justify-content: flex-start; width: 100%; }
 	box-shadow: none;
 	animation: nand-fade-in var(--nand-duration) var(--nand-ease);
 }
+.nand-shell--medium > .nand-rail {
+	position: relative;
+	z-index: var(--nand-z-popover);
+}
+.nand-shell--medium > .nand-shell-scrim {
+	inset-inline-start: var(--nand-rail-width);
+}
 .nand-shell-overlay {
 	position: absolute;
 	top: 0;
@@ -24473,3 +24552,14 @@ button.nand-status-chip:hover { color: var(--text-normal); }
 .nand-workbench-home-overview .nand-workbench-home-calendar .dashboard-sidebar-week-calendar { display: flex; }
 .nand-workbench-home-overview .nand-workbench-home-recent .dashboard-recent { display: block; }
 @container (max-width: 560px) { .nand-workbench-home-overview { grid-template-columns: 1fr; } }
+/* News heat curve. The line uses the current text color; missing hours are not drawn. */
+.nand-news-heat { display: flex; flex-wrap: wrap; align-items: center; gap: var(--nand-space-2); }
+.nand-news-heat h2,
+.nand-news-heat p { flex-basis: 100%; margin: 0; }
+.nand-news-heat button { min-height: 32px; }
+.nand-news-heat-chart { flex-basis: 100%; min-height: 32px; }
+.nand-news-heat-chart:focus-visible { outline: var(--nand-focus-ring); }
+.nand-news-heat-line { fill: none; stroke: currentColor; }
+@media (pointer: coarse) {
+	.nand-news-heat button { min-height: var(--nand-touch-target); }
+}

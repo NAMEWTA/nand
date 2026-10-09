@@ -6,6 +6,7 @@ import './module-strings';
 import { El } from './mini-dom';
 
 export const requestUrl = async (): Promise<{ json: unknown }> => ({ json: {} });
+export const getIconIds = (): string[] => ['file-text', 'star', 'search'];
 
 // Modal base for config-modal tests: wire contentEl/containerEl to mini-DOM
 // nodes, with `parentElement` staying null so optional-chained parent calls

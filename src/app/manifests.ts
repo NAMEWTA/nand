@@ -8,6 +8,7 @@ import { homeManifest } from '../modules/home/manifest';
 import { iconsManifest } from '../modules/icons/manifest';
 import { notificationsManifest } from '../modules/notifications/manifest';
 import { syncManifest } from '../modules/sync/manifest';
+import { newsManifest } from '../modules/news/manifest';
 
 /** Every module NAND ships. Manifests are data only; module code loads through `manifest.load()`. */
 export const MANIFESTS: readonly ModuleManifest[] = [
@@ -20,4 +21,5 @@ export const MANIFESTS: readonly ModuleManifest[] = [
 	notificationsManifest,
 	automationsManifest,
 	syncManifest,
+	newsManifest,
 ];

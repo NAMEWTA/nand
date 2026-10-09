@@ -186,6 +186,13 @@ button.nand-panel-primary-button { justify-content: flex-start; width: 100%; }
 	box-shadow: none;
 	animation: nand-fade-in var(--nand-duration) var(--nand-ease);
 }
+.nand-shell--medium > .nand-rail {
+	position: relative;
+	z-index: var(--nand-z-popover);
+}
+.nand-shell--medium > .nand-shell-scrim {
+	inset-inline-start: var(--nand-rail-width);
+}
 .nand-shell-overlay {
 	position: absolute;
 	top: 0;

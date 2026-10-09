@@ -3,7 +3,9 @@ import { h } from 'preact';
 import type { HolidayInfo } from '../../platform/calendar/holiday-service';
 import type { PomodoroService } from '../../platform/pomodoro/pomodoro-service';
 import type { ReadingService } from '../../platform/reading/reading-service';
-import { getLanguage } from '../../../../shared/i18n/index';
+import { getLanguage, t } from '../../../../shared/i18n/index';
+import { memberMount } from '../../core/board/widget-registry';
+import { homeServices } from '../../services/instances';
 import { renderSidebarCalendar } from '../calendar/calendar-widget';
 import { renderSidebarExpenseWidget } from '../expense/expense-widget';
 import { renderSidebarHabitWidget } from '../habit/habit-widget';
@@ -111,6 +113,32 @@ function saveSingletonBackground(
 ): void {
 	void settingsAccess?.updateSettings((current) => ({ ...current, [key]: bg }));
 }
+
+const NEWS_KINDS = ['news-raw', 'news-hot', 'news-view'] as const;
+
+function mountedNewsKinds(): readonly string[] {
+	const index = homeServices.widgets;
+	if (!index) return [];
+	const enabled = new Set<string>(['home']);
+	if (homeServices.news?.()) enabled.add('news');
+	return NEWS_KINDS.filter((kind) => memberMount({ kind, provider: 'news' }, index, enabled) === 'mount');
+}
+
+function renderNewsWidget(host: HTMLElement, kind: string): void {
+	const service = homeServices.news?.();
+	const root = host.createDiv({ cls: 'dashboard-sidebar-widget dashboard-sidebar-news' });
+	const titleKey = kind === 'news-hot' ? 'news.widget.hot' : kind === 'news-view' ? 'news.widget.view' : 'news.widget.raw';
+	root.createDiv({ cls: 'dashboard-sidebar-widget-title', text: t(titleKey) });
+	const materials = [...(service?.materials() ?? [])];
+	const analyses = service?.analyses() ?? [];
+	const rows = (kind === 'news-hot'
+		? materials.sort((left, right) => (analyses.find((item) => item.materialId === right.id)?.score ?? 0) - (analyses.find((item) => item.materialId === left.id)?.score ?? 0))
+		: materials
+	).slice(0, 8);
+	const list = root.createEl('ul');
+	for (const material of rows) list.createEl('li', { text: material.title });
+}
+
 export function renderSidebarWidgets(
 	container: HTMLElement,
 	settings: import('../../core/board/types/index').DashboardSettings,
@@ -124,6 +152,7 @@ export function renderSidebarWidgets(
 	renderQuickActions?: (container: HTMLElement) => void,
 	settingsAccess?: DashboardSettingsAccess,
 ): HTMLElement | null {
+	const newsKinds = mountedNewsKinds();
 	const anyEnabled =
 		settings.widgetWeatherEnabled ||
 		settings.pomodoroEnabled ||
@@ -137,7 +166,8 @@ export function renderSidebarWidgets(
 		(settings.countdownEnabled && (settings.countdowns?.length ?? 0) > 0) ||
 		settings.readingEnabled ||
 		(settings.widgetQuickActionsEnabled && !!renderQuickActions) ||
-		(settings.widgetMusicEnabled && !Platform.isPhone);
+		(settings.widgetMusicEnabled && !Platform.isPhone) ||
+		newsKinds.length > 0;
 	if (!anyEnabled) return null;
 
 	const stacked = isStackedLayout();
@@ -251,6 +281,13 @@ export function renderSidebarWidgets(
 						widgetAlbumTransition: ref.transition,
 					},
 					app,
+					ref,
+					(focal) => {
+						void settingsAccess?.updateSettings((current) => ({
+							...current,
+							albums: current.albums.map((item) => (item.id === ref.id ? { ...item, focal } : item)),
+						}));
+					},
 				),
 		});
 	}
@@ -279,6 +316,10 @@ export function renderSidebarWidgets(
 					saveSingletonBackground(settingsAccess, 'musicBackground', bg),
 				),
 		});
+	}
+	for (const kind of newsKinds) {
+		const key = kind;
+		enabled.push({ key, render: (host) => renderNewsWidget(host, key) });
 	}
 	if (settings.countdownEnabled) {
 		for (const cd of settings.countdowns ?? []) {

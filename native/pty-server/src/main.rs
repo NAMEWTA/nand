@@ -6,6 +6,7 @@
 mod agent_data;
 mod data;
 mod frame;
+mod inherited_fds;
 mod job;
 mod session;
 
@@ -111,6 +112,8 @@ fn dispatch(out: &Outbox, sessions: &Sessions, history: &data::History, body: &[
 }
 
 fn main() {
+    // Do this before channels, threads, PTYs or history databases are created.
+    inherited_fds::close_inherited_fds();
     job::kill_children_with_helper();
     let (out, outgoing) = mpsc::channel::<Vec<u8>>();
     let writer = thread::spawn(move || {

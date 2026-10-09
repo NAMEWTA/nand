@@ -10,6 +10,7 @@ import { isStackedLayout, sidebarWidgetSignature, renderSidebarWeekCalendar } fr
 import { setupDragAndDrop } from '../ui/dnd';
 import { captureRootScrollState, restoreRootScrollState } from '../ui/scroll-preserve';
 import { renderWorkspaceSwitcher } from '../workspace/workspace-switcher';
+import { boardFrame } from './board-frame';
 import type { DashboardSurface } from './dashboard-surface';
 
 export function render(this: DashboardSurface, data: DashboardData): void {
@@ -57,9 +58,12 @@ export function render(this: DashboardSurface, data: DashboardData): void {
 
 	container.empty();
 	container.addClass('nand-dashboard-root');
-	// Layout mode rides on an attribute so CSS owns the switch. Phones
-	// always report 'side' (isStackedLayout excludes them).
-	container.setAttribute('data-layout', isStackedLayout() ? 'stacked' : 'side');
+	// The structural frame stays stacked or side. Immersive is a second
+	// attribute: replacing stacked made the content column shrink-wrap.
+	const frame = boardFrame(data.layout === 'immersive', isStackedLayout());
+	container.setAttribute('data-layout', frame.layout);
+	if (frame.board) container.setAttribute('data-board', frame.board);
+	else container.removeAttribute('data-board');
 
 	// Board appearance (background image layer + advanced overrides) before banner/main are created,
 	// so the background layer sits behind content.

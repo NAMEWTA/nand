@@ -7,6 +7,7 @@ import type {
 	BrowserSettings,
 } from '../core/model';
 import type { BrowserPage } from '../platform/desktop/page';
+import type { AiWorkspace } from './ai-workspace';
 export interface BrowserHost {
 	app: App;
 	enabled(): boolean;
@@ -29,4 +30,5 @@ export interface BrowserHost {
 	copyImage(data: string): void;
 	saveImage(data: string, context?: string): Promise<string[]>;
 	agents: BrowserAgentDeliveryPort;
+	workspace?: AiWorkspace;
 }

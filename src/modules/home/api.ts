@@ -1,6 +1,12 @@
 /** Public surface of the home module (types and service keys). */
-import { serviceKey } from '../../app/contracts/module';
+import { contributionPoint, serviceKey } from '../../app/contracts/module';
 import type { PanelModel, WorkbenchTarget } from '../../app/contracts/workbench';
+import type { WidgetBundle } from './core/board/widget-registry';
+
+export type { WidgetBundle as HomeWidgetBundle, WidgetKind as HomeWidgetKind } from './core/board/widget-registry';
+
+/** One bundle per contributing module. Home collects them and mounts by kind. */
+export const HOME_WIDGETS = contributionPoint<WidgetBundle>('home', 'widgets');
 
 /** Multi-board registry operations exposed to the shell and other modules. */
 export interface BoardOperations {

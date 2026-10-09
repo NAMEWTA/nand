@@ -39,7 +39,6 @@ exports.install=(id,partition,notify,grants={})=>{
  on(guest,'will-navigate',guard);on(guest,'will-redirect',guard);
  on(guest,'before-input-event',(event,input)=>{
   if(input.type!=='keyDown')return;
-  if((input.control||input.meta)&&['l','f'].includes(input.key.toLowerCase())){event.preventDefault();notify('shortcut',input.key.toLowerCase())}
   if(input.key==='Escape')notify('shortcut','Escape');
  });
  on(guest,'did-create-window',(child,details)=>{

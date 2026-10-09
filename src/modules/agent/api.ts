@@ -31,3 +31,28 @@ export interface AgentWorkbench {
 }
 
 export const AGENT_WORKBENCH = serviceKey<AgentWorkbench>('agent', 'workbench');
+
+/** One authorized prompt run. A truncated tail is not a completed answer. */
+export interface AgentPromptResult {
+	status: 'complete' | 'truncated' | 'failed' | 'budget';
+	text: string;
+}
+
+export interface AgentPromptRequest {
+	prompt: string;
+	purpose: string;
+}
+
+export interface AgentPromptRunner {
+	run(request: AgentPromptRequest): Promise<AgentPromptResult>;
+}
+
+export const AGENT_PROMPT_RUNNER = serviceKey<AgentPromptRunner>('agent', 'prompt-runner');
+
+/** Start a session or paste into one. Neither path presses Enter or reports model success. */
+export interface AgentDispatch {
+	start(prompt: string): Promise<{ id: string; submitted: false }>;
+	paste(sessionId: string, prompt: string): Promise<{ submitted: false }>;
+}
+
+export const AGENT_DISPATCH = serviceKey<AgentDispatch>('agent', 'dispatch');

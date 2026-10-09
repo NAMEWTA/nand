@@ -1,4 +1,4 @@
-import { mkdir, readFile, rename, writeFile } from 'node:fs/promises';
+import { chmod, mkdir, readFile, rename, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import type { GitHost } from '../../core/ports';
 import { createGitRunner, machineName } from './git-runner';
@@ -19,10 +19,13 @@ export function desktopGitHost(vaultRoot: string): GitHost {
 			}
 		},
 		async writeJson(file, value) {
-			await mkdir(path.dirname(file), { recursive: true });
+			const parent = path.dirname(file);
+			await mkdir(parent, { recursive: true, mode: 0o700 });
+			if (process.platform !== 'win32') await chmod(parent, 0o700).catch(() => undefined);
 			const temporary = `${file}.${process.pid}.tmp`;
-			await writeFile(temporary, `${JSON.stringify(value, null, '\t')}\n`, 'utf8');
+			await writeFile(temporary, `${JSON.stringify(value, null, '\t')}\n`, { encoding: 'utf8', mode: 0o600 });
 			await rename(temporary, file);
+			if (process.platform !== 'win32') await chmod(file, 0o600).catch(() => undefined);
 		},
 		resolve: (cwd, relative) => path.resolve(cwd, relative),
 	};

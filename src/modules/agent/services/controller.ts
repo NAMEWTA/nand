@@ -393,6 +393,52 @@ export class AgentController {
 		return focused?.running ? focused : this.sessions.focused;
 	}
 
+	/** Paste into one session and do not press Enter. */
+	pasteInto(id: string, text: string): boolean {
+		const session = this.sessions.get(id);
+		if (!session) return false;
+		session.paste(text);
+		this.show(id);
+		return true;
+	}
+
+	/**
+	 * Run one prompt in an enabled agent and return the terminal text.
+	 * A still-running session is truncated. An empty screen is a failure.
+	 */
+	async runPrompt(request: { prompt: string; purpose: string }): Promise<{ status: 'complete' | 'truncated' | 'failed' | 'budget'; text: string }> {
+		const enabled = AGENT_CATALOG.find((agent) => this.settings.get().agents.agents[agent.id]?.enabled);
+		if (!enabled) return { status: 'failed', text: '' };
+		let session: TerminalSession | undefined;
+		try {
+			await launchAgent({
+				...this.launchHost({ tab: true }),
+				start: async (launch) => {
+					session = await this.start({ ...launch, kind: 'agent', input: request.prompt, title: request.purpose || launch.title });
+				},
+			}, enabled.id);
+		} catch {
+			return { status: 'failed', text: '' };
+		}
+		if (!session) return { status: 'failed', text: '' };
+		const win = this.app.workspace.containerEl.win;
+		const deadline = Date.now() + 20000;
+		let last = '';
+		let stable = 0;
+		while (Date.now() < deadline && session.running) {
+			await new Promise((resolve) => win.setTimeout(resolve, 200));
+			const text = session.text();
+			if (text === last && text.trim()) stable += 1;
+			else stable = 0;
+			last = text;
+			if (stable >= 8) break;
+		}
+		const text = session.text().trim();
+		if (!text) return { status: 'failed', text: '' };
+		if (session.running) return { status: 'truncated', text };
+		return { status: 'complete', text };
+	}
+
 	/** Paste text into the target session (no Enter). */
 	send(text: string): boolean {
 		const session = this.target();

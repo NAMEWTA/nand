@@ -1,5 +1,6 @@
 import { t } from '../../../../shared/i18n/index';
 import type { AnniversaryConfig } from '../board/types/index';
+import { lunarAnniversaryThisYear, type LunarLookup } from './lunar-map';
 
 export function parseAnniversaryDate(raw: string): Date | null {
 	if (!raw) return null;
@@ -42,7 +43,14 @@ export function formatElapsed(start: Date, now: Date, precision: AnniversaryConf
 }
 
 /** The date this year that carries the anniversary's month/day (Feb 29 rolls
- *  onto Mar 1 in common years — Date overflow does this naturally). */
-export function anniversaryDateThisYear(start: Date, now: Date): Date {
+ *  onto Mar 1 in common years — Date overflow does this naturally).
+ *  A lunar anniversary uses the injected calendar and does not rewrite the stored solar start. */
+export function anniversaryDateThisYear(start: Date, now: Date, calendar?: 'solar' | 'lunar', lookup?: LunarLookup): Date {
+	if (calendar === 'lunar' && lookup) {
+		const pad = (value: number) => String(value).padStart(2, '0');
+		const iso = `${start.getFullYear()}-${pad(start.getMonth() + 1)}-${pad(start.getDate())}`;
+		const mapped = parseAnniversaryDate(lunarAnniversaryThisYear(iso, now.getFullYear(), lookup).solar);
+		if (mapped) return mapped;
+	}
 	return new Date(now.getFullYear(), start.getMonth(), start.getDate());
 }

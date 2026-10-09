@@ -1,0 +1,11 @@
+/* News heat curve. The line uses the current text color; missing hours are not drawn. */
+.nand-news-heat { display: flex; flex-wrap: wrap; align-items: center; gap: var(--nand-space-2); }
+.nand-news-heat h2,
+.nand-news-heat p { flex-basis: 100%; margin: 0; }
+.nand-news-heat button { min-height: 32px; }
+.nand-news-heat-chart { flex-basis: 100%; min-height: 32px; }
+.nand-news-heat-chart:focus-visible { outline: var(--nand-focus-ring); }
+.nand-news-heat-line { fill: none; stroke: currentColor; }
+@media (pointer: coarse) {
+	.nand-news-heat button { min-height: var(--nand-touch-target); }
+}

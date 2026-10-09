@@ -1,8 +1,11 @@
 import { bindLocalizedElement, bindLocalizedControl } from '../../../../ui/primitives/localized-dom';
-import { App, FuzzySuggestModal, Modal, setIcon } from 'obsidian';
+import { App, FuzzySuggestModal, Modal, Notice, setIcon } from 'obsidian';
+import { focalForWrite } from '../../core/board/board-experience';
+import { commitHomeDecor } from '../../core/board/appearance-preset';
 import type { BgSize, DashboardSettings } from '../../core/board/types/index';
 import { t } from '../../../../shared/i18n/index';
 import type { DashboardHost } from '../host';
+import { resolveVaultImage } from '../banner/banner';
 import { showConfirmDialog } from '../ui/confirm-dialog';
 import { refreshAppearanceLive } from './appearance';
 import { applyModalTheme } from './modal-theme';
@@ -31,6 +34,7 @@ export class ThemeStudioModal extends Modal {
 	private glassBlur: number | null;
 	private radiusScale: number | null;
 	private fontScale: DashboardSettings['fontScale'];
+	private bgFocal: { x: number; y: number } | undefined;
 	private readonly advancedDefaults: AdvancedDefaults;
 	private saveTimer: number | null = null;
 
@@ -46,6 +50,7 @@ export class ThemeStudioModal extends Modal {
 		this.glassBlur = s.glassBlur;
 		this.radiusScale = s.radiusScale;
 		this.fontScale = s.fontScale ?? 'medium';
+		this.bgFocal = focalForWrite(s.bgFocal);
 		this.advancedDefaults = readAdvancedDefaults();
 	}
 
@@ -175,6 +180,18 @@ export class ThemeStudioModal extends Modal {
 			this.bgSize = sizeSelect.value === 'contain' ? 'contain' : 'cover';
 			this.scheduleApply();
 		});
+		const resolved = this.bgImage.trim() ? resolveVaultImage(this.app, this.bgImage.trim()) : '';
+		if (resolved) {
+			const preview = section.createEl('img', { cls: 'dashboard-theme-studio-preview', attr: { src: resolved, alt: '' } });
+			preview.addEventListener('click', (event) => {
+				const rect = preview.getBoundingClientRect();
+				if (!rect.width || !rect.height) return;
+				const next = focalForWrite({ x: ((event.clientX - rect.left) / rect.width) * 100, y: ((event.clientY - rect.top) / rect.height) * 100 });
+				if (!next) return;
+				this.bgFocal = next;
+				this.scheduleApply();
+			});
+		}
 	}
 
 	// ── Advanced (glass blur, corner radius, surface opacity) ──────────────
@@ -381,17 +398,33 @@ export class ThemeStudioModal extends Modal {
 
 	/** Write current edits into settings, live-apply to open dashboards, debounce-save. */
 	private scheduleApply(): void {
-		this.plugin.settings = {
-			...this.plugin.settings,
-			bgImage: this.bgImage.trim(),
-			bgDim: this.bgDim,
-			bgBlur: this.bgBlur,
-			bgSize: this.bgSize,
-			surfaceOpacity: this.surfaceOpacity,
-			glassBlur: this.glassBlur,
-			radiusScale: this.radiusScale,
-			fontScale: this.fontScale,
-		};
+		const focal = this.bgFocal;
+		const committed = commitHomeDecor(
+			{
+				bgImage: this.bgImage.trim(),
+				bgDim: this.bgDim,
+				bgBlur: this.bgBlur,
+				bgSize: this.bgSize,
+				surfaceOpacity: this.surfaceOpacity,
+				glassBlur: this.glassBlur,
+				radiusScale: this.radiusScale,
+				fontScale: this.fontScale,
+			},
+			() => undefined,
+			(home) => {
+				this.plugin.settings = {
+					...this.plugin.settings,
+					...home,
+					bgSize: home.bgSize === 'contain' ? 'contain' : 'cover',
+					fontScale: home.fontScale === 'small' || home.fontScale === 'large' ? home.fontScale : 'medium',
+					...(focal ? { bgFocal: focal } : {}),
+				};
+			},
+		);
+		if (!committed.saved) {
+			new Notice(committed.error);
+			return;
+		}
 		refreshAppearanceLive(this.app, this.plugin.settings);
 		if (this.saveTimer !== null) window.clearTimeout(this.saveTimer);
 		this.saveTimer = window.setTimeout(() => {

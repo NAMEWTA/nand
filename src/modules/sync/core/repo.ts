@@ -1,5 +1,5 @@
 import { classifyGitOutput, detailOf, GitError } from './errors';
-import type { GitResult, GitRunner, GitRunOptions } from './ports';
+import { pathWithinScope, safeRepoPath, type GitResult, type GitRunner, type GitRunOptions } from './ports';
 import { parsePathList, parseStatus, type RepoStatus } from './status';
 
 /** A merge, rebase, cherry-pick or revert that stopped and waits for the user. */
@@ -34,7 +34,7 @@ const DIFF_LIMIT = 200_000;
 
 /** Typed git commands for one repository. Every method runs git through the runner; nothing here touches the host. */
 export class GitRepo {
-	constructor(private readonly runner: GitRunner) {}
+	constructor(private readonly runner: GitRunner, private readonly scope = '.') {}
 
 	/** Run git; a non-zero exit (other than `allow`) becomes a classified `GitError`. */
 	async git(args: readonly string[], options: GitRunOptions & { allow?: readonly number[] } = {}): Promise<GitResult> {
@@ -72,6 +72,37 @@ export class GitRepo {
 		return remote && ref ? { remote, ref } : null;
 	}
 
+	/**
+	 * The one remote and ref a plain `git push` updates for this branch.
+	 * Null when pushRemote, push.default, or the remote's push refspec does not name exactly one destination.
+	 */
+	async pushTarget(branch: string): Promise<Upstream | null> {
+		const pushRemote = await this.config(`branch.${branch}.pushRemote`);
+		const pushDefault = pushRemote ? '' : await this.config('remote.pushDefault');
+		const upstreamRemote = await this.config(`branch.${branch}.remote`);
+		const merge = await this.config(`branch.${branch}.merge`);
+		const remote = pushRemote || pushDefault || upstreamRemote;
+		if (!remote || !merge.startsWith('refs/')) return null;
+		const mode = await this.config('push.default');
+		const listed = await this.git(['config', '--get-all', `remote.${remote}.push`], { allow: [1] });
+		const refspecs = listed.code === 0 ? listed.stdout.split(/\r?\n/).map((line) => line.trim()).filter(Boolean) : [];
+		if (refspecs.length > 1) return null;
+		if (refspecs.length === 1) {
+			const ref = onePushRef(refspecs[0]!, branch);
+			return ref ? { remote, ref } : null;
+		}
+		if (mode === 'matching' || mode === 'nothing') return null;
+		return { remote, ref: merge };
+	}
+
+	/** The fetched commit a push of `ref` to `remote` would fast-forward, or null when that tip is not present. */
+	async remoteTip(remote: string, ref: string): Promise<string | null> {
+		const name = ref.startsWith('refs/heads/') ? ref.slice('refs/heads/'.length) : ref;
+		if (!name || name.includes('..') || name.startsWith('/') || remote.includes('/')) return null;
+		const result = await this.git(['rev-parse', '-q', '--verify', `refs/remotes/${remote}/${name}^{commit}`], { allow: [1, 128] });
+		return result.code === 0 ? result.stdout.trim() : null;
+	}
+
 	async remotes(): Promise<string[]> {
 		return (await this.git(['remote'])).stdout.split(/\r?\n/).map((line) => line.trim()).filter(Boolean);
 	}
@@ -97,31 +128,52 @@ export class GitRepo {
 
 	/** Stage every change under the working directory (the vault), including deletions and new files. */
 	async stageAll(): Promise<void> {
-		await this.git(['add', '-A', '--', '.']);
+		await this.git(['add', '-A', '--', this.scope === '.' ? '.' : top(this.scope)]);
+	}
+
+	/** Staged paths that are outside the vault. Empty when the repository is the vault. */
+	async stagedOutside(): Promise<string[]> {
+		if (!this.scope || this.scope === '.') return [];
+		return (await this.stagedPaths()).filter((repoPath) => !pathWithinScope(repoPath, this.scope));
+	}
+
+	private vaultPaths(paths: readonly string[]): string[] {
+		const safe = paths.map((repoPath) => {
+			const normalized = safeRepoPath(repoPath);
+			return normalized && pathWithinScope(normalized, this.scope) ? normalized : null;
+		});
+		if (safe.some((repoPath) => !repoPath)) throw new GitError('outside-index', paths.join(', '));
+		return safe.filter((repoPath): repoPath is string => !!repoPath);
 	}
 
 	async stage(paths: readonly string[]): Promise<void> {
-		if (paths.length) await this.git(['add', '-A', '--', ...paths.map(top)]);
+		const safe = this.vaultPaths(paths);
+		if (safe.length) await this.git(['add', '-A', '--', ...safe.map(top)]);
 	}
 
 	async unstage(paths: readonly string[]): Promise<void> {
-		if (!paths.length) return;
-		if (await this.head()) await this.git(['restore', '--staged', '--', ...paths.map(top)]);
+		const safe = this.vaultPaths(paths);
+		if (!safe.length) return;
+		if (await this.head()) await this.git(['restore', '--staged', '--', ...safe.map(top)]);
 		// Before the first commit there is no HEAD to restore from; dropping the index entries is the same thing.
-		else await this.git(['rm', '--cached', '-q', '-r', '--', ...paths.map(top)]);
+		else await this.git(['rm', '--cached', '-q', '-r', '--', ...safe.map(top)]);
 	}
 
 	async unstageAll(): Promise<void> {
-		if (await this.head()) await this.git(['reset', '-q']);
-		else await this.git(['rm', '--cached', '-q', '-r', '--', ':/'], { allow: [128] });
+		const scope = !this.scope || this.scope === '.' ? '.' : this.scope;
+		if (await this.head()) await this.git(['restore', '--staged', '--', top(scope)]);
+		else await this.git(['rm', '--cached', '-q', '-r', '--', top(scope)], { allow: [128] });
 	}
 
 	/** Restore tracked files in the working tree from the index (unstaged edits are lost). */
 	async discard(paths: readonly string[]): Promise<void> {
-		if (paths.length) await this.git(['restore', '--worktree', '--', ...paths.map(top)]);
+		const safe = this.vaultPaths(paths);
+		if (safe.length) await this.git(['restore', '--worktree', '--', ...safe.map(top)]);
 	}
 
 	async commit(message: string, options: { allowEmpty?: boolean } = {}): Promise<void> {
+		const outside = await this.stagedOutside();
+		if (outside.length) throw new GitError('outside-index', outside.join(', '));
 		await this.git(['commit', '-q', ...(options.allowEmpty ? ['--allow-empty'] : []), '-F', '-'], { input: message });
 	}
 
@@ -165,6 +217,11 @@ export class GitRepo {
 
 	async push(remote: string, refspec: string, setUpstream = false): Promise<void> {
 		await this.git(['push', '--porcelain', ...(setUpstream ? ['-u'] : []), remote, refspec], { timeoutMs: NETWORK_TIMEOUT });
+	}
+
+	/** `git push` with no remote or refspec, so git uses the configured push target. */
+	async pushConfigured(): Promise<void> {
+		await this.git(['push', '--porcelain'], { timeoutMs: NETWORK_TIMEOUT });
 	}
 
 	/** Finish a stopped operation after its conflicts were resolved and staged. */
@@ -237,4 +294,16 @@ export class GitRepo {
  */
 function top(path: string): string {
 	return `:(top,literal)${path}`;
+}
+
+/** Destination of one non-wildcard refspec that publishes `branch`, or null when it does not. */
+function onePushRef(spec: string, branch: string): string | null {
+	const body = spec.startsWith('+') ? spec.slice(1) : spec;
+	if (!body || body.includes('*')) return null;
+	const colon = body.indexOf(':');
+	const src = colon === -1 ? body : body.slice(0, colon);
+	const dst = colon === -1 ? body : body.slice(colon + 1);
+	if (!src || !dst.startsWith('refs/')) return null;
+	if (src !== 'HEAD' && src !== `refs/heads/${branch}`) return null;
+	return dst;
 }

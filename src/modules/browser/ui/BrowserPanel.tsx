@@ -1,7 +1,10 @@
 import { Menu, Notice, Platform } from 'obsidian';
 import { useLayoutEffect, useRef, useState } from 'preact/hooks';
 import type { BrowserAgent, BrowserGrab, BrowserPageState } from '../core/model';
+import { browserShortcut } from '../core/ai-workbench';
 import { historySuggestions, normalizeBrowserUrl } from '../core/url';
+import { browserFocusTarget } from './browser-keys';
+import { AiBar } from './AiBar';
 import type { BrowserPage } from '../platform/desktop/page';
 import { t } from '../../../shared/i18n';
 import { AddressBar, DownloadsBar, FindBar, PageMessage, SelectionPanel, ToolbarButton } from './browser-controls';
@@ -119,13 +122,24 @@ export function BrowserPanel({
 				e.preventDefault();
 				e.stopPropagation();
 			}
-			if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'l') {
+			const node = e.target instanceof HTMLElement ? e.target : null;
+			const action = browserShortcut({
+				key: e.key,
+				mod: e.ctrlKey || e.metaKey,
+				target: browserFocusTarget({
+					inside: !!node && container.contains(node),
+					address: !!node && !!address.current && (node === address.current || address.current.contains(node)),
+					find: !!node && !!findInput.current && (node === findInput.current || findInput.current.contains(node)),
+					toolbar: !!node?.closest('.nand-browser-toolbar'),
+					page: !!node?.closest('.nand-browser-viewport'),
+				}),
+			});
+			if (action === 'address') {
 				e.preventDefault();
 				e.stopPropagation();
 				address.current?.focus();
 				address.current?.select();
-			}
-			if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'f') {
+			} else if (action === 'find') {
 				e.preventDefault();
 				e.stopPropagation();
 				openFind();
@@ -134,10 +148,11 @@ export function BrowserPanel({
 		container.addEventListener('keydown', handler);
 		if (page)
 			page.shortcut = (key) => {
-				if (key === 'l') {
+				const action = browserShortcut({ key, mod: true, target: 'page' });
+				if (action === 'address') {
 					address.current?.focus();
 					address.current?.select();
-				} else if (key === 'f') openFind();
+				} else if (action === 'find') openFind();
 				else if (key === 'Escape') {
 					run(() => page.automation?.design());
 					setDesign(false);
@@ -334,6 +349,7 @@ export function BrowserPanel({
 				)}
 				{modal && <ToolbarButton label="close" icon="x" onClick={() => close?.()} />}
 			</div>
+			{host.workspace ? <AiBar workspace={host.workspace} /> : null}
 			{find !== null && (
 				<FindBar
 					inputRef={findInput}
@@ -391,6 +407,13 @@ export function BrowserPanel({
 						onAttach={() =>
 							run(async () => {
 								const description = grabText(grab);
+								if (host.workspace) {
+									const decision = host.workspace.assist(['read'], description);
+									if (!decision.allowed) {
+										new Notice(t('browser.ai.refused'));
+										return;
+									}
+								}
 								const files = grab.screenshot ? await host.saveImage(grab.screenshot, description) : [];
 								await host.agents.attach(agent, description, files);
 								new Notice(t('browser.attached'));

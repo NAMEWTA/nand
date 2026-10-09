@@ -66,11 +66,19 @@ export function bindLocalizedControl<T extends object>(
 }
 export function bindLocalizedOptions<T>(control: T, bindings: Record<string, [string, Params?]>): T {
 	const select = (control as { selectEl?: HTMLSelectElement }).selectEl;
-	if (select)
+	if (select) {
+		select.setAttribute('data-nand-i18n-options', 'true');
 		for (const option of Array.from(select.options)) {
 			const binding = bindings[option.value];
 			if (binding) setLocalizedText(option, binding[0], binding[1]);
 		}
+		// Obsidian's native dropdown measures its longest option lazily. Force a
+		// layout pass after replacing labels while preserving the selected value.
+		const value = select.value;
+		select.setCssProps({ width: '' });
+		void select.offsetWidth;
+		select.value = value;
+	}
 	return control;
 }
 export function refreshLocalizedDom(root: HTMLElement): void {
@@ -107,5 +115,12 @@ export function refreshLocalizedDom(root: HTMLElement): void {
 			else element.setAttribute(target, value);
 			element.setAttribute(attribute.name, JSON.stringify([key, params, value]));
 		}
+	}
+	for (const select of [root, ...Array.from(root.querySelectorAll<HTMLSelectElement>('select[data-nand-i18n-options]'))]) {
+		if (!select.instanceOf(HTMLSelectElement)) continue;
+		const value = select.value;
+		select.setCssProps({ width: '' });
+		void select.offsetWidth;
+		select.value = value;
 	}
 }

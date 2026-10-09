@@ -1,5 +1,6 @@
 import { bindLocalizedElement } from '../../../../ui/primitives/localized-dom';
 import { App, Modal, setIcon } from 'obsidian';
+import { selectTemplate, templateChoices } from '../../core/board/board-experience';
 import type { LibraryConfig, PropertyFilterOperator } from '../../core/board/types/index';
 import { t } from '../../../../shared/i18n/index';
 import { ExcludeFoldersEditor } from '../ui/exclude-folders-editor';
@@ -309,11 +310,14 @@ export class LibraryConfigModal extends Modal {
 			.addEventListener('click', () => {
 				const folders = excludeEditor.value;
 				const picked = pinnedEditor.value;
+				const typed = tplInput.value.trim();
+				const choices = templateChoices(undefined, typed ? [typed] : []);
+				const chosen = selectTemplate(choices, typed ? 0 : null);
 				this.onSave({
 					...this.config,
 					excludeFolders: folders.length > 0 ? folders : undefined,
 					visibleProperties: picked.length > 0 ? picked : undefined,
-					templatePath: tplInput.value.trim() || undefined,
+					templatePath: chosen || undefined,
 				});
 				this.close();
 			});

@@ -21,6 +21,7 @@ export const createBrowserPage = (current: () => BrowserModule): WorkbenchContri
   open: (request) => module.openInWindow(request, context.contentEl.win),
   copyText: (text) => module.copyText(text), copyImage: (data) => module.copyImage(data),
   saveImage: (data, context) => module.saveImage(data, context),
+  workspace: module.workspace,
  };
  const surface = new BrowserPresentation(context, host);
  await surface.setState({ ...state, id: target.resourceId }, {} as ViewStateResult);

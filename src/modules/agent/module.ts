@@ -1,11 +1,12 @@
 import type { ModuleContext, ModuleInstance } from '../../app/contracts/module';
 import { registerMessages } from '../../shared/i18n/index';
 import { AUTOMATION_AGENT_RUNTIME } from '../automations/api';
-import { AGENT_SESSIONS, AGENT_WORKBENCH } from './api';
+import { AGENT_DISPATCH, AGENT_PROMPT_RUNNER, AGENT_SESSIONS, AGENT_WORKBENCH } from './api';
 import { messages } from './i18n';
 import { messages as automationStrings } from '../../shared/i18n/lazy/automation';
 import { messages as commonStrings } from '../../shared/i18n/lazy/common';
 import type { AgentController } from './services/controller';
+import { createAgentDispatch, createPromptRunner } from './services/prompt-port';
 import { sessionMaterialPort } from './services/session-material';
 import { agentWorkbench } from './services/workbench';
 import { agentSettings } from './settings';
@@ -25,11 +26,14 @@ export default function createAgentModule(context: ModuleContext): ModuleInstanc
 	return {
 		/** Read after `activate()`. */
 		get services() {
-			return controller
+			const current = controller;
+			return current
 				? [
-						[AUTOMATION_AGENT_RUNTIME, controller.runtime] as const,
-						[AGENT_SESSIONS, sessionMaterialPort(controller)] as const,
-						[AGENT_WORKBENCH, agentWorkbench(controller)] as const,
+						[AUTOMATION_AGENT_RUNTIME, current.runtime] as const,
+						[AGENT_SESSIONS, sessionMaterialPort(current)] as const,
+						[AGENT_WORKBENCH, agentWorkbench(current)] as const,
+						[AGENT_PROMPT_RUNNER, createPromptRunner({ run: (request) => current.runPrompt(request) })] as const,
+						[AGENT_DISPATCH, createAgentDispatch({ openShell: () => current.newShell(), paste: (id, text) => current.pasteInto(id, text) })] as const,
 					]
 				: [];
 		},

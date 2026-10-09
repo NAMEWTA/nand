@@ -1,4 +1,5 @@
 import type { DataviewConfig } from '../../core/board/types/index';
+import { reconcileColumns } from '../../core/board/board-experience';
 import type { QueryResult, ResultRow } from '../../core/dql/types';
 import { formatDate, kindOf } from '../../core/dql/values';
 import { t } from '../../../../shared/i18n/index';
@@ -24,7 +25,18 @@ export interface DisplayColumns {
 	hasImplicitFileCol: boolean;
 }
 
-export function displayColumns(result: QueryResult): DisplayColumns {
+export function displayColumns(result: QueryResult, prefs?: { order?: readonly string[]; hidden?: readonly string[] }): DisplayColumns {
+	const base = baseColumns(result);
+	if (!prefs?.order?.length && !prefs?.hidden?.length) return base;
+	const reconciled = reconcileColumns(prefs.order ?? [], prefs.hidden ?? [], base.valueColumns);
+	const hidden = new Set(reconciled.hidden);
+	return {
+		valueColumns: reconciled.order.filter((field) => base.valueColumns.includes(field) && !hidden.has(field)),
+		hasImplicitFileCol: base.hasImplicitFileCol,
+	};
+}
+
+function baseColumns(result: QueryResult): DisplayColumns {
 	if (result.queryType === 'TABLE') {
 		const valueColumns = result.columns.map((c) => c.alias);
 		const hasImplicitFileCol = !valueColumns.includes('file') ? false : result.columns[0]?.alias === 'file';
@@ -96,7 +108,12 @@ export function tableLayout(
 	config: DataviewConfig | undefined,
 	showRowNumbers: boolean,
 ): TableLayout {
-	const dc = displayColumns(result);
+	const dc = displayColumns(
+		result,
+		config?.columnOrder?.length || config?.hiddenColumns?.length
+			? { order: config.columnOrder, hidden: config.hiddenColumns }
+			: undefined,
+	);
 	const showSource = config?.showSource !== false;
 	const isTask = result.queryType === 'TASK';
 	const labels: string[] = [];

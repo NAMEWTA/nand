@@ -11,11 +11,11 @@ import { Pagination } from '../library/Pagination';
 import type { DataviewContext } from './context';
 import {
 	DEFAULT_PAGE_SIZE,
-	MAX_ROWS,
 	PAGE_SIZE_OPTIONS,
 	PAGINATED_TYPES,
 	compareRowsForSort,
 	rowSearchText,
+	visibleRowWindow,
 } from './result-model';
 import { EmptyResult, FreeList, ResultCalendar, ResultHeatmap, ResultList, ResultTable } from './ResultViews';
 import type { ViewState } from './table-model';
@@ -115,9 +115,11 @@ function ResultPanel({
 	const [view, setView] = useState<ViewState>({ filter: '', sortCol: null, sortDir: 'asc' }),
 		[page, setPage] = useState(1),
 		[size, setSize] = useState(config.pageSize ?? DEFAULT_PAGE_SIZE),
+		[shown, setShown] = useState(0),
 		[mode, setMode] = useState(config.viewMode ?? 'auto');
 	const paginated = PAGINATED_TYPES.has(result.queryType),
-		capped = result.rows.slice(0, MAX_ROWS);
+		windowed = visibleRowWindow(result.rows.length, shown),
+		capped = result.rows.slice(0, windowed.count);
 	let rows = capped;
 	const needle = view.filter.trim().toLowerCase();
 	if (paginated && needle) rows = rows.filter((row) => rowSearchText(row).includes(needle));
@@ -156,8 +158,10 @@ function ResultPanel({
 				needle ? 'dataview.filteredCount' : 'dataview.resultCount',
 				needle ? { shown: rows.length, total: capped.length } : { count: capped.length },
 			)}
-			{!needle && result.rows.length > MAX_ROWS && (
-				<span class="dashboard-dataview-capped">{t('dataview.capped', { count: MAX_ROWS })}</span>
+			{!needle && windowed.truncated && (
+				<button type="button" class="dashboard-dataview-capped" onClick={() => setShown(windowed.next)}>
+					{t('dataview.capped', { count: windowed.count })}
+				</button>
 			)}
 		</>
 	);

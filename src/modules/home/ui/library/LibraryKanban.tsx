@@ -1,9 +1,10 @@
 import { Notice, Platform, type TFile } from 'obsidian';
 import { useLayoutEffect, useMemo, useRef, useState } from 'preact/hooks';
 import { t } from '../../../../shared/i18n/index';
+import { libraryStageMove } from '../../core/board/library-stage';
 import { noteHover } from '../cards/InlineLinks';
 import { KANBAN_FILE_DRAG_TYPE } from '../ui/dnd';
-import { Cover, PropertyBadges, type LibraryViewProps } from './LibraryViews';
+import { Cover, LibraryDeleteButton, PropertyBadges, type LibraryViewProps } from './LibraryViews';
 import { formatDate } from './library-file-result';
 import {
 	ancestorGroupKeys,
@@ -14,7 +15,7 @@ import {
 } from './library-groups';
 import { extractCoverValue, omitFrontmatterKey, openFile } from './library-presentation';
 const pendingMoves = new WeakSet<TFile>();
-export function LibraryKanban({ app, config, context, results }: LibraryViewProps) {
+export function LibraryKanban({ app, config, context, results, onDelete }: LibraryViewProps) {
 	const folder = config.groupMode === 'folder',
 		property = config.kanbanGroupBy ?? 'tags';
 	const folders = useMemo(() => buildKanbanGroupFolders(results, config.folders ?? []), [results, config.folders]);
@@ -53,10 +54,6 @@ export function LibraryKanban({ app, config, context, results }: LibraryViewProp
 				new Notice(t('library.moveFailed'));
 				return;
 			}
-			if (app.vault.getAbstractFileByPath(`${destination}/${file.name}`)) {
-				new Notice(t('library.moveNameConflict', { name: file.basename, folder: destination }));
-				return;
-			}
 		} else if (
 			nextGroupPropertyValue(
 				app.metadataCache.getFileCache(file)?.frontmatter?.[property],
@@ -65,6 +62,21 @@ export function LibraryKanban({ app, config, context, results }: LibraryViewProp
 			) === undefined
 		)
 			return;
+		const siblingNames = folder && destination && app.vault.getAbstractFileByPath(`${destination}/${file.name}`) ? [file.name] : [];
+		const decision = libraryStageMove({
+			mode: folder ? 'folder' : 'property',
+			path: file.path,
+			destination: folder ? destination! : target.key,
+			siblingNames,
+			statusField: property,
+			stageValue: target.key,
+			writeStatus: () => 'ok',
+			rename: () => 'ok',
+		});
+		if (decision.status === 'refused') {
+			new Notice(decision.error === 'name-clash' ? t('library.moveNameConflict', { name: file.basename, folder: destination ?? target.label }) : t('library.moveFailed'));
+			return;
+		}
 		const original = groups,
 			result = groups.flatMap((group) => group.items).find((item) => item.file === file);
 		if (!result) return;
@@ -145,8 +157,17 @@ export function LibraryKanban({ app, config, context, results }: LibraryViewProp
 									draggable={!Platform.isMobile}
 									title={t(folder ? 'library.kanbanDragHint' : 'library.kanbanDragHintProperty')}
 									onMouseOver={(event) => noteHover(app, context, result.file, event)}
-									onClick={(event) => openFile(app, result.file, event.currentTarget)}
+									onClick={(event) => {
+										if ((event.target as HTMLElement).closest('.dashboard-library-table-delete')) return;
+										openFile(app, result.file, event.currentTarget);
+									}}
 									onDragStart={(event) => {
+										const target = event.target as HTMLElement | null;
+										if (target?.closest('.dashboard-library-table-delete')) {
+											event.preventDefault();
+											event.stopPropagation();
+											return;
+										}
 										drag.current = { file: result.file, from: group.isNoGroup ? null : group.key };
 										event.currentTarget.classList.add('dashboard-library-kanban-card--dragging');
 										if (event.dataTransfer) {
@@ -160,6 +181,7 @@ export function LibraryKanban({ app, config, context, results }: LibraryViewProp
 										event.currentTarget.classList.remove('dashboard-library-kanban-card--dragging');
 									}}
 								>
+									<LibraryDeleteButton file={result.file} onDelete={onDelete} />
 									{config.kanbanShowCovers && <Cover app={app} result={result} kanban />}
 									<div class="dashboard-library-kanban-card-title">{result.basename}</div>
 									<div class="dashboard-library-kanban-card-date">{formatDate(result.mtime)}</div>

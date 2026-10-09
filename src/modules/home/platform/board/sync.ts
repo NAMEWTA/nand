@@ -1,3 +1,4 @@
+import { moveCardGrid, packBoardOnce, resizeCardGrid } from '../../core/board/board-grid';
 import { DASHBOARD_CONFLICT_DIR, DashboardSaveError, dashboardSaveMessage, type DashboardSaveState, type DashboardSaveStatus } from '../../core/board/save-state';
 import { ensureDirectory } from '../../../../shared/storage/durable-state';
 import { App, Notice, TFile } from 'obsidian';
@@ -29,6 +30,7 @@ import {
 } from '../../core/board/task-tree';
 import type {
 	BannerData,
+	BoardLayout,
 	CardType,
 	DashboardCard,
 	DashboardData,
@@ -1009,12 +1011,48 @@ export class SyncEngine {
 
 	async updateCardGrid(cardId: string, gridCols: number, gridRows: number): Promise<void> {
 		this.assertOpen();
-		await this.updateCard(cardId, { gridCols, gridRows });
+		if (!this.data) return;
+		this.data = this.withCards(resizeCardGrid(this.boardCards(), cardId, gridCols, gridRows));
+		await this.writeToDisk();
 	}
 
 	async updateCardGridMove(cardId: string, gridCol: number, gridRow: number): Promise<void> {
 		this.assertOpen();
-		await this.updateCard(cardId, { gridCol, gridRow });
+		if (!this.data) return;
+		this.data = this.withCards(moveCardGrid(this.boardCards(), cardId, gridCol, gridRow));
+		await this.writeToDisk();
+	}
+
+	/** User layout choice. Immersive packing runs once here, never on open or resize. */
+	async setBoardLayout(layout: BoardLayout): Promise<void> {
+		this.assertOpen();
+		if (!this.data) return;
+		const next = layout === 'stacked' ? undefined : layout;
+		let cards = this.boardCards();
+		let gridPacked = this.data.gridPacked;
+		if (layout === 'immersive' && !gridPacked) {
+			const packed = packBoardOnce(cards, false);
+			cards = packed.cards;
+			gridPacked = true;
+		}
+		this.data = { ...this.withCards(cards), layout: next, gridPacked };
+		await this.writeToDisk();
+	}
+
+	private boardCards(): DashboardCard[] {
+		return this.data?.columns.flatMap((column) => column.cards) ?? [];
+	}
+
+	private withCards(cards: readonly DashboardCard[]): DashboardData {
+		const byId = new Map(cards.map((card) => [card.id, card]));
+		const data = this.data!;
+		return {
+			...data,
+			columns: data.columns.map((column) => ({
+				...column,
+				cards: column.cards.map((card) => byId.get(card.id) ?? card),
+			})),
+		};
 	}
 
 	async updateProjectCover(cardId: string, coverImage: string): Promise<void> {
