@@ -26,6 +26,8 @@ export default function createAgentModule(context: ModuleContext): ModuleInstanc
 	let controller: AgentController | undefined;
 	let dispatch: ReturnType<typeof createAgentDispatch> | undefined;
 	let skills: AgentSkillDirectory | undefined;
+	const migrationLifetime = new AbortController();
+	let releaseMigration: (() => void) | undefined;
 	return {
 		/** Read after `activate()`. */
 		get services() {
@@ -50,6 +52,9 @@ export default function createAgentModule(context: ModuleContext): ModuleInstanc
 			skills = new AgentSkillDirectory(context.app.vault.adapter, settings, context.env.desktop);
 			// Portable discovery never imports the terminal controller or its desktop dependency tree.
 			if (!context.env.desktop) return;
+			const { prepareAccounts } = await import('./platform/desktop/agents/prepare-accounts');
+			releaseMigration = await prepareAccounts(context.app, context.manifest.dir ?? '', async options => (await import('./ui/terminal/legacy-account-choice')).chooseLegacyAccount(context.app, options, migrationLifetime.signal));
+			if (migrationLifetime.signal.aborted) { releaseMigration(); releaseMigration = undefined; return; }
 			const { AgentController } = await import('./services/controller');
 			controller = new AgentController(context, settings, {
 				confirm: async (app, message) => (await import('./ui/terminal/confirm')).confirmAction(app, message),
@@ -61,6 +66,7 @@ export default function createAgentModule(context: ModuleContext): ModuleInstanc
 				cwd: () => current.vaultPath() ?? '', clock: context.app.workspace.containerEl.win });
 		},
 		async dispose() {
+			migrationLifetime.abort(); releaseMigration?.(); releaseMigration = undefined;
 			skills?.dispose(); skills = undefined;
 			dispatch?.dispose(); dispatch = undefined;
 			const current = controller;

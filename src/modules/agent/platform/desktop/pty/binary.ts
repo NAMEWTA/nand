@@ -3,12 +3,16 @@ import * as fs from 'node:fs';
 import { setTimeout as scheduleTimeout, clearTimeout as cancelTimeout } from 'node:timers';
 import { requestUrl, type RequestUrlResponse } from 'obsidian';
 import * as path from 'node:path';
+import { absoluteNandPath } from '../../../../../host/desktop/nand-paths';
+import { nativeVaultStorage } from '../../../../../host/desktop/vault-storage';
+import { secureOwnedDirectory } from '../../../../../host/desktop/owned-permissions';
 
 /** Release that publishes the native helper next to the plugin files. */
 export const RELEASE_BASE = 'https://github.com/NAMEWTA/nand/releases/download';
 const DIGEST_LIMIT = 4096;
 const REQUEST_TIMEOUT = 60_000;
 const STAMP = 'nand-pty.json';
+const installations = new Map<string, Promise<string>>();
 
 export type BinaryErrorCode = 'unsupported' | 'offlineMissing' | 'http' | 'network' | 'redirects' | 'timeout' | 'tooLarge' | 'checksumMissing' | 'checksumMismatch' | 'inUse';
 
@@ -68,20 +72,22 @@ export async function downloadHelperBytes(url: string, limit: number, timeout = 
 interface Stamp {
 	version: string;
 	sha256: string;
+	source: 'release' | 'development';
 }
 
 function readStamp(dir: string): Stamp | null {
 	try {
 		const value = JSON.parse(fs.readFileSync(path.join(dir, STAMP), 'utf8')) as Partial<Stamp>;
-		return typeof value.version === 'string' && typeof value.sha256 === 'string' ? { version: value.version, sha256: value.sha256 } : null;
+		return typeof value.version === 'string' && typeof value.sha256 === 'string' && (value.source === 'release' || value.source === 'development') ? { version: value.version, sha256: value.sha256, source: value.source } : null;
 	} catch {
 		return null;
 	}
 }
 
 export interface InstallOptions {
-	/** Absolute plugin folder. */
-	pluginDir: string;
+	/** Opened vault and its initialized local device identity. */
+	vault: string;
+	device: string;
 	/** Plugin version; the helper comes from the release with the same tag. */
 	version: string;
 	offline: boolean;
@@ -94,24 +100,37 @@ export interface InstallOptions {
 
 /**
  * Path of a usable helper binary, downloading and verifying it when needed. A file is trusted when it
- * matches the digest published for this plugin version (or, offline, when it exists; the protocol
- * handshake still has to accept it).
+ * matches the digest published for this plugin version. Offline use requires a verified receipt;
+ * each version has its own path so an upgrade never replaces a running older executable.
  */
 export async function ensureHelper(options: InstallOptions): Promise<string> {
-	// Development and acceptance runs point at a locally built helper; the handshake still checks it.
+	const root = await absoluteNandPath(options.vault, `.nand/helpers/${options.device}`);
+	const key = JSON.stringify([root, options.version, options.platform ?? process.platform, options.arch ?? process.arch]);
+	const operation = (installations.get(key) ?? Promise.resolve()).catch(() => {}).then(() => installHelper(options));
+	installations.set(key, operation);
+	try { return await operation; } finally { if (installations.get(key) === operation) installations.delete(key); }
+}
+
+async function installHelper(options: InstallOptions): Promise<string> {
 	const local = process.env.NAND_PTY_BINARY;
-	if (local && fs.existsSync(local)) return local;
-	const name = assetName(options.platform ?? process.platform, options.arch ?? process.arch);
+	const platform = options.platform ?? process.platform, arch = options.arch ?? process.arch;
+	const name = assetName(platform, arch);
 	if (!name) throw new BinaryError('unsupported', 'No terminal helper is published for this platform');
-	const dir = path.join(options.pluginDir, 'binaries');
-	const file = path.join(dir, name);
+	if (!/^\d+\.\d+\.\d+(?:-[a-z\d.-]+)?$/i.test(options.version)) throw new BinaryError('unsupported', 'Invalid terminal helper version');
+	await secureOwnedDirectory(options.vault, `.nand/helpers/${options.device}`);
+	const relative = `.nand/helpers/${options.device}/${platform}-${arch}/${options.version}`;
+	const dir = await absoluteNandPath(options.vault, relative), file = await absoluteNandPath(options.vault, relative + '/' + name);
+	await absoluteNandPath(options.vault, relative + '/' + STAMP);
+	const localBytes = local ? fs.readFileSync(local) : undefined, source = localBytes ? 'development' : 'release';
+	const localDigest = localBytes ? createHash('sha256').update(localBytes).digest('hex') : undefined;
 	const exists = fs.existsSync(file);
+	const stamp = readStamp(dir);
+	const verified = exists && stamp?.version === options.version && stamp.source === source && sha256(file) === stamp.sha256 && (!localDigest || stamp.sha256 === localDigest);
 	if (options.offline) {
-		if (!exists) throw new BinaryError('offlineMissing', 'Offline mode is on and no terminal helper is installed');
+		if (!verified) throw new BinaryError('offlineMissing', 'Offline mode requires a verified terminal helper for this version');
 		return file;
 	}
-	const stamp = readStamp(dir);
-	if (exists && stamp?.version === options.version && sha256(file) === stamp.sha256) return file;
+	if (verified) return file;
 
 	const fetch = async (url: string, limit: number) => {
 		try { return await (options.fetch ?? downloadHelperBytes)(url, limit); }
@@ -124,27 +143,29 @@ export async function ensureHelper(options: InstallOptions): Promise<string> {
 	};
 	const base = `${RELEASE_BASE}/${encodeURIComponent(options.version)}/${name}`;
 	options.progress?.('downloading');
-	const digest = parseDigest((await fetch(`${base}.sha256`, DIGEST_LIMIT)).toString('utf8'));
+	const digest = localDigest ?? parseDigest((await fetch(`${base}.sha256`, DIGEST_LIMIT)).toString('utf8'));
 	if (!digest) throw new BinaryError('checksumMissing', 'The published terminal helper checksum is missing or invalid');
-	fs.mkdirSync(dir, { recursive: true });
-	const remember = () => fs.writeFileSync(path.join(dir, STAMP), JSON.stringify({ version: options.version, sha256: digest }));
+	await nativeVaultStorage(options.vault).mkdir(relative);
+	await absoluteNandPath(options.vault, relative + '/' + name);
+	const remember = async () => { await absoluteNandPath(options.vault, relative + '/' + STAMP); fs.writeFileSync(path.join(dir, STAMP), JSON.stringify({ version: options.version, sha256: digest, source }), { mode: 0o600 }); };
 	// A matching file placed by hand (same release) is accepted without downloading again.
 	if (exists && sha256(file) === digest) {
-		remember();
+		await remember();
 		return file;
 	}
-	const bytes = await fetch(base, 256 * 1024 * 1024);
+	const bytes = localBytes ?? await fetch(base, 256 * 1024 * 1024);
 	options.progress?.('verifying');
 	if (createHash('sha256').update(bytes).digest('hex') !== digest) throw new BinaryError('checksumMismatch', 'The downloaded terminal helper does not match its checksum; the previous file was kept');
-	const temporary = `${file}.download`;
-	fs.writeFileSync(temporary, bytes, { mode: 0o755 });
+	await absoluteNandPath(options.vault, relative + '/' + name);
+	const temporary = `${file}.download-${crypto.randomUUID()}`;
+	fs.writeFileSync(temporary, bytes, { mode: 0o700, flag: 'wx' });
 	try {
 		fs.renameSync(temporary, file);
 	} catch (error) {
 		fs.rmSync(temporary, { force: true });
 		throw new BinaryError('inUse', `The terminal helper could not be replaced: ${error instanceof Error ? error.message : String(error)}`);
 	}
-	if (process.platform !== 'win32') fs.chmodSync(file, 0o755);
-	remember();
+	if (process.platform !== 'win32') fs.chmodSync(file, 0o700);
+	await remember();
 	return file;
 }

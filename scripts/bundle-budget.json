@@ -1,7 +1,7 @@
 {
   "$comment": "CI gate: `check:bundle --budget scripts/bundle-budget.json --enforce`. eagerBytes caps the code evaluated at plugin startup and moduleActivationBytes caps what each module loads when it starts; outputBytes and stylesBytes are ratchets on main.js and styles.css. Lower a limit as code shrinks; never raise one without a recorded reason.",
-  "outputBytes": 4661248,
-  "outputBudgetReason": "2026-10-11 T-04：库内显式 Session、冷迁移、恢复副本与回执严格冲突检测、取消及删除恢复、下载按网页归属通知。实测 main.js 4660290 字节，按 KiB 取整 4661248；启动与模块激活上限不变，策略和迁移按需加载。证据：speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/evidence/T-04.md。",
+  "outputBytes": 4677632,
+  "outputBudgetReason": "2026-10-11 T-05：账号身份及全量环境、冷迁移与显式绑定、原生 Windows ACL、版本化 helper、Hook 写入边界及旧产物链接映射。main.js 实测 4677317 字节，按 KiB 取整 4677632；启动、模块激活及样式预算不变，未引入依赖。证据：speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/evidence/T-05.md。",
   "stylesBytes": 757760,
   "eagerBytes": 122880,
   "forbiddenEagerAreas": [

@@ -8,7 +8,7 @@ artifact: "ticket"
 change: "2026-10-11-vault-data-unification"
 id: "T-04"
 title: "浏览器会话与产物进入 vault"
-status: "review"
+status: "done"
 kind: "feature"
 planning_depth: "deep"
 planning_depth_reason: "涉及公共持久化、数据迁移、身份隔离或发布；用户已批准完整计划及实施。"
@@ -80,9 +80,9 @@ E2E owner/environment: root / current-workspace。提交已获用户授权；imp
 
 ## 10. 验收标准
 
-- [ ] AC-004：所有 NAND 网页表面绑定 vault 内的显式 Session；Cookie、站点数据、缓存、下载、桥接和临时文件进入 .nand；按设备和 profile 隔离；旧库冷迁移，跨设备允许重新登录。
-- [ ] 非空实现、验证和双轴审查事实写入 <Path>{roots.state}/specdev/changes/2026-10-11-vault-data-unification/evidence/T-04.md</Path>。
-- [ ] 实际路径、Skill 摘要、命令结果、未验证范围与 Map 一致。
+- [x] AC-004：所有 NAND 网页表面绑定 vault 内的显式 Session；Cookie、站点数据、缓存、下载、桥接和临时文件进入 .nand；按设备和 profile 隔离；旧库冷迁移，跨设备允许重新登录。
+- [x] 非空实现、验证和双轴审查事实写入 <Path>{roots.state}/specdev/changes/2026-10-11-vault-data-unification/evidence/T-04.md</Path>。
+- [x] 实际路径、Skill 摘要、命令结果、未验证范围与 Map 一致。
 
 ## 12. 停止、检查点与交付
 

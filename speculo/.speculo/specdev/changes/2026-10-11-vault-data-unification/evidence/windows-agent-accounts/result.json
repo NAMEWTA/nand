@@ -1,0 +1,456 @@
+{
+  "passed": true,
+  "realAccountsVerified": false,
+  "rows": [
+    {
+      "name": "old-owned-data-requires-cold-restart",
+      "passed": true
+    },
+    {
+      "name": "old-account-still-exists-before-restart",
+      "passed": true
+    },
+    {
+      "name": "module-reload-cannot-bypass-cold-gate",
+      "passed": true
+    },
+    {
+      "name": "old-account-retained-under-vault",
+      "passed": true
+    },
+    {
+      "name": "old-helper-retained-under-vault",
+      "passed": true
+    },
+    {
+      "name": "plugin-data-retired",
+      "passed": true
+    },
+    {
+      "name": "explicit-legacy-choice-a.b",
+      "passed": true
+    },
+    {
+      "name": "launch-claude-code-a.b",
+      "passed": true,
+      "detail": {
+        "ok": true
+      }
+    },
+    {
+      "name": "native-environment-claude-code-a.b",
+      "passed": true,
+      "detail": {
+        "HOME": "D:\\Document\\code\\nand\\scripts\\tmp\\agent-vault-data-20261011-03\\vault\\.nand\\agents\\2ba2c304-5229-4680-9f93-f71025eb49d3\\accounts\\claude-code\\2e7336dc8eba87ef472df568c35482abf2575dc3e5eac0c5c62b8ffaeac2c934\\home",
+        "USERPROFILE": "D:\\Document\\code\\nand\\scripts\\tmp\\agent-vault-data-20261011-03\\vault\\.nand\\agents\\2ba2c304-5229-4680-9f93-f71025eb49d3\\accounts\\claude-code\\2e7336dc8eba87ef472df568c35482abf2575dc3e5eac0c5c62b8ffaeac2c934\\home",
+        "APPDATA": "D:\\Document\\code\\nand\\scripts\\tmp\\agent-vault-data-20261011-03\\vault\\.nand\\agents\\2ba2c304-5229-4680-9f93-f71025eb49d3\\accounts\\claude-code\\2e7336dc8eba87ef472df568c35482abf2575dc3e5eac0c5c62b8ffaeac2c934\\home\\AppData\\Roaming",
+        "LOCALAPPDATA": "D:\\Document\\code\\nand\\scripts\\tmp\\agent-vault-data-20261011-03\\vault\\.nand\\agents\\2ba2c304-5229-4680-9f93-f71025eb49d3\\accounts\\claude-code\\2e7336dc8eba87ef472df568c35482abf2575dc3e5eac0c5c62b8ffaeac2c934\\home\\AppData\\Local",
+        "TMP": "D:\\Document\\code\\nand\\scripts\\tmp\\agent-vault-data-20261011-03\\vault\\.nand\\agents\\2ba2c304-5229-4680-9f93-f71025eb49d3\\accounts\\claude-code\\2e7336dc8eba87ef472df568c35482abf2575dc3e5eac0c5c62b8ffaeac2c934\\tmp",
+        "TEMP": "D:\\Document\\code\\nand\\scripts\\tmp\\agent-vault-data-20261011-03\\vault\\.nand\\agents\\2ba2c304-5229-4680-9f93-f71025eb49d3\\accounts\\claude-code\\2e7336dc8eba87ef472df568c35482abf2575dc3e5eac0c5c62b8ffaeac2c934\\tmp",
+        "TMPDIR": "D:\\Document\\code\\nand\\scripts\\tmp\\agent-vault-data-20261011-03\\vault\\.nand\\agents\\2ba2c304-5229-4680-9f93-f71025eb49d3\\accounts\\claude-code\\2e7336dc8eba87ef472df568c35482abf2575dc3e5eac0c5c62b8ffaeac2c934\\tmp",
+        "XDG_CONFIG_HOME": "D:\\Document\\code\\nand\\scripts\\tmp\\agent-vault-data-20261011-03\\vault\\.nand\\agents\\2ba2c304-5229-4680-9f93-f71025eb49d3\\accounts\\claude-code\\2e7336dc8eba87ef472df568c35482abf2575dc3e5eac0c5c62b8ffaeac2c934\\xdg\\config",
+        "XDG_CACHE_HOME": "D:\\Document\\code\\nand\\scripts\\tmp\\agent-vault-data-20261011-03\\vault\\.nand\\agents\\2ba2c304-5229-4680-9f93-f71025eb49d3\\accounts\\claude-code\\2e7336dc8eba87ef472df568c35482abf2575dc3e5eac0c5c62b8ffaeac2c934\\xdg\\cache",
+        "XDG_DATA_HOME": "D:\\Document\\code\\nand\\scripts\\tmp\\agent-vault-data-20261011-03\\vault\\.nand\\agents\\2ba2c304-5229-4680-9f93-f71025eb49d3\\accounts\\claude-code\\2e7336dc8eba87ef472df568c35482abf2575dc3e5eac0c5c62b8ffaeac2c934\\xdg\\data",
+        "XDG_STATE_HOME": "D:\\Document\\code\\nand\\scripts\\tmp\\agent-vault-data-20261011-03\\vault\\.nand\\agents\\2ba2c304-5229-4680-9f93-f71025eb49d3\\accounts\\claude-code\\2e7336dc8eba87ef472df568c35482abf2575dc3e5eac0c5c62b8ffaeac2c934\\xdg\\state",
+        "CLAUDE_CONFIG_DIR": "D:\\Document\\code\\nand\\scripts\\tmp\\agent-vault-data-20261011-03\\vault\\.nand\\agents\\2ba2c304-5229-4680-9f93-f71025eb49d3\\accounts\\claude-code\\2e7336dc8eba87ef472df568c35482abf2575dc3e5eac0c5c62b8ffaeac2c934\\legacy-config",
+        "CODEX_HOME": "D:\\Document\\code\\nand\\scripts\\tmp\\agent-vault-data-20261011-03\\vault\\.nand\\agents\\2ba2c304-5229-4680-9f93-f71025eb49d3\\accounts\\claude-code\\2e7336dc8eba87ef472df568c35482abf2575dc3e5eac0c5c62b8ffaeac2c934\\home\\.codex",
+        "GEMINI_CLI_HOME": "D:\\Document\\code\\nand\\scripts\\tmp\\agent-vault-data-20261011-03\\vault\\.nand\\agents\\2ba2c304-5229-4680-9f93-f71025eb49d3\\accounts\\claude-code\\2e7336dc8eba87ef472df568c35482abf2575dc3e5eac0c5c62b8ffaeac2c934\\home",
+        "GROK_HOME": "D:\\Document\\code\\nand\\scripts\\tmp\\agent-vault-data-20261011-03\\vault\\.nand\\agents\\2ba2c304-5229-4680-9f93-f71025eb49d3\\accounts\\claude-code\\2e7336dc8eba87ef472df568c35482abf2575dc3e5eac0c5c62b8ffaeac2c934\\home\\.grok",
+        "PI_CODING_AGENT_DIR": "D:\\Document\\code\\nand\\scripts\\tmp\\agent-vault-data-20261011-03\\vault\\.nand\\agents\\2ba2c304-5229-4680-9f93-f71025eb49d3\\accounts\\claude-code\\2e7336dc8eba87ef472df568c35482abf2575dc3e5eac0c5c62b8ffaeac2c934\\home\\.pi\\agent",
+        "PI_CODING_AGENT_SESSION_DIR": "D:\\Document\\code\\nand\\scripts\\tmp\\agent-vault-data-20261011-03\\vault\\.nand\\agents\\2ba2c304-5229-4680-9f93-f71025eb49d3\\accounts\\claude-code\\2e7336dc8eba87ef472df568c35482abf2575dc3e5eac0c5c62b8ffaeac2c934\\home\\.pi\\agent\\sessions",
+        "OPENCODE_CONFIG_DIR": "D:\\Document\\code\\nand\\scripts\\tmp\\agent-vault-data-20261011-03\\vault\\.nand\\agents\\2ba2c304-5229-4680-9f93-f71025eb49d3\\accounts\\claude-code\\2e7336dc8eba87ef472df568c35482abf2575dc3e5eac0c5c62b8ffaeac2c934\\xdg\\config\\opencode",
+        "NAND_ACCOUNT_ROOT": "D:\\Document\\code\\nand\\scripts\\tmp\\agent-vault-data-20261011-03\\vault\\.nand\\agents\\2ba2c304-5229-4680-9f93-f71025eb49d3\\accounts\\claude-code\\2e7336dc8eba87ef472df568c35482abf2575dc3e5eac0c5c62b8ffaeac2c934",
+        "NAND_ACCOUNT_ID": "claude-code/2e7336dc8eba87ef472df568c35482abf2575dc3e5eac0c5c62b8ffaeac2c934",
+        "NAND_ACCOUNT_NAME": "a.b",
+        "NAND_HOOK_DIR": "D:\\Document\\code\\nand\\scripts\\tmp\\agent-vault-data-20261011-03\\vault\\.nand\\agents\\2ba2c304-5229-4680-9f93-f71025eb49d3\\accounts\\claude-code\\2e7336dc8eba87ef472df568c35482abf2575dc3e5eac0c5c62b8ffaeac2c934\\runtime\\hooks\\terminal-VT0XDb"
+      }
+    },
+    {
+      "name": "selected-old-credentials-used",
+      "passed": true
+    },
+    {
+      "name": "explicit-legacy-choice-ab",
+      "passed": true
+    },
+    {
+      "name": "launch-claude-code-ab",
+      "passed": true,
+      "detail": {
+        "ok": true
+      }
+    },
+    {
+      "name": "native-environment-claude-code-ab",
+      "passed": true,
+      "detail": {
+        "HOME": "D:\\Document\\code\\nand\\scripts\\tmp\\agent-vault-data-20261011-03\\vault\\.nand\\agents\\2ba2c304-5229-4680-9f93-f71025eb49d3\\accounts\\claude-code\\fb8e20fc2e4c3f248c60c39bd652f3c1347298bb977b8b4d5903b85055620603\\home",
+        "USERPROFILE": "D:\\Document\\code\\nand\\scripts\\tmp\\agent-vault-data-20261011-03\\vault\\.nand\\agents\\2ba2c304-5229-4680-9f93-f71025eb49d3\\accounts\\claude-code\\fb8e20fc2e4c3f248c60c39bd652f3c1347298bb977b8b4d5903b85055620603\\home",
+        "APPDATA": "D:\\Document\\code\\nand\\scripts\\tmp\\agent-vault-data-20261011-03\\vault\\.nand\\agents\\2ba2c304-5229-4680-9f93-f71025eb49d3\\accounts\\claude-code\\fb8e20fc2e4c3f248c60c39bd652f3c1347298bb977b8b4d5903b85055620603\\home\\AppData\\Roaming",
+        "LOCALAPPDATA": "D:\\Document\\code\\nand\\scripts\\tmp\\agent-vault-data-20261011-03\\vault\\.nand\\agents\\2ba2c304-5229-4680-9f93-f71025eb49d3\\accounts\\claude-code\\fb8e20fc2e4c3f248c60c39bd652f3c1347298bb977b8b4d5903b85055620603\\home\\AppData\\Local",
+        "TMP": "D:\\Document\\code\\nand\\scripts\\tmp\\agent-vault-data-20261011-03\\vault\\.nand\\agents\\2ba2c304-5229-4680-9f93-f71025eb49d3\\accounts\\claude-code\\fb8e20fc2e4c3f248c60c39bd652f3c1347298bb977b8b4d5903b85055620603\\tmp",
+        "TEMP": "D:\\Document\\code\\nand\\scripts\\tmp\\agent-vault-data-20261011-03\\vault\\.nand\\agents\\2ba2c304-5229-4680-9f93-f71025eb49d3\\accounts\\claude-code\\fb8e20fc2e4c3f248c60c39bd652f3c1347298bb977b8b4d5903b85055620603\\tmp",
+        "TMPDIR": "D:\\Document\\code\\nand\\scripts\\tmp\\agent-vault-data-20261011-03\\vault\\.nand\\agents\\2ba2c304-5229-4680-9f93-f71025eb49d3\\accounts\\claude-code\\fb8e20fc2e4c3f248c60c39bd652f3c1347298bb977b8b4d5903b85055620603\\tmp",
+        "XDG_CONFIG_HOME": "D:\\Document\\code\\nand\\scripts\\tmp\\agent-vault-data-20261011-03\\vault\\.nand\\agents\\2ba2c304-5229-4680-9f93-f71025eb49d3\\accounts\\claude-code\\fb8e20fc2e4c3f248c60c39bd652f3c1347298bb977b8b4d5903b85055620603\\xdg\\config",
+        "XDG_CACHE_HOME": "D:\\Document\\code\\nand\\scripts\\tmp\\agent-vault-data-20261011-03\\vault\\.nand\\agents\\2ba2c304-5229-4680-9f93-f71025eb49d3\\accounts\\claude-code\\fb8e20fc2e4c3f248c60c39bd652f3c1347298bb977b8b4d5903b85055620603\\xdg\\cache",
+        "XDG_DATA_HOME": "D:\\Document\\code\\nand\\scripts\\tmp\\agent-vault-data-20261011-03\\vault\\.nand\\agents\\2ba2c304-5229-4680-9f93-f71025eb49d3\\accounts\\claude-code\\fb8e20fc2e4c3f248c60c39bd652f3c1347298bb977b8b4d5903b85055620603\\xdg\\data",
+        "XDG_STATE_HOME": "D:\\Document\\code\\nand\\scripts\\tmp\\agent-vault-data-20261011-03\\vault\\.nand\\agents\\2ba2c304-5229-4680-9f93-f71025eb49d3\\accounts\\claude-code\\fb8e20fc2e4c3f248c60c39bd652f3c1347298bb977b8b4d5903b85055620603\\xdg\\state",
+        "CLAUDE_CONFIG_DIR": "D:\\Document\\code\\nand\\scripts\\tmp\\agent-vault-data-20261011-03\\vault\\.nand\\agents\\2ba2c304-5229-4680-9f93-f71025eb49d3\\accounts\\claude-code\\fb8e20fc2e4c3f248c60c39bd652f3c1347298bb977b8b4d5903b85055620603\\home\\.claude",
+        "CODEX_HOME": "D:\\Document\\code\\nand\\scripts\\tmp\\agent-vault-data-20261011-03\\vault\\.nand\\agents\\2ba2c304-5229-4680-9f93-f71025eb49d3\\accounts\\claude-code\\fb8e20fc2e4c3f248c60c39bd652f3c1347298bb977b8b4d5903b85055620603\\home\\.codex",
+        "GEMINI_CLI_HOME": "D:\\Document\\code\\nand\\scripts\\tmp\\agent-vault-data-20261011-03\\vault\\.nand\\agents\\2ba2c304-5229-4680-9f93-f71025eb49d3\\accounts\\claude-code\\fb8e20fc2e4c3f248c60c39bd652f3c1347298bb977b8b4d5903b85055620603\\home",
+        "GROK_HOME": "D:\\Document\\code\\nand\\scripts\\tmp\\agent-vault-data-20261011-03\\vault\\.nand\\agents\\2ba2c304-5229-4680-9f93-f71025eb49d3\\accounts\\claude-code\\fb8e20fc2e4c3f248c60c39bd652f3c1347298bb977b8b4d5903b85055620603\\home\\.grok",
+        "PI_CODING_AGENT_DIR": "D:\\Document\\code\\nand\\scripts\\tmp\\agent-vault-data-20261011-03\\vault\\.nand\\agents\\2ba2c304-5229-4680-9f93-f71025eb49d3\\accounts\\claude-code\\fb8e20fc2e4c3f248c60c39bd652f3c1347298bb977b8b4d5903b85055620603\\home\\.pi\\agent",
+        "PI_CODING_AGENT_SESSION_DIR": "D:\\Document\\code\\nand\\scripts\\tmp\\agent-vault-data-20261011-03\\vault\\.nand\\agents\\2ba2c304-5229-4680-9f93-f71025eb49d3\\accounts\\claude-code\\fb8e20fc2e4c3f248c60c39bd652f3c1347298bb977b8b4d5903b85055620603\\home\\.pi\\agent\\sessions",
+        "OPENCODE_CONFIG_DIR": "D:\\Document\\code\\nand\\scripts\\tmp\\agent-vault-data-20261011-03\\vault\\.nand\\agents\\2ba2c304-5229-4680-9f93-f71025eb49d3\\accounts\\claude-code\\fb8e20fc2e4c3f248c60c39bd652f3c1347298bb977b8b4d5903b85055620603\\xdg\\config\\opencode",
+        "NAND_ACCOUNT_ROOT": "D:\\Document\\code\\nand\\scripts\\tmp\\agent-vault-data-20261011-03\\vault\\.nand\\agents\\2ba2c304-5229-4680-9f93-f71025eb49d3\\accounts\\claude-code\\fb8e20fc2e4c3f248c60c39bd652f3c1347298bb977b8b4d5903b85055620603",
+        "NAND_ACCOUNT_ID": "claude-code/fb8e20fc2e4c3f248c60c39bd652f3c1347298bb977b8b4d5903b85055620603",
+        "NAND_ACCOUNT_NAME": "ab",
+        "NAND_HOOK_DIR": "D:\\Document\\code\\nand\\scripts\\tmp\\agent-vault-data-20261011-03\\vault\\.nand\\agents\\2ba2c304-5229-4680-9f93-f71025eb49d3\\accounts\\claude-code\\fb8e20fc2e4c3f248c60c39bd652f3c1347298bb977b8b4d5903b85055620603\\runtime\\hooks\\terminal-75p923"
+      }
+    },
+    {
+      "name": "lossy-collision-does-not-reuse-credentials",
+      "passed": true
+    },
+    {
+      "name": "explicit-legacy-choice-",
+      "passed": true
+    },
+    {
+      "name": "launch-claude-code-",
+      "passed": true,
+      "detail": {
+        "ok": true
+      }
+    },
+    {
+      "name": "native-environment-claude-code-",
+      "passed": true,
+      "detail": {
+        "HOME": "D:\\Document\\code\\nand\\scripts\\tmp\\agent-vault-data-20261011-03\\vault\\.nand\\agents\\2ba2c304-5229-4680-9f93-f71025eb49d3\\accounts\\claude-code\\default\\home",
+        "USERPROFILE": "D:\\Document\\code\\nand\\scripts\\tmp\\agent-vault-data-20261011-03\\vault\\.nand\\agents\\2ba2c304-5229-4680-9f93-f71025eb49d3\\accounts\\claude-code\\default\\home",
+        "APPDATA": "D:\\Document\\code\\nand\\scripts\\tmp\\agent-vault-data-20261011-03\\vault\\.nand\\agents\\2ba2c304-5229-4680-9f93-f71025eb49d3\\accounts\\claude-code\\default\\home\\AppData\\Roaming",
+        "LOCALAPPDATA": "D:\\Document\\code\\nand\\scripts\\tmp\\agent-vault-data-20261011-03\\vault\\.nand\\agents\\2ba2c304-5229-4680-9f93-f71025eb49d3\\accounts\\claude-code\\default\\home\\AppData\\Local",
+        "TMP": "D:\\Document\\code\\nand\\scripts\\tmp\\agent-vault-data-20261011-03\\vault\\.nand\\agents\\2ba2c304-5229-4680-9f93-f71025eb49d3\\accounts\\claude-code\\default\\tmp",
+        "TEMP": "D:\\Document\\code\\nand\\scripts\\tmp\\agent-vault-data-20261011-03\\vault\\.nand\\agents\\2ba2c304-5229-4680-9f93-f71025eb49d3\\accounts\\claude-code\\default\\tmp",
+        "TMPDIR": "D:\\Document\\code\\nand\\scripts\\tmp\\agent-vault-data-20261011-03\\vault\\.nand\\agents\\2ba2c304-5229-4680-9f93-f71025eb49d3\\accounts\\claude-code\\default\\tmp",
+        "XDG_CONFIG_HOME": "D:\\Document\\code\\nand\\scripts\\tmp\\agent-vault-data-20261011-03\\vault\\.nand\\agents\\2ba2c304-5229-4680-9f93-f71025eb49d3\\accounts\\claude-code\\default\\xdg\\config",
+        "XDG_CACHE_HOME": "D:\\Document\\code\\nand\\scripts\\tmp\\agent-vault-data-20261011-03\\vault\\.nand\\agents\\2ba2c304-5229-4680-9f93-f71025eb49d3\\accounts\\claude-code\\default\\xdg\\cache",
+        "XDG_DATA_HOME": "D:\\Document\\code\\nand\\scripts\\tmp\\agent-vault-data-20261011-03\\vault\\.nand\\agents\\2ba2c304-5229-4680-9f93-f71025eb49d3\\accounts\\claude-code\\default\\xdg\\data",
+        "XDG_STATE_HOME": "D:\\Document\\code\\nand\\scripts\\tmp\\agent-vault-data-20261011-03\\vault\\.nand\\agents\\2ba2c304-5229-4680-9f93-f71025eb49d3\\accounts\\claude-code\\default\\xdg\\state",
+        "CLAUDE_CONFIG_DIR": "D:\\Document\\code\\nand\\scripts\\tmp\\agent-vault-data-20261011-03\\vault\\.nand\\agents\\2ba2c304-5229-4680-9f93-f71025eb49d3\\accounts\\claude-code\\default\\home\\.claude",
+        "CODEX_HOME": "D:\\Document\\code\\nand\\scripts\\tmp\\agent-vault-data-20261011-03\\vault\\.nand\\agents\\2ba2c304-5229-4680-9f93-f71025eb49d3\\accounts\\claude-code\\default\\home\\.codex",
+        "GEMINI_CLI_HOME": "D:\\Document\\code\\nand\\scripts\\tmp\\agent-vault-data-20261011-03\\vault\\.nand\\agents\\2ba2c304-5229-4680-9f93-f71025eb49d3\\accounts\\claude-code\\default\\home",
+        "GROK_HOME": "D:\\Document\\code\\nand\\scripts\\tmp\\agent-vault-data-20261011-03\\vault\\.nand\\agents\\2ba2c304-5229-4680-9f93-f71025eb49d3\\accounts\\claude-code\\default\\home\\.grok",
+        "PI_CODING_AGENT_DIR": "D:\\Document\\code\\nand\\scripts\\tmp\\agent-vault-data-20261011-03\\vault\\.nand\\agents\\2ba2c304-5229-4680-9f93-f71025eb49d3\\accounts\\claude-code\\default\\home\\.pi\\agent",
+        "PI_CODING_AGENT_SESSION_DIR": "D:\\Document\\code\\nand\\scripts\\tmp\\agent-vault-data-20261011-03\\vault\\.nand\\agents\\2ba2c304-5229-4680-9f93-f71025eb49d3\\accounts\\claude-code\\default\\home\\.pi\\agent\\sessions",
+        "OPENCODE_CONFIG_DIR": "D:\\Document\\code\\nand\\scripts\\tmp\\agent-vault-data-20261011-03\\vault\\.nand\\agents\\2ba2c304-5229-4680-9f93-f71025eb49d3\\accounts\\claude-code\\default\\xdg\\config\\opencode",
+        "NAND_ACCOUNT_ROOT": "D:\\Document\\code\\nand\\scripts\\tmp\\agent-vault-data-20261011-03\\vault\\.nand\\agents\\2ba2c304-5229-4680-9f93-f71025eb49d3\\accounts\\claude-code\\default",
+        "NAND_ACCOUNT_ID": "claude-code/default",
+        "NAND_ACCOUNT_NAME": "",
+        "NAND_HOOK_DIR": "D:\\Document\\code\\nand\\scripts\\tmp\\agent-vault-data-20261011-03\\vault\\.nand\\agents\\2ba2c304-5229-4680-9f93-f71025eb49d3\\accounts\\claude-code\\default\\runtime\\hooks\\terminal-vSUN8h"
+      }
+    },
+    {
+      "name": "launch-codex-",
+      "passed": true,
+      "detail": {
+        "ok": true
+      }
+    },
+    {
+      "name": "native-environment-codex-",
+      "passed": true,
+      "detail": {
+        "HOME": "D:\\Document\\code\\nand\\scripts\\tmp\\agent-vault-data-20261011-03\\vault\\.nand\\agents\\2ba2c304-5229-4680-9f93-f71025eb49d3\\accounts\\codex\\default\\home",
+        "USERPROFILE": "D:\\Document\\code\\nand\\scripts\\tmp\\agent-vault-data-20261011-03\\vault\\.nand\\agents\\2ba2c304-5229-4680-9f93-f71025eb49d3\\accounts\\codex\\default\\home",
+        "APPDATA": "D:\\Document\\code\\nand\\scripts\\tmp\\agent-vault-data-20261011-03\\vault\\.nand\\agents\\2ba2c304-5229-4680-9f93-f71025eb49d3\\accounts\\codex\\default\\home\\AppData\\Roaming",
+        "LOCALAPPDATA": "D:\\Document\\code\\nand\\scripts\\tmp\\agent-vault-data-20261011-03\\vault\\.nand\\agents\\2ba2c304-5229-4680-9f93-f71025eb49d3\\accounts\\codex\\default\\home\\AppData\\Local",
+        "TMP": "D:\\Document\\code\\nand\\scripts\\tmp\\agent-vault-data-20261011-03\\vault\\.nand\\agents\\2ba2c304-5229-4680-9f93-f71025eb49d3\\accounts\\codex\\default\\tmp",
+        "TEMP": "D:\\Document\\code\\nand\\scripts\\tmp\\agent-vault-data-20261011-03\\vault\\.nand\\agents\\2ba2c304-5229-4680-9f93-f71025eb49d3\\accounts\\codex\\default\\tmp",
+        "TMPDIR": "D:\\Document\\code\\nand\\scripts\\tmp\\agent-vault-data-20261011-03\\vault\\.nand\\agents\\2ba2c304-5229-4680-9f93-f71025eb49d3\\accounts\\codex\\default\\tmp",
+        "XDG_CONFIG_HOME": "D:\\Document\\code\\nand\\scripts\\tmp\\agent-vault-data-20261011-03\\vault\\.nand\\agents\\2ba2c304-5229-4680-9f93-f71025eb49d3\\accounts\\codex\\default\\xdg\\config",
+        "XDG_CACHE_HOME": "D:\\Document\\code\\nand\\scripts\\tmp\\agent-vault-data-20261011-03\\vault\\.nand\\agents\\2ba2c304-5229-4680-9f93-f71025eb49d3\\accounts\\codex\\default\\xdg\\cache",
+        "XDG_DATA_HOME": "D:\\Document\\code\\nand\\scripts\\tmp\\agent-vault-data-20261011-03\\vault\\.nand\\agents\\2ba2c304-5229-4680-9f93-f71025eb49d3\\accounts\\codex\\default\\xdg\\data",
+        "XDG_STATE_HOME": "D:\\Document\\code\\nand\\scripts\\tmp\\agent-vault-data-20261011-03\\vault\\.nand\\agents\\2ba2c304-5229-4680-9f93-f71025eb49d3\\accounts\\codex\\default\\xdg\\state",
+        "CLAUDE_CONFIG_DIR": "D:\\Document\\code\\nand\\scripts\\tmp\\agent-vault-data-20261011-03\\vault\\.nand\\agents\\2ba2c304-5229-4680-9f93-f71025eb49d3\\accounts\\codex\\default\\home\\.claude",
+        "CODEX_HOME": "D:\\Document\\code\\nand\\scripts\\tmp\\agent-vault-data-20261011-03\\vault\\.nand\\agents\\2ba2c304-5229-4680-9f93-f71025eb49d3\\accounts\\codex\\default\\home\\.codex",
+        "GEMINI_CLI_HOME": "D:\\Document\\code\\nand\\scripts\\tmp\\agent-vault-data-20261011-03\\vault\\.nand\\agents\\2ba2c304-5229-4680-9f93-f71025eb49d3\\accounts\\codex\\default\\home",
+        "GROK_HOME": "D:\\Document\\code\\nand\\scripts\\tmp\\agent-vault-data-20261011-03\\vault\\.nand\\agents\\2ba2c304-5229-4680-9f93-f71025eb49d3\\accounts\\codex\\default\\home\\.grok",
+        "PI_CODING_AGENT_DIR": "D:\\Document\\code\\nand\\scripts\\tmp\\agent-vault-data-20261011-03\\vault\\.nand\\agents\\2ba2c304-5229-4680-9f93-f71025eb49d3\\accounts\\codex\\default\\home\\.pi\\agent",
+        "PI_CODING_AGENT_SESSION_DIR": "D:\\Document\\code\\nand\\scripts\\tmp\\agent-vault-data-20261011-03\\vault\\.nand\\agents\\2ba2c304-5229-4680-9f93-f71025eb49d3\\accounts\\codex\\default\\home\\.pi\\agent\\sessions",
+        "OPENCODE_CONFIG_DIR": "D:\\Document\\code\\nand\\scripts\\tmp\\agent-vault-data-20261011-03\\vault\\.nand\\agents\\2ba2c304-5229-4680-9f93-f71025eb49d3\\accounts\\codex\\default\\xdg\\config\\opencode",
+        "NAND_ACCOUNT_ROOT": "D:\\Document\\code\\nand\\scripts\\tmp\\agent-vault-data-20261011-03\\vault\\.nand\\agents\\2ba2c304-5229-4680-9f93-f71025eb49d3\\accounts\\codex\\default",
+        "NAND_ACCOUNT_ID": "codex/default",
+        "NAND_ACCOUNT_NAME": "",
+        "NAND_HOOK_DIR": "D:\\Document\\code\\nand\\scripts\\tmp\\agent-vault-data-20261011-03\\vault\\.nand\\agents\\2ba2c304-5229-4680-9f93-f71025eb49d3\\accounts\\codex\\default\\runtime\\hooks\\terminal-XMGNCs"
+      }
+    },
+    {
+      "name": "launch-gemini-",
+      "passed": true,
+      "detail": {
+        "ok": true
+      }
+    },
+    {
+      "name": "native-environment-gemini-",
+      "passed": true,
+      "detail": {
+        "HOME": "D:\\Document\\code\\nand\\scripts\\tmp\\agent-vault-data-20261011-03\\vault\\.nand\\agents\\2ba2c304-5229-4680-9f93-f71025eb49d3\\accounts\\gemini\\default\\home",
+        "USERPROFILE": "D:\\Document\\code\\nand\\scripts\\tmp\\agent-vault-data-20261011-03\\vault\\.nand\\agents\\2ba2c304-5229-4680-9f93-f71025eb49d3\\accounts\\gemini\\default\\home",
+        "APPDATA": "D:\\Document\\code\\nand\\scripts\\tmp\\agent-vault-data-20261011-03\\vault\\.nand\\agents\\2ba2c304-5229-4680-9f93-f71025eb49d3\\accounts\\gemini\\default\\home\\AppData\\Roaming",
+        "LOCALAPPDATA": "D:\\Document\\code\\nand\\scripts\\tmp\\agent-vault-data-20261011-03\\vault\\.nand\\agents\\2ba2c304-5229-4680-9f93-f71025eb49d3\\accounts\\gemini\\default\\home\\AppData\\Local",
+        "TMP": "D:\\Document\\code\\nand\\scripts\\tmp\\agent-vault-data-20261011-03\\vault\\.nand\\agents\\2ba2c304-5229-4680-9f93-f71025eb49d3\\accounts\\gemini\\default\\tmp",
+        "TEMP": "D:\\Document\\code\\nand\\scripts\\tmp\\agent-vault-data-20261011-03\\vault\\.nand\\agents\\2ba2c304-5229-4680-9f93-f71025eb49d3\\accounts\\gemini\\default\\tmp",
+        "TMPDIR": "D:\\Document\\code\\nand\\scripts\\tmp\\agent-vault-data-20261011-03\\vault\\.nand\\agents\\2ba2c304-5229-4680-9f93-f71025eb49d3\\accounts\\gemini\\default\\tmp",
+        "XDG_CONFIG_HOME": "D:\\Document\\code\\nand\\scripts\\tmp\\agent-vault-data-20261011-03\\vault\\.nand\\agents\\2ba2c304-5229-4680-9f93-f71025eb49d3\\accounts\\gemini\\default\\xdg\\config",
+        "XDG_CACHE_HOME": "D:\\Document\\code\\nand\\scripts\\tmp\\agent-vault-data-20261011-03\\vault\\.nand\\agents\\2ba2c304-5229-4680-9f93-f71025eb49d3\\accounts\\gemini\\default\\xdg\\cache",
+        "XDG_DATA_HOME": "D:\\Document\\code\\nand\\scripts\\tmp\\agent-vault-data-20261011-03\\vault\\.nand\\agents\\2ba2c304-5229-4680-9f93-f71025eb49d3\\accounts\\gemini\\default\\xdg\\data",
+        "XDG_STATE_HOME": "D:\\Document\\code\\nand\\scripts\\tmp\\agent-vault-data-20261011-03\\vault\\.nand\\agents\\2ba2c304-5229-4680-9f93-f71025eb49d3\\accounts\\gemini\\default\\xdg\\state",
+        "CLAUDE_CONFIG_DIR": "D:\\Document\\code\\nand\\scripts\\tmp\\agent-vault-data-20261011-03\\vault\\.nand\\agents\\2ba2c304-5229-4680-9f93-f71025eb49d3\\accounts\\gemini\\default\\home\\.claude",
+        "CODEX_HOME": "D:\\Document\\code\\nand\\scripts\\tmp\\agent-vault-data-20261011-03\\vault\\.nand\\agents\\2ba2c304-5229-4680-9f93-f71025eb49d3\\accounts\\gemini\\default\\home\\.codex",
+        "GEMINI_CLI_HOME": "D:\\Document\\code\\nand\\scripts\\tmp\\agent-vault-data-20261011-03\\vault\\.nand\\agents\\2ba2c304-5229-4680-9f93-f71025eb49d3\\accounts\\gemini\\default\\home",
+        "GROK_HOME": "D:\\Document\\code\\nand\\scripts\\tmp\\agent-vault-data-20261011-03\\vault\\.nand\\agents\\2ba2c304-5229-4680-9f93-f71025eb49d3\\accounts\\gemini\\default\\home\\.grok",
+        "PI_CODING_AGENT_DIR": "D:\\Document\\code\\nand\\scripts\\tmp\\agent-vault-data-20261011-03\\vault\\.nand\\agents\\2ba2c304-5229-4680-9f93-f71025eb49d3\\accounts\\gemini\\default\\home\\.pi\\agent",
+        "PI_CODING_AGENT_SESSION_DIR": "D:\\Document\\code\\nand\\scripts\\tmp\\agent-vault-data-20261011-03\\vault\\.nand\\agents\\2ba2c304-5229-4680-9f93-f71025eb49d3\\accounts\\gemini\\default\\home\\.pi\\agent\\sessions",
+        "OPENCODE_CONFIG_DIR": "D:\\Document\\code\\nand\\scripts\\tmp\\agent-vault-data-20261011-03\\vault\\.nand\\agents\\2ba2c304-5229-4680-9f93-f71025eb49d3\\accounts\\gemini\\default\\xdg\\config\\opencode",
+        "NAND_ACCOUNT_ROOT": "D:\\Document\\code\\nand\\scripts\\tmp\\agent-vault-data-20261011-03\\vault\\.nand\\agents\\2ba2c304-5229-4680-9f93-f71025eb49d3\\accounts\\gemini\\default",
+        "NAND_ACCOUNT_ID": "gemini/default",
+        "NAND_ACCOUNT_NAME": "",
+        "NAND_HOOK_DIR": "D:\\Document\\code\\nand\\scripts\\tmp\\agent-vault-data-20261011-03\\vault\\.nand\\agents\\2ba2c304-5229-4680-9f93-f71025eb49d3\\accounts\\gemini\\default\\runtime\\hooks\\terminal-vn4oAe"
+      }
+    },
+    {
+      "name": "launch-grok-",
+      "passed": true,
+      "detail": {
+        "ok": true
+      }
+    },
+    {
+      "name": "native-environment-grok-",
+      "passed": true,
+      "detail": {
+        "HOME": "D:\\Document\\code\\nand\\scripts\\tmp\\agent-vault-data-20261011-03\\vault\\.nand\\agents\\2ba2c304-5229-4680-9f93-f71025eb49d3\\accounts\\grok\\default\\home",
+        "USERPROFILE": "D:\\Document\\code\\nand\\scripts\\tmp\\agent-vault-data-20261011-03\\vault\\.nand\\agents\\2ba2c304-5229-4680-9f93-f71025eb49d3\\accounts\\grok\\default\\home",
+        "APPDATA": "D:\\Document\\code\\nand\\scripts\\tmp\\agent-vault-data-20261011-03\\vault\\.nand\\agents\\2ba2c304-5229-4680-9f93-f71025eb49d3\\accounts\\grok\\default\\home\\AppData\\Roaming",
+        "LOCALAPPDATA": "D:\\Document\\code\\nand\\scripts\\tmp\\agent-vault-data-20261011-03\\vault\\.nand\\agents\\2ba2c304-5229-4680-9f93-f71025eb49d3\\accounts\\grok\\default\\home\\AppData\\Local",
+        "TMP": "D:\\Document\\code\\nand\\scripts\\tmp\\agent-vault-data-20261011-03\\vault\\.nand\\agents\\2ba2c304-5229-4680-9f93-f71025eb49d3\\accounts\\grok\\default\\tmp",
+        "TEMP": "D:\\Document\\code\\nand\\scripts\\tmp\\agent-vault-data-20261011-03\\vault\\.nand\\agents\\2ba2c304-5229-4680-9f93-f71025eb49d3\\accounts\\grok\\default\\tmp",
+        "TMPDIR": "D:\\Document\\code\\nand\\scripts\\tmp\\agent-vault-data-20261011-03\\vault\\.nand\\agents\\2ba2c304-5229-4680-9f93-f71025eb49d3\\accounts\\grok\\default\\tmp",
+        "XDG_CONFIG_HOME": "D:\\Document\\code\\nand\\scripts\\tmp\\agent-vault-data-20261011-03\\vault\\.nand\\agents\\2ba2c304-5229-4680-9f93-f71025eb49d3\\accounts\\grok\\default\\xdg\\config",
+        "XDG_CACHE_HOME": "D:\\Document\\code\\nand\\scripts\\tmp\\agent-vault-data-20261011-03\\vault\\.nand\\agents\\2ba2c304-5229-4680-9f93-f71025eb49d3\\accounts\\grok\\default\\xdg\\cache",
+        "XDG_DATA_HOME": "D:\\Document\\code\\nand\\scripts\\tmp\\agent-vault-data-20261011-03\\vault\\.nand\\agents\\2ba2c304-5229-4680-9f93-f71025eb49d3\\accounts\\grok\\default\\xdg\\data",
+        "XDG_STATE_HOME": "D:\\Document\\code\\nand\\scripts\\tmp\\agent-vault-data-20261011-03\\vault\\.nand\\agents\\2ba2c304-5229-4680-9f93-f71025eb49d3\\accounts\\grok\\default\\xdg\\state",
+        "CLAUDE_CONFIG_DIR": "D:\\Document\\code\\nand\\scripts\\tmp\\agent-vault-data-20261011-03\\vault\\.nand\\agents\\2ba2c304-5229-4680-9f93-f71025eb49d3\\accounts\\grok\\default\\home\\.claude",
+        "CODEX_HOME": "D:\\Document\\code\\nand\\scripts\\tmp\\agent-vault-data-20261011-03\\vault\\.nand\\agents\\2ba2c304-5229-4680-9f93-f71025eb49d3\\accounts\\grok\\default\\home\\.codex",
+        "GEMINI_CLI_HOME": "D:\\Document\\code\\nand\\scripts\\tmp\\agent-vault-data-20261011-03\\vault\\.nand\\agents\\2ba2c304-5229-4680-9f93-f71025eb49d3\\accounts\\grok\\default\\home",
+        "GROK_HOME": "D:\\Document\\code\\nand\\scripts\\tmp\\agent-vault-data-20261011-03\\vault\\.nand\\agents\\2ba2c304-5229-4680-9f93-f71025eb49d3\\accounts\\grok\\default\\home\\.grok",
+        "PI_CODING_AGENT_DIR": "D:\\Document\\code\\nand\\scripts\\tmp\\agent-vault-data-20261011-03\\vault\\.nand\\agents\\2ba2c304-5229-4680-9f93-f71025eb49d3\\accounts\\grok\\default\\home\\.pi\\agent",
+        "PI_CODING_AGENT_SESSION_DIR": "D:\\Document\\code\\nand\\scripts\\tmp\\agent-vault-data-20261011-03\\vault\\.nand\\agents\\2ba2c304-5229-4680-9f93-f71025eb49d3\\accounts\\grok\\default\\home\\.pi\\agent\\sessions",
+        "OPENCODE_CONFIG_DIR": "D:\\Document\\code\\nand\\scripts\\tmp\\agent-vault-data-20261011-03\\vault\\.nand\\agents\\2ba2c304-5229-4680-9f93-f71025eb49d3\\accounts\\grok\\default\\xdg\\config\\opencode",
+        "NAND_ACCOUNT_ROOT": "D:\\Document\\code\\nand\\scripts\\tmp\\agent-vault-data-20261011-03\\vault\\.nand\\agents\\2ba2c304-5229-4680-9f93-f71025eb49d3\\accounts\\grok\\default",
+        "NAND_ACCOUNT_ID": "grok/default",
+        "NAND_ACCOUNT_NAME": "",
+        "NAND_HOOK_DIR": "D:\\Document\\code\\nand\\scripts\\tmp\\agent-vault-data-20261011-03\\vault\\.nand\\agents\\2ba2c304-5229-4680-9f93-f71025eb49d3\\accounts\\grok\\default\\runtime\\hooks\\terminal-80jcPq"
+      }
+    },
+    {
+      "name": "launch-pi-",
+      "passed": true,
+      "detail": {
+        "ok": true
+      }
+    },
+    {
+      "name": "native-environment-pi-",
+      "passed": true,
+      "detail": {
+        "HOME": "D:\\Document\\code\\nand\\scripts\\tmp\\agent-vault-data-20261011-03\\vault\\.nand\\agents\\2ba2c304-5229-4680-9f93-f71025eb49d3\\accounts\\pi\\default\\home",
+        "USERPROFILE": "D:\\Document\\code\\nand\\scripts\\tmp\\agent-vault-data-20261011-03\\vault\\.nand\\agents\\2ba2c304-5229-4680-9f93-f71025eb49d3\\accounts\\pi\\default\\home",
+        "APPDATA": "D:\\Document\\code\\nand\\scripts\\tmp\\agent-vault-data-20261011-03\\vault\\.nand\\agents\\2ba2c304-5229-4680-9f93-f71025eb49d3\\accounts\\pi\\default\\home\\AppData\\Roaming",
+        "LOCALAPPDATA": "D:\\Document\\code\\nand\\scripts\\tmp\\agent-vault-data-20261011-03\\vault\\.nand\\agents\\2ba2c304-5229-4680-9f93-f71025eb49d3\\accounts\\pi\\default\\home\\AppData\\Local",
+        "TMP": "D:\\Document\\code\\nand\\scripts\\tmp\\agent-vault-data-20261011-03\\vault\\.nand\\agents\\2ba2c304-5229-4680-9f93-f71025eb49d3\\accounts\\pi\\default\\tmp",
+        "TEMP": "D:\\Document\\code\\nand\\scripts\\tmp\\agent-vault-data-20261011-03\\vault\\.nand\\agents\\2ba2c304-5229-4680-9f93-f71025eb49d3\\accounts\\pi\\default\\tmp",
+        "TMPDIR": "D:\\Document\\code\\nand\\scripts\\tmp\\agent-vault-data-20261011-03\\vault\\.nand\\agents\\2ba2c304-5229-4680-9f93-f71025eb49d3\\accounts\\pi\\default\\tmp",
+        "XDG_CONFIG_HOME": "D:\\Document\\code\\nand\\scripts\\tmp\\agent-vault-data-20261011-03\\vault\\.nand\\agents\\2ba2c304-5229-4680-9f93-f71025eb49d3\\accounts\\pi\\default\\xdg\\config",
+        "XDG_CACHE_HOME": "D:\\Document\\code\\nand\\scripts\\tmp\\agent-vault-data-20261011-03\\vault\\.nand\\agents\\2ba2c304-5229-4680-9f93-f71025eb49d3\\accounts\\pi\\default\\xdg\\cache",
+        "XDG_DATA_HOME": "D:\\Document\\code\\nand\\scripts\\tmp\\agent-vault-data-20261011-03\\vault\\.nand\\agents\\2ba2c304-5229-4680-9f93-f71025eb49d3\\accounts\\pi\\default\\xdg\\data",
+        "XDG_STATE_HOME": "D:\\Document\\code\\nand\\scripts\\tmp\\agent-vault-data-20261011-03\\vault\\.nand\\agents\\2ba2c304-5229-4680-9f93-f71025eb49d3\\accounts\\pi\\default\\xdg\\state",
+        "CLAUDE_CONFIG_DIR": "D:\\Document\\code\\nand\\scripts\\tmp\\agent-vault-data-20261011-03\\vault\\.nand\\agents\\2ba2c304-5229-4680-9f93-f71025eb49d3\\accounts\\pi\\default\\home\\.claude",
+        "CODEX_HOME": "D:\\Document\\code\\nand\\scripts\\tmp\\agent-vault-data-20261011-03\\vault\\.nand\\agents\\2ba2c304-5229-4680-9f93-f71025eb49d3\\accounts\\pi\\default\\home\\.codex",
+        "GEMINI_CLI_HOME": "D:\\Document\\code\\nand\\scripts\\tmp\\agent-vault-data-20261011-03\\vault\\.nand\\agents\\2ba2c304-5229-4680-9f93-f71025eb49d3\\accounts\\pi\\default\\home",
+        "GROK_HOME": "D:\\Document\\code\\nand\\scripts\\tmp\\agent-vault-data-20261011-03\\vault\\.nand\\agents\\2ba2c304-5229-4680-9f93-f71025eb49d3\\accounts\\pi\\default\\home\\.grok",
+        "PI_CODING_AGENT_DIR": "D:\\Document\\code\\nand\\scripts\\tmp\\agent-vault-data-20261011-03\\vault\\.nand\\agents\\2ba2c304-5229-4680-9f93-f71025eb49d3\\accounts\\pi\\default\\home\\.pi\\agent",
+        "PI_CODING_AGENT_SESSION_DIR": "D:\\Document\\code\\nand\\scripts\\tmp\\agent-vault-data-20261011-03\\vault\\.nand\\agents\\2ba2c304-5229-4680-9f93-f71025eb49d3\\accounts\\pi\\default\\home\\.pi\\agent\\sessions",
+        "OPENCODE_CONFIG_DIR": "D:\\Document\\code\\nand\\scripts\\tmp\\agent-vault-data-20261011-03\\vault\\.nand\\agents\\2ba2c304-5229-4680-9f93-f71025eb49d3\\accounts\\pi\\default\\xdg\\config\\opencode",
+        "NAND_ACCOUNT_ROOT": "D:\\Document\\code\\nand\\scripts\\tmp\\agent-vault-data-20261011-03\\vault\\.nand\\agents\\2ba2c304-5229-4680-9f93-f71025eb49d3\\accounts\\pi\\default",
+        "NAND_ACCOUNT_ID": "pi/default",
+        "NAND_ACCOUNT_NAME": "",
+        "NAND_HOOK_DIR": "D:\\Document\\code\\nand\\scripts\\tmp\\agent-vault-data-20261011-03\\vault\\.nand\\agents\\2ba2c304-5229-4680-9f93-f71025eb49d3\\accounts\\pi\\default\\runtime\\hooks\\terminal-JRROTQ"
+      }
+    },
+    {
+      "name": "launch-opencode-",
+      "passed": true,
+      "detail": {
+        "ok": true
+      }
+    },
+    {
+      "name": "native-environment-opencode-",
+      "passed": true,
+      "detail": {
+        "HOME": "D:\\Document\\code\\nand\\scripts\\tmp\\agent-vault-data-20261011-03\\vault\\.nand\\agents\\2ba2c304-5229-4680-9f93-f71025eb49d3\\accounts\\opencode\\default\\home",
+        "USERPROFILE": "D:\\Document\\code\\nand\\scripts\\tmp\\agent-vault-data-20261011-03\\vault\\.nand\\agents\\2ba2c304-5229-4680-9f93-f71025eb49d3\\accounts\\opencode\\default\\home",
+        "APPDATA": "D:\\Document\\code\\nand\\scripts\\tmp\\agent-vault-data-20261011-03\\vault\\.nand\\agents\\2ba2c304-5229-4680-9f93-f71025eb49d3\\accounts\\opencode\\default\\home\\AppData\\Roaming",
+        "LOCALAPPDATA": "D:\\Document\\code\\nand\\scripts\\tmp\\agent-vault-data-20261011-03\\vault\\.nand\\agents\\2ba2c304-5229-4680-9f93-f71025eb49d3\\accounts\\opencode\\default\\home\\AppData\\Local",
+        "TMP": "D:\\Document\\code\\nand\\scripts\\tmp\\agent-vault-data-20261011-03\\vault\\.nand\\agents\\2ba2c304-5229-4680-9f93-f71025eb49d3\\accounts\\opencode\\default\\tmp",
+        "TEMP": "D:\\Document\\code\\nand\\scripts\\tmp\\agent-vault-data-20261011-03\\vault\\.nand\\agents\\2ba2c304-5229-4680-9f93-f71025eb49d3\\accounts\\opencode\\default\\tmp",
+        "TMPDIR": "D:\\Document\\code\\nand\\scripts\\tmp\\agent-vault-data-20261011-03\\vault\\.nand\\agents\\2ba2c304-5229-4680-9f93-f71025eb49d3\\accounts\\opencode\\default\\tmp",
+        "XDG_CONFIG_HOME": "D:\\Document\\code\\nand\\scripts\\tmp\\agent-vault-data-20261011-03\\vault\\.nand\\agents\\2ba2c304-5229-4680-9f93-f71025eb49d3\\accounts\\opencode\\default\\xdg\\config",
+        "XDG_CACHE_HOME": "D:\\Document\\code\\nand\\scripts\\tmp\\agent-vault-data-20261011-03\\vault\\.nand\\agents\\2ba2c304-5229-4680-9f93-f71025eb49d3\\accounts\\opencode\\default\\xdg\\cache",
+        "XDG_DATA_HOME": "D:\\Document\\code\\nand\\scripts\\tmp\\agent-vault-data-20261011-03\\vault\\.nand\\agents\\2ba2c304-5229-4680-9f93-f71025eb49d3\\accounts\\opencode\\default\\xdg\\data",
+        "XDG_STATE_HOME": "D:\\Document\\code\\nand\\scripts\\tmp\\agent-vault-data-20261011-03\\vault\\.nand\\agents\\2ba2c304-5229-4680-9f93-f71025eb49d3\\accounts\\opencode\\default\\xdg\\state",
+        "CLAUDE_CONFIG_DIR": "D:\\Document\\code\\nand\\scripts\\tmp\\agent-vault-data-20261011-03\\vault\\.nand\\agents\\2ba2c304-5229-4680-9f93-f71025eb49d3\\accounts\\opencode\\default\\home\\.claude",
+        "CODEX_HOME": "D:\\Document\\code\\nand\\scripts\\tmp\\agent-vault-data-20261011-03\\vault\\.nand\\agents\\2ba2c304-5229-4680-9f93-f71025eb49d3\\accounts\\opencode\\default\\home\\.codex",
+        "GEMINI_CLI_HOME": "D:\\Document\\code\\nand\\scripts\\tmp\\agent-vault-data-20261011-03\\vault\\.nand\\agents\\2ba2c304-5229-4680-9f93-f71025eb49d3\\accounts\\opencode\\default\\home",
+        "GROK_HOME": "D:\\Document\\code\\nand\\scripts\\tmp\\agent-vault-data-20261011-03\\vault\\.nand\\agents\\2ba2c304-5229-4680-9f93-f71025eb49d3\\accounts\\opencode\\default\\home\\.grok",
+        "PI_CODING_AGENT_DIR": "D:\\Document\\code\\nand\\scripts\\tmp\\agent-vault-data-20261011-03\\vault\\.nand\\agents\\2ba2c304-5229-4680-9f93-f71025eb49d3\\accounts\\opencode\\default\\home\\.pi\\agent",
+        "PI_CODING_AGENT_SESSION_DIR": "D:\\Document\\code\\nand\\scripts\\tmp\\agent-vault-data-20261011-03\\vault\\.nand\\agents\\2ba2c304-5229-4680-9f93-f71025eb49d3\\accounts\\opencode\\default\\home\\.pi\\agent\\sessions",
+        "OPENCODE_CONFIG_DIR": "D:\\Document\\code\\nand\\scripts\\tmp\\agent-vault-data-20261011-03\\vault\\.nand\\agents\\2ba2c304-5229-4680-9f93-f71025eb49d3\\accounts\\opencode\\default\\xdg\\config\\opencode",
+        "NAND_ACCOUNT_ROOT": "D:\\Document\\code\\nand\\scripts\\tmp\\agent-vault-data-20261011-03\\vault\\.nand\\agents\\2ba2c304-5229-4680-9f93-f71025eb49d3\\accounts\\opencode\\default",
+        "NAND_ACCOUNT_ID": "opencode/default",
+        "NAND_ACCOUNT_NAME": "",
+        "NAND_HOOK_DIR": "D:\\Document\\code\\nand\\scripts\\tmp\\agent-vault-data-20261011-03\\vault\\.nand\\agents\\2ba2c304-5229-4680-9f93-f71025eb49d3\\accounts\\opencode\\default\\runtime\\hooks\\terminal-36ISDy"
+      }
+    },
+    {
+      "name": "launch-codex-中文.账号",
+      "passed": true,
+      "detail": {
+        "ok": true
+      }
+    },
+    {
+      "name": "native-environment-codex-中文.账号",
+      "passed": true,
+      "detail": {
+        "HOME": "D:\\Document\\code\\nand\\scripts\\tmp\\agent-vault-data-20261011-03\\vault\\.nand\\agents\\2ba2c304-5229-4680-9f93-f71025eb49d3\\accounts\\codex\\189cd4a241bc9d92a287c16922db5fa792c282b1d5b4dcd31bff8b4874254cb8\\home",
+        "USERPROFILE": "D:\\Document\\code\\nand\\scripts\\tmp\\agent-vault-data-20261011-03\\vault\\.nand\\agents\\2ba2c304-5229-4680-9f93-f71025eb49d3\\accounts\\codex\\189cd4a241bc9d92a287c16922db5fa792c282b1d5b4dcd31bff8b4874254cb8\\home",
+        "APPDATA": "D:\\Document\\code\\nand\\scripts\\tmp\\agent-vault-data-20261011-03\\vault\\.nand\\agents\\2ba2c304-5229-4680-9f93-f71025eb49d3\\accounts\\codex\\189cd4a241bc9d92a287c16922db5fa792c282b1d5b4dcd31bff8b4874254cb8\\home\\AppData\\Roaming",
+        "LOCALAPPDATA": "D:\\Document\\code\\nand\\scripts\\tmp\\agent-vault-data-20261011-03\\vault\\.nand\\agents\\2ba2c304-5229-4680-9f93-f71025eb49d3\\accounts\\codex\\189cd4a241bc9d92a287c16922db5fa792c282b1d5b4dcd31bff8b4874254cb8\\home\\AppData\\Local",
+        "TMP": "D:\\Document\\code\\nand\\scripts\\tmp\\agent-vault-data-20261011-03\\vault\\.nand\\agents\\2ba2c304-5229-4680-9f93-f71025eb49d3\\accounts\\codex\\189cd4a241bc9d92a287c16922db5fa792c282b1d5b4dcd31bff8b4874254cb8\\tmp",
+        "TEMP": "D:\\Document\\code\\nand\\scripts\\tmp\\agent-vault-data-20261011-03\\vault\\.nand\\agents\\2ba2c304-5229-4680-9f93-f71025eb49d3\\accounts\\codex\\189cd4a241bc9d92a287c16922db5fa792c282b1d5b4dcd31bff8b4874254cb8\\tmp",
+        "TMPDIR": "D:\\Document\\code\\nand\\scripts\\tmp\\agent-vault-data-20261011-03\\vault\\.nand\\agents\\2ba2c304-5229-4680-9f93-f71025eb49d3\\accounts\\codex\\189cd4a241bc9d92a287c16922db5fa792c282b1d5b4dcd31bff8b4874254cb8\\tmp",
+        "XDG_CONFIG_HOME": "D:\\Document\\code\\nand\\scripts\\tmp\\agent-vault-data-20261011-03\\vault\\.nand\\agents\\2ba2c304-5229-4680-9f93-f71025eb49d3\\accounts\\codex\\189cd4a241bc9d92a287c16922db5fa792c282b1d5b4dcd31bff8b4874254cb8\\xdg\\config",
+        "XDG_CACHE_HOME": "D:\\Document\\code\\nand\\scripts\\tmp\\agent-vault-data-20261011-03\\vault\\.nand\\agents\\2ba2c304-5229-4680-9f93-f71025eb49d3\\accounts\\codex\\189cd4a241bc9d92a287c16922db5fa792c282b1d5b4dcd31bff8b4874254cb8\\xdg\\cache",
+        "XDG_DATA_HOME": "D:\\Document\\code\\nand\\scripts\\tmp\\agent-vault-data-20261011-03\\vault\\.nand\\agents\\2ba2c304-5229-4680-9f93-f71025eb49d3\\accounts\\codex\\189cd4a241bc9d92a287c16922db5fa792c282b1d5b4dcd31bff8b4874254cb8\\xdg\\data",
+        "XDG_STATE_HOME": "D:\\Document\\code\\nand\\scripts\\tmp\\agent-vault-data-20261011-03\\vault\\.nand\\agents\\2ba2c304-5229-4680-9f93-f71025eb49d3\\accounts\\codex\\189cd4a241bc9d92a287c16922db5fa792c282b1d5b4dcd31bff8b4874254cb8\\xdg\\state",
+        "CLAUDE_CONFIG_DIR": "D:\\Document\\code\\nand\\scripts\\tmp\\agent-vault-data-20261011-03\\vault\\.nand\\agents\\2ba2c304-5229-4680-9f93-f71025eb49d3\\accounts\\codex\\189cd4a241bc9d92a287c16922db5fa792c282b1d5b4dcd31bff8b4874254cb8\\home\\.claude",
+        "CODEX_HOME": "D:\\Document\\code\\nand\\scripts\\tmp\\agent-vault-data-20261011-03\\vault\\.nand\\agents\\2ba2c304-5229-4680-9f93-f71025eb49d3\\accounts\\codex\\189cd4a241bc9d92a287c16922db5fa792c282b1d5b4dcd31bff8b4874254cb8\\home\\.codex",
+        "GEMINI_CLI_HOME": "D:\\Document\\code\\nand\\scripts\\tmp\\agent-vault-data-20261011-03\\vault\\.nand\\agents\\2ba2c304-5229-4680-9f93-f71025eb49d3\\accounts\\codex\\189cd4a241bc9d92a287c16922db5fa792c282b1d5b4dcd31bff8b4874254cb8\\home",
+        "GROK_HOME": "D:\\Document\\code\\nand\\scripts\\tmp\\agent-vault-data-20261011-03\\vault\\.nand\\agents\\2ba2c304-5229-4680-9f93-f71025eb49d3\\accounts\\codex\\189cd4a241bc9d92a287c16922db5fa792c282b1d5b4dcd31bff8b4874254cb8\\home\\.grok",
+        "PI_CODING_AGENT_DIR": "D:\\Document\\code\\nand\\scripts\\tmp\\agent-vault-data-20261011-03\\vault\\.nand\\agents\\2ba2c304-5229-4680-9f93-f71025eb49d3\\accounts\\codex\\189cd4a241bc9d92a287c16922db5fa792c282b1d5b4dcd31bff8b4874254cb8\\home\\.pi\\agent",
+        "PI_CODING_AGENT_SESSION_DIR": "D:\\Document\\code\\nand\\scripts\\tmp\\agent-vault-data-20261011-03\\vault\\.nand\\agents\\2ba2c304-5229-4680-9f93-f71025eb49d3\\accounts\\codex\\189cd4a241bc9d92a287c16922db5fa792c282b1d5b4dcd31bff8b4874254cb8\\home\\.pi\\agent\\sessions",
+        "OPENCODE_CONFIG_DIR": "D:\\Document\\code\\nand\\scripts\\tmp\\agent-vault-data-20261011-03\\vault\\.nand\\agents\\2ba2c304-5229-4680-9f93-f71025eb49d3\\accounts\\codex\\189cd4a241bc9d92a287c16922db5fa792c282b1d5b4dcd31bff8b4874254cb8\\xdg\\config\\opencode",
+        "NAND_ACCOUNT_ROOT": "D:\\Document\\code\\nand\\scripts\\tmp\\agent-vault-data-20261011-03\\vault\\.nand\\agents\\2ba2c304-5229-4680-9f93-f71025eb49d3\\accounts\\codex\\189cd4a241bc9d92a287c16922db5fa792c282b1d5b4dcd31bff8b4874254cb8",
+        "NAND_ACCOUNT_ID": "codex/189cd4a241bc9d92a287c16922db5fa792c282b1d5b4dcd31bff8b4874254cb8",
+        "NAND_ACCOUNT_NAME": "中文.账号",
+        "NAND_HOOK_DIR": "D:\\Document\\code\\nand\\scripts\\tmp\\agent-vault-data-20261011-03\\vault\\.nand\\agents\\2ba2c304-5229-4680-9f93-f71025eb49d3\\accounts\\codex\\189cd4a241bc9d92a287c16922db5fa792c282b1d5b4dcd31bff8b4874254cb8\\runtime\\hooks\\terminal-9BbnPG"
+      }
+    },
+    {
+      "name": "launch-codex-中文账号",
+      "passed": true,
+      "detail": {
+        "ok": true
+      }
+    },
+    {
+      "name": "native-environment-codex-中文账号",
+      "passed": true,
+      "detail": {
+        "HOME": "D:\\Document\\code\\nand\\scripts\\tmp\\agent-vault-data-20261011-03\\vault\\.nand\\agents\\2ba2c304-5229-4680-9f93-f71025eb49d3\\accounts\\codex\\f5030fddc4e7ac2364beb8920352f3501173714b09adada9d0e92e9d189557f4\\home",
+        "USERPROFILE": "D:\\Document\\code\\nand\\scripts\\tmp\\agent-vault-data-20261011-03\\vault\\.nand\\agents\\2ba2c304-5229-4680-9f93-f71025eb49d3\\accounts\\codex\\f5030fddc4e7ac2364beb8920352f3501173714b09adada9d0e92e9d189557f4\\home",
+        "APPDATA": "D:\\Document\\code\\nand\\scripts\\tmp\\agent-vault-data-20261011-03\\vault\\.nand\\agents\\2ba2c304-5229-4680-9f93-f71025eb49d3\\accounts\\codex\\f5030fddc4e7ac2364beb8920352f3501173714b09adada9d0e92e9d189557f4\\home\\AppData\\Roaming",
+        "LOCALAPPDATA": "D:\\Document\\code\\nand\\scripts\\tmp\\agent-vault-data-20261011-03\\vault\\.nand\\agents\\2ba2c304-5229-4680-9f93-f71025eb49d3\\accounts\\codex\\f5030fddc4e7ac2364beb8920352f3501173714b09adada9d0e92e9d189557f4\\home\\AppData\\Local",
+        "TMP": "D:\\Document\\code\\nand\\scripts\\tmp\\agent-vault-data-20261011-03\\vault\\.nand\\agents\\2ba2c304-5229-4680-9f93-f71025eb49d3\\accounts\\codex\\f5030fddc4e7ac2364beb8920352f3501173714b09adada9d0e92e9d189557f4\\tmp",
+        "TEMP": "D:\\Document\\code\\nand\\scripts\\tmp\\agent-vault-data-20261011-03\\vault\\.nand\\agents\\2ba2c304-5229-4680-9f93-f71025eb49d3\\accounts\\codex\\f5030fddc4e7ac2364beb8920352f3501173714b09adada9d0e92e9d189557f4\\tmp",
+        "TMPDIR": "D:\\Document\\code\\nand\\scripts\\tmp\\agent-vault-data-20261011-03\\vault\\.nand\\agents\\2ba2c304-5229-4680-9f93-f71025eb49d3\\accounts\\codex\\f5030fddc4e7ac2364beb8920352f3501173714b09adada9d0e92e9d189557f4\\tmp",
+        "XDG_CONFIG_HOME": "D:\\Document\\code\\nand\\scripts\\tmp\\agent-vault-data-20261011-03\\vault\\.nand\\agents\\2ba2c304-5229-4680-9f93-f71025eb49d3\\accounts\\codex\\f5030fddc4e7ac2364beb8920352f3501173714b09adada9d0e92e9d189557f4\\xdg\\config",
+        "XDG_CACHE_HOME": "D:\\Document\\code\\nand\\scripts\\tmp\\agent-vault-data-20261011-03\\vault\\.nand\\agents\\2ba2c304-5229-4680-9f93-f71025eb49d3\\accounts\\codex\\f5030fddc4e7ac2364beb8920352f3501173714b09adada9d0e92e9d189557f4\\xdg\\cache",
+        "XDG_DATA_HOME": "D:\\Document\\code\\nand\\scripts\\tmp\\agent-vault-data-20261011-03\\vault\\.nand\\agents\\2ba2c304-5229-4680-9f93-f71025eb49d3\\accounts\\codex\\f5030fddc4e7ac2364beb8920352f3501173714b09adada9d0e92e9d189557f4\\xdg\\data",
+        "XDG_STATE_HOME": "D:\\Document\\code\\nand\\scripts\\tmp\\agent-vault-data-20261011-03\\vault\\.nand\\agents\\2ba2c304-5229-4680-9f93-f71025eb49d3\\accounts\\codex\\f5030fddc4e7ac2364beb8920352f3501173714b09adada9d0e92e9d189557f4\\xdg\\state",
+        "CLAUDE_CONFIG_DIR": "D:\\Document\\code\\nand\\scripts\\tmp\\agent-vault-data-20261011-03\\vault\\.nand\\agents\\2ba2c304-5229-4680-9f93-f71025eb49d3\\accounts\\codex\\f5030fddc4e7ac2364beb8920352f3501173714b09adada9d0e92e9d189557f4\\home\\.claude",
+        "CODEX_HOME": "D:\\Document\\code\\nand\\scripts\\tmp\\agent-vault-data-20261011-03\\vault\\.nand\\agents\\2ba2c304-5229-4680-9f93-f71025eb49d3\\accounts\\codex\\f5030fddc4e7ac2364beb8920352f3501173714b09adada9d0e92e9d189557f4\\home\\.codex",
+        "GEMINI_CLI_HOME": "D:\\Document\\code\\nand\\scripts\\tmp\\agent-vault-data-20261011-03\\vault\\.nand\\agents\\2ba2c304-5229-4680-9f93-f71025eb49d3\\accounts\\codex\\f5030fddc4e7ac2364beb8920352f3501173714b09adada9d0e92e9d189557f4\\home",
+        "GROK_HOME": "D:\\Document\\code\\nand\\scripts\\tmp\\agent-vault-data-20261011-03\\vault\\.nand\\agents\\2ba2c304-5229-4680-9f93-f71025eb49d3\\accounts\\codex\\f5030fddc4e7ac2364beb8920352f3501173714b09adada9d0e92e9d189557f4\\home\\.grok",
+        "PI_CODING_AGENT_DIR": "D:\\Document\\code\\nand\\scripts\\tmp\\agent-vault-data-20261011-03\\vault\\.nand\\agents\\2ba2c304-5229-4680-9f93-f71025eb49d3\\accounts\\codex\\f5030fddc4e7ac2364beb8920352f3501173714b09adada9d0e92e9d189557f4\\home\\.pi\\agent",
+        "PI_CODING_AGENT_SESSION_DIR": "D:\\Document\\code\\nand\\scripts\\tmp\\agent-vault-data-20261011-03\\vault\\.nand\\agents\\2ba2c304-5229-4680-9f93-f71025eb49d3\\accounts\\codex\\f5030fddc4e7ac2364beb8920352f3501173714b09adada9d0e92e9d189557f4\\home\\.pi\\agent\\sessions",
+        "OPENCODE_CONFIG_DIR": "D:\\Document\\code\\nand\\scripts\\tmp\\agent-vault-data-20261011-03\\vault\\.nand\\agents\\2ba2c304-5229-4680-9f93-f71025eb49d3\\accounts\\codex\\f5030fddc4e7ac2364beb8920352f3501173714b09adada9d0e92e9d189557f4\\xdg\\config\\opencode",
+        "NAND_ACCOUNT_ROOT": "D:\\Document\\code\\nand\\scripts\\tmp\\agent-vault-data-20261011-03\\vault\\.nand\\agents\\2ba2c304-5229-4680-9f93-f71025eb49d3\\accounts\\codex\\f5030fddc4e7ac2364beb8920352f3501173714b09adada9d0e92e9d189557f4",
+        "NAND_ACCOUNT_ID": "codex/f5030fddc4e7ac2364beb8920352f3501173714b09adada9d0e92e9d189557f4",
+        "NAND_ACCOUNT_NAME": "中文账号",
+        "NAND_HOOK_DIR": "D:\\Document\\code\\nand\\scripts\\tmp\\agent-vault-data-20261011-03\\vault\\.nand\\agents\\2ba2c304-5229-4680-9f93-f71025eb49d3\\accounts\\codex\\f5030fddc4e7ac2364beb8920352f3501173714b09adada9d0e92e9d189557f4\\runtime\\hooks\\terminal-p6DhFq"
+      }
+    },
+    {
+      "name": "unicode-and-punctuation-identities-stay-distinct",
+      "passed": true
+    },
+    {
+      "name": "nonempty-invalid-name-is-visible",
+      "passed": true,
+      "detail": "账号名最多 128 个字符，不能含控制字符或只有空白；完全留空表示使用当前库的默认账号。"
+    },
+    {
+      "name": "launch-claude-code-a.b",
+      "passed": true,
+      "detail": {
+        "ok": true
+      }
+    },
+    {
+      "name": "native-environment-claude-code-a.b",
+      "passed": true,
+      "detail": {
+        "HOME": "D:\\Document\\code\\nand\\scripts\\tmp\\agent-vault-data-20261011-03\\vault\\.nand\\agents\\2ba2c304-5229-4680-9f93-f71025eb49d3\\accounts\\claude-code\\2e7336dc8eba87ef472df568c35482abf2575dc3e5eac0c5c62b8ffaeac2c934\\home",
+        "USERPROFILE": "D:\\Document\\code\\nand\\scripts\\tmp\\agent-vault-data-20261011-03\\vault\\.nand\\agents\\2ba2c304-5229-4680-9f93-f71025eb49d3\\accounts\\claude-code\\2e7336dc8eba87ef472df568c35482abf2575dc3e5eac0c5c62b8ffaeac2c934\\home",
+        "APPDATA": "D:\\Document\\code\\nand\\scripts\\tmp\\agent-vault-data-20261011-03\\vault\\.nand\\agents\\2ba2c304-5229-4680-9f93-f71025eb49d3\\accounts\\claude-code\\2e7336dc8eba87ef472df568c35482abf2575dc3e5eac0c5c62b8ffaeac2c934\\home\\AppData\\Roaming",
+        "LOCALAPPDATA": "D:\\Document\\code\\nand\\scripts\\tmp\\agent-vault-data-20261011-03\\vault\\.nand\\agents\\2ba2c304-5229-4680-9f93-f71025eb49d3\\accounts\\claude-code\\2e7336dc8eba87ef472df568c35482abf2575dc3e5eac0c5c62b8ffaeac2c934\\home\\AppData\\Local",
+        "TMP": "D:\\Document\\code\\nand\\scripts\\tmp\\agent-vault-data-20261011-03\\vault\\.nand\\agents\\2ba2c304-5229-4680-9f93-f71025eb49d3\\accounts\\claude-code\\2e7336dc8eba87ef472df568c35482abf2575dc3e5eac0c5c62b8ffaeac2c934\\tmp",
+        "TEMP": "D:\\Document\\code\\nand\\scripts\\tmp\\agent-vault-data-20261011-03\\vault\\.nand\\agents\\2ba2c304-5229-4680-9f93-f71025eb49d3\\accounts\\claude-code\\2e7336dc8eba87ef472df568c35482abf2575dc3e5eac0c5c62b8ffaeac2c934\\tmp",
+        "TMPDIR": "D:\\Document\\code\\nand\\scripts\\tmp\\agent-vault-data-20261011-03\\vault\\.nand\\agents\\2ba2c304-5229-4680-9f93-f71025eb49d3\\accounts\\claude-code\\2e7336dc8eba87ef472df568c35482abf2575dc3e5eac0c5c62b8ffaeac2c934\\tmp",
+        "XDG_CONFIG_HOME": "D:\\Document\\code\\nand\\scripts\\tmp\\agent-vault-data-20261011-03\\vault\\.nand\\agents\\2ba2c304-5229-4680-9f93-f71025eb49d3\\accounts\\claude-code\\2e7336dc8eba87ef472df568c35482abf2575dc3e5eac0c5c62b8ffaeac2c934\\xdg\\config",
+        "XDG_CACHE_HOME": "D:\\Document\\code\\nand\\scripts\\tmp\\agent-vault-data-20261011-03\\vault\\.nand\\agents\\2ba2c304-5229-4680-9f93-f71025eb49d3\\accounts\\claude-code\\2e7336dc8eba87ef472df568c35482abf2575dc3e5eac0c5c62b8ffaeac2c934\\xdg\\cache",
+        "XDG_DATA_HOME": "D:\\Document\\code\\nand\\scripts\\tmp\\agent-vault-data-20261011-03\\vault\\.nand\\agents\\2ba2c304-5229-4680-9f93-f71025eb49d3\\accounts\\claude-code\\2e7336dc8eba87ef472df568c35482abf2575dc3e5eac0c5c62b8ffaeac2c934\\xdg\\data",
+        "XDG_STATE_HOME": "D:\\Document\\code\\nand\\scripts\\tmp\\agent-vault-data-20261011-03\\vault\\.nand\\agents\\2ba2c304-5229-4680-9f93-f71025eb49d3\\accounts\\claude-code\\2e7336dc8eba87ef472df568c35482abf2575dc3e5eac0c5c62b8ffaeac2c934\\xdg\\state",
+        "CLAUDE_CONFIG_DIR": "D:\\Document\\code\\nand\\scripts\\tmp\\agent-vault-data-20261011-03\\vault\\.nand\\agents\\2ba2c304-5229-4680-9f93-f71025eb49d3\\accounts\\claude-code\\2e7336dc8eba87ef472df568c35482abf2575dc3e5eac0c5c62b8ffaeac2c934\\legacy-config",
+        "CODEX_HOME": "D:\\Document\\code\\nand\\scripts\\tmp\\agent-vault-data-20261011-03\\vault\\.nand\\agents\\2ba2c304-5229-4680-9f93-f71025eb49d3\\accounts\\claude-code\\2e7336dc8eba87ef472df568c35482abf2575dc3e5eac0c5c62b8ffaeac2c934\\home\\.codex",
+        "GEMINI_CLI_HOME": "D:\\Document\\code\\nand\\scripts\\tmp\\agent-vault-data-20261011-03\\vault\\.nand\\agents\\2ba2c304-5229-4680-9f93-f71025eb49d3\\accounts\\claude-code\\2e7336dc8eba87ef472df568c35482abf2575dc3e5eac0c5c62b8ffaeac2c934\\home",
+        "GROK_HOME": "D:\\Document\\code\\nand\\scripts\\tmp\\agent-vault-data-20261011-03\\vault\\.nand\\agents\\2ba2c304-5229-4680-9f93-f71025eb49d3\\accounts\\claude-code\\2e7336dc8eba87ef472df568c35482abf2575dc3e5eac0c5c62b8ffaeac2c934\\home\\.grok",
+        "PI_CODING_AGENT_DIR": "D:\\Document\\code\\nand\\scripts\\tmp\\agent-vault-data-20261011-03\\vault\\.nand\\agents\\2ba2c304-5229-4680-9f93-f71025eb49d3\\accounts\\claude-code\\2e7336dc8eba87ef472df568c35482abf2575dc3e5eac0c5c62b8ffaeac2c934\\home\\.pi\\agent",
+        "PI_CODING_AGENT_SESSION_DIR": "D:\\Document\\code\\nand\\scripts\\tmp\\agent-vault-data-20261011-03\\vault\\.nand\\agents\\2ba2c304-5229-4680-9f93-f71025eb49d3\\accounts\\claude-code\\2e7336dc8eba87ef472df568c35482abf2575dc3e5eac0c5c62b8ffaeac2c934\\home\\.pi\\agent\\sessions",
+        "OPENCODE_CONFIG_DIR": "D:\\Document\\code\\nand\\scripts\\tmp\\agent-vault-data-20261011-03\\vault\\.nand\\agents\\2ba2c304-5229-4680-9f93-f71025eb49d3\\accounts\\claude-code\\2e7336dc8eba87ef472df568c35482abf2575dc3e5eac0c5c62b8ffaeac2c934\\xdg\\config\\opencode",
+        "NAND_ACCOUNT_ROOT": "D:\\Document\\code\\nand\\scripts\\tmp\\agent-vault-data-20261011-03\\vault\\.nand\\agents\\2ba2c304-5229-4680-9f93-f71025eb49d3\\accounts\\claude-code\\2e7336dc8eba87ef472df568c35482abf2575dc3e5eac0c5c62b8ffaeac2c934",
+        "NAND_ACCOUNT_ID": "claude-code/2e7336dc8eba87ef472df568c35482abf2575dc3e5eac0c5c62b8ffaeac2c934",
+        "NAND_ACCOUNT_NAME": "a.b",
+        "NAND_HOOK_DIR": "D:\\Document\\code\\nand\\scripts\\tmp\\agent-vault-data-20261011-03\\vault\\.nand\\agents\\2ba2c304-5229-4680-9f93-f71025eb49d3\\accounts\\claude-code\\2e7336dc8eba87ef472df568c35482abf2575dc3e5eac0c5c62b8ffaeac2c934\\runtime\\hooks\\terminal-VT0XDb"
+      }
+    },
+    {
+      "name": "binding-survives-cold-restart",
+      "passed": true
+    },
+    {
+      "name": "archived-original-survives-new-launches",
+      "passed": true
+    },
+    {
+      "name": "native-children-exit",
+      "passed": true
+    }
+  ]
+}

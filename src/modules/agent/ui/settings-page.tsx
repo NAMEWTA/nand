@@ -234,11 +234,10 @@ function agentSection(container: HTMLElement, controller: AgentController, save:
 			.setName(t('agent.settings.extraArgs'))
 			.setDesc(t('agent.settings.extraArgsDesc'))
 			.addText((text) => text.setValue(entry.extraArgs).onChange((value) => save((draft) => { draft.agents.agents[agent.id].extraArgs = value; })));
-		if (agent.accountKind !== 'none')
-			new Setting(group)
-				.setName(t('agent.settings.account'))
-				.setDesc(t('agent.settings.accountDesc'))
-				.addText((text) => text.setValue(entry.accountId).onChange((value) => save((draft) => { draft.agents.agents[agent.id].accountId = value.trim(); })));
+		new Setting(group)
+			.setName(t('agent.settings.account'))
+			.setDesc(t('agent.settings.accountDesc'))
+			.addText((text) => text.setValue(entry.accountId).onChange((value) => save((draft) => { draft.agents.agents[agent.id].accountId = value; })));
 		if (agent.usage !== 'none')
 			new Setting(group).setName(t('agent.settings.showUsage')).addToggle((toggle) => toggle.setValue(entry.showUsage).onChange((value) => save((draft) => { draft.agents.agents[agent.id].showUsage = value; })));
 	}

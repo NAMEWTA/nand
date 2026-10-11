@@ -3,10 +3,12 @@ import { getAgent } from '../../core/launch/catalog';
 import { launchArgs } from '../../core/launch/flags';
 import type { AgentId, AgentSettings } from '../../core/launch/types';
 import type { VaultSession } from '../../core/history/types';
-import { accountEnv } from '../../platform/desktop/agents/accounts';
+import { accountEnv, restoredAccountEnv } from '../../platform/desktop/agents/accounts';
+import { accountArgs } from '../../platform/desktop/agents/account-args';
+import { deviceId } from '../../../../host/obsidian/storage/device-id';
 import { resolveCli } from '../../platform/desktop/agents/resolver';
 import { canonicalVaultCwd } from '../../platform/desktop/history/canonical-cwd';
-import { isFile } from '../../platform/desktop/history/node-modules';
+import { checkAccountTranscript } from '../../platform/desktop/agents/transcript';
 import { resumeArgs } from '../../platform/desktop/history/scope';
 import { t } from '../../../../shared/i18n/index';
 
@@ -23,7 +25,6 @@ export interface LaunchRequest {
 export interface LaunchHost {
 	app: App;
 	getVaultPath: () => string | undefined;
-	getPluginDataDir: () => string;
 	getAgentSettings: () => AgentSettings;
 	saveAgentSettings: (settings: AgentSettings) => Promise<void>;
 	/** Create the session and show it in the workbench. */
@@ -58,12 +59,13 @@ export async function launchAgent(host: LaunchHost, agentId: AgentId): Promise<v
 		return;
 	}
 
+	const env = await accountEnv(agent, entry.accountId, cwd, deviceId(host.app), true);
 	await host.start({
 		file: command,
-		args: launchArgs(settings, agentId),
+		args: accountArgs(agentId, launchArgs(settings, agentId), env),
 		agentId,
 		cwd,
-		env: accountEnv(agent, entry.accountId, host.getPluginDataDir()),
+		env,
 		title: agent.title,
 	});
 }
@@ -73,11 +75,11 @@ export async function resumeAgent(host: LaunchHost, session: VaultSession): Prom
 	const vault = host.getVaultPath();
 	if (!vault) throw new Error(t('agent.vaultMissing'));
 	await canonicalVaultCwd(vault, session.cwd);
-	if (session.transcriptPath && !(await isFile(session.transcriptPath)))
-		throw new Error(t('agent.sessionMissing'));
 	const settings = host.getAgentSettings();
 	const entry = settings.agents[session.agentId];
 	const agent = getAgent(session.agentId);
+	const env = await restoredAccountEnv(agent, session.env, vault, deviceId(host.app));
+	await checkAccountTranscript(vault, env, session.transcriptPath);
 	if (!entry?.enabled) {
 		new Notice(t('agent.agentOff', { title: agent.title }));
 		return;
@@ -102,13 +104,10 @@ export async function resumeAgent(host: LaunchHost, session: VaultSession): Prom
 		args: resumeArgs(
 			session.agentId,
 			session.agentId === 'pi' ? session.transcriptPath || '' : session.sessionId,
-			launchArgs(settings, session.agentId),
+			accountArgs(session.agentId, launchArgs(settings, session.agentId), env),
 		),
 		cwd: session.cwd,
-		env: {
-			...accountEnv(agent, entry.accountId, host.getPluginDataDir()),
-			...session.env,
-		},
+		env,
 		title: session.title || agent.title,
 	});
 }

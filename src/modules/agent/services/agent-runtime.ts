@@ -4,11 +4,12 @@ import { AGENT_CATALOG, getAgent } from '../core/launch/catalog';
 import { effectivePermission, launchArgs } from '../core/launch/flags';
 import type { AgentId, AgentSettings } from '../core/launch/types';
 import { AutomationHooks, type NativeHookEvent } from '../platform/desktop/hooks/automation-hooks';
-import { absolutePluginDir, accountEnv } from '../platform/desktop/agents/accounts';
+import { accountEnv, restoredAccountEnv } from '../platform/desktop/agents/accounts';
 import { resolveCli } from '../platform/desktop/agents/resolver';
 import { runtimeProcess } from '../platform/desktop/agents/runtime-process';
 import { canonicalVaultCwd } from '../platform/desktop/history/canonical-cwd';
-import { createNodeSessionIo } from '../platform/desktop/history/scan';
+import { checkAccountTranscript } from '../platform/desktop/agents/transcript';
+import { accountArgs } from '../platform/desktop/agents/account-args';
 import { isCwdInsideVault } from '../platform/desktop/history/scope';
 import { AutomationError } from '../../../shared/automation/errors';
 import type {
@@ -122,7 +123,7 @@ export class TerminalAutomationRuntime implements AgentRuntimePort {
 	private store: JsonStore<AgentSessionRef[]>;
 	private loaded: Promise<void>;
 	constructor(private host: AutomationRuntimeHost) {
-		this.hooks = new AutomationHooks(host.app.workspace.containerEl.win);
+		this.hooks = new AutomationHooks(host.app.workspace.containerEl.win, () => ({ vault: vaultPath(host.app), device: getDeviceId(host.app) }));
 		const device = getDeviceId(host.app);
 		const storage = privateVaultStorage(host.app);
 		const path = `.nand/terminal-agent/${device}/automation-sessions.json`;
@@ -282,19 +283,12 @@ export class TerminalAutomationRuntime implements AgentRuntimePort {
 			launchArgs(settings, id).length
 		)
 			throw new AutomationError('permissionRequired');
-		const io = createNodeSessionIo();
 		if (
 			action.sessionMode === 'specific' &&
 			(!action.session ||
 				action.session.agentId !== id ||
 				action.session.cwd !== action.cwd ||
 				!action.session.sessionId)
-		)
-			throw new AutomationError('sessionMissing');
-		if (
-			action.sessionMode === 'specific' &&
-			action.session?.transcriptPath &&
-			!(await io.stat(action.session.transcriptPath))?.isFile
 		)
 			throw new AutomationError('sessionMissing');
 		let sessionEnv: Record<string, string> | undefined;
@@ -312,8 +306,11 @@ export class TerminalAutomationRuntime implements AgentRuntimePort {
 			)
 				throw new AutomationError('sessionMissing');
 		}
-		const env = sessionEnv ?? accountEnv(agent, entry.accountId, absolutePluginDir(vaultPath(this.host.app), this.host.pluginDir));
+		const env = sessionEnv
+			? await restoredAccountEnv(agent, sessionEnv, vaultPath(this.host.app), getDeviceId(this.host.app))
+			: await accountEnv(agent, entry.accountId, vaultPath(this.host.app), getDeviceId(this.host.app));
 		const accountKey = JSON.stringify(env);
+		if (action.sessionMode === 'specific') await checkAccountTranscript(vaultPath(this.host.app), env, action.session?.transcriptPath);
 		if (execution.onPrepared) {
 			const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(accountIdentity(accountKey)));
 			execution.onPrepared({ agentId: id, accountIdentity: Array.from(new Uint8Array(digest), byte => byte.toString(16).padStart(2, '0')).join('') });
@@ -412,7 +409,7 @@ export class TerminalAutomationRuntime implements AgentRuntimePort {
 				const args = automationArgs(
 					id,
 					action.prompt,
-					launchArgs(settings, id),
+					accountArgs(id, launchArgs(settings, id), env),
 					action.sessionMode === 'specific' ? action.session : undefined,
 				);
 				const argv = [command, ...args];

@@ -14,7 +14,9 @@ const { TerminalAutomationRuntime } = await import(
 const { normalizeAgentSettings } = await import(
 	new URL('./src/modules/agent/core/launch/defaults.ts', pathToFileURL(repo + '/')).href
 );
-const { initializeDevice } = await import(new URL('./src/host/obsidian/storage/device-id.ts', pathToFileURL(repo + '/')).href);
+const { initializeDevice, deviceId } = await import(new URL('./src/host/obsidian/storage/device-id.ts', pathToFileURL(repo + '/')).href);
+const { accountEnv } = await import(new URL('./src/modules/agent/platform/desktop/agents/accounts.ts', pathToFileURL(repo + '/')).href);
+const { getAgent } = await import(new URL('./src/modules/agent/core/launch/catalog.ts', pathToFileURL(repo + '/')).href);
 const root = fs.realpathSync.native(fs.mkdtempSync(path.join(tmpdir(), 'nand-native-session-race-')));
 let runtime;
 try {
@@ -84,7 +86,7 @@ try {
 		cwd: vault,
 		sessionId: 'shared-native-session',
 		title: 'Synthetic',
-		accountKey: '{}',
+		accountKey: JSON.stringify(await accountEnv(getAgent('grok'), '', vault, deviceId(host.app))),
 		modifiedAtMs: 0,
 	};
 	runtime.listSessions = async () => [session];

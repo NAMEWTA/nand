@@ -5,8 +5,10 @@ import type { App } from 'obsidian';
 import type { AgentSettings } from '../../core/launch/types';
 import { t } from '../../../../shared/i18n/index';
 import { JsonStore } from '../../../../shared/json-store';
-import { absolutePluginDir, accountConfigDir } from '../desktop/agents/accounts';
+import { accountEnv } from '../desktop/agents/accounts';
+import { AGENT_CATALOG } from '../../core/launch/catalog';
 import { historyNodeModules } from '../desktop/history/node-modules';
+import { absoluteNandPath } from '../../../../host/desktop/nand-paths';
 import type { HistoryClient, HistoryClientSource, HistoryPage, NativeSession, NativeSessionSummary, NativeUsage } from '../desktop/server/agent-data-client';
 export interface HistoryMetadata {
 	title?: string;
@@ -64,6 +66,7 @@ export class NativeHistory {
 	private metadataVersion = 0;
 	private version = 0;
 	private scanRead?: { key: string; read: SharedRead<string[]> };
+	private preparingScope?: { key: string; promise: ReturnType<NativeHistory['loadScanScope']> };
 	private pages = new Map<string, SharedRead<HistoryPage>>();
 	private reads = new Set<AbortController>();
 	private client?: HistoryClient;
@@ -74,7 +77,6 @@ export class NativeHistory {
 		private app: App,
 		private service: HistoryClientSource,
 		private settings: () => AgentSettings,
-		private pluginDir: string,
 	) {
 		const device = getDeviceId(app);
 		this.store = new JsonStore(
@@ -162,36 +164,29 @@ export class NativeHistory {
 		return { vault, index: path.join(vault, '.nand', 'terminal-agent', device, 'index.sqlite') };
 	}
 
-	private async scanScope() {
-		const [path, os, , process] = await historyNodeModules();
-		const scope = await this.scope(),
-			home = os.homedir(),
-			settings = this.settings();
-		const dir = absolutePluginDir(scope.vault, this.pluginDir);
-		const claude =
-			accountConfigDir('claude', settings.agents['claude-code'].accountId, dir) ||
-			process.env.CLAUDE_CONFIG_DIR ||
-			path.join(home, '.claude');
-		const codex =
-			accountConfigDir('codex', settings.agents.codex.accountId, dir) ||
-			process.env.CODEX_HOME ||
-			path.join(home, '.codex');
-		const gemini = path.join(process.env.GEMINI_CLI_HOME || home, '.gemini');
-		const pi = process.env.PI_CODING_AGENT_DIR || path.join(home, '.pi', 'agent');
-		const grok = process.env.GROK_HOME || path.join(home, '.grok');
-		const openCode = path.join(process.env.XDG_DATA_HOME || path.join(home, '.local', 'share'), 'opencode');
-		const roots = [
-			{
-				agentId: 'claude-code',
-				path: path.join(claude, 'projects'),
-				accountKey: JSON.stringify({ CLAUDE_CONFIG_DIR: claude }),
-			},
-			{ agentId: 'codex', path: path.join(codex, 'sessions'), accountKey: JSON.stringify({ CODEX_HOME: codex }) },
-			{ agentId: 'gemini', path: path.join(gemini, 'tmp'), accountKey: '{}' },
-			{ agentId: 'pi', path: path.join(pi, 'sessions'), accountKey: JSON.stringify({ PI_CODING_AGENT_DIR: pi }) },
-			{ agentId: 'grok', path: path.join(grok, 'sessions'), accountKey: JSON.stringify({ GROK_HOME: grok }) },
-			{ agentId: 'opencode', path: path.join(openCode, 'opencode.db'), accountKey: '{}' },
-		];
+	private scanScope() {
+		const settings = structuredClone(this.settings()), key = JSON.stringify(settings);
+		if (this.preparingScope?.key === key) return this.preparingScope.promise;
+		const promise = this.loadScanScope(settings).finally(() => { if (this.preparingScope?.promise === promise) this.preparingScope = undefined; });
+		this.preparingScope = { key, promise };
+		return promise;
+	}
+	private async loadScanScope(settings: AgentSettings) {
+		const [path] = await historyNodeModules();
+		const scope = await this.scope(), roots = [];
+		for (const agent of AGENT_CATALOG) {
+			const env = await accountEnv(agent, settings.agents[agent.id].accountId, scope.vault, getDeviceId(this.app));
+			const sources = {
+				'claude-code': path.join(env.CLAUDE_CONFIG_DIR!, 'projects'),
+				codex: path.join(env.CODEX_HOME!, 'sessions'),
+				gemini: path.join(env.GEMINI_CLI_HOME!, '.gemini', 'tmp'),
+				pi: env.PI_CODING_AGENT_SESSION_DIR!,
+				grok: path.join(env.GROK_HOME!, 'sessions'),
+				opencode: path.join(env.XDG_DATA_HOME!, 'opencode', 'opencode.db'),
+			};
+			const source = await absoluteNandPath(scope.vault, path.relative(scope.vault, sources[agent.id]).split(path.sep).join('/'));
+			roots.push({ agentId: agent.id, path: source, accountKey: JSON.stringify(env) });
+		}
 		return { ...scope, roots };
 	}
 	async scan(signal?: AbortSignal): Promise<string[]> {

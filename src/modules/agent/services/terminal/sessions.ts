@@ -8,8 +8,8 @@ import { TerminalSession, type Activity, type SessionColors, type SessionKind } 
 
 export interface TerminalHost {
 	app: App;
-	/** Absolute plugin folder (the helper binary lives in `binaries/`). */
-	pluginDir(): string;
+	/** Vault-owned home, cache and temporary directories for helper and shell processes. */
+	environment(): Promise<Record<string, string>>;
 	version: string;
 	/** `process.platform` of the desktop app. */
 	platform: string;
@@ -116,6 +116,8 @@ export class TerminalSessions {
 		if (this.helper?.alive) return this.helper;
 		this.starting ??= (async () => {
 			const binary = await this.host.binary();
+			const environment = await this.host.environment();
+			if (this.disposed) throw new Error('The terminal module is off');
 			const { PtyHelper } = await import('../../platform/desktop/pty/helper');
 			let started: PtyHelper | undefined;
 			const helper = await PtyHelper.start(binary, {
@@ -124,7 +126,7 @@ export class TerminalSessions {
 				closed: (reason) => {
 					if (started) this.helperClosed(started, reason);
 				},
-			}, this.host.app.workspace.containerEl.win);
+			}, this.host.app.workspace.containerEl.win, environment);
 			started = helper;
 			if (this.disposed) {
 				helper.dispose();
@@ -161,6 +163,7 @@ export class TerminalSessions {
 	async create(request: CreateSession): Promise<TerminalSession> {
 		request.signal?.throwIfAborted();
 		const helper = await this.ensureHelper();
+		const environment = await this.host.environment();
 		request.signal?.throwIfAborted();
 		if (this.disposed) throw new Error('The terminal module is off');
 		const settings = this.host.settings();
@@ -185,6 +188,7 @@ export class TerminalSessions {
 		request.prepare?.(session);
 		this.changed();
 		let env: Record<string, string> = {
+			...environment,
 			TERM: 'xterm-256color',
 			COLORTERM: 'truecolor',
 			TERM_PROGRAM: 'nand',

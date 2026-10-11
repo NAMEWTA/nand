@@ -12,7 +12,7 @@ async function invoke(input: unknown) {
 	try {
 		const script = path.join(directory, 'hook.cjs');
 		await fs.writeFile(script, HOOK_SCRIPT);
-		const child = spawn(process.execPath, [script, 'Stop'], { windowsHide: true, env: { ...process.env, NAND_HOOK_DIR: directory, NAND_HOOK_TOKEN: 'test-token' } });
+		const child = spawn(process.execPath, [script, 'Stop'], { windowsHide: true, env: { ...process.env, NAND_ACCOUNT_ROOT: directory, NAND_HOOK_DIR: directory, NAND_HOOK_TOKEN: 'test-token' } });
 		let output = '';
 		child.stdout.on('data', chunk => { output += String(chunk); });
 		const exited = new Promise<void>((resolve, reject) => {
@@ -44,4 +44,16 @@ test('oversize answers and hook input produce explicit errors instead of losing 
 	const input = await invoke({ prompt: 'x'.repeat(MAX_HOOK_INPUT_BYTES + 1) });
 	assert.equal(input.event, 'HookError');
 	assert.equal(input.data.nand_answer_error, 'hookInputTooLarge');
+});
+
+test('the generated hook refuses a spool junction that was replaced after preparation', async () => {
+	const root = await fs.mkdtemp(path.join(os.tmpdir(), 'nand-hook-link-')), outside = path.join(root, 'outside'), owner = path.join(root, 'account'), spool = path.join(owner, 'spool');
+	await fs.mkdir(outside); await fs.mkdir(owner); await fs.symlink(outside, spool, process.platform === 'win32' ? 'junction' : 'dir');
+	try {
+		const script = path.join(owner, 'hook.cjs'); await fs.writeFile(script, HOOK_SCRIPT);
+		const child = spawn(process.execPath, [script, 'Stop'], { windowsHide: true, env: { ...process.env, NAND_ACCOUNT_ROOT: owner, NAND_HOOK_DIR: spool, NAND_HOOK_TOKEN: 'fixture' } });
+		const exit = new Promise<void>((resolve, reject) => { child.once('error', reject); child.once('exit', code => code === 0 ? resolve() : reject(new Error(String(code)))); });
+		child.stdin.end('{}'); await exit;
+		assert.deepEqual(await fs.readdir(outside), []);
+	} finally { await fs.rm(root, { recursive: true, force: true }); }
 });

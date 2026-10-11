@@ -33,7 +33,7 @@ export async function launchFreshVault({ root, files = {}, settings, port = 9237
 		await fs.writeFile(path.join(vault, file), text);
 	}
 	await fs.writeFile(path.join(profile, 'obsidian.json'), JSON.stringify({ vaults: { abcdef1234567890: { path: vault, ts: Date.now(), open: true } } }));
-	const env = { ...process.env, HOME: path.join(root, 'home'), XDG_CONFIG_HOME: path.join(root, 'config'), XDG_RUNTIME_DIR: path.join(root, 'runtime'), NAND_CDP_URL: `http://127.0.0.1:${port}` };
+	const env = { ...process.env, HOME: path.join(root, 'home'), USERPROFILE: path.join(root, 'home'), XDG_CONFIG_HOME: path.join(root, 'config'), XDG_RUNTIME_DIR: path.join(root, 'runtime'), NAND_CDP_URL: `http://127.0.0.1:${port}` };
 	process.env.NAND_CDP_URL = env.NAND_CDP_URL;
 	const session = { connection: undefined, app: undefined, exited: undefined };
 	const start = async () => {

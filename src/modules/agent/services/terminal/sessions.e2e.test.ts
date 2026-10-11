@@ -12,7 +12,7 @@ function manager() {
 	const win = globalThis as unknown as Window;
 	return new TerminalSessions({
 		app: { workspace: { containerEl: { win } } } as never,
-		pluginDir: () => '',
+		environment: async () => ({}),
 		version: 'test',
 		platform: process.platform,
 		settings: () => normalizeTerminalSettings({}),

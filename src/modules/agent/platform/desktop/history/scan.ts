@@ -23,50 +23,6 @@ export function resetVaultSessionCache(): void {
 	cache = null;
 }
 
-export function createNodeSessionIo(): SessionIo {
-	const requireNode = window.require;
-	const fs = requireNode('fs') as typeof import('fs');
-	const os = requireNode('os') as typeof import('os');
-	return {
-		platform: process.platform,
-		homedir: () => os.homedir(),
-		env: (name) => process.env[name],
-		async readDir(dir) {
-			try {
-				return await fs.promises.readdir(dir);
-			} catch {
-				return [];
-			}
-		},
-		async stat(file) {
-			try {
-				const info = await fs.promises.stat(file);
-				return {
-					isDirectory: info.isDirectory(),
-					isFile: info.isFile(),
-					mtimeMs: info.mtimeMs,
-					size: info.size,
-				};
-			} catch {
-				return null;
-			}
-		},
-		async readFile(file, maxBytes) {
-			let handle: import('fs').promises.FileHandle | null = null;
-			try {
-				handle = await fs.promises.open(file, 'r');
-				const buffer = Buffer.alloc(maxBytes);
-				const { bytesRead } = await handle.read(buffer, 0, maxBytes, 0);
-				return buffer.subarray(0, bytesRead).toString('utf8');
-			} catch {
-				return null;
-			} finally {
-				await handle?.close();
-			}
-		},
-	};
-}
-
 export async function scanVaultSessions(request: VaultScanRequest, now = Date.now()): Promise<VaultSession[]> {
 	const sessions = (
 		await Promise.all([
@@ -94,11 +50,12 @@ async function collectSafely(agent: string, read: () => Promise<VaultSession[]>)
 async function scanClaude(request: VaultScanRequest): Promise<VaultSession[]> {
 	const pathApi = pathFor(request.io.platform);
 	const roots = uniquePaths(
-		[pathApi.join(request.io.homedir(), '.claude'), ...request.claudeConfigDirs],
+		request.claudeConfigDirs,
 		request.io.platform,
 	);
 	const found: VaultSession[] = [];
 	for (const root of roots) {
+		if (!isCwdInsideVault(pathApi.join(request.vaultPath, '.nand'), root, request.io.platform)) continue;
 		const projectRoot = pathApi.join(root, 'projects');
 		const names = await request.io.readDir(projectRoot);
 		for (const name of names) {
@@ -118,13 +75,13 @@ async function scanClaude(request: VaultScanRequest): Promise<VaultSession[]> {
 
 async function scanCodex(request: VaultScanRequest): Promise<VaultSession[]> {
 	const pathApi = pathFor(request.io.platform);
-	const envHome = request.io.env('CODEX_HOME')?.trim();
 	const roots = uniquePaths(
-		[envHome || pathApi.join(request.io.homedir(), '.codex'), ...request.codexHomes],
+		request.codexHomes,
 		request.io.platform,
 	);
 	const found: VaultSession[] = [];
 	for (const root of roots) {
+		if (!isCwdInsideVault(pathApi.join(request.vaultPath, '.nand'), root, request.io.platform)) continue;
 		const files = await newestCodexFiles(
 			request.io,
 			pathApi.join(root, 'sessions'),
@@ -140,7 +97,8 @@ async function scanCodex(request: VaultScanRequest): Promise<VaultSession[]> {
 
 async function scanGemini(request: VaultScanRequest): Promise<VaultSession[]> {
 	const pathApi = pathFor(request.io.platform);
-	const root = pathApi.join(request.io.homedir(), '.gemini');
+	const root = request.geminiConfigDir;
+	if (!root || !isCwdInsideVault(pathApi.join(request.vaultPath, '.nand'), root, request.io.platform)) return [];
 	const projects = await geminiProjects(request, root);
 	const found: VaultSession[] = [];
 	for (const project of projects) {

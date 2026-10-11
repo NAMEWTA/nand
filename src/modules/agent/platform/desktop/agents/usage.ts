@@ -1,13 +1,11 @@
 import * as fs from 'node:fs';
 import * as https from 'node:https';
-import * as os from 'node:os';
 import * as path from 'node:path';
-import { Platform } from 'obsidian';
 import { getAgent } from '../../../core/launch/catalog';
 import type { AgentId, AgentSettings, UsageKind, UsageSnapshot, UsageWindow } from '../../../core/launch/types';
 import { t } from '../../../../../shared/i18n/index';
-import { accountConfigDir } from './accounts';
-import { runtimeProcess } from './runtime-process';
+import { accountEnv } from './accounts';
+import { privatePathHasSymlink } from '../../../../../host/desktop/private-mode';
 import { ProviderReadError, ProviderUsageCache } from './usage-cache';
 
 const REQUEST_TIMEOUT_MS = 10_000;
@@ -16,7 +14,7 @@ const providerReads = new ProviderUsageCache();
 
 type ProviderSnapshot = Omit<UsageSnapshot, 'agentId' | 'failed'>;
 
-const READERS: Partial<Record<UsageKind, (home?: string) => Promise<ProviderSnapshot>>> = {
+const READERS: Partial<Record<UsageKind, (home: string) => Promise<ProviderSnapshot>>> = {
 	claude: readClaudeUsage,
 	codex: readCodexUsage,
 	grok: readGrokUsage,
@@ -26,11 +24,12 @@ const READERS: Partial<Record<UsageKind, (home?: string) => Promise<ProviderSnap
 
 export interface UsageContext {
 	settings: AgentSettings;
-	pluginDir: string;
+	vault: string;
+	device: string;
 }
 export async function readUsageSnapshots(
 	enabled: readonly AgentId[],
-	context?: UsageContext,
+	context: UsageContext,
 ): Promise<UsageSnapshot[]> {
 	const jobs: Array<Promise<UsageSnapshot>> = [];
 	for (const id of enabled) {
@@ -52,19 +51,14 @@ export async function readUsageSnapshots(
 			);
 			continue;
 		}
-		const account = context?.settings.agents[id]?.accountId;
-		const home =
-			context && account && agent.accountKind !== 'none'
-				? (accountConfigDir(agent.accountKind, account, context.pluginDir) ?? undefined)
-				: undefined;
-		const defaultHome =
-			id === 'claude-code'
-				? runtimeProcess().env.CLAUDE_CONFIG_DIR
-				: id === 'codex'
-					? runtimeProcess().env.CODEX_HOME
-					: undefined;
-		const key = `${agent.usage}:${home || defaultHome || 'default'}`;
-		const ttl = Math.max(60, context?.settings.usageRefreshSec ?? 60) * 1000;
+		const account = context.settings.agents[id].accountId;
+		let env: Record<string, string>;
+		try { env = await accountEnv(agent, account, context.vault, context.device); }
+		catch (error) { jobs.push(safeRead(id, () => Promise.reject(error instanceof Error ? error : new Error(String(error))))); continue; }
+		const homes: Record<string, string> = { claude: env.CLAUDE_CONFIG_DIR!, codex: env.CODEX_HOME!, grok: env.GROK_HOME!, gemini: path.join(env.GEMINI_CLI_HOME!, '.gemini'), opencode: path.join(env.XDG_DATA_HOME!, 'opencode') };
+		const home = homes[agent.usage]!;
+		const key = `${agent.usage}:${home}`;
+		const ttl = Math.max(60, context.settings.usageRefreshSec) * 1000;
 		jobs.push(
 			safeRead(id, async () => {
 				const cached = await providerReads.read(key, ttl, () => read(home));
@@ -116,13 +110,8 @@ async function safeRead(agentId: AgentId, read: () => Promise<ProviderSnapshot>)
 	}
 }
 
-async function readClaudeUsage(home?: string): Promise<ProviderSnapshot> {
-	const credentialsPath = path.join(
-		home || runtimeProcess().env.CLAUDE_CONFIG_DIR || path.join(os.homedir(), '.claude'),
-		'.credentials.json',
-	);
-	const credentials =
-		readJson(credentialsPath) ?? (await readClaudeKeychain(home || runtimeProcess().env.CLAUDE_CONFIG_DIR));
+async function readClaudeUsage(home: string): Promise<ProviderSnapshot> {
+	const credentials = await readJson(path.join(home, '.credentials.json'));
 	const oauth = asRecord(credentials?.claudeAiOauth);
 	const token = typeof oauth?.accessToken === 'string' ? oauth.accessToken : '';
 	if (!token) {
@@ -147,46 +136,8 @@ async function readClaudeUsage(home?: string): Promise<ProviderSnapshot> {
 	};
 }
 
-/** Claude scopes custom macOS credentials by the canonical config directory. */
-async function readClaudeKeychain(selectedHome?: string): Promise<Record<string, unknown> | null> {
-	if (!Platform.isDesktop) return null;
-	if (runtimeProcess().platform !== 'darwin') return null;
-	const { execFile } = window.require('node:child_process') as typeof import('node:child_process');
-	const { createHash } = window.require('node:crypto') as typeof import('node:crypto');
-	const home = selectedHome || path.join(os.homedir(), '.claude');
-	const canonical = await fs.promises.realpath(home).catch(() => home);
-	const services = [
-		...new Set(
-			[canonical, home].map(
-				(dir) =>
-					`Claude Code-credentials-${createHash('sha256').update(dir.normalize('NFC')).digest('hex').slice(0, 8)}`,
-			),
-		),
-	];
-	if (!selectedHome) services.push('Claude Code-credentials');
-	for (const service of services) {
-		const raw = await new Promise<string | null>((resolve) => {
-			execFile(
-				'/usr/bin/security',
-				['find-generic-password', '-s', service, '-a', os.userInfo().username, '-w'],
-				{ timeout: 3000, maxBuffer: 262144 },
-				(error, output) => resolve(error ? null : output),
-			);
-		});
-		if (!raw) continue;
-		try {
-			const value = asRecord(JSON.parse(raw));
-			if (value) return value;
-		} catch {
-			/* Try only this account's remaining aliases. */
-		}
-	}
-	return null;
-}
-
-async function readCodexUsage(selectedHome?: string): Promise<ProviderSnapshot> {
-	const home = selectedHome || runtimeProcess().env.CODEX_HOME || path.join(os.homedir(), '.codex');
-	const auth = readJson(path.join(home, 'auth.json'));
+async function readCodexUsage(home: string): Promise<ProviderSnapshot> {
+	const auth = await readJson(path.join(home, 'auth.json'));
 	const tokens = asRecord(auth?.tokens);
 	const accessToken = typeof tokens?.access_token === 'string' ? tokens.access_token : '';
 	if (!accessToken) {
@@ -218,8 +169,8 @@ async function readCodexUsage(selectedHome?: string): Promise<ProviderSnapshot> 
 	};
 }
 
-async function readGrokUsage(): Promise<ProviderSnapshot> {
-	const session = readGrokSession();
+async function readGrokUsage(home: string): Promise<ProviderSnapshot> {
+	const session = await readGrokSession(home);
 	if (!session) {
 		return { provider: 'Grok', account: null, status: t('agent.usage.status.notSignedIn'), statusKey: 'notSignedIn', windows: [] };
 	}
@@ -256,14 +207,13 @@ async function readGrokUsage(): Promise<ProviderSnapshot> {
 	};
 }
 
-function readGrokSession(): {
+async function readGrokSession(home: string): Promise<{
 	accessToken: string;
 	userId: string | null;
 	email: string | null;
 	expiresAtMs: number | null;
-} | null {
-	const home = runtimeProcess().env.GROK_HOME || path.join(os.homedir(), '.grok');
-	const parsed = readJson(path.join(home, 'auth.json'));
+} | null> {
+	const parsed = await readJson(path.join(home, 'auth.json'));
 	if (!parsed) return null;
 	const entries = Object.entries(parsed);
 	const preferred = entries.find(([key]) => key === 'https://auth.x.ai' || key.startsWith('https://auth.x.ai::'));
@@ -362,11 +312,13 @@ function asRecord(value: unknown): Record<string, unknown> | null {
 	return value as Record<string, unknown>;
 }
 
-function readJson(file: string): Record<string, unknown> | null {
+async function readJson(file: string): Promise<Record<string, unknown> | null> {
+	if (await privatePathHasSymlink(file)) throw new Error('private-storage.symlink');
 	try {
 		return asRecord(JSON.parse(fs.readFileSync(file, 'utf8')));
-	} catch {
-		return null;
+	} catch (error) {
+		if ((error as NodeJS.ErrnoException).code === 'ENOENT') return null;
+		throw error;
 	}
 }
 
@@ -448,8 +400,8 @@ function requestRaw(url: string, headers: Record<string, string>, body?: string)
 	});
 }
 
-async function readGeminiUsage(): Promise<ProviderSnapshot> {
-	const creds = readJson(path.join(os.homedir(), '.gemini', 'oauth_creds.json'));
+async function readGeminiUsage(home: string): Promise<ProviderSnapshot> {
+	const creds = await readJson(path.join(home, 'oauth_creds.json'));
 	const token = typeof creds?.access_token === 'string' ? creds.access_token : '';
 	const expiry = typeof creds?.expiry_date === 'number' ? creds.expiry_date : 0;
 	if (!token)
@@ -501,8 +453,8 @@ async function readGeminiUsage(): Promise<ProviderSnapshot> {
 	};
 }
 
-async function readOpenCodeUsage(): Promise<ProviderSnapshot> {
-	const key = readOpenCodeGoKey();
+async function readOpenCodeUsage(home: string): Promise<ProviderSnapshot> {
+	const key = await readOpenCodeGoKey(home);
 	if (!key)
 		return { provider: 'OpenCode', account: null, status: t('agent.usage.status.notSignedIn'), statusKey: 'notSignedIn', windows: [] };
 	const data = asRecord(
@@ -526,22 +478,9 @@ async function readOpenCodeUsage(): Promise<ProviderSnapshot> {
 	};
 }
 
-function readOpenCodeGoKey(): string | null {
-	const env = runtimeProcess().env.OPENCODE_API_KEY?.trim();
-	if (env) return env;
-	const { APPDATA, XDG_DATA_HOME } = runtimeProcess().env;
-	const candidates = [
-		APPDATA ? path.join(APPDATA, 'opencode', 'auth.json') : null,
-		XDG_DATA_HOME ? path.join(XDG_DATA_HOME, 'opencode', 'auth.json') : null,
-		path.join(os.homedir(), '.local', 'share', 'opencode', 'auth.json'),
-		path.join(os.homedir(), 'Library', 'Application Support', 'opencode', 'auth.json'),
-	].filter((candidate): candidate is string => candidate !== null);
-	for (const candidate of candidates) {
-		const parsed = readJson(candidate);
-		const entry = asRecord(parsed?.['opencode-go']);
-		if (entry?.type === 'api' && typeof entry.key === 'string' && entry.key.trim()) return entry.key.trim();
-	}
-	return null;
+async function readOpenCodeGoKey(home: string): Promise<string | null> {
+	const entry = asRecord((await readJson(path.join(home, 'auth.json')))?.['opencode-go']);
+	return entry?.type === 'api' && typeof entry.key === 'string' && entry.key.trim() ? entry.key.trim() : null;
 }
 
 function percentWindow(name: string, record: Record<string, unknown> | null): UsageWindow | null {

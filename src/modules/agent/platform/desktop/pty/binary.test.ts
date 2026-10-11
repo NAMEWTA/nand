@@ -22,7 +22,7 @@ function setup() {
 		}
 		return binary;
 	};
-	return { pluginDir, binary, requests, fetch, setDigest: (value: string) => { digest = value; }, file: path.join(pluginDir, 'binaries', 'nand-pty-linux-x64') };
+	return { pluginDir, binary, requests, fetch, setDigest: (value: string) => { digest = value; }, file: path.join(pluginDir, '.nand/helpers/fixture-device/linux-x64/0.0.1-alpha.1', 'nand-pty-linux-x64') };
 }
 
 test('asset names and digest parsing', () => {
@@ -35,14 +35,27 @@ test('asset names and digest parsing', () => {
 	assert.equal(parseDigest('not-a-digest'), null);
 });
 
+test('upgrades install inside the vault with a distinct version path and retain the old running binary', async () => {
+	const f = setup();
+	try {
+		const options = { vault: f.pluginDir, device: 'fixture-device', offline: false, platform: 'linux', arch: 'x64', fetch: f.fetch };
+		const first = await ensureHelper({ ...options, version: '0.0.1-alpha.1' });
+		const second = await ensureHelper({ ...options, version: '0.0.1-alpha.2' });
+		assert.notEqual(first, second);
+		assert.equal(path.relative(f.pluginDir, second), path.join('.nand', 'helpers', 'fixture-device', 'linux-x64', '0.0.1-alpha.2', 'nand-pty-linux-x64'));
+		assert.deepEqual(fs.readFileSync(first), f.binary);
+		assert.deepEqual(fs.readFileSync(second), f.binary);
+	} finally { fs.rmSync(f.pluginDir, { recursive: true, force: true }); }
+});
+
 test('downloads from the matching release, verifies, then reuses the verified file offline of the network', async () => {
 	const f = setup();
-	const installed = await ensureHelper({ pluginDir: f.pluginDir, version: '0.0.1-alpha.1', offline: false, platform: 'linux', arch: 'x64', fetch: f.fetch });
+	const installed = await ensureHelper({ vault: f.pluginDir, device: 'fixture-device', version: '0.0.1-alpha.1', offline: false, platform: 'linux', arch: 'x64', fetch: f.fetch });
 	assert.equal(installed, f.file);
 	assert.deepEqual(fs.readFileSync(f.file), f.binary);
 	assert.deepEqual(f.requests, [`${RELEASE_BASE}/0.0.1-alpha.1/nand-pty-linux-x64.sha256`, `${RELEASE_BASE}/0.0.1-alpha.1/nand-pty-linux-x64`]);
 	f.requests.length = 0;
-	await ensureHelper({ pluginDir: f.pluginDir, version: '0.0.1-alpha.1', offline: false, platform: 'linux', arch: 'x64', fetch: f.fetch });
+	await ensureHelper({ vault: f.pluginDir, device: 'fixture-device', version: '0.0.1-alpha.1', offline: false, platform: 'linux', arch: 'x64', fetch: f.fetch });
 	assert.deepEqual(f.requests, [], 'a verified file for this version needs no network');
 });
 
@@ -50,42 +63,42 @@ test('a hand-placed file is accepted only when it matches the published digest',
 	const f = setup();
 	fs.mkdirSync(path.dirname(f.file), { recursive: true });
 	fs.writeFileSync(f.file, f.binary);
-	await ensureHelper({ pluginDir: f.pluginDir, version: '0.0.1-alpha.1', offline: false, platform: 'linux', arch: 'x64', fetch: f.fetch });
+	await ensureHelper({ vault: f.pluginDir, device: 'fixture-device', version: '0.0.1-alpha.1', offline: false, platform: 'linux', arch: 'x64', fetch: f.fetch });
 	assert.equal(f.requests.length, 1, 'only the digest was requested');
 	const g = setup();
 	fs.mkdirSync(path.dirname(g.file), { recursive: true });
 	fs.writeFileSync(g.file, 'unknown');
-	await ensureHelper({ pluginDir: g.pluginDir, version: '0.0.1-alpha.1', offline: false, platform: 'linux', arch: 'x64', fetch: g.fetch });
+	await ensureHelper({ vault: g.pluginDir, device: 'fixture-device', version: '0.0.1-alpha.1', offline: false, platform: 'linux', arch: 'x64', fetch: g.fetch });
 	assert.deepEqual(fs.readFileSync(g.file), g.binary, 'an unknown file is replaced by the verified download');
 });
 
 test('missing or mismatched checksums stop installation and keep the previous file', async () => {
 	const f = setup();
 	f.setDigest('garbage');
-	await assert.rejects(ensureHelper({ pluginDir: f.pluginDir, version: '0.0.1-alpha.1', offline: false, platform: 'linux', arch: 'x64', fetch: f.fetch }), (error: unknown) => error instanceof BinaryError && error.code === 'checksumMissing');
+	await assert.rejects(ensureHelper({ vault: f.pluginDir, device: 'fixture-device', version: '0.0.1-alpha.1', offline: false, platform: 'linux', arch: 'x64', fetch: f.fetch }), (error: unknown) => error instanceof BinaryError && error.code === 'checksumMissing');
 	f.setDigest(`${'0'.repeat(64)}  nand-pty-linux-x64`);
 	fs.mkdirSync(path.dirname(f.file), { recursive: true });
 	fs.writeFileSync(f.file, 'previous');
-	await assert.rejects(ensureHelper({ pluginDir: f.pluginDir, version: '0.0.1-alpha.1', offline: false, platform: 'linux', arch: 'x64', fetch: f.fetch }), (error: unknown) => error instanceof BinaryError && error.code === 'checksumMismatch');
+	await assert.rejects(ensureHelper({ vault: f.pluginDir, device: 'fixture-device', version: '0.0.1-alpha.1', offline: false, platform: 'linux', arch: 'x64', fetch: f.fetch }), (error: unknown) => error instanceof BinaryError && error.code === 'checksumMismatch');
 	assert.equal(fs.readFileSync(f.file, 'utf8'), 'previous');
 	assert.equal(fs.existsSync(`${f.file}.download`), false);
 });
 
 test('offline mode never downloads and requires an installed file', async () => {
 	const f = setup();
-	await assert.rejects(ensureHelper({ pluginDir: f.pluginDir, version: '0.0.1-alpha.1', offline: true, platform: 'linux', arch: 'x64', fetch: f.fetch }), (error: unknown) => error instanceof BinaryError && error.code === 'offlineMissing');
+	await assert.rejects(ensureHelper({ vault: f.pluginDir, device: 'fixture-device', version: '0.0.1-alpha.1', offline: true, platform: 'linux', arch: 'x64', fetch: f.fetch }), (error: unknown) => error instanceof BinaryError && error.code === 'offlineMissing');
 	fs.mkdirSync(path.dirname(f.file), { recursive: true });
 	fs.writeFileSync(f.file, 'any');
-	assert.equal(await ensureHelper({ pluginDir: f.pluginDir, version: '0.0.1-alpha.1', offline: true, platform: 'linux', arch: 'x64', fetch: f.fetch }), f.file);
+	await assert.rejects(ensureHelper({ vault: f.pluginDir, device: 'fixture-device', version: '0.0.1-alpha.1', offline: true, platform: 'linux', arch: 'x64', fetch: f.fetch }), (error) => error instanceof BinaryError && error.code === 'offlineMissing');
 	assert.deepEqual(f.requests, []);
-	await assert.rejects(ensureHelper({ pluginDir: f.pluginDir, version: '0.0.1-alpha.1', offline: false, platform: 'win32', arch: 'arm64', fetch: f.fetch }), (error: unknown) => error instanceof BinaryError && error.code === 'unsupported');
+	await assert.rejects(ensureHelper({ vault: f.pluginDir, device: 'fixture-device', version: '0.0.1-alpha.1', offline: false, platform: 'win32', arch: 'arm64', fetch: f.fetch }), (error: unknown) => error instanceof BinaryError && error.code === 'unsupported');
 });
 
 test('installation failures identify the requested release and keep the previous binary until a retry succeeds', async () => {
 	const f = setup();
 	fs.mkdirSync(path.dirname(f.file), { recursive: true });
 	fs.writeFileSync(f.file, 'previous');
-	const options = { pluginDir: f.pluginDir, version: '0.0.1-alpha.1', offline: false, platform: 'linux', arch: 'x64' };
+	const options = { vault: f.pluginDir, device: 'fixture-device', version: '0.0.1-alpha.1', offline: false, platform: 'linux', arch: 'x64' };
 	await assert.rejects(ensureHelper({ ...options, fetch: async () => { throw new BinaryError('http', 'HTTP 404', { status: 404 }); } }), (error: unknown) => {
 		assert.ok(error instanceof BinaryError);
 		assert.deepEqual(error.detail, { status: 404, version: options.version, url: `${RELEASE_BASE}/${options.version}/nand-pty-linux-x64.sha256` });

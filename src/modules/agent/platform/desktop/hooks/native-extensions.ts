@@ -1,15 +1,17 @@
 // Native lifecycle adapters, informed by Orca 27b823f (MIT, Lovecast Inc.).
 // Hooks are inert outside NAND and never infer completion from output silence.
 import { EVENT_PAYLOAD_SCRIPT } from './event-payload';
+import { SPOOL_GUARD } from './spool-guard';
 
 const transport = `import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
 const dir = process.env.NAND_HOOK_DIR, token = process.env.NAND_HOOK_TOKEN;
 ${EVENT_PAYLOAD_SCRIPT}
+${SPOOL_GUARD}
 function post(event, data) {
  if (!dir || !token) return;
- try { const file = path.join(dir, process.hrtime.bigint().toString().padStart(24, '0') + '-' + crypto.randomUUID());
+ try { checkSpool(); const file = path.join(dir, process.hrtime.bigint().toString().padStart(24, '0') + '-' + crypto.randomUUID());
  fs.writeFileSync(file + '.pending', JSON.stringify({ token, event, at: Date.now(), data: eventData(data) }), { mode: 0o600 });
  fs.renameSync(file + '.pending', file + '.json'); } catch {}
 }

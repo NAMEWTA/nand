@@ -13,7 +13,7 @@ test('vault scan keeps claude, codex, and gemini sessions inside the vault', asy
 	const files = new Map<string, { text: string; mtimeMs: number }>();
 	const dirs = new Set<string>();
 
-	const claudeRoot = 'C:\\Users\\ada\\.claude';
+	const claudeRoot = 'D:\\vault\\.nand\\agents\\claude';
 	const claudeProjects = pathApi.join(claudeRoot, 'projects');
 	const vaultBucket = pathApi.join(claudeProjects, 'D--vault');
 	const childBucket = pathApi.join(claudeProjects, 'D--vault-src');
@@ -35,7 +35,7 @@ test('vault scan keeps claude, codex, and gemini sessions inside the vault', asy
 		text: `${JSON.stringify({ type: 'user', cwd: 'D:\\other', sessionId: 'sess-other', message: { content: 'nope' } })}\n`,
 	});
 
-	const codexRoot = 'C:\\Users\\ada\\.codex';
+	const codexRoot = 'D:\\vault\\.nand\\agents\\codex';
 	const day = pathApi.join(codexRoot, 'sessions', '2026', '09', '25');
 	dirs.add(pathApi.join(codexRoot, 'sessions'));
 	dirs.add(pathApi.join(codexRoot, 'sessions', '2026'));
@@ -56,7 +56,7 @@ test('vault scan keeps claude, codex, and gemini sessions inside the vault', asy
 		].join('\n'),
 	});
 
-	const geminiRoot = 'C:\\Users\\ada\\.gemini';
+	const geminiRoot = 'D:\\vault\\.nand\\agents\\gemini';
 	const chats = pathApi.join(geminiRoot, 'tmp', 'nand', 'chats');
 	dirs.add(pathApi.join(geminiRoot, 'tmp'));
 	dirs.add(pathApi.join(geminiRoot, 'tmp', 'nand'));
@@ -78,8 +78,9 @@ test('vault scan keeps claude, codex, and gemini sessions inside the vault', asy
 		key: 'vault-test',
 		vaultPath: vault,
 		io,
-		claudeConfigDirs: [],
-		codexHomes: [],
+		claudeConfigDirs: [claudeRoot],
+		codexHomes: [codexRoot],
+		geminiConfigDir: geminiRoot,
 	});
 	const ids = sessions.map((session) => session.sessionId);
 	assert.deepEqual(ids, ['codex-vault', 'sess-vault', 'sess-child', 'gem-1']);
@@ -93,8 +94,6 @@ test('vault scan keeps claude, codex, and gemini sessions inside the vault', asy
 function fakeIo(files: Map<string, { text: string; mtimeMs: number }>, dirs: Set<string>): SessionIo {
 	return {
 		platform: 'win32',
-		homedir: () => 'C:\\Users\\ada',
-		env: () => undefined,
 		async readDir(dir) {
 			const prefix = dir.endsWith('\\') ? dir : `${dir}\\`;
 			const names = new Set<string>();

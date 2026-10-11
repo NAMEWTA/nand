@@ -83,7 +83,7 @@ describe('git vault boundary', () => {
 		assert.equal((await pushStep(repo, { squash: true })).state, 'failed');
 		assert.equal(sh(remote, 'rev-parse', 'trunk'), upstream);
 		assert.equal(sh(work, 'rev-parse', 'HEAD'), head);
-	});
+	}, 30_000); // Real Windows Git repositories, consistent with neighbouring integration cases.
 
 	test('squash refreshes the push tip instead of rewriting commits hidden by stale tracking refs', async () => {
 		const { remote, work, repo } = pushFixture('stale-tip');
@@ -97,7 +97,7 @@ describe('git vault boundary', () => {
 		assert.equal(step.squash, 'single');
 		assert.equal(sh(work, 'rev-parse', 'HEAD'), head);
 		assert.equal(sh(remote, 'rev-parse', 'main'), head);
-	});
+	}, 30_000);
 	test('terminal parent segments cannot expand an index operation outside the vault', async () => {
 		const root = path.join(base, 'traversal');
 		mkdirSync(path.join(root, 'vault'), { recursive: true });

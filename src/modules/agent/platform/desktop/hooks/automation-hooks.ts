@@ -3,6 +3,17 @@ import { AutomationError } from '../../../../../shared/automation/errors';
 import type { AgentId } from '../../../core/launch/types';
 import { OPENCODE_EXTENSION, PI_EXTENSION } from './native-extensions';
 import { EVENT_PAYLOAD_SCRIPT, MAX_HOOK_INPUT_BYTES } from './event-payload';
+import { getAgent } from '../../../core/launch/catalog';
+import { accountEnv } from '../agents/accounts';
+import { privatePathHasSymlink } from '../../../../../host/desktop/private-mode';
+import { t } from '../../../../../shared/i18n/index';
+import { SPOOL_GUARD } from './spool-guard';
+
+const installations = new Map<string, Promise<void>>();
+
+async function checkOwnedPath(file: string): Promise<void> {
+	if (await privatePathHasSymlink(file)) throw new Error('private-storage.symlink');
+}
 
 async function nodeModules() {
 	if (!Platform.isDesktop) throw new AutomationError('agentUnavailable');
@@ -19,14 +30,15 @@ export interface NativeHookEvent {
 	data: Record<string, unknown>;
 }
 const SCRIPT_NAME = 'nand-automation-hook.cjs';
-// An inert user hook outside NAND: no network, no prompt logging, no effect unless
-// this particular child process inherited a private automation event directory.
+// Generated for this account; it has no effect without this terminal's event token.
 export const HOOK_SCRIPT = `const fs = require('fs'), path = require('path'), crypto = require('crypto');
 const dir = process.env.NAND_HOOK_DIR, token = process.env.NAND_HOOK_TOKEN;
 if (!dir || !token) process.exit(0);
 ${EVENT_PAYLOAD_SCRIPT}
+${SPOOL_GUARD}
 function post(event, data) {
  try {
+ checkSpool();
  const name = process.hrtime.bigint().toString().padStart(24, '0') + '-' + crypto.randomUUID();
  const file = path.join(dir, name);
  fs.writeFileSync(file + '.pending', JSON.stringify({ token, event, at: Date.now(), data }), { mode: 0o600 });
@@ -98,29 +110,36 @@ export class AutomationHooks {
 	private timer?: number;
 	private reading = false;
 	private slots = new Map<string, { dir: string; token: string; receive: (event: NativeHookEvent) => void }>();
-	private installTail: Promise<void> = Promise.resolve();
-	constructor(private win: Window) {}
+	constructor(private win: Window, private scope: () => { vault: string; device: string }) {}
 	async prepare(
 		agent: AgentId,
 		env: Record<string, string>,
 		receive: (event: NativeHookEvent) => void,
 	): Promise<{ env: Record<string, string>; close(): void }> {
 		if (this.disposed) throw new AutomationError('agentUnavailable');
-		const [fs, os, path] = await nodeModules();
+		const [fs, , path] = await nodeModules();
+		const scope = this.scope();
+		const owned = await accountEnv(getAgent(agent), env.NAND_ACCOUNT_NAME!, scope.vault, scope.device);
+		if (Object.entries(owned).some(([key, value]) => env[key] !== value)) throw new Error(t('agent.accountScopeMismatch'));
 		const token = crypto.randomUUID();
-		const dir = await fs.mkdtemp(path.join(os.tmpdir(), 'nand-automation-'));
+		const parent = path.join(owned.NAND_ACCOUNT_ROOT!, 'runtime', 'hooks');
+		await checkOwnedPath(parent); await fs.mkdir(parent, { recursive: true, mode: 0o700 });
+		const dir = await fs.mkdtemp(path.join(parent, 'terminal-'));
 		await fs.chmod(dir, 0o700);
-		const installation = this.installTail.then(() => {
+		const key = owned.NAND_ACCOUNT_ROOT!;
+		const installation = (installations.get(key) ?? Promise.resolve()).catch(() => {}).then(() => {
 			if (this.disposed) throw new AutomationError('agentUnavailable');
-			return this.install(agent, env);
+			return this.install(agent, owned);
 		});
-		this.installTail = installation.catch(() => {});
+		installations.set(key, installation);
 		try {
 			await installation;
 			if (this.disposed) throw new AutomationError('agentUnavailable');
 		} catch (error) {
-			await fs.rm(dir, { recursive: true, force: true });
+			await checkOwnedPath(dir); await fs.rm(dir, { recursive: true, force: true });
 			throw error;
+		} finally {
+			if (installations.get(key) === installation) installations.delete(key);
 		}
 		this.slots.set(token, { dir, token, receive });
 		this.timer ??= this.win.setInterval(() => {
@@ -130,7 +149,7 @@ export class AutomationHooks {
 			env: { NAND_HOOK_DIR: dir, NAND_HOOK_TOKEN: token },
 			close: () => {
 				this.slots.delete(token);
-				void fs.rm(dir, { recursive: true, force: true }).catch(console.error);
+				void checkOwnedPath(dir).then(() => fs.rm(dir, { recursive: true, force: true })).catch(console.error);
 				if (!this.slots.size && this.timer !== undefined) {
 					this.win.clearInterval(this.timer);
 					this.timer = undefined;
@@ -139,47 +158,43 @@ export class AutomationHooks {
 		};
 	}
 	private async install(agent: AgentId, env: Record<string, string>): Promise<void> {
-		const [fs, os, path, process] = await nodeModules();
-		const home = os.homedir();
+		const [fs, , path, process] = await nodeModules();
 		if (agent === 'pi' || agent === 'opencode') {
 			const file =
 				agent === 'pi'
 					? path.join(
-							env.PI_CODING_AGENT_DIR ||
-								process.env.PI_CODING_AGENT_DIR ||
-								path.join(home, '.pi', 'agent'),
+							env.PI_CODING_AGENT_DIR!,
 							'extensions',
 							'nand-status.ts',
 						)
 					: path.join(
-							env.XDG_CONFIG_HOME || process.env.XDG_CONFIG_HOME || path.join(home, '.config'),
-							'opencode',
+							env.OPENCODE_CONFIG_DIR!,
 							'plugins',
 							'nand-status.mjs',
 						);
-			await fs.mkdir(path.dirname(file), { recursive: true });
+			await checkOwnedPath(file); await fs.mkdir(path.dirname(file), { recursive: true, mode: 0o700 });
 			await fs.writeFile(file, agent === 'pi' ? PI_EXTENSION : OPENCODE_EXTENSION, { mode: 0o600 });
 			return;
 		}
 		const providers: Record<Exclude<AgentId, 'pi' | 'opencode'>, { file: string; events: string[] }> = {
 			'claude-code': {
 				file: path.join(
-					env.CLAUDE_CONFIG_DIR || process.env.CLAUDE_CONFIG_DIR || path.join(home, '.claude'),
+					env.CLAUDE_CONFIG_DIR!,
 					'settings.json',
 				),
 				events: ['SessionStart', 'UserPromptSubmit', 'PermissionRequest', 'PreToolUse', 'Stop', 'StopFailure'],
 			},
 			codex: {
-				file: path.join(env.CODEX_HOME || process.env.CODEX_HOME || path.join(home, '.codex'), 'hooks.json'),
+				file: path.join(env.CODEX_HOME!, 'hooks.json'),
 				events: ['SessionStart', 'UserPromptSubmit', 'PermissionRequest', 'PreToolUse', 'Stop', 'Interrupt'],
 			},
 			gemini: {
-				file: path.join(home, '.gemini', 'settings.json'),
+				file: path.join(env.GEMINI_CLI_HOME!, '.gemini', 'settings.json'),
 				events: ['SessionStart', 'BeforeAgent', 'BeforeTool', 'Notification', 'AfterAgent'],
 			},
 			grok: {
 				file: path.join(
-					env.GROK_HOME || process.env.GROK_HOME || path.join(home, '.grok'),
+					env.GROK_HOME!,
 					'hooks',
 					'nand-status.json',
 				),
@@ -187,8 +202,9 @@ export class AutomationHooks {
 			},
 		};
 		const provider = providers[agent];
-		const script = path.join(home, '.nand', 'hooks', SCRIPT_NAME);
-		await fs.mkdir(path.dirname(script), { recursive: true });
+		const script = path.join(env.NAND_ACCOUNT_ROOT!, 'runtime', SCRIPT_NAME);
+		await checkOwnedPath(script); await checkOwnedPath(provider.file);
+		await fs.mkdir(path.dirname(script), { recursive: true, mode: 0o700 });
 		await fs.writeFile(script, HOOK_SCRIPT, { mode: 0o600 });
 		let raw: string | undefined;
 		try {
@@ -202,9 +218,9 @@ export class AutomationHooks {
 			provider.events,
 			process,
 		);
-		await fs.mkdir(path.dirname(provider.file), { recursive: true });
-		if (raw !== undefined) await fs.writeFile(`${provider.file}.nand-backup`, raw, { mode: 0o600 });
-		const next = `${provider.file}.nand-pending`;
+		await fs.mkdir(path.dirname(provider.file), { recursive: true, mode: 0o700 });
+		if (raw !== undefined) { await checkOwnedPath(`${provider.file}.nand-backup`); await fs.writeFile(`${provider.file}.nand-backup`, raw, { mode: 0o600 }); }
+		const next = `${provider.file}.nand-pending-${crypto.randomUUID()}`;
 		await fs.writeFile(next, JSON.stringify(settings, null, 2) + '\n', { mode: 0o600 });
 		// Refuse to replace settings changed by a different process during installation.
 		let current: string | undefined;
@@ -217,7 +233,7 @@ export class AutomationHooks {
 			await fs.unlink(next);
 			throw new AutomationError('hookSettingsChanged');
 		}
-		await fs.rename(next, provider.file);
+		await checkOwnedPath(provider.file); await fs.rename(next, provider.file);
 	}
 	private async poll(): Promise<void> {
 		const [fs, , path] = await nodeModules();
@@ -226,10 +242,14 @@ export class AutomationHooks {
 		try {
 			for (const slot of this.slots.values()) {
 				try {
+					await checkOwnedPath(slot.dir);
 					for (const file of (await fs.readdir(slot.dir)).filter((name) => name.endsWith('.json')).sort()) {
 						const full = path.join(slot.dir, file);
 						try {
-							if ((await fs.stat(full)).size > MAX_HOOK_INPUT_BYTES) {
+							await checkOwnedPath(full);
+							const metadata = await fs.lstat(full);
+							if (!metadata.isFile()) throw new AutomationError('hookInputInvalid');
+							if (metadata.size > MAX_HOOK_INPUT_BYTES) {
 								if (this.slots.has(slot.token)) slot.receive({ event: 'HookError', at: Date.now(), data: { nand_answer_error: 'hookInputTooLarge' } });
 								continue;
 							}
@@ -246,11 +266,11 @@ export class AutomationHooks {
 							)
 								slot.receive(row);
 						} finally {
-							await fs.unlink(full).catch(() => {});
+							await checkOwnedPath(full); await fs.unlink(full).catch(() => {});
 						}
 					}
 				} catch (error) {
-					if (this.slots.has(slot.token)) console.error('[NAND agent hooks]', error);
+					if (this.slots.has(slot.token)) { console.error('[NAND agent hooks]', error); slot.receive({ event: 'HookError', at: Date.now(), data: { nand_answer_error: 'hookInputInvalid' } }); }
 				}
 			}
 		} finally {
@@ -262,7 +282,7 @@ export class AutomationHooks {
 		if (this.timer !== undefined) this.win.clearInterval(this.timer);
 		for (const slot of this.slots.values())
 			void nodeModules()
-				.then(([fs]) => fs.rm(slot.dir, { recursive: true, force: true }))
+				.then(async ([fs]) => { await checkOwnedPath(slot.dir); await fs.rm(slot.dir, { recursive: true, force: true }); })
 				.catch(console.error);
 		this.slots.clear();
 	}

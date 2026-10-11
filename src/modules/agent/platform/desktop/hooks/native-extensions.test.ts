@@ -11,8 +11,10 @@ async function spool(run: (directory: string) => Promise<void>) {
 		dir: process.env.NAND_HOOK_DIR,
 		token: process.env.NAND_HOOK_TOKEN,
 		owner: process.env.NAND_NATIVE_OWNER,
+		account: process.env.NAND_ACCOUNT_ROOT,
 	};
 	process.env.NAND_HOOK_DIR = directory;
+	process.env.NAND_ACCOUNT_ROOT = directory;
 	process.env.NAND_HOOK_TOKEN = 'test';
 	delete process.env.NAND_NATIVE_OWNER;
 	try {
@@ -22,6 +24,7 @@ async function spool(run: (directory: string) => Promise<void>) {
 			NAND_HOOK_DIR: saved.dir,
 			NAND_HOOK_TOKEN: saved.token,
 			NAND_NATIVE_OWNER: saved.owner,
+			NAND_ACCOUNT_ROOT: saved.account,
 		}))
 			if (value === undefined) delete process.env[key];
 			else process.env[key] = value;

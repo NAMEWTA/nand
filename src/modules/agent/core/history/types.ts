@@ -14,8 +14,6 @@ export interface VaultSession {
 
 export interface SessionIo {
 	platform: OperatingSystem;
-	homedir(): string;
-	env(name: string): string | undefined;
 	readDir(dir: string): Promise<string[]>;
 	stat(file: string): Promise<{ isDirectory: boolean; isFile: boolean; mtimeMs: number; size: number } | null>;
 	readFile(file: string, maxBytes: number): Promise<string | null>;
@@ -28,4 +26,5 @@ export interface VaultScanRequest {
 	io: SessionIo;
 	claudeConfigDirs: readonly string[];
 	codexHomes: readonly string[];
+	geminiConfigDir?: string;
 }

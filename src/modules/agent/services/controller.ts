@@ -4,6 +4,7 @@ import type { ModuleContext } from '../../../app/contracts/module';
 import type { WorkbenchTarget } from '../../../app/contracts/workbench';
 import { collectReferences } from '../../../host/obsidian/references';
 import { t } from '../../../shared/i18n/index';
+import { deviceId } from '../../../host/obsidian/storage/device-id';
 import type { SettingsHandle } from '../../../shared/settings/store';
 import { AGENT_CATALOG, getAgent } from '../core/launch/catalog';
 import type { AgentId } from '../core/launch/types';
@@ -16,6 +17,7 @@ import { absolutePluginDir } from '../platform/desktop/agents/accounts';
 import { readUsageSnapshots } from '../platform/desktop/agents/usage';
 import { AutomationHooks } from '../platform/desktop/hooks/automation-hooks';
 import { BinaryError, ensureHelper } from '../platform/desktop/pty/binary';
+import { terminalEnvironment } from '../platform/desktop/pty/runtime-environment';
 import { availableShells, resolveShell, sessionDirectory, type ShellOption } from '../platform/desktop/pty/shells';
 import type { NativeSessionSummary } from '../platform/desktop/server/agent-data-client';
 import { NativeHistory } from '../platform/history/service';
@@ -73,12 +75,12 @@ export class AgentController {
 	constructor(private readonly context: ModuleContext, readonly settings: SettingsHandle<TerminalSettings>, private readonly dialogs: ControllerDialogs) {
 		const app = context.app;
 		const win = app.workspace.containerEl.win;
-		this.hooks = new AutomationHooks(win);
+		this.hooks = new AutomationHooks(win, () => ({ vault: this.vaultPath() ?? '', device: deviceId(app) }));
 		this.sessions = new TerminalSessions({
 			app,
 			version: context.manifest.version,
 			platform: Platform.isWin ? 'win32' : Platform.isMacOS ? 'darwin' : 'linux',
-			pluginDir: () => this.pluginDir(),
+			environment: () => terminalEnvironment(this.vaultPath() ?? '', deviceId(app)),
 			settings: () => this.settings.get(),
 			colors: () => this.themeColors(),
 			binary: () => this.binary(),
@@ -90,7 +92,7 @@ export class AgentController {
 		});
 		context.lifetime.register(this.sessions.subscribe(() => this.changed()));
 		this.usage = new AgentUsageSource({
-			read: () => readUsageSnapshots(this.usageAgents(), { settings: this.settings.get().agents, pluginDir: this.pluginDir() }),
+			read: () => readUsageSnapshots(this.usageAgents(), { settings: this.settings.get().agents, vault: this.vaultPath() ?? '', device: deviceId(app) }),
 			active: () => true,
 			delay: (failures) => usageDelay(this.settings.get().agents.usageRefreshSec, failures),
 			now: () => Date.now(),
@@ -147,7 +149,7 @@ export class AgentController {
 
 	history(): NativeHistory {
 		if (!this.historyService) {
-			this.historyService = new NativeHistory(this.app, this.sessions, () => this.settings.get().agents, this.context.manifest.dir ?? '');
+			this.historyService = new NativeHistory(this.app, this.sessions, () => this.settings.get().agents);
 			this.context.lifetime.register(this.historyService.subscribe(() => this.changed()));
 		}
 		return this.historyService;
@@ -233,7 +235,8 @@ export class AgentController {
 			let notice: Notice | undefined;
 			try {
 				return await ensureHelper({
-					pluginDir: this.pluginDir(),
+					vault: this.vaultPath() ?? '',
+					device: deviceId(this.app),
 					version: this.context.manifest.version,
 					offline: this.settings.get().offline,
 					progress: (state) => {
@@ -319,7 +322,6 @@ export class AgentController {
 		return {
 			app: this.app,
 			getVaultPath: () => this.vaultPath(),
-			getPluginDataDir: () => this.pluginDir(),
 			getAgentSettings: () => this.settings.get().agents,
 			saveAgentSettings: (agents) => this.settings.update((draft) => { draft.agents = agents; }),
 			start: async (request) => { await this.start(request, placement); },

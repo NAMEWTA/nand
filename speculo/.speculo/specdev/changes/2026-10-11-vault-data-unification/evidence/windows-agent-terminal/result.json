@@ -1,0 +1,98 @@
+{
+  "passed": true,
+  "proxyFromEnvironment": true,
+  "rows": [
+    {
+      "name": "fresh-vault-no-binary-or-override",
+      "passed": true
+    },
+    {
+      "name": "localized-http-404-en",
+      "passed": true,
+      "detail": {
+        "code": "http",
+        "detail": {
+          "url": "https://github.com/NAMEWTA/nand/releases/download/0.0.1-alpha.1/nand-pty-win32-x64.exe.sha256",
+          "status": 404,
+          "version": "0.0.1-alpha.1"
+        },
+        "notice": "Downloading the terminal helper… The terminal helper is not available: the helper or checksum for version 0.0.1-alpha.1 has not been published for this platform (HTTP 404)"
+      }
+    },
+    {
+      "name": "localized-http-503-zh",
+      "passed": true,
+      "detail": {
+        "code": "http",
+        "detail": {
+          "url": "https://github.com/NAMEWTA/nand/releases/download/0.0.1-alpha.1/nand-pty-win32-x64.exe.sha256",
+          "status": 503,
+          "version": "0.0.1-alpha.1"
+        },
+        "notice": "Downloading the terminal helper… The terminal helper is not available: the helper or checksum for version 0.0.1-alpha.1 has not been published for this platform (HTTP 404) 正在下载终端组件… 终端组件不可用：版本 0.0.1-alpha.1 下载失败（HTTP 503），请稍后重试"
+      }
+    },
+    {
+      "name": "localized-network-and-sanitized-log",
+      "passed": true
+    },
+    {
+      "name": "real-release-download-handshake-shell",
+      "passed": true,
+      "detail": {
+        "ok": true,
+        "state": "connected"
+      }
+    },
+    {
+      "name": "download-matches-published-stamp",
+      "passed": true,
+      "detail": {
+        "version": "0.0.1-alpha.1",
+        "sha256": "e118dddd7104f65d2b28e43c30128f4395599e9cd441c283c3caf97b2991fea1",
+        "source": "release"
+      }
+    },
+    {
+      "name": "real-shell-input-output",
+      "passed": true
+    },
+    {
+      "name": "shell-remains-usable-after-resize",
+      "passed": true
+    },
+    {
+      "name": "installed-agent-opens-with-isolated-empty-account",
+      "passed": true
+    },
+    {
+      "name": "installed-agent-closes",
+      "passed": true
+    },
+    {
+      "name": "helper-exits-with-host",
+      "passed": true
+    },
+    {
+      "name": "verified-binary-reused-after-restart-without-network",
+      "passed": true,
+      "detail": {
+        "ok": true,
+        "state": "connected"
+      }
+    },
+    {
+      "name": "cached-binary-unchanged",
+      "passed": true
+    },
+    {
+      "name": "shell-exits-cleanly",
+      "passed": true
+    },
+    {
+      "name": "no-host-errors",
+      "passed": true,
+      "detail": []
+    }
+  ]
+}

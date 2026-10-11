@@ -29,15 +29,17 @@ try {
 	// Configure only this disposable profile's network session for the test machine's proxy.
 	if (process.env.HTTPS_PROXY) await runtime.connection.evaluate(`require('@electron/remote').session.defaultSession.setProxy({proxyRules:process.env.HTTPS_PROXY})`);
 	await page();
-	const binaries = path.join(runtime.vault, '.obsidian/plugins/nand/binaries');
+	const identity = JSON.parse(await fs.readFile(path.join(runtime.vault, '.nand/config/identity.json'), 'utf8'));
+	const device = Object.keys(identity.devices)[0], version = JSON.parse(await fs.readFile('manifest.json', 'utf8')).version;
+	const binaries = path.join(runtime.vault, '.nand/helpers', device, 'win32-x64', version);
 	check('fresh-vault-no-binary-or-override', !await fs.stat(binaries).catch(() => undefined) && await runtime.connection.evaluate(`!process.env.NAND_PTY_BINARY`));
 	await runtime.connection.evaluate(`window.hostRequest=window.nandAcceptanceObsidian.requestUrl;window.helperNotices=[];window.nandAcceptanceObsidian.Notice=class extends window.nandAcceptanceObsidian.Notice{constructor(message,...args){super(message,...args);helperNotices.push(String(message))}};window.helperWarnings=[];window.hostWarn=console.warn;console.warn=(...args)=>{helperWarnings.push(args.map(a=>typeof a==='string'?a:JSON.stringify(a)).join(' '));hostWarn(...args)};true`);
 	for (const [language, status] of [['en', 404], ['zh', 503]]) {
 		await runtime.connection.evaluate(`app.plugins.plugins.nand.changeLanguage(${JSON.stringify(language)})`);
-		await runtime.connection.evaluate(`window.nandAcceptanceObsidian.requestUrl=async()=>({status:${status},arrayBuffer:new ArrayBuffer(0)});window.failureResult=null;agentController.checkHelper().then(()=>failureResult={unexpectedSuccess:true}).catch(e=>{failureResult={code:e.code,detail:e.detail,notice:helperNotices.join(' ')}});true`);
+		await runtime.connection.evaluate(`window.nandAcceptanceObsidian.requestUrl=async()=>({status:${status},arrayBuffer:new ArrayBuffer(0)});window.failureResult=null;agentController.checkHelper().then(()=>failureResult={unexpectedSuccess:true}).catch(e=>{failureResult={code:e.code,detail:e.detail,notice:helperNotices.join(' '),cause:e.cause?{code:e.cause.code,stderr:e.cause.stderr}:undefined}});true`);
 		await until(`!!window.failureResult`);
 		const failure = await runtime.connection.evaluate(`failureResult`);
-		check(`localized-http-${status}-${language}`, failure.code === 'http' && failure.detail.status === status && failure.notice.includes(String(status)) && failure.notice.includes('0.0.1-alpha.1') && (status !== 404 || failure.notice.includes('has not been published')), failure);
+		check(`localized-http-${status}-${language}`, failure.code === 'http' && failure.detail.status === status && failure.notice.includes(String(status)) && failure.notice.includes(version) && (status !== 404 || failure.notice.includes('has not been published')), failure);
 	}
 	await runtime.connection.evaluate(`window.nandAcceptanceObsidian.requestUrl=async()=>{throw Error('reset https://signed.example/?token=secret-test-token')};window.failureResult=null;agentController.checkHelper().catch(e=>{failureResult={code:e.code,notice:helperNotices.join(' ')}});true`);
 	await until(`!!window.failureResult`);

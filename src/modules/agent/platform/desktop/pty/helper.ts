@@ -52,8 +52,8 @@ export class PtyHelper {
 	}
 
 	/** Start the helper and complete the protocol handshake. */
-	static async start(binary: string, events: HelperEvents, win: Window = window): Promise<PtyHelper> {
-		const child = spawn(binary, [], { stdio: ['pipe', 'pipe', 'pipe'], windowsHide: true });
+	static async start(binary: string, events: HelperEvents, win: Window, env: Record<string, string>): Promise<PtyHelper> {
+		const child = spawn(binary, [], { stdio: ['pipe', 'pipe', 'pipe'], windowsHide: true, env: { ...process.env, ...env } });
 		const helper = new PtyHelper(child, events, win);
 		const hello = await new Promise<Record<string, unknown>>((resolve, reject) => {
 			const timer = win.setTimeout(() => reject(new Error('The terminal helper did not answer the handshake')), HANDSHAKE_TIMEOUT);

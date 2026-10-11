@@ -8,7 +8,7 @@ artifact: "ticket"
 change: "2026-10-11-vault-data-unification"
 id: "T-05"
 title: "账号身份、凭据与终端辅助程序"
-status: "ready"
+status: "in_progress"
 kind: "feature"
 planning_depth: "deep"
 planning_depth_reason: "涉及公共持久化、数据迁移、身份隔离或发布；用户已批准完整计划及实施。"
@@ -17,11 +17,11 @@ risk: "high"
 blocked_by: ["T-02"]
 contract_ids: ["AC-005"]
 owner: "root"
-expected_changes: ["<Path>src/shared/**</Path>","<Path>src/host/**</Path>","<Path>src/modules/agent/**</Path>","<Path>scripts/**</Path>","<Path>test/**</Path>","<Path>native/pty-server/**</Path>"]
-writable_paths: ["<Path>src/shared/**</Path>","<Path>src/host/**</Path>","<Path>src/modules/agent/**</Path>","<Path>scripts/**</Path>","<Path>test/**</Path>","<Path>native/pty-server/**</Path>"]
+expected_changes: ["<Path>src/shared/**</Path>","<Path>src/host/**</Path>","<Path>src/modules/agent/**</Path>","<Path>scripts/**</Path>","<Path>test/**</Path>","<Path>native/pty-server/**</Path>","<Path>main.js</Path>","<Path>styles.css</Path>"]
+writable_paths: ["<Path>src/shared/**</Path>","<Path>src/host/**</Path>","<Path>src/modules/agent/**</Path>","<Path>scripts/**</Path>","<Path>test/**</Path>","<Path>native/pty-server/**</Path>","<Path>main.js</Path>","<Path>styles.css</Path>"]
 read_only_paths: []
-shared_paths: ["<Path>src/shared/**</Path>","<Path>src/host/**</Path>","<Path>src/modules/agent/**</Path>","<Path>scripts/**</Path>","<Path>test/**</Path>","<Path>native/pty-server/**</Path>"]
-shared_path_owners: ["<Path>src/shared/**</Path> => root","<Path>src/host/**</Path> => root","<Path>src/modules/agent/**</Path> => root","<Path>scripts/**</Path> => root","<Path>test/**</Path> => root","<Path>native/pty-server/**</Path> => root"]
+shared_paths: ["<Path>src/shared/**</Path>","<Path>src/host/**</Path>","<Path>src/modules/agent/**</Path>","<Path>scripts/**</Path>","<Path>test/**</Path>","<Path>native/pty-server/**</Path>","<Path>main.js</Path>","<Path>styles.css</Path>"]
+shared_path_owners: ["<Path>src/shared/**</Path> => root","<Path>src/host/**</Path> => root","<Path>src/modules/agent/**</Path> => root","<Path>scripts/**</Path> => root","<Path>test/**</Path> => root","<Path>native/pty-server/**</Path> => root","<Path>main.js</Path> => root","<Path>styles.css</Path> => root"]
 ---
 
 # T-05 账号身份、凭据与终端辅助程序
