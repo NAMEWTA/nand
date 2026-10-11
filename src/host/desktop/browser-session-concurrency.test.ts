@@ -1,4 +1,5 @@
 import path from 'node:path';
+import { createHash } from 'node:crypto';
 import { tmpdir } from 'node:os';
 import { mkdtemp, mkdir, readFile, writeFile, rm, readdir } from 'node:fs/promises';
 import { expect, test, vi } from 'vitest';
@@ -6,6 +7,7 @@ import { prepareSessionDirectory, confirmSessionDirectory, retainLegacyDirectory
 
 const race = vi.hoisted(() => ({ source: '', before: undefined as (() => Promise<void>) | undefined, after: undefined as (() => Promise<void>) | undefined, copy: undefined as ((target: string) => Promise<void>) | undefined }));
 const receiptRace = vi.hoisted(() => ({ file: '', previous: '', armed: false, fired: false, clear: false }));
+const firstReceiptRace = vi.hoisted(() => ({ before: undefined as ((file: string) => Promise<void>) | undefined }));
 vi.mock('node:fs/promises', async original => {
 	const actual = await original<typeof import('node:fs/promises')>();
 	return { ...actual, rename: async (from: string, to: string) => {
@@ -13,7 +15,9 @@ vi.mock('node:fs/promises', async original => {
 		await actual.rename(from, to);
 		if (from === race.source) await race.after?.();
 	}, copyFile: async (from: string, to: string) => { await race.copy?.(to); await actual.copyFile(from, to); },
-	readFile: async (...args: Parameters<typeof actual.readFile>) => {
+	writeFile: async (...args: Parameters<typeof actual.writeFile>) => {
+		await firstReceiptRace.before?.(String(args[0])); return actual.writeFile(...args);
+	}, readFile: async (...args: Parameters<typeof actual.readFile>) => {
 		if (args[0] === receiptRace.file && receiptRace.armed) {
 			receiptRace.armed = false; receiptRace.fired = true;
 			await actual.writeFile(receiptRace.file, receiptRace.previous);
@@ -27,6 +31,31 @@ vi.mock('node:fs/promises', async original => {
 		return result;
 	} };
 });
+
+test('initialization never adopts or overwrites a concurrently arriving primary or backup as its own baseline', async () => {
+	for (const duringChoice of [false, true]) for (const backupOnly of [false, true]) {
+		const root = await mkdtemp(path.join(tmpdir(), 'nand-initial-receipt-')), source = path.join(root, 'source'), vault = path.join(root, 'vault');
+		await mkdir(source); await mkdir(vault); await writeFile(path.join(source, 'Cookies'), 'old');
+		const options = { source, vault, relative: '.nand/browser/device/profiles/default', boot: 'one', active: () => false };
+		const primary = path.join(vault, options.relative, 'migration.json'), session = path.join(vault, options.relative, 'session');
+		const remote = JSON.stringify({ version: 1, source: createHash('sha256').update(source).digest('hex'), origin: source, boot: 'remote', phase: 'fresh', files: {}, verified: true });
+		try {
+			const arrive = async () => {
+				await mkdir(session, { recursive: true }); await writeFile(path.join(session, 'Cookies'), 'synced');
+				await writeFile(backupOnly ? primary + '.backup' : primary, remote);
+			};
+			if (!duringChoice) firstReceiptRace.before = async file => {
+				if (file !== primary + '.backup') return;
+				firstReceiptRace.before = undefined; await arrive();
+			};
+			await expect(prepareSessionDirectory({ ...options, ambiguous: duringChoice, choose: async () => { await arrive(); return 'copy'; } })).rejects.toThrow('browser_session_source_changed');
+			expect(await readFile(backupOnly ? primary + '.backup' : primary, 'utf8')).toBe(remote);
+			expect(await prepareSessionDirectory({ ...options, boot: 'two' })).toBe(session);
+			expect(await readFile(path.join(session, 'Cookies'), 'utf8')).toBe('synced');
+			expect(await readFile(path.join(source, 'Cookies'), 'utf8')).toBe('old');
+		} finally { firstReceiptRace.before = undefined; await rm(root, { recursive: true, force: true }); }
+	}
+}, 30000);
 
 test('synced receipt rollback between sealing commits stops confirmation or cleanup and preserves recovery bytes', async () => {
 	for (const clear of [false, true]) {
@@ -102,4 +131,4 @@ test('source changes at retirement keep the actual moved version and never delet
 			await expect(run()).rejects.toThrow('browser_session_source_changed');
 		} finally { race.source = ''; race.before = undefined; race.after = undefined; await rm(root, { recursive: true, force: true }); }
 	}
-});
+}, 30000);

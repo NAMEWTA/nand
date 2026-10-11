@@ -2,7 +2,7 @@ import path from 'node:path';
 import { createHash, randomUUID } from 'node:crypto';
 import { createReadStream } from 'node:fs';
 import { isDeepStrictEqual } from 'node:util';
-import { chmod, copyFile, lstat, mkdir, readdir, rename, rmdir, unlink } from 'node:fs/promises';
+import { chmod, copyFile, lstat, mkdir, readdir, rename, rmdir, unlink, writeFile } from 'node:fs/promises';
 import { JsonStore } from '../../shared/json-store';
 import { nativeVaultStorage } from './vault-storage';
 import { absoluteNandPath } from './nand-paths';
@@ -131,13 +131,14 @@ async function removeEmptyClaim(source: string | undefined, retirement: string |
 	if (await exists(claimed)) await rmdir(claimed);
 }
 
-async function saveReceipt(storage: ReturnType<typeof nativeVaultStorage>, file: string, store: JsonStore<Receipt | null>, base: Receipt | null, value: Receipt): Promise<Receipt> {
+async function saveReceipt(vault: string, storage: ReturnType<typeof nativeVaultStorage>, file: string, store: JsonStore<Receipt | null>, base: Receipt | null, value: Receipt): Promise<Receipt> {
 	if (!base) {
-		// The first recovery copy contains the explicit choice, rather than an uninformative null.
+		// Seed only an absent recovery copy. A sync arriving during the choice dialog
+		// remains an external revision; never reload it as this operation's baseline.
 		await storage.mkdir(path.posix.dirname(file));
-		const text = JSON.stringify(value); await storage.write(file + '.backup', text);
-		if (await storage.read(file + '.backup') !== text) throw new Error('browser_session_receipt_invalid');
-		base = await store.load(null);
+		const text = JSON.stringify(value);
+		try { await writeFile(await absoluteNandPath(vault, file + '.backup'), text, { encoding: 'utf8', mode: 0o600, flag: 'wx' }); }
+		catch (error) { if ((error as NodeJS.ErrnoException).code !== 'EEXIST') throw error; }
 	}
 	return (await store.commit({ base, value }))!;
 }
@@ -160,7 +161,7 @@ async function prepare(options: SessionMigration): Promise<string> {
 	const store = new JsonStore<Receipt | null>(storage, receiptPath, valid, mergeReceipt);
 	let receipt = await store.load(null);
 	const sourceKey = digest(source ?? '');
-	const save = async (value: Receipt) => { receipt = await saveReceipt(storage, receiptPath, store, receipt, value); };
+	const save = async (value: Receipt) => { receipt = await saveReceipt(vault, storage, receiptPath, store, receipt, value); };
 	if (receipt?.phase === 'fresh' || receipt?.phase === 'complete') {
 		if ((receipt.phase === 'complete' || receipt.verified) && !await exists(target)) throw new Error('browser_session_unclaimed');
 		if (receipt.source === sourceKey) await removeEmptyClaim(source, receipt.retirement);
@@ -277,7 +278,7 @@ export async function retainLegacyDirectory(vault: string, relative: string, sou
 	if (receipt && receipt.source !== digest(source)) throw new Error('browser_session_source_changed');
 	if (!receipt && !await exists(source)) return undefined;
 	if (!receipt && await exists(target)) throw new Error('browser_session_unclaimed');
-	const save = async (value: Receipt) => { receipt = await saveReceipt(storage, file, store, receipt, value); };
+	const save = async (value: Receipt) => { receipt = await saveReceipt(vault, storage, file, store, receipt, value); };
 	if (!receipt) await save({ version: 1, source: digest(source), origin: source, boot: 'inactive-files', phase: 'copying', files: await snapshot(source) });
 	if (receipt!.phase === 'copying') {
 		await copyVerified(source, target, receipt!.files);
