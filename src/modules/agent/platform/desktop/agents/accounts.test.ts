@@ -1,5 +1,5 @@
 import path from 'node:path';
-import { mkdtemp, rm, stat } from 'node:fs/promises';
+import { mkdtemp, mkdir, symlink, rm, stat } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { expect, test } from 'vitest';
 import { accountConfigDir, accountEnv } from './accounts';
@@ -29,6 +29,17 @@ test('every provider including its default identity uses the opened vault for ho
 			expect(env.NAND_ACCOUNT_NAME).toBe(name);
 		}
 	} finally { await rm(vault, { recursive: true, force: true }); }
+}, 30000);
+
+test('a junction arriving after permission repair cannot be handed to a child process', async () => {
+	const root = await mkdtemp(path.join(tmpdir(), 'nand-agent-link-')), vault = path.join(root, 'vault'), outside = path.join(root, 'outside');
+	await mkdir(vault); await mkdir(outside);
+	try {
+		const agent = AGENT_CATALOG.find(row => row.id === 'codex')!;
+		const env = await accountEnv(agent, '', vault, 'fixture-device');
+		await symlink(outside, path.join(env.CODEX_HOME!, 'sessions'), 'junction');
+		await expect(accountEnv(agent, '', vault, 'fixture-device')).rejects.toThrow('private-storage.symlink');
+	} finally { await rm(root, { recursive: true, force: true }); }
 }, 30000);
 
 test('vault accounts cannot silently inherit host-global provider tokens or credential files', async () => {

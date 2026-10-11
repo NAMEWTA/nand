@@ -1,7 +1,7 @@
 {
   "$comment": "CI gate: `check:bundle --budget scripts/bundle-budget.json --enforce`. eagerBytes caps the code evaluated at plugin startup and moduleActivationBytes caps what each module loads when it starts; outputBytes and stylesBytes are ratchets on main.js and styles.css. Lower a limit as code shrinks; never raise one without a recorded reason.",
-  "outputBytes": 4677632,
-  "outputBudgetReason": "2026-10-11 T-05：账号身份及全量环境、冷迁移与显式绑定、原生 Windows ACL、版本化 helper、Hook 写入边界及旧产物链接映射。main.js 实测 4677317 字节，按 KiB 取整 4677632；启动、模块激活及样式预算不变，未引入依赖。证据：speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/evidence/T-05.md。",
+  "outputBytes": 4683776,
+  "outputBudgetReason": "2026-10-11 T-05：账号身份及全量环境、冷迁移与显式绑定、Windows ACL、版本化 helper、Hook 写入边界和旧产物链接映射；复审增加宿主保护的 helper 回执、原子保留并发 Hook 设置、旧会话与历史标注映射及启动前子树检查。main.js 实测 4682795 字节，按 KiB 取整 4683776；启动、模块激活及样式预算不变，未引入依赖。证据：speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/evidence/T-05.md。",
   "stylesBytes": 757760,
   "eagerBytes": 122880,
   "forbiddenEagerAreas": [

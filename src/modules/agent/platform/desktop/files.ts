@@ -1,21 +1,22 @@
 import { shell, webUtils } from 'electron';
 import * as fs from 'node:fs';
-import * as os from 'node:os';
 import * as path from 'node:path';
 import { retainedBrowserFile } from '../../../../host/desktop/retained-browser-file';
 
 export type ResolvedReference = { kind: 'vault'; path: string } | { kind: 'external'; path: string } | null;
 
 /** Where a file reference printed in a terminal points: a note in the vault, another file, or nothing. */
-export async function resolveReference(reference: string, cwd: string, vault: string | undefined): Promise<ResolvedReference> {
-	const expanded = reference.startsWith('~/') ? path.join(os.homedir(), reference.slice(2)) : reference;
+export async function resolveReference(reference: string, cwd: string, vault: string | undefined, home?: string): Promise<ResolvedReference> {
+	if (reference.startsWith('~/') && !home) return null;
+	const expanded = reference.startsWith('~/') ? path.join(home!, reference.slice(2)) : reference;
 	const absolute = path.isAbsolute(expanded) ? expanded : path.resolve(cwd, expanded);
 	if (vault) {
-		const retained = await retainedBrowserFile(vault, absolute);
-		if (retained) return { kind: 'external', path: retained };
 		const relative = path.relative(vault, absolute);
 		if (relative.startsWith('.nand' + path.sep) && fs.existsSync(absolute)) return { kind: 'external', path: absolute };
 		if (relative && !relative.startsWith('..') && !path.isAbsolute(relative)) return { kind: 'vault', path: relative.split(path.sep).join('/') };
+		if (fs.existsSync(absolute)) return { kind: 'external', path: absolute };
+		const retained = await retainedBrowserFile(vault, absolute);
+		if (retained) return { kind: 'external', path: retained };
 	}
 	return fs.existsSync(absolute) ? { kind: 'external', path: absolute } : null;
 }

@@ -3,7 +3,7 @@ import { getAgent } from '../../core/launch/catalog';
 import { launchArgs } from '../../core/launch/flags';
 import type { AgentId, AgentSettings } from '../../core/launch/types';
 import type { VaultSession } from '../../core/history/types';
-import { accountEnv, restoredAccountEnv } from '../../platform/desktop/agents/accounts';
+import { accountEnv, restoredAccountReference } from '../../platform/desktop/agents/accounts';
 import { accountArgs } from '../../platform/desktop/agents/account-args';
 import { deviceId } from '../../../../host/obsidian/storage/device-id';
 import { resolveCli } from '../../platform/desktop/agents/resolver';
@@ -78,8 +78,8 @@ export async function resumeAgent(host: LaunchHost, session: VaultSession): Prom
 	const settings = host.getAgentSettings();
 	const entry = settings.agents[session.agentId];
 	const agent = getAgent(session.agentId);
-	const env = await restoredAccountEnv(agent, session.env, vault, deviceId(host.app));
-	await checkAccountTranscript(vault, env, session.transcriptPath);
+	const { env, transcriptPath } = await restoredAccountReference(agent, session.env, vault, deviceId(host.app), session.transcriptPath);
+	await checkAccountTranscript(vault, env, transcriptPath);
 	if (!entry?.enabled) {
 		new Notice(t('agent.agentOff', { title: agent.title }));
 		return;
@@ -103,7 +103,7 @@ export async function resumeAgent(host: LaunchHost, session: VaultSession): Prom
 		agentId: session.agentId,
 		args: resumeArgs(
 			session.agentId,
-			session.agentId === 'pi' ? session.transcriptPath || '' : session.sessionId,
+			session.agentId === 'pi' ? transcriptPath || '' : session.sessionId,
 			accountArgs(session.agentId, launchArgs(settings, session.agentId), env),
 		),
 		cwd: session.cwd,

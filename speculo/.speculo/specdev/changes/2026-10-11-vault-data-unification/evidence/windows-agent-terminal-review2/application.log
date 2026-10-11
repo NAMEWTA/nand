@@ -1,0 +1,54 @@
+
+2026-10-11 15:30:09 Loaded main app package D:\Pro\Obsidian\resources\obsidian.asar
+CLI server error: Error: listen EADDRINUSE: address already in use \\.\pipe\obsidian-cli-cdewta
+    at Server.setupListenHandle [as _listen2] (node:net:1987:21)
+    at listenInCluster (node:net:2066:12)
+    at Server.listen (node:net:2188:5)
+    at module.exports (D:\Pro\Obsidian\resources\obsidian.asar\main.js:64:404)
+    at loadApp (D:\Pro\Obsidian\resources\app.asar\main.js:310:3)
+    at Object.<anonymous> (D:\Pro\Obsidian\resources\app.asar\main.js:470:12)
+    at Module._compile (node:internal/modules/cjs/loader:1879:14)
+    at Object..js (node:internal/modules/cjs/loader:2012:10)
+    at Module.load (node:internal/modules/cjs/loader:1601:32)
+    at node:internal/modules/cjs/loader:1403:12 {
+  code: 'EADDRINUSE',
+  errno: -4091,
+  syscall: 'listen',
+  address: '\\\\.\\pipe\\obsidian-cli-cdewta',
+  port: -1
+}
+
+DevTools listening on ws://127.0.0.1:9249/devtools/browser/6a991939-a572-42b4-b496-429b25374041
+Ignored: Error: ENOENT: no such file or directory, open 'D:\Document\code\nand\scripts\tmp\agent-terminal-vault-20261011-05\profile\abcdef1234567890.json'
+2026-10-11 15:30:09 Checking for update using Github
+2026-10-11 15:30:11 Success.
+2026-10-11 15:30:11 Latest version is 1.14.4
+2026-10-11 15:30:11 Downloading update from https://github.com/obsidianmd/obsidian-releases/releases/download/v1.14.4/obsidian-1.14.4.asar.gz
+2026-10-11 15:30:18 Verifying hash & signature. Size= 9200670
+2026-10-11 15:30:18 Saving file
+2026-10-11 15:30:18 Update complete.
+
+2026-10-11 15:30:24 Loaded updated app D:\Document\code\nand\scripts\tmp\agent-terminal-vault-20261011-05\profile\obsidian-1.14.4.asar
+CLI server error: Error: listen EADDRINUSE: address already in use \\.\pipe\obsidian-cli-cdewta
+    at Server.setupListenHandle [as _listen2] (node:net:1987:21)
+    at listenInCluster (node:net:2066:12)
+    at Server.listen (node:net:2188:5)
+    at module.exports (D:\Document\code\nand\scripts\tmp\agent-terminal-vault-20261011-05\profile\obsidian-1.14.4.asar\main.js:64:405)
+    at loadApp (D:\Pro\Obsidian\resources\app.asar\main.js:310:3)
+    at Object.<anonymous> (D:\Pro\Obsidian\resources\app.asar\main.js:456:12)
+    at Module._compile (node:internal/modules/cjs/loader:1879:14)
+    at Object..js (node:internal/modules/cjs/loader:2012:10)
+    at Module.load (node:internal/modules/cjs/loader:1601:32)
+    at node:internal/modules/cjs/loader:1403:12 {
+  code: 'EADDRINUSE',
+  errno: -4091,
+  syscall: 'listen',
+  address: '\\\\.\\pipe\\obsidian-cli-cdewta',
+  port: -1
+}
+
+DevTools listening on ws://127.0.0.1:9249/devtools/browser/7174d0ce-ab12-4971-a854-bc3ed467e4b5
+2026-10-11 15:30:24 Checking for update using Github
+2026-10-11 15:30:24 Success.
+2026-10-11 15:30:24 Latest version is 1.14.4
+2026-10-11 15:30:24 App is up to date.

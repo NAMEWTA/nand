@@ -105,10 +105,17 @@ export async function legacyAccountConfig(vault: string, device: string, agent: 
 			binding = await store.commit({ base: null, value: { version: 1, name, candidate, phase: candidate === null ? 'ready' : 'copying', files: candidate === null ? {} : await snapshot(path.join(archive, candidate, 'home')) } });
 		}
 		if (binding!.name !== name) throw new Error(t('agent.legacyChanged'));
-		if (binding!.candidate === null) return undefined;
+		// Seal both records before a CLI can mutate the imported credentials or add hooks.
+		// Recovery must never replay the immutable copy stage against a live account.
+		const seal = async (ready: Binding): Promise<void> => {
+			const saved = await store.commit({ base: binding, value: ready });
+			await store.commit({ base: saved, value: saved });
+		};
+		if (binding!.candidate === null) { await seal(binding!); return undefined; }
 		const destination = await absoluteNandPath(vault, identity + '/legacy-config');
 		if (binding!.phase === 'ready') {
 			if (!await exists(destination)) throw new Error(t('agent.legacyChanged'));
+			await seal(binding!);
 			return destination;
 		}
 		const source = await absoluteNandPath(vault, archiveRelative + '/' + binding!.candidate + '/home');
@@ -123,7 +130,7 @@ export async function legacyAccountConfig(vault: string, device: string, agent: 
 			if (digest(await readFile(target)) !== hash) throw new Error(t('agent.legacyChanged'));
 		}
 		if (!isDeepStrictEqual(await snapshot(destination), binding!.files) || !isDeepStrictEqual(await snapshot(source), binding!.files)) throw new Error(t('agent.legacyChanged'));
-		await store.commit({ base: binding, value: { ...binding!, phase: 'ready' } });
+		await seal({ ...binding!, phase: 'ready' });
 		return destination;
 	});
 }

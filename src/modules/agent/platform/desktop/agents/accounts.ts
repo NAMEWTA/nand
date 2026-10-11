@@ -5,9 +5,10 @@ import type { AgentId } from '../../../core/launch/types';
 import { accountName } from '../../../core/launch/account-name';
 import { absoluteNandPath } from '../../../../../host/desktop/nand-paths';
 import { nativeVaultStorage } from '../../../../../host/desktop/vault-storage';
-import { secureOwnedDirectory } from '../../../../../host/desktop/owned-permissions';
+import { checkOwnedDirectory, secureOwnedDirectory } from '../../../../../host/desktop/owned-permissions';
 import { t } from '../../../../../shared/i18n/index';
 import { legacyAccountConfig } from './legacy-accounts';
+import { legacyReferences, uniqueLegacyReference } from './legacy-references';
 
 function normalizedName(value: string): string {
 	try { return accountName(value); } catch { throw new Error(t('agent.accountInvalid')); }
@@ -49,15 +50,31 @@ export async function accountEnv(agent: AgentCatalogEntry, accountId: string, va
 		const owned = relative + '/' + path.relative(root, directory).split(path.sep).join('/');
 		await storage.mkdir(owned);
 	}
+	await checkOwnedDirectory(vault, relative + '/' + path.relative(root, owner).split(path.sep).join('/'));
 	return { ...env, ...ISOLATED_CREDENTIAL_ENV, NAND_ACCOUNT_NAME: name, NAND_ACCOUNT_ID: agent.id + '/' + path.basename(owner), NAND_ACCOUNT_ROOT: owner };
 }
 
 /** A history record identifies an account; it cannot supply arbitrary child-process environment. */
 export async function restoredAccountEnv(agent: AgentCatalogEntry, saved: Record<string, string>, vault: string, device: string): Promise<Record<string, string>> {
+	return (await restoredAccountReference(agent, saved, vault, device)).env;
+}
+
+export async function restoredAccountReference(agent: AgentCatalogEntry, saved: Record<string, string>, vault: string, device: string, transcriptPath?: string): Promise<{ env: Record<string, string>; transcriptPath?: string }> {
+	if (!Object.hasOwn(saved, 'NAND_ACCOUNT_ID')) {
+		const binding = uniqueLegacyReference(await legacyReferences(vault, device, agent.id), saved);
+		if (!binding) throw new Error(t('agent.accountScopeMismatch'));
+		const env = await accountEnv(agent, binding.name, vault, device);
+		if (transcriptPath) {
+			const tail = path.relative(binding.from, transcriptPath);
+			if (!tail || tail === '..' || tail.startsWith('..' + path.sep) || path.isAbsolute(tail)) throw new Error(t('agent.sessionMissing'));
+			transcriptPath = path.join(binding.to, tail);
+		}
+		return { env, transcriptPath };
+	}
 	if (typeof saved.NAND_ACCOUNT_NAME !== 'string' || typeof saved.NAND_ACCOUNT_ID !== 'string') throw new Error(t('agent.accountScopeMismatch'));
 	const expected = await accountEnv(agent, saved.NAND_ACCOUNT_NAME, vault, device);
 	if (Object.keys(saved).length !== Object.keys(expected).length || Object.entries(expected).some(([key, value]) => saved[key] !== value)) throw new Error(t('agent.accountScopeMismatch'));
-	return expected;
+	return { env: expected, transcriptPath };
 }
 /** Resolve host-relative plugin paths once, before selecting native credentials. */
 export function absolutePluginDir(vault: string, dir: string): string {

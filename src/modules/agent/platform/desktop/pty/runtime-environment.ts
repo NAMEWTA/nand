@@ -2,7 +2,7 @@ import path from 'node:path';
 import { absoluteNandPath } from '../../../../../host/desktop/nand-paths';
 import { nativeVaultStorage } from '../../../../../host/desktop/vault-storage';
 import { ISOLATED_CREDENTIAL_ENV } from '../agents/accounts';
-import { secureOwnedDirectory } from '../../../../../host/desktop/owned-permissions';
+import { checkOwnedDirectory, secureOwnedDirectory } from '../../../../../host/desktop/owned-permissions';
 
 /** Helper and ordinary shells have their own vault home, including native temporary-file fallbacks. */
 export async function terminalEnvironment(vault: string, device: string): Promise<Record<string, string>> {
@@ -21,5 +21,6 @@ export async function terminalEnvironment(vault: string, device: string): Promis
 	};
 	const storage = nativeVaultStorage(vault);
 	for (const directory of new Set(Object.values(env))) await storage.mkdir(relative + '/' + path.relative(root, directory).split(path.sep).join('/'));
+	await checkOwnedDirectory(vault, relative);
 	return { ...env, ...ISOLATED_CREDENTIAL_ENV };
 }

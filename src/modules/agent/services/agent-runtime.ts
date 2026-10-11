@@ -4,7 +4,7 @@ import { AGENT_CATALOG, getAgent } from '../core/launch/catalog';
 import { effectivePermission, launchArgs } from '../core/launch/flags';
 import type { AgentId, AgentSettings } from '../core/launch/types';
 import { AutomationHooks, type NativeHookEvent } from '../platform/desktop/hooks/automation-hooks';
-import { accountEnv, restoredAccountEnv } from '../platform/desktop/agents/accounts';
+import { accountEnv, restoredAccountReference } from '../platform/desktop/agents/accounts';
 import { resolveCli } from '../platform/desktop/agents/resolver';
 import { runtimeProcess } from '../platform/desktop/agents/runtime-process';
 import { canonicalVaultCwd } from '../platform/desktop/history/canonical-cwd';
@@ -306,11 +306,13 @@ export class TerminalAutomationRuntime implements AgentRuntimePort {
 			)
 				throw new AutomationError('sessionMissing');
 		}
-		const env = sessionEnv
-			? await restoredAccountEnv(agent, sessionEnv, vaultPath(this.host.app), getDeviceId(this.host.app))
-			: await accountEnv(agent, entry.accountId, vaultPath(this.host.app), getDeviceId(this.host.app));
+		const restored = sessionEnv ? await restoredAccountReference(agent, sessionEnv, vaultPath(this.host.app), getDeviceId(this.host.app), action.session?.transcriptPath) : undefined;
+		const env = restored?.env ?? await accountEnv(agent, entry.accountId, vaultPath(this.host.app), getDeviceId(this.host.app));
 		const accountKey = JSON.stringify(env);
-		if (action.sessionMode === 'specific') await checkAccountTranscript(vaultPath(this.host.app), env, action.session?.transcriptPath);
+		if (action.sessionMode === 'specific') {
+			await checkAccountTranscript(vaultPath(this.host.app), env, restored?.transcriptPath ?? action.session?.transcriptPath);
+			if (action.session && restored) action = { ...action, session: { ...action.session, accountKey, transcriptPath: restored.transcriptPath } };
+		}
 		if (execution.onPrepared) {
 			const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(accountIdentity(accountKey)));
 			execution.onPrepared({ agentId: id, accountIdentity: Array.from(new Uint8Array(digest), byte => byte.toString(16).padStart(2, '0')).join('') });

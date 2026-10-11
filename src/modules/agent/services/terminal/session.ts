@@ -26,6 +26,7 @@ export interface SessionColors {
 }
 
 export interface SessionInit {
+	home?: string;
 	id: string;
 	sid: number;
 	kind: SessionKind;
@@ -61,6 +62,7 @@ export function oscColor(hex: string): string | undefined {
  * views replay a snapshot of it before following live output.
  */
 export class TerminalSession {
+	readonly home?: string;
 	readonly id: string;
 	readonly sid: number;
 	readonly kind: SessionKind;
@@ -91,6 +93,7 @@ export class TerminalSession {
 	private readonly colors: () => SessionColors;
 
 	constructor(init: SessionInit) {
+		this.home = init.home;
 		this.id = init.id;
 		this.sid = init.sid;
 		this.kind = init.kind;

@@ -1,0 +1,10 @@
+Already up to date
+Done in 311ms using pnpm v11.1.3
+node.exe : $ node scripts/verify-docs.mjs
+所在位置 C:\Users\cdewta\AppData\Roaming\npm\pnpm.ps1:24 字符: 5
++     & "node$exe"  "$basedir/node_modules/pnpm/bin/pnpm.mjs" $args
++     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: ($ node scripts/verify-docs.mjs:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+Documentation: 671 Markdown files (skill=15, agent-handbook=1, root-entry=6, user-doc=40, script-doc=1, speculo-tooling=287, specdev=36, specdev-change=262, source-template=3, test-fixture=19, license=1), 1947 local links, 423 external links (fetch not requested).

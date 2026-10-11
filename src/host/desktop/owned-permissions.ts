@@ -45,6 +45,19 @@ while($pending.Count -gt 0) {
 `;
 const repairs = new Map<string, { identity: string; promise: Promise<void> }>();
 
+/** Recheck current descendants before handing an owned tree to another process; ACL caches are unrelated. */
+export async function checkOwnedDirectory(vault: string, relative: string): Promise<void> {
+	const root = await absoluteNandPath(vault, relative);
+	let count = 0;
+	const visit = async (file: string): Promise<void> => {
+		if (++count > 20000) throw new Error('private-storage.repair-limit');
+		const info = await lstat(file);
+		if (info.isSymbolicLink() || !info.isFile() && !info.isDirectory()) throw new Error('private-storage.symlink');
+		if (info.isDirectory()) for (const child of await readdir(file)) await visit(path.join(file, child));
+	};
+	await visit(root);
+}
+
 /** Repair a NAND-owned tree once per process/root identity; new files inherit its private ACL. */
 export async function secureOwnedDirectory(vault: string, relative: string, force = false): Promise<void> {
 	const directory = await absoluteNandPath(vault, relative);

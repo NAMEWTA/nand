@@ -236,7 +236,7 @@ export class TerminalView {
 	}
 
 	private async openReference(reference: string, line?: number): Promise<void> {
-		const target = await resolveReference(reference, this.session.cwd, this.host.vaultPath());
+		const target = await resolveReference(reference, this.session.cwd, this.host.vaultPath(), this.session.home);
 		if (target?.kind === 'vault') {
 			const file = this.host.app.vault.getAbstractFileByPath(target.path);
 			if (file instanceof TFile) {

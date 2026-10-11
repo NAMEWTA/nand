@@ -49,7 +49,8 @@ try {
 	await until(`!!window.installResult`);
 	const installation = await runtime.connection.evaluate(`installResult`);
 	check('real-release-download-handshake-shell', installation.ok && installation.state === 'connected', installation);
-	const stamp = JSON.parse(await fs.readFile(path.join(binaries, 'nand-pty.json'), 'utf8'));
+	const envelope = JSON.parse(await fs.readFile(path.join(binaries, 'nand-pty.json'), 'utf8'));
+	const stamp = await runtime.connection.evaluate(`JSON.parse(require('@electron/remote').require('electron').safeStorage.decryptString(Buffer.from(${JSON.stringify(envelope.proof)},'base64')))`);
 	const file = path.join(binaries, 'nand-pty-win32-x64.exe');
 	check('download-matches-published-stamp', createHash('sha256').update(await fs.readFile(file)).digest('hex') === stamp.sha256, stamp);
 	await runtime.connection.evaluate(`probeSession.input(${JSON.stringify('echo NAND_REAL_SHELL_OK\r')});true`);
@@ -82,6 +83,24 @@ try {
 	await runtime.connection.evaluate(`window.nandAcceptanceObsidian.requestUrl=hostRequest;probeSession.input(${JSON.stringify('exit\r')});true`);
 	await until(`probeSession.connection==='exited'`);
 	check('shell-exits-cleanly', true);
+	const original = await fs.readFile(file), forged = Buffer.from('MZ-NAND-REJECTED-FIXTURE');
+	const retiringPid = await runtime.connection.evaluate(`agentController.sessions.helper?.pid`);
+	await runtime.connection.evaluate(`agentController.settings.update(d=>{d.offline=true});app.plugins.plugins.nand.setModuleEnabled('agent',false)`);
+	const exitDeadline = Date.now() + 15000;
+	while (retiringPid && Date.now() < exitDeadline) {
+		try { process.kill(retiringPid, 0); } catch { break; }
+		await delay(100);
+	}
+	await fs.writeFile(file, forged);
+	await fs.writeFile(path.join(binaries, 'nand-pty.json'), JSON.stringify({ version, sha256: createHash('sha256').update(forged).digest('hex'), source: 'release' }));
+	await runtime.connection.evaluate(`app.plugins.plugins.nand.setModuleEnabled('agent',true)`); await page();
+	await runtime.connection.evaluate(`window.forgedResult=null;agentController.checkHelper().then(()=>forgedResult={accepted:true},e=>forgedResult={code:e.code});true`);
+	await until(`!!window.forgedResult`);
+	check('forged-binary-and-self-written-stamp-rejected-offline', await runtime.connection.evaluate(`forgedResult.code==='offlineMissing'&&!agentController.sessions.helper?.alive`), await runtime.connection.evaluate(`forgedResult`));
+	await fs.writeFile(file, original); await fs.writeFile(path.join(binaries, 'nand-pty.json'), JSON.stringify(envelope));
+	await runtime.connection.evaluate(`window.recoveredResult=null;agentController.checkHelper().then(()=>recoveredResult={ok:true},e=>recoveredResult={code:e.code});true`);
+	await until(`!!window.recoveredResult`);
+	check('protected-receipt-recovers-offline-after-restoring-authenticated-bytes', await runtime.connection.evaluate(`recoveredResult.ok===true`), await runtime.connection.evaluate(`recoveredResult`));
 	check('no-host-errors', await runtime.connection.evaluate(`nandAcceptanceErrors.length===0`), await runtime.connection.evaluate(`nandAcceptanceErrors`));
 } catch (error) {
 	rows.push({ name: 'acceptance-failure', passed: false, detail: error.stack });

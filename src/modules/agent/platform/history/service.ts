@@ -6,6 +6,7 @@ import type { AgentSettings } from '../../core/launch/types';
 import { t } from '../../../../shared/i18n/index';
 import { JsonStore } from '../../../../shared/json-store';
 import { accountEnv } from '../desktop/agents/accounts';
+import { legacyReferences } from '../desktop/agents/legacy-references';
 import { AGENT_CATALOG } from '../../core/launch/catalog';
 import { historyNodeModules } from '../desktop/history/node-modules';
 import { absoluteNandPath } from '../../../../host/desktop/nand-paths';
@@ -56,6 +57,7 @@ function sharedRead<T>(load: (signal: AbortSignal) => Promise<T>): SharedRead<T>
 	return read;
 }
 export class NativeHistory {
+	private accountAliases = new Map<string, string>();
 	private metadata: Record<string, HistoryMetadata> = {};
 	private store: JsonStore<Record<string, HistoryMetadata>>;
 	private loaded: Promise<void>;
@@ -142,7 +144,20 @@ export class NativeHistory {
 		await this.tail;
 	}
 	meta(key: string): HistoryMetadata {
-		return this.metadata[key] ?? {};
+		return this.mappedMetadata()[key] ?? {};
+	}
+	private mappedMetadata(): Record<string, HistoryMetadata> {
+		const result = { ...this.metadata };
+		for (const [key, metadata] of Object.entries(this.metadata)) {
+			let tuple: unknown;
+			try { tuple = JSON.parse(key); } catch { continue; }
+			if (!Array.isArray(tuple) || tuple.length !== 3 || !tuple.every(value => typeof value === 'string')) continue;
+			const replacement = this.accountAliases.get(JSON.stringify([tuple[0], tuple[1]]));
+			if (!replacement) continue;
+			const mapped = JSON.stringify([tuple[0], replacement, tuple[2]]);
+			result[mapped] = { ...metadata, ...result[mapped] };
+		}
+		return result;
 	}
 	update(key: string, patch: HistoryMetadata): Promise<void> {
 		this.active();
@@ -173,8 +188,9 @@ export class NativeHistory {
 	}
 	private async loadScanScope(settings: AgentSettings) {
 		const [path] = await historyNodeModules();
-		const scope = await this.scope(), roots = [];
+		const scope = await this.scope(), roots = [], warnings: string[] = [], aliases = new Map<string, string>();
 		for (const agent of AGENT_CATALOG) {
+			try {
 			const env = await accountEnv(agent, settings.agents[agent.id].accountId, scope.vault, getDeviceId(this.app));
 			const sources = {
 				'claude-code': path.join(env.CLAUDE_CONFIG_DIR!, 'projects'),
@@ -186,8 +202,13 @@ export class NativeHistory {
 			};
 			const source = await absoluteNandPath(scope.vault, path.relative(scope.vault, sources[agent.id]).split(path.sep).join('/'));
 			roots.push({ agentId: agent.id, path: source, accountKey: JSON.stringify(env) });
+			const references = await legacyReferences(scope.vault, getDeviceId(this.app), agent.id);
+			for (const reference of references) if (reference.name === env.NAND_ACCOUNT_NAME && references.filter(row => row.from === reference.from).length === 1)
+				aliases.set(JSON.stringify([agent.id, JSON.stringify(reference.env)]), JSON.stringify(env));
+			} catch (error) { warnings.push(agent.title + ': ' + (error instanceof Error ? error.message : String(error))); }
 		}
-		return { ...scope, roots };
+		this.accountAliases = aliases;
+		return { ...scope, roots, warnings };
 	}
 	async scan(signal?: AbortSignal): Promise<string[]> {
 		this.active();
@@ -204,7 +225,7 @@ export class NativeHistory {
 				this.indexVersion = result.revision;
 				this.scanned = true;
 				this.changed();
-				return result.warnings;
+				return [...scope.warnings, ...result.warnings];
 			});
 			this.scanRead = { key, read };
 			const clear = () => { if (this.scanRead?.read === read) this.scanRead = undefined; };
@@ -229,7 +250,7 @@ export class NativeHistory {
 		const key = JSON.stringify([scope, this.revision, this.clientRevision, query, offset, filter]);
 		let read = this.pages.get(key);
 		if (!read || read.abort.signal.aborted) {
-			const metadata = this.metadata;
+			const metadata = this.mappedMetadata();
 			read = this.createRead(async sharedSignal => client.request<HistoryPage>(
 				'query', { vault: scope.vault, index: scope.index, query, offset, filter, metadata }, sharedSignal,
 			));

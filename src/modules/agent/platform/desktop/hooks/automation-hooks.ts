@@ -8,6 +8,7 @@ import { accountEnv } from '../agents/accounts';
 import { privatePathHasSymlink } from '../../../../../host/desktop/private-mode';
 import { t } from '../../../../../shared/i18n/index';
 import { SPOOL_GUARD } from './spool-guard';
+import { writeHookSettings } from './settings-write';
 
 const installations = new Map<string, Promise<void>>();
 
@@ -206,34 +207,9 @@ export class AutomationHooks {
 		await checkOwnedPath(script); await checkOwnedPath(provider.file);
 		await fs.mkdir(path.dirname(script), { recursive: true, mode: 0o700 });
 		await fs.writeFile(script, HOOK_SCRIPT, { mode: 0o600 });
-		let raw: string | undefined;
-		try {
-			raw = await fs.readFile(provider.file, 'utf8');
-		} catch (error) {
-			if ((error as { code?: string }).code !== 'ENOENT') throw error;
-		}
-		const settings = mergeNativeHooks(
-			raw === undefined ? {} : (JSON.parse(raw) as unknown),
-			script,
-			provider.events,
-			process,
-		);
-		await fs.mkdir(path.dirname(provider.file), { recursive: true, mode: 0o700 });
-		if (raw !== undefined) { await checkOwnedPath(`${provider.file}.nand-backup`); await fs.writeFile(`${provider.file}.nand-backup`, raw, { mode: 0o600 }); }
-		const next = `${provider.file}.nand-pending-${crypto.randomUUID()}`;
-		await fs.writeFile(next, JSON.stringify(settings, null, 2) + '\n', { mode: 0o600 });
-		// Refuse to replace settings changed by a different process during installation.
-		let current: string | undefined;
-		try {
-			current = await fs.readFile(provider.file, 'utf8');
-		} catch (error) {
-			if ((error as { code?: string }).code !== 'ENOENT') throw error;
-		}
-		if (current !== raw) {
-			await fs.unlink(next);
-			throw new AutomationError('hookSettingsChanged');
-		}
-		await checkOwnedPath(provider.file); await fs.rename(next, provider.file);
+		await writeHookSettings(fs, provider.file, raw => JSON.stringify(mergeNativeHooks(
+			raw === undefined ? {} : (JSON.parse(raw) as unknown), script, provider.events, process,
+		), null, 2) + '\n', checkOwnedPath);
 	}
 	private async poll(): Promise<void> {
 		const [fs, , path] = await nodeModules();

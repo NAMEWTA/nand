@@ -17,6 +17,7 @@ import { absolutePluginDir } from '../platform/desktop/agents/accounts';
 import { readUsageSnapshots } from '../platform/desktop/agents/usage';
 import { AutomationHooks } from '../platform/desktop/hooks/automation-hooks';
 import { BinaryError, ensureHelper } from '../platform/desktop/pty/binary';
+import { protectedReceipt } from '../../../host/desktop/protected-receipt';
 import { terminalEnvironment } from '../platform/desktop/pty/runtime-environment';
 import { availableShells, resolveShell, sessionDirectory, type ShellOption } from '../platform/desktop/pty/shells';
 import type { NativeSessionSummary } from '../platform/desktop/server/agent-data-client';
@@ -235,6 +236,7 @@ export class AgentController {
 			let notice: Notice | undefined;
 			try {
 				return await ensureHelper({
+					receipt: protectedReceipt(this.app.workspace.containerEl.win),
 					vault: this.vaultPath() ?? '',
 					device: deviceId(this.app),
 					version: this.context.manifest.version,

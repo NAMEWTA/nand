@@ -1,6 +1,6 @@
 import path from 'node:path';
 import { createRequire } from 'node:module';
-import { mkdtemp, rm, writeFile } from 'node:fs/promises';
+import { mkdtemp, mkdir, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import type { App } from 'obsidian';
 import { expect, test, vi } from 'vitest';
@@ -8,6 +8,8 @@ import { nativeVaultStorage } from '../../src/host/desktop/vault-storage';
 import { initializeTestDevice } from '../fixtures/vault-storage';
 import { normalizeAgentSettings } from '../../src/modules/agent/core/launch/defaults';
 import { launchAgent, resumeAgent, type LaunchHost, type LaunchRequest } from '../../src/modules/agent/services/launch/launcher';
+import { prepareLegacyAccounts } from '../../src/modules/agent/platform/desktop/agents/legacy-accounts';
+import { deviceId } from '../../src/host/obsidian/storage/device-id';
 
 test('launch and resume derive an owned account environment instead of accepting stored path overrides', async () => {
 	const vault = await mkdtemp(path.join(tmpdir(), 'nand-agent-launch-'));
@@ -31,4 +33,27 @@ test('launch and resume derive an owned account environment instead of accepting
 		await expect(resumeAgent(host, { ...session, env: started[0]!.env, transcriptPath: outside })).rejects.toThrow();
 		expect(started).toHaveLength(2);
 	} finally { vi.unstubAllGlobals(); await rm(vault, { recursive: true, force: true }); }
+}, 30000);
+
+test('an explicitly bound legacy session resumes with its retained transcript and the new account environment', async () => {
+	const vault = await mkdtemp(path.join(tmpdir(), 'nand-agent-legacy-launch-')), plugin = path.join(vault, '.obsidian/plugins/nand');
+	const old = path.join(plugin, 'accounts/claude/ab/home');
+	await mkdir(old, { recursive: true }); await writeFile(path.join(old, 'session.jsonl'), '{}');
+	vi.stubGlobal('window', { require: createRequire(import.meta.url) });
+	const app = { vault: { adapter: { ...nativeVaultStorage(vault), getBasePath: () => vault } } } as unknown as App;
+	const settings = normalizeAgentSettings(null); settings.yoloAcknowledged = true;
+	Object.assign(settings.agents['claude-code'], { enabled: true, accountId: 'a.b', cliPath: process.execPath });
+	const started: LaunchRequest[] = [];
+	const host: LaunchHost = { app, getVaultPath: () => vault, getAgentSettings: () => settings, saveAgentSettings: async () => {}, start: async request => { started.push(request); } };
+	let unbind: (() => void) | undefined;
+	try {
+		await initializeTestDevice(app);
+		await expect(prepareLegacyAccounts({ vault, device: deviceId(app), plugin, boot: 'one' })).rejects.toThrow();
+		unbind = await prepareLegacyAccounts({ vault, device: deviceId(app), plugin, boot: 'two', choose: async () => 'ab' });
+		await launchAgent(host, 'claude-code');
+		await resumeAgent(host, { agentId: 'claude-code', title: '旧会话', cwd: vault, sessionId: 'session', modifiedAtMs: 1, env: { CLAUDE_CONFIG_DIR: old }, transcriptPath: path.join(old, 'session.jsonl') });
+		expect(started).toHaveLength(2);
+		expect(started[1]!.env).toEqual(started[0]!.env);
+		expect(started[1]!.args).toContain('session');
+	} finally { unbind?.(); vi.unstubAllGlobals(); await rm(vault, { recursive: true, force: true }); }
 }, 30000);

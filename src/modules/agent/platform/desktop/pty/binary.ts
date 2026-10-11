@@ -6,6 +6,7 @@ import * as path from 'node:path';
 import { absoluteNandPath } from '../../../../../host/desktop/nand-paths';
 import { nativeVaultStorage } from '../../../../../host/desktop/vault-storage';
 import { secureOwnedDirectory } from '../../../../../host/desktop/owned-permissions';
+import type { ProtectedReceipt } from '../../../../../host/desktop/protected-receipt';
 
 /** Release that publishes the native helper next to the plugin files. */
 export const RELEASE_BASE = 'https://github.com/NAMEWTA/nand/releases/download';
@@ -70,21 +71,25 @@ export async function downloadHelperBytes(url: string, limit: number, timeout = 
 }
 
 interface Stamp {
+	context: string;
 	version: string;
 	sha256: string;
 	source: 'release' | 'development';
 }
 
-function readStamp(dir: string): Stamp | null {
+function readStamp(dir: string, receipt?: ProtectedReceipt): Stamp | null {
 	try {
-		const value = JSON.parse(fs.readFileSync(path.join(dir, STAMP), 'utf8')) as Partial<Stamp>;
-		return typeof value.version === 'string' && typeof value.sha256 === 'string' && (value.source === 'release' || value.source === 'development') ? { version: value.version, sha256: value.sha256, source: value.source } : null;
+		const envelope = JSON.parse(fs.readFileSync(path.join(dir, STAMP), 'utf8')) as { proof?: unknown };
+		if (!receipt || typeof envelope.proof !== 'string') return null;
+		const value = JSON.parse(receipt.open(envelope.proof)) as Partial<Stamp>;
+		return typeof value.context === 'string' && typeof value.version === 'string' && typeof value.sha256 === 'string' && (value.source === 'release' || value.source === 'development') ? { context: value.context, version: value.version, sha256: value.sha256, source: value.source } : null;
 	} catch {
 		return null;
 	}
 }
 
 export interface InstallOptions {
+	receipt?: ProtectedReceipt;
 	/** Opened vault and its initialized local device identity. */
 	vault: string;
 	device: string;
@@ -124,8 +129,9 @@ async function installHelper(options: InstallOptions): Promise<string> {
 	const localBytes = local ? fs.readFileSync(local) : undefined, source = localBytes ? 'development' : 'release';
 	const localDigest = localBytes ? createHash('sha256').update(localBytes).digest('hex') : undefined;
 	const exists = fs.existsSync(file);
-	const stamp = readStamp(dir);
-	const verified = exists && stamp?.version === options.version && stamp.source === source && sha256(file) === stamp.sha256 && (!localDigest || stamp.sha256 === localDigest);
+	const context = JSON.stringify([dir, name]);
+	const stamp = readStamp(dir, options.receipt);
+	const verified = exists && stamp?.context === context && stamp.version === options.version && stamp.source === source && sha256(file) === stamp.sha256 && (!localDigest || stamp.sha256 === localDigest);
 	if (options.offline) {
 		if (!verified) throw new BinaryError('offlineMissing', 'Offline mode requires a verified terminal helper for this version');
 		return file;
@@ -147,13 +153,20 @@ async function installHelper(options: InstallOptions): Promise<string> {
 	if (!digest) throw new BinaryError('checksumMissing', 'The published terminal helper checksum is missing or invalid');
 	await nativeVaultStorage(options.vault).mkdir(relative);
 	await absoluteNandPath(options.vault, relative + '/' + name);
-	const remember = async () => { await absoluteNandPath(options.vault, relative + '/' + STAMP); fs.writeFileSync(path.join(dir, STAMP), JSON.stringify({ version: options.version, sha256: digest, source }), { mode: 0o600 }); };
+	const remember = async () => {
+		await absoluteNandPath(options.vault, relative + '/' + STAMP);
+		const proof = options.receipt?.seal(JSON.stringify({ context, version: options.version, sha256: digest, source }));
+		fs.writeFileSync(path.join(dir, STAMP), JSON.stringify({ proof: proof ?? null }), { mode: 0o600 });
+	};
 	// A matching file placed by hand (same release) is accepted without downloading again.
 	if (exists && sha256(file) === digest) {
 		await remember();
 		return file;
 	}
-	const bytes = localBytes ?? await fetch(base, 256 * 1024 * 1024);
+	const retained = await absoluteNandPath(options.vault, `.nand/helpers/${options.device}/legacy-plugin/files/${name}`);
+	const retainedBytes = !localBytes && fs.existsSync(retained) && fs.lstatSync(retained).isFile() && fs.statSync(retained).size <= 256 * 1024 * 1024 ? fs.readFileSync(retained) : undefined;
+	// Legacy stamps are not execution proofs. Reuse the retained bytes only after the official digest matches.
+	const bytes = localBytes ?? (retainedBytes && createHash('sha256').update(retainedBytes).digest('hex') === digest ? retainedBytes : await fetch(base, 256 * 1024 * 1024));
 	options.progress?.('verifying');
 	if (createHash('sha256').update(bytes).digest('hex') !== digest) throw new BinaryError('checksumMismatch', 'The downloaded terminal helper does not match its checksum; the previous file was kept');
 	await absoluteNandPath(options.vault, relative + '/' + name);

@@ -169,6 +169,7 @@ export class TerminalSessions {
 		const settings = this.host.settings();
 		const sid = this.nextSid++;
 		const session = new TerminalSession({
+			home: request.env?.HOME ?? environment.HOME,
 			id: `terminal-${crypto.randomUUID()}`,
 			sid,
 			kind: request.kind,

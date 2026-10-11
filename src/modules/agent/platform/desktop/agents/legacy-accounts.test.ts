@@ -3,7 +3,8 @@ import { mkdtemp, mkdir, writeFile, readFile, rm, access } from 'node:fs/promise
 import { tmpdir } from 'node:os';
 import { test, expect } from 'vitest';
 import { prepareLegacyAccounts } from './legacy-accounts';
-import { accountEnv } from './accounts';
+import { accountEnv, restoredAccountReference } from './accounts';
+import { checkAccountTranscript } from './transcript';
 import { getAgent } from '../../../core/launch/catalog';
 import { t } from '../../../../../shared/i18n';
 
@@ -25,9 +26,25 @@ test('legacy accounts require a cold restart and an explicit binding, preserving
 		const env = await accountEnv(getAgent('claude-code'), 'a.b', vault, 'device', true);
 		expect(env.CLAUDE_CONFIG_DIR).toContain(path.join('.nand', 'agents', 'device', 'accounts', 'claude-code'));
 		expect(await readFile(path.join(env.CLAUDE_CONFIG_DIR!, '.credentials.json'), 'utf8')).toContain('retained');
+		const old = { CLAUDE_CONFIG_DIR: source };
+		const restored = await restoredAccountReference(getAgent('claude-code'), old, vault, 'device', path.join(source, '.credentials.json'));
+		expect(restored.env).toEqual(env);
+		expect(restored.transcriptPath).toBe(path.join(env.CLAUDE_CONFIG_DIR!, '.credentials.json'));
+		await expect(checkAccountTranscript(vault, restored.env, restored.transcriptPath)).resolves.toBeUndefined();
+		await expect(restoredAccountReference(getAgent('claude-code'), { ...old, ARBITRARY: 'value' }, vault, 'device')).rejects.toThrow();
 		await writeFile(path.join(env.CLAUDE_CONFIG_DIR!, '.credentials.json'), '{"fixture":"renewed"}');
+		await writeFile(path.join(env.CLAUDE_CONFIG_DIR!, 'settings.json'), '{"hooks":"installed"}');
+		const binding = path.join(env.NAND_ACCOUNT_ROOT!, 'legacy-binding.json');
+		await writeFile(binding, 'corrupt');
 		expect((await accountEnv(getAgent('claude-code'), 'a.b', vault, 'device')).CLAUDE_CONFIG_DIR).toBe(env.CLAUDE_CONFIG_DIR);
+		await rm(binding);
+		expect((await accountEnv(getAgent('claude-code'), 'a.b', vault, 'device')).CLAUDE_CONFIG_DIR).toBe(env.CLAUDE_CONFIG_DIR);
+		expect(await readFile(path.join(env.CLAUDE_CONFIG_DIR!, '.credentials.json'), 'utf8')).toContain('renewed');
 		expect(await readFile(path.join(vault, '.nand/agents/device/legacy-accounts/files/claude/ab/home/.credentials.json'), 'utf8')).toContain('retained');
 		await expect(accountEnv(getAgent('claude-code'), 'ab', vault, 'device')).rejects.toThrow(t('agent.legacyChoice'));
+		dispose();
+		dispose = await prepareLegacyAccounts({ vault, device: 'device', plugin, boot: 'two', choose: async () => 'ab' });
+		await accountEnv(getAgent('claude-code'), 'another', vault, 'device', true);
+		await expect(restoredAccountReference(getAgent('claude-code'), old, vault, 'device')).rejects.toThrow(t('agent.accountScopeMismatch'));
 	} finally { dispose?.(); await rm(vault, { recursive: true, force: true }); }
 }, 30000);
