@@ -245,3 +245,17 @@ test('property links preserve YAML comments, aliases, scalar values and CRLF whi
 	expect(result).toContain('examples: "`[[image.png]]`"\r\nnumber: 2026');
 	expect(files.getMetadata(files.getFileByPath('.nand/content/New/Note.md')!)!.frontmatter).toMatchObject({ cover: '[[/.nand/content/Old/image.png]]', copy: '[[/.nand/content/Peer.md]]', number: 2026 });
 });
+
+test('moving an HTML block preserves every actual image and ignores text inside unrelated attributes', async () => {
+	const html = '<div title="<img src=ignore.png>">\n<img src="a.png">\n<img alt="src=fake.png" src=\'b.png\'>\n<img src=c.png>\n<!-- <img src="a.png"> -->\n<script>const example = \'<img src="a.png">\';</script>\n</div>';
+	const vault = memoryVault({ '.nand/content/Old/Note.md': html, ...Object.fromEntries(['a','b','c'].flatMap(name => [['.nand/content/Old/'+name+'.png', 'original'], ['.nand/content/New/'+name+'.png', 'different']])) });
+	const files = new ContentFiles(vault.app); await files.refresh();
+	await files.rename(files.getFileByPath('.nand/content/Old/Note.md')!, '.nand/content/New/Note.md');
+	const text = await files.read('.nand/content/New/Note.md');
+	expect(text).toContain('<img src="/.nand/content/Old/a.png">');
+	expect(text).toContain("<img alt=\"src=fake.png\" src='/.nand/content/Old/b.png'>");
+	expect(text).toContain('<img src="/.nand/content/Old/c.png">');
+	expect(text).toContain('<div title="<img src=ignore.png>">');
+	expect(text).toContain('<!-- <img src="a.png"> -->');
+	expect(text).toContain('<script>const example = \'<img src="a.png">\';</script>');
+});

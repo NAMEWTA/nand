@@ -1,11 +1,11 @@
 import { parser } from '@lezer/markdown';
 import { decodeHTMLStrict } from 'entities';
-import { visit } from 'yaml';
+import { isPair, isScalar, visit } from 'yaml';
 import { readMarkdownDocument, readYaml } from '../../../shared/storage/markdown-document';
 
 export type LinkSyntax = 'wiki' | 'markdown';
-interface Destination { from: number; to: number; link: string; syntax: LinkSyntax }
-interface Property { from: number; to: number; value: string; comment: string }
+interface Destination { from: number; to: number; link: string; syntax: LinkSyntax; htmlQuote?: string }
+interface Property { from: number; to: number; value: string; comment: string; cover: boolean }
 
 function properties(text: string): { bodyStart: number; values: Property[] } {
 	const values: Property[] = [];
@@ -15,10 +15,11 @@ function properties(text: string): { bodyStart: number; values: Property[] } {
 		bodyStart = text.length - source.body.length;
 		if (!source.yaml) return { bodyStart, values };
 		const start = text.indexOf(source.yaml);
-		visit(readYaml(source.yaml), { Scalar(key, node) {
+		visit(readYaml(source.yaml), { Scalar(key, node, parents) {
 			if (key === 'key' || typeof node.value !== 'string' || !node.range) return;
 			const comment = node.srcToken?.type === 'block-scalar' ? node.srcToken.props.flatMap(token => token.type === 'comment' && 'source' in token ? [token.source] : []).join(' ') : '';
-			values.push({ from: start + node.range[0], to: start + node.range[1], value: node.value, comment });
+			const pair = [...parents].reverse().find(isPair), name = pair && isScalar(pair.key) ? String(pair.key.value).toLowerCase() : '';
+			values.push({ from: start + node.range[0], to: start + node.range[1], value: node.value, comment, cover: name === 'cover' || name === '封面' });
 		} });
 	} catch { /* Malformed properties are left intact; body links remain usable. */ }
 	return { bodyStart, values };
@@ -36,19 +37,36 @@ const markdown = parser.configure({
 	} }],
 });
 
+function htmlDestinations(text: string, offset: number): Destination[] {
+	const result: Destination[] = [];
+	// Consume whole quoted attributes/comments so an example containing "<img" is never a tag.
+	const tokens = /<!--[\s\S]*?-->|<(script|style|textarea|title|xmp|iframe|noembed|noframes)\b(?:"[^"]*"|'[^']*'|[^'">])*?>[\s\S]*?<\/\1\s*>|<\/?[a-z][\w:-]*(?:"[^"]*"|'[^']*'|[^'">])*>/gi;
+	for (const token of text.matchAll(tokens)) {
+		const opening = /^<img\b/i.exec(token[0]);
+		if (!opening) continue;
+		const attributes = token[0].slice(opening[0].length);
+		const pattern = /\s+([^\s=/>]+)(?:\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s>]+)))?/g;
+		for (const attribute of attributes.matchAll(pattern)) {
+			if (attribute[1]!.toLowerCase() !== 'src') continue;
+			const link = attribute[2] ?? attribute[3] ?? attribute[4];
+			if (link === undefined) break;
+			const valueStart = attribute[0].indexOf('=') + 1;
+			const prefix = /^\s*(["']?)/.exec(attribute[0].slice(valueStart))!;
+			const from = offset + token.index + opening[0].length + attribute.index + valueStart + prefix[0].length;
+			result.push({ from, to: from + link.length, link: decodeHTMLStrict(link), syntax: 'markdown', htmlQuote: prefix[1] ?? '' });
+			break;
+		}
+	}
+	return result;
+}
+
 /** Preserve source ranges so rewriting touches destinations only, never code or labels. */
 function destinations(text: string, bodyStart = 0): Destination[] {
 	const result: Destination[] = [];
 	markdown.parse(text).iterate({ enter(node) {
 		if (node.to <= bodyStart) return false;
 		if (node.name === 'HTMLTag' || node.name === 'HTMLBlock') {
-			const tag = text.slice(node.from, node.to);
-			const match = /^(<img\b[^>]*?\bsrc\s*=\s*)(?:"([^"]*)"|'([^']*)')/i.exec(tag);
-			if (match) {
-				const link = match[2] ?? match[3]!;
-				const from = node.from + match[1]!.length + 1;
-				result.push({ from, to: from + link.length, link: decodeHTMLStrict(link), syntax: 'markdown' });
-			}
+			result.push(...htmlDestinations(text.slice(node.from, node.to), node.from));
 			return false;
 		}
 		if (node.name === 'NandWikiLink') {
@@ -76,10 +94,10 @@ export function rewriteContentLinks(text: string, destination: (link: string, sy
 	const edits: Array<{ from: number; to: number; text: string }> = [];
 	for (const item of destinations(text, bodyStart)) {
 		const next = destination(item.link, item.syntax);
-		if (next !== undefined) edits.push({ ...item, text: replacement(text, item, next) });
+		if (next !== undefined) edits.push({ ...item, text: replacement(item, next) });
 	}
 	for (const item of values) {
-		const next = plainAttachment(item.value) ? destination(item.value, 'wiki') ?? item.value : rewriteInline(item.value, destination);
+		const next = item.cover && plainAttachment(item.value) ? destination(item.value, 'wiki') ?? item.value : rewriteInline(item.value, destination);
 		if (next !== item.value) {
 			const ending = /\r?\n$/.exec(text.slice(item.from, item.to))?.[0] ?? '';
 			edits.push({ ...item, text: JSON.stringify(next) + (item.comment ? ' ' + item.comment : '') + ending });
@@ -92,12 +110,15 @@ export function rewriteContentLinks(text: string, destination: (link: string, sy
 function rewriteInline(text: string, destination: (link: string, syntax: LinkSyntax) => string | undefined): string {
 	for (const item of destinations(text).reverse()) {
 		const next = destination(item.link, item.syntax);
-		if (next !== undefined) text = text.slice(0, item.from) + replacement(text, item, next) + text.slice(item.to);
+		if (next !== undefined) text = text.slice(0, item.from) + replacement(item, next) + text.slice(item.to);
 	}
 	return text;
 }
 
-function replacement(text: string, item: Destination, next: string): string {
-	// HTML attribute ranges exclude their quotes; Markdown URL ranges include angle brackets.
-	return item.syntax === 'wiki' || /["']/.test(text[item.from - 1] ?? '') ? next : '<' + next + '>';
+function replacement(item: Destination, next: string): string {
+	if (item.htmlQuote !== undefined) {
+		const escaped = next.replaceAll('&', '&amp;').replaceAll('"', '&quot;').replaceAll("'", '&#39;');
+		return item.htmlQuote ? escaped : '"' + escaped + '"';
+	}
+	return item.syntax === 'wiki' ? next : '<' + next + '>';
 }

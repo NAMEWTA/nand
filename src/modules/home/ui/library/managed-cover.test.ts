@@ -25,3 +25,15 @@ test('managed and ordinary library covers preserve their bytes across a property
 		expect(reopened.getMetadata(reopened.getFileByPath('.nand/content/Ref.md')!)!.frontmatter!.related).toBe('[[/.nand/content/New/Note.md]]');
 	}
 });
+
+test('cover rewriting preserves a quoted HTML destination and leaves ordinary title strings alone', async () => {
+	for (const reference of ['pic.png', "<img src='pic&apos;s.png'>"]) {
+		const vault = memoryVault({ '.nand/content/Old/Note.md': '---\ntitle: "pic.png"\naliases: ["pic.png"]\ntags: ["pic.png"]\nunknown: "pic.png"\ncover: '+JSON.stringify(reference)+'\n---\n', '.nand/content/Old/pic.png': 'image', ".nand/content/Old/pic's.png": 'image' });
+		const files = contentFiles(vault.app); await files.refresh();
+		await files.rename(files.getFileByPath('.nand/content/Old/Note.md')!, '.nand/content/New/Note.md'); await files.prepareMetadata();
+		const file = files.getFileByPath('.nand/content/New/Note.md')!, metadata = files.getMetadata(file)!.frontmatter!;
+		expect(metadata).toMatchObject({ title: 'pic.png', aliases: ['pic.png'], tags: ['pic.png'], unknown: 'pic.png' });
+		const url = await resolveLibraryCover(extractCoverValue(metadata)!.value, file, vault.app); expect(url).toMatch(/^blob:/);
+		try { expect(await (await fetch(url)).text()).toBe('image'); } finally { URL.revokeObjectURL(url); }
+	}
+});

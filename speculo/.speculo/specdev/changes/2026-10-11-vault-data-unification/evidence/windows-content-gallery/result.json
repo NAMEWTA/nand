@@ -6,7 +6,15 @@
       "passed": true
     },
     {
+      "name": "gallery-renders-quoted-html-cover",
+      "passed": true
+    },
+    {
       "name": "gallery-keeps-original-cover-after-move",
+      "passed": true
+    },
+    {
+      "name": "gallery-keeps-quoted-html-cover-after-move",
       "passed": true
     },
     {
@@ -14,7 +22,15 @@
       "passed": true
     },
     {
+      "name": "html-images-updated-and-ordinary-title-preserved",
+      "passed": true
+    },
+    {
       "name": "gallery-keeps-original-cover-after-restart",
+      "passed": true
+    },
+    {
+      "name": "gallery-keeps-quoted-html-cover-after-restart",
       "passed": true
     },
     {
