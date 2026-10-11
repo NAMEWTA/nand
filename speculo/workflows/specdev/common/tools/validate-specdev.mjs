@@ -2811,6 +2811,7 @@ function validateGitEvidence(repoRoot, changeStatus, errors) {
     return;
   }
   const currentBranch = gitOutput(resolvedRoot, ["branch", "--show-current"]);
+  const historical = new Set(["completed", "archived"]).has(changeStatus?.change_status);
   for (const worktree of Array.isArray(changeStatus?.worktrees) ? changeStatus.worktrees : []) {
     const label = String(worktree.ticket_id ?? "worktree");
     for (const [name, sha] of [
@@ -2826,9 +2827,15 @@ function validateGitEvidence(repoRoot, changeStatus, errors) {
       }
     }
     if (worktree.workspace_ref === "current") {
-      if (currentBranch !== worktree.parent_branch) errors.push(`${label}: current branch ${currentBranch ?? "<detached>"} must equal ${worktree.parent_branch}`);
-      if (new Set(["integrated", "removed"]).has(worktree.status) && worktree.integration?.result_sha && gitOutput(resolvedRoot, ["rev-parse", worktree.parent_branch]) !== worktree.integration.result_sha) {
-        errors.push(`${label}: parent branch HEAD must equal recorded result_sha`);
+      if (!historical && currentBranch !== worktree.parent_branch) errors.push(`${label}: current branch ${currentBranch ?? "<detached>"} must equal ${worktree.parent_branch}`);
+      if (new Set(["integrated", "removed"]).has(worktree.status) && worktree.integration?.result_sha) {
+        // Completion/archival commits advance HEAD after the verified implementation.
+        // Historical receipts require containment; active integration still requires exact HEAD.
+        if (historical) {
+          if (!gitSucceeds(resolvedRoot, ["merge-base", "--is-ancestor", worktree.integration.result_sha, worktree.parent_branch])) errors.push(`${label}: parent branch must contain recorded result_sha`);
+        } else if (gitOutput(resolvedRoot, ["rev-parse", worktree.parent_branch]) !== worktree.integration.result_sha) {
+          errors.push(`${label}: parent branch HEAD must equal recorded result_sha`);
+        }
       }
       if (worktree.integration?.source_sha && worktree.base_sha && !gitSucceeds(resolvedRoot, ["merge-base", "--is-ancestor", worktree.base_sha, worktree.integration.source_sha])) {
         errors.push(`${label}: source_sha must descend from base_sha`);
@@ -2836,7 +2843,7 @@ function validateGitEvidence(repoRoot, changeStatus, errors) {
     } else if (worktree.integration?.source_sha && worktree.base_sha && !gitSucceeds(resolvedRoot, ["merge-base", "--is-ancestor", worktree.base_sha, worktree.integration.source_sha])) {
       errors.push(`${label}: source_sha must descend from base_sha`);
     }
-    if (new Set(["integrated", "removed"]).has(worktree.status) && gitOutput(resolvedRoot, ["status", "--porcelain"])) {
+    if (!historical && new Set(["integrated", "removed"]).has(worktree.status) && gitOutput(resolvedRoot, ["status", "--porcelain"])) {
       errors.push(`${label}: repository is dirty while Ticket is recorded as ${worktree.status}`);
     }
   }
@@ -2964,7 +2971,7 @@ function validateParentImplementation(change, parentStatus, stage, errors, warni
     const status = validateChangeStatus(join(memberRoot, ".status.json"), member, memberErrors);
     if (status) {
       memberStatuses.set(member, status);
-      if (status.change_status === "archived") memberErrors.push("archived change cannot be an implementation member");
+      if (status.change_status === "archived" && parentStatus?.change_status !== "archived") memberErrors.push("archived change cannot be an active implementation member");
       if (status.current_work !== null && status.current_work !== "specdev/implement") {
         memberErrors.push(`current_work=${status.current_work} conflicts with parent implementation ownership`);
       }
@@ -3227,8 +3234,9 @@ function validateParentImplementation(change, parentStatus, stage, errors, warni
   if (stage === "goal-plan" && parentStatus && new Set(["active", "blocked"]).has(parentStatus.change_status) && !new Set(["specdev/goal-plan"]).has(parentStatus.current_work)) {
     errors.push("parent active/blocked status must keep current_work=specdev/goal-plan");
   }
-  if (parentStatus?.change_status === "completed") {
-    const incomplete = members.filter((member) => memberStatuses.get(member)?.change_status !== "completed");
+  if (new Set(["completed", "archived"]).has(parentStatus?.change_status)) {
+    const completedStates = parentStatus.change_status === "archived" ? new Set(["completed", "archived"]) : new Set(["completed"]);
+    const incomplete = members.filter((member) => !completedStates.has(memberStatuses.get(member)?.change_status));
     if (incomplete.length) errors.push(`parent implementation is completed while members remain incomplete: ${JSON.stringify(incomplete)}`);
     const unfinished = [...ticketByTask].filter(([, value]) => !new Set(["done", "cancelled"]).has(value.artifact.meta.status)).map(([task]) => task);
     if (unfinished.length) errors.push(`completed parent implementation has unfinished composite tasks: ${JSON.stringify(unfinished)}`);
@@ -3583,18 +3591,18 @@ function validateChange(change, stage = null, repoRoot = null) {
 
   if (changeStatus) {
     if (
-      changeStatus.change_status === "completed" &&
+      new Set(["completed", "archived"]).has(changeStatus.change_status) &&
       [...tickets.values()].some(
         (artifact) => !new Set(["done", "cancelled"]).has(artifact.meta.status),
       )
     ) {
       errors.push("change_status is completed while planned Tickets remain unfinished");
     }
-    if (changeStatus.change_status === "archived") {
+    if (changeStatus.change_status === "archived" && (!workspace.specdevRoot || !toPosix(relative(workspace.specdevRoot, change)).startsWith("archive/"))) {
       warnings.push("validating an archived change in place; normally it lives under the archive root");
     }
-    if (stage === "complete" && changeStatus.change_status !== "completed") {
-      errors.push("complete stage requires change_status=completed");
+    if (stage === "complete" && !new Set(["completed", "archived"]).has(changeStatus.change_status)) {
+      errors.push("complete stage requires change_status=completed or archived");
     }
   }
   if (

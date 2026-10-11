@@ -1,0 +1,388 @@
+{
+  "verifiedAt": "2026-10-11T02:33:49.638Z",
+  "states": [
+    {
+      "number": 150,
+      "state": "CLOSED",
+      "title": "[看板] English 界面下农历小组件第一行「丙午 year」被左上角求签按钮盖住",
+      "url": "https://github.com/NAMEWTA/nand/issues/150"
+    },
+    {
+      "number": 149,
+      "state": "CLOSED",
+      "title": "[测试] main 00a1dd2 的 test:all 有 4 项失败，GitHub CI「Node.js build」持续为红，check:notices / check:native 未执行",
+      "url": "https://github.com/NAMEWTA/nand/issues/149"
+    },
+    {
+      "number": 148,
+      "state": "OPEN",
+      "title": "[发布] Release 0.0.1-alpha.1 来自 1b91213，落后于 main 00a1dd2 但版本号相同，用户拿不到最新修复与 helper",
+      "url": "https://github.com/NAMEWTA/nand/issues/148"
+    },
+    {
+      "number": 147,
+      "state": "CLOSED",
+      "title": "[浏览器] 新增的多站点 AI 栏没有样式且总是显示，占掉大半个浏览器页（1280×740 下网页只剩 178px）",
+      "url": "https://github.com/NAMEWTA/nand/issues/147"
+    },
+    {
+      "number": 146,
+      "state": "CLOSED",
+      "title": "[浏览器][回归] 浏览历史与站点权限不再保存，重启后丢失（私有存储层 import('node:fs/promises') 在渲染进程被拦截）",
+      "url": "https://github.com/NAMEWTA/nand/issues/146"
+    },
+    {
+      "number": 145,
+      "state": "CLOSED",
+      "title": "[产品方案调研] 内置浏览器自动化与多 AI 协同工作台（参考 ORCA）",
+      "url": "https://github.com/NAMEWTA/nand/issues/145"
+    },
+    {
+      "number": 144,
+      "state": "CLOSED",
+      "title": "[数据][加固] 库内 .nand/ 按 umask 创建为 755 / 644（含智能体会话历史索引、浏览状态），建议收紧为 0700 / 0600",
+      "url": "https://github.com/NAMEWTA/nand/issues/144"
+    },
+    {
+      "number": 143,
+      "state": "CLOSED",
+      "title": "[终端][加固] nand-pty 继承了 Obsidian 渲染进程约 48 个无关文件句柄（Chromium 共享内存、IPC socket 等），建议 helper 启动时关闭 fd ≥ 3",
+      "url": "https://github.com/NAMEWTA/nand/issues/143"
+    },
+    {
+      "number": 142,
+      "state": "CLOSED",
+      "title": "[浏览器] 焦点在地址栏时 Ctrl+F / Ctrl+L 没有反应（被 Obsidian 默认热键吃掉），与文档不符",
+      "url": "https://github.com/NAMEWTA/nand/issues/142"
+    },
+    {
+      "number": 141,
+      "state": "CLOSED",
+      "title": "[看板][工作台] 窗口宽度 ≤640px 时首页快捷创建栏被拉到约 1950px 高，横幅下只剩一个空的大框",
+      "url": "https://github.com/NAMEWTA/nand/issues/141"
+    },
+    {
+      "number": 140,
+      "state": "CLOSED",
+      "title": "[图标][i18n] 实时切换到中文后，图标设置下拉框宽度仍按英文计算，「仅限移动设备」被截断",
+      "url": "https://github.com/NAMEWTA/nand/issues/140"
+    },
+    {
+      "number": 139,
+      "state": "CLOSED",
+      "title": "[工作台][设置] 设置 → 常规的模块列表里，模块图标紧贴在开关右边（样式只对 Obsidian 设置窗口生效）",
+      "url": "https://github.com/NAMEWTA/nand/issues/139"
+    },
+    {
+      "number": 138,
+      "state": "CLOSED",
+      "title": "[工作台] medium 布局下侧栏以覆盖层打开时，点图标栏的其他模块只会关闭覆盖层、不会切换页面（遮罩盖住了图标栏）",
+      "url": "https://github.com/NAMEWTA/nand/issues/138"
+    },
+    {
+      "number": 137,
+      "state": "CLOSED",
+      "title": "[看板][重构] 全面参考 apex-dashboard 深度仿造并完整重构首页看板：沉浸式自由网格、小组件注册机制与 AI Agent 技能快捷派发",
+      "url": "https://github.com/NAMEWTA/nand/issues/137"
+    },
+    {
+      "number": 136,
+      "state": "CLOSED",
+      "title": "[新闻][新功能] 深度参考并仿照 AIHOT 的热点新闻实现，新增「新闻」模块：独立页面、首页小组件、设置集中配置，AI 部分复用现有 Agent CLI",
+      "url": "https://github.com/NAMEWTA/nand/issues/136"
+    },
+    {
+      "number": 135,
+      "state": "CLOSED",
+      "title": "[回归][终端] main 已是 1.0.0，但 1.0.0 Release 不存在：nand-pty 下载 404，Shell 和所有智能体会话都打不开；提示误导为「检查网络」",
+      "url": "https://github.com/NAMEWTA/nand/issues/135"
+    },
+    {
+      "number": 134,
+      "state": "CLOSED",
+      "title": "[Git 同步] 全面研读并对照复现 obsidian-git-zh 的同步机制与交互",
+      "url": "https://github.com/NAMEWTA/nand/issues/134"
+    },
+    {
+      "number": 124,
+      "state": "CLOSED",
+      "title": "[档案][增强] 个人/企业档案支持列表与卡片切换，并完善现有 YAML + Markdown 全文检索",
+      "url": "https://github.com/NAMEWTA/nand/issues/124"
+    }
+  ],
+  "receipts": [
+    {
+      "operation": "issue-comment-close",
+      "provider": "github",
+      "repo": "NAMEWTA/nand",
+      "mode": "apply",
+      "number": 140,
+      "url": "https://github.com/NAMEWTA/nand/issues/140",
+      "state_before": "OPEN",
+      "marker": "specdev:2026-10-08-workbench-regressions:issue-140:completion",
+      "comment_required": true,
+      "close_required": true,
+      "steps": [
+        "commented",
+        "closed"
+      ],
+      "state_after": "CLOSED",
+      "status": "closed",
+      "commentUrl": "https://github.com/NAMEWTA/nand/issues/140#issuecomment-6104349182",
+      "verifiedAt": "2026-10-11T01:50:24.568Z",
+      "stateReason": "completed"
+    },
+    {
+      "operation": "issue-comment-close",
+      "provider": "github",
+      "repo": "NAMEWTA/nand",
+      "mode": "apply",
+      "number": 142,
+      "url": "https://github.com/NAMEWTA/nand/issues/142",
+      "state_before": "OPEN",
+      "marker": "specdev:2026-10-08-browser-ai-workbench:completion",
+      "comment_required": true,
+      "close_required": true,
+      "steps": [
+        "commented",
+        "closed"
+      ],
+      "state_after": "CLOSED",
+      "status": "closed",
+      "commentUrl": "https://github.com/NAMEWTA/nand/issues/142#issuecomment-6104351277",
+      "verifiedAt": "2026-10-11T01:50:43.100Z",
+      "stateReason": "completed"
+    },
+    {
+      "operation": "issue-comment-close",
+      "provider": "github",
+      "repo": "NAMEWTA/nand",
+      "mode": "apply",
+      "number": 146,
+      "url": "https://github.com/NAMEWTA/nand/issues/146",
+      "state_before": "OPEN",
+      "marker": "specdev:2026-10-08-private-storage-permissions:issue-146:completion",
+      "comment_required": true,
+      "close_required": true,
+      "steps": [
+        "commented",
+        "closed"
+      ],
+      "state_after": "CLOSED",
+      "status": "closed",
+      "commentUrl": "https://github.com/NAMEWTA/nand/issues/146#issuecomment-6104353257",
+      "verifiedAt": "2026-10-11T01:50:58.543Z",
+      "stateReason": "completed"
+    },
+    {
+      "operation": "issue-comment-close",
+      "provider": "github",
+      "repo": "NAMEWTA/nand",
+      "mode": "apply",
+      "number": 147,
+      "url": "https://github.com/NAMEWTA/nand/issues/147",
+      "state_before": "OPEN",
+      "marker": "specdev:2026-10-08-browser-ai-workbench:issue-147:completion",
+      "comment_required": true,
+      "close_required": true,
+      "steps": [
+        "commented",
+        "closed"
+      ],
+      "state_after": "CLOSED",
+      "status": "closed",
+      "commentUrl": "https://github.com/NAMEWTA/nand/issues/147#issuecomment-6104355107",
+      "verifiedAt": "2026-10-11T01:51:15.010Z",
+      "stateReason": "completed"
+    },
+    {
+      "operation": "issue-comment-close",
+      "provider": "github",
+      "repo": "NAMEWTA/nand",
+      "mode": "apply",
+      "number": 124,
+      "url": "https://github.com/NAMEWTA/nand/issues/124",
+      "state_before": "OPEN",
+      "marker": "specdev:2026-10-08-archives-completion:issue-124:accepted-windows-completion",
+      "comment_required": true,
+      "close_required": true,
+      "steps": [
+        "commented",
+        "closed"
+      ],
+      "state_after": "CLOSED",
+      "status": "closed",
+      "commentUrl": "https://github.com/NAMEWTA/nand/issues/124#issuecomment-6104610363",
+      "verifiedAt": "2026-10-11T02:27:36.351Z",
+      "stateReason": "completed"
+    },
+    {
+      "operation": "issue-comment-close",
+      "provider": "github",
+      "repo": "NAMEWTA/nand",
+      "mode": "apply",
+      "number": 134,
+      "url": "https://github.com/NAMEWTA/nand/issues/134",
+      "state_before": "OPEN",
+      "marker": "specdev:2026-10-08-git-sync-parity:issue-134:accepted-windows-completion",
+      "comment_required": true,
+      "close_required": true,
+      "steps": [
+        "commented",
+        "closed"
+      ],
+      "state_after": "CLOSED",
+      "status": "closed",
+      "commentUrl": "https://github.com/NAMEWTA/nand/issues/134#issuecomment-6104613059",
+      "verifiedAt": "2026-10-11T02:27:58.219Z",
+      "stateReason": "completed"
+    },
+    {
+      "operation": "issue-comment-close",
+      "provider": "github",
+      "repo": "NAMEWTA/nand",
+      "mode": "apply",
+      "number": 136,
+      "url": "https://github.com/NAMEWTA/nand/issues/136",
+      "state_before": "OPEN",
+      "marker": "specdev:2026-10-08-news-aihot:issue-136:accepted-windows-completion",
+      "comment_required": true,
+      "close_required": true,
+      "steps": [
+        "commented",
+        "closed"
+      ],
+      "state_after": "CLOSED",
+      "status": "closed",
+      "commentUrl": "https://github.com/NAMEWTA/nand/issues/136#issuecomment-6104614967",
+      "verifiedAt": "2026-10-11T02:28:17.750Z",
+      "stateReason": "completed"
+    },
+    {
+      "operation": "issue-comment-close",
+      "provider": "github",
+      "repo": "NAMEWTA/nand",
+      "mode": "apply",
+      "number": 137,
+      "url": "https://github.com/NAMEWTA/nand/issues/137",
+      "state_before": "OPEN",
+      "marker": "specdev:2026-10-08-home-grid-rebuild:issue-137:accepted-windows-completion",
+      "comment_required": true,
+      "close_required": true,
+      "steps": [
+        "commented",
+        "closed"
+      ],
+      "state_after": "CLOSED",
+      "status": "closed",
+      "commentUrl": "https://github.com/NAMEWTA/nand/issues/137#issuecomment-6104617525",
+      "verifiedAt": "2026-10-11T02:28:40.906Z",
+      "stateReason": "completed"
+    },
+    {
+      "operation": "issue-comment-close",
+      "provider": "github",
+      "repo": "NAMEWTA/nand",
+      "mode": "apply",
+      "number": 143,
+      "url": "https://github.com/NAMEWTA/nand/issues/143",
+      "state_before": "OPEN",
+      "marker": "specdev:2026-10-08-terminal-reliability:issue-143:accepted-windows-completion",
+      "comment_required": true,
+      "close_required": true,
+      "steps": [
+        "commented",
+        "closed"
+      ],
+      "state_after": "CLOSED",
+      "status": "closed",
+      "commentUrl": "https://github.com/NAMEWTA/nand/issues/143#issuecomment-6104619885",
+      "verifiedAt": "2026-10-11T02:29:02.907Z",
+      "stateReason": "completed"
+    },
+    {
+      "operation": "issue-comment-close",
+      "provider": "github",
+      "repo": "NAMEWTA/nand",
+      "mode": "apply",
+      "number": 144,
+      "url": "https://github.com/NAMEWTA/nand/issues/144",
+      "state_before": "OPEN",
+      "marker": "specdev:2026-10-08-private-storage-permissions:issue-144:accepted-windows-completion",
+      "comment_required": true,
+      "close_required": true,
+      "steps": [
+        "commented",
+        "closed"
+      ],
+      "state_after": "CLOSED",
+      "status": "closed",
+      "commentUrl": "https://github.com/NAMEWTA/nand/issues/144#issuecomment-6104622456",
+      "verifiedAt": "2026-10-11T02:29:21.025Z",
+      "stateReason": "completed"
+    },
+    {
+      "operation": "issue-comment-close",
+      "provider": "github",
+      "repo": "NAMEWTA/nand",
+      "mode": "apply",
+      "number": 145,
+      "url": "https://github.com/NAMEWTA/nand/issues/145",
+      "state_before": "OPEN",
+      "marker": "specdev:2026-10-08-browser-ai-workbench:issue-145:accepted-windows-completion",
+      "comment_required": true,
+      "close_required": true,
+      "steps": [
+        "commented",
+        "closed"
+      ],
+      "state_after": "CLOSED",
+      "status": "closed",
+      "commentUrl": "https://github.com/NAMEWTA/nand/issues/145#issuecomment-6104624534",
+      "verifiedAt": "2026-10-11T02:29:42.947Z",
+      "stateReason": "completed"
+    },
+    {
+      "operation": "issue-comment-close",
+      "provider": "github",
+      "repo": "NAMEWTA/nand",
+      "mode": "apply",
+      "number": 149,
+      "url": "https://github.com/NAMEWTA/nand/issues/149",
+      "state_before": "OPEN",
+      "marker": "specdev:2026-10-08-all-open-issues:issue-149:accepted-windows-completion",
+      "comment_required": true,
+      "close_required": true,
+      "steps": [
+        "commented",
+        "closed"
+      ],
+      "state_after": "CLOSED",
+      "status": "closed",
+      "commentUrl": "https://github.com/NAMEWTA/nand/issues/149#issuecomment-6104627028",
+      "verifiedAt": "2026-10-11T02:30:02.385Z",
+      "stateReason": "completed"
+    },
+    {
+      "operation": "issue-comment-close",
+      "provider": "github",
+      "repo": "NAMEWTA/nand",
+      "mode": "apply",
+      "number": 150,
+      "url": "https://github.com/NAMEWTA/nand/issues/150",
+      "state_before": "OPEN",
+      "marker": "specdev:2026-10-08-home-grid-rebuild:issue-150:accepted-windows-completion",
+      "comment_required": true,
+      "close_required": true,
+      "steps": [
+        "commented",
+        "closed"
+      ],
+      "state_after": "CLOSED",
+      "status": "closed",
+      "commentUrl": "https://github.com/NAMEWTA/nand/issues/150#issuecomment-6104629076",
+      "verifiedAt": "2026-10-11T02:30:20.525Z",
+      "stateReason": "completed"
+    }
+  ]
+}

@@ -36,7 +36,7 @@ NAND 是预发布版本。自动运行的检查（类型检查、lint、单元�
 
 - Obsidian 1.13.0 本身。声明的最低版本是 1.13.0，实机测试使用的是 Linux 上更新的 1.13.x 桌面版。
 - 手机和平板：还没有任何移动设备运行过该插件，移动端性能、输入法和触摸行为都没有测量。
-- macOS 实机、终端中文输入法，以及智能体 TUI 的完整键盘模式。Windows Obsidian 1.13.7 已有工作台、档案、本地 Git 克隆、终端组件和新闻的定向实机检查；范围和未覆盖部分见[审查证据](../speculo/.speculo/specdev/changes/2026-10-08-all-open-issues/review-progress.json)。
+- macOS 实机、终端中文输入法，以及智能体 TUI 的完整键盘模式。Windows Obsidian 1.13.7 已有工作台、档案、本地 Git 克隆、终端组件和新闻的定向实机检查；范围和未覆盖部分见[审查证据](../speculo/.speculo/specdev/archive/2026-10/2026-10-08-all-open-issues/review-progress.json)。
 - 第三方主题和代码片段。
 - 真实账号：CLI 智能体的登录、启动、恢复和额度，Git 经 HTTPS 凭据管理器、SSH agent 和真实托管服务的使用，以及微信读书、音乐和天气小组件对真实服务的访问。
 - 长时间运行：长期存活的终端、大量并发会话，以及跨越数天和休眠的自动化。

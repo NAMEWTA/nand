@@ -36,7 +36,7 @@ NAND is a pre-release. Checks that run automatically (type check, lint, unit and
 
 - Obsidian 1.13.0 itself. The declared minimum is 1.13.0; real-host testing used a later 1.13.x desktop build on Linux.
 - Phones and tablets: no mobile device has run the plugin, and mobile performance, input methods and touch behavior are unmeasured.
-- macOS on a real host, Chinese input methods in the terminal, and the full keyboard modes of agent TUIs. Windows Obsidian 1.13.7 now has targeted real-host checks for the workbench, archives, local Git clone, terminal/helper and news; scope and remaining gaps are recorded in the [review evidence](../speculo/.speculo/specdev/changes/2026-10-08-all-open-issues/review-progress.json).
+- macOS on a real host, Chinese input methods in the terminal, and the full keyboard modes of agent TUIs. Windows Obsidian 1.13.7 now has targeted real-host checks for the workbench, archives, local Git clone, terminal/helper and news; scope and remaining gaps are recorded in the [review evidence](../speculo/.speculo/specdev/archive/2026-10/2026-10-08-all-open-issues/review-progress.json).
 - Third-party themes and snippets.
 - Real accounts: sign-in, launch, resume and quota of the CLI agents, Git over HTTPS credential managers, SSH agents and real hosting, and the WeRead, music and weather widgets against live services.
 - Long-running use: long-lived terminals, many concurrent sessions, and automations over days and across sleep.

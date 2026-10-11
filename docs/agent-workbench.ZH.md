@@ -145,4 +145,4 @@ NAND 不会为模型选择的技能工具猜测用户命令。发现列表展示
 
 ## 使用限制
 
-请先在本机安装并登录各 CLI，并完成它自己的目录信任和权限提示。Obsidian 退出后，终端和自动化任务不会继续运行。不同 CLI 提供的历史、完成事件和额度信息不同，缺失的信息显示为未知或不可用。Windows 上已在真实 Obsidian 验证组件安装、Shell 输入与尺寸调整、提示词任务的进程清理。提示词测试使用原生 hook 协议测试程序；Claude/Codex 真实模型运行的完整答案、其他 CLI 适配器，以及 macOS 和 Linux 仍待验证，见 [runner 证据](../speculo/.speculo/specdev/changes/2026-10-08-news-aihot/evidence/review-runner.json)和[验证说明](../speculo/.speculo/specdev/context/validation.ZH.md)。
+请先在本机安装并登录各 CLI，并完成它自己的目录信任和权限提示。Obsidian 退出后，终端和自动化任务不会继续运行。不同 CLI 提供的历史、完成事件和额度信息不同，缺失的信息显示为未知或不可用。Windows 上已在真实 Obsidian 验证组件安装、Shell 输入与尺寸调整、提示词任务的进程清理。提示词测试使用原生 hook 协议测试程序；Claude/Codex 真实模型运行的完整答案、其他 CLI 适配器，以及 macOS 和 Linux 仍待验证，见 [runner 证据](../speculo/.speculo/specdev/archive/2026-10/2026-10-08-news-aihot/evidence/review-runner.json)和[验证说明](../speculo/.speculo/specdev/context/validation.ZH.md)。
