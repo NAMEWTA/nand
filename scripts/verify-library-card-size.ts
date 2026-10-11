@@ -83,6 +83,8 @@ const makeApp = () => {
 			},
 		},
 		metadataCache: {
+			on: () => ({}),
+			offref: () => {},
 			getFileCache: () => ({ frontmatter: { title: 'x' }, tags: [] }),
 			fileToLinktext: (f: { path: string }) => f.path,
 		},

@@ -13,6 +13,8 @@
  * Run: `pnpm run test:folder-tag-search`
  */
 import { strict as assert } from 'node:assert';
+import { installPreactMiniDom } from './preact-mini-dom';
+installPreactMiniDom();
 import type { App } from 'obsidian';
 import { FolderConfigModal } from '../src/modules/home/ui/library/folder-config-modal';
 import { findByClass, findTag, orderIndex, type El } from './mini-dom';

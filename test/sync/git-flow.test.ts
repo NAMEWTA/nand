@@ -4,7 +4,7 @@
  */
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
-import { chmodSync, existsSync, mkdirSync, mkdtempSync, readFileSync, renameSync, rmSync, unlinkSync, writeFileSync } from 'node:fs';
+import { chmodSync, existsSync, mkdirSync, mkdtempSync, readFileSync, realpathSync, renameSync, rmSync, unlinkSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { setTimeout as delay } from 'node:timers/promises';
@@ -24,7 +24,7 @@ let base = '';
 const saved: Record<string, string | undefined> = {};
 
 beforeAll(() => {
-	base = mkdtempSync(path.join(tmpdir(), 'nand-git-'));
+	base = realpathSync(mkdtempSync(path.join(tmpdir(), 'nand-git-')));
 	const globalConfig = path.join(base, 'gitconfig');
 	writeFileSync(globalConfig, '[init]\n\tdefaultBranch = main\n[user]\n\tname = Tester\n\temail = tester@example.com\n[commit]\n\tgpgsign = false\n');
 	// The tests never read the developer's own git configuration or credentials.

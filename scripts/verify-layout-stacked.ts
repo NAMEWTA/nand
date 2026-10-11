@@ -99,7 +99,7 @@ const run = (): void => {
 		const row = rows[0]!;
 		assert.equal(row.parent, areaEl, 'strip wrapper is a direct child of the widgets area');
 		assert.equal(areaEl.children.length, 1, 'strip wrapper is the widgets area only child');
-		const qa = findByClass(host, 'dashboard-quick-actions')[0]!;
+		const qa = findByClass(host, 'dashboard-sidebar-widget-mount').find(w => w.dataset.widgetKey === 'quickActions')!;
 		assert.equal(qa.parent, row, 'quick actions renders inside the strip');
 		assert.deepEqual(
 			row.children.map((c) => c.dataset.widgetKey ?? ''),
@@ -165,7 +165,7 @@ const run = (): void => {
 			undefined,
 			stubQuickActions,
 		);
-		const widgets = findByClass(host, 'dashboard-sidebar-widget');
+		const widgets = findByClass(host, 'dashboard-sidebar-widget-mount');
 		// Saved order is [lunar, yearProgress, quickActions]. The pinned QA row
 		// exits the reorder system (5c), so yearProgress is dragged onto lunar.
 		const dragged = widgets.find((w) => w.dataset.widgetKey === 'yearProgress')!;
@@ -185,7 +185,7 @@ const run = (): void => {
 		// target widgets are adjacent, where "after lunar" is the saved spot.
 		assert.deepEqual(
 			orders[0],
-			indicator === 'top' ? ['yearProgress', 'lunar', 'quickActions'] : ['lunar', 'yearProgress', 'quickActions'],
+			indicator === 'top' ? ['home:quick-actions:default', 'home:year-progress:default', 'home:lunar:default'] : ['home:quick-actions:default', 'home:lunar:default', 'home:year-progress:default'],
 			`reorder matches the ${indicator} indicator`,
 		);
 		return indicator;
@@ -217,7 +217,7 @@ const run = (): void => {
 			undefined,
 			stubQuickActions,
 		);
-		const lunar = findByClass(host, 'dashboard-sidebar-lunar')[0]!;
+		const lunar = findByClass(host, 'dashboard-sidebar-widget-mount').find(w => w.dataset.widgetKey === 'lunar')!;
 		lunar.dispatchEvent({ type: 'mousedown', target: lunar, button: 0 });
 		assert.equal(lunar.getAttribute('draggable'), 'true', 'left mousedown arms the widget for dragging');
 		lunar.dispatchEvent({ type: 'mousedown', target: lunar, button: 2 });
@@ -243,20 +243,21 @@ const run = (): void => {
 			undefined,
 			stubQuickActions,
 		);
-		const qa = findByClass(host, 'dashboard-quick-actions')[0]!;
-		assert.equal(qa.getAttribute('draggable'), null, 'stacked QA row is never armed draggable');
-		const lunar = findByClass(host, 'dashboard-sidebar-lunar')[0]!;
+		const qa = findByClass(host, 'dashboard-sidebar-widget-mount').find(w => w.dataset.widgetKey === 'quickActions')!;
+		qa.dispatchEvent({ type: 'mousedown', target: qa, button: 0 });
+		assert.equal(qa.getAttribute('draggable'), 'true', 'quick actions can be dragged like other members');
+		const lunar = findByClass(host, 'dashboard-sidebar-widget-mount').find(w => w.dataset.widgetKey === 'lunar')!;
 		const dataTransfer = { effectAllowed: '', setData: (): void => {}, dropEffect: '' };
 		lunar.dispatchEvent({ type: 'dragstart', target: lunar, dataTransfer });
 		qa.dispatchEvent({ type: 'dragover', target: qa, dataTransfer, clientX: -5, clientY: -5 });
 		qa.dispatchEvent({ type: 'drop', target: qa, dataTransfer, clientX: -5, clientY: -5 });
-		assert.equal(orders.length, 0, 'drop on the pinned QA row fires no reorder');
+		assert.deepEqual(orders, [['home:lunar:default', 'home:quick-actions:default', 'home:year-progress:default']], 'drop reorders stable member IDs');
 		assert.equal(
 			['left', 'right', 'top', 'bottom'].some((side) =>
 				qa.hasClass(`dashboard-sidebar-widget--drag-over-${side}`),
 			),
 			false,
-			'drop on the pinned QA row paints no insertion indicator',
+			'drop clears the insertion indicator',
 		);
 	}
 };

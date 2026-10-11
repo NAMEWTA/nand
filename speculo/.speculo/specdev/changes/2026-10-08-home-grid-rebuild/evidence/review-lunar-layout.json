@@ -1,0 +1,512 @@
+{
+  "rows": [
+    {
+      "name": "en-system-light-500",
+      "passed": true,
+      "detail": {
+        "button": {
+          "width": 0,
+          "height": 0
+        },
+        "visible": true,
+        "text": "丙午 year马戊戌 month · 戊午 day",
+        "overlap": false,
+        "overflow": false
+      }
+    },
+    {
+      "name": "en-system-light-800",
+      "passed": true,
+      "detail": {
+        "button": {
+          "width": 32,
+          "height": 32
+        },
+        "visible": true,
+        "text": "丙午 year马戊戌 month · 戊午 day",
+        "overlap": false,
+        "overflow": false
+      }
+    },
+    {
+      "name": "en-system-light-1500",
+      "passed": true,
+      "detail": {
+        "button": {
+          "width": 32,
+          "height": 32
+        },
+        "visible": true,
+        "text": "丙午 year马戊戌 month · 戊午 day",
+        "overlap": false,
+        "overflow": false
+      }
+    },
+    {
+      "name": "en-system-dark-500",
+      "passed": true,
+      "detail": {
+        "button": {
+          "width": 0,
+          "height": 0
+        },
+        "visible": true,
+        "text": "丙午 year马戊戌 month · 戊午 day",
+        "overlap": false,
+        "overflow": false
+      }
+    },
+    {
+      "name": "en-system-dark-800",
+      "passed": true,
+      "detail": {
+        "button": {
+          "width": 32,
+          "height": 32
+        },
+        "visible": true,
+        "text": "丙午 year马戊戌 month · 戊午 day",
+        "overlap": false,
+        "overflow": false
+      }
+    },
+    {
+      "name": "en-system-dark-1500",
+      "passed": true,
+      "detail": {
+        "button": {
+          "width": 32,
+          "height": 32
+        },
+        "visible": true,
+        "text": "丙午 year马戊戌 month · 戊午 day",
+        "overlap": false,
+        "overflow": false
+      }
+    },
+    {
+      "name": "en-claude-code-light-500",
+      "passed": true,
+      "detail": {
+        "button": {
+          "width": 0,
+          "height": 0
+        },
+        "visible": true,
+        "text": "丙午 year马戊戌 month · 戊午 day",
+        "overlap": false,
+        "overflow": false
+      }
+    },
+    {
+      "name": "en-claude-code-light-800",
+      "passed": true,
+      "detail": {
+        "button": {
+          "width": 32,
+          "height": 32
+        },
+        "visible": true,
+        "text": "丙午 year马戊戌 month · 戊午 day",
+        "overlap": false,
+        "overflow": false
+      }
+    },
+    {
+      "name": "en-claude-code-light-1500",
+      "passed": true,
+      "detail": {
+        "button": {
+          "width": 32,
+          "height": 32
+        },
+        "visible": true,
+        "text": "丙午 year马戊戌 month · 戊午 day",
+        "overlap": false,
+        "overflow": false
+      }
+    },
+    {
+      "name": "en-claude-code-dark-500",
+      "passed": true,
+      "detail": {
+        "button": {
+          "width": 0,
+          "height": 0
+        },
+        "visible": true,
+        "text": "丙午 year马戊戌 month · 戊午 day",
+        "overlap": false,
+        "overflow": false
+      }
+    },
+    {
+      "name": "en-claude-code-dark-800",
+      "passed": true,
+      "detail": {
+        "button": {
+          "width": 32,
+          "height": 32
+        },
+        "visible": true,
+        "text": "丙午 year马戊戌 month · 戊午 day",
+        "overlap": false,
+        "overflow": false
+      }
+    },
+    {
+      "name": "en-claude-code-dark-1500",
+      "passed": true,
+      "detail": {
+        "button": {
+          "width": 32,
+          "height": 32
+        },
+        "visible": true,
+        "text": "丙午 year马戊戌 month · 戊午 day",
+        "overlap": false,
+        "overflow": false
+      }
+    },
+    {
+      "name": "en-eye-care-light-500",
+      "passed": true,
+      "detail": {
+        "button": {
+          "width": 0,
+          "height": 0
+        },
+        "visible": true,
+        "text": "丙午 year马戊戌 month · 戊午 day",
+        "overlap": false,
+        "overflow": false
+      }
+    },
+    {
+      "name": "en-eye-care-light-800",
+      "passed": true,
+      "detail": {
+        "button": {
+          "width": 32,
+          "height": 32
+        },
+        "visible": true,
+        "text": "丙午 year马戊戌 month · 戊午 day",
+        "overlap": false,
+        "overflow": false
+      }
+    },
+    {
+      "name": "en-eye-care-light-1500",
+      "passed": true,
+      "detail": {
+        "button": {
+          "width": 32,
+          "height": 32
+        },
+        "visible": true,
+        "text": "丙午 year马戊戌 month · 戊午 day",
+        "overlap": false,
+        "overflow": false
+      }
+    },
+    {
+      "name": "en-eye-care-dark-500",
+      "passed": true,
+      "detail": {
+        "button": {
+          "width": 0,
+          "height": 0
+        },
+        "visible": true,
+        "text": "丙午 year马戊戌 month · 戊午 day",
+        "overlap": false,
+        "overflow": false
+      }
+    },
+    {
+      "name": "en-eye-care-dark-800",
+      "passed": true,
+      "detail": {
+        "button": {
+          "width": 32,
+          "height": 32
+        },
+        "visible": true,
+        "text": "丙午 year马戊戌 month · 戊午 day",
+        "overlap": false,
+        "overflow": false
+      }
+    },
+    {
+      "name": "en-eye-care-dark-1500",
+      "passed": true,
+      "detail": {
+        "button": {
+          "width": 32,
+          "height": 32
+        },
+        "visible": true,
+        "text": "丙午 year马戊戌 month · 戊午 day",
+        "overlap": false,
+        "overflow": false
+      }
+    },
+    {
+      "name": "zh-system-light-500",
+      "passed": true,
+      "detail": {
+        "button": {
+          "width": 0,
+          "height": 0
+        },
+        "visible": true,
+        "text": "丙午 year马戊戌 month · 戊午 day",
+        "overlap": false,
+        "overflow": false
+      }
+    },
+    {
+      "name": "zh-system-light-800",
+      "passed": true,
+      "detail": {
+        "button": {
+          "width": 32,
+          "height": 32
+        },
+        "visible": true,
+        "text": "丙午 year马戊戌 month · 戊午 day",
+        "overlap": false,
+        "overflow": false
+      }
+    },
+    {
+      "name": "zh-system-light-1500",
+      "passed": true,
+      "detail": {
+        "button": {
+          "width": 32,
+          "height": 32
+        },
+        "visible": true,
+        "text": "丙午 year马戊戌 month · 戊午 day",
+        "overlap": false,
+        "overflow": false
+      }
+    },
+    {
+      "name": "zh-system-dark-500",
+      "passed": true,
+      "detail": {
+        "button": {
+          "width": 0,
+          "height": 0
+        },
+        "visible": true,
+        "text": "丙午 year马戊戌 month · 戊午 day",
+        "overlap": false,
+        "overflow": false
+      }
+    },
+    {
+      "name": "zh-system-dark-800",
+      "passed": true,
+      "detail": {
+        "button": {
+          "width": 32,
+          "height": 32
+        },
+        "visible": true,
+        "text": "丙午 year马戊戌 month · 戊午 day",
+        "overlap": false,
+        "overflow": false
+      }
+    },
+    {
+      "name": "zh-system-dark-1500",
+      "passed": true,
+      "detail": {
+        "button": {
+          "width": 32,
+          "height": 32
+        },
+        "visible": true,
+        "text": "丙午 year马戊戌 month · 戊午 day",
+        "overlap": false,
+        "overflow": false
+      }
+    },
+    {
+      "name": "zh-claude-code-light-500",
+      "passed": true,
+      "detail": {
+        "button": {
+          "width": 0,
+          "height": 0
+        },
+        "visible": true,
+        "text": "丙午 year马戊戌 month · 戊午 day",
+        "overlap": false,
+        "overflow": false
+      }
+    },
+    {
+      "name": "zh-claude-code-light-800",
+      "passed": true,
+      "detail": {
+        "button": {
+          "width": 32,
+          "height": 32
+        },
+        "visible": true,
+        "text": "丙午 year马戊戌 month · 戊午 day",
+        "overlap": false,
+        "overflow": false
+      }
+    },
+    {
+      "name": "zh-claude-code-light-1500",
+      "passed": true,
+      "detail": {
+        "button": {
+          "width": 32,
+          "height": 32
+        },
+        "visible": true,
+        "text": "丙午 year马戊戌 month · 戊午 day",
+        "overlap": false,
+        "overflow": false
+      }
+    },
+    {
+      "name": "zh-claude-code-dark-500",
+      "passed": true,
+      "detail": {
+        "button": {
+          "width": 0,
+          "height": 0
+        },
+        "visible": true,
+        "text": "丙午 year马戊戌 month · 戊午 day",
+        "overlap": false,
+        "overflow": false
+      }
+    },
+    {
+      "name": "zh-claude-code-dark-800",
+      "passed": true,
+      "detail": {
+        "button": {
+          "width": 32,
+          "height": 32
+        },
+        "visible": true,
+        "text": "丙午 year马戊戌 month · 戊午 day",
+        "overlap": false,
+        "overflow": false
+      }
+    },
+    {
+      "name": "zh-claude-code-dark-1500",
+      "passed": true,
+      "detail": {
+        "button": {
+          "width": 32,
+          "height": 32
+        },
+        "visible": true,
+        "text": "丙午 year马戊戌 month · 戊午 day",
+        "overlap": false,
+        "overflow": false
+      }
+    },
+    {
+      "name": "zh-eye-care-light-500",
+      "passed": true,
+      "detail": {
+        "button": {
+          "width": 0,
+          "height": 0
+        },
+        "visible": true,
+        "text": "丙午 year马戊戌 month · 戊午 day",
+        "overlap": false,
+        "overflow": false
+      }
+    },
+    {
+      "name": "zh-eye-care-light-800",
+      "passed": true,
+      "detail": {
+        "button": {
+          "width": 32,
+          "height": 32
+        },
+        "visible": true,
+        "text": "丙午 year马戊戌 month · 戊午 day",
+        "overlap": false,
+        "overflow": false
+      }
+    },
+    {
+      "name": "zh-eye-care-light-1500",
+      "passed": true,
+      "detail": {
+        "button": {
+          "width": 32,
+          "height": 32
+        },
+        "visible": true,
+        "text": "丙午 year马戊戌 month · 戊午 day",
+        "overlap": false,
+        "overflow": false
+      }
+    },
+    {
+      "name": "zh-eye-care-dark-500",
+      "passed": true,
+      "detail": {
+        "button": {
+          "width": 0,
+          "height": 0
+        },
+        "visible": true,
+        "text": "丙午 year马戊戌 month · 戊午 day",
+        "overlap": false,
+        "overflow": false
+      }
+    },
+    {
+      "name": "zh-eye-care-dark-800",
+      "passed": true,
+      "detail": {
+        "button": {
+          "width": 32,
+          "height": 32
+        },
+        "visible": true,
+        "text": "丙午 year马戊戌 month · 戊午 day",
+        "overlap": false,
+        "overflow": false
+      }
+    },
+    {
+      "name": "zh-eye-care-dark-1500",
+      "passed": true,
+      "detail": {
+        "button": {
+          "width": 32,
+          "height": 32
+        },
+        "visible": true,
+        "text": "丙午 year马戊戌 month · 戊午 day",
+        "overlap": false,
+        "overflow": false
+      }
+    }
+  ],
+  "unverified": [
+    "Non-Windows hosts",
+    "Physical mobile hardware"
+  ]
+}

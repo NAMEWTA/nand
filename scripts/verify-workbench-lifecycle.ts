@@ -106,7 +106,7 @@ test('hidden browser guests are not silently evicted by a visibility-only cache 
  const f = fixture({ resourcePages: true });
  for (let i = 0; i < 6; i++) f.pages.show(await f.prepare({ feature: 'browser', resourceId: String(i) }));
  assert.equal(f.instances.length, 6); assert.equal(f.instances.reduce((sum, item) => sum + item.closed, 0), 0);
- await f.pages.close(JSON.stringify(['browser', '0']));
+ await f.pages.closeResource('browser', '0');
  assert.equal(f.instances[0]!.closed, 1); assert.equal(f.pages.getSurfaces().length, 5); await f.pages.dispose();
 });
 

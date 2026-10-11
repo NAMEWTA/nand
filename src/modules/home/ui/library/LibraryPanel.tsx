@@ -332,7 +332,7 @@ export function LibraryPanel({
 						currentKey={config.viewMode}
 						items={modes.map((mode) => ({
 							key: mode,
-							label: t('library.view' + mode[0]!.toUpperCase() + mode.slice(1)),
+							label: ({ grid: t('library.viewGrid'), gallery: t('library.viewGallery'), list: t('library.viewList'), table: t('library.viewTable'), kanban: t('library.viewKanban') })[mode],
 							icon: icons[mode],
 						}))}
 						pick={(mode) => update({ ...config, viewMode: mode as LibraryViewMode })}
@@ -343,9 +343,9 @@ export function LibraryPanel({
 				>
 					<ToolbarDropdown
 						currentKey={config.cardSize ?? 'medium'}
-						items={['small', 'medium', 'large'].map((size) => ({
+						items={(['small', 'medium', 'large'] as const).map((size) => ({
 							key: size,
-							label: t('library.size' + size[0]!.toUpperCase() + size.slice(1)),
+							label: ({ small: t('library.sizeSmall'), medium: t('library.sizeMedium'), large: t('library.sizeLarge') })[size],
 							short: size[0]!.toUpperCase(),
 						}))}
 						pick={(size) => update({ ...config, cardSize: size as LibraryConfig['cardSize'] })}

@@ -14,7 +14,7 @@ const { TerminalAutomationRuntime } = await import(
 const { normalizeAgentSettings } = await import(
 	new URL('./src/modules/agent/core/launch/defaults.ts', pathToFileURL(repo + '/')).href
 );
-const root = fs.mkdtempSync(path.join(tmpdir(), 'nand-native-session-race-'));
+const root = fs.realpathSync(fs.mkdtempSync(path.join(tmpdir(), 'nand-native-session-race-')));
 let runtime;
 try {
 	const vault = path.join(root, 'vault');
@@ -137,7 +137,7 @@ try {
 			updatedAt: 0,
 		});
 	const tick = service.tick(1000);
-	await firstPrepared;
+	await Promise.race([firstPrepared, tick.then(() => { throw Error('scheduler finished before preparing a session: ' + JSON.stringify(service.state.runs)); })]);
 	await new Promise((r) => setTimeout(r, 0));
 	assert.equal(launches, 0, 'first launch remains reserved during prepare');
 	unblock();

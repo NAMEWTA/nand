@@ -290,7 +290,7 @@ describe('git vault boundary', () => {
 			assert.equal(existsSync(path.join(target, '.git')), false);
 			if (!cancel) {
 				assert.equal(result.error?.kind, 'clone-target-not-empty');
-				assert.equal(readFileSync(path.join(result.recoveryPath!, 'note.md'), 'utf8'), 'one\n');
+				assert.equal(readFileSync(path.join(result.recoveryPath!, 'note.md'), 'utf8').replace(/\r\n/g, '\n'), 'one\n');
 			}
 		}
 	});

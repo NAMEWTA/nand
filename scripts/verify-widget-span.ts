@@ -69,7 +69,7 @@ const spansFor = (keys: string[], ratios: StackedRatios = {}): number[] =>
 	resolveStackedSpans(buildStackedSpanSpecs(keys, ratios));
 
 const cssVarOf = (el: El, name: string): string | undefined =>
-	(el as unknown as { cssProps?: Record<string, string> }).cssProps?.[name];
+	el.style.getPropertyValue(name) || undefined;
 
 const albumCfg = (id: number, heightRatio?: AlbumConfig['heightRatio']): AlbumConfig =>
 	({ id, folder: '', intervalSec: 8, recursive: true, ratio: '1:1', transition: 'fade', heightRatio }) as AlbumConfig;

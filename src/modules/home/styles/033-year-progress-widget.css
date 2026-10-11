@@ -59,6 +59,7 @@
 }
 
 .dashboard-sidebar-lunar-meta {
+	padding-inline: 32px;
 	display: flex;
 	flex-wrap: wrap;
 	justify-content: center;

@@ -1,3 +1,5 @@
+import { installPreactMiniDom } from './preact-mini-dom';
+installPreactMiniDom();
 import { registerShellCommands } from '../src/app/commands';
 import type DashboardPlugin from '../src/app/main';
 import assert from 'node:assert/strict';

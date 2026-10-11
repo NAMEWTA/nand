@@ -51,6 +51,8 @@ const run = async (): Promise<void> => {
 			},
 		},
 		metadataCache: {
+			on: () => ({}),
+			offref: () => {},
 			getFileCache: (f: { path: string }) => ({
 				frontmatter: notes.find((n) => n.path === f.path)?.fm ?? {},
 				tags: [],

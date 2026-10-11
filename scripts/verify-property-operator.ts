@@ -17,6 +17,8 @@
  * Run: `pnpm run test:property-operator`
  */
 import { strict as assert } from 'node:assert';
+import { installPreactMiniDom } from './preact-mini-dom';
+installPreactMiniDom();
 import type { App } from 'obsidian';
 import { queryVaultFiles } from '../src/modules/home/ui/library/index';
 import { LibraryConfigModal } from '../src/modules/home/ui/library/library-config-modal';

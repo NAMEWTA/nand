@@ -8560,6 +8560,7 @@ body {
 }
 
 .dashboard-sidebar-lunar-meta {
+	padding-inline: 32px;
 	display: flex;
 	flex-wrap: wrap;
 	justify-content: center;
@@ -8659,7 +8660,8 @@ body {
 	border: 0;
 	box-shadow: none;
 	background: transparent;
-	height: auto;
+	min-width: 32px;
+	min-height: 32px;
 	position: absolute;
 	top: 10px;
 	left: 6px;

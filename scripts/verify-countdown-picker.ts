@@ -19,6 +19,7 @@ import { El, findByClass, findTag } from './mini-dom';
 // The popup mounts on activeDocument.body — give the stub a live El body.
 const bodyEl = new El('body');
 (globalThis as unknown as Record<string, unknown>).activeDocument = {
+	defaultView: { innerWidth: 1920, setTimeout: () => 0, clearTimeout: () => {} },
 	querySelector: () => null,
 	addEventListener: () => {},
 	removeEventListener: () => {},

@@ -1,6 +1,14 @@
 /** Strings of the home module, registered when the module loads. */
 export const messages = {
 	en: {
+		"library.viewGrid": "Grid",
+		"library.viewGallery": "Gallery",
+		"library.viewList": "List",
+		"library.viewTable": "Table",
+		"library.viewKanban": "Kanban",
+		"library.sizeSmall": "Small cards",
+		"library.sizeMedium": "Medium cards",
+		"library.sizeLarge": "Large cards",
 		"appearancePresets.title": "Saved appearances",
 		"appearancePresets.hint": "Save the current global theme and Home decoration together. Applying a saved appearance updates every board, editor and window.",
 		"appearancePresets.name": "Appearance name",
@@ -1426,6 +1434,14 @@ export const messages = {
 		"storage.retry": "Retry saving",
 	},
 	zh: {
+		"library.viewGrid": "网格",
+		"library.viewGallery": "画廊",
+		"library.viewList": "列表",
+		"library.viewTable": "表格",
+		"library.viewKanban": "看板",
+		"library.sizeSmall": "小卡片",
+		"library.sizeMedium": "中卡片",
+		"library.sizeLarge": "大卡片",
 		"appearancePresets.title": "已保存的外观",
 		"appearancePresets.hint": "一起保存当前全局主题与首页装饰。应用已保存的外观会更新所有看板、编辑器和窗口。",
 		"appearancePresets.name": "外观名称",
