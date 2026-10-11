@@ -1,4 +1,5 @@
-import type { App, TFile } from 'obsidian';
+import type { App } from 'obsidian';
+import type { ContentFile } from '../../../../host/obsidian/storage/content-files';
 import { h } from 'preact';
 import type { DashboardSettings } from '../../core/board/types/index';
 import { getRenderContext, mountDashboardPanel } from '../renderer/render-context';
@@ -17,7 +18,7 @@ export function renderSidebarCalendar(
 	container: HTMLElement,
 	settings: DashboardSettings,
 	app: App,
-	onOpenNote?: (file: TFile, line?: number) => void,
+	onOpenNote?: (file: ContentFile, line?: number) => void,
 	opts?: { autoLoad?: boolean },
 	settingsAccess?: DashboardSettingsAccess,
 ): void {

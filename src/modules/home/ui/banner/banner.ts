@@ -1,3 +1,4 @@
+import { contentFiles } from '../../../../host/obsidian/storage/content-files';
 import { bindLocalizedElement } from '../../../../ui/primitives/localized-dom';
 import { localizedAttributes, localizedText } from '../../../../ui/primitives/localized-dom';
 import { App, Modal, setIcon } from 'obsidian';
@@ -135,7 +136,7 @@ export function resolveVaultImage(app: App, relativePath: string): string | null
 		return relativePath;
 	}
 
-	const file = app.vault.getFileByPath(relativePath);
+	const file = contentFiles(app).resolveLink(relativePath);
 	if (!file) return null;
 
 	const adapter = app.vault.adapter;
@@ -143,7 +144,7 @@ export function resolveVaultImage(app: App, relativePath: string): string | null
 		'getResourcePath' in adapter &&
 		typeof (adapter as { getResourcePath: (path: string) => string }).getResourcePath === 'function'
 	) {
-		return (adapter as { getResourcePath: (path: string) => string }).getResourcePath(relativePath);
+		return (adapter as { getResourcePath: (path: string) => string }).getResourcePath(file.path);
 	}
 
 	const parts = relativePath.split('/');

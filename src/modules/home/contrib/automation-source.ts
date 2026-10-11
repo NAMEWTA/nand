@@ -30,7 +30,7 @@ export function dashboardAutomationSource(options: {
 		open: async (source, ownerWindow) => {
 			if (source.kind === 'dashboard' && source.id.startsWith('pipeline:')) {
 				const file = await boards.resolvePipelineSource(source);
-				await app.workspace.openLinkText(file.path, '', false);
+				await contentFiles(app).open(file.path, ownerWindow);
 				return;
 			}
 			if (source.kind === 'widget') {

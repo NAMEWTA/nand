@@ -253,7 +253,7 @@ async function main(): Promise<void> {
 		const { app, created, mkdirs } = makeVaultApp(new Set());
 		const file = await createNoteWithProps(app, ' /Notes/Sub/ ', 'My Note', { status: '进行中' });
 		assert.equal(file.path, '.nand/content/Notes/Sub/My Note.md', 'leading/trailing slashes trimmed, .md appended');
-		assert.deepEqual(mkdirs, ['.nand', '.nand/content', '.nand/content/Notes', '.nand/content/Notes/Sub'], 'missing folders created in order');
+		assert.deepEqual(mkdirs, ['.nand', '.nand/content', '.nand/content/Notes', '.nand/content/Notes/Sub', '.nand/recovery', '.nand/recovery/content-creates'], 'missing folders created in order');
 		assert.equal(created.length, 1, 'one vault.create call');
 		assert.equal(created[0]!.content, yamlFrontmatter({ status: '进行中' }), 'content is the frontmatter block');
 	}
@@ -271,7 +271,7 @@ async function main(): Promise<void> {
 		const { app, created, mkdirs } = makeVaultApp(new Set());
 		const file = await createNoteWithProps(app, '', 'Root', {});
 		assert.equal(file.path, '.nand/content/Root.md', 'empty folder → vault root');
-		assert.deepEqual(mkdirs, ['.nand', '.nand/content'], 'empty preference uses the managed content root');
+		assert.deepEqual(mkdirs, ['.nand', '.nand/content', '.nand/recovery', '.nand/recovery/content-creates'], 'empty preference uses the managed content root');
 		assert.equal(created.length, 1, 'created once');
 	}
 

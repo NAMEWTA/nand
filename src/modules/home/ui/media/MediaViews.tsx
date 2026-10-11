@@ -1,4 +1,5 @@
-import { Notice, Platform, type App, type TFile } from 'obsidian';
+import { Notice, Platform, type App } from 'obsidian';
+import { type ContentFile } from '../../../../host/obsidian/storage/content-files';
 import { useLayoutEffect, useRef, useState } from 'preact/hooks';
 import { t } from '../../../../shared/i18n';
 import { Icon } from '../../../../ui/primitives/Icon';
@@ -177,9 +178,9 @@ export function MediaViews({
 	size: ThumbSize;
 	view: 'grid' | 'list';
 	open: (index: number) => void;
-	remove: (file: TFile) => void;
+	remove: (file: ContentFile) => void;
 	refresh: () => void;
-	openNote?: (file: TFile) => void;
+	openNote?: (file: ContentFile) => void;
 	editTags?: (result: MediaFileResult) => void;
 }) {
 	const grid = view === 'grid';

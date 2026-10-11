@@ -1,4 +1,5 @@
-import { Menu, Notice, Platform, type App, type TFile } from 'obsidian';
+import { Menu, Notice, Platform, type App } from 'obsidian';
+import { contentFiles, type ContentFile } from '../../../../host/obsidian/storage/content-files';
 import { useCallback, useLayoutEffect, useRef, useState } from 'preact/hooks';
 import type { CalendarTaskFilter } from '../../core/calendar/task-filter';
 import type { DashboardSettings } from '../../core/board/types/index';
@@ -30,7 +31,7 @@ export interface CalendarPanelProps {
 	settingsAccess?: DashboardSettingsAccess;
 	widget?: boolean;
 	autoLoad?: boolean;
-	onOpenNote?: (file: TFile, line?: number) => void;
+	onOpenNote?: (file: ContentFile, line?: number) => void;
 	openDay: (
 		iso: string,
 		tasks: VaultTask[],
@@ -95,6 +96,9 @@ export function CalendarPanel({
 			generation.current++;
 		};
 	}, [load]);
+	useLayoutEffect(() => contentFiles(app).subscribe(event => {
+		if (event.path.endsWith('.md') && started.current) void load();
+	}), [app, load]);
 	useLayoutEffect(() => {
 		calendarReloaders.set(root, async (reset) => {
 			if (!started.current) return;

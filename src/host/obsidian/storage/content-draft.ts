@@ -38,7 +38,12 @@ export class ContentDraft {
 	private async preserve(): Promise<void> {
 		const value = { path: this.path, base: this.base, value: this.value };
 		let base = this.persisted;
-		if (base === null) { base = await this.recovery.load(value); if (JSON.stringify(base) !== JSON.stringify(value)) throw new Error('nand-content.draft-changed'); }
+		if (base === null) {
+			base = await this.recovery.load(value);
+			if (JSON.stringify(base) !== JSON.stringify(value)) throw new Error('nand-content.draft-changed');
+			// This baseline also owns the backup if the first primary write fails.
+			this.persisted = base;
+		}
 		this.persisted = await this.recovery.commit({ base, value });
 	}
 	edit(value: string): Promise<void> { this.value = value; this.changed(); return this.enqueue(() => this.preserve()); }

@@ -4,12 +4,13 @@ import type { DqlLink, DqlValue, ResultRow } from '../../core/dql/types';
 import { formatValue, kindOf } from '../../core/dql/values';
 import type { DataviewContext } from './context';
 import { INLINE_TOKEN_RE, resolveDvFile } from './value-model';
+import { contentFiles, isManagedFile } from '../../../../host/obsidian/storage/content-files';
 export function rowOpen(context: DataviewContext, row: ResultRow) {
-	const file = row.page ? context.app.vault.getFileByPath(row.page.file.path) : null;
+	const file = row.page ? contentFiles(context.app).getFileByPath(row.page.file.path) : null;
 	return {
 		class: file ? 'is-clickable' : '',
 		onMouseOver: (event: MouseEvent) => {
-			if (file && context.hoverParent && !Platform.isMobile)
+			if (file && !isManagedFile(file) && context.hoverParent && !Platform.isMobile)
 				context.app.workspace.trigger('hover-link', {
 					event,
 					source: 'nand-dashboard',

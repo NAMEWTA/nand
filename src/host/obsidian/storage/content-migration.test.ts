@@ -1,6 +1,6 @@
 import { expect, test } from 'vitest';
 import { memoryVault } from '../../../../scripts/fixtures/memory-vault';
-import { prepareVaultContent } from './content-migration';
+import { contentMigrationCandidates, prepareVaultContent, resolveContentCandidate } from './content-migration';
 import { contentFiles } from './content-files';
 
 test('startup discovers owned records and registered boards while preserving ordinary neighbours', async () => {
@@ -20,4 +20,42 @@ test('startup discovers owned records and registered boards while preserving ord
 	expect(vault.contents.get('NAND/习惯/ordinary.md')).toBe('An ordinary neighbouring note');
 	expect(vault.contents.get('Ordinary.md')).toBe('[[NAND/习惯/Read/习惯]]');
 	await prepareVaultContent(vault.app);
+});
+
+test('legacy highlights and the configured task archive migrate but ordinary export-folder notes do not', async () => {
+	const high = '---\nsource: weread\nbookId: "book-1"\ntitle: Book\nhighlightCount: 1\n---\nExisting highlight';
+	const vault = memoryVault({ 'Weread/Highlights/Book.md': high, 'Archive/Done.md': '- [x] Done', 'NAND Exports/ordinary.md': '# My note', 'NAND/AI Workspace/Exports/ordinary.md': 'Other note', 'Example?.md': '---\nx: [\n---\n```yaml\nnand-type: habit\n```' });
+	await prepareVaultContent(vault.app);
+	expect(vault.contents.get('.nand/content/Weread/Highlights/Book.md')).toBe(high);
+	expect(vault.contents.get('.nand/content/Archive/Done.md')).toBe('- [x] Done');
+	expect(vault.contents.get('NAND Exports/ordinary.md')).toBe('# My note');
+	expect(vault.contents.get('NAND/AI Workspace/Exports/ordinary.md')).toBe('Other note');
+	expect(vault.contents.has('Example?.md')).toBe(true);
+});
+
+test('new owned sources arriving during migration or after a completed batch are discovered', async () => {
+	const owned = '---\nnand-type: habit\nnand-id: one\n---\n';
+	const vault = memoryVault({ 'one.md': owned }), copy = vault.adapter.copy;
+	let inject = true;
+	vault.adapter.copy = async (source, target) => { await copy(source, target); if (inject) { inject = false; await vault.adapter.write('two.md', owned.replace('one', 'two')); } };
+	await prepareVaultContent(vault.app);
+	expect(vault.contents.has('.nand/content/two.md')).toBe(true);
+	await vault.adapter.write('.nand/content/one.md', 'edited after migration');
+	await vault.adapter.write('three.md', owned.replace('one', 'three'));
+	await prepareVaultContent(vault.app);
+	expect(vault.contents.get('.nand/content/one.md')).toBe('edited after migration');
+	expect(vault.contents.has('.nand/content/three.md')).toBe(true);
+});
+
+test('ambiguous exports stay ordinary until an explicit ownership choice and retain original bytes when moved', async () => {
+	const vault = memoryVault({ 'NAND Exports/unknown.md': 'conversation', 'NAND Exports/personal.md': 'personal' });
+	await prepareVaultContent(vault.app);
+	expect(await contentMigrationCandidates(vault.app)).toEqual(['NAND Exports/unknown.md', 'NAND Exports/personal.md']);
+	await resolveContentCandidate(vault.app, 'NAND Exports/personal.md', false);
+	await resolveContentCandidate(vault.app, 'NAND Exports/unknown.md', true);
+	await prepareVaultContent(vault.app);
+	expect(await contentMigrationCandidates(vault.app)).toEqual([]);
+	expect(vault.contents.get('NAND Exports/personal.md')).toBe('personal');
+	expect(vault.contents.get('.nand/content/NAND Exports/unknown.md')).toBe('conversation');
+	expect(vault.contents.get('.nand/migrations/content/originals/NAND Exports/unknown.md')).toBe('conversation');
 });

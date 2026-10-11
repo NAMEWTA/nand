@@ -147,7 +147,7 @@ function prepareModal(modal: Modal, actions: CalendarModalCallbacks): DashboardR
 	});
 	const context = new DashboardRenderContext(modal.contentEl);
 	context.noteOpener = (file, subpath) => {
-		if (isManagedFile(file)) { void contentFiles(modal.app).open(file.path); return; }
+		if (isManagedFile(file)) { void contentFiles(modal.app).open(file.path + (subpath ?? '')); return; }
 		if (actions.onOpenNote) actions.onOpenNote(file);
 		else void modal.app.workspace.openLinkText(file.path + (subpath ?? ''), '');
 	};

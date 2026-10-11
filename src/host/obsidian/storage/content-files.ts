@@ -6,6 +6,8 @@ import { storageWriteQueue } from '../../../shared/storage/write-queue';
 import { privateVaultStorage } from './private-storage';
 import { patchFrontmatter, readMarkdownDocument, readYaml } from '../../../shared/storage/markdown-document';
 import { stringify } from 'yaml';
+import { createContentExclusive } from './content-io';
+import { ContentMoves } from './content-moves';
 
 /** A NAND index entry. It is never passed to Obsidian as a TFile. */
 export interface ManagedFile {
@@ -18,7 +20,12 @@ export interface ManagedFile {
 }
 export type ContentFile = ManagedFile | TFile;
 export function isManagedFile(file: ContentFile): file is ManagedFile { return 'kind' in file && file.kind === 'managed'; }
-export interface ContentMetadata { frontmatter?: Record<string, unknown>; tags?: Array<{ tag: string }> }
+export interface ContentMetadata {
+	frontmatter?: Record<string, unknown>; tags?: Array<{ tag: string }>; links?: Array<{ link: string }>;
+	headings?: Array<{ heading: string; level: number }>;
+	blocks?: Record<string, { position: { start: { line: number } } }>;
+	listItems?: Array<{ task?: string }>;
+}
 export interface ContentChange { kind: 'create' | 'modify' | 'delete' | 'rename'; path: string; oldPath?: string }
 
 const instances = new WeakMap<App, ContentFiles>();
@@ -38,7 +45,8 @@ export class ContentFiles {
 	private drafts = new Map<symbol, { path: string; read: () => string }>();
 	private opener?: (path: string, ownerWindow?: Window, fragment?: string) => Promise<void>;
 	private queue;
-	constructor(private readonly app: App) { this.queue = storageWriteQueue(app.vault.adapter); }
+	private moves: ContentMoves;
+	constructor(private readonly app: App) { this.queue = storageWriteQueue(app.vault.adapter); this.moves = new ContentMoves(app); }
 	bindOpen(open: (path: string, ownerWindow?: Window, fragment?: string) => Promise<void>): () => void { this.opener = open; return () => { this.opener = undefined; }; }
 	async open(path: string, ownerWindow?: Window): Promise<void> {
 		if (isContentPath(path) && this.directories.has(path)) {
@@ -48,22 +56,36 @@ export class ContentFiles {
 		const target = this.resolveLink(path);
 		if (!target) throw new Error(`Missing document: ${path}`);
 		if (isContentPath(target.path)) { if (!this.opener) throw new Error('nand-content.not-ready'); await this.opener(target.path, ownerWindow, path.includes('#') ? path.slice(path.indexOf('#')) : undefined); }
-		else if (target instanceof TFile) await this.app.workspace.getLeaf('tab').openFile(target);
+		else if (target instanceof TFile) await this.app.workspace.openLinkText(target.path + (path.includes('#') ? path.slice(path.indexOf('#')) : ''), '', true);
 	}
 	resolveLink(raw: string, source = ''): ContentFile | null {
+		// Callers opening an indexed path pass a literal filename, not a URL.
+		try { const exact = this.getFileByPath(raw); if (exact) return exact; } catch { /* Resolve link syntax below. */ }
 		let link = raw.split('|')[0]!.split('#')[0]!;
 		if (!link && raw.startsWith('#')) link = source;
-		try { link = decodeURIComponent(link); } catch { return null; }
+		try { const literal = this.getFileByPath(link); if (literal) return literal; } catch { /* Relative links may contain dot segments. */ }
+		try { link = decodeURIComponent(link); } catch { /* Literal percent signs are valid filenames. */ }
 		if (!link || /^[a-z][a-z\d+.-]*:|^[/\\]/i.test(link)) return null;
 		const candidates = [link];
-		if (source.includes('/')) candidates.unshift(source.slice(0, source.lastIndexOf('/') + 1) + link);
+		if (source.includes('/') && !isContentPath(link)) {
+			const origin = this.moves.origin(source);
+			const sources = [...new Set([origin, source])];
+			candidates.unshift(...sources.flatMap(value => {
+				const relative = value.slice(0, value.lastIndexOf('/') + 1) + link;
+				return isContentPath(value) ? [relative, relative.slice(CONTENT_ROOT.length + 1)] : [relative];
+			}));
+		}
 		for (const candidate of [...candidates]) {
 			const parts: string[] = [];
 			for (const part of candidate.split('/')) { if (part === '..') parts.pop(); else if (part !== '.') parts.push(part); }
 			const path = parts.join('/');
 			for (const value of [path, path + '.md']) {
 				const direct = this.getFileByPath(value); if (direct) return direct;
-				try { const migrated = this.getFileByPath(contentPath(value)); if (migrated) return migrated; } catch { /* An ordinary link may use names outside the managed namespace. */ }
+				try {
+					const managed = contentPath(value);
+					const destination = this.moves.target(managed, target => this.indexed.has(target));
+					if (destination) return this.indexed.get(destination)!;
+				} catch { /* An ordinary link may use names outside the managed namespace. */ }
 			}
 		}
 		const native = this.app.metadataCache?.getFirstLinkpathDest(link, source);
@@ -99,7 +121,10 @@ export class ContentFiles {
 		return () => { this.listeners.delete(listener); if (!this.listeners.size) for (const ref of this.refs.splice(0)) this.app.vault.offref(ref); };
 	}
 	async refresh(): Promise<void> {
-		return this.queue.run('nand-content:index', async () => {
+		return this.queue.run('nand-content:mutation', () => this.scan());
+	}
+	private async scan(): Promise<void> {
+			await this.moves.load();
 			const adapter = this.app.vault.adapter, storage = privateVaultStorage(this.app);
 			const next = new Map<string, ManagedFile>();
 			const directories = new Set<string>();
@@ -138,13 +163,30 @@ export class ContentFiles {
 			}
 			for (const path of previous.keys()) if (!next.has(path)) changes.push({ kind: 'delete', path });
 			for (const event of changes) this.emit(event);
-		});
 	}
 	getMarkdownFiles(): ContentFile[] { return [...this.app.vault.getMarkdownFiles(), ...[...this.indexed.values()].filter(file => file.extension === 'md')]; }
+	getFiles(): ContentFile[] { return [...this.app.vault.getFiles(), ...this.indexed.values()]; }
 	allManaged(): readonly ManagedFile[] { return [...this.indexed.values()]; }
+	allDirectories(): readonly string[] { return [...this.directories]; }
 	getMetadata(file: ContentFile): ContentMetadata | null {
 		if (!isManagedFile(file)) return this.app.metadataCache.getFileCache(file);
 		return this.metadata.get(file.path)?.value ?? null;
+	}
+	resolvedLinks(): Record<string, Record<string, number>> {
+		const graph: Record<string, Record<string, number>> = {};
+		for (const [source, targets] of Object.entries(this.app.metadataCache.resolvedLinks)) {
+			const next = graph[source] = {} as Record<string, number>;
+			for (const [path, count] of Object.entries(targets)) next[this.resolveLink(path, source)?.path ?? path] = count;
+		}
+		for (const file of this.indexed.values()) {
+			const targets: Record<string, number> = {};
+			for (const { link } of this.getMetadata(file)?.links ?? []) {
+				const target = this.resolveLink(link, file.path);
+				if (target) targets[target.path] = (targets[target.path] ?? 0) + 1;
+			}
+			graph[file.path] = targets;
+		}
+		return graph;
 	}
 	/** Only consumers needing properties pay for parsing; normal polling performs no body reads. */
 	async prepareMetadata(): Promise<void> {
@@ -160,6 +202,19 @@ export class ContentFiles {
 				value.frontmatter = (readYaml(document.yaml).toJSON() ?? {}) as Record<string, unknown>;
 			} catch { /* Invalid properties stay unindexed; the document remains readable and editable. */ }
 			value.tags = [...body.matchAll(/(?:^|\s)#([^\s#.,;!?()[\]{}]+)/g)].map(match => ({ tag: '#' + match[1]! }));
+			value.links = [...body.matchAll(/\[\[([^\]]+)\]\]|\]\(([^\s)]+)(?:\s+"[^"]*")?\)/g)].map(match => ({ link: match[1] ?? match[2]! }));
+			value.headings = []; value.blocks = {}; value.listItems = [];
+			let fenced = false;
+			for (const [line, text] of raw.split('\n').entries()) {
+				if (/^\s*(`{3,}|~{3,})/.test(text)) { fenced = !fenced; continue; }
+				if (fenced) continue;
+				const heading = /^(#{1,6})\s+(.+?)\s*#*\s*$/.exec(text);
+				if (heading) value.headings.push({ heading: heading[2]!, level: heading[1]!.length });
+				const block = /\s\^([A-Za-z\d-]+)\s*$/.exec(text);
+				if (block) value.blocks[block[1]!] = { position: { start: { line } } };
+				const task = /^\s*[-*+]\s+\[(.)\]/.exec(text);
+				if (task) value.listItems.push({ task: task[1] });
+			}
 			this.metadata.set(file.path, { stamp, value });
 		}
 		for (const path of this.metadata.keys()) if (!this.indexed.has(path)) this.metadata.delete(path);
@@ -181,12 +236,13 @@ export class ContentFiles {
 			if (await storage.exists(target)) throw new Error(`Exists: ${target}`);
 			this.checkEditor(oldPath, await this.read(oldPath));
 			await ensureDirectory(storage, target.slice(0, target.lastIndexOf('/')));
+			await this.moves.prepare(oldPath, target);
 			await this.app.vault.adapter.rename(oldPath, target);
 			// Announce the pair before the next scan can appear as an unrelated deletion.
 			this.indexed.delete(oldPath);
 			file.path = target;
 			this.indexed.set(target, file);
-			await this.refresh();
+			await this.scan();
 			this.emit({ kind: 'rename', path: target, oldPath });
 		});
 	}
@@ -199,7 +255,7 @@ export class ContentFiles {
 			await ensureDirectory(storage, target.slice(0, target.lastIndexOf('/')));
 			if (await storage.exists(target)) throw new Error('nand-content.trash-exists');
 			await this.app.vault.adapter.rename(file.path, target);
-			await this.refresh();
+			await this.scan();
 		});
 	}
 	getAbstractFileByPath(path: string): ContentFile | { path: string } | null {
@@ -212,7 +268,7 @@ export class ContentFiles {
 			...[...this.indexed.values()].filter(file => file.path.startsWith(path + '/')).map(file => ({ path: file.path, folder: false, size: file.stat.size, modified: file.stat.mtime }))];
 	}
 	async mkdir(path: string): Promise<void> {
-		await this.queue.run('nand-content:mutation', async () => { await ensureDirectory(privateVaultStorage(this.app), contentPath(path)); await this.refresh(); });
+		await this.queue.run('nand-content:mutation', async () => { await ensureDirectory(privateVaultStorage(this.app), contentPath(path)); await this.scan(); });
 	}
 	async createFolder(path: string): Promise<void> {
 		const target = contentPath(path);
@@ -221,7 +277,7 @@ export class ContentFiles {
 			if (await storage.exists(target)) throw new Error(`Exists: ${target}`);
 			await ensureDirectory(storage, target.slice(0, target.lastIndexOf('/')));
 			await this.app.vault.adapter.mkdir(target);
-			await this.refresh();
+			await this.scan();
 		});
 	}
 	async createBinary(path: string, data: ArrayBuffer): Promise<ManagedFile> {
@@ -230,10 +286,8 @@ export class ContentFiles {
 			const storage = privateVaultStorage(this.app);
 			if (await storage.exists(target)) throw new Error(`Exists: ${target}`);
 			await ensureDirectory(storage, target.slice(0, target.lastIndexOf('/')));
-			// Create the empty file with private permissions before writing attachment bytes.
-			await storage.write(target, '');
-			await this.app.vault.adapter.writeBinary(target, data);
-			await this.refresh();
+			await createContentExclusive(this.app, target, data);
+			await this.scan();
 		});
 		return this.indexed.get(target)!;
 	}
@@ -244,7 +298,7 @@ export class ContentFiles {
 	async trashFolder(path: string): Promise<void> {
 		await this.queue.run('nand-content:mutation', async () => {
 			if (!isContentPath(path) || path === CONTENT_ROOT) throw new Error('nand-content.invalid-path');
-			await this.refresh();
+			await this.scan();
 			if (!this.directories.has(path)) throw new Error('nand-content.missing');
 			await this.checkFolderEditors(path);
 			const target = `.nand/recovery/trash/${crypto.randomUUID()}/${path.slice(CONTENT_ROOT.length + 1)}`;
@@ -252,16 +306,28 @@ export class ContentFiles {
 			await ensureDirectory(storage, target.slice(0, target.lastIndexOf('/')));
 			if (await storage.exists(target)) throw new Error('nand-content.trash-exists');
 			await this.app.vault.adapter.rename(validateNandPath(path), validateNandPath(target));
-			await this.refresh();
+			await this.scan();
 		});
 	}
 	async resourceUrl(path: string): Promise<string> {
-		if (!isContentPath(path) || !await privateVaultStorage(this.app).exists(validateNandPath(path))) throw new Error('nand-content.missing');
+		if (!isContentPath(path)) {
+			const native = this.app.vault.getFileByPath(path);
+			if (!native) throw new Error('nand-content.missing');
+			return this.app.vault.getResourcePath(native);
+		}
+		if (!await privateVaultStorage(this.app).exists(validateNandPath(path))) throw new Error('nand-content.missing');
 		return this.app.vault.adapter.getResourcePath(path);
 	}
-	async create(path: string, text: string): Promise<ManagedFile> {
+	async create(path: string, text: string, admit: () => void = () => {}): Promise<ManagedFile> {
 		const target = contentPath(path);
-		await this.process(target, current => { if (current !== null) throw new Error(`Exists: ${target}`); return text; });
+		await this.queue.run('nand-content:mutation', async () => {
+			admit();
+			const storage = privateVaultStorage(this.app);
+			if (await storage.exists(target)) throw new Error(`Exists: ${target}`);
+			await ensureDirectory(storage, target.slice(0, target.lastIndexOf('/')));
+			await createContentExclusive(this.app, target, text, admit);
+			await this.scan();
+		});
 		return this.indexed.get(target)!;
 	}
 	getFileByPath(path: string): ContentFile | null {
@@ -289,8 +355,8 @@ export class ContentFiles {
 			if (isContentPath(path)) {
 				validateNandPath(path);
 				if (await storage.exists(path)) result = await adapter.process(path, apply);
-				else { result = update(null); await ensureDirectory(storage, path.slice(0, path.lastIndexOf('/'))); await storage.write(path, result); }
-				await this.refresh();
+				else { result = update(null); await ensureDirectory(storage, path.slice(0, path.lastIndexOf('/'))); await createContentExclusive(this.app, path, result); }
+				await this.scan();
 			} else {
 				const file = this.app.vault.getFileByPath(path);
 				if (file) result = await this.app.vault.process(file, apply);

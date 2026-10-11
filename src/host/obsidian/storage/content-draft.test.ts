@@ -47,3 +47,18 @@ test('accepting the exact external text resolves a conflict without rewriting it
 	await editor.edit('theirs'); await editor.save();
 	expect(editor.dirty).toBe(false); expect(vault.contents.get(path)).toBe('theirs'); editor.dispose();
 });
+
+test('the next edit can recover after the first draft primary write fails', async () => {
+	const path = '.nand/content/note.md', recoveryPath = '.nand/recovery/content/test.json';
+	const vault = memoryVault({ [path]: 'base' }), write = vault.adapter.write;
+	let fail = true;
+	vault.adapter.write = async (file, text) => {
+		if (file === recoveryPath && fail) { fail = false; throw new Error('disk temporarily unavailable'); }
+		await write(file, text);
+	};
+	const editor = new ContentDraft(contentFiles(vault.app), path, { storage: vault.adapter, path: recoveryPath }); await editor.load();
+	await expect(editor.edit('first')).rejects.toThrow('temporarily');
+	await editor.edit('second'); await editor.save();
+	expect(vault.contents.get(path)).toBe('second');
+	editor.dispose();
+});

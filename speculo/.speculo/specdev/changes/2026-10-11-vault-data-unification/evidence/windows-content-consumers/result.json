@@ -6,6 +6,30 @@
       "passed": true
     },
     {
+      "name": "library-new-note-uses-real-dialog-and-managed-editor",
+      "passed": true
+    },
+    {
+      "name": "managed-library-filter-and-view:list",
+      "passed": true
+    },
+    {
+      "name": "managed-library-filter-and-view:grid",
+      "passed": true
+    },
+    {
+      "name": "managed-library-filter-and-view:gallery",
+      "passed": true
+    },
+    {
+      "name": "managed-library-filter-and-view:table",
+      "passed": true
+    },
+    {
+      "name": "managed-library-filter-and-view:kanban",
+      "passed": true
+    },
+    {
       "name": "new-board-is-hidden-and-indexed",
       "passed": true
     },
@@ -31,6 +55,10 @@
     },
     {
       "name": "board-registry-survives-restart",
+      "passed": true
+    },
+    {
+      "name": "managed-library-remains-visible-after-restart",
       "passed": true
     },
     {

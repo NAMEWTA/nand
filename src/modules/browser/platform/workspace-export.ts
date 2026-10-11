@@ -9,5 +9,5 @@ export async function saveWorkspaceExport(app: App, root: string, text: string, 
 	if (!normalized || !['md', 'maiw.jsonl'].includes(extension)) throw new BrowserError('browser_workspace_folder');
 	admit(); const folder = normalized + '/Exports';
 	const path = folder + '/' + new Date().toISOString().replace(/[:.]/g, '-') + '-' + crypto.randomUUID() + '.' + extension;
-	await contentFiles(app).create(path, text); return path;
+	await contentFiles(app).create(path, text, admit); return path;
 }

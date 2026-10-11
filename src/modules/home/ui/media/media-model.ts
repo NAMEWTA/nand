@@ -1,3 +1,5 @@
+import { contentFiles } from '../../../../host/obsidian/storage/content-files';
+import { CONTENT_ROOT } from '../../../../shared/storage/content-paths';
 import { getVaultPreference } from '../../../../host/obsidian/storage/preferences';
 import { App } from 'obsidian';
 import type { MediaTagService } from '../../platform/media/media-tags';
@@ -97,10 +99,10 @@ export function queryMediaFiles(
 		return includes.some((inc) => p === inc || p.startsWith(inc + '/'));
 	};
 	const results: MediaFileResult[] = [];
-	for (const file of app.vault.getFiles()) {
-		if (file.path.startsWith('.')) continue;
-		if (!inScope(file.path)) continue;
-		if (isUnderExcludedFolder(file.path, excluded)) continue;
+	for (const file of contentFiles(app).getFiles()) {
+
+		if (!inScope(file.path) && !inScope(file.path.replace(CONTENT_ROOT + '/', ''))) continue;
+		if ((isUnderExcludedFolder(file.path, excluded) || isUnderExcludedFolder(file.path.replace(CONTENT_ROOT + '/', ''), excluded))) continue;
 		if (!exts.has(file.extension)) continue;
 		results.push({
 			file,

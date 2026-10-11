@@ -1,4 +1,5 @@
-import type { App, TFile } from 'obsidian';
+import type { App } from 'obsidian';
+import { type ContentFile } from '../../../../host/obsidian/storage/content-files';
 import { useState } from 'preact/hooks';
 import { t } from '../../../../shared/i18n';
 import { Icon } from '../../../../ui/primitives/Icon';
@@ -16,7 +17,7 @@ export function MediaLightboxPanel({
 	close,
 }: {
 	app: App;
-	files: TFile[];
+	files: ContentFile[];
 	index: number;
 	kind: 'image' | 'video';
 	tagHooks?: MediaTagHooks;

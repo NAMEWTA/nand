@@ -205,6 +205,7 @@ export class DashboardSurface extends NativeSurface implements HoverParent {
 	dndCleanupFns: Array<() => void> = [];
 	suppressNextRender = false;
 	vaultEventRefs: Array<{ evt: Events; ref: unknown }> = [];
+	vaultContentUnsubscribe?: () => void;
 	bannerStatsTimer: number | null = null;
 	bannerStatsEl: HTMLElement | null = null;
 	/** Vault changes accumulated across one debounce window: every changed

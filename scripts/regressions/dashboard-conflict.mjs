@@ -37,7 +37,8 @@ const app = {
 				(handlers.get(ref.name) ?? []).filter((x) => x !== ref.cb),
 			),
 		adapter: {
-			exists: async (path) => path !== '.nand/content',
+			exists: async (path) => backup.has(path) || path === file.path,
+			read: async (path) => { if (backup.has(path)) return backup.get(path); if (path === file.path) return disk; throw Error('missing'); },
 			mkdir: async () => {},
 			list: async () => ({ files: [...backup.keys()], folders: [] }),
 			remove: async (p) => backup.delete(p),

@@ -1,4 +1,5 @@
-import type { App, TFile } from 'obsidian';
+import type { App } from 'obsidian';
+import type { ContentFile } from '../../../../host/obsidian/storage/content-files';
 import { Menu } from 'obsidian';
 import { useLayoutEffect, useRef, useState } from 'preact/hooks';
 import {
@@ -19,7 +20,7 @@ import { readCalendarTaskFilter, writeCalendarTaskFilter } from './calendar-pref
 export interface CalendarModalCallbacks {
 	settingsAccess?: DashboardSettingsAccess;
 	onToggle: (task: VaultTask, checked: boolean) => Promise<void> | void;
-	onOpenNote?: (file: TFile, line?: number) => void;
+	onOpenNote?: (file: ContentFile, line?: number) => void;
 }
 interface CommonProps {
 	app: App;

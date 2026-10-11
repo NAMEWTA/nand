@@ -17,6 +17,8 @@ import { destroyAlbumWidgets, refreshAlbumWidgets } from '../widgets/album-widge
 import { refreshHabitWidget } from '../habit/habit-widget';
 import { renderSidebarLunarWidget } from '../widgets/lunar-widget';
 import type { DashboardSurface } from './dashboard-surface';
+import { contentFiles } from '../../../../host/obsidian/storage/content-files';
+import { CONTENT_ROOT, isContentPath } from '../../../../shared/storage/content-paths';
 
 export function registerVaultListeners(this: DashboardSurface): void {
 	this.unregisterVaultListeners();
@@ -54,9 +56,16 @@ export function registerVaultListeners(this: DashboardSurface): void {
 		{ evt: events, ref: deleteRef },
 		{ evt: events, ref: renameRef },
 	];
+	this.vaultContentUnsubscribe = contentFiles(this.app).subscribe(event => {
+		if (!isContentPath(event.path)) return;
+		this.vaultChangePaths.add(event.path);
+		if (event.oldPath) this.vaultChangePaths.add(event.oldPath);
+		void contentFiles(this.app).prepareMetadata().then(() => { if (this.isOpen) this.scheduleVaultRefresh(); }).catch(error => console.error('[NAND content metadata]', error));
+	});
 }
 
 export function unregisterVaultListeners(this: DashboardSurface): void {
+	this.vaultContentUnsubscribe?.(); this.vaultContentUnsubscribe = undefined;
 	for (const { evt, ref } of this.vaultEventRefs) {
 		evt.offref(ref as Parameters<typeof evt.offref>[0]);
 	}
@@ -93,7 +102,7 @@ export function scheduleVaultRefresh(this: DashboardSurface): void {
  *  sections an image/audio/video one, and scanning sections a change
  *  inside their scan scope. */
 export function flushVaultRefresh(this: DashboardSurface, paths: ReadonlySet<string>, broad: boolean): void {
-	const lowerPaths = [...paths].map((p) => p.toLowerCase());
+	const lowerPaths = [...paths].flatMap(p => [p.toLowerCase(), p.replace(CONTENT_ROOT + '/', '').toLowerCase()]);
 	const changedMd = broad || lowerPaths.some((p) => p.endsWith('.md'));
 	const changedMedia =
 		broad ||

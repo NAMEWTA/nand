@@ -35,7 +35,7 @@
     "history": []
   },
   "created_at": "2026-10-11T05:11:40.581Z",
-  "updated_at": "2026-10-11T08:42:13.852Z",
+  "updated_at": "2026-10-11T09:35:28.591Z",
   "completed_at": null,
   "archived": false,
   "archive_path": null,
@@ -138,14 +138,14 @@
       "parent_branch": "main",
       "branch": "main",
       "workspace_ref": "current",
-      "source_checkpoint": null,
+      "source_checkpoint": "51249a92fd628fdbffd2cec30118ef28b93d3aab",
       "status": "active",
-      "updated_at": "2026-10-11T08:42:13.852Z",
+      "updated_at": "2026-10-11T09:35:28.591Z",
       "integration": {
         "status": "pending",
         "parent_ref": "main",
         "parent_before_sha": "ff262a6728f411bb7f96b6356bb0c124c94c31a0",
-        "source_sha": null,
+        "source_sha": "51249a92fd628fdbffd2cec30118ef28b93d3aab",
         "candidate_sha": null,
         "candidate_tree_sha": null,
         "candidate_branch": null,
@@ -167,7 +167,7 @@
           "evidence": "<Path>{roots.state}/specdev/changes/2026-10-11-vault-data-unification/evidence/T-03.md</Path>"
         },
         "evidence": "<Path>{roots.state}/specdev/changes/2026-10-11-vault-data-unification/evidence/T-03.md</Path>",
-        "attempts": 1,
+        "attempts": 2,
         "promotion_status": "pending"
       }
     }

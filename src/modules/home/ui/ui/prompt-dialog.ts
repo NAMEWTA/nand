@@ -17,7 +17,8 @@ interface PromptOptions {
  * Used instead of `prompt()`, which is disallowed by the `no-alert` lint rule.
  */
 export function showPromptDialog(app: App | undefined, options: PromptOptions): Promise<string | null> {
-	const doc = activeDocument;
+	const owner = options.owner as { ownerDocument?: Document; contentEl?: HTMLElement } | undefined;
+	const doc = owner?.ownerDocument ?? owner?.contentEl?.ownerDocument ?? app?.workspace?.containerEl?.ownerDocument ?? activeDocument;
 	return new Promise((resolve) => {
 		let release = () => {};
 		let resolved = false;

@@ -1,5 +1,6 @@
 import { setVaultPreference } from '../../../../host/obsidian/storage/preferences';
-import { Notice, type App, type TFile } from 'obsidian';
+import { Notice, type App } from 'obsidian';
+import { type ContentFile } from '../../../../host/obsidian/storage/content-files';
 import { Fragment } from 'preact';
 import { useMemo, useState } from 'preact/hooks';
 import type { DashboardColumn } from '../../core/board/types';
@@ -35,7 +36,7 @@ export function MediaPanel({
 }: {
 	app: App;
 	column: DashboardColumn;
-	openNote?: (file: TFile) => void;
+	openNote?: (file: ContentFile) => void;
 	tagService?: MediaTagService;
 }) {
 	const [query, setQuery] = useState(''),
@@ -82,15 +83,15 @@ export function MediaPanel({
 	const collapseAll = groups.some((group) => !collapsed.has(group.key));
 	const tagHooks = tagService
 		? {
-				getTags: (file: TFile) => tagService.getTags(file.path),
+				getTags: (file: ContentFile) => tagService.getTags(file.path),
 				getAllTags: () => tagService.getAllTags(),
-				onTagsChange: (file: TFile, tags: string[]) => {
+				onTagsChange: (file: ContentFile, tags: string[]) => {
 					tagService.setTags(file.path, tags);
 					refresh();
 				},
 			}
 		: undefined;
-	const remove = async (file: TFile) => {
+	const remove = async (file: ContentFile) => {
 		if (
 			!(await showConfirmDialog(app, {
 				title: t('common.confirmDelete'),

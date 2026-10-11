@@ -9,6 +9,7 @@ import { t } from '../../../../shared/i18n/index';
 import { applyModalTheme } from '../appearance/modal-theme';
 import { mountDashboardPanel } from '../renderer/render-context';
 import { QuickActionsPanel } from './QuickActionsPanel';
+import { getSearchableFiles } from '../renderer/render-context';
 
 // Curated set of common Lucide icons offered in the quick-action icon picker.
 const COMMON_ICONS: readonly string[] = [
@@ -336,9 +337,7 @@ export class AddActionModal extends Modal {
 			return;
 		}
 
-		const files = this.app.vault
-			.getFiles()
-			.filter((f) => !f.path.startsWith('.'))
+		const files = getSearchableFiles(this.app)
 			.filter(
 				(f) =>
 					f.extension === 'md' ||
@@ -456,9 +455,7 @@ export class DocSearchModal extends Modal {
 			const q = query.toLowerCase().trim();
 			if (!q) return;
 
-			const files = this.app.vault
-				.getFiles()
-				.filter((f) => !f.path.startsWith('.'))
+			const files = getSearchableFiles(this.app)
 				.filter(
 					(f) =>
 						f.extension === 'md' ||

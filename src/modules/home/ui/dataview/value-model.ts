@@ -1,4 +1,5 @@
-import { App, TFile } from 'obsidian';
+import { App } from 'obsidian';
+import { contentFiles, type ContentFile } from '../../../../host/obsidian/storage/content-files';
 import type { TrackerDataPoint } from '../../core/board/types/index';
 import { getLanguage } from '../../../../shared/i18n/index';
 import { HEATMAP_CELL_GAP, HEATMAP_MAX_CELL, HEATMAP_MIN_CELL } from './table-model';
@@ -39,15 +40,4 @@ export function ymdKey(ts: number): string {
 export const INLINE_TOKEN_RE =
 	/(\[\[[^\]]+?\]\]|\[[^\]]+\]\([^)]+\)|\*\*[^*]+\*\*|__[^_]+__|\*[^*\s][^*]*?\*|`[^`]+`|==[^=]+==|~~[^~]+~~)/g;
 
-export function resolveDvFile(appRef: App, path: string): TFile | null {
-	const cleaned = path.replace(/\.md$/i, '');
-	// Direct path lookup first.
-	const direct = appRef.vault.getAbstractFileByPath(path) ?? appRef.vault.getAbstractFileByPath(cleaned + '.md');
-	if (direct instanceof TFile) return direct;
-	// Fall back to a basename match across markdown files (O(n) but rare).
-	const files = appRef.vault.getMarkdownFiles();
-	for (const f of files) {
-		if (f.basename.toLowerCase() === cleaned.split('/').pop()!.toLowerCase()) return f;
-	}
-	return null;
-}
+export function resolveDvFile(appRef: App, path: string): ContentFile | null { return contentFiles(appRef).resolveLink(path); }

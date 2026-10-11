@@ -5,7 +5,7 @@ export interface RecentDocScope {
 }
 /** Explicit managed collections, not every note under a directory named NAND. */
 const managedRoots = ['NAND/习惯', 'NAND/番茄钟', 'NAND/记账', 'NAND/阅读', 'NAND/自动化'] as const;
-function clean(value: string): string { return value.replace(/\\/g, '/').replace(/^\/+|\/+$/g, ''); }
+function clean(value: string): string { return value.replace(/\\/g, '/').replace(/^\.nand\/content\//, '').replace(/^\/+|\/+$/g, ''); }
 function markdown(value: string): string { const p = clean(value); return /\.md$/i.test(p) ? p : p + '.md'; }
 export function isRecentUserDocument(filePath: string, scope: RecentDocScope): boolean {
   const p = clean(filePath);

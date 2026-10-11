@@ -1,3 +1,4 @@
+import { memoryVault } from './fixtures/memory-vault';
 import { buildPages } from '../src/modules/home/platform/dql/page-builder';
 import { collectVaultTasks } from '../src/modules/home/platform/calendar/alltasks-scan';
 import { CountdownPanel } from '../src/modules/home/ui/widgets/CountdownPanel';
@@ -130,8 +131,7 @@ assert.equal(clockB.timers.size, 0);
 const hosts = [document.createElement('div'), document.createElement('div')];
 const opened: number[] = [];
 for (const [i, host] of hosts.entries()) {
-	const file = Object.assign(new TFile(), { path: 'same.md', basename: 'same' });
-	const app = { vault: { getAbstractFileByPath: () => file } } as unknown as App;
+	const app = memoryVault({ 'same.md': 'Same note' }).app;
 	bindDataviewContext(host as unknown as HTMLElement, {
 		app,
 		hoverParent: null,
@@ -313,6 +313,7 @@ assertPhoto(hosted((host) => renderSidebarMusicWidget(host, photo, musicApp)), t
 
 async function verifyVaultCaches(): Promise<void> {
 	const makeVault = (title: string) => {
+		const complete = memoryVault({ 'same.md': '- [ ] ' + title });
 		const file = Object.assign(new TFile(), {
 			path: 'same.md',
 			basename: 'same',
@@ -321,8 +322,8 @@ async function verifyVaultCaches(): Promise<void> {
 		});
 		const cache = { frontmatter: { title }, listItems: [{ task: ' ' }] };
 		return {
-			vault: { getMarkdownFiles: () => [file], cachedRead: async () => '- [ ] ' + title },
-			metadataCache: { getFileCache: () => cache, resolvedLinks: { 'source.md': { 'same.md': 1 } } },
+			...complete.app, vault: { ...complete.app.vault, getMarkdownFiles: () => [file], cachedRead: async () => '- [ ] ' + title },
+			metadataCache: { ...complete.app.metadataCache, getFileCache: () => cache, resolvedLinks: { 'source.md': { 'same.md': 1 } } },
 		} as unknown as App;
 	};
 	const first = makeVault('First vault'),

@@ -1,8 +1,9 @@
-import { App, TFile } from 'obsidian';
+import { App } from 'obsidian';
+import { contentFiles, type ContentFile } from '../../../../host/obsidian/storage/content-files';
 
 /** Shape shared by the grid/list/table media views. */
 export interface MediaFileResult {
-	file: TFile;
+	file: ContentFile;
 	basename: string;
 	path: string;
 	mtime: number;
@@ -18,13 +19,13 @@ export type MediaKind = 'image' | 'video';
 export type ThumbSize = 'small' | 'medium' | 'large';
 
 /** Notes that link to or embed the given media file (backlinks via resolvedLinks). */
-export function getMediaBacklinks(app: App, file: TFile): TFile[] {
+export function getMediaBacklinks(app: App, file: ContentFile): ContentFile[] {
 	const target = file.path;
-	const out: TFile[] = [];
-	const resolved = app.metadataCache.resolvedLinks;
+	const out: ContentFile[] = [];
+	const resolved = contentFiles(app).resolvedLinks();
 	for (const [srcPath, targets] of Object.entries(resolved)) {
 		if (targets[target]) {
-			const src = app.vault.getFileByPath(srcPath);
+			const src = contentFiles(app).getFileByPath(srcPath);
 			if (src) out.push(src);
 		}
 	}

@@ -1,4 +1,5 @@
-import type { App, TFile } from 'obsidian';
+import type { App } from 'obsidian';
+import type { ContentFile } from '../../../../host/obsidian/storage/content-files';
 import type { HomeWidgetContext } from '../../api';
 import type { DashboardSettings } from '../../core/board/types/model';
 import type { HolidayInfo } from '../../platform/calendar/holiday-service';
@@ -14,7 +15,7 @@ export interface BuiltinWidgetEnvironment {
 	reading?: ReadingService;
 	holidayData?: Record<string, HolidayInfo>;
 	calendarAutoLoad?: boolean;
-	openNote?: (file: TFile, line?: number) => void;
+	openNote?: (file: ContentFile, line?: number) => void;
 	renderQuickActions?: (host: HTMLElement) => void;
 	renderSkills?: (host: HTMLElement, context: HomeWidgetContext) => void;
 }

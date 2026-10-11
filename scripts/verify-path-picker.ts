@@ -1,3 +1,4 @@
+import { memoryVault } from './fixtures/memory-vault';
 import { strict as assert } from 'node:assert';
 import { TFile, TFolder, type App } from 'obsidian';
 import { El, findByClass } from './mini-dom';
@@ -27,8 +28,9 @@ const file = (path: string): MockFile => {
 const folder = (path: string): MockFolder => Object.assign(new TFolder(), { path, name: path.split('/').pop()! });
 
 function makeApp(files: string[], folders: string[]): App {
-	const app = {
-		vault: {
+	const complete = memoryVault();
+	const app = { ...complete.app,
+		vault: { ...complete.app.vault,
 			getMarkdownFiles: () => files.map(file),
 			getAllLoadedFiles: () => [...files.map(file), ...folders.map(folder)],
 		},

@@ -1,4 +1,5 @@
-import { App, TFile } from 'obsidian';
+import type { App } from 'obsidian';
+import type { ContentFile } from '../../../../host/obsidian/storage/content-files';
 import { taskDayKind, toIsoDate, type VaultTask } from '../../platform/calendar/alltasks-scan';
 import { getLanguage, t } from '../../../../shared/i18n/index';
 
@@ -9,7 +10,7 @@ export interface MonthGridOptions {
 	app: App;
 	onToggle?: (task: VaultTask, nextChecked: boolean) => void;
 	/** Open a task's source note, optionally scrolling to the task's line. */
-	onOpenNote?: (file: TFile, line?: number) => void;
+	onOpenNote?: (file: ContentFile, line?: number) => void;
 	/** Compact mode: clicking a day cell opens its agenda. */
 	onDayClick?: (iso: string) => void;
 	/** Dot mode: show a single dot when the day has tasks (no task text). Implies

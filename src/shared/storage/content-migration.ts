@@ -16,6 +16,8 @@ interface Manifest {
 	version: 1;
 	stage: 'prepared' | 'copied' | 'complete';
 	files: Array<{ source: string; hash: string }>;
+	/** Earlier completed batches may have since been edited at their new location. */
+	completed?: string[];
 }
 export const CONTENT_MIGRATION_FILE = nandPath('migrations/content/manifest.json');
 function validManifest(value: unknown): value is Manifest | null {
@@ -24,6 +26,7 @@ function validManifest(value: unknown): value is Manifest | null {
 	const record = value as Record<string, unknown>;
 	const destinations = new Set<string>();
 	return record.version === 1 && ['prepared', 'copied', 'complete'].includes(String(record.stage)) && Array.isArray(record.files)
+		&& (record.completed === undefined || Array.isArray(record.completed) && record.completed.every(source => typeof source === 'string' && (record.files as Array<{ source: string }>).some(file => file.source === source)))
 		&& record.files.every((file: unknown) => {
 			if (!file || typeof file !== 'object') return false;
 			const item = file as Record<string, unknown>;
@@ -62,12 +65,26 @@ export function migrateContent(storage: ContentMigrationPort, sources: readonly 
 			if (JSON.stringify(base) !== JSON.stringify(candidate)) throw new Error('nand-content.migration-replaced');
 			manifest = (await store.commit({ base, value: candidate }))!;
 		}
+		const known = new Set(manifest.files.map(file => file.source));
+		const additional = [...new Set(sources)].filter(source => !isContentPath(source) && !known.has(source));
+		if (additional.length) {
+			const files = [...manifest.files];
+			const names = new Set(files.map(file => contentPath(file.source).normalize('NFC').toLowerCase()));
+			for (const source of additional) {
+				const name = contentPath(source).normalize('NFC').toLowerCase();
+				if (names.has(name)) throw new Error('nand-content.migration-name-conflict');
+				names.add(name); files.push({ source, hash: await digest(storage, source) });
+			}
+			manifest = (await store.commit({ base: manifest, value: { ...manifest, files, stage: 'prepared', completed: manifest.stage === 'complete' ? manifest.files.map(file => file.source) : manifest.completed ?? [] } }))!;
+		}
+		const completed = new Set(manifest.stage === 'complete' ? manifest.files.map(file => file.source) : manifest.completed);
+		const settled = (source: string) => completed.has(source);
 		for (const { source, hash } of manifest.files) {
 			if (!source || isContentPath(source)) throw new Error('nand-content.invalid-migration');
 			const target = contentPath(source);
-			if (manifest.stage === 'complete') continue;
+			if (settled(source)) continue;
 			if (!await storage.exists(target)) {
-				const origin = manifest.stage === 'copied' && !await storage.exists(source) ? nandPath('migrations/content/originals', source) : source;
+				const origin = !await storage.exists(source) ? nandPath('migrations/content/originals', source) : source;
 				if (await digest(storage, origin) !== hash) throw new Error(`nand-content.migration-source-changed: ${origin}`);
 				await ensureDirectory(storage, target.slice(0, target.lastIndexOf('/')));
 				await storage.copy(origin, target);
@@ -77,10 +94,10 @@ export function migrateContent(storage: ContentMigrationPort, sources: readonly 
 		if (manifest.stage === 'prepared') manifest = (await store.commit({ base: manifest, value: { ...manifest, stage: 'copied' } }))!;
 		for (const { source, hash } of manifest.files) {
 			const target = contentPath(source);
-			if (manifest.stage !== 'complete' && await digest(storage, target) !== hash) throw new Error(`nand-content.migration-target-changed: ${target}`);
+			if (!settled(source) && await digest(storage, target) !== hash) throw new Error(`nand-content.migration-target-changed: ${target}`);
 			const retained = nandPath('migrations/content/originals', source);
 			if (await storage.exists(source)) {
-				if (manifest.stage === 'complete' || await storage.exists(retained) || await digest(storage, source) !== hash) throw new Error(`nand-content.migration-source-changed: ${source}`);
+				if (settled(source) || await storage.exists(retained) || await digest(storage, source) !== hash) throw new Error(`nand-content.migration-source-changed: ${source}`);
 				await ensureDirectory(storage, retained.slice(0, retained.lastIndexOf('/')));
 				await storage.move(source, retained);
 			}

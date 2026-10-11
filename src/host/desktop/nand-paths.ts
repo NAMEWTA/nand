@@ -2,6 +2,20 @@ import path from 'node:path';
 import { lstat, realpath } from 'node:fs/promises';
 import { validateNandPath } from '../../shared/storage/nand-paths';
 
+/** Read-only discovery permits ordinary OS filenames and skips linked subtrees. */
+export async function discoverableVaultEntry(vaultRoot: string, relative: string): Promise<boolean> {
+	const root = await realpath(vaultRoot), target = path.resolve(root, relative);
+	const tail = path.relative(root, target);
+	if (tail === '..' || tail.startsWith('..' + path.sep) || path.isAbsolute(tail)) return false;
+	let current = root;
+	for (const part of tail.split(path.sep).filter(Boolean)) {
+		current = path.join(current, part);
+		try { if ((await lstat(current)).isSymbolicLink()) return false; }
+		catch (error) { if (error instanceof Error && 'code' in error && error.code === 'ENOENT') return false; throw error; }
+	}
+	return true;
+}
+
 /** Resolve aliases of the vault itself, then forbid links inside NAND's owned tree. */
 export async function absoluteNandPath(vaultRoot: string, relative: string): Promise<string> {
 	const owned = validateNandPath(relative);

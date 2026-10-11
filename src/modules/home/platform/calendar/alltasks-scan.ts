@@ -1,4 +1,6 @@
-import { App, TFile } from 'obsidian';
+import { App } from 'obsidian';
+import { contentFiles, isManagedFile, type ContentFile } from '../../../../host/obsidian/storage/content-files';
+import { CONTENT_ROOT, contentPath, isContentPath } from '../../../../shared/storage/content-paths';
 import { CalendarTaskFilter } from '../../core/calendar/task-filter';
 import { isUnderExcludedFolder, normalizeExcludeFolders } from '../../../../shared/exclude-folders';
 
@@ -12,7 +14,7 @@ export type TaskGroupBy = 'date' | 'priority' | 'none';
  * display it, bucket it, and write the toggle back to its exact source line.
  */
 export interface VaultTask {
-	file: TFile;
+	file: ContentFile;
 	path: string;
 	/** 0-based line index of the checkbox in the source file. */
 	line: number;
@@ -107,7 +109,7 @@ function hhmm(s: string | undefined): string | undefined {
  * Scan one markdown file's content for checkbox tasks. Returns an empty array
  * (never throws) so one bad file can't break the whole section.
  */
-export function scanFileTasks(file: TFile, content: string): VaultTask[] {
+export function scanFileTasks(file: ContentFile, content: string): VaultTask[] {
 	const lines = content.split('\n');
 	const out: VaultTask[] = [];
 	for (let i = 0; i < lines.length; i++) {
@@ -234,7 +236,8 @@ export async function collectVaultTasks(
 	const normalized = normalizeExcludeFolders(excludeFolders);
 	const rawAlways = (alwaysIncludePath ?? '').trim().toLowerCase();
 	const alwaysFile = rawAlways ? (rawAlways.endsWith('.md') ? rawAlways : `${rawAlways}.md`) : '';
-	const files = app.vault.getMarkdownFiles();
+	const content = contentFiles(app); await content.refresh();
+	const files = content.getMarkdownFiles();
 	const stale = new Set(moduleCache.keys());
 	const all: VaultTask[] = [];
 
@@ -246,12 +249,12 @@ export async function collectVaultTasks(
 		// every file.
 		if (i > 0 && i % 50 === 0) await new Promise<void>((r) => window.setTimeout(r, 0));
 
-		if (file.path.startsWith('.')) {
+		if (file.path.startsWith('.') && !isContentPath(file.path)) {
 			stale.delete(file.path);
 			continue;
 		}
-		const exempt = alwaysFile !== '' && file.path.toLowerCase() === alwaysFile;
-		if (!exempt && isUnderExcludedFolder(file.path, normalized)) {
+		const exempt = alwaysFile !== '' && [alwaysFile, contentPath(alwaysFile)].includes(file.path.toLowerCase());
+		if (!exempt && (isUnderExcludedFolder(file.path, normalized) || isUnderExcludedFolder(file.path.replace(CONTENT_ROOT + '/', ''), normalized))) {
 			stale.delete(file.path);
 			continue;
 		}
@@ -268,14 +271,14 @@ export async function collectVaultTasks(
 		// have none). This avoids reading + regex-parsing the vast majority of notes.
 		// (Don't cache the empty result: re-checking the metadata cache each scan is
 		// cheap and self-heals if the cache was briefly stale after a write.)
-		const fc = app.metadataCache.getFileCache(file);
+		const fc = isManagedFile(file) ? null : app.metadataCache.getFileCache(file);
 		if (fc && !fc.listItems?.some((li) => li.task !== undefined)) {
 			continue;
 		}
 
 		let content: string;
 		try {
-			content = await app.vault.cachedRead(file);
+			content = await contentFiles(app).read(file);
 		} catch {
 			continue;
 		}
@@ -301,7 +304,8 @@ export function invalidatePath(app: App, path: string): void {
 export async function toggleTaskInFile(app: App, task: VaultTask, nextChecked: boolean): Promise<boolean> {
 	let wrote = false;
 	try {
-		await app.vault.process(task.file, (data: string) => {
+		await contentFiles(app).process(task.path, (data) => {
+			if (data === null) throw new Error('nand-content.missing');
 			const lines = data.split('\n');
 			const target = task.originalLine;
 			const wantOpen = target.indexOf('- [ ]');

@@ -1,3 +1,5 @@
+import { contentFiles } from '../../../../host/obsidian/storage/content-files';
+import { CONTENT_ROOT } from '../../../../shared/storage/content-paths';
 import { App } from 'obsidian';
 
 export const ALBUM_IMAGE_EXTS = new Set(['png', 'jpg', 'jpeg', 'gif', 'svg', 'webp', 'bmp']);
@@ -52,14 +54,13 @@ export function listAlbumImages(app: App, folder: string, recursive: boolean): s
 	const normalized = normalizeAlbumFolder(folder);
 	if (!normalized) return [];
 	const prefix = normalized + '/';
-	return app.vault
-		.getFiles()
+	return contentFiles(app).getFiles()
 		.filter(
 			(f) =>
-				!f.path.startsWith('.') &&
+
 				ALBUM_IMAGE_EXTS.has(f.extension) &&
-				f.path.startsWith(prefix) &&
-				(recursive || f.parent?.path === normalized),
+				(f.path.startsWith(prefix) || f.path.replace(CONTENT_ROOT + '/', '').startsWith(prefix)) &&
+				(recursive || [f.path, f.path.replace(CONTENT_ROOT + '/', '')].some(path => path.slice(0, path.lastIndexOf('/')) === normalized)),
 		)
 		.map((f) => f.path)
 		.sort((a, b) => a.localeCompare(b, undefined, { numeric: true }));

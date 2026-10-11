@@ -1,3 +1,4 @@
+import { contentFiles } from '../../../../host/obsidian/storage/content-files';
 import { App } from 'obsidian';
 import { isRecentUserDocument, type RecentDocScope } from '../../core/board/recent-doc-policy';
 import { h } from 'preact';
@@ -13,7 +14,7 @@ export interface RecentDoc {
 }
 
 export function getRecentDocs(app: App, count: number, scope: RecentDocScope = {}): RecentDoc[] {
-	const files = app.vault.getMarkdownFiles();
+	const files = contentFiles(app).getMarkdownFiles();
 	const sorted = files
 		.filter((f) => isRecentUserDocument(f.path, scope))
 		.sort((a, b) => b.stat.mtime - a.stat.mtime || (a.path < b.path ? -1 : a.path > b.path ? 1 : 0))

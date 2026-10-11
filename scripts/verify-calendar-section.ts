@@ -1,3 +1,4 @@
+import { memoryVault } from './fixtures/memory-vault';
 import { installPreactMiniDom } from './preact-mini-dom';
 installPreactMiniDom();
 Object.assign(globalThis, { requestAnimationFrame: () => 0, cancelAnimationFrame: () => {} });
@@ -36,8 +37,11 @@ function makeVault(files: Record<string, string>): {
 		f.stat = { mtime: mtime.get(path) ?? 1_000, ctime: 1_000, size: 0 };
 		return f;
 	};
-	const app = {
-		vault: {
+	const complete = memoryVault();
+	const app = { ...complete.app,
+		vault: { ...complete.app.vault,
+			getFileByPath: (path: string) => store.has(path) ? fileOf(path) : null,
+			read: async (f: MemFile) => store.get(f.path) ?? '',
 			getMarkdownFiles: () => [...store.keys()].map(fileOf),
 			cachedRead: async (f: MemFile) => store.get(f.path) ?? '',
 			// Write-back path used by toggleTaskInFile: run the transform, store
@@ -49,7 +53,7 @@ function makeVault(files: Record<string, string>): {
 				return next;
 			},
 		},
-		metadataCache: {
+		metadataCache: { ...complete.app.metadataCache,
 			getFileCache: (_f: MemFile) => undefined,
 		},
 	};

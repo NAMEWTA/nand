@@ -1,3 +1,5 @@
+import { contentFiles } from '../../../../host/obsidian/storage/content-files';
+import { CONTENT_ROOT } from '../../../../shared/storage/content-paths';
 import { App } from 'obsidian';
 import type { TrackerDataPoint } from '../../core/board/types/index';
 
@@ -17,14 +19,14 @@ export function readTrackerDataForRange(
 		const dateStr = formatDateString(d);
 		const filePath = cleanFolder ? `${cleanFolder}/${dateStr}.md` : `${dateStr}.md`;
 
-		const file = app.vault.getFileByPath(filePath);
+		const file = contentFiles(app).resolveLink(filePath);
 		if (!file) {
 			points.push({ date: dateStr, value: null });
 			d.setDate(d.getDate() + 1);
 			continue;
 		}
 
-		const cache = app.metadataCache.getFileCache(file);
+		const cache = contentFiles(app).getMetadata(file);
 		const fm = cache?.frontmatter;
 		if (!fm || !(key in fm)) {
 			points.push({ date: dateStr, value: null });
@@ -88,16 +90,16 @@ export function thisYearRange(now: Date = new Date()): { start: Date; end: Date 
 export function suggestTrackerKeys(app: App, journalPath?: string): string[] {
 	const keys = new Set<string>();
 
-	let files = app.vault.getMarkdownFiles();
+	let files = contentFiles(app).getMarkdownFiles();
 
 	if (journalPath) {
-		files = files.filter((f) => f.path.startsWith(journalPath + '/'));
+		files = files.filter((f) => [f.path, f.path.replace(CONTENT_ROOT + '/', '')].some(path => path.startsWith(journalPath + '/')));
 	}
 
 	files = files.sort((a, b) => b.stat.mtime - a.stat.mtime).slice(0, 50);
 
 	for (const file of files) {
-		const cache = app.metadataCache.getFileCache(file);
+		const cache = contentFiles(app).getMetadata(file);
 		const fm = cache?.frontmatter;
 		if (fm) {
 			for (const k of Object.keys(fm)) {

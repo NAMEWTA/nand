@@ -1,3 +1,4 @@
+import { contentFiles } from '../../../../host/obsidian/storage/content-files';
 import { bindLocalizedElement } from '../../../../ui/primitives/localized-dom';
 import { App, Modal, setIcon } from 'obsidian';
 import type { DashboardCard } from '../../core/board/types/index';
@@ -119,9 +120,7 @@ export class CardEditModal extends Modal {
 			const q = searchInput.value.toLowerCase().trim();
 			if (!q) return;
 
-			const files = this.app.vault
-				.getFiles()
-				.filter((f) => !f.path.startsWith('.'))
+			const files = contentFiles(this.app).getFiles()
 				.filter(
 					(f) =>
 						f.extension === 'md' ||

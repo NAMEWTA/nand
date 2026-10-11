@@ -81,7 +81,7 @@ async function main(): Promise<void> {
 		const res = await createMemoNote(app, opts({ card: makeCard({ body: simpleCardText }) }));
 		assert.equal(res.templateMissing, false, 'default path is not a miss');
 		assert.equal(res.path, '.nand/content/Memos/买菜-20260922-143005.md', 'title + timestamp filename in the folder');
-		assert.deepEqual(mkdirs, ['.nand', '.nand/content', '.nand/content/Memos'], 'destination folder created');
+		assert.deepEqual(mkdirs, ['.nand', '.nand/content', '.nand/content/Memos', '.nand/recovery', '.nand/recovery/content-creates'], 'destination folder created');
 		assert.equal(created.length, 1, 'one vault.create call');
 		const content = created[0]!.content;
 		const lines = content.split('\n');
@@ -150,7 +150,7 @@ async function main(): Promise<void> {
 				card: makeCard({ body: simpleCardText }),
 			}),
 		);
-		assert.deepEqual(mkdirs, ['.nand', '.nand/content', '.nand/content/Memos']);
+		assert.deepEqual(mkdirs, ['.nand', '.nand/content', '.nand/content/Memos', '.nand/recovery', '.nand/recovery/content-creates']);
 		assert.equal(
 			created[0]!.content,
 			[
@@ -211,7 +211,7 @@ async function main(): Promise<void> {
 		const res = await createMemoNote(app, opts({ folder: ' ', card: makeCard({ body: 'x' }) }));
 		assert.equal(res.path, '.nand/content/买菜-20260922-143005.md', 'created at the vault root');
 		assert.equal(res.path.slice(0, res.path.lastIndexOf('/')), '.nand/content', 'empty folder uses the managed content root');
-		assert.deepEqual(mkdirs, ['.nand', '.nand/content'], 'no folder created');
+		assert.deepEqual(mkdirs, ['.nand', '.nand/content', '.nand/recovery', '.nand/recovery/content-creates'], 'no folder created');
 		assert.equal(created.length, 1);
 	}
 

@@ -1,4 +1,5 @@
-import { CONTENT_ROOT, contentPath } from '../../../../shared/storage/content-paths';
+import { CONTENT_ROOT, contentPath, isContentPath } from '../../../../shared/storage/content-paths';
+import { readMarkdownDocument } from '../../../../shared/storage/markdown-document';
 import { contentFiles, type ContentFile } from '../../../../host/obsidian/storage/content-files';
 import { bindLocalizedElement } from '../../../../ui/primitives/localized-dom';
 import { App } from 'obsidian';
@@ -30,7 +31,7 @@ export function extractFrontmatterProperties(app: App): Map<string, Set<string>>
 	props.set('path', new Set());
 
 	for (const file of contentFiles(app).getMarkdownFiles()) {
-		if (file.path.startsWith('.')) continue;
+		if (file.path.startsWith('.') && !isContentPath(file.path)) continue;
 		const cache = contentFiles(app).getMetadata(file);
 		if (!cache?.frontmatter) continue;
 
@@ -100,7 +101,7 @@ export function queryVaultFiles(app: App, config: LibraryConfig): LibraryFileRes
 	const excluded = normalizeExcludeFolders(config.excludeFolders ?? []);
 
 	for (const file of files) {
-		if (file.path.startsWith('.')) continue;
+		if (file.path.startsWith('.') && !isContentPath(file.path)) continue;
 		if (isUnderExcludedFolder(file.path, excluded) || isUnderExcludedFolder(file.path.replace(CONTENT_ROOT + '/', ''), excluded)) continue;
 
 		if (scanFolders.length > 0) {
@@ -221,14 +222,12 @@ export function localDateKey(ts: number): string {
 	return `${d.getFullYear()}-${m}-${day}`;
 }
 export async function loadPreview(app: App, file: ContentFile): Promise<string> {
-	const cache = contentFiles(app).getMetadata(file);
-	const position = cache?.frontmatter?.position as { end: { line: number } } | undefined;
-	if (!position) return '';
-	const startLine = position.end.line + 1;
 	const raw = await contentFiles(app).read(file);
-	const lines = raw.split('\n');
+	let body = raw;
+	try { body = readMarkdownDocument(raw).body; } catch { /* Malformed properties must not hide readable body text. */ }
+	const lines = body.split('\n');
 	const previewLines: string[] = [];
-	for (let i = startLine; i < lines.length && previewLines.length < 3; i++) {
+	for (let i = 0; i < lines.length && previewLines.length < 3; i++) {
 		const line = lines[i]!.replace(/^#+\s*/, '').trim();
 		if (line && !line.startsWith('---') && !line.startsWith('```')) previewLines.push(line);
 	}

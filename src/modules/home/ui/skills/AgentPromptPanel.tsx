@@ -1,4 +1,5 @@
-import { SuggestModal, type App, type TFile } from 'obsidian';
+import { SuggestModal, type App } from 'obsidian';
+import { contentFiles, type ContentFile } from '../../../../host/obsidian/storage/content-files';
 import { useState } from 'preact/hooks';
 import type { SkillShortcut } from '../../core/board/types/model';
 import { skillError, skillPrompt, type SkillContext, type SkillDraft } from '../../services/skill-shortcuts';
@@ -14,10 +15,10 @@ function chooseFile(app: App, signal: AbortSignal, owner: unknown): Promise<stri
 	return new Promise(resolve => {
 		let result: string | null = null;
 		let release = () => {};
-		const modal = new (class extends SuggestModal<TFile> {
-			getSuggestions(query: string) { return app.vault.getFiles().filter(file => file.path.toLocaleLowerCase().includes(query.toLocaleLowerCase())).slice(0, 100); }
-			renderSuggestion(file: TFile, el: HTMLElement) { el.setText(file.path); }
-			onChooseSuggestion(file: TFile) { result = file.path; }
+		const modal = new (class extends SuggestModal<ContentFile> {
+			getSuggestions(query: string) { return contentFiles(app).getFiles().filter(file => file.path.toLocaleLowerCase().includes(query.toLocaleLowerCase())).slice(0, 100); }
+			renderSuggestion(file: ContentFile, el: HTMLElement) { el.setText(file.path); }
+			onChooseSuggestion(file: ContentFile) { result = file.path; }
 			onClose() { super.onClose(); release(); queueMicrotask(() => resolve(signal.aborted ? null : result)); }
 		})(app);
 		const close = () => modal.close();

@@ -1,4 +1,5 @@
-import type { App, HoverParent, TFile } from 'obsidian';
+import type { App, HoverParent } from 'obsidian';
+import { type ContentFile } from '../../../../host/obsidian/storage/content-files';
 import { h } from 'preact';
 import type { DashboardColumn } from '../../core/board/types';
 import type { MediaTagService } from '../../platform/media/media-tags';
@@ -13,7 +14,7 @@ export function renderMediaSection(
 	column: DashboardColumn,
 	app: App,
 	_hoverParent: HoverParent | null,
-	onOpenNote?: (file: TFile) => void,
+	onOpenNote?: (file: ContentFile) => void,
 	tagService?: MediaTagService,
 ): void {
 	if (!extsFor(column.sectionType ?? '')) return;

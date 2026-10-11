@@ -58,7 +58,7 @@ export function createCallbacks(this: DashboardSurface) {
 		settingsAccess: createDashboardSettingsAccess(this.plugin),
 		onCardEdit: (card: DashboardCard) => this.openCardEditModal(card),
 		onOpenNoteInPopover: (file: ContentFile, subpath?: string) => this.openNote(file, subpath),
-		onOpenNoteAtLine: (file: TFile, line?: number) => this.openNote(file, undefined, line),
+		onOpenNoteAtLine: (file: ContentFile, line?: number) => this.openNote(file, undefined, line),
 		onCardDelete: async (cardId: string) => {
 			const confirmed = await showConfirmDialog(this.app, {
 				title: t('common.confirmDelete'),

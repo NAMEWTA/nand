@@ -1,4 +1,6 @@
-import { App, type CachedMetadata, type TFile } from 'obsidian';
+import type { App } from 'obsidian';
+import { contentFiles, type ContentFile, type ContentMetadata } from '../../../../host/obsidian/storage/content-files';
+import { isContentPath } from '../../../../shared/storage/content-paths';
 import { parseDate } from '../../core/dql/functions';
 import type { DqlValue, Page } from '../../core/dql/types';
 import { asList, coerceString, kindOf, makeDate, makeLink, makeObject } from '../../core/dql/values';
@@ -46,7 +48,8 @@ function withLinks(page: Page, links: LinkMaps): Page {
  *  large vaults don't freeze the app (mirrors alltasks-scan.ts:191). */
 export async function buildPages(app: App): Promise<Page[]> {
 	const moduleCache = pageCache(app);
-	const files = app.vault.getMarkdownFiles();
+	await contentFiles(app).prepareMetadata();
+	const files = contentFiles(app).getMarkdownFiles();
 	const stale = new Set(moduleCache.keys());
 	const pages: Page[] = [];
 
@@ -57,7 +60,7 @@ export async function buildPages(app: App): Promise<Page[]> {
 		const file = files[i]!;
 		if (i > 0 && i % 50 === 0) await new Promise<void>((r) => window.setTimeout(r, 0));
 
-		if (file.path.startsWith('.')) {
+		if (file.path.startsWith('.') && !isContentPath(file.path)) {
 			stale.delete(file.path);
 			continue;
 		}
@@ -84,19 +87,19 @@ export function invalidatePath(app: App, path: string): void {
 	pageCache(app).delete(path);
 }
 
-async function buildPage(app: App, file: TFile): Promise<Page | null> {
-	const cache = app.metadataCache.getFileCache(file);
+async function buildPage(app: App, file: ContentFile): Promise<Page | null> {
+	const cache = contentFiles(app).getMetadata(file);
 	const fields: Record<string, DqlValue> = {};
 
 	// Read the body once — used for inline fields AND task extraction.
 	let body = '';
 	try {
-		body = await app.vault.cachedRead(file);
+		body = await contentFiles(app).read(file);
 	} catch {
 		// File read failure (race with deletion, etc.) — keep the metadata-only page.
 	}
 
-	// file.* implicit fields (computed from TFile.stat + metadataCache + body).
+	// file.* implicit fields (computed from ContentFile.stat + metadataCache + body).
 	addFileFields(fields, app, file, cache, body);
 
 	// Frontmatter fields (skip Obsidian's internal `position`).
@@ -124,8 +127,8 @@ async function buildPage(app: App, file: TFile): Promise<Page | null> {
 function addFileFields(
 	fields: Record<string, DqlValue>,
 	app: App,
-	file: TFile,
-	cache: CachedMetadata | null,
+	file: ContentFile,
+	cache: ContentMetadata | null,
 	body: string,
 ): void {
 	const stat = file.stat;
@@ -183,10 +186,10 @@ function midnight(ts: number): number {
 	return new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
 }
 
-function collectTags(cache: CachedMetadata | null): string[] {
+function collectTags(cache: ContentMetadata | null): string[] {
 	const set = new Set<string>();
 	if (cache?.frontmatter) {
-		const fm = cache.frontmatter as Record<string, unknown>;
+		const fm = cache.frontmatter;
 		const fmTags: unknown = fm['tags'] ?? fm['tag'];
 		const arr: readonly unknown[] = Array.isArray(fmTags) ? fmTags : fmTags !== undefined ? [fmTags] : [];
 		for (const t of arr) if (t != null) set.add(toStr(t).replace(/^#/, ''));
@@ -201,7 +204,7 @@ function tagToLink(tag: string): DqlValue {
 	return makeLink('#' + tag, '#' + tag);
 }
 
-function collectTasks(file: TFile, body: string): DqlValue[] {
+function collectTasks(file: ContentFile, body: string): DqlValue[] {
 	if (!body) return [];
 	const scanned = scanFileTasks(file, body);
 	return scanned.map((t) => {
@@ -225,7 +228,7 @@ function collectTasks(file: TFile, body: string): DqlValue[] {
 }
 
 /** Resolve file.day from a frontmatter Date field or a yyyy-mm-dd filename. */
-function resolveFileDay(cache: CachedMetadata | null, name: string): DqlValue {
+function resolveFileDay(cache: ContentMetadata | null, name: string): DqlValue {
 	const fm = cache?.frontmatter;
 	const dayField: unknown = fm?.['day'] ?? fm?.['date'];
 	if (dayField != null) {
@@ -305,10 +308,12 @@ function rebuildLinkMaps(app: App): LinkMaps {
 	const resolved = app.metadataCache.resolvedLinks;
 	const inlinks: Record<string, string[]> = {};
 	const outlinks: Record<string, string[]> = {};
-	for (const source of Object.keys(resolved)) {
-		const targets = resolved[source]!;
-		const outs = Object.keys(targets);
-		outlinks[source] = outs.slice();
+	const content = contentFiles(app);
+	for (const file of content.getMarkdownFiles()) {
+		const source = file.path;
+		const links = [...Object.keys(resolved[source] ?? {}), ...(content.getMetadata(file)?.links ?? []).map(item => item.link)];
+		const outs = [...new Set(links.map(link => content.resolveLink(link, source)?.path).filter((path): path is string => !!path))];
+		outlinks[source] = outs;
 		for (const target of outs) {
 			(inlinks[target] ??= []).push(source);
 		}

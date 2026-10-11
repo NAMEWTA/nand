@@ -1,3 +1,5 @@
+import { contentFiles } from '../../../../host/obsidian/storage/content-files';
+import { isContentPath } from '../../../../shared/storage/content-paths';
 import { App } from 'obsidian';
 import type {
 	BannerCenterStat,
@@ -133,7 +135,7 @@ export function computeBannerStats(app: App, config?: BannerStatsConfig): Banner
 		const lower = path.toLowerCase();
 		return excludeFolders.some((f) => lower === f || lower.startsWith(f + '/'));
 	};
-	const files = app.vault.getMarkdownFiles().filter((f) => !isExcluded(f.path));
+	const files = contentFiles(app).getMarkdownFiles().filter((f) => !isExcluded(f.path));
 	const now = nowMoment();
 	const startOfMonth = now.clone().startOf('month').valueOf();
 	const weekAgoMs = now.clone().subtract(6, 'days').startOf('day').valueOf();
@@ -152,7 +154,7 @@ export function computeBannerStats(app: App, config?: BannerStatsConfig): Banner
 	const tagCounts = new Map<string, number>();
 	const activityDates = new Set<string>();
 
-	const resolved = app.metadataCache.resolvedLinks;
+	const resolved = contentFiles(app).resolvedLinks();
 	const hasOutgoing = new Set<string>();
 	const hasIncoming = new Set<string>();
 	let totalLinks = 0;
@@ -174,7 +176,7 @@ export function computeBannerStats(app: App, config?: BannerStatsConfig): Banner
 	let doneTasks = 0;
 
 	for (const file of files) {
-		if (file.path.startsWith('.')) continue;
+		if (file.path.startsWith('.') && !isContentPath(file.path)) continue;
 		totalNotes++;
 
 		const ctime = file.stat.ctime;
@@ -188,7 +190,7 @@ export function computeBannerStats(app: App, config?: BannerStatsConfig): Banner
 
 		if (!hasOutgoing.has(file.path) && !hasIncoming.has(file.path)) orphanNotes++;
 
-		const cache = app.metadataCache.getFileCache(file);
+		const cache = contentFiles(app).getMetadata(file);
 		const fmTags: unknown = cache?.frontmatter?.tags;
 		const addTag = (raw: unknown): void => {
 			if (raw == null) return;
@@ -269,7 +271,7 @@ export function computeBannerStats(app: App, config?: BannerStatsConfig): Banner
 export function collectDailyNoteDates(app: App, folder: string, format: string): Set<string> {
 	const dates = new Set<string>();
 	const prefix = folder ? `${folder}/` : '';
-	for (const file of app.vault.getMarkdownFiles()) {
+	for (const file of contentFiles(app).getMarkdownFiles()) {
 		if (prefix && !file.path.toLowerCase().startsWith(prefix.toLowerCase())) continue;
 		if (prefix && file.path.slice(prefix.length).includes('/')) continue;
 		const m = parseStrict(file.basename, format);

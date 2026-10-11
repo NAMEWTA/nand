@@ -1,3 +1,5 @@
+import { contentFiles } from '../../../../host/obsidian/storage/content-files';
+import { CONTENT_ROOT, contentPath } from '../../../../shared/storage/content-paths';
 import { setLocalizedText } from '../../../../ui/primitives/localized-dom';
 import type { HoverParent } from 'obsidian';
 import { App, Component, Platform } from 'obsidian';
@@ -70,15 +72,15 @@ export function invalidateScanningSectionSignatures(root: HTMLElement): void {
 }
 function scanningSectionSignature(column: DashboardColumn, app: App): string {
 	const cfg = column.libraryConfig;
-	const folders = (cfg?.folders ?? []).map((f) => f.trim().replace(/^\/+|\/+$/g, '')).filter((f) => f.length > 0);
+	const folders = (cfg?.folders ?? []).map((f) => f.trim().replace(/^\/+|\/+$/g, '')).filter((f) => f.length > 0).flatMap(folder => [folder, contentPath(folder)]);
 	const excluded = normalizeExcludeFolders(cfg?.excludeFolders ?? []);
 	const parts: string[] = [];
-	for (const file of app.vault.getMarkdownFiles()) {
+	for (const file of contentFiles(app).getMarkdownFiles()) {
 		if (folders.length > 0) {
 			const lp = file.path.toLowerCase();
 			if (!folders.some((f) => lp.startsWith(f.toLowerCase() + '/'))) continue;
 		}
-		if (isUnderExcludedFolder(file.path, excluded)) continue;
+		if ((isUnderExcludedFolder(file.path, excluded) || isUnderExcludedFolder(file.path.replace(CONTENT_ROOT + '/', ''), excluded))) continue;
 		parts.push(`${file.path}|${file.stat.mtime}|${file.stat.ctime}`);
 	}
 	// Vault iteration order is not contractual; sort for a stable signature.

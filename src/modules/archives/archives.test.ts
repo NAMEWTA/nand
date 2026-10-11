@@ -300,6 +300,8 @@ function memoryVault() {
 		list: async (path: string) => { const prefix = path ? path + '/' : ''; const children = [...files.values()].filter(file => file.path.startsWith(prefix) && !file.path.slice(prefix.length).includes('/')); return { files: children.filter(file => file instanceof TFile).map(file => file.path), folders: children.filter(file => file instanceof TFolder).map(file => file.path) }; },
 		process: (path: string, update: (raw: string) => string) => vault.process(files.get(path) as TFile, update),
 		writeBinary: async (path: string, bytes: ArrayBuffer) => adapter.write(path, new TextDecoder().decode(bytes)),
+		copy: async (source: string, target: string) => { const value = text.get(source); if (value === undefined) throw new Error('missing'); if (files.has(target)) throw new Error('exists'); await adapter.write(target, value); },
+		remove: async (path: string) => { files.delete(path); text.delete(path); },
 		rename: (source: string, target: string) => vault.rename(files.get(source)!, target),
 	};
 	const vault = {

@@ -1,5 +1,4 @@
 import type { BoardTile } from '../core/board/types/model';
-import type { TFile } from 'obsidian';
 import type { ContentFile } from '../../../host/obsidian/storage/content-files';
 import type {
 	BoardLayout,
@@ -25,7 +24,7 @@ export interface RenderCallbacks {
 	/** subpath is the raw `#heading` / `#^block` fragment of a wikilink, when present. */
 	onOpenNoteInPopover(this: void, file: ContentFile, subpath?: string): void;
 	/** Open a note scrolled to a 1-based line (calendar section/agenda task jumps). */
-	onOpenNoteAtLine?(this: void, file: TFile, line?: number): void;
+	onOpenNoteAtLine?(this: void, file: ContentFile, line?: number): void;
 	onCardDelete(cardId: string): void;
 	onCheckboxToggle(cardId: string, taskPath: number[], checked: boolean): void;
 	onTaskAdd(cardId: string, text: string, parentPath?: number[]): void;

@@ -452,7 +452,7 @@ export class ContactsPresentation extends NativeSurface {
 				.setTitle(ct('source'))
 				.setIcon('file-text')
 				.onClick(() => {
-					void this.app.workspace.openLinkText(record.path, '', true);
+					void contentFiles(this.app).open(record.path).catch(error => new Notice(String(error)));
 				}),
 		);
 		menu.addItem((item) =>

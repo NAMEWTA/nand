@@ -1,4 +1,5 @@
-import type { App, TFile } from 'obsidian';
+import type { App } from 'obsidian';
+import type { ContentFile } from '../../../../host/obsidian/storage/content-files';
 import { h } from 'preact';
 import type { DashboardSettings } from '../../core/board/types/index';
 import { getRenderContext, mountDashboardPanel } from '../renderer/render-context';
@@ -21,7 +22,7 @@ export function renderCalendarSection(
 	el: HTMLElement,
 	app: App,
 	settings: DashboardSettings,
-	onOpenNote?: (file: TFile, line?: number) => void,
+	onOpenNote?: (file: ContentFile, line?: number) => void,
 	settingsAccess?: DashboardSettingsAccess,
 ): void {
 	const root = el.createDiv({ cls: 'dashboard-calendar-section' });

@@ -1,4 +1,5 @@
-import type { App, HoverParent, TFile } from 'obsidian';
+import type { App, HoverParent } from 'obsidian';
+import type { ContentFile } from '../../../../host/obsidian/storage/content-files';
 import { h } from 'preact';
 import type { DashboardColumn, DataviewConfig } from '../../core/board/types';
 import { mountDashboardPanel } from '../renderer/render-context';
@@ -9,7 +10,7 @@ export function renderDataviewSection(
 	column: DashboardColumn,
 	app: App,
 	hoverParent: HoverParent | null,
-	onOpenNote: ((file: TFile, subpath?: string) => void) | null,
+	onOpenNote: ((file: ContentFile, subpath?: string) => void) | null,
 	reloadRegister: (reload: () => void) => void,
 	onConfigChange: ((config: DataviewConfig) => void) | null = null,
 ): void {

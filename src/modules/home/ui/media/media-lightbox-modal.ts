@@ -1,4 +1,5 @@
-import { App, Modal, type TFile } from 'obsidian';
+import { App, Modal } from 'obsidian';
+import { type ContentFile } from '../../../../host/obsidian/storage/content-files';
 import { h } from 'preact';
 import {
 	bindRenderContext,
@@ -8,9 +9,9 @@ import {
 } from '../renderer/render-context';
 import { MediaLightboxPanel } from './MediaLightboxPanel';
 export interface MediaTagHooks {
-	getTags(file: TFile): string[];
+	getTags(file: ContentFile): string[];
 	getAllTags(): string[];
-	onTagsChange(file: TFile, tags: string[]): void;
+	onTagsChange(file: ContentFile, tags: string[]): void;
 }
 
 export class MediaLightboxModal extends Modal {
@@ -20,7 +21,7 @@ export class MediaLightboxModal extends Modal {
 	};
 	constructor(
 		app: App,
-		private readonly files: TFile[],
+		private readonly files: ContentFile[],
 		startIndex: number,
 		private readonly kind: 'image' | 'video',
 		private readonly tagHooks?: MediaTagHooks,

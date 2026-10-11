@@ -1,4 +1,4 @@
-import { TFile } from 'obsidian';
+import { contentFiles } from '../../../../host/obsidian/storage/content-files';
 import { Fragment } from 'preact';
 import { useLayoutEffect, useRef, useState } from 'preact/hooks';
 import type { DataviewConfig } from '../../core/board/types';
@@ -71,9 +71,9 @@ function TaskCheck({
 					let committed = checked;
 					try {
 						const app = context.app,
-							file = app.vault.getAbstractFileByPath(task.path);
+							file = contentFiles(app).getFileByPath(task.path);
 						if (
-							file instanceof TFile &&
+							file &&
 							(await toggleTaskInFile(
 								app,
 								{ ...task, file, mtime: file.stat.mtime, ctime: file.stat.ctime },
@@ -425,7 +425,7 @@ export function ResultCalendar({ result, rows, context }: Props) {
 								class={`dashboard-dataview-calendar-cell${items.length ? ' has-dots' : ''}`}
 								onClick={() => {
 									const path = items[0]?.page?.file.path;
-									const file = path ? context.app.vault.getFileByPath(path) : null;
+									const file = path ? contentFiles(context.app).getFileByPath(path) : null;
 									if (file) context.opener?.(file);
 								}}
 							>

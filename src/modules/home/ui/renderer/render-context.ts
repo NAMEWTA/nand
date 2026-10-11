@@ -139,7 +139,7 @@ export function relativeLuminance(r: number, g: number, b: number): number {
 export const VAULT_FILE_EXTS = SUPPORTED_FILE_EXTS;
 
 export function getSearchableFiles(app: App) {
-	return app.vault.getFiles().filter((f) => !f.path.startsWith('.') && VAULT_FILE_EXTS.has(f.extension));
+	return contentFiles(app).getFiles().filter((f) => VAULT_FILE_EXTS.has(f.extension));
 }
 
 const basenameIndexes = new WeakMap<App, { index: Map<string, TFile>; refs: EventRef[] }>();

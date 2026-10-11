@@ -12,6 +12,7 @@ import { closeOwnedDashboardPanels } from '../ui/panel-modal';
 import { showPromptDialog } from '../ui/prompt-dialog';
 import { loadHolidayData } from '../widgets/lunar-model';
 import type { DashboardSurface } from './dashboard-surface';
+import { contentFiles } from '../../../../host/obsidian/storage/content-files';
 
 export function showModuleDisabled(this: DashboardSurface): void {
 	if (this.isOpen || this.isOpening) {
@@ -39,6 +40,7 @@ export async function onOpen(this: DashboardSurface): Promise<void> {
 	const revision = ++this.lifecycleRevision;
 	this.sync.updateSettings(this.plugin.settings);
 	await this.sync.init();
+	await contentFiles(this.app).prepareMetadata();
 	if (revision !== this.lifecycleRevision) return;
 	// The banner "streak" auto-detects the Daily Notes core plugin, whose
 	// internal-plugins state may report as not-yet-enabled during the very

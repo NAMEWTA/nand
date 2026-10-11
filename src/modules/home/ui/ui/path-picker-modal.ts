@@ -1,5 +1,6 @@
+import { contentFiles } from '../../../../host/obsidian/storage/content-files';
 import { bindLocalizedElement } from '../../../../ui/primitives/localized-dom';
-import { App, Modal, setIcon, TFile, TFolder } from 'obsidian';
+import { App, Modal, setIcon, TFolder } from 'obsidian';
 import { t } from '../../../../shared/i18n/index';
 import { applyModalTheme } from '../appearance/modal-theme';
 
@@ -19,22 +20,20 @@ interface PickerEntry {
  *  folders (root excluded), all sorted by path. */
 function collectEntries(app: App, mode: PathPickerMode): PickerEntry[] {
 	if (mode === 'image') {
-		return app.vault
-			.getFiles()
-			.filter((f: TFile) => IMAGE_EXTS.has(f.extension.toLowerCase()))
-			.map((f: TFile) => ({ path: f.path, name: f.basename }))
+		return contentFiles(app).getFiles()
+			.filter((f) => IMAGE_EXTS.has(f.extension.toLowerCase()))
+			.map((f) => ({ path: f.path, name: f.basename }))
 			.sort((a, b) => a.path.localeCompare(b.path));
 	}
 	if (mode === 'file') {
-		return app.vault
-			.getMarkdownFiles()
-			.map((f: TFile) => ({ path: f.path, name: f.basename }))
+		return contentFiles(app).getMarkdownFiles()
+			.map((f) => ({ path: f.path, name: f.basename }))
 			.sort((a, b) => a.path.localeCompare(b.path));
 	}
 	return app.vault
 		.getAllLoadedFiles()
 		.filter((f): f is TFolder => f instanceof TFolder && f.path !== '/')
-		.map((f: TFolder) => ({ path: f.path, name: f.name }))
+		.map((f: TFolder) => ({ path: f.path, name: f.name })).concat(contentFiles(app).allDirectories().map(path => ({ path, name: path.split('/').at(-1)! })))
 		.sort((a, b) => a.path.localeCompare(b.path));
 }
 

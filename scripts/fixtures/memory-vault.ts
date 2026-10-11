@@ -23,6 +23,7 @@ export function memoryVault(initial: Record<string, string> = {}, win: unknown =
 		readBinary: async (path: string) => new TextEncoder().encode(await adapter.read(path)).buffer,
 		writeBinary: async (path: string, data: ArrayBuffer) => adapter.write(path, new TextDecoder().decode(data)),
 		getResourcePath: (path: string) => 'app://vault/' + path,
+		remove: async (path: string) => { contents.delete(path); },
 		copy: async (source: string, target: string) => { if (contents.has(target)) throw new Error('Exists'); await adapter.write(target, await adapter.read(source)); },
 		rename: async (source: string, target: string) => {
 			if (contents.has(target) || directories.has(target)) throw new Error('Exists');
@@ -34,6 +35,7 @@ export function memoryVault(initial: Record<string, string> = {}, win: unknown =
 		},
 	};
 	const app = { vault: {
+		getFiles: () => [...files.values()].filter(f => contents.has(f.path) && visible(f.path)),
 		adapter, getMarkdownFiles: () => [...files.values()].filter(f => contents.has(f.path) && visible(f.path) && f.path.endsWith('.md')),
 		getAbstractFileByPath: (path: string) => visible(path) && contents.has(path) ? file(path) : null,
 		getFileByPath: (path: string) => visible(path) && contents.has(path) ? file(path) : null,
@@ -41,6 +43,6 @@ export function memoryVault(initial: Record<string, string> = {}, win: unknown =
 		process: (f: TFile, update: (text: string) => string) => { const operation = (queues.get(f.path) ?? Promise.resolve()).then(async () => { const result = update(await adapter.read(f.path)); await adapter.write(f.path, result); return result; }); queues.set(f.path, operation.catch(() => {})); return operation; },
 		on: (name: string, callback: (...args: any[]) => void) => { if (!listeners.has(name)) listeners.set(name, new Set()); listeners.get(name)!.add(callback); return { name, callback }; },
 		offref: ({ name, callback }: { name: string; callback: (...args: any[]) => void }) => listeners.get(name)?.delete(callback),
-	}, workspace: { getLeavesOfType: () => [], containerEl: { win } } } as unknown as App;
+	}, metadataCache: { getFileCache: () => null, resolvedLinks: {}, getFirstLinkpathDest: (link: string) => visible(link) && contents.has(link) ? file(link) : null }, workspace: { getLeavesOfType: () => [], containerEl: { win } } } as unknown as App;
 	return { app, contents, adapter, emit, file, get reads() { return reads; }, get writes() { return writes; } };
 }

@@ -1,5 +1,6 @@
 import { bindLocalizedElement } from '../../../../ui/primitives/localized-dom';
-import { App, Modal, Notice, TFile } from 'obsidian';
+import { App, Modal, Notice } from 'obsidian';
+import { type ContentFile } from '../../../../host/obsidian/storage/content-files';
 import { MEDIA_TAG_MAX_LEN, MEDIA_TAG_MAX_PER_FILE, normalizeTags } from '../../platform/media/media-tags';
 import { t } from '../../../../shared/i18n/index';
 import { applyModalTheme } from '../appearance/modal-theme';
@@ -10,14 +11,14 @@ import { applyModalTheme } from '../appearance/modal-theme';
  * is committed only on Save via the onSave callback.
  */
 export class MediaTagEditModal extends Modal {
-	private file: TFile;
+	private file: ContentFile;
 	private tags: string[];
 	private readonly allKnownTags: string[];
 	private readonly onSave: (tags: string[]) => void;
 
 	constructor(
 		app: App,
-		file: TFile,
+		file: ContentFile,
 		currentTags: string[],
 		allKnownTags: string[],
 		onSave: (tags: string[]) => void,

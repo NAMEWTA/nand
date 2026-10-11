@@ -1,4 +1,5 @@
-import { App, TFile } from 'obsidian';
+import { App } from 'obsidian';
+import { contentFiles, type ContentFile } from '../../../../host/obsidian/storage/content-files';
 import { isSupportedExtension } from '../../../../shared/file-types';
 
 export interface FileSuggestHandle {
@@ -24,7 +25,7 @@ export function attachFileSuggest(inputEl: HTMLTextAreaElement | HTMLInputElemen
 	let selectedIdx = 0;
 	let bracketPos = -1;
 	let active = false;
-	let selectedFile: TFile | null = null;
+	let selectedFile: ContentFile | null = null;
 	let suppressInput = false;
 
 	// === Dropdown rendering ===
@@ -94,21 +95,13 @@ export function attachFileSuggest(inputEl: HTMLTextAreaElement | HTMLInputElemen
 
 	// === File resolution ===
 
-	function resolveFile(query: string): TFile | null {
-		let file = app.vault.getFileByPath(query);
-		if (file) return file;
-		file = app.vault.getFileByPath(query + '.md');
-		if (file) return file;
-		return app.vault.getFiles().find((f) => f.basename === query) ?? null;
-	}
+	function resolveFile(query: string): ContentFile | null { return contentFiles(app).resolveLink(query); }
 
 	// === Show functions ===
 
 	function showFiles(query: string) {
 		const q = query.toLowerCase();
-		const files = app.vault
-			.getFiles()
-			.filter((f) => !f.path.startsWith('.'))
+		const files = contentFiles(app).getFiles()
 			.filter((f) => isSupportedExtension(f.extension))
 			.filter((f) => f.basename.toLowerCase().includes(q) || f.path.toLowerCase().includes(q))
 			.slice(0, 10);
@@ -121,7 +114,7 @@ export function attachFileSuggest(inputEl: HTMLTextAreaElement | HTMLInputElemen
 		active = true;
 		items = files.map((f) => ({
 			text: f.basename,
-			subtext: f.parent?.path,
+			subtext: f.path.split('/').slice(0, -1).join('/'),
 			select: () => selectFile(f),
 		}));
 
@@ -130,8 +123,8 @@ export function attachFileSuggest(inputEl: HTMLTextAreaElement | HTMLInputElemen
 		renderItems();
 	}
 
-	function showHeadings(file: TFile, query: string) {
-		const cache = app.metadataCache.getFileCache(file);
+	function showHeadings(file: ContentFile, query: string) {
+		const cache = contentFiles(app).getMetadata(file);
 		if (!cache?.headings?.length) {
 			hide();
 			return;
@@ -157,8 +150,8 @@ export function attachFileSuggest(inputEl: HTMLTextAreaElement | HTMLInputElemen
 		renderItems();
 	}
 
-	async function showBlocks(file: TFile, query: string) {
-		const cache = app.metadataCache.getFileCache(file);
+	async function showBlocks(file: ContentFile, query: string) {
+		const cache = contentFiles(app).getMetadata(file);
 		if (!cache?.blocks) {
 			hide();
 			return;
@@ -171,7 +164,7 @@ export function attachFileSuggest(inputEl: HTMLTextAreaElement | HTMLInputElemen
 		}
 
 		const version = request;
-		const content = await app.vault.cachedRead(file);
+		const content = await contentFiles(app).read(file);
 		if (disposed || version !== request) return;
 		const lines = content.split('\n');
 		const q = query.toLowerCase();
@@ -203,7 +196,7 @@ export function attachFileSuggest(inputEl: HTMLTextAreaElement | HTMLInputElemen
 
 	// === Selection handlers ===
 
-	function selectFile(file: TFile) {
+	function selectFile(file: ContentFile) {
 		insertClosedLink(file.path);
 		selectedFile = file;
 		dispatchInput();

@@ -80,7 +80,7 @@ export function openNotePopover(this: DashboardSurface, file: TFile, subpath?: s
  *  always opened in a real tab — the in-dashboard popover only hosts a
  *  MarkdownView and would render them broken. */
 export function openNote(this: DashboardSurface, file: ContentFile, subpath?: string, line?: number): void {
-	if (isManagedFile(file)) { void contentFiles(this.app).open(file.path).catch(error => new Notice(String(error))); return; }
+	if (isManagedFile(file)) { void contentFiles(this.app).open(file.path + (subpath ?? (line === undefined ? '' : '#line=' + line))).catch(error => new Notice(String(error))); return; }
 	if (this.plugin.settings.disableNotePopover || file.extension !== 'md') {
 		void this.openNoteInTab(file, subpath, line);
 		return;

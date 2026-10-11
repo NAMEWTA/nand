@@ -1,4 +1,5 @@
-import { App, Platform, TFile } from 'obsidian';
+import type { ContentFile } from '../../../../host/obsidian/storage/content-files';
+import { App, Platform } from 'obsidian';
 import { h } from 'preact';
 import type { HolidayInfo } from '../../platform/calendar/holiday-service';
 import type { PomodoroService } from '../../platform/pomodoro/pomodoro-service';
@@ -104,7 +105,7 @@ export function renderSidebarWidgets(
 	holidayData?: Record<string, HolidayInfo>,
 	onWidgetReorder?: (order: string[]) => void,
 	reuse?: HTMLElement | null,
-	onOpenNote?: (file: TFile, line?: number) => void,
+	onOpenNote?: (file: ContentFile, line?: number) => void,
 	renderQuickActions?: (container: HTMLElement) => void,
 	settingsAccess?: DashboardSettingsAccess,
 	stacked = isStackedLayout(undefined, settings),
