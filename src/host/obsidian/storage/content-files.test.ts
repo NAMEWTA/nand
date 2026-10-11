@@ -153,8 +153,14 @@ test('a destination arriving during rename is retained alongside the moved sourc
 	expect(JSON.parse(vault.contents.get('.nand/content-moves/manifest.json')!).pending).toBeTruthy();
 });
 
-test('every interrupted rename persistence step recovers consistent references without losing content', async () => {
-	const initial = { '.nand/content/Old.md': '---\ncover: "[[image.png]]" # Keep\n---\n# Original\n![image](image.png)', '.nand/content/image.png': 'image', 'Ref.md': '---\nrelated: "[[Old]]"\n---\n[[Old]]' };
+test.each([
+	{ yaml: 'cover: "[[image.png]]" # Keep', expected: { cover: '[[/.nand/content/image.png]]' } },
+	{ yaml: 'asset: &img image.png\ncover: *img\ntitle: *img', expected: { asset: 'image.png', cover: '/.nand/content/image.png', title: 'image.png' } },
+	{ yaml: 'cover: &img image.png\ntitle: *img', expected: { cover: '/.nand/content/image.png', title: 'image.png' } },
+	{ yaml: 'asset: &img [image.png]\ncover: *img\ntitle: *img', expected: { asset: ['image.png'], cover: ['/.nand/content/image.png'], title: ['image.png'] } },
+	{ yaml: 'cover: &img [image.png]\ntitle: *img', expected: { cover: ['/.nand/content/image.png'], title: ['image.png'] } },
+])('every interrupted rename persistence step recovers references without losing content (%#)', async ({ yaml, expected }) => {
+	const initial = { '.nand/content/Old.md': '---\n'+yaml+'\n---\n# Original\n![image](image.png)', '.nand/content/image.png': 'image', 'Ref.md': '---\nrelated: "[[Old]]"\n---\n[[Old]]' };
 	const run = async (failAt = 0, after = false) => {
 		const vault = memoryVault(initial); let files = new ContentFiles(vault.app); await files.refresh();
 		let calls = 0;
@@ -171,7 +177,11 @@ test('every interrupted rename persistence step recovers consistent references w
 		const count = calls;
 		files = new ContentFiles(vault.app); await files.refresh();
 		const destination = vault.contents.has('.nand/content/New.md') ? '.nand/content/New.md' : '.nand/content/Old.md';
-		expect(vault.contents.get(destination)).toBe(destination.endsWith('/New.md') ? '---\ncover: "[[/.nand/content/image.png]]" # Keep\n---\n# Original\n![image](</.nand/content/image.png>)' : initial['.nand/content/Old.md']);
+		if (destination.endsWith('/New.md')) {
+			const result = readMarkdownDocument(vault.contents.get(destination)!);
+			expect(result.body).toBe('# Original\n![image](</.nand/content/image.png>)');
+			expect(readYaml(result.yaml).toJSON()).toEqual(expected);
+		} else expect(vault.contents.get(destination)).toBe(initial['.nand/content/Old.md']);
 		const reference = vault.contents.get('Ref.md')!.split('\n').at(-1)!.slice(2, -2);
 		expect(files.resolveLink(reference, 'Ref.md')?.path).toBe(destination);
 		const related = String(readYaml(readMarkdownDocument(vault.contents.get('Ref.md')!).yaml).get('related')).slice(2, -2);
@@ -258,4 +268,12 @@ test('moving an HTML block preserves every actual image and ignores text inside 
 	expect(text).toContain('<div title="<img src=ignore.png>">');
 	expect(text).toContain('<!-- <img src="a.png"> -->');
 	expect(text).toContain('<script>const example = \'<img src="a.png">\';</script>');
+});
+
+test('raw HTML text across inline parser nodes remains literal when an attachment moves', async () => {
+	const raw = ['textarea','script','style','title','xmp','iframe','noembed','noframes'].map(tag => `Example: <${tag}><img src="Old.png">[[Old.png]]</${tag}>`).join('\n\n');
+	const vault = memoryVault({ '.nand/content/Old.png': 'image', 'Ref.md': raw+'\n\n<img src="Old.png">' });
+	const files = new ContentFiles(vault.app); await files.refresh();
+	await files.rename(files.getFileByPath('.nand/content/Old.png')!, '.nand/content/New.png');
+	expect(vault.contents.get('Ref.md')).toBe(raw+'\n\n<img src="/.nand/content/New.png">');
 });

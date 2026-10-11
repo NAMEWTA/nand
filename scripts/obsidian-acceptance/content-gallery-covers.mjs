@@ -25,6 +25,8 @@ try {
   '.nand/content/Old/Note.md': '---\n# Keep this cover\ntitle: Windows cover\ncover: "[[pic.svg]]"\n---\n# Windows cover\n',
   '.nand/content/Old/pic.svg': image('red'), '.nand/content/New/pic.svg': image('blue'),
   '.nand/content/Old/HTML.md': '---\ntitle: "pic.svg"\ncover: '+JSON.stringify("<img src='pic&apos;s.svg'>")+'\n---\n<img src="pic.svg">\n<img src="pic&apos;s.svg">\n',
+  '.nand/content/Old/Alias.md': '---\ncover: &img pic.svg\ntitle: *img\n---\n',
+  '.nand/content/Old/AliasUse.md': '---\nasset: &img pic.svg\ncover: *img\ntitle: *img\n---\n',
   ".nand/content/Old/pic's.svg": image('green'), ".nand/content/New/pic's.svg": image('blue'),
  }, settings: { version: 1, namespaces: {
   app: { language: 'zh', introSeen: true, modules: Object.fromEntries(['home','agent','browser','news','archives','automations','notifications','icons','comments','sync'].map(id => [id, false])) },
@@ -34,12 +36,18 @@ try {
  await c.evaluate(`board.sync.updateLibraryConfig('Cover test',{viewMode:'gallery',folders:['Old','New'],filters:[],sortBy:'name',sortDesc:false})`);
  check('gallery-renders-managed-cover-bytes', (await coverBytes()).includes('fill="red"'));
  check('gallery-renders-quoted-html-cover', (await coverBytes('HTML')).includes('fill="green"'));
+ for (const name of ['Alias','AliasUse']) check('gallery-renders-shared-anchor:'+name, (await coverBytes(name)).includes('fill="red"'));
  await c.evaluate(`${p}.managedContent.rename(${p}.managedContent.getFileByPath('.nand/content/Old/Note.md'),'.nand/content/New/Note.md')`);
  await c.evaluate(`${p}.managedContent.rename(${p}.managedContent.getFileByPath('.nand/content/Old/HTML.md'),'.nand/content/New/HTML.md')`);
+ for (const name of ['Alias','AliasUse']) await c.evaluate(`${p}.managedContent.rename(${p}.managedContent.getFileByPath('.nand/content/Old/${name}.md'),'.nand/content/New/${name}.md')`);
  await until(`!${p}.managedContent.getFileByPath('.nand/content/Old/Note.md')&&!!${p}.managedContent.getFileByPath('.nand/content/New/Note.md')`);
  await delay(500);
  check('gallery-keeps-original-cover-after-move', (await coverBytes()).includes('fill="red"'));
  check('gallery-keeps-quoted-html-cover-after-move', (await coverBytes('HTML')).includes('fill="green"'));
+ for (const name of ['Alias','AliasUse']) {
+  check('gallery-keeps-anchor-cover-after-move:'+name, (await coverBytes(name)).includes('fill="red"'));
+  check('ordinary-anchor-title-kept:'+name, await c.evaluate(`${p}.managedContent.getMetadata(${p}.managedContent.getFileByPath('.nand/content/New/${name}.md')).frontmatter.title==='pic.svg'`));
+ }
  const text = await fs.readFile(path.join(runtime.vault,'.nand/content/New/Note.md'),'utf8');
  check('frontmatter-link-preserves-original-image-identity', text.includes('[[/.nand/content/Old/pic.svg]]') && text.includes('# Keep this cover'));
  const html = await fs.readFile(path.join(runtime.vault,'.nand/content/New/HTML.md'),'utf8');
@@ -49,6 +57,7 @@ try {
  await runtime.restart(); c = runtime.connection; await openBoard();
  check('gallery-keeps-original-cover-after-restart', (await coverBytes()).includes('fill="red"'));
  check('gallery-keeps-quoted-html-cover-after-restart', (await coverBytes('HTML')).includes('fill="green"'));
+ for (const name of ['Alias','AliasUse']) check('gallery-keeps-anchor-cover-after-restart:'+name, (await coverBytes(name)).includes('fill="red"'));
  check('no-runtime-errors', await c.evaluate('(window.nandAcceptanceErrors??[]).length===0'));
  await c.evaluate(`${cover('HTML')}.scrollIntoView({block:'center'});true`); await delay(150);
  await runtime.shot('gallery-cover-after-restart');

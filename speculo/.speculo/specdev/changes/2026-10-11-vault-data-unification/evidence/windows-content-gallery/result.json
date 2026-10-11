@@ -10,11 +10,35 @@
       "passed": true
     },
     {
+      "name": "gallery-renders-shared-anchor:Alias",
+      "passed": true
+    },
+    {
+      "name": "gallery-renders-shared-anchor:AliasUse",
+      "passed": true
+    },
+    {
       "name": "gallery-keeps-original-cover-after-move",
       "passed": true
     },
     {
       "name": "gallery-keeps-quoted-html-cover-after-move",
+      "passed": true
+    },
+    {
+      "name": "gallery-keeps-anchor-cover-after-move:Alias",
+      "passed": true
+    },
+    {
+      "name": "ordinary-anchor-title-kept:Alias",
+      "passed": true
+    },
+    {
+      "name": "gallery-keeps-anchor-cover-after-move:AliasUse",
+      "passed": true
+    },
+    {
+      "name": "ordinary-anchor-title-kept:AliasUse",
       "passed": true
     },
     {
@@ -31,6 +55,14 @@
     },
     {
       "name": "gallery-keeps-quoted-html-cover-after-restart",
+      "passed": true
+    },
+    {
+      "name": "gallery-keeps-anchor-cover-after-restart:Alias",
+      "passed": true
+    },
+    {
+      "name": "gallery-keeps-anchor-cover-after-restart:AliasUse",
       "passed": true
     },
     {

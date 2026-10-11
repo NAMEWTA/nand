@@ -37,3 +37,17 @@ test('cover rewriting preserves a quoted HTML destination and leaves ordinary ti
 		try { expect(await (await fetch(url)).text()).toBe('image'); } finally { URL.revokeObjectURL(url); }
 	}
 });
+
+test('shared YAML anchors keep ordinary values while each cover use follows its original image', async () => {
+	for (const source of ['asset: &img pic.png\ncover: *img\ntitle: *img\nunknown: *img', 'cover: &img pic.png\ntitle: *img\nunknown: *img', 'asset: &img [pic.png]\ncover: *img\ntitle: *img', 'cover: &img [pic.png]\ntitle: *img']) {
+		const vault = memoryVault({ '.nand/content/Old/Note.md': '---\n'+source+'\n---\n', '.nand/content/Old/pic.png': 'original', '.nand/content/New/pic.png': 'different' });
+		const files = contentFiles(vault.app); await files.prepareMetadata();
+		const title = files.getMetadata(files.getFileByPath('.nand/content/Old/Note.md')!)!.frontmatter!.title;
+		await files.rename(files.getFileByPath('.nand/content/Old/Note.md')!, '.nand/content/New/Note.md');
+		const reopened = new ContentFiles(vault.app); await reopened.prepareMetadata();
+		const file = reopened.getFileByPath('.nand/content/New/Note.md')!, metadata = reopened.getMetadata(file)!.frontmatter!;
+		expect(metadata.title).toEqual(title); if ('unknown' in metadata) expect(metadata.unknown).toBe('pic.png');
+		const url = await resolveLibraryCover(extractCoverValue(metadata)!.value, file, vault.app); expect(url).toMatch(/^blob:/);
+		try { expect(await (await fetch(url)).text()).toBe('original'); } finally { URL.revokeObjectURL(url); }
+	}
+});
