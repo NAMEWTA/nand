@@ -24,7 +24,7 @@ let base = '';
 const saved: Record<string, string | undefined> = {};
 
 beforeAll(() => {
-	base = realpathSync(mkdtempSync(path.join(tmpdir(), 'nand-git-')));
+	base = realpathSync.native(mkdtempSync(path.join(tmpdir(), 'nand-git-')));
 	const globalConfig = path.join(base, 'gitconfig');
 	writeFileSync(globalConfig, '[init]\n\tdefaultBranch = main\n[user]\n\tname = Tester\n\temail = tester@example.com\n[commit]\n\tgpgsign = false\n');
 	// The tests never read the developer's own git configuration or credentials.

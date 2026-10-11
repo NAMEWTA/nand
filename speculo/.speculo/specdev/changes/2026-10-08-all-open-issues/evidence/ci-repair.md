@@ -27,3 +27,5 @@ Windows、Node 24.21.0、pnpm 11.1.3。使用 CI 相同的 GIT_CONFIG_COUNT=1、
 ## 远程流水线
 
 修复提交推送后核验 Linux Node 22、Linux Node 24、Windows Node 24；后续完成记录追加最终 run 和结果，不以本地通过冒充远端通过。
+
+首轮修复 [2ce9e6b](https://github.com/NAMEWTA/nand/commit/2ce9e6b49718ac5691085c02db6a6a01412c9c82) 的 [CI 38104470019](https://github.com/NAMEWTA/nand/actions/runs/38104470019)：Linux Node 22/24 全部通过；Windows 剩余 2 项为路径别名。普通 realpathSync 保留 8.3 短名，已改成 realpathSync.native。用本地新建临时目录的真实 8.3 路径复现两种解析结果，在该 TEMP/TMP 及 core.autocrlf=true 下重跑 safety-regressions 和生产 clone 用例，均通过。

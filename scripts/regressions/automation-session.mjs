@@ -14,7 +14,7 @@ const { TerminalAutomationRuntime } = await import(
 const { normalizeAgentSettings } = await import(
 	new URL('./src/modules/agent/core/launch/defaults.ts', pathToFileURL(repo + '/')).href
 );
-const root = fs.realpathSync(fs.mkdtempSync(path.join(tmpdir(), 'nand-native-session-race-')));
+const root = fs.realpathSync.native(fs.mkdtempSync(path.join(tmpdir(), 'nand-native-session-race-')));
 let runtime;
 try {
 	const vault = path.join(root, 'vault');
