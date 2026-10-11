@@ -29,7 +29,7 @@ status: "in_progress"
 | T-01 | <Path>{roots.state}/specdev/changes/2026-10-11-vault-data-unification/ticket/01-durable-storage.md</Path> | 连续保存与故障恢复 | — | deep | high | yes | root | AC-001 | done |
 | T-02 | <Path>{roots.state}/specdev/changes/2026-10-11-vault-data-unification/ticket/02-vault-storage.md</Path> | 统一路径、设备身份与内部状态 | T-01 | deep | high | yes | root | AC-002 | done |
 | T-03 | <Path>{roots.state}/specdev/changes/2026-10-11-vault-data-unification/ticket/03-hidden-content.md</Path> | 隐藏目录中的内容访问和迁移 | T-02 | deep | high | yes | root | AC-003 | done |
-| T-04 | <Path>{roots.state}/specdev/changes/2026-10-11-vault-data-unification/ticket/04-browser-sessions.md</Path> | 浏览器会话与产物进入 vault | T-02 | deep | high | yes | root | AC-004 | in_progress |
+| T-04 | <Path>{roots.state}/specdev/changes/2026-10-11-vault-data-unification/ticket/04-browser-sessions.md</Path> | 浏览器会话与产物进入 vault | T-02 | deep | high | yes | root | AC-004 | review |
 | T-05 | <Path>{roots.state}/specdev/changes/2026-10-11-vault-data-unification/ticket/05-agent-accounts.md</Path> | 账号身份、凭据与终端辅助程序 | T-02 | deep | high | yes | root | AC-005 | ready |
 | T-06 | <Path>{roots.state}/specdev/changes/2026-10-11-vault-data-unification/ticket/06-git-release-gates.md</Path> | Git 冲突判定与发布检查依赖 | — | deep | high | yes | root | AC-006 | ready |
 | T-07 | <Path>{roots.state}/specdev/changes/2026-10-11-vault-data-unification/ticket/07-current-docs.md</Path> | 当前规范中文化与旧文档清理 | T-01, T-02, T-03, T-04, T-05, T-06 | deep | high | yes | root | AC-007 | ready |
