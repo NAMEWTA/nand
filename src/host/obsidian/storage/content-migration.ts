@@ -60,6 +60,7 @@ export async function prepareVaultContent(app: App): Promise<ContentFiles> {
 	const review = reviewStore(app); let unresolved: string[] = [];
 	const discover = async (): Promise<string[]> => {
 		const sources = new Set<string>();
+		const base = await review.load(emptyReview());
 		const settings = await new JsonStore<Record<string, unknown> | null>(privateStorage, '.nand/config/settings.json', (value): value is Record<string, unknown> | null => value === null || !!value && typeof value === 'object' && !Array.isArray(value)).load(null);
 		const namespaces = object(settings?.namespaces), home = object(namespaces.home), browser = object(namespaces.browser);
 		const workspaceFiles: unknown[] = Array.isArray(home.workspaceFiles) ? home.workspaceFiles : [];
@@ -77,7 +78,8 @@ export async function prepareVaultContent(app: App): Promise<ContentFiles> {
 		};
 		await scan('');
 		for (const path of all) {
-			if (boards.has(path) || path === archive && typeof home.taskArchivePath === 'string' && !!home.taskArchivePath.trim() && home.taskArchiveTarget !== 'daily') { sources.add(path); continue; }
+			if (base.ordinary.includes(path)) continue;
+			if (boards.has(path)) { sources.add(path); continue; }
 			if (!path.endsWith('.md')) continue;
 			const text = await adapter.read(path);
 			// Unmarked notes, including earlier ordinary note creation, keep their native ownership.
@@ -91,9 +93,8 @@ export async function prepareVaultContent(app: App): Promise<ContentFiles> {
 				if (['person', 'company'].includes(String(properties['nand-type'])) && path.endsWith('/基本信息.md')) recordFolders.add(path.slice(0, path.lastIndexOf('/')));
 			} else if (path === 'dashboard.md' && properties.dashboard === true) sources.add(path);
 		}
-		for (const path of all) if ([...recordFolders].some(folder => path.startsWith(folder + '/'))) sources.add(path);
+		for (const path of all) if (!base.ordinary.includes(path) && [...recordFolders].some(folder => path.startsWith(folder + '/'))) sources.add(path);
 		for (const source of sources) await guard(source);
-		const base = await review.load(emptyReview());
 		const exportRoot = legacy(browser.workspaceFolder, 'NAND/AI Workspace') + '/Exports/';
 		unresolved = all.filter(path => !sources.has(path) && !base.ordinary.includes(path) && (path === archive || path.startsWith('NAND Exports/') || path.startsWith(exportRoot)));
 		if (JSON.stringify(base.paths) !== JSON.stringify(unresolved)) await review.commit({ base, value: { ...base, paths: unresolved } });

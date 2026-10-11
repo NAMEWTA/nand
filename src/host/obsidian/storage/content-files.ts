@@ -8,7 +8,7 @@ import { patchFrontmatter, readMarkdownDocument, readYaml } from '../../../share
 import { stringify } from 'yaml';
 import { contentDigest, createContentExclusive } from './content-io';
 import { ContentMoves, type LinkEdit } from './content-moves';
-import { rewriteContentLinks } from './content-link-text';
+import type { LinkSyntax } from './content-link-text';
 
 /** A NAND index entry. It is never passed to Obsidian as a TFile. */
 export interface ManagedFile {
@@ -22,7 +22,7 @@ export interface ManagedFile {
 export type ContentFile = ManagedFile | TFile;
 export function isManagedFile(file: ContentFile): file is ManagedFile { return 'kind' in file && file.kind === 'managed'; }
 export interface ContentMetadata {
-	frontmatter?: Record<string, unknown>; tags?: Array<{ tag: string }>; links?: Array<{ link: string }>;
+	frontmatter?: Record<string, unknown>; tags?: Array<{ tag: string }>; links?: Array<{ link: string; syntax?: LinkSyntax }>;
 	headings?: Array<{ heading: string; level: number }>;
 	blocks?: Record<string, { position: { start: { line: number } } }>;
 	listItems?: Array<{ task?: string }>;
@@ -59,15 +59,15 @@ export class ContentFiles {
 		if (isContentPath(target.path)) { if (!this.opener) throw new Error('nand-content.not-ready'); await this.opener(target.path, ownerWindow, path.includes('#') ? path.slice(path.indexOf('#')) : undefined); }
 		else if (target instanceof TFile) await this.app.workspace.openLinkText(target.path + (path.includes('#') ? path.slice(path.indexOf('#')) : ''), '', true);
 	}
-	resolveLink(raw: string, source = ''): ContentFile | null {
+	resolveLink(raw: string, source = '', syntax: LinkSyntax = 'wiki'): ContentFile | null {
 		// Callers opening an indexed path pass a literal filename, not a URL.
-		if (!source) try { const exact = this.getFileByPath(raw); if (exact) return exact; } catch { /* Resolve link syntax below. */ }
+		if (!source && syntax === 'wiki') try { const exact = this.getFileByPath(raw); if (exact) return exact; } catch { /* Resolve link syntax below. */ }
 		let link = raw.split('|')[0]!.split('#')[0]!;
 		if (!link && raw.startsWith('#')) link = source;
 		if (!link || /^[a-z][a-z\d+.-]*:|^[/\\]{2}|^\\/i.test(link)) return null;
 		let decoded = link;
 		try { decoded = decodeURIComponent(link); } catch { /* Literal percent signs are valid filenames. */ }
-		for (const spelling of new Set([link, decoded])) {
+		for (const spelling of new Set(syntax === 'markdown' ? [decoded] : [link, decoded])) {
 			const candidates = [spelling.replace(/^\//, '')];
 			if (source.includes('/') && !spelling.startsWith('/') && !isContentPath(spelling)) {
 				const relative = source.slice(0, source.lastIndexOf('/') + 1) + spelling;
@@ -125,7 +125,7 @@ export class ContentFiles {
 	}
 	private async scan(): Promise<void> {
 			await this.moves.load();
-			await this.moves.recover((path, text) => this.checkEditor(path, text));
+			await this.moves.recover((path, before, after) => this.checkEditor(path, before, undefined, after));
 			const adapter = this.app.vault.adapter, storage = privateVaultStorage(this.app);
 			const next = new Map<string, ManagedFile>();
 			const directories = new Set<string>();
@@ -152,6 +152,14 @@ export class ContentFiles {
 			await visit(CONTENT_ROOT);
 			const previous = this.indexed;
 			const changes: ContentChange[] = [];
+			// Reconcile completed receipts before diffing the index, including recovered moves.
+			for (const { from, to } of this.moves.completed()) {
+				const old = previous.get(from), current = next.get(to);
+				if (old && current && !next.has(from)) {
+					previous.delete(from); Object.assign(old, current); previous.set(to, old);
+					changes.push({ kind: 'rename', path: to, oldPath: from });
+				}
+			}
 			this.indexed = next;
 			this.directories = directories;
 			for (const file of next.values()) {
@@ -181,8 +189,8 @@ export class ContentFiles {
 		}
 		for (const file of this.indexed.values()) {
 			const targets: Record<string, number> = {};
-			for (const { link } of this.getMetadata(file)?.links ?? []) {
-				const target = this.resolveLink(link, file.path);
+			for (const { link, syntax } of this.getMetadata(file)?.links ?? []) {
+				const target = this.resolveLink(link, file.path, syntax);
 				if (target) targets[target.path] = (targets[target.path] ?? 0) + 1;
 			}
 			graph[file.path] = targets;
@@ -192,6 +200,7 @@ export class ContentFiles {
 	/** Only consumers needing properties pay for parsing; normal polling performs no body reads. */
 	async prepareMetadata(): Promise<void> {
 		await this.refresh();
+		const { contentLinkDestinations } = await import('./content-link-text');
 		for (const file of this.indexed.values()) {
 			if (file.extension !== 'md') continue;
 			const stamp = `${file.stat.mtime}:${file.stat.size}`;
@@ -203,7 +212,7 @@ export class ContentFiles {
 				value.frontmatter = (readYaml(document.yaml).toJSON() ?? {}) as Record<string, unknown>;
 			} catch { /* Invalid properties stay unindexed; the document remains readable and editable. */ }
 			value.tags = [...body.matchAll(/(?:^|\s)#([^\s#.,;!?()[\]{}]+)/g)].map(match => ({ tag: '#' + match[1]! }));
-			value.links = [...body.matchAll(/\[\[([^\]]+)\]\]|\]\(([^\s)]+)(?:\s+"[^"]*")?\)/g)].map(match => ({ link: match[1] ?? match[2]! }));
+			value.links = contentLinkDestinations(body);
 			value.headings = []; value.blocks = {}; value.listItems = [];
 			let fenced = false;
 			for (const [line, text] of raw.split('\n').entries()) {
@@ -239,14 +248,16 @@ export class ContentFiles {
 			this.checkEditor(oldPath, await this.read(oldPath));
 			await ensureDirectory(storage, target.slice(0, target.lastIndexOf('/')));
 			const edits: LinkEdit[] = [];
+			const { rewriteContentLinks } = await import('./content-link-text');
 			for (const document of this.getMarkdownFiles()) {
 				const before = await this.read(document);
-				const after = rewriteContentLinks(before, link => {
+				const after = rewriteContentLinks(before, (link, syntax) => {
 					if (!link || link.startsWith('#')) return undefined;
-					const destination = this.resolveLink(link, document.path);
+					const destination = this.resolveLink(link, document.path, syntax);
 					if (!destination || destination.path !== oldPath && document.path !== oldPath) return undefined;
 					const fragment = link.includes('#') ? link.slice(link.indexOf('#')) : '';
-					return '/' + (destination.path === oldPath ? target : destination.path).split('/').map(part => encodeURIComponent(part)).join('/') + fragment;
+					const path = destination.path === oldPath ? target : destination.path;
+					return '/' + (syntax === 'wiki' ? path : path.split('/').map(part => encodeURIComponent(part)).join('/')) + fragment;
 				});
 				if (before !== after) { this.checkEditor(document.path, before); edits.push({ path: document.path, before, after }); }
 			}
@@ -256,19 +267,14 @@ export class ContentFiles {
 			await ensureDirectory(storage, retained.slice(0, retained.lastIndexOf('/')));
 			await this.moves.prepare(oldPath, target, edits, retained, digest);
 			try {
-				for (const edit of edits) await this.moves.apply(edit, true, (path, text) => this.checkEditor(path, text));
-				for (const edit of edits) this.checkEditor(edit.path, edit.before);
+				for (const edit of edits) await this.moves.apply(edit, true, (path, before, after) => this.checkEditor(path, before, undefined, after));
+				for (const edit of edits) this.checkEditor(edit.path, edit.before, undefined, edit.after);
 				if (await contentDigest(this.app, oldPath) !== digest) throw new Error('nand-content.move-source-changed');
 				await this.app.vault.adapter.rename(oldPath, retained);
 				await this.moves.publish();
-			} catch (error) { await this.moves.recover((path, text) => this.checkEditor(path, text)); throw error; }
-			// Announce the pair before the next scan can appear as an unrelated deletion.
-			this.indexed.delete(oldPath);
-			file.path = target;
-			this.indexed.set(target, file);
-			await this.moves.finish();
-			await this.scan();
-			this.emit({ kind: 'rename', path: target, oldPath });
+				await this.moves.finish();
+				await this.scan();
+			} catch (error) { await this.scan(); throw error; }
 		});
 	}
 	async trash(file: ContentFile): Promise<void> {
@@ -308,7 +314,7 @@ export class ContentFiles {
 	async createBinary(path: string, data: ArrayBuffer): Promise<ManagedFile> {
 		const target = contentPath(path);
 		await this.queue.run('nand-content:mutation', async () => {
-			await this.moves.load(); await this.moves.recover((path, text) => this.checkEditor(path, text));
+			await this.moves.load(); await this.moves.recover((path, before, after) => this.checkEditor(path, before, undefined, after));
 			const storage = privateVaultStorage(this.app);
 			if (await storage.exists(target)) throw new Error(`Exists: ${target}`);
 			await ensureDirectory(storage, target.slice(0, target.lastIndexOf('/')));
@@ -349,7 +355,7 @@ export class ContentFiles {
 		const target = contentPath(path);
 		await this.queue.run('nand-content:mutation', async () => {
 			admit();
-			await this.moves.load(); await this.moves.recover((path, text) => this.checkEditor(path, text));
+			await this.moves.load(); await this.moves.recover((path, before, after) => this.checkEditor(path, before, undefined, after));
 			const storage = privateVaultStorage(this.app);
 			if (await storage.exists(target)) throw new Error(`Exists: ${target}`);
 			await ensureDirectory(storage, target.slice(0, target.lastIndexOf('/')));
@@ -370,10 +376,11 @@ export class ContentFiles {
 		if (!native) throw new Error(`Missing document: ${path}`);
 		return this.app.vault.read(native);
 	}
-	checkEditor(path: string, disk: string, owner?: symbol): void {
-		for (const [token, draft] of this.drafts) if (token !== owner && draft.path === path && draft.read() !== disk) throw new Error(`Unsaved editor: ${path}`);
+	checkEditor(path: string, disk: string, owner?: symbol, transactionText?: string): void {
+		const matches = (text: string) => text === disk || transactionText !== undefined && text === transactionText;
+		for (const [token, draft] of this.drafts) if (token !== owner && draft.path === path && !matches(draft.read())) throw new Error(`Unsaved editor: ${path}`);
 		for (const leaf of this.app.workspace.getLeavesOfType('markdown')) {
-			if (leaf.view instanceof MarkdownView && leaf.view.file?.path === path && leaf.view.editor.getValue() !== disk) throw new Error(`Unsaved editor: ${path}`);
+			if (leaf.view instanceof MarkdownView && leaf.view.file?.path === path && !matches(leaf.view.editor.getValue())) throw new Error(`Unsaved editor: ${path}`);
 		}
 	}
 	async process(path: string, update: (text: string | null) => string, owner?: symbol): Promise<string> {
@@ -383,7 +390,7 @@ export class ContentFiles {
 			let result: string;
 			if (isContentPath(path)) {
 				validateNandPath(path);
-				await this.moves.load(); await this.moves.recover((path, text) => this.checkEditor(path, text));
+				await this.moves.load(); await this.moves.recover((path, before, after) => this.checkEditor(path, before, undefined, after));
 				if (await storage.exists(path)) result = await adapter.process(path, apply);
 				else { result = update(null); await ensureDirectory(storage, path.slice(0, path.lastIndexOf('/'))); await this.moves.created(path); await createContentExclusive(this.app, path, result); }
 				await this.scan();

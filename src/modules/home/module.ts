@@ -146,6 +146,7 @@ export default function createHomeModule(context: ModuleContext): ModuleInstance
 				repointAll: () => repointBoards(host),
 				refreshAll: () => host.refreshAllDashboards(),
 			});
+			await boards.recoverMoves();
 			boards.watch(dispose => context.lifetime.register(dispose));
 			app.workspace.onLayoutReady(() => {
 				if (host.boards === boards) void boards.prune();

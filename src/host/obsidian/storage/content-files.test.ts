@@ -1,4 +1,5 @@
 import { expect, test } from 'vitest';
+import { MarkdownView, type WorkspaceLeaf } from 'obsidian';
 import { memoryVault } from '../../../../scripts/fixtures/memory-vault';
 import { ContentFiles, contentFiles } from './content-files';
 
@@ -152,7 +153,7 @@ test('a destination arriving during rename is retained alongside the moved sourc
 });
 
 test('every interrupted rename persistence step recovers consistent references without losing content', async () => {
-	const initial = { '.nand/content/Old.md': '# Original', 'Ref.md': '[[Old]]' };
+	const initial = { '.nand/content/Old.md': '# Original\n![image](image.png)', '.nand/content/image.png': 'image', 'Ref.md': '[[Old]]' };
 	const run = async (failAt = 0, after = false) => {
 		const vault = memoryVault(initial); let files = new ContentFiles(vault.app); await files.refresh();
 		let calls = 0;
@@ -169,7 +170,7 @@ test('every interrupted rename persistence step recovers consistent references w
 		const count = calls;
 		files = new ContentFiles(vault.app); await files.refresh();
 		const destination = vault.contents.has('.nand/content/New.md') ? '.nand/content/New.md' : '.nand/content/Old.md';
-		expect(vault.contents.get(destination)).toBe('# Original');
+		expect(vault.contents.get(destination)).toBe(destination.endsWith('/New.md') ? '# Original\n![image](</.nand/content/image.png>)' : initial['.nand/content/Old.md']);
 		const reference = vault.contents.get('Ref.md')!.slice(2, -2);
 		expect(files.resolveLink(reference, 'Ref.md')?.path).toBe(destination);
 		expect(JSON.parse(vault.contents.get('.nand/content-moves/manifest.json') ?? '{"pending":null}').pending).toBeFalsy();
@@ -177,4 +178,56 @@ test('every interrupted rename persistence step recovers consistent references w
 	};
 	const count = await run();
 	for (let point = 1; point <= count; point++) for (const after of [false, true]) await run(point, after);
+});
+
+test('moving links preserves their parsed targets, syntax and code examples', async () => {
+	const code = '    [[Old/Note]]\n\n> ```md\n> [[Old/Note]]\n> ```\n\n- example\n\n      [[Old/Note]]\n\n``a ` [[Old/Note]]``\n\\[[Old/Note]]';
+	const vault = memoryVault({ '.nand/content/Old/Note.md': '[[A B]]\n[[A%20B]]\n[space](A%20B.md)\n[literal](A%2520B.md)\n![picture](image(1).png)', '.nand/content/Old/A B.md': 'space', '.nand/content/Old/A%20B.md': 'literal', '.nand/content/Old/image(1).png': 'old picture', '.nand/content/New/image(1).png': 'new picture', '.nand/content/Ref.md': '[note](Old/Note.md)', 'Ordinary.md': code + '\n\n[[Old/Note]]' });
+	let files = new ContentFiles(vault.app); await files.prepareMetadata();
+	const outgoing = files.resolvedLinks()['.nand/content/Old/Note.md'];
+	expect(outgoing).toEqual({ '.nand/content/Old/A B.md': 2, '.nand/content/Old/A%20B.md': 2, '.nand/content/Old/image(1).png': 1 });
+	await files.rename(files.getFileByPath('.nand/content/Old/Note.md')!, '.nand/content/New/Note.md');
+	files = new ContentFiles(vault.app); await files.prepareMetadata();
+	expect(files.resolvedLinks()['.nand/content/New/Note.md']).toEqual(outgoing);
+	expect(files.resolvedLinks()['.nand/content/Ref.md']).toEqual({ '.nand/content/New/Note.md': 1 });
+	expect(vault.contents.get('Ordinary.md')).toBe(code + '\n\n[[/.nand/content/New/Note.md]]');
+	expect(await files.read('.nand/content/New/Note.md')).toContain('[[/.nand/content/Old/A B.md]]');
+});
+
+test('clean native editors can follow transaction writes and rollbacks while true dirty editors block them', async () => {
+	for (const rollback of [false, true]) {
+		const vault = memoryVault({ '.nand/content/Old.md': 'original', 'Ref.md': '[[Old]]' });
+		const files = new ContentFiles(vault.app); await files.refresh();
+		const leaf = {} as WorkspaceLeaf;
+		const view = Object.assign(new MarkdownView(leaf), { file: vault.file('Ref.md'), editor: { getValue: () => vault.contents.get('Ref.md')! } });
+		leaf.view = view; vault.app.workspace.getLeavesOfType = () => [leaf];
+		if (rollback) vault.adapter.rename = async () => { throw new Error('move denied'); };
+		const moving = files.rename(files.getFileByPath('.nand/content/Old.md')!, '.nand/content/New.md');
+		if (rollback) await expect(moving).rejects.toThrow('move denied'); else await moving;
+		await files.refresh();
+		expect(vault.contents.get('Ref.md')).toBe(rollback ? '[[Old]]' : '[[/.nand/content/New.md]]');
+	}
+});
+
+test('completed moves emit one rename even when target publication or receipt completion reports failure', async () => {
+	for (const failure of ['copy', 'finish']) {
+		const vault = memoryVault({ '.nand/content/Old.md': 'original', 'Ref.md': '[[Old]]' });
+		const files = new ContentFiles(vault.app); await files.refresh();
+		const events: string[] = []; files.subscribe(event => { if (event.path.startsWith('.nand/content/')) events.push(event.kind); });
+		let failed = false;
+		const copy = vault.adapter.copy, write = vault.adapter.write;
+		vault.adapter.copy = async (from, to) => { await copy(from, to); if (failure === 'copy' && !failed && to === '.nand/content/New.md') { failed = true; throw new Error('copy completed'); } };
+		vault.adapter.write = async (path, text) => { if (failure === 'finish' && !failed && path === '.nand/content-moves/manifest.json' && text.includes('"entries"') && !text.includes('"pending"')) { failed = true; throw new Error('finish denied'); } await write(path, text); };
+		try { await files.rename(files.getFileByPath('.nand/content/Old.md')!, '.nand/content/New.md'); } catch { /* The recovered identity must still reach consumers. */ }
+		await files.refresh();
+		expect(failed).toBe(true);
+		expect(events).not.toContain('delete'); expect(events).not.toContain('create'); expect(events.filter(event => event === 'rename')).toHaveLength(1);
+	}
+});
+
+test('native reference filenames outside the portable owned namespace remain usable', async () => {
+	const vault = memoryVault({ '.nand/content/Old.md': 'target', 'Why?.md': '[[Old]]' }), files = new ContentFiles(vault.app); await files.refresh();
+	await files.rename(files.getFileByPath('.nand/content/Old.md')!, '.nand/content/New.md');
+	await new ContentFiles(vault.app).refresh();
+	expect(vault.contents.get('Why?.md')).toBe('[[/.nand/content/New.md]]');
 });

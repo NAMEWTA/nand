@@ -17,6 +17,9 @@ importers:
       '@codemirror/view':
         specifier: ^6.38.6
         version: 6.38.6
+      '@lezer/markdown':
+        specifier: 1.8.0
+        version: 1.8.0
       '@xterm/addon-fit':
         specifier: ^0.11.0
         version: 0.11.0
@@ -41,6 +44,9 @@ importers:
       chart.js:
         specifier: ^4.5.1
         version: 4.5.1
+      entities:
+        specifier: 8.1.0
+        version: 8.1.0
       lunar-typescript:
         specifier: ^1.8.6
         version: 1.8.6
@@ -418,6 +424,9 @@ packages:
 
   '@lezer/lr@1.4.10':
     resolution: {integrity: sha512-rnCpTIBafOx4mRp43xOxDJbFipJm/c0cia/V5TiGlhmMa+wsSdoGmUN3w5Bqrks/09Q/D4tNAmWaT8p6NRi77A==}
+
+  '@lezer/markdown@1.8.0':
+    resolution: {integrity: sha512-X6w3A2NpyhdtGqTWRJB8gR4QDXBaFMbTOs780ZdZ15KKCfBXOQTKcB3Vr+W6tqJHVlealt53tLmHRvOqPTQgYA==}
 
   '@marijn/find-cluster-break@1.0.2':
     resolution: {integrity: sha512-l0h88YhZFyKdXIFNfSWpyjStDjGHwZ/U7iobcK1cQQD8sejsONdQtTVU+1wVN1PBw40PiiHB1vA5S7VTfQiP9g==}
@@ -2585,6 +2594,11 @@ snapshots:
   '@lezer/lr@1.4.10':
     dependencies:
       '@lezer/common': 1.5.3
+
+  '@lezer/markdown@1.8.0':
+    dependencies:
+      '@lezer/common': 1.5.3
+      '@lezer/highlight': 1.2.4
 
   '@marijn/find-cluster-break@1.0.2': {}
 

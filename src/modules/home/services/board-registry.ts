@@ -40,6 +40,16 @@ export class BoardRegistry implements BoardOperations {
 
 	constructor(private readonly host: BoardRegistryHost) {}
 
+	/** Startup may have completed a move before any module subscribed to content events. */
+	async recoverMoves(): Promise<void> {
+		const files = contentFiles(this.host.app);
+		for (const registered of [...this.host.read().workspaceFiles]) {
+			const source = registered.endsWith('.md') ? registered : registered + '.md';
+			const target = files.resolveLink(source);
+			if (target && target.path !== source) await this.followRename(target, source);
+		}
+	}
+
 	/** Follow renames and deletions of board files in the vault. */
 	watch(register: (dispose: () => void) => void): void {
 		register(contentFiles(this.host.app).subscribe(event => {

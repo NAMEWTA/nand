@@ -17,11 +17,11 @@ risk: "high"
 blocked_by: ["T-02"]
 contract_ids: ["AC-003"]
 owner: "root"
-expected_changes: ["<Path>src/**</Path>","<Path>scripts/**</Path>","<Path>test/**</Path>","<Path>main.js</Path>","<Path>styles.css</Path>"]
-writable_paths: ["<Path>src/**</Path>","<Path>scripts/**</Path>","<Path>test/**</Path>","<Path>main.js</Path>","<Path>styles.css</Path>"]
+expected_changes: ["<Path>src/**</Path>","<Path>scripts/**</Path>","<Path>test/**</Path>","<Path>main.js</Path>","<Path>styles.css</Path>","<Path>package.json</Path>","<Path>pnpm-lock.yaml</Path>","<Path>THIRD-PARTY-NOTICES.md</Path>"]
+writable_paths: ["<Path>src/**</Path>","<Path>scripts/**</Path>","<Path>test/**</Path>","<Path>main.js</Path>","<Path>styles.css</Path>","<Path>package.json</Path>","<Path>pnpm-lock.yaml</Path>","<Path>THIRD-PARTY-NOTICES.md</Path>"]
 read_only_paths: []
-shared_paths: ["<Path>src/**</Path>","<Path>scripts/**</Path>","<Path>test/**</Path>","<Path>main.js</Path>","<Path>styles.css</Path>"]
-shared_path_owners: ["<Path>src/**</Path> => root","<Path>scripts/**</Path> => root","<Path>test/**</Path> => root","<Path>main.js</Path> => root","<Path>styles.css</Path> => root"]
+shared_paths: ["<Path>src/**</Path>","<Path>scripts/**</Path>","<Path>test/**</Path>","<Path>main.js</Path>","<Path>styles.css</Path>","<Path>package.json</Path>","<Path>pnpm-lock.yaml</Path>","<Path>THIRD-PARTY-NOTICES.md</Path>"]
+shared_path_owners: ["<Path>src/**</Path> => root","<Path>scripts/**</Path> => root","<Path>test/**</Path> => root","<Path>main.js</Path> => root","<Path>styles.css</Path> => root","<Path>package.json</Path> => root","<Path>pnpm-lock.yaml</Path> => root","<Path>THIRD-PARTY-NOTICES.md</Path> => root"]
 ---
 
 # T-03 隐藏目录中的内容访问和迁移
@@ -87,3 +87,5 @@ E2E owner/environment: root / current-workspace。提交已获用户授权；imp
 ## 12. 停止、检查点与交付
 
 记录 HEAD、写集和每次验证结果。遇到契约失效或失败则保留证据和可恢复数据，解决后重跑；完成后记录 implementation commit 和 direct-parent result，不将未执行的步骤写为通过。
+
+实施范围补充：第三轮复审发现基于正则的链接改写会触及代码区域、漏掉合法括号地址。使用 MIT 许可的 @lezer/markdown 解析实际链接及代码节点、BSD-2-Clause 许可的 entities 解析 Markdown 字符实体；补充依赖清单、锁文件和生成的第三方声明，由 root 串行更新。功能合同与交付数量不变，包体增量按实际测量记录。

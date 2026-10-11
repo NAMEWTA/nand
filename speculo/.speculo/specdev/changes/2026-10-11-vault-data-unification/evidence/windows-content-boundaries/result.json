@@ -1,0 +1,147 @@
+{
+  "platform": "win32",
+  "rows": [
+    {
+      "name": "native-clean-editor-follows-reference-update",
+      "passed": true
+    },
+    {
+      "name": "ordinary-code-examples-unchanged",
+      "passed": true
+    },
+    {
+      "name": "rewritten-destinations-keep-distinct-identities",
+      "passed": true,
+      "detail": {
+        ".nand/content/Old/A B.md": 2,
+        ".nand/content/Old/A%20B.md": 2,
+        ".nand/content/Old/image(1).svg": 1
+      }
+    },
+    {
+      "name": "real-adapter-recovers-after-moving-a-document-with-outgoing-links",
+      "passed": true
+    },
+    {
+      "name": "ordinary-archive-stays-after-settings-save-and-restart",
+      "passed": true
+    },
+    {
+      "name": "home-activation-recovers-a-board-that-missed-the-rename-event",
+      "passed": true
+    },
+    {
+      "name": "native-click-wiki space",
+      "passed": true,
+      "detail": [
+        {
+          "text": "wiki space",
+          "href": "/.nand/content/Old/A B.md",
+          "data": ".nand/content/Old/A B.md"
+        },
+        {
+          "text": "wiki literal",
+          "href": "/.nand/content/Old/A%20B.md",
+          "data": ".nand/content/Old/A%20B.md"
+        },
+        {
+          "text": "markdown space",
+          "href": "/.nand/content/Old/A B.md",
+          "data": ".nand/content/Old/A B.md"
+        },
+        {
+          "text": "markdown literal",
+          "href": "/.nand/content/Old/A%20B.md",
+          "data": ".nand/content/Old/A%20B.md"
+        }
+      ]
+    },
+    {
+      "name": "native-click-wiki literal",
+      "passed": true,
+      "detail": [
+        {
+          "text": "wiki space",
+          "href": "/.nand/content/Old/A B.md",
+          "data": ".nand/content/Old/A B.md"
+        },
+        {
+          "text": "wiki literal",
+          "href": "/.nand/content/Old/A%20B.md",
+          "data": ".nand/content/Old/A%20B.md"
+        },
+        {
+          "text": "markdown space",
+          "href": "/.nand/content/Old/A B.md",
+          "data": ".nand/content/Old/A B.md"
+        },
+        {
+          "text": "markdown literal",
+          "href": "/.nand/content/Old/A%20B.md",
+          "data": ".nand/content/Old/A%20B.md"
+        }
+      ]
+    },
+    {
+      "name": "native-click-markdown space",
+      "passed": true,
+      "detail": [
+        {
+          "text": "wiki space",
+          "href": "/.nand/content/Old/A B.md",
+          "data": ".nand/content/Old/A B.md"
+        },
+        {
+          "text": "wiki literal",
+          "href": "/.nand/content/Old/A%20B.md",
+          "data": ".nand/content/Old/A%20B.md"
+        },
+        {
+          "text": "markdown space",
+          "href": "/.nand/content/Old/A B.md",
+          "data": ".nand/content/Old/A B.md"
+        },
+        {
+          "text": "markdown literal",
+          "href": "/.nand/content/Old/A%20B.md",
+          "data": ".nand/content/Old/A%20B.md"
+        }
+      ]
+    },
+    {
+      "name": "native-click-markdown literal",
+      "passed": true,
+      "detail": [
+        {
+          "text": "wiki space",
+          "href": "/.nand/content/Old/A B.md",
+          "data": ".nand/content/Old/A B.md"
+        },
+        {
+          "text": "wiki literal",
+          "href": "/.nand/content/Old/A%20B.md",
+          "data": ".nand/content/Old/A%20B.md"
+        },
+        {
+          "text": "markdown space",
+          "href": "/.nand/content/Old/A B.md",
+          "data": ".nand/content/Old/A B.md"
+        },
+        {
+          "text": "markdown literal",
+          "href": "/.nand/content/Old/A%20B.md",
+          "data": ".nand/content/Old/A%20B.md"
+        }
+      ]
+    },
+    {
+      "name": "balanced-parenthesis-image-renders",
+      "passed": true
+    },
+    {
+      "name": "no-runtime-errors",
+      "passed": true,
+      "detail": []
+    }
+  ]
+}
