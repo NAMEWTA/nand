@@ -1,4 +1,4 @@
-=== NAND/阅读/Dune- Book 1-000-dune/书籍.md ===
+=== .nand/content/NAND/阅读/Dune- Book 1-000-dune/书籍.md ===
 ---
 nand-type: book
 nand-id: book-0000-0000-dune
@@ -13,7 +13,7 @@ totalPages: 612
 finished: false
 ---
 
-=== NAND/阅读/记录/2026/2026-10-04.md ===
+=== .nand/content/NAND/阅读/记录/2026/2026-10-04.md ===
 ---
 nand-type: reading-records
 nand-id: reading:2026-10-04

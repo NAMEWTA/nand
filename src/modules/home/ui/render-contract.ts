@@ -1,5 +1,6 @@
 import type { BoardTile } from '../core/board/types/model';
 import type { TFile } from 'obsidian';
+import type { ContentFile } from '../../../host/obsidian/storage/content-files';
 import type {
 	BoardLayout,
 	CardSize,
@@ -22,7 +23,7 @@ export interface RenderCallbacks {
 	onPipelineConfigChange?(columnName: string, config: import('../core/board/types/model').PipelineConfig): Promise<void>;
 	onPipelineSkill?(columnName: string, skillId: string, stageId: string, path?: string, input?: string, signal?: AbortSignal): Promise<void>;
 	/** subpath is the raw `#heading` / `#^block` fragment of a wikilink, when present. */
-	onOpenNoteInPopover(this: void, file: TFile, subpath?: string): void;
+	onOpenNoteInPopover(this: void, file: ContentFile, subpath?: string): void;
 	/** Open a note scrolled to a 1-based line (calendar section/agenda task jumps). */
 	onOpenNoteAtLine?(this: void, file: TFile, line?: number): void;
 	onCardDelete(cardId: string): void;

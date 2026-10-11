@@ -296,6 +296,7 @@ export class ContactsApplication {
 	async create(draft: ArchiveRecord): Promise<ArchiveRecord> {
 		const root = this.root;
 		return this.queue.run('create', async () => {
+			await this.files.ready();
 			this.guard();
 			if (root !== this.root) throw new ContactsError('folderChanged');
 			validateRecord(draft);

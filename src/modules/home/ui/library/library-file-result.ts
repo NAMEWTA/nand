@@ -1,5 +1,7 @@
+import { CONTENT_ROOT, contentPath } from '../../../../shared/storage/content-paths';
+import { contentFiles, type ContentFile } from '../../../../host/obsidian/storage/content-files';
 import { bindLocalizedElement } from '../../../../ui/primitives/localized-dom';
-import { App, TFile } from 'obsidian';
+import { App } from 'obsidian';
 import type { LibraryConfig, PropertyFilter } from '../../core/board/types/index';
 import { isUnderExcludedFolder, normalizeExcludeFolders } from '../../../../shared/exclude-folders';
 import { getLanguage, t } from '../../../../shared/i18n/index';
@@ -10,7 +12,7 @@ import { applyModalTheme } from '../appearance/modal-theme';
 // without threading these through every function signature. Mirrors the
 // renderer.ts module-level idiom.
 export interface LibraryFileResult {
-	file: TFile;
+	file: ContentFile;
 	basename: string;
 	mtime: number;
 	ctime: number;
@@ -27,9 +29,9 @@ export function extractFrontmatterProperties(app: App): Map<string, Set<string>>
 	props.set('created', new Set());
 	props.set('path', new Set());
 
-	for (const file of app.vault.getMarkdownFiles()) {
+	for (const file of contentFiles(app).getMarkdownFiles()) {
 		if (file.path.startsWith('.')) continue;
-		const cache = app.metadataCache.getFileCache(file);
+		const cache = contentFiles(app).getMetadata(file);
 		if (!cache?.frontmatter) continue;
 
 		const fm = cache.frontmatter;
@@ -42,7 +44,7 @@ export function extractFrontmatterProperties(app: App): Map<string, Set<string>>
 					if (item != null) set.add(String(item));
 				}
 			} else if (value != null) {
-				set.add(String(value));
+				set.add(str(value));
 			}
 		}
 
@@ -52,7 +54,7 @@ export function extractFrontmatterProperties(app: App): Map<string, Set<string>>
 			if (Array.isArray(fm.tags)) {
 				for (const tag of fm.tags) tagsSet.add(String(tag));
 			} else {
-				tagsSet.add(String(fm.tags));
+				tagsSet.add(str(fm.tags));
 			}
 		}
 		if (cache.tags) {
@@ -85,13 +87,13 @@ export function renderTagsSelector(
 	}
 }
 export function queryVaultFiles(app: App, config: LibraryConfig): LibraryFileResult[] {
-	const files = app.vault.getMarkdownFiles();
+	const files = contentFiles(app).getMarkdownFiles();
 	const results: LibraryFileResult[] = [];
 
 	// Folder section: restrict to files under any configured folder (recursive, OR).
 	const scanFolders = (config.folders ?? [])
 		.map((f) => f.trim().replace(/^\/+|\/+$/g, ''))
-		.filter((f) => f.length > 0);
+		.filter((f) => f.length > 0).flatMap(folder => [folder, contentPath(folder)]);
 
 	// Excluded folders: files inside them never reach the section (library scans
 	// and folder sections alike).
@@ -99,15 +101,15 @@ export function queryVaultFiles(app: App, config: LibraryConfig): LibraryFileRes
 
 	for (const file of files) {
 		if (file.path.startsWith('.')) continue;
-		if (isUnderExcludedFolder(file.path, excluded)) continue;
+		if (isUnderExcludedFolder(file.path, excluded) || isUnderExcludedFolder(file.path.replace(CONTENT_ROOT + '/', ''), excluded)) continue;
 
 		if (scanFolders.length > 0) {
 			const lp = file.path.toLowerCase();
 			if (!scanFolders.some((f) => lp.startsWith(f.toLowerCase() + '/'))) continue;
 		}
 
-		const cache = app.metadataCache.getFileCache(file);
-		const fm = (cache?.frontmatter ?? {}) as Record<string, unknown>;
+		const cache = contentFiles(app).getMetadata(file);
+		const fm = cache?.frontmatter ?? {};
 
 		// Apply filters (AND logic)
 		let matches = true;
@@ -141,10 +143,10 @@ export function queryVaultFiles(app: App, config: LibraryConfig): LibraryFileRes
 	return results;
 }
 function evaluateFilter(
-	file: TFile,
+	file: ContentFile,
 	fm: Record<string, unknown>,
 	filter: PropertyFilter,
-	cache: ReturnType<typeof import('obsidian').App.prototype.metadataCache.getFileCache>,
+	cache: import('../../../../host/obsidian/storage/content-files').ContentMetadata | null,
 ): boolean {
 	if (filter.values.length === 0 && !filter.dateRange) return true;
 
@@ -218,12 +220,12 @@ export function localDateKey(ts: number): string {
 	const day = String(d.getDate()).padStart(2, '0');
 	return `${d.getFullYear()}-${m}-${day}`;
 }
-export async function loadPreview(app: App, file: TFile): Promise<string> {
-	const cache = app.metadataCache.getFileCache(file);
+export async function loadPreview(app: App, file: ContentFile): Promise<string> {
+	const cache = contentFiles(app).getMetadata(file);
 	const position = cache?.frontmatter?.position as { end: { line: number } } | undefined;
 	if (!position) return '';
 	const startLine = position.end.line + 1;
-	const raw = await app.vault.cachedRead(file);
+	const raw = await contentFiles(app).read(file);
 	const lines = raw.split('\n');
 	const previewLines: string[] = [];
 	for (let i = startLine; i < lines.length && previewLines.length < 3; i++) {

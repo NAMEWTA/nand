@@ -26,12 +26,14 @@ import { collectReferences } from '../host/obsidian/references';
 import { registerCopyCommands } from './copy-commands';
 import { BROWSER_OPEN, type BrowserOpenRequest } from '../modules/browser/api';
 import { desktopMachineIdentity, initializeDevice, vaultIdentity } from '../host/obsidian/storage/device-id';
+import type { ContentFiles } from '../host/obsidian/storage/content-files';
 
 /**
  * Composition root. Module code is created by the module registry from `MANIFESTS`; this class keeps the
  * settings runtime, native registrations and the host members panels call.
  */
 export default class DashboardPlugin extends Plugin {
+	managedContent!: ContentFiles;
 	override addCommand(command: LocalizedCommand): Command {
 		return registerLocalizedCommand(this, command, (native) => super.addCommand(native));
 	}
@@ -52,6 +54,8 @@ export default class DashboardPlugin extends Plugin {
 			label: t('storage.defaultDevice'),
 			chooseDevice: async devices => (await import('./device-choice')).chooseVaultDevice(this.app, devices),
 		});
+		try { this.managedContent = await (await import('../host/obsidian/storage/content-migration')).prepareVaultContent(this.app); }
+		catch (error) { new Notice(t('content.migrationFailed', { error: error instanceof Error ? error.message : String(error) }), 0); throw error; }
 		await this.loadSettings();
 		new ThemeRuntime(this.runtime.theme).attach(this);
 		const adapter = this.app.vault.adapter as { getBasePath?: () => string };
@@ -121,6 +125,13 @@ export default class DashboardPlugin extends Plugin {
 		this.settingsTab = new NandSettingTab(this.app, this);
 		this.addSettingTab(this.settingsTab);
 		this.workbench = composeWorkbench(this);
+		const files = this.managedContent;
+		this.register(files.bindOpen((path, ownerWindow, focusId) => this.openWorkbench({ feature: 'content', resourceId: path, focusId }, ownerWindow)));
+		this.register(files.watch(window, error => { console.error('[NAND content]', error); new Notice(t('content.indexFailed')); }));
+		this.register(files.subscribe(() => this.workbench?.refresh()));
+		const links = await import('../host/obsidian/storage/content-links');
+		this.registerMarkdownPostProcessor((element, context) => links.renderContentLinks(this.app, element, context.sourcePath));
+		this.registerDomEvent(this.app.workspace.containerEl, 'click', event => { links.handleContentLink(this.app, event); }, true);
 		this.register(this.runtime.store.onPersisted(() => this.workbench?.refresh()));
 		this.app.workspace.onLayoutReady(() => {
 			this.rewriteDeferredLeafTitles();

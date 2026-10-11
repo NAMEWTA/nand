@@ -1,5 +1,5 @@
 import { expect, test, vi } from 'vitest';
-import { MarkdownView } from 'obsidian';
+import { contentFiles } from '../../../host/obsidian/storage/content-files';
 import { memoryVault } from '../../../../scripts/fixtures/memory-vault';
 import { registerMessages, setLanguage } from '../../../shared/i18n';
 import { parseDocumentValue } from '../../../shared/storage/document-repository';
@@ -27,18 +27,18 @@ function newsVault(initial: Parameters<typeof memoryVault>[0] = {}) {
 
 test('custom folders affect new notes while tagged favorites and editions keep identity across moves and restart', async () => {
 	const vault = newsVault(), item = await material();
-	const folders = { favoriteFolder: 'Reading/Saved', editionFolder: 'Reading/Daily' };
+	const folders = { favoriteFolder: '.nand/content/Reading/Saved', editionFolder: '.nand/content/Reading/Daily' };
 	const notes = new NewsNotebook(newsNotePort(vault.app, () => folders), () => undefined, () => folders);
 	await notes.ready; await notes.save(item, 'Reader annotation');
-	const saved = notes.path(item.id)!; expect(saved.startsWith('Reading/Saved/')).toBe(true);
+	const saved = notes.path(item.id)!; expect(saved.startsWith('.nand/content/Reading/Saved/')).toBe(true);
 	const edition = buildDailyEdition({ materials: [], analyses: [], sources: [], events: emptyEvents(), previous: [], evidence: [] }, Date.UTC(2026, 9, 9, 12));
 	await notes.saveEdition(edition, [], [], []);
-	const original = `Reading/Daily/${edition.date}.md`, moved = 'Personal/News journal.md';
+	const original = `.nand/content/Reading/Daily/${edition.date}.md`, moved = '.nand/content/Personal/News journal.md';
 	await vault.adapter.write(moved, vault.contents.get(original)! + '\nJournal annotation\n'); vault.contents.delete(original); vault.emit('rename', vault.file(moved), original);
-	folders.favoriteFolder = 'New/Favorites'; folders.editionFolder = 'New/Daily';
+	folders.favoriteFolder = '.nand/content/New/Favorites'; folders.editionFolder = '.nand/content/New/Daily';
 	await notes.save({ ...item, title: 'Updated' }, ''); await notes.saveEdition(edition, [], [], []);
 	expect(notes.path(item.id)).toBe(saved); expect(vault.contents.get(saved)).toContain('Reader annotation');
-	expect(vault.contents.get(moved)).toContain('Journal annotation'); expect(vault.contents.has(`New/Daily/${edition.date}.md`)).toBe(false);
+	expect(vault.contents.get(moved)).toContain('Journal annotation'); expect(vault.contents.has(`.nand/content/New/Daily/${edition.date}.md`)).toBe(false);
 	await notes.dispose();
 	const restarted = new NewsNotebook(newsNotePort(vault.app, () => folders), () => undefined, () => folders); await restarted.ready;
 	expect(restarted.path(item.id)).toBe(saved); await restarted.saveEdition(edition, [], [], []);
@@ -50,7 +50,7 @@ test('custom folders affect new notes while tagged favorites and editions keep i
 });
 
 test('renamed brief notes remain authoritative after restart and story merge, preserving reader edits', async () => {
-	const renamed = 'NAND/新闻/简报/自定义名称.md';
+	const renamed = '.nand/content/NAND/新闻/简报/自定义名称.md';
 	const vault = newsVault({ [renamed]: serializeBrief('old-story', 'Old title', 'Old body', 'My annotations') });
 	const notes = new NewsNotebook(newsNotePort(vault.app), () => undefined);
 	await notes.ready;
@@ -98,7 +98,7 @@ test('the Vault notebook handles filename collisions and renames, and rediscover
 	expect(path).not.toBe(first);
 	expect(vault.contents.get(first)).toBe('# An unrelated user note\n');
 	expect([...vault.contents.values()].filter(text => text.includes('nand-type: news'))).toHaveLength(1);
-	const renamed = 'NAND/新闻/收藏/我的文件.md';
+	const renamed = '.nand/content/NAND/新闻/收藏/我的文件.md';
 	await vault.adapter.write(renamed, vault.contents.get(path)!);
 	vault.contents.delete(path);
 	vault.emit('rename', vault.file(renamed), path);
@@ -123,19 +123,17 @@ test('an unsaved editor or changed generated region prevents overwriting the not
 	const vault = newsVault({ [path]: original });
 	const notes = new NewsNotebook(newsNotePort(vault.app), () => undefined);
 	await notes.ready;
-	const view = Object.create(MarkdownView.prototype) as MarkdownView;
 	let editor = original;
-	Object.assign(view, { file: vault.file(path), editor: { getValue: () => editor } });
-	vi.spyOn(vault.app.workspace, 'getLeavesOfType').mockReturnValue([{ view } as never]);
-	const process = vault.app.vault.process.bind(vault.app.vault);
-	vi.spyOn(vault.app.vault, 'process').mockImplementation((file, update) => {
-		// The edit arrives after the save action starts, before Vault applies its atomic update.
+	const claim = contentFiles(vault.app).claimDraft(path, () => editor);
+	const process = vault.adapter.process.bind(vault.adapter);
+	vi.spyOn(vault.adapter, 'process').mockImplementation((file, update) => {
+		// The draft changes after admission, before the adapter applies the atomic update.
 		editor = original + ' unsaved';
 		return process(file, update);
 	});
-	await expect(notes.save({ ...item, title: 'Replace' }, '')).rejects.toThrow('news.note.unsaved');
+	await expect(notes.save({ ...item, title: 'Replace' }, '')).rejects.toThrow('Unsaved editor');
 	expect(vault.contents.get(path)).toBe(original);
-	vi.restoreAllMocks();
+	vi.restoreAllMocks(); claim.release();
 	const edited = original.replace('A short excerpt', 'Reader correction');
 	await vault.adapter.write(path, edited);
 	await expect(notes.save(item, '')).rejects.toThrow('news.note.edited');

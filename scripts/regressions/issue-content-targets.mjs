@@ -7,7 +7,7 @@ import { generateDefaultMarkdown } from '../../src/modules/home/core/board/parse
 import { parse, serialize } from '../../src/modules/home/core/board/parser/index.ts';
 import { DashboardAutomationSource } from '../../src/modules/home/platform/board/automation.ts';
 import { setLanguage } from '../../src/shared/i18n/index.ts';
-import { TFile } from '../obsidian-stub.ts';
+import { memoryVault } from '../fixtures/memory-vault.ts';
 import fs from 'node:fs';
 
 for (const [section, type, expected] of [['todo','task',true],['sticky','task',true],['sticky','note',false],['memo','task',false],['projects','project',false],['projects','task',true],['todo','web',false],['todo','weather',false],['todo','tracker',false],['library','task',false]]) {
@@ -19,7 +19,7 @@ for (const p of ['NAND/习惯/a/习惯.md','NAND/番茄钟/活动.md','NAND/记�
 for (const p of ['NAND/技术笔记/note.md','NAND-笔记/习惯.md','Notes/活动.md','Notes/dashboard.md','Notes/2026-10-04.md','People/个人档案/A/资料.md','People/个人档案/A/sub/基本信息.md']) test('keep user material ' + p,()=>assert.equal(isRecentUserDocument(p,scope),true));
 test('custom roots and workspace preferences are evaluated, not cached globally',()=>{assert.equal(isRecentUserDocument('People/个人档案/A/基本信息.md',{contacts:{rootFolder:'Elsewhere'}}),true); assert.equal(isRecentUserDocument('Boards/Current.md',{}),true);});
 test('new defaults are language neutral and three recent-document call sites pass their host scope',()=>{
-  assert.equal(DEFAULT_TASK_ARCHIVE_PATH,'Archive/Done.md');assert.equal(DEFAULT_HIGHLIGHT_IMPORT_PATH,'Weread/Highlights');
+  assert.equal(DEFAULT_TASK_ARCHIVE_PATH,'.nand/content/Archive/Done.md');assert.equal(DEFAULT_HIGHLIGHT_IMPORT_PATH,'.nand/content/Weread/Highlights');
   for(const file of ['sidebar.ts','mobile.ts','vault-refresh.ts']) assert.ok(fs.readFileSync('src/modules/home/ui/view/'+file,'utf8').includes('getRecentDocs(this.app, this.plugin.settings.recentDocCount, this.plugin.settings)'));
 });
 for (const language of ['zh','en','zh']) test('default document uses creation-time language '+language,()=>{
@@ -32,10 +32,11 @@ for (const language of ['zh','en','zh']) test('default document uses creation-ti
 });
 function sourceFixture(){
   setLanguage('en');let disk=generateDefaultMarkdown(),enabled=true;
-  const file=Object.assign(new TFile(),{path:'Board.md',basename:'Board',stat:{mtime:1,size:1}});
-  const app={workspace:{getLeavesOfType:()=>[]},vault:{getFileByPath:p=>p==='Board.md'?file:null,read:async()=>disk,process:async(_f,fn)=>{disk=fn(disk);return disk;}}};
+  const fixture=memoryVault({'.nand/content/Board.md':disk}), app=fixture.app;
+  const originalProcess=fixture.adapter.process.bind(fixture.adapter);
+  fixture.adapter.process=async(path,update)=>{const result=await originalProcess(path,update);disk=fixture.contents.get('.nand/content/Board.md');return result;};
   const source=new DashboardAutomationSource(app,()=>({dashboardFile:'Board',workspaceFiles:[]}), 'test',async()=>{},()=>enabled);
-  return {source,get disk(){return disk;},set disk(value){disk=value;},disable(){enabled=false;}};
+  return {source,get disk(){return disk;},set disk(value){disk=value;fixture.contents.set('.nand/content/Board.md',value);},disable(){enabled=false;}};
 }
 test('only two default targets and direct delivery cannot write a memo',async()=>{
   const f=sourceFixture();assert.deepEqual((await f.source.targets()).map(t=>t.cardId),['demo-todo-1','demo-todo-2']);

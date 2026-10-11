@@ -1,4 +1,5 @@
-import type { App, TFile } from 'obsidian';
+import { contentFiles, type ContentFile } from '../../../../host/obsidian/storage/content-files';
+import type { App } from 'obsidian';
 import { AutomationError } from '../../../../shared/automation/errors';
 import { isDefinition } from '../../../../shared/automation/metadata';
 import type { AutomationDefinition, SourceRef } from '../../../../shared/automation/types';
@@ -17,6 +18,7 @@ export class PipelineAutomationSource {
 	constructor(private readonly app: App) { this.vault = new PipelineVault(app); }
 	async list(scopes: readonly PipelineScope[]): Promise<AutomationDefinition[]> {
 		const definitions = new Map<string, AutomationDefinition>(), bindings = new Map<string, Binding>(), duplicates = new Set<string>();
+		await contentFiles(this.app).prepareMetadata();
 		for (const scope of scopes) for (const candidate of this.vault.scan(scope.config)) {
 			if (!isDefinition(candidate.frontmatter.nandAutomation)) continue;
 			const { note } = await this.vault.read(candidate.path);
@@ -33,9 +35,9 @@ export class PipelineAutomationSource {
 		this.bindings = bindings;
 		return [...definitions.values()];
 	}
-	resolve(source: SourceRef): TFile {
+	resolve(source: SourceRef): ContentFile {
 		const binding = this.bindings.get(source.id);
-		const file = binding?.boardPath === source.path ? this.app.vault.getFileByPath(binding.notePath) : null;
+		const file = binding?.boardPath === source.path ? contentFiles(this.app).getFileByPath(binding.notePath) : null;
 		if (!file) throw new AutomationError('sourceMissing');
 		return file;
 	}

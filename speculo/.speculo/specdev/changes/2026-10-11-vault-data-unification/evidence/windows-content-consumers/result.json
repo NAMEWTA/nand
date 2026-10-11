@@ -1,0 +1,41 @@
+{
+  "platform": "win32",
+  "rows": [
+    {
+      "name": "board-edits-hidden-default-document",
+      "passed": true
+    },
+    {
+      "name": "new-board-is-hidden-and-indexed",
+      "passed": true
+    },
+    {
+      "name": "native-archive-create-writes-markdown",
+      "passed": true
+    },
+    {
+      "name": "archive-attached-note-is-managed",
+      "passed": true
+    },
+    {
+      "name": "news-favorite-is-hidden-markdown",
+      "passed": true
+    },
+    {
+      "name": "no-errors-before-restart",
+      "passed": true
+    },
+    {
+      "name": "archive-identity-survives-restart",
+      "passed": true
+    },
+    {
+      "name": "board-registry-survives-restart",
+      "passed": true
+    },
+    {
+      "name": "no-errors-after-restart",
+      "passed": true
+    }
+  ]
+}

@@ -1,4 +1,5 @@
-import { Notice, TFile } from 'obsidian';
+import { contentFiles } from '../../../../host/obsidian/storage/content-files';
+import { Notice } from 'obsidian';
 import { render } from 'preact';
 import { useEffect, useRef, useState } from 'preact/hooks';
 import { getLanguage, t } from '../../../../shared/i18n/index';
@@ -201,10 +202,10 @@ function HistoryPreview({ controller, historyKey, back }: { controller: AgentCon
 		void controller
 			.history()
 			.export(row)
-			.then(async (file: TFile) => {
+			.then(async (file) => {
 				new Notice(t('agent.exported', { path: file.path }));
 				try {
-					await controller.app.workspace.getLeaf('tab').openFile(file);
+					await contentFiles(controller.app).open(file.path);
 				} catch (reason) {
 					new Notice(t('agent.exportOpenFailed', { path: file.path, message: reason instanceof Error ? reason.message : String(reason) }));
 				}

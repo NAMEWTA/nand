@@ -1,8 +1,8 @@
-import { Component, MarkdownView, TFile, TFolder, type App } from 'obsidian';
+import { Component, type App } from 'obsidian';
+import { contentFiles } from '../../../host/obsidian/storage/content-files';
 import { ContactsApplication } from '../core/application';
-import type { ContactsFile, ContactsFiles } from '../core/files';
+import type { ContactsFiles } from '../core/files';
 import { ContactsError } from '../core/model';
-import type { ArchiveFolderEntry } from '../core/resources';
 import guide from '../core/persist/format-guide.md';
 import englishGuide from '../core/persist/format-guide-en.md';
 import type { ContactsSettings } from '../../../shared/contacts-settings';
@@ -10,15 +10,13 @@ import { getLanguage } from '../../../shared/i18n';
 /** Native lifecycle, Vault IO and protection of unsaved editor content. */
 export class ContactsController extends Component {
 	private readonly application: ContactsApplication;
+	private unsubscribe?: () => void;
 	constructor(
 		readonly app: App,
 		getSettings: () => ContactsSettings,
 	) {
 		super();
-		const native = (file: ContactsFile): TFile => {
-			if (!(file instanceof TFile)) throw new ContactsError('missing');
-			return file;
-		};
+		const content = contentFiles(app);
 		const files: ContactsFiles = {
 			get formatGuide() {
 				return getLanguage() === 'en' ? englishGuide : guide;
@@ -26,27 +24,22 @@ export class ContactsController extends Component {
 			ready: async () => {
 				if (!app.workspace.layoutReady)
 					await new Promise<void>((resolve) => app.workspace.onLayoutReady(resolve));
+				await content.refresh();
 			},
-			getMarkdownFiles: () => app.vault.getMarkdownFiles(),
-			getFileByPath: (path) => app.vault.getFileByPath(path),
-			getAbstractFileByPath: (path) => app.vault.getAbstractFileByPath(path),
-			read: (file) => app.vault.read(native(file)),
-			cachedRead: (file) => app.vault.cachedRead(native(file)),
-			process: (file, update) => app.vault.process(native(file), update),
-			create: (path, content) => app.vault.create(path, content),
-			createBinary: (path, content) => app.vault.createBinary(path, content),
-			listFolder: (path) => this.listFolder(path),
-			trashFolder: async (path) => {
-				const folder = app.vault.getAbstractFileByPath(path);
-				if (!(folder instanceof TFolder)) throw new ContactsError('missing');
-				await app.fileManager.trashFile(folder);
-			},
-			checkFolderEditors: (path) => this.checkFolderEditors(path),
-			createFolder: async (path) => {
-				await app.vault.createFolder(path);
-			},
-			mkdir: (path) => this.mkdir(path),
-			checkEditor: (file, disk) => this.checkEditor(native(file), disk),
+			getMarkdownFiles: () => content.getMarkdownFiles(),
+			getFileByPath: path => content.getFileByPath(path),
+			getAbstractFileByPath: path => content.getAbstractFileByPath(path),
+			read: file => content.read(file.path),
+			cachedRead: file => content.read(file.path),
+			process: (file, update) => content.process(file.path, latest => { if (latest === null) throw new ContactsError('missing'); return update(latest); }),
+			create: (path, text) => content.create(path, text),
+			createBinary: (path, bytes) => content.createBinary(path, bytes),
+			listFolder: path => content.listFolder(path),
+			trashFolder: path => content.trashFolder(path),
+			checkFolderEditors: async path => { try { await content.checkFolderEditors(path); } catch { throw new ContactsError('editorConflict'); } },
+			createFolder: path => content.createFolder(path),
+			mkdir: path => content.mkdir(path),
+			checkEditor: (file, disk) => { try { content.checkEditor(file.path, disk); } catch { throw new ContactsError('editorConflict'); } },
 		};
 		this.application = new ContactsApplication(files, getSettings);
 	}
@@ -67,21 +60,16 @@ export class ContactsController extends Component {
 	}
 	onload(): void {
 		this.application.activate();
-		const refresh = (file: unknown) => {
-			if (file instanceof TFile) this.application.fileChanged(file);
-		};
-		this.registerEvent(this.app.vault.on('create', refresh));
-		this.registerEvent(this.app.vault.on('modify', refresh));
-		this.registerEvent(
-			this.app.vault.on('delete', (file) => this.application.fileDeleted(file.path, !(file instanceof TFile))),
-		);
-		this.registerEvent(
-			this.app.vault.on('rename', (file, oldPath) =>
-				this.application.fileRenamed(file instanceof TFile ? file : null, oldPath, file.path),
-			),
-		);
+		const content = contentFiles(this.app);
+		this.unsubscribe = content.subscribe(event => {
+			const file = content.getFileByPath(event.path);
+			if (event.kind === 'delete') this.application.fileDeleted(event.path, false);
+			else if (event.kind === 'rename') this.application.fileRenamed(file, event.oldPath!, event.path);
+			else if (file) this.application.fileChanged(file);
+		});
 	}
 	onunload(): void {
+		this.unsubscribe?.(); this.unsubscribe = undefined;
 		this.application.dispose();
 	}
 	saveReminder = (
@@ -114,58 +102,4 @@ export class ContactsController extends Component {
 	countFolder = (
 		...args: Parameters<ContactsApplication['countFolder']>
 	): ReturnType<ContactsApplication['countFolder']> => this.application.countFolder(...args);
-	private checkEditor(file: TFile, disk: string): void {
-		for (const leaf of this.app.workspace.getLeavesOfType('markdown')) {
-			if (
-				leaf.view instanceof MarkdownView &&
-				leaf.view.file === file &&
-				leaf.view.getMode() === 'source' &&
-				leaf.view.editor.getValue() !== disk
-			)
-				throw new ContactsError('editorConflict');
-		}
-	}
-	private listFolder(path: string): ArchiveFolderEntry[] {
-		const folder = this.app.vault.getAbstractFileByPath(path);
-		if (!(folder instanceof TFolder)) throw new ContactsError('missing');
-		const entries: ArchiveFolderEntry[] = [];
-		const pending = [...folder.children];
-		while (pending.length) {
-			const entry = pending.pop()!;
-			if (entry instanceof TFolder) {
-				entries.push({ path: entry.path, folder: true, size: 0, modified: 0 });
-				pending.push(...entry.children);
-			} else if (entry instanceof TFile)
-				entries.push({ path: entry.path, folder: false, size: entry.stat.size, modified: entry.stat.mtime });
-		}
-		return entries;
-	}
-	private async checkFolderEditors(path: string): Promise<void> {
-		for (const leaf of this.app.workspace.getLeavesOfType('markdown')) {
-			const view = leaf.view;
-			if (
-				!(view instanceof MarkdownView) ||
-				!view.file?.path.startsWith(path + '/') ||
-				view.getMode() !== 'source'
-			)
-				continue;
-			const file = view.file;
-			this.checkEditor(file, await this.app.vault.read(file));
-		}
-	}
-	private async mkdir(path: string): Promise<void> {
-		let current = '';
-		for (const segment of path.split('/')) {
-			current = current ? current + '/' + segment : segment;
-			const existing = this.app.vault.getAbstractFileByPath(current);
-			if (existing && !(existing instanceof TFolder)) throw new ContactsError('invalidFolder');
-			if (!existing) {
-				try {
-					await this.app.vault.createFolder(current);
-				} catch (error) {
-					if (!(this.app.vault.getAbstractFileByPath(current) instanceof TFolder)) throw error;
-				}
-			}
-		}
-	}
 }

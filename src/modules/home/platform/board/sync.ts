@@ -6,6 +6,7 @@ import type { BoardTile, BoardWidgetMember } from '../../core/board/types/model'
 import { DASHBOARD_CONFLICT_DIR, DashboardSaveError, dashboardSaveMessage, type DashboardSaveState, type DashboardSaveStatus } from '../../core/board/save-state';
 import { ensureDirectory } from '../../../../shared/storage/durable-state';
 import { privateVaultStorage } from '../../../../host/obsidian/storage/private-storage';
+import { contentFiles, type ContentFile } from '../../../../host/obsidian/storage/content-files';
 import { App, Notice, TFile, TFolder } from 'obsidian';
 import { renamedImagePath } from '../../core/board/focal-point';
 import { moveBeside, moveToOwnRow, unpartnerAt } from '../../core/board/column-pairs';
@@ -118,7 +119,7 @@ export class SyncEngine {
 
 	private app: App;
 	private settings: DashboardSettings;
-	private file: TFile | null = null;
+	private file: ContentFile | null = null;
 	private data: DashboardData | null = null;
 	private debounceTimer: number | null = null;
 	private readonly debounceMs = 300;
@@ -135,7 +136,7 @@ export class SyncEngine {
 		remote: string;
 	} | null = null;
 	private callbacks: DataCallback[] = [];
-	private eventRef: ReturnType<typeof this.app.vault.on> | null = null;
+	private contentUnsubscribe: (() => void) | null = null;
 	private static readonly BACKUP_DIR = '.nand/recovery/dashboard';
 	private static readonly MAX_BACKUPS = 5;
 
@@ -182,10 +183,7 @@ export class SyncEngine {
 	/** Detach the vault modify/rename watchers. Called on destroy and before
 	    re-pointing the engine at another workspace file (switchFile). */
 	private unregisterFileWatchers(): void {
-		if (this.eventRef) {
-			this.app.vault.offref(this.eventRef);
-			this.eventRef = null;
-		}
+		this.contentUnsubscribe?.(); this.contentUnsubscribe = null;
 		if (this.renameEventRef) {
 			this.app.vault.offref(this.renameEventRef);
 			this.renameEventRef = null;
@@ -213,9 +211,10 @@ export class SyncEngine {
 		const task = this.writeQueue.then(async () => {
 			try {
 				const revision = this.localRevision;
-				const file = this.file && this.app.vault.getFileByPath(this.file.path);
+				await contentFiles(this.app).refresh();
+				const file = this.file && contentFiles(this.app).getFileByPath(this.file.path);
 				if (!file) throw new DashboardSaveError('saveFailed', t('dashboard.sync.sourceMissing'));
-				const remote = await this.app.vault.read(file);
+				const remote = await contentFiles(this.app).read(file);
 				if (revision !== this.localRevision) throw new DashboardSaveError('changed', t('dashboard.sync.changed'));
 				if (this.localDirty) {
 					this.conflict ??= { id: crypto.randomUUID(), path: file.path, base: this.baseline ?? '', local: this.getLocalDraft(), candidate: this.getLocalDraft(), remote };
@@ -1114,14 +1113,15 @@ export class SyncEngine {
 	private async findOrCreateFile(): Promise<void> {
 		const rawPath = this.settings.dashboardFile.trim();
 		const path = rawPath.endsWith('.md') ? rawPath : `${rawPath}.md`;
-		const existing = this.app.vault.getFileByPath(path);
+		const files = contentFiles(this.app); await files.refresh();
+		const existing = files.getFileByPath(path);
 		if (existing) {
 			this.file = existing;
 			return;
 		}
 
 		const content = generateDefaultMarkdown();
-		this.file = await this.app.vault.create(path, content);
+		this.file = await files.create(path, content);
 	}
 
 	private deferredWriteTimer: number | null = null;
@@ -1133,8 +1133,8 @@ export class SyncEngine {
 
 	private registerFileWatcher(): void {
 		const filePath = this.file?.path;
-		this.eventRef = this.app.vault.on('modify', (file) => {
-			if (file instanceof TFile && file.path === filePath) {
+		this.contentUnsubscribe = contentFiles(this.app).subscribe(event => {
+			if (event.kind === 'modify' && event.path === filePath) {
 				this.onFileModify();
 			}
 		});
@@ -1236,7 +1236,7 @@ export class SyncEngine {
 		)
 			return;
 		const file = this.file;
-		const content = await this.app.vault.read(file);
+		const content = await contentFiles(this.app).read(file);
 		if (
 			this.file !== file ||
 			this.blocked ||
@@ -1283,7 +1283,8 @@ export class SyncEngine {
 				await this.createBackup(base);
 				let remote = base, conflict = false;
 				try {
-					await this.app.vault.process(fileRef, current => {
+					await contentFiles(this.app).process(fileRef.path, current => {
+						if (current === null) throw new DashboardSaveError('saveFailed', t('dashboard.sync.sourceMissing'));
 						remote = current;
 						if (current !== base) { conflict = true; throw new DashboardSaveError('conflict', t('dashboard.sync.conflictPending')); }
 						return content;

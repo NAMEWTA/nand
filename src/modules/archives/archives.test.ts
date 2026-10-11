@@ -1,10 +1,11 @@
+import { contentFiles } from '../../host/obsidian/storage/content-files';
 import { archiveLocation, safeArchiveName, queryResources, normalizeValues } from '../../modules/archives/core/resources';
 import { WriteQueue } from '../../shared/storage/write-queue';
 import { t, setLanguage } from '../../shared/i18n/index';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { test } from 'vitest';
-import { Setting, TFile, TFolder, MarkdownView, type App } from 'obsidian';
+import { Setting, TFile, TFolder, type App } from 'obsidian';
 import { archivesSettingsPage } from '../../modules/archives/ui/settings-page';
 import { cloneRecord, newRecord, emptyRef, ContactsError, type ArchiveRecord } from '../../modules/archives/core/model';
 import { createMarkdown, parseRecord, patchMarkdown, relativeLink } from '../../modules/archives/core/persist/markdown';
@@ -26,7 +27,7 @@ import { cleanPageState } from '../../shell/navigation-state';
 function fixture(kind: 'person' | 'company' = 'person', name = '张三'): ArchiveRecord {
 	const record = newRecord(kind);
 	record.fields.name = name;
-	record.folderPath = `档案/${kind === 'person' ? '个人档案' : '企业档案'}/${name}`;
+	record.folderPath = `.nand/content/档案/${kind === 'person' ? '个人档案' : '企业档案'}/${name}`;
 	record.path = record.folderPath + '/基本信息.md';
 	return record;
 }
@@ -54,7 +55,7 @@ function job(company: ArchiveRecord, status: 'current' | 'past' = 'current') {
 		company: {
 			id: company.id,
 			label: company.fields.name,
-			link: relativeLink('档案/个人档案/张三/基本信息.md', company.path),
+			link: relativeLink('.nand/content/档案/个人档案/张三/基本信息.md', company.path),
 		},
 		department: '业务部',
 		title: '经理',
@@ -137,7 +138,7 @@ test('malformed YAML, duplicate identity and table boundaries never silently tru
 		assert.ok(parseRecord(raw, base.path)!.errors.length);
 		assert.throws(() => patchMarkdown(raw, base, base));
 	}
-	assert.equal(parseRecord('# ordinary note\nnotes here', '档案/普通.md'), null);
+	assert.equal(parseRecord('# ordinary note\nnotes here', '.nand/content/档案/普通.md'), null);
 });
 
 test('manual rows resolve as ordinary Markdown and receive persistent row IDs on save', () => {
@@ -212,10 +213,10 @@ test('renames preserve identity; duplicate IDs and conflicting visible links blo
 	index.set(round(a));
 	index.set(round(company));
 	index.remove(company.path);
-	company.path = '档案/企业/新名字.md';
+	company.path = '.nand/content/档案/企业/新名字.md';
 	index.set(round(company));
 	assert.equal(index.resolve(a.employments[0]!.company, a)?.id, company.id);
-	const duplicate = { ...company, path: '档案/企业/副本.md' };
+	const duplicate = { ...company, path: '.nand/content/档案/企业/副本.md' };
 	index.set(duplicate);
 	assert.ok(index.issues(company).includes('duplicateId'));
 	assert.equal(index.get(company.id), undefined);
@@ -249,13 +250,13 @@ test('folder preferences reject hidden/external/traversal paths and retain defau
 		'/tmp/contacts',
 		'../contacts',
 		'.obsidian/contacts',
-		'档案/../其他',
+		'.nand/content/档案/../其他',
 		'C:\\contacts',
-		'档案//联系人',
+		'.nand/content/档案//联系人',
 	])
 		assert.equal(validContactsFolder(path), false);
 	assert.deepEqual(normalizeContactsSettings({ rootFolder: '../bad', maxColumns: 10 }), {
-		rootFolder: '档案',
+		rootFolder: '.nand/content/档案',
 		maxColumns: 6,
 		layouts: {},
 	});
@@ -284,25 +285,42 @@ function memoryVault() {
 		text = new Map<string, string>();
 	const listeners = new Map<string, Array<(...args: unknown[]) => void>>();
 	const emit = (event: string, ...args: unknown[]) => {
+		const entry = args[0] as { path?: string } | undefined;
+		if (app && entry?.path?.startsWith('.nand/')) { queueMicrotask(() => { void contentFiles(app).refresh(); }); return; }
 		for (const listener of listeners.get(event) ?? []) listener(...args);
 	};
 	let fail = false;
+	let app: App;
+	const adapter = {
+		exists: async (path: string) => files.has(path),
+		read: async (path: string) => vault.read(files.get(path) as TFile),
+		write: async (path: string, value: string) => { if (fail) throw new Error('disk full'); const existing = files.get(path); if (existing instanceof TFolder) throw new Error('folder'); if (existing) await vault.process(existing, () => value); else await vault.create(path, value); },
+		mkdir: async (path: string) => { await vault.createFolder(path); },
+		stat: async (path: string) => { const file = files.get(path); return !file ? null : file instanceof TFolder ? { type: 'folder', ctime: 1, mtime: 1, size: 0 } : { type: 'file', ...file.stat }; },
+		list: async (path: string) => { const prefix = path ? path + '/' : ''; const children = [...files.values()].filter(file => file.path.startsWith(prefix) && !file.path.slice(prefix.length).includes('/')); return { files: children.filter(file => file instanceof TFile).map(file => file.path), folders: children.filter(file => file instanceof TFolder).map(file => file.path) }; },
+		process: (path: string, update: (raw: string) => string) => vault.process(files.get(path) as TFile, update),
+		writeBinary: async (path: string, bytes: ArrayBuffer) => adapter.write(path, new TextDecoder().decode(bytes)),
+		rename: (source: string, target: string) => vault.rename(files.get(source)!, target),
+	};
 	const vault = {
+		adapter,
+		offref: ({ event, callback }: { event: string; callback: (...args: unknown[]) => void }) => { listeners.set(event, (listeners.get(event) ?? []).filter(fn => fn !== callback)); },
 		on: (event: string, callback: (...args: unknown[]) => void) => {
 			const list = listeners.get(event) ?? [];
 			list.push(callback);
 			listeners.set(event, list);
 			return { event, callback };
 		},
-		getMarkdownFiles: () => [...files.values()].filter((f): f is TFile => f instanceof TFile),
+		getMarkdownFiles: () => [...files.values()].filter((f): f is TFile => f instanceof TFile && !f.path.startsWith('.')),
 		getFileByPath: (path: string) => {
 			const f = files.get(path);
-			return f instanceof TFile ? f : null;
+			return f instanceof TFile && !path.startsWith('.') ? f : null;
 		},
 		getAbstractFileByPath: (path: string) => files.get(path),
-		cachedRead: async (file: TFile) => text.get(file.path)!,
 		read: async (file: TFile) => text.get(file.path)!,
 		createFolder: async (path: string) => {
+			const parent = path.slice(0, path.lastIndexOf('/'));
+			if (path.includes('/') && !files.has(parent)) await vault.createFolder(parent);
 			if (files.has(path)) throw new Error('exists');
 			const folder = Object.assign(new TFolder(), { path });
 			Object.defineProperty(folder, 'children', {
@@ -350,7 +368,7 @@ function memoryVault() {
 			return updated;
 		},
 	};
-	const app = {
+	app = {
 		vault,
 		workspace: { getLeavesOfType: () => [], layoutReady: true },
 		fileManager: {
@@ -364,7 +382,7 @@ function memoryVault() {
 			},
 		},
 	} as unknown as App;
-	const settings = { rootFolder: '档案', maxColumns: 6 as const, layouts: {} };
+	const settings = { rootFolder: '.nand/content/档案', maxColumns: 6 as const, layouts: {} };
 	const controller = new ContactsController(app, () => settings);
 	Object.assign(controller, { registerEvent: () => {} });
 	controller.onload();
@@ -387,7 +405,7 @@ test('vault integration: duplicate names, real files, disk failure, external edi
 		b = await f.controller.create(newNamed('person', '张三'));
 	assert.notEqual(a.path, b.path);
 	assert.notEqual(a.id, b.id);
-	assert.ok(f.text.has('档案/档案格式说明.md'));
+	assert.ok(f.text.has('.nand/content/档案/档案格式说明.md'));
 	const base = await f.controller.snapshot(a.path),
 		draft = cloneRecord(base);
 	draft.fields.phones = ['00123'];
@@ -417,7 +435,7 @@ test('folder switching rejects stale forms and preserves old files', async () =>
 	const f = memoryVault();
 	await f.controller.ensureLoaded();
 	const a = await f.controller.create(newNamed('person', '旧档案'));
-	f.settings.rootFolder = '其他档案';
+	f.settings.rootFolder = '.nand/content/其他档案';
 	await f.controller.reload();
 	assert.equal(f.controller.index.byPath.size, 0);
 	const next = cloneRecord(a);
@@ -427,7 +445,7 @@ test('folder switching rejects stale forms and preserves old files', async () =>
 });
 
 test('a late read cannot publish into a newer folder or a disposed archive', async () => {
-	const blockNext = (vault: { cachedRead: (file: TFile) => Promise<string> }) => {
+	const blockNext = (vault: { read: (file: TFile) => Promise<string> }) => {
 		let release = () => {};
 		let opened = () => {};
 		const started = new Promise<void>((resolve) => {
@@ -436,9 +454,9 @@ test('a late read cannot publish into a newer folder or a disposed archive', asy
 		const gate = new Promise<void>((resolve) => {
 			release = resolve;
 		});
-		const read = vault.cachedRead.bind(vault);
+		const read = vault.read.bind(vault);
 		let armed = true;
-		vault.cachedRead = async (file: TFile) => {
+		vault.read = async (file: TFile) => {
 			const value = await read(file);
 			if (armed) {
 				armed = false;
@@ -455,13 +473,13 @@ test('a late read cannot publish into a newer folder or a disposed archive', asy
 	const held = blockNext(folder.vault);
 	const first = folder.controller.reload();
 	await held.started;
-	folder.settings.rootFolder = '其他档案';
+	folder.settings.rootFolder = '.nand/content/其他档案';
 	const second = folder.controller.reload();
 	held.release();
 	await first;
 	await second;
 	assert.equal(folder.controller.index.byPath.has(person.path), false);
-	assert.equal([...folder.controller.index.byPath.keys()].some((path) => path.startsWith('档案/')), false);
+	assert.equal([...folder.controller.index.byPath.keys()].some((path) => path.startsWith('.nand/content/档案/')), false);
 
 	const disposed = memoryVault();
 	await disposed.controller.ensureLoaded();
@@ -483,7 +501,7 @@ test('a failed read from an older rebuild cannot replace the new root status', a
 	let started = () => {};
 	const reading = new Promise<void>((resolve) => { started = resolve; });
 	const gate = new Promise<void>((resolve) => { release = resolve; });
-	f.vault.cachedRead = async () => { started(); await gate; throw new Error('old read failed'); };
+	f.vault.read = async () => { started(); await gate; throw new Error('old read failed'); };
 	const old = f.controller.reload();
 	await reading;
 	f.settings.rootFolder = 'New archives';
@@ -517,16 +535,11 @@ test('unsaved edits in the native Markdown editor prevent panel writes', async (
 	const f = memoryVault();
 	await f.controller.ensureLoaded();
 	const original = await f.controller.create(newNamed('person', '编辑器草稿'));
-	const editor = Object.assign(Object.create(MarkdownView.prototype) as MarkdownView, {
-		file: f.vault.getFileByPath(original.path),
-		getMode: () => 'source',
-		editor: { getValue: () => original.raw + '\n未保存的文字' },
-	});
-	Object.assign(f.app.workspace, { getLeavesOfType: () => [{ view: editor }] });
+	const claim = contentFiles(f.app).claimDraft(original.path, () => original.raw + '\n未保存的文字');
 	const draft = cloneRecord(original);
 	draft.fields.region = '北京';
 	await assert.rejects(f.controller.save(original, draft), /editorConflict/);
-	assert.equal(f.text.get(original.path), original.raw);
+	assert.equal(f.text.get(original.path), original.raw); claim.release();
 });
 
 test('an unreadable file does not hide other records during a rebuild', async () => {
@@ -534,8 +547,8 @@ test('an unreadable file does not hide other records during a rebuild', async ()
 	await f.controller.ensureLoaded();
 	const broken = await f.controller.create(newNamed('person', '读取失败'));
 	const good = await f.controller.create(newNamed('person', '仍可读取'));
-	const read = f.vault.cachedRead;
-	f.vault.cachedRead = async (file) => {
+	const read = f.vault.read;
+	f.vault.read = async (file) => {
 		if (file.path === broken.path) throw new Error('unreadable');
 		return read(file);
 	};
@@ -599,14 +612,14 @@ test('format guide uses creation-time language and preserves existing documents 
 		await f.controller.ensureLoaded();
 		setLanguage('en'); // The controller was created before this language change.
 		const company = await f.controller.create(newNamed('company', 'Guide Company'));
-		const english = f.text.get('档案/档案格式说明.md')!;
+		const english = f.text.get('.nand/content/档案/档案格式说明.md')!;
 		assert.match(english, /^# Archive format\r?\n/, 'An English first creation needs the complete English guide');
 		assert.match(english, /Changing the display name does not rename the file/);
 		const original = f.text.get(company.path)!;
 		setLanguage('zh');
 		await f.controller.create(newNamed('person', 'Later Person'));
 		assert.equal(
-			f.text.get('档案/档案格式说明.md'),
+			f.text.get('.nand/content/档案/档案格式说明.md'),
 			english,
 			'Switching language never replaces an existing guide',
 		);
@@ -618,10 +631,10 @@ test('format guide uses creation-time language and preserves existing documents 
 		assert.equal(renamed.id, company.id);
 		assert.equal(renamed.path, company.path);
 
-		f.settings.rootFolder = '中文档案';
+		f.settings.rootFolder = '.nand/content/中文档案';
 		await f.controller.reload();
 		await f.controller.create(newNamed('person', '中文人物'));
-		const chinese = f.text.get('中文档案/档案格式说明.md')!;
+		const chinese = f.text.get('.nand/content/中文档案/档案格式说明.md')!;
 		assert.match(chinese, /^# 档案格式\r?\n/);
 		assert.match(chinese, /更改显示名称不会自动重命名文件/);
 		for (const guide of [english, chinese]) {
@@ -647,7 +660,7 @@ test('format guide uses creation-time language and preserves existing documents 
 				assert.ok(guide.includes('`' + field + '`'), field);
 		}
 		const custom = '# My guide\r\nKeep exact bytes: 用户内容\r\n';
-		f.text.set('中文档案/档案格式说明.md', custom);
+		f.text.set('.nand/content/中文档案/档案格式说明.md', custom);
 		const before = new Map(f.text);
 		setLanguage('en');
 		await f.controller.reload();
@@ -685,7 +698,7 @@ test('archive folder row is the only contacts setting that reserves description 
 		}
 	).created;
 	const before = registry.length;
-	const settings = { get: () => ({ rootFolder: '档案', maxColumns: 6 }), update: async () => {}, subscribe: () => () => {} };
+	const settings = { get: () => ({ rootFolder: '.nand/content/档案', maxColumns: 6 }), update: async () => {}, subscribe: () => () => {} };
 	archivesSettingsPage({} as App, {} as ContactsController, settings as never)({ appendChild() {} } as never, { refresh() {}, keep() {} });
 	const created = registry.slice(before);
 	const folder = created.find((row) => row.name === t('contacts.folder'));
@@ -699,15 +712,15 @@ test('archive folder row is the only contacts setting that reserves description 
 test('strict folder entry rules exclude flat archives, ordinary material notes and nested fake entries', async () => {
 	const f = memoryVault();
 	const valid = await f.controller.create(newNamed('person', '王天肖'));
-	assert.equal(valid.path, '档案/个人档案/王天肖/基本信息.md');
-	assert.equal(valid.folderPath, '档案/个人档案/王天肖');
+	assert.equal(valid.path, '.nand/content/档案/个人档案/王天肖/基本信息.md');
+	assert.equal(valid.folderPath, '.nand/content/档案/个人档案/王天肖');
 	for (const path of [
-		'档案/联系人/旧档案.md',
+		'.nand/content/档案/联系人/旧档案.md',
 		valid.folderPath + '/沟通记录.md',
 		valid.folderPath + '/资料/基本信息.md',
 	]) {
 		await f.vault.create(path, createMarkdown(newNamed('person', '附件中的档案属性')));
-		assert.equal(archiveLocation('档案', path), null);
+		assert.equal(archiveLocation('.nand/content/档案', path), null);
 	}
 	await f.controller.reload();
 	assert.equal(f.controller.index.byPath.size, 1);
@@ -721,7 +734,7 @@ test('portable folder names and collisions never merge with an unrelated existin
 	assert.equal(safeArchiveName(' 王/天:肖. '), '王-天-肖');
 	assert.throws(() => safeArchiveName('...'), /invalidName/);
 	const f = memoryVault();
-	await f.vault.createFolder('档案/个人档案/同名');
+	await f.vault.createFolder('.nand/content/档案/个人档案/同名');
 	const record = await f.controller.create(newNamed('person', '同名'));
 	assert.match(record.folderPath, /同名-[\w-]+$/);
 	const edited = cloneRecord(record);
@@ -770,8 +783,8 @@ test('resource events notify without reparsing Markdown and a folder rename reta
 	const record = await f.controller.create(newNamed('person', '晶晶'));
 	let reads = 0,
 		events = 0;
-	const cachedRead = f.vault.cachedRead;
-	f.vault.cachedRead = async (file) => {
+	const cachedRead = f.vault.read;
+	f.vault.read = async (file) => {
 		reads++;
 		return cachedRead(file);
 	};
@@ -784,9 +797,9 @@ test('resource events notify without reparsing Markdown and a folder rename reta
 	);
 	assert.equal(events, 1);
 	assert.equal(reads, 0);
-	await f.vault.rename(f.vault.getAbstractFileByPath(record.folderPath)!, '档案/个人档案/晶晶新目录');
+	await f.vault.rename(f.vault.getAbstractFileByPath(record.folderPath)!, '.nand/content/档案/个人档案/晶晶新目录');
 	await new Promise((resolve) => setTimeout(resolve, 0));
-	assert.equal(f.controller.index.get(record.id)?.folderPath, '档案/个人档案/晶晶新目录');
+	assert.equal(f.controller.index.get(record.id)?.folderPath, '.nand/content/档案/个人档案/晶晶新目录');
 	assert.equal(f.controller.resources(record.id).length, 3);
 	assert.equal(reads, 1);
 	unsubscribe();
@@ -801,20 +814,15 @@ test('whole-folder deletion rejects changed scope and unsaved material notes; un
 	const ticket = await f.controller.deletion(record.id);
 	const note = await f.controller.createNote(record.id, '新资料');
 	await assert.rejects(f.controller.remove(ticket), /deleteChanged/);
-	const editor = Object.assign(Object.create(MarkdownView.prototype) as MarkdownView, {
-		file: f.vault.getFileByPath(note),
-		getMode: () => 'source',
-		editor: { getValue: () => '未保存' },
-	});
-	Object.assign(f.app.workspace, { getLeavesOfType: () => [{ view: editor }] });
+	const claim = contentFiles(f.app).claimDraft(note, () => '未保存');
 	await assert.rejects(f.controller.deletion(record.id), /editorConflict/);
-	Object.assign(f.app.workspace, { getLeavesOfType: () => [] });
+	claim.release();
 	const final = await f.controller.deletion(record.id);
 	assert.equal(final.resources, 1);
 	await f.controller.remove(final);
 	assert.equal(f.vault.getAbstractFileByPath(record.folderPath), undefined);
 	assert.equal(f.vault.getFileByPath(note), null);
-	assert.ok(f.vault.getFileByPath(keep.path));
+	assert.ok(contentFiles(f.app).getFileByPath(keep.path));
 	await assert.rejects(f.controller.remove(final), /missing/);
 	f.controller.onunload();
 });
@@ -838,7 +846,7 @@ test('delete queues behind imports and refuses the earlier confirmation scope', 
 	release(new ArrayBuffer(3));
 	await uploading;
 	await assert.rejects(removal, /deleteChanged/);
-	assert.ok(f.vault.getFileByPath(record.folderPath + '/延迟.pdf'));
+	assert.ok(contentFiles(f.app).getFileByPath(record.folderPath + '/延迟.pdf'));
 	f.controller.onunload();
 });
 
@@ -1119,18 +1127,18 @@ test('new and restored archive leaves pick layouts without throwing on bad value
 	const state = emptyPanelState();
 	state.query.search = 'kept';
 	state.page = 2;
-	state.selectedPath = '档案/a.md';
-	const next = applyLayout(state, 'card', '档案/a.md');
+	state.selectedPath = '.nand/content/档案/a.md';
+	const next = applyLayout(state, 'card', '.nand/content/档案/a.md');
 	assert.equal(next.query, state.query);
 	assert.equal(next.page, 2);
 	assert.equal(next.selectedPath, state.selectedPath);
 	assert.equal(next.layout.person, 'card');
-	assert.equal(next.anchors.person.list, '档案/a.md');
-	assert.equal(next.anchors.person.card, '档案/a.md');
+	assert.equal(next.anchors.person.list, '.nand/content/档案/a.md');
+	assert.equal(next.anchors.person.card, '.nand/content/档案/a.md');
 	assert.equal(applyLayout(next, 'card', 'other'), next);
-	const back = applyLayout(next, 'list', '档案/b.md');
-	assert.equal(back.anchors.person.list, '档案/a.md');
-	assert.equal(back.anchors.person.card, '档案/b.md');
+	const back = applyLayout(next, 'list', '.nand/content/档案/b.md');
+	assert.equal(back.anchors.person.list, '.nand/content/档案/a.md');
+	assert.equal(back.anchors.person.card, '.nand/content/档案/b.md');
 });
 
 test('archive group navigation clears the previous detail and a record kind wins', async () => {
@@ -1228,7 +1236,7 @@ test('entry-note search keeps both records that share an email and reports the h
 	company.raw = createMarkdown(company);
 	const duplicate = fixture('person', '同号的另一个人');
 	duplicate.id = person.id;
-	duplicate.path = '档案/个人档案/同号/基本信息.md';
+	duplicate.path = '.nand/content/档案/个人档案/同号/基本信息.md';
 	index.set(company);
 	index.set(other);
 	index.set(person);
@@ -1259,7 +1267,7 @@ test('entry-note search keeps both records that share an email and reports the h
 	index.set(other);
 	assert.equal(index.hit(person, '改名后的朋友')?.source, 'relation');
 	assert.equal(index.query({ ...emptyQuery(), kind: 'person', search: oldName }).some((record) => record.path === person.path), false);
-	const moved = { ...person, path: '档案/个人档案/搬迁/基本信息.md' };
+	const moved = { ...person, path: '.nand/content/档案/个人档案/搬迁/基本信息.md' };
 	index.remove(person.path);
 	index.set(moved);
 	assert.equal(index.byPath.has(person.path), false);
@@ -1526,7 +1534,7 @@ test('hot entry-note queries stay in memory', () => {
 			const body = bytes ? `${'甲'.repeat(40)}\n`.repeat(Math.ceil(bytes / 41)).slice(0, bytes) : '';
 			for (let i = 0; i < count; i++) {
 				const record = fixture('person', `Timed ${i}`);
-				record.path = `档案/个人档案/timed-${i}/基本信息.md`;
+				record.path = `.nand/content/档案/个人档案/timed-${i}/基本信息.md`;
 				record.raw = body ? `\n\n${body} token-${i}\n` : '';
 				index.set(record);
 			}

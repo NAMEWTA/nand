@@ -1,3 +1,4 @@
+import { isManagedFile } from '../../../../host/obsidian/storage/content-files';
 import { App, Platform } from 'obsidian';
 import type { DashboardColumn } from '../../core/board/types/index';
 import { attachNoteHover } from '../ui/hover-preview';
@@ -87,7 +88,7 @@ function renderWikilink(container: HTMLElement, content: string, app: App): void
 
 	const file = resolveNoteFile(app, path);
 
-	if (file && !Platform.isMobile && context.hoverParent) {
+	if (file && !isManagedFile(file) && !Platform.isMobile && context.hoverParent) {
 		attachNoteHover(app, link, file, context.hoverParent, fragment ? `#${fragment}` : undefined);
 	}
 

@@ -104,7 +104,7 @@ export function ledgerCsv(service: ExpenseService) {
 			]),
 		];
 		// BOM so Excel detects UTF-8 (parseCsv strips it on the way back in).
-		const path = `expense-export-${expenseToday()}.csv`;
+		const path = `.nand/content/exports/expense-export-${expenseToday()}.csv`;
 		try {
 			await service.writeVaultFile(path, '\uFEFF' + serializeCsv(lines));
 			new Notice(t('expense.ledger.exported', { n: lastFiltered.length, path }));

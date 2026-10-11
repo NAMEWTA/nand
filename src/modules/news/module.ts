@@ -1,4 +1,4 @@
-import { TFile } from 'obsidian';
+import { contentFiles } from '../../host/obsidian/storage/content-files';
 import type { ModuleContext, ModuleInstance } from '../../app/contracts/module';
 import { deviceId } from '../../host/obsidian/storage/device-id';
 import { privateVaultStorage } from '../../host/obsidian/storage/private-storage';
@@ -47,11 +47,7 @@ export default function createNewsModule(context: ModuleContext): ModuleInstance
 		sessions: () => context.services.peek(AGENT_SESSIONS),
 		browser: () => context.services.peek(BROWSER_OPEN),
 		inbox: () => context.services.peek(NOTIFICATION_INBOX),
-		openNote: async path => {
-			const file = context.app.vault.getAbstractFileByPath(path);
-			if (!(file instanceof TFile)) throw new Error('news.note.missing');
-			await context.app.workspace.getLeaf(false).openFile(file);
-		},
+		openNote: path => contentFiles(context.app).open(path),
 	});
 	return { services: [[NEWS_READ, service], [NEWS_WORKBENCH, newsWorkbench(service, actions)]], contributions: [[NEWS_HOME_WIDGETS, homeWidgets], [NOTIFICATION_OPENERS, opener]], pages: { news: async () => (await import('./ui/workbench-page')).createNewsPage(service, actions) }, settingsPage: async () => (await import('./ui/settings-page')).newsSettingsPage(settings, actions, configureWidget), activate: async () => { await service.ready; schedule.start(); heatSchedule.update(settings.get().enabled); stopHeatSettings = settings.subscribe(() => heatSchedule.update(settings.get().enabled)); }, dispose: async () => { schedule.dispose(); heatSchedule.dispose(); stopHeatSettings?.(); try { await actions.dispose(); } finally { await service.shutdown(); } } };
 }

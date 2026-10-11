@@ -8,28 +8,32 @@ import { createBoardSwitchQueue } from '../../../shell/board-switch';
 import { workbenchBoardSettings, workbenchBoardSettingsPatch } from '../../../shell/board-settings';
 import { t } from '../../../shared/i18n';
 import type { HomeHost } from '../services/home-host';
+import { contentFiles } from '../../../host/obsidian/storage/content-files';
+import { contentPath } from '../../../shared/storage/content-paths';
+
+const boardPath = (path: string) => contentPath(normalizeWorkspacePath(path));
 
 /** Board page for the workbench (`refresh` updates the workbench status when the board saves). */
 export const boardPage = (plugin: HomeHost): PageCreate => async (context, target, state) => createDashboardPage(plugin, context, target, state, () => plugin.workbenchRefresh());
 
 /** Each workbench keeps its own board pointer; the global registry remains authoritative. */
 export function createDashboardPage(plugin: HomeHost, context: NativeSurfaceContext, target: WorkbenchTarget, state: Record<string, unknown>, onSaveState?: () => void): WorkbenchPageBinding {
- let path = normalizeWorkspacePath(target.resourceId ?? (typeof state.dashboardFile === 'string' ? state.dashboardFile : plugin.settings.dashboardFile));
- if ((target.resourceId || typeof state.dashboardFile === 'string') && !plugin.app.vault.getFileByPath(path + '.md')) throw new Error(t('workbench.missing'));
+ let path = boardPath(target.resourceId ?? (typeof state.dashboardFile === 'string' ? state.dashboardFile : plugin.settings.dashboardFile));
+ if ((target.resourceId || typeof state.dashboardFile === 'string') && !contentFiles(plugin.app).getFileByPath(path + '.md')) throw new Error(t('workbench.missing'));
  let surface: DashboardSurface;
  const switchBoard = createBoardSwitchQueue({
   current: () => path,
   assign: (next) => { path = next; },
-  exists: (candidate) => !!plugin.app.vault.getFileByPath(candidate + '.md'),
+  exists: (candidate) => !!contentFiles(plugin.app).getFileByPath(candidate + '.md'),
   reload: () => surface.applyWorkspaceSwitch(),
   missing: () => new Error(t('workbench.missing')),
   save: () => { plugin.app.workspace.requestSaveLayout(); context.changed?.(); },
  });
- const switchPath = (requested: string, signal?: AbortSignal): Promise<void> => switchBoard(normalizeWorkspacePath(requested), signal);
+ const switchPath = (requested: string, signal?: AbortSignal): Promise<void> => switchBoard(boardPath(requested), signal);
  const host: DashboardHost = {
   app: plugin.app, manifest: plugin.manifest, appearance: plugin.appearance,
   get settings() { return workbenchBoardSettings(plugin.settings, path); },
-  set settings(value) { path = normalizeWorkspacePath(value.dashboardFile); plugin.settings = { ...plugin.settings, ...workbenchBoardSettingsPatch(value) }; },
+  set settings(value) { path = boardPath(value.dashboardFile); plugin.settings = { ...plugin.settings, ...workbenchBoardSettingsPatch(value) }; },
   get automationHost() { return plugin.automationHost; },
   saveSettings: () => plugin.saveSettings(), refreshAllDashboards: () => plugin.refreshAllDashboards(),
   openSettings: () => plugin.openSettings(), openBrowser: (request) => plugin.openBrowser(request),
@@ -42,9 +46,9 @@ export function createDashboardPage(plugin: HomeHost, context: NativeSurfaceCont
  let attached = false;
  if (onSaveState) surface.register(surface.sync.onSaveStateUpdate(() => { if (attached) onSaveState(); }));
  attached = true;
- surface.registerEvent(plugin.app.vault.on('rename', (file, oldPath) => {
-  if (normalizeWorkspacePath(oldPath) === path) {
-   path = normalizeWorkspacePath(file.path);
+ surface.register(contentFiles(plugin.app).subscribe(event => {
+  if (event.kind === 'rename' && event.oldPath && boardPath(event.oldPath) === path) {
+   path = boardPath(event.path);
    void surface.applyWorkspaceSwitch().then(() => context.changed?.()).catch((error: unknown) => console.error('[NAND workbench]', error));
   }
  }));

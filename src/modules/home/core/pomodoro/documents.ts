@@ -2,7 +2,7 @@ import { requireDailyRecords, requireFields } from '../../../../shared/storage/d
 import { collectionDocument as doc, recordRows, type DocumentCollectionCodec } from '../../../../shared/storage/document-collection';
 import type { PomodoroData, PomodoroRecord } from './application';
 
-const root = 'NAND/番茄钟';
+const root = '.nand/content/NAND/番茄钟';
 export const pomodoroDocuments: DocumentCollectionCodec<PomodoroData> = {
 	root,
 	empty: () => ({ version: 2, currentActivity: '', tags: [], sessions: [] }),

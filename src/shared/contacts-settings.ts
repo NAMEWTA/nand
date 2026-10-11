@@ -1,3 +1,5 @@
+import { contentPath } from './storage/content-paths';
+
 /** Only UI preferences live in plugin settings. All archive data lives in Markdown. */
 export interface ContactsSettings {
 	rootFolder: string;
@@ -5,14 +7,10 @@ export interface ContactsSettings {
 	/** The layout last chosen for each kind. Absent until the user picks one; new pages start from it. */
 	layouts: Partial<Record<'person' | 'company', 'list' | 'card'>>;
 }
-export const DEFAULT_CONTACTS_SETTINGS: ContactsSettings = { rootFolder: '档案', maxColumns: 6, layouts: {} };
+export const DEFAULT_CONTACTS_SETTINGS: ContactsSettings = { rootFolder: contentPath('档案'), maxColumns: 6, layouts: {} };
 
 export function validContactsFolder(value: string): boolean {
-	return (
-		!!value.trim() &&
-		!/^[\\/]|^[a-z]:/i.test(value) &&
-		!value.split(/[\\/]/).some((part) => !part || part.startsWith('.') || /[:*?"<>|]/.test(part))
-	);
+	try { return !!value.trim() && !!contentPath(value); } catch { return false; }
 }
 export function normalizeContactsSettings(raw: unknown): ContactsSettings {
 	const value = raw && typeof raw === 'object' ? (raw as Record<string, unknown>) : {};
@@ -23,7 +21,7 @@ export function normalizeContactsSettings(raw: unknown): ContactsSettings {
 	for (const kind of ['person', 'company'] as const)
 		if (given[kind] === 'list' || given[kind] === 'card') layouts[kind] = given[kind];
 	return {
-		rootFolder: validContactsFolder(root) ? root : DEFAULT_CONTACTS_SETTINGS.rootFolder,
+		rootFolder: validContactsFolder(root) ? contentPath(root) : DEFAULT_CONTACTS_SETTINGS.rootFolder,
 		maxColumns: value.maxColumns === 5 ? 5 : 6,
 		layouts,
 	};

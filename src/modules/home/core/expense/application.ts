@@ -1,3 +1,5 @@
+import { contentPath } from '../../../../shared/storage/content-paths';
+import { ensureDirectory } from '../../../../shared/storage/durable-state';
 import { DurableState } from '../../../../shared/storage/durable-state';
 import type { TextStorage } from '../../../../shared/storage/ports';
 import {
@@ -422,7 +424,9 @@ export class ExpenseApplication {
 
 	/** Write a text file into the vault (CSV export); vault-relative path. */
 	async writeVaultFile(path: string, content: string): Promise<void> {
-		await this.storage.write(path, content);
+		const target = contentPath(path);
+		await ensureDirectory(this.storage, target.slice(0, target.lastIndexOf('/')));
+		await this.storage.write(target, content);
 	}
 
 	// ===== Aggregation queries (pure derivations, no disk access) =====

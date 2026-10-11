@@ -1,10 +1,12 @@
-import { App, Platform, TFile } from 'obsidian';
+import { contentFiles, type ContentFile, isManagedFile } from '../../../../host/obsidian/storage/content-files';
+import { App, Platform } from 'obsidian';
 import { resolveCoverAsObjectUrl } from '../../platform/reading/book-service';
 import { getRenderContext } from '../renderer/render-context';
 import { attachNoteHover } from '../ui/hover-preview';
 import { str } from './library-file-result';
 
-export function openFile(app: App, file: TFile, owner: HTMLElement): void {
+export function openFile(app: App, file: ContentFile, owner: HTMLElement): void {
+	if (isManagedFile(file)) { void contentFiles(app).open(file.path, owner.win); return; }
 	const opener = getRenderContext(owner).noteOpener;
 	if (!Platform.isMobile && opener) {
 		opener(file);
@@ -13,15 +15,16 @@ export function openFile(app: App, file: TFile, owner: HTMLElement): void {
 	}
 }
 
-export function attachItemHover(app: App, el: HTMLElement, file: TFile): void {
+export function attachItemHover(app: App, el: HTMLElement, file: ContentFile): void {
+	if (isManagedFile(file)) return;
 	const hoverParent = getRenderContext(el).hoverParent;
 	if (!Platform.isMobile && hoverParent) {
 		attachNoteHover(app, el, file, hoverParent);
 	}
 }
 
-export async function trashLibraryFile(app: App, file: TFile): Promise<void> {
-	await app.fileManager.trashFile(file);
+export async function trashLibraryFile(app: App, file: ContentFile): Promise<void> {
+	await contentFiles(app).trash(file);
 }
 
 export function omitFrontmatterKey(frontmatter: Record<string, unknown>, key: string): Record<string, unknown> {
@@ -88,11 +91,11 @@ export function extractCoverValue(frontmatter: Record<string, unknown>): CoverCa
 	return null;
 }
 
-export async function resolveLibraryCover(raw: string, file: TFile, app: App): Promise<string> {
+export async function resolveLibraryCover(raw: string, file: ContentFile, app: App): Promise<string> {
 	if (/^(https?:|data:|file:)/i.test(raw) || /^[a-zA-Z]:[\\/]/.test(raw)) {
 		return resolveCoverAsObjectUrl(raw, app);
 	}
-	const dest = app.metadataCache.getFirstLinkpathDest(raw, file.path);
+	const dest = contentFiles(app).resolveLink(raw, file.path);
 	if (dest) return resolveCoverAsObjectUrl(dest.path, app);
 	return resolveCoverAsObjectUrl(raw, app);
 }

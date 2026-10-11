@@ -6,7 +6,7 @@ import { canonicalNewsUrl } from '../core/materials';
 import type { NewsAnalysis, NewsEdition, NewsMaterial, NewsSource } from '../core/model';
 import { DEFAULT_FAVORITE_FOLDER, DEFAULT_EDITION_FOLDER } from '../core/note-folders';
 
-export const NEWS_NOTES_ROOT = 'NAND/新闻';
+export const NEWS_NOTES_ROOT = '.nand/content/NAND/新闻';
 const opening = '<!-- nand:news -->';
 const closing = '<!-- /nand:news -->';
 

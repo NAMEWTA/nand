@@ -72,7 +72,7 @@ describe('git vault boundary', () => {
 		assert.equal((await pushStep(repo, { squash: false })).state, 'done');
 		assert.equal(sh(remote, 'rev-parse', 'trunk'), upstream);
 		assert.equal(sh(remote, 'rev-parse', 'main'), sh(work, 'rev-parse', 'HEAD'));
-	});
+	}, 30_000); // Real Git push on Windows exceeds the 5s unit default under full-suite IO load.
 
 	test('simple mode refuses differently named upstreams instead of overriding Git configuration', async () => {
 		const { remote, work, repo } = pushFixture('simple-name', 'trunk');

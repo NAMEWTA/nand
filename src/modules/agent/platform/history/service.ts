@@ -1,6 +1,7 @@
+import { contentFiles, type ContentFile } from '../../../../host/obsidian/storage/content-files';
 import { deviceId as getDeviceId } from '../../../../host/obsidian/storage/device-id';
 import { privateVaultStorage } from '../../../../host/obsidian/storage/private-storage';
-import { TFolder, type App, type TFile } from 'obsidian';
+import type { App } from 'obsidian';
 import type { AgentSettings } from '../../core/launch/types';
 import { t } from '../../../../shared/i18n/index';
 import { JsonStore } from '../../../../shared/json-store';
@@ -261,7 +262,7 @@ export class NativeHistory {
 			return client.request<NativeSession>('read', { ...scope, key: session.key }, sharedSignal);
 		}), signal);
 	}
-	async export(session: NativeSessionSummary): Promise<TFile> {
+	async export(session: NativeSessionSummary): Promise<ContentFile> {
 		let full: NativeSession;
 		try {
 			await this.loaded;
@@ -270,22 +271,18 @@ export class NativeHistory {
 			throw new Error(t('agent.exportReadFailed', { message: error instanceof Error ? error.message : String(error) }));
 		}
 		try {
-			const vault = this.app.vault, folder = 'NAND Exports';
-			if (!vault.getAbstractFileByPath(folder)) {
-				try { await vault.createFolder(folder); }
-				catch (error) { if (!(vault.getAbstractFileByPath(folder) instanceof TFolder)) throw error; }
-			}
-			if (!(vault.getAbstractFileByPath(folder) instanceof TFolder)) throw new Error(t('agent.exportFolderConflict'));
+			const files = contentFiles(this.app), folder = '.nand/content/NAND Exports';
+			await files.mkdir(folder);
 			const agent = session.agentId.replace(/[^a-zA-Z0-9_-]/g, '_').slice(0, 32) || 'agent';
 			const id = session.sessionId.replace(/[^a-zA-Z0-9_-]/g, '_').slice(0, 96) || 'session';
 			const content = `# ${this.meta(session.key).title || session.title}\n\n${full.text}`;
 			for (let index = 0; index < 1000; index++) {
 				const path = `${folder}/${agent}-${id}${index ? ` (${index + 1})` : ''}.md`;
-				if (vault.getAbstractFileByPath(path)) continue;
-				try { return await vault.create(path, content); }
+				if (files.getAbstractFileByPath(path)) continue;
+				try { return await files.create(path, content); }
 				catch (error) {
 					// A simultaneous export can claim this name; Vault.create never overwrites it.
-					if (!vault.getAbstractFileByPath(path)) throw error;
+					if (!files.getAbstractFileByPath(path)) throw error;
 				}
 			}
 			throw new Error(t('agent.exportNameUnavailable'));

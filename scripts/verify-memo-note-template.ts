@@ -1,3 +1,4 @@
+import { managedNotes } from './fixtures/managed-notes';
 /**
  * Verifies the memo-note template feature (createMemoNote in src/memo-note.ts):
  *
@@ -18,7 +19,6 @@
  * Run: `pnpm run test:memo-note-template`
  */
 import { strict as assert } from 'node:assert';
-import { App, TFile } from 'obsidian';
 import { createMemoNote } from '../src/modules/home/ui/notes/memo-note';
 import type { MomentLike } from '../src/host/obsidian/datetime';
 import type { DashboardCard } from '../src/modules/home/core/board/types/index';
@@ -52,37 +52,10 @@ const makeCard = (over: Partial<DashboardCard> = {}): DashboardCard =>
 		...over,
 	}) as unknown as DashboardCard;
 
-interface CreateCall {
-	path: string;
-	content: string;
-}
 
 /** Stub vault combining the template resolver with a mutable existence set:
  *  template files live in `templates`, created/known paths in `existing`. */
-const makeApp = (templates: Record<string, string>, existing: Set<string>) => {
-	const created: CreateCall[] = [];
-	const mkdirs: string[] = [];
-	const tplFile = (path: string) => Object.assign(new TFile(), { path });
-	const app = {
-		vault: {
-			adapter: {
-				exists: async (p: string): Promise<boolean> => existing.has(p),
-				mkdir: async (p: string): Promise<void> => {
-					mkdirs.push(p);
-					existing.add(p);
-				},
-			},
-			getAbstractFileByPath: (p: string): object | null => (p in templates ? tplFile(p) : null),
-			read: async (f: { path: string }): Promise<string> => templates[f.path]!,
-			create: async (path: string, content: string): Promise<{ path: string }> => {
-				created.push({ path, content });
-				existing.add(path);
-				return { path };
-			},
-		},
-	} as unknown as App;
-	return { app, created, mkdirs };
-};
+const makeApp = (templates: Record<string, string>, existing: Set<string>) => managedNotes(templates, existing);
 
 const opts = (
 	over: {
@@ -107,8 +80,8 @@ async function main(): Promise<void> {
 		const { app, created, mkdirs } = makeApp({}, new Set());
 		const res = await createMemoNote(app, opts({ card: makeCard({ body: simpleCardText }) }));
 		assert.equal(res.templateMissing, false, 'default path is not a miss');
-		assert.equal(res.path, 'Memos/买菜-20260922-143005.md', 'title + timestamp filename in the folder');
-		assert.deepEqual(mkdirs, ['Memos'], 'destination folder created');
+		assert.equal(res.path, '.nand/content/Memos/买菜-20260922-143005.md', 'title + timestamp filename in the folder');
+		assert.deepEqual(mkdirs, ['.nand', '.nand/content', '.nand/content/Memos'], 'destination folder created');
 		assert.equal(created.length, 1, 'one vault.create call');
 		const content = created[0]!.content;
 		const lines = content.split('\n');
@@ -177,7 +150,7 @@ async function main(): Promise<void> {
 				card: makeCard({ body: simpleCardText }),
 			}),
 		);
-		assert.deepEqual(mkdirs, ['Memos']);
+		assert.deepEqual(mkdirs, ['.nand', '.nand/content', '.nand/content/Memos']);
 		assert.equal(
 			created[0]!.content,
 			[
@@ -229,16 +202,16 @@ async function main(): Promise<void> {
 	{
 		const { app, created } = makeApp({}, new Set(['Memos/买菜-20260922-143005.md']));
 		const res = await createMemoNote(app, opts({ card: makeCard({ body: 'x' }) }));
-		assert.equal(res.path, 'Memos/买菜-20260922-143005-2.md', 'collision suffix applied');
+		assert.equal(res.path, '.nand/content/Memos/买菜-20260922-143005-2.md', 'collision suffix applied');
 	}
 
 	// 6. Empty folder: vault root, no mkdir.
 	{
 		const { app, created, mkdirs } = makeApp({}, new Set());
 		const res = await createMemoNote(app, opts({ folder: ' ', card: makeCard({ body: 'x' }) }));
-		assert.equal(res.path, '买菜-20260922-143005.md', 'created at the vault root');
-		assert.ok(!res.path.includes('/'), 'no folder segment');
-		assert.deepEqual(mkdirs, [], 'no folder created');
+		assert.equal(res.path, '.nand/content/买菜-20260922-143005.md', 'created at the vault root');
+		assert.equal(res.path.slice(0, res.path.lastIndexOf('/')), '.nand/content', 'empty folder uses the managed content root');
+		assert.deepEqual(mkdirs, ['.nand', '.nand/content'], 'no folder created');
 		assert.equal(created.length, 1);
 	}
 
@@ -246,7 +219,7 @@ async function main(): Promise<void> {
 	{
 		const { app, created } = makeApp({}, new Set());
 		await createMemoNote(app, opts({ card: makeCard({ title: '', body: 'x' }), untitled: '未命名' }));
-		assert.equal(created[0]!.path, 'Memos/未命名-20260922-143005.md', 'untitled label in the filename');
+		assert.equal(created[0]!.path, '.nand/content/Memos/未命名-20260922-143005.md', 'untitled label in the filename');
 	}
 
 	console.log('memo note template: ALL PASS');

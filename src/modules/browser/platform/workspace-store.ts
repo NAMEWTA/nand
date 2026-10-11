@@ -87,10 +87,12 @@ export class WorkspaceStore {
 	}
 }
 
-export const workspaceDocumentKey = (root: string): string => 'browser/workspace-documents/' + encodeURIComponent(root) + '.json';
+export const workspaceDocumentKey = (root: string): string => 'browser/workspace-documents/' + encodeURIComponent(workspaceFolder(root) ?? root) + '.json';
 
 export function markdownWorkspaceStore(app: App, root: string, changed: () => void, recoveryPath?: string): WorkspaceStore {
-	if (workspaceFolder(root) !== root) throw new BrowserError('browser_workspace_folder');
+	const normalized = workspaceFolder(root);
+	if (!normalized) throw new BrowserError('browser_workspace_folder');
+	root = normalized;
 	const key = workspaceDocumentKey(root);
 	const storage = new MarkdownCollectionStorage(app, workspaceDocuments(root), key);
 	let unsubscribe = () => {};

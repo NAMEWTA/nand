@@ -1,3 +1,4 @@
+import { memoryVault } from './fixtures/memory-vault';
 import { installPreactMiniDom } from './preact-mini-dom';
 import { bindTestPreferences } from '../test/fixtures/vault-storage';
 /**
@@ -70,6 +71,7 @@ const files: StubFile[] = [
 
 const app = {
 	vault: {
+			...memoryVault().app.vault,
 		getMarkdownFiles: () => files,
 		getFileByPath: () => null,
 	},

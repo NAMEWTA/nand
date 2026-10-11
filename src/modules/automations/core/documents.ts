@@ -17,7 +17,7 @@ export interface AutomationDefinitionsRepository {
 export interface DefinitionCollection {
 	definitions: AutomationDefinition[];
 }
-const root = 'NAND/自动化';
+const root = '.nand/content/NAND/自动化';
 export const automationDocuments: DocumentCollectionCodec<DefinitionCollection> = {
 	root,
 	managedProperties: [

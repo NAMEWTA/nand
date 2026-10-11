@@ -6,7 +6,7 @@ import {
 } from '../../../../shared/storage/document-collection';
 import { emptyData, normalizeData, type HabitData } from './model';
 
-const root = 'NAND/习惯';
+const root = '.nand/content/NAND/习惯';
 export const habitDocuments: DocumentCollectionCodec<HabitData> = {
 	root,
 	empty: emptyData,

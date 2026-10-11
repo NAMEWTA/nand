@@ -1,4 +1,4 @@
-=== NAND/番茄钟/活动.md ===
+=== .nand/content/NAND/番茄钟/活动.md ===
 ---
 nand-type: pomodoro-settings
 nand-id: pomodoro-settings
@@ -10,7 +10,7 @@ tags:
     pinned: false
 ---
 
-=== NAND/番茄钟/记录/2026/2026-10-02.md ===
+=== .nand/content/NAND/番茄钟/记录/2026/2026-10-02.md ===
 ---
 nand-type: pomodoro-records
 nand-id: pomodoro:2026-10-02

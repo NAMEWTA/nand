@@ -62,7 +62,9 @@ export class WorkflowStore {
 }
 
 export function markdownWorkflowStore(app: App, folder: string, recovery: string, changed: () => void): WorkflowStore {
-	if (workspaceFolder(folder) !== folder) throw new BrowserError('browser_workspace_folder');
+	const normalized = workspaceFolder(folder);
+	if (!normalized) throw new BrowserError('browser_workspace_folder');
+	folder = normalized;
 	const key = 'browser/workflow-documents/' + encodeURIComponent(folder) + '.json';
 	const storage = new MarkdownCollectionStorage(app, workflowDocuments(folder), key);
 	let unsubscribe = () => {};

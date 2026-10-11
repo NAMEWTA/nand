@@ -6,6 +6,8 @@
  * the '.md' extension, matching the `dashboardFile` settings convention.
  */
 
+import { contentPath } from '../../../../shared/storage/content-paths';
+
 export interface WorkspaceRegistry {
 	files: string[];
 	names: string[];
@@ -27,14 +29,16 @@ export function normalizeWorkspacePath(path: unknown): string {
     'dashboard') when nothing survives, and guarantee the active file is
     listed. Names stay index-aligned through de-duplication. */
 export function normalizeWorkspaces(raw: Record<string, unknown>): WorkspaceRegistry {
-	const active = normalizeWorkspacePath(raw.dashboardFile) || 'dashboard';
+	const active = contentPath(normalizeWorkspacePath(raw.dashboardFile) || 'dashboard');
 	const rawNames = Array.isArray(raw.workspaceNames) ? raw.workspaceNames : [];
 	const rawFiles = Array.isArray(raw.workspaceFiles) ? raw.workspaceFiles : [];
 	const files: string[] = [];
 	const names: string[] = [];
 	for (let i = 0; i < rawFiles.length; i++) {
-		const p = normalizeWorkspacePath(rawFiles[i]);
-		if (!p || files.includes(p)) continue;
+		const normalized = normalizeWorkspacePath(rawFiles[i]);
+		if (!normalized) continue;
+		const p = contentPath(normalized);
+		if (files.includes(p)) continue;
 		files.push(p);
 		names.push(typeof rawNames[i] === 'string' ? (rawNames[i] as string) : '');
 	}
@@ -87,7 +91,7 @@ export function nextWorkspacePath(
 	preferredName: string,
 	exists: (path: string) => boolean,
 ): string {
-	const first = normalizeWorkspacePath(existingFiles[0]) || 'dashboard';
+	const first = contentPath(normalizeWorkspacePath(existingFiles[0]) || 'dashboard');
 	const slash = first.lastIndexOf('/');
 	const dir = slash >= 0 ? first.slice(0, slash + 1) : '';
 	const base = (slash >= 0 ? first.slice(slash + 1) : first) || 'dashboard';

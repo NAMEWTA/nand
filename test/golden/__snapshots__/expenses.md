@@ -1,4 +1,4 @@
-=== NAND/记账/分类.md ===
+=== .nand/content/NAND/记账/分类.md ===
 ---
 nand-type: expense-settings
 nand-id: expense-settings
@@ -22,7 +22,7 @@ categoryParents:
     food: 日常
 ---
 
-=== NAND/记账/记录/2026/2026-10-01.md ===
+=== .nand/content/NAND/记账/记录/2026/2026-10-01.md ===
 ---
 nand-type: expense-records
 nand-id: expense:2026-10-01
@@ -36,7 +36,7 @@ date: 2026-10-01
 | "exp-2" | "income" | 1200 | "salary" | null | "2026-10-01" | 1790000100000 |
 <!-- /nand:records -->
 
-=== NAND/记账/记录/2026/2026-10-03.md ===
+=== .nand/content/NAND/记账/记录/2026/2026-10-03.md ===
 ---
 nand-type: expense-records
 nand-id: expense:2026-10-03

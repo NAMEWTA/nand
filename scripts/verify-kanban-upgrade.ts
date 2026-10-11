@@ -1,3 +1,4 @@
+import { memoryVault } from './fixtures/memory-vault';
 import { installPreactMiniDom } from './preact-mini-dom';
 import { flushSync } from 'preact/compat';
 installPreactMiniDom();
@@ -111,9 +112,11 @@ const makeApp = () => {
 	};
 	return {
 		vault: {
+			...memoryVault().app.vault,
 			getMarkdownFiles: () => [file],
 			cachedRead: async () => '---\nstatus: todo\ntitle: x\n---\n\nbody',
 			adapter: {
+				...memoryVault().adapter,
 				read: async () => {
 					throw new Error('no adapter in stub');
 				},

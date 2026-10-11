@@ -69,7 +69,7 @@ const memory = (): TextStorage & { files: Map<string, string>; failBrief: boolea
 			return value;
 		},
 		async write(path: string, content: string) {
-			if (store.failBrief && path.startsWith('NAND/')) throw new Error('disk');
+			if (store.failBrief && path.startsWith('.nand/content/NAND/')) throw new Error('disk');
 			files.set(path, content);
 		},
 		async mkdir() {},

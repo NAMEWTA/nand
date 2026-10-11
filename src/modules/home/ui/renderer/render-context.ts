@@ -5,6 +5,7 @@ import { cloneElement, h, isValidElement, render, type ComponentChild } from 'pr
 import { RenderBoundary } from '../../../../ui/primitives/RenderBoundary';
 import { refreshLocalizedDom } from '../../../../ui/primitives/localized-dom';
 import { SUPPORTED_FILE_EXTS } from '../../../../shared/file-types';
+import { contentFiles, type ContentFile } from '../../../../host/obsidian/storage/content-files';
 
 /** One resource and interaction scope per dashboard root, including detached render trees. */
 export class DashboardRenderContext {
@@ -18,7 +19,7 @@ export class DashboardRenderContext {
 	readonly taskDragSource = { current: null as { cardId: string; taskPath: number[] } | null };
 	readonly docDragSource = { current: null as { cardId: string; docPath: number[] } | null };
 	hoverParent: HoverParent | null = null;
-	noteOpener: ((file: TFile, subpath?: string) => void) | null = null;
+	noteOpener: ((file: ContentFile, subpath?: string) => void) | null = null;
 	markdownComponent: Component | null = null;
 }
 const contexts = new WeakMap<HTMLElement, DashboardRenderContext>();
@@ -179,7 +180,9 @@ export function teardownBasenameIndex(app: App): void {
 	basenameIndexes.delete(app);
 }
 
-export function resolveNoteFile(app: App, rawPath: string): TFile | null {
+export function resolveNoteFile(app: App, rawPath: string): ContentFile | null {
+	const managed = contentFiles(app).resolveLink(rawPath);
+	if (managed) return managed;
 	const direct = app.vault.getFileByPath(rawPath);
 	if (direct) return direct;
 	const withMd = rawPath.includes('.') ? rawPath : `${rawPath}.md`;

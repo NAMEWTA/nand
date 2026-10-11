@@ -1,3 +1,4 @@
+import { memoryVault } from './fixtures/memory-vault';
 import { installPreactMiniDom } from './preact-mini-dom';
 import { flushSync } from 'preact/compat';
 installPreactMiniDom();
@@ -34,6 +35,7 @@ const run = async (): Promise<void> => {
 	];
 	const app = {
 		vault: {
+			...memoryVault().app.vault,
 			getMarkdownFiles: () =>
 				notes.map((n) => ({
 					path: n.path,
@@ -44,6 +46,7 @@ const run = async (): Promise<void> => {
 			cachedRead: async () => '---\n---\n\nbody',
 			getFileByPath: (p: string) => (p === 'pic.png' ? { path: p } : null),
 			adapter: {
+				...memoryVault().adapter,
 				read: async (p: string) => {
 					if (p === 'pic.png') return 'binary';
 					throw new Error('not found');

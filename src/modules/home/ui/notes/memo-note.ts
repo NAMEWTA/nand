@@ -1,6 +1,7 @@
+import { contentFiles } from '../../../../host/obsidian/storage/content-files';
+import { contentPath } from '../../../../shared/storage/content-paths';
 import type { App } from 'obsidian';
 import type { DashboardCard } from '../../core/board/types/index';
-import { ensureFolder } from '../../platform/calendar/daily-notes';
 import { memoCardText } from '../../platform/board/card-move';
 import { nowMoment, type MomentLike } from '../../../../host/obsidian/datetime';
 import { mergeTemplateNoteContent } from '../library/library-new-note';
@@ -48,9 +49,8 @@ export async function createMemoNote(
 	const fileName = `${safe}-${now.format('YYYYMMDD-HHmmss')}.md`;
 
 	const folder = input.folder.trim().replace(/^\/+|\/+$/g, '');
-	if (folder) await ensureFolder(app, folder);
 	const base = folder ? `${folder}/${fileName}` : fileName;
-	const path = await uniquePath(app, base);
+	const path = await uniquePath(app, contentPath(base));
 
 	// Marker props every memo note carries; they win collisions with a
 	// template's own frontmatter so type/创建时间 are guaranteed present.
@@ -80,6 +80,6 @@ export async function createMemoNote(
 	const body = [tplBody, cardText].filter((s) => s.trim().length > 0).join('\n\n');
 	const content = mergeTemplateNoteContent(tplFm, body, props);
 
-	await app.vault.create(path, content);
+	await contentFiles(app).create(path, content);
 	return { path, templateMissing };
 }

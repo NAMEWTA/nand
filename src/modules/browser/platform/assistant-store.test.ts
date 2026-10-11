@@ -20,7 +20,7 @@ const fixture = (): AssistantTask => ({ id: 'assistant', title: 'Inspect the loc
 test('assistant Markdown owns goal, prompt, step evidence and output while retaining user notes and foreign documents', async () => {
 	const task = fixture(); task.status = 'succeeded'; task.text = '# Observed result\n\nDraft filled. Submission was declined.';
 	task.steps.push({ id: 'step', target: { ...task.pages[0]!.target }, operation: 'snapshot', startedAt: 1, finishedAt: 2, state: 'returned', evidence: '# Form\n\nButton: Publish' });
-	const codec = assistantDocuments('NAND/AI Workspace'), document = codec.encode({ version: 1, tasks: [task] })[0]!, files = new Map<string, string>();
+	const codec = assistantDocuments('.nand/content/NAND/AI Workspace'), document = codec.encode({ version: 1, tasks: [task] })[0]!, files = new Map<string, string>();
 	const repository = new DocumentRepository({ read: async path => files.get(path)!, process: async (path, update) => { const next = update(files.get(path) ?? null); files.set(path, next); return next; } });
 	await repository.update(document.path, { properties: {} }, document);
 	await expect(files.get(document.path)).toMatchFileSnapshot(resolve(process.cwd(), 'test/golden/__snapshots__/browser-assistant.md'));
@@ -28,12 +28,12 @@ test('assistant Markdown owns goal, prompt, step evidence and output while retai
 	assert.equal(JSON.stringify(document.properties).includes('Fill a draft'), false);
 	assert.deepEqual(codec.decode([{ ...document, ...parseDocumentValue(files.get(document.path)!) }]), { version: 1, tasks: [task] });
 	const foreign = '---\nnand-type: automation\nnand-id: foreign\n---\nKeep my automation.\n';
-	const vault = memoryVault({ [document.path]: files.get(document.path)! + '\nMy manual review notes.\n', 'NAND/AI Workspace/automation.md': foreign });
-	const store = markdownAssistantStore(vault.app, 'NAND/AI Workspace', '.nand/recovery/assistant', () => {});
+	const vault = memoryVault({ [document.path]: files.get(document.path)! + '\nMy manual review notes.\n', '.nand/content/NAND/AI Workspace/automation.md': foreign });
+	const store = markdownAssistantStore(vault.app, '.nand/content/NAND/AI Workspace', '.nand/recovery/assistant', () => {});
 	await store.ready; const next = structuredClone(task); next.text += '\nAdditional result.';
 	await store.put(next, task);
 	assert.match(vault.contents.get(document.path)!, /My manual review notes/);
-	assert.equal(vault.contents.get('NAND/AI Workspace/automation.md'), foreign); await store.shutdown();
+	assert.equal(vault.contents.get('.nand/content/NAND/AI Workspace/automation.md'), foreign); await store.shutdown();
 });
 
 test('a failed intent cannot be replaced; retry only writes, and newer native facts have a separate recovery snapshot', async () => {
@@ -75,7 +75,7 @@ test('documents reject steps from another account, oversized budgets and broken 
 		(row: AssistantTask) => { row.maxOperations = 201; },
 		(row: AssistantTask) => { row.pages.push(structuredClone(row.pages[0]!)); },
 	]) { const invalid = structuredClone(task); mutate(invalid); assert.throws(() => validateAssistant({ version: 1, tasks: [invalid] }), /assistant_storage/); }
-	const codec = assistantDocuments('Workspace'), documents = codec.encode({ version: 1, tasks: [task] });
+	const codec = assistantDocuments('.nand/content/Workspace'), documents = codec.encode({ version: 1, tasks: [task] });
 	delete documents[0]!.sections!['step-a']; assert.throws(() => codec.decode(documents), /assistant_storage/);
 });
 
@@ -104,11 +104,10 @@ test('restore saves only the reviewed snapshot, interrupts unfinished steps and 
 });
 
 test('independent recovery reader is read-only, folder-scoped and usable with broken primary Markdown', async () => {
-	const vault = memoryVault(), folder = 'Workspace';
+	const vault = memoryVault(), folder = '.nand/content/Workspace';
 	Object.assign(vault.app, { loadLocalStorage: () => '00000000-0000-0000-0000-000000000001', saveLocalStorage: () => {} });
 	await initializeTestDevice(vault.app);
-	Object.assign(vault.adapter, { exists: async (path: string) => vault.contents.has(path) || [...vault.contents.keys()].some(key => key.startsWith(path + '/')),
-		list: async (path: string) => ({ files: [...vault.contents.keys()].filter(key => key.startsWith(path + '/') && !key.slice(path.length + 1).includes('/')), folders: [] }) });
+
 	const directory = await assistantRecoveryDirectory(vault.app, folder), id = crypto.randomUUID(), file = `${directory}/${id}.json`;
 	const task = fixture(); task.status = 'succeeded'; task.text = 'Late observed result';
 	vault.contents.set(file, JSON.stringify({ path: assistantDocumentKey(folder), at: new Date(5).toISOString(), baseline: { version: 1, tasks: [] }, draft: { version: 1, tasks: [task] } }));
@@ -116,8 +115,22 @@ test('independent recovery reader is read-only, folder-scoped and usable with br
 	assert.equal(loaded.review.canRestore, true); assert.equal(loaded.review.draft!.tasks[0]!.text, task.text);
 	assert.equal((await readAssistantRecovery(vault.app, folder)).review.draft, undefined);
 	assert.equal((await readAssistantRecovery(vault.app, 'Another')).review.drafts.length, 0);
-	await vault.app.vault.create('Workspace/broken.md', '---\nnand-type: browser-assistant\nnand-id: broken\nnand-assistant: {}\n---\n');
+	await vault.app.vault.create('.nand/content/Workspace/broken.md', '---\nnand-type: browser-assistant\nnand-id: broken\nnand-assistant: {}\n---\n');
 	loaded = await readAssistantRecovery(vault.app, folder, id);
 	assert.equal(loaded.review.error, 'browser_workspace_recovery_local_invalid'); assert.equal(loaded.review.canRestore, false);
 	assert.equal(loaded.review.draft!.tasks[0]!.text, task.text); assert.equal(vault.contents.get(file), before);
+});
+
+test('legacy assistant recovery can be explicitly restored after the workspace folder moves', async () => {
+	const { recoveryLocations } = await import('./recovery-locations');
+	const vault = memoryVault(), folder = '.nand/content/Workspace'; await initializeTestDevice(vault.app);
+	const [current, legacy] = await recoveryLocations(vault.app, folder, 'assistant');
+	const id = crypto.randomUUID(), file = `${legacy!.directory}/${id}.json`, task = fixture(); task.status = 'succeeded';
+	const raw = JSON.stringify({ path: legacy!.key, at: new Date(5).toISOString(), baseline: { version: 1, tasks: [] }, draft: { version: 1, tasks: [task] } });
+	vault.contents.set(file, raw);
+	const loaded = await readAssistantRecovery(vault.app, folder, id);
+	assert.equal(loaded.review.canRestore, true); assert.equal(loaded.record!.path, current!.key);
+	const store = markdownAssistantStore(vault.app, folder, current!.directory, () => {}); await store.ready;
+	await store.restore(loaded.record!, loaded.review.local!); assert.equal(store.data().tasks[0]!.status, 'succeeded');
+	assert.equal(vault.contents.get(file), raw); await store.shutdown();
 });

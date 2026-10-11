@@ -1,5 +1,6 @@
+import { contentFiles } from '../../../../host/obsidian/storage/content-files';
 import { useEffect, useMemo, useState } from 'preact/hooks';
-import type { App, TAbstractFile } from 'obsidian';
+import type { App } from 'obsidian';
 import type { DashboardColumn, PipelineConfig as Config, PipelineSkill } from '../../core/board/types/model';
 import { emptyPipeline } from '../../core/pipeline/model';
 import { pipelineConfigError, pipelineDestination, pipelineFieldValues, pipelinePath, projectPipeline, withinPipeline } from '../../core/pipeline/rules';
@@ -26,14 +27,16 @@ export function PipelineSection({ app, column, callbacks, signal, win }: { app: 
 	const canRun = (skill: PipelineSkill) => agents.some(agent => agent.id === skill.agentId && agent.enabled);
 	const refresh = () => setRevision(value => value + 1);
 	useEffect(() => {
-		let timer = 0;
-		const changed = (file: TAbstractFile, oldPath?: string) => {
+		let timer = 0, disposed = false;
+		const index = () => { void contentFiles(app).prepareMetadata().then(() => { if (!disposed && !signal.aborted) refresh(); }).catch(error => { if (!disposed) setError(pipelineError(error)); }); };
+		const changed = (file: { path: string }, oldPath?: string) => {
 			if (!withinPipeline(config.rootFolder, file.path) && !(oldPath && withinPipeline(config.rootFolder, oldPath))) return;
-			win.clearTimeout(timer); timer = win.setTimeout(() => { if (!signal.aborted) refresh(); }, 80);
+			win.clearTimeout(timer); timer = win.setTimeout(() => { if (!signal.aborted) index(); }, 80);
 		};
 		const vaultRefs = [app.vault.on('create', changed), app.vault.on('delete', changed), app.vault.on('rename', changed)];
 		const metadataRef = app.metadataCache.on('changed', file => changed(file));
-		return () => { win.clearTimeout(timer); vaultRefs.forEach(ref => app.vault.offref(ref)); app.metadataCache.offref(metadataRef); };
+		const stop = contentFiles(app).subscribe(event => changed(event, event.oldPath)); index();
+		return () => { disposed = true; stop(); win.clearTimeout(timer); vaultRefs.forEach(ref => app.vault.offref(ref)); app.metadataCache.offref(metadataRef); };
 	}, [app, config.rootFolder, signal, win]);
 	const notes = useMemo(() => port.scan(config), [port, config, revision]);
 	const view = useMemo(() => projectPipeline(config, notes), [config, notes]);
@@ -74,7 +77,7 @@ export function PipelineSection({ app, column, callbacks, signal, win }: { app: 
 			const props = Object.fromEntries(config.filterFields.filter(field => config.filters[field]).map(field => [field, config.filters[field]!]));
 			props[config.statusField] = stage.value.trim();
 			const file = await createNoteWithProps(app, folder, newNote.title, props, newNote.template);
-			if (!signal.aborted) { setNewNote(null); refresh(); callbacks.onOpenNoteInPopover(file); }
+			if (!signal.aborted) { setNewNote(null); refresh(); await contentFiles(app).open(file.path); }
 		} catch (error) { if (!signal.aborted) setError(pipelineError(error)); }
 		finally { if (!signal.aborted) setBusy(false); }
 	};

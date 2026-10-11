@@ -1,4 +1,5 @@
-import { Menu, Notice, type App, type TFile } from 'obsidian';
+import { contentFiles, type ContentFile } from '../../../../host/obsidian/storage/content-files';
+import { Menu, Notice, type App } from 'obsidian';
 import { Fragment } from 'preact';
 import { createPortal } from 'preact/compat';
 import { useLayoutEffect, useMemo, useRef, useState } from 'preact/hooks';
@@ -165,15 +166,16 @@ export function LibraryPanel({
 	const [columnsOpen, setColumnsOpen] = useState(false);
 	useLayoutEffect(() => {
 		const win = root.ownerDocument.defaultView;
-		let timer: number | undefined;
+		let timer: number | undefined, disposed = false;
 		// Vault writes can precede indexing; query again when frontmatter is ready.
 		const refresh = () => {
 			win?.clearTimeout(timer);
-			timer = win?.setTimeout(() => setRevision(value => value + 1), 100);
+			timer = win?.setTimeout(() => { void contentFiles(app).prepareMetadata().then(() => { if (!disposed) setRevision(value => value + 1); }).catch(error => { console.error('[NAND library]', error); if (!disposed) new Notice(t('library.propertyMoveFailed')); }); }, 100);
 		};
 		const ref = app.metadataCache.on('changed', refresh);
+		const stop = contentFiles(app).subscribe(refresh); refresh();
 		root.addEventListener('dashboard-library-refresh', refresh);
-		return () => { app.metadataCache.offref(ref); root.removeEventListener('dashboard-library-refresh', refresh); win?.clearTimeout(timer); closeOwnedDashboardDialogs(app, root); };
+		return () => { disposed = true; stop(); app.metadataCache.offref(ref); root.removeEventListener('dashboard-library-refresh', refresh); win?.clearTimeout(timer); closeOwnedDashboardDialogs(app, root); };
 	}, [app, root]);
 	const filterButton = useRef<HTMLDivElement>(null);
 	useLayoutEffect(() => {
@@ -254,7 +256,7 @@ export function LibraryPanel({
 			: groupKey.startsWith('prop:')
 				? `${t('library.viewGroup')}: ${groupKey.slice(5)}`
 				: t('library.viewGroup');
-	const remove = async (file: TFile) => {
+	const remove = async (file: ContentFile) => {
 		if (
 			!(await showConfirmDialog(app, {
 				title: t('common.confirmDelete'),
@@ -280,7 +282,7 @@ export function LibraryPanel({
 			context,
 			windowKey,
 			showTags: column.sectionType === 'folder',
-			onDelete: (file: TFile) => {
+			onDelete: (file: ContentFile) => {
 				void remove(file);
 			},
 		};

@@ -1,54 +1,54 @@
-import { MarkdownView, TFile, type App } from 'obsidian';
+import type { App } from 'obsidian';
+import { contentFiles } from '../../../host/obsidian/storage/content-files';
+import { isContentPath } from '../../../shared/storage/content-paths';
 import type { DocumentPort } from '../../../shared/storage/document-repository';
-import { ensureDirectory } from '../../../shared/storage/durable-state';
+import { parseDocumentValue } from '../../../shared/storage/document-repository';
 import { NEWS_NOTES_ROOT } from './notes';
-import { favoriteFolder, editionFolder, newsFolder, type NewsNoteFolders } from '../core/note-folders';
+import { favoriteFolder, editionFolder, type NewsNoteFolders } from '../core/note-folders';
 
 export interface NewsNotePort extends DocumentPort {
+	refresh?(): Promise<void>;
 	paths(): readonly string[];
 	subscribe(listener: () => void): () => void;
 }
 
-/** Visible Markdown uses the Vault API, including its atomic process and editor protection. */
+/** Hidden Markdown is indexed independently of Obsidian's visible-file metadata cache. */
 export function newsNotePort(app: App, folders: () => NewsNoteFolders = () => ({})): NewsNotePort {
+	const files = contentFiles(app), tags = new Map<string, { stamp: string; news: boolean }>();
 	let known = new Set<string>();
-	const tagged = (path: string): boolean => {
-		const file = app.vault.getAbstractFileByPath(path);
-		const kind: unknown = file instanceof TFile ? app.metadataCache.getFileCache(file)?.frontmatter?.['nand-type'] : undefined;
-		return kind === 'news' || kind === 'news-brief' || kind === 'news-edition';
-	};
-	const owns = (path: string): boolean => !!newsFolder(path) && path.endsWith('.md') &&
-		(known.has(path) || tagged(path) || [NEWS_NOTES_ROOT, favoriteFolder(folders()), editionFolder(folders())].some(root => path.startsWith(`${root}/`)));
+	const inFolder = (path: string) => [NEWS_NOTES_ROOT, favoriteFolder(folders()), editionFolder(folders())].some(root => path.startsWith(root + '/'));
+	const owns = (path: string) => isContentPath(path) && path.endsWith('.md') && (known.has(path) || inFolder(path));
 	return {
-		paths: () => { const paths = app.vault.getMarkdownFiles().filter(file => owns(file.path)).map(file => file.path); known = new Set(paths); return paths; },
-		read: async path => {
-			const file = app.vault.getAbstractFileByPath(path);
-			if (!(file instanceof TFile)) throw new Error('news.note.missing');
-			return app.vault.read(file);
+		refresh: async () => {
+			await files.refresh();
+			const next = new Set<string>();
+			for (const file of files.allManaged()) {
+				if (file.extension !== 'md') continue;
+				if (inFolder(file.path)) { next.add(file.path); continue; }
+				const stamp = `${file.stat.mtime}:${file.stat.size}`, previous = tags.get(file.path);
+				let news = previous?.news ?? false;
+				if (previous?.stamp !== stamp) {
+					const text = await files.read(file);
+					try { news = ['news', 'news-brief', 'news-edition'].includes(String(parseDocumentValue(text).properties['nand-type'])); }
+					catch { news = news || /^nand-type:\s*news(?:-brief|-edition)?\s*$/m.test(text); }
+					tags.set(file.path, { stamp, news });
+				}
+				if (news) next.add(file.path);
+			}
+			for (const path of tags.keys()) if (!files.getFileByPath(path)) tags.delete(path);
+			known = next;
 		},
+		paths: () => [...known],
+		read: path => files.read(path),
 		process: async (path, update) => {
 			if (!owns(path)) throw new Error('news.note.path');
-			const file = app.vault.getAbstractFileByPath(path);
-			if (file instanceof TFile) {
-				return app.vault.process(file, current => {
-					for (const leaf of app.workspace.getLeavesOfType('markdown')) {
-						if (leaf.view instanceof MarkdownView && leaf.view.file?.path === path && leaf.view.editor.getValue() !== current) throw new Error('news.note.unsaved');
-					}
-					return update(current);
-				});
+			return files.process(path, update);
+		},
+		subscribe: listener => files.subscribe(event => {
+			if ([event.path, event.oldPath ?? ''].some(path => isContentPath(path) && path.endsWith('.md'))) {
+				tags.delete(event.path); if (event.oldPath) tags.delete(event.oldPath);
+				listener();
 			}
-			if (file) throw new Error('news.note.path');
-			const text = update(null);
-			await ensureDirectory(app.vault.adapter, path.slice(0, path.lastIndexOf('/')));
-			await app.vault.create(path, text);
-			return text;
-		},
-		subscribe: listener => {
-			const changed = (file: { path: string }): void => { if (owns(file.path)) listener(); };
-			const refs = [app.vault.on('create', changed), app.vault.on('modify', changed), app.vault.on('delete', changed),
-				app.vault.on('rename', (file, old) => { if (owns(file.path) || owns(old)) listener(); })];
-			const metadata = app.metadataCache.on('changed', file => { if (owns(file.path)) listener(); });
-			return () => { for (const ref of refs) app.vault.offref(ref); app.metadataCache.offref(metadata); known.clear(); };
-		},
+		}),
 	};
 }

@@ -240,8 +240,8 @@ export interface QuickCommand {
 
 export const DEFAULT_DASHBOARD_SETTINGS: DashboardSettings = {
 	appearancePresets: [],
-	dashboardFile: 'dashboard',
-	workspaceFiles: ['dashboard'],
+	dashboardFile: '.nand/content/dashboard',
+	workspaceFiles: ['.nand/content/dashboard'],
 	workspaceNames: [''],
 	recentDocCount: 5,
 	// Defaults match the CSS spans/sizes until the user drags or picks a tier.

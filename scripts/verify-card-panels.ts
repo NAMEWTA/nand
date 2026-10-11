@@ -1,5 +1,6 @@
 import { verifyOpenIssuePanels } from './verify-open-issue-panels';
 import { memoryVault } from './fixtures/memory-vault';
+import { parse as parseYaml } from 'yaml';
 import { useLayoutEffect } from 'preact/hooks';
 import {
 	DashboardPanelModal,
@@ -59,6 +60,7 @@ const flush = async () => {
 const file = Object.assign(new TFile(), { path: 'Target.md', basename: 'Target', extension: 'md' });
 const app = Object.assign(new App(), {
 	vault: {
+		...memoryVault().app.vault,
 		getFileByPath: (path: string) => (path === 'Target.md' || path === 'Target' ? file : null),
 		getFiles: () => [file],
 	},
@@ -274,6 +276,17 @@ async function main() {
 	]);
 	let rejectWrite = true;
 	const libraryApp = Object.assign(new App(), {
+		workspace: { getLeavesOfType: () => [] },
+		vault: {
+			...memoryVault().app.vault,
+			getFileByPath: (path: string) => [one, two].find(file => file.path === path) ?? null,
+			read: async (file: TFile) => `---\n${JSON.stringify(metadata.get(file))}\n---\n`,
+			process: async (file: TFile, update: (raw: string) => string) => {
+				if (rejectWrite) throw new Error('expected test failure');
+				const text = update(`---\n${JSON.stringify(metadata.get(file))}\n---\n`);
+				metadata.set(file, parseYaml(text.split('---')[1]!) as Record<string, unknown>); return text;
+			},
+		},
 		metadataCache: { getFileCache: (file: TFile) => ({ frontmatter: metadata.get(file) }) },
 		fileManager: {
 			processFrontMatter: async (file: TFile, mutate: (data: Record<string, unknown>) => void) => {
@@ -416,6 +429,7 @@ async function main() {
 		);
 	const queryApp = {
 		vault: {
+			...memoryVault().app.vault,
 			getAbstractFileByPath: (path: string) => queryFiles.find((f) => f.path === path) ?? null,
 			getFileByPath: (path: string) => queryFiles.find((f) => f.path === path) ?? null,
 			getMarkdownFiles: () => queryFiles,

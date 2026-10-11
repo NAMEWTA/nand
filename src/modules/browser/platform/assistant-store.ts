@@ -81,9 +81,11 @@ export class AssistantStore {
 	}
 }
 
-export const assistantDocumentKey = (folder: string): string => 'browser/assistant-documents/' + encodeURIComponent(folder) + '.json';
+export const assistantDocumentKey = (folder: string): string => 'browser/assistant-documents/' + encodeURIComponent(workspaceFolder(folder) ?? folder) + '.json';
 export function markdownAssistantStore(app: App, folder: string, recoveryDirectory: string, changed: () => void): AssistantStore {
-	if (workspaceFolder(folder) !== folder) throw new BrowserError('browser_workspace_folder');
+	const normalized = workspaceFolder(folder);
+	if (!normalized) throw new BrowserError('browser_workspace_folder');
+	folder = normalized;
 	const key = assistantDocumentKey(folder);
 	const storage = new MarkdownCollectionStorage(app, assistantDocuments(folder), key);
 	let unsubscribe = () => {};

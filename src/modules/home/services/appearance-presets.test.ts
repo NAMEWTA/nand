@@ -45,7 +45,7 @@ test('named snapshots whitelist all theme/decor fields and apply both namespaces
 	await f.service.apply(snapshot.id);
 	assert.deepEqual(f.theme.get(), expectedTheme);
 	assert.deepEqual(homeDecor(f.home.get()), expectedHome);
-	assert.equal(f.home.get().dashboardFile, 'Keep');
+	assert.equal(f.home.get().dashboardFile, '.nand/content/Keep');
 	assert.equal(f.home.get().wereadApiKey, 'must-not-copy');
 	assert.equal(f.writes.length, 1);
 	assert.deepEqual(f.writes[0]!.namespaces.theme, expectedTheme);

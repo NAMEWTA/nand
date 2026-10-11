@@ -37,9 +37,9 @@ const app = {
 				(handlers.get(ref.name) ?? []).filter((x) => x !== ref.cb),
 			),
 		adapter: {
-			exists: async () => true,
+			exists: async (path) => path !== '.nand/content',
 			mkdir: async () => {},
-			list: async () => ({ files: [...backup.keys()] }),
+			list: async () => ({ files: [...backup.keys()], folders: [] }),
 			remove: async (p) => backup.delete(p),
 			write: async (p, text) => {
 				if (hold) {
@@ -51,6 +51,7 @@ const app = {
 			},
 		},
 	},
+	workspace: { getLeavesOfType: () => [] },
 };
 const engine = new SyncEngine(app, { dashboardFile: 'Board.md' });
 await engine.init();

@@ -8,7 +8,7 @@ import {
 } from '../../../../shared/storage/document-collection';
 import type { BookInfo, ReadingData, ReadingRecord } from './application';
 
-const root = 'NAND/阅读';
+const root = '.nand/content/NAND/阅读';
 export const readingDocuments: DocumentCollectionCodec<ReadingData> = {
 	root,
 	empty: () => ({ activeBooks: [], sessions: [] }),

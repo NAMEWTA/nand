@@ -1,3 +1,4 @@
+import { contentFiles, isManagedFile, type ContentFile } from '../../../../host/obsidian/storage/content-files';
 import { homeServices } from '../../services/instances';
 import { runSkillCommand } from '../../services/skill-command';
 import { previewAgentPrompt } from '../widgets/AgentPromptDialog';
@@ -78,7 +79,8 @@ export function openNotePopover(this: DashboardSurface, file: TFile, subpath?: s
  *  Non-markdown files (canvas whiteboards, base databases, pdf, media) are
  *  always opened in a real tab — the in-dashboard popover only hosts a
  *  MarkdownView and would render them broken. */
-export function openNote(this: DashboardSurface, file: TFile, subpath?: string, line?: number): void {
+export function openNote(this: DashboardSurface, file: ContentFile, subpath?: string, line?: number): void {
+	if (isManagedFile(file)) { void contentFiles(this.app).open(file.path).catch(error => new Notice(String(error))); return; }
 	if (this.plugin.settings.disableNotePopover || file.extension !== 'md') {
 		void this.openNoteInTab(file, subpath, line);
 		return;
@@ -437,7 +439,7 @@ export async function handleCardNewNote(this: DashboardSurface, cardId: string):
 		if (title == null || !this.isOpen) return;
 
 		try {
-			let file: TFile;
+			let file: ContentFile;
 			try {
 				file = await createNoteWithProps(this.app, folder, title, {}, templatePath || undefined);
 			} catch (err) {
@@ -451,7 +453,7 @@ export async function handleCardNewNote(this: DashboardSurface, cardId: string):
 				}
 			}
 			await observeDashboardPromise(this.sync.addDocToCard(card.id, file.path));
-			await this.app.workspace.getLeaf('tab').openFile(file);
+			await contentFiles(this.app).open(file.path);
 			new Notice(t('quickNote.created', { name: file.basename }));
 		} catch (err) {
 			console.error('[Dashboard] card new note failed:', err);
@@ -542,7 +544,7 @@ export async function handleLibraryNewNote(
 		try {
 			const templatePath = await chooseNoteTemplate(this.app, column.libraryConfig, this);
 			if (templatePath === null || !this.isOpen) return;
-			let file: TFile;
+			let file: ContentFile;
 			try {
 				file = await createNoteWithProps(this.app, folder, title, props, templatePath || undefined);
 			} catch (err) {
@@ -555,7 +557,7 @@ export async function handleLibraryNewNote(
 					throw err;
 				}
 			}
-			await this.app.workspace.getLeaf('tab').openFile(file);
+			await contentFiles(this.app).open(file.path);
 			new Notice(t('quickNote.created', { name: file.basename }));
 			if (skipped.length > 0) {
 				new Notice(t('library.newNoteSkipped', { props: skipped.join(', ') }));
@@ -645,6 +647,8 @@ export async function promptAddColumn(this: DashboardSurface): Promise<void> {
 }
 
 export async function navigateToPath(this: DashboardSurface, path: string): Promise<void> {
+	const managed = contentFiles(this.app).resolveLink(path);
+	if (managed) { await contentFiles(this.app).open(managed.path); return; }
 	let file = this.app.vault.getFileByPath(path);
 	if (!file && !path.endsWith('.md')) {
 		file = this.app.vault.getFileByPath(`${path}.md`);

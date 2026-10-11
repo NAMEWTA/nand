@@ -1,3 +1,5 @@
+import { memoryVault } from '../../../scripts/fixtures/memory-vault';
+import { contentFiles } from '../../host/obsidian/storage/content-files';
 // Fixed time zone: localized dates and DST cases below assume America/New_York.
 process.env.TZ = 'America/New_York';
 import { renderHomeSettings } from '../../app/settings/home';
@@ -532,9 +534,12 @@ test('completed delivery is not replayed even after notification retention has t
 
 test('dashboard source indexes explicit ownership, ignores plain task lines and creates each run once', async () => {
 	let raw = '# Board\n\n## Todo\n\n### Tasks\n\n- [ ] Parent\n  - [ ] Nested ⏰ 2026-09-27 09:00\n';
-	const file = { path: 'Board.md', basename: 'Board' };
+	const file = { path: '.nand/content/Board.md', basename: 'Board' };
 	const settings = { ...homeSettings.defaults(), dashboardFile: 'Board', workspaceFiles: [] };
-	const app = { vault: { getFileByPath: (p: string) => p === file.path ? file : null, read: async () => raw, process: async (_: unknown, edit: (text: string) => string) => { raw = edit(raw); return raw; } }, workspace: { getLeavesOfType: () => [] } } as unknown as App;
+	const vault = memoryVault({ [file.path]: raw }), app = vault.app;
+	const read = vault.adapter.read.bind(vault.adapter), write = vault.adapter.write.bind(vault.adapter);
+	vault.adapter.read = async path => path === file.path ? raw : read(path);
+	vault.adapter.write = async (path, value) => { if (path === file.path) raw = value; await write(path, value); };
 	const source = new DashboardAutomationSource(app, () => settings, 'first-device', async () => {}, () => true);
 	assert.equal((await source.list()).length, 0, 'a plain task line is not an automation');
 	raw = raw.replace('Nested ⏰ 2026-09-27 09:00', 'Nested' + taskMetaSuffix({ id: 'nested-id', automation: definition({ deviceId: 'first-device' }) }));
@@ -604,9 +609,9 @@ test('widget sources resolve dashboard paths with and without the .md extension 
 			settings.countdownEnabled = settings.anniversaryEnabled = true;
 			settings.countdowns = [{ ...settings.countdowns[0]!, id: 'count', label: 'User countdown', targetDate: '2027-01-01', reminderDays: 1 }];
 			settings.anniversaries = [{ ...settings.anniversaries[0]!, id: 'ann', label: 'User anniversary', startDate: '2020-01-01', annualReminder: true }];
-			const file = { path: path.endsWith('.md') ? path : `${path}.md` };
-			let exists = true, enabled = true, saves = 0;
-			const app = { vault: { getFileByPath: (p: string) => exists && p === file.path ? file : null, read: async () => '' }, workspace: { getLeavesOfType: () => [] } } as unknown as App;
+			const file = { path: '.nand/content/' + (path.endsWith('.md') ? path : path + '.md') };
+			let enabled = true, saves = 0;
+			const vault = memoryVault({ [file.path]: '' }), app = vault.app;
 			const source = new DashboardAutomationSource(app, () => settings, 'original-device', async () => { saves++; }, () => enabled);
 			const rows = await source.list();
 			assert.equal(rows.length, 2);
@@ -614,16 +619,16 @@ test('widget sources resolve dashboard paths with and without the .md extension 
 			assert.equal(saves, 1);
 			for (const row of rows) {
 				assert.equal(row.source?.path, file.path);
-				assert.equal(source.resolveWidgetSource(row.source!), file);
-				assert.equal(source.resolveWidgetSource({ ...row.source!, path: file.path.slice(0, -3) }), file);
+				assert.equal(source.resolveWidgetSource(row.source!).path, file.path);
+				assert.equal(source.resolveWidgetSource({ ...row.source!, path: file.path.slice(0, -3) }).path, file.path);
 				assert.equal(row.deviceId, 'original-device');
 			}
 			assert.deepEqual(await source.list(), rows);
 			assert.equal(saves, 1, 'Reading/resolving never rewrites persisted definitions');
 			const ref = rows[0]!.source!;
-			exists = false;
+			vault.contents.delete(file.path); await contentFiles(app).refresh();
 			assert.throws(() => source.resolveWidgetSource(ref), { message: t('automation.widgetDashboardMissing') });
-			exists = true;
+			await vault.adapter.write(file.path, ''); await contentFiles(app).refresh();
 			enabled = false;
 			assert.throws(() => source.resolveWidgetSource(ref), { message: t('automation.widgetModuleDisabled') });
 			enabled = true;
@@ -932,10 +937,7 @@ test('anniversary reminders use the singular English year only for a difference 
 						annualReminder: true,
 					},
 				];
-				const app = {
-					vault: { getFileByPath: () => null, read: async () => '' },
-					workspace: { getLeavesOfType: () => [] },
-				} as unknown as App;
+				const { app } = memoryVault();
 				const source = new DashboardAutomationSource(app, () => settings, 'device', async () => {}, () => true);
 				const [row] = await source.list();
 				const body = row?.action.kind === 'notify' ? row.action.body : '';

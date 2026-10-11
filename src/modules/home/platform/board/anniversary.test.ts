@@ -1,5 +1,5 @@
+import { memoryVault } from '../../../../../scripts/fixtures/memory-vault';
 import { expect, test, vi } from 'vitest';
-import type { App } from 'obsidian';
 import { normalizeDashboardSettings } from '../../core/board/settings';
 import { anniversaryDateThisYear } from '../../core/anniversaries/calendar';
 import { lunarLookup } from '../../core/anniversaries/lunar-calendar';
@@ -13,7 +13,7 @@ test('annual reminders use the widget lunar date, preserve original dates and re
 			{ id: 'solar', label: 'Solar', startDate: '2020-02-29', precision: 'days', annualReminder: true },
 			{ id: 'invalid', label: 'Invalid', startDate: '2025-02-30', precision: 'days', calendar: 'lunar', annualReminder: true },
 		] });
-		const app = { vault: { getFileByPath: () => null } } as unknown as App;
+		const { app } = memoryVault();
 		const save = vi.fn(async () => {});
 		const source = new DashboardAutomationSource(app, () => settings, 'device', save, () => true);
 		const rows = await source.list();

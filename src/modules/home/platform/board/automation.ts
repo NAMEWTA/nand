@@ -1,6 +1,8 @@
+import { contentFiles, type ContentFile } from '../../../../host/obsidian/storage/content-files';
+import { contentPath } from '../../../../shared/storage/content-paths';
 import { canReceiveTask } from '../../core/board/card-kind';
 import { AutomationError } from '../../../../shared/automation/errors';
-import { MarkdownView, normalizePath, type App, type TFile } from 'obsidian';
+import { normalizePath, type App } from 'obsidian';
 import { anniversaryOccurrence, parseAnniversaryDate } from '../../core/anniversaries/calendar';
 import { resolveWidgetLabel } from '../../core/board/default-widget-label';
 import { parse as parseDashboard, serialize as serializeDashboard } from '../../core/board/parser/index';
@@ -12,17 +14,17 @@ import type { PipelineConfig } from '../../core/board/types/model';
 import type { PipelineAutomationSource, PipelineScope } from '../pipeline/automation';
 
 function widgetDashboardPath(path: string): string {
-	const normalized = normalizePath(path.trim());
+	const normalized = contentPath(normalizePath(path.trim()));
 	return /\.md$/i.test(normalized) ? normalized : `${normalized}.md`;
 }
 
 /** Background writes stay in the dashboard persistence domain and always re-read the note. */
 export class DashboardAutomationSource {
 	async pinAction(path: string, definition: AutomationDefinition): Promise<void> {
-		const file = this.app.vault.getFileByPath(widgetDashboardPath(path));
+		const file = contentFiles(this.app).getFileByPath(widgetDashboardPath(path));
 		if (!file) throw new AutomationError('sourceMissing');
-		await this.app.vault.process(file, raw => {
-			this.checkEditor(file, raw);
+		await contentFiles(this.app).process(file.path, raw => {
+			if (raw === null) throw new AutomationError('sourceMissing');
 			const data = parseDashboard(raw);
 			if (!data.quickActions.some(action => action.type === 'action' && action.target === definition.id))
 				data.quickActions.push({ type: 'action', target: definition.id, name: definition.name, icon: 'play' });
@@ -31,7 +33,7 @@ export class DashboardAutomationSource {
 	}
 	private cache = new Map<string, { stamp: string; rows: AutomationDefinition[]; pipelines: PipelineConfig[] }>();
 	private pipeline?: PipelineAutomationSource;
-	async resolvePipelineSource(source: SourceRef): Promise<TFile> {
+	async resolvePipelineSource(source: SourceRef): Promise<ContentFile> {
 		await this.list();
 		if (!this.pipeline) throw new AutomationError('sourceMissing');
 		return this.pipeline.resolve(source);
@@ -45,11 +47,11 @@ export class DashboardAutomationSource {
 		private isEnabled: () => boolean,
 	) {}
 	/** Resolve extensionless references (settings store paths without `.md`) without changing task/contact source protocols. */
-	resolveWidgetSource(source: SourceRef): TFile {
+	resolveWidgetSource(source: SourceRef): ContentFile {
 		if (!this.isEnabled()) throw new AutomationError('widgetModuleDisabled');
 		const settings = this.settings();
 		const path = widgetDashboardPath(source.path);
-		const file = this.app.vault.getFileByPath(path);
+		const file = contentFiles(this.app).getFileByPath(path);
 		if (!file || ![settings.dashboardFile, ...settings.workspaceFiles].some((p) => widgetDashboardPath(p) === path))
 			throw new AutomationError('widgetDashboardMissing');
 		const matches = [
@@ -59,15 +61,16 @@ export class DashboardAutomationSource {
 		if (matches.length !== 1) throw new AutomationError('widgetMissing');
 		return file;
 	}
-	private files(): TFile[] {
+	private files(): ContentFile[] {
 		const settings = this.settings();
 		if (!this.isEnabled()) return [];
 		return [...new Set([...(settings.workspaceFiles ?? []), settings.dashboardFile])].flatMap((path) => {
-			const file = this.app.vault.getFileByPath(path.endsWith('.md') ? path : `${path}.md`);
+			const file = contentFiles(this.app).getFileByPath(widgetDashboardPath(path));
 			return file ? [file] : [];
 		});
 	}
 	async list(): Promise<AutomationDefinition[]> {
+		await contentFiles(this.app).refresh();
 		const result: AutomationDefinition[] = [];
 		const pipelines: PipelineScope[] = [];
 		for (const file of this.files()) {
@@ -76,7 +79,7 @@ export class DashboardAutomationSource {
 				const cached = this.cache.get(file.path);
 				if (cached && cached.stamp === stamp) { result.push(...cached.rows); pipelines.push(...cached.pipelines.map(config => ({ boardPath: file.path, config }))); continue; }
 				const offset = result.length;
-				const raw = await this.app.vault.read(file);
+				const raw = await contentFiles(this.app).read(file);
 				// Task lines that carry an automation block become definitions.
 				for (const line of raw.split('\n')) {
 					if (!/^\s*- \[ \]/.test(line)) continue;
@@ -97,16 +100,6 @@ export class DashboardAutomationSource {
 			result.push(...await this.pipeline.list(pipelines));
 		}
 		return [...result, ...(await this.widgets())];
-	}
-	private checkEditor(file: TFile, raw: string): void {
-		for (const leaf of this.app.workspace.getLeavesOfType('markdown'))
-			if (
-				leaf.view instanceof MarkdownView &&
-				leaf.view.file === file &&
-				leaf.view.getMode() === 'source' &&
-				leaf.view.editor.getValue() !== raw
-			)
-				throw new AutomationError('editorConflict');
 	}
 
 	private definition(id: string, name: string, at: number, source: SourceRef): AutomationDefinition {
@@ -142,7 +135,7 @@ export class DashboardAutomationSource {
 			const path = widgetDashboardPath(settings.dashboardFile);
 			const source: SourceRef = {
 				kind: 'widget',
-				path: this.app.vault.getFileByPath(path)?.path ?? path,
+				path: contentFiles(this.app).getFileByPath(path)?.path ?? path,
 				id: `widget:${entry.id}`,
 			};
 			if (!entry.automation) {
@@ -204,6 +197,7 @@ export class DashboardAutomationSource {
 	}
 
 	async save(definition: AutomationDefinition, remove = false): Promise<void> {
+		await contentFiles(this.app).refresh();
 		const source = definition.source;
 		if (!source) throw new AutomationError('invalid');
 		if (source.kind === 'dashboard' && source.id.startsWith('pipeline:')) {
@@ -222,10 +216,10 @@ export class DashboardAutomationSource {
 			await this.saveSettings();
 			return;
 		}
-		const file = this.files().find((f) => f.path === source.path);
+		const file = this.files().find((f) => f.path === widgetDashboardPath(source.path));
 		if (!file) throw new AutomationError('sourceMissing');
-		await this.app.vault.process(file, (raw) => {
-			this.checkEditor(file, raw);
+		await contentFiles(this.app).process(file.path, (raw) => {
+			if (raw === null) throw new AutomationError('sourceMissing');
 			let found = false;
 			const next = raw
 				.split('\n')
@@ -243,9 +237,10 @@ export class DashboardAutomationSource {
 		});
 	}
 	async targets(): Promise<Array<{ path: string; cardId: string; title: string }>> {
+		await contentFiles(this.app).refresh();
 		const result: Array<{ path: string; cardId: string; title: string }> = [];
 		for (const file of this.files()) {
-			const data = parseDashboard(await this.app.vault.read(file));
+			const data = parseDashboard(await contentFiles(this.app).read(file));
 			const counts = new Map<string, number>();
 			for (const column of data.columns) for (const card of column.cards) counts.set(card.id, (counts.get(card.id) ?? 0) + 1);
 			for (const column of data.columns)
@@ -259,10 +254,11 @@ export class DashboardAutomationSource {
 		return result;
 	}
 	async createTask(action: Extract<AutomationAction, { kind: 'create-task' }>, runId: string): Promise<void> {
-		const file = this.files().find((f) => f.path === action.path);
+		await contentFiles(this.app).refresh();
+		const file = this.files().find((f) => f.path === widgetDashboardPath(action.path));
 		if (!file) throw new AutomationError('sourceMissing');
-		await this.app.vault.process(file, (raw) => {
-			this.checkEditor(file, raw);
+		await contentFiles(this.app).process(file.path, (raw) => {
+			if (raw === null) throw new AutomationError('sourceMissing');
 			if (raw.split('\n').some((line) => readTaskMeta(line).runId === runId)) return raw;
 			const data = parseDashboard(raw);
 			const matches = data.columns.flatMap(column => column.cards.map(card => ({ column, card }))).filter(entry => entry.card.id === action.cardId);

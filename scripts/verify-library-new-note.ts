@@ -1,3 +1,5 @@
+import { memoryVault } from './fixtures/memory-vault';
+import { managedNotes } from './fixtures/managed-notes';
 import { installPreactMiniDom } from './preact-mini-dom';
 import { flushSync } from 'preact/compat';
 installPreactMiniDom();
@@ -23,7 +25,7 @@ installPreactMiniDom();
  * Run: `pnpm run test:library-new-note`
  */
 import { strict as assert } from 'node:assert';
-import { App, Menu, TFile } from 'obsidian';
+import { Menu } from 'obsidian';
 import { renderLibrarySection } from '../src/modules/home/ui/library/index';
 import {
 	buildNewNoteProps,
@@ -190,32 +192,8 @@ console.log('yamlFrontmatter escaping: PASS');
 
 // ---------- 3. createNoteWithProps (async) + 4. toolbar integration ----------
 
-interface CreateCall {
-	path: string;
-	content: string;
-}
 
-const makeVaultApp = (existing: Set<string>) => {
-	const created: CreateCall[] = [];
-	const mkdirs: string[] = [];
-	const app = {
-		vault: {
-			adapter: {
-				exists: async (p: string): Promise<boolean> => existing.has(p),
-				mkdir: async (p: string): Promise<void> => {
-					mkdirs.push(p);
-					existing.add(p);
-				},
-			},
-			create: async (path: string, content: string): Promise<{ path: string }> => {
-				created.push({ path, content });
-				existing.add(path);
-				return { path };
-			},
-		},
-	} as unknown as App;
-	return { app, created, mkdirs };
-};
+const makeVaultApp = (existing: Set<string>) => managedNotes({}, existing);
 
 const makeSectionApp = (): Parameters<typeof renderLibrarySection>[2] => {
 	const file = {
@@ -226,9 +204,11 @@ const makeSectionApp = (): Parameters<typeof renderLibrarySection>[2] => {
 	};
 	return {
 		vault: {
+			...memoryVault().app.vault,
 			getMarkdownFiles: () => [file],
 			cachedRead: async () => '---\ntitle: x\n---\n\nbody',
 			adapter: {
+				...memoryVault().adapter,
 				read: async () => {
 					throw new Error('no adapter in stub');
 				},
@@ -272,8 +252,8 @@ async function main(): Promise<void> {
 	{
 		const { app, created, mkdirs } = makeVaultApp(new Set());
 		const file = await createNoteWithProps(app, ' /Notes/Sub/ ', 'My Note', { status: '进行中' });
-		assert.equal(file.path, 'Notes/Sub/My Note.md', 'leading/trailing slashes trimmed, .md appended');
-		assert.deepEqual(mkdirs, ['Notes', 'Notes/Sub'], 'missing folders created in order');
+		assert.equal(file.path, '.nand/content/Notes/Sub/My Note.md', 'leading/trailing slashes trimmed, .md appended');
+		assert.deepEqual(mkdirs, ['.nand', '.nand/content', '.nand/content/Notes', '.nand/content/Notes/Sub'], 'missing folders created in order');
 		assert.equal(created.length, 1, 'one vault.create call');
 		assert.equal(created[0]!.content, yamlFrontmatter({ status: '进行中' }), 'content is the frontmatter block');
 	}
@@ -282,7 +262,7 @@ async function main(): Promise<void> {
 	{
 		const { app, created } = makeVaultApp(new Set(['Notes/T.md']));
 		const file = await createNoteWithProps(app, 'Notes', 'T', {});
-		assert.equal(file.path, 'Notes/T-2.md', 'collision suffixed with -2');
+		assert.equal(file.path, '.nand/content/Notes/T-2.md', 'collision suffixed with -2');
 		assert.equal(created[0]!.content, '', 'no props → bare note, no fences');
 	}
 
@@ -290,8 +270,8 @@ async function main(): Promise<void> {
 	{
 		const { app, created, mkdirs } = makeVaultApp(new Set());
 		const file = await createNoteWithProps(app, '', 'Root', {});
-		assert.equal(file.path, 'Root.md', 'empty folder → vault root');
-		assert.deepEqual(mkdirs, [], 'no folders created');
+		assert.equal(file.path, '.nand/content/Root.md', 'empty folder → vault root');
+		assert.deepEqual(mkdirs, ['.nand', '.nand/content'], 'empty preference uses the managed content root');
 		assert.equal(created.length, 1, 'created once');
 	}
 
@@ -299,7 +279,7 @@ async function main(): Promise<void> {
 	{
 		const { app, created } = makeVaultApp(new Set());
 		const file = await createNoteWithProps(app, 'N', 'a/b:c*', {});
-		assert.equal(file.path, 'N/abc.md', 'illegal characters stripped');
+		assert.equal(file.path, '.nand/content/N/abc.md', 'illegal characters stripped');
 		await assert.rejects(() => createNoteWithProps(app, 'N', '///', {}), /empty/i, 'blank title rejected');
 		assert.equal(created.length, 1, 'rejected title created nothing');
 	}
@@ -357,22 +337,7 @@ async function main(): Promise<void> {
 
 	// ---------- 5. Template pipeline + folder-config save regression ----------
 
-	const tplFile = (path: string) => Object.assign(new TFile(), { path });
-	const makeTplVaultApp = (templates: Record<string, string>) => {
-		const created: CreateCall[] = [];
-		const app = {
-			vault: {
-				adapter: { exists: async () => false, mkdir: async () => {} },
-				getAbstractFileByPath: (p: string): object | null => (p in templates ? tplFile(p) : null),
-				read: async (f: { path: string }): Promise<string> => templates[f.path]!,
-				create: async (path: string, content: string): Promise<{ path: string }> => {
-					created.push({ path, content });
-					return { path };
-				},
-			},
-		} as unknown as App;
-		return { app, created };
-	};
+	const makeTplVaultApp = (templates: Record<string, string>) => managedNotes(templates);
 
 	// Template body seeds the note, {{title}} substituted; the template's own
 	// frontmatter now MERGES under the filter props (props win collisions).

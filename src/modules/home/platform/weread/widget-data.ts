@@ -1,4 +1,6 @@
-import { App,TFile } from 'obsidian';
+import { contentFiles } from '../../../../host/obsidian/storage/content-files';
+import { contentPath } from '../../../../shared/storage/content-paths';
+import { App } from 'obsidian';
 import {
 applyWereadProgressEntry,
 needsProgressFetch
@@ -79,13 +81,9 @@ export async function importHighlightsToObsidian(
 	nb: WereadNotebookLike,
 	marks: WereadBookmarkLike[],
 ): Promise<string> {
-	const folder = importPath.trim().replace(/^\/+|\/+$/g, '');
+	const folder = contentPath(importPath.trim().replace(/^\/+|\/+$/g, ''));
 	const safeTitle = sanitizeFileName(nb.title);
 	const path = folder ? `${folder}/${safeTitle}.md` : `${safeTitle}.md`;
-
-	if (folder) {
-		await ensureFolder(app, folder);
-	}
 
 	const lines: string[] = [];
 	lines.push('---');
@@ -108,12 +106,7 @@ export async function importHighlightsToObsidian(
 	});
 	const content = lines.join('\n');
 
-	const existing = app.vault.getAbstractFileByPath(path);
-	if (existing && existing instanceof TFile) {
-		await app.vault.modify(existing, content);
-	} else {
-		await app.vault.create(path, content);
-	}
+	await contentFiles(app).process(path, () => content);
 	return path;
 }
 
@@ -124,22 +117,6 @@ export function sanitizeFileName(name: string): string {
 			.trim()
 			.slice(0, 80) || 'untitled'
 	);
-}
-
-export async function ensureFolder(app: App, folder: string): Promise<void> {
-	const trimmed = folder.replace(/^\/+|\/+$/g, '');
-	if (!trimmed) return;
-	let current = '';
-	for (const part of trimmed.split('/').filter(Boolean)) {
-		current = current ? `${current}/${part}` : part;
-		if (!app.vault.getAbstractFileByPath(current)) {
-			try {
-				await app.vault.createFolder(current);
-			} catch {
-				/* race or already exists */
-			}
-		}
-	}
 }
 
 export function yamlScalar(v: string): string {

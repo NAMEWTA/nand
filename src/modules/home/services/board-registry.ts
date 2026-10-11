@@ -1,4 +1,4 @@
-import { Notice, TFile, type App, type TAbstractFile } from 'obsidian';
+import { Notice, type App } from 'obsidian';
 import { t } from '../../../shared/i18n/index';
 import { generateDefaultMarkdown } from '../core/board/parser/default-document';
 import {
@@ -14,6 +14,7 @@ import { legacyBoardMembers } from '../core/board/widget-members';
 import { boardTileSources, boardTiles, persistedBoardTiles } from '../core/board/board-tiles';
 import { widgetTileDefaults } from './widget-layout';
 import type { BoardOperations } from '../api';
+import { contentFiles } from '../../../host/obsidian/storage/content-files';
 
 type Registry = Pick<DashboardSettings, 'workspaceFiles' | 'workspaceNames' | 'dashboardFile'>;
 
@@ -40,13 +41,11 @@ export class BoardRegistry implements BoardOperations {
 	constructor(private readonly host: BoardRegistryHost) {}
 
 	/** Follow renames and deletions of board files in the vault. */
-	watch(register: (ref: ReturnType<App['vault']['on']>) => void): void {
-		const vault = this.host.app.vault;
-		register(vault.on('rename', (file: TAbstractFile, oldPath: string) => {
-			if (file instanceof TFile) void this.run(() => this.followRename(file, oldPath));
-		}));
-		register(vault.on('delete', (file: TAbstractFile) => {
-			if (file instanceof TFile) void this.run(() => this.followDelete(file));
+	watch(register: (dispose: () => void) => void): void {
+		register(contentFiles(this.host.app).subscribe(event => {
+			if (!event.path.endsWith('.md')) return;
+			if (event.kind === 'rename') void this.run(() => this.followRename(event, event.oldPath!));
+			if (event.kind === 'delete') void this.run(() => this.followDelete(event));
 		}));
 	}
 
@@ -73,7 +72,7 @@ export class BoardRegistry implements BoardOperations {
 				const settings = this.host.settings?.();
 				if (settings) data.widgets = legacyBoardMembers(settings, layout !== 'side');
 				if (layout === 'immersive') data.immersive = persistedBoardTiles(boardTiles(data, boardTileSources(data, data.widgets ?? []), member => settings ? widgetTileDefaults(member, settings, true) : undefined));
-				await this.host.app.vault.create(path.endsWith('.md') ? path : `${path}.md`, serialize(data));
+				await contentFiles(this.host.app).create(path.endsWith('.md') ? path : `${path}.md`, serialize(data));
 			} catch (error) {
 				console.error('[NAND board] creation failed', error);
 				new Notice(t('workspace.createFailed'));
@@ -185,7 +184,7 @@ export class BoardRegistry implements BoardOperations {
 		});
 	}
 
-	private async followRename(file: TFile, oldPath: string): Promise<void> {
+	private async followRename(file: { path: string }, oldPath: string): Promise<void> {
 		const registry = this.host.read();
 		const oldEntry = normalizeWorkspacePath(oldPath);
 		const index = registry.workspaceFiles.indexOf(oldEntry);
@@ -199,7 +198,7 @@ export class BoardRegistry implements BoardOperations {
 		await this.host.repointAll();
 	}
 
-	private async followDelete(file: TFile): Promise<void> {
+	private async followDelete(file: { path: string }): Promise<void> {
 		const registry = this.host.read();
 		const entry = normalizeWorkspacePath(file.path);
 		const files = registry.workspaceFiles;
@@ -207,7 +206,7 @@ export class BoardRegistry implements BoardOperations {
 		if (index < 0) return;
 		if (files.length <= 1) {
 			// Last board gone: reset to the default entry; the engine recreates a default board.
-			await this.host.write({ workspaceFiles: ['dashboard'], workspaceNames: [''], dashboardFile: 'dashboard' });
+			await this.host.write({ workspaceFiles: ['.nand/content/dashboard'], workspaceNames: [''], dashboardFile: '.nand/content/dashboard' });
 		} else {
 			const names = alignWorkspaceNames(files, registry.workspaceNames);
 			const nextFiles = files.filter((_, i) => i !== index);
@@ -221,7 +220,7 @@ export class BoardRegistry implements BoardOperations {
 	}
 
 	private exists(path: string): boolean {
-		return !!this.host.app.vault.getFileByPath(path.endsWith('.md') ? path : `${path}.md`);
+		return !!contentFiles(this.host.app).getFileByPath(path.endsWith('.md') ? path : `${path}.md`);
 	}
 
 	private run(operation: () => Promise<void>): Promise<void> {

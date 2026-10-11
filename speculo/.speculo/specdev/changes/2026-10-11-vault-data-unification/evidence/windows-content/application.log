@@ -1,0 +1,79 @@
+
+2026-10-11 08:36:07 Loaded main app package D:\Pro\Obsidian\resources\obsidian.asar
+CLI server error: Error: listen EADDRINUSE: address already in use \\.\pipe\obsidian-cli-cdewta
+    at Server.setupListenHandle [as _listen2] (node:net:1987:21)
+    at listenInCluster (node:net:2066:12)
+    at Server.listen (node:net:2188:5)
+    at module.exports (D:\Pro\Obsidian\resources\obsidian.asar\main.js:64:404)
+    at loadApp (D:\Pro\Obsidian\resources\app.asar\main.js:310:3)
+    at Object.<anonymous> (D:\Pro\Obsidian\resources\app.asar\main.js:470:12)
+    at Module._compile (node:internal/modules/cjs/loader:1879:14)
+    at Object..js (node:internal/modules/cjs/loader:2012:10)
+    at Module.load (node:internal/modules/cjs/loader:1601:32)
+    at node:internal/modules/cjs/loader:1403:12 {
+  code: 'EADDRINUSE',
+  errno: -4091,
+  syscall: 'listen',
+  address: '\\\\.\\pipe\\obsidian-cli-cdewta',
+  port: -1
+}
+
+DevTools listening on ws://127.0.0.1:9442/devtools/browser/78efc485-86fa-402b-8aaf-1ab046d04c1d
+Ignored: Error: ENOENT: no such file or directory, open 'D:\Document\code\nand\scripts\tmp\hidden-content-20261011-final\profile\abcdef1234567890.json'
+2026-10-11 08:36:08 Checking for update using Github
+2026-10-11 08:36:09 Success.
+2026-10-11 08:36:09 Latest version is 1.14.4
+2026-10-11 08:36:09 Downloading update from https://github.com/obsidianmd/obsidian-releases/releases/download/v1.14.4/obsidian-1.14.4.asar.gz
+2026-10-11 08:36:15 Verifying hash & signature. Size= 9200670
+2026-10-11 08:36:15 Saving file
+2026-10-11 08:36:15 Update complete.
+
+2026-10-11 08:36:21 Loaded updated app D:\Document\code\nand\scripts\tmp\hidden-content-20261011-final\profile\obsidian-1.14.4.asar
+CLI server error: Error: listen EADDRINUSE: address already in use \\.\pipe\obsidian-cli-cdewta
+    at Server.setupListenHandle [as _listen2] (node:net:1987:21)
+    at listenInCluster (node:net:2066:12)
+    at Server.listen (node:net:2188:5)
+    at module.exports (D:\Document\code\nand\scripts\tmp\hidden-content-20261011-final\profile\obsidian-1.14.4.asar\main.js:64:405)
+    at loadApp (D:\Pro\Obsidian\resources\app.asar\main.js:310:3)
+    at Object.<anonymous> (D:\Pro\Obsidian\resources\app.asar\main.js:456:12)
+    at Module._compile (node:internal/modules/cjs/loader:1879:14)
+    at Object..js (node:internal/modules/cjs/loader:2012:10)
+    at Module.load (node:internal/modules/cjs/loader:1601:32)
+    at node:internal/modules/cjs/loader:1403:12 {
+  code: 'EADDRINUSE',
+  errno: -4091,
+  syscall: 'listen',
+  address: '\\\\.\\pipe\\obsidian-cli-cdewta',
+  port: -1
+}
+
+DevTools listening on ws://127.0.0.1:9442/devtools/browser/64e68a4a-05c4-46be-ba80-9f1a4e780019
+2026-10-11 08:36:21 Checking for update using Github
+2026-10-11 08:36:21 Success.
+2026-10-11 08:36:21 Latest version is 1.14.4
+2026-10-11 08:36:21 App is up to date.
+
+2026-10-11 08:36:29 Loaded updated app D:\Document\code\nand\scripts\tmp\hidden-content-20261011-final\profile\obsidian-1.14.4.asar
+CLI server error: Error: listen EADDRINUSE: address already in use \\.\pipe\obsidian-cli-cdewta
+    at Server.setupListenHandle [as _listen2] (node:net:1987:21)
+    at listenInCluster (node:net:2066:12)
+    at Server.listen (node:net:2188:5)
+    at module.exports (D:\Document\code\nand\scripts\tmp\hidden-content-20261011-final\profile\obsidian-1.14.4.asar\main.js:64:405)
+    at loadApp (D:\Pro\Obsidian\resources\app.asar\main.js:310:3)
+    at Object.<anonymous> (D:\Pro\Obsidian\resources\app.asar\main.js:456:12)
+    at Module._compile (node:internal/modules/cjs/loader:1879:14)
+    at Object..js (node:internal/modules/cjs/loader:2012:10)
+    at Module.load (node:internal/modules/cjs/loader:1601:32)
+    at node:internal/modules/cjs/loader:1403:12 {
+  code: 'EADDRINUSE',
+  errno: -4091,
+  syscall: 'listen',
+  address: '\\\\.\\pipe\\obsidian-cli-cdewta',
+  port: -1
+}
+
+DevTools listening on ws://127.0.0.1:9442/devtools/browser/110950ef-b1fd-4c57-9dfc-925e4b584e88
+2026-10-11 08:36:29 Checking for update using Github
+2026-10-11 08:36:29 Success.
+2026-10-11 08:36:29 Latest version is 1.14.4
+2026-10-11 08:36:29 App is up to date.

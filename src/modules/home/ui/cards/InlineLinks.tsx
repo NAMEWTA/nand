@@ -1,4 +1,5 @@
-import { Platform, type App, type TFile } from 'obsidian';
+import { isManagedFile, type ContentFile } from '../../../../host/obsidian/storage/content-files';
+import { Platform, type App } from 'obsidian';
 import type { TargetedMouseEvent } from 'preact';
 import { resolveNoteFile, type DashboardRenderContext } from '../renderer/render-context';
 import { documentLink } from '../../core/board/document-link';
@@ -6,11 +7,11 @@ import { documentLink } from '../../core/board/document-link';
 export function noteHover(
 	app: App,
 	context: DashboardRenderContext,
-	file: TFile | null,
+	file: ContentFile | null,
 	event: TargetedMouseEvent<HTMLElement>,
 	subpath?: string,
 ): void {
-	if (!file || Platform.isMobile || !context.hoverParent) return;
+	if (!file || isManagedFile(file) || Platform.isMobile || !context.hoverParent) return;
 	app.workspace.trigger('hover-link', {
 		event,
 		source: 'nand-dashboard',

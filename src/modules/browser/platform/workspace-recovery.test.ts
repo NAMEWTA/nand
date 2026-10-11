@@ -4,15 +4,27 @@ import { memoryVault } from '../../../../scripts/fixtures/memory-vault';
 import { markdownWorkspaceStore } from './workspace-store';
 import { readWorkspaceRecovery, workspaceRecoveryDirectory } from './workspace-recovery';
 import { initializeTestDevice } from '../../../../test/fixtures/vault-storage';
+import { deviceId } from '../../../../src/host/obsidian/storage/device-id';
+import { emptyWorkspace } from '../core/workspace/model';
+
+test('legacy folder recovery stays discoverable after content migration without rewriting its evidence', async () => {
+	const vault = memoryVault(), old = 'NAND/AI Workspace', root = '.nand/content/' + old;
+	await initializeTestDevice(vault.app);
+	const hash = [...new Uint8Array(await crypto.subtle.digest('SHA-256', new TextEncoder().encode(old)))].map(byte => byte.toString(16).padStart(2, '0')).join('');
+	const id = crypto.randomUUID(), path = `.nand/recovery/drafts/browser-${deviceId(vault.app)}-${hash}/${id}.json`;
+	const raw = JSON.stringify({ path: 'browser/workspace-documents/' + encodeURIComponent(old) + '.json', at: new Date(1).toISOString(), baseline: emptyWorkspace(), draft: { ...emptyWorkspace(), tasks: [{ id: 'task', title: 'Recovered', draft: 'Keep this', pinned: false, createdAt: 1, updatedAt: 1, targets: [], selectedTargetIds: [], visibleTargetIds: [] }] } });
+	vault.contents.set(path, raw);
+	const loaded = await readWorkspaceRecovery(vault.app, root, id);
+	assert.equal(loaded.review.canRestore, true);
+	assert.equal(loaded.record!.path, 'browser/workspace-documents/' + encodeURIComponent(root) + '.json');
+	assert.equal(vault.contents.get(path), raw);
+});
 
 test('a failed restart save cannot overwrite a previous runtime recovery snapshot, and listing stays in this workspace', async () => {
-	const vault = memoryVault(), root = 'NAND/AI Workspace';
+	const vault = memoryVault(), root = '.nand/content/NAND/AI Workspace';
 	Object.assign(vault.app, { loadLocalStorage: () => '00000000-0000-0000-0000-000000000001', saveLocalStorage: () => {} });
 	await initializeTestDevice(vault.app);
-	Object.assign(vault.adapter, {
-		exists: async (path: string) => vault.contents.has(path) || [...vault.contents.keys()].some(key => key.startsWith(path + '/')),
-		list: async (path: string) => ({ files: [...vault.contents.keys()].filter(key => key.startsWith(path + '/') && !key.slice(path.length + 1).includes('/')), folders: [] }),
-	});
+
 	const directory = await workspaceRecoveryDirectory(vault.app, root), firstId = crypto.randomUUID(), secondId = crypto.randomUUID();
 	const firstFile = directory + '/' + firstId + '.json', secondFile = directory + '/' + secondId + '.json';
 	let store = markdownWorkspaceStore(vault.app, root, () => {}, firstFile);

@@ -1,6 +1,7 @@
-import { App, Menu, TFile } from 'obsidian';
+import { contentFiles, type ContentFile } from '../../../../host/obsidian/storage/content-files';
+import { contentPath } from '../../../../shared/storage/content-paths';
+import { App, Menu } from 'obsidian';
 import { LibraryConfig } from '../../core/board/types/index';
-import { ensureFolder } from '../../platform/calendar/daily-notes';
 import { nowMoment } from '../../../../host/obsidian/datetime';
 import { readTemplateContent, sanitizeFilename, splitFrontmatter, uniquePath } from '../notes/quick-note-section';
 
@@ -175,13 +176,12 @@ export async function createNoteWithProps(
 	title: string,
 	props: Record<string, string | string[]>,
 	templatePath?: string,
-): Promise<TFile> {
+): Promise<ContentFile> {
 	const cleanFolder = folder.trim().replace(/^\/+|\/+$/g, '');
 	const name = sanitizeFilename(title);
 	if (!name) throw new Error('Note title is empty after sanitization');
-	if (cleanFolder) await ensureFolder(app, cleanFolder);
 	const base = cleanFolder ? `${cleanFolder}/${name}.md` : `${name}.md`;
-	const path = await uniquePath(app, base);
+	const path = await uniquePath(app, contentPath(base));
 
 	let content = yamlFrontmatter(props);
 	const tpl = (templatePath ?? '').trim();
@@ -194,7 +194,7 @@ export async function createNoteWithProps(
 		const { fm, body } = splitFrontmatter(tplContent);
 		content = mergeTemplateNoteContent(fm, body.replace(/^\n+/, ''), props);
 	}
-	return app.vault.create(path, content);
+	return contentFiles(app).create(path, content);
 }
 
 /**

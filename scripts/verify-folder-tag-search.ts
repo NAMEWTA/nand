@@ -1,3 +1,4 @@
+import { memoryVault } from './fixtures/memory-vault';
 /**
  * Verifies the tag-search box in FolderConfigModal's tag filter section:
  * renders above the chips, narrows the list as you type, shows a dedicated
@@ -31,6 +32,7 @@ import { findByClass, findTag, orderIndex, type El } from './mini-dom';
 // skips caches without frontmatter; tags come from fm.tags (bare names, no #).
 const app = {
 	vault: {
+			...memoryVault().app.vault,
 		getMarkdownFiles: () => [{ path: 'a.md' }, { path: 'b.md' }],
 	},
 	metadataCache: {

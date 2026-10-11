@@ -113,8 +113,9 @@ async function verifySync(): Promise<void> {
 			},
 			on: () => ({}),
 			offref: () => {},
-			adapter: { exists: async () => true, write: async () => {}, list: async () => ({ files: [] }) },
+			adapter: { exists: async (path: string) => path === file.path, mkdir: async () => {}, write: async () => {}, list: async () => ({ files: [], folders: [] }) },
 		},
+		workspace: { getLeavesOfType: () => [] },
 	} as unknown as App;
 	const sync = new SyncEngine(app, { dashboardFile: 'test-board' } as DashboardSettings);
 	await sync.init();

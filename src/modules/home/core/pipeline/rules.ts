@@ -1,5 +1,6 @@
 import type { PipelineConfig, PipelineNote, PipelineStage, PipelineTask } from './model';
 import { readMarkdownDocument } from '../../../../shared/storage/markdown-document';
+import { contentPath, isContentPath } from '../../../../shared/storage/content-paths';
 
 /** Reject traversal and absolute paths before any normalizer could hide them. */
 export function pipelinePath(value: string): string | undefined {
@@ -11,7 +12,9 @@ export function pipelinePath(value: string): string | undefined {
 }
 export function withinPipeline(root: string, path: string): boolean {
 	const base = pipelinePath(root), target = pipelinePath(path);
-	return !!base && !!target && target.startsWith(`${base}/`);
+	if (!base || !target) return false;
+	if (target.startsWith(`${base}/`)) return true;
+	try { return !isContentPath(base) && target.startsWith(contentPath(base) + '/'); } catch { return false; }
 }
 export function resolvePipelineStage(config: PipelineConfig, status: unknown): PipelineStage | undefined {
 	return typeof status === 'string' ? config.stages.find(stage => stage.value.trim().toLocaleLowerCase() === status.trim().toLocaleLowerCase()) : undefined;
@@ -42,7 +45,8 @@ export function pipelineDestination(config: PipelineConfig, path: string, target
 	if (!folder) return path;
 	const normalized = pipelinePath(folder);
 	if (!normalized || (target !== 'archive' && !withinPipeline(config.rootFolder, `${normalized}/note.md`))) throw new Error('home.pipeline.invalidPath');
-	return `${normalized}/${path.split('/').pop()!}`;
+	const destination = `${normalized}/${path.split('/').pop()!}`;
+	return isContentPath(path) ? contentPath(destination) : destination;
 }
 export function pipelineFieldValues(value: unknown): string[] {
 	return (Array.isArray(value) ? value : [value]).flatMap(item => typeof item === 'string' || typeof item === 'number' || typeof item === 'boolean' ? [String(item)] : []);

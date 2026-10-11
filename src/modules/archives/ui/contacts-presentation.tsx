@@ -1,3 +1,4 @@
+import { contentFiles } from '../../../host/obsidian/storage/content-files';
 import { NativeSurface, type NativeSurfaceContext } from '../../../ui/native-surface';
 import {
 	Component,
@@ -330,35 +331,14 @@ export class ContactsPresentation extends NativeSurface {
 		if (!controller) return;
 		new ArchiveNoteModal(this.app, async (name) => {
 			const path = await controller.createNote(record.id, name);
-			const file = this.app.vault.getFileByPath(path);
-			if (file) {
-				const leaf = this.app.workspace.getLeaf('tab');
-				await leaf.openFile(file, { active: true });
-				await this.app.workspace.revealLeaf(leaf);
-			}
+			await contentFiles(this.app).open(path, this.app.workspace.containerEl.win);
 		}).open();
 	}
-	/** Opens a file in a new tab; `line` (1-based) scrolls a Markdown note to that line. */
-	openResource(path: string, line?: number): void {
-		const file = this.app.vault.getFileByPath(path);
-		if (file) {
-			const leaf = this.app.workspace.getLeaf('tab');
-			void leaf
-				.openFile(file, { active: true, eState: line ? { line: line - 1 } : undefined })
-				.then(() => this.app.workspace.revealLeaf(leaf))
-				.catch((error: unknown) => new Notice(errorText(error)));
-		}
+	openResource(path: string, _line?: number): void {
+		void contentFiles(this.app).open(path).catch((error: unknown) => new Notice(errorText(error)));
 	}
 	revealFolder(record: ArchiveRecord): void {
-		const folder = this.app.vault.getAbstractFileByPath(record.folderPath);
-		const leaf = this.app.workspace.getLeavesOfType('file-explorer')[0];
-		if (!folder || !leaf) {
-			new Notice(ct('folderUnavailable'));
-			return;
-		}
-		const explorer = leaf.view as typeof leaf.view & { revealInFolder?: (file: typeof folder) => void };
-		explorer.revealInFolder?.(folder);
-		void this.app.workspace.revealLeaf(leaf);
+		void contentFiles(this.app).open(record.folderPath).catch((error: unknown) => new Notice(errorText(error)));
 	}
 	addResources(record: ArchiveRecord, files?: File[]): void {
 		const controller = this.controller;

@@ -30,6 +30,7 @@ export class NewsNotebook {
 	}
 	private async scan(): Promise<void> {
 		if (!this.dirty) return;
+		await this.port.refresh?.();
 		this.dirty = false;
 		const entries = new Map<string, { path: string; material: NewsMaterial }>();
 		const briefs = new Map<string, NewsBrief>();

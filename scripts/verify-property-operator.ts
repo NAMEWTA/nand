@@ -1,3 +1,4 @@
+import { memoryVault } from './fixtures/memory-vault';
 /**
  * Verifies the property-filter operators in library/folder sections:
  *
@@ -42,6 +43,7 @@ const files = [
 const stat = { mtime: 1, ctime: 1 };
 const app = {
 	vault: {
+			...memoryVault().app.vault,
 		getMarkdownFiles: () => files.map((f) => ({ path: f.path, basename: f.basename, stat })),
 	},
 	metadataCache: {

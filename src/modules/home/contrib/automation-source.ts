@@ -1,3 +1,4 @@
+import { contentFiles } from '../../../host/obsidian/storage/content-files';
 import type { App, EventRef } from 'obsidian';
 import type { ShellAccess } from '../../../app/contracts/module';
 import { AutomationError } from '../../../shared/automation/errors';
@@ -37,7 +38,7 @@ export function dashboardAutomationSource(options: {
 				await shell.open({ feature: 'dashboard', resourceId: file.path, focusId: source.id }, ownerWindow);
 				return;
 			}
-			const file = app.vault.getFileByPath(source.path);
+			const file = contentFiles(app).getFileByPath(source.path);
 			if (!file) throw new AutomationError('sourceMissing');
 			await shell.open({ feature: 'dashboard', resourceId: file.path }, ownerWindow);
 		},

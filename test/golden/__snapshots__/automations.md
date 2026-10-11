@@ -1,4 +1,4 @@
-=== NAND/自动化/Backup-0-script/操作.md ===
+=== .nand/content/NAND/自动化/Backup-0-script/操作.md ===
 ---
 nand-type: automation
 nand-id: auto-0000-0000-script
@@ -25,7 +25,7 @@ at: 2026-10-10T02:00:00.000Z
 echo "backup" | tee log.txt
 <!-- /nand:script -->
 
-=== NAND/自动化/Stand up-0-notify/操作.md ===
+=== .nand/content/NAND/自动化/Stand up-0-notify/操作.md ===
 ---
 nand-type: automation
 nand-id: auto-0000-0000-notify
@@ -48,7 +48,7 @@ schedule: manual
 Stretch for five minutes.
 <!-- /nand:prompt -->
 
-=== NAND/自动化/每日总结-00-agent/操作.md ===
+=== .nand/content/NAND/自动化/每日总结-00-agent/操作.md ===
 ---
 nand-type: automation
 nand-id: auto-0000-0000-agent

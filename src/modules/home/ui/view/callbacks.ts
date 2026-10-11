@@ -1,3 +1,5 @@
+import { contentFiles, type ContentFile } from '../../../../host/obsidian/storage/content-files';
+import { contentPath } from '../../../../shared/storage/content-paths';
 import type { BoardTile } from '../../core/board/types/model';
 import { observeDashboardPromise } from '../save-feedback';
 import { DEFAULT_TASK_ARCHIVE_PATH } from '../../core/board/default-paths';
@@ -55,7 +57,7 @@ export function createCallbacks(this: DashboardSurface) {
 		},
 		settingsAccess: createDashboardSettingsAccess(this.plugin),
 		onCardEdit: (card: DashboardCard) => this.openCardEditModal(card),
-		onOpenNoteInPopover: (file: TFile, subpath?: string) => this.openNote(file, subpath),
+		onOpenNoteInPopover: (file: ContentFile, subpath?: string) => this.openNote(file, subpath),
 		onOpenNoteAtLine: (file: TFile, line?: number) => this.openNote(file, undefined, line),
 		onCardDelete: async (cardId: string) => {
 			const confirmed = await showConfirmDialog(this.app, {
@@ -356,7 +358,7 @@ export async function archiveCompletedTasks(this: DashboardSurface, columnName: 
 		const lines = entries.map((e) => t('notice.archiveLine', { time, task: e.task, card: e.card }));
 		const appendText = `${lines.join('\n')}\n`;
 
-		let destFile: TFile;
+		let destFile: ContentFile;
 		if (this.plugin.settings.taskArchiveTarget === 'daily') {
 			const note = await getOrCreateDailyNote(this.app, nowMoment().format('YYYY-MM-DD'));
 			if (!note) {
@@ -368,17 +370,15 @@ export async function archiveCompletedTasks(this: DashboardSurface, columnName: 
 			destFile = note;
 		} else {
 			const configured = this.plugin.settings.taskArchivePath.trim().replace(/^\/+|\/+$/g, '');
-			const fullPath = configured || DEFAULT_TASK_ARCHIVE_PATH;
-			const slash = fullPath.lastIndexOf('/');
-			const folder = slash >= 0 ? fullPath.slice(0, slash) : '';
-			if (folder) await ensureFolder(this.app, folder);
-			const existing = this.app.vault.getAbstractFileByPath(fullPath);
-			destFile = existing instanceof TFile ? existing : await this.app.vault.create(fullPath, '');
+			const files = contentFiles(this.app), fullPath = contentPath(configured || DEFAULT_TASK_ARCHIVE_PATH);
+			destFile = files.getFileByPath(fullPath) ?? await files.create(fullPath, '');
 		}
 
-		const raw = await this.app.vault.read(destFile);
-		const sep = raw === '' || raw.endsWith('\n') ? '' : '\n';
-		await this.app.vault.modify(destFile, `${raw}${sep}${appendText}`);
+		await contentFiles(this.app).process(destFile.path, raw => {
+			if (raw === null) throw new Error('nand-content.missing');
+			const sep = raw === '' || raw.endsWith('\n') ? '' : '\n';
+			return `${raw}${sep}${appendText}`;
+		});
 
 		await observeDashboardPromise(this.sync.archiveTasks(columnName));
 

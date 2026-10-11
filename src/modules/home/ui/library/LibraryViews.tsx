@@ -1,4 +1,5 @@
-import { Notice, type App, type TFile } from 'obsidian';
+import { contentFiles, type ContentFile } from '../../../../host/obsidian/storage/content-files';
+import { Notice, type App } from 'obsidian';
 import { useLayoutEffect, useRef, useState } from 'preact/hooks';
 import type { LibraryConfig } from '../../core/board/types/index';
 import { t } from '../../../../shared/i18n/index';
@@ -23,7 +24,7 @@ export interface LibraryViewProps {
 	config: LibraryConfig;
 	context: DashboardRenderContext;
 	showTags?: boolean;
-	onDelete?: (file: TFile) => void;
+	onDelete?: (file: ContentFile) => void;
 	/** Changes when the library query changes; progressive limits otherwise survive refresh. */
 	windowKey?: string;
 }
@@ -96,7 +97,7 @@ function Preview({ app, result }: { app: App; result: LibraryFileResult }) {
 	);
 }
 /** The table, cards, list and kanban share this control. It confirms through the panel. */
-export function LibraryDeleteButton({ file, onDelete }: { file: TFile; onDelete?: (file: TFile) => void }) {
+export function LibraryDeleteButton({ file, onDelete }: { file: ContentFile; onDelete?: (file: ContentFile) => void }) {
 	return (
 		<button
 			type="button"
@@ -211,7 +212,7 @@ function PropertyCell({
 	original,
 }: {
 	app: App;
-	file: TFile;
+	file: ContentFile;
 	property: string;
 	original: unknown;
 }) {
@@ -247,7 +248,7 @@ function PropertyCell({
 					: Number(raw);
 		const previous = value;
 		setValue(next);
-		void app.fileManager
+		void contentFiles(app)
 			.processFrontMatter(file, (frontmatter: Record<string, unknown>) => {
 				if (next === null) delete frontmatter[property];
 				else frontmatter[property] = next;

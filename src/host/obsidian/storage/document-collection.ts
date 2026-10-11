@@ -1,9 +1,9 @@
-import { MarkdownView, TFile, type App, type EventRef } from 'obsidian';
+import type { App } from 'obsidian';
 import { DocumentRepository, type DocumentValue } from '../../../shared/storage/document-repository';
 import type { CollectionDocument, DocumentCollectionCodec } from '../../../shared/storage/document-collection';
-import { ensureDirectory } from '../../../shared/storage/durable-state';
 import type { TextStorage } from '../../../shared/storage/ports';
 import { privateVaultStorage } from './private-storage';
+import { contentFiles, type ContentFiles } from './content-files';
 
 /** Incremental Vault index. No plugin-directory JSON or compatibility scans. */
 export class MarkdownCollectionStorage<T> implements TextStorage {
@@ -12,54 +12,25 @@ export class MarkdownCollectionStorage<T> implements TextStorage {
 	private dirty = new Map<string, number>();
 	private revision = 0;
 	private loaded = false;
-	private refs: EventRef[] = [];
+	private readonly files: ContentFiles;
+	private readonly unsubscribe: () => void;
 	private readonly listeners = new Set<() => void>();
 	constructor(
 		private app: App,
 		private codec: DocumentCollectionCodec<T>,
 		private key: string,
 	) {
-		const vault = app.vault;
+		this.files = contentFiles(app);
 		this.repository = new DocumentRepository({
-			read: async (path) => {
-				const file = vault.getAbstractFileByPath(path);
-				if (!(file instanceof TFile)) throw new Error(`Missing document: ${path}`);
-				return vault.read(file);
-			},
-			process: async (path, update) => {
-				const file = vault.getAbstractFileByPath(path);
-				if (file instanceof TFile) {
-					for (const leaf of app.workspace.getLeavesOfType('markdown')) {
-						if (
-							leaf.view instanceof MarkdownView &&
-							leaf.view.file?.path === path &&
-							leaf.view.editor.getValue() !== (await vault.read(file))
-						)
-							throw new Error(`Unsaved editor: ${path}`);
-					}
-					return vault.process(file, update);
-				}
-				if (file) throw new Error(`Not a document: ${path}`);
-				await ensureDirectory(vault.adapter, path.split('/').slice(0, -1).join('/'));
-				const text = update(null);
-				await vault.create(path, text);
-				return text;
-			},
+			read: path => this.files.read(path),
+			process: (path, update) => this.files.process(path, update),
 		});
 		const changed = (file: { path: string }) => {
 			if (!this.owns(file.path)) return;
 			this.dirty.set(file.path, ++this.revision);
 			for (const listener of this.listeners) listener();
 		};
-		this.refs.push(
-			vault.on('create', changed),
-			vault.on('modify', changed),
-			vault.on('delete', changed),
-			vault.on('rename', (file, old) => {
-				changed(file);
-				changed({ path: old });
-			}),
-		);
+		this.unsubscribe = this.files.subscribe(event => { changed(event); if (event.oldPath) changed({ path: event.oldPath }); });
 	}
 	subscribeInvalidation(listener: () => void): () => void {
 		this.listeners.add(listener);
@@ -74,14 +45,15 @@ export class MarkdownCollectionStorage<T> implements TextStorage {
 		return path.startsWith(`${this.codec.root}/`) && path.endsWith('.md');
 	}
 	private async refresh(): Promise<void> {
+		await this.files.refresh();
 		if (!this.loaded) {
-			for (const file of this.app.vault.getMarkdownFiles())
+			for (const file of this.files.getMarkdownFiles())
 				if (this.owns(file.path)) this.dirty.set(file.path, ++this.revision);
 			this.loaded = true;
 		}
 		for (const [path, revision] of this.dirty) {
-			const file = this.app.vault.getAbstractFileByPath(path);
-			if (file instanceof TFile) {
+			const file = this.files.getFileByPath(path);
+			if (file) {
 				const snapshot = await this.repository.read(path);
 				const id = snapshot.value.properties['nand-id'];
 				const owned = !this.codec.ownedTypes || this.codec.ownedTypes.includes(String(snapshot.value.properties['nand-type']));
@@ -154,6 +126,6 @@ export class MarkdownCollectionStorage<T> implements TextStorage {
 	}
 	dispose(): void {
 		this.listeners.clear();
-		for (const ref of this.refs.splice(0)) this.app.vault.offref(ref);
+		this.unsubscribe();
 	}
 }

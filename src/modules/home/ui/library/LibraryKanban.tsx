@@ -1,4 +1,5 @@
-import { Notice, Platform, type TFile } from 'obsidian';
+import { contentFiles, type ContentFile } from '../../../../host/obsidian/storage/content-files';
+import { Notice, Platform } from 'obsidian';
 import { useLayoutEffect, useMemo, useRef, useState } from 'preact/hooks';
 import { t } from '../../../../shared/i18n/index';
 import { libraryStageMove } from '../../core/board/library-stage';
@@ -15,7 +16,7 @@ import {
 } from './library-groups';
 import { extractCoverValue, omitFrontmatterKey, openFile } from './library-presentation';
 import { GroupWindow, useProgressiveResults } from './ProgressiveResults';
-const pendingMoves = new WeakSet<TFile>();
+const pendingMoves = new WeakSet<ContentFile>();
 export function LibraryKanban({ app, config, context, results, onDelete, windowKey }: LibraryViewProps) {
 	const progressive = useProgressiveResults(results, windowKey ?? JSON.stringify(config));
 	const folder = config.groupMode === 'folder',
@@ -39,7 +40,7 @@ export function LibraryKanban({ app, config, context, results, onDelete, windowK
 	}, [results, folder, property, config.folders, folders]);
 	const [groups, setGroups] = useState(initial);
 	useLayoutEffect(() => setGroups(initial), [initial]);
-	const drag = useRef<{ file: TFile; from: string | null } | null>(null);
+	const drag = useRef<{ file: ContentFile; from: string | null } | null>(null);
 	const root = useRef<HTMLDivElement>(null);
 	const clearHints = () =>
 		root.current
@@ -52,19 +53,19 @@ export function LibraryKanban({ app, config, context, results, onDelete, windowK
 			destination = folders.get(target.key);
 		if (folder) {
 			if (!destination || file.path === `${destination}/${file.name}`) return;
-			if (!app.vault.getAbstractFileByPath(destination)) {
+			if (!contentFiles(app).getAbstractFileByPath(destination)) {
 				new Notice(t('library.moveFailed'));
 				return;
 			}
 		} else if (
 			nextGroupPropertyValue(
-				app.metadataCache.getFileCache(file)?.frontmatter?.[property],
+				contentFiles(app).getMetadata(file)?.frontmatter?.[property],
 				target.key,
 				source.from,
 			) === undefined
 		)
 			return;
-		const siblingNames = folder && destination && app.vault.getAbstractFileByPath(`${destination}/${file.name}`) ? [file.name] : [];
+		const siblingNames = folder && destination && contentFiles(app).getAbstractFileByPath(`${destination}/${file.name}`) ? [file.name] : [];
 		const decision = libraryStageMove({
 			mode: folder ? 'folder' : 'property',
 			path: file.path,
@@ -98,10 +99,10 @@ export function LibraryKanban({ app, config, context, results, onDelete, windowK
 		);
 		try {
 			if (folder) {
-				await app.fileManager.renameFile(file, `${destination!}/${file.name}`);
+				await contentFiles(app).rename(file, `${destination!}/${file.name}`);
 				new Notice(t('library.moved', { name: file.basename, folder: destination! }));
 			} else {
-				await app.fileManager.processFrontMatter(file, (frontmatter: Record<string, unknown>) => {
+				await contentFiles(app).processFrontMatter(file, (frontmatter: Record<string, unknown>) => {
 					const next = nextGroupPropertyValue(frontmatter[property], target.key, source.from);
 					if (next !== undefined) frontmatter[property] = next;
 				});

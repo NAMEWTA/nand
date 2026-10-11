@@ -1,3 +1,4 @@
+import type { ContentFile } from '../../../../host/obsidian/storage/content-files';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { render } from 'preact';
@@ -35,9 +36,9 @@ const config = {
 	groupMode: 'property',
 } as LibraryConfig;
 
-function scene(): { app: App; context: DashboardRenderContext; opened: string[]; deleted: TFile[] } {
+function scene(): { app: App; context: DashboardRenderContext; opened: string[]; deleted: ContentFile[] } {
 	const opened: string[] = [];
-	const deleted: TFile[] = [];
+	const deleted: ContentFile[] = [];
 	const app = {
 		workspace: {
 			trigger() {},
@@ -62,7 +63,7 @@ test('grid, gallery, list and kanban delete through the confirm handler without 
 		const { app, context, opened, deleted } = scene();
 		const root = document.createElement('div');
 		document.body.append(root);
-		const onDelete = (item: TFile) => deleted.push(item);
+		const onDelete = (item: ContentFile) => deleted.push(item);
 		const node =
 			view === 'kanban' ? (
 				<LibraryKanban results={[result]} app={app} config={config} context={context} onDelete={onDelete} />

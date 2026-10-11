@@ -1,3 +1,4 @@
+import { memoryVault } from './fixtures/memory-vault';
 /**
  * Verifies the pinned-card-properties feature end to end:
  *
@@ -80,6 +81,7 @@ console.log('selectBadgeKeys semantics: PASS');
 
 const app = {
 	vault: {
+			...memoryVault().app.vault,
 		getMarkdownFiles: () => [{ path: 'a.md' }],
 	},
 	metadataCache: {

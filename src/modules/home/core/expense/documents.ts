@@ -2,7 +2,7 @@ import { requireDailyRecords } from '../../../../shared/storage/document-validat
 import { collectionDocument as doc, recordRows, type DocumentCollectionCodec } from '../../../../shared/storage/document-collection';
 import { emptyData, normalizeData, type ExpenseData } from './model';
 
-const root = 'NAND/记账';
+const root = '.nand/content/NAND/记账';
 export const expenseDocuments: DocumentCollectionCodec<ExpenseData> = {
 	root,
 	empty: emptyData,

@@ -145,7 +145,7 @@ export class DashboardSurface extends NativeSurface implements HoverParent {
 	declare openBannerEditModal: (data: DashboardData) => void;
 	declare openCardEditModal: (card: DashboardCard) => void;
 	declare openNotePopover: (file: TFile, subpath?: string, line?: number) => void;
-	declare openNote: (file: TFile, subpath?: string, line?: number) => void;
+	declare openNote: (file: import('../../../../host/obsidian/storage/content-files').ContentFile, subpath?: string, line?: number) => void;
 	declare openNoteInTab: (file: TFile, subpath?: string, line?: number) => Promise<void>;
 	declare addColumnWithType: (name: string, sectionType?: string) => Promise<void>;
 	declare openAddSectionModal: () => void;

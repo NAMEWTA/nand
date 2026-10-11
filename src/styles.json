@@ -2,6 +2,7 @@
 	"sources": [
 		"src/ui/styles/000-foundation.css",
 		"src/ui/styles/001-primitives.css",
+		"src/app/styles/content.css",
 		"src/theme/styles/presets.css",
 		"src/theme/styles/markdown.css",
 		"src/modules/home/styles/003-shared-transparent-sections-for-neon-volt-magma-.css",

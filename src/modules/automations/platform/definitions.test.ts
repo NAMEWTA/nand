@@ -22,7 +22,7 @@ test('unreadable saved automation blocks listing and edits until its document is
 		expect(await definitions.list()).toEqual([action]);
 		await definitions.save({ ...action, name: 'Changed' });
 		expect((await definitions.list())[0]?.name).toBe('Changed');
-		vi.spyOn(vault.app.vault, 'process').mockRejectedValueOnce(new Error('Write unavailable'));
+		vi.spyOn(vault.adapter, 'process').mockRejectedValueOnce(new Error('Write unavailable'));
 		await expect(definitions.save({ ...action, name: 'Retry' })).rejects.toThrow('Write unavailable');
 		await definitions.save({ ...action, name: 'Retry' });
 		expect((await definitions.list())[0]?.name).toBe('Retry');

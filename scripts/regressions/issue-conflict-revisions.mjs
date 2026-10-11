@@ -12,7 +12,7 @@ function deferred(){let resolve;const promise=new Promise(r=>resolve=r);return {
 async function fixture(name='Board'){
  let disk=generateDefaultMarkdown();const copies=new Map(), handlers=new Map();let beforeWrite=async()=>{};
  const file=Object.assign(new TFile(),{path:name+'.md',basename:name,extension:'md'});
- const app={vault:{getFileByPath:p=>p===file.path?file:null,read:async()=>disk,process:async(f,fn)=>{disk=fn(disk);for(const cb of handlers.get('modify')??[])cb(f);return disk;},on:(name,cb)=>{handlers.set(name,[...(handlers.get(name)??[]),cb]);return {name,cb};},offref:ref=>handlers.set(ref.name,(handlers.get(ref.name)??[]).filter(cb=>cb!==ref.cb)),adapter:{exists:async()=>true,mkdir:async()=>{},list:async()=>({files:[...copies.keys()]}),remove:async p=>copies.delete(p),write:async(p,text)=>{await beforeWrite(p,text);copies.set(p,text);}}}};
+ const app={workspace:{getLeavesOfType:()=>[]},vault:{getFileByPath:p=>p===file.path?file:null,read:async()=>disk,process:async(f,fn)=>{disk=fn(disk);for(const cb of handlers.get('modify')??[])cb(f);return disk;},on:(name,cb)=>{handlers.set(name,[...(handlers.get(name)??[]),cb]);return {name,cb};},offref:ref=>handlers.set(ref.name,(handlers.get(ref.name)??[]).filter(cb=>cb!==ref.cb)),adapter:{exists:async path=>path!==' .nand/content'.trim(),mkdir:async()=>{},list:async()=>({files:[...copies.keys()],folders:[]}),remove:async p=>copies.delete(p),write:async(p,text)=>{await beforeWrite(p,text);copies.set(p,text);}}}};
  const engine=new SyncEngine(app,{dashboardFile:file.path});await engine.init();
  return {engine,copies,app,get disk(){return disk;},set disk(text){disk=text;},set beforeWrite(fn){beforeWrite=fn;},recovery(){return JSON.parse([...copies].find(([p])=>p.includes('/conflicts/'))[1]);}};
 }

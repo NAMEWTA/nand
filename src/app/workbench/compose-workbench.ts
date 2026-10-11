@@ -211,6 +211,14 @@ export function composeWorkbench(plugin: DashboardPlugin) {
 			create: modulePage('notifications', 'inbox'),
 		},
 		{
+			id: 'content', rail: { slot: 'top' },
+			navigation: { id: 'content', labelKey: 'content.title', icon: 'files', target: { feature: 'content' } },
+			panel: ({ target }) => ({ searchable: true, sections: [{ id: 'content', emptyText: t('content.noResults'), items: (plugin.managedContent?.allManaged() ?? []).map(file => ({ id: file.path, label: file.basename, meta: file.path.replace(/^\.nand\/content\//, ''), icon: file.extension === 'md' ? 'file-text' : 'paperclip', target: { feature: 'content' as const, resourceId: file.path }, active: target.resourceId === file.path })) }] }),
+			title: target => target.resourceId?.split('/').at(-1) ?? t('content.title'),
+			availability: ready, stateKeys: [], resourcePages: true, resourceTabs: () => false,
+			create: async (context, target, state, signal) => (await import('../content/page')).createContentPage(context, target, state, signal),
+		},
+		{
 			id: 'settings',
 			rail: { slot: 'bottom' },
 			navigation: { id: 'settings', labelKey: 'workbench.settings', icon: 'settings', target: { feature: 'settings' } },
@@ -298,7 +306,7 @@ export function composeWorkbench(plugin: DashboardPlugin) {
 			return () => { listeners.delete(listener); };
 		},
 		openSettings: (feature) => {
-			const product = { dashboard: 'dashboard', terminal: 'terminal', browser: 'browser', contacts: 'contacts', automations: 'automation', notifications: 'general', icons: 'iconic', comments: 'editor', records: 'dashboard', sync: 'sync', news: 'news', settings: 'general' } as const;
+			const product = { dashboard: 'dashboard', terminal: 'terminal', browser: 'browser', contacts: 'contacts', automations: 'automation', notifications: 'general', icons: 'iconic', comments: 'editor', records: 'dashboard', sync: 'sync', news: 'news', content: 'general', settings: 'general' } as const;
 			void plugin.openWorkbenchSettings(feature ? product[feature] : 'general').catch(report);
 		},
 		openFocus: async (target, state, placement, ownerWindow) => {

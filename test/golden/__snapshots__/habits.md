@@ -1,4 +1,4 @@
-=== NAND/习惯/Walk- 30 min-000-walk/习惯.md ===
+=== .nand/content/NAND/习惯/Walk- 30 min-000-walk/习惯.md ===
 ---
 nand-type: habit
 nand-id: habit-0000-0000-walk
@@ -7,7 +7,7 @@ name: "Walk: 30 min"
 createdAt: 2026-09-15
 ---
 
-=== NAND/习惯/记录/2026/2026-10-01.md ===
+=== .nand/content/NAND/习惯/记录/2026/2026-10-01.md ===
 ---
 nand-type: habit-records
 nand-id: habit:2026-10-01
@@ -20,7 +20,7 @@ date: 2026-10-01
 | "2026-10-01:habit-0000-0000-read" | "habit-0000-0000-read" |
 <!-- /nand:records -->
 
-=== NAND/习惯/记录/2026/2026-10-02.md ===
+=== .nand/content/NAND/习惯/记录/2026/2026-10-02.md ===
 ---
 nand-type: habit-records
 nand-id: habit:2026-10-02
@@ -34,7 +34,7 @@ date: 2026-10-02
 | "2026-10-02:habit-0000-0000-walk" | "habit-0000-0000-walk" |
 <!-- /nand:records -->
 
-=== NAND/习惯/阅读-000-read/习惯.md ===
+=== .nand/content/NAND/习惯/阅读-000-read/习惯.md ===
 ---
 nand-type: habit
 nand-id: habit-0000-0000-read

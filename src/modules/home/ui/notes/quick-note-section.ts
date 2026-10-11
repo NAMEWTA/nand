@@ -1,8 +1,9 @@
-import { App, Notice, TFile } from 'obsidian';
+import { contentFiles, type ContentFile } from '../../../../host/obsidian/storage/content-files';
+import { contentPath } from '../../../../shared/storage/content-paths';
+import { App, Notice } from 'obsidian';
 import { h } from 'preact';
 import type { DashboardSettings, PinnedNote, QuickNotePreset } from '../../core/board/types/index';
 import {
-	ensureFolder,
 	getOrCreateDailyNote,
 	substituteTemplateVars,
 } from '../../platform/calendar/daily-notes';
@@ -43,10 +44,9 @@ export async function createNoteFromPreset(app: App, preset: QuickNotePreset): P
 	if (!filename) filename = now.format('YYYY-MM-DD');
 
 	const folder = (preset.folder || '').trim().replace(/^\/+|\/+$/g, '');
-	if (folder) await ensureFolder(app, folder);
 	const ext = filename.toLowerCase().endsWith('.md') ? '' : '.md';
 	let path = folder ? `${folder}/${filename}${ext}` : `${filename}${ext}`;
-	path = await uniquePath(app, path);
+	path = await uniquePath(app, contentPath(path));
 
 	let content = '';
 	const tplPath = (preset.templatePath || '').trim();
@@ -58,8 +58,8 @@ export async function createNoteFromPreset(app: App, preset: QuickNotePreset): P
 		content = tpl.content;
 	}
 
-	const file = await app.vault.create(path, content);
-	await app.workspace.getLeaf('tab').openFile(file);
+	const file = await contentFiles(app).create(path, content);
+	await contentFiles(app).open(file.path);
 	new Notice(t('quickNote.created', { name: file.basename }));
 }
 
@@ -76,22 +76,20 @@ export async function captureThought(app: App, settings: DashboardSettings, text
 	if (target) {
 		const file = await getOrCreateNote(app, target);
 		if (file) {
-			const raw = await app.vault.read(file);
-			await app.vault.modify(file, placeCaptureLine(raw, line, settings.quickCapturePosition));
+			await contentFiles(app).process(file.path, raw => placeCaptureLine(raw ?? '', line, settings.quickCapturePosition));
 			new Notice(t('quickNote.captured'));
 			return;
 		}
 	}
 
 	const folder = (settings.quickCaptureFolder || '').trim().replace(/^\/+|\/+$/g, '');
-	if (folder) await ensureFolder(app, folder);
 	const filename = now.format('YYYY-MM-DD-HHmm');
 	let path = folder ? `${folder}/${filename}.md` : `${filename}.md`;
-	path = await uniquePath(app, path);
+	path = await uniquePath(app, contentPath(path));
 	// Seed new notes with the configured template (if any), then place the
 	// captured line top/bottom of it exactly as for an existing target note.
 	const { content: tplContent } = await readTemplateContent(app, settings.quickCaptureTemplate, { now });
-	await app.vault.create(path, placeCaptureLine(tplContent, line, settings.quickCapturePosition));
+	await contentFiles(app).create(path, placeCaptureLine(tplContent, line, settings.quickCapturePosition));
 	new Notice(t('quickNote.captured'));
 }
 
@@ -99,7 +97,7 @@ export async function captureThought(app: App, settings: DashboardSettings, text
 export function openPinnedNote(app: App, note: PinnedNote): void {
 	const file = resolveFile(app, note.path);
 	if (file) {
-		void app.workspace.getLeaf('tab').openFile(file);
+		void contentFiles(app).open(file.path);
 	} else {
 		new Notice(t('quickNote.notFound'));
 	}
@@ -115,21 +113,14 @@ export async function openTodayNote(app: App): Promise<void> {
 		new Notice(t('quickNote.dailyDisabled'));
 		return;
 	}
-	await app.workspace.getLeaf('tab').openFile(file);
+	await contentFiles(app).open(file.path);
 }
 
 // ── Helpers ────────────────────────────────────────────────────────────────
 
 /** Resolve a vault file path, trying `.md` append if needed. */
-function resolveFile(app: App, path: string): TFile | null {
-	const p = path.trim();
-	let f = app.vault.getAbstractFileByPath(p);
-	if (f instanceof TFile) return f;
-	if (!p.toLowerCase().endsWith('.md')) {
-		f = app.vault.getAbstractFileByPath(`${p}.md`);
-		if (f instanceof TFile) return f;
-	}
-	return null;
+function resolveFile(app: App, path: string): ContentFile | null {
+	return contentFiles(app).resolveLink(path.trim());
 }
 
 /** Read a template file (vault path, `.md` fallback) and substitute
@@ -146,7 +137,7 @@ export async function readTemplateContent(
 	const tpl = resolveFile(app, p);
 	if (!tpl) return { content: '', found: false };
 	try {
-		const raw = await app.vault.read(tpl);
+		const raw = await contentFiles(app).read(tpl);
 		return { content: substituteTemplateVars(raw, opts), found: true };
 	} catch {
 		return { content: '', found: false };
@@ -205,14 +196,12 @@ export function splitFrontmatter(raw: string): { fm: string; body: string } {
 
 /** Get an existing note (resolving a `.md` suffix if the path omits it), or
  *  create it (empty, as a proper `.md` note) so capture can append to it. */
-async function getOrCreateNote(app: App, path: string): Promise<TFile | null> {
+async function getOrCreateNote(app: App, path: string): Promise<ContentFile | null> {
 	const existing = resolveFile(app, path);
 	if (existing) return existing;
-	const folder = path.includes('/') ? path.slice(0, path.lastIndexOf('/')) : '';
-	if (folder) await ensureFolder(app, folder);
 	const ext = path.toLowerCase().endsWith('.md') ? '' : '.md';
 	try {
-		return await app.vault.create(`${path}${ext}`, '');
+		return await contentFiles(app).create(`${path}${ext}`, '');
 	} catch {
 		return null;
 	}

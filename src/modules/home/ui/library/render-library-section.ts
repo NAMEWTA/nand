@@ -1,4 +1,5 @@
-import type { App, HoverParent, TFile } from 'obsidian';
+import type { ContentFile } from '../../../../host/obsidian/storage/content-files';
+import type { App, HoverParent } from 'obsidian';
 import { h } from 'preact';
 import type { LibraryConfig } from '../../core/board/types/index';
 import { getRenderContext, mountDashboardPanel } from '../renderer/render-context';
@@ -9,7 +10,7 @@ export function renderLibrarySection(
 	app: App,
 	onConfigChange: (config: LibraryConfig) => void,
 	hoverParent: HoverParent | null = null,
-	onOpenNote: ((file: TFile) => void) | null = null,
+	onOpenNote: ((file: ContentFile) => void) | null = null,
 ): void {
 	const context = getRenderContext(el);
 	context.hoverParent = hoverParent;

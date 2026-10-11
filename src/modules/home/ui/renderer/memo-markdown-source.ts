@@ -67,7 +67,7 @@ export function wireMemoMarkdownLinks(container: HTMLElement, app: App): void {
 			const target = a.getAttribute('data-href') ?? a.getText();
 			const path = target.split('#')[0]!;
 			const file = resolveNoteFile(app, path);
-			if (file && !Platform.isMobile && context.hoverParent) {
+			if (file && !('kind' in file) && !Platform.isMobile && context.hoverParent) {
 				attachNoteHover(
 					app,
 					a,

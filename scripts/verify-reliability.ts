@@ -8,6 +8,7 @@ import { threeWayMerge } from '../src/shared/storage/three-way-merge';
 import { patchManagedLines } from '../src/shared/storage/managed-lines';
 import { DocumentRepository, parseDocumentValue } from '../src/shared/storage/document-repository';
 import { MarkdownCollectionStorage } from '../src/host/obsidian/storage/document-collection';
+import { contentFiles } from '../src/host/obsidian/storage/content-files';
 import { habitDocuments } from '../src/modules/home/core/habit/documents';
 import { expenseDocuments } from '../src/modules/home/core/expense/documents';
 import { emptyData } from '../src/modules/home/core/expense/model';
@@ -355,10 +356,10 @@ test('10,000 ledger records update one daily document without rereading the full
 
 test('habit cold startup rescans when layout settles and file events refresh without reopening a view', async () => {
 	const { HabitService } = await import('../src/modules/home/platform/habit/habit-service');
-	const file = 'NAND/习惯/read/习惯.md';
+	const file = '.nand/content/NAND/习惯/read/习惯.md';
 	const fixture = memoryVault({ [file]: '---\nnand-id: existing\nnand-type: habit\nname: Read\ncreatedAt: 2026-10-01\n---\n' });
-	const scan = fixture.app.vault.getMarkdownFiles;
-	fixture.app.vault.getMarkdownFiles = () => [];
+	const scan = fixture.adapter.list;
+	fixture.adapter.list = async () => ({ files: [], folders: [] });
 	let layout!: () => void;
 	const doc = new EventTarget();
 	Object.assign(fixture.app.workspace, { onLayoutReady: (callback: () => void) => { layout = callback; }, containerEl: { ownerDocument: doc } });
@@ -369,17 +370,18 @@ test('habit cold startup rescans when layout settles and file events refresh wit
 		assert.equal(service.getHabits().length, 0);
 		assert.equal(service.isLoading, true, 'The incomplete first scan is not an empty-library state');
 		assert.equal(service.readyForEdits, false);
-		fixture.app.vault.getMarkdownFiles = scan;
+		fixture.adapter.list = scan;
 		layout(); await tick(); await service.flush();
 		assert.equal(service.isLoading, false);
 		assert.equal(service.readyForEdits, true);
 		assert.equal(service.getHabits()[0]?.name, 'Read');
 		await fixture.adapter.write(file, fixture.contents.get(file)!.replace('name: Read', 'name: Read daily'));
+		await contentFiles(fixture.app).refresh();
 		await tick(); await service.flush();
 		assert.equal(service.getHabits()[0]?.name, 'Read daily');
 		service.addHabit('Another'); await service.flush(); await tick();
 		assert.equal(service.getHabits().length, 2);
-		fixture.contents.delete(file); fixture.emit('delete', fixture.file(file));
+		fixture.contents.delete(file); await contentFiles(fixture.app).refresh();
 		await tick(); await service.flush();
 		assert.deepEqual(service.getHabits().map(h => h.name), ['Another']);
 	} finally { service.destroy(); await tick(); }

@@ -1,0 +1,467 @@
+{
+  "platform": "win32",
+  "rows": [
+    {
+      "name": "migration-complete-with-owned-files",
+      "passed": true,
+      "detail": [
+        {
+          "source": "Boards/work.md",
+          "hash": "cb970459f06403c4109a617fa3204a255b12efdacc65324606f08a6e971b300d"
+        },
+        {
+          "source": "People/Acceptance/基本信息.md",
+          "hash": "50b2bfca3d373c2a0fe212cba619e7943d550b603a2e9a5311c2b94e9d2da10c"
+        },
+        {
+          "source": "People/Acceptance/附件.md",
+          "hash": "14e8faa1ff7255282072b9dfa8f6c9f9129b63faf307d67b00782382b34061f8"
+        }
+      ]
+    },
+    {
+      "name": "verified-retained-source:People/Acceptance/基本信息.md",
+      "passed": true
+    },
+    {
+      "name": "verified-retained-source:People/Acceptance/附件.md",
+      "passed": true
+    },
+    {
+      "name": "verified-retained-source:Boards/work.md",
+      "passed": true
+    },
+    {
+      "name": "ordinary-neighbours-remain",
+      "passed": true
+    },
+    {
+      "name": "hidden-index-is-independent-of-native-vault",
+      "passed": true
+    },
+    {
+      "name": "binary-attachment-bytes",
+      "passed": true
+    },
+    {
+      "name": "native-input-autosaves-under-vault",
+      "passed": true
+    },
+    {
+      "name": "relative-attachment-preview",
+      "passed": true
+    },
+    {
+      "name": "search-reads-hidden-markdown-body",
+      "passed": true
+    },
+    {
+      "name": "ordinary-wikilink-opens-managed-heading",
+      "passed": true
+    },
+    {
+      "name": "layout:system:light:1100",
+      "passed": true,
+      "detail": {
+        "width": 704,
+        "scroll": 704,
+        "client": 704,
+        "bodyScroll": 672,
+        "bodyClient": 672,
+        "buttons": [
+          {
+            "height": 32,
+            "width": 52
+          },
+          {
+            "height": 32,
+            "width": 122.453125
+          }
+        ]
+      }
+    },
+    {
+      "name": "layout:system:light:780",
+      "passed": true,
+      "detail": {
+        "width": 436,
+        "scroll": 436,
+        "client": 436,
+        "bodyScroll": 404,
+        "bodyClient": 404,
+        "buttons": [
+          {
+            "height": 32,
+            "width": 52
+          },
+          {
+            "height": 32,
+            "width": 122.453125
+          }
+        ]
+      }
+    },
+    {
+      "name": "layout:system:light:500",
+      "passed": true,
+      "detail": {
+        "width": 156,
+        "scroll": 156,
+        "client": 156,
+        "bodyScroll": 124,
+        "bodyClient": 124,
+        "buttons": [
+          {
+            "height": 32,
+            "width": 52
+          },
+          {
+            "height": 32,
+            "width": 122.453125
+          }
+        ]
+      }
+    },
+    {
+      "name": "layout:system:dark:1100",
+      "passed": true,
+      "detail": {
+        "width": 704,
+        "scroll": 704,
+        "client": 704,
+        "bodyScroll": 672,
+        "bodyClient": 672,
+        "buttons": [
+          {
+            "height": 32,
+            "width": 52
+          },
+          {
+            "height": 32,
+            "width": 122.453125
+          }
+        ]
+      }
+    },
+    {
+      "name": "layout:system:dark:780",
+      "passed": true,
+      "detail": {
+        "width": 436,
+        "scroll": 436,
+        "client": 436,
+        "bodyScroll": 404,
+        "bodyClient": 404,
+        "buttons": [
+          {
+            "height": 32,
+            "width": 52
+          },
+          {
+            "height": 32,
+            "width": 122.453125
+          }
+        ]
+      }
+    },
+    {
+      "name": "layout:system:dark:500",
+      "passed": true,
+      "detail": {
+        "width": 156,
+        "scroll": 156,
+        "client": 156,
+        "bodyScroll": 124,
+        "bodyClient": 124,
+        "buttons": [
+          {
+            "height": 32,
+            "width": 52
+          },
+          {
+            "height": 32,
+            "width": 122.453125
+          }
+        ]
+      }
+    },
+    {
+      "name": "layout:claude-code:light:1100",
+      "passed": true,
+      "detail": {
+        "width": 704,
+        "scroll": 704,
+        "client": 704,
+        "bodyScroll": 672,
+        "bodyClient": 672,
+        "buttons": [
+          {
+            "height": 32,
+            "width": 52
+          },
+          {
+            "height": 32,
+            "width": 122.453125
+          }
+        ]
+      }
+    },
+    {
+      "name": "layout:claude-code:light:780",
+      "passed": true,
+      "detail": {
+        "width": 436,
+        "scroll": 436,
+        "client": 436,
+        "bodyScroll": 404,
+        "bodyClient": 404,
+        "buttons": [
+          {
+            "height": 32,
+            "width": 52
+          },
+          {
+            "height": 32,
+            "width": 122.453125
+          }
+        ]
+      }
+    },
+    {
+      "name": "layout:claude-code:light:500",
+      "passed": true,
+      "detail": {
+        "width": 156,
+        "scroll": 156,
+        "client": 156,
+        "bodyScroll": 124,
+        "bodyClient": 124,
+        "buttons": [
+          {
+            "height": 32,
+            "width": 52
+          },
+          {
+            "height": 32,
+            "width": 122.453125
+          }
+        ]
+      }
+    },
+    {
+      "name": "layout:claude-code:dark:1100",
+      "passed": true,
+      "detail": {
+        "width": 704,
+        "scroll": 704,
+        "client": 704,
+        "bodyScroll": 672,
+        "bodyClient": 672,
+        "buttons": [
+          {
+            "height": 32,
+            "width": 52
+          },
+          {
+            "height": 32,
+            "width": 122.453125
+          }
+        ]
+      }
+    },
+    {
+      "name": "layout:claude-code:dark:780",
+      "passed": true,
+      "detail": {
+        "width": 436,
+        "scroll": 436,
+        "client": 436,
+        "bodyScroll": 404,
+        "bodyClient": 404,
+        "buttons": [
+          {
+            "height": 32,
+            "width": 52
+          },
+          {
+            "height": 32,
+            "width": 122.453125
+          }
+        ]
+      }
+    },
+    {
+      "name": "layout:claude-code:dark:500",
+      "passed": true,
+      "detail": {
+        "width": 156,
+        "scroll": 156,
+        "client": 156,
+        "bodyScroll": 124,
+        "bodyClient": 124,
+        "buttons": [
+          {
+            "height": 32,
+            "width": 52
+          },
+          {
+            "height": 32,
+            "width": 122.453125
+          }
+        ]
+      }
+    },
+    {
+      "name": "layout:eye-care:light:1100",
+      "passed": true,
+      "detail": {
+        "width": 704,
+        "scroll": 704,
+        "client": 704,
+        "bodyScroll": 672,
+        "bodyClient": 672,
+        "buttons": [
+          {
+            "height": 32,
+            "width": 52
+          },
+          {
+            "height": 32,
+            "width": 122.453125
+          }
+        ]
+      }
+    },
+    {
+      "name": "layout:eye-care:light:780",
+      "passed": true,
+      "detail": {
+        "width": 436,
+        "scroll": 436,
+        "client": 436,
+        "bodyScroll": 404,
+        "bodyClient": 404,
+        "buttons": [
+          {
+            "height": 32,
+            "width": 52
+          },
+          {
+            "height": 32,
+            "width": 122.453125
+          }
+        ]
+      }
+    },
+    {
+      "name": "layout:eye-care:light:500",
+      "passed": true,
+      "detail": {
+        "width": 156,
+        "scroll": 156,
+        "client": 156,
+        "bodyScroll": 124,
+        "bodyClient": 124,
+        "buttons": [
+          {
+            "height": 32,
+            "width": 52
+          },
+          {
+            "height": 32,
+            "width": 122.453125
+          }
+        ]
+      }
+    },
+    {
+      "name": "layout:eye-care:dark:1100",
+      "passed": true,
+      "detail": {
+        "width": 704,
+        "scroll": 704,
+        "client": 704,
+        "bodyScroll": 672,
+        "bodyClient": 672,
+        "buttons": [
+          {
+            "height": 32,
+            "width": 52
+          },
+          {
+            "height": 32,
+            "width": 122.453125
+          }
+        ]
+      }
+    },
+    {
+      "name": "layout:eye-care:dark:780",
+      "passed": true,
+      "detail": {
+        "width": 436,
+        "scroll": 436,
+        "client": 436,
+        "bodyScroll": 404,
+        "bodyClient": 404,
+        "buttons": [
+          {
+            "height": 32,
+            "width": 52
+          },
+          {
+            "height": 32,
+            "width": 122.453125
+          }
+        ]
+      }
+    },
+    {
+      "name": "layout:eye-care:dark:500",
+      "passed": true,
+      "detail": {
+        "width": 156,
+        "scroll": 156,
+        "client": 156,
+        "bodyScroll": 124,
+        "bodyClient": 124,
+        "buttons": [
+          {
+            "height": 32,
+            "width": 52
+          },
+          {
+            "height": 32,
+            "width": 122.453125
+          }
+        ]
+      }
+    },
+    {
+      "name": "coarse-controls-44px",
+      "passed": true
+    },
+    {
+      "name": "popout-shares-live-draft",
+      "passed": true
+    },
+    {
+      "name": "restart-retains-edits-and-receipt",
+      "passed": true
+    },
+    {
+      "name": "external-edit-never-overwritten",
+      "passed": true
+    },
+    {
+      "name": "crash-reopens-unsaved-draft",
+      "passed": true
+    },
+    {
+      "name": "no-runtime-errors",
+      "passed": true,
+      "detail": []
+    }
+  ],
+  "realAccounts": "unverified"
+}

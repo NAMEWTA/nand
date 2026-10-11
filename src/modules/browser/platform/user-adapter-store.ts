@@ -42,7 +42,9 @@ export class UserAdapterStore {
 }
 
 export function markdownUserAdapterStore(app: App, folder: string, recovery: string, changed: () => void): UserAdapterStore {
-	if (workspaceFolder(folder) !== folder) throw new BrowserError('browser_workspace_folder');
+	const normalized = workspaceFolder(folder);
+	if (!normalized) throw new BrowserError('browser_workspace_folder');
+	folder = normalized;
 	const key = 'browser/user-adapter-documents/' + encodeURIComponent(folder) + '.json';
 	const storage = new MarkdownCollectionStorage(app, userAdapterDocuments(folder), key);
 	let unsubscribe = () => {};

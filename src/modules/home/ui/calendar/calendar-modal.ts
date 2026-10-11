@@ -12,6 +12,7 @@ import {
 } from '../renderer/render-context';
 import { CalendarModalPanel, DayAgendaPanel, type CalendarModalCallbacks } from './CalendarModalPanel';
 import { readTaskInsertPosition, readTaskTarget } from './calendar-preferences';
+import { contentFiles, isManagedFile } from '../../../../host/obsidian/storage/content-files';
 
 /** Native modal lifecycle and keyboard scope; business rendering belongs to the panel. */
 export class CalendarMonthModal extends Modal {
@@ -146,6 +147,7 @@ function prepareModal(modal: Modal, actions: CalendarModalCallbacks): DashboardR
 	});
 	const context = new DashboardRenderContext(modal.contentEl);
 	context.noteOpener = (file, subpath) => {
+		if (isManagedFile(file)) { void contentFiles(modal.app).open(file.path); return; }
 		if (actions.onOpenNote) actions.onOpenNote(file);
 		else void modal.app.workspace.openLinkText(file.path + (subpath ?? ''), '');
 	};
