@@ -1,3 +1,4 @@
+import { getVaultPreference } from '../../../../host/obsidian/storage/preferences';
 import { widgetTileDefaults } from '../../services/widget-layout';
 import { dashboardSaveMessage } from '../../core/board/save-state';
 import { NativeSurface, type NativeSurfaceContext } from '../../../../ui/native-surface';
@@ -220,9 +221,9 @@ export class DashboardSurface extends NativeSurface implements HoverParent {
 	bannerStatsResolvedOnce = false;
 	bannerQuoteIndex = 0;
 	bannerImageIndex = 0;
-	sidebarPinned = this.app.loadLocalStorage('nand.dashboard.sidebar-pinned') === 'true';
+	sidebarPinned = getVaultPreference(this.app, 'nand.dashboard.sidebar-pinned') === 'true';
 	sidebarExpanded = false;
-	bannerCollapsed = this.app.loadLocalStorage('nand.dashboard.banner-collapsed') === 'true';
+	bannerCollapsed = getVaultPreference(this.app, 'nand.dashboard.banner-collapsed') === 'true';
 	pendingScrollCardId: string | null = null;
 	pendingScrollToLastCardOfColumn: string | null = null;
 	pomodoroService: PomodoroService | null = null;

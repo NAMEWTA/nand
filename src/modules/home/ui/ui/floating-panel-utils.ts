@@ -1,5 +1,6 @@
+import { getVaultPreference, setVaultPreference } from '../../../../host/obsidian/storage/preferences';
 import type { App } from 'obsidian';
-type PositionStorage = Pick<App, 'loadLocalStorage' | 'saveLocalStorage'>;
+type PositionStorage = App;
 /** Shared helpers for body-level floating mini panels (pomodoro pill,
  *  reading timer): viewport-clamped positioning, persisted drag positions
  *  and a pointer-drag wiring that leaves inner buttons clickable. */
@@ -16,7 +17,7 @@ interface SavedPos {
 
 function loadPos(storage: PositionStorage, key: string): SavedPos | null {
 	try {
-		const raw = storage.loadLocalStorage(key) as unknown;
+		const raw = getVaultPreference(storage, key);
 		if (!raw) return null;
 		const parsed = (typeof raw === 'string' ? JSON.parse(raw) : raw) as Partial<SavedPos>;
 		if (
@@ -34,7 +35,7 @@ function loadPos(storage: PositionStorage, key: string): SavedPos | null {
 
 function savePos(storage: PositionStorage, key: string, pos: SavedPos): void {
 	try {
-		storage.saveLocalStorage(key, pos);
+		setVaultPreference(storage, key, pos);
 	} catch {
 		// Storage unavailable (sandboxed context) — position lives for this mount only.
 	}

@@ -59,7 +59,7 @@ export function pathWithinScope(repoPath: string, scope: string): boolean {
 	return safe === prefix || safe.startsWith(`${prefix}/`);
 }
 
-/** This device's automatic-sync bookkeeping. Kept inside the git directory, so it is never committed or synced. */
+/** This device's automatic-sync bookkeeping, stored under vault/.nand/sync/<device>/. */
 export interface DeviceSyncState {
 	/** Epoch ms of the last automatic commit-and-sync, pull and push. */
 	lastCommit: number;
@@ -94,9 +94,9 @@ export interface GitHost {
 	runner(binary: string, cwd: string): GitRunner & { dispose(): void };
 	clone(binary: string, target: string, source: string, options: CloneOptions): Promise<CloneResult>;
 	hostname(): string;
-	/** Read and write JSON at an absolute path (the state file inside the git directory). */
-	readJson(path: string): Promise<unknown>;
-	writeJson(path: string, value: unknown): Promise<void>;
+	/** Copy and verify the legacy sidecar before adopting vault-owned device state. */
+	loadDevice(cwd: string, legacyPath: string): Promise<DeviceSyncState>;
+	saveDevice(cwd: string, base: DeviceSyncState, value: DeviceSyncState): Promise<DeviceSyncState>;
 	/** Absolute path of `relative` from `cwd`. */
 	resolve(cwd: string, relative: string): string;
 }

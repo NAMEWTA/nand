@@ -1,3 +1,4 @@
+import { getVaultPreference } from '../../../../host/obsidian/storage/preferences';
 import { App } from 'obsidian';
 import type { MediaTagService } from '../../platform/media/media-tags';
 import { isUnderExcludedFolder, normalizeExcludeFolders } from '../../../../shared/exclude-folders';
@@ -19,7 +20,7 @@ export type ThumbSize = 'small' | 'medium' | 'large';
 export const THUMB_SIZE_STORAGE_KEY = 'nand.dashboard.media-thumb-size';
 
 export function readStoredThumbSize(app: App): ThumbSize {
-	const stored = app.loadLocalStorage(THUMB_SIZE_STORAGE_KEY) as string | null;
+	const stored = getVaultPreference(app, THUMB_SIZE_STORAGE_KEY) as string | null;
 	return stored === 'small' || stored === 'large' ? stored : 'medium';
 }
 

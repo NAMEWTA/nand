@@ -8,7 +8,7 @@ import type { MarkdownPostProcessor } from 'obsidian';
 import { switchModule } from './settings/module-switch';
 import { MANIFESTS } from './manifests';
 import { ModuleRegistry } from './modules/registry';
-import { loadSettingsRuntime, type SettingsRuntime } from './settings/runtime';
+import { defaultLanguage, loadSettingsRuntime, type SettingsRuntime } from './settings/runtime';
 import { languageUpdater, settingsWriter } from './settings/language';
 import { NandSettingTab } from './settings/entry-tab';
 import { IntroModal } from './intro-modal';
@@ -25,6 +25,7 @@ import { COMMENTS_VIEW_TYPE, CommentsLeaf } from './workbench/comments-leaf';
 import { collectReferences } from '../host/obsidian/references';
 import { registerCopyCommands } from './copy-commands';
 import { BROWSER_OPEN, type BrowserOpenRequest } from '../modules/browser/api';
+import { desktopMachineIdentity, initializeDevice, vaultIdentity } from '../host/obsidian/storage/device-id';
 
 /**
  * Composition root. Module code is created by the module registry from `MANIFESTS`; this class keeps the
@@ -45,6 +46,12 @@ export default class DashboardPlugin extends Plugin {
 	private readonly postProcessors = new Set<MarkdownPostProcessor>();
 
 	async onload(): Promise<void> {
+		setLanguage(defaultLanguage());
+		await initializeDevice(this.app, {
+			machineIdentity: desktopMachineIdentity,
+			label: t('storage.defaultDevice'),
+			chooseDevice: async devices => (await import('./device-choice')).chooseVaultDevice(this.app, devices),
+		});
 		await this.loadSettings();
 		new ThemeRuntime(this.runtime.theme).attach(this);
 		const adapter = this.app.vault.adapter as { getBasePath?: () => string };
@@ -147,6 +154,8 @@ export default class DashboardPlugin extends Plugin {
 	get appSettings() {
 		return this.runtime.ns.app;
 	}
+	/** Current vault and device identifiers, used by diagnostics and acceptance probes. */
+	get storageIdentity() { return vaultIdentity(this.app); }
 
 	/** A settings namespace bound by the app or an active module (diagnostics and acceptance checks). */
 	settingsNamespace(name: string) {

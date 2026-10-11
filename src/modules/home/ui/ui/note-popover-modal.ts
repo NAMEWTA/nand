@@ -1,3 +1,4 @@
+import { getVaultPreference, setVaultPreference } from '../../../../host/obsidian/storage/preferences';
 import { App, MarkdownView, Modal, Notice, TFile, WorkspaceLeaf, setIcon } from 'obsidian';
 import { t } from '../../../../shared/i18n/index';
 import { applyModalTheme, removeNativeModalCloseButton } from '../appearance/modal-theme';
@@ -29,7 +30,7 @@ export class NotePopoverModal extends Modal {
 		this.file = file;
 		this.subpath = subpath;
 		this.line = line;
-		this.mode = (this.app.loadLocalStorage(MODE_STORAGE_KEY) as string | null) === 'preview' ? 'preview' : 'source';
+		this.mode = (getVaultPreference(this.app, MODE_STORAGE_KEY) as string | null) === 'preview' ? 'preview' : 'source';
 	}
 
 	async onOpen(): Promise<void> {
@@ -119,7 +120,7 @@ export class NotePopoverModal extends Modal {
 		await this.opening;
 		if (!leaf || this.leaf !== leaf) return;
 		this.mode = this.mode === 'source' ? 'preview' : 'source';
-		this.app.saveLocalStorage(MODE_STORAGE_KEY, this.mode);
+		setVaultPreference(this.app, MODE_STORAGE_KEY, this.mode);
 		if (this.toggleBtn) setIcon(this.toggleBtn, this.mode === 'source' ? 'pencil' : 'eye');
 		this.opening = leaf.setViewState({
 			type: 'markdown',

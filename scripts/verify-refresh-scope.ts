@@ -1,4 +1,5 @@
 import { installPreactMiniDom } from './preact-mini-dom';
+import { bindTestPreferences } from '../test/fixtures/vault-storage';
 /**
  * Verifies the vault-refresh scope filtering and signature skip for scanning
  * (library/folder) sections — the fix for the "workbench refreshes rapidly"
@@ -83,6 +84,7 @@ const app = {
 	loadLocalStorage: () => null,
 	saveLocalStorage: () => {},
 } as unknown as App;
+bindTestPreferences(app);
 
 const makeColumn = (name: string, config: LibraryConfig): DashboardColumn =>
 	({ name, color: '', sectionType: 'folder', cards: [], libraryConfig: config }) as unknown as DashboardColumn;

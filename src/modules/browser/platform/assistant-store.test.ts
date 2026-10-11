@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import { initializeTestDevice } from '../../../../test/fixtures/vault-storage';
 import { resolve } from 'node:path';
 import { expect, test } from 'vitest';
 import { memoryVault } from '../../../../scripts/fixtures/memory-vault';
@@ -105,6 +106,7 @@ test('restore saves only the reviewed snapshot, interrupts unfinished steps and 
 test('independent recovery reader is read-only, folder-scoped and usable with broken primary Markdown', async () => {
 	const vault = memoryVault(), folder = 'Workspace';
 	Object.assign(vault.app, { loadLocalStorage: () => '00000000-0000-0000-0000-000000000001', saveLocalStorage: () => {} });
+	await initializeTestDevice(vault.app);
 	Object.assign(vault.adapter, { exists: async (path: string) => vault.contents.has(path) || [...vault.contents.keys()].some(key => key.startsWith(path + '/')),
 		list: async (path: string) => ({ files: [...vault.contents.keys()].filter(key => key.startsWith(path + '/') && !key.slice(path.length + 1).includes('/')), folders: [] }) });
 	const directory = await assistantRecoveryDirectory(vault.app, folder), id = crypto.randomUUID(), file = `${directory}/${id}.json`;

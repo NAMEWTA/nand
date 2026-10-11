@@ -5,6 +5,7 @@ import type { SettingsScope } from '../../shared/settings/schema';
 import { t } from '../../shared/i18n/index';
 import { deviceId } from '../../host/obsidian/storage/device-id';
 import { privateVaultStorage } from '../../host/obsidian/storage/private-storage';
+import { initializeVaultPreferences, setVaultPreference } from '../../host/obsidian/storage/preferences';
 import { homeSettings, seedDashboardSettings } from '../../modules/home/settings';
 import { archivesSettings } from '../../modules/archives/settings';
 import { browserSettings } from '../../modules/browser/settings';
@@ -63,6 +64,7 @@ export async function loadSettingsRuntime(app: App): Promise<SettingsRuntime> {
 	}, { timers: { set: (callback, ms) => window.setTimeout(callback, ms), clear: (handle) => window.clearTimeout(handle as number) } });
 	await store.load();
 	const firstRun = store.empty;
+	await initializeVaultPreferences(app, store);
 	const ns: AppNamespaces = {
 		app: store.bind('app', appSchema(defaultLanguage())),
 		home: store.bind('home', homeSettings),
@@ -72,7 +74,7 @@ export async function loadSettingsRuntime(app: App): Promise<SettingsRuntime> {
 	};
 	if (firstRun) {
 		await ns.home.update((draft) => seedDashboardSettings(draft, { countdown: t('defaults.countdownLabel'), anniversary: t('defaults.anniversaryLabel') }));
-		app.saveLocalStorage('nand.dashboard.sidebar-pinned', 'true');
+		setVaultPreference(app, 'nand.dashboard.sidebar-pinned', 'true');
 		await Promise.all([ns.app.touch(), ns.archives.touch(), ns.browser.touch(), ns.comments.touch()]);
 	}
 	return { store, ns, theme: store.bind('theme', themeSettings), firstRun };

@@ -241,7 +241,7 @@ describe('git vault boundary', () => {
 		sh(seed, 'push', '-q', '-u', 'origin', 'HEAD:main');
 		const empty = path.join(base, 'empty-clone');
 		mkdirSync(empty);
-		const host = desktopGitHost(seed);
+		const host = desktopGitHost(seed, 'test-device');
 		const options = { signal: new AbortController().signal };
 		const cloned = await host.clone('git', empty, remote, options);
 		assert.equal(cloned.state, 'cloned');
@@ -276,7 +276,7 @@ describe('git vault boundary', () => {
 			mkdirSync(target);
 			const controller = new AbortController();
 			let receivedProgress = false;
-			const result = await desktopGitHost(work).clone('git', target, pathToFileURL(remote).href, {
+			const result = await desktopGitHost(work, 'test-device').clone('git', target, pathToFileURL(remote).href, {
 				 signal: controller.signal,
 				 onProgress() {
 					 receivedProgress = true;

@@ -3,10 +3,12 @@ import { test } from 'vitest';
 import { memoryVault } from '../../../../scripts/fixtures/memory-vault';
 import { markdownWorkspaceStore } from './workspace-store';
 import { readWorkspaceRecovery, workspaceRecoveryDirectory } from './workspace-recovery';
+import { initializeTestDevice } from '../../../../test/fixtures/vault-storage';
 
 test('a failed restart save cannot overwrite a previous runtime recovery snapshot, and listing stays in this workspace', async () => {
 	const vault = memoryVault(), root = 'NAND/AI Workspace';
 	Object.assign(vault.app, { loadLocalStorage: () => '00000000-0000-0000-0000-000000000001', saveLocalStorage: () => {} });
+	await initializeTestDevice(vault.app);
 	Object.assign(vault.adapter, {
 		exists: async (path: string) => vault.contents.has(path) || [...vault.contents.keys()].some(key => key.startsWith(path + '/')),
 		list: async (path: string) => ({ files: [...vault.contents.keys()].filter(key => key.startsWith(path + '/') && !key.slice(path.length + 1).includes('/')), folders: [] }),

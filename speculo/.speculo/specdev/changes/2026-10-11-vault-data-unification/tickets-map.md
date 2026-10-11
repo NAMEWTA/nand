@@ -20,14 +20,14 @@ status: "in_progress"
 | Applies To | Project Skill | Trigger / Scope | Read Timing | Purpose |
 |---|---|---|---|---|
 | ALL | <Path>.agents/skills/dev/SKILL.md</Path> | 插件、存储、测试、文档与发布 | Map 后 Ticket 前 | 架构与验证 |
-| T-03,T-04,T-05,T-08 | <Path>.agents/skills/ui/SKILL.md</Path> | 内容与账号界面、浏览器、宿主验收 | Map 后 Ticket 前 | 工作台与可访问性 |
+| T-02,T-03,T-04,T-05,T-08 | <Path>.agents/skills/ui/SKILL.md</Path> | 内容与账号界面、浏览器、宿主验收 | Map 后 Ticket 前 | 工作台与可访问性 |
 
 ## 2. 执行清单
 
 | ID | Ticket | 可观察产出 | Blocked By | Depth | Risk | Ready | Owner | Contract IDs | Status |
 |---|---|---|---|---|---|---|---|---|---|
-| T-01 | <Path>{roots.state}/specdev/changes/2026-10-11-vault-data-unification/ticket/01-durable-storage.md</Path> | 连续保存与故障恢复 | — | deep | high | yes | root | AC-001 | in_progress |
-| T-02 | <Path>{roots.state}/specdev/changes/2026-10-11-vault-data-unification/ticket/02-vault-storage.md</Path> | 统一路径、设备身份与内部状态 | T-01 | deep | high | yes | root | AC-002 | ready |
+| T-01 | <Path>{roots.state}/specdev/changes/2026-10-11-vault-data-unification/ticket/01-durable-storage.md</Path> | 连续保存与故障恢复 | — | deep | high | yes | root | AC-001 | done |
+| T-02 | <Path>{roots.state}/specdev/changes/2026-10-11-vault-data-unification/ticket/02-vault-storage.md</Path> | 统一路径、设备身份与内部状态 | T-01 | deep | high | yes | root | AC-002 | in_progress |
 | T-03 | <Path>{roots.state}/specdev/changes/2026-10-11-vault-data-unification/ticket/03-hidden-content.md</Path> | 隐藏目录中的内容访问和迁移 | T-02 | deep | high | yes | root | AC-003 | ready |
 | T-04 | <Path>{roots.state}/specdev/changes/2026-10-11-vault-data-unification/ticket/04-browser-sessions.md</Path> | 浏览器会话与产物进入 vault | T-02 | deep | high | yes | root | AC-004 | ready |
 | T-05 | <Path>{roots.state}/specdev/changes/2026-10-11-vault-data-unification/ticket/05-agent-accounts.md</Path> | 账号身份、凭据与终端辅助程序 | T-02 | deep | high | yes | root | AC-005 | ready |

@@ -1,3 +1,4 @@
+import { getVaultPreference, setVaultPreference } from '../../../../host/obsidian/storage/preferences';
 import { DEFAULT_HIGHLIGHT_IMPORT_PATH } from '../../core/board/default-paths';
 import { setLocalizedAttribute, localizedAttributes, localizedText } from '../../../../ui/primitives/localized-dom';
 import type { HoverParent } from 'obsidian';
@@ -47,7 +48,7 @@ export function refreshMediaSections(
 const COLLAPSED_KEY = 'nand.dashboard.media-collapsed';
 function getCollapsedSections(app: App): Set<string> {
 	try {
-		const raw = app.loadLocalStorage(COLLAPSED_KEY) as string | null;
+		const raw = getVaultPreference(app, COLLAPSED_KEY) as string | null;
 		if (!raw) return new Set();
 		return new Set(JSON.parse(raw) as string[]);
 	} catch {
@@ -55,7 +56,7 @@ function getCollapsedSections(app: App): Set<string> {
 	}
 }
 function saveCollapsedSections(app: App, collapsed: Set<string>): void {
-	app.saveLocalStorage(COLLAPSED_KEY, JSON.stringify([...collapsed]));
+	setVaultPreference(app, COLLAPSED_KEY, JSON.stringify([...collapsed]));
 }
 function attachSectionResizeHandle(el: HTMLElement, column: DashboardColumn, callbacks: RenderCallbacks): void {
 	if (Platform.isMobile) return;

@@ -9,6 +9,8 @@ import type { Automatics } from './services/automatics';
 import { describeReport } from './services/report';
 import type { SyncService } from './services/sync-service';
 import { syncWorkbench } from './services/workbench';
+import { deviceId } from '../../host/obsidian/storage/device-id';
+import { privateVaultStorage } from '../../host/obsidian/storage/private-storage';
 
 registerMessages(commonStrings);
 registerMessages(messages);
@@ -60,7 +62,7 @@ export default function createSyncModule(context: ModuleContext): ModuleInstance
 				import('./ui/dialogs'),
 			]);
 			const current = new Service({
-				host: desktopGitHost(adapter.getBasePath()),
+				host: desktopGitHost(adapter.getBasePath(), deviceId(app), privateVaultStorage(app)),
 				settings,
 				dialogs: syncDialogs(app),
 				notify: (text, error) => void new Notice(text, error ? 10_000 : 5_000),

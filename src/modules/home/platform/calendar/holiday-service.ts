@@ -1,3 +1,4 @@
+import { getVaultPreference, setVaultPreference } from '../../../../host/obsidian/storage/preferences';
 import { App, requestUrl } from 'obsidian';
 
 export interface HolidayInfo {
@@ -29,7 +30,7 @@ function isValidCache(obj: unknown): obj is HolidayCache {
 
 function loadDiskCache(app: App): HolidayCache | null {
 	try {
-		const raw = app.loadLocalStorage(CACHE_KEY) as string | null;
+		const raw = getVaultPreference(app, CACHE_KEY) as string | null;
 		if (!raw) return null;
 		const parsed: unknown = JSON.parse(raw);
 		if (!isValidCache(parsed)) return null;
@@ -42,7 +43,7 @@ function loadDiskCache(app: App): HolidayCache | null {
 
 function saveDiskCache(app: App, cache: HolidayCache): void {
 	try {
-		app.saveLocalStorage(CACHE_KEY, JSON.stringify(cache));
+		setVaultPreference(app, CACHE_KEY, JSON.stringify(cache));
 	} catch {
 		// ignore storage errors
 	}

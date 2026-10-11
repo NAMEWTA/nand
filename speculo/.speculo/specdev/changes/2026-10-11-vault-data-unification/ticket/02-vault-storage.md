@@ -2,13 +2,13 @@
 schema_version: 3
 plan_contract_version: 1
 skill_scan: "已扫描 .agents/skills：dev 适用全部实现，ui 适用内容/浏览器/账号界面及验收。"
-skill_bindings: [{"id":"dev","path":"<Path>.agents/skills/dev/SKILL.md</Path>","sha256":"c8fe48347cd03367c384ca52535cc1981de658721fa82093b34c271c25d295d6","phase":"implement","operation":"implement-and-verify","inputs":["本票合同、真实源码与定向差异"],"outputs":["实现、定向验证与 Evidence"],"required":true,"on_failure":"block-ticket"}]
+skill_bindings: [{"id":"dev","path":"<Path>.agents/skills/dev/SKILL.md</Path>","sha256":"c8fe48347cd03367c384ca52535cc1981de658721fa82093b34c271c25d295d6","phase":"implement","operation":"implement-and-verify","inputs":["本票合同、真实源码与定向差异"],"outputs":["实现、定向验证与 Evidence"],"required":true,"on_failure":"block-ticket"},{"id":"ui","path":"<Path>.agents/skills/ui/SKILL.md</Path>","sha256":"8c362a984536481585cceeae64d8fcc784f56451262444e0400660b19c801044","phase":"implement","operation":"implement-and-verify","inputs":["设备身份不可自动识别时的设备选择"],"outputs":["原生可访问选择器与验证"],"required":true,"on_failure":"block-ticket"}]
 resource_claims: ["current-workspace:root"]
 artifact: "ticket"
 change: "2026-10-11-vault-data-unification"
 id: "T-02"
 title: "统一路径、设备身份与内部状态"
-status: "ready"
+status: "in_progress"
 kind: "feature"
 planning_depth: "deep"
 planning_depth_reason: "涉及公共持久化、数据迁移、身份隔离或发布；用户已批准完整计划及实施。"
@@ -17,11 +17,11 @@ risk: "high"
 blocked_by: ["T-01"]
 contract_ids: ["AC-002"]
 owner: "root"
-expected_changes: ["<Path>src/shared/**</Path>","<Path>src/host/**</Path>","<Path>src/app/**</Path>","<Path>src/modules/home/**</Path>","<Path>src/modules/browser/platform/store.ts</Path>","<Path>src/modules/sync/**</Path>","<Path>scripts/**</Path>","<Path>test/**</Path>"]
-writable_paths: ["<Path>src/shared/**</Path>","<Path>src/host/**</Path>","<Path>src/app/**</Path>","<Path>src/modules/home/**</Path>","<Path>src/modules/browser/platform/store.ts</Path>","<Path>src/modules/sync/**</Path>","<Path>scripts/**</Path>","<Path>test/**</Path>"]
+expected_changes: ["<Path>src/shared/**</Path>","<Path>src/host/**</Path>","<Path>src/app/**</Path>","<Path>src/modules/home/**</Path>","<Path>src/modules/browser/platform/store.ts</Path>","<Path>src/modules/sync/**</Path>","<Path>scripts/**</Path>","<Path>test/**</Path>","<Path>main.js</Path>","<Path>src/modules/agent/services/agent-runtime.test.ts</Path>","<Path>src/modules/agent/platform/desktop/server/native-history.test.ts</Path>","<Path>src/modules/browser/platform/assistant-store.test.ts</Path>","<Path>src/modules/browser/platform/workspace-recovery.test.ts</Path>"]
+writable_paths: ["<Path>src/shared/**</Path>","<Path>src/host/**</Path>","<Path>src/app/**</Path>","<Path>src/modules/home/**</Path>","<Path>src/modules/browser/platform/store.ts</Path>","<Path>src/modules/sync/**</Path>","<Path>scripts/**</Path>","<Path>test/**</Path>","<Path>main.js</Path>","<Path>src/modules/agent/services/agent-runtime.test.ts</Path>","<Path>src/modules/agent/platform/desktop/server/native-history.test.ts</Path>","<Path>src/modules/browser/platform/assistant-store.test.ts</Path>","<Path>src/modules/browser/platform/workspace-recovery.test.ts</Path>"]
 read_only_paths: []
-shared_paths: ["<Path>src/shared/**</Path>","<Path>src/host/**</Path>","<Path>src/app/**</Path>","<Path>src/modules/home/**</Path>","<Path>src/modules/browser/platform/store.ts</Path>","<Path>src/modules/sync/**</Path>","<Path>scripts/**</Path>","<Path>test/**</Path>"]
-shared_path_owners: ["<Path>src/shared/**</Path> => root","<Path>src/host/**</Path> => root","<Path>src/app/**</Path> => root","<Path>src/modules/home/**</Path> => root","<Path>src/modules/browser/platform/store.ts</Path> => root","<Path>src/modules/sync/**</Path> => root","<Path>scripts/**</Path> => root","<Path>test/**</Path> => root"]
+shared_paths: ["<Path>src/shared/**</Path>","<Path>src/host/**</Path>","<Path>src/app/**</Path>","<Path>src/modules/home/**</Path>","<Path>src/modules/browser/platform/store.ts</Path>","<Path>src/modules/sync/**</Path>","<Path>scripts/**</Path>","<Path>test/**</Path>","<Path>main.js</Path>","<Path>src/modules/agent/services/agent-runtime.test.ts</Path>","<Path>src/modules/agent/platform/desktop/server/native-history.test.ts</Path>","<Path>src/modules/browser/platform/assistant-store.test.ts</Path>","<Path>src/modules/browser/platform/workspace-recovery.test.ts</Path>"]
+shared_path_owners: ["<Path>src/shared/**</Path> => root","<Path>src/host/**</Path> => root","<Path>src/app/**</Path> => root","<Path>src/modules/home/**</Path> => root","<Path>src/modules/browser/platform/store.ts</Path> => root","<Path>src/modules/sync/**</Path> => root","<Path>scripts/**</Path> => root","<Path>test/**</Path> => root","<Path>main.js</Path> => root","<Path>src/modules/agent/services/agent-runtime.test.ts</Path> => root","<Path>src/modules/agent/platform/desktop/server/native-history.test.ts</Path> => root","<Path>src/modules/browser/platform/assistant-store.test.ts</Path> => root","<Path>src/modules/browser/platform/workspace-recovery.test.ts</Path> => root"]
 ---
 
 # T-02 统一路径、设备身份与内部状态

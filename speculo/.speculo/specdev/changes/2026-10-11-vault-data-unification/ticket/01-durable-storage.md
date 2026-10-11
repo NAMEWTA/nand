@@ -8,7 +8,7 @@ artifact: "ticket"
 change: "2026-10-11-vault-data-unification"
 id: "T-01"
 title: "连续保存与故障恢复"
-status: "in_progress"
+status: "done"
 kind: "feature"
 planning_depth: "deep"
 planning_depth_reason: "涉及公共持久化、数据迁移、身份隔离或发布；用户已批准完整计划及实施。"
@@ -80,9 +80,9 @@ E2E owner/environment: root / current-workspace。提交已获用户授权；imp
 
 ## 10. 验收标准
 
-- [ ] AC-001：编辑基线与提交结果显式化；外部新增、修改和删除在后续保存中保持；排队编辑不会被旧回调覆盖；备份保存最近有效磁盘版本，故障后可恢复。
-- [ ] 非空实现、验证和双轴审查事实写入 <Path>{roots.state}/specdev/changes/2026-10-11-vault-data-unification/evidence/T-01.md</Path>。
-- [ ] 实际路径、Skill 摘要、命令结果、未验证范围与 Map 一致。
+- [x] AC-001：编辑基线与提交结果显式化；外部新增、修改和删除在后续保存中保持；排队编辑不会被旧回调覆盖；备份保存最近有效磁盘版本，故障后可恢复。
+- [x] 非空实现、验证和双轴审查事实写入 <Path>{roots.state}/specdev/changes/2026-10-11-vault-data-unification/evidence/T-01.md</Path>。
+- [x] 实际路径、Skill 摘要、命令结果、未验证范围与 Map 一致。
 
 ## 12. 停止、检查点与交付
 

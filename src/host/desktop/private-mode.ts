@@ -2,6 +2,7 @@ import path from 'node:path';
 import { constants } from 'node:fs';
 import { chmod, lstat, mkdir, open, opendir, realpath } from 'node:fs/promises';
 import type { TextStorage } from '../../shared/storage/ports';
+import { absoluteNandPath } from './nand-paths';
 
 export const PRIVATE_DIR_MODE = 0o700;
 export const PRIVATE_FILE_MODE = 0o600;
@@ -49,7 +50,12 @@ export async function tightenPrivateAbsolute(absolute: string, kind: 'dir' | 'fi
 
 /** A single port per adapter owns repair and preserves adapter write notifications. */
 export function privateTextStorage(inner: TextStorage, vaultRoot: string): TextStorage {
-	if (!chmodAllowed(process.platform)) return inner;
+	if (!chmodAllowed(process.platform)) return {
+		async exists(relative) { if (isPrivateRelative(relative)) await absoluteNandPath(vaultRoot, relative); return inner.exists(relative); },
+		async read(relative) { if (isPrivateRelative(relative)) await absoluteNandPath(vaultRoot, relative); return inner.read(relative); },
+		async mkdir(relative) { if (isPrivateRelative(relative)) await absoluteNandPath(vaultRoot, relative); return inner.mkdir(relative); },
+		async write(relative, content) { if (isPrivateRelative(relative)) await absoluteNandPath(vaultRoot, relative); await inner.write(relative, content); },
+	};
 	// Resolve aliases outside the vault (e.g. macOS /var); links inside .nand are forbidden.
 	const root = realpath(vaultRoot);
 	const reported = new Set<string>();
@@ -61,9 +67,11 @@ export function privateTextStorage(inner: TextStorage, vaultRoot: string): TextS
 		console.warn('[NAND private storage]', category, reason);
 	};
 	const privatePath = async (relative: string): Promise<string> => {
-		const parts = relative.replaceAll('\\', '/').split('/').filter(part => part && part !== '.');
-		if (parts[0] !== '.nand' || parts.includes('..')) throw new Error('private-storage.path');
-		return path.join(await root, ...parts);
+		try { return await absoluteNandPath(await root, relative); }
+		catch (error) {
+			if (error instanceof Error && error.message === 'nand-storage.invalid-path') throw new Error('private-storage.path');
+			throw error;
+		}
 	};
 	const check = async (relative: string) => {
 		const absolute = await privatePath(relative);

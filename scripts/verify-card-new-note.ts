@@ -1,4 +1,5 @@
 import { installPreactMiniDom } from './preact-mini-dom';
+import { bindTestPreferences } from '../test/fixtures/vault-storage';
 installPreactMiniDom();
 import { strict as assert } from 'node:assert';
 import type { App } from 'obsidian';
@@ -45,15 +46,18 @@ import type { RenderCallbacks } from '../src/modules/home/ui/render-contract';
 	}
 };
 
-const makeApp = (): App =>
-	({
+const makeApp = (): App => {
+	const app = {
 		vault: {
 			getFileByPath: () => null,
 			getMarkdownFiles: () => [],
 		},
 		loadLocalStorage: () => null,
 		saveLocalStorage: () => {},
-	}) as unknown as App;
+	} as unknown as App;
+	bindTestPreferences(app);
+	return app;
+};
 
 const makeCard = (over: Partial<DashboardCard> = {}): DashboardCard =>
 	({

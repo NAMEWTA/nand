@@ -35,7 +35,7 @@ function disk(root: string): TextStorage {
 	};
 }
 
-test('Windows keeps the native storage port and never performs POSIX repair', async () => {
+test('Windows adds path guards without pretending POSIX chmod was applied', async () => {
 	assert.equal(chmodAllowed('win32'), false);
 	assert.equal(chmodAllowed('android'), false);
 	assert.equal(chmodAllowed('ios'), false);
@@ -43,7 +43,7 @@ test('Windows keeps the native storage port and never performs POSIX repair', as
 	assert.equal(chmodAllowed('linux'), true);
 	if (process.platform !== 'win32') return;
 	const inner = disk('unused');
-	assert.equal(privateTextStorage(inner, 'unused'), inner);
+	assert.notEqual(privateTextStorage(inner, 'unused'), inner);
 	assert.equal(await tightenPrivateAbsolute('unused', 'file'), 'skipped');
 });
 

@@ -5,7 +5,7 @@ import type { CloneProgress, CloneResult } from '../core/clone';
 import { formatCommitMessage, type CommitMode } from '../core/commit-mode';
 import { GitError, needsAttention, type GitErrorKind } from '../core/errors';
 import { blocker, commitAndSync, commitStep, pullStep, pushStep, succeeded, type StepResult } from '../core/flow';
-import { normalizeDeviceState, EMPTY_DEVICE_STATE, type DeviceSyncState, type GitHost, type GitRunner, type RepoPlace } from '../core/ports';
+import { EMPTY_DEVICE_STATE, type DeviceSyncState, type GitHost, type GitRunner, type RepoPlace } from '../core/ports';
 import { CancelledError, OperationQueue } from '../core/queue';
 import { GitRepo, type Commit, type CommitFile, type RepoOperation } from '../core/repo';
 import { FAILURE_LIMIT, GIT_WRITE_GRACE } from '../core/schedule';
@@ -76,7 +76,7 @@ export class SyncService {
 	snapshot: SyncSnapshot = { phase: 'starting', gitVersion: '', operation: null, locked: false, remotes: [], identity: { name: '', email: '' }, device: { ...EMPTY_DEVICE_STATE } };
 	private runner?: GitRunner & { dispose(): void };
 	private repo?: GitRepo;
-	private statePath = '';
+	private deviceCwd = '';
 	private readonly queue: OperationQueue;
 	private readonly listeners = new Set<() => void>();
 	private readonly deviceListeners = new Set<() => void>();
@@ -126,7 +126,7 @@ export class SyncService {
 		this.runner?.dispose();
 		this.runner = undefined;
 		this.repo = undefined;
-		this.statePath = '';
+		this.deviceCwd = '';
 		this.snapshot = { ...this.snapshot, phase: 'starting', place: undefined, status: undefined, operation: null, locked: false, remotes: [], identity: { name: '', email: '' }, device: { ...EMPTY_DEVICE_STATE }, last: undefined, error: undefined };
 		this.emit();
 		const settings = this.deps.settings.get();
@@ -151,11 +151,13 @@ export class SyncService {
 		this.repo = new GitRepo(this.runner, place.scope ?? '.');
 		try {
 			const relative = (await this.repo.git(['rev-parse', '--git-path', STATE_FILE])).stdout.trim();
-			this.statePath = this.deps.host.resolve(place.cwd, relative);
-			const device = normalizeDeviceState(await this.deps.host.readJson(this.statePath));
+			const device = await this.deps.host.loadDevice(place.cwd, this.deps.host.resolve(place.cwd, relative));
+			this.deviceCwd = place.cwd;
 			this.snapshot = { ...this.snapshot, phase: 'ready', gitVersion: found.version, place, device };
 		} catch (error) {
+			this.repo = undefined;
 			this.snapshot = { ...this.snapshot, phase: 'ready', gitVersion: found.version, place, error: errorOf(error) };
+			return this.emit();
 		}
 		await this.load();
 		for (const listener of [...this.deviceListeners]) listener();
@@ -301,9 +303,9 @@ export class SyncService {
 
 	private async saveDevice(device: DeviceSyncState): Promise<void> {
 		const changed = JSON.stringify(device) !== JSON.stringify(this.snapshot.device);
-		this.snapshot = { ...this.snapshot, device };
 		if (!changed) return;
-		if (this.statePath) await this.deps.host.writeJson(this.statePath, device).catch(() => undefined);
+		const persisted = this.deviceCwd ? await this.deps.host.saveDevice(this.deviceCwd, this.snapshot.device, device) : device;
+		this.snapshot = { ...this.snapshot, device: persisted };
 		for (const listener of [...this.deviceListeners]) listener();
 	}
 

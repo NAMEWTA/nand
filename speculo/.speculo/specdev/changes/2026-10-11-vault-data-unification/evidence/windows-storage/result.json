@@ -1,0 +1,42 @@
+{
+  "platform": "win32",
+  "method": "Real Obsidian startup, native command, vault files and two full restarts; no external accounts.",
+  "rows": [
+    {
+      "name": "identity-is-vault-owned",
+      "passed": true
+    },
+    {
+      "name": "legacy-identities-are-not-written",
+      "passed": true
+    },
+    {
+      "name": "same-device-survives-restart",
+      "passed": true
+    },
+    {
+      "name": "legacy-preferences-migrated-and-cleared",
+      "passed": true
+    },
+    {
+      "name": "preferences-persist-in-device-file",
+      "passed": true
+    },
+    {
+      "name": "git-state-migrated",
+      "passed": true
+    },
+    {
+      "name": "native-command-saves-in-vault",
+      "passed": true
+    },
+    {
+      "name": "restarted-identity-and-sync-state-preserved",
+      "passed": true
+    },
+    {
+      "name": "no-runtime-errors",
+      "passed": true
+    }
+  ]
+}

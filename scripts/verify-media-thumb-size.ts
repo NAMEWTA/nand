@@ -1,12 +1,13 @@
 import { flushSync } from 'preact/compat';
 import { installPreactMiniDom } from './preact-mini-dom';
+import { bindTestPreferences } from '../test/fixtures/vault-storage';
 /**
  * Verifies the media section's thumbnail-size (S/M/L) persistence:
  *
  * 1. No stored value — medium active, grid renders un-suffixed... actually the
  *    media grid always suffixes (`--small/medium/large`); assert `--medium`.
  * 2. Stored 'large' — L active on open, grid renders `--large`.
- * 3. Clicking S — saves via app.saveLocalStorage with the right key, grid
+ * 3. Clicking S — saves through the vault preferences handle with the right key, grid
  *    re-renders `--small`.
  * 4. Stored garbage — falls back to medium.
  *
@@ -25,10 +26,10 @@ import { El, findByClass } from './mini-dom';
 
 installPreactMiniDom();
 
-/** localStorage-backed app stub recording writes into `store`. */
+/** An injected settings handle records edits into `store`. */
 const makeApp = (store: Record<string, string>) => {
 	const img = { path: 'pics/a.png', name: 'a.png', extension: 'png', stat: { mtime: 1, ctime: 1 } };
-	return {
+	const app = {
 		vault: {
 			getFiles: () => [img],
 			getFileByPath: (p: string) => (p === img.path ? img : null),
@@ -42,6 +43,8 @@ const makeApp = (store: Record<string, string>) => {
 		metadataCache: { getFileCache: () => null, fileToLinktext: (f: { path: string }) => f.path },
 		workspace: { on: () => {}, off: () => {} },
 	} as unknown as Parameters<typeof renderMediaSection>[2];
+	bindTestPreferences(app, store);
+	return app;
 };
 
 const open = (store: Record<string, string>): { el: El } => {

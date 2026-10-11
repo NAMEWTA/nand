@@ -35,7 +35,7 @@
     "history": []
   },
   "created_at": "2026-10-11T05:11:40.581Z",
-  "updated_at": "2026-10-11T05:25:29.867Z",
+  "updated_at": "2026-10-11T05:53:44.076Z",
   "completed_at": null,
   "archived": false,
   "archive_path": null,
@@ -52,13 +52,56 @@
       "parent_branch": "main",
       "branch": "main",
       "workspace_ref": "current",
+      "source_checkpoint": "5200b0e439b620f8a11159a54f44752d9df78f49",
+      "status": "integrated",
+      "updated_at": "2026-10-11T05:53:44.076Z",
+      "integration": {
+        "status": "passed",
+        "parent_ref": "main",
+        "parent_before_sha": "239a16a181dbd3fbdedff35eeeac84aba05707d1",
+        "source_sha": "5200b0e439b620f8a11159a54f44752d9df78f49",
+        "candidate_sha": null,
+        "candidate_tree_sha": null,
+        "candidate_branch": null,
+        "candidate_workspace_ref": null,
+        "result_sha": "5200b0e439b620f8a11159a54f44752d9df78f49",
+        "method": "direct-parent",
+        "conflict_paths": [],
+        "verification": "passed",
+        "full_suite": {
+          "required": true,
+          "status": "passed",
+          "reason": null,
+          "evidence": "<Path>{roots.state}/specdev/changes/2026-10-11-vault-data-unification/evidence/T-01.md</Path>"
+        },
+        "e2e": {
+          "required": false,
+          "status": "not-required",
+          "reason": "存储集成验证在本票执行，Windows 总体验收由 T-08 完成。",
+          "evidence": null
+        },
+        "evidence": "<Path>{roots.state}/specdev/changes/2026-10-11-vault-data-unification/evidence/T-01.md</Path>",
+        "attempts": 1,
+        "promotion_status": "applied"
+      }
+    },
+    {
+      "ticket_id": "T-02",
+      "owner": "root",
+      "implementation_owner": "root",
+      "integration_owner": "root",
+      "provider": "git",
+      "base_sha": "5200b0e439b620f8a11159a54f44752d9df78f49",
+      "parent_branch": "main",
+      "branch": "main",
+      "workspace_ref": "current",
       "source_checkpoint": null,
       "status": "active",
-      "updated_at": "2026-10-11T05:25:29.867Z",
+      "updated_at": "2026-10-11T05:53:44.076Z",
       "integration": {
         "status": "pending",
         "parent_ref": "main",
-        "parent_before_sha": "239a16a181dbd3fbdedff35eeeac84aba05707d1",
+        "parent_before_sha": "5200b0e439b620f8a11159a54f44752d9df78f49",
         "source_sha": null,
         "candidate_sha": null,
         "candidate_tree_sha": null,
@@ -75,12 +118,12 @@
           "evidence": null
         },
         "e2e": {
-          "required": false,
-          "status": "not-required",
-          "reason": "存储集成验证在本票执行，Windows 总体验收由 T-08 完成。",
+          "required": true,
+          "status": "pending",
+          "reason": "Windows 隔离 vault 的路径与设备身份验收。",
           "evidence": null
         },
-        "evidence": "<Path>{roots.state}/specdev/changes/2026-10-11-vault-data-unification/evidence/T-01.md</Path>",
+        "evidence": "<Path>{roots.state}/specdev/changes/2026-10-11-vault-data-unification/evidence/T-02.md</Path>",
         "attempts": 0,
         "promotion_status": "pending"
       }

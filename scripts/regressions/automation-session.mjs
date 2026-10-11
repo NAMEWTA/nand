@@ -14,6 +14,7 @@ const { TerminalAutomationRuntime } = await import(
 const { normalizeAgentSettings } = await import(
 	new URL('./src/modules/agent/core/launch/defaults.ts', pathToFileURL(repo + '/')).href
 );
+const { initializeDevice } = await import(new URL('./src/host/obsidian/storage/device-id.ts', pathToFileURL(repo + '/')).href);
 const root = fs.realpathSync.native(fs.mkdtempSync(path.join(tmpdir(), 'nand-native-session-race-')));
 let runtime;
 try {
@@ -27,14 +28,16 @@ try {
 	settings.agents.grok.cliPath = cli;
 	settings.globalPermissionMode = 'default';
 	let launches = 0;
+	const vaultFiles = new Map();
 	const host = {
 		pluginDir: '.obsidian/plugins/nand',
 		agentSettings: () => settings,
 		history: () => ({}),
 		app: {
 			loadLocalStorage: () => '11111111-1111-4111-8111-111111111111',
+			saveLocalStorage: () => {},
 			workspace: { containerEl: { win: { setInterval, clearInterval, setTimeout, clearTimeout } } },
-			vault: { adapter: { exists: async () => false, getBasePath: () => vault } },
+			vault: { adapter: { exists: async name => vaultFiles.has(name), read: async name => vaultFiles.get(name), write: async (name, text) => { vaultFiles.set(name, text); }, mkdir: async () => {}, getBasePath: () => vault } },
 		},
 		create: async (request) => {
 			const session = {
@@ -54,6 +57,7 @@ try {
 		open: async () => {},
 		shell: () => ({ file: '/bin/sh', args: [], title: 'sh' }),
 	};
+	await initializeDevice(host.app, { machineIdentity: async () => 'test-machine', label: 'Test', chooseDevice: async () => ({ label: 'Manual' }) });
 	runtime = new TerminalAutomationRuntime(host);
 	let entered;
 	const firstPrepared = new Promise((r) => {

@@ -8,7 +8,7 @@ vi.mock('../../private-storage', () => ({ privateStorageIfDesktop: vi.fn() }));
 vi.mock('../../desktop/private-mode', () => ({ privateTextStorage: (inner: unknown) => inner }));
 afterEach(() => vi.restoreAllMocks());
 
-test('only a desktop POSIX filesystem adapter enters the private storage port', () => {
+test('desktop filesystem adapters use the guarded storage port on Windows and POSIX', () => {
 	const adapter = Object.create(FileSystemAdapter.prototype) as FileSystemAdapter;
 	adapter.getBasePath = () => '/vault';
 	const app = { vault: { adapter } } as unknown as App;
@@ -26,7 +26,9 @@ test('only a desktop POSIX filesystem adapter enters the private storage port', 
 		expect(privateVaultStorage(app)).toBe(adapter);
 		Platform.isDesktopApp = true;
 		Platform.isWin = true;
-		expect(privateVaultStorage(app)).toBe(adapter);
+		expect(privateVaultStorage(app)).toBe(port);
+		expect(privateStorageIfDesktop).toHaveBeenCalledWith(adapter, '/vault');
+		vi.mocked(privateStorageIfDesktop).mockClear();
 		Platform.isWin = false;
 		const virtual = { getBasePath: () => '/virtual' };
 		expect(privateVaultStorage({ vault: { adapter: virtual } } as unknown as App)).toBe(virtual);

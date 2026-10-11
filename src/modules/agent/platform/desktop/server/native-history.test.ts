@@ -5,16 +5,13 @@ import * as fs from 'node:fs/promises';
 import * as os from 'node:os';
 import * as path from 'node:path';
 import type { App } from 'obsidian';
-import { buildSync } from 'esbuild';
+import { initializeTestDevice } from '../../../../../../test/fixtures/vault-storage';
+import { NativeHistory } from '../../history/service';
 import type { HistoryClientSource } from './agent-data-client.ts';
 import { normalizeAgentSettings } from '../../../core/launch/defaults.ts';
 import type { HistoryPage } from './agent-data-client.ts';
 
 globalThis.window = { require: createRequire(import.meta.url) } as unknown as Window & typeof globalThis;
-// The production adapter also imports JsonStore, whose parameter properties
-// require transformation. Keep the repository's strip-only test runner intact.
-const bundled = buildSync({ entryPoints: ['src/modules/agent/platform/history/service.ts'], bundle: true, platform: 'node', format: 'esm', write: false, alias: { obsidian: './scripts/obsidian-stub.ts' } }).outputFiles[0]!.text;
-const { NativeHistory } = await import(`data:text/javascript;base64,${Buffer.from(bundled).toString('base64')}`) as { NativeHistory: typeof import('../../history/service.ts').NativeHistory };
 const page: HistoryPage = { rows: [], total: 0, usage: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0, cost: null, known: false }, revision: 1 };
 test('native history shares scan/query/usage, revisions invalidate leaves, and aborts are consumer scoped', async () => {
 	const fixture = await fs.mkdtemp(path.join(os.tmpdir(), 'nand-history-model-'));
@@ -24,6 +21,7 @@ test('native history shares scan/query/usage, revisions invalidate leaves, and a
 		const wait = new Promise<void>(resolve => { release = resolve; });
 		const settings = normalizeAgentSettings({});
 		const app = { loadLocalStorage: () => '11111111-1111-4111-8111-111111111111', vault: { adapter: { getBasePath: () => fixture, exists: async (name: string) => files.has(name), read: async (name: string) => files.get(name), write: async (name: string, body: string) => { files.set(name, body); }, mkdir: async (name: string) => { files.set(name, 'directory'); } } } } as unknown as App;
+		await initializeTestDevice(app);
 		let connectionChanged!: () => void;
 		const client = { connected: true, isConnected: () => client.connected, connectionRevision: 1, subscribeConnection: (listener: () => void) => { connectionChanged = listener; return () => {}; }, request: async (operation: string, _payload: unknown, signal: AbortSignal | undefined) => {
 			requests.push({ operation, signal });
@@ -66,7 +64,9 @@ test('native history shares scan/query/usage, revisions invalidate leaves, and a
 test('history requests cancelled while awaiting a client never execute the native operation', async () => {
 	const fixture = await fs.mkdtemp(path.join(os.tmpdir(), 'nand-history-cancel-'));
 	try {
-		const app = { loadLocalStorage: () => '11111111-1111-4111-8111-111111111111', vault: { adapter: { getBasePath: () => fixture, exists: async () => false } } } as unknown as App;
+		const files = new Map<string, string>();
+		const app = { loadLocalStorage: () => '11111111-1111-4111-8111-111111111111', vault: { adapter: { getBasePath: () => fixture, exists: async (name: string) => files.has(name), read: async (name: string) => files.get(name), write: async (name: string, body: string) => { files.set(name, body); }, mkdir: async () => {} } } } as unknown as App;
+		await initializeTestDevice(app);
 		for (const operation of ['query', 'scan', 'read'] as const) {
 			let entered!: () => void, release!: () => void;
 			const atClient = new Promise<void>(resolve => { entered = resolve; });

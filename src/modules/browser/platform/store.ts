@@ -2,7 +2,7 @@ import type { App } from 'obsidian';
 import type { BrowserHistoryEntry } from '../core/model';
 import { recordHistory } from '../core/url';
 import { DurableState } from '../../../shared/storage/durable-state';
-import { deviceId } from '../../../host/obsidian/storage/device-id';
+import { deviceId, vaultIdentity } from '../../../host/obsidian/storage/device-id';
 import { privateVaultStorage } from '../../../host/obsidian/storage/private-storage';
 interface BrowserData { history: BrowserHistoryEntry[]; permissions: Record<string, boolean> }
 export class BrowserStore {
@@ -10,9 +10,8 @@ export class BrowserStore {
 	readonly ready: Promise<void>;
 	private repository: DurableState<BrowserData>;
 	constructor(app: App, changed: () => void = () => undefined) {
-		const saved: unknown = app.loadLocalStorage('nand.browser.vault-id');
-		this.vaultId = typeof saved === 'string' && /^[a-z\d-]{36}$/.test(saved) ? saved : crypto.randomUUID();
-		app.saveLocalStorage('nand.browser.vault-id', this.vaultId);
+		const identity = vaultIdentity(app);
+		this.vaultId = identity.legacyBrowserVaultId ?? identity.vaultId;
 		this.repository = new DurableState(privateVaultStorage(app), `.nand/browser/${deviceId(app)}/state.json`,
 			() => ({ history: [], permissions: {} }), value => {
 				const data = value as BrowserData;

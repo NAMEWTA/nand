@@ -2,10 +2,11 @@ import type { App } from 'obsidian';
 import { expect, test, vi } from 'vitest';
 import type { AgentSessionRef } from '../../../shared/automation/types';
 import { TerminalAutomationRuntime, type AutomationRuntimeHost } from './agent-runtime';
+import { initializeTestDevice } from '../../../../test/fixtures/vault-storage';
 
 const file = '.nand/terminal-agent/00000000-0000-0000-0000-000000000000/automation-sessions.json';
 const row = (id: string, at: number): AgentSessionRef => ({ agentId: 'codex', sessionId: id, cwd: '/vault', title: 'Prompt', accountKey: '{}', modifiedAtMs: at });
-function fixture() {
+async function fixture() {
 	const files = new Map<string, string>();
 	const adapter = {
 		exists: async (path: string) => files.has(path),
@@ -14,6 +15,7 @@ function fixture() {
 		mkdir: async () => {},
 	};
 	const app = { vault: { adapter }, workspace: { containerEl: { win: {} } }, loadLocalStorage: () => '00000000-0000-0000-0000-000000000000' } as unknown as App;
+	await initializeTestDevice(app);
 	const create = () => new TerminalAutomationRuntime({ app } as AutomationRuntimeHost);
 	return { files, adapter, create };
 }
@@ -25,7 +27,7 @@ function receive(runtime: TerminalAutomationRuntime, id: string, at: number) {
 }
 
 test('independent external and local sessions merge across successive hook events', async () => {
-	const f = fixture(), runtime = f.create();
+	const f = await fixture(), runtime = f.create();
 	const errors = vi.spyOn(console, 'error').mockImplementation(() => {});
 	try {
 		await loaded(runtime);
@@ -37,7 +39,7 @@ test('independent external and local sessions merge across successive hook event
 });
 
 test('immediate reopening observes every write admitted before disposal', async () => {
-	const f = fixture(), runtime = f.create();
+	const f = await fixture(), runtime = f.create();
 	await loaded(runtime);
 	let release!: () => void, entered!: () => void;
 	const gate = new Promise<void>(resolve => { release = resolve; }), blocked = new Promise<void>(resolve => { entered = resolve; });

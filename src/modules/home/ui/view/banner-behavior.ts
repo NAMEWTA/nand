@@ -1,3 +1,4 @@
+import { setVaultPreference } from '../../../../host/obsidian/storage/preferences';
 import { localizedAttributes } from '../../../../ui/primitives/localized-dom';
 import { Platform, setIcon } from 'obsidian';
 import type { BannerData } from '../../core/board/types/index';
@@ -19,7 +20,7 @@ export function setupBannerBehavior(this: DashboardSurface, bannerEl: HTMLElemen
 		if (win.innerWidth <= 640) return;
 		this.bannerCollapsed = !this.bannerCollapsed;
 		bannerEl.toggleClass('dashboard-banner--collapsed', this.bannerCollapsed);
-		this.app.saveLocalStorage('nand.dashboard.banner-collapsed', String(this.bannerCollapsed));
+		setVaultPreference(this.app, 'nand.dashboard.banner-collapsed', String(this.bannerCollapsed));
 	});
 
 	const onResize = () => {
@@ -95,7 +96,7 @@ export function renderBannerPinButton(this: DashboardSurface, bannerEl: HTMLElem
 	pinBtn.addEventListener('click', (e) => {
 		e.stopPropagation();
 		this.sidebarPinned = !this.sidebarPinned;
-		this.app.saveLocalStorage('nand.dashboard.sidebar-pinned', String(this.sidebarPinned));
+		setVaultPreference(this.app, 'nand.dashboard.sidebar-pinned', String(this.sidebarPinned));
 		const sidebar = this.containerEl.querySelector('.dashboard-sidebar');
 		if (sidebar) {
 			if (this.sidebarPinned) {

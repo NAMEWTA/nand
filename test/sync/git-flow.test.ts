@@ -1,3 +1,4 @@
+import { syncStatePath } from '../../src/modules/sync/platform/desktop/device-state';
 /**
  * Git sync against real git: a temporary bare remote and independent working copies. Checks file contents, git
  * status and the commit graph, not only that commands returned.
@@ -553,11 +554,11 @@ describe('the sync service', () => {
 	test('invalid repository settings remain recoverable and stop writing state to the previously connected repository', async () => {
 		const w = await published();
 		const settings = settingsOf();
-		const service = new SyncService({ host: desktopGitHost(w.a), settings, dialogs: { confirmUpstream: async () => true }, notify() {}, describe: () => '' });
+		const service = new SyncService({ host: desktopGitHost(w.a, 'test-device'), settings, dialogs: { confirmUpstream: async () => true }, notify() {}, describe: () => '' });
 		try {
 			await service.connect();
 			await service.setPaused(true);
-			const statePath = path.join(w.a, '.git', 'nand-sync.json');
+			const statePath = path.join(w.a, syncStatePath(w.a, w.a, 'test-device'));
 			const state = readFileSync(statePath, 'utf8');
 			await settings.update(draft => { draft.repoSubPath = '..'; });
 			await service.connect();
@@ -576,7 +577,7 @@ describe('the sync service', () => {
 
 	test('clones through the production host while retaining the current vault connection', async () => {
 		const w = await published();
-		const host = desktopGitHost(w.a);
+		const host = desktopGitHost(w.a, 'test-device');
 		const service = new SyncService({ host, settings: settingsOf(), dialogs: { confirmUpstream: async () => true }, notify() {}, describe: () => '' });
 		await service.connect();
 		const before = service.snapshot.status?.head;
@@ -600,7 +601,7 @@ describe('the sync service', () => {
 		mkdirSync(vault);
 		const notices: Array<[string, boolean]> = [];
 		const service = new SyncService({
-			host: desktopGitHost(vault),
+			host: desktopGitHost(vault, 'test-device'),
 			settings: settingsOf(),
 			dialogs: { confirmUpstream: async () => true },
 			notify: (text, error) => notices.push([text, error]),
@@ -632,7 +633,7 @@ describe('the sync service', () => {
 		const w = await published();
 		const notices: string[] = [];
 		const service = new SyncService({
-			host: desktopGitHost(w.a),
+			host: desktopGitHost(w.a, 'test-device'),
 			settings: settingsOf(),
 			dialogs: { confirmUpstream: async () => true },
 			notify: (text) => notices.push(text),
@@ -647,10 +648,13 @@ describe('the sync service', () => {
 		for (let i = 0; i < 3; i++) await service.pull({ auto: true });
 		assert.equal(service.snapshot.device.paused, 'failures');
 		assert.equal(service.snapshot.device.failures, 3);
-		const state = JSON.parse(readFileSync(path.join(w.a, '.git', 'nand-sync.json'), 'utf8')) as { paused: string; lastPull: number };
+		const state = JSON.parse(readFileSync(path.join(w.a, syncStatePath(w.a, w.a, 'test-device')), 'utf8')) as { paused: string; lastPull: number };
 		assert.equal(state.paused, 'failures');
 		assert.ok(state.lastPull > 0);
-		assert.equal(sh(w.a, 'status', '--porcelain'), '');
+		assert.equal(sh(w.a, 'status', '--porcelain', '--', '.', ':(exclude).nand'), '');
+		const stateFiles = sh(w.a, 'status', '--porcelain', '--untracked-files=all', '--', '.nand').trim().split('\n').map(line => line.slice(3)).sort();
+		const stateFile = syncStatePath(w.a, w.a, 'test-device');
+		assert.deepEqual(stateFiles, [stateFile, stateFile + '.backup'].sort());
 		sh(w.a, 'remote', 'set-url', 'origin', w.remote);
 		assert.equal((await service.pull()).ok, true);
 		assert.equal(service.snapshot.device.paused, '');

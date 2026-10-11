@@ -1,3 +1,4 @@
+import { setVaultPreference } from '../../../../host/obsidian/storage/preferences';
 import { Notice, type App, type TFile } from 'obsidian';
 import { Fragment } from 'preact';
 import { useMemo, useState } from 'preact/hooks';
@@ -233,7 +234,7 @@ export function MediaPanel({
 						}))}
 						pick={(key) => {
 							setSize(key as ThumbSize);
-							app.saveLocalStorage(THUMB_SIZE_STORAGE_KEY, key);
+							setVaultPreference(app, THUMB_SIZE_STORAGE_KEY, key);
 						}}
 					/>
 				</div>

@@ -3,6 +3,7 @@ import { afterEach, expect, test, vi } from 'vitest';
 import { loadSettingsRuntime } from './runtime';
 import { defineSettings, f as field } from '../../shared/settings/schema';
 import type { SettingsFile } from '../../shared/settings/store';
+import { initializeDevice } from '../../host/obsidian/storage/device-id';
 
 const vaultFile = '.nand/config/settings.json';
 const deviceFile = '.nand/config/devices/00000000-0000-0000-0000-000000000000.json';
@@ -18,7 +19,8 @@ async function fixture() {
 		write: async (path: string, text: string) => { files.set(path, text); },
 		mkdir: async () => {},
 	};
-	const app = { vault: { adapter }, loadLocalStorage: () => '00000000-0000-0000-0000-000000000000' } as unknown as App;
+	const app = { vault: { adapter }, loadLocalStorage: (key: string) => key === 'nand.device-id' ? '00000000-0000-0000-0000-000000000000' : null, saveLocalStorage: () => {} } as unknown as App;
+	await initializeDevice(app, { machineIdentity: async () => 'test-machine', label: 'Test', chooseDevice: async () => ({ label: 'Manual' }) });
 	const runtime = await loadSettingsRuntime(app);
 	return { files, adapter, runtime, handle: runtime.store.bind('sample', schema), disk: () => JSON.parse(files.get(vaultFile)!) as SettingsFile };
 }
