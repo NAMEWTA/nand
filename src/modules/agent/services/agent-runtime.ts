@@ -19,6 +19,8 @@ import type {
 	AutomationRun,
 } from '../../../shared/automation/types';
 import { JsonStore } from '../../../shared/json-store';
+import { threeWayMerge } from '../../../shared/storage/three-way-merge';
+import { storageWriteQueue, type WriteQueue } from '../../../shared/storage/write-queue';
 import type { App } from 'obsidian';
 import type { NativeHistory } from '../platform/history/service';
 import type { ShellCommand } from '../platform/desktop/pty/shells';
@@ -114,26 +116,35 @@ export class TerminalAutomationRuntime implements AgentRuntimePort {
 	private live = new Map<string, LiveSession>();
 	private hooks: AutomationHooks;
 	private registry: AgentSessionRef[] = [];
-	private registryWrites: Promise<void> = Promise.resolve();
+	private readonly registryQueue: WriteQueue;
+	private readonly registryQueueKey: string;
 	private readonly pendingRegistry = new Map<string, AgentSessionRef>();
 	private store: JsonStore<AgentSessionRef[]>;
 	private loaded: Promise<void>;
 	constructor(private host: AutomationRuntimeHost) {
 		this.hooks = new AutomationHooks(host.app.workspace.containerEl.win);
 		const device = getDeviceId(host.app);
+		const storage = privateVaultStorage(host.app);
+		const path = `.nand/terminal-agent/${device}/automation-sessions.json`;
+		this.registryQueue = storageWriteQueue(storage);
+		this.registryQueueKey = 'automation-registry:' + path;
 		this.store = new JsonStore(
-			privateVaultStorage(host.app),
-			`.nand/terminal-agent/${device}/automation-sessions.json`,
+			storage,
+			path,
 			(v): v is AgentSessionRef[] =>
 				Array.isArray(v) &&
 				v.every(
 					(item: unknown) =>
 						!!item && typeof item === 'object' && typeof (item as AgentSessionRef).sessionId === 'string',
 				),
+			(base, local, remote) => {
+				const keyed = (rows: AgentSessionRef[]) => Object.fromEntries(rows.map(row => [this.registryKey(row), row]));
+				return Object.values(threeWayMerge(keyed(base), keyed(local), keyed(remote)));
+			},
 		);
-		this.loaded = this.store.load([]).then((rows) => {
+		this.loaded = this.registryQueue.run(this.registryQueueKey, () => this.store.load([]).then((rows) => {
 			this.registry = rows;
-		});
+		}));
 	}
 	listAgents() {
 		const settings = this.host.agentSettings();
@@ -534,7 +545,8 @@ export class TerminalAutomationRuntime implements AgentRuntimePort {
 		return JSON.stringify([session.agentId, session.sessionId, session.accountKey]);
 	}
 	private persistRegistry(): Promise<void> {
-		const operation = this.registryWrites.then(async () => {
+		// Admit work immediately on the adapter's shared queue, so reopening cannot load between hook writes.
+		return this.registryQueue.run(this.registryQueueKey, async () => {
 			await this.loaded;
 			if (!this.pendingRegistry.size) return;
 			const pending = new Map(this.pendingRegistry);
@@ -542,8 +554,6 @@ export class TerminalAutomationRuntime implements AgentRuntimePort {
 			this.registry = await this.store.commit({ base: this.registry, value: next });
 			for (const [key, session] of pending) if (this.pendingRegistry.get(key) === session) this.pendingRegistry.delete(key);
 		});
-		this.registryWrites = operation.catch(() => {});
-		return operation;
 	}
 	dispose(): void {
 		this.disposed = true;

@@ -15,6 +15,7 @@ export class JsonStore<T> {
 		private adapter: TextStorage,
 		private path: string,
 		private validate: (value: unknown) => value is T,
+		private merge: (base: T, local: T, remote: T) => T = threeWayMerge,
 	) {}
 	load(fallback: T): Promise<T> {
 		return storageWriteQueue(this.adapter).run(this.path, () => this.loadNow(fallback));
@@ -62,11 +63,19 @@ export class JsonStore<T> {
 			if (current === undefined && this.observed !== undefined) throw new Error('Store removed externally: ' + this.path);
 			const valid = current === undefined ? undefined : this.decode(current);
 			if (valid === undefined && current !== this.observed) throw new Error('Invalid concurrent data: ' + this.path);
-			const remote = valid === undefined ? JSON.parse(this.snapshot) as T : valid;
-			const next = threeWayMerge(base, requested, remote);
+			let remote = valid;
+			let preserveBackup = false;
+			if (remote === undefined && await this.adapter.exists(this.path + '.backup')) {
+				remote = this.decode(await this.adapter.read(this.path + '.backup'));
+				if (remote === undefined) throw new Error('Invalid backup: ' + this.path);
+				preserveBackup = true;
+			}
+			if (remote === undefined) remote = JSON.parse(this.snapshot) as T;
+			const next = this.merge(base, requested, remote);
 			if (!this.validate(next)) throw new Error('Invalid merged data: ' + this.path);
 			await ensureDirectory(this.adapter, this.path.split('/').slice(0, -1).join('/'));
-			await this.writeVerified(this.path + '.backup', JSON.stringify(remote));
+			// During recovery this is the only valid disk copy. Keep it until the primary is verified.
+			if (!preserveBackup) await this.writeVerified(this.path + '.backup', JSON.stringify(remote));
 			const text = JSON.stringify(next);
 			try { await this.writeVerified(this.path, text); }
 			catch (error) { this.needsRecovery = true; throw error; }

@@ -89,6 +89,23 @@ test('backup verification failure leaves the primary untouched', async () => {
 	expect(files.get('state')).toBe('{"a":1}');
 });
 
+test('recovery never rewrites the only valid backup and rereads external backup updates', async () => {
+	const { files, storage } = memory();
+	files.set('state', '{'); files.set('state.backup', '{"a":1,"b":1}');
+	const store = new JsonStore(storage, 'state', validate), base = await store.load({});
+	files.set('state.backup', '{"a":1,"b":2}');
+	const write = storage.write;
+	storage.write = async (path, value) => {
+		if (path === 'state.backup') { files.set(path, '{'); throw new Error('backup interrupted'); }
+		if (path === 'state') { files.set(path, '{'); throw new Error('primary interrupted'); }
+		await write(path, value);
+	};
+	await expect(store.commit({ base, value: { ...base, a: 2 } })).rejects.toThrow('primary interrupted');
+	expect(await new JsonStore(storage, 'state', validate).load({})).toEqual({ a: 1, b: 2 });
+	storage.write = write;
+	expect(await store.commit({ base, value: { ...base, a: 2 } })).toEqual({ a: 2, b: 2 });
+});
+
 test('conflicting edits and externally removed files are rejected without silent replacement', async () => {
 	const { files, storage } = memory();
 	files.set('state', '{"a":1}');

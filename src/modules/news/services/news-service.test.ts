@@ -14,6 +14,7 @@ import type { NewsSettings } from '../settings';
 import { newsActions } from './news-actions';
 import { NewsService } from './news-service';
 import { defaultNewsWidgets } from '../core/home-widgets';
+import type { NewsRunJournal } from './run-journal';
 
 test('disabling collection while SHA-256 is pending discards the result before persistence', async () => {
 	const store = memory(), config = { enabled: true, sources: [source()], views: [] };
@@ -104,6 +105,73 @@ function settingsOf(initial: NewsSettings): SettingsHandle<NewsSettings> {
 }
 
 const feed = '<rss><channel><item><title>标题</title><link>https://example.com/hello</link><pubDate>Fri, 09 Oct 2026 10:00:00 GMT</pubDate><description>摘要</description></item></channel></rss>';
+
+test('a failed multi-file save settles its siblings before a subsequent clear can complete', async () => {
+	const store = memory(), write = store.write.bind(store);
+	let release!: () => void, entered!: () => void, failed!: () => void;
+	const gate = new Promise<void>(resolve => { release = resolve; });
+	const blocked = new Promise<void>(resolve => { entered = resolve; });
+	const failure = new Promise<void>(resolve => { failed = resolve; });
+	let block = true, fail = true;
+	store.write = async (path, text) => {
+		if (path.endsWith('/materials.json') && block) { block = false; entered(); await gate; }
+		if (path.endsWith('/analyses.json') && fail) { fail = false; failed(); throw new Error('disk'); }
+		await write(path, text);
+	};
+	const service = new NewsService(store, memoryNotes(store), () => ({ enabled: true, sources: [source()], views: [] }), { fetch: async () => ({ status: 200, text: feed }) });
+	try {
+		let settled = false;
+		const refresh = service.refresh().then(() => { settled = true; }, () => { settled = true; });
+		await Promise.all([blocked, failure]);
+		await new Promise<void>(resolve => setTimeout(resolve, 0));
+		assert.equal(settled, false, 'failure must wait for all admitted writes');
+		const clear = service.clearCache();
+		release(); await Promise.all([refresh, clear]);
+		assert.equal(service.materials().length, 0);
+		assert.deepEqual(JSON.parse(store.files.get('.nand/news/local/materials.json')!).items, []);
+	} finally { release(); await service.shutdown().catch(() => {}); }
+});
+
+test('retry after a late reader failure preserves externally added materials already committed', async () => {
+	const store = memory(), write = store.write.bind(store);
+	let now = Date.now(), fail = true;
+	const clock = vi.spyOn(Date, 'now').mockImplementation(() => now);
+	const service = new NewsService(store, memoryNotes(store), () => ({ enabled: true, sources: [source()], views: [], adaptiveInterval: false }), { fetch: async () => ({ status: 200, text: feed }) });
+	try {
+		await service.ready;
+		store.files.set('.nand/news/local/materials.json', JSON.stringify({ version: 1, items: [{ id: 'external', sourceId: 'other', canonicalKey: 'https://example.com/external', originalUrl: 'https://example.com/external', title: 'External', bodyExcerpt: '', revision: 1, contentHash: 'external', discoveredAt: now }] }));
+		store.write = async (path, text) => {
+			if (fail && path.endsWith('/reader-state.json') && JSON.parse(text).items.health.alpha?.lastSuccess) { fail = false; throw new Error('reader disk'); }
+			await write(path, text);
+		};
+		await assert.rejects(service.refresh(), /reader disk/);
+		now += 3_600_001;
+		await service.refresh();
+		assert.ok(service.materials().some(item => item.id === 'external'));
+		assert.ok(JSON.parse(store.files.get('.nand/news/local/materials.json')!).items.some((item: { id: string }) => item.id === 'external'));
+	} finally { clock.mockRestore(); await service.shutdown(); }
+});
+
+test('a journal edit queued behind collection retains the baseline used to construct its runs', async () => {
+	const store = memory(), write = store.write.bind(store);
+	const service = new NewsService(store, memoryNotes(store), () => ({ enabled: true, sources: [source()], views: [] }), { fetch: async () => ({ status: 200, text: feed }) });
+	let release!: () => void, entered!: () => void;
+	const gate = new Promise<void>(resolve => { release = resolve; }), blocked = new Promise<void>(resolve => { entered = resolve; });
+	let block = true;
+	try {
+		await service.ready;
+		store.files.set('.nand/news/local/runs.json', JSON.stringify({ version: 1, items: [{ id: 'external', at: Date.now(), status: 'complete', calls: 1, spent: 1 }] }));
+		store.write = async (path, text) => { if (block && path.endsWith('/runs.json')) { block = false; entered(); await gate; } await write(path, text); };
+		const refresh = service.refresh(); await blocked;
+		const journal = Reflect.get(service, 'journal') as NewsRunJournal;
+		const call = journal.call({ kind: 'brief', batchId: 'local', sample: 0, attempt: 0 }, 20, async () => ({ status: 'failed', text: '', errorCode: 'cliMissing' }));
+		await new Promise<void>(resolve => setTimeout(resolve, 0));
+		release(); await Promise.all([refresh, call]);
+		assert.ok(service.run('external'));
+		assert.equal(service.runHistory().length, 2);
+		assert.equal(JSON.parse(store.files.get('.nand/news/local/runs.json')!).items.length, 2);
+	} finally { release(); await service.shutdown(); }
+});
 
 test('configured material retention prunes raw cache but keeps favorite identity and saved Markdown', async () => {
 	const store = memory(), now = Date.now();

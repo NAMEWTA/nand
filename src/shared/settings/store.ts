@@ -191,12 +191,15 @@ export class SettingsStore {
 					const current = this.snapshot();
 					current[scope] = rebaseChanges(submitted, current[scope], result);
 					this.raw[scope] = structuredClone(result.namespaces);
+					const notifications: (() => void)[] = [];
 					for (const [name, namespace] of this.namespaces) {
 						const next = namespace.schema.normalize({ ...current.vault.namespaces[name], ...current.device.namespaces[name] });
 						if (JSON.stringify(namespace.value) === JSON.stringify(next)) continue;
 						namespace.value = next;
-						for (const listener of [...namespace.listeners]) listener();
+						notifications.push(...namespace.listeners);
 					}
+					// Subscribers may synchronously edit another namespace; publish after all adoption is complete.
+					for (const listener of notifications) listener();
 				}
 			})
 			.then(

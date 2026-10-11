@@ -1,12 +1,12 @@
 import type { App } from 'obsidian';
 import { afterEach, expect, test, vi } from 'vitest';
 import { loadSettingsRuntime } from './runtime';
-import { defineSettings, f } from '../../shared/settings/schema';
+import { defineSettings, f as field } from '../../shared/settings/schema';
 import type { SettingsFile } from '../../shared/settings/store';
 
 const vaultFile = '.nand/config/settings.json';
 const deviceFile = '.nand/config/devices/00000000-0000-0000-0000-000000000000.json';
-const schema = defineSettings({ a: f.number({ default: 1 }), b: f.number({ default: 1 }), device: f.number({ default: 1, scope: 'device' }) });
+const schema = defineSettings({ a: field.number({ default: 1 }), b: field.number({ default: 1 }), device: field.number({ default: 1, scope: 'device' }) });
 afterEach(() => vi.unstubAllGlobals());
 
 async function fixture() {
@@ -66,3 +66,20 @@ test('a device write failure retains edits and does not undo a successful vault 
 	expect(JSON.parse(f.files.get(deviceFile)!).namespaces.sample).toEqual({ device: 4 });
 	await f.runtime.store.dispose();
 });
+
+test('a merged namespace notification cannot overwrite another namespace edited by its subscriber', async () => {
+	const secondSchema = defineSettings({ c: field.number({ default: 1 }) });
+	const f = await fixture();
+	const second = f.runtime.store.bind('second', secondSchema);
+	const external = f.disk(); external.namespaces.sample!.b = 2; f.files.set(vaultFile, JSON.stringify(external));
+	let queued: Promise<void> | undefined;
+	const off = f.handle.subscribe(() => {
+		if (f.handle.get().b === 2 && !queued) queued = second.update(value => { value.c = 5; }, { persist: 'immediate' });
+	});
+	await f.handle.update(value => { value.a = 2; }, { persist: 'immediate' });
+	await queued;
+	expect(second.get().c).toBe(5);
+	expect(f.disk().namespaces.second).toEqual({ c: 5 });
+	off(); await f.runtime.store.dispose();
+});
+

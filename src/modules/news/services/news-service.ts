@@ -129,10 +129,13 @@ export class NewsService implements NewsReadService {
 		this.runsFile = new JsonStore(storage, `${directory}/runs.json`, envelopeOf((value): value is NewsRun[] => isList(value, isRun)));
 		this.readerFile = new JsonStore(storage, `${directory}/reader-state.json`, envelopeOf(isReader));
 		this.notebook = new NewsNotebook(notes, () => this.emit(), this.settings);
-		this.journal = new NewsRunJournal(() => this.data.runs, runs => this.exclusive(async () => {
-			await this.saveRuns(runs);
-			this.emit();
-		}));
+		this.journal = new NewsRunJournal(() => this.data.runs, runs => {
+			const base = structuredClone(this.data.runs);
+			return this.exclusive(async () => {
+				await this.saveRuns(runs, base);
+				this.emit();
+			});
+		});
 		this.ready = Promise.all([this.load(), this.notebook.ready]).then(() => undefined);
 	}
 	private async load(): Promise<void> {
@@ -271,8 +274,8 @@ export class NewsService implements NewsReadService {
 		this.saved = { ...this.saved, ...structuredClone(patch) };
 		this.data = { ...this.data, ...patch };
 	}
-	private async saveRuns(items: NewsRun[]): Promise<void> {
-		const result = await this.runsFile.commit({ base: { version: 1, items: this.saved.runs }, value: { version: 1, items } });
+	private async saveRuns(items: NewsRun[], base = this.saved.runs): Promise<void> {
+		const result = await this.runsFile.commit({ base: { version: 1, items: base }, value: { version: 1, items } });
 		this.saved.runs = structuredClone(result.items);
 		this.data = { ...this.data, runs: result.items };
 	}
@@ -363,15 +366,23 @@ export class NewsService implements NewsReadService {
 			runs: this.data.runs.filter((item) => now - item.at <= RETENTION_MS),
 		};
 		this.data.heat = repairHeatHours(this.heatEvidence(now), now, this.heat(), this.heatRules());
-		await Promise.all([
-			this.saveMaterials(this.data.materials),
-			this.saveAnalyses(this.data.analyses),
-			this.saveEvents(this.events()),
-			this.saveHeat(this.data.heat),
-			this.saveRuns(this.data.runs),
-		]);
-		// Commit conditional-request cursors only after every collected record is durable.
-		await this.saveReader();
+		try {
+			const writes = await Promise.allSettled([
+				this.saveMaterials(this.data.materials),
+				this.saveAnalyses(this.data.analyses),
+				this.saveEvents(this.events()),
+				this.saveHeat(this.data.heat),
+				this.saveRuns(this.data.runs),
+			]);
+			const failure = writes.find(result => result.status === 'rejected');
+			if (failure?.status === 'rejected') throw failure.reason;
+			// Commit conditional-request cursors only after every collected record is durable.
+			await this.saveReader();
+		} catch (error) {
+			// Partial success is durable. Restore each confirmed file, not the old whole-service snapshot.
+			this.data = structuredClone(this.saved);
+			throw error;
+		}
 		this.emit();
 	}
 	async refresh(sourceId?: string): Promise<void> {
@@ -513,13 +524,12 @@ export class NewsService implements NewsReadService {
 					materials = previous ? materials.map((item) => (item.id === previous.id ? next : item)) : [...materials, next];
 				}
 				const health = markSourceAttempt(previousHealth, source, Date.now(), true, this.dailyRate(source.id, materials), this.settings().adaptiveInterval !== false);
-				const before = this.data;
 				this.data = {
 					...this.data,
 					materials,
 					health: { ...this.data.health, [source.id]: { ...health, ...(response.etag ? { etag: response.etag } : {}), ...(response.lastModified ? { lastModified: response.lastModified } : {}) } },
 				};
-				try { await this.persist(); } catch (error) { this.data = before; throw error; }
+				await this.persist();
 			});
 		} catch (error) {
 			await this.exclusive(async () => {
