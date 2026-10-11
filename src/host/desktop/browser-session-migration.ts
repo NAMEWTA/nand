@@ -24,7 +24,7 @@ export interface SessionMigration {
 	boot: string;
 	active(directory: string): boolean;
 	ambiguous?: boolean;
-	choose?(): Promise<'copy' | 'fresh'>;
+	choose?(sourceMissing?: boolean): Promise<'copy' | 'fresh'>;
 }
 const operations = new Map<string, Promise<string>>();
 const digest = (text: string) => createHash('sha256').update(text).digest('hex');
@@ -156,7 +156,7 @@ async function prepare(options: SessionMigration): Promise<string> {
 	const sourceKey = digest(source ?? '');
 	const save = async (value: Receipt) => { receipt = await saveReceipt(storage, receiptPath, store, receipt, value); };
 	if (receipt?.phase === 'fresh' || receipt?.phase === 'complete') {
-		if (receipt.phase === 'complete' && !await exists(target)) throw new Error('browser_session_unclaimed');
+		if ((receipt.phase === 'complete' || receipt.verified) && !await exists(target)) throw new Error('browser_session_unclaimed');
 		if (receipt.source === sourceKey) await removeEmptyClaim(source, receipt.retirement);
 		await storage.mkdir(relative + '/session'); await checkSessionTree(target); return target;
 	}
@@ -172,17 +172,32 @@ async function prepare(options: SessionMigration): Promise<string> {
 		if (fresh) { await storage.mkdir(relative + '/session'); await checkSessionTree(target); return target; }
 	}
 	if (!source) throw new Error('browser_session_source_changed');
+	let copySource = source;
+	if (['restart', 'copying'].includes(receipt!.phase) && !await exists(source)) {
+		// Another explicitly selected vault may have finished first. Do not silently
+		// discard this vault's choice; let its owner choose a new login or restore data.
+		let retained: string | undefined;
+		if (receipt!.phase === 'copying') for (const candidate of [path.join(root, 'legacy-original'), target]) {
+			if (await exists(candidate) && sameFiles(await snapshot(candidate), receipt!.files)) { retained = candidate; break; }
+		}
+		if (retained) copySource = retained;
+		else {
+			if (await exists(target) || !options.ambiguous || !options.choose || await options.choose(true) !== 'fresh') throw new Error('browser_session_source_changed');
+			await save({ ...receipt!, boot, phase: 'fresh', files: {} });
+			await storage.mkdir(relative + '/session'); await checkSessionTree(target); return target;
+		}
+	}
 	if (options.active(source) || receipt!.boot === boot && receipt!.phase === 'restart') throw new Error('browser_session_restart');
 	if (receipt!.phase === 'restart') await save({ ...receipt!, boot, phase: 'copying', files: await snapshot(source) });
 	if (receipt!.phase === 'copying') {
-		if (!sameFiles(await snapshot(source), receipt!.files)) throw new Error('browser_session_source_changed');
+		if (!sameFiles(await snapshot(copySource), receipt!.files)) throw new Error('browser_session_source_changed');
 		// Each explicitly selected vault owns its original bytes before any vault can retire the shared source.
-		await copyVerified(source, path.join(root, 'legacy-original'), receipt!.files);
+		await copyVerified(copySource, path.join(root, 'legacy-original'), receipt!.files);
 		if (await exists(target)) {
 			if (!sameFiles(await snapshot(target), receipt!.files)) throw new Error('browser_session_source_changed');
 		} else {
 			const stage = path.join(root, 'session-copy');
-			await copyVerified(source, stage, receipt!.files);
+			await copyVerified(copySource, stage, receipt!.files);
 			await check(target); await rename(stage, target);
 		}
 		await save({ ...receipt!, boot, phase: 'published' });
@@ -203,7 +218,11 @@ async function prepare(options: SessionMigration): Promise<string> {
 export async function confirmSessionDirectory(vault: string, relative: string, boot: string): Promise<void> {
 	const store = new JsonStore<Receipt | null>(nativeVaultStorage(vault), relative + '/migration.json', valid), receipt = await store.load(null);
 	if (!receipt) throw new Error('browser_session_receipt_invalid');
-	if (receipt.phase === 'published' && !receipt.verified) await store.commit({ base: receipt, value: { ...receipt, verified: true, boot } });
+	if (receipt.phase === 'published' || receipt.phase === 'fresh') {
+		const confirmed = receipt.verified ? receipt : (await store.commit({ base: receipt, value: { ...receipt, verified: true, boot } }))!;
+		// Both primary and recovery records must remember that this directory held a live session.
+		await store.commit({ base: confirmed, value: confirmed });
+	}
 }
 
 /** Explicit account deletion also retires the owned legacy credentials. Downloads are not site data. */
@@ -221,6 +240,8 @@ export async function clearSessionRecovery(options: SessionMigration): Promise<v
 		receipt = (await store.commit({ base: receipt, value: { ...receipt, phase: 'complete' } }))!;
 	}
 	if (!['complete', 'fresh'].includes(receipt.phase)) throw new Error('browser_session_restart');
+	// A recovery record must not send a deleted account back into the copy/cleanup phase.
+	await store.commit({ base: receipt, value: receipt });
 	if (receipt.source === digest(source ?? '')) await removeEmptyClaim(source, receipt.retirement);
 	const remove = async (directory: string): Promise<void> => {
 		await check(directory);

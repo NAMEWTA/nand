@@ -236,6 +236,7 @@ export class BrowserPage {
 		this.guestGeneration = crypto.randomUUID();
 		this.automation = new BrowserAutomation(guest, this);
 		if (!this.sessionLease) throw new BrowserError('browser_unavailable');
+		this.sessionLease.protect(guest.id);
 		this.permissionPolicy = installGuestPolicy(this.win, this.api, guest, this.sessionLease.storagePath, (event, value) => {
 				if (this.disposed) return;
 				if (event === 'open') this.actions.open(value);

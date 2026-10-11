@@ -42,25 +42,29 @@ exports.acquire=(vault,directory,downloads)=>{
   const native=session.fromPath(directory);
   if(native.storagePath!==directory)throw Error('browser_session_path');
   native.setCodeCachePath(path.join(directory,'Code Cache'));
-  const failed=()=>{for(const listener of entry.errors)try{listener();}catch{}};
-  const download=(event,item)=>{try{
+  const failed=owner=>{for(const [listener,guests] of entry.errors)if(guests.has(owner?.id))try{listener();}catch{}};
+  const download=(event,item,owner)=>{try{
    if(!entry.refs){event.preventDefault();item.cancel();return;}
    checked(vault,downloads);
    const name=item.getFilename().replace(/[<>:"/\\|?*\x00-\x1f]/g,'_').replace(/[. ]+$/,'').slice(-120)||'download';
    const file=path.join(downloads,crypto.randomUUID()+'-'+name);checked(vault,file);item.setSavePath(file);
-   const done=(_event,status)=>{entry.pending.delete(item);if(status==='interrupted')failed();};
+   const done=(_event,status)=>{entry.pending.delete(item);if(status==='interrupted')failed(owner);};
    item.once('done',done);entry.pending.set(item,done);
-  }catch{event.preventDefault();item.cancel();failed();}};
-  entry={native,download,refs:0,closing:[],errors:new Set(),pending:new Map()};state.sessions.set(directory,entry);
+  }catch{event.preventDefault();item.cancel();failed(owner);}};
+  entry={native,download,refs:0,closing:[],errors:new Map(),pending:new Map()};state.sessions.set(directory,entry);
   native.on('will-download',download);
   native.setPermissionRequestHandler((_wc,_permission,callback)=>callback(false));
   native.setPermissionCheckHandler(()=>false);
  }
- for(const off of entry.closing.splice(0))off();entry.refs++;let disposed=false;const bindings=new Set();
+ for(const off of entry.closing.splice(0))off();entry.refs++;let disposed=false;const bindings=new Set(),guests=new Set();
+ const track=guest=>{if(guests.has(guest.id))return;guests.add(guest.id);
+  const child=window=>track(window.webContents);guest.on('did-create-window',child);
+  bindings.add(()=>{guests.delete(guest.id);if(!guest.isDestroyed())guest.removeListener('did-create-window',child)});
+ };
  const release=()=>{if(entry.refs)return;const guests=webContents.getAllWebContents().filter(wc=>!wc.isDestroyed()&&wc.session===entry.native);if(guests.length)return;
   for(const off of entry.closing.splice(0))off();entry.native.removeListener('will-download',entry.download);entry.native.setPermissionRequestHandler(null);entry.native.setPermissionCheckHandler(null);state.sessions.delete(directory);
  };
- return {session:entry.native,onDownloadError(listener){if(disposed)return;entry.errors.add(listener);bindings.add(()=>entry.errors.delete(listener));},bind(ownerId,token){
+ return {session:entry.native,onDownloadError(listener){if(disposed)return;entry.errors.set(listener,guests);bindings.add(()=>entry.errors.delete(listener));},bind(ownerId,token){
   if(disposed)throw Error('browser_session_closed');
   const owner=webContents.fromId(ownerId);if(!owner||owner.isDestroyed())throw Error('browser_session_closed');
   const hook=(event,prefs,params)=>{if(params.partition!==token)return;
@@ -71,6 +75,7 @@ exports.acquire=(vault,directory,downloads)=>{
   const dispose=()=>{bindings.delete(dispose);if(!owner.isDestroyed())owner.removeListener('will-attach-webview',hook);};bindings.add(dispose);return {dispose};
  },protect(id){
   const guest=webContents.fromId(id);if(disposed||!guest||guest.session!==entry.native)throw Error('browser_session_closed');
+  track(guest);
   const guard=(event,url)=>{try{const target=new URL(url);if(!['https:','http:'].includes(target.protocol)||target.username||target.password)event.preventDefault();}catch{event.preventDefault();}};
   guest.setWindowOpenHandler(()=>({action:'deny'}));guest.on('will-navigate',guard);guest.on('will-redirect',guard);
   bindings.add(()=>{if(!guest.isDestroyed()){guest.removeListener('will-navigate',guard);guest.removeListener('will-redirect',guard);}});
@@ -84,7 +89,7 @@ export interface SessionOptions {
 	profile: string;
 	legacyPartition?: string;
 	ambiguous?: boolean;
-	choose?: () => Promise<'copy' | 'fresh'>;
+	choose?: (sourceMissing?: boolean) => Promise<'copy' | 'fresh'>;
 	signal?: AbortSignal;
 }
 export interface VaultSessionLease {

@@ -27,12 +27,12 @@ test('bundled main policy attaches explicit sessions, constrains downloads and g
 		let denied = false;
 		guest.emit('will-navigate', { preventDefault: () => { denied = true; } }, 'file:///outside'); expect(denied).toBe(true);
 		let saved = '', cancelled = false;
-		let errors = 0; first.onDownloadError(() => { errors++; });
+		let errors = 0, unrelatedErrors = 0; first.onDownloadError(() => { errors++; }); second.onDownloadError(() => { unrelatedErrors++; });
 		const event = { preventDefault: () => { cancelled = true; } }, item = Object.assign(new EventEmitter(), { getFilename: () => '../../outside.txt', setSavePath: (file: string) => { saved = file; }, cancel: () => { cancelled = true; } });
-		session.emit('will-download', event, item); expect(path.dirname(saved)).toBe(downloads); expect(cancelled).toBe(false);
+		session.emit('will-download', event, item, guest); expect(path.dirname(saved)).toBe(downloads); expect(cancelled).toBe(false);
 		item.emit('done', {}, 'interrupted'); expect(errors).toBe(1);
 		rmSync(downloads, { recursive: true }); symlinkSync(directory, downloads, 'junction');
-		session.emit('will-download', event, item); expect(errors).toBe(2); expect(cancelled).toBe(true);
+		session.emit('will-download', event, item, guest); expect(errors).toBe(2); expect(cancelled).toBe(true); expect(unrelatedErrors).toBe(0);
 		rmdirSync(downloads); mkdirSync(downloads); cancelled = false;
 		first.dispose(); expect(owner.listenerCount('will-attach-webview')).toBe(0); expect(session.listenerCount('will-download')).toBe(1);
 		second.dispose(); expect(session.listenerCount('will-download')).toBe(1);

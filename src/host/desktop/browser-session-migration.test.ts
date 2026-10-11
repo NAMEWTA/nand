@@ -74,6 +74,19 @@ test('two explicitly selected vaults retain their own original bytes before eith
 	}
 });
 
+test('a vault opened after another recipient retired the shared source can explicitly choose a new login', async () => {
+	const first = await fixture(), otherVault = path.join(first.root, 'other-vault'); await mkdir(otherVault);
+	const second = { ...first, vault: otherVault, ambiguous: true };
+	for (const options of [first, second]) await expect(prepareSessionDirectory({ ...options, ambiguous: true, choose: async () => 'copy' })).rejects.toThrow('browser_session_restart');
+	await prepareSessionDirectory({ ...first, boot: 'two' }); await confirmSessionDirectory(first.vault, first.relative, 'two');
+	await prepareSessionDirectory({ ...first, boot: 'three' });
+	await expect(prepareSessionDirectory({ ...second, boot: 'three' })).rejects.toThrow('browser_session_source_changed');
+	let missing: boolean | undefined;
+	const target = await prepareSessionDirectory({ ...second, boot: 'three', choose: async value => { missing = value; return 'fresh'; } });
+	expect(missing).toBe(true); expect(await readdir(target)).toEqual([]);
+	expect(await readFile(path.join(first.vault, first.relative, 'legacy-original/Local Storage/data'), 'utf8')).toBe('login-data');
+}, 30000);
+
 test('a missing published session never authorizes removal of its original source', async () => {
 	const options = await fixture();
 	await expect(prepareSessionDirectory(options)).rejects.toThrow('browser_session_restart');
@@ -107,9 +120,23 @@ test('account deletion removes all legacy credentials after cold migration while
 		const downloads = path.join(options.vault, options.relative, 'downloads'); await mkdir(downloads); await writeFile(path.join(downloads, 'saved'), 'user-material');
 		await clearSessionRecovery({ ...options, boot: 'three' });
 		await clearSessionRecovery({ ...options, boot: 'three' });
+		await writeFile(path.join(options.vault, options.relative, 'migration.json'), '{broken');
 		await expect(readdir(options.source)).rejects.toMatchObject({ code: 'ENOENT' });
 		await expect(readdir(path.join(options.vault, options.relative, 'legacy-original'))).rejects.toMatchObject({ code: 'ENOENT' });
 		expect(await readFile(path.join(downloads, 'saved'), 'utf8')).toBe('user-material');
 		await prepareSessionDirectory({ ...options, boot: 'four' });
+	}
+}, 30000);
+
+test('a verified fresh session cannot be silently recreated after its directory disappears, even after receipt recovery', async () => {
+	for (const ambiguous of [false, true]) {
+		const options = await fixture();
+		const source = ambiguous ? options.source : undefined;
+		const target = await prepareSessionDirectory({ ...options, source, ambiguous, choose: async () => 'fresh' });
+		await confirmSessionDirectory(options.vault, options.relative, options.boot);
+		await writeFile(path.join(target, 'Cookies'), 'new-credential');
+		await rm(target, { recursive: true });
+		await writeFile(path.join(options.vault, options.relative, 'migration.json'), '{broken');
+		await expect(prepareSessionDirectory({ ...options, source, boot: 'two' })).rejects.toThrow('browser_session_unclaimed');
 	}
 }, 30000);

@@ -21,6 +21,10 @@ const open = async () => c.evaluate(`bo.open({url:${JSON.stringify(url)}})`);
 const guest = id => `document.querySelector('[data-page-id="${id}"] webview')`;
 const native = id => `require('@electron/remote').webContents.fromId(${guest(id)}.getWebContentsId())`;
 const script = (id, source) => c.evaluate(`${guest(id)}.executeJavaScript(${JSON.stringify(source)},true)`);
+const moveAfterDownloadCloses = async (from, to) => {
+ const deadline=Date.now()+5000;
+ for (;;) { try { await fs.rename(from,to); return; } catch(error) { if(!['EPERM','EBUSY'].includes(error.code)||Date.now()>deadline)throw error; await delay(80); } }
+};
 try {
  runtime = await launchFreshVault({ root: process.argv[2], port: 9445, settings: { version: 1, namespaces: { app: { language: 'zh', introSeen: true, modules: Object.fromEntries(['home','agent','browser','news','archives','automations','notifications','icons','comments','sync'].map(id => [id,false])) } } } }); c = runtime.connection;
  const identityPath = path.join(runtime.vault, '.nand/config/identity.json'), identity = JSON.parse(await fs.readFile(identityPath, 'utf8')), device = Object.keys(identity.devices)[0];
@@ -68,8 +72,9 @@ try {
  for (let i = 0; i < 100 && !download; i++) { download = (await fs.readdir(downloadDir)).find(name => name.endsWith('-vault-proof.txt')); if (!download) await delay(100); }
  check('download-has-vault-destination', !!download);
  check('download-bytes-are-complete', await fs.readFile(path.join(downloadDir, download), 'utf8') === 'vault-download-bytes');
+	await until(`!!document.querySelector('[data-page-id="${id}"] .nand-browser-downloads button[aria-label="打开文件"]:not([disabled])')`);
  const outside = path.join(runtime.root ?? path.dirname(runtime.vault),'outside-download'); await fs.mkdir(outside);
- const parked = downloadDir + '-parked'; await fs.rename(downloadDir, parked); await fs.symlink(outside, downloadDir, 'junction');
+ const parked = downloadDir + '-parked'; await moveAfterDownloadCloses(downloadDir, parked); await fs.symlink(outside, downloadDir, 'junction');
  await script(id, `location.href=${JSON.stringify(url + '/download')};true`);
  await until(`document.querySelector('[data-page-id="${id}"]')?.textContent.includes('下载失败')`);
  check('unsafe-download-visible-and-no-outside-file', (await fs.readdir(outside)).length === 0);
@@ -109,11 +114,15 @@ try {
  check('no-host-iframe-fallback', await c.evaluate(`document.querySelectorAll('.dashboard-web-content iframe').length===0`));
  await c.evaluate(`document.querySelector('.dashboard-web-frame').scrollIntoView({block:'center'});true`); await delay(150);
  await runtime.shot('home-owned-webview');
+ await c.evaluate(`board.sync.addColumn('Other web','web');board.sync.updateWebConfig('Other web',{url:${JSON.stringify(url)},zoom:0.9})`);
+ await until(`document.querySelectorAll('.dashboard-web-frame').length===2&&[...document.querySelectorAll('.dashboard-web-frame')].every(e=>e.getURL?.()===${JSON.stringify(url + '/')})`);
+ const unaffectedGuest = await c.evaluate(`document.querySelector('[data-column="Other web"] webview').getWebContentsId()`);
  const homeDownloads = path.join(homePath,'../../home-web/downloads'), homeParked = homeDownloads + '-parked';
  await fs.rename(homeDownloads,homeParked); await fs.symlink(outside,homeDownloads,'junction');
  await c.evaluate(`document.querySelector('.dashboard-web-frame').executeJavaScript(${JSON.stringify('location.href='+JSON.stringify(url+'/download')+';true')})`);
  await until(`document.querySelector('.dashboard-web-fallback')?.textContent.includes('下载失败')`);
  check('home-download-error-visible-and-no-outside-file',(await fs.readdir(outside)).length===0);
+ check('download-failure-keeps-other-home-webview-alive', await c.evaluate(`document.querySelector('[data-column="Other web"] webview')?.getWebContentsId()===${unaffectedGuest}&&!require('@electron/remote').webContents.fromId(${unaffectedGuest}).isDestroyed()`));
  await runtime.shot('home-download-error'); await fs.rmdir(homeDownloads); await fs.rename(homeParked,homeDownloads);
  await c.evaluate(`document.querySelector('.dashboard-web-fallback-btn').click();true`);
  await until(`document.querySelector('.dashboard-web-frame')?.getURL?.()===${JSON.stringify(url + '/')}`);
