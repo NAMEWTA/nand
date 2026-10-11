@@ -15,6 +15,7 @@ Automations and notifications are two workbench pages. The **Automations** icon 
 | Obsidian command | Runs an Obsidian command | Yes | No | No |
 | Open note | Opens a note | Yes | No | No |
 | Open web page | Opens a page in the [browser](browser.md) (or the system browser if the module is off) | Yes | No | No |
+| Browser workflow | Runs a verified finite workflow on explicitly selected pages and accounts | Yes | Yes, subject to page and confirmation requirements | Yes |
 
 For an Obsidian command the result means only that the command was invoked. A script's result is its real exit code.
 
@@ -86,6 +87,14 @@ Claude Code, Codex, Gemini, Grok, Pi and OpenCode report their lifecycle through
 
 Directory trust, login and hook permissions of each CLI are managed by the CLI. Complete them by hand first. If **Approval prompts** is YOLO (the default) and the agent has such flags, launch the agent by hand once so you can acknowledge the permission mode; until then an automation run fails with *Launch this agent manually once to acknowledge its configured permission mode*. Usage is taken from the difference of the native session totals before and after the run; when the baseline or the native record is missing, usage is shown as missing and no cost is estimated.
 
+## Browser workflows
+
+Choose **Browser workflow** as an action, select a verified workflow version, enter its public variables and explicitly bind every page scope. The definition retains that version and those page/account choices. Missing versions or pages are shown as unavailable; another active tab is never substituted. Required secrets must be supplied through a reviewed manual run in Browser workflows, so they cannot be saved in an automation definition.
+
+Manual and scheduled runs use the same automation history, cancellation and **Open workflow result** action. The browser records step checks under that run ID. Scheduling requires Browser and Automations to remain enabled and the selected native pages to be loaded in the required account and scope. A scheduled run does not reveal a page or bypass login or a final submission confirmation; unmet conditions fail or interrupt the run for manual attention.
+
+Turning Browser off revokes its running workflows and makes new triggers unavailable without enabling it again. Turning Automations off cancels its owned workflows. Definitions and historical results remain on disk. Restarting interrupts unfinished runs without replaying page actions. See [Browser workflows](browser.md#reusable-browser-workflows) for verification, pause/resume, secrets and storage.
+
 ## Devices
 
 Each definition has an owning device. Only that device runs it. A definition synced from another computer shows *This automation belongs to another device*. The device id lives in Obsidian's local storage, so do not copy local storage to clone an execution device. Restoring files never changes the owning device automatically.
@@ -109,6 +118,8 @@ While it is off, the Automations page says so and board buttons for saved action
 | Sessions that automations started | `.nand/terminal-agent/<device-id>/automation-sessions.json` |
 
 Back up the related notes and the whole `.nand` folder (see [Data and recovery](data.md)).
+
+An unreadable action document causes a load failure instead of an empty action list. Repair the indicated Markdown file, then retry loading or re-enable Automations. Saving or removing definitions also stops if the latest documents cannot be read; a temporary write failure can be retried after its cause is fixed.
 
 ## Limits
 

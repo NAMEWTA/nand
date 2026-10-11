@@ -5,8 +5,10 @@ use std::{
     process::{Command, Stdio},
     sync::mpsc,
     thread,
-    time::{Duration, Instant},
+    time::Duration,
 };
+#[cfg(unix)]
+use std::time::Instant;
 
 fn frame(kind: u8, body: &[u8]) -> Vec<u8> {
     let mut out = ((body.len() + 1) as u32).to_be_bytes().to_vec();
@@ -42,8 +44,22 @@ fn frames(mut stdout: impl Read + Send + 'static) -> mpsc::Receiver<(u8, Vec<u8>
 #[cfg(unix)]
 #[test]
 fn handshake_session_and_shutdown_on_stdin_close() {
-    let mut child = Command::new(env!("CARGO_BIN_EXE_nand-pty"))
-        .stdin(Stdio::piped())
+    use std::os::unix::{io::AsRawFd, net::UnixStream, process::CommandExt};
+    let sentinel = std::fs::File::open(std::env::current_exe().unwrap()).unwrap();
+    let (socket, _peer) = UnixStream::pair().unwrap();
+    let (file_fd, socket_fd) = (sentinel.as_raw_fd(), socket.as_raw_fd());
+    let mut command = Command::new(env!("CARGO_BIN_EXE_nand-pty"));
+    // dup2 creates non-CLOEXEC file/socket sentinels in the child without changing the test runner.
+    unsafe {
+        command.pre_exec(move || {
+            for fd in (32..96).chain([198]) {
+                if libc::dup2(file_fd, fd) == -1 { return Err(std::io::Error::last_os_error()); }
+            }
+            if libc::dup2(socket_fd, 199) == -1 { return Err(std::io::Error::last_os_error()); }
+            Ok(())
+        });
+    }
+    let mut child = command.stdin(Stdio::piped())
         .stdout(Stdio::piped())
         .stderr(Stdio::null())
         .spawn()
@@ -59,9 +75,25 @@ fn handshake_session_and_shutdown_on_stdin_close() {
     assert_eq!(hello["protocol"], 3);
     assert_eq!(hello["accepted"], true);
 
+    #[cfg(target_os = "linux")]
+    for fd in (32..96).chain([198, 199]) {
+        let error = std::fs::symlink_metadata(format!("/proc/{}/fd/{fd}", child.id()))
+            .expect_err("inherited descriptor survived");
+        assert_eq!(error.kind(), std::io::ErrorKind::NotFound);
+    }
+    #[cfg(target_os = "macos")]
+    {
+        let output = Command::new("/usr/sbin/lsof")
+            .args(["-a", "-p", &child.id().to_string(), "-d", "32-95,198,199", "-Ff"])
+            .output().unwrap();
+        assert!(output.stderr.is_empty(), "lsof failed: {}", String::from_utf8_lossy(&output.stderr));
+        assert!(output.stdout.is_empty(), "inherited descriptors survived: {}", String::from_utf8_lossy(&output.stdout));
+    }
+
     stdin
-        .write_all(&control(r#"{"type":"spawn","sid":9,"file":"/bin/sh","args":["-c","read x; echo got-$x"],"cols":80,"rows":24}"#))
+        .write_all(&control(r#"{"type":"spawn","sid":9,"file":"/bin/sh","args":["-c","read x; stty size; echo got-$x"],"cols":80,"rows":24}"#))
         .unwrap();
+    stdin.write_all(&control(r#"{"type":"resize","sid":9,"cols":99,"rows":33}"#)).unwrap();
     let mut input = 9u32.to_be_bytes().to_vec();
     input.extend_from_slice(b"ping\r");
     stdin.write_all(&frame(2, &input)).unwrap();
@@ -88,6 +120,7 @@ fn handshake_session_and_shutdown_on_stdin_close() {
     }
     assert!(spawned);
     assert!(output.contains("got-ping"), "{output}");
+    assert!(output.contains("33 99"), "resize did not reach the PTY: {output}");
     assert_eq!(exit.unwrap()["code"], 0);
 
     // A long-running session ends when the client goes away.

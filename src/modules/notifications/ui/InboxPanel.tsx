@@ -14,12 +14,14 @@ export function InboxPanel({
 	markRead,
 	clearRead,
 	open,
+	openable,
 }: {
 	records: readonly NotificationRecord[];
 	filter: 'all' | 'unread';
 	markRead: (id?: string) => void;
 	clearRead: () => void;
 	open: (record: NotificationRecord) => void;
+	openable: ReadonlySet<string>;
 }) {
 	const records = filter === 'unread' ? all.filter((record) => !record.read) : all;
 	return (
@@ -73,7 +75,7 @@ export function InboxPanel({
 									</div>
 								</div>
 								<div className="nand-inbox-item-actions">
-									{(record.source || record.target) && (
+									{openable.has(record.id) && (
 										<button className="nand-ui-btn" onClick={() => open(record)}>
 											{t('automation.open')}
 										</button>

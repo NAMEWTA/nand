@@ -1,0 +1,260 @@
+{
+  "rows": [
+    {
+      "name": "album-empty-family-create-visible",
+      "passed": true
+    },
+    {
+      "name": "album-cancel-keeps-catalog",
+      "passed": true
+    },
+    {
+      "name": "album-cancel-zero-config-and-member-writes",
+      "passed": true
+    },
+    {
+      "name": "album-confirm-persists-instance-then-member",
+      "passed": true,
+      "detail": {
+        "config": [
+          {
+            "id": 1791593468953,
+            "folder": "Photos",
+            "intervalSec": 8,
+            "recursive": true,
+            "ratio": "1:1",
+            "transition": "fade",
+            "heightRatio": "full"
+          }
+        ],
+        "members": [
+          {
+            "memberId": "widget-b069a6fe-767b-4769-93e9-08d5c13a7f88",
+            "provider": "home",
+            "kind": "album",
+            "instanceId": "1791593468953"
+          }
+        ]
+      }
+    },
+    {
+      "name": "album-rendered-without-global-enable",
+      "passed": true
+    },
+    {
+      "name": "album-other-board-untouched",
+      "passed": true
+    },
+    {
+      "name": "anniversary-empty-family-create-visible",
+      "passed": true
+    },
+    {
+      "name": "anniversary-cancel-keeps-catalog",
+      "passed": true
+    },
+    {
+      "name": "anniversary-cancel-zero-config-and-member-writes",
+      "passed": true
+    },
+    {
+      "name": "anniversary-confirm-persists-instance-then-member",
+      "passed": true,
+      "detail": {
+        "config": [
+          {
+            "id": "av-6594a7da-8421-45df-9f21-4ec3666101ee",
+            "label": "Shared anniversary",
+            "startDate": "2020-01-02",
+            "precision": "ymd",
+            "annualReminder": false,
+            "defaultLabel": false
+          }
+        ],
+        "members": [
+          {
+            "memberId": "widget-b069a6fe-767b-4769-93e9-08d5c13a7f88",
+            "provider": "home",
+            "kind": "album",
+            "instanceId": "1791593468953"
+          },
+          {
+            "memberId": "widget-80736f22-e665-4681-8b37-3c8f8fb52dda",
+            "provider": "home",
+            "kind": "anniversary",
+            "instanceId": "av-6594a7da-8421-45df-9f21-4ec3666101ee"
+          }
+        ]
+      }
+    },
+    {
+      "name": "anniversary-rendered-without-global-enable",
+      "passed": true
+    },
+    {
+      "name": "anniversary-other-board-untouched",
+      "passed": true
+    },
+    {
+      "name": "countdown-empty-family-create-visible",
+      "passed": true
+    },
+    {
+      "name": "countdown-cancel-keeps-catalog",
+      "passed": true
+    },
+    {
+      "name": "countdown-cancel-zero-config-and-member-writes",
+      "passed": true
+    },
+    {
+      "name": "countdown-confirm-persists-instance-then-member",
+      "passed": true,
+      "detail": {
+        "config": [
+          {
+            "id": "cd-85a311f8-79c2-4106-a19d-a5b431d0dc0d",
+            "label": "Shared countdown",
+            "targetDate": "2026-10-10T08:51",
+            "displayMode": "days",
+            "reminderDays": 0,
+            "defaultLabel": false
+          }
+        ],
+        "members": [
+          {
+            "memberId": "widget-b069a6fe-767b-4769-93e9-08d5c13a7f88",
+            "provider": "home",
+            "kind": "album",
+            "instanceId": "1791593468953"
+          },
+          {
+            "memberId": "widget-80736f22-e665-4681-8b37-3c8f8fb52dda",
+            "provider": "home",
+            "kind": "anniversary",
+            "instanceId": "av-6594a7da-8421-45df-9f21-4ec3666101ee"
+          },
+          {
+            "memberId": "widget-0ede08ee-0f41-4731-8b75-43e15542ebf0",
+            "provider": "home",
+            "kind": "countdown",
+            "instanceId": "cd-85a311f8-79c2-4106-a19d-a5b431d0dc0d"
+          }
+        ]
+      }
+    },
+    {
+      "name": "countdown-rendered-without-global-enable",
+      "passed": true
+    },
+    {
+      "name": "countdown-other-board-untouched",
+      "passed": true
+    },
+    {
+      "name": "same-instance-shared-across-two-boards",
+      "passed": true
+    },
+    {
+      "name": "corner-remove-only-current-membership",
+      "passed": true
+    },
+    {
+      "name": "readd-reuses-original-instance",
+      "passed": true
+    },
+    {
+      "name": "context-remove-keeps-instance-and-other-board",
+      "passed": true
+    },
+    {
+      "name": "configure-updates-shared-instance",
+      "passed": true
+    },
+    {
+      "name": "keyboard-member-reorder",
+      "passed": true
+    },
+    {
+      "name": "panel-reuses-board-reorder",
+      "passed": true
+    },
+    {
+      "name": "restart-retains-both-orders",
+      "passed": true
+    },
+    {
+      "name": "keyboard-remove-retains-provider-instance",
+      "passed": true
+    },
+    {
+      "name": "touch-remove-retains-provider-instance",
+      "passed": true
+    },
+    {
+      "name": "failed-instance-save-no-member-or-orphan",
+      "passed": true
+    },
+    {
+      "name": "provider-revocation-aborts-pending-create",
+      "passed": true
+    },
+    {
+      "name": "late-created-instance-cannot-add-member",
+      "passed": true
+    },
+    {
+      "name": "calendar-popup-registers-owned-listener",
+      "passed": true
+    },
+    {
+      "name": "module-off-closes-editors-and-calendar-listener",
+      "passed": true
+    },
+    {
+      "name": "popout-album-editor-in-owner-window",
+      "passed": true
+    },
+    {
+      "name": "popout-album-cancel-zero-writes",
+      "passed": true
+    },
+    {
+      "name": "popout-anniversary-editor-in-owner-window",
+      "passed": true
+    },
+    {
+      "name": "popout-anniversary-cancel-zero-writes",
+      "passed": true
+    },
+    {
+      "name": "popout-countdown-editor-in-owner-window",
+      "passed": true
+    },
+    {
+      "name": "popout-countdown-cancel-zero-writes",
+      "passed": true
+    },
+    {
+      "name": "no-runtime-errors",
+      "passed": true,
+      "detail": []
+    }
+  ],
+  "unverified": [
+    "Actual phone and other OS",
+    "Complete13kind matrix tracked by integrated Home acceptance"
+  ],
+  "runtimeEvidence": "C:\\Users\\cdewta\\AppData\\Local\\Temp\\nand-home-catalog-review-10d357ebeb944af293bca137808b9a00\\evidence",
+  "validation": {
+    "native": "40 passed; genuine Windows Obsidian, including popout draft editors and countdown calendar",
+    "build": "passed",
+    "lint": "passed",
+    "i18n": "2963 keys / 24 dictionaries passed",
+    "architecture": "809 modules passed",
+    "bundle": "within limits",
+    "album": "ALL PASS",
+    "fullTests": "485 passed /4 skipped,98 files passed/1 skipped;160.98s",
+    "docs": "inherited planning errors remain; exact unchanged exception checker passes543 Markdown,535 local links,320 external links"
+  }
+}

@@ -1,7 +1,13 @@
-import { moveCardGrid, packBoardOnce, resizeCardGrid } from '../../core/board/board-grid';
+import { boardTileSources, boardTiles, persistedBoardTiles, type TileDefaults } from '../../core/board/board-tiles';
+import { withStableSectionIds } from '../../core/board/section-identity';
+import { legacyBoardMembers } from '../../core/board/widget-members';
+import { effectiveBoardLayout } from '../../core/board/layout';
+import type { BoardTile, BoardWidgetMember } from '../../core/board/types/model';
 import { DASHBOARD_CONFLICT_DIR, DashboardSaveError, dashboardSaveMessage, type DashboardSaveState, type DashboardSaveStatus } from '../../core/board/save-state';
 import { ensureDirectory } from '../../../../shared/storage/durable-state';
-import { App, Notice, TFile } from 'obsidian';
+import { privateVaultStorage } from '../../../../host/obsidian/storage/private-storage';
+import { App, Notice, TFile, TFolder } from 'obsidian';
+import { renamedImagePath } from '../../core/board/focal-point';
 import { moveBeside, moveToOwnRow, unpartnerAt } from '../../core/board/column-pairs';
 import {
 	type DocPath,
@@ -133,7 +139,7 @@ export class SyncEngine {
 	private static readonly BACKUP_DIR = '.nand/recovery/dashboard';
 	private static readonly MAX_BACKUPS = 5;
 
-	constructor(app: App, settings: DashboardSettings) {
+	constructor(app: App, settings: DashboardSettings, private readonly widgetDefaults: (member: BoardWidgetMember, legacy: boolean) => TileDefaults | undefined = () => undefined) {
 		this.app = app;
 		this.settings = settings;
 	}
@@ -472,9 +478,11 @@ export class SyncEngine {
 				DashboardCard,
 				| 'title'
 				| 'body'
+				| 'docs'
 				| 'dueDate'
 				| 'color'
 				| 'coverImage'
+				| 'coverPos'
 				| 'width'
 				| 'size'
 				| 'gridCols'
@@ -623,6 +631,13 @@ export class SyncEngine {
 				col.name === columnName ? { ...col, libraryConfig: config } : col,
 			),
 		};
+		await this.writeToDisk();
+	}
+
+	async updatePipelineConfig(columnName: string, config: import('../../core/board/types/model').PipelineConfig): Promise<void> {
+		this.assertOpen();
+		if (!this.data) return;
+		this.data = { ...this.data, columns: this.data.columns.map(column => column.name === columnName ? { ...column, pipelineConfig: config } : column) };
 		await this.writeToDisk();
 	}
 
@@ -1009,50 +1024,56 @@ export class SyncEngine {
 		await this.updateCard(cardId, { size });
 	}
 
-	async updateCardGrid(cardId: string, gridCols: number, gridRows: number): Promise<void> {
+	/** Skills belong to this board's visible Markdown, not global provider settings. */
+	async setBoardSkills(skills: readonly import('../../core/board/types/model').SkillShortcut[]): Promise<void> {
 		this.assertOpen();
 		if (!this.data) return;
-		this.data = this.withCards(resizeCardGrid(this.boardCards(), cardId, gridCols, gridRows));
+		this.data = { ...this.data, skills: skills.map(skill => ({ ...skill, destination: { ...skill.destination } })) };
 		await this.writeToDisk();
 	}
 
-	async updateCardGridMove(cardId: string, gridCol: number, gridRow: number): Promise<void> {
+	/** Explicit grid edits save every displaced tile in one board write. */
+	async setBoardTiles(tiles: readonly BoardTile[]): Promise<void> {
 		this.assertOpen();
 		if (!this.data) return;
-		this.data = this.withCards(moveCardGrid(this.boardCards(), cardId, gridCol, gridRow));
+		if (JSON.stringify(this.data.immersive) === JSON.stringify(tiles)) return;
+		this.data = { ...this.data, immersive: tiles.map(tile => ({ ...tile })) };
+		this.materializeBoard(false);
+		this.data.layoutNeedsRepair = undefined;
 		await this.writeToDisk();
 	}
 
-	/** User layout choice. Immersive packing runs once here, never on open or resize. */
+	/** User layout choice. Packing runs here, never on open, content fit or resize. */
 	async setBoardLayout(layout: BoardLayout): Promise<void> {
 		this.assertOpen();
-		if (!this.data) return;
-		const next = layout === 'stacked' ? undefined : layout;
-		let cards = this.boardCards();
-		let gridPacked = this.data.gridPacked;
-		if (layout === 'immersive' && !gridPacked) {
-			const packed = packBoardOnce(cards, false);
-			cards = packed.cards;
-			gridPacked = true;
-		}
-		this.data = { ...this.withCards(cards), layout: next, gridPacked };
+		if (!this.data || this.data.layout === layout) return;
+		this.materializeBoard(layout === 'immersive');
+		this.data = { ...this.data, layout };
 		await this.writeToDisk();
 	}
 
-	private boardCards(): DashboardCard[] {
-		return this.data?.columns.flatMap((column) => column.cards) ?? [];
+	/** Member edits affect this board only. Provider instance configuration is never deleted here. */
+	async setBoardMembers(members: readonly BoardWidgetMember[]): Promise<void> {
+		this.assertOpen();
+		if (!this.data) return;
+		const previous = this.data.widgets ?? legacyBoardMembers(this.settings, effectiveBoardLayout(this.data.layout, this.settings.layoutMode) !== 'side');
+		const kept = new Set(members.map(member => member.memberId));
+		const removed = new Set(previous.filter(member => !kept.has(member.memberId)).map(member => member.memberId));
+		this.data = { ...this.data, widgets: members.map(member => ({ ...member })), immersive: this.data.immersive?.filter(tile => !removed.has(tile.id)) };
+		this.materializeBoard(this.data.layout === 'immersive');
+		await this.writeToDisk();
 	}
 
-	private withCards(cards: readonly DashboardCard[]): DashboardData {
-		const byId = new Map(cards.map((card) => [card.id, card]));
-		const data = this.data!;
-		return {
-			...data,
-			columns: data.columns.map((column) => ({
-				...column,
-				cards: column.cards.map((card) => byId.get(card.id) ?? card),
-			})),
-		};
+	private materializeBoard(grid: boolean): void {
+		const legacy = this.data!.widgets === undefined;
+		const widgets = this.data!.widgets ?? legacyBoardMembers(this.settings, effectiveBoardLayout(this.data!.layout, this.settings.layoutMode) !== 'side');
+		this.data = withStableSectionIds({ ...this.data!, widgets }, () => `section-${crypto.randomUUID()}`);
+		if (grid) {
+			// A cap is not measured content height. Existing fit tiles may have adjacent
+			// positions inside each other's caps; adding a member must not move them.
+			this.data.immersive = persistedBoardTiles(boardTiles(this.data, boardTileSources(this.data, widgets), member => this.widgetDefaults(member, legacy)), true);
+			this.data.layoutNeedsRepair = undefined;
+		}
 	}
 
 	async updateProjectCover(cardId: string, coverImage: string): Promise<void> {
@@ -1119,24 +1140,24 @@ export class SyncEngine {
 		});
 
 		this.renameEventRef = this.app.vault.on('rename', (file, oldPath: string) => {
-			if (!this.data || !(file instanceof TFile)) return;
+			if (!this.data || !(file instanceof TFile || file instanceof TFolder)) return;
 			this.handleFileRename(file, oldPath);
 		});
 	}
 
-	private handleFileRename(file: TFile, oldPath: string): void {
+	private handleFileRename(file: TFile | TFolder, oldPath: string): void {
 		if (!this.data) return;
 		const newPath = file.path;
 		let changed = false;
 
 		const replace = (str: string): string => {
-			if (!str || !str.includes(oldPath)) return str;
-			changed = true;
-			return str.split(oldPath).join(newPath);
+			const renamed = renamedImagePath(str, oldPath, newPath, file instanceof TFolder);
+			if (renamed !== str) changed = true;
+			return renamed;
 		};
 
 		const oldPathNoExt = oldPath.endsWith('.md') ? oldPath.slice(0, -3) : oldPath;
-		const newName = file.basename;
+		const newName = file instanceof TFile ? file.basename : file.name;
 
 		const quickActions = this.data.quickActions.map((action) => {
 			if (action.type !== 'file') return action;
@@ -1146,6 +1167,8 @@ export class SyncEngine {
 		});
 
 		const banner = { ...this.data.banner, image: replace(this.data.banner.image) };
+		if (banner.images) banner.images = banner.images.map(replace);
+		if (banner.imagePos) banner.imagePos = Object.fromEntries(Object.entries(banner.imagePos).map(([path, value]) => [replace(path), value]));
 
 		const columns = this.data.columns.map((col) => ({
 			...col,
@@ -1290,7 +1313,7 @@ export class SyncEngine {
 		if (!conflict) throw new DashboardSaveError('recoveryFailed', t('dashboard.sync.recoveryFailed'));
 		this.setSaveState('conflict-pending');
 		const record = { ...conflict, local, revision };
-		const adapter = this.app.vault.adapter;
+		const adapter = privateVaultStorage(this.app);
 		await ensureDirectory(adapter, DASHBOARD_CONFLICT_DIR);
 		await adapter.write(DASHBOARD_CONFLICT_DIR + '/' + conflict.id + '.json', JSON.stringify(record, null, 2));
 		this.conflict = record;
@@ -1301,7 +1324,8 @@ export class SyncEngine {
 	private async createBackup(currentContent: string): Promise<void> {
 		const adapter = this.app.vault.adapter;
 		const dir = SyncEngine.BACKUP_DIR;
-		await ensureDirectory(adapter, dir);
+		const storage = privateVaultStorage(this.app);
+		await ensureDirectory(storage, dir);
 
 		// Keyed per workspace: each board keeps its own rolling copies and
 		// prunes only its own files (dot separator so 'dashboard.' never
@@ -1309,7 +1333,7 @@ export class SyncEngine {
 		const base = this.file?.basename ?? 'dashboard';
 		const ts = new Date().toISOString().replace(/[:.]/g, '-');
 		const backupPath = `${dir}/${workspaceBackupName(base, ts)}`;
-		await adapter.write(backupPath, currentContent);
+		await storage.write(backupPath, currentContent);
 
 		// Prune old backups, keep only MAX_BACKUPS
 		const files = await adapter.list(dir);

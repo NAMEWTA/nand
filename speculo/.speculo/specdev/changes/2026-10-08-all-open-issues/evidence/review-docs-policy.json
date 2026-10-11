@@ -1,0 +1,38 @@
+{
+  "finding": "R-080",
+  "status": "fixed-standard-gate-verified",
+  "implementation": [
+    "scripts/verify-docs.mjs",
+    "scripts/documentation-policy.mjs",
+    "test/release/documentation-policy.test.ts"
+  ],
+  "fixes": [
+    "Permanent knowledge remains bilingual; Change/archive artifacts keep source/working language while retaining strict links/anchors/fences/secret checks.",
+    "Only reference-link scanning omits the exact Source issue heading of frontmatter-labelled captured GitHub issues. Inline links, body reference links and definitions remain checked. Original source files are unchanged.",
+    "Third-party guides under docs now receive normal user-guide bilingual/link checks; original license notices remain distinct. No change-name allowlist or temporary exception."
+  ],
+  "verification": {
+    "standard": "pnpm test:docs PASS549Markdown:38userguides,36permanentSpecDev,146Changeartifacts;559local links/348external links(no fetch).",
+    "tests": "2targeted regression tests PASS; positive/negative capture metadata, ordinary headings, body links and document ownership. Full589 preceded this script-only change; no claim of a full591 run.",
+    "build": "pnpm run build PASS, including test TypeScript check; application bundle unchanged4027620/styles744109",
+    "lint": "pnpm run lint PASS zero warnings. Explicit lint file selection initially returned ignored-file warnings because project excludes scripts/tests; project lint completed normally.",
+    "logs": "C:/Users/cdewta/AppData/Local/Temp/nand-review-docs-policy-{gate,tests,build,project-lint}.log"
+  },
+  "documentation": {
+    "backup": "C:/Users/cdewta/AppData/Local/Temp/nand-review-docs-policy-al5x_317",
+    "files": [
+      {
+        "path": "speculo/.speculo/specdev/.config/domain-layout.md",
+        "beforeCharacters": 6798,
+        "afterCharacters": 7150
+      },
+      {
+        "path": "speculo/.speculo/specdev/.config/domain-layout.ZH.md",
+        "beforeCharacters": 3742,
+        "afterCharacters": 3869
+      }
+    ],
+    "ticket": "R080 documentation ownership and captured-source title parsing",
+    "status": "bilingual-reviewed"
+  }
+}

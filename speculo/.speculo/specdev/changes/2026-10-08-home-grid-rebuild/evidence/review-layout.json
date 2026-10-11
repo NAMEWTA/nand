@@ -1,0 +1,144 @@
+{
+  "rows": [
+    {
+      "name": "historical-side-really-renders",
+      "passed": true,
+      "detail": {
+        "layout": "side",
+        "selected": "side",
+        "hoisted": false,
+        "widgets": "side",
+        "scrollRegion": false
+      }
+    },
+    {
+      "name": "saved-stacked-overrides-history",
+      "passed": true,
+      "detail": {
+        "layout": "stacked",
+        "selected": "stacked",
+        "hoisted": true,
+        "widgets": "stacked",
+        "scrollRegion": true
+      }
+    },
+    {
+      "name": "both-openings-byte-identical",
+      "passed": true
+    },
+    {
+      "name": "explicit-side-select",
+      "passed": true,
+      "detail": {
+        "layout": "side",
+        "selected": "side",
+        "hoisted": false,
+        "widgets": "side",
+        "scrollRegion": false
+      }
+    },
+    {
+      "name": "other-board-unchanged",
+      "passed": true
+    },
+    {
+      "name": "explicit-stacked-over-history",
+      "passed": true,
+      "detail": {
+        "layout": "stacked",
+        "selected": "stacked",
+        "hoisted": true,
+        "widgets": "stacked",
+        "scrollRegion": true
+      }
+    },
+    {
+      "name": "explicit-layout-fields",
+      "passed": true
+    },
+    {
+      "name": "personal-body-preserved",
+      "passed": true
+    },
+    {
+      "name": "restart-old-stacked",
+      "passed": true
+    },
+    {
+      "name": "restart-modern-side",
+      "passed": true
+    },
+    {
+      "name": "resize-640-retains-side",
+      "passed": true
+    },
+    {
+      "name": "resize-850-retains-side",
+      "passed": true
+    },
+    {
+      "name": "resize-1400-retains-side",
+      "passed": true
+    },
+    {
+      "name": "restart-and-resize-zero-file-edits",
+      "passed": true
+    },
+    {
+      "name": "panel-active-follows-resource",
+      "passed": true
+    },
+    {
+      "name": "panel-layout-menu",
+      "passed": true
+    },
+    {
+      "name": "new-dialog-cancel-zero-files",
+      "passed": true
+    },
+    {
+      "name": "new-board-opens-with-selected-layout",
+      "passed": true
+    },
+    {
+      "name": "new-board-layout-saved",
+      "passed": true
+    },
+    {
+      "name": "new-board-does-not-edit-existing",
+      "passed": true
+    },
+    {
+      "name": "no-runtime-errors",
+      "passed": true,
+      "detail": []
+    }
+  ],
+  "unverified": [
+    "Actual phone; pure effective layout function tested separately",
+    "Full member/tile codec and migration still pending T-02/T-03/T-04 review"
+  ],
+  "status": "partial-ticket-codec-and-provenance-pending",
+  "nativeEvidence": "C:\\Users\\cdewta\\AppData\\Local\\Temp\\nand-home-layout-review-54b052502ec94282bf663d90b40ca22d\\evidence",
+  "host": "Windows / Obsidian 1.13.7",
+  "harness": "scripts/obsidian-acceptance/home-layout.mjs",
+  "checks": 21,
+  "finding": "Saved side layout was ignored by every desktop rendering gate, and selecting stacked erased the choice (so legacy side would override it). All board frames/widgets/signatures/resize handles now resolve the board choice with read-only historical settings fallback and actual phone projection. Explicit stacked is persisted; native select, panel layout menu and create dialog support per-board choices. Panel target/active state now uses resourceId rather than changing every leaf via global board selection.",
+  "verification": [
+    "21 real Obsidian checks pass, including two boards, historical side, explicit stacked, all widget frames, restart, viewport resizing, unchanged read-only bytes, preserved personal body/comments, panel selection/menu, new-board layout and cancellation.",
+    "Full suite: 466 passed, 4 platform skips, 94 passed files + 1 skipped, 162.73s. Initial full run had two 5s Chrome/Git integration timeouts; isolated 18 tests passed; per-test deadlines now match real subprocess deadlines. Build, zero-warning lint, 2929 i18n keys, architecture 790 modules, bundle budget and CSS/stacked/style checks pass.",
+    "Docs standard check still reports inherited planning-language/title exceptions; unchanged planning-exception checker passes 541 Markdown / 535 local / 320 external links."
+  ],
+  "screenshotsInspected": [
+    "old-stacked.png",
+    "failure.png from earlier run 7193142bd2f74f9f980848b0251c2d34 (correct new side board, assertion ran before settings debounce/route completed; harness now waits for target)"
+  ],
+  "limits": [
+    "Actual phone runtime unavailable; pure layout projection tested.",
+    "Editing frontmatter retains unknown YAML values/comments but may normalize their formatting; unchanged parse/serialize remains byte identical.",
+    "Full canonical member/tile codec, projection/migration, provenance mapping and docs remain unfinished; T-02 not complete."
+  ],
+  "latestRegistryRegressionEvidence": "C:\\Users\\cdewta\\AppData\\Local\\Temp\\nand-home-layout-review-d579bd4bffb948529b849bf67c08024c\\evidence",
+  "latestRegistryRegression": "passed",
+  "latestImmersiveRegressionEvidence": "C:\\Users\\cdewta\\AppData\\Local\\Temp\\nand-home-layout-review-9aea1412b3e04e0182591701ffc57418\\evidence"
+}

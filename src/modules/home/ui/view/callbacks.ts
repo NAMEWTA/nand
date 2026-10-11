@@ -1,3 +1,4 @@
+import type { BoardTile } from '../../core/board/types/model';
 import { observeDashboardPromise } from '../save-feedback';
 import { DEFAULT_TASK_ARCHIVE_PATH } from '../../core/board/default-paths';
 import { guardDashboardCallbacks } from '../save-feedback';
@@ -23,9 +24,32 @@ import { captureThought, createNoteFromPreset, openPinnedNote, openTodayNote } f
 import { createDashboardSettingsAccess } from '../settings-access';
 import { showConfirmDialog } from '../ui/confirm-dialog';
 import type { DashboardSurface } from './dashboard-surface';
+import { editBoardWidgets } from '../widgets/WidgetCatalog';
+import { homeServices } from '../../services/instances';
+import { legacyBoardMembers } from '../../core/board/widget-members';
+import { isStackedLayout } from '../renderer/render-sidebar-widgets';
+import { cardSkillMenu, quickNoteSkillMenu } from '../skills/context-menu';
 
 export function createCallbacks(this: DashboardSurface) {
 	return guardDashboardCallbacks({
+		onCardSkill: (anchor: HTMLElement, cardId: string, input: string) => cardSkillMenu(this, anchor, cardId, input),
+		onQuickNoteSkill: (anchor: HTMLElement, input: string) => quickNoteSkillMenu(this, anchor, input),
+		onBoardWidgetRemove: (memberId: string) => {
+			if (!this.data) return;
+			const members = this.data.widgets ?? legacyBoardMembers(this.plugin.settings, isStackedLayout(this.data, this.plugin.settings));
+			return observeDashboardPromise(this.sync.setBoardMembers(members.filter(member => member.memberId !== memberId)));
+		},
+		onBoardWidgets: async () => {
+			if (!this.data) return;
+			if (!homeServices.widgets) throw new Error(t('home.widget.unavailable'));
+			const data = this.data;
+			const path = this.plugin.settings.dashboardFile;
+			const signature = JSON.stringify(data.widgets);
+			const result = await editBoardWidgets(this.app, data.widgets ?? legacyBoardMembers(this.plugin.settings, isStackedLayout(data, this.plugin.settings)), homeServices.widgets, { owner: this, boardPath: path, element: this.contentEl, currentIndex: () => homeServices.widgets, watchIndex: listener => homeServices.watchWidgets?.(listener) ?? (() => {}), openSettings: () => this.plugin.openSettings() });
+			if (!result) return;
+			if (!this.isOpen || this.plugin.settings.dashboardFile !== path || JSON.stringify(this.data?.widgets) !== signature) throw new Error(t('home.widget.changed'));
+			await observeDashboardPromise(this.sync.setBoardMembers(result));
+		},
 		onOpenWeb: (url: string, target: 'modal' | 'tab') => {
 			void this.plugin.openBrowser?.({ url, target });
 		},
@@ -146,10 +170,7 @@ export function createCallbacks(this: DashboardSurface) {
 		onCardWidthChange: (cardId: string, width: number) => observeDashboardPromise(this.sync.updateCardWidth(cardId, width)),
 		onCardSizeChange: (cardId: string, size: string) =>
 			observeDashboardPromise(this.sync.updateCardSize(cardId, size as import('../../core/board/types/index').CardSize)),
-		onCardGridChange: (cardId: string, gridCols: number, gridRows: number) =>
-			observeDashboardPromise(this.sync.updateCardGrid(cardId, gridCols, gridRows)),
-		onCardGridMove: (cardId: string, gridCol: number, gridRow: number) =>
-			observeDashboardPromise(this.sync.updateCardGridMove(cardId, gridCol, gridRow)),
+		onBoardTiles: (tiles: readonly BoardTile[]) => observeDashboardPromise(this.sync.setBoardTiles(tiles)),
 		onBoardLayout: (layout: BoardLayout) => observeDashboardPromise(this.sync.setBoardLayout(layout)),
 		onFileDrop: (cardId: string, filePath: string) => this.handleFileDrop(cardId, filePath),
 		onColumnRename: (oldName: string, newName: string, columnIndex?: number) => {
@@ -185,9 +206,24 @@ export function createCallbacks(this: DashboardSurface) {
 		onArchiveTasks: (columnName: string) => this.archiveCompletedTasks(columnName),
 		onLibraryConfigChange: (columnName: string, config: LibraryConfig) => {
 			this.suppressNextRender = true;
-			void observeDashboardPromise(this.sync.updateLibraryConfig(columnName, config).then(() => {
-				this.refreshSectionInPlace(columnName);
+			// LibraryPanel already applied this edit. Replacing it discards focus,
+			// the inline column editor and transient search/pagination state.
+			void observeDashboardPromise(this.sync.updateLibraryConfig(columnName, config).finally(() => {
+				this.suppressNextRender = false;
 			}));
+		},
+		onPipelineConfigChange: async (columnName: string, config: import('../../core/board/types/model').PipelineConfig) => {
+			// The inline Preact controls own their current draft/focus. Other views
+			// still receive the board write through their ordinary vault watcher.
+			this.suppressNextRender = true;
+			try { await this.sync.updatePipelineConfig(columnName, config); }
+			finally { this.suppressNextRender = false; }
+			try { for (const skill of config.skills) await homeServices.skills?.()?.remember(skill.agentId, skill.skillName); }
+			catch { new Notice(t('home.skills.rememberFailed')); }
+		},
+		onPipelineSkill: async (columnName: string, skillId: string, stageId: string, path?: string, input?: string, signal?: AbortSignal) => {
+			const ui = await import('../pipeline/dispatch');
+			await ui.runPipelineSkill(this, columnName, skillId, stageId, path, input, signal);
 		},
 		onDataviewConfigChange: (columnName: string, config: DataviewConfig) => {
 			this.suppressNextRender = true;

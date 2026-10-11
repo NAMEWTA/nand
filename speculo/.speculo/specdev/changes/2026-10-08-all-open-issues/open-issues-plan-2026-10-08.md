@@ -1,5 +1,9 @@
 # NAND 全部 open issue 规划总览
 
+<!-- ACTUAL-CODE-REVIEW:START -->
+2026-10-11 实际代码审查与修复见 [review-report.md](review-report.md) 和 [review-progress.json](review-progress.json)。已逐项审查61票／180条AC；原规划文本、阶段 Gate 与历史授权说明保留为历史记录。用户当前已授权自主代码修复，未要求提交、推送、发版或关闭 issue；不以规划阶段“0/61／只规划”描述当前工作区，也不把真实账号或未跑平台 Gate 视为通过。
+<!-- ACTUAL-CODE-REVIEW:END -->
+
 已按用户确认完成 T-triage → G → S → T-tickets → P-goal-plan。**13个open issue → 8个领域change → 61张Ticket → 180条验收合同**，另有1个整体父Goal。所有设计树consensus，子Spec/Tickets Ready；本轮只规划，产品执行0/61、issue关闭0/13。
 
 **整体入口**：<Path>{roots.state}/specdev/changes/2026-10-08-all-open-issues/tickets-map.md</Path>；**整体Goal**：<Path>{roots.state}/specdev/changes/2026-10-08-all-open-issues/implementation-plan.md</Path>；**依赖与归属**：<Path>{roots.state}/specdev/changes/2026-10-08-all-open-issues/implementation-map.md</Path>；**验证报告**：<Path>{roots.state}/specdev/changes/2026-10-08-all-open-issues/planning-validation.md</Path>。

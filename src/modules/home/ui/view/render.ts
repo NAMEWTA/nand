@@ -12,8 +12,16 @@ import { captureRootScrollState, restoreRootScrollState } from '../ui/scroll-pre
 import { renderWorkspaceSwitcher } from '../workspace/workspace-switcher';
 import { boardFrame } from './board-frame';
 import type { DashboardSurface } from './dashboard-surface';
+import { Platform } from 'obsidian';
+import { createDashboardSettingsAccess } from '../settings-access';
+import { renderBoardQuickActions } from './quick-actions-widget';
+import { renderBoardSkills } from './skills-widget';
 
 export function render(this: DashboardSurface, data: DashboardData): void {
+	const immersive = data.layout === 'immersive' && !Platform.isPhone;
+	const active = this.contentEl.ownerDocument.activeElement as HTMLElement | null;
+	const focusedTile = active?.closest<HTMLElement>('[data-tile]')?.dataset.tile;
+	const focusedAction = active?.dataset.gridAction;
 	// Snapshot EVERY scrolled container (stacked region, board, sidebar
 	// rail, widget deck, card decks, task lists, widget internals — and the
 	// root itself, which scrolls on mobile) before any teardown. Keyed by
@@ -41,9 +49,10 @@ export function render(this: DashboardSurface, data: DashboardData): void {
 		!!this.pomodoroService,
 		!!this.readingService,
 		!!this.holidayData && Object.keys(this.holidayData).length > 0,
-		JSON.stringify([data.quickActions, data.quickActionOrder, data.hiddenPresets]),
+		JSON.stringify([data.quickActions, data.quickActionOrder, data.hiddenPresets, data.widgets, data.skills]),
+		isStackedLayout(data, this.plugin.settings),
 	);
-	const preserveWidgets = !!this.sidebarWidgetsEl && this.sidebarWidgetsSig === widgetSig;
+	const preserveWidgets = !immersive && !!this.sidebarWidgetsEl && this.sidebarWidgetsSig === widgetSig;
 
 	this.runCleanup(preserveWidgets);
 	this.data = data;
@@ -60,7 +69,7 @@ export function render(this: DashboardSurface, data: DashboardData): void {
 	container.addClass('nand-dashboard-root');
 	// The structural frame stays stacked or side. Immersive is a second
 	// attribute: replacing stacked made the content column shrink-wrap.
-	const frame = boardFrame(data.layout === 'immersive', isStackedLayout());
+	const frame = boardFrame(data.layout === 'immersive' && !Platform.isPhone, isStackedLayout(data, this.plugin.settings));
 	container.setAttribute('data-layout', frame.layout);
 	if (frame.board) container.setAttribute('data-board', frame.board);
 	else container.removeAttribute('data-board');
@@ -84,7 +93,7 @@ export function render(this: DashboardSurface, data: DashboardData): void {
 	// Sidebar pin — desktop-only, bottom-left corner of the banner. Moved
 	// here out of the quick-actions header because quick buttons became a
 	// hideable sidebar widget (the pin must survive hiding them).
-	this.renderBannerPinButton(bannerEl);
+	if (!immersive) this.renderBannerPinButton(bannerEl);
 
 	if (this.bannerCollapsed && container.ownerDocument.defaultView!.innerWidth > 640) {
 		bannerEl.addClass('dashboard-banner--collapsed');
@@ -109,7 +118,7 @@ export function render(this: DashboardSurface, data: DashboardData): void {
 	// board scroll TOGETHER inside one region below it (the user wheels
 	// through widgets and sections as one page). The side layout keeps the
 	// old split (rail scrolls alone, board scrolls alone).
-	const stacked = isStackedLayout();
+	const stacked = isStackedLayout(data, this.plugin.settings);
 	if (stacked && this.plugin.settings.quickNotesEnabled) {
 		renderQuickNoteRegion(mainLayout, this.plugin.settings, this.createCallbacks());
 	}
@@ -125,6 +134,7 @@ export function render(this: DashboardSurface, data: DashboardData): void {
 	// Rail state classes apply in BOTH layouts: in stacked mode they carry
 	// strip semantics instead (collapse to a slim bar, expand on click,
 	// pin keeps it open) via the [data-layout="stacked"] CSS overrides.
+	if (!immersive) {
 	const sidebar = contentHost.createDiv({ cls: 'dashboard-sidebar' });
 	if (this.sidebarPinned) {
 		sidebar.addClass('dashboard-sidebar--pinned');
@@ -136,6 +146,7 @@ export function render(this: DashboardSurface, data: DashboardData): void {
 	this.applySidebarSizing(sidebar);
 	this.renderSidebar(sidebar, container, preserveWidgets ? this.sidebarWidgetsEl : null);
 	this.setupSidebarBehavior(sidebar, container);
+	}
 
 	// Two-layer board: a NON-scrolling wrapper around the scrolling
 	// .dashboard-kanban. (The switcher itself lives on the banner; the split
@@ -144,6 +155,11 @@ export function render(this: DashboardSurface, data: DashboardData): void {
 	const kanban = kanbanWrapper.createDiv({ cls: 'dashboard-kanban' });
 	renderDashboard(kanban, data, this.createCallbacks(), this.app, this.plugin.settings, this, {
 		skipQuickNotes: stacked,
+		immersive: {
+			boardPath: this.plugin.settings.dashboardFile,
+			openSettings: () => this.plugin.openSettings(),
+			builtin: { app: this.app, settings: this.plugin.settings, settingsAccess: createDashboardSettingsAccess(this.plugin), pomodoro: this.pomodoroService ?? undefined, reading: this.readingService ?? undefined, holidayData: this.holidayData, openNote: (file, line) => this.openNote(file, undefined, line), renderQuickActions: host => renderBoardQuickActions(this, host), renderSkills: (host, context) => renderBoardSkills(this, host, context) },
+		},
 	});
 	setupDragAndDrop(kanban, this.createCallbacks(), this.dndCleanupFns);
 	// Library config event delegation
@@ -205,4 +221,5 @@ export function render(this: DashboardSurface, data: DashboardData): void {
 	}
 
 	this.renderScrollToTop(container);
+	if (focusedTile && focusedAction) container.querySelector<HTMLElement>(`[data-tile="${CSS.escape(focusedTile)}"] [data-grid-action="${CSS.escape(focusedAction)}"]`)?.focus({ preventScroll: true });
 }

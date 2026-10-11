@@ -31,6 +31,8 @@ export interface WorkbenchContribution {
 	availability(): FeatureAvailability;
 	stateKeys: readonly string[];
 	resourcePages?: boolean;
+	/** Restrict automatic new-page ids and the tab strip to these sections. Other sections own their resource ids. */
+	resourceTabs?: (target: WorkbenchTarget) => boolean;
 	navigationContext?: boolean;
 	releaseWhenHidden?: boolean;
 	create(context: NativeSurfaceContext, target: WorkbenchTarget, state: Record<string, unknown>, signal: AbortSignal): Promise<WorkbenchPageBinding>;
@@ -68,6 +70,7 @@ export interface WorkbenchSurface {
 	ensureActivePage(): Promise<void>;
 	getSavedPages(feature?: WorkbenchFeature): SavedPage[];
 	activateResource(feature: WorkbenchFeature, id: string): Promise<boolean>;
+	closeResource(feature: WorkbenchFeature, id: string): Promise<void>;
 	getNativeSurfaces(): readonly NativeSurface[];
 	getState(): Record<string, unknown>;
 	setState(raw: Record<string, unknown>): Promise<void>;

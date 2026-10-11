@@ -85,28 +85,7 @@ pub(crate) fn execute(operation: &str, request: &Request, cancel: &AtomicBool) -
     {
         return Err("index outside vault".into());
     }
-    // Check existing ancestors before mkdir, including a symlinked .nand directory.
-    let existing = parent
-        .ancestors()
-        .find(|p| p.exists())
-        .ok_or("index path")?;
-    if !fs::canonicalize(existing)
-        .map_err(|e| e.to_string())?
-        .starts_with(&vault)
-    {
-        return Err("index outside vault".into());
-    }
-    if fs::symlink_metadata(&index).is_ok_and(|m| m.file_type().is_symlink()) {
-        return Err("symlinked index".into());
-    }
-    fs::create_dir_all(parent).map_err(|e| e.to_string())?;
-    if !fs::canonicalize(parent)
-        .map_err(|e| e.to_string())?
-        .starts_with(&vault)
-    {
-        return Err("index outside vault".into());
-    }
-    secure_private_path(parent, &index)?;
+    secure_private_path(&vault, parent, &index)?;
     let mut db = open_index(&index, operation == "scan", cancel)?;
     // WAL sidecars appear only after open. A chmod miss does not delete the index.
     tighten_private_modes(parent, &index);
@@ -222,57 +201,88 @@ pub(crate) fn execute(operation: &str, request: &Request, cancel: &AtomicBool) -
 
 /// History is private vault metadata. Tighten only NAND-owned paths and never
 /// follow a symlink while doing so.
-fn secure_private_path(parent: &Path, index: &Path) -> Result<(), String> {
-    let mut current = PathBuf::new();
-    let mut private = false;
-    for component in parent.components() {
+fn secure_private_path(vault: &Path, parent: &Path, index: &Path) -> Result<(), String> {
+    let relative = parent.strip_prefix(vault).map_err(|_| "index outside vault")?;
+    let mut current = vault.to_path_buf();
+    let mut directories = Vec::new();
+    // Validate before creating anything, even when a link targets a normal folder in this vault.
+    for component in relative.components() {
         current.push(component);
-        if component.as_os_str() == ".nand" { private = true; }
-        let metadata = fs::symlink_metadata(&current).map_err(|e| e.to_string())?;
-        if metadata.file_type().is_symlink() { return Err("symlinked history directory".into()); }
-        #[cfg(unix)] if private {
-            use std::os::unix::fs::PermissionsExt;
-            fs::set_permissions(&current, fs::Permissions::from_mode(0o700)).map_err(|e| e.to_string())?;
-        }
+        reject_private_link(&current, true)?;
+        directories.push(current.clone());
     }
-    if index.exists() {
-        if fs::symlink_metadata(index).map_err(|e| e.to_string())?.file_type().is_symlink() { return Err("symlinked index".into()); }
+    for suffix in ["", "-wal", "-shm", "-journal"] {
+        reject_private_link(&PathBuf::from(format!("{}{}", index.display(), suffix)), false)?;
+    }
+    for directory in directories {
+        let builder = fs::DirBuilder::new();
+        #[cfg(unix)]
+        let mut builder = builder;
         #[cfg(unix)] {
-            use std::os::unix::fs::PermissionsExt;
-            fs::set_permissions(index, fs::Permissions::from_mode(0o600)).map_err(|e| e.to_string())?;
-            for suffix in ["-wal", "-shm"] {
-                let sidecar = PathBuf::from(format!("{}{}", index.display(), suffix));
-                if sidecar.exists() { fs::set_permissions(sidecar, fs::Permissions::from_mode(0o600)).map_err(|e| e.to_string())?; }
+            use std::os::unix::fs::DirBuilderExt;
+            builder.mode(0o700);
+        }
+        match builder.create(&directory) {
+            Ok(()) => {}
+            Err(error) if error.kind() == std::io::ErrorKind::AlreadyExists => {}
+            Err(error) => return Err(error.to_string()),
+        }
+        reject_private_link(&directory, true)?;
+        tighten_private_mode(&directory, 0o700);
+    }
+    // SQLite derives new sidecar modes from the DB. Create the DB privately first.
+    let mut options = fs::OpenOptions::new();
+    options.write(true).create_new(true);
+    #[cfg(unix)] {
+        use std::os::unix::fs::OpenOptionsExt;
+        options.mode(0o600).custom_flags(libc::O_NOFOLLOW);
+    }
+    match options.open(index) {
+        Ok(_) => {}
+        Err(error) if error.kind() == std::io::ErrorKind::AlreadyExists => {}
+        Err(error) => return Err(error.to_string()),
+    }
+    reject_private_link(index, false)?;
+    tighten_private_modes(parent, index);
+    Ok(())
+}
+
+fn reject_private_link(path: &Path, directory: bool) -> Result<(), String> {
+    match fs::symlink_metadata(path) {
+        Ok(metadata) => {
+            if metadata.file_type().is_symlink() {
+                return Err(if directory { "symlinked history directory" } else { "symlinked index" }.into());
             }
+            if (directory && !metadata.is_dir()) || (!directory && !metadata.is_file()) {
+                return Err("invalid private history path".into());
+            }
+            Ok(())
+        }
+        Err(error) if error.kind() == std::io::ErrorKind::NotFound => Ok(()),
+        Err(error) => Err(error.to_string()),
+    }
+}
+
+fn tighten_private_mode(path: &Path, bits: u32) {
+    #[cfg(unix)] {
+        use std::os::unix::fs::PermissionsExt;
+        if fs::symlink_metadata(path).ok().is_some_and(|meta| meta.file_type().is_symlink()) { return; }
+        if let Err(error) = fs::set_permissions(path, fs::Permissions::from_mode(bits)) {
+            // Category and OS code only; history paths may contain identifying data.
+            eprintln!("NAND history permissions: {:?}", error.kind());
         }
     }
-    Ok(())
+    #[cfg(not(unix))] { let _ = (path, bits); }
 }
 
 /// Tighten modes after SQLite has created the index and its sidecars.
 /// Symlinks are skipped. A permission error is ignored and nothing is deleted.
 fn tighten_private_modes(parent: &Path, index: &Path) {
-    #[cfg(unix)]
-    {
-        use std::os::unix::fs::PermissionsExt;
-        let mode = |path: &Path, bits: u32| {
-            if fs::symlink_metadata(path).ok().is_some_and(|meta| meta.file_type().is_symlink()) {
-                return;
-            }
-            let _ = fs::set_permissions(path, fs::Permissions::from_mode(bits));
-        };
-        mode(parent, 0o700);
-        mode(index, 0o600);
-        for suffix in ["-wal", "-shm"] {
-            let sidecar = PathBuf::from(format!("{}{}", index.display(), suffix));
-            if sidecar.exists() {
-                mode(&sidecar, 0o600);
-            }
-        }
-    }
-    #[cfg(not(unix))]
-    {
-        let _ = (parent, index);
+    tighten_private_mode(parent, 0o700);
+    tighten_private_mode(index, 0o600);
+    for suffix in ["-wal", "-shm", "-journal"] {
+        let sidecar = PathBuf::from(format!("{}{}", index.display(), suffix));
+        if sidecar.exists() { tighten_private_mode(&sidecar, 0o600); }
     }
 }
 fn save(db: &Connection, row: &Session, stamp: &str) -> rusqlite::Result<usize> {
@@ -938,7 +948,7 @@ mod tests {
             req.vault = temp.0.to_string_lossy().into();
             assert_eq!(
                 execute("query", &req, &cancel).unwrap_err(),
-                "index outside vault"
+                "symlinked history directory"
             );
             assert!(!outside.0.join("linked.sqlite").exists());
             let source = outside.0.join("source.sqlite");
@@ -1194,6 +1204,47 @@ mod tests {
         assert_eq!(session.usage.output, 7);
         assert_eq!(session.usage.cache_read, 3);
         assert_eq!(session.text.matches("answer").count(), 1);
+    }
+    #[cfg(unix)]
+    #[test]
+    fn history_rejects_links_before_creating_directories_or_touching_sidecars() {
+        use std::os::unix::fs::{symlink, PermissionsExt};
+        let cancel = AtomicBool::new(false);
+        for linked in [".nand", ".nand/terminal-agent"] {
+            let temp = Temp::new();
+            let notes = temp.0.join("notes");
+            fs::create_dir(&notes).unwrap();
+            fs::set_permissions(&notes, fs::Permissions::from_mode(0o755)).unwrap();
+            let link = temp.0.join(linked);
+            fs::create_dir_all(link.parent().unwrap()).unwrap();
+            symlink(&notes, &link).unwrap();
+            let mut req = request(&temp.0, vec![]);
+            req.index = link.join("new/device/index.sqlite").to_string_lossy().into();
+            assert_eq!(execute("scan", &req, &cancel).unwrap_err(), "symlinked history directory");
+            assert!(!notes.join("new").exists());
+            assert_eq!(fs::metadata(&notes).unwrap().permissions().mode() & 0o777, 0o755);
+        }
+        for suffix in ["-wal", "-shm", "-journal"] {
+            for dangling in [false, true] {
+                let temp = Temp::new();
+                let req = request(&temp.0, vec![]);
+                execute("scan", &req, &cancel).unwrap();
+                let secret = temp.0.join("note.md");
+                if !dangling {
+                    fs::write(&secret, b"keep").unwrap();
+                    fs::set_permissions(&secret, fs::Permissions::from_mode(0o644)).unwrap();
+                }
+                let sidecar = PathBuf::from(format!("{}{}", req.index, suffix));
+                if sidecar.exists() { fs::remove_file(&sidecar).unwrap(); }
+                symlink(&secret, &sidecar).unwrap();
+                assert_eq!(execute("scan", &req, &cancel).unwrap_err(), "symlinked index");
+                if dangling { assert!(!secret.exists()); }
+                else {
+                    assert_eq!(fs::read(&secret).unwrap(), b"keep");
+                    assert_eq!(fs::metadata(&secret).unwrap().permissions().mode() & 0o777, 0o644);
+                }
+            }
+        }
     }
     #[cfg(unix)]
     #[test]

@@ -34,4 +34,5 @@ export interface AutomationsApi {
 		now?: number,
 	): Promise<AutomationRun | undefined>;
 	stop(run: AutomationRun): Promise<void>;
+	openRun?(run: AutomationRun): Promise<void>;
 }

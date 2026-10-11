@@ -128,8 +128,8 @@ export class AlbumSettingsModal extends Modal {
 				cls: 'dashboard-modal-btn dashboard-modal-btn--confirm',
 			}), 'common.save')
 			.addEventListener('click', () => {
-				this.close();
 				this.onSave(this.cfg);
+				this.close();
 			});
 	}
 

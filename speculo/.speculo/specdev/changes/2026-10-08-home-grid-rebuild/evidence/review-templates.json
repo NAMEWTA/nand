@@ -1,0 +1,377 @@
+{
+  "rows": [
+    {
+      "name": "legacy-read-does-not-write",
+      "passed": true
+    },
+    {
+      "name": "Library1-legacy-projected-single",
+      "passed": true
+    },
+    {
+      "name": "Library1-config-cancel-preserves-bytes",
+      "passed": true
+    },
+    {
+      "name": "Folder1-legacy-projected-single",
+      "passed": true
+    },
+    {
+      "name": "Folder1-config-cancel-preserves-bytes",
+      "passed": true
+    },
+    {
+      "name": "Library0-creates-selected-content-filter-and-unique-path",
+      "passed": true,
+      "detail": "---\n\"channel\": \"local\"\n---\n"
+    },
+    {
+      "name": "Library1-creates-selected-content-filter-and-unique-path",
+      "passed": true,
+      "detail": "---\n\"channel\": \"local\"\ncustom: retain\n---\n# Existing\nTemplate A\n2026-10-10\n\n"
+    },
+    {
+      "name": "Library2-creates-selected-content-filter-and-unique-path",
+      "passed": true,
+      "detail": "---\n\"channel\": \"local\"\ncustom: retain\n---\n# Existing\nTemplate B\n2026-10-10\n\n"
+    },
+    {
+      "name": "Folder0-creates-selected-content-filter-and-unique-path",
+      "passed": true,
+      "detail": "---\n\"channel\": \"local\"\n---\n"
+    },
+    {
+      "name": "Folder1-creates-selected-content-filter-and-unique-path",
+      "passed": true,
+      "detail": "---\n\"channel\": \"local\"\ncustom: retain\n---\n# Existing\nTemplate A\n2026-10-10\n\n"
+    },
+    {
+      "name": "Folder2-creates-selected-content-filter-and-unique-path",
+      "passed": true,
+      "detail": "---\n\"channel\": \"local\"\ncustom: retain\n---\n# Existing\nTemplate B\n2026-10-10\n\n"
+    },
+    {
+      "name": "Library2-chooser-cancel-creates-nothing",
+      "passed": true
+    },
+    {
+      "name": "Library2-title-cancel-creates-nothing",
+      "passed": true
+    },
+    {
+      "name": "Library2-keyboard-reorder",
+      "passed": true
+    },
+    {
+      "name": "Library2-reordered-draft-cancel-zero-writes",
+      "passed": true
+    },
+    {
+      "name": "Library2-ordered-list-and-first-mirror-saved",
+      "passed": true
+    },
+    {
+      "name": "Folder2-chooser-cancel-creates-nothing",
+      "passed": true
+    },
+    {
+      "name": "Folder2-title-cancel-creates-nothing",
+      "passed": true
+    },
+    {
+      "name": "Folder2-keyboard-reorder",
+      "passed": true
+    },
+    {
+      "name": "Folder2-reordered-draft-cancel-zero-writes",
+      "passed": true
+    },
+    {
+      "name": "Folder2-ordered-list-and-first-mirror-saved",
+      "passed": true
+    },
+    {
+      "name": "Library2-remove-draft",
+      "passed": true
+    },
+    {
+      "name": "Library2-add-trims-and-deduplicates",
+      "passed": true
+    },
+    {
+      "name": "Library2-browse-appends-existing-template",
+      "passed": true
+    },
+    {
+      "name": "Library2-add-remove-browse-cancel-zero-writes",
+      "passed": true
+    },
+    {
+      "name": "Folder2-remove-draft",
+      "passed": true
+    },
+    {
+      "name": "Folder2-add-trims-and-deduplicates",
+      "passed": true
+    },
+    {
+      "name": "Folder2-browse-appends-existing-template",
+      "passed": true
+    },
+    {
+      "name": "Folder2-add-remove-browse-cancel-zero-writes",
+      "passed": true
+    },
+    {
+      "name": "templates-system-light-500",
+      "passed": true,
+      "detail": {
+        "width": 286,
+        "scroll": 286,
+        "controls": true
+      }
+    },
+    {
+      "name": "templates-system-light-800",
+      "passed": true,
+      "detail": {
+        "width": 446,
+        "scroll": 446,
+        "controls": true
+      }
+    },
+    {
+      "name": "templates-system-light-1500",
+      "passed": true,
+      "detail": {
+        "width": 446,
+        "scroll": 446,
+        "controls": true
+      }
+    },
+    {
+      "name": "templates-system-dark-500",
+      "passed": true,
+      "detail": {
+        "width": 286,
+        "scroll": 286,
+        "controls": true
+      }
+    },
+    {
+      "name": "templates-system-dark-800",
+      "passed": true,
+      "detail": {
+        "width": 446,
+        "scroll": 446,
+        "controls": true
+      }
+    },
+    {
+      "name": "templates-system-dark-1500",
+      "passed": true,
+      "detail": {
+        "width": 446,
+        "scroll": 446,
+        "controls": true
+      }
+    },
+    {
+      "name": "templates-claude-code-light-500",
+      "passed": true,
+      "detail": {
+        "width": 286,
+        "scroll": 286,
+        "controls": true
+      }
+    },
+    {
+      "name": "templates-claude-code-light-800",
+      "passed": true,
+      "detail": {
+        "width": 446,
+        "scroll": 446,
+        "controls": true
+      }
+    },
+    {
+      "name": "templates-claude-code-light-1500",
+      "passed": true,
+      "detail": {
+        "width": 446,
+        "scroll": 446,
+        "controls": true
+      }
+    },
+    {
+      "name": "templates-claude-code-dark-500",
+      "passed": true,
+      "detail": {
+        "width": 286,
+        "scroll": 286,
+        "controls": true
+      }
+    },
+    {
+      "name": "templates-claude-code-dark-800",
+      "passed": true,
+      "detail": {
+        "width": 446,
+        "scroll": 446,
+        "controls": true
+      }
+    },
+    {
+      "name": "templates-claude-code-dark-1500",
+      "passed": true,
+      "detail": {
+        "width": 446,
+        "scroll": 446,
+        "controls": true
+      }
+    },
+    {
+      "name": "templates-eye-care-light-500",
+      "passed": true,
+      "detail": {
+        "width": 286,
+        "scroll": 286,
+        "controls": true
+      }
+    },
+    {
+      "name": "templates-eye-care-light-800",
+      "passed": true,
+      "detail": {
+        "width": 446,
+        "scroll": 446,
+        "controls": true
+      }
+    },
+    {
+      "name": "templates-eye-care-light-1500",
+      "passed": true,
+      "detail": {
+        "width": 446,
+        "scroll": 446,
+        "controls": true
+      }
+    },
+    {
+      "name": "templates-eye-care-dark-500",
+      "passed": true,
+      "detail": {
+        "width": 286,
+        "scroll": 286,
+        "controls": true
+      }
+    },
+    {
+      "name": "templates-eye-care-dark-800",
+      "passed": true,
+      "detail": {
+        "width": 446,
+        "scroll": 446,
+        "controls": true
+      }
+    },
+    {
+      "name": "templates-eye-care-dark-1500",
+      "passed": true,
+      "detail": {
+        "width": 446,
+        "scroll": 446,
+        "controls": true
+      }
+    },
+    {
+      "name": "themes-and-resize-never-save-draft",
+      "passed": true
+    },
+    {
+      "name": "config-page-hide-closes-owned-dialog-and-creates-nothing",
+      "passed": true
+    },
+    {
+      "name": "title-page-hide-closes-owned-dialog-and-creates-nothing",
+      "passed": true
+    },
+    {
+      "name": "chooser-page-hide-closes-owned-dialog-and-creates-nothing",
+      "passed": true
+    },
+    {
+      "name": "no-native-errors-before-restart",
+      "passed": true,
+      "detail": []
+    },
+    {
+      "name": "Library2-restart-preserves-order",
+      "passed": true
+    },
+    {
+      "name": "Folder2-restart-preserves-order",
+      "passed": true
+    },
+    {
+      "name": "new-note-entry-keyboard-operable",
+      "passed": true
+    },
+    {
+      "name": "config-entry-keyboard-operable",
+      "passed": true
+    },
+    {
+      "name": "template-choice-owned-by-popout",
+      "passed": true
+    },
+    {
+      "name": "template-config-owned-by-popout",
+      "passed": true
+    },
+    {
+      "name": "module-disable-closes-config-and-unmounts-page",
+      "passed": true
+    },
+    {
+      "name": "no-native-errors",
+      "passed": true,
+      "detail": []
+    }
+  ],
+  "unverified": [
+    "Actual phone hardware"
+  ],
+  "state": "implemented-native60-full551-phone-unverified",
+  "nativeEvidence": "C:\\Users\\cdewta\\AppData\\Local\\Temp\\nand-home-templates-review-e0f2e7e92533451b8d468634d4ee80df\\evidence",
+  "harness": "scripts/obsidian-acceptance/home-templates.mjs",
+  "screenshotsInspected": [
+    "templates-system-light-500.png (previous equivalent 18-matrix run)",
+    "templates-popout.png"
+  ],
+  "codeReview": [
+    "Explicit empty list differs from missing old single-path projection; read and unrelated edits preserve bytes.",
+    "Ordered draft editor plus native suggestion chooser; cancel cannot select a fallback.",
+    "Shared creation path retains title/date, filter prefill and unique paths.",
+    "Configuration, nested picker, chooser and title prompt belong to the board surface lifetime.",
+    "Creation/configuration buttons now use native shared IconButton.",
+    "Missing filter operator labels added to both dictionaries."
+  ],
+  "verification": {
+    "build": "pass",
+    "lint": "pass",
+    "architecture": "842 modules pass",
+    "i18n": "3113 keys pass",
+    "library-new-note": "pass",
+    "card-new-note": "7 pass",
+    "golden": "new board-multi-templates snapshot; old fixtures unchanged",
+    "bundle": {
+      "state": "within limits",
+      "mainBytes": 3982971,
+      "stylesBytes": 737247,
+      "reason": "T11 feature increase; total main budget +4096 bytes, startup/activation/style unchanged"
+    },
+    "docs": "standard gate fails inherited planning exceptions; prior exact scoped exception passes 547 files/541 local links/332 external links",
+    "fullSuite": "551 passed, 4 skipped, 116 test files passed/1 skipped; 123.49 seconds; TEMP/nand-review-templates-full-tests.log"
+  }
+}

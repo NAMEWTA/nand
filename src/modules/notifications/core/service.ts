@@ -38,6 +38,7 @@ export class NotificationService implements NotificationInbox {
 		/** Opens what the record points at (its source or run); the record is marked read afterwards. */
 		private opener: (record: NotificationRecord) => Promise<void>,
 		private deliveryAdapter: NotificationDelivery,
+		private readonly canOpenRecord?: (record: NotificationRecord) => Promise<boolean>,
 	) {
 		this.store = new JsonStore(storage, path, (v): v is InboxState => {
 			if (!v || typeof v !== 'object') return false;
@@ -150,6 +151,10 @@ export class NotificationService implements NotificationInbox {
 		await this.opener(record);
 		await this.markRead(record.id);
 	}
+	canOpen(record: NotificationRecord): Promise<boolean> {
+		return this.canOpenRecord?.(record) ?? Promise.resolve(!!(record.source || record.target));
+	}
+	refreshOpeners(): void { this.emit(); }
 	dispose(): void {
 		void this.shutdown().catch(console.error);
 	}

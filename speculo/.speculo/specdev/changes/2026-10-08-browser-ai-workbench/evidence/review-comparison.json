@@ -1,0 +1,119 @@
+{
+  "ticket": "Browser T07 current answer comparison and acquisition quality",
+  "finding": "R-096",
+  "status": "implemented-local-verification-live-gate-unverified",
+  "reviewed": [
+    "ticket/07-current-answer-comparison.md",
+    "spec.md AC016-018",
+    "core/workspace/model.ts and model.test.ts",
+    "platform/desktop/provider-session.ts and provider DOM programs",
+    "ui/WorkspacePage.tsx",
+    "MAIW pinned MIT core/acquisition/quality-gate.ts; db/acquisition-snapshot-service.ts; runtime/native-copy-client.ts"
+  ],
+  "baseline": "R095 compiled main4171656/styles749580; full667/4skipped; native65; full lint/build/architecture/i18n/docs/bundle pass.",
+  "findings": [
+    "Current UI only lists individual round answers; no explicit 2-3 comparison, copy, provenance details or single-target follow-up.",
+    "Monotonic capture revision/latest partial preservation already covered. Provider history identity/terminal rules are explicit, and DOM fallback is always partial. Native-copy capture is absent; existing data/DOM collection never writes clipboard.",
+    "Canonical conversation URL helper exists; original-message navigation must verify target identity and must not merely open whichever page is active."
+  ],
+  "next": [
+    "Browser T08 recovery; actual provider account compatibility and native-copy full coverage remain unverified."
+  ],
+  "implemented": [
+    "Comparison pins 2-3 same-round exchange/capture identities, labels old selections after recollect, and shows one focus target on narrow windows.",
+    "Capture metadata shows source, adapter version and conversation/message identity; model remains unverified. Explicit copy writes exactly the displayed Markdown. Original conversation uses canonical provider URL and original profile.",
+    "followUp selects one unchanged provider/profile/conversation target, preserving draft and visibility, then uses normal preview/send.",
+    "Shared content quality rejects empty, confirmed title-only and status-only captures; short answers and structure are not rejected by length. History title projection is bounded; scoped DOM remains partial.",
+    "Exact source reveal now uses canonical captured conversation/original account, existing matching page or new ordinary tab, shared control lease, native provider public message and parent identity, and a guarded finite scroll. It does not edit task bindings or the send journal. Login/challenge, missing loaded message or changed identity fail explicitly. Native source76 passed.",
+    "Strict website copy fallback wired to three provider public-message roots, explicit copy control, whole-message/draft guard, bounded synchronous modern payload, legacy copy/cut suppression, no activation/focus, full-content equality. Retains incomplete native-copy-coverage-unverified until real coverage contracts are verified."
+  ],
+  "verification": {
+    "baseline": "R095 full667/4skipped and native65.",
+    "unit": "37 passed across 8 provider/workspace-core/service files after quality additions; earlier comparison2+Workspace15+Sender20=37 passed.",
+    "checks": "build4180683/styles750405; browser lint zero warnings; architecture907/i18n3391/docs552/CSS pass; bundle caps4180992/750720. Full suite and full lint now running.",
+    "exploratory": [
+      {
+        "path": "C:/Users/cdewta/AppData/Local/Temp/nand-comparison-native-047041191fc440caa3fb2a720cf40af4/evidence",
+        "result": "65 checks before follow-up assertion passed. Fixture Stop kept partial assistant in DOM but omitted it from history; next user parent differed from the staged branch. Production correctly retained unknown and actual counts11/9/9 with one attempt. Fixture now persists stopped partial history; source guard unchanged."
+      },
+      {
+        "path": "C:/Users/cdewta/AppData/Local/Temp/nand-production-copy-e2f0106cd7b4448dae693432ae730161/evidence",
+        "result": "Three submitted answers saved scoped DOM because JSON key ordering across CDP caused the copy-control guard to reject. No copy handler fired and no clipboard write. Changed guard to compare root/button fields explicitly."
+      },
+      {
+        "path": "C:/Users/cdewta/AppData/Local/Temp/nand-production-copy-diagnostic-72bd0d4b8d184370b2ac99de9f77d558/evidence",
+        "result": "Diagnostic source program confirmed exact copy control and inactive userActivation, with successful isolated synchronous capture. Production root/button field comparison fixed afterward."
+      },
+      {
+        "path": "C:/Users/cdewta/AppData/Local/Temp/nand-production-copy-identity-24039aee10dd41c886956d2161ad272e/evidence",
+        "result": "Production three-site copy identity/source check passed. Harness attempted unavailable global require(\"obsidian\") for expected Markdown; replaced with explicit independent expected Markdown. No source change."
+      }
+    ],
+    "native": {
+      "checks": 72,
+      "evidence": "C:/Users/cdewta/AppData/Local/Temp/nand-comparison-quality-native-49d1824c2d5c474499e7f9aa8b635247/evidence",
+      "scope": "Current production comparison3 at18 theme/width cases; narrow single-focus/touch controls; explicit old capture after recollect; native single-target follow-up and counts; status/title-only partial; restart and prior R095 ownership/recovery coverage."
+    },
+    "fullLint": {
+      "passed": true,
+      "log": "C:/Users/cdewta/AppData/Local/Temp/nand-review-comparison-lint.log"
+    },
+    "fullSuite": {
+      "passed": 672,
+      "skipped": 4,
+      "filesPassed": 148,
+      "filesSkipped": 1,
+      "durationSeconds": 130.47,
+      "started": "2026-10-11 01:32:37 Asia/Shanghai",
+      "log": "C:/Users/cdewta/AppData/Local/Temp/nand-review-comparison-full.log",
+      "scope": "Comparison/follow-up/quality before exact-source reveal additions."
+    },
+    "sourceUnit": "Source3 + owned providers3 + automation1 =7 passed. Source methods then gained explicit source-not-loaded text and login/challenge guard; final build/native pending.",
+    "sourceNative": {
+      "checks": 76,
+      "evidence": "C:/Users/cdewta/AppData/Local/Temp/nand-comparison-source-native-f243a2e45c8c48a39899234b9f3688e3/evidence",
+      "scope": "Final compiled source reveal for each of three provider pages, exact public ID/parent scroll, no send or extra page, missing message rejects text guessing; full comparison/recovery/quality/follow-up/restart regression."
+    },
+    "sourceChecks": "build4184265/styles750405; browser lint zero warnings, i18n3392/docs552/architecture908 passed. Full suite675 expected not run after source additions; prior full672 passed.",
+    "copyHelper": {
+      "checks": 16,
+      "evidence": "C:/Users/cdewta/AppData/Local/Temp/nand-copy-capture-helper-5ed89ff40f6641dea64c5c39805e5172/evidence",
+      "scope": "Real guest modern and inactive legacy permissions; isolated bundled copy helper synchronous/HTML/ambiguous/late/legacy/changed-identity guards, full clipboard format bytes and focus preserved. Before provider integration."
+    },
+    "copyNative": {
+      "checks": 11,
+      "evidence": "C:/Users/cdewta/AppData/Local/Temp/nand-production-copy-final-fa78447b9e1641bcad236a5ffa49fb58/evidence",
+      "scope": "Unmodified compiled production workspace/provider capture on three official origins fulfilled locally. One click per current answer, exact Markdown structure/source, clipboard formats, draft/focus, wrong payload and ambiguous control rejection, pause/late blob cleanup."
+    },
+    "finalFullSuite": {
+      "passed": 675,
+      "skipped": 4,
+      "filesPassed": 149,
+      "filesSkipped": 1,
+      "durationSeconds": 133.1,
+      "started": "2026-10-11 02:00:57 Asia/Shanghai",
+      "log": "C:/Users/cdewta/AppData/Local/Temp/nand-review-copy-full.log",
+      "scope": "All source changes through exact-source reveal and strict native-copy integration, compiled main4188858."
+    },
+    "finalFullLint": {
+      "passed": true,
+      "log": "C:/Users/cdewta/AppData/Local/Temp/nand-review-copy-lint.log"
+    },
+    "finalChecks": "Build4188858/styles750405; i18n3393/docs552/architecture909 passed; bundle cap4189184/styles750720 within limits. Full675/4skip and full lint passed.",
+    "copyNativeFinal": {
+      "checks": 12,
+      "evidence": "C:/Users/cdewta/AppData/Local/Temp/nand-production-copy-ui-84e8b050a3a140ef9a1e33c57702d910/evidence",
+      "scope": "All prior production copy11 checks plus native explicit Copy answer Markdown button delivers exact current Markdown to a temporary host clipboard sink. Sink restores immediately; no user clipboard content altered. No live provider compatibility claim."
+    },
+    "finalNative": {
+      "checks": 76,
+      "evidence": "C:/Users/cdewta/AppData/Local/Temp/nand-comparison-copy-regression-c5ff49dae7f54ca1b4042cfffd26615c/evidence",
+      "scope": "Final unmodified production main4188858 after strict-copy integration; comparison/source reveal, readiness, ownership, partial/recollect/resend, native single-site follow-up, status/title quality and restart."
+    }
+  },
+  "designNotes": [
+    "Original-source action now reveals the exact public message with matching parent and conversation, canonical URL and original account; source76 verifies the production path.",
+    "MAIW native-copy main bridge suppresses navigator.clipboard writes while armed but clears active capture after75ms/timeout. Do not assume that proves late writes or legacy execCommand are harmless. NAND guest-policy already installs both permission check/request handlers and its permissions set excludes clipboard-sanitized-write, so modern guest Clipboard writes are denied even after a capture hook is removed. Native probe must verify actual behavior before enabling a copy acquisition path.",
+    "References read: pinned MAIW src/entrypoints/native-copy-main.content.ts and src/runtime/native-copy-client.ts; official https://www.electronjs.org/docs/latest/api/session and https://chromedevtools.github.io/devtools-protocol/tot/Browser/ . Latest Electron clipboard API page differs from the bundled API; use actual runtime capabilities and matching primary docs."
+  ]
+}

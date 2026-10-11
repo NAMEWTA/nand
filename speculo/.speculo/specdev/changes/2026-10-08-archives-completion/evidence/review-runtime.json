@@ -1,0 +1,436 @@
+{
+  "passed": true,
+  "mainSha256": "c69d21368cee77386474f40a55c49ef1345e67f3cc25a7fc3f967aaa5f0b82f8",
+  "rows": [
+    {
+      "name": "first-archive-screen",
+      "ms": 566.0889999999999,
+      "records": 1000,
+      "bodyBytesPerRecord": 2048
+    },
+    {
+      "name": "layout-order-page-detail-return",
+      "passed": true
+    },
+    {
+      "name": "email-identity-and-copy",
+      "passed": true
+    },
+    {
+      "name": "body-and-basic-scope",
+      "passed": true
+    },
+    {
+      "name": "composition-event-focus",
+      "passed": true,
+      "limitation": "Synthetic composition sequence, not a physical IME."
+    },
+    {
+      "name": "host-query-through-two-animation-frames",
+      "p50Ms": 33.100000001490116,
+      "p95Ms": 34.399999998509884,
+      "samples": 30,
+      "heap": 86302637,
+      "reads": 0
+    },
+    {
+      "name": "host-layout-through-two-animation-frames",
+      "p50Ms": 33.19999999552965,
+      "p95Ms": 34.099999994039536,
+      "samples": 20,
+      "reads": 0
+    },
+    {
+      "name": "restart-retains-query-page-layout",
+      "passed": true
+    },
+    {
+      "name": "employment-and-relation-hit-expansion",
+      "passed": true
+    },
+    {
+      "name": "original-note-line-and-detail-restart-return",
+      "passed": true
+    },
+    {
+      "name": "legacy-layout-and-explicit-preference",
+      "passed": true
+    },
+    {
+      "name": "layout",
+      "preset": "system",
+      "dark": false,
+      "language": "en",
+      "viewport": 1400,
+      "width": 1032,
+      "overflow": 0,
+      "rows": 60
+    },
+    {
+      "name": "layout",
+      "preset": "system",
+      "dark": false,
+      "language": "en",
+      "viewport": 850,
+      "width": 742,
+      "overflow": 0,
+      "rows": 60
+    },
+    {
+      "name": "layout",
+      "preset": "system",
+      "dark": false,
+      "language": "en",
+      "viewport": 390,
+      "width": 334,
+      "overflow": 0,
+      "rows": 60
+    },
+    {
+      "name": "layout",
+      "preset": "system",
+      "dark": false,
+      "language": "zh",
+      "viewport": 1400,
+      "width": 1032,
+      "overflow": 0,
+      "rows": 60
+    },
+    {
+      "name": "layout",
+      "preset": "system",
+      "dark": false,
+      "language": "zh",
+      "viewport": 850,
+      "width": 742,
+      "overflow": 0,
+      "rows": 60
+    },
+    {
+      "name": "layout",
+      "preset": "system",
+      "dark": false,
+      "language": "zh",
+      "viewport": 390,
+      "width": 334,
+      "overflow": 0,
+      "rows": 60
+    },
+    {
+      "name": "layout",
+      "preset": "system",
+      "dark": true,
+      "language": "en",
+      "viewport": 1400,
+      "width": 1032,
+      "overflow": 0,
+      "rows": 60
+    },
+    {
+      "name": "layout",
+      "preset": "system",
+      "dark": true,
+      "language": "en",
+      "viewport": 850,
+      "width": 742,
+      "overflow": 0,
+      "rows": 60
+    },
+    {
+      "name": "layout",
+      "preset": "system",
+      "dark": true,
+      "language": "en",
+      "viewport": 390,
+      "width": 334,
+      "overflow": 0,
+      "rows": 60
+    },
+    {
+      "name": "layout",
+      "preset": "system",
+      "dark": true,
+      "language": "zh",
+      "viewport": 1400,
+      "width": 1032,
+      "overflow": 0,
+      "rows": 60
+    },
+    {
+      "name": "layout",
+      "preset": "system",
+      "dark": true,
+      "language": "zh",
+      "viewport": 850,
+      "width": 742,
+      "overflow": 0,
+      "rows": 60
+    },
+    {
+      "name": "layout",
+      "preset": "system",
+      "dark": true,
+      "language": "zh",
+      "viewport": 390,
+      "width": 334,
+      "overflow": 0,
+      "rows": 60
+    },
+    {
+      "name": "layout",
+      "preset": "claude-code",
+      "dark": false,
+      "language": "en",
+      "viewport": 1400,
+      "width": 1032,
+      "overflow": 0,
+      "rows": 60
+    },
+    {
+      "name": "layout",
+      "preset": "claude-code",
+      "dark": false,
+      "language": "en",
+      "viewport": 850,
+      "width": 742,
+      "overflow": 0,
+      "rows": 60
+    },
+    {
+      "name": "layout",
+      "preset": "claude-code",
+      "dark": false,
+      "language": "en",
+      "viewport": 390,
+      "width": 334,
+      "overflow": 0,
+      "rows": 60
+    },
+    {
+      "name": "layout",
+      "preset": "claude-code",
+      "dark": false,
+      "language": "zh",
+      "viewport": 1400,
+      "width": 1032,
+      "overflow": 0,
+      "rows": 60
+    },
+    {
+      "name": "layout",
+      "preset": "claude-code",
+      "dark": false,
+      "language": "zh",
+      "viewport": 850,
+      "width": 742,
+      "overflow": 0,
+      "rows": 60
+    },
+    {
+      "name": "layout",
+      "preset": "claude-code",
+      "dark": false,
+      "language": "zh",
+      "viewport": 390,
+      "width": 334,
+      "overflow": 0,
+      "rows": 60
+    },
+    {
+      "name": "layout",
+      "preset": "claude-code",
+      "dark": true,
+      "language": "en",
+      "viewport": 1400,
+      "width": 1032,
+      "overflow": 0,
+      "rows": 60
+    },
+    {
+      "name": "layout",
+      "preset": "claude-code",
+      "dark": true,
+      "language": "en",
+      "viewport": 850,
+      "width": 742,
+      "overflow": 0,
+      "rows": 60
+    },
+    {
+      "name": "layout",
+      "preset": "claude-code",
+      "dark": true,
+      "language": "en",
+      "viewport": 390,
+      "width": 334,
+      "overflow": 0,
+      "rows": 60
+    },
+    {
+      "name": "layout",
+      "preset": "claude-code",
+      "dark": true,
+      "language": "zh",
+      "viewport": 1400,
+      "width": 1032,
+      "overflow": 0,
+      "rows": 60
+    },
+    {
+      "name": "layout",
+      "preset": "claude-code",
+      "dark": true,
+      "language": "zh",
+      "viewport": 850,
+      "width": 742,
+      "overflow": 0,
+      "rows": 60
+    },
+    {
+      "name": "layout",
+      "preset": "claude-code",
+      "dark": true,
+      "language": "zh",
+      "viewport": 390,
+      "width": 334,
+      "overflow": 0,
+      "rows": 60
+    },
+    {
+      "name": "layout",
+      "preset": "eye-care",
+      "dark": false,
+      "language": "en",
+      "viewport": 1400,
+      "width": 1032,
+      "overflow": 0,
+      "rows": 60
+    },
+    {
+      "name": "layout",
+      "preset": "eye-care",
+      "dark": false,
+      "language": "en",
+      "viewport": 850,
+      "width": 742,
+      "overflow": 0,
+      "rows": 60
+    },
+    {
+      "name": "layout",
+      "preset": "eye-care",
+      "dark": false,
+      "language": "en",
+      "viewport": 390,
+      "width": 334,
+      "overflow": 0,
+      "rows": 60
+    },
+    {
+      "name": "layout",
+      "preset": "eye-care",
+      "dark": false,
+      "language": "zh",
+      "viewport": 1400,
+      "width": 1032,
+      "overflow": 0,
+      "rows": 60
+    },
+    {
+      "name": "layout",
+      "preset": "eye-care",
+      "dark": false,
+      "language": "zh",
+      "viewport": 850,
+      "width": 742,
+      "overflow": 0,
+      "rows": 60
+    },
+    {
+      "name": "layout",
+      "preset": "eye-care",
+      "dark": false,
+      "language": "zh",
+      "viewport": 390,
+      "width": 334,
+      "overflow": 0,
+      "rows": 60
+    },
+    {
+      "name": "layout",
+      "preset": "eye-care",
+      "dark": true,
+      "language": "en",
+      "viewport": 1400,
+      "width": 1032,
+      "overflow": 0,
+      "rows": 60
+    },
+    {
+      "name": "layout",
+      "preset": "eye-care",
+      "dark": true,
+      "language": "en",
+      "viewport": 850,
+      "width": 742,
+      "overflow": 0,
+      "rows": 60
+    },
+    {
+      "name": "layout",
+      "preset": "eye-care",
+      "dark": true,
+      "language": "en",
+      "viewport": 390,
+      "width": 334,
+      "overflow": 0,
+      "rows": 60
+    },
+    {
+      "name": "layout",
+      "preset": "eye-care",
+      "dark": true,
+      "language": "zh",
+      "viewport": 1400,
+      "width": 1032,
+      "overflow": 0,
+      "rows": 60
+    },
+    {
+      "name": "layout",
+      "preset": "eye-care",
+      "dark": true,
+      "language": "zh",
+      "viewport": 850,
+      "width": 742,
+      "overflow": 0,
+      "rows": 60
+    },
+    {
+      "name": "layout",
+      "preset": "eye-care",
+      "dark": true,
+      "language": "zh",
+      "viewport": 390,
+      "width": 334,
+      "overflow": 0,
+      "rows": 60
+    },
+    {
+      "name": "company-edit-and-partial-read-recovery",
+      "passed": true
+    },
+    {
+      "name": "popout-migration-and-layout",
+      "passed": true
+    }
+  ],
+  "screenshotDirectory": "C:\\Users\\cdewta\\AppData\\Local\\Temp\\nand-archives-review-01c13940863448db986299d5caa5c4c3\\evidence",
+  "environment": {
+    "host": "Obsidian desktop",
+    "os": "Windows",
+    "phone": "390px responsive viewport only; native mobile app unverified",
+    "ime": "composition events; physical input method unverified"
+  },
+  "sourceState": "Uncommitted workspace; no release or remote write"
+}

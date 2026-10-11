@@ -18,6 +18,7 @@ export const PANEL_MAX = 360;
 export const PANEL_DEFAULT = 260;
 
 const sections: Partial<Record<WorkbenchFeature, readonly string[]>> = {
+	browser: ['multi-ai', 'assistant', 'workflows', 'access'],
 	terminal: ['running', 'history', 'usage'],
 	contacts: ['person', 'company'],
 	automations: ['tasks', 'runs'],
@@ -25,6 +26,7 @@ const sections: Partial<Record<WorkbenchFeature, readonly string[]>> = {
 	comments: ['open', 'all'],
 	records: ['habits', 'expenses', 'pomodoro', 'reading'],
 	sync: ['changes', 'history'],
+	news: ['featured', 'all', 'hot', 'today', 'favorites', 'sources', 'runs', 'views'],
 };
 /** Features whose sections are open-ended ids (settings categories, icon settings pages). */
 const freeSections = new Set<WorkbenchFeature>(['settings', 'icons']);

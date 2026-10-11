@@ -1,4 +1,4 @@
-import { App, MarkdownView, Modal, TFile, WorkspaceLeaf, setIcon } from 'obsidian';
+import { App, MarkdownView, Modal, Notice, TFile, WorkspaceLeaf, setIcon } from 'obsidian';
 import { t } from '../../../../shared/i18n/index';
 import { applyModalTheme, removeNativeModalCloseButton } from '../appearance/modal-theme';
 
@@ -19,6 +19,8 @@ export class NotePopoverModal extends Modal {
 	private readonly subpath?: string;
 	private readonly line?: number;
 	private leaf: WorkspaceLeaf | null = null;
+	private opening: Promise<void> | null = null;
+	private timers: number[] = [];
 	private toggleBtn: HTMLElement | null = null;
 	private mode: NoteViewMode;
 
@@ -53,7 +55,7 @@ export class NotePopoverModal extends Modal {
 		this.toggleBtn.setAttribute('aria-label', t('notePopover.toggleView'));
 		setIcon(this.toggleBtn, this.mode === 'source' ? 'pencil' : 'eye');
 		this.toggleBtn.addEventListener('click', () => {
-			void this.toggleMode();
+			void this.toggleMode().catch(error => { if (this.leaf) new Notice(String(error)); });
 		});
 
 		const openTabBtn = actions.createEl('button', { cls: 'note-popover-btn' });
@@ -80,8 +82,11 @@ export class NotePopoverModal extends Modal {
 		const LeafCtor = WorkspaceLeaf as unknown as new (app: App) => WorkspaceLeaf;
 		const leaf = new LeafCtor(this.app) as WorkspaceLeaf & { containerEl: HTMLElement };
 		this.leaf = leaf;
-		await leaf.openFile(this.file, { state: { mode: this.mode } });
 		host.appendChild(leaf.containerEl);
+		this.opening = leaf.openFile(this.file, { state: { mode: this.mode } });
+		try { await this.opening; }
+		catch (error) { if (this.leaf === leaf) { new Notice(String(error)); this.close(); } return; }
+		if (this.leaf !== leaf) return;
 
 		// Wikilink subpath (#heading / #^block): scroll the embedded view to the
 		// anchor once the editor has actually laid out. setEphemeralState is the
@@ -89,13 +94,13 @@ export class NotePopoverModal extends Modal {
 		// delay the editor has no geometry yet and the scroll lands on the top.
 		if (this.subpath && leaf.view instanceof MarkdownView) {
 			const view = leaf.view;
-			window.setTimeout(() => {
+			this.timers.push(contentEl.win.setTimeout(() => {
 				try {
 					view.setEphemeralState({ subpath: this.subpath });
 				} catch {
 					// Best-effort scroll; a bad anchor just leaves the note at the top.
 				}
-			}, 100);
+			}, 100));
 		}
 
 		// Bare line target (calendar task jumps): reveal the line the same way,
@@ -103,35 +108,45 @@ export class NotePopoverModal extends Modal {
 		if (this.line !== undefined && leaf.view instanceof MarkdownView) {
 			const view = leaf.view;
 			const line = this.line;
-			window.setTimeout(() => {
+			this.timers.push(contentEl.win.setTimeout(() => {
 				revealMarkdownLine(view, line);
-			}, 100);
+			}, 100));
 		}
 	}
 
 	private async toggleMode(): Promise<void> {
-		if (!this.leaf) return;
+		const leaf = this.leaf;
+		await this.opening;
+		if (!leaf || this.leaf !== leaf) return;
 		this.mode = this.mode === 'source' ? 'preview' : 'source';
 		this.app.saveLocalStorage(MODE_STORAGE_KEY, this.mode);
 		if (this.toggleBtn) setIcon(this.toggleBtn, this.mode === 'source' ? 'pencil' : 'eye');
-		await this.leaf.setViewState({
+		this.opening = leaf.setViewState({
 			type: 'markdown',
 			state: { file: this.file.path, mode: this.mode },
 		});
+		await this.opening;
 	}
 
 	onClose(): void {
 		const leaf = this.leaf;
+		const opening = this.opening;
 		this.leaf = null;
+		this.opening = null;
 		this.toggleBtn = null;
+		for (const timer of this.timers) this.contentEl.win.clearTimeout(timer);
+		this.timers = [];
 		if (leaf) {
-			void this.detachLeaf(leaf);
+			void this.detachLeaf(leaf, opening);
 		}
 		this.contentEl.empty();
 	}
 
-	private async detachLeaf(leaf: WorkspaceLeaf): Promise<void> {
+	private async detachLeaf(leaf: WorkspaceLeaf, opening: Promise<void> | null): Promise<void> {
 		try {
+			// Closing while openFile/setViewState is still initializing CodeMirror
+			// must wait before saving history or unloading that editor state.
+			await opening;
 			if (leaf.view instanceof MarkdownView) {
 				await leaf.view.save();
 			}

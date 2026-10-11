@@ -1,5 +1,6 @@
 import { t } from '../../../shared/i18n';
 import { NativeSurface, type NativeSurfaceContext } from '../../../ui/native-surface';
+import { refreshLocalizedDom } from '../../../ui/primitives/localized-dom';
 import type { PageCreate } from '../../../app/contracts/workbench-host';
 import type IconicController from '../platform/host/controller';
 
@@ -50,6 +51,7 @@ class IconsSurface extends NativeSurface {
 		for (const element of Array.from(this.contentEl.querySelectorAll<HTMLElement>('[data-settings-page]'))) {
 			element.hidden = element.dataset.settingsPage !== this.section;
 		}
+		refreshLocalizedDom(this.contentEl);
 	}
 }
 

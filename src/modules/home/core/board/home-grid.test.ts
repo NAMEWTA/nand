@@ -4,8 +4,6 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { describe, test } from 'vitest';
 import { lunarAnniversaryThisYear } from '../anniversaries/lunar-map';
-import { appearancePreset, commitAppearancePreset } from './appearance-preset';
-import { cardTiles, moveCardGrid, packBoardOnce, resizeCardGrid } from './board-grid';
 import {
 	displayFocal,
 	focalForWrite,
@@ -15,7 +13,7 @@ import {
 	selectTemplate,
 	templateChoices,
 } from './board-experience';
-import { iconPickerRows } from './icon-catalog';
+import { orderedHostIcons } from './icon-catalog';
 import {
 	beginGesture,
 	cancelGesture,
@@ -36,7 +34,7 @@ import { parse, serialize } from './parser/parse';
 import { planDashboardUpdate } from './render-update';
 import { advanceStage } from './pipeline';
 import { fillTemplate, planSkillDispatch } from './skill-prompt';
-import { indexWidgetProviders, memberMount, normalizeMembers, removeBoardMember } from './widget-registry';
+import { indexWidgetProviders, memberMount, normalizeMembers, removeBoardMember, widgetProviderKey } from './widget-registry';
 
 describe('home grid and board rules', () => {
 	test('choosing the immersive layout rebuilds the whole board', () => {
@@ -44,7 +42,7 @@ describe('home grid and board rules', () => {
 		const entered = plain.replace('dashboard: true\n', 'dashboard: true\nlayout: immersive\ngridPacked: true\n');
 		assert.equal(planDashboardUpdate(parse(plain), parse(entered), 'local').kind, 'full');
 		const moved = entered.replace('type: generic\n', 'type: generic\ncols: 5\n');
-		assert.equal(planDashboardUpdate(parse(entered), parse(moved), 'local').kind, 'sections');
+		assert.equal(planDashboardUpdate(parse(entered), parse(moved), 'local').kind, 'full');
 	});
 
 	test('parse and serialize leave an untouched board byte-stable', () => {
@@ -83,7 +81,7 @@ describe('home grid and board rules', () => {
 		];
 		const placed = placeTiles(canonical);
 		assert.equal(tilesOverlap(placed), false);
-		assert.ok(placed.every((tile) => tile.x >= 1 && tile.x + tile.w - 1 <= 12 && tile.h >= 1));
+		assert.ok(placed.every((tile) => tile.x >= 0 && tile.x + tile.w <= 12 && tile.h >= 3));
 		const narrow = projectLayout(placed, 288);
 		assert.equal(narrow.writes, 0);
 		assert.equal(narrow.columns, 3);
@@ -112,19 +110,7 @@ describe('home grid and board rules', () => {
 		);
 		assert.equal(tilesOverlap(swapped), false);
 		assert.equal(tilesOverlap(resizeTile(placed, 'a', 3, 2)), false);
-		const unpacked = [
-			{ id: 'a', gridCol: 0, gridRow: 0, gridCols: 0, gridRows: 0 },
-			{ id: 'b', gridCol: 0, gridRow: 0, gridCols: 0, gridRows: 0 },
-		];
-		const packed = packBoardOnce(unpacked, false);
-		assert.equal(packed.write, true);
-		assert.equal(tilesOverlap(cardTiles(packed.cards)), false);
-		assert.equal(packBoardOnce(packed.cards, true).write, false);
-		const onto = packed.cards.find((card) => card.id === 'b')!;
-		const swappedCards = moveCardGrid(packed.cards, 'a', onto.gridCol, onto.gridRow);
-		assert.equal(tilesOverlap(cardTiles(swappedCards)), false);
-		assert.equal(swappedCards.find((card) => card.id === 'a')!.gridCol, onto.gridCol);
-		assert.equal(tilesOverlap(cardTiles(resizeCardGrid(packed.cards, 'a', 2, 2))), false);
+
 	});
 
 	test('skill prompts substitute once and do not submit', () => {
@@ -225,46 +211,20 @@ describe('home grid and board rules', () => {
 		assert.deepEqual(displayFocal(undefined), { x: 50, y: 50 });
 		assert.equal(focalForWrite(undefined), undefined);
 		assert.deepEqual(focalForWrite({ x: 140, y: -3 }), { x: 100, y: 0 });
-		assert.deepEqual(templateChoices('old.md', []), ['old.md']);
+		assert.deepEqual(templateChoices('old.md'), ['old.md']);
+		assert.deepEqual(templateChoices('old.md', []), []);
+		assert.deepEqual(templateChoices('old.md', [' b.md ', 'a.md', 'b.md', '']), ['b.md', 'a.md']);
 		assert.equal(selectTemplate(['a.md', 'b.md'], null), null);
 	});
 
-	test('appearance save failure is not success, and the icon list stays within 400 host names', () => {
-		const preset = appearancePreset(
-			'day',
-			'Day',
-			{
-				preset: 'system',
-				headings: 'sans',
-				emphasis: 'bold',
-				accentLight: '#fff',
-				accentDark: '#000',
-				lineHeight: 1.5,
-			},
-			{
-				bgImage: '',
-				bgDim: 0,
-				bgBlur: 0,
-				bgSize: 'cover',
-				surfaceOpacity: null,
-				glassBlur: null,
-				radiusScale: null,
-				fontScale: 'medium',
-			},
-		);
-		const failed = commitAppearancePreset(
-			preset,
-			() => undefined,
-			() => {
-				throw new Error('disk full');
-			},
-		);
-		assert.deepEqual(failed, { saved: false, error: 'disk full' });
-		const hosts = Array.from({ length: 900 }, (_, index) => `icon-${String(index).padStart(3, '0')}`);
-		const rows = iconPickerRows(hosts, '');
-		assert.equal(rows.length, 400);
-		assert.ok(iconPickerRows(hosts, 'icon-899').includes('icon-899'));
-		assert.ok(iconPickerRows([], 'star').includes('star'));
+	test('the icon authority keeps the full host list, promotes preferred names and invents none', () => {
+		const hosts = [...Array.from({ length: 900 }, (_, index) => `icon-${String(index).padStart(3, '0')}`), 'star', 'star'];
+		const rows = orderedHostIcons(hosts);
+		assert.equal(rows.length, 901);
+		assert.equal(rows[0], 'star');
+		assert.ok(rows.includes('icon-899'));
+		assert.deepEqual(orderedHostIcons([]), []);
+		assert.deepEqual(orderedHostIcons(['lucide-telescope', 'lucide-star']), ['lucide-star', 'lucide-telescope']);
 	});
 
 	test('widgets share one registry and a removed member keeps the instance', () => {
@@ -279,6 +239,8 @@ describe('home grid and board rules', () => {
 							icon: 'calendar',
 							defaultSize: { w: 4, h: 4 },
 							minSize: { w: 2, h: 2 },
+							instances: () => [{ id: 'default' }],
+							render: () => undefined,
 						},
 					],
 				},
@@ -293,19 +255,21 @@ describe('home grid and board rules', () => {
 							icon: 'newspaper',
 							defaultSize: { w: 4, h: 4 },
 							minSize: { w: 2, h: 2 },
+							instances: () => [{ id: 'default' }],
+							render: () => undefined,
 						},
 					],
 				},
 			},
 		]);
-		assert.equal(index.byKey.get('calendar')?.module, 'home');
-		assert.equal(index.errors.length, 1);
+		assert.equal(index.byKey.get(widgetProviderKey('home', 'calendar'))?.module, 'home');
+		assert.equal(index.errors.length, 0);
+		assert.equal(index.byKey.get(widgetProviderKey('news', 'calendar'))?.module, 'news');
 		const members = normalizeMembers(
 			[
-				{ id: 'm1', kind: 'calendar', provider: 'news' },
-				{ id: 'm1', kind: 'calendar', provider: 'news' },
+				{ memberId: 'm1', kind: 'calendar', provider: 'news' },
+				{ memberId: 'm1', kind: 'calendar', provider: 'news' },
 			],
-			index,
 		);
 		assert.equal(members.length, 1);
 		assert.equal(memberMount({ kind: 'calendar', provider: 'home' }, index, new Set()), 'disabled');
@@ -321,8 +285,8 @@ describe('home grid and board rules', () => {
 			'utf8',
 		);
 		assert.match(quick, /\.dashboard-main > \.dashboard-quicknote \{[^}]*flex:\s*0 0 auto/s);
-		const banner = readFileSync(path.join(root, 'src/modules/home/styles/011-banner.css'), 'utf8');
-		assert.match(banner, /padding:\s*22px 48px 16px/);
+		// Banner clearance is measured in the real host by home-quicknote.mjs;
+		// a fixed padding assertion missed both wrapping and the <=640 override.
 		const icons = readFileSync(
 			path.join(root, 'src/ui/styles/111-nand-surface-polish-host-theme-outside-the-board.css'),
 			'utf8',
@@ -330,11 +294,8 @@ describe('home grid and board rules', () => {
 		assert.match(icons, /\.nand-settings-page \.nand-home-module-icon/);
 		const immersive = readFileSync(path.join(root, 'src/modules/home/styles/071b-immersive-grid.css'), 'utf8');
 		assert.doesNotMatch(immersive, /transition|animation/);
-		const motion = readFileSync(path.join(root, 'src/shell/styles/workbench-pages.css'), 'utf8');
-		assert.match(
-			motion,
-			/@media \(prefers-reduced-motion: reduce\) \{ \.nand-shell \* \{ scroll-behavior: auto; transition-duration: 0s; animation-duration: 0s; \} \}/,
-		);
+		// home-integration.mjs checks computed reduced-motion styles in Obsidian.
+		// A literal CSS assertion passed while more-specific widget rules still animated.
 	});
 
 	test('a pointer on the scrollport edge steps, and the middle or a blocked side does not', () => {

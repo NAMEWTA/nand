@@ -26,6 +26,10 @@ shared_path_owners: ["<Path>main.js</Path> => 2026-10-08-private-storage-permiss
 
 # Ticket T-01: 在桌面存储边界统一创建和升级权限
 
+<!-- ACTUAL-CODE-REVIEW:START -->
+2026-10-11 实际代码审查：[T-01.md](../evidence/T-01.md)。本票下文保留原规划合同与基线；当前实现、修复、验证及未验证条件以该记录为准。原“仅规划／未授权实施／必须提交”的阶段约束不适用于用户已授权的本次工作区审查；提交与远程操作仍未执行。
+<!-- ACTUAL-CODE-REVIEW:END -->
+
 - Ticket：<Path>{roots.state}/specdev/changes/2026-10-08-private-storage-permissions/ticket/01-posix-private-storage.md</Path>
 - 总控Map：<Path>{roots.state}/specdev/changes/2026-10-08-private-storage-permissions/tickets-map.md</Path>
 - Spec：<Path>{roots.state}/specdev/changes/2026-10-08-private-storage-permissions/spec.md</Path>
@@ -37,7 +41,7 @@ shared_path_owners: ["<Path>main.js</Path> => 2026-10-08-private-storage-permiss
 
 **目标与可观察产出：** 桌面首次/升级使用.nand即获得最小权限，用户读写行为保持。
 
-**当前事实：** 创建走adapter无mode；不能把fs放shared。
+**规划时基线：** 创建走adapter无mode；不能把fs放shared。
 
 **来源：** AC-001, AC-002, AC-003, AC-004, AC-006；issue #144；<Path>{roots.state}/specdev/changes/2026-10-08-private-storage-permissions/reference-analysis.md</Path>。深度 deep：涉及持久数据/公共接口/进程或权限的跨边界合同，必须记录恢复与兼容。
 

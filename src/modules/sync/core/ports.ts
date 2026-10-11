@@ -1,3 +1,5 @@
+import type { CloneOptions, CloneResult } from './clone';
+
 /** What the sync core needs from the host: a git process runner bound to one working directory. */
 export interface GitResult {
 	code: number;
@@ -13,6 +15,8 @@ export interface GitRunOptions {
 	/** Kill the process after this many milliseconds (the runner has a default). */
 	timeoutMs?: number;
 	signal?: AbortSignal;
+	/** Transient process output for clone progress; callers must not display raw credentials. */
+	onProgress?: (chunk: string) => void;
 }
 
 export interface GitRunner {
@@ -42,7 +46,7 @@ export interface RepoPlace {
 /** Reject absolute paths and traversal before passing a path to git. */
 export function safeRepoPath(value: string): string | null {
 	const normalized = value.replaceAll('\\', '/').replace(/^\.\//, '');
-	if (!normalized || normalized.startsWith('/') || normalized === '..' || normalized.startsWith('../') || normalized.includes('/../')) return null;
+	if (!normalized || normalized.includes('\0') || normalized.startsWith('/') || /^[a-z]:/i.test(normalized) || normalized.split('/').includes('..')) return null;
 	return normalized;
 }
 
@@ -88,6 +92,7 @@ export interface GitHost {
 	locate(gitPath: string): Promise<{ binary: string; version: string } | null>;
 	place(binary: string, subPath: string): Promise<RepoPlace>;
 	runner(binary: string, cwd: string): GitRunner & { dispose(): void };
+	clone(binary: string, target: string, source: string, options: CloneOptions): Promise<CloneResult>;
 	hostname(): string;
 	/** Read and write JSON at an absolute path (the state file inside the git directory). */
 	readJson(path: string): Promise<unknown>;

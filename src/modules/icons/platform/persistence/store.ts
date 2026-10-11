@@ -1,4 +1,5 @@
 import { ensureDirectory } from '../../../../shared/storage/durable-state';
+import { privateVaultStorage } from '../../../../host/obsidian/storage/private-storage';
 import { threeWayMerge } from '../../../../shared/storage/three-way-merge';
 import {
 	Notice,
@@ -16,6 +17,7 @@ const HOUR = 3600000;
 const MINUTE = 60000;
 const SECOND = 1000;
 export class IconicStore {
+	private get storage() { return privateVaultStorage(this.app); }
 	settings = structuredClone(DEFAULT_ICONIC_SETTINGS);
 	readonly path: string;
 	private isSaving = false;
@@ -56,19 +58,19 @@ export class IconicStore {
 	}
 
 	private async loadData(): Promise<unknown> {
-		if (!(await this.app.vault.adapter.exists(this.path))) {
+		if (!(await this.storage.exists(this.path))) {
 			this.lastText = null;
 			return null;
 		}
-		const text = await this.app.vault.adapter.read(this.path);
+		const text = await this.storage.read(this.path);
 		const value: unknown = JSON.parse(text);
 		this.lastText = text;
 		return value;
 	}
 	private async saveData(settings: IconicSettings): Promise<void> {
-		await ensureDirectory(this.app.vault.adapter, '.nand/icons');
+		await ensureDirectory(privateVaultStorage(this.app), '.nand/icons');
 		const local = structuredClone(settings);
-		const remoteText = await this.app.vault.adapter.exists(this.path) ? await this.app.vault.adapter.read(this.path) : null;
+		const remoteText = await this.storage.exists(this.path) ? await this.storage.read(this.path) : null;
 		let merged = local;
 		if (remoteText !== this.lastText) {
 			if (!remoteText) throw new Error('Icon settings removed externally');
@@ -77,7 +79,7 @@ export class IconicStore {
 			merged = threeWayMerge({ ...DEFAULT_ICONIC_SETTINGS, ...JSON.parse(this.lastText ?? '{}') } as IconicSettings, local, { ...DEFAULT_ICONIC_SETTINGS, ...remote });
 		}
 		const text = JSON.stringify(merged, null, 2);
-		await this.app.vault.adapter.write(this.path, text);
+		await privateVaultStorage(this.app).write(this.path, text);
 		this.lastText = text;
 		this.settings = threeWayMerge(local, this.settings, merged);
 	}
@@ -129,8 +131,8 @@ export class IconicStore {
 		try {
 			await this.pending;
 			if (!this.watching || generation !== this.watchGeneration) return;
-			const text = (await this.app.vault.adapter.exists(this.path))
-				? await this.app.vault.adapter.read(this.path)
+			const text = (await this.storage.exists(this.path))
+				? await this.storage.read(this.path)
 				: null;
 			if (text === this.lastText) return;
 			if (!this.watching || generation !== this.watchGeneration) return;
@@ -141,7 +143,7 @@ export class IconicStore {
 		}
 	}
 	async load(): Promise<void> {
-		const { adapter } = this.app.vault;
+		const adapter = this.storage;
 		const dataPath = this.path;
 		const backupPath = normalizePath(dataPath + '.backup');
 
@@ -176,17 +178,18 @@ export class IconicStore {
 		const { adapter } = this.app.vault;
 		const dataPath = this.path;
 		const backupPath = normalizePath(dataPath + '.backup');
+		if (!(await this.storage.exists(backupPath + 1))) return;
 		const backupStat = await adapter.stat(backupPath + 1);
 		if (!backupStat) return;
 
 		// Validate recovery first; keep the damaged original before replacing it.
-		const backup = await adapter.read(backupPath + 1);
+		const backup = await this.storage.read(backupPath + 1);
 		const value: unknown = JSON.parse(backup);
 		if (!value || typeof value !== 'object' || Array.isArray(value)) throw new Error('Invalid icon backup');
-		if (await adapter.exists(dataPath)) {
-			await adapter.write(`${dataPath}.corrupt-${Date.now()}`, await adapter.read(dataPath));
+		if (await this.storage.exists(dataPath)) {
+			await this.storage.write(`${dataPath}.corrupt-${Date.now()}`, await this.storage.read(dataPath));
 		}
-		await adapter.write(dataPath, backup);
+		await privateVaultStorage(this.app).write(dataPath, backup);
 
 		// Describe how long ago the backup was made
 		const ago = Date.now() - backupStat.mtime;
@@ -242,12 +245,13 @@ export class IconicStore {
 
 		// Loop through backup files
 		for (let i = 10; i--; i === 0) {
-			if (await adapter.exists(backupPath + i)) {
+			if (await this.storage.exists(backupPath + i)) {
 				if (i > this.settings.maxBackups || (isDueForBackup && i === this.settings.maxBackups)) {
 					// Delete any backup numbered higher than the maximum, or due for replacement
 					await adapter.remove(backupPath + i);
 				} else if (isDueForBackup && i < this.settings.maxBackups) {
 					// Increment backup number
+					await this.storage.exists(backupPath + (i + 1));
 					await adapter.rename(backupPath + i, backupPath + (i + 1));
 				}
 			}
@@ -255,7 +259,8 @@ export class IconicStore {
 
 		// Create new backup if necessary
 		if (isDueForBackup) {
-			await adapter.copy(dataPath, backupPath + 1);
+			const storage = privateVaultStorage(this.app);
+			await storage.write(backupPath + 1, await storage.read(dataPath));
 		}
 	}
 }

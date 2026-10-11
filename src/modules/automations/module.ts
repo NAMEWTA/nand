@@ -3,7 +3,8 @@ import type { ModuleContext, ModuleInstance } from '../../app/contracts/module';
 import type { AutomationDefinition, SourceRef } from '../../shared/automation/types';
 import { t } from '../../shared/i18n/index';
 import { NOTIFICATION_INBOX, NOTIFICATION_OPENERS, type NotificationOpener, type NotificationRequest } from '../notifications/api';
-import { AUTOMATIONS, type AutomationsService } from './api';
+import { AUTOMATIONS, AUTOMATION_INVOCATIONS, AUTOMATION_WORKFLOW_INVOCATIONS, type AutomationsService, type AutomationInvocations, type AutomationWorkflowInvocations } from './api';
+import { AutomationError } from '../../shared/automation/errors';
 import type { AutomationEditRequest } from './core/api';
 import { createAutomationRuntime, type AutomationRuntime } from './services/runtime';
 import { registerMessages } from '../../shared/i18n/index';
@@ -65,7 +66,10 @@ export default function createAutomationsModule(context: ModuleContext): ModuleI
 			return () => listeners.delete(listener);
 		},
 		actions: () => runtime?.actions() ?? [],
-		runAction: async (id) => { await runtime?.runAction(id); },
+		runAction: async (id) => {
+			if (!runtime) throw new AutomationError('moduleOff');
+			await runtime.runAction(id);
+		},
 		stopAction: async (id) => { await runtime?.stopAction(id); },
 		openAction: async (id) => { await runtime?.openAction(id); },
 		edit,
@@ -75,9 +79,34 @@ export default function createAutomationsModule(context: ModuleContext): ModuleI
 		canOpen: (record) => !!runtime?.opener.canOpen(record),
 		open: async (record) => { await runtime?.opener.open(record); },
 	};
+	const invocations: AutomationInvocations = {
+		invoke: (request, options) => {
+			if (!runtime) return Promise.reject(new AutomationError('moduleOff'));
+			return runtime.service.invokeAgent(request, options?.signal);
+		},
+		receipt: id => {
+			const receipt = runtime?.service.state.runs.find(run => run.invocation?.request.invocationId === id)?.invocation?.receipt;
+			return receipt ? structuredClone(receipt) : undefined;
+		},
+	};
+	const workflows: AutomationWorkflowInvocations = {
+		invoke: (request, options) => {
+			if (!runtime) return Promise.reject(new AutomationError('moduleOff'));
+			return runtime.service.invokeWorkflow(request, options);
+		},
+		receipt: id => runtime?.service.workflowReceipt(id),
+		cancel: async id => {
+			const run = runtime?.service.state.runs.find(row => row.id === id);
+			if (run) await runtime?.service.stop(run);
+		},
+		open: async id => {
+			const run = runtime?.service.state.runs.find(row => row.id === id);
+			if (run) await runtime?.service.openRun(run);
+		},
+	};
 
 	return {
-		services: [[AUTOMATIONS, api]],
+		services: [[AUTOMATIONS, api], [AUTOMATION_INVOCATIONS, invocations], [AUTOMATION_WORKFLOW_INVOCATIONS, workflows]],
 		contributions: [[NOTIFICATION_OPENERS, opener]],
 		pages: {
 			automations: async () => (await import('./ui/workbench-page')).createAutomationsPage(() => runtime && {
@@ -92,6 +121,8 @@ export default function createAutomationsModule(context: ModuleContext): ModuleI
 					return request;
 				},
 				taskTargets,
+				workflowSources: { workflows: () => runtime?.workflows() ?? Promise.reject(new AutomationError('workflowUnavailable')),
+					pages: () => runtime?.workflowPages() ?? Promise.reject(new AutomationError('workflowUnavailable')) },
 				cwd: app.vault.adapter instanceof FileSystemAdapter ? app.vault.adapter.getBasePath() : '',
 			}, () => new Error(t('automation.failedLoad'))),
 		},

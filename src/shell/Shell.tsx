@@ -51,6 +51,7 @@ export function Shell(props: ShellProps) {
 	const [overlay, setOverlay] = useState(false);
 	const [motion, setMotion] = useState<'' | 'opening' | 'closing'>('');
 	const [announcement, setAnnouncement] = useState('');
+	const returnFocus = useRef<HTMLElement | null>(null);
 	const { state } = props;
 	const focus = state.focus;
 	const inline = layout === 'wide' && !focus;
@@ -79,7 +80,7 @@ export function Shell(props: ShellProps) {
 	// Drawer and overlay: Escape closes; focus moves in and is restored when they close.
 	useEffect(() => {
 		if (inline || !overlay) return;
-		const previous = root.current?.ownerDocument.activeElement as HTMLElement | null;
+		const previous = returnFocus.current;
 		root.current?.querySelector<HTMLElement>('.nand-shell-overlay input, .nand-shell-overlay button')?.focus();
 		return () => {
 			if (previous?.isConnected) previous.focus();
@@ -95,7 +96,10 @@ export function Shell(props: ShellProps) {
 		if (inline) {
 			animate(!state.panelOpen);
 			props.onPanelOpen(!state.panelOpen);
-		} else setOverlay(!overlay);
+		} else {
+			if (!overlay) returnFocus.current = root.current?.ownerDocument.activeElement as HTMLElement | null;
+			setOverlay(!overlay);
+		}
 	};
 	const selectRail = (feature: WorkbenchFeature) => {
 		const result = props.onRail(feature);
@@ -191,7 +195,7 @@ export function Shell(props: ShellProps) {
 			{!inline && overlay && !focus && (
 				<>
 					<button type="button" class="nand-shell-scrim" tabIndex={-1} aria-label={t('workbench.closeNavigation')} onClick={() => setOverlay(false)} />
-					<div class={`nand-shell-overlay nand-shell-overlay--${layout}`} role="dialog" aria-modal="true" aria-labelledby={overlayLabel}>
+					<div class={`nand-shell-overlay nand-shell-overlay--${layout}`} role="dialog" aria-modal={layout === 'narrow' ? true : undefined} aria-labelledby={overlayLabel}>
 						<span class="nand-visually-hidden" id={overlayLabel}>{props.panelTitle}</span>
 						{layout === 'narrow' && <Rail items={railItems} current={current} panelOpen orientation="horizontal" onSelect={selectRail} />}
 						{panel(() => setOverlay(false))}

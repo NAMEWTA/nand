@@ -49,14 +49,19 @@ export async function launchFreshVault({ root, files = {}, settings, port = 9237
 			try { connection = await connect(); } catch { await delay(250); }
 		}
 		assert.ok(connection, 'Obsidian did not expose a CDP target');
+		session.connection = connection;
+		await connection.evaluate(`(()=>{window.nandAcceptanceErrors=[];const original=console.error;console.error=(...args)=>{nandAcceptanceErrors.push(args.map(a=>a?.stack??String(a)).join(' '));original(...args)};window.addEventListener('unhandledrejection',e=>nandAcceptanceErrors.push(e.reason?.stack??String(e.reason)));})()`);
 		// Ready = the trust prompt is answered and onload finished (the workbench exists).
 		const ready = `typeof app !== 'undefined' && !!app.workspace?.layoutReady && !!app.plugins?.plugins?.nand?.workbench`;
 		while (Date.now() < deadline) {
-			await connection.evaluate(`(()=>{const b=[...document.querySelectorAll('button')].find(b=>b.textContent==='Trust author and enable plugins');b?.click()})()`).catch(() => undefined);
+			await connection.evaluate(`(()=>{if(window.nandAcceptanceTrusted)return;const b=[...document.querySelectorAll('button')].find(b=>['Trust author and enable plugins','信任仓库作者并启用插件'].includes(b.textContent));if(b){window.nandAcceptanceTrusted=true;b.click()}})()`).catch(() => undefined);
 			if (await connection.evaluate(ready).catch(() => false)) break;
 			await delay(150);
 		}
-		assert.ok(await connection.evaluate(ready), 'NAND did not finish loading');
+		if (!await connection.evaluate(ready)) {
+			await fs.writeFile(path.join(evidence, 'startup-failure.json'), JSON.stringify(await connection.evaluate(`({errors:window.nandAcceptanceErrors,body:document.body.innerText,plugin:app.plugins.plugins.nand?Object.keys(app.plugins.plugins.nand):null})`), null, 2));
+			throw new Error('NAND did not finish loading; see startup-failure.json');
+		}
 		session.connection = connection;
 	};
 	const stop = async () => {
@@ -64,7 +69,9 @@ export async function launchFreshVault({ root, files = {}, settings, port = 9237
 		if (!app) return;
 		await connection?.evaluate(`setTimeout(()=>require('@electron/remote').app.quit(),50);true`).catch(() => undefined);
 		connection?.close();
-		await Promise.race([exited, delay(20000)]);
+		let deadline;
+		try { await Promise.race([exited, new Promise(resolve => { deadline = setTimeout(resolve, 20000); })]); }
+		finally { clearTimeout(deadline); }
 		if (app.exitCode === null) app.kill('SIGKILL');
 		session.app = undefined;
 		session.connection = undefined;
@@ -73,12 +80,22 @@ export async function launchFreshVault({ root, files = {}, settings, port = 9237
 		const { data } = await session.connection.send('Page.captureScreenshot', { format: 'png' });
 		await fs.writeFile(path.join(evidence, `${name}.png`), Buffer.from(data, 'base64'));
 	};
-	await start();
+	try { await start(); } catch (error) { await stop(); throw error; }
 	return {
 		vault, evidence, stop, shot,
 		get connection() { return session.connection; },
 		/** Quit normally and start Obsidian again on the same vault and profile. */
 		restart: async () => { await stop(); await start(); },
+		/** Abruptly terminate only this fixture's owned child, then reopen its existing vault. */
+		crashRestart: async () => {
+			const { connection, app, exited } = session;
+			assert.ok(app, 'No owned fixture process to terminate');
+			connection?.close();
+			if (app.exitCode === null) app.kill('SIGKILL');
+			await exited;
+			session.app = undefined; session.connection = undefined;
+			await delay(250); await start();
+		},
 	};
 
 }

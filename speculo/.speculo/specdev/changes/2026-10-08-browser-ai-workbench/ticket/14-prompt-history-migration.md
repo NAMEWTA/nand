@@ -26,6 +26,10 @@ shared_path_owners: ["<Path>main.js</Path> => 2026-10-08-browser-ai-workbench::T
 
 # Ticket T-14: 提示词、任务历史与 maiw v3 迁移
 
+<!-- ACTUAL-CODE-REVIEW:START -->
+2026-10-11 实际代码审查：[T-14.md](../evidence/T-14.md)。本票下文保留原规划合同与基线；当前实现、修复、验证及未验证条件以该记录为准。原“仅规划／未授权实施／必须提交”的阶段约束不适用于用户已授权的本次工作区审查；提交与远程操作仍未执行。
+<!-- ACTUAL-CODE-REVIEW:END -->
+
 - Ticket：<Path>{roots.state}/specdev/changes/2026-10-08-browser-ai-workbench/ticket/14-prompt-history-migration.md</Path>
 - 总控Map：<Path>{roots.state}/specdev/changes/2026-10-08-browser-ai-workbench/tickets-map.md</Path>
 - Spec：<Path>{roots.state}/specdev/changes/2026-10-08-browser-ai-workbench/spec.md</Path>
@@ -37,7 +41,7 @@ shared_path_owners: ["<Path>main.js</Path> => 2026-10-08-browser-ai-workbench::T
 
 **目标与可观察产出：** 用户管理并复用问题模板，搜索/整理历史，明确范围导出并从MAIW v3可靠迁移。
 
-**当前事实：** 前序有最小任务/turn快照和结果恢复；还无完整prompt库CRUD/顺序与history migration。参考v3只含session/turn/exchange，无完整snapshot或独立模板库。
+**规划时基线：** 前序有最小任务/turn快照和结果恢复；还无完整prompt库CRUD/顺序与history migration。参考v3只含session/turn/exchange，无完整snapshot或独立模板库。
 
 **来源：** AC-006, AC-019, AC-020, AC-021, AC-022；issue #142, #145；<Path>{roots.state}/specdev/changes/2026-10-08-browser-ai-workbench/reference-analysis.md</Path>。深度 deep：涉及持久数据/公共接口/进程或权限的跨边界合同，必须记录恢复与兼容。
 

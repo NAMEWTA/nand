@@ -187,7 +187,8 @@ test('saves coalesce for 300ms, isolate data.json and own their defaults', async
 	await promise;
 	assert.deepEqual(Object.keys(JSON.parse(f.files.get(f.store.path)!).fileIcons), ['A.md', 'Z.md']);
 	assert.equal(f.files.get('.custom/plugins/nand/data.json'), '{"unrelated":true}');
-	assert.deepEqual(f.writes, [f.store.path]);
+	assert.deepEqual(f.writes.filter(path => path === f.store.path), [f.store.path]);
+	assert.equal(f.files.get(f.store.path + '.backup1'), f.files.get(f.store.path));
 	const second = storage();
 	await second.store.load();
 	assert.deepEqual(second.store.settings.fileIcons, {});

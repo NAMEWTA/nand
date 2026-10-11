@@ -21,20 +21,20 @@ export class MarkdownAutomationDefinitions implements AutomationDefinitionsRepos
 			() => undefined,
 		);
 	}
-	/** Re-read the collection. Reads queue behind pending writes but do not wait for (or rethrow) them. */
+	/** Re-read the collection and propagate unreadable documents instead of publishing stale definitions. */
 	async list(): Promise<AutomationDefinition[]> {
-		await this.repository.sync();
+		await this.repository.sync(true);
 		return structuredClone(this.repository.value.definitions);
 	}
 	async save(definition: AutomationDefinition): Promise<void> {
-		await this.repository.sync();
+		await this.repository.sync(true);
 		const definitions = this.repository.value.definitions.filter((row) => row.id !== definition.id);
 		this.repository.value = { definitions: [...definitions, definition] };
 		this.repository.save();
 		await this.repository.flush();
 	}
 	async remove(definition: AutomationDefinition): Promise<void> {
-		await this.repository.sync();
+		await this.repository.sync(true);
 		this.repository.value = {
 			definitions: this.repository.value.definitions.filter((row) => row.id !== definition.id),
 		};

@@ -1,0 +1,387 @@
+{
+  "hardware": {
+    "platform": "win32",
+    "release": "10.0.26200",
+    "arch": "x64",
+    "node": "v24.21.0",
+    "cpu": "12th Gen Intel(R) Core(TM) i7-12700",
+    "logicalCpus": 20,
+    "totalMemoryBytes": 68391653376,
+    "freeMemoryBytes": 22343368704
+  },
+  "samples": [
+    {
+      "count": 100,
+      "people": 50,
+      "companies": 50,
+      "bodyBytesPerRecord": 0,
+      "fileBytes": 54100,
+      "coldIndexMs": 42.2,
+      "query": {
+        "p50Ms": 0.03,
+        "p95Ms": 0.11,
+        "samples": 80,
+        "distinctConsecutiveQueries": true,
+        "workload": {
+          "notes": {
+            "p50Ms": 0.02,
+            "p95Ms": 0.09
+          },
+          "body": {
+            "p50Ms": 0.01,
+            "p95Ms": 0.04
+          },
+          "missing": {
+            "p50Ms": 0.02,
+            "p95Ms": 0.11
+          },
+          "broad": {
+            "p50Ms": 0.05,
+            "p95Ms": 0.12
+          }
+        }
+      },
+      "repeatedQuery": {
+        "p50Ms": 0,
+        "p95Ms": 0
+      },
+      "heapDeltaBytes": 1663464,
+      "heapUsedBytes": 7929312,
+      "rssBytes": 58036224,
+      "gcAvailable": true,
+      "target": null
+    },
+    {
+      "count": 100,
+      "people": 50,
+      "companies": 50,
+      "bodyBytesPerRecord": 2048,
+      "fileBytes": 258900,
+      "coldIndexMs": 41.34,
+      "query": {
+        "p50Ms": 0.05,
+        "p95Ms": 0.13,
+        "samples": 80,
+        "distinctConsecutiveQueries": true,
+        "workload": {
+          "notes": {
+            "p50Ms": 0.06,
+            "p95Ms": 0.15
+          },
+          "body": {
+            "p50Ms": 0.04,
+            "p95Ms": 0.07
+          },
+          "missing": {
+            "p50Ms": 0.05,
+            "p95Ms": 0.07
+          },
+          "broad": {
+            "p50Ms": 0.08,
+            "p95Ms": 0.15
+          }
+        }
+      },
+      "repeatedQuery": {
+        "p50Ms": 0,
+        "p95Ms": 0
+      },
+      "heapDeltaBytes": 1216432,
+      "heapUsedBytes": 8562200,
+      "rssBytes": 64954368,
+      "gcAvailable": true,
+      "target": null
+    },
+    {
+      "count": 100,
+      "people": 50,
+      "companies": 50,
+      "bodyBytesPerRecord": 20480,
+      "fileBytes": 2102100,
+      "coldIndexMs": 58.75,
+      "query": {
+        "p50Ms": 0.06,
+        "p95Ms": 0.16,
+        "samples": 80,
+        "distinctConsecutiveQueries": true,
+        "workload": {
+          "notes": {
+            "p50Ms": 0.06,
+            "p95Ms": 0.1
+          },
+          "body": {
+            "p50Ms": 0.05,
+            "p95Ms": 0.09
+          },
+          "missing": {
+            "p50Ms": 0.05,
+            "p95Ms": 0.1
+          },
+          "broad": {
+            "p50Ms": 0.08,
+            "p95Ms": 0.18
+          }
+        }
+      },
+      "repeatedQuery": {
+        "p50Ms": 0,
+        "p95Ms": 0
+      },
+      "heapDeltaBytes": 7435256,
+      "heapUsedBytes": 14845864,
+      "rssBytes": 79679488,
+      "gcAvailable": true,
+      "target": null
+    },
+    {
+      "count": 1000,
+      "people": 500,
+      "companies": 500,
+      "bodyBytesPerRecord": 0,
+      "fileBytes": 541000,
+      "coldIndexMs": 254.51,
+      "query": {
+        "p50Ms": 0.23,
+        "p95Ms": 1.25,
+        "samples": 80,
+        "distinctConsecutiveQueries": true,
+        "workload": {
+          "notes": {
+            "p50Ms": 0.23,
+            "p95Ms": 0.46
+          },
+          "body": {
+            "p50Ms": 0.11,
+            "p95Ms": 0.26
+          },
+          "missing": {
+            "p50Ms": 0.19,
+            "p95Ms": 0.36
+          },
+          "broad": {
+            "p50Ms": 0.74,
+            "p95Ms": 1.28
+          }
+        }
+      },
+      "repeatedQuery": {
+        "p50Ms": 0,
+        "p95Ms": 0
+      },
+      "heapDeltaBytes": 4786216,
+      "heapUsedBytes": 12740712,
+      "rssBytes": 101998592,
+      "gcAvailable": true,
+      "target": null
+    },
+    {
+      "count": 1000,
+      "people": 500,
+      "companies": 500,
+      "bodyBytesPerRecord": 2048,
+      "fileBytes": 2589000,
+      "coldIndexMs": 335.81,
+      "query": {
+        "p50Ms": 0.4,
+        "p95Ms": 2.02,
+        "samples": 80,
+        "distinctConsecutiveQueries": true,
+        "workload": {
+          "notes": {
+            "p50Ms": 0.4,
+            "p95Ms": 0.93
+          },
+          "body": {
+            "p50Ms": 0.3,
+            "p95Ms": 0.62
+          },
+          "missing": {
+            "p50Ms": 0.36,
+            "p95Ms": 0.59
+          },
+          "broad": {
+            "p50Ms": 1.67,
+            "p95Ms": 2.18
+          }
+        }
+      },
+      "repeatedQuery": {
+        "p50Ms": 0,
+        "p95Ms": 0.01
+      },
+      "heapDeltaBytes": 11703616,
+      "heapUsedBytes": 19723000,
+      "rssBytes": 129785856,
+      "gcAvailable": true,
+      "target": {
+        "p95Ms": 100,
+        "passed": true
+      }
+    },
+    {
+      "count": 1000,
+      "people": 500,
+      "companies": 500,
+      "bodyBytesPerRecord": 20480,
+      "fileBytes": 21021000,
+      "coldIndexMs": 552.36,
+      "query": {
+        "p50Ms": 1.05,
+        "p95Ms": 1.98,
+        "samples": 80,
+        "distinctConsecutiveQueries": true,
+        "workload": {
+          "notes": {
+            "p50Ms": 1.01,
+            "p95Ms": 1.91
+          },
+          "body": {
+            "p50Ms": 0.85,
+            "p95Ms": 1.66
+          },
+          "missing": {
+            "p50Ms": 0.98,
+            "p95Ms": 1.58
+          },
+          "broad": {
+            "p50Ms": 1.7,
+            "p95Ms": 3.47
+          }
+        }
+      },
+      "repeatedQuery": {
+        "p50Ms": 0,
+        "p95Ms": 0.01
+      },
+      "heapDeltaBytes": 73136952,
+      "heapUsedBytes": 81337992,
+      "rssBytes": 241274880,
+      "gcAvailable": true,
+      "target": null
+    },
+    {
+      "count": 5000,
+      "people": 2500,
+      "companies": 2500,
+      "bodyBytesPerRecord": 0,
+      "fileBytes": 2705000,
+      "coldIndexMs": 1426.41,
+      "query": {
+        "p50Ms": 1.61,
+        "p95Ms": 8.99,
+        "samples": 80,
+        "distinctConsecutiveQueries": true,
+        "workload": {
+          "notes": {
+            "p50Ms": 1.88,
+            "p95Ms": 4.17
+          },
+          "body": {
+            "p50Ms": 0.93,
+            "p95Ms": 2.42
+          },
+          "missing": {
+            "p50Ms": 1.23,
+            "p95Ms": 3.01
+          },
+          "broad": {
+            "p50Ms": 5.81,
+            "p95Ms": 12.65
+          }
+        }
+      },
+      "repeatedQuery": {
+        "p50Ms": 0,
+        "p95Ms": 0.02
+      },
+      "heapDeltaBytes": 20971800,
+      "heapUsedBytes": 29456864,
+      "rssBytes": 266620928,
+      "gcAvailable": true,
+      "target": null
+    },
+    {
+      "count": 5000,
+      "people": 2500,
+      "companies": 2500,
+      "bodyBytesPerRecord": 2048,
+      "fileBytes": 12945000,
+      "coldIndexMs": 1414.28,
+      "query": {
+        "p50Ms": 3.04,
+        "p95Ms": 8.52,
+        "samples": 80,
+        "distinctConsecutiveQueries": true,
+        "workload": {
+          "notes": {
+            "p50Ms": 2.89,
+            "p95Ms": 5.19
+          },
+          "body": {
+            "p50Ms": 2.3,
+            "p95Ms": 3.51
+          },
+          "missing": {
+            "p50Ms": 2.31,
+            "p95Ms": 3.91
+          },
+          "broad": {
+            "p50Ms": 7.15,
+            "p95Ms": 12.55
+          }
+        }
+      },
+      "repeatedQuery": {
+        "p50Ms": 0.01,
+        "p95Ms": 0.02
+      },
+      "heapDeltaBytes": 58178088,
+      "heapUsedBytes": 65670216,
+      "rssBytes": 281939968,
+      "gcAvailable": true,
+      "target": null
+    },
+    {
+      "count": 5000,
+      "people": 2500,
+      "companies": 2500,
+      "bodyBytesPerRecord": 20480,
+      "fileBytes": 105105000,
+      "coldIndexMs": 2892.05,
+      "query": {
+        "p50Ms": 8.23,
+        "p95Ms": 14.29,
+        "samples": 80,
+        "distinctConsecutiveQueries": true,
+        "workload": {
+          "notes": {
+            "p50Ms": 7.85,
+            "p95Ms": 10.27
+          },
+          "body": {
+            "p50Ms": 7.23,
+            "p95Ms": 9.39
+          },
+          "missing": {
+            "p50Ms": 7.46,
+            "p95Ms": 9.1
+          },
+          "broad": {
+            "p50Ms": 11.1,
+            "p95Ms": 17.22
+          }
+        }
+      },
+      "repeatedQuery": {
+        "p50Ms": 0.01,
+        "p95Ms": 0.02
+      },
+      "heapDeltaBytes": 365480944,
+      "heapUsedBytes": 373021952,
+      "rssBytes": 569987072,
+      "gcAvailable": true,
+      "target": null
+    }
+  ],
+  "note": "Fresh in-memory index with warm OS file cache. Files removed before hot queries. Host rendering is a separate Obsidian measurement."
+}

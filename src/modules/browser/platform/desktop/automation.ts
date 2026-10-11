@@ -5,6 +5,10 @@ import { listenNative, type GuestContents } from './electron-api';
 import type { BrowserPage } from './page';
 import { buildSnapshot, type RefEntry, type SnapshotResult } from './snapshot-engine';
 import { GRAB_ELEMENT_FUNCTION } from './grab-script';
+import { consoleDiagnostic, networkDiagnostic } from '../../core/diagnostics';
+import { READ_ELEMENT_VALUE } from './read-element';
+import { READ_ACTION_REVIEW } from './action-review';
+import type { BrowserActionReview, BrowserReviewableAction } from '../../core/control';
 
 function record(value: unknown): Record<string, unknown> {
 	return value && typeof value === 'object' ? (value as Record<string, unknown>) : {};
@@ -38,6 +42,9 @@ export class BrowserAutomation {
 	private lost = false;
 	private ready?: Promise<void>;
 	private designHandler?: (grab: BrowserGrab) => void;
+	private providerInputCheck?: (method: string, params: Record<string, unknown>) => Promise<void>;
+	private operationAdmission?: () => void;
+	private actionReview?: { review: BrowserActionReview; material: string };
 	readonly queue = new BrowserOperationQueue();
 	readonly consoleMessages: unknown[] = [];
 	readonly networkFailures: unknown[] = [];
@@ -48,6 +55,7 @@ export class BrowserAutomation {
 	invalidate(): void {
 		this.revision++;
 		this.snapshot = undefined;
+		this.actionReview = undefined;
 	}
 	private async ensure(): Promise<void> {
 		if (this.lost) throw new BrowserError('browser_debugger_unavailable');
@@ -84,18 +92,11 @@ export class BrowserAutomation {
 				}
 				if (method === 'Page.frameNavigated' || method === 'Page.navigatedWithinDocument') this.invalidate();
 				if (method === 'Runtime.consoleAPICalled') {
-					this.consoleMessages.push({
-						type: params.type,
-						timestamp: params.timestamp,
-						args: (Array.isArray(params.args) ? params.args : []).map((arg: unknown) => {
-							const row = record(arg);
-							return describe(row.value ?? row.description ?? '').slice(0, 2000);
-						}),
-					});
+					this.consoleMessages.push(consoleDiagnostic(params));
 					if (this.consoleMessages.length > 100) this.consoleMessages.shift();
 				}
 				if (method === 'Network.loadingFailed') {
-					this.networkFailures.push(params);
+					this.networkFailures.push(networkDiagnostic(params));
 					if (this.networkFailures.length > 100) this.networkFailures.shift();
 				}
 				if (method === 'Overlay.inspectNodeRequested' && this.designHandler) {
@@ -122,6 +123,15 @@ export class BrowserAutomation {
 	async send(method: string, params: Record<string, unknown> = {}, session?: string): Promise<unknown> {
 		if (this.page.disposed || this.queue.abort.signal.aborted) throw new BrowserError('browser_page_closed');
 		if (this.lost) throw new BrowserError('browser_debugger_unavailable');
+		const releaseInput = (method === 'Input.dispatchMouseEvent' && params.type === 'mouseReleased') || (method === 'Input.dispatchKeyEvent' && params.type === 'keyUp');
+		if (!releaseInput) this.operationAdmission?.();
+		if (method === 'Input.insertText' || (method === 'Input.dispatchMouseEvent' && params.type === 'mousePressed') ||
+			(method === 'Input.dispatchKeyEvent' && params.type === 'keyDown')) {
+			await this.providerInputCheck?.(method, params);
+			if (!this.page.webview.getBoundingClientRect().width || this.page.webview.ownerDocument.activeElement !== this.page.webview)
+				throw new BrowserError('browser_input_focus_changed');
+		}
+		if (!releaseInput) this.operationAdmission?.();
 		const win = this.page.webview.win;
 		return new Promise((resolve, reject) => {
 			const timer = win.setTimeout(() => finish(new BrowserError('browser_timeout')), 15000);
@@ -152,6 +162,73 @@ export class BrowserAutomation {
 		);
 		if (result.exceptionDetails) throw new BrowserError('browser_script_failed');
 		return record(result.result).value;
+	}
+	/** Internal adapters supply static read-only DOM programs; this is not a bridge method. */
+	readProviderDom(expression: string, admission: () => void): Promise<unknown> {
+		return this.queue.run(async () => {
+			admission(); await this.ensure(); admission();
+			const value = await this.evaluate(expression); admission(); return value;
+		});
+	}
+	/** Static scoped copy program shares ownership/admission with all other provider operations. */
+	providerCopy(expression: string, admission: () => void): Promise<unknown> {
+		return this.queue.run(async () => {
+			admission(); await this.ensure(); admission();
+			const value = await this.evaluate(expression); admission(); return value;
+		});
+	}
+	/** Explicit source navigation, guarded and scrolled in one guest evaluation without editor input. */
+	providerReveal(request: { selector: string; guard: string }, admission: () => void): Promise<void> {
+		const frozen = { ...request };
+		return this.queue.run(async () => {
+			admission(); await this.ensure(); admission();
+			const revealed = await this.evaluate('(()=>{if(!(' + frozen.guard + '))return false;const rows=[...document.querySelectorAll(' + JSON.stringify(frozen.selector)
+				+ ')];if(rows.length!==1)return false;rows[0].scrollIntoView({block:"center",inline:"nearest",behavior:"instant"});return true})()');
+			admission(); if (revealed !== true) throw new BrowserError('browser_workspace_source_not_loaded');
+		});
+	}
+	/** Only request IDs observed by a task's endpoint allowlist reach this internal reader. */
+	readProviderResponse(requestId: string, admission: () => void): Promise<unknown> {
+		return this.queue.run(async () => {
+			admission(); await this.ensure(); admission();
+			const value = await this.send('Network.getResponseBody', { requestId }); admission(); return value;
+		});
+	}
+	/** Finite internal provider input, sharing the same queue and native implementation as ordinary controls. */
+	providerInput(request: { selector: string; kind: 'fill' | 'click'; value?: string; guard: string }, admission: () => void): Promise<void> {
+		const frozen = { ...request };
+		return this.queue.run(async signal => {
+			admission(); await this.ensure(); admission();
+			if (!this.page.webview.getBoundingClientRect().width) throw new BrowserError('browser_input_not_visible');
+			this.page.webview.focus();
+			const guard = async () => {
+				admission();
+				if (await this.evaluate(frozen.guard) !== true) throw new BrowserError('browser_workspace_draft_changed');
+				admission();
+			};
+			try {
+				await guard();
+				const found = record(await this.send('Runtime.evaluate', { expression: `(()=>{const found=[...document.querySelectorAll(${JSON.stringify(frozen.selector)})].filter(el=>el.getClientRects().length&&getComputedStyle(el).visibility!=="hidden");if(found.length!==1)throw Error("ambiguous provider control");return found[0]})()`, objectGroup: 'nand-browser-operation' }));
+				const objectId = text(record(found.result), 'objectId');
+				if (found.exceptionDetails || !objectId) throw new BrowserError('browser_workspace_control_missing');
+				const described = record(await this.send('DOM.describeNode', { objectId })), backendDOMNodeId = record(described.node).backendNodeId;
+				if (typeof backendDOMNodeId !== 'number') throw new BrowserError('browser_workspace_control_missing');
+				this.invalidate();
+				const entry: RefEntry = { backendDOMNodeId, role: 'generic', name: '' }, element = '@provider';
+				this.snapshot = { snapshot: '', refs: [{ ref: element, role: entry.role, name: entry.name }], refMap: new Map([[element, entry]]) };
+				const revision = this.currentRevision();
+				this.providerInputCheck = async (_method, params) => {
+					await guard(); this.checkRevision({ revision });
+					const valid = await this.call(objectId, entry, `function(x,y){if(!this.isConnected||this.disabled||this.getAttribute("aria-disabled")==="true")return false;const r=this.getBoundingClientRect();if(!r.width||!r.height)return false;return ${frozen.kind === 'click' ? 'this.contains(document.elementFromPoint(x,y))' : 'document.activeElement===this&&(x===undefined||this.contains(document.elementFromPoint(x,y)))'};}`, [params.x, params.y]);
+					if (valid !== true) throw new BrowserError('browser_workspace_control_changed');
+					admission();
+				};
+				admission(); await this.perform(frozen.kind, { revision, element, value: frozen.value }, signal); admission();
+			} finally {
+				this.providerInputCheck = undefined;
+				if (!signal.aborted) { try { await this.send('Runtime.releaseObjectGroup', { objectGroup: 'nand-browser-operation' }); } catch { /* Guest closed. */ } }
+			}
+		});
 	}
 	private async resolve(
 		params: Record<string, unknown>,
@@ -215,13 +292,27 @@ export class BrowserAutomation {
 		if (!box.width || !box.height) throw new BrowserError('browser_element_not_visible');
 		return { x: Number(box.x), y: Number(box.y), session: entry.sessionId };
 	}
-	async execute(method: string, params: Record<string, unknown>): Promise<unknown> {
-		if (method === 'stop') { this.page.stop(); return { ...this.page.state }; }
+	async execute(method: string, params: Record<string, unknown>, admission?: () => void): Promise<unknown> {
+		if (method === 'stop') { admission?.(); this.page.stop(); return { ...this.page.state }; }
 		return this.queue.run(async (signal) => {
+			admission?.();
 			await this.ensure();
+			admission?.();
+			const input = ['click', 'dblclick', 'hover', 'drag', 'fill', 'type', 'focus', 'select', 'check', 'keypress', 'reviewed'].includes(method);
+			this.operationAdmission = admission;
 			try {
+				// Hidden Electron guests can acknowledge input without applying it. Reveal is an explicit caller action.
+				if (input) {
+					if (!this.page.webview.getBoundingClientRect().width) throw new BrowserError('browser_input_not_visible');
+					this.page.webview.focus();
+				}
+				admission?.();
+				if (method === 'review') return await this.reviewAction(params);
+				if (method === 'reviewed') return await this.performReviewed(text(params, 'id'), signal, text(params, 'expectedOperation'));
 				return await this.perform(method, params, signal);
 			} finally {
+				this.operationAdmission = undefined;
+				this.providerInputCheck = undefined;
 				if (!signal.aborted) {
 					for (const session of [undefined, ...this.frames.values()]) {
 						try {
@@ -237,6 +328,45 @@ export class BrowserAutomation {
 				}
 			}
 		});
+	}
+	private async reviewAction(params: Record<string, unknown>): Promise<BrowserActionReview> {
+		this.actionReview = undefined;
+		const action = structuredClone(params.action) as BrowserReviewableAction;
+		if (!action || !['click', 'keypress'].includes(action.kind) || !action.ref
+			|| (action.kind === 'keypress' && (typeof action.key !== 'string' || action.key.length > 40)))
+			throw new BrowserError('browser_invalid_argument');
+		const { entry, objectId } = await this.resolve({ ...action.ref });
+		const material = await this.call(objectId, entry, READ_ACTION_REVIEW) as Omit<BrowserActionReview, 'id' | 'target' | 'action' | 'expiresAt' | 'pageUrl'>;
+		this.checkRevision({ ...action.ref });
+		const review: BrowserActionReview = { ...material, id: crypto.randomUUID(), action,
+			target: { pageId: this.page.state.id, profileId: this.page.profileId, generation: this.page.generation },
+			expiresAt: Date.now() + 120_000, pageUrl: this.page.state.url };
+		this.actionReview = { review, material: JSON.stringify(material) };
+		return structuredClone(review);
+	}
+	private async performReviewed(id: string, signal: AbortSignal, expectedOperation: string): Promise<unknown> {
+		const saved = this.actionReview;
+		this.actionReview = undefined; // Consume before any await, including a failed attempt.
+		if (!saved || saved.review.id !== id || Date.now() >= saved.review.expiresAt
+			|| (expectedOperation && saved.review.action.kind !== expectedOperation))
+			throw new BrowserError('browser_action_review_changed');
+		const { review, material } = saved, params = { ...review.action.ref, ...('key' in review.action ? { key: review.action.key } : {}) };
+		const { entry, objectId } = await this.resolve(params);
+		const guard = async () => {
+			this.operationAdmission?.(); this.checkRevision(params);
+			if (Date.now() >= review.expiresAt || this.page.state.url !== review.pageUrl
+				|| JSON.stringify(await this.call(objectId, entry, READ_ACTION_REVIEW)) !== material)
+				throw new BrowserError('browser_action_review_changed');
+			this.operationAdmission?.(); this.checkRevision(params);
+		};
+		await guard();
+		this.providerInputCheck = async (_method, input) => {
+			await guard();
+			const valid = await this.call(objectId, entry, 'function(x,y){return this.isConnected&&(x===undefined?this.ownerDocument.activeElement===this:this.contains(this.ownerDocument.elementFromPoint(x,y)))}', [input.x, input.y]);
+			if (valid !== true) throw new BrowserError('browser_action_review_changed');
+		};
+		await this.perform(review.action.kind, params, signal);
+		return { operation: review.action.kind };
 	}
 	private async perform(method: string, params: Record<string, unknown>, signal: AbortSignal): Promise<unknown> {
 		switch (method) {
@@ -350,26 +480,48 @@ export class BrowserAutomation {
 			case 'check':
 			case 'get': {
 				const { entry, objectId } = await this.resolve(params);
+				const checkDraft = async () => {
+					if (method !== 'fill' || !('expectedValue' in params)) return;
+					if (typeof params.expectedValue !== 'string') throw new BrowserError('browser_invalid_argument');
+					const current = await this.call(objectId, entry, READ_ELEMENT_VALUE) as { value?: string };
+					if (current?.value !== params.expectedValue) throw new BrowserError('browser_workspace_draft_changed');
+				};
 				if (method === 'get')
 					return this.call(
 						objectId,
 						entry,
-						'function(){return {text:this.innerText||this.textContent,tag:this.tagName,attributes:Object.fromEntries([...this.attributes].filter(a=>!/^value$/i.test(a.name)).map(a=>[a.name,a.value]))}}',
+						READ_ELEMENT_VALUE,
 					);
+				await checkDraft();
 				await this.call(objectId, entry, 'function(){this.focus()}');
 				this.checkRevision(params);
+				if (method === 'fill' || method === 'type') {
+					// DOM focus alone can leave Electron's input routing on a different visible guest.
+					const point = await this.point(params);
+					await this.send('Input.dispatchMouseEvent', { type: 'mouseMoved', x: point.x, y: point.y }, point.session);
+					if (await this.call(objectId, entry, 'function(x,y){const editable=this.isContentEditable||this.tagName==="TEXTAREA"||(this.tagName==="INPUT"&&!["button","checkbox","color","file","hidden","image","radio","range","reset","submit"].includes(this.type));return editable&&this.isConnected&&!this.disabled&&!this.readOnly&&this.contains(document.elementFromPoint(x,y))}', [point.x, point.y]) !== true)
+						throw new BrowserError('browser_workspace_control_changed');
+					this.checkRevision(params);
+					await this.send('Input.dispatchMouseEvent', { type: 'mousePressed', button: 'left', clickCount: 1, x: point.x, y: point.y }, point.session);
+					try { this.checkRevision(params); }
+					finally { await this.send('Input.dispatchMouseEvent', { type: 'mouseReleased', button: 'left', clickCount: 1, x: point.x, y: point.y }, point.session); }
+				}
 				if (method === 'fill')
 					await this.call(
 						objectId,
 						entry,
 						'function(){if(this.type==="file")throw Error("file input");if(this.isContentEditable){const r=document.createRange();r.selectNodeContents(this);const s=getSelection();s.removeAllRanges();s.addRange(r)}else if(this.select){this.select()}else throw Error("not editable")}',
 					);
-				if (method === 'type' || method === 'fill')
+				if (method === 'type' || method === 'fill') {
+					if (await this.call(objectId, entry, 'function(){return this.isConnected&&document.activeElement===this}') !== true)
+						throw new BrowserError('browser_input_focus_changed');
+					await checkDraft();
 					await this.send(
 						'Input.insertText',
 						{ text: text(params, 'value') || text(params, 'input') },
 						entry.sessionId,
 					);
+				}
 				if (method === 'select')
 					await this.call(
 						objectId,
@@ -387,6 +539,13 @@ export class BrowserAutomation {
 				return { performed: method };
 			}
 			case 'keypress': {
+				let session: string | undefined;
+				if (params.element !== undefined) {
+					const { entry, objectId } = await this.resolve(params);
+					await this.call(objectId, entry, 'function(){this.focus()}');
+					this.checkRevision(params);
+					session = entry.sessionId;
+				}
 				const parts = text(params, 'key').split('+');
 				const key = parts.pop() ?? '';
 				const mask: Record<string, number> = { Alt: 1, Control: 2, Ctrl: 2, Meta: 4, Command: 4, Shift: 8 };
@@ -420,13 +579,13 @@ export class BrowserAutomation {
 						: !modifiers && key.length === 1
 							? { text: key }
 							: {}),
-				});
+				}, session);
 				await this.send('Input.dispatchKeyEvent', {
 					type: 'keyUp',
 					key,
 					modifiers,
 					windowsVirtualKeyCode: code,
-				});
+				}, session);
 				return { key };
 			}
 			default:
@@ -462,6 +621,8 @@ export class BrowserAutomation {
 		throw new BrowserError('browser_timeout');
 	}
 	async screenshot(full = false): Promise<string> {
+		// A hidden workbench page has no compositor surface; native capture otherwise waits until timeout.
+		if (!this.page.webview.getBoundingClientRect().width) throw new BrowserError('browser_capture_not_visible');
 		await this.ensure();
 		const params: Record<string, unknown> = { format: 'png', captureBeyondViewport: full };
 		if (full) {
@@ -532,7 +693,11 @@ export class BrowserAutomation {
 		for (const off of this.cleanups.splice(0)) off();
 		this.release?.();
 		this.frames.clear();
+		this.requests.clear();
+		this.consoleMessages.length = 0;
+		this.networkFailures.length = 0;
 		this.snapshot = undefined;
 		this.designHandler = undefined;
+		this.actionReview = undefined;
 	}
 }

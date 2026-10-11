@@ -1,0 +1,281 @@
+{
+  "status": "fixed-targeted-native-protocol-and-ui-verified-live-model-quality-pending",
+  "ticket": "T-07",
+  "contracts": [
+    "AC-020",
+    "AC-022",
+    "AC-026"
+  ],
+  "nativeRoot": "C:\\Users\\cdewta\\AppData\\Local\\Temp\\nand-news-brief-review-ae3a5c8175c94b37b9217637ee76fd8d\\evidence",
+  "native": {
+    "method": "Native Obsidian + published PTY + local Node CLI/native-hook fixture; no model/provider calls",
+    "passed": true,
+    "rows": [
+      {
+        "name": "reader-shows-current-chinese-analysis-reason-and-original-source",
+        "passed": true
+      },
+      {
+        "name": "native-stop-result-saved-and-markdown-rendered-with-source-links",
+        "passed": true
+      },
+      {
+        "name": "successful-brief-sends-no-notification-by-default",
+        "passed": true
+      },
+      {
+        "name": "edited-note-is-not-overwritten-and-reply-remains-recoverable",
+        "passed": true
+      },
+      {
+        "name": "failure-notification-has-working-opener-without-automation-fields",
+        "passed": true
+      },
+      {
+        "name": "notification-opens-news-detail",
+        "passed": true
+      },
+      {
+        "name": "local-save-retry-keeps-quota-file-identity-and-annotation",
+        "passed": true
+      },
+      {
+        "name": "repeated-publish-is-idempotent-and-success-stays-quiet",
+        "passed": true
+      },
+      {
+        "name": "invalid-sections-reject-answer-without-replacing-saved-brief",
+        "passed": true
+      },
+      {
+        "name": "notifications-disabled-does-not-block-durable-brief",
+        "passed": true
+      },
+      {
+        "name": "new-interactive-session-is-discoverable-after-reader-mounted",
+        "passed": true,
+        "detail": "C:\\Users\\cdewta\\AppData\\Local\\Programs\\nodejs\\node.exe"
+      },
+      {
+        "name": "existing-agent-receives-one-unsent-bracketed-paste",
+        "passed": true,
+        "detail": {
+          "chars": 63,
+          "bracketed": true,
+          "tail": [
+            35201,
+            12290,
+            27,
+            91,
+            50,
+            48,
+            49,
+            126
+          ]
+        }
+      },
+      {
+        "name": "original-opens-only-on-explicit-click-and-falls-back-when-browser-disabled",
+        "passed": true
+      },
+      {
+        "name": "favorite-note-uses-chinese-summary-and-original-url",
+        "passed": true
+      },
+      {
+        "name": "open-saved-note-uses-native-markdown-leaf",
+        "passed": true
+      },
+      {
+        "name": "width-claude-code-light-1200",
+        "passed": true,
+        "detail": {
+          "width": 832,
+          "scroll": 832
+        }
+      },
+      {
+        "name": "width-claude-code-light-800",
+        "passed": true,
+        "detail": {
+          "width": 692,
+          "scroll": 692
+        }
+      },
+      {
+        "name": "width-claude-code-light-420",
+        "passed": true,
+        "detail": {
+          "width": 364,
+          "scroll": 364
+        }
+      },
+      {
+        "name": "width-claude-code-dark-1200",
+        "passed": true,
+        "detail": {
+          "width": 832,
+          "scroll": 832
+        }
+      },
+      {
+        "name": "width-claude-code-dark-800",
+        "passed": true,
+        "detail": {
+          "width": 692,
+          "scroll": 692
+        }
+      },
+      {
+        "name": "width-claude-code-dark-420",
+        "passed": true,
+        "detail": {
+          "width": 364,
+          "scroll": 364
+        }
+      },
+      {
+        "name": "width-codex-light-1200",
+        "passed": true,
+        "detail": {
+          "width": 832,
+          "scroll": 832
+        }
+      },
+      {
+        "name": "width-codex-light-800",
+        "passed": true,
+        "detail": {
+          "width": 692,
+          "scroll": 692
+        }
+      },
+      {
+        "name": "width-codex-light-420",
+        "passed": true,
+        "detail": {
+          "width": 364,
+          "scroll": 364
+        }
+      },
+      {
+        "name": "width-codex-dark-1200",
+        "passed": true,
+        "detail": {
+          "width": 832,
+          "scroll": 832
+        }
+      },
+      {
+        "name": "width-codex-dark-800",
+        "passed": true,
+        "detail": {
+          "width": 692,
+          "scroll": 692
+        }
+      },
+      {
+        "name": "width-codex-dark-420",
+        "passed": true,
+        "detail": {
+          "width": 364,
+          "scroll": 364
+        }
+      },
+      {
+        "name": "width-obsidian-light-1200",
+        "passed": true,
+        "detail": {
+          "width": 832,
+          "scroll": 832
+        }
+      },
+      {
+        "name": "width-obsidian-light-800",
+        "passed": true,
+        "detail": {
+          "width": 692,
+          "scroll": 692
+        }
+      },
+      {
+        "name": "width-obsidian-light-420",
+        "passed": true,
+        "detail": {
+          "width": 364,
+          "scroll": 364
+        }
+      },
+      {
+        "name": "width-obsidian-dark-1200",
+        "passed": true,
+        "detail": {
+          "width": 832,
+          "scroll": 832
+        }
+      },
+      {
+        "name": "width-obsidian-dark-800",
+        "passed": true,
+        "detail": {
+          "width": 692,
+          "scroll": 692
+        }
+      },
+      {
+        "name": "width-obsidian-dark-420",
+        "passed": true,
+        "detail": {
+          "width": 364,
+          "scroll": 364
+        }
+      },
+      {
+        "name": "cache-clear-retains-readable-brief-and-favorite",
+        "passed": true
+      },
+      {
+        "name": "no-host-errors-before-restart",
+        "passed": true,
+        "detail": []
+      },
+      {
+        "name": "restart-rediscovers-renamed-visible-notes-without-cache-or-cli",
+        "passed": true
+      },
+      {
+        "name": "four-real-process-calls-and-each-prompt-cites-two-source-urls",
+        "passed": true
+      },
+      {
+        "name": "owned-brief-processes-have-exited",
+        "passed": true
+      },
+      {
+        "name": "no-host-errors-after-restart",
+        "passed": true,
+        "detail": []
+      }
+    ]
+  },
+  "automated": [
+    "140 targeted news/notification/automation/golden tests passed; full suite 464 passed, 4 platform skips, 93 passed files + 1 skipped, 157.12 seconds.",
+    "Build, zero-warning lint, i18n 2927 keys, architecture 787 modules and bundle budgets pass.",
+    "Standard docs check remains blocked by inherited Speculo planning language/title exceptions; unchanged planning-exception checker passes 541 Markdown files / 521 local links / 318 external links."
+  ],
+  "changes": [
+    "Exact linked URL validation and three populated Markdown sections, bounded 12-source/1500-character brief input.",
+    "Shared journal quota; per-story concurrent dedupe; durable note failure remains received/needs-attention; 0-call save retry/startup recovery; explicit retry for unknown CLI outcome.",
+    "Visible brief index and Markdown rendering/open; stable renamed notes and merged story aliases; preserve annotations/frontmatter/generated-region edits.",
+    "Current-revision analysis only, category/tags detail, atomic reader state, refreshed live session picker and one unsent paste.",
+    "Default failure notifications and selected channel availability; inbox Open uses registered opener capability without changing public notification schema."
+  ],
+  "limitations": [
+    "Native CLI was a local Node fixture through the published helper and native Stop hooks; no real provider/model output quality was tested.",
+    "System-browser fallback was intercepted in the native window; embedded browser dispatch covered by unit tests, real browser integration remains for browser-domain review.",
+    "Windows Obsidian 1.13.7 only; no mobile/macOS/Linux execution."
+  ],
+  "screenshotsInspected": [
+    "Previous equivalent run: brief-codex-dark-420.png at nand-news-brief-review-47eb2847c01c4f8f9f4dfbfb6cabbe29/evidence; final rerun has same rendered content."
+  ]
+}

@@ -29,6 +29,17 @@ const delivery = (system = false) => {
 const request = (id = 'run') => ({ id, title: 'Title', body: 'Body', channels: ['in-app', 'system'] as NotificationChannelId[] });
 
 describe('NotificationService', () => {
+	it('opener capability supports news records without an automation target and changes with the sender', async () => {
+		let active = true;
+		const inbox = new NotificationService(new MemoryStorage(), 'inbox.json', async () => {}, delivery().adapter, async record => active && record.id.startsWith('news:'));
+		await inbox.load(); await inbox.send(request('news:run:complete'));
+		expect(inbox.records[0]!.target).toBeUndefined(); expect(inbox.records[0]!.source).toBeUndefined();
+		expect(await inbox.canOpen(inbox.records[0]!)).toBe(true);
+		let redraws = 0; inbox.subscribe(() => { redraws++; });
+		active = false; inbox.refreshOpeners();
+		expect(await inbox.canOpen(inbox.records[0]!)).toBe(false); expect(redraws).toBe(1);
+		await inbox.shutdown();
+	});
 	it('delivers each request id once, across concurrent calls and restarts', async () => {
 		const disk = new MemoryStorage();
 		const { adapter, sent } = delivery();

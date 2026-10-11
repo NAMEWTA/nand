@@ -26,6 +26,10 @@ shared_path_owners: ["<Path>main.js</Path> => 2026-10-08-browser-ai-workbench::T
 
 # Ticket T-05: 交付 ChatGPT 真实单站闭环 PoC
 
+<!-- ACTUAL-CODE-REVIEW:START -->
+2026-10-11 实际代码审查：[T-05.md](../evidence/T-05.md)。本票下文保留原规划合同与基线；当前实现、修复、验证及未验证条件以该记录为准。原“仅规划／未授权实施／必须提交”的阶段约束不适用于用户已授权的本次工作区审查；提交与远程操作仍未执行。
+<!-- ACTUAL-CODE-REVIEW:END -->
+
 - Ticket：<Path>{roots.state}/specdev/changes/2026-10-08-browser-ai-workbench/ticket/05-chatgpt-workspace-poc.md</Path>
 - 总控Map：<Path>{roots.state}/specdev/changes/2026-10-08-browser-ai-workbench/tickets-map.md</Path>
 - Spec：<Path>{roots.state}/specdev/changes/2026-10-08-browser-ai-workbench/spec.md</Path>
@@ -37,7 +41,7 @@ shared_path_owners: ["<Path>main.js</Path> => 2026-10-08-browser-ai-workbench::T
 
 **目标与可观察产出：** ChatGPT在既有任务/模板快照/持久intent/结果UI中完成真实发送与当前轮采集，作为三站PoC之一。
 
-**当前事实：** NAND没有ChatGPT adapter；复用T-03契约，固定MAIW provider目录提供登录/防护、conversation/current branch node、父节点与当前回答，重生成/切分支不能串答案参考，不包含宿主实测。
+**规划时基线：** NAND没有ChatGPT adapter；复用T-03契约，固定MAIW provider目录提供登录/防护、conversation/current branch node、父节点与当前回答，重生成/切分支不能串答案参考，不包含宿主实测。
 
 **来源：** AC-014, AC-007, AC-016, AC-026；issue #142, #145；<Path>{roots.state}/specdev/changes/2026-10-08-browser-ai-workbench/reference-analysis.md</Path>。深度 deep：涉及持久数据/公共接口/进程或权限的跨边界合同，必须记录恢复与兼容。
 

@@ -185,6 +185,10 @@
 	background: var(--db-bg-hover);
 }
 
+@media (prefers-reduced-motion: reduce) {
+	.dashboard-sidebar-calendar .dashboard-calendar.is-compact .dashboard-calendar-cell.is-clickable { transition: none; }
+}
+
 .dashboard-sidebar-calendar .dashboard-calendar.is-compact .dashboard-calendar-cell.is-today {
 	background: color-mix(in srgb, var(--db-accent) 22%, transparent);
 	color: var(--db-text);

@@ -198,6 +198,9 @@ select.nand-input:focus { border-color: var(--interactive-accent); box-shadow: v
 
 @media (prefers-reduced-motion: reduce) {
 	.nand-skeleton { animation: none; }
+	button.nand-btn,
+	button.nand-icon-btn,
+	.nand-list-item { transition: none; }
 }
 @media (pointer: coarse) {
 	button.nand-btn,

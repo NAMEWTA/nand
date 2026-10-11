@@ -1,5 +1,6 @@
 import type { ModuleManifest } from '../../app/contracts/module';
 import { AUTOMATION_SOURCES } from '../automations/api';
+import { HOME_WIDGETS, HOME_WORKBENCH } from './api';
 
 export const homeManifest: ModuleManifest = {
 	id: 'home',
@@ -10,6 +11,7 @@ export const homeManifest: ModuleManifest = {
 	platforms: { desktop: true, mobile: true },
 	defaultEnabled: true,
 	activation: 'startup',
-	contributes: [AUTOMATION_SOURCES],
+	provides: [HOME_WORKBENCH],
+	contributes: [AUTOMATION_SOURCES, HOME_WIDGETS],
 	load: () => import('./module'),
 };

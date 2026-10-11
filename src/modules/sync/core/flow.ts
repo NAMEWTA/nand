@@ -25,6 +25,8 @@ export interface StepResult {
 	upstreamSet?: boolean;
 	/** Push only: why unpushed commits were not squashed, or that they were. */
 	squash?: SquashOutcome;
+	/** A durable refs/nand/pre-squash pointer keeps this original history available after a failed push. */
+	recovery?: { head: string; base: string };
 }
 
 export type SquashOutcome = 'squashed' | 'diverged' | 'staged' | 'single' | 'merges' | 'referenced' | 'target-mismatch';
@@ -81,6 +83,7 @@ export async function commitAndSync(repo: GitRepo, options: SyncOptions): Promis
 export async function commitStep(repo: GitRepo, status: RepoStatus, options: Pick<SyncOptions, 'mode' | 'autoStageOnEmptyIndex' | 'message'>): Promise<StepResult> {
 	try {
 		if (status.conflicted.length) throw new GitError('conflict');
+		await repo.assertIndexWithinScope();
 		const resolved = resolveCommitMode(options.mode, status.staged.length > 0, options.autoStageOnEmptyIndex);
 		if (resolved === 'nothing') {
 			const pending = status.unstaged.length + status.untracked.length > 0;
@@ -127,6 +130,8 @@ const sameTarget = (left: { remote: string; ref: string } | null | undefined, ri
 
 /** Push the current branch to the resolved push target. Without an upstream, push with `-u` after the caller agrees. */
 export async function pushStep(repo: GitRepo, options: Pick<SyncOptions, 'squash' | 'confirmUpstream' | 'pushTarget'>): Promise<StepResult> {
+	let recovery: StepResult['recovery'];
+	let squash: SquashOutcome | undefined;
 	try {
 		const status = await repo.status();
 		const { operation } = await repo.state();
@@ -146,31 +151,28 @@ export async function pushStep(repo: GitRepo, options: Pick<SyncOptions, 'squash
 			await repo.push(remote, `HEAD:refs/heads/${branch}`, true);
 			return { step: 'push', state: 'done', count, upstreamSet: true };
 		}
-		if (status.upstreamGone) {
-			// The remote branch was deleted (or never fetched): pushing recreates it with everything on this branch.
-			await repo.push(upstream.remote, `HEAD:${upstream.ref}`);
-			return { step: 'push', state: 'done' };
-		}
+		await repo.assertPushSafe(branch);
 		const destination = await repo.pushTarget(branch);
 		const tracksUpstream = sameTarget(destination, upstream);
-		const aheadBase = tracksUpstream || !destination ? '@{u}' : await repo.remoteTip(destination.remote, destination.ref);
-		const ahead = aheadBase ? await repo.revCount(`${aheadBase}..HEAD`) : await repo.revCount('HEAD');
-		if ((tracksUpstream || !destination) && !ahead) return { step: 'push', state: 'nothing' };
-		let squash: SquashOutcome | undefined;
+		const aheadBase = tracksUpstream && !status.upstreamGone ? '@{u}' : destination ? await repo.remoteTip(destination.remote, destination.ref) : null;
+		let ahead = aheadBase ? await repo.revCount(`${aheadBase}..HEAD`) : destination ? await repo.revCount('HEAD') : undefined;
 		if (options.squash) {
 			const declared = options.pushTarget ?? destination;
 			if (!destination || !sameTarget(declared, destination)) squash = 'target-mismatch';
-			else if (tracksUpstream) squash = await squashUnpushed(repo, branch);
 			else {
-				const tip = await repo.remoteTip(destination.remote, destination.ref);
+				const tip = await repo.fetchPushTip(destination.remote, destination.ref);
+				if (tip) ahead = await repo.revCount(`${tip}..HEAD`);
 				squash = tip ? await squashUnpushed(repo, branch, tip) : 'target-mismatch';
+				if (squash === 'squashed' && tip) recovery = { head: status.head, base: tip };
 			}
 		}
-		if (destination) await repo.push(destination.remote, `HEAD:${destination.ref}`);
-		else await repo.pushConfigured();
-		return { step: 'push', state: 'done', count: squash === 'squashed' ? 1 : ahead, squash };
+		// Let Git enforce current/simple/upstream and all configured refspecs, even when the pull upstream is gone.
+		const result = await repo.pushConfigured();
+		const updates = result.stdout.split(/\r?\n/).filter(line => /^[ =*+!-]\t/.test(line));
+		const unchanged = updates.length > 0 && updates.every(line => line.startsWith('=\t'));
+		return { step: 'push', state: unchanged ? 'nothing' : 'done', count: unchanged ? 0 : squash === 'squashed' ? 1 : ahead, squash };
 	} catch (error) {
-		return failed('push', error);
+		return { ...failed('push', error), squash, recovery };
 	}
 }
 
@@ -190,6 +192,7 @@ export async function squashUnpushed(repo: GitRepo, branch: string, base = '@{u}
 	const oldest = commits[commits.length - 1]!;
 	if ((await repo.otherRefsContaining(oldest, branch)).length) return 'referenced';
 	const head = commits[0]!;
+	await repo.saveSquashHead(head);
 	await repo.resetSoft(base);
 	try {
 		await repo.commitReusing(head);

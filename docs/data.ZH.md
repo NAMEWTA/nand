@@ -9,16 +9,28 @@
 | 数据 | 位置 |
 |---|---|
 | 看板 | 你选择的看板笔记（第一份是库根目录下的 `dashboard.md`） |
+| 看板技能按钮 | 各看板 YAML 的 `skills` 字段，包含模板、智能体、目标及每个按钮的预览选择 |
+| 资料库和文件夹的笔记模板 | 列的 `library.templatePaths` 有序列表。列表缺失时只读投影旧 `templatePath` 为单项，不写迁移；显式 `[]` 表示空白笔记。保存配置时另将首项镜像到 `templatePath`，供旧版读取。 |
+| 表格列偏好 | 每分区的 `library.tableOrder` 和 `library.tableHidden` 列表。列标识为 `file.name`、`file.modified`，以及表示笔记属性的 `property:<字段名>`。缺席字段保留偏好，重置只删除这两个列表；卡片徽章另用 `visibleProperties`。 |
+| 工作流分区 | 各看板列的 `pipeline` YAML 对象保存根目录、阶段、筛选、模板、列宽和限定范围的技能。笔记保存状态、任务、`due`、`remind`；在工作流中启用提醒时，还会在 `nandAutomation` 中保存现有格式的自动化定义及所属设备 id。不要在笔记间复制该定义的 id。 |
+| 已记住的技能名称与额外目录 | `.nand/config/devices/<device-id>.json` 的 `agent` 命名空间，字段为 `knownSkills`、`skillDirectories`；名称按智能体隔离 |
 | 人物、企业及其资料文件 | 你选择的档案文件夹，默认是 `档案/`，其中有 `个人档案/` 和 `企业档案/` |
 | 独立的自动化操作 | `NAND/自动化/<名称>-<短 ID>/操作.md` |
 | 习惯、记账、阅读、番茄钟 | `NAND/` 下各领域目录（`NAND/习惯`、`NAND/记账`、`NAND/阅读`、`NAND/番茄钟`） |
 | 全局设置 | `.nand/config/settings.json` |
+| 已保存的外观 | 全局设置中的 `home.appearancePresets` 保存 `{id,name,theme,home}` 快照，`activeAppearancePresetId` 标记上次保存或应用的组合。主题字段为 `preset`、`headings`、`emphasis`、`accentLight`、`accentDark`、`lineHeight`；首页字段为 `bgImage`、`bgDim`、`bgBlur`、`bgSize`、可选 `bgFocal`、`surfaceOpacity`、`glassBlur`、`radiusScale`、`fontScale`。不包含看板路径、小组件配置、凭证或设备设置。应用时通过同一设置写入批次更新既有 `theme` 和 `home` 命名空间。 |
 | 设备设置 | `.nand/config/devices/<device-id>.json` |
 | 图标及其备份 | `.nand/icons/` |
 | 评论与锚点 | `.nand/editor/comments/` |
 | 自动化运行、通知回执 | `.nand/automation/<device-id>/`、`.nand/notifications/<device-id>/` |
+| 智能体派发快照 | 同一自动化 `runtime.json`，包含最终提示词、文件引用、来源、调用 ID 和交付回执 |
 | 终端索引、历史标注、自动化会话 | `.nand/terminal-agent/<device-id>/` |
-| 浏览历史与站点权限 | `.nand/browser/<device-id>/` |
+| 浏览历史、账号元数据与站点权限 | `.nand/browser/<device-id>/state.json` 与 `profiles.json` |
+| 新闻缓存、分析、阅读状态和 CLI 回执 | `.nand/news/<device-id>/`；保留与恢复规则见[新闻](news.ZH.md) |
+| 新闻分析策略 | 库级设置 `news.prefilter` 保存屏蔽词、最少字符数和允许的语言；`news.vocabulary` 保存分类、主题和实体词表；`news.templates` 保存四类可编辑模板。新分析回执在实际提示词哈希与文本之外保存词表快照，恢复时不会用后来的设置重新解释已保存回复。 |
+| 新闻本地编排参数 | 库级设置 `news.understandFloor`、`news.heatRules`、`news.editionRules` 和 `news.groupingRules` 保存数值策略。热度观测携带实际规则版本；新分析计划和已接收分析保存 `groupingConfidence`，修改设置只影响后续批次，不重新解释已保存的成员关系。 |
+| 新闻小组件配置 | 库级设置的 `news.widgets`：`{id,mode,name,count,showSummary,staleMinutes,viewId?}`，模式为 `featured`、`hot`、`view`；`viewId` 引用 `news.views`。看板 Markdown 只保存成员的 provider/kind/instance ID 与布局，移除成员保留配置。 |
+| 新闻收藏、简报与日报 | 默认目录为 `NAND/新闻/收藏/`、`NAND/新闻/简报/`、`NAND/新闻/日报/`，独立于缓存保留。库级设置 `news.favoriteFolder` 和 `news.editionFolder` 修改新笔记的目标目录；已有带身份属性的笔记在库内可见目录间移动后仍保留身份。`news.retentionDays` 控制原始资料和分析的保留期，CLI 回执历史仍为 30 天。 |
 | 恢复草稿与看板冲突副本 | `.nand/recovery/` |
 | 缓存（微信读书进度） | `.nand/cache/` |
 | 导出为笔记的智能体对话 | `NAND Exports/` |
@@ -28,6 +40,10 @@
 | 独立的智能体登录（可选） | 插件目录下的 `accounts/` |
 
 `档案`、`个人档案`、`企业档案`、`NAND/自动化`、`NAND/习惯`、`NAND/记账`、`NAND/阅读`、`NAND/番茄钟` 这些文件夹名在所有界面语言下都是中文，`基本信息.md`、`操作.md` 等文件名也一样。没有设置文件的库从默认值开始。
+
+## 私有文件权限
+
+在桌面 macOS 和 Linux 上，NAND 以 `0700` 创建 `.nand/` 目录，以 `0600` 创建文件，包括恢复副本与原生历史数据库。启动时对既有托管路径做一次有界权限修复；权限失败会记录，不删除数据。私有路径中的软链接会被拒绝。普通笔记保持原权限，Windows、移动端和非文件系统适配器保留原有行为。Git 不保留这些权限位，因此克隆库首次加载时会重新应用。权限限制本机访问，不会加密文件，也不会阻止你同步它们。
 
 ## 库之外的数据
 
@@ -68,5 +84,7 @@
 看板上的状态区提供“复制当前草稿”“复制副本路径”“重试保存”和“重新载入原文”。副本保存失败时页面保持打开：先复制草稿，修复磁盘或权限后再重试。重新载入需要确认，并保留恢复副本。副本是包含原始、当前和外部文本的 JSON，不能当作看板 Markdown 去覆盖看板。强制结束进程或磁盘不可写时，不能保证尚未落盘的输入被保存。
 
 ## 格式与语言
+
+图片裁剪位置保存在看板 Markdown 中：`banner.imagePos` 按图片路径保存 `"x,y"` 字符串，卡片的 `coverPos` 行保存封面位置。坐标是 0 到 100 的整数百分比，未设置时为 `50,50`。只读时仅对显示归一化，越界值限制在范围内，无效值按居中显示，不自动改写原文。编辑或重置某张图片只改它的位置，其他原始条目（包括未使用的路径）保留，图片文件本身不变。
 
 语言设置只影响界面，从不改变文件路径、身份标识、笔记正文或操作参数。

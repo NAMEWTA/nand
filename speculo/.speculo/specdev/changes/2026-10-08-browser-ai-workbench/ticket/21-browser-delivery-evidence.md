@@ -26,6 +26,10 @@ shared_path_owners: ["<Path>main.js</Path> => 2026-10-08-browser-ai-workbench::T
 
 # Ticket T-21: 完成八站产品支持证据、双语指南与许可归属
 
+<!-- ACTUAL-CODE-REVIEW:START -->
+2026-10-11 实际代码审查：[T-21.md](../evidence/T-21.md)。本票下文保留原规划合同与基线；当前实现、修复、验证及未验证条件以该记录为准。原“仅规划／未授权实施／必须提交”的阶段约束不适用于用户已授权的本次工作区审查；提交与远程操作仍未执行。
+<!-- ACTUAL-CODE-REVIEW:END -->
+
 - Ticket：<Path>{roots.state}/specdev/changes/2026-10-08-browser-ai-workbench/ticket/21-browser-delivery-evidence.md</Path>
 - 总控Map：<Path>{roots.state}/specdev/changes/2026-10-08-browser-ai-workbench/tickets-map.md</Path>
 - Spec：<Path>{roots.state}/specdev/changes/2026-10-08-browser-ai-workbench/spec.md</Path>
@@ -37,7 +41,7 @@ shared_path_owners: ["<Path>main.js</Path> => 2026-10-08-browser-ai-workbench::T
 
 **目标与可观察产出：** 在已逐票功能完成基础上收束公开支持表、真实宿主使用指南、来源许可与产物一致性；不以这票替代前面真实验收。
 
-**当前事实：** 研究已经读取主参考与全部指定候选，尚无NAND实现或账号实测；后续前20票每票都必须具备自身验证，本票只交付最终用户可用说明及组合验收。
+**规划时基线：** 研究已经读取主参考与全部指定候选，尚无NAND实现或账号实测；后续前20票每票都必须具备自身验证，本票只交付最终用户可用说明及组合验收。
 
 **来源：** AC-002, AC-015, AC-027, AC-028, AC-029, AC-030, AC-031, AC-039, AC-040；issue #142, #145；<Path>{roots.state}/specdev/changes/2026-10-08-browser-ai-workbench/reference-analysis.md</Path>。深度 standard：涉及明确的垂直行为及现有可复用接缝；验证按实际风险。
 

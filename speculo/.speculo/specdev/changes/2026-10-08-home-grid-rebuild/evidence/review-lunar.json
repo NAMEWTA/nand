@@ -1,0 +1,379 @@
+{
+  "ticket": "T-14",
+  "requirements": [
+    "AC-057",
+    "AC-058",
+    "AC-059",
+    "AC-060"
+  ],
+  "state": "implemented-native41-targeted137-phone-unverified",
+  "implementation": [
+    "Pure lazy lunar-calendar shared with original lunar UI; no duplicate converter or new dependency. Lunar month strings already include the leap prefix, so remove the duplicated prefix.",
+    "Strict civil and lunar validation; input conversion preserves the original solar ISO time and offset, precision and reminder flag. Invalid input cannot save; switching valid calendars preserves the same date.",
+    "Missing leap month uses same ordinary month; absent day uses month end only for annual recurrence, never for typed input. Missing/failed conversion cannot silently use solar anniversary.",
+    "Widget and automation source share current lunar year mapping and age; January before Lunar New Year uses the preceding lunar year. Solar midnight and Feb29-to-Mar1 behavior retained.",
+    "Owned Preact editor, bounded modal body and persistent footer, 32/44 px targets, nested background disposal and DOM-owned dialog closure when cached board hides. Settings-page disposal also closes owned anniversary editors."
+  ],
+  "sources": [
+    "https://www.hko.gov.hk/en/gts/time/calendar/text/files/T2020e.txt",
+    "https://www.hko.gov.hk/en/gts/time/calendar/text/files/T2021e.txt",
+    "https://www.hko.gov.hk/en/gts/time/calendar/text/files/T2023e.txt",
+    "https://www.hko.gov.hk/en/gts/time/calendar/text/files/T2025e.txt"
+  ],
+  "knownDates": [
+    "2020-05-24 lunar leap4/2 -> 2021-05-13 ordinary4/2",
+    "2023-03-21 lunar2/30 -> 2025-03-28 lunar2/29"
+  ],
+  "native": {
+    "evidence": "C:\\Users\\cdewta\\AppData\\Local\\Temp\\nand-home-lunar-review-d590efeb1e8548c7b80758c5d643a236\\evidence",
+    "harness": "scripts/obsidian-acceptance/home-lunar.mjs",
+    "checks": 41,
+    "rows": [
+      {
+        "name": "real-short-month-display",
+        "passed": true
+      },
+      {
+        "name": "real-missing-leap-month-display",
+        "passed": true
+      },
+      {
+        "name": "solar-feb29-retains-march1",
+        "passed": true
+      },
+      {
+        "name": "reminders-share-widget-dates",
+        "passed": true,
+        "detail": [
+          {
+            "id": "widget:leap",
+            "schedule": {
+              "kind": "once",
+              "at": 1745856000000
+            }
+          },
+          {
+            "id": "widget:short",
+            "schedule": {
+              "kind": "once",
+              "at": 1743091200000
+            }
+          },
+          {
+            "id": "widget:winter",
+            "schedule": {
+              "kind": "once",
+              "at": 1769270400000
+            }
+          },
+          {
+            "id": "widget:solar",
+            "schedule": {
+              "kind": "once",
+              "at": 1740758400000
+            }
+          }
+        ]
+      },
+      {
+        "name": "keyboard-opens-visible-widget-editor",
+        "passed": true
+      },
+      {
+        "name": "lunar-editor-loads-real-leap-parts",
+        "passed": true
+      },
+      {
+        "name": "calendar-switch-shows-original-solar-day",
+        "passed": true
+      },
+      {
+        "name": "roundtrip-preserves-exact-start-time-precision-and-reminder",
+        "passed": true
+      },
+      {
+        "name": "nonexistent-leap-month-blocks-save",
+        "passed": true
+      },
+      {
+        "name": "keyboard-ordinary-month-recovers-valid-date",
+        "passed": true
+      },
+      {
+        "name": "typed-missing-day-is-rejected-without-clamping",
+        "passed": true
+      },
+      {
+        "name": "out-of-range-month-is-rejected",
+        "passed": true
+      },
+      {
+        "name": "invalid-draft-cancel-writes-nothing",
+        "passed": true
+      },
+      {
+        "name": "solar-to-lunar-save-persists-true-solar-start",
+        "passed": true
+      },
+      {
+        "name": "lunar-system-light-500",
+        "passed": true,
+        "detail": {
+          "width": 311,
+          "scroll": 311,
+          "controls": true,
+          "saveVisible": true
+        }
+      },
+      {
+        "name": "lunar-system-light-800",
+        "passed": true,
+        "detail": {
+          "width": 471,
+          "scroll": 471,
+          "controls": true,
+          "saveVisible": true
+        }
+      },
+      {
+        "name": "lunar-system-light-1500",
+        "passed": true,
+        "detail": {
+          "width": 471,
+          "scroll": 471,
+          "controls": true,
+          "saveVisible": true
+        }
+      },
+      {
+        "name": "lunar-system-dark-500",
+        "passed": true,
+        "detail": {
+          "width": 311,
+          "scroll": 311,
+          "controls": true,
+          "saveVisible": true
+        }
+      },
+      {
+        "name": "lunar-system-dark-800",
+        "passed": true,
+        "detail": {
+          "width": 471,
+          "scroll": 471,
+          "controls": true,
+          "saveVisible": true
+        }
+      },
+      {
+        "name": "lunar-system-dark-1500",
+        "passed": true,
+        "detail": {
+          "width": 471,
+          "scroll": 471,
+          "controls": true,
+          "saveVisible": true
+        }
+      },
+      {
+        "name": "lunar-claude-code-light-500",
+        "passed": true,
+        "detail": {
+          "width": 311,
+          "scroll": 311,
+          "controls": true,
+          "saveVisible": true
+        }
+      },
+      {
+        "name": "lunar-claude-code-light-800",
+        "passed": true,
+        "detail": {
+          "width": 471,
+          "scroll": 471,
+          "controls": true,
+          "saveVisible": true
+        }
+      },
+      {
+        "name": "lunar-claude-code-light-1500",
+        "passed": true,
+        "detail": {
+          "width": 471,
+          "scroll": 471,
+          "controls": true,
+          "saveVisible": true
+        }
+      },
+      {
+        "name": "lunar-claude-code-dark-500",
+        "passed": true,
+        "detail": {
+          "width": 311,
+          "scroll": 311,
+          "controls": true,
+          "saveVisible": true
+        }
+      },
+      {
+        "name": "lunar-claude-code-dark-800",
+        "passed": true,
+        "detail": {
+          "width": 471,
+          "scroll": 471,
+          "controls": true,
+          "saveVisible": true
+        }
+      },
+      {
+        "name": "lunar-claude-code-dark-1500",
+        "passed": true,
+        "detail": {
+          "width": 471,
+          "scroll": 471,
+          "controls": true,
+          "saveVisible": true
+        }
+      },
+      {
+        "name": "lunar-eye-care-light-500",
+        "passed": true,
+        "detail": {
+          "width": 311,
+          "scroll": 311,
+          "controls": true,
+          "saveVisible": true
+        }
+      },
+      {
+        "name": "lunar-eye-care-light-800",
+        "passed": true,
+        "detail": {
+          "width": 471,
+          "scroll": 471,
+          "controls": true,
+          "saveVisible": true
+        }
+      },
+      {
+        "name": "lunar-eye-care-light-1500",
+        "passed": true,
+        "detail": {
+          "width": 471,
+          "scroll": 471,
+          "controls": true,
+          "saveVisible": true
+        }
+      },
+      {
+        "name": "lunar-eye-care-dark-500",
+        "passed": true,
+        "detail": {
+          "width": 311,
+          "scroll": 311,
+          "controls": true,
+          "saveVisible": true
+        }
+      },
+      {
+        "name": "lunar-eye-care-dark-800",
+        "passed": true,
+        "detail": {
+          "width": 471,
+          "scroll": 471,
+          "controls": true,
+          "saveVisible": true
+        }
+      },
+      {
+        "name": "lunar-eye-care-dark-1500",
+        "passed": true,
+        "detail": {
+          "width": 471,
+          "scroll": 471,
+          "controls": true,
+          "saveVisible": true
+        }
+      },
+      {
+        "name": "theme-resize-and-cancel-preserve-date",
+        "passed": true
+      },
+      {
+        "name": "date-edits-never-rewrite-board",
+        "passed": true
+      },
+      {
+        "name": "nested-background-editor-opens",
+        "passed": true
+      },
+      {
+        "name": "page-hide-closes-owned-and-nested-editors",
+        "passed": true
+      },
+      {
+        "name": "no-native-errors-before-restart",
+        "passed": true,
+        "detail": []
+      },
+      {
+        "name": "restart-retains-input-calendar-and-original-time",
+        "passed": true
+      },
+      {
+        "name": "popout-editor-mounts-in-owner-window",
+        "passed": true
+      },
+      {
+        "name": "module-disable-unmounts-widget-and-editor",
+        "passed": true
+      },
+      {
+        "name": "no-native-errors",
+        "passed": true,
+        "detail": []
+      }
+    ],
+    "inspected": [
+      "lunar-system-light-500.png",
+      "lunar-popout.png"
+    ]
+  },
+  "tests": {
+    "targeted": "137 passed /32 files (Home, golden, automations, notifications); 7 new tests including settings golden",
+    "safetyRegressions": "7 passed",
+    "build": "passed; main.js 3992828 bytes and styles.css 738707 bytes rebuilt",
+    "lint": "passed, zero warnings",
+    "architecture": "850 modules passed",
+    "i18n": "24 dictionaries /3132 keys passed",
+    "css": "108 files, 67 baselined files /150 groups, no new violations",
+    "styles": "109 sources /738707 bytes",
+    "bundle": "3992828-byte main.js, 738707-byte styles.css; within recorded adjusted output/style budgets; startup/module limits unchanged",
+    "docs": "Standard gate fails inherited planning bilingual/source-heading exceptions. Exact prior temporary scoped exception passes 548 Markdown /541 local /332 external links; no broader exceptions."
+  },
+  "documents": {
+    "backup": "C:\\Users\\cdewta\\AppData\\Local\\Temp\\nand-review-lunar-docs-c__5_mhl",
+    "documents": [
+      {
+        "path": "docs/dashboard.md",
+        "beforeCharacters": 19016,
+        "afterCharacters": 19932,
+        "backup": "C:\\Users\\cdewta\\AppData\\Local\\Temp\\nand-review-lunar-docs-c__5_mhl\\docs\\dashboard.md"
+      },
+      {
+        "path": "docs/dashboard.ZH.md",
+        "beforeCharacters": 7021,
+        "afterCharacters": 7355,
+        "backup": "C:\\Users\\cdewta\\AppData\\Local\\Temp\\nand-review-lunar-docs-c__5_mhl\\docs\\dashboard.ZH.md"
+      }
+    ],
+    "reason": "T14 solar/lunar input, recurrence policy and explicit errors; bilingual pair updated together."
+  },
+  "unverified": [
+    "Actual phone hardware",
+    "No live notification delivery waited for; shared real source dates verified in native app and fixed-clock source unit test."
+  ],
+  "limits": [
+    "No commit, push, version bump or release."
+  ]
+}

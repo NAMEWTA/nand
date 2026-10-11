@@ -15,6 +15,10 @@ ready_for_execution: false
 
 # NAND 全部 open issue — 整体 Goal Plan
 
+<!-- ACTUAL-CODE-REVIEW:START -->
+2026-10-11 实际代码审查与修复见 [review-report.md](review-report.md) 和 [review-progress.json](review-progress.json)。已逐项审查61票／180条AC；原规划文本、阶段 Gate 与历史授权说明保留为历史记录。用户当前已授权自主代码修复，未要求提交、推送、发版或关闭 issue；不以规划阶段“0/61／只规划”描述当前工作区，也不把真实账号或未跑平台 Gate 视为通过。
+<!-- ACTUAL-CODE-REVIEW:END -->
+
 ## 1. Outcome and Authority
 
 交付用户要求的所有功能与BUG修复，且遵循NAND目录、模块、lazy、api、settings、存储、设计系统、双语产品文档与许可规范。本轮完成的是全部规划；运行时实现、提交、远程写入未开始。父调度权威为Implementation Map/Plan，子合同仍归各Spec/Ticket。
@@ -127,7 +131,7 @@ Issue新内容单独抓新快照，引用原source不覆盖。子Spec/Ticket/Ski
 
 ## 7. Progress and Decisions
 
-规划成果已就绪；产品执行0/61，issue关闭0/13。status=blocked与ready_for_execution=false仅表示本轮止于plan、执行授权未开，不代表规划缺少产品决定。所有已确认用户选择见总览/各LOG；不再重问相同边界。
+历史规划阶段曾记录产品执行0/61、issue关闭0/13。2026-10-11当前代码审查已覆盖61票及180条AC，并修复实际缺陷；每项本地证据与未验证条件见review-report及各票Evidence。原status/ready_for_execution是规划快照，不作为本次用户已授权审查的阻断条件。issue关闭、提交、推送和发布仍未执行。
 
 恢复入口为父tickets-map.md，先ticket-control只读检查，再P run/resume。先核真实授权和环境，按Ready frontier动态派发。即便所有票done，G-AGGREGATE未通过仍不得宣布整体完成。
 

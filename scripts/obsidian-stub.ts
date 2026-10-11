@@ -6,6 +6,13 @@ import './module-strings';
 import { El } from './mini-dom';
 
 export const requestUrl = async (): Promise<{ json: unknown }> => ({ json: {} });
+/** Parsing-only stand-in; callers extract text and never mount this fragment. */
+export function sanitizeHTMLToDom(html: string): DocumentFragment {
+	const document = new DOMParser().parseFromString('<html><body></body></html>', 'text/html');
+	const template = document.createElement('template');
+	template.innerHTML = html;
+	return template.content;
+}
 export const getIconIds = (): string[] => ['file-text', 'star', 'search'];
 
 // Modal base for config-modal tests: wire contentEl/containerEl to mini-DOM
@@ -138,6 +145,7 @@ export function normalizePath(path: string): string {
 	return path;
 }
 export const Platform = { isMacOS: false, isWin: false, isMobile: false, isMobileApp: false, isDesktop: true, isDesktopApp: true };
+export class FileSystemAdapter {}
 export function setIcon(_el: unknown, _icon: string): void {}
 export function setTooltip(_el: unknown, _tooltip: string, _options?: unknown): void {}
 export function getLanguage(): string { return 'en'; }
@@ -177,6 +185,13 @@ export const MarkdownRenderer = {
 // FuzzySuggestModal base for modules that import it: the verify scripts never
 // open one (the studio's image browser only mounts on a browse click), so a
 // bare class with the Modal surface is enough for the bundle to resolve.
+export class SuggestModal<T> extends Modal {
+	setPlaceholder(_value: string): void {}
+	getSuggestions(_query: string): T[] { return []; }
+	renderSuggestion(_value: T, _element: HTMLElement): void {}
+	onChooseSuggestion(_value: T): void {}
+}
+
 export class FuzzySuggestModal<T> {
 	app: unknown;
 	constructor(app: unknown) {

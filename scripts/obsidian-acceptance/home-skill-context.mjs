@@ -1,0 +1,79 @@
+// Actual Obsidian menus, live files and a local interactive CLI fixture. No model-quality claims.
+import assert from 'node:assert/strict';
+import fs from 'node:fs/promises';
+import path from 'node:path';
+import { setTimeout as delay } from 'node:timers/promises';
+import { launchFreshVault } from './fresh-vault.mjs';
+
+const template='path={{path}}\ntitle={{title}}\nfolder={{folder}}\nstage={{stage}}\npaths={{paths}}\ninput={{input}}';
+const skill={id:'context',label:'Context review',agentId:'codex',skillName:'review',promptTemplate:template,directSend:false,destination:{kind:'fresh',cwd:''}};
+const board=`---\nlayout: side\nwidgets: []\nskills: ${JSON.stringify([skill])}\ncolumns: [{name: Notes, type: notes}, {name: Memo, type: memo}]\n---\n\n## Notes\n\n### Linked note\nid: linked\ntype: note\nlink: [[Inbox/Source]]\n\n## Memo\n\n### Inline card\nid: inline\ntype: generic\nA selectable inline body.\n`;
+const interactive=String.raw`const fs=require('fs'),path=require('path');process.stdin.setRawMode?.(true);process.stdin.resume();process.stdout.write('\x1b[?2004hREADY');process.stdin.on('data',d=>fs.appendFileSync(path.join(process.cwd(),'context-input.jsonl'),JSON.stringify(d.toString())+'\n'));setInterval(()=>{},1000);`;
+const runtime=await launchFreshVault({root:process.argv[2],port:9266,files:{'Board.md':board,'Inbox/Source.md':'# Source\n','Inbox/Capture.md':'# Capture\n','interactive.cjs':interactive},settings:{version:1,namespaces:{
+	app:{language:'en',introSeen:true,modules:{home:true,agent:true,automations:true,news:false,browser:false,archives:false,notifications:false,sync:false,comments:false,icons:false}},
+	home:{dashboardFile:'Board',workspaceFiles:['Board'],workspaceNames:['Board'],quickNotesEnabled:true,quickCaptureEnabled:true,quickCaptureTarget:'Inbox/Capture',quickCaptureFolder:'Inbox',quickDailyEnabled:false,widgetLunarEnabled:false,widgetWeatherEnabled:false,widgetMusicEnabled:false,pomodoroEnabled:false},
+}}});
+const c=runtime.connection,rows=[];
+const check=(name,passed,detail)=>{rows.push({name,passed,detail});assert.ok(passed,name);};
+const until=async expression=>{const end=Date.now()+25000;while(Date.now()<end){if(await c.evaluate(expression))return;await delay(60);}throw Error(expression);};
+const click=async expression=>{await c.send('Page.bringToFront');await c.evaluate(`window.focus();${expression}.scrollIntoView({block:'center'});true`);await delay(150);await until(`(()=>{const e=${expression},r=e.getBoundingClientRect();return e.contains(document.elementFromPoint(r.x+r.width/2,r.y+r.height/2))})()`);const p=await c.evaluate(`(()=>{const e=${expression},r=e.getBoundingClientRect();return{x:r.x+r.width/2,y:r.y+r.height/2}})()`);await c.send('Input.dispatchMouseEvent',{type:'mousePressed',...p,button:'left',clickCount:1});await c.send('Input.dispatchMouseEvent',{type:'mouseReleased',...p,button:'left',clickCount:1});};
+const key=async value=>{const windowsVirtualKeyCode={ArrowDown:40,Enter:13,Escape:27,Tab:9}[value];await c.send('Input.dispatchKeyEvent',{type:'keyDown',key:value,code:value,windowsVirtualKeyCode,...(value==='Enter'?{text:'\r'}:{})});await c.send('Input.dispatchKeyEvent',{type:'keyUp',key:value,code:value,windowsVirtualKeyCode});await delay(70);};
+const navigate=async target=>{await c.evaluate(`app.plugins.plugins.nand.openWorkbench(${JSON.stringify(target)})`);await delay(200);};
+const home=async()=>{await navigate({feature:'dashboard',resourceId:'Board'});await until(`!!document.querySelector('.dashboard-quicknote-skill')`);await c.evaluate(`window.hs=app.workspace.getLeavesOfType('nand-workbench-view').flatMap(l=>l.view.getNativeSurfaces()).find(s=>s.getViewType()==='nand-dashboard-view');true`);};
+const choice=()=>`[...document.querySelectorAll('.menu-item')].find(e=>e.textContent.includes('Context review'))`;
+const trigger=async selector=>{await click(`document.querySelector(${JSON.stringify(selector)})`);await until(`!!${choice()}`);await click(choice());await until(`!!document.querySelector('.nand-skills-preview')`);};
+const final=()=>c.evaluate(`document.querySelectorAll('.nand-skills-preview textarea')[1].value`);
+const cancel=async()=>{await key('Escape');await until(`!document.querySelector('.nand-skills-preview')`);};
+const material=async()=>{try{return(await fs.readFile(path.join(runtime.vault,'context-input.jsonl'),'utf8')).trim().split('\n').map(JSON.parse).join('');}catch{return'';}};
+try{
+	await c.evaluate(`app.workspace.leftSplit.collapse();app.vault.setConfig('alwaysUpdateLinks',true);true`);await c.send('Emulation.setDeviceMetricsOverride',{width:1500,height:1000,deviceScaleFactor:1,mobile:false});
+	await navigate({feature:'terminal',section:'running'});await until(`app.workspace.getLeavesOfType('nand-workbench-view').some(l=>l.view.getNativeSurfaces().some(s=>s.getViewType()==='nand-agent-page'))`);
+	await c.evaluate(`window.ac=app.workspace.getLeavesOfType('nand-workbench-view').flatMap(l=>l.view.getNativeSurfaces()).find(s=>s.getViewType()==='nand-agent-page').controller;ac.settings.update(d=>{d.agents.agents.codex.enabled=true;d.agents.agents.codex.cliPath=${JSON.stringify(process.execPath)}})`);
+	await c.evaluate(`ac.sessions.create({kind:'agent',title:'Context fixture',file:${JSON.stringify(process.execPath)},args:[${JSON.stringify(path.join(runtime.vault,'interactive.cjs'))}],cwd:${JSON.stringify(runtime.vault)},agentId:'codex',hooks:false}).then(s=>window.interactive=s);true`);await until(`window.interactive?.inputReady()`);
+	await home();await c.evaluate(`hs.sync.setBoardSkills(hs.data.skills.map(s=>({...s,destination:{kind:'existing',sessionId:interactive.id}})))`);await until(`hs.sync.getSaveState().status==='saved'`);
+	const bytes=await fs.readFile(path.join(runtime.vault,'Inbox/Capture.md'),'utf8');
+	const input='before {{path}} 中文 after';await c.evaluate(`(()=>{const e=document.querySelector('.dashboard-quicknote-capture-input');e.value=${JSON.stringify(input)};e.focus();e.setSelectionRange(7,18)})()`);
+	await trigger('.dashboard-quicknote-skill');const expectedInput=input.slice(7,18);
+	check('quicknote-current-target-title-folder-and-selected-literal-input',await final()===`$review\npath=Inbox/Capture.md\ntitle=Capture\nfolder=Inbox\nstage=\npaths=Inbox/Capture.md\ninput=${expectedInput}`,await final());
+	check('quicknote-file-scope-is-target-only',await c.evaluate(`[...document.querySelectorAll('.nand-skills-preview input[type="checkbox"]')].map(e=>e.parentElement.textContent)` ).then(files=>JSON.stringify(files)===JSON.stringify(['Inbox/Capture.md'])));
+	await cancel();check('preview-cancel-neither-captures-nor-clears-draft',(await fs.readFile(path.join(runtime.vault,'Inbox/Capture.md'),'utf8'))===bytes&&await c.evaluate(`document.querySelector('.dashboard-quicknote-capture-input').value`)===input);
+	await c.evaluate(`app.plugins.plugins.nand.settingsNamespace('home').update(d=>{d.quickCaptureTarget='Inbox/NotCreated'})`);await c.evaluate(`hs.refresh()`);await delay(150);
+	await trigger('.dashboard-quicknote-skill');check('unsaved-quicknote-empty-scope-no-implicit-file',await c.evaluate(`document.querySelectorAll('.nand-skills-preview input[type="checkbox"]').length`)===0&&!await c.evaluate(`!!app.vault.getAbstractFileByPath('Inbox/NotCreated.md')`),await final());await cancel();
+	await c.evaluate(`app.plugins.plugins.nand.settingsNamespace('home').update(d=>{d.quickCaptureTarget='Inbox/Capture'})`);await c.evaluate(`hs.refresh()`);await delay(150);await c.evaluate(`(()=>{const e=document.querySelector('.dashboard-quicknote-capture-input');e.value='whole {{title}} draft';e.setSelectionRange(0,0)})()`);
+	await trigger('.dashboard-quicknote-skill');check('quicknote-whole-draft-without-selection',(await final()).endsWith('input=whole {{title}} draft'));
+	await click(`document.querySelector('.nand-skills-preview input[type="checkbox"]')`);const capturePrompt=await final();check('preview-file-subset-also-rebuilds-paths',capturePrompt.includes('paths=\ninput=whole {{title}} draft'));
+	await until(`[...document.querySelectorAll('.nand-skills-preview button')].some(e=>e.textContent==='Paste without sending'&&!e.disabled)`);await click(`[...document.querySelectorAll('.nand-skills-preview button')].find(e=>e.textContent==='Paste without sending')`);for(let n=0;n<100&&!(await material());n++)await delay(50);const capturePaste=`\x1b[200~${capturePrompt.replace(/\n/g,'\r')}\x1b[201~`;
+	check('quicknote-native-one-unsent-block-and-no-capture-write',await material()===capturePaste&&(await fs.readFile(path.join(runtime.vault,'Inbox/Capture.md'),'utf8'))===bytes);await home();
+	await trigger('[data-card-id="linked"] .dashboard-context-skill');check('ordinary-card-context-uses-linked-note',await final()===`$review\npath=Inbox/Source.md\ntitle=Source\nfolder=Inbox\nstage=\npaths=Inbox/Source.md\ninput=`);await cancel();
+	await c.evaluate(`app.vault.createFolder('Moved').then(()=>app.fileManager.renameFile(app.vault.getAbstractFileByPath('Inbox/Source.md'),'Moved/Renamed.md'))`);
+	await until(`hs.data.columns.some(c=>c.cards.some(card=>card.id==='linked'&&card.wikiLink.includes('Renamed')))`);
+	await trigger('[data-card-id="linked"] .dashboard-context-skill');check('renamed-and-moved-card-context-is-live',await final()===`$review\npath=Moved/Renamed.md\ntitle=Renamed\nfolder=Moved\nstage=\npaths=Moved/Renamed.md\ninput=`,await final());await runtime.shot('renamed-card-preview');
+	const text=' Edited {{path}} 中文\n';await c.evaluate(`(()=>{const e=document.querySelectorAll('.nand-skills-preview textarea')[1];e.value=${JSON.stringify(text)};e.dispatchEvent(new Event('input',{bubbles:true}));})()`);
+	await until(`[...document.querySelectorAll('.nand-skills-preview button')].some(e=>e.textContent==='Paste without sending'&&!e.disabled)`);await click(`[...document.querySelectorAll('.nand-skills-preview button')].find(e=>e.textContent==='Paste without sending')`);await until(`!document.querySelector('.nand-skills-preview')`);for(let n=0;n<100&&!(await material());n++)await delay(50);
+	// Terminal paste represents embedded newlines as CR inside bracketed-paste markers.
+	// A submitting Enter would occur after the closing marker; there must be none.
+	for(let n=0;n<100&&(await material())===capturePaste;n++)await delay(50);
+	check('card-native-one-unsent-block-with-current-file',await material()===capturePaste+`\x1b[200~${(text+'\nMoved/Renamed.md').replace(/\n/g,'\r')}\x1b[201~`,JSON.stringify(await material()));
+	const journalDir=path.join(runtime.vault,'.nand/automation');const journalName=(await fs.readdir(journalDir))[0];let recorded=false;
+	for(let n=0;n<100&&!recorded;n++){try{const journal=JSON.parse(await fs.readFile(path.join(journalDir,journalName,'runtime.json'),'utf8'));recorded=journal.runs.some(r=>r.invocation?.request.finalPrompt===text&&r.invocation.request.files[0]==='Moved/Renamed.md'&&r.invocation.receipt?.delivery==='pasted'&&r.status==='delivered');}catch(error){if(!(error instanceof SyntaxError))throw error;}if(!recorded)await delay(50);}
+	check('context-run-retains-exact-edited-text-and-pasted-receipt',recorded);
+	await home();await delay(700);const selected=await c.evaluate(`(()=>{const body=document.querySelector('[data-card-id="inline"] .dashboard-memo-view--md p'),range=document.createRange();range.selectNodeContents(body);const selection=document.getSelection();selection.removeAllRanges();selection.addRange(range);return{text:selection.toString(),range:range.toString(),css:getComputedStyle(body).userSelect,count:selection.rangeCount,anchor:selection.anchorNode?.parentElement?.outerHTML.slice(0,200)}})()`);check('fixture-selects-visible-card-body',selected.text === 'A selectable inline body.',selected);
+	await trigger('[data-card-id="inline"] .dashboard-context-skill');check('inline-card-selection-and-board-path-stay-local',(await final()).includes('path=Board.md\ntitle=Inline card\nfolder=\nstage=\npaths=\ninput=A selectable inline body.'),await final());await cancel();
+	await c.evaluate(`document.getSelection().removeAllRanges();document.querySelector('[data-card-id="inline"] .dashboard-context-skill').focus()`);await key('Enter');await until(`!!${choice()}`);await key('ArrowDown');await key('Enter');await until(`!!document.querySelector('.nand-skills-preview')`);check('card-button-and-native-menu-keyboard-operable',true);await cancel();
+	await click(`document.querySelector('.dashboard-quicknote-skill')`);await until(`!!${choice()}`);await navigate({feature:'terminal',section:'running'});await until(`!document.querySelector('.menu')`);check('page-navigation-closes-owned-context-menu',true);
+	await home();await trigger('.dashboard-quicknote-skill');await navigate({feature:'terminal',section:'running'});await until(`!document.querySelector('.nand-skills-preview')`);check('hiding-page-closes-context-preview-without-submission',true);
+	await home();const beforeMatrix=await fs.readFile(path.join(runtime.vault,'Board.md'),'utf8');
+	for(const preset of ['system','claude-code','eye-care'])for(const dark of [false,true]){
+		await c.evaluate(`app.plugins.plugins.nand.theme.update(d=>{d.preset=${JSON.stringify(preset)}});app.changeTheme(${JSON.stringify(dark?'obsidian':'moonstone')});true`);
+		for(const width of [500,800,1500]){
+			await c.send('Emulation.setDeviceMetricsOverride',{width,height:1000,deviceScaleFactor:1,mobile:false});await delay(160);
+			const measure=await c.evaluate(`(()=>{const q=document.querySelector('.dashboard-quicknote'),buttons=[...document.querySelectorAll('.dashboard-context-skill')];return{overflow:q.scrollWidth>q.clientWidth+2,buttons:buttons.map(e=>{const r=e.getBoundingClientRect();return{width:r.width,height:r.height,name:e.getAttribute('aria-label')}})}})()`);
+			check(`context-controls-${preset}-${dark?'dark':'light'}-${width}`,!measure.overflow&&measure.buttons.length===3&&measure.buttons.every(b=>b.width>=32&&b.height>=32&&b.name),measure);await runtime.shot(`context-${preset}-${dark?'dark':'light'}-${width}`);
+		}
+	}
+	check('context-theme-resize-does-not-write-board',await fs.readFile(path.join(runtime.vault,'Board.md'),'utf8')===beforeMatrix);
+	await c.evaluate(`ac.sessions.end(interactive.id,true);true`);await until(`!interactive.running`);await trigger('.dashboard-quicknote-skill');await delay(150);check('context-expired-session-no-fresh-fallback',await c.evaluate(`[...document.querySelectorAll('.nand-skills-preview button')].find(e=>e.textContent==='Paste without sending').disabled&&!ac.sessions.list().some(s=>s.running)`));await cancel();
+	await home();await c.evaluate(`app.plugins.plugins.nand.setModuleEnabled('agent',false)`);await click(`document.querySelector('.dashboard-quicknote-skill')`);await until(`!!${choice()}`);check('disabled-agent-menu-placeholder-and-no-auto-activation',await c.evaluate(`${choice()}.classList.contains('is-disabled')&&app.plugins.plugins.nand.registry.services.peek({owner:'agent',id:'directory'})===undefined`));await key('Escape');
+	check('no-unhandled-native-errors',await c.evaluate(`nandAcceptanceErrors.length`)===0,await c.evaluate('nandAcceptanceErrors'));
+	await fs.writeFile(path.join(runtime.evidence,'review.json'),JSON.stringify({rows,unverified:['Actual provider/model execution','Actual mobile hardware','Concrete workflow-stage integration pending T10']},null,2));
+}catch(error){await fs.writeFile(path.join(runtime.evidence,'partial-review.json'),JSON.stringify(rows,null,2));await fs.writeFile(path.join(runtime.evidence,'diagnostic.json'),JSON.stringify(await c.evaluate(`({errors:nandAcceptanceErrors,body:document.body.innerText,cards:window.hs?.data?.columns})`).catch(e=>String(e)),null,2));await runtime.shot('failure').catch(()=>{});throw error;}finally{console.log(JSON.stringify({evidence:runtime.evidence,checks:rows.length,failed:rows.filter(r=>!r.passed)}));await runtime.stop();}

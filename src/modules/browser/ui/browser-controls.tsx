@@ -144,7 +144,7 @@ export function PageMessage({ message, failed, onRetry, onExternal }: { message:
 }
 
 /** A design-mode selection: copy it, mark it up, or paste it into an agent session. */
-export function SelectionPanel({ grab, agents, agent, onAgent, onClose, onMarkup, onCopyText, onCopyImage, onAttach }: {
+export function SelectionPanel({ grab, agents, agent, onAgent, onClose, onMarkup, onCopyText, onCopyImage, onAttach, children }: {
 	grab: BrowserGrab;
 	agents: readonly BrowserAgent[];
 	agent: string;
@@ -154,6 +154,7 @@ export function SelectionPanel({ grab, agents, agent, onAgent, onClose, onMarkup
 	onCopyText: () => void;
 	onCopyImage: () => void;
 	onAttach: () => void;
+	children?: import('preact').ComponentChildren;
 }) {
 	return (
 		<div class="nand-browser-overlay nand-browser-grab">
@@ -164,6 +165,7 @@ export function SelectionPanel({ grab, agents, agent, onAgent, onClose, onMarkup
 			</div>
 			{grab.screenshot && <img src={grab.screenshot} alt={t('browser.selection')} />}
 			<pre>{grabText(grab)}</pre>
+			{children}
 			{grab.screenshot && <button class="nand-ui-btn-ghost" onClick={onMarkup}>{t('browser.markup')}</button>}
 			<div class="nand-ui-toolbar">
 				<button class="nand-ui-btn-ghost" onClick={onCopyText}>{t('browser.copy')}</button>

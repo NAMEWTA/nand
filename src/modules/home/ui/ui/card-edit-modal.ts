@@ -3,38 +3,43 @@ import { App, Modal, setIcon } from 'obsidian';
 import type { DashboardCard } from '../../core/board/types/index';
 import { t } from '../../../../shared/i18n/index';
 import { applyModalTheme } from '../appearance/modal-theme';
+import { cardDocumentPaths, editCardDocuments } from '../../core/board/card-links';
+import { formatFocalPoint } from '../../core/board/focal-point';
+import { resolveVaultImage } from '../banner/banner';
+import { mountFocalEditor } from '../images/focal-editor';
+
+type CardEdit = Pick<DashboardCard, 'title' | 'docs' | 'coverImage' | 'coverPos'>;
 
 export class CardEditModal extends Modal {
 	private card: DashboardCard;
-	private onSave: (updates: { title: string; body: string; coverImage: string }) => void;
+	private onSave: (updates: CardEdit) => void;
 	private linkedPaths: string[];
 	private coverImageValue: string;
+	private coverPos: string | undefined;
+	private focalEditor?: ReturnType<typeof mountFocalEditor>;
 	private pendingPaths: Set<string> = new Set();
 
 	constructor(
 		app: App,
 		card: DashboardCard,
-		onSave: (updates: { title: string; body: string; coverImage: string }) => void,
+		onSave: (updates: CardEdit) => void,
 	) {
 		super(app);
 		this.card = card;
 		this.onSave = onSave;
 
-		this.linkedPaths = card.body
-			.split('\n')
-			.map((line) => line.trim())
-			.filter((line) => line.startsWith('[[') && line.endsWith(']]'))
-			.map((line) => line.slice(2, -2));
+		this.linkedPaths = cardDocumentPaths(card.docs);
 
 		this.coverImageValue = card.coverImage || '';
+		this.coverPos = card.coverPos;
 	}
 
 	onOpen(): void {
 		const { contentEl, containerEl } = this;
 		contentEl.empty();
-		contentEl.addClass('dashboard-library-config-modal');
-		containerEl.addClass('modal--dashboard');
-		containerEl.parentElement?.addClass('modal-bg--dashboard');
+		contentEl.addClass('dashboard-library-config-modal', 'nand-focal-modal');
+		this.modalEl.addClass('modal--dashboard');
+		containerEl.addClass('modal-bg--dashboard');
 		applyModalTheme(containerEl);
 
 		const container = contentEl.createDiv({ cls: 'dashboard-modal dashboard-modal--compact' });
@@ -48,7 +53,7 @@ export class CardEditModal extends Modal {
 		bindLocalizedElement(titleField.createEl('label', { text: t('cardEdit.titleLabel') }), 'cardEdit.titleLabel');
 		const titleInput = titleField.createEl('input', {
 			cls: 'dashboard-modal-input',
-			attr: { type: 'text' },
+			attr: { type: 'text', 'aria-label': t('cardEdit.titleLabel') },
 		});
 		titleInput.value = this.card.title;
 
@@ -56,9 +61,14 @@ export class CardEditModal extends Modal {
 		bindLocalizedElement(coverField.createEl('label', { text: t('cardEdit.coverImage') }), 'cardEdit.coverImage');
 		const coverInput = bindLocalizedElement(coverField.createEl('input', {
 			cls: 'dashboard-modal-input',
-			attr: { type: 'text', placeholder: t('cardEdit.coverImagePlaceholder') },
+			attr: { type: 'text', placeholder: t('cardEdit.coverImagePlaceholder'), 'aria-label': t('cardEdit.coverImage') },
 		}), 'cardEdit.coverImagePlaceholder', undefined, "placeholder");
 		coverInput.value = this.coverImageValue;
+		this.focalEditor = mountFocalEditor(coverField.createDiv(), {
+			source: resolveVaultImage(this.app, this.coverImageValue), value: this.coverPos, ratio: 3,
+			change: point => { this.coverPos = formatFocalPoint(point); },
+		}, this.app);
+		coverInput.addEventListener('input', () => this.focalEditor?.update(resolveVaultImage(this.app, coverInput.value.trim()), this.coverPos));
 
 		const docsField = form.createDiv();
 		bindLocalizedElement(docsField.createEl('label', { text: t('cardEdit.linkedDocs') }), 'cardEdit.linkedDocs');
@@ -81,11 +91,13 @@ export class CardEditModal extends Modal {
 
 				const removeBtn = docItem.createEl('button', {
 					cls: 'dashboard-modal-doc-remove',
+					attr: { 'aria-label': t('common.remove', { name: docPath }) },
 				});
 				setIcon(removeBtn, 'x');
 				removeBtn.addEventListener('click', () => {
 					this.linkedPaths = this.linkedPaths.filter((_, i) => i !== idx);
 					renderDocs();
+					(docsList.querySelector<HTMLButtonElement>('button') ?? searchInput).focus();
 				});
 			});
 		};
@@ -97,7 +109,7 @@ export class CardEditModal extends Modal {
 		bindLocalizedElement(searchField.createEl('label', { text: t('cardEdit.searchDocs') }), 'cardEdit.searchDocs');
 		const searchInput = bindLocalizedElement(searchField.createEl('input', {
 			cls: 'dashboard-modal-input',
-			attr: { type: 'text', placeholder: t('quickLinks.typeToSearch') },
+			attr: { type: 'text', placeholder: t('quickLinks.typeToSearch'), 'aria-label': t('cardEdit.searchDocs') },
 		}), 'quickLinks.typeToSearch', undefined, "placeholder");
 
 		const searchResults = searchField.createDiv({ cls: 'dashboard-modal-search-results' });
@@ -129,16 +141,17 @@ export class CardEditModal extends Modal {
 
 			for (const file of files) {
 				const selected = this.pendingPaths.has(file.path);
-				const item = searchResults.createDiv({
+				const item = searchResults.createEl('button', {
 					cls: 'dashboard-modal-search-item' + (selected ? ' is-selected' : ''),
+					attr: { type: 'button', 'aria-pressed': String(selected) },
 				});
 
-				const check = item.createDiv({ cls: 'dashboard-modal-search-check' });
+				const check = item.createSpan({ cls: 'dashboard-modal-search-check' });
 				if (selected) {
 					setIcon(check, 'check');
 				}
 
-				const info = item.createDiv({ cls: 'dashboard-modal-search-info' });
+				const info = item.createSpan({ cls: 'dashboard-modal-search-info' });
 				info.createSpan({ text: file.basename, cls: 'dashboard-modal-search-name' });
 				info.createSpan({ text: file.path, cls: 'dashboard-modal-search-path' });
 
@@ -148,7 +161,10 @@ export class CardEditModal extends Modal {
 					} else {
 						this.pendingPaths.add(file.path);
 					}
-					renderSearchResults();
+					item.toggleClass('is-selected', this.pendingPaths.has(file.path));
+					item.setAttribute('aria-pressed', String(this.pendingPaths.has(file.path)));
+					check.empty();
+					if (this.pendingPaths.has(file.path)) setIcon(check, 'check');
 					updateAddBtn();
 				});
 			}
@@ -203,11 +219,11 @@ export class CardEditModal extends Modal {
 			text: t('common.save'),
 		}), 'common.save');
 		saveBtn.addEventListener('click', () => {
-			const body = this.linkedPaths.map((p) => `[[${p}]]`).join('\n');
 			this.onSave({
 				title: titleInput.value.trim() || this.card.title,
-				body,
+				docs: editCardDocuments(this.card.docs, this.linkedPaths),
 				coverImage: coverInput.value.trim(),
+				coverPos: this.coverPos,
 			});
 			this.close();
 		});
@@ -221,6 +237,8 @@ export class CardEditModal extends Modal {
 	}
 
 	onClose(): void {
+		this.focalEditor?.dispose();
+		this.focalEditor = undefined;
 		const { contentEl } = this;
 		contentEl.empty();
 	}

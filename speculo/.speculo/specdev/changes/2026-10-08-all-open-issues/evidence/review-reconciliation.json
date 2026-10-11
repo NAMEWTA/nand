@@ -1,0 +1,727 @@
+{
+  "finding": "R-012",
+  "status": "complete",
+  "tickets": 61,
+  "acceptanceCriteria": 180,
+  "backup": "C:/Users/cdewta/AppData/Local/Temp/nand-review-reconcile-odCx1N",
+  "files": [
+    {
+      "path": "speculo/.speculo/specdev/changes/2026-10-08-all-open-issues/implementation-map.md",
+      "backup": "C:\\Users\\cdewta\\AppData\\Local\\Temp\\nand-review-reconcile-odCx1N\\2026-10-08-all-open-issues\\implementation-map.md",
+      "beforeCharacters": 80951,
+      "afterCharacters": 80887
+    },
+    {
+      "path": "speculo/.speculo/specdev/changes/2026-10-08-all-open-issues/implementation-plan.md",
+      "backup": "C:\\Users\\cdewta\\AppData\\Local\\Temp\\nand-review-reconcile-odCx1N\\2026-10-08-all-open-issues\\implementation-plan.md",
+      "beforeCharacters": 12261,
+      "afterCharacters": 12479
+    },
+    {
+      "path": "speculo/.speculo/specdev/changes/2026-10-08-all-open-issues/open-issues-plan-2026-10-08.md",
+      "backup": "C:\\Users\\cdewta\\AppData\\Local\\Temp\\nand-review-reconcile-odCx1N\\2026-10-08-all-open-issues\\open-issues-plan-2026-10-08.md",
+      "beforeCharacters": 4648,
+      "afterCharacters": 4905
+    },
+    {
+      "path": "speculo/.speculo/specdev/changes/2026-10-08-all-open-issues/planning-review.md",
+      "backup": "C:\\Users\\cdewta\\AppData\\Local\\Temp\\nand-review-reconcile-odCx1N\\2026-10-08-all-open-issues\\planning-review.md",
+      "beforeCharacters": 620,
+      "afterCharacters": 620
+    },
+    {
+      "path": "speculo/.speculo/specdev/changes/2026-10-08-all-open-issues/planning-validation.md",
+      "backup": "C:\\Users\\cdewta\\AppData\\Local\\Temp\\nand-review-reconcile-odCx1N\\2026-10-08-all-open-issues\\planning-validation.md",
+      "beforeCharacters": 3200,
+      "afterCharacters": 3200
+    },
+    {
+      "path": "speculo/.speculo/specdev/changes/2026-10-08-all-open-issues/spec.md",
+      "backup": "C:\\Users\\cdewta\\AppData\\Local\\Temp\\nand-review-reconcile-odCx1N\\2026-10-08-all-open-issues\\spec.md",
+      "beforeCharacters": 1166,
+      "afterCharacters": 1455
+    },
+    {
+      "path": "speculo/.speculo/specdev/changes/2026-10-08-all-open-issues/tickets-map.md",
+      "backup": "C:\\Users\\cdewta\\AppData\\Local\\Temp\\nand-review-reconcile-odCx1N\\2026-10-08-all-open-issues\\tickets-map.md",
+      "beforeCharacters": 657,
+      "afterCharacters": 945
+    },
+    {
+      "path": "speculo/.speculo/specdev/changes/2026-10-08-archives-completion/ADR.md",
+      "backup": "C:\\Users\\cdewta\\AppData\\Local\\Temp\\nand-review-reconcile-odCx1N\\2026-10-08-archives-completion\\ADR.md",
+      "beforeCharacters": 79,
+      "afterCharacters": 330
+    },
+    {
+      "path": "speculo/.speculo/specdev/changes/2026-10-08-archives-completion/CONTEXT.md",
+      "backup": "C:\\Users\\cdewta\\AppData\\Local\\Temp\\nand-review-reconcile-odCx1N\\2026-10-08-archives-completion\\CONTEXT.md",
+      "beforeCharacters": 259,
+      "afterCharacters": 503
+    },
+    {
+      "path": "speculo/.speculo/specdev/changes/2026-10-08-archives-completion/goal-plan.md",
+      "backup": "C:\\Users\\cdewta\\AppData\\Local\\Temp\\nand-review-reconcile-odCx1N\\2026-10-08-archives-completion\\goal-plan.md",
+      "beforeCharacters": 5691,
+      "afterCharacters": 5790
+    },
+    {
+      "path": "speculo/.speculo/specdev/changes/2026-10-08-archives-completion/spec.md",
+      "backup": "C:\\Users\\cdewta\\AppData\\Local\\Temp\\nand-review-reconcile-odCx1N\\2026-10-08-archives-completion\\spec.md",
+      "beforeCharacters": 4490,
+      "afterCharacters": 4619
+    },
+    {
+      "path": "speculo/.speculo/specdev/changes/2026-10-08-archives-completion/tickets-map.md",
+      "backup": "C:\\Users\\cdewta\\AppData\\Local\\Temp\\nand-review-reconcile-odCx1N\\2026-10-08-archives-completion\\tickets-map.md",
+      "beforeCharacters": 3868,
+      "afterCharacters": 4034
+    },
+    {
+      "path": "speculo/.speculo/specdev/changes/2026-10-08-archives-completion/ticket/01-close-parity-evidence.md",
+      "backup": "C:\\Users\\cdewta\\AppData\\Local\\Temp\\nand-review-reconcile-odCx1N\\2026-10-08-archives-completion\\ticket\\01-close-parity-evidence.md",
+      "beforeCharacters": 9110,
+      "afterCharacters": 9183
+    },
+    {
+      "path": "speculo/.speculo/specdev/changes/2026-10-08-browser-ai-workbench/ADR.md",
+      "backup": "C:\\Users\\cdewta\\AppData\\Local\\Temp\\nand-review-reconcile-odCx1N\\2026-10-08-browser-ai-workbench\\ADR.md",
+      "beforeCharacters": 4409,
+      "afterCharacters": 4560
+    },
+    {
+      "path": "speculo/.speculo/specdev/changes/2026-10-08-browser-ai-workbench/CONTEXT.md",
+      "backup": "C:\\Users\\cdewta\\AppData\\Local\\Temp\\nand-review-reconcile-odCx1N\\2026-10-08-browser-ai-workbench\\CONTEXT.md",
+      "beforeCharacters": 1093,
+      "afterCharacters": 1324
+    },
+    {
+      "path": "speculo/.speculo/specdev/changes/2026-10-08-browser-ai-workbench/goal-plan.md",
+      "backup": "C:\\Users\\cdewta\\AppData\\Local\\Temp\\nand-review-reconcile-odCx1N\\2026-10-08-browser-ai-workbench\\goal-plan.md",
+      "beforeCharacters": 16350,
+      "afterCharacters": 16362
+    },
+    {
+      "path": "speculo/.speculo/specdev/changes/2026-10-08-browser-ai-workbench/spec.md",
+      "backup": "C:\\Users\\cdewta\\AppData\\Local\\Temp\\nand-review-reconcile-odCx1N\\2026-10-08-browser-ai-workbench\\spec.md",
+      "beforeCharacters": 33859,
+      "afterCharacters": 33862
+    },
+    {
+      "path": "speculo/.speculo/specdev/changes/2026-10-08-browser-ai-workbench/tickets-map.md",
+      "backup": "C:\\Users\\cdewta\\AppData\\Local\\Temp\\nand-review-reconcile-odCx1N\\2026-10-08-browser-ai-workbench\\tickets-map.md",
+      "beforeCharacters": 20176,
+      "afterCharacters": 20245
+    },
+    {
+      "path": "speculo/.speculo/specdev/changes/2026-10-08-browser-ai-workbench/ticket/01-browser-host-shortcuts.md",
+      "backup": "C:\\Users\\cdewta\\AppData\\Local\\Temp\\nand-review-reconcile-odCx1N\\2026-10-08-browser-ai-workbench\\ticket\\01-browser-host-shortcuts.md",
+      "beforeCharacters": 11061,
+      "afterCharacters": 11139
+    },
+    {
+      "path": "speculo/.speculo/specdev/changes/2026-10-08-browser-ai-workbench/ticket/02-profile-page-control.md",
+      "backup": "C:\\Users\\cdewta\\AppData\\Local\\Temp\\nand-review-reconcile-odCx1N\\2026-10-08-browser-ai-workbench\\ticket\\02-profile-page-control.md",
+      "beforeCharacters": 12862,
+      "afterCharacters": 12937
+    },
+    {
+      "path": "speculo/.speculo/specdev/changes/2026-10-08-browser-ai-workbench/ticket/03-deepseek-workspace-poc.md",
+      "backup": "C:\\Users\\cdewta\\AppData\\Local\\Temp\\nand-review-reconcile-odCx1N\\2026-10-08-browser-ai-workbench\\ticket\\03-deepseek-workspace-poc.md",
+      "beforeCharacters": 13524,
+      "afterCharacters": 13596
+    },
+    {
+      "path": "speculo/.speculo/specdev/changes/2026-10-08-browser-ai-workbench/ticket/04-kimi-workspace-poc.md",
+      "backup": "C:\\Users\\cdewta\\AppData\\Local\\Temp\\nand-review-reconcile-odCx1N\\2026-10-08-browser-ai-workbench\\ticket\\04-kimi-workspace-poc.md",
+      "beforeCharacters": 11604,
+      "afterCharacters": 11680
+    },
+    {
+      "path": "speculo/.speculo/specdev/changes/2026-10-08-browser-ai-workbench/ticket/05-chatgpt-workspace-poc.md",
+      "backup": "C:\\Users\\cdewta\\AppData\\Local\\Temp\\nand-review-reconcile-odCx1N\\2026-10-08-browser-ai-workbench\\ticket\\05-chatgpt-workspace-poc.md",
+      "beforeCharacters": 11728,
+      "afterCharacters": 11804
+    },
+    {
+      "path": "speculo/.speculo/specdev/changes/2026-10-08-browser-ai-workbench/ticket/06-multitarget-poc-gate.md",
+      "backup": "C:\\Users\\cdewta\\AppData\\Local\\Temp\\nand-review-reconcile-odCx1N\\2026-10-08-browser-ai-workbench\\ticket\\06-multitarget-poc-gate.md",
+      "beforeCharacters": 12003,
+      "afterCharacters": 12074
+    },
+    {
+      "path": "speculo/.speculo/specdev/changes/2026-10-08-browser-ai-workbench/ticket/07-current-answer-comparison.md",
+      "backup": "C:\\Users\\cdewta\\AppData\\Local\\Temp\\nand-review-reconcile-odCx1N\\2026-10-08-browser-ai-workbench\\ticket\\07-current-answer-comparison.md",
+      "beforeCharacters": 11539,
+      "afterCharacters": 11615
+    },
+    {
+      "path": "speculo/.speculo/specdev/changes/2026-10-08-browser-ai-workbench/ticket/08-workspace-restart-recovery.md",
+      "backup": "C:\\Users\\cdewta\\AppData\\Local\\Temp\\nand-review-reconcile-odCx1N\\2026-10-08-browser-ai-workbench\\ticket\\08-workspace-restart-recovery.md",
+      "beforeCharacters": 11653,
+      "afterCharacters": 11727
+    },
+    {
+      "path": "speculo/.speculo/specdev/changes/2026-10-08-browser-ai-workbench/ticket/09-claude-provider.md",
+      "backup": "C:\\Users\\cdewta\\AppData\\Local\\Temp\\nand-review-reconcile-odCx1N\\2026-10-08-browser-ai-workbench\\ticket\\09-claude-provider.md",
+      "beforeCharacters": 12405,
+      "afterCharacters": 12478
+    },
+    {
+      "path": "speculo/.speculo/specdev/changes/2026-10-08-browser-ai-workbench/ticket/10-qwen-provider.md",
+      "backup": "C:\\Users\\cdewta\\AppData\\Local\\Temp\\nand-review-reconcile-odCx1N\\2026-10-08-browser-ai-workbench\\ticket\\10-qwen-provider.md",
+      "beforeCharacters": 12358,
+      "afterCharacters": 12431
+    },
+    {
+      "path": "speculo/.speculo/specdev/changes/2026-10-08-browser-ai-workbench/ticket/11-doubao-provider.md",
+      "backup": "C:\\Users\\cdewta\\AppData\\Local\\Temp\\nand-review-reconcile-odCx1N\\2026-10-08-browser-ai-workbench\\ticket\\11-doubao-provider.md",
+      "beforeCharacters": 12267,
+      "afterCharacters": 12340
+    },
+    {
+      "path": "speculo/.speculo/specdev/changes/2026-10-08-browser-ai-workbench/ticket/12-coze-provider.md",
+      "backup": "C:\\Users\\cdewta\\AppData\\Local\\Temp\\nand-review-reconcile-odCx1N\\2026-10-08-browser-ai-workbench\\ticket\\12-coze-provider.md",
+      "beforeCharacters": 12525,
+      "afterCharacters": 12598
+    },
+    {
+      "path": "speculo/.speculo/specdev/changes/2026-10-08-browser-ai-workbench/ticket/13-minimax-provider.md",
+      "backup": "C:\\Users\\cdewta\\AppData\\Local\\Temp\\nand-review-reconcile-odCx1N\\2026-10-08-browser-ai-workbench\\ticket\\13-minimax-provider.md",
+      "beforeCharacters": 12656,
+      "afterCharacters": 12729
+    },
+    {
+      "path": "speculo/.speculo/specdev/changes/2026-10-08-browser-ai-workbench/ticket/14-prompt-history-migration.md",
+      "backup": "C:\\Users\\cdewta\\AppData\\Local\\Temp\\nand-review-reconcile-odCx1N\\2026-10-08-browser-ai-workbench\\ticket\\14-prompt-history-migration.md",
+      "beforeCharacters": 13124,
+      "afterCharacters": 13195
+    },
+    {
+      "path": "speculo/.speculo/specdev/changes/2026-10-08-browser-ai-workbench/ticket/15-optin-answer-synthesis.md",
+      "backup": "C:\\Users\\cdewta\\AppData\\Local\\Temp\\nand-review-reconcile-odCx1N\\2026-10-08-browser-ai-workbench\\ticket\\15-optin-answer-synthesis.md",
+      "beforeCharacters": 13473,
+      "afterCharacters": 13551
+    },
+    {
+      "path": "speculo/.speculo/specdev/changes/2026-10-08-browser-ai-workbench/ticket/16-scoped-web-assistant.md",
+      "backup": "C:\\Users\\cdewta\\AppData\\Local\\Temp\\nand-review-reconcile-odCx1N\\2026-10-08-browser-ai-workbench\\ticket\\16-scoped-web-assistant.md",
+      "beforeCharacters": 15913,
+      "afterCharacters": 15986
+    },
+    {
+      "path": "speculo/.speculo/specdev/changes/2026-10-08-browser-ai-workbench/ticket/17-element-guidance-user-adapter.md",
+      "backup": "C:\\Users\\cdewta\\AppData\\Local\\Temp\\nand-review-reconcile-odCx1N\\2026-10-08-browser-ai-workbench\\ticket\\17-element-guidance-user-adapter.md",
+      "beforeCharacters": 11714,
+      "afterCharacters": 11791
+    },
+    {
+      "path": "speculo/.speculo/specdev/changes/2026-10-08-browser-ai-workbench/ticket/18-reusable-browser-workflow.md",
+      "backup": "C:\\Users\\cdewta\\AppData\\Local\\Temp\\nand-review-reconcile-odCx1N\\2026-10-08-browser-ai-workbench\\ticket\\18-reusable-browser-workflow.md",
+      "beforeCharacters": 12838,
+      "afterCharacters": 12913
+    },
+    {
+      "path": "speculo/.speculo/specdev/changes/2026-10-08-browser-ai-workbench/ticket/19-automation-browser-contribution.md",
+      "backup": "C:\\Users\\cdewta\\AppData\\Local\\Temp\\nand-review-reconcile-odCx1N\\2026-10-08-browser-ai-workbench\\ticket\\19-automation-browser-contribution.md",
+      "beforeCharacters": 12267,
+      "afterCharacters": 12346
+    },
+    {
+      "path": "speculo/.speculo/specdev/changes/2026-10-08-browser-ai-workbench/ticket/20-scoped-local-external-bridge.md",
+      "backup": "C:\\Users\\cdewta\\AppData\\Local\\Temp\\nand-review-reconcile-odCx1N\\2026-10-08-browser-ai-workbench\\ticket\\20-scoped-local-external-bridge.md",
+      "beforeCharacters": 13836,
+      "afterCharacters": 13908
+    },
+    {
+      "path": "speculo/.speculo/specdev/changes/2026-10-08-browser-ai-workbench/ticket/21-browser-delivery-evidence.md",
+      "backup": "C:\\Users\\cdewta\\AppData\\Local\\Temp\\nand-review-reconcile-odCx1N\\2026-10-08-browser-ai-workbench\\ticket\\21-browser-delivery-evidence.md",
+      "beforeCharacters": 11955,
+      "afterCharacters": 12025
+    },
+    {
+      "path": "speculo/.speculo/specdev/changes/2026-10-08-git-sync-parity/ADR.md",
+      "backup": "C:\\Users\\cdewta\\AppData\\Local\\Temp\\nand-review-reconcile-odCx1N\\2026-10-08-git-sync-parity\\ADR.md",
+      "beforeCharacters": 3842,
+      "afterCharacters": 3966
+    },
+    {
+      "path": "speculo/.speculo/specdev/changes/2026-10-08-git-sync-parity/CONTEXT.md",
+      "backup": "C:\\Users\\cdewta\\AppData\\Local\\Temp\\nand-review-reconcile-odCx1N\\2026-10-08-git-sync-parity\\CONTEXT.md",
+      "beforeCharacters": 355,
+      "afterCharacters": 597
+    },
+    {
+      "path": "speculo/.speculo/specdev/changes/2026-10-08-git-sync-parity/goal-plan.md",
+      "backup": "C:\\Users\\cdewta\\AppData\\Local\\Temp\\nand-review-reconcile-odCx1N\\2026-10-08-git-sync-parity\\goal-plan.md",
+      "beforeCharacters": 7228,
+      "afterCharacters": 7316
+    },
+    {
+      "path": "speculo/.speculo/specdev/changes/2026-10-08-git-sync-parity/spec.md",
+      "backup": "C:\\Users\\cdewta\\AppData\\Local\\Temp\\nand-review-reconcile-odCx1N\\2026-10-08-git-sync-parity\\spec.md",
+      "beforeCharacters": 7009,
+      "afterCharacters": 7121
+    },
+    {
+      "path": "speculo/.speculo/specdev/changes/2026-10-08-git-sync-parity/tickets-map.md",
+      "backup": "C:\\Users\\cdewta\\AppData\\Local\\Temp\\nand-review-reconcile-odCx1N\\2026-10-08-git-sync-parity\\tickets-map.md",
+      "beforeCharacters": 4989,
+      "afterCharacters": 5147
+    },
+    {
+      "path": "speculo/.speculo/specdev/changes/2026-10-08-git-sync-parity/ticket/01-vault-index-boundary.md",
+      "backup": "C:\\Users\\cdewta\\AppData\\Local\\Temp\\nand-review-reconcile-odCx1N\\2026-10-08-git-sync-parity\\ticket\\01-vault-index-boundary.md",
+      "beforeCharacters": 11153,
+      "afterCharacters": 11231
+    },
+    {
+      "path": "speculo/.speculo/specdev/changes/2026-10-08-git-sync-parity/ticket/02-safe-clone-onboarding.md",
+      "backup": "C:\\Users\\cdewta\\AppData\\Local\\Temp\\nand-review-reconcile-odCx1N\\2026-10-08-git-sync-parity\\ticket\\02-safe-clone-onboarding.md",
+      "beforeCharacters": 10161,
+      "afterCharacters": 10240
+    },
+    {
+      "path": "speculo/.speculo/specdev/changes/2026-10-08-git-sync-parity/ticket/03-push-target-squash.md",
+      "backup": "C:\\Users\\cdewta\\AppData\\Local\\Temp\\nand-review-reconcile-odCx1N\\2026-10-08-git-sync-parity\\ticket\\03-push-target-squash.md",
+      "beforeCharacters": 9833,
+      "afterCharacters": 9912
+    },
+    {
+      "path": "speculo/.speculo/specdev/changes/2026-10-08-git-sync-parity/ticket/04-sync-parity-and-recovery.md",
+      "backup": "C:\\Users\\cdewta\\AppData\\Local\\Temp\\nand-review-reconcile-odCx1N\\2026-10-08-git-sync-parity\\ticket\\04-sync-parity-and-recovery.md",
+      "beforeCharacters": 8803,
+      "afterCharacters": 8879
+    },
+    {
+      "path": "speculo/.speculo/specdev/changes/2026-10-08-home-grid-rebuild/ADR.md",
+      "backup": "C:\\Users\\cdewta\\AppData\\Local\\Temp\\nand-review-reconcile-odCx1N\\2026-10-08-home-grid-rebuild\\ADR.md",
+      "beforeCharacters": 8228,
+      "afterCharacters": 8327
+    },
+    {
+      "path": "speculo/.speculo/specdev/changes/2026-10-08-home-grid-rebuild/CONTEXT.md",
+      "backup": "C:\\Users\\cdewta\\AppData\\Local\\Temp\\nand-review-reconcile-odCx1N\\2026-10-08-home-grid-rebuild\\CONTEXT.md",
+      "beforeCharacters": 897,
+      "afterCharacters": 1122
+    },
+    {
+      "path": "speculo/.speculo/specdev/changes/2026-10-08-home-grid-rebuild/goal-plan.md",
+      "backup": "C:\\Users\\cdewta\\AppData\\Local\\Temp\\nand-review-reconcile-odCx1N\\2026-10-08-home-grid-rebuild\\goal-plan.md",
+      "beforeCharacters": 15003,
+      "afterCharacters": 15025
+    },
+    {
+      "path": "speculo/.speculo/specdev/changes/2026-10-08-home-grid-rebuild/spec.md",
+      "backup": "C:\\Users\\cdewta\\AppData\\Local\\Temp\\nand-review-reconcile-odCx1N\\2026-10-08-home-grid-rebuild\\spec.md",
+      "beforeCharacters": 34299,
+      "afterCharacters": 34259
+    },
+    {
+      "path": "speculo/.speculo/specdev/changes/2026-10-08-home-grid-rebuild/tickets-map.md",
+      "backup": "C:\\Users\\cdewta\\AppData\\Local\\Temp\\nand-review-reconcile-odCx1N\\2026-10-08-home-grid-rebuild\\tickets-map.md",
+      "beforeCharacters": 21828,
+      "afterCharacters": 21869
+    },
+    {
+      "path": "speculo/.speculo/specdev/changes/2026-10-08-home-grid-rebuild/ticket/01-quicknote-layout.md",
+      "backup": "C:\\Users\\cdewta\\AppData\\Local\\Temp\\nand-review-reconcile-odCx1N\\2026-10-08-home-grid-rebuild\\ticket\\01-quicknote-layout.md",
+      "beforeCharacters": 9827,
+      "afterCharacters": 9905
+    },
+    {
+      "path": "speculo/.speculo/specdev/changes/2026-10-08-home-grid-rebuild/ticket/02-board-layout-and-provenance.md",
+      "backup": "C:\\Users\\cdewta\\AppData\\Local\\Temp\\nand-review-reconcile-odCx1N\\2026-10-08-home-grid-rebuild\\ticket\\02-board-layout-and-provenance.md",
+      "beforeCharacters": 12309,
+      "afterCharacters": 12385
+    },
+    {
+      "path": "speculo/.speculo/specdev/changes/2026-10-08-home-grid-rebuild/ticket/03-home-widget-contributions.md",
+      "backup": "C:\\Users\\cdewta\\AppData\\Local\\Temp\\nand-review-reconcile-odCx1N\\2026-10-08-home-grid-rebuild\\ticket\\03-home-widget-contributions.md",
+      "beforeCharacters": 13441,
+      "afterCharacters": 13516
+    },
+    {
+      "path": "speculo/.speculo/specdev/changes/2026-10-08-home-grid-rebuild/ticket/04-immersive-grid-surface.md",
+      "backup": "C:\\Users\\cdewta\\AppData\\Local\\Temp\\nand-review-reconcile-odCx1N\\2026-10-08-home-grid-rebuild\\ticket\\04-immersive-grid-surface.md",
+      "beforeCharacters": 11858,
+      "afterCharacters": 11933
+    },
+    {
+      "path": "speculo/.speculo/specdev/changes/2026-10-08-home-grid-rebuild/ticket/05-immersive-accessible-interaction.md",
+      "backup": "C:\\Users\\cdewta\\AppData\\Local\\Temp\\nand-review-reconcile-odCx1N\\2026-10-08-home-grid-rebuild\\ticket\\05-immersive-accessible-interaction.md",
+      "beforeCharacters": 11272,
+      "afterCharacters": 11346
+    },
+    {
+      "path": "speculo/.speculo/specdev/changes/2026-10-08-home-grid-rebuild/ticket/06-widget-catalog-and-board-management.md",
+      "backup": "C:\\Users\\cdewta\\AppData\\Local\\Temp\\nand-review-reconcile-odCx1N\\2026-10-08-home-grid-rebuild\\ticket\\06-widget-catalog-and-board-management.md",
+      "beforeCharacters": 10765,
+      "afterCharacters": 10843
+    },
+    {
+      "path": "speculo/.speculo/specdev/changes/2026-10-08-home-grid-rebuild/ticket/07-shared-agent-shortcut-dispatch.md",
+      "backup": "C:\\Users\\cdewta\\AppData\\Local\\Temp\\nand-review-reconcile-odCx1N\\2026-10-08-home-grid-rebuild\\ticket\\07-shared-agent-shortcut-dispatch.md",
+      "beforeCharacters": 14794,
+      "afterCharacters": 14864
+    },
+    {
+      "path": "speculo/.speculo/specdev/changes/2026-10-08-home-grid-rebuild/ticket/08-existing-session-context-shortcuts.md",
+      "backup": "C:\\Users\\cdewta\\AppData\\Local\\Temp\\nand-review-reconcile-odCx1N\\2026-10-08-home-grid-rebuild\\ticket\\08-existing-session-context-shortcuts.md",
+      "beforeCharacters": 12066,
+      "afterCharacters": 12139
+    },
+    {
+      "path": "speculo/.speculo/specdev/changes/2026-10-08-home-grid-rebuild/ticket/09-agent-skill-discovery.md",
+      "backup": "C:\\Users\\cdewta\\AppData\\Local\\Temp\\nand-review-reconcile-odCx1N\\2026-10-08-home-grid-rebuild\\ticket\\09-agent-skill-discovery.md",
+      "beforeCharacters": 11618,
+      "afterCharacters": 11694
+    },
+    {
+      "path": "speculo/.speculo/specdev/changes/2026-10-08-home-grid-rebuild/ticket/10-workflow-section.md",
+      "backup": "C:\\Users\\cdewta\\AppData\\Local\\Temp\\nand-review-reconcile-odCx1N\\2026-10-08-home-grid-rebuild\\ticket\\10-workflow-section.md",
+      "beforeCharacters": 13379,
+      "afterCharacters": 13448
+    },
+    {
+      "path": "speculo/.speculo/specdev/changes/2026-10-08-home-grid-rebuild/ticket/11-multi-note-templates.md",
+      "backup": "C:\\Users\\cdewta\\AppData\\Local\\Temp\\nand-review-reconcile-odCx1N\\2026-10-08-home-grid-rebuild\\ticket\\11-multi-note-templates.md",
+      "beforeCharacters": 11332,
+      "afterCharacters": 11410
+    },
+    {
+      "path": "speculo/.speculo/specdev/changes/2026-10-08-home-grid-rebuild/ticket/12-table-column-preferences.md",
+      "backup": "C:\\Users\\cdewta\\AppData\\Local\\Temp\\nand-review-reconcile-odCx1N\\2026-10-08-home-grid-rebuild\\ticket\\12-table-column-preferences.md",
+      "beforeCharacters": 11261,
+      "afterCharacters": 11339
+    },
+    {
+      "path": "speculo/.speculo/specdev/changes/2026-10-08-home-grid-rebuild/ticket/13-progressive-group-rendering.md",
+      "backup": "C:\\Users\\cdewta\\AppData\\Local\\Temp\\nand-review-reconcile-odCx1N\\2026-10-08-home-grid-rebuild\\ticket\\13-progressive-group-rendering.md",
+      "beforeCharacters": 11015,
+      "afterCharacters": 11093
+    },
+    {
+      "path": "speculo/.speculo/specdev/changes/2026-10-08-home-grid-rebuild/ticket/14-lunar-anniversaries.md",
+      "backup": "C:\\Users\\cdewta\\AppData\\Local\\Temp\\nand-review-reconcile-odCx1N\\2026-10-08-home-grid-rebuild\\ticket\\14-lunar-anniversaries.md",
+      "beforeCharacters": 12774,
+      "afterCharacters": 12850
+    },
+    {
+      "path": "speculo/.speculo/specdev/changes/2026-10-08-home-grid-rebuild/ticket/15-image-focal-points.md",
+      "backup": "C:\\Users\\cdewta\\AppData\\Local\\Temp\\nand-review-reconcile-odCx1N\\2026-10-08-home-grid-rebuild\\ticket\\15-image-focal-points.md",
+      "beforeCharacters": 11536,
+      "afterCharacters": 11614
+    },
+    {
+      "path": "speculo/.speculo/specdev/changes/2026-10-08-home-grid-rebuild/ticket/16-named-global-appearance.md",
+      "backup": "C:\\Users\\cdewta\\AppData\\Local\\Temp\\nand-review-reconcile-odCx1N\\2026-10-08-home-grid-rebuild\\ticket\\16-named-global-appearance.md",
+      "beforeCharacters": 12522,
+      "afterCharacters": 12597
+    },
+    {
+      "path": "speculo/.speculo/specdev/changes/2026-10-08-home-grid-rebuild/ticket/17-icons-and-card-delete.md",
+      "backup": "C:\\Users\\cdewta\\AppData\\Local\\Temp\\nand-review-reconcile-odCx1N\\2026-10-08-home-grid-rebuild\\ticket\\17-icons-and-card-delete.md",
+      "beforeCharacters": 11999,
+      "afterCharacters": 12076
+    },
+    {
+      "path": "speculo/.speculo/specdev/changes/2026-10-08-home-grid-rebuild/ticket/18-integrated-home-acceptance.md",
+      "backup": "C:\\Users\\cdewta\\AppData\\Local\\Temp\\nand-review-reconcile-odCx1N\\2026-10-08-home-grid-rebuild\\ticket\\18-integrated-home-acceptance.md",
+      "beforeCharacters": 12088,
+      "afterCharacters": 12160
+    },
+    {
+      "path": "speculo/.speculo/specdev/changes/2026-10-08-news-aihot/ADR.md",
+      "backup": "C:\\Users\\cdewta\\AppData\\Local\\Temp\\nand-review-reconcile-odCx1N\\2026-10-08-news-aihot\\ADR.md",
+      "beforeCharacters": 7939,
+      "afterCharacters": 8038
+    },
+    {
+      "path": "speculo/.speculo/specdev/changes/2026-10-08-news-aihot/CONTEXT.md",
+      "backup": "C:\\Users\\cdewta\\AppData\\Local\\Temp\\nand-review-reconcile-odCx1N\\2026-10-08-news-aihot\\CONTEXT.md",
+      "beforeCharacters": 1150,
+      "afterCharacters": 1363
+    },
+    {
+      "path": "speculo/.speculo/specdev/changes/2026-10-08-news-aihot/goal-plan.md",
+      "backup": "C:\\Users\\cdewta\\AppData\\Local\\Temp\\nand-review-reconcile-odCx1N\\2026-10-08-news-aihot\\goal-plan.md",
+      "beforeCharacters": 10401,
+      "afterCharacters": 10457
+    },
+    {
+      "path": "speculo/.speculo/specdev/changes/2026-10-08-news-aihot/spec.md",
+      "backup": "C:\\Users\\cdewta\\AppData\\Local\\Temp\\nand-review-reconcile-odCx1N\\2026-10-08-news-aihot\\spec.md",
+      "beforeCharacters": 22964,
+      "afterCharacters": 23008
+    },
+    {
+      "path": "speculo/.speculo/specdev/changes/2026-10-08-news-aihot/tickets-map.md",
+      "backup": "C:\\Users\\cdewta\\AppData\\Local\\Temp\\nand-review-reconcile-odCx1N\\2026-10-08-news-aihot\\tickets-map.md",
+      "beforeCharacters": 12331,
+      "afterCharacters": 12448
+    },
+    {
+      "path": "speculo/.speculo/specdev/changes/2026-10-08-news-aihot/ticket/01-raw-news-and-collection.md",
+      "backup": "C:\\Users\\cdewta\\AppData\\Local\\Temp\\nand-review-reconcile-odCx1N\\2026-10-08-news-aihot\\ticket\\01-raw-news-and-collection.md",
+      "beforeCharacters": 13166,
+      "afterCharacters": 13239
+    },
+    {
+      "path": "speculo/.speculo/specdev/changes/2026-10-08-news-aihot/ticket/02-agent-structured-prompt-runner.md",
+      "backup": "C:\\Users\\cdewta\\AppData\\Local\\Temp\\nand-review-reconcile-odCx1N\\2026-10-08-news-aihot\\ticket\\02-agent-structured-prompt-runner.md",
+      "beforeCharacters": 13739,
+      "afterCharacters": 13815
+    },
+    {
+      "path": "speculo/.speculo/specdev/changes/2026-10-08-news-aihot/ticket/03-featured-analysis-and-receipts.md",
+      "backup": "C:\\Users\\cdewta\\AppData\\Local\\Temp\\nand-review-reconcile-odCx1N\\2026-10-08-news-aihot\\ticket\\03-featured-analysis-and-receipts.md",
+      "beforeCharacters": 11322,
+      "afterCharacters": 11397
+    },
+    {
+      "path": "speculo/.speculo/specdev/changes/2026-10-08-news-aihot/ticket/04-event-occurrences-and-representative.md",
+      "backup": "C:\\Users\\cdewta\\AppData\\Local\\Temp\\nand-review-reconcile-odCx1N\\2026-10-08-news-aihot\\ticket\\04-event-occurrences-and-representative.md",
+      "beforeCharacters": 10211,
+      "afterCharacters": 10290
+    },
+    {
+      "path": "speculo/.speculo/specdev/changes/2026-10-08-news-aihot/ticket/05-hot-ranking-and-observation-history.md",
+      "backup": "C:\\Users\\cdewta\\AppData\\Local\\Temp\\nand-review-reconcile-odCx1N\\2026-10-08-news-aihot\\ticket\\05-hot-ranking-and-observation-history.md",
+      "beforeCharacters": 10627,
+      "afterCharacters": 10705
+    },
+    {
+      "path": "speculo/.speculo/specdev/changes/2026-10-08-news-aihot/ticket/06-daily-edition-and-saved-views.md",
+      "backup": "C:\\Users\\cdewta\\AppData\\Local\\Temp\\nand-review-reconcile-odCx1N\\2026-10-08-news-aihot\\ticket\\06-daily-edition-and-saved-views.md",
+      "beforeCharacters": 11128,
+      "afterCharacters": 11207
+    },
+    {
+      "path": "speculo/.speculo/specdev/changes/2026-10-08-news-aihot/ticket/07-briefs-reader-actions-and-notifications.md",
+      "backup": "C:\\Users\\cdewta\\AppData\\Local\\Temp\\nand-review-reconcile-odCx1N\\2026-10-08-news-aihot\\ticket\\07-briefs-reader-actions-and-notifications.md",
+      "beforeCharacters": 11968,
+      "afterCharacters": 12046
+    },
+    {
+      "path": "speculo/.speculo/specdev/changes/2026-10-08-news-aihot/ticket/08-home-news-widgets.md",
+      "backup": "C:\\Users\\cdewta\\AppData\\Local\\Temp\\nand-review-reconcile-odCx1N\\2026-10-08-news-aihot\\ticket\\08-home-news-widgets.md",
+      "beforeCharacters": 11217,
+      "afterCharacters": 11297
+    },
+    {
+      "path": "speculo/.speculo/specdev/changes/2026-10-08-news-aihot/ticket/09-opml-and-static-web-sources.md",
+      "backup": "C:\\Users\\cdewta\\AppData\\Local\\Temp\\nand-review-reconcile-odCx1N\\2026-10-08-news-aihot\\ticket\\09-opml-and-static-web-sources.md",
+      "beforeCharacters": 10916,
+      "afterCharacters": 10995
+    },
+    {
+      "path": "speculo/.speculo/specdev/changes/2026-10-08-news-aihot/ticket/10-reference-docs-and-runtime-acceptance.md",
+      "backup": "C:\\Users\\cdewta\\AppData\\Local\\Temp\\nand-review-reconcile-odCx1N\\2026-10-08-news-aihot\\ticket\\10-reference-docs-and-runtime-acceptance.md",
+      "beforeCharacters": 11113,
+      "afterCharacters": 11191
+    },
+    {
+      "path": "speculo/.speculo/specdev/changes/2026-10-08-private-storage-permissions/ADR.md",
+      "backup": "C:\\Users\\cdewta\\AppData\\Local\\Temp\\nand-review-reconcile-odCx1N\\2026-10-08-private-storage-permissions\\ADR.md",
+      "beforeCharacters": 732,
+      "afterCharacters": 959
+    },
+    {
+      "path": "speculo/.speculo/specdev/changes/2026-10-08-private-storage-permissions/CONTEXT.md",
+      "backup": "C:\\Users\\cdewta\\AppData\\Local\\Temp\\nand-review-reconcile-odCx1N\\2026-10-08-private-storage-permissions\\CONTEXT.md",
+      "beforeCharacters": 191,
+      "afterCharacters": 438
+    },
+    {
+      "path": "speculo/.speculo/specdev/changes/2026-10-08-private-storage-permissions/goal-plan.md",
+      "backup": "C:\\Users\\cdewta\\AppData\\Local\\Temp\\nand-review-reconcile-odCx1N\\2026-10-08-private-storage-permissions\\goal-plan.md",
+      "beforeCharacters": 6181,
+      "afterCharacters": 6276
+    },
+    {
+      "path": "speculo/.speculo/specdev/changes/2026-10-08-private-storage-permissions/spec.md",
+      "backup": "C:\\Users\\cdewta\\AppData\\Local\\Temp\\nand-review-reconcile-odCx1N\\2026-10-08-private-storage-permissions\\spec.md",
+      "beforeCharacters": 4718,
+      "afterCharacters": 4852
+    },
+    {
+      "path": "speculo/.speculo/specdev/changes/2026-10-08-private-storage-permissions/tickets-map.md",
+      "backup": "C:\\Users\\cdewta\\AppData\\Local\\Temp\\nand-review-reconcile-odCx1N\\2026-10-08-private-storage-permissions\\tickets-map.md",
+      "beforeCharacters": 4024,
+      "afterCharacters": 4191
+    },
+    {
+      "path": "speculo/.speculo/specdev/changes/2026-10-08-private-storage-permissions/ticket/01-posix-private-storage.md",
+      "backup": "C:\\Users\\cdewta\\AppData\\Local\\Temp\\nand-review-reconcile-odCx1N\\2026-10-08-private-storage-permissions\\ticket\\01-posix-private-storage.md",
+      "beforeCharacters": 9930,
+      "afterCharacters": 10007
+    },
+    {
+      "path": "speculo/.speculo/specdev/changes/2026-10-08-private-storage-permissions/ticket/02-native-history-permissions.md",
+      "backup": "C:\\Users\\cdewta\\AppData\\Local\\Temp\\nand-review-reconcile-odCx1N\\2026-10-08-private-storage-permissions\\ticket\\02-native-history-permissions.md",
+      "beforeCharacters": 7540,
+      "afterCharacters": 7622
+    },
+    {
+      "path": "speculo/.speculo/specdev/changes/2026-10-08-terminal-reliability/ADR.md",
+      "backup": "C:\\Users\\cdewta\\AppData\\Local\\Temp\\nand-review-reconcile-odCx1N\\2026-10-08-terminal-reliability\\ADR.md",
+      "beforeCharacters": 1441,
+      "afterCharacters": 1642
+    },
+    {
+      "path": "speculo/.speculo/specdev/changes/2026-10-08-terminal-reliability/CONTEXT.md",
+      "backup": "C:\\Users\\cdewta\\AppData\\Local\\Temp\\nand-review-reconcile-odCx1N\\2026-10-08-terminal-reliability\\CONTEXT.md",
+      "beforeCharacters": 198,
+      "afterCharacters": 445
+    },
+    {
+      "path": "speculo/.speculo/specdev/changes/2026-10-08-terminal-reliability/goal-plan.md",
+      "backup": "C:\\Users\\cdewta\\AppData\\Local\\Temp\\nand-review-reconcile-odCx1N\\2026-10-08-terminal-reliability\\goal-plan.md",
+      "beforeCharacters": 6207,
+      "afterCharacters": 6302
+    },
+    {
+      "path": "speculo/.speculo/specdev/changes/2026-10-08-terminal-reliability/spec.md",
+      "backup": "C:\\Users\\cdewta\\AppData\\Local\\Temp\\nand-review-reconcile-odCx1N\\2026-10-08-terminal-reliability\\spec.md",
+      "beforeCharacters": 4770,
+      "afterCharacters": 4903
+    },
+    {
+      "path": "speculo/.speculo/specdev/changes/2026-10-08-terminal-reliability/tickets-map.md",
+      "backup": "C:\\Users\\cdewta\\AppData\\Local\\Temp\\nand-review-reconcile-odCx1N\\2026-10-08-terminal-reliability\\tickets-map.md",
+      "beforeCharacters": 3912,
+      "afterCharacters": 4079
+    },
+    {
+      "path": "speculo/.speculo/specdev/changes/2026-10-08-terminal-reliability/ticket/01-download-diagnostics.md",
+      "backup": "C:\\Users\\cdewta\\AppData\\Local\\Temp\\nand-review-reconcile-odCx1N\\2026-10-08-terminal-reliability\\ticket\\01-download-diagnostics.md",
+      "beforeCharacters": 9256,
+      "afterCharacters": 9334
+    },
+    {
+      "path": "speculo/.speculo/specdev/changes/2026-10-08-terminal-reliability/ticket/02-unix-inherited-fds.md",
+      "backup": "C:\\Users\\cdewta\\AppData\\Local\\Temp\\nand-review-reconcile-odCx1N\\2026-10-08-terminal-reliability\\ticket\\02-unix-inherited-fds.md",
+      "beforeCharacters": 7439,
+      "afterCharacters": 7519
+    },
+    {
+      "path": "speculo/.speculo/specdev/changes/2026-10-08-workbench-regressions/ADR.md",
+      "backup": "C:\\Users\\cdewta\\AppData\\Local\\Temp\\nand-review-reconcile-odCx1N\\2026-10-08-workbench-regressions\\ADR.md",
+      "beforeCharacters": 698,
+      "afterCharacters": 925
+    },
+    {
+      "path": "speculo/.speculo/specdev/changes/2026-10-08-workbench-regressions/CONTEXT.md",
+      "backup": "C:\\Users\\cdewta\\AppData\\Local\\Temp\\nand-review-reconcile-odCx1N\\2026-10-08-workbench-regressions\\CONTEXT.md",
+      "beforeCharacters": 172,
+      "afterCharacters": 419
+    },
+    {
+      "path": "speculo/.speculo/specdev/changes/2026-10-08-workbench-regressions/goal-plan.md",
+      "backup": "C:\\Users\\cdewta\\AppData\\Local\\Temp\\nand-review-reconcile-odCx1N\\2026-10-08-workbench-regressions\\goal-plan.md",
+      "beforeCharacters": 6634,
+      "afterCharacters": 6725
+    },
+    {
+      "path": "speculo/.speculo/specdev/changes/2026-10-08-workbench-regressions/spec.md",
+      "backup": "C:\\Users\\cdewta\\AppData\\Local\\Temp\\nand-review-reconcile-odCx1N\\2026-10-08-workbench-regressions\\spec.md",
+      "beforeCharacters": 4325,
+      "afterCharacters": 4456
+    },
+    {
+      "path": "speculo/.speculo/specdev/changes/2026-10-08-workbench-regressions/tickets-map.md",
+      "backup": "C:\\Users\\cdewta\\AppData\\Local\\Temp\\nand-review-reconcile-odCx1N\\2026-10-08-workbench-regressions\\tickets-map.md",
+      "beforeCharacters": 3984,
+      "afterCharacters": 4149
+    },
+    {
+      "path": "speculo/.speculo/specdev/changes/2026-10-08-workbench-regressions/ticket/01-overlay-rail-navigation.md",
+      "backup": "C:\\Users\\cdewta\\AppData\\Local\\Temp\\nand-review-reconcile-odCx1N\\2026-10-08-workbench-regressions\\ticket\\01-overlay-rail-navigation.md",
+      "beforeCharacters": 7984,
+      "afterCharacters": 8064
+    },
+    {
+      "path": "speculo/.speculo/specdev/changes/2026-10-08-workbench-regressions/ticket/02-settings-module-icons.md",
+      "backup": "C:\\Users\\cdewta\\AppData\\Local\\Temp\\nand-review-reconcile-odCx1N\\2026-10-08-workbench-regressions\\ticket\\02-settings-module-icons.md",
+      "beforeCharacters": 7988,
+      "afterCharacters": 8069
+    },
+    {
+      "path": "speculo/.speculo/specdev/changes/2026-10-08-workbench-regressions/ticket/03-localized-dropdown-sizing.md",
+      "backup": "C:\\Users\\cdewta\\AppData\\Local\\Temp\\nand-review-reconcile-odCx1N\\2026-10-08-workbench-regressions\\ticket\\03-localized-dropdown-sizing.md",
+      "beforeCharacters": 8279,
+      "afterCharacters": 8359
+    },
+    {
+      "path": "speculo/.speculo/specdev/changes/2026-10-08-all-open-issues/review-progress.json",
+      "backup": "C:\\Users\\cdewta\\AppData\\Local\\Temp\\nand-review-reconcile-odCx1N\\2026-10-08-all-open-issues\\review-progress.json",
+      "beforeCharacters": 309361,
+      "afterCharacters": 325837
+    }
+  ],
+  "sourceHead": "00a1dd2ef8dbb4c84174ae3c112e76b686522c98",
+  "prohibitedClaims": [
+    "No workflow activation or fabricated commit/result SHA.",
+    "No real-account or unavailable-platform pass.",
+    "No deletion or weakening of original AC."
+  ],
+  "skillVersions": [
+    {
+      "path": ".agents/skills/dev/SKILL.md",
+      "sha256": "c8fe48347cd03367c384ca52535cc1981de658721fa82093b34c271c25d295d6"
+    },
+    {
+      "path": ".agents/skills/ui/SKILL.md",
+      "sha256": "8c362a984536481585cceeae64d8fcc784f56451262444e0400660b19c801044"
+    }
+  ],
+  "finished": "2026-10-11",
+  "finalVerification": {
+    "date": "2026-10-11",
+    "baseHead": "00a1dd2ef8dbb4c84174ae3c112e76b686522c98",
+    "build": "PASS source+test TypeScript/styles/production bundle",
+    "lint": "PASS zero warnings",
+    "unit": {
+      "passed": 805,
+      "skipped": 4,
+      "filesPassed": 173,
+      "filesSkipped": 1,
+      "durationSeconds": 168.38,
+      "log": "C:/Users/cdewta/AppData/Local/Temp/nand-review-external-full.log"
+    },
+    "architecture": "PASS983 modules",
+    "i18n": "PASS25 dictionaries/3810 keys",
+    "css": "PASS109 CSS files; no new violations;150 existing baseline groups",
+    "styles": "Canonical110 sources and diagnostic style report passed",
+    "bundle": "PASS startup99.3KiB/browser232.6KiB, unchanged activation caps",
+    "notices": "PASS12 npm/62crates",
+    "docs": "PASS624 Markdown/1654 local links/350 external links; no fetch",
+    "sharedSafety": "PASS automation/DST/dispatch plus document conflict/recovery suites",
+    "nativeDelivery": {
+      "checks": 13,
+      "evidence": "speculo/.speculo/specdev/changes/2026-10-08-browser-ai-workbench/evidence/review-delivery.json"
+    },
+    "artifacts": [
+      {
+        "path": "main.js",
+        "bytes": 4513810,
+        "sha256": "b7500c9f13036463eba12b2274045acf9d91b778edb8d56c2bcddf8680f493bd"
+      },
+      {
+        "path": "styles.css",
+        "bytes": 756435,
+        "sha256": "75fe7ec20e2660786e856e0ec2cf94d97b7d4051dd6fcfa2c62c9fb5b5196a13"
+      }
+    ],
+    "authorization": "Review/fixes/local verification only; no commit/push/version/release/issue closure.",
+    "unverified": [
+      "User explicitly deferred all real browser account acceptance.",
+      "Real CLI/model-account completion and quality.",
+      "POSIX permissions/inherited FDs/process groups; non-Windows browser and terminal host matrices.",
+      "Actual mobile hardware/OS IME composition; hosting authentication/SSH and full native Git conflict editor matrix."
+    ],
+    "diffCheck": "PASS after removing three trailing blank lines in reviewed source/test files; no executable change."
+  },
+  "originalACRowsUnchanged": true
+}

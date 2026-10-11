@@ -56,6 +56,7 @@
    clickable/painted above an embedded web frame in edge cases where the
    frame's surface ends up over the line below it. */
 .dashboard-add-section {
+	height: var(--nand-touch-target);
 	display: flex;
 	align-items: center;
 	justify-content: center;

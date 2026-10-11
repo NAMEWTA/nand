@@ -9,6 +9,10 @@ sources: ["<Path>{roots.state}/specdev/changes/2026-10-08-private-storage-permis
 
 # Spec: NAND 私有目录和文件的最小POSIX权限
 
+<!-- ACTUAL-CODE-REVIEW:START -->
+2026-10-11 实际代码审查与修复：[review-index.md](evidence/review-index.md)，覆盖本 change 的 2 票、6 条 AC。下文保留原规划目标与当时基线，不能把“尚未实现／本轮只规划”当成当前代码状态。当前源码与接口以审查证据及 owner 的 `api.ts` 为准；未验证的账号或平台仍未验证，原 AC 没有删减。
+<!-- ACTUAL-CODE-REVIEW:END -->
+
 - ADR：<Path>{roots.state}/specdev/changes/2026-10-08-private-storage-permissions/ADR.md</Path>
 - CONTEXT：<Path>{roots.state}/specdev/changes/2026-10-08-private-storage-permissions/CONTEXT.md</Path>
 - 引用对照：<Path>{roots.state}/specdev/changes/2026-10-08-private-storage-permissions/reference-analysis.md</Path>
@@ -19,7 +23,7 @@ sources: ["<Path>{roots.state}/specdev/changes/2026-10-08-private-storage-permis
 
 收紧桌面POSIX .nand配置/运行数据的目录与文件权限，兼容旧库、克隆库与原有读写。
 
-### 当前事实
+### 规划时基线
 
 JsonStore/DurableState/adapter写入按umask，native SQLite同样会创建文件；浏览器用户数据目录已显式0700/0600，库内目前不一致。
 

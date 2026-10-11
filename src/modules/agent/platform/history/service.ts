@@ -1,4 +1,5 @@
 import { deviceId as getDeviceId } from '../../../../host/obsidian/storage/device-id';
+import { privateVaultStorage } from '../../../../host/obsidian/storage/private-storage';
 import { TFolder, type App, type TFile } from 'obsidian';
 import type { AgentSettings } from '../../core/launch/types';
 import { t } from '../../../../shared/i18n/index';
@@ -76,7 +77,7 @@ export class NativeHistory {
 	) {
 		const device = getDeviceId(app);
 		this.store = new JsonStore(
-			app.vault.adapter,
+			privateVaultStorage(app),
 			`.nand/terminal-agent/${device}/history.json`,
 			(v): v is Record<string, HistoryMetadata> => !!v && typeof v === 'object' && !Array.isArray(v),
 		);

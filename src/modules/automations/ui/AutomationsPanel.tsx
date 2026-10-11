@@ -280,10 +280,10 @@ export function AutomationsPanel({
 								)}
 							</div>
 							{host.pin && currentIds.has(selected.id) && <button type="button" className="nand-ui-btn" onClick={() => actions.run(() => host.pin!(selected))}>{t('automation.pin')}</button>}
-							<div className="nand-ui-section-label">{t('automation.prompt')}</div>
+							{selected.action.kind !== 'browser-workflow' && <><div className="nand-ui-section-label">{t('automation.prompt')}</div>
 							<p className="nand-automation-prompt">
 								{actionText(selected.action)}
-							</p>
+							</p></>}
 						</section>
 						<div className="nand-automation-section-head">
 							<h4>{t('automation.history')}</h4>

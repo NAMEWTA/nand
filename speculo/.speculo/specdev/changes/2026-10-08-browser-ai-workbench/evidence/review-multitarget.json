@@ -1,0 +1,119 @@
+{
+  "ticket": "Browser T06 multi-target production path and gate",
+  "finding": "R-095",
+  "status": "implemented-local-verification-live-gate-unverified",
+  "findingDetails": [
+    "Task UI/service create only one target; no add/remove target, select all/none or explicit ready-only preview. Core sender supports multi-row execution but it is not reachable through ordinary production UI.",
+    "All-target preflight exits at first error without reporting each selected target readiness. Persisted ready status is not a fresh site check.",
+    "UI acting lock covers the entire send/capture promise and disables independent visibility changes.",
+    "Sender owns page IDs only inside its own instance. Common BrowserControl/legacy bridge mutations and preparation are not admitted against a shared task/page/profile/generation lease.",
+    "Explicit recollect/retry-send/takeover/resume actions are absent. Save retry exists and stays disk-only. Batch stage/commit/rollback and pause tests already cover core safety, but native multi-provider failure/recovery has not been exercised."
+  ],
+  "reviewed": [
+    "ticket/06-multitarget-poc-gate.md scope/contract/matrix/AC006-011/015/024/025",
+    "spec.md readiness/ownership/shared service contracts",
+    "src/modules/browser/services/workspace.ts",
+    "src/modules/browser/services/workspace-sender.ts (complete)",
+    "src/modules/browser/services/workspace-sender.test.ts (complete)",
+    "src/modules/browser/services/page-control.ts (complete)",
+    "src/modules/browser/services/index.ts controlledPages and execute",
+    "src/modules/browser/core/operation-queue.ts",
+    "src/modules/browser/core/workspace/documents.ts",
+    "src/modules/browser/ui/WorkspacePage.tsx",
+    "src/modules/browser/ui/workspace-page.tsx page activation/visibility"
+  ],
+  "implemented": [
+    "Workspace and registered public API add/remove target bindings through validated browser profiles; same provider can have distinct binding IDs. Adding targets does not select recipients or open pages. Removing targets preserves prior turn/answer snapshots and closes the current presentation.",
+    "Task UI exposes add/remove and select-all/clear-recipient actions. Visibility changes now remain available during the long send/capture operation and do not change recipients.",
+    "Target membership edits invalidate task previews by their actual turn-keyed IDs. New regression covers unselected/invisible additions, duplicate provider identities, unsupported providers and immutable past answers.",
+    "Fresh read-only preflight checks every selected binding and reports readiness; default preview rejects all input if any target fails. Explicit ready-only preview freezes the eligible subset without changing saved recipients. Draft/recipient edits and rebinding invalidate previews/checks.",
+    "Shared PageOwnership admits task sessions against typed control and authenticated bridge mutations. Ordinary control calls retain the existing serial queue and close cancellation. Pause revokes old task admission; late known receipts survive; takeover explicitly reveals a bound page and resume only rechecks readiness.",
+    "Removing a binding now persists membership first and closes the captured presentation after, avoiding a close-before-edit race. No historical turn/capture is removed.",
+    "Native three-guest test exposed CDP text entering the previously focused guest despite the host webview focus. A verified native editor click now establishes input routing before selection/insertion. Host and editor focus/readback guards remain. webContents.isFocused was experimentally unsuitable on Windows and was removed; ordinary browser32 and internal provider17 checks pass after removal.",
+    "If send-time preflight fails before attempts exist, every untouched exchange now reports not-sent with the failure reason instead of remaining idle. Save retry remains disk-only.",
+    "Bilingual guide covers membership, fresh readiness, ready subset, takeover and control exclusion; stale no-multiple-accounts/Linux-only claims corrected. Stable module and shell contracts updated with pre-edit backups.",
+    "Read-only recollect now requires a confirmed submission receipt, verified same conversation/profile/provider and the original user message in the current branch. It never creates an attempt or touches website drafts. Capture revisions are retained, newest partial stays current, and explicit history expands lazily with keyboard/touch controls. Save-failed complete recollection is retained for disk-only retry.",
+    "Explicit previewRetry/retrySend freezes the original prompt, one current binding and the complete last-attempt context. Fresh read-only inspection precedes review; one-use confirmation adds only that target attempt through the shared sender. Previous unknown attempts and successful exchanges remain intact; edited tasks/bindings invalidate review; pending sends can be paused before provider admission.",
+    "Journal evidence is refreshed before native execution and disk-only retry. Newly durable acceptance blocks stale resend; a rolled-back failed intent can clear its error by re-reading durable state without replaying that intent."
+  ],
+  "verification": {
+    "baseline": "R094 full646 passed/4skipped; ChatGPT72, DeepSeek52, Kimi63 individual-provider local native checks. These are not a multi-target real-account gate.",
+    "gate": "Unverified: three real provider accounts/live websites unavailable. Do not mark the T06 real-account gate passed or downstream real-site acceptance complete from local fixtures.",
+    "currentStep": "Build4171656/styles749580, full lint zero warnings, architecture903, i18n3370, docs552 and updated bundle cap4171776 pass. Final native65 passed; full667/4skipped passed.",
+    "native": [
+      {
+        "checks": 52,
+        "evidence": "C:/Users/cdewta/AppData/Local/Temp/nand-multitarget-complete-92cb1c6586c541848bb99d9c1b99e0af/evidence",
+        "scope": "Production three-provider task UI, login blocker and ready-only send, continuous three rounds, repeated/multiline prompt and >60k answers, 18 theme/width combinations, coarse44, human draft and stage failure, one unknown submit, ownership against typed API and authenticated bridge, takeover/manual draft/resume, removal/history, restart. Before removing redundant Windows native-focus predicate."
+      },
+      {
+        "checks": 32,
+        "evidence": "C:/Users/cdewta/AppData/Local/Temp/nand-control-native-focus-final-34fc03c7cd914f228228c4ec491650d1/evidence",
+        "scope": "Final ordinary BrowserControl native regression after verified editor click and removal of unreliable native-focus predicate."
+      },
+      {
+        "checks": 17,
+        "evidence": "C:/Users/cdewta/AppData/Local/Temp/nand-provider-native-focus-final-068acdb37c2f455aa9270786e9e67377/evidence",
+        "scope": "Final internal provider helper against real local guest: native input/readback, changed guards/overlay/ambiguity, response privacy and cancellation."
+      },
+      {
+        "checks": 52,
+        "evidence": "C:/Users/cdewta/AppData/Local/Temp/nand-multitarget-native-final-e55b89f73bcc4cc392d792d83543dfa8/evidence",
+        "scope": "Final uninstrumented production build after removing native-focus predicate. All three-provider send/unknown/takeover/manual/restart checks pass."
+      },
+      {
+        "checks": 65,
+        "evidence": "C:/Users/cdewta/AppData/Local/Temp/nand-multitarget-resend-final-531074e599cb4015aa768532f2d4ba0c/evidence",
+        "scope": "Final compiled production multi-target/recollect/resend UI. Explicit review and duplicate warning, original prompt despite next draft, single new target attempt, two successful exchanges unchanged, narrow touch controls, ownership/takeover, read-only recollect/history/keyboard/restart. Screenshot inspected."
+      }
+    ],
+    "exploratoryFailures": [
+      {
+        "evidence": "C:/Users/cdewta/AppData/Local/Temp/nand-multitarget-trace-869b10969e144f609a64a2b8048448b3/evidence",
+        "cause": "Instrumented diagnostic confirmed one insert command per intended guest but second guest text reached first guest. Corrected through verified native editor click; diagnostic wrapper removed."
+      },
+      {
+        "evidence": "C:/Users/cdewta/AppData/Local/Temp/nand-control-native-fill-debug-f160ff3cf4124a08bcba96e1f406b0d8/evidence",
+        "cause": "Experimental webContents.isFocused predicate rejected valid editor path; removed, final native control32 passed."
+      },
+      {
+        "evidence": "C:/Users/cdewta/AppData/Local/Temp/nand-multitarget-recovery-final-46bbc0f839bf477584732d24399aa405/evidence",
+        "cause": "47 checks passed; harness looked for AX role textbox, production snapshot normalizes it to text input. Harness now uses the explicit composer accessible name. No source defect from this assertion."
+      },
+      {
+        "evidence": "C:/Users/cdewta/AppData/Local/Temp/nand-multitarget-resend-83612ecf486544418b8feba59597e18c/evidence",
+        "cause": "Successful target records deeply equal and native counts8/8/8, but JSON property order changed after Markdown refresh. Harness now compares full objects with deep equality. No source defect from assertion."
+      }
+    ],
+    "fullSuite": {
+      "passed": 667,
+      "skipped": 4,
+      "filesPassed": 146,
+      "filesSkipped": 1,
+      "durationSeconds": 114.17,
+      "started": "2026-10-11 01:15:18 Asia/Shanghai",
+      "log": "C:/Users/cdewta/AppData/Local/Temp/nand-review-multitarget-recovery-full.log"
+    },
+    "recollect": {
+      "unit": "Workspace/Sender27 passed, including four new no-submit/identity/pause/save-failure recollect cases. Browser lint and i18n3367 pass; build4166955/styles749580. CSS lint and styles check pass.",
+      "native": "60 passed: C:/Users/cdewta/AppData/Local/Temp/nand-multitarget-recollect-keyboard-9b828e42a0874f7d8333a05f7fd3d69e/evidence. Includes current partial/history preservation, keyboard collapse/unmount/reopen, 44px target, no-focus API collection and restart. Internal provider input19 passed at C:/Users/cdewta/AppData/Local/Temp/nand-provider-editor-guard-211fced724424707acafbb43ba1979ba/evidence.",
+      "knownFixtureCorrection": "Stop buttons in local fixtures now clear aria-busy as well as stopping the timer, so their stopped UI does not still declare generating."
+    },
+    "retry": {
+      "unit": "Workspace14 + Sender20 + Journal2 = 36 passed. Covers unknown/success isolation, original prompt, exact preview one-use, unselected target, changed binding/draft, queued pause, failed durable intent zero input, external accepted evidence, explicit rebind and disk-only failure recovery.",
+      "build": "main.js4171656/styles749580; browser lint zero warnings; i18n3370/docs552/architecture903 passed. Full667/4skipped, native65 and full lint pass."
+    }
+  },
+  "next": [
+    "Continue Browser T07 current-answer comparison and T08 recovery review.",
+    "Keep live-account T06 gate explicitly unverified; continue independent work and global planning reconciliation."
+  ],
+  "designNotes": [
+    "Fresh readiness should inspect every selected bound page without native input/focus, retain per-target reasons, reject default preview if any fail, and allow explicit ready-only turn snapshot without changing saved recipient selection. Current preview only checks persisted target.status.",
+    "Common BrowserModule.controlledPages.execute is shared by typed control and legacy bridge; check shared page ownership there immediately before native mutation. tab.close/tab.switch and typed activation/close bypass it and need deliberate ownership/takeover handling.",
+    "Existing sender has per-instance owners Set and all-intent/all-stage preconditions. Explicit page lease should also cover prepare/preview and be revoked on pause; native session already checks task signal before input.",
+    "Task membership UI newly reuses existing target CSS; pending native multi-target/width/theme verification.",
+    "Browser T08 recovery and AC011/017 reread: newest partial is current; prior complete captures remain explicit history. Unknown cannot be converted to unsent from TTL/hash. Recollect/save/retry-send must remain distinct actions.",
+    "Native-input API reference consulted: https://www.electronjs.org/docs/latest/api/web-contents/ . Actual routing and the Windows predicate limitation established by retained local native evidence, not inferred from the reference."
+  ]
+}

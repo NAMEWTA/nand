@@ -1,0 +1,162 @@
+{
+  "finding": "R-109",
+  "ticket": "T17 AC018/AC035",
+  "status": "implemented-local-verification-live-gate-unverified",
+  "observed": "No task-bound partial element capture or user adapter lifecycle. Existing design-mode grab and NativeProviderSession will be reused.",
+  "contracts": [
+    "User-selected snippets keep page/profile/generation, conversation/message where provable, selector and selection bounds; always incomplete. No fabricated full answer or website verification.",
+    "Candidate rule binds official origin/provider/profile/path and finite composer/submit/answer selectors. Preview and one explicit real validation send precede enable; failures do not shadow built-in behavior; revoke restores built-in.",
+    "Visible Markdown for rules; no arbitrary script/cookie. Same durable precheck/stage/intent/ownership and final send confirmation as workspace; explanation uses existing opt-in synthesis."
+  ],
+  "references": [
+    {
+      "url": "https://github.com/stablyai/orca/blob/e3639ef8d69209b8278b41c0e722811960ea7ec0/src/main/browser/browser-manager-grab.ts",
+      "license": "MIT",
+      "review": "Read fixed owner/guest admission, cancel/teardown and single selection result. Reuse NAND current design-mode implementation; no new overlay or copied upstream source."
+    }
+  ],
+  "next": [
+    "T18 finite browser workflows and missing Home-owned automations workflow contract",
+    "T19 automation contribution, T20 external scoped bridge, T21 delivery evidence and global planning reconciliation"
+  ],
+  "selectionCheckpoint": {
+    "status": "implemented-local-native-verified",
+    "build": {
+      "mainBytes": 4391413,
+      "stylesBytes": 754693
+    },
+    "native": {
+      "checks": 77,
+      "failed": [],
+      "evidence": "C:/Users/cdewta/AppData/Local/Temp/nand-guidance-5ff6151f32bc44259682c9873729add9/evidence",
+      "environment": "Fresh isolated Obsidian vault; controlled DeepSeek-origin fixture. No real provider account."
+    },
+    "checks": {
+      "targetedTests": 45,
+      "architecture": 962,
+      "i18n": 3647,
+      "build": "passed",
+      "css": "passed"
+    },
+    "coverage": [
+      "Real CDP Overlay element selection via native input",
+      "Exact page/profile/generation, public message id, selector, viewport and rectangle",
+      "Partial text stored separately from provider captures in visible Markdown",
+      "No current-answer mutation and no second submission",
+      "Opt-in synthesis offers partial selection",
+      "18 theme/width combinations and coarse pointer controls"
+    ],
+    "failedProbe": {
+      "evidence": "C:/Users/cdewta/AppData/Local/Temp/nand-guidance-aa55656ad3c546858e4e799a8fec62d7/evidence",
+      "reason": "Probe selector string quoting; corrected to JSON.stringify; no product assertion failed"
+    },
+    "finalNative": {
+      "checks": 77,
+      "failed": [],
+      "mainBytes": 4414984,
+      "stylesBytes": 755502,
+      "evidence": "C:/Users/cdewta/AppData/Local/Temp/nand-guidance-final-1464a8adc4be4d91b0b434b51f871320/evidence"
+    }
+  },
+  "adapterCheckpoint": {
+    "status": "implemented-local-native-verified",
+    "build": {
+      "mainBytes": 4414984,
+      "stylesBytes": 755502
+    },
+    "native": {
+      "evidence": "C:/Users/cdewta/AppData/Local/Temp/nand-user-adapter-2b6ef0c120cf49c7a62557f30fd4a114/evidence",
+      "checks": 76,
+      "failed": [],
+      "earlierPositiveRun": {
+        "checks": 52,
+        "evidence": "C:/Users/cdewta/AppData/Local/Temp/nand-user-adapter-f2fe97b9caf14755b70124e901ea32ab/evidence"
+      }
+    },
+    "coverage": [
+      "Existing native Overlay selects all three roles",
+      "Changed DOM blocks built-in readiness; candidate preview does not type",
+      "One real native submission with durable intent, exact receipt and partial selected answer",
+      "Enable separately confirms current message and selected content; no consumed-send replay",
+      "Matching enabled rule used by normal task after explicit target recheck; preview names version",
+      "Withdrawal restores built-in API/history capture",
+      "Missing answer region retains accepted receipt and explicit incomplete/error; candidate never becomes default",
+      "CSS text cannot run JavaScript",
+      "Module stop discards pending verification permission; reenable only restores local withdrawn record",
+      "36 theme/width cases, two coarse44 checks; no host errors"
+    ],
+    "tests": {
+      "targeted": 37,
+      "files": 5,
+      "full": {
+        "passed": 778,
+        "skipped": 4,
+        "filesPassed": 171,
+        "filesSkipped": 1,
+        "start": "2026-10-11 07:07:55 Asia/Shanghai",
+        "seconds": 160.71,
+        "log": "C:\\Users\\cdewta\\AppData\\Local\\Temp\\nand-review-guidance-full.log"
+      },
+      "productionAndTestTypes": "passed in build",
+      "lint": "full zero warnings",
+      "architecture": 967,
+      "i18n": 3678,
+      "docs": 554,
+      "css": "no new violations",
+      "bundle": "within measured output/style limits; startup and activation caps unchanged"
+    },
+    "failureRepairs": [
+      {
+        "kind": "product",
+        "reason": "Retry saving originally only flushed the failed write. Now calls DurableState.retry; persistence failure/recovery/optimistic-edit tests pass."
+      },
+      {
+        "kind": "probe",
+        "evidence": "C:/Users/cdewta/AppData/Local/Temp/nand-user-adapter-148d60ec6759479c9ce6b3f3b9a63eff/evidence",
+        "reason": "Expected #id while existing Design Mode correctly returned tag#id. Corrected assertion."
+      },
+      {
+        "kind": "probe",
+        "evidence": "C:/Users/cdewta/AppData/Local/Temp/nand-user-adapter-e2e621e102c14ea99119b82087054a62/evidence",
+        "reason": "Expected failed acquisition, while shared sender correctly preserves accepted receipt as incomplete with browser_adapter_answer. Corrected assertion to actual contract."
+      }
+    ]
+  },
+  "liveAccountDecision": {
+    "at": "2026-10-11",
+    "user": "Not convenient; retain real accounts as unverified.",
+    "status": "unverified-do-not-wait"
+  },
+  "documentation": {
+    "backup": "C:\\Users\\cdewta\\AppData\\Local\\Temp\\nand-review-guidance-docs-bd93aeb3f66a4c468b6574b7e555eb7c",
+    "files": [
+      {
+        "path": "docs/browser.md",
+        "before": {
+          "bytes": 31233,
+          "lines": 181,
+          "headings": 13
+        },
+        "after": {
+          "bytes": 34183,
+          "lines": 195,
+          "headings": 15
+        }
+      },
+      {
+        "path": "docs/browser.ZH.md",
+        "before": {
+          "bytes": 28397,
+          "lines": 181,
+          "headings": 13
+        },
+        "after": {
+          "bytes": 31045,
+          "lines": 195,
+          "headings": 15
+        }
+      }
+    ],
+    "skill": "Updated module-authoring stable ownership/storage/version rules."
+  }
+}

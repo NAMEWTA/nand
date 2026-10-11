@@ -88,9 +88,10 @@ export class ContactsIndex {
 		const previous = this.byPath.get(path);
 		if (!previous) return;
 		this.byPath.delete(path);
-		const rest = (this.byId.get(previous.id) ?? []).filter((r) => r.path !== path);
-		if (rest.length) this.byId.set(previous.id, rest);
-		else this.byId.delete(previous.id);
+		const id = this.indexedIdentity.get(path)!.id;
+		const rest = (this.byId.get(id) ?? []).filter((r) => r.path !== path);
+		if (rest.length) this.byId.set(id, rest);
+		else this.byId.delete(id);
 		const contribution = this.contributions.get(path);
 		for (const company of contribution?.companies ?? []) this.memberships.get(company)?.delete(path);
 		for (const person of contribution?.people ?? [])
@@ -133,7 +134,7 @@ export class ContactsIndex {
 		const previous = this.byPath.get(path);
 		if (!previous) return;
 		this.revision++;
-		const refresh = this.affected(path, [previous.id]);
+		const refresh = this.affected(path, [this.indexedIdentity.get(path)!.id]);
 		this.detach(path);
 		this.rebuild(refresh);
 	}

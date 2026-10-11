@@ -9,6 +9,12 @@ import type { AutomationAction, AutomationDefinition } from '../../../shared/aut
 import { onLanguageChanged, t } from '../../../shared/i18n/index';
 import { repaintLocalizedForm } from '../../../ui/primitives/localized-form';
 import { AutomationSessionPicker } from './session-picker';
+import type { AutomationWorkflowChoice, AutomationWorkflowRunner } from '../api';
+
+export interface WorkflowEditorSources {
+	workflows(): Promise<AutomationWorkflowChoice[]>;
+	pages(): Promise<ReturnType<AutomationWorkflowRunner['pages']>>;
+}
 
 export type TaskTarget = { path: string; cardId: string; title: string };
 export type { AutomationEditRequest };
@@ -31,6 +37,7 @@ export class AutomationEditorForm {
 		request: AutomationEditRequest,
 		private readonly done: (saved?: AutomationDefinition) => void,
 		private pin?: (definition: AutomationDefinition) => Promise<void>,
+		private workflowSources?: WorkflowEditorSources,
 	) {
 		const { source, title = '', existing } = request;
 		this.editing = !!existing;
@@ -100,7 +107,8 @@ export class AutomationEditorForm {
 		const main = body.createDiv({ cls: 'nand-automation-editor-main' }),
 			side = body.createDiv({ cls: 'nand-automation-editor-side' });
 		const action = this.draft.action;
-		bindLocalizedControl(new Setting(main).setName(t('automation.prompt')), "name", 'automation.prompt').addTextArea((input) => {
+		if (action.kind === 'browser-workflow') this.workflowFields(main, action, generation);
+		else bindLocalizedControl(new Setting(main).setName(t('automation.prompt')), "name", 'automation.prompt').addTextArea((input) => {
 			input.inputEl.rows = 12;
 			input.setDisabled(this.draft.source?.kind === 'widget');
 			input
@@ -179,6 +187,55 @@ export class AutomationEditorForm {
 		if (this.pin) new Setting(el).addButton(button => bindLocalizedControl(button.setButtonText(t('automation.pin')), "buttonText", 'automation.pin').onClick(() => {
 			void this.save(true);
 		}));
+	}
+	private workflowFields(el: HTMLElement, action: Extract<AutomationAction, { kind: 'browser-workflow' }>, generation: number): void {
+		const row = new Setting(el).setName(t('automation.browser-workflow')).setDesc(t('automation.workflowLoading'));
+		if (!this.workflowSources) { row.setDesc(t('automation.workflowUnavailable')); return; }
+		void Promise.all([this.workflowSources.workflows(), this.workflowSources.pages()]).then(([all, pages]) => {
+			if (generation !== this.generation) return;
+			const choices = all.filter(flow => flow.verified), selected = choices.find(flow => flow.id === action.workflowId && flow.version === action.version);
+			row.setDesc(t(selected ? 'automation.workflowHelp' : action.workflowId ? 'automation.workflowSelectionUnavailable' : 'automation.workflowChoose'));
+			row.addDropdown(input => {
+				input.addOption('', t('automation.select'));
+				const saved = action.workflowId ? `${action.workflowId}:${action.version}` : '';
+				if (saved && !selected) input.addOption(saved, `${action.workflowId} · ${action.version} (${t('automation.unavailable')})`);
+				for (const choice of choices) input.addOption(`${choice.id}:${choice.version}`, `${choice.title} · ${choice.version}`);
+				input.setValue(saved).onChange(value => {
+					const next = choices.find(flow => `${flow.id}:${flow.version}` === value);
+					if (!next) { action.workflowId = ''; action.variables = {}; action.scope = []; this.draw(); return; }
+					action.workflowId = next.id; action.version = next.version; action.variables = {}; action.scope = [];
+					if (!this.draft.name.trim()) this.draft.name = next.title;
+					this.draw();
+				});
+			});
+			if (!selected) return;
+			for (const variable of selected.variables) {
+				const field = new Setting(el).setName(variable.name);
+				if (variable.type === 'secret') { field.setDesc(t('automation.workflowSecrets')); continue; }
+				if (variable.required) field.setDesc(t('automation.workflowRequired'));
+				const current = action.variables[variable.name] ?? variable.default;
+				if (variable.type === 'boolean') field.addDropdown(input => input.addOptions({ '': t('automation.workflowUnset'), true: t('automation.workflowTrue'), false: t('automation.workflowFalse') })
+					.setValue(current === undefined ? '' : String(current)).onChange(value => { if (value === '') delete action.variables[variable.name]; else action.variables[variable.name] = value === 'true'; }));
+				else field.addText(input => { input.inputEl.type = variable.type === 'number' ? 'number' : 'text'; input.setValue(current === undefined ? '' : String(current)).onChange(value => {
+					if (value === '') delete action.variables[variable.name]; else action.variables[variable.name] = variable.type === 'number' ? Number(value) : value;
+				}); });
+			}
+			for (const scope of selected.scope) {
+				const available = pages.filter(page => {
+					try { const url = new URL(page.url); return page.profileId === scope.profileId && url.origin === scope.origin && !url.username && !url.password && url.pathname.startsWith(scope.pathPrefix); } catch { return false; }
+				});
+				const selectedPage = action.scope.find(row => row.id === scope.id)?.pageId ?? '';
+				new Setting(el).setName(scope.id).setDesc(`${scope.origin}${scope.pathPrefix}`).addDropdown(input => {
+					input.addOption('', t('automation.workflowPage'));
+					if (selectedPage && !available.some(page => page.pageId === selectedPage)) input.addOption(selectedPage, `${selectedPage} (${t('automation.unavailable')})`);
+					for (const page of available) input.addOption(page.pageId, `${page.title || page.url} · ${page.url}`);
+					input.setValue(selectedPage).onChange(pageId => {
+						action.scope = action.scope.filter(row => row.id !== scope.id);
+						if (pageId) action.scope.push({ id: scope.id, profileId: scope.profileId, pageId });
+					});
+				});
+			}
+		}).catch(() => { if (generation === this.generation) row.setDesc(t('automation.workflowUnavailable')); });
 	}
 	private agentFields(el: HTMLElement, action: Extract<AutomationAction, { kind: 'agent' }>): void {
 		const agents = this.availableAgents();
@@ -340,7 +397,13 @@ export class AutomationEditorForm {
 				)
 					invalid('targetRequired');
 			}
-			if (!actionText(a).trim())
+			if (a.kind === 'browser-workflow') {
+				const workflow = (await this.workflowSources?.workflows())?.find(flow => flow.id === a.workflowId && flow.version === a.version && flow.verified);
+				if (!workflow) invalid('workflowSelectionUnavailable');
+				if (workflow!.variables.some(variable => variable.type === 'secret' && variable.required)) invalid('workflowSecrets');
+				if (a.scope.length !== workflow!.scope.length) invalid('workflowPage');
+			}
+			if (a.kind !== 'browser-workflow' && !actionText(a).trim())
 				invalid('contentRequired');
 			if (a.kind === 'notify' && !this.draft.channels.length) invalid('channelsRequired');
 			if (

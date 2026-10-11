@@ -1,0 +1,76 @@
+{
+  "finding": "R-106",
+  "ticket": "T06/T14 AC006 panel presentation",
+  "status": "implemented-local-verification",
+  "observed": "WorkspacePage currently exposes recipient and visibility controls but lacks reorder, width, maximize and narrow focused website pane navigation.",
+  "plan": [
+    "Persist presentation order/width/focus/maximized separately from recipient sets and immutable turn snapshots",
+    "Keep guest DOM stable when visual order changes; verify native guest identity survives",
+    "Add keyboard/touch controls and responsive 2-3 panel layout/narrow focus",
+    "Native proof that presentation controls and reload never submit; restart/local-only restore; bilingual guide and standard checks"
+  ],
+  "implemented": [
+    "Persist task panelLayout separately from bindings, recipients and frozen rounds",
+    "Presentation edits serialized without rejecting busy captures or invalidating send previews",
+    "Stable guest DOM, CSS visual order/relative width, explicit maximize/restore and narrow focused panel selector",
+    "Native v3 export projects current native panel order/width; original imported layout remains source provenance",
+    "Target add/remove maintains layout references; source/model/golden regression tests"
+  ],
+  "verification": {
+    "targetedWithGoldens": 52,
+    "updatedServiceTransfer": 32,
+    "types": "source/test passed",
+    "architecture": 939,
+    "i18n": 3500,
+    "lint": "full passed",
+    "docs": 552,
+    "css": "no new violations",
+    "build": {
+      "mainBytes": 4288637,
+      "stylesBytes": 751703
+    },
+    "bundle": "within adjusted caps; startup97.1KB browser157.8KB+298.9KB deferred",
+    "native": {
+      "passed": 104,
+      "failed": 0,
+      "evidence": "C:/Users/cdewta/AppData/Local/Temp/nand-panel-busy-d9ace24205f9448b8d401402db927ac9/evidence",
+      "buildMainBytes": 4288637,
+      "scope": "Three-site full native input regression, relative widths, stable guest identities, 18 theme/width cases, narrow input from a different maximized panel, reorder while collecting, reload and persisted layout after restart. Local HTTPS fixtures; no live account claim."
+    },
+    "screenshotsReviewed": [
+      "website-panels-system-light-500",
+      "website-panels-system-light-1500"
+    ],
+    "previousNative": {
+      "passed": 102,
+      "failed": 0,
+      "evidence": "C:/Users/cdewta/AppData/Local/Temp/nand-panel-layout-d0ec23c9aaa349e9912bd1fa706ca0f5/evidence",
+      "buildMainBytes": 4288258,
+      "scope": "Three-site full native input regression plus panel layout/focus/keyboard/18 theme-width cases/reload and restart. Source activation-focus addition is newer and under another native run."
+    },
+    "full": {
+      "passed": 722,
+      "skipped": 4,
+      "filesPassed": 160,
+      "filesSkipped": 1,
+      "seconds": 129.17,
+      "start": "2026-10-11 05:02:58 Asia/Shanghai",
+      "log": "C:\\Users\\cdewta\\AppData\\Local\\Temp/nand-review-panels-full.log"
+    }
+  },
+  "nativeAttempts": [
+    {
+      "evidence": "C:/Users/cdewta/AppData/Local/Temp/nand-panel-layout-e6fff89673d04f1f950b6172f8e8f0cd/evidence",
+      "passed": 4,
+      "finding": "Native width click saved through global action lock, disabling focused slider and moving focus to body. Fixed by keeping range enabled and serializing its service writes independently."
+    },
+    {
+      "evidence": "C:/Users/cdewta/AppData/Local/Temp/nand-panel-narrow-c463384e972a4bc1bf88c7d61ab62750/evidence",
+      "passed": 79,
+      "finding": "Narrow input from a different maximized panel passed. Reorder during collection was disabled by outer send action lock. Fixed with independent local presentation action state; width writes remain independently serialized."
+    }
+  ],
+  "next": [
+    "T15 synthesis then T16-T21/Home workflow/planning reconciliation; real-account gates remain unverified"
+  ]
+}

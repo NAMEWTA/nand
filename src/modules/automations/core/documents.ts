@@ -46,6 +46,7 @@ export const automationDocuments: DocumentCollectionCodec<DefinitionCollection> 
 		'repeat',
 		'start',
 		'timezone',
+		'workflowId', 'version', 'variables', 'scope',
 	],
 	empty: () => ({ definitions: [] }),
 	encode: ({ definitions }) =>
@@ -89,7 +90,7 @@ export const automationDocuments: DocumentCollectionCodec<DefinitionCollection> 
 				});
 				Object.assign(
 					action,
-					...['shell', 'sessionMode', 'session', 'cardId', 'path', 'command', 'url']
+					...['shell', 'sessionMode', 'session', 'cardId', 'path', 'command', 'url', 'workflowId', 'version', 'variables', 'scope']
 						.filter((key) => p[key] !== undefined)
 						.map((key) => ({ [key]: p[key] })),
 				);

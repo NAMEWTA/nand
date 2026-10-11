@@ -94,12 +94,14 @@
 
 /* Editor modal: two tidy columns, side column as a soft panel. */
 .nand-automation-editor { display: flex; flex-direction: column; gap: var(--size-4-2); }
+.nand-automation-editor button { min-height: var(--nand-control-height); }
 .nand-automation-editor .setting-item { flex-wrap: wrap; gap: var(--size-4-2); }
-.nand-automation-editor .setting-item-control { max-width: 100%; }
-.nand-automation-editor .setting-item-control :is(input, select, textarea) { border-radius: var(--nand-radius-sm); }
+.nand-automation-editor .setting-item-control { min-width: 0; max-width: 100%; }
+.nand-automation-editor .setting-item-control :is(input, select, textarea) { min-width: 0; max-width: 100%; min-height: var(--nand-control-height); border-radius: var(--nand-radius-sm); }
 .nand-automation-editor-body { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); gap: var(--size-4-4); align-items: start; }
 .nand-automation-editor-main .setting-item { flex-direction: column; align-items: stretch; border-top: none; }
 .nand-automation-editor-main .setting-item-control { width: 100%; }
+.nand-automation-editor-main .setting-item-control :is(input, select) { width: 100%; }
 .nand-automation-editor textarea { box-sizing: border-box; width: 100%; min-height: 240px; padding: var(--size-4-3); border-radius: var(--nand-radius-sm); font-family: var(--font-monospace); font-size: var(--nand-text-body); line-height: 1.55; resize: vertical; }
 .nand-automation-editor-side { padding: var(--size-4-3); border-radius: var(--nand-radius-md); background: var(--nand-surface-muted); }
 .nand-automation-editor-side .setting-item-heading { padding: var(--size-4-4) 0 0; }
@@ -113,6 +115,7 @@
 }
 @media (pointer: coarse) {
  .nand-automation-view button, .nand-automation-view .nand-automation-output > summary, .nand-automation-editor button { min-height: var(--nand-touch-target); }
+ .nand-automation-editor .setting-item-control :is(input, select, textarea) { min-height: var(--nand-touch-target); }
 }
 @media (prefers-reduced-motion: reduce) {
  .nand-automation-run-card, .nand-automation-output-chevron { transition: none; }

@@ -1,0 +1,125 @@
+import assert from 'node:assert/strict';
+import fs from 'node:fs/promises';
+import path from 'node:path';
+import { parse as yaml } from 'yaml';
+import { setTimeout as delay } from 'node:timers/promises';
+import { launchFreshVault } from './fresh-vault.mjs';
+import { connect } from './cdp.mjs';
+
+const body = '\r\n<!-- Keep this introduction -->\r\n\r\n## Notes\r\n\r\n### Grouped memo\r\nid: grouped\r\ntype: generic\r\nVisible grouped body.\r\n\r\n### Standalone memo\r\nid: single\r\ntype: generic\r\nVisible standalone body.\r\n';
+const members = [{ memberId: 'year', provider: 'home', kind: 'year-progress', instanceId: 'default' }, { memberId: 'disabled', provider: 'news', kind: 'news-raw', instanceId: 'default' }];
+const tiles = [{ id: 'year', w: 3, cap: 30, x: 0, y: 0 }, { id: 'disabled', w: 3, cap: 30, x: 3, y: 0 }, { id: 'section', w: 6, cap: 40, fixed: true, x: 6, y: 0 }, { id: 'single', w: 6, cap: 40, x: 0, y: 40 }, { id: 'missing-reference', w: 6, cap: 30, x: 6, y: 40 }];
+const legacy = `---\r\n# Personal header\r\ncustom: [one, two] # keep\r\ncolumns: [{name: Notes, type: memo, height: 310}]\r\n---\r\n${body}`;
+const mixed = `---\r\nlayout: immersive\r\nwidgets: ${JSON.stringify(members)}\r\nimmersive: ${JSON.stringify(tiles)}\r\ncolumns: [{id: section, name: Notes, type: memo}]\r\ncustom: keep\r\n---\r\n${body}`;
+const invalid = mixed.replace(JSON.stringify(tiles),JSON.stringify([{id:'year',w:99,cap:-1,x:-5,y:0},{id:'missing-reference',w:3,h:2,x:0,y:0}]));
+const runtime = await launchFreshVault({ root: process.argv[2], port: 9263, files: { 'Legacy.md': legacy, 'Mixed.md': mixed, 'Invalid.md':invalid }, settings: { version: 1, namespaces: {
+	app: { language: 'en', introSeen: true, modules: { home: true, news: false, agent: false, browser: false, archives: false, automations: false, notifications: false, icons: false, comments: false, sync: false } },
+	home: { dashboardFile: 'Legacy', workspaceFiles: ['Legacy', 'Mixed','Invalid'], workspaceNames: ['Legacy', 'Mixed','Invalid'], quickNotesEnabled: true, widgetWeatherEnabled: false, widgetLunarEnabled: false, widgetMusicEnabled: false, pomodoroEnabled: false, widgetQuickActionsEnabled: false, widgetYearProgressEnabled: true },
+} } });
+let c = runtime.connection;
+const rows = [];
+const check = (name, passed, detail) => rows.push({ name, passed, detail });
+const until = async expression => { const end = Date.now() + 15000; while (Date.now() < end) { if (await c.evaluate(expression)) return; await delay(60); } throw Error(expression); };
+const navigate = async id => { await c.evaluate(`app.plugins.plugins.nand.openWorkbench({feature:'dashboard',resourceId:${JSON.stringify(id)}})`); await until(`app.workspace.getLeavesOfType('nand-workbench-view').some(l=>l.view.getState().target.resourceId===${JSON.stringify(id)})`); await delay(400); };
+const bytes = id => fs.readFile(path.join(runtime.vault, `${id}.md`), 'utf8');
+const metadata = async id => yaml((await bytes(id)).split('---')[1]);
+const snapshot = () => c.evaluate(`(()=>{const g=document.querySelector('.nand-immersive-grid');return {columns:g?.dataset.columns,width:g?.clientWidth,sidebar:!!document.querySelector('.dashboard-sidebar'),tiles:Array.from(g?.querySelectorAll('[data-tile]')??[],e=>({id:e.dataset.tile,column:e.style.gridColumn,row:e.style.gridRow,text:e.textContent,width:e.clientWidth,height:e.clientHeight,scroll:e.querySelector('.nand-immersive-body').scrollHeight,bodyHeight:e.querySelector('.nand-immersive-body').clientHeight}))}})()`);
+const surface = `app.workspace.getLeavesOfType('nand-workbench-view').flatMap(l=>l.view.getNativeSurfaces()).find(s=>s.getViewType()==='nand-dashboard-view')`;
+const countWrites = () => c.evaluate(`(()=>{window.gridWrites=0;if(!window.gridProcess){window.gridProcess=app.vault.process;app.vault.process=async function(file,fn){if(['Legacy.md','Mixed.md'].includes(file.path))window.gridWrites++;return window.gridProcess.call(this,file,fn)}}return true})()`);
+const key = async (name, modifiers = 0) => { const code = { Enter: 13, Escape: 27, ArrowUp: 38, ArrowRight: 39, ArrowDown: 40 }[name]; await c.send('Input.dispatchKeyEvent', { type: 'keyDown', key: name, code: name, windowsVirtualKeyCode: code, modifiers, ...(name === 'Enter' ? { text: '\r' } : {}) }); await c.send('Input.dispatchKeyEvent', { type: 'keyUp', key: name, code: name, windowsVirtualKeyCode: code, modifiers }); };
+const focus = async (id, action = 'move') => { await c.send('Page.bringToFront'); await c.evaluate('window.focus()'); await delay(100); await c.evaluate(`document.querySelector('[data-tile="${id}"] [data-grid-action="${action}"]').focus();true`); await delay(100); };
+const width = async value => { await c.send('Emulation.setDeviceMetricsOverride', { width: value, height: 1000, deviceScaleFactor: 1, mobile: false }); await delay(400); };
+const point = async (id, action='move') => c.evaluate(`(()=>{const e=document.querySelector('[data-tile="${id}"] [data-grid-action="${action}"]');e.scrollIntoView({block:'center'});const r=e.getBoundingClientRect();return {x:r.x+r.width/2,y:r.y+r.height/2}})()`);
+const pointer = (type,p) => c.send('Input.dispatchMouseEvent',{type,...p,button:'left',buttons:type==='mouseReleased'?0:1,clickCount:1});
+try {
+	await c.evaluate('app.workspace.leftSplit.collapse();app.workspace.rightSplit.collapse();true'); await width(1700); await navigate('Legacy');
+	check('legacy-open-does-not-write', await bytes('Legacy') === legacy);
+	await c.evaluate(`(()=>{const e=document.querySelector('[data-board-layout-choice]');e.value='immersive';e.dispatchEvent(new Event('change',{bubbles:true}));})()`);
+	await until(`!!document.querySelector('.nand-immersive-grid')`); await delay(700);
+	const first = await snapshot(); const persisted = await metadata('Legacy');
+	check('first-switch-renders-real-widget-and-section', first.tiles.some(t=>t.text.includes('Visible grouped body.')) && first.tiles.some(t=>t.id==='home:year-progress:default') && !first.sidebar, first);
+	check('first-switch-persists-members-sections-and-grid-once', persisted.layout==='immersive'&&persisted.widgets.length>0&&persisted.columns.every(c=>c.id)&&persisted.immersive.every(t=>Number.isFinite(t.x)&&Number.isFinite(t.y)&&t.cap>=3)&&!persisted.gridPacked, persisted);
+	check('personal-markdown-preserved', (await bytes('Legacy')).endsWith(body)&& (await bytes('Legacy')).includes('# Personal header'));
+	const legacySaved = await bytes('Legacy'); await navigate('Mixed'); await countWrites();
+	const before = await bytes('Mixed'); let state = await snapshot();
+	check('mixed-real-content-and-unavailable-placeholders', state.tiles.length===5&&state.tiles.find(t=>t.id==='section')?.text.includes('Visible grouped body.')&&state.tiles.find(t=>t.id==='single')?.text.includes('Visible standalone body.')&&state.tiles.find(t=>t.id==='disabled')?.text.includes('unavailable')&&state.tiles.find(t=>t.id==='missing-reference')?.text.includes('unavailable'),state);
+	check('standalone-body-not-duplicated-in-section',!state.tiles.find(t=>t.id==='section')?.text.includes('Visible standalone body.'));
+	check('content-fit-shrinks-within-cap-and-fixed-is-exact',state.tiles.find(t=>t.id==='year').height<300&&state.tiles.find(t=>t.id==='section').height===400,state);
+	check('opening-and-fit-zero-writes',await bytes('Mixed')===before&&await c.evaluate('gridWrites')===0);
+	await runtime.shot('mixed-wide');
+	for (const [viewport,columns] of [[1100,'6'],[640,'3'],[1700,'12']]) { await width(viewport); state=await snapshot();check(`owner-resize-${columns}-column-projection`,state.columns===columns,state); await runtime.shot(`mixed-${columns}-columns`); }
+	check('resize-zero-writes-canonical-bytes-retained',await bytes('Mixed')===before&&await c.evaluate('gridWrites')===0);
+	await focus('year'); await key('Enter'); await key('ArrowDown'); await key('Escape'); await delay(200);
+	check('keyboard-cancel-zero-writes',await bytes('Mixed')===before&&await c.evaluate('gridWrites')===0);
+	await focus('year'); await key('Enter'); await key('ArrowDown'); await key('ArrowDown',8); await key('Enter'); await delay(500);
+	const edited = await metadata('Mixed');
+	check('keyboard-move-resize-one-save',await c.evaluate('gridWrites')===1&&edited.immersive.find(t=>t.id==='year').fixed===true&&edited.immersive.find(t=>t.id==='year').y===1,edited.immersive);
+	check('focus-restored-after-save',await c.evaluate(`document.activeElement?.closest('[data-tile]')?.dataset.tile==='year'&&document.activeElement.dataset.gridAction==='move'`));
+	check('other-board-unchanged',await bytes('Legacy')===legacySaved);
+	await countWrites(); let origin=await point('year');
+	await pointer('mousePressed',origin);await pointer('mouseMoved',{x:origin.x+4,y:origin.y});await pointer('mouseReleased',{x:origin.x+4,y:origin.y});await delay(120);
+	check('pointer-under-5px-no-write',await c.evaluate('gridWrites')===0);
+	let target=await point('disabled'); origin=await point('year');
+	await pointer('mousePressed',origin);await pointer('mouseMoved',target);await delay(100);await key('Escape');await pointer('mouseReleased',target);await delay(160);
+	check('pointer-preview-escape-no-write',await c.evaluate('gridWrites')===0&&await c.evaluate(`!!document.querySelector('.nand-immersive-ghost').hidden`));
+	origin=await point('year');target=await point('disabled');
+	await pointer('mousePressed',origin);await pointer('mouseMoved',target);await delay(100);await pointer('mouseReleased',target);await delay(450);
+	const swapped=(await metadata('Mixed')).immersive;
+	check('pointer-swap-saves-both-tiles-once',await c.evaluate('gridWrites')===1&&swapped.find(t=>t.id==='year').x===3&&swapped.find(t=>t.id==='disabled').x===0,swapped);
+	await countWrites(); origin=await point('year','resize');
+	await pointer('mousePressed',origin);await pointer('mouseMoved',{x:origin.x,y:origin.y+50});await delay(100);await pointer('mouseReleased',{x:origin.x,y:origin.y+50});await delay(450);
+	check('pointer-corner-resize-saves-once',await c.evaluate('gridWrites')===1&&(await metadata('Mixed')).immersive.find(t=>t.id==='year').cap>swapped.find(t=>t.id==='year').cap);
+	await focus('single');await key('Enter');const picked=await c.evaluate(`({focus:document.activeElement?.closest('[data-tile]')?.dataset.tile,lifted:document.querySelector('[data-tile="single"]').dataset.lifted,columns:document.querySelector('.nand-immersive-grid').dataset.columns})`);for(let i=0;i<17;i++)await key('ArrowUp');await key('Enter');await delay(300);
+	const fitPositions=(await metadata('Mixed')).immersive;
+	check('fit-tile-can-use-space-inside-another-height-cap',fitPositions.find(t=>t.id==='single').y===23,{picked,fitPositions});
+	for(const layout of ['side','immersive']){await c.evaluate(`(()=>{const e=document.querySelector('[data-board-layout-choice]');e.value=${JSON.stringify(layout)};e.dispatchEvent(new Event('change',{bubbles:true}));})()`);await delay(350);}
+	check('layout-switch-does-not-repack-existing-fit-positions',JSON.stringify((await metadata('Mixed')).immersive)===JSON.stringify(fitPositions));
+	await c.send('Emulation.setDeviceMetricsOverride',{width:1700,height:740,deviceScaleFactor:1,mobile:false});await delay(120);
+	await countWrites();origin=await point('year');
+	const edge=await c.evaluate(`(()=>{const e=document.querySelector('.dashboard-scroll-region'),r=e.getBoundingClientRect();return {y:r.bottom-4,start:e.scrollTop}})()`);
+	await pointer('mousePressed',origin);await pointer('mouseMoved',{x:origin.x,y:edge.y});await delay(120);
+	const scrolling=await c.evaluate(`document.querySelector('.dashboard-scroll-region').scrollTop`);await delay(120);
+	const scrolled=await c.evaluate(`document.querySelector('.dashboard-scroll-region').scrollTop`);
+	await key('Escape');await pointer('mouseReleased',{x:origin.x,y:edge.y});await delay(80);
+	const stopped=await c.evaluate(`document.querySelector('.dashboard-scroll-region').scrollTop`);await delay(100);
+	check('edge-scroll-repeats-and-cancel-stops',scrolling>edge.start&&scrolled>=scrolling&&await c.evaluate(`document.querySelector('.dashboard-scroll-region').scrollTop`)===stopped&&await c.evaluate('gridWrites')===0,{edge,scrolling,scrolled,stopped});
+	origin=await point('year');await c.send('Emulation.setTouchEmulationEnabled',{enabled:true,maxTouchPoints:1});
+	await c.send('Input.dispatchTouchEvent',{type:'touchStart',touchPoints:[{...origin,id:1}]});await c.send('Input.dispatchTouchEvent',{type:'touchMove',touchPoints:[{x:origin.x+100,y:origin.y+20,id:1}]});await delay(80);await c.send('Input.dispatchTouchEvent',{type:'touchCancel',touchPoints:[]});await delay(80);await c.send('Emulation.setTouchEmulationEnabled',{enabled:false});
+	check('native-touch-cancel-no-save-or-ghost',await c.evaluate('gridWrites')===0&&await c.evaluate(`document.querySelector('.nand-immersive-ghost').hidden`));
+	await width(1700);
+	const saved = await bytes('Mixed'); const savedPositions=(await snapshot()).tiles.map(t=>[t.id,t.column,t.row]);
+	await runtime.shot('mixed-edited');
+	await runtime.restart(); c=runtime.connection; await width(1700); await navigate('Mixed'); await delay(500);
+	check('restart-retains-canonical-bytes',await bytes('Mixed')===saved);
+	check('restart-retains-grid-positions',JSON.stringify((await snapshot()).tiles.map(t=>[t.id,t.column,t.row]))===JSON.stringify(savedPositions),{before:savedPositions,after:(await snapshot()).tiles});
+	await countWrites();await focus('year');await key('Enter');await key('ArrowDown');await navigate('Legacy');await delay(100);
+	check('navigation-cancels-pending-gesture',await bytes('Mixed')===saved&&await c.evaluate('gridWrites')===0);
+	await navigate('Mixed');await countWrites();
+	await c.evaluate('app.plugins.plugins.nand.setModuleEnabled("news",true)');await until(`!!document.querySelector('[data-widget-member="disabled"] .dashboard-sidebar-news')`);
+	check('provider-enable-mounts-in-grid-no-save',await bytes('Mixed')===saved&&await c.evaluate('gridWrites')===0);
+	await c.evaluate('app.plugins.plugins.nand.setModuleEnabled("news",false)');await until(`document.querySelector('[data-widget-member="disabled"]')?.textContent.includes('unavailable')`);
+	check('provider-disable-keeps-geometry-no-save',await bytes('Mixed')===saved&&await c.evaluate('gridWrites')===0);
+	for(const preset of ['system','claude-code','eye-care'])for(const dark of [false,true]){
+		await c.evaluate(`app.plugins.plugins.nand.theme.update(d=>{d.preset=${JSON.stringify(preset)}});app.changeTheme(${JSON.stringify(dark?'obsidian':'moonstone')});true`);
+		for(const viewport of [640,1100,1700]){await width(viewport);const visible=await c.evaluate(`(()=>{const g=document.querySelector('.nand-immersive-grid'),rs=[...g.querySelectorAll('[data-tile]')].map(e=>e.getBoundingClientRect());return {overflow:g.scrollWidth>g.clientWidth+1,overlap:rs.some((a,i)=>rs.slice(i+1).some(b=>Math.min(a.right,b.right)>Math.max(a.left,b.left)+1&&Math.min(a.bottom,b.bottom)>Math.max(a.top,b.top)+1)),small:[...g.querySelectorAll('[data-grid-action]')].some(e=>{const r=e.getBoundingClientRect();return r.width<31||r.height<31})}})()`);check(`theme-${preset}-${dark?'dark':'light'}-${viewport}`,!visible.overflow&&!visible.overlap&&!visible.small,visible);await runtime.shot(`grid-${preset}-${dark?'dark':'light'}-${viewport}`);}
+	}
+	check('theme-and-width-zero-board-writes',await bytes('Mixed')===saved&&await c.evaluate('gridWrites')===0);
+	await navigate('Invalid');await delay(150);
+	check('invalid-values-diagnostic-and-readonly',await bytes('Invalid')===invalid&&await c.evaluate(`!!document.querySelector('.nand-immersive-diagnostic')`));
+	await focus('year');await key('Enter');await key('ArrowDown');await key('Enter');await delay(400);
+	const repaired=await metadata('Invalid');check('invalid-values-repaired-on-explicit-edit',repaired.immersive.every(t=>t.w>=1&&t.w<=12&&t.cap>=3&&t.cap<=240&&t.x>=0&&t.y>=0)&&repaired.immersive.some(t=>t.id==='missing-reference')&&await c.evaluate(`!document.querySelector('.nand-immersive-diagnostic')`),repaired.immersive);
+	await navigate('Mixed');await countWrites();
+	await c.send('Emulation.setEmulatedMedia',{features:[{name:'prefers-reduced-motion',value:'reduce'}]});
+	check('reduced-motion-has-no-grid-animation',await c.evaluate(`Array.from(document.querySelectorAll('.nand-immersive-grid,.nand-immersive-tile,.nand-immersive-ghost'),e=>getComputedStyle(e)).every(s=>s.animationName==='none'&&s.transitionDuration==='0s')`));
+	const main=c,beforePopout=new Set((await(await fetch(process.env.NAND_CDP_URL+'/json')).json()).map(t=>t.id));
+	await c.send('Emulation.clearDeviceMetricsOverride');await c.evaluate(`window.floatingBoard=${surface};app.workspace.moveLeafToPopout(floatingBoard.leaf,{width:1700,height:1000});true`);await until(`floatingBoard.contentEl.win!==window`);
+	const popTarget=(await(await fetch(process.env.NAND_CDP_URL+'/json')).json()).find(t=>t.type==='page'&&!beforePopout.has(t.id));assert.ok(popTarget);c=await connect(popTarget.url,popTarget.id);
+	await width(1700);await focus('year');await key('Enter');await key('ArrowDown');await key('Escape');
+	check('popout-keyboard-cancel-no-write',await bytes('Mixed')===saved&&await main.evaluate('gridWrites')===0);
+	await width(850);check('popout-owner-window-resize',(await snapshot()).columns==='6');
+	const shot=await c.send('Page.captureScreenshot',{format:'png'});await fs.writeFile(path.join(runtime.evidence,'grid-popout.png'),Buffer.from(shot.data,'base64'));
+	c.close();c=main;
+	check('no-runtime-errors',(await c.evaluate('window.nandAcceptanceErrors')).length===0,await c.evaluate('window.nandAcceptanceErrors'));
+	await fs.writeFile(path.join(runtime.evidence,'review.json'),JSON.stringify({rows,unverified:['Actual phone and other OS','All 13 builtin widget kinds and external provider failure matrix tracked by T03/T06']},null,2));
+	const failed=rows.filter(r=>!r.passed);console.log(JSON.stringify({evidence:runtime.evidence,checks:rows.length,failed},null,2));assert.equal(failed.length,0);
+} catch(error) {await fs.writeFile(path.join(runtime.evidence,'partial-review.json'),JSON.stringify(rows,null,2));await runtime.shot('failure').catch(()=>undefined);throw error;} finally {await runtime.stop();}

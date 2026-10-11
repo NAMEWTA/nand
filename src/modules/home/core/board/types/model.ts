@@ -2,6 +2,7 @@ import { DEFAULT_TASK_ARCHIVE_PATH, DEFAULT_HIGHLIGHT_IMPORT_PATH } from '../def
 import type { TaskAutomationMeta } from '../../../../../shared/automation/metadata';
 import type { AutomationDefinition } from '../../../../../shared/automation/types';
 import type { CalendarTaskFilter } from '../../calendar/task-filter';
+import type { AppearancePreset } from '../appearance-preset';
 import type {
 	WereadContentType,
 	WereadGroupBy,
@@ -17,6 +18,11 @@ export interface CalendarTaskTarget {
 }
 
 export interface DashboardSettings {
+	/** Global theme + Home decor snapshots, independent of board content. */
+	appearancePresets: AppearancePreset[];
+	activeAppearancePresetId?: string;
+	/** Historical read-only fallback for boards without their own layout. */
+	layoutMode?: 'side' | 'stacked';
 	/** Path of the ACTIVE workspace file (no .md extension). */
 	dashboardFile: string;
 	/** All workspace board files in switcher order (button i+1). Paths follow
@@ -233,6 +239,7 @@ export interface QuickCommand {
 }
 
 export const DEFAULT_DASHBOARD_SETTINGS: DashboardSettings = {
+	appearancePresets: [],
 	dashboardFile: 'dashboard',
 	workspaceFiles: ['dashboard'],
 	workspaceNames: [''],
@@ -397,6 +404,8 @@ export interface BannerData {
 	quoteFont?: string;
 	quotes?: QuoteItem[];
 	images?: string[];
+	/** Raw path-to-"x,y" values survive unrelated edits; display clamps without writing. */
+	imagePos?: Record<string, unknown>;
 	statsConfig?: BannerStatsConfig;
 }
 
@@ -493,6 +502,8 @@ export interface DashboardCard {
 	blockquote: string;
 	color: string;
 	coverImage: string;
+	/** Raw "x,y" metadata; absent means centered. */
+	coverPos?: string;
 	width: number;
 	size: CardSize;
 	gridCols: number;
@@ -553,6 +564,10 @@ export interface LibraryConfig {
 	    falls back to the automatic first-`propertyLimit` display. Empty/undefined
 	    = automatic mode for every card. */
 	visibleProperties?: string[];
+	/** Table columns use file.name/file.modified or property:<frontmatter key> identities.
+	 * Missing fields retain their preferences; these are independent of card badges. */
+	tableOrder?: string[];
+	tableHidden?: string[];
 	/** Quick date filter. When `days` is set it is a rolling "last N days"
 	    window evaluated relative to today (start/end ignored); otherwise the
 	    fixed start/end date range applies. */
@@ -572,6 +587,8 @@ export interface LibraryConfig {
 	/** New notes created from this section's toolbar button start from this
 	 *  template note's content ({{title}} / {{date:...}} substituted). Empty = bare note. */
 	templatePath?: string;
+	/** Ordered choices. Missing projects templatePath; an explicit empty list creates a blank note. */
+	templatePaths?: string[];
 	/** All-tasks section: dimension used to group tasks into list sections / kanban columns. */
 	taskGroupBy?: 'date' | 'priority' | 'none';
 }
@@ -758,12 +775,44 @@ export interface WebEmbedConfig {
 	zoom?: number;
 }
 
+export interface PipelineStage {
+	id: string;
+	value: string;
+	label: string;
+	/** Relative to rootFolder. Absent means leave the note in its current folder. */
+	folder?: string;
+	width?: number;
+}
+export interface PipelineSkill extends SkillShortcut {
+	scope: 'stage' | 'card';
+	/** Empty means all configured stage values. */
+	stages: string[];
+}
+export interface PipelineConfig {
+	rootFolder: string;
+	statusField: string;
+	stages: PipelineStage[];
+	excludeFolders: string[];
+	/** Explicit vault-relative destination, which may be outside rootFolder. */
+	archiveFolder?: string;
+	templatePaths: string[];
+	sortBy: 'title' | 'modified' | 'created' | 'due';
+	sortDesc: boolean;
+	filterFields: string[];
+	filters: Record<string, string>;
+	search: string;
+	skills: PipelineSkill[];
+}
+
 export interface DashboardColumn {
+	/** Stable layout identity; assigned on the first explicit layout edit. */
+	id?: string;
 	name: string;
 	color: string;
 	sectionType?: string;
 	cards: DashboardCard[];
 	libraryConfig?: LibraryConfig;
+	pipelineConfig?: PipelineConfig;
 	/** Weread section config (sectionType 'weread'). */
 	wereadConfig?: WereadConfig;
 	/** Dataview section config (sectionType 'dataview'). */
@@ -785,12 +834,50 @@ export interface DashboardColumn {
 
 export type BoardLayout = 'side' | 'stacked' | 'immersive';
 
+/** Board membership is separate from the provider's shared instance configuration. */
+export interface BoardWidgetMember {
+	memberId: string;
+	provider: string;
+	kind: string;
+	instanceId: string;
+	label?: string;
+	icon?: string;
+}
+
+/** Persisted geometry: zero-based coordinates and a height cap in fine rows. */
+export interface BoardTile {
+	id: string;
+	w: number;
+	cap: number;
+	fixed?: boolean;
+	x?: number;
+	y?: number;
+}
+
+/** One declaration shared by widget and contextual skill buttons. */
+export interface SkillShortcut {
+	id: string;
+	label: string;
+	icon?: string;
+	agentId: string;
+	skillName: string;
+	promptTemplate: string;
+	inputPlaceholder?: string;
+	directSend: boolean;
+	destination: { kind: 'fresh'; cwd: string } | { kind: 'existing'; sessionId: string };
+}
+
 export interface DashboardData {
 	/** Original text and its owned projection; retained through immutable UI updates. */
 	document?: { source: string; baseline: string };
 	/** Absent on older boards. Written only when the user picks a layout. */
 	layout?: BoardLayout;
-	/** Set after the one-time immersive pack. Opening a board does not set it. */
+	widgets?: BoardWidgetMember[];
+	immersive?: BoardTile[];
+	skills?: SkillShortcut[];
+	/** Read diagnostics only; never serialized. */
+	layoutNeedsRepair?: boolean;
+	/** Legacy card-coordinate marker, read only to recover old standalone cards. */
 	gridPacked?: boolean;
 	banner: BannerData;
 	quickActions: QuickAction[];

@@ -26,6 +26,10 @@ shared_path_owners: ["<Path>main.js</Path> => 2026-10-08-home-grid-rebuild::T-13
 
 # Ticket T-13: 限制大库分组和看板的同步渲染量
 
+<!-- ACTUAL-CODE-REVIEW:START -->
+2026-10-11 实际代码审查：[T-13.md](../evidence/T-13.md)。本票下文保留原规划合同与基线；当前实现、修复、验证及未验证条件以该记录为准。原“仅规划／未授权实施／必须提交”的阶段约束不适用于用户已授权的本次工作区审查；提交与远程操作仍未执行。
+<!-- ACTUAL-CODE-REVIEW:END -->
+
 - Ticket：<Path>{roots.state}/specdev/changes/2026-10-08-home-grid-rebuild/ticket/13-progressive-group-rendering.md</Path>
 - 总控Map：<Path>{roots.state}/specdev/changes/2026-10-08-home-grid-rebuild/tickets-map.md</Path>
 - Spec：<Path>{roots.state}/specdev/changes/2026-10-08-home-grid-rebuild/spec.md</Path>
@@ -37,7 +41,7 @@ shared_path_owners: ["<Path>main.js</Path> => 2026-10-08-home-grid-rebuild::T-13
 
 **目标与可观察产出：** 大型分组/kanban首次只渲染可用的一屏批次，用户可逐步加载且知道截断范围。
 
-**当前事实：** LibraryKanban直接group.items.map；LibraryPanel分组直接view(group.items)，跳过分页会一次全部渲染；普通分页已有。
+**规划时基线：** LibraryKanban直接group.items.map；LibraryPanel分组直接view(group.items)，跳过分页会一次全部渲染；普通分页已有。
 
 **来源：** AC-054, AC-055, AC-056；issue #137, #141；<Path>{roots.state}/specdev/changes/2026-10-08-home-grid-rebuild/reference-analysis.md</Path>。深度 standard：涉及明确的垂直行为及现有可复用接缝；验证按实际风险。
 

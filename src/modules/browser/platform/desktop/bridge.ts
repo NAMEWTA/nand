@@ -1,10 +1,12 @@
 type Server = import('node:net').Server;
 type Socket = import('node:net').Socket;
-import { admitBridge, BRIDGE_SCOPE } from '../../core/ai-workbench';
+import { admitBridge, BRIDGE_SCOPE } from '../../core/bridge-policy';
 import { BrowserError, type BrowserAutomationPort } from '../../core/model';
+import { bridgeFailure } from '../../core/bridge-errors';
 import { privateDirectory, removeBrowserRun, sweepBrowserRuns } from './runtime-files';
 import { BROWSER_CLI_SOURCE } from './cli-source';
 import type { ElectronBrowserApi } from './electron-api';
+import type { ScopedBrowserConnection, ScopedBrowserPort } from '../../core/scoped-grant';
 
 export class BrowserBridge {
 	private server?: Server;
@@ -21,25 +23,30 @@ export class BrowserBridge {
 	private readonly net: typeof import('node:net');
 	private readonly crypto: typeof import('node:crypto');
 	private readonly buffer: typeof import('node:buffer').Buffer;
+	private readonly timers: typeof import('node:timers');
 	private readonly windows: boolean;
 	readonly directory: string;
 	readonly contextPath: string;
 	readonly cliPath: string;
 	readonly endpoint: string;
-	private readonly token: string;
-	private readonly expiresAt: number;
+	private token: string;
+	private expiresAt: number;
+	private broadEpoch = 0;
 	private revoked = false;
+	private readonly scoped = new Map<string, { port: ScopedBrowserPort; abort: AbortController; expiresAt: number; dispose(): void }>();
 	constructor(
 		private readonly win: Window,
 		api: ElectronBrowserApi,
 		vaultId: string,
 		private readonly port: BrowserAutomationPort,
+		private broadEnabled = false,
 	) {
 		this.fs = win.require('node:fs') as typeof import('node:fs');
 		this.path = win.require('node:path') as typeof import('node:path');
 		this.net = win.require('node:net') as typeof import('node:net');
 		this.crypto = win.require('node:crypto') as typeof import('node:crypto');
 		this.buffer = (win.require('node:buffer') as typeof import('node:buffer')).Buffer;
+		this.timers = win.require('node:timers') as typeof import('node:timers');
 		const process = this.process = win.require('node:process') as typeof import('node:process');
 		if (!/^[a-z\d_-]+$/i.test(vaultId)) throw new BrowserError('browser_invalid_argument');
 		this.temporary = api.app.getPath('temp');
@@ -104,13 +111,13 @@ export class BrowserBridge {
 			socket.destroy();
 			return;
 		}
-		this.sockets.add(socket);
+		this.sockets.add(socket); const disconnected = new AbortController();
 		let data = '',
 			admitted = false;
 		socket.setEncoding('utf8');
 		socket.setTimeout(70000, () => socket.destroy());
 		socket.on('error', () => socket.destroy());
-		socket.on('close', () => this.sockets.delete(socket));
+		socket.on('close', () => { this.sockets.delete(socket); disconnected.abort(); });
 		socket.on('data', (chunk: string) => {
 			if (admitted) return;
 			data += chunk;
@@ -128,14 +135,15 @@ export class BrowserBridge {
 					data = '';
 					id = request.id;
 					const supplied = typeof request.token === 'string' ? request.token : '';
+					const scoped = this.scoped.get(this.tokenHash(supplied));
 					if (
 						!/^[a-f\d]{64}$/.test(supplied) ||
-						!this.crypto.timingSafeEqual(this.buffer.from(supplied), this.buffer.from(this.token))
+						(!scoped && !this.crypto.timingSafeEqual(this.buffer.from(supplied), this.buffer.from(this.token)))
 					)
 						throw new BrowserError('browser_unauthorized');
 					if (this.disposed) throw new BrowserError('browser_disabled');
-					const decision = admitBridge({
-						enabled: true,
+					const decision = scoped ? { allowed: !scoped.abort.signal.aborted && Date.now() < scoped.expiresAt } : admitBridge({
+						enabled: this.broadEnabled,
 						tokenOk: true,
 						scope: BRIDGE_SCOPE,
 						method: String(request.method),
@@ -151,7 +159,13 @@ export class BrowserBridge {
 						Array.isArray(request.params)
 					)
 						throw new BrowserError('browser_invalid_argument');
-					const result = await this.port.execute(request.method, request.params as Record<string, unknown>);
+					const epoch = this.broadEpoch;
+					const admit = () => {
+						if (this.disposed || !this.broadEnabled || this.broadEpoch !== epoch || disconnected.signal.aborted || Date.now() >= this.expiresAt)
+							throw new BrowserError('browser_unauthorized');
+					};
+					const result = scoped ? await scoped.port.execute(request.method, request.params as Record<string, unknown>, AbortSignal.any([scoped.abort.signal, disconnected.signal]))
+						: await this.port.execute(request.method, request.params as Record<string, unknown>, admit);
 					if (!socket.destroyed) socket.end(JSON.stringify({ id, ok: true, result }) + '\n');
 				} catch (error) {
 					if (!socket.destroyed)
@@ -159,10 +173,7 @@ export class BrowserBridge {
 							JSON.stringify({
 								id,
 								ok: false,
-								error: {
-									code: error instanceof BrowserError ? error.code : 'browser_failed',
-									message: error instanceof Error ? error.message : String(error),
-								},
+								error: bridgeFailure(error),
 							}) + '\n',
 						);
 				}
@@ -170,12 +181,32 @@ export class BrowserBridge {
 		});
 	}
 	get environment(): Record<string, string> {
+		return this.broadEnabled ? this.environmentFor(this.token) : {};
+	}
+	setBroadEnabled(enabled: boolean): void {
+		if (this.disposed || enabled === this.broadEnabled) return;
+		this.broadEnabled = enabled; this.broadEpoch++;
+		if (enabled) { this.token = this.crypto.randomBytes(32).toString('hex'); this.expiresAt = Date.now() + 12 * 60 * 60 * 1000; }
+	}
+	private tokenHash(token: string): string { return this.crypto.createHash('sha256').update(token).digest('hex'); }
+	private environmentFor(token: string): Record<string, string> {
 		return {
 			NAND_BROWSER_CLI: this.cliPath,
-			NAND_BROWSER_TOKEN: this.token,
+			NAND_BROWSER_TOKEN: token,
 			NAND_BROWSER_CONTEXT: this.contextPath,
 			NAND_BROWSER_GUIDE: this.path.join(this.directory, 'USAGE.md'),
 		};
+	}
+	/** An internal caller supplies its already-scoped executor. Tokens live only in the run environment. */
+	createScoped(port: ScopedBrowserPort, signal: AbortSignal, expiresAt: number): ScopedBrowserConnection {
+		if (this.disposed || !this.server?.listening) throw new BrowserError('browser_disabled');
+		if (signal.aborted || !Number.isFinite(expiresAt) || expiresAt <= Date.now() || expiresAt > Date.now() + 30 * 60_000)
+			throw new BrowserError('browser_scoped_grant_invalid');
+		const token = this.crypto.randomBytes(32).toString('hex'), hash = this.tokenHash(token), abort = new AbortController();
+		const dispose = () => { this.scoped.delete(hash); this.timers.clearTimeout(expiry); signal.removeEventListener('abort', dispose); abort.abort(); };
+		const expiry = this.timers.setTimeout(dispose, Math.max(0, expiresAt - Date.now())); expiry.unref();
+		this.scoped.set(hash, { port, abort, expiresAt, dispose }); signal.addEventListener('abort', dispose, { once: true });
+		return { environment: Object.freeze(this.environmentFor(token)), dispose };
 	}
 	writeArtifact(dataUrl: string, description?: string): string[] {
 		if (!/^data:image\/png;base64,[A-Za-z\d+/=]+$/.test(dataUrl)) throw new BrowserError('browser_invalid_image');
@@ -199,6 +230,7 @@ export class BrowserBridge {
 		if (this.disposed) return;
 		this.disposed = true;
 		this.revoked = true;
+		for (const grant of [...this.scoped.values()]) grant.dispose();
 		this.win.removeEventListener?.('unload', this.exit);
 		this.process.removeListener('exit', this.exit);
 		for (const socket of this.sockets) socket.destroy();

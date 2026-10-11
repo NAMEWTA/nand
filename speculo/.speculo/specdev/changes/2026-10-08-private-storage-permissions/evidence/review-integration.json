@@ -1,0 +1,30 @@
+{
+  "date": "2026-10-11",
+  "status": "reviewed-fixed-windows-verified-posix-unverified",
+  "findings": [
+    "R-001",
+    "R-002",
+    "R-003"
+  ],
+  "code": [
+    "src/host/obsidian/storage/private-storage.ts",
+    "src/host/desktop/private-mode.ts",
+    "src/app/settings/runtime.ts",
+    "native/pty-server/src/agent_data.rs"
+  ],
+  "behavior": [
+    "All private domain writers use the shared host adapter; pure shared code has no filesystem imports.",
+    "POSIX creation requests restrictive permissions before bytes are written; bounded one-time legacy repair preserves bytes and rejects root/intermediate/dangling symlinks.",
+    "Native history preflights root/intermediate/DB/WAL/SHM/journal links before creation/repair; ordinary notes stay outside private mode repair.",
+    "Windows/mobile/nonfilesystem paths retain ordinary adapter behavior."
+  ],
+  "verification": {
+    "unit": "Latest full805/4skip covers portable adapter guards, shared queues and Windows no-POSIX behavior. POSIX-only filesystem tests are explicitly skipped.",
+    "native": "Earlier pnpm check:native passed on Windows:17 unit and1stdio; Unix-only native tests were not executed.",
+    "documentation": "Paired docs/data.md and docs/privacy.md explain0700/0600, cloned-data repair, platform boundaries and no encryption."
+  },
+  "limits": [
+    "Actual POSIX chmod/symlink/restricted-permission and SQLite sidecar runtime remains unverified.",
+    "Actual mobile hardware was not exercised; platform guards are unit-verified."
+  ]
+}

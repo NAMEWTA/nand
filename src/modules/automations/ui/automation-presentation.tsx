@@ -63,7 +63,7 @@ export class AutomationPresentation extends NativeSurface {
 		this.editor?.close();
 		this.listEl.hide();
 		this.editorEl.show();
-		this.editor = new AutomationEditorForm(this.app, this.editorEl, this.host.service, () => this.host.taskTargets?.() ?? Promise.resolve([]), this.host.cwd ?? '', request, (saved) => this.stopEdit(saved), this.host.pin);
+		this.editor = new AutomationEditorForm(this.app, this.editorEl, this.host.service, () => this.host.taskTargets?.() ?? Promise.resolve([]), this.host.cwd ?? '', request, (saved) => this.stopEdit(saved), this.host.pin, this.host.workflowSources);
 		this.editor.open();
 		this.editorEl.querySelector<HTMLInputElement>('input')?.focus();
 		if (this.section !== 'tasks') {

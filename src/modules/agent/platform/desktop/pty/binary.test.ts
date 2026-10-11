@@ -80,3 +80,18 @@ test('offline mode never downloads and requires an installed file', async () => 
 	assert.deepEqual(f.requests, []);
 	await assert.rejects(ensureHelper({ pluginDir: f.pluginDir, version: '0.0.1-alpha.1', offline: false, platform: 'win32', arch: 'arm64', fetch: f.fetch }), (error: unknown) => error instanceof BinaryError && error.code === 'unsupported');
 });
+
+test('installation failures identify the requested release and keep the previous binary until a retry succeeds', async () => {
+	const f = setup();
+	fs.mkdirSync(path.dirname(f.file), { recursive: true });
+	fs.writeFileSync(f.file, 'previous');
+	const options = { pluginDir: f.pluginDir, version: '0.0.1-alpha.1', offline: false, platform: 'linux', arch: 'x64' };
+	await assert.rejects(ensureHelper({ ...options, fetch: async () => { throw new BinaryError('http', 'HTTP 404', { status: 404 }); } }), (error: unknown) => {
+		assert.ok(error instanceof BinaryError);
+		assert.deepEqual(error.detail, { status: 404, version: options.version, url: `${RELEASE_BASE}/${options.version}/nand-pty-linux-x64.sha256` });
+		assert.equal(fs.readFileSync(f.file, 'utf8'), 'previous');
+		return true;
+	});
+	await ensureHelper({ ...options, fetch: f.fetch });
+	assert.deepEqual(fs.readFileSync(f.file), f.binary);
+});

@@ -19,7 +19,7 @@ export function AutomationRunsPanel({ host, state, changed, actions }: {
   <div className="nand-automation-filters">
    <label className="nand-ui-field"><span>{t('automation.search')}</span><input type="search" value={state.search} onInput={(event) => { state.search = event.currentTarget.value; change(); }} /></label>
    <label className="nand-ui-field"><span>{t('workbench.runStatus')}</span><select value={state.status} onChange={(event) => { state.status = event.currentTarget.value; change(); }}>
-    {['', 'pending', 'running', 'unknown', 'succeeded', 'failed', 'cancelled', 'interrupted', 'skipped'].map((status) => <option key={status} value={status}>{t('automation.' + (status || 'all'))}</option>)}
+    {['', 'pending', 'running', 'unknown', 'delivered', 'succeeded', 'failed', 'cancelled', 'interrupted', 'skipped'].map((status) => <option key={status} value={status}>{t('automation.' + (status || 'all'))}</option>)}
    </select></label>
   </div>
   {!rows.length && <p>{t('workbench.noRuns')}</p>}

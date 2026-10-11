@@ -6,6 +6,7 @@ import { t } from '../../../../shared/i18n/index';
 import { applyModalTheme } from '../appearance/modal-theme';
 import type { DashboardHost } from '../host';
 import { IconPickerModal } from '../ui/icon-picker-modal';
+import { closeOwnedDashboardDialogs, openOwnedDashboardModal } from '../ui/dialog-scope';
 import { attachPathPicker, type PathPickerMode } from '../ui/path-picker-modal';
 
 /**
@@ -55,6 +56,7 @@ export class QuickNoteConfigModal extends Modal {
 	}
 
 	onClose(): void {
+		closeOwnedDashboardDialogs(this.app, this);
 		this.contentEl.empty();
 	}
 
@@ -426,10 +428,10 @@ export class QuickNoteConfigModal extends Modal {
 		}), 'quickNote.pickIcon', undefined, "aria-label"), 'quickNote.pickIcon', undefined, "title");
 		setIcon(btn, currentIcon);
 		btn.addEventListener('click', () => {
-			new IconPickerModal(this.app, (name) => {
+			openOwnedDashboardModal(this.app, new IconPickerModal(this.app, (name) => {
 				setIcon(btn, name);
 				onPick(name);
-			}).open();
+			}), this);
 		});
 		return btn;
 	}

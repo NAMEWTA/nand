@@ -1,0 +1,114 @@
+{
+  "ticket": "Browser T08 workspace restart recovery",
+  "finding": "R-097",
+  "status": "implemented-local-verification-live-gate-unverified",
+  "baseline": "R096 full675/4skip, native76/copy12, build4188858, lint/architecture909/i18n3393/docs552/bundle passed.",
+  "reviewed": [
+    "ticket/08-workspace-restart-recovery.md",
+    "WorkspaceSender saveFacts/run/recover",
+    "WorkspaceStore",
+    "WorkspaceJournal",
+    "DurableState",
+    "MarkdownCollectionStorage",
+    "workspace runtime and initial failure UI"
+  ],
+  "findings": [
+    "Concurrent acquisitions are saved only after Promise.all: a fast complete answer can be lost if the process exits while another provider is pending.",
+    "When documents have a pending save, saveFacts throws before updating the recovery draft with newer in-memory observations.",
+    "Recovery JSON is written but cannot be explicitly inspected/restored through workspace; synthetic recovery key lacks configured folder identity.",
+    "Initial journal/recovery write failure prevents reading otherwise valid saved task content; audit UI read-only behavior.",
+    "Native OS-lock probe exposed fixed-file recovery overwrite on restart; independent runtime snapshot files now preserve the prior complete answer draft."
+  ],
+  "next": [
+    "Actual provider accounts/POSIX remain unverified; continue independent remaining scope."
+  ],
+  "implemented": [
+    "Each acquisition saves as soon as its own answer arrives. All started acquisitions drain with allSettled, retaining the first storage failure for explicit retry.",
+    "WorkspaceStore.retainPending and DurableState.preserveDraft persist newer observed facts into the existing recovery draft without rewriting visible documents or clearing the save error.",
+    "Recovery directory scoped by device/folder and folder-specific synthetic document key. Independent per-runtime snapshot files preserve old recovery data through further restart save failures; no unrelated recovery scan. Explicit selection validates local documents and snapshot; restore compares a fresh preview and merges with current edits. Runtime attempts are not imported.",
+    "Read-only local/recovery viewer is available even when journal initialization fails. Restore uses no provider connection, rejects wrong workspace/stale preview/conflicts, and normalizes derived restart statuses so already-captured answers can be restored."
+  ],
+  "verification": {
+    "regression": "Two new sender tests reproduced both failures on baseline; after fix, sender22 + workspace15 + store2 + journal2 =41 passed. Targeted lint reported unknown throw and was corrected; final lint/tsc running.",
+    "unit": "44 targeted passed. Full suite682/4skip and full lint passed.",
+    "nativeExploratory": [
+      {
+        "path": "C:/Users/cdewta/AppData/Local/Temp/nand-workspace-recovery-13329ffce5c34f73b72296c84b7dffd4/evidence",
+        "result": "Probe reached initial loading wrapper before the creation form. Restored existing loading wrapper class; failure/recovery UI retains its new layout."
+      },
+      {
+        "path": "C:/Users/cdewta/AppData/Local/Temp/nand-workspace-recovery-os-40cdd462bf84418c807f03bd79e14cc2/evidence",
+        "result": "Fast answer verified on disk before other providers completed; post-restart assertion used array position although Markdown file enumeration changed order. Stored capture survived with same ID. Harness now matches stable exchange ID."
+      },
+      {
+        "path": "C:/Users/cdewta/AppData/Local/Temp/nand-workspace-recovery-identities-361a82615d2f48bd83b5d00ac9724fcd/evidence",
+        "result": "Hard-crash fast answer plus slow accepted receipts passed. Probe annotation expression had an incorrectly escaped guest regex; changed to serialize a real function. Repeated same harness failure once in nand-workspace-recovery-lock-d4b783aaae904051a9ce3d6ffb7c3079 before corrected script was applied. No product source failure."
+      },
+      {
+        "path": "C:/Users/cdewta/AppData/Local/Temp/nand-workspace-recovery-filesystem-d0c45300dff045cc9f0cf77fa818e82e/evidence",
+        "result": "Seven native checks passed: hard-crash persistence, real OS-sharing write failure, all three proven answers in recovery, read-only local answers under blocked save. Found actual defect: restart recovery write failure overwrote the single fixed backup with an incomplete snapshot. Replaced fixed file with scoped directory/per-runtime snapshot files and explicit selection; added regression proving previous snapshot remains byte-identical."
+      },
+      {
+        "path": "C:/Users/cdewta/AppData/Local/Temp/nand-workspace-recovery-snapshots-6a33ff32dd4442cbb30fde5960f5fc2e/evidence",
+        "result": "30 checks passed including snapshot selection/restore, 18 responsive themes, touch44 and corrupt-journal read-only answers. Final crash probe waited for service snapshot before UI rendered; corrected harness readiness to include target controls."
+      }
+    ],
+    "checks": "Build4201379/styles750459; full lint passed; architecture912/i18n3415/docs552, CSS no-new-violations and bundle caps4201472/750720 passed.",
+    "native": {
+      "path": "C:/Users/cdewta/AppData/Local/Temp/nand-workspace-recovery-final-aabea27b9888407aa7ad0d2769540df2/evidence",
+      "checks": 32,
+      "failed": 0,
+      "scope": "Real Windows Obsidian 1.13.7, OS FileShare.Read lock, owned process SIGKILL/restarts, unchanged production main.js and local official-origin fixtures. Fast answer durably saved before peers; recovery archive survives repeated failed restart; explicit restore preserves capture IDs and human document edits; corrupt journal stays byte-identical while saved answers readable; dispatch interruption becomes unknown with staged peers paused and no reopened guests."
+    },
+    "full": {
+      "passed": 682,
+      "skipped": 4,
+      "filesPassed": 151,
+      "filesSkipped": 1,
+      "durationSeconds": 153.53,
+      "log": "C:\\Users\\cdewta\\AppData\\Local\\Temp\\nand-review-recovery-full.log"
+    }
+  },
+  "design": [
+    "Recovery directory is stable per device/folder within .nand/recovery/drafts, each runtime has a UUID snapshot. New failed initialization cannot overwrite a prior captured-answer snapshot. Reader lists only this directory and requires explicit selection.",
+    "Explicit preview validates baseline/draft and fresh current documents. Restore uses deletion-aware three-way merge and fresh preview comparison; no automatic send. Conflicts stay visible and recoverable answers remain readable/copyable.",
+    "Initial journal error should retain an explicit local-read/recovery entry rather than making saved answers inaccessible. Damaged owned Markdown is not overwritten by a default empty object."
+  ],
+  "runtimeClarification": {
+    "installerVersion": "1.13.7",
+    "electron": "43.3.0",
+    "note": "Electron app.getVersion() reports the installed runtime. Fresh profiles automatically downloaded an app update; application logs below prove restart loaded a newer renderer app. Prior single version labels did not distinguish these.",
+    "updates": [
+      {
+        "log": "C:\\Users\\cdewta\\AppData\\Local\\Temp\\nand-workspace-recovery-os-40cdd462bf84418c807f03bd79e14cc2\\evidence\\application.log",
+        "rendererUpdateLoaded": [
+          "1.14.4"
+        ]
+      },
+      {
+        "log": "C:\\Users\\cdewta\\AppData\\Local\\Temp\\nand-workspace-recovery-identities-361a82615d2f48bd83b5d00ac9724fcd\\evidence\\application.log",
+        "rendererUpdateLoaded": [
+          "1.14.4"
+        ]
+      },
+      {
+        "log": "C:\\Users\\cdewta\\AppData\\Local\\Temp\\nand-workspace-recovery-filesystem-d0c45300dff045cc9f0cf77fa818e82e\\evidence\\application.log",
+        "rendererUpdateLoaded": [
+          "1.14.4"
+        ]
+      },
+      {
+        "log": "C:\\Users\\cdewta\\AppData\\Local\\Temp\\nand-workspace-recovery-snapshots-6a33ff32dd4442cbb30fde5960f5fc2e\\evidence\\application.log",
+        "rendererUpdateLoaded": [
+          "1.14.4"
+        ]
+      },
+      {
+        "log": "C:\\Users\\cdewta\\AppData\\Local\\Temp\\nand-workspace-recovery-final-aabea27b9888407aa7ad0d2769540df2\\evidence\\application.log",
+        "rendererUpdateLoaded": [
+          "1.14.4"
+        ]
+      }
+    ]
+  }
+}

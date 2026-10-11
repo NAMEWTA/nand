@@ -13,7 +13,7 @@ import { normalizeBrowserUrl, recordHistory, historySuggestions } from '../../mo
 import { newPageState } from '../../modules/browser/core/model';
 import { BrowserOperationQueue } from '../../modules/browser/core/operation-queue';
 import { browserAgentMaterial } from '../../modules/browser/core/agent-material';
-import { sessionMaterialPort } from '../../modules/agent/services/session-material';
+import { SessionMaterialService } from '../../modules/agent/services/session-material';
 import type { AgentController } from '../../modules/agent/services/controller';
 import {
 	arrowHeadGeometry,
@@ -81,11 +81,11 @@ test('Agent delivery refuses shell/unready sessions and only pastes into the sel
 		show: (id: string) => { selected.push(id); },
 		open: async () => {},
 	} as unknown as AgentController;
-	const delivery = sessionMaterialPort(host);
+	const delivery = new SessionMaterialService(host);
 	const attach = (id: string, text: string, files: string[]) => delivery.attachMaterial(id, { title: 'Material', text, files });
-	assert.deepEqual(await delivery.list(), [{ id: 'agent', title: 'Agent' }]);
-	await assert.rejects(attach('shell', 'page', []), /browser_agent_unavailable/);
-	await assert.rejects(attach('agent', 'page', []), /browser_agent_not_ready/);
+	assert.deepEqual(await delivery.list(), [{ id: 'agent', title: 'Agent', agentId: 'codex' }]);
+	await assert.rejects(attach('shell', 'page', []), { code: 'missing' });
+	await assert.rejects(attach('agent', 'page', []), { code: 'timeout' });
 	ready = true;
 	await attach('agent', 'page\x1b[201~', ['image.png']);
 	assert.equal(pasted.length, 1);
@@ -280,7 +280,7 @@ test('authenticated local bridge and generated CLI isolate vaults and remove con
 	const runtimeRequire = createRequire(join(process.cwd(), 'package.json'));
 	const win = { require: runtimeRequire } as unknown as Window;
 	const api = { app: { getPath: () => directory } } as unknown as ElectronBrowserApi;
-	const a = new BrowserBridge(win, api, 'vault-a', { execute: async (method) => ({ method }) });
+	const a = new BrowserBridge(win, api, 'vault-a', { execute: async (method) => ({ method }) }, true);
 	const b = new BrowserBridge(win, api, 'vault-b', { execute: async () => ({ other: true }) });
 	try {
 		await a.start();

@@ -1,8 +1,6 @@
 /** Keep a disappeared column's preference and append new fields as visible. */
 export function reconcileColumns(order: readonly string[], hidden: readonly string[], available: readonly string[]): { order: string[]; hidden: string[] } {
-	const known = new Set([...order, ...hidden]);
-	const nextOrder = [...order];
-	for (const field of available) if (!known.has(field) && !nextOrder.includes(field)) nextOrder.push(field);
+	const nextOrder = [...new Set([...order, ...hidden, ...available])];
 	const nextHidden = hidden.filter((field, index) => hidden.indexOf(field) === index);
 	return { order: nextOrder, hidden: nextHidden };
 }
@@ -51,10 +49,8 @@ export function focalForWrite(value: unknown): FocalPoint | undefined {
 }
 
 /** The legacy single template still reads. An empty list is the blank note. Cancel chooses nothing. */
-export function templateChoices(legacyPath: string | undefined, templates: readonly string[]): string[] {
-	const list = templates.map((item) => item.trim()).filter(Boolean);
-	if (list.length) return list;
-	return legacyPath?.trim() ? [legacyPath.trim()] : [];
+export function templateChoices(legacyPath: string | undefined, templates?: readonly string[]): string[] {
+	return [...new Set((templates ?? (legacyPath ? [legacyPath] : [])).map(item => item.trim()).filter(Boolean))];
 }
 
 export function selectTemplate(templates: readonly string[], choice: number | null): string | null {

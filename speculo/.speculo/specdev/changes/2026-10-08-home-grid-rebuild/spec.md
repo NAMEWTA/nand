@@ -9,6 +9,10 @@ sources: ["<Path>{roots.state}/specdev/changes/2026-10-08-home-grid-rebuild/sour
 
 # Spec: 首页看板自由网格、组件贡献与智能体技能派发
 
+<!-- ACTUAL-CODE-REVIEW:START -->
+2026-10-11 实际代码审查与修复：[review-index.md](evidence/review-index.md)，覆盖本 change 的 18 票、77 条 AC。下文保留原规划目标与当时基线，不能把“尚未实现／本轮只规划”当成当前代码状态。当前源码与接口以审查证据及 owner 的 `api.ts` 为准；未验证的账号或平台仍未验证，原 AC 没有删减。
+<!-- ACTUAL-CODE-REVIEW:END -->
+
 - ADR：<Path>{roots.state}/specdev/changes/2026-10-08-home-grid-rebuild/ADR.md</Path>
 - CONTEXT：<Path>{roots.state}/specdev/changes/2026-10-08-home-grid-rebuild/CONTEXT.md</Path>
 - 引用对照：<Path>{roots.state}/specdev/changes/2026-10-08-home-grid-rebuild/reference-analysis.md</Path>
@@ -19,7 +23,7 @@ sources: ["<Path>{roots.state}/specdev/changes/2026-10-08-home-grid-rebuild/sour
 
 先独立修复 #141 的窄桌面快捷创建栏异常高度和横幅遮挡；随后完整落实 #137：固定参考 apex-dashboard 3.7.5 源码，形成按看板布局/成员、沉浸式统一网格、内外部小组件贡献、NAND 终端技能派发、工作流分区以及全部八项附加体验。遵守现有模块边界、懒加载、全局主题、Markdown 保真、i18n 与许可；RSS 产品由新闻 change 实现。本次交付是成熟规格、18 张票与串行计划，不执行实现或发布。
 
-### 当前事实
+### 规划时基线
 
 当前研究基线为 NAND 1b9121382363cc50254fbc973c24742b7742edc7。#137 的 21f852b 路径/类型描述部分过时：DashboardLayoutMode/layoutMode 已删除，shell/board-settings.ts 仅覆盖 dashboardFile；真正布局入口是 home/ui/renderer/render-sidebar-widgets.ts 的 isStackedLayout()，非手机恒为 stacked。DashboardData 尚无 layout/immersive/members，parser 已具备 document.source/baseline 与 preserveDashboardDocument 原文保真。内置 widgets 仍硬编码，BoardOperations.reorder 已有但面板未暴露。AgentSessionsPort 仅 list/attachMaterial，既有 interactive 会话只粘贴；自动化 runtime 的 reuse 会回车，不可直接用于新快捷按钮的既有会话路径。AUTOMATIONS.runAction 只接已存 id，尚无动态 prompt 调用/派发回执 API。icons 无 api.ts，但内部用 Obsidian getIconIds 和 lazy keywords。当前全局主题 ADR 是 0006，非 issue 旧编号 0020。#141 的 ≤640 媒体查询空档仍存在；本轮只有静态根因核查，未声称真实 Obsidian 已复现或修复。
 

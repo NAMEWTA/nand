@@ -12,10 +12,12 @@ interface ConfirmOptions {
 	/** When false the confirm button uses the accent color instead of the
 	 *  destructive red. Defaults to true (destructive). */
 	destructive?: boolean;
+	owner?: HTMLElement;
 }
 
 export function showConfirmDialog(app: App | undefined, options: ConfirmOptions): Promise<boolean> {
-	const doc = activeDocument;
+	const doc = options.owner?.doc ?? activeDocument;
+	const previousFocus = doc.activeElement as HTMLElement | null;
 	return new Promise((resolve) => {
 		let release = () => {};
 		let resolved = false;
@@ -36,7 +38,7 @@ export function showConfirmDialog(app: App | undefined, options: ConfirmOptions)
 		// Dialog card
 		const dialog = overlay.createDiv({
 			cls: 'dashboard-confirm-card',
-			attr: { role: 'dialog', 'aria-modal': 'true' },
+			attr: { role: 'dialog', 'aria-modal': 'true', 'aria-label': options.title },
 		});
 		applyModalTheme(dialog);
 
@@ -49,6 +51,7 @@ export function showConfirmDialog(app: App | undefined, options: ConfirmOptions)
 			release();
 			doc.removeEventListener('keydown', onKeydown);
 			overlay.remove();
+			if (previousFocus?.isConnected && !previousFocus.closest('[inert], [hidden]')) previousFocus.focus();
 			done(value);
 		};
 
@@ -79,6 +82,11 @@ export function showConfirmDialog(app: App | undefined, options: ConfirmOptions)
 		// half-black overlay, darkening the screen one press at a time.
 		const onKeydown = (e: KeyboardEvent) => {
 			if (e.isComposing) return;
+			if (e.key === 'Tab') {
+				e.preventDefault();
+				(doc.activeElement === cancelBtn ? confirmBtn : cancelBtn).focus();
+				return;
+			}
 			if (e.key === 'Escape') {
 				e.preventDefault();
 				close(false);
@@ -91,7 +99,7 @@ export function showConfirmDialog(app: App | undefined, options: ConfirmOptions)
 		};
 		doc.addEventListener('keydown', onKeydown);
 
-		release = ownDialog(app, () => close(false));
+		release = ownDialog(app, () => close(false), options.owner);
 
 		// Claim focus into the dialog (the prompt dialog does the same for its
 		// input): the default button is focused so Tab starts inside and Enter

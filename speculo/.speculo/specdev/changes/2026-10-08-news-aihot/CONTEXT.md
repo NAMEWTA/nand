@@ -1,5 +1,9 @@
 # 本地新闻工作台与 Agent 分析领域语义
 
+<!-- ACTUAL-CODE-REVIEW:START -->
+2026-10-11 实际代码审查与修复：[review-index.md](evidence/review-index.md)，覆盖本 change 的 10 票、28 条 AC。下文保留原规划目标与当时基线，不能把“尚未实现／本轮只规划”当成当前代码状态。当前源码与接口以审查证据及 owner 的 `api.ts` 为准；未验证的账号或平台仍未验证，原 AC 没有删减。
+<!-- ACTUAL-CODE-REVIEW:END -->
+
 **新闻模块**：负责信源采集、新闻分析、阅读和收藏的可启停模块，模块 id 为 news。
 _Avoid_: 将该词用作其它模块的持久化或调度权威。
 

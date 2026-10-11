@@ -1,0 +1,429 @@
+{
+  "host": "Obsidian 1.13.7 / Windows",
+  "rows": [
+    {
+      "name": "news-default-off",
+      "passed": true
+    },
+    {
+      "name": "opening-does-not-fetch",
+      "passed": true,
+      "detail": []
+    },
+    {
+      "name": "empty-state-action",
+      "passed": true
+    },
+    {
+      "name": "saving-sources-does-not-fetch",
+      "passed": true
+    },
+    {
+      "name": "native-static-preview",
+      "passed": true,
+      "detail": [
+        {
+          "id": "static:76aed19a",
+          "sourceId": "static",
+          "sourceItemId": "http://127.0.0.1:13476/release#one",
+          "originalUrl": "http://127.0.0.1:13476/release#one",
+          "canonicalKey": "https://127.0.0.1:13476/release#one",
+          "canonicalUrl": "https://127.0.0.1:13476/release#one",
+          "title": "Static one",
+          "bodyExcerpt": "Static one ReadToday",
+          "summary": "Static one ReadToday",
+          "body": "Static one ReadToday",
+          "publishedAt": 1791580776493,
+          "claimedAt": 1791580776493,
+          "discoveredAt": 1791580776499,
+          "firstSeenAt": 1791580776499,
+          "updatedAt": 1791580776499,
+          "revision": 1,
+          "contentHash": "e7458a45",
+          "hash": "e7458a45",
+          "backfillReason": "initial-import"
+        },
+        {
+          "id": "static:22325860",
+          "sourceId": "static",
+          "sourceItemId": "http://127.0.0.1:13476/release#two",
+          "originalUrl": "http://127.0.0.1:13476/release#two",
+          "canonicalKey": "https://127.0.0.1:13476/release#two",
+          "canonicalUrl": "https://127.0.0.1:13476/release#two",
+          "title": "Static two",
+          "bodyExcerpt": "Static two Read",
+          "summary": "Static two Read",
+          "body": "Static two Read",
+          "discoveredAt": 1791580776499,
+          "firstSeenAt": 1791580776499,
+          "updatedAt": 1791580776499,
+          "revision": 1,
+          "contentHash": "cda23b59",
+          "hash": "cda23b59",
+          "backfillReason": "initial-import"
+        }
+      ]
+    },
+    {
+      "name": "preview-has-no-cache-or-script-effects",
+      "passed": true
+    },
+    {
+      "name": "native-feed-formats",
+      "passed": true,
+      "detail": [
+        {
+          "id": "feed-7fae89cc:aee7d751",
+          "sourceId": "feed-7fae89cc",
+          "sourceItemId": "rss-1",
+          "originalUrl": "http://127.0.0.1:13476/article?x=1&y=2",
+          "canonicalKey": "https://127.0.0.1:13476/article?x=1&y=2",
+          "canonicalUrl": "https://127.0.0.1:13476/article?x=1&y=2",
+          "title": "RSS & source",
+          "bodyExcerpt": "FULL ARTICLE TEXT",
+          "summary": "A short excerpt.",
+          "body": "FULL ARTICLE TEXT",
+          "publishedAt": 1791580776000,
+          "claimedAt": 1791580776000,
+          "discoveredAt": 1791580776542,
+          "firstSeenAt": 1791580776542,
+          "updatedAt": 1791580776542,
+          "revision": 1,
+          "contentHash": "cac1f34e",
+          "hash": "cac1f34e",
+          "backfillReason": "initial-import"
+        },
+        {
+          "id": "atom:b46093ba",
+          "sourceId": "atom",
+          "sourceItemId": "atom-1",
+          "originalUrl": "http://127.0.0.1:13476/root/atom?x=1&y=2",
+          "canonicalKey": "https://127.0.0.1:13476/root/atom?x=1&y=2",
+          "canonicalUrl": "https://127.0.0.1:13476/root/atom?x=1&y=2",
+          "title": "Atom title",
+          "bodyExcerpt": "Before middle after",
+          "summary": "",
+          "body": "Before middle after",
+          "publishedAt": 1791580776524,
+          "claimedAt": 1791580776524,
+          "discoveredAt": 1791580776573,
+          "firstSeenAt": 1791580776573,
+          "updatedAt": 1791580776573,
+          "revision": 1,
+          "contentHash": "2b0e6024",
+          "hash": "2b0e6024",
+          "backfillReason": "initial-import"
+        },
+        {
+          "id": "json:f98ff381",
+          "sourceId": "json",
+          "sourceItemId": "json-1",
+          "originalUrl": "http://127.0.0.1:13476/json-item",
+          "canonicalKey": "https://127.0.0.1:13476/json-item",
+          "canonicalUrl": "https://127.0.0.1:13476/json-item",
+          "title": "Titleless JSON material",
+          "author": "Fixture author",
+          "bodyExcerpt": "Titleless JSON material",
+          "summary": "Titleless JSON material",
+          "body": "Titleless JSON material",
+          "publishedAt": 1791580776541,
+          "claimedAt": 1791580776541,
+          "discoveredAt": 1791580776595,
+          "firstSeenAt": 1791580776595,
+          "updatedAt": 1791580776595,
+          "revision": 1,
+          "contentHash": "0a3f8753",
+          "hash": "0a3f8753",
+          "backfillReason": "initial-import"
+        },
+        {
+          "id": "static:76aed19a",
+          "sourceId": "static",
+          "sourceItemId": "http://127.0.0.1:13476/release#one",
+          "originalUrl": "http://127.0.0.1:13476/release#one",
+          "canonicalKey": "https://127.0.0.1:13476/release#one",
+          "canonicalUrl": "https://127.0.0.1:13476/release#one",
+          "title": "Static one",
+          "bodyExcerpt": "Static one ReadToday",
+          "summary": "Static one ReadToday",
+          "body": "Static one ReadToday",
+          "publishedAt": 1791580776631,
+          "claimedAt": 1791580776631,
+          "discoveredAt": 1791580776642,
+          "firstSeenAt": 1791580776642,
+          "updatedAt": 1791580776642,
+          "revision": 1,
+          "contentHash": "e7458a45",
+          "hash": "e7458a45",
+          "backfillReason": "initial-import"
+        },
+        {
+          "id": "static:22325860",
+          "sourceId": "static",
+          "sourceItemId": "http://127.0.0.1:13476/release#two",
+          "originalUrl": "http://127.0.0.1:13476/release#two",
+          "canonicalKey": "https://127.0.0.1:13476/release#two",
+          "canonicalUrl": "https://127.0.0.1:13476/release#two",
+          "title": "Static two",
+          "bodyExcerpt": "Static two Read",
+          "summary": "Static two Read",
+          "body": "Static two Read",
+          "discoveredAt": 1791580776642,
+          "firstSeenAt": 1791580776642,
+          "updatedAt": 1791580776642,
+          "revision": 1,
+          "contentHash": "cda23b59",
+          "hash": "cda23b59",
+          "backfillReason": "initial-import"
+        }
+      ]
+    },
+    {
+      "name": "initial-import-not-today",
+      "passed": true
+    },
+    {
+      "name": "failed-source-visible-health",
+      "passed": true
+    },
+    {
+      "name": "not-due-does-not-fetch",
+      "passed": true
+    },
+    {
+      "name": "visible-favorite-format",
+      "passed": true,
+      "detail": {
+        "notePath": "NAND/新闻/收藏/2026-10-10-RSS & source.md",
+        "note": "---\nnand-type: news\nnand-id: feed-7fae89cc:aee7d751\ntitle: RSS & source\nurl: http://127.0.0.1:13476/article?x=1&y=2\nsource: feed-7fae89cc\nsource-item: rss-1\npublished: 2026-10-09T21:19:36.000Z\ndiscovered: 2026-10-09T21:19:36.542Z\nrevision: 1\nscore: null\ntags: []\nevent: null\nnand-generated: a31e794b\n---\n\n<!-- nand:news -->\n# RSS & source\n\nA short excerpt.\n\n[Open original](<http://127.0.0.1:13476/article?x=1&y=2>)\n<!-- /nand:news -->\n\n## My notes\n\nFirst annotation\n\n## Notes\nSecond annotation\n"
+      }
+    },
+    {
+      "name": "reader-sections-and-yaml-preserved",
+      "passed": true
+    },
+    {
+      "name": "renamed-favorite-reused",
+      "passed": true
+    },
+    {
+      "name": "native-unsaved-editor-protected",
+      "passed": true,
+      "detail": "news.note.unsaved"
+    },
+    {
+      "name": "cache-clear-retains-favorites",
+      "passed": true
+    },
+    {
+      "name": "native-settings-trial-result",
+      "passed": true
+    },
+    {
+      "name": "native-opml-roundtrip",
+      "passed": true
+    },
+    {
+      "name": "source-language-preserves-draft",
+      "passed": true
+    },
+    {
+      "name": "source-settings-width-claude-code-light-1200",
+      "passed": true,
+      "detail": {
+        "client": 760,
+        "scroll": 760
+      }
+    },
+    {
+      "name": "source-settings-width-claude-code-light-800",
+      "passed": true,
+      "detail": {
+        "client": 692,
+        "scroll": 692
+      }
+    },
+    {
+      "name": "source-settings-width-claude-code-light-420",
+      "passed": true,
+      "detail": {
+        "client": 364,
+        "scroll": 364
+      }
+    },
+    {
+      "name": "source-settings-width-claude-code-dark-1200",
+      "passed": true,
+      "detail": {
+        "client": 760,
+        "scroll": 760
+      }
+    },
+    {
+      "name": "source-settings-width-claude-code-dark-800",
+      "passed": true,
+      "detail": {
+        "client": 692,
+        "scroll": 692
+      }
+    },
+    {
+      "name": "source-settings-width-claude-code-dark-420",
+      "passed": true,
+      "detail": {
+        "client": 364,
+        "scroll": 364
+      }
+    },
+    {
+      "name": "source-settings-width-codex-light-1200",
+      "passed": true,
+      "detail": {
+        "client": 760,
+        "scroll": 760
+      }
+    },
+    {
+      "name": "source-settings-width-codex-light-800",
+      "passed": true,
+      "detail": {
+        "client": 692,
+        "scroll": 692
+      }
+    },
+    {
+      "name": "source-settings-width-codex-light-420",
+      "passed": true,
+      "detail": {
+        "client": 364,
+        "scroll": 364
+      }
+    },
+    {
+      "name": "source-settings-width-codex-dark-1200",
+      "passed": true,
+      "detail": {
+        "client": 760,
+        "scroll": 760
+      }
+    },
+    {
+      "name": "source-settings-width-codex-dark-800",
+      "passed": true,
+      "detail": {
+        "client": 692,
+        "scroll": 692
+      }
+    },
+    {
+      "name": "source-settings-width-codex-dark-420",
+      "passed": true,
+      "detail": {
+        "client": 364,
+        "scroll": 364
+      }
+    },
+    {
+      "name": "source-settings-width-obsidian-light-1200",
+      "passed": true,
+      "detail": {
+        "client": 760,
+        "scroll": 760
+      }
+    },
+    {
+      "name": "source-settings-width-obsidian-light-800",
+      "passed": true,
+      "detail": {
+        "client": 692,
+        "scroll": 692
+      }
+    },
+    {
+      "name": "source-settings-width-obsidian-light-420",
+      "passed": true,
+      "detail": {
+        "client": 364,
+        "scroll": 364
+      }
+    },
+    {
+      "name": "source-settings-width-obsidian-dark-1200",
+      "passed": true,
+      "detail": {
+        "client": 760,
+        "scroll": 760
+      }
+    },
+    {
+      "name": "source-settings-width-obsidian-dark-800",
+      "passed": true,
+      "detail": {
+        "client": 692,
+        "scroll": 692
+      }
+    },
+    {
+      "name": "source-settings-width-obsidian-dark-420",
+      "passed": true,
+      "detail": {
+        "client": 364,
+        "scroll": 364
+      }
+    },
+    {
+      "name": "module-stopped",
+      "passed": true
+    },
+    {
+      "name": "reenable-rediscovers-visible-favorite",
+      "passed": true
+    },
+    {
+      "name": "restart-rediscovers-visible-favorite",
+      "passed": true
+    },
+    {
+      "name": "host-errors-empty",
+      "passed": true,
+      "detail": []
+    }
+  ],
+  "requests": [
+    {
+      "url": "/list"
+    },
+    {
+      "url": "/rss"
+    },
+    {
+      "url": "/atom"
+    },
+    {
+      "url": "/json"
+    },
+    {
+      "url": "/list",
+      "etag": "fixture-etag"
+    },
+    {
+      "url": "/failed"
+    },
+    {
+      "url": "/list",
+      "etag": "fixture-etag"
+    }
+  ],
+  "script": "scripts/obsidian-acceptance/news-collection.mjs",
+  "screenshotsInspected": [
+    "Earlier identical successful run dd9a925d2b8d42609a1fd7cdd4c2bf18: sources-obsidian-dark-420.png",
+    "Earlier successful run 76c9e78d3a274bc8957fc693e7701a4d: sources-claude-code-420.png and sources-codex-800.png"
+  ],
+  "limits": [
+    "This run uses an owned local HTTP source fixture; public static-site validation is still pending.",
+    "requestUrl has no public transport-abort/streaming interface: service cancellation discards late results and the size bound is checked after the host response is materialized.",
+    "News analysis/receipts/scoring/grouping/heat/daily/page-state and home widgets are separate pending review domains; this collection evidence does not certify them."
+  ],
+  "fixtureRoot": "C:\\Users\\cdewta\\AppData\\Local\\Temp\\nand-news-review-d5c3b8ed0ddb44ef9081d917a94fca4c",
+  "postEditionRegression": "40 checks pass after sources were placed in their own workbench section."
+}

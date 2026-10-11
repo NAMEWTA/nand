@@ -1,0 +1,129 @@
+{
+  "ticket": "Browser T03 durable workspace and DeepSeek provider",
+  "finding": "R-092",
+  "status": "fixed-core-loop-real-account-unverified",
+  "findingDetails": [
+    "AiWorkspace routes every provider through pageSitePort(() => latestPage()), so a later page can receive a different target operation.",
+    "Eight providers share one repeatedly navigated guest; there are no durable task/turn/binding/intent records.",
+    "Submission uses generic page-text change and capture slices text after the last prompt occurrence, without stable user/assistant/parent/branch identity.",
+    "The ordinary BrowserPanel contains a global AiBar prototype rather than the requested task workspace; history/import/synthesis surfaces are incomplete."
+  ],
+  "sourceReview": {
+    "reference": "https://github.com/NAMEWTA/multi-ai-browser-extension",
+    "sha": "b6b83ca90f0f67fbf25a676e7a8f6b8b34327800",
+    "local": "C:/Users/cdewta/AppData/Local/Temp/nand-maiw-browser-review-161505c0a8a24243a20841f4cf6abdcf",
+    "license": "MIT Copyright (c) 2026 NAMEWTA; LICENSE read",
+    "read": [
+      "src/providers/deepseek/selectors.ts",
+      "src/providers/deepseek/runtime-acquisition.ts",
+      "src/providers/deepseek/definition.ts",
+      "src/providers/deepseek/acquisition.ts (complete)",
+      "src/providers/deepseek/strategy.ts",
+      "src/providers/deepseek/native-copy.ts",
+      "src/providers/deepseek/fixtures/acquisition-history-fragments.json",
+      "src/providers/deepseek/fixtures/acquisition-history-legacy.json",
+      "LICENSE"
+    ],
+    "adaptedCode": "DeepSeek public history parser and DOM selector/exclusion reference adapted from pinned MIT source with headers, full upstream license, NOTICE and bilingual mapping. Native session input, lifetime and passive projection written for NAND; no credential replay or copied native-copy implementation."
+  },
+  "implementedSoFar": [
+    "core/workspace/model.ts: explicit bindings, immutable turn snapshots, attempts and capture revisions with separate submit/acquisition/save states.",
+    "core/providers/contracts.ts: a driver is bound to one page generation; inspect/new-conversation/stage/readback/commit/capture/rollback and owned cleanup.",
+    "platform/workspace-journal.ts: DurableState reservation before stage, dispatch intent before commit, transition CAS, exact previous-attempt id for explicit resend, unknown on restart, failed-write rollback.",
+    "core/workspace/documents.ts + golden browser-workspace.md: visible task/turn/prompt and answer Markdown; all meaningful answer revisions and current pointer in one atomic exchange document; referential validation.",
+    "platform/workspace-store.ts: failed document drafts remain pending, later edits blocked until explicit retrySave; no native page capability in storage; owned invalidation cleanup.",
+    "DocumentCollectionCodec.ownedTypes optional filter prevents a configurable workspace folder from tombstoning foreign NAND documents.",
+    "Typed element readback now returns editable value for staging, excluding password/hidden/explicit credential inputs; platform/desktop/read-element.ts.",
+    "services/workspace.ts: durable task editing, explicit prepare/new-conversation action, immutable editable-final-prompt previews, snapshot invalidation, single-use send and serialized metadata operations; lazily instantiated by BrowserModule and exposed as registered BROWSER_WORKSPACE.",
+    "services/workspace-sender.ts: all durable intents precede any input; strict staged readback, branch/page identity and accepted user-message verification; dispatch all targets before answer waits; per-task/page ownership; explicit pause, unknown outcome and disk-only retrySave. Runtime facts survive failed writes; accepted conversation/parent receipt stored in both journal and visible exchange metadata.",
+    "core/providers/verification.ts validates branch tip, new user-message identity, exact prompt, current answer parent and explicit terminal evidence.",
+    "platform/desktop/provider-responses.ts: task-owned passive exact-endpoint observation, bounded in-flight/retained responses, projected data only, arrival-order preservation, abort/detach/generation cleanup. Internal automation readers use the existing guest queue and are not bridge methods.",
+    "core/providers/deepseek-history.ts: legacy/fragments envelopes, stable IDs, public fragments, parent-chain and pagination/count reasons. Missing/duplicate IDs rejected; repeated public fragments retained. History alone never establishes generation completion.",
+    "BrowserAutomation.providerInput: finite internal fill/click uses existing queue and native implementation, exact static guard before input dispatch, unique visible control lookup, generation admission, current active composer or coordinate hit test, and scoped object cleanup. Not exposed as a bridge method.",
+    "platform/desktop/deepseek-dom.ts: bounded scoped read-only message DOM with stable IDs, explicit parent only, composer/submit/new-chat controls, stop/login/challenge state, preserved heading/table/code/TeX and excluded reasoning/control content. Consumed by the native DeepSeek ProviderSession.",
+    "platform/desktop/deepseek-session.ts now implements explicit inspect/newConversation/stage/one-dispatch commit/parent-bound capture/rollback/dispose over generation-bound native queue and passive history responses. Native session and production task UI now verified with local Electron fixtures. DOM fallback is always partial because virtual-list coverage is unverified; complete API captures require explicit branch/pagination and observed generation end.",
+    "Pause revokes cleanup mutations too: no rollback after abort, rollback signal follows the original admission revocation. Already observed answers are retained as partial after pause. Added meaningful sender regression; sender10/workspace5 pass.",
+    "BROWSER_WORKSPACE declared in manifest and registered through module.ts; lazy workspace-runtime loads visible Markdown and device journal only on explicit initialization, with desktop-only provider import and revoked-generation guards.",
+    "Production multi-ai workbench route, task creation/account, pinned task sidebar, service-owned coalesced drafts, explicit open/current/new-conversation actions, separate recipient/visibility, frozen preview/send/pause, independent submit/acquisition/save and rendered Markdown answers. Restoring a task creates no guest.",
+    "Native guest presentations stay module-owned and fixed-profile. Activation reveals and scrolls the correct task pane; closing/migration revokes task operations and unmounts owned guest. Disconnected restored targets are visibly labelled.",
+    "Old AiWorkspace/AiBar/pageSitePort/site-exchange/site-adapter prototype and its misleading generic send tests removed. No latest-page AI route remains.",
+    "Shell resourceTabs limits automatic page IDs and tabs to ordinary browser pages; section participates in retained page identity. Task focus copies retain task identity; ordinary browser focus copies retain account profile.",
+    "Native integration caught JSON insertion-order false conflict after Markdown decode. Canonical snapshot comparison now preserves array order and ignores object property order; workspace service tests roundtrip through real document codec.",
+    "Pausing includes pending reviewed-turn persistence before sender creation; held-write regression proves no provider mutation or attempt after cancellation.",
+    "Default visible document folder validated and configurable with explicit apply; changes take effect on module restart. Canonical official conversation URLs exclude raw login/query tokens.",
+    "Save errors preserve verified acquisition completion; latest draft buffer remains owned by workspace across presentation changes and explicit save retry.",
+    "Missing parent metadata is explicitly unverified, never treated as a proven history root; current-answer completion requires positive chain evidence. Task-list navigation uses the event owner window."
+  ],
+  "verification": {
+    "targeted": "7 foundational tests plus 13 shared reliability checks pass; build with production/test type checking, full lint, architecture 882 before read-element addition, docs550 and i18n3262 pass.",
+    "integration": "Production uninstrumented build and registered service/UI verified in actual Obsidian with local HTTPS session interception. Three complete turns, repeated question, visible Markdown and restart/off/reenable tested. Real DeepSeek account compatibility remains unverified.",
+    "nativeReadback": {
+      "checks": 32,
+      "passed": 32,
+      "evidence": "C:/Users/cdewta/AppData/Local/Temp/nand-browser-readback-review-a94d881c1cd94bf9923131e8641d15d4/evidence",
+      "scope": "Existing BrowserControl regressions plus input/textarea readback and password/API-key masking; not a workspace/provider implementation test."
+    },
+    "bundle": "main.js4128554/styles.css749504 within caps4128768/749568. Startup96.8KiB/browser activation125.5KiB under unchanged startup/module caps. No added dependency.",
+    "full": {
+      "passed": 633,
+      "skipped": 4,
+      "filesPassed": 142,
+      "filesSkipped": 1,
+      "seconds": 133.93,
+      "log": "C:/Users/cdewta/AppData/Local/Temp/nand-review-browser-workspace-ui-full.log"
+    },
+    "serviceTargeted": {
+      "passed": 28,
+      "files": 9,
+      "scope": "sender9, workspace5, foundation7, response-scope2, history-parser4, automation lifecycle1; unit fixtures only, no real-provider claim."
+    },
+    "currentChecks": "Build/full lint/architecture892/i18n3341/docs552(567 local,350 external)/CSS109(150 baseline groups)/bundle pass. Full633+4skip/142+1skip files/133.93s. After final missing-parent proof and owner-window refinement: targeted42, browser lint, build/bundle and native workspace52 pass. Ordinary browser native32 also passed.",
+    "providerInputNative": {
+      "passed": 14,
+      "evidence": "C:/Users/cdewta/AppData/Local/Temp/nand-provider-input-review-4f9209234b7e476495a2c1f4831abc76/evidence",
+      "scope": "Current source helpers bundled into disposable evidence directory and exercised against actual Electron guest; native multiline fill/click, guard after hover, overlay/ambiguity rejection, passive projected response, late stale read and disposal. Local fixture only, not registered provider/task UI."
+    },
+    "controlAfterProvider": {
+      "passed": 32,
+      "evidence": "C:/Users/cdewta/AppData/Local/Temp/nand-browser-control-after-provider-0484e65ec8a746cba3ab44228468a059/evidence"
+    },
+    "browserUnit": {
+      "passed": 62,
+      "files": 18,
+      "seconds": 11.84
+    },
+    "providerDomNative": {
+      "passed": 17,
+      "evidence": "C:/Users/cdewta/AppData/Local/Temp/nand-provider-dom-review-3247e9e1d3604d76ad65f741637a27b3/evidence",
+      "previousAttempt": "C:/Users/cdewta/AppData/Local/Temp/nand-provider-dom-review-b6168905c7e840c49d62e1cc363a1574/evidence:16 behavioral checks passed, final harness global error-array lookup was undefined. Harness now subscribes to CDP Runtime.exceptionThrown and reads optional initial tracker; rerun17 passed.",
+      "scope": "Previous14native helper checks plus explicit DOM identity, preserved HTML/TeX exclusions and missing-parent non-inference. Local fixture, no actual-provider claim."
+    },
+    "sessionCurrent": "DeepSeek ProviderSession native fixture17 and production registered workspace UI48 passed; no real-account acceptance claim.",
+    "deepseekSessionNative": {
+      "passed": 17,
+      "evidence": "C:/Users/cdewta/AppData/Local/Temp/nand-deepseek-session-review-438d1b45e8674e0db1a67a3785696117/evidence",
+      "method": "Actual ProviderSession source and real Electron guest, official HTTPS requests fulfilled with scripts/fixtures/deepseek-page.html and local history responses. Instrumented plugin entry exists only in disposable vault, so Obsidian supplies its real htmlToMarkdown.",
+      "scope": "Explicit empty new conversation, three turns including repeat, stable user receipt/parent, complete API answer with observed generation end and explicit fixture pagination, heading/table/code/math retention, private metadata exclusion, truthful partial DOM fallback, existing draft preservation, stale guest rejection and listener cleanup. No actual provider account or registered BROWSER_WORKSPACE/UI acceptance.",
+      "initialHarnessFailure": "Temporary standalone CJS could not resolve Obsidian API; replaced by an instrumented existing NAND entry only inside the disposable vault. No production test hook was added."
+    },
+    "workspaceNative": {
+      "passed": 52,
+      "evidence": "C:/Users/cdewta/AppData/Local/Temp/nand-browser-workspace-final-708b9d7ed7744ff7a11f8f6eda7785a3/evidence",
+      "scope": "Uninstrumented production build and registered service/UI/Markdown store with real Electron input; HTTPS is fulfilled locally. Three complete turns, repeated question, a fourth paused accepted turn, receipt/incomplete preservation, separate visibility/recipients, 18 theme/width/coarse44 cases, language, popout guest disposal, another-window presentation, restart/off/reenable and zero automatic sends. No real-account claim."
+    },
+    "controlAfterWorkspace": {
+      "passed": 32,
+      "evidence": "C:/Users/cdewta/AppData/Local/Temp/nand-browser-control-after-workspace-77bcb948ce8a42989cf65255930c814f/evidence"
+    }
+  },
+  "next": [
+    "Real DeepSeek account/current website verification remains unavailable; local fixtures cannot prove private DOM/API contracts.",
+    "Continue Browser T04-T21, Home workflow integration and planning document reconciliation.",
+    "Additional task editing/history/provider/adapter/workflow features remain to implement in their tickets; do not label browser Change complete."
+  ],
+  "remaining": [
+    "Real DeepSeek account/current website verification remains unavailable; local fixtures cannot prove private DOM/API contracts.",
+    "Continue Browser T04-T21, Home workflow integration and planning document reconciliation.",
+    "Additional task editing/history/provider/adapter/workflow features remain to implement in their tickets; do not label browser Change complete."
+  ]
+}

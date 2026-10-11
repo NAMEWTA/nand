@@ -1,5 +1,6 @@
 import { readMarkdownDocument, readYaml } from '../../../../../shared/storage/markdown-document';
 import { normalizeColumnPairs } from '../column-pairs';
+import { readPipelineConfig } from '../../pipeline/codec';
 import type {
 	BannerCenterStat,
 	BannerData,
@@ -9,6 +10,7 @@ import type {
 	DashboardColumn,
 	DataviewConfig,
 	LibraryConfig,
+	PipelineConfig,
 	QuickAction,
 	WebEmbedConfig,
 	WereadConfig,
@@ -54,6 +56,8 @@ export function parseBanner(fm: Record<string, unknown>): BannerData {
 		quoteFont: (raw.quoteFont as string) || undefined,
 		quotes,
 		images,
+		imagePos: raw.imagePos && typeof raw.imagePos === 'object' && !Array.isArray(raw.imagePos)
+			? { ...(raw.imagePos as Record<string, unknown>) } : undefined,
 		mode: raw.mode === 'stats' ? 'stats' : 'quote',
 		statsConfig: parseStatsConfig(raw.statsConfig),
 	};
@@ -116,10 +120,12 @@ export function parseHiddenPresets(fm: Record<string, unknown>): string[] | unde
 	return undefined;
 }
 export function parseColumnDefs(fm: Record<string, unknown>): Array<{
+	id?: string;
 	name: string;
 	color: string;
 	sectionType?: string;
 	libraryConfig?: LibraryConfig;
+	pipelineConfig?: PipelineConfig;
 	wereadConfig?: WereadConfig;
 	dataviewConfig?: DataviewConfig;
 	webConfig?: WebEmbedConfig;
@@ -131,10 +137,12 @@ export function parseColumnDefs(fm: Record<string, unknown>): Array<{
 	if (!Array.isArray(raw)) return DEFAULT_COLUMNS;
 
 	return (raw as Array<Record<string, unknown>>).map((item) => ({
+		id: typeof item.id === 'string' && item.id.trim() ? item.id.trim() : undefined,
 		name: String((item.name ?? 'Unnamed') as string | number | boolean),
 		color: String((item.color ?? '#6366f1') as string | number | boolean),
 		sectionType: item.type ? String(item.type as string | number | boolean) : undefined,
 		libraryConfig: item.library ? parseLibraryConfig(item.library as Record<string, unknown>) : undefined,
+		pipelineConfig: item.pipeline ? readPipelineConfig(item.pipeline) : undefined,
 		wereadConfig: item.weread ? parseWereadConfig(item.weread as Record<string, unknown>) : undefined,
 		dataviewConfig: item.dataview ? parseDataviewConfig(item.dataview as Record<string, unknown>) : undefined,
 		webConfig: item.web ? parseWebConfig(item.web as Record<string, unknown>) : undefined,
@@ -147,10 +155,12 @@ export function parseColumnDefs(fm: Record<string, unknown>): Array<{
 export function parseColumns(
 	body: string,
 	defs: Array<{
+		id?: string;
 		name: string;
 		color: string;
 		sectionType?: string;
 		libraryConfig?: LibraryConfig;
+		pipelineConfig?: PipelineConfig;
 		wereadConfig?: WereadConfig;
 		dataviewConfig?: DataviewConfig;
 		webConfig?: WebEmbedConfig;
@@ -175,12 +185,14 @@ export function parseColumns(
 		const cards = parseCards(section.content, section.heading);
 		const resolvedType = resolveSectionType(section.heading, cards, def?.sectionType);
 		return {
+			id: def?.id,
 			name: section.heading,
 			color: def?.color ?? '#6366f1',
 			sectionType: resolvedType,
 			// Memo rendering includes task/doc trees; retain their structure on reload.
 			cards,
 			libraryConfig: def?.libraryConfig,
+			pipelineConfig: def?.pipelineConfig,
 			wereadConfig: def?.wereadConfig,
 			dataviewConfig: def?.dataviewConfig,
 			webConfig: def?.webConfig,

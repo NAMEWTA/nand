@@ -1,6 +1,6 @@
 import type { SettingsHandle } from '../../../shared/settings/store';
 import type { SyncSettings } from '../settings';
-import { nextDelay } from '../core/schedule';
+import { MAX_DELAY, nextDelay } from '../core/schedule';
 import type { SyncService } from './sync-service';
 
 /**
@@ -12,6 +12,7 @@ import type { SyncService } from './sync-service';
 export class Automatics {
 	private timers = new Map<'commit' | 'pull' | 'push', number>();
 	private editTimer?: number;
+	private lastEdit?: number;
 	private stopped = false;
 
 	constructor(
@@ -34,6 +35,7 @@ export class Automatics {
 		this.timers.clear();
 		this.win.clearTimeout(this.editTimer);
 		this.editTimer = undefined;
+		this.lastEdit = undefined;
 	}
 
 	private get active(): boolean {
@@ -44,16 +46,16 @@ export class Automatics {
 	schedule(): void {
 		for (const timer of this.timers.values()) this.win.clearTimeout(timer);
 		this.timers.clear();
-		if (!this.active) {
-			this.win.clearTimeout(this.editTimer);
-			return;
-		}
+		this.win.clearTimeout(this.editTimer);
+		this.editTimer = undefined;
+		if (!this.active) return;
 		const settings = this.settings.get();
 		const device = this.service.snapshot.device;
 		const now = this.now();
 		if (!settings.autoBackupAfterFileChange) this.arm('commit', nextDelay(settings.autoSaveInterval, device.lastCommit, now));
+		else this.armAfterEdit();
 		this.arm('pull', nextDelay(settings.autoPullInterval, device.lastPull, now));
-		if (settings.differentIntervalCommitAndPush) this.arm('push', nextDelay(settings.autoPushInterval, device.lastPush, now));
+		if (settings.differentIntervalCommitAndPush && !settings.disablePush) this.arm('push', nextDelay(settings.autoPushInterval, device.lastPush, now));
 	}
 
 	private arm(kind: 'commit' | 'pull' | 'push', delay: number | null): void {
@@ -66,12 +68,30 @@ export class Automatics {
 		const settings = this.settings.get();
 		if (!settings.autoBackupAfterFileChange || !(settings.autoSaveInterval > 0) || !this.active || this.service.writingFiles) return;
 		this.win.clearTimeout(this.editTimer);
-		this.editTimer = this.win.setTimeout(() => void this.run('commit'), settings.autoSaveInterval * 60_000);
+		this.lastEdit = this.now();
+		this.armAfterEdit();
+	}
+
+	private armAfterEdit(): void {
+		const minutes = this.settings.get().autoSaveInterval;
+		if (this.lastEdit === undefined || !(minutes > 0)) return;
+		const delay = Math.min(MAX_DELAY, Math.max(0, this.lastEdit + minutes * 60_000 - this.now()));
+		this.editTimer = this.win.setTimeout(() => {
+			this.editTimer = undefined;
+			this.lastEdit = undefined;
+			void this.run('commit');
+		}, delay);
+	}
+
+	private interval(kind: 'commit' | 'pull' | 'push'): number {
+		const settings = this.settings.get();
+		if (kind === 'push') return settings.differentIntervalCommitAndPush && !settings.disablePush ? settings.autoPushInterval : 0;
+		return kind === 'pull' ? settings.autoPullInterval : settings.autoSaveInterval;
 	}
 
 	private async run(kind: 'commit' | 'pull' | 'push'): Promise<void> {
 		this.timers.delete(kind);
-		if (!this.active) return;
+		if (!this.active || !(this.interval(kind) > 0)) return;
 		const snapshot = this.service.snapshot;
 		// A stopped merge or rebase waits for the user; the conflict status row already says so.
 		const waiting = !!snapshot.operation || !!snapshot.status?.conflicted.length;
@@ -89,7 +109,7 @@ export class Automatics {
 			// Runs that did not happen still move the clock, so a blocked repository is not retried in a tight loop.
 			if (!this.stopped && !this.timers.has(kind)) {
 				const settings = this.settings.get();
-				const minutes = kind === 'pull' ? settings.autoPullInterval : kind === 'push' ? settings.autoPushInterval : settings.autoSaveInterval;
+				const minutes = this.interval(kind);
 				const once = kind === 'commit' && settings.autoBackupAfterFileChange;
 				if (this.active && !once) this.arm(kind, nextDelay(minutes, this.now(), this.now()));
 			}

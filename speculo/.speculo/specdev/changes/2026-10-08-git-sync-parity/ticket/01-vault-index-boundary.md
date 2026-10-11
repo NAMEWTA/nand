@@ -26,6 +26,10 @@ shared_path_owners: ["<Path>main.js</Path> => 2026-10-08-git-sync-parity::T-01�
 
 # Ticket T-01: 阻止库外暂存混入并明确私有数据同步范围
 
+<!-- ACTUAL-CODE-REVIEW:START -->
+2026-10-11 实际代码审查：[T-01.md](../evidence/T-01.md)。本票下文保留原规划合同与基线；当前实现、修复、验证及未验证条件以该记录为准。原“仅规划／未授权实施／必须提交”的阶段约束不适用于用户已授权的本次工作区审查；提交与远程操作仍未执行。
+<!-- ACTUAL-CODE-REVIEW:END -->
+
 - Ticket：<Path>{roots.state}/specdev/changes/2026-10-08-git-sync-parity/ticket/01-vault-index-boundary.md</Path>
 - 总控Map：<Path>{roots.state}/specdev/changes/2026-10-08-git-sync-parity/tickets-map.md</Path>
 - Spec：<Path>{roots.state}/specdev/changes/2026-10-08-git-sync-parity/spec.md</Path>
@@ -37,7 +41,7 @@ shared_path_owners: ["<Path>main.js</Path> => 2026-10-08-git-sync-parity::T-01�
 
 **目标与可观察产出：** vault处于更大repo时任何NAND提交都不带入其它项目暂存。 stage/unstage/discard/markResolved也不越出vault边界。
 
-**当前事实：** stageAll限cwd但commit和stagedPaths读全index，现有文档声称只提交vault需实证。
+**规划时基线：** stageAll限cwd但commit和stagedPaths读全index，现有文档声称只提交vault需实证。
 
 **来源：** AC-004, AC-005；issue #134；<Path>{roots.state}/specdev/changes/2026-10-08-git-sync-parity/reference-analysis.md</Path>。深度 deep：涉及持久数据/公共接口/进程或权限的跨边界合同，必须记录恢复与兼容。
 

@@ -1,0 +1,106 @@
+{
+  "finding": "R-101",
+  "ticket": "Browser T12 Coze",
+  "status": "implemented-local-verification-live-gate-unverified",
+  "reference": {
+    "commit": "b6b83ca90f0f67fbf25a676e7a8f6b8b34327800",
+    "license": "MIT",
+    "files": [
+      "src/providers/coze/definition.ts",
+      "selectors.ts",
+      "strategy.ts",
+      "native-copy.ts",
+      "native-copy.test.ts",
+      "index.ts"
+    ],
+    "official": [
+      "https://www.coze.cn/",
+      "https://docs.coze.cn/developer_guides_list_chat_messages"
+    ],
+    "limit": "Public homepage and documented developer API do not establish authenticated website DOM/private API/permalink. No upstream acquisition adapter exists."
+  },
+  "plan": [
+    "Scoped native DOM/copy with explicit message/parent/conversation identities; incomplete coverage remains partial",
+    "Allow both official hosts at connection but bind one exact origin for the session; host changes require recheck",
+    "No network acquisition hook for DOM-only policy",
+    "Original answer can be revealed only on the captured page generation until a canonical permalink contract is proved",
+    "Real-account and live website gates remain unverified"
+  ],
+  "implemented": [
+    "Optional response policy means DOM-only sessions install no ProviderResponses hook; direct throwing-debugger test proves the boundary.",
+    "Exact official host binding is persisted as a canonical homepage in the existing target officialUrl; explicit prepare can rebind it, ordinary preview/send cannot. Native check exposed cross-session empty-conversation host adoption and this was fixed.",
+    "Scoped public conversation/message/parent attributes, private exclusions and code-copy exclusion; no manufactured IDs, website-copy/DOM coverage stays partial.",
+    "No permalink is invented; exact original-page generation, profile and message identity are required for source reveal.",
+    "Missing conversation identity with visible messages blocks readiness across shared native providers."
+  ],
+  "verification": {
+    "targeted": 45,
+    "buildBeforeHostFix": 4233628,
+    "browserLint": "passed after host-origin fix",
+    "architecture": 923,
+    "i18n": 3419,
+    "docs": 552,
+    "notices": "12 npm/62 crates current",
+    "nativeExploratory": [
+      {
+        "path": "C:/Users/cdewta/AppData/Local/Temp/nand-coze-workspace-929337745de14819838c4b3483ec31c9/evidence",
+        "checks": 22,
+        "error": "Probe counted host native automation debugger listeners as provider response observation; replaced with direct no-debugger-access unit test and no-history-request native check."
+      },
+      {
+        "path": "C:/Users/cdewta/AppData/Local/Temp/nand-coze-final-d47c62a89ab142d2838a43fd3771fd9a/evidence",
+        "checks": 57,
+        "error": "Native host switch allowed a newly connected session to adopt another official host for an empty conversation; persisted verified origin and explicit-recheck boundary added.",
+        "passedScope": "Three complete native submissions with partial copy captures, long/repeated paragraphs, clipboard unchanged, missing conversation blocks, theme/width18, no/wrong-copy fallback, new context."
+      }
+    ],
+    "build": 4233844,
+    "styles": 750459,
+    "fullLint": "passed after final host fix",
+    "bundle": "4233844 within4234240; startup97.1KB/94inputs, browser144.5KB +258.6KB deferred",
+    "nativeSingle": {
+      "path": "C:\\Users\\cdewta\\AppData\\Local\\Temp\\nand-coze-host-final-f07c31843fb14ea1ba6aceb6643718a1/evidence",
+      "checks": 72,
+      "failed": 0,
+      "artifactBytes": 4233844,
+      "scope": "Production build in real Windows Obsidian1.13.7/Electron43.3, local official-origin fixtures only. Three rounds, long/repeated content, missing conversation blocks, native copy and clipboard fingerprint unchanged, code-copy exclusion, no/wrong-copy partial fallback, both official hosts and explicit recheck, pause/restart/module/UI18/touch44."
+    },
+    "nativeMixed": {
+      "path": "C:\\Users\\cdewta\\AppData\\Local\\Temp\\nand-coze-mixed-bcb44cfcb2844741ac639e7a1a858042/evidence",
+      "checks": 76,
+      "failed": 0,
+      "artifactBytes": 4233844,
+      "scope": "Production DS/Kimi/Coze local fixtures: three mixed rounds retain API-complete and Coze partial-copy states, exact captured original-page reveals, partial failure/resend, takeover/bridge exclusion, comparison/recollect and restart."
+    },
+    "full": {
+      "passed": 696,
+      "skipped": 4,
+      "filesPassed": 155,
+      "filesSkipped": 1,
+      "seconds": 125.98,
+      "log": "C:\\Users\\cdewta\\AppData\\Local\\Temp/nand-review-coze-full.log"
+    }
+  },
+  "next": [
+    "MiniMax T13 in progress; actual accounts and website permalink remain unverified"
+  ],
+  "runtimeClarification": {
+    "installerVersion": "1.13.7",
+    "electron": "43.3.0",
+    "note": "Electron app.getVersion() reports the installed runtime. Fresh profiles automatically downloaded an app update; application logs below prove restart loaded a newer renderer app. Prior single version labels did not distinguish these.",
+    "updates": [
+      {
+        "log": "C:\\Users\\cdewta\\AppData\\Local\\Temp\\nand-coze-host-final-f07c31843fb14ea1ba6aceb6643718a1\\evidence\\application.log",
+        "rendererUpdateLoaded": [
+          "1.14.4"
+        ]
+      },
+      {
+        "log": "C:\\Users\\cdewta\\AppData\\Local\\Temp\\nand-coze-mixed-bcb44cfcb2844741ac639e7a1a858042\\evidence\\application.log",
+        "rendererUpdateLoaded": [
+          "1.14.4"
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,45 @@
+{
+  "finding": "R-103",
+  "ticket": "Browser T14 prompt library",
+  "status": "implemented-local-verification",
+  "scope": [
+    "Markdown CRUD and explicit order",
+    "Persist task selection; immutable historical snapshots",
+    "Conflict guard, local deletion and native UI/restart checks"
+  ],
+  "remainingT14": [
+    "History search/rename/delete/switch/detail",
+    "Scoped Markdown export",
+    "MAIW v3 strict validation/idempotent import/dry preview/export"
+  ],
+  "verification": {
+    "build": 4242177,
+    "styles": 750459,
+    "targeted": 22,
+    "full": {
+      "passed": 702,
+      "skipped": 4,
+      "filesPassed": 156,
+      "filesSkipped": 1,
+      "seconds": 126.27,
+      "started": "2026-10-11 03:54:04 Asia/Shanghai",
+      "log": "C:\\Users\\cdewta\\AppData\\Local\\Temp\\nand-review-prompts-full.log"
+    },
+    "lint": "passed",
+    "architecture": 927,
+    "i18n": 3437,
+    "docs": 552,
+    "bundle": "4242177 within4242432; startup97.1KB/94inputs, browser146.7KB +264.5KB deferred",
+    "native": {
+      "path": "C:/Users/cdewta/AppData/Local/Temp/nand-prompts-visual-eeff88a9e18d4e50bf6febf1b251d473/evidence",
+      "checks": 61,
+      "failed": 0
+    },
+    "priorNative": {
+      "path": "C:/Users/cdewta/AppData/Local/Temp/nand-prompts-workspace-c00684b754244473aa666d07152bcd1c/evidence",
+      "checks": 25,
+      "failed": 1,
+      "reason": "Probe read the tombstone before asynchronous save completion. File later contained correct body and nand-deleted:true; wait for action completion added. Production code unchanged."
+    }
+  }
+}

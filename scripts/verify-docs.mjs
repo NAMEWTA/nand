@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
 import fs from 'node:fs';
 import path from 'node:path';
+import { documentationKind as classify, referenceLinkBody } from './documentation-policy.mjs';
 
 const root = process.cwd();
 const state = 'speculo/.speculo/specdev';
@@ -28,26 +29,10 @@ function walk(directory) {
 walk(root);
 
 // Local scratch files (for example `temp/`) are git-ignored and never part of the documentation inventory.
-const ignored = spawnSync('git', ['check-ignore', '--stdin'], { cwd: root, input: files.join('\n'), encoding: 'utf8' });
+const ignored = spawnSync('git', ['check-ignore', '-z', '--stdin'], { cwd: root, input: files.join('\0') + '\0', encoding: 'utf8' });
 if (ignored.status === 0) {
-	const skip = new Set(ignored.stdout.split(/\r?\n/).filter(Boolean).map(posix));
+	const skip = new Set(ignored.stdout.split('\0').filter(Boolean).map(posix));
 	files.splice(0, files.length, ...files.filter((file) => !skip.has(file)));
-}
-
-function classify(rel) {
-	if (rel === 'NOTICE' || rel === 'THIRD-PARTY-NOTICES.md' || rel.endsWith('/NOTICE.txt') || rel.startsWith('docs/third-party/') || rel.startsWith('docs/licensing/')) return 'license';
-	if (rel.startsWith('docs/')) return 'user-doc';
-	if (/^(README|CHANGELOG|CLAUDE|SECURITY)(\.ZH)?\.md$/.test(rel)) return 'root-entry';
-	if (rel === 'AGENTS.md') return 'agent-handbook';
-	if (rel.startsWith('.agents/')) return 'skill';
-	if (rel.startsWith('speculo/.speculo/specdev/')) return 'specdev';
-	if (rel.startsWith('speculo/')) return 'speculo-tooling';
-	if (rel.startsWith('src/')) return 'source-template';
-	if (rel.startsWith('scripts/')) return 'script-doc';
-	if (rel.startsWith('test/')) return 'test-fixture';
-	if (rel.startsWith('processes/')) return 'process-doc';
-	if (rel.startsWith('.github/')) return 'workflow-doc';
-	return '';
 }
 
 const counts = new Map();
@@ -70,7 +55,7 @@ for (const required of [
 	if (!fs.existsSync(path.join(root, required))) failures.push(`missing required documentation asset ${required}`);
 }
 
-const strict = new Set(['user-doc', 'root-entry', 'skill', 'specdev', 'source-template', 'agent-handbook']);
+const strict = new Set(['user-doc', 'root-entry', 'skill', 'specdev', 'specdev-change', 'source-template', 'agent-handbook']);
 let links = 0;
 let external = 0;
 const headings = new Map();
@@ -178,7 +163,7 @@ for (const [file, body] of bodies) {
 	}
 	for (const destination of definitions.values()) checkTarget(file, destination);
 	for (const match of body.matchAll(/!?\[[^\]\n]*\]\(([^)\n]+)\)/g)) checkTarget(file, match[1]);
-	for (const match of body.matchAll(/!?\[([^\]\n]*)\]\[([^\]\n]*)\]/g)) {
+	for (const match of referenceLinkBody(file, body).matchAll(/!?\[([^\]\n]*)\]\[([^\]\n]*)\]/g)) {
 		const key = labelKey(match[2] || match[1]);
 		const destination = definitions.get(key);
 		if (!destination) failures.push(`${file}: unresolved reference link [${match[1]}][${match[2]}]`);
@@ -224,7 +209,7 @@ for (const file of ['docs/data.md', 'docs/privacy.md', 'docs/records.md', 'docs/
 		failures.push(`${file}: data path ${match[0]} is not in source`);
 	}
 }
-// User docs, root entries and SpecDev stay bilingual. Skills under `.agents/` are Chinese only.
+// User docs, root entries and permanent SpecDev knowledge stay bilingual; Change artifacts keep their source language.
 const bilingual = new Set(['user-doc', 'root-entry', 'specdev']);
 const english = '[English](';
 const chinese = '[简体中文](';

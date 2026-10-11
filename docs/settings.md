@@ -8,7 +8,7 @@ NAND settings live in the workbench: click the gear at the bottom of the left ic
 |---|---|
 | General | Language, bottom status, module switches, and help for the copy-reference commands |
 | Appearance | Global style, Markdown heading and bold looks, reading line height, accent colors, copy/paste/reset (see [Appearance](appearance.md)) |
-| Dashboard, Browser, Editor, Agents, Archives, Automations, Git sync | Settings of each feature; a page is listed only while its feature is on |
+| Dashboard, Browser, News, Editor, Agents, Archives, Automations, Git sync | Settings of each feature; a page is listed only while its feature is on |
 | About | A short description of NAND and a link to the author's GitHub profile |
 
 Icon settings are on the Icons page of the rail, not in the settings categories. Notifications and Records have no settings page of their own.
@@ -32,12 +32,13 @@ Each feature is a module with its own switch under **General → Modules**.
 | Switch | Feature | Default | Platforms |
 |---|---|---|---|
 | Browser | Web pages in the workbench, web shortcuts, browser tools for agents | On | Desktop; on phones, pages open in the system browser |
+| News | Feed collection, analysis, event reading and briefs ([News](news.md)) | Off | Desktop; saved Markdown is readable on mobile |
 | Dashboard | Boards, widgets, to-dos and [Records](records.md) | On | Desktop and mobile |
 | Editor | [Comments](comments.md) on Markdown notes | On | Desktop and mobile |
 | Archives | People and companies ([Archives](contacts.md)) | On | Desktop and mobile |
 | Agents | Terminal sessions and coding agents ([Agent workbench](agent-workbench.md)) | On | Desktop only |
 | Icons | File, folder and interface icons ([Icons](icons.md)) | On | Desktop and mobile |
-| Notifications | Inbox for automation results and reminders | On | Desktop and mobile |
+| Notifications | Inbox for automation results, news results and reminders | On | Desktop and mobile |
 | Automations | Manual and scheduled actions | On | Desktop and mobile; agents and scripts need desktop |
 | Git sync | Commit, pull and push with the system Git ([Git sync](sync.md)) | Off | Desktop only |
 
@@ -69,8 +70,8 @@ CLI agents, the terminal helper and the built-in browser need the desktop app. P
 
 | File | Contents |
 |---|---|
-| `.nand/config/settings.json` | Settings shared by every device of the vault: language, module switches, appearance, dashboard, browser, comments, archives, Git sync behavior |
-| `.nand/config/devices/<device-id>.json` | Settings of one device: Agents settings, and the Git program and repository folder of Git sync |
+| `.nand/config/settings.json` | Settings shared by every device of the vault: language, module switches, appearance, dashboard, browser, news sources and reading policies, comments, archives, Git sync behavior |
+| `.nand/config/devices/<device-id>.json` | Settings of one device: Agents settings, News agent selection and working directory, and the Git program and repository folder of Git sync |
 
 A vault with no settings files starts from defaults. The device id is kept in Obsidian's local storage, not in the vault, so copying a vault does not make two computers the same device.
 

@@ -88,6 +88,8 @@ export interface ShellAccess {
 	savedPages(feature: WorkbenchFeature): SavedPage[];
 	/** Show a kept resource page in whichever workbench holds it; false when none does. */
 	activateResource(feature: WorkbenchFeature, resourceId: string): Promise<boolean>;
+	/** Close kept pages for a resource, including pages that have not mounted yet. */
+	closeResource(feature: WorkbenchFeature, resourceId: string): Promise<void>;
 }
 
 /** Palette commands that exist only while the module is active. */

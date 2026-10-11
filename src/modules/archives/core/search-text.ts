@@ -294,9 +294,11 @@ export function searchHit(doc: SearchDocument, search: string, scope: 'record' |
 	const term = firstTerm(fragment.lower, terms);
 	let line: number | undefined;
 	if (fragment.source === 'body' && fragment.located && fragment.lineAt) {
-		const at = fragment.located.toLocaleLowerCase().indexOf(term);
+		const lower = fragment.located.toLocaleLowerCase();
+		const at = lower.indexOf(term);
 		// A term found only after collapsing a line break is not a line in the original file.
-		if (at >= 0) line = fragment.lineAt(at);
+		// Case folding can expand characters, so its offsets are reliable only at equal lengths.
+		if (at >= 0 && lower.length === fragment.located.length) line = fragment.lineAt(at);
 	}
 	return { source: fragment.source, snippet: window(fragment.text, term), line };
 }

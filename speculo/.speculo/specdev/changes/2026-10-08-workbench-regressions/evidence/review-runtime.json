@@ -1,0 +1,1677 @@
+{
+  "passed": true,
+  "rows": [
+    {
+      "name": "medium-single-click-dashboard",
+      "passed": true
+    },
+    {
+      "name": "medium-single-click-automations",
+      "passed": true
+    },
+    {
+      "name": "medium-single-click-contacts",
+      "passed": true
+    },
+    {
+      "name": "rail-restores-archive-section",
+      "passed": true
+    },
+    {
+      "name": "medium-visible-rail-not-hidden-by-modal-semantics",
+      "passed": true
+    },
+    {
+      "name": "medium-keyboard-reaches-rail",
+      "passed": true,
+      "detail": [
+        {
+          "rail": false,
+          "panel": true,
+          "tag": "DIV"
+        },
+        {
+          "rail": false,
+          "panel": true,
+          "tag": "DIV"
+        },
+        {
+          "rail": true,
+          "panel": false,
+          "tag": "BUTTON"
+        },
+        {
+          "rail": false,
+          "panel": true,
+          "tag": "BUTTON"
+        },
+        {
+          "rail": false,
+          "panel": true,
+          "tag": "DIV"
+        },
+        {
+          "rail": false,
+          "panel": true,
+          "tag": "DIV"
+        },
+        {
+          "rail": true,
+          "panel": false,
+          "tag": "BUTTON"
+        },
+        {
+          "rail": false,
+          "panel": true,
+          "tag": "BUTTON"
+        },
+        {
+          "rail": false,
+          "panel": true,
+          "tag": "DIV"
+        },
+        {
+          "rail": false,
+          "panel": true,
+          "tag": "DIV"
+        },
+        {
+          "rail": true,
+          "panel": false,
+          "tag": "BUTTON"
+        },
+        {
+          "rail": false,
+          "panel": true,
+          "tag": "BUTTON"
+        },
+        {
+          "rail": false,
+          "panel": true,
+          "tag": "DIV"
+        },
+        {
+          "rail": false,
+          "panel": true,
+          "tag": "DIV"
+        }
+      ]
+    },
+    {
+      "name": "medium-escape-close",
+      "passed": true
+    },
+    {
+      "name": "scrim-closes-without-page-click",
+      "passed": true
+    },
+    {
+      "name": "narrow-shift-tab-stays-in-dialog",
+      "passed": true
+    },
+    {
+      "name": "narrow-tab-cycle-stays-in-dialog",
+      "passed": true,
+      "detail": [
+        {
+          "inside": true,
+          "tag": "BUTTON"
+        },
+        {
+          "inside": true,
+          "tag": "BUTTON"
+        },
+        {
+          "inside": true,
+          "tag": "DIV"
+        },
+        {
+          "inside": true,
+          "tag": "DIV"
+        },
+        {
+          "inside": true,
+          "tag": "BUTTON"
+        },
+        {
+          "inside": true,
+          "tag": "BUTTON"
+        },
+        {
+          "inside": true,
+          "tag": "DIV"
+        },
+        {
+          "inside": true,
+          "tag": "DIV"
+        },
+        {
+          "inside": true,
+          "tag": "BUTTON"
+        },
+        {
+          "inside": true,
+          "tag": "BUTTON"
+        },
+        {
+          "inside": true,
+          "tag": "DIV"
+        },
+        {
+          "inside": true,
+          "tag": "DIV"
+        },
+        {
+          "inside": true,
+          "tag": "BUTTON"
+        },
+        {
+          "inside": true,
+          "tag": "BUTTON"
+        },
+        {
+          "inside": true,
+          "tag": "DIV"
+        },
+        {
+          "inside": true,
+          "tag": "DIV"
+        }
+      ]
+    },
+    {
+      "name": "narrow-focus-restored",
+      "passed": true
+    },
+    {
+      "name": "workbench-module-icons",
+      "passed": true,
+      "detail": [
+        {
+          "width": 32,
+          "height": 32,
+          "left": 532,
+          "nameLeft": 564,
+          "toggleLeft": 1009.109375,
+          "nameRight": 993.109375,
+          "connected": true
+        },
+        {
+          "width": 32,
+          "height": 32,
+          "left": 532,
+          "nameLeft": 564,
+          "toggleLeft": 1105.421875,
+          "nameRight": 1089.421875,
+          "connected": true
+        },
+        {
+          "width": 32,
+          "height": 32,
+          "left": 532,
+          "nameLeft": 564,
+          "toggleLeft": 942.234375,
+          "nameRight": 926.234375,
+          "connected": true
+        },
+        {
+          "width": 32,
+          "height": 32,
+          "left": 532,
+          "nameLeft": 564,
+          "toggleLeft": 1126.25,
+          "nameRight": 1110.25,
+          "connected": true
+        },
+        {
+          "width": 32,
+          "height": 32,
+          "left": 532,
+          "nameLeft": 564,
+          "toggleLeft": 1097.734375,
+          "nameRight": 1081.734375,
+          "connected": true
+        },
+        {
+          "width": 32,
+          "height": 32,
+          "left": 532,
+          "nameLeft": 564,
+          "toggleLeft": 1107.21875,
+          "nameRight": 1091.21875,
+          "connected": true
+        },
+        {
+          "width": 32,
+          "height": 32,
+          "left": 532,
+          "nameLeft": 564,
+          "toggleLeft": 1149.984375,
+          "nameRight": 1133.984375,
+          "connected": true
+        },
+        {
+          "width": 32,
+          "height": 32,
+          "left": 532,
+          "nameLeft": 564,
+          "toggleLeft": 1005.296875,
+          "nameRight": 989.296875,
+          "connected": true
+        },
+        {
+          "width": 32,
+          "height": 32,
+          "left": 532,
+          "nameLeft": 564,
+          "toggleLeft": 1178,
+          "nameRight": 1162,
+          "connected": true
+        },
+        {
+          "width": 32,
+          "height": 32,
+          "left": 532,
+          "nameLeft": 564,
+          "toggleLeft": 1178,
+          "nameRight": 1162,
+          "connected": true
+        }
+      ]
+    },
+    {
+      "name": "workbench-icons-system-850",
+      "passed": true,
+      "detail": [
+        {
+          "width": 32,
+          "height": 32,
+          "left": 136,
+          "nameLeft": 168,
+          "toggleLeft": 590.953125,
+          "nameRight": 574.953125,
+          "connected": true
+        },
+        {
+          "width": 32,
+          "height": 32,
+          "left": 136,
+          "nameLeft": 168,
+          "toggleLeft": 636,
+          "nameRight": 620,
+          "connected": true
+        },
+        {
+          "width": 32,
+          "height": 32,
+          "left": 136,
+          "nameLeft": 168,
+          "toggleLeft": 516,
+          "nameRight": 500,
+          "connected": true
+        },
+        {
+          "width": 32,
+          "height": 32,
+          "left": 136,
+          "nameLeft": 168,
+          "toggleLeft": 632.515625,
+          "nameRight": 616.515625,
+          "connected": true
+        },
+        {
+          "width": 32,
+          "height": 32,
+          "left": 136,
+          "nameLeft": 168,
+          "toggleLeft": 670.28125,
+          "nameRight": 654.28125,
+          "connected": true
+        },
+        {
+          "width": 32,
+          "height": 32,
+          "left": 136,
+          "nameLeft": 168,
+          "toggleLeft": 624,
+          "nameRight": 608,
+          "connected": true
+        },
+        {
+          "width": 32,
+          "height": 32,
+          "left": 136,
+          "nameLeft": 168,
+          "toggleLeft": 672,
+          "nameRight": 656,
+          "connected": true
+        },
+        {
+          "width": 32,
+          "height": 32,
+          "left": 136,
+          "nameLeft": 168,
+          "toggleLeft": 552,
+          "nameRight": 536,
+          "connected": true
+        },
+        {
+          "width": 32,
+          "height": 32,
+          "left": 136,
+          "nameLeft": 168,
+          "toggleLeft": 714,
+          "nameRight": 698,
+          "connected": true
+        },
+        {
+          "width": 32,
+          "height": 32,
+          "left": 136,
+          "nameLeft": 168,
+          "toggleLeft": 725.6875,
+          "nameRight": 709.6875,
+          "connected": true
+        }
+      ]
+    },
+    {
+      "name": "workbench-icons-language-system-850",
+      "passed": true
+    },
+    {
+      "name": "workbench-icons-system-1400",
+      "passed": true,
+      "detail": [
+        {
+          "width": 32,
+          "height": 32,
+          "left": 532,
+          "nameLeft": 564,
+          "toggleLeft": 1009.109375,
+          "nameRight": 993.109375,
+          "connected": true
+        },
+        {
+          "width": 32,
+          "height": 32,
+          "left": 532,
+          "nameLeft": 564,
+          "toggleLeft": 1105.421875,
+          "nameRight": 1089.421875,
+          "connected": true
+        },
+        {
+          "width": 32,
+          "height": 32,
+          "left": 532,
+          "nameLeft": 564,
+          "toggleLeft": 942.234375,
+          "nameRight": 926.234375,
+          "connected": true
+        },
+        {
+          "width": 32,
+          "height": 32,
+          "left": 532,
+          "nameLeft": 564,
+          "toggleLeft": 1126.25,
+          "nameRight": 1110.25,
+          "connected": true
+        },
+        {
+          "width": 32,
+          "height": 32,
+          "left": 532,
+          "nameLeft": 564,
+          "toggleLeft": 1097.734375,
+          "nameRight": 1081.734375,
+          "connected": true
+        },
+        {
+          "width": 32,
+          "height": 32,
+          "left": 532,
+          "nameLeft": 564,
+          "toggleLeft": 1107.21875,
+          "nameRight": 1091.21875,
+          "connected": true
+        },
+        {
+          "width": 32,
+          "height": 32,
+          "left": 532,
+          "nameLeft": 564,
+          "toggleLeft": 1149.984375,
+          "nameRight": 1133.984375,
+          "connected": true
+        },
+        {
+          "width": 32,
+          "height": 32,
+          "left": 532,
+          "nameLeft": 564,
+          "toggleLeft": 1005.296875,
+          "nameRight": 989.296875,
+          "connected": true
+        },
+        {
+          "width": 32,
+          "height": 32,
+          "left": 532,
+          "nameLeft": 564,
+          "toggleLeft": 1178,
+          "nameRight": 1162,
+          "connected": true
+        },
+        {
+          "width": 32,
+          "height": 32,
+          "left": 532,
+          "nameLeft": 564,
+          "toggleLeft": 1178,
+          "nameRight": 1162,
+          "connected": true
+        }
+      ]
+    },
+    {
+      "name": "workbench-icons-language-system-1400",
+      "passed": true
+    },
+    {
+      "name": "workbench-icons-claude-code-850",
+      "passed": true,
+      "detail": [
+        {
+          "width": 32,
+          "height": 32,
+          "left": 136,
+          "nameLeft": 168,
+          "toggleLeft": 590.953125,
+          "nameRight": 574.953125,
+          "connected": true
+        },
+        {
+          "width": 32,
+          "height": 32,
+          "left": 136,
+          "nameLeft": 168,
+          "toggleLeft": 636,
+          "nameRight": 620,
+          "connected": true
+        },
+        {
+          "width": 32,
+          "height": 32,
+          "left": 136,
+          "nameLeft": 168,
+          "toggleLeft": 516,
+          "nameRight": 500,
+          "connected": true
+        },
+        {
+          "width": 32,
+          "height": 32,
+          "left": 136,
+          "nameLeft": 168,
+          "toggleLeft": 632.515625,
+          "nameRight": 616.515625,
+          "connected": true
+        },
+        {
+          "width": 32,
+          "height": 32,
+          "left": 136,
+          "nameLeft": 168,
+          "toggleLeft": 670.28125,
+          "nameRight": 654.28125,
+          "connected": true
+        },
+        {
+          "width": 32,
+          "height": 32,
+          "left": 136,
+          "nameLeft": 168,
+          "toggleLeft": 624,
+          "nameRight": 608,
+          "connected": true
+        },
+        {
+          "width": 32,
+          "height": 32,
+          "left": 136,
+          "nameLeft": 168,
+          "toggleLeft": 672,
+          "nameRight": 656,
+          "connected": true
+        },
+        {
+          "width": 32,
+          "height": 32,
+          "left": 136,
+          "nameLeft": 168,
+          "toggleLeft": 552,
+          "nameRight": 536,
+          "connected": true
+        },
+        {
+          "width": 32,
+          "height": 32,
+          "left": 136,
+          "nameLeft": 168,
+          "toggleLeft": 714,
+          "nameRight": 698,
+          "connected": true
+        },
+        {
+          "width": 32,
+          "height": 32,
+          "left": 136,
+          "nameLeft": 168,
+          "toggleLeft": 725.6875,
+          "nameRight": 709.6875,
+          "connected": true
+        }
+      ]
+    },
+    {
+      "name": "workbench-icons-language-claude-code-850",
+      "passed": true
+    },
+    {
+      "name": "workbench-icons-claude-code-1400",
+      "passed": true,
+      "detail": [
+        {
+          "width": 32,
+          "height": 32,
+          "left": 532,
+          "nameLeft": 564,
+          "toggleLeft": 1009.109375,
+          "nameRight": 993.109375,
+          "connected": true
+        },
+        {
+          "width": 32,
+          "height": 32,
+          "left": 532,
+          "nameLeft": 564,
+          "toggleLeft": 1105.421875,
+          "nameRight": 1089.421875,
+          "connected": true
+        },
+        {
+          "width": 32,
+          "height": 32,
+          "left": 532,
+          "nameLeft": 564,
+          "toggleLeft": 942.234375,
+          "nameRight": 926.234375,
+          "connected": true
+        },
+        {
+          "width": 32,
+          "height": 32,
+          "left": 532,
+          "nameLeft": 564,
+          "toggleLeft": 1126.25,
+          "nameRight": 1110.25,
+          "connected": true
+        },
+        {
+          "width": 32,
+          "height": 32,
+          "left": 532,
+          "nameLeft": 564,
+          "toggleLeft": 1097.734375,
+          "nameRight": 1081.734375,
+          "connected": true
+        },
+        {
+          "width": 32,
+          "height": 32,
+          "left": 532,
+          "nameLeft": 564,
+          "toggleLeft": 1107.21875,
+          "nameRight": 1091.21875,
+          "connected": true
+        },
+        {
+          "width": 32,
+          "height": 32,
+          "left": 532,
+          "nameLeft": 564,
+          "toggleLeft": 1149.984375,
+          "nameRight": 1133.984375,
+          "connected": true
+        },
+        {
+          "width": 32,
+          "height": 32,
+          "left": 532,
+          "nameLeft": 564,
+          "toggleLeft": 1005.296875,
+          "nameRight": 989.296875,
+          "connected": true
+        },
+        {
+          "width": 32,
+          "height": 32,
+          "left": 532,
+          "nameLeft": 564,
+          "toggleLeft": 1178,
+          "nameRight": 1162,
+          "connected": true
+        },
+        {
+          "width": 32,
+          "height": 32,
+          "left": 532,
+          "nameLeft": 564,
+          "toggleLeft": 1178,
+          "nameRight": 1162,
+          "connected": true
+        }
+      ]
+    },
+    {
+      "name": "workbench-icons-language-claude-code-1400",
+      "passed": true
+    },
+    {
+      "name": "workbench-icons-eye-care-850",
+      "passed": true,
+      "detail": [
+        {
+          "width": 32,
+          "height": 32,
+          "left": 136,
+          "nameLeft": 168,
+          "toggleLeft": 590.953125,
+          "nameRight": 574.953125,
+          "connected": true
+        },
+        {
+          "width": 32,
+          "height": 32,
+          "left": 136,
+          "nameLeft": 168,
+          "toggleLeft": 636,
+          "nameRight": 620,
+          "connected": true
+        },
+        {
+          "width": 32,
+          "height": 32,
+          "left": 136,
+          "nameLeft": 168,
+          "toggleLeft": 516,
+          "nameRight": 500,
+          "connected": true
+        },
+        {
+          "width": 32,
+          "height": 32,
+          "left": 136,
+          "nameLeft": 168,
+          "toggleLeft": 632.515625,
+          "nameRight": 616.515625,
+          "connected": true
+        },
+        {
+          "width": 32,
+          "height": 32,
+          "left": 136,
+          "nameLeft": 168,
+          "toggleLeft": 670.28125,
+          "nameRight": 654.28125,
+          "connected": true
+        },
+        {
+          "width": 32,
+          "height": 32,
+          "left": 136,
+          "nameLeft": 168,
+          "toggleLeft": 624,
+          "nameRight": 608,
+          "connected": true
+        },
+        {
+          "width": 32,
+          "height": 32,
+          "left": 136,
+          "nameLeft": 168,
+          "toggleLeft": 672,
+          "nameRight": 656,
+          "connected": true
+        },
+        {
+          "width": 32,
+          "height": 32,
+          "left": 136,
+          "nameLeft": 168,
+          "toggleLeft": 552,
+          "nameRight": 536,
+          "connected": true
+        },
+        {
+          "width": 32,
+          "height": 32,
+          "left": 136,
+          "nameLeft": 168,
+          "toggleLeft": 714,
+          "nameRight": 698,
+          "connected": true
+        },
+        {
+          "width": 32,
+          "height": 32,
+          "left": 136,
+          "nameLeft": 168,
+          "toggleLeft": 725.6875,
+          "nameRight": 709.6875,
+          "connected": true
+        }
+      ]
+    },
+    {
+      "name": "workbench-icons-language-eye-care-850",
+      "passed": true
+    },
+    {
+      "name": "workbench-icons-eye-care-1400",
+      "passed": true,
+      "detail": [
+        {
+          "width": 32,
+          "height": 32,
+          "left": 532,
+          "nameLeft": 564,
+          "toggleLeft": 1009.109375,
+          "nameRight": 993.109375,
+          "connected": true
+        },
+        {
+          "width": 32,
+          "height": 32,
+          "left": 532,
+          "nameLeft": 564,
+          "toggleLeft": 1105.421875,
+          "nameRight": 1089.421875,
+          "connected": true
+        },
+        {
+          "width": 32,
+          "height": 32,
+          "left": 532,
+          "nameLeft": 564,
+          "toggleLeft": 942.234375,
+          "nameRight": 926.234375,
+          "connected": true
+        },
+        {
+          "width": 32,
+          "height": 32,
+          "left": 532,
+          "nameLeft": 564,
+          "toggleLeft": 1126.25,
+          "nameRight": 1110.25,
+          "connected": true
+        },
+        {
+          "width": 32,
+          "height": 32,
+          "left": 532,
+          "nameLeft": 564,
+          "toggleLeft": 1097.734375,
+          "nameRight": 1081.734375,
+          "connected": true
+        },
+        {
+          "width": 32,
+          "height": 32,
+          "left": 532,
+          "nameLeft": 564,
+          "toggleLeft": 1107.21875,
+          "nameRight": 1091.21875,
+          "connected": true
+        },
+        {
+          "width": 32,
+          "height": 32,
+          "left": 532,
+          "nameLeft": 564,
+          "toggleLeft": 1149.984375,
+          "nameRight": 1133.984375,
+          "connected": true
+        },
+        {
+          "width": 32,
+          "height": 32,
+          "left": 532,
+          "nameLeft": 564,
+          "toggleLeft": 1005.296875,
+          "nameRight": 989.296875,
+          "connected": true
+        },
+        {
+          "width": 32,
+          "height": 32,
+          "left": 532,
+          "nameLeft": 564,
+          "toggleLeft": 1178,
+          "nameRight": 1162,
+          "connected": true
+        },
+        {
+          "width": 32,
+          "height": 32,
+          "left": 532,
+          "nameLeft": 564,
+          "toggleLeft": 1178,
+          "nameRight": 1162,
+          "connected": true
+        }
+      ]
+    },
+    {
+      "name": "workbench-icons-language-eye-care-1400",
+      "passed": true
+    },
+    {
+      "name": "native-module-icons",
+      "passed": true,
+      "detail": [
+        {
+          "width": 32,
+          "height": 32,
+          "left": 297,
+          "nameLeft": 329,
+          "toggleLeft": 560.5,
+          "nameRight": 544.5,
+          "connected": true
+        },
+        {
+          "width": 32,
+          "height": 32,
+          "left": 297,
+          "nameLeft": 329,
+          "toggleLeft": 560.5,
+          "nameRight": 544.5,
+          "connected": true
+        },
+        {
+          "width": 32,
+          "height": 32,
+          "left": 297,
+          "nameLeft": 329,
+          "toggleLeft": 560.5,
+          "nameRight": 544.5,
+          "connected": true
+        },
+        {
+          "width": 32,
+          "height": 32,
+          "left": 297,
+          "nameLeft": 329,
+          "toggleLeft": 560.5,
+          "nameRight": 544.5,
+          "connected": true
+        },
+        {
+          "width": 32,
+          "height": 32,
+          "left": 297,
+          "nameLeft": 329,
+          "toggleLeft": 560.5,
+          "nameRight": 544.5,
+          "connected": true
+        },
+        {
+          "width": 32,
+          "height": 32,
+          "left": 297,
+          "nameLeft": 329,
+          "toggleLeft": 560.5,
+          "nameRight": 544.5,
+          "connected": true
+        },
+        {
+          "width": 32,
+          "height": 32,
+          "left": 297,
+          "nameLeft": 329,
+          "toggleLeft": 560.5,
+          "nameRight": 544.5,
+          "connected": true
+        },
+        {
+          "width": 32,
+          "height": 32,
+          "left": 297,
+          "nameLeft": 329,
+          "toggleLeft": 560.5,
+          "nameRight": 544.5,
+          "connected": true
+        },
+        {
+          "width": 32,
+          "height": 32,
+          "left": 297,
+          "nameLeft": 329,
+          "toggleLeft": 560.5,
+          "nameRight": 544.5,
+          "connected": true
+        },
+        {
+          "width": 32,
+          "height": 32,
+          "left": 297,
+          "nameLeft": 329,
+          "toggleLeft": 584.5,
+          "nameRight": 568.5,
+          "connected": true
+        }
+      ]
+    },
+    {
+      "name": "native-settings-window",
+      "passed": true,
+      "detail": {
+        "url": "about:blank",
+        "same": false,
+        "targets": [
+          {
+            "type": "page",
+            "url": "about:blank",
+            "title": "设置 - vault - Obsidian 1.13.7"
+          },
+          {
+            "type": "page",
+            "url": "app://obsidian.md/index.html",
+            "title": "NAND - vault - Obsidian 1.13.7"
+          },
+          {
+            "type": "worker",
+            "url": "",
+            "title": ""
+          },
+          {
+            "type": "worker",
+            "url": "",
+            "title": ""
+          }
+        ]
+      }
+    },
+    {
+      "name": "native-icons-system-700",
+      "passed": true,
+      "detail": [
+        {
+          "width": 32,
+          "height": 32,
+          "left": 272,
+          "nameLeft": 304,
+          "toggleLeft": 448,
+          "nameRight": 432,
+          "connected": true
+        },
+        {
+          "width": 32,
+          "height": 32,
+          "left": 272,
+          "nameLeft": 304,
+          "toggleLeft": 448,
+          "nameRight": 432,
+          "connected": true
+        },
+        {
+          "width": 32,
+          "height": 32,
+          "left": 272,
+          "nameLeft": 304,
+          "toggleLeft": 448,
+          "nameRight": 432,
+          "connected": true
+        },
+        {
+          "width": 32,
+          "height": 32,
+          "left": 272,
+          "nameLeft": 304,
+          "toggleLeft": 448,
+          "nameRight": 432,
+          "connected": true
+        },
+        {
+          "width": 32,
+          "height": 32,
+          "left": 272,
+          "nameLeft": 304,
+          "toggleLeft": 448,
+          "nameRight": 432,
+          "connected": true
+        },
+        {
+          "width": 32,
+          "height": 32,
+          "left": 272,
+          "nameLeft": 304,
+          "toggleLeft": 448,
+          "nameRight": 432,
+          "connected": true
+        },
+        {
+          "width": 32,
+          "height": 32,
+          "left": 272,
+          "nameLeft": 304,
+          "toggleLeft": 448,
+          "nameRight": 432,
+          "connected": true
+        },
+        {
+          "width": 32,
+          "height": 32,
+          "left": 272,
+          "nameLeft": 304,
+          "toggleLeft": 448,
+          "nameRight": 432,
+          "connected": true
+        },
+        {
+          "width": 32,
+          "height": 32,
+          "left": 272,
+          "nameLeft": 304,
+          "toggleLeft": 448,
+          "nameRight": 432,
+          "connected": true
+        },
+        {
+          "width": 32,
+          "height": 32,
+          "left": 272,
+          "nameLeft": 304,
+          "toggleLeft": 472,
+          "nameRight": 456,
+          "connected": true
+        }
+      ]
+    },
+    {
+      "name": "shared-module-label-system-700",
+      "passed": true
+    },
+    {
+      "name": "native-icons-system-1100",
+      "passed": true,
+      "detail": [
+        {
+          "width": 32,
+          "height": 32,
+          "left": 365,
+          "nameLeft": 397,
+          "toggleLeft": 673,
+          "nameRight": 657,
+          "connected": true
+        },
+        {
+          "width": 32,
+          "height": 32,
+          "left": 365,
+          "nameLeft": 397,
+          "toggleLeft": 673,
+          "nameRight": 657,
+          "connected": true
+        },
+        {
+          "width": 32,
+          "height": 32,
+          "left": 365,
+          "nameLeft": 397,
+          "toggleLeft": 673,
+          "nameRight": 657,
+          "connected": true
+        },
+        {
+          "width": 32,
+          "height": 32,
+          "left": 365,
+          "nameLeft": 397,
+          "toggleLeft": 673,
+          "nameRight": 657,
+          "connected": true
+        },
+        {
+          "width": 32,
+          "height": 32,
+          "left": 365,
+          "nameLeft": 397,
+          "toggleLeft": 673,
+          "nameRight": 657,
+          "connected": true
+        },
+        {
+          "width": 32,
+          "height": 32,
+          "left": 365,
+          "nameLeft": 397,
+          "toggleLeft": 673,
+          "nameRight": 657,
+          "connected": true
+        },
+        {
+          "width": 32,
+          "height": 32,
+          "left": 365,
+          "nameLeft": 397,
+          "toggleLeft": 673,
+          "nameRight": 657,
+          "connected": true
+        },
+        {
+          "width": 32,
+          "height": 32,
+          "left": 365,
+          "nameLeft": 397,
+          "toggleLeft": 673,
+          "nameRight": 657,
+          "connected": true
+        },
+        {
+          "width": 32,
+          "height": 32,
+          "left": 365,
+          "nameLeft": 397,
+          "toggleLeft": 673,
+          "nameRight": 657,
+          "connected": true
+        },
+        {
+          "width": 32,
+          "height": 32,
+          "left": 365,
+          "nameLeft": 397,
+          "toggleLeft": 697,
+          "nameRight": 681,
+          "connected": true
+        }
+      ]
+    },
+    {
+      "name": "shared-module-label-system-1100",
+      "passed": true
+    },
+    {
+      "name": "native-icons-claude-code-700",
+      "passed": true,
+      "detail": [
+        {
+          "width": 32,
+          "height": 32,
+          "left": 272,
+          "nameLeft": 304,
+          "toggleLeft": 448,
+          "nameRight": 432,
+          "connected": true
+        },
+        {
+          "width": 32,
+          "height": 32,
+          "left": 272,
+          "nameLeft": 304,
+          "toggleLeft": 448,
+          "nameRight": 432,
+          "connected": true
+        },
+        {
+          "width": 32,
+          "height": 32,
+          "left": 272,
+          "nameLeft": 304,
+          "toggleLeft": 448,
+          "nameRight": 432,
+          "connected": true
+        },
+        {
+          "width": 32,
+          "height": 32,
+          "left": 272,
+          "nameLeft": 304,
+          "toggleLeft": 448,
+          "nameRight": 432,
+          "connected": true
+        },
+        {
+          "width": 32,
+          "height": 32,
+          "left": 272,
+          "nameLeft": 304,
+          "toggleLeft": 448,
+          "nameRight": 432,
+          "connected": true
+        },
+        {
+          "width": 32,
+          "height": 32,
+          "left": 272,
+          "nameLeft": 304,
+          "toggleLeft": 448,
+          "nameRight": 432,
+          "connected": true
+        },
+        {
+          "width": 32,
+          "height": 32,
+          "left": 272,
+          "nameLeft": 304,
+          "toggleLeft": 448,
+          "nameRight": 432,
+          "connected": true
+        },
+        {
+          "width": 32,
+          "height": 32,
+          "left": 272,
+          "nameLeft": 304,
+          "toggleLeft": 448,
+          "nameRight": 432,
+          "connected": true
+        },
+        {
+          "width": 32,
+          "height": 32,
+          "left": 272,
+          "nameLeft": 304,
+          "toggleLeft": 448,
+          "nameRight": 432,
+          "connected": true
+        },
+        {
+          "width": 32,
+          "height": 32,
+          "left": 272,
+          "nameLeft": 304,
+          "toggleLeft": 472,
+          "nameRight": 456,
+          "connected": true
+        }
+      ]
+    },
+    {
+      "name": "shared-module-label-claude-code-700",
+      "passed": true
+    },
+    {
+      "name": "native-icons-claude-code-1100",
+      "passed": true,
+      "detail": [
+        {
+          "width": 32,
+          "height": 32,
+          "left": 365,
+          "nameLeft": 397,
+          "toggleLeft": 673,
+          "nameRight": 657,
+          "connected": true
+        },
+        {
+          "width": 32,
+          "height": 32,
+          "left": 365,
+          "nameLeft": 397,
+          "toggleLeft": 673,
+          "nameRight": 657,
+          "connected": true
+        },
+        {
+          "width": 32,
+          "height": 32,
+          "left": 365,
+          "nameLeft": 397,
+          "toggleLeft": 673,
+          "nameRight": 657,
+          "connected": true
+        },
+        {
+          "width": 32,
+          "height": 32,
+          "left": 365,
+          "nameLeft": 397,
+          "toggleLeft": 673,
+          "nameRight": 657,
+          "connected": true
+        },
+        {
+          "width": 32,
+          "height": 32,
+          "left": 365,
+          "nameLeft": 397,
+          "toggleLeft": 673,
+          "nameRight": 657,
+          "connected": true
+        },
+        {
+          "width": 32,
+          "height": 32,
+          "left": 365,
+          "nameLeft": 397,
+          "toggleLeft": 673,
+          "nameRight": 657,
+          "connected": true
+        },
+        {
+          "width": 32,
+          "height": 32,
+          "left": 365,
+          "nameLeft": 397,
+          "toggleLeft": 673,
+          "nameRight": 657,
+          "connected": true
+        },
+        {
+          "width": 32,
+          "height": 32,
+          "left": 365,
+          "nameLeft": 397,
+          "toggleLeft": 673,
+          "nameRight": 657,
+          "connected": true
+        },
+        {
+          "width": 32,
+          "height": 32,
+          "left": 365,
+          "nameLeft": 397,
+          "toggleLeft": 673,
+          "nameRight": 657,
+          "connected": true
+        },
+        {
+          "width": 32,
+          "height": 32,
+          "left": 365,
+          "nameLeft": 397,
+          "toggleLeft": 697,
+          "nameRight": 681,
+          "connected": true
+        }
+      ]
+    },
+    {
+      "name": "shared-module-label-claude-code-1100",
+      "passed": true
+    },
+    {
+      "name": "native-icons-eye-care-700",
+      "passed": true,
+      "detail": [
+        {
+          "width": 32,
+          "height": 32,
+          "left": 272,
+          "nameLeft": 304,
+          "toggleLeft": 448,
+          "nameRight": 432,
+          "connected": true
+        },
+        {
+          "width": 32,
+          "height": 32,
+          "left": 272,
+          "nameLeft": 304,
+          "toggleLeft": 448,
+          "nameRight": 432,
+          "connected": true
+        },
+        {
+          "width": 32,
+          "height": 32,
+          "left": 272,
+          "nameLeft": 304,
+          "toggleLeft": 448,
+          "nameRight": 432,
+          "connected": true
+        },
+        {
+          "width": 32,
+          "height": 32,
+          "left": 272,
+          "nameLeft": 304,
+          "toggleLeft": 448,
+          "nameRight": 432,
+          "connected": true
+        },
+        {
+          "width": 32,
+          "height": 32,
+          "left": 272,
+          "nameLeft": 304,
+          "toggleLeft": 448,
+          "nameRight": 432,
+          "connected": true
+        },
+        {
+          "width": 32,
+          "height": 32,
+          "left": 272,
+          "nameLeft": 304,
+          "toggleLeft": 448,
+          "nameRight": 432,
+          "connected": true
+        },
+        {
+          "width": 32,
+          "height": 32,
+          "left": 272,
+          "nameLeft": 304,
+          "toggleLeft": 448,
+          "nameRight": 432,
+          "connected": true
+        },
+        {
+          "width": 32,
+          "height": 32,
+          "left": 272,
+          "nameLeft": 304,
+          "toggleLeft": 448,
+          "nameRight": 432,
+          "connected": true
+        },
+        {
+          "width": 32,
+          "height": 32,
+          "left": 272,
+          "nameLeft": 304,
+          "toggleLeft": 448,
+          "nameRight": 432,
+          "connected": true
+        },
+        {
+          "width": 32,
+          "height": 32,
+          "left": 272,
+          "nameLeft": 304,
+          "toggleLeft": 472,
+          "nameRight": 456,
+          "connected": true
+        }
+      ]
+    },
+    {
+      "name": "shared-module-label-eye-care-700",
+      "passed": true
+    },
+    {
+      "name": "native-icons-eye-care-1100",
+      "passed": true,
+      "detail": [
+        {
+          "width": 32,
+          "height": 32,
+          "left": 365,
+          "nameLeft": 397,
+          "toggleLeft": 673,
+          "nameRight": 657,
+          "connected": true
+        },
+        {
+          "width": 32,
+          "height": 32,
+          "left": 365,
+          "nameLeft": 397,
+          "toggleLeft": 673,
+          "nameRight": 657,
+          "connected": true
+        },
+        {
+          "width": 32,
+          "height": 32,
+          "left": 365,
+          "nameLeft": 397,
+          "toggleLeft": 673,
+          "nameRight": 657,
+          "connected": true
+        },
+        {
+          "width": 32,
+          "height": 32,
+          "left": 365,
+          "nameLeft": 397,
+          "toggleLeft": 673,
+          "nameRight": 657,
+          "connected": true
+        },
+        {
+          "width": 32,
+          "height": 32,
+          "left": 365,
+          "nameLeft": 397,
+          "toggleLeft": 673,
+          "nameRight": 657,
+          "connected": true
+        },
+        {
+          "width": 32,
+          "height": 32,
+          "left": 365,
+          "nameLeft": 397,
+          "toggleLeft": 673,
+          "nameRight": 657,
+          "connected": true
+        },
+        {
+          "width": 32,
+          "height": 32,
+          "left": 365,
+          "nameLeft": 397,
+          "toggleLeft": 673,
+          "nameRight": 657,
+          "connected": true
+        },
+        {
+          "width": 32,
+          "height": 32,
+          "left": 365,
+          "nameLeft": 397,
+          "toggleLeft": 673,
+          "nameRight": 657,
+          "connected": true
+        },
+        {
+          "width": 32,
+          "height": 32,
+          "left": 365,
+          "nameLeft": 397,
+          "toggleLeft": 673,
+          "nameRight": 657,
+          "connected": true
+        },
+        {
+          "width": 32,
+          "height": 32,
+          "left": 365,
+          "nameLeft": 397,
+          "toggleLeft": 697,
+          "nameRight": 681,
+          "connected": true
+        }
+      ]
+    },
+    {
+      "name": "shared-module-label-eye-care-1100",
+      "passed": true
+    },
+    {
+      "name": "dropdown-zh-38",
+      "passed": true,
+      "detail": {
+        "text": "仅限移动设备",
+        "value": "mobile",
+        "width": 120,
+        "required": 119.60000000000001,
+        "changes": 0,
+        "parent": "<div class=\"clickable-icon extra-setting-button iconic-indicator\" tabindex=\"0\"><svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" class=\"svg-icon lucide-tablet-smartphone\"><rect x=\"3\" y=\"8\" width=\"10\" height=\"14\" rx=\"2\"></rect><path d=\"M5 4a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v16a2 2 0 0 1-2 2h-2.4\"></path><path d=\"M8 18h.01\"></path></svg></div><select class=\"dropdown\" data-nand-i18n-options=\"true\" style=\"--dropdown-fitted-width: 120px;\"><option value=\"on\" data-nand-i18n-text=\"[&quot;iconic.settings.values.on&quot;,null,&quot;开启&quot;]\">开启</option><option value=\"desktop\" data-nand-i18n-text=\"[&quot;iconic.settings.values.desktop&quot;,null,&quot;仅限桌面&quot;]\">仅限桌面</option><option value=\"mobile\" data-nand-i18n-text=\"[&quot;iconic.settings.values.mobile&quot;,null,&quot;仅限移动设备&quot;]\">仅限移动设备</option><option value=\"off\" data-nand-i18n-text=\"[&quot;iconic.settings.values.off&quot;,null,&quot;关闭&quot;]\">关闭</option></select><select class=\"dropdown is-measuring\" aria-hidden=\"true\" tabindex=\"-1\"><option>仅限移动设备</option></select>"
+      }
+    },
+    {
+      "name": "dropdown-en-39",
+      "passed": true,
+      "detail": {
+        "text": "Mobile only",
+        "value": "mobile",
+        "width": 117,
+        "required": 115.62636718750001,
+        "changes": 0,
+        "parent": "<div class=\"clickable-icon extra-setting-button iconic-indicator\" tabindex=\"0\"><svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" class=\"svg-icon lucide-tablet-smartphone\"><rect x=\"3\" y=\"8\" width=\"10\" height=\"14\" rx=\"2\"></rect><path d=\"M5 4a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v16a2 2 0 0 1-2 2h-2.4\"></path><path d=\"M8 18h.01\"></path></svg></div><select class=\"dropdown\" data-nand-i18n-options=\"true\" style=\"--dropdown-fitted-width: 117px;\"><option value=\"on\" data-nand-i18n-text=\"[&quot;iconic.settings.values.on&quot;,null,&quot;On&quot;]\">On</option><option value=\"desktop\" data-nand-i18n-text=\"[&quot;iconic.settings.values.desktop&quot;,null,&quot;Desktop only&quot;]\">Desktop only</option><option value=\"mobile\" data-nand-i18n-text=\"[&quot;iconic.settings.values.mobile&quot;,null,&quot;Mobile only&quot;]\">Mobile only</option><option value=\"off\" data-nand-i18n-text=\"[&quot;iconic.settings.values.off&quot;,null,&quot;Off&quot;]\">Off</option></select><select class=\"dropdown is-measuring\" aria-hidden=\"true\" tabindex=\"-1\"><option>Mobile only</option></select>"
+      }
+    },
+    {
+      "name": "dropdown-zh-40",
+      "passed": true,
+      "detail": {
+        "text": "仅限移动设备",
+        "value": "mobile",
+        "width": 120,
+        "required": 119.60000000000001,
+        "changes": 0,
+        "parent": "<div class=\"clickable-icon extra-setting-button iconic-indicator\" tabindex=\"0\"><svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" class=\"svg-icon lucide-tablet-smartphone\"><rect x=\"3\" y=\"8\" width=\"10\" height=\"14\" rx=\"2\"></rect><path d=\"M5 4a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v16a2 2 0 0 1-2 2h-2.4\"></path><path d=\"M8 18h.01\"></path></svg></div><select class=\"dropdown\" data-nand-i18n-options=\"true\" style=\"--dropdown-fitted-width: 120px;\"><option value=\"on\" data-nand-i18n-text=\"[&quot;iconic.settings.values.on&quot;,null,&quot;开启&quot;]\">开启</option><option value=\"desktop\" data-nand-i18n-text=\"[&quot;iconic.settings.values.desktop&quot;,null,&quot;仅限桌面&quot;]\">仅限桌面</option><option value=\"mobile\" data-nand-i18n-text=\"[&quot;iconic.settings.values.mobile&quot;,null,&quot;仅限移动设备&quot;]\">仅限移动设备</option><option value=\"off\" data-nand-i18n-text=\"[&quot;iconic.settings.values.off&quot;,null,&quot;关闭&quot;]\">关闭</option></select><select class=\"dropdown is-measuring\" aria-hidden=\"true\" tabindex=\"-1\"><option>仅限移动设备</option></select>"
+      }
+    },
+    {
+      "name": "language-does-not-save-icon-preferences",
+      "passed": true
+    },
+    {
+      "name": "disposed-dropdown-not-refreshed",
+      "passed": true
+    },
+    {
+      "name": "reopened-dropdown-keeps-value",
+      "passed": true
+    },
+    {
+      "name": "rule-picker-localized-value-preserved",
+      "passed": true
+    },
+    {
+      "name": "popout-overlay-medium",
+      "passed": true
+    },
+    {
+      "name": "popout-escape-and-focus",
+      "passed": true
+    },
+    {
+      "name": "no-host-errors",
+      "passed": true,
+      "detail": []
+    }
+  ],
+  "screenshotDirectory": "C:\\Users\\cdewta\\AppData\\Local\\Temp/nand-workbench-review-4712f6c5f52e42ed8d7d25e2a2856c05/evidence",
+  "remaining": [],
+  "sourceState": "Uncommitted workspace"
+}

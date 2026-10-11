@@ -31,13 +31,13 @@ export class DurableState<T> {
 	private tail: Promise<void> = Promise.resolve();
 	private error?: Error;
 	private closed = false;
-	private recoveryId = crypto.randomUUID();
 	constructor(
 		private storage: TextStorage,
 		private path: string,
 		private empty: () => T,
 		private decode: (value: unknown) => T,
 		private changed: () => void,
+		private readonly recoveryPath = `.nand/recovery/drafts/${crypto.randomUUID()}.json`,
 	) {
 		this.value = empty();
 		this.baseline = empty();
@@ -55,21 +55,24 @@ export class DurableState<T> {
 	private async recover(error: unknown): Promise<void> {
 		this.failure(error);
 		try {
-			await ensureDirectory(this.storage, '.nand/recovery/drafts');
-			await this.storage.write(
-				`.nand/recovery/drafts/${this.recoveryId}.json`,
-				JSON.stringify({
-					path: this.path,
-					at: new Date().toISOString(),
-					baseline: this.baseline,
-					draft: this.value,
-					error: this.error?.message,
-				}),
-			);
+			await this.writeRecovery();
 		} catch (recoveryError) {
 			this.state = { ...this.state, error: `${this.state.error}; recovery: ${String(recoveryError)}` };
 			this.changed();
 		}
+	}
+	private async writeRecovery(): Promise<void> {
+		await ensureDirectory(this.storage, this.recoveryPath.split('/').slice(0, -1).join('/'));
+		await this.storage.write(this.recoveryPath, JSON.stringify({
+			path: this.path, at: new Date().toISOString(), baseline: this.baseline, draft: this.value, error: this.error?.message,
+		}));
+	}
+	/** Preserve newer observations after a failed primary save, without retrying that write or clearing its error. */
+	async preserveDraft(): Promise<void> {
+		if (this.closed) throw new Error('Repository is closed');
+		let failure: Error | undefined;
+		await this.enqueue(() => this.writeRecovery(), error => { failure = error instanceof Error ? error : new Error(String(error)); this.failure(error); });
+		if (failure) throw failure;
 	}
 	load(): Promise<void> {
 		if (!this.loading) this.loading = this.sync();
@@ -90,9 +93,11 @@ export class DurableState<T> {
 		});
 		return settled;
 	}
-	sync(): Promise<void> {
-		if (this.closed) return Promise.resolve();
-		return this.enqueue(async () => {
+	async sync(throwOnError = false): Promise<void> {
+		if (this.closed) return;
+		let failed = false;
+		let failure: unknown;
+		await this.enqueue(async () => {
 			const remote = await this.read();
 			this.value = threeWayMerge(this.baseline, this.value, remote);
 			this.baseline = structuredClone(remote);
@@ -100,7 +105,8 @@ export class DurableState<T> {
 			if (saved) this.error = undefined;
 			this.state = { status: saved ? 'saved' : 'unsaved', ...(this.error ? { error: this.error.message } : {}) };
 			this.changed();
-		}, (error) => this.failure(error));
+		}, (error) => { this.failure(error); failed = true; failure = error; });
+		if (failed && throwOnError) throw failure;
 	}
 	save(): void {
 		if (this.closed) {

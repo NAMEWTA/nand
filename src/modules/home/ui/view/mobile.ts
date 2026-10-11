@@ -1,18 +1,20 @@
 import { observeDashboardPromise } from '../save-feedback';
 import { localizedAttributes, localizedText } from '../../../../ui/primitives/localized-dom';
-import { setIcon } from 'obsidian';
+import { Platform, setIcon } from 'obsidian';
 import { t } from '../../../../shared/i18n/index';
-import { renderSidebarCalendar } from '../calendar/calendar-widget';
-import { renderSidebarExpenseWidget } from '../expense/expense-widget';
-import { renderSidebarHabitWidget } from '../habit/habit-widget';
 import { renderQuickActions } from '../notes/quick-actions';
-import { renderSidebarPomodoro } from '../renderer/refresh-sidebar-weather-widget';
 import { unmountDashboardPanelsIn } from '../renderer/render-context';
-import { renderSidebarReading } from '../renderer/render-sidebar-countdown';
 import { createDashboardSettingsAccess } from '../settings-access';
 import { showConfirmDialog } from '../ui/confirm-dialog';
 import { getRecentDocs, renderRecentDocs } from '../ui/recent';
-import { renderSidebarLunarWidget } from '../widgets/lunar-widget';
+import { legacyBoardMembers } from '../../core/board/widget-members';
+import { widgetProviderKey } from '../../core/board/widget-registry';
+import { homeServices } from '../../services/instances';
+import { bindBuiltinWidgetEnvironment } from '../widgets/builtin-context';
+import { mountWidgetHost } from '../widgets/WidgetHost';
+import { widgetMemberLabel } from '../widgets/widget-label';
+import { renderBoardQuickActions } from './quick-actions-widget';
+import { renderBoardSkills } from './skills-widget';
 import type { DashboardSurface } from './dashboard-surface';
 
 export function renderMobileActions(this: DashboardSurface, bannerEl: HTMLElement): void {
@@ -61,7 +63,7 @@ export function renderMobileWidgetBar(this: DashboardSurface, container: HTMLEle
 	const bar = container.createDiv({ cls: 'dashboard-mobile-widget-bar' });
 
 	// Thin strip: collapsed state, tap to expand tabs
-	const strip = bar.createDiv({ cls: 'dashboard-mobile-widget-strip' });
+	const strip = bar.createEl('button', { cls: 'dashboard-mobile-widget-strip', attr: { type: 'button', ...localizedAttributes('home.widget.manage', undefined, 'aria-label') } });
 	strip.createDiv({ cls: 'dashboard-mobile-widget-strip-hint' });
 	strip.addEventListener('click', (e) => {
 		e.stopPropagation();
@@ -75,45 +77,30 @@ export function renderMobileWidgetBar(this: DashboardSurface, container: HTMLEle
 	// Tab row: hidden by default, revealed by tapping strip
 	const tabs = bar.createDiv({ cls: 'dashboard-mobile-widget-tabs' });
 
-	const widgets: Array<{
-		key: 'pomodoro' | 'reading' | 'lunar' | 'calendar' | 'habit' | 'expense';
-		label: string;
-		icon: string;
-	}> = [
-		{ key: 'lunar', label: t('mobile.lunar'), icon: 'moon' },
-		...(this.plugin.settings.widgetCalendarEnabled
-			? [{ key: 'calendar' as const, label: t('mobile.calendar'), icon: 'calendar' }]
-			: []),
-		{ key: 'pomodoro', label: t('mobile.pomodoro'), icon: 'hourglass' },
-		...(this.plugin.settings.widgetHabitEnabled
-			? [{ key: 'habit' as const, label: t('mobile.habit'), icon: 'check-circle-2' }]
-			: []),
-		...(this.plugin.settings.widgetExpenseEnabled
-			? [{ key: 'expense' as const, label: t('mobile.expense'), icon: 'wallet' }]
-			: []),
-		{ key: 'reading', label: t('mobile.reading'), icon: 'book-open' },
-	];
+	const members = this.data?.widgets ?? legacyBoardMembers(this.plugin.settings, true, Platform.isPhone);
 
 	bar.createDiv({ cls: 'dashboard-mobile-widget-panel' });
 
-	for (const w of widgets) {
+	for (const member of members) {
+		const kind = homeServices.widgets?.byKey.get(widgetProviderKey(member.provider, member.kind))?.kind;
+		const label = widgetMemberLabel(member, kind);
 		const btn = tabs.createEl('button', {
 			cls: 'dashboard-mobile-widget-btn',
-			attr: localizedAttributes(`mobile.${w.key}`),
+			attr: { type: 'button', 'aria-label': label, title: label },
 		});
-		setIcon(btn, w.icon);
+		setIcon(btn, kind?.icon ?? 'puzzle');
 
 		btn.addEventListener('click', (e) => {
 			e.stopPropagation();
-			if (this.mobileWidgetExpanded === w.key) {
+			if (this.mobileWidgetExpanded === member.memberId) {
 				this.mobileWidgetExpanded = null;
 			} else {
-				this.mobileWidgetExpanded = w.key;
+				this.mobileWidgetExpanded = member.memberId;
 			}
 			this.refreshMobileWidgetPanel(bar);
 		});
 
-		btn.dataset.widgetKey = w.key;
+		btn.dataset.widgetMember = member.memberId;
 	}
 
 	this.refreshMobileWidgetPanel(bar);
@@ -127,14 +114,18 @@ export function refreshMobileWidgetPanel(this: DashboardSurface, bar: HTMLElemen
 
 	// Toggle strip active state
 	strip.classList.toggle('dashboard-mobile-widget-strip--active', this.mobileWidgetTabsOpen);
+	strip.setAttribute('aria-expanded', String(this.mobileWidgetTabsOpen));
 
 	// Toggle tabs visibility
 	tabs.classList.toggle('dashboard-mobile-widget-tabs--open', this.mobileWidgetTabsOpen);
+	(tabs as HTMLElement).inert = !this.mobileWidgetTabsOpen;
 
 	// Update button active states
 	tabs.querySelectorAll('.dashboard-mobile-widget-btn').forEach((btn) => {
 		const el = btn as HTMLElement;
-		el.classList.toggle('active', el.dataset.widgetKey === this.mobileWidgetExpanded);
+		const active = el.dataset.widgetMember === this.mobileWidgetExpanded;
+		el.classList.toggle('active', active);
+		el.setAttribute('aria-pressed', String(active));
 	});
 
 	// Render panel content
@@ -148,28 +139,20 @@ export function refreshMobileWidgetPanel(this: DashboardSurface, bar: HTMLElemen
 
 	panel.addClass('dashboard-mobile-widget-panel--open');
 
-	if (this.mobileWidgetExpanded === 'pomodoro' && this.pomodoroService) {
-		renderSidebarPomodoro(panel, this.pomodoroService, this.plugin.settings, this.app);
-	} else if (this.mobileWidgetExpanded === 'reading' && this.readingService) {
-		renderSidebarReading(panel, this.readingService);
-	} else if (this.mobileWidgetExpanded === 'lunar') {
-		renderSidebarLunarWidget(panel, this.holidayData, this.app);
-	} else if (this.mobileWidgetExpanded === 'calendar') {
-		// The tab tap is explicit intent: autoLoad skips the phone deferred-scan
-		// placeholder so the grid (and its dots) appear without a second tap.
-		renderSidebarCalendar(
-			panel,
-			this.plugin.settings,
-			this.app,
-			(file, line) => this.openNote(file, undefined, line),
-			{ autoLoad: true },
-			createDashboardSettingsAccess(this.plugin),
-		);
-	} else if (this.mobileWidgetExpanded === 'habit') {
-		renderSidebarHabitWidget(panel, this.app);
-	} else if (this.mobileWidgetExpanded === 'expense') {
-		renderSidebarExpenseWidget(panel, this.app);
-	}
+	const members = this.data?.widgets ?? legacyBoardMembers(this.plugin.settings, true, Platform.isPhone);
+	const member = members.find(item => item.memberId === this.mobileWidgetExpanded);
+	if (!member) return;
+	const root = panel.createDiv({ cls: 'dashboard-sidebar-widget-mount' });
+	root.dataset.widgetMember = member.memberId;
+	const kind = homeServices.widgets?.byKey.get(widgetProviderKey(member.provider, member.kind))?.kind;
+	mountWidgetHost(root, member, kind, this.plugin.settings.dashboardFile, () => this.plugin.openSettings(), context => {
+		bindBuiltinWidgetEnvironment(context, {
+			app: this.app, settings: this.plugin.settings, settingsAccess: createDashboardSettingsAccess(this.plugin),
+			pomodoro: this.pomodoroService ?? undefined, reading: this.readingService ?? undefined, holidayData: this.holidayData,
+			openNote: (file, line) => this.openNote(file, undefined, line), calendarAutoLoad: true,
+			renderQuickActions: host => renderBoardQuickActions(this, host), renderSkills: (host, ctx) => renderBoardSkills(this, host, ctx),
+		});
+	});
 }
 
 export function openMobileDrawer(this: DashboardSurface, type: 'quickActions' | 'recent'): void {

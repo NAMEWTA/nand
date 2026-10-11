@@ -1,6 +1,18 @@
 /* Independent browser: native leaves and modal share one stable guest surface. */
 .nand-browser-view, .nand-browser-panel { height: 100%; min-height: 0; }
 .nand-browser-view { position: relative; }
+.nand-browser-profile { min-width: 0; max-width: 12rem; }
+.nand-browser-profile-settings .setting-item-control { min-width: 0; flex-wrap: wrap; }
+.nand-browser-profile-settings .setting-item-name { overflow-wrap: anywhere; }
+.nand-browser-profile-settings :is(input, button), .nand-browser-profile { min-height: var(--nand-control-height); }
+@media (pointer: coarse) {
+	.nand-browser-profile-settings :is(input, button), .nand-browser-profile { min-height: var(--nand-touch-target); }
+}
+@media (max-width: 600px) {
+	.nand-browser-profile-settings .setting-item { flex-direction: column; align-items: stretch; }
+	.nand-browser-profile-settings .setting-item-info { margin: 0; }
+	.nand-browser-profile-settings .setting-item-control { justify-content: flex-start; }
+}
 .nand-browser-panel { display: flex; flex-direction: column; background: var(--nand-surface); color: var(--text-normal); }
 .nand-browser-toolbar { flex: 0 0 auto; gap: var(--size-4-1); padding: var(--size-4-2); border-bottom: var(--nand-border);
 	flex-wrap: wrap;

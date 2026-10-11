@@ -47,7 +47,7 @@ function patchNode(doc: Document, node: Node | null, base: unknown, next: unknow
 	}
 	if (isSeq(node) && Array.isArray(base) && Array.isArray(next)) {
 		// Named/identified entries keep their unknown attributes when moved.
-		const key = (v: unknown): unknown => (record(v) ? (v.id ?? v.target ?? v.name) : v);
+		const key = (v: unknown): unknown => (record(v) ? (v.id ?? v.memberId ?? v.target ?? v.name) : v);
 		const used = new Set<number>();
 		node.items = next.map((value, index) => {
 			let old = base.findIndex((v, i) => !used.has(i) && equal(key(v), key(value)));

@@ -1,3 +1,7 @@
+import { analysisAnswer, analysisRow, factAnswer, promptMaterialIds } from '../../../../test/news/analysis';
+import { memoryNotes } from '../../../../test/news/notes';
+import { DOMParser } from 'linkedom';
+import { vi } from 'vitest';
 import assert from 'node:assert/strict';
 import { h, render } from 'preact';
 import { Setting } from '../../../../scripts/obsidian-stub';
@@ -7,7 +11,10 @@ import { flush, installDom, key } from '../../../../test/dom';
 import { registerMessages } from '../../../shared/i18n';
 import type { SettingsHandle } from '../../../shared/settings/store';
 import type { TextStorage } from '../../../shared/storage/ports';
-import { t } from '../../../shared/i18n';
+import { getLanguage, t } from '../../../shared/i18n';
+import { HeatChart } from './HeatChart';
+import { observeHeatHour, type HeatFact } from '../core/heat';
+import type { NewsHeatSnapshot } from '../core/model';
 import { messages } from '../i18n';
 import type { NewsSettings } from '../settings';
 import { newsActions } from '../services/news-actions';
@@ -16,6 +23,7 @@ import type { NewsMaterial } from '../core/model';
 import { briefPath } from '../platform/notes';
 import { EventDetail } from './EventDetail';
 import { NewsPage } from './NewsPage';
+import { newsPageState, type NewsSection } from './page-state';
 import { newsSettingsPage } from './settings-page';
 
 registerMessages(messages);
@@ -58,31 +66,31 @@ function settingsOf(initial: NewsSettings): SettingsHandle<NewsSettings> {
 async function settle(): Promise<void> {
 	for (let i = 0; i < 8; i++) await flush();
 }
+function mountPage(service: NewsService, actions: ReturnType<typeof newsActions>, root: HTMLElement) {
+	let state = newsPageState({ section: 'all' });
+	const paint = () => render(h(NewsPage, { service, actions, state, onState: patch => { state = newsPageState({ ...state, ...patch }); paint(); } }), root);
+	return { paint, section: (section: NewsSection) => { state = { ...state, section }; paint(); } };
+}
 
 test('the news page and settings turn collection on, import, favorite, analyze, and build the edition', async () => {
 	const store = memory();
-	const settings = settingsOf({ enabled: false, sources: [], views: [], interest: '', analysisEnabled: true, dailyEditionEnabled: false, autoRefresh: false });
-	const service = new NewsService(store, () => settings.get(), {
+	const settings = settingsOf({ enabled: false, sources: [], views: [], interest: '', analysisEnabled: true, writeDailyNote: false, autoRefresh: false });
+	const service = new NewsService(store, memoryNotes(store), () => settings.get(), {
 		fetch: async () => ({ status: 200, text: '<rss><channel><item><title>Hello</title><link>https://example.com/hello</link><pubDate>Fri, 09 Oct 2026 10:00:00 GMT</pubDate></item></channel></rss>' }),
 	});
 	const actions = newsActions(service, settings, () => ({
 		run: async (request) => {
-			const id = request.prompt.match(/id=(\S+)/)?.[1] ?? '';
-			return { status: 'complete' as const, text: JSON.stringify([{ id, axes: { relevance: 80, novelty: 70, quality: 60, impact: 50, clarity: 90 }, target: 'featured' }]) };
+			return { status: 'succeeded' as const, text: factAnswer(request.prompt) };
 		},
 	}));
 	await service.ready;
 	const root = document.createElement('div');
 	document.body.append(root);
-	const paint = () => render(h(NewsPage, { service, actions }), root);
+	const page = mountPage(service, actions, root), paint = page.paint;
 	paint();
 	await flush();
 	const button = (label: string) => [...root.querySelectorAll('button')].find((item) => item.textContent === label);
-	const opml = root.querySelector('textarea') as HTMLTextAreaElement;
-	opml.value = '<opml><body><outline text="Example" xmlUrl="https://example.com/feed.xml"/></body></opml>';
-	opml.dispatchEvent(new Event('input', { bubbles: true }));
-	await flush();
-	button(t('news.importOpml'))?.click();
+	await actions.importOpml('<opml><body><outline text="Example" xmlUrl="https://example.com/feed.xml"/></body></opml>');
 	await settle();
 	assert.equal(settings.get().enabled, true);
 	assert.equal(settings.get().sources.length, 1);
@@ -91,7 +99,8 @@ test('the news page and settings turn collection on, import, favorite, analyze, 
 	paint();
 	await flush();
 	assert.equal(root.querySelectorAll('li').length, 1);
-	const note = root.querySelector('li input') as HTMLInputElement;
+	button('Hello')?.click(); await flush();
+	const note = root.querySelector('.nand-news-detail textarea') as HTMLTextAreaElement;
 	note.value = 'keep this';
 	note.dispatchEvent(new Event('input', { bubbles: true }));
 	await flush();
@@ -102,7 +111,7 @@ test('the news page and settings turn collection on, import, favorite, analyze, 
 	await settle();
 	paint();
 	await flush();
-	assert.match(root.textContent ?? '', /complete/);
+	assert.ok(root.textContent?.includes(t('news.run.complete')));
 	const environment = globalThis as { document?: unknown; activeDocument?: unknown };
 	const savedDocument = environment.document;
 	const savedActive = environment.activeDocument;
@@ -110,24 +119,23 @@ test('the news page and settings turn collection on, import, favorite, analyze, 
 	environment.activeDocument = undefined;
 	try {
 		const before = Setting.created.length;
-		newsSettingsPage(settings, actions)(new El('div') as unknown as HTMLElement);
+		newsSettingsPage(settings, actions, async () => null)(new El('div') as unknown as HTMLElement, { keep: () => {}, refresh: () => {} });
 		const daily = Setting.created.slice(before).find((item) => item.name === t('news.settings.daily'));
 		await daily?.toggles[0]?.fire?.(true);
 	} finally {
 		environment.document = savedDocument;
 		environment.activeDocument = savedActive;
 	}
-	paint();
-	await flush();
-	assert.match(root.textContent ?? '', /edition|精选|\d{4}-\d{2}-\d{2}/);
+	page.section('today'); await flush();
+	assert.match(root.textContent ?? '', /edition|要闻|\d{4}-\d{2}-\d{2}/);
 	await service.shutdown();
 	render(null, root);
 });
 
 test('an original without the built-in browser opens in the system window', async () => {
 	const store = memory();
-	const settings = settingsOf({ enabled: true, sources: [], views: [], interest: '', analysisEnabled: false, dailyEditionEnabled: false, autoRefresh: false });
-	const service = new NewsService(store, () => settings.get(), {
+	const settings = settingsOf({ enabled: true, sources: [], views: [], interest: '', analysisEnabled: false, writeDailyNote: false, autoRefresh: false });
+	const service = new NewsService(store, memoryNotes(store), () => settings.get(), {
 		fetch: async () => ({ status: 200, text: '<rss><channel><item><title>标题</title><link>https://example.com/hello</link><pubDate>Fri, 09 Oct 2026 10:00:00 GMT</pubDate><description>摘要</description></item></channel></rss>' }),
 	});
 	const actions = newsActions(service, settings, () => undefined);
@@ -143,7 +151,7 @@ test('an original without the built-in browser opens in the system window', asyn
 	const root = document.createElement('div');
 	document.body.append(root);
 	try {
-		render(h(NewsPage, { service, actions }), root);
+		mountPage(service, actions, root).paint();
 		await flush();
 		[...root.querySelectorAll('button')].find((item) => item.textContent === '标题')?.click();
 		await flush();
@@ -159,8 +167,8 @@ test('an original without the built-in browser opens in the system window', asyn
 
 test('reader actions open the original, paste into an agent, write one brief, and hide the row', async () => {
 	const store = memory();
-	const settings = settingsOf({ enabled: false, sources: [], views: [], interest: '', analysisEnabled: true, dailyEditionEnabled: false, autoRefresh: false });
-	const service = new NewsService(store, () => settings.get(), {
+	const settings = settingsOf({ enabled: false, sources: [], views: [], interest: '', analysisEnabled: true, writeDailyNote: false, autoRefresh: false });
+	const service = new NewsService(store, memoryNotes(store), () => settings.get(), {
 		fetch: async () => ({ status: 200, text: '<rss><channel><item><title>标题</title><link>https://example.com/hello</link><pubDate>Fri, 09 Oct 2026 10:00:00 GMT</pubDate><description>摘要</description></item></channel></rss>' }),
 	});
 	const opened: string[] = [];
@@ -175,11 +183,11 @@ test('reader actions open the original, paste into an agent, write one brief, an
 	const actions = newsActions(service, settings, () => ({
 		run: async (request) => {
 			if (request.purpose === 'news-brief') {
-				const url = request.prompt.match(/url=(\S+)/)?.[1] ?? '';
-				return { status: 'complete' as const, text: `背景\n${url}\n影响\n时间线` };
+				const payload = JSON.parse(request.prompt.slice(request.prompt.lastIndexOf('\n\n') + 2)) as { sources: { url: string }[] };
+				const url = payload.sources[0]?.url ?? '';
+				return { status: 'succeeded' as const, text: `## 背景\n[来源](<${url}>)\n## 影响\n实际影响\n## 时间线\n今天发布` };
 			}
-			const id = request.prompt.match(/id=(\S+)/)?.[1] ?? '';
-			return { status: 'complete' as const, text: JSON.stringify([{ id, axes: { relevance: 80, novelty: 70, quality: 60, impact: 50, clarity: 90 }, target: 'featured', reason: '来源清楚' }]) };
+			return { status: 'succeeded' as const, text: factAnswer(request.prompt) };
 		},
 	}), {
 		browser: () => ({ open: async (request) => { opened.push(request.url ?? ''); return 'page'; }, show: async () => undefined }),
@@ -198,7 +206,7 @@ test('reader actions open the original, paste into an agent, write one brief, an
 	await service.ready;
 	const root = document.createElement('div');
 	document.body.append(root);
-	const paint = () => render(h(NewsPage, { service, actions }), root);
+	const paint = mountPage(service, actions, root).paint;
 	try {
 		await actions.addSource('https://example.com/feed.xml');
 		await service.refresh();
@@ -227,8 +235,7 @@ test('reader actions open the original, paste into an agent, write one brief, an
 		const story = service.stories()[0];
 		assert.match(store.files.get(story ? briefPath(story.id) : '') ?? '', /背景/);
 		assert.match(root.textContent ?? '', new RegExp(t('news.briefSaved')));
-		assert.equal(notified.length, 1);
-		assert.match(notified[0] ?? '', /^news:[^:]+:complete$/);
+		assert.equal(notified.length, 0); // Default policy reports failures only.
 		click(t('news.hide'));
 		await settle();
 		paint();
@@ -240,6 +247,7 @@ test('reader actions open the original, paste into an agent, write one brief, an
 		document.body.append(orderRoot);
 		let order: 'asc' | 'desc' = 'desc';
 		const showOrder = () => render(h(EventDetail, {
+			occurrences: [], sources: service.sources(),
 			reports: [early, late],
 			order,
 			sessions: [],
@@ -263,87 +271,46 @@ test('reader actions open the original, paste into an agent, write one brief, an
 	}
 });
 
-const stamp = (hour: number) => new Date(hour).toISOString().slice(0, 16).replace('T', ' ');
+const stamp = (hour: number) => new Date(hour).toLocaleString(getLanguage() === 'zh' ? 'zh-CN' : 'en-US', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', timeZoneName: 'short' });
 
-test('the heat chart moves by keyboard and does not draw a gap or a short series', async () => {
-	const store = memory();
-	const now = Date.now();
-	const hour = 3_600_000;
-	const current = Math.floor(now / hour) * hour;
-	const row = (hoursAgo: number, heat: number, cohort = 'a,b', complete = true) => ({
-		sourceId: 'e1',
-		eventId: 'e1',
-		score: heat,
-		observedAt: current - hoursAgo * hour + hour,
-		hour: current - hoursAgo * hour,
-		complete,
-		cohort,
-		cohortSize: 2,
-		participants: 2,
-		ruleVersion: 'heat-v1',
-	});
-	store.files.set('.nand/news/local/heat.json', JSON.stringify({
-		version: 1,
-		items: [row(2, 10), row(3, 11), row(30, 12), row(40, 13), row(0, 7, 'a,b', false)],
-	}));
-	const settings = settingsOf({ enabled: true, sources: [], views: [], interest: '', analysisEnabled: false, dailyEditionEnabled: false, autoRefresh: false });
-	const service = new NewsService(store, () => settings.get());
-	const actions = newsActions(service, settings, () => undefined);
-	await service.ready;
-	const root = document.createElement('div');
-	document.body.append(root);
-	render(h(NewsPage, { service, actions }), root);
-	await flush();
-	const hours = () => [...root.querySelectorAll('[data-hour]')].map((item) => Number(item.getAttribute('data-hour')));
-	assert.deepEqual(hours(), [current - 40 * hour, current - 30 * hour, current - 3 * hour, current - 2 * hour]);
+test('the heat chart selects visible observations by keyboard, shows local time and leaves real gaps', async () => {
+	const now = Math.floor(Date.now() / 3_600_000) * 3_600_000, hour = 3_600_000;
+	const facts: HeatFact[] = [40, 30, 3, 2].map(hours => ({ eventId: 'e', participantId: 'a', sourceId: 'source', editorial: true, at: now - hours * hour, addedAt: 0, stale: false }));
+	const points = [40, 30, 3, 2].reduce((rows, hours) => observeHeatHour(facts, now - hours * hour, rows), [] as NewsHeatSnapshot[]);
+	const root = document.createElement('div'); document.body.append(root);
+	render(h(HeatChart, { points, facts, now, eventId: 'e' }), root); await flush();
+	const hours = () => [...root.querySelectorAll('[data-hour]')].map(item => Number(item.getAttribute('data-hour')));
+	assert.deepEqual(hours(), [40, 30, 3, 2].map(ago => now - ago * hour));
 	assert.equal(root.querySelectorAll('polyline').length, 1);
-	assert.equal(root.textContent?.includes(stamp(current - 40 * hour)), true);
-	assert.equal(root.textContent?.includes(stamp(current - 2 * hour)), true);
-	assert.equal(root.textContent?.includes(stamp(current - 4 * hour)), false);
-	assert.equal(root.textContent?.includes(stamp(current)), false);
-	const chart = root.querySelector('.nand-news-heat-chart');
-	const live = root.querySelector('[aria-live]');
-	assert.ok(chart);
-	key(chart, 'ArrowRight');
-	await flush();
-	assert.equal(live?.textContent, t('news.heatPoint', { heat: 13, time: stamp(current - 40 * hour) }));
-	key(chart, 'ArrowRight');
-	await flush();
-	assert.equal(live?.textContent, t('news.heatPoint', { heat: 12, time: stamp(current - 30 * hour) }));
-	key(chart, 'ArrowLeft');
-	await flush();
-	assert.equal(live?.textContent, t('news.heatPoint', { heat: 13, time: stamp(current - 40 * hour) }));
-	key(chart, 'Escape');
-	await flush();
-	assert.equal(live?.textContent, '');
-	[...root.querySelectorAll('button')].find((item) => item.textContent === t('news.heat24'))?.click();
-	await flush();
-	assert.deepEqual(hours(), [current - 3 * hour, current - 2 * hour]);
-	assert.equal(root.querySelectorAll('polyline').length, 0);
-	assert.equal(root.textContent?.includes(stamp(current - 40 * hour)), false);
-	await service.shutdown();
+	assert.equal(root.querySelectorAll('circle').length, 4);
+	assert.ok(root.textContent?.includes(stamp(now - 40 * hour)));
+	const chart = root.querySelector('.nand-news-heat-chart')!, live = root.querySelector('[aria-live]')!;
+	key(chart, 'ArrowRight'); await flush();
+	assert.equal(live.textContent, t('news.heatPoint', { heat: 10, time: stamp(now - 40 * hour) }));
+	assert.equal(live.classList.contains('nand-visually-hidden'), false);
+	key(chart, 'ArrowRight'); await flush();
+	assert.equal(live.textContent, t('news.heatPoint', { heat: 10, time: stamp(now - 30 * hour) }));
+	key(chart, 'ArrowLeft'); await flush();
+	assert.equal(live.textContent, t('news.heatPoint', { heat: 10, time: stamp(now - 40 * hour) }));
+	key(chart, 'Escape'); await flush(); assert.equal(live.textContent, '');
+	[...root.querySelectorAll('button')].find(item => item.textContent === t('news.heat24'))!.click(); await flush();
+	assert.deepEqual(hours(), [now - 3 * hour, now - 2 * hour]);
+	assert.equal(root.querySelectorAll('svg').length, 0);
+	assert.ok(root.textContent?.includes(t('news.heatInsufficient')));
 	render(null, root);
 });
 
-test('a heat chart with a new cohort does not connect older hours or draw under three points', async () => {
-	const store = memory();
-	const now = Date.now();
-	const hour = 3_600_000;
-	const current = Math.floor(now / hour) * hour;
-	const row = (hoursAgo: number, heat: number, cohort: string) => ({
-		sourceId: 'e1', eventId: 'e1', score: heat, observedAt: current - hoursAgo * hour + hour, hour: current - hoursAgo * hour, complete: true, cohort, cohortSize: 2, participants: 2, ruleVersion: 'heat-v1',
-	});
-	store.files.set('.nand/news/local/heat.json', JSON.stringify({ version: 1, items: [row(50, 21, 'old'), row(40, 22, 'old'), row(30, 23, 'old'), row(2, 9, 'new')] }));
-	const settings = settingsOf({ enabled: true, sources: [], views: [], interest: '', analysisEnabled: false, dailyEditionEnabled: false, autoRefresh: false });
-	const service = new NewsService(store, () => settings.get());
-	await service.ready;
-	const root = document.createElement('div');
-	document.body.append(root);
-	render(h(NewsPage, { service, actions: newsActions(service, settings, () => undefined) }), root);
-	await flush();
-	assert.deepEqual([...root.querySelectorAll('[data-hour]')].map((item) => item.textContent), ['9']);
+test('a source added during the plot cannot create a historical jump', async () => {
+	const now = Math.floor(Date.now() / 3_600_000) * 3_600_000, hour = 3_600_000;
+	const facts: HeatFact[] = [50, 40, 30, 2].map(hours => ({ eventId: 'e', participantId: 'a', sourceId: 'old', editorial: true, at: now - hours * hour, addedAt: 0, stale: false }));
+	facts.push({ eventId: 'e', participantId: 'late', sourceId: 'late', editorial: true, at: now - 2 * hour, addedAt: now - 10 * hour, stale: false });
+	const points = [50, 40, 30, 2].reduce((rows, hours) => observeHeatHour(facts, now - hours * hour, rows), [] as NewsHeatSnapshot[]);
+	const root = document.createElement('div'); document.body.append(root);
+	render(h(HeatChart, { points, facts, now, eventId: 'e' }), root); await flush();
+	assert.deepEqual([...root.querySelectorAll('[data-hour]')].map(item => item.textContent), ['10', '10', '10', '10']);
 	assert.equal(root.querySelectorAll('polyline').length, 0);
-	assert.equal(root.textContent?.includes(stamp(current - 50 * hour)), false);
-	await service.shutdown();
+	assert.equal(root.querySelectorAll('circle').length, 4);
 	render(null, root);
 });
+
+vi.stubGlobal('DOMParser', DOMParser);

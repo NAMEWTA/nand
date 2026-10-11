@@ -1,4 +1,5 @@
 import { ensureDirectory } from '../../../../shared/storage/durable-state';
+import { privateVaultStorage } from '../../../../host/obsidian/storage/private-storage';
 import type { App } from 'obsidian';
 import type { WereadReadingState } from '../../core/weread/weread-shelf-model';
 
@@ -96,7 +97,7 @@ export class WereadProgressStore {
 		if (this.loaded) return;
 		this.loaded = true;
 		try {
-			const raw = await this.app.vault.adapter.read(this.path);
+			const raw = await privateVaultStorage(this.app).read(this.path);
 			this.file = normalizeProgressFile(JSON.parse(raw));
 			this.lastWritten = raw;
 		} catch {
@@ -134,7 +135,7 @@ export class WereadProgressStore {
 
 	private async persist(): Promise<void> {
 		try {
-			const adapter = this.app.vault.adapter;
+			const adapter = privateVaultStorage(this.app);
 			const path = this.path;
 			// Merge the disk state first when someone else wrote since our last
 			// write — blind full-file saves revert the other device's entries.

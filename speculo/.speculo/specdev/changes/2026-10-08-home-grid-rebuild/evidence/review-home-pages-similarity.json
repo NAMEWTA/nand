@@ -1,0 +1,1780 @@
+{
+	"k": 25,
+	"window": 20,
+	"minimum": 0.05,
+	"ours": [
+		"src",
+		"native/pty-server/src",
+		"scripts",
+		"test"
+	],
+	"theirs": [
+		"nand-home-pages-reference-df0029854a0944a6b7e346bd2a9e6d7a"
+	],
+	"results": [
+		{
+			"file": "src\\modules\\home\\platform\\board\\daily-note-access.ts",
+			"tokens": 227,
+			"raw": {
+				"share": 0.045,
+				"match": "src\\utils\\vault.ts",
+				"run": 34
+			},
+			"normalized": {
+				"share": 0.05,
+				"match": "src\\utils\\vault.ts",
+				"run": 34
+			}
+		},
+		{
+			"file": "src\\modules\\home\\styles\\066-confirm-dialog.css",
+			"tokens": 1872,
+			"raw": {
+				"share": 0.005,
+				"match": "src\\widgets\\wechat.ts",
+				"run": 25
+			},
+			"normalized": {
+				"share": 0.125,
+				"match": "styles.css",
+				"run": 63
+			}
+		},
+		{
+			"file": "src\\modules\\browser\\styles\\116-independent-browser-native-leaves-and-modal-shar.css",
+			"tokens": 2653,
+			"raw": {
+				"share": 0.004,
+				"match": "styles.css",
+				"run": 33
+			},
+			"normalized": {
+				"share": 0.122,
+				"match": "styles.css",
+				"run": 45
+			}
+		},
+		{
+			"file": "src\\modules\\home\\styles\\027-insight-v2-additions.css",
+			"tokens": 3553,
+			"raw": {
+				"share": 0.003,
+				"match": "styles.css",
+				"run": 28
+			},
+			"normalized": {
+				"share": 0.141,
+				"match": "styles.css",
+				"run": 64
+			}
+		},
+		{
+			"file": "src\\modules\\home\\styles\\084-weread-section.css",
+			"tokens": 4676,
+			"raw": {
+				"share": 0.002,
+				"match": "styles.css",
+				"run": 35
+			},
+			"normalized": {
+				"share": 0.122,
+				"match": "styles.css",
+				"run": 72
+			}
+		},
+		{
+			"file": "src\\modules\\home\\styles\\051-habit.css",
+			"tokens": 48,
+			"raw": {
+				"share": 0,
+				"match": null,
+				"run": 0
+			},
+			"normalized": {
+				"share": 1,
+				"match": "styles.css",
+				"run": 40
+			}
+		},
+		{
+			"file": "src\\app\\manifests.ts",
+			"tokens": 110,
+			"raw": {
+				"share": 0,
+				"match": null,
+				"run": 0
+			},
+			"normalized": {
+				"share": 0.333,
+				"match": "src\\widgets\\registry.ts",
+				"run": 76
+			}
+		},
+		{
+			"file": "src\\modules\\agent\\i18n.ts",
+			"tokens": 1889,
+			"raw": {
+				"share": 0,
+				"match": null,
+				"run": 0
+			},
+			"normalized": {
+				"share": 0.333,
+				"match": "eslint.config.mjs",
+				"run": 941
+			}
+		},
+		{
+			"file": "src\\modules\\archives\\i18n.ts",
+			"tokens": 1489,
+			"raw": {
+				"share": 0,
+				"match": null,
+				"run": 0
+			},
+			"normalized": {
+				"share": 0.333,
+				"match": "eslint.config.mjs",
+				"run": 741
+			}
+		},
+		{
+			"file": "src\\modules\\comments\\i18n.ts",
+			"tokens": 361,
+			"raw": {
+				"share": 0,
+				"match": null,
+				"run": 0
+			},
+			"normalized": {
+				"share": 0.333,
+				"match": "eslint.config.mjs",
+				"run": 177
+			}
+		},
+		{
+			"file": "src\\modules\\home\\i18n.ts",
+			"tokens": 11401,
+			"raw": {
+				"share": 0,
+				"match": null,
+				"run": 0
+			},
+			"normalized": {
+				"share": 0.333,
+				"match": "eslint.config.mjs",
+				"run": 5697
+			}
+		},
+		{
+			"file": "src\\modules\\home\\styles\\014-external-link-clickable-text-url.css",
+			"tokens": 66,
+			"raw": {
+				"share": 0,
+				"match": null,
+				"run": 0
+			},
+			"normalized": {
+				"share": 0.333,
+				"match": "styles.css",
+				"run": 27
+			}
+		},
+		{
+			"file": "src\\modules\\home\\styles\\039-recent-docs.css",
+			"tokens": 246,
+			"raw": {
+				"share": 0,
+				"match": null,
+				"run": 0
+			},
+			"normalized": {
+				"share": 0.333,
+				"match": "styles.css",
+				"run": 38
+			}
+		},
+		{
+			"file": "src\\modules\\icons\\i18n.ts",
+			"tokens": 2681,
+			"raw": {
+				"share": 0,
+				"match": null,
+				"run": 0
+			},
+			"normalized": {
+				"share": 0.333,
+				"match": "eslint.config.mjs",
+				"run": 1337
+			}
+		},
+		{
+			"file": "src\\modules\\news\\i18n.ts",
+			"tokens": 2305,
+			"raw": {
+				"share": 0,
+				"match": null,
+				"run": 0
+			},
+			"normalized": {
+				"share": 0.333,
+				"match": "eslint.config.mjs",
+				"run": 1149
+			}
+		},
+		{
+			"file": "src\\modules\\sync\\i18n.ts",
+			"tokens": 1929,
+			"raw": {
+				"share": 0,
+				"match": null,
+				"run": 0
+			},
+			"normalized": {
+				"share": 0.333,
+				"match": "eslint.config.mjs",
+				"run": 961
+			}
+		},
+		{
+			"file": "src\\shared\\i18n\\appearance.ts",
+			"tokens": 305,
+			"raw": {
+				"share": 0,
+				"match": null,
+				"run": 0
+			},
+			"normalized": {
+				"share": 0.333,
+				"match": "eslint.config.mjs",
+				"run": 149
+			}
+		},
+		{
+			"file": "src\\shared\\i18n\\editor.ts",
+			"tokens": 137,
+			"raw": {
+				"share": 0,
+				"match": null,
+				"run": 0
+			},
+			"normalized": {
+				"share": 0.333,
+				"match": "eslint.config.mjs",
+				"run": 65
+			}
+		},
+		{
+			"file": "src\\shared\\i18n\\lazy\\automation.ts",
+			"tokens": 1225,
+			"raw": {
+				"share": 0,
+				"match": null,
+				"run": 0
+			},
+			"normalized": {
+				"share": 0.333,
+				"match": "eslint.config.mjs",
+				"run": 609
+			}
+		},
+		{
+			"file": "src\\shared\\i18n\\lazy\\browser.ts",
+			"tokens": 929,
+			"raw": {
+				"share": 0,
+				"match": null,
+				"run": 0
+			},
+			"normalized": {
+				"share": 0.333,
+				"match": "eslint.config.mjs",
+				"run": 461
+			}
+		},
+		{
+			"file": "src\\shared\\i18n\\nand.ts",
+			"tokens": 305,
+			"raw": {
+				"share": 0,
+				"match": null,
+				"run": 0
+			},
+			"normalized": {
+				"share": 0.333,
+				"match": "eslint.config.mjs",
+				"run": 149
+			}
+		},
+		{
+			"file": "src\\shared\\i18n\\workbench.ts",
+			"tokens": 505,
+			"raw": {
+				"share": 0,
+				"match": null,
+				"run": 0
+			},
+			"normalized": {
+				"share": 0.333,
+				"match": "eslint.config.mjs",
+				"run": 249
+			}
+		},
+		{
+			"file": "src\\modules\\home\\styles\\033-year-progress-widget.css",
+			"tokens": 807,
+			"raw": {
+				"share": 0,
+				"match": null,
+				"run": 0
+			},
+			"normalized": {
+				"share": 0.313,
+				"match": "styles.css",
+				"run": 56
+			}
+		},
+		{
+			"file": "src\\modules\\home\\styles\\059-doc-search.css",
+			"tokens": 468,
+			"raw": {
+				"share": 0,
+				"match": null,
+				"run": 0
+			},
+			"normalized": {
+				"share": 0.263,
+				"match": "styles.css",
+				"run": 43
+			}
+		},
+		{
+			"file": "src\\modules\\archives\\core\\persist\\column-labels.ts",
+			"tokens": 111,
+			"raw": {
+				"share": 0,
+				"match": null,
+				"run": 0
+			},
+			"normalized": {
+				"share": 0.25,
+				"match": "src\\utils\\weather.ts",
+				"run": 41
+			}
+		},
+		{
+			"file": "src\\modules\\home\\styles\\018-sidebar-widgets.css",
+			"tokens": 326,
+			"raw": {
+				"share": 0,
+				"match": null,
+				"run": 0
+			},
+			"normalized": {
+				"share": 0.24,
+				"match": "styles.css",
+				"run": 36
+			}
+		},
+		{
+			"file": "src\\modules\\home\\styles\\062-scrollbar.css",
+			"tokens": 296,
+			"raw": {
+				"share": 0,
+				"match": null,
+				"run": 0
+			},
+			"normalized": {
+				"share": 0.231,
+				"match": "styles.css",
+				"run": 51
+			}
+		},
+		{
+			"file": "src\\modules\\home\\styles\\081-note-popover-modal-in-place-edit-popup-for-hover.css",
+			"tokens": 661,
+			"raw": {
+				"share": 0,
+				"match": null,
+				"run": 0
+			},
+			"normalized": {
+				"share": 0.214,
+				"match": "styles.css",
+				"run": 83
+			}
+		},
+		{
+			"file": "src\\modules\\home\\styles\\073-list-view.css",
+			"tokens": 365,
+			"raw": {
+				"share": 0,
+				"match": null,
+				"run": 0
+			},
+			"normalized": {
+				"share": 0.207,
+				"match": "styles.css",
+				"run": 39
+			}
+		},
+		{
+			"file": "src\\modules\\automations\\ui\\status-presentation.ts",
+			"tokens": 83,
+			"raw": {
+				"share": 0,
+				"match": null,
+				"run": 0
+			},
+			"normalized": {
+				"share": 0.2,
+				"match": "src\\utils\\weather.ts",
+				"run": 35
+			}
+		},
+		{
+			"file": "src\\modules\\sync\\api.ts",
+			"tokens": 108,
+			"raw": {
+				"share": 0,
+				"match": null,
+				"run": 0
+			},
+			"normalized": {
+				"share": 0.2,
+				"match": "src\\widgets\\media.ts",
+				"run": 26
+			}
+		},
+		{
+			"file": "src\\modules\\home\\styles\\080-dataview-announcement-community-group-modal.css",
+			"tokens": 806,
+			"raw": {
+				"share": 0,
+				"match": null,
+				"run": 0
+			},
+			"normalized": {
+				"share": 0.175,
+				"match": "styles.css",
+				"run": 71
+			}
+		},
+		{
+			"file": "src\\modules\\agent\\styles\\agent.css",
+			"tokens": 2250,
+			"raw": {
+				"share": 0,
+				"match": null,
+				"run": 0
+			},
+			"normalized": {
+				"share": 0.173,
+				"match": "styles.css",
+				"run": 79
+			}
+		},
+		{
+			"file": "src\\modules\\home\\core\\reading\\duration.ts",
+			"tokens": 111,
+			"raw": {
+				"share": 0,
+				"match": null,
+				"run": 0
+			},
+			"normalized": {
+				"share": 0.167,
+				"match": "src\\widgets\\pomodoro.ts",
+				"run": 30
+			}
+		},
+		{
+			"file": "src\\modules\\home\\styles\\012-file-suggest-dropdown.css",
+			"tokens": 331,
+			"raw": {
+				"share": 0,
+				"match": null,
+				"run": 0
+			},
+			"normalized": {
+				"share": 0.167,
+				"match": "styles.css",
+				"run": 37
+			}
+		},
+		{
+			"file": "src\\modules\\agent\\platform\\desktop\\server\\agent-data-client.ts",
+			"tokens": 168,
+			"raw": {
+				"share": 0,
+				"match": null,
+				"run": 0
+			},
+			"normalized": {
+				"share": 0.154,
+				"match": "src\\widgets\\annotations.ts",
+				"run": 40
+			}
+		},
+		{
+			"file": "src\\modules\\home\\styles\\034-fortune-stick-button.css",
+			"tokens": 209,
+			"raw": {
+				"share": 0,
+				"match": null,
+				"run": 0
+			},
+			"normalized": {
+				"share": 0.154,
+				"match": "styles.css",
+				"run": 32
+			}
+		},
+		{
+			"file": "src\\modules\\home\\styles\\025-habit-stats-modal.css",
+			"tokens": 1809,
+			"raw": {
+				"share": 0,
+				"match": null,
+				"run": 0
+			},
+			"normalized": {
+				"share": 0.148,
+				"match": "styles.css",
+				"run": 56
+			}
+		},
+		{
+			"file": "src\\modules\\agent\\core\\launch\\types.ts",
+			"tokens": 197,
+			"raw": {
+				"share": 0,
+				"match": null,
+				"run": 0
+			},
+			"normalized": {
+				"share": 0.143,
+				"match": "src\\widgets\\annotations.ts",
+				"run": 45
+			}
+		},
+		{
+			"file": "scripts\\documentation-policy.mjs",
+			"tokens": 312,
+			"raw": {
+				"share": 0,
+				"match": null,
+				"run": 0
+			},
+			"normalized": {
+				"share": 0.143,
+				"match": "src\\utils\\date.ts",
+				"run": 93
+			}
+		},
+		{
+			"file": "src\\modules\\home\\styles\\023-pomodoro-stats-modal.css",
+			"tokens": 1874,
+			"raw": {
+				"share": 0,
+				"match": null,
+				"run": 0
+			},
+			"normalized": {
+				"share": 0.14,
+				"match": "styles.css",
+				"run": 50
+			}
+		},
+		{
+			"file": "src\\modules\\home\\styles\\072-gallery-view-card-grid-with-frontmatter-driven-c.css",
+			"tokens": 1635,
+			"raw": {
+				"share": 0,
+				"match": null,
+				"run": 0
+			},
+			"normalized": {
+				"share": 0.14,
+				"match": "styles.css",
+				"run": 77
+			}
+		},
+		{
+			"file": "src\\modules\\home\\styles\\060-add-action-confirm-view-custom-name-icon.css",
+			"tokens": 502,
+			"raw": {
+				"share": 0,
+				"match": null,
+				"run": 0
+			},
+			"normalized": {
+				"share": 0.136,
+				"match": "styles.css",
+				"run": 60
+			}
+		},
+		{
+			"file": "src\\modules\\notifications\\styles\\inbox.css",
+			"tokens": 1101,
+			"raw": {
+				"share": 0,
+				"match": null,
+				"run": 0
+			},
+			"normalized": {
+				"share": 0.136,
+				"match": "styles.css",
+				"run": 54
+			}
+		},
+		{
+			"file": "src\\modules\\home\\styles\\030-expense-category-manager-confirm-card-overlay.css",
+			"tokens": 1097,
+			"raw": {
+				"share": 0,
+				"match": null,
+				"run": 0
+			},
+			"normalized": {
+				"share": 0.13,
+				"match": "styles.css",
+				"run": 48
+			}
+		},
+		{
+			"file": "src\\app\\styles\\009-about-author-page.css",
+			"tokens": 747,
+			"raw": {
+				"share": 0,
+				"match": null,
+				"run": 0
+			},
+			"normalized": {
+				"share": 0.129,
+				"match": "styles.css",
+				"run": 51
+			}
+		},
+		{
+			"file": "src\\modules\\home\\styles\\026-tag-manager-modal.css",
+			"tokens": 1434,
+			"raw": {
+				"share": 0,
+				"match": null,
+				"run": 0
+			},
+			"normalized": {
+				"share": 0.128,
+				"match": "styles.css",
+				"run": 54
+			}
+		},
+		{
+			"file": "src\\modules\\home\\styles\\075-kanban-view.css",
+			"tokens": 1097,
+			"raw": {
+				"share": 0,
+				"match": null,
+				"run": 0
+			},
+			"normalized": {
+				"share": 0.128,
+				"match": "styles.css",
+				"run": 53
+			}
+		},
+		{
+			"file": "src\\modules\\home\\styles\\079-quick-notes-first-run-guide-modal.css",
+			"tokens": 811,
+			"raw": {
+				"share": 0,
+				"match": null,
+				"run": 0
+			},
+			"normalized": {
+				"share": 0.127,
+				"match": "styles.css",
+				"run": 71
+			}
+		},
+		{
+			"file": "src\\modules\\home\\styles\\045-tasks.css",
+			"tokens": 1444,
+			"raw": {
+				"share": 0,
+				"match": null,
+				"run": 0
+			},
+			"normalized": {
+				"share": 0.126,
+				"match": "styles.css",
+				"run": 43
+			}
+		},
+		{
+			"file": "src\\modules\\home\\core\\pipeline\\model.ts",
+			"tokens": 135,
+			"raw": {
+				"share": 0,
+				"match": null,
+				"run": 0
+			},
+			"normalized": {
+				"share": 0.125,
+				"match": "tests\\integrations.test.ts",
+				"run": 25
+			}
+		},
+		{
+			"file": "src\\modules\\home\\styles\\024-wide-stats-modal-landscape.css",
+			"tokens": 1656,
+			"raw": {
+				"share": 0,
+				"match": null,
+				"run": 0
+			},
+			"normalized": {
+				"share": 0.121,
+				"match": "styles.css",
+				"run": 67
+			}
+		},
+		{
+			"file": "src\\modules\\home\\styles\\044-cards.css",
+			"tokens": 1169,
+			"raw": {
+				"share": 0,
+				"match": null,
+				"run": 0
+			},
+			"normalized": {
+				"share": 0.121,
+				"match": "styles.css",
+				"run": 41
+			}
+		},
+		{
+			"file": "src\\modules\\home\\ui\\expense\\expense-charts.ts",
+			"tokens": 303,
+			"raw": {
+				"share": 0,
+				"match": null,
+				"run": 0
+			},
+			"normalized": {
+				"share": 0.12,
+				"match": "src\\utils\\weather.ts",
+				"run": 52
+			}
+		},
+		{
+			"file": "src\\modules\\home\\styles\\049-project.css",
+			"tokens": 1277,
+			"raw": {
+				"share": 0,
+				"match": null,
+				"run": 0
+			},
+			"normalized": {
+				"share": 0.117,
+				"match": "styles.css",
+				"run": 44
+			}
+		},
+		{
+			"file": "src\\modules\\home\\styles\\090-floating-reading-mini-timer.css",
+			"tokens": 2961,
+			"raw": {
+				"share": 0,
+				"match": null,
+				"run": 0
+			},
+			"normalized": {
+				"share": 0.116,
+				"match": "styles.css",
+				"run": 68
+			}
+		},
+		{
+			"file": "src\\modules\\home\\styles\\043-scroll-to-top-floating-button.css",
+			"tokens": 1089,
+			"raw": {
+				"share": 0,
+				"match": null,
+				"run": 0
+			},
+			"normalized": {
+				"share": 0.114,
+				"match": "styles.css",
+				"run": 45
+			}
+		},
+		{
+			"file": "src\\modules\\sync\\styles\\sync.css",
+			"tokens": 2361,
+			"raw": {
+				"share": 0,
+				"match": null,
+				"run": 0
+			},
+			"normalized": {
+				"share": 0.114,
+				"match": "styles.css",
+				"run": 85
+			}
+		},
+		{
+			"file": "src\\modules\\home\\styles\\029-expense-ledger-overlay-view-all-full-table.css",
+			"tokens": 3073,
+			"raw": {
+				"share": 0,
+				"match": null,
+				"run": 0
+			},
+			"normalized": {
+				"share": 0.11,
+				"match": "styles.css",
+				"run": 89
+			}
+		},
+		{
+			"file": "src\\modules\\home\\styles\\035-sidebar-calendar-widget.css",
+			"tokens": 1348,
+			"raw": {
+				"share": 0,
+				"match": null,
+				"run": 0
+			},
+			"normalized": {
+				"share": 0.108,
+				"match": "styles.css",
+				"run": 62
+			}
+		},
+		{
+			"file": "src\\shell\\styles\\workbench-pages.css",
+			"tokens": 910,
+			"raw": {
+				"share": 0,
+				"match": null,
+				"run": 0
+			},
+			"normalized": {
+				"share": 0.108,
+				"match": "styles.css",
+				"run": 48
+			}
+		},
+		{
+			"file": "src\\modules\\automations\\styles\\114-automation-surfaces-share-the-app-s-visual-scale.css",
+			"tokens": 4551,
+			"raw": {
+				"share": 0,
+				"match": null,
+				"run": 0
+			},
+			"normalized": {
+				"share": 0.105,
+				"match": "styles.css",
+				"run": 73
+			}
+		},
+		{
+			"file": "src\\app\\workbench\\settings-categories.ts",
+			"tokens": 445,
+			"raw": {
+				"share": 0,
+				"match": null,
+				"run": 0
+			},
+			"normalized": {
+				"share": 0.103,
+				"match": "src\\widgets\\annotations.ts",
+				"run": 121
+			}
+		},
+		{
+			"file": "src\\modules\\home\\styles\\087-quick-notes-region-single-line-accent-navbar-mas.css",
+			"tokens": 10884,
+			"raw": {
+				"share": 0,
+				"match": null,
+				"run": 0
+			},
+			"normalized": {
+				"share": 0.101,
+				"match": "styles.css",
+				"run": 94
+			}
+		},
+		{
+			"file": "src\\modules\\automations\\ui\\session-picker.ts",
+			"tokens": 147,
+			"raw": {
+				"share": 0,
+				"match": null,
+				"run": 0
+			},
+			"normalized": {
+				"share": 0.1,
+				"match": "src\\widgets\\userLoader.ts",
+				"run": 51
+			}
+		},
+		{
+			"file": "src\\modules\\home\\styles\\007-settings-visual-layout-picker.css",
+			"tokens": 1160,
+			"raw": {
+				"share": 0,
+				"match": null,
+				"run": 0
+			},
+			"normalized": {
+				"share": 0.099,
+				"match": "styles.css",
+				"run": 49
+			}
+		},
+		{
+			"file": "src\\modules\\home\\styles\\017-sidebar.css",
+			"tokens": 377,
+			"raw": {
+				"share": 0,
+				"match": null,
+				"run": 0
+			},
+			"normalized": {
+				"share": 0.097,
+				"match": "styles.css",
+				"run": 32
+			}
+		},
+		{
+			"file": "src\\modules\\home\\styles\\070-template-modal.css",
+			"tokens": 7089,
+			"raw": {
+				"share": 0,
+				"match": null,
+				"run": 0
+			},
+			"normalized": {
+				"share": 0.095,
+				"match": "styles.css",
+				"run": 64
+			}
+		},
+		{
+			"file": "src\\modules\\home\\styles\\088-web-section-embedded-page-iframe-desktop-webview.css",
+			"tokens": 3050,
+			"raw": {
+				"share": 0,
+				"match": null,
+				"run": 0
+			},
+			"normalized": {
+				"share": 0.095,
+				"match": "styles.css",
+				"run": 61
+			}
+		},
+		{
+			"file": "src\\app\\styles\\008-settings-fallback-tab-bar-pre-1-13-builds.css",
+			"tokens": 669,
+			"raw": {
+				"share": 0,
+				"match": null,
+				"run": 0
+			},
+			"normalized": {
+				"share": 0.093,
+				"match": "styles.css",
+				"run": 39
+			}
+		},
+		{
+			"file": "src\\modules\\home\\styles\\069-tracker-heatmap.css",
+			"tokens": 511,
+			"raw": {
+				"share": 0,
+				"match": null,
+				"run": 0
+			},
+			"normalized": {
+				"share": 0.093,
+				"match": "styles.css",
+				"run": 39
+			}
+		},
+		{
+			"file": "src\\modules\\home\\styles\\058-library-dialect-footer-buttons.css",
+			"tokens": 3650,
+			"raw": {
+				"share": 0,
+				"match": null,
+				"run": 0
+			},
+			"normalized": {
+				"share": 0.092,
+				"match": "styles.css",
+				"run": 44
+			}
+		},
+		{
+			"file": "src\\modules\\home\\styles\\085-reading-stats-widget-period-toggle-6-kpis-trend-.css",
+			"tokens": 4797,
+			"raw": {
+				"share": 0,
+				"match": null,
+				"run": 0
+			},
+			"normalized": {
+				"share": 0.092,
+				"match": "styles.css",
+				"run": 58
+			}
+		},
+		{
+			"file": "src\\app\\settings\\about.ts",
+			"tokens": 363,
+			"raw": {
+				"share": 0,
+				"match": null,
+				"run": 0
+			},
+			"normalized": {
+				"share": 0.091,
+				"match": "src\\ui\\modals.ts",
+				"run": 35
+			}
+		},
+		{
+			"file": "src\\app\\settings\\nav.ts",
+			"tokens": 251,
+			"raw": {
+				"share": 0,
+				"match": null,
+				"run": 0
+			},
+			"normalized": {
+				"share": 0.091,
+				"match": "src\\widgets\\hero.ts",
+				"run": 39
+			}
+		},
+		{
+			"file": "src\\modules\\comments\\core\\model.ts",
+			"tokens": 171,
+			"raw": {
+				"share": 0,
+				"match": null,
+				"run": 0
+			},
+			"normalized": {
+				"share": 0.091,
+				"match": "src\\utils\\weather.ts",
+				"run": 35
+			}
+		},
+		{
+			"file": "src\\modules\\home\\ui\\widgets\\lunar-model.ts",
+			"tokens": 182,
+			"raw": {
+				"share": 0,
+				"match": null,
+				"run": 0
+			},
+			"normalized": {
+				"share": 0.091,
+				"match": "src\\ui\\sortable.ts",
+				"run": 30
+			}
+		},
+		{
+			"file": "src\\modules\\home\\styles\\028-expense-stats-modal.css",
+			"tokens": 5916,
+			"raw": {
+				"share": 0,
+				"match": null,
+				"run": 0
+			},
+			"normalized": {
+				"share": 0.09,
+				"match": "styles.css",
+				"run": 53
+			}
+		},
+		{
+			"file": "src\\modules\\home\\styles\\078-library-pagination.css",
+			"tokens": 1189,
+			"raw": {
+				"share": 0,
+				"match": null,
+				"run": 0
+			},
+			"normalized": {
+				"share": 0.09,
+				"match": "styles.css",
+				"run": 58
+			}
+		},
+		{
+			"file": "src\\modules\\home\\styles\\083-media-lightbox.css",
+			"tokens": 9340,
+			"raw": {
+				"share": 0,
+				"match": null,
+				"run": 0
+			},
+			"normalized": {
+				"share": 0.09,
+				"match": "styles.css",
+				"run": 64
+			}
+		},
+		{
+			"file": "src\\modules\\comments\\styles\\091-editor-product-comments-does-not-use-dashboard-t.css",
+			"tokens": 2478,
+			"raw": {
+				"share": 0,
+				"match": null,
+				"run": 0
+			},
+			"normalized": {
+				"share": 0.088,
+				"match": "styles.css",
+				"run": 46
+			}
+		},
+		{
+			"file": "src\\shell\\styles\\shell.css",
+			"tokens": 3485,
+			"raw": {
+				"share": 0,
+				"match": null,
+				"run": 0
+			},
+			"normalized": {
+				"share": 0.086,
+				"match": "styles.css",
+				"run": 71
+			}
+		},
+		{
+			"file": "src\\ui\\styles\\001-primitives.css",
+			"tokens": 3087,
+			"raw": {
+				"share": 0,
+				"match": null,
+				"run": 0
+			},
+			"normalized": {
+				"share": 0.085,
+				"match": "styles.css",
+				"run": 47
+			}
+		},
+		{
+			"file": "src\\modules\\home\\styles\\031-reading-widget.css",
+			"tokens": 7777,
+			"raw": {
+				"share": 0,
+				"match": null,
+				"run": 0
+			},
+			"normalized": {
+				"share": 0.084,
+				"match": "styles.css",
+				"run": 52
+			}
+		},
+		{
+			"file": "src\\modules\\home\\styles\\040-quick-links-glass-buttons.css",
+			"tokens": 3317,
+			"raw": {
+				"share": 0,
+				"match": null,
+				"run": 0
+			},
+			"normalized": {
+				"share": 0.084,
+				"match": "styles.css",
+				"run": 71
+			}
+		},
+		{
+			"file": "src\\modules\\home\\styles\\082-media-sections-images-videos.css",
+			"tokens": 5204,
+			"raw": {
+				"share": 0,
+				"match": null,
+				"run": 0
+			},
+			"normalized": {
+				"share": 0.083,
+				"match": "styles.css",
+				"run": 58
+			}
+		},
+		{
+			"file": "src\\modules\\icons\\core\\settings\\model.ts",
+			"tokens": 534,
+			"raw": {
+				"share": 0,
+				"match": null,
+				"run": 0
+			},
+			"normalized": {
+				"share": 0.083,
+				"match": "src\\widgets\\insights.ts",
+				"run": 91
+			}
+		},
+		{
+			"file": "src\\modules\\home\\styles\\021-stacked-layout-desktop-tablet-only.css",
+			"tokens": 9498,
+			"raw": {
+				"share": 0,
+				"match": null,
+				"run": 0
+			},
+			"normalized": {
+				"share": 0.081,
+				"match": "styles.css",
+				"run": 63
+			}
+		},
+		{
+			"file": "src\\modules\\home\\styles\\036-hover-day-preview-dotmode-only.css",
+			"tokens": 1144,
+			"raw": {
+				"share": 0,
+				"match": null,
+				"run": 0
+			},
+			"normalized": {
+				"share": 0.078,
+				"match": "styles.css",
+				"run": 41
+			}
+		},
+		{
+			"file": "src\\modules\\home\\styles\\089-floating-pomodoro-mini-panel.css",
+			"tokens": 1464,
+			"raw": {
+				"share": 0,
+				"match": null,
+				"run": 0
+			},
+			"normalized": {
+				"share": 0.078,
+				"match": "styles.css",
+				"run": 45
+			}
+		},
+		{
+			"file": "src\\modules\\home\\services\\instances.ts",
+			"tokens": 235,
+			"raw": {
+				"share": 0,
+				"match": null,
+				"run": 0
+			},
+			"normalized": {
+				"share": 0.077,
+				"match": "src\\api.ts",
+				"run": 45
+			}
+		},
+		{
+			"file": "src\\modules\\home\\styles\\019-widget-card-backgrounds-per-widget-decorative-im.css",
+			"tokens": 861,
+			"raw": {
+				"share": 0,
+				"match": null,
+				"run": 0
+			},
+			"normalized": {
+				"share": 0.077,
+				"match": "styles.css",
+				"run": 38
+			}
+		},
+		{
+			"file": "src\\modules\\home\\styles\\050-progress.css",
+			"tokens": 179,
+			"raw": {
+				"share": 0,
+				"match": null,
+				"run": 0
+			},
+			"normalized": {
+				"share": 0.077,
+				"match": "styles.css",
+				"run": 43
+			}
+		},
+		{
+			"file": "src\\modules\\home\\styles\\skills.css",
+			"tokens": 729,
+			"raw": {
+				"share": 0,
+				"match": null,
+				"run": 0
+			},
+			"normalized": {
+				"share": 0.077,
+				"match": "styles.css",
+				"run": 42
+			}
+		},
+		{
+			"file": "src\\modules\\home\\ui\\widgets\\lunar-compute.ts",
+			"tokens": 313,
+			"raw": {
+				"share": 0,
+				"match": null,
+				"run": 0
+			},
+			"normalized": {
+				"share": 0.077,
+				"match": "src\\widgets\\onthisday.ts",
+				"run": 47
+			}
+		},
+		{
+			"file": "src\\ui\\styles\\000-foundation.css",
+			"tokens": 3316,
+			"raw": {
+				"share": 0,
+				"match": null,
+				"run": 0
+			},
+			"normalized": {
+				"share": 0.077,
+				"match": "styles.css",
+				"run": 48
+			}
+		},
+		{
+			"file": "src\\modules\\home\\styles\\064-task-reminder.css",
+			"tokens": 3201,
+			"raw": {
+				"share": 0,
+				"match": null,
+				"run": 0
+			},
+			"normalized": {
+				"share": 0.076,
+				"match": "styles.css",
+				"run": 45
+			}
+		},
+		{
+			"file": "src\\app\\workbench\\icons-panel.ts",
+			"tokens": 245,
+			"raw": {
+				"share": 0,
+				"match": null,
+				"run": 0
+			},
+			"normalized": {
+				"share": 0.071,
+				"match": "tests\\integrations.test.ts",
+				"run": 89
+			}
+		},
+		{
+			"file": "src\\modules\\browser\\core\\model.ts",
+			"tokens": 671,
+			"raw": {
+				"share": 0,
+				"match": null,
+				"run": 0
+			},
+			"normalized": {
+				"share": 0.071,
+				"match": "src\\widgets\\annotations.ts",
+				"run": 44
+			}
+		},
+		{
+			"file": "src\\modules\\home\\core\\weread\\widget-model.ts",
+			"tokens": 186,
+			"raw": {
+				"share": 0,
+				"match": null,
+				"run": 0
+			},
+			"normalized": {
+				"share": 0.071,
+				"match": "src\\ui\\sortable.ts",
+				"run": 25
+			}
+		},
+		{
+			"file": "src\\modules\\news\\platform\\notes.test.ts",
+			"tokens": 230,
+			"raw": {
+				"share": 0,
+				"match": null,
+				"run": 0
+			},
+			"normalized": {
+				"share": 0.071,
+				"match": "src\\utils\\weather.ts",
+				"run": 46
+			}
+		},
+		{
+			"file": "src\\modules\\archives\\styles\\113-independent-archive-surface.css",
+			"tokens": 7740,
+			"raw": {
+				"share": 0,
+				"match": null,
+				"run": 0
+			},
+			"normalized": {
+				"share": 0.069,
+				"match": "styles.css",
+				"run": 64
+			}
+		},
+		{
+			"file": "src\\modules\\home\\styles\\037-fortune-stick-modal-traditional-parchment.css",
+			"tokens": 597,
+			"raw": {
+				"share": 0,
+				"match": null,
+				"run": 0
+			},
+			"normalized": {
+				"share": 0.069,
+				"match": "styles.css",
+				"run": 38
+			}
+		},
+		{
+			"file": "src\\modules\\home\\ui\\ui\\reminder-notice.ts",
+			"tokens": 354,
+			"raw": {
+				"share": 0,
+				"match": null,
+				"run": 0
+			},
+			"normalized": {
+				"share": 0.069,
+				"match": "src\\widgets\\insights.ts",
+				"run": 33
+			}
+		},
+		{
+			"file": "src\\modules\\archives\\ui\\panel-contract.ts",
+			"tokens": 366,
+			"raw": {
+				"share": 0,
+				"match": null,
+				"run": 0
+			},
+			"normalized": {
+				"share": 0.065,
+				"match": "src\\widgets\\kanban.ts",
+				"run": 27
+			}
+		},
+		{
+			"file": "src\\modules\\home\\styles\\022-activity-selector-pomodoro-widget.css",
+			"tokens": 1747,
+			"raw": {
+				"share": 0,
+				"match": null,
+				"run": 0
+			},
+			"normalized": {
+				"share": 0.065,
+				"match": "styles.css",
+				"run": 62
+			}
+		},
+		{
+			"file": "src\\modules\\home\\styles\\038-fortune-result-card.css",
+			"tokens": 2407,
+			"raw": {
+				"share": 0,
+				"match": null,
+				"run": 0
+			},
+			"normalized": {
+				"share": 0.065,
+				"match": "styles.css",
+				"run": 44
+			}
+		},
+		{
+			"file": "src\\modules\\news\\platform\\opml.test.ts",
+			"tokens": 397,
+			"raw": {
+				"share": 0,
+				"match": null,
+				"run": 0
+			},
+			"normalized": {
+				"share": 0.065,
+				"match": "src\\utils\\weather.ts",
+				"run": 35
+			}
+		},
+		{
+			"file": "src\\modules\\archives\\module.ts",
+			"tokens": 380,
+			"raw": {
+				"share": 0,
+				"match": null,
+				"run": 0
+			},
+			"normalized": {
+				"share": 0.063,
+				"match": "src\\widgets\\insights.ts",
+				"run": 30
+			}
+		},
+		{
+			"file": "src\\modules\\home\\platform\\audio\\chime.ts",
+			"tokens": 401,
+			"raw": {
+				"share": 0,
+				"match": null,
+				"run": 0
+			},
+			"normalized": {
+				"share": 0.063,
+				"match": "tests\\integrations.test.ts",
+				"run": 58
+			}
+		},
+		{
+			"file": "src\\modules\\home\\styles\\077-library-config-modal.css",
+			"tokens": 3467,
+			"raw": {
+				"share": 0,
+				"match": null,
+				"run": 0
+			},
+			"normalized": {
+				"share": 0.063,
+				"match": "styles.css",
+				"run": 58
+			}
+		},
+		{
+			"file": "src\\modules\\notifications\\module.ts",
+			"tokens": 341,
+			"raw": {
+				"share": 0,
+				"match": null,
+				"run": 0
+			},
+			"normalized": {
+				"share": 0.063,
+				"match": "src\\widgets\\insights.ts",
+				"run": 27
+			}
+		},
+		{
+			"file": "src\\ui\\styles\\111-nand-surface-polish-host-theme-outside-the-board.css",
+			"tokens": 3670,
+			"raw": {
+				"share": 0,
+				"match": null,
+				"run": 0
+			},
+			"normalized": {
+				"share": 0.059,
+				"match": "styles.css",
+				"run": 43
+			}
+		},
+		{
+			"file": "src\\modules\\home\\ui\\weread\\shelf-presentation.ts",
+			"tokens": 461,
+			"raw": {
+				"share": 0,
+				"match": null,
+				"run": 0
+			},
+			"normalized": {
+				"share": 0.057,
+				"match": "src\\utils\\weather.ts",
+				"run": 63
+			}
+		},
+		{
+			"file": "src\\modules\\news\\contrib\\home-widgets.ts",
+			"tokens": 353,
+			"raw": {
+				"share": 0,
+				"match": null,
+				"run": 0
+			},
+			"normalized": {
+				"share": 0.057,
+				"match": "src\\widgets\\annotations.ts",
+				"run": 27
+			}
+		},
+		{
+			"file": "src\\modules\\home\\styles\\pipeline.css",
+			"tokens": 640,
+			"raw": {
+				"share": 0,
+				"match": null,
+				"run": 0
+			},
+			"normalized": {
+				"share": 0.056,
+				"match": "styles.css",
+				"run": 43
+			}
+		},
+		{
+			"file": "src\\modules\\home\\ui\\ui\\exclude-folders-editor.ts",
+			"tokens": 596,
+			"raw": {
+				"share": 0,
+				"match": null,
+				"run": 0
+			},
+			"normalized": {
+				"share": 0.054,
+				"match": "src\\widgets\\media.ts",
+				"run": 37
+			}
+		},
+		{
+			"file": "src\\modules\\home\\styles\\042-sticky-section-memo-todo-cards-in-one-todo-style.css",
+			"tokens": 761,
+			"raw": {
+				"share": 0,
+				"match": null,
+				"run": 0
+			},
+			"normalized": {
+				"share": 0.053,
+				"match": "styles.css",
+				"run": 41
+			}
+		},
+		{
+			"file": "src\\modules\\home\\styles\\068-tracker-widget-size-variants.css",
+			"tokens": 243,
+			"raw": {
+				"share": 0,
+				"match": null,
+				"run": 0
+			},
+			"normalized": {
+				"share": 0.053,
+				"match": "styles.css",
+				"run": 29
+			}
+		},
+		{
+			"file": "src\\modules\\home\\ui\\widgets\\widget-type-modal.ts",
+			"tokens": 433,
+			"raw": {
+				"share": 0,
+				"match": null,
+				"run": 0
+			},
+			"normalized": {
+				"share": 0.053,
+				"match": "src\\ui\\modals.ts",
+				"run": 32
+			}
+		},
+		{
+			"file": "src\\ui\\primitives\\empty-state.ts",
+			"tokens": 220,
+			"raw": {
+				"share": 0,
+				"match": null,
+				"run": 0
+			},
+			"normalized": {
+				"share": 0.053,
+				"match": "src\\widgets\\insights.ts",
+				"run": 41
+			}
+		},
+		{
+			"file": "src\\modules\\home\\styles\\047-memo.css",
+			"tokens": 1015,
+			"raw": {
+				"share": 0,
+				"match": null,
+				"run": 0
+			},
+			"normalized": {
+				"share": 0.051,
+				"match": "styles.css",
+				"run": 40
+			}
+		},
+		{
+			"file": "src\\modules\\home\\ui\\notes\\sticky-card-type-modal.ts",
+			"tokens": 458,
+			"raw": {
+				"share": 0,
+				"match": null,
+				"run": 0
+			},
+			"normalized": {
+				"share": 0.05,
+				"match": "src\\ui\\modals.ts",
+				"run": 32
+			}
+		},
+		{
+			"file": "src\\modules\\home\\ui\\reading\\ReadingMiniPanel.tsx",
+			"tokens": 237,
+			"raw": {
+				"share": 0,
+				"match": null,
+				"run": 0
+			},
+			"normalized": {
+				"share": 0.05,
+				"match": "src\\widgets\\annotations.ts",
+				"run": 38
+			}
+		},
+		{
+			"file": "src\\modules\\home\\ui\\widgets\\fortune-stick.ts",
+			"tokens": 483,
+			"raw": {
+				"share": 0,
+				"match": null,
+				"run": 0
+			},
+			"normalized": {
+				"share": 0.05,
+				"match": "tests\\integrations.test.ts",
+				"run": 86
+			}
+		},
+		{
+			"file": "src\\theme\\styles\\markdown.css",
+			"tokens": 625,
+			"raw": {
+				"share": 0,
+				"match": null,
+				"run": 0
+			},
+			"normalized": {
+				"share": 0.05,
+				"match": "styles.css",
+				"run": 42
+			}
+		}
+	]
+}

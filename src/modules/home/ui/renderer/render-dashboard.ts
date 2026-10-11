@@ -1,14 +1,19 @@
 import { setLocalizedText } from '../../../../ui/primitives/localized-dom';
 import type { HoverParent } from 'obsidian';
-import { App, Component } from 'obsidian';
+import { App, Component, Platform } from 'obsidian';
+import { h } from 'preact';
+import { effectiveBoardLayout } from '../../core/board/layout';
+import { LayoutPicker } from '../LayoutPicker';
+import { Button } from '../../../../ui/primitives/Button';
+import { t } from '../../../../shared/i18n';
 import type { DashboardColumn, DashboardData, DashboardSettings } from '../../core/board/types/index';
 import { isUnderExcludedFolder, normalizeExcludeFolders } from '../../../../shared/exclude-folders';
 import { renderQuickNoteRegion } from '../notes/quick-note-section';
 import type { RenderCallbacks } from '../render-contract';
 import { captureScrollStates, restoreScrollStates } from '../ui/scroll-preserve';
-import { renderImmersiveBoard } from './render-immersive';
+import { renderImmersiveBoard, type ImmersiveEnvironment } from './render-immersive';
 import { renderSection } from './refresh-media-sections';
-import { getRenderContext } from './render-context';
+import { getRenderContext, mountDashboardPanel, unmountDashboardPanelsIn } from './render-context';
 import { getSectionType } from './render-text-with-links';
 
 export function renderDashboard(
@@ -18,7 +23,7 @@ export function renderDashboard(
 	app: App,
 	settings?: DashboardSettings,
 	hoverParent: HoverParent | null = null,
-	opts?: { skipQuickNotes?: boolean },
+	opts?: { skipQuickNotes?: boolean; immersive?: ImmersiveEnvironment },
 ): void {
 	getRenderContext(container).hoverParent = hoverParent;
 	getRenderContext(container).noteOpener = callbacks.onOpenNoteInPopover ?? null;
@@ -28,16 +33,12 @@ export function renderDashboard(
 
 	container.empty();
 	container.addClass('dashboard-kanban');
-	const layoutButton = container.createDiv({ cls: 'nand-board-layout', attr: { role: 'button', tabindex: '0' } });
-	setLocalizedText(layoutButton, data.layout === 'immersive' ? 'renderer.layoutStacked' : 'renderer.layoutImmersive');
-	const chooseLayout = () => callbacks.onBoardLayout?.(data.layout === 'immersive' ? 'stacked' : 'immersive');
-	layoutButton.addEventListener('click', chooseLayout);
-	layoutButton.addEventListener('keydown', (event) => {
-		if (event.key === 'Enter' || event.key === ' ') {
-			event.preventDefault();
-			chooseLayout();
-		}
-	});
+	const selectedLayout = effectiveBoardLayout(data.layout, settings?.layoutMode);
+	const layout = effectiveBoardLayout(data.layout, settings?.layoutMode, Platform.isPhone);
+	mountDashboardPanel(container.createDiv({ cls: 'nand-board-layout-host' }), h('div', { class: 'nand-board-controls' }, h(LayoutPicker, {
+		value: selectedLayout,
+		choose: next => callbacks.onBoardLayout?.(next),
+	}), h(Button, { onClick: () => callbacks.onBoardWidgets?.(), children: t('home.widget.manage') })));
 
 	// Quick Notes region: pinned at the top, above all sections (non-reorderable).
 	// Stacked layout hoists it out of the kanban entirely — the view renders it
@@ -47,8 +48,8 @@ export function renderDashboard(
 		renderQuickNoteRegion(container, settings, callbacks);
 	}
 
-	if (data.layout === 'immersive') {
-		renderImmersiveBoard(container, data, callbacks);
+	if (layout === 'immersive' && settings && opts?.immersive) {
+		renderImmersiveBoard(container, data, callbacks, app, settings, opts.immersive);
 		return;
 	}
 
@@ -57,9 +58,8 @@ export function renderDashboard(
 		container.appendChild(section);
 	}
 
-	const addColBtn = container.createDiv({ cls: 'dashboard-add-section' });
+	const addColBtn = container.createEl('button', { cls: 'dashboard-add-section', attr: { type: 'button' } });
 	setLocalizedText(addColBtn, 'renderer.addSection');
-	addColBtn.setAttribute('role', 'button');
 	addColBtn.addEventListener('click', () => {
 		callbacks.onRequestAddSection();
 	});
@@ -109,10 +109,18 @@ export function refreshScanningSections(
 		const signature = scanningSectionSignature(column, app);
 		if (getRenderContext(kanban).scanningSignatures.get(key) === signature) continue;
 		getRenderContext(kanban).scanningSignatures.set(key, signature);
+		const panel = oldEl.querySelector('.dashboard-library-content');
+		if (panel) {
+			// The mounted Preact panel refreshes rows without losing its open
+			// column editor, keyboard focus, search or pagination state.
+			panel.dispatchEvent(new CustomEvent('dashboard-library-refresh'));
+			continue;
+		}
 		const newEl = renderSection(column, callbacks, app, data, settings, getRenderContext(kanban));
 		// Carry the old row's scroll positions over the swap (file lists,
 		// library kanban) so a vault-event refresh doesn't yank the viewport.
 		const scrollStates = captureScrollStates(oldEl);
+		unmountDashboardPanelsIn(oldEl as HTMLElement);
 		oldEl.replaceWith(newEl);
 		restoreScrollStates(newEl, scrollStates);
 		refreshed++;

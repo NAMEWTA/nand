@@ -26,6 +26,10 @@ shared_path_owners: ["<Path>main.js</Path> => 2026-10-08-browser-ai-workbench::T
 
 # Ticket T-18: 有变量和结果证据的可复用浏览器流程
 
+<!-- ACTUAL-CODE-REVIEW:START -->
+2026-10-11 实际代码审查：[T-18.md](../evidence/T-18.md)。本票下文保留原规划合同与基线；当前实现、修复、验证及未验证条件以该记录为准。原“仅规划／未授权实施／必须提交”的阶段约束不适用于用户已授权的本次工作区审查；提交与远程操作仍未执行。
+<!-- ACTUAL-CODE-REVIEW:END -->
+
 - Ticket：<Path>{roots.state}/specdev/changes/2026-10-08-browser-ai-workbench/ticket/18-reusable-browser-workflow.md</Path>
 - 总控Map：<Path>{roots.state}/specdev/changes/2026-10-08-browser-ai-workbench/tickets-map.md</Path>
 - Spec：<Path>{roots.state}/specdev/changes/2026-10-08-browser-ai-workbench/spec.md</Path>
@@ -37,7 +41,7 @@ shared_path_owners: ["<Path>main.js</Path> => 2026-10-08-browser-ai-workbench::T
 
 **目标与可观察产出：** 用户把已验证的步骤保存成带变量的流程并手动运行/取消，看到每步前后条件和最终结果。
 
-**当前事实：** 现有浏览器操作是单次CLI/队列，无浏览器业务流程文档；automations已有全局scheduler，不能另造。
+**规划时基线：** 现有浏览器操作是单次CLI/队列，无浏览器业务流程文档；automations已有全局scheduler，不能另造。
 
 **来源：** AC-025, AC-034, AC-036；issue #142, #145；<Path>{roots.state}/specdev/changes/2026-10-08-browser-ai-workbench/reference-analysis.md</Path>。深度 deep：涉及持久数据/公共接口/进程或权限的跨边界合同，必须记录恢复与兼容。
 

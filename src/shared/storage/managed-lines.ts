@@ -1,6 +1,5 @@
 /** Align owned lines while leaving unmatched author prose and comments in place. */
-function matches(a: string[], b: string[]): Array<[number, number]> {
-	const key = (line: string) => line.trim();
+function matches(a: string[], b: string[], key: (line: string) => string): Array<[number, number]> {
 	if (a.length * b.length > 1_000_000) {
 		const positions = new Map<string, number[]>();
 		b.forEach((line, index) => {
@@ -33,20 +32,20 @@ function matches(a: string[], b: string[]): Array<[number, number]> {
 	}
 	return result;
 }
-export function patchManagedLines(original: string, baseline: string, next: string): string {
+export function patchManagedLines(original: string, baseline: string, next: string, key = (line: string) => line.trim()): string {
 	if (baseline === next) return original;
 	const newline = original.includes('\r\n') ? '\r\n' : '\n';
 	const split = (text: string) => text.replace(/\r\n/g, '\n').split('\n');
 	const raw = split(original),
 		base = split(baseline),
 		generated = split(next);
-	const rawAt = new Map(matches(base, raw));
+	const rawAt = new Map(matches(base, raw, key));
 	const deletions = new Set<number>(),
 		insertions = new Map<number, string[]>();
 	let previousBase = -1,
 		previousNext = -1;
 	for (const [baseIndex, nextIndex] of [
-		...matches(base, generated),
+		...matches(base, generated, key),
 		[base.length, generated.length] as [number, number],
 	]) {
 		const changed = Array.from({ length: baseIndex - previousBase - 1 }, (_, offset) => previousBase + 1 + offset);

@@ -9,6 +9,10 @@ sources: ["<Path>{roots.state}/specdev/changes/2026-10-08-terminal-reliability/s
 
 # Spec: 终端 helper 可安装性、错误反馈与句柄隔离
 
+<!-- ACTUAL-CODE-REVIEW:START -->
+2026-10-11 实际代码审查与修复：[review-index.md](evidence/review-index.md)，覆盖本 change 的 2 票、5 条 AC。下文保留原规划目标与当时基线，不能把“尚未实现／本轮只规划”当成当前代码状态。当前源码与接口以审查证据及 owner 的 `api.ts` 为准；未验证的账号或平台仍未验证，原 AC 没有删减。
+<!-- ACTUAL-CODE-REVIEW:END -->
+
 - ADR：<Path>{roots.state}/specdev/changes/2026-10-08-terminal-reliability/ADR.md</Path>
 - CONTEXT：<Path>{roots.state}/specdev/changes/2026-10-08-terminal-reliability/CONTEXT.md</Path>
 - 引用对照：<Path>{roots.state}/specdev/changes/2026-10-08-terminal-reliability/reference-analysis.md</Path>
@@ -19,7 +23,7 @@ sources: ["<Path>{roots.state}/specdev/changes/2026-10-08-terminal-reliability/s
 
 确保新安装真实下载校验后可打开Shell/Agent，并区分未发布资产与网络错误；Unix helper启动时不继承渲染进程无关句柄。
 
-### 当前事实
+### 规划时基线
 
 当前0.0.1-alpha.1 Release已有五平台helper和校验和；旧1.0.0背景不再成立。BinaryError含message但controller映射为笼统http文案；main.rs尚无继承FD清理。
 

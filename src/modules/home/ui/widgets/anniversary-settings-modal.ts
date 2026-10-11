@@ -7,6 +7,7 @@ import type { AnniversaryConfig } from '../../core/board/types/index';
 import { t } from '../../../../shared/i18n/index';
 import { applyModalTheme } from '../appearance/modal-theme';
 import { WidgetBackgroundModal } from './widget-background';
+import { AnniversaryDateEditor } from './AnniversaryDateEditor';
 
 /** Create/edit one anniversary ("纪念日") entry: a historical date plus the
  *  elapsed display precision and the annual reminder switch. Edits stay local
@@ -15,6 +16,10 @@ export class AnniversarySettingsModal extends Modal {
 	private readonly cfg: AnniversaryConfig;
 	private readonly onSave: (cfg: AnniversaryConfig) => void;
 	private preview: Setting | null = null;
+	private dateEditor?: AnniversaryDateEditor;
+	private dateValid = false;
+	private saveButton?: HTMLButtonElement;
+	private backgroundModal?: WidgetBackgroundModal;
 
 	constructor(app: App, cfg: AnniversaryConfig, onSave: (cfg: AnniversaryConfig) => void) {
 		super(app);
@@ -24,12 +29,13 @@ export class AnniversarySettingsModal extends Modal {
 			defaultLabel: usesDefaultWidgetLabel(cfg, 'anniversary'),
 		};
 		this.onSave = onSave;
+		this.dateValid = !!parseAnniversaryDate(this.cfg.startDate);
 	}
 
 	onOpen(): void {
 		const { contentEl, containerEl } = this;
 		contentEl.empty();
-		contentEl.addClass('dashboard-library-config-modal');
+		contentEl.addClass('dashboard-library-config-modal', 'nand-anniversary-modal');
 		this.modalEl.addClass('modal--dashboard');
 		containerEl.addClass('modal-bg--dashboard');
 		applyModalTheme(containerEl);
@@ -52,34 +58,13 @@ export class AnniversarySettingsModal extends Modal {
 					}),
 			);
 
-		bindLocalizedControl(bindLocalizedControl(new Setting(body)
-			.setName(t('anniversary.startDate')), "name", 'anniversary.startDate')
-			.setDesc(t('anniversary.startDateDesc')), "desc", 'anniversary.startDateDesc')
-			.addText((text) => {
-				// Native date input: Obsidian's Chromium renders a real
-				// calendar picker, localized by the OS, value always
-				// YYYY-MM-DD. A hand-rolled time part (if ever present) is
-				// preserved on top of the picked date.
-				text.inputEl.type = 'date';
-				text.setValue(this.cfg.startDate.split('T')[0] ?? '').onChange((v) => {
-					const timePart = this.cfg.startDate.includes('T') ? this.cfg.startDate.split('T')[1] : '';
-					this.cfg.startDate = v ? `${v}${timePart ? 'T' + timePart : ''}` : '';
-					this.updatePreview();
-				});
-			});
-
-		bindLocalizedControl(new Setting(body).setName(t('anniversary.calendar')), 'name', 'anniversary.calendar').addDropdown((dropdown) =>
-			bindLocalizedOptions(
-				dropdown
-					.addOption('solar', t('anniversary.solar'))
-					.addOption('lunar', t('anniversary.lunar'))
-					.setValue(this.cfg.calendar === 'lunar' ? 'lunar' : 'solar')
-					.onChange((value) => {
-						this.cfg.calendar = value === 'lunar' ? 'lunar' : 'solar';
-					}),
-				{ solar: ['anniversary.solar'], lunar: ['anniversary.lunar'] },
-			),
-		);
+		this.dateEditor = new AnniversaryDateEditor(body.createDiv(), this.cfg, (date, calendar, valid) => {
+			this.cfg.startDate = date;
+			this.cfg.calendar = calendar;
+			this.dateValid = valid;
+			if (this.saveButton) this.saveButton.disabled = !valid;
+			this.updatePreview();
+		});
 
 		bindLocalizedControl(bindLocalizedControl(new Setting(body)
 			.setName(t('anniversary.precision')), "name", 'anniversary.precision')
@@ -113,9 +98,10 @@ export class AnniversarySettingsModal extends Modal {
 			.setDesc(this.cfg.background?.image ?? '')
 			.addButton((btn) =>
 				bindLocalizedControl(btn.setButtonText(this.cfg.background ? t('common.edit') : t('wbg.set')), "buttonText", this.cfg.background ? ('common.edit') : ('wbg.set'), (this.cfg.background) ? (undefined) : (undefined)).onClick(() => {
-					new WidgetBackgroundModal(this.app, this.cfg.background, (bg) => {
+					this.backgroundModal = new WidgetBackgroundModal(this.app, this.cfg.background, (bg) => {
 						this.cfg.background = bg;
-					}).open();
+					});
+					this.backgroundModal.open();
 				}),
 			);
 
@@ -130,14 +116,16 @@ export class AnniversarySettingsModal extends Modal {
 				cls: 'dashboard-modal-btn dashboard-modal-btn--cancel',
 			}), 'common.cancel')
 			.addEventListener('click', () => this.close());
-		bindLocalizedElement(footer
+		this.saveButton = bindLocalizedElement(footer
 			.createEl('button', {
 				text: t('common.save'),
 				cls: 'dashboard-modal-btn dashboard-modal-btn--confirm',
-			}), 'common.save')
-			.addEventListener('click', () => {
-				this.close();
+			}), 'common.save');
+		this.saveButton.disabled = !this.dateValid;
+		this.saveButton.addEventListener('click', () => {
+				if (!this.dateValid) return;
 				this.onSave(this.cfg);
+				this.close();
 			});
 	}
 
@@ -145,11 +133,15 @@ export class AnniversarySettingsModal extends Modal {
 		if (!this.preview) return;
 		const start = parseAnniversaryDate(this.cfg.startDate);
 		this.preview.setDesc(
-			start ? formatElapsed(start, new Date(), this.cfg.precision) : t('anniversary.invalidDate'),
+			start && this.dateValid ? formatElapsed(start, new Date(), this.cfg.precision) : t('anniversary.invalidDate'),
 		);
 	}
 
 	onClose(): void {
+		this.dateEditor?.dispose();
+		this.dateEditor = undefined;
+		this.backgroundModal?.close();
+		this.backgroundModal = undefined;
 		this.contentEl.empty();
 	}
 }

@@ -201,6 +201,8 @@ const makeApp = () =>
 			},
 		},
 		metadataCache: {
+			on: () => ({}),
+			offref: () => {},
 			getFileCache: (f: StubFile) => ({ frontmatter: f.fm, tags: [] }),
 			fileToLinktext: (f: { path: string }) => f.path,
 		},

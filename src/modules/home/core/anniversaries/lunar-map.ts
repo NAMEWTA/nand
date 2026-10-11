@@ -32,7 +32,8 @@ export function lunarAnniversaryThisYear(startSolar: string, targetYear: number,
 		leap = false;
 		rule = 'plain-month';
 	}
-	const length = lookup.monthDays(targetYear, lunar.month, leap) ?? lunar.day;
+	const length = lookup.monthDays(targetYear, lunar.month, leap);
+	if (length !== 29 && length !== 30) throw new RangeError('Lunar month is unavailable');
 	const day = Math.min(lunar.day, length);
 	if (day !== lunar.day) rule = 'month-end';
 	return { solar: lookup.toSolar(targetYear, lunar.month, leap, day), rule, leapCollapsed: lunar.leap && !leap };

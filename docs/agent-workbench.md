@@ -63,6 +63,33 @@ Tokens come from the native logs. Input includes cache reads and writes; the cac
 
 Choose **Attach note or archive…** in the right-click menu of an agent session. The selected note (the editor's content when the note is open) is pasted into the input as one bracketed paste once the agent's input is ready; no Enter is added. Text, elements and screenshots captured in the [browser](browser.md) are attached through the same interface. If the session ends, or the input is not ready within 10 seconds, NAND reports an error.
 
+## Board skill buttons
+
+In Home, open **Board widgets** and add **Agent skills**. Configure buttons inside the widget: name, icon, agent, skill name, prompt template and a new or existing session. Buttons belong to this board's Markdown. Cancelling an edit writes nothing. An empty skill name sends a plain prompt.
+
+**Choose a discovered skill** reads `.agents/skills`, `.claude/skills` and `.codex/skills` only when you open or refresh the list. A skill's name comes from its `SKILL.md` frontmatter, or its directory name if no name is set; body text does not supply a name. Duplicate names show their sources. Saving a valid button remembers its name for that agent on this device, so a moved directory does not remove the remembered choice. Cancelling does not remember a draft. **Settings → Agents → Skill discovery** lets you clear remembered names or explicitly add directories, one absolute path per line. `~` expands on desktop. An empty setting scans no additional directories. Mobile supports vault discovery and remembered names; it does not read additional directories or run terminals.
+
+Explicit invocation syntax was checked against official documentation on October 10, 2026:
+
+| Agent | Skill name in the prompt | Reference |
+|---|---|---|
+| Claude Code | `/name`, including `/plugin:skill` | [Skills](https://code.claude.com/docs/en/skills) |
+| Codex | `$name` | [Build skills](https://learn.chatgpt.com/docs/build-skills) |
+| Grok | `/name`, including qualified names | [Skills guide](https://github.com/xai-org/grok-build/blob/main/crates/codegen/xai-grok-pager/docs/user-guide/08-skills.md) |
+| Pi | `/skill:name` | [Skills guide](https://github.com/earendil-works/pi/blob/main/packages/coding-agent/docs/skills.md) |
+| OpenCode | Plain prompt; the documented skill tool is selected by the model | [Agent skills](https://opencode.ai/docs/skills/) |
+| Gemini CLI | Plain prompt; `/skills` manages skills, and the model activates them | [Agent skills](https://geminicli.com/docs/cli/skills/) |
+
+NAND does not invent a user command for a model-selected skill tool. Discovery lists local names; it does not confirm that a CLI has loaded a skill. Actual provider execution still depends on that CLI's configuration and permissions.
+
+Templates support `{{path}}`, `{{title}}`, `{{folder}}`, `{{stage}}`, `{{paths}}` and `{{input}}`. Values are inserted once; braces inside a value and unknown variables remain literal. The widget supplies the current board path and title, with no selected files by default. The preview lets you add vault files, enter additional input, choose the destination and edit the final prompt. Once you edit the final text, changing template inputs does not overwrite it; **Rebuild from template** explicitly replaces it. Sending uses the final text as written and appends the selected file references.
+
+The sparkle button beside fleeting capture and in ordinary card headers opens this board's saved skills. Capture supplies its selected text, or the entire draft when nothing is selected, and its existing target note. An unsaved capture has an empty path and file scope; running a skill neither creates a note nor clears the draft. A linked card supplies the note's current path and title after moves or renames; an inline card supplies its title and board path. Only text selected inside that card becomes input. The preview can exclude context files, and cancelling leaves the capture and note unchanged.
+
+Preview is the default. **Skip preview for this button** applies only to that button and uses its current context immediately. Confirmation closes the preview. A new session uses the selected agent's existing account and permission settings; an existing session receives one unsent block, without Enter. Missing, ended or busy sessions report an error and never fall back to a new session. A disabled Agents module stays disabled.
+
+The automation run history records the final prompt, file references, source and terminal. It saves the invocation before starting or pasting and deduplicates repeated invocation IDs. **Started** is delivery, with completion reported by the CLI's native lifecycle; **Pasted · awaiting your submission** is not a completed model task. The 10-second delivery deadline ends waiting, so check run history for any task already accepted. Closing the page cancels its pending delivery wait, while accepted runtime tasks follow the existing automation lifecycle.
+
 ## Settings
 
 Under **Settings → Agents** (stored per device):
@@ -90,13 +117,19 @@ To learn when an agent is working, waiting or idle, NAND installs a small status
 
 Merged files keep your settings and other hooks, and the original is copied to a `.nand-backup` file next to it. The hook script itself is the file `nand-automation-hook.cjs` in a `hooks` folder inside a `.nand` folder in your home folder (outside the vault). The hook does nothing unless the process was started by NAND with its private event folder; it has no network access and does not log prompts. Pi waits for the real idle state, and OpenCode ignores child sessions and recoverable errors.
 
-The directory trust, login and hook permissions of each CLI stay under the CLI's control. For a CLI without a native completion event, a run shows *Submitted; completion unverified* until the process exits or you stop it.
+The directory trust, login and hook permissions of each CLI stay under the CLI's control. Codex requires review of new or changed hooks through its `/hooks` command; NAND does not bypass that review. See the [Codex hook reference](https://learn.chatgpt.com/docs/hooks).
+
+Prompt tasks used by other NAND modules have a default ten-minute deadline. The task can expose its terminal while waiting for login, trust or permissions. Cancellation and timeout stop that task's process. A completed task normally closes its terminal; a caller can explicitly retain it for inspection and remains responsible for closing it. Other manually opened terminals are unaffected.
+
+A prompt result comes from the CLI's native completion event and complete answer. Claude Code and Codex supply the final message in their hooks; Gemini supplies `prompt_response`; Pi supplies the settled turn's assistant message; OpenCode supplies the current turn's completed text parts through its local session client. Missing answers, process exit without an answer and answers exceeding 2 MiB of UTF-8 text return an error. Large hook input also produces an explicit error. No prompt or tool input is stored in the hook event spool. Tasks use the selected CLI's existing account and permission settings, and available usage comes from its native records.
 
 ## Terminal helper
 
 Terminals run in a small native program, `nand-pty` (MIT, source in `native/pty-server`). The plugin talks to it only over its standard input and output; it opens no port and needs no token. NAND checks the protocol version (3) at start and fails clearly on a mismatch. The helper ends all terminals when the plugin stops. On Windows it uses ConPTY and a job object so child processes end with it.
 
 The helper is published for Windows x64, macOS x64 and arm64, and Linux x64 and arm64. On first use, NAND downloads `nand-pty-<platform>-<arch>` (`.exe` on Windows) and its `.sha256` file from the release of the same plugin version, never from another version, and keeps them in the plugin's `binaries/` folder. If the checksum is missing, damaged or different, installation stops and the existing file stays. You can place the matching files of that release in `binaries/` yourself: with a network NAND checks them against the official digest and accepts them; with **Offline mode** on it never connects and only uses what is installed. After a failed download, open a terminal again to retry; no reload is needed. Developers can point the environment variable `NAND_PTY_BINARY` at a local build.
+
+Download errors identify the failed step. HTTP 404 means that this release has not published the helper or checksum for your platform; other HTTP failures show the status and plugin version. Connection failures and timeouts have separate messages. The developer console records the original release asset address, without redirect signatures or authentication details. A failed attempt keeps the installed binary and can be retried.
 
 ## Commands
 
@@ -112,4 +145,4 @@ The helper is published for Windows x64, macOS x64 and arm64, and Linux x64 and 
 
 ## Limits
 
-Install and sign in to each CLI on this computer first, and complete its own directory trust and permission prompts. Terminals and automations stop when Obsidian quits. CLIs differ in the history, completion events and quota they provide; missing information is shown as unknown or unavailable. Real sign-in, resume and quota flows of the CLIs, and the terminal on Windows and macOS, are not verified on a real host; see [Validation](../speculo/.speculo/specdev/context/validation.md).
+Install and sign in to each CLI on this computer first, and complete its own directory trust and permission prompts. Terminals and automations stop when Obsidian quits. CLIs differ in the history, completion events and quota they provide; missing information is shown as unknown or unavailable. Windows helper installation, shell input/resize and prompt process cleanup have been tested in real Obsidian. The prompt tests use a native-hook protocol fixture; complete answers from real Claude/Codex model runs, other CLI adapters, macOS and Linux still require validation. See the [runner evidence](../speculo/.speculo/specdev/changes/2026-10-08-news-aihot/evidence/review-runner.json) and [Validation](../speculo/.speculo/specdev/context/validation.md).

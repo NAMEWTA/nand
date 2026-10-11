@@ -32,6 +32,8 @@ export interface GuestContents extends NativeEvents {
 	capturePage(rect?: { x: number; y: number; width: number; height: number }): Promise<NativeImage>;
 }
 export interface GuestSession extends NativeEvents {
+	clearStorageData(): Promise<void>;
+	clearCache(): Promise<void>;
 	setPermissionRequestHandler(
 		handler: (_guest: unknown, _permission: string, callback: (allowed: boolean) => void) => void,
 	): void;

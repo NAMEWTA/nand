@@ -26,6 +26,10 @@ shared_path_owners: ["<Path>main.js</Path> => 2026-10-08-terminal-reliability::T
 
 # Ticket T-02: 在 helper 最早入口关闭继承的Unix描述符
 
+<!-- ACTUAL-CODE-REVIEW:START -->
+2026-10-11 实际代码审查：[T-02.md](../evidence/T-02.md)。本票下文保留原规划合同与基线；当前实现、修复、验证及未验证条件以该记录为准。原“仅规划／未授权实施／必须提交”的阶段约束不适用于用户已授权的本次工作区审查；提交与远程操作仍未执行。
+<!-- ACTUAL-CODE-REVIEW:END -->
+
 - Ticket：<Path>{roots.state}/specdev/changes/2026-10-08-terminal-reliability/ticket/02-unix-inherited-fds.md</Path>
 - 总控Map：<Path>{roots.state}/specdev/changes/2026-10-08-terminal-reliability/tickets-map.md</Path>
 - Spec：<Path>{roots.state}/specdev/changes/2026-10-08-terminal-reliability/spec.md</Path>
@@ -37,7 +41,7 @@ shared_path_owners: ["<Path>main.js</Path> => 2026-10-08-terminal-reliability::T
 
 **目标与可观察产出：** helper不再持有Obsidian无关IPC/共享内存，并保持终端会话正常。
 
-**当前事实：** main先建立资源，无fd隔离。
+**规划时基线：** main先建立资源，无fd隔离。
 
 **来源：** AC-004, AC-005；issue #135, #143；<Path>{roots.state}/specdev/changes/2026-10-08-terminal-reliability/reference-analysis.md</Path>。深度 deep：涉及持久数据/公共接口/进程或权限的跨边界合同，必须记录恢复与兼容。
 

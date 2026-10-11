@@ -14,7 +14,9 @@ Git sync commits, pulls and pushes the whole vault with the Git installed on you
 
 If the vault already lies inside a repository (including a vault that is only a subfolder of one), NAND uses that repository and commits only changes below the vault folder. You can also point **Repository folder** in the settings at a folder inside the vault.
 
-**NAND never clones a remote repository into an existing vault**, so nothing in the vault can be overwritten. To use an existing repository on a new device, clone it with Git first (`git clone <url> <folder>`) and open that folder as a vault in Obsidian.
+To use an existing repository on a new device, expand **Clone an existing repository** on the Git sync page. Enter the repository URL and an absolute path to a new or empty folder outside the current vault; its parent folder must already exist. Confirm the destination to start, or use **Cancel clone** while it runs. Credentials come from system Git; URLs with embedded passwords or HTTPS credentials are refused.
+
+NAND clones into a temporary sibling directory and checks the destination again before moving the result there. A non-empty destination, including files added while cloning, is preserved. Failed or cancelled attempts never trigger recursive cleanup: any retained files are reported with their temporary path for you to inspect. After success, open Obsidian's vault switcher and choose **Open folder as vault**. NAND keeps the current vault open until you switch.
 
 ## Authentication
 
@@ -23,7 +25,7 @@ Pushing and pulling use the authentication of the Git on your computer. Set it u
 - HTTPS: use a Git credential helper. Git for Windows ships Git Credential Manager; on macOS you can use `git config --global credential.helper osxkeychain`; `gh auth setup-git` also works.
 - SSH: add your key to the SSH agent and make sure `git push` in a terminal does not ask for a passphrase.
 
-NAND runs Git with prompts disabled (`GIT_TERMINAL_PROMPT=0`). A missing credential ends at once as *authentication failed* instead of hanging. Credentials are not written to the vault, the settings or the logs, and `https://user:token@` in error details is masked.
+NAND runs Git with prompts disabled (`GIT_TERMINAL_PROMPT=0`). A missing credential ends at once as *authentication failed* instead of hanging. Adding a remote or cloning refuses URLs with embedded credentials, query parameters or fragments. URL credentials and query strings in error details are masked; configure authentication through your system Git credential helper or SSH agent.
 
 ## The Changes page
 
@@ -88,9 +90,11 @@ When on, several unpushed commits are combined into one before the push, keeping
 - the remote branch is an ancestor of the local branch, so the remote has no commits you have not merged;
 - nothing is staged but uncommitted;
 - there are at least two unpushed commits and none is a merge commit;
-- no other branch or tag points into those commits.
+- no other reference, including a remote tracking branch, contains those commits.
 
-History that was already pushed is never rewritten. If squashing fails midway, the branch goes back to where it was.
+NAND reads and fetches the actual push destination before choosing the range. If the destination is ambiguous, squashing is skipped and Git uses its configured push behavior. The result explains why squashing was skipped. Forced refspecs and mirror pushes are refused.
+
+If the squash commit fails, the branch returns to its original HEAD. If squashing succeeds but pushing fails, the failure shows the original commit, retained at `refs/nand/pre-squash`; use `git branch nand-recovery refs/nand/pre-squash` to inspect that history without changing current files. This reference is replaced before the next squash.
 
 ## Automatic sync
 
@@ -173,9 +177,9 @@ Git commits the files of the vault: every note and attachment outside `.gitignor
 | Merge and rebase | Supported | — |
 | Submodules | Not managed (the system Git runs as configured) | — |
 
-A phone has no system Git and cannot use SSH, so Git sync is not offered there. To sync a phone, use another app that supports Git on the same repository.
+Obsidian mobile does not expose the desktop Git runner, so NAND does not offer Git sync there. To sync a phone, use another app that supports Git on the same repository.
 
-Not included: blame, hunk-level staging, a branch switcher, submodule management, a clone wizard and raw Git commands. The behavior of this module follows [obsidian-git](https://github.com/Vinzent03/obsidian-git) (MIT license); attribution and license text are in [NOTICE](../NOTICE).
+Not included: blame, hunk-level staging, a branch switcher, submodule management and raw Git commands. The behavior of this module follows [obsidian-git](https://github.com/Vinzent03/obsidian-git) (MIT license); attribution and license text are in [NOTICE](../NOTICE).
 
 Tests run against real Git with local bare remotes. HTTPS credential managers, SSH agents, a hosting provider's rejection messages and a large first push over a real network have not been exercised, see [Validation](../speculo/.speculo/specdev/context/validation.md).
 

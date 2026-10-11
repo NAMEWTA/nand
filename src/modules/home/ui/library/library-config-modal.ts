@@ -1,11 +1,11 @@
 import { bindLocalizedElement } from '../../../../ui/primitives/localized-dom';
 import { App, Modal, setIcon } from 'obsidian';
-import { selectTemplate, templateChoices } from '../../core/board/board-experience';
+import { templateChoices } from '../../core/board/board-experience';
 import type { LibraryConfig, PropertyFilterOperator } from '../../core/board/types/index';
 import { t } from '../../../../shared/i18n/index';
 import { ExcludeFoldersEditor } from '../ui/exclude-folders-editor';
 import { applyModalTheme } from '../appearance/modal-theme';
-import { PathPickerModal } from '../ui/path-picker-modal';
+import { TemplateListEditor } from './TemplateListEditor';
 import { extractFrontmatterProperties } from './library-file-result';
 import { VisiblePropertiesEditor } from './visible-properties-editor';
 
@@ -18,6 +18,7 @@ export class LibraryConfigModal extends Modal {
 	private config: LibraryConfig;
 	private availableProps: Map<string, Set<string>>;
 	private onSave: (config: LibraryConfig) => void;
+	private templates?: TemplateListEditor;
 
 	constructor(app: App, config: LibraryConfig, onSave: (config: LibraryConfig) => void) {
 		super(app);
@@ -284,23 +285,7 @@ export class LibraryConfigModal extends Modal {
 		// toolbar "+" (frontmatter merged from the section's filter props).
 		const tplSection = body.createDiv({ cls: 'dashboard-library-config-section' });
 		bindLocalizedElement(tplSection.createDiv({ cls: 'dashboard-library-config-section-title', text: t('library.newNoteTemplate') }), 'library.newNoteTemplate');
-		bindLocalizedElement(tplSection.createDiv({ cls: 'dashboard-library-config-hint', text: t('library.newNoteTemplateHint') }), 'library.newNoteTemplateHint');
-		const tplRow = tplSection.createDiv({ cls: 'dashboard-media-folder-input-row' });
-		const tplInput = tplRow.createEl('input', {
-			cls: 'dashboard-media-filter-folder',
-			attr: { type: 'text', placeholder: 'Templates/note.md' },
-		});
-		tplInput.value = this.config.templatePath ?? '';
-		bindLocalizedElement(tplRow
-			.createEl('button', {
-				cls: 'dashboard-media-folder-browse',
-				text: t('folder.browse'),
-			}), 'folder.browse')
-			.addEventListener('click', () => {
-				new PathPickerModal(this.app, 'file', (path) => {
-					tplInput.value = path;
-				}).open();
-			});
+		this.templates = new TemplateListEditor(this.app, tplSection.createDiv(), templateChoices(this.config.templatePath, this.config.templatePaths));
 
 		bindLocalizedElement(footer
 			.createEl('button', {
@@ -310,20 +295,20 @@ export class LibraryConfigModal extends Modal {
 			.addEventListener('click', () => {
 				const folders = excludeEditor.value;
 				const picked = pinnedEditor.value;
-				const typed = tplInput.value.trim();
-				const choices = templateChoices(undefined, typed ? [typed] : []);
-				const chosen = selectTemplate(choices, typed ? 0 : null);
+				const templates = this.templates!.value;
 				this.onSave({
 					...this.config,
 					excludeFolders: folders.length > 0 ? folders : undefined,
 					visibleProperties: picked.length > 0 ? picked : undefined,
-					templatePath: chosen || undefined,
+					templatePaths: templates,
+					templatePath: templates[0],
 				});
 				this.close();
 			});
 	}
 
 	onClose(): void {
+		this.templates?.dispose();
 		this.contentEl.empty();
 	}
 }

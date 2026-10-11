@@ -9,6 +9,10 @@ sources: ["<Path>{roots.state}/specdev/changes/2026-10-08-archives-completion/so
 
 # Spec: 档案列表、卡片与正文检索的完整核销
 
+<!-- ACTUAL-CODE-REVIEW:START -->
+2026-10-11 实际代码审查与修复：[review-index.md](evidence/review-index.md)，覆盖本 change 的 1 票、8 条 AC。下文保留原规划目标与当时基线，不能把“尚未实现／本轮只规划”当成当前代码状态。当前源码与接口以审查证据及 owner 的 `api.ts` 为准；未验证的账号或平台仍未验证，原 AC 没有删减。
+<!-- ACTUAL-CODE-REVIEW:END -->
+
 - ADR：<Path>{roots.state}/specdev/changes/2026-10-08-archives-completion/ADR.md</Path>
 - CONTEXT：<Path>{roots.state}/specdev/changes/2026-10-08-archives-completion/CONTEXT.md</Path>
 - 引用对照：<Path>{roots.state}/specdev/changes/2026-10-08-archives-completion/reference-analysis.md</Path>
@@ -19,7 +23,7 @@ sources: ["<Path>{roots.state}/specdev/changes/2026-10-08-archives-completion/so
 
 完成个人/企业同一数据的双布局、入口笔记全文搜索、命中解释和性能验收；现有实现优先复用。
 
-### 当前事实
+### 规划时基线
 
 当前 src/modules/archives 已实现列表/卡片、默认偏好、分区文本、关联名称依赖失效与摘要；#124 的旧目录和“只有字段搜索”已过时。91项定向基线测试通过，但不包含本轮新宿主/规模证据。
 

@@ -26,6 +26,10 @@ shared_path_owners: ["<Path>main.js</Path> => 2026-10-08-home-grid-rebuild::T-14
 
 # Ticket T-14: 实现有明确缺失日期规则的农历纪念日
 
+<!-- ACTUAL-CODE-REVIEW:START -->
+2026-10-11 实际代码审查：[T-14.md](../evidence/T-14.md)。本票下文保留原规划合同与基线；当前实现、修复、验证及未验证条件以该记录为准。原“仅规划／未授权实施／必须提交”的阶段约束不适用于用户已授权的本次工作区审查；提交与远程操作仍未执行。
+<!-- ACTUAL-CODE-REVIEW:END -->
+
 - Ticket：<Path>{roots.state}/specdev/changes/2026-10-08-home-grid-rebuild/ticket/14-lunar-anniversaries.md</Path>
 - 总控Map：<Path>{roots.state}/specdev/changes/2026-10-08-home-grid-rebuild/tickets-map.md</Path>
 - Spec：<Path>{roots.state}/specdev/changes/2026-10-08-home-grid-rebuild/spec.md</Path>
@@ -37,7 +41,7 @@ shared_path_owners: ["<Path>main.js</Path> => 2026-10-08-home-grid-rebuild::T-14
 
 **目标与可观察产出：** 用户输入农历日期可无损转换并在每年正确农历日提醒，闰月/短月政策明确。
 
-**当前事实：** core/calendar只有solar周年，lunar-compute在UI且夹带holiday平台读取；不可让core/services直接import UI。已有lunar-typescript可复用但要保持lazy。
+**规划时基线：** core/calendar只有solar周年，lunar-compute在UI且夹带holiday平台读取；不可让core/services直接import UI。已有lunar-typescript可复用但要保持lazy。
 
 **来源：** AC-057, AC-058, AC-059, AC-060；issue #137, #141；<Path>{roots.state}/specdev/changes/2026-10-08-home-grid-rebuild/reference-analysis.md</Path>。深度 deep：涉及持久数据/公共接口/进程或权限的跨边界合同，必须记录恢复与兼容。
 

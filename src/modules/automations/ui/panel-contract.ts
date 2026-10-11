@@ -1,7 +1,7 @@
 import type { AutomationsApi } from '../core/api';
 import type { AutomationDefinition } from '../../../shared/automation/types';
 import type { AutomationEditRequest } from '../core/api';
-import type { TaskTarget } from './editor';
+import type { TaskTarget, WorkflowEditorSources } from './editor';
 export interface AutomationViewHost {
 	service: AutomationsApi;
 	edit(definition?: AutomationDefinition): void;
@@ -14,6 +14,7 @@ export interface AutomationViewHost {
 	taskTargets?(): Promise<TaskTarget[]>;
 	/** Default working directory for agent and script actions (the vault folder on desktop). */
 	readonly cwd?: string;
+	readonly workflowSources?: WorkflowEditorSources;
 }
 export interface AutomationPanelState {
 	selected: string;

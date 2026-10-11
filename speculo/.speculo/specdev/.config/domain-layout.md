@@ -77,6 +77,6 @@ These terms are used the same way in code, documents and the interface. Terms th
 - The source and reproducible checks outrank prose. When they disagree, fix the document.
 - Documents describe what is true now, in the present tense. A claim about a platform, version or account is written as verified only when [validation](../context/validation.md) says so.
 - Each document has one owner: user guides describe operation and data; the domain map defines terms and ownership; ADRs explain decisions; the baseline and validation documents state facts and measured results. They do not copy each other.
-- Every document is bilingual: the English file is canonical, the Chinese file mirrors it, and each starts with a language switch line.
+- User guides, repository entries and permanent SpecDev knowledge are bilingual: the English file is canonical, the Chinese file mirrors it, and each starts with a language switch line. Change and archive workflow artifacts keep their working or captured source language; immutable issue captures are not rewritten for translation. Skills under `.agents/` are Chinese only. Original license texts keep their original language; third-party reference guides under `docs/` remain bilingual.
 - `changes/` holds only work in progress and `status.json` lists exactly those directories. `pnpm test:docs` checks links, anchors, the status index and the required documents.
 - Third-party licenses and source attributions are kept with the code that uses them (`NOTICE`, `THIRD-PARTY-NOTICES.md`).

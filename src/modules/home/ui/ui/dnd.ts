@@ -111,7 +111,7 @@ export function setupDragAndDrop(
 			// A library kanban card drag hovering this section row: decline early
 			// (no preventDefault, no highlight, no drop indicator) so the row can't
 			// masquerade as a drop target for a file move it would silently ignore.
-			if (e.dataTransfer?.types.includes(KANBAN_FILE_DRAG_TYPE)) return;
+			if (e.dataTransfer?.types.some(type => type === KANBAN_FILE_DRAG_TYPE || type === 'application/x-nand-pipeline-path')) return;
 			// An in-card item drag is none of the section row's business either
 			// (no card move, no section reorder): decline the same way so no
 			// misleading card drop indicator is painted over empty row space.

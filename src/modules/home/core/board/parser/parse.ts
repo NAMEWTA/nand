@@ -2,6 +2,9 @@ import { taskMetaSuffix } from '../../../../../shared/automation/metadata';
 import type { DashboardData, TaskItem } from '../types/model';
 import { escapeYamlString, serializeDocTree } from './extract-card-parts';
 import { preserveDashboardDocument } from './preserve-document';
+import { boardTilesNeedRepair, readBoardMembers, readBoardTiles } from '../board-codec';
+import { readSkillShortcuts } from '../skill-shortcuts';
+import { readMarkdownDocument, readYaml } from '../../../../../shared/storage/markdown-document';
 import {
 	parseBanner,
 	parseColumnDefs,
@@ -23,6 +26,10 @@ export function parse(markdown: string): DashboardData {
 	const layout = frontmatter.layout;
 	if (layout === 'side' || layout === 'stacked' || layout === 'immersive') data.layout = layout;
 	if (frontmatter.gridPacked === true) data.gridPacked = true;
+	data.widgets = readBoardMembers(frontmatter.widgets);
+	data.immersive = readBoardTiles(frontmatter.immersive);
+	data.skills = readSkillShortcuts(frontmatter.skills);
+	if (boardTilesNeedRepair(frontmatter.immersive)) data.layoutNeedsRepair = true;
 	if (quickActionOrder) data.quickActionOrder = quickActionOrder;
 	const hiddenPresets = parseHiddenPresets(frontmatter);
 	if (hiddenPresets) data.hiddenPresets = hiddenPresets;
@@ -31,7 +38,30 @@ export function parse(markdown: string): DashboardData {
 }
 export function serialize(data: DashboardData): string {
 	const generated = serializeManaged(data);
-	return data.document ? preserveDashboardDocument(data.document.source, data.document.baseline, generated) : generated;
+	if (!data.document) return generated;
+	if (data.document.baseline === generated) return data.document.source;
+	return preserveDashboardDocument(data.document.source, geometryCommitBaseline(data, generated), generated);
+}
+
+/** Only an explicit layout/member/geometry edit commits a normalized tile projection. */
+function geometryCommitBaseline(data: DashboardData, generated: string): string {
+	const snapshot = data.document!;
+	const before = readMarkdownDocument(snapshot.baseline);
+	const baseDoc = readYaml(before.yaml);
+	const base = baseDoc.toJSON() as Record<string, unknown>;
+	const next = splitFrontmatter(generated).frontmatter;
+	if (['layout', 'widgets', 'immersive'].every(key => JSON.stringify(base[key]) === JSON.stringify(next[key]))) return snapshot.baseline;
+	const raw = splitFrontmatter(snapshot.source).frontmatter.immersive;
+	if (!Array.isArray(raw)) return snapshot.baseline;
+	// Retain ownership of legacy h until the explicit write removes it. Unknown
+	// fields remain in the source node, outside this owned baseline projection.
+	const keys = ['id', 'w', 'cap', 'h', 'fixed', 'x', 'y'];
+	baseDoc.set('immersive', raw.map((entry: unknown) => {
+		if (!entry || typeof entry !== 'object' || Array.isArray(entry)) return entry;
+		const value = entry as Record<string, unknown>;
+		return Object.fromEntries(keys.filter(key => key in value).map(key => [key, value[key]]));
+	}));
+	return `---\n${baseDoc.toString({ lineWidth: 0 })}---\n${before.body}`;
 }
 function serializeManaged(data: DashboardData): string {
 	const lines: string[] = [];
@@ -40,6 +70,9 @@ function serializeManaged(data: DashboardData): string {
 	lines.push('dashboard: true');
 	if (data.layout) lines.push(`layout: ${data.layout}`);
 	if (data.gridPacked) lines.push('gridPacked: true');
+	if (data.widgets) lines.push(`widgets: ${JSON.stringify(data.widgets)}`);
+	if (data.immersive) lines.push(`immersive: ${JSON.stringify(data.immersive)}`);
+	if (data.skills) lines.push(`skills: ${JSON.stringify(data.skills)}`);
 
 	lines.push('banner:');
 	lines.push(`  quote: "${escapeYamlString(data.banner.quote)}"`);
@@ -66,6 +99,7 @@ function serializeManaged(data: DashboardData): string {
 			lines.push(`    - "${escapeYamlString(img)}"`);
 		}
 	}
+	if (data.banner.imagePos) lines.push(`  imagePos: ${JSON.stringify(data.banner.imagePos)}`);
 	if (data.banner.mode === 'stats') {
 		lines.push('  mode: stats');
 	}
@@ -123,10 +157,12 @@ function serializeManaged(data: DashboardData): string {
 	lines.push('columns:');
 	for (const col of data.columns) {
 		lines.push(`  - name: "${escapeYamlString(col.name)}"`);
+		if (col.id) lines.push(`    id: ${JSON.stringify(col.id)}`);
 		lines.push(`    color: "${col.color}"`);
 		if (col.sectionType) {
 			lines.push(`    type: ${col.sectionType}`);
 		}
+		if (col.pipelineConfig) lines.push(`    pipeline: ${JSON.stringify(col.pipelineConfig)}`);
 		if (col.libraryConfig) {
 			lines.push('    library:');
 			const lc = col.libraryConfig;
@@ -160,6 +196,9 @@ function serializeManaged(data: DashboardData): string {
 			if (lc.templatePath) {
 				lines.push(`      templatePath: "${escapeYamlString(lc.templatePath)}"`);
 			}
+			if (lc.templatePaths !== undefined) lines.push(`      templatePaths: ${JSON.stringify(lc.templatePaths)}`);
+			if (lc.tableOrder !== undefined) lines.push(`      tableOrder: ${JSON.stringify(lc.tableOrder)}`);
+			if (lc.tableHidden !== undefined) lines.push(`      tableHidden: ${JSON.stringify(lc.tableHidden)}`);
 			if (lc.taskGroupBy) {
 				lines.push(`      taskGroupBy: ${lc.taskGroupBy}`);
 			}
@@ -310,6 +349,7 @@ function serializeManaged(data: DashboardData): string {
 
 		if (
 			column.sectionType === 'library' ||
+			column.sectionType === 'pipeline' ||
 			column.sectionType === 'folder' ||
 			column.sectionType === 'images' ||
 			column.sectionType === 'videos' ||
@@ -367,6 +407,7 @@ function serializeManaged(data: DashboardData): string {
 			if (card.coverImage) {
 				lines.push(`cover: ${card.coverImage}`);
 			}
+			if (card.coverPos !== undefined) lines.push(`coverPos: ${card.coverPos}`);
 
 			if (card.width > 0) {
 				lines.push(`width: ${card.width}`);

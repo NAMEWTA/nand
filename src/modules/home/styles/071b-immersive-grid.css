@@ -1,10 +1,45 @@
-.nand-board-layout {
-	display: inline-flex;
+.nand-board-layout-host {
+	flex: 0 0 100%;
+	min-width: 0;
+}
+
+.nand-board-controls,
+.nand-widget-catalog li {
+	display: flex;
 	align-items: center;
-	min-height: 32px;
+	flex-wrap: wrap;
+	gap: var(--nand-space-2);
+}
+
+.nand-widget-catalog li {
+	margin-block: var(--nand-space-2);
+}
+
+.nand-widget-status button,
+.dashboard-sidebar-news button {
+	min-height: var(--nand-control-height);
+	white-space: normal;
+	text-align: start;
+}
+
+.nand-widget-status button:focus-visible,
+.dashboard-sidebar-news button:focus-visible {
+	box-shadow: var(--nand-focus-ring);
+}
+
+.nand-board-layout {
+	display: flex;
+	align-items: center;
+	flex-wrap: wrap;
+	gap: var(--nand-space-2);
+	min-height: var(--nand-control-height);
 	margin: 0 0 8px;
 	padding: 0 10px;
-	cursor: pointer;
+}
+
+.nand-board-layout select {
+	width: auto;
+	max-width: 100%;
 }
 
 .nand-dashboard-root[data-board='immersive'] .dashboard-kanban {
@@ -13,10 +48,12 @@
 }
 
 .nand-immersive-grid {
+	position: relative;
 	display: grid;
 	width: 100%;
 	grid-auto-rows: 10px;
-	gap: 10px;
+	column-gap: 10px;
+	row-gap: 0;
 	align-content: start;
 }
 
@@ -25,26 +62,116 @@
 	min-width: 0;
 	min-height: 0;
 	overflow: hidden;
+	padding-bottom: 10px;
+	box-sizing: border-box;
 }
 
 .nand-immersive-grip,
 .nand-immersive-resize {
 	font: inherit;
 	color: inherit;
+	touch-action: none;
 }
 
 .nand-immersive-grip {
 	display: block;
-	width: 100%;
-	height: 100%;
+	flex: 1;
+	min-width: 32px;
+	overflow: hidden;
+	text-overflow: ellipsis;
 	text-align: start;
 	cursor: grab;
 }
 
 .nand-immersive-resize {
 	position: absolute;
-	right: 2px;
-	bottom: 2px;
-	z-index: 1;
+	inset-inline-end: 2px;
+	bottom: 12px;
+	z-index: var(--nand-z-sticky);
 	cursor: nwse-resize;
+}
+
+.nand-immersive-surface {
+	display: flex;
+	flex-direction: column;
+	height: 100%;
+	min-height: 0;
+	border: var(--nand-border);
+	border-radius: var(--nand-radius-md);
+	background: var(--nand-surface);
+	overflow: hidden;
+}
+
+.nand-immersive-toolbar {
+	display: flex;
+	flex: 0 0 auto;
+	min-width: 0;
+	gap: var(--nand-space-1);
+}
+
+.nand-immersive-toolbar button {
+	min-width: 32px;
+	min-height: 32px;
+}
+
+.nand-immersive-toolbar button:focus-visible {
+	box-shadow: var(--nand-focus-ring);
+}
+
+.nand-immersive-body {
+	min-height: 0;
+	min-width: 0;
+	overflow: auto;
+	flex: 1;
+}
+
+.nand-immersive-content {
+	display: flow-root;
+	min-width: 0;
+}
+
+.nand-immersive-content > .dashboard-section-row,
+.nand-immersive-content > .dashboard-card {
+	width: 100%;
+	max-width: none;
+	min-width: 0;
+	margin: 0;
+}
+
+.nand-immersive-content > .dashboard-section-row {
+	max-height: none;
+	height: auto;
+}
+
+.nand-immersive-content .dashboard-section-resize-handle,
+.nand-immersive-content .dashboard-section-grip,
+.nand-immersive-content > .dashboard-card .dashboard-card-resize-handle {
+	display: none;
+}
+
+.nand-immersive-ghost {
+	border: 2px dashed var(--interactive-accent);
+	z-index: var(--nand-z-overlay);
+	margin-bottom: 10px;
+	pointer-events: none;
+}
+
+.nand-immersive-ghost[hidden],
+.nand-immersive-projection[hidden] {
+	display: none;
+}
+
+.nand-immersive-projection {
+	color: var(--text-muted);
+}
+
+.nand-immersive-grid[data-dragging='true'] {
+	user-select: none;
+}
+
+@media (pointer: coarse) {
+	.nand-immersive-toolbar button {
+		min-width: 44px;
+		min-height: 44px;
+	}
 }

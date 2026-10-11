@@ -1,0 +1,410 @@
+{
+  "rows": [
+    {
+      "name": "all-matching-records-contribute-columns-beyond-current-page",
+      "passed": true,
+      "detail": [
+        "file.name",
+        "file.modified",
+        "property:status",
+        "property:owner",
+        "property:name",
+        "property:late"
+      ]
+    },
+    {
+      "name": "opening-column-controls-does-not-write-board",
+      "passed": true
+    },
+    {
+      "name": "keyboard-hide-retains-focused-native-input",
+      "passed": true
+    },
+    {
+      "name": "hide-affects-only-one-section",
+      "passed": true
+    },
+    {
+      "name": "reorder-retains-focused-button-after-board-save",
+      "passed": true
+    },
+    {
+      "name": "boundary-reorder-keeps-focus-and-owner-first",
+      "passed": true
+    },
+    {
+      "name": "second-section-has-independent-order-and-hidden-set",
+      "passed": true
+    },
+    {
+      "name": "preferences-never-write-Work/Note00.md",
+      "passed": true
+    },
+    {
+      "name": "preferences-never-write-Work/Note01.md",
+      "passed": true
+    },
+    {
+      "name": "preferences-never-write-Work/Note02.md",
+      "passed": true
+    },
+    {
+      "name": "preferences-never-write-Work/Note03.md",
+      "passed": true
+    },
+    {
+      "name": "preferences-never-write-Work/Note04.md",
+      "passed": true
+    },
+    {
+      "name": "preferences-never-write-Work/Note05.md",
+      "passed": true
+    },
+    {
+      "name": "preferences-never-write-Work/Note06.md",
+      "passed": true
+    },
+    {
+      "name": "preferences-never-write-Work/Note07.md",
+      "passed": true
+    },
+    {
+      "name": "preferences-never-write-Work/Note08.md",
+      "passed": true
+    },
+    {
+      "name": "preferences-never-write-Work/Note09.md",
+      "passed": true
+    },
+    {
+      "name": "preferences-never-write-Work/Note10.md",
+      "passed": true
+    },
+    {
+      "name": "preferences-never-write-Work/Note11.md",
+      "passed": true
+    },
+    {
+      "name": "preferences-never-write-Work/Note12.md",
+      "passed": true
+    },
+    {
+      "name": "preferences-never-write-Work/Note13.md",
+      "passed": true
+    },
+    {
+      "name": "preferences-never-write-Work/Note14.md",
+      "passed": true
+    },
+    {
+      "name": "preferences-never-write-Work/Note15.md",
+      "passed": true
+    },
+    {
+      "name": "preferences-never-write-Work/Note16.md",
+      "passed": true
+    },
+    {
+      "name": "preferences-never-write-Work/Note17.md",
+      "passed": true
+    },
+    {
+      "name": "preferences-never-write-Work/Note18.md",
+      "passed": true
+    },
+    {
+      "name": "preferences-never-write-Work/Note19.md",
+      "passed": true
+    },
+    {
+      "name": "preferences-never-write-Work/Note20.md",
+      "passed": true
+    },
+    {
+      "name": "preferences-never-write-Work/Note21.md",
+      "passed": true
+    },
+    {
+      "name": "preferences-never-write-Work/Note22.md",
+      "passed": true
+    },
+    {
+      "name": "preferences-never-write-Work/Note23.md",
+      "passed": true
+    },
+    {
+      "name": "preferences-never-write-Work/Note24.md",
+      "passed": true
+    },
+    {
+      "name": "missing-fields-retain-preferences-and-are-marked-absent",
+      "passed": true
+    },
+    {
+      "name": "new-field-appends-visible-in-both-sections",
+      "passed": true
+    },
+    {
+      "name": "returned-fields-restore-order-and-hidden-preference",
+      "passed": true
+    },
+    {
+      "name": "file-changes-never-rewrite-table-preferences",
+      "passed": true
+    },
+    {
+      "name": "no-errors-before-restart",
+      "passed": true,
+      "detail": []
+    },
+    {
+      "name": "two-section-preferences-survive-restart",
+      "passed": true
+    },
+    {
+      "name": "columns-system-light-500",
+      "passed": true,
+      "detail": {
+        "width": 392,
+        "scroll": 392,
+        "tableHeight": 118,
+        "controls": true
+      }
+    },
+    {
+      "name": "columns-system-light-800",
+      "passed": true,
+      "detail": {
+        "width": 611,
+        "scroll": 611,
+        "tableHeight": 354,
+        "controls": true
+      }
+    },
+    {
+      "name": "columns-system-light-1500",
+      "passed": true,
+      "detail": {
+        "width": 1051,
+        "scroll": 1051,
+        "tableHeight": 354,
+        "controls": true
+      }
+    },
+    {
+      "name": "columns-system-dark-500",
+      "passed": true,
+      "detail": {
+        "width": 392,
+        "scroll": 392,
+        "tableHeight": 118,
+        "controls": true
+      }
+    },
+    {
+      "name": "columns-system-dark-800",
+      "passed": true,
+      "detail": {
+        "width": 611,
+        "scroll": 611,
+        "tableHeight": 354,
+        "controls": true
+      }
+    },
+    {
+      "name": "columns-system-dark-1500",
+      "passed": true,
+      "detail": {
+        "width": 1051,
+        "scroll": 1051,
+        "tableHeight": 354,
+        "controls": true
+      }
+    },
+    {
+      "name": "columns-claude-code-light-500",
+      "passed": true,
+      "detail": {
+        "width": 392,
+        "scroll": 392,
+        "tableHeight": 118,
+        "controls": true
+      }
+    },
+    {
+      "name": "columns-claude-code-light-800",
+      "passed": true,
+      "detail": {
+        "width": 611,
+        "scroll": 611,
+        "tableHeight": 354,
+        "controls": true
+      }
+    },
+    {
+      "name": "columns-claude-code-light-1500",
+      "passed": true,
+      "detail": {
+        "width": 1051,
+        "scroll": 1051,
+        "tableHeight": 354,
+        "controls": true
+      }
+    },
+    {
+      "name": "columns-claude-code-dark-500",
+      "passed": true,
+      "detail": {
+        "width": 392,
+        "scroll": 392,
+        "tableHeight": 118,
+        "controls": true
+      }
+    },
+    {
+      "name": "columns-claude-code-dark-800",
+      "passed": true,
+      "detail": {
+        "width": 611,
+        "scroll": 611,
+        "tableHeight": 354,
+        "controls": true
+      }
+    },
+    {
+      "name": "columns-claude-code-dark-1500",
+      "passed": true,
+      "detail": {
+        "width": 1051,
+        "scroll": 1051,
+        "tableHeight": 354,
+        "controls": true
+      }
+    },
+    {
+      "name": "columns-eye-care-light-500",
+      "passed": true,
+      "detail": {
+        "width": 392,
+        "scroll": 392,
+        "tableHeight": 118,
+        "controls": true
+      }
+    },
+    {
+      "name": "columns-eye-care-light-800",
+      "passed": true,
+      "detail": {
+        "width": 611,
+        "scroll": 611,
+        "tableHeight": 354,
+        "controls": true
+      }
+    },
+    {
+      "name": "columns-eye-care-light-1500",
+      "passed": true,
+      "detail": {
+        "width": 1051,
+        "scroll": 1051,
+        "tableHeight": 354,
+        "controls": true
+      }
+    },
+    {
+      "name": "columns-eye-care-dark-500",
+      "passed": true,
+      "detail": {
+        "width": 392,
+        "scroll": 392,
+        "tableHeight": 118,
+        "controls": true
+      }
+    },
+    {
+      "name": "columns-eye-care-dark-800",
+      "passed": true,
+      "detail": {
+        "width": 611,
+        "scroll": 611,
+        "tableHeight": 354,
+        "controls": true
+      }
+    },
+    {
+      "name": "columns-eye-care-dark-1500",
+      "passed": true,
+      "detail": {
+        "width": 1051,
+        "scroll": 1051,
+        "tableHeight": 354,
+        "controls": true
+      }
+    },
+    {
+      "name": "appearance-and-resize-never-persist-preferences",
+      "passed": true
+    },
+    {
+      "name": "keyboard-reset-clears-only-first-section-preferences",
+      "passed": true
+    },
+    {
+      "name": "reset-restores-default-visible-fields",
+      "passed": true
+    },
+    {
+      "name": "column-controls-owned-by-popout",
+      "passed": true
+    },
+    {
+      "name": "module-disable-unmounts-table-editor",
+      "passed": true
+    },
+    {
+      "name": "no-native-errors",
+      "passed": true,
+      "detail": []
+    }
+  ],
+  "unverified": [
+    "Actual phone hardware"
+  ],
+  "state": "implemented-native62-home82-phone-unverified",
+  "nativeEvidence": "C:\\Users\\cdewta\\AppData\\Local\\Temp\\nand-home-table-columns-review-ff672cf614a74eea885549556aeb87d7\\evidence",
+  "harness": "scripts/obsidian-acceptance/home-table-columns.mjs",
+  "screenshotsInspected": [
+    "columns-system-light-500.png",
+    "columns-popout.png (equivalent 62-pass run before bounded editor CSS)"
+  ],
+  "codeReview": [
+    "Separate tableOrder/tableHidden codec; read/reset preserve unknown source and card badge preferences.",
+    "Stable file.name/file.modified and property:<key> identities; all matching notes contribute independently of current page/group.",
+    "Missing/hidden-only identities retained and new fields append visibly.",
+    "Native keyed controls and in-place config writes retain keyboard focus; bounded scroll area preserves table visibility.",
+    "Metadata changed subscription fixes cold-start incomplete fields; owned timers/listeners are cleaned on unmount.",
+    "Scanning refresh now asks the mounted panel to requery instead of replacing it; fallback replacement explicitly unmounts Preact panels."
+  ],
+  "verification": {
+    "build": "pass",
+    "lint": "pass",
+    "architecture": "844 modules pass",
+    "i18n": "3118 keys pass",
+    "css": "108 files; 67 files/150 baseline groups; no new violations",
+    "styles": "109 sources, 737810 bytes",
+    "homeAndGolden": "82 tests passed in 25 files; TEMP/nand-review-table-home-tests.log",
+    "lastFullRegression": "T11 checkpoint: 551 passed/4 skipped; T12 runs relevant Home/golden tests and targeted scripts; final integrated full run remains.",
+    "targetedScripts": [
+      "visible-properties pass",
+      "library-new-note pass",
+      "refresh-scope pass (updated to assert in-place invalidation and retained identity)"
+    ],
+    "bundle": {
+      "state": "within limits",
+      "mainBytes": 3986203,
+      "stylesBytes": 737810,
+      "reason": "T12 feature: main budget +4 KiB, scoped editor CSS +1 KiB; startup/module budgets unchanged"
+    },
+    "docs": "standard gate still fails inherited planning exceptions; exact prior scoped exception passes 548 files/541 local links/332 external links"
+  }
+}

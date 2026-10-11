@@ -2,6 +2,7 @@ import { DEFAULT_TASK_ARCHIVE_PATH } from '../../core/board/default-paths';
 import { Setting, type TextComponent } from 'obsidian';
 
 import { t } from '../../../../shared/i18n/index';
+import { openOwnedDashboardModal } from '../ui/dialog-scope';
 import { ThemeStudioModal } from '../appearance/theme-studio-modal';
 import { QuickNoteConfigModal } from '../notes/quick-note-config-modal';
 import { PathPickerModal } from '../ui/path-picker-modal';
@@ -18,7 +19,7 @@ export function renderGeneralSettings(this: BoardSettingsTab, containerEl: HTMLE
 				.setButtonText(t('themeStudio.open'))
 				.setCta()
 				.onClick(() => {
-					new ThemeStudioModal(this.app, this.plugin).open();
+					openOwnedDashboardModal(this.app, new ThemeStudioModal(this.app, this.plugin), this);
 				}),
 		);
 
@@ -34,7 +35,7 @@ export function renderGeneralSettings(this: BoardSettingsTab, containerEl: HTMLE
 		)
 		.addButton((btn) =>
 			btn.setButtonText(t('quickNote.config')).onClick(() => {
-				new QuickNoteConfigModal(this.app, this.plugin).open();
+				openOwnedDashboardModal(this.app, new QuickNoteConfigModal(this.app, this.plugin), this);
 			}),
 		);
 

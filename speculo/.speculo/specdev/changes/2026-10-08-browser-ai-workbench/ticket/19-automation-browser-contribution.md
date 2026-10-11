@@ -26,6 +26,10 @@ shared_path_owners: ["<Path>main.js</Path> => 2026-10-08-browser-ai-workbench::T
 
 # Ticket T-19: 接入既有自动化调度与统一运行回执
 
+<!-- ACTUAL-CODE-REVIEW:START -->
+2026-10-11 实际代码审查：[T-19.md](../evidence/T-19.md)。本票下文保留原规划合同与基线；当前实现、修复、验证及未验证条件以该记录为准。原“仅规划／未授权实施／必须提交”的阶段约束不适用于用户已授权的本次工作区审查；提交与远程操作仍未执行。
+<!-- ACTUAL-CODE-REVIEW:END -->
+
 - Ticket：<Path>{roots.state}/specdev/changes/2026-10-08-browser-ai-workbench/ticket/19-automation-browser-contribution.md</Path>
 - 总控Map：<Path>{roots.state}/specdev/changes/2026-10-08-browser-ai-workbench/tickets-map.md</Path>
 - Spec：<Path>{roots.state}/specdev/changes/2026-10-08-browser-ai-workbench/spec.md</Path>
@@ -37,7 +41,7 @@ shared_path_owners: ["<Path>main.js</Path> => 2026-10-08-browser-ai-workbench::T
 
 **目标与可观察产出：** 在现有automations页面选浏览器流程、运行/可选调度，并用同一receipt查看取消/结果。
 
-**当前事实：** automations现有SourceRef/action尚无browser流程，home专票负责共享receipt与typed贡献合同；本票消费owner已交付API，不修改其实现。 父确认home::T-07将补typed workflow runner/source/action contribution，本票只消费。
+**规划时基线：** automations现有SourceRef/action尚无browser流程，home专票负责共享receipt与typed贡献合同；本票消费owner已交付API，不修改其实现。 父确认home::T-07将补typed workflow runner/source/action contribution，本票只消费。
 
 **来源：** AC-037；issue #142, #145；<Path>{roots.state}/specdev/changes/2026-10-08-browser-ai-workbench/reference-analysis.md</Path>。深度 deep：涉及持久数据/公共接口/进程或权限的跨边界合同，必须记录恢复与兼容。
 

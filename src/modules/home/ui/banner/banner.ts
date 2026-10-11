@@ -12,6 +12,8 @@ import { renderBannerStats } from './banner-stats';
 import { BannerQuotePanel } from './BannerQuotePanel';
 import { CENTER_STAT_OPTIONS, LEFT_STAT_OPTIONS, resolveStatsConfig, RIGHT_STAT_OPTIONS } from './stats-data';
 import { homeServices } from '../../services/instances';
+import { editImageFocal, focalPosition } from '../../core/board/focal-point';
+import { mountFocalEditor } from '../images/focal-editor';
 
 export function getActiveQuote(banner: BannerData): QuoteItem {
 	if (banner.quotes && banner.quotes.length > 0) {
@@ -80,6 +82,7 @@ export function firstFontName(stack: string): string {
 
 export function renderBanner(container: HTMLElement, banner: BannerData, onEdit: () => void, app: App): HTMLElement {
 	const el = container.createDiv({ cls: 'dashboard-banner' });
+	el.style.backgroundPosition = focalPosition(banner.imagePos?.[getActiveImage(banner)]);
 
 	// Stats mode: three-column data panel over the (blurred, darkened) poster image.
 	if (banner.mode === 'stats') {
@@ -153,6 +156,8 @@ export class BannerEditModal extends Modal {
 	private onSave: (updates: Partial<BannerData>) => void;
 	private quotes: QuoteItem[];
 	private images: string[];
+	private imagePos: BannerData['imagePos'];
+	private focalEditors: Array<ReturnType<typeof mountFocalEditor>> = [];
 	private mode: 'quote' | 'stats';
 	private statsDraft: BannerStatsConfig;
 	private quoteColorDraft: string;
@@ -162,6 +167,7 @@ export class BannerEditModal extends Modal {
 	constructor(app: App, banner: BannerData, onSave: (updates: Partial<BannerData>) => void) {
 		super(app);
 		this.banner = banner;
+		this.imagePos = banner.imagePos ? { ...banner.imagePos } : undefined;
 		this.onSave = onSave;
 		this.mode = banner.mode === 'stats' ? 'stats' : 'quote';
 		this.statsDraft = resolveStatsConfig(banner.statsConfig);
@@ -178,9 +184,9 @@ export class BannerEditModal extends Modal {
 	onOpen(): void {
 		const { contentEl, containerEl } = this;
 		contentEl.empty();
-		contentEl.addClass('dashboard-library-config-modal');
-		containerEl.addClass('modal--dashboard');
-		containerEl.parentElement?.addClass('modal-bg--dashboard');
+		contentEl.addClass('dashboard-library-config-modal', 'nand-focal-modal');
+		this.modalEl.addClass('modal--dashboard');
+		containerEl.addClass('modal-bg--dashboard');
 		applyModalTheme(containerEl);
 
 		const container = contentEl.createDiv({ cls: 'dashboard-modal dashboard-modal--compact' });
@@ -226,6 +232,7 @@ export class BannerEditModal extends Modal {
 	}
 
 	private renderBody(): void {
+		this.disposeFocalEditors();
 		this.form.empty();
 		if (this.mode === 'stats') {
 			this.renderStatsBody();
@@ -295,51 +302,7 @@ export class BannerEditModal extends Modal {
 			if (last) last.focus();
 		});
 
-		// === Images section ===
-		const imagesSection = this.form.createDiv({ cls: 'dashboard-modal-images' });
-		imagesSection.createEl('label', { ...localizedText('banner.imagesLabel'), cls: 'dashboard-modal-images-label' });
-		const imagesList = imagesSection.createDiv({ cls: 'dashboard-modal-images-list' });
-
-		const renderImages = () => {
-			imagesList.empty();
-			for (let i = 0; i < this.images.length; i++) {
-				const row = imagesList.createDiv({ cls: 'dashboard-modal-image-item' });
-
-				const imgInput = row.createEl('input', {
-					cls: 'dashboard-modal-input dashboard-modal-image-input',
-					attr: { type: 'text', placeholder: 'attachments/banner.jpg' },
-				});
-				imgInput.value = this.images[i]!;
-				imgInput.addEventListener('input', () => {
-					this.images[i] = imgInput.value;
-				});
-
-				if (this.images.length > 1) {
-					const delBtn = row.createEl('button', {
-						cls: 'dashboard-modal-image-delete',
-						attr: { ...localizedAttributes('banner.deleteImage', undefined, 'aria-label') },
-					});
-					setIcon(delBtn, 'x');
-					delBtn.addEventListener('click', () => {
-						this.images.splice(i, 1);
-						renderImages();
-					});
-				}
-			}
-		};
-
-		renderImages();
-
-		const addImageBtn = imagesSection.createEl('button', {
-			cls: 'dashboard-modal-image-add',
-			...localizedText('banner.addImage'),
-		});
-		addImageBtn.addEventListener('click', () => {
-			this.images.push('');
-			renderImages();
-			const last = imagesList.querySelector<HTMLInputElement>('.dashboard-modal-image-item:last-child input');
-			if (last) last.focus();
-		});
+		this.renderImages();
 
 		// === Quote Color ===
 		const colorSection = this.form.createDiv({ cls: 'dashboard-modal-quote-color' });
@@ -402,7 +365,65 @@ export class BannerEditModal extends Modal {
 		});
 	}
 
+	private renderImages(): void {
+		// === Images section ===
+		const imagesSection = this.form.createDiv({ cls: 'dashboard-modal-images' });
+		imagesSection.createEl('label', { ...localizedText('banner.imagesLabel'), cls: 'dashboard-modal-images-label' });
+		const imagesList = imagesSection.createDiv({ cls: 'dashboard-modal-images-list' });
+
+		const renderImages = () => {
+			this.disposeFocalEditors();
+			imagesList.empty();
+			for (let i = 0; i < this.images.length; i++) {
+				const item = imagesList.createDiv({ cls: 'nand-ui-stack nand-banner-image-entry' });
+				const row = item.createDiv({ cls: 'dashboard-modal-image-item' });
+
+				const imgInput = row.createEl('input', {
+					cls: 'dashboard-modal-input dashboard-modal-image-input',
+					attr: { type: 'text', placeholder: 'attachments/banner.jpg', ...localizedAttributes('banner.imagesLabel', undefined, 'aria-label') },
+				});
+				imgInput.value = this.images[i]!;
+				imgInput.addEventListener('input', () => {
+					this.images[i] = imgInput.value;
+					focal.update(resolveVaultImage(this.app, imgInput.value), this.imagePos?.[imgInput.value]);
+				});
+				const focal = mountFocalEditor(item.createDiv(), {
+					source: resolveVaultImage(this.app, imgInput.value), value: this.imagePos?.[imgInput.value], ratio: 6,
+					change: point => { this.imagePos = editImageFocal(this.imagePos, this.images[i]!, point); },
+				}, this.app);
+				this.focalEditors.push(focal);
+
+				if (this.images.length > 1) {
+					const delBtn = row.createEl('button', {
+						cls: 'dashboard-modal-image-delete',
+						attr: { ...localizedAttributes('banner.deleteImage', undefined, 'aria-label') },
+					});
+					setIcon(delBtn, 'x');
+					delBtn.addEventListener('click', () => {
+						this.images.splice(i, 1);
+						renderImages();
+					});
+				}
+			}
+		};
+
+		renderImages();
+
+		const addImageBtn = imagesSection.createEl('button', {
+			cls: 'dashboard-modal-image-add',
+			...localizedText('banner.addImage'),
+		});
+		addImageBtn.addEventListener('click', () => {
+			this.images.push('');
+			renderImages();
+			const last = imagesList.querySelector<HTMLInputElement>('.dashboard-modal-image-item:last-child input');
+			if (last) last.focus();
+		});
+
+	}
+
 	private renderStatsBody(): void {
+		this.renderImages();
 		// === Columns: visibility + per-column stat ===
 		const colsSection = this.form.createDiv({ cls: 'dashboard-modal-stats-cols' });
 		colsSection.createEl('label', { ...localizedText('banner.stats.columns'), cls: 'dashboard-modal-stats-label' });
@@ -709,7 +730,6 @@ export class BannerEditModal extends Modal {
 			};
 		} else {
 			const validQuotes = this.quotes.filter((q) => q.quote.trim());
-			const validImages = this.images.filter((s) => s.trim());
 			if (validQuotes.length > 0) {
 				updates.quote = validQuotes[0]!.quote;
 				updates.author = validQuotes[0]!.author;
@@ -720,21 +740,25 @@ export class BannerEditModal extends Modal {
 				updates.author = '';
 				updates.quotes = undefined;
 			}
-			if (validImages.length > 0) {
-				updates.image = validImages[0]!;
-				updates.images = validImages.length > 1 ? validImages : undefined;
-			} else {
-				updates.image = '';
-				updates.images = undefined;
-			}
 			updates.quoteColor = this.quoteColorDraft === '#ffffff' ? undefined : this.quoteColorDraft;
 			updates.quoteFont = this.quoteFontDraft.trim() || undefined;
 		}
+		updates.imagePos = this.imagePos;
+		// Both modes use the same rotating background images and focal map.
+		const images = this.images.filter(value => value.trim());
+		updates.image = images[0] ?? '';
+		updates.images = images.length > 1 ? images : undefined;
 		this.onSave(updates);
 		this.close();
 	}
 
+	private disposeFocalEditors(): void {
+		for (const editor of this.focalEditors) editor.dispose();
+		this.focalEditors = [];
+	}
+
 	onClose(): void {
+		this.disposeFocalEditors();
 		const { contentEl } = this;
 		contentEl.empty();
 	}

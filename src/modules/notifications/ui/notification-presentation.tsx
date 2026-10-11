@@ -6,6 +6,8 @@ import { InboxPanel } from './InboxPanel';
 
 /** Inbox page: `section` `unread` shows unread records only, anything else shows all. */
 export class NotificationPresentation extends NativeSurface {
+	private generation = 0;
+	private openable = new Set<string>();
 	constructor(context: NativeSurfaceContext, private readonly service: NotificationService, private readonly report: (error: unknown) => void, private filter: 'all' | 'unread' = 'all') {
 		super(context);
 	}
@@ -25,6 +27,18 @@ export class NotificationPresentation extends NativeSurface {
 		this.draw();
 	}
 	private draw(): void {
+		const generation = ++this.generation;
+		const records = this.service.records;
+		void Promise.all(records.map(async record => await this.service.canOpen(record) ? record.id : undefined))
+			.then(ids => {
+				if (generation !== this.generation) return;
+				this.openable = new Set(ids.filter((id): id is string => id !== undefined));
+				this.render(this.openable);
+			})
+			.catch(this.report);
+		this.render(this.openable);
+	}
+	private render(openable: ReadonlySet<string>): void {
 		render(
 			<InboxPanel
 				records={this.service.records}
@@ -32,11 +46,13 @@ export class NotificationPresentation extends NativeSurface {
 				markRead={(id) => { void this.service.markRead(id).catch(this.report); }}
 				clearRead={() => { void this.service.clearRead().catch(this.report); }}
 				open={(record) => { void this.service.open(record).catch(this.report); }}
+				openable={openable}
 			/>,
 			this.contentEl,
 		);
 	}
 	onClose(): Promise<void> {
+		this.generation++;
 		render(null, this.contentEl);
 		return Promise.resolve();
 	}

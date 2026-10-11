@@ -1,6 +1,7 @@
 import { Platform, type App, type TFile } from 'obsidian';
 import type { TargetedMouseEvent } from 'preact';
 import { resolveNoteFile, type DashboardRenderContext } from '../renderer/render-context';
+import { documentLink } from '../../core/board/document-link';
 
 export function noteHover(
 	app: App,
@@ -26,10 +27,7 @@ export function InlineLinks({ text, app, context }: { text: string; app: App; co
 			{text.split(/(\[\[[^\]]+?\]\]|\[[^\]]+\]\([^)]+\))/g).map((part, index) => {
 				const wiki = part.match(/^\[\[([^\]]+)\]\]$/);
 				if (wiki) {
-					const [target = '', alias] = wiki[1]!.split('|');
-					const hash = target.indexOf('#');
-					const path = hash < 0 ? target : target.slice(0, hash);
-					const subpath = hash < 0 ? undefined : target.slice(hash);
+					const { path, subpath, alias } = documentLink(wiki[1]!);
 					const name = path.split('/').pop()?.replace(/\.md$/, '') ?? path;
 					const file = resolveNoteFile(app, path);
 					return (

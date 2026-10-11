@@ -4,6 +4,7 @@ import type { AnniversaryConfig } from '../../core/board/types/index';
 import { t } from '../../../../shared/i18n/index';
 import { AnniversarySettingsModal } from '../widgets/anniversary-settings-modal';
 import type { BoardSettingsTab } from './board-settings-tab';
+import { openOwnedDashboardModal } from '../ui/dialog-scope';
 
 /** Widgets tab: anniversary ("纪念日") cards — the countdown list pattern. */
 export function renderAnniversarySettings(this: BoardSettingsTab, containerEl: HTMLElement): void {
@@ -78,7 +79,7 @@ export function editAnniversary(this: BoardSettingsTab, existing: AnniversaryCon
 	const modal = new AnniversarySettingsModal(this.app, baseline, (updated) => {
 		void this.applyAnniversaryUpdate(updated);
 	});
-	modal.open();
+	openOwnedDashboardModal(this.app, modal, this);
 }
 
 export async function applyAnniversaryUpdate(this: BoardSettingsTab, updated: AnniversaryConfig): Promise<void> {

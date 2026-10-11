@@ -1,0 +1,365 @@
+{
+  "ticket": "Browser T02 account/profile portion",
+  "requirements": [
+    "AC-003",
+    "AC-004",
+    "AC-039"
+  ],
+  "finding": "R-089",
+  "status": "fixed-native51-full605-verified-control-contract-pending",
+  "findingDetails": [
+    "Profiles existed only in AiWorkspace memory, so their metadata disappeared after restart. Page state did not persist its profile, and createPage chose the currently selected workspace profile.",
+    "Isolated partition names omitted the vault ID and used predictable site-N IDs, permitting the same partition to be reused across vaults in one Obsidian profile.",
+    "There was no connected profile rename/delete workflow or per-profile site permission store."
+  ],
+  "implementation": [
+    "Persist validated account metadata and isolated-account grants with DurableState in .nand/browser/<device-id>/profiles.json. Read failures fail module activation without replacing the file; failed edits retain the previous durable profile and can retry.",
+    "Keep the exact original default partition persist:nand-browser-<vault-id>; isolated partitions include vault and UUID profile identity. Cookies stay in Electron sessions.",
+    "Persist profileId in workbench stateKeys and page state. Each guest freezes its account and has a runtime generation ID; new-window links, modal-to-tab and popout rebuild preserve the account. URL reuse also matches the profile.",
+    "Expose registered BROWSER_PROFILES service and native account create/rename/open/delete controls. Selecting an account opens a new page instead of rebinding a running guest.",
+    "Deletion verifies the confirmed page set, persists a deleting state, closes live/pending/saved account pages, clears only that native session, and removes metadata. Interrupted deletion can retry and rejects new pages. Module disposal stops subsequent deletion steps and drains owned operations.",
+    "Add minimal shell closeResource capability to close kept resource pages without activating their browser guest. Account controls wrap at narrow widths, use 32/44px targets, and retain drafts through live language changes."
+  ],
+  "verification": {
+    "nativeDirectory": "C:/Users/cdewta/AppData/Local/Temp/nand-browser-profiles-review-7d2f7b58d57c4fd0b39b90f49d50fbe6/evidence",
+    "harness": "scripts/obsidian-acceptance/browser-profiles.mjs",
+    "checks": [
+      {
+        "name": "default-keeps-original-vault-partition",
+        "passed": true
+      },
+      {
+        "name": "blank-label-is-rejected",
+        "passed": true
+      },
+      {
+        "name": "native-settings-create-two-accounts",
+        "passed": true
+      },
+      {
+        "name": "new-work-account-has-no-default-cookie",
+        "passed": true
+      },
+      {
+        "name": "native-new-window-link-keeps-account",
+        "passed": true
+      },
+      {
+        "name": "second-account-has-no-other-account-data",
+        "passed": true
+      },
+      {
+        "name": "work-and-default-retain-own-data",
+        "passed": true
+      },
+      {
+        "name": "isolated-partitions-include-vault-and-profile",
+        "passed": true,
+        "detail": [
+          "persist:nand-browser-ecdf57c5-fbaf-476a-8d77-3bd2d8749b9f",
+          "persist:nand-browser-ecdf57c5-fbaf-476a-8d77-3bd2d8749b9f-profile-2006f6dc-3fb2-4571-8663-ce62d1b19fa3",
+          "persist:nand-browser-ecdf57c5-fbaf-476a-8d77-3bd2d8749b9f-profile-bb855a03-af40-48ff-87b6-13686fdd7575"
+        ]
+      },
+      {
+        "name": "native-site-grant-is-profile-scoped",
+        "passed": true
+      },
+      {
+        "name": "reuse-matches-url-and-profile",
+        "passed": true
+      },
+      {
+        "name": "account-selector-opens-a-new-page",
+        "passed": true
+      },
+      {
+        "name": "account-selector-never-rebinds-existing-guest",
+        "passed": true
+      },
+      {
+        "name": "rename-preserves-profile-and-page-identity",
+        "passed": true
+      },
+      {
+        "name": "metadata-is-durable-and-has-no-cookie-export",
+        "passed": true
+      },
+      {
+        "name": "profile-labels-and-grants-survive-restart",
+        "passed": true
+      },
+      {
+        "name": "persisted-work-session-keeps-own-cookie",
+        "passed": true
+      },
+      {
+        "name": "persisted-default-session-keeps-original-cookie",
+        "passed": true
+      },
+      {
+        "name": "saved-pages-retain-profile-id",
+        "passed": true
+      },
+      {
+        "name": "delete-dialog-lists-affected-pages",
+        "passed": true
+      },
+      {
+        "name": "cancel-keeps-profile",
+        "passed": true
+      },
+      {
+        "name": "changed-page-set-requires-new-confirmation",
+        "passed": true
+      },
+      {
+        "name": "delete-closes-live-and-saved-profile-pages",
+        "passed": true
+      },
+      {
+        "name": "delete-clears-only-selected-session",
+        "passed": true
+      },
+      {
+        "name": "default-cookie-survives-other-account-delete",
+        "passed": true
+      },
+      {
+        "name": "settings-fit-500",
+        "passed": true,
+        "detail": {
+          "width": 408,
+          "scroll": 408
+        }
+      },
+      {
+        "name": "settings-fit-800",
+        "passed": true,
+        "detail": {
+          "width": 656,
+          "scroll": 656
+        }
+      },
+      {
+        "name": "settings-fit-1100",
+        "passed": true,
+        "detail": {
+          "width": 696,
+          "scroll": 696
+        }
+      },
+      {
+        "name": "profile-settings-system-light-500",
+        "passed": true,
+        "detail": {
+          "width": 408,
+          "scroll": 408,
+          "small": 0
+        }
+      },
+      {
+        "name": "profile-settings-system-light-800",
+        "passed": true,
+        "detail": {
+          "width": 656,
+          "scroll": 656,
+          "small": 0
+        }
+      },
+      {
+        "name": "profile-settings-system-light-1500",
+        "passed": true,
+        "detail": {
+          "width": 712,
+          "scroll": 712,
+          "small": 0
+        }
+      },
+      {
+        "name": "profile-settings-system-dark-500",
+        "passed": true,
+        "detail": {
+          "width": 408,
+          "scroll": 408,
+          "small": 0
+        }
+      },
+      {
+        "name": "profile-settings-system-dark-800",
+        "passed": true,
+        "detail": {
+          "width": 656,
+          "scroll": 656,
+          "small": 0
+        }
+      },
+      {
+        "name": "profile-settings-system-dark-1500",
+        "passed": true,
+        "detail": {
+          "width": 712,
+          "scroll": 712,
+          "small": 0
+        }
+      },
+      {
+        "name": "profile-settings-claude-code-light-500",
+        "passed": true,
+        "detail": {
+          "width": 408,
+          "scroll": 408,
+          "small": 0
+        }
+      },
+      {
+        "name": "profile-settings-claude-code-light-800",
+        "passed": true,
+        "detail": {
+          "width": 656,
+          "scroll": 656,
+          "small": 0
+        }
+      },
+      {
+        "name": "profile-settings-claude-code-light-1500",
+        "passed": true,
+        "detail": {
+          "width": 712,
+          "scroll": 712,
+          "small": 0
+        }
+      },
+      {
+        "name": "profile-settings-claude-code-dark-500",
+        "passed": true,
+        "detail": {
+          "width": 408,
+          "scroll": 408,
+          "small": 0
+        }
+      },
+      {
+        "name": "profile-settings-claude-code-dark-800",
+        "passed": true,
+        "detail": {
+          "width": 656,
+          "scroll": 656,
+          "small": 0
+        }
+      },
+      {
+        "name": "profile-settings-claude-code-dark-1500",
+        "passed": true,
+        "detail": {
+          "width": 712,
+          "scroll": 712,
+          "small": 0
+        }
+      },
+      {
+        "name": "profile-settings-eye-care-light-500",
+        "passed": true,
+        "detail": {
+          "width": 408,
+          "scroll": 408,
+          "small": 0
+        }
+      },
+      {
+        "name": "profile-settings-eye-care-light-800",
+        "passed": true,
+        "detail": {
+          "width": 656,
+          "scroll": 656,
+          "small": 0
+        }
+      },
+      {
+        "name": "profile-settings-eye-care-light-1500",
+        "passed": true,
+        "detail": {
+          "width": 712,
+          "scroll": 712,
+          "small": 0
+        }
+      },
+      {
+        "name": "profile-settings-eye-care-dark-500",
+        "passed": true,
+        "detail": {
+          "width": 408,
+          "scroll": 408,
+          "small": 0
+        }
+      },
+      {
+        "name": "profile-settings-eye-care-dark-800",
+        "passed": true,
+        "detail": {
+          "width": 656,
+          "scroll": 656,
+          "small": 0
+        }
+      },
+      {
+        "name": "profile-settings-eye-care-dark-1500",
+        "passed": true,
+        "detail": {
+          "width": 712,
+          "scroll": 712,
+          "small": 0
+        }
+      },
+      {
+        "name": "profile-controls-at-least-44-in-coarse-mode",
+        "passed": true
+      },
+      {
+        "name": "live-language-preserves-account-draft",
+        "passed": true
+      },
+      {
+        "name": "module-off-releases-profile-service",
+        "passed": true
+      },
+      {
+        "name": "reenable-retains-only-remaining-accounts",
+        "passed": true
+      },
+      {
+        "name": "popout-rebuild-keeps-frozen-account",
+        "passed": true
+      },
+      {
+        "name": "no-host-errors",
+        "passed": true,
+        "detail": []
+      }
+    ],
+    "screenshotReviewed": "profiles-500.png",
+    "shortcutRegression": "26 passed in C:/Users/cdewta/AppData/Local/Temp/nand-browser-shortcuts-after-profiles-9a964db0c77a45ddb38b9a69111145b4/evidence",
+    "targeted": "30 browser tests passed; 3 profile-store tests verify write failure/retry, interrupted deletion, invalid storage and partition isolation.",
+    "full": "605 passed / 4 skipped; 133 files passed / 1 skipped; 132.43 seconds",
+    "fullLog": "C:/Users/cdewta/AppData/Local/Temp/nand-review-browser-profiles-full.log",
+    "finalCopyRefinement": "After full605, differentiated interrupted deletion/open errors from unsaved account edits; build/lint/i18n3247 and profile-store3 passed again.",
+    "gates": {
+      "build": "passed",
+      "lint": "zero warnings",
+      "i18n": "3247 keys passed",
+      "architecture": "874 modules passed",
+      "css": "108 files, 67 files/150 baseline groups, no new violations; styles check passed",
+      "docs": "549 Markdown / 559 local / 348 external links; passed, external fetch not requested",
+      "bundleBytes": 4054633,
+      "stylesBytes": 747016,
+      "outputLimit": 4055040,
+      "stylesLimit": 747520,
+      "startupAndModuleCaps": "unchanged"
+    }
+  },
+  "limitations": [
+    "Native evidence uses Windows Electron cookie/localStorage fixtures, not a real provider login, SSO or passkey account. Other operating systems are unverified.",
+    "Write failure and invalid metadata are verified at the storage boundary. No claim of a native OS cookie-storage failure test.",
+    "Browser T02 remains in progress: the explicit page/profile/generation control API and background observation routing are the next audit."
+  ]
+}

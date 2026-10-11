@@ -9,6 +9,10 @@ sources: ["<Path>{roots.state}/specdev/changes/2026-10-08-git-sync-parity/source
 
 # Spec: Git 同步对照补齐、仓库边界与失败恢复
 
+<!-- ACTUAL-CODE-REVIEW:START -->
+2026-10-11 实际代码审查与修复：[review-index.md](evidence/review-index.md)，覆盖本 change 的 4 票、11 条 AC。下文保留原规划目标与当时基线，不能把“尚未实现／本轮只规划”当成当前代码状态。当前源码与接口以审查证据及 owner 的 `api.ts` 为准；未验证的账号或平台仍未验证，原 AC 没有删减。
+<!-- ACTUAL-CODE-REVIEW:END -->
+
 - ADR：<Path>{roots.state}/specdev/changes/2026-10-08-git-sync-parity/ADR.md</Path>
 - CONTEXT：<Path>{roots.state}/specdev/changes/2026-10-08-git-sync-parity/CONTEXT.md</Path>
 - 引用对照：<Path>{roots.state}/specdev/changes/2026-10-08-git-sync-parity/reference-analysis.md</Path>
@@ -19,7 +23,7 @@ sources: ["<Path>{roots.state}/specdev/changes/2026-10-08-git-sync-parity/source
 
 在已有同步模块上完成wta参考的逐项差异核销，补clone引导、严格vault边界和推送目标保护，验证手动/自动/冲突恢复完整闭环。
 
-### 当前事实
+### 规划时基线
 
 当前有sync module完整实现、真实Git测试及文档，旧src/core/sync占位事实过时。尚无clone向导；GitRepo.status/stagedPaths/commit使用整个index，vault位于父repo时须补外部暂存保护；squash按upstream而参考按pushTarget，分离目标需显式处理。
 

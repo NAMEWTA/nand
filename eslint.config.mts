@@ -31,6 +31,9 @@ export default tseslint.config(
 	// Desktop folders are the only place Node and Electron are allowed (architecture rule R5, enforced by
 	// scripts/verify-architecture.mjs); they are reached only on desktop.
 	{ files: ["src/**/desktop/**/*.ts"], languageOptions: { globals: globals.node }, rules: { "obsidianmd/no-nodejs-modules": "off" } },
+	// This guest shim intercepts legacy copy/cut to block OS clipboard writes and restores the original method.
+	// It does not use execCommand to acquire content; modern Clipboard methods supply the bounded payload.
+	{ files: ["src/modules/browser/platform/desktop/provider-copy.ts"], rules: { "@typescript-eslint/no-deprecated": "off" } },
 	{
 		files: ["src/**/*.ts", "src/**/*.tsx"],
 		ignores: ["src/**/desktop/**"],

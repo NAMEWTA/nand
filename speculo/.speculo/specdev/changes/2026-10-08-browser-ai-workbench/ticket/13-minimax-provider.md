@@ -26,6 +26,10 @@ shared_path_owners: ["<Path>main.js</Path> => 2026-10-08-browser-ai-workbench::T
 
 # Ticket T-13: 完成MiniMax发送与可靠当前轮采集
 
+<!-- ACTUAL-CODE-REVIEW:START -->
+2026-10-11 实际代码审查：[T-13.md](../evidence/T-13.md)。本票下文保留原规划合同与基线；当前实现、修复、验证及未验证条件以该记录为准。原“仅规划／未授权实施／必须提交”的阶段约束不适用于用户已授权的本次工作区审查；提交与远程操作仍未执行。
+<!-- ACTUAL-CODE-REVIEW:END -->
+
 - Ticket：<Path>{roots.state}/specdev/changes/2026-10-08-browser-ai-workbench/ticket/13-minimax-provider.md</Path>
 - 总控Map：<Path>{roots.state}/specdev/changes/2026-10-08-browser-ai-workbench/tickets-map.md</Path>
 - Spec：<Path>{roots.state}/specdev/changes/2026-10-08-browser-ai-workbench/spec.md</Path>
@@ -37,7 +41,7 @@ shared_path_owners: ["<Path>main.js</Path> => 2026-10-08-browser-ai-workbench::T
 
 **目标与可观察产出：** MiniMax成为完整工作台目标，使用同一profile/turn/模板/结果/恢复契约，实际证明后加入支持表。
 
-**当前事实：** NAND未实现MiniMax；上游MAIW固定minimax目录有definition/selectors/strategy/native-copy，无acquisition.ts，不代表当日账号可用。
+**规划时基线：** NAND未实现MiniMax；上游MAIW固定minimax目录有definition/selectors/strategy/native-copy，无acquisition.ts，不代表当日账号可用。
 
 **来源：** AC-031, AC-007, AC-016, AC-023, AC-026；issue #142, #145；<Path>{roots.state}/specdev/changes/2026-10-08-browser-ai-workbench/reference-analysis.md</Path>。深度 deep：涉及持久数据/公共接口/进程或权限的跨边界合同，必须记录恢复与兼容。
 

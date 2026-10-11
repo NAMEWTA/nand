@@ -26,6 +26,10 @@ shared_path_owners: ["<Path>main.js</Path> => 2026-10-08-home-grid-rebuild::T-08
 
 # Ticket T-08: 接通既有会话只粘贴与各入口上下文技能
 
+<!-- ACTUAL-CODE-REVIEW:START -->
+2026-10-11 实际代码审查：[T-08.md](../evidence/T-08.md)。本票下文保留原规划合同与基线；当前实现、修复、验证及未验证条件以该记录为准。原“仅规划／未授权实施／必须提交”的阶段约束不适用于用户已授权的本次工作区审查；提交与远程操作仍未执行。
+<!-- ACTUAL-CODE-REVIEW:END -->
+
 - Ticket：<Path>{roots.state}/specdev/changes/2026-10-08-home-grid-rebuild/ticket/08-existing-session-context-shortcuts.md</Path>
 - 总控Map：<Path>{roots.state}/specdev/changes/2026-10-08-home-grid-rebuild/tickets-map.md</Path>
 - Spec：<Path>{roots.state}/specdev/changes/2026-10-08-home-grid-rebuild/spec.md</Path>
@@ -37,7 +41,7 @@ shared_path_owners: ["<Path>main.js</Path> => 2026-10-08-home-grid-rebuild::T-08
 
 **目标与可观察产出：** 用户从快念/卡片或技能组件把准确材料粘贴到指定已有agent输入框，同时看到诚实的待发送回执。
 
-**当前事实：** AGENT_SESSIONS.list没有agentId，attachMaterial已有只粘贴和10s readiness；automation reuse会Enter，因此不能误用。现快念与普通卡片没有技能按钮。
+**规划时基线：** AGENT_SESSIONS.list没有agentId，attachMaterial已有只粘贴和10s readiness；automation reuse会Enter，因此不能误用。现快念与普通卡片没有技能按钮。
 
 **来源：** AC-031, AC-032, AC-033, AC-034, AC-035；issue #137, #141；<Path>{roots.state}/specdev/changes/2026-10-08-home-grid-rebuild/reference-analysis.md</Path>。深度 deep：涉及持久数据/公共接口/进程或权限的跨边界合同，必须记录恢复与兼容。
 

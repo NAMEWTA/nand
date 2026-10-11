@@ -1,0 +1,285 @@
+{
+  "status": "fixed-targeted-and-native-fixtures-verified",
+  "reference": "KKKKhazix/AIHOT c547b669acc7f64720cd82024e502446ee1ef88d reports/edition.ts, full source read",
+  "nativeRoot": "C:\\Users\\cdewta\\AppData\\Local\\Temp\\nand-news-edition-review-29fb9bdad06244e1a10db13a5834a3ba",
+  "native": {
+    "method": "Native Obsidian with explicit analyzed-material fixtures; no network/model calls",
+    "passed": true,
+    "rows": [
+      {
+        "name": "local-natural-day-twelve-main-ten-flashes-with-source-cap",
+        "passed": true
+      },
+      {
+        "name": "opening-daily-edition-does-not-write-visible-markdown",
+        "passed": true
+      },
+      {
+        "name": "compile-with-writing-off-persists-memory-only",
+        "passed": true
+      },
+      {
+        "name": "one-daily-file-preserves-annotation",
+        "passed": true
+      },
+      {
+        "name": "query-keeps-space-while-typing-and-filters",
+        "passed": true
+      },
+      {
+        "name": "tag-comma-input-keeps-both-tags",
+        "passed": true
+      },
+      {
+        "name": "saved-view-has-stable-id-and-selected-item",
+        "passed": true,
+        "detail": {
+          "state": {
+            "section": "views",
+            "selected": "m0",
+            "view": "288f445a-8bc0-4465-b342-edf1d525bd39",
+            "filter": {
+              "category": "",
+              "tags": [
+                "agents",
+                "models"
+              ],
+              "sourceIds": [],
+              "query": "Alpha "
+            },
+            "order": "desc"
+          },
+          "views": [
+            {
+              "id": "288f445a-8bc0-4465-b342-edf1d525bd39",
+              "name": "Alpha view",
+              "category": "",
+              "tags": [
+                "agents",
+                "models"
+              ],
+              "sourceIds": [],
+              "query": "Alpha "
+            }
+          ]
+        }
+      },
+      {
+        "name": "updating-view-keeps-identity",
+        "passed": true
+      },
+      {
+        "name": "two-leaves-isolate-query-selection-order-and-section",
+        "passed": true
+      },
+      {
+        "name": "restart-restores-both-leaf-states-and-saved-view",
+        "passed": true
+      },
+      {
+        "name": "restart-keeps-edition-memory-without-self-suppression",
+        "passed": true
+      },
+      {
+        "name": "section-featured-visible",
+        "passed": true
+      },
+      {
+        "name": "section-all-visible",
+        "passed": true
+      },
+      {
+        "name": "section-hot-visible",
+        "passed": true
+      },
+      {
+        "name": "section-today-visible",
+        "passed": true
+      },
+      {
+        "name": "section-favorites-visible",
+        "passed": true
+      },
+      {
+        "name": "section-sources-visible",
+        "passed": true
+      },
+      {
+        "name": "section-runs-visible",
+        "passed": true
+      },
+      {
+        "name": "returning-to-saved-view-reapplies-its-filter",
+        "passed": true
+      },
+      {
+        "name": "width-claude-code-light-1200",
+        "passed": true,
+        "detail": {
+          "width": 844,
+          "scroll": 844
+        }
+      },
+      {
+        "name": "width-claude-code-light-800",
+        "passed": true,
+        "detail": {
+          "width": 704,
+          "scroll": 704
+        }
+      },
+      {
+        "name": "width-claude-code-light-420",
+        "passed": true,
+        "detail": {
+          "width": 376,
+          "scroll": 376
+        }
+      },
+      {
+        "name": "width-claude-code-dark-1200",
+        "passed": true,
+        "detail": {
+          "width": 844,
+          "scroll": 844
+        }
+      },
+      {
+        "name": "width-claude-code-dark-800",
+        "passed": true,
+        "detail": {
+          "width": 704,
+          "scroll": 704
+        }
+      },
+      {
+        "name": "width-claude-code-dark-420",
+        "passed": true,
+        "detail": {
+          "width": 376,
+          "scroll": 376
+        }
+      },
+      {
+        "name": "width-codex-light-1200",
+        "passed": true,
+        "detail": {
+          "width": 844,
+          "scroll": 844
+        }
+      },
+      {
+        "name": "width-codex-light-800",
+        "passed": true,
+        "detail": {
+          "width": 704,
+          "scroll": 704
+        }
+      },
+      {
+        "name": "width-codex-light-420",
+        "passed": true,
+        "detail": {
+          "width": 376,
+          "scroll": 376
+        }
+      },
+      {
+        "name": "width-codex-dark-1200",
+        "passed": true,
+        "detail": {
+          "width": 844,
+          "scroll": 844
+        }
+      },
+      {
+        "name": "width-codex-dark-800",
+        "passed": true,
+        "detail": {
+          "width": 704,
+          "scroll": 704
+        }
+      },
+      {
+        "name": "width-codex-dark-420",
+        "passed": true,
+        "detail": {
+          "width": 376,
+          "scroll": 376
+        }
+      },
+      {
+        "name": "width-obsidian-light-1200",
+        "passed": true,
+        "detail": {
+          "width": 844,
+          "scroll": 844
+        }
+      },
+      {
+        "name": "width-obsidian-light-800",
+        "passed": true,
+        "detail": {
+          "width": 704,
+          "scroll": 704
+        }
+      },
+      {
+        "name": "width-obsidian-light-420",
+        "passed": true,
+        "detail": {
+          "width": 376,
+          "scroll": 376
+        }
+      },
+      {
+        "name": "width-obsidian-dark-1200",
+        "passed": true,
+        "detail": {
+          "width": 844,
+          "scroll": 844
+        }
+      },
+      {
+        "name": "width-obsidian-dark-800",
+        "passed": true,
+        "detail": {
+          "width": 704,
+          "scroll": 704
+        }
+      },
+      {
+        "name": "width-obsidian-dark-420",
+        "passed": true,
+        "detail": {
+          "width": 376,
+          "scroll": 376
+        }
+      },
+      {
+        "name": "no-host-errors",
+        "passed": true,
+        "detail": []
+      },
+      {
+        "name": "all-edition-and-view-work-used-zero-cli-calls",
+        "passed": true
+      }
+    ]
+  },
+  "automated": "113 tests across news, user-format golden and shell navigation files pass. Build/lint/CSS/i18n/architecture/bundle pass: 787 modules; news 215.5 KB + 48.5 KB deferred UI, styles 729864 bytes.",
+  "changes": [
+    "Local natural day and durable date/time-zone/window boundaries; first-import, unknown dates, future releases and old deferred analysis excluded",
+    "One entry per event, importance formula, 12 main / 10 flashes / 2 main per source, seven-day cited-occurrence memory with current regrouping and aliases",
+    "New-fact party action or four-source follow-ups, all-follow-up-day exception, official three-participant fill-in, roundup folding under the most important mention",
+    "Pure read and no CLI sorting; compile/collection/analysis retain reader-state issue memory; optional same-day managed Markdown preserves annotations and stops on edited generated regions",
+    "Real filters read current analysis category/tags/score plus multilingual title/summary, stable bounded saved view IDs, save/update/copy/delete",
+    "Seven sections and saved views in workbench panel; per-leaf bounded section/filter/selection/order state; no global focused selection; native split and restart verified",
+    "Screenshot review found a saved-view re-entry filter reset; fixed and added native return-navigation assertion"
+  ],
+  "limitations": [
+    "Native content is explicitly seeded analyzed evidence; no model quality claim.",
+    "Native Windows Obsidian only; no mobile or other desktop OS run.",
+    "Reader brief/notification policies and home widgets have separate outstanding reviews."
+  ]
+}

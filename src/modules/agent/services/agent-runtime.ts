@@ -1,4 +1,5 @@
 import { deviceId as getDeviceId } from '../../../host/obsidian/storage/device-id';
+import { privateVaultStorage } from '../../../host/obsidian/storage/private-storage';
 import { AGENT_CATALOG, getAgent } from '../core/launch/catalog';
 import { effectivePermission, launchArgs } from '../core/launch/flags';
 import type { AgentId, AgentSettings } from '../core/launch/types';
@@ -23,6 +24,19 @@ import type { NativeHistory } from '../platform/history/service';
 import type { ShellCommand } from '../platform/desktop/pty/shells';
 import type { TerminalSession } from './terminal/session';
 import type { CreateSession } from './terminal/sessions';
+
+/** Shared execution metadata; consumers never construct an AutomationRun. */
+export interface AgentExecution {
+	id: string;
+	title: string;
+	kind: 'automation' | 'prompt';
+	reveal?: boolean;
+	signal?: AbortSignal;
+	resolveContext?: (cwd: string) => Promise<Readonly<Record<string, string>>>;
+	onTerminal?: (terminalId: string) => void;
+	onPrepared?: (identity: { agentId: AgentId; accountIdentity: string }) => void;
+	onState?: (status: 'running' | 'needs-attention', terminalId: string) => void;
+}
 
 /** What the automation runtime needs from the agent module. */
 export interface AutomationRuntimeHost {
@@ -70,6 +84,7 @@ export function automationArgs(
 type AgentAction = Extract<AutomationAction, { kind: 'agent' }>;
 type RunResult = Awaited<AgentRunHandle['completion']>;
 interface LiveSession {
+	execution?: AgentExecution;
 	listeners?: Set<() => void>;
 	terminal?: TerminalSession;
 	action: AgentAction;
@@ -105,7 +120,7 @@ export class TerminalAutomationRuntime implements AgentRuntimePort {
 		this.hooks = new AutomationHooks(host.app.workspace.containerEl.win);
 		const device = getDeviceId(host.app);
 		this.store = new JsonStore(
-			host.app.vault.adapter,
+			privateVaultStorage(host.app),
 			`.nand/terminal-agent/${device}/automation-sessions.json`,
 			(v): v is AgentSessionRef[] =>
 				Array.isArray(v) &&
@@ -144,6 +159,11 @@ export class TerminalAutomationRuntime implements AgentRuntimePort {
 	private receive(slot: LiveSession, event: NativeHookEvent): void {
 		if (event.at < slot.since || event.data.agent_id || event.data.subagent_id || event.data.parent_session_id)
 			return;
+		if (event.event === 'HookError') {
+			slot.finish?.({ status: 'failed', message: '', errorCode: typeof event.data.nand_answer_error === 'string' ? event.data.nand_answer_error : 'hookInputInvalid' });
+			slot.finish = undefined;
+			return;
+		}
 		const id = event.data.session_id ?? event.data.sessionId;
 		if (typeof id === 'string' && id) {
 			slot.session = {
@@ -155,37 +175,52 @@ export class TerminalAutomationRuntime implements AgentRuntimePort {
 				accountKey: slot.accountKey,
 				transcriptPath: typeof event.data.transcript_path === 'string' ? event.data.transcript_path : undefined,
 			};
-			this.registry = [
-				...this.registry.filter(
-					(s) =>
-						!(s.agentId === slot.action.agentId && s.sessionId === id && s.accountKey === slot.accountKey),
-				),
-				slot.session,
-			];
-			void this.store.save(this.registry).catch(console.error);
+			if (slot.execution?.kind !== 'prompt') {
+				this.registry = [
+					...this.registry.filter(
+						(s) =>
+							!(s.agentId === slot.action.agentId && s.sessionId === id && s.accountKey === slot.accountKey),
+					),
+					slot.session,
+				];
+				void this.store.save(this.registry).catch(console.error);
+			}
+		}
+		if (event.event === 'PermissionRequest' || event.event === 'Notification') {
+			slot.terminal?.setActivity('waiting');
+			if (slot.terminal) slot.execution?.onState?.('needs-attention', slot.terminal.id);
+		}
+		if ((event.event === 'PreToolUse' || event.event === 'BeforeTool') && slot.terminal) {
+			slot.terminal.setActivity('running');
+			slot.execution?.onState?.('running', slot.terminal.id);
 		}
 		if (event.event === 'UserPromptSubmit' || event.event === 'BeforeAgent') {
 			slot.busy = true;
 			slot.terminal?.setActivity('running');
 			slot.started = true;
+			if (slot.terminal) slot.execution?.onState?.('running', slot.terminal.id);
 			for (const listener of slot.listeners ?? []) listener();
 		}
-		if (slot.started && ['Stop', 'AfterAgent', 'StopFailure', 'StopCancelled'].includes(event.event)) {
+		if (slot.started && ['Stop', 'AfterAgent', 'StopFailure', 'StopCancelled', 'Interrupt'].includes(event.event)) {
 			slot.busy = false;
 			slot.terminal?.setActivity('idle');
 			slot.started = false;
 			const message =
 				typeof event.data.last_assistant_message === 'string'
-					? event.data.last_assistant_message.slice(-8000)
+					? event.data.last_assistant_message
 					: '';
+			const answerError = typeof event.data.nand_answer_error === 'string' && event.data.nand_answer_error
+				? event.data.nand_answer_error
+				: slot.execution?.kind === 'prompt' && ['Stop', 'AfterAgent'].includes(event.event) && !message.trim() ? 'nativeAnswerMissing' : undefined;
 			slot.finish?.({
 				status:
-					event.event === 'StopFailure'
+					event.event === 'StopFailure' || answerError
 						? 'failed'
-						: event.event === 'StopCancelled'
+						: event.event === 'StopCancelled' || event.event === 'Interrupt'
 							? 'cancelled'
 							: 'succeeded',
 				message,
+				errorCode: answerError,
 				output: slot.output,
 				session: slot.session,
 			});
@@ -214,7 +249,11 @@ export class TerminalAutomationRuntime implements AgentRuntimePort {
 		}
 	}
 	async start(action: AgentAction, run: AutomationRun, previous?: AutomationRun): Promise<AgentRunHandle> {
+		return this.execute(action, { id: run.id, title: run.title, kind: 'automation', reveal: run.trigger === 'manual' }, previous?.terminalId);
+	}
+	async execute(action: AgentAction, execution: AgentExecution, previousTerminal?: string): Promise<AgentRunHandle> {
 		await this.loaded;
+		execution.signal?.throwIfAborted();
 		const id = action.agentId as AgentId;
 		const settings = this.host.agentSettings();
 		const entry = settings.agents[id];
@@ -224,7 +263,7 @@ export class TerminalAutomationRuntime implements AgentRuntimePort {
 		const command = resolveCli(agent.detectCommand, entry.cliPath, '');
 		if (!command) throw new AutomationError('cliMissing');
 		try {
-			await canonicalVaultCwd(vaultPath(this.host.app), action.cwd);
+			action = { ...action, cwd: await canonicalVaultCwd(vaultPath(this.host.app), action.cwd) };
 		} catch {
 			throw new AutomationError('cwdInvalid');
 		}
@@ -266,6 +305,10 @@ export class TerminalAutomationRuntime implements AgentRuntimePort {
 		}
 		const env = sessionEnv ?? accountEnv(agent, entry.accountId, absolutePluginDir(vaultPath(this.host.app), this.host.pluginDir));
 		const accountKey = JSON.stringify(env);
+		if (execution.onPrepared) {
+			const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(accountIdentity(accountKey)));
+			execution.onPrepared({ agentId: id, accountIdentity: Array.from(new Uint8Array(digest), byte => byte.toString(16).padStart(2, '0')).join('') });
+		}
 		if (action.sessionMode === 'specific') {
 			const sessions = await this.listSessions(action.cwd);
 			if (
@@ -299,7 +342,7 @@ export class TerminalAutomationRuntime implements AgentRuntimePort {
 		if (reservation) this.reservations.add(reservation);
 		try {
 			const prior =
-				action.sessionMode === 'reuse' && previous?.terminalId ? this.live.get(previous.terminalId) : undefined;
+				action.sessionMode === 'reuse' && previousTerminal ? this.live.get(previousTerminal) : undefined;
 			const reuse =
 				prior &&
 				!prior.busy &&
@@ -309,6 +352,7 @@ export class TerminalAutomationRuntime implements AgentRuntimePort {
 				prior.accountKey === accountKey
 					? prior
 					: undefined;
+			if (execution.kind === 'prompt' && previousTerminal && !reuse) throw new AutomationError('sessionMissing');
 			const slot: LiveSession = reuse ?? {
 				action,
 				accountKey,
@@ -318,6 +362,7 @@ export class TerminalAutomationRuntime implements AgentRuntimePort {
 				output: '',
 			};
 			slot.action = action;
+			slot.execution = execution;
 			slot.busy = true;
 			slot.started = false;
 			slot.since = Date.now();
@@ -350,6 +395,8 @@ export class TerminalAutomationRuntime implements AgentRuntimePort {
 			});
 			let terminal = slot.terminal;
 			if (reuse && terminal) {
+				execution.signal?.throwIfAborted();
+				execution.onTerminal?.(terminal.id);
 				terminal.paste(action.prompt);
 				terminal.input('\r');
 			} else {
@@ -359,22 +406,34 @@ export class TerminalAutomationRuntime implements AgentRuntimePort {
 					launchArgs(settings, id),
 					action.sessionMode === 'specific' ? action.session : undefined,
 				);
+				const argv = [command, ...args];
+				const argvSize = runtimeProcess().platform === 'win32'
+					? argv.reduce((size, arg) => size + arg.length + (arg.match(/[\\"]/g)?.length ?? 0) + 3, 0)
+					: new TextEncoder().encode(argv.join('\0')).length;
+				if (argvSize > (runtimeProcess().platform === 'win32' ? 30_000 : 100_000)) throw new AutomationError('promptTooLarge');
 				const hook = await this.hooks.prepare(id, env, (event) => this.receive(slot, event));
 				slot.hookClose = () => hook.close();
 				try {
 					if (this.disposed) throw new AutomationError('busy');
+					execution.signal?.throwIfAborted();
+					// Resolve after the canonical cwd and run id exist. Keep grants out of
+					// account identity, hook installation and every persisted session.
+					const contextEnv = await execution.resolveContext?.(action.cwd);
+					execution.signal?.throwIfAborted();
 					terminal = await this.host.create({
-						kind: 'automation',
-						title: run.title,
+						kind: execution.kind === 'automation' ? 'automation' : 'agent',
+						title: execution.title,
 						file: command,
 						args,
 						cwd: action.cwd,
-						env: { ...env, ...hook.env, NAND_AUTOMATION_RUN_ID: run.id },
+						env: { ...contextEnv, ...env, ...hook.env, ...(execution.kind === 'automation' ? { NAND_AUTOMATION_RUN_ID: execution.id } : {}) },
+						signal: execution.signal,
 						agentId: id,
 						automated: true,
 						prepare: (session) => {
 							slot.terminal = session;
 							this.live.set(session.id, slot);
+							execution.onTerminal?.(session.id);
 							session.observe((event) => {
 								if (event.kind === 'data') {
 									slot.output = (slot.output + event.text).slice(-8000);
@@ -384,14 +443,14 @@ export class TerminalAutomationRuntime implements AgentRuntimePort {
 								slot.finish?.({
 									status:
 										event.kind === 'exit'
-											? event.code === 0
+											? event.code === 0 && execution.kind !== 'prompt'
 												? 'succeeded'
 												: event.code < 0
 													? 'interrupted'
 													: 'failed'
 											: 'interrupted',
 									message: event.kind === 'exit' ? String(event.code) : '',
-									errorCode: event.kind === 'exit' ? 'processExit' : undefined,
+									errorCode: event.kind === 'exit' ? 'processExit' : 'agentUnavailable',
 									errorParams: event.kind === 'exit' ? { code: event.code } : undefined,
 									output: slot.output,
 									session: slot.session,
@@ -409,7 +468,8 @@ export class TerminalAutomationRuntime implements AgentRuntimePort {
 					throw error;
 				}
 			}
-			if (run.trigger === 'manual') void this.open(terminal.id).catch(console.error);
+			execution.signal?.throwIfAborted();
+			if (execution.reveal) void this.open(terminal.id).catch(console.error);
 			return {
 				terminalId: terminal.id,
 				session: slot.session ?? action.session,
@@ -426,6 +486,11 @@ export class TerminalAutomationRuntime implements AgentRuntimePort {
 		}
 	}
 	async stop(id: string): Promise<void> {
+		const slot = this.live.get(id);
+		slot?.finish?.({ status: 'cancelled', message: '' });
+		if (slot) slot.finish = undefined;
+		// A dedicated prompt must terminate its process, even when the CLI ignores SIGHUP.
+		if (slot?.execution?.kind === 'prompt') slot.terminal?.end(true);
 		this.host.remove(id);
 		this.live.get(id)?.hookClose?.();
 		this.live.delete(id);
@@ -469,6 +534,10 @@ export class TerminalAutomationRuntime implements AgentRuntimePort {
 	}
 	dispose(): void {
 		this.disposed = true;
+		for (const slot of this.live.values()) {
+			slot.finish?.({ status: 'interrupted', message: '', errorCode: 'agentUnavailable' });
+			slot.finish = undefined;
+		}
 		this.hooks.dispose();
 	}
 }

@@ -26,6 +26,10 @@ shared_path_owners: ["<Path>main.js</Path> => 2026-10-08-home-grid-rebuild::T-07
 
 # Ticket T-07: 建立公共技能模板、可编辑预览与新会话派发
 
+<!-- ACTUAL-CODE-REVIEW:START -->
+2026-10-11 实际代码审查：[T-07.md](../evidence/T-07.md)。本票下文保留原规划合同与基线；当前实现、修复、验证及未验证条件以该记录为准。原“仅规划／未授权实施／必须提交”的阶段约束不适用于用户已授权的本次工作区审查；提交与远程操作仍未执行。
+<!-- ACTUAL-CODE-REVIEW:END -->
+
 - Ticket：<Path>{roots.state}/specdev/changes/2026-10-08-home-grid-rebuild/ticket/07-shared-agent-shortcut-dispatch.md</Path>
 - 总控Map：<Path>{roots.state}/specdev/changes/2026-10-08-home-grid-rebuild/tickets-map.md</Path>
 - Spec：<Path>{roots.state}/specdev/changes/2026-10-08-home-grid-rebuild/spec.md</Path>
@@ -37,7 +41,7 @@ shared_path_owners: ["<Path>main.js</Path> => 2026-10-08-home-grid-rebuild::T-07
 
 **目标与可观察产出：** 从一个可配置技能小组件生成精确prompt，经预览编辑或直发创建真实新agent会话并可追踪结果；公共能力供news/browser复用。
 
-**当前事实：** 当前runAction仅saved id，agent/api无公共shortcut dispatch；上游preview实际readonly，不能满足issue可编辑要求。runtime.start和运行日志已有，必须复用。
+**规划时基线：** 当前runAction仅saved id，agent/api无公共shortcut dispatch；上游preview实际readonly，不能满足issue可编辑要求。runtime.start和运行日志已有，必须复用。
 
 **来源：** AC-024, AC-025, AC-026, AC-027, AC-028, AC-029, AC-030；issue #137, #141；<Path>{roots.state}/specdev/changes/2026-10-08-home-grid-rebuild/reference-analysis.md</Path>。深度 deep：涉及持久数据/公共接口/进程或权限的跨边界合同，必须记录恢复与兼容。
 

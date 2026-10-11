@@ -129,8 +129,9 @@
 /* Row delete: ghost icon button revealed on row hover / keyboard focus;
    danger tint (not a solid red disc) when armed. */
 .dashboard-library-table-delete {
-	width: 24px;
-	height: 24px;
+	width: var(--nand-control-height);
+	height: var(--nand-control-height);
+	flex-shrink: 0;
 	display: inline-flex;
 	align-items: center;
 	justify-content: center;
@@ -180,6 +181,8 @@
 @media (pointer: coarse) {
 	.dashboard-library-table-delete {
 		opacity: 0.6;
+		width: var(--nand-touch-target);
+		height: var(--nand-touch-target);
 	}
 }
 

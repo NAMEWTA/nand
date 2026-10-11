@@ -26,6 +26,10 @@ shared_path_owners: ["<Path>main.js</Path> => 2026-10-08-home-grid-rebuild::T-17
 
 # Ticket T-17: 补齐全量图标选择与文件卡快捷删除
 
+<!-- ACTUAL-CODE-REVIEW:START -->
+2026-10-11 实际代码审查：[T-17.md](../evidence/T-17.md)。本票下文保留原规划合同与基线；当前实现、修复、验证及未验证条件以该记录为准。原“仅规划／未授权实施／必须提交”的阶段约束不适用于用户已授权的本次工作区审查；提交与远程操作仍未执行。
+<!-- ACTUAL-CODE-REVIEW:END -->
+
 - Ticket：<Path>{roots.state}/specdev/changes/2026-10-08-home-grid-rebuild/ticket/17-icons-and-card-delete.md</Path>
 - 总控Map：<Path>{roots.state}/specdev/changes/2026-10-08-home-grid-rebuild/tickets-map.md</Path>
 - Spec：<Path>{roots.state}/specdev/changes/2026-10-08-home-grid-rebuild/spec.md</Path>
@@ -37,7 +41,7 @@ shared_path_owners: ["<Path>main.js</Path> => 2026-10-08-home-grid-rebuild::T-17
 
 **目标与可观察产出：** 用户找到任意宿主图标，并在所有文件卡视图通过可达按钮安全删除，无额外数据或图标系统。
 
-**当前事实：** home只有约74精选icons；Iconic内部getIconIds和lazy keywords可复用但无api。文件表格已有delete，grid/gallery/kanban缺hover按钮，trashLibraryFile已存在。
+**规划时基线：** home只有约74精选icons；Iconic内部getIconIds和lazy keywords可复用但无api。文件表格已有delete，grid/gallery/kanban缺hover按钮，trashLibraryFile已存在。
 
 **来源：** AC-068, AC-069, AC-070, AC-071；issue #137, #141；<Path>{roots.state}/specdev/changes/2026-10-08-home-grid-rebuild/reference-analysis.md</Path>。深度 standard：涉及明确的垂直行为及现有可复用接缝；验证按实际风险。
 

@@ -40,6 +40,7 @@ export class BrowserModal extends Modal {
 				host={this.host}
 				initial={this.state}
 				modal
+				keyScope={this.scope}
 				changed={(state) => {
 					this.state = state;
 				}}

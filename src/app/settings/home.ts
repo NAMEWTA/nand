@@ -1,4 +1,5 @@
 import { Notice, Setting, setIcon } from 'obsidian';
+import { bindLocalizedControl } from '../../ui/primitives/localized-dom';
 import { t } from '../../shared/i18n/index';
 import { normalizeLanguage } from './language';
 import { appearancePage, themePresetSection } from './appearance';
@@ -83,7 +84,7 @@ export function renderAppearanceSection(this: HomeSettingsHost, containerEl: HTM
 
 /** Module on/off switches, one per module manifest. */
 export function renderModuleToggles(this: HomeSettingsHost, containerEl: HTMLElement): void {
-	new Setting(containerEl).setName(t('settings.homeModules')).setHeading();
+	bindLocalizedControl(new Setting(containerEl).setName(t('settings.homeModules')).setHeading(), 'name', 'settings.homeModules');
 	for (const manifest of this.plugin.moduleManifests()) {
 		const setting = new Setting(containerEl)
 			.setName(t(manifest.titleKey))
@@ -102,6 +103,8 @@ export function renderModuleToggles(this: HomeSettingsHost, containerEl: HTMLEle
 					}
 				});
 			});
+		bindLocalizedControl(setting, 'name', manifest.titleKey);
+		bindLocalizedControl(setting, 'desc', manifest.descriptionKey);
 		setIcon(setting.settingEl.createDiv({ cls: 'nand-home-module-icon', attr: { 'aria-hidden': 'true' } }), manifest.icon);
 	}
 }

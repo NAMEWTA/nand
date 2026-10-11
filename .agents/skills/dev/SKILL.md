@@ -43,7 +43,7 @@ metadata:
 | 显示名称 | `NAND` |
 | 插件 id | `nand` |
 | 视图类型 | `nand-workbench-view`（工作台）、`nand-comments-view`（评论侧栏） |
-| 模块 | `home`、`agent`、`browser`、`archives`、`automations`、`notifications`、`icons`、`comments`、`sync` |
+| 模块 | `home`、`agent`、`browser`、`news`、`archives`、`automations`、`notifications`、`icons`、`comments`、`sync` |
 | `minAppVersion` | `1.13.0`（不要使用标注 `@since 1.13.1` 或更高的 API） |
 | `isDesktopOnly` | `false` |
 | 许可证 | MIT（`LICENSE`；署名在 `NOTICE` 与 `THIRD-PARTY-NOTICES.md`） |

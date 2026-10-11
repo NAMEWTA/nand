@@ -1,11 +1,10 @@
-import { Solar } from 'lunar-typescript';
+import { calendarDay } from '../../core/anniversaries/lunar-calendar';
 import { getHolidayForDate, type HolidayInfo } from '../../platform/calendar/holiday-service';
 import { getTodayAlmanac } from './lunar-almanac';
 import type { LunarWidgetData } from './lunar-model';
 
 export function computeLunarData(date: Date, holidayData: Record<string, HolidayInfo>): LunarWidgetData {
-	const solar = Solar.fromDate(date);
-	const lunar = solar.getLunar();
+	const { solar, lunar } = calendarDay(date);
 
 	const y = date.getFullYear();
 	const m = String(date.getMonth() + 1).padStart(2, '0');
@@ -32,6 +31,5 @@ export function computeLunarData(date: Date, holidayData: Record<string, Holiday
 export function formatLunarDate(lunar: import('lunar-typescript').Lunar): string {
 	const month = lunar.getMonthInChinese();
 	const day = lunar.getDayInChinese();
-	const isLeap = lunar.getMonth() < 0;
-	return (isLeap ? '闰' : '') + month + '月' + day;
+	return month + '月' + day;
 }

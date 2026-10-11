@@ -1,0 +1,63 @@
+{
+  "ticket": "T-17",
+  "requirements": [
+    "AC-068",
+    "AC-069",
+    "AC-070",
+    "AC-071"
+  ],
+  "status": "implemented-native-verified",
+  "environment": {
+    "host": "Obsidian 1.13.7",
+    "platform": "Windows",
+    "nativeEvidence": "C:/Users/cdewta/AppData/Local/Temp/nand-home-icons-delete-review-7d67fe0e9ae246b59cdffeb74436d2a1/evidence"
+  },
+  "fixes": [
+    "Host-native fuzzy ranking scans all deduplicated getIconIds before limiting400; common ordering recognizes lucide- prefix without changing stored IDs. No icons module dependency or copied list.",
+    "Shared file-card delete stops pointer drag and hover preview;32/44px targets, owned confirmation with accessible name, safe focus and Tab containment. Uses existing host trash and error path.",
+    "Quicknote config owns picker and settings owns config; navigation and module disposal close both. Icon opener/suggestions and confirmation buttons meet32/44px targets.",
+    "File deletion message describes trash operation. Bilingual dashboard guide updated."
+  ],
+  "verification": {
+    "native": {
+      "passed": 73,
+      "failed": 0,
+      "script": "scripts/obsidian-acceptance/home-icons-delete.mjs",
+      "coverage": [
+        "icons off/on/off, native noncontiguous fuzzy search,400DOM limit, stored hostID and SVG",
+        "six library/folder grid/gallery/kanban: keyboard confirmation,Cancel focus,async failure retains file/card,real trash and count refresh",
+        "native mouse drag from delete never starts card drag",
+        "three presets x light/dark x500/800/1500",
+        "CDP touch opens confirmation,44px targets,Cancel preserves file",
+        "page hide,unchanged board,restart,popout,disable cleanup"
+      ],
+      "faultInjection": "Six asynchronous injected host trash failures; six real trash operations in disposable vault.",
+      "visualsInspected": [
+        "delete-confirm-touch.png",
+        "icons-touch.png (prior71-pass run, same icon CSS)",
+        "icons-popout.png (prior67-pass run)"
+      ]
+    },
+    "tests": {
+      "passed": 101,
+      "files": 30,
+      "command": "pnpm exec vitest run src/modules/home test/golden/user-formats.test.ts"
+    },
+    "gates": {
+      "build": "PASS",
+      "lint": "PASS zero warnings before final CSS/text-only changes",
+      "architecture": "PASS856 modules",
+      "i18n": "PASS24 dictionaries3155 keys",
+      "css": "PASS unchanged baseline",
+      "libraryCover": "ALL PASS",
+      "bundle": "PASS main 4006916 / styles741975; startup/module caps unchanged, recorded1KiB style ratchet",
+      "docs": "Standard FAIL inherited planning bilingual/source-heading exceptions. Exact scoped exception PASS549Markdown/541local/332external links; external fetch not requested."
+    }
+  },
+  "relatedFindings": [
+    "R-072"
+  ],
+  "unverified": [
+    "Actual phone hardware; touch checked with CDP emulation only"
+  ]
+}

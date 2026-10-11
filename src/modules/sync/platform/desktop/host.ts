@@ -3,6 +3,7 @@ import path from 'node:path';
 import type { GitHost } from '../../core/ports';
 import { createGitRunner, machineName } from './git-runner';
 import { locateGit, locateRepo } from './locate';
+import { cloneRepository } from './clone';
 
 /** Git sync on a desktop: the system git, run in the vault folder. */
 export function desktopGitHost(vaultRoot: string): GitHost {
@@ -10,6 +11,7 @@ export function desktopGitHost(vaultRoot: string): GitHost {
 		locate: locateGit,
 		place: (binary, subPath) => locateRepo(binary, vaultRoot, subPath),
 		runner: createGitRunner,
+		clone: (binary, target, source, options) => cloneRepository(binary, vaultRoot, target, source, options),
 		hostname: machineName,
 		async readJson(file) {
 			try {

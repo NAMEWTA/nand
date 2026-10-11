@@ -72,6 +72,7 @@ test('git failures are classified from their English output, and credentials are
 	];
 	for (const [output, kind] of cases) assert.equal(classifyGitOutput(output), kind, output);
 	assert.equal(scrub('https://me:ghp_secret@github.com/me/vault.git'), 'https://***@github.com/me/vault.git');
+	assert.equal(scrub("fatal: 'https://host/vault.git?access_token=secret' denied"), "fatal: 'https://host/vault.git?***' denied");
 	assert.equal(detailOf('', 'hint: try this\nfatal: https://u:p@host/x failed').includes('u:p'), false);
 	assert.equal(needsAttention('network'), false);
 	assert.equal(needsAttention('auth'), true);

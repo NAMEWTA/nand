@@ -73,5 +73,7 @@ ${bundled}*/
 		treeShaking: true,
 		outfile: 'main.js',
 		minify: production,
+		// Obsidian loads UTF-8 scripts. Avoid expanding every localized character to an ASCII escape.
+		charset: 'utf8',
 	};
 }

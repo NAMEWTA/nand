@@ -26,6 +26,10 @@ shared_path_owners: ["<Path>main.js</Path> => 2026-10-08-home-grid-rebuild::T-10
 
 # Ticket T-10: 交付工作流分区的阶段推进、任务提醒与技能
 
+<!-- ACTUAL-CODE-REVIEW:START -->
+2026-10-11 实际代码审查：[T-10.md](../evidence/T-10.md)。本票下文保留原规划合同与基线；当前实现、修复、验证及未验证条件以该记录为准。原“仅规划／未授权实施／必须提交”的阶段约束不适用于用户已授权的本次工作区审查；提交与远程操作仍未执行。
+<!-- ACTUAL-CODE-REVIEW:END -->
+
 - Ticket：<Path>{roots.state}/specdev/changes/2026-10-08-home-grid-rebuild/ticket/10-workflow-section.md</Path>
 - 总控Map：<Path>{roots.state}/specdev/changes/2026-10-08-home-grid-rebuild/tickets-map.md</Path>
 - Spec：<Path>{roots.state}/specdev/changes/2026-10-08-home-grid-rebuild/spec.md</Path>
@@ -37,7 +41,7 @@ shared_path_owners: ["<Path>main.js</Path> => 2026-10-08-home-grid-rebuild::T-10
 
 **目标与可观察产出：** 配置一个真实笔记工作流，能推进状态/目录、管理清单/截止并给卡片或整列派技能，全部行为可重启恢复。
 
-**当前事实：** 现有library kanban只有按属性或文件夹的分组移动，不能等同独立pipeline；上游pipeline-model含App/TFile与扫描，不能直接进core。上游先写status后发现rename冲突且只回滚DOM有缺陷。
+**规划时基线：** 现有library kanban只有按属性或文件夹的分组移动，不能等同独立pipeline；上游pipeline-model含App/TFile与扫描，不能直接进core。上游先写status后发现rename冲突且只回滚DOM有缺陷。
 
 **来源：** AC-040, AC-041, AC-042, AC-043, AC-044, AC-045, AC-046, AC-047；issue #137, #141；<Path>{roots.state}/specdev/changes/2026-10-08-home-grid-rebuild/reference-analysis.md</Path>。深度 deep：涉及持久数据/公共接口/进程或权限的跨边界合同，必须记录恢复与兼容。
 

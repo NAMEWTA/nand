@@ -5,7 +5,8 @@ import { t } from '../../../../shared/i18n/index';
 import { ExcludeFoldersEditor } from '../ui/exclude-folders-editor';
 import { MultiFolderSelectModal } from '../ui/folder-select-modal';
 import { applyModalTheme } from '../appearance/modal-theme';
-import { PathPickerModal } from '../ui/path-picker-modal';
+import { TemplateListEditor } from './TemplateListEditor';
+import { templateChoices } from '../../core/board/board-experience';
 import { extractFrontmatterProperties, getAllTags, renderTagsSelector } from './library-file-result';
 import { VisiblePropertiesEditor } from './visible-properties-editor';
 
@@ -26,6 +27,7 @@ export interface FolderConfigResult {
 	visibleProperties: string[] | undefined;
 	/** Template note applied to new notes created from this section. */
 	templatePath: string | undefined;
+	templatePaths?: string[];
 }
 
 /**
@@ -53,6 +55,7 @@ export function folderResultToLibraryConfig(
 		result.tags.length > 0
 			? [...filtersWithoutTags, { property: 'tags', values: result.tags }]
 			: filtersWithoutTags;
+	const templates = templateChoices(result.templatePath, result.templatePaths);
 	return {
 		...safeBase,
 		folders: result.folders,
@@ -64,7 +67,8 @@ export function folderResultToLibraryConfig(
 		showProperties: result.showProperties ? undefined : false,
 		propertyLimit: result.propertyLimit,
 		visibleProperties: result.visibleProperties,
-		templatePath: result.templatePath,
+		templatePath: templates[0],
+		templatePaths: templates,
 	};
 }
 
@@ -83,7 +87,8 @@ export class FolderConfigModal extends Modal {
 	private showProperties: boolean;
 	private propertyLimit: number;
 	private visibleProperties: string[];
-	private templatePath: string;
+	private readonly templatePaths: string[];
+	private templates?: TemplateListEditor;
 	private readonly onSave: (result: FolderConfigResult) => void;
 
 	constructor(
@@ -99,6 +104,7 @@ export class FolderConfigModal extends Modal {
 		currentVisibleProperties?: string[],
 		currentKanbanShowCovers?: boolean,
 		templatePath?: string,
+		templatePaths?: string[],
 	) {
 		super(app);
 		this.folders = [...currentFolders];
@@ -110,7 +116,7 @@ export class FolderConfigModal extends Modal {
 		this.showProperties = currentShowProperties !== false;
 		this.propertyLimit = currentPropertyLimit ?? 6;
 		this.visibleProperties = [...(currentVisibleProperties ?? [])];
-		this.templatePath = (templatePath ?? '').trim();
+		this.templatePaths = templateChoices(templatePath, templatePaths);
 		this.onSave = onSave;
 	}
 
@@ -330,27 +336,7 @@ export class FolderConfigModal extends Modal {
 		// toolbar "+" (frontmatter merged from the section's filter props).
 		const tplSection = body.createDiv({ cls: 'dashboard-library-config-section' });
 		bindLocalizedElement(tplSection.createDiv({ cls: 'dashboard-library-config-section-title', text: t('library.newNoteTemplate') }), 'library.newNoteTemplate');
-		bindLocalizedElement(tplSection.createDiv({ cls: 'dashboard-library-config-hint', text: t('library.newNoteTemplateHint') }), 'library.newNoteTemplateHint');
-		const tplRow = tplSection.createDiv({ cls: 'dashboard-media-folder-input-row' });
-		const tplInput = tplRow.createEl('input', {
-			cls: 'dashboard-media-filter-folder',
-			attr: { type: 'text', placeholder: 'Templates/note.md' },
-		});
-		tplInput.value = this.templatePath;
-		bindLocalizedElement(tplRow
-			.createEl('button', {
-				cls: 'dashboard-media-folder-browse',
-				text: t('folder.browse'),
-			}), 'folder.browse')
-			.addEventListener('click', () => {
-				new PathPickerModal(this.app, 'file', (path) => {
-					tplInput.value = path;
-					this.templatePath = path;
-				}).open();
-			});
-		tplInput.addEventListener('change', () => {
-			this.templatePath = tplInput.value.trim();
-		});
+		this.templates = new TemplateListEditor(this.app, tplSection.createDiv(), this.templatePaths);
 
 		bindLocalizedElement(footer
 			.createEl('button', {
@@ -376,13 +362,15 @@ export class FolderConfigModal extends Modal {
 					showProperties: this.showProperties,
 					propertyLimit: this.propertyLimit,
 					visibleProperties: picked.length > 0 ? picked : undefined,
-					templatePath: this.templatePath || undefined,
+					templatePath: this.templates!.value[0],
+					templatePaths: this.templates!.value,
 				});
 				this.close();
 			});
 	}
 
 	onClose(): void {
+		this.templates?.dispose();
 		this.contentEl.empty();
 	}
 }

@@ -1,0 +1,53 @@
+{
+  "checkedAt": "2026-10-10",
+  "state": "implemented-public-capability-native-six-preview-verified",
+  "scope": "Documented explicit user skill invocation. A CLI may support model-selected skills without a direct skill command.",
+  "agents": [
+    {
+      "agentId": "claude-code",
+      "syntax": "/name",
+      "namespaces": true,
+      "url": "https://code.claude.com/docs/en/skills",
+      "note": "Includes /plugin:skill. Verified during dispatch foundation review."
+    },
+    {
+      "agentId": "codex",
+      "syntax": "$name",
+      "namespaces": false,
+      "url": "https://learn.chatgpt.com/docs/build-skills",
+      "note": "Official Codex skills documentation redirects here. Verified during dispatch foundation review."
+    },
+    {
+      "agentId": "grok",
+      "syntax": "/name",
+      "namespaces": true,
+      "url": "https://github.com/xai-org/grok-build/blob/main/crates/codegen/xai-grok-pager/docs/user-guide/08-skills.md",
+      "note": "Skill names are slash commands; scope/plugin-qualified commands are supported. Mapping implemented and native preview verified."
+    },
+    {
+      "agentId": "pi",
+      "syntax": "/skill:name",
+      "namespaces": false,
+      "url": "https://github.com/earendil-works/pi/blob/main/packages/coding-agent/docs/skills.md",
+      "note": "Explicit skill command appends arguments to loaded instructions. Upstream moved from badlogic/pi-mono. Mapping implemented and native preview verified."
+    },
+    {
+      "agentId": "opencode",
+      "syntax": null,
+      "namespaces": false,
+      "url": "https://opencode.ai/docs/skills/",
+      "note": "Documented on-demand skill tool; no explicit user prefix documented on this page. Keep plain-prompt support and reject guessed skill syntax."
+    },
+    {
+      "agentId": "gemini",
+      "syntax": null,
+      "namespaces": false,
+      "url": "https://geminicli.com/docs/cli/skills/",
+      "note": "Model calls activate_skill; /skills commands manage discovery and availability. No direct invocation prefix documented. Keep plain-prompt support."
+    }
+  ],
+  "remaining": [
+    "Actual CLI/provider execution beyond controlled native protocol fixtures"
+  ],
+  "evidence": "review-discovery.json"
+}

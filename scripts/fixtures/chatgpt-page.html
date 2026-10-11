@@ -1,0 +1,64 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>ChatGPT adapter local fixture</title>
+<a id="new-chat" href="/" data-testid="create-new-chat-button">New chat</a>
+<main id="messages"></main>
+<div id="prompt-textarea" class="ProseMirror fixture-composer" contenteditable="true" role="textbox" style="min-height:50px;border:1px solid;padding:8px;white-space:pre-wrap"></div>
+<button id="submit" data-testid="send-button">Send</button>
+<button id="stop" data-testid="stop-button" style="display:none">Stop</button>
+<script>
+const composer = document.querySelector('#prompt-textarea'), output = document.querySelector('#messages'), submit = document.querySelector('#submit'), stop = document.querySelector('#stop');
+let conversation, serial = 0, messages = [], timer;
+const fence = String.fromCharCode(96).repeat(3);
+window.fixtureMarkdown = '# Heading\n\n| A | B |\n| --- | --- |\n| 1 | 2 |\n\n' + fence + 'ts\nconst a = 1;\n' + fence + '\n\n$x^2$\n\nRepeated paragraph\n\nRepeated paragraph';
+window.fixtureCount = () => messages.length;
+window.fixtureHistory = () => {
+ const mapping = { root: { id: 'root', parent: null, message: null } };
+ for (const row of messages) {
+  const node = structuredClone(row);
+  if (node.message.author.role === 'assistant') {
+   const analysis = 'analysis-' + node.id, tool = 'tool-' + node.id;
+   mapping[analysis] = { id: analysis, parent: node.parent, message: { id: analysis, author: { role: 'assistant' }, channel: 'analysis', content: { content_type: 'text', parts: ['Private reasoning fixture'] } } };
+   mapping[tool] = { id: tool, parent: analysis, message: { id: tool, author: { role: 'tool' }, content: { content_type: 'text', parts: ['Private tool fixture'] } } };
+   node.parent = tool;
+  }
+  mapping[node.id] = node;
+ }
+ const last = messages.at(-1);
+ if (last?.message.author.role === 'assistant') mapping.old = { id: 'old', parent: last.parent, message: { id: 'old', author: { role: 'assistant' }, channel: 'final', recipient: 'all', content: { content_type: 'text', parts: ['Inactive branch secret'] }, status: 'finished_successfully', end_turn: true } };
+ if (window.fixtureMode === 'missing-parent') delete mapping.root;
+ return { conversation_id: conversation, current_node: window.fixtureMode === 'stale-branch' ? 'old' : last?.id, mapping, access_token: 'fixture-only-secret' };
+};
+function row(id, parent, role, text) {
+ const turn = document.createElement('article'); turn.dataset.testid = 'conversation-turn-' + messages.length;
+ if (role === 'assistant') { const hidden = document.createElement('div'); hidden.dataset.messageAuthorRole = 'assistant'; hidden.dataset.messageId = 'private-dom-' + id; hidden.dataset.channel = 'analysis'; hidden.textContent = 'Private reasoning fixture'; turn.append(hidden); }
+ const message = document.createElement('div'); message.dataset.messageId = id; message.dataset.messageAuthorRole = role; message.dataset.parentId = parent ?? '';
+ const content = document.createElement('div'); content.className = role === 'assistant' ? 'markdown' : 'whitespace-pre-wrap'; content.style.whiteSpace = 'pre-wrap';
+ content.textContent = text; message.append(content); turn.append(message); output.append(turn); return content;
+}
+document.querySelector('#new-chat').onclick = event => {
+ event.preventDefault(); if (timer) clearTimeout(timer);
+ conversation = undefined; messages = []; output.replaceChildren(); composer.replaceChildren();
+ history.replaceState({}, '', '/'); stop.style.display = 'none'; submit.disabled = false;
+};
+submit.onclick = () => {
+ if (!composer.innerText || submit.disabled) return;
+ const question = composer.innerText, parent = messages.at(-1)?.id;
+ conversation ??= crypto.randomUUID(); history.replaceState({}, '', '/c/' + conversation);
+ const user = 'user-' + (++serial), answer = 'answer-' + serial;
+ messages.push({ id: user, parent: parent ?? 'root', message: { id: user, author: { role: 'user' }, content: { content_type: 'text', parts: [question] } } });
+ row(user, parent, 'user', question);
+ const response = row(answer, user, 'assistant', 'Partial answer'); response.parentElement.setAttribute('aria-busy', 'true');
+ composer.replaceChildren(); submit.disabled = true; stop.style.display = '';
+ timer = setTimeout(() => {
+  response.parentElement.removeAttribute('aria-busy');
+  response.innerHTML = '<h1>Heading</h1><table><tr><th>A</th><th>B</th></tr><tr><td>1</td><td>2</td></tr></table><pre><code class="language-ts">const a = 1;</code></pre><span class="katex"><annotation encoding="application/x-tex">x^2</annotation></span><div class="reasoning">Private reasoning fixture</div><button>Copy</button>';
+  messages.push({ id: answer, parent: user, message: { id: answer, author: { role: 'assistant' }, channel: 'final', recipient: 'all',
+   status: window.fixtureMode === 'unfinished' ? 'in_progress' : 'finished_successfully', end_turn: window.fixtureMode !== 'unfinished',
+   content: { content_type: 'text', parts: [fixtureMarkdown + (window.fixtureLongAnswer ? '\n\n' + 'Long public paragraph. '.repeat(3000) : '')] } } });
+  submit.disabled = false; stop.style.display = 'none'; timer = undefined;
+  if (!window.fixtureNoHistory) void fetch('/backend-api/conversation/' + conversation);
+ }, window.fixtureDelay ?? 900);
+};
+stop.onclick = () => { clearTimeout(timer); timer = undefined; stop.style.display = 'none'; submit.disabled = false; for (const row of output.querySelectorAll('[aria-busy]')) row.removeAttribute('aria-busy'); const status = document.createElement('p'); status.role = 'status'; status.textContent = 'Stopped'; output.append(status); };
+</script>

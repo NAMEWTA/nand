@@ -13,6 +13,7 @@ import type { ChangeCode, FileChange } from '../core/status';
 import { errorText, lastRunText, describeReport } from '../services/report';
 import type { SyncService, SyncSnapshot } from '../services/sync-service';
 import { askText, confirmAction } from './dialogs';
+import { CloneRepository } from './CloneRepository';
 
 export type SyncSection = 'changes' | 'history';
 
@@ -116,6 +117,7 @@ function SyncPage(props: PageProps) {
 	return (
 		<div class="nand-sync-body">
 			<Summary {...props} />
+			<CloneRepository app={props.app} service={service} snapshot={snapshot} report={host.report} />
 			{props.section === 'history' ? <History service={service} head={snapshot.status?.head ?? null} app={props.app} /> : <Changes {...props} />}
 		</div>
 	);
@@ -138,16 +140,16 @@ function NoRepository({ app, service, snapshot, host }: PageProps) {
 	};
 	return (
 		<div class="nand-sync-body nand-sync-setup">
-			<EmptyState icon="git-branch" title={t('sync.noRepo')} description={t('sync.noRepoHelp', { path: snapshot.place?.cwd ?? '' })} layout="content" />
+			<EmptyState icon="git-branch" title={t('sync.noRepo')} description={snapshot.error ? errorText(snapshot.error.kind) : t('sync.noRepoHelp', { path: snapshot.place?.cwd ?? '' })} layout="content" />
 			<label class="nand-sync-check">
 				<input type="checkbox" checked={ignore} onChange={(event) => setIgnore(event.currentTarget.checked)} />
 				{t('sync.writeGitignore')}
 			</label>
 			<div class="nand-sync-actions">
-				<Button variant="primary" icon="git-branch" onClick={() => void init()}>{t('sync.init')}</Button>
+				<Button variant="primary" icon="git-branch" disabled={!!snapshot.running || !snapshot.place} onClick={() => void init()}>{t('sync.init')}</Button>
 				<Button onClick={() => host.openSettings()}>{t('sync.openSettings')}</Button>
 			</div>
-			<p class="nand-sync-muted">{t('sync.cloneHelp')}</p>
+			<CloneRepository app={app} service={service} snapshot={snapshot} report={host.report} />
 		</div>
 	);
 }

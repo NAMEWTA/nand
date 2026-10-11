@@ -1,7 +1,11 @@
 import { bindLocalizedElement, bindLocalizedControl } from '../../../../ui/primitives/localized-dom';
 import { App, FuzzySuggestModal, Modal, Notice, setIcon } from 'obsidian';
 import { focalForWrite } from '../../core/board/board-experience';
-import { commitHomeDecor } from '../../core/board/appearance-preset';
+import { homeDecor } from '../../core/board/appearance-preset';
+import { h, render } from 'preact';
+import { formatFocalPoint } from '../../core/board/focal-point';
+import { mountFocalEditor } from '../images/focal-editor';
+import { closeOwnedDashboardDialogs, openOwnedDashboardModal } from '../ui/dialog-scope';
 import type { BgSize, DashboardSettings } from '../../core/board/types/index';
 import { t } from '../../../../shared/i18n/index';
 import type { DashboardHost } from '../host';
@@ -37,6 +41,10 @@ export class ThemeStudioModal extends Modal {
 	private bgFocal: { x: number; y: number } | undefined;
 	private readonly advancedDefaults: AdvancedDefaults;
 	private saveTimer: number | null = null;
+	private disposePresets?: () => void;
+	private decorRoot?: HTMLElement;
+	private focalEditor?: ReturnType<typeof mountFocalEditor>;
+	private themeObserver?: MutationObserver;
 
 	constructor(app: App, plugin: DashboardHost) {
 		super(app);
@@ -51,30 +59,42 @@ export class ThemeStudioModal extends Modal {
 		this.radiusScale = s.radiusScale;
 		this.fontScale = s.fontScale ?? 'medium';
 		this.bgFocal = focalForWrite(s.bgFocal);
-		this.advancedDefaults = readAdvancedDefaults();
+		this.advancedDefaults = readAdvancedDefaults(this.contentEl.doc);
 	}
 
 	onOpen(): void {
 		const { contentEl, containerEl } = this;
 		contentEl.empty();
-		contentEl.addClass('dashboard-library-config-modal');
-		containerEl.addClass('modal--dashboard');
-		containerEl.parentElement?.addClass('modal-bg--dashboard');
+		contentEl.addClass('dashboard-library-config-modal', 'nand-appearance-modal');
+		this.modalEl.addClass('modal--dashboard');
+		containerEl.addClass('modal-bg--dashboard');
 		applyModalTheme(containerEl);
+		const ownerWindow = containerEl.win as Window & { MutationObserver: typeof MutationObserver };
+		const observer = new ownerWindow.MutationObserver(() => this.refreshTheme());
+		observer.observe(containerEl.doc.body, { attributes: true, attributeFilter: ['class', 'style'] });
+		this.themeObserver = observer;
 		this.renderBody();
 	}
 
 	onClose(): void {
+		this.themeObserver?.disconnect();
+		this.themeObserver = undefined;
 		if (this.saveTimer !== null) {
-			window.clearTimeout(this.saveTimer);
-			void this.plugin.saveSettings();
+			this.contentEl.win.clearTimeout(this.saveTimer);
+			void this.plugin.saveSettings().catch(() => new Notice(t('appearancePresets.unsaved')));
 		}
+		this.saveTimer = null;
+		closeOwnedDashboardDialogs(this.app, this);
+		closeOwnedDashboardDialogs(this.app, this.contentEl);
+		this.disposePresets?.();
+		this.focalEditor?.dispose();
 		this.contentEl.empty();
 	}
 
 	/** Build (or rebuild) the modal body. Safe to call on discrete clicks only —
 	 *  never on continuous `input` events, or an open color picker would lose focus. */
 	private renderBody(): void {
+		this.disposePresets?.();
 		const { contentEl } = this;
 		contentEl.empty();
 		const container = contentEl.createDiv({
@@ -97,10 +117,27 @@ export class ThemeStudioModal extends Modal {
 		const body = container.createDiv({ cls: 'dashboard-modal-body' });
 		bindLocalizedElement(body.createEl('p', { cls: 'dashboard-theme-studio-hint', text: t('themeStudio.hint') }), 'themeStudio.hint');
 
-		const form = body.createDiv({ cls: 'dashboard-modal-form' });
-		this.renderBackgroundSection(form);
-		this.renderAdvancedSection(form);
+		const presets = body.createDiv();
+		let closed = false;
+		this.disposePresets = () => { closed = true; render(null, presets); };
+		void import('./AppearancePresetsPanel').then(({ AppearancePresetsPanel }) => {
+			if (!closed) render(h(AppearancePresetsPanel, { service: this.plugin.appearance, applied: () => {
+				Object.assign(this, homeDecor(this.plugin.settings));
+				this.refreshTheme();
+				this.renderDecor();
+			} }), presets);
+		}, () => { if (!closed) presets.createEl('p', { text: t('appearancePresets.loadError'), attr: { role: 'alert' } }); });
+		this.decorRoot = body.createDiv({ cls: 'dashboard-modal-form' });
+		this.renderDecor();
 		this.renderActions(container);
+	}
+
+	private renderDecor(): void {
+		if (!this.decorRoot) return;
+		this.focalEditor?.dispose();
+		this.decorRoot.empty();
+		this.renderBackgroundSection(this.decorRoot);
+		this.renderAdvancedSection(this.decorRoot);
 	}
 
 	private renderBackgroundSection(form: HTMLElement): void {
@@ -112,11 +149,12 @@ export class ThemeStudioModal extends Modal {
 		const imageRow = section.createDiv({ cls: 'dashboard-theme-studio-image-row' });
 		const input = imageRow.createEl('input', {
 			cls: 'dashboard-modal-input dashboard-theme-studio-image-input',
-			attr: { type: 'text', placeholder: 'attachments/bg.jpg' },
+			attr: { type: 'text', placeholder: 'attachments/bg.jpg', 'aria-label': t('themeStudio.bg.title') },
 		});
 		input.value = this.bgImage;
 		input.addEventListener('input', () => {
 			this.bgImage = input.value;
+			this.focalEditor?.update(resolveVaultImage(this.app, this.bgImage), (this.bgFocal ? formatFocalPoint(this.bgFocal) : undefined));
 			this.scheduleApply();
 		});
 
@@ -125,11 +163,12 @@ export class ThemeStudioModal extends Modal {
 			text: t('themeStudio.bg.browse'),
 		}), 'themeStudio.bg.browse');
 		browseBtn.addEventListener('click', () => {
-			new ImageFileSuggestModal(this.app, (path) => {
+			openOwnedDashboardModal(this.app, new ImageFileSuggestModal(this.app, (path) => {
 				this.bgImage = path;
 				input.value = path;
+				this.focalEditor?.update(resolveVaultImage(this.app, path), (this.bgFocal ? formatFocalPoint(this.bgFocal) : undefined));
 				this.scheduleApply();
-			}).open();
+			}), this);
 		});
 
 		const clearImgBtn = bindLocalizedElement(imageRow.createEl('button', {
@@ -139,6 +178,7 @@ export class ThemeStudioModal extends Modal {
 		clearImgBtn.addEventListener('click', () => {
 			this.bgImage = '';
 			input.value = '';
+			this.focalEditor?.update(null, (this.bgFocal ? formatFocalPoint(this.bgFocal) : undefined));
 			this.scheduleApply();
 		});
 
@@ -171,7 +211,7 @@ export class ThemeStudioModal extends Modal {
 		// Fill mode
 		const sizeRow = section.createDiv({ cls: 'dashboard-theme-studio-size-row' });
 		bindLocalizedElement(sizeRow.createSpan({ cls: 'dashboard-theme-studio-color-label', text: t('themeStudio.bg.size') }), 'themeStudio.bg.size');
-		const sizeSelect = sizeRow.createEl('select', { cls: 'dashboard-modal-input dashboard-theme-studio-size' });
+		const sizeSelect = sizeRow.createEl('select', { cls: 'dashboard-modal-input dashboard-theme-studio-size', attr: { 'aria-label': t('themeStudio.bg.size') } });
 		const coverOpt = bindLocalizedElement(sizeSelect.createEl('option', { value: 'cover', text: t('themeStudio.bg.sizeCover') }), 'themeStudio.bg.sizeCover');
 		const containOpt = bindLocalizedElement(sizeSelect.createEl('option', { value: 'contain', text: t('themeStudio.bg.sizeContain') }), 'themeStudio.bg.sizeContain');
 		if (this.bgSize === 'contain') containOpt.selected = true;
@@ -180,18 +220,10 @@ export class ThemeStudioModal extends Modal {
 			this.bgSize = sizeSelect.value === 'contain' ? 'contain' : 'cover';
 			this.scheduleApply();
 		});
-		const resolved = this.bgImage.trim() ? resolveVaultImage(this.app, this.bgImage.trim()) : '';
-		if (resolved) {
-			const preview = section.createEl('img', { cls: 'dashboard-theme-studio-preview', attr: { src: resolved, alt: '' } });
-			preview.addEventListener('click', (event) => {
-				const rect = preview.getBoundingClientRect();
-				if (!rect.width || !rect.height) return;
-				const next = focalForWrite({ x: ((event.clientX - rect.left) / rect.width) * 100, y: ((event.clientY - rect.top) / rect.height) * 100 });
-				if (!next) return;
-				this.bgFocal = next;
-				this.scheduleApply();
-			});
-		}
+		this.focalEditor = mountFocalEditor(section.createDiv(), {
+			source: resolveVaultImage(this.app, this.bgImage), value: (this.bgFocal ? formatFocalPoint(this.bgFocal) : undefined), ratio: 2,
+			change: point => { this.bgFocal = point; this.scheduleApply(); },
+		}, this.app);
 	}
 
 	// ── Advanced (glass blur, corner radius, surface opacity) ──────────────
@@ -314,7 +346,7 @@ export class ThemeStudioModal extends Modal {
 
 		const slider = row.createEl('input', {
 			cls: 'dashboard-theme-studio-slider',
-			attr: { type: 'range', min: String(opts.min), max: String(opts.max), step: String(opts.step) },
+			attr: { type: 'range', min: String(opts.min), max: String(opts.max), step: String(opts.step), 'aria-label': opts.label },
 		});
 		slider.value = String(current ?? opts.displayDefault);
 		slider.addEventListener('input', () => {
@@ -348,7 +380,7 @@ export class ThemeStudioModal extends Modal {
 		});
 		const slider = row.createEl('input', {
 			cls: 'dashboard-theme-studio-slider',
-			attr: { type: 'range', min: String(opts.min), max: String(opts.max), step: String(opts.step) },
+			attr: { type: 'range', min: String(opts.min), max: String(opts.max), step: String(opts.step), 'aria-label': opts.label },
 		});
 		slider.value = String(opts.value);
 		slider.addEventListener('input', () => {
@@ -378,10 +410,12 @@ export class ThemeStudioModal extends Modal {
 			message: t('themeStudio.resetAllConfirm'),
 			confirmLabel: t('common.confirm'),
 			destructive: false,
+			owner: this.contentEl,
 		});
 		if (!ok) return;
 
 		this.bgImage = '';
+		this.bgFocal = undefined;
 		this.bgDim = 40;
 		this.bgBlur = 0;
 		this.bgSize = 'cover';
@@ -398,39 +432,17 @@ export class ThemeStudioModal extends Modal {
 
 	/** Write current edits into settings, live-apply to open dashboards, debounce-save. */
 	private scheduleApply(): void {
-		const focal = this.bgFocal;
-		const committed = commitHomeDecor(
-			{
-				bgImage: this.bgImage.trim(),
-				bgDim: this.bgDim,
-				bgBlur: this.bgBlur,
-				bgSize: this.bgSize,
-				surfaceOpacity: this.surfaceOpacity,
-				glassBlur: this.glassBlur,
-				radiusScale: this.radiusScale,
-				fontScale: this.fontScale,
-			},
-			() => undefined,
-			(home) => {
-				this.plugin.settings = {
-					...this.plugin.settings,
-					...home,
-					bgSize: home.bgSize === 'contain' ? 'contain' : 'cover',
-					fontScale: home.fontScale === 'small' || home.fontScale === 'large' ? home.fontScale : 'medium',
-					...(focal ? { bgFocal: focal } : {}),
-				};
-			},
-		);
-		if (!committed.saved) {
-			new Notice(committed.error);
-			return;
-		}
-		refreshAppearanceLive(this.app, this.plugin.settings);
-		if (this.saveTimer !== null) window.clearTimeout(this.saveTimer);
-		this.saveTimer = window.setTimeout(() => {
-			void this.plugin.saveSettings();
+		this.plugin.settings = { ...this.plugin.settings, ...homeDecor(this) };
+		this.refreshTheme();
+		if (this.saveTimer !== null) this.contentEl.win.clearTimeout(this.saveTimer);
+		this.saveTimer = this.contentEl.win.setTimeout(() => {
+			void this.plugin.saveSettings().catch(() => new Notice(t('appearancePresets.unsaved')));
 			this.saveTimer = null;
 		}, 400);
+	}
+	private refreshTheme(): void {
+		refreshAppearanceLive(this.app, this.plugin.settings);
+		applyModalTheme(this.containerEl);
 	}
 }
 
@@ -469,10 +481,10 @@ interface TFileStub {
 }
 
 /** Read the active theme's blur + radius so advanced sliders start at the right spot. */
-function readAdvancedDefaults(): AdvancedDefaults {
-	const root = activeDocument.querySelector<HTMLElement>('.nand-dashboard-root');
+function readAdvancedDefaults(doc: Document): AdvancedDefaults {
+	const root = doc.querySelector<HTMLElement>('.nand-dashboard-root');
 	if (!root) return { blur: 0, radius: 14 };
-	const cs = getComputedStyle(root);
+	const cs = root.win.getComputedStyle(root);
 	const blurRaw = cs.getPropertyValue('--db-backdrop-blur').trim();
 	const blurMatch = blurRaw.match(/blur\(([\d.]+)px\)/i);
 	const blur = blurMatch ? Math.round(parseFloat(blurMatch[1]!)) : 0;

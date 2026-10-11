@@ -26,6 +26,10 @@ shared_path_owners: ["<Path>main.js</Path> => 2026-10-08-news-aihot::T-05（本�
 
 # Ticket T-05: 展示可信热点趋势与七天曲线
 
+<!-- ACTUAL-CODE-REVIEW:START -->
+2026-10-11 实际代码审查：[T-05.md](../evidence/T-05.md)。本票下文保留原规划合同与基线；当前实现、修复、验证及未验证条件以该记录为准。原“仅规划／未授权实施／必须提交”的阶段约束不适用于用户已授权的本次工作区审查；提交与远程操作仍未执行。
+<!-- ACTUAL-CODE-REVIEW:END -->
+
 - Ticket：<Path>{roots.state}/specdev/changes/2026-10-08-news-aihot/ticket/05-hot-ranking-and-observation-history.md</Path>
 - 总控Map：<Path>{roots.state}/specdev/changes/2026-10-08-news-aihot/tickets-map.md</Path>
 - Spec：<Path>{roots.state}/specdev/changes/2026-10-08-news-aihot/spec.md</Path>
@@ -37,7 +41,7 @@ shared_path_owners: ["<Path>main.js</Path> => 2026-10-08-news-aihot::T-05（本�
 
 **目标与可观察产出：** 读者看到按独立参与方计算的热点、可比趋势和真实观测曲线，能理解尚无趋势的原因。
 
-**当前事实：** 无news热度/历史；AIHOT算法依赖source当前角色/owner、可靠原文时间与cohort，不能按文章数冒充。
+**规划时基线：** 无news热度/历史；AIHOT算法依赖source当前角色/owner、可靠原文时间与cohort，不能按文章数冒充。
 
 **来源：** AC-015, AC-016, AC-017；issue #136；<Path>{roots.state}/specdev/changes/2026-10-08-news-aihot/reference-analysis.md</Path>。深度 deep：涉及持久数据/公共接口/进程或权限的跨边界合同，必须记录恢复与兼容。
 

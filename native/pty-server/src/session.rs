@@ -255,9 +255,10 @@ fn hang_up(session: &Session) {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use std::sync::mpsc::Receiver;
-    use std::time::Instant;
+    #[cfg(unix)]
+    use std::{sync::mpsc::Receiver, time::Instant};
 
+    #[cfg(unix)]
     fn collect(rx: &Receiver<Vec<u8>>, until: impl Fn(&[u8], &[serde_json::Value]) -> bool) -> (Vec<u8>, Vec<serde_json::Value>) {
         let mut output = Vec::new();
         let mut messages = Vec::new();

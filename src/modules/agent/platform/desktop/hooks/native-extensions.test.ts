@@ -36,27 +36,30 @@ async function events(directory: string): Promise<string[]> {
 	);
 }
 
-test('Pi reports completion only after a native idle check, and suppresses repeated settlement', async () =>
+test('Pi reports the full answer only at native final settlement, and suppresses repeated settlement', async () =>
 	spool(async (directory) => {
 		const handlers = new Map<string, (event: Record<string, unknown>, ctx: unknown) => void>();
 		const module = await import(`data:text/javascript,${encodeURIComponent(PI_EXTENSION)}#${Date.now()}`);
 		module.default({
 			on: (key: string, fn: (event: Record<string, unknown>, ctx: unknown) => void) => handlers.set(key, fn),
 		});
-		let idle = false;
 		const ctx = {
 			cwd: directory,
-			isIdle: () => idle,
+			isIdle: () => true,
 			sessionManager: { getSessionId: () => 'root', getSessionFile: () => 'root.jsonl' },
 		};
+		const answer = '完整原生答案'.repeat(3000);
 		handlers.get('agent_start')!({}, ctx);
-		handlers.get('agent_end')!({}, ctx);
+		handlers.get('agent_end')!({ messages: [{ role: 'assistant', content: [{ type: 'thinking', text: 'omit' }, { type: 'text', text: answer }] }] }, ctx);
 		await new Promise((r) => setTimeout(r, 25));
 		assert.equal((await events(directory)).filter((e) => e === 'Stop').length, 0);
-		idle = true;
 		handlers.get('agent_settled')!({}, ctx);
 		handlers.get('agent_settled')!({}, ctx);
 		assert.equal((await events(directory)).filter((e) => e === 'Stop').length, 1);
+		for (const file of (await fs.readdir(directory)).filter(file => file.endsWith('.json'))) {
+			const event = JSON.parse(await fs.readFile(path.join(directory, file), 'utf8'));
+			if (event.event === 'Stop') assert.equal(event.data.last_assistant_message, answer);
+		}
 		handlers.get('session_shutdown')!({}, ctx);
 	}));
 
@@ -69,6 +72,10 @@ test('OpenCode ignores child idle and recoverable errors but accepts root busy/i
 					get: async ({ path: { id } }: { path: { id: string } }) => ({
 						data: { directory, parentID: id === 'child' ? 'root' : undefined },
 					}),
+					messages: async () => ({ data: [
+						{ info: { id: 'user', role: 'user' }, parts: [] },
+						{ info: { role: 'assistant', parentID: 'user', time: { completed: 1 } }, parts: [{ type: 'text', text: 'final' }, { type: 'reasoning', text: 'omit' }] },
+					] }),
 				},
 			},
 		});

@@ -14,8 +14,10 @@ import {
 	type LibraryResultGroup,
 } from './library-groups';
 import { extractCoverValue, omitFrontmatterKey, openFile } from './library-presentation';
+import { GroupWindow, useProgressiveResults } from './ProgressiveResults';
 const pendingMoves = new WeakSet<TFile>();
-export function LibraryKanban({ app, config, context, results, onDelete }: LibraryViewProps) {
+export function LibraryKanban({ app, config, context, results, onDelete, windowKey }: LibraryViewProps) {
+	const progressive = useProgressiveResults(results, windowKey ?? JSON.stringify(config));
 	const folder = config.groupMode === 'folder',
 		property = config.kanbanGroupBy ?? 'tags';
 	const folders = useMemo(() => buildKanbanGroupFolders(results, config.folders ?? []), [results, config.folders]);
@@ -117,6 +119,7 @@ export function LibraryKanban({ app, config, context, results, onDelete }: Libra
 		<div ref={root} class="dashboard-library-kanban">
 			{groups.map((group) => {
 				const accepts = !group.isNoGroup && (!folder || folders.has(group.key));
+				const window = progressive.group(group.key, group.items);
 				return (
 					<div
 						class="dashboard-library-kanban-col"
@@ -144,7 +147,7 @@ export function LibraryKanban({ app, config, context, results, onDelete }: Libra
 						<div class="dashboard-library-kanban-col-title">
 							{group.label} ({group.items.length})
 						</div>
-						{group.items.map((result) => {
+						{window.items.map((result) => {
 							const cover = config.kanbanShowCovers ? extractCoverValue(result.frontmatter) : null;
 							let frontmatter = cover
 								? omitFrontmatterKey(result.frontmatter, cover.key)
@@ -154,6 +157,7 @@ export function LibraryKanban({ app, config, context, results, onDelete }: Libra
 								<div
 									class="dashboard-library-kanban-card"
 									key={result.file.path}
+									data-file-path={result.file.path}
 									draggable={!Platform.isMobile}
 									title={t(folder ? 'library.kanbanDragHint' : 'library.kanbanDragHintProperty')}
 									onMouseOver={(event) => noteHover(app, context, result.file, event)}
@@ -189,6 +193,7 @@ export function LibraryKanban({ app, config, context, results, onDelete }: Libra
 								</div>
 							);
 						})}
+						<GroupWindow label={group.label} {...window} more={() => progressive.more(group.key, window.available)} />
 					</div>
 				);
 			})}

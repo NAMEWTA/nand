@@ -3,6 +3,7 @@ import { DocumentRepository, type DocumentValue } from '../../../shared/storage/
 import type { CollectionDocument, DocumentCollectionCodec } from '../../../shared/storage/document-collection';
 import { ensureDirectory } from '../../../shared/storage/durable-state';
 import type { TextStorage } from '../../../shared/storage/ports';
+import { privateVaultStorage } from './private-storage';
 
 /** Incremental Vault index. No plugin-directory JSON or compatibility scans. */
 export class MarkdownCollectionStorage<T> implements TextStorage {
@@ -83,21 +84,22 @@ export class MarkdownCollectionStorage<T> implements TextStorage {
 			if (file instanceof TFile) {
 				const snapshot = await this.repository.read(path);
 				const id = snapshot.value.properties['nand-id'];
-				if (typeof id === 'string') this.documents.set(path, { ...snapshot.value, id, path });
+				const owned = !this.codec.ownedTypes || this.codec.ownedTypes.includes(String(snapshot.value.properties['nand-type']));
+				if (typeof id === 'string' && owned) this.documents.set(path, { ...snapshot.value, id, path });
 				else this.documents.delete(path);
 			} else this.documents.delete(path);
 			if (this.dirty.get(path) === revision) this.dirty.delete(path);
 		}
 	}
 	async exists(path: string): Promise<boolean> {
-		return path === this.key || this.app.vault.adapter.exists(path);
+		return path === this.key || privateVaultStorage(this.app).exists(path);
 	}
 	async mkdir(path: string): Promise<void> {
 		if (this.key.startsWith(`${path}/`)) return;
-		await this.app.vault.adapter.mkdir(path);
+		await privateVaultStorage(this.app).mkdir(path);
 	}
 	async read(path: string): Promise<string> {
-		if (path !== this.key) return this.app.vault.adapter.read(path);
+		if (path !== this.key) return privateVaultStorage(this.app).read(path);
 		await this.refresh();
 		const ids = new Set<string>();
 		for (const doc of this.documents.values()) {
@@ -110,7 +112,7 @@ export class MarkdownCollectionStorage<T> implements TextStorage {
 	}
 	async write(path: string, text: string): Promise<void> {
 		if (path !== this.key) {
-			await this.app.vault.adapter.write(path, text);
+			await privateVaultStorage(this.app).write(path, text);
 			return;
 		}
 		const next = this.codec.encode(JSON.parse(text) as T);
@@ -120,9 +122,12 @@ export class MarkdownCollectionStorage<T> implements TextStorage {
 			existing.set(doc.id, doc);
 		}
 		const ids = new Set(next.map((doc) => doc.id));
+		const removed: CollectionDocument[] = [];
 		for (const doc of existing.values())
 			if (!ids.has(doc.id) && doc.properties['nand-deleted'] !== true)
-				next.push({ ...doc, properties: { ...doc.properties, 'nand-deleted': true } });
+				removed.push({ ...doc, properties: { ...doc.properties, 'nand-deleted': true } });
+		if (this.codec.deletionPriority) removed.sort((a, b) => this.codec.deletionPriority!(a) - this.codec.deletionPriority!(b));
+		next.push(...removed);
 		for (const doc of next) {
 			const old = existing.get(doc.id);
 			const target = old?.path ?? doc.path;

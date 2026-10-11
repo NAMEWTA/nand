@@ -26,6 +26,10 @@ shared_path_owners: ["<Path>main.js</Path> => 2026-10-08-news-aihot::T-02（本�
 
 # Ticket T-02: 复用 Agent 并可靠读回完整结构化答案
 
+<!-- ACTUAL-CODE-REVIEW:START -->
+2026-10-11 实际代码审查：[T-02.md](../evidence/T-02.md)。本票下文保留原规划合同与基线；当前实现、修复、验证及未验证条件以该记录为准。原“仅规划／未授权实施／必须提交”的阶段约束不适用于用户已授权的本次工作区审查；提交与远程操作仍未执行。
+<!-- ACTUAL-CODE-REVIEW:END -->
+
 - Ticket：<Path>{roots.state}/specdev/changes/2026-10-08-news-aihot/ticket/02-agent-structured-prompt-runner.md</Path>
 - 总控Map：<Path>{roots.state}/specdev/changes/2026-10-08-news-aihot/tickets-map.md</Path>
 - Spec：<Path>{roots.state}/specdev/changes/2026-10-08-news-aihot/spec.md</Path>
@@ -37,7 +41,7 @@ shared_path_owners: ["<Path>main.js</Path> => 2026-10-08-news-aihot::T-02（本�
 
 **目标与可观察产出：** 新闻可通过公开runner发送一段prompt，得到完整最后答案及用量；用户能处理权限、取消和超时。
 
-**当前事实：** runtime要求AutomationRun、message尾8000、hook stdin65536字符和spool100000bytes上限；Pi/OpenCode无last message，旧history parser不输出最后assistant；PermissionRequest未消费。依赖终端change的helper验收及home公共Agent目录contract。
+**规划时基线：** runtime要求AutomationRun、message尾8000、hook stdin65536字符和spool100000bytes上限；Pi/OpenCode无last message，旧history parser不输出最后assistant；PermissionRequest未消费。依赖终端change的helper验收及home公共Agent目录contract。
 
 **来源：** AC-006, AC-007；issue #136；<Path>{roots.state}/specdev/changes/2026-10-08-news-aihot/reference-analysis.md</Path>。深度 deep：涉及持久数据/公共接口/进程或权限的跨边界合同，必须记录恢复与兼容。
 

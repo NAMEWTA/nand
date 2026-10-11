@@ -1,7 +1,8 @@
 import { execFile } from 'node:child_process';
-import { realpath } from 'node:fs/promises';
+import { realpath, stat } from 'node:fs/promises';
 import path from 'node:path';
 import type { RepoPlace } from '../../core/ports';
+import { GitError } from '../../core/errors';
 
 /** Where git usually lives when it is not on the PATH Obsidian was started with (macOS apps get a short PATH). */
 function candidates(preferred: string): string[] {
@@ -34,8 +35,16 @@ const posix = (value: string) => value.split(path.sep).join('/');
 
 /** Find the repository that holds the vault (or the vault's `subPath` folder) and how their paths relate. */
 export async function locateRepo(binary: string, vaultRoot: string, subPath: string): Promise<RepoPlace> {
-	const vault = await realpath(vaultRoot).catch(() => vaultRoot);
-	const cwd = subPath.trim() ? path.resolve(vault, subPath.trim()) : vault;
+	const vault = await realpath(vaultRoot);
+	let cwd: string;
+	try {
+		if (path.isAbsolute(subPath.trim()) || subPath.includes('\0')) throw new GitError('invalid-repo-folder');
+		cwd = await realpath(path.resolve(vault, subPath.trim()));
+		const relative = path.relative(vault, cwd);
+		if (relative === '..' || relative.startsWith(`..${path.sep}`) || path.isAbsolute(relative) || !(await stat(cwd)).isDirectory()) throw new GitError('invalid-repo-folder');
+	} catch {
+		throw new GitError('invalid-repo-folder');
+	}
 	const top = await new Promise<string | null>((resolve) => {
 		execFile(binary, ['rev-parse', '--show-toplevel'], { cwd, timeout: 15_000, windowsHide: true, encoding: 'utf8', env: { ...process.env, LC_ALL: 'C' } }, (error, stdout) => {
 			resolve(error ? null : stdout.trim());

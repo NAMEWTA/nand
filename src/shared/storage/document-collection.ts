@@ -7,8 +7,12 @@ export interface CollectionDocument extends DocumentValue {
 /** Domain-owned mapping; infrastructure never knows a habit, book or ledger entry. */
 export interface DocumentCollectionCodec<T> {
 	root: string;
+	/** When a configurable folder also contains other NAND documents, leave those owners untouched. */
+	ownedTypes?: readonly string[];
 	/** Keys owned by this domain, including keys absent after changing a variant. */
 	managedProperties?: readonly string[];
+	/** Delete dependent records before their parents so an interrupted write remains readable. Lower values go first. */
+	deletionPriority?(document: CollectionDocument): number;
 	empty(): T;
 	encode(value: T): CollectionDocument[];
 	decode(documents: CollectionDocument[]): T;

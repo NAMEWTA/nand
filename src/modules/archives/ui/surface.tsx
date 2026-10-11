@@ -238,7 +238,7 @@ function Detail({ view, record }: { view: ContactsPanelHost; record: ArchiveReco
 			{record.kind === 'person' && (
 				<>
 					<Section
-						initialOpen={view.state.focus === 'employments'}
+						initialOpen={view.state.focus === 'employment'}
 						title={`${ct('employments')} (${record.employments.length})`}
 						action={
 							<Action
@@ -295,7 +295,7 @@ function Detail({ view, record }: { view: ContactsPanelHost; record: ArchiveReco
 							))}
 					</Section>
 					<Section
-						initialOpen={view.state.focus === 'relations'}
+						initialOpen={view.state.focus === 'relation'}
 						title={`${ct('relations')} (${index.relationsFor(record.id).length})`}
 						action={
 							<Action icon="plus" label={ct('add')} action={() => edit('relation')} disabled={blocked} />

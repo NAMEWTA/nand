@@ -1,0 +1,923 @@
+{
+  "rows": [
+    {
+      "name": "legacy-open-does-not-write",
+      "passed": true
+    },
+    {
+      "name": "first-switch-renders-real-widget-and-section",
+      "passed": true,
+      "detail": {
+        "columns": "12",
+        "width": 1312,
+        "sidebar": false,
+        "tiles": [
+          {
+            "id": "home:year-progress:default",
+            "column": "1 / span 4",
+            "row": "1 / span 14",
+            "text": "Year progressFit contentResize202682 days leftDay 283 of 36577.4%",
+            "width": 431,
+            "height": 140,
+            "scroll": 96,
+            "bodyHeight": 96
+          },
+          {
+            "id": "section-492bc011-bc68-4f52-8d10-2c1314163967",
+            "column": "1 / span 12",
+            "row": "15 / span 27",
+            "text": "NotesFit contentResizeNotesGrouped memoVisible grouped body.Standalone memoVisible standalone body.",
+            "width": 1312,
+            "height": 270,
+            "scroll": 226,
+            "bodyHeight": 226
+          }
+        ]
+      }
+    },
+    {
+      "name": "first-switch-persists-members-sections-and-grid-once",
+      "passed": true,
+      "detail": {
+        "custom": [
+          "one",
+          "two"
+        ],
+        "columns": [
+          {
+            "name": "Notes",
+            "type": "memo",
+            "height": 310,
+            "id": "section-492bc011-bc68-4f52-8d10-2c1314163967"
+          }
+        ],
+        "layout": "immersive",
+        "widgets": [
+          {
+            "memberId": "home:year-progress:default",
+            "provider": "home",
+            "kind": "year-progress",
+            "instanceId": "default"
+          }
+        ],
+        "immersive": [
+          {
+            "id": "home:year-progress:default",
+            "w": 4,
+            "cap": 14,
+            "x": 0,
+            "y": 0
+          },
+          {
+            "id": "section-492bc011-bc68-4f52-8d10-2c1314163967",
+            "w": 12,
+            "cap": 32,
+            "x": 0,
+            "y": 14
+          }
+        ]
+      }
+    },
+    {
+      "name": "personal-markdown-preserved",
+      "passed": true
+    },
+    {
+      "name": "mixed-real-content-and-unavailable-placeholders",
+      "passed": true,
+      "detail": {
+        "columns": "12",
+        "width": 1302,
+        "sidebar": false,
+        "tiles": [
+          {
+            "id": "year",
+            "column": "1 / span 3",
+            "row": "1 / span 14",
+            "text": "Year progressFit contentResize202682 days leftDay 283 of 36577.4%",
+            "width": 318,
+            "height": 140,
+            "scroll": 96,
+            "bodyHeight": 96
+          },
+          {
+            "id": "disabled",
+            "column": "4 / span 3",
+            "row": "1 / span 21",
+            "text": "news-rawFit contentResizenews-rawThis widget provider is unavailable. Enable it in settings to restore this widget.Open settings",
+            "width": 318,
+            "height": 210,
+            "scroll": 166,
+            "bodyHeight": 166
+          },
+          {
+            "id": "section",
+            "column": "7 / span 6",
+            "row": "1 / span 40",
+            "text": "NotesFit contentResizeNotesGrouped memoVisible grouped body.",
+            "width": 646,
+            "height": 400,
+            "scroll": 356,
+            "bodyHeight": 356
+          },
+          {
+            "id": "single",
+            "column": "1 / span 6",
+            "row": "41 / span 21",
+            "text": "Standalone memoFit contentResizeStandalone memoVisible standalone body.",
+            "width": 646,
+            "height": 210,
+            "scroll": 166,
+            "bodyHeight": 166
+          },
+          {
+            "id": "missing-reference",
+            "column": "7 / span 6",
+            "row": "41 / span 7",
+            "text": "missing-referenceFit contentResizeThe content for this tile is unavailable. Its saved position is retained.",
+            "width": 646,
+            "height": 70,
+            "scroll": 26,
+            "bodyHeight": 26
+          }
+        ]
+      }
+    },
+    {
+      "name": "standalone-body-not-duplicated-in-section",
+      "passed": true
+    },
+    {
+      "name": "content-fit-shrinks-within-cap-and-fixed-is-exact",
+      "passed": true,
+      "detail": {
+        "columns": "12",
+        "width": 1302,
+        "sidebar": false,
+        "tiles": [
+          {
+            "id": "year",
+            "column": "1 / span 3",
+            "row": "1 / span 14",
+            "text": "Year progressFit contentResize202682 days leftDay 283 of 36577.4%",
+            "width": 318,
+            "height": 140,
+            "scroll": 96,
+            "bodyHeight": 96
+          },
+          {
+            "id": "disabled",
+            "column": "4 / span 3",
+            "row": "1 / span 21",
+            "text": "news-rawFit contentResizenews-rawThis widget provider is unavailable. Enable it in settings to restore this widget.Open settings",
+            "width": 318,
+            "height": 210,
+            "scroll": 166,
+            "bodyHeight": 166
+          },
+          {
+            "id": "section",
+            "column": "7 / span 6",
+            "row": "1 / span 40",
+            "text": "NotesFit contentResizeNotesGrouped memoVisible grouped body.",
+            "width": 646,
+            "height": 400,
+            "scroll": 356,
+            "bodyHeight": 356
+          },
+          {
+            "id": "single",
+            "column": "1 / span 6",
+            "row": "41 / span 21",
+            "text": "Standalone memoFit contentResizeStandalone memoVisible standalone body.",
+            "width": 646,
+            "height": 210,
+            "scroll": 166,
+            "bodyHeight": 166
+          },
+          {
+            "id": "missing-reference",
+            "column": "7 / span 6",
+            "row": "41 / span 7",
+            "text": "missing-referenceFit contentResizeThe content for this tile is unavailable. Its saved position is retained.",
+            "width": 646,
+            "height": 70,
+            "scroll": 26,
+            "bodyHeight": 26
+          }
+        ]
+      }
+    },
+    {
+      "name": "opening-and-fit-zero-writes",
+      "passed": true
+    },
+    {
+      "name": "owner-resize-6-column-projection",
+      "passed": true,
+      "detail": {
+        "columns": "6",
+        "width": 702,
+        "sidebar": false,
+        "tiles": [
+          {
+            "id": "year",
+            "column": "1 / span 3",
+            "row": "1 / span 14",
+            "text": "Year progressFit contentResize202682 days leftDay 283 of 36577.4%",
+            "width": 346,
+            "height": 140,
+            "scroll": 96,
+            "bodyHeight": 96
+          },
+          {
+            "id": "disabled",
+            "column": "4 / span 3",
+            "row": "1 / span 20",
+            "text": "news-rawFit contentResizenews-rawThis widget provider is unavailable. Enable it in settings to restore this widget.Open settings",
+            "width": 346,
+            "height": 200,
+            "scroll": 156,
+            "bodyHeight": 156
+          },
+          {
+            "id": "section",
+            "column": "1 / span 6",
+            "row": "21 / span 40",
+            "text": "NotesFit contentResizeNotesGrouped memoVisible grouped body.",
+            "width": 702,
+            "height": 400,
+            "scroll": 356,
+            "bodyHeight": 356
+          },
+          {
+            "id": "single",
+            "column": "1 / span 6",
+            "row": "61 / span 21",
+            "text": "Standalone memoFit contentResizeStandalone memoVisible standalone body.",
+            "width": 702,
+            "height": 210,
+            "scroll": 166,
+            "bodyHeight": 166
+          },
+          {
+            "id": "missing-reference",
+            "column": "1 / span 6",
+            "row": "82 / span 7",
+            "text": "missing-referenceFit contentResizeThe content for this tile is unavailable. Its saved position is retained.",
+            "width": 702,
+            "height": 70,
+            "scroll": 26,
+            "bodyHeight": 26
+          }
+        ]
+      }
+    },
+    {
+      "name": "owner-resize-3-column-projection",
+      "passed": true,
+      "detail": {
+        "columns": "3",
+        "width": 568,
+        "sidebar": false,
+        "tiles": [
+          {
+            "id": "year",
+            "column": "1 / span 3",
+            "row": "1 / span 14",
+            "text": "Year progressFit contentResize202682 days leftDay 283 of 36577.4%",
+            "width": 568,
+            "height": 140,
+            "scroll": 96,
+            "bodyHeight": 96
+          },
+          {
+            "id": "disabled",
+            "column": "1 / span 3",
+            "row": "15 / span 20",
+            "text": "news-rawFit contentResizenews-rawThis widget provider is unavailable. Enable it in settings to restore this widget.Open settings",
+            "width": 568,
+            "height": 200,
+            "scroll": 156,
+            "bodyHeight": 156
+          },
+          {
+            "id": "section",
+            "column": "1 / span 3",
+            "row": "35 / span 40",
+            "text": "NotesFit contentResizeNotesGrouped memoVisible grouped body.",
+            "width": 568,
+            "height": 400,
+            "scroll": 356,
+            "bodyHeight": 356
+          },
+          {
+            "id": "single",
+            "column": "1 / span 3",
+            "row": "75 / span 20",
+            "text": "Standalone memoFit contentResizeStandalone memoVisible standalone body.",
+            "width": 568,
+            "height": 200,
+            "scroll": 156,
+            "bodyHeight": 156
+          },
+          {
+            "id": "missing-reference",
+            "column": "1 / span 3",
+            "row": "95 / span 7",
+            "text": "missing-referenceFit contentResizeThe content for this tile is unavailable. Its saved position is retained.",
+            "width": 568,
+            "height": 70,
+            "scroll": 26,
+            "bodyHeight": 26
+          }
+        ]
+      }
+    },
+    {
+      "name": "owner-resize-12-column-projection",
+      "passed": true,
+      "detail": {
+        "columns": "12",
+        "width": 1302,
+        "sidebar": false,
+        "tiles": [
+          {
+            "id": "year",
+            "column": "1 / span 3",
+            "row": "1 / span 14",
+            "text": "Year progressFit contentResize202682 days leftDay 283 of 36577.4%",
+            "width": 318,
+            "height": 140,
+            "scroll": 96,
+            "bodyHeight": 96
+          },
+          {
+            "id": "disabled",
+            "column": "4 / span 3",
+            "row": "1 / span 21",
+            "text": "news-rawFit contentResizenews-rawThis widget provider is unavailable. Enable it in settings to restore this widget.Open settings",
+            "width": 318,
+            "height": 210,
+            "scroll": 166,
+            "bodyHeight": 166
+          },
+          {
+            "id": "section",
+            "column": "7 / span 6",
+            "row": "1 / span 40",
+            "text": "NotesFit contentResizeNotesGrouped memoVisible grouped body.",
+            "width": 646,
+            "height": 400,
+            "scroll": 356,
+            "bodyHeight": 356
+          },
+          {
+            "id": "single",
+            "column": "1 / span 6",
+            "row": "41 / span 21",
+            "text": "Standalone memoFit contentResizeStandalone memoVisible standalone body.",
+            "width": 646,
+            "height": 210,
+            "scroll": 166,
+            "bodyHeight": 166
+          },
+          {
+            "id": "missing-reference",
+            "column": "7 / span 6",
+            "row": "41 / span 7",
+            "text": "missing-referenceFit contentResizeThe content for this tile is unavailable. Its saved position is retained.",
+            "width": 646,
+            "height": 70,
+            "scroll": 26,
+            "bodyHeight": 26
+          }
+        ]
+      }
+    },
+    {
+      "name": "resize-zero-writes-canonical-bytes-retained",
+      "passed": true
+    },
+    {
+      "name": "keyboard-cancel-zero-writes",
+      "passed": true
+    },
+    {
+      "name": "keyboard-move-resize-one-save",
+      "passed": true,
+      "detail": [
+        {
+          "id": "year",
+          "w": 3,
+          "cap": 15,
+          "x": 0,
+          "y": 1,
+          "fixed": true
+        },
+        {
+          "id": "disabled",
+          "w": 3,
+          "cap": 30,
+          "x": 3,
+          "y": 0
+        },
+        {
+          "id": "section",
+          "w": 6,
+          "cap": 40,
+          "fixed": true,
+          "x": 6,
+          "y": 0
+        },
+        {
+          "id": "single",
+          "w": 6,
+          "cap": 40,
+          "x": 0,
+          "y": 40
+        },
+        {
+          "id": "missing-reference",
+          "w": 6,
+          "cap": 30,
+          "x": 6,
+          "y": 40
+        }
+      ]
+    },
+    {
+      "name": "focus-restored-after-save",
+      "passed": true
+    },
+    {
+      "name": "other-board-unchanged",
+      "passed": true
+    },
+    {
+      "name": "pointer-under-5px-no-write",
+      "passed": true
+    },
+    {
+      "name": "pointer-preview-escape-no-write",
+      "passed": true
+    },
+    {
+      "name": "pointer-swap-saves-both-tiles-once",
+      "passed": true,
+      "detail": [
+        {
+          "id": "year",
+          "w": 3,
+          "cap": 15,
+          "x": 3,
+          "y": 0,
+          "fixed": true
+        },
+        {
+          "id": "disabled",
+          "w": 3,
+          "cap": 30,
+          "x": 0,
+          "y": 1
+        },
+        {
+          "id": "section",
+          "w": 6,
+          "cap": 40,
+          "fixed": true,
+          "x": 6,
+          "y": 0
+        },
+        {
+          "id": "single",
+          "w": 6,
+          "cap": 40,
+          "x": 0,
+          "y": 40
+        },
+        {
+          "id": "missing-reference",
+          "w": 6,
+          "cap": 30,
+          "x": 6,
+          "y": 40
+        }
+      ]
+    },
+    {
+      "name": "pointer-corner-resize-saves-once",
+      "passed": true
+    },
+    {
+      "name": "fit-tile-can-use-space-inside-another-height-cap",
+      "passed": true,
+      "detail": {
+        "picked": {
+          "focus": "single",
+          "lifted": "true",
+          "columns": "12"
+        },
+        "fitPositions": [
+          {
+            "id": "year",
+            "w": 3,
+            "cap": 20,
+            "x": 3,
+            "y": 0,
+            "fixed": true
+          },
+          {
+            "id": "disabled",
+            "w": 3,
+            "cap": 30,
+            "x": 0,
+            "y": 1
+          },
+          {
+            "id": "section",
+            "w": 6,
+            "cap": 40,
+            "fixed": true,
+            "x": 6,
+            "y": 0
+          },
+          {
+            "id": "single",
+            "w": 6,
+            "cap": 40,
+            "x": 0,
+            "y": 23
+          },
+          {
+            "id": "missing-reference",
+            "w": 6,
+            "cap": 30,
+            "x": 6,
+            "y": 40
+          }
+        ]
+      }
+    },
+    {
+      "name": "layout-switch-does-not-repack-existing-fit-positions",
+      "passed": true
+    },
+    {
+      "name": "edge-scroll-repeats-and-cancel-stops",
+      "passed": true,
+      "detail": {
+        "edge": {
+          "y": 736,
+          "start": 0
+        },
+        "scrolling": 128,
+        "scrolled": 316,
+        "stopped": 0
+      }
+    },
+    {
+      "name": "native-touch-cancel-no-save-or-ghost",
+      "passed": true
+    },
+    {
+      "name": "restart-retains-canonical-bytes",
+      "passed": true
+    },
+    {
+      "name": "restart-retains-grid-positions",
+      "passed": true,
+      "detail": {
+        "before": [
+          [
+            "year",
+            "4 / span 3",
+            "1 / span 20"
+          ],
+          [
+            "disabled",
+            "1 / span 3",
+            "2 / span 21"
+          ],
+          [
+            "section",
+            "7 / span 6",
+            "1 / span 40"
+          ],
+          [
+            "single",
+            "1 / span 6",
+            "24 / span 21"
+          ],
+          [
+            "missing-reference",
+            "7 / span 6",
+            "41 / span 7"
+          ]
+        ],
+        "after": [
+          {
+            "id": "year",
+            "column": "4 / span 3",
+            "row": "1 / span 20",
+            "text": "Year progressFit contentResize202682 days leftDay 283 of 36577.4%",
+            "width": 321,
+            "height": 200,
+            "scroll": 156,
+            "bodyHeight": 156
+          },
+          {
+            "id": "disabled",
+            "column": "1 / span 3",
+            "row": "2 / span 21",
+            "text": "news-rawFit contentResizenews-rawThis widget provider is unavailable. Enable it in settings to restore this widget.Open settings",
+            "width": 321,
+            "height": 210,
+            "scroll": 166,
+            "bodyHeight": 166
+          },
+          {
+            "id": "section",
+            "column": "7 / span 6",
+            "row": "1 / span 40",
+            "text": "NotesFit contentResizeNotesGrouped memoVisible grouped body.",
+            "width": 651,
+            "height": 400,
+            "scroll": 356,
+            "bodyHeight": 356
+          },
+          {
+            "id": "single",
+            "column": "1 / span 6",
+            "row": "24 / span 21",
+            "text": "Standalone memoFit contentResizeStandalone memoVisible standalone body.",
+            "width": 651,
+            "height": 210,
+            "scroll": 166,
+            "bodyHeight": 166
+          },
+          {
+            "id": "missing-reference",
+            "column": "7 / span 6",
+            "row": "41 / span 7",
+            "text": "missing-referenceFit contentResizeThe content for this tile is unavailable. Its saved position is retained.",
+            "width": 651,
+            "height": 70,
+            "scroll": 26,
+            "bodyHeight": 26
+          }
+        ]
+      }
+    },
+    {
+      "name": "navigation-cancels-pending-gesture",
+      "passed": true
+    },
+    {
+      "name": "provider-enable-mounts-in-grid-no-save",
+      "passed": true
+    },
+    {
+      "name": "provider-disable-keeps-geometry-no-save",
+      "passed": true
+    },
+    {
+      "name": "theme-system-light-640",
+      "passed": true,
+      "detail": {
+        "overflow": false,
+        "overlap": false,
+        "small": false
+      }
+    },
+    {
+      "name": "theme-system-light-1100",
+      "passed": true,
+      "detail": {
+        "overflow": false,
+        "overlap": false,
+        "small": false
+      }
+    },
+    {
+      "name": "theme-system-light-1700",
+      "passed": true,
+      "detail": {
+        "overflow": false,
+        "overlap": false,
+        "small": false
+      }
+    },
+    {
+      "name": "theme-system-dark-640",
+      "passed": true,
+      "detail": {
+        "overflow": false,
+        "overlap": false,
+        "small": false
+      }
+    },
+    {
+      "name": "theme-system-dark-1100",
+      "passed": true,
+      "detail": {
+        "overflow": false,
+        "overlap": false,
+        "small": false
+      }
+    },
+    {
+      "name": "theme-system-dark-1700",
+      "passed": true,
+      "detail": {
+        "overflow": false,
+        "overlap": false,
+        "small": false
+      }
+    },
+    {
+      "name": "theme-claude-code-light-640",
+      "passed": true,
+      "detail": {
+        "overflow": false,
+        "overlap": false,
+        "small": false
+      }
+    },
+    {
+      "name": "theme-claude-code-light-1100",
+      "passed": true,
+      "detail": {
+        "overflow": false,
+        "overlap": false,
+        "small": false
+      }
+    },
+    {
+      "name": "theme-claude-code-light-1700",
+      "passed": true,
+      "detail": {
+        "overflow": false,
+        "overlap": false,
+        "small": false
+      }
+    },
+    {
+      "name": "theme-claude-code-dark-640",
+      "passed": true,
+      "detail": {
+        "overflow": false,
+        "overlap": false,
+        "small": false
+      }
+    },
+    {
+      "name": "theme-claude-code-dark-1100",
+      "passed": true,
+      "detail": {
+        "overflow": false,
+        "overlap": false,
+        "small": false
+      }
+    },
+    {
+      "name": "theme-claude-code-dark-1700",
+      "passed": true,
+      "detail": {
+        "overflow": false,
+        "overlap": false,
+        "small": false
+      }
+    },
+    {
+      "name": "theme-eye-care-light-640",
+      "passed": true,
+      "detail": {
+        "overflow": false,
+        "overlap": false,
+        "small": false
+      }
+    },
+    {
+      "name": "theme-eye-care-light-1100",
+      "passed": true,
+      "detail": {
+        "overflow": false,
+        "overlap": false,
+        "small": false
+      }
+    },
+    {
+      "name": "theme-eye-care-light-1700",
+      "passed": true,
+      "detail": {
+        "overflow": false,
+        "overlap": false,
+        "small": false
+      }
+    },
+    {
+      "name": "theme-eye-care-dark-640",
+      "passed": true,
+      "detail": {
+        "overflow": false,
+        "overlap": false,
+        "small": false
+      }
+    },
+    {
+      "name": "theme-eye-care-dark-1100",
+      "passed": true,
+      "detail": {
+        "overflow": false,
+        "overlap": false,
+        "small": false
+      }
+    },
+    {
+      "name": "theme-eye-care-dark-1700",
+      "passed": true,
+      "detail": {
+        "overflow": false,
+        "overlap": false,
+        "small": false
+      }
+    },
+    {
+      "name": "theme-and-width-zero-board-writes",
+      "passed": true
+    },
+    {
+      "name": "invalid-values-diagnostic-and-readonly",
+      "passed": true
+    },
+    {
+      "name": "invalid-values-repaired-on-explicit-edit",
+      "passed": true,
+      "detail": [
+        {
+          "id": "year",
+          "w": 12,
+          "cap": 6,
+          "x": 0,
+          "y": 9
+        },
+        {
+          "id": "disabled",
+          "w": 3,
+          "cap": 40,
+          "x": 0,
+          "y": 15
+        },
+        {
+          "id": "section",
+          "w": 12,
+          "cap": 60,
+          "x": 0,
+          "y": 36
+        },
+        {
+          "id": "missing-reference",
+          "w": 3,
+          "x": 0,
+          "y": 0,
+          "cap": 20
+        }
+      ]
+    },
+    {
+      "name": "reduced-motion-has-no-grid-animation",
+      "passed": true
+    },
+    {
+      "name": "popout-keyboard-cancel-no-write",
+      "passed": true
+    },
+    {
+      "name": "popout-owner-window-resize",
+      "passed": true
+    },
+    {
+      "name": "no-runtime-errors",
+      "passed": true,
+      "detail": []
+    }
+  ],
+  "unverified": [
+    "Actual phone and other OS",
+    "All 13 builtin widget kinds and external provider failure matrix tracked by T03/T06"
+  ],
+  "runtimeEvidence": "C:\\Users\\cdewta\\AppData\\Local\\Temp\\nand-home-immersive-review-6c3611c49ec44bccb095a32310353d96\\evidence",
+  "testHarness": "scripts/obsidian-acceptance/home-immersive.mjs",
+  "validation": {
+    "fullTests": "483 passed / 4 skipped;98 passed files/1 skipped;157.30s before final chrome minimum, fit placement and scrollbar-gesture refinements",
+    "targeted": "20 tests passed after final refinements",
+    "build": "pass latest",
+    "lint": "pass latest T04/T05",
+    "architecture": "807 modules,pass",
+    "css": "no new violations",
+    "bundle": "within original budgets latest T04/T05",
+    "i18n": "2958 keys/24 dictionaries,pass",
+    "docs": "standard check retains inherited planning-title/language exceptions; unchanged exception check passes543files/535local/320external links"
+  }
+}

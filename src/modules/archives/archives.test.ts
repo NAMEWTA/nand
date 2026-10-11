@@ -475,6 +475,27 @@ test('a late read cannot publish into a newer folder or a disposed archive', asy
 	assert.equal(disposed.controller.index.byPath.size, 0);
 });
 
+test('a failed read from an older rebuild cannot replace the new root status', async () => {
+	const f = memoryVault();
+	await f.controller.ensureLoaded();
+	await f.controller.create(newNamed('person', 'Previous root'));
+	let release = () => {};
+	let started = () => {};
+	const reading = new Promise<void>((resolve) => { started = resolve; });
+	const gate = new Promise<void>((resolve) => { release = resolve; });
+	f.vault.cachedRead = async () => { started(); await gate; throw new Error('old read failed'); };
+	const old = f.controller.reload();
+	await reading;
+	f.settings.rootFolder = 'New archives';
+	await f.controller.reload();
+	release();
+	await old;
+	assert.equal(f.controller.error, '');
+	assert.equal(f.controller.loading, false);
+	assert.equal(f.controller.index.byPath.size, 0);
+	f.controller.onunload();
+});
+
 test('two windows merge independent fields but reject overlapping edits', async () => {
 	const f = memoryVault();
 	await f.controller.ensureLoaded();
@@ -1081,12 +1102,12 @@ test('archive search follows the selected kind and empty prose stays distinct fr
 
 test('new and restored archive leaves pick layouts without throwing on bad values', () => {
 	assert.deepEqual(layoutsFor({}), { person: 'list', company: 'card' });
-	assert.deepEqual(layoutsFor({ query: { kind: 'person' } }), { person: 'list', company: 'card' });
+	assert.deepEqual(layoutsFor({ query: { kind: 'person' } }), { person: 'card', company: 'card' });
 	assert.deepEqual(layoutsFor({ page: 1, layout: { person: 'list', company: 'sideways' } }), {
 		person: 'list',
 		company: 'card',
 	});
-	assert.deepEqual(layoutsFor({ layout: { person: 'grid' } }), { person: 'list', company: 'card' });
+	assert.deepEqual(layoutsFor({ layout: { person: 'grid' } }), { person: 'card', company: 'card' });
 	// The last explicit choice beats both defaults; the leaf's own layout beats the choice.
 	assert.deepEqual(layoutsFor({}, { person: 'card', company: 'list' }), { person: 'card', company: 'list' });
 	assert.deepEqual(layoutsFor({ query: { kind: 'person' } }, { person: 'list' }), { person: 'list', company: 'card' });
@@ -1107,6 +1128,9 @@ test('new and restored archive leaves pick layouts without throwing on bad value
 	assert.equal(next.anchors.person.list, '档案/a.md');
 	assert.equal(next.anchors.person.card, '档案/a.md');
 	assert.equal(applyLayout(next, 'card', 'other'), next);
+	const back = applyLayout(next, 'list', '档案/b.md');
+	assert.equal(back.anchors.person.list, '档案/a.md');
+	assert.equal(back.anchors.person.card, '档案/b.md');
 });
 
 test('archive group navigation clears the previous detail and a record kind wins', async () => {
@@ -1123,6 +1147,7 @@ test('archive group navigation clears the previous detail and a record kind wins
 		['company-b', { kind: 'company', path: 'Companies/B.md' }],
 	]);
 	const surface = {
+		getTarget: () => contactsTarget(state),
 		controller: {
 			ensureLoaded: async () => {},
 			index: {
@@ -1145,6 +1170,11 @@ test('archive group navigation clears the previous detail and a record kind wins
 	assert.equal(state.selectedPath, 'Companies/B.md');
 	assert.equal(contactsTarget(state).section, 'company');
 	assert.equal(contactsTarget(state).resourceId, 'company-b');
+	state.query.search = 'kept after restart';
+	state.page = 2;
+	await navigateContacts(surface, { feature: 'contacts', section: 'company', resourceId: 'company-b' }, new AbortController().signal);
+	assert.equal(state.query.search, 'kept after restart');
+	assert.equal(state.page, 2);
 	await navigateContacts(surface, { feature: 'contacts', section: 'person' }, new AbortController().signal);
 	assert.equal(state.selectedPath, '');
 	assert.equal(state.query.kind, 'person');
@@ -1171,7 +1201,7 @@ test('contacts layout and anchors survive the real workbench state whitelist', (
 	assert.equal(restored.selectedId, 'company-b');
 	assert.equal(restored.scroll, 48);
 	const sparse = restoreContactsState(cleanPageState({ query: { kind: 'person' }, page: 1, selectedPath: 'People/A.md' }, CONTACTS_PAGE_STATE_KEYS));
-	assert.deepEqual(sparse.layout, { person: 'list', company: 'card' });
+	assert.deepEqual(sparse.layout, { person: 'card', company: 'card' });
 	assert.equal(sparse.anchors.person.list, '');
 });
 
@@ -1306,6 +1336,10 @@ test('record search matches one fragment, keeps foreign UUIDs, and maps body lin
 	assert.equal(index.query({ ...emptyQuery(), search: '跨行甲 乙尾' }).some((record) => record.path === wrapped.path), true);
 	assert.equal(index.hit(wrapped, '跨行甲 乙尾')?.line, fileLine(wrapped.raw, '跨行甲'));
 	assert.equal(index.hit(wrapped, '跨行甲')?.line, fileLine(wrapped.raw, '跨行甲'));
+	const expanded = fixture('person', '大小写展开');
+	expanded.raw = `${createMarkdown(expanded)}\n${'İ'.repeat(100)}\nneedle\nother line\n`;
+	index.set(expanded);
+	assert.equal(index.hit(expanded, 'needle')?.line, undefined, 'Expanded case folding cannot reuse original text offsets');
 	const emoji = fixture('person', '表情');
 	emoji.prose.notes = `😀${'测'.repeat(23)}界标`;
 	index.set(emoji);
@@ -1342,6 +1376,30 @@ test('a path-only reference refreshes when the target is renamed in place or rem
 	index.remove(company.path);
 	assert.equal(named('手写标签'), true);
 	assert.equal(named('原地新名'), false);
+});
+
+test('changing an indexed identity removes the old id and refreshes its dependents', () => {
+	const index = new ContactsIndex();
+	const company = fixture('company', 'Resolved company');
+	const person = fixture('person', 'Employee');
+	person.employments = [{ ...job(company), company: { id: company.id, label: 'Fallback company', link: '' } }];
+	index.set(company);
+	index.set(person);
+	const oldId = company.id;
+	company.id = crypto.randomUUID();
+	index.set(company);
+	assert.equal(index.get(oldId), undefined);
+	assert.equal(index.get(company.id), company);
+	assert.equal(index.query({ ...emptyQuery(), search: 'Resolved company' }).length, 0);
+	assert.equal(index.query({ ...emptyQuery(), search: 'Fallback company' }).length, 1);
+	const replacement = fixture('company', 'Replacement');
+	replacement.id = oldId;
+	index.set(replacement);
+	assert.equal(index.get(oldId), replacement);
+	replacement.id = crypto.randomUUID();
+	index.remove(replacement.path);
+	assert.equal(index.get(oldId), undefined);
+	assert.equal(index.query({ ...emptyQuery(), search: 'Replacement' }).length, 0);
 });
 
 test('hot queries answer from the index after the note text is gone', () => {

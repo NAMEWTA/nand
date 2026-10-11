@@ -1,0 +1,107 @@
+{
+  "passed": true,
+  "rows": [
+    {
+      "name": "fresh-vault-no-binary-or-override",
+      "passed": true
+    },
+    {
+      "name": "localized-http-404-en",
+      "passed": true,
+      "detail": {
+        "code": "http",
+        "detail": {
+          "url": "https://github.com/NAMEWTA/nand/releases/download/0.0.1-alpha.1/nand-pty-win32-x64.exe",
+          "status": 404,
+          "version": "0.0.1-alpha.1"
+        },
+        "notice": "The terminal helper is not available: the helper or checksum for version 0.0.1-alpha.1 has not been published for this platform (HTTP 404)"
+      }
+    },
+    {
+      "name": "localized-http-503-zh",
+      "passed": true,
+      "detail": {
+        "code": "http",
+        "detail": {
+          "url": "https://github.com/NAMEWTA/nand/releases/download/0.0.1-alpha.1/nand-pty-win32-x64.exe.sha256",
+          "status": 503,
+          "version": "0.0.1-alpha.1"
+        },
+        "notice": "The terminal helper is not available: the helper or checksum for version 0.0.1-alpha.1 has not been published for this platform (HTTP 404) 正在下载终端组件… 终端组件不可用：版本 0.0.1-alpha.1 下载失败（HTTP 503），请稍后重试"
+      }
+    },
+    {
+      "name": "localized-network-and-sanitized-log",
+      "passed": true
+    },
+    {
+      "name": "real-release-download-handshake-shell",
+      "passed": true,
+      "detail": {
+        "ok": true,
+        "state": "connected"
+      }
+    },
+    {
+      "name": "download-matches-published-stamp",
+      "passed": true,
+      "detail": {
+        "version": "0.0.1-alpha.1",
+        "sha256": "e118dddd7104f65d2b28e43c30128f4395599e9cd441c283c3caf97b2991fea1"
+      }
+    },
+    {
+      "name": "real-shell-input-output",
+      "passed": true
+    },
+    {
+      "name": "shell-remains-usable-after-resize",
+      "passed": true
+    },
+    {
+      "name": "installed-agent-opens-with-isolated-empty-account",
+      "passed": true
+    },
+    {
+      "name": "installed-agent-closes",
+      "passed": true
+    },
+    {
+      "name": "helper-exits-with-host",
+      "passed": true
+    },
+    {
+      "name": "verified-binary-reused-after-restart-without-network",
+      "passed": true,
+      "detail": {
+        "ok": true,
+        "state": "connected"
+      }
+    },
+    {
+      "name": "cached-binary-unchanged",
+      "passed": true
+    },
+    {
+      "name": "shell-exits-cleanly",
+      "passed": true
+    },
+    {
+      "name": "no-host-errors",
+      "passed": true,
+      "detail": []
+    }
+  ],
+  "platform": "Windows x64",
+  "host": "Obsidian 1.13.7",
+  "sourceState": "Uncommitted workspace; actual downloaded binary is published 0.0.1-alpha.1, not the modified Rust source",
+  "screenshots": "C:\\Users\\cdewta\\AppData\\Local\\Temp/nand-terminal-review-342160584bae424cab1d171b2cc479b1/evidence",
+  "remaining": [
+    "Linux/macOS FD runtime unavailable",
+    "The host requestUrl API has no public cancellation; late responses cannot install after the deadline. The byte limit is checked after host materialization."
+  ],
+  "proxyFromEnvironment": true,
+  "network": "Isolated profile default network session configured from existing HTTPS_PROXY. Direct connection intermittently timed out; successful installation uses real release URLs, no local helper override.",
+  "agentCheck": "Actual Codex text rendered in headless terminal model before screenshot; isolated empty account and manual permission mode; no task or prompt sent."
+}

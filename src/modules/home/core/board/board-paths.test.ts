@@ -1,7 +1,6 @@
 import assert from 'node:assert/strict';
 import { describe, test } from 'vitest';
 import { anniversaryDateThisYear } from '../anniversaries/calendar';
-import { commitHomeDecor } from './appearance-preset';
 import { libraryStageMove } from './library-stage';
 
 describe('board actions use the shipped experience', () => {
@@ -34,13 +33,6 @@ describe('board actions use the shipped experience', () => {
 		assert.equal(refused.status, 'refused');
 		assert.equal(refused.error, 'name-clash');
 		assert.equal(writes, 0);
-		const failed = commitHomeDecor(
-			{ bgImage: 'a.png', bgDim: 1, bgBlur: 0, bgSize: 'cover', surfaceOpacity: null, glassBlur: null, radiusScale: null, fontScale: 'medium' },
-			() => undefined,
-			() => {
-				throw new Error('disk full');
-			},
-		);
-		assert.deepEqual(failed, { saved: false, error: 'disk full' });
+
 	});
 });

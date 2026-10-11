@@ -1,0 +1,176 @@
+{
+  "ticket": "Browser T01",
+  "requirements": [
+    "AC-001",
+    "AC-002"
+  ],
+  "finding": "R-088",
+  "status": "fixed-windows-native26-full603-verified",
+  "reproduction": {
+    "directory": "C:/Users/cdewta/AppData/Local/Temp/nand-browser-shortcuts-baseline-d2dc4ff0efd64de28be528683fafe65a/evidence",
+    "result": "Three native address Ctrl+F attempts wrote domain1/2/3 into the address instead of find; Ctrl+L did not select the address. Four failures on the original production bundle."
+  },
+  "implementation": [
+    "Replace container bubbling shortcut handling with owner-document Obsidian Scope Mod+F/Mod+L bindings. Only visible focused browser host controls admit the actions.",
+    "Release on guest/editor focus, blur, hidden sizing, unmount and window migration. Popout controls use their own document and window.",
+    "Modal scope is the parent. A wildcard only consumes a handled Escape, allowing an unhandled Escape to reach the modal dismissal binding; named bindings returning undefined would still shadow it.",
+    "Native CDP helper now accepts webview targets as well as host pages for direct guest keyboard verification. No guest shortcut or global user hotkey setting changed."
+  ],
+  "verification": {
+    "nativeDirectory": "C:/Users/cdewta/AppData/Local/Temp/nand-browser-shortcuts-review-5e170bd8e2e449a3affbe923785618a3/evidence",
+    "harness": "scripts/obsidian-acceptance/browser-shortcuts.mjs",
+    "checks": [
+      {
+        "name": "address-find-native-1",
+        "passed": true,
+        "detail": {
+          "find": true,
+          "findValue": "domain1",
+          "address": "http://127.0.0.1:14270/",
+          "active": "<input aria-label=\"Find in page\">"
+        }
+      },
+      {
+        "name": "address-find-native-2",
+        "passed": true,
+        "detail": {
+          "find": true,
+          "findValue": "domain2",
+          "address": "http://127.0.0.1:14270/",
+          "active": "<input aria-label=\"Find in page\">"
+        }
+      },
+      {
+        "name": "address-find-native-3",
+        "passed": true,
+        "detail": {
+          "find": true,
+          "findValue": "domain3",
+          "address": "http://127.0.0.1:14270/",
+          "active": "<input aria-label=\"Find in page\">"
+        }
+      },
+      {
+        "name": "address-mod-l-selects-all",
+        "passed": true,
+        "detail": {
+          "find": false,
+          "address": "http://127.0.0.1:14270/",
+          "active": "<input class=\"nand-browser-address\" aria-label=\"Address or search\" placeholder=\"Address or search\" spellcheck=\"false\">"
+        }
+      },
+      {
+        "name": "native-tab-focuses-toolbar-button",
+        "passed": true,
+        "detail": {
+          "find": false,
+          "address": "http://127.0.0.1:14270/",
+          "active": "<button type=\"button\" class=\"nand-ui-icon-btn\" aria-label=\"Reload\" title=\"Reload\"><span aria-hidden=\"true\"><svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" class=\"svg-icon lucide-rotate-cw\"><path d=\"M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8\"></path><path d=\"M2"
+        }
+      },
+      {
+        "name": "toolbar-find-receives-native-text",
+        "passed": true
+      },
+      {
+        "name": "repeated-find-selects-query",
+        "passed": true
+      },
+      {
+        "name": "find-mod-l-focuses-address",
+        "passed": true
+      },
+      {
+        "name": "escape-closes-find",
+        "passed": true
+      },
+      {
+        "name": "extra-alt-is-not-browser-mod-l",
+        "passed": true
+      },
+      {
+        "name": "guest-keeps-native-mod-f-and-l",
+        "passed": true
+      },
+      {
+        "name": "scope-released-for-guest",
+        "passed": true
+      },
+      {
+        "name": "hidden-first-pane-releases-scope",
+        "passed": true
+      },
+      {
+        "name": "two-pages-have-one-find-owner",
+        "passed": true
+      },
+      {
+        "name": "note-keeps-host-search",
+        "passed": true
+      },
+      {
+        "name": "modal-find-uses-local-scope",
+        "passed": true
+      },
+      {
+        "name": "modal-escape-closes-find-first",
+        "passed": true
+      },
+      {
+        "name": "unhandled-escape-closes-modal",
+        "passed": true,
+        "detail": {
+          "register": "function(e,t,n){var i={scope:this,modifiers:e?uy.compileModifiers(e):null,key:t,func:n};return this.keys.push(i),i}",
+          "unregister": "function(e){this.keys.remove(e)}",
+          "setTabFocusContainerEl": "function(e){this.tabFocusContainerEl=e}",
+          "handleKey": "function(e,t){for(var n=0,i=this.keys;n<i.length;n++){var r=i[n];if(uy.isMatch(r,t)){var o=r.func(e,t);if(void 0!==o)return o;if(null!==r.key||null!==r.modifiers)return o}}if(this.parent)return this.parent.handleKey(e,t)}"
+        }
+      },
+      {
+        "name": "popout-native-find-500",
+        "passed": true
+      },
+      {
+        "name": "popout-native-find-800",
+        "passed": true
+      },
+      {
+        "name": "popout-native-find-1100",
+        "passed": true
+      },
+      {
+        "name": "popout-native-mod-l-selects-all",
+        "passed": true
+      },
+      {
+        "name": "module-off-unmounts-browser-panels",
+        "passed": true
+      },
+      {
+        "name": "module-off-releases-popout-scope",
+        "passed": true
+      },
+      {
+        "name": "old-main-scope-is-not-retained",
+        "passed": true
+      },
+      {
+        "name": "main-and-popout-have-no-errors",
+        "passed": true
+      }
+    ],
+    "screenshotReviewed": "popout-500.png (previous equivalent native25 run 7489d82ae7d2460fac6c5d3a6d7ad87a; final adds module-off scope assertion)",
+    "targeted": "28 browser tests passed",
+    "full": "603 passed / 4 skipped; 132 files passed / 1 skipped; 127.93 seconds",
+    "fullLog": "C:/Users/cdewta/AppData/Local/Temp/nand-review-browser-shortcuts-full.log",
+    "build": "passed",
+    "lint": "zero warnings",
+    "architecture": "870 modules passed",
+    "bundleBytes": 4043210,
+    "bundle": "within existing 4043776-byte limit; no budget increase",
+    "docs": "549 Markdown / 559 local / 348 external links, passed"
+  },
+  "limitations": [
+    "Windows Ctrl shortcuts and real local HTTP guest verified. macOS Cmd/Linux shortcuts and OS IME composition are not claimed as native verified. IME/extra-modifier admission is additionally covered by a lifecycle unit test."
+  ]
+}

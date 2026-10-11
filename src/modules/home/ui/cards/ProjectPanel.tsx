@@ -1,5 +1,6 @@
-import { useLayoutEffect, useState } from 'preact/hooks';
+import { useLayoutEffect, useRef, useState } from 'preact/hooks';
 import type { DocNode } from '../../core/board/types/index';
+import { documentLink } from '../../core/board/document-link';
 import { iconForExtension } from '../../../../shared/file-types';
 import { t } from '../../../../shared/i18n/index';
 import { Icon } from '../../../../ui/primitives/Icon';
@@ -17,7 +18,9 @@ function DocRow({
 	const { card, callbacks, context, app } = props;
 	const [collapsed, setCollapsed] = useState(doc.collapsed);
 	useLayoutEffect(() => setCollapsed(doc.collapsed), [doc.collapsed]);
-	const file = resolveNoteFile(app, doc.path);
+	const target = documentLink(doc.path);
+	const file = resolveNoteFile(app, target.path);
+	const name = file?.basename ?? target.path.split('/').pop() ?? target.path;
 	const hasChildren = !!doc.children?.length;
 	return (
 		<>
@@ -26,48 +29,50 @@ function DocRow({
 				style={{ marginLeft: (path.length - 1) * 18 }}
 				draggable
 				data-doc-path={JSON.stringify(path)}
-				aria-expanded={hasChildren ? !collapsed : undefined}
-				onMouseOver={(event) => noteHover(app, context, file, event)}
-				onClick={() => {
-					if (file) context.noteOpener?.(file);
-				}}
 				{...itemDrag(context, callbacks, 'doc', card.id, path)}
 			>
 				{hasChildren && (
-					<div
+					<button
 						class="dashboard-task-toggle dashboard-task-toggle--active"
-						role="button"
-						tabIndex={0}
+						type="button"
+						aria-expanded={!collapsed}
 						aria-label={t(collapsed ? 'renderer.expandDoc' : 'renderer.collapseDoc')}
+						onPointerDown={(event) => event.stopPropagation()}
 						onClick={(event) => {
 							event.stopPropagation();
 							setCollapsed(!collapsed);
 							callbacks.onDocToggleCollapse(card.id, path);
 						}}
-						onKeyDown={(event) => {
-							if (event.key === 'Enter' || event.key === ' ') {
-								event.preventDefault();
-								event.currentTarget.click();
-							}
-						}}
 					>
 						<Icon name={collapsed ? 'chevron-right' : 'chevron-down'} />
-					</div>
+					</button>
 				)}
-				<span class="dashboard-project-doc-icon">
-					<Icon name={iconForExtension(file?.extension ?? '')} />
-				</span>
-				<span class="dashboard-project-doc-name">
-					{file?.basename ?? doc.path.split('/').pop() ?? doc.path}
-				</span>
+				<a
+					class="dashboard-project-doc-link"
+					href={file ? file.path + (target.subpath ?? '') : undefined}
+					aria-disabled={file ? undefined : true}
+					draggable={false}
+					onMouseOver={(event) => noteHover(app, context, file, event, target.subpath)}
+					onClick={(event) => {
+						event.preventDefault(); event.stopPropagation();
+						if (file) context.noteOpener?.(file, target.subpath);
+					}}
+				>
+					<span class="dashboard-project-doc-icon"><Icon name={iconForExtension(file?.extension ?? '')} /></span>
+					<span class="dashboard-project-doc-name">{target.alias || (target.subpath ? `${name} > ${target.subpath.slice(1)}` : name)}</span>
+				</a>
 				<button
 					class="dashboard-project-doc-remove"
+					type="button"
 					aria-label={t('renderer.removeDoc')}
+					onPointerDown={(event) => event.stopPropagation()}
 					onClick={(event) => {
 						event.stopPropagation();
 						void showConfirmDialog(app, {
-							title: t('common.confirmDelete'),
-							message: t('common.confirmDeleteMessage'),
+							title: t('renderer.removeDoc'),
+							message: t('renderer.removeDocMessage'),
+							confirmLabel: t('renderer.removeDoc'),
+							owner: event.currentTarget,
 						}).then((confirmed) => {
 							if (confirmed) callbacks.onDocDelete(card.id, path);
 						});
@@ -86,10 +91,22 @@ export function ProjectPanel(props: CardBodyProps) {
 	const { card, callbacks, context, app } = props;
 	const [query, setQuery] = useState('');
 	const [focused, setFocused] = useState(false);
+	const search = useRef<HTMLInputElement>(null);
+	const addDocument = async (path: string): Promise<void> => {
+		const owner = search.current;
+		setQuery('');
+		owner?.focus();
+		try { await callbacks.onDocAdd(card.id, path); }
+		catch { /* The board save state already reports failures and owns retry. */ }
+		if (!owner || owner.isConnected || !context.root.isConnected || context.root.closest('[inert], [hidden]') || owner.doc.activeElement !== owner.doc.body) return;
+		const current = [...context.root.querySelectorAll<HTMLElement>('.dashboard-project-add-doc')].find(element => element.dataset.cardId === card.id);
+		current?.querySelector('input')?.focus({ preventScroll: true });
+	};
 	const paths = new Set<string>();
 	const collect = (docs: DocNode[]) => {
 		for (const doc of docs) {
-			paths.add(doc.path);
+			const target = documentLink(doc.path);
+			paths.add(resolveNoteFile(app, target.path)?.path ?? target.path);
 			if (doc.children) collect(doc.children);
 		}
 	};
@@ -117,37 +134,29 @@ export function ProjectPanel(props: CardBodyProps) {
 					<DocRow key={index} {...props} doc={doc} path={[index]} />
 				))}
 			</div>
-			<div class="dashboard-project-add-doc">
+			<div class="dashboard-project-add-doc" data-card-id={card.id} onFocusCapture={() => setFocused(true)} onBlurCapture={(event) => {
+				if (!event.currentTarget.contains(event.relatedTarget as Node | null)) setFocused(false);
+			}}>
 				<input
+					ref={search}
 					class="dashboard-task-input"
 					type="text"
 					placeholder={t('renderer.addDocument')}
+					aria-label={t('renderer.addDocument')}
 					value={query}
 					onInput={(event) => setQuery(event.currentTarget.value)}
-					onFocus={() => setFocused(true)}
-					onBlur={() => setFocused(false)}
 				/>
 				<div class="dashboard-project-doc-results">
 					{files.map((file) => (
-						<div
+						<button
 							key={file.path}
 							class="dashboard-project-doc-result"
-							role="button"
-							tabIndex={0}
+							type="button"
 							onMouseDown={(event) => event.preventDefault()}
-							onClick={() => {
-								callbacks.onDocAdd(card.id, file.path);
-								setQuery('');
-							}}
-							onKeyDown={(event) => {
-								if (event.key === 'Enter') {
-									callbacks.onDocAdd(card.id, file.path);
-									setQuery('');
-								}
-							}}
+							onClick={() => { void addDocument(file.path); }}
 						>
 							{file.basename}
-						</div>
+						</button>
 					))}
 				</div>
 			</div>

@@ -1,3 +1,4 @@
+import { widgetTileDefaults } from '../../services/widget-layout';
 import { dashboardSaveMessage } from '../../core/board/save-state';
 import { NativeSurface, type NativeSurfaceContext } from '../../../../ui/native-surface';
 import { applyControlContrast } from '../appearance/appearance';
@@ -230,7 +231,7 @@ export class DashboardSurface extends NativeSurface implements HoverParent {
 	readingService: ReadingService | null = null;
 	habitUnsubscribe: (() => void) | null = null;
 	holidayData: Record<string, HolidayInfo> = {};
-	mobileWidgetExpanded: 'pomodoro' | 'reading' | 'lunar' | 'calendar' | 'habit' | 'expense' | null = null;
+	mobileWidgetExpanded: string | null = null;
 	mobileWidgetTabsOpen: boolean = false;
 	weatherRefreshTimer: number | null = null;
 	dayRolloverTimer: number | null = null;
@@ -243,6 +244,7 @@ export class DashboardSurface extends NativeSurface implements HoverParent {
 	isOpening = false;
 	openingPromise: Promise<void> | null = null;
 	isOpen = false;
+	readonly agentDeliveries = new Map<string, AbortController>();
 	lifecycleRevision = 0;
 	pendingInitialData: DashboardData | null = null;
 
@@ -272,7 +274,7 @@ export class DashboardSurface extends NativeSurface implements HoverParent {
 				this.render(this.data);
 			}),
 		);
-		this.sync = new SyncEngine(this.app, this.plugin.settings);
+		this.sync = new SyncEngine(this.app, this.plugin.settings, (member, legacy) => widgetTileDefaults(member, this.plugin.settings, legacy));
 		this.sync.onDataUpdate((data, source) => {
 			this.handleDataUpdate(data, source);
 		});
@@ -285,6 +287,10 @@ export class DashboardSurface extends NativeSurface implements HoverParent {
 
 	getViewType(): string {
 		return DASHBOARD_PAGE_TYPE;
+	}
+	setVisible(visible: boolean): void {
+		super.setVisible(visible);
+		if (!visible) closeOwnedDashboardPanels(this.app, this, this.contentEl);
 	}
 
 	getDisplayText(): string {
@@ -311,7 +317,7 @@ export class DashboardSurface extends NativeSurface implements HoverParent {
 		const widget = Array.from(this.contentEl.querySelectorAll<HTMLElement>('[data-widget-key]')).find(
 			(el) => el.dataset.widgetKey === key,
 		);
-		closeOwnedDashboardPanels(this.app, this);
+		closeOwnedDashboardPanels(this.app, this, this.contentEl);
 		const sidebar = widget?.closest<HTMLElement>('.dashboard-sidebar');
 		if (sidebar) {
 			this.sidebarExpanded = true;

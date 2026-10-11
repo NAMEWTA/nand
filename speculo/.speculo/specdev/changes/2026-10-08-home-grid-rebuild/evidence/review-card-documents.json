@@ -1,0 +1,53 @@
+{
+  "ticket": "T-18 integration follow-up",
+  "requirements": [
+    "AC-075",
+    "AC-077"
+  ],
+  "status": "fixed-native-verified",
+  "findings": [
+    "R-073",
+    "R-074"
+  ],
+  "fixes": [
+    "Card editor reads/writes actual DocNode tree; removing parent promotes retained children, additions preserve existing hierarchy/collapse. Body stays untouched.",
+    "CRLF links are parsed; preserving writer accepts canonical document-line match keys so legacy unbulleted links can be removed without rewriting prose.",
+    "Native searchable document buttons retain focus, removal is named and restores focus, all inputs have names.",
+    "Narrow card header actions accept pointer/focus, touch actions stay visible and clickable. Shared polish now uses32px desktop targets and44px modal footer buttons on touch."
+  ],
+  "verification": {
+    "native": {
+      "host": "Obsidian1.13.7 / Windows",
+      "evidence": "C:/Users/cdewta/AppData/Local/Temp/nand-home-card-documents-review-1f46a10daea64703a5f3a3c5a7d9d262/evidence",
+      "script": "scripts/obsidian-acceptance/home-card-documents.mjs",
+      "passed": 31,
+      "coverage": [
+        "parsed nested links",
+        "Cancel and unchanged Save preserve exact CRLF bytes",
+        "keyboard remove/add with retained focus",
+        "saved parent removal promotes child, preserves prose and appends new link",
+        "three themes x light/dark x500/800/1500",
+        "touch targets44",
+        "restart,popout,dispose,no console errors"
+      ],
+      "visualsInspected": [
+        "editor-system-light-500.png",
+        "editor-touch.png"
+      ]
+    },
+    "targeted": "102 PASS/31files Home+shared/storage+golden; two new parser/editor round-trip cases replace body-only false seam test",
+    "safety": "7 PASS",
+    "gates": {
+      "build": "PASS final styles742864",
+      "lint": "PASS zero warnings",
+      "architecture": "PASS856",
+      "css": "PASS unchanged baseline",
+      "bundle": "PASS; main4007392,styles742864; recorded1KiB style increment, startup/module caps unchanged",
+      "fullTests": "PASS575 tests,4 skipped;123 files passed,1 skipped"
+    }
+  },
+  "unverified": [
+    "Physical phone; touch emulated through CDP"
+  ],
+  "remaining": "T18 remains open for news/agent/browser integration and final documentation/AC reconciliation."
+}

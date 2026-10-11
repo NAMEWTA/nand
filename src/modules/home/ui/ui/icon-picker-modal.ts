@@ -1,7 +1,7 @@
 import { bindLocalizedControl } from '../../../../ui/primitives/localized-dom';
 import { App, FuzzyMatch, FuzzySuggestModal, getIconIds, setIcon } from 'obsidian';
 import { t } from '../../../../shared/i18n/index';
-import { iconPickerRows } from '../../core/board/icon-catalog';
+import { orderedHostIcons } from '../../core/board/icon-catalog';
 
 /**
  * Host icon picker. `getIconIds` is Obsidian's list, so it stays available when the icons module is off.
@@ -12,6 +12,7 @@ export class IconPickerModal extends FuzzySuggestModal<string> {
 
 	constructor(app: App, onPick: (icon: string) => void) {
 		super(app);
+		this.limit = 400;
 		this.onPick = onPick;
 		this.setPlaceholder(t('quickNote.iconPickerPlaceholder'));
 		bindLocalizedControl(this, 'placeholder', 'quickNote.iconPickerPlaceholder');
@@ -19,8 +20,11 @@ export class IconPickerModal extends FuzzySuggestModal<string> {
 	}
 
 	getItems(): string[] {
-		const query = this.inputEl?.value ?? '';
-		return iconPickerRows(getIconIds(), query);
+		return orderedHostIcons(getIconIds());
+	}
+
+	getSuggestions(query: string): FuzzyMatch<string>[] {
+		return super.getSuggestions(query).slice(0, 400);
 	}
 
 	getItemText(item: string): string {

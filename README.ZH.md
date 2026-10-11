@@ -31,6 +31,7 @@ NAND 当前版本为 0.0.1-alpha.1，是第一个公开预发布版。
 | 自动化 | [手动／定时动作、设备归属和通知](docs/automation.ZH.md) |
 | 编程智能体 | [终端会话、原生历史、用量和上下文](docs/agent-workbench.ZH.md) |
 | 浏览器 | [网页、站点权限、CLI 与材料采集](docs/browser.ZH.md) |
+| 新闻 | [订阅、分析、事件阅读、收藏和简报（桌面端，默认关闭）](docs/news.ZH.md) |
 | 档案 | [个人、企业、任职、关系和相关资料](docs/contacts.ZH.md) |
 | 评论 | [不改写笔记正文的评论](docs/comments.ZH.md) |
 | 图标 | [文件和界面图标、颜色及规则](docs/icons.ZH.md) |
@@ -55,7 +56,7 @@ NAND 当前版本为 0.0.1-alpha.1，是第一个公开预发布版。
 
 NAND 使用 MIT 许可证，见 [LICENSE](LICENSE)。第三方署名：
 
-- [NOTICE](NOTICE) 列出 NAND 改编的作品并保留它们的许可证原文：apex-dashboard 与 obsidian-dashboard（看板设计）、Orca（终端与浏览器部分）、Iconic（图标规则）和 obsidian-git（Git 同步）。Orca 的对应关系见 [docs/third-party](docs/third-party/orca-terminal-workbench.ZH.md)。
+- [NOTICE](NOTICE) 列出 NAND 改编的作品并保留它们的许可证原文：apex-dashboard 与 obsidian-dashboard（看板设计）、Orca（终端与浏览器部分）、Iconic（图标规则）、obsidian-git（Git 同步）和 AIHOT（新闻算法）。见 [Orca 对照](docs/third-party/orca-terminal-workbench.ZH.md)和[新闻对照](docs/third-party/aihot-news.ZH.md)。
 - [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md) 列出打包进插件的 npm 依赖和终端辅助程序的 Rust 依赖。
 - 图标、Emoji 与 Unicode 数据的声明见 [src/modules/icons/core/res/NOTICE.txt](src/modules/icons/core/res/NOTICE.txt)。
 

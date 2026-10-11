@@ -91,7 +91,9 @@ export async function onOpen(this: DashboardSurface): Promise<void> {
 }
 
 export async function onClose(this: DashboardSurface): Promise<void> {
-	closeOwnedDashboardPanels(this.app, this);
+	for (const delivery of this.agentDeliveries.values()) delivery.abort();
+	this.agentDeliveries.clear();
+	closeOwnedDashboardPanels(this.app, this, this.contentEl);
 	this.lifecycleRevision++;
 	this.isOpening = false;
 	this.isOpen = false;
@@ -169,6 +171,9 @@ export async function reloadFromDisk(this: DashboardSurface): Promise<void> {
  *  Settings objects are replaced (not mutated) on every save, so the fresh
  *  reference must be pushed into the engine before it re-resolves the file. */
 export async function applyWorkspaceSwitch(this: DashboardSurface): Promise<void> {
+	for (const delivery of this.agentDeliveries.values()) delivery.abort();
+	this.agentDeliveries.clear();
+	closeOwnedDashboardPanels(this.app, this, this.contentEl);
 	this.sync.updateSettings(this.plugin.settings);
 	await observeDashboardPromise(this.sync.switchFile());
 }

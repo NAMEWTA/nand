@@ -12,6 +12,10 @@ serializations: ["2026-10-08-terminal-reliability::T-01 <> 2026-10-08-home-grid-
 
 # NAND 全部 open issue — 总体实施图
 
+<!-- ACTUAL-CODE-REVIEW:START -->
+2026-10-11 实际代码审查与修复见 [review-report.md](review-report.md) 和 [review-progress.json](review-progress.json)。已逐项审查61票／180条AC；原规划文本、阶段 Gate 与历史授权说明保留为历史记录。用户当前已授权自主代码修复，未要求提交、推送、发版或关闭 issue；不以规划阶段“0/61／只规划”描述当前工作区，也不把真实账号或未跑平台 Gate 视为通过。
+<!-- ACTUAL-CODE-REVIEW:END -->
+
 ## 1. Members and Source Authority
 
 本图只组合，不复制或替代子Spec/Ticket。来源为13个open issue完整正文/评论快照、固定参考和用户确认。本轮只规划；全部61票未实施。

@@ -1,0 +1,90 @@
+{
+  "finding": "R-102",
+  "ticket": "Browser T13 MiniMax",
+  "status": "implemented-local-verification-live-gate-unverified",
+  "reference": {
+    "commit": "b6b83ca90f0f67fbf25a676e7a8f6b8b34327800",
+    "license": "MIT",
+    "files": [
+      "src/providers/minimax/definition.ts",
+      "selectors.ts",
+      "strategy.ts",
+      "native-copy.ts",
+      "native-copy.test.ts",
+      "index.ts"
+    ],
+    "official": [
+      {
+        "url": "https://agent.minimax.io/",
+        "result": "Public MiniMax Agent page"
+      },
+      {
+        "url": "https://chat.minimax.io/",
+        "result": "Observed redirect to https://agent.minimax.cn/ on 2026-10-11 in this environment"
+      },
+      {
+        "url": "https://agent.minimax.cn/",
+        "result": "Public MiniMax Agent page"
+      }
+    ],
+    "limit": "Public origins/redirect only. Authenticated website DOM, stable IDs and canonical conversation permalinks remain unverified."
+  },
+  "plan": [
+    "Reuse scoped DOM and guarded website-copy policy; no response observer or invented API",
+    "Exact host binding survives separate send sessions; explicit recheck required across the three observed official origins",
+    "Identity/ancestry missing stays unsupported; coverage remains partial",
+    "Original source only on captured page generation until verified permalink evidence",
+    "Native single/mixed checks and honest live-account gate"
+  ],
+  "implemented": [
+    "MiniMax is selectable and lazily registered, with three explicitly allowlisted official origins and persisted exact-origin binding.",
+    "Coze and MiniMax share the same scoped DOM reader with separate role class selectors; neither creates a response observer.",
+    "Explicit public conversation/message/parent identity, whole-answer copy and partial coverage; no API or permalink invented.",
+    "Source navigation uses original captured generation/profile/message and never guesses by text.",
+    "Native runner fixtures cover distinct MiniMax class roles and copy toolbar, both secondary hosts, and mixed incomplete/complete targets.",
+    "Review exposed that DOM-only saved conversations could not reopen their official homepage after page closure; fixed homepage open without inventing a permalink."
+  ],
+  "verification": {
+    "targeted": 26,
+    "build": 4234931,
+    "styles": 750459,
+    "browserLint": "passed",
+    "architecture": 926,
+    "i18n": 3420,
+    "docs": 552,
+    "notices": "12 npm/62 crates current",
+    "bundle": "4234931 within4235264; startup97.1KB/94inputs, browser144.6KB +259.5KB deferred",
+    "nativeExploratory": {
+      "path": "C:/Users/cdewta/AppData/Local/Temp/nand-minimax-workspace-acce6e660036470c8a67acc91a339d69/evidence",
+      "checks": 74,
+      "failed": 1,
+      "error": "Three uncaught illegal access strings after popout close/language switch. Following 75-check run with uncaught-exception tracing passed without exceptions; root cause unconfirmed, first run retained as failed."
+    },
+    "runtimeCaveat": "application.log shows fresh launcher checks auto-update and restart loads downloaded obsidian-1.14.4.asar. Electron app.getVersion()1.13.7 is installer/runtime version, not proof of the renderer app version after restart. Capture both versions in subsequent probe; prior runtime labels need this distinction.",
+    "native": {
+      "path": "C:/Users/cdewta/AppData/Local/Temp/nand-minimax-trace-080fdff64f8d4b0883a336048f549c36/evidence",
+      "checks": 75,
+      "failed": 0,
+      "debuggerErrors": []
+    },
+    "mixed": {
+      "path": "C:/Users/cdewta/AppData/Local/Temp/nand-minimax-mixed-9b6d51d4bac34e8f9a7f493ab4ea4dbb/evidence",
+      "checks": 76,
+      "failed": 0
+    },
+    "full": {
+      "passed": 699,
+      "skipped": 4,
+      "filesPassed": 156,
+      "filesSkipped": 1,
+      "durationSeconds": 135.5,
+      "started": "2026-10-11 03:46:43 Asia/Shanghai",
+      "log": "C:\\Users\\cdewta\\AppData\\Local\\Temp\\nand-review-minimax-full.log",
+      "note": "R103 template service additions were present; its three new tests were added after this suite loaded and passed separately."
+    }
+  },
+  "next": [
+    "Real-account website gate unverified; no inferred API/permalink",
+    "Continue remaining review scope"
+  ]
+}

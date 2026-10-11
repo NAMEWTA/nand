@@ -26,6 +26,10 @@ shared_path_owners: ["<Path>main.js</Path> => 2026-10-08-archives-completion::T-
 
 # Ticket T-01: 核销档案双布局、全文搜索与规模行为
 
+<!-- ACTUAL-CODE-REVIEW:START -->
+2026-10-11 实际代码审查：[T-01.md](../evidence/T-01.md)。本票下文保留原规划合同与基线；当前实现、修复、验证及未验证条件以该记录为准。原“仅规划／未授权实施／必须提交”的阶段约束不适用于用户已授权的本次工作区审查；提交与远程操作仍未执行。
+<!-- ACTUAL-CODE-REVIEW:END -->
+
 - Ticket：<Path>{roots.state}/specdev/changes/2026-10-08-archives-completion/ticket/01-close-parity-evidence.md</Path>
 - 总控Map：<Path>{roots.state}/specdev/changes/2026-10-08-archives-completion/tickets-map.md</Path>
 - Spec：<Path>{roots.state}/specdev/changes/2026-10-08-archives-completion/spec.md</Path>
@@ -37,7 +41,7 @@ shared_path_owners: ["<Path>main.js</Path> => 2026-10-08-archives-completion::T-
 
 **目标与可观察产出：** 提供逐项可回读的#124能力/宿主/规模验收记录及准确使用说明。
 
-**当前事实：** 主要能力已有，不制造功能重写票或新的测试框架。
+**规划时基线：** 主要能力已有，不制造功能重写票或新的测试框架。
 
 **来源：** AC-001, AC-002, AC-003, AC-004, AC-005, AC-006, AC-007, AC-008；issue #124；<Path>{roots.state}/specdev/changes/2026-10-08-archives-completion/reference-analysis.md</Path>。深度 standard：涉及明确的垂直行为及现有可复用接缝；验证按实际风险。
 

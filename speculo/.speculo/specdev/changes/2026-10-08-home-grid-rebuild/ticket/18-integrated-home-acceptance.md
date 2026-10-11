@@ -26,6 +26,10 @@ shared_path_owners: ["<Path>main.js</Path> => 2026-10-08-home-grid-rebuild::T-18
 
 # Ticket T-18: 完成看板与新闻智能体的联合验收和交付文档
 
+<!-- ACTUAL-CODE-REVIEW:START -->
+2026-10-11 实际代码审查：[T-18.md](../evidence/T-18.md)。本票下文保留原规划合同与基线；当前实现、修复、验证及未验证条件以该记录为准。原“仅规划／未授权实施／必须提交”的阶段约束不适用于用户已授权的本次工作区审查；提交与远程操作仍未执行。
+<!-- ACTUAL-CODE-REVIEW:END -->
+
 - Ticket：<Path>{roots.state}/specdev/changes/2026-10-08-home-grid-rebuild/ticket/18-integrated-home-acceptance.md</Path>
 - 总控Map：<Path>{roots.state}/specdev/changes/2026-10-08-home-grid-rebuild/tickets-map.md</Path>
 - Spec：<Path>{roots.state}/specdev/changes/2026-10-08-home-grid-rebuild/spec.md</Path>
@@ -37,7 +41,7 @@ shared_path_owners: ["<Path>main.js</Path> => 2026-10-08-home-grid-rebuild::T-18
 
 **目标与可观察产出：** 在全部feature和news贡献可用后验证完整用户旅程，交付可追溯的双语文档、许可和实际证据。
 
-**当前事实：** 各票应已各自提供功能/错误证据；本票不是留给前票的实现兜底。当前研究尚未运行构建/真实UI/相似度，不可复用“未测”当通过。
+**规划时基线：** 各票应已各自提供功能/错误证据；本票不是留给前票的实现兜底。当前研究尚未运行构建/真实UI/相似度，不可复用“未测”当通过。
 
 **来源：** AC-072, AC-073, AC-074, AC-075, AC-076, AC-077；issue #137, #141；<Path>{roots.state}/specdev/changes/2026-10-08-home-grid-rebuild/reference-analysis.md</Path>。深度 deep：涉及持久数据/公共接口/进程或权限的跨边界合同，必须记录恢复与兼容。
 

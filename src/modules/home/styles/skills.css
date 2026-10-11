@@ -1,0 +1,118 @@
+.nand-skills-widget {
+	padding: var(--nand-space-3);
+	overflow: auto;
+	min-width: 0;
+}
+
+.nand-dashboard-root .dashboard-context-skill {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	flex-shrink: 0;
+	min-width: var(--nand-control-height);
+	min-height: var(--nand-control-height);
+	color: var(--db-text-muted);
+	border-radius: var(--db-radius-sm);
+}
+
+.dashboard-context-skill:focus-visible {
+	outline: var(--nand-focus-ring);
+}
+
+.dashboard-context-skill svg {
+	width: 16px;
+	height: 16px;
+}
+
+/* Obsidian's app chrome disables text selection; context actions need the card's own text. */
+.dashboard-card-body {
+	user-select: text;
+}
+
+.nand-skills-widget .nand-ui-toolbar,
+.nand-skills-row {
+	display: flex;
+	align-items: center;
+	gap: var(--nand-space-2);
+	flex-wrap: wrap;
+}
+
+.nand-skills-row > button:first-child {
+	flex: 1;
+	white-space: normal;
+	overflow-wrap: anywhere;
+}
+
+.nand-skills-widget input:not([type='checkbox']),
+.nand-skills-widget select,
+.nand-skills-widget textarea,
+.nand-skills-preview select {
+	width: 100%;
+	min-width: 0;
+}
+
+.nand-skills-editor {
+	border-top: var(--nand-border);
+	padding-top: var(--nand-space-3);
+}
+
+.nand-skill-picker {
+	overflow-wrap: anywhere;
+}
+
+.nand-skills-choice {
+	display: grid;
+	gap: var(--nand-space-1);
+	overflow-wrap: anywhere;
+}
+
+.nand-skills-choice small {
+	color: var(--db-text-muted);
+}
+
+.nand-skills-check {
+	display: flex;
+	align-items: center;
+	gap: var(--nand-space-2);
+	min-height: var(--nand-control-height);
+	overflow-wrap: anywhere;
+}
+
+.nand-skill-preview-dialog {
+	width: min(760px, 95vw);
+}
+
+.nand-skills-preview fieldset {
+	border: var(--nand-border);
+	border-radius: var(--nand-radius-sm);
+	min-width: 0;
+	max-height: 200px;
+	overflow: auto;
+}
+
+.nand-skills-widget button,
+.nand-skills-preview button,
+.nand-skills-widget select,
+.nand-skills-preview select {
+	min-height: var(--nand-control-height);
+}
+
+@media (pointer: coarse) {
+	.nand-dashboard-root .dashboard-context-skill {
+		min-width: var(--nand-touch-target);
+		min-height: var(--nand-touch-target);
+	}
+
+	.nand-skills-widget button,
+	.nand-skills-preview button,
+	.nand-skills-check,
+	.nand-skills-widget select,
+	.nand-skills-preview select {
+		min-height: var(--nand-touch-target);
+	}
+
+	.nand-skills-widget button,
+	.nand-skills-preview button {
+		min-width: var(--nand-touch-target);
+	}
+}

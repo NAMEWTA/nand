@@ -1,0 +1,54 @@
+{
+  "ticket": "Browser T02 explicit page control",
+  "requirements": [
+    "AC-024",
+    "AC-039"
+  ],
+  "finding": "R-090",
+  "status": "fixed-native28-shortcut26-full607-verified",
+  "findingDetails": [
+    "Bridge observations always activated the target page. No public registered service bound operations to page/profile/guest generation.",
+    "Native hidden input can acknowledge without applying text, and hidden capture can time out. Explicit page activation also failed to reveal its containing Obsidian leaf."
+  ],
+  "implementation": [
+    "Register finite BROWSER_CONTROL service and target/observation/action types; do not expose arbitrary CDP or renderer ids.",
+    "Freeze target and action parameters, validate target before admission to the existing guest queue and again before publishing results. Change guest generation whenever the native guest is replaced.",
+    "Observations keep foreground page/editor focus. Cold saved pages require explicit tab switch. Legacy bridge supports optional profileId/generation and freezes the admitted live guest.",
+    "Native input and capture require an explicitly visible page. Input focuses only that guest and checks focus before native dispatch; no hidden-input success claim. Keypress can bind a snapshot element instead of relying on guest focus.",
+    "Explicit activation reveals the owning Obsidian leaf before switching the internal page. Close/module-off retire active and queued guest operations."
+  ],
+  "verification": {
+    "native": {
+      "checks": 28,
+      "passed": 28,
+      "evidence": "C:/Users/cdewta/AppData/Local/Temp/nand-browser-control-review-ce1cf5a59188471e9da425f5774e3da4/evidence",
+      "harness": "scripts/obsidian-acceptance/browser-control.mjs"
+    },
+    "shortcuts": {
+      "checks": 26,
+      "passed": 26,
+      "evidence": "C:/Users/cdewta/AppData/Local/Temp/nand-browser-shortcuts-after-control-4372c8b30f934562bbfeb3f31eba66ba/evidence"
+    },
+    "unit": "16 targeted and 607 full pass / 4 skip, 134 files pass / 1 skip, 111.47s",
+    "gates": [
+      "build",
+      "lint",
+      "architecture 876",
+      "i18n 3252",
+      "docs 549 / 559 local links",
+      "bundle main.js 4059566, styles.css 747016; within recorded 4060160 output cap"
+    ],
+    "failedProbes": [
+      "Hidden CDP screenshot timed out; Electron capturePage(stayHidden) also timed out. Both rejected as unsupported paths; final code requires visible capture.",
+      "Hidden input remained empty with and without emulated focus. Final code rejects it and tests explicit activation plus native input.",
+      "Native reveal from note leaf exposed missing revealLeaf; corrected and rerun."
+    ],
+    "fullLog": "C:\\Users\\cdewta\\AppData\\Local\\Temp\\nand-review-browser-control-full.log"
+  },
+  "limitations": [
+    "Windows and local fixture evidence; no provider login or other OS claims.",
+    "Screenshots and native input require a visible page; observations and address navigation may run in the background.",
+    "Task ownership, cancellation/resume and provider-scoped capture are subsequent Browser tickets; generic target control does not claim those contracts.",
+    "Legacy external bridge still accepts page-only calls; token scoping and stricter client identity remain T20 review work."
+  ]
+}

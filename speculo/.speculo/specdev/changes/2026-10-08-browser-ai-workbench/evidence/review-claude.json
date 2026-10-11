@@ -1,0 +1,92 @@
+{
+  "finding": "R-098",
+  "ticket": "Browser T09 Claude",
+  "status": "implemented-local-verification-live-gate-unverified",
+  "reference": {
+    "repository": "https://github.com/NAMEWTA/multi-ai-browser-extension",
+    "commit": "b6b83ca90f0f67fbf25a676e7a8f6b8b34327800",
+    "license": "MIT",
+    "files": [
+      "claude/acquisition.ts",
+      "claude/runtime-acquisition.ts",
+      "claude/selectors.ts",
+      "claude/strategy.ts",
+      "claude/native-copy.ts",
+      "claude/definition.ts",
+      "claude/index.ts",
+      "associated tests"
+    ],
+    "officialContext": [
+      "https://claude.ai/",
+      "https://support.claude.com/en/articles/9450526-export-your-claude-data",
+      "https://platform.claude.com/docs/en/build-with-claude/handling-stop-reasons"
+    ],
+    "limit": "Official API stop reasons are not proof of private website response shape. Homepage redirects to login; no authenticated provider session available. Native fixtures will validate conservative implementation, not current private schema compatibility."
+  },
+  "verification": {
+    "parser": 3,
+    "tsc": "passed",
+    "targeted": 19,
+    "nativeSingle": {
+      "path": "C:/Users/cdewta/AppData/Local/Temp/nand-claude-workspace-ea9ce62b738a4ed0b07f9b616f813c9b/evidence",
+      "checks": 72,
+      "failures": 0,
+      "method": "Production build in real Windows Obsidian, intercepted local official-origin HTTPS fixtures. Three rounds including long/repeated question, native richtext input, privacy/branch/terminal/missing-history boundaries, login/challenge no-bypass, 18 theme/width cases, touch44, restart/module lifecycle. Real accounts unverified."
+    },
+    "build": 4208852,
+    "styles": 750459,
+    "architecture": 915,
+    "i18n": 3416,
+    "docs": 552,
+    "notices": "12 npm/62 crates check passed",
+    "lint": "full lint passed",
+    "bundle": "within cap4209664; same startup/module/style limits",
+    "nativeMixed": {
+      "path": "C:/Users/cdewta/AppData/Local/Temp/nand-claude-multitarget-72f08f77964a4ef59951b6525782476d/evidence",
+      "checks": 76,
+      "failures": 0,
+      "providers": [
+        "deepseek",
+        "kimi",
+        "claude"
+      ],
+      "scope": "Local official-origin fixtures in real Obsidian: selected/visible targets, partial group failure, takeover, bridge ownership, read-only recollect, explicit one-target resend, 2-3 capture comparison, original-message navigation and follow-up."
+    },
+    "full": {
+      "passed": 685,
+      "skipped": 4,
+      "filesPassed": 152,
+      "filesSkipped": 1,
+      "durationSeconds": 126.22,
+      "log": "C:\\Users\\cdewta\\AppData\\Local\\Temp/nand-review-claude-full.log"
+    }
+  },
+  "next": [
+    "Actual-account compatibility remains unverified; user availability question pending. Continue T10-T21 and remaining Home/planning seams."
+  ],
+  "implemented": [
+    "Lazy Claude session policy and shared runtime queue/ownership/journal/storage. Official conversation URL, native task choice and EN/ZH label.",
+    "Bounded exact-origin passive history response projection, stable IDs, explicit parents/current tip and end-turn evidence; private blocks excluded and repeated public text retained.",
+    "Public scoped DOM with unique richtext/send/new controls, explicit message IDs, copy boundary reuse, challenge/login blocking and partial fallback.",
+    "Bilingual guide/MAIW source mapping and NOTICE updated."
+  ],
+  "runtimeClarification": {
+    "installerVersion": "1.13.7",
+    "electron": "43.3.0",
+    "note": "Electron app.getVersion() reports the installed runtime. Fresh profiles automatically downloaded an app update; application logs below prove restart loaded a newer renderer app. Prior single version labels did not distinguish these.",
+    "updates": [
+      {
+        "log": "C:\\Users\\cdewta\\AppData\\Local\\Temp\\nand-claude-workspace-ea9ce62b738a4ed0b07f9b616f813c9b\\evidence\\application.log",
+        "rendererUpdateLoaded": [
+          "1.14.4"
+        ]
+      },
+      {
+        "log": "C:\\Users\\cdewta\\AppData\\Local\\Temp\\nand-claude-multitarget-72f08f77964a4ef59951b6525782476d\\evidence\\application.log",
+        "rendererUpdateLoaded": [
+          "1.14.4"
+        ]
+      }
+    ]
+  }
+}

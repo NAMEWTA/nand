@@ -26,6 +26,10 @@ shared_path_owners: ["<Path>main.js</Path> => 2026-10-08-home-grid-rebuild::T-16
 
 # Ticket T-16: 保存并应用全局主题与首页组合外观
 
+<!-- ACTUAL-CODE-REVIEW:START -->
+2026-10-11 实际代码审查：[T-16.md](../evidence/T-16.md)。本票下文保留原规划合同与基线；当前实现、修复、验证及未验证条件以该记录为准。原“仅规划／未授权实施／必须提交”的阶段约束不适用于用户已授权的本次工作区审查；提交与远程操作仍未执行。
+<!-- ACTUAL-CODE-REVIEW:END -->
+
 - Ticket：<Path>{roots.state}/specdev/changes/2026-10-08-home-grid-rebuild/ticket/16-named-global-appearance.md</Path>
 - 总控Map：<Path>{roots.state}/specdev/changes/2026-10-08-home-grid-rebuild/tickets-map.md</Path>
 - Spec：<Path>{roots.state}/specdev/changes/2026-10-08-home-grid-rebuild/spec.md</Path>
@@ -37,7 +41,7 @@ shared_path_owners: ["<Path>main.js</Path> => 2026-10-08-home-grid-rebuild::T-16
 
 **目标与可观察产出：** 按已确认规则保存theme+home完整命名组合，一键恢复全部窗口外观且不引入按板主题。
 
-**当前事实：** theme namespace/runtime已经管理所有窗口和编辑器；home ThemeStudio现在只调背景/装饰，无private palette和saved themes。SettingsStore能同时bind多个namespace并共用flush。
+**规划时基线：** theme namespace/runtime已经管理所有窗口和编辑器；home ThemeStudio现在只调背景/装饰，无private palette和saved themes。SettingsStore能同时bind多个namespace并共用flush。
 
 **来源：** AC-064, AC-065, AC-066, AC-067；issue #137, #141；<Path>{roots.state}/specdev/changes/2026-10-08-home-grid-rebuild/reference-analysis.md</Path>。深度 deep：涉及持久数据/公共接口/进程或权限的跨边界合同，必须记录恢复与兼容。
 

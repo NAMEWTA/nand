@@ -9,6 +9,7 @@ import { AGENT_CATALOG } from '../core/launch/catalog';
 import type { AgentPermissionMode } from '../core/launch/types';
 import { SHELL_CHOICES, type LaunchPreset, type ShellChoice, type TerminalSettings } from '../core/terminal/settings';
 import type { AgentController } from '../services/controller';
+import type { SettingsHandle } from '../../../shared/settings/store';
 
 type Save = (recipe: (draft: TerminalSettings) => void) => void;
 
@@ -269,11 +270,27 @@ function helperSection(container: HTMLElement, controller: AgentController, save
 }
 
 /** Settings → Agent: shell, appearance, presets, agents and the native helper. */
-export function agentSettingsPage(controller: () => AgentController | undefined): SettingsPageRenderer {
+export function agentSettingsPage(controller: () => AgentController | undefined, portableSettings?: SettingsHandle<TerminalSettings>, desktop = true): SettingsPageRenderer {
 	return (container, page) => {
 		const current = controller();
+		const handle = current?.settings ?? portableSettings;
+		if (handle) {
+			new Setting(container).setName(t('agent.skills.heading')).setHeading();
+			if (desktop) new Setting(container).setName(t('agent.skills.directories')).setDesc(t('agent.skills.directoriesHint')).addTextArea(text => text.setValue(handle.get().skillDirectories.join('\n')).onChange(value => {
+				void handle.update(draft => { draft.skillDirectories = value.split(/\r?\n/).map(path => path.trim()).filter(Boolean); }).catch(() => new Notice(t('settings.writeFailed')));
+			}));
+			else container.createEl('p', { text: t('agent.skills.mobile') });
+			for (const agent of AGENT_CATALOG) {
+				const names = handle.get().knownSkills[agent.id] ?? [];
+				if (!names.length) continue;
+				new Setting(container).setName(t('agent.skills.remembered', { name: agent.title })).setDesc(names.join(', ')).addButton(button => button.setButtonText(t('agent.skills.clear')).onClick(async () => {
+					try { await handle.update(draft => { delete draft.knownSkills[agent.id]; }); page.refresh(); }
+					catch { new Notice(t('settings.writeFailed')); }
+				}));
+			}
+		}
 		if (!current) {
-			container.createEl('p', { text: t('workbench.notReady') });
+			if (!handle) container.createEl('p', { text: t('workbench.notReady') });
 			return;
 		}
 		const save: Save = (recipe) => { void current.settings.update(recipe).catch(() => new Notice(t('settings.writeFailed'))); };

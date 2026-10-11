@@ -1,0 +1,98 @@
+{
+  "finding": "R-099",
+  "ticket": "Browser T10 Qwen",
+  "status": "implemented-local-verification-live-gate-unverified",
+  "reference": {
+    "commit": "b6b83ca90f0f67fbf25a676e7a8f6b8b34327800",
+    "license": "MIT",
+    "files": [
+      "src/providers/qwen/definition.ts",
+      "src/providers/qwen/acquisition.ts",
+      "src/providers/qwen/runtime-acquisition.ts",
+      "src/providers/qwen/selectors.ts",
+      "src/providers/qwen/strategy.ts",
+      "src/providers/qwen/native-copy.ts",
+      "related tests",
+      "detail/alternate/partial fixtures"
+    ],
+    "official": "https://www.qianwen.com/",
+    "limit": "Public homepage confirms official Qianwen entry only; no authenticated account/private DOM or API schema proof."
+  },
+  "findings": [
+    "Provider ID exists but cannot create/control a task target.",
+    "Reference joins progressive prefixes and deduplicates repeated content, fabricates missing IDs and treats absent parent as rooted history; NAND must require explicit evidence.",
+    "Composer selection must exclude conversation search and verification inputs; Slate placeholder nodes must not become a user draft. Dormant captcha containers cannot block normal input."
+  ],
+  "next": [
+    "Continue Doubao T11; real-account gate remains unverified"
+  ],
+  "implemented": [
+    "Qwen lazy session, canonical official URL and task UI choice use existing lifecycle/queue/ownership/storage.",
+    "Strict detail map, alternate array and partial response projections; explicit roots/branches, stable IDs, message count/pagination/end state; private blocks excluded and repeats retained, ambiguous prefixes stay partial.",
+    "Scoped native DOM excludes search and verification controls, ignores empty Slate placeholders and dormant captcha containers; exact native input/readback.",
+    "Native screenshot revealed raw provider IDs in task/previews/comparison. Those labels now use the EN/ZH provider dictionary.",
+    "JSON-encoded public content is parsed before private-block exclusion; unknown-role duplicate IDs are rejected. Full688 and source lint include these final parser changes; native76 predates this pure parser patch."
+  ],
+  "verification": {
+    "targeted": 19,
+    "build": 4218238,
+    "styles": 750459,
+    "architecture": 918,
+    "i18n": 3417,
+    "docs": 552,
+    "notices": "12 npm/62 crates current",
+    "bundle": "within cap4218880; same startup/module/style limits",
+    "nativeSingle": {
+      "path": "C:\\Users\\cdewta\\AppData\\Local\\Temp\\nand-qwen-labels-final-38eff6828abf4c31b7e7597e3a5ff7a2/evidence",
+      "checks": 76,
+      "failed": 0,
+      "scope": "Production main.js/real Windows Obsidian, local HTTPS fixtures only. Three rounds/detail+alternate, long/repeated question, missing parent/unfinished/stale branch/no history, Slate placeholder and real draft protection, search exclusion, login/challenge, responsive18/touch44, restart/module lifecycle. English/Chinese names checked and narrow screenshot reviewed.",
+      "artifactBytes": 4218019
+    },
+    "nativeExploratory": {
+      "path": "C:/Users/cdewta/AppData/Local/Temp/nand-qwen-multitarget-4439307eaf854f829de38ccb12cfa6d4/evidence",
+      "checks": 2,
+      "error": "Generic mixed runner inserted only ChatGPT/Claude login test ID. Qwen pinned selector uses button login class; fixture now supplies both, matching single-provider check. No submission occurred. Running corrected probe."
+    },
+    "runtime": {
+      "method": "Read-only CDP query against the owned fresh-vault process",
+      "obsidian": "1.13.7",
+      "electron": "43.3.0",
+      "chrome": "150.0.7871.212"
+    },
+    "lint": "full lint passed",
+    "nativeMixed": {
+      "path": "C:/Users/cdewta/AppData/Local/Temp/nand-qwen-mixed-final-88e904c045ec41bca784ec248f79b35f/evidence",
+      "checks": 76,
+      "failed": 0,
+      "scope": "Final production build4218019, mixed DeepSeek/Kimi/Qianwen local HTTPS fixtures in real Obsidian. Readiness subset, three shared rounds, partial failure, owner/bridge exclusion, comparison/source/follow-up/recollect/resend."
+    },
+    "full": {
+      "passed": 688,
+      "skipped": 4,
+      "filesPassed": 153,
+      "filesSkipped": 1,
+      "seconds": 125.23,
+      "log": "C:\\Users\\cdewta\\AppData\\Local\\Temp/nand-review-qwen-full.log"
+    }
+  },
+  "runtimeClarification": {
+    "installerVersion": "1.13.7",
+    "electron": "43.3.0",
+    "note": "Electron app.getVersion() reports the installed runtime. Fresh profiles automatically downloaded an app update; application logs below prove restart loaded a newer renderer app. Prior single version labels did not distinguish these.",
+    "updates": [
+      {
+        "log": "C:\\Users\\cdewta\\AppData\\Local\\Temp\\nand-qwen-labels-final-38eff6828abf4c31b7e7597e3a5ff7a2\\evidence\\application.log",
+        "rendererUpdateLoaded": [
+          "1.14.4"
+        ]
+      },
+      {
+        "log": "C:\\Users\\cdewta\\AppData\\Local\\Temp\\nand-qwen-mixed-final-88e904c045ec41bca784ec248f79b35f\\evidence\\application.log",
+        "rendererUpdateLoaded": [
+          "1.14.4"
+        ]
+      }
+    ]
+  }
+}

@@ -26,6 +26,10 @@ shared_path_owners: ["<Path>main.js</Path> => 2026-10-08-news-aihot::T-10（本�
 
 # Ticket T-10: 完成参考归因、用户文档与宿主验收
 
+<!-- ACTUAL-CODE-REVIEW:START -->
+2026-10-11 实际代码审查：[T-10.md](../evidence/T-10.md)。本票下文保留原规划合同与基线；当前实现、修复、验证及未验证条件以该记录为准。原“仅规划／未授权实施／必须提交”的阶段约束不适用于用户已授权的本次工作区审查；提交与远程操作仍未执行。
+<!-- ACTUAL-CODE-REVIEW:END -->
+
 - Ticket：<Path>{roots.state}/specdev/changes/2026-10-08-news-aihot/ticket/10-reference-docs-and-runtime-acceptance.md</Path>
 - 总控Map：<Path>{roots.state}/specdev/changes/2026-10-08-news-aihot/tickets-map.md</Path>
 - Spec：<Path>{roots.state}/specdev/changes/2026-10-08-news-aihot/spec.md</Path>
@@ -37,7 +41,7 @@ shared_path_owners: ["<Path>main.js</Path> => 2026-10-08-news-aihot::T-10（本�
 
 **目标与可观察产出：** 一名读者按文档可完成新闻全流程，维护者能审查参考/差异和真实运行证据。
 
-**当前事实：** 研究已固定上游SHA与源码映射，但实现/账号/主题矩阵尚未验证；已有docs双语和Obsidian probe可扩展。
+**规划时基线：** 研究已固定上游SHA与源码映射，但实现/账号/主题矩阵尚未验证；已有docs双语和Obsidian probe可扩展。
 
 **来源：** AC-027, AC-028；issue #136；<Path>{roots.state}/specdev/changes/2026-10-08-news-aihot/reference-analysis.md</Path>。深度 deep：涉及持久数据/公共接口/进程或权限的跨边界合同，必须记录恢复与兼容。
 

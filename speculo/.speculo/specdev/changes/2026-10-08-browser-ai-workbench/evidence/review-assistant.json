@@ -1,0 +1,175 @@
+{
+  "finding": "R-108",
+  "ticket": "T16 AC025/AC033/AC034/AC039 scoped web assistant",
+  "status": "implemented-local-verification-live-gate-unverified",
+  "observed": "Initial review found only authorizeAssistant prototypes and a broad bridge token. A registered scoped assistant and public owner integration now implement this feature.",
+  "contracts": [
+    "Reuse typed BrowserControl, guest operation admission and PageOwnership. Scope binds exact page/profile/generation, operations, visible time/step budgets; page text cannot widen it.",
+    "One automatic AGENT_PROMPT_RUNNER run with opaque one-use handle. AGENT_RUN_CONTEXTS resolves token only into that run environment. No token in prompt/argv/Markdown/receipt; revoke on pause/takeover/cancel/timeout/module off.",
+    "Manual existing mode remains paste only. High-consequence action confirmation must bind exact object/content/destination and cannot be reused. No private browser CLI process or model reader."
+  ],
+  "next": [
+    "T17 element guidance/user adapters, T18 workflows, T19 automation contributions, T20 external grants, T21 evidence and Home workflow integration.",
+    "Real provider/CLI-account acceptance remains unverified."
+  ],
+  "foundations": {
+    "files": [
+      "core/scoped-grant.ts",
+      "services/scoped-runs.ts",
+      "services/scoped-executor.ts",
+      "platform/desktop/bridge.ts",
+      "platform/desktop/action-review.ts",
+      "platform/desktop/automation.ts",
+      "services/page-control.ts",
+      "services/index.ts",
+      "core/page-ownership.ts",
+      "api.ts",
+      "manifest.ts",
+      "module.ts"
+    ],
+    "implemented": [
+      "Exact page/profile/guest generation and operation grant; 1-200 operations, <=30 minute TTL; pause/resume epochs invalidate queued permits and old observations.",
+      "Scoped bridge credentials remain in memory and one owner run environment, with a synchronously claimed one-use handle. Request disconnect, run cancellation and module disposal revoke authority. Actual AGENT_RUN_CONTEXTS contribution is registered and unknown handles do not lazy-initialize it.",
+      "Scoped wire commands use the existing typed PageControl and guest queue; unknown methods never fall through to broad control. A task lease excludes ordinary mutations and task owners, and is checked again at native input.",
+      "One-use action review binds exact native reference, page URL, visible control/form fields and destination; final native input rechecks material. Changed, expired, mismatched or reused review fails. Sensitive visible fields require manual handling.",
+      "Scoped executor writes a step intent before control, requires a fresh observation after mutations/resume, exposes native acknowledgement separately from website acceptance, and invokes a human confirmation port for click/key submission."
+    ],
+    "verification": {
+      "unit": "25 passed across eight control/scope/context/executor files at 05:51:50; later 22 passed across assistant/store/executor/context files at 06:00:43.",
+      "architecture": "952 modules passed before runtime/UI additions.",
+      "i18n": "3553 keys passed.",
+      "native": {
+        "checks": 16,
+        "path": "C:/Users/cdewta/AppData/Local/Temp/nand-action-review-3128928f257d46e58a2ea427fa741bba/evidence",
+        "method": "Actual production bundle BROWSER_CONTROL with two inert local Electron guest forms in fresh Obsidian. No assistant UI or CLI-account acceptance.",
+        "found": "Native field labels included descendant textarea content; fixed by removing editable controls from the cloned label before reading it. All 16 checks passed after rebuild.",
+        "productionBytes": 4327002
+      },
+      "failedProbeAttempts": [
+        {
+          "path": "C:/Users/cdewta/AppData/Local/Temp/nand-action-review-d9989233aac44832a20709994e38a6be/evidence",
+          "cause": "Probe used top-level await in a CDP expression; fixed to async expression before rerun."
+        },
+        {
+          "path": "C:/Users/cdewta/AppData/Local/Temp/nand-action-review-572f0d40573846e1bc10e0c36928e472/evidence",
+          "cause": "Caught the textarea label-content issue; production reader fixed and rebuilt."
+        }
+      ]
+    },
+    "limitations": [
+      "Legacy broad external bridge behavior remains for the separately tracked T20 review; no external-client scope claim.",
+      "The action review describes observable DOM material, not arbitrary hidden JavaScript semantics. No real provider or CLI account acceptance."
+    ],
+    "references": [
+      {
+        "url": "https://github.com/browser-use/browser-use/blob/c75e8476e26d18b7617643bc2ae082fae8eae431/browser_use/agent/service.py",
+        "license": "MIT",
+        "review": "Bounded loop, pause/stop checks and timeout handling."
+      },
+      {
+        "url": "https://github.com/browserbase/stagehand/blob/2d605b099996e10c3e3ab0dcf293db8d482a2c97/packages/integrations/core/src/facade/tools.ts",
+        "license": "MIT",
+        "review": "Typed tool facade and schemas."
+      },
+      {
+        "url": "https://github.com/nanobrowser/nanobrowser/blob/ad47282a17ecdfb894745af093e0f7332fc1f71a/src/background/agent/executor.ts",
+        "license": "Apache-2.0",
+        "review": "Bounded execution, cancel/pause/resume and cleanup."
+      }
+    ],
+    "referenceUse": "Read-only design comparison; no dependency, copied source or adaptation."
+  },
+  "implementationCheckpoint": {
+    "state": "implemented-local-verification-live-gate-unverified",
+    "implemented": [
+      "Independent assistant Markdown documents and strict codec/golden. Serial store rejects changed material and preserves exact late output in separate per-run recovery snapshots.",
+      "One-use task review/start service, one public native owner run with runContext; existing sessions receive planning material only and no grant. Stop/pause/timeout/takeover/lease loss revoke authority and release ownership. Reaching the operation budget stops the run.",
+      "Restart converts unfinished tasks/steps to interrupted/unknown without executing. Explicit new-run review includes prior evidence and fresh page generations; never silently resumes.",
+      "Registered BROWSER_ASSISTANT facade and lazy assistant runtime plus actual AGENT_RUN_CONTEXTS provider. Workbench assistant section and task list, opt-in scope/budgets/agent selection, history, and original-page pause/takeover/consequence banner.",
+      "Opaque context handles are never reissued even after disposal; repeated disposal cannot remove a later grant.",
+      "Shell allowlist includes assistant; native probing caught and fixed its missing route.",
+      "Independent recovery reader remains available with broken primary Markdown. Restore rechecks exact local/draft snapshots, preserves conflicts/deletions and never replays actions. Owner usage persists; result copy uses existing clipboard boundary."
+    ],
+    "checks": {
+      "targeted": "35 passed: assistant service, storage/recovery and shell navigation, 06:20:23.",
+      "types": "Source/test types passed in production build.",
+      "build": {
+        "mainBytes": 4381954,
+        "stylesBytes": 753882
+      },
+      "lint": "Full lint passed, zero warnings.",
+      "architecture": "960 modules passed.",
+      "i18n": "3634 keys, 25 dictionaries passed.",
+      "docs": "554 Markdown files / 569 local links passed.",
+      "css": "109 files, 150 existing groups, no new violations.",
+      "bundle": "Enforced budget passed. Startup97.9 KiB, browser activation190.3 KiB; output4382720/styles753920 caps documented.",
+      "full": {
+        "passed": 770,
+        "skipped": 4,
+        "filesPassed": 168,
+        "filesSkipped": 1,
+        "start": "2026-10-11 06:29:30 +08:00",
+        "seconds": 151.1,
+        "log": "C:/Users/cdewta/AppData/Local/Temp/nand-review-assistant-full.log"
+      }
+    },
+    "remaining": [
+      "Real CLI/account interoperability gate; external clients remain separate T20 work."
+    ],
+    "limitations": [
+      "Public owner fixtures cannot validate real CLI/account interoperability.",
+      "DOM review binds observable material; hidden website JavaScript behavior is not inferred. UI requires manual takeover when no destination is declared. Existing ordinary provider question path remains unchanged."
+    ],
+    "native": {
+      "checks": 85,
+      "path": "C:/Users/cdewta/AppData/Local/Temp/nand-assistant-ea9f77661d2e4f3a9042657410e9e56b/evidence",
+      "productionBytes": 4381954,
+      "stylesBytes": 753882,
+      "method": "Fresh real Obsidian; production workbench/Markdown/AGENT_RUN_CONTEXTS/named-pipe bridge/native Electron guest forms. Public agent owner fixture, no real CLI or provider account.",
+      "coverage": [
+        "Opt-in off, registered route, missing-agent help, exact scope/budget/prompt preview; one owner/one-use handle and credential only in runtime environment.",
+        "Reject outside page, wrong account and eval; scoped fill leaves other guest unchanged; task lease excludes ordinary mutation; same-page takeover revokes token; new reviewed run re-observes manual edits.",
+        "Exact consequence: decline gives zero submissions; acceptance gives one submit and fresh count observation; changed material rejects before native input; confirmation replay rejected.",
+        "Existing session pasted only; output-write fault preserves complete result and usage; retry saves without rerun.",
+        "Crash/restart interrupts unfinished task without owner replay. Ordinary browser layout can independently restore a guest; recovery preserves that page set and creates no task actions.",
+        "Independent recovery UI reads/restores late native result and step evidence. Module off closes guest first and preserves resulting pause; token and owner revoked. Reenable neither resumes nor revives token.",
+        "54 theme/light-dark/width cases, three touch checks, bilingual statuses/controls and zero host exceptions."
+      ],
+      "screenshotsViewed": [
+        "assistant-preview-system-light-500.png (native73)",
+        "assistant-consequence-eye-care-dark-1500.png (native73)",
+        "assistant-recovery.png (native85)"
+      ]
+    },
+    "failedProbeAttempts": [
+      {
+        "path": "C:/Users/cdewta/AppData/Local/Temp/nand-assistant-f55e8ef3f8d6456ea8edae17237d9546/evidence",
+        "cause": "Probe used button instead of sidebar ListItem; selector fixed."
+      },
+      {
+        "path": "C:/Users/cdewta/AppData/Local/Temp/nand-assistant-5c2280f8ef294d6aaf8bbd7459345cce/evidence",
+        "cause": "Actual missing assistant shell route; fixed allowlist and regression assertion."
+      },
+      {
+        "path": "C:/Users/cdewta/AppData/Local/Temp/nand-assistant-3f5415c576d7413198567e582df2933e/evidence",
+        "cause": "Probe incorrectly expected zero ordinary restored browser guests. Task was interrupted; now checks no active owner/task and unchanged page set through recovery."
+      },
+      {
+        "path": "C:/Users/cdewta/AppData/Local/Temp/nand-assistant-c7cc2f0f5b744dee81c50027b55682ab/evidence",
+        "cause": "Probe incorrectly expected cancelled after module off. Shell closes page first, producing a safe pause; native85 verifies revoke/no-resume."
+      }
+    ],
+    "documentation": {
+      "backup": "C:\\Users\\cdewta\\AppData\\Local\\Temp\\nand-review-assistant-docs-ffdf5c8726c0489b8769c1e8dd42479e",
+      "beforeBytes": {
+        "en": 28347,
+        "zh": 25797
+      },
+      "afterBytes": {
+        "en": 31233,
+        "zh": 28397
+      },
+      "change": "Bilingual scope/confirmation/takeover/recovery guide; explicit live-account limits; previous sections retained."
+    }
+  }
+}

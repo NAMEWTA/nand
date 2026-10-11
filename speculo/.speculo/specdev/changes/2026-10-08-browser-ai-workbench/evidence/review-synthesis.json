@@ -1,0 +1,74 @@
+{
+  "finding": "R-107",
+  "ticket": "T15 AC018/AC032 answer synthesis",
+  "status": "implemented-local-verification-live-gate-unverified",
+  "observed": "Only unused synthesisPlan prototype and optional module.promptRunner callback exist; no production synthesis UI, immutable input review or result documents.",
+  "contracts": {
+    "automatic": "AGENT_PROMPT_RUNNER.run once: AgentPromptRequest uses purpose, agentId, prompt, timeoutMs, signal, resultChannel=native, onState. Result status/text/usage/terminalId comes from native completion, never terminal screen.",
+    "manual": "AGENT_DISPATCH.dispatch exact finalPrompt with destination.kind existing and source.kind browser; receipt delivery pasted is not model completion. AGENT_SESSIONS supplies selected session identity; AGENT_DIRECTORY supplies configured agents."
+  },
+  "next": [
+    "T16 scoped web assistant, T17 user adapters, T18 workflows, T19 automation, T20 external bridge, T21 delivery; Home workflow seam and planning reconciliation remain."
+  ],
+  "implemented": [
+    "One-use review freezes exact selected capture versions, source limits, instruction and explicit automatic/existing destination. Ordinary send/recollect has zero agent discovery or calls.",
+    "Automatic mode calls AGENT_PROMPT_RUNNER exactly once with native result channel and consumes owner states/text/usage. Existing mode only AGENT_DISPATCH; pasted is never completion, cancellation receipts stay cancelled.",
+    "Independent browser-synthesis Markdown documents retain all inputs/references and results after original task deletion; UI is opt-in and includes exact preview, cancellation, running terminal and local/recovery readers.",
+    "Durable intent before owner calls; failed intent executes nothing. Failed output writes retain completed output and retry only storage. Conflicting material edits preserve a separate recovery snapshot and cannot misattribute output during restore.",
+    "Browser shutdown aborts/drains calls, restart marks unfinished intents interrupted without replay; bilingual guide and new synthesis format golden."
+  ],
+  "verification": {
+    "targetedInitial": 74,
+    "storageAndService": 42,
+    "finalServiceAndGoldens": 41,
+    "types": "source/test passed",
+    "architecture": 943,
+    "i18n": 3544,
+    "docs": 553,
+    "css": "no new violations; styles check passed",
+    "lint": "full passed; final cancellation mapping targeted ESLint passed",
+    "build": {
+      "mainBytes": 4315090,
+      "stylesBytes": 752168
+    },
+    "bundle": "Within recorded output4315136/style752384 caps; startup97.1KB, browser165.5KB+317.5KB deferred. No new dependency.",
+    "full": {
+      "passed": 734,
+      "skipped": 4,
+      "filesPassed": 161,
+      "filesSkipped": 1,
+      "seconds": 148.35,
+      "start": "2026-10-11 05:24:36 Asia/Shanghai",
+      "log": "C:\\Users\\cdewta\\AppData\\Local\\Temp\\nand-review-synthesis-full.log",
+      "scope": "Full suite before final manual-cancellation mapping. Subsequent mapping and added cancellation test passed final41 targeted and rebuilt production."
+    },
+    "native": {
+      "passed": 60,
+      "failed": 0,
+      "evidence": "C:/Users/cdewta/AppData/Local/Temp/nand-synthesis-lifecycle-0bccb4a80d3f42b6998349eca9702314/evidence",
+      "mainBytes": 4315090,
+      "scope": "Production UI/storage with public agent capability fixtures, two provider capture versions, explicit extra execution/manual paste, cancellation/open running terminal, Vault.process result-write fault/retry, recovery reader, crash/restart interruption, module disable/drain/reenable, original task deletion with all result readers preserved. 36 theme/width cases plus touch controls. Real CLI account unverified."
+    },
+    "screenshotsReviewed": [
+      "synthesis-preview-system-light-500",
+      "synthesis-result-eye-care-dark-1500"
+    ],
+    "previousNative": {
+      "passed": 57,
+      "evidence": "C:/Users/cdewta/AppData/Local/Temp/nand-synthesis-native-e1017ef22d1349ec9728234b94851db2/evidence",
+      "mainBytes": 4315006
+    }
+  },
+  "nativeAttempts": [
+    {
+      "passed": 3,
+      "evidence": "C:/Users/cdewta/AppData/Local/Temp/nand-synthesis-native-bac7056016b7479fb3ff8baa90e6c5d3/evidence",
+      "finding": "Probe-only invalid nested string newline in fixture injection. Corrected with String.raw; no production error or real account claim."
+    }
+  ],
+  "unverified": [
+    "Real configured CLI-account synthesis/paste",
+    "Live website/account compatibility",
+    "Mobile host and POSIX"
+  ]
+}

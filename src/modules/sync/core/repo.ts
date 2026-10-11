@@ -77,12 +77,10 @@ export class GitRepo {
 	 * Null when pushRemote, push.default, or the remote's push refspec does not name exactly one destination.
 	 */
 	async pushTarget(branch: string): Promise<Upstream | null> {
-		const pushRemote = await this.config(`branch.${branch}.pushRemote`);
-		const pushDefault = pushRemote ? '' : await this.config('remote.pushDefault');
+		const remote = (await this.git(['for-each-ref', '--format=%(push:remotename)', `refs/heads/${branch}`])).stdout.trim();
 		const upstreamRemote = await this.config(`branch.${branch}.remote`);
 		const merge = await this.config(`branch.${branch}.merge`);
-		const remote = pushRemote || pushDefault || upstreamRemote;
-		if (!remote || !merge.startsWith('refs/')) return null;
+		if (!remote || remote.includes('\n') || (await this.config(`remote.${remote}.mirror`)) === 'true') return null;
 		const mode = await this.config('push.default');
 		const listed = await this.git(['config', '--get-all', `remote.${remote}.push`], { allow: [1] });
 		const refspecs = listed.code === 0 ? listed.stdout.split(/\r?\n/).map((line) => line.trim()).filter(Boolean) : [];
@@ -91,8 +89,26 @@ export class GitRepo {
 			const ref = onePushRef(refspecs[0]!, branch);
 			return ref ? { remote, ref } : null;
 		}
-		if (mode === 'matching' || mode === 'nothing') return null;
-		return { remote, ref: merge };
+		if (mode === 'upstream' || mode === 'tracking') return remote === upstreamRemote && merge.startsWith('refs/heads/') ? { remote, ref: merge } : null;
+		if (mode === 'current') return { remote, ref: `refs/heads/${branch}` };
+		if (mode && mode !== 'simple') return null;
+		if (remote === upstreamRemote && merge !== `refs/heads/${branch}`) return null;
+		return { remote, ref: `refs/heads/${branch}` };
+	}
+
+	/** Pin the actual push endpoint's tip; fetch URLs and stale remote-tracking refs are not evidence. */
+	async fetchPushTip(remote: string, ref: string): Promise<string | null> {
+		const urls = (await this.git(['remote', 'get-url', '--push', '--all', remote])).stdout.trim().split(/\r?\n/).filter(Boolean);
+		if (urls.length !== 1 || !ref.startsWith('refs/heads/')) return null;
+		const url = urls[0]!;
+		const listed = await this.git(['ls-remote', '--refs', '--', url, ref], { timeoutMs: NETWORK_TIMEOUT });
+		const tips = listed.stdout.split(/\r?\n/).filter(line => line.split('\t')[1] === ref);
+		if (tips.length !== 1) return null;
+		const oid = tips[0]!.split('\t')[0]!;
+		if (!/^[a-f\d]{40,64}$/.test(oid)) return null;
+		await this.git(['fetch', '--no-tags', '--no-write-fetch-head', '--', url, ref], { timeoutMs: NETWORK_TIMEOUT });
+		await this.git(['cat-file', '-e', `${oid}^{commit}`]);
+		return oid;
 	}
 
 	/** The fetched commit a push of `ref` to `remote` would fast-forward, or null when that tip is not present. */
@@ -123,7 +139,8 @@ export class GitRepo {
 
 	/** Paths with staged changes. */
 	async stagedPaths(): Promise<string[]> {
-		return parsePathList((await this.git(['diff', '--cached', '--name-only', '-z'])).stdout);
+		// A rename has two index paths. Include its deletion, even outside the cwd or with diff.relative set.
+		return parsePathList((await this.git(['diff', '--cached', '--no-renames', '--no-relative', '--name-only', '-z'])).stdout);
 	}
 
 	/** Stage every change under the working directory (the vault), including deletions and new files. */
@@ -135,6 +152,11 @@ export class GitRepo {
 	async stagedOutside(): Promise<string[]> {
 		if (!this.scope || this.scope === '.') return [];
 		return (await this.stagedPaths()).filter((repoPath) => !pathWithinScope(repoPath, this.scope));
+	}
+
+	async assertIndexWithinScope(): Promise<void> {
+		const outside = await this.stagedOutside();
+		if (outside.length) throw new GitError('outside-index', outside.join(', '));
 	}
 
 	private vaultPaths(paths: readonly string[]): string[] {
@@ -154,7 +176,12 @@ export class GitRepo {
 	async unstage(paths: readonly string[]): Promise<void> {
 		const safe = this.vaultPaths(paths);
 		if (!safe.length) return;
-		if (await this.head()) await this.git(['restore', '--staged', '--', ...safe.map(top)]);
+		// A staged rename is one UI row but two index paths. Restore both only when both belong to this vault.
+		const selected = new Set(safe);
+		for (const change of (await this.status()).staged) {
+			if (change.index === 'R' && change.from && selected.has(change.path) && pathWithinScope(change.from, this.scope)) selected.add(change.from);
+		}
+		if (await this.head()) await this.git(['restore', '--staged', '--', ...[...selected].map(top)]);
 		// Before the first commit there is no HEAD to restore from; dropping the index entries is the same thing.
 		else await this.git(['rm', '--cached', '-q', '-r', '--', ...safe.map(top)]);
 	}
@@ -172,8 +199,7 @@ export class GitRepo {
 	}
 
 	async commit(message: string, options: { allowEmpty?: boolean } = {}): Promise<void> {
-		const outside = await this.stagedOutside();
-		if (outside.length) throw new GitError('outside-index', outside.join(', '));
+		await this.assertIndexWithinScope();
 		await this.git(['commit', '-q', ...(options.allowEmpty ? ['--allow-empty'] : []), '-F', '-'], { input: message });
 	}
 
@@ -207,6 +233,7 @@ export class GitRepo {
 	 * (`--autostash`), so committing only the staged part still syncs. Resolves false when it stopped on conflicts.
 	 */
 	async integrate(method: 'merge' | 'rebase'): Promise<boolean> {
+		await this.assertIndexWithinScope();
 		const args = method === 'merge' ? ['merge', '--no-edit', '--no-stat', '--autostash', '@{u}'] : ['rebase', '--autostash', '@{u}'];
 		const result = await this.runner.run(args);
 		if (result.code === 0) return true;
@@ -216,16 +243,30 @@ export class GitRepo {
 	}
 
 	async push(remote: string, refspec: string, setUpstream = false): Promise<void> {
+		await this.assertRemotePushSafe(remote);
 		await this.git(['push', '--porcelain', ...(setUpstream ? ['-u'] : []), remote, refspec], { timeoutMs: NETWORK_TIMEOUT });
 	}
 
+	/** Check before squashing, so disallowed push configuration cannot first rewrite local history. */
+	async assertPushSafe(branch: string): Promise<void> {
+		const remote = (await this.git(['for-each-ref', '--format=%(push:remotename)', `refs/heads/${branch}`])).stdout.trim();
+		if (remote) await this.assertRemotePushSafe(remote);
+	}
+
+	private async assertRemotePushSafe(remote: string): Promise<void> {
+		const mirror = await this.git(['config', '--bool', '--get', `remote.${remote}.mirror`], { allow: [1] });
+		const refs = await this.git(['config', '--get-all', `remote.${remote}.push`], { allow: [1] });
+		if (mirror.stdout.trim() === 'true' || refs.stdout.split(/\r?\n/).some(ref => ref.trim().startsWith('+'))) throw new GitError('unsafe-push-config');
+	}
+
 	/** `git push` with no remote or refspec, so git uses the configured push target. */
-	async pushConfigured(): Promise<void> {
-		await this.git(['push', '--porcelain'], { timeoutMs: NETWORK_TIMEOUT });
+	async pushConfigured(): Promise<GitResult> {
+		return this.git(['push', '--porcelain'], { timeoutMs: NETWORK_TIMEOUT });
 	}
 
 	/** Finish a stopped operation after its conflicts were resolved and staged. */
 	async continueOperation(operation: RepoOperation): Promise<void> {
+		await this.assertIndexWithinScope();
 		if (operation === 'merge') await this.git(['commit', '-q', '--no-edit']);
 		else await this.git([operation, '--continue'], { env: { GIT_EDITOR: 'true' } });
 	}
@@ -271,7 +312,7 @@ export class GitRepo {
 
 	/** Refs other than `branch` that point at or build on `commit` (squashing would leave them behind). */
 	async otherRefsContaining(commit: string, branch: string): Promise<string[]> {
-		const result = await this.git(['for-each-ref', '--format=%(refname)', '--contains', commit, 'refs/heads', 'refs/tags']);
+		const result = await this.git(['for-each-ref', '--format=%(refname)', '--contains', commit]);
 		return result.stdout.split(/\r?\n/).filter((ref) => ref && ref !== `refs/heads/${branch}`);
 	}
 
@@ -283,7 +324,13 @@ export class GitRepo {
 		await this.git(['reset', '-q', '--soft', target]);
 	}
 
+	/** Keep the original history reachable even if the subsequent push fails or the app closes. */
+	async saveSquashHead(head: string): Promise<void> {
+		await this.git(['update-ref', 'refs/nand/pre-squash', head]);
+	}
+
 	async commitReusing(message: string): Promise<void> {
+		await this.assertIndexWithinScope();
 		await this.git(['commit', '-q', '-C', message]);
 	}
 }
@@ -304,6 +351,6 @@ function onePushRef(spec: string, branch: string): string | null {
 	const src = colon === -1 ? body : body.slice(0, colon);
 	const dst = colon === -1 ? body : body.slice(colon + 1);
 	if (!src || !dst.startsWith('refs/')) return null;
-	if (src !== 'HEAD' && src !== `refs/heads/${branch}`) return null;
+	if (src !== 'HEAD' && src !== branch && src !== `refs/heads/${branch}`) return null;
 	return dst;
 }

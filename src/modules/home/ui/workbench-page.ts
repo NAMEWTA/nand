@@ -27,14 +27,14 @@ export function createDashboardPage(plugin: HomeHost, context: NativeSurfaceCont
  });
  const switchPath = (requested: string, signal?: AbortSignal): Promise<void> => switchBoard(normalizeWorkspacePath(requested), signal);
  const host: DashboardHost = {
-  app: plugin.app, manifest: plugin.manifest,
+  app: plugin.app, manifest: plugin.manifest, appearance: plugin.appearance,
   get settings() { return workbenchBoardSettings(plugin.settings, path); },
   set settings(value) { path = normalizeWorkspacePath(value.dashboardFile); plugin.settings = { ...plugin.settings, ...workbenchBoardSettingsPatch(value) }; },
   get automationHost() { return plugin.automationHost; },
   saveSettings: () => plugin.saveSettings(), refreshAllDashboards: () => plugin.refreshAllDashboards(),
   openSettings: () => plugin.openSettings(), openBrowser: (request) => plugin.openBrowser(request),
   switchWorkspace: switchPath,
-  createWorkspace: async (name) => { await plugin.createWorkspace(name); await switchPath(plugin.settings.dashboardFile); },
+  createWorkspace: async (name, layout) => { await plugin.createWorkspace(name, layout); await switchPath(plugin.settings.dashboardFile); },
   renameWorkspace: (file, name) => plugin.renameWorkspace(file, name),
   removeWorkspace: async (file) => { await plugin.removeWorkspace(file); if (!plugin.settings.workspaceFiles.includes(path)) await switchPath(plugin.settings.dashboardFile); },
  };

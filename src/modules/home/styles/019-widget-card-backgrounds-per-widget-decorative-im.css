@@ -123,3 +123,17 @@
 	height: 13px;
 }
 
+.dashboard-sidebar-anniversary .dashboard-widget-cfg-btn {
+	visibility: visible;
+	opacity: 1;
+	width: var(--nand-control-height);
+	height: var(--nand-control-height);
+}
+
+@media (pointer: coarse) {
+	.dashboard-sidebar-anniversary .dashboard-widget-cfg-btn {
+		width: var(--nand-touch-target);
+		height: var(--nand-touch-target);
+	}
+}
+

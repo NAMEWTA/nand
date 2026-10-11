@@ -1,0 +1,161 @@
+{
+  "status": "review-complete-local-native13-full805-real-accounts-unverified",
+  "scope": "Browser T21 and Home T18 final shared consumer reconciliation",
+  "localGates": {
+    "build": "passed",
+    "lint": "Final full lint PASS zero warnings",
+    "fullTests": "805 passed /4 skipped",
+    "architecture": "983 modules",
+    "bundle": "main4513810/styles756435, startup99.3KiB/browser232.6KiB within caps",
+    "i18n": "3810 keys",
+    "css": "109 CSS files; no new violations",
+    "notices": "12 npm/62 crates",
+    "docs": "PASS624 Markdown/1654 local links/350 external links, no external fetch",
+    "safety": "PASS shared automation/DST/dispatch and document conflict/recovery suites"
+  },
+  "native": {
+    "passed": 13,
+    "evidence": "C:/Users/cdewta/AppData/Local/Temp/nand-browser-delivery-resumed-696e0b8e158041c18fbff94bbc846325/evidence",
+    "source": "C:\\Users\\cdewta\\AppData\\Local\\Temp\\nand-browser-delivery-2e3253a383cc495b949931c65b182f7c\\vault\\NAND\\AI Workspace",
+    "rows": [
+      {
+        "name": "delivery-restarted-multisite-history-exports-exact-current-markdown",
+        "passed": true
+      },
+      {
+        "name": "delivery-synthesis-review-reuses-restored-captures-before-any-call",
+        "passed": true
+      },
+      {
+        "name": "delivery-synthesis-calls-owner-once-without-changing-source-history",
+        "passed": true
+      },
+      {
+        "name": "delivery-two-accounts-use-distinct-partitions-and-isolated-storage",
+        "passed": true
+      },
+      {
+        "name": "delivery-human-takeover-releases-assistant-owner-before-workflow",
+        "passed": true
+      },
+      {
+        "name": "delivery-workflow-uses-released-page-and-one-shared-owner-receipt",
+        "passed": true
+      },
+      {
+        "name": "delivery-workflow-keeps-other-account-draft-unchanged",
+        "passed": true
+      },
+      {
+        "name": "delivery-generated-cli-observes-workflow-result-through-scoped-grant",
+        "passed": true
+      },
+      {
+        "name": "delivery-generated-cli-rejects-other-account",
+        "passed": true
+      },
+      {
+        "name": "delivery-revoke-invalidates-the-same-generated-cli-credential",
+        "passed": true
+      },
+      {
+        "name": "delivery-all-consumers-leave-captured-history-intact",
+        "passed": true
+      },
+      {
+        "name": "delivery-restart-keeps-history-and-results-without-new-guests-or-grants",
+        "passed": true,
+        "detail": {
+          "sourceMatches": true,
+          "syntheses": [
+            "succeeded"
+          ],
+          "pages": [],
+          "assistant": [
+            "paused"
+          ],
+          "workflows": [
+            "succeeded"
+          ],
+          "grants": 0
+        }
+      },
+      {
+        "name": "no-host-exceptions",
+        "passed": true,
+        "detail": []
+      }
+    ],
+    "errors": [],
+    "bytes": {
+      "main": 4513810,
+      "styles": 756435
+    },
+    "screenshotsInspected": [
+      "delivery-synthesis.png",
+      "delivery-revoked-grant.png"
+    ],
+    "observationScope": "Actual production UI/store/IPC/native guests. Agent owner is an explicit local fixture. Host exception listener covers the pre-restart run; synchronous restart reads and final assertions passed."
+  },
+  "limits": [
+    "All8 real website accounts remain unverified by explicit user decision.",
+    "Real CLI-account synthesis and assistant completion unverified.",
+    "macOS/Linux browser, phone hardware and OS IME composition unverified."
+  ],
+  "attempts": [
+    {
+      "root": "C:/Users/cdewta/AppData/Local/Temp/nand-browser-delivery-0b3be8a2cc3348c99e6f35c4bd31cab1",
+      "failure": "Harness launch lacked NAND_OBSIDIAN_EXECUTABLE; no vault started."
+    },
+    {
+      "root": "C:/Users/cdewta/AppData/Local/Temp/nand-browser-delivery-2e3253a383cc495b949931c65b182f7c/evidence",
+      "checks": 76,
+      "failure": "Embedded fixture owner JavaScript string used interpreted newline; corrected to String.raw. Product multisite/restart/export checks passed."
+    },
+    {
+      "root": "C:/Users/cdewta/AppData/Local/Temp/nand-browser-delivery-f5c6098baad34a73b0b42faf322550b5/evidence",
+      "checks": 78,
+      "failure": "Harness compared entire WorkspaceData including newly created syntheses. Corrected assertion to compare tasks/turns/exchanges/templates with stable field order and separately require one new synthesis. No host exceptions."
+    },
+    {
+      "root": "C:/Users/cdewta/AppData/Local/Temp/nand-browser-delivery-4b4e35c2f97245c5b9a00345fe0fb1d2/evidence",
+      "checks": 78,
+      "failure": "After corrected synthesis/source separation passed, a nested fixture JavaScript cookie string failed parsing. Replaced all nested guest snippets with JSON.stringify arguments. No product source change."
+    },
+    {
+      "root": "C:/Users/cdewta/AppData/Local/Temp/nand-browser-delivery-resumed-b84ed6ae3b97487e8499f4c3311406bf/evidence",
+      "failure": "Combined export/synthesis/profile isolation/assistant takeover/workflow/scoped CLI/revoke completed. Restart assertion incorrectly required no ordinary browser page despite an intentionally open ordinary browser tab being restored. Corrected setup closes its own pages and waits for layout save before restart. Failure handler also now reads the replacement CDP connection.",
+      "diagnostic": {
+        "tasks": 1,
+        "turns": 11,
+        "synthesis": "succeeded",
+        "assistant": "paused",
+        "workflow": "succeeded",
+        "grants": 0,
+        "restoredOrdinaryPage": "Combined account B"
+      },
+      "cleanup": "Owned probe exec interrupted after stale-CDP failure handler stalled; all processes with this fixture root exited. No unrelated Obsidian instance touched."
+    },
+    {
+      "root": "C:/Users/cdewta/AppData/Local/Temp/nand-browser-delivery-resumed-614d3de3146b4f9c834b6fa5009ac42c/evidence",
+      "passedBeforeFailure": 11,
+      "failure": "All combined consumer handovers passed; final restart composite assertion failed after explicit ordinary-page close. Captured paused assistant and no host exceptions. Adding per-field source/record/page/grant diagnostics before deciding whether failure is application or harness."
+    },
+    {
+      "root": "C:/Users/cdewta/AppData/Local/Temp/nand-browser-delivery-resumed-80f2972e1ca64a42b7d75996d0105471/evidence",
+      "passedBeforeFailure": 11,
+      "failure": "Per-field restart diagnostics: one succeeded synthesis, paused assistant, succeeded workflow, zero pages and zero grants. Only unordered top-level record enumeration differed. Node assert.deepEqual after sorting tasks/turns/exchanges/templates by stable ID proves all content identical, preserving inner array order. Harness comparison corrected; no product code change."
+    }
+  ],
+  "currentRun": "C:/Users/cdewta/AppData/Local/Temp/nand-browser-delivery-resumed-696e0b8e158041c18fbff94bbc846325/evidence",
+  "resumedMethod": "Fresh isolated vault seeded only with saved task/turn/answer Markdown from the first controlled multisite run; no profile/cookie/credential or runtime state copied. Separate helper enables debugging the remaining consumer seams without repeating previously passed multi-round sends.",
+  "sourceMultisite": {
+    "evidence": "C:/Users/cdewta/AppData/Local/Temp/nand-browser-delivery-2e3253a383cc495b949931c65b182f7c/evidence/partial.json",
+    "note": "All75 pre-delivery multisite/partial/rollback/takeover/recollection/restart checks passed; first delivery export also passed. Later failure was the helper fixture syntax, retained in attempts. The native13 continuation uses only these saved Markdown records in a new disposable vault."
+  },
+  "nativeScreenshotsShow": "Final4513810 bundle including separate URL line in the access page. Synthesis output is a fixture, not a real model answer.",
+  "nativeArtifact": {
+    "main": 4513810,
+    "styles": 756435
+  }
+}

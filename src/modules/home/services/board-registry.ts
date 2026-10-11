@@ -7,7 +7,12 @@ import {
 	normalizeWorkspacePath,
 	pruneMissingWorkspaces,
 } from '../core/workspace/workspace-registry';
-import type { DashboardSettings } from '../core/board/types/model';
+import type { BoardLayout, DashboardSettings } from '../core/board/types/model';
+import { parse, serialize } from '../core/board/parser/parse';
+import { withStableSectionIds } from '../core/board/section-identity';
+import { legacyBoardMembers } from '../core/board/widget-members';
+import { boardTileSources, boardTiles, persistedBoardTiles } from '../core/board/board-tiles';
+import { widgetTileDefaults } from './widget-layout';
 import type { BoardOperations } from '../api';
 
 type Registry = Pick<DashboardSettings, 'workspaceFiles' | 'workspaceNames' | 'dashboardFile'>;
@@ -16,6 +21,7 @@ export interface BoardRegistryHost {
 	readonly app: App;
 	/** Current registry fields. */
 	read(): Registry;
+	settings?(): DashboardSettings;
 	/** Replace registry fields and persist them. */
 	write(next: Registry): Promise<void>;
 	/** Re-point every open board at the active file (serial, drains each board's queued writes first). */
@@ -56,13 +62,18 @@ export class BoardRegistry implements BoardOperations {
 		});
 	}
 
-	create(name: string): Promise<void> {
+	create(name: string, layout?: BoardLayout): Promise<void> {
 		return this.run(async () => {
 			const registry = this.host.read();
 			const trimmed = name.trim();
 			const path = nextWorkspacePath(registry.workspaceFiles, trimmed, (p) => this.exists(p));
 			try {
-				await this.host.app.vault.create(path.endsWith('.md') ? path : `${path}.md`, generateDefaultMarkdown());
+				const data = withStableSectionIds(parse(generateDefaultMarkdown()), () => `section-${crypto.randomUUID()}`);
+				if (layout) data.layout = layout;
+				const settings = this.host.settings?.();
+				if (settings) data.widgets = legacyBoardMembers(settings, layout !== 'side');
+				if (layout === 'immersive') data.immersive = persistedBoardTiles(boardTiles(data, boardTileSources(data, data.widgets ?? []), member => settings ? widgetTileDefaults(member, settings, true) : undefined));
+				await this.host.app.vault.create(path.endsWith('.md') ? path : `${path}.md`, serialize(data));
 			} catch (error) {
 				console.error('[NAND board] creation failed', error);
 				new Notice(t('workspace.createFailed'));

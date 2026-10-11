@@ -8,6 +8,7 @@ interface PromptOptions {
 	title: string;
 	placeholder?: string;
 	defaultValue?: string;
+	owner?: unknown;
 }
 
 /**
@@ -77,7 +78,7 @@ export function showPromptDialog(app: App | undefined, options: PromptOptions): 
 
 		doc.addEventListener('keydown', onKeydown);
 
-		release = ownDialog(app, () => finish(null));
+		release = ownDialog(app, () => finish(null), options.owner);
 		// Defer focus until the input is laid out.
 		const win = doc.defaultView!;
 		const timer = win.setTimeout(() => {

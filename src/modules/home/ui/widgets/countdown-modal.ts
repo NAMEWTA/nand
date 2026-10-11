@@ -11,6 +11,7 @@ export class CountdownSettingsModal extends Modal {
 	private config: CountdownConfig;
 	private onSave: (config: CountdownConfig) => void;
 	private calendarPopup: HTMLElement | null = null;
+	private releaseCalendar: (() => void) | null = null;
 	private selectedDate: string;
 	private selectedHour: number;
 	private selectedMinute: number;
@@ -114,6 +115,8 @@ export class CountdownSettingsModal extends Modal {
 	}
 
 	private closeCalendarPopup(): void {
+		this.releaseCalendar?.();
+		this.releaseCalendar = null;
 		if (this.calendarPopup) {
 			this.calendarPopup.remove();
 			this.calendarPopup = null;
@@ -123,7 +126,9 @@ export class CountdownSettingsModal extends Modal {
 	private showCalendarPopup(anchor: HTMLElement, dateText: HTMLElement): void {
 		this.closeCalendarPopup();
 
-		const popup = activeDocument.body.createDiv({
+		const doc = anchor.ownerDocument;
+		const win = doc.defaultView!;
+		const popup = doc.body.createDiv({
 			cls: 'dashboard-task-reminder-popup dashboard-countdown-calendar-popup',
 		});
 		applyModalTheme(popup);
@@ -134,8 +139,8 @@ export class CountdownSettingsModal extends Modal {
 			top: `${rect.bottom + 4}px`,
 		});
 		const popupWidth = 240;
-		if (rect.left + popupWidth > window.innerWidth) {
-			popup.style.right = `${window.innerWidth - rect.right}px`;
+		if (rect.left + popupWidth > win.innerWidth) {
+			popup.style.right = `${win.innerWidth - rect.right}px`;
 		} else {
 			popup.style.left = `${rect.left}px`;
 		}
@@ -354,9 +359,9 @@ export class CountdownSettingsModal extends Modal {
 			if (target && typeof target.matches === 'function' && target.matches('select, option')) return;
 			if (!popup.contains(target) && !anchor.contains(target)) {
 				this.closeCalendarPopup();
-				activeDocument.removeEventListener('mousedown', outsideClick);
 			}
 		};
-		window.setTimeout(() => activeDocument.addEventListener('mousedown', outsideClick), 0);
+		const timer = win.setTimeout(() => doc.addEventListener('mousedown', outsideClick), 0);
+		this.releaseCalendar = () => { win.clearTimeout(timer); doc.removeEventListener('mousedown', outsideClick); };
 	}
 }

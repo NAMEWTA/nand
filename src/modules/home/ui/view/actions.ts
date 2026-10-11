@@ -1,5 +1,6 @@
 import { homeServices } from '../../services/instances';
 import { runSkillCommand } from '../../services/skill-command';
+import { previewAgentPrompt } from '../widgets/AgentPromptDialog';
 import { observeDashboardPromise } from '../save-feedback';
 import { MarkdownView, Notice, TFile } from 'obsidian';
 import type { DashboardCard, DashboardColumn, DashboardData, QuickAction } from '../../core/board/types/index';
@@ -9,6 +10,7 @@ import { BannerEditModal } from '../banner/banner';
 import { DataviewConfigModal } from '../dataview/dataview-config-modal';
 import { FolderConfigModal, folderResultToLibraryConfig } from '../library/folder-config-modal';
 import { LibraryConfigModal } from '../library/library-config-modal';
+import { chooseNoteTemplate } from '../library/choose-note-template';
 import {
 	buildNewNoteProps,
 	createNoteWithProps,
@@ -20,10 +22,11 @@ import { NotesSectionConfigModal } from '../notes/notes-config-modal';
 import { AddActionModal, DocSearchModal } from '../notes/quick-actions';
 import { StickyCardTypeModal } from '../notes/sticky-card-type-modal';
 import { renderSection } from '../renderer/refresh-media-sections';
-import { getRenderContext } from '../renderer/render-context';
+import { getRenderContext, unmountDashboardPanelsIn } from '../renderer/render-context';
 import { AddSectionModal } from '../ui/add-section-modal';
 import { CardEditModal } from '../ui/card-edit-modal';
 import { showConfirmDialog } from '../ui/confirm-dialog';
+import { openOwnedDashboardModal } from '../ui/dialog-scope';
 import { setupDragAndDrop } from '../ui/dnd';
 import { NotePopoverModal, revealMarkdownLine } from '../ui/note-popover-modal';
 import { showPromptDialog } from '../ui/prompt-dialog';
@@ -41,7 +44,7 @@ export function openBannerEditModal(this: DashboardSurface, data: DashboardData)
 	const modal = new BannerEditModal(this.app, data.banner, (updates) => {
 		void observeDashboardPromise(this.sync.updateBanner(updates));
 	});
-	modal.open();
+	openOwnedDashboardModal(this.app, modal, this);
 }
 
 export function openCardEditModal(this: DashboardSurface, card: DashboardCard): void {
@@ -52,7 +55,7 @@ export function openCardEditModal(this: DashboardSurface, card: DashboardCard): 
 	const modal = new CardEditModal(this.app, card, (updates) => {
 		void observeDashboardPromise(this.sync.updateCard(card.id, updates));
 	});
-	modal.open();
+	openOwnedDashboardModal(this.app, modal, this);
 }
 
 export function openNotePopover(this: DashboardSurface, file: TFile, subpath?: string, line?: number): void {
@@ -189,7 +192,7 @@ export function openLibraryConfigModal(this: DashboardSurface, colName: string):
 	const modal = new LibraryConfigModal(this.app, existingConfig, (config) => {
 		void observeDashboardPromise(this.sync.updateLibraryConfig(colName, config));
 	});
-	modal.open();
+	openOwnedDashboardModal(this.app, modal, this);
 }
 
 export function openDataviewConfigModal(this: DashboardSurface, colName: string): void {
@@ -369,6 +372,7 @@ export function refreshSectionInPlace(this: DashboardSurface, columnName: string
 	// the "page jumps away after finishing an edit" symptom. Carry the old
 	// row's scroll positions over the node swap.
 	const scrollStates = captureScrollStates(oldEl);
+	unmountDashboardPanelsIn(oldEl as HTMLElement);
 	oldEl.replaceWith(newEl);
 	restoreScrollStates(newEl, scrollStates);
 	for (const fn of this.dndCleanupFns) fn();
@@ -398,8 +402,9 @@ export function openFolderConfigModal(this: DashboardSurface, colName: string): 
 		libraryConfig?.visibleProperties,
 		libraryConfig?.kanbanShowCovers,
 		libraryConfig?.templatePath,
+		libraryConfig?.templatePaths,
 	);
-	modal.open();
+	openOwnedDashboardModal(this.app, modal, this);
 }
 
 /** Per-card "new note" (notes/projects sections): prompt for a title, create
@@ -422,12 +427,14 @@ export async function handleCardNewNote(this: DashboardSurface, cardId: string):
 		const { column, card } = found;
 
 		const folder = sectionNewNoteFolder(column.libraryConfig);
-		const templatePath = (column.libraryConfig?.templatePath ?? '').trim();
+		const templatePath = await chooseNoteTemplate(this.app, column.libraryConfig, this);
+		if (templatePath === null || !this.isOpen) return;
 		const title = await showPromptDialog(this.app, {
 			title: t('quickNote.titlePrompt'),
 			placeholder: t('quickNote.titlePlaceholder'),
+			owner: this,
 		});
-		if (title == null) return; // cancelled (empty submit cancels too)
+		if (title == null || !this.isOpen) return;
 
 		try {
 			let file: TFile;
@@ -475,6 +482,7 @@ export function openNotesSectionConfigModal(this: DashboardSurface, colName: str
 				sortDesc: true,
 				...config,
 				templatePath: settings.templatePath || undefined,
+				templatePaths: settings.templatePath === (config?.templatePath ?? '') ? config?.templatePaths : settings.templatePath.trim() ? [settings.templatePath.trim()] : [],
 				folders: settings.folder ? [settings.folder] : undefined,
 			}));
 		},
@@ -526,12 +534,14 @@ export async function handleLibraryNewNote(
 		const title = await showPromptDialog(this.app, {
 			title: t('quickNote.titlePrompt'),
 			placeholder: t('quickNote.titlePlaceholder'),
+			owner: this,
 		});
-		if (title == null) return; // cancelled (empty submit cancels too — same as presets)
+		if (title == null || !this.isOpen) return;
 
 		const { props, skipped } = buildNewNoteProps(column.libraryConfig);
 		try {
-			const templatePath = (column.libraryConfig?.templatePath ?? '').trim();
+			const templatePath = await chooseNoteTemplate(this.app, column.libraryConfig, this);
+			if (templatePath === null || !this.isOpen) return;
 			let file: TFile;
 			try {
 				file = await createNoteWithProps(this.app, folder, title, props, templatePath || undefined);
@@ -600,7 +610,14 @@ export async function executeAction(this: DashboardSurface, action: QuickAction)
 	if (action.type === 'file') {
 		await this.navigateToPath(action.target);
 	} else if (action.type === 'command' && action.target.startsWith('skill:')) {
-		await runSkillCommand(action.target, homeServices.acquireDispatch ?? (async () => undefined), (message) => new Notice(message));
+		if (this.agentDeliveries.has(action.target)) return;
+		const abort = new AbortController(); this.agentDeliveries.set(action.target, abort);
+		try {
+			await runSkillCommand(action.target, homeServices.acquireDispatch ?? (async () => undefined), (message) => { if (!abort.signal.aborted) new Notice(message); }, {
+				source: { kind: 'widget', path: this.plugin.settings.dashboardFile, id: action.target }, signal: abort.signal,
+				preview: (prompt, agent) => previewAgentPrompt(this.app, prompt, agent, this),
+			});
+		} finally { if (this.agentDeliveries.get(action.target) === abort) this.agentDeliveries.delete(action.target); }
 	} else if (action.type === 'command') {
 		// Route every command (including 'daily-notes') through Obsidian's command
 		// system so the core Daily notes plugin honors its folder/format/template

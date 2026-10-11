@@ -1,16 +1,16 @@
+import { renderBoardQuickActions } from './quick-actions-widget';
+import { renderBoardSkills } from './skills-widget';
 import { observeDashboardPromise } from '../save-feedback';
 import { localizedAttributes, setLocalizedAttribute } from '../../../../ui/primitives/localized-dom';
 import { Platform } from 'obsidian';
-import { t } from '../../../../shared/i18n/index';
-import { renderQuickActions } from '../notes/quick-actions';
 import { isStackedLayout, renderSidebarWeekCalendar, renderSidebarWidgets } from '../renderer/render-sidebar-widgets';
 import { createDashboardSettingsAccess } from '../settings-access';
-import { showConfirmDialog } from '../ui/confirm-dialog';
 import { startGuardedDrag } from '../ui/drag-guard';
 import { getRecentDocs, renderRecentDocs } from '../ui/recent';
 import { clampSidebarWidth, clampWidgetUnitHeight } from '../widgets/widget-span';
 import type { DashboardSurface } from './dashboard-surface';
 import { nativeSurfaces } from '../../../../ui/native-surface';
+import { legacyBoardMembers } from '../../core/board/widget-members';
 
 export function renderSidebar(
 	this: DashboardSurface,
@@ -26,61 +26,13 @@ export function renderSidebar(
 	// building them there: the recent-docs list costs a full markdown-file
 	// mtime sort per render, and the debounced refresh already no-ops when
 	// the .dashboard-recent block is absent.
-	if (!isStackedLayout()) {
+	if (!isStackedLayout(this.data, this.plugin.settings)) {
 		renderSidebarWeekCalendar(scroll);
 	}
 
 	// Quick buttons participate in the widget drag/reorder system now; the
 	// renderer adds them to the widget area like any other sidebar widget.
-	const renderQuickActionsWidget = (container: HTMLElement): void => {
-		if (!this.data) return;
-		renderQuickActions(
-			container,
-			this.data.quickActions,
-			(action) => {
-				void this.executeAction(action);
-			},
-			(index) => {
-				void showConfirmDialog(this.app, {
-					title: t('common.confirmDelete'),
-					message: t('common.confirmDeleteMessage'),
-				}).then((confirmed) => {
-					if (confirmed) void observeDashboardPromise(this.sync.removeQuickAction(index));
-				});
-			},
-			() => this.openAddActionModal(),
-			this.data.quickActionOrder,
-			(order) => {
-				void observeDashboardPromise(this.sync.reorderQuickActions(order));
-			},
-			(key) => {
-				void showConfirmDialog(this.app, {
-					title: t('common.confirmDelete'),
-					message: t('common.confirmDeleteMessage'),
-				}).then((confirmed) => {
-					if (confirmed) void observeDashboardPromise(this.sync.removeQuickActionByKey(key));
-				});
-			},
-			this.data.hiddenPresets,
-			(action) => this.openEditActionModal(action),
-			{
-				bg: this.plugin.settings.quickButtonsBgColor,
-				btn: this.plugin.settings.quickButtonsBtnColor,
-				onChange: (kind, color) => {
-					void (async () => {
-						this.plugin.settings = {
-							...this.plugin.settings,
-							...(kind === 'bg'
-								? { quickButtonsBgColor: color ?? undefined }
-								: { quickButtonsBtnColor: color ?? undefined }),
-						};
-						await this.plugin.saveSettings();
-					})();
-				},
-			},
-			this.plugin.automationHost,
-		);
-	};
+
 
 	// Preserve: reuse the detached widgets DOM when the signature matched.
 	// Either way, track the live element for the next render's detach step.
@@ -92,22 +44,20 @@ export function renderSidebar(
 		this.readingService ?? undefined,
 		this.holidayData,
 		(order) => {
-			void (async () => {
-				this.plugin.settings = {
-					...this.plugin.settings,
-					widgetOrder: order,
-				};
-				await this.plugin.saveSettings();
-				this.render(this.data!);
-			})();
+			if (!this.data) return;
+			const members = this.data.widgets ?? legacyBoardMembers(this.plugin.settings, isStackedLayout(this.data, this.plugin.settings), Platform.isPhone);
+			const rank = new Map(order.map((id, index) => [id, index]));
+			void observeDashboardPromise(this.sync.setBoardMembers([...members].sort((a, b) => (rank.get(a.memberId) ?? order.length) - (rank.get(b.memberId) ?? order.length))));
 		},
 		reuseWidgets,
 		(file, line) => this.openNote(file, undefined, line),
-		renderQuickActionsWidget,
+		container => renderBoardQuickActions(this, container),
 		createDashboardSettingsAccess(this.plugin),
+		isStackedLayout(this.data, this.plugin.settings),
+		{ path: this.plugin.settings.dashboardFile, members: this.data.widgets, openSettings: () => this.plugin.openSettings(), renderSkills: (host, context) => renderBoardSkills(this, host, context) },
 	);
 
-	if (!isStackedLayout()) {
+	if (!isStackedLayout(this.data, this.plugin.settings)) {
 		const docs = getRecentDocs(this.app, this.plugin.settings.recentDocCount, this.plugin.settings);
 		renderRecentDocs(scroll, docs, (path) => {
 			void this.navigateToPath(path);
@@ -150,7 +100,9 @@ export function setupSidebarBehavior(this: DashboardSurface, sidebar: HTMLElemen
 	const outsideHandler = (e: MouseEvent) => {
 		if (this.sidebarPinned) return;
 		if (!this.sidebarExpanded) return;
-		if (sidebar.contains(e.target as Node)) return;
+		// A widget action may replace its button before this bubbling listener runs.
+		// The event path retains the original containment after that DOM update.
+		if (e.composedPath().some(node => (node as HTMLElement).classList?.contains('dashboard-sidebar')) || sidebar.contains(e.target as Node)) return;
 		sidebar.removeClass('dashboard-sidebar--expanded');
 		sidebar.addClass('dashboard-sidebar--collapsed');
 		this.sidebarExpanded = false;
@@ -164,7 +116,7 @@ export function setupSidebarBehavior(this: DashboardSurface, sidebar: HTMLElemen
 	// The handles are direct sidebar children, so the collapsed state's
 	// `> *:not(.slim-indicator)` hiding rule keeps them unreachable there.
 	if (Platform.isMobile) return;
-	if (isStackedLayout()) {
+	if (isStackedLayout(this.data, this.plugin.settings)) {
 		this.attachStripHeightHandle(sidebar);
 	} else {
 		this.attachSidebarWidthHandle(sidebar);
@@ -180,7 +132,7 @@ export function setupSidebarBehavior(this: DashboardSurface, sidebar: HTMLElemen
  *  re-attached node from a previous render. */
 export function applySidebarSizing(this: DashboardSurface, sidebar: HTMLElement): void {
 	const s = this.plugin.settings;
-	if (isStackedLayout()) {
+	if (isStackedLayout(this.data, this.plugin.settings)) {
 		sidebar.setCssProps({ '--db-widget-unit-h': `${clampWidgetUnitHeight(s.widgetUnitHeight)}px` });
 	} else if (!Platform.isMobile) {
 		// Unitless: the stylesheet multiplies by 1px for the width and by

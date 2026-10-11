@@ -1,13 +1,15 @@
 import { canReceiveTask } from '../../core/board/card-kind';
 import { AutomationError } from '../../../../shared/automation/errors';
 import { MarkdownView, normalizePath, type App, type TFile } from 'obsidian';
-import { anniversaryDateThisYear, parseAnniversaryDate } from '../../core/anniversaries/calendar';
+import { anniversaryOccurrence, parseAnniversaryDate } from '../../core/anniversaries/calendar';
 import { resolveWidgetLabel } from '../../core/board/default-widget-label';
 import { parse as parseDashboard, serialize as serializeDashboard } from '../../core/board/parser/index';
 import type { DashboardSettings } from '../../core/board/types/index';
 import { readTaskMeta, TASK_META_REGEX, taskMetaSuffix } from '../../../../shared/automation/metadata';
 import type { AutomationAction, AutomationDefinition, SourceRef } from '../../../../shared/automation/types';
 import { t } from '../../../../shared/i18n/index';
+import type { PipelineConfig } from '../../core/board/types/model';
+import type { PipelineAutomationSource, PipelineScope } from '../pipeline/automation';
 
 function widgetDashboardPath(path: string): string {
 	const normalized = normalizePath(path.trim());
@@ -27,7 +29,13 @@ export class DashboardAutomationSource {
 			return serializeDashboard(data);
 		});
 	}
-	private cache = new Map<string, { stamp: string; rows: AutomationDefinition[] }>();
+	private cache = new Map<string, { stamp: string; rows: AutomationDefinition[]; pipelines: PipelineConfig[] }>();
+	private pipeline?: PipelineAutomationSource;
+	async resolvePipelineSource(source: SourceRef): Promise<TFile> {
+		await this.list();
+		if (!this.pipeline) throw new AutomationError('sourceMissing');
+		return this.pipeline.resolve(source);
+	}
 	invalidate(path: string): void { this.cache.delete(path); }
 	constructor(
 		private app: App,
@@ -61,11 +69,12 @@ export class DashboardAutomationSource {
 	}
 	async list(): Promise<AutomationDefinition[]> {
 		const result: AutomationDefinition[] = [];
+		const pipelines: PipelineScope[] = [];
 		for (const file of this.files()) {
 			try {
 				const stamp = file.stat ? `${file.stat.mtime}:${file.stat.size}` : '';
 				const cached = this.cache.get(file.path);
-				if (cached && cached.stamp === stamp) { result.push(...cached.rows); continue; }
+				if (cached && cached.stamp === stamp) { result.push(...cached.rows); pipelines.push(...cached.pipelines.map(config => ({ boardPath: file.path, config }))); continue; }
 				const offset = result.length;
 				const raw = await this.app.vault.read(file);
 				// Task lines that carry an automation block become definitions.
@@ -76,10 +85,16 @@ export class DashboardAutomationSource {
 					const source: SourceRef = { kind: 'dashboard', path: file.path, id: meta.id };
 					result.push({ ...meta.automation, source });
 				}
-				this.cache.set(file.path, { stamp, rows: result.slice(offset) });
+				const configs = parseDashboard(raw).columns.flatMap(column => column.sectionType === 'pipeline' && column.pipelineConfig ? [column.pipelineConfig] : []);
+				pipelines.push(...configs.map(config => ({ boardPath: file.path, config })));
+				this.cache.set(file.path, { stamp, rows: result.slice(offset), pipelines: configs });
 			} catch (error) {
 				console.error('[NAND reminders]', file.path, error);
 			}
+		}
+		if (pipelines.length || this.pipeline) {
+			this.pipeline ??= new (await import('../pipeline/automation')).PipelineAutomationSource(this.app);
+			result.push(...await this.pipeline.list(pipelines));
 		}
 		return [...result, ...(await this.widgets())];
 	}
@@ -169,9 +184,10 @@ export class DashboardAutomationSource {
 				if (!entry.annualReminder) continue;
 				const start = parseAnniversaryDate(entry.startDate);
 				if (!start) continue;
-				const at = anniversaryDateThisYear(start, now, entry.calendar, lookup).getTime();
+				const occurrence = anniversaryOccurrence(start, now, entry.calendar, lookup);
+				const at = occurrence.date.getTime();
 				const label = resolveWidgetLabel(entry, 'anniversary') || entry.startDate;
-				const years = now.getFullYear() - start.getFullYear();
+				const years = occurrence.years;
 				add(
 					entry,
 					label,
@@ -190,6 +206,12 @@ export class DashboardAutomationSource {
 	async save(definition: AutomationDefinition, remove = false): Promise<void> {
 		const source = definition.source;
 		if (!source) throw new AutomationError('invalid');
+		if (source.kind === 'dashboard' && source.id.startsWith('pipeline:')) {
+			await this.list();
+			if (!this.pipeline) throw new AutomationError('sourceMissing');
+			await this.pipeline.save(definition, remove);
+			return;
+		}
 		if (source.kind === 'widget') {
 			const settings = this.settings();
 			const entry = [...settings.countdowns, ...settings.anniversaries].find(

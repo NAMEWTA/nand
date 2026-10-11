@@ -18,6 +18,9 @@ import { selectBadgeKeys } from '../src/modules/home/ui/library/library-presenta
 import { VisiblePropertiesEditor } from '../src/modules/home/ui/library/visible-properties-editor';
 import { FolderConfigModal } from '../src/modules/home/ui/library/folder-config-modal';
 import { El, findByClass, findTag } from './mini-dom';
+import { installPreactMiniDom } from './preact-mini-dom';
+
+installPreactMiniDom();
 
 (globalThis as unknown as Record<string, unknown>).activeDocument = {
 	querySelector: () => null,

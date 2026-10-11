@@ -9,6 +9,10 @@ sources: ["<Path>{roots.state}/specdev/changes/2026-10-08-news-aihot/source.md</
 
 # Spec: 本地新闻工作台与 Agent 分析
 
+<!-- ACTUAL-CODE-REVIEW:START -->
+2026-10-11 实际代码审查与修复：[review-index.md](evidence/review-index.md)，覆盖本 change 的 10 票、28 条 AC。下文保留原规划目标与当时基线，不能把“尚未实现／本轮只规划”当成当前代码状态。当前源码与接口以审查证据及 owner 的 `api.ts` 为准；未验证的账号或平台仍未验证，原 AC 没有删减。
+<!-- ACTUAL-CODE-REVIEW:END -->
+
 - ADR：<Path>{roots.state}/specdev/changes/2026-10-08-news-aihot/ADR.md</Path>
 - CONTEXT：<Path>{roots.state}/specdev/changes/2026-10-08-news-aihot/CONTEXT.md</Path>
 - 引用对照：<Path>{roots.state}/specdev/changes/2026-10-08-news-aihot/reference-analysis.md</Path>
@@ -19,7 +23,7 @@ sources: ["<Path>{roots.state}/specdev/changes/2026-10-08-news-aihot/source.md</
 
 深读 AIHOT 固定提交后按 NAND 模块、工作台、设置、Markdown 和 Agent CLI 契约重写完整新闻能力：采集、可解释精选、事件归组、热度、日报、收藏/简报、我的视图及首页组件；保留 OPML、静态网页列表、可选双评分与七天曲线。仅做本轮完整规划；后续 current 严格串行。
 
-### 当前事实
+### 规划时基线
 
 NAND 当前 HEAD 1b9121382363cc50254fbc973c24742b7742edc7，无 news 模块，home 无跨模块 widget registry；#136 旧基线 21f852b 已过期。agent/api.ts 只有 AGENT_SESSIONS 与 AGENT_WORKBENCH；TerminalAutomationRuntime 已复用登录/CLI/hooks/PTY但要求 AutomationRun、答案截尾8000字符且无总运行超时。现六CLI首次prompt均经argv/flag，旧 automation-catalog.ts 与 CORE_AGENT_IDS 已删除；以 AGENT_CATALOG 为准。hook stdin >65536字符静默退出，spool >100000 bytes拒收；Pi/OpenCode未带最终答案，history/parse.ts仅元数据没有完整assistant文本。manifest/package当前0.0.1-alpha.1，不能按旧issue断言仍是1.0.0。AIHOT c547b669acc7f64720cd82024e502446ee1ef88d 已固定clone在repo外并深读算法/提示词/UI。home领域change拥有公共Agent目录/派发、automation invocation/receipt contract；本change依赖并复用，不另建同名公共目录。本change独立拥有新闻结构化后台结果runner扩展。
 

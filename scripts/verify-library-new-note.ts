@@ -236,6 +236,8 @@ const makeSectionApp = (): Parameters<typeof renderLibrarySection>[2] => {
 		},
 		metadataCache: {
 			getFileCache: () => ({ frontmatter: { title: 'x' }, tags: [] }),
+			on: () => ({}),
+			offref: () => {},
 			fileToLinktext: (f: { path: string }) => f.path,
 		},
 		workspace: { on: () => {}, off: () => {} },

@@ -1,0 +1,51 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Claude adapter local fixture</title>
+<a id="new-chat" href="/new">New chat</a>
+<main id="messages"></main>
+<div id="composer" class="ProseMirror fixture-composer" contenteditable="true" role="textbox" style="min-height:50px;border:1px solid;padding:8px;white-space:pre-wrap"></div>
+<button id="submit" aria-label="Send Message">Send</button>
+<button id="stop" data-testid="stop-button" aria-label="Stop response" style="display:none">Stop</button>
+<script>
+const composer = document.querySelector('#composer'), output = document.querySelector('#messages'), submit = document.querySelector('#submit'), stop = document.querySelector('#stop');
+let conversation, serial = 0, messages = [], timer;
+const fence = String.fromCharCode(96).repeat(3);
+window.fixtureMarkdown = '# Heading\n\n| A | B |\n| --- | --- |\n| 1 | 2 |\n\n' + fence + 'ts\nconst a = 1;\n' + fence + '\n\n$x^2$\n\nRepeated paragraph\n\nRepeated paragraph';
+window.fixtureCount = () => messages.length;
+window.fixtureHistory = () => {
+ const rows = structuredClone(messages), last = rows.at(-1);
+ if (last?.sender === 'assistant') rows.push({ ...last, uuid: 'other', content: [{ type: 'text', text: 'Inactive branch secret' }] });
+ if (window.fixtureMode === 'missing-parent') rows.shift();
+ return { uuid: conversation, name: 'Fixture research', current_leaf_message_uuid: window.fixtureMode === 'stale-branch' ? 'other' : last?.uuid, chat_messages: rows, access_token: 'fixture-only-secret' };
+};
+function row(id, parent, role, text) {
+ const root = document.createElement('section'); root.dataset.messageId = id; root.dataset.parentMessageUuid = parent ?? '';
+ const message = document.createElement('div'); message.dataset.testid = role === 'user' ? 'user-message' : 'assistant-message';
+ const content = document.createElement('div'); content.className = role === 'assistant' ? 'standard-markdown' : 'user-content'; content.style.whiteSpace = 'pre-wrap';
+ content.textContent = text; message.append(content); root.append(message); output.append(root); return content;
+}
+document.querySelector('#new-chat').onclick = event => {
+ event.preventDefault(); if (timer) clearTimeout(timer);
+ conversation = undefined; messages = []; output.replaceChildren(); composer.replaceChildren();
+ history.replaceState({}, '', '/new'); stop.style.display = 'none'; submit.disabled = false;
+};
+submit.onclick = () => {
+ if (!composer.innerText || submit.disabled) return;
+ const question = composer.innerText, parent = messages.at(-1)?.uuid;
+ conversation ??= crypto.randomUUID(); history.replaceState({}, '', '/chat/' + conversation);
+ const user = 'user-' + (++serial), answer = 'answer-' + serial;
+ messages.push({ uuid: user, sender: 'human', parent_message_uuid: parent ?? null, content: [{ type: 'text', text: question }] });
+ row(user, parent, 'user', question);
+ const response = row(answer, user, 'assistant', 'Partial answer'), root = response.closest('[data-message-id]'); root.dataset.isStreaming = 'true';
+ composer.replaceChildren(); submit.disabled = true; stop.style.display = '';
+ timer = setTimeout(() => {
+  root.dataset.isStreaming = 'false';
+  response.innerHTML = '<h1>Heading</h1><table><tr><th>A</th><th>B</th></tr><tr><td>1</td><td>2</td></tr></table><pre><code class="language-ts">const a = 1;</code></pre><span class="katex"><annotation encoding="application/x-tex">x^2</annotation></span><div class="reasoning">Private reasoning fixture</div><button>Copy</button>';
+  messages.push({ uuid: answer, sender: 'assistant', parent_message_uuid: user, stop_reason: window.fixtureMode === 'unfinished' ? 'max_tokens' : 'end_turn',
+   content: [{ type: 'thinking', text: 'Private reasoning fixture' }, { type: 'tool_use', text: 'Private tool fixture' }, { type: 'text', text: fixtureMarkdown + (window.fixtureLongAnswer ? '\n\n' + 'Long public paragraph. '.repeat(3000) : '') }] });
+  submit.disabled = false; stop.style.display = 'none'; timer = undefined;
+  if (!window.fixtureNoHistory) void fetch('/api/organizations/fixture-org/chat_conversations/' + conversation + '?tree=true');
+ }, window.fixtureDelay ?? 900);
+};
+stop.onclick = () => { clearTimeout(timer); timer = undefined; stop.style.display = 'none'; submit.disabled = false; for (const row of output.querySelectorAll('[data-is-streaming]')) row.dataset.isStreaming = 'false'; const status = document.createElement('p'); status.role = 'status'; status.textContent = 'Stopped'; output.append(status); };
+</script>

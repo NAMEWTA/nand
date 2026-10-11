@@ -26,6 +26,10 @@ shared_path_owners: ["<Path>main.js</Path> => 2026-10-08-news-aihot::T-06（本�
 
 # Ticket T-06: 编排今日要闻与保存我的视图
 
+<!-- ACTUAL-CODE-REVIEW:START -->
+2026-10-11 实际代码审查：[T-06.md](../evidence/T-06.md)。本票下文保留原规划合同与基线；当前实现、修复、验证及未验证条件以该记录为准。原“仅规划／未授权实施／必须提交”的阶段约束不适用于用户已授权的本次工作区审查；提交与远程操作仍未执行。
+<!-- ACTUAL-CODE-REVIEW:END -->
+
 - Ticket：<Path>{roots.state}/specdev/changes/2026-10-08-news-aihot/ticket/06-daily-edition-and-saved-views.md</Path>
 - 总控Map：<Path>{roots.state}/specdev/changes/2026-10-08-news-aihot/tickets-map.md</Path>
 - Spec：<Path>{roots.state}/specdev/changes/2026-10-08-news-aihot/spec.md</Path>
@@ -37,7 +41,7 @@ shared_path_owners: ["<Path>main.js</Path> => 2026-10-08-news-aihot::T-06（本�
 
 **目标与可观察产出：** 读者无需额外AI调用即可看今日要闻、保存个性筛选并在重启/分屏恢复。
 
-**当前事实：** 已有分析/事件/热点是稳定输入；本地需选择今日窗口而不能照搬AIHOT服务器08:00出刊。
+**规划时基线：** 已有分析/事件/热点是稳定输入；本地需选择今日窗口而不能照搬AIHOT服务器08:00出刊。
 
 **来源：** AC-018, AC-019；issue #136；<Path>{roots.state}/specdev/changes/2026-10-08-news-aihot/reference-analysis.md</Path>。深度 deep：涉及持久数据/公共接口/进程或权限的跨边界合同，必须记录恢复与兼容。
 

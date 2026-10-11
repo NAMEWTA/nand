@@ -1,0 +1,81 @@
+{
+  "ticket": "T-15",
+  "requirements": [
+    "AC-061",
+    "AC-062",
+    "AC-063"
+  ],
+  "status": "implemented-native-verified",
+  "environment": {
+    "host": "Obsidian 1.13.7",
+    "platform": "Windows",
+    "freshVault": "C:/Users/cdewta/AppData/Local/Temp/nand-home-focal-review-5fb7fa97078c4a98992b517255a36101"
+  },
+  "fixes": [
+    "Independent banner imagePos map and card coverPos; raw malformed values remain unchanged until intentional edit; default is centered.",
+    "Lazy Preact preview with pointer, native Escape cancellation, keyboard/Shift-arrow, numeric fields and center reset; owned modal and popup window lifecycle.",
+    "Shared image editing in poster/statistics modes; actual banner/carousel/card CSS positions use the same formatter.",
+    "Exact file and folder-segment rename migration for images, per-image map and covers; URLs and unrelated paths unaffected.",
+    "Legacy id-less card source matching preserves author prose, CRLF and unchanged headings during focal-only edits."
+  ],
+  "reference": {
+    "source": "MIT Apex Dashboard",
+    "commit": "db9d2892032c27f5f8899a72c0dca61d72572a9a",
+    "format": "imagePos path -> x,y string; card coverPos metadata string",
+    "planningDifference": "Spec predicted object points and coverPosition. Implementation uses pinned Apex string fields with raw preservation; behavior/0..100 coordinates are unchanged. Reconcile stale schema wording in integrated planning review.",
+    "attribution": "NOTICE and bilingual docs/third-party/apex-dashboard mapping"
+  },
+  "verification": {
+    "native": {
+      "passed": 46,
+      "failed": 0,
+      "path": "C:/Users/cdewta/AppData/Local/Temp/nand-home-focal-review-5fb7fa97078c4a98992b517255a36101/evidence",
+      "script": "scripts/obsidian-acceptance/home-focal.mjs",
+      "carouselClock": "Production 30-minute callback captured/invoked, real 600ms fade elapsed; did not wait 30 minutes.",
+      "visualsInspected": [
+        "focal-system-light-500.png",
+        "focal-popout.png"
+      ],
+      "coverage": [
+        "two independent carousel images + card",
+        "pointer and Escape rollback",
+        "keyboard and numeric values",
+        "cancel preserves complete source bytes",
+        "reset changes only selected image",
+        "file and folder rename",
+        "three theme presets x light/dark x widths 500/800/1500",
+        "page hide, restart, popup window, module disposal"
+      ]
+    },
+    "targetedTests": {
+      "passed": 96,
+      "files": 29,
+      "command": "pnpm exec vitest run src/modules/home test/golden/user-formats.test.ts"
+    },
+    "regressions": [
+      "test:library-cover PASS",
+      "test:banner-quote-font 7 PASS"
+    ],
+    "gates": {
+      "build": "PASS",
+      "lint": "PASS zero warnings",
+      "architecture": "PASS 854 modules",
+      "i18n": "PASS 24 dictionaries / 3139 keys",
+      "css": "PASS unchanged baseline",
+      "bundle": "PASS main 3999151 bytes, styles 740299 bytes, Home activation 424.6 KiB; recorded 8 KiB/1 KiB output/style increments, startup/module budgets unchanged",
+      "docs": "Standard gate FAIL: inherited planning bilingual/source-heading exceptions. Existing exact scoped exception runner PASS 549 Markdown / 541 local links / 332 external links (not fetched)."
+    }
+  },
+  "unverified": [
+    "Actual phone hardware",
+    "Touch input"
+  ],
+  "relatedFindings": [
+    "R-065",
+    "R-066",
+    "R-067"
+  ],
+  "followup": [
+    "Card editor linked-documents list ignores parsed card.docs; source bytes preserved by this change, inspect linkage editing under integrated review."
+  ]
+}

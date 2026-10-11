@@ -11,22 +11,9 @@ export const PREFERRED_ICONS: readonly string[] = [
 ];
 
 const preferred = new Set(PREFERRED_ICONS);
+const isPreferred = (id: string) => preferred.has(id.replace(/^lucide-/, ''));
 
-/**
- * Host icon names, preferred ones first, at most `limit` rows.
- * An empty host list still offers the preferred names, so the picker works with the icons module off.
- */
-export function iconPickerRows(hostIds: readonly string[], query: string, limit = 400): string[] {
-	const needle = query.trim().toLowerCase();
-	const available = hostIds.length ? hostIds : PREFERRED_ICONS;
-	const matched: string[] = [];
-	const seen = new Set<string>();
-	for (const id of available) {
-		if (seen.has(id)) continue;
-		if (needle && !id.toLowerCase().includes(needle)) continue;
-		seen.add(id);
-		matched.push(id);
-	}
-	matched.sort((a, b) => Number(preferred.has(b)) - Number(preferred.has(a)) || a.localeCompare(b));
-	return matched.slice(0, Math.max(0, limit));
+/** Keep the host's complete authority list so native fuzzy search can rank before limiting. */
+export function orderedHostIcons(hostIds: readonly string[]): string[] {
+	return [...new Set(hostIds)].sort((a, b) => Number(isPreferred(b)) - Number(isPreferred(a)) || a.localeCompare(b));
 }

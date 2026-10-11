@@ -4,9 +4,10 @@
  */
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
-import { existsSync, mkdirSync, mkdtempSync, readFileSync, renameSync, rmSync, unlinkSync, writeFileSync } from 'node:fs';
+import { chmodSync, existsSync, mkdirSync, mkdtempSync, readFileSync, renameSync, rmSync, unlinkSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
+import { setTimeout as delay } from 'node:timers/promises';
 import { afterAll, beforeAll, describe, test, vi } from 'vitest';
 import { commitAndSync, commitStep, pullStep, pushStep, squashUnpushed, succeeded, type StepResult, type SyncOptions } from '../../src/modules/sync/core/flow';
 import { GitRepo } from '../../src/modules/sync/core/repo';
@@ -406,6 +407,45 @@ describe('squashing unpushed commits', () => {
 		assert.equal(await squashUnpushed(moved.repo, 'main'), 'diverged');
 		assert.equal(Number(sh(moved.a, 'rev-list', '--count', 'HEAD').trim()), 4);
 	});
+
+	test('remote and custom references protect published commits from squashing', async () => {
+		for (const ref of ['refs/remotes/backup/main', 'refs/archive/keep']) {
+			const w = await threeUnpushed();
+			const head = sh(w.a, 'rev-parse', 'HEAD').trim();
+			sh(w.a, 'update-ref', ref, 'HEAD~1');
+			assert.equal(await squashUnpushed(w.repo, 'main'), 'referenced');
+			assert.equal(sh(w.a, 'rev-parse', 'HEAD').trim(), head);
+		}
+	});
+
+	test('a rejected push retains original history and reports its recovery reference', async () => {
+		const w = await threeUnpushed();
+		const head = sh(w.a, 'rev-parse', 'HEAD').trim();
+		const base = sh(w.a, 'rev-parse', '@{u}').trim();
+		write(w.remote, 'hooks/pre-receive', '#!/bin/sh\nexit 1\n');
+		chmodSync(path.join(w.remote, 'hooks/pre-receive'), 0o755);
+		write(w.a, 'note.md', 'unstaged edit stays\n');
+		const result = await pushStep(w.repo, { squash: true });
+		assert.equal(result.state, 'failed');
+		assert.deepEqual(result.recovery, { head, base });
+		assert.equal(sh(w.a, 'rev-parse', 'refs/nand/pre-squash').trim(), head);
+		assert.equal(sh(w.remote, 'rev-parse', 'main').trim(), base);
+		assert.equal(read(w.a, 'note.md'), 'unstaged edit stays\n');
+		assert.equal(sh(w.a, 'diff', '--cached', '--name-only'), '');
+	});
+
+	test('a failed squash commit restores the original HEAD without changing edits or the index', async () => {
+		const w = await threeUnpushed();
+		const head = sh(w.a, 'rev-parse', 'HEAD').trim();
+		write(w.a, '.git/hooks/pre-commit', '#!/bin/sh\nexit 1\n');
+		chmodSync(path.join(w.a, '.git/hooks/pre-commit'), 0o755);
+		write(w.a, 'note.md', 'unsaved to git\n');
+		const result = await pushStep(w.repo, { squash: true });
+		assert.equal(result.state, 'failed');
+		assert.equal(sh(w.a, 'rev-parse', 'HEAD').trim(), head);
+		assert.equal(read(w.a, 'note.md'), 'unsaved to git\n');
+		assert.equal(sh(w.a, 'diff', '--cached', '--name-only'), '');
+	});
 });
 
 describe('paths, scale and the runner', () => {
@@ -448,6 +488,37 @@ describe('paths, scale and the runner', () => {
 		await assert.rejects(createGitRunner(path.join(base, 'no-such-git'), base).run(['status']), (error: Error & { kind?: string }) => error.kind === 'missing-git');
 	});
 
+	test.each(['abort', 'timeout', 'dispose'] as const)('%s terminates the helper process spawned by Git', async (mode) => {
+		const w = world();
+		const helper = path.join(w.root, 'helper.cjs');
+		const marker = path.join(w.root, 'helper.pid');
+		writeFileSync(helper, "require('node:fs').writeFileSync(process.argv[2], String(process.pid)); setInterval(() => {}, 1000);\n");
+		const quote = (value: string) => "'" + value.replaceAll('\\', '/').replaceAll("'", "'\\''") + "'";
+		const runner = createGitRunner('git', w.a);
+		const controller = new AbortController();
+		const run = runner.run(['-c', `alias.nand-wait=!${quote(process.execPath)} ${quote(helper)} ${quote(marker)}`, 'nand-wait'], { signal: controller.signal, timeoutMs: mode === 'timeout' ? 5000 : undefined });
+		const rejected = assert.rejects(run, (error: Error & { kind?: string }) => error.kind === (mode === 'timeout' ? 'timeout' : 'cancelled'));
+		let pid: number | undefined;
+		const alive = () => { if (!pid) return false; try { process.kill(pid, 0); return true; } catch { return false; } };
+		try {
+			const deadline = Date.now() + 5000;
+			while (!existsSync(marker) && Date.now() < deadline) await delay(25);
+			assert.ok(existsSync(marker), 'Git spawned the helper');
+			pid = Number(readFileSync(marker, 'utf8'));
+			assert.ok(pid > 0);
+			if (mode === 'abort') controller.abort();
+			if (mode === 'dispose') runner.dispose();
+			await rejected;
+			const stopped = Date.now() + 2000;
+			while (alive() && Date.now() < stopped) await delay(25);
+			assert.equal(alive(), false, 'the child helper must not survive cancelled Git');
+		} finally {
+			controller.abort(); runner.dispose();
+			await run.catch(() => {});
+			if (alive()) { process.kill(pid!); await delay(100); }
+		}
+	}, 15_000);
+
 	test('pulling with no upstream is skipped, not an error', async () => {
 		const w = world();
 		write(w.a, 'x.md', 'x\n');
@@ -479,6 +550,50 @@ function settingsOf(values: Partial<SyncSettings> = {}): SettingsHandle<SyncSett
 }
 
 describe('the sync service', () => {
+	test('invalid repository settings remain recoverable and stop writing state to the previously connected repository', async () => {
+		const w = await published();
+		const settings = settingsOf();
+		const service = new SyncService({ host: desktopGitHost(w.a), settings, dialogs: { confirmUpstream: async () => true }, notify() {}, describe: () => '' });
+		try {
+			await service.connect();
+			await service.setPaused(true);
+			const statePath = path.join(w.a, '.git', 'nand-sync.json');
+			const state = readFileSync(statePath, 'utf8');
+			await settings.update(draft => { draft.repoSubPath = '..'; });
+			await service.connect();
+			assert.equal(service.snapshot.phase, 'no-repo');
+			assert.equal(service.snapshot.error?.kind, 'invalid-repo-folder');
+			assert.equal(service.snapshot.place, undefined);
+			await assert.rejects(service.init(), (error: Error & { kind?: string }) => error.kind === 'invalid-repo-folder');
+			await service.setPaused(false);
+			assert.equal(readFileSync(statePath, 'utf8'), state);
+			await settings.update(draft => { draft.repoSubPath = ''; });
+			await service.connect();
+			assert.equal(service.snapshot.phase, 'ready');
+			assert.equal(service.snapshot.device.paused, 'manual');
+		} finally { await service.dispose(); }
+	});
+
+	test('clones through the production host while retaining the current vault connection', async () => {
+		const w = await published();
+		const host = desktopGitHost(w.a);
+		const service = new SyncService({ host, settings: settingsOf(), dialogs: { confirmUpstream: async () => true }, notify() {}, describe: () => '' });
+		await service.connect();
+		const before = service.snapshot.status?.head;
+		const target = path.join(w.root, 'new-vault');
+		try {
+			const result = await service.clone(target, w.remote);
+			assert.equal(result.state, 'cloned');
+			assert.equal(service.snapshot.clone?.state, 'cloned');
+			assert.equal(service.snapshot.status?.head, before);
+			assert.equal(sh(target, 'rev-parse', 'HEAD').trim(), before);
+			assert.equal(service.snapshot.place?.cwd, w.a);
+			const pending = service.clone(path.join(w.root, 'cancel-clone'), w.remote);
+			service.cancelClone();
+			assert.equal((await pending).state, 'cancelled');
+		} finally { await service.dispose(); }
+	});
+
 	test('finds no repository, creates one, reports a missing remote, then publishes after a remote is added', async () => {
 		const w = world();
 		const vault = path.join(w.root, 'vault');
@@ -501,6 +616,10 @@ describe('the sync service', () => {
 		const noRemote = await service.commitAndSync('all');
 		assert.equal(noRemote.ok, false);
 		assert.deepEqual(notices.at(-1), ['commit:done,pull:skipped,push:failed', true]);
+		for (const url of ['https://user:secret@example.com/repo', 'https://example.com/repo?token=secret']) {
+			await assert.rejects(service.addRemote('credential', url), (error: Error & { kind?: string }) => error.kind === 'invalid-remote-url');
+			assert.doesNotMatch(readFileSync(path.join(vault, '.git', 'config'), 'utf8'), /secret|credential/);
+		}
 		await service.addRemote('origin', w.remote);
 		const published = await service.commitAndSync('all');
 		assert.equal(published.ok, true);

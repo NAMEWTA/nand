@@ -113,6 +113,10 @@ export class ContactsPresentation extends NativeSurface {
 		this.render();
 	}
 	render(): void {
+		if (!this.state.selectedPath && this.controller && !this.controller.loading) {
+			const pages = Math.max(1, Math.ceil(this.controller.index.query(this.state.query).length / 60));
+			this.state.page = Math.min(this.state.page, pages - 1);
+		}
 		if (this.state.selectedPath && this.controller) {
 			const tracked = this.state.selectedId
 				? this.controller.index.get(this.state.selectedId)
@@ -183,7 +187,7 @@ export class ContactsPresentation extends NativeSurface {
 		const kind = this.state.query.kind;
 		const anchor = this.state.anchors[kind][this.state.layout[kind]];
 		this.contentEl.win.requestAnimationFrame(() => {
-			if (anchor) this.scrollToPath(anchor);
+			if (anchor && this.controller?.index.query(this.state.query).some((record) => record.path === anchor)) this.scrollToPath(anchor);
 			else this.contentEl.scrollTop = this.state.scroll;
 		});
 	}
@@ -231,6 +235,7 @@ export class ContactsPresentation extends NativeSurface {
 		this.persist();
 	}
 	changeKind(kind: RecordKind): void {
+		if (kind === this.state.query.kind && !this.state.selectedPath) return;
 		this.history = [];
 		this.state = showContactKind(this.state, kind);
 		this.render();

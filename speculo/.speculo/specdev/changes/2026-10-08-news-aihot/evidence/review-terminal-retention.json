@@ -1,0 +1,327 @@
+{
+  "ticket": [
+    "News T02",
+    "News T03",
+    "News T07",
+    "News T10"
+  ],
+  "requirements": [
+    "AC-006",
+    "AC-007",
+    "AC-012",
+    "AC-020",
+    "AC-027",
+    "AC-028"
+  ],
+  "status": "fixed-native20-shared-deadline-full600-verified",
+  "finding": "R-084",
+  "implementation": [
+    "Native settings expose 1..120 minute call timeout (default 10) and opt-in completed terminal retention (default off).",
+    "Analysis, repair, merge review and briefs pass configured timeout to the shared agent runner. Repair remains in the same terminal.",
+    "History opens retained terminals only for their current runner owner. News disposal aborts active calls and closes retained terminals; Agent disposal closes its owned processes and history redraws through service availability.",
+    "Final timeout semantics follow source/spec: one monotonic deadline per analysis or merge-review batch, shared by original answer, format repair and independent samples. A brief has one deadline. Expiration before the next invocation closes its continuation terminal and records an unsent timeout with zero additional quota. UI/docs now say analysis batch / brief timeout."
+  ],
+  "verification": {
+    "nativeDirectory": "C:/Users/cdewta/AppData/Local/Temp/nand-news-retention-review-debe306295bd4f1794d674aa36823e92/evidence",
+    "harness": "scripts/obsidian-acceptance/news-retention.mjs",
+    "checks": [
+      {
+        "name": "default-completes-and-closes-process",
+        "passed": true
+      },
+      {
+        "name": "default-leaves-no-process-or-open-button",
+        "passed": true
+      },
+      {
+        "name": "default-timeout-ten-and-retention-off",
+        "passed": true
+      },
+      {
+        "name": "native-controls-save-vault-settings",
+        "passed": true
+      },
+      {
+        "name": "repair-completes",
+        "passed": true
+      },
+      {
+        "name": "repair-reuses-retained-process",
+        "passed": true
+      },
+      {
+        "name": "history-opens-retained-agent-terminal",
+        "passed": true
+      },
+      {
+        "name": "brief-retains-its-own-terminal",
+        "passed": true
+      },
+      {
+        "name": "one-minute-native-timeout",
+        "passed": true,
+        "detail": {
+          "elapsed": 60099
+        }
+      },
+      {
+        "name": "timeout-closes-process-with-retention-enabled",
+        "passed": true
+      },
+      {
+        "name": "news-disable-closes-all-retained-processes",
+        "passed": true
+      },
+      {
+        "name": "restart-of-news-hides-stale-terminal-links",
+        "passed": true
+      },
+      {
+        "name": "reenabled-consumer-can-retain-again",
+        "passed": true
+      },
+      {
+        "name": "agent-disable-closes-process-and-updates-visible-history",
+        "passed": true
+      },
+      {
+        "name": "app-restart-restores-timeout-and-retention-settings",
+        "passed": true
+      },
+      {
+        "name": "new-controls-localize-live",
+        "passed": true
+      },
+      {
+        "name": "controls-fit-width-500",
+        "passed": true,
+        "detail": {
+          "width": 444,
+          "scroll": 444
+        }
+      },
+      {
+        "name": "controls-fit-width-800",
+        "passed": true,
+        "detail": {
+          "width": 692,
+          "scroll": 692
+        }
+      },
+      {
+        "name": "controls-fit-width-1500",
+        "passed": true,
+        "detail": {
+          "width": 760,
+          "scroll": 760
+        }
+      },
+      {
+        "name": "no-host-errors",
+        "passed": true,
+        "detail": []
+      }
+    ],
+    "processes": [
+      {
+        "pid": 25356,
+        "mode": "normal"
+      },
+      {
+        "pid": 4468,
+        "mode": "repair"
+      },
+      {
+        "pid": 17308,
+        "mode": "brief"
+      },
+      {
+        "pid": 28780,
+        "mode": "wait"
+      },
+      {
+        "pid": 36048,
+        "mode": "normal"
+      }
+    ],
+    "unit": "9 passing tests in news-actions, analysis-settings and prompt-runner",
+    "screenshotReview": [
+      "retention-settings-500.png visually inspected; labels wrap and controls fit."
+    ],
+    "fullSuite": "600 pass,4skip,112.02s",
+    "i18n": "3211 keys passed after correcting terminalUnavailable literal key",
+    "architecture": "867 modules passed",
+    "deadlineRefinement": {
+      "nativeDirectory": "C:/Users/cdewta/AppData/Local/Temp/nand-news-deadline-review-8f4ce347664f4a4ca49925b7e2ffed6f/evidence",
+      "checks": [
+        {
+          "name": "default-completes-and-closes-process",
+          "passed": true
+        },
+        {
+          "name": "default-leaves-no-process-or-open-button",
+          "passed": true
+        },
+        {
+          "name": "default-timeout-ten-and-retention-off",
+          "passed": true
+        },
+        {
+          "name": "native-controls-save-vault-settings",
+          "passed": true
+        },
+        {
+          "name": "repair-completes",
+          "passed": true
+        },
+        {
+          "name": "repair-reuses-retained-process",
+          "passed": true
+        },
+        {
+          "name": "history-opens-retained-agent-terminal",
+          "passed": true
+        },
+        {
+          "name": "brief-retains-its-own-terminal",
+          "passed": true
+        },
+        {
+          "name": "one-minute-batch-deadline-includes-delayed-repair",
+          "passed": true,
+          "detail": {
+            "outcome": "timeout",
+            "elapsed": 60095
+          }
+        },
+        {
+          "name": "timeout-closes-process-with-retention-enabled",
+          "passed": true
+        },
+        {
+          "name": "news-disable-closes-all-retained-processes",
+          "passed": true
+        },
+        {
+          "name": "restart-of-news-hides-stale-terminal-links",
+          "passed": true
+        },
+        {
+          "name": "reenabled-consumer-can-retain-again",
+          "passed": true
+        },
+        {
+          "name": "agent-disable-closes-process-and-updates-visible-history",
+          "passed": true
+        },
+        {
+          "name": "app-restart-restores-timeout-and-retention-settings",
+          "passed": true
+        },
+        {
+          "name": "new-controls-localize-live",
+          "passed": true
+        },
+        {
+          "name": "controls-fit-width-500",
+          "passed": true,
+          "detail": {
+            "width": 444,
+            "scroll": 444
+          }
+        },
+        {
+          "name": "controls-fit-width-800",
+          "passed": true,
+          "detail": {
+            "width": 692,
+            "scroll": 692
+          }
+        },
+        {
+          "name": "controls-fit-width-1500",
+          "passed": true,
+          "detail": {
+            "width": 760,
+            "scroll": 760
+          }
+        },
+        {
+          "name": "no-host-errors",
+          "passed": true,
+          "detail": []
+        }
+      ],
+      "processes": [
+        {
+          "pid": 27472,
+          "mode": "normal"
+        },
+        {
+          "pid": 36592,
+          "mode": "repair"
+        },
+        {
+          "pid": 32208,
+          "mode": "brief"
+        },
+        {
+          "pid": 33872,
+          "mode": "repair-wait"
+        },
+        {
+          "pid": 34040,
+          "mode": "normal"
+        }
+      ],
+      "unit": "19 passing tests (news-actions, run-journal, prompt-runner); remaining repair timeout 6 of 7 minutes, expired batch zero extra CLI/quota.",
+      "build": "pass",
+      "lint": "pass zero warnings",
+      "i18n": "3218keys pass",
+      "docs": "549files pass",
+      "bundle": "4040893 bytes,4041728limit",
+      "fullSuite": "600 pass,4skip,112.02s"
+    }
+  },
+  "documentation": {
+    "backup": "C:/Users/cdewta/AppData/Local/Temp/nand-review-news-retention-docs-36xax043",
+    "files": [
+      {
+        "path": "docs/news.md",
+        "beforeCharacters": 10049,
+        "afterCharacters": 10535
+      },
+      {
+        "path": "docs/news.ZH.md",
+        "beforeCharacters": 3683,
+        "afterCharacters": 3848
+      }
+    ]
+  },
+  "limits": [
+    "Local CLI hook-protocol fixture and released Windows PTY helper; no live provider/model quality acceptance.",
+    "General News source issue settings inventory remains under review."
+  ],
+  "documentationRefinement": {
+    "backup": "C:/Users/cdewta/AppData/Local/Temp/nand-review-news-batch-deadline-docs-bm0rza8l",
+    "files": [
+      {
+        "path": "docs/news.md",
+        "beforeCharacters": 12461,
+        "afterCharacters": 12645
+      },
+      {
+        "path": "docs/news.ZH.md",
+        "beforeCharacters": 4498,
+        "afterCharacters": 4544
+      }
+    ]
+  },
+  "currentReview": {
+    "date": "2026-10-11",
+    "note": "Settings inventory is completed; its earlier pending statement is historical.",
+    "evidence": [
+      "review-settings-inventory.json"
+    ]
+  }
+}

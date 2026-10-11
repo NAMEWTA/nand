@@ -1,0 +1,123 @@
+{
+  "ticket": "T-03 / T-10",
+  "requirements": [
+    "AC-012",
+    "AC-027",
+    "AC-028"
+  ],
+  "status": "fixed-native40-full589",
+  "findings": [
+    "R-078",
+    "R-079"
+  ],
+  "implementation": [
+    "src/modules/news/core/analysis-policy.ts",
+    "src/modules/news/core/analysis-run.ts",
+    "src/modules/news/core/analysis.ts",
+    "src/modules/news/core/prompts.ts",
+    "src/modules/news/core/prompt-templates.ts",
+    "src/modules/news/core/materials.ts",
+    "src/modules/news/core/model.ts",
+    "src/modules/news/platform/feed-reader.ts",
+    "src/modules/news/settings.ts",
+    "src/modules/news/services/analysis-settings.ts",
+    "src/modules/news/services/news-service.ts",
+    "src/modules/news/ui/prompt-settings.ts",
+    "src/modules/news/ui/analysis-settings.ts",
+    "src/modules/news/ui/settings-page.ts",
+    "src/modules/news/i18n.ts",
+    "src/modules/news/styles/news.css",
+    "src/app/main.ts",
+    "src/app/workbench/settings-page.ts"
+  ],
+  "fixes": [
+    "Literal blocked terms, minimum Unicode character count and declared RSS/Atom/JSON feed language filter new analysis before quota, including explicit reanalysis. Unknown language remains eligible; raw materials remain readable. Empty lists/zero min disable filtering. Saved replies recover using original plan.",
+    "Configurable category/topic/entity vocabulary in prompt, effective version and strict response validation; vocabulary snapshot in new durable analysis plans. Completed revisions do not automatically reanalyze. Vocabulary values are literal data rather than recursive template includes.",
+    "Four template reset, vocabulary reset and live effective SHA256 covering templates/dependencies/vocabulary/interest/bodyLimit. Unknown/recursive include rejection, retained drafts and field-scoped compensation for failed SettingsStore persistence. UI settings save errors use correct wording.",
+    "News settings controls now meet 32px mouse /44px coarse target rules; existing 8em template editor minimum preserved. All subscriptions/async hash callbacks owned by settings host.",
+    "SettingsSurface listens to module registry transitions. Disabling its owner releases host.keep and returns to General; renderer identity changes refresh only that owner, preserving drafts on unrelated module activity."
+  ],
+  "verification": {
+    "native": {
+      "host": "Native Windows Obsidian at D:/Pro/Obsidian/Obsidian.exe; exact application version not asserted by harness",
+      "script": "scripts/obsidian-acceptance/news-settings.mjs",
+      "evidence": "C:/Users/cdewta/AppData/Local/Temp/nand-news-settings-review-f0254a3f67ee491ebc85d4c7fea6a189/evidence",
+      "passed": 40,
+      "method": "Real CDP pointer/keyboard input, native Setting controls, actual SettingsStore/disk/restart, local HTTP JSON Feed through requestUrl. Two deterministic analysis-adapter calls, no actual model/provider invocation.",
+      "coverage": [
+        "template invalid draft, edits, effective hash, body limit, reset four, injected write failure rollback/draft/retry",
+        "custom vocabulary strict acceptance and durable plan, reject empty categories",
+        "blocked term /length /language filters skip 3 of5 raw items before quota, unknown language eligible; clearing filters processes only3 pending",
+        "18 system/claude-code/eye-care ?light/dark ?500/800/1500 geometry/screenshots;32px;coarse44px",
+        "restart keeps5analyses/2fixturecalls/customvocabulary/hash; default vocabulary reset preserves old analyses/quota; language switch preserves draft",
+        "popout setting/reset/hash owned by popup; module off removes controls and releases all kept subscriptions; no unexpected errors"
+      ],
+      "visualInspection": [
+        "Final system/light/500 and touch/500 inspected; prior40-check same geometry wider eye-care/dark/1500 inspected."
+      ]
+    },
+    "targeted": "123 passed /31 files (before final full-suite run); new5 tests include local no-call policy, custom vocabulary/recovery, normalization, feed-language inheritance and failed settings write/retry",
+    "build": "PASS; main.js 4027620 bytes, styles.css744109 bytes",
+    "lint": "PASS zero warnings",
+    "architecture": "PASS864modules",
+    "i18n": "PASS24dictionaries/3190keys",
+    "css": "PASS108files;67files/150existingbaselinegroups,no newviolations",
+    "bundle": "PASS;mainoutputbudget4028416 (+9KiB for8420byte measured change); startup/module/stylelimitsunchanged",
+    "docs": "PASS standard pnpm test:docs after R080:549Markdown/559local/348external links(no fetch). Earlier policy failures and scoped temporary checker retained in logs; R080 fixes production gate without Change-name exceptions.",
+    "full": "PASS589 tests,4 intentionally skipped;128 files pass/1 skipped,119.29s. pnpm test; C:/Users/cdewta/AppData/Local/Temp/nand-review-news-settings-full-tests.log"
+  },
+  "documentation": {
+    "backup": "C:/Users/cdewta/AppData/Local/Temp/nand-review-news-settings-docs-1bei5i9i",
+    "files": [
+      {
+        "path": "docs/news.md",
+        "beforeCharacters": 8475,
+        "afterCharacters": 10049
+      },
+      {
+        "path": "docs/news.ZH.md",
+        "beforeCharacters": 3157,
+        "afterCharacters": 3683
+      },
+      {
+        "path": "docs/third-party/aihot-news.md",
+        "beforeCharacters": 8815,
+        "afterCharacters": 9465
+      },
+      {
+        "path": "docs/third-party/aihot-news.ZH.md",
+        "beforeCharacters": 3982,
+        "afterCharacters": 4201
+      },
+      {
+        "path": "docs/data.md",
+        "beforeCharacters": 10756,
+        "afterCharacters": 11159
+      },
+      {
+        "path": "docs/data.ZH.md",
+        "beforeCharacters": 4947,
+        "afterCharacters": 5105
+      },
+      {
+        "path": ".agents/skills/dev/references/module-authoring.md",
+        "beforeCharacters": 5791,
+        "afterCharacters": 5908
+      }
+    ],
+    "ticket": "News T03/T10 analysis policy; R079 module settings lifetime",
+    "status": "bilingual-reviewed"
+  },
+  "unverified": [
+    "Real Claude/Codex/other provider login/model-quality parity",
+    "Actual phone hardware and POSIX",
+    "T10 closure still requires original-issue draft configuration comparison and actual provider/platform evidence limitations"
+  ],
+  "nativeFailuresResolved": [
+    "Initial raw settings do not persist schema defaults until written; harness compares untouched raw settings and reads defaults from namespace.",
+    "Failure injection initially affected earlier debounced body-limit edit; harness now flushes it before injecting one template write failure.",
+    "Harness injected-newline escape and wrong runHistory accessor corrected.",
+    "Native found30px controls: production CSS fixed.",
+    "Native found module-off settings lifetime leak: production SettingsSurface fixed(R079)."
+  ]
+}

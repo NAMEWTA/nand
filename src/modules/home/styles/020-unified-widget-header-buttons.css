@@ -88,3 +88,7 @@
 	height: 13px;
 }
 
+@media (prefers-reduced-motion: reduce) {
+	.dashboard-quick-actions .dashboard-qa-btn-group button { transition: none; }
+}
+

@@ -21,6 +21,12 @@ export type GitErrorKind =
 	| 'detached'
 	| 'empty-message'
 	| 'outside-index'
+	| 'unsafe-push-config'
+	| 'invalid-clone-source'
+	| 'invalid-repo-folder'
+	| 'invalid-remote-url'
+	| 'invalid-clone-target'
+	| 'clone-target-not-empty'
 	| 'unknown';
 
 export class GitError extends Error {
@@ -56,7 +62,7 @@ export function classifyGitOutput(output: string): GitErrorKind {
 
 /** Remove credentials embedded in URLs (`https://user:token@host`) before output reaches the UI or logs. */
 export function scrub(text: string): string {
-	return text.replace(/(\b[a-z][\w+.-]*:\/\/)[^\s/@]+@/gi, '$1***@');
+	return text.replace(/(\b[a-z][\w+.-]*:\/\/)[^\s/@]+@/gi, '$1***@').replace(/(\b[a-z][\w+.-]*:\/\/[^\s?#]+)[?#][^\s'"<>]*/gi, '$1?***');
 }
 
 /** The last few meaningful lines of git's output, without hints. */

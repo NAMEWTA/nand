@@ -1,3 +1,5 @@
+// Interval rules adapted from KKKKhazix/AIHOT c547b669acc7f64720cd82024e502446ee1ef88d (MIT).
+// Copyright (c) 2026 数字生命卡兹克. See NOTICE and docs/third-party/aihot-news.md.
 import type { NewsSource, NewsSourceHealth } from './model';
 
 export function sourceBackoffMinutes(intervalMinutes: number, oldFailureCount: number): number {
@@ -7,13 +9,14 @@ export function sourceDue(source: Pick<NewsSourceHealth, 'nextDue'> & { enabled?
 	return source.enabled !== false && (source.nextDue === undefined || source.nextDue <= now);
 }
 export function nextAdaptiveIntervalMinutes(source: Pick<NewsSource, 'participation' | 'intervalMinutes'>, dailyCount: number): number {
-	if (source.participation === 'signal') return Math.min(180, Math.max(15, source.intervalMinutes));
-	if (dailyCount <= 0.15) return 1440;
-	return Math.round(Math.max(15, Math.min(60, 1440 / (Math.max(0.01, dailyCount) * 3))));
+	const upper = source.participation === 'signal' ? 180 : 60;
+	if (dailyCount <= 0.15) return upper;
+	return Math.round(Math.max(15, Math.min(upper, 1440 / (dailyCount * 3))));
 }
-export function markSourceAttempt(source: NewsSourceHealth, sourceConfig: Pick<NewsSource, 'intervalMinutes' | 'participation'>, now = Date.now(), success = true, dailyCount = 0): NewsSourceHealth {
+export function markSourceAttempt(source: NewsSourceHealth, sourceConfig: Pick<NewsSource, 'intervalMinutes' | 'participation'>, now = Date.now(), success = true, dailyCount = 0, adaptive = true): NewsSourceHealth {
 	const oldFailureCount = source.failureCount;
-	const failureCount = success ? 0 : Math.min(5, oldFailureCount + 1);
-	const interval = success ? nextAdaptiveIntervalMinutes(sourceConfig, dailyCount) : sourceBackoffMinutes(sourceConfig.intervalMinutes, oldFailureCount);
-	return { ...source, lastAttempt: now, ...(success ? { lastSuccess: now } : {}), failureCount, nextDue: now + interval * 60_000 };
+	const failureCount = success ? 0 : oldFailureCount + 1;
+	const base = !adaptive ? sourceConfig.intervalMinutes : success ? nextAdaptiveIntervalMinutes(sourceConfig, dailyCount) : source.intervalMinutes ?? sourceConfig.intervalMinutes;
+	const interval = success ? base : sourceBackoffMinutes(base, oldFailureCount);
+	return { ...source, intervalMinutes: base, lastAttempt: now, ...(success ? { lastSuccess: now, lastError: undefined } : {}), failureCount, nextDue: now + interval * 60_000 };
 }

@@ -1,5 +1,6 @@
 import { readTaskMeta, TASK_META_REGEX } from '../../../../../shared/automation/metadata';
 import { appendChild, getTaskByPath } from '../task-tree';
+import { templateChoices } from '../board-experience';
 import type {
 	CardSize,
 	CardType,
@@ -99,6 +100,10 @@ export function parseLibraryConfig(raw: Record<string, unknown>): LibraryConfig 
 			? raw.includeFolders.map((v: unknown) => String(v))
 			: undefined,
 		templatePath: typeof raw.templatePath === 'string' ? raw.templatePath : undefined,
+		tableOrder: Array.isArray(raw.tableOrder) ? [...new Set(raw.tableOrder.filter((value): value is string => typeof value === 'string' && value.length > 0))] : undefined,
+		tableHidden: Array.isArray(raw.tableHidden) ? [...new Set(raw.tableHidden.filter((value): value is string => typeof value === 'string' && value.length > 0))] : undefined,
+		templatePaths: Array.isArray(raw.templatePaths) || typeof raw.templatePath === 'string'
+			? templateChoices(typeof raw.templatePath === 'string' ? raw.templatePath : undefined, Array.isArray(raw.templatePaths) ? raw.templatePaths.filter((value): value is string => typeof value === 'string') : undefined) : undefined,
 		taskGroupBy: ['date', 'priority', 'none'].includes(str(raw.taskGroupBy ?? ''))
 			? (raw.taskGroupBy as import('../types/index').LibraryConfig['taskGroupBy'])
 			: undefined,
@@ -253,6 +258,7 @@ function parseCard(block: { title: string; body: string }, columnName: string): 
 		blockquote,
 		color: normalizeHexColor(metadata.color),
 		coverImage: metadata.cover ?? '',
+		coverPos: metadata.coverPos,
 		width: parseInt(metadata.width ?? '0', 10) || 0,
 		size: parseCardSize(metadata.size),
 		gridCols: parseInt(metadata.cols ?? '0', 10) || 0,
@@ -322,7 +328,7 @@ export function extractCardParts(body: string): {
 			continue;
 		}
 
-		const docMatch = line.match(DOC_LINE_REGEX);
+		const docMatch = line.trimEnd().match(DOC_LINE_REGEX);
 		if (docMatch) {
 			docLines.push(line);
 			continue;
@@ -347,7 +353,7 @@ function parseDocTree(rawLines: string[]): DocNode[] {
 	const root: DocNode[] = [];
 	const stack: { depth: number; node: DocNode }[] = [];
 	for (const line of rawLines) {
-		const m = line.match(DOC_LINE_REGEX);
+		const m = line.trimEnd().match(DOC_LINE_REGEX);
 		if (!m) continue;
 		const indentSpaces = (m[1] ?? '').replace(/\t/g, '    ');
 		const depth = Math.floor(indentSpaces.length / DOC_TREE_INDENT);

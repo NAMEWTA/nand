@@ -1,5 +1,4 @@
-import type { AgentDispatch } from '../../agent/api';
-import type { NewsReadService } from '../../news/api';
+import type { AgentDispatch, AgentDirectoryEntry, AgentSessionsPort, AgentSkills } from '../../agent/api';
 import type { IndexedWidgets } from '../core/board/widget-registry';
 import type { ExpenseService } from '../platform/expense/expense-service';
 import type { HabitService } from '../platform/habit/habit-service';
@@ -21,8 +20,13 @@ export const homeServices: {
 	pomodoro?: PomodoroService;
 	reading?: ReadingService;
 	widgets?: IndexedWidgets;
-	news?: () => NewsReadService | undefined;
+	widgetRevision?: number;
+	watchWidgets?: (listener: () => void) => () => void;
 	acquireDispatch?: () => Promise<AgentDispatch | undefined>;
+	agents?: () => readonly AgentDirectoryEntry[];
+	sessions?: () => AgentSessionsPort | undefined;
+	skills?: () => AgentSkills | undefined;
+	watchAgents?: (listener: () => void) => () => void;
 } = {};
 
 /** Opens a records page (habits, expenses, Pomodoro, reading) in the workbench; set while the home module is active. */

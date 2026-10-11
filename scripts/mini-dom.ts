@@ -51,6 +51,9 @@ export class El {
 	})();
 	parent: El | null = null;
 
+	/** No rendered boxes without a layout engine. */
+	getClientRects(): DOMRect[] { return []; }
+
 	/** Zero-geometry stand-in for popup positioning code. */
 	getBoundingClientRect(): {
 		top: number;

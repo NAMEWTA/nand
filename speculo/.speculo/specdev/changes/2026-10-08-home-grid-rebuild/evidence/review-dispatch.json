@@ -1,0 +1,580 @@
+{
+  "rows": [
+    {
+      "name": "default-preview-no-cli-start",
+      "passed": true
+    },
+    {
+      "name": "preview-cancel-no-record",
+      "passed": true
+    },
+    {
+      "name": "rapid-repeat-keeps-one-preview",
+      "passed": true
+    },
+    {
+      "name": "exact-edited-prompt-reaches-real-cli-once",
+      "passed": true,
+      "detail": {
+        "prompt": "  $review\nEdited {{input}} 中文\n",
+        "recorded": true,
+        "pid": 22016
+      }
+    },
+    {
+      "name": "request-durable-before-cli-process",
+      "passed": true
+    },
+    {
+      "name": "native-completion-and-delivery-separate",
+      "passed": true,
+      "detail": [
+        {
+          "invocation": {
+            "request": {
+              "invocationId": "a9e9e250-ff39-44fd-b867-38d07a06a296",
+              "title": "review",
+              "source": {
+                "kind": "widget",
+                "path": "A",
+                "id": "skill:codex:review"
+              },
+              "agentId": "codex",
+              "destination": {
+                "kind": "fresh",
+                "cwd": "C:\\Users\\cdewta\\AppData\\Local\\Temp\\nand-home-skills-review-23109a1c211f41afa4a3adf5590c231c\\vault"
+              },
+              "finalPrompt": "  $review\nEdited {{input}} 中文\n",
+              "files": []
+            },
+            "receipt": {
+              "invocationId": "a9e9e250-ff39-44fd-b867-38d07a06a296",
+              "delivery": "started",
+              "runId": "be8d6db9-6cbc-4a5f-9628-a2531c191f60",
+              "terminalId": "terminal-86e5a862-5ac5-443e-8191-c2c7f206a6b2"
+            }
+          },
+          "definition": {
+            "id": "invocation:a9e9e250-ff39-44fd-b867-38d07a06a296",
+            "name": "review",
+            "enabled": true,
+            "deviceId": "92d09913-94c9-4557-acac-e85ed7b21262",
+            "revision": 1,
+            "schedule": {
+              "kind": "manual"
+            },
+            "action": {
+              "kind": "agent",
+              "agentId": "codex",
+              "cwd": "C:\\Users\\cdewta\\AppData\\Local\\Temp\\nand-home-skills-review-23109a1c211f41afa4a3adf5590c231c\\vault",
+              "prompt": "  $review\nEdited {{input}} 中文\n",
+              "sessionMode": "fresh"
+            },
+            "source": {
+              "kind": "widget",
+              "path": "A",
+              "id": "skill:codex:review"
+            },
+            "channels": [
+              "in-app"
+            ],
+            "notifyOn": "always",
+            "graceMinutes": 0,
+            "createdAt": 1791598783515,
+            "updatedAt": 1791598783515
+          },
+          "id": "be8d6db9-6cbc-4a5f-9628-a2531c191f60",
+          "automationId": "invocation:a9e9e250-ff39-44fd-b867-38d07a06a296",
+          "revision": 1,
+          "title": "review",
+          "scheduledFor": 1791598783515,
+          "trigger": "manual",
+          "status": "succeeded",
+          "startedAt": 1791598783515,
+          "message": "Fixture native completion",
+          "source": {
+            "kind": "widget",
+            "path": "A",
+            "id": "skill:codex:review"
+          },
+          "terminalId": "terminal-86e5a862-5ac5-443e-8191-c2c7f206a6b2",
+          "output": "\u001b[6n\u001b[?9001h\u001b[?1004h\u001b[?25l\u001b[m\u001b[K\r\n\u001b[K\r\n\u001b[K\r\n\u001b[K\r\n\u001b[K\r\n\u001b[K\r\n\u001b[K\r\n\u001b[K\r\n\u001b[K\r\n\u001b[K\r\n\u001b[K\r\n\u001b[K\r\n\u001b[K\r\n\u001b[K\r\n\u001b[K\r\n\u001b[K\r\n\u001b[K\r\n\u001b[K\r\n\u001b[K\r\n\u001b[K\r\n\u001b[K\r\n\u001b[K\r\n\u001b[K\r\n\u001b[K\r\n\u001b[K\r\n\u001b[K\r\n\u001b[K\r\n\u001b[K\r\n\u001b[K\r\n\u001b[K\r\n\u001b[K\r\n\u001b[K\r\n\u001b[K\r\n\u001b[K\r\n\u001b[K\r\n\u001b[K\r\n\u001b[K\r\n\u001b[K\r\n\u001b[K\r\n\u001b[K\r\n\u001b[K\r\n\u001b[K\r\n\u001b[K\r\n\u001b[K\r\n\u001b[K\r\n\u001b[K\u001b[H\u001b]0;C:\\Users\\cdewta\\AppData\\Local\\Programs\\nodejs\\node.exe\u0007\u001b[?25h",
+          "endedAt": 1791598784468,
+          "notificationAttempted": true
+        }
+      ]
+    },
+    {
+      "name": "same-invocation-no-second-process",
+      "passed": true
+    },
+    {
+      "name": "existing-port-pasted-receipt",
+      "passed": true,
+      "detail": {
+        "invocationId": "existing",
+        "runId": "8fc7a5c8-d0ab-449b-92c6-0c972a7d2f75",
+        "terminalId": "terminal-86b843e9-d134-4f57-b064-5cc07ba502cd",
+        "delivery": "pasted"
+      }
+    },
+    {
+      "name": "native-terminal-one-block-no-enter",
+      "passed": true,
+      "detail": "\"\\u001b[200~Existing {{literal}}\\u001b[201~\""
+    },
+    {
+      "name": "paste-not-model-success",
+      "passed": true
+    },
+    {
+      "name": "native-readiness-timeout-keeps-session",
+      "passed": true,
+      "detail": {
+        "invocationId": "timeout",
+        "delivery": "timeout",
+        "errorCode": "timeout"
+      }
+    },
+    {
+      "name": "history-has-delivery-and-prompt-detail",
+      "passed": true
+    },
+    {
+      "name": "inline-editor-click-keeps-widget-area-open",
+      "passed": true
+    },
+    {
+      "name": "skill-config-cancel-zero-writes",
+      "passed": true
+    },
+    {
+      "name": "saving-inline-editor-keeps-widget-area-open",
+      "passed": true
+    },
+    {
+      "name": "widget-persists-board-local-declaration",
+      "passed": true
+    },
+    {
+      "name": "preview-supplement-single-template-expansion",
+      "passed": true
+    },
+    {
+      "name": "preview-file-picker-retains-selection",
+      "passed": true
+    },
+    {
+      "name": "supplement-cannot-overwrite-edited-final-text",
+      "passed": true
+    },
+    {
+      "name": "configured-widget-exact-prompt-and-selected-file-once",
+      "passed": true
+    },
+    {
+      "name": "direct-send-skips-preview",
+      "passed": true
+    },
+    {
+      "name": "direct-send-repeat-starts-only-once",
+      "passed": true
+    },
+    {
+      "name": "saved-direct-send-reopens-checked",
+      "passed": true
+    },
+    {
+      "name": "saved-session-selected-in-preview",
+      "passed": true
+    },
+    {
+      "name": "widget-existing-session-single-unsent-block",
+      "passed": true,
+      "detail": "\"\\u001b[200~Widget paste {{literal}}\\u001b[201~\""
+    },
+    {
+      "name": "expired-session-requires-reselection-without-fresh-fallback",
+      "passed": true
+    },
+    {
+      "name": "skill-preview-system-light-500",
+      "passed": true,
+      "detail": {
+        "left": 50,
+        "right": 450,
+        "width": 500,
+        "overflow": false,
+        "controls": [
+          32,
+          32,
+          32,
+          32,
+          32,
+          32
+        ]
+      }
+    },
+    {
+      "name": "skill-preview-system-light-800",
+      "passed": true,
+      "detail": {
+        "left": 80,
+        "right": 720,
+        "width": 800,
+        "overflow": false,
+        "controls": [
+          32,
+          32,
+          32,
+          32,
+          32,
+          32
+        ]
+      }
+    },
+    {
+      "name": "skill-preview-system-light-1500",
+      "passed": true,
+      "detail": {
+        "left": 370,
+        "right": 1130,
+        "width": 1500,
+        "overflow": false,
+        "controls": [
+          32,
+          32,
+          32,
+          32,
+          32,
+          32
+        ]
+      }
+    },
+    {
+      "name": "skill-preview-system-dark-500",
+      "passed": true,
+      "detail": {
+        "left": 50,
+        "right": 450,
+        "width": 500,
+        "overflow": false,
+        "controls": [
+          32,
+          32,
+          32,
+          32,
+          32,
+          32
+        ]
+      }
+    },
+    {
+      "name": "skill-preview-system-dark-800",
+      "passed": true,
+      "detail": {
+        "left": 80,
+        "right": 720,
+        "width": 800,
+        "overflow": false,
+        "controls": [
+          32,
+          32,
+          32,
+          32,
+          32,
+          32
+        ]
+      }
+    },
+    {
+      "name": "skill-preview-system-dark-1500",
+      "passed": true,
+      "detail": {
+        "left": 370,
+        "right": 1130,
+        "width": 1500,
+        "overflow": false,
+        "controls": [
+          32,
+          32,
+          32,
+          32,
+          32,
+          32
+        ]
+      }
+    },
+    {
+      "name": "skill-preview-claude-code-light-500",
+      "passed": true,
+      "detail": {
+        "left": 50,
+        "right": 450,
+        "width": 500,
+        "overflow": false,
+        "controls": [
+          32,
+          32,
+          32,
+          32,
+          32,
+          32
+        ]
+      }
+    },
+    {
+      "name": "skill-preview-claude-code-light-800",
+      "passed": true,
+      "detail": {
+        "left": 80,
+        "right": 720,
+        "width": 800,
+        "overflow": false,
+        "controls": [
+          32,
+          32,
+          32,
+          32,
+          32,
+          32
+        ]
+      }
+    },
+    {
+      "name": "skill-preview-claude-code-light-1500",
+      "passed": true,
+      "detail": {
+        "left": 370,
+        "right": 1130,
+        "width": 1500,
+        "overflow": false,
+        "controls": [
+          32,
+          32,
+          32,
+          32,
+          32,
+          32
+        ]
+      }
+    },
+    {
+      "name": "skill-preview-claude-code-dark-500",
+      "passed": true,
+      "detail": {
+        "left": 50,
+        "right": 450,
+        "width": 500,
+        "overflow": false,
+        "controls": [
+          32,
+          32,
+          32,
+          32,
+          32,
+          32
+        ]
+      }
+    },
+    {
+      "name": "skill-preview-claude-code-dark-800",
+      "passed": true,
+      "detail": {
+        "left": 80,
+        "right": 720,
+        "width": 800,
+        "overflow": false,
+        "controls": [
+          32,
+          32,
+          32,
+          32,
+          32,
+          32
+        ]
+      }
+    },
+    {
+      "name": "skill-preview-claude-code-dark-1500",
+      "passed": true,
+      "detail": {
+        "left": 370,
+        "right": 1130,
+        "width": 1500,
+        "overflow": false,
+        "controls": [
+          32,
+          32,
+          32,
+          32,
+          32,
+          32
+        ]
+      }
+    },
+    {
+      "name": "skill-preview-eye-care-light-500",
+      "passed": true,
+      "detail": {
+        "left": 50,
+        "right": 450,
+        "width": 500,
+        "overflow": false,
+        "controls": [
+          32,
+          32,
+          32,
+          32,
+          32,
+          32
+        ]
+      }
+    },
+    {
+      "name": "skill-preview-eye-care-light-800",
+      "passed": true,
+      "detail": {
+        "left": 80,
+        "right": 720,
+        "width": 800,
+        "overflow": false,
+        "controls": [
+          32,
+          32,
+          32,
+          32,
+          32,
+          32
+        ]
+      }
+    },
+    {
+      "name": "skill-preview-eye-care-light-1500",
+      "passed": true,
+      "detail": {
+        "left": 370,
+        "right": 1130,
+        "width": 1500,
+        "overflow": false,
+        "controls": [
+          32,
+          32,
+          32,
+          32,
+          32,
+          32
+        ]
+      }
+    },
+    {
+      "name": "skill-preview-eye-care-dark-500",
+      "passed": true,
+      "detail": {
+        "left": 50,
+        "right": 450,
+        "width": 500,
+        "overflow": false,
+        "controls": [
+          32,
+          32,
+          32,
+          32,
+          32,
+          32
+        ]
+      }
+    },
+    {
+      "name": "skill-preview-eye-care-dark-800",
+      "passed": true,
+      "detail": {
+        "left": 80,
+        "right": 720,
+        "width": 800,
+        "overflow": false,
+        "controls": [
+          32,
+          32,
+          32,
+          32,
+          32,
+          32
+        ]
+      }
+    },
+    {
+      "name": "skill-preview-eye-care-dark-1500",
+      "passed": true,
+      "detail": {
+        "left": 370,
+        "right": 1130,
+        "width": 1500,
+        "overflow": false,
+        "controls": [
+          32,
+          32,
+          32,
+          32,
+          32,
+          32
+        ]
+      }
+    },
+    {
+      "name": "preview-theme-resize-does-not-rewrite-board",
+      "passed": true
+    },
+    {
+      "name": "board-navigation-closes-owned-preview",
+      "passed": true
+    },
+    {
+      "name": "home-module-off-closes-owned-preview",
+      "passed": true
+    },
+    {
+      "name": "agent-module-off-closes-preview-and-file-picker",
+      "passed": true
+    },
+    {
+      "name": "revoked-port-does-not-restart-module",
+      "passed": true
+    },
+    {
+      "name": "widget-agent-off-placeholder",
+      "passed": true
+    },
+    {
+      "name": "no-runtime-errors",
+      "passed": true,
+      "detail": []
+    },
+    {
+      "name": "restart-preserves-declarations-and-does-not-auto-start",
+      "passed": true
+    }
+  ],
+  "unverified": [
+    "Actual provider/model execution",
+    "Context entrypoints and browser-workflow automation",
+    "Actual mobile hardware and skill preview in a popout window"
+  ],
+  "nativeRoot": "C:\\Users\\cdewta\\AppData\\Local\\Temp\\nand-home-skills-review-23109a1c211f41afa4a3adf5590c231c\\evidence",
+  "artifact": "Final T07 pre-open guard build, before T08 context entrypoint changes",
+  "verification": [
+    "build and lint pass",
+    "35 targeted tests pass",
+    "native 52 checks pass"
+  ],
+  "currentReview": {
+    "date": "2026-10-11",
+    "note": "Earlier pending context/discovery/workflow consumers are now implemented and locally validated; real CLI accounts remain unverified.",
+    "evidence": [
+      "review-context.json",
+      "review-discovery.json",
+      "review-pipeline.json",
+      "../../2026-10-08-browser-ai-workbench/evidence/review-workflows.json"
+    ]
+  }
+}

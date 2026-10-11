@@ -1,0 +1,134 @@
+{
+  "source": "source.md section 7 (lines 415-445), reconciled against actual settings schema, native settings UI and runtime consumers",
+  "status": "reviewed-with-explicit-channel-and-live-environment-limits",
+  "groups": [
+    {
+      "group": "general",
+      "fields": [
+        "refreshWhenStale/staleMinutes",
+        "refreshOnStartup",
+        "retentionDays",
+        "favoriteFolder",
+        "writeDailyNote/editionFolder",
+        "notifyOn/notificationChannels"
+      ],
+      "implementation": [
+        "src/modules/news/settings.ts",
+        "src/modules/news/ui/settings-page.ts",
+        "src/modules/news/ui/storage-settings.ts",
+        "src/modules/news/services/news-service.ts"
+      ],
+      "evidence": [
+        "review-collection.json",
+        "review-storage-settings.json"
+      ]
+    },
+    {
+      "group": "sources",
+      "fields": [
+        "sources CRUD/enabled/tier/participation/owner/interval/test fetch",
+        "adaptiveInterval",
+        "OPML import/export",
+        "web-list selectors"
+      ],
+      "implementation": [
+        "src/modules/news/ui/source-settings.ts",
+        "src/modules/news/ui/settings-page.ts",
+        "src/modules/news/core/source-schedule.ts"
+      ],
+      "evidence": [
+        "review-storage-settings.json"
+      ]
+    },
+    {
+      "group": "interest",
+      "fields": [
+        "interest",
+        "prefilter.blockedTerms/minChars/languages",
+        "vocabulary.categories/tags"
+      ],
+      "implementation": [
+        "src/modules/news/ui/analysis-settings.ts",
+        "src/modules/news/core/analysis-policy.ts"
+      ],
+      "evidence": [
+        "review-analysis-settings.json"
+      ]
+    },
+    {
+      "group": "agent",
+      "fields": [
+        "available agentId",
+        "vault-relative cwd",
+        "batchSize/bodyLimit",
+        "batchTimeoutMinutes",
+        "dailyCallLimit",
+        "doubleScore",
+        "keepTerminal",
+        "four templates/version hash/reset"
+      ],
+      "implementation": [
+        "src/modules/news/ui/analysis-settings.ts",
+        "src/modules/news/services/news-actions.ts",
+        "src/modules/news/core/analysis-run.ts"
+      ],
+      "evidence": [
+        "review-analysis-settings.json",
+        "review-terminal-retention.json"
+      ]
+    },
+    {
+      "group": "selection",
+      "fields": [
+        "thresholds T1/T1_5/T2",
+        "understandFloor",
+        "weights seven types/five dimensions"
+      ],
+      "implementation": [
+        "src/modules/news/ui/analysis-settings.ts",
+        "src/modules/news/core/scoring.ts"
+      ],
+      "evidence": [
+        "review-analysis-settings.json",
+        "review-grouping-settings.json"
+      ]
+    },
+    {
+      "group": "heat edition grouping",
+      "fields": [
+        "heatRules eight parameters",
+        "editionRules four parameters",
+        "groupingRules recallDays/similarityPercent/confidencePercent"
+      ],
+      "implementation": [
+        "src/modules/news/ui/editorial-settings.ts",
+        "src/modules/news/core/editorial-rules.ts",
+        "src/modules/news/core/heat.ts",
+        "src/modules/news/core/recall.ts",
+        "src/modules/news/core/grouping.ts"
+      ],
+      "evidence": [
+        "review-editorial-rules.json",
+        "review-grouping-settings.json"
+      ]
+    }
+  ],
+  "channelBoundary": {
+    "implemented": "The shared runner exposes resultChannel=native. It chooses the CLI capability-directed native completion or transcript path, without automatic cycling or ANSI tail parsing.",
+    "notImplemented": "No manual channel selector or optional result-file output mode. source section 4 and spec lines 52/165 explicitly label result-file output optional; this review does not claim that optional mode exists.",
+    "files": [
+      "src/modules/agent/api.ts",
+      "src/modules/agent/services/prompt-runner.ts"
+    ]
+  },
+  "verification": "R078, R084, R085, R086 and R087 native and unit evidence; latest full603 passed / 4 skipped.",
+  "limitations": [
+    "Actual six-provider login/permission/completion/long-prompt capability tests are not substituted by deterministic CLI protocol fixtures.",
+    "macOS/Linux/WSL/Docker/mobile remain unverified where no actual platform evidence exists.",
+    "Final planning Markdown reconciliation is still pending."
+  ],
+  "currentReview": {
+    "date": "2026-10-11",
+    "note": "Final planning reconciliation completed in R012. Optional result-file output remains unimplemented and explicitly optional; real CLI accounts and unavailable OS remain unverified."
+  }
+}

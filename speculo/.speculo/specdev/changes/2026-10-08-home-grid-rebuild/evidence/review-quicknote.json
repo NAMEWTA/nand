@@ -1,0 +1,7219 @@
+{
+  "platform": "win32",
+  "rows": [
+    {
+      "name": "en-639-empty-natural-height",
+      "passed": true,
+      "detail": {
+        "viewport": 639,
+        "root": {
+          "left": 344,
+          "right": 639,
+          "top": 84,
+          "bottom": 740,
+          "width": 295,
+          "height": 656
+        },
+        "quicknote": {
+          "left": 352,
+          "right": 619,
+          "top": 243.375,
+          "bottom": 313.9375,
+          "width": 267,
+          "height": 70.5625
+        },
+        "basis": "auto",
+        "region": {
+          "left": 352,
+          "right": 619,
+          "top": 321.9375,
+          "bottom": 973.03125,
+          "width": 267,
+          "height": 651.09375
+        },
+        "calendar": {
+          "left": 352,
+          "right": 619,
+          "top": 321.9375,
+          "bottom": 567.046875,
+          "width": 267,
+          "height": 245.109375
+        },
+        "banner": {
+          "left": 352,
+          "right": 619,
+          "top": 92,
+          "bottom": 219.375,
+          "width": 267,
+          "height": 127.375
+        },
+        "quote": {
+          "left": 372,
+          "right": 599,
+          "top": 132,
+          "bottom": 171.875,
+          "width": 227,
+          "height": 39.875
+        },
+        "lines": [
+          {
+            "left": 373.703125,
+            "right": 597.296875,
+            "top": 132,
+            "bottom": 150
+          },
+          {
+            "left": 401.671875,
+            "right": 569.3125,
+            "top": 151.9375,
+            "bottom": 169.9375
+          }
+        ],
+        "buttons": [
+          {
+            "tag": "BUTTON",
+            "label": "dashboard.md",
+            "left": 361,
+            "right": 393,
+            "top": 95,
+            "bottom": 127,
+            "width": 32,
+            "height": 32
+          },
+          {
+            "tag": "BUTTON",
+            "label": "New workspace",
+            "left": 396,
+            "right": 428,
+            "top": 95,
+            "bottom": 127,
+            "width": 32,
+            "height": 32
+          }
+        ],
+        "overlap": false,
+        "capture": null,
+        "horizontalOverflow": false,
+        "layout": "stacked"
+      }
+    },
+    {
+      "name": "en-639-empty-quote-clear",
+      "passed": true,
+      "detail": {
+        "banner": {
+          "left": 352,
+          "right": 619,
+          "top": 92,
+          "bottom": 219.375,
+          "width": 267,
+          "height": 127.375
+        },
+        "lines": [
+          {
+            "left": 373.703125,
+            "right": 597.296875,
+            "top": 132,
+            "bottom": 150
+          },
+          {
+            "left": 401.671875,
+            "right": 569.3125,
+            "top": 151.9375,
+            "bottom": 169.9375
+          }
+        ],
+        "buttons": [
+          {
+            "tag": "BUTTON",
+            "label": "dashboard.md",
+            "left": 361,
+            "right": 393,
+            "top": 95,
+            "bottom": 127,
+            "width": 32,
+            "height": 32
+          },
+          {
+            "tag": "BUTTON",
+            "label": "New workspace",
+            "left": 396,
+            "right": 428,
+            "top": 95,
+            "bottom": 127,
+            "width": 32,
+            "height": 32
+          }
+        ]
+      }
+    },
+    {
+      "name": "en-639-empty-button-targets",
+      "passed": true
+    },
+    {
+      "name": "en-639-populated-natural-height",
+      "passed": true,
+      "detail": {
+        "viewport": 639,
+        "root": {
+          "left": 344,
+          "right": 639,
+          "top": 84,
+          "bottom": 740,
+          "width": 295,
+          "height": 656
+        },
+        "quicknote": {
+          "left": 352,
+          "right": 619,
+          "top": 243.375,
+          "bottom": 285.375,
+          "width": 267,
+          "height": 42
+        },
+        "basis": "auto",
+        "region": {
+          "left": 352,
+          "right": 619,
+          "top": 293.375,
+          "bottom": 944.46875,
+          "width": 267,
+          "height": 651.09375
+        },
+        "calendar": {
+          "left": 352,
+          "right": 619,
+          "top": 293.375,
+          "bottom": 538.484375,
+          "width": 267,
+          "height": 245.109375
+        },
+        "banner": {
+          "left": 352,
+          "right": 619,
+          "top": 92,
+          "bottom": 219.375,
+          "width": 267,
+          "height": 127.375
+        },
+        "quote": {
+          "left": 372,
+          "right": 599,
+          "top": 132,
+          "bottom": 171.875,
+          "width": 227,
+          "height": 39.875
+        },
+        "lines": [
+          {
+            "left": 373.703125,
+            "right": 597.296875,
+            "top": 132,
+            "bottom": 150
+          },
+          {
+            "left": 401.671875,
+            "right": 569.3125,
+            "top": 151.9375,
+            "bottom": 169.9375
+          }
+        ],
+        "buttons": [
+          {
+            "tag": "BUTTON",
+            "label": "dashboard.md",
+            "left": 361,
+            "right": 393,
+            "top": 95,
+            "bottom": 127,
+            "width": 32,
+            "height": 32
+          },
+          {
+            "tag": "BUTTON",
+            "label": "New workspace",
+            "left": 396,
+            "right": 428,
+            "top": 95,
+            "bottom": 127,
+            "width": 32,
+            "height": 32
+          }
+        ],
+        "overlap": false,
+        "capture": null,
+        "horizontalOverflow": false,
+        "layout": "stacked"
+      }
+    },
+    {
+      "name": "en-639-populated-quote-clear",
+      "passed": true,
+      "detail": {
+        "banner": {
+          "left": 352,
+          "right": 619,
+          "top": 92,
+          "bottom": 219.375,
+          "width": 267,
+          "height": 127.375
+        },
+        "lines": [
+          {
+            "left": 373.703125,
+            "right": 597.296875,
+            "top": 132,
+            "bottom": 150
+          },
+          {
+            "left": 401.671875,
+            "right": 569.3125,
+            "top": 151.9375,
+            "bottom": 169.9375
+          }
+        ],
+        "buttons": [
+          {
+            "tag": "BUTTON",
+            "label": "dashboard.md",
+            "left": 361,
+            "right": 393,
+            "top": 95,
+            "bottom": 127,
+            "width": 32,
+            "height": 32
+          },
+          {
+            "tag": "BUTTON",
+            "label": "New workspace",
+            "left": 396,
+            "right": 428,
+            "top": 95,
+            "bottom": 127,
+            "width": 32,
+            "height": 32
+          }
+        ]
+      }
+    },
+    {
+      "name": "en-639-populated-button-targets",
+      "passed": true
+    },
+    {
+      "name": "en-639-capture-natural-height",
+      "passed": true,
+      "detail": {
+        "viewport": 639,
+        "root": {
+          "left": 344,
+          "right": 639,
+          "top": 84,
+          "bottom": 740,
+          "width": 295,
+          "height": 656
+        },
+        "quicknote": {
+          "left": 352,
+          "right": 619,
+          "top": 243.375,
+          "bottom": 415.375,
+          "width": 267,
+          "height": 172
+        },
+        "basis": "auto",
+        "region": {
+          "left": 352,
+          "right": 619,
+          "top": 423.375,
+          "bottom": 1074.46875,
+          "width": 267,
+          "height": 651.09375
+        },
+        "calendar": {
+          "left": 352,
+          "right": 619,
+          "top": 423.375,
+          "bottom": 668.484375,
+          "width": 267,
+          "height": 245.109375
+        },
+        "banner": {
+          "left": 352,
+          "right": 619,
+          "top": 92,
+          "bottom": 219.375,
+          "width": 267,
+          "height": 127.375
+        },
+        "quote": {
+          "left": 372,
+          "right": 599,
+          "top": 132,
+          "bottom": 171.875,
+          "width": 227,
+          "height": 39.875
+        },
+        "lines": [
+          {
+            "left": 373.703125,
+            "right": 597.296875,
+            "top": 132,
+            "bottom": 150
+          },
+          {
+            "left": 401.671875,
+            "right": 569.3125,
+            "top": 151.9375,
+            "bottom": 169.9375
+          }
+        ],
+        "buttons": [
+          {
+            "tag": "BUTTON",
+            "label": "dashboard.md",
+            "left": 361,
+            "right": 393,
+            "top": 95,
+            "bottom": 127,
+            "width": 32,
+            "height": 32
+          },
+          {
+            "tag": "BUTTON",
+            "label": "New workspace",
+            "left": 396,
+            "right": 428,
+            "top": 95,
+            "bottom": 127,
+            "width": 32,
+            "height": 32
+          }
+        ],
+        "overlap": false,
+        "capture": {
+          "left": 488,
+          "right": 584,
+          "top": 249.375,
+          "bottom": 409.375,
+          "width": 96,
+          "height": 160
+        },
+        "horizontalOverflow": false,
+        "layout": "stacked"
+      }
+    },
+    {
+      "name": "en-639-capture-quote-clear",
+      "passed": true,
+      "detail": {
+        "banner": {
+          "left": 352,
+          "right": 619,
+          "top": 92,
+          "bottom": 219.375,
+          "width": 267,
+          "height": 127.375
+        },
+        "lines": [
+          {
+            "left": 373.703125,
+            "right": 597.296875,
+            "top": 132,
+            "bottom": 150
+          },
+          {
+            "left": 401.671875,
+            "right": 569.3125,
+            "top": 151.9375,
+            "bottom": 169.9375
+          }
+        ],
+        "buttons": [
+          {
+            "tag": "BUTTON",
+            "label": "dashboard.md",
+            "left": 361,
+            "right": 393,
+            "top": 95,
+            "bottom": 127,
+            "width": 32,
+            "height": 32
+          },
+          {
+            "tag": "BUTTON",
+            "label": "New workspace",
+            "left": 396,
+            "right": 428,
+            "top": 95,
+            "bottom": 127,
+            "width": 32,
+            "height": 32
+          }
+        ]
+      }
+    },
+    {
+      "name": "en-639-capture-button-targets",
+      "passed": true
+    },
+    {
+      "name": "en-639-capture-grows",
+      "passed": true,
+      "detail": {
+        "before": {
+          "left": 352,
+          "right": 619,
+          "top": 243.375,
+          "bottom": 285.375,
+          "width": 267,
+          "height": 42
+        },
+        "after": {
+          "left": 352,
+          "right": 619,
+          "top": 243.375,
+          "bottom": 415.375,
+          "width": 267,
+          "height": 172
+        }
+      }
+    },
+    {
+      "name": "en-640-empty-natural-height",
+      "passed": true,
+      "detail": {
+        "viewport": 640,
+        "root": {
+          "left": 344,
+          "right": 640,
+          "top": 84,
+          "bottom": 740,
+          "width": 296,
+          "height": 656
+        },
+        "quicknote": {
+          "left": 352,
+          "right": 620,
+          "top": 243.375,
+          "bottom": 313.9375,
+          "width": 268,
+          "height": 70.5625
+        },
+        "basis": "auto",
+        "region": {
+          "left": 352,
+          "right": 620,
+          "top": 321.9375,
+          "bottom": 973.03125,
+          "width": 268,
+          "height": 651.09375
+        },
+        "calendar": {
+          "left": 352,
+          "right": 620,
+          "top": 321.9375,
+          "bottom": 567.046875,
+          "width": 268,
+          "height": 245.109375
+        },
+        "banner": {
+          "left": 352,
+          "right": 620,
+          "top": 92,
+          "bottom": 219.375,
+          "width": 268,
+          "height": 127.375
+        },
+        "quote": {
+          "left": 372,
+          "right": 600,
+          "top": 132,
+          "bottom": 171.875,
+          "width": 228,
+          "height": 39.875
+        },
+        "lines": [
+          {
+            "left": 374.203125,
+            "right": 597.796875,
+            "top": 132,
+            "bottom": 150
+          },
+          {
+            "left": 402.171875,
+            "right": 569.8125,
+            "top": 151.9375,
+            "bottom": 169.9375
+          }
+        ],
+        "buttons": [
+          {
+            "tag": "BUTTON",
+            "label": "dashboard.md",
+            "left": 361,
+            "right": 393,
+            "top": 95,
+            "bottom": 127,
+            "width": 32,
+            "height": 32
+          },
+          {
+            "tag": "BUTTON",
+            "label": "New workspace",
+            "left": 396,
+            "right": 428,
+            "top": 95,
+            "bottom": 127,
+            "width": 32,
+            "height": 32
+          }
+        ],
+        "overlap": false,
+        "capture": null,
+        "horizontalOverflow": false,
+        "layout": "stacked"
+      }
+    },
+    {
+      "name": "en-640-empty-quote-clear",
+      "passed": true,
+      "detail": {
+        "banner": {
+          "left": 352,
+          "right": 620,
+          "top": 92,
+          "bottom": 219.375,
+          "width": 268,
+          "height": 127.375
+        },
+        "lines": [
+          {
+            "left": 374.203125,
+            "right": 597.796875,
+            "top": 132,
+            "bottom": 150
+          },
+          {
+            "left": 402.171875,
+            "right": 569.8125,
+            "top": 151.9375,
+            "bottom": 169.9375
+          }
+        ],
+        "buttons": [
+          {
+            "tag": "BUTTON",
+            "label": "dashboard.md",
+            "left": 361,
+            "right": 393,
+            "top": 95,
+            "bottom": 127,
+            "width": 32,
+            "height": 32
+          },
+          {
+            "tag": "BUTTON",
+            "label": "New workspace",
+            "left": 396,
+            "right": 428,
+            "top": 95,
+            "bottom": 127,
+            "width": 32,
+            "height": 32
+          }
+        ]
+      }
+    },
+    {
+      "name": "en-640-empty-button-targets",
+      "passed": true
+    },
+    {
+      "name": "en-640-populated-natural-height",
+      "passed": true,
+      "detail": {
+        "viewport": 640,
+        "root": {
+          "left": 344,
+          "right": 640,
+          "top": 84,
+          "bottom": 740,
+          "width": 296,
+          "height": 656
+        },
+        "quicknote": {
+          "left": 352,
+          "right": 620,
+          "top": 243.375,
+          "bottom": 285.375,
+          "width": 268,
+          "height": 42
+        },
+        "basis": "auto",
+        "region": {
+          "left": 352,
+          "right": 620,
+          "top": 293.375,
+          "bottom": 944.46875,
+          "width": 268,
+          "height": 651.09375
+        },
+        "calendar": {
+          "left": 352,
+          "right": 620,
+          "top": 293.375,
+          "bottom": 538.484375,
+          "width": 268,
+          "height": 245.109375
+        },
+        "banner": {
+          "left": 352,
+          "right": 620,
+          "top": 92,
+          "bottom": 219.375,
+          "width": 268,
+          "height": 127.375
+        },
+        "quote": {
+          "left": 372,
+          "right": 600,
+          "top": 132,
+          "bottom": 171.875,
+          "width": 228,
+          "height": 39.875
+        },
+        "lines": [
+          {
+            "left": 374.203125,
+            "right": 597.796875,
+            "top": 132,
+            "bottom": 150
+          },
+          {
+            "left": 402.171875,
+            "right": 569.8125,
+            "top": 151.9375,
+            "bottom": 169.9375
+          }
+        ],
+        "buttons": [
+          {
+            "tag": "BUTTON",
+            "label": "dashboard.md",
+            "left": 361,
+            "right": 393,
+            "top": 95,
+            "bottom": 127,
+            "width": 32,
+            "height": 32
+          },
+          {
+            "tag": "BUTTON",
+            "label": "New workspace",
+            "left": 396,
+            "right": 428,
+            "top": 95,
+            "bottom": 127,
+            "width": 32,
+            "height": 32
+          }
+        ],
+        "overlap": false,
+        "capture": null,
+        "horizontalOverflow": false,
+        "layout": "stacked"
+      }
+    },
+    {
+      "name": "en-640-populated-quote-clear",
+      "passed": true,
+      "detail": {
+        "banner": {
+          "left": 352,
+          "right": 620,
+          "top": 92,
+          "bottom": 219.375,
+          "width": 268,
+          "height": 127.375
+        },
+        "lines": [
+          {
+            "left": 374.203125,
+            "right": 597.796875,
+            "top": 132,
+            "bottom": 150
+          },
+          {
+            "left": 402.171875,
+            "right": 569.8125,
+            "top": 151.9375,
+            "bottom": 169.9375
+          }
+        ],
+        "buttons": [
+          {
+            "tag": "BUTTON",
+            "label": "dashboard.md",
+            "left": 361,
+            "right": 393,
+            "top": 95,
+            "bottom": 127,
+            "width": 32,
+            "height": 32
+          },
+          {
+            "tag": "BUTTON",
+            "label": "New workspace",
+            "left": 396,
+            "right": 428,
+            "top": 95,
+            "bottom": 127,
+            "width": 32,
+            "height": 32
+          }
+        ]
+      }
+    },
+    {
+      "name": "en-640-populated-button-targets",
+      "passed": true
+    },
+    {
+      "name": "en-640-capture-natural-height",
+      "passed": true,
+      "detail": {
+        "viewport": 640,
+        "root": {
+          "left": 344,
+          "right": 640,
+          "top": 84,
+          "bottom": 740,
+          "width": 296,
+          "height": 656
+        },
+        "quicknote": {
+          "left": 352,
+          "right": 620,
+          "top": 243.375,
+          "bottom": 415.375,
+          "width": 268,
+          "height": 172
+        },
+        "basis": "auto",
+        "region": {
+          "left": 352,
+          "right": 620,
+          "top": 423.375,
+          "bottom": 1074.46875,
+          "width": 268,
+          "height": 651.09375
+        },
+        "calendar": {
+          "left": 352,
+          "right": 620,
+          "top": 423.375,
+          "bottom": 668.484375,
+          "width": 268,
+          "height": 245.109375
+        },
+        "banner": {
+          "left": 352,
+          "right": 620,
+          "top": 92,
+          "bottom": 219.375,
+          "width": 268,
+          "height": 127.375
+        },
+        "quote": {
+          "left": 372,
+          "right": 600,
+          "top": 132,
+          "bottom": 171.875,
+          "width": 228,
+          "height": 39.875
+        },
+        "lines": [
+          {
+            "left": 374.203125,
+            "right": 597.796875,
+            "top": 132,
+            "bottom": 150
+          },
+          {
+            "left": 402.171875,
+            "right": 569.8125,
+            "top": 151.9375,
+            "bottom": 169.9375
+          }
+        ],
+        "buttons": [
+          {
+            "tag": "BUTTON",
+            "label": "dashboard.md",
+            "left": 361,
+            "right": 393,
+            "top": 95,
+            "bottom": 127,
+            "width": 32,
+            "height": 32
+          },
+          {
+            "tag": "BUTTON",
+            "label": "New workspace",
+            "left": 396,
+            "right": 428,
+            "top": 95,
+            "bottom": 127,
+            "width": 32,
+            "height": 32
+          }
+        ],
+        "overlap": false,
+        "capture": {
+          "left": 489,
+          "right": 585,
+          "top": 249.375,
+          "bottom": 409.375,
+          "width": 96,
+          "height": 160
+        },
+        "horizontalOverflow": false,
+        "layout": "stacked"
+      }
+    },
+    {
+      "name": "en-640-capture-quote-clear",
+      "passed": true,
+      "detail": {
+        "banner": {
+          "left": 352,
+          "right": 620,
+          "top": 92,
+          "bottom": 219.375,
+          "width": 268,
+          "height": 127.375
+        },
+        "lines": [
+          {
+            "left": 374.203125,
+            "right": 597.796875,
+            "top": 132,
+            "bottom": 150
+          },
+          {
+            "left": 402.171875,
+            "right": 569.8125,
+            "top": 151.9375,
+            "bottom": 169.9375
+          }
+        ],
+        "buttons": [
+          {
+            "tag": "BUTTON",
+            "label": "dashboard.md",
+            "left": 361,
+            "right": 393,
+            "top": 95,
+            "bottom": 127,
+            "width": 32,
+            "height": 32
+          },
+          {
+            "tag": "BUTTON",
+            "label": "New workspace",
+            "left": 396,
+            "right": 428,
+            "top": 95,
+            "bottom": 127,
+            "width": 32,
+            "height": 32
+          }
+        ]
+      }
+    },
+    {
+      "name": "en-640-capture-button-targets",
+      "passed": true
+    },
+    {
+      "name": "en-640-capture-grows",
+      "passed": true,
+      "detail": {
+        "before": {
+          "left": 352,
+          "right": 620,
+          "top": 243.375,
+          "bottom": 285.375,
+          "width": 268,
+          "height": 42
+        },
+        "after": {
+          "left": 352,
+          "right": 620,
+          "top": 243.375,
+          "bottom": 415.375,
+          "width": 268,
+          "height": 172
+        }
+      }
+    },
+    {
+      "name": "en-641-empty-natural-height",
+      "passed": true,
+      "detail": {
+        "viewport": 641,
+        "root": {
+          "left": 344,
+          "right": 641,
+          "top": 84,
+          "bottom": 740,
+          "width": 297,
+          "height": 656
+        },
+        "quicknote": {
+          "left": 360,
+          "right": 625,
+          "top": 292.25,
+          "bottom": 362.8125,
+          "width": 265,
+          "height": 70.5625
+        },
+        "basis": "auto",
+        "region": {
+          "left": 360,
+          "right": 625,
+          "top": 372.8125,
+          "bottom": 740,
+          "width": 265,
+          "height": 367.1875
+        },
+        "calendar": {
+          "left": 360,
+          "right": 615,
+          "top": 372.8125,
+          "bottom": 617.921875,
+          "width": 255,
+          "height": 245.109375
+        },
+        "banner": {
+          "left": 360,
+          "right": 625,
+          "top": 84,
+          "bottom": 276.25,
+          "width": 265,
+          "height": 192.25
+        },
+        "quote": {
+          "left": 408,
+          "right": 577,
+          "top": 124,
+          "bottom": 224.75,
+          "width": 169,
+          "height": 100.75
+        },
+        "lines": [
+          {
+            "left": 421.171875,
+            "right": 563.8125,
+            "top": 125,
+            "bottom": 148
+          },
+          {
+            "left": 410.328125,
+            "right": 574.671875,
+            "top": 150.1875,
+            "bottom": 173.1875
+          },
+          {
+            "left": 443.671875,
+            "right": 541.3125,
+            "top": 175.375,
+            "bottom": 198.375
+          },
+          {
+            "left": 453.046875,
+            "right": 531.953125,
+            "top": 200.5625,
+            "bottom": 223.5625
+          }
+        ],
+        "buttons": [
+          {
+            "tag": "BUTTON",
+            "label": "dashboard.md",
+            "left": 372,
+            "right": 404,
+            "top": 87,
+            "bottom": 119,
+            "width": 32,
+            "height": 32
+          },
+          {
+            "tag": "BUTTON",
+            "label": "New workspace",
+            "left": 407,
+            "right": 439,
+            "top": 87,
+            "bottom": 119,
+            "width": 32,
+            "height": 32
+          }
+        ],
+        "overlap": false,
+        "capture": null,
+        "horizontalOverflow": false,
+        "layout": "stacked"
+      }
+    },
+    {
+      "name": "en-641-empty-quote-clear",
+      "passed": true,
+      "detail": {
+        "banner": {
+          "left": 360,
+          "right": 625,
+          "top": 84,
+          "bottom": 276.25,
+          "width": 265,
+          "height": 192.25
+        },
+        "lines": [
+          {
+            "left": 421.171875,
+            "right": 563.8125,
+            "top": 125,
+            "bottom": 148
+          },
+          {
+            "left": 410.328125,
+            "right": 574.671875,
+            "top": 150.1875,
+            "bottom": 173.1875
+          },
+          {
+            "left": 443.671875,
+            "right": 541.3125,
+            "top": 175.375,
+            "bottom": 198.375
+          },
+          {
+            "left": 453.046875,
+            "right": 531.953125,
+            "top": 200.5625,
+            "bottom": 223.5625
+          }
+        ],
+        "buttons": [
+          {
+            "tag": "BUTTON",
+            "label": "dashboard.md",
+            "left": 372,
+            "right": 404,
+            "top": 87,
+            "bottom": 119,
+            "width": 32,
+            "height": 32
+          },
+          {
+            "tag": "BUTTON",
+            "label": "New workspace",
+            "left": 407,
+            "right": 439,
+            "top": 87,
+            "bottom": 119,
+            "width": 32,
+            "height": 32
+          }
+        ]
+      }
+    },
+    {
+      "name": "en-641-empty-button-targets",
+      "passed": true
+    },
+    {
+      "name": "en-641-populated-natural-height",
+      "passed": true,
+      "detail": {
+        "viewport": 641,
+        "root": {
+          "left": 344,
+          "right": 641,
+          "top": 84,
+          "bottom": 740,
+          "width": 297,
+          "height": 656
+        },
+        "quicknote": {
+          "left": 360,
+          "right": 625,
+          "top": 292.25,
+          "bottom": 334.25,
+          "width": 265,
+          "height": 42
+        },
+        "basis": "auto",
+        "region": {
+          "left": 360,
+          "right": 625,
+          "top": 344.25,
+          "bottom": 740,
+          "width": 265,
+          "height": 395.75
+        },
+        "calendar": {
+          "left": 360,
+          "right": 615,
+          "top": 344.25,
+          "bottom": 589.359375,
+          "width": 255,
+          "height": 245.109375
+        },
+        "banner": {
+          "left": 360,
+          "right": 625,
+          "top": 84,
+          "bottom": 276.25,
+          "width": 265,
+          "height": 192.25
+        },
+        "quote": {
+          "left": 408,
+          "right": 577,
+          "top": 124,
+          "bottom": 224.75,
+          "width": 169,
+          "height": 100.75
+        },
+        "lines": [
+          {
+            "left": 421.171875,
+            "right": 563.8125,
+            "top": 125,
+            "bottom": 148
+          },
+          {
+            "left": 410.328125,
+            "right": 574.671875,
+            "top": 150.1875,
+            "bottom": 173.1875
+          },
+          {
+            "left": 443.671875,
+            "right": 541.3125,
+            "top": 175.375,
+            "bottom": 198.375
+          },
+          {
+            "left": 453.046875,
+            "right": 531.953125,
+            "top": 200.5625,
+            "bottom": 223.5625
+          }
+        ],
+        "buttons": [
+          {
+            "tag": "BUTTON",
+            "label": "dashboard.md",
+            "left": 372,
+            "right": 404,
+            "top": 87,
+            "bottom": 119,
+            "width": 32,
+            "height": 32
+          },
+          {
+            "tag": "BUTTON",
+            "label": "New workspace",
+            "left": 407,
+            "right": 439,
+            "top": 87,
+            "bottom": 119,
+            "width": 32,
+            "height": 32
+          }
+        ],
+        "overlap": false,
+        "capture": null,
+        "horizontalOverflow": false,
+        "layout": "stacked"
+      }
+    },
+    {
+      "name": "en-641-populated-quote-clear",
+      "passed": true,
+      "detail": {
+        "banner": {
+          "left": 360,
+          "right": 625,
+          "top": 84,
+          "bottom": 276.25,
+          "width": 265,
+          "height": 192.25
+        },
+        "lines": [
+          {
+            "left": 421.171875,
+            "right": 563.8125,
+            "top": 125,
+            "bottom": 148
+          },
+          {
+            "left": 410.328125,
+            "right": 574.671875,
+            "top": 150.1875,
+            "bottom": 173.1875
+          },
+          {
+            "left": 443.671875,
+            "right": 541.3125,
+            "top": 175.375,
+            "bottom": 198.375
+          },
+          {
+            "left": 453.046875,
+            "right": 531.953125,
+            "top": 200.5625,
+            "bottom": 223.5625
+          }
+        ],
+        "buttons": [
+          {
+            "tag": "BUTTON",
+            "label": "dashboard.md",
+            "left": 372,
+            "right": 404,
+            "top": 87,
+            "bottom": 119,
+            "width": 32,
+            "height": 32
+          },
+          {
+            "tag": "BUTTON",
+            "label": "New workspace",
+            "left": 407,
+            "right": 439,
+            "top": 87,
+            "bottom": 119,
+            "width": 32,
+            "height": 32
+          }
+        ]
+      }
+    },
+    {
+      "name": "en-641-populated-button-targets",
+      "passed": true
+    },
+    {
+      "name": "en-641-capture-natural-height",
+      "passed": true,
+      "detail": {
+        "viewport": 641,
+        "root": {
+          "left": 344,
+          "right": 641,
+          "top": 84,
+          "bottom": 740,
+          "width": 297,
+          "height": 656
+        },
+        "quicknote": {
+          "left": 360,
+          "right": 625,
+          "top": 292.25,
+          "bottom": 464.25,
+          "width": 265,
+          "height": 172
+        },
+        "basis": "auto",
+        "region": {
+          "left": 360,
+          "right": 625,
+          "top": 474.25,
+          "bottom": 740,
+          "width": 265,
+          "height": 265.75
+        },
+        "calendar": {
+          "left": 360,
+          "right": 615,
+          "top": 474.25,
+          "bottom": 719.359375,
+          "width": 255,
+          "height": 245.109375
+        },
+        "banner": {
+          "left": 360,
+          "right": 625,
+          "top": 84,
+          "bottom": 276.25,
+          "width": 265,
+          "height": 192.25
+        },
+        "quote": {
+          "left": 408,
+          "right": 577,
+          "top": 124,
+          "bottom": 224.75,
+          "width": 169,
+          "height": 100.75
+        },
+        "lines": [
+          {
+            "left": 421.171875,
+            "right": 563.8125,
+            "top": 125,
+            "bottom": 148
+          },
+          {
+            "left": 410.328125,
+            "right": 574.671875,
+            "top": 150.1875,
+            "bottom": 173.1875
+          },
+          {
+            "left": 443.671875,
+            "right": 541.3125,
+            "top": 175.375,
+            "bottom": 198.375
+          },
+          {
+            "left": 453.046875,
+            "right": 531.953125,
+            "top": 200.5625,
+            "bottom": 223.5625
+          }
+        ],
+        "buttons": [
+          {
+            "tag": "BUTTON",
+            "label": "dashboard.md",
+            "left": 372,
+            "right": 404,
+            "top": 87,
+            "bottom": 119,
+            "width": 32,
+            "height": 32
+          },
+          {
+            "tag": "BUTTON",
+            "label": "New workspace",
+            "left": 407,
+            "right": 439,
+            "top": 87,
+            "bottom": 119,
+            "width": 32,
+            "height": 32
+          }
+        ],
+        "overlap": false,
+        "capture": {
+          "left": 494,
+          "right": 590,
+          "top": 298.25,
+          "bottom": 458.25,
+          "width": 96,
+          "height": 160
+        },
+        "horizontalOverflow": false,
+        "layout": "stacked"
+      }
+    },
+    {
+      "name": "en-641-capture-quote-clear",
+      "passed": true,
+      "detail": {
+        "banner": {
+          "left": 360,
+          "right": 625,
+          "top": 84,
+          "bottom": 276.25,
+          "width": 265,
+          "height": 192.25
+        },
+        "lines": [
+          {
+            "left": 421.171875,
+            "right": 563.8125,
+            "top": 125,
+            "bottom": 148
+          },
+          {
+            "left": 410.328125,
+            "right": 574.671875,
+            "top": 150.1875,
+            "bottom": 173.1875
+          },
+          {
+            "left": 443.671875,
+            "right": 541.3125,
+            "top": 175.375,
+            "bottom": 198.375
+          },
+          {
+            "left": 453.046875,
+            "right": 531.953125,
+            "top": 200.5625,
+            "bottom": 223.5625
+          }
+        ],
+        "buttons": [
+          {
+            "tag": "BUTTON",
+            "label": "dashboard.md",
+            "left": 372,
+            "right": 404,
+            "top": 87,
+            "bottom": 119,
+            "width": 32,
+            "height": 32
+          },
+          {
+            "tag": "BUTTON",
+            "label": "New workspace",
+            "left": 407,
+            "right": 439,
+            "top": 87,
+            "bottom": 119,
+            "width": 32,
+            "height": 32
+          }
+        ]
+      }
+    },
+    {
+      "name": "en-641-capture-button-targets",
+      "passed": true
+    },
+    {
+      "name": "en-641-capture-grows",
+      "passed": true,
+      "detail": {
+        "before": {
+          "left": 360,
+          "right": 625,
+          "top": 292.25,
+          "bottom": 334.25,
+          "width": 265,
+          "height": 42
+        },
+        "after": {
+          "left": 360,
+          "right": 625,
+          "top": 292.25,
+          "bottom": 464.25,
+          "width": 265,
+          "height": 172
+        }
+      }
+    },
+    {
+      "name": "en-660-empty-natural-height",
+      "passed": true,
+      "detail": {
+        "viewport": 660,
+        "root": {
+          "left": 344,
+          "right": 660,
+          "top": 84,
+          "bottom": 740,
+          "width": 316,
+          "height": 656
+        },
+        "quicknote": {
+          "left": 360,
+          "right": 644,
+          "top": 267.0625,
+          "bottom": 337.625,
+          "width": 284,
+          "height": 70.5625
+        },
+        "basis": "auto",
+        "region": {
+          "left": 360,
+          "right": 644,
+          "top": 347.625,
+          "bottom": 740,
+          "width": 284,
+          "height": 392.375
+        },
+        "calendar": {
+          "left": 360,
+          "right": 634,
+          "top": 347.625,
+          "bottom": 592.734375,
+          "width": 274,
+          "height": 245.109375
+        },
+        "banner": {
+          "left": 360,
+          "right": 644,
+          "top": 84,
+          "bottom": 251.0625,
+          "width": 284,
+          "height": 167.0625
+        },
+        "quote": {
+          "left": 408,
+          "right": 596,
+          "top": 124,
+          "bottom": 199.5625,
+          "width": 188,
+          "height": 75.5625
+        },
+        "lines": [
+          {
+            "left": 412.515625,
+            "right": 591.484375,
+            "top": 125,
+            "bottom": 148
+          },
+          {
+            "left": 437.984375,
+            "right": 566.015625,
+            "top": 150.1875,
+            "bottom": 173.1875
+          },
+          {
+            "left": 411.0625,
+            "right": 592.9375,
+            "top": 175.375,
+            "bottom": 198.375
+          }
+        ],
+        "buttons": [
+          {
+            "tag": "BUTTON",
+            "label": "dashboard.md",
+            "left": 372,
+            "right": 404,
+            "top": 87,
+            "bottom": 119,
+            "width": 32,
+            "height": 32
+          },
+          {
+            "tag": "BUTTON",
+            "label": "New workspace",
+            "left": 407,
+            "right": 439,
+            "top": 87,
+            "bottom": 119,
+            "width": 32,
+            "height": 32
+          }
+        ],
+        "overlap": false,
+        "capture": null,
+        "horizontalOverflow": false,
+        "layout": "stacked"
+      }
+    },
+    {
+      "name": "en-660-empty-quote-clear",
+      "passed": true,
+      "detail": {
+        "banner": {
+          "left": 360,
+          "right": 644,
+          "top": 84,
+          "bottom": 251.0625,
+          "width": 284,
+          "height": 167.0625
+        },
+        "lines": [
+          {
+            "left": 412.515625,
+            "right": 591.484375,
+            "top": 125,
+            "bottom": 148
+          },
+          {
+            "left": 437.984375,
+            "right": 566.015625,
+            "top": 150.1875,
+            "bottom": 173.1875
+          },
+          {
+            "left": 411.0625,
+            "right": 592.9375,
+            "top": 175.375,
+            "bottom": 198.375
+          }
+        ],
+        "buttons": [
+          {
+            "tag": "BUTTON",
+            "label": "dashboard.md",
+            "left": 372,
+            "right": 404,
+            "top": 87,
+            "bottom": 119,
+            "width": 32,
+            "height": 32
+          },
+          {
+            "tag": "BUTTON",
+            "label": "New workspace",
+            "left": 407,
+            "right": 439,
+            "top": 87,
+            "bottom": 119,
+            "width": 32,
+            "height": 32
+          }
+        ]
+      }
+    },
+    {
+      "name": "en-660-empty-button-targets",
+      "passed": true
+    },
+    {
+      "name": "en-660-populated-natural-height",
+      "passed": true,
+      "detail": {
+        "viewport": 660,
+        "root": {
+          "left": 344,
+          "right": 660,
+          "top": 84,
+          "bottom": 740,
+          "width": 316,
+          "height": 656
+        },
+        "quicknote": {
+          "left": 360,
+          "right": 644,
+          "top": 267.0625,
+          "bottom": 309.0625,
+          "width": 284,
+          "height": 42
+        },
+        "basis": "auto",
+        "region": {
+          "left": 360,
+          "right": 644,
+          "top": 319.0625,
+          "bottom": 740,
+          "width": 284,
+          "height": 420.9375
+        },
+        "calendar": {
+          "left": 360,
+          "right": 634,
+          "top": 319.0625,
+          "bottom": 564.171875,
+          "width": 274,
+          "height": 245.109375
+        },
+        "banner": {
+          "left": 360,
+          "right": 644,
+          "top": 84,
+          "bottom": 251.0625,
+          "width": 284,
+          "height": 167.0625
+        },
+        "quote": {
+          "left": 408,
+          "right": 596,
+          "top": 124,
+          "bottom": 199.5625,
+          "width": 188,
+          "height": 75.5625
+        },
+        "lines": [
+          {
+            "left": 412.515625,
+            "right": 591.484375,
+            "top": 125,
+            "bottom": 148
+          },
+          {
+            "left": 437.984375,
+            "right": 566.015625,
+            "top": 150.1875,
+            "bottom": 173.1875
+          },
+          {
+            "left": 411.0625,
+            "right": 592.9375,
+            "top": 175.375,
+            "bottom": 198.375
+          }
+        ],
+        "buttons": [
+          {
+            "tag": "BUTTON",
+            "label": "dashboard.md",
+            "left": 372,
+            "right": 404,
+            "top": 87,
+            "bottom": 119,
+            "width": 32,
+            "height": 32
+          },
+          {
+            "tag": "BUTTON",
+            "label": "New workspace",
+            "left": 407,
+            "right": 439,
+            "top": 87,
+            "bottom": 119,
+            "width": 32,
+            "height": 32
+          }
+        ],
+        "overlap": false,
+        "capture": null,
+        "horizontalOverflow": false,
+        "layout": "stacked"
+      }
+    },
+    {
+      "name": "en-660-populated-quote-clear",
+      "passed": true,
+      "detail": {
+        "banner": {
+          "left": 360,
+          "right": 644,
+          "top": 84,
+          "bottom": 251.0625,
+          "width": 284,
+          "height": 167.0625
+        },
+        "lines": [
+          {
+            "left": 412.515625,
+            "right": 591.484375,
+            "top": 125,
+            "bottom": 148
+          },
+          {
+            "left": 437.984375,
+            "right": 566.015625,
+            "top": 150.1875,
+            "bottom": 173.1875
+          },
+          {
+            "left": 411.0625,
+            "right": 592.9375,
+            "top": 175.375,
+            "bottom": 198.375
+          }
+        ],
+        "buttons": [
+          {
+            "tag": "BUTTON",
+            "label": "dashboard.md",
+            "left": 372,
+            "right": 404,
+            "top": 87,
+            "bottom": 119,
+            "width": 32,
+            "height": 32
+          },
+          {
+            "tag": "BUTTON",
+            "label": "New workspace",
+            "left": 407,
+            "right": 439,
+            "top": 87,
+            "bottom": 119,
+            "width": 32,
+            "height": 32
+          }
+        ]
+      }
+    },
+    {
+      "name": "en-660-populated-button-targets",
+      "passed": true
+    },
+    {
+      "name": "en-660-capture-natural-height",
+      "passed": true,
+      "detail": {
+        "viewport": 660,
+        "root": {
+          "left": 344,
+          "right": 660,
+          "top": 84,
+          "bottom": 740,
+          "width": 316,
+          "height": 656
+        },
+        "quicknote": {
+          "left": 360,
+          "right": 644,
+          "top": 267.0625,
+          "bottom": 439.0625,
+          "width": 284,
+          "height": 172
+        },
+        "basis": "auto",
+        "region": {
+          "left": 360,
+          "right": 644,
+          "top": 449.0625,
+          "bottom": 740,
+          "width": 284,
+          "height": 290.9375
+        },
+        "calendar": {
+          "left": 360,
+          "right": 634,
+          "top": 449.0625,
+          "bottom": 694.171875,
+          "width": 274,
+          "height": 245.109375
+        },
+        "banner": {
+          "left": 360,
+          "right": 644,
+          "top": 84,
+          "bottom": 251.0625,
+          "width": 284,
+          "height": 167.0625
+        },
+        "quote": {
+          "left": 408,
+          "right": 596,
+          "top": 124,
+          "bottom": 199.5625,
+          "width": 188,
+          "height": 75.5625
+        },
+        "lines": [
+          {
+            "left": 412.515625,
+            "right": 591.484375,
+            "top": 125,
+            "bottom": 148
+          },
+          {
+            "left": 437.984375,
+            "right": 566.015625,
+            "top": 150.1875,
+            "bottom": 173.1875
+          },
+          {
+            "left": 411.0625,
+            "right": 592.9375,
+            "top": 175.375,
+            "bottom": 198.375
+          }
+        ],
+        "buttons": [
+          {
+            "tag": "BUTTON",
+            "label": "dashboard.md",
+            "left": 372,
+            "right": 404,
+            "top": 87,
+            "bottom": 119,
+            "width": 32,
+            "height": 32
+          },
+          {
+            "tag": "BUTTON",
+            "label": "New workspace",
+            "left": 407,
+            "right": 439,
+            "top": 87,
+            "bottom": 119,
+            "width": 32,
+            "height": 32
+          }
+        ],
+        "overlap": false,
+        "capture": {
+          "left": 513,
+          "right": 609,
+          "top": 273.0625,
+          "bottom": 433.0625,
+          "width": 96,
+          "height": 160
+        },
+        "horizontalOverflow": false,
+        "layout": "stacked"
+      }
+    },
+    {
+      "name": "en-660-capture-quote-clear",
+      "passed": true,
+      "detail": {
+        "banner": {
+          "left": 360,
+          "right": 644,
+          "top": 84,
+          "bottom": 251.0625,
+          "width": 284,
+          "height": 167.0625
+        },
+        "lines": [
+          {
+            "left": 412.515625,
+            "right": 591.484375,
+            "top": 125,
+            "bottom": 148
+          },
+          {
+            "left": 437.984375,
+            "right": 566.015625,
+            "top": 150.1875,
+            "bottom": 173.1875
+          },
+          {
+            "left": 411.0625,
+            "right": 592.9375,
+            "top": 175.375,
+            "bottom": 198.375
+          }
+        ],
+        "buttons": [
+          {
+            "tag": "BUTTON",
+            "label": "dashboard.md",
+            "left": 372,
+            "right": 404,
+            "top": 87,
+            "bottom": 119,
+            "width": 32,
+            "height": 32
+          },
+          {
+            "tag": "BUTTON",
+            "label": "New workspace",
+            "left": 407,
+            "right": 439,
+            "top": 87,
+            "bottom": 119,
+            "width": 32,
+            "height": 32
+          }
+        ]
+      }
+    },
+    {
+      "name": "en-660-capture-button-targets",
+      "passed": true
+    },
+    {
+      "name": "en-660-capture-grows",
+      "passed": true,
+      "detail": {
+        "before": {
+          "left": 360,
+          "right": 644,
+          "top": 267.0625,
+          "bottom": 309.0625,
+          "width": 284,
+          "height": 42
+        },
+        "after": {
+          "left": 360,
+          "right": 644,
+          "top": 267.0625,
+          "bottom": 439.0625,
+          "width": 284,
+          "height": 172
+        }
+      }
+    },
+    {
+      "name": "en-1400-empty-natural-height",
+      "passed": true,
+      "detail": {
+        "viewport": 1400,
+        "root": {
+          "left": 656,
+          "right": 1400,
+          "top": 84,
+          "bottom": 740,
+          "width": 744,
+          "height": 656
+        },
+        "quicknote": {
+          "left": 672,
+          "right": 1384,
+          "top": 220,
+          "bottom": 290.5625,
+          "width": 712,
+          "height": 70.5625
+        },
+        "basis": "auto",
+        "region": {
+          "left": 672,
+          "right": 1384,
+          "top": 300.5625,
+          "bottom": 740,
+          "width": 712,
+          "height": 439.4375
+        },
+        "calendar": {
+          "left": 672,
+          "right": 1374,
+          "top": 300.5625,
+          "bottom": 463.671875,
+          "width": 702,
+          "height": 163.109375
+        },
+        "banner": {
+          "left": 672,
+          "right": 1384,
+          "top": 84,
+          "bottom": 204,
+          "width": 712,
+          "height": 120
+        },
+        "quote": {
+          "left": 778.25,
+          "right": 1277.75,
+          "top": 125.65625,
+          "bottom": 150.84375,
+          "width": 499.5,
+          "height": 25.1875
+        },
+        "lines": [
+          {
+            "left": 778.25,
+            "right": 1277.75,
+            "top": 126.65625,
+            "bottom": 149.65625
+          }
+        ],
+        "buttons": [
+          {
+            "tag": "BUTTON",
+            "label": "dashboard.md",
+            "left": 684,
+            "right": 716,
+            "top": 87,
+            "bottom": 119,
+            "width": 32,
+            "height": 32
+          },
+          {
+            "tag": "BUTTON",
+            "label": "New workspace",
+            "left": 719,
+            "right": 751,
+            "top": 87,
+            "bottom": 119,
+            "width": 32,
+            "height": 32
+          }
+        ],
+        "overlap": false,
+        "capture": null,
+        "horizontalOverflow": false,
+        "layout": "stacked"
+      }
+    },
+    {
+      "name": "en-1400-empty-quote-clear",
+      "passed": true,
+      "detail": {
+        "banner": {
+          "left": 672,
+          "right": 1384,
+          "top": 84,
+          "bottom": 204,
+          "width": 712,
+          "height": 120
+        },
+        "lines": [
+          {
+            "left": 778.25,
+            "right": 1277.75,
+            "top": 126.65625,
+            "bottom": 149.65625
+          }
+        ],
+        "buttons": [
+          {
+            "tag": "BUTTON",
+            "label": "dashboard.md",
+            "left": 684,
+            "right": 716,
+            "top": 87,
+            "bottom": 119,
+            "width": 32,
+            "height": 32
+          },
+          {
+            "tag": "BUTTON",
+            "label": "New workspace",
+            "left": 719,
+            "right": 751,
+            "top": 87,
+            "bottom": 119,
+            "width": 32,
+            "height": 32
+          }
+        ]
+      }
+    },
+    {
+      "name": "en-1400-empty-button-targets",
+      "passed": true
+    },
+    {
+      "name": "en-1400-populated-natural-height",
+      "passed": true,
+      "detail": {
+        "viewport": 1400,
+        "root": {
+          "left": 656,
+          "right": 1400,
+          "top": 84,
+          "bottom": 740,
+          "width": 744,
+          "height": 656
+        },
+        "quicknote": {
+          "left": 672,
+          "right": 1384,
+          "top": 220,
+          "bottom": 262,
+          "width": 712,
+          "height": 42
+        },
+        "basis": "auto",
+        "region": {
+          "left": 672,
+          "right": 1384,
+          "top": 272,
+          "bottom": 740,
+          "width": 712,
+          "height": 468
+        },
+        "calendar": {
+          "left": 672,
+          "right": 1374,
+          "top": 272,
+          "bottom": 435.109375,
+          "width": 702,
+          "height": 163.109375
+        },
+        "banner": {
+          "left": 672,
+          "right": 1384,
+          "top": 84,
+          "bottom": 204,
+          "width": 712,
+          "height": 120
+        },
+        "quote": {
+          "left": 778.25,
+          "right": 1277.75,
+          "top": 125.65625,
+          "bottom": 150.84375,
+          "width": 499.5,
+          "height": 25.1875
+        },
+        "lines": [
+          {
+            "left": 778.25,
+            "right": 1277.75,
+            "top": 126.65625,
+            "bottom": 149.65625
+          }
+        ],
+        "buttons": [
+          {
+            "tag": "BUTTON",
+            "label": "dashboard.md",
+            "left": 684,
+            "right": 716,
+            "top": 87,
+            "bottom": 119,
+            "width": 32,
+            "height": 32
+          },
+          {
+            "tag": "BUTTON",
+            "label": "New workspace",
+            "left": 719,
+            "right": 751,
+            "top": 87,
+            "bottom": 119,
+            "width": 32,
+            "height": 32
+          }
+        ],
+        "overlap": false,
+        "capture": null,
+        "horizontalOverflow": false,
+        "layout": "stacked"
+      }
+    },
+    {
+      "name": "en-1400-populated-quote-clear",
+      "passed": true,
+      "detail": {
+        "banner": {
+          "left": 672,
+          "right": 1384,
+          "top": 84,
+          "bottom": 204,
+          "width": 712,
+          "height": 120
+        },
+        "lines": [
+          {
+            "left": 778.25,
+            "right": 1277.75,
+            "top": 126.65625,
+            "bottom": 149.65625
+          }
+        ],
+        "buttons": [
+          {
+            "tag": "BUTTON",
+            "label": "dashboard.md",
+            "left": 684,
+            "right": 716,
+            "top": 87,
+            "bottom": 119,
+            "width": 32,
+            "height": 32
+          },
+          {
+            "tag": "BUTTON",
+            "label": "New workspace",
+            "left": 719,
+            "right": 751,
+            "top": 87,
+            "bottom": 119,
+            "width": 32,
+            "height": 32
+          }
+        ]
+      }
+    },
+    {
+      "name": "en-1400-populated-button-targets",
+      "passed": true
+    },
+    {
+      "name": "en-1400-capture-natural-height",
+      "passed": true,
+      "detail": {
+        "viewport": 1400,
+        "root": {
+          "left": 656,
+          "right": 1400,
+          "top": 84,
+          "bottom": 740,
+          "width": 744,
+          "height": 656
+        },
+        "quicknote": {
+          "left": 672,
+          "right": 1384,
+          "top": 220,
+          "bottom": 362,
+          "width": 712,
+          "height": 142
+        },
+        "basis": "auto",
+        "region": {
+          "left": 672,
+          "right": 1384,
+          "top": 372,
+          "bottom": 740,
+          "width": 712,
+          "height": 368
+        },
+        "calendar": {
+          "left": 672,
+          "right": 1374,
+          "top": 372,
+          "bottom": 535.109375,
+          "width": 702,
+          "height": 163.109375
+        },
+        "banner": {
+          "left": 672,
+          "right": 1384,
+          "top": 84,
+          "bottom": 204,
+          "width": 712,
+          "height": 120
+        },
+        "quote": {
+          "left": 778.25,
+          "right": 1277.75,
+          "top": 125.65625,
+          "bottom": 150.84375,
+          "width": 499.5,
+          "height": 25.1875
+        },
+        "lines": [
+          {
+            "left": 778.25,
+            "right": 1277.75,
+            "top": 126.65625,
+            "bottom": 149.65625
+          }
+        ],
+        "buttons": [
+          {
+            "tag": "BUTTON",
+            "label": "dashboard.md",
+            "left": 684,
+            "right": 716,
+            "top": 87,
+            "bottom": 119,
+            "width": 32,
+            "height": 32
+          },
+          {
+            "tag": "BUTTON",
+            "label": "New workspace",
+            "left": 719,
+            "right": 751,
+            "top": 87,
+            "bottom": 119,
+            "width": 32,
+            "height": 32
+          }
+        ],
+        "overlap": false,
+        "capture": {
+          "left": 1224.8125,
+          "right": 1349,
+          "top": 226,
+          "bottom": 356,
+          "width": 124.1875,
+          "height": 130
+        },
+        "horizontalOverflow": false,
+        "layout": "stacked"
+      }
+    },
+    {
+      "name": "en-1400-capture-quote-clear",
+      "passed": true,
+      "detail": {
+        "banner": {
+          "left": 672,
+          "right": 1384,
+          "top": 84,
+          "bottom": 204,
+          "width": 712,
+          "height": 120
+        },
+        "lines": [
+          {
+            "left": 778.25,
+            "right": 1277.75,
+            "top": 126.65625,
+            "bottom": 149.65625
+          }
+        ],
+        "buttons": [
+          {
+            "tag": "BUTTON",
+            "label": "dashboard.md",
+            "left": 684,
+            "right": 716,
+            "top": 87,
+            "bottom": 119,
+            "width": 32,
+            "height": 32
+          },
+          {
+            "tag": "BUTTON",
+            "label": "New workspace",
+            "left": 719,
+            "right": 751,
+            "top": 87,
+            "bottom": 119,
+            "width": 32,
+            "height": 32
+          }
+        ]
+      }
+    },
+    {
+      "name": "en-1400-capture-button-targets",
+      "passed": true
+    },
+    {
+      "name": "en-1400-capture-grows",
+      "passed": true,
+      "detail": {
+        "before": {
+          "left": 672,
+          "right": 1384,
+          "top": 220,
+          "bottom": 262,
+          "width": 712,
+          "height": 42
+        },
+        "after": {
+          "left": 672,
+          "right": 1384,
+          "top": 220,
+          "bottom": 362,
+          "width": 712,
+          "height": 142
+        }
+      }
+    },
+    {
+      "name": "en-return-home",
+      "passed": true,
+      "detail": {
+        "viewport": 640,
+        "root": {
+          "left": 344,
+          "right": 640,
+          "top": 84,
+          "bottom": 740,
+          "width": 296,
+          "height": 656
+        },
+        "quicknote": {
+          "left": 352,
+          "right": 620,
+          "top": 243.375,
+          "bottom": 385.375,
+          "width": 268,
+          "height": 142
+        },
+        "basis": "auto",
+        "region": {
+          "left": 352,
+          "right": 620,
+          "top": 393.375,
+          "bottom": 1044.46875,
+          "width": 268,
+          "height": 651.09375
+        },
+        "calendar": {
+          "left": 352,
+          "right": 620,
+          "top": 393.375,
+          "bottom": 638.484375,
+          "width": 268,
+          "height": 245.109375
+        },
+        "banner": {
+          "left": 352,
+          "right": 620,
+          "top": 92,
+          "bottom": 219.375,
+          "width": 268,
+          "height": 127.375
+        },
+        "quote": {
+          "left": 372,
+          "right": 600,
+          "top": 132,
+          "bottom": 171.875,
+          "width": 228,
+          "height": 39.875
+        },
+        "lines": [
+          {
+            "left": 374.203125,
+            "right": 597.796875,
+            "top": 132,
+            "bottom": 150
+          },
+          {
+            "left": 402.171875,
+            "right": 569.8125,
+            "top": 151.9375,
+            "bottom": 169.9375
+          }
+        ],
+        "buttons": [
+          {
+            "tag": "BUTTON",
+            "label": "dashboard.md",
+            "left": 361,
+            "right": 393,
+            "top": 95,
+            "bottom": 127,
+            "width": 32,
+            "height": 32
+          },
+          {
+            "tag": "BUTTON",
+            "label": "New workspace",
+            "left": 396,
+            "right": 428,
+            "top": 95,
+            "bottom": 127,
+            "width": 32,
+            "height": 32
+          }
+        ],
+        "overlap": false,
+        "capture": {
+          "left": 489,
+          "right": 585,
+          "top": 249.375,
+          "bottom": 379.375,
+          "width": 96,
+          "height": 130
+        },
+        "horizontalOverflow": false,
+        "layout": "stacked"
+      }
+    },
+    {
+      "name": "zh-639-empty-natural-height",
+      "passed": true,
+      "detail": {
+        "viewport": 639,
+        "root": {
+          "left": 344,
+          "right": 639,
+          "top": 84,
+          "bottom": 740,
+          "width": 295,
+          "height": 656
+        },
+        "quicknote": {
+          "left": 352,
+          "right": 619,
+          "top": 243.375,
+          "bottom": 313.9375,
+          "width": 267,
+          "height": 70.5625
+        },
+        "basis": "auto",
+        "region": {
+          "left": 352,
+          "right": 619,
+          "top": 321.9375,
+          "bottom": 973.03125,
+          "width": 267,
+          "height": 651.09375
+        },
+        "calendar": {
+          "left": 352,
+          "right": 619,
+          "top": 321.9375,
+          "bottom": 567.046875,
+          "width": 267,
+          "height": 245.109375
+        },
+        "banner": {
+          "left": 352,
+          "right": 619,
+          "top": 92,
+          "bottom": 219.375,
+          "width": 267,
+          "height": 127.375
+        },
+        "quote": {
+          "left": 372,
+          "right": 599,
+          "top": 132,
+          "bottom": 171.875,
+          "width": 227,
+          "height": 39.875
+        },
+        "lines": [
+          {
+            "left": 373.703125,
+            "right": 597.296875,
+            "top": 132,
+            "bottom": 150
+          },
+          {
+            "left": 401.671875,
+            "right": 569.3125,
+            "top": 151.9375,
+            "bottom": 169.9375
+          }
+        ],
+        "buttons": [
+          {
+            "tag": "BUTTON",
+            "label": "dashboard.md",
+            "left": 361,
+            "right": 393,
+            "top": 95,
+            "bottom": 127,
+            "width": 32,
+            "height": 32
+          },
+          {
+            "tag": "BUTTON",
+            "label": "新建工作台",
+            "left": 396,
+            "right": 428,
+            "top": 95,
+            "bottom": 127,
+            "width": 32,
+            "height": 32
+          }
+        ],
+        "overlap": false,
+        "capture": null,
+        "horizontalOverflow": false,
+        "layout": "stacked"
+      }
+    },
+    {
+      "name": "zh-639-empty-quote-clear",
+      "passed": true,
+      "detail": {
+        "banner": {
+          "left": 352,
+          "right": 619,
+          "top": 92,
+          "bottom": 219.375,
+          "width": 267,
+          "height": 127.375
+        },
+        "lines": [
+          {
+            "left": 373.703125,
+            "right": 597.296875,
+            "top": 132,
+            "bottom": 150
+          },
+          {
+            "left": 401.671875,
+            "right": 569.3125,
+            "top": 151.9375,
+            "bottom": 169.9375
+          }
+        ],
+        "buttons": [
+          {
+            "tag": "BUTTON",
+            "label": "dashboard.md",
+            "left": 361,
+            "right": 393,
+            "top": 95,
+            "bottom": 127,
+            "width": 32,
+            "height": 32
+          },
+          {
+            "tag": "BUTTON",
+            "label": "新建工作台",
+            "left": 396,
+            "right": 428,
+            "top": 95,
+            "bottom": 127,
+            "width": 32,
+            "height": 32
+          }
+        ]
+      }
+    },
+    {
+      "name": "zh-639-empty-button-targets",
+      "passed": true
+    },
+    {
+      "name": "zh-639-populated-natural-height",
+      "passed": true,
+      "detail": {
+        "viewport": 639,
+        "root": {
+          "left": 344,
+          "right": 639,
+          "top": 84,
+          "bottom": 740,
+          "width": 295,
+          "height": 656
+        },
+        "quicknote": {
+          "left": 352,
+          "right": 619,
+          "top": 243.375,
+          "bottom": 285.375,
+          "width": 267,
+          "height": 42
+        },
+        "basis": "auto",
+        "region": {
+          "left": 352,
+          "right": 619,
+          "top": 293.375,
+          "bottom": 944.46875,
+          "width": 267,
+          "height": 651.09375
+        },
+        "calendar": {
+          "left": 352,
+          "right": 619,
+          "top": 293.375,
+          "bottom": 538.484375,
+          "width": 267,
+          "height": 245.109375
+        },
+        "banner": {
+          "left": 352,
+          "right": 619,
+          "top": 92,
+          "bottom": 219.375,
+          "width": 267,
+          "height": 127.375
+        },
+        "quote": {
+          "left": 372,
+          "right": 599,
+          "top": 132,
+          "bottom": 171.875,
+          "width": 227,
+          "height": 39.875
+        },
+        "lines": [
+          {
+            "left": 373.703125,
+            "right": 597.296875,
+            "top": 132,
+            "bottom": 150
+          },
+          {
+            "left": 401.671875,
+            "right": 569.3125,
+            "top": 151.9375,
+            "bottom": 169.9375
+          }
+        ],
+        "buttons": [
+          {
+            "tag": "BUTTON",
+            "label": "dashboard.md",
+            "left": 361,
+            "right": 393,
+            "top": 95,
+            "bottom": 127,
+            "width": 32,
+            "height": 32
+          },
+          {
+            "tag": "BUTTON",
+            "label": "新建工作台",
+            "left": 396,
+            "right": 428,
+            "top": 95,
+            "bottom": 127,
+            "width": 32,
+            "height": 32
+          }
+        ],
+        "overlap": false,
+        "capture": null,
+        "horizontalOverflow": false,
+        "layout": "stacked"
+      }
+    },
+    {
+      "name": "zh-639-populated-quote-clear",
+      "passed": true,
+      "detail": {
+        "banner": {
+          "left": 352,
+          "right": 619,
+          "top": 92,
+          "bottom": 219.375,
+          "width": 267,
+          "height": 127.375
+        },
+        "lines": [
+          {
+            "left": 373.703125,
+            "right": 597.296875,
+            "top": 132,
+            "bottom": 150
+          },
+          {
+            "left": 401.671875,
+            "right": 569.3125,
+            "top": 151.9375,
+            "bottom": 169.9375
+          }
+        ],
+        "buttons": [
+          {
+            "tag": "BUTTON",
+            "label": "dashboard.md",
+            "left": 361,
+            "right": 393,
+            "top": 95,
+            "bottom": 127,
+            "width": 32,
+            "height": 32
+          },
+          {
+            "tag": "BUTTON",
+            "label": "新建工作台",
+            "left": 396,
+            "right": 428,
+            "top": 95,
+            "bottom": 127,
+            "width": 32,
+            "height": 32
+          }
+        ]
+      }
+    },
+    {
+      "name": "zh-639-populated-button-targets",
+      "passed": true
+    },
+    {
+      "name": "zh-639-capture-natural-height",
+      "passed": true,
+      "detail": {
+        "viewport": 639,
+        "root": {
+          "left": 344,
+          "right": 639,
+          "top": 84,
+          "bottom": 740,
+          "width": 295,
+          "height": 656
+        },
+        "quicknote": {
+          "left": 352,
+          "right": 619,
+          "top": 243.375,
+          "bottom": 415.375,
+          "width": 267,
+          "height": 172
+        },
+        "basis": "auto",
+        "region": {
+          "left": 352,
+          "right": 619,
+          "top": 423.375,
+          "bottom": 1074.46875,
+          "width": 267,
+          "height": 651.09375
+        },
+        "calendar": {
+          "left": 352,
+          "right": 619,
+          "top": 423.375,
+          "bottom": 668.484375,
+          "width": 267,
+          "height": 245.109375
+        },
+        "banner": {
+          "left": 352,
+          "right": 619,
+          "top": 92,
+          "bottom": 219.375,
+          "width": 267,
+          "height": 127.375
+        },
+        "quote": {
+          "left": 372,
+          "right": 599,
+          "top": 132,
+          "bottom": 171.875,
+          "width": 227,
+          "height": 39.875
+        },
+        "lines": [
+          {
+            "left": 373.703125,
+            "right": 597.296875,
+            "top": 132,
+            "bottom": 150
+          },
+          {
+            "left": 401.671875,
+            "right": 569.3125,
+            "top": 151.9375,
+            "bottom": 169.9375
+          }
+        ],
+        "buttons": [
+          {
+            "tag": "BUTTON",
+            "label": "dashboard.md",
+            "left": 361,
+            "right": 393,
+            "top": 95,
+            "bottom": 127,
+            "width": 32,
+            "height": 32
+          },
+          {
+            "tag": "BUTTON",
+            "label": "新建工作台",
+            "left": 396,
+            "right": 428,
+            "top": 95,
+            "bottom": 127,
+            "width": 32,
+            "height": 32
+          }
+        ],
+        "overlap": false,
+        "capture": {
+          "left": 488,
+          "right": 584,
+          "top": 249.375,
+          "bottom": 409.375,
+          "width": 96,
+          "height": 160
+        },
+        "horizontalOverflow": false,
+        "layout": "stacked"
+      }
+    },
+    {
+      "name": "zh-639-capture-quote-clear",
+      "passed": true,
+      "detail": {
+        "banner": {
+          "left": 352,
+          "right": 619,
+          "top": 92,
+          "bottom": 219.375,
+          "width": 267,
+          "height": 127.375
+        },
+        "lines": [
+          {
+            "left": 373.703125,
+            "right": 597.296875,
+            "top": 132,
+            "bottom": 150
+          },
+          {
+            "left": 401.671875,
+            "right": 569.3125,
+            "top": 151.9375,
+            "bottom": 169.9375
+          }
+        ],
+        "buttons": [
+          {
+            "tag": "BUTTON",
+            "label": "dashboard.md",
+            "left": 361,
+            "right": 393,
+            "top": 95,
+            "bottom": 127,
+            "width": 32,
+            "height": 32
+          },
+          {
+            "tag": "BUTTON",
+            "label": "新建工作台",
+            "left": 396,
+            "right": 428,
+            "top": 95,
+            "bottom": 127,
+            "width": 32,
+            "height": 32
+          }
+        ]
+      }
+    },
+    {
+      "name": "zh-639-capture-button-targets",
+      "passed": true
+    },
+    {
+      "name": "zh-639-capture-grows",
+      "passed": true,
+      "detail": {
+        "before": {
+          "left": 352,
+          "right": 619,
+          "top": 243.375,
+          "bottom": 285.375,
+          "width": 267,
+          "height": 42
+        },
+        "after": {
+          "left": 352,
+          "right": 619,
+          "top": 243.375,
+          "bottom": 415.375,
+          "width": 267,
+          "height": 172
+        }
+      }
+    },
+    {
+      "name": "zh-640-empty-natural-height",
+      "passed": true,
+      "detail": {
+        "viewport": 640,
+        "root": {
+          "left": 344,
+          "right": 640,
+          "top": 84,
+          "bottom": 740,
+          "width": 296,
+          "height": 656
+        },
+        "quicknote": {
+          "left": 352,
+          "right": 620,
+          "top": 243.375,
+          "bottom": 313.9375,
+          "width": 268,
+          "height": 70.5625
+        },
+        "basis": "auto",
+        "region": {
+          "left": 352,
+          "right": 620,
+          "top": 321.9375,
+          "bottom": 973.03125,
+          "width": 268,
+          "height": 651.09375
+        },
+        "calendar": {
+          "left": 352,
+          "right": 620,
+          "top": 321.9375,
+          "bottom": 567.046875,
+          "width": 268,
+          "height": 245.109375
+        },
+        "banner": {
+          "left": 352,
+          "right": 620,
+          "top": 92,
+          "bottom": 219.375,
+          "width": 268,
+          "height": 127.375
+        },
+        "quote": {
+          "left": 372,
+          "right": 600,
+          "top": 132,
+          "bottom": 171.875,
+          "width": 228,
+          "height": 39.875
+        },
+        "lines": [
+          {
+            "left": 374.203125,
+            "right": 597.796875,
+            "top": 132,
+            "bottom": 150
+          },
+          {
+            "left": 402.171875,
+            "right": 569.8125,
+            "top": 151.9375,
+            "bottom": 169.9375
+          }
+        ],
+        "buttons": [
+          {
+            "tag": "BUTTON",
+            "label": "dashboard.md",
+            "left": 361,
+            "right": 393,
+            "top": 95,
+            "bottom": 127,
+            "width": 32,
+            "height": 32
+          },
+          {
+            "tag": "BUTTON",
+            "label": "新建工作台",
+            "left": 396,
+            "right": 428,
+            "top": 95,
+            "bottom": 127,
+            "width": 32,
+            "height": 32
+          }
+        ],
+        "overlap": false,
+        "capture": null,
+        "horizontalOverflow": false,
+        "layout": "stacked"
+      }
+    },
+    {
+      "name": "zh-640-empty-quote-clear",
+      "passed": true,
+      "detail": {
+        "banner": {
+          "left": 352,
+          "right": 620,
+          "top": 92,
+          "bottom": 219.375,
+          "width": 268,
+          "height": 127.375
+        },
+        "lines": [
+          {
+            "left": 374.203125,
+            "right": 597.796875,
+            "top": 132,
+            "bottom": 150
+          },
+          {
+            "left": 402.171875,
+            "right": 569.8125,
+            "top": 151.9375,
+            "bottom": 169.9375
+          }
+        ],
+        "buttons": [
+          {
+            "tag": "BUTTON",
+            "label": "dashboard.md",
+            "left": 361,
+            "right": 393,
+            "top": 95,
+            "bottom": 127,
+            "width": 32,
+            "height": 32
+          },
+          {
+            "tag": "BUTTON",
+            "label": "新建工作台",
+            "left": 396,
+            "right": 428,
+            "top": 95,
+            "bottom": 127,
+            "width": 32,
+            "height": 32
+          }
+        ]
+      }
+    },
+    {
+      "name": "zh-640-empty-button-targets",
+      "passed": true
+    },
+    {
+      "name": "zh-640-populated-natural-height",
+      "passed": true,
+      "detail": {
+        "viewport": 640,
+        "root": {
+          "left": 344,
+          "right": 640,
+          "top": 84,
+          "bottom": 740,
+          "width": 296,
+          "height": 656
+        },
+        "quicknote": {
+          "left": 352,
+          "right": 620,
+          "top": 243.375,
+          "bottom": 285.375,
+          "width": 268,
+          "height": 42
+        },
+        "basis": "auto",
+        "region": {
+          "left": 352,
+          "right": 620,
+          "top": 293.375,
+          "bottom": 944.46875,
+          "width": 268,
+          "height": 651.09375
+        },
+        "calendar": {
+          "left": 352,
+          "right": 620,
+          "top": 293.375,
+          "bottom": 538.484375,
+          "width": 268,
+          "height": 245.109375
+        },
+        "banner": {
+          "left": 352,
+          "right": 620,
+          "top": 92,
+          "bottom": 219.375,
+          "width": 268,
+          "height": 127.375
+        },
+        "quote": {
+          "left": 372,
+          "right": 600,
+          "top": 132,
+          "bottom": 171.875,
+          "width": 228,
+          "height": 39.875
+        },
+        "lines": [
+          {
+            "left": 374.203125,
+            "right": 597.796875,
+            "top": 132,
+            "bottom": 150
+          },
+          {
+            "left": 402.171875,
+            "right": 569.8125,
+            "top": 151.9375,
+            "bottom": 169.9375
+          }
+        ],
+        "buttons": [
+          {
+            "tag": "BUTTON",
+            "label": "dashboard.md",
+            "left": 361,
+            "right": 393,
+            "top": 95,
+            "bottom": 127,
+            "width": 32,
+            "height": 32
+          },
+          {
+            "tag": "BUTTON",
+            "label": "新建工作台",
+            "left": 396,
+            "right": 428,
+            "top": 95,
+            "bottom": 127,
+            "width": 32,
+            "height": 32
+          }
+        ],
+        "overlap": false,
+        "capture": null,
+        "horizontalOverflow": false,
+        "layout": "stacked"
+      }
+    },
+    {
+      "name": "zh-640-populated-quote-clear",
+      "passed": true,
+      "detail": {
+        "banner": {
+          "left": 352,
+          "right": 620,
+          "top": 92,
+          "bottom": 219.375,
+          "width": 268,
+          "height": 127.375
+        },
+        "lines": [
+          {
+            "left": 374.203125,
+            "right": 597.796875,
+            "top": 132,
+            "bottom": 150
+          },
+          {
+            "left": 402.171875,
+            "right": 569.8125,
+            "top": 151.9375,
+            "bottom": 169.9375
+          }
+        ],
+        "buttons": [
+          {
+            "tag": "BUTTON",
+            "label": "dashboard.md",
+            "left": 361,
+            "right": 393,
+            "top": 95,
+            "bottom": 127,
+            "width": 32,
+            "height": 32
+          },
+          {
+            "tag": "BUTTON",
+            "label": "新建工作台",
+            "left": 396,
+            "right": 428,
+            "top": 95,
+            "bottom": 127,
+            "width": 32,
+            "height": 32
+          }
+        ]
+      }
+    },
+    {
+      "name": "zh-640-populated-button-targets",
+      "passed": true
+    },
+    {
+      "name": "zh-640-capture-natural-height",
+      "passed": true,
+      "detail": {
+        "viewport": 640,
+        "root": {
+          "left": 344,
+          "right": 640,
+          "top": 84,
+          "bottom": 740,
+          "width": 296,
+          "height": 656
+        },
+        "quicknote": {
+          "left": 352,
+          "right": 620,
+          "top": 243.375,
+          "bottom": 415.375,
+          "width": 268,
+          "height": 172
+        },
+        "basis": "auto",
+        "region": {
+          "left": 352,
+          "right": 620,
+          "top": 423.375,
+          "bottom": 1074.46875,
+          "width": 268,
+          "height": 651.09375
+        },
+        "calendar": {
+          "left": 352,
+          "right": 620,
+          "top": 423.375,
+          "bottom": 668.484375,
+          "width": 268,
+          "height": 245.109375
+        },
+        "banner": {
+          "left": 352,
+          "right": 620,
+          "top": 92,
+          "bottom": 219.375,
+          "width": 268,
+          "height": 127.375
+        },
+        "quote": {
+          "left": 372,
+          "right": 600,
+          "top": 132,
+          "bottom": 171.875,
+          "width": 228,
+          "height": 39.875
+        },
+        "lines": [
+          {
+            "left": 374.203125,
+            "right": 597.796875,
+            "top": 132,
+            "bottom": 150
+          },
+          {
+            "left": 402.171875,
+            "right": 569.8125,
+            "top": 151.9375,
+            "bottom": 169.9375
+          }
+        ],
+        "buttons": [
+          {
+            "tag": "BUTTON",
+            "label": "dashboard.md",
+            "left": 361,
+            "right": 393,
+            "top": 95,
+            "bottom": 127,
+            "width": 32,
+            "height": 32
+          },
+          {
+            "tag": "BUTTON",
+            "label": "新建工作台",
+            "left": 396,
+            "right": 428,
+            "top": 95,
+            "bottom": 127,
+            "width": 32,
+            "height": 32
+          }
+        ],
+        "overlap": false,
+        "capture": {
+          "left": 489,
+          "right": 585,
+          "top": 249.375,
+          "bottom": 409.375,
+          "width": 96,
+          "height": 160
+        },
+        "horizontalOverflow": false,
+        "layout": "stacked"
+      }
+    },
+    {
+      "name": "zh-640-capture-quote-clear",
+      "passed": true,
+      "detail": {
+        "banner": {
+          "left": 352,
+          "right": 620,
+          "top": 92,
+          "bottom": 219.375,
+          "width": 268,
+          "height": 127.375
+        },
+        "lines": [
+          {
+            "left": 374.203125,
+            "right": 597.796875,
+            "top": 132,
+            "bottom": 150
+          },
+          {
+            "left": 402.171875,
+            "right": 569.8125,
+            "top": 151.9375,
+            "bottom": 169.9375
+          }
+        ],
+        "buttons": [
+          {
+            "tag": "BUTTON",
+            "label": "dashboard.md",
+            "left": 361,
+            "right": 393,
+            "top": 95,
+            "bottom": 127,
+            "width": 32,
+            "height": 32
+          },
+          {
+            "tag": "BUTTON",
+            "label": "新建工作台",
+            "left": 396,
+            "right": 428,
+            "top": 95,
+            "bottom": 127,
+            "width": 32,
+            "height": 32
+          }
+        ]
+      }
+    },
+    {
+      "name": "zh-640-capture-button-targets",
+      "passed": true
+    },
+    {
+      "name": "zh-640-capture-grows",
+      "passed": true,
+      "detail": {
+        "before": {
+          "left": 352,
+          "right": 620,
+          "top": 243.375,
+          "bottom": 285.375,
+          "width": 268,
+          "height": 42
+        },
+        "after": {
+          "left": 352,
+          "right": 620,
+          "top": 243.375,
+          "bottom": 415.375,
+          "width": 268,
+          "height": 172
+        }
+      }
+    },
+    {
+      "name": "zh-641-empty-natural-height",
+      "passed": true,
+      "detail": {
+        "viewport": 641,
+        "root": {
+          "left": 344,
+          "right": 641,
+          "top": 84,
+          "bottom": 740,
+          "width": 297,
+          "height": 656
+        },
+        "quicknote": {
+          "left": 360,
+          "right": 625,
+          "top": 292.25,
+          "bottom": 362.8125,
+          "width": 265,
+          "height": 70.5625
+        },
+        "basis": "auto",
+        "region": {
+          "left": 360,
+          "right": 625,
+          "top": 372.8125,
+          "bottom": 740,
+          "width": 265,
+          "height": 367.1875
+        },
+        "calendar": {
+          "left": 360,
+          "right": 615,
+          "top": 372.8125,
+          "bottom": 617.921875,
+          "width": 255,
+          "height": 245.109375
+        },
+        "banner": {
+          "left": 360,
+          "right": 625,
+          "top": 84,
+          "bottom": 276.25,
+          "width": 265,
+          "height": 192.25
+        },
+        "quote": {
+          "left": 408,
+          "right": 577,
+          "top": 124,
+          "bottom": 224.75,
+          "width": 169,
+          "height": 100.75
+        },
+        "lines": [
+          {
+            "left": 421.171875,
+            "right": 563.8125,
+            "top": 125,
+            "bottom": 148
+          },
+          {
+            "left": 410.328125,
+            "right": 574.671875,
+            "top": 150.1875,
+            "bottom": 173.1875
+          },
+          {
+            "left": 443.671875,
+            "right": 541.3125,
+            "top": 175.375,
+            "bottom": 198.375
+          },
+          {
+            "left": 453.046875,
+            "right": 531.953125,
+            "top": 200.5625,
+            "bottom": 223.5625
+          }
+        ],
+        "buttons": [
+          {
+            "tag": "BUTTON",
+            "label": "dashboard.md",
+            "left": 372,
+            "right": 404,
+            "top": 87,
+            "bottom": 119,
+            "width": 32,
+            "height": 32
+          },
+          {
+            "tag": "BUTTON",
+            "label": "新建工作台",
+            "left": 407,
+            "right": 439,
+            "top": 87,
+            "bottom": 119,
+            "width": 32,
+            "height": 32
+          }
+        ],
+        "overlap": false,
+        "capture": null,
+        "horizontalOverflow": false,
+        "layout": "stacked"
+      }
+    },
+    {
+      "name": "zh-641-empty-quote-clear",
+      "passed": true,
+      "detail": {
+        "banner": {
+          "left": 360,
+          "right": 625,
+          "top": 84,
+          "bottom": 276.25,
+          "width": 265,
+          "height": 192.25
+        },
+        "lines": [
+          {
+            "left": 421.171875,
+            "right": 563.8125,
+            "top": 125,
+            "bottom": 148
+          },
+          {
+            "left": 410.328125,
+            "right": 574.671875,
+            "top": 150.1875,
+            "bottom": 173.1875
+          },
+          {
+            "left": 443.671875,
+            "right": 541.3125,
+            "top": 175.375,
+            "bottom": 198.375
+          },
+          {
+            "left": 453.046875,
+            "right": 531.953125,
+            "top": 200.5625,
+            "bottom": 223.5625
+          }
+        ],
+        "buttons": [
+          {
+            "tag": "BUTTON",
+            "label": "dashboard.md",
+            "left": 372,
+            "right": 404,
+            "top": 87,
+            "bottom": 119,
+            "width": 32,
+            "height": 32
+          },
+          {
+            "tag": "BUTTON",
+            "label": "新建工作台",
+            "left": 407,
+            "right": 439,
+            "top": 87,
+            "bottom": 119,
+            "width": 32,
+            "height": 32
+          }
+        ]
+      }
+    },
+    {
+      "name": "zh-641-empty-button-targets",
+      "passed": true
+    },
+    {
+      "name": "zh-641-populated-natural-height",
+      "passed": true,
+      "detail": {
+        "viewport": 641,
+        "root": {
+          "left": 344,
+          "right": 641,
+          "top": 84,
+          "bottom": 740,
+          "width": 297,
+          "height": 656
+        },
+        "quicknote": {
+          "left": 360,
+          "right": 625,
+          "top": 292.25,
+          "bottom": 334.25,
+          "width": 265,
+          "height": 42
+        },
+        "basis": "auto",
+        "region": {
+          "left": 360,
+          "right": 625,
+          "top": 344.25,
+          "bottom": 740,
+          "width": 265,
+          "height": 395.75
+        },
+        "calendar": {
+          "left": 360,
+          "right": 615,
+          "top": 344.25,
+          "bottom": 589.359375,
+          "width": 255,
+          "height": 245.109375
+        },
+        "banner": {
+          "left": 360,
+          "right": 625,
+          "top": 84,
+          "bottom": 276.25,
+          "width": 265,
+          "height": 192.25
+        },
+        "quote": {
+          "left": 408,
+          "right": 577,
+          "top": 124,
+          "bottom": 224.75,
+          "width": 169,
+          "height": 100.75
+        },
+        "lines": [
+          {
+            "left": 421.171875,
+            "right": 563.8125,
+            "top": 125,
+            "bottom": 148
+          },
+          {
+            "left": 410.328125,
+            "right": 574.671875,
+            "top": 150.1875,
+            "bottom": 173.1875
+          },
+          {
+            "left": 443.671875,
+            "right": 541.3125,
+            "top": 175.375,
+            "bottom": 198.375
+          },
+          {
+            "left": 453.046875,
+            "right": 531.953125,
+            "top": 200.5625,
+            "bottom": 223.5625
+          }
+        ],
+        "buttons": [
+          {
+            "tag": "BUTTON",
+            "label": "dashboard.md",
+            "left": 372,
+            "right": 404,
+            "top": 87,
+            "bottom": 119,
+            "width": 32,
+            "height": 32
+          },
+          {
+            "tag": "BUTTON",
+            "label": "新建工作台",
+            "left": 407,
+            "right": 439,
+            "top": 87,
+            "bottom": 119,
+            "width": 32,
+            "height": 32
+          }
+        ],
+        "overlap": false,
+        "capture": null,
+        "horizontalOverflow": false,
+        "layout": "stacked"
+      }
+    },
+    {
+      "name": "zh-641-populated-quote-clear",
+      "passed": true,
+      "detail": {
+        "banner": {
+          "left": 360,
+          "right": 625,
+          "top": 84,
+          "bottom": 276.25,
+          "width": 265,
+          "height": 192.25
+        },
+        "lines": [
+          {
+            "left": 421.171875,
+            "right": 563.8125,
+            "top": 125,
+            "bottom": 148
+          },
+          {
+            "left": 410.328125,
+            "right": 574.671875,
+            "top": 150.1875,
+            "bottom": 173.1875
+          },
+          {
+            "left": 443.671875,
+            "right": 541.3125,
+            "top": 175.375,
+            "bottom": 198.375
+          },
+          {
+            "left": 453.046875,
+            "right": 531.953125,
+            "top": 200.5625,
+            "bottom": 223.5625
+          }
+        ],
+        "buttons": [
+          {
+            "tag": "BUTTON",
+            "label": "dashboard.md",
+            "left": 372,
+            "right": 404,
+            "top": 87,
+            "bottom": 119,
+            "width": 32,
+            "height": 32
+          },
+          {
+            "tag": "BUTTON",
+            "label": "新建工作台",
+            "left": 407,
+            "right": 439,
+            "top": 87,
+            "bottom": 119,
+            "width": 32,
+            "height": 32
+          }
+        ]
+      }
+    },
+    {
+      "name": "zh-641-populated-button-targets",
+      "passed": true
+    },
+    {
+      "name": "zh-641-capture-natural-height",
+      "passed": true,
+      "detail": {
+        "viewport": 641,
+        "root": {
+          "left": 344,
+          "right": 641,
+          "top": 84,
+          "bottom": 740,
+          "width": 297,
+          "height": 656
+        },
+        "quicknote": {
+          "left": 360,
+          "right": 625,
+          "top": 292.25,
+          "bottom": 464.25,
+          "width": 265,
+          "height": 172
+        },
+        "basis": "auto",
+        "region": {
+          "left": 360,
+          "right": 625,
+          "top": 474.25,
+          "bottom": 740,
+          "width": 265,
+          "height": 265.75
+        },
+        "calendar": {
+          "left": 360,
+          "right": 615,
+          "top": 474.25,
+          "bottom": 719.359375,
+          "width": 255,
+          "height": 245.109375
+        },
+        "banner": {
+          "left": 360,
+          "right": 625,
+          "top": 84,
+          "bottom": 276.25,
+          "width": 265,
+          "height": 192.25
+        },
+        "quote": {
+          "left": 408,
+          "right": 577,
+          "top": 124,
+          "bottom": 224.75,
+          "width": 169,
+          "height": 100.75
+        },
+        "lines": [
+          {
+            "left": 421.171875,
+            "right": 563.8125,
+            "top": 125,
+            "bottom": 148
+          },
+          {
+            "left": 410.328125,
+            "right": 574.671875,
+            "top": 150.1875,
+            "bottom": 173.1875
+          },
+          {
+            "left": 443.671875,
+            "right": 541.3125,
+            "top": 175.375,
+            "bottom": 198.375
+          },
+          {
+            "left": 453.046875,
+            "right": 531.953125,
+            "top": 200.5625,
+            "bottom": 223.5625
+          }
+        ],
+        "buttons": [
+          {
+            "tag": "BUTTON",
+            "label": "dashboard.md",
+            "left": 372,
+            "right": 404,
+            "top": 87,
+            "bottom": 119,
+            "width": 32,
+            "height": 32
+          },
+          {
+            "tag": "BUTTON",
+            "label": "新建工作台",
+            "left": 407,
+            "right": 439,
+            "top": 87,
+            "bottom": 119,
+            "width": 32,
+            "height": 32
+          }
+        ],
+        "overlap": false,
+        "capture": {
+          "left": 494,
+          "right": 590,
+          "top": 298.25,
+          "bottom": 458.25,
+          "width": 96,
+          "height": 160
+        },
+        "horizontalOverflow": false,
+        "layout": "stacked"
+      }
+    },
+    {
+      "name": "zh-641-capture-quote-clear",
+      "passed": true,
+      "detail": {
+        "banner": {
+          "left": 360,
+          "right": 625,
+          "top": 84,
+          "bottom": 276.25,
+          "width": 265,
+          "height": 192.25
+        },
+        "lines": [
+          {
+            "left": 421.171875,
+            "right": 563.8125,
+            "top": 125,
+            "bottom": 148
+          },
+          {
+            "left": 410.328125,
+            "right": 574.671875,
+            "top": 150.1875,
+            "bottom": 173.1875
+          },
+          {
+            "left": 443.671875,
+            "right": 541.3125,
+            "top": 175.375,
+            "bottom": 198.375
+          },
+          {
+            "left": 453.046875,
+            "right": 531.953125,
+            "top": 200.5625,
+            "bottom": 223.5625
+          }
+        ],
+        "buttons": [
+          {
+            "tag": "BUTTON",
+            "label": "dashboard.md",
+            "left": 372,
+            "right": 404,
+            "top": 87,
+            "bottom": 119,
+            "width": 32,
+            "height": 32
+          },
+          {
+            "tag": "BUTTON",
+            "label": "新建工作台",
+            "left": 407,
+            "right": 439,
+            "top": 87,
+            "bottom": 119,
+            "width": 32,
+            "height": 32
+          }
+        ]
+      }
+    },
+    {
+      "name": "zh-641-capture-button-targets",
+      "passed": true
+    },
+    {
+      "name": "zh-641-capture-grows",
+      "passed": true,
+      "detail": {
+        "before": {
+          "left": 360,
+          "right": 625,
+          "top": 292.25,
+          "bottom": 334.25,
+          "width": 265,
+          "height": 42
+        },
+        "after": {
+          "left": 360,
+          "right": 625,
+          "top": 292.25,
+          "bottom": 464.25,
+          "width": 265,
+          "height": 172
+        }
+      }
+    },
+    {
+      "name": "zh-660-empty-natural-height",
+      "passed": true,
+      "detail": {
+        "viewport": 660,
+        "root": {
+          "left": 344,
+          "right": 660,
+          "top": 84,
+          "bottom": 740,
+          "width": 316,
+          "height": 656
+        },
+        "quicknote": {
+          "left": 360,
+          "right": 644,
+          "top": 267.0625,
+          "bottom": 337.625,
+          "width": 284,
+          "height": 70.5625
+        },
+        "basis": "auto",
+        "region": {
+          "left": 360,
+          "right": 644,
+          "top": 347.625,
+          "bottom": 740,
+          "width": 284,
+          "height": 392.375
+        },
+        "calendar": {
+          "left": 360,
+          "right": 634,
+          "top": 347.625,
+          "bottom": 592.734375,
+          "width": 274,
+          "height": 245.109375
+        },
+        "banner": {
+          "left": 360,
+          "right": 644,
+          "top": 84,
+          "bottom": 251.0625,
+          "width": 284,
+          "height": 167.0625
+        },
+        "quote": {
+          "left": 408,
+          "right": 596,
+          "top": 124,
+          "bottom": 199.5625,
+          "width": 188,
+          "height": 75.5625
+        },
+        "lines": [
+          {
+            "left": 412.515625,
+            "right": 591.484375,
+            "top": 125,
+            "bottom": 148
+          },
+          {
+            "left": 437.984375,
+            "right": 566.015625,
+            "top": 150.1875,
+            "bottom": 173.1875
+          },
+          {
+            "left": 411.0625,
+            "right": 592.9375,
+            "top": 175.375,
+            "bottom": 198.375
+          }
+        ],
+        "buttons": [
+          {
+            "tag": "BUTTON",
+            "label": "dashboard.md",
+            "left": 372,
+            "right": 404,
+            "top": 87,
+            "bottom": 119,
+            "width": 32,
+            "height": 32
+          },
+          {
+            "tag": "BUTTON",
+            "label": "新建工作台",
+            "left": 407,
+            "right": 439,
+            "top": 87,
+            "bottom": 119,
+            "width": 32,
+            "height": 32
+          }
+        ],
+        "overlap": false,
+        "capture": null,
+        "horizontalOverflow": false,
+        "layout": "stacked"
+      }
+    },
+    {
+      "name": "zh-660-empty-quote-clear",
+      "passed": true,
+      "detail": {
+        "banner": {
+          "left": 360,
+          "right": 644,
+          "top": 84,
+          "bottom": 251.0625,
+          "width": 284,
+          "height": 167.0625
+        },
+        "lines": [
+          {
+            "left": 412.515625,
+            "right": 591.484375,
+            "top": 125,
+            "bottom": 148
+          },
+          {
+            "left": 437.984375,
+            "right": 566.015625,
+            "top": 150.1875,
+            "bottom": 173.1875
+          },
+          {
+            "left": 411.0625,
+            "right": 592.9375,
+            "top": 175.375,
+            "bottom": 198.375
+          }
+        ],
+        "buttons": [
+          {
+            "tag": "BUTTON",
+            "label": "dashboard.md",
+            "left": 372,
+            "right": 404,
+            "top": 87,
+            "bottom": 119,
+            "width": 32,
+            "height": 32
+          },
+          {
+            "tag": "BUTTON",
+            "label": "新建工作台",
+            "left": 407,
+            "right": 439,
+            "top": 87,
+            "bottom": 119,
+            "width": 32,
+            "height": 32
+          }
+        ]
+      }
+    },
+    {
+      "name": "zh-660-empty-button-targets",
+      "passed": true
+    },
+    {
+      "name": "zh-660-populated-natural-height",
+      "passed": true,
+      "detail": {
+        "viewport": 660,
+        "root": {
+          "left": 344,
+          "right": 660,
+          "top": 84,
+          "bottom": 740,
+          "width": 316,
+          "height": 656
+        },
+        "quicknote": {
+          "left": 360,
+          "right": 644,
+          "top": 267.0625,
+          "bottom": 309.0625,
+          "width": 284,
+          "height": 42
+        },
+        "basis": "auto",
+        "region": {
+          "left": 360,
+          "right": 644,
+          "top": 319.0625,
+          "bottom": 740,
+          "width": 284,
+          "height": 420.9375
+        },
+        "calendar": {
+          "left": 360,
+          "right": 634,
+          "top": 319.0625,
+          "bottom": 564.171875,
+          "width": 274,
+          "height": 245.109375
+        },
+        "banner": {
+          "left": 360,
+          "right": 644,
+          "top": 84,
+          "bottom": 251.0625,
+          "width": 284,
+          "height": 167.0625
+        },
+        "quote": {
+          "left": 408,
+          "right": 596,
+          "top": 124,
+          "bottom": 199.5625,
+          "width": 188,
+          "height": 75.5625
+        },
+        "lines": [
+          {
+            "left": 412.515625,
+            "right": 591.484375,
+            "top": 125,
+            "bottom": 148
+          },
+          {
+            "left": 437.984375,
+            "right": 566.015625,
+            "top": 150.1875,
+            "bottom": 173.1875
+          },
+          {
+            "left": 411.0625,
+            "right": 592.9375,
+            "top": 175.375,
+            "bottom": 198.375
+          }
+        ],
+        "buttons": [
+          {
+            "tag": "BUTTON",
+            "label": "dashboard.md",
+            "left": 372,
+            "right": 404,
+            "top": 87,
+            "bottom": 119,
+            "width": 32,
+            "height": 32
+          },
+          {
+            "tag": "BUTTON",
+            "label": "新建工作台",
+            "left": 407,
+            "right": 439,
+            "top": 87,
+            "bottom": 119,
+            "width": 32,
+            "height": 32
+          }
+        ],
+        "overlap": false,
+        "capture": null,
+        "horizontalOverflow": false,
+        "layout": "stacked"
+      }
+    },
+    {
+      "name": "zh-660-populated-quote-clear",
+      "passed": true,
+      "detail": {
+        "banner": {
+          "left": 360,
+          "right": 644,
+          "top": 84,
+          "bottom": 251.0625,
+          "width": 284,
+          "height": 167.0625
+        },
+        "lines": [
+          {
+            "left": 412.515625,
+            "right": 591.484375,
+            "top": 125,
+            "bottom": 148
+          },
+          {
+            "left": 437.984375,
+            "right": 566.015625,
+            "top": 150.1875,
+            "bottom": 173.1875
+          },
+          {
+            "left": 411.0625,
+            "right": 592.9375,
+            "top": 175.375,
+            "bottom": 198.375
+          }
+        ],
+        "buttons": [
+          {
+            "tag": "BUTTON",
+            "label": "dashboard.md",
+            "left": 372,
+            "right": 404,
+            "top": 87,
+            "bottom": 119,
+            "width": 32,
+            "height": 32
+          },
+          {
+            "tag": "BUTTON",
+            "label": "新建工作台",
+            "left": 407,
+            "right": 439,
+            "top": 87,
+            "bottom": 119,
+            "width": 32,
+            "height": 32
+          }
+        ]
+      }
+    },
+    {
+      "name": "zh-660-populated-button-targets",
+      "passed": true
+    },
+    {
+      "name": "zh-660-capture-natural-height",
+      "passed": true,
+      "detail": {
+        "viewport": 660,
+        "root": {
+          "left": 344,
+          "right": 660,
+          "top": 84,
+          "bottom": 740,
+          "width": 316,
+          "height": 656
+        },
+        "quicknote": {
+          "left": 360,
+          "right": 644,
+          "top": 267.0625,
+          "bottom": 439.0625,
+          "width": 284,
+          "height": 172
+        },
+        "basis": "auto",
+        "region": {
+          "left": 360,
+          "right": 644,
+          "top": 449.0625,
+          "bottom": 740,
+          "width": 284,
+          "height": 290.9375
+        },
+        "calendar": {
+          "left": 360,
+          "right": 634,
+          "top": 449.0625,
+          "bottom": 694.171875,
+          "width": 274,
+          "height": 245.109375
+        },
+        "banner": {
+          "left": 360,
+          "right": 644,
+          "top": 84,
+          "bottom": 251.0625,
+          "width": 284,
+          "height": 167.0625
+        },
+        "quote": {
+          "left": 408,
+          "right": 596,
+          "top": 124,
+          "bottom": 199.5625,
+          "width": 188,
+          "height": 75.5625
+        },
+        "lines": [
+          {
+            "left": 412.515625,
+            "right": 591.484375,
+            "top": 125,
+            "bottom": 148
+          },
+          {
+            "left": 437.984375,
+            "right": 566.015625,
+            "top": 150.1875,
+            "bottom": 173.1875
+          },
+          {
+            "left": 411.0625,
+            "right": 592.9375,
+            "top": 175.375,
+            "bottom": 198.375
+          }
+        ],
+        "buttons": [
+          {
+            "tag": "BUTTON",
+            "label": "dashboard.md",
+            "left": 372,
+            "right": 404,
+            "top": 87,
+            "bottom": 119,
+            "width": 32,
+            "height": 32
+          },
+          {
+            "tag": "BUTTON",
+            "label": "新建工作台",
+            "left": 407,
+            "right": 439,
+            "top": 87,
+            "bottom": 119,
+            "width": 32,
+            "height": 32
+          }
+        ],
+        "overlap": false,
+        "capture": {
+          "left": 513,
+          "right": 609,
+          "top": 273.0625,
+          "bottom": 433.0625,
+          "width": 96,
+          "height": 160
+        },
+        "horizontalOverflow": false,
+        "layout": "stacked"
+      }
+    },
+    {
+      "name": "zh-660-capture-quote-clear",
+      "passed": true,
+      "detail": {
+        "banner": {
+          "left": 360,
+          "right": 644,
+          "top": 84,
+          "bottom": 251.0625,
+          "width": 284,
+          "height": 167.0625
+        },
+        "lines": [
+          {
+            "left": 412.515625,
+            "right": 591.484375,
+            "top": 125,
+            "bottom": 148
+          },
+          {
+            "left": 437.984375,
+            "right": 566.015625,
+            "top": 150.1875,
+            "bottom": 173.1875
+          },
+          {
+            "left": 411.0625,
+            "right": 592.9375,
+            "top": 175.375,
+            "bottom": 198.375
+          }
+        ],
+        "buttons": [
+          {
+            "tag": "BUTTON",
+            "label": "dashboard.md",
+            "left": 372,
+            "right": 404,
+            "top": 87,
+            "bottom": 119,
+            "width": 32,
+            "height": 32
+          },
+          {
+            "tag": "BUTTON",
+            "label": "新建工作台",
+            "left": 407,
+            "right": 439,
+            "top": 87,
+            "bottom": 119,
+            "width": 32,
+            "height": 32
+          }
+        ]
+      }
+    },
+    {
+      "name": "zh-660-capture-button-targets",
+      "passed": true
+    },
+    {
+      "name": "zh-660-capture-grows",
+      "passed": true,
+      "detail": {
+        "before": {
+          "left": 360,
+          "right": 644,
+          "top": 267.0625,
+          "bottom": 309.0625,
+          "width": 284,
+          "height": 42
+        },
+        "after": {
+          "left": 360,
+          "right": 644,
+          "top": 267.0625,
+          "bottom": 439.0625,
+          "width": 284,
+          "height": 172
+        }
+      }
+    },
+    {
+      "name": "zh-1400-empty-natural-height",
+      "passed": true,
+      "detail": {
+        "viewport": 1400,
+        "root": {
+          "left": 656,
+          "right": 1400,
+          "top": 84,
+          "bottom": 740,
+          "width": 744,
+          "height": 656
+        },
+        "quicknote": {
+          "left": 672,
+          "right": 1384,
+          "top": 220,
+          "bottom": 290.5625,
+          "width": 712,
+          "height": 70.5625
+        },
+        "basis": "auto",
+        "region": {
+          "left": 672,
+          "right": 1384,
+          "top": 300.5625,
+          "bottom": 740,
+          "width": 712,
+          "height": 439.4375
+        },
+        "calendar": {
+          "left": 672,
+          "right": 1374,
+          "top": 300.5625,
+          "bottom": 463.671875,
+          "width": 702,
+          "height": 163.109375
+        },
+        "banner": {
+          "left": 672,
+          "right": 1384,
+          "top": 84,
+          "bottom": 204,
+          "width": 712,
+          "height": 120
+        },
+        "quote": {
+          "left": 778.25,
+          "right": 1277.75,
+          "top": 125.65625,
+          "bottom": 150.84375,
+          "width": 499.5,
+          "height": 25.1875
+        },
+        "lines": [
+          {
+            "left": 778.25,
+            "right": 1277.75,
+            "top": 126.65625,
+            "bottom": 149.65625
+          }
+        ],
+        "buttons": [
+          {
+            "tag": "BUTTON",
+            "label": "dashboard.md",
+            "left": 684,
+            "right": 716,
+            "top": 87,
+            "bottom": 119,
+            "width": 32,
+            "height": 32
+          },
+          {
+            "tag": "BUTTON",
+            "label": "新建工作台",
+            "left": 719,
+            "right": 751,
+            "top": 87,
+            "bottom": 119,
+            "width": 32,
+            "height": 32
+          }
+        ],
+        "overlap": false,
+        "capture": null,
+        "horizontalOverflow": false,
+        "layout": "stacked"
+      }
+    },
+    {
+      "name": "zh-1400-empty-quote-clear",
+      "passed": true,
+      "detail": {
+        "banner": {
+          "left": 672,
+          "right": 1384,
+          "top": 84,
+          "bottom": 204,
+          "width": 712,
+          "height": 120
+        },
+        "lines": [
+          {
+            "left": 778.25,
+            "right": 1277.75,
+            "top": 126.65625,
+            "bottom": 149.65625
+          }
+        ],
+        "buttons": [
+          {
+            "tag": "BUTTON",
+            "label": "dashboard.md",
+            "left": 684,
+            "right": 716,
+            "top": 87,
+            "bottom": 119,
+            "width": 32,
+            "height": 32
+          },
+          {
+            "tag": "BUTTON",
+            "label": "新建工作台",
+            "left": 719,
+            "right": 751,
+            "top": 87,
+            "bottom": 119,
+            "width": 32,
+            "height": 32
+          }
+        ]
+      }
+    },
+    {
+      "name": "zh-1400-empty-button-targets",
+      "passed": true
+    },
+    {
+      "name": "zh-1400-populated-natural-height",
+      "passed": true,
+      "detail": {
+        "viewport": 1400,
+        "root": {
+          "left": 656,
+          "right": 1400,
+          "top": 84,
+          "bottom": 740,
+          "width": 744,
+          "height": 656
+        },
+        "quicknote": {
+          "left": 672,
+          "right": 1384,
+          "top": 220,
+          "bottom": 262,
+          "width": 712,
+          "height": 42
+        },
+        "basis": "auto",
+        "region": {
+          "left": 672,
+          "right": 1384,
+          "top": 272,
+          "bottom": 740,
+          "width": 712,
+          "height": 468
+        },
+        "calendar": {
+          "left": 672,
+          "right": 1374,
+          "top": 272,
+          "bottom": 435.109375,
+          "width": 702,
+          "height": 163.109375
+        },
+        "banner": {
+          "left": 672,
+          "right": 1384,
+          "top": 84,
+          "bottom": 204,
+          "width": 712,
+          "height": 120
+        },
+        "quote": {
+          "left": 778.25,
+          "right": 1277.75,
+          "top": 125.65625,
+          "bottom": 150.84375,
+          "width": 499.5,
+          "height": 25.1875
+        },
+        "lines": [
+          {
+            "left": 778.25,
+            "right": 1277.75,
+            "top": 126.65625,
+            "bottom": 149.65625
+          }
+        ],
+        "buttons": [
+          {
+            "tag": "BUTTON",
+            "label": "dashboard.md",
+            "left": 684,
+            "right": 716,
+            "top": 87,
+            "bottom": 119,
+            "width": 32,
+            "height": 32
+          },
+          {
+            "tag": "BUTTON",
+            "label": "新建工作台",
+            "left": 719,
+            "right": 751,
+            "top": 87,
+            "bottom": 119,
+            "width": 32,
+            "height": 32
+          }
+        ],
+        "overlap": false,
+        "capture": null,
+        "horizontalOverflow": false,
+        "layout": "stacked"
+      }
+    },
+    {
+      "name": "zh-1400-populated-quote-clear",
+      "passed": true,
+      "detail": {
+        "banner": {
+          "left": 672,
+          "right": 1384,
+          "top": 84,
+          "bottom": 204,
+          "width": 712,
+          "height": 120
+        },
+        "lines": [
+          {
+            "left": 778.25,
+            "right": 1277.75,
+            "top": 126.65625,
+            "bottom": 149.65625
+          }
+        ],
+        "buttons": [
+          {
+            "tag": "BUTTON",
+            "label": "dashboard.md",
+            "left": 684,
+            "right": 716,
+            "top": 87,
+            "bottom": 119,
+            "width": 32,
+            "height": 32
+          },
+          {
+            "tag": "BUTTON",
+            "label": "新建工作台",
+            "left": 719,
+            "right": 751,
+            "top": 87,
+            "bottom": 119,
+            "width": 32,
+            "height": 32
+          }
+        ]
+      }
+    },
+    {
+      "name": "zh-1400-populated-button-targets",
+      "passed": true
+    },
+    {
+      "name": "zh-1400-capture-natural-height",
+      "passed": true,
+      "detail": {
+        "viewport": 1400,
+        "root": {
+          "left": 656,
+          "right": 1400,
+          "top": 84,
+          "bottom": 740,
+          "width": 744,
+          "height": 656
+        },
+        "quicknote": {
+          "left": 672,
+          "right": 1384,
+          "top": 220,
+          "bottom": 362,
+          "width": 712,
+          "height": 142
+        },
+        "basis": "auto",
+        "region": {
+          "left": 672,
+          "right": 1384,
+          "top": 372,
+          "bottom": 740,
+          "width": 712,
+          "height": 368
+        },
+        "calendar": {
+          "left": 672,
+          "right": 1374,
+          "top": 372,
+          "bottom": 535.109375,
+          "width": 702,
+          "height": 163.109375
+        },
+        "banner": {
+          "left": 672,
+          "right": 1384,
+          "top": 84,
+          "bottom": 204,
+          "width": 712,
+          "height": 120
+        },
+        "quote": {
+          "left": 778.25,
+          "right": 1277.75,
+          "top": 125.65625,
+          "bottom": 150.84375,
+          "width": 499.5,
+          "height": 25.1875
+        },
+        "lines": [
+          {
+            "left": 778.25,
+            "right": 1277.75,
+            "top": 126.65625,
+            "bottom": 149.65625
+          }
+        ],
+        "buttons": [
+          {
+            "tag": "BUTTON",
+            "label": "dashboard.md",
+            "left": 684,
+            "right": 716,
+            "top": 87,
+            "bottom": 119,
+            "width": 32,
+            "height": 32
+          },
+          {
+            "tag": "BUTTON",
+            "label": "新建工作台",
+            "left": 719,
+            "right": 751,
+            "top": 87,
+            "bottom": 119,
+            "width": 32,
+            "height": 32
+          }
+        ],
+        "overlap": false,
+        "capture": {
+          "left": 1224.8125,
+          "right": 1349,
+          "top": 226,
+          "bottom": 356,
+          "width": 124.1875,
+          "height": 130
+        },
+        "horizontalOverflow": false,
+        "layout": "stacked"
+      }
+    },
+    {
+      "name": "zh-1400-capture-quote-clear",
+      "passed": true,
+      "detail": {
+        "banner": {
+          "left": 672,
+          "right": 1384,
+          "top": 84,
+          "bottom": 204,
+          "width": 712,
+          "height": 120
+        },
+        "lines": [
+          {
+            "left": 778.25,
+            "right": 1277.75,
+            "top": 126.65625,
+            "bottom": 149.65625
+          }
+        ],
+        "buttons": [
+          {
+            "tag": "BUTTON",
+            "label": "dashboard.md",
+            "left": 684,
+            "right": 716,
+            "top": 87,
+            "bottom": 119,
+            "width": 32,
+            "height": 32
+          },
+          {
+            "tag": "BUTTON",
+            "label": "新建工作台",
+            "left": 719,
+            "right": 751,
+            "top": 87,
+            "bottom": 119,
+            "width": 32,
+            "height": 32
+          }
+        ]
+      }
+    },
+    {
+      "name": "zh-1400-capture-button-targets",
+      "passed": true
+    },
+    {
+      "name": "zh-1400-capture-grows",
+      "passed": true,
+      "detail": {
+        "before": {
+          "left": 672,
+          "right": 1384,
+          "top": 220,
+          "bottom": 262,
+          "width": 712,
+          "height": 42
+        },
+        "after": {
+          "left": 672,
+          "right": 1384,
+          "top": 220,
+          "bottom": 362,
+          "width": 712,
+          "height": 142
+        }
+      }
+    },
+    {
+      "name": "zh-return-home",
+      "passed": true,
+      "detail": {
+        "viewport": 640,
+        "root": {
+          "left": 344,
+          "right": 640,
+          "top": 84,
+          "bottom": 740,
+          "width": 296,
+          "height": 656
+        },
+        "quicknote": {
+          "left": 352,
+          "right": 620,
+          "top": 243.375,
+          "bottom": 385.375,
+          "width": 268,
+          "height": 142
+        },
+        "basis": "auto",
+        "region": {
+          "left": 352,
+          "right": 620,
+          "top": 393.375,
+          "bottom": 1044.46875,
+          "width": 268,
+          "height": 651.09375
+        },
+        "calendar": {
+          "left": 352,
+          "right": 620,
+          "top": 393.375,
+          "bottom": 638.484375,
+          "width": 268,
+          "height": 245.109375
+        },
+        "banner": {
+          "left": 352,
+          "right": 620,
+          "top": 92,
+          "bottom": 219.375,
+          "width": 268,
+          "height": 127.375
+        },
+        "quote": {
+          "left": 372,
+          "right": 600,
+          "top": 132,
+          "bottom": 171.875,
+          "width": 228,
+          "height": 39.875
+        },
+        "lines": [
+          {
+            "left": 374.203125,
+            "right": 597.796875,
+            "top": 132,
+            "bottom": 150
+          },
+          {
+            "left": 402.171875,
+            "right": 569.8125,
+            "top": 151.9375,
+            "bottom": 169.9375
+          }
+        ],
+        "buttons": [
+          {
+            "tag": "BUTTON",
+            "label": "dashboard.md",
+            "left": 361,
+            "right": 393,
+            "top": 95,
+            "bottom": 127,
+            "width": 32,
+            "height": 32
+          },
+          {
+            "tag": "BUTTON",
+            "label": "新建工作台",
+            "left": 396,
+            "right": 428,
+            "top": 95,
+            "bottom": 127,
+            "width": 32,
+            "height": 32
+          }
+        ],
+        "overlap": false,
+        "capture": {
+          "left": 489,
+          "right": 585,
+          "top": 249.375,
+          "bottom": 379.375,
+          "width": 96,
+          "height": 130
+        },
+        "horizontalOverflow": false,
+        "layout": "stacked"
+      }
+    },
+    {
+      "name": "wide-window-narrow-leaf",
+      "passed": true,
+      "detail": {
+        "viewport": 1400,
+        "root": {
+          "left": 344,
+          "right": 664,
+          "top": 84,
+          "bottom": 740,
+          "width": 320,
+          "height": 656
+        },
+        "quicknote": {
+          "left": 360,
+          "right": 648,
+          "top": 267.0625,
+          "bottom": 409.0625,
+          "width": 288,
+          "height": 142
+        },
+        "basis": "auto",
+        "region": {
+          "left": 360,
+          "right": 648,
+          "top": 419.0625,
+          "bottom": 740,
+          "width": 288,
+          "height": 320.9375
+        },
+        "calendar": {
+          "left": 360,
+          "right": 638,
+          "top": 419.0625,
+          "bottom": 664.171875,
+          "width": 278,
+          "height": 245.109375
+        },
+        "banner": {
+          "left": 360,
+          "right": 648,
+          "top": 84,
+          "bottom": 251.0625,
+          "width": 288,
+          "height": 167.0625
+        },
+        "quote": {
+          "left": 408,
+          "right": 600,
+          "top": 124,
+          "bottom": 199.5625,
+          "width": 192,
+          "height": 75.5625
+        },
+        "lines": [
+          {
+            "left": 414.515625,
+            "right": 593.484375,
+            "top": 125,
+            "bottom": 148
+          },
+          {
+            "left": 439.984375,
+            "right": 568.015625,
+            "top": 150.1875,
+            "bottom": 173.1875
+          },
+          {
+            "left": 413.0625,
+            "right": 594.9375,
+            "top": 175.375,
+            "bottom": 198.375
+          }
+        ],
+        "buttons": [
+          {
+            "tag": "BUTTON",
+            "label": "dashboard.md",
+            "left": 372,
+            "right": 404,
+            "top": 87,
+            "bottom": 119,
+            "width": 32,
+            "height": 32
+          },
+          {
+            "tag": "BUTTON",
+            "label": "新建工作台",
+            "left": 407,
+            "right": 439,
+            "top": 87,
+            "bottom": 119,
+            "width": 32,
+            "height": 32
+          }
+        ],
+        "overlap": false,
+        "capture": {
+          "left": 517,
+          "right": 613,
+          "top": 273.0625,
+          "bottom": 403.0625,
+          "width": 96,
+          "height": 130
+        },
+        "horizontalOverflow": false,
+        "layout": "stacked"
+      }
+    },
+    {
+      "name": "workspace-add-keyboard-focus",
+      "passed": true,
+      "detail": {
+        "add": true,
+        "outline": "solid",
+        "tag": "<button class=\"dashboard-workspace-btn dashboard-workspace-add-btn\" aria-label=\"新建工作台\" data-nand-i18n-aria-label=\"[&quot;workspace.newTitle&quot;,null,&quot;新建工作台&quot;]\" title=\"新建工作台\" data-nand-i18n-title=\"[&quot;workspace.newTitle&quot;,null,&quot;新建工作台&quot;]\"><svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" class=\"svg-icon lucide-plus\"><path d=\"M5 12h14\"></path><path d=\"M12 5v14\"></path></svg></button>"
+      }
+    },
+    {
+      "name": "workspace-add-keyboard-activation",
+      "passed": true
+    },
+    {
+      "name": "system-light-640",
+      "passed": true,
+      "detail": {
+        "viewport": 640,
+        "root": {
+          "left": 344,
+          "right": 640,
+          "top": 84,
+          "bottom": 740,
+          "width": 296,
+          "height": 656
+        },
+        "quicknote": {
+          "left": 352,
+          "right": 620,
+          "top": 243.375,
+          "bottom": 385.375,
+          "width": 268,
+          "height": 142
+        },
+        "basis": "auto",
+        "region": {
+          "left": 352,
+          "right": 620,
+          "top": 393.375,
+          "bottom": 1044.46875,
+          "width": 268,
+          "height": 651.09375
+        },
+        "calendar": {
+          "left": 352,
+          "right": 620,
+          "top": 393.375,
+          "bottom": 638.484375,
+          "width": 268,
+          "height": 245.109375
+        },
+        "banner": {
+          "left": 352,
+          "right": 620,
+          "top": 92,
+          "bottom": 219.375,
+          "width": 268,
+          "height": 127.375
+        },
+        "quote": {
+          "left": 372,
+          "right": 600,
+          "top": 132,
+          "bottom": 171.875,
+          "width": 228,
+          "height": 39.875
+        },
+        "lines": [
+          {
+            "left": 374.203125,
+            "right": 597.796875,
+            "top": 132,
+            "bottom": 150
+          },
+          {
+            "left": 402.171875,
+            "right": 569.8125,
+            "top": 151.9375,
+            "bottom": 169.9375
+          }
+        ],
+        "buttons": [
+          {
+            "tag": "BUTTON",
+            "label": "dashboard.md",
+            "left": 361,
+            "right": 393,
+            "top": 95,
+            "bottom": 127,
+            "width": 32,
+            "height": 32
+          },
+          {
+            "tag": "BUTTON",
+            "label": "新建工作台",
+            "left": 396,
+            "right": 428,
+            "top": 95,
+            "bottom": 127,
+            "width": 32,
+            "height": 32
+          }
+        ],
+        "overlap": false,
+        "capture": {
+          "left": 489,
+          "right": 585,
+          "top": 249.375,
+          "bottom": 379.375,
+          "width": 96,
+          "height": 130
+        },
+        "horizontalOverflow": false,
+        "layout": "stacked"
+      }
+    },
+    {
+      "name": "system-light-850",
+      "passed": true,
+      "detail": {
+        "viewport": 850,
+        "root": {
+          "left": 344,
+          "right": 850,
+          "top": 84,
+          "bottom": 740,
+          "width": 506,
+          "height": 656
+        },
+        "quicknote": {
+          "left": 360,
+          "right": 834,
+          "top": 241.875,
+          "bottom": 383.875,
+          "width": 474,
+          "height": 142
+        },
+        "basis": "auto",
+        "region": {
+          "left": 360,
+          "right": 834,
+          "top": 393.875,
+          "bottom": 740,
+          "width": 474,
+          "height": 346.125
+        },
+        "calendar": {
+          "left": 360,
+          "right": 824,
+          "top": 393.875,
+          "bottom": 638.984375,
+          "width": 464,
+          "height": 245.109375
+        },
+        "banner": {
+          "left": 360,
+          "right": 834,
+          "top": 84,
+          "bottom": 225.875,
+          "width": 474,
+          "height": 141.875
+        },
+        "quote": {
+          "left": 408,
+          "right": 786,
+          "top": 124,
+          "bottom": 174.375,
+          "width": 378,
+          "height": 50.375
+        },
+        "lines": [
+          {
+            "left": 440.84375,
+            "right": 753.15625,
+            "top": 125,
+            "bottom": 148
+          },
+          {
+            "left": 506.0625,
+            "right": 687.9375,
+            "top": 150.1875,
+            "bottom": 173.1875
+          }
+        ],
+        "buttons": [
+          {
+            "tag": "BUTTON",
+            "label": "dashboard.md",
+            "left": 372,
+            "right": 404,
+            "top": 87,
+            "bottom": 119,
+            "width": 32,
+            "height": 32
+          },
+          {
+            "tag": "BUTTON",
+            "label": "新建工作台",
+            "left": 407,
+            "right": 439,
+            "top": 87,
+            "bottom": 119,
+            "width": 32,
+            "height": 32
+          }
+        ],
+        "overlap": false,
+        "capture": {
+          "left": 703,
+          "right": 799,
+          "top": 247.875,
+          "bottom": 377.875,
+          "width": 96,
+          "height": 130
+        },
+        "horizontalOverflow": false,
+        "layout": "stacked"
+      }
+    },
+    {
+      "name": "system-light-1400",
+      "passed": true,
+      "detail": {
+        "viewport": 1400,
+        "root": {
+          "left": 656,
+          "right": 1400,
+          "top": 84,
+          "bottom": 740,
+          "width": 744,
+          "height": 656
+        },
+        "quicknote": {
+          "left": 672,
+          "right": 1384,
+          "top": 220,
+          "bottom": 362,
+          "width": 712,
+          "height": 142
+        },
+        "basis": "auto",
+        "region": {
+          "left": 672,
+          "right": 1384,
+          "top": 372,
+          "bottom": 740,
+          "width": 712,
+          "height": 368
+        },
+        "calendar": {
+          "left": 672,
+          "right": 1374,
+          "top": 372,
+          "bottom": 535.109375,
+          "width": 702,
+          "height": 163.109375
+        },
+        "banner": {
+          "left": 672,
+          "right": 1384,
+          "top": 84,
+          "bottom": 204,
+          "width": 712,
+          "height": 120
+        },
+        "quote": {
+          "left": 778.25,
+          "right": 1277.75,
+          "top": 125.65625,
+          "bottom": 150.84375,
+          "width": 499.5,
+          "height": 25.1875
+        },
+        "lines": [
+          {
+            "left": 778.25,
+            "right": 1277.75,
+            "top": 126.65625,
+            "bottom": 149.65625
+          }
+        ],
+        "buttons": [
+          {
+            "tag": "BUTTON",
+            "label": "dashboard.md",
+            "left": 684,
+            "right": 716,
+            "top": 87,
+            "bottom": 119,
+            "width": 32,
+            "height": 32
+          },
+          {
+            "tag": "BUTTON",
+            "label": "新建工作台",
+            "left": 719,
+            "right": 751,
+            "top": 87,
+            "bottom": 119,
+            "width": 32,
+            "height": 32
+          }
+        ],
+        "overlap": false,
+        "capture": {
+          "left": 1225.265625,
+          "right": 1349,
+          "top": 226,
+          "bottom": 356,
+          "width": 123.734375,
+          "height": 130
+        },
+        "horizontalOverflow": false,
+        "layout": "stacked"
+      }
+    },
+    {
+      "name": "system-dark-640",
+      "passed": true,
+      "detail": {
+        "viewport": 640,
+        "root": {
+          "left": 344,
+          "right": 640,
+          "top": 84,
+          "bottom": 740,
+          "width": 296,
+          "height": 656
+        },
+        "quicknote": {
+          "left": 352,
+          "right": 620,
+          "top": 243.375,
+          "bottom": 385.375,
+          "width": 268,
+          "height": 142
+        },
+        "basis": "auto",
+        "region": {
+          "left": 352,
+          "right": 620,
+          "top": 393.375,
+          "bottom": 1044.46875,
+          "width": 268,
+          "height": 651.09375
+        },
+        "calendar": {
+          "left": 352,
+          "right": 620,
+          "top": 393.375,
+          "bottom": 638.484375,
+          "width": 268,
+          "height": 245.109375
+        },
+        "banner": {
+          "left": 352,
+          "right": 620,
+          "top": 92,
+          "bottom": 219.375,
+          "width": 268,
+          "height": 127.375
+        },
+        "quote": {
+          "left": 372,
+          "right": 600,
+          "top": 132,
+          "bottom": 171.875,
+          "width": 228,
+          "height": 39.875
+        },
+        "lines": [
+          {
+            "left": 374.203125,
+            "right": 597.796875,
+            "top": 132,
+            "bottom": 150
+          },
+          {
+            "left": 402.171875,
+            "right": 569.8125,
+            "top": 151.9375,
+            "bottom": 169.9375
+          }
+        ],
+        "buttons": [
+          {
+            "tag": "BUTTON",
+            "label": "dashboard.md",
+            "left": 361,
+            "right": 393,
+            "top": 95,
+            "bottom": 127,
+            "width": 32,
+            "height": 32
+          },
+          {
+            "tag": "BUTTON",
+            "label": "新建工作台",
+            "left": 396,
+            "right": 428,
+            "top": 95,
+            "bottom": 127,
+            "width": 32,
+            "height": 32
+          }
+        ],
+        "overlap": false,
+        "capture": {
+          "left": 489,
+          "right": 585,
+          "top": 249.375,
+          "bottom": 379.375,
+          "width": 96,
+          "height": 130
+        },
+        "horizontalOverflow": false,
+        "layout": "stacked"
+      }
+    },
+    {
+      "name": "system-dark-850",
+      "passed": true,
+      "detail": {
+        "viewport": 850,
+        "root": {
+          "left": 344,
+          "right": 850,
+          "top": 84,
+          "bottom": 740,
+          "width": 506,
+          "height": 656
+        },
+        "quicknote": {
+          "left": 360,
+          "right": 834,
+          "top": 241.875,
+          "bottom": 383.875,
+          "width": 474,
+          "height": 142
+        },
+        "basis": "auto",
+        "region": {
+          "left": 360,
+          "right": 834,
+          "top": 393.875,
+          "bottom": 740,
+          "width": 474,
+          "height": 346.125
+        },
+        "calendar": {
+          "left": 360,
+          "right": 824,
+          "top": 393.875,
+          "bottom": 638.984375,
+          "width": 464,
+          "height": 245.109375
+        },
+        "banner": {
+          "left": 360,
+          "right": 834,
+          "top": 84,
+          "bottom": 225.875,
+          "width": 474,
+          "height": 141.875
+        },
+        "quote": {
+          "left": 408,
+          "right": 786,
+          "top": 124,
+          "bottom": 174.375,
+          "width": 378,
+          "height": 50.375
+        },
+        "lines": [
+          {
+            "left": 440.84375,
+            "right": 753.15625,
+            "top": 125,
+            "bottom": 148
+          },
+          {
+            "left": 506.0625,
+            "right": 687.9375,
+            "top": 150.1875,
+            "bottom": 173.1875
+          }
+        ],
+        "buttons": [
+          {
+            "tag": "BUTTON",
+            "label": "dashboard.md",
+            "left": 372,
+            "right": 404,
+            "top": 87,
+            "bottom": 119,
+            "width": 32,
+            "height": 32
+          },
+          {
+            "tag": "BUTTON",
+            "label": "新建工作台",
+            "left": 407,
+            "right": 439,
+            "top": 87,
+            "bottom": 119,
+            "width": 32,
+            "height": 32
+          }
+        ],
+        "overlap": false,
+        "capture": {
+          "left": 703,
+          "right": 799,
+          "top": 247.875,
+          "bottom": 377.875,
+          "width": 96,
+          "height": 130
+        },
+        "horizontalOverflow": false,
+        "layout": "stacked"
+      }
+    },
+    {
+      "name": "system-dark-1400",
+      "passed": true,
+      "detail": {
+        "viewport": 1400,
+        "root": {
+          "left": 656,
+          "right": 1400,
+          "top": 84,
+          "bottom": 740,
+          "width": 744,
+          "height": 656
+        },
+        "quicknote": {
+          "left": 672,
+          "right": 1384,
+          "top": 220,
+          "bottom": 362,
+          "width": 712,
+          "height": 142
+        },
+        "basis": "auto",
+        "region": {
+          "left": 672,
+          "right": 1384,
+          "top": 372,
+          "bottom": 740,
+          "width": 712,
+          "height": 368
+        },
+        "calendar": {
+          "left": 672,
+          "right": 1374,
+          "top": 372,
+          "bottom": 535.109375,
+          "width": 702,
+          "height": 163.109375
+        },
+        "banner": {
+          "left": 672,
+          "right": 1384,
+          "top": 84,
+          "bottom": 204,
+          "width": 712,
+          "height": 120
+        },
+        "quote": {
+          "left": 778.25,
+          "right": 1277.75,
+          "top": 125.65625,
+          "bottom": 150.84375,
+          "width": 499.5,
+          "height": 25.1875
+        },
+        "lines": [
+          {
+            "left": 778.25,
+            "right": 1277.75,
+            "top": 126.65625,
+            "bottom": 149.65625
+          }
+        ],
+        "buttons": [
+          {
+            "tag": "BUTTON",
+            "label": "dashboard.md",
+            "left": 684,
+            "right": 716,
+            "top": 87,
+            "bottom": 119,
+            "width": 32,
+            "height": 32
+          },
+          {
+            "tag": "BUTTON",
+            "label": "新建工作台",
+            "left": 719,
+            "right": 751,
+            "top": 87,
+            "bottom": 119,
+            "width": 32,
+            "height": 32
+          }
+        ],
+        "overlap": false,
+        "capture": {
+          "left": 1224.890625,
+          "right": 1349,
+          "top": 226,
+          "bottom": 356,
+          "width": 124.109375,
+          "height": 130
+        },
+        "horizontalOverflow": false,
+        "layout": "stacked"
+      }
+    },
+    {
+      "name": "claude-code-light-640",
+      "passed": true,
+      "detail": {
+        "viewport": 640,
+        "root": {
+          "left": 344,
+          "right": 640,
+          "top": 84,
+          "bottom": 740,
+          "width": 296,
+          "height": 656
+        },
+        "quicknote": {
+          "left": 352,
+          "right": 620,
+          "top": 243.375,
+          "bottom": 385.375,
+          "width": 268,
+          "height": 142
+        },
+        "basis": "auto",
+        "region": {
+          "left": 352,
+          "right": 620,
+          "top": 393.375,
+          "bottom": 1044.46875,
+          "width": 268,
+          "height": 651.09375
+        },
+        "calendar": {
+          "left": 352,
+          "right": 620,
+          "top": 393.375,
+          "bottom": 638.484375,
+          "width": 268,
+          "height": 245.109375
+        },
+        "banner": {
+          "left": 352,
+          "right": 620,
+          "top": 92,
+          "bottom": 219.375,
+          "width": 268,
+          "height": 127.375
+        },
+        "quote": {
+          "left": 372,
+          "right": 600,
+          "top": 132,
+          "bottom": 171.875,
+          "width": 228,
+          "height": 39.875
+        },
+        "lines": [
+          {
+            "left": 374.203125,
+            "right": 597.796875,
+            "top": 132,
+            "bottom": 150
+          },
+          {
+            "left": 402.171875,
+            "right": 569.8125,
+            "top": 151.9375,
+            "bottom": 169.9375
+          }
+        ],
+        "buttons": [
+          {
+            "tag": "BUTTON",
+            "label": "dashboard.md",
+            "left": 361,
+            "right": 393,
+            "top": 95,
+            "bottom": 127,
+            "width": 32,
+            "height": 32
+          },
+          {
+            "tag": "BUTTON",
+            "label": "新建工作台",
+            "left": 396,
+            "right": 428,
+            "top": 95,
+            "bottom": 127,
+            "width": 32,
+            "height": 32
+          }
+        ],
+        "overlap": false,
+        "capture": {
+          "left": 489,
+          "right": 585,
+          "top": 249.375,
+          "bottom": 379.375,
+          "width": 96,
+          "height": 130
+        },
+        "horizontalOverflow": false,
+        "layout": "stacked"
+      }
+    },
+    {
+      "name": "claude-code-light-850",
+      "passed": true,
+      "detail": {
+        "viewport": 850,
+        "root": {
+          "left": 344,
+          "right": 850,
+          "top": 84,
+          "bottom": 740,
+          "width": 506,
+          "height": 656
+        },
+        "quicknote": {
+          "left": 360,
+          "right": 834,
+          "top": 241.875,
+          "bottom": 383.875,
+          "width": 474,
+          "height": 142
+        },
+        "basis": "auto",
+        "region": {
+          "left": 360,
+          "right": 834,
+          "top": 393.875,
+          "bottom": 740,
+          "width": 474,
+          "height": 346.125
+        },
+        "calendar": {
+          "left": 360,
+          "right": 824,
+          "top": 393.875,
+          "bottom": 638.984375,
+          "width": 464,
+          "height": 245.109375
+        },
+        "banner": {
+          "left": 360,
+          "right": 834,
+          "top": 84,
+          "bottom": 225.875,
+          "width": 474,
+          "height": 141.875
+        },
+        "quote": {
+          "left": 408,
+          "right": 786,
+          "top": 124,
+          "bottom": 174.375,
+          "width": 378,
+          "height": 50.375
+        },
+        "lines": [
+          {
+            "left": 440.84375,
+            "right": 753.15625,
+            "top": 125,
+            "bottom": 148
+          },
+          {
+            "left": 506.0625,
+            "right": 687.9375,
+            "top": 150.1875,
+            "bottom": 173.1875
+          }
+        ],
+        "buttons": [
+          {
+            "tag": "BUTTON",
+            "label": "dashboard.md",
+            "left": 372,
+            "right": 404,
+            "top": 87,
+            "bottom": 119,
+            "width": 32,
+            "height": 32
+          },
+          {
+            "tag": "BUTTON",
+            "label": "新建工作台",
+            "left": 407,
+            "right": 439,
+            "top": 87,
+            "bottom": 119,
+            "width": 32,
+            "height": 32
+          }
+        ],
+        "overlap": false,
+        "capture": {
+          "left": 703,
+          "right": 799,
+          "top": 247.875,
+          "bottom": 377.875,
+          "width": 96,
+          "height": 130
+        },
+        "horizontalOverflow": false,
+        "layout": "stacked"
+      }
+    },
+    {
+      "name": "claude-code-light-1400",
+      "passed": true,
+      "detail": {
+        "viewport": 1400,
+        "root": {
+          "left": 656,
+          "right": 1400,
+          "top": 84,
+          "bottom": 740,
+          "width": 744,
+          "height": 656
+        },
+        "quicknote": {
+          "left": 672,
+          "right": 1384,
+          "top": 220,
+          "bottom": 362,
+          "width": 712,
+          "height": 142
+        },
+        "basis": "auto",
+        "region": {
+          "left": 672,
+          "right": 1384,
+          "top": 372,
+          "bottom": 740,
+          "width": 712,
+          "height": 368
+        },
+        "calendar": {
+          "left": 672,
+          "right": 1374,
+          "top": 372,
+          "bottom": 535.109375,
+          "width": 702,
+          "height": 163.109375
+        },
+        "banner": {
+          "left": 672,
+          "right": 1384,
+          "top": 84,
+          "bottom": 204,
+          "width": 712,
+          "height": 120
+        },
+        "quote": {
+          "left": 778.25,
+          "right": 1277.75,
+          "top": 125.65625,
+          "bottom": 150.84375,
+          "width": 499.5,
+          "height": 25.1875
+        },
+        "lines": [
+          {
+            "left": 778.25,
+            "right": 1277.75,
+            "top": 126.65625,
+            "bottom": 149.65625
+          }
+        ],
+        "buttons": [
+          {
+            "tag": "BUTTON",
+            "label": "dashboard.md",
+            "left": 684,
+            "right": 716,
+            "top": 87,
+            "bottom": 119,
+            "width": 32,
+            "height": 32
+          },
+          {
+            "tag": "BUTTON",
+            "label": "新建工作台",
+            "left": 719,
+            "right": 751,
+            "top": 87,
+            "bottom": 119,
+            "width": 32,
+            "height": 32
+          }
+        ],
+        "overlap": false,
+        "capture": {
+          "left": 1225.28125,
+          "right": 1349,
+          "top": 226,
+          "bottom": 356,
+          "width": 123.71875,
+          "height": 130
+        },
+        "horizontalOverflow": false,
+        "layout": "stacked"
+      }
+    },
+    {
+      "name": "claude-code-dark-640",
+      "passed": true,
+      "detail": {
+        "viewport": 640,
+        "root": {
+          "left": 344,
+          "right": 640,
+          "top": 84,
+          "bottom": 740,
+          "width": 296,
+          "height": 656
+        },
+        "quicknote": {
+          "left": 352,
+          "right": 620,
+          "top": 243.375,
+          "bottom": 385.375,
+          "width": 268,
+          "height": 142
+        },
+        "basis": "auto",
+        "region": {
+          "left": 352,
+          "right": 620,
+          "top": 393.375,
+          "bottom": 1044.46875,
+          "width": 268,
+          "height": 651.09375
+        },
+        "calendar": {
+          "left": 352,
+          "right": 620,
+          "top": 393.375,
+          "bottom": 638.484375,
+          "width": 268,
+          "height": 245.109375
+        },
+        "banner": {
+          "left": 352,
+          "right": 620,
+          "top": 92,
+          "bottom": 219.375,
+          "width": 268,
+          "height": 127.375
+        },
+        "quote": {
+          "left": 372,
+          "right": 600,
+          "top": 132,
+          "bottom": 171.875,
+          "width": 228,
+          "height": 39.875
+        },
+        "lines": [
+          {
+            "left": 374.203125,
+            "right": 597.796875,
+            "top": 132,
+            "bottom": 150
+          },
+          {
+            "left": 402.171875,
+            "right": 569.8125,
+            "top": 151.9375,
+            "bottom": 169.9375
+          }
+        ],
+        "buttons": [
+          {
+            "tag": "BUTTON",
+            "label": "dashboard.md",
+            "left": 361,
+            "right": 393,
+            "top": 95,
+            "bottom": 127,
+            "width": 32,
+            "height": 32
+          },
+          {
+            "tag": "BUTTON",
+            "label": "新建工作台",
+            "left": 396,
+            "right": 428,
+            "top": 95,
+            "bottom": 127,
+            "width": 32,
+            "height": 32
+          }
+        ],
+        "overlap": false,
+        "capture": {
+          "left": 489,
+          "right": 585,
+          "top": 249.375,
+          "bottom": 379.375,
+          "width": 96,
+          "height": 130
+        },
+        "horizontalOverflow": false,
+        "layout": "stacked"
+      }
+    },
+    {
+      "name": "claude-code-dark-850",
+      "passed": true,
+      "detail": {
+        "viewport": 850,
+        "root": {
+          "left": 344,
+          "right": 850,
+          "top": 84,
+          "bottom": 740,
+          "width": 506,
+          "height": 656
+        },
+        "quicknote": {
+          "left": 360,
+          "right": 834,
+          "top": 241.875,
+          "bottom": 383.875,
+          "width": 474,
+          "height": 142
+        },
+        "basis": "auto",
+        "region": {
+          "left": 360,
+          "right": 834,
+          "top": 393.875,
+          "bottom": 740,
+          "width": 474,
+          "height": 346.125
+        },
+        "calendar": {
+          "left": 360,
+          "right": 824,
+          "top": 393.875,
+          "bottom": 638.984375,
+          "width": 464,
+          "height": 245.109375
+        },
+        "banner": {
+          "left": 360,
+          "right": 834,
+          "top": 84,
+          "bottom": 225.875,
+          "width": 474,
+          "height": 141.875
+        },
+        "quote": {
+          "left": 408,
+          "right": 786,
+          "top": 124,
+          "bottom": 174.375,
+          "width": 378,
+          "height": 50.375
+        },
+        "lines": [
+          {
+            "left": 440.84375,
+            "right": 753.15625,
+            "top": 125,
+            "bottom": 148
+          },
+          {
+            "left": 506.0625,
+            "right": 687.9375,
+            "top": 150.1875,
+            "bottom": 173.1875
+          }
+        ],
+        "buttons": [
+          {
+            "tag": "BUTTON",
+            "label": "dashboard.md",
+            "left": 372,
+            "right": 404,
+            "top": 87,
+            "bottom": 119,
+            "width": 32,
+            "height": 32
+          },
+          {
+            "tag": "BUTTON",
+            "label": "新建工作台",
+            "left": 407,
+            "right": 439,
+            "top": 87,
+            "bottom": 119,
+            "width": 32,
+            "height": 32
+          }
+        ],
+        "overlap": false,
+        "capture": {
+          "left": 703,
+          "right": 799,
+          "top": 247.875,
+          "bottom": 377.875,
+          "width": 96,
+          "height": 130
+        },
+        "horizontalOverflow": false,
+        "layout": "stacked"
+      }
+    },
+    {
+      "name": "claude-code-dark-1400",
+      "passed": true,
+      "detail": {
+        "viewport": 1400,
+        "root": {
+          "left": 656,
+          "right": 1400,
+          "top": 84,
+          "bottom": 740,
+          "width": 744,
+          "height": 656
+        },
+        "quicknote": {
+          "left": 672,
+          "right": 1384,
+          "top": 220,
+          "bottom": 362,
+          "width": 712,
+          "height": 142
+        },
+        "basis": "auto",
+        "region": {
+          "left": 672,
+          "right": 1384,
+          "top": 372,
+          "bottom": 740,
+          "width": 712,
+          "height": 368
+        },
+        "calendar": {
+          "left": 672,
+          "right": 1374,
+          "top": 372,
+          "bottom": 535.109375,
+          "width": 702,
+          "height": 163.109375
+        },
+        "banner": {
+          "left": 672,
+          "right": 1384,
+          "top": 84,
+          "bottom": 204,
+          "width": 712,
+          "height": 120
+        },
+        "quote": {
+          "left": 778.25,
+          "right": 1277.75,
+          "top": 125.65625,
+          "bottom": 150.84375,
+          "width": 499.5,
+          "height": 25.1875
+        },
+        "lines": [
+          {
+            "left": 778.25,
+            "right": 1277.75,
+            "top": 126.65625,
+            "bottom": 149.65625
+          }
+        ],
+        "buttons": [
+          {
+            "tag": "BUTTON",
+            "label": "dashboard.md",
+            "left": 684,
+            "right": 716,
+            "top": 87,
+            "bottom": 119,
+            "width": 32,
+            "height": 32
+          },
+          {
+            "tag": "BUTTON",
+            "label": "新建工作台",
+            "left": 719,
+            "right": 751,
+            "top": 87,
+            "bottom": 119,
+            "width": 32,
+            "height": 32
+          }
+        ],
+        "overlap": false,
+        "capture": {
+          "left": 1224.890625,
+          "right": 1349,
+          "top": 226,
+          "bottom": 356,
+          "width": 124.109375,
+          "height": 130
+        },
+        "horizontalOverflow": false,
+        "layout": "stacked"
+      }
+    },
+    {
+      "name": "eye-care-light-640",
+      "passed": true,
+      "detail": {
+        "viewport": 640,
+        "root": {
+          "left": 344,
+          "right": 640,
+          "top": 84,
+          "bottom": 740,
+          "width": 296,
+          "height": 656
+        },
+        "quicknote": {
+          "left": 352,
+          "right": 620,
+          "top": 243.375,
+          "bottom": 385.375,
+          "width": 268,
+          "height": 142
+        },
+        "basis": "auto",
+        "region": {
+          "left": 352,
+          "right": 620,
+          "top": 393.375,
+          "bottom": 1044.46875,
+          "width": 268,
+          "height": 651.09375
+        },
+        "calendar": {
+          "left": 352,
+          "right": 620,
+          "top": 393.375,
+          "bottom": 638.484375,
+          "width": 268,
+          "height": 245.109375
+        },
+        "banner": {
+          "left": 352,
+          "right": 620,
+          "top": 92,
+          "bottom": 219.375,
+          "width": 268,
+          "height": 127.375
+        },
+        "quote": {
+          "left": 372,
+          "right": 600,
+          "top": 132,
+          "bottom": 171.875,
+          "width": 228,
+          "height": 39.875
+        },
+        "lines": [
+          {
+            "left": 374.203125,
+            "right": 597.796875,
+            "top": 132,
+            "bottom": 150
+          },
+          {
+            "left": 402.171875,
+            "right": 569.8125,
+            "top": 151.9375,
+            "bottom": 169.9375
+          }
+        ],
+        "buttons": [
+          {
+            "tag": "BUTTON",
+            "label": "dashboard.md",
+            "left": 361,
+            "right": 393,
+            "top": 95,
+            "bottom": 127,
+            "width": 32,
+            "height": 32
+          },
+          {
+            "tag": "BUTTON",
+            "label": "新建工作台",
+            "left": 396,
+            "right": 428,
+            "top": 95,
+            "bottom": 127,
+            "width": 32,
+            "height": 32
+          }
+        ],
+        "overlap": false,
+        "capture": {
+          "left": 489,
+          "right": 585,
+          "top": 249.375,
+          "bottom": 379.375,
+          "width": 96,
+          "height": 130
+        },
+        "horizontalOverflow": false,
+        "layout": "stacked"
+      }
+    },
+    {
+      "name": "eye-care-light-850",
+      "passed": true,
+      "detail": {
+        "viewport": 850,
+        "root": {
+          "left": 344,
+          "right": 850,
+          "top": 84,
+          "bottom": 740,
+          "width": 506,
+          "height": 656
+        },
+        "quicknote": {
+          "left": 360,
+          "right": 834,
+          "top": 241.875,
+          "bottom": 383.875,
+          "width": 474,
+          "height": 142
+        },
+        "basis": "auto",
+        "region": {
+          "left": 360,
+          "right": 834,
+          "top": 393.875,
+          "bottom": 740,
+          "width": 474,
+          "height": 346.125
+        },
+        "calendar": {
+          "left": 360,
+          "right": 824,
+          "top": 393.875,
+          "bottom": 638.984375,
+          "width": 464,
+          "height": 245.109375
+        },
+        "banner": {
+          "left": 360,
+          "right": 834,
+          "top": 84,
+          "bottom": 225.875,
+          "width": 474,
+          "height": 141.875
+        },
+        "quote": {
+          "left": 408,
+          "right": 786,
+          "top": 124,
+          "bottom": 174.375,
+          "width": 378,
+          "height": 50.375
+        },
+        "lines": [
+          {
+            "left": 440.84375,
+            "right": 753.15625,
+            "top": 125,
+            "bottom": 148
+          },
+          {
+            "left": 506.0625,
+            "right": 687.9375,
+            "top": 150.1875,
+            "bottom": 173.1875
+          }
+        ],
+        "buttons": [
+          {
+            "tag": "BUTTON",
+            "label": "dashboard.md",
+            "left": 372,
+            "right": 404,
+            "top": 87,
+            "bottom": 119,
+            "width": 32,
+            "height": 32
+          },
+          {
+            "tag": "BUTTON",
+            "label": "新建工作台",
+            "left": 407,
+            "right": 439,
+            "top": 87,
+            "bottom": 119,
+            "width": 32,
+            "height": 32
+          }
+        ],
+        "overlap": false,
+        "capture": {
+          "left": 703,
+          "right": 799,
+          "top": 247.875,
+          "bottom": 377.875,
+          "width": 96,
+          "height": 130
+        },
+        "horizontalOverflow": false,
+        "layout": "stacked"
+      }
+    },
+    {
+      "name": "eye-care-light-1400",
+      "passed": true,
+      "detail": {
+        "viewport": 1400,
+        "root": {
+          "left": 656,
+          "right": 1400,
+          "top": 84,
+          "bottom": 740,
+          "width": 744,
+          "height": 656
+        },
+        "quicknote": {
+          "left": 672,
+          "right": 1384,
+          "top": 220,
+          "bottom": 362,
+          "width": 712,
+          "height": 142
+        },
+        "basis": "auto",
+        "region": {
+          "left": 672,
+          "right": 1384,
+          "top": 372,
+          "bottom": 740,
+          "width": 712,
+          "height": 368
+        },
+        "calendar": {
+          "left": 672,
+          "right": 1374,
+          "top": 372,
+          "bottom": 535.109375,
+          "width": 702,
+          "height": 163.109375
+        },
+        "banner": {
+          "left": 672,
+          "right": 1384,
+          "top": 84,
+          "bottom": 204,
+          "width": 712,
+          "height": 120
+        },
+        "quote": {
+          "left": 778.25,
+          "right": 1277.75,
+          "top": 125.65625,
+          "bottom": 150.84375,
+          "width": 499.5,
+          "height": 25.1875
+        },
+        "lines": [
+          {
+            "left": 778.25,
+            "right": 1277.75,
+            "top": 126.65625,
+            "bottom": 149.65625
+          }
+        ],
+        "buttons": [
+          {
+            "tag": "BUTTON",
+            "label": "dashboard.md",
+            "left": 684,
+            "right": 716,
+            "top": 87,
+            "bottom": 119,
+            "width": 32,
+            "height": 32
+          },
+          {
+            "tag": "BUTTON",
+            "label": "新建工作台",
+            "left": 719,
+            "right": 751,
+            "top": 87,
+            "bottom": 119,
+            "width": 32,
+            "height": 32
+          }
+        ],
+        "overlap": false,
+        "capture": {
+          "left": 1225.28125,
+          "right": 1349,
+          "top": 226,
+          "bottom": 356,
+          "width": 123.71875,
+          "height": 130
+        },
+        "horizontalOverflow": false,
+        "layout": "stacked"
+      }
+    },
+    {
+      "name": "eye-care-dark-640",
+      "passed": true,
+      "detail": {
+        "viewport": 640,
+        "root": {
+          "left": 344,
+          "right": 640,
+          "top": 84,
+          "bottom": 740,
+          "width": 296,
+          "height": 656
+        },
+        "quicknote": {
+          "left": 352,
+          "right": 620,
+          "top": 243.375,
+          "bottom": 385.375,
+          "width": 268,
+          "height": 142
+        },
+        "basis": "auto",
+        "region": {
+          "left": 352,
+          "right": 620,
+          "top": 393.375,
+          "bottom": 1044.46875,
+          "width": 268,
+          "height": 651.09375
+        },
+        "calendar": {
+          "left": 352,
+          "right": 620,
+          "top": 393.375,
+          "bottom": 638.484375,
+          "width": 268,
+          "height": 245.109375
+        },
+        "banner": {
+          "left": 352,
+          "right": 620,
+          "top": 92,
+          "bottom": 219.375,
+          "width": 268,
+          "height": 127.375
+        },
+        "quote": {
+          "left": 372,
+          "right": 600,
+          "top": 132,
+          "bottom": 171.875,
+          "width": 228,
+          "height": 39.875
+        },
+        "lines": [
+          {
+            "left": 374.203125,
+            "right": 597.796875,
+            "top": 132,
+            "bottom": 150
+          },
+          {
+            "left": 402.171875,
+            "right": 569.8125,
+            "top": 151.9375,
+            "bottom": 169.9375
+          }
+        ],
+        "buttons": [
+          {
+            "tag": "BUTTON",
+            "label": "dashboard.md",
+            "left": 361,
+            "right": 393,
+            "top": 95,
+            "bottom": 127,
+            "width": 32,
+            "height": 32
+          },
+          {
+            "tag": "BUTTON",
+            "label": "新建工作台",
+            "left": 396,
+            "right": 428,
+            "top": 95,
+            "bottom": 127,
+            "width": 32,
+            "height": 32
+          }
+        ],
+        "overlap": false,
+        "capture": {
+          "left": 489,
+          "right": 585,
+          "top": 249.375,
+          "bottom": 379.375,
+          "width": 96,
+          "height": 130
+        },
+        "horizontalOverflow": false,
+        "layout": "stacked"
+      }
+    },
+    {
+      "name": "eye-care-dark-850",
+      "passed": true,
+      "detail": {
+        "viewport": 850,
+        "root": {
+          "left": 344,
+          "right": 850,
+          "top": 84,
+          "bottom": 740,
+          "width": 506,
+          "height": 656
+        },
+        "quicknote": {
+          "left": 360,
+          "right": 834,
+          "top": 241.875,
+          "bottom": 383.875,
+          "width": 474,
+          "height": 142
+        },
+        "basis": "auto",
+        "region": {
+          "left": 360,
+          "right": 834,
+          "top": 393.875,
+          "bottom": 740,
+          "width": 474,
+          "height": 346.125
+        },
+        "calendar": {
+          "left": 360,
+          "right": 824,
+          "top": 393.875,
+          "bottom": 638.984375,
+          "width": 464,
+          "height": 245.109375
+        },
+        "banner": {
+          "left": 360,
+          "right": 834,
+          "top": 84,
+          "bottom": 225.875,
+          "width": 474,
+          "height": 141.875
+        },
+        "quote": {
+          "left": 408,
+          "right": 786,
+          "top": 124,
+          "bottom": 174.375,
+          "width": 378,
+          "height": 50.375
+        },
+        "lines": [
+          {
+            "left": 440.84375,
+            "right": 753.15625,
+            "top": 125,
+            "bottom": 148
+          },
+          {
+            "left": 506.0625,
+            "right": 687.9375,
+            "top": 150.1875,
+            "bottom": 173.1875
+          }
+        ],
+        "buttons": [
+          {
+            "tag": "BUTTON",
+            "label": "dashboard.md",
+            "left": 372,
+            "right": 404,
+            "top": 87,
+            "bottom": 119,
+            "width": 32,
+            "height": 32
+          },
+          {
+            "tag": "BUTTON",
+            "label": "新建工作台",
+            "left": 407,
+            "right": 439,
+            "top": 87,
+            "bottom": 119,
+            "width": 32,
+            "height": 32
+          }
+        ],
+        "overlap": false,
+        "capture": {
+          "left": 703,
+          "right": 799,
+          "top": 247.875,
+          "bottom": 377.875,
+          "width": 96,
+          "height": 130
+        },
+        "horizontalOverflow": false,
+        "layout": "stacked"
+      }
+    },
+    {
+      "name": "eye-care-dark-1400",
+      "passed": true,
+      "detail": {
+        "viewport": 1400,
+        "root": {
+          "left": 656,
+          "right": 1400,
+          "top": 84,
+          "bottom": 740,
+          "width": 744,
+          "height": 656
+        },
+        "quicknote": {
+          "left": 672,
+          "right": 1384,
+          "top": 220,
+          "bottom": 362,
+          "width": 712,
+          "height": 142
+        },
+        "basis": "auto",
+        "region": {
+          "left": 672,
+          "right": 1384,
+          "top": 372,
+          "bottom": 740,
+          "width": 712,
+          "height": 368
+        },
+        "calendar": {
+          "left": 672,
+          "right": 1374,
+          "top": 372,
+          "bottom": 535.109375,
+          "width": 702,
+          "height": 163.109375
+        },
+        "banner": {
+          "left": 672,
+          "right": 1384,
+          "top": 84,
+          "bottom": 204,
+          "width": 712,
+          "height": 120
+        },
+        "quote": {
+          "left": 778.25,
+          "right": 1277.75,
+          "top": 125.65625,
+          "bottom": 150.84375,
+          "width": 499.5,
+          "height": 25.1875
+        },
+        "lines": [
+          {
+            "left": 778.25,
+            "right": 1277.75,
+            "top": 126.65625,
+            "bottom": 149.65625
+          }
+        ],
+        "buttons": [
+          {
+            "tag": "BUTTON",
+            "label": "dashboard.md",
+            "left": 684,
+            "right": 716,
+            "top": 87,
+            "bottom": 119,
+            "width": 32,
+            "height": 32
+          },
+          {
+            "tag": "BUTTON",
+            "label": "新建工作台",
+            "left": 719,
+            "right": 751,
+            "top": 87,
+            "bottom": 119,
+            "width": 32,
+            "height": 32
+          }
+        ],
+        "overlap": false,
+        "capture": {
+          "left": 1225.28125,
+          "right": 1349,
+          "top": 226,
+          "bottom": 356,
+          "width": 123.71875,
+          "height": 130
+        },
+        "horizontalOverflow": false,
+        "layout": "stacked"
+      }
+    },
+    {
+      "name": "collapsed-switcher-clear-of-quicknote",
+      "passed": true,
+      "detail": {
+        "viewport": 1400,
+        "root": {
+          "left": 656,
+          "right": 1400,
+          "top": 84,
+          "bottom": 740,
+          "width": 744,
+          "height": 656
+        },
+        "quicknote": {
+          "left": 672,
+          "right": 1384,
+          "top": 132,
+          "bottom": 274,
+          "width": 712,
+          "height": 142
+        },
+        "basis": "auto",
+        "region": {
+          "left": 672,
+          "right": 1384,
+          "top": 284,
+          "bottom": 740,
+          "width": 712,
+          "height": 456
+        },
+        "calendar": {
+          "left": 672,
+          "right": 1374,
+          "top": 284,
+          "bottom": 447.109375,
+          "width": 702,
+          "height": 163.109375
+        },
+        "banner": {
+          "left": 672,
+          "right": 1384,
+          "top": 84,
+          "bottom": 88,
+          "width": 712,
+          "height": 4
+        },
+        "quote": {
+          "left": 778.25,
+          "right": 1277.75,
+          "top": 124,
+          "bottom": 149.1875,
+          "width": 499.5,
+          "height": 25.1875
+        },
+        "lines": [
+          {
+            "left": 778.25,
+            "right": 1277.75,
+            "top": 125,
+            "bottom": 148
+          }
+        ],
+        "buttons": [
+          {
+            "tag": "BUTTON",
+            "label": "dashboard.md",
+            "left": 712,
+            "right": 744,
+            "top": 87,
+            "bottom": 119,
+            "width": 32,
+            "height": 32
+          },
+          {
+            "tag": "BUTTON",
+            "label": "新建工作台",
+            "left": 747,
+            "right": 779,
+            "top": 87,
+            "bottom": 119,
+            "width": 32,
+            "height": 32
+          }
+        ],
+        "overlap": false,
+        "capture": {
+          "left": 1224.8125,
+          "right": 1349,
+          "top": 138,
+          "bottom": 268,
+          "width": 124.1875,
+          "height": 130
+        },
+        "horizontalOverflow": false,
+        "layout": "stacked"
+      }
+    },
+    {
+      "name": "board-open-does-not-rewrite",
+      "passed": true
+    },
+    {
+      "name": "no-runtime-errors",
+      "passed": true,
+      "detail": []
+    }
+  ],
+  "unverified": [
+    "Actual phone host"
+  ],
+  "base": "00a1dd2ef8dbb4c84174ae3c112e76b686522c98",
+  "host": "Obsidian 1.13.7 / Windows 10 desktop",
+  "nativeEvidence": "C:\\Users\\cdewta\\AppData\\Local\\Temp\\nand-home-quicknote-review-5a931f87a11c404196bfb38c0fba6f72\\evidence",
+  "harness": "scripts/obsidian-acceptance/home-quicknote.mjs",
+  "baselineEvidence": "C:\\Users\\cdewta\\AppData\\Local\\Temp\\nand-home-quicknote-review-9e2de239e4254657bf62a3da26f7ea46\\evidence\\partial-review.json",
+  "finding": "Existing direct-child flex fix already prevented the tall blank bar. Native measurements still reproduced quote overlap at 639/640/641 and missing workspace keyboard focus. Quote banner now fits wrapped content below a reserved control row, provides 32px desktop/44px touch targets and visible keyboard focus, and keeps collapsed controls clear of the bar. Stats banner sizing is unchanged.",
+  "checks": 126,
+  "quicknoteHeightRange": {
+    "min": 42,
+    "max": 172
+  },
+  "verification": [
+    "126 native checks pass, including 30 language/viewport/content cases; wide 320px leaf, return navigation, capture growth, keyboard add/cancel, 18 theme/mode/width cases, collapse, unchanged board bytes, zero runtime errors.",
+    "Build, zero-warning lint, CSS lint, stacked layout, scroll-root, styles consistency and check:styles passed.",
+    "126 checks passed again after the per-board layout and new-board dialog changes; fresh fixture 5a931f87a11c404196bfb38c0fba6f72."
+  ],
+  "screenshotsInspected": [
+    "Earlier equivalent fixture a6a5d26b55e94eefb7d182b6c035e951: home-claude-code-dark-640.png, home-wide-narrow-leaf.png"
+  ],
+  "limits": [
+    "Actual phone host remains unavailable; desktop emulation never claims actual phone validation.",
+    "No implementation commit requested or created."
+  ],
+  "latestRegistryRegressionEvidence": "C:\\Users\\cdewta\\AppData\\Local\\Temp\\nand-home-quicknote-review-f87527fe6c85439c83288f0617f0cbe6\\evidence",
+  "latestRegistryRegression": "passed"
+}

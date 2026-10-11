@@ -1,0 +1,59 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>DeepSeek adapter local fixture</title>
+<button id="new-chat" aria-label="New chat">New chat</button>
+<main id="messages"></main>
+<textarea class="fixture-composer" id="chat-input" placeholder="DeepSeek"></textarea>
+<button id="submit" aria-label="Send">Send</button>
+<button id="stop" aria-label="Stop" style="display:none">Stop</button>
+<script>
+const composer = document.querySelector('#chat-input'), output = document.querySelector('#messages'), submit = document.querySelector('#submit'), stop = document.querySelector('#stop');
+let conversation, serial = 0, messages = [], timer;
+const fence = String.fromCharCode(96).repeat(3);
+window.fixtureMarkdown = '# Heading\n\n| A | B |\n| --- | --- |\n| 1 | 2 |\n\n' + fence + 'ts\nconst a = 1;\n' + fence + '\n\n$x^2$';
+window.fixtureCount = () => messages.length;
+window.fixtureHistory = () => ({ data: { biz_data: {
+ access_token: 'fixture-only-secret', chat_session: { id: conversation, current_message_id: messages.at(-1)?.message_id },
+ chat_messages: messages, has_more: false, total_count: messages.length
+} } });
+function row(id, parent, role, text) {
+ const element = document.createElement('div');
+ element.dataset.messageId = id; element.dataset.role = role;
+ element.dataset.parentId = parent ?? '';
+ element.textContent = text; output.append(element); return element;
+}
+document.querySelector('#new-chat').onclick = () => {
+ if (timer) clearTimeout(timer);
+ conversation = undefined; messages = []; output.replaceChildren(); composer.value = '';
+ history.replaceState({}, '', '/'); stop.style.display = 'none'; submit.disabled = false;
+};
+submit.onclick = () => {
+ if (!composer.value || submit.disabled) return;
+ for (const status of output.querySelectorAll('[role="status"]')) status.remove();
+ const question = composer.value, parent = messages.at(-1)?.message_id;
+ conversation ??= crypto.randomUUID();
+ history.replaceState({}, '', '/a/chat/s/' + conversation);
+ const user = 'user-' + (++serial), answer = 'answer-' + serial;
+ messages.push({ message_id: user, parent_id: parent ?? null, fragments: [{ type: 'REQUEST', content: question }] });
+ row(user, parent, 'user', question);
+ const response = row(answer, user, 'assistant', 'Partial answer');
+ response.setAttribute('aria-busy', 'true');
+ composer.value = ''; submit.disabled = true; stop.style.display = '';
+ timer = setTimeout(() => {
+  response.removeAttribute('aria-busy');
+  response.innerHTML = '<h1>Heading</h1><table><tr><th>A</th><th>B</th></tr><tr><td>1</td><td>2</td></tr></table><pre><code class="language-ts">const a = 1;</code></pre><span class="katex"><annotation encoding="application/x-tex">x^2</annotation></span><div class="ds-think-content">Private reasoning fixture</div><button>Copy</button>';
+  messages.push({ message_id: answer, parent_id: user, fragments: [{ type: 'THINK', content: 'Private reasoning fixture' }, { type: 'RESPONSE', content: fixtureMarkdown }] });
+  submit.disabled = false; stop.style.display = 'none'; timer = undefined;
+  if (!window.fixtureNoHistory) void fetch('/api/v0/chat/history_messages?chat_session_id=' + conversation);
+ }, window.fixtureDelay ?? 900);
+};
+stop.onclick = () => {
+ clearTimeout(timer); timer = undefined; stop.style.display = 'none'; submit.disabled = false;
+ for (const row of output.querySelectorAll('[aria-busy]')) {
+  if (row.dataset.role === 'assistant' && !messages.some(message => message.message_id === row.dataset.messageId))
+   messages.push({ message_id: row.dataset.messageId, parent_id: row.dataset.parentId, fragments: [{ type: 'RESPONSE', content: row.textContent }] });
+  row.removeAttribute('aria-busy');
+ }
+ const status = document.createElement('p'); status.role = 'status'; status.textContent = 'Stopped'; output.append(status);
+};
+</script>

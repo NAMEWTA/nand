@@ -61,7 +61,7 @@ export function setupWidgetDnD(
 	// dropping onto it (or dragging it) could never move anything on screen.
 	// It exits the reorder system there entirely: no insertion indicators, no
 	// persisted no-op order writes that would read as a broken drag.
-	const isPinned = (keyEl: HTMLElement): boolean => stacked && keyEl.dataset.widgetKey === 'quickActions';
+	const isPinned = (keyEl: HTMLElement): boolean => stacked && (keyEl.dataset.widgetMember ?? keyEl.dataset.widgetKey) === 'quickActions';
 
 	widgets().forEach((el) => {
 		const wEl = el as HTMLElement;
@@ -90,7 +90,7 @@ export function setupWidgetDnD(
 	widgetArea.addEventListener('dragstart', (e) => {
 		const keyEl = keyElOf(e);
 		if (!keyEl || isPinned(keyEl)) return;
-		draggedKey = keyEl.dataset.widgetKey ?? null;
+		draggedKey = (keyEl.dataset.widgetMember ?? keyEl.dataset.widgetKey) ?? null;
 		keyEl.addClass('dashboard-sidebar-widget--dragging');
 		if (e.dataTransfer) {
 			e.dataTransfer.effectAllowed = 'move';
@@ -113,7 +113,7 @@ export function setupWidgetDnD(
 		if (!keyEl || isPinned(keyEl)) return;
 		e.preventDefault();
 		if (e.dataTransfer) e.dataTransfer.dropEffect = 'move';
-		if (!draggedKey || keyEl.dataset.widgetKey === draggedKey) return;
+		if (!draggedKey || (keyEl.dataset.widgetMember ?? keyEl.dataset.widgetKey) === draggedKey) return;
 		widgets().forEach((el2) => clearDragOver(el2 as HTMLElement));
 		keyEl.addClass(
 			isBefore(keyEl, e)
@@ -132,9 +132,9 @@ export function setupWidgetDnD(
 		if (!keyEl || isPinned(keyEl)) return;
 		e.preventDefault();
 		clearDragOver(keyEl);
-		if (!draggedKey || keyEl.dataset.widgetKey === draggedKey) return;
+		if (!draggedKey || (keyEl.dataset.widgetMember ?? keyEl.dataset.widgetKey) === draggedKey) return;
 
-		const targetKey = keyEl.dataset.widgetKey ?? '';
+		const targetKey = (keyEl.dataset.widgetMember ?? keyEl.dataset.widgetKey) ?? '';
 		const insertBefore = isBefore(keyEl, e);
 
 		const keys = [...currentKeys];

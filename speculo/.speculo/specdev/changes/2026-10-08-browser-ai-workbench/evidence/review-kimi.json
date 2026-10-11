@@ -1,0 +1,97 @@
+{
+  "ticket": "Browser T04 Kimi workspace PoC",
+  "finding": "R-093",
+  "status": "fixed-core-loop-real-account-unverified",
+  "findingDetails": [
+    "Kimi exists only in the provider enum/prototype metadata; the production provider factory rejects it and task creation exposes only DeepSeek.",
+    "Kimi ListMessages associates conversation and page cursor in POST body rather than the response URL; passive capture needs a bounded allowlisted identity projection. No credentials or raw request bodies should be retained."
+  ],
+  "sourceReview": {
+    "reference": "https://github.com/NAMEWTA/multi-ai-browser-extension",
+    "sha": "b6b83ca90f0f67fbf25a676e7a8f6b8b34327800",
+    "local": "C:/Users/cdewta/AppData/Local/Temp/nand-maiw-browser-review-161505c0a8a24243a20841f4cf6abdcf",
+    "read": [
+      "src/providers/kimi/definition.ts",
+      "src/providers/kimi/selectors.ts",
+      "src/providers/kimi/strategy.ts",
+      "src/providers/kimi/acquisition.ts (complete)",
+      "src/providers/kimi/runtime-acquisition.ts (complete)",
+      "src/providers/kimi/native-copy.ts (complete)",
+      "src/providers/kimi/fixtures/acquisition-list-messages-page-1.json",
+      "src/providers/kimi/fixtures/acquisition-list-messages-page-2.json",
+      "src/runtime/acquisition-network-protocol.ts endpoint matching",
+      "src/providers/kimi/runtime-acquisition.test.ts first115lines"
+    ],
+    "license": "Pinned upstream MIT headers, full license and NOTICE retained; bilingual source mapping expanded for Kimi.",
+    "observations": [
+      "Definition official origin https://www.kimi.com; endpoint /apiv2/kimi.gateway.chat.v1.ChatService/ListMessages, POST body chat_id/page_token.",
+      "Lexical richtext composer, .send-button-container and explicit new-chat controls. Do not copy upstream execCommand; use existing native input and exact readback.",
+      "Upstream finished detection uses status.endsWith(term), which accepts an unfinished suffix; NAND must use explicit finished status values.",
+      "Upstream joinDistinct drops repeated public text blocks; preserve repeats.",
+      "Upstream network replay and anonymous DOM identity/native-copy fallback are outside this passive native adapter. Pagination without complete request chain and current branch evidence stays partial."
+    ]
+  },
+  "implemented": [
+    "Finite passive POST request projection before retaining response evidence: only conversation ID and cursor, exact HTTPS origin/endpoint/method, bounded body and maps; no request secrets or credential replay.",
+    "Kimi public text blocks preserve repeated content and Markdown, exact terminal statuses reject UNFINISHED; observed cursor chain, current DOM branch, parent identity, role order and page/count bounds prevent false completeness.",
+    "Kimi readonly DOM reader recognizes lexical/contenteditable input, explicit stable message/parent identities and public answer scope; no anonymous IDs, index identities or inferred parents. Native input uses the existing guest operation queue and exact readback.",
+    "Shared NativeProviderSession preserves the existing page/profile/generation admission, native input, pause, acceptance proof, capture and disposal lifecycle for both providers. Provider adapters lazy-load only when explicitly connected.",
+    "Provider selection in the registered production task API/UI; canonical Kimi URLs; unchanged durable workspace task/turn/answer storage and send journal. Unsupported providers rejected before task write.",
+    "Incomplete answer reasons exposed in bilingual result UI; title, draft, selected/visible recipients, independent submission/acquisition/save states, Markdown and restart behavior stay in the same workspace."
+  ],
+  "verification": {
+    "realAccount": "Not available; current live Kimi private API/DOM compatibility remains unverified.",
+    "unit": {
+      "command": "pnpm exec vitest run src/modules/browser/core/providers src/modules/browser/platform/desktop/provider-responses.test.ts src/modules/browser/services/workspace.test.ts src/modules/browser/services/workspace-sender.test.ts",
+      "passed": 31
+    },
+    "native": [
+      {
+        "provider": "kimi",
+        "passed": 59,
+        "evidence": "C:/Users/cdewta/AppData/Local/Temp/nand-kimi-workspace-review-1995dbfae33b4bb697d3c3028530e2d5/evidence"
+      },
+      {
+        "provider": "kimi",
+        "passed": 60,
+        "evidence": "C:/Users/cdewta/AppData/Local/Temp/nand-kimi-workspace-final-4c2bebfb2d374eaf96c4f5f748307a7d/evidence",
+        "extra": "Actual multiline contenteditable input and >60k-character answer preservation; observed two-page history; missing page/UNFINISHED/no-history remain incomplete; actual new context preserves old turns."
+      },
+      {
+        "provider": "deepseek",
+        "passed": 52,
+        "evidence": "C:/Users/cdewta/AppData/Local/Temp/nand-deepseek-shared-session-review-7bc71400af614ae495be38136312412b/evidence",
+        "extra": "Production regression after extracting shared native lifecycle."
+      },
+      {
+        "provider": "kimi",
+        "passed": 63,
+        "evidence": "C:/Users/cdewta/AppData/Local/Temp/nand-kimi-workspace-reasons-fe853b80b7954d2d85adcee8c34b2e4c/evidence",
+        "extra": "Final production build; prior native60 plus localized missing-page, unfinished and scoped-DOM explanations asserted in actual result UI."
+      }
+    ],
+    "method": "Uninstrumented main.js and registered BROWSER_WORKSPACE API with real native task UI, guest ownership, Markdown storage and native inputs. All HTTPS traffic in the disposable fixture partition is intercepted locally; this proves NAND integration, not live provider compatibility.",
+    "checks": {
+      "build": "pass; main.js 4142283 bytes, styles.css 749504",
+      "lint": "pass; zero warnings",
+      "architecture": "pass; 898 modules",
+      "i18n": "pass; 3352 keys",
+      "docs": "pass; 552 documents, 567 local and 350 external links",
+      "bundle": "pass; main.js 4142283 / cap 4143104, styles749504 / cap749568; startup96.8KiB, browser activation127.3KiB within unchanged caps"
+    },
+    "visual": "Reviewed 500px light screenshot: actual multiline prompt, heading/table/code/math/repeated prose rendered in bounded answer cards.",
+    "fullSuite": {
+      "command": "pnpm test",
+      "passed": 640,
+      "skipped": 4,
+      "filesPassed": 143,
+      "filesSkipped": 1,
+      "durationSeconds": 144.24,
+      "log": "C:/Users/cdewta/AppData/Local/Temp/nand-review-kimi-full.log"
+    }
+  },
+  "next": [
+    "Real Kimi account acceptance unavailable; current live private API/DOM remains unverified.",
+    "Continue independent Browser T05-T21 and remaining Home workflow integration/planning reconciliation."
+  ]
+}

@@ -12,6 +12,7 @@ export function normalizeDashboardSettings(input: unknown): DashboardSettings {
 	return {
 		...structuredClone(DEFAULT_DASHBOARD_SETTINGS),
 		...(raw as Partial<DashboardSettings>),
+		layoutMode: raw.layoutMode === 'side' || raw.layoutMode === 'stacked' ? raw.layoutMode : undefined,
 		countdowns: Array.isArray(raw.countdowns) ? (raw.countdowns as CountdownConfig[]).filter((c) => c && typeof c.id === 'string') : [],
 		albums: Array.isArray(raw.albums) ? (raw.albums as AlbumConfig[]).filter((a) => a && typeof a.id === 'number') : [],
 		anniversaries: Array.isArray(raw.anniversaries)

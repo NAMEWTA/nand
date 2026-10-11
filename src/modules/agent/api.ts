@@ -1,20 +1,42 @@
-import { serviceKey } from '../../app/contracts/module';
+import { contributionPoint, serviceKey } from '../../app/contracts/module';
 import type { PanelModel, WorkbenchTarget } from '../../app/contracts/workbench';
 import type { AgentUsageSource } from './core/launch/usage-source';
+import type { AgentId } from './core/launch/types';
+import type { AgentDispatchRequest, AgentDispatchReceipt } from '../../shared/agent-dispatch';
+import type { AgentSkillCapability } from '../../shared/agent-prompt';
+import type { SkillEntry, SkillScan, SkillSource } from './core/skills/registry';
 
-export type { AgentUsageSource };
+export type { AgentId, AgentUsageSource };
+export type { AgentDispatchRequest, AgentDispatchReceipt };
+export type { AgentSkillCapability, SkillEntry, SkillScan, SkillSource };
+
+/** Read-only discovery runs only when a picker or explicit refresh requests it. */
+export interface AgentSkills {
+	targets(): readonly Pick<AgentDirectoryEntry, 'id' | 'title'>[];
+	capability(agentId: string): AgentSkillCapability | undefined;
+	list(agentId: string, signal?: AbortSignal): Promise<SkillScan>;
+	/** Call only after the user's button configuration has been saved. */
+	remember(agentId: string, name: string): Promise<void>;
+	forget(agentId: string, name: string): Promise<void>;
+}
+export const AGENT_SKILLS = serviceKey<AgentSkills>('agent', 'skills');
+
+export interface AgentDirectoryEntry { id: AgentId; title: string; enabled: boolean; installed: boolean; }
+export interface AgentDirectory { list(): readonly AgentDirectoryEntry[]; }
+export const AGENT_DIRECTORY = serviceKey<AgentDirectory>('agent', 'directory');
 
 /** A running agent session that can receive material (browser selections, screenshots). */
 export interface AgentSessionSummary {
 	id: string;
 	title: string;
+	agentId?: AgentId;
 }
 
 /** Agent sessions as other modules see them (service `agent.sessions`). Material is pasted, never sent. */
 export interface AgentSessionsPort {
 	list(): Promise<AgentSessionSummary[]>;
 	/** Paste `text` (and attach `files`) into the session's input as one unsent block. */
-	attachMaterial(sessionId: string, material: { title: string; text: string; files: string[] }): Promise<void>;
+	attachMaterial(sessionId: string, material: { title: string; text: string; files: string[] }, options?: { agentId?: AgentId; signal?: AbortSignal }): Promise<void>;
 }
 
 export const AGENT_SESSIONS = serviceKey<AgentSessionsPort>('agent', 'sessions');
@@ -32,27 +54,62 @@ export interface AgentWorkbench {
 
 export const AGENT_WORKBENCH = serviceKey<AgentWorkbench>('agent', 'workbench');
 
-/** One authorized prompt run. A truncated tail is not a completed answer. */
+export type AgentPromptStatus = 'succeeded' | 'failed' | 'cancelled' | 'interrupted' | 'timeout';
+
+/** One authorized prompt run. Text is exclusively the complete native answer. */
 export interface AgentPromptResult {
-	status: 'complete' | 'truncated' | 'failed' | 'budget';
+	status: AgentPromptStatus;
 	text: string;
+	agentId?: AgentId;
+	/** Hash of the native account identity; never an environment or credential map. */
+	accountIdentity?: string;
+	terminalId?: string;
+	errorCode?: string;
+	usage?: { input: number; output: number; cacheRead: number; cacheWrite: number; cost: number | null; known: boolean; partial?: boolean };
 }
 
 export interface AgentPromptRequest {
 	prompt: string;
 	purpose: string;
+	agentId?: AgentId;
+	/** Defaults to the vault root. Every supplied cwd must resolve within it. */
+	cwd?: string;
+	timeoutMs?: number;
+	signal?: AbortSignal;
+	reveal?: boolean;
+	keepTerminal?: boolean;
+	/** Continue a successful retained prompt terminal, e.g. one format repair. */
+	continueTerminalId?: string;
+	/** Full native lifecycle answer, never terminal screen text. */
+	resultChannel?: 'native';
+	runContext?: { provider: string; handle: string };
+	onState?: (state: { status: 'running' | 'needs-attention'; terminalId: string }) => void;
 }
 
 export interface AgentPromptRunner {
 	run(request: AgentPromptRequest): Promise<AgentPromptResult>;
+	/** Open a terminal owned by this runner, e.g. to answer a CLI permission prompt. */
+	open?(terminalId: string): Promise<void>;
+	/** End a retained terminal when its consuming module is disabled. */
+	close?(terminalId: string): Promise<void>;
 }
 
 export const AGENT_PROMPT_RUNNER = serviceKey<AgentPromptRunner>('agent', 'prompt-runner');
 
-/** Start a session or paste into one. Neither path presses Enter or reports model success. */
+export interface AgentRunContextLease {
+	/** Short-lived grants only. Never stored in account/session identity or receipts. */
+	env: Readonly<Record<string, string>>;
+	dispose(): void | Promise<void>;
+}
+export interface AgentRunContextProvider {
+	id: string;
+	resolve(handle: string, run: { runId: string; cwd: string; signal: AbortSignal }): Promise<AgentRunContextLease | undefined>;
+}
+export const AGENT_RUN_CONTEXTS = contributionPoint<AgentRunContextProvider>('agent', 'run-contexts');
+
+/** Deliver once through the shared journal. Fresh starts the selected CLI; existing only pastes. */
 export interface AgentDispatch {
-	start(prompt: string): Promise<{ id: string; submitted: false }>;
-	paste(sessionId: string, prompt: string): Promise<{ submitted: false }>;
+	dispatch(request: AgentDispatchRequest, options?: { signal?: AbortSignal }): Promise<AgentDispatchReceipt>;
 }
 
 export const AGENT_DISPATCH = serviceKey<AgentDispatch>('agent', 'dispatch');

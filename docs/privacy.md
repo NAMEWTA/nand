@@ -10,6 +10,14 @@ Archive text is in the archive folder you choose, one `基本信息.md` per pers
 
 Settings are plain JSON. If you enter a WeRead API key for the dashboard, it is stored as text in `.nand/config/settings.json`.
 
+Board skill templates are visible YAML in board notes. Dispatch history under `.nand/automation/<device-id>/runtime.json` retains the final prompt and selected file references as plain text, together with the source and delivery receipt. A new session passes this material to the selected CLI and its configured provider; pasting into an existing session leaves submission to you. These snapshots are not diagnostic logs and are not redacted.
+
+The skill picker reads local `SKILL.md` files to extract names; it does not execute them or send their contents to a provider. It scans the three documented vault directories only on opening or refresh. Additional directories are an explicit device setting, read on desktop only; leaving the setting empty makes no additional scan. Remembered names and directory paths are stored in device settings and can be cleared under Agents. Discovery does not change skill files.
+
+News stores collected text, analysis and raw CLI replies in `.nand/news/<device-id>/`, with a 30-day collected/run-history window. Favorites, briefs and optional daily notes are visible Markdown under `NAND/新闻/`. Clearing collected cache keeps those notes and current quota. Source/view/interest settings are shared with the vault; the selected CLI and working directory are device-specific. See [News](news.md).
+
+On desktop macOS and Linux, private `.nand/` directories use `0700` and files use `0600`; existing managed files are tightened at startup, including after a Git clone. NAND refuses symlinked private paths and does not change ordinary note permissions. This is local access control, not encryption or a Git upload restriction. Windows and mobile retain their native permission behavior. See [Data and recovery](data.md#private-file-permissions) for repair behavior.
+
 Diagnostic logs are redacted before they are printed: the vault path and home folder are replaced, credentials in URLs and common token, password and key query parameters are masked, bearer tokens and `token=…`-style assignments are masked, and long text is cut. Terminal screens, your Markdown and text you copy yourself do not pass through this redaction, and a debug switch cannot bypass it.
 
 ## Network
@@ -19,6 +27,8 @@ Archive search and the list/card switch read only an in-memory index and make no
 | Feature | When | What is sent, and to whom |
 |---|---|---|
 | Browser | You open a page, search, download | Whatever the sites you visit receive. Text that is not an address goes to your chosen search engine (Google, Bing or DuckDuckGo) |
+| News collection (off by default) | You preview or refresh sources, or enable a background refresh policy | HTTP requests to the configured feed/static-page addresses; static source scripts are not executed |
+| News analysis and briefs (off by default) | You request analysis or a brief | Bounded report excerpts, configured interests and templates go to the selected CLI/account; its provider handles the model request. NAND stores no model API key and does not call a model API directly |
 | Web section on a board | The section is shown | The configured address is requested once to read its framing headers, and the page is then loaded in the board. Web shortcut cards load nothing until you open them |
 | Terminal helper | The first time you open a terminal | A download of `nand-pty-<platform>-<arch>` and its checksum from the GitHub release of the plugin's version. No vault data is sent. Offline mode never connects |
 | Agent quota | The Usage page is open, or quota is shown in the status bar | For each enabled agent, NAND reads the sign-in that the CLI saved on this computer and calls the provider's quota endpoint (Anthropic, OpenAI/ChatGPT, Google, xAI/Grok, OpenCode and others) |

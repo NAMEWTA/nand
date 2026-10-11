@@ -1,5 +1,8 @@
 export const messages = {
 	en: {
+		'workbench.browserWorkflows': 'Browser workflows',
+		'workbench.browserAccess': 'Local access',
+		'workbench.browserAssistant': 'Web assistant',
 		"workbench.openInWorkbench": "Open in workbench",
 		"workbench.unreadCount": "{count} unread",
 		"workbench.moduleFailed": "This feature could not start",
@@ -28,6 +31,9 @@ export const messages = {
 		"workbench.history": "History",
 		"workbench.usage": "Usage",
 		"workbench.browser": "Browser",
+		"workbench.browserWorkspace": "AI workspace",
+		"workbench.browserNewTask": "New task",
+		"workbench.browserNoTasks": "No saved tasks yet",
 		"workbench.contacts": "Archives",
 		"workbench.people": "People",
 		"workbench.companies": "Companies",
@@ -63,6 +69,9 @@ export const messages = {
 		"workbench.newPage": "New page",
 	},
 	zh: {
+		'workbench.browserWorkflows': '浏览器流程',
+		'workbench.browserAccess': '本地外接',
+		'workbench.browserAssistant': '网页助手',
 		"workbench.openInWorkbench": "在工作台中打开",
 		"workbench.unreadCount": "{count} 条未读",
 		"workbench.moduleFailed": "此功能未能启动",
@@ -91,6 +100,9 @@ export const messages = {
 		"workbench.history": "历史",
 		"workbench.usage": "用量",
 		"workbench.browser": "浏览器",
+		"workbench.browserWorkspace": "AI 工作台",
+		"workbench.browserNewTask": "新建任务",
+		"workbench.browserNoTasks": "尚无已保存任务",
 		"workbench.contacts": "档案",
 		"workbench.people": "个人",
 		"workbench.companies": "企业",

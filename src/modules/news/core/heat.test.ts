@@ -1,7 +1,10 @@
+import { analysisRow } from '../../../../test/news/analysis';
+import { acceptScore } from './scoring';
 import assert from 'node:assert/strict';
 import { test } from 'vitest';
-import { closeHeatHour, heatFacts, heatSeries, HEAT_RULE_VERSION, participantKey, rankHeat, sourceIsStale, type HeatFact } from './heat';
+import { observeHeatHour, repairHeatHours, heatFacts, heatSeries, HEAT_RULE_VERSION, participantKey, rankHeat, sourceIsStale, type HeatFact } from './heat';
 import { normalizeNewsSource, type NewsMaterial, type NewsSource } from './model';
+import { DEFAULT_HEAT_RULES } from './editorial-rules';
 
 const HOUR = 3_600_000;
 const now = Date.UTC(2026, 9, 9, 12, 0, 0);
@@ -16,6 +19,25 @@ function pair(eventId: string, at: number, latest = at): HeatFact[] {
 
 const source = (over: Partial<NewsSource> = {}): NewsSource =>
 	normalizeNewsSource({ id: 'alpha', name: 'Alpha', url: 'https://example.com/a.xml', type: 'rss', enabled: true, participation: 'editorial', intervalMinutes: 60, ...over })!;
+
+test('edited heat rules recompute ranking and observed curves without inventing history', () => {
+	const facts = pair('e', now - 24 * HOUR).map(item => ({ ...item, scheduled: false }));
+	const rules = { ...DEFAULT_HEAT_RULES, halfLifeHours: 12, topCount: 1 };
+	assert.equal(rankHeat(facts, now)[0]!.index, 10);
+	assert.equal(rankHeat(facts, now, rules)[0]!.index, 5);
+	assert.equal(rankHeat(facts, now, { ...rules, windowHours: 12 }).length, 0);
+	assert.equal(rankHeat(facts, now, { ...rules, minParticipants: 3 }).length, 0);
+	assert.equal(rankHeat([...facts, ...pair('second', now)], now, rules).length, 1);
+	const snapshots = [now - 2 * HOUR, now].flatMap(hour => observeHeatHour(facts, hour, []));
+	const repaired = repairHeatHours(facts, now, snapshots, rules);
+	assert.deepEqual(repaired.map(item => item.hour), snapshots.map(item => item.hour));
+	assert.ok(repaired.every(item => item.ruleVersion !== HEAT_RULE_VERSION));
+	assert.equal(repaired.at(-1)!.score, 5);
+	const curve = heatSeries(repaired, now, 24, 'e', facts, rules);
+	assert.equal(curve.points.at(-1)!.heat, 5); assert.equal(curve.draw, false);
+	const empty = repairHeatHours(facts, now, snapshots, { ...rules, windowHours: 1 });
+	assert.ok(empty.every(item => item.score === 0 && !item.complete));
+});
 
 test('heat counts each participant once on a 48h window and a 24h half-life', () => {
 	const ranked = rankHeat([fact({ participantId: 'a', at: now }), fact({ participantId: 'a', at: now - HOUR }), fact({ participantId: 'b', at: now - 24 * HOUR })], now);
@@ -32,8 +54,8 @@ test('heat counts each participant once on a 48h window and a 24h half-life', ()
 	assert.equal(top.length, 10);
 	assert.equal(top[0]?.eventId, 'e0');
 	assert.equal(top.some((row) => row.eventId === 'e11'), false);
-	assert.equal(participantKey(source({ participantStrategy: 'community' }), 'ada'), 'a:ada');
-	assert.equal(participantKey(source({ participantStrategy: 'community' })), undefined);
+	assert.equal(participantKey(source({ participantStrategy: 'community' }), 'ada'), 'a:alpha:ada');
+	assert.equal(participantKey(source({ participantStrategy: 'community' })), 's:alpha');
 	assert.equal(participantKey(source({ participation: 'isolated', participantStrategy: 'community' }), 'ada'), undefined);
 	assert.equal(participantKey(source({ groupId: 'lab', ownerEntityId: 'org' })), 'g:lab');
 });
@@ -41,10 +63,10 @@ test('heat counts each participant once on a 48h window and a 24h half-life', ()
 test('trends use the 6h-earlier window and ignore late or stale sources', () => {
 	const steady = [fact({ participantId: 'a', at: now - HOUR }), fact({ participantId: 'a', at: now - 7 * HOUR }), fact({ participantId: 'b', at: now - 2 * HOUR }), fact({ participantId: 'b', at: now - 8 * HOUR })];
 	assert.equal(rankHeat(steady, now)[0]?.trend, 'flat');
-	assert.equal(rankHeat(steady, now)[0]?.badge, undefined);
+	assert.deepEqual(rankHeat(steady, now)[0]?.badges, []);
 	const rising = [fact({ participantId: 'a', at: now }), fact({ participantId: 'a', at: now - 30 * HOUR }), fact({ participantId: 'b', at: now }), fact({ participantId: 'b', at: now - 30 * HOUR })];
 	assert.equal(rankHeat(rising, now)[0]?.trend, 'up');
-	assert.equal(rankHeat(rising, now)[0]?.badge, 'rising');
+	assert.deepEqual(rankHeat(rising, now)[0]?.badges, ['rising']);
 	const aged = (ratio: number) => (24 * Math.log(1 / ratio) / Math.log(0.5)) * HOUR;
 	const boundary = (ratio: number) => rankHeat([
 		fact({ participantId: 'a', at: now }), fact({ participantId: 'a', at: now - 6 * HOUR - aged(ratio) }),
@@ -52,68 +74,88 @@ test('trends use the 6h-earlier window and ignore late or stale sources', () => 
 	], now)[0];
 	assert.equal(boundary(1.1)?.trend, 'flat');
 	assert.equal(boundary(1.15)?.trend, 'up');
-	assert.equal(boundary(1.15)?.badge, undefined);
+	assert.deepEqual(boundary(1.15)?.badges, []);
 	const falling = [fact({ participantId: 'a', at: now - 6 * HOUR }), fact({ participantId: 'b', at: now - 6 * HOUR })];
 	assert.equal(rankHeat(falling, now)[0]?.trend, 'down');
 	assert.equal(rankHeat(steady.map((item) => ({ ...item, stale: true })), now)[0]?.trend, 'unknown');
 	assert.equal(rankHeat(steady.map((item) => ({ ...item, addedAt: now - 10 * HOUR })), now)[0]?.trend, 'unknown');
 	const fresh = [fact({ participantId: 'a', at: now - HOUR }), fact({ participantId: 'b', at: now - HOUR })];
 	assert.equal(rankHeat(fresh, now)[0]?.trend, 'new');
-	assert.equal(rankHeat(fresh, now)[0]?.badge, 'new');
+	assert.deepEqual(rankHeat(fresh, now)[0]?.badges, ['new']);
 	const surge = ['a', 'b', 'c', 'd', 'e', 'f'].flatMap((id) => {
 		const recent = id < 'd';
 		return [fact({ participantId: id, at: now - (recent ? HOUR : 30 * HOUR) }), ...(recent ? [] : [fact({ participantId: id, at: now - 40 * HOUR })])];
 	});
-	assert.equal(rankHeat(surge, now)[0]?.badge, 'surge');
+	assert.deepEqual(rankHeat(surge, now)[0]?.badges, ['surge']);
 	assert.equal(sourceIsStale(now - 90 * 60_000, 30, now), false);
 	assert.equal(sourceIsStale(now - 90 * 60_000 - 1, 30, now), true);
 	assert.equal(sourceIsStale(now - 180 * 60_000, 60, now), false);
 	assert.equal(sourceIsStale(now - 180 * 60_000 - 1, 60, now), true);
 });
 
-test('hourly history keeps gaps, the comparable cohort, and the closed hour only', () => {
-	const current = Math.floor(now / HOUR) * HOUR;
-	const snap = (hoursAgo: number, heat: number, cohort: string, complete = true) => ({
-		sourceId: 'e', eventId: 'e', score: heat, observedAt: current - hoursAgo * HOUR + HOUR, hour: current - hoursAgo * HOUR, complete, cohort, cohortSize: 2, participants: 2, ruleVersion: HEAT_RULE_VERSION,
-	});
-	const observed = [snap(2, 10, 'a,b'), snap(3, 11, 'a,b'), snap(30, 12, 'a,b'), snap(0, 0, 'a,b', false)];
-	const series = heatSeries(observed, now, 168);
-	assert.deepEqual(series.points.map((point) => point.heat), [12, 11, 10]);
+test('new participants on established sources count as growth; every channel controls participant coverage', () => {
+	const existing = [fact({ participantId: 'old', at: now - 7 * HOUR }), fact({ participantId: 'old', at: now - HOUR })];
+	const growth = [...existing, fact({ participantId: 'new', at: now - HOUR })];
+	assert.equal(rankHeat(growth, now)[0]?.trend, 'up');
+	assert.ok((rankHeat(growth, now)[0]?.trendPct ?? 0) > 90);
+	assert.equal(rankHeat([...existing, fact({ participantId: 'new', at: now - HOUR, addedAt: now - 10 * HOUR })], now)[0]?.trend, 'flat');
+	const staleChannel = [...growth, fact({ participantId: 'old', sourceId: 'other-channel', at: now - 8 * HOUR, stale: true })];
+	assert.equal(rankHeat(staleChannel, now)[0]?.trend, 'unknown');
+	const lost = [fact({ participantId: 'gone', at: now - 50 * HOUR }), fact({ participantId: 'a', at: now }), fact({ participantId: 'b', at: now })];
+	assert.equal(rankHeat(lost, now)[0]?.trend, 'up');
+	assert.ok((rankHeat(lost, now)[0]?.trendPct ?? 0) > 100);
+});
+
+test('editorial evidence survives a newer signal by the same owner, and surge can also be new', () => {
+	const facts = [fact({ participantId: 'owner', editorial: true, at: now - HOUR }), fact({ participantId: 'owner', editorial: false, at: now }), fact({ participantId: 'b', editorial: false }), fact({ participantId: 'c', editorial: false })];
+	const rank = rankHeat(facts, now)[0];
+	assert.equal(rank?.participants, 3);
+	assert.equal(rank?.editorial, 1);
+	assert.deepEqual(rank?.badges, ['surge', 'new']);
+});
+
+test('only observed hours exist; incomplete coverage can be repaired and one cohort spans the plot', () => {
+	const facts = [40, 30, 3, 2].flatMap(hours => pair('e', now - hours * HOUR));
+	const observed = [40, 30, 3, 2].reduce((rows, hours) => observeHeatHour(facts, now - hours * HOUR, rows), [] as import('./model').NewsHeatSnapshot[]);
+	const series = heatSeries(observed, now, 168, 'e', facts);
+	assert.deepEqual(series.points.map(point => point.hour), [40, 30, 3, 2].map(hours => now - hours * HOUR));
+	assert.deepEqual(series.points.map(point => point.heat), [20, 20, 20, 20]);
 	assert.equal(series.draw, true);
-	assert.equal(series.from, current - 30 * HOUR);
-	assert.equal(series.to, current - 2 * HOUR);
-	assert.equal(series.points.some((point) => point.heat === 0), false);
-	const day = heatSeries(observed, now, 24);
-	assert.deepEqual(day.points.map((point) => point.heat), [11, 10]);
-	assert.equal(day.draw, false);
-	const newer = { ...snap(1, 4, 'a,b'), eventId: 'other', sourceId: 'other' };
-	assert.deepEqual(heatSeries([...observed, newer], now, 168).points.map((point) => point.heat), [4]);
-	const mixed = heatSeries([snap(50, 21, 'old'), snap(40, 22, 'old'), snap(30, 23, 'old'), snap(2, 9, 'new')], now, 168);
-	assert.deepEqual(mixed.points.map((point) => point.heat), [9]);
-	assert.equal(mixed.draw, false);
-	const facts = [fact({ participantId: 'a', at: now - HOUR }), fact({ participantId: 'b', at: now - HOUR })];
-	const mid = now + 30 * 60_000;
-	const first = closeHeatHour(facts, mid, []);
-	assert.equal(first.length, 1);
-	assert.equal(first[0]?.complete, true);
-	assert.equal(first[0]?.hour, current - HOUR);
-	assert.equal(first[0]?.ruleVersion, HEAT_RULE_VERSION);
-	assert.equal(closeHeatHour(facts, mid, first).length, 0);
-	assert.deepEqual(closeHeatHour(facts, mid, []).map((item) => item.hour), [current - HOUR]);
-	const kept = { ...first[0]!, ruleVersion: 'keep-me', score: 1 };
-	assert.equal(closeHeatHour(facts, mid, [kept]).length, 0);
-	const stale = facts.map((item) => ({ ...item, stale: true, at: now - 30 * HOUR }));
-	stale.push(fact({ participantId: 'a', at: now - 40 * HOUR, stale: true }), fact({ participantId: 'b', at: now - 40 * HOUR, stale: true }));
-	assert.equal(closeHeatHour(stale, mid, []).length, 0);
-	const editorial = source();
-	const isolated = source({ id: 'beta', participation: 'isolated' });
+	assert.equal(heatSeries(observed, now, 24, 'e', facts).draw, false);
+	const late = [...facts, fact({ participantId: 'late', at: now - 2 * HOUR, addedAt: now - 10 * HOUR })];
+	assert.equal(rankHeat(late, now)[0]?.participants, 3);
+	assert.deepEqual(heatSeries(observed, now, 168, 'e', late).points.map(point => point.heat), [20, 20, 20, 20]);
+	const incomplete = observeHeatHour(facts.map(item => ({ ...item, stale: true })), now - HOUR, observed);
+	assert.equal(incomplete.at(-1)?.complete, false);
+	assert.equal(heatSeries(incomplete, now, 168, 'e', facts).points.length, 4);
+	const repaired = repairHeatHours(facts.map(item => ({ ...item, lastSuccess: now })), now, incomplete);
+	assert.equal(repaired.length, 5);
+	assert.equal(repaired.at(-1)?.complete, true);
+	assert.equal(repaired.some(item => item.hour === now - 4 * HOUR), false);
+	assert.equal(repairHeatHours(facts, now + 8 * 24 * HOUR, observed).length, 0);
+	assert.ok(observed.every(item => item.ruleVersion === HEAT_RULE_VERSION));
+});
+
+test('current evidence roles, owners, withdrawal and factual editorial membership control heat', () => {
+	const editorial = source(), second = source({ id: 'beta' });
 	const material = (id: string, sourceId: string): NewsMaterial => ({
-		id, sourceId, sourceItemId: id, originalUrl: `https://example.com/${id}`, canonicalKey: id, title: 'Same', bodyExcerpt: '', discoveredAt: now, publishedAt: now, revision: 1, contentHash: id,
+		id, sourceId, sourceItemId: id, originalUrl: `https://example.com/${id}`, canonicalKey: id, title: 'Release', bodyExcerpt: 'Company released a model.', discoveredAt: now, publishedAt: now, revision: 1, contentHash: id,
 	});
-	const story = { id: 'story-1', title: 'Same', materialIds: ['m1', 'm2'], occurrenceIds: [], firstSeenAt: now, latestAt: now };
-	const ranked = rankHeat(heatFacts([material('m1', 'alpha'), material('m2', 'beta')], [editorial, isolated], {}, [story], now), now);
-	assert.equal(ranked.length, 0);
-	const again = rankHeat(heatFacts([material('m1', 'alpha'), { ...material('m2', 'beta'), sourceId: 'gamma' }], [editorial, source({ id: 'gamma' })], {}, [story], now), now);
-	assert.equal(again.length, 1);
-	assert.equal(again[0]?.index, 20);
+	const materials = [material('m1', 'alpha'), material('m2', 'beta')];
+	const analyses = materials.map(item => acceptScore(item, analysisRow(item.id, { scope: 'single', frame: { title: 'Release', subject: 'Company', action: 'released', object: 'model', occurredAt: null, evidence: item.bodyExcerpt, conditions: [] } }), { version: 'fixture', now, groupConfirmed: true }));
+	const story = { id: 'story-1', title: 'Release', materialIds: ['m1', 'm2'], occurrenceIds: [], firstSeenAt: now, latestAt: now };
+	const evidence = () => heatFacts(materials, [editorial, second], {}, [story], now, analyses);
+	assert.equal(rankHeat(evidence(), now)[0]?.index, 20);
+	editorial.ownerEntityId = second.ownerEntityId = 'one-owner';
+	assert.equal(rankHeat(evidence(), now).length, 0);
+	delete editorial.ownerEntityId; delete second.ownerEntityId;
+	second.participation = 'isolated'; assert.equal(evidence().length, 1);
+	second.participation = 'editorial'; materials[1]!.withdrawn = true; assert.equal(evidence().length, 1);
+	delete materials[1]!.withdrawn;
+	analyses[1]!.groupConfirmed = false; analyses[1]!.scope = 'unknown'; analyses[1]!.frame = null;
+	assert.equal(evidence().length, 1);
+	second.participation = 'signal'; analyses[1]!.relations = [{ kind: 'SAME_STORY', targetId: 'm1', confidence: 0.8 }];
+	assert.equal(rankHeat(evidence(), now)[0]?.editorial, 1);
+	assert.equal(rankHeat(evidence(), now)[0]?.participants, 2);
+	analyses[1]!.scope = 'composite'; assert.equal(evidence().length, 1);
 });

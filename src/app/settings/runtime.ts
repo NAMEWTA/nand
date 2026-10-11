@@ -4,6 +4,7 @@ import { SettingsStore, type SettingsFile } from '../../shared/settings/store';
 import type { SettingsScope } from '../../shared/settings/schema';
 import { t } from '../../shared/i18n/index';
 import { deviceId } from '../../host/obsidian/storage/device-id';
+import { privateVaultStorage } from '../../host/obsidian/storage/private-storage';
 import { homeSettings, seedDashboardSettings } from '../../modules/home/settings';
 import { archivesSettings } from '../../modules/archives/settings';
 import { browserSettings } from '../../modules/browser/settings';
@@ -47,7 +48,7 @@ export function defaultLanguage(): 'en' | 'zh' {
 }
 
 export async function loadSettingsRuntime(app: App): Promise<SettingsRuntime> {
-	const adapter = app.vault.adapter;
+	const adapter = privateVaultStorage(app);
 	const isObject = (value: unknown): value is Record<string, unknown> => !!value && typeof value === 'object' && !Array.isArray(value);
 	const stores: Record<SettingsScope, JsonStore<Record<string, unknown> | null>> = {
 		vault: new JsonStore(adapter, VAULT_FILE, (value): value is Record<string, unknown> | null => value === null || isObject(value)),

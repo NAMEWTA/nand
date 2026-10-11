@@ -49,11 +49,13 @@ export class ContactsApplication {
 	}
 	async ensureLoaded(): Promise<void> {
 		if (!this.active) return;
-		if (!this.ready)
+		if (!this.ready) {
+			const generation = ++this.generation;
 			this.ready = (async () => {
 				await this.files.ready();
-				if (this.active) await this.rebuild();
+				if (this.active && generation === this.generation) await this.rebuild(generation);
 			})();
+		}
 		await this.ready;
 	}
 	fileChanged(file: ContactsFile): void {
@@ -77,6 +79,7 @@ export class ContactsApplication {
 		if (!this.active) return;
 		// Keep observers on one consistent index, including a folder rename in a split pane.
 		this.batching++;
+		const generation = this.generation;
 		this.fileDeleted(oldPath, !file);
 		const candidates = file
 			? [file]
@@ -84,10 +87,10 @@ export class ContactsApplication {
 		void Promise.allSettled(
 			candidates
 				.filter((candidate) => this.inside(candidate.path))
-				.map((candidate) => this.readFile(candidate, this.generation)),
+				.map((candidate) => this.readFile(candidate, generation)),
 		)
 			.then((results) => {
-				if (results.some((result) => result.status === 'rejected')) this.error = 'readFailed';
+				if (this.active && generation === this.generation && results.some((result) => result.status === 'rejected')) this.error = 'readFailed';
 			})
 			.finally(() => {
 				this.batching--;
@@ -141,8 +144,7 @@ export class ContactsApplication {
 		this.ready = null;
 		await this.ensureLoaded();
 	}
-	private async rebuild(): Promise<void> {
-		const generation = ++this.generation;
+	private async rebuild(generation: number): Promise<void> {
 		this.loading = true;
 		this.error = '';
 		this.index.clear();
@@ -154,6 +156,7 @@ export class ContactsApplication {
 				const results = await Promise.allSettled(
 					files.slice(i, i + 20).map((file) => this.readFile(file, generation)),
 				);
+				if (!this.active || generation !== this.generation) return;
 				if (results.some((result) => result.status === 'rejected')) this.error = 'readFailed';
 			}
 			// Resolve identifier-free manually authored rows after all target files are known.
@@ -170,7 +173,7 @@ export class ContactsApplication {
 				if (changed) this.index.set(record);
 			}
 		} catch {
-			this.error = 'readFailed';
+			if (this.active && generation === this.generation) this.error = 'readFailed';
 		} finally {
 			if (generation === this.generation) {
 				this.loading = false;
@@ -180,7 +183,9 @@ export class ContactsApplication {
 	}
 	private refreshFile(file: ContactsFile): void {
 		if (!this.active || file.extension !== 'md' || !this.inside(file.path)) return;
-		void this.readFile(file, this.generation).catch(() => {
+		const generation = this.generation;
+		void this.readFile(file, generation).catch(() => {
+			if (!this.active || generation !== this.generation) return;
 			this.error = 'readFailed';
 			this.emit();
 		});

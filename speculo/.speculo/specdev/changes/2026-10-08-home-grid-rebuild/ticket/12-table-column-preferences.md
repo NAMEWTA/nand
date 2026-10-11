@@ -26,6 +26,10 @@ shared_path_owners: ["<Path>main.js</Path> => 2026-10-08-home-grid-rebuild::T-12
 
 # Ticket T-12: 交付每分区表格列显隐与排序
 
+<!-- ACTUAL-CODE-REVIEW:START -->
+2026-10-11 实际代码审查：[T-12.md](../evidence/T-12.md)。本票下文保留原规划合同与基线；当前实现、修复、验证及未验证条件以该记录为准。原“仅规划／未授权实施／必须提交”的阶段约束不适用于用户已授权的本次工作区审查；提交与远程操作仍未执行。
+<!-- ACTUAL-CODE-REVIEW:END -->
+
 - Ticket：<Path>{roots.state}/specdev/changes/2026-10-08-home-grid-rebuild/ticket/12-table-column-preferences.md</Path>
 - 总控Map：<Path>{roots.state}/specdev/changes/2026-10-08-home-grid-rebuild/tickets-map.md</Path>
 - Spec：<Path>{roots.state}/specdev/changes/2026-10-08-home-grid-rebuild/spec.md</Path>
@@ -37,7 +41,7 @@ shared_path_owners: ["<Path>main.js</Path> => 2026-10-08-home-grid-rebuild::T-12
 
 **目标与可观察产出：** 用户能为每分区保存表格列顺序和显隐，数据变化后偏好仍可靠。
 
-**当前事实：** 当前visibleProperties是卡片badge用途，不能直接当表格列设置；Table视图自行派生，缺少tableOrder/tableHidden和picker。
+**规划时基线：** 当前visibleProperties是卡片badge用途，不能直接当表格列设置；Table视图自行派生，缺少tableOrder/tableHidden和picker。
 
 **来源：** AC-051, AC-052, AC-053；issue #137, #141；<Path>{roots.state}/specdev/changes/2026-10-08-home-grid-rebuild/reference-analysis.md</Path>。深度 standard：涉及明确的垂直行为及现有可复用接缝；验证按实际风险。
 

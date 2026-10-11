@@ -1,0 +1,70 @@
+{
+  "finding": "R-076",
+  "status": "fixed-native37-full592",
+  "implementation": [
+    "src/modules/home/core/board/document-link.ts",
+    "src/modules/home/ui/cards/InlineLinks.tsx",
+    "src/modules/home/ui/cards/ProjectPanel.tsx",
+    "src/modules/home/ui/render-contract.ts",
+    "src/modules/home/i18n.ts",
+    "src/modules/home/styles/049-project.css"
+  ],
+  "fixes": [
+    "Separate stored path, alias and heading/block subpath for real file resolution and navigation. Shared parser with inline wiki links; leave stored Markdown unchanged.",
+    "Native anchor for document link and buttons for collapse/results; pointer/keyboard targeting without parent row click/hover. Search result focus survives Tab, Enter/Space adds once and restores the field after async board rerender; already linked alias targets are excluded.",
+    "Remove only a link with accurate localized wording, owner-window confirmation and safe Cancel focus; keep the document itself. Scoped32/44px targets, keyboard focus indicators and visible focused/touch removal. Existing native row drag retains nested links."
+  ],
+  "verification": {
+    "native": {
+      "host": "Native Windows Obsidian at D:/Pro/Obsidian/Obsidian.exe; exact application version not asserted",
+      "script": "scripts/obsidian-acceptance/home-project-links.mjs",
+      "evidence": "C:/Users/cdewta/AppData/Local/Temp/nand-project-links-review-d3bddc6490084f22bc0e87a032baa262/evidence",
+      "passed": 37,
+      "coverage": [
+        "actual MarkdownView cursor reaches heading and block from alias link",
+        "Space expands nested rows; Tab keeps result and focuses native button; Space adds once and restores field after persisted board update",
+        "alias duplicate exclusion; unchanged navigation bytes; add/remove preserve prose, CRLF and nested raw paths",
+        "remove Cancel no writes and correctfocus; confirm only detacheslink/keepsnote",
+        "actual intercepted HTML drag fromlink reordersdocuments with alias/child/prose retained",
+        "18theme/mode/width combinations and screenshots32px includingsearch;coarse44px/visibledelete",
+        "restart byte preservation;popout confirmationownership and Homeoff cleanup no writes;zero hosterrors"
+      ],
+      "visualInspection": [
+        "Final system/light/500 and eye-care/dark/1500 inspected; prior same-layout touch500 inspected. Final run includes32pxsearch/focusringand44pxtouch."
+      ]
+    },
+    "tests": "pnpm test PASS592tests/4skip,130filesPASS/1skip,136.22s. Includes new document target parsing and2documentation policy regressions. Final equivalent click-handler lint refactor verified by final native37 and targeted lint.",
+    "build": "PASS; main.js4028701 bytes and styles.css745747 bytes",
+    "lint": "PASS pnpm run lint zero warnings; final rerun after correcting single no-misused-promises issue. Targeted file lint also passed.",
+    "architecture": "PASS865modules",
+    "i18n": "PASS24dict/3191keys",
+    "css": "PASS108files,67files/150baselinedgroups,no newviolations",
+    "docs": "PASS standard549Markdown/559local/348external links(no fetch)",
+    "bundle": "PASS mainoutputbudget4029440(+1KiB),styles746496(+2KiB),measuredchanges documented;startup/modulebudgetsunchanged",
+    "logs": "C:/Users/cdewta/AppData/Local/Temp/nand-review-project-links-{build,full-tests,lint,lint-recheck,architecture,css,i18n,docs,bundle}.log"
+  },
+  "documentation": {
+    "backup": "C:/Users/cdewta/AppData/Local/Temp/nand-review-project-links-docs-i4otip_n",
+    "files": [
+      {
+        "path": "docs/dashboard.md",
+        "beforeCharacters": 22372,
+        "afterCharacters": 22873
+      },
+      {
+        "path": "docs/dashboard.ZH.md",
+        "beforeCharacters": 8207,
+        "afterCharacters": 8405
+      }
+    ],
+    "ticket": "Home R076 project document navigation and interaction",
+    "status": "bilingual-reviewed"
+  },
+  "nativeFailuresResolved": [
+    "Keyboard search first preserved result focus but async board refresh removed the field; await real onDocAdd result and recover focus only when owner removed and focus stillonbody.",
+    "Coarse opacity assertion initially ran during150ms transition; wait200ms before computed style check."
+  ],
+  "unverified": [
+    "Actual phone hardware"
+  ]
+}

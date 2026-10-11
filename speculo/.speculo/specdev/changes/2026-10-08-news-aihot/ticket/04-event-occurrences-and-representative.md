@@ -26,6 +26,10 @@ shared_path_owners: ["<Path>main.js</Path> => 2026-10-08-news-aihot::T-04（本�
 
 # Ticket T-04: 归组同一发生与后续事件
 
+<!-- ACTUAL-CODE-REVIEW:START -->
+2026-10-11 实际代码审查：[T-04.md](../evidence/T-04.md)。本票下文保留原规划合同与基线；当前实现、修复、验证及未验证条件以该记录为准。原“仅规划／未授权实施／必须提交”的阶段约束不适用于用户已授权的本次工作区审查；提交与远程操作仍未执行。
+<!-- ACTUAL-CODE-REVIEW:END -->
+
 - Ticket：<Path>{roots.state}/specdev/changes/2026-10-08-news-aihot/ticket/04-event-occurrences-and-representative.md</Path>
 - 总控Map：<Path>{roots.state}/specdev/changes/2026-10-08-news-aihot/tickets-map.md</Path>
 - Spec：<Path>{roots.state}/specdev/changes/2026-10-08-news-aihot/spec.md</Path>
@@ -37,7 +41,7 @@ shared_path_owners: ["<Path>main.js</Path> => 2026-10-08-news-aihot::T-04（本�
 
 **目标与可观察产出：** 读者看到重复报道折叠，同一事件后续进展清晰，点击代表新闻不会被爆料或无关汇总抢占。
 
-**当前事实：** 仅material分析不能表达AIHOT fact/story；需要occurrence层、关系候选和代表稿。
+**规划时基线：** 仅material分析不能表达AIHOT fact/story；需要occurrence层、关系候选和代表稿。
 
 **来源：** AC-013, AC-014；issue #136；<Path>{roots.state}/specdev/changes/2026-10-08-news-aihot/reference-analysis.md</Path>。深度 deep：涉及持久数据/公共接口/进程或权限的跨边界合同，必须记录恢复与兼容。
 

@@ -13,7 +13,7 @@ src/theme/          主题样式、Markdown 样式、把它们应用到每个窗
 src/host/           多个模块共用的 Obsidian 与桌面适配器
 src/shared/         工具函数、设置 DSL 与存储、存储辅助、i18n 运行时与启动词典
 src/types/          环境类型声明
-src/modules/<id>/   home | agent | browser | archives | automations | notifications | icons | comments | sync
+src/modules/<id>/   home | agent | browser | news | archives | automations | notifications | icons | comments | sync
   manifest.ts       纯数据描述，启动时加载
   api.ts            其他模块可导入的类型和 serviceKey()/contributionPoint() 常量
   module.ts         懒加载入口：创建 ModuleInstance
@@ -78,6 +78,8 @@ esbuild 构建一个不拆分代码的 CommonJS `main.js`。只能通过 `import
 
 模块之间通过以下方式通信：
 
+`agent` 可在移动端激活可移植的技能目录；`module.ts` 在 `context.env.desktop` 为假时止于此处。终端控制器及其 desktop 依赖只在桌面分支动态加载，终端页面仍由工作台的桌面可用性守卫限制。消费者不要把目录可用误当成终端或派发服务可用。
+
 - **服务**（所有者 `api.ts` 里的 `ServiceKey<T>`）：`peek` 只在所有者处于激活状态时返回值，从不激活它；`acquire` 激活所有者并返回租约，所有者停止时租约的 `revoked` 信号中止；`watch` 跟随可用性变化。
 - **贡献点**（`ContributionPoint<T>`）：例如首页和档案贡献的自动化来源，自动化贡献的通知打开器。
 
@@ -117,6 +119,8 @@ id 不带插件 id 前缀；名称里不写「命令」二字；没有默认快�
 | 智能体生命周期钩子脚本 | `~/.nand/hooks/nand-automation-hook.cjs`，注册在各 CLI 自己的设置里，并留有 `.nand-backup` 副本 | 智能体 |
 | 终端辅助程序 | `<插件目录>/binaries/nand-pty-<平台>-<架构>[.exe]` 和 `nand-pty.json`（版本与摘要） | 智能体 |
 | 浏览历史与站点授权 | `.nand/browser/<device-id>/state.json` | 浏览器 |
+| 新闻采集、分析、事件、热度与回执 | `.nand/news/<device-id>/`（`materials.json`、`analyses.json`、`events.json`、`heat.json`、`runs.json`、`reader-state.json`） | 新闻 |
+| 新闻收藏、简报与日报 | `NAND/新闻/收藏/`、`NAND/新闻/简报/`、`NAND/新闻/日报/` | 新闻；可见 Markdown |
 | 恢复草稿与看板冲突 | `.nand/recovery/drafts/`、`.nand/recovery/dashboard/conflicts/` | 共享存储、首页 |
 | 缓存 | `.nand/cache/`（微信读书进度） | 首页 |
 | 记录 | `NAND/习惯/`、`NAND/记账/`、`NAND/番茄钟/`、`NAND/阅读/` 下的 Markdown | 首页 |

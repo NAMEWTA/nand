@@ -7,6 +7,7 @@ export interface AgentActionDefaults {
 
 export function actionText(action: AutomationAction): string {
 	switch (action.kind) {
+		case 'browser-workflow': return '';
 		case 'agent': return action.prompt;
 		case 'notify': return action.body;
 		case 'create-task': return action.text;
@@ -34,6 +35,7 @@ export function switchAutomationAction(
 	defaults: AgentActionDefaults,
 ): AutomationAction {
 	if (kind === current.kind) return current;
+	if (kind === 'browser-workflow') return { kind, workflowId: '', version: 1, variables: {}, scope: [] };
 	const text = actionText(current);
 	if (kind === 'script') return { kind, script: text, cwd: defaults.cwd, shell: 'powershell' };
 	if (kind === 'open-file') return { kind, path: '' };

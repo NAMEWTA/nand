@@ -1,0 +1,298 @@
+{
+  "method": "Native Obsidian/private storage/published PTY helper with protocol fixture; no real-model quality claim",
+  "passed": true,
+  "rows": [
+    {
+      "name": "same-terminal-repair-consumes-two-calls-and-stops-next-batch",
+      "passed": true,
+      "detail": {
+        "status": "budget",
+        "calls": 2,
+        "spent": 2,
+        "count": 12
+      }
+    },
+    {
+      "name": "repair-did-not-spawn-another-process",
+      "passed": true,
+      "detail": [
+        {
+          "pid": 2572,
+          "ids": [
+            "m0",
+            "m1",
+            "m2",
+            "m3",
+            "m4",
+            "m5",
+            "m6",
+            "m7",
+            "m8",
+            "m9",
+            "m10",
+            "m11"
+          ],
+          "started": true,
+          "promptChars": 11550
+        }
+      ]
+    },
+    {
+      "name": "reservation-was-durable-before-spawn",
+      "passed": true
+    },
+    {
+      "name": "batch-ids-hide-source-identity",
+      "passed": true
+    },
+    {
+      "name": "raw-results-durable-with-unknown-usage-and-account-hash",
+      "passed": true
+    },
+    {
+      "name": "integer-score-and-native-account-persisted",
+      "passed": true
+    },
+    {
+      "name": "reweighting-is-local-and-preserves-axes",
+      "passed": true
+    },
+    {
+      "name": "completed-revisions-are-reused-at-exhausted-quota",
+      "passed": true
+    },
+    {
+      "name": "received-replies-apply-locally-on-activation",
+      "passed": true
+    },
+    {
+      "name": "received-recovery-sends-zero-prompts",
+      "passed": true
+    },
+    {
+      "name": "unstarted-batch-continues-only-after-authorized-run",
+      "passed": true
+    },
+    {
+      "name": "completed-owned-processes-exit",
+      "passed": true
+    },
+    {
+      "name": "invalid-weight-draft-does-not-change-scores",
+      "passed": true
+    },
+    {
+      "name": "native-weight-editor-recalculates-with-zero-calls",
+      "passed": true
+    },
+    {
+      "name": "invalid-template-is-not-saved",
+      "passed": true
+    },
+    {
+      "name": "language-switch-preserves-template-draft-and-localizes-axes",
+      "passed": true
+    },
+    {
+      "name": "analysis-settings-width-claude-code-light-1200",
+      "passed": true,
+      "detail": {
+        "width": 760,
+        "scroll": 760
+      }
+    },
+    {
+      "name": "analysis-settings-width-claude-code-light-800",
+      "passed": true,
+      "detail": {
+        "width": 692,
+        "scroll": 692
+      }
+    },
+    {
+      "name": "analysis-settings-width-claude-code-light-420",
+      "passed": true,
+      "detail": {
+        "width": 364,
+        "scroll": 364
+      }
+    },
+    {
+      "name": "analysis-settings-width-claude-code-dark-1200",
+      "passed": true,
+      "detail": {
+        "width": 760,
+        "scroll": 760
+      }
+    },
+    {
+      "name": "analysis-settings-width-claude-code-dark-800",
+      "passed": true,
+      "detail": {
+        "width": 692,
+        "scroll": 692
+      }
+    },
+    {
+      "name": "analysis-settings-width-claude-code-dark-420",
+      "passed": true,
+      "detail": {
+        "width": 364,
+        "scroll": 364
+      }
+    },
+    {
+      "name": "analysis-settings-width-codex-light-1200",
+      "passed": true,
+      "detail": {
+        "width": 760,
+        "scroll": 760
+      }
+    },
+    {
+      "name": "analysis-settings-width-codex-light-800",
+      "passed": true,
+      "detail": {
+        "width": 692,
+        "scroll": 692
+      }
+    },
+    {
+      "name": "analysis-settings-width-codex-light-420",
+      "passed": true,
+      "detail": {
+        "width": 364,
+        "scroll": 364
+      }
+    },
+    {
+      "name": "analysis-settings-width-codex-dark-1200",
+      "passed": true,
+      "detail": {
+        "width": 760,
+        "scroll": 760
+      }
+    },
+    {
+      "name": "analysis-settings-width-codex-dark-800",
+      "passed": true,
+      "detail": {
+        "width": 692,
+        "scroll": 692
+      }
+    },
+    {
+      "name": "analysis-settings-width-codex-dark-420",
+      "passed": true,
+      "detail": {
+        "width": 364,
+        "scroll": 364
+      }
+    },
+    {
+      "name": "analysis-settings-width-obsidian-light-1200",
+      "passed": true,
+      "detail": {
+        "width": 760,
+        "scroll": 760
+      }
+    },
+    {
+      "name": "analysis-settings-width-obsidian-light-800",
+      "passed": true,
+      "detail": {
+        "width": 692,
+        "scroll": 692
+      }
+    },
+    {
+      "name": "analysis-settings-width-obsidian-light-420",
+      "passed": true,
+      "detail": {
+        "width": 364,
+        "scroll": 364
+      }
+    },
+    {
+      "name": "analysis-settings-width-obsidian-dark-1200",
+      "passed": true,
+      "detail": {
+        "width": 760,
+        "scroll": 760
+      }
+    },
+    {
+      "name": "analysis-settings-width-obsidian-dark-800",
+      "passed": true,
+      "detail": {
+        "width": 692,
+        "scroll": 692
+      }
+    },
+    {
+      "name": "analysis-settings-width-obsidian-dark-420",
+      "passed": true,
+      "detail": {
+        "width": 364,
+        "scroll": 364
+      }
+    },
+    {
+      "name": "full-host-restart-preserves-analysis-and-quota",
+      "passed": true
+    },
+    {
+      "name": "agent-preference-is-device-scoped",
+      "passed": true
+    },
+    {
+      "name": "native-permission-state-has-terminal-action",
+      "passed": true
+    },
+    {
+      "name": "permission-action-opens-agent-terminal",
+      "passed": true
+    },
+    {
+      "name": "cancel-button-records-cancelled-and-clears-activity",
+      "passed": true
+    },
+    {
+      "name": "interrupted-has-explicit-retry-and-unknown-cost",
+      "passed": true
+    },
+    {
+      "name": "visible-retry-sends-once-and-applies-result",
+      "passed": true
+    },
+    {
+      "name": "explicit-reanalysis-uses-new-template-version-and-one-call",
+      "passed": true
+    },
+    {
+      "name": "cancel-and-retry-leave-no-owned-processes",
+      "passed": true
+    },
+    {
+      "name": "no-host-errors",
+      "passed": true,
+      "detail": []
+    }
+  ],
+  "artifactRoot": "C:\\Users\\cdewta\\AppData\\Local\\Temp\\nand-news-analysis-review-54f3f23c32174093b43b3345bee3c206\\evidence",
+  "environment": {
+    "os": "win32",
+    "obsidian": "1.13.7",
+    "helper": "0.0.1-alpha.1/protocol 3"
+  },
+  "limits": [
+    "Protocol fixture, not a real provider/model answer or editorial quality comparison.",
+    "Backend API/storage acceptance only; settings, receipt/progress UI and manual retry still pending.",
+    "Event grouping confirmation remains false pending T04; no fabricated featured selection.",
+    "Windows only."
+  ],
+  "targetedTests": "70 News tests / 20 files after T-04 changes",
+  "checks": 44,
+  "nativeRoot": "C:\\Users\\cdewta\\AppData\\Local\\Temp\\nand-news-analysis-review-f0844957006a427dbff440082edbcae7",
+  "postEditionRegression": "44 native checks pass after T-06 per-leaf state and sections; owned processes exited."
+}

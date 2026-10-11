@@ -4,6 +4,7 @@ import type { BannerData } from '../../core/board/types/index';
 import { resolveVaultImage } from '../banner/banner';
 import type { DashboardSurface } from './dashboard-surface';
 import { BANNER_IMAGE_ROTATION_MS } from './timing';
+import { focalPosition } from '../../core/board/focal-point';
 
 export function setupBannerBehavior(this: DashboardSurface, bannerEl: HTMLElement): void {
 	const win = bannerEl.ownerDocument.defaultView!;
@@ -46,6 +47,7 @@ export function setupBannerRotation(this: DashboardSurface, container: HTMLEleme
 			const resolved = resolveVaultImage(this.app, images[imgIndex]!);
 			if (resolved) {
 				bannerEl.style.backgroundImage = `url("${resolved}")`;
+				bannerEl.style.backgroundPosition = focalPosition(banner.imagePos?.[images[imgIndex]!]);
 			}
 
 			let fadeTimer: number | undefined;
@@ -59,6 +61,7 @@ export function setupBannerRotation(this: DashboardSurface, container: HTMLEleme
 				fadeTimer = win.setTimeout(() => {
 					if (nextResolved) {
 						bannerEl.style.backgroundImage = `url("${nextResolved}")`;
+						bannerEl.style.backgroundPosition = focalPosition(banner.imagePos?.[nextPath]);
 					}
 					bannerEl.removeClass('dashboard-banner--fading');
 				}, 600);

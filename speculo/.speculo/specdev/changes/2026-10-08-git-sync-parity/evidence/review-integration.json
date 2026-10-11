@@ -1,0 +1,52 @@
+{
+  "date": "2026-10-11",
+  "status": "reviewed-fixed-windows-verified-platform-and-authentication-limits",
+  "source": "Current production code, real Git regression suites and actual isolated Obsidian clone flow; historical individual results retained in parent review-progress.json.",
+  "findings": [
+    "R-005",
+    "R-006",
+    "R-007",
+    "R-008",
+    "R-009",
+    "R-010",
+    "R-011",
+    "R-013",
+    "R-014",
+    "R-019",
+    "R-020",
+    "R-021",
+    "R-022"
+  ],
+  "code": [
+    "src/modules/sync/core/flow.ts",
+    "src/modules/sync/platform/desktop/git-runner.ts",
+    "src/modules/sync/services/sync-service.ts",
+    "src/modules/sync/services/automatics.ts",
+    "src/modules/sync/ui/sync-presentation.tsx"
+  ],
+  "tests": [
+    "test/sync/git-boundary.test.ts",
+    "test/sync/git-flow.test.ts",
+    "src/modules/sync/services/automatics.test.ts",
+    "src/modules/sync/core/core.test.ts"
+  ],
+  "verification": {
+    "latestFull": "805 passed / 4 skipped, 2026-10-11 08:38:17; includes real bare remotes, index guards, current/simple push semantics, stale tracking-ref protection, hook refusal/recovery, parent-index rename/unborn boundaries, clone cancellation/late files, merge/rebase/text/delete/binary conflict recovery, unreachable/rejected/locked errors, CJK paths and thousand-file/20MiB sync.",
+    "targeted": "64 passed after canonical paths/timers/process-tree cancellation; subsequent credential URL guards separately passed and are included in latest full suite.",
+    "native": {
+      "checks": 22,
+      "evidence": "C:/Users/cdewta/AppData/Local/Temp/nand-sync-review-31e4fb21c807476fb756abe8ffeb34b7/evidence",
+      "coverage": "Actual native mouse clone confirmation, repository files/HEAD, current-vault preservation, nonempty retry, navigation result persistence,18 theme/width combinations."
+    }
+  },
+  "reference": {
+    "commit": "bde2d06edf2cac28f90cba796afc51bdbf73f160",
+    "license": "MIT; frozen commands/LICENSE and current NOTICE checked earlier in this review",
+    "matrix": "../reference-analysis.md"
+  },
+  "limits": [
+    "Real hosting credentials, SSH agent and full native conflict-editor matrix unverified.",
+    "POSIX process-group cancellation unverified on this Windows host.",
+    "The desktop system-Git implementation does not claim mobile sync, submodule/blame/hunk/branch management or force/reset parity."
+  ]
+}

@@ -38,6 +38,10 @@
 .nand-sync-diff .is-del { color: var(--nand-tone-error); }
 .nand-sync-diff .is-hunk { color: var(--nand-tone-info); }
 .nand-sync-setup { align-items: center; text-align: center; }
+.nand-sync-clone { width: 100%; text-align: start; overflow-wrap: anywhere; }
+.nand-sync-clone summary { min-height: var(--nand-control-height); padding-block: var(--nand-space-2); cursor: pointer; }
+.nand-sync-clone summary:focus-visible { box-shadow: var(--nand-focus-ring); }
+.nand-sync-clone-form { display: flex; flex-direction: column; gap: var(--nand-space-2); }
 .nand-sync-check { display: inline-flex; align-items: center; gap: var(--nand-space-2); font-size: var(--nand-text-body); }
 .nand-sync-history { display: flex; flex-direction: column; gap: var(--nand-space-2); }
 .nand-sync-commits { display: flex; flex-direction: column; margin: 0; padding: 0; list-style: none; }

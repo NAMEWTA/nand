@@ -1,0 +1,169 @@
+{
+  "passed": true,
+  "method": "native Obsidian + published PTY helper + protocol fixture; no model/provider claim",
+  "rows": [
+    {
+      "name": "manual-session-started",
+      "passed": true
+    },
+    {
+      "name": "full-native-answer-over-8000-characters",
+      "passed": true,
+      "detail": {
+        "status": "succeeded",
+        "chars": 76891,
+        "promptChars": 10000
+      }
+    },
+    {
+      "name": "long-Chinese-argv-arrives-intact",
+      "passed": true
+    },
+    {
+      "name": "default-completion-kills-owned-process",
+      "passed": true
+    },
+    {
+      "name": "manual-session-survives",
+      "passed": true
+    },
+    {
+      "name": "permission-wait-opens-terminal",
+      "passed": true
+    },
+    {
+      "name": "cancel-is-terminal",
+      "passed": true
+    },
+    {
+      "name": "cancel-kills-process",
+      "passed": true
+    },
+    {
+      "name": "timeout-kills-process",
+      "passed": true,
+      "detail": {
+        "status": "timeout",
+        "text": "",
+        "terminalId": "terminal-c4022ca1-8430-4e32-99ad-e6c756a5ab1e"
+      }
+    },
+    {
+      "name": "oversize-keeps-error-completion",
+      "passed": true,
+      "detail": {
+        "status": "failed",
+        "text": "",
+        "terminalId": "terminal-cd9b8305-773f-48be-86d5-8bdad2e32b88",
+        "errorCode": "answerTooLarge"
+      }
+    },
+    {
+      "name": "zero-exit-without-native-answer-fails",
+      "passed": true,
+      "detail": {
+        "status": "failed",
+        "text": "",
+        "terminalId": "terminal-b8c86a94-0b30-45d2-8993-c0f0a5ff3f01",
+        "errorCode": "processExit"
+      }
+    },
+    {
+      "name": "oversize-argv-rejected-before-spawn",
+      "passed": true,
+      "detail": {
+        "status": "failed",
+        "text": "",
+        "errorCode": "promptTooLarge"
+      }
+    },
+    {
+      "name": "explicitly-retained-terminal-stays-owned",
+      "passed": true
+    },
+    {
+      "name": "format-repair-reuses-same-terminal",
+      "passed": true,
+      "detail": {
+        "status": "succeeded",
+        "text": "{\"repaired\":true}",
+        "terminalId": "terminal-9e2952ec-091a-4839-9c72-e7e7a169f29a"
+      }
+    },
+    {
+      "name": "completed-repair-closes-owned-terminal",
+      "passed": true
+    },
+    {
+      "name": "agent-disable-interrupts-run",
+      "passed": true
+    },
+    {
+      "name": "agent-disable-kills-process",
+      "passed": true
+    },
+    {
+      "name": "no-host-errors",
+      "passed": true,
+      "detail": []
+    }
+  ],
+  "environment": {
+    "os": "win32",
+    "obsidian": "1.13.7",
+    "helper": "0.0.1-alpha.1/protocol 3"
+  },
+  "artifactRoot": "C:\\Users\\cdewta\\AppData\\Local\\Temp\\nand-prompt-review-6a6f4619f92c4a7f97dd6fed003fd101\\evidence",
+  "cliInventory": [
+    {
+      "id": "codex",
+      "version": "0.162.0",
+      "installed": true,
+      "loginStatus": "logged-in",
+      "modelAnswerTested": false
+    },
+    {
+      "id": "grok",
+      "version": "1.0.46 (2765805b9442)",
+      "installed": true,
+      "loginStatus": "not-probed",
+      "modelAnswerTested": false
+    },
+    {
+      "id": "claude-code",
+      "installed": false,
+      "modelAnswerTested": false
+    },
+    {
+      "id": "gemini",
+      "installed": false,
+      "modelAnswerTested": false
+    },
+    {
+      "id": "opencode",
+      "installed": false,
+      "modelAnswerTested": false
+    },
+    {
+      "id": "pi",
+      "installed": false,
+      "modelAnswerTested": false
+    }
+  ],
+  "limits": [
+    "Native lifecycle acceptance uses a protocol fixture, not a real model answer. AC-006 remains partial.",
+    "Only Windows is covered.",
+    "Native output channel and same-terminal repair continuation implemented. Explicit result-file channel remains pending.",
+    "News and browser cancellation is wired; consumer agent selection, durable receipts, permission-state UI and repair integration remain pending."
+  ],
+  "currentReview": {
+    "date": "2026-10-11",
+    "note": "Consumer selection, durable receipts, attention/repair/cancellation and terminal retention completed by subsequent analysis/brief/browser evidence. Optional result-file channel remains absent by the documented optional boundary; real CLI/model accounts remain unverified.",
+    "evidence": [
+      "review-analysis.json",
+      "review-brief.json",
+      "review-terminal-retention.json",
+      "review-settings-inventory.json"
+    ]
+  }
+}

@@ -3,6 +3,7 @@ import { t } from '../../../shared/i18n/index';
 import { promptText } from '../../../ui/primitives/prompt';
 import type { HomeWorkbench } from '../api';
 import type { HomeHost } from '../services/home-host';
+import { promptNewBoard } from './NewBoardDialog';
 
 const boardPath = (path: string) => path.replace(/\.md$/i, '').replace(/^\/+/, '');
 
@@ -29,14 +30,17 @@ export function homeWorkbench(host: HomeHost, subscribe: (listener: () => void) 
 		const settings = host.settings;
 		const files = settings.workspaceFiles;
 		const names = files.map((_, index) => settings.workspaceNames?.[index] ?? '');
-		const active = boardPath(settings.dashboardFile);
+		const active = boardPath(target.resourceId ?? settings.dashboardFile);
 		return {
 			primary: {
 				label: t('workbench.newBoard'),
 				icon: 'plus',
 				run: async () => {
-					const name = await promptText(host.app, { title: t('workspace.newTitle'), placeholder: t('workspace.newTitle') });
-					if (name) await host.createWorkspace(name);
+					const result = await promptNewBoard(host.app);
+					if (result) {
+						await host.createWorkspace(result.name, result.layout);
+						await host.openBoard(host.settings.dashboardFile);
+					}
 				},
 			},
 			searchable: files.length > 6,
@@ -49,9 +53,15 @@ export function homeWorkbench(host: HomeHost, subscribe: (listener: () => void) 
 						label: names[index] || file.split('/').pop() || file,
 						icon: 'layout-dashboard',
 						active: target.feature === 'dashboard' && file === active,
-						select: () => host.switchWorkspace(file),
-						target: { feature: 'dashboard' as const },
+						target: { feature: 'dashboard' as const, resourceId: file },
 						menu: () => [
+							...(index > 0 ? [{ title: t('workspace.moveUp'), icon: 'arrow-up', run: () => host.reorderWorkspaces(index, index - 1) }] : []),
+							...(index < files.length - 1 ? [{ title: t('workspace.moveDown'), icon: 'arrow-down', run: () => host.reorderWorkspaces(index, index + 1) }] : []),
+							...(['side', 'stacked', 'immersive'] as const).map(layout => ({
+								title: t(layout === 'side' ? 'renderer.layoutSide' : layout === 'stacked' ? 'renderer.layoutStacked' : 'renderer.layoutImmersive'),
+								icon: 'panels-top-left',
+								run: () => host.setBoardLayout(file, layout),
+							})),
 							{
 								title: t('workspace.renameTitle'),
 								icon: 'pencil',

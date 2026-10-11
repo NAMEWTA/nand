@@ -5,8 +5,10 @@ import type { AutomationUiPort } from '../../../shared/automation/types';
 import { AUTOMATIONS } from '../../automations/api';
 import { BROWSER_OPEN, type BrowserOpenRequest } from '../../browser/api';
 import { BOARD_SURFACE_TYPE, type BoardOperations, type BoardSurfaceApi } from '../api';
-import type { DashboardSettings } from '../core/board/types/model';
+import type { BoardLayout, DashboardSettings } from '../core/board/types/model';
+import { t } from '../../../shared/i18n';
 import { normalizeWorkspacePath } from '../core/workspace/workspace-registry';
+import { AppearancePresets } from './appearance-presets';
 
 /** Board settings as the board code reads them, plus the module switch it checks before drawing. */
 export type HomeSettingsView = DashboardSettings & { modules: { dashboard: boolean } };
@@ -18,6 +20,7 @@ export type HomeSettingsView = DashboardSettings & { modules: { dashboard: boole
 export interface HomeHost {
 	readonly app: App;
 	readonly manifest: PluginManifest;
+	readonly appearance: AppearancePresets;
 	settings: HomeSettingsView;
 	saveSettings(): Promise<void>;
 	boards?: BoardOperations;
@@ -30,7 +33,9 @@ export interface HomeHost {
 	openBrowser(request: BrowserOpenRequest): Promise<void>;
 	workbenchRefresh(): void;
 	switchWorkspace(path: string): Promise<void>;
-	createWorkspace(name: string): Promise<void>;
+	createWorkspace(name: string, layout?: BoardLayout): Promise<void>;
+	openBoard(path: string): Promise<void>;
+	setBoardLayout(path: string, layout: BoardLayout): Promise<void>;
 	renameWorkspace(path: string, name: string): Promise<void>;
 	removeWorkspace(path: string): Promise<void>;
 	reorderWorkspaces(from: number, to: number): Promise<void>;
@@ -71,6 +76,7 @@ export function createHomeHost(context: ModuleContext, handle: SettingsHandle<Da
 	const host: HomeHost = {
 		app,
 		manifest: context.manifest,
+		appearance: new AppearancePresets(context.settings, handle),
 		get settings() {
 			return view();
 		},
@@ -105,7 +111,14 @@ export function createHomeHost(context: ModuleContext, handle: SettingsHandle<Da
 		},
 		workbenchRefresh: () => context.shell.refresh(),
 		switchWorkspace: (path) => host.boards?.switch(path) ?? Promise.resolve(),
-		createWorkspace: (name) => host.boards?.create(name) ?? Promise.resolve(),
+		createWorkspace: (name, layout) => host.boards?.create(name, layout) ?? Promise.resolve(),
+		openBoard: path => context.shell.open({ feature: 'dashboard', resourceId: normalizeWorkspacePath(path) }),
+		setBoardLayout: async (path, layout) => {
+			await host.openBoard(path);
+			const surface = host.activeDashboard();
+			if (!surface || normalizeWorkspacePath(surface.plugin.settings.dashboardFile) !== normalizeWorkspacePath(path)) throw new Error(t('workbench.missing'));
+			await surface.sync.setBoardLayout(layout);
+		},
 		renameWorkspace: (path, name) => host.boards?.rename(path, name) ?? Promise.resolve(),
 		removeWorkspace: (path) => host.boards?.remove(path) ?? Promise.resolve(),
 		reorderWorkspaces: (from, to) => host.boards?.reorder(from, to) ?? Promise.resolve(),

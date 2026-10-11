@@ -47,14 +47,15 @@ export function applyAppearance(container: HTMLElement, app: App, settings: Dash
  * it swaps the background layer and rewrites the `--db-*` overrides in place.
  */
 export function refreshAppearanceLive(app: App, settings: DashboardSettings): void {
-	const roots = activeDocument.querySelectorAll<HTMLElement>('.nand-dashboard-root');
-	roots.forEach((root) => {
+	const documents = new Set<Document>([app.workspace.containerEl.doc]);
+	app.workspace.iterateAllLeaves(leaf => documents.add(leaf.view.containerEl.doc));
+	for (const doc of documents) for (const root of doc.querySelectorAll<HTMLElement>('.nand-dashboard-root')) {
 		root.querySelectorAll(':scope > .nand-dashboard-bg').forEach((el) => el.remove());
 		clearAdvanced(root);
 		applyBackground(root, app, settings);
 		applyAdvanced(root, settings);
 		applyControlContrast(root);
-	});
+	}
 }
 
 function applyBackground(container: HTMLElement, app: App, settings: DashboardSettings): void {
@@ -117,7 +118,7 @@ function applyFontScale(root: HTMLElement, scale: DashboardSettings['fontScale']
 /** Re-emit surface tokens as rgba(rgb, alpha), preserving the effective color. */
 function applySurfaceOpacity(root: HTMLElement, opacity: number): void {
 	const alpha = clampNumber(opacity, 0, 100, 100) / 100;
-	const cs = getComputedStyle(root);
+	const cs = root.win.getComputedStyle(root);
 	for (const token of SURFACE_TOKENS) {
 		const rgb = parseRgb(cs.getPropertyValue(token).trim());
 		if (rgb) {

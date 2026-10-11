@@ -113,7 +113,10 @@ fn dispatch(out: &Outbox, sessions: &Sessions, history: &data::History, body: &[
 
 fn main() {
     // Do this before channels, threads, PTYs or history databases are created.
-    inherited_fds::close_inherited_fds();
+    if let Err(error) = inherited_fds::close_inherited_fds() {
+        eprintln!("nand-pty: inherited descriptor cleanup failed: {error}");
+        std::process::exit(1);
+    }
     job::kill_children_with_helper();
     let (out, outgoing) = mpsc::channel::<Vec<u8>>();
     let writer = thread::spawn(move || {

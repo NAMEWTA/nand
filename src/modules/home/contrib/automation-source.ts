@@ -27,6 +27,11 @@ export function dashboardAutomationSource(options: {
 		list: () => boards.list(),
 		save: (definition, remove) => boards.save(definition, remove),
 		open: async (source, ownerWindow) => {
+			if (source.kind === 'dashboard' && source.id.startsWith('pipeline:')) {
+				const file = await boards.resolvePipelineSource(source);
+				await app.workspace.openLinkText(file.path, '', false);
+				return;
+			}
 			if (source.kind === 'widget') {
 				const file = boards.resolveWidgetSource(source);
 				await shell.open({ feature: 'dashboard', resourceId: file.path, focusId: source.id }, ownerWindow);

@@ -6,6 +6,8 @@ import { Icon } from '../../../../ui/primitives/Icon';
 import { noteHover } from '../cards/InlineLinks';
 import type { DashboardRenderContext } from '../renderer/render-context';
 import { formatDate, loadPreview, str, type LibraryFileResult } from './library-file-result';
+import { libraryTableCandidates, libraryTableColumns } from '../../core/board/table-columns';
+import { tableColumnLabel } from './TableColumnsEditor';
 import {
 	extractCoverValue,
 	formatBadgeValue,
@@ -22,6 +24,8 @@ export interface LibraryViewProps {
 	context: DashboardRenderContext;
 	showTags?: boolean;
 	onDelete?: (file: TFile) => void;
+	/** Changes when the library query changes; progressive limits otherwise survive refresh. */
+	windowKey?: string;
 }
 export function Cover({ result, app, kanban = false }: { result: LibraryFileResult; app: App; kanban?: boolean }) {
 	const cover = extractCoverValue(result.frontmatter);
@@ -99,6 +103,11 @@ export function LibraryDeleteButton({ file, onDelete }: { file: TFile; onDelete?
 			class="dashboard-library-table-delete"
 			title={t('library.delete')}
 			aria-label={t('library.delete')}
+			onPointerDown={event => {
+				// A draggable card receives dragstart as the target, even when the press began on this button.
+				event.preventDefault(); event.stopPropagation(); event.currentTarget.focus();
+			}}
+			onMouseOver={event => event.stopPropagation()}
 			onClick={(event) => {
 				event.preventDefault();
 				event.stopPropagation();
@@ -132,6 +141,7 @@ export function FileCards({
 					<div
 						key={result.file.path}
 						class="dashboard-library-card"
+						data-file-path={result.file.path}
 						onMouseOver={(event) => noteHover(app, context, result.file, event)}
 						onClick={(event) => {
 							if ((event.target as HTMLElement).closest('.dashboard-library-table-delete')) return;
@@ -178,6 +188,7 @@ export function FileList({ results, app, context, onDelete }: Pick<LibraryViewPr
 				<div
 					key={result.file.path}
 					class="dashboard-library-list-item"
+					data-file-path={result.file.path}
 					onMouseOver={(event) => noteHover(app, context, result.file, event)}
 					onClick={(event) => {
 						if ((event.target as HTMLElement).closest('.dashboard-library-table-delete')) return;
@@ -277,29 +288,15 @@ function PropertyCell({
 		</td>
 	);
 }
-export function FileTable({ results, app, config, context, onDelete }: LibraryViewProps) {
-	const keys = new Set(
-		config.filters
-			.map((filter) => filter.property)
-			.filter((key) => !['tags', 'modified', 'created', 'path'].includes(key)),
-	);
-	for (const result of results.slice(0, 20))
-		for (const key of Object.keys(result.frontmatter)) {
-			if (key === 'position') continue;
-			keys.add(key);
-			if (keys.size >= 6) break;
-		}
+export function FileTable({ results, app, config, context, onDelete, tableColumns }: LibraryViewProps & { tableColumns?: readonly string[] }) {
+	const columns = tableColumns ?? libraryTableColumns(config, libraryTableCandidates(results, config.filters)).visible;
 	return (
 		<table class="dashboard-library-table">
 			<thead>
 				<tr>
-					{['name', 'modified', ...keys].map((key) => (
+					{columns.map((key) => (
 						<th key={key} data-sort-key={key}>
-							{key === 'name'
-								? t('library.sortName')
-								: key === 'modified'
-									? t('library.sortModified')
-									: key}
+							{tableColumnLabel(key)}
 						</th>
 					))}
 					<th class="dashboard-library-table-op-col" aria-label={t('library.delete')} />
@@ -308,7 +305,8 @@ export function FileTable({ results, app, config, context, onDelete }: LibraryVi
 			<tbody>
 				{results.map((result) => (
 					<tr key={result.file.path}>
-						<td
+						{columns.map(key => key === 'file.name' ? <td
+							key={key}
 							class="dashboard-library-table-name"
 							onMouseOver={(event) => noteHover(app, context, result.file, event)}
 							onClick={(event) => {
@@ -317,15 +315,13 @@ export function FileTable({ results, app, config, context, onDelete }: LibraryVi
 							}}
 						>
 							{result.basename}
-						</td>
-						<td>{formatDate(result.mtime)}</td>
-						{Array.from(keys, (key) => (
+						</td> : key === 'file.modified' ? <td key={key}>{formatDate(result.mtime)}</td> : (
 							<PropertyCell
 								key={key}
 								app={app}
 								file={result.file}
-								property={key}
-								original={result.frontmatter[key]}
+								property={key.slice('property:'.length)}
+								original={result.frontmatter[key.slice('property:'.length)]}
 							/>
 						))}
 						<td class="dashboard-library-table-op">

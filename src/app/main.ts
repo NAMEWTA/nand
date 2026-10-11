@@ -71,6 +71,7 @@ export default class DashboardPlugin extends Plugin {
 					openFocus: (target, state, ownerWindow) => this.workbench?.openFocus(target, state, ownerWindow) ?? Promise.reject(new Error(t('workbench.notReady'))),
 					savedPages: (feature) => this.workbench?.savedPages(feature) ?? [],
 					activateResource: (feature, id) => this.workbench?.activateResource(feature, id) ?? Promise.resolve(false),
+					closeResource: (feature, id) => this.workbench?.closeResource(feature, id) ?? Promise.resolve(),
 				};
 				const commands: CommandAccess = {
 					add: (command) => {
@@ -160,6 +161,10 @@ export default class DashboardPlugin extends Plugin {
 
 	moduleInstance(id: ModuleId): ModuleInstance | undefined {
 		return this.registry?.instance(id);
+	}
+
+	onModuleChanged(listener: () => void): () => void {
+		return this.registry.onChange(listener);
 	}
 
 	/** Activate a module on demand (a page or command needs it); undefined when it is off, unsupported or failed. */

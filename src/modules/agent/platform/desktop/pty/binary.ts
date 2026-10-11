@@ -1,12 +1,11 @@
 import { createHash } from 'node:crypto';
 import * as fs from 'node:fs';
-import * as http from 'node:http';
-import * as https from 'node:https';
+import { setTimeout as scheduleTimeout, clearTimeout as cancelTimeout } from 'node:timers';
+import { requestUrl, type RequestUrlResponse } from 'obsidian';
 import * as path from 'node:path';
 
 /** Release that publishes the native helper next to the plugin files. */
 export const RELEASE_BASE = 'https://github.com/NAMEWTA/nand/releases/download';
-const MAX_REDIRECTS = 5;
 const DIGEST_LIMIT = 4096;
 const REQUEST_TIMEOUT = 60_000;
 const STAMP = 'nand-pty.json';
@@ -36,45 +35,34 @@ function sha256(file: string): string {
 	return createHash('sha256').update(fs.readFileSync(file)).digest('hex');
 }
 
-function get(url: string, limit: number, redirects = 0): Promise<Buffer> {
-	const lib = new URL(url).protocol === 'http:' ? http : https;
-	return new Promise((resolve, reject) => {
-		const request = lib.get(url, { headers: { 'User-Agent': 'NAND' } }, (response) => {
-			const status = response.statusCode ?? 0;
-			if (status >= 300 && status < 400 && response.headers.location) {
-				response.resume();
-				if (redirects >= MAX_REDIRECTS) return reject(new BinaryError('redirects', 'Too many redirects while downloading the terminal helper'));
-				return resolve(get(new URL(response.headers.location, url).toString(), limit, redirects + 1));
-			}
-			if (status !== 200) {
-				response.resume();
-				return reject(new BinaryError('http', `HTTP ${status} for ${url}`, { status, url }));
-			}
-			const chunks: Buffer[] = [];
-			let size = 0;
-			response.on('data', (chunk: Buffer) => {
-				size += chunk.length;
-				if (size > limit) {
-					request.destroy();
-					reject(new BinaryError('tooLarge', `Response from ${url} is too large`));
-					return;
-				}
-				chunks.push(chunk);
-			});
-			response.on('end', () => resolve(Buffer.concat(chunks)));
-			response.on('error', reject);
-		});
-		request.setTimeout(REQUEST_TIMEOUT, () => {
-			request.destroy();
-			reject(new BinaryError('timeout', `Timed out downloading ${url}`));
-		});
-		request.on('error', (error) => reject(new BinaryError('network', `Network error downloading ${url}: ${error.message}`, { url })));
-	});
-}
-
-/** Download one helper URL. HTTP status and network failure stay different errors. */
-export function downloadHelperBytes(url: string, limit: number): Promise<Buffer> {
-	return get(url, limit);
+/** Use the host network stack, including its proxy handling. Never expose redirected URLs. */
+export async function downloadHelperBytes(url: string, limit: number, timeout = REQUEST_TIMEOUT): Promise<Buffer> {
+	const original = new URL(url);
+	original.username = '';
+	original.password = '';
+	original.search = '';
+	original.hash = '';
+	const safeUrl = original.toString();
+	const failure = (code: BinaryErrorCode, message: string, status?: number) =>
+		new BinaryError(code, message + ': ' + safeUrl, { url: safeUrl, status });
+	let timer: ReturnType<typeof scheduleTimeout> | undefined;
+	try {
+		const response = await Promise.race([
+			requestUrl({ url, headers: { 'User-Agent': 'NAND' }, throw: false }),
+			new Promise<RequestUrlResponse>((_resolve, reject) => {
+				timer = scheduleTimeout(() => reject(failure('timeout', 'Timed out downloading the terminal helper')), timeout);
+			}),
+		]);
+		if (response.status !== 200) throw failure('http', 'HTTP ' + response.status, response.status);
+		if (response.arrayBuffer.byteLength > limit) throw failure('tooLarge', 'The terminal helper download is too large');
+		return Buffer.from(response.arrayBuffer);
+	} catch (error) {
+		if (error instanceof BinaryError) throw error;
+		const message = error instanceof Error ? error.message : '';
+		if (message.includes('ERR_TIMED_OUT')) throw failure('timeout', 'Timed out downloading the terminal helper');
+		if (message.includes('ERR_TOO_MANY_REDIRECTS')) throw failure('redirects', 'Too many redirects downloading the terminal helper');
+		throw failure('network', 'Network error downloading the terminal helper');
+	} finally { if (timer) cancelTimeout(timer); }
 }
 
 interface Stamp {
@@ -125,8 +113,17 @@ export async function ensureHelper(options: InstallOptions): Promise<string> {
 	const stamp = readStamp(dir);
 	if (exists && stamp?.version === options.version && sha256(file) === stamp.sha256) return file;
 
-	const fetch = options.fetch ?? get;
+	const fetch = async (url: string, limit: number) => {
+		try { return await (options.fetch ?? downloadHelperBytes)(url, limit); }
+		catch (error) {
+			if (error instanceof BinaryError) {
+				throw new BinaryError(error.code, error.message, { ...error.detail, url, version: options.version });
+			}
+			throw new BinaryError('network', `Network error downloading ${url}`, { url, version: options.version });
+		}
+	};
 	const base = `${RELEASE_BASE}/${encodeURIComponent(options.version)}/${name}`;
+	options.progress?.('downloading');
 	const digest = parseDigest((await fetch(`${base}.sha256`, DIGEST_LIMIT)).toString('utf8'));
 	if (!digest) throw new BinaryError('checksumMissing', 'The published terminal helper checksum is missing or invalid');
 	fs.mkdirSync(dir, { recursive: true });
@@ -136,7 +133,6 @@ export async function ensureHelper(options: InstallOptions): Promise<string> {
 		remember();
 		return file;
 	}
-	options.progress?.('downloading');
 	const bytes = await fetch(base, 256 * 1024 * 1024);
 	options.progress?.('verifying');
 	if (createHash('sha256').update(bytes).digest('hex') !== digest) throw new BinaryError('checksumMismatch', 'The downloaded terminal helper does not match its checksum; the previous file was kept');

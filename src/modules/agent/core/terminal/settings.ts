@@ -1,5 +1,7 @@
 import { normalizeAgentSettings } from '../launch/defaults';
 import type { AgentSettings } from '../launch/types';
+import { AGENT_IDS } from '../launch/defaults';
+import { validSkillName } from '../../../../shared/agent-prompt';
 
 export const SHELL_CHOICES = ['default', 'bash', 'zsh', 'pwsh', 'powershell', 'cmd', 'gitbash', 'wsl', 'custom'] as const;
 export type ShellChoice = (typeof SHELL_CHOICES)[number];
@@ -40,6 +42,9 @@ export interface TerminalSettings {
 	offline: boolean;
 	presets: LaunchPreset[];
 	agents: AgentSettings;
+	/** Explicit device-only opt-in. Empty means no scan outside the vault. */
+	skillDirectories: string[];
+	knownSkills: Record<string, string[]>;
 }
 
 export const DEFAULT_TERMINAL_SETTINGS: TerminalSettings = {
@@ -60,6 +65,8 @@ export const DEFAULT_TERMINAL_SETTINGS: TerminalSettings = {
 	offline: false,
 	presets: [],
 	agents: normalizeAgentSettings(undefined),
+	skillDirectories: [],
+	knownSkills: {},
 };
 
 const isRecord = (value: unknown): value is Record<string, unknown> => !!value && typeof value === 'object' && !Array.isArray(value);
@@ -111,5 +118,10 @@ export function normalizeTerminalSettings(raw: unknown): TerminalSettings {
 		offline: value.offline === true,
 		presets,
 		agents: normalizeAgentSettings(isRecord(value.agents) ? value.agents : undefined),
+		skillDirectories: Array.isArray(value.skillDirectories) ? [...new Set(value.skillDirectories.filter((path): path is string => typeof path === 'string' && !!path.trim()).map(path => path.trim()))].slice(0, 20) : [],
+		knownSkills: Object.fromEntries(AGENT_IDS.flatMap(id => {
+			const names = isRecord(value.knownSkills) ? value.knownSkills[id] : undefined;
+			return Array.isArray(names) ? [[id, [...new Set(names.filter((name): name is string => typeof name === 'string' && validSkillName(name)))].slice(-200)]] : [];
+		})),
 	};
 }

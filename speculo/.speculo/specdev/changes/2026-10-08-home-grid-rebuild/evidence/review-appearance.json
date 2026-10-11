@@ -1,0 +1,70 @@
+{
+  "ticket": "T-16",
+  "requirements": [
+    "AC-064",
+    "AC-065",
+    "AC-066",
+    "AC-067"
+  ],
+  "status": "implemented-native-verified",
+  "environment": {
+    "host": "Obsidian 1.13.7",
+    "platform": "Windows",
+    "nativeEvidence": "C:/Users/cdewta/AppData/Local/Temp/nand-home-appearance-review-f3870cee7b93434c8e7db4bc89d5ca42/evidence"
+  },
+  "fixes": [
+    "Named home.appearancePresets and activeAppearancePresetId; theme normalization remains owned by theme/settings.ts and snapshot Home decor is explicitly whitelisted, including background focus.",
+    "Real shared SettingsStore service: await writes, coalesce theme/Home apply into existing batch, reject duplicate names, delete active snapshot without changing look, retry existing failed store. Removed fake synchronous success helpers/tests.",
+    "Lazy Preact controls in existing appearance form, locale subscription and real persisted/error feedback on reopen. Settings/modal/nested picker ownership and owner-window timers/observer cleanup.",
+    "Refresh appearance in every leaf owner document; live modal tokens track body theme changes; constrained controls wrap at narrow widths. Reused accessible focal editor for global background.",
+    "SettingsSurface releases keep callbacks and invalidates pending loads on hide/close; rebuilds settings bindings on return."
+  ],
+  "verification": {
+    "native": {
+      "passed": 37,
+      "failed": 0,
+      "script": "scripts/obsidian-acceptance/home-appearance.mjs",
+      "coverage": [
+        "native Enter saves complete named snapshot",
+        "duplicate rejection and whitelist",
+        "main and popup board theme/decor + live editor line height",
+        "delete active leaves current look",
+        "asynchronous settings persistence failure, retained disk, visible in-memory changes, reopen error and explicit retry",
+        "three theme presets x light/dark x 500/800/1500 widths, whole-form overflow and current theme tokens",
+        "page hide closes studio and nested image picker",
+        "board files unchanged",
+        "restart and module disposal"
+      ],
+      "faultInjection": "Existing SettingsStore.persistence.save temporarily rejects asynchronously; native UI and production service/store handle it. Not a physical disk-failure simulation.",
+      "visualsInspected": [
+        "appearance-system-light-500.png",
+        "appearance-eye-care-dark-1500.png"
+      ]
+    },
+    "tests": {
+      "passed": 115,
+      "files": 33,
+      "command": "pnpm exec vitest run src/modules/home src/theme src/shared/settings/store.test.ts test/golden/user-formats.test.ts"
+    },
+    "gates": {
+      "build": "PASS",
+      "lint": "PASS zero warnings",
+      "architecture": "PASS 856 modules",
+      "i18n": "PASS 24 dictionaries / 3155 keys",
+      "css": "PASS unchanged baseline",
+      "bundle": "PASS main4006669/styles741353, Home activation427.2KiB; recorded8KiB/1KiB ratchet, unchanged startup/module caps",
+      "docs": "Standard FAIL inherited planning bilingual/source-heading exceptions. Existing exact scoped exception PASS549 Markdown/541 local links/332 external links, not fetched."
+    },
+    "golden": "test/golden/__snapshots__/appearance-settings.json"
+  },
+  "relatedFindings": [
+    "R-068",
+    "R-070",
+    "R-071"
+  ],
+  "unverified": [
+    "Actual phone hardware",
+    "Touch input"
+  ],
+  "separateFollowup": "R-069: sole full-workbench moved to popout then explicit main-window open did not create a main board. Native ribbon/user reproduction pending; T16 retains main full board and a second focus popup board."
+}

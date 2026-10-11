@@ -26,6 +26,10 @@ shared_path_owners: ["<Path>main.js</Path> => 2026-10-08-news-aihot::T-07（本�
 
 # Ticket T-07: 生成深入了解简报并连接阅读动作
 
+<!-- ACTUAL-CODE-REVIEW:START -->
+2026-10-11 实际代码审查：[T-07.md](../evidence/T-07.md)。本票下文保留原规划合同与基线；当前实现、修复、验证及未验证条件以该记录为准。原“仅规划／未授权实施／必须提交”的阶段约束不适用于用户已授权的本次工作区审查；提交与远程操作仍未执行。
+<!-- ACTUAL-CODE-REVIEW:END -->
+
 - Ticket：<Path>{roots.state}/specdev/changes/2026-10-08-news-aihot/ticket/07-briefs-reader-actions-and-notifications.md</Path>
 - 总控Map：<Path>{roots.state}/specdev/changes/2026-10-08-news-aihot/tickets-map.md</Path>
 - Spec：<Path>{roots.state}/specdev/changes/2026-10-08-news-aihot/spec.md</Path>
@@ -37,7 +41,7 @@ shared_path_owners: ["<Path>main.js</Path> => 2026-10-08-news-aihot::T-07（本�
 
 **目标与可观察产出：** 用户从新闻详情生成带来源简报、打开原文或送入现有Agent输入，并收到幂等完成/失败通知。
 
-**当前事实：** BROWSER_OPEN/AGENT_SESSIONS/NOTIFICATION_INBOX已可用；notification target当前automation形状，news不能伪造其字段。
+**规划时基线：** BROWSER_OPEN/AGENT_SESSIONS/NOTIFICATION_INBOX已可用；notification target当前automation形状，news不能伪造其字段。
 
 **来源：** AC-020, AC-022, AC-026；issue #136；<Path>{roots.state}/specdev/changes/2026-10-08-news-aihot/reference-analysis.md</Path>。深度 deep：涉及持久数据/公共接口/进程或权限的跨边界合同，必须记录恢复与兼容。
 

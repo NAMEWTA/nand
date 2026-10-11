@@ -12,7 +12,7 @@
 	height: auto;
 	max-height: none;
 	position: relative;
-	z-index: 1;
+	z-index: var(--nand-z-base);
 }
 .dashboard-quicknote {
 	display: flex;
@@ -359,7 +359,7 @@
 	align-items: center;
 	justify-content: center;
 	width: 36px;
-	height: 30px;
+	height: var(--nand-control-height);
 	padding: 0;
 	flex: 0 0 36px;
 	border: 1px solid var(--db-border-input);
@@ -443,6 +443,15 @@
 	display: flex;
 	align-items: center;
 	gap: 10px;
+	min-height: var(--nand-control-height);
+}
+@media (pointer: coarse) {
+	.dashboard-quicknote-cfg-icon-btn {
+		width: var(--nand-touch-target);
+		height: var(--nand-touch-target);
+		flex-basis: var(--nand-touch-target);
+	}
+	.dashboard-icon-picker-item { min-height: var(--nand-touch-target); }
 }
 .dashboard-icon-picker-glyph {
 	display: inline-flex;

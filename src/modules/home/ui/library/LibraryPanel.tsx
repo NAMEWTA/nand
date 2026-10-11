@@ -5,10 +5,12 @@ import { useLayoutEffect, useMemo, useRef, useState } from 'preact/hooks';
 import type { LibraryConfig, LibraryViewMode } from '../../core/board/types/index';
 import { t } from '../../../../shared/i18n/index';
 import { Icon } from '../../../../ui/primitives/Icon';
+import { IconButton } from '../../../../ui/primitives/IconButton';
 import { applyModalTheme } from '../appearance/modal-theme';
 import type { DashboardRenderContext } from '../renderer/render-context';
 import { ToolbarDropdown } from '../ui/ToolbarDropdown';
 import { showConfirmDialog } from '../ui/confirm-dialog';
+import { closeOwnedDashboardDialogs } from '../ui/dialog-scope';
 import { LibraryKanban } from './LibraryKanban';
 import { FileCards, FileList, FileTable } from './LibraryViews';
 import { Pagination } from './Pagination';
@@ -22,6 +24,10 @@ import {
 } from './library-file-result';
 import { groupLibraryResults } from './library-groups';
 import { trashLibraryFile } from './library-presentation';
+import { libraryTableCandidates, libraryTableColumns } from '../../core/board/table-columns';
+import { TableColumnsEditor } from './TableColumnsEditor';
+import { GroupWindow, useProgressiveResults } from './ProgressiveResults';
+import { SECTION_CANDIDATE_LIMIT } from '../../core/board/progressive-results';
 const modes: LibraryViewMode[] = ['grid', 'gallery', 'list', 'table', 'kanban'];
 const icons = { grid: 'layout-grid', gallery: 'image', list: 'list', table: 'table', kanban: 'columns' };
 function QuickFilter({
@@ -156,6 +162,19 @@ export function LibraryPanel({
 		[revision, setRevision] = useState(0),
 		[collapsed, setCollapsed] = useState(new Set<string>()),
 		[filterOpen, setFilterOpen] = useState(false);
+	const [columnsOpen, setColumnsOpen] = useState(false);
+	useLayoutEffect(() => {
+		const win = root.ownerDocument.defaultView;
+		let timer: number | undefined;
+		// Vault writes can precede indexing; query again when frontmatter is ready.
+		const refresh = () => {
+			win?.clearTimeout(timer);
+			timer = win?.setTimeout(() => setRevision(value => value + 1), 100);
+		};
+		const ref = app.metadataCache.on('changed', refresh);
+		root.addEventListener('dashboard-library-refresh', refresh);
+		return () => { app.metadataCache.offref(ref); root.removeEventListener('dashboard-library-refresh', refresh); win?.clearTimeout(timer); closeOwnedDashboardDialogs(app, root); };
+	}, [app, root]);
 	const filterButton = useRef<HTMLDivElement>(null);
 	useLayoutEffect(() => {
 		const win = root.ownerDocument.defaultView;
@@ -201,6 +220,10 @@ export function LibraryPanel({
 	const grouped =
 		config.viewMode !== 'kanban' &&
 		(config.viewGroupMode === 'folder' || (config.viewGroupMode === 'property' && !!config.viewGroupBy));
+	const tableCandidates = useMemo(() => config.viewMode === 'table' ? libraryTableCandidates(results, config.filters) : [], [results, config.viewMode, config.filters]);
+	const tableColumns = libraryTableColumns(config, tableCandidates).visible;
+	const windowKey = JSON.stringify([search, config.viewMode, config.viewGroupMode, config.viewGroupBy, config.kanbanGroupBy, config.groupMode, config.filters, config.folders, config.excludeFolders, config.folderFilter, config.quickDateFilter, config.sortBy, config.sortDesc]);
+	const progressive = useProgressiveResults(results, windowKey);
 	const groups = useMemo(
 		() =>
 			grouped
@@ -236,6 +259,7 @@ export function LibraryPanel({
 			!(await showConfirmDialog(app, {
 				title: t('common.confirmDelete'),
 				message: t('library.confirmDelete', { name: file.basename }),
+				owner: root,
 			}))
 		)
 			return;
@@ -254,6 +278,7 @@ export function LibraryPanel({
 			app,
 			config,
 			context,
+			windowKey,
 			showTags: column.sectionType === 'folder',
 			onDelete: (file: TFile) => {
 				void remove(file);
@@ -264,7 +289,7 @@ export function LibraryPanel({
 		) : config.viewMode === 'list' ? (
 			<FileList {...props} />
 		) : config.viewMode === 'table' ? (
-			<FileTable {...props} />
+			<FileTable {...props} tableColumns={tableColumns} />
 		) : (
 			<FileCards {...props} covers={config.viewMode === 'gallery'} />
 		);
@@ -428,12 +453,10 @@ export function LibraryPanel({
 						</option>
 					))}
 				</select>
-				<div
-					class="dashboard-library-newnote-btn"
-					role="button"
-					tabIndex={0}
-					title={t('library.newNote')}
-					aria-label={t('library.newNote')}
+				<IconButton
+					className="dashboard-library-newnote-btn"
+					icon="file-plus"
+					label={t('library.newNote')}
 					onClick={(event) =>
 						root.dispatchEvent(
 							new CustomEvent('dashboard-library-new-note', {
@@ -442,14 +465,12 @@ export function LibraryPanel({
 							}),
 						)
 					}
-				>
-					<Icon name="file-plus" />
-				</div>
-				<div
-					class="dashboard-library-config-btn"
-					role="button"
-					tabIndex={0}
-					title={t('library.configure')}
+				/>
+				{config.viewMode === 'table' && <IconButton className="dashboard-library-columns-btn" icon="columns-3" label={t('library.tableColumns')} ariaExpanded={columnsOpen} onClick={() => setColumnsOpen(value => !value)} />}
+				<IconButton
+					className="dashboard-library-config-btn"
+					icon="settings"
+					label={t('library.configure')}
 					onClick={() =>
 						root.dispatchEvent(
 							new CustomEvent('dashboard-library-config', {
@@ -458,18 +479,19 @@ export function LibraryPanel({
 							}),
 						)
 					}
-				>
-					<Icon name="settings" />
-				</div>
+				/>
 			</div>
+			{config.viewMode === 'table' && columnsOpen && <TableColumnsEditor config={config} candidates={tableCandidates} change={update} />}
+			{skip && results.length > SECTION_CANDIDATE_LIMIT && <p class="dashboard-library-window-notice" role="status">{t('library.windowLimit', { limit: SECTION_CANDIDATE_LIMIT, total: results.length })}</p>}
 			<div class="dashboard-library-files" data-view-mode={config.viewMode}>
 				{results.length === 0 ? (
 					<div class="dashboard-library-empty">
 						{t(!config.filters.length && !config.folders?.length ? 'library.noConfig' : 'library.noFiles')}
 					</div>
 				) : grouped ? (
-					groups.map((group) => (
-						<Fragment key={group.key}>
+					groups.map((group) => {
+						const window = progressive.group(group.key, group.items);
+						return <Fragment key={group.key}>
 							<div
 								class={`dashboard-library-group-header${collapsed.has(group.key) ? ' is-collapsed' : ''}${group.isNoGroup ? ' is-nogroup' : ''}`}
 								data-group-key={group.key}
@@ -489,10 +511,11 @@ export function LibraryPanel({
 								<div class="dashboard-library-group-count">{group.items.length}</div>
 							</div>
 							<div class={`dashboard-library-group-body${collapsed.has(group.key) ? ' is-hidden' : ''}`}>
-								{view(group.items)}
+								{view(window.items)}
+								<GroupWindow label={group.label} {...window} more={() => progressive.more(group.key, window.available)} />
 							</div>
-						</Fragment>
-					))
+						</Fragment>;
+					})
 				) : (
 					view(items)
 				)}

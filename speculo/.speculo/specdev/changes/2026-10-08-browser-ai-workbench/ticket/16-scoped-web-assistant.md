@@ -26,6 +26,10 @@ shared_path_owners: ["<Path>main.js</Path> => 2026-10-08-browser-ai-workbench::T
 
 # Ticket T-16: 独立 opt-in 的受限网页助手与人工接管
 
+<!-- ACTUAL-CODE-REVIEW:START -->
+2026-10-11 实际代码审查：[T-16.md](../evidence/T-16.md)。本票下文保留原规划合同与基线；当前实现、修复、验证及未验证条件以该记录为准。原“仅规划／未授权实施／必须提交”的阶段约束不适用于用户已授权的本次工作区审查；提交与远程操作仍未执行。
+<!-- ACTUAL-CODE-REVIEW:END -->
+
 - Ticket：<Path>{roots.state}/specdev/changes/2026-10-08-browser-ai-workbench/ticket/16-scoped-web-assistant.md</Path>
 - 总控Map：<Path>{roots.state}/specdev/changes/2026-10-08-browser-ai-workbench/tickets-map.md</Path>
 - Spec：<Path>{roots.state}/specdev/changes/2026-10-08-browser-ai-workbench/spec.md</Path>
@@ -37,7 +41,7 @@ shared_path_owners: ["<Path>main.js</Path> => 2026-10-08-browser-ai-workbench::T
 
 **目标与可观察产出：** 用户在指定page/profile/task范围让已有agent辅助完成网页步骤，看到结果证据并可随时同页接管。
 
-**当前事实：** 已有浏览器CLI/工具但无user-facing scoped task循环；home owning dispatch负责agent进程/receipt，browser拥有授权与控制，不重复底座。
+**规划时基线：** 已有浏览器CLI/工具但无user-facing scoped task循环；home owning dispatch负责agent进程/receipt，browser拥有授权与控制，不重复底座。
 
 **来源：** AC-025, AC-033, AC-034, AC-039；issue #142, #145；<Path>{roots.state}/specdev/changes/2026-10-08-browser-ai-workbench/reference-analysis.md</Path>。深度 deep：涉及持久数据/公共接口/进程或权限的跨边界合同，必须记录恢复与兼容。
 

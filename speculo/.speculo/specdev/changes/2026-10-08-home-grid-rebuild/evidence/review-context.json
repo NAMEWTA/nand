@@ -1,0 +1,564 @@
+{
+  "rows": [
+    {
+      "name": "quicknote-current-target-title-folder-and-selected-literal-input",
+      "passed": true,
+      "detail": "$review\npath=Inbox/Capture.md\ntitle=Capture\nfolder=Inbox\nstage=\npaths=Inbox/Capture.md\ninput={{path}} 中文"
+    },
+    {
+      "name": "quicknote-file-scope-is-target-only",
+      "passed": true
+    },
+    {
+      "name": "preview-cancel-neither-captures-nor-clears-draft",
+      "passed": true
+    },
+    {
+      "name": "unsaved-quicknote-empty-scope-no-implicit-file",
+      "passed": true,
+      "detail": "$review\npath=\ntitle=Fleeting Capture\nfolder=Inbox\nstage=\npaths=\ninput="
+    },
+    {
+      "name": "quicknote-whole-draft-without-selection",
+      "passed": true
+    },
+    {
+      "name": "preview-file-subset-also-rebuilds-paths",
+      "passed": true
+    },
+    {
+      "name": "quicknote-native-one-unsent-block-and-no-capture-write",
+      "passed": true
+    },
+    {
+      "name": "ordinary-card-context-uses-linked-note",
+      "passed": true
+    },
+    {
+      "name": "renamed-and-moved-card-context-is-live",
+      "passed": true,
+      "detail": "$review\npath=Moved/Renamed.md\ntitle=Renamed\nfolder=Moved\nstage=\npaths=Moved/Renamed.md\ninput="
+    },
+    {
+      "name": "card-native-one-unsent-block-with-current-file",
+      "passed": true,
+      "detail": "\"\\u001b[200~$review\\rpath=Inbox/Capture.md\\rtitle=Capture\\rfolder=Inbox\\rstage=\\rpaths=\\rinput=whole {{title}} draft\\u001b[201~\\u001b[200~ Edited {{path}} 中文\\r\\rMoved/Renamed.md\\u001b[201~\""
+    },
+    {
+      "name": "context-run-retains-exact-edited-text-and-pasted-receipt",
+      "passed": true
+    },
+    {
+      "name": "fixture-selects-visible-card-body",
+      "passed": true,
+      "detail": {
+        "text": "A selectable inline body.",
+        "range": "A selectable inline body.",
+        "css": "text",
+        "count": 1,
+        "anchor": "<div class=\"dashboard-memo-view--md\" style=\"\"><p dir=\"auto\">A selectable inline body.</p></div>"
+      }
+    },
+    {
+      "name": "inline-card-selection-and-board-path-stay-local",
+      "passed": true,
+      "detail": "$review\npath=Board.md\ntitle=Inline card\nfolder=\nstage=\npaths=\ninput=A selectable inline body."
+    },
+    {
+      "name": "card-button-and-native-menu-keyboard-operable",
+      "passed": true
+    },
+    {
+      "name": "page-navigation-closes-owned-context-menu",
+      "passed": true
+    },
+    {
+      "name": "hiding-page-closes-context-preview-without-submission",
+      "passed": true
+    },
+    {
+      "name": "context-controls-system-light-500",
+      "passed": true,
+      "detail": {
+        "overflow": false,
+        "buttons": [
+          {
+            "width": 40,
+            "height": 32,
+            "name": "Run a board skill"
+          },
+          {
+            "width": 32,
+            "height": 32,
+            "name": "Run a board skill"
+          },
+          {
+            "width": 32,
+            "height": 32,
+            "name": "Run a board skill"
+          }
+        ]
+      }
+    },
+    {
+      "name": "context-controls-system-light-800",
+      "passed": true,
+      "detail": {
+        "overflow": false,
+        "buttons": [
+          {
+            "width": 40,
+            "height": 32,
+            "name": "Run a board skill"
+          },
+          {
+            "width": 32,
+            "height": 32,
+            "name": "Run a board skill"
+          },
+          {
+            "width": 32,
+            "height": 32,
+            "name": "Run a board skill"
+          }
+        ]
+      }
+    },
+    {
+      "name": "context-controls-system-light-1500",
+      "passed": true,
+      "detail": {
+        "overflow": false,
+        "buttons": [
+          {
+            "width": 40,
+            "height": 32,
+            "name": "Run a board skill"
+          },
+          {
+            "width": 32,
+            "height": 32,
+            "name": "Run a board skill"
+          },
+          {
+            "width": 32,
+            "height": 32,
+            "name": "Run a board skill"
+          }
+        ]
+      }
+    },
+    {
+      "name": "context-controls-system-dark-500",
+      "passed": true,
+      "detail": {
+        "overflow": false,
+        "buttons": [
+          {
+            "width": 40,
+            "height": 32,
+            "name": "Run a board skill"
+          },
+          {
+            "width": 32,
+            "height": 32,
+            "name": "Run a board skill"
+          },
+          {
+            "width": 32,
+            "height": 32,
+            "name": "Run a board skill"
+          }
+        ]
+      }
+    },
+    {
+      "name": "context-controls-system-dark-800",
+      "passed": true,
+      "detail": {
+        "overflow": false,
+        "buttons": [
+          {
+            "width": 40,
+            "height": 32,
+            "name": "Run a board skill"
+          },
+          {
+            "width": 32,
+            "height": 32,
+            "name": "Run a board skill"
+          },
+          {
+            "width": 32,
+            "height": 32,
+            "name": "Run a board skill"
+          }
+        ]
+      }
+    },
+    {
+      "name": "context-controls-system-dark-1500",
+      "passed": true,
+      "detail": {
+        "overflow": false,
+        "buttons": [
+          {
+            "width": 40,
+            "height": 32,
+            "name": "Run a board skill"
+          },
+          {
+            "width": 32,
+            "height": 32,
+            "name": "Run a board skill"
+          },
+          {
+            "width": 32,
+            "height": 32,
+            "name": "Run a board skill"
+          }
+        ]
+      }
+    },
+    {
+      "name": "context-controls-claude-code-light-500",
+      "passed": true,
+      "detail": {
+        "overflow": false,
+        "buttons": [
+          {
+            "width": 40,
+            "height": 32,
+            "name": "Run a board skill"
+          },
+          {
+            "width": 32,
+            "height": 32,
+            "name": "Run a board skill"
+          },
+          {
+            "width": 32,
+            "height": 32,
+            "name": "Run a board skill"
+          }
+        ]
+      }
+    },
+    {
+      "name": "context-controls-claude-code-light-800",
+      "passed": true,
+      "detail": {
+        "overflow": false,
+        "buttons": [
+          {
+            "width": 40,
+            "height": 32,
+            "name": "Run a board skill"
+          },
+          {
+            "width": 32,
+            "height": 32,
+            "name": "Run a board skill"
+          },
+          {
+            "width": 32,
+            "height": 32,
+            "name": "Run a board skill"
+          }
+        ]
+      }
+    },
+    {
+      "name": "context-controls-claude-code-light-1500",
+      "passed": true,
+      "detail": {
+        "overflow": false,
+        "buttons": [
+          {
+            "width": 40,
+            "height": 32,
+            "name": "Run a board skill"
+          },
+          {
+            "width": 32,
+            "height": 32,
+            "name": "Run a board skill"
+          },
+          {
+            "width": 32,
+            "height": 32,
+            "name": "Run a board skill"
+          }
+        ]
+      }
+    },
+    {
+      "name": "context-controls-claude-code-dark-500",
+      "passed": true,
+      "detail": {
+        "overflow": false,
+        "buttons": [
+          {
+            "width": 40,
+            "height": 32,
+            "name": "Run a board skill"
+          },
+          {
+            "width": 32,
+            "height": 32,
+            "name": "Run a board skill"
+          },
+          {
+            "width": 32,
+            "height": 32,
+            "name": "Run a board skill"
+          }
+        ]
+      }
+    },
+    {
+      "name": "context-controls-claude-code-dark-800",
+      "passed": true,
+      "detail": {
+        "overflow": false,
+        "buttons": [
+          {
+            "width": 40,
+            "height": 32,
+            "name": "Run a board skill"
+          },
+          {
+            "width": 32,
+            "height": 32,
+            "name": "Run a board skill"
+          },
+          {
+            "width": 32,
+            "height": 32,
+            "name": "Run a board skill"
+          }
+        ]
+      }
+    },
+    {
+      "name": "context-controls-claude-code-dark-1500",
+      "passed": true,
+      "detail": {
+        "overflow": false,
+        "buttons": [
+          {
+            "width": 40,
+            "height": 32,
+            "name": "Run a board skill"
+          },
+          {
+            "width": 32,
+            "height": 32,
+            "name": "Run a board skill"
+          },
+          {
+            "width": 32,
+            "height": 32,
+            "name": "Run a board skill"
+          }
+        ]
+      }
+    },
+    {
+      "name": "context-controls-eye-care-light-500",
+      "passed": true,
+      "detail": {
+        "overflow": false,
+        "buttons": [
+          {
+            "width": 40,
+            "height": 32,
+            "name": "Run a board skill"
+          },
+          {
+            "width": 32,
+            "height": 32,
+            "name": "Run a board skill"
+          },
+          {
+            "width": 32,
+            "height": 32,
+            "name": "Run a board skill"
+          }
+        ]
+      }
+    },
+    {
+      "name": "context-controls-eye-care-light-800",
+      "passed": true,
+      "detail": {
+        "overflow": false,
+        "buttons": [
+          {
+            "width": 40,
+            "height": 32,
+            "name": "Run a board skill"
+          },
+          {
+            "width": 32,
+            "height": 32,
+            "name": "Run a board skill"
+          },
+          {
+            "width": 32,
+            "height": 32,
+            "name": "Run a board skill"
+          }
+        ]
+      }
+    },
+    {
+      "name": "context-controls-eye-care-light-1500",
+      "passed": true,
+      "detail": {
+        "overflow": false,
+        "buttons": [
+          {
+            "width": 40,
+            "height": 32,
+            "name": "Run a board skill"
+          },
+          {
+            "width": 32,
+            "height": 32,
+            "name": "Run a board skill"
+          },
+          {
+            "width": 32,
+            "height": 32,
+            "name": "Run a board skill"
+          }
+        ]
+      }
+    },
+    {
+      "name": "context-controls-eye-care-dark-500",
+      "passed": true,
+      "detail": {
+        "overflow": false,
+        "buttons": [
+          {
+            "width": 40,
+            "height": 32,
+            "name": "Run a board skill"
+          },
+          {
+            "width": 32,
+            "height": 32,
+            "name": "Run a board skill"
+          },
+          {
+            "width": 32,
+            "height": 32,
+            "name": "Run a board skill"
+          }
+        ]
+      }
+    },
+    {
+      "name": "context-controls-eye-care-dark-800",
+      "passed": true,
+      "detail": {
+        "overflow": false,
+        "buttons": [
+          {
+            "width": 40,
+            "height": 32,
+            "name": "Run a board skill"
+          },
+          {
+            "width": 32,
+            "height": 32,
+            "name": "Run a board skill"
+          },
+          {
+            "width": 32,
+            "height": 32,
+            "name": "Run a board skill"
+          }
+        ]
+      }
+    },
+    {
+      "name": "context-controls-eye-care-dark-1500",
+      "passed": true,
+      "detail": {
+        "overflow": false,
+        "buttons": [
+          {
+            "width": 40,
+            "height": 32,
+            "name": "Run a board skill"
+          },
+          {
+            "width": 32,
+            "height": 32,
+            "name": "Run a board skill"
+          },
+          {
+            "width": 32,
+            "height": 32,
+            "name": "Run a board skill"
+          }
+        ]
+      }
+    },
+    {
+      "name": "context-theme-resize-does-not-write-board",
+      "passed": true
+    },
+    {
+      "name": "context-expired-session-no-fresh-fallback",
+      "passed": true
+    },
+    {
+      "name": "disabled-agent-menu-placeholder-and-no-auto-activation",
+      "passed": true
+    },
+    {
+      "name": "no-unhandled-native-errors",
+      "passed": true,
+      "detail": []
+    }
+  ],
+  "unverified": [
+    "Actual provider/model execution",
+    "Actual mobile hardware",
+    "Concrete workflow-stage integration pending T10"
+  ],
+  "nativeEvidence": "C:\\Users\\cdewta\\AppData\\Local\\Temp\\nand-home-context-review-9326f600876b4e0494a9f49b4748292f\\evidence",
+  "quicknoteRegression": {
+    "checks": 126,
+    "failed": [],
+    "path": "C:\\Users\\cdewta\\AppData\\Local\\Temp\\nand-home-quicknote-context-5dd49b033a6640aca6b24e31edcd89d0\\evidence"
+  },
+  "validation": {
+    "build": "passed",
+    "lint": "passed",
+    "targetedTests": "5 passed",
+    "architecture": "821 modules passed",
+    "i18n": "3023 keys / 24 dictionaries",
+    "css": "107 files, 67 baseline files, 150 groups, no new violations",
+    "styles": "108 ordered sources, 735338 bytes",
+    "docs": "Inherited planning-document failures; exact planning-only exception validates 544 Markdown, 537 local and 320 external links",
+    "fullTests": "523 passed, 4 skipped; 104 files passed, 1 skipped; 215.33s, no native harness running",
+    "bundle": "within documented limits: main.js 3933325 <= 3948544; startup 92.4 KiB, Home activation 406.4 KiB"
+  },
+  "visualInspection": [
+    "context-system-light-500.png",
+    "context-claude-code-dark-800.png",
+    "context-eye-care-light-1500.png"
+  ],
+  "currentReview": {
+    "date": "2026-10-11",
+    "note": "Concrete workflow-stage consumer completed in R056/native67; earlier producer-pending note is historical.",
+    "evidence": [
+      "review-pipeline.json"
+    ]
+  }
+}

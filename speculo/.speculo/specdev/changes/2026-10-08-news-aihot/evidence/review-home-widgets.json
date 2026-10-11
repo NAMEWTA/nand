@@ -1,0 +1,105 @@
+{
+  "ticket": "News T08 / Home registry integration",
+  "requirements": [
+    "AC-023"
+  ],
+  "status": "fixed-targeted-native-verified",
+  "findings": [
+    "R-075"
+  ],
+  "implementation": "Uncommitted authorized workspace changes; no commit/push/release requested.",
+  "fixes": [
+    "Three lazy provider kinds: featured/hot/view, independent provider-owned configuration referenced by Home members. count, summary, saved view ID, name and stale threshold persisted in news.widgets; defaults featured/hot.",
+    "Home public subscribeInstances notification contract updates member labels and absent/present configurations. Catalog subscribes in layout effect so an immediate provider change after opening is not lost. Content updates stay in provider component subscriptions.",
+    "Featured/saved-view lists filter hidden/withdrawn material and deduplicate events with matching representative fallback; hot links use event ID, other rows exact material ID, heading exact saved view or section.",
+    "Real pending source count, latest successful source time, stale indicator, running/attention analysis count and history link; manual and explicit stale-policy refresh share service work and preserve due/backoff; visible widget refresh never enables collection or analysis.",
+    "Native News settings rows manage instances. Lazy short editor retains draft on rejected write and compensates only the failed instance while retaining unrelated concurrent changes; no board membership added before successful create.",
+    "Provider-owned timers/subscriptions are disposed on removal/disable. An already requested global refresh survives Home unmount. Off placeholders retain board references and provider configuration; missing saved view and deleted configuration are distinct visible states."
+  ],
+  "verification": {
+    "native": {
+      "host": "Native Windows Obsidian at D:/Pro/Obsidian/Obsidian.exe; exact application version not asserted by this harness",
+      "script": "scripts/obsidian-acceptance/news-home-widgets.mjs",
+      "evidence": "C:/Users/cdewta/AppData/Local/Temp/nand-news-widgets-review-b21004373e644a47bc3848022485049b/evidence",
+      "passed": 53,
+      "method": "Real pointer/keyboard input and Obsidian surfaces. Seeded analyzed materials/events and controlled delayed source fetch/activity map; no model call.",
+      "coverage": [
+        "hot + featured + two independent saved views",
+        "cancel/create/configure/failure/retry and native settings deletion",
+        "catalog immediate rename, view deletion/restoration, configuration placeholder recovery",
+        "exact view/material/event/history/settings navigation",
+        "shared refresh deduplication, progress, latest success, per-instance stale",
+        "global refresh survives Home off; own widget timers reach zero",
+        "18 theme/mode/width combinations with screenshots, 32 px controls; coarse touch 44 px",
+        "restart, popout ownership/navigation, Home and News off cleanup; no unexpected errors"
+      ],
+      "visualInspection": [
+        "final widget-touch.png inspected",
+        "same-style prior 45-check run system/light/500 and eye-care/dark/1500 inspected"
+      ]
+    },
+    "targeted": "200 passed /59 files: Home, News, user-format golden; includes new configuration golden, event projection, instance notification, real SettingsStore failed-save recovery and shared stale-refresh tests.",
+    "build": "passed; main.js 4018118 bytes, styles.css 743734 bytes regenerated",
+    "lint": "passed with zero warnings",
+    "architecture": "861 modules passed",
+    "i18n": "24 dictionaries /3174 keys passed",
+    "css": "108 files, 67 baselined files /150 groups; no new violations",
+    "bundle": "passed; output budget +8 KiB to 4018176, styles +1 KiB to 744448 with recorded feature rationale; startup/module activation limits unchanged; no dependency added",
+    "docs": "Standard test:docs still fails inherited planning bilingual/source-heading exceptions; exact existing scoped exception passes 549 Markdown /543 local links /332 external links (no external fetch requested).",
+    "fullSuite": {
+      "command": "pnpm test",
+      "result": "584 passed, 4 skipped; 126 files passed, 1 skipped",
+      "seconds": 131.84,
+      "log": "C:/Users/cdewta/AppData/Local/Temp/nand-review-news-integration-full-tests.log"
+    }
+  },
+  "documentation": {
+    "backup": "C:/Users/cdewta/AppData/Local/Temp/nand-review-news-widgets-docs-o614a26l",
+    "files": [
+      {
+        "path": ".agents/skills/dev/references/module-authoring.md",
+        "beforeCharacters": 5660,
+        "afterCharacters": 5791
+      },
+      {
+        "path": "docs/dashboard.md",
+        "beforeCharacters": 21989,
+        "afterCharacters": 22372
+      },
+      {
+        "path": "docs/dashboard.ZH.md",
+        "beforeCharacters": 8068,
+        "afterCharacters": 8207
+      },
+      {
+        "path": "docs/news.md",
+        "beforeCharacters": 6645,
+        "afterCharacters": 8033
+      },
+      {
+        "path": "docs/news.ZH.md",
+        "beforeCharacters": 2574,
+        "afterCharacters": 3035
+      },
+      {
+        "path": "docs/data.md",
+        "beforeCharacters": 10439,
+        "afterCharacters": 10756
+      },
+      {
+        "path": "docs/data.ZH.md",
+        "beforeCharacters": 4744,
+        "afterCharacters": 4947
+      }
+    ],
+    "ticket": "News T08 / Home public widget contract",
+    "status": "bilingual-reviewed"
+  },
+  "unverified": [
+    "Actual phone hardware (News module is desktop-only).",
+    "Real model-provider editorial quality; native activity fixtures validate UI/state, not model quality."
+  ],
+  "planningDrift": [
+    "Ticket draft still says raw and Home-owned instance configuration. Actual published Home API and user-authorized implementation use featured and provider-owned configuration with Home-owned membership; reconcile planning before final delivery."
+  ]
+}

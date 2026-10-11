@@ -650,7 +650,8 @@ test('inbox renders structured reasons in the current language and deduplicates 
 		].map(row => ({ ...row, createdAt: Date.UTC(2026, 8, 28, 12), read: false, channels: ['in-app'], deliveries: { 'in-app': 'sent' } }));
 		for (const language of ['zh', 'en', 'zh'] as const) {
 			setLanguage(language);
-			render(h(InboxPanel, { records: records as NotificationRecord[], filter: 'all', markRead: () => {}, clearRead: () => {}, open: () => {} }), panel);
+			render(h(InboxPanel, { records: records as NotificationRecord[], filter: 'all', markRead: () => {}, clearRead: () => {}, open: () => {}, openable: new Set(['plain']) }), panel);
+			assert.equal([...panel.querySelectorAll('button')].filter(button => button.textContent === t('automation.open')).length, 1, 'An opener can expose a record without legacy source or target fields');
 			assert.ok(panel.textContent!.includes(t('automation.cliMissing')), 'Persisted system reason follows the current language');
 			assert.ok(panel.textContent!.includes('Keep original free text 原文'));
 			assert.equal(panel.textContent!.split('Exact reminder').length - 1, 1);

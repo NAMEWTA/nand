@@ -111,3 +111,56 @@ test('paused devices and stopped merges do not run; editing restarts the after-e
 	afterEdit.fileChanged();
 	assert.deepEqual(clock.pending(), []);
 });
+
+test('disabling after-edit sync clears its pending timer', async () => {
+	const clock = fakeWindow();
+	const { service, calls } = fakeService();
+	const values = { ...syncSettings.defaults(), autoSaveInterval: 1, autoBackupAfterFileChange: true };
+	const automatic = new Automatics(service, { get: () => values } as unknown as SettingsHandle<SyncSettings>, clock.win, clock.now);
+	automatic.start(); automatic.fileChanged();
+	values.autoSaveInterval = 0;
+	automatic.schedule();
+	await clock.advance(60_000);
+	assert.deepEqual(calls, []);
+	assert.deepEqual(clock.pending(), []);
+});
+
+test('changing the after-edit interval recalculates from the last edit', async () => {
+	const clock = fakeWindow();
+	const { service, calls } = fakeService();
+	const values = { ...syncSettings.defaults(), autoSaveInterval: 2, autoBackupAfterFileChange: true };
+	const automatic = new Automatics(service, { get: () => values } as unknown as SettingsHandle<SyncSettings>, clock.win, clock.now);
+	automatic.start(); automatic.fileChanged();
+	await clock.advance(30_000);
+	values.autoSaveInterval = 1;
+	automatic.schedule();
+	assert.deepEqual(clock.pending(), [30_000]);
+	await clock.advance(30_000);
+	assert.deepEqual(calls, ['commit-and-sync:true']);
+});
+
+test('turning off the separate push clock while it runs does not rearm it', async () => {
+	const clock = fakeWindow();
+	const { service, raw, calls } = fakeService();
+	let finish!: () => void;
+	raw.push = () => { calls.push('push'); return new Promise<void>(resolve => { finish = resolve; }); };
+	const values = { ...syncSettings.defaults(), autoSaveInterval: 0, differentIntervalCommitAndPush: true, autoPushInterval: 1 };
+	const automatic = new Automatics(service, { get: () => values } as unknown as SettingsHandle<SyncSettings>, clock.win, clock.now);
+	automatic.start();
+	await clock.advance(60_000);
+	values.differentIntervalCommitAndPush = false;
+	automatic.schedule(); finish();
+	await clock.advance(60_000);
+	assert.deepEqual(clock.pending(), []);
+	assert.deepEqual(calls, ['push']);
+});
+
+test('disable-push also disables the independent automatic push clock', async () => {
+	const clock = fakeWindow();
+	const { service, calls } = fakeService();
+	const automatic = new Automatics(service, settingsOf({ autoSaveInterval: 0, differentIntervalCommitAndPush: true, autoPushInterval: 1, disablePush: true }), clock.win, clock.now);
+	automatic.start();
+	await clock.advance(60_000);
+	assert.deepEqual(calls, []);
+	assert.deepEqual(clock.pending(), []);
+});

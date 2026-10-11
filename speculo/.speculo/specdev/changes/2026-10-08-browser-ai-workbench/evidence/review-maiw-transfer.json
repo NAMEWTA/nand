@@ -1,0 +1,106 @@
+{
+  "finding": "R-105",
+  "ticket": "Browser T14 MAIW v3 migration",
+  "status": "implemented-local-verification",
+  "reference": {
+    "commit": "b6b83ca90f0f67fbf25a676e7a8f6b8b34327800",
+    "read": [
+      "src/db/history-transfer.ts",
+      "src/db/history-transfer.test.ts",
+      "src/db/database.ts",
+      "src/db/session-service.ts"
+    ],
+    "format": "v3 has session/turn/exchange only. No complete acquisition snapshots or independent prompt library; stable website identity is absent."
+  },
+  "fixture": {
+    "path": "src/modules/browser/core/workspace/fixtures/maiw-v3.jsonl",
+    "generator": "scripts/generate-maiw-history-fixture.mjs",
+    "method": "Executed actual pinned exportHistoryJsonl function with deterministic in-memory database rows; no claim of running the MAIW extension UI.",
+    "sessions": 1,
+    "turns": 2,
+    "exchanges": 2,
+    "bytes": 2247
+  },
+  "verification": {
+    "parser": 4,
+    "transfer": 5,
+    "workspaceRegression": 38,
+    "sourceLint": "passed",
+    "architecture": 937,
+    "types": "source and test passed",
+    "targeted": 36,
+    "build": {
+      "mainBytes": 4283267,
+      "stylesBytes": 750624
+    },
+    "i18n": 3493,
+    "docs": 552,
+    "lint": "full passed",
+    "css": "no new violations",
+    "styles": "passed",
+    "notices": "current",
+    "bundle": "within caps; startup97.1KB browser157.0KB+294.9KB deferred",
+    "native": {
+      "passed": 59,
+      "failed": 0,
+      "evidence": "C:/Users/cdewta/AppData/Local/Temp/nand-maiw-verified-b291d623a3d94c0180b9c27f50491d59/evidence",
+      "method": "Production UI; CDP file control; pinned upstream export-function fixture; Vault.create fault; clipboard boundary observer; no live account claim",
+      "screenshotsReviewed": [
+        "maiw-import-preview-system-light-500",
+        "maiw-imported-reader-system-light-500",
+        "maiw-interrupted-import-recovery"
+      ]
+    },
+    "full": {
+      "passed": 720,
+      "skipped": 4,
+      "filesPassed": 160,
+      "filesSkipped": 1,
+      "seconds": 149.9,
+      "start": "2026-10-11 04:44:38 Asia/Shanghai",
+      "log": "C:\\Users\\cdewta\\AppData\\Local\\Temp/nand-review-maiw-full.log"
+    }
+  },
+  "next": [
+    "R106 AC006 panel presentation controls",
+    "T15-T21, Home workflow seam and final planning/evidence reconciliation; live-account gates unverified"
+  ],
+  "implemented": [
+    "Strict pinned v3 parser and actual-reference-function fixture",
+    "Imported source IDs/fingerprints kept with records; transcripts separate from verified captures and stored in readable Markdown sections",
+    "Core import plan with duplicate/conflict report, no writes during preview, explicit source ownership validation",
+    "No provider identities, receipts, page bindings or independent template library invented; source template revision unavailable (local snapshot revision1 only)",
+    "Supported v3 export/roundtrip; native current same-site extra panels become historical exchange panels because v3 allows one current panel per provider",
+    "Workspace relation validation uses maps/sets instead of repeated whole-array scans",
+    "Service bounded exact preview/commit with stale-data checks; failed saves retain full recoverable draft; explicit rebind resets only current target",
+    "Task/recovery imported reader, searchable source transcript and scoped Markdown projection; file input/conflict preview/v3 export UI",
+    "Bilingual migration limits and MIT source mapping/NOTICE updated"
+  ],
+  "nativeAttempts": [
+    {
+      "root": "C:/Users/cdewta/AppData/Local/Temp/nand-maiw-workspace-150ed72e1b9245cabca5949fc108ce6e/evidence",
+      "passed": 27,
+      "issue": "Probe used a nonexistent copy-label; imported plain-text copy label clarified in product."
+    },
+    {
+      "root": "C:/Users/cdewta/AppData/Local/Temp/nand-maiw-workspace-6d4d6a8e05ca4bf2892d506dabf44439/evidence",
+      "passed": 49,
+      "issue": "Probe toggled already-open retained migration details closed on return; hidden checkbox click timed out. Corrected open-state check."
+    },
+    {
+      "root": "C:/Users/cdewta/AppData/Local/Temp/nand-maiw-workspace-999aea5e17cd4eac8055707fe9c7b17d/evidence",
+      "passed": 49,
+      "issue": "Same closed-details probe error; corrected after this run started."
+    },
+    {
+      "root": "C:/Users/cdewta/AppData/Local/Temp/nand-maiw-final-67a1cbecf9e442e592419df332a57e92/evidence",
+      "passed": 52,
+      "issue": "Probe selected next file while retry-save still disabled the input; now waits for enabled control."
+    },
+    {
+      "root": "C:/Users/cdewta/AppData/Local/Temp/nand-maiw-final-f6b1a941b25745e496ada7f7c804613f/evidence",
+      "passed": 52,
+      "issue": "Probe omitted explicit recovery-snapshot selection; now follows real UI chooser."
+    }
+  ]
+}

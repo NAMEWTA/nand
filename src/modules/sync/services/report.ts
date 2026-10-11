@@ -10,6 +10,13 @@ export function errorText(kind: GitErrorKind): string {
 
 /** One step as a short phrase: "Committed 3 files", "Already up to date", "Push failed: …". */
 export function stepText(step: StepResult): string {
+	const text = stepSummary(step);
+	const skipped = step.squash && step.squash !== 'squashed' ? ` · ${t(`sync.squash.skip.${step.squash}`)}` : '';
+	const recovery = step.recovery ? `\n${t('sync.squash.recovery', { head: step.recovery.head })}` : '';
+	return text + skipped + recovery;
+}
+
+function stepSummary(step: StepResult): string {
 	const count = step.count ?? 0;
 	switch (step.state) {
 		case 'done':
@@ -18,7 +25,6 @@ export function stepText(step: StepResult): string {
 			if (step.upstreamSet) return t('sync.step.pushedUpstream', { count });
 			if (step.count === undefined) return t('sync.step.pushedDone');
 			if (step.squash === 'squashed') return t('sync.step.pushedSquashed');
-			if (step.squash === 'target-mismatch') return t('sync.step.pushedTargetMismatch', { count });
 			return t('sync.step.pushed', { count });
 		case 'nothing':
 			return t(`sync.step.nothing.${step.step}`);

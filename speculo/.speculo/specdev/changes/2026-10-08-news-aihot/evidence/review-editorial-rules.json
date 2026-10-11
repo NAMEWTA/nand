@@ -1,0 +1,326 @@
+{
+  "ticket": [
+    "News T05",
+    "News T06",
+    "News T10"
+  ],
+  "requirements": [
+    "AC-015",
+    "AC-016",
+    "AC-017",
+    "AC-018",
+    "AC-027",
+    "AC-028"
+  ],
+  "status": "fixed-native-and-full596-verified",
+  "finding": "R-085",
+  "implementation": [
+    "Add bounded native draft controls/reset for eight heat parameters and four daily edition limits. Persist only on explicit save; failed persistence restores saved values and keeps draft.",
+    "The same heat settings govern live rank, observed snapshot repair and chart points; nondefault parameters receive a deterministic rule version. Rule changes do not invent observed hours or retain obsolete completeness when the window changes.",
+    "Daily edition uses saved main/flash/source caps and memory horizon. Retain up to 30 days of published issues so increasing memory reuses available history.",
+    "Settings notifications refresh current readers and widgets. Saved rules do not request a model, mutate existing analyses or change prompt hashes."
+  ],
+  "verification": {
+    "nativeDirectory": "C:/Users/cdewta/AppData/Local/Temp/nand-news-editorial-review-4ad0a9057ecd4790896ca3e24a06e79e/evidence",
+    "harness": "scripts/obsidian-acceptance/news-editorial-rules.mjs",
+    "checks": [
+      {
+        "name": "defaults-read-existing-heat-and-edition",
+        "passed": true
+      },
+      {
+        "name": "default-half-life-uses-original-time",
+        "passed": true,
+        "detail": 10
+      },
+      {
+        "name": "draft-does-not-recompute-before-save",
+        "passed": true
+      },
+      {
+        "name": "saving-recomputes-hot-limit-and-rule-version",
+        "passed": true
+      },
+      {
+        "name": "history-recomputes-only-observed-hours",
+        "passed": true
+      },
+      {
+        "name": "edited-half-life-updates-existing-heat",
+        "passed": true
+      },
+      {
+        "name": "minimum-participant-setting-filters-list",
+        "passed": true
+      },
+      {
+        "name": "reset-restores-baseline-and-version",
+        "passed": true
+      },
+      {
+        "name": "invalid-draft-keeps-durable-rule",
+        "passed": true
+      },
+      {
+        "name": "write-failure-restores-rule-and-keeps-draft",
+        "passed": true
+      },
+      {
+        "name": "failed-rule-save-can-retry",
+        "passed": true
+      },
+      {
+        "name": "edition-caps-recompute-locally",
+        "passed": true
+      },
+      {
+        "name": "edition-memory-setting-is-durable",
+        "passed": true
+      },
+      {
+        "name": "per-source-cap-is-applied",
+        "passed": true
+      },
+      {
+        "name": "zero-flash-limit-disables-flashes",
+        "passed": true
+      },
+      {
+        "name": "all-rule-edits-use-zero-cli-and-preserve-analysis",
+        "passed": true
+      },
+      {
+        "name": "rules-system-light-500",
+        "passed": true,
+        "detail": {
+          "width": 444,
+          "scroll": 444,
+          "small": 0
+        }
+      },
+      {
+        "name": "rules-system-light-800",
+        "passed": true,
+        "detail": {
+          "width": 692,
+          "scroll": 692,
+          "small": 0
+        }
+      },
+      {
+        "name": "rules-system-light-1500",
+        "passed": true,
+        "detail": {
+          "width": 760,
+          "scroll": 760,
+          "small": 0
+        }
+      },
+      {
+        "name": "rules-system-dark-500",
+        "passed": true,
+        "detail": {
+          "width": 444,
+          "scroll": 444,
+          "small": 0
+        }
+      },
+      {
+        "name": "rules-system-dark-800",
+        "passed": true,
+        "detail": {
+          "width": 692,
+          "scroll": 692,
+          "small": 0
+        }
+      },
+      {
+        "name": "rules-system-dark-1500",
+        "passed": true,
+        "detail": {
+          "width": 760,
+          "scroll": 760,
+          "small": 0
+        }
+      },
+      {
+        "name": "rules-claude-code-light-500",
+        "passed": true,
+        "detail": {
+          "width": 444,
+          "scroll": 444,
+          "small": 0
+        }
+      },
+      {
+        "name": "rules-claude-code-light-800",
+        "passed": true,
+        "detail": {
+          "width": 692,
+          "scroll": 692,
+          "small": 0
+        }
+      },
+      {
+        "name": "rules-claude-code-light-1500",
+        "passed": true,
+        "detail": {
+          "width": 760,
+          "scroll": 760,
+          "small": 0
+        }
+      },
+      {
+        "name": "rules-claude-code-dark-500",
+        "passed": true,
+        "detail": {
+          "width": 444,
+          "scroll": 444,
+          "small": 0
+        }
+      },
+      {
+        "name": "rules-claude-code-dark-800",
+        "passed": true,
+        "detail": {
+          "width": 692,
+          "scroll": 692,
+          "small": 0
+        }
+      },
+      {
+        "name": "rules-claude-code-dark-1500",
+        "passed": true,
+        "detail": {
+          "width": 760,
+          "scroll": 760,
+          "small": 0
+        }
+      },
+      {
+        "name": "rules-eye-care-light-500",
+        "passed": true,
+        "detail": {
+          "width": 444,
+          "scroll": 444,
+          "small": 0
+        }
+      },
+      {
+        "name": "rules-eye-care-light-800",
+        "passed": true,
+        "detail": {
+          "width": 692,
+          "scroll": 692,
+          "small": 0
+        }
+      },
+      {
+        "name": "rules-eye-care-light-1500",
+        "passed": true,
+        "detail": {
+          "width": 760,
+          "scroll": 760,
+          "small": 0
+        }
+      },
+      {
+        "name": "rules-eye-care-dark-500",
+        "passed": true,
+        "detail": {
+          "width": 444,
+          "scroll": 444,
+          "small": 0
+        }
+      },
+      {
+        "name": "rules-eye-care-dark-800",
+        "passed": true,
+        "detail": {
+          "width": 692,
+          "scroll": 692,
+          "small": 0
+        }
+      },
+      {
+        "name": "rules-eye-care-dark-1500",
+        "passed": true,
+        "detail": {
+          "width": 760,
+          "scroll": 760,
+          "small": 0
+        }
+      },
+      {
+        "name": "rules-coarse-controls-at-least-44",
+        "passed": true
+      },
+      {
+        "name": "restart-restores-rules-and-derived-edition",
+        "passed": true
+      },
+      {
+        "name": "language-change-preserves-unsaved-rule",
+        "passed": true
+      },
+      {
+        "name": "popout-rule-controls-save-through-owner",
+        "passed": true
+      },
+      {
+        "name": "module-off-releases-rule-controls",
+        "passed": true
+      },
+      {
+        "name": "no-unexpected-host-errors",
+        "passed": true,
+        "detail": []
+      }
+    ],
+    "unit": "19 passing targeted tests, including edited decay/window/rank/history and edition caps/memory",
+    "build": "pass",
+    "lint": "pass zero warnings",
+    "i18n": "3211 keys passed after correcting terminalUnavailable literal key",
+    "docs": "549 Markdown / 559 local / 348 external (no fetch)",
+    "bundle": "4035542 main.js, 746250 styles.css; output limit4035584; startup/module/style limits unchanged",
+    "screenshotReview": [
+      "rules-system-false-500.png",
+      "rules-eye-care-true-1500.png"
+    ],
+    "fullSuite": "596 passed, 4 skipped; 130.78s",
+    "architecture": "867 modules passed"
+  },
+  "documentation": {
+    "backup": "C:/Users/cdewta/AppData/Local/Temp/nand-review-news-rules-docs-d6s0b89i",
+    "files": [
+      {
+        "path": "docs/news.md",
+        "beforeCharacters": 10535,
+        "afterCharacters": 11509
+      },
+      {
+        "path": "docs/news.ZH.md",
+        "beforeCharacters": 3848,
+        "afterCharacters": 4183
+      },
+      {
+        "path": "docs/third-party/aihot-news.md",
+        "beforeCharacters": 9465,
+        "afterCharacters": 10006
+      },
+      {
+        "path": "docs/third-party/aihot-news.ZH.md",
+        "beforeCharacters": 4201,
+        "afterCharacters": 4378
+      }
+    ]
+  },
+  "nativeFailuresResolved": [
+    "First fixture omitted required source health configHash and module correctly refused invalid state. Added valid fixture field.",
+    "Failed-save injection initially replaced persistence before a prior flush settled. Awaited flush before injection; real failed-save rollback/retry then passed."
+  ],
+  "limits": [
+    "Historical observations are explicit seeded fixtures, not a claim of live multi-day monitoring.",
+    "Other settings listed in source issue section7 remain under audit."
+  ]
+}

@@ -23,6 +23,7 @@ export function planDashboardUpdate(
 	// The immersive grid replaces the section board. A section refresh would
 	// leave the old columns on screen after the file already says immersive.
 	if (previous.layout !== next.layout || previous.gridPacked !== next.gridPacked) return { kind: 'full' };
+	if (!sameValue(previous.widgets, next.widgets) || !sameValue(previous.immersive, next.immersive) || !sameValue(previous.skills, next.skills)) return { kind: 'full' };
 	if (!sameValue(previous.banner, next.banner)) return { kind: 'full' };
 	if (!sameValue(previous.quickActions, next.quickActions)) return { kind: 'full' };
 	if (!sameValue(previous.quickActionOrder, next.quickActionOrder)) return { kind: 'full' };
@@ -70,7 +71,7 @@ export function planDashboardUpdate(
 		}
 	}
 
-	return changed.length > 0 ? { kind: 'sections', names: changed } : { kind: 'none' };
+	return changed.length > 0 ? next.layout === 'immersive' ? { kind: 'full' } : { kind: 'sections', names: changed } : { kind: 'none' };
 }
 
 /** Resolve the settings path form to the real vault markdown path. */

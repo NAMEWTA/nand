@@ -32,6 +32,7 @@ export class BrowserPresentation extends NativeSurface {
 	getState(): Record<string, unknown> {
 		return {
 			id: this.state.id,
+			profileId: this.state.profileId,
 			url: this.state.url,
 			title: this.state.title,
 			zoom: this.state.zoom,
@@ -84,8 +85,8 @@ export class BrowserPresentation extends NativeSurface {
 		this.unregister = this.host.registerPresentation(
 			this.state.id,
 			async () => {
+				await this.app.workspace.revealLeaf(this.leaf);
 				if (this.context.activate) await this.context.activate();
-				else await this.app.workspace.revealLeaf(this.leaf);
 				this.activated = true;
 				this.paint();
 			},

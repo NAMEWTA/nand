@@ -1,6 +1,7 @@
 import { moment } from 'obsidian';
 import type { SettingsHandle } from '../../../shared/settings/store';
 import type { SyncSettings } from '../settings';
+import type { CloneProgress, CloneResult } from '../core/clone';
 import { formatCommitMessage, type CommitMode } from '../core/commit-mode';
 import { GitError, needsAttention, type GitErrorKind } from '../core/errors';
 import { blocker, commitAndSync, commitStep, pullStep, pushStep, succeeded, type StepResult } from '../core/flow';
@@ -9,8 +10,9 @@ import { CancelledError, OperationQueue } from '../core/queue';
 import { GitRepo, type Commit, type CommitFile, type RepoOperation } from '../core/repo';
 import { FAILURE_LIMIT, GIT_WRITE_GRACE } from '../core/schedule';
 import type { RepoStatus } from '../core/status';
+import { hasEmbeddedCredentials } from '../core/remote-url';
 
-export type SyncAction = 'commit-and-sync' | 'commit' | 'pull' | 'push' | 'fetch' | 'continue' | 'abort' | 'stage' | 'unstage' | 'discard' | 'init' | 'remote' | 'identity' | 'refresh';
+export type SyncAction = 'commit-and-sync' | 'commit' | 'pull' | 'push' | 'fetch' | 'continue' | 'abort' | 'stage' | 'unstage' | 'discard' | 'init' | 'clone' | 'remote' | 'identity' | 'refresh';
 
 export interface RunReport {
 	action: SyncAction;
@@ -45,6 +47,7 @@ export interface SyncSnapshot {
 	device: DeviceSyncState;
 	/** The last status refresh failed. */
 	error?: { kind: GitErrorKind; detail: string };
+	clone?: { state: 'running'; target: string; progress?: CloneProgress } | CloneResult;
 }
 
 export interface SyncDialogs {
@@ -81,6 +84,8 @@ export class SyncService {
 	private refreshTimer?: number;
 	private refreshWin?: Window;
 	private closed = false;
+	private cloneController?: AbortController;
+	private cloning?: Promise<CloneResult>;
 	private readonly now: () => number;
 
 	constructor(private readonly deps: SyncDependencies) {
@@ -121,13 +126,23 @@ export class SyncService {
 		this.runner?.dispose();
 		this.runner = undefined;
 		this.repo = undefined;
+		this.statePath = '';
+		this.snapshot = { ...this.snapshot, phase: 'starting', place: undefined, status: undefined, operation: null, locked: false, remotes: [], identity: { name: '', email: '' }, device: { ...EMPTY_DEVICE_STATE }, last: undefined, error: undefined };
+		this.emit();
 		const settings = this.deps.settings.get();
 		const found = await this.deps.host.locate(settings.gitPath);
+		if (this.closed) return;
 		if (!found) {
 			this.snapshot = { ...this.snapshot, phase: 'no-git', gitVersion: '', place: undefined, status: undefined, error: undefined };
 			return this.emit();
 		}
-		const place = await this.deps.host.place(found.binary, settings.repoSubPath);
+		let place: RepoPlace;
+		try { place = await this.deps.host.place(found.binary, settings.repoSubPath); }
+		catch (error) {
+			this.snapshot = { ...this.snapshot, phase: 'no-repo', gitVersion: found.version, place: undefined, status: undefined, error: errorOf(error) };
+			return this.emit();
+		}
+		if (this.closed) return;
 		this.runner = this.deps.host.runner(found.binary, place.cwd);
 		if (!place.root) {
 			this.snapshot = { ...this.snapshot, phase: 'no-repo', gitVersion: found.version, place, status: undefined, error: undefined };
@@ -356,14 +371,52 @@ export class SyncService {
 	init(): Promise<void> {
 		return this.queue.enqueue('init', 'init', async () => {
 			const runner = this.runner;
-			if (!runner) throw new GitError('missing-git');
+			if (!runner) throw new GitError(this.snapshot.error?.kind ?? 'missing-git');
 			await new GitRepo(runner).git(['init']);
 			await this.locate();
 		});
 	}
 
+	/** Clone outside this vault. State belongs to the service so navigating away does not lose it. */
+	clone(target: string, source: string): Promise<CloneResult> {
+		if (this.cloning) return this.cloning;
+		const controller = new AbortController();
+		this.cloneController = controller;
+		const run = this.queue.enqueue('clone', 'clone', async (): Promise<CloneResult> => {
+			this.snapshot = { ...this.snapshot, clone: { state: 'running', target } };
+			this.emit();
+			let result: CloneResult;
+			try {
+				const found = await this.deps.host.locate(this.deps.settings.get().gitPath);
+				if (!found) throw new GitError('missing-git');
+				result = await this.deps.host.clone(found.binary, target, source, {
+					signal: controller.signal,
+					onProgress: (progress) => {
+						this.snapshot = { ...this.snapshot, clone: { state: 'running', target, progress } };
+						this.emit();
+					},
+				});
+			} catch (error) {
+				const failure = errorOf(error);
+				result = { state: failure.kind === 'cancelled' ? 'cancelled' : 'failed', target, error: failure };
+			}
+			this.snapshot = { ...this.snapshot, clone: result };
+			this.emit();
+			return result;
+		});
+		this.cloning = run.finally(() => { this.cloneController = undefined; this.cloning = undefined; });
+		return this.cloning;
+	}
+
+	cancelClone(): void {
+		this.cloneController?.abort();
+	}
+
 	addRemote(name: string, url: string): Promise<void> {
-		return this.run('remote', (repo) => repo.git(['remote', 'add', name, url]).then(() => undefined));
+		return this.run('remote', async (repo) => {
+			if (!url.trim() || /[\0\r\n]/.test(url) || hasEmbeddedCredentials(url)) throw new GitError('invalid-remote-url');
+			await repo.git(['remote', 'add', '--', name, url]);
+		});
 	}
 
 	setIdentity(name: string, email: string): Promise<void> {
@@ -387,6 +440,7 @@ export class SyncService {
 	/** Stop timers and git processes. Waiting work is cancelled; the running command is killed. */
 	async dispose(): Promise<void> {
 		this.closed = true;
+		this.cancelClone();
 		this.refreshWin?.clearTimeout(this.refreshTimer);
 		this.runner?.dispose();
 		await this.queue.close();

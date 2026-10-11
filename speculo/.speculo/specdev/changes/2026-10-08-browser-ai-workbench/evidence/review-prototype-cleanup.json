@@ -1,0 +1,28 @@
+{
+  "finding": "R-112",
+  "status": "fixed-production-coverage-full805",
+  "problem": "Four obsolete prototype files and five tests exercised helpers absent from the product path. Only BRIDGE_SCOPE/admitBridge had a production caller. These tests cannot establish MAIW, synthesis, assistant, workflow or keyboard completion.",
+  "callerEvidence": "rg src found only platform/desktop/bridge.ts importing live policy; ui/browser-keys.ts and all other ai-workbench helpers had test-only callers.",
+  "backup": "C:/Users/cdewta/AppData/Local/Temp/nand-review-prototype-cleanup-rLqEVr",
+  "change": "Extract unchanged live policy to core/bridge-policy.ts, update bridge import, remove obsolete ai-workbench.ts/test and browser-keys.ts/test.",
+  "retainedEvidence": [
+    "ui/browser-key-scope.test.ts and native shortcut probe",
+    "core/workspace/maiw-format.test.ts and history-transfer.test.ts with native transfer UI",
+    "services/workspace*.test.ts and production native multistation fixtures",
+    "services/synthesis.test.ts and native synthesis UI",
+    "services/assistant.test.ts, scoped executor and native assistant UI",
+    "services/workflows.test.ts, shared owner tests and native workflow/automation UI"
+  ],
+  "validation": "Focused16, full805/4skip, source/test types/build, full lint zero, architecture983, bundle and final native13 consumer journey passed. Five obsolete tests removed; coverage now refers to actual production paths.",
+  "fullSuite": {
+    "command": "pnpm test",
+    "passed": 805,
+    "skipped": 4,
+    "filesPassed": 173,
+    "filesSkipped": 1,
+    "durationSeconds": 168.38,
+    "startedLocal": "2026-10-11 08:38:17 Asia/Shanghai",
+    "log": "C:/Users/cdewta/AppData/Local/Temp/nand-review-external-full.log",
+    "note": "After R111 grants/transport/CLI and R112 removal of five prototype tests. Final current main4513810/styles756435."
+  }
+}

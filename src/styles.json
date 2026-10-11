@@ -104,8 +104,11 @@
 		"src/modules/automations/styles/114-automation-surfaces-share-the-app-s-visual-scale.css",
 		"src/modules/sync/styles/sync.css",
 		"src/modules/browser/styles/116-independent-browser-native-leaves-and-modal-shar.css",
+		"src/modules/browser/styles/workspace.css",
 		"src/shell/styles/shell.css",
 		"src/shell/styles/workbench-pages.css",
-		"src/modules/news/styles/news.css"
+		"src/modules/news/styles/news.css",
+		"src/modules/home/styles/skills.css",
+		"src/modules/home/styles/pipeline.css"
 	]
 }

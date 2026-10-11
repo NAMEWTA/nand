@@ -1,4 +1,29 @@
 /* News heat curve. The line uses the current text color; missing hours are not drawn. */
+.nand-news-page { max-width: 960px; margin-inline: auto; padding: var(--nand-space-4); overflow-wrap: anywhere; }
+.nand-news-page-header { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--nand-space-3); margin-bottom: var(--nand-space-4); }
+.nand-news-page-header h1 { margin: 0; font-size: var(--nand-text-heading); }
+.nand-news-page .nand-ui-toolbar { flex-wrap: wrap; gap: var(--nand-space-2); }
+.nand-news-page button { min-height: var(--nand-control-height); max-width: 100%; white-space: normal; height: auto; }
+.nand-news-page input,
+.nand-news-page select,
+.nand-news-page textarea { min-width: 0; max-width: 100%; }
+.nand-news-page summary { min-height: var(--nand-control-height); cursor: pointer; padding-block: var(--nand-space-2); }
+.nand-news-page summary:focus-visible { outline: var(--nand-focus-ring); }
+.nand-news-filter { display: grid; gap: var(--nand-space-2); margin-block: var(--nand-space-4); }
+.nand-news-filter-fields { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr)); gap: var(--nand-space-3); }
+.nand-news-filter-fields fieldset { min-width: 0; margin: 0; border: 1px solid var(--nand-border-color); border-radius: var(--nand-radius-sm); }
+.nand-news-filter-source { display: flex; align-items: center; gap: var(--nand-space-2); min-height: var(--nand-control-height); }
+.nand-news-reading-list { list-style: none; padding: 0; margin: 0; }
+.nand-news-reading-list > li { margin-block: var(--nand-space-3); }
+.nand-news-reading-list article { padding: var(--nand-space-3); }
+.nand-news-reading-list article > button { justify-content: flex-start; text-align: start; font-weight: 600; }
+.nand-news-day { font-size: var(--nand-text-body); color: var(--text-muted); margin-block: var(--nand-space-5) var(--nand-space-2); }
+.nand-news-meta { color: var(--text-muted); font-size: var(--nand-text-caption); }
+.nand-news-detail { margin-block: var(--nand-space-6); padding-block: var(--nand-space-4); border-top: 1px solid var(--nand-border-color); }
+.nand-news-sources-page > form { display: flex; flex-wrap: wrap; align-items: end; gap: var(--nand-space-2); }
+.nand-news-sources-page > form > label { flex: 1; min-width: min(100%, 220px); }
+.nand-news-sources-page > details { margin-block: var(--nand-space-4); }
+.nand-news-edition li { margin-block: var(--nand-space-3); }
 .nand-news-heat { display: flex; flex-wrap: wrap; align-items: center; gap: var(--nand-space-2); }
 .nand-news-heat h2,
 .nand-news-heat p { flex-basis: 100%; margin: 0; }
@@ -6,6 +31,52 @@
 .nand-news-heat-chart { flex-basis: 100%; min-height: 32px; }
 .nand-news-heat-chart:focus-visible { outline: var(--nand-focus-ring); }
 .nand-news-heat-line { fill: none; stroke: currentColor; }
+.nand-news-heat-point { fill: currentColor; }
+.nand-news-heat-selected { flex-basis: 100%; min-height: var(--nand-control-height); }
+.nand-news-hot { overflow-wrap: anywhere; }
+.nand-news-hot li { margin-block: var(--nand-space-3); }
+.nand-news-hot button { min-height: var(--nand-control-height); max-width: 100%; white-space: normal; }
+.nand-news-settings,
+.nand-news-source { min-width: 0; overflow-wrap: anywhere; }
+.nand-news-source > summary { min-height: 32px; padding-block: var(--nand-space-2); cursor: pointer; }
+.nand-news-source > summary:focus-visible { outline: var(--nand-focus-ring); }
+.nand-news-settings .setting-item-control { min-width: 0; max-width: 100%; flex-wrap: wrap; }
+.nand-news-settings .setting-item-control input,
+.nand-news-settings .setting-item-control textarea { max-width: 100%; }
+.nand-news-settings .setting-item-control :is(button, input, select, textarea) { min-height: var(--nand-control-height); }
+.nand-news-settings .setting-item-control button { height: auto; white-space: normal; }
+.nand-news-settings .nand-news-source-actions { flex-direction: column; align-items: stretch; gap: var(--nand-space-2); }
+.nand-news-source-actions .setting-item-control { justify-content: flex-start; }
+.nand-news-analysis-settings { min-width: 0; }
+.nand-news-analysis-settings > summary { min-height: var(--nand-control-height); padding-block: var(--nand-space-2); cursor: pointer; }
+.nand-news-analysis-settings > summary:focus-visible { outline: var(--nand-focus-ring); }
+.nand-news-weight-row .setting-item-control input { width: 4em; }
+.nand-news-weight-row .nand-ui-field { max-width: 100%; }
+.nand-news-settings .nand-news-analysis-settings .setting-item-control textarea { width: 100%; min-height: 8em; }
+.nand-news-runs { margin-block: var(--nand-space-3); overflow-wrap: anywhere; }
+.nand-news-runs li { margin-block: var(--nand-space-2); }
+.nand-news-runs button,
+.nand-news-runs summary { min-height: var(--nand-control-height); }
+.nand-news-runs summary:focus-visible { outline: var(--nand-focus-ring); }
+.dashboard-sidebar-news { overflow-wrap: anywhere; }
+.dashboard-sidebar-news > ul { padding: 0; list-style: none; }
+.dashboard-sidebar-news li { margin-block: var(--nand-space-3); }
+.dashboard-sidebar-news button.nand-btn { height: auto; white-space: normal; text-align: start; justify-content: flex-start; max-width: 100%; }
+.dashboard-sidebar-news li p { margin: var(--nand-space-1) 0; font-size: var(--nand-text-caption); color: var(--text-muted); }
+.nand-news-widget-update { font-size: var(--nand-text-caption); color: var(--text-muted); }
+.nand-news-widget-dialog .nand-dialog-body { max-height: 70vh; overflow-y: auto; }
+.nand-news-widget-config label { min-height: var(--nand-control-height); }
 @media (pointer: coarse) {
+	.nand-news-settings .setting-item-control :is(button, input, select, textarea) { min-height: var(--nand-touch-target); }
+	.dashboard-sidebar-news button.nand-btn,
+	.nand-news-widget-config :is(label, button, select, input:not([type="checkbox"])) { min-height: var(--nand-touch-target); }
+	.nand-news-page button,
+	.nand-news-page summary,
+	.nand-news-filter-source { min-height: var(--nand-touch-target); }
+	.nand-news-hot button { min-height: var(--nand-touch-target); }
 	.nand-news-heat button { min-height: var(--nand-touch-target); }
+	.nand-news-source > summary { min-height: var(--nand-touch-target); }
+	.nand-news-analysis-settings > summary { min-height: var(--nand-touch-target); }
+	.nand-news-runs button,
+	.nand-news-runs summary { min-height: var(--nand-touch-target); }
 }

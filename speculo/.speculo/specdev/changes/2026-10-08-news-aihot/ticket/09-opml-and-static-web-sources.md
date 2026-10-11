@@ -26,6 +26,10 @@ shared_path_owners: ["<Path>main.js</Path> => 2026-10-08-news-aihot::T-09（本�
 
 # Ticket T-09: 导入订阅并采集静态网页列表
 
+<!-- ACTUAL-CODE-REVIEW:START -->
+2026-10-11 实际代码审查：[T-09.md](../evidence/T-09.md)。本票下文保留原规划合同与基线；当前实现、修复、验证及未验证条件以该记录为准。原“仅规划／未授权实施／必须提交”的阶段约束不适用于用户已授权的本次工作区审查；提交与远程操作仍未执行。
+<!-- ACTUAL-CODE-REVIEW:END -->
+
 - Ticket：<Path>{roots.state}/specdev/changes/2026-10-08-news-aihot/ticket/09-opml-and-static-web-sources.md</Path>
 - 总控Map：<Path>{roots.state}/specdev/changes/2026-10-08-news-aihot/tickets-map.md</Path>
 - Spec：<Path>{roots.state}/specdev/changes/2026-10-08-news-aihot/spec.md</Path>
@@ -37,7 +41,7 @@ shared_path_owners: ["<Path>main.js</Path> => 2026-10-08-news-aihot::T-09（本�
 
 **目标与可观察产出：** 用户可迁移OPML订阅及添加无需登录的静态HTML列表信源，并看到试抓预览和错误。
 
-**当前事实：** P5列为完整范围，AIHOT web-list有多种site特例/付费抓取不应全搬；上游JSON-list也不是本票标准feed parser。
+**规划时基线：** P5列为完整范围，AIHOT web-list有多种site特例/付费抓取不应全搬；上游JSON-list也不是本票标准feed parser。
 
 **来源：** AC-024, AC-025；issue #136；<Path>{roots.state}/specdev/changes/2026-10-08-news-aihot/reference-analysis.md</Path>。深度 standard：涉及明确的垂直行为及现有可复用接缝；验证按实际风险。
 

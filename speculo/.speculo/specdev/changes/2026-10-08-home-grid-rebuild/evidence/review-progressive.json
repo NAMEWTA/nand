@@ -1,0 +1,486 @@
+{
+  "rows": [
+    {
+      "name": "read-only-open-does-not-write-board",
+      "passed": true
+    },
+    {
+      "name": "Grouped-initial-fifty-per-group-and-full-count",
+      "passed": true
+    },
+    {
+      "name": "Grouped-section-cap-has-narrowing-guidance",
+      "passed": true
+    },
+    {
+      "name": "Grouped-append-retains-existing-node-and-keyboard-focus",
+      "passed": true
+    },
+    {
+      "name": "Grouped-last-batch-keeps-focused-control-and-refuses-over-cap",
+      "passed": true
+    },
+    {
+      "name": "Grouped-shared-cap-is-five-hundred-across-groups",
+      "passed": true
+    },
+    {
+      "name": "Grouped-filter-before-cap-finds-previously-truncated-note",
+      "passed": true
+    },
+    {
+      "name": "Grouped-changing-query-resets-only-transient-window",
+      "passed": true
+    },
+    {
+      "name": "Kanban-initial-fifty-per-group-and-full-count",
+      "passed": true
+    },
+    {
+      "name": "Kanban-section-cap-has-narrowing-guidance",
+      "passed": true
+    },
+    {
+      "name": "Kanban-append-retains-existing-node-and-keyboard-focus",
+      "passed": true
+    },
+    {
+      "name": "Kanban-last-batch-keeps-focused-control-and-refuses-over-cap",
+      "passed": true
+    },
+    {
+      "name": "Kanban-shared-cap-is-five-hundred-across-groups",
+      "passed": true
+    },
+    {
+      "name": "Kanban-filter-before-cap-finds-previously-truncated-note",
+      "passed": true
+    },
+    {
+      "name": "Kanban-changing-query-resets-only-transient-window",
+      "passed": true
+    },
+    {
+      "name": "ordinary-pagination-retains-ten-item-pages-without-cap-warning",
+      "passed": true
+    },
+    {
+      "name": "ordinary-second-page-uses-next-ten-notes",
+      "passed": true
+    },
+    {
+      "name": "progressive-system-light-500",
+      "passed": true,
+      "detail": [
+        {
+          "height": 32,
+          "width": 396,
+          "scroll": 396,
+          "available": 396
+        },
+        {
+          "height": 32,
+          "width": 232.609375,
+          "scroll": 233,
+          "available": 233
+        }
+      ]
+    },
+    {
+      "name": "progressive-system-light-800",
+      "passed": true,
+      "detail": [
+        {
+          "height": 32,
+          "width": 618,
+          "scroll": 618,
+          "available": 618
+        },
+        {
+          "height": 32,
+          "width": 232.609375,
+          "scroll": 233,
+          "available": 233
+        }
+      ]
+    },
+    {
+      "name": "progressive-system-light-1500",
+      "passed": true,
+      "detail": [
+        {
+          "height": 32,
+          "width": 1058,
+          "scroll": 1058,
+          "available": 1058
+        },
+        {
+          "height": 32,
+          "width": 232.609375,
+          "scroll": 233,
+          "available": 233
+        }
+      ]
+    },
+    {
+      "name": "progressive-system-dark-500",
+      "passed": true,
+      "detail": [
+        {
+          "height": 32,
+          "width": 396,
+          "scroll": 396,
+          "available": 396
+        },
+        {
+          "height": 32,
+          "width": 232.609375,
+          "scroll": 233,
+          "available": 233
+        }
+      ]
+    },
+    {
+      "name": "progressive-system-dark-800",
+      "passed": true,
+      "detail": [
+        {
+          "height": 32,
+          "width": 618,
+          "scroll": 618,
+          "available": 618
+        },
+        {
+          "height": 32,
+          "width": 232.609375,
+          "scroll": 233,
+          "available": 233
+        }
+      ]
+    },
+    {
+      "name": "progressive-system-dark-1500",
+      "passed": true,
+      "detail": [
+        {
+          "height": 32,
+          "width": 1058,
+          "scroll": 1058,
+          "available": 1058
+        },
+        {
+          "height": 32,
+          "width": 232.609375,
+          "scroll": 233,
+          "available": 233
+        }
+      ]
+    },
+    {
+      "name": "progressive-claude-code-light-500",
+      "passed": true,
+      "detail": [
+        {
+          "height": 32,
+          "width": 396,
+          "scroll": 396,
+          "available": 396
+        },
+        {
+          "height": 32,
+          "width": 232.609375,
+          "scroll": 233,
+          "available": 233
+        }
+      ]
+    },
+    {
+      "name": "progressive-claude-code-light-800",
+      "passed": true,
+      "detail": [
+        {
+          "height": 32,
+          "width": 618,
+          "scroll": 618,
+          "available": 618
+        },
+        {
+          "height": 32,
+          "width": 232.609375,
+          "scroll": 233,
+          "available": 233
+        }
+      ]
+    },
+    {
+      "name": "progressive-claude-code-light-1500",
+      "passed": true,
+      "detail": [
+        {
+          "height": 32,
+          "width": 1058,
+          "scroll": 1058,
+          "available": 1058
+        },
+        {
+          "height": 32,
+          "width": 232.609375,
+          "scroll": 233,
+          "available": 233
+        }
+      ]
+    },
+    {
+      "name": "progressive-claude-code-dark-500",
+      "passed": true,
+      "detail": [
+        {
+          "height": 32,
+          "width": 396,
+          "scroll": 396,
+          "available": 396
+        },
+        {
+          "height": 32,
+          "width": 232.609375,
+          "scroll": 233,
+          "available": 233
+        }
+      ]
+    },
+    {
+      "name": "progressive-claude-code-dark-800",
+      "passed": true,
+      "detail": [
+        {
+          "height": 32,
+          "width": 618,
+          "scroll": 618,
+          "available": 618
+        },
+        {
+          "height": 32,
+          "width": 232.609375,
+          "scroll": 233,
+          "available": 233
+        }
+      ]
+    },
+    {
+      "name": "progressive-claude-code-dark-1500",
+      "passed": true,
+      "detail": [
+        {
+          "height": 32,
+          "width": 1058,
+          "scroll": 1058,
+          "available": 1058
+        },
+        {
+          "height": 32,
+          "width": 232.609375,
+          "scroll": 233,
+          "available": 233
+        }
+      ]
+    },
+    {
+      "name": "progressive-eye-care-light-500",
+      "passed": true,
+      "detail": [
+        {
+          "height": 32,
+          "width": 396,
+          "scroll": 396,
+          "available": 396
+        },
+        {
+          "height": 32,
+          "width": 232.609375,
+          "scroll": 233,
+          "available": 233
+        }
+      ]
+    },
+    {
+      "name": "progressive-eye-care-light-800",
+      "passed": true,
+      "detail": [
+        {
+          "height": 32,
+          "width": 618,
+          "scroll": 618,
+          "available": 618
+        },
+        {
+          "height": 32,
+          "width": 232.609375,
+          "scroll": 233,
+          "available": 233
+        }
+      ]
+    },
+    {
+      "name": "progressive-eye-care-light-1500",
+      "passed": true,
+      "detail": [
+        {
+          "height": 32,
+          "width": 1058,
+          "scroll": 1058,
+          "available": 1058
+        },
+        {
+          "height": 32,
+          "width": 232.609375,
+          "scroll": 233,
+          "available": 233
+        }
+      ]
+    },
+    {
+      "name": "progressive-eye-care-dark-500",
+      "passed": true,
+      "detail": [
+        {
+          "height": 32,
+          "width": 396,
+          "scroll": 396,
+          "available": 396
+        },
+        {
+          "height": 32,
+          "width": 232.609375,
+          "scroll": 233,
+          "available": 233
+        }
+      ]
+    },
+    {
+      "name": "progressive-eye-care-dark-800",
+      "passed": true,
+      "detail": [
+        {
+          "height": 32,
+          "width": 618,
+          "scroll": 618,
+          "available": 618
+        },
+        {
+          "height": 32,
+          "width": 232.609375,
+          "scroll": 233,
+          "available": 233
+        }
+      ]
+    },
+    {
+      "name": "progressive-eye-care-dark-1500",
+      "passed": true,
+      "detail": [
+        {
+          "height": 32,
+          "width": 1058,
+          "scroll": 1058,
+          "available": 1058
+        },
+        {
+          "height": 32,
+          "width": 232.609375,
+          "scroll": 233,
+          "available": 233
+        }
+      ]
+    },
+    {
+      "name": "theme-and-resize-never-persist-window-state",
+      "passed": true
+    },
+    {
+      "name": "native-drag-retains-note-path-and-move-operation",
+      "passed": true,
+      "detail": {
+        "items": [
+          {
+            "mimeType": "application/x-nand-dashboard-libcard",
+            "data": "Work/Note000.md"
+          }
+        ],
+        "dragOperationsMask": 16
+      }
+    },
+    {
+      "name": "native-drop-updates-real-note-and-full-group-counts",
+      "passed": true
+    },
+    {
+      "name": "confirmed-delete-refreshes-real-totals-and-releases-cap-slot",
+      "passed": true
+    },
+    {
+      "name": "more-filter-move-delete-never-persist-render-limits",
+      "passed": true
+    },
+    {
+      "name": "no-native-errors-before-restart",
+      "passed": true,
+      "detail": []
+    },
+    {
+      "name": "restart-resets-transient-limits-and-keeps-real-file-state",
+      "passed": true
+    },
+    {
+      "name": "popout-more-operates-on-owned-section",
+      "passed": true
+    },
+    {
+      "name": "module-disable-unmounts-progressive-controls",
+      "passed": true
+    },
+    {
+      "name": "no-native-errors",
+      "passed": true,
+      "detail": []
+    }
+  ],
+  "unverified": [
+    "Actual phone hardware",
+    "Touch dragging"
+  ],
+  "state": "implemented-native45-home84-phone-and-touch-unverified",
+  "nativeEvidence": "C:\\Users\\cdewta\\AppData\\Local\\Temp\\nand-home-progressive-review-347ab571f2e74840aff3937e2fd16bb6\\evidence",
+  "harness": "scripts/obsidian-acceptance/home-progressive.mjs",
+  "screenshotsInspected": [
+    "progressive-Kanban-system-light-500.png",
+    "progressive-popout.png"
+  ],
+  "codeReview": [
+    "Filtered/sorted results feed one 500-file candidate set before grouping; full counts remain separate.",
+    "Per-group windows start at 50 and grow by 50; keyed rows and live native More button retain nodes and keyboard focus.",
+    "Query/grouping changes discard prior loaded counts, including returning to an earlier query; metadata/vault refresh preserves current query limits.",
+    "Both grouped Library views and native kanban reuse the projection; ordinary ungrouped pagination remains unchanged.",
+    "Native drag uses production intercepted MIME data with MOVE mask, edits real status, then confirmed deletion updates totals and frees a candidate slot.",
+    "Window limits remain component state; read, More/filter/resize/move/delete/restart never write board configuration."
+  ],
+  "verification": {
+    "build": "pass",
+    "lint": "pass",
+    "architecture": "846 modules pass",
+    "i18n": "3123 keys pass",
+    "homeAndGolden": "84 tests passed in 26 files; TEMP/nand-review-progressive-home-tests.log",
+    "targetedScripts": [
+      "library-group pass",
+      "kanban-upgrade pass"
+    ],
+    "lastFullRegression": "T11:551 passed/4 skipped; final integrated full run remains.",
+    "bundle": {
+      "state": "within existing T12 limits",
+      "mainBytes": 3988793,
+      "stylesBytes": 737810,
+      "newDependencies": false,
+      "newCss": false
+    },
+    "docs": "standard gate fails inherited planning exceptions; exact prior scoped exception passes 548 Markdown/541 local links/332 external links"
+  }
+}

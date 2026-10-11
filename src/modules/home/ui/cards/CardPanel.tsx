@@ -1,4 +1,5 @@
 import { cardKind } from '../../core/board/card-kind';
+import { focalPosition } from '../../core/board/focal-point';
 export { cardKind } from '../../core/board/card-kind';
 import { useLayoutEffect, useRef, useState } from 'preact/hooks';
 import type { CardSize } from '../../core/board/types/index';
@@ -12,6 +13,7 @@ import { TrackerPanel } from './TrackerPanel';
 import { WeatherPanel } from './WeatherPanel';
 import { WebShortcutPanel } from './WebShortcutPanel';
 import { listDrop } from './card-interactions';
+import { cardSkillInput } from '../skills/context-menu';
 export function CardPanel(props: CardBodyProps & { root: HTMLElement; sectionType: string }) {
 	const { card, callbacks, app, context, root, sectionType } = props;
 	const widget = card.type === 'weather' || card.type === 'tracker';
@@ -27,6 +29,7 @@ export function CardPanel(props: CardBodyProps & { root: HTMLElement; sectionTyp
 	const color = useRef<HTMLInputElement>(null);
 	const finished = useRef(false);
 	const cleanupResize = useRef<(() => void) | null>(null);
+	const skillInput = useRef('');
 	useLayoutEffect(() => () => cleanupResize.current?.(), []);
 	useLayoutEffect(() => {
 		if (editing && title.current) {
@@ -50,7 +53,7 @@ export function CardPanel(props: CardBodyProps & { root: HTMLElement; sectionTyp
 			{cover && (
 				<div
 					class={`dashboard-project-cover${image ? '' : ' dashboard-project-cover--default'}`}
-					style={image ? { backgroundImage: `url("${image}")` } : undefined}
+					style={image ? { backgroundImage: `url("${image}")`, backgroundPosition: focalPosition(card.coverPos) } : undefined}
 					draggable
 				/>
 			)}
@@ -95,6 +98,7 @@ export function CardPanel(props: CardBodyProps & { root: HTMLElement; sectionTyp
 					)}
 				</h4>
 				<div class="dashboard-card-actions" onClick={(event) => event.stopPropagation()}>
+					{!widget && callbacks.onCardSkill && <button class="dashboard-card-btn dashboard-context-skill" aria-label={t('home.skills.run')} onPointerDown={event => { skillInput.current = cardSkillInput(root); event.preventDefault(); }} onClick={event => callbacks.onCardSkill?.(event.currentTarget, card.id, event.detail ? skillInput.current : cardSkillInput(root))}><Icon name="sparkles" /></button>}
 					{widget && sectionType === 'dashboard' && (
 						<button
 							class="dashboard-card-btn dashboard-card-btn--size"
@@ -141,7 +145,7 @@ export function CardPanel(props: CardBodyProps & { root: HTMLElement; sectionTyp
 					)}
 					{kind !== 'memo' && kind !== 'task' && !(widget && sectionType === 'dashboard') && (
 						<button
-							class="dashboard-card-btn"
+							class="dashboard-card-btn dashboard-card-btn--edit"
 							aria-label={t('renderer.editCard')}
 							onClick={() => callbacks.onCardEdit(card)}
 						>

@@ -1,0 +1,99 @@
+{
+  "ticket": "Browser T05 ChatGPT workspace PoC",
+  "finding": "R-094",
+  "status": "fixed-core-loop-real-account-unverified",
+  "findingDetails": [
+    "ChatGPT exists in the provider enum but production registry and task UI do not implement it.",
+    "The pinned upstream parser can mark a current assistant branch complete without explicit terminal status, deduplicates repeated text, and does not exclude non-public assistant channels. NAND must not copy these behaviors."
+  ],
+  "sourceReview": {
+    "reference": "https://github.com/NAMEWTA/multi-ai-browser-extension",
+    "sha": "b6b83ca90f0f67fbf25a676e7a8f6b8b34327800",
+    "local": "C:/Users/cdewta/AppData/Local/Temp/nand-maiw-browser-review-161505c0a8a24243a20841f4cf6abdcf",
+    "read": [
+      "src/providers/chatgpt/definition.ts",
+      "selectors.ts",
+      "strategy.ts",
+      "acquisition.ts (complete)",
+      "runtime-acquisition.ts (complete)",
+      "native-copy.ts (complete)",
+      "acquisition.test.ts (complete current-branch fixture)",
+      "runtime-acquisition.test.ts (complete)",
+      "src/runtime/acquisition-network-protocol.ts ChatGPT matching"
+    ],
+    "observations": [
+      "Official origin https://chatgpt.com; conversation URL /c/<id>; observed history endpoint /backend-api/conversation/<id>. Exact anchored endpoint needed; upstream startsWith is too broad.",
+      "Mapping nodes/current_node identify the active branch. Null root/system/tool/non-public nodes can sit between public messages; projected public parent must follow proven node links, never array/DOM order.",
+      "Require explicit assistant terminal status and end-turn evidence. Preserve repeated parts; exclude analysis/reasoning/tool/hidden assistant content.",
+      "The native copy reference scopes by turn test IDs; do not treat numbered conversation-turn indexes as message IDs. Only explicit stable message attributes are valid.",
+      "Use the shared native lifecycle and passive observer; no upstream network replay, credentials or independent queue."
+    ]
+  },
+  "implemented": [
+    "Bounded exact-origin conversation response parser traverses current_node to an explicit root, rejects ID conflicts/cycles/missing ancestry, and projects only public user/final assistant messages on that branch.",
+    "Public parent links follow verified mapping edges through system/tool/analysis nodes. Unknown or unsupported intervening public messages invalidate projected parent identity. Repeated Markdown parts are preserved; status finished_successfully plus end_turn true required for terminal evidence.",
+    "ChatGPT readonly DOM scopes explicit stable message IDs, skips non-public message channels and strips reasoning/tool/action/status content; numbered conversation-turn containers never become IDs. Login/challenge states block send and leave the page available for manual action.",
+    "Lazy ChatGPT factory and canonical conversation URL integrated into the existing registered task service and native task UI. Shared NativeProviderSession and existing BrowserOperationQueue own input/capture/cancellation; no network replay or separate workspace.",
+    "Shared acceptance now requires positive parentKnown evidence including root submissions. DeepSeek parser/DOM expose that proof; absent parent fields can no longer be treated as explicit root evidence.",
+    "Bilingual incomplete-history/identity explanations cover ChatGPT branch limits; MIT source headers, NOTICE and bilingual source mapping updated."
+  ],
+  "verification": {
+    "realAccount": "Unavailable. Current live ChatGPT DOM/private response compatibility and real account acceptance remain unverified.",
+    "unit": {
+      "command": "pnpm exec vitest run src/modules/browser/core/providers src/modules/browser/platform/desktop/provider-responses.test.ts src/modules/browser/services/workspace.test.ts src/modules/browser/services/workspace-sender.test.ts",
+      "passed": 37,
+      "refinement": "After explicit parent-proof refinement, affected provider/service34 tests pass."
+    },
+    "native": [
+      {
+        "passed": 70,
+        "evidence": "C:/Users/cdewta/AppData/Local/Temp/nand-chatgpt-workspace-debug-37e5e2a8ed3340b3862691a2c383042e/evidence"
+      },
+      {
+        "passed": 72,
+        "evidence": "C:/Users/cdewta/AppData/Local/Temp/nand-chatgpt-workspace-final-62fb5acd41b540968672442b9dd95020/evidence",
+        "details": "Uninstrumented production main.js, registered workspace, native task provider selection/contenteditable input, 3 consecutive rounds including repeated multiline question and >60k answer, only current branch, missing root/unfinished/no-history/stale-branch incomplete, actual new website context, pause, retained Markdown, 18 width/theme cases/coarse44, popout, restart, module off/on. Visible analysis sibling nodes excluded; anonymous numbered turn blocked. Login/challenge blocked send and were left untouched."
+      },
+      {
+        "provider": "deepseek",
+        "passed": 52,
+        "evidence": "C:/Users/cdewta/AppData/Local/Temp/nand-deepseek-parent-proof-review-9cfd2e71b10548eb9641138171567f5d/evidence",
+        "details": "Production shared-session regression after requiring explicit root/parent evidence for acceptance."
+      }
+    ],
+    "method": "All HTTPS requests in the disposable fixture partition fulfilled locally. No actual ChatGPT account/live private contract acceptance claim.",
+    "failedExploratoryRuns": [
+      {
+        "evidence": "C:/Users/cdewta/AppData/Local/Temp/nand-chatgpt-workspace-review-d4e9a5d24ed843de97a3bf3d873dd9bf/evidence",
+        "reason": "Harness declared the same guest global const twice; fixed by isolating fixture setup in an IIFE."
+      },
+      {
+        "evidence": "C:/Users/cdewta/AppData/Local/Temp/nand-chatgpt-workspace-review-b8510250dbcc49fc93a64bb9597a4ab8/evidence",
+        "reason": "69 functional checks passed but final host-error gate saw 3 generic Uncaught events without saved details. Not counted as success. Harness now retains complete exceptionDetails and last check; subsequent70 and72 runs had no host errors. Original cause not established."
+      }
+    ],
+    "visual": "Reviewed final 500px light screenshot: repeated multiline question and public Markdown heading/table/code/math/prose render within answer cards.",
+    "checks": {
+      "build": "pass; main.js4150274 styles749504",
+      "browserLint": "pass; zero warnings",
+      "architecture": "pass;901modules",
+      "i18n": "pass;3353keys",
+      "docs": "pass;552documents567local350external links",
+      "fullLint": "pass; zero warnings",
+      "bundle": "pass;4150274 /4151296 output,749504 /749568 styles; startup96.8KiB, browser activation127.4KiB within unchanged caps"
+    },
+    "fullSuite": {
+      "command": "pnpm test",
+      "passed": 646,
+      "skipped": 4,
+      "filesPassed": 144,
+      "filesSkipped": 1,
+      "durationSeconds": 110.05,
+      "log": "C:/Users/cdewta/AppData/Local/Temp/nand-review-chatgpt-full.log"
+    }
+  },
+  "next": [
+    "Real ChatGPT account acceptance remains unavailable; current live private DOM/API compatibility is unverified.",
+    "Continue Browser T06 multi-target production path, followed by remaining Browser T07-T21 and Home workflow/planning."
+  ]
+}

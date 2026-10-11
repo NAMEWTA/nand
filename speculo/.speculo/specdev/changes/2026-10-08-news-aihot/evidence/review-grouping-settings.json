@@ -1,0 +1,325 @@
+{
+  "ticket": [
+    "News T03",
+    "News T04",
+    "News T10"
+  ],
+  "requirements": [
+    "AC-011",
+    "AC-012",
+    "AC-014",
+    "AC-027",
+    "AC-028"
+  ],
+  "finding": "R-087",
+  "status": "fixed-native47-full603-verified",
+  "implementation": [
+    "Add configurable summary floor (strict unrounded mean > floor), recall days, lexical similarity and relation confidence with native draft save/reset/validation. Changes consume no agent calls.",
+    "New batches snapshot candidate IDs and relation confidence. Recovery uses the saved batch threshold; existing memberships are not reinterpreted by later settings. Existing analysis without the optional threshold uses the original 0.8 default.",
+    "Local score display recomputes from existing samples using the summary floor; tier eligibility remains independent."
+  ],
+  "verification": {
+    "nativeDirectory": "C:/Users/cdewta/AppData/Local/Temp/nand-news-grouping-settings-review-e0040fda908c4cd9af99d1656d097b00/evidence",
+    "harness": "scripts/obsidian-acceptance/news-editorial-rules.mjs",
+    "method": "Real Obsidian native pointer/keyboard and durable settings; seeded analysis/history; no network or CLI calls.",
+    "checks": [
+      {
+        "name": "defaults-read-existing-heat-and-edition",
+        "passed": true
+      },
+      {
+        "name": "default-half-life-uses-original-time",
+        "passed": true,
+        "detail": 10
+      },
+      {
+        "name": "draft-does-not-recompute-before-save",
+        "passed": true
+      },
+      {
+        "name": "saving-recomputes-hot-limit-and-rule-version",
+        "passed": true
+      },
+      {
+        "name": "history-recomputes-only-observed-hours",
+        "passed": true
+      },
+      {
+        "name": "edited-half-life-updates-existing-heat",
+        "passed": true
+      },
+      {
+        "name": "minimum-participant-setting-filters-list",
+        "passed": true
+      },
+      {
+        "name": "reset-restores-baseline-and-version",
+        "passed": true
+      },
+      {
+        "name": "invalid-draft-keeps-durable-rule",
+        "passed": true
+      },
+      {
+        "name": "write-failure-restores-rule-and-keeps-draft",
+        "passed": true
+      },
+      {
+        "name": "failed-rule-save-can-retry",
+        "passed": true
+      },
+      {
+        "name": "edition-caps-recompute-locally",
+        "passed": true
+      },
+      {
+        "name": "edition-memory-setting-is-durable",
+        "passed": true
+      },
+      {
+        "name": "per-source-cap-is-applied",
+        "passed": true
+      },
+      {
+        "name": "zero-flash-limit-disables-flashes",
+        "passed": true
+      },
+      {
+        "name": "all-rule-edits-use-zero-cli-and-preserve-analysis",
+        "passed": true
+      },
+      {
+        "name": "unlisted-existing-analysis-uses-summary-floor",
+        "passed": true
+      },
+      {
+        "name": "summary-floor-is-strict-and-local",
+        "passed": true
+      },
+      {
+        "name": "lower-floor-restores-existing-summaries",
+        "passed": true
+      },
+      {
+        "name": "grouping-controls-save-without-reinterpreting-memberships",
+        "passed": true
+      },
+      {
+        "name": "invalid-grouping-confidence-is-not-saved",
+        "passed": true
+      },
+      {
+        "name": "grouping-reset-restores-source-defaults",
+        "passed": true
+      },
+      {
+        "name": "rules-system-light-500",
+        "passed": true,
+        "detail": {
+          "width": 444,
+          "scroll": 444,
+          "small": 0
+        }
+      },
+      {
+        "name": "rules-system-light-800",
+        "passed": true,
+        "detail": {
+          "width": 692,
+          "scroll": 692,
+          "small": 0
+        }
+      },
+      {
+        "name": "rules-system-light-1500",
+        "passed": true,
+        "detail": {
+          "width": 760,
+          "scroll": 760,
+          "small": 0
+        }
+      },
+      {
+        "name": "rules-system-dark-500",
+        "passed": true,
+        "detail": {
+          "width": 444,
+          "scroll": 444,
+          "small": 0
+        }
+      },
+      {
+        "name": "rules-system-dark-800",
+        "passed": true,
+        "detail": {
+          "width": 692,
+          "scroll": 692,
+          "small": 0
+        }
+      },
+      {
+        "name": "rules-system-dark-1500",
+        "passed": true,
+        "detail": {
+          "width": 760,
+          "scroll": 760,
+          "small": 0
+        }
+      },
+      {
+        "name": "rules-claude-code-light-500",
+        "passed": true,
+        "detail": {
+          "width": 444,
+          "scroll": 444,
+          "small": 0
+        }
+      },
+      {
+        "name": "rules-claude-code-light-800",
+        "passed": true,
+        "detail": {
+          "width": 692,
+          "scroll": 692,
+          "small": 0
+        }
+      },
+      {
+        "name": "rules-claude-code-light-1500",
+        "passed": true,
+        "detail": {
+          "width": 760,
+          "scroll": 760,
+          "small": 0
+        }
+      },
+      {
+        "name": "rules-claude-code-dark-500",
+        "passed": true,
+        "detail": {
+          "width": 444,
+          "scroll": 444,
+          "small": 0
+        }
+      },
+      {
+        "name": "rules-claude-code-dark-800",
+        "passed": true,
+        "detail": {
+          "width": 692,
+          "scroll": 692,
+          "small": 0
+        }
+      },
+      {
+        "name": "rules-claude-code-dark-1500",
+        "passed": true,
+        "detail": {
+          "width": 760,
+          "scroll": 760,
+          "small": 0
+        }
+      },
+      {
+        "name": "rules-eye-care-light-500",
+        "passed": true,
+        "detail": {
+          "width": 444,
+          "scroll": 444,
+          "small": 0
+        }
+      },
+      {
+        "name": "rules-eye-care-light-800",
+        "passed": true,
+        "detail": {
+          "width": 692,
+          "scroll": 692,
+          "small": 0
+        }
+      },
+      {
+        "name": "rules-eye-care-light-1500",
+        "passed": true,
+        "detail": {
+          "width": 760,
+          "scroll": 760,
+          "small": 0
+        }
+      },
+      {
+        "name": "rules-eye-care-dark-500",
+        "passed": true,
+        "detail": {
+          "width": 444,
+          "scroll": 444,
+          "small": 0
+        }
+      },
+      {
+        "name": "rules-eye-care-dark-800",
+        "passed": true,
+        "detail": {
+          "width": 692,
+          "scroll": 692,
+          "small": 0
+        }
+      },
+      {
+        "name": "rules-eye-care-dark-1500",
+        "passed": true,
+        "detail": {
+          "width": 760,
+          "scroll": 760,
+          "small": 0
+        }
+      },
+      {
+        "name": "rules-coarse-controls-at-least-44",
+        "passed": true
+      },
+      {
+        "name": "restart-restores-rules-and-derived-edition",
+        "passed": true
+      },
+      {
+        "name": "restart-restores-grouping-confidence",
+        "passed": true
+      },
+      {
+        "name": "language-change-preserves-unsaved-rule",
+        "passed": true
+      },
+      {
+        "name": "popout-rule-controls-save-through-owner",
+        "passed": true
+      },
+      {
+        "name": "module-off-releases-rule-controls",
+        "passed": true
+      },
+      {
+        "name": "no-unexpected-host-errors",
+        "passed": true,
+        "detail": []
+      }
+    ],
+    "screenshotReviewed": "rules-system-false-500.png",
+    "targeted": "23 passed: scoring, grouping, analysis-policy, heat. Includes strict unrounded floor, configurable recall and confidence, and received-batch recovery with changed settings.",
+    "full": "603 passed / 4 skipped; 131 files passed / 1 skipped; 109.42 seconds",
+    "fullLog": "C:/Users/cdewta/AppData/Local/Temp/nand-review-news-grouping-settings-full.log",
+    "gates": {
+      "build": "passed",
+      "lint": "zero warnings",
+      "i18n": "3224 keys passed",
+      "architecture": "869 modules passed",
+      "bundleBytes": 4042762,
+      "stylesBytes": 746250,
+      "docs": "549 Markdown / 559 local / 348 external; external fetch not requested"
+    }
+  },
+  "limitations": [
+    "Native checks use seeded historical analysis and no provider account/model request. Confidence recovery is additionally verified at the service unit boundary.",
+    "Windows native controls verified. macOS/Linux/phone and live provider capability/quality remain unverified."
+  ]
+}

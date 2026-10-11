@@ -1,0 +1,55 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Kimi adapter local fixture</title>
+<button id="new-chat" aria-label="New chat">New chat</button>
+<main id="messages"></main>
+<div id="chat-input" class="chat-input-editor fixture-composer" contenteditable="true" data-lexical-editor="true" role="textbox" style="min-height:50px;border:1px solid;padding:8px;white-space:pre-wrap"></div>
+<button id="submit" class="send-button-container" aria-label="Send">Send</button>
+<button id="stop" aria-label="Stop" style="display:none">Stop</button>
+<script>
+const composer = document.querySelector('#chat-input'), output = document.querySelector('#messages'), submit = document.querySelector('#submit'), stop = document.querySelector('#stop');
+let conversation, serial = 0, messages = [], timer;
+const fence = String.fromCharCode(96).repeat(3);
+window.fixtureMarkdown = '# Heading\n\n| A | B |\n| --- | --- |\n| 1 | 2 |\n\n' + fence + 'ts\nconst a = 1;\n' + fence + '\n\n$x^2$\n\nRepeated paragraph\n\nRepeated paragraph';
+window.fixtureCount = () => messages.length;
+window.fixtureHistory = cursor => ({ messages: cursor === 'older-page' ? messages.slice(0, -2).toReversed() : messages.slice(-2).toReversed(),
+ nextPageToken: cursor === 'older-page' || messages.length <= 2 ? '' : 'older-page', totalCount: messages.length, access_token: 'fixture-only-secret' });
+async function observeHistory() {
+ const response = await fetch('/apiv2/kimi.gateway.chat.v1.ChatService/ListMessages', { method: 'POST', headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({ chat_id: conversation, page_token: '', private_token: 'fixture-only-request-secret' }) });
+ const first = await response.json();
+ if (first.nextPageToken && window.fixtureMode !== 'missing-page') await fetch('/apiv2/kimi.gateway.chat.v1.ChatService/ListMessages', { method: 'POST', headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({ chat_id: conversation, page_token: first.nextPageToken, private_token: 'fixture-only-request-secret' }) });
+}
+function row(id, parent, role, text) {
+ const element = document.createElement('div');
+ element.dataset.messageId = id; element.dataset.role = role; element.dataset.parentId = parent ?? '';
+ element.className = 'chat-content-item-' + role;
+ const content = document.createElement('div'); content.className = 'segment-' + role; content.style.whiteSpace = 'pre-wrap';
+ content.textContent = text; element.append(content); output.append(element); return content;
+}
+document.querySelector('#new-chat').onclick = () => {
+ if (timer) clearTimeout(timer);
+ conversation = undefined; messages = []; output.replaceChildren(); composer.replaceChildren();
+ history.replaceState({}, '', '/'); stop.style.display = 'none'; submit.disabled = false;
+};
+submit.onclick = () => {
+ if (!composer.innerText || submit.disabled) return;
+ const question = composer.innerText, parent = messages.at(-1)?.id;
+ conversation ??= crypto.randomUUID(); history.replaceState({}, '', '/chat/' + conversation);
+ const user = 'user-' + (++serial), answer = 'answer-' + serial;
+ messages.push({ id: user, parentId: parent ?? '', role: 'ROLE_USER', status: 'MESSAGE_STATUS_FINISHED', blocks: [{ text: { content: question } }] });
+ row(user, parent, 'user', question);
+ const response = row(answer, user, 'assistant', 'Partial answer'); response.setAttribute('aria-busy', 'true');
+ composer.replaceChildren(); submit.disabled = true; stop.style.display = '';
+ timer = setTimeout(() => {
+  response.removeAttribute('aria-busy');
+  response.innerHTML = '<h1>Heading</h1><table><tr><th>A</th><th>B</th></tr><tr><td>1</td><td>2</td></tr></table><pre><code class="language-ts">const a = 1;</code></pre><span class="katex"><annotation encoding="application/x-tex">x^2</annotation></span><div class="thinking">Private reasoning fixture</div><button>Copy</button>';
+  messages.push({ id: answer, parentId: user, role: 'ROLE_ASSISTANT', status: window.fixtureMode === 'unfinished' ? 'MESSAGE_STATUS_UNFINISHED' : 'MESSAGE_STATUS_FINISHED',
+   blocks: [{ think: { content: 'Private reasoning fixture' } }, { text: { content: fixtureMarkdown + (window.fixtureLongAnswer ? '\n\n' + 'Long public paragraph. '.repeat(3000) : '') } }] });
+  submit.disabled = false; stop.style.display = 'none'; timer = undefined;
+  if (!window.fixtureNoHistory) void observeHistory();
+ }, window.fixtureDelay ?? 900);
+};
+stop.onclick = () => { clearTimeout(timer); timer = undefined; stop.style.display = 'none'; submit.disabled = false; for (const row of output.querySelectorAll('[aria-busy]')) row.removeAttribute('aria-busy'); const status = document.createElement('p'); status.role = 'status'; status.textContent = 'Stopped'; output.append(status); };
+</script>

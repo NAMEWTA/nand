@@ -1,0 +1,30 @@
+{
+  "widgets": [
+    {
+      "id": "hot-main",
+      "mode": "hot",
+      "name": "Top events",
+      "count": 5,
+      "showSummary": false,
+      "staleMinutes": 30
+    },
+    {
+      "id": "view-one",
+      "mode": "view",
+      "name": "Research",
+      "count": 3,
+      "showSummary": true,
+      "staleMinutes": 120,
+      "viewId": "research-view"
+    },
+    {
+      "id": "view-two",
+      "mode": "view",
+      "name": "",
+      "count": 8,
+      "showSummary": false,
+      "staleMinutes": 60,
+      "viewId": "tools-view"
+    }
+  ]
+}

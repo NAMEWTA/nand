@@ -1,0 +1,20 @@
+{
+  "finding": "R-069",
+  "status": "fixed-native-verified",
+  "description": "Programmatic ownerWindow opening selected a sidebar anchor then reused the popup. Native ribbon itself worked. Select most recent central leaf scoped to window for full/focus openings.",
+  "file": "src/app/workbench/compose-workbench.ts",
+  "verification": {
+    "script": "scripts/obsidian-acceptance/workbench-window-owner.mjs",
+    "evidence": "C:/Users/cdewta/AppData/Local/Temp/nand-workbench-window-review-2cfc1398a79d4269aa2c3d7d373913a0/evidence",
+    "passed": 7,
+    "coverage": [
+      "explicit main open after sole leaf popout",
+      "native main ribbon",
+      "original popup remains",
+      "explicit main and popup focus tabs",
+      "full workbench reuse",
+      "no console errors"
+    ]
+  },
+  "environmentIssue": "9277/9280 unavailable in this session; failed startup attempts are not product failures. Reused9276 after other native processes finished."
+}

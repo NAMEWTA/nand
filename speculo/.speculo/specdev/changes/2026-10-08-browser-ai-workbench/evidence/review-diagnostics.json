@@ -1,0 +1,44 @@
+{
+  "ticket": "Browser T02/T03 diagnostic privacy boundary",
+  "requirements": [
+    "AC-026",
+    "AC-039"
+  ],
+  "finding": "R-091",
+  "status": "fixed-native11-targeted18-verified-provider-capture-pending",
+  "findingDetails": [
+    "BrowserAutomation copied raw guest console values/descriptions into retained history. Secrets printed by a page could be returned through the authenticated bridge.",
+    "Network failure events were retained wholesale and disposed automation objects kept their diagnostic arrays."
+  ],
+  "implementation": [
+    "Retain only console event kind, timestamp and argument types; never raw argument values, descriptions, previews or stacks.",
+    "Network failures retain only resource type, timestamp, cancellation and symbolic Chromium error code. Discard arbitrary fields, URLs, request ids, headers and bodies.",
+    "Dispose clears diagnostic arrays and request tracking together with native listeners and the debugger lease."
+  ],
+  "verification": {
+    "native": {
+      "checks": 11,
+      "passed": 11,
+      "evidence": "C:/Users/cdewta/AppData/Local/Temp/nand-browser-diagnostics-review-c8ae8ec160d844509207a4d0d1ab2fd0/evidence",
+      "harness": "scripts/obsidian-acceptance/browser-diagnostics.mjs",
+      "covers": [
+        "Real authenticated CLI, background snapshot with profile/generation and no focus change.",
+        "Actual guest console logging fixture token/cookie/password and failed fetch with authorization header/query. Returned summaries contain no fixture marker.",
+        "100-row bound, closing background page without reveal and disabling bridge/guests."
+      ]
+    },
+    "targeted": "18 tests across diagnostics, native listener lifecycle, page control and browser; 11.13s",
+    "gates": [
+      "build",
+      "lint",
+      "architecture 877",
+      "docs 549/559 links",
+      "bundle 4060565 bytes within recorded 4061184 cap; styles unchanged 747016"
+    ],
+    "fullBaseline": "R090 full 607 pass / 4 skip before this diagnostic change; full suite not repeated for R091."
+  },
+  "limitations": [
+    "Generic diagnostics are verified; provider/task allowlisted capture instrumentation is not yet implemented and AC-026 remains open for T03.",
+    "Only Windows/local fixture evidence, no real provider or credential tested."
+  ]
+}

@@ -1,0 +1,248 @@
+{
+  "method": "Native Obsidian/published helper protocol fixture; no model-provider quality claim",
+  "passed": true,
+  "rows": [
+    {
+      "name": "analysis-completes-through-native-helper",
+      "passed": true
+    },
+    {
+      "name": "same-batch-duplicate-folds-and-root-has-three-occurrences",
+      "passed": true,
+      "detail": {
+        "id": "story-fixture:LEAK",
+        "title": "[LEAK] 模型发布与进展",
+        "materialIds": [
+          "fixture:LEAK",
+          "fixture:OFFICIAL",
+          "fixture:MEDIA",
+          "fixture:REVIEW"
+        ],
+        "occurrenceIds": [
+          "occ-fixture:LEAK",
+          "occ-fixture:OFFICIAL",
+          "occ-fixture:REVIEW"
+        ],
+        "firstSeenAt": 1791537374425,
+        "latestAt": 1791548174425,
+        "aliases": [],
+        "rootOccurrenceId": "occ-fixture:LEAK",
+        "representativeId": "fixture:OFFICIAL"
+      }
+    },
+    {
+      "name": "most-covered-occurrence-selects-official-representative",
+      "passed": true
+    },
+    {
+      "name": "roundup-only-mentions-two-independent-events",
+      "passed": true
+    },
+    {
+      "name": "low-confidence-is-unconfirmed-and-not-featured",
+      "passed": true
+    },
+    {
+      "name": "confirmed-high-score-becomes-featured",
+      "passed": true
+    },
+    {
+      "name": "reader-shows-fold-count-progress-and-report-timeline",
+      "passed": true
+    },
+    {
+      "name": "timeline-order-reverses",
+      "passed": true
+    },
+    {
+      "name": "event-width-claude-code-light-1200",
+      "passed": true,
+      "detail": {
+        "width": 832,
+        "scroll": 832
+      }
+    },
+    {
+      "name": "event-width-claude-code-light-800",
+      "passed": true,
+      "detail": {
+        "width": 692,
+        "scroll": 692
+      }
+    },
+    {
+      "name": "event-width-claude-code-light-420",
+      "passed": true,
+      "detail": {
+        "width": 364,
+        "scroll": 364
+      }
+    },
+    {
+      "name": "event-width-claude-code-dark-1200",
+      "passed": true,
+      "detail": {
+        "width": 832,
+        "scroll": 832
+      }
+    },
+    {
+      "name": "event-width-claude-code-dark-800",
+      "passed": true,
+      "detail": {
+        "width": 692,
+        "scroll": 692
+      }
+    },
+    {
+      "name": "event-width-claude-code-dark-420",
+      "passed": true,
+      "detail": {
+        "width": 364,
+        "scroll": 364
+      }
+    },
+    {
+      "name": "event-width-codex-light-1200",
+      "passed": true,
+      "detail": {
+        "width": 832,
+        "scroll": 832
+      }
+    },
+    {
+      "name": "event-width-codex-light-800",
+      "passed": true,
+      "detail": {
+        "width": 692,
+        "scroll": 692
+      }
+    },
+    {
+      "name": "event-width-codex-light-420",
+      "passed": true,
+      "detail": {
+        "width": 364,
+        "scroll": 364
+      }
+    },
+    {
+      "name": "event-width-codex-dark-1200",
+      "passed": true,
+      "detail": {
+        "width": 832,
+        "scroll": 832
+      }
+    },
+    {
+      "name": "event-width-codex-dark-800",
+      "passed": true,
+      "detail": {
+        "width": 692,
+        "scroll": 692
+      }
+    },
+    {
+      "name": "event-width-codex-dark-420",
+      "passed": true,
+      "detail": {
+        "width": 364,
+        "scroll": 364
+      }
+    },
+    {
+      "name": "event-width-obsidian-light-1200",
+      "passed": true,
+      "detail": {
+        "width": 832,
+        "scroll": 832
+      }
+    },
+    {
+      "name": "event-width-obsidian-light-800",
+      "passed": true,
+      "detail": {
+        "width": 692,
+        "scroll": 692
+      }
+    },
+    {
+      "name": "event-width-obsidian-light-420",
+      "passed": true,
+      "detail": {
+        "width": 364,
+        "scroll": 364
+      }
+    },
+    {
+      "name": "event-width-obsidian-dark-1200",
+      "passed": true,
+      "detail": {
+        "width": 832,
+        "scroll": 832
+      }
+    },
+    {
+      "name": "event-width-obsidian-dark-800",
+      "passed": true,
+      "detail": {
+        "width": 692,
+        "scroll": 692
+      }
+    },
+    {
+      "name": "event-width-obsidian-dark-420",
+      "passed": true,
+      "detail": {
+        "width": 364,
+        "scroll": 364
+      }
+    },
+    {
+      "name": "bridge-and-independent-review-complete",
+      "passed": true
+    },
+    {
+      "name": "merge-review-counts-one-extra-durable-call",
+      "passed": true
+    },
+    {
+      "name": "old-event-alias-resolves-to-merged-occurrence",
+      "passed": true
+    },
+    {
+      "name": "legacy-event-deep-link-opens-merged-reader",
+      "passed": true
+    },
+    {
+      "name": "restart-preserves-alias-membership-and-quota",
+      "passed": true
+    },
+    {
+      "name": "repeated-analysis-does-not-repeat-root-review",
+      "passed": true
+    },
+    {
+      "name": "review-reservation-exists-before-separate-process",
+      "passed": true
+    },
+    {
+      "name": "owned-processes-exited",
+      "passed": true
+    },
+    {
+      "name": "no-host-errors",
+      "passed": true,
+      "detail": []
+    }
+  ],
+  "artifactRoot": "C:\\Users\\cdewta\\AppData\\Local\\Temp\\nand-news-grouping-review-882b48e909cd49c6ae6e621663b82d16\\evidence",
+  "environment": "Windows 11, Obsidian 1.13.7, published nand-pty win32-x64 alpha1, isolated Node CLI protocol fixture",
+  "limitations": [
+    "No real model-provider editorial-quality claim",
+    "No mobile device or POSIX runtime verification"
+  ],
+  "targetedTests": "70 passed / 20 files; last candidate-revision invalidation and alias-schema tests covered after native run",
+  "nativeRoot": "C:\\Users\\cdewta\\AppData\\Local\\Temp\\nand-news-grouping-review-621166f1d604455fae7fbe2e202c85eb",
+  "postEditionRegression": "35 native checks pass after T-06 per-leaf state and sections; owned processes exited."
+}

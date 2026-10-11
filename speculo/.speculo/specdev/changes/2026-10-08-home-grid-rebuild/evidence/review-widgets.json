@@ -1,0 +1,184 @@
+{
+  "rows": [
+    {
+      "name": "saved-members-ignore-old-global-enable-flags",
+      "passed": true,
+      "detail": [
+        {
+          "id": "year",
+          "text": "202682 days leftDay 283 of 36577.3%"
+        },
+        {
+          "id": "countdown",
+          "text": "Until Shared countdown1179days"
+        },
+        {
+          "id": "news",
+          "text": "News readerThis widget provider is unavailable. Enable it in settings to restore this widget.Open settings"
+        },
+        {
+          "id": "external",
+          "text": "External calendarThis widget provider is unavailable. Enable it in settings to restore this widget.Open settings"
+        },
+        {
+          "id": "broken",
+          "text": "brokenThis widget provider is unavailable. Enable it in settings to restore this widget.Open settings"
+        },
+        {
+          "id": "slow",
+          "text": "slowThis widget provider is unavailable. Enable it in settings to restore this widget.Open settings"
+        }
+      ]
+    },
+    {
+      "name": "disabled-and-unknown-members-visible",
+      "passed": true
+    },
+    {
+      "name": "side-and-stacked-use-same-host",
+      "passed": true
+    },
+    {
+      "name": "readonly-both-files-byte-identical",
+      "passed": true
+    },
+    {
+      "name": "news-contribution-mounted-in-existing-member",
+      "passed": true
+    },
+    {
+      "name": "provider-enable-no-board-writes",
+      "passed": true
+    },
+    {
+      "name": "provider-disable-preserves-position-and-bytes",
+      "passed": true
+    },
+    {
+      "name": "provider-reenable-mounts-once",
+      "passed": true
+    },
+    {
+      "name": "external-same-kind-name-and-local-error-isolation",
+      "passed": true
+    },
+    {
+      "name": "mounted-provider-timer-really-runs",
+      "passed": true
+    },
+    {
+      "name": "async-update-error-releases-instance",
+      "passed": true
+    },
+    {
+      "name": "cleanup-once-and-late-async-disposed",
+      "passed": true,
+      "detail": {
+        "mount": 1,
+        "dispose": 1,
+        "lateDispose": 1,
+        "ticks": 3
+      }
+    },
+    {
+      "name": "no-timer-after-provider-removal",
+      "passed": true
+    },
+    {
+      "name": "fixture-provider-never-edits-board",
+      "passed": true
+    },
+    {
+      "name": "present-singleton-not-offered-again",
+      "passed": true
+    },
+    {
+      "name": "catalog-cancel-no-write",
+      "passed": true
+    },
+    {
+      "name": "membership-remove-persists-current-board-only",
+      "passed": true
+    },
+    {
+      "name": "shared-instance-not-deleted",
+      "passed": true
+    },
+    {
+      "name": "other-board-retains-instance",
+      "passed": true
+    },
+    {
+      "name": "existing-instance-can-be-added-again",
+      "passed": true
+    },
+    {
+      "name": "global-order-unmodified",
+      "passed": true
+    },
+    {
+      "name": "keyboard-member-reorder",
+      "passed": true,
+      "detail": {
+        "beforeOrder": [
+          "year",
+          "news",
+          "external",
+          "broken",
+          "slow",
+          "widget-5311edc8-e5ac-493e-a453-cff305c804b8"
+        ],
+        "afterOrder": [
+          "year",
+          "news",
+          "external",
+          "broken",
+          "widget-5311edc8-e5ac-493e-a453-cff305c804b8",
+          "slow"
+        ]
+      }
+    },
+    {
+      "name": "member-order-rendered-and-saved",
+      "passed": true
+    },
+    {
+      "name": "restart-preserves-members-and-original-text",
+      "passed": true
+    },
+    {
+      "name": "restart-other-board-byte-identical",
+      "passed": true
+    },
+    {
+      "name": "unchanged-refresh-keeps-single-mounted-widget",
+      "passed": true
+    },
+    {
+      "name": "leaving-board-closes-owned-catalog-without-write",
+      "passed": true
+    },
+    {
+      "name": "home-disable-cleans-mounted-and-pending-provider",
+      "passed": true
+    },
+    {
+      "name": "home-disable-closes-owned-dialog",
+      "passed": true
+    },
+    {
+      "name": "no-unhandled-runtime-errors",
+      "passed": true,
+      "detail": []
+    }
+  ],
+  "scope": "Real Obsidian, real news module toggles, controlled external contribution fixture; no model calls or news source collection. Existing home services may fetch holiday data.",
+  "runtimeEvidence": "C:\\Users\\cdewta\\AppData\\Local\\Temp\\nand-home-widgets-review-4eb13c5698ad4c928571341ab0423188\\evidence",
+  "testHarness": "scripts/obsidian-acceptance/home-widgets.mjs",
+  "limitations": [
+    "Native matrix exercises year-progress/countdown plus real news and controlled external widgets. All 13 built-ins now use the same provider adapter; a full visual matrix of every kind remains for integrated acceptance.",
+    "Instance creation/configuration from catalog and tile remove buttons are T-06 work, still pending.",
+    "News raw/hot/view provider reads are implemented; analyzed-news heat/view fixture and live-navigation acceptance are still News T-08 work.",
+    "Actual phone and other OS not exercised."
+  ]
+}

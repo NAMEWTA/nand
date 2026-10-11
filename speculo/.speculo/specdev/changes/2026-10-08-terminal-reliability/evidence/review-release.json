@@ -1,0 +1,62 @@
+{
+  "tag": "0.0.1-alpha.1",
+  "publishedAt": "2026-10-09T03:19:21Z",
+  "url": "https://github.com/NAMEWTA/nand/releases/tag/0.0.1-alpha.1",
+  "assets": [
+    {
+      "name": "nand-pty-darwin-arm64",
+      "size": 2516272,
+      "url": "https://github.com/NAMEWTA/nand/releases/download/0.0.1-alpha.1/nand-pty-darwin-arm64"
+    },
+    {
+      "name": "nand-pty-darwin-arm64.sha256",
+      "size": 88,
+      "url": "https://github.com/NAMEWTA/nand/releases/download/0.0.1-alpha.1/nand-pty-darwin-arm64.sha256"
+    },
+    {
+      "name": "nand-pty-darwin-x64",
+      "size": 2591424,
+      "url": "https://github.com/NAMEWTA/nand/releases/download/0.0.1-alpha.1/nand-pty-darwin-x64"
+    },
+    {
+      "name": "nand-pty-darwin-x64.sha256",
+      "size": 86,
+      "url": "https://github.com/NAMEWTA/nand/releases/download/0.0.1-alpha.1/nand-pty-darwin-x64.sha256"
+    },
+    {
+      "name": "nand-pty-linux-arm64",
+      "size": 2707280,
+      "url": "https://github.com/NAMEWTA/nand/releases/download/0.0.1-alpha.1/nand-pty-linux-arm64"
+    },
+    {
+      "name": "nand-pty-linux-arm64.sha256",
+      "size": 87,
+      "url": "https://github.com/NAMEWTA/nand/releases/download/0.0.1-alpha.1/nand-pty-linux-arm64.sha256"
+    },
+    {
+      "name": "nand-pty-linux-x64",
+      "size": 2841656,
+      "url": "https://github.com/NAMEWTA/nand/releases/download/0.0.1-alpha.1/nand-pty-linux-x64"
+    },
+    {
+      "name": "nand-pty-linux-x64.sha256",
+      "size": 85,
+      "url": "https://github.com/NAMEWTA/nand/releases/download/0.0.1-alpha.1/nand-pty-linux-x64.sha256"
+    },
+    {
+      "name": "nand-pty-win32-x64.exe",
+      "size": 2311680,
+      "url": "https://github.com/NAMEWTA/nand/releases/download/0.0.1-alpha.1/nand-pty-win32-x64.exe"
+    },
+    {
+      "name": "nand-pty-win32-x64.exe.sha256",
+      "size": 90,
+      "url": "https://github.com/NAMEWTA/nand/releases/download/0.0.1-alpha.1/nand-pty-win32-x64.exe.sha256"
+    }
+  ],
+  "checks": [
+    "verify-release-artifacts: all five binaries and checksums passed",
+    "verify-pty-helper: published Windows helper passed input/output, flow control and stdin-close lifecycle"
+  ],
+  "platformRuntime": "Windows x64 only"
+}

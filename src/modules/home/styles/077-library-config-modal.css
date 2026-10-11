@@ -1,4 +1,110 @@
 /* ===== Library Config Modal ===== */
+.nand-anniversary-modal .dashboard-modal,
+.nand-appearance-modal .dashboard-modal,
+.nand-focal-modal .dashboard-modal {
+	display: flex;
+	flex-direction: column;
+	max-height: 75vh;
+}
+
+.nand-anniversary-modal .dashboard-modal-body,
+.nand-appearance-modal .dashboard-modal-body,
+.nand-focal-modal .dashboard-modal-body {
+	min-height: 0;
+	overflow-y: auto;
+}
+
+.nand-anniversary-modal :is(.dashboard-modal-title, .dashboard-modal-footer),
+.nand-appearance-modal :is(.dashboard-modal-header, .dashboard-modal-footer),
+.nand-focal-modal :is(.dashboard-modal-header, .dashboard-modal-footer) {
+	flex-shrink: 0;
+}
+
+.nand-banner-image-entry + .nand-banner-image-entry { margin-top: var(--nand-space-4); }
+
+.nand-focal-modal :is(.dashboard-modal-btn, button, input) { min-height: var(--nand-control-height); }
+.nand-focal-modal .dashboard-modal-doc-remove { min-width: var(--nand-control-height); }
+.nand-focal-modal .dashboard-modal-doc-remove:focus-visible { opacity: 1; }
+.nand-focal-modal button.dashboard-modal-search-item {
+	height: auto;
+	width: 100%;
+	text-align: left;
+	background: var(--nand-surface-muted);
+	color: var(--text-normal);
+	box-shadow: none;
+}
+
+@media (pointer: coarse) {
+	.nand-focal-modal :is(.dashboard-modal-btn, button, input) { min-height: var(--nand-touch-target); }
+	.nand-focal-modal .dashboard-modal-doc-remove { min-width: var(--nand-touch-target); opacity: 1; }
+}
+
+button.nand-focal-preview {
+	position: relative;
+	display: block;
+	width: 100%;
+	height: auto;
+	min-height: var(--nand-touch-target);
+	padding: 0;
+	overflow: hidden;
+	border: 1px solid var(--nand-border-color);
+	border-radius: var(--nand-radius-sm);
+	background-size: cover;
+	background-repeat: no-repeat;
+	touch-action: none;
+}
+
+button.nand-focal-preview:focus-visible { box-shadow: var(--nand-focus-ring); }
+
+.nand-focal-marker {
+	position: absolute;
+	width: var(--nand-icon-size);
+	height: var(--nand-icon-size);
+	border: 2px solid var(--text-on-accent);
+	border-radius: var(--nand-radius-pill);
+	background: var(--nand-accent);
+	transform: translate(-50%, -50%);
+	pointer-events: none;
+}
+
+.nand-focal-axes {
+	display: grid;
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+	gap: var(--nand-space-3);
+}
+
+.nand-focal-axes input { min-width: 0; }
+
+.dashboard-banner-edit-btn {
+	min-width: var(--nand-control-height);
+	min-height: var(--nand-control-height);
+}
+
+.dashboard-banner-edit-btn:focus-visible {
+	opacity: 1;
+	outline: 2px solid var(--nand-accent);
+	outline-offset: 2px;
+}
+
+.dashboard-card:focus-within .dashboard-card-actions { opacity: 1; }
+
+@media (pointer: coarse) {
+	.dashboard-banner-edit-btn {
+		min-width: var(--nand-touch-target);
+		min-height: var(--nand-touch-target);
+	}
+}
+
+.nand-anniversary-date-editor :is(select, .nand-ui-toolbar) {
+	min-height: var(--nand-control-height);
+}
+
+@media (pointer: coarse) {
+	.nand-anniversary-date-editor :is(select, input:not([type="checkbox"]), .nand-ui-toolbar) {
+		min-height: var(--nand-touch-target);
+	}
+}
+
 .dashboard-library-config-modal {
 	padding: 0;
 }
@@ -273,5 +379,29 @@
 .dashboard-library-add-filter-btn:hover {
 	border-color: var(--db-accent, var(--interactive-accent));
 	color: var(--db-accent, var(--interactive-accent));
+}
+
+/* Column preferences keep native controls reachable at narrow and touch widths. */
+.nand-library-columns {
+	max-height: min(30vh, 16rem);
+	overflow-y: auto;
+	flex-shrink: 0;
+}
+
+.nand-library-columns > * { flex-shrink: 0; }
+
+.nand-library-columns label {
+	min-height: var(--nand-control-height);
+	cursor: pointer;
+	overflow-wrap: anywhere;
+}
+
+.nand-library-columns button[aria-disabled="true"] {
+	opacity: var(--nand-disabled-opacity, 0.4);
+	cursor: default;
+}
+
+@media (pointer: coarse) {
+	.nand-library-columns label { min-height: var(--nand-touch-target); }
 }
 

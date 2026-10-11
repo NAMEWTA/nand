@@ -1,0 +1,92 @@
+{
+  "status": "fixed-targeted-and-native-public-source-verified",
+  "ticket": "T-09",
+  "contracts": [
+    "AC-024",
+    "AC-025"
+  ],
+  "nativeRoot": "C:\\Users\\cdewta\\AppData\\Local\\Temp\\nand-news-public-review-90c4badc634543239a0cc82bfd468710\\evidence",
+  "native": {
+    "method": "Native Obsidian requestUrl, public https://go.dev/blog/, no model/provider calls",
+    "passed": true,
+    "rows": [
+      {
+        "name": "public-static-preview-displays-titles-absolute-links-and-dates",
+        "passed": true
+      },
+      {
+        "name": "preview-does-not-store-materials-health-or-call-cli",
+        "passed": true
+      },
+      {
+        "name": "public-list-uses-normal-material-identity-and-initial-import-policy",
+        "passed": true,
+        "detail": {
+          "count": 11,
+          "sample": [
+            {
+              "title": "Arch-specific SIMD in Go",
+              "url": "https://go.dev/blog/archsimd",
+              "publishedAt": 1790870400000,
+              "backfill": "initial-import",
+              "revision": 1
+            },
+            {
+              "title": "Platform-independent SIMD in Go",
+              "url": "https://go.dev/blog/simd-experiment",
+              "publishedAt": 1790179200000,
+              "backfill": "initial-import",
+              "revision": 1
+            }
+          ]
+        }
+      },
+      {
+        "name": "public-list-publication-dates-parse-and-health-is-healthy",
+        "passed": true
+      },
+      {
+        "name": "repeat-fetch-does-not-duplicate-identities-or-revisions",
+        "passed": true
+      },
+      {
+        "name": "no-matches-preview-gives-actionable-selector-message-and-keeps-stored-data",
+        "passed": true
+      },
+      {
+        "name": "invalid-selector-is-visible",
+        "passed": true
+      },
+      {
+        "name": "static-source-opml-round-trip-preserves-selectors-and-deduplicates",
+        "passed": true
+      },
+      {
+        "name": "no-cli-or-visible-note-created-by-preview-and-collection",
+        "passed": true
+      },
+      {
+        "name": "no-host-errors",
+        "passed": true,
+        "detail": []
+      }
+    ]
+  },
+  "relatedEvidence": [
+    "review-collection.json"
+  ],
+  "coverage": [
+    "Production Obsidian requestUrl to https://go.dev/blog/; no authentication, paid scraper or browser execution.",
+    "Native source controls configure selectors, preview without persistence, save and refresh through shared source-health/material pipeline; repeated refresh retains identity/revision.",
+    "Public relative URLs and publication dates parsed; missing and invalid selectors report actionable errors without clearing collected data.",
+    "Static source selectors round-trip through OPML without duplication. Existing 40-check collection acceptance covers XML entities, RSS/Atom/JSON, initial import, source ownership, no script execution and native OPML controls."
+  ],
+  "limits": [
+    "One public static site, Windows Obsidian 1.13.7.",
+    "The host requestUrl response does not expose a final redirect URL; extraction resolves relative links against the configured source URL. Use the canonical final source URL for redirects that change path or origin.",
+    "No live model calls or external authenticated services used."
+  ],
+  "screenshotsInspected": [
+    "public-static-source.png"
+  ]
+}

@@ -1,0 +1,81 @@
+{
+  "ticket": "News T01 identity / T10 reference follow-up",
+  "requirements": [
+    "AC-003"
+  ],
+  "findings": [
+    "R-077"
+  ],
+  "status": "fixed-targeted-native-verified",
+  "fixes": [
+    "Native Web Crypto SHA-256 hashes normalized title/body/summary joined by U+0001, and source-item IDs. upsert/preview/collection await real hashes; test callers await their fixtures.",
+    "Known FNV collision pair item-1ppgtvf / item-rx6lxj now creates distinct source-item IDs and distinct content revisions.",
+    "Missing body/summary keeps existing content; another source for a canonical article cannot overwrite its original owner or trigger alternating revisions.",
+    "seenContentHashes retained with material cache prevents previously accepted rotating text from replacing the current revision or causing another analysis; persisted across restart. No full old bodies are copied into a history table.",
+    "Generation checks after digest prevent old collection results from committing after disable/source changes; collect also skips daily edition writes after generation invalidation."
+  ],
+  "verification": {
+    "targeted": "118 passed /29 files: News + user-format golden; known collision, omission/mirror/history and disable-during-digest regressions.",
+    "golden": "news-favorite.md intentionally updated for SHA-256 material ID; Markdown sections and annotation behavior retained.",
+    "native": {
+      "script": "scripts/obsidian-acceptance/news-material-identity.mjs",
+      "evidence": "C:/Users/cdewta/AppData/Local/Temp/nand-news-identity-review-566c8537e46b4593b074998520ca8693/evidence",
+      "passed": 16,
+      "method": "Real Windows Obsidian/Web Crypto/requestUrl and a local HTTP JSON Feed, with explicit due-time and digest-delay fixtures; no model calls.",
+      "coverage": [
+        "native SHA-256 compared with independent Node crypto",
+        "colliding IDs yield two distinct visible rows",
+        "favorite persists and rediscovers after restart",
+        "whitespace/absent text/current-repeat preserve revision",
+        "changed content increments once; mirror does not change owner/content",
+        "seen old text after restart stays on current revision",
+        "collection disabled during hash does not write material or daily edition",
+        "zero analysis calls and no host errors"
+      ]
+    },
+    "build": "passed, main.js 4018792 bytes and styles.css 743734 bytes",
+    "lint": "passed with zero warnings",
+    "architecture": "861 modules passed",
+    "bundle": "passed; output budget 4019200 (+1 KiB recorded); no new dependency/startup/module/style budget changes",
+    "docs": "Standard gate fails inherited planning/source heading exceptions; existing exact scoped exception passes 549 Markdown /543 local links /332 external links (not fetched).",
+    "fullSuite": {
+      "command": "pnpm test",
+      "result": "584 passed, 4 skipped; 126 files passed, 1 skipped",
+      "seconds": 131.84,
+      "log": "C:/Users/cdewta/AppData/Local/Temp/nand-review-news-integration-full-tests.log"
+    }
+  },
+  "reference": "https://github.com/KKKKhazix/AIHOT/blob/c547b669acc7f64720cd82024e502446ee1ef88d/packages/backend/src/content/materials.ts#L112",
+  "documentation": {
+    "backup": "C:/Users/cdewta/AppData/Local/Temp/nand-review-news-identity-docs-94tjfyps",
+    "files": [
+      {
+        "path": "docs/third-party/aihot-news.md",
+        "beforeCharacters": 7867,
+        "afterCharacters": 8815
+      },
+      {
+        "path": "docs/third-party/aihot-news.ZH.md",
+        "beforeCharacters": 3580,
+        "afterCharacters": 3982
+      },
+      {
+        "path": "docs/news.md",
+        "beforeCharacters": 8033,
+        "afterCharacters": 8475
+      },
+      {
+        "path": "docs/news.ZH.md",
+        "beforeCharacters": 3035,
+        "afterCharacters": 3157
+      }
+    ],
+    "ticket": "News T01 identity / T10 reference follow-up",
+    "status": "bilingual-reviewed"
+  },
+  "limits": [
+    "Known-content history follows retained device cache, so clearing/expiring that cache clears its remembered hashes.",
+    "Actual model-provider editorial quality not exercised."
+  ],
+  "delivery": "Uncommitted authorized workspace changes; no commit/push/release."
+}

@@ -1,0 +1,31 @@
+{
+  "appearancePresets": [
+    {
+      "id": "evening",
+      "name": "Evening",
+      "theme": {
+        "preset": "eye-care",
+        "headings": "accented",
+        "emphasis": "highlight",
+        "accentLight": "#275c3a",
+        "accentDark": "#99d6ab",
+        "lineHeight": 1.9
+      },
+      "home": {
+        "bgImage": "Images/bg.svg",
+        "bgDim": 33,
+        "bgBlur": 3,
+        "bgSize": "contain",
+        "bgFocal": {
+          "x": 22,
+          "y": 77
+        },
+        "surfaceOpacity": 75,
+        "glassBlur": 6,
+        "radiusScale": 19,
+        "fontScale": "large"
+      }
+    }
+  ],
+  "activeAppearancePresetId": "evening"
+}

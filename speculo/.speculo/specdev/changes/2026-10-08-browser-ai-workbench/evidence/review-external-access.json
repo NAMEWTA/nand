@@ -1,0 +1,333 @@
+{
+  "finding": "R-111",
+  "ticket": "Browser T20 AC024/AC025/AC034/AC038/AC039",
+  "status": "fixed-native39-full805-real-accounts-unverified",
+  "observed": [
+    "Internal scoped tokens/executor and native final confirmation can be reused. No external user grant page or service is registered.",
+    "Bridge scoped Map keys are raw tokens. Expiry is checked only at request admission, so an admitted waiting operation has no transport expiry timer.",
+    "Broad transport error responses expose raw exception messages and broad token validity does not recheck the opt-in setting.",
+    "core/ai-workbench.ts contains test-only obsolete prototypes; only BRIDGE_SCOPE/admitBridge are live. Browser key tests also exercise a test-only shortcut helper. This must not be counted as actual feature evidence."
+  ],
+  "constraints": [
+    "Reuse local named pipe/socket, typed BrowserControl, ScopedBrowserExecutor, PageOwnership and native queue. No network server or CDP/eval exposure.",
+    "Explicit ephemeral grants, exact task/page/profile/generation/action limits, default no grant. One-time credential delivery; token hashes in transport registry and no token persistence/logging.",
+    "Grant revocation/expiry/module shutdown cancel queued and waiting requests; dispatched outcome remains returned/unknown. Human takeover revokes access.",
+    "Only authorized page listing; mutation retains native visibility/foreground and final confirmation."
+  ],
+  "next": [],
+  "implementedSoFar": [
+    "Transport scoped registry now indexes SHA256 token hashes, owns an expiry timer that aborts waiting work, and returns symbolic code/reason/retryAction without raw exception messages.",
+    "Broad legacy access defaults off, rechecks opt-in/admission, rotates credentials when re-enabled, and follows settings lifecycle without revoking scoped grants.",
+    "BrowserGrants runtime service: explicit finite page/profile/generation/task/action grant, local-only one-time environment, per-request ownership, existing ScopedBrowserExecutor/native confirmation, draft guard, revoke/expiry/exhaustion and symbolic event history.",
+    "Existing browser shell access route/settings entry, lazy module public service, review/create/one-time command UI, active grant list/revoke and original-page consequence/takeover banner. No bridge is opened merely to view the page.",
+    "Generated CLI binds NAND_BROWSER_TASK, supports explicit empty arguments, documents expectedValue, and uses symbolic local errors.",
+    "Generated CLI rejects malformed endpoint metadata without stderr/raw exception; native failure screenshots skip visible credentials and text redacts 64-hex credentials.",
+    "Documentation paired EN/ZH and stable module API facts updated; live-only bridge policy separated from obsolete prototypes in R112."
+  ],
+  "validationSoFar": {
+    "focused": {
+      "tests": 16,
+      "files": 3,
+      "passed": true,
+      "command": "pnpm exec vitest run src/modules/browser/platform/desktop/scoped-bridge.test.ts src/modules/browser/services/grants.test.ts src/modules/browser/ui/browser-key-scope.test.ts"
+    },
+    "native": {
+      "passed": 39,
+      "evidence": "C:/Users/cdewta/AppData/Local/Temp/nand-external-access-5631445bf9b0407091024ae38a2680e2/evidence",
+      "method": "Production UI, real generated CLI over local named pipe, real 1-minute expiry; local controlled HTTPS pages, no live accounts",
+      "artifact": {
+        "main": 4513611,
+        "styles": 756435
+      },
+      "screenshotsInspected": [
+        "external-access-form-system-light-500.png",
+        "external-access-grants-zh.png"
+      ],
+      "afterNative": "CLI malformed-metadata failure now returns symbolic JSON; tested in generated-CLI regression. Page/account URL gets an explicit line break after screenshot inspection."
+    },
+    "types": "source/test types PASS via final build",
+    "lint": "full lint PASS zero warnings; later one JSX br only",
+    "architecture": "PASS983 modules",
+    "docs": "PASS554 Markdown,573 local links,350 external links without fetch",
+    "notices": "PASS12 npm/62crates",
+    "bundle": "PASS current main4513810/styles756435; startup99.3KiB/browser232.6KiB within unchanged activation caps",
+    "css": "PASS109 author CSS files with no new violations; generated110 sources",
+    "full": {
+      "command": "pnpm test",
+      "passed": 805,
+      "skipped": 4,
+      "filesPassed": 173,
+      "filesSkipped": 1,
+      "durationSeconds": 168.38,
+      "startedLocal": "2026-10-11 08:38:17 Asia/Shanghai",
+      "log": "C:/Users/cdewta/AppData/Local/Temp/nand-review-external-full.log",
+      "note": "After R111 grants/transport/CLI and R112 removal of five prototype tests. Final current main4513810/styles756435."
+    }
+  },
+  "fullSuite": {
+    "command": "pnpm test",
+    "passed": 805,
+    "skipped": 4,
+    "filesPassed": 173,
+    "filesSkipped": 1,
+    "durationSeconds": 168.38,
+    "startedLocal": "2026-10-11 08:38:17 Asia/Shanghai",
+    "log": "C:/Users/cdewta/AppData/Local/Temp/nand-review-external-full.log",
+    "note": "After R111 grants/transport/CLI and R112 removal of five prototype tests. Final current main4513810/styles756435."
+  },
+  "nativeChecks": [
+    {
+      "name": "local-access-is-registered-and-default-off-with-no-guest-or-bridge",
+      "passed": true
+    },
+    {
+      "name": "external-access-form-system-light-500",
+      "passed": true,
+      "detail": {
+        "width": 444,
+        "scroll": 444,
+        "small": 0
+      }
+    },
+    {
+      "name": "external-access-form-system-light-800",
+      "passed": true,
+      "detail": {
+        "width": 692,
+        "scroll": 692,
+        "small": 0
+      }
+    },
+    {
+      "name": "external-access-form-system-light-1500",
+      "passed": true,
+      "detail": {
+        "width": 1144,
+        "scroll": 1144,
+        "small": 0
+      }
+    },
+    {
+      "name": "external-access-form-system-dark-500",
+      "passed": true,
+      "detail": {
+        "width": 444,
+        "scroll": 444,
+        "small": 0
+      }
+    },
+    {
+      "name": "external-access-form-system-dark-800",
+      "passed": true,
+      "detail": {
+        "width": 692,
+        "scroll": 692,
+        "small": 0
+      }
+    },
+    {
+      "name": "external-access-form-system-dark-1500",
+      "passed": true,
+      "detail": {
+        "width": 1144,
+        "scroll": 1144,
+        "small": 0
+      }
+    },
+    {
+      "name": "external-access-form-claude-code-light-500",
+      "passed": true,
+      "detail": {
+        "width": 444,
+        "scroll": 444,
+        "small": 0
+      }
+    },
+    {
+      "name": "external-access-form-claude-code-light-800",
+      "passed": true,
+      "detail": {
+        "width": 692,
+        "scroll": 692,
+        "small": 0
+      }
+    },
+    {
+      "name": "external-access-form-claude-code-light-1500",
+      "passed": true,
+      "detail": {
+        "width": 1144,
+        "scroll": 1144,
+        "small": 0
+      }
+    },
+    {
+      "name": "external-access-form-claude-code-dark-500",
+      "passed": true,
+      "detail": {
+        "width": 444,
+        "scroll": 444,
+        "small": 0
+      }
+    },
+    {
+      "name": "external-access-form-claude-code-dark-800",
+      "passed": true,
+      "detail": {
+        "width": 692,
+        "scroll": 692,
+        "small": 0
+      }
+    },
+    {
+      "name": "external-access-form-claude-code-dark-1500",
+      "passed": true,
+      "detail": {
+        "width": 1144,
+        "scroll": 1144,
+        "small": 0
+      }
+    },
+    {
+      "name": "external-access-form-eye-care-light-500",
+      "passed": true,
+      "detail": {
+        "width": 444,
+        "scroll": 444,
+        "small": 0
+      }
+    },
+    {
+      "name": "external-access-form-eye-care-light-800",
+      "passed": true,
+      "detail": {
+        "width": 692,
+        "scroll": 692,
+        "small": 0
+      }
+    },
+    {
+      "name": "external-access-form-eye-care-light-1500",
+      "passed": true,
+      "detail": {
+        "width": 1144,
+        "scroll": 1144,
+        "small": 0
+      }
+    },
+    {
+      "name": "external-access-form-eye-care-dark-500",
+      "passed": true,
+      "detail": {
+        "width": 444,
+        "scroll": 444,
+        "small": 0
+      }
+    },
+    {
+      "name": "external-access-form-eye-care-dark-800",
+      "passed": true,
+      "detail": {
+        "width": 692,
+        "scroll": 692,
+        "small": 0
+      }
+    },
+    {
+      "name": "external-access-form-eye-care-dark-1500",
+      "passed": true,
+      "detail": {
+        "width": 1144,
+        "scroll": 1144,
+        "small": 0
+      }
+    },
+    {
+      "name": "external-access-form-touch-controls-44px",
+      "passed": true
+    },
+    {
+      "name": "real-generated-cli-lists-only-the-authorized-page",
+      "passed": true
+    },
+    {
+      "name": "background-native-snapshot-does-not-reveal-page-or-take-focus",
+      "passed": true
+    },
+    {
+      "name": "scoped-cli-denies-other-page",
+      "passed": true
+    },
+    {
+      "name": "scoped-cli-denies-other-account",
+      "passed": true
+    },
+    {
+      "name": "scoped-cli-denies-other-task",
+      "passed": true
+    },
+    {
+      "name": "scoped-cli-denies-write",
+      "passed": true
+    },
+    {
+      "name": "scoped-cli-denies-arbitrary-eval",
+      "passed": true
+    },
+    {
+      "name": "runtime-files-and-public-grant-list-contain-no-token",
+      "passed": true
+    },
+    {
+      "name": "ui-revocation-invalidates-the-real-client-token",
+      "passed": true
+    },
+    {
+      "name": "explicit-write-grant-fills-the-original-guest",
+      "passed": true
+    },
+    {
+      "name": "external-submission-awaits-original-page-final-confirmation",
+      "passed": true
+    },
+    {
+      "name": "one-confirmed-external-action-submits-once",
+      "passed": true
+    },
+    {
+      "name": "another-grant-cannot-displace-an-existing-native-page-owner",
+      "passed": true
+    },
+    {
+      "name": "human-takeover-revokes-all-page-grants-and-cancels-waiting-click",
+      "passed": true
+    },
+    {
+      "name": "real-one-minute-expiry-aborts-pending-native-confirmation",
+      "passed": true
+    },
+    {
+      "name": "module-disable-removes-service-and-connection-file",
+      "passed": true
+    },
+    {
+      "name": "module-reenable-does-not-reissue-credentials-or-open-guests",
+      "passed": true
+    },
+    {
+      "name": "restart-never-restores-grants-or-guests",
+      "passed": true
+    },
+    {
+      "name": "no-host-exceptions",
+      "passed": true,
+      "detail": []
+    }
+  ],
+  "finalConsumer": {
+    "evidence": "review-delivery.json",
+    "main": 4513810,
+    "styles": 756435,
+    "checks": "Generated CLI reads workflow page, rejects other account, is revoked, no grants restored; account/URL line separation visually inspected."
+  }
+}

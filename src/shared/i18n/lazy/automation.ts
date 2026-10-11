@@ -1,6 +1,12 @@
 /** Strings shared by several modules; each registers this dictionary when it loads. */
 export const messages = {
 	en: {
+		"automation.delivered": "Pasted · awaiting your submission",
+		"automation.finalPrompt": "Delivered prompt and file references",
+		"automation.delivery.started": "Agent started; completion is tracked separately",
+		"automation.delivery.pasted": "Material pasted; awaiting your submission",
+		"automation.delivery.timeout": "Delivery timed out; the underlying task was not stopped",
+		"automation.delivery.rejected": "Delivery rejected",
 		"automation.taskTargetInvalid": "This card cannot receive to-dos. Choose a to-do card and save the automation again.",
 		"automation.noTaskTargets": "No to-do cards are available. Add a to-do card to a registered dashboard first.",
 		"automation.script": "Terminal script",
@@ -148,6 +154,12 @@ export const messages = {
 		"automation.output": "Terminal output",
 	},
 	zh: {
+		"automation.delivered": "已粘贴 · 等待你发送",
+		"automation.finalPrompt": "交付的提示词与文件引用",
+		"automation.delivery.started": "已启动智能体，完成状态单独跟踪",
+		"automation.delivery.pasted": "已粘贴材料，等待你发送",
+		"automation.delivery.timeout": "交付等待超时，底层任务未停止",
+		"automation.delivery.rejected": "交付已拒绝",
 		"automation.taskTargetInvalid": "该卡片不能接收待办。请选择待办卡片后重新保存自动化。",
 		"automation.noTaskTargets": "没有可用的待办卡片。请先在已注册看板中添加待办卡片。",
 		"automation.script": "终端脚本",

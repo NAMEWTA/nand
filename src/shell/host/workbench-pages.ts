@@ -23,13 +23,15 @@ export class WorkbenchPages {
  contribution(feature: WorkbenchFeature): WorkbenchContribution | undefined { return this.contributions.find((item) => item.id === feature); }
  resolve(raw: WorkbenchTarget): WorkbenchTarget {
   const target = normalizeTarget(raw), contribution = this.contribution(target.feature);
-  if (!contribution?.resourcePages) return target;
+  if (!contribution?.resourcePages || contribution.resourceTabs?.(target) === false) return target;
   if (target.resourceId) return target;
   const key = this.last.get(target.feature);
   const previous = key ? this.entries.get(key)?.target ?? this.saved.get(key)?.target : undefined;
-  return previous ?? { ...target, resourceId: crypto.randomUUID() };
+  return previous && previous.section === target.section ? previous : { ...target, resourceId: crypto.randomUUID() };
  }
- private key(target: WorkbenchTarget): string { return JSON.stringify([target.feature, this.contribution(target.feature)?.resourcePages ? target.resourceId ?? '' : '']); }
+ private key(target: WorkbenchTarget): string {
+  return JSON.stringify([target.feature, ...(this.contribution(target.feature)?.resourcePages ? [target.section ?? '', target.resourceId ?? ''] : [''])]);
+ }
  private cleanState(contribution: WorkbenchContribution, raw: unknown): Record<string, unknown> {
   return cleanPageState(raw, contribution.stateKeys);
  }
@@ -38,7 +40,8 @@ export class WorkbenchPages {
   for (const item of raw.slice(0, 100)) {
    if (!item || typeof item !== 'object') continue;
    const value = item as Record<string, unknown>, target = normalizeTarget(value.target), contribution = this.contribution(target.feature);
-   if (!contribution || !value.target || typeof value.target !== 'object' || (value.target as Record<string, unknown>).feature !== target.feature || (contribution.resourcePages && !target.resourceId)) continue;
+   if (!contribution || !value.target || typeof value.target !== 'object' || (value.target as Record<string, unknown>).feature !== target.feature ||
+    (contribution.resourcePages && contribution.resourceTabs?.(target) !== false && !target.resourceId)) continue;
    const key = this.key(target);
    this.saved.set(key, { target, state: this.cleanState(contribution, value.state) });
    this.last.set(target.feature, key);
@@ -143,7 +146,8 @@ export class WorkbenchPages {
   const recent = [...this.entries.values()].filter((item) => item.alive && item.visited).sort((a, b) => (b.visited ?? 0) - (a.visited ?? 0));
   const targetOf = (item: PageEntry | undefined) => item && (item.binding?.getTarget?.() ?? item.target);
   const sibling = this.contribution(entry.target.feature)?.resourcePages
-   ? targetOf(recent.find((item) => item.target.feature === entry.target.feature)) ?? [...this.saved.values()].find((page) => page.target.feature === entry.target.feature)?.target
+   ? targetOf(recent.find((item) => item.target.feature === entry.target.feature && item.target.section === entry.target.section)) ??
+    [...this.saved.values()].find((page) => page.target.feature === entry.target.feature && page.target.section === entry.target.section)?.target
    : undefined;
   await this.navigate(sibling ?? targetOf(recent[0]) ?? { feature: entry.target.feature === 'dashboard' ? 'settings' : 'dashboard' });
  }
@@ -151,9 +155,10 @@ export class WorkbenchPages {
  closeResource(feature: WorkbenchFeature, resourceId: string): Promise<void> {
   const entry = [...this.entries.values()].find((item) => item.target.feature === feature && item.target.resourceId === resourceId);
   if (entry) return this.close(entry.key);
-  const key = JSON.stringify([feature, resourceId]);
-  this.saved.delete(key);
-  if (this.last.get(feature) === key) this.last.delete(feature);
+  for (const [key, page] of this.saved) if (page.target.feature === feature && page.target.resourceId === resourceId) {
+   this.saved.delete(key);
+   if (this.last.get(feature) === key) this.last.delete(feature);
+  }
   this.changed();
   return Promise.resolve();
  }

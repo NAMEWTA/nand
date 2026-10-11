@@ -75,6 +75,9 @@ class WorkbenchShellSurface implements WorkbenchSurface {
 	getNativeSurfaces(): readonly NativeSurface[] {
 		return this.pages?.getSurfaces() ?? [];
 	}
+	async closeResource(feature: WorkbenchFeature, id: string): Promise<void> {
+		await this.pages?.closeResource(feature, id);
+	}
 	getState(): Record<string, unknown> {
 		return { ...this.state, pages: this.pages?.getState() ?? this.savedPages };
 	}
@@ -142,6 +145,9 @@ class WorkbenchShellSurface implements WorkbenchSurface {
 	async refreshAvailability(): Promise<void> {
 		if (!this.opened) return;
 		const changed = await this.pages?.refreshAvailability();
+		// Service notifications during page creation must not replace the requested route with the old unavailable page.
+		// Explicit module changes cancel navigation through prepareModuleChanges instead.
+		if (this.busy) return this.draw();
 		if (changed || this.unavailable) {
 			this.transition.invalidate();
 			await this.navigate(this.state.target);
@@ -220,9 +226,10 @@ class WorkbenchShellSurface implements WorkbenchSurface {
 	}
 	private browserTabs() {
 		const contribution = this.contribution(this.state.target.feature);
-		if (!contribution?.resourcePages) return undefined;
+		if (!contribution?.resourcePages || contribution.resourceTabs?.(this.state.target) === false) return undefined;
 		const feature = contribution.id;
-		const pages = this.getSavedPages(feature);
+		const section = this.state.target.section;
+		const pages = this.getSavedPages(feature).filter(page => page.target.section === section);
 		return {
 			tabs: pages.map((page) => ({
 				id: page.target.resourceId ?? '',
@@ -230,11 +237,11 @@ class WorkbenchShellSurface implements WorkbenchSurface {
 				icon: contribution.navigation.icon,
 			})),
 			active: this.state.target.resourceId,
-			onSelect: (id: string) => this.requestNavigation({ feature, resourceId: id }),
+			onSelect: (id: string) => this.requestNavigation({ feature, section, resourceId: id }),
 			onClose: (id: string) => {
 				void this.pages?.closeResource(feature, id).catch(this.host.report);
 			},
-			onNew: () => this.requestNavigation({ feature, resourceId: crypto.randomUUID() }),
+			onNew: () => this.requestNavigation({ feature, section, resourceId: crypto.randomUUID() }),
 			newLabel: t('workbench.newPage'),
 		};
 	}

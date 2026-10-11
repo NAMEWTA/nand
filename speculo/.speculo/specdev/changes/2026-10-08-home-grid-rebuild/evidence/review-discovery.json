@@ -1,0 +1,505 @@
+{
+  "rows": [
+    {
+      "name": "editor-and-manual-input-do-not-scan",
+      "passed": true
+    },
+    {
+      "name": "cancelled-name-not-remembered",
+      "passed": true
+    },
+    {
+      "name": "real-adapter-frontmatter-fallback-and-merged-full-path-sources",
+      "passed": true,
+      "detail": {
+        "entries": [
+          {
+            "name": "from-directory",
+            "sources": [
+              {
+                "kind": "vault",
+                "path": ".codex/skills/from-directory/SKILL.md"
+              }
+            ]
+          },
+          {
+            "name": "shared-review",
+            "sources": [
+              {
+                "kind": "vault",
+                "path": ".agents/skills/alpha/SKILL.md"
+              },
+              {
+                "kind": "vault",
+                "path": ".claude/skills/beta/SKILL.md"
+              }
+            ]
+          }
+        ],
+        "unavailable": [
+          ".agents/skills/invalid/SKILL.md"
+        ]
+      }
+    },
+    {
+      "name": "invalid-skill-is-visible-partial-discovery",
+      "passed": true
+    },
+    {
+      "name": "adapter-paths-never-double-prefix",
+      "passed": true,
+      "detail": [
+        {
+          "method": "exists",
+          "path": ".agents/skills"
+        },
+        {
+          "method": "list",
+          "path": ".agents/skills"
+        },
+        {
+          "method": "list",
+          "path": ".agents/skills/alpha"
+        },
+        {
+          "method": "read",
+          "path": ".agents/skills/alpha/SKILL.md"
+        },
+        {
+          "method": "list",
+          "path": ".agents/skills/invalid"
+        },
+        {
+          "method": "read",
+          "path": ".agents/skills/invalid/SKILL.md"
+        },
+        {
+          "method": "list",
+          "path": ".agents/skills/missing"
+        },
+        {
+          "method": "exists",
+          "path": ".claude/skills"
+        },
+        {
+          "method": "list",
+          "path": ".claude/skills"
+        },
+        {
+          "method": "list",
+          "path": ".claude/skills/beta"
+        },
+        {
+          "method": "read",
+          "path": ".claude/skills/beta/SKILL.md"
+        },
+        {
+          "method": "exists",
+          "path": ".codex/skills"
+        },
+        {
+          "method": "list",
+          "path": ".codex/skills"
+        },
+        {
+          "method": "list",
+          "path": ".codex/skills/from-directory"
+        },
+        {
+          "method": "read",
+          "path": ".codex/skills/from-directory/SKILL.md"
+        },
+        {
+          "method": "exists",
+          "path": ".agents/skills"
+        },
+        {
+          "method": "list",
+          "path": ".agents/skills"
+        },
+        {
+          "method": "list",
+          "path": ".agents/skills/alpha"
+        },
+        {
+          "method": "read",
+          "path": ".agents/skills/alpha/SKILL.md"
+        },
+        {
+          "method": "list",
+          "path": ".agents/skills/invalid"
+        },
+        {
+          "method": "read",
+          "path": ".agents/skills/invalid/SKILL.md"
+        },
+        {
+          "method": "list",
+          "path": ".agents/skills/missing"
+        },
+        {
+          "method": "exists",
+          "path": ".claude/skills"
+        },
+        {
+          "method": "list",
+          "path": ".claude/skills"
+        },
+        {
+          "method": "list",
+          "path": ".claude/skills/beta"
+        },
+        {
+          "method": "read",
+          "path": ".claude/skills/beta/SKILL.md"
+        },
+        {
+          "method": "exists",
+          "path": ".codex/skills"
+        },
+        {
+          "method": "list",
+          "path": ".codex/skills"
+        },
+        {
+          "method": "list",
+          "path": ".codex/skills/from-directory"
+        },
+        {
+          "method": "read",
+          "path": ".codex/skills/from-directory/SKILL.md"
+        }
+      ]
+    },
+    {
+      "name": "picked-but-cancelled-name-does-not-enter-memory",
+      "passed": true
+    },
+    {
+      "name": "saved-name-remembered-for-selected-agent-only",
+      "passed": true
+    },
+    {
+      "name": "saved-discovered-name-survives-moved-directories",
+      "passed": true
+    },
+    {
+      "name": "empty-config-excludes-outside-skills",
+      "passed": true
+    },
+    {
+      "name": "device-setting-enables-explicit-directory-source",
+      "passed": true
+    },
+    {
+      "name": "restart-retains-button-memory-and-explicit-device-path",
+      "passed": true
+    },
+    {
+      "name": "clearing-extra-directories-removes-outside-source",
+      "passed": true
+    },
+    {
+      "name": "clearing-memory-keeps-saved-board-button",
+      "passed": true
+    },
+    {
+      "name": "six-public-capabilities-match-official-evidence",
+      "passed": true
+    },
+    {
+      "name": "native-preview-capability-claude-code",
+      "passed": true
+    },
+    {
+      "name": "native-preview-capability-codex",
+      "passed": true
+    },
+    {
+      "name": "native-preview-capability-grok",
+      "passed": true
+    },
+    {
+      "name": "native-preview-capability-pi",
+      "passed": true
+    },
+    {
+      "name": "native-preview-capability-opencode",
+      "passed": true
+    },
+    {
+      "name": "native-preview-capability-gemini",
+      "passed": true
+    },
+    {
+      "name": "skill-picker-system-light-500",
+      "passed": true,
+      "detail": {
+        "overflow": false,
+        "buttons": [
+          32,
+          32,
+          32
+        ]
+      }
+    },
+    {
+      "name": "skill-picker-system-light-800",
+      "passed": true,
+      "detail": {
+        "overflow": false,
+        "buttons": [
+          32,
+          32,
+          32
+        ]
+      }
+    },
+    {
+      "name": "skill-picker-system-light-1500",
+      "passed": true,
+      "detail": {
+        "overflow": false,
+        "buttons": [
+          32,
+          32,
+          32
+        ]
+      }
+    },
+    {
+      "name": "skill-picker-system-dark-500",
+      "passed": true,
+      "detail": {
+        "overflow": false,
+        "buttons": [
+          32,
+          32,
+          32
+        ]
+      }
+    },
+    {
+      "name": "skill-picker-system-dark-800",
+      "passed": true,
+      "detail": {
+        "overflow": false,
+        "buttons": [
+          32,
+          32,
+          32
+        ]
+      }
+    },
+    {
+      "name": "skill-picker-system-dark-1500",
+      "passed": true,
+      "detail": {
+        "overflow": false,
+        "buttons": [
+          32,
+          32,
+          32
+        ]
+      }
+    },
+    {
+      "name": "skill-picker-claude-code-light-500",
+      "passed": true,
+      "detail": {
+        "overflow": false,
+        "buttons": [
+          32,
+          32,
+          32
+        ]
+      }
+    },
+    {
+      "name": "skill-picker-claude-code-light-800",
+      "passed": true,
+      "detail": {
+        "overflow": false,
+        "buttons": [
+          32,
+          32,
+          32
+        ]
+      }
+    },
+    {
+      "name": "skill-picker-claude-code-light-1500",
+      "passed": true,
+      "detail": {
+        "overflow": false,
+        "buttons": [
+          32,
+          32,
+          32
+        ]
+      }
+    },
+    {
+      "name": "skill-picker-claude-code-dark-500",
+      "passed": true,
+      "detail": {
+        "overflow": false,
+        "buttons": [
+          32,
+          32,
+          32
+        ]
+      }
+    },
+    {
+      "name": "skill-picker-claude-code-dark-800",
+      "passed": true,
+      "detail": {
+        "overflow": false,
+        "buttons": [
+          32,
+          32,
+          32
+        ]
+      }
+    },
+    {
+      "name": "skill-picker-claude-code-dark-1500",
+      "passed": true,
+      "detail": {
+        "overflow": false,
+        "buttons": [
+          32,
+          32,
+          32
+        ]
+      }
+    },
+    {
+      "name": "skill-picker-eye-care-light-500",
+      "passed": true,
+      "detail": {
+        "overflow": false,
+        "buttons": [
+          32,
+          32,
+          32
+        ]
+      }
+    },
+    {
+      "name": "skill-picker-eye-care-light-800",
+      "passed": true,
+      "detail": {
+        "overflow": false,
+        "buttons": [
+          32,
+          32,
+          32
+        ]
+      }
+    },
+    {
+      "name": "skill-picker-eye-care-light-1500",
+      "passed": true,
+      "detail": {
+        "overflow": false,
+        "buttons": [
+          32,
+          32,
+          32
+        ]
+      }
+    },
+    {
+      "name": "skill-picker-eye-care-dark-500",
+      "passed": true,
+      "detail": {
+        "overflow": false,
+        "buttons": [
+          32,
+          32,
+          32
+        ]
+      }
+    },
+    {
+      "name": "skill-picker-eye-care-dark-800",
+      "passed": true,
+      "detail": {
+        "overflow": false,
+        "buttons": [
+          32,
+          32,
+          32
+        ]
+      }
+    },
+    {
+      "name": "skill-picker-eye-care-dark-1500",
+      "passed": true,
+      "detail": {
+        "overflow": false,
+        "buttons": [
+          32,
+          32,
+          32
+        ]
+      }
+    },
+    {
+      "name": "picker-theme-resize-does-not-save-draft",
+      "passed": true
+    },
+    {
+      "name": "narrow-widget-tabs-follow-board-membership",
+      "passed": true
+    },
+    {
+      "name": "narrow-tab-close-aborts-picker-and-unmounts",
+      "passed": true
+    },
+    {
+      "name": "narrow-collapsed-tabs-are-inert",
+      "passed": true
+    },
+    {
+      "name": "narrow-widget-opens-with-keyboard-and-touch-sized-buttons",
+      "passed": true
+    },
+    {
+      "name": "popout-picker-renders-in-owner-window",
+      "passed": true
+    },
+    {
+      "name": "narrow-collapse-keyboard-popout-do-not-write-board",
+      "passed": true
+    },
+    {
+      "name": "module-off-revokes-picker-without-reactivation",
+      "passed": true
+    },
+    {
+      "name": "no-unhandled-native-errors",
+      "passed": true,
+      "detail": []
+    }
+  ],
+  "unverified": [
+    "Actual mobile hardware; portable module and no-desktop-import behavior covered by module/service tests",
+    "Actual Grok/Pi and other provider/model execution"
+  ],
+  "nativeRoot": "C:\\Users\\cdewta\\AppData\\Local\\Temp\\nand-home-discovery-review-a6381663a2cd4cbbba9219117c704fe0\\evidence",
+  "environment": "Windows, Obsidian 1.14.4; real desktop native input and DataAdapter. No model calls in this probe.",
+  "verification": {
+    "native": "47 passed",
+    "fullSuite": "533 passed / 4 skipped; 109 files passed / 1 skipped",
+    "build": "passed; main.js and styles.css rebuilt",
+    "lint": "passed zero warnings",
+    "architecture": "827 modules passed",
+    "styles": "108 ordered sources / 735296 bytes; no new CSS violations",
+    "bundle": "within limits; startup 92.4 KiB; Home 408.0 KiB",
+    "i18n": "3040 keys, 24 dictionaries passed",
+    "docs": "Standard gate still fails inherited planning-language/source-title exceptions. Exact prior temporary exception passes 544 Markdown / 537 local / 332 external links."
+  }
+}

@@ -1,0 +1,152 @@
+{
+  "finding": "R-110",
+  "tickets": [
+    "Browser T18 AC025/AC034/AC036",
+    "Home T07 shared workflow contract",
+    "Browser T19 AC037"
+  ],
+  "status": "fixed-native84-full797-real-accounts-unverified",
+  "observed": [
+    "No browser workflow model, visible document store, editor or typed runner exists.",
+    "SourceRef already includes browser-workflow, but AutomationAction and AUTOMATION_SOURCES lack the executor contract. AutomationService ignores ActionResult.handle for non-agent actions and immediately reports success.",
+    "Existing ScopedBrowserExecutor, scopedControl, PageOwnership, native action review and ConsequenceConfirmation can be reused without another scheduler or agent process.",
+    "Workflow editable-field preconditions need rechecking inside the existing native input queue so a human edit between observation and dispatch is not overwritten."
+  ],
+  "constraints": [
+    "Finite typed steps and variables, exact page/profile/origin scope, explicit pre/postconditions, no arbitrary code or loops.",
+    "Secret variables remain runtime-only; templates, shared receipt and browser step evidence must not contain resolved secret values.",
+    "One shared automations run ID and receipt. Browser owns spec and step/artifact documents, not a second shared run store or scheduler.",
+    "Manual review before start, one-use native consequence confirmation before submission-capable actions, immediate cancellation and ownership release.",
+    "Resume reobserves identities and field state; an unknown dispatched step is never replayed. Restart interrupts and never resumes automatically.",
+    "Public API/contribution only between browser and automations. The Home T07 owner contract must be implemented before claiming T19 integration."
+  ],
+  "next": [],
+  "liveAccountStatus": "Unverified; user declined real-account acceptance for now. Continue controlled native validation.",
+  "implementedSoFar": [
+    "Finite bounded workflow spec, typed variables, strict target scope, proof invalidation and one-pass interpolation.",
+    "Visible workflow and per-run Markdown documents, optimistic durable store, save retry and separate late-fact recovery.",
+    "Shared automations typed browser-workflow action, revocable contribution, dynamic invocation service, single run ID, deduplication, durable owned completion, cancel/open and restart interruption.",
+    "Browser runner uses existing ScopedBrowserExecutor/PageOwnership/native queue; manual explicit page activation, final native confirmation, pause/takeover/resume without replaying uncertain steps, bounded time and operation count.",
+    "Secret inputs remain in memory; workflows declaring secrets suppress persisted DOM evidence, observed values and result text.",
+    "Expected input values are passed to native fill and rechecked before focus and immediately before native insertion.",
+    "Module/manifest registration and existing shell workflows section, editor, reviewed-run form, per-step evidence and guest-page confirmation/control banner.",
+    "Existing automations editor verified version/typed variable/explicit page selection, one shared scheduler and run result action.",
+    "Native accessibility display ordinals retain an ambiguity marker; workflows reject ambiguous locators. Read-only editor inspection shows actual native role names.",
+    "Owner cancellation remains cancelled; producer revocation remains interrupted. Initial save failure retains interrupted intent. Completion/cancel error persistence is sanitized."
+  ],
+  "validationSoFar": {
+    "sourceTypes": "passed after runtime, module and workflow UI wiring",
+    "testTypes": "passed after runtime and workflow UI wiring",
+    "focusedShared": {
+      "tests": 49,
+      "files": 5,
+      "passed": true
+    },
+    "workflowFocused": {
+      "tests": 19,
+      "files": 3,
+      "passed": true
+    },
+    "latestControlRegression": {
+      "tests": 19,
+      "files": 4,
+      "passed": true
+    },
+    "architecture": "978 modules passed",
+    "i18n": "3785 keys passed",
+    "css": "109 files no new violations; styles match 110 sources",
+    "eslint": "full lint passed, zero warnings",
+    "native": {
+      "passed": 60,
+      "evidence": "C:/Users/cdewta/AppData/Local/Temp/nand-workflows-e5ce163976eb44f887a485ee8f5d005a/evidence",
+      "bytes": {
+        "main": 4491942,
+        "styles": 756013
+      }
+    },
+    "docs": "554 Markdown files passed",
+    "full": {
+      "passed": 797,
+      "skipped": 4,
+      "filesPassed": 174,
+      "filesSkipped": 1,
+      "seconds": 163.66,
+      "started": "2026-10-11 08:00:23 Asia/Shanghai",
+      "log": "C:/Users/cdewta/AppData/Local/Temp/nand-review-workflows-full.log"
+    },
+    "native64": {
+      "passed": 64,
+      "evidence": "C:/Users/cdewta/AppData/Local/Temp/nand-workflows-a59370cc3caf42ce92e7881da45f55d1/evidence",
+      "bytes": {
+        "main": 4491942,
+        "styles": 756013
+      }
+    },
+    "safetyRegressions": "passed",
+    "build": "Final source/test types, style synchronization and production build passed main4491997/styles756378",
+    "bundle": "within recorded total/style caps, unchanged startup and module activation caps",
+    "finalNative": {
+      "passed": 84,
+      "evidence": "C:/Users/cdewta/AppData/Local/Temp/nand-workflows-final-bbaa339852424ae19959b2baa30dad17/evidence",
+      "bytes": {
+        "main": 4491997,
+        "styles": 756378
+      },
+      "coverage": [
+        "Native editor authoring/element inspection, two distinct variable runs, exact pre/post evidence and shared run IDs.",
+        "Pause/takeover/resume, original-page final confirmations and cancellation with no replay.",
+        "Existing automations editor typed variables/pages/version, real schedule tick, result opening, owner UI cancellation and producer module-off.",
+        "Scheduled final confirmation blocks submission; missing page fails without auto-opening.",
+        "Secret runtime input absent from all vault Markdown/JSON; repeated native labels rejected; focus-time draft mutation preserved.",
+        "54 theme/light-dark/width cases, three44px coarse checks, visible control containment, language/restart/no-host-exceptions."
+      ]
+    },
+    "finalUi": "Final AutomationsPanel empty prompt block removed for workflow actions; targeted ESLint and build passed; final native84 uses this output. Full797 was before this small presentation-only adjustment."
+  },
+  "nativeInitialFailures": [
+    {
+      "evidence": "C:/Users/cdewta/AppData/Local/Temp/nand-workflows-7d3d034b5765463bad2b4745c5c069e4/evidence",
+      "reason": "Probe assumed AX textbox; real BrowserControl exposes normalized text input."
+    },
+    {
+      "evidence": "C:/Users/cdewta/AppData/Local/Temp/nand-workflows-d550fe6a0694452b8137532b025de123/evidence",
+      "reason": "Diagnostic observation confirmed real role; workflow validator and editor fixed to accept actual normalized roles. Native34 and60 subsequently passed."
+    },
+    {
+      "evidence": "C:/Users/cdewta/AppData/Local/Temp/nand-workflows-final-bcae109ba2484efe96843a9ace550880/evidence",
+      "reason": "Expanded automation editor matrix caught three buttons below32px at800px. Page select overflow already fixed; explicit editor button minimum added."
+    },
+    {
+      "evidence": "C:/Users/cdewta/AppData/Local/Temp/nand-workflows-final-bcc287b0c1a444578a3761a9a3ffea03/evidence",
+      "reason": "Additional containment assertion after returning to the desktop viewport still found the long page select wider than its form column. Neither excluding hidden checkboxes nor waiting250ms fixed it. Explicit input/select width100% added to the editor main column; final verification pending."
+    },
+    {
+      "evidence": "C:/Users/cdewta/AppData/Local/Temp/nand-workflows-final-930cff4dda5a4835b0777820e73a56a7/evidence",
+      "reason": "Additional containment assertion after returning to the desktop viewport still found the long page select wider than its form column. Neither excluding hidden checkboxes nor waiting250ms fixed it. Explicit input/select width100% added to the editor main column; final verification pending."
+    },
+    {
+      "evidence": "C:/Users/cdewta/AppData/Local/Temp/nand-workflows-final-46b597561dda400780cbc909d3bc7ccd/evidence",
+      "reason": "Additional containment assertion after returning to the desktop viewport still found the long page select wider than its form column. Neither excluding hidden checkboxes nor waiting250ms fixed it. Explicit input/select width100% added to the editor main column; final verification pending."
+    },
+    {
+      "evidence": "C:/Users/cdewta/AppData/Local/Temp/nand-workflows-final-cf32c2117d2442ff848476def6961ff4/evidence",
+      "reason": "Computed-style diagnostics identified hidden Obsidian dropdown.is-measuring, maxWidth none. Prior containment diagnoses corrected; no visible overflow in inspected screenshot."
+    },
+    {
+      "evidence": "C:/Users/cdewta/AppData/Local/Temp/nand-workflows-final-d6a60f9f0c474e8ea8b08226d94e8bc3/evidence",
+      "reason": "Visibility-corrected matrix and containment passed. Probe cancellation selected a non-visible/global run card; scoped to current visible page and bounded native hit testing. Final84 passed."
+    }
+  ],
+  "docBackup": "C:/Users/cdewta/AppData/Local/Temp/nand-review-workflow-docs-be0ba6ef092a4e438aad40bc37bc1204",
+  "visualFinding": {
+    "observed": "Initial visible long page selector overflow and three editor buttons below32px fixed with scoped width/32-44px rules. Final screenshots inspected.",
+    "probeCorrection": "Later containment failures were false positives from Obsidian hidden dropdown.is-measuring. Final assertion excludes visibility:hidden/opacity0. Cancellation clicks scope to the visible automations page and wait for actual hit testing.",
+    "passed": true
+  },
+  "limitations": [
+    "Real website accounts remain unverified by the user decision.",
+    "Native acceptance uses controlled local HTTPS fixture inside Windows Obsidian; it does not establish live website compatibility or mobile/POSIX behavior.",
+    "No commit, push, release or version change."
+  ],
+  "finalConsumer": "T20 native39 and T21 combined native13 completed; full805/4skip current artifact. See review-delivery.json."
+}

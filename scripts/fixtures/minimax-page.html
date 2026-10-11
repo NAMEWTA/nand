@@ -1,0 +1,37 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>MiniMax scoped DOM local fixture</title>
+<a id="new-chat" href="/">New chat</a>
+<main id="messages"></main>
+<div id="composer" class="fixture-composer ProseMirror" contenteditable="true" role="textbox" style="min-height:50px;border:1px solid;padding:8px;white-space:pre-wrap"></div>
+<button id="submit" aria-label="Send">Send</button>
+<button id="stop" aria-label="Stop response" style="display:none">Stop</button>
+<script>
+const composer=document.querySelector('#composer'),output=document.querySelector('#messages'),submit=document.querySelector('#submit'),stop=document.querySelector('#stop');
+let conversation,serial=0,messages=[],timer;
+window.fixtureCount=()=>messages.length; window.fixtureCopyCalls=0;
+function row(id,parent,role,text) {
+ const root=document.createElement('article');root.className=role==='assistant'?'assistant-message':'user-message';root.dataset.messageId=id;root.dataset.parentId=parent??'';
+ const content=document.createElement('div');content.className=role==='assistant'?'markdown-body':'message-content';content.style.whiteSpace='pre-wrap';content.textContent=text;
+ root.append(content);output.append(root);return content;
+}
+document.querySelector('#new-chat').onclick=event=>{
+ event.preventDefault();if(timer)clearTimeout(timer);conversation=undefined;messages=[];output.replaceChildren();delete output.dataset.conversationId;
+ composer.replaceChildren();stop.style.display='none';submit.disabled=false;
+};
+submit.onclick=()=>{
+ if(!composer.innerText||submit.disabled)return;
+ const question=composer.innerText,parent=messages.at(-1)?.id;conversation??=crypto.randomUUID();output.dataset.conversationId=conversation;
+ const user='user-'+(++serial),answer='answer-'+serial;messages.push({id:user});row(user,parent,'user',question);const response=row(answer,user,'assistant','Partial answer');
+ composer.replaceChildren();submit.disabled=true;stop.style.display='';
+ timer=setTimeout(()=>{
+  const publicHtml='<h1>Heading</h1><table><tr><th>A</th><th>B</th></tr><tr><td>1</td><td>2</td></tr></table><pre><code class="language-ts">const a = 1;</code></pre><p>$x^2$</p><p>Repeated paragraph</p><p>Repeated paragraph</p>'+(window.fixtureLongAnswer?'<p>'+'Long public paragraph. '.repeat(3000)+'</p>':'');
+  response.innerHTML=publicHtml.replace('<p>$x^2$</p>','<p><span class="katex"><annotation encoding="application/x-tex">x^2</annotation></span></p>')+'<div class="thinking">Private reasoning fixture</div><div class="tool-call">Private tool fixture</div>';
+  const codeCopy=document.createElement('button');codeCopy.ariaLabel='Copy';codeCopy.textContent='Copy code';codeCopy.onclick=()=>navigator.clipboard.writeText('Wrong code-only payload');response.querySelector('pre').append(codeCopy);
+  const actions=document.createElement('div');actions.className='message-toolbar';const copy=document.createElement('button');copy.ariaLabel='Copy response';copy.textContent='Copy response';copy.disabled=window.fixtureMode==='no-copy';
+  copy.onclick=()=>{fixtureCopyCalls++;return navigator.clipboard.write([new ClipboardItem({'text/html':new Blob([publicHtml+(window.fixtureMode==='wrong-copy'?'<p>Different copy payload</p>':'')],{type:'text/html'})})])};
+  actions.append(copy);response.parentElement.append(actions);messages.push({id:answer});submit.disabled=false;stop.style.display='none';timer=undefined;
+ },window.fixtureDelay??900);
+};
+stop.onclick=()=>{clearTimeout(timer);timer=undefined;stop.style.display='none';submit.disabled=false;const status=document.createElement('p');status.role='status';status.textContent='Stopped';output.append(status)};
+</script>

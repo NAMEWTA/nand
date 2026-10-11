@@ -1,0 +1,2392 @@
+{
+  "rows": [
+    {
+      "name": "fourteen-builtins-and-three-news-kinds-mounted",
+      "passed": true,
+      "detail": [
+        {
+          "id": "calendar",
+          "text": "Oct 2026MonTueWedThuFriSatSun2829301234567891011121314151617181920212223242526272829303112345678"
+        },
+        {
+          "id": "lunar",
+          "text": "🎐丙午 year马戊戌 month · 丁巳 day九月初一Weekend"
+        },
+        {
+          "id": "anniversary",
+          "text": "Anniversary6 y 9 mo 8 d2026-01-02"
+        },
+        {
+          "id": "countdown",
+          "text": "Until Countdown1179days"
+        },
+        {
+          "id": "habit",
+          "text": "HabitsNo habits yet — tap + to add one."
+        },
+        {
+          "id": "expense",
+          "text": "SavedExpense TrackerExpense¥FoodTransportShoppingHousingUtilitiesEntertainmentMedicalEducationSocialOther+ New category…Manage categories…Income¥SalaryBonusInvestmentSide jobRed packetOther+ New category…Manage categories…Log"
+        },
+        {
+          "id": "pomodoro",
+          "text": "🍅 Today 0Tap to set activity00:00Start Focus"
+        },
+        {
+          "id": "reading",
+          "text": "Saved🔖 Reading Record"
+        },
+        {
+          "id": "weather",
+          "text": "..."
+        },
+        {
+          "id": "music",
+          "text": "Nothing playingSearch to add a song0:00--:--"
+        },
+        {
+          "id": "album",
+          "text": "No images found in this folder"
+        },
+        {
+          "id": "year-progress",
+          "text": "202682 days leftDay 283 of 36577.5%"
+        },
+        {
+          "id": "quick-actions",
+          "text": "Quick ButtonsNew journalNew noteReview action"
+        },
+        {
+          "id": "skills",
+          "text": "Agent skillsReview skill"
+        },
+        {
+          "id": "news-featured",
+          "text": "Featured newsRefreshNo successful source update yet · StaleEnable news collection in settingsNo news to show"
+        },
+        {
+          "id": "news-hot",
+          "text": "Hot newsRefreshNo successful source update yet · StaleEnable news collection in settingsNo news to show"
+        },
+        {
+          "id": "news-view",
+          "text": "Empty viewRefreshNo successful source update yet · StaleEnable news collection in settingsNo news to show"
+        }
+      ]
+    },
+    {
+      "name": "saved-automation-available-in-registry-widget",
+      "passed": true
+    },
+    {
+      "name": "automation-button-opens-its-explicit-file",
+      "passed": true
+    },
+    {
+      "name": "news-off-preserves-all-members-and-layout",
+      "passed": true
+    },
+    {
+      "name": "news-off-replaces-three-mounts-with-placeholders",
+      "passed": true
+    },
+    {
+      "name": "agent-off-preserves-all-members-and-layout",
+      "passed": true
+    },
+    {
+      "name": "agent-off-disables-skill-with-local-status",
+      "passed": true
+    },
+    {
+      "name": "automations-off-preserves-all-members-and-layout",
+      "passed": true
+    },
+    {
+      "name": "automations-off-disables-saved-action",
+      "passed": true
+    },
+    {
+      "name": "revoked-automation-port-rejects-execution",
+      "passed": true
+    },
+    {
+      "name": "all-modules-return-without-board-write",
+      "passed": true
+    },
+    {
+      "name": "invalid-automation-is-visible-load-error",
+      "passed": true
+    },
+    {
+      "name": "repaired-definition-reloads-and-restores-action",
+      "passed": true
+    },
+    {
+      "name": "all-kinds-system-light-500",
+      "passed": true,
+      "detail": {
+        "grid": 0,
+        "tiles": [
+          {
+            "id": "calendar",
+            "overflow": 0,
+            "width": 428,
+            "height": 400
+          },
+          {
+            "id": "lunar",
+            "overflow": 0,
+            "width": 428,
+            "height": 120
+          },
+          {
+            "id": "anniversary",
+            "overflow": 0,
+            "width": 428,
+            "height": 140
+          },
+          {
+            "id": "countdown",
+            "overflow": 0,
+            "width": 428,
+            "height": 140
+          },
+          {
+            "id": "habit",
+            "overflow": 0,
+            "width": 428,
+            "height": 160
+          },
+          {
+            "id": "expense",
+            "overflow": 0,
+            "width": 428,
+            "height": 230
+          },
+          {
+            "id": "pomodoro",
+            "overflow": 0,
+            "width": 428,
+            "height": 210
+          },
+          {
+            "id": "reading",
+            "overflow": 0,
+            "width": 428,
+            "height": 130
+          },
+          {
+            "id": "weather",
+            "overflow": 0,
+            "width": 428,
+            "height": 250
+          },
+          {
+            "id": "music",
+            "overflow": 0,
+            "width": 428,
+            "height": 200
+          },
+          {
+            "id": "album",
+            "overflow": 0,
+            "width": 428,
+            "height": 400
+          },
+          {
+            "id": "year-progress",
+            "overflow": 0,
+            "width": 428,
+            "height": 140
+          },
+          {
+            "id": "quick-actions",
+            "overflow": 0,
+            "width": 428,
+            "height": 230
+          },
+          {
+            "id": "skills",
+            "overflow": 0,
+            "width": 428,
+            "height": 150
+          },
+          {
+            "id": "news-featured",
+            "overflow": 0,
+            "width": 428,
+            "height": 230
+          },
+          {
+            "id": "news-hot",
+            "overflow": 0,
+            "width": 428,
+            "height": 230
+          },
+          {
+            "id": "news-view",
+            "overflow": 0,
+            "width": 428,
+            "height": 230
+          }
+        ],
+        "controls": true
+      }
+    },
+    {
+      "name": "all-kinds-system-light-800",
+      "passed": true,
+      "detail": {
+        "grid": 0,
+        "tiles": [
+          {
+            "id": "calendar",
+            "overflow": 0,
+            "width": 438,
+            "height": 400
+          },
+          {
+            "id": "lunar",
+            "overflow": 0,
+            "width": 438,
+            "height": 120
+          },
+          {
+            "id": "anniversary",
+            "overflow": 0,
+            "width": 438,
+            "height": 140
+          },
+          {
+            "id": "countdown",
+            "overflow": 0,
+            "width": 438,
+            "height": 140
+          },
+          {
+            "id": "habit",
+            "overflow": 0,
+            "width": 438,
+            "height": 160
+          },
+          {
+            "id": "expense",
+            "overflow": 0,
+            "width": 438,
+            "height": 230
+          },
+          {
+            "id": "pomodoro",
+            "overflow": 0,
+            "width": 438,
+            "height": 210
+          },
+          {
+            "id": "reading",
+            "overflow": 0,
+            "width": 438,
+            "height": 130
+          },
+          {
+            "id": "weather",
+            "overflow": 0,
+            "width": 438,
+            "height": 250
+          },
+          {
+            "id": "music",
+            "overflow": 0,
+            "width": 438,
+            "height": 200
+          },
+          {
+            "id": "album",
+            "overflow": 0,
+            "width": 438,
+            "height": 400
+          },
+          {
+            "id": "year-progress",
+            "overflow": 0,
+            "width": 438,
+            "height": 140
+          },
+          {
+            "id": "quick-actions",
+            "overflow": 0,
+            "width": 438,
+            "height": 230
+          },
+          {
+            "id": "skills",
+            "overflow": 0,
+            "width": 438,
+            "height": 150
+          },
+          {
+            "id": "news-featured",
+            "overflow": 0,
+            "width": 438,
+            "height": 230
+          },
+          {
+            "id": "news-hot",
+            "overflow": 0,
+            "width": 438,
+            "height": 230
+          },
+          {
+            "id": "news-view",
+            "overflow": 0,
+            "width": 438,
+            "height": 230
+          }
+        ],
+        "controls": true
+      }
+    },
+    {
+      "name": "all-kinds-system-light-1500",
+      "passed": true,
+      "detail": {
+        "grid": 0,
+        "tiles": [
+          {
+            "id": "calendar",
+            "overflow": 0,
+            "width": 361,
+            "height": 400
+          },
+          {
+            "id": "lunar",
+            "overflow": 0,
+            "width": 361,
+            "height": 120
+          },
+          {
+            "id": "anniversary",
+            "overflow": 0,
+            "width": 361,
+            "height": 140
+          },
+          {
+            "id": "countdown",
+            "overflow": 0,
+            "width": 361,
+            "height": 140
+          },
+          {
+            "id": "habit",
+            "overflow": 0,
+            "width": 361,
+            "height": 160
+          },
+          {
+            "id": "expense",
+            "overflow": 0,
+            "width": 361,
+            "height": 230
+          },
+          {
+            "id": "pomodoro",
+            "overflow": 0,
+            "width": 361,
+            "height": 210
+          },
+          {
+            "id": "reading",
+            "overflow": 0,
+            "width": 361,
+            "height": 130
+          },
+          {
+            "id": "weather",
+            "overflow": 0,
+            "width": 361,
+            "height": 250
+          },
+          {
+            "id": "music",
+            "overflow": 0,
+            "width": 361,
+            "height": 200
+          },
+          {
+            "id": "album",
+            "overflow": 0,
+            "width": 361,
+            "height": 390
+          },
+          {
+            "id": "year-progress",
+            "overflow": 0,
+            "width": 361,
+            "height": 140
+          },
+          {
+            "id": "quick-actions",
+            "overflow": 0,
+            "width": 361,
+            "height": 230
+          },
+          {
+            "id": "skills",
+            "overflow": 0,
+            "width": 361,
+            "height": 150
+          },
+          {
+            "id": "news-featured",
+            "overflow": 0,
+            "width": 361,
+            "height": 230
+          },
+          {
+            "id": "news-hot",
+            "overflow": 0,
+            "width": 361,
+            "height": 230
+          },
+          {
+            "id": "news-view",
+            "overflow": 0,
+            "width": 361,
+            "height": 230
+          }
+        ],
+        "controls": true
+      }
+    },
+    {
+      "name": "all-kinds-system-dark-500",
+      "passed": true,
+      "detail": {
+        "grid": 0,
+        "tiles": [
+          {
+            "id": "calendar",
+            "overflow": 0,
+            "width": 428,
+            "height": 400
+          },
+          {
+            "id": "lunar",
+            "overflow": 0,
+            "width": 428,
+            "height": 120
+          },
+          {
+            "id": "anniversary",
+            "overflow": 0,
+            "width": 428,
+            "height": 140
+          },
+          {
+            "id": "countdown",
+            "overflow": 0,
+            "width": 428,
+            "height": 140
+          },
+          {
+            "id": "habit",
+            "overflow": 0,
+            "width": 428,
+            "height": 160
+          },
+          {
+            "id": "expense",
+            "overflow": 0,
+            "width": 428,
+            "height": 230
+          },
+          {
+            "id": "pomodoro",
+            "overflow": 0,
+            "width": 428,
+            "height": 210
+          },
+          {
+            "id": "reading",
+            "overflow": 0,
+            "width": 428,
+            "height": 130
+          },
+          {
+            "id": "weather",
+            "overflow": 0,
+            "width": 428,
+            "height": 250
+          },
+          {
+            "id": "music",
+            "overflow": 0,
+            "width": 428,
+            "height": 200
+          },
+          {
+            "id": "album",
+            "overflow": 0,
+            "width": 428,
+            "height": 400
+          },
+          {
+            "id": "year-progress",
+            "overflow": 0,
+            "width": 428,
+            "height": 140
+          },
+          {
+            "id": "quick-actions",
+            "overflow": 0,
+            "width": 428,
+            "height": 230
+          },
+          {
+            "id": "skills",
+            "overflow": 0,
+            "width": 428,
+            "height": 150
+          },
+          {
+            "id": "news-featured",
+            "overflow": 0,
+            "width": 428,
+            "height": 230
+          },
+          {
+            "id": "news-hot",
+            "overflow": 0,
+            "width": 428,
+            "height": 230
+          },
+          {
+            "id": "news-view",
+            "overflow": 0,
+            "width": 428,
+            "height": 230
+          }
+        ],
+        "controls": true
+      }
+    },
+    {
+      "name": "all-kinds-system-dark-800",
+      "passed": true,
+      "detail": {
+        "grid": 0,
+        "tiles": [
+          {
+            "id": "calendar",
+            "overflow": 0,
+            "width": 438,
+            "height": 400
+          },
+          {
+            "id": "lunar",
+            "overflow": 0,
+            "width": 438,
+            "height": 120
+          },
+          {
+            "id": "anniversary",
+            "overflow": 0,
+            "width": 438,
+            "height": 140
+          },
+          {
+            "id": "countdown",
+            "overflow": 0,
+            "width": 438,
+            "height": 140
+          },
+          {
+            "id": "habit",
+            "overflow": 0,
+            "width": 438,
+            "height": 160
+          },
+          {
+            "id": "expense",
+            "overflow": 0,
+            "width": 438,
+            "height": 230
+          },
+          {
+            "id": "pomodoro",
+            "overflow": 0,
+            "width": 438,
+            "height": 210
+          },
+          {
+            "id": "reading",
+            "overflow": 0,
+            "width": 438,
+            "height": 130
+          },
+          {
+            "id": "weather",
+            "overflow": 0,
+            "width": 438,
+            "height": 250
+          },
+          {
+            "id": "music",
+            "overflow": 0,
+            "width": 438,
+            "height": 200
+          },
+          {
+            "id": "album",
+            "overflow": 0,
+            "width": 438,
+            "height": 400
+          },
+          {
+            "id": "year-progress",
+            "overflow": 0,
+            "width": 438,
+            "height": 140
+          },
+          {
+            "id": "quick-actions",
+            "overflow": 0,
+            "width": 438,
+            "height": 230
+          },
+          {
+            "id": "skills",
+            "overflow": 0,
+            "width": 438,
+            "height": 150
+          },
+          {
+            "id": "news-featured",
+            "overflow": 0,
+            "width": 438,
+            "height": 230
+          },
+          {
+            "id": "news-hot",
+            "overflow": 0,
+            "width": 438,
+            "height": 230
+          },
+          {
+            "id": "news-view",
+            "overflow": 0,
+            "width": 438,
+            "height": 230
+          }
+        ],
+        "controls": true
+      }
+    },
+    {
+      "name": "all-kinds-system-dark-1500",
+      "passed": true,
+      "detail": {
+        "grid": 0,
+        "tiles": [
+          {
+            "id": "calendar",
+            "overflow": 0,
+            "width": 361,
+            "height": 400
+          },
+          {
+            "id": "lunar",
+            "overflow": 0,
+            "width": 361,
+            "height": 120
+          },
+          {
+            "id": "anniversary",
+            "overflow": 0,
+            "width": 361,
+            "height": 140
+          },
+          {
+            "id": "countdown",
+            "overflow": 0,
+            "width": 361,
+            "height": 140
+          },
+          {
+            "id": "habit",
+            "overflow": 0,
+            "width": 361,
+            "height": 160
+          },
+          {
+            "id": "expense",
+            "overflow": 0,
+            "width": 361,
+            "height": 230
+          },
+          {
+            "id": "pomodoro",
+            "overflow": 0,
+            "width": 361,
+            "height": 210
+          },
+          {
+            "id": "reading",
+            "overflow": 0,
+            "width": 361,
+            "height": 130
+          },
+          {
+            "id": "weather",
+            "overflow": 0,
+            "width": 361,
+            "height": 250
+          },
+          {
+            "id": "music",
+            "overflow": 0,
+            "width": 361,
+            "height": 200
+          },
+          {
+            "id": "album",
+            "overflow": 0,
+            "width": 361,
+            "height": 390
+          },
+          {
+            "id": "year-progress",
+            "overflow": 0,
+            "width": 361,
+            "height": 140
+          },
+          {
+            "id": "quick-actions",
+            "overflow": 0,
+            "width": 361,
+            "height": 230
+          },
+          {
+            "id": "skills",
+            "overflow": 0,
+            "width": 361,
+            "height": 150
+          },
+          {
+            "id": "news-featured",
+            "overflow": 0,
+            "width": 361,
+            "height": 230
+          },
+          {
+            "id": "news-hot",
+            "overflow": 0,
+            "width": 361,
+            "height": 230
+          },
+          {
+            "id": "news-view",
+            "overflow": 0,
+            "width": 361,
+            "height": 230
+          }
+        ],
+        "controls": true
+      }
+    },
+    {
+      "name": "all-kinds-claude-code-light-500",
+      "passed": true,
+      "detail": {
+        "grid": 0,
+        "tiles": [
+          {
+            "id": "calendar",
+            "overflow": 0,
+            "width": 428,
+            "height": 400
+          },
+          {
+            "id": "lunar",
+            "overflow": 0,
+            "width": 428,
+            "height": 120
+          },
+          {
+            "id": "anniversary",
+            "overflow": 0,
+            "width": 428,
+            "height": 140
+          },
+          {
+            "id": "countdown",
+            "overflow": 0,
+            "width": 428,
+            "height": 140
+          },
+          {
+            "id": "habit",
+            "overflow": 0,
+            "width": 428,
+            "height": 160
+          },
+          {
+            "id": "expense",
+            "overflow": 0,
+            "width": 428,
+            "height": 230
+          },
+          {
+            "id": "pomodoro",
+            "overflow": 0,
+            "width": 428,
+            "height": 210
+          },
+          {
+            "id": "reading",
+            "overflow": 0,
+            "width": 428,
+            "height": 130
+          },
+          {
+            "id": "weather",
+            "overflow": 0,
+            "width": 428,
+            "height": 250
+          },
+          {
+            "id": "music",
+            "overflow": 0,
+            "width": 428,
+            "height": 200
+          },
+          {
+            "id": "album",
+            "overflow": 0,
+            "width": 428,
+            "height": 400
+          },
+          {
+            "id": "year-progress",
+            "overflow": 0,
+            "width": 428,
+            "height": 140
+          },
+          {
+            "id": "quick-actions",
+            "overflow": 0,
+            "width": 428,
+            "height": 230
+          },
+          {
+            "id": "skills",
+            "overflow": 0,
+            "width": 428,
+            "height": 150
+          },
+          {
+            "id": "news-featured",
+            "overflow": 0,
+            "width": 428,
+            "height": 230
+          },
+          {
+            "id": "news-hot",
+            "overflow": 0,
+            "width": 428,
+            "height": 230
+          },
+          {
+            "id": "news-view",
+            "overflow": 0,
+            "width": 428,
+            "height": 230
+          }
+        ],
+        "controls": true
+      }
+    },
+    {
+      "name": "all-kinds-claude-code-light-800",
+      "passed": true,
+      "detail": {
+        "grid": 0,
+        "tiles": [
+          {
+            "id": "calendar",
+            "overflow": 0,
+            "width": 438,
+            "height": 400
+          },
+          {
+            "id": "lunar",
+            "overflow": 0,
+            "width": 438,
+            "height": 120
+          },
+          {
+            "id": "anniversary",
+            "overflow": 0,
+            "width": 438,
+            "height": 140
+          },
+          {
+            "id": "countdown",
+            "overflow": 0,
+            "width": 438,
+            "height": 140
+          },
+          {
+            "id": "habit",
+            "overflow": 0,
+            "width": 438,
+            "height": 160
+          },
+          {
+            "id": "expense",
+            "overflow": 0,
+            "width": 438,
+            "height": 230
+          },
+          {
+            "id": "pomodoro",
+            "overflow": 0,
+            "width": 438,
+            "height": 210
+          },
+          {
+            "id": "reading",
+            "overflow": 0,
+            "width": 438,
+            "height": 130
+          },
+          {
+            "id": "weather",
+            "overflow": 0,
+            "width": 438,
+            "height": 250
+          },
+          {
+            "id": "music",
+            "overflow": 0,
+            "width": 438,
+            "height": 200
+          },
+          {
+            "id": "album",
+            "overflow": 0,
+            "width": 438,
+            "height": 400
+          },
+          {
+            "id": "year-progress",
+            "overflow": 0,
+            "width": 438,
+            "height": 140
+          },
+          {
+            "id": "quick-actions",
+            "overflow": 0,
+            "width": 438,
+            "height": 230
+          },
+          {
+            "id": "skills",
+            "overflow": 0,
+            "width": 438,
+            "height": 150
+          },
+          {
+            "id": "news-featured",
+            "overflow": 0,
+            "width": 438,
+            "height": 230
+          },
+          {
+            "id": "news-hot",
+            "overflow": 0,
+            "width": 438,
+            "height": 230
+          },
+          {
+            "id": "news-view",
+            "overflow": 0,
+            "width": 438,
+            "height": 230
+          }
+        ],
+        "controls": true
+      }
+    },
+    {
+      "name": "all-kinds-claude-code-light-1500",
+      "passed": true,
+      "detail": {
+        "grid": 0,
+        "tiles": [
+          {
+            "id": "calendar",
+            "overflow": 0,
+            "width": 361,
+            "height": 400
+          },
+          {
+            "id": "lunar",
+            "overflow": 0,
+            "width": 361,
+            "height": 120
+          },
+          {
+            "id": "anniversary",
+            "overflow": 0,
+            "width": 361,
+            "height": 140
+          },
+          {
+            "id": "countdown",
+            "overflow": 0,
+            "width": 361,
+            "height": 140
+          },
+          {
+            "id": "habit",
+            "overflow": 0,
+            "width": 361,
+            "height": 160
+          },
+          {
+            "id": "expense",
+            "overflow": 0,
+            "width": 361,
+            "height": 230
+          },
+          {
+            "id": "pomodoro",
+            "overflow": 0,
+            "width": 361,
+            "height": 210
+          },
+          {
+            "id": "reading",
+            "overflow": 0,
+            "width": 361,
+            "height": 130
+          },
+          {
+            "id": "weather",
+            "overflow": 0,
+            "width": 361,
+            "height": 250
+          },
+          {
+            "id": "music",
+            "overflow": 0,
+            "width": 361,
+            "height": 200
+          },
+          {
+            "id": "album",
+            "overflow": 0,
+            "width": 361,
+            "height": 390
+          },
+          {
+            "id": "year-progress",
+            "overflow": 0,
+            "width": 361,
+            "height": 140
+          },
+          {
+            "id": "quick-actions",
+            "overflow": 0,
+            "width": 361,
+            "height": 230
+          },
+          {
+            "id": "skills",
+            "overflow": 0,
+            "width": 361,
+            "height": 150
+          },
+          {
+            "id": "news-featured",
+            "overflow": 0,
+            "width": 361,
+            "height": 230
+          },
+          {
+            "id": "news-hot",
+            "overflow": 0,
+            "width": 361,
+            "height": 230
+          },
+          {
+            "id": "news-view",
+            "overflow": 0,
+            "width": 361,
+            "height": 230
+          }
+        ],
+        "controls": true
+      }
+    },
+    {
+      "name": "all-kinds-claude-code-dark-500",
+      "passed": true,
+      "detail": {
+        "grid": 0,
+        "tiles": [
+          {
+            "id": "calendar",
+            "overflow": 0,
+            "width": 428,
+            "height": 400
+          },
+          {
+            "id": "lunar",
+            "overflow": 0,
+            "width": 428,
+            "height": 120
+          },
+          {
+            "id": "anniversary",
+            "overflow": 0,
+            "width": 428,
+            "height": 140
+          },
+          {
+            "id": "countdown",
+            "overflow": 0,
+            "width": 428,
+            "height": 140
+          },
+          {
+            "id": "habit",
+            "overflow": 0,
+            "width": 428,
+            "height": 160
+          },
+          {
+            "id": "expense",
+            "overflow": 0,
+            "width": 428,
+            "height": 230
+          },
+          {
+            "id": "pomodoro",
+            "overflow": 0,
+            "width": 428,
+            "height": 210
+          },
+          {
+            "id": "reading",
+            "overflow": 0,
+            "width": 428,
+            "height": 130
+          },
+          {
+            "id": "weather",
+            "overflow": 0,
+            "width": 428,
+            "height": 250
+          },
+          {
+            "id": "music",
+            "overflow": 0,
+            "width": 428,
+            "height": 200
+          },
+          {
+            "id": "album",
+            "overflow": 0,
+            "width": 428,
+            "height": 400
+          },
+          {
+            "id": "year-progress",
+            "overflow": 0,
+            "width": 428,
+            "height": 140
+          },
+          {
+            "id": "quick-actions",
+            "overflow": 0,
+            "width": 428,
+            "height": 230
+          },
+          {
+            "id": "skills",
+            "overflow": 0,
+            "width": 428,
+            "height": 150
+          },
+          {
+            "id": "news-featured",
+            "overflow": 0,
+            "width": 428,
+            "height": 230
+          },
+          {
+            "id": "news-hot",
+            "overflow": 0,
+            "width": 428,
+            "height": 230
+          },
+          {
+            "id": "news-view",
+            "overflow": 0,
+            "width": 428,
+            "height": 230
+          }
+        ],
+        "controls": true
+      }
+    },
+    {
+      "name": "all-kinds-claude-code-dark-800",
+      "passed": true,
+      "detail": {
+        "grid": 0,
+        "tiles": [
+          {
+            "id": "calendar",
+            "overflow": 0,
+            "width": 438,
+            "height": 400
+          },
+          {
+            "id": "lunar",
+            "overflow": 0,
+            "width": 438,
+            "height": 120
+          },
+          {
+            "id": "anniversary",
+            "overflow": 0,
+            "width": 438,
+            "height": 140
+          },
+          {
+            "id": "countdown",
+            "overflow": 0,
+            "width": 438,
+            "height": 140
+          },
+          {
+            "id": "habit",
+            "overflow": 0,
+            "width": 438,
+            "height": 160
+          },
+          {
+            "id": "expense",
+            "overflow": 0,
+            "width": 438,
+            "height": 230
+          },
+          {
+            "id": "pomodoro",
+            "overflow": 0,
+            "width": 438,
+            "height": 210
+          },
+          {
+            "id": "reading",
+            "overflow": 0,
+            "width": 438,
+            "height": 130
+          },
+          {
+            "id": "weather",
+            "overflow": 0,
+            "width": 438,
+            "height": 250
+          },
+          {
+            "id": "music",
+            "overflow": 0,
+            "width": 438,
+            "height": 200
+          },
+          {
+            "id": "album",
+            "overflow": 0,
+            "width": 438,
+            "height": 400
+          },
+          {
+            "id": "year-progress",
+            "overflow": 0,
+            "width": 438,
+            "height": 140
+          },
+          {
+            "id": "quick-actions",
+            "overflow": 0,
+            "width": 438,
+            "height": 230
+          },
+          {
+            "id": "skills",
+            "overflow": 0,
+            "width": 438,
+            "height": 150
+          },
+          {
+            "id": "news-featured",
+            "overflow": 0,
+            "width": 438,
+            "height": 230
+          },
+          {
+            "id": "news-hot",
+            "overflow": 0,
+            "width": 438,
+            "height": 230
+          },
+          {
+            "id": "news-view",
+            "overflow": 0,
+            "width": 438,
+            "height": 230
+          }
+        ],
+        "controls": true
+      }
+    },
+    {
+      "name": "all-kinds-claude-code-dark-1500",
+      "passed": true,
+      "detail": {
+        "grid": 0,
+        "tiles": [
+          {
+            "id": "calendar",
+            "overflow": 0,
+            "width": 361,
+            "height": 400
+          },
+          {
+            "id": "lunar",
+            "overflow": 0,
+            "width": 361,
+            "height": 120
+          },
+          {
+            "id": "anniversary",
+            "overflow": 0,
+            "width": 361,
+            "height": 140
+          },
+          {
+            "id": "countdown",
+            "overflow": 0,
+            "width": 361,
+            "height": 140
+          },
+          {
+            "id": "habit",
+            "overflow": 0,
+            "width": 361,
+            "height": 160
+          },
+          {
+            "id": "expense",
+            "overflow": 0,
+            "width": 361,
+            "height": 230
+          },
+          {
+            "id": "pomodoro",
+            "overflow": 0,
+            "width": 361,
+            "height": 210
+          },
+          {
+            "id": "reading",
+            "overflow": 0,
+            "width": 361,
+            "height": 130
+          },
+          {
+            "id": "weather",
+            "overflow": 0,
+            "width": 361,
+            "height": 250
+          },
+          {
+            "id": "music",
+            "overflow": 0,
+            "width": 361,
+            "height": 200
+          },
+          {
+            "id": "album",
+            "overflow": 0,
+            "width": 361,
+            "height": 390
+          },
+          {
+            "id": "year-progress",
+            "overflow": 0,
+            "width": 361,
+            "height": 140
+          },
+          {
+            "id": "quick-actions",
+            "overflow": 0,
+            "width": 361,
+            "height": 230
+          },
+          {
+            "id": "skills",
+            "overflow": 0,
+            "width": 361,
+            "height": 150
+          },
+          {
+            "id": "news-featured",
+            "overflow": 0,
+            "width": 361,
+            "height": 230
+          },
+          {
+            "id": "news-hot",
+            "overflow": 0,
+            "width": 361,
+            "height": 230
+          },
+          {
+            "id": "news-view",
+            "overflow": 0,
+            "width": 361,
+            "height": 230
+          }
+        ],
+        "controls": true
+      }
+    },
+    {
+      "name": "all-kinds-eye-care-light-500",
+      "passed": true,
+      "detail": {
+        "grid": 0,
+        "tiles": [
+          {
+            "id": "calendar",
+            "overflow": 0,
+            "width": 428,
+            "height": 400
+          },
+          {
+            "id": "lunar",
+            "overflow": 0,
+            "width": 428,
+            "height": 120
+          },
+          {
+            "id": "anniversary",
+            "overflow": 0,
+            "width": 428,
+            "height": 140
+          },
+          {
+            "id": "countdown",
+            "overflow": 0,
+            "width": 428,
+            "height": 140
+          },
+          {
+            "id": "habit",
+            "overflow": 0,
+            "width": 428,
+            "height": 160
+          },
+          {
+            "id": "expense",
+            "overflow": 0,
+            "width": 428,
+            "height": 230
+          },
+          {
+            "id": "pomodoro",
+            "overflow": 0,
+            "width": 428,
+            "height": 210
+          },
+          {
+            "id": "reading",
+            "overflow": 0,
+            "width": 428,
+            "height": 130
+          },
+          {
+            "id": "weather",
+            "overflow": 0,
+            "width": 428,
+            "height": 250
+          },
+          {
+            "id": "music",
+            "overflow": 0,
+            "width": 428,
+            "height": 200
+          },
+          {
+            "id": "album",
+            "overflow": 0,
+            "width": 428,
+            "height": 400
+          },
+          {
+            "id": "year-progress",
+            "overflow": 0,
+            "width": 428,
+            "height": 140
+          },
+          {
+            "id": "quick-actions",
+            "overflow": 0,
+            "width": 428,
+            "height": 230
+          },
+          {
+            "id": "skills",
+            "overflow": 0,
+            "width": 428,
+            "height": 150
+          },
+          {
+            "id": "news-featured",
+            "overflow": 0,
+            "width": 428,
+            "height": 230
+          },
+          {
+            "id": "news-hot",
+            "overflow": 0,
+            "width": 428,
+            "height": 230
+          },
+          {
+            "id": "news-view",
+            "overflow": 0,
+            "width": 428,
+            "height": 230
+          }
+        ],
+        "controls": true
+      }
+    },
+    {
+      "name": "all-kinds-eye-care-light-800",
+      "passed": true,
+      "detail": {
+        "grid": 0,
+        "tiles": [
+          {
+            "id": "calendar",
+            "overflow": 0,
+            "width": 438,
+            "height": 400
+          },
+          {
+            "id": "lunar",
+            "overflow": 0,
+            "width": 438,
+            "height": 120
+          },
+          {
+            "id": "anniversary",
+            "overflow": 0,
+            "width": 438,
+            "height": 140
+          },
+          {
+            "id": "countdown",
+            "overflow": 0,
+            "width": 438,
+            "height": 140
+          },
+          {
+            "id": "habit",
+            "overflow": 0,
+            "width": 438,
+            "height": 160
+          },
+          {
+            "id": "expense",
+            "overflow": 0,
+            "width": 438,
+            "height": 230
+          },
+          {
+            "id": "pomodoro",
+            "overflow": 0,
+            "width": 438,
+            "height": 210
+          },
+          {
+            "id": "reading",
+            "overflow": 0,
+            "width": 438,
+            "height": 130
+          },
+          {
+            "id": "weather",
+            "overflow": 0,
+            "width": 438,
+            "height": 250
+          },
+          {
+            "id": "music",
+            "overflow": 0,
+            "width": 438,
+            "height": 200
+          },
+          {
+            "id": "album",
+            "overflow": 0,
+            "width": 438,
+            "height": 400
+          },
+          {
+            "id": "year-progress",
+            "overflow": 0,
+            "width": 438,
+            "height": 140
+          },
+          {
+            "id": "quick-actions",
+            "overflow": 0,
+            "width": 438,
+            "height": 230
+          },
+          {
+            "id": "skills",
+            "overflow": 0,
+            "width": 438,
+            "height": 150
+          },
+          {
+            "id": "news-featured",
+            "overflow": 0,
+            "width": 438,
+            "height": 230
+          },
+          {
+            "id": "news-hot",
+            "overflow": 0,
+            "width": 438,
+            "height": 230
+          },
+          {
+            "id": "news-view",
+            "overflow": 0,
+            "width": 438,
+            "height": 230
+          }
+        ],
+        "controls": true
+      }
+    },
+    {
+      "name": "all-kinds-eye-care-light-1500",
+      "passed": true,
+      "detail": {
+        "grid": 0,
+        "tiles": [
+          {
+            "id": "calendar",
+            "overflow": 0,
+            "width": 361,
+            "height": 400
+          },
+          {
+            "id": "lunar",
+            "overflow": 0,
+            "width": 361,
+            "height": 120
+          },
+          {
+            "id": "anniversary",
+            "overflow": 0,
+            "width": 361,
+            "height": 140
+          },
+          {
+            "id": "countdown",
+            "overflow": 0,
+            "width": 361,
+            "height": 140
+          },
+          {
+            "id": "habit",
+            "overflow": 0,
+            "width": 361,
+            "height": 160
+          },
+          {
+            "id": "expense",
+            "overflow": 0,
+            "width": 361,
+            "height": 230
+          },
+          {
+            "id": "pomodoro",
+            "overflow": 0,
+            "width": 361,
+            "height": 210
+          },
+          {
+            "id": "reading",
+            "overflow": 0,
+            "width": 361,
+            "height": 130
+          },
+          {
+            "id": "weather",
+            "overflow": 0,
+            "width": 361,
+            "height": 250
+          },
+          {
+            "id": "music",
+            "overflow": 0,
+            "width": 361,
+            "height": 200
+          },
+          {
+            "id": "album",
+            "overflow": 0,
+            "width": 361,
+            "height": 390
+          },
+          {
+            "id": "year-progress",
+            "overflow": 0,
+            "width": 361,
+            "height": 140
+          },
+          {
+            "id": "quick-actions",
+            "overflow": 0,
+            "width": 361,
+            "height": 230
+          },
+          {
+            "id": "skills",
+            "overflow": 0,
+            "width": 361,
+            "height": 150
+          },
+          {
+            "id": "news-featured",
+            "overflow": 0,
+            "width": 361,
+            "height": 230
+          },
+          {
+            "id": "news-hot",
+            "overflow": 0,
+            "width": 361,
+            "height": 230
+          },
+          {
+            "id": "news-view",
+            "overflow": 0,
+            "width": 361,
+            "height": 230
+          }
+        ],
+        "controls": true
+      }
+    },
+    {
+      "name": "all-kinds-eye-care-dark-500",
+      "passed": true,
+      "detail": {
+        "grid": 0,
+        "tiles": [
+          {
+            "id": "calendar",
+            "overflow": 0,
+            "width": 428,
+            "height": 400
+          },
+          {
+            "id": "lunar",
+            "overflow": 0,
+            "width": 428,
+            "height": 120
+          },
+          {
+            "id": "anniversary",
+            "overflow": 0,
+            "width": 428,
+            "height": 140
+          },
+          {
+            "id": "countdown",
+            "overflow": 0,
+            "width": 428,
+            "height": 140
+          },
+          {
+            "id": "habit",
+            "overflow": 0,
+            "width": 428,
+            "height": 160
+          },
+          {
+            "id": "expense",
+            "overflow": 0,
+            "width": 428,
+            "height": 230
+          },
+          {
+            "id": "pomodoro",
+            "overflow": 0,
+            "width": 428,
+            "height": 210
+          },
+          {
+            "id": "reading",
+            "overflow": 0,
+            "width": 428,
+            "height": 130
+          },
+          {
+            "id": "weather",
+            "overflow": 0,
+            "width": 428,
+            "height": 250
+          },
+          {
+            "id": "music",
+            "overflow": 0,
+            "width": 428,
+            "height": 200
+          },
+          {
+            "id": "album",
+            "overflow": 0,
+            "width": 428,
+            "height": 400
+          },
+          {
+            "id": "year-progress",
+            "overflow": 0,
+            "width": 428,
+            "height": 140
+          },
+          {
+            "id": "quick-actions",
+            "overflow": 0,
+            "width": 428,
+            "height": 230
+          },
+          {
+            "id": "skills",
+            "overflow": 0,
+            "width": 428,
+            "height": 150
+          },
+          {
+            "id": "news-featured",
+            "overflow": 0,
+            "width": 428,
+            "height": 230
+          },
+          {
+            "id": "news-hot",
+            "overflow": 0,
+            "width": 428,
+            "height": 230
+          },
+          {
+            "id": "news-view",
+            "overflow": 0,
+            "width": 428,
+            "height": 230
+          }
+        ],
+        "controls": true
+      }
+    },
+    {
+      "name": "all-kinds-eye-care-dark-800",
+      "passed": true,
+      "detail": {
+        "grid": 0,
+        "tiles": [
+          {
+            "id": "calendar",
+            "overflow": 0,
+            "width": 438,
+            "height": 400
+          },
+          {
+            "id": "lunar",
+            "overflow": 0,
+            "width": 438,
+            "height": 120
+          },
+          {
+            "id": "anniversary",
+            "overflow": 0,
+            "width": 438,
+            "height": 140
+          },
+          {
+            "id": "countdown",
+            "overflow": 0,
+            "width": 438,
+            "height": 140
+          },
+          {
+            "id": "habit",
+            "overflow": 0,
+            "width": 438,
+            "height": 160
+          },
+          {
+            "id": "expense",
+            "overflow": 0,
+            "width": 438,
+            "height": 230
+          },
+          {
+            "id": "pomodoro",
+            "overflow": 0,
+            "width": 438,
+            "height": 210
+          },
+          {
+            "id": "reading",
+            "overflow": 0,
+            "width": 438,
+            "height": 130
+          },
+          {
+            "id": "weather",
+            "overflow": 0,
+            "width": 438,
+            "height": 250
+          },
+          {
+            "id": "music",
+            "overflow": 0,
+            "width": 438,
+            "height": 200
+          },
+          {
+            "id": "album",
+            "overflow": 0,
+            "width": 438,
+            "height": 400
+          },
+          {
+            "id": "year-progress",
+            "overflow": 0,
+            "width": 438,
+            "height": 140
+          },
+          {
+            "id": "quick-actions",
+            "overflow": 0,
+            "width": 438,
+            "height": 230
+          },
+          {
+            "id": "skills",
+            "overflow": 0,
+            "width": 438,
+            "height": 150
+          },
+          {
+            "id": "news-featured",
+            "overflow": 0,
+            "width": 438,
+            "height": 230
+          },
+          {
+            "id": "news-hot",
+            "overflow": 0,
+            "width": 438,
+            "height": 230
+          },
+          {
+            "id": "news-view",
+            "overflow": 0,
+            "width": 438,
+            "height": 230
+          }
+        ],
+        "controls": true
+      }
+    },
+    {
+      "name": "all-kinds-eye-care-dark-1500",
+      "passed": true,
+      "detail": {
+        "grid": 0,
+        "tiles": [
+          {
+            "id": "calendar",
+            "overflow": 0,
+            "width": 361,
+            "height": 400
+          },
+          {
+            "id": "lunar",
+            "overflow": 0,
+            "width": 361,
+            "height": 120
+          },
+          {
+            "id": "anniversary",
+            "overflow": 0,
+            "width": 361,
+            "height": 140
+          },
+          {
+            "id": "countdown",
+            "overflow": 0,
+            "width": 361,
+            "height": 140
+          },
+          {
+            "id": "habit",
+            "overflow": 0,
+            "width": 361,
+            "height": 160
+          },
+          {
+            "id": "expense",
+            "overflow": 0,
+            "width": 361,
+            "height": 230
+          },
+          {
+            "id": "pomodoro",
+            "overflow": 0,
+            "width": 361,
+            "height": 210
+          },
+          {
+            "id": "reading",
+            "overflow": 0,
+            "width": 361,
+            "height": 130
+          },
+          {
+            "id": "weather",
+            "overflow": 0,
+            "width": 361,
+            "height": 250
+          },
+          {
+            "id": "music",
+            "overflow": 0,
+            "width": 361,
+            "height": 200
+          },
+          {
+            "id": "album",
+            "overflow": 0,
+            "width": 361,
+            "height": 390
+          },
+          {
+            "id": "year-progress",
+            "overflow": 0,
+            "width": 361,
+            "height": 140
+          },
+          {
+            "id": "quick-actions",
+            "overflow": 0,
+            "width": 361,
+            "height": 230
+          },
+          {
+            "id": "skills",
+            "overflow": 0,
+            "width": 361,
+            "height": 150
+          },
+          {
+            "id": "news-featured",
+            "overflow": 0,
+            "width": 361,
+            "height": 230
+          },
+          {
+            "id": "news-hot",
+            "overflow": 0,
+            "width": 361,
+            "height": 230
+          },
+          {
+            "id": "news-view",
+            "overflow": 0,
+            "width": 361,
+            "height": 230
+          }
+        ],
+        "controls": true
+      }
+    },
+    {
+      "name": "reduced-motion-stops-home-animation-and-transitions",
+      "passed": true,
+      "detail": []
+    },
+    {
+      "name": "coarse-grid-controls44",
+      "passed": true
+    },
+    {
+      "name": "theme-width-motion-changes-are-readonly",
+      "passed": true
+    },
+    {
+      "name": "layout-side-retains-every-member",
+      "passed": true
+    },
+    {
+      "name": "layout-stacked-retains-every-member",
+      "passed": true
+    },
+    {
+      "name": "layout-immersive-retains-every-member",
+      "passed": true
+    },
+    {
+      "name": "restart-restores-all-kinds-without-rewriting",
+      "passed": true
+    },
+    {
+      "name": "native-create-explicit-immersive-persists-canonical-grid",
+      "passed": true,
+      "detail": {
+        "dashboard": true,
+        "banner": {
+          "quote": "Keep a little progress visible every day.",
+          "author": "NAND",
+          "quoteFont": "Didot,\"Bodoni MT\",Georgia,serif"
+        },
+        "columns": [
+          {
+            "name": "Memo",
+            "color": "#f59e0b",
+            "type": "memo",
+            "id": "section-d0b87acc-cd82-4dab-86e2-f68e8dafe356"
+          },
+          {
+            "name": "Todo",
+            "color": "#6366f1",
+            "type": "todo",
+            "id": "section-2f957b69-0d5e-4bb3-9ce6-da12c35dbecb"
+          },
+          {
+            "name": "Projects",
+            "color": "#10b981",
+            "type": "projects",
+            "id": "section-00025ba5-e1e3-4ecb-9d8a-7fdd899eb9cc"
+          },
+          {
+            "name": "Library",
+            "color": "#8b5cf6",
+            "type": "projects",
+            "id": "section-ba673554-b7cf-411b-a0ff-373425556ef7"
+          }
+        ],
+        "layout": "immersive",
+        "widgets": [
+          {
+            "memberId": "home:quick-actions:default",
+            "provider": "home",
+            "kind": "quick-actions",
+            "instanceId": "default"
+          },
+          {
+            "memberId": "home:lunar:default",
+            "provider": "home",
+            "kind": "lunar",
+            "instanceId": "default"
+          },
+          {
+            "memberId": "home:pomodoro:default",
+            "provider": "home",
+            "kind": "pomodoro",
+            "instanceId": "default"
+          },
+          {
+            "memberId": "home:album:1",
+            "provider": "home",
+            "kind": "album",
+            "instanceId": "1"
+          }
+        ],
+        "immersive": [
+          {
+            "id": "home:quick-actions:default",
+            "w": 4,
+            "cap": 35,
+            "x": 0,
+            "y": 0
+          },
+          {
+            "id": "home:lunar:default",
+            "w": 3,
+            "cap": 14,
+            "x": 4,
+            "y": 0
+          },
+          {
+            "id": "home:pomodoro:default",
+            "w": 3,
+            "cap": 19,
+            "x": 7,
+            "y": 0
+          },
+          {
+            "id": "home:album:1",
+            "w": 4,
+            "cap": 35,
+            "x": 4,
+            "y": 19
+          },
+          {
+            "id": "section-d0b87acc-cd82-4dab-86e2-f68e8dafe356",
+            "w": 12,
+            "cap": 60,
+            "x": 0,
+            "y": 54
+          },
+          {
+            "id": "section-2f957b69-0d5e-4bb3-9ce6-da12c35dbecb",
+            "w": 12,
+            "cap": 60,
+            "x": 0,
+            "y": 114
+          },
+          {
+            "id": "section-00025ba5-e1e3-4ecb-9d8a-7fdd899eb9cc",
+            "w": 12,
+            "cap": 60,
+            "x": 0,
+            "y": 174
+          },
+          {
+            "id": "section-ba673554-b7cf-411b-a0ff-373425556ef7",
+            "w": 12,
+            "cap": 60,
+            "x": 0,
+            "y": 234
+          }
+        ]
+      }
+    },
+    {
+      "name": "home-disable-clears-all-widget-mounts",
+      "passed": true
+    },
+    {
+      "name": "no-native-errors",
+      "passed": true,
+      "detail": []
+    }
+  ],
+  "method": "Actual Obsidian, all widget kinds and native automation open-file action; empty local News data, no provider/model calls",
+  "unverified": [
+    "Actual phone hardware and non-Windows platforms",
+    "Real provider model quality"
+  ],
+  "nativeRoot": "C:\\Users\\cdewta\\AppData\\Local\\Temp\\nand-home-integration-review-af2cce7e80eb45a4a8c49aa349927d7c\\evidence",
+  "findings": [
+    "R-081",
+    "R-082",
+    "R-083"
+  ],
+  "screenshotsInspected": [
+    "all-kinds-system-light-500.png",
+    "all-kinds-eye-care-dark-1500.png"
+  ],
+  "screenshotNote": "The light narrow image includes the expected temporary load-failure notice from the deliberately malformed definition; repaired definitions subsequently reload successfully. Images show representative portions of a scrolling board; geometry is measured for all 17 tiles.",
+  "verification": {
+    "build": "PASS: type checks and generated main.js",
+    "lint": "PASS zero warnings",
+    "unit": "PASS full593/4skip,131filesPASS/1skip; first run592pass/1fail was obsolete literal CSS assertion, removed in favor of native computed-style coverage; recheck593PASS",
+    "architecture": "PASS 865 modules",
+    "css": "PASS no new violations, 150 legacy rule groups remain",
+    "styles": "test:styles/check:styles PASS, 109 author sources",
+    "bundle": "PASS without budget increase; main.js 4028825 bytes, styles.css 746250 bytes",
+    "notices": "check:notices PASS:12 npm /62 crates",
+    "docs": "standard test:docs PASS:549 Markdown,559 local links,348 external links; no external fetch"
+  },
+  "licensing": {
+    "apexCommit": "db9d2892032c27f5f8899a72c0dca61d72572a9a",
+    "apexLicenseWordsAndCopyrightRetained": true,
+    "apexMapping": "docs/third-party/apex-dashboard.md and .ZH.md expanded to all requested behavior families; focal-point source header now contains SHA/copyright",
+    "homePagesCommit": "2f98a7c44432a5e077977535f94093487417c735",
+    "method": "Only check-similarity.mjs read the GPL tree; model reviewed only numeric output and NAND source. No GPL implementation text read or copied.",
+    "oursFiles": 1240,
+    "referenceFiles": 48,
+    "maxRawShare": 0.045,
+    "maxRawRun": 35,
+    "thresholdFlags": [],
+    "normalizedReview": "Reviewed NAND short habit CSS (48 tokens, raw 0), manifest imports (raw 0), dictionary structure (raw 0) and daily-note helper (raw .045/run34). Normalization erases strings/identifiers, inflating structurally repetitive short files and dictionaries; report is evidence, not a license-proof test."
+  },
+  "attempts": [
+    {
+      "root": "e442330d51f04d5c9288538721ad015b",
+      "reason": "Incorrect fixture CSS selector"
+    },
+    {
+      "root": "632ae01410d14297b2145a5f6922227d",
+      "reason": "Fixture lacked required managed action-text region"
+    },
+    {
+      "root": "0aa082c5f254491cb2817f40bc432049",
+      "reason": "Read/decode failure silently hidden; diagnosed R082"
+    },
+    {
+      "root": "5d8a991e318c4037b07fb7a4c9dfeb12",
+      "reason": "Diagnostic probe used wrong native surface type"
+    },
+    {
+      "root": "b8cb94b6b08e4f93a968ae55cbe3eeaa",
+      "reason": "Confirmed repository error with runtime empty list/loadError empty"
+    },
+    {
+      "root": "47ba950a40ed4e7e95e2d94e628f3d92",
+      "reason": "Native9 failed stale action enabled after module-off; R081"
+    },
+    {
+      "root": "910691f294f14b34b9929c3f9e27744c",
+      "reason": "Native32 failed computed reduced motion; R083"
+    },
+    {
+      "root": "7a04f6e1adc24c3ca6f30bbb1426318a",
+      "reason": "Specific calendar/quick-action CSS still overrode generic reduced-motion rule"
+    },
+    {
+      "root": "5b8a3aa315534251be3f7827118b7a3a",
+      "reason": "Additional broad selector insufficient; replaced with owning component rules"
+    }
+  ],
+  "remaining": [
+    "Actual phone/other OS and actual provider/model execution unavailable"
+  ],
+  "currentReview": {
+    "date": "2026-10-11",
+    "note": "Browser workflow/shared owner consumer completed in R110/native84 and final combined native13. R012 planning reconciliation now completed for61tickets/180AC. Actual phone/other OS/model-account limits remain.",
+    "evidence": [
+      "../../2026-10-08-browser-ai-workbench/evidence/review-workflows.json",
+      "../../2026-10-08-all-open-issues/evidence/review-reconciliation.json"
+    ]
+  }
+}

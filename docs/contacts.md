@@ -69,6 +69,8 @@ The list and the cards are two views of the same query. A new Archives page list
 
 Card lists, lists and company personnel lists show up to 60 entries per page. Links to companies and people continue inside Archives, and Back restores what you saw in the layout you used. On a phone, Add, filters, sort and delete are in the tab menu. The top of a detail page edits the basic data; the other sections keep their own Add and Edit buttons. **Open original note** is for the moments you need to inspect the underlying file.
 
+An older saved page without layout fields opens as cards unless you have explicitly chosen a layout for that record type. Each layout keeps its own scroll anchor. Restarting on a detail page preserves the search and page to return to.
+
 ## Detail page and related files
 
 The basic data and related material share one page. Employment, relationships, company personnel, personality, habits and notes are collapsed by default; click the title to expand. Forms group fields (identity, contact details and so on); aliases and tags are removable chips; long text starts at three lines. A failed save keeps the draft; conflicts offer copy and reload.

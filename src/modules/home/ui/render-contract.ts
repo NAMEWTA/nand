@@ -1,3 +1,4 @@
+import type { BoardTile } from '../core/board/types/model';
 import type { TFile } from 'obsidian';
 import type {
 	BoardLayout,
@@ -11,9 +12,15 @@ import type {
 } from '../core/board/types/model';
 
 export interface RenderCallbacks {
+	onBoardWidgets?(): void;
+	onBoardWidgetRemove?(memberId: string): void;
 	onOpenWeb?(url: string, target: 'modal' | 'tab'): void;
 	settingsAccess?: import('./settings-access').DashboardSettingsAccess;
 	onCardEdit(card: DashboardCard): void;
+	onCardSkill?(anchor: HTMLElement, cardId: string, input: string): void;
+	onQuickNoteSkill?(anchor: HTMLElement, input: string): void;
+	onPipelineConfigChange?(columnName: string, config: import('../core/board/types/model').PipelineConfig): Promise<void>;
+	onPipelineSkill?(columnName: string, skillId: string, stageId: string, path?: string, input?: string, signal?: AbortSignal): Promise<void>;
 	/** subpath is the raw `#heading` / `#^block` fragment of a wikilink, when present. */
 	onOpenNoteInPopover(this: void, file: TFile, subpath?: string): void;
 	/** Open a note scrolled to a 1-based line (calendar section/agenda task jumps). */
@@ -52,7 +59,7 @@ export interface RenderCallbacks {
 	): void;
 	onMemoSaveAsNote(card: DashboardCard): void;
 	onTaskSaveToDaily(card: DashboardCard): void;
-	onDocAdd(cardId: string, path: string): void;
+	onDocAdd(cardId: string, path: string): void | Promise<void>;
 	/** Per-card "new note" (notes/projects sections): create a vault note and
 	 *  attach it to the card's doc list. */
 	onCardNewNote(cardId: string): void;
@@ -72,8 +79,7 @@ export interface RenderCallbacks {
 	onCardTitleEdit(cardId: string, newTitle: string): void;
 	onCardWidthChange(cardId: string, width: number): void;
 	onCardSizeChange(cardId: string, size: CardSize): void;
-	onCardGridChange(cardId: string, gridCols: number, gridRows: number): void;
-	onCardGridMove(cardId: string, gridCol: number, gridRow: number): void;
+	onBoardTiles(tiles: readonly BoardTile[]): void;
 	/** Persisted only after the user picks a layout. Absent means the historical board. */
 	onBoardLayout?(layout: BoardLayout): void;
 	onFileDrop(cardId: string, filePath: string): void;

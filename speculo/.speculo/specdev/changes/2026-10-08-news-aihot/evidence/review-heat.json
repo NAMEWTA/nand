@@ -1,0 +1,225 @@
+{
+  "status": "fixed-targeted-and-native-fixtures-verified",
+  "reference": "KKKKhazix/AIHOT c547b669acc7f64720cd82024e502446ee1ef88d",
+  "nativeRoot": "C:\\Users\\cdewta\\AppData\\Local\\Temp\\nand-news-heat-review-15f3ab5b433a441f8ec1c768ed7e62bc",
+  "native": {
+    "method": "Native Obsidian reader with explicitly seeded observation/evidence fixtures; no historical-monitoring claim",
+    "passed": true,
+    "rows": [
+      {
+        "name": "owner-channels-deduplicate-and-late-source-does-not-create-growth",
+        "passed": true
+      },
+      {
+        "name": "history-recomputes-a-common-cohort-and-omits-incomplete-hour",
+        "passed": true
+      },
+      {
+        "name": "isolated-observations-are-dots-without-lines-across-gaps",
+        "passed": true
+      },
+      {
+        "name": "keyboard-point-is-visible-and-announced",
+        "passed": true
+      },
+      {
+        "name": "right-arrow-selects-next-real-observation",
+        "passed": true
+      },
+      {
+        "name": "left-arrow-restores-previous-observation",
+        "passed": true
+      },
+      {
+        "name": "escape-clears-selected-point",
+        "passed": true
+      },
+      {
+        "name": "history-range-3-observations",
+        "passed": true
+      },
+      {
+        "name": "history-range-4-observations",
+        "passed": true
+      },
+      {
+        "name": "history-range-6-observations",
+        "passed": true
+      },
+      {
+        "name": "source-owner-change-recalculates-without-cli",
+        "passed": true
+      },
+      {
+        "name": "heat-width-claude-code-light-1200",
+        "passed": true,
+        "detail": {
+          "width": 844,
+          "scroll": 844
+        }
+      },
+      {
+        "name": "heat-width-claude-code-light-800",
+        "passed": true,
+        "detail": {
+          "width": 704,
+          "scroll": 704
+        }
+      },
+      {
+        "name": "heat-width-claude-code-light-420",
+        "passed": true,
+        "detail": {
+          "width": 376,
+          "scroll": 376
+        }
+      },
+      {
+        "name": "heat-width-claude-code-dark-1200",
+        "passed": true,
+        "detail": {
+          "width": 844,
+          "scroll": 844
+        }
+      },
+      {
+        "name": "heat-width-claude-code-dark-800",
+        "passed": true,
+        "detail": {
+          "width": 704,
+          "scroll": 704
+        }
+      },
+      {
+        "name": "heat-width-claude-code-dark-420",
+        "passed": true,
+        "detail": {
+          "width": 376,
+          "scroll": 376
+        }
+      },
+      {
+        "name": "heat-width-codex-light-1200",
+        "passed": true,
+        "detail": {
+          "width": 844,
+          "scroll": 844
+        }
+      },
+      {
+        "name": "heat-width-codex-light-800",
+        "passed": true,
+        "detail": {
+          "width": 704,
+          "scroll": 704
+        }
+      },
+      {
+        "name": "heat-width-codex-light-420",
+        "passed": true,
+        "detail": {
+          "width": 376,
+          "scroll": 376
+        }
+      },
+      {
+        "name": "heat-width-codex-dark-1200",
+        "passed": true,
+        "detail": {
+          "width": 844,
+          "scroll": 844
+        }
+      },
+      {
+        "name": "heat-width-codex-dark-800",
+        "passed": true,
+        "detail": {
+          "width": 704,
+          "scroll": 704
+        }
+      },
+      {
+        "name": "heat-width-codex-dark-420",
+        "passed": true,
+        "detail": {
+          "width": 376,
+          "scroll": 376
+        }
+      },
+      {
+        "name": "heat-width-obsidian-light-1200",
+        "passed": true,
+        "detail": {
+          "width": 844,
+          "scroll": 844
+        }
+      },
+      {
+        "name": "heat-width-obsidian-light-800",
+        "passed": true,
+        "detail": {
+          "width": 704,
+          "scroll": 704
+        }
+      },
+      {
+        "name": "heat-width-obsidian-light-420",
+        "passed": true,
+        "detail": {
+          "width": 376,
+          "scroll": 376
+        }
+      },
+      {
+        "name": "heat-width-obsidian-dark-1200",
+        "passed": true,
+        "detail": {
+          "width": 844,
+          "scroll": 844
+        }
+      },
+      {
+        "name": "heat-width-obsidian-dark-800",
+        "passed": true,
+        "detail": {
+          "width": 704,
+          "scroll": 704
+        }
+      },
+      {
+        "name": "heat-width-obsidian-dark-420",
+        "passed": true,
+        "detail": {
+          "width": 376,
+          "scroll": 376
+        }
+      },
+      {
+        "name": "restart-does-not-invent-hours-or-send-cli",
+        "passed": true
+      },
+      {
+        "name": "no-network-refresh-cursor-was-advanced",
+        "passed": true
+      },
+      {
+        "name": "no-host-errors",
+        "passed": true,
+        "detail": []
+      }
+    ]
+  },
+  "automated": "76 news tests across 21 files pass; latest build, lint, architecture, CSS, i18n and bundle checks pass. Full repository suite is running.",
+  "coverage": [
+    "Participant latest original time, owner/group/community-author/source identity, editorial evidence OR, isolated and withdrawn exclusion, confirmed factual evidence only",
+    "48-hour / 24-hour decay, top ten, stable ties, six-hour comparison union, whole-participant late/stale exclusion, 10/15 percent and surge/new badges",
+    "Module-owned observed-hour clock, sleep/disable gaps, repair existing observations only, seven-day retention, one source cohort across entire plot",
+    "Native local-time chart ranges, dots across gaps, arrows/escape, 18 theme/mode/width screenshots, settings recalculation, restart and zero model/network calls"
+  ],
+  "limitations": [
+    "Native history is explicitly seeded; no claim of seven days of live monitoring.",
+    "Clock continuity uses deterministic fake timers; OS suspend was not exercised over hours.",
+    "Desktop Windows verified; mobile is unsupported and other platforms were not run."
+  ],
+  "postEditionRegression": "32 checks pass after moving heat into its own workbench section."
+}

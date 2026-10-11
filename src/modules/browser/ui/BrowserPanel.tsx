@@ -1,16 +1,20 @@
-import { Menu, Notice, Platform } from 'obsidian';
+import { Menu, Notice, Platform, type Scope } from 'obsidian';
 import { useLayoutEffect, useRef, useState } from 'preact/hooks';
 import type { BrowserAgent, BrowserGrab, BrowserPageState } from '../core/model';
-import { browserShortcut } from '../core/ai-workbench';
 import { historySuggestions, normalizeBrowserUrl } from '../core/url';
-import { browserFocusTarget } from './browser-keys';
-import { AiBar } from './AiBar';
+import { mountBrowserKeyScope } from './browser-key-scope';
 import type { BrowserPage } from '../platform/desktop/page';
 import { t } from '../../../shared/i18n';
 import { AddressBar, DownloadsBar, FindBar, PageMessage, SelectionPanel, ToolbarButton } from './browser-controls';
 import type { BrowserHost } from '../services/page-host';
 import { MarkupPanel } from './MarkupPanel';
 import { browserError, grabText } from '../core/text';
+import { AssistantBanner } from './AssistantBanner';
+import { WorkflowBanner } from './WorkflowBanner';
+import { AccessBanner } from './AccessBanner';
+import { SelectionGuidance } from './SelectionGuidance';
+import { UserAdapterEditor } from './UserAdapterEditor';
+import type { BrowserPageTarget } from '../core/control';
 
 export { browserError, grabText };
 export function BrowserPanel({
@@ -20,6 +24,8 @@ export function BrowserPanel({
 	modal = false,
 	close,
 	activate = true,
+	keyScope,
+	fixedProfile = false,
 }: {
 	host: BrowserHost;
 	initial: BrowserPageState;
@@ -27,6 +33,8 @@ export function BrowserPanel({
 	modal?: boolean;
 	close?: () => void;
 	activate?: boolean;
+	keyScope?: Scope;
+	fixedProfile?: boolean;
 }) {
 	const root = useRef<HTMLDivElement>(null),
 		mount = useRef<HTMLDivElement>(null),
@@ -41,6 +49,8 @@ export function BrowserPanel({
 	const [failure, setFailure] = useState(''),
 		[design, setDesign] = useState(false),
 		[grab, setGrab] = useState<BrowserGrab | null>(null);
+	const [grabTarget, setGrabTarget] = useState<BrowserPageTarget>();
+	const [adapterOpen, setAdapterOpen] = useState(false);
 	const [markup, setMarkup] = useState<{ data: string; width: number; selection?: BrowserGrab } | null>(null),
 		[agents, setAgents] = useState<BrowserAgent[]>([]);
 	const [agent, setAgent] = useState(''),
@@ -98,74 +108,45 @@ export function BrowserPanel({
 		const menu = new Menu();
 		menu.addItem(item => item.setTitle(origin).setDisabled(true));
 		for (const permission of ['media', 'geolocation', 'notifications', 'clipboard-read', 'fullscreen']) {
-			const allowed = host.permissions()[`${origin}|${permission}`] === true;
+			const allowed = host.permissions(state.profileId)[`${origin}|${permission}`] === true;
 			menu.addItem(item => item.setTitle(t(`browser.permission.${permission}`)).setChecked(allowed)
-				.onClick(() => run(async () => { await host.grantPermission(origin, permission, !allowed); redraw(n => n + 1); })));
+				.onClick(() => run(async () => { await host.grantPermission(origin, permission, !allowed, state.profileId); redraw(n => n + 1); })));
 		}
 		menu.showAtMouseEvent(event);
+	};
+	const keyActions = useRef<{ find(): void; address(): void; escape(): boolean }>({ find: openFind, address: () => {}, escape: () => false });
+	keyActions.current = {
+		find: openFind,
+		address: () => { address.current?.focus(); address.current?.select(); },
+		escape: () => {
+			if (design) { run(() => page?.automation?.design()); setDesign(false); }
+			else if (grab) setGrab(null);
+			else if (find !== null) { setFind(null); page?.find(''); page?.webview.focus(); }
+			else return false;
+			return true;
+		},
 	};
 	useLayoutEffect(() => {
 		const container = root.current;
 		if (!container) return;
-		const handler = (e: KeyboardEvent) => {
-			if (e.isComposing) return;
-			if (e.key === 'Escape') {
-				if (design) {
-					run(() => page?.automation?.design());
-					setDesign(false);
-				} else if (grab) setGrab(null);
-				else if (find !== null) {
-					setFind(null);
-					page?.find('');
-					page?.webview.focus();
-				} else return;
-				e.preventDefault();
-				e.stopPropagation();
-			}
-			const node = e.target instanceof HTMLElement ? e.target : null;
-			const action = browserShortcut({
-				key: e.key,
-				mod: e.ctrlKey || e.metaKey,
-				target: browserFocusTarget({
-					inside: !!node && container.contains(node),
-					address: !!node && !!address.current && (node === address.current || address.current.contains(node)),
-					find: !!node && !!findInput.current && (node === findInput.current || findInput.current.contains(node)),
-					toolbar: !!node?.closest('.nand-browser-toolbar'),
-					page: !!node?.closest('.nand-browser-viewport'),
-				}),
-			});
-			if (action === 'address') {
-				e.preventDefault();
-				e.stopPropagation();
-				address.current?.focus();
-				address.current?.select();
-			} else if (action === 'find') {
-				e.preventDefault();
-				e.stopPropagation();
-				openFind();
-			}
+		return mountBrowserKeyScope(host.app, container, keyScope ?? host.app.scope, {
+			find: () => keyActions.current.find(),
+			address: () => keyActions.current.address(),
+			escape: () => keyActions.current.escape(),
+		});
+	}, [host, keyScope]);
+	useLayoutEffect(() => {
+		if (!page) return;
+		page.shortcut = key => {
+			if (key !== 'Escape') return;
+			run(() => page.automation?.design());
+			setDesign(false);
+			setGrab(null);
+			setFind(null);
+			page.find('');
 		};
-		container.addEventListener('keydown', handler);
-		if (page)
-			page.shortcut = (key) => {
-				const action = browserShortcut({ key, mod: true, target: 'page' });
-				if (action === 'address') {
-					address.current?.focus();
-					address.current?.select();
-				} else if (action === 'find') openFind();
-				else if (key === 'Escape') {
-					run(() => page.automation?.design());
-					setDesign(false);
-					setGrab(null);
-					setFind(null);
-					page.find('');
-				}
-			};
-		return () => {
-			container.removeEventListener('keydown', handler);
-			if (page) page.shortcut = undefined;
-		};
-	}, [design, grab, find, page]);
+		return () => { page.shortcut = undefined; };
+	}, [page]);
 	const navigate = (url = value) =>
 		run(async () => {
 			const next = normalizeBrowserUrl(url, host.settings().searchEngine);
@@ -236,6 +217,7 @@ export function BrowserPanel({
 					: (selection) => {
 							setDesign(false);
 							setGrab(selection);
+							setGrabTarget({ pageId: page.state.id, profileId: page.profileId, generation: page.generation });
 							loadAgents();
 						},
 			);
@@ -286,6 +268,13 @@ export function BrowserPanel({
 		<div ref={root} class="nand-browser-panel" data-page-id={state.id}>
 			<div class="nand-ui-toolbar nand-browser-toolbar">
 				<ToolbarButton label="permissions" icon="shield" onClick={permissions} />
+				{!fixedProfile && <select class="nand-browser-profile" aria-label={t('browser.profile.openWith')} value={state.profileId ?? 'default'} onChange={event => {
+					const profileId = event.currentTarget.value;
+					event.currentTarget.value = state.profileId ?? 'default';
+					run(() => host.open({ url: state.url, profileId }));
+				}}>
+					{host.profiles().filter(profile => profile.state === 'ready').map(profile => <option key={profile.id} value={profile.id}>{profile.kind === 'default' ? t('browser.profile.default') : profile.label}</option>)}
+				</select>}
 				<ToolbarButton label="back" icon="arrow-left" onClick={() => run(() => page?.back())} disabled={!state.canGoBack} />
 				<ToolbarButton label="forward" icon="arrow-right" onClick={() => run(() => page?.forward())} disabled={!state.canGoForward} />
 				<ToolbarButton label={state.loading ? 'stop' : 'reload'} icon={state.loading ? 'x' : 'rotate-cw'} onClick={() => run(() => (state.loading ? page?.stop() : page?.reload()))} disabled={!ready} />
@@ -334,6 +323,7 @@ export function BrowserPanel({
 					))}
 				</select>
 				<ToolbarButton label="design" icon="mouse-pointer-2" onClick={toggleDesign} disabled={!ready} />
+				{host.getUserAdapters && <ToolbarButton label="userAdapter" icon="settings-2" onClick={() => setAdapterOpen(!adapterOpen)} disabled={!ready} />}
 				<ToolbarButton label="more" icon="ellipsis" onClick={(e) => menu(e)} />
 				{modal && (
 					<ToolbarButton
@@ -341,7 +331,7 @@ export function BrowserPanel({
 						icon="panel-top"
 						onClick={() =>
 							run(async () => {
-								await host.open({ url: state.url, title: state.title, zoom: state.zoom, scroll: state.scroll });
+								await host.open({ url: state.url, title: state.title, zoom: state.zoom, scroll: state.scroll, profileId: state.profileId });
 								close?.();
 							})
 						}
@@ -349,7 +339,9 @@ export function BrowserPanel({
 				)}
 				{modal && <ToolbarButton label="close" icon="x" onClick={() => close?.()} />}
 			</div>
-			{host.workspace ? <AiBar workspace={host.workspace} /> : null}
+			{page && <AssistantBanner host={host} target={{ pageId: state.id, profileId: page.profileId, generation: page.generation }} />}
+			{page && <WorkflowBanner host={host} target={{ pageId: state.id, profileId: page.profileId, generation: page.generation }} />}
+			{page && <AccessBanner host={host} target={{ pageId: state.id, profileId: page.profileId, generation: page.generation }} />}
 			{find !== null && (
 				<FindBar
 					inputRef={findInput}
@@ -394,7 +386,7 @@ export function BrowserPanel({
 						onExternal={external}
 					/>
 				)}
-				{grab && (
+				{grab && !adapterOpen && (
 					<SelectionPanel
 						grab={grab}
 						agents={agents}
@@ -407,23 +399,23 @@ export function BrowserPanel({
 						onAttach={() =>
 							run(async () => {
 								const description = grabText(grab);
-								if (host.workspace) {
-									const decision = host.workspace.assist(['read'], description);
-									if (!decision.allowed) {
-										new Notice(t('browser.ai.refused'));
-										return;
-									}
-								}
 								const files = grab.screenshot ? await host.saveImage(grab.screenshot, description) : [];
 								await host.agents.attach(agent, description, files);
 								new Notice(t('browser.attached'));
 								setGrab(null);
 							})
 						}
-					/>
+					>
+						{grabTarget && host.guidanceChoices && host.saveGuidance && <SelectionGuidance host={host} target={grabTarget} grab={grab} saved={() => setGrab(null)} />}
+					</SelectionPanel>
 				)}
 				{markup && <MarkupPanel data={markup.data} viewportWidth={markup.width || 1000} close={() => setMarkup(null)} finish={finishMarkup} />}
 			</div>
+			{adapterOpen && page && <div class="nand-browser-adapter-container" hidden={design}>
+				<UserAdapterEditor key={page.generation} host={host} target={{ pageId: page.state.id, profileId: page.profileId, generation: page.generation }} url={state.url}
+					grab={grab && grabTarget?.pageId === page.state.id && grabTarget.generation === page.generation && grabTarget.profileId === page.profileId ? grab : undefined}
+					pick={toggleDesign} close={() => setAdapterOpen(false)} />
+			</div>}
 		</div>
 	);
 }

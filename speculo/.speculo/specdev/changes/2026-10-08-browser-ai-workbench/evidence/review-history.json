@@ -1,0 +1,66 @@
+{
+  "finding": "R-104",
+  "ticket": "Browser T14 history and scoped Markdown export",
+  "status": "implemented-local-verification",
+  "reference": {
+    "commit": "b6b83ca90f0f67fbf25a676e7a8f6b8b34327800",
+    "read": [
+      "src/db/history-transfer.ts",
+      "src/db/history-transfer.test.ts",
+      "src/db/database.ts",
+      "src/db/session-service.ts"
+    ],
+    "format": "v3 has session/turn/exchange only. No complete acquisition snapshots or independent prompt library; stable website identity is absent."
+  },
+  "next": [
+    "MAIW v3 transfer split into R105; T14 is not complete until migration acceptance passes"
+  ],
+  "implemented": [
+    "Chronological history and recovery reader, search titles/questions/saved captures",
+    "Rename/pin/switch and exact-review local tombstone deletion; preserve other tasks/templates/website state",
+    "Explicit task/target/all-or-latest Markdown scope; current partial revision authoritative; omit runtime/private fields and arbitrary URL queries",
+    "Frozen export preview, explicit copy and new visible vault export file",
+    "Fault injection proved deleting a parent first left unreadable orphan documents. Added opt-in codec deletion priority: answers before turns before tasks. Intermediate collections remain valid; explicit recovery and retry preserve deletion intent. Other codecs keep existing behavior."
+  ],
+  "verification": {
+    "targeted": 23,
+    "build": 4255434,
+    "styles": 750459,
+    "architecture": 932,
+    "i18n": 3458,
+    "sourceLint": "passed before final small UI labels",
+    "native": {
+      "path": "C:/Users/cdewta/AppData/Local/Temp/nand-history-matrix-e07dced26a8848158f5d9ac70e3b6274/evidence",
+      "checks": 114,
+      "failed": 0,
+      "method": "Production build/native input/local HTTPS fixtures; explicit copy observed at module clipboard boundary without OS clipboard mutation; actual Windows sharing lock; restart; open export and deletion UI each covers18 theme/width cases plus44px touch targets."
+    },
+    "targetedWithGolden": 45,
+    "partialDeletionRegression": "Failed before fix with browser_workspace_storage after disk-full; passed after ordering fix, including explicit recovery merge after restart.",
+    "exploratoryNative": [
+      {
+        "path": "C:/Users/cdewta/AppData/Local/Temp/nand-history-workspace-8512de4608f44b5ca921c67979dda7c9/evidence",
+        "checks": 61,
+        "failed": 1,
+        "reason": "Probe expected no latest answer, but pause correctly retained a partial scoped-DOM answer. Assertion corrected to verify incomplete current text."
+      },
+      {
+        "path": "C:/Users/cdewta/AppData/Local/Temp/nand-history-final-cb26dcc569474943ad0515ad166512fe/evidence",
+        "checks": 72,
+        "failedAssertions": 0,
+        "completed": false,
+        "reason": "After successful retry the error-only Retry saving button disappeared; probe wait queried its disabled property. Now waits for stable history controls. Actual Windows file lock and partial collection check passed."
+      }
+    ],
+    "full": {
+      "passed": 707,
+      "skipped": 4,
+      "filesPassed": 158,
+      "filesSkipped": 1,
+      "seconds": 123.9,
+      "started": "2026-10-11 04:12:26 Asia/Shanghai",
+      "log": "C:\\Users\\cdewta\\AppData\\Local\\Temp\\nand-review-history-full.log"
+    },
+    "docs": 552
+  }
+}

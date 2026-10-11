@@ -1,4 +1,5 @@
 import { Menu, Notice, Platform, type App } from 'obsidian';
+import { SessionMaterialService } from './session-material';
 import type { ModuleContext } from '../../../app/contracts/module';
 import type { WorkbenchTarget } from '../../../app/contracts/workbench';
 import { collectReferences } from '../../../host/obsidian/references';
@@ -19,6 +20,8 @@ import { availableShells, resolveShell, sessionDirectory, type ShellOption } fro
 import type { NativeSessionSummary } from '../platform/desktop/server/agent-data-client';
 import { NativeHistory } from '../platform/history/service';
 import { TerminalAutomationRuntime } from './agent-runtime';
+import { AGENT_RUN_CONTEXTS } from '../api';
+import { PromptRunner } from './prompt-runner';
 import { launchAgent, resumeAgent, type LaunchHost, type LaunchRequest } from './launch/launcher';
 import type { TerminalSession } from './terminal/session';
 import { hookActivity, TerminalSessions } from './terminal/sessions';
@@ -52,6 +55,8 @@ export class AgentController {
 	readonly sessions: TerminalSessions;
 	readonly usage: AgentUsageSource;
 	readonly runtime: TerminalAutomationRuntime;
+	readonly prompts: PromptRunner;
+	readonly materials: SessionMaterialService;
 	private historyService?: NativeHistory;
 	/** First page of this vault's native history, for the side panel and preview lookups. */
 	private historyRows: NativeSessionSummary[] = [];
@@ -113,6 +118,8 @@ export class AgentController {
 			},
 			shell: (kind) => resolveShell(kind === 'powershell' ? (Platform.isWin ? 'powershell' : 'pwsh') : 'bash', this.settings.get()),
 		});
+		this.prompts = new PromptRunner(this.runtime, () => this.vaultPath() ?? '', async () => (await context.contributions.collect(AGENT_RUN_CONTEXTS)).map(item => item.value), win);
+		this.materials = new SessionMaterialService(this);
 	}
 
 	get app(): App {
@@ -235,7 +242,11 @@ export class AgentController {
 					},
 				});
 			} catch (error) {
-				const message = error instanceof BinaryError ? t(`agent.helper.${error.code}`) : error instanceof Error ? error.message : String(error);
+				const message = error instanceof BinaryError
+					? t(error.code === 'http' && error.detail?.status === 404 ? 'agent.helper.unpublished' : `agent.helper.${error.code}`, {
+						status: error.detail?.status ?? 0, version: this.context.manifest.version,
+					}) : error instanceof Error ? error.message : String(error);
+				if (error instanceof BinaryError) console.warn('[NAND terminal helper]', error.code, error.detail);
 				new Notice(t('agent.helper.failed', { message }), 10_000);
 				throw error;
 			} finally {
@@ -402,43 +413,6 @@ export class AgentController {
 		return true;
 	}
 
-	/**
-	 * Run one prompt in an enabled agent and return the terminal text.
-	 * A still-running session is truncated. An empty screen is a failure.
-	 */
-	async runPrompt(request: { prompt: string; purpose: string }): Promise<{ status: 'complete' | 'truncated' | 'failed' | 'budget'; text: string }> {
-		const enabled = AGENT_CATALOG.find((agent) => this.settings.get().agents.agents[agent.id]?.enabled);
-		if (!enabled) return { status: 'failed', text: '' };
-		let session: TerminalSession | undefined;
-		try {
-			await launchAgent({
-				...this.launchHost({ tab: true }),
-				start: async (launch) => {
-					session = await this.start({ ...launch, kind: 'agent', input: request.prompt, title: request.purpose || launch.title });
-				},
-			}, enabled.id);
-		} catch {
-			return { status: 'failed', text: '' };
-		}
-		if (!session) return { status: 'failed', text: '' };
-		const win = this.app.workspace.containerEl.win;
-		const deadline = Date.now() + 20000;
-		let last = '';
-		let stable = 0;
-		while (Date.now() < deadline && session.running) {
-			await new Promise((resolve) => win.setTimeout(resolve, 200));
-			const text = session.text();
-			if (text === last && text.trim()) stable += 1;
-			else stable = 0;
-			last = text;
-			if (stable >= 8) break;
-		}
-		const text = session.text().trim();
-		if (!text) return { status: 'failed', text: '' };
-		if (session.running) return { status: 'truncated', text };
-		return { status: 'complete', text };
-	}
-
 	/** Paste text into the target session (no Enter). */
 	send(text: string): boolean {
 		const session = this.target();
@@ -522,6 +496,8 @@ export class AgentController {
 	}
 
 	async dispose(): Promise<void> {
+		this.materials.dispose();
+		await this.prompts.dispose();
 		this.runtime.dispose();
 		this.hooks.dispose();
 		this.usage.dispose();

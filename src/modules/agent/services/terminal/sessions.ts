@@ -22,6 +22,7 @@ export interface TerminalHost {
 }
 
 export interface CreateSession {
+	signal?: AbortSignal;
 	kind: SessionKind;
 	title: string;
 	file: string;
@@ -43,9 +44,9 @@ const DEFAULT_ROWS = 32;
 
 /** Activity reported by a CLI's native lifecycle event. */
 export function hookActivity(event: string): Activity | undefined {
-	if (event === 'UserPromptSubmit' || event === 'BeforeAgent' || event === 'PreToolUse') return 'running';
+	if (event === 'UserPromptSubmit' || event === 'BeforeAgent' || event === 'PreToolUse' || event === 'BeforeTool') return 'running';
 	if (event === 'Notification' || event === 'PermissionRequest') return 'waiting';
-	if (event === 'Stop' || event === 'AfterAgent' || event === 'StopFailure' || event === 'StopCancelled' || event === 'SessionStart') return 'idle';
+	if (event === 'Stop' || event === 'AfterAgent' || event === 'StopFailure' || event === 'StopCancelled' || event === 'Interrupt' || event === 'SessionStart') return 'idle';
 	return undefined;
 }
 
@@ -158,7 +159,10 @@ export class TerminalSessions {
 	}
 
 	async create(request: CreateSession): Promise<TerminalSession> {
+		request.signal?.throwIfAborted();
 		const helper = await this.ensureHelper();
+		request.signal?.throwIfAborted();
+		if (this.disposed) throw new Error('The terminal module is off');
 		const settings = this.host.settings();
 		const sid = this.nextSid++;
 		const session = new TerminalSession({
@@ -187,13 +191,23 @@ export class TerminalSessions {
 			...request.env,
 			NAND_SESSION_ID: session.id,
 		};
+		let spawning = false;
+		const abort = () => { if (spawning) helper.end(sid, true); };
+		request.signal?.addEventListener('abort', abort, { once: true });
 		try {
 			if (request.hooks && request.agentId && this.host.agentHooks) {
 				const hook = await this.host.agentHooks(request.agentId, env, (activity) => session.setActivity(activity));
 				env = { ...env, ...hook.env };
 				this.hooks.set(session.id, () => hook.close());
 			}
+			request.signal?.throwIfAborted();
+			if (this.disposed || !this.sessions.has(session.id)) throw new Error('The terminal session is closed');
+			spawning = true;
 			const pid = await helper.spawnSession(sid, { file: request.file, args: request.args, cwd: request.cwd, env, cols: session.cols, rows: session.rows });
+			if (request.signal?.aborted || this.disposed || !this.sessions.has(session.id)) {
+				helper.end(sid, true);
+				throw new Error('The terminal session is closed');
+			}
 			session.attach(
 				{
 					input: (id, data) => this.helper?.input(id, data),
@@ -207,6 +221,8 @@ export class TerminalSessions {
 			this.hooks.get(session.id)?.();
 			this.hooks.delete(session.id);
 			session.fail(error instanceof Error ? error.message : String(error));
+		} finally {
+			request.signal?.removeEventListener('abort', abort);
 		}
 		this.changed();
 		return session;
@@ -221,7 +237,10 @@ export class TerminalSessions {
 	remove(id: string): void {
 		const session = this.sessions.get(id);
 		if (!session) return;
-		if (session.running) session.end();
+		if (session.running) {
+			session.end();
+			session.exit(-1, null);
+		}
 		this.hooks.get(id)?.();
 		this.hooks.delete(id);
 		this.sessions.delete(id);

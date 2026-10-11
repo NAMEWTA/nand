@@ -26,6 +26,10 @@ shared_path_owners: ["<Path>main.js</Path> => 2026-10-08-browser-ai-workbench::T
 
 # Ticket T-08: 可靠重启、人工恢复与保存失败闭环
 
+<!-- ACTUAL-CODE-REVIEW:START -->
+2026-10-11 实际代码审查：[T-08.md](../evidence/T-08.md)。本票下文保留原规划合同与基线；当前实现、修复、验证及未验证条件以该记录为准。原“仅规划／未授权实施／必须提交”的阶段约束不适用于用户已授权的本次工作区审查；提交与远程操作仍未执行。
+<!-- ACTUAL-CODE-REVIEW:END -->
+
 - Ticket：<Path>{roots.state}/specdev/changes/2026-10-08-browser-ai-workbench/ticket/08-workspace-restart-recovery.md</Path>
 - 总控Map：<Path>{roots.state}/specdev/changes/2026-10-08-browser-ai-workbench/tickets-map.md</Path>
 - Spec：<Path>{roots.state}/specdev/changes/2026-10-08-browser-ai-workbench/spec.md</Path>
@@ -37,7 +41,7 @@ shared_path_owners: ["<Path>main.js</Path> => 2026-10-08-browser-ai-workbench::T
 
 **目标与可观察产出：** 进程/guest退出、保存失败后可恢复事实和答案，无隐式重问；人工接管后可安全继续。
 
-**当前事实：** 首轮已要求intent先持久，此票补所有restart/partial write/文档手工编辑与capture recovery场景，不推迟基本发送安全。
+**规划时基线：** 首轮已要求intent先持久，此票补所有restart/partial write/文档手工编辑与capture recovery场景，不推迟基本发送安全。
 
 **来源：** AC-011, AC-017, AC-020, AC-023, AC-025, AC-039；issue #142, #145；<Path>{roots.state}/specdev/changes/2026-10-08-browser-ai-workbench/reference-analysis.md</Path>。深度 deep：涉及持久数据/公共接口/进程或权限的跨边界合同，必须记录恢复与兼容。
 

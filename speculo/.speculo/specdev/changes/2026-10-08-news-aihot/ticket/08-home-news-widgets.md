@@ -26,6 +26,10 @@ shared_path_owners: ["<Path>main.js</Path> => 2026-10-08-news-aihot::T-08（本�
 
 # Ticket T-08: 在首页添加独立新闻小组件实例
 
+<!-- ACTUAL-CODE-REVIEW:START -->
+2026-10-11 实际代码审查：[T-08.md](../evidence/T-08.md)。本票下文保留原规划合同与基线；当前实现、修复、验证及未验证条件以该记录为准。原“仅规划／未授权实施／必须提交”的阶段约束不适用于用户已授权的本次工作区审查；提交与远程操作仍未执行。
+<!-- ACTUAL-CODE-REVIEW:END -->
+
 - Ticket：<Path>{roots.state}/specdev/changes/2026-10-08-news-aihot/ticket/08-home-news-widgets.md</Path>
 - 总控Map：<Path>{roots.state}/specdev/changes/2026-10-08-news-aihot/tickets-map.md</Path>
 - Spec：<Path>{roots.state}/specdev/changes/2026-10-08-news-aihot/spec.md</Path>
@@ -37,7 +41,7 @@ shared_path_owners: ["<Path>main.js</Path> => 2026-10-08-news-aihot::T-08（本�
 
 **目标与可观察产出：** 用户在统一首页组件库添加热点、精选、我的视图新闻组件，并能独立配置与导航。
 
-**当前事实：** 当前home没有registry，此票外部依赖home领域统一组件注册表；不允许同时建临时HOME_WIDGETS。
+**规划时基线：** 当前home没有registry，此票外部依赖home领域统一组件注册表；不允许同时建临时HOME_WIDGETS。
 
 **来源：** AC-023；issue #136；<Path>{roots.state}/specdev/changes/2026-10-08-news-aihot/reference-analysis.md</Path>。深度 deep：涉及持久数据/公共接口/进程或权限的跨边界合同，必须记录恢复与兼容。
 

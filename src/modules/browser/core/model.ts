@@ -1,4 +1,5 @@
 import type { SearchEngine } from '../../../shared/web-url';
+import { DEFAULT_WORKSPACE_FOLDER, workspaceFolder } from './workspace/location';
 
 export type { SearchEngine };
 export const BROWSER_PAGE_TYPE = 'nand-browser-view';
@@ -7,8 +8,10 @@ export interface BrowserSettings {
 	searchEngine: SearchEngine;
 	/** Let agent sessions started from NAND control the browser through the local bridge (off by default). */
 	agentAccess: boolean;
+	workspaceFolder?: string;
 }
 export interface BrowserOpenRequest {
+	profileId?: string;
 	url?: string;
 	target?: BrowserTarget;
 	reuse?: boolean;
@@ -18,6 +21,7 @@ export interface BrowserOpenRequest {
 }
 export interface BrowserPageState {
 	id: string;
+	profileId?: string;
 	url: string;
 	title: string;
 	zoom: number;
@@ -45,6 +49,8 @@ export interface BrowserSnapshotRef {
 	ref: string;
 	role: string;
 	name: string;
+	/** Display ordinal suffixes do not make a repeated role/name a stable workflow locator. */
+	ambiguous?: boolean;
 }
 export interface BrowserRect {
 	x: number;
@@ -63,6 +69,9 @@ export interface BrowserGrab {
 	rect: BrowserRect;
 	screenshot: string | null;
 	viewport: { width: number; height: number };
+	/** Only public identities explicitly declared by the selected element's ancestors. */
+	messageId?: string;
+	conversationId?: string;
 }
 export interface BrowserAgent {
 	id: string;
@@ -73,7 +82,7 @@ export interface BrowserAgentDeliveryPort {
 	attach(agentId: string, text: string, files: string[]): Promise<void>;
 }
 export interface BrowserAutomationPort {
-	execute(method: string, params: Record<string, unknown>): Promise<unknown>;
+	execute(method: string, params: Record<string, unknown>, admission?: () => void): Promise<unknown>;
 }
 export class BrowserError extends Error {
 	constructor(
@@ -87,6 +96,7 @@ export class BrowserError extends Error {
 export function newPageState(id: string, value: Partial<BrowserPageState> = {}): BrowserPageState {
 	return {
 		id,
+		profileId: typeof value.profileId === 'string' ? value.profileId : 'default',
 		url: typeof value.url === 'string' ? value.url : 'about:blank',
 		title: typeof value.title === 'string' ? value.title : '',
 		zoom: clampZoom(value.zoom),
@@ -106,5 +116,6 @@ export function clampZoom(value?: number): number {
 export function normalizeBrowserSettings(raw: unknown): BrowserSettings {
 	const value = raw as Partial<BrowserSettings> | null;
 	const engine = value?.searchEngine;
-	return { searchEngine: engine === 'bing' || engine === 'duckduckgo' ? engine : 'google', agentAccess: value?.agentAccess === true };
+	return { searchEngine: engine === 'bing' || engine === 'duckduckgo' ? engine : 'google', agentAccess: value?.agentAccess === true,
+		workspaceFolder: workspaceFolder(value?.workspaceFolder) ?? DEFAULT_WORKSPACE_FOLDER };
 }

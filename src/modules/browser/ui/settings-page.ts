@@ -6,6 +6,8 @@ import type { BrowserOpener } from '../api';
 import type { BrowserSettings, SearchEngine } from '../core/model';
 import { browserError } from '../core/text';
 import type { BrowserModule } from '../services';
+import { profileSettings } from './profile-settings';
+import { DEFAULT_WORKSPACE_FOLDER, workspaceFolder } from '../core/workspace/location';
 
 /** Settings → Browser: search engine, agent access to the browser and the connection command. */
 export function browserSettingsPage(current: () => BrowserModule, settings: SettingsHandle<BrowserSettings>, opener: BrowserOpener): SettingsPageRenderer {
@@ -21,7 +23,19 @@ export function browserSettingsPage(current: () => BrowserModule, settings: Sett
 				.setValue(settings.get().searchEngine)
 				.onChange((value) => save((draft) => { draft.searchEngine = value as SearchEngine; })),
 		);
+		let folder = settings.get().workspaceFolder ?? DEFAULT_WORKSPACE_FOLDER;
+		new Setting(container).setName(t('browser.workspace.folder')).setDesc(t('browser.workspace.folderHint'))
+			.addText(text => text.setValue(folder).onChange(value => { folder = value; }))
+			.addButton(button => button.setButtonText(t('browser.workspace.folderApply')).onClick(async () => {
+				const normalized = workspaceFolder(folder);
+				if (!normalized) { new Notice(t('browser.browser_workspace_folder')); return; }
+				try { await settings.update(draft => { draft.workspaceFolder = normalized; }); page.refresh(); }
+				catch (error) { new Notice(browserError(error)); }
+			}));
 		if (!Platform.isDesktopApp) return;
+		profileSettings(container, current(), page);
+		new Setting(container).setName(t('browser.access.title')).setDesc(t('browser.access.intro'))
+			.addButton(button => button.setButtonText(t('browser.access.open')).onClick(() => { void current().openAccess(container.win).catch(error => new Notice(browserError(error))); }));
 		new Setting(container)
 			.setName(t('browser.agentAccess'))
 			.setDesc(t('browser.agentAccessDesc'))

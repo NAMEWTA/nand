@@ -1,0 +1,78 @@
+{
+  "finding": "R-100",
+  "ticket": "Browser T11 Doubao",
+  "status": "implemented-local-verification-live-gate-unverified",
+  "reference": {
+    "commit": "b6b83ca90f0f67fbf25a676e7a8f6b8b34327800",
+    "license": "MIT",
+    "files": [
+      "src/providers/doubao/acquisition.ts",
+      "runtime-acquisition.ts",
+      "selectors.ts",
+      "strategy.ts",
+      "native-copy.ts",
+      "tests and two chain fixtures"
+    ],
+    "official": "https://www.doubao.com/chat/",
+    "limit": "Official public entry only; authenticated DOM/API schema and real-account send remain unverified."
+  },
+  "next": [
+    "Coze T12 in progress; real-account gates unverified"
+  ],
+  "implemented": [
+    "Lazy Doubao session, official URL and localized task choice use the existing workspace/queue/ownership/journal.",
+    "Observed POST conversation/anchor projection excludes tokens and arbitrary request data; exact official chain endpoint only, no request replay.",
+    "Two chain envelopes, JSON public blocks, explicit message identity/parent roots and end state; duplicates, missing pages, cursor loops, conflicting IDs and counts stay partial.",
+    "Scoped ProseMirror/send/new conversation/answer controls; real identity only; current-answer HTML and TeX, private block exclusion, login/challenge stops."
+  ],
+  "verification": {
+    "targeted": 20,
+    "build": 4228604,
+    "styles": 750459,
+    "fullLint": "passed",
+    "architecture": 921,
+    "i18n": 3418,
+    "docs": 552,
+    "notices": "12 npm/62 crates current",
+    "bundle": "4229120 cap; startup97.1KB/94inputs, browser144.4KB +253.5KB deferred; no dependency/style cap change",
+    "nativeSingle": {
+      "path": "C:\\Users\\cdewta\\AppData\\Local\\Temp\\nand-doubao-workspace-ebd0b9eeca444b35822622a9e2768eee/evidence",
+      "checks": 75,
+      "failed": 0,
+      "scope": "Production main.js4228604 in real Windows Obsidian1.13.7/Electron43.3; local HTTPS fixtures only. Three rounds, long/repeated questions, two pages, missing page/parent, unfinished/stale/no history, login/challenge, new context, UI18/touch44, module/restart. Narrow screenshot inspected."
+    },
+    "nativeMixed": {
+      "path": "C:\\Users\\cdewta\\AppData\\Local\\Temp\\nand-doubao-mixed-7612bed8049a47f1baf27f4d31dc4c21/evidence",
+      "checks": 76,
+      "failed": 0,
+      "scope": "Production main.js4228604; DeepSeek/Kimi/Doubao local HTTPS fixtures, readiness subset/three rounds/partial failure/comparison/ownership/recollect/resend/restart. Actual accounts unverified."
+    },
+    "full": {
+      "passed": 692,
+      "skipped": 4,
+      "filesPassed": 154,
+      "filesSkipped": 1,
+      "seconds": 148.67,
+      "log": "C:\\Users\\cdewta\\AppData\\Local\\Temp/nand-review-doubao-full.log"
+    }
+  },
+  "runtimeClarification": {
+    "installerVersion": "1.13.7",
+    "electron": "43.3.0",
+    "note": "Electron app.getVersion() reports the installed runtime. Fresh profiles automatically downloaded an app update; application logs below prove restart loaded a newer renderer app. Prior single version labels did not distinguish these.",
+    "updates": [
+      {
+        "log": "C:\\Users\\cdewta\\AppData\\Local\\Temp\\nand-doubao-workspace-ebd0b9eeca444b35822622a9e2768eee\\evidence\\application.log",
+        "rendererUpdateLoaded": [
+          "1.14.4"
+        ]
+      },
+      {
+        "log": "C:\\Users\\cdewta\\AppData\\Local\\Temp\\nand-doubao-mixed-7612bed8049a47f1baf27f4d31dc4c21\\evidence\\application.log",
+        "rendererUpdateLoaded": [
+          "1.14.4"
+        ]
+      }
+    ]
+  }
+}

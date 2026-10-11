@@ -26,6 +26,10 @@ shared_path_owners: ["<Path>main.js</Path> => 2026-10-08-home-grid-rebuild::T-04
 
 # Ticket T-04: 接通沉浸式统一网格、数据与真实渲染
 
+<!-- ACTUAL-CODE-REVIEW:START -->
+2026-10-11 实际代码审查：[T-04.md](../evidence/T-04.md)。本票下文保留原规划合同与基线；当前实现、修复、验证及未验证条件以该记录为准。原“仅规划／未授权实施／必须提交”的阶段约束不适用于用户已授权的本次工作区审查；提交与远程操作仍未执行。
+<!-- ACTUAL-CODE-REVIEW:END -->
+
 - Ticket：<Path>{roots.state}/specdev/changes/2026-10-08-home-grid-rebuild/ticket/04-immersive-grid-surface.md</Path>
 - 总控Map：<Path>{roots.state}/specdev/changes/2026-10-08-home-grid-rebuild/tickets-map.md</Path>
 - Spec：<Path>{roots.state}/specdev/changes/2026-10-08-home-grid-rebuild/spec.md</Path>
@@ -37,7 +41,7 @@ shared_path_owners: ["<Path>main.js</Path> => 2026-10-08-home-grid-rebuild::T-04
 
 **目标与可观察产出：** 用户首次切immersive即可看到widgets/sections/cards的共同网格，重启与窄屏投影可靠。
 
-**当前事实：** 已有card grid字段/更新回调未接UI，实际仍S/M/L；上游纯grid可移植但explicit overlap、硬编码cols和changed遗漏要修正。
+**规划时基线：** 已有card grid字段/更新回调未接UI，实际仍S/M/L；上游纯grid可移植但explicit overlap、硬编码cols和changed遗漏要修正。
 
 **来源：** AC-012, AC-013, AC-014, AC-015；issue #137, #141；<Path>{roots.state}/specdev/changes/2026-10-08-home-grid-rebuild/reference-analysis.md</Path>。深度 deep：涉及持久数据/公共接口/进程或权限的跨边界合同，必须记录恢复与兼容。
 

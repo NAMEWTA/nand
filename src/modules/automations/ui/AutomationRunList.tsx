@@ -5,6 +5,7 @@ import { getLanguage, t } from '../../../shared/i18n';
 import type { AutomationsApi } from '../core/api';
 import { Icon } from '../../../ui/primitives/Icon';
 import { STATUS_TONE, statusBadge } from './status-presentation';
+import { dispatchMaterial } from '../../../shared/agent-dispatch';
 import type { AutomationPanelActions } from './panel-contract';
 /** Shared run details preserve output, stop semantics, accounting and exact session actions. */
 export function AutomationRunList({ runs, service, actions, selected }: {
@@ -30,6 +31,8 @@ export function AutomationRunList({ runs, service, actions, selected }: {
 													{t('automation.open')}
 												</button>
 											)}
+											{run.definition?.action.kind === 'browser-workflow' && <button className="nand-ui-btn nand-ui-btn-ghost" disabled={!service.openRun}
+												onClick={() => actions.run(async () => service.openRun?.(run))}><Icon name="workflow" />{t('automation.workflowResult')}</button>}
 											{isActiveRun(run) && (
 												<button
 													className="nand-ui-btn nand-ui-btn-ghost nand-automation-btn-danger"
@@ -43,6 +46,11 @@ export function AutomationRunList({ runs, service, actions, selected }: {
 										{(run.errorCode || run.message) && (
 											<p className="nand-automation-run-message">{automationMessage(run)}</p>
 										)}
+										{run.invocation && <details className="nand-automation-output">
+											<summary>{t('automation.finalPrompt')}</summary>
+											{run.invocation.receipt && <p>{t(`automation.delivery.${run.invocation.receipt.delivery}`)}</p>}
+											<pre>{dispatchMaterial(run.invocation.request)}</pre>
+										</details>}
 										{run.usage?.known && (
 											<p className="nand-automation-run-usage">
 												{t('automation.tokens')}{t('automation.colon')}{run.usage.input} / {run.usage.output}

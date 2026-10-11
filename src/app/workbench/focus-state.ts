@@ -8,11 +8,12 @@ export interface FocusLeafState extends Record<string, unknown> {
 
 /** "Open in new tab/split" opens a focus-mode workbench leaf. Browser copies get a new page id and no session secrets. */
 export function focusLeafState(target: WorkbenchTarget, state: Record<string, unknown>): FocusLeafState {
-	if (target.feature !== 'browser') return { target, focus: true, pages: [{ target, state }] };
+	if (target.feature !== 'browser' || target.section) return { target, focus: true, pages: [{ target, state }] };
 	const id = crypto.randomUUID();
 	const copied: WorkbenchTarget = { feature: 'browser', resourceId: id };
 	const page: Record<string, unknown> = { id };
 	if (typeof state.url === 'string') page.url = state.url;
+	if (typeof state.profileId === 'string') page.profileId = state.profileId;
 	if (typeof state.title === 'string') page.title = state.title;
 	if (typeof state.zoom === 'number' && Number.isFinite(state.zoom)) page.zoom = state.zoom;
 	if (state.scroll && typeof state.scroll === 'object' && !Array.isArray(state.scroll)) page.scroll = state.scroll;

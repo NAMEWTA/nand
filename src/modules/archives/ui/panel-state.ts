@@ -43,9 +43,10 @@ function anchors(raw: unknown): ContactsPanelState['anchors'] {
 }
 /** Per-kind layout preference chosen earlier (settings), used when the leaf has none of its own. */
 export type PreferredLayouts = Partial<Record<'person' | 'company', ContactsLayoutMode>>;
-/** The leaf's own layout wins, then the user's last explicit choice. Without either, people are listed and companies are cards. */
+/** Saved leaves without a valid choice keep cards; new leaves list people. Explicit choices take precedence. */
 export function layoutsFor(raw: Record<string, unknown>, preferred: PreferredLayouts = {}): ContactsPanelState['layout'] {
-	const fallback: ContactsPanelState['layout'] = { person: 'list', company: 'card' };
+	const saved = CONTACTS_PAGE_STATE_KEYS.some((key) => Object.hasOwn(raw, key));
+	const fallback: ContactsPanelState['layout'] = { person: saved ? 'card' : 'list', company: 'card' };
 	const given = raw.layout && typeof raw.layout === 'object' ? (raw.layout as Record<string, unknown>) : {};
 	return {
 		person: mode(given.person, mode(preferred.person, fallback.person)),
@@ -75,12 +76,12 @@ export function restoreContactsState(raw: Record<string, unknown>, preferred: Pr
 export function emptyPanelState(preferred: PreferredLayouts = {}): ContactsPanelState {
 	return restoreContactsState({}, preferred);
 }
-/** Layout is the only field that changes. The visible path becomes the other layout's anchor. */
+/** Keep each layout's anchor. A layout's first visit starts at the currently visible record. */
 export function applyLayout(state: ContactsPanelState, mode: ContactsLayoutMode, visible = ''): ContactsPanelState {
 	const kind = state.query.kind;
 	if (state.layout[kind] === mode) return state;
 	const current = { ...state.anchors[kind], [state.layout[kind]]: visible };
-	if (visible) current[mode] = visible;
+	if (visible && !current[mode]) current[mode] = visible;
 	return {
 		...state,
 		layout: { ...state.layout, [kind]: mode },

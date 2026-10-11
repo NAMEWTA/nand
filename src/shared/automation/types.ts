@@ -11,7 +11,7 @@ export type NotificationChannelId = 'in-app' | 'system';
 export type ScheduleSpec =
 	{ kind: 'manual' } | { kind: 'once'; at: number } | { kind: 'recurring'; expression: string; start: number; timezone?: string };
 export interface SourceRef {
-	kind: 'dashboard' | 'contacts' | 'widget';
+	kind: 'dashboard' | 'contacts' | 'widget' | 'news' | 'browser' | 'browser-workflow';
 	path: string;
 	id: string;
 }
@@ -26,6 +26,7 @@ export interface AgentSessionRef {
 	terminalId?: string;
 }
 export type AutomationAction =
+	| BrowserWorkflowAction
 	| { kind: 'script'; script: string; cwd: string; shell: 'powershell' | 'bash' }
 	| { kind: 'obsidian-command'; command: string }
 	| { kind: 'open-file'; path: string }
@@ -40,6 +41,25 @@ export type AutomationAction =
 			sessionMode: 'fresh' | 'reuse' | 'specific';
 			session?: AgentSessionRef;
 	  };
+/** Only public values belong in saved definitions. Secrets and review grants stay in the producer's memory. */
+export interface BrowserWorkflowAction {
+	kind: 'browser-workflow';
+	workflowId: string;
+	version: number;
+	variables: Record<string, string | number | boolean>;
+	/** Explicit persistent page/account choices; a runner must bind their current runtime generations. */
+	scope: Array<{ id: string; pageId: string; profileId: string }>;
+}
+export interface AutomationActionCompletion extends AutomationMessage {
+	status: 'succeeded' | 'failed' | 'cancelled' | 'interrupted';
+	output?: string;
+}
+/** A non-terminal action remains owned until its actual completion or cancellation. */
+export interface AutomationActionHandle {
+	completion: Promise<AutomationActionCompletion>;
+	cancel(): Promise<void>;
+	open(): Promise<void>;
+}
 export interface AutomationDefinition {
 	id: string;
 	name: string;
@@ -56,13 +76,15 @@ export interface AutomationDefinition {
 	updatedAt: number;
 }
 export type RunStatus =
-	'pending' | 'running' | 'unknown' | 'succeeded' | 'failed' | 'cancelled' | 'interrupted' | 'skipped';
+	'pending' | 'running' | 'unknown' | 'succeeded' | 'failed' | 'cancelled' | 'interrupted' | 'skipped' | 'delivered';
 export interface AutomationMessage {
 	message: string;
 	errorCode?: string;
 	errorParams?: Record<string, string | number>;
 }
 export interface AutomationRun extends AutomationMessage {
+	workflowInvocation?: { invocationId: string; identity: string };
+	invocation?: { request: AgentDispatchRequest; receipt?: AgentDispatchReceipt };
 	definition?: AutomationDefinition;
 	notificationAttempted?: boolean;
 	id: string;
@@ -131,3 +153,4 @@ export interface AutomationUiPort {
 export function isActiveRun(run: AutomationRun): boolean {
 	return run.status === 'pending' || run.status === 'running' || run.status === 'unknown';
 }
+import type { AgentDispatchRequest, AgentDispatchReceipt } from '../agent-dispatch';

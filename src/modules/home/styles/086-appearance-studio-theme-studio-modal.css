@@ -6,6 +6,25 @@
 	max-width: 520px;
 	border-radius: 14px;
 }
+
+.nand-appearance-presets { margin-bottom: var(--nand-space-4); }
+.nand-appearance-actions { display: flex; flex-wrap: wrap; gap: var(--nand-space-2); }
+.nand-appearance-preset {
+	padding: var(--nand-space-3);
+	border: 1px solid var(--nand-border-color);
+	border-radius: var(--nand-radius-sm);
+	overflow-wrap: anywhere;
+}
+
+.nand-appearance-modal :is(button, input, select) { min-height: var(--nand-control-height); }
+.nand-appearance-modal button { min-width: var(--nand-control-height); }
+.nand-appearance-modal input { min-width: 0; }
+.nand-appearance-modal :is(.dashboard-theme-studio-slider-row, .dashboard-theme-studio-size-row, .dashboard-theme-studio-fontscale-row) { flex-wrap: wrap; }
+
+@media (pointer: coarse) {
+	.nand-appearance-modal :is(button, input, select) { min-height: var(--nand-touch-target); }
+	.nand-appearance-modal button { min-width: var(--nand-touch-target); }
+}
 .dashboard-theme-studio-hint {
 	margin: 0 0 14px;
 	font-size: 0.82em;

@@ -1,9 +1,11 @@
 import { t } from '../../../../shared/i18n/index';
 import type { AnniversaryConfig } from '../board/types/index';
 import { lunarAnniversaryThisYear, type LunarLookup } from './lunar-map';
+import { civilDate, validCivilDate } from './civil-date';
 
 export function parseAnniversaryDate(raw: string): Date | null {
-	if (!raw) return null;
+	const parts = /^(\d{4}-\d{2}-\d{2})(?:T([0-2]\d):([0-5]\d)(?::([0-5]\d)(?:\.\d{1,3})?)?(?:Z|[+-][0-2]\d:[0-5]\d)?)?$/.exec(raw);
+	if (!parts || !validCivilDate(parts[1]!) || (parts[2] && Number(parts[2]) > 23)) return null;
 	const date = raw.includes('T') ? new Date(raw) : new Date(raw + 'T00:00:00');
 	const time = date.getTime();
 	if (Number.isNaN(time)) return null;
@@ -46,11 +48,19 @@ export function formatElapsed(start: Date, now: Date, precision: AnniversaryConf
  *  onto Mar 1 in common years — Date overflow does this naturally).
  *  A lunar anniversary uses the injected calendar and does not rewrite the stored solar start. */
 export function anniversaryDateThisYear(start: Date, now: Date, calendar?: 'solar' | 'lunar', lookup?: LunarLookup): Date {
-	if (calendar === 'lunar' && lookup) {
-		const pad = (value: number) => String(value).padStart(2, '0');
-		const iso = `${start.getFullYear()}-${pad(start.getMonth() + 1)}-${pad(start.getDate())}`;
-		const mapped = parseAnniversaryDate(lunarAnniversaryThisYear(iso, now.getFullYear(), lookup).solar);
-		if (mapped) return mapped;
-	}
-	return new Date(now.getFullYear(), start.getMonth(), start.getDate());
+	return anniversaryOccurrence(start, now, calendar, lookup).date;
+}
+
+/** Current calendar year's occurrence, shared by the widget and notification source.
+ * Before Lunar New Year, late lunar months still belong to the preceding lunar year. */
+export function anniversaryOccurrence(start: Date, now: Date, calendar?: 'solar' | 'lunar', lookup?: LunarLookup): { date: Date; years: number } {
+	if (calendar !== 'lunar') return {
+		date: new Date(now.getFullYear(), start.getMonth(), start.getDate()),
+		years: now.getFullYear() - start.getFullYear(),
+	};
+	if (!lookup) throw new Error('Lunar calendar is unavailable');
+	const year = lookup.toLunar(civilDate(now)).year;
+	const mapped = parseAnniversaryDate(lunarAnniversaryThisYear(civilDate(start), year, lookup).solar);
+	if (!mapped) throw new RangeError('Invalid lunar anniversary');
+	return { date: mapped, years: year - lookup.toLunar(civilDate(start)).year };
 }

@@ -1,0 +1,54 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Doubao adapter local fixture</title>
+<a id="new-chat" href="/new">New chat</a>
+<main id="messages" class="list_items"></main>
+<div id="composer" class="fixture-composer tiptap ProseMirror" contenteditable="true" role="textbox" style="min-height:50px;border:1px solid;padding:8px;white-space:pre-wrap"></div>
+<button id="submit" data-testid="chat_input_send_button" aria-label="Send">Send</button>
+<button id="stop" data-testid="chat_input_local_break_button" aria-label="Stop response" style="display:none">Stop</button>
+<script>
+const composer = document.querySelector('#composer'), output = document.querySelector('#messages'), submit = document.querySelector('#submit'), stop = document.querySelector('#stop');
+let conversation, serial = 0, messages = [], timer;
+const fence = String.fromCharCode(96).repeat(3);
+window.fixtureMarkdown = '# Heading\n\n| A | B |\n| --- | --- |\n| 1 | 2 |\n\n' + fence + 'ts\nconst a = 1;\n' + fence + '\n\n$x^2$\n\nRepeated paragraph\n\nRepeated paragraph';
+window.fixtureCount = () => messages.length;
+window.fixtureHistory = anchor => {
+ const rows = structuredClone(messages), count = rows.length, split = Math.max(0,count-2), first = anchor === undefined || Number(anchor) === count;
+ if(window.fixtureMode==='missing-parent')rows.shift();
+ if(window.fixtureMode==='stale-branch'&&rows.length)rows.at(-1).message_id='inactive-answer';
+ const body = {conversation_id:conversation,has_more:first&&split>0,total_count:count,messages:first?rows.slice(-2):rows.slice(0,-2)};
+ if(body.has_more)body.next_index_in_conv=split;
+ return first?{downlink_body:{pull_singe_chain_downlink_body:body},access_token:'fixture-only-secret'}:{pull_single_chain_downlink_body:body};
+};
+function row(id, parent, role, text) {
+ const root = document.createElement('section'); root.className='v_list_row'; root.dataset.messageId=id; root.dataset.parentId=parent??'';
+ const content = document.createElement('div'); content.dataset.role=role; content.className=role==='assistant'?'flow-markdown-body':'send-msg-bubble'; content.style.whiteSpace='pre-wrap';
+ content.textContent=text; root.append(content); output.append(root); return content;
+}
+document.querySelector('#new-chat').onclick = event => {
+ event.preventDefault(); if(timer)clearTimeout(timer);
+ conversation=undefined; messages=[]; output.replaceChildren(); composer.replaceChildren();
+ history.replaceState({},'', '/new'); stop.style.display='none'; submit.disabled=false;
+};
+submit.onclick = () => {
+ if(!composer.innerText||submit.disabled)return;
+ const question=composer.innerText,parent=messages.at(-1)?.message_id;
+ conversation??=crypto.randomUUID(); history.replaceState({},'', '/chat/'+conversation);
+ const user='user-'+(++serial),answer='answer-'+serial;
+ messages.push({message_id:user,parent_id:parent??null,sender_type:1,content:JSON.stringify({text:question})}); row(user,parent,'user',question);
+ const response=row(answer,user,'assistant','Partial answer');
+ composer.replaceChildren(); submit.disabled=true; stop.style.display='';
+ timer=setTimeout(()=>{
+  response.innerHTML='<h1>Heading</h1><table><tr><th>A</th><th>B</th></tr><tr><td>1</td><td>2</td></tr></table><pre><code class="language-ts">const a = 1;</code></pre><span class="katex"><annotation encoding="application/x-tex">x^2</annotation></span><div class="reasoning">Private reasoning fixture</div><button>Copy</button>';
+  messages.push({message_id:answer,parent_id:user,sender_type:2,status:window.fixtureMode==='unfinished'?'unfinished':'finished',
+   content_block:JSON.stringify([{block_type:'reasoning',text:'Private reasoning fixture'},{block_type:'tool_use',text:'Private tool fixture'},
+    {block_type:'markdown',markdown:fixtureMarkdown+(window.fixtureLongAnswer?'\n\n'+'Long public paragraph. '.repeat(3000):'')}])});
+  submit.disabled=false; stop.style.display='none'; timer=undefined;
+  if(!window.fixtureNoHistory)void(async()=>{
+   const request=anchor=>fetch('/im/chain/single',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({conversation_id:conversation,anchor,direction:1,token:'fixture-only-secret'})});
+   await request(messages.length); if(messages.length>2&&window.fixtureMode!=='missing-page')await request(messages.length-2);
+  })();
+ },window.fixtureDelay??900);
+};
+stop.onclick=()=>{clearTimeout(timer);timer=undefined;stop.style.display='none';submit.disabled=false;const status=document.createElement('p');status.role='status';status.textContent='Stopped';output.append(status)};
+</script>

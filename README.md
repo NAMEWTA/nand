@@ -31,6 +31,7 @@ The [user guide](docs/README.md) covers every feature, including settings, appea
 | Automations | [Manual and scheduled actions, device ownership and notifications](docs/automation.md) |
 | Coding agents | [Terminal sessions, native history, usage and context](docs/agent-workbench.md) |
 | Browser | [Web pages, site permissions, CLI and material capture](docs/browser.md) |
+| News | [Feeds, analysis, event reading, favorites and briefs (desktop, off by default)](docs/news.md) |
 | Archives | [People, companies, positions, relationships and related material](docs/contacts.md) |
 | Comments | [Comments that never rewrite the note](docs/comments.md) |
 | Icons | [File and interface icons, colors and rules](docs/icons.md) |
@@ -55,7 +56,7 @@ Changes by version are in the [changelog](CHANGELOG.md).
 
 NAND is released under the MIT License: see [LICENSE](LICENSE). Third-party attribution:
 
-- [NOTICE](NOTICE) names the works NAND adapts and keeps their license texts: apex-dashboard and obsidian-dashboard (board design), Orca (terminal and browser parts), Iconic (icon rules) and obsidian-git (Git sync). The Orca mapping is in [docs/third-party](docs/third-party/orca-terminal-workbench.md).
+- [NOTICE](NOTICE) names the works NAND adapts and keeps their license texts: apex-dashboard and obsidian-dashboard (board design), Orca (terminal and browser parts), Iconic (icon rules), obsidian-git (Git sync) and AIHOT (news algorithms). See the [Orca mapping](docs/third-party/orca-terminal-workbench.md) and [news mapping](docs/third-party/aihot-news.md).
 - [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md) lists the npm packages bundled into the plugin and the Rust crates of the terminal helper.
 - Icon, emoji and Unicode data notices are in [src/modules/icons/core/res/NOTICE.txt](src/modules/icons/core/res/NOTICE.txt).
 

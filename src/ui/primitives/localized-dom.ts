@@ -1,4 +1,8 @@
 import { t } from '../../shared/i18n';
+import type { DropdownComponent } from 'obsidian';
+
+// The element owns the control refresh without a global listener or a strong registry.
+const dropdownRefresh = new WeakMap<HTMLSelectElement, () => void>();
 
 type Params = Record<string, string | number>;
 /** Explicit bindings only: never infer translations from user-authored DOM text. */
@@ -64,21 +68,17 @@ export function bindLocalizedControl<T extends object>(
 		);
 	return control;
 }
-export function bindLocalizedOptions<T>(control: T, bindings: Record<string, [string, Params?]>): T {
-	const select = (control as { selectEl?: HTMLSelectElement }).selectEl;
-	if (select) {
-		select.setAttribute('data-nand-i18n-options', 'true');
-		for (const option of Array.from(select.options)) {
-			const binding = bindings[option.value];
-			if (binding) setLocalizedText(option, binding[0], binding[1]);
-		}
-		// Obsidian's native dropdown measures its longest option lazily. Force a
-		// layout pass after replacing labels while preserving the selected value.
-		const value = select.value;
-		select.setCssProps({ width: '' });
-		void select.offsetWidth;
-		select.value = value;
+export function bindLocalizedOptions<T extends Pick<DropdownComponent, 'selectEl' | 'getValue'> & { setValue(value: string): unknown }>(control: T, bindings: Record<string, [string, Params?]>): T {
+	const select = control.selectEl;
+	select.setAttribute('data-nand-i18n-options', 'true');
+	for (const option of Array.from(select.options)) {
+		const binding = bindings[option.value];
+		if (binding) setLocalizedText(option, binding[0], binding[1]);
 	}
+	// The public setter updates native measurement without emitting onChange.
+	const refresh = () => { if (select.getClientRects().length) control.setValue(control.getValue()); };
+	dropdownRefresh.set(select, refresh);
+	refresh();
 	return control;
 }
 export function refreshLocalizedDom(root: HTMLElement): void {
@@ -117,10 +117,6 @@ export function refreshLocalizedDom(root: HTMLElement): void {
 		}
 	}
 	for (const select of [root, ...Array.from(root.querySelectorAll<HTMLSelectElement>('select[data-nand-i18n-options]'))]) {
-		if (!select.instanceOf(HTMLSelectElement)) continue;
-		const value = select.value;
-		select.setCssProps({ width: '' });
-		void select.offsetWidth;
-		select.value = value;
+		dropdownRefresh.get(select as HTMLSelectElement)?.();
 	}
 }

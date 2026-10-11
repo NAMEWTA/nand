@@ -1,0 +1,179 @@
+{
+  "ticket": [
+    "News T01",
+    "News T06",
+    "News T07",
+    "News T10"
+  ],
+  "requirements": [
+    "AC-003",
+    "AC-005",
+    "AC-018",
+    "AC-019",
+    "AC-020",
+    "AC-027",
+    "AC-028"
+  ],
+  "finding": "R-086",
+  "status": "fixed-native23-full599-verified",
+  "implementation": [
+    "Native settings add 1..365 material retention days (default30), opt-out adaptive polling, and configurable visible vault folders for new favorites/daily notes. Invalid paths reject hidden, absolute, parent, special and reserved segments.",
+    "Existing notes are rediscovered by NAND type/identity metadata, including visible moves outside their old folders. Daily notes join favorite/brief identity indexing so folder edits and moves do not duplicate an issue. Metadata listeners are released on module disposal.",
+    "Material retention applies at next cache persistence; visible notes and separate 30-day receipt history are retained. Saved favorite identities remain discoverable.",
+    "Disabling adaptive intervals uses configured source interval while retaining bounded failure backoff. Interval/participation/adaptive edits recalculate due time locally and invalidate stale collection generations. Cancelled first attempts without a completed schedule remain immediately eligible."
+  ],
+  "verification": {
+    "nativeDirectory": "C:/Users/cdewta/AppData/Local/Temp/nand-news-storage-review-b7c283642b6344f29c082a5076d38b9d/evidence",
+    "harness": "scripts/obsidian-acceptance/news-storage-settings.mjs",
+    "checks": [
+      {
+        "name": "default-favorite-folder-is-preserved",
+        "passed": true
+      },
+      {
+        "name": "defaults-are-thirty-days-and-adaptive",
+        "passed": true
+      },
+      {
+        "name": "storage-controls-save-durably",
+        "passed": true
+      },
+      {
+        "name": "unsafe-folder-is-rejected",
+        "passed": true
+      },
+      {
+        "name": "invalid-retention-keeps-saved-value",
+        "passed": true
+      },
+      {
+        "name": "retention-prunes-old-raw-without-deleting-favorite",
+        "passed": true
+      },
+      {
+        "name": "saved-markdown-and-annotation-survive",
+        "passed": true
+      },
+      {
+        "name": "manual-source-interval-controls-next-fetch",
+        "passed": true
+      },
+      {
+        "name": "interval-edit-recalculates-due-time-without-fetch",
+        "passed": true
+      },
+      {
+        "name": "new-favorite-uses-configured-folder",
+        "passed": true
+      },
+      {
+        "name": "daily-markdown-uses-configured-folder",
+        "passed": true
+      },
+      {
+        "name": "folder-change-keeps-existing-note-identities",
+        "passed": true
+      },
+      {
+        "name": "moves-outside-configured-folders-preserve-identity",
+        "passed": true
+      },
+      {
+        "name": "adaptive-switch-restores-computed-interval",
+        "passed": true
+      },
+      {
+        "name": "live-language-keeps-folder-draft",
+        "passed": true
+      },
+      {
+        "name": "storage-controls-fit-500",
+        "passed": true,
+        "detail": {
+          "width": 444,
+          "scroll": 444
+        }
+      },
+      {
+        "name": "storage-controls-fit-800",
+        "passed": true,
+        "detail": {
+          "width": 692,
+          "scroll": 692
+        }
+      },
+      {
+        "name": "storage-controls-fit-1500",
+        "passed": true,
+        "detail": {
+          "width": 760,
+          "scroll": 760
+        }
+      },
+      {
+        "name": "restart-rediscovers-moved-tagged-notes",
+        "passed": true
+      },
+      {
+        "name": "restart-updates-moved-edition-without-duplicate",
+        "passed": true
+      },
+      {
+        "name": "no-model-calls-and-no-extra-collection",
+        "passed": true
+      },
+      {
+        "name": "module-off-unmounts-storage-settings",
+        "passed": true
+      },
+      {
+        "name": "no-host-errors",
+        "passed": true,
+        "detail": []
+      }
+    ],
+    "httpRequests": 1,
+    "unit": "26 passing targeted tests in news-service, news-notebook, edition, source-schedule and notes",
+    "build": "pass",
+    "lint": "pass zero warnings after replacing control-character regex with explicit codepoint check",
+    "i18n": "3218 keys pass",
+    "screenshotReview": "storage-settings-500.png visually inspected",
+    "fullSuite": "599 pass,4skip,113.15s",
+    "architecture": "869 modules passed",
+    "docs": "549 files/559local/348external no fetch",
+    "bundle": "4040579 bytes,limit4040704; startup/module/style limits unchanged"
+  },
+  "documentation": {
+    "backup": "C:/Users/cdewta/AppData/Local/Temp/nand-review-news-storage-docs-o70m60sw",
+    "files": [
+      {
+        "path": "docs/news.md",
+        "beforeCharacters": 11509,
+        "afterCharacters": 12461
+      },
+      {
+        "path": "docs/news.ZH.md",
+        "beforeCharacters": 4183,
+        "afterCharacters": 4498
+      },
+      {
+        "path": "docs/data.md",
+        "beforeCharacters": 11159,
+        "afterCharacters": 11444
+      },
+      {
+        "path": "docs/data.ZH.md",
+        "beforeCharacters": 5105,
+        "afterCharacters": 5251
+      }
+    ]
+  },
+  "nativeFailuresResolved": [
+    "Probe originally requested 90 minutes for an editorial source, which correctly normalizes to its 60-minute maximum; changed probe to supported 30-minute edit.",
+    "Vault.createFolder returns a cyclic TFolder that CDP cannot serialize; probe awaits it and returns true. No production bypass."
+  ],
+  "limits": [
+    "Deterministic local feed and native Vault operations, no external provider/CLI calls.",
+    "Remaining source issue settings (understandFloor/recall) still under audit."
+  ]
+}

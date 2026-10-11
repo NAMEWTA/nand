@@ -1,18 +1,34 @@
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
-import { mkdtempSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
-import { test } from 'vitest';
+import { pathToFileURL } from 'node:url';
+import { afterEach, test } from 'vitest';
 
-const styles = path.resolve('styles.css');
+const styles = pathToFileURL(path.resolve('styles.css')).href;
+const chromeExecutable = process.env.NAND_CHROME_EXECUTABLE ?? [
+	'C:/Program Files/Google/Chrome/Application/chrome.exe',
+	'C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe',
+	'/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
+	'/usr/bin/google-chrome', '/usr/bin/chromium', '/usr/bin/chromium-browser',
+].find(candidate => existsSync(candidate)) ?? 'google-chrome';
+const fixtures: string[] = [];
+afterEach(() => {
+	for (const directory of fixtures.splice(0)) {
+		assert.equal(path.dirname(directory), path.resolve(tmpdir()));
+		assert.ok(path.basename(directory).startsWith('nand-surface-'));
+		rmSync(directory, { recursive: true, force: true });
+	}
+});
 
 function chrome<T>(html: string): T {
 	const dir = mkdtempSync(path.join(tmpdir(), 'nand-surface-'));
+	fixtures.push(dir);
 	const file = path.join(dir, 'page.html');
 	writeFileSync(file, html);
 	const result = spawnSync(
-		'google-chrome',
+		chromeExecutable,
 		[
 			'--headless=new',
 			'--disable-gpu',
@@ -22,10 +38,11 @@ function chrome<T>(html: string): T {
 			'--window-size=1200,800',
 			'--virtual-time-budget=2000',
 			'--dump-dom',
-			file,
+			pathToFileURL(file).href,
 		],
-		{ encoding: 'utf8', timeout: 30_000 },
+		{ encoding: 'utf8', timeout: 30_000, windowsHide: true },
 	);
+	if (result.error) throw result.error;
 	assert.equal(result.status, 0, result.stderr);
 	const match = /<pre id="out">([^<]*)<\/pre>/.exec(result.stdout);
 	assert.ok(match, result.stdout.slice(-500));
@@ -34,7 +51,7 @@ function chrome<T>(html: string): T {
 
 test('a 288px desktop column keeps the quick note at content height', () => {
 	const measured = chrome<{ height: number; flex: string; main: number; gap: number }>(`<!doctype html>
-<html><head><link rel="stylesheet" href="file://${styles}"></head>
+<html><head><link rel="stylesheet" href="${styles}"></head>
 <body>
 <div class="nand-dashboard-root" data-layout="stacked" style="width:288px;height:1950px">
   <div class="dashboard-main">
@@ -60,13 +77,13 @@ document.getElementById('out').textContent = JSON.stringify({
 	assert.equal(measured.flex, '0 0 auto');
 	assert.ok(measured.main > 1000, JSON.stringify(measured));
 	assert.ok(measured.gap >= 0 && measured.gap < 24, JSON.stringify(measured));
-});
+}, 35_000); // Real Chrome has its own 30s process deadline, including cold startup.
 
 type Tone = { text: string; background: string };
 
 test('archive text and paper differ in light and dark', () => {
 	const measured = chrome<{ light: Tone; dark: Tone }>(`<!doctype html>
-<html><head><link rel="stylesheet" href="file://${styles}"></head>
+<html><head><link rel="stylesheet" href="${styles}"></head>
 <body class="nand-theme--claude-code theme-light">
 <div class="nand-contacts-surface"><button class="nand-contacts-row-name">王</button></div>
 <pre id="out"></pre>
@@ -86,4 +103,4 @@ document.getElementById('out').textContent = JSON.stringify({ light, dark });
 	assert.notEqual(measured.dark.text, measured.dark.background);
 	assert.notEqual(measured.light.text, measured.dark.text);
 	assert.notEqual(measured.light.background, measured.dark.background);
-});
+}, 35_000);

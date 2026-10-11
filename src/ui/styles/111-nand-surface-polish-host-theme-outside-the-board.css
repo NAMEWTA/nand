@@ -109,7 +109,7 @@
 .nand-dashboard-root .dashboard-section-title-wrap { min-width: 0; gap: var(--size-4-2); }
 .nand-dashboard-root .dashboard-card-header { align-items: center; gap: var(--size-4-2); margin-bottom: var(--size-4-2); }
 .nand-dashboard-root .dashboard-card-title { min-width: 0; overflow-wrap: anywhere; line-height: 1.5; }
-.nand-dashboard-root .dashboard-card-btn { min-width: 28px; min-height: 28px; border-radius: var(--db-radius-sm); }
+.nand-dashboard-root .dashboard-card-btn { min-width: var(--nand-control-height); min-height: var(--nand-control-height); border-radius: var(--db-radius-sm); }
 .nand-dashboard-root .dashboard-card:focus-within .dashboard-card-actions { opacity: 1; }
 .nand-dashboard-root .dashboard-card-body { line-height: 1.5; overflow-wrap: anywhere; }
 .nand-dashboard-root .dashboard-section-header-actions { gap: var(--size-4-2); }
@@ -117,9 +117,10 @@
 :is(.nand-editor-view, .nand-editor-comment-popover, .nand-empty-state, .nand-settings, .dashboard-settings-root) :is(button, a):focus-visible { outline: 2px solid var(--interactive-accent); outline-offset: 2px; }
 .nand-editor-comment .nand-editor-comment-quote:focus-visible { outline: 2px solid var(--interactive-accent); outline-offset: 2px; }
 @media (pointer: coarse) {
+	.modal--dashboard .dashboard-modal-btn { min-height: var(--nand-touch-target); }
 	:is(.nand-editor-view, .nand-editor-comment-popover, .nand-empty-state, .nand-settings, .dashboard-settings-root) button,
 	.nand-dashboard-root .dashboard-card-btn { min-width: 44px; min-height: 44px; }
-	.nand-dashboard-root .dashboard-card-actions { opacity: 1; }
+	.nand-dashboard-root .dashboard-card-actions { opacity: 1; pointer-events: auto; }
 	.nand-editor-comment-actions :is(button.nand-ui-btn, button.nand-ui-icon-btn),
 	.nand-editor-tabs button.nand-editor-tab,
 	.nand-editor-comment-popover button.nand-editor-comment-popover-btn { min-width: 44px; min-height: 44px; }

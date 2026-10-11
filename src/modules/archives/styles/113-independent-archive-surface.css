@@ -23,13 +23,14 @@
 .nand-contacts-list { display: flex; flex-direction: column; gap: var(--size-4-1); min-width: 0; }
 .nand-contacts-row { display: grid; grid-template-columns: minmax(7rem, 1.1fr) minmax(0, 4fr) auto; gap: var(--size-4-2); align-items: center; min-width: 0; padding: var(--size-4-2) var(--size-4-3); }
 .nand-contacts-row-wide { display: grid; grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr) minmax(0, 1.2fr) minmax(0, 1fr); gap: var(--size-4-2); min-width: 0; }
+.nand-contacts-row-wide > span { min-width: 0; overflow-wrap: anywhere; }
 .nand-contacts-row-name { padding: 0; border: 0; background: none; color: var(--text-normal); font-weight: 600; text-align: start; overflow-wrap: anywhere; cursor: pointer; }
 .nand-contacts-row-copy { justify-self: end; }
-.nand-contacts-row-narrow { display: none; }
+.nand-contacts-row-narrow { display: none; overflow-wrap: anywhere; }
 .nand-contacts-hit { grid-column: 1 / -1; margin: 0; padding: 0; border: 0; background: none; color: var(--text-muted); font-size: var(--font-ui-smaller); text-align: start; overflow-wrap: anywhere; }
 button.nand-contacts-hit { cursor: pointer; }
 .nand-contacts-row-name:focus-visible, .nand-contacts-hit:focus-visible, .nand-contacts-scope:focus-visible { outline: 2px solid var(--interactive-accent); outline-offset: 2px; }
-@container contacts (max-width: 640px) {
+@container contacts (max-width: 800px) {
 	.nand-contacts-row { grid-template-columns: minmax(0, 1fr) auto; }
 	.nand-contacts-row-wide { display: none; }
 	.nand-contacts-row-narrow { display: flex; flex-direction: column; gap: 2px; grid-column: 1 / -1; min-width: 0; }

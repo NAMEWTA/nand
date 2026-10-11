@@ -15,7 +15,7 @@ import { captureScrollStates, restoreScrollStates } from '../ui/scroll-preserve'
 import { renderWebSection } from '../web/web-section';
 import { renderWereadSection } from '../weread/render-weread-section';
 import { renderCard } from './render-card';
-import { bindRenderContext, getRenderContext, type DashboardRenderContext } from './render-context';
+import { bindRenderContext, DashboardRenderContext, destroyDashboardPanels, getRenderContext } from './render-context';
 import { getSectionType } from './render-text-with-links';
 import { homeServices } from '../../services/instances';
 
@@ -314,6 +314,21 @@ export function renderSection(
 		});
 		setIcon(templateBtn, 'layout-template');
 		templateBtn.addEventListener('click', () => callbacks.onAddFromTemplate(column.name));
+	}
+
+	if (sectionType === 'pipeline') {
+		el.addClass('dashboard-section-row--pipeline');
+		const remove = headerActions.createEl('button', { cls: 'dashboard-section-add-btn dashboard-section-delete-btn', attr: localizedAttributes('renderer.deleteSection', { column: column.name }, 'aria-label') });
+		setIcon(remove, 'trash-2');
+		remove.addEventListener('click', () => callbacks.onColumnDelete(column.name, data ? data.columns.indexOf(column) : -1));
+		const root = el.createDiv({ cls: 'nand-pipeline-host' }), abort = new AbortController();
+		bindRenderContext(root, new DashboardRenderContext(root));
+		getRenderContext(el).resources.set(root, () => { abort.abort(); destroyDashboardPanels(root); });
+		void import('../pipeline/render').then(ui => {
+			if (!abort.signal.aborted) ui.renderPipelineSection(root, column, app, callbacks, abort.signal);
+		}).catch(error => { if (!abort.signal.aborted) root.createEl('p', { text: error instanceof Error ? error.message : String(error), attr: { role: 'alert' } }); });
+		attachSectionResizeHandle(el, column, callbacks);
+		return el;
 	}
 
 	// Library section: render differently

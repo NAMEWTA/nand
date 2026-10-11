@@ -23,6 +23,7 @@ export const SECTION_TYPE_OPTIONS: SectionTypeOption[] = [
 	{ value: 'dataview', icon: 'table-2', labelKey: 'renderer.typeDataview' },
 	{ value: 'library', icon: 'database', labelKey: 'renderer.typeLibrary' },
 	{ value: 'folder', icon: 'folder', labelKey: 'renderer.typeFolder' },
+	{ value: 'pipeline', icon: 'workflow', labelKey: 'home.pipeline.title' },
 	{ value: 'images', icon: 'image', labelKey: 'renderer.typeImages' },
 	{ value: 'videos', icon: 'video', labelKey: 'renderer.typeVideos' },
 	{ value: 'calendar', icon: 'calendar-days', labelKey: 'renderer.typeCalendar' },
@@ -34,6 +35,7 @@ export class AddSectionModal extends Modal {
 	private selectedType: string;
 	private readonly onAdd: (name: string, sectionType: string) => void;
 	private nameInput: HTMLInputElement | null = null;
+	private focusTimer?: number;
 
 	constructor(
 		app: import('obsidian').App,
@@ -90,22 +92,26 @@ export class AddSectionModal extends Modal {
 		}), 'common.save');
 		confirmBtn.addEventListener('click', () => this.tryConfirm());
 
-		window.setTimeout(() => this.nameInput?.focus(), 0);
+		this.focusTimer = contentEl.win.setTimeout(() => this.nameInput?.focus(), 0);
 	}
 
 	private renderTypeGrid(grid: HTMLElement): void {
 		grid.empty();
 		for (const opt of SECTION_TYPE_OPTIONS) {
-			const card = grid.createDiv({
+			const card = grid.createEl('button', {
 				cls: 'dashboard-add-section-card' + (opt.value === this.selectedType ? ' active' : ''),
-				attr: { 'data-type': opt.value, role: 'button' },
+				attr: { 'data-type': opt.value, type: 'button', 'aria-pressed': String(opt.value === this.selectedType) },
 			});
 			const iconEl = card.createDiv({ cls: 'dashboard-add-section-card-icon' });
 			setIcon(iconEl, opt.icon);
 			bindLocalizedElement(card.createDiv({ cls: 'dashboard-add-section-card-name', text: t(opt.labelKey) }), opt.labelKey);
 			card.addEventListener('click', () => {
 				this.selectedType = opt.value;
-				this.renderTypeGrid(grid);
+				for (const choice of grid.querySelectorAll<HTMLElement>('[data-type]')) {
+					const selected = choice.dataset.type === this.selectedType;
+					choice.toggleClass('active', selected);
+					choice.setAttribute('aria-pressed', String(selected));
+				}
 			});
 		}
 	}
@@ -123,6 +129,8 @@ export class AddSectionModal extends Modal {
 	}
 
 	onClose(): void {
+		if (this.focusTimer !== undefined) this.contentEl.win.clearTimeout(this.focusTimer);
+		this.nameInput = null;
 		this.contentEl.empty();
 	}
 }

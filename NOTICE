@@ -15,6 +15,10 @@ from apex-dashboard and from obsidian-dashboard.
 
 apex-dashboard
 https://github.com/PandoraReads/apex-dashboard
+Home layout and height-codec reference pinned to:
+db9d2892032c27f5f8899a72c0dca61d72572a9a (manifest version 3.7.5).
+The coarse-height conversion is adapted in home/core/board/board-codec.ts.
+Source and behavior mappings: docs/third-party/apex-dashboard.md.
 
 MIT License
 
@@ -137,3 +141,47 @@ Terminal
 
 The terminal (src/modules/agent) and its native helper (native/pty-server) are
 written for NAND.
+
+--------------------------------------------------------------------------------
+AIHOT (KKKKhazix/AIHOT), MIT License
+--------------------------------------------------------------------------------
+
+Copyright (c) 2026 数字生命卡兹克
+https://github.com/KKKKhazix/AIHOT
+
+News material timeline and adaptive collection interval rules are adapted from
+commit c547b669acc7f64720cd82024e502446ee1ef88d. NAND uses local Markdown,
+Obsidian storage and the user's Agent CLI instead of AIHOT's server runtime.
+Mapping: docs/third-party/aihot-news.md
+Full license text: docs/third-party/aihot-LICENSE.txt
+
+--------------------------------------------------------------------------------
+MAIW (NAMEWTA/multi-ai-browser-extension), MIT License
+--------------------------------------------------------------------------------
+
+Copyright (c) 2026 NAMEWTA
+https://github.com/NAMEWTA/multi-ai-browser-extension
+
+DeepSeek, Kimi, ChatGPT, Claude, Qwen, Doubao, Coze and MiniMax DOM selectors, public-content exclusions, history envelopes,
+public-content fragments, pagination, parent-chain parsing and the MAIW v3 history field contract
+are adapted from commit b6b83ca90f0f67fbf25a676e7a8f6b8b34327800.
+Mapping: docs/third-party/maiw-browser-workspace.md
+Full license text: docs/third-party/maiw-LICENSE.txt
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.

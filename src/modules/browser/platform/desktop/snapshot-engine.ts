@@ -118,7 +118,7 @@ export async function buildSnapshot(
 				displayName = `${entry.name} (${ordinal(nth)})`;
 			}
 			lines.push(`${indent}[${entry.ref}] ${entry.role} "${displayName}"`);
-			refs.push({ ref: entry.ref, role: entry.role, name: displayName });
+			refs.push({ ref: entry.ref, role: entry.role, name: displayName, ...(total > 1 ? { ambiguous: true } : {}) });
 			refMap.set(entry.ref, {
 				backendDOMNodeId: entry.backendDOMNodeId,
 				role: entry.role,

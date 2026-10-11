@@ -9,7 +9,7 @@ import { DashboardSettingTab } from '../settings/settings-tab';
 import { renderCopyHelp } from '../settings/editor-settings';
 import { renderAbout } from '../settings/about';
 import { PRODUCT_MODULES } from '../settings/nav';
-import type { ModuleId } from '../contracts/module';
+import type { ModuleId, ModuleInstance } from '../contracts/module';
 
 /** Settings categories (product ids) owned by a module. */
 const CATEGORY_MODULES: Readonly<Record<string, ModuleId>> = PRODUCT_MODULES;
@@ -18,6 +18,8 @@ class SettingsSurface extends NativeSurface {
 	private category = 'general';
 	private renderId = 0;
 	private kept: Array<() => void> = [];
+	private hidden = false;
+	private moduleSettingsPage: ModuleInstance['settingsPage'];
 
 	constructor(context: NativeSurfaceContext, private readonly plugin: DashboardPlugin, private readonly tab: DashboardSettingTab) {
 		super(context);
@@ -34,13 +36,34 @@ class SettingsSurface extends NativeSurface {
 	onOpen(): Promise<void> {
 		this.contentEl.addClass('nand-settings-page-host');
 		this.register(this.tab.onRefresh(() => this.render()));
+		this.register(this.plugin.onModuleChanged(() => {
+			const module = CATEGORY_MODULES[this.category];
+			if (this.hidden || !module) return;
+			if (!this.plugin.moduleEnabled(module)) {
+				this.show('general');
+				this.context.changed?.();
+			} else if (this.plugin.moduleInstance(module)?.settingsPage !== this.moduleSettingsPage) this.render();
+		}));
 		this.render();
 		return Promise.resolve();
 	}
 	onClose(): Promise<void> {
+		this.hidden = true;
+		++this.renderId;
 		this.release();
 		this.tab.dispose();
 		return Promise.resolve();
+	}
+	setVisible(visible: boolean): void {
+		super.setVisible(visible);
+		if (!visible) {
+			this.hidden = true;
+			++this.renderId;
+			this.release();
+		} else if (this.hidden) {
+			this.hidden = false;
+			this.render();
+		}
 	}
 	private release(): void {
 		for (const off of this.kept.splice(0)) off();
@@ -56,8 +79,10 @@ class SettingsSurface extends NativeSurface {
 		return this.category;
 	}
 	private render(): void {
+		if (this.hidden) return;
 		const id = ++this.renderId;
 		this.release();
+		this.moduleSettingsPage = undefined;
 		this.contentEl.empty();
 		const page = this.contentEl.createDiv({ cls: 'nand-settings-page' });
 		const category = settingsCategories(this.plugin).find((item) => item.id === this.category);
@@ -79,6 +104,7 @@ class SettingsSurface extends NativeSurface {
 				// Modules that own their settings page render it; the rest still use the shared settings tab.
 				const module = CATEGORY_MODULES[this.category];
 				const load = module ? this.plugin.moduleInstance(module)?.settingsPage : undefined;
+				this.moduleSettingsPage = load;
 				if (!load) {
 					this.tab.renderProduct(body, this.category as SettingsProduct);
 					return;

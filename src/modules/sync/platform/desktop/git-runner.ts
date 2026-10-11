@@ -1,7 +1,9 @@
-import { execFile } from 'node:child_process';
+import { execFile, spawn, type ChildProcess } from 'node:child_process';
 import { access } from 'node:fs/promises';
 import { hostname } from 'node:os';
 import path from 'node:path';
+import { setTimeout as delay } from 'node:timers/promises';
+import { setTimeout as setProcessTimeout, clearTimeout as clearProcessTimeout } from 'node:timers';
 import { GitError } from '../../core/errors';
 import type { GitResult, GitRunner, GitRunOptions } from '../../core/ports';
 
@@ -38,24 +40,53 @@ export function createGitRunner(binary: string, cwd: string): DesktopGitRunner {
 	return {
 		run(args: readonly string[], options: GitRunOptions = {}): Promise<GitResult> {
 			if (lifetime.signal.aborted) return Promise.reject(new GitError('cancelled'));
-			const signal = combine(lifetime.signal, options.signal);
+			const { signal, release } = combine(lifetime.signal, options.signal);
+			if (signal.aborted) { release(); return Promise.reject(new GitError('cancelled')); }
 			return new Promise((resolve, reject) => {
-				const child = execFile(
-					binary,
-					['-c', 'core.quotepath=off', '-c', 'color.ui=false', ...args],
-					{ cwd, env: gitEnv(options.env), timeout: options.timeoutMs ?? DEFAULT_TIMEOUT, maxBuffer: MAX_BUFFER, windowsHide: true, signal, encoding: 'utf8' },
-					(error, stdout, stderr) => {
-						if (!error) return resolve({ code: 0, stdout, stderr });
-						const failure = error as NodeJS.ErrnoException & { code?: string | number; killed?: boolean; signal?: string };
-						if (failure.code === 'ENOENT') return reject(new GitError('missing-git', binary));
-						if (failure.name === 'AbortError' || signal.aborted) return reject(new GitError('cancelled'));
-						if (failure.killed || failure.signal === 'SIGTERM') return reject(new GitError('timeout', args[0] ?? ''));
-						if (failure.code === 'ERR_CHILD_PROCESS_STDIO_MAXBUFFER') return reject(new GitError('unknown', 'output too large'));
-						resolve({ code: typeof failure.code === 'number' ? failure.code : 1, stdout, stderr });
-					},
-				);
+				let child: ReturnType<typeof spawn>;
+				try {
+					child = spawn(binary, ['-c', 'core.quotepath=off', '-c', 'color.ui=false', ...args], {
+						cwd, env: gitEnv(options.env), windowsHide: true, detached: process.platform !== 'win32', stdio: 'pipe',
+					});
+				} catch (error) { release(); reject(error instanceof Error ? error : new Error(String(error))); return; }
+				const stdout: string[] = [], stderr: string[] = [];
+				let bytes = 0;
+				let failure: GitError | undefined;
+				let termination: Promise<void> | undefined;
+				const stop = (reason: GitError) => {
+					if (termination) return;
+					failure = reason;
+					termination = terminateTree(child).catch(() => {
+						child.kill();
+						failure = new GitError('unknown', 'Could not terminate the Git process tree');
+					});
+				};
+				const abort = () => stop(new GitError('cancelled'));
+				const timeout = options.timeoutMs ?? DEFAULT_TIMEOUT;
+				const timer = timeout > 0 ? setProcessTimeout(() => stop(new GitError('timeout', args[0] ?? '')), timeout) : undefined;
+				const collect = (output: string[], text: string) => {
+					bytes += Buffer.byteLength(text);
+					if (bytes > MAX_BUFFER) stop(new GitError('unknown', 'output too large'));
+					else output.push(text);
+				};
+				child.stdout?.setEncoding('utf8').on('data', (text: string) => collect(stdout, text));
+				child.stderr?.setEncoding('utf8').on('data', (text: string) => { collect(stderr, text); options.onProgress?.(text); });
+				child.once('error', (error: NodeJS.ErrnoException) => { failure = new GitError(error.code === 'ENOENT' ? 'missing-git' : 'unknown', error.code ?? ''); });
+				child.once('close', (code) => {
+					clearProcessTimeout(timer);
+					signal.removeEventListener('abort', abort);
+					release();
+					void (termination ?? Promise.resolve()).then(() => {
+						if (failure) reject(failure);
+						else resolve({ code: code ?? 1, stdout: stdout.join(''), stderr: stderr.join('') });
+					});
+				});
+				// A command can finish before consuming stdin; its exit status determines the result.
+				child.stdin?.on('error', () => {});
 				if (options.input !== undefined) child.stdin?.end(options.input);
 				else child.stdin?.end();
+				signal.addEventListener('abort', abort, { once: true });
+				if (signal.aborted) abort();
 			});
 		},
 		async exists(target: string): Promise<boolean> {
@@ -72,15 +103,40 @@ export function createGitRunner(binary: string, cwd: string): DesktopGitRunner {
 	};
 }
 
+/** Keep the root alive until Windows has enumerated its descendants; on POSIX, own one process group. */
+async function terminateTree(child: ChildProcess): Promise<void> {
+	const pid = child.pid;
+	if (!pid) return;
+	if (process.platform === 'win32') {
+		await new Promise<void>((resolve, reject) => {
+			execFile(path.join(process.env.SystemRoot ?? 'C:\\Windows', 'System32', 'taskkill.exe'), ['/pid', String(pid), '/t', '/f'], { windowsHide: true }, error => {
+				if (error && child.exitCode === null && child.signalCode === null) reject(new Error('Could not terminate the Git process tree'));
+				else resolve();
+			});
+		});
+		return;
+	}
+	const kill = (signal: NodeJS.Signals): boolean => {
+		try { process.kill(-pid, signal); return true; }
+		catch (error) { if ((error as NodeJS.ErrnoException).code === 'ESRCH') return false; throw error; }
+	};
+	if (!kill('SIGTERM')) return;
+	await delay(250);
+	kill('SIGKILL');
+}
+
 /** Aborts when either signal does (`AbortSignal.any` is missing from older Electron builds). */
-function combine(first: AbortSignal, second?: AbortSignal): AbortSignal {
-	if (!second) return first;
+function combine(first: AbortSignal, second?: AbortSignal): { signal: AbortSignal; release: () => void } {
+	if (!second) return { signal: first, release() {} };
 	const controller = new AbortController();
 	const abort = () => controller.abort();
 	if (first.aborted || second.aborted) abort();
 	first.addEventListener('abort', abort, { once: true });
 	second.addEventListener('abort', abort, { once: true });
-	return controller.signal;
+	return { signal: controller.signal, release() {
+		first.removeEventListener('abort', abort);
+		second.removeEventListener('abort', abort);
+	} };
 }
 
 /** This computer's name, for `{{hostname}}` in commit messages. */

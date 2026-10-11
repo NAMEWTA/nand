@@ -125,6 +125,11 @@ export function QuickNotesPanel({
 						/>
 					</div>
 				)}
+				{callbacks.onQuickNoteSkill && <button class="dashboard-context-skill dashboard-quicknote-skill" aria-label={t('home.skills.run')} onPointerDown={event => event.preventDefault()} onClick={event => {
+					const field = input.current;
+					const text = field ? field.selectionStart !== field.selectionEnd ? field.value.slice(field.selectionStart, field.selectionEnd) : field.value : '';
+					callbacks.onQuickNoteSkill?.(event.currentTarget, text);
+				}}><Icon name="sparkles" /></button>}
 				<button
 					class="dashboard-quicknote-cog"
 					aria-label={t('quickNote.config')}

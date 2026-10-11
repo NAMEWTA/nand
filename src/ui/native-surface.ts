@@ -1,4 +1,5 @@
 import { Component, setIcon, setTooltip, type App, type Menu, type ViewStateResult, type WorkspaceLeaf } from 'obsidian';
+import { refreshLocalizedDom } from './primitives/localized-dom';
 
 /** A real native host supplies capabilities. This is not an ItemView or a fake leaf. */
 export interface NativeSurfaceContext {
@@ -30,7 +31,13 @@ export abstract class NativeSurface extends Component {
 	abstract getIcon(): string;
 	onOpen(): Promise<void> { return Promise.resolve(); }
 	onClose(): Promise<void> { return Promise.resolve(); }
-	setVisible(visible: boolean): void { if (visible) this.onResize(); }
+	setVisible(visible: boolean): void {
+		if (visible) {
+			// Native dropdowns cannot measure while the workbench page is hidden.
+			refreshLocalizedDom(this.contentEl);
+			this.onResize();
+		}
+	}
 	onResize(): void { /* A presentation can opt in to native resize notification. */ }
 	onPaneMenu(menu: Menu, source = ''): void { void menu; void source; }
 	getState(): Record<string, unknown> { return {}; }

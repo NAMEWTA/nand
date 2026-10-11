@@ -2,6 +2,7 @@ import { t } from '../../../shared/i18n';
 import type { WorkbenchTarget } from '../../../app/contracts/workbench';
 
 export interface ContactsNavigationSurface {
+	getTarget?(): WorkbenchTarget;
 	controller?: {
 		ensureLoaded(): Promise<void>;
 		index: {
@@ -20,6 +21,10 @@ export async function navigateContacts(surface: ContactsNavigationSurface, targe
 	if (signal.aborted) return;
 	surface.leaveEditor?.();
 	if (target.resourceId) {
+		// A restored detail already owns its target. Waiting for the index here would
+		// block Obsidian's layout restoration, which the index itself awaits.
+		const current = surface.getTarget?.();
+		if (current?.resourceId === target.resourceId && (!target.section || current.section === target.section)) return;
 		await surface.controller?.ensureLoaded();
 		if (signal.aborted) return;
 		const record = surface.controller?.index.get(target.resourceId) ?? surface.controller?.index.byPath.get(target.resourceId);
