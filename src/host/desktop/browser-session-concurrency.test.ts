@@ -2,17 +2,57 @@ import path from 'node:path';
 import { tmpdir } from 'node:os';
 import { mkdtemp, mkdir, readFile, writeFile, rm, readdir } from 'node:fs/promises';
 import { expect, test, vi } from 'vitest';
-import { prepareSessionDirectory, confirmSessionDirectory, retainLegacyDirectory } from './browser-session-migration';
+import { prepareSessionDirectory, confirmSessionDirectory, retainLegacyDirectory, clearSessionRecovery } from './browser-session-migration';
 
 const race = vi.hoisted(() => ({ source: '', before: undefined as (() => Promise<void>) | undefined, after: undefined as (() => Promise<void>) | undefined, copy: undefined as ((target: string) => Promise<void>) | undefined }));
+const receiptRace = vi.hoisted(() => ({ file: '', previous: '', armed: false, fired: false, clear: false }));
 vi.mock('node:fs/promises', async original => {
 	const actual = await original<typeof import('node:fs/promises')>();
 	return { ...actual, rename: async (from: string, to: string) => {
 		if (from === race.source) await race.before?.();
 		await actual.rename(from, to);
 		if (from === race.source) await race.after?.();
-	}, copyFile: async (from: string, to: string) => { await race.copy?.(to); await actual.copyFile(from, to); } };
+	}, copyFile: async (from: string, to: string) => { await race.copy?.(to); await actual.copyFile(from, to); },
+	readFile: async (...args: Parameters<typeof actual.readFile>) => {
+		if (args[0] === receiptRace.file && receiptRace.armed) {
+			receiptRace.armed = false; receiptRace.fired = true;
+			await actual.writeFile(receiptRace.file, receiptRace.previous);
+		}
+		const result = await actual.readFile(...args);
+		if (args[0] === receiptRace.file && !receiptRace.fired) {
+			const value = JSON.parse(String(result)) as { phase: string; verified?: boolean };
+			if (receiptRace.clear ? value.phase === 'complete' : value.verified) receiptRace.armed = true;
+			else receiptRace.previous = String(result);
+		}
+		return result;
+	} };
 });
+
+test('synced receipt rollback between sealing commits stops confirmation or cleanup and preserves recovery bytes', async () => {
+	for (const clear of [false, true]) {
+		const root = await mkdtemp(path.join(tmpdir(), 'nand-receipt-sync-')), source = path.join(root, 'source'), vault = path.join(root, 'vault');
+		await mkdir(source); await mkdir(vault); await writeFile(path.join(source, 'Cookies'), 'credential');
+		const options = { source, vault, relative: '.nand/browser/device/profiles/default', boot: 'one', active: () => false };
+		try {
+			await expect(prepareSessionDirectory(options)).rejects.toThrow('browser_session_restart');
+			const target = await prepareSessionDirectory({ ...options, boot: 'two' });
+			Object.assign(receiptRace, { file: path.join(vault, options.relative, 'migration.json'), previous: '', armed: false, fired: false, clear });
+			const run = () => clear ? clearSessionRecovery(options) : confirmSessionDirectory(vault, options.relative, 'two');
+			await expect(run()).rejects.toThrow('browser_session_source_changed');
+			expect(receiptRace.fired).toBe(true); receiptRace.file = '';
+			expect(await readFile(path.join(vault, options.relative, 'legacy-original', 'Cookies'), 'utf8')).toBe('credential');
+			expect(await readFile(path.join(target, 'Cookies'), 'utf8')).toBe('credential');
+			await run();
+			await writeFile(path.join(vault, options.relative, 'migration.json'), '{');
+			await prepareSessionDirectory({ ...options, boot: 'three' });
+			if (clear) await expect(readdir(path.join(vault, options.relative, 'legacy-original'))).rejects.toMatchObject({ code: 'ENOENT' });
+			else {
+				await rm(target, { recursive: true });
+				await expect(prepareSessionDirectory({ ...options, boot: 'four' })).rejects.toThrow('browser_session_unclaimed');
+			}
+		} finally { receiptRace.file = ''; receiptRace.armed = false; await rm(root, { recursive: true, force: true }); }
+	}
+}, 30000);
 
 test('a recipient interrupted by shared-source retirement recovers its verified backup or explicitly chooses fresh', async () => {
 	for (const backupReady of [false, true]) {

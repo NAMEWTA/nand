@@ -1,0 +1,317 @@
+{
+  "method": "Real Obsidian native settings and real Electron cookie/localStorage sessions on a local HTTP fixture.",
+  "rows": [
+    {
+      "name": "default-session-is-inside-vault",
+      "passed": true
+    },
+    {
+      "name": "blank-label-is-rejected",
+      "passed": true
+    },
+    {
+      "name": "native-settings-create-two-accounts",
+      "passed": true
+    },
+    {
+      "name": "new-work-account-has-no-default-cookie",
+      "passed": true
+    },
+    {
+      "name": "native-new-window-link-keeps-account",
+      "passed": true
+    },
+    {
+      "name": "second-account-has-no-other-account-data",
+      "passed": true
+    },
+    {
+      "name": "work-and-default-retain-own-data",
+      "passed": true
+    },
+    {
+      "name": "isolated-sessions-include-device-and-profile",
+      "passed": true,
+      "detail": [
+        "D:\\Document\\code\\nand\\scripts\\tmp\\browser-vault-profiles-20261011-03\\vault\\.nand\\browser\\d089d02d-256c-494d-8d86-725ecb05d5c6\\profiles\\default\\session",
+        "D:\\Document\\code\\nand\\scripts\\tmp\\browser-vault-profiles-20261011-03\\vault\\.nand\\browser\\d089d02d-256c-494d-8d86-725ecb05d5c6\\profiles\\bc1085d6-64a7-4b79-b72f-f8fba3075cf8\\session",
+        "D:\\Document\\code\\nand\\scripts\\tmp\\browser-vault-profiles-20261011-03\\vault\\.nand\\browser\\d089d02d-256c-494d-8d86-725ecb05d5c6\\profiles\\5b45318b-693d-4bc9-8061-bdd8a1170b38\\session"
+      ]
+    },
+    {
+      "name": "native-site-grant-is-profile-scoped",
+      "passed": true
+    },
+    {
+      "name": "reuse-matches-url-and-profile",
+      "passed": true
+    },
+    {
+      "name": "account-selector-opens-a-new-page",
+      "passed": true
+    },
+    {
+      "name": "account-selector-never-rebinds-existing-guest",
+      "passed": true
+    },
+    {
+      "name": "rename-preserves-profile-and-page-identity",
+      "passed": true
+    },
+    {
+      "name": "metadata-is-durable-and-has-no-cookie-export",
+      "passed": true
+    },
+    {
+      "name": "profile-labels-and-grants-survive-restart",
+      "passed": true
+    },
+    {
+      "name": "persisted-work-session-keeps-own-cookie",
+      "passed": true
+    },
+    {
+      "name": "persisted-default-session-keeps-original-cookie",
+      "passed": true
+    },
+    {
+      "name": "saved-pages-retain-profile-id",
+      "passed": true
+    },
+    {
+      "name": "delete-dialog-lists-affected-pages",
+      "passed": true
+    },
+    {
+      "name": "cancel-keeps-profile",
+      "passed": true
+    },
+    {
+      "name": "changed-page-set-requires-new-confirmation",
+      "passed": true
+    },
+    {
+      "name": "delete-closes-live-and-saved-profile-pages",
+      "passed": true
+    },
+    {
+      "name": "delete-clears-only-selected-session",
+      "passed": true
+    },
+    {
+      "name": "default-cookie-survives-other-account-delete",
+      "passed": true
+    },
+    {
+      "name": "settings-fit-500",
+      "passed": true,
+      "detail": {
+        "width": 396,
+        "scroll": 396
+      }
+    },
+    {
+      "name": "settings-fit-800",
+      "passed": true,
+      "detail": {
+        "width": 656,
+        "scroll": 656
+      }
+    },
+    {
+      "name": "settings-fit-1100",
+      "passed": true,
+      "detail": {
+        "width": 696,
+        "scroll": 696
+      }
+    },
+    {
+      "name": "profile-settings-system-light-500",
+      "passed": true,
+      "detail": {
+        "width": 396,
+        "scroll": 396,
+        "small": 0
+      }
+    },
+    {
+      "name": "profile-settings-system-light-800",
+      "passed": true,
+      "detail": {
+        "width": 656,
+        "scroll": 656,
+        "small": 0
+      }
+    },
+    {
+      "name": "profile-settings-system-light-1500",
+      "passed": true,
+      "detail": {
+        "width": 712,
+        "scroll": 712,
+        "small": 0
+      }
+    },
+    {
+      "name": "profile-settings-system-dark-500",
+      "passed": true,
+      "detail": {
+        "width": 396,
+        "scroll": 396,
+        "small": 0
+      }
+    },
+    {
+      "name": "profile-settings-system-dark-800",
+      "passed": true,
+      "detail": {
+        "width": 656,
+        "scroll": 656,
+        "small": 0
+      }
+    },
+    {
+      "name": "profile-settings-system-dark-1500",
+      "passed": true,
+      "detail": {
+        "width": 712,
+        "scroll": 712,
+        "small": 0
+      }
+    },
+    {
+      "name": "profile-settings-claude-code-light-500",
+      "passed": true,
+      "detail": {
+        "width": 396,
+        "scroll": 396,
+        "small": 0
+      }
+    },
+    {
+      "name": "profile-settings-claude-code-light-800",
+      "passed": true,
+      "detail": {
+        "width": 656,
+        "scroll": 656,
+        "small": 0
+      }
+    },
+    {
+      "name": "profile-settings-claude-code-light-1500",
+      "passed": true,
+      "detail": {
+        "width": 712,
+        "scroll": 712,
+        "small": 0
+      }
+    },
+    {
+      "name": "profile-settings-claude-code-dark-500",
+      "passed": true,
+      "detail": {
+        "width": 396,
+        "scroll": 396,
+        "small": 0
+      }
+    },
+    {
+      "name": "profile-settings-claude-code-dark-800",
+      "passed": true,
+      "detail": {
+        "width": 656,
+        "scroll": 656,
+        "small": 0
+      }
+    },
+    {
+      "name": "profile-settings-claude-code-dark-1500",
+      "passed": true,
+      "detail": {
+        "width": 712,
+        "scroll": 712,
+        "small": 0
+      }
+    },
+    {
+      "name": "profile-settings-eye-care-light-500",
+      "passed": true,
+      "detail": {
+        "width": 396,
+        "scroll": 396,
+        "small": 0
+      }
+    },
+    {
+      "name": "profile-settings-eye-care-light-800",
+      "passed": true,
+      "detail": {
+        "width": 656,
+        "scroll": 656,
+        "small": 0
+      }
+    },
+    {
+      "name": "profile-settings-eye-care-light-1500",
+      "passed": true,
+      "detail": {
+        "width": 712,
+        "scroll": 712,
+        "small": 0
+      }
+    },
+    {
+      "name": "profile-settings-eye-care-dark-500",
+      "passed": true,
+      "detail": {
+        "width": 396,
+        "scroll": 396,
+        "small": 0
+      }
+    },
+    {
+      "name": "profile-settings-eye-care-dark-800",
+      "passed": true,
+      "detail": {
+        "width": 656,
+        "scroll": 656,
+        "small": 0
+      }
+    },
+    {
+      "name": "profile-settings-eye-care-dark-1500",
+      "passed": true,
+      "detail": {
+        "width": 712,
+        "scroll": 712,
+        "small": 0
+      }
+    },
+    {
+      "name": "profile-controls-at-least-44-in-coarse-mode",
+      "passed": true
+    },
+    {
+      "name": "live-language-preserves-account-draft",
+      "passed": true
+    },
+    {
+      "name": "module-off-releases-profile-service",
+      "passed": true
+    },
+    {
+      "name": "reenable-retains-only-remaining-accounts",
+      "passed": true
+    },
+    {
+      "name": "popout-rebuild-keeps-frozen-account",
+      "passed": true
+    },
+    {
+      "name": "no-host-errors",
+      "passed": true,
+      "detail": []
+    }
+  ]
+}

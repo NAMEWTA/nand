@@ -1,0 +1,159 @@
+{
+  "rows": [
+    {
+      "name": "legacy-profile-restart-requires-cold-restart",
+      "passed": true
+    },
+    {
+      "name": "legacy-profile-published-requires-cold-restart",
+      "passed": true
+    },
+    {
+      "name": "legacy-profile-complete-requires-cold-restart",
+      "passed": true
+    },
+    {
+      "name": "legacy-session-requires-full-restart",
+      "passed": true,
+      "detail": "请关闭所有 Obsidian 窗口并重新启动，以安全迁移旧浏览器会话。"
+    },
+    {
+      "name": "module-reload-does-not-bypass-cold-migration",
+      "passed": true
+    },
+    {
+      "name": "delete-before-migration-retries-after-cold-restart",
+      "passed": true
+    },
+    {
+      "name": "cold-copy-opens-only-vault-session",
+      "passed": true,
+      "detail": "D:\\Document\\code\\nand\\scripts\\tmp\\browser-vault-sessions-20261011-12\\vault\\.nand\\browser\\871a7948-142f-4ec8-821c-8c55f7d897a8\\profiles\\default\\session"
+    },
+    {
+      "name": "legacy-cookie-and-site-data-survive-copy",
+      "passed": true
+    },
+    {
+      "name": "old-bridge-artifacts-retained-in-vault",
+      "passed": true
+    },
+    {
+      "name": "old-bridge-source-cleaned-after-verification",
+      "passed": true
+    },
+    {
+      "name": "legacy-original-retained-until-next-boot",
+      "passed": true
+    },
+    {
+      "name": "native-login-popup-shares-vault-session",
+      "passed": true
+    },
+    {
+      "name": "native-popup-cookie-is-shared",
+      "passed": true
+    },
+    {
+      "name": "download-has-vault-destination",
+      "passed": true
+    },
+    {
+      "name": "download-bytes-are-complete",
+      "passed": true
+    },
+    {
+      "name": "unsafe-download-visible-and-no-outside-file",
+      "passed": true
+    },
+    {
+      "name": "published-profile-delete-clears-old-source-and-backup",
+      "passed": true
+    },
+    {
+      "name": "profile-delete-retains-saved-downloads",
+      "passed": true
+    },
+    {
+      "name": "bridge-and-artifacts-use-vault-device-root",
+      "passed": true,
+      "detail": {
+        "artifacts": [
+          "D:\\Document\\code\\nand\\scripts\\tmp\\browser-vault-sessions-20261011-12\\vault\\.nand\\browser\\871a7948-142f-4ec8-821c-8c55f7d897a8\\runtime\\artifacts\\ff5def47-c3e6-4aea-86bf-8e2c1a49f086.txt",
+          "D:\\Document\\code\\nand\\scripts\\tmp\\browser-vault-sessions-20261011-12\\vault\\.nand\\browser\\871a7948-142f-4ec8-821c-8c55f7d897a8\\runtime\\artifacts\\ff5def47-c3e6-4aea-86bf-8e2c1a49f086.png"
+        ],
+        "context": "D:\\Document\\code\\nand\\scripts\\tmp\\browser-vault-sessions-20261011-12\\vault\\.nand\\browser\\871a7948-142f-4ec8-821c-8c55f7d897a8\\runtime\\6b9b31bf-c3db-4dfb-a84f-c0164fd5f8b0\\connection.json",
+        "cli": "D:\\Document\\code\\nand\\scripts\\tmp\\browser-vault-sessions-20261011-12\\vault\\.nand\\browser\\871a7948-142f-4ec8-821c-8c55f7d897a8\\runtime\\6b9b31bf-c3db-4dfb-a84f-c0164fd5f8b0\\nand-browser.cjs"
+      }
+    },
+    {
+      "name": "profile-cleanup-reached-complete-phase",
+      "passed": true
+    },
+    {
+      "name": "complete-profile-delete-clears-legacy-recovery",
+      "passed": true
+    },
+    {
+      "name": "migrated-session-retains-new-data-after-restart",
+      "passed": true
+    },
+    {
+      "name": "legacy-source-cleaned-only-after-validation",
+      "passed": true
+    },
+    {
+      "name": "legacy-source-preserved-inside-vault",
+      "passed": true
+    },
+    {
+      "name": "closed-runtime-removes-connection",
+      "passed": true
+    },
+    {
+      "name": "published-artifacts-remain-in-vault",
+      "passed": true
+    },
+    {
+      "name": "home-webview-has-separate-vault-session",
+      "passed": true
+    },
+    {
+      "name": "home-webview-does-not-inherit-browser-cookie",
+      "passed": true
+    },
+    {
+      "name": "music-cookie-store-is-in-vault",
+      "passed": true
+    },
+    {
+      "name": "no-host-iframe-fallback",
+      "passed": true
+    },
+    {
+      "name": "home-download-error-visible-and-no-outside-file",
+      "passed": true
+    },
+    {
+      "name": "download-failure-keeps-other-home-webview-alive",
+      "passed": true
+    },
+    {
+      "name": "home-download-error-can-retry",
+      "passed": true
+    },
+    {
+      "name": "native-music-login-window-uses-vault-session",
+      "passed": true
+    },
+    {
+      "name": "music-login-test-used-local-intercept",
+      "passed": true
+    },
+    {
+      "name": "no-host-errors",
+      "passed": true,
+      "detail": []
+    }
+  ]
+}

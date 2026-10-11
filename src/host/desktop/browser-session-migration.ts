@@ -1,6 +1,7 @@
 import path from 'node:path';
 import { createHash, randomUUID } from 'node:crypto';
 import { createReadStream } from 'node:fs';
+import { isDeepStrictEqual } from 'node:util';
 import { chmod, copyFile, lstat, mkdir, readdir, rename, rmdir, unlink } from 'node:fs/promises';
 import { JsonStore } from '../../shared/json-store';
 import { nativeVaultStorage } from './vault-storage';
@@ -76,6 +77,11 @@ async function checkSessionTree(directory: string): Promise<void> {
 	}
 }
 const sameFiles = (a: Record<string, string>, b: Record<string, string>) => Object.keys(a).length === Object.keys(b).length && Object.entries(a).every(([file, hash]) => b[file] === hash);
+/** Recovery journals govern destructive transitions; an external revision needs an explicit retry. */
+function mergeReceipt(base: Receipt | null, requested: Receipt | null, remote: Receipt | null): Receipt | null {
+	if (!isDeepStrictEqual(remote, base) && !isDeepStrictEqual(remote, requested)) throw new Error('browser_session_source_changed');
+	return requested;
+}
 async function copyVerified(source: string, target: string, files: Record<string, string>): Promise<void> {
 	await check(target); await mkdir(target, { recursive: true, mode: 0o700 });
 	for (const [file, hash] of Object.entries(files)) {
@@ -151,7 +157,7 @@ async function prepare(options: SessionMigration): Promise<string> {
 	const { vault, relative, source, boot } = options;
 	const root = await absoluteNandPath(vault, relative), target = await absoluteNandPath(vault, relative + '/session');
 	const storage = nativeVaultStorage(vault), receiptPath = relative + '/migration.json';
-	const store = new JsonStore<Receipt | null>(storage, receiptPath, valid);
+	const store = new JsonStore<Receipt | null>(storage, receiptPath, valid, mergeReceipt);
 	let receipt = await store.load(null);
 	const sourceKey = digest(source ?? '');
 	const save = async (value: Receipt) => { receipt = await saveReceipt(storage, receiptPath, store, receipt, value); };
@@ -216,7 +222,7 @@ async function prepare(options: SessionMigration): Promise<string> {
 
 /** A native Session must actually open at the owned path before a later boot can retire its source. */
 export async function confirmSessionDirectory(vault: string, relative: string, boot: string): Promise<void> {
-	const store = new JsonStore<Receipt | null>(nativeVaultStorage(vault), relative + '/migration.json', valid), receipt = await store.load(null);
+	const store = new JsonStore<Receipt | null>(nativeVaultStorage(vault), relative + '/migration.json', valid, mergeReceipt), receipt = await store.load(null);
 	if (!receipt) throw new Error('browser_session_receipt_invalid');
 	if (receipt.phase === 'published' || receipt.phase === 'fresh') {
 		const confirmed = receipt.verified ? receipt : (await store.commit({ base: receipt, value: { ...receipt, verified: true, boot } }))!;
@@ -229,7 +235,7 @@ export async function confirmSessionDirectory(vault: string, relative: string, b
 export async function clearSessionRecovery(options: SessionMigration): Promise<void> {
 	const { vault, relative, source } = options;
 	const root = await absoluteNandPath(vault, relative), storage = nativeVaultStorage(vault), file = relative + '/migration.json';
-	const store = new JsonStore<Receipt | null>(storage, file, valid);
+	const store = new JsonStore<Receipt | null>(storage, file, valid, mergeReceipt);
 	let receipt = await store.load(null);
 	if (!receipt) throw new Error('browser_session_receipt_invalid');
 	if (receipt.phase === 'published') {
@@ -261,7 +267,7 @@ export async function clearSessionRecovery(options: SessionMigration): Promise<v
 /** Retain an inactive, explicitly owned legacy tree in the vault. No retained script is executed. */
 export async function retainLegacyDirectory(vault: string, relative: string, source: string): Promise<string | undefined> {
 	const target = await absoluteNandPath(vault, relative + '/files'), storage = nativeVaultStorage(vault), file = relative + '/migration.json';
-	const store = new JsonStore<Receipt | null>(storage, file, valid);
+	const store = new JsonStore<Receipt | null>(storage, file, valid, mergeReceipt);
 	let receipt = await store.load(null);
 	if (receipt?.phase === 'complete') {
 		if (await exists(source)) throw new Error('browser_session_source_changed');
