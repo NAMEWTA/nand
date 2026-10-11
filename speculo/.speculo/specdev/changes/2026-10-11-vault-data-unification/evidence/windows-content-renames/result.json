@@ -1,0 +1,42 @@
+{
+  "platform": "win32",
+  "rows": [
+    {
+      "name": "ordinary-default-archive-keeps-its-owner",
+      "passed": true
+    },
+    {
+      "name": "open-editor-follows-rename-and-preserves-old-image",
+      "passed": true
+    },
+    {
+      "name": "rewritten-absolute-image-renders-in-native-markdown",
+      "passed": true
+    },
+    {
+      "name": "new-relative-link-uses-the-current-directory",
+      "passed": true
+    },
+    {
+      "name": "existing-incoming-links-follow-original-identity",
+      "passed": true
+    },
+    {
+      "name": "ordinary-incoming-link-preserves-the-target",
+      "passed": true
+    },
+    {
+      "name": "restart-retains-both-image-targets",
+      "passed": true
+    },
+    {
+      "name": "native-reference-opens-original-after-path-reuse",
+      "passed": true
+    },
+    {
+      "name": "no-runtime-errors",
+      "passed": true,
+      "detail": []
+    }
+  ]
+}

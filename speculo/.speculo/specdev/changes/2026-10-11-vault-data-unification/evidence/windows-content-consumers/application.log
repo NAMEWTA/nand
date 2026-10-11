@@ -1,5 +1,5 @@
 
-2026-10-11 09:27:41 Loaded main app package D:\Pro\Obsidian\resources\obsidian.asar
+2026-10-11 09:55:12 Loaded main app package D:\Pro\Obsidian\resources\obsidian.asar
 CLI server error: Error: listen EADDRINUSE: address already in use \\.\pipe\obsidian-cli-cdewta
     at Server.setupListenHandle [as _listen2] (node:net:1987:21)
     at listenInCluster (node:net:2066:12)
@@ -18,14 +18,14 @@ CLI server error: Error: listen EADDRINUSE: address already in use \\.\pipe\obsi
   port: -1
 }
 
-DevTools listening on ws://127.0.0.1:9443/devtools/browser/a4a749fd-b5c4-4e20-b0ea-e0dd3e65ca48
-Ignored: Error: ENOENT: no such file or directory, open 'D:\Document\code\nand\scripts\tmp\content-consumers-20261011-review04\profile\abcdef1234567890.json'
-2026-10-11 09:27:41 Checking for update using Github
-2026-10-11 09:27:43 Success.
-2026-10-11 09:27:43 Latest version is 1.14.4
-2026-10-11 09:27:43 Downloading update from https://github.com/obsidianmd/obsidian-releases/releases/download/v1.14.4/obsidian-1.14.4.asar.gz
+DevTools listening on ws://127.0.0.1:9443/devtools/browser/ba268567-f599-401a-80d7-0e9023cccc91
+Ignored: Error: ENOENT: no such file or directory, open 'D:\Document\code\nand\scripts\tmp\content-consumers-20261011-review05\profile\abcdef1234567890.json'
+2026-10-11 09:55:12 Checking for update using Github
+2026-10-11 09:55:14 Success.
+2026-10-11 09:55:14 Latest version is 1.14.4
+2026-10-11 09:55:14 Downloading update from https://github.com/obsidianmd/obsidian-releases/releases/download/v1.14.4/obsidian-1.14.4.asar.gz
 
-2026-10-11 09:27:46 Loaded main app package D:\Pro\Obsidian\resources\obsidian.asar
+2026-10-11 09:55:17 Loaded main app package D:\Pro\Obsidian\resources\obsidian.asar
 CLI server error: Error: listen EADDRINUSE: address already in use \\.\pipe\obsidian-cli-cdewta
     at Server.setupListenHandle [as _listen2] (node:net:1987:21)
     at listenInCluster (node:net:2066:12)
@@ -45,8 +45,8 @@ CLI server error: Error: listen EADDRINUSE: address already in use \\.\pipe\obsi
 }
 Removing partition for vault nand-dashboard-music-vault
 
-DevTools listening on ws://127.0.0.1:9443/devtools/browser/ca2dbb1a-7f8e-4160-af88-bce5b5da1ae9
-2026-10-11 09:27:46 Checking for update using Github
-2026-10-11 09:27:47 Success.
-2026-10-11 09:27:47 Latest version is 1.14.4
-2026-10-11 09:27:47 Downloading update from https://github.com/obsidianmd/obsidian-releases/releases/download/v1.14.4/obsidian-1.14.4.asar.gz
+DevTools listening on ws://127.0.0.1:9443/devtools/browser/5b4512cf-7624-40c5-b145-60e128735769
+2026-10-11 09:55:17 Checking for update using Github
+2026-10-11 09:55:17 Success.
+2026-10-11 09:55:17 Latest version is 1.14.4
+2026-10-11 09:55:17 Downloading update from https://github.com/obsidianmd/obsidian-releases/releases/download/v1.14.4/obsidian-1.14.4.asar.gz

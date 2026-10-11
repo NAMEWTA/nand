@@ -77,7 +77,7 @@ export async function prepareVaultContent(app: App): Promise<ContentFiles> {
 		};
 		await scan('');
 		for (const path of all) {
-			if (boards.has(path) || path === archive && home.taskArchiveTarget !== 'daily') { sources.add(path); continue; }
+			if (boards.has(path) || path === archive && typeof home.taskArchivePath === 'string' && !!home.taskArchivePath.trim() && home.taskArchiveTarget !== 'daily') { sources.add(path); continue; }
 			if (!path.endsWith('.md')) continue;
 			const text = await adapter.read(path);
 			// Unmarked notes, including earlier ordinary note creation, keep their native ownership.
@@ -95,7 +95,7 @@ export async function prepareVaultContent(app: App): Promise<ContentFiles> {
 		for (const source of sources) await guard(source);
 		const base = await review.load(emptyReview());
 		const exportRoot = legacy(browser.workspaceFolder, 'NAND/AI Workspace') + '/Exports/';
-		unresolved = all.filter(path => !sources.has(path) && !base.ordinary.includes(path) && (path.startsWith('NAND Exports/') || path.startsWith(exportRoot)));
+		unresolved = all.filter(path => !sources.has(path) && !base.ordinary.includes(path) && (path === archive || path.startsWith('NAND Exports/') || path.startsWith(exportRoot)));
 		if (JSON.stringify(base.paths) !== JSON.stringify(unresolved)) await review.commit({ base, value: { ...base, paths: unresolved } });
 		return [...sources].filter(path => !isContentPath(path));
 	};

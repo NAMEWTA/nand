@@ -1,7 +1,7 @@
 /** Main */
 export const messages = {
 	en: {
-		"content.reviewNeeded": "{count} legacy export files need an ownership review in NAND files",
+		"content.reviewNeeded": "{count} legacy files need an ownership review in NAND files",
 		"content.reviewHelp": "These folders can also contain ordinary notes. Open each file, then move it only if NAND owns it. Originals remain recoverable in this vault.",
 		"content.reviewOpen": "Open original",
 		"content.reviewMove": "NAND file: move into .nand",
@@ -27,8 +27,8 @@ export const messages = {
 		"storage.preferenceFailed": "NAND could not save this preference. Check vault access and retry.",
 	},
 	zh: {
-		"content.reviewNeeded": "有 {count} 个旧导出文件需要在「NAND 文件」中确认归属",
-		"content.reviewHelp": "旧导出目录也可能含有普通笔记。请逐个打开，仅将属于 NAND 的文件迁入 .nand；迁移后会在库内保留可恢复的原件。",
+		"content.reviewNeeded": "有 {count} 个旧文件需要在「NAND 文件」中确认归属",
+		"content.reviewHelp": "旧归档和导出目录也可能含有普通笔记。请逐个打开，仅将属于 NAND 的文件迁入 .nand；迁移后会在库内保留可恢复的原件。",
 		"content.reviewOpen": "打开原文件",
 		"content.reviewMove": "属于 NAND，迁入 .nand",
 		"content.reviewOrdinary": "保留为普通笔记",

@@ -2,6 +2,11 @@ import { FileSystemAdapter, Platform, type App } from 'obsidian';
 import { privateVaultStorage } from './private-storage';
 import { ensureDirectory } from '../../../shared/storage/durable-state';
 
+export async function contentDigest(app: App, path: string): Promise<string> {
+	if (!await privateVaultStorage(app).exists(path)) throw new Error('nand-content.missing');
+	return [...new Uint8Array(await crypto.subtle.digest('SHA-256', await app.vault.adapter.readBinary(path)))].map(byte => byte.toString(16).padStart(2, '0')).join('');
+}
+
 export async function copyContentExclusive(app: App, source: string, target: string): Promise<void> {
 	const adapter = app.vault.adapter;
 	if (Platform.isDesktopApp && adapter instanceof FileSystemAdapter) {

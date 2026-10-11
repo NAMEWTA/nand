@@ -24,13 +24,21 @@ test('startup discovers owned records and registered boards while preserving ord
 
 test('legacy highlights and the configured task archive migrate but ordinary export-folder notes do not', async () => {
 	const high = '---\nsource: weread\nbookId: "book-1"\ntitle: Book\nhighlightCount: 1\n---\nExisting highlight';
-	const vault = memoryVault({ 'Weread/Highlights/Book.md': high, 'Archive/Done.md': '- [x] Done', 'NAND Exports/ordinary.md': '# My note', 'NAND/AI Workspace/Exports/ordinary.md': 'Other note', 'Example?.md': '---\nx: [\n---\n```yaml\nnand-type: habit\n```' });
+	const vault = memoryVault({ '.nand/config/settings.json': JSON.stringify({ version: 1, namespaces: { home: { taskArchivePath: 'Archive/Done.md', taskArchiveTarget: 'file' } } }), 'Weread/Highlights/Book.md': high, 'Archive/Done.md': '- [x] Done', 'NAND Exports/ordinary.md': '# My note', 'NAND/AI Workspace/Exports/ordinary.md': 'Other note', 'Example?.md': '---\nx: [\n---\n```yaml\nnand-type: habit\n```' });
 	await prepareVaultContent(vault.app);
 	expect(vault.contents.get('.nand/content/Weread/Highlights/Book.md')).toBe(high);
 	expect(vault.contents.get('.nand/content/Archive/Done.md')).toBe('- [x] Done');
 	expect(vault.contents.get('NAND Exports/ordinary.md')).toBe('# My note');
 	expect(vault.contents.get('NAND/AI Workspace/Exports/ordinary.md')).toBe('Other note');
 	expect(vault.contents.has('Example?.md')).toBe(true);
+});
+
+test('the default archive name alone never establishes NAND ownership', async () => {
+	const vault = memoryVault({ 'Archive/Done.md': '# Personal completed work' });
+	await prepareVaultContent(vault.app);
+	expect(vault.contents.get('Archive/Done.md')).toBe('# Personal completed work');
+	expect(vault.contents.has('.nand/content/Archive/Done.md')).toBe(false);
+	expect(await contentMigrationCandidates(vault.app)).toContain('Archive/Done.md');
 });
 
 test('new owned sources arriving during migration or after a completed batch are discovered', async () => {

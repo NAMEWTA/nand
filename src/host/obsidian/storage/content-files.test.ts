@@ -81,5 +81,100 @@ test('moving content preserves incoming and relative outgoing links across resta
 	await files.rename(files.getFileByPath('.nand/content/Projects/Sub/Note.md')!, '.nand/content/Moved/Note.md');
 	files = new ContentFiles(vault.app); await files.refresh();
 	expect(files.resolveLink('Projects/Sub/Note')?.path).toBe('.nand/content/Moved/Note.md');
-	expect(files.resolveLink('../assets/image.png', '.nand/content/Moved/Note.md')?.path).toBe('Projects/assets/image.png');
+	const moved = await files.read('.nand/content/Moved/Note.md');
+	expect(moved).toBe('![picture](</Projects/assets/image.png>)');
+	expect(files.resolveLink('/Projects/assets/image.png', '.nand/content/Moved/Note.md')?.path).toBe('Projects/assets/image.png');
+});
+
+test('relative links prefer the source directory and renamed links survive path reuse', async () => {
+	const vault = memoryVault({ '.nand/content/A/Note.md': '![old](pic.png)', '.nand/content/A/pic.png': 'old', '.nand/content/B/pic.png': 'new', 'Note.md': 'ordinary root', 'pic.png': 'root image' });
+	let files = contentFiles(vault.app); await files.refresh();
+	expect(files.resolveLink('pic.png', '.nand/content/A/Note.md')?.path).toBe('.nand/content/A/pic.png');
+	await files.rename(files.getFileByPath('.nand/content/A/Note.md')!, '.nand/content/B/Note.md');
+	await files.process('.nand/content/B/Note.md', text => text + '\n![new](./pic.png)');
+	expect(files.resolveLink('./pic.png', '.nand/content/B/Note.md')?.path).toBe('.nand/content/B/pic.png');
+	expect(await files.read('.nand/content/B/Note.md')).toContain('/.nand/content/A/pic.png');
+	await files.rename(files.getFileByPath('.nand/content/B/Note.md')!, '.nand/content/C/Note.md');
+	await files.create('.nand/content/B/Note.md', 'new file');
+	files = new ContentFiles(vault.app); await files.refresh();
+	expect(files.resolveLink('A/Note')?.path).toBe('.nand/content/C/Note.md');
+	expect(files.resolveLink('pic.png', '.nand/content/B/Note.md')?.path).toBe('.nand/content/B/pic.png');
+});
+
+test('a failed rename cannot lend its source directory to an unrelated new destination', async () => {
+	const vault = memoryVault({ '.nand/content/A/Note.md': '![old](pic.png)', '.nand/content/A/pic.png': 'old', '.nand/content/B/pic.png': 'new' });
+	const files = contentFiles(vault.app); await files.refresh();
+	vault.adapter.rename = async () => { throw new Error('rename denied'); };
+	await expect(files.rename(files.getFileByPath('.nand/content/A/Note.md')!, '.nand/content/B/Note.md')).rejects.toThrow('rename denied');
+	await files.create('.nand/content/B/Note.md', 'new file');
+	expect(files.resolveLink('pic.png', '.nand/content/B/Note.md')?.path).toBe('.nand/content/B/pic.png');
+});
+
+test('relative literal percent names take precedence over URL decoding', async () => {
+	const vault = memoryVault({ '.nand/content/Folder/A%20B.md': 'literal', '.nand/content/Folder/A B.md': 'space' });
+	const files = contentFiles(vault.app); await files.refresh();
+	for (const link of ['A%20B', 'A%20B.md', 'A%2520B']) expect(files.resolveLink(link, '.nand/content/Folder/Ref.md')?.path).toBe('.nand/content/Folder/A%20B.md');
+});
+
+test('existing incoming references keep their target when the old path is reused', async () => {
+	const vault = memoryVault({ '.nand/content/Old/B.md': '# Target', '.nand/content/A.md': '[[Old/B#Target|label]]', 'Ordinary.md': '[target](Old/B.md#Target)\n`[[Old/B]]`\n```md\n[[Old/B]]\n```' });
+	let files = contentFiles(vault.app); await files.refresh();
+	await files.rename(files.getFileByPath('.nand/content/Old/B.md')!, '.nand/content/New/B.md');
+	await files.create('.nand/content/Old/B.md', 'unrelated new content');
+	files = new ContentFiles(vault.app); await files.refresh();
+	expect(await files.read('.nand/content/A.md')).toBe('[[/.nand/content/New/B.md#Target|label]]');
+	expect(await files.read('Ordinary.md')).toBe('[target](</.nand/content/New/B.md#Target>)\n`[[Old/B]]`\n```md\n[[Old/B]]\n```');
+	expect(files.resolveLink('/.nand/content/New/B.md#Target', '.nand/content/A.md')?.path).toBe('.nand/content/New/B.md');
+	expect(files.getFileByPath('.nand/content/Old/B.md')?.path).toBe('.nand/content/Old/B.md');
+});
+
+test('failed moves restore reference edits and retain a replayable receipt until rollback succeeds', async () => {
+	const vault = memoryVault({ '.nand/content/Old/B.md': '![old](image.png)', '.nand/content/Old/image.png': 'image', 'Ref.md': '[[Old/B]]' });
+	const files = contentFiles(vault.app); await files.refresh();
+	const rename = vault.adapter.rename;
+	vault.adapter.rename = async () => { throw new Error('move denied'); };
+	await expect(files.rename(files.getFileByPath('.nand/content/Old/B.md')!, '.nand/content/New/B.md')).rejects.toThrow('move denied');
+	expect(vault.contents.get('Ref.md')).toBe('[[Old/B]]');
+	expect(vault.contents.get('.nand/content/Old/B.md')).toBe('![old](image.png)');
+	vault.adapter.rename = rename;
+	await files.rename(files.getFileByPath('.nand/content/Old/B.md')!, '.nand/content/New/B.md');
+	expect(vault.contents.get('Ref.md')).toBe('[[/.nand/content/New/B.md]]');
+});
+
+test('a destination arriving during rename is retained alongside the moved source and receipt', async () => {
+	const vault = memoryVault({ '.nand/content/Old.md': 'local original' }), files = contentFiles(vault.app);
+	await files.refresh(); const rename = vault.adapter.rename;
+	vault.adapter.rename = async (from, to) => { await vault.adapter.write('.nand/content/New.md', 'external destination'); await rename(from, to); };
+	await expect(files.rename(files.getFileByPath('.nand/content/Old.md')!, '.nand/content/New.md')).rejects.toThrow('move-target-changed');
+	expect(vault.contents.get('.nand/content/New.md')).toBe('external destination');
+	expect([...vault.contents].some(([path, text]) => path.startsWith('.nand/recovery/renames/') && text === 'local original')).toBe(true);
+	expect(JSON.parse(vault.contents.get('.nand/content-moves/manifest.json')!).pending).toBeTruthy();
+});
+
+test('every interrupted rename persistence step recovers consistent references without losing content', async () => {
+	const initial = { '.nand/content/Old.md': '# Original', 'Ref.md': '[[Old]]' };
+	const run = async (failAt = 0, after = false) => {
+		const vault = memoryVault(initial); let files = new ContentFiles(vault.app); await files.refresh();
+		let calls = 0;
+		for (const method of ['write', 'rename', 'copy'] as const) {
+			const original = vault.adapter[method];
+			vault.adapter[method] = async (first: string, second: string) => {
+				const fail = ++calls === failAt;
+				if (fail && !after) throw new Error('injected move failure');
+				await original(first, second);
+				if (fail && after) throw new Error('injected move failure');
+			};
+		}
+		try { await files.rename(files.getFileByPath('.nand/content/Old.md')!, '.nand/content/New.md'); } catch { /* Restart is the recovery boundary under test. */ }
+		const count = calls;
+		files = new ContentFiles(vault.app); await files.refresh();
+		const destination = vault.contents.has('.nand/content/New.md') ? '.nand/content/New.md' : '.nand/content/Old.md';
+		expect(vault.contents.get(destination)).toBe('# Original');
+		const reference = vault.contents.get('Ref.md')!.slice(2, -2);
+		expect(files.resolveLink(reference, 'Ref.md')?.path).toBe(destination);
+		expect(JSON.parse(vault.contents.get('.nand/content-moves/manifest.json') ?? '{"pending":null}').pending).toBeFalsy();
+		return count;
+	};
+	const count = await run();
+	for (let point = 1; point <= count; point++) for (const after of [false, true]) await run(point, after);
 });
