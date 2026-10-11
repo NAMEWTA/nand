@@ -43,10 +43,10 @@ test('replacement JSON store drains pending writes', async () => {
 	const disk = new MemoryStorage();
 	const validate = (value: unknown): value is { a: number; b: number } => !!value && typeof value === 'object' && 'a' in value && 'b' in value;
 	const first = new JsonStore(disk, 'settings.json', validate), second = new JsonStore(disk, 'settings.json', validate);
-	await first.load({ a: 0, b: 0 }); await second.load({ a: 0, b: 0 });
-	await Promise.all([first.save({ a: 1, b: 0 }), second.save({ a: 0, b: 2 })]);
+	const firstBase = await first.load({ a: 0, b: 0 }), secondBase = await second.load({ a: 0, b: 0 });
+	const [local] = await Promise.all([first.commit({ base: firstBase, value: { a: 1, b: 0 } }), second.commit({ base: secondBase, value: { a: 0, b: 2 } })]);
 	assert.deepEqual(JSON.parse(await disk.read('settings.json')), { a: 1, b: 2 });
-	const pending = first.save({ a: 3, b: 0 });
+	const pending = first.commit({ base: local, value: { ...local, a: 3 } });
 	const replacement = new JsonStore(disk, 'settings.json', validate);
 	assert.deepEqual(await replacement.load({ a: 0, b: 0 }), { a: 3, b: 2 }); await pending;
 });

@@ -127,6 +127,7 @@ export class AutomationService {
 	}
 	private async loadData(): Promise<void> {
 		this.state = await this.store.load(this.state);
+		this.saved = structuredClone(this.state);
 		await this.commit((state) => {
 			for (const run of state.runs)
 				if (isActiveRun(run)) {
@@ -564,9 +565,10 @@ export class AutomationService {
 		});
 	}
 	/** Serialize state transitions; publish only after successful persistence. */
+	private saved?: AutomationState;
 	private commit(change: (state: AutomationState) => void): Promise<void> {
 		const operation = this.writes.then(async () => {
-			const next = structuredClone(this.state);
+			let next = structuredClone(this.state);
 			change(next);
 			const counts = new Map<string, number>();
 			next.runs = next.runs
@@ -579,12 +581,15 @@ export class AutomationService {
 					return n <= 100;
 				})
 				.reverse();
-			await this.store.save(next);
 			// Preserve references held by live completion handlers and callers.
-			const live = new Map(this.state.runs.map(row => [row.id, row]));
+			const live = new Map([...next.runs, ...this.state.runs].map(row => [row.id, row]));
+			next = await this.store.commit({ base: this.saved ?? this.state, value: next });
+			this.saved = structuredClone(next);
 			next.runs = next.runs.map((row) => {
 				const existing = live.get(row.id);
-				return existing ? Object.assign(existing, row) : row;
+				if (!existing) return row;
+				for (const key of Object.keys(existing)) if (!(key in row)) Reflect.deleteProperty(existing, key);
+				return Object.assign(existing, row);
 			});
 			this.state = next;
 			this.emit();

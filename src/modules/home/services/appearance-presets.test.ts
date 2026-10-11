@@ -17,6 +17,7 @@ async function fixture() {
 			if (fail) throw new Error('disk full');
 			files.set(scope, structuredClone(file));
 			if (scope === 'vault') writes.push(structuredClone(file));
+			return structuredClone(file);
 		},
 	};
 	const store = new SettingsStore(persistence, { debounceMs: 0, timers: { set: (fn, ms) => setTimeout(fn, ms), clear: id => clearTimeout(id as ReturnType<typeof setTimeout>) } });

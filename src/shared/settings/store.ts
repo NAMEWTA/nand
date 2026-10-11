@@ -1,4 +1,5 @@
 import type { Schema, SettingsScope } from './schema';
+import { rebaseChanges } from '../storage/three-way-merge';
 
 /** On-disk shape of both settings files (`version` marks the namespaced layout). */
 export interface SettingsFile {
@@ -8,7 +9,7 @@ export interface SettingsFile {
 
 export interface SettingsPersistence {
 	load(scope: SettingsScope): Promise<SettingsFile | null>;
-	save(scope: SettingsScope, file: SettingsFile): Promise<void>;
+	save(scope: SettingsScope, file: SettingsFile, base: SettingsFile | null): Promise<SettingsFile>;
 }
 
 export interface SettingsTimers {
@@ -47,6 +48,7 @@ interface Namespace {
  */
 export class SettingsStore {
 	private readonly raw: Record<SettingsScope, Record<string, Record<string, unknown>>> = { vault: {}, device: {} };
+	private readonly persisted: Record<SettingsScope, SettingsFile | null> = { vault: null, device: null };
 	private readonly namespaces = new Map<string, Namespace>();
 	private readonly statusListeners = new Set<(status: SaveStatus) => void>();
 	private timer: unknown;
@@ -67,6 +69,7 @@ export class SettingsStore {
 	async load(): Promise<void> {
 		for (const scope of ['vault', 'device'] as const) {
 			const file: unknown = await this.persistence.load(scope);
+			this.persisted[scope] = structuredClone(file) as SettingsFile | null;
 			if (isSettingsFile(file)) this.raw[scope] = structuredClone(file.namespaces);
 		}
 	}
@@ -176,13 +179,25 @@ export class SettingsStore {
 	private write(): void {
 		const batch = this.waiting;
 		this.waiting = [];
-		const files = this.snapshot();
 		this.setStatus('saving');
 		this.writing = this.writing
 			.catch(() => undefined)
 			.then(async () => {
-				await this.persistence.save('vault', files.vault);
-				await this.persistence.save('device', files.device);
+				// Capture after preceding writes have rebased memory, not when the timer fired.
+				for (const scope of ['vault', 'device'] as const) {
+					const submitted = this.snapshot()[scope];
+					const result = await this.persistence.save(scope, submitted, this.persisted[scope]);
+					this.persisted[scope] = structuredClone(result);
+					const current = this.snapshot();
+					current[scope] = rebaseChanges(submitted, current[scope], result);
+					this.raw[scope] = structuredClone(result.namespaces);
+					for (const [name, namespace] of this.namespaces) {
+						const next = namespace.schema.normalize({ ...current.vault.namespaces[name], ...current.device.namespaces[name] });
+						if (JSON.stringify(namespace.value) === JSON.stringify(next)) continue;
+						namespace.value = next;
+						for (const listener of [...namespace.listeners]) listener();
+					}
+				}
 			})
 			.then(
 				() => {

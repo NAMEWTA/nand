@@ -109,6 +109,8 @@ export class NewsService implements NewsReadService {
 	private readonly activities = new Map<string, { status: 'running' | 'needs-attention'; terminalId: string }>();
 	private readonly readerFile: JsonStore<Envelope<ReaderState>>;
 	private data: NewsData = empty();
+	private saved: NewsData = empty();
+	private savedReader: ReaderState = { health: {} };
 	private loaded = false;
 	private tail: Promise<void> = Promise.resolve();
 	readonly ready: Promise<void>;
@@ -128,8 +130,7 @@ export class NewsService implements NewsReadService {
 		this.readerFile = new JsonStore(storage, `${directory}/reader-state.json`, envelopeOf(isReader));
 		this.notebook = new NewsNotebook(notes, () => this.emit(), this.settings);
 		this.journal = new NewsRunJournal(() => this.data.runs, runs => this.exclusive(async () => {
-			await this.runsFile.save({ version: 1, items: runs });
-			this.data = { ...this.data, runs };
+			await this.saveRuns(runs);
 			this.emit();
 		}));
 		this.ready = Promise.all([this.load(), this.notebook.ready]).then(() => undefined);
@@ -144,6 +145,8 @@ export class NewsService implements NewsReadService {
 			this.readerFile.load({ version: 1, items: { health: {} } }),
 		]);
 		this.data = { ...events.items, materials: materials.items, analyses: analyses.items, heat: heat.items, runs: runs.items, health: reader.items.health, readIds: reader.items.read ?? [], hiddenIds: reader.items.hidden ?? [], editions: reader.items.editions ?? [] };
+		this.saved = structuredClone(this.data);
+		this.savedReader = structuredClone(reader.items);
 		this.loaded = true;
 		await this.journal.recover();
 		await this.journal.retireObsolete(this.materials());
@@ -192,8 +195,8 @@ export class NewsService implements NewsReadService {
 		const story = this.story(id);
 		return this.notebook.brief(story ? [story.id, ...(story.aliases ?? [])] : [id]);
 	}
-	private events(): NewsEvents {
-		const { stories, occurrences, records, mentions, proposals, reviews } = this.data;
+	private events(data = this.data): NewsEvents {
+		const { stories, occurrences, records, mentions, proposals, reviews } = data;
 		return { stories, occurrences, records, mentions, proposals, reviews };
 	}
 	private groupReviewPort(): GroupReviewPort {
@@ -202,8 +205,7 @@ export class NewsService implements NewsReadService {
 			const proposal = events.proposals.find(item => item.id === review.proposalId);
 			if (!proposal || ![proposal.left, proposal.right].every(saved => this.materials().some(item => item.id === saved.id && item.revision === saved.revision && item.contentHash === saved.contentHash))) return;
 			const next = groupMaterials(this.materials(), [], { ...events, reviews: [...events.reviews.filter(item => item.proposalId !== review.proposalId), review] });
-			await this.eventsFile.save({ version: 1, items: next });
-			this.data = { ...this.data, ...next };
+			await this.saveEvents(next);
 			this.emit();
 		}) };
 	}
@@ -239,7 +241,6 @@ export class NewsService implements NewsReadService {
 				hidden.delete(id);
 			}
 			await this.saveReader({ read: [...read], hidden: [...hidden] });
-			this.data = { ...this.data, readIds: [...read], hiddenIds: [...hidden] };
 			this.emit();
 		});
 	}
@@ -257,14 +258,43 @@ export class NewsService implements NewsReadService {
 			// Retain the full supported memory horizon so increasing the setting can reuse prior issues.
 			const editions = [...editionMemory(this.data.editions, now, 30), edition];
 			await this.saveReader({ editions });
-			this.data = { ...this.data, editions };
 			if (this.settings().writeDailyNote) await this.notebook.saveEdition(edition, this.materials(), this.analyses(), this.sources());
 			this.emit();
 		});
 		return edition;
 	}
 	private async saveReader(overrides: Partial<ReaderState> = {}): Promise<void> {
-		await this.readerFile.save({ version: 1, items: { health: this.data.health, read: this.data.readIds, hidden: this.data.hiddenIds, editions: this.data.editions, ...overrides } });
+		const reader = (data: NewsData): ReaderState => ({ health: data.health, read: data.readIds, hidden: data.hiddenIds, editions: data.editions });
+		const { items } = await this.readerFile.commit({ base: { version: 1, items: this.savedReader }, value: { version: 1, items: { ...reader(this.data), ...overrides } } });
+		this.savedReader = structuredClone(items);
+		const patch = { health: items.health, readIds: items.read ?? [], hiddenIds: items.hidden ?? [], editions: items.editions ?? [] };
+		this.saved = { ...this.saved, ...structuredClone(patch) };
+		this.data = { ...this.data, ...patch };
+	}
+	private async saveRuns(items: NewsRun[]): Promise<void> {
+		const result = await this.runsFile.commit({ base: { version: 1, items: this.saved.runs }, value: { version: 1, items } });
+		this.saved.runs = structuredClone(result.items);
+		this.data = { ...this.data, runs: result.items };
+	}
+	private async saveEvents(items: NewsEvents): Promise<void> {
+		const result = await this.eventsFile.commit({ base: { version: 1, items: this.events(this.saved) }, value: { version: 1, items } });
+		this.saved = { ...this.saved, ...structuredClone(result.items) };
+		this.data = { ...this.data, ...result.items };
+	}
+	private async saveHeat(items: NewsHeatSnapshot[]): Promise<void> {
+		const result = await this.heatFile.commit({ base: { version: 1, items: this.saved.heat }, value: { version: 1, items } });
+		this.saved.heat = structuredClone(result.items);
+		this.data = { ...this.data, heat: result.items };
+	}
+	private async saveMaterials(items: NewsMaterial[]): Promise<void> {
+		const result = await this.materialsFile.commit({ base: { version: 1, items: this.saved.materials }, value: { version: 1, items } });
+		this.saved.materials = structuredClone(result.items);
+		this.data = { ...this.data, materials: result.items };
+	}
+	private async saveAnalyses(items: NewsAnalysis[]): Promise<void> {
+		const result = await this.analysesFile.commit({ base: { version: 1, items: this.saved.analyses }, value: { version: 1, items } });
+		this.saved.analyses = structuredClone(result.items);
+		this.data = { ...this.data, analyses: result.items };
 	}
 	views(): readonly NewsView[] {
 		return this.settings().views;
@@ -289,8 +319,7 @@ export class NewsService implements NewsReadService {
 			if (this.stopped || !this.settings().enabled) return;
 			const facts = this.heatEvidence(hour);
 			const heat = observeHeatHour(facts, hour, repairHeatHours(facts, hour, this.heat(), this.heatRules()), this.heatRules());
-			await this.heatFile.save({ version: 1, items: heat });
-			this.data = { ...this.data, heat };
+			await this.saveHeat(heat);
 			this.emit();
 		});
 	}
@@ -335,11 +364,11 @@ export class NewsService implements NewsReadService {
 		};
 		this.data.heat = repairHeatHours(this.heatEvidence(now), now, this.heat(), this.heatRules());
 		await Promise.all([
-			this.materialsFile.save({ version: 1, items: this.data.materials }),
-			this.analysesFile.save({ version: 1, items: this.data.analyses }),
-			this.eventsFile.save({ version: 1, items: this.events() }),
-			this.heatFile.save({ version: 1, items: this.data.heat }),
-			this.runsFile.save({ version: 1, items: this.data.runs }),
+			this.saveMaterials(this.data.materials),
+			this.saveAnalyses(this.data.analyses),
+			this.saveEvents(this.events()),
+			this.saveHeat(this.data.heat),
+			this.saveRuns(this.data.runs),
 		]);
 		// Commit conditional-request cursors only after every collected record is durable.
 		await this.saveReader();
@@ -430,7 +459,6 @@ export class NewsService implements NewsReadService {
 	private async setHealth(sourceId: string, health: NewsSourceHealth): Promise<void> {
 		const next = { ...this.data.health, [sourceId]: health };
 		await this.saveReader({ health: next });
-		this.data = { ...this.data, health: next };
 		this.emit();
 	}
 	private refreshSource(configured: NewsSource, now: number): Promise<void> {
@@ -598,10 +626,9 @@ export class NewsService implements NewsReadService {
 		await this.exclusive(async () => {
 			const current = fresh.filter(analysis => this.materials().some(material => material.id === analysis.materialId && material.revision === analysis.revision && material.contentHash === analysis.contentHash));
 			const analyses = [...this.data.analyses.filter(item => !current.some(next => next.materialId === item.materialId)), ...current];
-			await this.analysesFile.save({ version: 1, items: analyses });
+			await this.saveAnalyses(analyses);
 			const events = groupMaterials(this.materials(), current, this.events());
-			await this.eventsFile.save({ version: 1, items: events });
-			this.data = { ...this.data, ...events, analyses };
+			await this.saveEvents(events);
 			this.emit();
 		});
 		await this.journal.finish(batchId, 'applied');

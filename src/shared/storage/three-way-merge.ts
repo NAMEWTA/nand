@@ -19,16 +19,16 @@ function identity(v: unknown): string | undefined {
 }
 
 /** A missing key is a deletion, never an invitation to union old data back in. */
-export function threeWayMerge<T>(base: T, local: T, remote: T, path = ''): T {
+export function threeWayMerge<T>(base: T, local: T, remote: T, path = '', pendingEdit = false): T {
 	if (equal(local, base)) return structuredClone(remote);
 	if (equal(remote, base) || equal(local, remote)) return structuredClone(local);
-	if (base === undefined && object(local) && object(remote)) return threeWayMerge({} as T, local, remote, path);
+	if (base === undefined && object(local) && object(remote)) return threeWayMerge({} as T, local, remote, path, pendingEdit);
 	if (base === undefined && Array.isArray(local) && Array.isArray(remote))
-		return threeWayMerge([] as T, local, remote, path);
+		return threeWayMerge([] as T, local, remote, path, pendingEdit);
 	if (object(base) && object(local) && object(remote)) {
 		const merged: Record<string, unknown> = {};
 		for (const key of new Set([...Object.keys(base), ...Object.keys(local), ...Object.keys(remote)])) {
-			const value = threeWayMerge(base[key], local[key], remote[key], `${path}/${key}`);
+			const value = threeWayMerge(base[key], local[key], remote[key], `${path}/${key}`, pendingEdit);
 			if (value !== undefined) merged[key] = value;
 		}
 		return merged as T;
@@ -41,11 +41,17 @@ export function threeWayMerge<T>(base: T, local: T, remote: T, path = ''): T {
 			const [b, l, r] = maps;
 			const merged: unknown[] = [];
 			for (const id of new Set([...l!.keys(), ...r!.keys(), ...b!.keys()])) {
-				const value = threeWayMerge(b!.get(id), l!.get(id), r!.get(id), `${path}/${id}`);
+				const value = threeWayMerge(b!.get(id), l!.get(id), r!.get(id), `${path}/${id}`, pendingEdit);
 				if (value !== undefined) merged.push(value);
 			}
 			return merged as T;
 		}
 	}
+	if (pendingEdit) return structuredClone(local);
 	throw new DocumentConflict(path, base, local, remote);
+}
+
+/** Replay edits made after a save started onto its result. Only subsequent edits win; unchanged fields adopt the result. */
+export function rebaseChanges<T>(submitted: T, pending: T, persisted: T): T {
+	return threeWayMerge(submitted, pending, persisted, '', true);
 }

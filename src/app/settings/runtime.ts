@@ -56,7 +56,10 @@ export async function loadSettingsRuntime(app: App): Promise<SettingsRuntime> {
 	};
 	const store = new SettingsStore({
 		load: async (scope) => (await stores[scope].load(null)) as SettingsFile | null,
-		save: (scope, file) => stores[scope].save(file as unknown as Record<string, unknown>),
+		save: async (scope, file, base) => await stores[scope].commit({
+			base: base as unknown as Record<string, unknown> | null,
+			value: file as unknown as Record<string, unknown>,
+		}) as unknown as SettingsFile,
 	}, { timers: { set: (callback, ms) => window.setTimeout(callback, ms), clear: (handle) => window.clearTimeout(handle as number) } });
 	await store.load();
 	const firstRun = store.empty;

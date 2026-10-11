@@ -146,8 +146,7 @@ export class NativeHistory {
 		const result = this.tail.then(async () => {
 			await this.loaded;
 			const next = { ...this.metadata, [key]: { ...this.meta(key), ...patch } };
-			await this.store.save(next);
-			this.metadata = next;
+			this.metadata = await this.store.commit({ base: this.metadata, value: next });
 			this.metadataVersion++;
 			this.changed();
 		});

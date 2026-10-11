@@ -114,6 +114,8 @@ export class TerminalAutomationRuntime implements AgentRuntimePort {
 	private live = new Map<string, LiveSession>();
 	private hooks: AutomationHooks;
 	private registry: AgentSessionRef[] = [];
+	private registryWrites: Promise<void> = Promise.resolve();
+	private readonly pendingRegistry = new Map<string, AgentSessionRef>();
 	private store: JsonStore<AgentSessionRef[]>;
 	private loaded: Promise<void>;
 	constructor(private host: AutomationRuntimeHost) {
@@ -157,6 +159,7 @@ export class TerminalAutomationRuntime implements AgentRuntimePort {
 	}
 
 	private receive(slot: LiveSession, event: NativeHookEvent): void {
+		if (this.disposed) return;
 		if (event.at < slot.since || event.data.agent_id || event.data.subagent_id || event.data.parent_session_id)
 			return;
 		if (event.event === 'HookError') {
@@ -176,14 +179,9 @@ export class TerminalAutomationRuntime implements AgentRuntimePort {
 				transcriptPath: typeof event.data.transcript_path === 'string' ? event.data.transcript_path : undefined,
 			};
 			if (slot.execution?.kind !== 'prompt') {
-				this.registry = [
-					...this.registry.filter(
-						(s) =>
-							!(s.agentId === slot.action.agentId && s.sessionId === id && s.accountKey === slot.accountKey),
-					),
-					slot.session,
-				];
-				void this.store.save(this.registry).catch(console.error);
+				const session = slot.session;
+				this.pendingRegistry.set(this.registryKey(session), session);
+				void this.persistRegistry().catch(console.error);
 			}
 		}
 		if (event.event === 'PermissionRequest' || event.event === 'Notification') {
@@ -532,6 +530,21 @@ export class TerminalAutomationRuntime implements AgentRuntimePort {
 	async open(id: string): Promise<void> {
 		await this.host.open(id);
 	}
+	private registryKey(session: AgentSessionRef): string {
+		return JSON.stringify([session.agentId, session.sessionId, session.accountKey]);
+	}
+	private persistRegistry(): Promise<void> {
+		const operation = this.registryWrites.then(async () => {
+			await this.loaded;
+			if (!this.pendingRegistry.size) return;
+			const pending = new Map(this.pendingRegistry);
+			const next = [...this.registry.filter(session => !pending.has(this.registryKey(session))), ...pending.values()];
+			this.registry = await this.store.commit({ base: this.registry, value: next });
+			for (const [key, session] of pending) if (this.pendingRegistry.get(key) === session) this.pendingRegistry.delete(key);
+		});
+		this.registryWrites = operation.catch(() => {});
+		return operation;
+	}
 	dispose(): void {
 		this.disposed = true;
 		for (const slot of this.live.values()) {
@@ -539,5 +552,6 @@ export class TerminalAutomationRuntime implements AgentRuntimePort {
 			slot.finish = undefined;
 		}
 		this.hooks.dispose();
+		void this.persistRegistry().catch(console.error);
 	}
 }

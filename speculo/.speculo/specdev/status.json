@@ -1,7 +1,11 @@
 {
   "schema_version": 5,
   "workflow": "specdev",
-  "active": [],
+  "active": [
+    {
+      "change": "2026-10-11-vault-data-unification"
+    }
+  ],
   "archived": [
     "2026-10-08-all-open-issues",
     "2026-10-08-archives-completion",

@@ -1,0 +1,41 @@
+baseline sha256=34ce2c74cd62f41a8fc19f4f2bc853701316b1d594ed8ab16d99dbf4dd0510b1
+mutation=await this.writeVerified(this.path + '.backup', JSON.stringify(remote)); -> await this.writeVerified(this.path + '.backup', this.snapshot);
+exit=1
+
+ RUN  v5.0.3 D:/Document/code/nand
+
+ ❯ |unit| src/shared/json-store.test.ts (7 tests | 1 failed | 6 skipped) 10ms
+   × a partial primary write recovers the latest valid external state and can be retried 9ms
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 6 skipped (7)
+   Start at  13:25:30
+   Duration  642ms (transform 42%, setup 41%, import 15%, tests 2%, worker 1%)
+
+
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |unit| src/shared/json-store.test.ts > a partial primary write recovers the latest valid external state and can be retried
+AssertionError: expected { a: 1, b: 1, obsolete: 1 } to deeply equal { a: 1, b: 2 }
+
+- Expected
++ Received
+
+  {
+    "a": 1,
+-   "b": 2,
++   "b": 1,
++   "obsolete": 1,
+  }
+
+ ❯ src/shared/json-store.test.ts:49:49
+     47|  storage.write = async (path, value) => { if (path === 'state') { file…
+     48|  await expect(store.commit({ base, value: { ...base, a: 2 } })).reject…
+     49|  expect(JSON.parse(files.get('state.backup')!)).toEqual({ a: 1, b: 2 }…
+       |                                                 ^
+     50|  storage.write = write;
+     51|  const recovered = new JsonStore(storage, 'state', validate);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+

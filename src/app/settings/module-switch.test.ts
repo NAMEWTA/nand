@@ -11,6 +11,7 @@ function setup() {
 		save: async (scope, file) => {
 			if (failWrites) throw new Error('disk full');
 			if (scope === 'vault') saved.push(structuredClone(file));
+			return structuredClone(file);
 		},
 	}, { timers: { set: (callback) => { queueMicrotask(callback); return 0; }, clear: () => {} } });
 	return { store, saved, failWrites: (value: boolean) => { failWrites = value; } };

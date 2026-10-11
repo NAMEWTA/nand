@@ -358,8 +358,13 @@ test('active agents do not overlap; a slow agent startup does not hold reminders
 	});
 	await service.save(d);
 	await service.save(definition({ id: 'reminder' }));
+	const reminder = new Promise<void>(resolve => {
+		const stop = service.subscribe(() => {
+			if (service.state.runs.find(r => r.automationId === 'reminder')?.status === 'succeeded') { stop(); resolve(); }
+		});
+	});
 	const tick = service.tick(2000);
-	for (let i = 0; i < 50; i++) await Promise.resolve();
+	await reminder;
 	assert.equal(service.state.runs.find((r) => r.automationId === 'reminder')?.status, 'succeeded');
 	launch({
 		terminalId: 't',
@@ -416,13 +421,14 @@ test('corrupt primary recovers the backup and supports subsequent saves without 
 	const check = (v: unknown): v is { n: number } =>
 		!!v && typeof v === 'object' && typeof (v as { n: number }).n === 'number';
 	const store = new JsonStore(m.app.vault.adapter, '.nand/state.json', check);
-	await store.load({ n: 0 });
-	await store.save({ n: 1 });
-	await store.save({ n: 2 });
+	const initial = await store.load({ n: 0 });
+	const next = await store.commit({ base: initial, value: { n: 1 } });
+	await store.commit({ base: next, value: { n: 2 } });
 	m.files.set('.nand/state.json', 'broken');
 	const recovered = new JsonStore(m.app.vault.adapter, '.nand/state.json', check);
-	assert.deepEqual(await recovered.load({ n: 0 }), { n: 1 });
-	await recovered.save({ n: 3 });
+	const base = await recovered.load({ n: 0 });
+	assert.deepEqual(base, { n: 1 });
+	await recovered.commit({ base, value: { n: 3 } });
 	assert.equal(m.files.get('.nand/state.json.corrupt'), 'broken');
 	assert.equal(JSON.parse(m.files.get('.nand/state.json')!).n, 3);
 });
@@ -576,13 +582,14 @@ test('partial primary write recovers last valid data and a later write can succe
 	const m = memory();
 	const validate = (v: unknown): v is { revision: number } => !!v && typeof v === 'object' && typeof (v as { revision?: unknown }).revision === 'number';
 	const store = new JsonStore(m.app.vault.adapter, 'store.json', validate);
-	await store.load({ revision: 0 });
-	await store.save({ revision: 1 });
-	await store.save({ revision: 2 });
+	const initial = await store.load({ revision: 0 });
+	const next = await store.commit({ base: initial, value: { revision: 1 } });
+	await store.commit({ base: next, value: { revision: 2 } });
 	m.files.set('store.json', '{"revision":');
 	const restarted = new JsonStore(m.app.vault.adapter, 'store.json', validate);
-	assert.deepEqual(await restarted.load({ revision: 0 }), { revision: 1 });
-	await restarted.save({ revision: 3 });
+	const base = await restarted.load({ revision: 0 });
+	assert.deepEqual(base, { revision: 1 });
+	await restarted.commit({ base, value: { revision: 3 } });
 	assert.equal(JSON.parse(m.files.get('store.json')!).revision, 3);
 	assert.equal(m.files.get('store.json.corrupt'), '{"revision":');
 });

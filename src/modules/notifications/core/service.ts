@@ -19,6 +19,7 @@ interface InboxState {
 }
 export class NotificationService implements NotificationInbox {
 	private state: InboxState = { records: [], receipts: {} };
+	private saved: InboxState = { records: [], receipts: {} };
 	get records(): NotificationRecord[] {
 		return this.state.records;
 	}
@@ -54,6 +55,7 @@ export class NotificationService implements NotificationInbox {
 	async load(): Promise<void> {
 		this.loaded = false;
 		const state = await this.store.load({ records: [], receipts: {} });
+		this.saved = structuredClone(state);
 		for (const deliveries of Object.values(state.receipts))
 			for (const channel of Object.keys(deliveries) as NotificationChannelId[])
 				if (deliveries[channel] === 'pending') deliveries[channel] = 'unknown';
@@ -81,8 +83,8 @@ export class NotificationService implements NotificationInbox {
 	private async commit(change: (state: InboxState) => void): Promise<void> {
 		const next = structuredClone(this.state);
 		change(next);
-		await this.store.save(next);
-		this.state = next;
+		this.state = await this.store.commit({ base: this.saved, value: next });
+		this.saved = structuredClone(this.state);
 		this.emit();
 	}
 	available(channel: NotificationChannelId): boolean {

@@ -10,6 +10,7 @@ test('a failed widget save restores that instance, preserves another update, and
 	const store = new SettingsStore({ load: async () => null, save: async (scope, file) => {
 		if (fail) { fail = false; throw Error('disk full'); }
 		if (scope === 'vault') disk = structuredClone(file);
+		return structuredClone(file);
 	} }, { debounceMs: 0, timers: { set: (fn, ms) => setTimeout(fn, ms), clear: id => clearTimeout(id as ReturnType<typeof setTimeout>) } });
 	await store.load();
 	const handle = store.bind('news', newsSettings), original = handle.get().widgets![0]!;

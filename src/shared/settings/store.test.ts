@@ -47,6 +47,7 @@ function memory(initial: Partial<Record<SettingsScope, unknown>> = {}) {
 				}
 				files[scope] = structuredClone(file);
 				writes.push({ scope, file: structuredClone(file) });
+				return structuredClone(file);
 			},
 		},
 	};
