@@ -50,7 +50,10 @@ export async function launchFreshVault({ root, files = {}, settings, port = 9237
 		}
 		assert.ok(connection, 'Obsidian did not expose a CDP target');
 		session.connection = connection;
-		await connection.evaluate(`(()=>{window.nandAcceptanceErrors=[];const original=console.error;console.error=(...args)=>{nandAcceptanceErrors.push(args.map(a=>a?.stack??String(a)).join(' '));original(...args)};window.addEventListener('unhandledrejection',e=>nandAcceptanceErrors.push(e.reason?.stack??String(e.reason)));})()`);
+		const captureErrors = `(()=>{if(window.nandAcceptanceErrors)return;window.nandAcceptanceErrors=[];const original=console.error;console.error=(...args)=>{nandAcceptanceErrors.push(args.map(a=>a?.stack??String(a)).join(' '));original(...args)};window.addEventListener('unhandledrejection',e=>nandAcceptanceErrors.push(e.reason?.stack??String(e.reason)));})()`;
+		// The initially exposed target can still navigate to its final document during startup.
+		await connection.send('Page.addScriptToEvaluateOnNewDocument', { source: captureErrors });
+		await connection.evaluate(captureErrors);
 		// Ready = the trust prompt is answered and onload finished (the workbench exists).
 		const ready = `typeof app !== 'undefined' && !!app.workspace?.layoutReady && !!app.plugins?.plugins?.nand?.workbench`;
 		while (Date.now() < deadline) {

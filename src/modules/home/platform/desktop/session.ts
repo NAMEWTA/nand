@@ -10,7 +10,7 @@ async function chooseLegacySession(app: App, win: Window, signal: AbortSignal): 
 	const deadline = Date.now() + 1000;
 	while (activeDocument !== win.document) {
 		if (signal.aborted || win.closed || Date.now() >= deadline) throw new Error('browser_session_closed');
-		await new Promise<void>(resolve => win.setTimeout(resolve, 16));
+		await new Promise<void>(resolve => app.workspace.containerEl.win.setTimeout(resolve, 16));
 	}
 	return new Promise((resolve, reject) => {
 		let settled = false;

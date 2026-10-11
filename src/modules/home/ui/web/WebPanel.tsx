@@ -41,6 +41,7 @@ function Webview({ app, target, zoom, scheme, timeoutMs, failed }: {
 		void import('../../platform/desktop/session').then(({ homeSession }) => homeSession(app, win, 'web', abort.signal)).then(value => {
 			if (abort.signal.aborted) { value.dispose(); return; }
 			lease = value; lease.bind(element);
+			lease.onDownloadError(() => fail('web.browser_session_download'));
 			timer = win.setTimeout(() => fail('web.webviewUnavailable'), timeoutMs);
 			element.setAttribute('src', 'about:blank');
 		}).catch((error: unknown) => fail(error instanceof Error && error.message.startsWith('browser_session_') ? `web.${error.message}` : 'web.loadFailed'));

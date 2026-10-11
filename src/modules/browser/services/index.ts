@@ -498,6 +498,7 @@ export class BrowserModule implements BrowserHost, BrowserAutomationPort {
 		try {
 			ensureActive(); await lease.session.clearStorageData();
 			ensureActive(); await lease.session.clearCache();
+			ensureActive(); await lease.clearRecovery();
 		} finally { lease.dispose(); }
 		ensureActive();
 		await this.profileStore.remove(id);

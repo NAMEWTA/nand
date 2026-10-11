@@ -180,6 +180,7 @@ export class BrowserPage {
 		void prepareSession().then(lease => {
 			if (this.disposed) { lease.dispose(); return; }
 			this.sessionLease = lease;
+			lease.onDownloadError(() => { if (!this.disposed) this.fail('browser_session_download'); });
 			lease.bind(this.webview);
 			this.startupTimer = this.win.setTimeout(() => {
 				this.fail('browser_unavailable');

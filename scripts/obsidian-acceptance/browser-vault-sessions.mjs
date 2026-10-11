@@ -16,7 +16,7 @@ const surfaces = "app.workspace.getLeavesOfType('nand-workbench-view').flatMap(l
 let runtime, c;
 const check = (name, passed, detail) => { rows.push({ name, passed, detail }); assert.ok(passed, name); };
 const until = async expression => { const end = Date.now() + 30000; let lastError; while (Date.now() < end) { try { if (await c.evaluate(expression)) return; } catch (error) { lastError = error; } await delay(80); } throw Error('Timed out: ' + expression + (lastError ? String(lastError) : '')); };
-const bind = async () => { await c.evaluate(`window.bo=${p}.services.peek({owner:'browser',id:'open'});true`); };
+const bind = async () => { await c.evaluate(`window.bo=${p}.services.peek({owner:'browser',id:'open'});window.bp=${p}.services.peek({owner:'browser',id:'profiles'});true`); };
 const open = async () => c.evaluate(`bo.open({url:${JSON.stringify(url)}})`);
 const guest = id => `document.querySelector('[data-page-id="${id}"] webview')`;
 const native = id => `require('@electron/remote').webContents.fromId(${guest(id)}.getWebContentsId())`;
@@ -30,12 +30,26 @@ try {
  await fs.mkdir(path.join(oldRuntime,'artifacts'),{recursive:true}); await fs.writeFile(path.join(oldRuntime,'artifacts','11223344-5566-4777-8888-1234567890ac.txt'),'retained legacy context');
  await runtime.restart(); c = runtime.connection;
  await c.evaluate(`${p}.setModuleEnabled('browser',true)`); await bind();
+ const profiles = [];
+ for (const phase of ['restart','published','complete']) {
+  const profile = await c.evaluate(`bp.create(${JSON.stringify(phase)})`);
+  const source = await c.evaluate(`(async()=>{const e=document.createElement('webview');e.partition='persist:nand-browser-${legacyId}-profile-${profile.id}';const ready=new Promise(resolve=>e.addEventListener('dom-ready',resolve,{once:true}));e.src=${JSON.stringify(url)};document.body.append(e);await ready;await e.executeJavaScript("document.cookie='original=owned;path=/;max-age=86400';localStorage.original='owned';true");const s=require('@electron/remote').webContents.fromId(e.getWebContentsId()).session;await s.cookies.flushStore();const directory=s.storagePath;e.remove();return directory})()`);
+  profiles.push({id:profile.id,phase,source});
+  const failure = await c.evaluate(phase === 'restart' ? `bp.remove('${profile.id}',[]).then(()=>'',e=>e.message)` : `bo.open({url:${JSON.stringify(url)},profileId:'${profile.id}'}).then(()=>'',e=>e.message)`);
+  check(`legacy-profile-${phase}-requires-cold-restart`, /browser_session_restart|重新启动/.test(failure));
+ }
  const first = await c.evaluate(`bo.open({url:${JSON.stringify(url)}}).then(()=>'',e=>e.message)`);
  check('legacy-session-requires-full-restart', first.includes('关闭所有 Obsidian') && first.includes('重新启动'), first);
  await c.evaluate(`${p}.setModuleEnabled('browser',false)`); await c.evaluate(`${p}.setModuleEnabled('browser',true)`); await bind();
  const reload = await c.evaluate(`bo.open({url:${JSON.stringify(url)}}).then(()=>'',e=>e.message)`);
  check('module-reload-does-not-bypass-cold-migration', reload.includes('关闭所有 Obsidian') && reload.includes('重新启动'));
  await runtime.restart(); c = runtime.connection; await bind();
+ for (const profile of profiles) {
+  if (profile.phase === 'restart') {
+   await c.evaluate(`bp.remove('${profile.id}',bp.affectedPages('${profile.id}').map(p=>p.id))`);
+   check('delete-before-migration-retries-after-cold-restart', await fs.stat(profile.source).then(()=>false,error=>error.code==='ENOENT') && await c.evaluate(`!bp.list().some(p=>p.id==='${profile.id}')`));
+  } else await c.evaluate(`bo.open({url:${JSON.stringify(url)},profileId:'${profile.id}'})`);
+ }
  const id = await open(), directory = await c.evaluate(`${native(id)}.session.storagePath`);
  check('cold-copy-opens-only-vault-session', directory === path.join(runtime.vault, '.nand/browser', device, 'profiles/default/session'), directory);
  check('legacy-cookie-and-site-data-survive-copy', await script(id, "document.cookie==='account=legacy'&&localStorage.account==='legacy'"));
@@ -54,12 +68,29 @@ try {
  for (let i = 0; i < 100 && !download; i++) { download = (await fs.readdir(downloadDir)).find(name => name.endsWith('-vault-proof.txt')); if (!download) await delay(100); }
  check('download-has-vault-destination', !!download);
  check('download-bytes-are-complete', await fs.readFile(path.join(downloadDir, download), 'utf8') === 'vault-download-bytes');
+ const outside = path.join(runtime.root ?? path.dirname(runtime.vault),'outside-download'); await fs.mkdir(outside);
+ const parked = downloadDir + '-parked'; await fs.rename(downloadDir, parked); await fs.symlink(outside, downloadDir, 'junction');
+ await script(id, `location.href=${JSON.stringify(url + '/download')};true`);
+ await until(`document.querySelector('[data-page-id="${id}"]')?.textContent.includes('下载失败')`);
+ check('unsafe-download-visible-and-no-outside-file', (await fs.readdir(outside)).length === 0);
+ await runtime.shot('download-error'); await fs.rmdir(downloadDir); await fs.rename(parked, downloadDir);
+ const published = profiles.find(profile=>profile.phase==='published');
+ const publishedDownloads = path.join(runtime.vault,'.nand/browser',device,'profiles',published.id,'downloads');
+ await fs.writeFile(path.join(publishedDownloads,'saved-material.txt'),'keep saved material');
+ await c.evaluate(`bp.remove('${published.id}',bp.affectedPages('${published.id}').map(p=>p.id))`);
+ check('published-profile-delete-clears-old-source-and-backup', await fs.stat(published.source).then(()=>false,error=>error.code==='ENOENT') && await fs.stat(path.join(publishedDownloads,'../legacy-original')).then(()=>false,error=>error.code==='ENOENT'));
+ check('profile-delete-retains-saved-downloads', await fs.readFile(path.join(publishedDownloads,'saved-material.txt'),'utf8') === 'keep saved material');
  const artifacts = await c.evaluate(`(async()=>{window.bh=${surfaces}.find(s=>s.state?.id===${JSON.stringify(id)}).host;return bh.saveImage('data:image/png;base64,aGVsbG8=','context')})()`);
  const runtimeRoot = path.join(runtime.vault,'.nand/browser',device,'runtime'), run = (await fs.readdir(runtimeRoot)).find(name => /^[a-f\d-]{36}$/.test(name));
  assert.ok(run); const bridgePaths = { artifacts, context: path.join(runtimeRoot,run,'connection.json'), cli: path.join(runtimeRoot,run,'nand-browser.cjs') };
  check('bridge-and-artifacts-use-vault-device-root', [bridgePaths.context,bridgePaths.cli,...bridgePaths.artifacts].every(file => file.startsWith(path.join(runtime.vault,'.nand/browser',device)+path.sep)), bridgePaths);
  await runtime.shot('vault-browser-and-download');
  await runtime.restart(); c = runtime.connection; await bind(); const restored = await open();
+ const complete = profiles.find(profile=>profile.phase==='complete'); await c.evaluate(`bo.open({url:${JSON.stringify(url)},profileId:'${complete.id}'})`);
+ const completeRoot = path.join(runtime.vault,'.nand/browser',device,'profiles',complete.id);
+ check('profile-cleanup-reached-complete-phase', JSON.parse(await fs.readFile(path.join(completeRoot,'migration.json'),'utf8')).phase === 'complete');
+ await c.evaluate(`bp.remove('${complete.id}',bp.affectedPages('${complete.id}').map(p=>p.id))`);
+ check('complete-profile-delete-clears-legacy-recovery', await fs.stat(path.join(completeRoot,'legacy-original')).then(()=>false,error=>error.code==='ENOENT'));
  check('migrated-session-retains-new-data-after-restart', await script(restored, "document.cookie==='account=current'&&localStorage.account==='current'"));
  check('legacy-source-cleaned-only-after-validation', await fs.stat(legacyPath).then(() => false, error => error.code === 'ENOENT'));
  check('legacy-source-preserved-inside-vault', (await fs.stat(path.join(runtime.vault,'.nand/browser',device,'profiles/default/legacy-original'))).isDirectory());
@@ -78,6 +109,15 @@ try {
  check('no-host-iframe-fallback', await c.evaluate(`document.querySelectorAll('.dashboard-web-content iframe').length===0`));
  await c.evaluate(`document.querySelector('.dashboard-web-frame').scrollIntoView({block:'center'});true`); await delay(150);
  await runtime.shot('home-owned-webview');
+ const homeDownloads = path.join(homePath,'../../home-web/downloads'), homeParked = homeDownloads + '-parked';
+ await fs.rename(homeDownloads,homeParked); await fs.symlink(outside,homeDownloads,'junction');
+ await c.evaluate(`document.querySelector('.dashboard-web-frame').executeJavaScript(${JSON.stringify('location.href='+JSON.stringify(url+'/download')+';true')})`);
+ await until(`document.querySelector('.dashboard-web-fallback')?.textContent.includes('下载失败')`);
+ check('home-download-error-visible-and-no-outside-file',(await fs.readdir(outside)).length===0);
+ await runtime.shot('home-download-error'); await fs.rmdir(homeDownloads); await fs.rename(homeParked,homeDownloads);
+ await c.evaluate(`document.querySelector('.dashboard-web-fallback-btn').click();true`);
+ await until(`document.querySelector('.dashboard-web-frame')?.getURL?.()===${JSON.stringify(url + '/')}`);
+ check('home-download-error-can-retry',true);
  const musicPath = path.join(runtime.vault,'.nand/browser',device,'profiles/home-music/session');
  const intercept = `(()=>{const require=process.getBuiltinModule('module').createRequire(process.execPath);return directory=>require('electron').session.fromPath(directory).protocol.handle('https',()=>new Response('<title>Local music login fixture</title><h1>Local music login fixture</h1>',{headers:{'Content-Type':'text/html'}}))})()`;
  await c.evaluate(`require('@electron/remote').require('node:vm').runInThisContext(${JSON.stringify(intercept)})(${JSON.stringify(musicPath)})`);

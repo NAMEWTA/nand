@@ -1,4 +1,4 @@
-import { mkdtempSync, mkdirSync, rmSync, symlinkSync } from 'node:fs';
+import { mkdtempSync, mkdirSync, rmSync, rmdirSync, symlinkSync } from 'node:fs';
 import path from 'node:path';
 import { tmpdir } from 'node:os';
 import { EventEmitter } from 'node:events';
@@ -15,7 +15,7 @@ test('bundled main policy attaches explicit sessions, constrains downloads and g
 	let destroyed = false, handler: () => { action: string } = () => ({ action: '' });
 	const guest = Object.assign(new EventEmitter(), { id: 2, session, isDestroyed: () => destroyed, setWindowOpenHandler: (fn: typeof handler) => { handler = fn; } });
 	const nativeRequire = createRequire(process.cwd() + '/package.json');
-	const exported: { acquire?: (vault: string, directory: string, downloads: string) => { session: unknown; bind(owner: number, token: string): void; protect(id: number): void; dispose(): void } } = {};
+	const exported: { acquire?: (vault: string, directory: string, downloads: string) => { session: unknown; onDownloadError(listener: () => void): void; bind(owner: number, token: string): void; protect(id: number): void; dispose(): void } } = {};
 	runInNewContext(SESSION_RUNTIME_SOURCE, { exports: exported, require: (name: string) => name === 'electron' ? { session: { fromPath: (file: string) => { expect(file).toBe(directory); return session; } }, webContents: { fromId: (id: number) => id === 1 ? owner : guest, getAllWebContents: () => [owner, guest] } } : nativeRequire(name), URL });
 	try {
 		const first = exported.acquire!(root, directory, downloads), second = exported.acquire!(root, directory, downloads);
@@ -27,8 +27,13 @@ test('bundled main policy attaches explicit sessions, constrains downloads and g
 		let denied = false;
 		guest.emit('will-navigate', { preventDefault: () => { denied = true; } }, 'file:///outside'); expect(denied).toBe(true);
 		let saved = '', cancelled = false;
-		const event = { preventDefault: () => { cancelled = true; } }, item = { getFilename: () => '../../outside.txt', setSavePath: (file: string) => { saved = file; }, cancel: () => { cancelled = true; } };
+		let errors = 0; first.onDownloadError(() => { errors++; });
+		const event = { preventDefault: () => { cancelled = true; } }, item = Object.assign(new EventEmitter(), { getFilename: () => '../../outside.txt', setSavePath: (file: string) => { saved = file; }, cancel: () => { cancelled = true; } });
 		session.emit('will-download', event, item); expect(path.dirname(saved)).toBe(downloads); expect(cancelled).toBe(false);
+		item.emit('done', {}, 'interrupted'); expect(errors).toBe(1);
+		rmSync(downloads, { recursive: true }); symlinkSync(directory, downloads, 'junction');
+		session.emit('will-download', event, item); expect(errors).toBe(2); expect(cancelled).toBe(true);
+		rmdirSync(downloads); mkdirSync(downloads); cancelled = false;
 		first.dispose(); expect(owner.listenerCount('will-attach-webview')).toBe(0); expect(session.listenerCount('will-download')).toBe(1);
 		second.dispose(); expect(session.listenerCount('will-download')).toBe(1);
 		session.emit('will-download', event, item); expect(cancelled).toBe(true);
@@ -36,5 +41,7 @@ test('bundled main policy attaches explicit sessions, constrains downloads and g
 		expect(() => exported.acquire!(root, path.join(root, 'outside'), downloads)).toThrow('browser_session_path');
 		symlinkSync(downloads, path.join(root, '.nand/linked'), 'junction');
 		expect(() => exported.acquire!(root, path.join(root, '.nand/linked'), downloads)).toThrow('symlink');
+		symlinkSync(downloads, path.join(directory, 'Code Cache'), 'junction');
+		expect(() => exported.acquire!(root, directory, downloads)).toThrow('symlink');
 	} finally { rmSync(root, { recursive: true, force: true }); }
 });

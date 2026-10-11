@@ -66,12 +66,15 @@ export class NeteaseAccount {
 		if (this.disposed) throw new Error('browser_session_closed');
 		if (this.session) return this.session;
 		return this.pending ??= import('./session').then(({ homeSession }) => homeSession(this.app, this.app.workspace.containerEl.win, 'music', this.abort.signal, interactive)).then(lease => {
+			if (this.disposed || this.abort.signal.aborted) { lease.dispose(); throw new Error('browser_session_closed'); }
+			lease.onDownloadError(() => { if (!this.disposed) new Notice(t('web.browser_session_download')); });
 			this.lease = lease; this.session = lease.session; this.error = ''; return this.session;
 		}).finally(() => { this.pending = undefined; });
 	}
 
 	async cookie(): Promise<string> {
 		const cookies = await (await this.getSession()).cookies.get({ url: ORIGIN });
+		if (this.disposed) throw new Error('browser_session_closed');
 		const header = musicCookieHeader(cookies);
 		this.loggedIn = /(?:^|; )MUSIC_U=/.test(header);
 		return this.loggedIn ? header : '';
@@ -82,6 +85,7 @@ export class NeteaseAccount {
 		try {
 			await this.cookie();
 		} catch (error) {
+			if (this.disposed) return;
 			this.loggedIn = false;
 			this.error = error instanceof Error ? error.message : 'browser_session_unavailable';
 			new Notice(t(`web.${this.error.startsWith('browser_session_') ? this.error : 'browser_session_unavailable'}`));
@@ -172,10 +176,12 @@ export class NeteaseAccount {
 		const session = await this.getSession();
 		await session.clearStorageData();
 		await session.cookies.flushStore();
+		await this.lease!.clearRecovery();
 	}
 
 	destroy(): void {
 		this.disposed = true;
+		this.loggedIn = false;
 		this.cancelLogin?.();
 		this.abort.abort(); this.lease?.dispose(); this.lease = undefined; this.session = null;
 	}

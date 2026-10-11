@@ -1,5 +1,5 @@
 import path from 'node:path';
-import { createHash } from 'node:crypto';
+import { createHash, randomUUID } from 'node:crypto';
 import { createReadStream } from 'node:fs';
 import { chmod, copyFile, lstat, mkdir, readdir, rename, rmdir, unlink } from 'node:fs/promises';
 import { JsonStore } from '../../shared/json-store';
@@ -14,6 +14,8 @@ interface Receipt {
 	boot: string;
 	phase: 'restart' | 'copying' | 'published' | 'complete' | 'fresh';
 	files: Record<string, string>;
+	verified?: boolean;
+	retirement?: string;
 }
 export interface SessionMigration {
 	vault: string;
@@ -32,6 +34,8 @@ function valid(value: unknown): value is Receipt | null {
 	if (!value || typeof value !== 'object') return false;
 	const row = value as Partial<Receipt>;
 	return row.version === 1 && typeof row.source === 'string' && /^[a-f\d]{64}$/.test(row.source) && typeof row.boot === 'string'
+		&& (row.verified === undefined || typeof row.verified === 'boolean')
+		&& (row.retirement === undefined || typeof row.retirement === 'string' && /^[a-f\d]{8}(?:-[a-f\d]{4}){3}-[a-f\d]{12}$/.test(row.retirement))
 		&& (row.origin === undefined || typeof row.origin === 'string' && digest(row.origin) === row.source)
 		&& ['restart', 'copying', 'published', 'complete', 'fresh'].includes(row.phase ?? '') && !!row.files && typeof row.files === 'object' && !Array.isArray(row.files)
 		&& Object.entries(row.files).every(([file, hash]) => safeFile(file) && typeof hash === 'string' && /^[a-f\d]{64}$/.test(hash));
@@ -49,7 +53,7 @@ async function fileHash(file: string): Promise<string> {
 	return hash.digest('hex');
 }
 async function snapshot(directory: string): Promise<Record<string, string>> {
-	const files: Record<string, string> = {};
+	const files: Record<string, string> = Object.create(null) as Record<string, string>;
 	const walk = async (relative: string): Promise<void> => {
 		const current = path.join(directory, relative); await check(current);
 		for (const item of await readdir(current, { withFileTypes: true })) {
@@ -61,6 +65,15 @@ async function snapshot(directory: string): Promise<Record<string, string>> {
 		}
 	};
 	await walk(''); return files;
+}
+/** A copied or synced session may contain links below its root; Chromium must never follow them. */
+async function checkSessionTree(directory: string): Promise<void> {
+	await check(directory);
+	for (const item of await readdir(directory, { withFileTypes: true })) {
+		if (item.isSymbolicLink()) throw new Error('private-storage.symlink');
+		if (item.isDirectory()) await checkSessionTree(path.join(directory, item.name));
+		else if (!item.isFile()) throw new Error('browser_session_unsafe_source');
+	}
 }
 const sameFiles = (a: Record<string, string>, b: Record<string, string>) => Object.keys(a).length === Object.keys(b).length && Object.entries(a).every(([file, hash]) => b[file] === hash);
 async function copyVerified(source: string, target: string, files: Record<string, string>): Promise<void> {
@@ -74,12 +87,21 @@ async function copyVerified(source: string, target: string, files: Record<string
 	}
 	if (!sameFiles(await snapshot(target), files) || !sameFiles(await snapshot(source), files)) throw new Error('browser_session_source_changed');
 }
-async function removeVerifiedSource(source: string, backup: string, files: Record<string, string>): Promise<void> {
+async function removeVerifiedSource(source: string, backup: string, files: Record<string, string>, retirement: string): Promise<void> {
 	if (!sameFiles(await snapshot(backup), files)) throw new Error('browser_session_source_changed');
-	const remaining = await snapshot(source);
+	// Claim the actual directory atomically on its own filesystem. A new source at the old
+	// path is a different writer's data and is never part of this cleanup or a retry.
+	const claimed = path.join(path.dirname(source), '.nand-retired-' + retirement);
+	await check(source); await check(claimed);
+	if (!await exists(claimed)) {
+		if (!await exists(source)) return;
+		await rename(source, claimed);
+	} else if (await exists(source)) throw new Error('browser_session_source_changed');
+	if (await exists(source)) throw new Error('browser_session_source_changed');
+	const remaining = await snapshot(claimed);
 	if (Object.entries(remaining).some(([file, hash]) => files[file] !== hash)) throw new Error('browser_session_source_changed');
 	for (const [file, hash] of Object.entries(remaining)) {
-		const target = path.join(source, file);
+		const target = path.join(claimed, file);
 		if (await fileHash(target) !== hash) throw new Error('browser_session_source_changed');
 		await unlink(target);
 	}
@@ -89,9 +111,29 @@ async function removeVerifiedSource(source: string, backup: string, files: Recor
 			if (!item.isDirectory() || item.isSymbolicLink()) throw new Error('browser_session_source_changed');
 			await empty(path.join(directory, item.name));
 		}
-		await rmdir(directory);
+		// Keep the empty claim until the complete receipt is durable. It identifies a
+		// finished cleanup after a crash; a replacement at source must never be claimed.
+		if (directory !== claimed) await rmdir(directory);
 	};
-	await empty(source);
+	await empty(claimed);
+	if (await exists(source)) throw new Error('browser_session_source_changed');
+}
+async function removeEmptyClaim(source: string | undefined, retirement: string | undefined): Promise<void> {
+	if (!source || !retirement) return;
+	const claimed = path.join(path.dirname(source), '.nand-retired-' + retirement);
+	await check(claimed);
+	if (await exists(claimed)) await rmdir(claimed);
+}
+
+async function saveReceipt(storage: ReturnType<typeof nativeVaultStorage>, file: string, store: JsonStore<Receipt | null>, base: Receipt | null, value: Receipt): Promise<Receipt> {
+	if (!base) {
+		// The first recovery copy contains the explicit choice, rather than an uninformative null.
+		await storage.mkdir(path.posix.dirname(file));
+		const text = JSON.stringify(value); await storage.write(file + '.backup', text);
+		if (await storage.read(file + '.backup') !== text) throw new Error('browser_session_receipt_invalid');
+		base = await store.load(null);
+	}
+	return (await store.commit({ base, value }))!;
 }
 
 /** Cold-copy Chromium databases before opening Session.fromPath. Never replay a completed migration.
@@ -109,14 +151,14 @@ async function prepare(options: SessionMigration): Promise<string> {
 	const { vault, relative, source, boot } = options;
 	const root = await absoluteNandPath(vault, relative), target = await absoluteNandPath(vault, relative + '/session');
 	const storage = nativeVaultStorage(vault), receiptPath = relative + '/migration.json';
-	const receiptExisted = await storage.exists(receiptPath) || await storage.exists(receiptPath + '.backup');
 	const store = new JsonStore<Receipt | null>(storage, receiptPath, valid);
 	let receipt = await store.load(null);
-	if (!receipt && receiptExisted) throw new Error('browser_session_receipt_invalid');
 	const sourceKey = digest(source ?? '');
-	const save = async (value: Receipt) => { receipt = await store.commit({ base: receipt, value }); };
+	const save = async (value: Receipt) => { receipt = await saveReceipt(storage, receiptPath, store, receipt, value); };
 	if (receipt?.phase === 'fresh' || receipt?.phase === 'complete') {
-		await storage.mkdir(relative + '/session'); return target;
+		if (receipt.phase === 'complete' && !await exists(target)) throw new Error('browser_session_unclaimed');
+		if (receipt.source === sourceKey) await removeEmptyClaim(source, receipt.retirement);
+		await storage.mkdir(relative + '/session'); await checkSessionTree(target); return target;
 	}
 	if (receipt && receipt.source !== sourceKey) throw new Error('browser_session_source_changed');
 	if (!receipt) {
@@ -127,13 +169,15 @@ async function prepare(options: SessionMigration): Promise<string> {
 			fresh = await options.choose() === 'fresh';
 		}
 		await save({ version: 1, source: sourceKey, origin: source ?? '', boot, phase: fresh ? 'fresh' : 'restart', files: {} });
-		if (fresh) { await storage.mkdir(relative + '/session'); return target; }
+		if (fresh) { await storage.mkdir(relative + '/session'); await checkSessionTree(target); return target; }
 	}
 	if (!source) throw new Error('browser_session_source_changed');
 	if (options.active(source) || receipt!.boot === boot && receipt!.phase === 'restart') throw new Error('browser_session_restart');
 	if (receipt!.phase === 'restart') await save({ ...receipt!, boot, phase: 'copying', files: await snapshot(source) });
 	if (receipt!.phase === 'copying') {
 		if (!sameFiles(await snapshot(source), receipt!.files)) throw new Error('browser_session_source_changed');
+		// Each explicitly selected vault owns its original bytes before any vault can retire the shared source.
+		await copyVerified(source, path.join(root, 'legacy-original'), receipt!.files);
 		if (await exists(target)) {
 			if (!sameFiles(await snapshot(target), receipt!.files)) throw new Error('browser_session_source_changed');
 		} else {
@@ -143,40 +187,79 @@ async function prepare(options: SessionMigration): Promise<string> {
 		}
 		await save({ ...receipt!, boot, phase: 'published' });
 	}
-	if (receipt!.phase === 'published' && receipt!.boot !== boot) {
+	if (!await exists(target)) throw new Error('browser_session_unclaimed');
+	await checkSessionTree(target);
+	if (receipt!.phase === 'published' && receipt!.verified && receipt!.boot !== boot) {
 		const backup = path.join(root, 'legacy-original');
-		if (await exists(source)) {
-			// A prior cleanup may have removed only part of the source. The complete backup wins.
-			if (!await exists(backup) || !sameFiles(await snapshot(backup), receipt!.files)) await copyVerified(source, backup, receipt!.files);
-			await removeVerifiedSource(source, backup, receipt!.files);
-		} else if (!await exists(backup) || !sameFiles(await snapshot(backup), receipt!.files)) throw new Error('browser_session_source_changed');
+		if (!receipt!.retirement) await save({ ...receipt!, retirement: randomUUID() });
+		await removeVerifiedSource(source, backup, receipt!.files, receipt!.retirement!);
 		await save({ ...receipt!, phase: 'complete' });
+		await removeEmptyClaim(source, receipt!.retirement);
 	}
 	return target;
+}
+
+/** A native Session must actually open at the owned path before a later boot can retire its source. */
+export async function confirmSessionDirectory(vault: string, relative: string, boot: string): Promise<void> {
+	const store = new JsonStore<Receipt | null>(nativeVaultStorage(vault), relative + '/migration.json', valid), receipt = await store.load(null);
+	if (!receipt) throw new Error('browser_session_receipt_invalid');
+	if (receipt.phase === 'published' && !receipt.verified) await store.commit({ base: receipt, value: { ...receipt, verified: true, boot } });
+}
+
+/** Explicit account deletion also retires the owned legacy credentials. Downloads are not site data. */
+export async function clearSessionRecovery(options: SessionMigration): Promise<void> {
+	const { vault, relative, source } = options;
+	const root = await absoluteNandPath(vault, relative), storage = nativeVaultStorage(vault), file = relative + '/migration.json';
+	const store = new JsonStore<Receipt | null>(storage, file, valid);
+	let receipt = await store.load(null);
+	if (!receipt) throw new Error('browser_session_receipt_invalid');
+	if (receipt.phase === 'published') {
+		if (!source || receipt.source !== digest(source)) throw new Error('browser_session_source_changed');
+		if (options.active(source)) throw new Error('browser_session_restart');
+		if (!receipt.retirement) receipt = (await store.commit({ base: receipt, value: { ...receipt, retirement: randomUUID() } }))!;
+		await removeVerifiedSource(source, path.join(root, 'legacy-original'), receipt.files, receipt.retirement!);
+		receipt = (await store.commit({ base: receipt, value: { ...receipt, phase: 'complete' } }))!;
+	}
+	if (!['complete', 'fresh'].includes(receipt.phase)) throw new Error('browser_session_restart');
+	if (receipt.source === digest(source ?? '')) await removeEmptyClaim(source, receipt.retirement);
+	const remove = async (directory: string): Promise<void> => {
+		await check(directory);
+		if (!await exists(directory)) return;
+		for (const item of await readdir(directory, { withFileTypes: true })) {
+			const child = path.join(directory, item.name); await check(child);
+			if (item.isDirectory()) await remove(child);
+			else if (item.isFile()) await unlink(child);
+			else throw new Error('browser_session_unsafe_source');
+		}
+		await rmdir(directory);
+	};
+	await remove(path.join(root, 'legacy-original'));
+	await remove(path.join(root, 'session-copy'));
 }
 
 /** Retain an inactive, explicitly owned legacy tree in the vault. No retained script is executed. */
 export async function retainLegacyDirectory(vault: string, relative: string, source: string): Promise<string | undefined> {
 	const target = await absoluteNandPath(vault, relative + '/files'), storage = nativeVaultStorage(vault), file = relative + '/migration.json';
-	const existed = await storage.exists(file) || await storage.exists(file + '.backup');
 	const store = new JsonStore<Receipt | null>(storage, file, valid);
 	let receipt = await store.load(null);
-	if (!receipt && existed) throw new Error('browser_session_receipt_invalid');
 	if (receipt?.phase === 'complete') {
 		if (await exists(source)) throw new Error('browser_session_source_changed');
+		await removeEmptyClaim(source, receipt.retirement);
 		return target;
 	}
 	if (receipt && receipt.source !== digest(source)) throw new Error('browser_session_source_changed');
 	if (!receipt && !await exists(source)) return undefined;
-	const save = async (value: Receipt) => { receipt = await store.commit({ base: receipt, value }); };
+	if (!receipt && await exists(target)) throw new Error('browser_session_unclaimed');
+	const save = async (value: Receipt) => { receipt = await saveReceipt(storage, file, store, receipt, value); };
 	if (!receipt) await save({ version: 1, source: digest(source), origin: source, boot: 'inactive-files', phase: 'copying', files: await snapshot(source) });
 	if (receipt!.phase === 'copying') {
 		await copyVerified(source, target, receipt!.files);
 		await save({ ...receipt!, phase: 'published' });
 	}
 	if (receipt!.phase !== 'published') throw new Error('browser_session_receipt_invalid');
-	if (await exists(source)) await removeVerifiedSource(source, target, receipt!.files);
-	else if (!sameFiles(await snapshot(target), receipt!.files)) throw new Error('browser_session_source_changed');
+	if (!receipt!.retirement) await save({ ...receipt!, retirement: randomUUID() });
+	await removeVerifiedSource(source, target, receipt!.files, receipt!.retirement!);
 	await save({ ...receipt!, phase: 'complete' });
+	await removeEmptyClaim(source, receipt!.retirement);
 	return target;
 }

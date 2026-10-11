@@ -3,7 +3,7 @@ import path from 'node:path';
 import { vaultIdentity } from '../obsidian/storage/device-id';
 import { absoluteNandPath } from './nand-paths';
 import { nativeVaultStorage } from './vault-storage';
-import { prepareSessionDirectory } from './browser-session-migration';
+import { prepareSessionDirectory, confirmSessionDirectory, clearSessionRecovery } from './browser-session-migration';
 import { bundledMain, desktopRemote } from './electron-main';
 
 export interface VaultSession {
@@ -17,7 +17,7 @@ export interface VaultSession {
 interface SessionRuntime {
 	boot: string;
 	active(directory: string): boolean;
-	acquire(vault: string, directory: string, downloads: string): { session: VaultSession; bind(owner: number, token: string): { dispose(): void }; protect(id: number): void; dispose(): void };
+	acquire(vault: string, directory: string, downloads: string): { session: VaultSession; onDownloadError(listener: () => void): void; bind(owner: number, token: string): { dispose(): void }; protect(id: number): void; dispose(): void };
 }
 export const SESSION_RUNTIME_SOURCE = String.raw`
 const {session,webContents}=require('electron'),fs=require('node:fs'),path=require('node:path'),crypto=require('node:crypto');
@@ -31,20 +31,27 @@ const checked=(vault,file)=>{
  let current=root;for(const part of relative.split(path.sep)){current=path.join(current,part);if(fs.existsSync(current)&&fs.lstatSync(current).isSymbolicLink())throw Error('private-storage.symlink');}
  return file;
 };
+const tree=(vault,directory)=>{checked(vault,directory);for(const item of fs.readdirSync(directory,{withFileTypes:true})){
+ const file=path.join(directory,item.name);checked(vault,file);if(item.isDirectory())tree(vault,file);else if(!item.isFile())throw Error('browser_session_unsafe_source');
+}};
 exports.acquire=(vault,directory,downloads)=>{
- checked(vault,directory);checked(vault,downloads);
+ checked(vault,directory);checked(vault,downloads);checked(vault,path.join(directory,'Code Cache'));
  let entry=state.sessions.get(directory);
  if(!entry){
+  tree(vault,directory);
   const native=session.fromPath(directory);
   if(native.storagePath!==directory)throw Error('browser_session_path');
   native.setCodeCachePath(path.join(directory,'Code Cache'));
+  const failed=()=>{for(const listener of entry.errors)try{listener();}catch{}};
   const download=(event,item)=>{try{
    if(!entry.refs){event.preventDefault();item.cancel();return;}
    checked(vault,downloads);
    const name=item.getFilename().replace(/[<>:"/\\|?*\x00-\x1f]/g,'_').replace(/[. ]+$/,'').slice(-120)||'download';
    const file=path.join(downloads,crypto.randomUUID()+'-'+name);checked(vault,file);item.setSavePath(file);
-  }catch{event.preventDefault();item.cancel();}};
-  entry={native,download,refs:0,closing:[]};state.sessions.set(directory,entry);
+   const done=(_event,status)=>{entry.pending.delete(item);if(status==='interrupted')failed();};
+   item.once('done',done);entry.pending.set(item,done);
+  }catch{event.preventDefault();item.cancel();failed();}};
+  entry={native,download,refs:0,closing:[],errors:new Set(),pending:new Map()};state.sessions.set(directory,entry);
   native.on('will-download',download);
   native.setPermissionRequestHandler((_wc,_permission,callback)=>callback(false));
   native.setPermissionCheckHandler(()=>false);
@@ -53,7 +60,7 @@ exports.acquire=(vault,directory,downloads)=>{
  const release=()=>{if(entry.refs)return;const guests=webContents.getAllWebContents().filter(wc=>!wc.isDestroyed()&&wc.session===entry.native);if(guests.length)return;
   for(const off of entry.closing.splice(0))off();entry.native.removeListener('will-download',entry.download);entry.native.setPermissionRequestHandler(null);entry.native.setPermissionCheckHandler(null);state.sessions.delete(directory);
  };
- return {session:entry.native,bind(ownerId,token){
+ return {session:entry.native,onDownloadError(listener){if(disposed)return;entry.errors.add(listener);bindings.add(()=>entry.errors.delete(listener));},bind(ownerId,token){
   if(disposed)throw Error('browser_session_closed');
   const owner=webContents.fromId(ownerId);if(!owner||owner.isDestroyed())throw Error('browser_session_closed');
   const hook=(event,prefs,params)=>{if(params.partition!==token)return;
@@ -68,6 +75,7 @@ exports.acquire=(vault,directory,downloads)=>{
   guest.setWindowOpenHandler(()=>({action:'deny'}));guest.on('will-navigate',guard);guest.on('will-redirect',guard);
   bindings.add(()=>{if(!guest.isDestroyed()){guest.removeListener('will-navigate',guard);guest.removeListener('will-redirect',guard);}});
  },dispose(){if(disposed)return;disposed=true;for(const dispose of [...bindings])dispose();if(--entry.refs===0){
+  for(const [item,done] of entry.pending){item.removeListener('done',done);try{item.cancel();}catch{}}entry.pending.clear();
   for(const wc of webContents.getAllWebContents().filter(wc=>!wc.isDestroyed()&&wc.session===entry.native)){wc.once('destroyed',release);entry.closing.push(()=>{if(!wc.isDestroyed())wc.removeListener('destroyed',release);});}release();
  }}};
 };
@@ -82,6 +90,8 @@ export interface SessionOptions {
 export interface VaultSessionLease {
 	session: VaultSession;
 	storagePath: string;
+	onDownloadError(listener: () => void): void;
+	clearRecovery(): Promise<void>;
 	bind(element: HTMLElement): void;
 	protect(id: number): void;
 	dispose(): void;
@@ -103,10 +113,18 @@ export async function acquireVaultSession(app: App, win: Window, options: Sessio
 	if (options.signal?.aborted) throw new Error('browser_session_closed');
 	const downloadsRelative = relative + '/downloads';
 	await nativeVaultStorage(vault).mkdir(downloadsRelative);
-	const native = runtime.acquire(vault, directory, await absoluteNandPath(vault, downloadsRelative));
+	const downloads = await absoluteNandPath(vault, downloadsRelative);
+	if (options.signal?.aborted || win.closed) throw new Error('browser_session_closed');
+	const native = runtime.acquire(vault, directory, downloads);
+	try {
+		await confirmSessionDirectory(vault, relative, runtime.boot);
+		if (options.signal?.aborted || win.closed) throw new Error('browser_session_closed');
+	} catch (error) { native.dispose(); throw error; }
 	let disposed = false;
 	return {
 		session: native.session, storagePath: directory,
+		onDownloadError(listener) { native.onDownloadError(listener); },
+		clearRecovery() { if (disposed) return Promise.reject(new Error('browser_session_closed')); return clearSessionRecovery({ vault, relative, source, boot: runtime.boot, active: file => runtime.active(file) }); },
 		protect(id) { native.protect(id); },
 		bind(element) {
 			if (disposed) throw new Error('browser_session_closed');
