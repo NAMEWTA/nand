@@ -1,0 +1,28 @@
+{
+  "rows": [
+    {
+      "name": "ambiguous-session-presents-explicit-copy-and-fresh-choices",
+      "passed": true
+    },
+    {
+      "name": "dismissed-choice-does-not-open-a-host-session",
+      "passed": true
+    },
+    {
+      "name": "native-copy-choice-requires-cold-restart",
+      "passed": true
+    },
+    {
+      "name": "shared-session-copy-retains-cookie-and-local-storage",
+      "passed": true
+    },
+    {
+      "name": "shared-session-copy-binds-vault-directory",
+      "passed": true
+    },
+    {
+      "name": "no-host-errors",
+      "passed": true
+    }
+  ]
+}

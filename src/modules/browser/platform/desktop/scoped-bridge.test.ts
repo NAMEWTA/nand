@@ -10,7 +10,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { ScopedBrowserGrant } from '../../core/scoped-grant';
 import { BrowserBridge } from './bridge';
-import type { ElectronBrowserApi } from './electron-api';
+
 import type { BrowserAutomationPort } from '../../core/model';
 
 function rpc(bridge: BrowserBridge, token: string, method: string, params: Record<string, unknown> = {}): Promise<{ ok: boolean; result?: unknown; error?: { code: string } }> {
@@ -25,8 +25,7 @@ function rpc(bridge: BrowserBridge, token: string, method: string, params: Recor
 async function fixture(enabled = true, execute?: BrowserAutomationPort['execute']) {
 	const root = mkdtempSync(join(tmpdir(), 'nand-scoped-bridge-')), calls: string[] = [];
 	const win = { require: createRequire(join(process.cwd(), 'package.json')) } as unknown as Window;
-	const api = { app: { getPath: () => root } } as unknown as ElectronBrowserApi;
-	const bridge = new BrowserBridge(win, api, 'fixture-vault', { execute: execute ?? (async method => { calls.push(method); return 'ordinary'; }) }, enabled);
+	const bridge = new BrowserBridge(win, root, 'fixture-vault', { execute: execute ?? (async method => { calls.push(method); return 'ordinary'; }) }, enabled);
 	await bridge.start(); return { bridge, calls };
 }
 
@@ -139,5 +138,22 @@ test('generated CLI rejects malformed connection metadata with symbolic JSON and
 			assert.equal(result.code, 1); assert.equal(result.stderr, '');
 			assert.equal(JSON.parse(result.stdout).error.code, 'browser_connection_invalid');
 		}
+	} finally { bridge.dispose(); }
+});
+
+test('CLI screenshots stay inside vault artifacts, preserve bytes, and never overwrite', async () => {
+	const bytes = Buffer.from('fixture-png-bytes');
+	const { bridge } = await fixture(true, async () => ({ dataUrl: `data:image/png;base64,${bytes.toString('base64')}` }));
+	const run = (output: string) => promisify(execFile)(process.execPath, [bridge.cliPath, 'screenshot', '--output', output], { env: { ...process.env, ...bridge.environment } })
+		.then(value => ({ ...value, code: 0 }), (error: { code: number; stdout: string; stderr: string }) => error);
+	try {
+		for (const output of ['../outside.png', '..\\outside.png', 'C:\\outside.png', '/outside.png', 'CON.png', 'stream:name.png']) {
+			const result = await run(output);
+			assert.equal(result.code, 1); assert.equal(JSON.parse(result.stdout).error.code, 'browser_invalid_argument');
+		}
+		const result = await run('本地截图.png'), saved = JSON.parse(result.stdout).result.path;
+		assert.equal(saved, join(bridge.directory, '..', 'artifacts', '本地截图.png'));
+		assert.deepEqual(readFileSync(saved), bytes);
+		assert.equal((await run('本地截图.png')).code, 1); assert.deepEqual(readFileSync(saved), bytes);
 	} finally { bridge.dispose(); }
 });

@@ -1,4 +1,5 @@
 import { Notice } from 'obsidian';
+import { musicMediaBlob } from './media-bytes';
 import { NeteaseAccount } from '../desktop/netease-account';
 // createEl is an ambient global declared by the Obsidian typings, not a
 // module export — it creates a detached element, exactly what the player needs.
@@ -90,6 +91,7 @@ export function sanitizePlaylist(raw: unknown): MusicTrack[] {
 export class MusicService {
 	/** Detached; lives in the service, not the widget DOM. */
 	private audio: HTMLAudioElement;
+	private audioUrl?: string;
 	readonly account: NeteaseAccount;
 	private playRevision = 0;
 	private playlist: MusicTrack[] = [];
@@ -106,9 +108,7 @@ export class MusicService {
 	private persistTimer: number | null = null;
 
 	constructor(private plugin: WidgetSettingsHost) {
-		this.account = new NeteaseAccount(
-			`persist:nand-dashboard-music-${encodeURIComponent(plugin.app.vault.getName())}`,
-		);
+		this.account = new NeteaseAccount(plugin.app);
 		this.audio = createEl('audio');
 		this.audio.preload = 'auto';
 		this.audio.addEventListener('playing', () => {
@@ -428,7 +428,11 @@ export class MusicService {
 				this.advanceAfterFailure();
 				return;
 			}
-			this.audio.src = info.url;
+			const audioBytes = await musicMediaBlob(info.url, 'audio/mpeg');
+			if (revision !== this.playRevision) return;
+			if (this.audioUrl) URL.revokeObjectURL(this.audioUrl);
+			this.audioUrl = URL.createObjectURL(audioBytes);
+			this.audio.src = this.audioUrl;
 			this.audio.currentTime = resumeSec;
 			await this.audio.play();
 			// 'playing' listener sets status and resets playAttempts.
@@ -481,6 +485,7 @@ export class MusicService {
 		this.audio.pause();
 		this.audio.removeAttribute('src');
 		this.audio.load();
+		if (this.audioUrl) URL.revokeObjectURL(this.audioUrl); this.audioUrl = undefined;
 		this.status = 'idle';
 	}
 
@@ -515,6 +520,7 @@ export class MusicService {
 		this.audio.pause();
 		this.audio.removeAttribute('src');
 		this.audio.load();
+		if (this.audioUrl) URL.revokeObjectURL(this.audioUrl); this.audioUrl = undefined;
 		this.listeners.clear();
 	}
 }

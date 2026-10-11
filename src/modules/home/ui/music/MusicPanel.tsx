@@ -2,6 +2,7 @@ import { Notice } from 'obsidian';
 import { useLayoutEffect, useRef, useState } from 'preact/hooks';
 import type { MusicTrack } from '../../core/board/types';
 import type { MusicService } from '../../platform/music/music-service';
+import { musicMediaBlob } from '../../platform/music/media-bytes';
 import {
 	fetchLyric,
 	isPlayableByFee,
@@ -27,11 +28,21 @@ export function MusicPanel({
 		[panel, setPanel] = useState<'none' | 'playlist' | 'search'>('none'),
 		[volume, setVolume] = useState(false),
 		[lyrics, setLyrics] = useState<LyricLine[]>([]),
-		[failedCover, setFailedCover] = useState('');
+		[failedCover, setFailedCover] = useState(''),
+		[coverUrl, setCoverUrl] = useState('');
 	useLayoutEffect(() => service.subscribe(() => refresh((n) => n + 1)), [service]);
 	const state = service.getState(),
 		track = state.current,
 		trackId = track?.id;
+	useLayoutEffect(() => {
+		let active = true, objectUrl = '';
+		setCoverUrl(''); setFailedCover('');
+		if (track?.picUrl) void musicMediaBlob(track.picUrl, 'image/jpeg').then(blob => {
+			if (!active) return;
+			objectUrl = URL.createObjectURL(blob); setCoverUrl(objectUrl);
+		}).catch(() => { if (active) setFailedCover(track.picUrl!); });
+		return () => { active = false; if (objectUrl) URL.revokeObjectURL(objectUrl); };
+	}, [track?.picUrl]);
 	useLayoutEffect(() => {
 		let active = true;
 		setLyrics([]);
@@ -88,9 +99,9 @@ export function MusicPanel({
 				<div class="dashboard-sidebar-music-cover">
 					<img
 						class="dashboard-sidebar-music-cover-img"
-						src={track?.picUrl || undefined}
+						src={coverUrl || undefined}
 						loading="lazy"
-						hidden={!track?.picUrl || failedCover === track.picUrl}
+						hidden={!coverUrl || failedCover === track?.picUrl}
 						onError={() => setFailedCover(track?.picUrl ?? '')}
 					/>
 					<Icon className="dashboard-sidebar-music-cover-glyph" name="music" />

@@ -8,7 +8,7 @@ artifact: "ticket"
 change: "2026-10-11-vault-data-unification"
 id: "T-04"
 title: "浏览器会话与产物进入 vault"
-status: "ready"
+status: "in_progress"
 kind: "feature"
 planning_depth: "deep"
 planning_depth_reason: "涉及公共持久化、数据迁移、身份隔离或发布；用户已批准完整计划及实施。"
@@ -17,11 +17,11 @@ risk: "high"
 blocked_by: ["T-02"]
 contract_ids: ["AC-004"]
 owner: "root"
-expected_changes: ["<Path>src/host/**</Path>","<Path>src/modules/browser/**</Path>","<Path>src/modules/home/**</Path>","<Path>scripts/**</Path>","<Path>test/**</Path>"]
-writable_paths: ["<Path>src/host/**</Path>","<Path>src/modules/browser/**</Path>","<Path>src/modules/home/**</Path>","<Path>scripts/**</Path>","<Path>test/**</Path>"]
+expected_changes: ["<Path>src/host/**</Path>","<Path>src/modules/browser/**</Path>","<Path>src/modules/home/**</Path>","<Path>scripts/**</Path>","<Path>test/**</Path>","<Path>main.js</Path>","<Path>styles.css</Path>"]
+writable_paths: ["<Path>src/host/**</Path>","<Path>src/modules/browser/**</Path>","<Path>src/modules/home/**</Path>","<Path>scripts/**</Path>","<Path>test/**</Path>","<Path>main.js</Path>","<Path>styles.css</Path>"]
 read_only_paths: []
-shared_paths: ["<Path>src/host/**</Path>","<Path>src/modules/browser/**</Path>","<Path>src/modules/home/**</Path>","<Path>scripts/**</Path>","<Path>test/**</Path>"]
-shared_path_owners: ["<Path>src/host/**</Path> => root","<Path>src/modules/browser/**</Path> => root","<Path>src/modules/home/**</Path> => root","<Path>scripts/**</Path> => root","<Path>test/**</Path> => root"]
+shared_paths: ["<Path>src/host/**</Path>","<Path>src/modules/browser/**</Path>","<Path>src/modules/home/**</Path>","<Path>scripts/**</Path>","<Path>test/**</Path>","<Path>main.js</Path>","<Path>styles.css</Path>"]
+shared_path_owners: ["<Path>src/host/**</Path> => root","<Path>src/modules/browser/**</Path> => root","<Path>src/modules/home/**</Path> => root","<Path>scripts/**</Path> => root","<Path>test/**</Path> => root","<Path>main.js</Path> => root","<Path>styles.css</Path> => root"]
 ---
 
 # T-04 浏览器会话与产物进入 vault

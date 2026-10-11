@@ -16,6 +16,6 @@ export function profileLabel(value: string): string {
 }
 export function profilePartition(vaultId: string, profileId: string): string {
 	if (profileId !== DEFAULT_PROFILE && !/^[a-f\d-]{36}$/.test(profileId)) throw new BrowserError('browser_profile_missing');
-	// Preserve the existing vault's default login bytes. Isolated accounts are also vault-scoped.
+	// Read-only legacy discovery; new guests bind Session.fromPath under the vault.
 	return `persist:nand-browser-${vaultId}${profileId === DEFAULT_PROFILE ? '' : `-profile-${profileId}`}`;
 }

@@ -8,7 +8,7 @@ artifact: "ticket"
 change: "2026-10-11-vault-data-unification"
 id: "T-03"
 title: "隐藏目录中的内容访问和迁移"
-status: "review"
+status: "done"
 kind: "feature"
 planning_depth: "deep"
 planning_depth_reason: "涉及公共持久化、数据迁移、身份隔离或发布；用户已批准完整计划及实施。"
@@ -80,9 +80,9 @@ E2E owner/environment: root / current-workspace。提交已获用户授权；imp
 
 ## 10. 验收标准
 
-- [ ] AC-003：NAND 管理的 Markdown 统一进入 .nand/content；浏览、编辑、搜索、附件和链接正常；不搬迁外部普通笔记；复制、校验、切换、清理可恢复。
-- [ ] 非空实现、验证和双轴审查事实写入 <Path>{roots.state}/specdev/changes/2026-10-11-vault-data-unification/evidence/T-03.md</Path>。
-- [ ] 实际路径、Skill 摘要、命令结果、未验证范围与 Map 一致。
+- [x] AC-003：NAND 管理的 Markdown 统一进入 .nand/content；浏览、编辑、搜索、附件和链接正常；不搬迁外部普通笔记；复制、校验、切换、清理可恢复。
+- [x] 非空实现、验证和双轴审查事实写入 <Path>{roots.state}/specdev/changes/2026-10-11-vault-data-unification/evidence/T-03.md</Path>。
+- [x] 实际路径、Skill 摘要、命令结果、未验证范围与 Map 一致。
 
 ## 12. 停止、检查点与交付
 

@@ -1,0 +1,41 @@
+import assert from 'node:assert/strict';
+import fs from 'node:fs/promises';
+import path from 'node:path';
+import { createServer } from 'node:http';
+import { setTimeout as delay } from 'node:timers/promises';
+import { launchFreshVault } from './fresh-vault.mjs';
+const server=createServer((_request,response)=>response.end('<title>Shared session fixture</title><h1>Shared session fixture</h1>'));
+await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));
+const url=`http://127.0.0.1:${server.address().port}/`,p='app.plugins.plugins.nand',rows=[];
+const surfaces="app.workspace.getLeavesOfType('nand-workbench-view').flatMap(l=>l.view.getNativeSurfaces())";
+let runtime,c;
+const check=(name,passed)=>{rows.push({name,passed});assert.ok(passed,name);};
+const until=async expression=>{const end=Date.now()+25000;while(Date.now()<end){try{if(await c.evaluate(expression))return;}catch{}await delay(80);}throw Error(expression);};
+try{
+ runtime=await launchFreshVault({root:process.argv[2],port:9445,settings:{version:1,namespaces:{app:{language:'zh',introSeen:true,modules:Object.fromEntries(['home','agent','browser','news','archives','automations','notifications','icons','comments','sync'].map(id=>[id,false]))}}}});c=runtime.connection;
+ await c.evaluate(`(async()=>{const e=document.createElement('webview');e.partition='persist:nand-dashboard-web';const ready=new Promise(resolve=>e.addEventListener('dom-ready',resolve,{once:true}));e.src=${JSON.stringify(url)};document.body.append(e);await ready;await e.executeJavaScript("document.cookie='shared=yes;path=/;max-age=86400';localStorage.owner='old-shared';true");await require('@electron/remote').webContents.fromId(e.getWebContentsId()).session.cookies.flushStore();e.remove();return true})()`);
+ await c.evaluate(`${p}.setModuleEnabled('home',true)`);await c.evaluate(`${p}.openWorkbench({feature:'dashboard'},window)`);
+ await until(`${surfaces}.some(s=>s.sync?.getData())`);
+ await c.evaluate(`window.board=${surfaces}.find(s=>s.sync?.getData());board.sync.addColumn('Shared web','web')`);
+ await c.evaluate(`board.sync.updateWebConfig('Shared web',{url:${JSON.stringify(url)}})`);
+ const copy=`[...document.querySelectorAll('.suggestion-item')].find(e=>e.textContent.includes('将旧共享会话迁移到当前库'))`;
+ await until(`!!${copy}`);check('ambiguous-session-presents-explicit-copy-and-fresh-choices',await c.evaluate(`document.body.innerText.includes('在当前库重新登录')`));
+ await c.send('Input.dispatchKeyEvent',{type:'keyDown',key:'Escape',code:'Escape',windowsVirtualKeyCode:27});await c.send('Input.dispatchKeyEvent',{type:'keyUp',key:'Escape',code:'Escape',windowsVirtualKeyCode:27});
+ await until(`!!document.querySelector('[data-column="Shared web"] .dashboard-web-fallback')`);
+ check('dismissed-choice-does-not-open-a-host-session',await c.evaluate(`document.querySelectorAll('[data-column="Shared web"] webview,[data-column="Shared web"] iframe').length===0`));
+ await c.evaluate(`document.querySelector('[data-column="Shared web"] .dashboard-web-fallback-btn').click();true`);await until(`!!${copy}`);
+ const point=await c.evaluate(`(()=>{const r=${copy}.getBoundingClientRect();return{x:r.x+r.width/2,y:r.y+r.height/2}})()`);
+ for(const type of ['mousePressed','mouseReleased'])await c.send('Input.dispatchMouseEvent',{type,...point,button:'left',clickCount:1});
+ await until(`document.querySelector('[data-column="Shared web"] .dashboard-web-fallback')?.textContent.includes('重新启动')`);
+ check('native-copy-choice-requires-cold-restart',true);await runtime.shot('shared-session-restart');
+ await runtime.restart();c=runtime.connection;
+ await c.evaluate(`${p}.openWorkbench({feature:'dashboard'},window)`);
+ await until(`document.querySelector('[data-column="Shared web"] webview')?.getURL()===${JSON.stringify(url)}`);
+ const state=await c.evaluate(`(async()=>{const e=document.querySelector('[data-column="Shared web"] webview');return{path:require('@electron/remote').webContents.fromId(e.getWebContentsId()).session.storagePath,data:await e.executeJavaScript("document.cookie==='shared=yes'&&localStorage.owner==='old-shared'")}})()`);
+ check('shared-session-copy-retains-cookie-and-local-storage',state.data);
+ check('shared-session-copy-binds-vault-directory',state.path.startsWith(path.join(runtime.vault,'.nand')+path.sep));
+ check('no-host-errors',await c.evaluate('nandAcceptanceErrors.length===0'));
+ await c.evaluate(`document.querySelector('[data-column="Shared web"]').scrollIntoView({block:'center'});true`);await delay(150);await runtime.shot('shared-session-migrated');
+ await fs.writeFile(path.join(runtime.evidence,'result.json'),JSON.stringify({rows},null,2));
+}catch(error){if(runtime)await fs.writeFile(path.join(runtime.evidence,'partial.json'),JSON.stringify({rows,error:String(error),body:await c.evaluate('document.body.innerText'),active:await c.evaluate('({same:activeDocument===document,body:activeDocument.body.innerText,modals:document.querySelectorAll(".modal-container").length})')},null,2));throw error;}
+finally{if(runtime){console.log(JSON.stringify({evidence:runtime.evidence,checks:rows.length}));await runtime.stop();}server.closeAllConnections();server.close();}

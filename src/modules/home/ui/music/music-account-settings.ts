@@ -13,9 +13,10 @@ export function renderMusicAccountSettings(container: HTMLElement, app: App): vo
 	let busy = false;
 	const render = (): void => {
 		host.empty();
+		const status = service.account.error ? `web.${service.account.error.startsWith('browser_session_') ? service.account.error : 'browser_session_unavailable'}` : service.account.loggedIn ? 'music.accountSignedIn' : 'music.accountSignedOut';
 		bindLocalizedControl(bindLocalizedControl(new Setting(host)
 			.setName(t('music.accountTitle')), "name", 'music.accountTitle')
-			.setDesc(t(service.account.loggedIn ? 'music.accountSignedIn' : 'music.accountSignedOut')), "desc", service.account.loggedIn ? 'music.accountSignedIn' : 'music.accountSignedOut')
+			.setDesc(t(status)), "desc", status)
 			.addButton((button) =>
 				bindLocalizedControl(button
 					.setButtonText(t('music.accountLogin')), "buttonText", 'music.accountLogin')
@@ -29,7 +30,7 @@ export function renderMusicAccountSettings(container: HTMLElement, app: App): vo
 							new Notice(t('music.accountSuccess'));
 						} catch (error) {
 							if (!(error instanceof Error && error.message === 'CANCELLED'))
-								new Notice(t('music.accountFailed'));
+								new Notice(t(error instanceof Error && error.message.startsWith('browser_session_') ? `web.${error.message}` : 'music.accountFailed'));
 						} finally {
 							busy = false;
 							render();

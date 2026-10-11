@@ -23,13 +23,19 @@ import { NeteaseAccount } from '../src/modules/home/platform/desktop/netease-acc
 import { fetchSongUrl } from '../src/modules/home/platform/music/netease-client';
 import { MusicService } from '../src/modules/home/platform/music/music-service';
 import type { MusicTrack } from '../src/modules/home/core/board/types/index';
-import { resetNetwork, calls } from './music-network-stub';
+import { resetNetwork, calls, audioCalls, coverCalls } from './music-network-stub';
+import { musicVaultFixture } from './music-vault-fixture';
+import { h, render } from 'preact';
+import { installPreactMiniDom } from './preact-mini-dom';
+import { El, findTag } from './mini-dom';
+import { MusicPanel } from '../src/modules/home/ui/music/MusicPanel';
 import { setCookies, windows, flushes, setFailLoad } from './music-electron-stub';
 
 // Electron renderer timers, without a running Obsidian application.
 Object.assign(globalThis, { window: { setTimeout, clearTimeout } });
 async function run(): Promise<void> {
-	const account = new NeteaseAccount('test:music');
+	const fixture = await musicVaultFixture();
+	const account = new NeteaseAccount(fixture.app);
 	await account.restore();
 	assert.equal(account.loggedIn, false);
 	assert.equal(await account.cookie(), '');
@@ -41,7 +47,7 @@ async function run(): Promise<void> {
 	assert.equal(calls[0]?.headers?.Cookie, 'MUSIC_U=test-token');
 	assert.ok(flushes > 0);
 	assert.deepEqual(windows.at(-1)?.options.webPreferences, {
-		partition: 'test:music',
+		session: windows.at(-1)!.webContents.session,
 		nodeIntegration: false,
 		contextIsolation: true,
 		sandbox: true,
@@ -51,6 +57,7 @@ async function run(): Promise<void> {
 	assert.equal(account.loggedIn, false);
 	assert.equal(await account.cookie(), '');
 	const cancel = account.login();
+	await new Promise(resolve => setTimeout(resolve, 0));
 	windows.at(-1)?.close();
 	await assert.rejects(cancel, /CANCELLED/);
 	const pending = account.login();
@@ -59,7 +66,8 @@ async function run(): Promise<void> {
 	await assert.rejects(pending, /CANCELLED/);
 	await assert.rejects(account.login(), /BUSY/);
 	setFailLoad(true);
-	await assert.rejects(new NeteaseAccount('test:offline').login(), /LOAD_FAILED/);
+	const offline = new NeteaseAccount(fixture.app);
+	await assert.rejects(offline.login(), /LOAD_FAILED/); offline.destroy();
 	setFailLoad(false);
 
 	resetNetwork([
@@ -132,7 +140,7 @@ async function run(): Promise<void> {
 	});
 	const makeService = (): MusicService => {
 		const plugin = {
-			app: { vault: { getName: () => 'unit-music' } },
+			app: fixture.app,
 			settings: {},
 			saveSettings: async () => {},
 		} as unknown as ConstructorParameters<typeof MusicService>[0];
@@ -155,7 +163,9 @@ async function run(): Promise<void> {
 	svc.play(0);
 	await sleep(900);
 	assert.equal(svc.getState().status, 'playing', '-110 flake recovers via the spaced retry');
-	assert.equal(audio.src, 'https://m.music.126.net/recovered.mp3', 'recovered URL reached the audio element');
+	assert.match(audio.src!, /^blob:/, 'audio element consumes in-memory bytes without host web cache');
+	assert.equal(audioCalls[0], 'https://m.music.126.net/recovered.mp3');
+	assert.equal(await (await fetch(audio.src!)).text(), 'audio-fixture');
 	assert.equal(messages().length - seen, 0, 'no notice when a retry recovers');
 	assert.equal(calls.length, 2, 'two URL fetches (initial + one retry)');
 	assert.equal(calls[0]?.headers?.Cookie, 'MUSIC_U=member', 'member cookie sent');
@@ -221,7 +231,18 @@ async function run(): Promise<void> {
 		'anonymous fee-1 click keeps the vipSkipped notice',
 	);
 	assert.equal(calls.length, 0, 'no network for a pre-flight skip');
+	installPreactMiniDom();
+	const panel = new El('div');
+	render(h(MusicPanel, { service: svc, root: panel as unknown as HTMLElement }), panel as unknown as HTMLElement);
+	await sleep(30);
+	const cover = findTag(panel, 'img')[0]!.getAttribute('src')!;
+	assert.match(cover, /^blob:/, 'cover is never loaded by the host default session');
+	assert.equal(await (await fetch(cover)).text(), 'cover-fixture');
+	assert.equal(coverCalls.length, 1);
+	render(null, panel as unknown as HTMLElement);
+	await assert.rejects(fetch(cover), 'closing the panel revokes its temporary cover bytes');
 
+	svc.destroy(); await fixture.dispose();
 	process.stdout.write(
 		'verify-music-account: login, cancellation, cleanup, account-isolated playback and -110 retry/skip notices OK\n',
 	);

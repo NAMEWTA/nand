@@ -14,6 +14,7 @@ import { normalizeBrowserUrl } from '../core/url';
 import { BrowserBridge } from '../platform/desktop/bridge';
 import { electronBrowserApi } from '../platform/desktop/electron-api';
 import { BrowserPage } from '../platform/desktop/page';
+import { desktopVaultRoot } from '../../../host/obsidian/storage/private-storage';
 import { BrowserStore } from '../platform/store';
 import type { AgentPromptRunner, AgentRunContextProvider } from '../../agent/api';
 import type { SynthesisAgents } from './synthesis';
@@ -492,10 +493,12 @@ export class BrowserModule implements BrowserHost, BrowserAutomationPort {
 			await this.workbench.close(page.id);
 		}
 		ensureActive();
-		const session = electronBrowserApi(this.app.workspace.containerEl.win).session.fromPartition(profilePartition(this.store.vaultId, id));
-		await session.clearStorageData();
-		ensureActive();
-		await session.clearCache();
+		const { acquireVaultSession } = await import('../../../host/desktop/browser-session');
+		const lease = await acquireVaultSession(this.app, this.app.workspace.containerEl.win, { profile: id, legacyPartition: profilePartition(this.store.vaultId, id) });
+		try {
+			ensureActive(); await lease.session.clearStorageData();
+			ensureActive(); await lease.session.clearCache();
+		} finally { lease.dispose(); }
 		ensureActive();
 		await this.profileStore.remove(id);
 	}
@@ -546,14 +549,14 @@ export class BrowserModule implements BrowserHost, BrowserAutomationPort {
 			const generation = this.generation;
 			const bridge = new BrowserBridge(
 				this.app.workspace.containerEl.win,
-				electronBrowserApi(this.app.workspace.containerEl.win),
-				this.store.vaultId,
+				desktopVaultRoot(this.app),
+				deviceId(this.app),
 				this,
 				this.settings().agentAccess,
 			);
 			this.bridge = bridge;
-			this.bridgeReady = bridge
-				.start()
+			this.bridgeReady = import('../platform/desktop/legacy-runtime').then(({ migrateLegacyRuntime }) => migrateLegacyRuntime(this.app, this.app.workspace.containerEl.win))
+				.then(() => bridge.start())
 				.then(() => {
 					if (generation !== this.generation) {
 						bridge.dispose();
@@ -595,8 +598,12 @@ export class BrowserModule implements BrowserHost, BrowserAutomationPort {
 		if (this.pages.has(state.id)) throw new BrowserError('browser_duplicate_page');
 		const profileId = state.profileId ?? DEFAULT_PROFILE;
 		this.requireProfile(profileId);
-		const partition = profilePartition(this.store.vaultId, profileId);
-		const page = new BrowserPage({ ...state }, container, partition, {
+		const page = new BrowserPage({ ...state }, container, async () => {
+			const { migrateLegacyRuntime } = await import('../platform/desktop/legacy-runtime');
+			await migrateLegacyRuntime(this.app, container.win);
+			const { acquireVaultSession } = await import('../../../host/desktop/browser-session');
+			return acquireVaultSession(this.app, container.win, { profile: profileId, legacyPartition: profilePartition(this.store.vaultId, profileId) });
+		}, {
 			permissions: () => this.permissions(profileId),
 			changed,
 			visited: (url, title) => this.store.record(url, title),

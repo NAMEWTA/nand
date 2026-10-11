@@ -1,7 +1,7 @@
 {
   "$comment": "CI gate: `check:bundle --budget scripts/bundle-budget.json --enforce`. eagerBytes caps the code evaluated at plugin startup and moduleActivationBytes caps what each module loads when it starts; outputBytes and stylesBytes are ratchets on main.js and styles.css. Lower a limit as code shrinks; never raise one without a recorded reason.",
-  "outputBytes": 4633600,
-  "outputBudgetReason": "2026-10-11 T-03：隐藏内容访问、恢复迁移、消费者接入与链接语义修复。第七轮隔离循环 YAML，保留原文并让其他元数据和移动继续可用。实测 main.js 4633181 字节，按 KiB 取整 4633600；启动和模块激活上限不变。解析器按需加载且附许可证。证据：speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/evidence/T-03.md。",
+  "outputBytes": 4655104,
+  "outputBudgetReason": "2026-10-11 T-04：新增库内显式浏览器 Session、可恢复冷迁移、旧桥接产物保留和主页会话接入。实测 main.js 4654100 字节，按 KiB 取整 4655104；启动与各模块激活上限不变，原生策略和迁移按需加载。证据：speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/evidence/T-04.md。",
   "stylesBytes": 757760,
   "eagerBytes": 122880,
   "forbiddenEagerAreas": [

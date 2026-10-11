@@ -32,6 +32,7 @@ export interface GuestContents extends NativeEvents {
 	capturePage(rect?: { x: number; y: number; width: number; height: number }): Promise<NativeImage>;
 }
 export interface GuestSession extends NativeEvents {
+	storagePath: string;
 	clearStorageData(): Promise<void>;
 	clearCache(): Promise<void>;
 	setPermissionRequestHandler(
@@ -72,7 +73,7 @@ export interface WebviewElement extends HTMLElement {
 export interface ElectronBrowserApi {
 	require?: (name: string) => unknown;
 	webContents: { fromId(id: number): GuestContents | undefined };
-	session: { fromPartition(partition: string): GuestSession };
+	session: { fromPath(directory: string): GuestSession };
 	app: { getPath(name: string): string };
 	shell: {
 		openExternal(url: string): Promise<void>;
@@ -89,7 +90,7 @@ export function electronBrowserApi(win: Window): ElectronBrowserApi {
 		const api = electron.webContents
 			? (electron as ElectronBrowserApi)
 			: (electron.remote ?? (runtimeRequire('@electron/remote') as ElectronBrowserApi));
-		if (!api.webContents?.fromId || !api.session?.fromPartition) throw new Error();
+		if (!api.webContents?.fromId || !api.session?.fromPath) throw new Error();
 		return api;
 	} catch {
 		throw new BrowserError('browser_unavailable');

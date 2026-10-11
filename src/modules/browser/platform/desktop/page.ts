@@ -9,6 +9,7 @@ import {
 } from './electron-api';
 import { BrowserAutomation } from './automation';
 import { installGuestPolicy } from './guest-policy';
+import type { VaultSessionLease } from '../../../../host/desktop/browser-session';
 
 export interface PageActions {
 	open(url: string): void;
@@ -30,6 +31,7 @@ export class BrowserPage {
 	private cleanups: Array<() => void> = [];
 	private guestCleanups: Array<() => void> = [];
 	private permissionPolicy?: ReturnType<typeof installGuestPolicy>;
+	private sessionLease?: VaultSessionLease;
 	private navigation?: { cancel: (reason: string) => void };
 	permissionDenied = '';
 	private downloadItems = new Map<string, DownloadItem>();
@@ -41,12 +43,12 @@ export class BrowserPage {
 	readonly initialLoad: Promise<void>;
 	private loadResolve!: () => void;
 	private loadReject!: (error: Error) => void;
-	private startupTimer: number;
+	private startupTimer?: number;
 	private readonly win: Window;
 	constructor(
 		readonly state: BrowserPageState,
 		container: HTMLElement,
-		partition: string,
+		prepareSession: () => Promise<VaultSessionLease>,
 		private actions: PageActions,
 	) {
 		this.profileId = state.profileId ?? 'default';
@@ -68,7 +70,6 @@ export class BrowserPage {
 		this.webview = container.createEl('webview' as 'div', {
 			cls: 'nand-browser-webview',
 		}) as unknown as WebviewElement;
-		this.webview.setAttribute('partition', partition);
 		this.webview.setAttribute('allowpopups', '');
 		this.webview.setAttribute(
 			'webpreferences',
@@ -150,12 +151,6 @@ export class BrowserPage {
 				this.emit();
 			}
 		});
-		this.startupTimer = this.win.setTimeout(() => {
-			this.fail('browser_unavailable');
-			this.readyReject(new BrowserError('browser_unavailable'));
-			this.loadReject(new BrowserError('browser_unavailable'));
-			this.dispose();
-		}, 20000);
 		let readingScroll = false;
 		const scrollTimer = this.win.setInterval(() => {
 			if (readingScroll || !this.guest || this.state.loading || this.disposed || !this.webview.clientWidth)
@@ -181,8 +176,24 @@ export class BrowserPage {
 				});
 		}, 1000);
 		this.cleanups.push(() => this.win.clearInterval(scrollTimer));
-		// Install synchronous main-process policy before the first untrusted page.
-		this.webview.setAttribute('src', 'about:blank');
+		// Bind the native Session before creating a guest, including its initial blank page.
+		void prepareSession().then(lease => {
+			if (this.disposed) { lease.dispose(); return; }
+			this.sessionLease = lease;
+			lease.bind(this.webview);
+			this.startupTimer = this.win.setTimeout(() => {
+				this.fail('browser_unavailable');
+				this.readyReject(new BrowserError('browser_unavailable'));
+				this.loadReject(new BrowserError('browser_unavailable'));
+				this.dispose();
+			}, 20000);
+			this.webview.setAttribute('src', 'about:blank');
+		}).catch((error: unknown) => {
+			if (this.disposed) return;
+			const failure = error instanceof Error ? error : new BrowserError('browser_unavailable');
+			this.fail(failure.message); this.readyReject(failure); this.loadReject(failure);
+			this.dispose();
+		});
 	}
 	findResult = { matches: 0, activeMatchOrdinal: 0 };
 	subscribe(listener: () => void): () => void {
@@ -223,7 +234,8 @@ export class BrowserPage {
 		this.guest = guest;
 		this.guestGeneration = crypto.randomUUID();
 		this.automation = new BrowserAutomation(guest, this);
-		this.permissionPolicy = installGuestPolicy(this.win, this.api, guest, this.webview.getAttribute('partition')!, (event, value) => {
+		if (!this.sessionLease) throw new BrowserError('browser_unavailable');
+		this.permissionPolicy = installGuestPolicy(this.win, this.api, guest, this.sessionLease.storagePath, (event, value) => {
 				if (this.disposed) return;
 				if (event === 'open') this.actions.open(value);
 				else if (event === 'shortcut') this.shortcut?.(value);
@@ -391,6 +403,7 @@ export class BrowserPage {
 		}
 		// Removing the element owns guest destruction; do not close it twice across IPC.
 		this.webview.remove();
+		this.sessionLease?.dispose(); this.sessionLease = undefined;
 		this.guest = undefined;
 	}
 }

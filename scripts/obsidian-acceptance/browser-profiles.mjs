@@ -27,8 +27,8 @@ const open=async(profileId='default')=>c.evaluate(`bo.open({url:${JSON.stringify
 try{
  runtime=await launchFreshVault({root:process.argv[2],port:9276,settings:{version:1,namespaces:{app:{language:'en',introSeen:true,modules:{browser:true,home:false,agent:false,news:false,archives:false,sync:false,comments:false,notifications:false,automations:false,icons:false}}}}});c=runtime.connection;
  await c.evaluate('app.workspace.leftSplit?.collapse();app.workspace.rightSplit?.collapse();true');await bind();
- const original=await open();const vaultId=await c.evaluate(`app.loadLocalStorage('nand.browser.vault-id')`);
- check('default-keeps-original-vault-partition',await c.evaluate(`${guest(original)}.getAttribute('partition')`)===`persist:nand-browser-${vaultId}`);
+ const original=await open();const identity=JSON.parse(await fs.readFile(path.join(runtime.vault,'.nand/config/identity.json'),'utf8'));const device=Object.keys(identity.devices)[0],profileRoot=path.join(runtime.vault,'.nand/browser',device,'profiles');
+ check('default-session-is-inside-vault',await c.evaluate(`require('@electron/remote').webContents.fromId(${guest(original)}.getWebContentsId()).session.storagePath`)===path.join(profileRoot,'default','session'));
  await script(original,`document.cookie='account=default;path=/;max-age=86400';localStorage.account='default';true`);
  await settings();
  const newInput=`[...document.querySelectorAll('.nand-browser-profile-settings .setting-item')].find(e=>e.querySelector('.setting-item-name')?.textContent==='New account label').querySelector('input')`;
@@ -49,7 +49,7 @@ try{
  check('second-account-has-no-other-account-data',(await script(personalPage,'document.cookie'))===''&&(await script(personalPage,'localStorage.account??null'))===null);
  check('work-and-default-retain-own-data',(await script(workPage,'document.cookie'))==='account=work'&&(await script(original,'document.cookie'))==='account=default');
  const partitions=await c.evaluate(`[${guest(original)}.getAttribute('partition'),${guest(workPage)}.getAttribute('partition'),${guest(personalPage)}.getAttribute('partition')]`);
- check('isolated-partitions-include-vault-and-profile',new Set(partitions).size===3&&partitions[1]===`persist:nand-browser-${vaultId}-profile-${work}`,partitions);
+ const paths=await c.evaluate(`[${guest(original)},${guest(workPage)},${guest(personalPage)}].map(e=>require('@electron/remote').webContents.fromId(e.getWebContentsId()).session.storagePath)`);check('isolated-sessions-include-device-and-profile',new Set(paths).size===3&&paths[1]===path.join(profileRoot,work,'session')&&paths[2]===path.join(profileRoot,personal,'session'),paths);
  await click(`${panel}.querySelector('button[aria-label="Site permissions"]')`);await click(`[...document.querySelectorAll('.menu-item')].find(e=>e.querySelector('.menu-item-title')?.textContent==='Notifications')`);
  const host=`app.workspace.getLeavesOfType('nand-workbench-view').flatMap(l=>l.view.getNativeSurfaces()).find(s=>s.state?.id===${JSON.stringify(personalPage)}).host`;
  await until(`${host}.permissions(${JSON.stringify(personal)})[${JSON.stringify(new URL(url).origin+'|notifications')}]===true`);
@@ -64,7 +64,7 @@ try{
   check('account-selector-never-rebinds-existing-guest',await c.evaluate(`${guest(personalPage)}.getAttribute('partition')===${JSON.stringify(partitions[2])}`));
  await settings();await type(`${profileRow(work)}.querySelector('input')`,'Research');await click(button(profileRow(work),'Rename'));await until(`bp.list().find(p=>p.id===${JSON.stringify(work)}).label==='Research'&&document.querySelector('.nand-browser-profile-settings [role=status]').textContent==='Account saved'`);
  check('rename-preserves-profile-and-page-identity',await c.evaluate(`bp.affectedPages(${JSON.stringify(work)}).some(p=>p.id===${JSON.stringify(workPage)})`));
- const device=await c.evaluate(`app.loadLocalStorage('nand.device-id')`),file=path.join(runtime.vault,'.nand/browser',device,'profiles.json');
+ const file=path.join(runtime.vault,'.nand/browser',device,'profiles.json');
  const saved=JSON.parse(await fs.readFile(file,'utf8'));check('metadata-is-durable-and-has-no-cookie-export',saved.profiles.length===2&&!JSON.stringify(saved).includes('account=work'));
  await runtime.restart();c=runtime.connection;await bind();await c.evaluate('app.workspace.leftSplit?.collapse();app.workspace.rightSplit?.collapse();true');
  check('profile-labels-and-grants-survive-restart',await c.evaluate(`bp.list().find(p=>p.id===${JSON.stringify(work)})?.label==='Research'`));
@@ -81,7 +81,7 @@ try{
  await click(button(profileRow(work),'Delete account'));await click(button(`document.querySelector('.nand-dialog')`,'Delete account'));
  await until(`!bp.list().some(p=>p.id===${JSON.stringify(work)})`);
  check('delete-closes-live-and-saved-profile-pages',await c.evaluate(`bp.affectedPages(${JSON.stringify(work)}).length===0`)&&affected.length>=2);
- check('delete-clears-only-selected-session',await c.evaluate(`(async()=>{const s=require('@electron/remote').session.fromPartition(${JSON.stringify(partitions[1])});return (await s.cookies.get({url:${JSON.stringify(url)}})).length===0})()`));
+ check('delete-clears-only-selected-session',await c.evaluate(`(async()=>{const s=require('@electron/remote').session.fromPath(${JSON.stringify(path.join(profileRoot,work,'session'))});return (await s.cookies.get({url:${JSON.stringify(url)}})).length===0})()`));
  const remainingDefault=await open();check('default-cookie-survives-other-account-delete',(await script(remainingDefault,'document.cookie'))==='account=default');
  await settings();
  for(const width of [500,800,1100]){await c.evaluate(`require('@electron/remote').getCurrentWindow().setContentSize(${width},1000);true`);await delay(150);const layout=await c.evaluate(`(()=>{const e=document.querySelector('.nand-browser-profile-settings');return {width:e.clientWidth,scroll:e.scrollWidth}})()`);await runtime.shot(`profiles-${width}`);check(`settings-fit-${width}`,layout.scroll<=layout.width+1,layout);}
@@ -94,8 +94,8 @@ try{
  await c.evaluate(`${p}.setModuleEnabled('browser',false)`);check('module-off-releases-profile-service',await c.evaluate(`!${p}.services.peek({owner:'browser',id:'profiles'})&&!document.querySelector('webview')`));
  await c.evaluate(`${p}.setModuleEnabled('browser',true)`);await bind();check('reenable-retains-only-remaining-accounts',await c.evaluate(`bp.list().length===2&&bp.list().some(p=>p.id===${JSON.stringify(personal)})`));
  const popupPage=await open(personal);await script(popupPage,`localStorage.account='personal';true`);const targets=new Set((await(await fetch(process.env.NAND_CDP_URL+'/json')).json()).map(t=>t.id));await c.evaluate(`window.browserLeaf=app.workspace.getLeavesOfType('nand-workbench-view').find(l=>l.view.getNativeSurfaces().some(s=>s.state?.id===${JSON.stringify(popupPage)}));app.workspace.moveLeafToPopout(browserLeaf,{width:1000,height:900});true`);await until('browserLeaf.view.containerEl.win!==window');
- let target;for(let i=0;i<100&&!target;i++){target=(await(await fetch(process.env.NAND_CDP_URL+'/json')).json()).find(t=>t.type==='page'&&!targets.has(t.id));if(!target)await delay(100);}assert.ok(target);const main=c,popup=await connect(target.url,target.id);c=popup;await until(`(async()=>{const e=${guest(popupPage)};if(!e||e.getURL()!==${JSON.stringify(url)})return false;const account=await Promise.race([e.executeJavaScript('localStorage.account'),new Promise(resolve=>setTimeout(()=>resolve(null),1000))]);if(!e.isConnected)return false;window.profileMigration={partition:e.getAttribute('partition'),account};return account==='personal'})()`);
- check('popout-rebuild-keeps-frozen-account',await c.evaluate(`profileMigration.partition===${JSON.stringify(partitions[2])}&&profileMigration.account==='personal'`));popup.close();c=main;
+ let target;for(let i=0;i<100&&!target;i++){target=(await(await fetch(process.env.NAND_CDP_URL+'/json')).json()).find(t=>t.type==='page'&&!targets.has(t.id));if(!target)await delay(100);}assert.ok(target);const main=c,popup=await connect(target.url,target.id);c=popup;await until(`(async()=>{const e=${guest(popupPage)};if(!e||e.getURL()!==${JSON.stringify(url)})return false;const account=await Promise.race([e.executeJavaScript('localStorage.account'),new Promise(resolve=>setTimeout(()=>resolve(null),1000))]);if(!e.isConnected)return false;window.profileMigration={storagePath:require('@electron/remote').webContents.fromId(e.getWebContentsId()).session.storagePath,account};return account==='personal'})()`);
+ check('popout-rebuild-keeps-frozen-account',await c.evaluate(`profileMigration.storagePath===${JSON.stringify(path.join(profileRoot,personal,'session'))}&&profileMigration.account==='personal'`));popup.close();c=main;
  check('no-host-errors',await c.evaluate('nandAcceptanceErrors.length')===0,await c.evaluate('nandAcceptanceErrors'));
  await fs.writeFile(path.join(runtime.evidence,'result.json'),JSON.stringify({method:'Real Obsidian native settings and real Electron cookie/localStorage sessions on a local HTTP fixture.',rows},null,2));
 }catch(error){if(runtime)await fs.writeFile(path.join(runtime.evidence,'partial.json'),JSON.stringify({rows,error:String(error),body:await c.evaluate('document.body.innerText'),errors:await c.evaluate('window.nandAcceptanceErrors??[]')},null,2));throw error;}finally{if(runtime){console.log(JSON.stringify({evidence:runtime.evidence,checks:rows.length,failed:rows.filter(r=>!r.passed)}));await runtime.stop();}server.close();}

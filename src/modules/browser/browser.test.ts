@@ -218,7 +218,7 @@ test('debugger leases detach only the connection they own and only after last re
 });
 test('native popup policy returns synchronously, rejects unsafe navigation and cleans up', () => {
 	let requestPermission: Function, checkPermission: Function;
-	const nativeSession = { setPermissionRequestHandler: (fn: Function) => { requestPermission = fn; }, setPermissionCheckHandler: (fn: Function) => { checkPermission = fn; } };
+	const nativeSession = { storagePath: '/vault/.nand/session', setPermissionRequestHandler: (fn: Function) => { requestPermission = fn; }, setPermissionCheckHandler: (fn: Function) => { checkPermission = fn; } };
 	const guest = Object.assign(new EventEmitter(), {
 		id: 1, session: nativeSession, getURL: () => 'https://example.com/',
 		isDestroyed: () => false,
@@ -240,7 +240,7 @@ test('native popup policy returns synchronously, rejects unsafe navigation and c
 		URL,
 		Date: { now: () => (now += 300) }, setTimeout: () => 1, clearTimeout: () => {},
 	});
-	const policy = exports.install!(1, 'persist:nand-browser-test', (...args) => events.push(args));
+	const policy = exports.install!(1, '/vault/.nand/session', (...args) => events.push(args));
 	assert.equal(handler({ url: 'https://example.com', frameName: '_blank', features: '' }).action, 'deny');
 	assert.equal(events.length, 1);
 	assert.equal(
@@ -279,15 +279,14 @@ test('authenticated local bridge and generated CLI isolate vaults and remove con
 	const directory = mkdtempSync(join(tmpdir(), 'nand-browser-test-'));
 	const runtimeRequire = createRequire(join(process.cwd(), 'package.json'));
 	const win = { require: runtimeRequire } as unknown as Window;
-	const api = { app: { getPath: () => directory } } as unknown as ElectronBrowserApi;
-	const a = new BrowserBridge(win, api, 'vault-a', { execute: async (method) => ({ method }) }, true);
-	const b = new BrowserBridge(win, api, 'vault-b', { execute: async () => ({ other: true }) });
+		const a = new BrowserBridge(win, directory, 'vault-a', { execute: async (method) => ({ method }) }, true);
+	const b = new BrowserBridge(win, directory, 'vault-b', { execute: async () => ({ other: true }) });
 	try {
 		await a.start();
 		await b.start();
 		assert.notEqual(a.endpoint, b.endpoint);
 		assert.notEqual(a.contextPath, b.contextPath);
-		const metadata = JSON.parse(readFileSync(a.contextPath, 'utf8')) as { endpoint: string; token?: string };
+		const metadata = JSON.parse(readFileSync(a.contextPath, 'utf8')) as { endpoint: import('node:net').NetConnectOpts; token?: string };
 		assert.equal(metadata.token, undefined, 'connection file contains no credential');
 		const response = await new Promise<string>((resolve, reject) => {
 			const socket = createConnection(metadata.endpoint);
@@ -334,23 +333,22 @@ test('browser run teardown is idempotent, cleans early cancellation and retains 
 	const root = fs.mkdtempSync(paths.join(tmpdir(), 'nand-browser-cleanup-'));
 	const events = new EventTarget();
 	const win = { require: createRequire(join(process.cwd(), 'package.json')), addEventListener: events.addEventListener.bind(events), removeEventListener: events.removeEventListener.bind(events) } as unknown as Window;
-	const api = { app: { getPath: () => root } } as unknown as ElectronBrowserApi;
-	try {
+		try {
 		for (let i = 0; i < 4; i++) {
-			const bridge = new BrowserBridge(win, api, 'isolated-vault', { execute: async () => null });
+			const bridge = new BrowserBridge(win, root, 'isolated-vault', { execute: async () => null });
 			await bridge.start();
 			const attachments = bridge.writeArtifact('data:image/png;base64,aGVsbG8=', 'persisted reference');
 			if (i % 2) events.dispatchEvent(new Event('unload')); else bridge.dispose();
 			bridge.dispose();
 			assert.equal(fs.existsSync(bridge.directory), false);
-			if (process.platform !== 'win32') assert.equal(fs.existsSync(bridge.endpoint), false);
+			if (process.platform !== 'win32') assert.equal('host' in bridge.endpoint && bridge.endpoint.host, '127.0.0.1');
 			for (const path of attachments) assert.equal(fs.existsSync(path), true);
 		}
-		const early = new BrowserBridge(win, api, 'isolated-vault', { execute: async () => null });
+		const early = new BrowserBridge(win, root, 'isolated-vault', { execute: async () => null });
 		const opening = early.start(); early.dispose();
 		await assert.rejects(opening, /browser_disabled/);
 		assert.equal(fs.existsSync(early.directory), false);
-		assert.deepEqual(fs.readdirSync(paths.join(root, 'nand-browser', 'isolated-vault')), ['artifacts']);
+		assert.deepEqual(fs.readdirSync(paths.join(root, '.nand', 'browser', 'isolated-vault', 'runtime')), ['artifacts']);
 	} finally { fs.rmSync(root, { recursive: true, force: true }); }
 });
 

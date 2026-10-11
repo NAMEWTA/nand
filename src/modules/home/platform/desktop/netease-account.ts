@@ -1,4 +1,6 @@
-import { Platform, requestUrl } from 'obsidian';
+import { Notice, Platform, requestUrl, type App } from 'obsidian';
+import { t } from '../../../../shared/i18n';
+import type { VaultSessionLease } from '../../../../host/desktop/browser-session';
 
 declare const require: (id: string) => unknown;
 const ORIGIN = 'https://music.163.com';
@@ -12,6 +14,7 @@ interface Session {
 }
 interface LoginWindow {
 	webContents: {
+		id: number;
 		session: Session;
 		setWindowOpenHandler(handler: () => { action: 'deny' }): void;
 		on(event: 'will-navigate', handler: (event: { preventDefault(): void }, url: string) => void): void;
@@ -23,17 +26,16 @@ interface LoginWindow {
 }
 interface ElectronApi {
 	BrowserWindow: new (options: Record<string, unknown>) => LoginWindow;
-	session: { fromPartition(partition: string): Session };
 }
 function electronApi(): ElectronApi {
 	if (Platform.isMobile) throw new Error('UNSUPPORTED');
 	try {
 		const electron = require('electron') as Partial<ElectronApi> & { remote?: ElectronApi };
 		const api =
-			electron.BrowserWindow && electron.session
+			electron.BrowserWindow
 				? (electron as ElectronApi)
 				: (electron.remote ?? (require('@electron/remote') as ElectronApi));
-		if (!api?.BrowserWindow || !api.session) throw new Error('UNSUPPORTED');
+		if (!api?.BrowserWindow) throw new Error('UNSUPPORTED');
 		return api;
 	} catch {
 		throw new Error('UNSUPPORTED');
@@ -51,33 +53,45 @@ export function musicCookieHeader(cookies: Cookie[]): string {
 /** Credentials stay in Electron's isolated local cookie store, never the settings file. */
 export class NeteaseAccount {
 	private session: Session | null = null;
+	private lease?: VaultSessionLease;
+	private pending?: Promise<Session>;
+	private readonly abort = new AbortController();
 	private cancelLogin: (() => void) | null = null;
 	private disposed = false;
 	loggedIn = false;
-	constructor(private readonly partition: string) {}
+	error = '';
+	constructor(private readonly app: App) {}
 
-	private getSession(): Session {
-		if (!this.session) this.session = electronApi().session.fromPartition(this.partition);
-		return this.session;
+	private async getSession(interactive = false): Promise<Session> {
+		if (this.disposed) throw new Error('browser_session_closed');
+		if (this.session) return this.session;
+		return this.pending ??= import('./session').then(({ homeSession }) => homeSession(this.app, this.app.workspace.containerEl.win, 'music', this.abort.signal, interactive)).then(lease => {
+			this.lease = lease; this.session = lease.session; this.error = ''; return this.session;
+		}).finally(() => { this.pending = undefined; });
 	}
 
 	async cookie(): Promise<string> {
-		const cookies = await this.getSession().cookies.get({ url: ORIGIN });
+		const cookies = await (await this.getSession()).cookies.get({ url: ORIGIN });
 		const header = musicCookieHeader(cookies);
 		this.loggedIn = /(?:^|; )MUSIC_U=/.test(header);
 		return this.loggedIn ? header : '';
 	}
 
 	async restore(): Promise<void> {
+		if (Platform.isMobile) return;
 		try {
 			await this.cookie();
-		} catch {
+		} catch (error) {
 			this.loggedIn = false;
+			this.error = error instanceof Error ? error.message : 'browser_session_unavailable';
+			new Notice(t(`web.${this.error.startsWith('browser_session_') ? this.error : 'browser_session_unavailable'}`));
 		}
 	}
 
-	login(): Promise<void> {
+	async login(): Promise<void> {
 		if (this.disposed || this.cancelLogin) return Promise.reject(new Error('BUSY'));
+		const session = await this.getSession(true);
+		if (this.disposed || this.cancelLogin) throw new Error('BUSY');
 		return new Promise((resolve, reject) => {
 			const api = electronApi();
 			const win = new api.BrowserWindow({
@@ -85,7 +99,7 @@ export class NeteaseAccount {
 				height: 760,
 				title: 'NetEase Cloud Music',
 				webPreferences: {
-					partition: this.partition,
+					session,
 					nodeIntegration: false,
 					contextIsolation: true,
 					sandbox: true,
@@ -93,6 +107,7 @@ export class NeteaseAccount {
 				},
 			});
 			this.session = win.webContents.session;
+			this.lease!.protect(win.webContents.id);
 			let done = false;
 			let timer: number | undefined;
 			const finish = (error?: Error): void => {
@@ -131,7 +146,7 @@ export class NeteaseAccount {
 						const body = response.json as { code?: number; profile?: { userId?: number } };
 						if (done) return;
 						if (body.code === 200 && typeof body.profile?.userId === 'number') {
-							await this.getSession().cookies.flushStore();
+							await (await this.getSession()).cookies.flushStore();
 							if (!done) finish();
 							return;
 						}
@@ -154,12 +169,14 @@ export class NeteaseAccount {
 	async logout(): Promise<void> {
 		this.cancelLogin?.();
 		this.loggedIn = false;
-		await this.getSession().clearStorageData();
-		await this.getSession().cookies.flushStore();
+		const session = await this.getSession();
+		await session.clearStorageData();
+		await session.cookies.flushStore();
 	}
 
 	destroy(): void {
 		this.disposed = true;
 		this.cancelLogin?.();
+		this.abort.abort(); this.lease?.dispose(); this.lease = undefined; this.session = null;
 	}
 }

@@ -1,6 +1,6 @@
 import { installPreactMiniDom } from './preact-mini-dom';
 import { strict as assert } from 'node:assert';
-import { Platform } from 'obsidian';
+import { Platform, type App } from 'obsidian';
 import { El, findByClass, findTag } from './mini-dom';
 import { generateDefaultMarkdown } from '../src/modules/home/core/board/parser/default-document';
 import { parse, serialize } from '../src/modules/home/core/board/parser/index';
@@ -17,12 +17,7 @@ import {
 } from '../src/modules/home/ui/web/web-precheck';
 import { renderWebSection } from '../src/modules/home/ui/web/web-section';
 
-// Web section: config persistence round-trips through the hand-rolled YAML
-// serializer; the framing-policy precheck classifies response headers and
-// caches verdicts; the render state machine picks iframe / webview / fallback
-// per platform and verdict — with an epoch guard against late async
-// callbacks and a webview-attach timeout that escapes to the iframe.
-
+// The current contract uses owned desktop sessions and has no host iframe fallback.
 const flush = (): Promise<void> => new Promise((r) => setTimeout(r, 20));
 
 /** Deterministic header fetcher factory — records calls, returns a queue. */
@@ -61,12 +56,13 @@ function dataWith(col: DashboardColumn): DashboardData {
 /** Render into a fresh El and return the registered reload closure. */
 function render(
 	column: DashboardColumn,
-	options?: { fetcher?: HeaderFetcher; timeoutMs?: number },
+	options?: { timeoutMs?: number },
 ): { host: El; reload: () => void } {
 	const host = new El('div');
 	let reload: () => void = () => {};
 	renderWebSection(
 		host as unknown as HTMLElement,
+		{} as App,
 		column,
 		(fn) => {
 			reload = fn;
@@ -251,108 +247,31 @@ async function main(): Promise<void> {
 	findByClass(empty.host, 'dashboard-web-fallback-btn')[0]!.click();
 	assert.ok(routed, '14: configure button dispatched the config event');
 
-	// 15. A cached allowed verdict picks the iframe up front — no probe runs.
-	clearPrecheckCache();
+	// Desktop never navigates before acquiring its vault Session, even for frameable sites.
 	await precheckEmbed('https://frame.me', fakeFetcher([CLEAN]));
-	const neverProbe = fakeFetcher([new Error('probe must not run')]);
-	const cached = render(webColumn('F', 'https://frame.me'), { fetcher: neverProbe });
-	const frame15 = findTag(cached.host, 'iframe')[0]!;
-	assert.ok(frame15, '15: iframe mounted');
-	assert.equal(frame15.getAttribute('src'), 'https://frame.me', '15: src set');
-	assert.equal(frame15.getAttribute('referrerpolicy'), 'no-referrer', '15: referrer policy set');
-	assert.equal(frame15.getAttribute('sandbox'), null, '15: no sandbox (login-capable)');
-	assert.equal(neverProbe.calls.length, 0, '15: cached verdict skipped the probe');
-
-	// 16. auto + blocked verdict + desktop -> webview with isolated partition.
-	clearPrecheckCache();
-	const blockedDesktop = render(webColumn('B', 'https://deny.com'), { fetcher: fakeFetcher([DENY]) });
-	await flush();
-	const wv16 = findTag(blockedDesktop.host, 'webview')[0]!;
-	assert.ok(wv16, '16: webview mounted for blocked site');
-	assert.equal(wv16.getAttribute('src'), 'https://deny.com', '16: webview src');
-	assert.equal(wv16.getAttribute('partition'), 'persist:nand-dashboard-web', '16: isolated persistent partition');
-	assert.equal(wv16.getAttribute('nodeintegration'), null, '16: no node integration');
-	assert.equal(findTag(blockedDesktop.host, 'iframe').length, 0, '16: no iframe alongside');
-
-	// 17. Mobile + blocked -> fallback card with a working open-in-browser.
-	const wasMobile = Platform.isMobile;
-	Platform.isMobile = true;
+	const desktop = render(webColumn('F', 'https://frame.me'));
+	assert.equal(findTag(desktop.host, 'iframe').length, 0);
+	const guest = findTag(desktop.host, 'webview')[0]!;
+	assert.ok(guest);
+	assert.equal(guest.getAttribute('src'), null);
+	assert.equal(guest.getAttribute('partition'), null);
+	assert.match(guest.getAttribute('webpreferences')!, /nodeIntegration=false/);
+	await flush(); await flush();
+	assert.equal(findTag(desktop.host, 'iframe').length, 0);
+	assert.ok(findByClass(desktop.host, 'dashboard-web-fallback').length, 'unsupported native host reports a visible failure');
+	desktop.reload(); await flush();
+	assert.equal(findTag(desktop.host, 'iframe').length, 0, 'retry never falls back to host storage');
+	const wasMobile = Platform.isMobile; Platform.isMobile = true;
 	try {
-		clearPrecheckCache();
-		const mobileBlocked = render(webColumn('M', 'https://deny.com'), { fetcher: fakeFetcher([DENY]) });
-		await flush();
-		const card = findByClass(mobileBlocked.host, 'dashboard-web-fallback')[0]!;
-		assert.ok(card, '17: fallback card rendered');
-		assert.equal(findTag(mobileBlocked.host, 'iframe').length, 0, '17: optimistic iframe swapped out');
-		assert.ok(
-			findByClass(card, 'dashboard-web-fallback-host')[0]!.textContent.includes('deny.com'),
-			'17: hostname shown',
-		);
-		assert.equal(findTag(mobileBlocked.host, 'webview').length, 0, '17: no webview on mobile');
-		const before = opened.length;
-		findByClass(card, 'dashboard-web-fallback-btn')[0]!.click();
-		assert.equal(opened.length, before + 1, '17: open-in-browser button works');
-	} finally {
-		Platform.isMobile = wasMobile;
-	}
-
-	// 18. auto + allowed -> plain iframe, mounted optimistically and never
-	// remounted by the verdict (no reload flicker).
-	clearPrecheckCache();
-	const allowed = render(webColumn('A', 'https://fine.com'), { fetcher: fakeFetcher([CLEAN]) });
-	assert.ok(findTag(allowed.host, 'iframe')[0], '18: optimistic iframe mounts immediately');
-	await flush();
-	assert.equal(findTag(allowed.host, 'iframe').length, 1, '18: allowed verdict kept the live iframe (no remount)');
-	assert.equal(findTag(allowed.host, 'webview').length, 0, '18: no webview needed');
-
-	// 19. Epoch guard: reload supersedes a pending probe; when both resolve,
-	// only the live epoch's callback may mount — exactly one frame, not two.
-	clearPrecheckCache();
-	const delayed: HeaderFetcher = () =>
-		new Promise((res) => {
-			setTimeout(() => res(DENY), 25);
-		});
-	const racing = render(webColumn('R', 'https://race.com'), { fetcher: delayed });
-	assert.ok(findTag(racing.host, 'iframe')[0], '19: optimistic iframe while probing');
-	racing.reload(); // supersede: epoch 1 -> 2, a second probe starts
-	await flush();
-	await flush();
-	const frames19 = findTag(racing.host, 'iframe').length + findTag(racing.host, 'webview').length;
-	assert.equal(frames19, 1, '19: exactly one frame — late epoch-1 callback dropped');
-	assert.ok(findTag(racing.host, 'webview')[0], '19: live epoch landed its webview');
-
-	// 20. Reload closure: clears the URL's verdict cache and re-renders.
-	clearPrecheckCache();
-	const refreshing = render(webColumn('RL', 'https://deny.com'), { fetcher: fakeFetcher([DENY]) });
-	await flush();
-	assert.ok(findTag(refreshing.host, 'webview')[0], '20: blocked initially -> webview');
-	assert.equal(getCachedVerdict('https://deny.com'), 'blocked', '20: verdict cached');
-	refreshing.reload();
-	assert.equal(getCachedVerdict('https://deny.com'), undefined, '20: reload cleared the cache');
-	await Promise.resolve();
-	assert.ok(findTag(refreshing.host, 'iframe')[0], '20: re-render is optimistic again');
-	await flush();
-	assert.ok(findTag(refreshing.host, 'webview')[0], '20: re-probe re-landed the webview');
-	assert.equal(findTag(refreshing.host, 'iframe').length, 0, '20: swap cleared the optimistic iframe');
-
-	// 21. Zoom applies to the iframe path (the optimistic iframe mounts
-	// synchronously, so the css zoom is set before any verdict arrives).
-	clearPrecheckCache();
-	const zoomed = render(webColumn('Z', 'https://zoom.com', 0.75), { fetcher: fakeFetcher([CLEAN]) });
-	const frame21 = findTag(zoomed.host, 'iframe')[0]!;
-	assert.equal(String((frame21 as unknown as { style: Record<string, string> }).style.zoom), '0.75', '21: css zoom set');
-
-	// 22. Webview attach timeout escapes to the iframe (and does not loop).
-	clearPrecheckCache();
-	const stuck = render(webColumn('S', 'https://deny.com'), { fetcher: fakeFetcher([DENY]), timeoutMs: 5 });
-	await flush(); // webview mounts (blocked) — its dom-ready never fires in mini-dom
-	await new Promise((r) => setTimeout(r, 30)); // timeout elapses
-	const iframe22 = findTag(stuck.host, 'iframe')[0]!;
-	assert.ok(iframe22, '22: webview timeout fell back to iframe');
-	assert.equal(iframe22.getAttribute('src'), 'https://deny.com', '22: fallback iframe same URL');
-	assert.equal(findTag(stuck.host, 'webview').length, 0, '22: dead webview removed, no loop');
-
-	console.log('verify-web-section: 22 scenarios OK');
+		for (const target of ['https://frame.me', 'https://deny.com']) {
+			const mobile = render(webColumn('M', target)); await flush();
+			assert.equal(findTag(mobile.host, 'webview').length + findTag(mobile.host, 'iframe').length, 0);
+			const card = findByClass(mobile.host, 'dashboard-web-fallback')[0]!;
+			assert.ok(card); const before = opened.length;
+			findByClass(card, 'dashboard-web-fallback-btn')[0]!.click(); assert.equal(opened.length, before + 1);
+		}
+	} finally { Platform.isMobile = wasMobile; }
+	console.log('verify-web-section: parser, URL policy, vault-session admission and mobile fallback OK');
 }
 
 void main().catch((err) => {

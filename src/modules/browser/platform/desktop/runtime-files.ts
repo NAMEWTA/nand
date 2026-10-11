@@ -1,10 +1,20 @@
 type Fs = typeof import('node:fs');
 type Paths = typeof import('node:path');
 type Net = typeof import('node:net');
+import path from 'node:path';
 const RUN_ID = /^[a-f\d]{8}-[a-f\d]{4}-[a-f\d]{4}-[a-f\d]{4}-[a-f\d]{12}$/i;
 const RUNTIME_FILES = ['connection.json', 'owner.json', 'nand-browser.cjs', 'USAGE.md'];
 
+function checkDirectoryPath(fs: Fs, directory: string): void {
+	let current = path.parse(directory).root;
+	for (const part of path.relative(current, directory).split(path.sep)) {
+		current = path.join(current, part);
+		try { if (fs.lstatSync(current).isSymbolicLink()) throw new Error('Unsafe browser runtime directory'); }
+		catch (error) { if ((error as NodeJS.ErrnoException).code !== 'ENOENT') throw error; }
+	}
+}
 export function privateDirectory(fs: Fs, directory: string): void {
+	checkDirectoryPath(fs, directory);
 	fs.mkdirSync(directory, { recursive: true, mode: 0o700 });
 	const stat = fs.lstatSync(directory);
 	if (!stat.isDirectory() || stat.isSymbolicLink()) throw new Error('Unsafe browser runtime directory');
@@ -13,6 +23,7 @@ export function privateDirectory(fs: Fs, directory: string): void {
 /** Only remove known transient files. Existing agent attachments keep their original paths. */
 export function removeBrowserRun(fs: Fs, path: Paths, directory: string, endpoint: string, windows: boolean): void {
 	try {
+		checkDirectoryPath(fs, directory);
 		const stat = fs.lstatSync(directory);
 		if (!stat.isDirectory() || stat.isSymbolicLink()) return;
 		for (const name of RUNTIME_FILES) {

@@ -1,0 +1,111 @@
+{
+  "rows": [
+    {
+      "name": "legacy-session-requires-full-restart",
+      "passed": true,
+      "detail": "请关闭所有 Obsidian 窗口并重新启动，以安全迁移旧浏览器会话。"
+    },
+    {
+      "name": "module-reload-does-not-bypass-cold-migration",
+      "passed": true
+    },
+    {
+      "name": "cold-copy-opens-only-vault-session",
+      "passed": true,
+      "detail": "D:\\Document\\code\\nand\\scripts\\tmp\\browser-vault-sessions-20261011-08\\vault\\.nand\\browser\\0ef19dac-521f-4ee8-ba6a-64a18013f416\\profiles\\default\\session"
+    },
+    {
+      "name": "legacy-cookie-and-site-data-survive-copy",
+      "passed": true
+    },
+    {
+      "name": "old-bridge-artifacts-retained-in-vault",
+      "passed": true
+    },
+    {
+      "name": "old-bridge-source-cleaned-after-verification",
+      "passed": true
+    },
+    {
+      "name": "legacy-original-retained-until-next-boot",
+      "passed": true
+    },
+    {
+      "name": "native-login-popup-shares-vault-session",
+      "passed": true
+    },
+    {
+      "name": "native-popup-cookie-is-shared",
+      "passed": true
+    },
+    {
+      "name": "download-has-vault-destination",
+      "passed": true
+    },
+    {
+      "name": "download-bytes-are-complete",
+      "passed": true
+    },
+    {
+      "name": "bridge-and-artifacts-use-vault-device-root",
+      "passed": true,
+      "detail": {
+        "artifacts": [
+          "D:\\Document\\code\\nand\\scripts\\tmp\\browser-vault-sessions-20261011-08\\vault\\.nand\\browser\\0ef19dac-521f-4ee8-ba6a-64a18013f416\\runtime\\artifacts\\b30bfd61-daa6-42a9-a3ce-25bdf54990d7.txt",
+          "D:\\Document\\code\\nand\\scripts\\tmp\\browser-vault-sessions-20261011-08\\vault\\.nand\\browser\\0ef19dac-521f-4ee8-ba6a-64a18013f416\\runtime\\artifacts\\b30bfd61-daa6-42a9-a3ce-25bdf54990d7.png"
+        ],
+        "context": "D:\\Document\\code\\nand\\scripts\\tmp\\browser-vault-sessions-20261011-08\\vault\\.nand\\browser\\0ef19dac-521f-4ee8-ba6a-64a18013f416\\runtime\\b99d7f4c-d01b-4e24-a473-df488f000128\\connection.json",
+        "cli": "D:\\Document\\code\\nand\\scripts\\tmp\\browser-vault-sessions-20261011-08\\vault\\.nand\\browser\\0ef19dac-521f-4ee8-ba6a-64a18013f416\\runtime\\b99d7f4c-d01b-4e24-a473-df488f000128\\nand-browser.cjs"
+      }
+    },
+    {
+      "name": "migrated-session-retains-new-data-after-restart",
+      "passed": true
+    },
+    {
+      "name": "legacy-source-cleaned-only-after-validation",
+      "passed": true
+    },
+    {
+      "name": "legacy-source-preserved-inside-vault",
+      "passed": true
+    },
+    {
+      "name": "closed-runtime-removes-connection",
+      "passed": true
+    },
+    {
+      "name": "published-artifacts-remain-in-vault",
+      "passed": true
+    },
+    {
+      "name": "home-webview-has-separate-vault-session",
+      "passed": true
+    },
+    {
+      "name": "home-webview-does-not-inherit-browser-cookie",
+      "passed": true
+    },
+    {
+      "name": "music-cookie-store-is-in-vault",
+      "passed": true
+    },
+    {
+      "name": "no-host-iframe-fallback",
+      "passed": true
+    },
+    {
+      "name": "native-music-login-window-uses-vault-session",
+      "passed": true
+    },
+    {
+      "name": "music-login-test-used-local-intercept",
+      "passed": true
+    },
+    {
+      "name": "no-host-errors",
+      "passed": true,
+      "detail": []
+    }
+  ]
+}

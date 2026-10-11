@@ -35,7 +35,7 @@
     "history": []
   },
   "created_at": "2026-10-11T05:11:40.581Z",
-  "updated_at": "2026-10-11T11:10:07.100Z",
+  "updated_at": "2026-10-11T11:16:14.095Z",
   "completed_at": null,
   "archived": false,
   "archive_path": null,
@@ -138,25 +138,25 @@
       "parent_branch": "main",
       "branch": "main",
       "workspace_ref": "current",
-      "source_checkpoint": "44cb5376bfb3ed1abfbd818fd6277dbb17f2b9fd",
-      "status": "active",
-      "updated_at": "2026-10-11T11:10:07.100Z",
+      "source_checkpoint": "6e7197e297dc9ec23bfcad0c762b449df2abc8b0",
+      "status": "integrated",
+      "updated_at": "2026-10-11T11:16:14.095Z",
       "integration": {
-        "status": "pending",
+        "status": "passed",
         "parent_ref": "main",
         "parent_before_sha": "ff262a6728f411bb7f96b6356bb0c124c94c31a0",
-        "source_sha": "44cb5376bfb3ed1abfbd818fd6277dbb17f2b9fd",
+        "source_sha": "6e7197e297dc9ec23bfcad0c762b449df2abc8b0",
         "candidate_sha": null,
         "candidate_tree_sha": null,
         "candidate_branch": null,
         "candidate_workspace_ref": null,
-        "result_sha": null,
+        "result_sha": "6e7197e297dc9ec23bfcad0c762b449df2abc8b0",
         "method": "direct-parent",
         "conflict_paths": [],
         "verification": "passed",
         "full_suite": {
           "required": true,
-          "status": "pending",
+          "status": "passed",
           "reason": null,
           "evidence": "<Path>{roots.state}/specdev/changes/2026-10-11-vault-data-unification/evidence/T-03.md</Path>"
         },
@@ -168,6 +168,49 @@
         },
         "evidence": "<Path>{roots.state}/specdev/changes/2026-10-11-vault-data-unification/evidence/T-03.md</Path>",
         "attempts": 8,
+        "promotion_status": "applied"
+      }
+    },
+    {
+      "ticket_id": "T-04",
+      "owner": "root",
+      "implementation_owner": "root",
+      "integration_owner": "root",
+      "provider": "git",
+      "base_sha": "6e7197e297dc9ec23bfcad0c762b449df2abc8b0",
+      "parent_branch": "main",
+      "branch": "main",
+      "workspace_ref": "current",
+      "source_checkpoint": null,
+      "status": "active",
+      "updated_at": "2026-10-11T11:16:14.095Z",
+      "integration": {
+        "status": "pending",
+        "parent_ref": "main",
+        "parent_before_sha": "6e7197e297dc9ec23bfcad0c762b449df2abc8b0",
+        "source_sha": null,
+        "candidate_sha": null,
+        "candidate_tree_sha": null,
+        "candidate_branch": null,
+        "candidate_workspace_ref": null,
+        "result_sha": null,
+        "method": "direct-parent",
+        "conflict_paths": [],
+        "verification": "pending",
+        "full_suite": {
+          "required": true,
+          "status": "pending",
+          "reason": null,
+          "evidence": "<Path>{roots.state}/specdev/changes/2026-10-11-vault-data-unification/evidence/T-04.md</Path>"
+        },
+        "e2e": {
+          "required": true,
+          "status": "pending",
+          "reason": null,
+          "evidence": "<Path>{roots.state}/specdev/changes/2026-10-11-vault-data-unification/evidence/T-04.md</Path>"
+        },
+        "evidence": "<Path>{roots.state}/specdev/changes/2026-10-11-vault-data-unification/evidence/T-04.md</Path>",
+        "attempts": 0,
         "promotion_status": "pending"
       }
     }

@@ -5,7 +5,6 @@ import { BrowserError, type BrowserAutomationPort } from '../../core/model';
 import { bridgeFailure } from '../../core/bridge-errors';
 import { privateDirectory, removeBrowserRun, sweepBrowserRuns } from './runtime-files';
 import { BROWSER_CLI_SOURCE } from './cli-source';
-import type { ElectronBrowserApi } from './electron-api';
 import type { ScopedBrowserConnection, ScopedBrowserPort } from '../../core/scoped-grant';
 
 export class BrowserBridge {
@@ -14,7 +13,6 @@ export class BrowserBridge {
 	private disposed = false;
 	private starting?: Promise<void>;
 	private readonly process: typeof import('node:process');
-	private readonly temporary: string;
 	private readonly runtimeRoot: string;
 	private readonly artifactDirectory: string;
 	private readonly exit = () => this.dispose();
@@ -28,7 +26,7 @@ export class BrowserBridge {
 	readonly directory: string;
 	readonly contextPath: string;
 	readonly cliPath: string;
-	readonly endpoint: string;
+	readonly endpoint: import('node:net').NetConnectOpts;
 	private token: string;
 	private expiresAt: number;
 	private broadEpoch = 0;
@@ -36,8 +34,8 @@ export class BrowserBridge {
 	private readonly scoped = new Map<string, { port: ScopedBrowserPort; abort: AbortController; expiresAt: number; dispose(): void }>();
 	constructor(
 		private readonly win: Window,
-		api: ElectronBrowserApi,
-		vaultId: string,
+		vaultRoot: string,
+		deviceId: string,
 		private readonly port: BrowserAutomationPort,
 		private broadEnabled = false,
 	) {
@@ -48,9 +46,8 @@ export class BrowserBridge {
 		this.buffer = (win.require('node:buffer') as typeof import('node:buffer')).Buffer;
 		this.timers = win.require('node:timers') as typeof import('node:timers');
 		const process = this.process = win.require('node:process') as typeof import('node:process');
-		if (!/^[a-z\d_-]+$/i.test(vaultId)) throw new BrowserError('browser_invalid_argument');
-		this.temporary = api.app.getPath('temp');
-		this.runtimeRoot = this.path.join(api.app.getPath('userData'), 'nand-browser', vaultId);
+		if (!/^[a-z\d_-]+$/i.test(deviceId)) throw new BrowserError('browser_invalid_argument');
+		this.runtimeRoot = this.path.join(this.fs.realpathSync(vaultRoot), '.nand', 'browser', deviceId, 'runtime');
 		this.artifactDirectory = this.path.join(this.runtimeRoot, 'artifacts');
 		this.windows = process.platform === 'win32';
 		const runId = this.crypto.randomUUID();
@@ -59,8 +56,8 @@ export class BrowserBridge {
 		this.cliPath = this.path.join(this.directory, 'nand-browser.cjs');
 		this.endpoint =
 			process.platform === 'win32'
-				? `\\\\.\\pipe\\nand-browser-${runId}`
-				: this.path.join(this.temporary, `nand-browser-${runId}.sock`);
+				? { path: `\\\\.\\pipe\\nand-browser-${runId}` }
+				: { host: '127.0.0.1', port: 0 };
 		this.token = this.crypto.randomBytes(32).toString('hex');
 		this.expiresAt = Date.now() + 12 * 60 * 60 * 1000;
 	}
@@ -73,7 +70,7 @@ export class BrowserBridge {
 	}
 	private async startOnce(): Promise<void> {
 		privateDirectory(this.fs, this.path.dirname(this.runtimeRoot));
-		await sweepBrowserRuns(this.fs, this.path, this.net, this.process, this.runtimeRoot, this.temporary);
+		await sweepBrowserRuns(this.fs, this.path, this.net, this.process, this.runtimeRoot, this.runtimeRoot);
 		if (this.disposed) throw new BrowserError('browser_disabled');
 		privateDirectory(this.fs, this.directory);
 		this.fs.writeFileSync(this.path.join(this.directory, 'owner.json'), JSON.stringify({ pid: this.process.pid }), { mode: 0o600, flag: 'wx' });
@@ -89,6 +86,8 @@ export class BrowserBridge {
 		await new Promise<void>((resolve, reject) => {
 			this.server!.once('error', reject);
 			this.server!.listen(this.endpoint, () => {
+				const address = this.server!.address();
+				if (address && typeof address === 'object' && 'port' in this.endpoint) this.endpoint.port = address.port;
 				this.server!.removeListener('error', reject);
 				resolve();
 			});
@@ -98,11 +97,10 @@ export class BrowserBridge {
 			this.cleanupFiles();
 			throw new BrowserError('browser_disabled');
 		}
-		if (!this.windows) this.fs.chmodSync(this.endpoint, 0o600);
 		this.server.on('error', (error) => console.error('[NAND browser bridge]', error.message));
 		this.fs.writeFileSync(
 			this.contextPath,
-			JSON.stringify({ version: 1, endpoint: this.endpoint }),
+			JSON.stringify({ version: 2, endpoint: this.endpoint, artifacts: this.artifactDirectory }),
 			{ mode: 0o600 },
 		);
 	}
@@ -224,7 +222,7 @@ export class BrowserBridge {
 		return [metadata, png];
 	}
 	private cleanupFiles(): void {
-		removeBrowserRun(this.fs, this.path, this.directory, this.endpoint, this.windows);
+		removeBrowserRun(this.fs, this.path, this.directory, 'path' in this.endpoint ? this.endpoint.path : '', this.windows);
 	}
 	dispose(): void {
 		if (this.disposed) return;

@@ -539,8 +539,7 @@ export function renderSection(
 		return el;
 	}
 
-	// Web section: an embedded page. Frameable sites load as an iframe; sites
-	// whose headers refuse framing load in a desktop webview (see web-section).
+	// Every embedded page uses this vault's owned desktop session.
 	if (sectionType === 'web') {
 		for (const target of ['modal', 'tab'] as const) {
 			const button = headerActions.createEl('button', {
@@ -583,7 +582,7 @@ export function renderSection(
 			callbacks.onColumnDelete(column.name, data ? data.columns.indexOf(column) : -1);
 		});
 
-		renderWebSection(el, column, (fn) => {
+		renderWebSection(el, app, column, (fn) => {
 			reload = fn;
 		});
 		return el;
