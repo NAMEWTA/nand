@@ -305,14 +305,13 @@ function stripFrontmatter(body: string): string {
 /** Rebuild the inlinks/outlinks maps from metadataCache.resolvedLinks.
  *  O(vault) per render; runs once before the per-file loop. */
 function rebuildLinkMaps(app: App): LinkMaps {
-	const resolved = app.metadataCache.resolvedLinks;
+	const content = contentFiles(app), resolved = content.resolvedLinks();
 	const inlinks: Record<string, string[]> = {};
 	const outlinks: Record<string, string[]> = {};
-	const content = contentFiles(app);
 	for (const file of content.getMarkdownFiles()) {
 		const source = file.path;
-		const links = [...Object.keys(resolved[source] ?? {}), ...(content.getMetadata(file)?.links ?? []).map(item => item.link)];
-		const outs = [...new Set(links.map(link => content.resolveLink(link, source)?.path).filter((path): path is string => !!path))];
+		const metadata = (content.getMetadata(file)?.links ?? []).map(item => content.resolveLink(item.link, source, item.syntax)?.path);
+		const outs = [...new Set([...Object.keys(resolved[source] ?? {}), ...metadata.filter((path): path is string => !!path)])];
 		outlinks[source] = outs;
 		for (const target of outs) {
 			(inlinks[target] ??= []).push(source);

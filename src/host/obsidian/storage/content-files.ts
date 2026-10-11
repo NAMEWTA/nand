@@ -150,6 +150,7 @@ export class ContentFiles {
 				}
 			};
 			await visit(CONTENT_ROOT);
+			await this.moves.reconcile(path => next.has(path));
 			const previous = this.indexed;
 			const changes: ContentChange[] = [];
 			// Reconcile completed receipts before diffing the index, including recovered moves.
@@ -185,7 +186,10 @@ export class ContentFiles {
 		const graph: Record<string, Record<string, number>> = {};
 		for (const [source, targets] of Object.entries(this.app.metadataCache.resolvedLinks)) {
 			const next = graph[source] = {} as Record<string, number>;
-			for (const [path, count] of Object.entries(targets)) next[this.resolveLink(path, source)?.path ?? path] = count;
+			for (const [path, count] of Object.entries(targets)) {
+				const target = this.resolveLink('/' + path, source)?.path ?? path;
+				next[target] = (next[target] ?? 0) + count;
+			}
 		}
 		for (const file of this.indexed.values()) {
 			const targets: Record<string, number> = {};
@@ -212,7 +216,7 @@ export class ContentFiles {
 				value.frontmatter = (readYaml(document.yaml).toJSON() ?? {}) as Record<string, unknown>;
 			} catch { /* Invalid properties stay unindexed; the document remains readable and editable. */ }
 			value.tags = [...body.matchAll(/(?:^|\s)#([^\s#.,;!?()[\]{}]+)/g)].map(match => ({ tag: '#' + match[1]! }));
-			value.links = contentLinkDestinations(body);
+			value.links = contentLinkDestinations(raw);
 			value.headings = []; value.blocks = {}; value.listItems = [];
 			let fenced = false;
 			for (const [line, text] of raw.split('\n').entries()) {
@@ -375,6 +379,11 @@ export class ContentFiles {
 		const native = this.app.vault.getFileByPath(path);
 		if (!native) throw new Error(`Missing document: ${path}`);
 		return this.app.vault.read(native);
+	}
+	async readBinary(file: ContentFile): Promise<ArrayBuffer> {
+		if (!isManagedFile(file)) return this.app.vault.readBinary(file);
+		if (!await privateVaultStorage(this.app).exists(validateNandPath(file.path))) throw new Error('nand-content.missing');
+		return this.app.vault.adapter.readBinary(file.path);
 	}
 	checkEditor(path: string, disk: string, owner?: symbol, transactionText?: string): void {
 		const matches = (text: string) => text === disk || transactionText !== undefined && text === transactionText;

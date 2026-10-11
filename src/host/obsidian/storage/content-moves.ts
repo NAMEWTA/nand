@@ -71,6 +71,11 @@ export class ContentMoves {
 		if (moved) { await this.publish(); await this.finish(); } else await this.save({ version: 1, entries: this.value.entries });
 	}
 	completed(): readonly Move[] { return this.value.entries; }
+	/** External sync can reuse old paths without going through create(). */
+	async reconcile(exists: (path: string) => boolean): Promise<void> {
+		const entries = this.value.entries.filter(entry => !exists(entry.from) && exists(entry.to));
+		if (entries.length !== this.value.entries.length) await this.save({ ...this.value, entries });
+	}
 	async publish(): Promise<void> {
 		const pending = this.value.pending;
 		if (!pending) throw new Error('nand-content.move-missing');

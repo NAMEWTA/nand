@@ -1,0 +1,52 @@
+
+2026-10-11 10:42:10 Loaded main app package D:\Pro\Obsidian\resources\obsidian.asar
+CLI server error: Error: listen EADDRINUSE: address already in use \\.\pipe\obsidian-cli-cdewta
+    at Server.setupListenHandle [as _listen2] (node:net:1987:21)
+    at listenInCluster (node:net:2066:12)
+    at Server.listen (node:net:2188:5)
+    at module.exports (D:\Pro\Obsidian\resources\obsidian.asar\main.js:64:404)
+    at loadApp (D:\Pro\Obsidian\resources\app.asar\main.js:310:3)
+    at Object.<anonymous> (D:\Pro\Obsidian\resources\app.asar\main.js:470:12)
+    at Module._compile (node:internal/modules/cjs/loader:1879:14)
+    at Object..js (node:internal/modules/cjs/loader:2012:10)
+    at Module.load (node:internal/modules/cjs/loader:1601:32)
+    at node:internal/modules/cjs/loader:1403:12 {
+  code: 'EADDRINUSE',
+  errno: -4091,
+  syscall: 'listen',
+  address: '\\\\.\\pipe\\obsidian-cli-cdewta',
+  port: -1
+}
+
+DevTools listening on ws://127.0.0.1:9444/devtools/browser/2dcbf17b-2b0a-4102-b40d-dbabcee3d16f
+Ignored: Error: ENOENT: no such file or directory, open 'D:\Document\code\nand\scripts\tmp\content-gallery-20261011-03\profile\abcdef1234567890.json'
+2026-10-11 10:42:10 Checking for update using Github
+2026-10-11 10:42:12 Success.
+2026-10-11 10:42:12 Latest version is 1.14.4
+2026-10-11 10:42:12 Downloading update from https://github.com/obsidianmd/obsidian-releases/releases/download/v1.14.4/obsidian-1.14.4.asar.gz
+
+2026-10-11 10:42:14 Loaded main app package D:\Pro\Obsidian\resources\obsidian.asar
+CLI server error: Error: listen EADDRINUSE: address already in use \\.\pipe\obsidian-cli-cdewta
+    at Server.setupListenHandle [as _listen2] (node:net:1987:21)
+    at listenInCluster (node:net:2066:12)
+    at Server.listen (node:net:2188:5)
+    at module.exports (D:\Pro\Obsidian\resources\obsidian.asar\main.js:64:404)
+    at loadApp (D:\Pro\Obsidian\resources\app.asar\main.js:310:3)
+    at Object.<anonymous> (D:\Pro\Obsidian\resources\app.asar\main.js:470:12)
+    at Module._compile (node:internal/modules/cjs/loader:1879:14)
+    at Object..js (node:internal/modules/cjs/loader:2012:10)
+    at Module.load (node:internal/modules/cjs/loader:1601:32)
+    at node:internal/modules/cjs/loader:1403:12 {
+  code: 'EADDRINUSE',
+  errno: -4091,
+  syscall: 'listen',
+  address: '\\\\.\\pipe\\obsidian-cli-cdewta',
+  port: -1
+}
+Removing partition for vault nand-dashboard-music-vault
+
+DevTools listening on ws://127.0.0.1:9444/devtools/browser/e90836c1-763e-45af-9d21-e1b287c8567a
+2026-10-11 10:42:14 Checking for update using Github
+2026-10-11 10:42:14 Success.
+2026-10-11 10:42:14 Latest version is 1.14.4
+2026-10-11 10:42:14 Downloading update from https://github.com/obsidianmd/obsidian-releases/releases/download/v1.14.4/obsidian-1.14.4.asar.gz

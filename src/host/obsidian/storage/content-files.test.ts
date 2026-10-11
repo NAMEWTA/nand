@@ -1,6 +1,7 @@
 import { expect, test } from 'vitest';
 import { MarkdownView, type WorkspaceLeaf } from 'obsidian';
 import { memoryVault } from '../../../../scripts/fixtures/memory-vault';
+import { readMarkdownDocument, readYaml } from '../../../shared/storage/markdown-document';
 import { ContentFiles, contentFiles } from './content-files';
 
 test('malformed frontmatter does not hide other searchable documents and remains editable', async () => {
@@ -153,7 +154,7 @@ test('a destination arriving during rename is retained alongside the moved sourc
 });
 
 test('every interrupted rename persistence step recovers consistent references without losing content', async () => {
-	const initial = { '.nand/content/Old.md': '# Original\n![image](image.png)', '.nand/content/image.png': 'image', 'Ref.md': '[[Old]]' };
+	const initial = { '.nand/content/Old.md': '---\ncover: "[[image.png]]" # Keep\n---\n# Original\n![image](image.png)', '.nand/content/image.png': 'image', 'Ref.md': '---\nrelated: "[[Old]]"\n---\n[[Old]]' };
 	const run = async (failAt = 0, after = false) => {
 		const vault = memoryVault(initial); let files = new ContentFiles(vault.app); await files.refresh();
 		let calls = 0;
@@ -170,9 +171,11 @@ test('every interrupted rename persistence step recovers consistent references w
 		const count = calls;
 		files = new ContentFiles(vault.app); await files.refresh();
 		const destination = vault.contents.has('.nand/content/New.md') ? '.nand/content/New.md' : '.nand/content/Old.md';
-		expect(vault.contents.get(destination)).toBe(destination.endsWith('/New.md') ? '# Original\n![image](</.nand/content/image.png>)' : initial['.nand/content/Old.md']);
-		const reference = vault.contents.get('Ref.md')!.slice(2, -2);
+		expect(vault.contents.get(destination)).toBe(destination.endsWith('/New.md') ? '---\ncover: "[[/.nand/content/image.png]]" # Keep\n---\n# Original\n![image](</.nand/content/image.png>)' : initial['.nand/content/Old.md']);
+		const reference = vault.contents.get('Ref.md')!.split('\n').at(-1)!.slice(2, -2);
 		expect(files.resolveLink(reference, 'Ref.md')?.path).toBe(destination);
+		const related = String(readYaml(readMarkdownDocument(vault.contents.get('Ref.md')!).yaml).get('related')).slice(2, -2);
+		expect(files.resolveLink(related, 'Ref.md')?.path).toBe(destination);
 		expect(JSON.parse(vault.contents.get('.nand/content-moves/manifest.json') ?? '{"pending":null}').pending).toBeFalsy();
 		return count;
 	};
@@ -230,4 +233,15 @@ test('native reference filenames outside the portable owned namespace remain usa
 	await files.rename(files.getFileByPath('.nand/content/Old.md')!, '.nand/content/New.md');
 	await new ContentFiles(vault.app).refresh();
 	expect(vault.contents.get('Why?.md')).toBe('[[/.nand/content/New.md]]');
+});
+
+test('property links preserve YAML comments, aliases, scalar values and CRLF while following moves', async () => {
+	const raw = '---\r\n# Header\r\ncover: >- # block comment\r\n  [[image.png]]\r\nrelated: &ref "[[../Peer]]"\r\ncopy: *ref\r\nexamples: "`[[image.png]]`"\r\nnumber: 2026\r\n---\r\nBody';
+	const vault = memoryVault({ '.nand/content/Old/Note.md': raw, '.nand/content/Old/image.png': 'image', '.nand/content/Peer.md': 'peer' }), files = new ContentFiles(vault.app); await files.refresh();
+	await files.rename(files.getFileByPath('.nand/content/Old/Note.md')!, '.nand/content/New/Note.md');
+	await files.prepareMetadata(); const result = await files.read('.nand/content/New/Note.md');
+	expect(result).toContain('# Header\r\n'); expect(result).toContain('# block comment\r\n');
+	expect(result).toContain('related: &ref "[[/.nand/content/Peer.md]]"\r\ncopy: *ref');
+	expect(result).toContain('examples: "`[[image.png]]`"\r\nnumber: 2026');
+	expect(files.getMetadata(files.getFileByPath('.nand/content/New/Note.md')!)!.frontmatter).toMatchObject({ cover: '[[/.nand/content/Old/image.png]]', copy: '[[/.nand/content/Peer.md]]', number: 2026 });
 });

@@ -4,6 +4,7 @@ import { resolveCoverAsObjectUrl } from '../../platform/reading/book-service';
 import { getRenderContext } from '../renderer/render-context';
 import { attachNoteHover } from '../ui/hover-preview';
 import { str } from './library-file-result';
+import { contentLinkDestinations } from '../../../../host/obsidian/storage/content-link-text';
 
 export function openFile(app: App, file: ContentFile, owner: HTMLElement): void {
 	if (isManagedFile(file)) { void contentFiles(app).open(file.path, owner.win); return; }
@@ -66,12 +67,12 @@ export function normalizeCoverValue(value: unknown): string | null {
 	if (wikilink) {
 		s = wikilink[1]!.split('|')[0]!.trim();
 	} else {
-		const mdImage = /^!\[[^\]]*\]\(([^()]+)\)$/.exec(s);
-		if (mdImage) {
-			s = mdImage[1]!.trim();
-		} else {
-			const imgTag = /^<img\b[^>]*\bsrc=["']([^"']+)["']/i.exec(s);
-			if (imgTag) s = imgTag[1]!.trim();
+		if (s.startsWith('![') || /^<img\b/i.test(s)) {
+			const destination = contentLinkDestinations(s)[0];
+			if (destination) {
+				s = destination.link;
+				if (!/^[a-z][a-z\d+.-]*:/i.test(s)) try { s = decodeURIComponent(s); } catch { /* Literal percent names remain valid. */ }
+			}
 		}
 	}
 	return s.length > 0 ? s : null;

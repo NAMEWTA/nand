@@ -40,6 +40,7 @@ export function memoryVault(initial: Record<string, string> = {}, win: unknown =
 		getAbstractFileByPath: (path: string) => visible(path) && contents.has(path) ? file(path) : null,
 		getFileByPath: (path: string) => visible(path) && contents.has(path) ? file(path) : null,
 		read: (f: TFile) => adapter.read(f.path), create: async (path: string, text: string) => { if (contents.has(path)) throw Error('Exists'); await adapter.write(path, text); return file(path); },
+		readBinary: (f: TFile) => adapter.readBinary(f.path),
 		process: (f: TFile, update: (text: string) => string) => { const operation = (queues.get(f.path) ?? Promise.resolve()).then(async () => { const result = update(await adapter.read(f.path)); await adapter.write(f.path, result); return result; }); queues.set(f.path, operation.catch(() => {})); return operation; },
 		on: (name: string, callback: (...args: any[]) => void) => { if (!listeners.has(name)) listeners.set(name, new Set()); listeners.get(name)!.add(callback); return { name, callback }; },
 		offref: ({ name, callback }: { name: string; callback: (...args: any[]) => void }) => listeners.get(name)?.delete(callback),

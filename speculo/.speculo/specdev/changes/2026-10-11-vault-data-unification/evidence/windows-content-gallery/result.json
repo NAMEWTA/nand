@@ -1,0 +1,25 @@
+{
+  "platform": "win32",
+  "rows": [
+    {
+      "name": "gallery-renders-managed-cover-bytes",
+      "passed": true
+    },
+    {
+      "name": "gallery-keeps-original-cover-after-move",
+      "passed": true
+    },
+    {
+      "name": "frontmatter-link-preserves-original-image-identity",
+      "passed": true
+    },
+    {
+      "name": "gallery-keeps-original-cover-after-restart",
+      "passed": true
+    },
+    {
+      "name": "no-runtime-errors",
+      "passed": true
+    }
+  ]
+}

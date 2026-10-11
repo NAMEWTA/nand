@@ -35,7 +35,7 @@
     "history": []
   },
   "created_at": "2026-10-11T05:11:40.581Z",
-  "updated_at": "2026-10-11T10:24:10.430Z",
+  "updated_at": "2026-10-11T10:43:50.952Z",
   "completed_at": null,
   "archived": false,
   "archive_path": null,
@@ -138,14 +138,14 @@
       "parent_branch": "main",
       "branch": "main",
       "workspace_ref": "current",
-      "source_checkpoint": "e7a2c4141fbde2d5e445662e36a9d8149ebf6863",
+      "source_checkpoint": "ad919b7d3e2111c7d7e89313e1fa9eb41f64b26d",
       "status": "active",
-      "updated_at": "2026-10-11T10:24:10.430Z",
+      "updated_at": "2026-10-11T10:43:50.952Z",
       "integration": {
         "status": "pending",
         "parent_ref": "main",
         "parent_before_sha": "ff262a6728f411bb7f96b6356bb0c124c94c31a0",
-        "source_sha": "e7a2c4141fbde2d5e445662e36a9d8149ebf6863",
+        "source_sha": "ad919b7d3e2111c7d7e89313e1fa9eb41f64b26d",
         "candidate_sha": null,
         "candidate_tree_sha": null,
         "candidate_branch": null,
@@ -167,7 +167,7 @@
           "evidence": "<Path>{roots.state}/specdev/changes/2026-10-11-vault-data-unification/evidence/T-03.md</Path>"
         },
         "evidence": "<Path>{roots.state}/specdev/changes/2026-10-11-vault-data-unification/evidence/T-03.md</Path>",
-        "attempts": 4,
+        "attempts": 5,
         "promotion_status": "pending"
       }
     }

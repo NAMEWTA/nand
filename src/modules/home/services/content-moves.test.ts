@@ -38,3 +38,16 @@ test('the board registry follows completed moves during recovery and after a mis
 		expect(state.dashboardFile).toBe('.nand/content/New');
 	}
 });
+
+test('external reuse of an old path retires its move identity before a later deletion', async () => {
+	const vault = memoryVault({ '.nand/content/A.md': 'original' }), files = contentFiles(vault.app); await files.refresh();
+	await files.rename(files.getFileByPath('.nand/content/A.md')!, '.nand/content/B.md');
+	await vault.adapter.write('.nand/content/A.md', 'different identity'); await files.refresh();
+	let state: ReturnType<BoardRegistryHost['read']> = { dashboardFile: '.nand/content/A', workspaceFiles: ['.nand/content/A', '.nand/content/B'], workspaceNames: ['New identity', 'Original'] };
+	const registry = new BoardRegistry({ app: vault.app, read: () => state, write: async next => { state = next; }, repointAll: async () => {}, refreshAll: () => {} }); registry.watch(() => {});
+	const events: string[] = []; files.subscribe(event => events.push(event.kind));
+	await vault.adapter.remove('.nand/content/A.md'); await files.refresh(); await registry.prune();
+	expect(events).toContain('delete'); expect(events).not.toContain('rename');
+	expect(state.workspaceNames).toEqual(['Original']);
+	expect(files.resolveLink('A')).toBeNull();
+});

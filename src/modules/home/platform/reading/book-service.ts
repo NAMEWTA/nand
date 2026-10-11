@@ -1,4 +1,5 @@
-import { App, Platform, TFile, normalizePath, requestUrl } from 'obsidian';
+import { App, Platform, normalizePath, requestUrl } from 'obsidian';
+import { contentFiles } from '../../../../host/obsidian/storage/content-files';
 
 export interface BookSearchResult {
 	title: string;
@@ -100,9 +101,9 @@ export async function resolveCoverAsObjectUrl(coverUrl: string, app: App): Promi
 /** Read a vault-internal image into a blob URL; '' when the path misses. */
 async function vaultCoverUrl(path: string, app: App): Promise<string> {
 	try {
-		const file = app.vault.getAbstractFileByPath(normalizePath(path));
-		if (!(file instanceof TFile)) return '';
-		const buffer = await app.vault.readBinary(file);
+		const files = contentFiles(app), file = files.getFileByPath(normalizePath(path));
+		if (!file) return '';
+		const buffer = await files.readBinary(file);
 		const type = COVER_MIME[file.extension.toLowerCase()] ?? 'image/jpeg';
 		return URL.createObjectURL(new Blob([buffer], { type }));
 	} catch {
