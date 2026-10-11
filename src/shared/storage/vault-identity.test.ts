@@ -37,3 +37,19 @@ test('identity write failures are surfaced and do not return an unpersisted devi
 	await expect(initializeVaultIdentity(f.storage, options('first'))).rejects.toThrow('disk');
 	expect(f.files.size).toBe(0);
 });
+
+test('the first confirmed identity survives primary corruption without minting a new vault or device', async () => {
+	const f = fixture(), first = await initializeVaultIdentity(f.storage, options('machine'));
+	f.files.set('.nand/config/identity.json', '{');
+	expect(await initializeVaultIdentity(f.storage, options('machine'))).toEqual(first);
+	f.files.delete('.nand/config/identity.json');
+	expect(await initializeVaultIdentity(f.storage, options('machine'))).toEqual(first);
+});
+
+test('an empty legacy backup never turns a damaged existing identity into a fresh installation', async () => {
+	const f = fixture();
+	f.files.set('.nand/config/identity.json', '{');
+	f.files.set('.nand/config/identity.json.backup', 'null');
+	await expect(initializeVaultIdentity(f.storage, options('machine'))).rejects.toThrow('identity');
+	expect(f.files.get('.nand/config/identity.json')).toBe('{');
+});

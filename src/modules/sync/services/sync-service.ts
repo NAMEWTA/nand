@@ -210,6 +210,10 @@ export class SyncService {
 		return formatCommitMessage(template, { date: moment().format(settings.commitDateFormat || 'YYYY-MM-DD HH:mm:ss'), hostname: this.deps.host.hostname(), files }, settings.listChangedFilesInMessageBody);
 	}
 	private confirmUpstream = (remote: string, branch: string) => this.deps.dialogs.confirmUpstream(remote, branch);
+	private autoCommitTrigger = (paths: readonly string[]): boolean => paths.some(path => {
+		const vaultPath = this.snapshot.place?.toVault(path);
+		return vaultPath != null && !vaultPath.startsWith('.nand/sync/');
+	});
 
 	/** Commit (all changes, or only staged ones) and then pull and push as configured. */
 	commitAndSync(mode: 'all' | 'staged', options: { auto?: boolean; message?: string } = {}): Promise<RunReport> {
@@ -217,6 +221,7 @@ export class SyncService {
 		return this.run('commit-and-sync', async (repo) => {
 			const settings = this.deps.settings.get();
 			const steps = await commitAndSync(repo, {
+				commitTrigger: auto ? this.autoCommitTrigger : undefined,
 				mode: auto ? (settings.autoCommitOnlyStaged ? 'staged' : 'all') : mode,
 				autoStageOnEmptyIndex: settings.autoStageOnEmptyIndex,
 				message: (files) => this.message(auto ? settings.autoCommitMessage : settings.commitMessage, files, options.message),
@@ -240,6 +245,7 @@ export class SyncService {
 			const step: StepResult = stop
 				? { step: 'commit', state: 'failed', error: { kind: stop, detail: operation ?? '' } }
 				: await commitStep(repo, status, {
+						commitTrigger: auto ? this.autoCommitTrigger : undefined,
 						mode: auto ? (settings.autoCommitOnlyStaged ? 'staged' : 'all') : mode,
 						autoStageOnEmptyIndex: settings.autoStageOnEmptyIndex,
 						message: (files) => this.message(auto ? settings.autoCommitMessage : settings.commitMessage, files, options.message),
@@ -311,8 +317,10 @@ export class SyncService {
 
 	/** Stop or restart automatic sync on this device. */
 	async setPaused(paused: boolean): Promise<void> {
-		await this.saveDevice({ ...this.snapshot.device, paused: paused ? 'manual' : '', failures: 0 });
-		this.emit();
+		await this.queue.enqueue('pause:' + crypto.randomUUID(), 'refresh', async () => {
+			await this.saveDevice({ ...this.snapshot.device, paused: paused ? 'manual' : '', failures: 0 });
+			this.emit();
+		});
 	}
 
 	stage(paths: readonly string[]): Promise<void> {

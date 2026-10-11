@@ -551,6 +551,39 @@ function settingsOf(values: Partial<SyncSettings> = {}): SettingsHandle<SyncSett
 }
 
 describe('the sync service', () => {
+	test('automatic bookkeeping alone does not generate commits; it follows the next real edit and remains manually committable', async () => {
+		const w = await published(); let now = 100;
+		const service = new SyncService({ host: desktopGitHost(w.a, 'test-device'), settings: settingsOf({ pullBeforePush: false, disablePush: true }), dialogs: { confirmUpstream: async () => true }, notify() {}, describe: () => '', now: () => ++now });
+		try {
+			await service.connect();
+			for (let i = 0; i < 4; i++) assert.equal((await service.commit('all', { auto: true })).steps[0]?.state, 'nothing');
+			write(w.a, 'user.md', 'edit');
+			assert.equal((await service.commitAndSync('all', { auto: true })).steps[0]?.state, 'done');
+			const head = sh(w.a, 'rev-parse', 'HEAD');
+			assert.ok(sh(w.a, 'ls-files', '.nand/sync').includes('test-device'));
+			for (let i = 0; i < 3; i++) assert.equal((await service.commitAndSync('all', { auto: true })).steps[0]?.state, 'nothing');
+			assert.equal(sh(w.a, 'rev-parse', 'HEAD'), head);
+			assert.equal((await service.commit('all')).steps[0]?.state, 'done');
+		} finally { await service.dispose(); }
+	});
+	test('resume admitted while pause is saving wins after the queue drains and after restart', async () => {
+		const w = await published(), host = desktopGitHost(w.a, 'test-device');
+		const save = host.saveDevice;
+		let release!: () => void, started!: () => void;
+		const gate = new Promise<void>(resolve => { release = resolve; });
+		const writing = new Promise<void>(resolve => { started = resolve; });
+		host.saveDevice = async (cwd, base, value) => { started(); await gate; return save(cwd, base, value); };
+		const service = new SyncService({ host, settings: settingsOf(), dialogs: { confirmUpstream: async () => true }, notify() {}, describe: () => '' });
+		try {
+			await service.connect();
+			const pause = service.setPaused(true); await writing;
+			const resume = service.setPaused(false);
+			release(); await Promise.all([pause, resume]);
+			assert.equal(service.snapshot.device.paused, '');
+			assert.equal(JSON.parse(readFileSync(path.join(w.a, syncStatePath(w.a, w.a, 'test-device')), 'utf8')).paused, '');
+			await service.connect(); assert.equal(service.snapshot.device.paused, '');
+		} finally { release(); await service.dispose(); }
+	});
 	test('invalid repository settings remain recoverable and stop writing state to the previously connected repository', async () => {
 		const w = await published();
 		const settings = settingsOf();

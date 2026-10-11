@@ -36,6 +36,8 @@ export interface SyncOptions {
 	autoStageOnEmptyIndex: boolean;
 	/** The commit message for these staged files; '' aborts the commit. */
 	message: (files: readonly string[]) => string;
+	/** Automatic runs can wait for a content change while keeping bookkeeping available for the next commit. */
+	commitTrigger?: (files: readonly string[]) => boolean;
 	pull: boolean;
 	push: boolean;
 	method: 'merge' | 'rebase';
@@ -80,7 +82,7 @@ export async function commitAndSync(repo: GitRepo, options: SyncOptions): Promis
 }
 
 /** Commit only. A commit that would include unresolved conflicts is refused. */
-export async function commitStep(repo: GitRepo, status: RepoStatus, options: Pick<SyncOptions, 'mode' | 'autoStageOnEmptyIndex' | 'message'>): Promise<StepResult> {
+export async function commitStep(repo: GitRepo, status: RepoStatus, options: Pick<SyncOptions, 'mode' | 'autoStageOnEmptyIndex' | 'message' | 'commitTrigger'>): Promise<StepResult> {
 	try {
 		if (status.conflicted.length) throw new GitError('conflict');
 		await repo.assertIndexWithinScope();
@@ -89,6 +91,9 @@ export async function commitStep(repo: GitRepo, status: RepoStatus, options: Pic
 			const pending = status.unstaged.length + status.untracked.length > 0;
 			return pending ? { step: 'commit', state: 'skipped', reason: 'nothing-staged' } : { step: 'commit', state: 'nothing' };
 		}
+		const pending = (resolved === 'all' ? [...status.staged, ...status.unstaged] : status.staged).flatMap(change => [change.path, ...(change.from ? [change.from] : [])]);
+		if (resolved === 'all') pending.push(...status.untracked);
+		if (options.commitTrigger && !options.commitTrigger(pending)) return { step: 'commit', state: 'nothing' };
 		if (resolved === 'all') await repo.stageAll();
 		const files = await repo.stagedPaths();
 		if (!files.length) return { step: 'commit', state: 'nothing' };

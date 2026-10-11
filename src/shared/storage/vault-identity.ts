@@ -27,11 +27,14 @@ function validFile(value: unknown): value is IdentityFile | null {
 /** Copied vaults share the mapping, but a different host gets a different device identity. */
 export function initializeVaultIdentity(storage: TextStorage, options: IdentityOptions): Promise<VaultIdentity> {
 	return storageWriteQueue(storage).run('nand-vault-identity:init', async () => {
-		const store = new JsonStore<IdentityFile | null>(storage, nandPath('config/identity.json'), validFile, (base, local, remote) => {
+		const file = nandPath('config/identity.json');
+		const existed = await storage.exists(file) || await storage.exists(file + '.backup');
+		const store = new JsonStore<IdentityFile | null>(storage, file, validFile, (base, local, remote) => {
 			if (base && remote && (base.vaultId !== remote.vaultId || base.salt !== remote.salt)) throw new Error('nand-storage.identity-replaced');
 			return threeWayMerge(base, local, remote);
 		});
 		const base = await store.load(null);
+		if (base === null && existed) throw new Error('nand-storage.identity-unrecoverable');
 		const next = structuredClone(base ?? { version: 1, vaultId: crypto.randomUUID(), salt: crypto.randomUUID(), devices: {} } satisfies IdentityFile);
 		let fingerprint: string | undefined;
 		if (options.machineIdentity) {
@@ -54,7 +57,9 @@ export function initializeVaultIdentity(storage: TextStorage, options: IdentityO
 			}
 		}
 		if (!device.legacyBrowserVaultId && validIdentityId(options.legacyBrowserVaultId)) device.legacyBrowserVaultId = options.legacyBrowserVaultId;
-		const persisted = JSON.stringify(base) !== JSON.stringify(next) ? await store.commit({ base, value: next }) : next;
+		let persisted = JSON.stringify(base) !== JSON.stringify(next) ? await store.commit({ base, value: next }) : next;
+		// Before any module uses this identity, its backup must contain the selected device too.
+		persisted = await store.commit({ base: persisted, value: persisted });
 		const selected = persisted?.devices[device.id];
 		if (!persisted || !selected) throw new Error('nand-storage.device-removed');
 		return { vaultId: persisted.vaultId, deviceId: selected.id, ...(selected.legacyBrowserVaultId ? { legacyBrowserVaultId: selected.legacyBrowserVaultId } : {}) };

@@ -20,7 +20,10 @@ export function chooseVaultDevice(app: App, devices: readonly VaultDevice[]): Pr
 					if (label?.trim()) resolve({ label }); else reject(new Error(t('storage.deviceCancelled')));
 				}, reject);
 			}
-			onClose(): void { if (!this.chosen) reject(new Error(t('storage.deviceCancelled'))); }
+			onClose(): void {
+				// SuggestModal closes before delivering onChooseSuggestion in the same call.
+				queueMicrotask(() => { if (!this.chosen) reject(new Error(t('storage.deviceCancelled'))); });
+			}
 		}
 		const modal = new DeviceChoice(app);
 		modal.setPlaceholder(t('storage.chooseDevice'));
