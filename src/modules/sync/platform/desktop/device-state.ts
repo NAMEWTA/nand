@@ -1,6 +1,7 @@
 import { createHash } from 'node:crypto';
-import { readFile, realpath, unlink } from 'node:fs/promises';
+import { lstat, readFile, realpath, rename } from 'node:fs/promises';
 import path from 'node:path';
+import { absoluteNandPath } from '../../../../host/desktop/nand-paths';
 import { JsonStore } from '../../../../shared/json-store';
 import { nandPath } from '../../../../shared/storage/nand-paths';
 import type { TextStorage } from '../../../../shared/storage/ports';
@@ -59,9 +60,12 @@ export class SyncDeviceStore {
 			}
 			const store = this.store(file);
 			let value = await store.load(receipt && receipt.stage !== 'complete' ? receipt.value : EMPTY_DEVICE_STATE);
+			const recovery = await absoluteNandPath(this.vaultRoot, nandPath('migrations', 'sync', this.device, path.basename(file, '.json') + '.legacy.json'));
+			if (receipt?.stage === 'complete' && (await legacyText(recovery) !== receipt.text || await legacyText(legacyPath) !== undefined)) throw new Error('nand-storage.migration-source-changed');
 			if (receipt && receipt.stage !== 'complete') {
 				const source = await legacyText(legacyPath);
-				if (receipt.source !== legacyPath || source !== receipt.text && !(source === undefined && receipt.stage === 'copied')) throw new Error('nand-storage.migration-source-changed');
+				const retained = await legacyText(recovery);
+				if (receipt.source !== legacyPath || (source !== receipt.text || retained !== undefined) && !(source === undefined && retained === receipt.text && receipt.stage === 'copied')) throw new Error('nand-storage.migration-source-changed');
 				if (JSON.stringify(value) !== JSON.stringify(receipt.value)) throw new Error('nand-storage.migration-target-changed');
 				// Repair an interrupted primary write before permitting source cleanup.
 				value = await store.commit({ base: value, value });
@@ -69,8 +73,12 @@ export class SyncDeviceStore {
 				const latest = await legacyText(legacyPath);
 				if (latest !== undefined) {
 					if (latest !== receipt.text) throw new Error('nand-storage.migration-source-changed');
-					await unlink(legacyPath);
+					if ((await lstat(legacyPath)).isSymbolicLink()) throw new Error('private-storage.symlink');
+					// Keep the actual removed version, including writes that raced the last read.
+					// Cross-volume or locked sources fail without deleting either copy.
+					await rename(legacyPath, recovery);
 				}
+				if (await legacyText(recovery) !== receipt.text || await legacyText(legacyPath) !== undefined) throw new Error('nand-storage.migration-source-changed');
 				await receipts.commit({ base: receipt, value: { ...receipt, stage: 'complete' } });
 			}
 			return value;

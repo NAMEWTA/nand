@@ -11,7 +11,7 @@ import { desktopGitHost } from './host';
 
 vi.mock('node:fs/promises', async importOriginal => {
 	const actual = await importOriginal<typeof import('node:fs/promises')>();
-	return { ...actual, unlink: vi.fn(actual.unlink) };
+	return { ...actual, rename: vi.fn(actual.rename) };
 });
 
 test('legacy Git bookkeeping is verified in the vault, then removed; another device starts independently', async () => {
@@ -37,17 +37,17 @@ test('legacy Git bookkeeping is verified in the vault, then removed; another dev
 
 test('migration cleanup retries after a verified copy', async () => {
 	const root = await mkdtemp(path.join(tmpdir(), 'nand-sync-cleanup-'));
-	const unlink = vi.mocked(fs.unlink);
+	const rename = vi.mocked(fs.rename);
 	try {
 		const legacy = path.join(root, 'nand-sync.json'), original = JSON.stringify(EMPTY_DEVICE_STATE);
 		await writeFile(legacy, original);
 		const storage = nativeVaultStorage(root);
-		unlink.mockRejectedValueOnce(Object.assign(new Error('busy'), { code: 'EACCES' }));
+		rename.mockRejectedValueOnce(Object.assign(new Error('busy'), { code: 'EACCES' }));
 		await expect(new SyncDeviceStore(storage, root, 'device').load(root, legacy)).rejects.toThrow('busy');
 		expect(await readFile(legacy, 'utf8')).toBe(original);
 		expect(await new SyncDeviceStore(storage, root, 'device').load(root, legacy)).toEqual(EMPTY_DEVICE_STATE);
 		await expect(access(legacy)).rejects.toMatchObject({ code: 'ENOENT' });
-	} finally { unlink.mockClear(); await rm(root, { recursive: true, force: true }); }
+	} finally { rename.mockClear(); await rm(root, { recursive: true, force: true }); }
 });
 
 test('migration source changes block cutover and remain visible after restart', async () => {
@@ -60,6 +60,43 @@ test('migration source changes block cutover and remain visible after restart', 
 		expect(JSON.parse(await readFile(legacy, 'utf8')).paused).toBe('manual');
 		storage.write = write;
 		await expect(new SyncDeviceStore(storage, root, 'device').load(root, legacy)).rejects.toThrow('migration');
+	} finally { await rm(root, { recursive: true, force: true }); }
+});
+
+test('a source update immediately before removal is retained and blocks migration across restarts', async () => {
+	const root = await mkdtemp(path.join(tmpdir(), 'nand-sync-race-'));
+	const actual = await vi.importActual<typeof import('node:fs/promises')>('node:fs/promises');
+	try {
+		const legacy = path.join(root, 'nand-sync.json'), updated = JSON.stringify({ ...EMPTY_DEVICE_STATE, paused: 'manual' });
+		await writeFile(legacy, JSON.stringify(EMPTY_DEVICE_STATE));
+		vi.mocked(fs.rename).mockImplementationOnce(async (source, target) => { await writeFile(legacy, updated); await actual.rename(source, target); });
+		const storage = nativeVaultStorage(root), file = syncStatePath(root, root, 'device');
+		await expect(new SyncDeviceStore(storage, root, 'device').load(root, legacy)).rejects.toThrow('migration-source-changed');
+		const recovery = path.join(root, '.nand/migrations/sync/device', path.basename(file, '.json') + '.legacy.json');
+		expect(await readFile(recovery, 'utf8')).toBe(updated);
+		expect(JSON.parse(await readFile(path.join(root, file), 'utf8')).paused).toBe('');
+		await expect(new SyncDeviceStore(storage, root, 'device').load(root, legacy)).rejects.toThrow('migration-source-changed');
+	} finally { vi.mocked(fs.rename).mockReset().mockImplementation(actual.rename); await rm(root, { recursive: true, force: true }); }
+});
+
+test('a moved source survives receipt failure and remains checked after completed migration', async () => {
+	const root = await mkdtemp(path.join(tmpdir(), 'nand-sync-retained-'));
+	try {
+		const legacy = path.join(root, 'nand-sync.json'), original = JSON.stringify(EMPTY_DEVICE_STATE);
+		await writeFile(legacy, original);
+		const storage = nativeVaultStorage(root), write = storage.write;
+		storage.write = async (file, text) => {
+			if (file.startsWith('.nand/migrations/') && JSON.parse(text)?.stage === 'complete') throw new Error('receipt write failed');
+			await write(file, text);
+		};
+		await expect(new SyncDeviceStore(storage, root, 'device').load(root, legacy)).rejects.toThrow('receipt write failed');
+		await expect(access(legacy)).rejects.toMatchObject({ code: 'ENOENT' });
+		storage.write = write;
+		expect(await new SyncDeviceStore(storage, root, 'device').load(root, legacy)).toEqual(EMPTY_DEVICE_STATE);
+		const recovery = path.join(root, '.nand/migrations/sync/device', path.basename(syncStatePath(root, root, 'device'), '.json') + '.legacy.json');
+		expect(await readFile(recovery, 'utf8')).toBe(original);
+		await writeFile(recovery, JSON.stringify({ ...EMPTY_DEVICE_STATE, paused: 'manual' }));
+		await expect(new SyncDeviceStore(storage, root, 'device').load(root, legacy)).rejects.toThrow('migration-source-changed');
 	} finally { await rm(root, { recursive: true, force: true }); }
 });
 

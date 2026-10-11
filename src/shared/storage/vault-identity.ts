@@ -57,7 +57,13 @@ export function initializeVaultIdentity(storage: TextStorage, options: IdentityO
 			}
 		}
 		if (!device.legacyBrowserVaultId && validIdentityId(options.legacyBrowserVaultId)) device.legacyBrowserVaultId = options.legacyBrowserVaultId;
-		let persisted = JSON.stringify(base) !== JSON.stringify(next) ? await store.commit({ base, value: next }) : next;
+		let commitBase = base;
+		if (base === null) {
+			// Seed a missing store with the complete mapping so its first backup is recoverable.
+			commitBase = await store.load(next);
+			if (JSON.stringify(commitBase) !== JSON.stringify(next)) throw new Error('nand-storage.identity-replaced');
+		}
+		let persisted = JSON.stringify(base) !== JSON.stringify(next) ? await store.commit({ base: commitBase, value: next }) : next;
 		// Before any module uses this identity, its backup must contain the selected device too.
 		persisted = await store.commit({ base: persisted, value: persisted });
 		const selected = persisted?.devices[device.id];

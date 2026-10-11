@@ -53,3 +53,17 @@ test('an empty legacy backup never turns a damaged existing identity into a fres
 	await expect(initializeVaultIdentity(f.storage, options('machine'))).rejects.toThrow('identity');
 	expect(f.files.get('.nand/config/identity.json')).toBe('{');
 });
+
+test('first identity primary-write failure can retry from the already verified full mapping', async () => {
+	const f = fixture(), write = f.storage.write;
+	let fail = true;
+	f.storage.write = async (path, text) => {
+		if (path === '.nand/config/identity.json' && fail) { fail = false; throw new Error('temporary'); }
+		await write(path, text);
+	};
+	await expect(initializeVaultIdentity(f.storage, options('machine'))).rejects.toThrow('temporary');
+	const backup = JSON.parse(f.files.get('.nand/config/identity.json.backup')!);
+	const recovered = await initializeVaultIdentity(f.storage, options('machine'));
+	expect(recovered.vaultId).toBe(backup.vaultId);
+	expect(backup.devices[recovered.deviceId]).toBeDefined();
+});

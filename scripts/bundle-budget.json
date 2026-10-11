@@ -1,7 +1,7 @@
 {
   "$comment": "CI gate: `check:bundle --budget scripts/bundle-budget.json --enforce`. eagerBytes caps the code evaluated at plugin startup and moduleActivationBytes caps what each module loads when it starts; outputBytes and stylesBytes are ratchets on main.js and styles.css. Lower a limit as code shrinks; never raise one without a recorded reason.",
-  "outputBytes": 4529152,
-  "outputBudgetReason": "2026-10-11 T-02：库内设备身份、路径边界、旧偏好与 Git 状态迁移；复审增加可恢复迁移清单、身份备份及自动记账提交保护。main.js 实测 4528762 字节，上限按 KiB 向上取整为 4529152；无新依赖，启动、模块激活和样式预算不变。证据：speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/evidence/T-02.md。",
+  "outputBytes": 4530176,
+  "outputBudgetReason": "2026-10-11 T-02：库内设备身份、路径边界、旧偏好与 Git 状态迁移；复审增加可恢复迁移清单、完整初始身份备份、原子移走并保留旧状态及自动记账提交保护。main.js 实测 4529364 字节，超出原上限 212 字节；上限按 KiB 向上取整为 4530176。无新依赖，启动、模块激活和样式预算不变。证据：speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/evidence/T-02.md。",
   "stylesBytes": 756480,
   "eagerBytes": 122880,
   "forbiddenEagerAreas": [
