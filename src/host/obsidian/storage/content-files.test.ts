@@ -277,3 +277,17 @@ test('raw HTML text across inline parser nodes remains literal when an attachmen
 	await files.rename(files.getFileByPath('.nand/content/Old.png')!, '.nand/content/New.png');
 	expect(vault.contents.get('Ref.md')).toBe(raw+'\n\n<img src="/.nand/content/New.png">');
 });
+
+test('cyclic YAML stays editable and does not block library metadata or unrelated moves', async () => {
+	for (const yaml of ['list: &self [*self]', 'loop: &self {self: *self}']) {
+		const prefix = '---\n'+yaml+'\n---\n';
+		const vault = memoryVault({ '.nand/content/Old.md': prefix+'Body', '.nand/content/Good.md': '---\ntitle: Good\n---\n# Good', 'Ref.md': prefix+'[[Old]]' });
+		const files = new ContentFiles(vault.app); await files.prepareMetadata();
+		expect(files.getMetadata(files.getFileByPath('.nand/content/Good.md')!)!.frontmatter).toEqual({ title: 'Good' });
+		expect(await files.read('.nand/content/Old.md')).toBe(prefix+'Body');
+		await files.rename(files.getFileByPath('.nand/content/Old.md')!, '.nand/content/New.md');
+		expect(await files.read('.nand/content/New.md')).toBe(prefix+'Body');
+		expect(vault.contents.get('Ref.md')).toBe(prefix+'[[/.nand/content/New.md]]');
+		await new ContentFiles(vault.app).prepareMetadata();
+	}
+});

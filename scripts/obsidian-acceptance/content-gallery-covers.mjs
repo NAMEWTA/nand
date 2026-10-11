@@ -27,6 +27,8 @@ try {
   '.nand/content/Old/HTML.md': '---\ntitle: "pic.svg"\ncover: '+JSON.stringify("<img src='pic&apos;s.svg'>")+'\n---\n<img src="pic.svg">\n<img src="pic&apos;s.svg">\n',
   '.nand/content/Old/Alias.md': '---\ncover: &img pic.svg\ntitle: *img\n---\n',
   '.nand/content/Old/AliasUse.md': '---\nasset: &img pic.svg\ncover: *img\ntitle: *img\n---\n',
+  '.nand/content/Cyclic.md': '---\nlist: &self [*self]\n---\nKeep cyclic array\n',
+  '.nand/content/CyclicObject.md': '---\nloop: &self {self: *self}\n---\nKeep cyclic object\n',
   ".nand/content/Old/pic's.svg": image('green'), ".nand/content/New/pic's.svg": image('blue'),
  }, settings: { version: 1, namespaces: {
   app: { language: 'zh', introSeen: true, modules: Object.fromEntries(['home','agent','browser','news','archives','automations','notifications','icons','comments','sync'].map(id => [id, false])) },
@@ -58,6 +60,7 @@ try {
  check('gallery-keeps-original-cover-after-restart', (await coverBytes()).includes('fill="red"'));
  check('gallery-keeps-quoted-html-cover-after-restart', (await coverBytes('HTML')).includes('fill="green"'));
  for (const name of ['Alias','AliasUse']) check('gallery-keeps-anchor-cover-after-restart:'+name, (await coverBytes(name)).includes('fill="red"'));
+ check('cyclic-properties-stay-intact-without-hiding-normal-gallery', (await fs.readFile(path.join(runtime.vault,'.nand/content/Cyclic.md'),'utf8'))==='---\nlist: &self [*self]\n---\nKeep cyclic array\n' && (await fs.readFile(path.join(runtime.vault,'.nand/content/CyclicObject.md'),'utf8'))==='---\nloop: &self {self: *self}\n---\nKeep cyclic object\n');
  check('no-runtime-errors', await c.evaluate('(window.nandAcceptanceErrors??[]).length===0'));
  await c.evaluate(`${cover('HTML')}.scrollIntoView({block:'center'});true`); await delay(150);
  await runtime.shot('gallery-cover-after-restart');

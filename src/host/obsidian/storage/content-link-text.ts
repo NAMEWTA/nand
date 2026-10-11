@@ -20,6 +20,9 @@ function properties(text: string): { bodyStart: number; values: Property[]; alia
 		if (!source.yaml) return { bodyStart, values, aliases };
 		const start = text.indexOf(source.yaml);
 		const document = readYaml(source.yaml);
+		// Cyclic YAML is valid but cannot be projected into JSON-backed consumers.
+		// Keep that property block opaque while still indexing and moving body links.
+		JSON.stringify(document.toJSON());
 		visit(document, { Scalar(key, node, parents) {
 			if (key === 'key' || typeof node.value !== 'string' || !node.range) return;
 			const comment = node.srcToken?.type === 'block-scalar' ? node.srcToken.props.flatMap(token => token.type === 'comment' && 'source' in token ? [token.source] : []).join(' ') : '';

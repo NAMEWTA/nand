@@ -66,6 +66,10 @@
       "passed": true
     },
     {
+      "name": "cyclic-properties-stay-intact-without-hiding-normal-gallery",
+      "passed": true
+    },
+    {
       "name": "no-runtime-errors",
       "passed": true
     }

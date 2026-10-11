@@ -1,5 +1,5 @@
 
-2026-10-11 11:02:09 Loaded main app package D:\Pro\Obsidian\resources\obsidian.asar
+2026-10-11 11:08:56 Loaded main app package D:\Pro\Obsidian\resources\obsidian.asar
 CLI server error: Error: listen EADDRINUSE: address already in use \\.\pipe\obsidian-cli-cdewta
     at Server.setupListenHandle [as _listen2] (node:net:1987:21)
     at listenInCluster (node:net:2066:12)
@@ -18,11 +18,14 @@ CLI server error: Error: listen EADDRINUSE: address already in use \\.\pipe\obsi
   port: -1
 }
 
-DevTools listening on ws://127.0.0.1:9444/devtools/browser/8e8af1bd-456a-439c-8847-c7910e426b6c
-Ignored: Error: ENOENT: no such file or directory, open 'D:\Document\code\nand\scripts\tmp\content-gallery-20261011-05\profile\abcdef1234567890.json'
-2026-10-11 11:02:09 Checking for update using Github
+DevTools listening on ws://127.0.0.1:9444/devtools/browser/e786b26f-bbff-41cb-ba85-2edee37494ac
+Ignored: Error: ENOENT: no such file or directory, open 'D:\Document\code\nand\scripts\tmp\content-gallery-20261011-06\profile\abcdef1234567890.json'
+2026-10-11 11:08:56 Checking for update using Github
+2026-10-11 11:08:59 Success.
+2026-10-11 11:08:59 Latest version is 1.14.4
+2026-10-11 11:08:59 Downloading update from https://github.com/obsidianmd/obsidian-releases/releases/download/v1.14.4/obsidian-1.14.4.asar.gz
 
-2026-10-11 11:02:15 Loaded main app package D:\Pro\Obsidian\resources\obsidian.asar
+2026-10-11 11:09:03 Loaded main app package D:\Pro\Obsidian\resources\obsidian.asar
 CLI server error: Error: listen EADDRINUSE: address already in use \\.\pipe\obsidian-cli-cdewta
     at Server.setupListenHandle [as _listen2] (node:net:1987:21)
     at listenInCluster (node:net:2066:12)
@@ -42,8 +45,8 @@ CLI server error: Error: listen EADDRINUSE: address already in use \\.\pipe\obsi
 }
 Removing partition for vault nand-dashboard-music-vault
 
-DevTools listening on ws://127.0.0.1:9444/devtools/browser/3d9ef79e-f736-468d-8805-900b0182776b
-2026-10-11 11:02:15 Checking for update using Github
-2026-10-11 11:02:16 Success.
-2026-10-11 11:02:16 Latest version is 1.14.4
-2026-10-11 11:02:16 Downloading update from https://github.com/obsidianmd/obsidian-releases/releases/download/v1.14.4/obsidian-1.14.4.asar.gz
+DevTools listening on ws://127.0.0.1:9444/devtools/browser/1fa186ba-bc62-462c-8a53-784e40738e88
+2026-10-11 11:09:03 Checking for update using Github
+2026-10-11 11:09:03 Success.
+2026-10-11 11:09:03 Latest version is 1.14.4
+2026-10-11 11:09:03 Downloading update from https://github.com/obsidianmd/obsidian-releases/releases/download/v1.14.4/obsidian-1.14.4.asar.gz

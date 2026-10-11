@@ -25,3 +25,13 @@ test('DQL preserves Markdown URL identities and already-resolved native paths', 
 	expect(pages.find(page => page.file.path === '.nand/content/Moved.md')?.fields['file.outlinks']).toEqual([makeLink('.nand/content/Folder/A B.md')]);
 	expect(pages.find(page => page.file.path === '.nand/content/Folder/A B.md')?.fields['file.inlinks']).toEqual([makeLink('.nand/content/Moved.md')]);
 });
+
+test('DQL keeps normal pages queryable beside cyclic YAML aliases', async () => {
+	const vault = memoryVault({ '.nand/content/Array.md': '---\nlist: &self [*self]\n---\n[[Good]]', '.nand/content/Object.md': '---\nloop: &self {self: *self}\n---\n', '.nand/content/Good.md': '---\ncategory: normal\n---\n' });
+	for (const name of ['Good','Moved']) {
+		if (name === 'Moved') { const files = contentFiles(vault.app); await files.rename(files.getFileByPath('.nand/content/Good.md')!, '.nand/content/Moved.md'); }
+		const pages = await buildPages(vault.app);
+		expect(pages.filter(page => page.fields.category === 'normal').map(page => page.file.path)).toEqual(['.nand/content/'+name+'.md']);
+		expect(pages.find(page => page.file.path === '.nand/content/Array.md')!.fields['file.outlinks']).toEqual([makeLink('.nand/content/'+name+'.md')]);
+	}
+});

@@ -213,7 +213,9 @@ export class ContentFiles {
 			let body = raw;
 			try {
 				const document = readMarkdownDocument(raw); body = document.body;
-				value.frontmatter = (readYaml(document.yaml).toJSON() ?? {}) as Record<string, unknown>;
+				const properties = (readYaml(document.yaml).toJSON() ?? {}) as Record<string, unknown>;
+				JSON.stringify(properties); // Cyclic aliases remain editable but are not queryable JSON.
+				value.frontmatter = properties;
 			} catch { /* Invalid properties stay unindexed; the document remains readable and editable. */ }
 			value.tags = [...body.matchAll(/(?:^|\s)#([^\s#.,;!?()[\]{}]+)/g)].map(match => ({ tag: '#' + match[1]! }));
 			value.links = contentLinkDestinations(raw);
