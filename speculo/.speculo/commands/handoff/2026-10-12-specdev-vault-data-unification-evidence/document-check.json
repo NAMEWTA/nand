@@ -1,0 +1,22 @@
+{
+  "createdAt": "2026-10-12T00:36:12.527Z",
+  "file": "speculo/.speculo/commands/handoff/2026-10-12-specdev-vault-data-unification.md",
+  "beforeCharacters": 0,
+  "afterCharacters": 20773,
+  "utf8Bytes": 33463,
+  "sha256": "67eaff300d97b8248476385372e40c701d17a62c5df493a4c5245afdb62e0644",
+  "backup": "not-applicable-new-file",
+  "checkedPaths": 121,
+  "missingPaths": [],
+  "latestAccounts": {
+    "passed": false,
+    "checks": 34,
+    "successful": 33
+  },
+  "docsCheck": {
+    "command": "pnpm test:docs",
+    "exitCode": 0,
+    "evidence": "speculo/.speculo/commands/handoff/2026-10-12-specdev-vault-data-unification-evidence/docs-check.log"
+  },
+  "productHead": "40f2acabff35cf84f8e070cb53960ebcd81de664"
+}

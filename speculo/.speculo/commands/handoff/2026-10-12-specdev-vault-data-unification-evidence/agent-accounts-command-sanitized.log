@@ -1,0 +1,23 @@
+{"evidence":"D:\\Document\\code\\nand\\scripts\\tmp\\agent-vault-data-20261011-04\\evidence","checks":34,"failures":[{"name":"acceptance-failure","passed":false,"detail":"Error: Timed out: app.workspace.getLeavesOfType('nand-workbench-view').flatMap(l=>l.view.getNativeSurfaces()).some(s=>s.getViewType()==='nand-agent-page'&&s.controller)\n    at until (file:///D:/Document/code/nand/scripts/obsidian-acceptance/agent-vault-data.mjs:13:163)\n    at async page (file:///D:/Document/code/nand/scripts/obsidian-acceptance/agent-vault-data.mjs:16:2)\n    at async file:///D:/Document/code/nand/scripts/obsidian-acceptance/agent-vault-data.mjs:63:51"}]}
+node : node:internal/modules/run_main:107
+所在位置 行:7 字符: 1
++ node scripts/obsidian-acceptance/agent-vault-data.mjs D:/Document/cod ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (node:internal/modules/run_main:107:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+
+    triggerUncaughtException(
+    ^
+
+AssertionError [ERR_ASSERTION]: Agent vault acceptance failed
+    at file:///D:/Document/code/nand/scripts/obsidian-acceptance/agent-vault-data.mjs:70:8
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5) {
+  generatedMessage: false,
+  code: 'ERR_ASSERTION',
+  actual: false,
+  expected: true,
+  operator: '==',
+  diff: 'simple'
+}
+
+Node.js v24.21.0
