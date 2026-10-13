@@ -1,0 +1,10 @@
+{
+  "sha": "b30eb965d39149709226e6f04b1909c393cfa0a4",
+  "runId": 38364094324,
+  "url": "https://github.com/NAMEWTA/nand/actions/runs/38364094324",
+  "failedJob": 115184962264,
+  "failedStep": "pnpm run check:bundle",
+  "error": "styles.css 783248 > 757760",
+  "cause": "core.autocrlf=true expands generated LF stylesheet on Windows checkout",
+  "recovery": "Pin styles.css text eol=lf, real Git checkout red/green; retain budget and all three CI matrix entries; no tag has been created"
+}

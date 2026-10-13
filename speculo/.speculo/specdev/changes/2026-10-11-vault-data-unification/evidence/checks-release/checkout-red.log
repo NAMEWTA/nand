@@ -1,0 +1,56 @@
+Already up to date
+Done in 451ms using pnpm v11.1.3
+
+ RUN  v5.0.3 <repo>
+
+ ❯ |unit| test/release/styles-build.test.ts (3 tests | 1 failed) 248ms
+   × checks out the generated stylesheet with identical bytes (autocrlf=true) 30ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |unit| test/release/styles-build.test.ts > checks out the generated stylesheet with identical bytes (autocrlf=true)
+AssertionError: expected Buffer[ 47, 42, 32, 228, 184, …(-149) ] to deeply equal Buffer[ 47, 42, 32, 228, 184, …(-151) ]
+
+- Expected
++ Received
+
+@@ -10,10 +10,11 @@
+      162,
+      152,
+      32,
+      42,
+      47,
++     13,
+      10,
+      46,
+      112,
+      97,
+      103,
+@@ -32,9 +33,10 @@
+      101,
+      100,
+      59,
+      32,
+      125,
++     13,
+      10,
+    ],
+    "type": "Buffer",
+  }
+
+ ❯ test/release/styles-build.test.ts:50:54
+     48|  rmSync(path.join(root, 'styles.css'));
+     49|  git('checkout-index', '--force', 'styles.css');
+     50|  expect(readFileSync(path.join(root, 'styles.css'))).toEqual(expected);
+       |                                                      ^
+     51| });
+     52|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 2 passed (3)
+   Start at  03:43:45
+   Duration  716ms (transform 46%, tests 42%, setup 9%, import 2%, worker 1%)
+

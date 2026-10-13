@@ -31,3 +31,21 @@ it('checks and writes the same stylesheet with CRLF sources and an LF package st
 	expect(run('--check').status).toBe(1);
 	expect(readFileSync(output, 'utf8')).toContain('green');
 });
+
+
+it.each(['true', 'false'])('checks out the generated stylesheet with identical bytes (autocrlf=%s)', autocrlf => {
+	const root = mkdtempSync(path.join(tmpdir(), 'nand-styles-checkout-'));
+	dirs.push(root);
+	const expected = Buffer.from('/* 主题 */\n.page { color: red; }\n');
+	writeFileSync(path.join(root, '.gitattributes'), readFileSync(path.resolve('.gitattributes')));
+	writeFileSync(path.join(root, 'styles.css'), expected);
+	const git = (...args: string[]) => {
+		const result = spawnSync('git', ['-c', `core.autocrlf=${autocrlf}`, ...args], { cwd: root, encoding: 'utf8' });
+		expect(result.status, result.stderr).toBe(0);
+	};
+	git('init');
+	git('add', '.gitattributes', 'styles.css');
+	rmSync(path.join(root, 'styles.css'));
+	git('checkout-index', '--force', 'styles.css');
+	expect(readFileSync(path.join(root, 'styles.css'))).toEqual(expected);
+});

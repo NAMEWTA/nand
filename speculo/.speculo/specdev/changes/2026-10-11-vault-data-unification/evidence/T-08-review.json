@@ -1,0 +1,44 @@
+{
+  "fixed_point": "ceb87931dd67733dd03249570c6b2ecc17c1bc59",
+  "head": "b30eb965d39149709226e6f04b1909c393cfa0a4",
+  "diff_command": "git diff ceb87931dd67733dd03249570c6b2ecc17c1bc59...b30eb965d39149709226e6f04b1909c393cfa0a4",
+  "commit_log": [
+    "b30eb965d39149709226e6f04b1909c393cfa0a4"
+  ],
+  "isolation": "用户禁止其他agent；同一root顺序自审，无独立reviewer隔离。",
+  "standards": {
+    "result": "pass",
+    "sources": [
+      "AGENTS.md",
+      ".agents/skills/dev/SKILL.md",
+      ".agents/skills/dev/references/testing.md",
+      ".agents/skills/dev/references/licensing.md",
+      ".agents/skills/ui/SKILL.md",
+      "eslint.config.mts",
+      "tsconfig.json",
+      "vitest.config.ts"
+    ],
+    "findings": [],
+    "checks": [
+      "所有返回可执行路径均在官方摘要/受保护回执或开发override摘要验证后恢复0700；离线不下载且不可信字节不chmod。",
+      "未改变模块接口/跨区导入/文案/数据格式。chmod失败传播，不返回假成功；stamp保留允许重试。",
+      "正式验收夹具使用全新隔离目录、禁止开发override、原进程退出后重启，finally停止自己拥有的宿主。",
+      "构建/lint/test:all 50/50/1818通过1跳过/包体/版本检查通过；README及许可指南遗漏已修正。"
+    ]
+  },
+  "specification": {
+    "result": "pass",
+    "sources": [
+      "speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/spec.md",
+      "speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/ticket/08-alpha2-delivery.md",
+      "speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/tickets-map.md"
+    ],
+    "findings": [],
+    "checks": [
+      "alpha.2四个版本文件及main.js一致，插件id/minAppVersion不变。",
+      "正式发行验收覆盖三插件文件逐字节、官方helper摘要、Linux仅0/1/2 fd、交互、重启及丢失执行位修复、旧helper冷迁移保留。",
+      "变更路径在本票声明范围；单writer，无agent；不把Windows或真实账号列已验证。",
+      "这是固定代码的审查结果；实际远端CI/Release/真实下载/issue/A仍待执行，T-08不标done。"
+    ]
+  }
+}

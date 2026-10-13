@@ -1,0 +1,22 @@
+[
+  {
+    "check": "build",
+    "exitCode": 0
+  },
+  {
+    "check": "lint",
+    "exitCode": 0
+  },
+  {
+    "check": "all",
+    "exitCode": 0
+  },
+  {
+    "check": "budget",
+    "exitCode": 0
+  },
+  {
+    "check": "versions",
+    "exitCode": 0
+  }
+]

@@ -1,0 +1,38 @@
+
+ RUN  v5.0.3 <repo>
+
+ ❯ |unit| src/modules/agent/platform/desktop/pty/binary.test.ts (11 tests | 2 failed | 9 skipped) 48ms
+   × verified cached helpers recover their executable permissions (offline=false) 28ms
+   × verified cached helpers recover their executable permissions (offline=true) 18ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |unit| src/modules/agent/platform/desktop/pty/binary.test.ts > verified cached helpers recover their executable permissions (offline=false)
+ FAIL  |unit| src/modules/agent/platform/desktop/pty/binary.test.ts > verified cached helpers recover their executable permissions (offline=true)
+AssertionError: Expected values to be strictly equal:
+
+384 !== 448
+
+
+- Expected
++ Received
+
+- 448
++ 384
+
+ ❯ src/modules/agent/platform/desktop/pty/binary.test.ts:51:10
+     49|   fs.chmodSync(f.file, 0o600); f.requests.length = 0;
+     50|   assert.equal(await ensureHelper({ ...options, offline }), f.file);
+     51|   assert.equal(fs.statSync(f.file).mode & 0o777, 0o700);
+       |          ^
+     52|   assert.deepEqual(f.requests, [], 'the protected matching receipt sti…
+     53|   assert.deepEqual(fs.readFileSync(f.file), f.binary);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  2 failed | 9 skipped (11)
+   Start at  00:04:02
+   Duration  421ms (transform 68%, tests 15%, setup 10%, import 7%, worker 1%)
+
