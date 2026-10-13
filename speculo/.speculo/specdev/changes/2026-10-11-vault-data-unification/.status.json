@@ -224,37 +224,37 @@
       "parent_branch": "main",
       "branch": "main",
       "workspace_ref": "current",
-      "source_checkpoint": null,
-      "status": "active",
+      "source_checkpoint": "8603b093ca7a437e0df629c126bd585ed551e092",
+      "status": "integrated",
       "updated_at": "2026-10-11T13:36:58.029Z",
       "integration": {
-        "status": "pending",
+        "status": "passed",
         "parent_ref": "main",
         "parent_before_sha": "f28906c91312b1da1017d33ad64770e366ecebf5",
-        "source_sha": null,
+        "source_sha": "8603b093ca7a437e0df629c126bd585ed551e092",
         "candidate_sha": null,
         "candidate_tree_sha": null,
         "candidate_branch": null,
         "candidate_workspace_ref": null,
-        "result_sha": null,
+        "result_sha": "8603b093ca7a437e0df629c126bd585ed551e092",
         "method": "direct-parent",
         "conflict_paths": [],
-        "verification": "pending",
+        "verification": "passed",
         "full_suite": {
           "required": true,
-          "status": "pending",
+          "status": "passed",
           "reason": null,
           "evidence": "<Path>{roots.state}/specdev/changes/2026-10-11-vault-data-unification/evidence/T-05.md</Path>"
         },
         "e2e": {
           "required": true,
-          "status": "pending",
-          "reason": null,
+          "status": "passed",
+          "reason": "2026-10-12 用户取消 Windows 专属门禁；本机 Linux 隔离验收38/38。",
           "evidence": "<Path>{roots.state}/specdev/changes/2026-10-11-vault-data-unification/evidence/T-05.md</Path>"
         },
         "evidence": "<Path>{roots.state}/specdev/changes/2026-10-11-vault-data-unification/evidence/T-05.md</Path>",
-        "attempts": 0,
-        "promotion_status": "pending"
+        "attempts": 1,
+        "promotion_status": "applied"
       }
     }
   ]

@@ -2,13 +2,13 @@
 schema_version: 3
 plan_contract_version: 1
 skill_scan: "已扫描 .agents/skills：dev 适用全部实现，ui 适用内容/浏览器/账号界面及验收。"
-skill_bindings: [{"id":"dev","path":"<Path>.agents/skills/dev/SKILL.md</Path>","sha256":"c8fe48347cd03367c384ca52535cc1981de658721fa82093b34c271c25d295d6","phase":"implement","operation":"implement-and-verify","inputs":["本票合同、真实源码与定向差异"],"outputs":["实现、定向验证与 Evidence"],"required":true,"on_failure":"block-ticket"},{"id":"ui","path":"<Path>.agents/skills/ui/SKILL.md</Path>","sha256":"8c362a984536481585cceeae64d8fcc784f56451262444e0400660b19c801044","phase":"implement","operation":"implement-and-verify","inputs":["本票合同、真实源码与定向差异"],"outputs":["实现、定向验证与 Evidence"],"required":true,"on_failure":"block-ticket"}]
+skill_bindings: [{"id":"dev","path":"<Path>.agents/skills/dev/SKILL.md</Path>","sha256":"13ff2185ff85752e85e4171d1cb4e5517f201c36bdaa35f4004dfe5248ffdf8a","phase":"implement","operation":"implement-and-verify","inputs":["本票合同、真实源码与定向差异"],"outputs":["实现、定向验证与 Evidence"],"required":true,"on_failure":"block-ticket"},{"id":"ui","path":"<Path>.agents/skills/ui/SKILL.md</Path>","sha256":"f78f3e974ff373077a66c78144be01ff7c4ca1775ca75f94186b4ce65bdc1723","phase":"implement","operation":"implement-and-verify","inputs":["本票合同、真实源码与定向差异"],"outputs":["实现、定向验证与 Evidence"],"required":true,"on_failure":"block-ticket"}]
 resource_claims: ["current-workspace:root"]
 artifact: "ticket"
 change: "2026-10-11-vault-data-unification"
 id: "T-05"
 title: "账号身份、凭据与终端辅助程序"
-status: "in_progress"
+status: "done"
 kind: "feature"
 planning_depth: "deep"
 planning_depth_reason: "涉及公共持久化、数据迁移、身份隔离或发布；用户已批准完整计划及实施。"
@@ -34,7 +34,7 @@ shared_path_owners: ["<Path>src/shared/**</Path> => root","<Path>src/host/**</Pa
 
 ## 2. 决策状态
 
-已锁定：所有 NAND 管理数据以当前 vault/.nand 为根；设备专属文件仍在其中；浏览器跨设备允许重新登录；本轮 Windows 验收。未决问题：无。
+已锁定：所有 NAND 管理数据以当前 vault/.nand 为根；设备专属文件仍在其中；浏览器跨设备允许重新登录；Windows 专属验收由 2026-10-12 用户修订取消，优先编码和适用检查。未决问题：无。
 
 ## 3. 范围边界
 
@@ -67,12 +67,12 @@ IN：账号身份、凭据与终端辅助程序。REUSE：当前模块、工作�
 | 错误和边界 | 在上述接缝注入对应读写/外部状态失败 | 无静默数据丢失或跨范围副作用 |
 | 集成 | 类型检查、build、lint；最终完整 CI | 同一提交可复现 |
 
-E2E disposition: required：Windows 隔离 Obsidian 中验证本票接缝与重启。
+E2E disposition: required：当前可用 Linux 隔离 Obsidian 中验证本票接缝与重启；Windows 专属要求由 2026-10-12 用户取消。
 E2E owner/environment: root / current-workspace。提交已获用户授权；implementation commit、direct-parent 的 result SHA 与 Evidence 由 root 记录。
 
 ## 9. 发布、迁移与恢复
 
-迁移为复制、校验、切换、验证后清理；失败保留来源和恢复副本。收缩仅在旧调用点为零且验证通过后进行。提交、push、发布与归档来自本轮已批准计划，Windows 实测完成前不关闭 issue。
+迁移为复制、校验、切换、验证后清理；失败保留来源和恢复副本。收缩仅在旧调用点为零且验证通过后进行。提交、push、发布与归档来自本轮已批准计划，满足当前有效合同与真实交付验证前不关闭 issue；Windows 专属要求由 2026-10-12 用户取消。
 
 ## 11. SKILL 调用计划
 
@@ -80,9 +80,9 @@ E2E owner/environment: root / current-workspace。提交已获用户授权；imp
 
 ## 10. 验收标准
 
-- [ ] AC-005：中文及标点账号映射稳定且不碰撞；非空非法账号报错；默认账号也使用 vault 目录；各 CLI、Hook 和 helper 统一 .nand；旧碰撞目录不得猜测归属；平台权限据实验证。
-- [ ] 非空实现、验证和双轴审查事实写入 <Path>{roots.state}/specdev/changes/2026-10-11-vault-data-unification/evidence/T-05.md</Path>。
-- [ ] 实际路径、Skill 摘要、命令结果、未验证范围与 Map 一致。
+- [x] AC-005：中文及标点账号映射稳定且不碰撞；非空非法账号报错；默认账号也使用 vault 目录；各 CLI、Hook 和 helper 统一 .nand；旧碰撞目录不得猜测归属；平台权限据实验证。
+- [x] 非空实现、验证和双轴审查事实写入 <Path>{roots.state}/specdev/changes/2026-10-11-vault-data-unification/evidence/T-05.md</Path>。
+- [x] 实际路径、Skill 摘要、命令结果、未验证范围与 Map 一致。
 
 ## 12. 停止、检查点与交付
 

@@ -1,0 +1,27 @@
+? Verifying lockfile against supply-chain policies (508 entries)...
+✓ Lockfile passes supply-chain policies (508 entries in 7.7s)
+Lockfile is up to date, resolution step is skipped
+Progress: resolved 1, reused 0, downloaded 0, added 0
+Packages: +1
++
+Progress: resolved 1, reused 0, downloaded 1, added 1, done
+
+dependencies:
++ @lezer/markdown 1.8.0
++ entities 8.1.0
+
+Done in 11.1s using pnpm v11.1.3
+Already up to date
+Done in 376ms using pnpm v11.1.3
+
+ RUN  v5.0.3 /home/wta/projects/nand
+
+
+ Test Files  41 passed (41)
+      Tests  125 passed (125)
+   Start at  21:23:08
+   Duration  28.52s (tests 76%, transform 15%, setup 5%, import 4%, worker 1%)
+
+    Isolate  41 workers spawned · ~98ms startup each (spawn + environment, per file)
+             at least ~3.93s faster with isolate: false — reuses workers across files instead of one per file
+

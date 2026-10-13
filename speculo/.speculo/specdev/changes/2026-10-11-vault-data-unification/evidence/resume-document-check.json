@@ -1,0 +1,73 @@
+{
+  "files": [
+    {
+      "path": "speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/spec.md",
+      "beforeCharacters": 2069,
+      "afterCharacters": 2251,
+      "backup": "scripts/tmp/vault-unification-resume/docs-backup/spec.md",
+      "sha256": "7321403427d3cf75c8ab4c7ddbd796f8dc60db8543a134a3b5aa93870ac01162"
+    },
+    {
+      "path": "speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/ADR.md",
+      "beforeCharacters": 199,
+      "afterCharacters": 390,
+      "backup": "scripts/tmp/vault-unification-resume/docs-backup/ADR.md",
+      "sha256": "3046f2fc7feb53e45396e6216c525fd96e1fd740513d07cc8dd7633531bf1b82"
+    },
+    {
+      "path": "speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/ticket/05-agent-accounts.md",
+      "beforeCharacters": 4179,
+      "afterCharacters": 4266,
+      "backup": "scripts/tmp/vault-unification-resume/docs-backup/ticket/05-agent-accounts.md",
+      "sha256": "70a54b98f2632a6741565886df37a076e3fa648ae45b4e79f24008497b1752fb"
+    },
+    {
+      "path": "speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/ticket/06-git-release-gates.md",
+      "beforeCharacters": 3580,
+      "afterCharacters": 3674,
+      "backup": "scripts/tmp/vault-unification-resume/docs-backup/ticket/06-git-release-gates.md",
+      "sha256": "212e59df8f1ee010701c6e3b235766cdc4a8af5351f2243d232a1f0e5b3a0a6a"
+    },
+    {
+      "path": "speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/ticket/07-current-docs.md",
+      "beforeCharacters": 3947,
+      "afterCharacters": 4008,
+      "backup": "scripts/tmp/vault-unification-resume/docs-backup/ticket/07-current-docs.md",
+      "sha256": "3dc0eb28abee77f95e01d240a15b4ad01f706546ad3865f56cd632fdd8818ffe"
+    },
+    {
+      "path": "speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/ticket/08-alpha2-delivery.md",
+      "beforeCharacters": 4335,
+      "afterCharacters": 4429,
+      "backup": "scripts/tmp/vault-unification-resume/docs-backup/ticket/08-alpha2-delivery.md",
+      "sha256": "1a9321e8386af235b3a8a00f707b71aca91a59188a88e7e7591323e200a0cdc8"
+    },
+    {
+      "path": "speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/tickets-map.md",
+      "beforeCharacters": 3411,
+      "afterCharacters": 3524,
+      "backup": "scripts/tmp/vault-unification-resume/docs-backup/tickets-map.md",
+      "sha256": "131fbb99bf5d0ec30e7dc9c57d68ec96f580ca2875bf9dc4faf00c1aef4049a4"
+    },
+    {
+      "path": "speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/evidence/T-05.md",
+      "beforeCharacters": 6181,
+      "afterCharacters": 8097,
+      "backup": "scripts/tmp/vault-unification-resume/docs-backup/evidence/T-05.md",
+      "sha256": "8587558c891e2a0ae90a15607bf6b20c018a4535ad778ce59c00cfcd03057ad7"
+    },
+    {
+      "path": "speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/LOG.md",
+      "beforeCharacters": 1266,
+      "afterCharacters": 1452,
+      "backup": "scripts/tmp/vault-unification-resume/docs-backup/LOG.md",
+      "sha256": "0c3bd0604b029a749a03c1997e1cb83c7e1240aadbfda7f5b9a769dc0117ea24"
+    }
+  ],
+  "behaviorChanges": [
+    "用户取消 Windows 专属验收",
+    "遵循禁用其他 agent，明确同会话两轴自审局限"
+  ],
+  "productChanged": false,
+  "skillDigestDrift": "Verified CRLF-to-LF only; updated unfinished bindings, historical done evidence preserved."
+}

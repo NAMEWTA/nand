@@ -30,7 +30,7 @@ status: "in_progress"
 | T-02 | <Path>{roots.state}/specdev/changes/2026-10-11-vault-data-unification/ticket/02-vault-storage.md</Path> | 统一路径、设备身份与内部状态 | T-01 | deep | high | yes | root | AC-002 | done |
 | T-03 | <Path>{roots.state}/specdev/changes/2026-10-11-vault-data-unification/ticket/03-hidden-content.md</Path> | 隐藏目录中的内容访问和迁移 | T-02 | deep | high | yes | root | AC-003 | done |
 | T-04 | <Path>{roots.state}/specdev/changes/2026-10-11-vault-data-unification/ticket/04-browser-sessions.md</Path> | 浏览器会话与产物进入 vault | T-02 | deep | high | yes | root | AC-004 | done |
-| T-05 | <Path>{roots.state}/specdev/changes/2026-10-11-vault-data-unification/ticket/05-agent-accounts.md</Path> | 账号身份、凭据与终端辅助程序 | T-02 | deep | high | yes | root | AC-005 | in_progress |
+| T-05 | <Path>{roots.state}/specdev/changes/2026-10-11-vault-data-unification/ticket/05-agent-accounts.md</Path> | 账号身份、凭据与终端辅助程序 | T-02 | deep | high | yes | root | AC-005 | done |
 | T-06 | <Path>{roots.state}/specdev/changes/2026-10-11-vault-data-unification/ticket/06-git-release-gates.md</Path> | Git 冲突判定与发布检查依赖 | — | deep | high | yes | root | AC-006 | ready |
 | T-07 | <Path>{roots.state}/specdev/changes/2026-10-11-vault-data-unification/ticket/07-current-docs.md</Path> | 当前规范中文化与旧文档清理 | T-01, T-02, T-03, T-04, T-05, T-06 | deep | high | yes | root | AC-007 | ready |
 | T-08 | <Path>{roots.state}/specdev/changes/2026-10-11-vault-data-unification/ticket/08-alpha2-delivery.md</Path> | Windows 验收、alpha.2 发布与归档 | T-01, T-02, T-03, T-04, T-05, T-06, T-07 | deep | high | yes | root | AC-008 | ready |
@@ -55,7 +55,7 @@ AC-008 → T-08：完整 CI、真实 Release 资产与 Windows Obsidian。
 
 ## 9. 总控与恢复
 
-状态来自票 frontmatter。生产写入串行；公共接口先稳定后迁移消费者，未完成票不得收缩兼容层。各票定向验证与双轴审查通过后记录 commit/Evidence；Windows 集成与完整 CI 为发布前总门。T-07 仅经 A 网关修改永久知识；已归档历史只读。同步数据不授权重放旧运行队列。失败保留基线、未闭合操作和恢复点。完成后按 T 远程入口验证 Release/issue，按 A 网关归档。
+状态来自票 frontmatter。生产写入串行；公共接口先稳定后迁移消费者，未完成票不得收缩兼容层。各票定向验证与双轴审查通过后记录 commit/Evidence；2026-10-12 用户取消 Windows 专属验收门，优先完成编码；完整 CI 和当前可用环境的适用集成检查仍为发布前门。T-07 仅经 A 网关修改永久知识；已归档历史只读。同步数据不授权重放旧运行队列。失败保留基线、未闭合操作和恢复点。完成后按 T 远程入口验证 Release/issue，按 A 网关归档。
 
 ## 3. 依赖 DAG
 
@@ -64,3 +64,5 @@ T-01 → T-02 → {T-03,T-04,T-05}；T-06 独立；T-01..T-06 → T-07 → T-08�
 ## 5. 并行与路径所有权
 
 不并行写入。全部共享项目路径显式绑定 root，状态及 E2E 也由 root 负责。
+
+恢复约束：单并发，不派发其他 agent。两轴分别顺序自审，明确无独立 reviewer 的局限；Windows 历史失败保留，不阻断用户已取消的专属门禁。

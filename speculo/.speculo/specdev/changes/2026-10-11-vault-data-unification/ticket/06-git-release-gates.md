@@ -2,7 +2,7 @@
 schema_version: 3
 plan_contract_version: 1
 skill_scan: "已扫描 .agents/skills：dev 适用全部实现，ui 适用内容/浏览器/账号界面及验收。"
-skill_bindings: [{"id":"dev","path":"<Path>.agents/skills/dev/SKILL.md</Path>","sha256":"c8fe48347cd03367c384ca52535cc1981de658721fa82093b34c271c25d295d6","phase":"implement","operation":"implement-and-verify","inputs":["本票合同、真实源码与定向差异"],"outputs":["实现、定向验证与 Evidence"],"required":true,"on_failure":"block-ticket"}]
+skill_bindings: [{"id":"dev","path":"<Path>.agents/skills/dev/SKILL.md</Path>","sha256":"13ff2185ff85752e85e4171d1cb4e5517f201c36bdaa35f4004dfe5248ffdf8a","phase":"implement","operation":"implement-and-verify","inputs":["本票合同、真实源码与定向差异"],"outputs":["实现、定向验证与 Evidence"],"required":true,"on_failure":"block-ticket"}]
 resource_claims: ["current-workspace:root"]
 artifact: "ticket"
 change: "2026-10-11-vault-data-unification"
@@ -34,7 +34,7 @@ shared_path_owners: ["<Path>src/modules/sync/**</Path> => root","<Path>test/sync
 
 ## 2. 决策状态
 
-已锁定：所有 NAND 管理数据以当前 vault/.nand 为根；设备专属文件仍在其中；浏览器跨设备允许重新登录；本轮 Windows 验收。未决问题：无。
+已锁定：所有 NAND 管理数据以当前 vault/.nand 为根；设备专属文件仍在其中；浏览器跨设备允许重新登录；Windows 专属验收由 2026-10-12 用户修订取消，优先编码和适用检查。未决问题：无。
 
 ## 3. 范围边界
 
@@ -67,12 +67,12 @@ IN：Git 冲突判定与发布检查依赖。REUSE：当前模块、工作台和
 | 错误和边界 | 在上述接缝注入对应读写/外部状态失败 | 无静默数据丢失或跨范围副作用 |
 | 集成 | 类型检查、build、lint；最终完整 CI | 同一提交可复现 |
 
-E2E disposition: required：Windows 隔离 Obsidian 中验证本票接缝与重启。
+E2E disposition: required：当前可用 Linux 隔离 Obsidian 中验证本票接缝与重启；Windows 专属要求由 2026-10-12 用户取消。
 E2E owner/environment: root / current-workspace。提交已获用户授权；implementation commit、direct-parent 的 result SHA 与 Evidence 由 root 记录。
 
 ## 9. 发布、迁移与恢复
 
-迁移为复制、校验、切换、验证后清理；失败保留来源和恢复副本。收缩仅在旧调用点为零且验证通过后进行。提交、push、发布与归档来自本轮已批准计划，Windows 实测完成前不关闭 issue。
+迁移为复制、校验、切换、验证后清理；失败保留来源和恢复副本。收缩仅在旧调用点为零且验证通过后进行。提交、push、发布与归档来自本轮已批准计划，满足当前有效合同与真实交付验证前不关闭 issue；Windows 专属要求由 2026-10-12 用户取消。
 
 ## 11. SKILL 调用计划
 

@@ -1,0 +1,25 @@
+2026-10-13 01:21:18 Loaded main app package /opt/Obsidian/resources/obsidian.asar
+
+DevTools listening on ws://127.0.0.1:9455/devtools/browser/8fb51b3e-557e-4cc5-a7a0-b7a6bf8c945a
+Ignored: Error: ENOENT: no such file or directory, open 'scripts/tmp/vault-unification-resume/accounts-linux-01/profile/abcdef1234567890.json'
+2026-10-13 01:21:19 Checking for update using Github
+2026-10-13 01:21:20 Success.
+2026-10-13 01:21:20 Latest version is 1.14.4
+2026-10-13 01:21:20 Downloading update from https://github.com/obsidianmd/obsidian-releases/releases/download/v1.14.4/obsidian-1.14.4.asar.gz
+2026-10-13 01:21:22 Verifying hash & signature. Size= 9200670
+2026-10-13 01:21:22 Saving file
+2026-10-13 01:21:25 Update complete.
+2026-10-13 01:21:27 Loaded updated app scripts/tmp/vault-unification-resume/accounts-linux-01/profile/obsidian-1.14.4.asar
+
+DevTools listening on ws://127.0.0.1:9455/devtools/browser/15d69a9b-7874-4c48-ad85-b21a54f6d5ca
+2026-10-13 01:21:27 Checking for update using Github
+2026-10-13 01:21:27 Success.
+2026-10-13 01:21:27 Latest version is 1.14.4
+2026-10-13 01:21:27 App is up to date.
+2026-10-13 01:21:45 Loaded updated app scripts/tmp/vault-unification-resume/accounts-linux-01/profile/obsidian-1.14.4.asar
+
+DevTools listening on ws://127.0.0.1:9455/devtools/browser/6c1d0034-7a65-410b-b2e5-ab9dbe48e109
+2026-10-13 01:21:46 Checking for update using Github
+2026-10-13 01:21:46 Success.
+2026-10-13 01:21:46 Latest version is 1.14.4
+2026-10-13 01:21:46 App is up to date.
