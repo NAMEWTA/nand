@@ -25,6 +25,7 @@ class WorkbenchShellSurface implements WorkbenchSurface {
 	private opened = false;
 	private pending: WorkbenchTarget = { feature: 'dashboard' };
 	private busy = false;
+	private availabilityPending = false;
 	private error?: string;
 	private unavailable?: { feature: WorkbenchFeature; message: string };
 	private savedPages: unknown;
@@ -127,6 +128,10 @@ class WorkbenchShellSurface implements WorkbenchSurface {
 			if (revision === this.revision) {
 				this.busy = false;
 				this.draw();
+				if (this.availabilityPending) {
+					this.availabilityPending = false;
+					void this.refreshAvailability().catch(this.host.report);
+				}
 				if (keyboard && !this.error) this.view.contentEl.win.requestAnimationFrame(() => {
 					if (this.opened && revision === this.revision) this.view.contentEl.querySelector<HTMLElement>('[data-workbench-focus="title"]')?.focus({ preventScroll: true });
 				});
@@ -138,6 +143,7 @@ class WorkbenchShellSurface implements WorkbenchSurface {
 		this.transition.invalidate();
 		this.revision++;
 		this.busy = false;
+		this.availabilityPending = false;
 		const closed = await this.pages?.refreshAvailability(disabled);
 		if (closed) this.unavailable = { feature: this.state.target.feature, message: t('workbench.disabled') };
 		this.draw();
@@ -147,7 +153,10 @@ class WorkbenchShellSurface implements WorkbenchSurface {
 		const changed = await this.pages?.refreshAvailability();
 		// Service notifications during page creation must not replace the requested route with the old unavailable page.
 		// Explicit module changes cancel navigation through prepareModuleChanges instead.
-		if (this.busy) return this.draw();
+		if (this.busy) {
+			this.availabilityPending = true;
+			return this.draw();
+		}
 		if (changed || this.unavailable) {
 			this.transition.invalidate();
 			await this.navigate(this.state.target);

@@ -15,6 +15,7 @@ import { GitRepo } from '../../src/modules/sync/core/repo';
 import { createGitRunner } from '../../src/modules/sync/platform/desktop/git-runner';
 import { desktopGitHost } from '../../src/modules/sync/platform/desktop/host';
 import { SyncService } from '../../src/modules/sync/services/sync-service';
+import { describeReport } from '../../src/modules/sync/services/report';
 import { syncSettings, type SyncSettings } from '../../src/modules/sync/settings';
 import type { SettingsHandle } from '../../src/shared/settings/store';
 
@@ -211,6 +212,33 @@ describe('commit and sync with real git', () => {
 });
 
 describe('conflicts and recovery', () => {
+	test.each([
+		['merge', false], ['merge', true], ['rebase', false], ['rebase', true],
+	] as const)('%s reports an autostash conflict after a successful integration (diverged=%s)', async (method, diverged) => {
+		const w = await published(), repo = repoAt(w.a);
+		write(w.b, 'note.md', 'remote edit\n');
+		await commitAndSync(repoAt(w.b), options());
+		if (diverged) {
+			write(w.a, 'local.md', 'local commit\n');
+			sh(w.a, 'add', 'local.md'); sh(w.a, 'commit', '-qm', 'local commit');
+		}
+		write(w.a, 'note.md', 'unstaged local edit\n');
+		const steps = await commitAndSync(repo, options({ mode: 'staged', method }));
+		assert.deepEqual(states(steps), ['skipped', 'conflict', 'skipped']);
+		assert.equal(steps[1]?.count, 1);
+		assert.equal(steps[2]?.reason, 'blocked');
+		assert.equal(succeeded(steps), false);
+		assert.equal((await repo.state()).operation, null, 'the integration completed; there is no operation to abort');
+		assert.deepEqual((await repo.status()).conflicted.map(row => row.path), ['note.md']);
+		assert.equal(sh(w.a, 'stash', 'show', '-p').includes('unstaged local edit'), true, 'the autostash keeps the local edits recoverable');
+		assert.match(read(w.a, 'note.md'), /<<<<<<<[\s\S]*remote edit[\s\S]*unstaged local edit[\s\S]*>>>>>>>/);
+		assert.equal(remoteCount(w.remote), 2, 'no local commit or merge was pushed');
+		write(w.a, 'note.md', 'resolved edit\n'); await repo.stage(['note.md']);
+		assert.equal(succeeded(await commitAndSync(repo, options({ method }))), true);
+		assert.equal(read(w.a, 'note.md'), 'resolved edit\n');
+		assert.equal(sh(w.a, 'stash', 'show', '-p').includes('unstaged local edit'), true);
+	});
+
 	async function conflicted(method: 'merge' | 'rebase') {
 		const w = await published();
 		write(w.a, 'note.md', 'line one from a\nline two\nline three\n');
@@ -551,6 +579,58 @@ function settingsOf(values: Partial<SyncSettings> = {}): SettingsHandle<SyncSett
 }
 
 describe('the sync service', () => {
+	test.each(['merge', 'rebase'] as const)('%s continuation reports a second conflict when the final autostash is restored', async syncMethod => {
+		const w = await published();
+		write(w.b, 'note.md', 'remote commit\n'); write(w.b, 'b.md', 'remote autostash conflict\n');
+		await commitAndSync(repoAt(w.b), options());
+		write(w.a, 'note.md', 'local commit\n'); sh(w.a, 'add', 'note.md'); sh(w.a, 'commit', '-qm', 'local commit');
+		write(w.a, 'b.md', 'unstaged local edit\n');
+		const service = new SyncService({ host: desktopGitHost(w.a, 'test-device'), settings: settingsOf({ syncMethod }), dialogs: { confirmUpstream: async () => true }, notify() {}, describe: describeReport });
+		try {
+			await service.connect(); assert.equal((await service.pull()).ok, false);
+			assert.equal(service.snapshot.operation, syncMethod);
+			write(w.a, 'note.md', 'resolved first conflict\n'); await service.markResolved(['note.md']);
+			const continued = await service.continueOperation();
+			assert.equal(continued.ok, false); assert.deepEqual(continued.steps, [{ step: 'pull', state: 'conflict', count: 1 }]);
+			assert.equal(service.snapshot.operation, null);
+			assert.deepEqual(service.snapshot.status?.conflicted.map(row => row.path), ['b.md']);
+			assert.equal(sh(w.a, 'stash', 'show', '-p').includes('unstaged local edit'), true);
+			assert.equal(remoteCount(w.remote), 2);
+		} finally { await service.dispose(); }
+	});
+
+	test.each(['merge', 'rebase'] as const)('%s autostash conflicts are reported, counted and preserved until resolved', async syncMethod => {
+		const w = await published(), notices: { text: string; error: boolean }[] = [];
+		write(w.b, 'note.md', 'remote edit\n'); await commitAndSync(repoAt(w.b), options());
+		write(w.a, 'note.md', 'unstaged local edit\n');
+		const service = new SyncService({
+			host: desktopGitHost(w.a, 'test-device'), settings: settingsOf({ syncMethod }),
+			dialogs: { confirmUpstream: async () => true }, describe: describeReport,
+			notify: (text, error) => notices.push({ text, error }),
+		});
+		try {
+			await service.connect();
+			const report = await service.pull({ auto: true });
+			assert.equal(report.ok, false); assert.equal(report.steps[0]?.state, 'conflict');
+			assert.equal(service.snapshot.device.failures, 1);
+			assert.deepEqual(service.snapshot.last, report);
+			assert.deepEqual(service.snapshot.status?.conflicted.map(row => row.path), ['note.md']);
+			assert.equal(service.snapshot.operation, null);
+			const notice = notices[notices.length - 1];
+			assert.equal(notice?.error, true); assert.match(notice!.text, /conflict|冲突/i);
+			const conflictedBytes = read(w.a, 'note.md'), stash = sh(w.a, 'stash', 'show', '-p');
+			assert.equal((await service.abortOperation()).ok, false);
+			assert.equal(read(w.a, 'note.md'), conflictedBytes); assert.equal(sh(w.a, 'stash', 'show', '-p'), stash);
+			assert.equal((await service.continueOperation()).ok, false);
+			for (let i = 0; i < 2; i++) await service.pull({ auto: true });
+			assert.equal(service.snapshot.device.failures, 3); assert.equal(service.snapshot.device.paused, 'failures');
+			write(w.a, 'note.md', 'resolved edit\n'); await service.markResolved(['note.md']);
+			assert.equal((await service.commitAndSync('all')).ok, true);
+			assert.equal(service.snapshot.device.failures, 0); assert.equal(service.snapshot.device.paused, '');
+			assert.equal(read(w.a, 'note.md'), 'resolved edit\n'); assert.equal(sh(w.a, 'stash', 'show', '-p'), stash);
+		} finally { await service.dispose(); }
+	});
+
 	test('automatic bookkeeping alone does not generate commits; it follows the next real edit and remains manually committable', async () => {
 		const w = await published(); let now = 100;
 		const service = new SyncService({ host: desktopGitHost(w.a, 'test-device'), settings: settingsOf({ pullBeforePush: false, disablePush: true }), dialogs: { confirmUpstream: async () => true }, notify() {}, describe: () => '', now: () => ++now });

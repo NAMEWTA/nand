@@ -1,4 +1,4 @@
-import { mkdtempSync, mkdirSync, rmSync, rmdirSync, symlinkSync } from 'node:fs';
+import { mkdtempSync, mkdirSync, rmSync, symlinkSync } from 'node:fs';
 import path from 'node:path';
 import { tmpdir } from 'node:os';
 import { EventEmitter } from 'node:events';
@@ -33,7 +33,7 @@ test('bundled main policy attaches explicit sessions, constrains downloads and g
 		item.emit('done', {}, 'interrupted'); expect(errors).toBe(1);
 		rmSync(downloads, { recursive: true }); symlinkSync(directory, downloads, 'junction');
 		session.emit('will-download', event, item, guest); expect(errors).toBe(2); expect(cancelled).toBe(true); expect(unrelatedErrors).toBe(0);
-		rmdirSync(downloads); mkdirSync(downloads); cancelled = false;
+		rmSync(downloads); mkdirSync(downloads); cancelled = false;
 		first.dispose(); expect(owner.listenerCount('will-attach-webview')).toBe(0); expect(session.listenerCount('will-download')).toBe(1);
 		second.dispose(); expect(session.listenerCount('will-download')).toBe(1);
 		session.emit('will-download', event, item); expect(cancelled).toBe(true);

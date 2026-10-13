@@ -10,8 +10,8 @@ const merge = (raw?: string) => JSON.stringify({ ...JSON.parse(raw ?? '{}'), hoo
 test('a recreated provider file wins publication and both versions survive the retry', async () => {
 	const root = await fs.mkdtemp(path.join(tmpdir(), 'nand-hook-publish-')), file = path.join(root, 'settings.json');
 	await fs.writeFile(file, '{"original":true}');
-	const wrapped = { ...fs, link: async (from: string, to: string) => {
-		if (from.endsWith(path.sep + 'next')) await fs.writeFile(to, '{"external":true}');
+	const wrapped: typeof fs = { ...fs, link: async (from, to) => {
+		if (typeof from === 'string' && from.endsWith(path.sep + 'next')) await fs.writeFile(to, '{"external":true}');
 		return fs.link(from, to);
 	} };
 	try {

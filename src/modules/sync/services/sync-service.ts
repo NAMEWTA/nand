@@ -289,12 +289,12 @@ export class SyncService {
 			if (action === 'pull') device.lastPull = report.at;
 			if (action === 'push') device.lastPush = report.at;
 		}
-		const failure = steps.find((step) => step.error)?.error;
+		const failure = steps.find((step) => step.error)?.error?.kind ?? (steps.some((step) => step.state === 'conflict') ? 'conflict' : undefined);
 		if (report.ok) {
 			device.failures = 0;
 			// A successful run means whatever stopped automatic sync was fixed.
 			if (!auto && device.paused === 'failures') device.paused = '';
-		} else if (auto && failure && needsAttention(failure.kind)) {
+		} else if (auto && failure && needsAttention(failure)) {
 			device.failures += 1;
 			if (device.failures >= FAILURE_LIMIT && !device.paused) device.paused = 'failures';
 		}
@@ -349,14 +349,14 @@ export class SyncService {
 		return this.run('continue', async (repo) => {
 			const { operation } = await repo.state();
 			const status = await repo.status();
-			if (!operation) return this.finish('continue', [{ step: 'pull', state: 'nothing' }], false, true);
 			if (status.conflicted.length) return this.finish('continue', [{ step: 'pull', state: 'conflict', count: status.conflicted.length }], false);
+			if (!operation) return this.finish('continue', [{ step: 'pull', state: 'nothing' }], false, true);
 			try {
 				await repo.continueOperation(operation);
 				// A rebase may stop again on the next commit.
 				const next = await repo.state();
 				const left = (await repo.status()).conflicted.length;
-				return this.finish('continue', [next.operation && left ? { step: 'pull', state: 'conflict', count: left } : { step: 'pull', state: 'done' }], false);
+				return this.finish('continue', [next.operation || left ? { step: 'pull', state: 'conflict', count: left } : { step: 'pull', state: 'done' }], false);
 			} catch (error) {
 				return this.finish('continue', [{ step: 'pull', state: 'failed', error: errorOf(error) }], false);
 			}
@@ -367,7 +367,10 @@ export class SyncService {
 	abortOperation(): Promise<RunReport> {
 		return this.run('abort', async (repo) => {
 			const { operation } = await repo.state();
-			if (!operation) return this.finish('abort', [{ step: 'pull', state: 'nothing' }], false, true);
+			if (!operation) {
+				const left = (await repo.status()).conflicted.length;
+				return this.finish('abort', [left ? { step: 'pull', state: 'conflict', count: left } : { step: 'pull', state: 'nothing' }], false, true);
+			}
 			try {
 				await repo.abortOperation(operation);
 				return this.finish('abort', [{ step: 'pull', state: 'done' }], false);

@@ -55,7 +55,15 @@ export async function checkOwnedDirectory(vault: string, relative: string): Prom
 		if (info.isSymbolicLink() || !info.isFile() && !info.isDirectory()) throw new Error('private-storage.symlink');
 		if (info.isDirectory()) for (const child of await readdir(file)) await visit(path.join(file, child));
 	};
-	await visit(root);
+	for (let attempt = 0; ; attempt++) {
+		try { await visit(root); return; }
+		catch (error) {
+			if ((error as NodeJS.ErrnoException).code !== 'ENOENT' || attempt === 2) throw error;
+			// Hook publication can rename a descendant after enumeration. Recheck the
+			// complete tree, including any newly arrived links, before allowing a launch.
+			await absoluteNandPath(vault, relative);
+		}
+	}
 }
 
 /** Repair a NAND-owned tree once per process/root identity; new files inherit its private ACL. */

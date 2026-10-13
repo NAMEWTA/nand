@@ -421,6 +421,7 @@ export function composeWorkbench(plugin: DashboardPlugin) {
 		status.refresh();
 		for (const listener of listeners) listener();
 	};
+	plugin.register(plugin.onModuleChanged(refresh));
 	plugin.register(() => { offAgent?.(); offAgentWatch(); status.dispose(); });
 	registerWorkbenchRibbon(plugin, (ownerWindow) => open(undefined, ownerWindow), report);
 	refresh();

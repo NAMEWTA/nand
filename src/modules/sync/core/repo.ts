@@ -236,9 +236,10 @@ export class GitRepo {
 		await this.assertIndexWithinScope();
 		const args = method === 'merge' ? ['merge', '--no-edit', '--no-stat', '--autostash', '@{u}'] : ['rebase', '--autostash', '@{u}'];
 		const result = await this.runner.run(args);
-		if (result.code === 0) return true;
+		// Git can exit zero after integration while restoring the autostash leaves an unmerged index.
 		const { operation } = await this.state();
 		if (operation || (await this.status()).conflicted.length) return false;
+		if (result.code === 0) return true;
 		throw new GitError(classifyGitOutput(`${result.stderr}\n${result.stdout}`), detailOf(result.stdout, result.stderr));
 	}
 

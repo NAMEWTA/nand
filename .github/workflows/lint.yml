@@ -1,6 +1,7 @@
 name: Node.js build
 
 on:
+    workflow_call:
     push:
         branches: ["**"]
     pull_request:
@@ -8,15 +9,24 @@ on:
 
 jobs:
     build:
-        runs-on: ubuntu-latest
+        runs-on: ${{ matrix.os }}
+        env:
+            GIT_CONFIG_COUNT: "1"
+            GIT_CONFIG_KEY_0: core.autocrlf
+            GIT_CONFIG_VALUE_0: ${{ matrix.os == 'windows-latest' && 'true' || 'false' }}
 
         strategy:
+            fail-fast: false
             matrix:
-                node-version: [22.x, 24.x]
-                # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
+                include:
+                    - { os: ubuntu-latest, node-version: 22.x }
+                    - { os: ubuntu-latest, node-version: 24.x }
+                    - { os: windows-latest, node-version: 24.x }
 
         steps:
             - uses: actions/checkout@v5
+              with:
+                  ref: ${{ github.sha }}
             - uses: pnpm/action-setup@v4
             - name: Use Node.js ${{ matrix.node-version }}
               uses: actions/setup-node@v5
@@ -26,30 +36,9 @@ jobs:
             - run: pnpm install --frozen-lockfile
             - run: pnpm run build
             - run: pnpm run check:bundle
-            - run: git diff --exit-code -- main.js
+            - run: git diff --exit-code -- main.js styles.css
             - run: pnpm run lint
             - run: pnpm run lint:css
             - run: pnpm run test:all
             - run: pnpm run check:notices
             - run: pnpm run check:native
-
-    windows-portability:
-        runs-on: windows-latest
-        env:
-            GIT_CONFIG_COUNT: "1"
-            GIT_CONFIG_KEY_0: core.autocrlf
-            GIT_CONFIG_VALUE_0: "true"
-        steps:
-            - uses: actions/checkout@v5
-            - uses: pnpm/action-setup@v4
-            - name: Use Node.js 24
-              uses: actions/setup-node@v5
-              with:
-                  node-version: 24.x
-                  cache: pnpm
-            - run: pnpm install --frozen-lockfile
-            - run: pnpm run build
-            - run: git diff --exit-code -- main.js
-            - run: pnpm run lint
-            - run: pnpm run lint:css
-            - run: pnpm run test:all

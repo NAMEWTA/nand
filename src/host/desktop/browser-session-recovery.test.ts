@@ -26,17 +26,25 @@ async function fixture(initialize = true) {
 	if (initialize) await expect(prepareSessionDirectory(options)).rejects.toThrow('browser_session_restart');
 	return { root, options };
 }
-test('every persistent mutation can fail before or after it without losing source data or replaying a completed copy', async () => {
-	const baseline = await fixture(); let steps = 0;
+
+type Fixture = Awaited<ReturnType<typeof fixture>>;
+async function faultCases(setup: () => Promise<Fixture>, action: (row: Fixture) => Promise<void>) {
+	const baseline = await setup();
 	try {
-		fault.enabled = true; fault.steps = 0;
-		await prepareSessionDirectory({ ...baseline.options, boot: 'two' });
-		await confirmSessionDirectory(baseline.options.vault, baseline.options.relative, 'two');
-		await prepareSessionDirectory({ ...baseline.options, boot: 'three' });
-		steps = fault.steps;
+		Object.assign(fault, { enabled: true, at: 0, steps: 0, after: false });
+		await action(baseline);
+		return [false, true].flatMap(after => Array.from({ length: fault.steps }, (_, index) => ({ after, at: index + 1 })));
 	} finally { fault.enabled = false; await rm(baseline.root, { recursive: true, force: true }); }
-	expect(steps).toBeGreaterThan(10);
-	for (const after of [false, true]) for (let at = 1; at <= steps; at++) {
+}
+// Each point has its own deadline and cleanup; a timed-out aggregate cannot keep mutating
+// the shared fault injector while the next test runs. Every discovered point is retained.
+const migrationCases = await faultCases(() => fixture(), async ({ options }) => {
+	await prepareSessionDirectory({ ...options, boot: 'two' });
+	await confirmSessionDirectory(options.vault, options.relative, 'two');
+	await prepareSessionDirectory({ ...options, boot: 'three' });
+});
+expect(migrationCases.length).toBeGreaterThan(20);
+test.each(migrationCases)('persistent mutation $at after=$after keeps source data and completed copies', async ({ after, at }) => {
 		const { root, options } = await fixture();
 		try {
 			Object.assign(fault, { enabled: true, at, after, steps: 0 });
@@ -55,18 +63,14 @@ test('every persistent mutation can fail before or after it without losing sourc
 			await prepareSessionDirectory({ ...options, boot: 'six' });
 			expect(await readFile(path.join(target, 'Cookies'), 'utf8')).toBe('new-credential');
 		} finally { fault.enabled = false; await rm(root, { recursive: true, force: true }); }
-	}
 }, 120000);
 
-test('interrupted account cleanup remains retryable without recreating the old credentials', async () => {
-	const setup = async () => {
-		const row = await fixture(); await prepareSessionDirectory({ ...row.options, boot: 'two' }); return row;
-	};
-	const baseline = await setup(); let steps = 0;
-	try { Object.assign(fault, { enabled: true, steps: 0, at: 0 }); await clearSessionRecovery(baseline.options); steps = fault.steps; }
-	finally { fault.enabled = false; await rm(baseline.root, { recursive: true, force: true }); }
-	for (const after of [false, true]) for (let at = 1; at <= steps; at++) {
-		const { root, options } = await setup();
+const cleanupSetup = async () => {
+	const row = await fixture(); await prepareSessionDirectory({ ...row.options, boot: 'two' }); return row;
+};
+const cleanupCases = await faultCases(cleanupSetup, ({ options }) => clearSessionRecovery(options));
+test.each(cleanupCases)('account cleanup mutation $at after=$after stays retryable without recreating credentials', async ({ after, at }) => {
+		const { root, options } = await cleanupSetup();
 		try {
 			Object.assign(fault, { enabled: true, at, after, steps: 0 });
 			try { await clearSessionRecovery(options); } catch (error) { expect(String(error)).toContain('fixture-io-fault'); }
@@ -77,19 +81,15 @@ test('interrupted account cleanup remains retryable without recreating the old c
 			await expect(readdir(path.join(options.vault, options.relative, 'legacy-original'))).rejects.toMatchObject({ code: 'ENOENT' });
 			expect(await readFile(path.join(root, 'host', 'unrelated'), 'utf8')).toBe('keep');
 		} finally { fault.enabled = false; await rm(root, { recursive: true, force: true }); }
-	}
 }, 120000);
 
-test('every first-receipt mutation recovers, including a valid null backup without a primary', async () => {
-	for (const legacy of [false, true]) {
+for (const legacy of [false, true]) {
 		const start = async (options: Awaited<ReturnType<typeof fixture>>['options']) => {
 			if (legacy) await retainLegacyDirectory(options.vault, '.nand/browser/device/legacy-runtime', options.source);
 			else try { await prepareSessionDirectory(options); } catch (error) { if (String(error).includes('browser_session_restart')) return; throw error; }
 		};
-		const baseline = await fixture(false); let steps = 0;
-		try { Object.assign(fault, { enabled: true, steps: 0, at: 0 }); await start(baseline.options); steps = fault.steps; }
-		finally { fault.enabled = false; await rm(baseline.root, { recursive: true, force: true }); }
-		for (const after of [false, true]) for (let at = 1; at <= steps; at++) {
+		const cases = await faultCases(() => fixture(false), ({ options }) => start(options));
+		test.each(cases)(`first receipt legacy=${legacy} mutation $at after=$after recovers valid null backups`, async ({ after, at }) => {
 			const { root, options } = await fixture(false);
 			try {
 				Object.assign(fault, { enabled: true, at, after, steps: 0 });
@@ -99,6 +99,5 @@ test('every first-receipt mutation recovers, including a valid null backup witho
 				const target = legacy ? await retainLegacyDirectory(options.vault, '.nand/browser/device/legacy-runtime', options.source) : await prepareSessionDirectory({ ...options, boot: 'two' });
 				expect(await readFile(path.join(target!, 'Cookies'), 'utf8'), `${legacy}:${after}:${at}`).toBe('credential');
 			} finally { fault.enabled = false; await rm(root, { recursive: true, force: true }); }
-		}
-	}
-}, 120000);
+		}, 120000);
+}
