@@ -1,0 +1,290 @@
+Already up to date
+Done in 471ms using pnpm v11.1.3
+$ node scripts/run-all-tests.mjs
+$ node scripts/verify-build-text.mjs
+Build text: LF/CRLF assets and license banners are equivalent
+$ esbuild scripts/verify-mobile-stability.ts --bundle --platform=node --format=cjs --outfile=node_modules/.tmp/verify-mobile-stability.cjs --log-level=warning && node node_modules/.tmp/verify-mobile-stability.cjs
+mobile interaction stability: 5/5 passed
+$ esbuild scripts/verify-weather-mapping.ts --bundle --platform=node --format=cjs --outfile=node_modules/.tmp/verify-weather-mapping.cjs --alias:obsidian=./scripts/obsidian-stub.ts --log-level=warning && node node_modules/.tmp/verify-weather-mapping.cjs
+verify-weather-mapping: 104 legend symbols + regression and fallback cases OK
+$ esbuild scripts/verify-folder-tag-search.ts --bundle --platform=node --format=cjs --outfile=node_modules/.tmp/verify-folder-tag-search.cjs --alias:obsidian=./scripts/obsidian-stub.ts --log-level=warning && node node_modules/.tmp/verify-folder-tag-search.cjs
+folder tag search: ALL PASS (7 checks)
+$ esbuild scripts/verify-visible-properties.ts --bundle --platform=node --format=cjs --outfile=node_modules/.tmp/verify-visible-properties.cjs --alias:obsidian=./scripts/obsidian-stub.ts --log-level=warning && node node_modules/.tmp/verify-visible-properties.cjs
+selectBadgeKeys semantics: PASS
+VisiblePropertiesEditor UI: PASS
+FolderConfigModal round-trip: PASS
+visible properties: ALL PASS
+$ esbuild scripts/verify-calendar-task-insert.ts --bundle --platform=node --format=cjs --outfile=node_modules/.tmp/verify-calendar-task-insert.cjs --alias:obsidian=./scripts/obsidian-stub.ts --log-level=warning && node node_modules/.tmp/verify-calendar-task-insert.cjs
+verify-calendar-task-insert: 10 scenarios + sanity OK
+$ esbuild scripts/verify-calendar-daynum.ts --bundle --platform=node --format=cjs --outfile=node_modules/.tmp/verify-calendar-daynum.cjs --alias:obsidian=./scripts/obsidian-stub.ts --log-level=warning && node node_modules/.tmp/verify-calendar-daynum.cjs
+verify-calendar-daynum: 6 scenarios OK
+$ esbuild scripts/verify-calendar-section.ts --bundle --platform=node --format=cjs --outfile=node_modules/.tmp/verify-calendar-section.cjs --alias:obsidian=./scripts/obsidian-stub.ts --log-level=warning && node node_modules/.tmp/verify-calendar-section.cjs
+verify-calendar-section: 6 scenarios OK
+$ esbuild scripts/verify-confirm-dialog.ts --bundle --platform=node --format=cjs --outfile=node_modules/.tmp/verify-confirm-dialog.cjs --alias:obsidian=./scripts/obsidian-stub.ts --log-level=warning && node node_modules/.tmp/verify-confirm-dialog.cjs
+verify-confirm-dialog: 7 scenarios OK
+$ esbuild scripts/verify-path-picker.ts --bundle --platform=node --format=cjs --outfile=node_modules/.tmp/verify-path-picker.cjs --alias:obsidian=./scripts/obsidian-stub.ts --log-level=warning && node node_modules/.tmp/verify-path-picker.cjs
+verify-path-picker: 6 scenarios OK
+$ esbuild scripts/verify-library-cover.ts --bundle --platform=node --format=cjs --outfile=node_modules/.tmp/verify-library-cover.cjs --alias:obsidian=./scripts/obsidian-stub.ts --log-level=warning && node node_modules/.tmp/verify-library-cover.cjs
+extractCoverValue semantics: PASS
+viewMode round-trip: PASS
+library cover: ALL PASS
+$ esbuild scripts/verify-kanban-upgrade.ts --bundle --platform=node --format=cjs --outfile=node_modules/.tmp/verify-kanban-upgrade.cjs --alias:obsidian=./scripts/obsidian-stub.ts --log-level=warning && node node_modules/.tmp/verify-kanban-upgrade.cjs
+kanbanShowCovers round-trip: PASS
+kanban property badges: PASS
+verify-kanban-upgrade: all assertions passed
+$ esbuild scripts/verify-pair-width.ts --bundle --platform=node --format=cjs --outfile=node_modules/.tmp/verify-pair-width.cjs --alias:obsidian=./scripts/obsidian-stub.ts --log-level=warning && node node_modules/.tmp/verify-pair-width.cjs
+column-pairs width clearing: PASS
+parser width round-trip: PASS
+applyPairWidth rendering: PASS
+verify-pair-width: all assertions passed
+$ esbuild scripts/verify-layout-stacked.ts --bundle --platform=node --format=cjs --outfile=node_modules/.tmp/verify-layout-stacked.cjs --alias:obsidian=./scripts/obsidian-stub.ts --log-level=warning && node node_modules/.tmp/verify-layout-stacked.cjs
+layout stacked: ALL PASS
+$ esbuild scripts/verify-widget-span.ts --bundle --platform=node --format=cjs --outfile=node_modules/.tmp/verify-widget-span.cjs --alias:obsidian=./scripts/obsidian-stub.ts --log-level=warning && node node_modules/.tmp/verify-widget-span.cjs
+widget span: ALL PASS
+$ esbuild scripts/verify-library-card-size.ts --bundle --platform=node --format=cjs --outfile=node_modules/.tmp/verify-library-card-size.cjs --alias:obsidian=./scripts/obsidian-stub.ts --log-level=warning && node node_modules/.tmp/verify-library-card-size.cjs
+cardSize parser round-trip: PASS
+card size toolbar + rendering: PASS
+library card size: ALL PASS
+$ esbuild scripts/verify-media-thumb-size.ts --bundle --platform=node --format=cjs --outfile=node_modules/.tmp/verify-media-thumb-size.cjs --alias:obsidian=./scripts/obsidian-stub.ts --log-level=warning && node node_modules/.tmp/verify-media-thumb-size.cjs
+media thumb size persistence: ALL PASS
+$ esbuild scripts/verify-library-group.ts --bundle --platform=node --format=cjs --outfile=node_modules/.tmp/verify-library-group.cjs --alias:obsidian=./scripts/obsidian-stub.ts --log-level=warning && node node_modules/.tmp/verify-library-group.cjs
+viewGroup parser round-trip: PASS
+groupLibraryResults: PASS
+group toolbar + rendering: PASS
+library view grouping: ALL PASS
+$ esbuild scripts/verify-countdown-picker.ts --bundle --platform=node --format=cjs --outfile=node_modules/.tmp/verify-countdown-picker.cjs --alias:obsidian=./scripts/obsidian-stub.ts --log-level=warning && node node_modules/.tmp/verify-countdown-picker.cjs
+countdown picker: ALL PASS
+$ esbuild scripts/verify-gallery-placeholder.ts --bundle --platform=node --format=cjs --outfile=node_modules/.tmp/verify-gallery-placeholder.cjs --alias:obsidian=./scripts/obsidian-stub.ts --log-level=warning && node node_modules/.tmp/verify-gallery-placeholder.cjs
+gallery placeholder cover: ALL PASS
+$ esbuild scripts/verify-album-widget.ts --bundle --platform=node --format=cjs --outfile=node_modules/.tmp/verify-album-widget.cjs --alias:obsidian=./scripts/obsidian-stub.ts --log-level=warning && node node_modules/.tmp/verify-album-widget.cjs
+album widget: ALL PASS
+$ esbuild scripts/verify-doc-bracket-paths.ts --bundle --platform=node --format=cjs --outfile=node_modules/.tmp/verify-doc-bracket-paths.cjs --alias:obsidian=./scripts/obsidian-stub.ts --log-level=warning && node node_modules/.tmp/verify-doc-bracket-paths.cjs
+doc bracket paths: ALL PASS
+$ esbuild scripts/verify-property-operator.ts --bundle --platform=node --format=cjs --outfile=node_modules/.tmp/verify-property-operator.cjs --alias:obsidian=./scripts/obsidian-stub.ts --log-level=warning && node node_modules/.tmp/verify-property-operator.cjs
+verify-property-operator: all assertions passed
+$ esbuild scripts/verify-library-new-note.ts --bundle --platform=node --format=cjs --outfile=node_modules/.tmp/verify-library-new-note.cjs --alias:obsidian=./scripts/obsidian-stub.ts --log-level=warning && node node_modules/.tmp/verify-library-new-note.cjs
+buildNewNoteProps mapping: PASS
+yamlFrontmatter escaping: PASS
+createNoteWithProps + pickFolderFromMenu: PASS
+toolbar button integration: PASS
+template pipeline + folder-config regression: PASS
+library new note: ALL PASS
+$ esbuild scripts/verify-weread-progress.ts --bundle --platform=node --format=cjs --outfile=node_modules/.tmp/verify-weread-progress.cjs --alias:obsidian=./scripts/obsidian-stub.ts --log-level=warning && node node_modules/.tmp/verify-weread-progress.cjs
+progressFromGetProgress: PASS
+parseShelf finishReading: PASS
+weread shelf facets: PASS
+needsProgressFetch: PASS
+progress store: PASS
+weread config round-trip: PASS
+weread progress: ALL PASS
+$ esbuild scripts/verify-weread-stats.ts --bundle --platform=node --format=cjs --outfile=node_modules/.tmp/verify-weread-stats.cjs --alias:obsidian=./scripts/obsidian-stub.ts --log-level=warning && node node_modules/.tmp/verify-weread-stats.cjs
+parseReadStats: PASS
+computeReadStreaks: PASS
+bucketLabel: PASS
+heatmap cells + shelf overlay: PASS
+default stats blocks: PASS
+weread stats: ALL PASS
+$ esbuild scripts/verify-web-section.ts --bundle --platform=node --format=cjs --outfile=node_modules/.tmp/verify-web-section.cjs --alias:obsidian=./scripts/obsidian-stub.ts --log-level=warning && node node_modules/.tmp/verify-web-section.cjs
+[Dashboard] web precheck failed: https://flaky.com Error: offline
+    at main (<repository>/node_modules/.tmp/verify-web-section.cjs:22555:33)
+[Dashboard] web precheck failed: https://hang.com Error: precheck timeout
+    at Timeout.<anonymous> (<repository>/node_modules/.tmp/verify-web-section.cjs:21769:48)
+    at listOnTimeout (node:internal/timers:685:17)
+    at process.processTimers (node:internal/timers:618:7)
+verify-web-section: parser, URL policy, vault-session admission and mobile fallback OK
+$ esbuild scripts/verify-card-move.ts --bundle --platform=node --format=cjs --outfile=node_modules/.tmp/verify-card-move.cjs --alias:obsidian=./scripts/obsidian-stub.ts --log-level=warning && node node_modules/.tmp/verify-card-move.cjs
+verify-card-move: note appearance and linked documents OK
+verify-card-move: move, conversion, content retention and persistence OK
+verify-card-move: sync write, edit and reload integration OK
+$ esbuild scripts/verify-music-account.ts --bundle --platform=node --format=cjs --outfile=node_modules/.tmp/verify-music-account.cjs --alias:obsidian=./scripts/music-network-stub.ts --alias:electron=./scripts/music-electron-stub.ts --alias:@electron/remote=./scripts/music-electron-stub.ts --log-level=warning && node node_modules/.tmp/verify-music-account.cjs
+verify-music-account: login, cancellation, cleanup, account-isolated playback and -110 retry/skip notices OK
+$ esbuild scripts/verify-music-client.ts --bundle --platform=node --format=cjs --outfile=node_modules/.tmp/verify-music-client.cjs --alias:obsidian=./scripts/obsidian-stub.ts --log-level=warning && node node_modules/.tmp/verify-music-client.cjs
+verify-music-client: 54 assertions OK
+$ esbuild scripts/verify-banner-quote-font.ts --bundle --platform=node --format=cjs --outfile=node_modules/.tmp/verify-banner-quote-font.cjs --alias:obsidian=./scripts/obsidian-stub.ts --log-level=warning && node node_modules/.tmp/verify-banner-quote-font.cjs
+verify-banner-quote-font: all 7 checks passed
+$ esbuild scripts/verify-card-new-note.ts --bundle --platform=node --format=cjs --outfile=node_modules/.tmp/verify-card-new-note.cjs --alias:obsidian=./scripts/obsidian-stub.ts --log-level=warning && node node_modules/.tmp/verify-card-new-note.cjs
+verify-card-new-note: all 7 checks passed
+$ esbuild scripts/verify-memo-markdown.ts --bundle --platform=node --format=cjs --outfile=node_modules/.tmp/verify-memo-markdown.cjs --alias:obsidian=./scripts/obsidian-stub.ts --log-level=warning && node node_modules/.tmp/verify-memo-markdown.cjs
+verify-memo-markdown: all 5 checks passed
+$ esbuild scripts/verify-memo-note-template.ts --bundle --platform=node --format=cjs --outfile=node_modules/.tmp/verify-memo-note-template.cjs --alias:obsidian=./scripts/obsidian-stub.ts --log-level=warning && node node_modules/.tmp/verify-memo-note-template.cjs
+memo note template: ALL PASS
+$ esbuild scripts/verify-expense.ts --bundle --platform=node --format=cjs --outfile=node_modules/.tmp/verify-expense.cjs --alias:obsidian=./scripts/obsidian-stub.ts --log-level=warning && node node_modules/.tmp/verify-expense.cjs
+verify-expense: all assertions passed
+$ esbuild scripts/verify-refresh-scope.ts --bundle --platform=node --format=cjs --outfile=node_modules/.tmp/verify-refresh-scope.cjs --alias:obsidian=./scripts/obsidian-stub.ts --log-level=warning && node node_modules/.tmp/verify-refresh-scope.cjs
+scope predicate filter: PASS
+signature skip: PASS
+mtime in-place refresh: PASS
+excluded-folder skip: PASS
+signature invalidation: PASS
+scope isolation: PASS
+verify-refresh-scope: ALL PASS
+$ esbuild scripts/verify-scroll-root.ts --bundle --platform=node --format=cjs --outfile=node_modules/.tmp/verify-scroll-root.cjs --alias:obsidian=./scripts/obsidian-stub.ts --log-level=warning && node node_modules/.tmp/verify-scroll-root.cjs
+full-tree capture/replay: PASS
+anchor stability under reorder: PASS
+graceful degradation: PASS
+verify-scroll-root: ALL PASS
+$ esbuild scripts/verify-issue-regressions.ts --bundle --platform=node --format=cjs --outfile=node_modules/.tmp/verify-issue-regressions.cjs --alias:obsidian=./scripts/obsidian-stub.ts --log-level=warning && node node_modules/.tmp/verify-issue-regressions.cjs
+verify-issue-regressions: default-name localization, edit intent, composer, language lifecycle and settings persistence passed
+$ node scripts/verify-promise-callbacks.mjs
+Promise callback guard passed against real Obsidian control types
+$ node scripts/verify-architecture.mjs
+Architecture: 1024 modules; no zone, host-package, desktop-only, barrel or cycle violations.
+$ esbuild scripts/verify-dashboard-isolation.ts --bundle --platform=node --format=cjs --outfile=node_modules/.tmp/verify-dashboard-isolation.cjs --alias:obsidian=./scripts/obsidian-stub.ts --log-level=warning && node node_modules/.tmp/verify-dashboard-isolation.cjs
+dashboard isolation: resources, panels, clocks, services, Dataview actions and vault caches passed
+$ esbuild scripts/verify-card-panels.ts --bundle --platform=node --format=cjs --outfile=node_modules/.tmp/verify-card-panels.cjs --alias:obsidian=./scripts/obsidian-stub.ts --log-level=warning && node node_modules/.tmp/verify-card-panels.cjs
+[Dashboard] library kanban move failed: Error: expected test failure
+    at Object.process (<repository>/node_modules/.tmp/verify-card-panels.cjs:74170:32)
+    at <repository>/node_modules/.tmp/verify-card-panels.cjs:27192:54
+Issue panels: saved/saving/failure/conflict/retry and initial-loading guards passed
+Dashboard panels: editing, drag rollback, async Markdown, subscriptions, video cleanup, ledger/query state and native modal teardown passed
+$ node scripts/run-safety-regressions.mjs
+(node:343197) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+Automation target: empty selection rejected, re-selection saved
+Automation DST: both repeated hours execute once; next/latest remain monotonic
+Automation DST: Lord Howe half-hour transitions remain monotonic
+(node:343220) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+(node:343243) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+Automation session: concurrent duplicate rejected busy; one terminal launched
+(node:343268) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+Dashboard conflict: external file and local recovery preserved; reload resumes safe writes
+(node:343292) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+✔ task eligibility todo/task (1.555438ms)
+✔ task eligibility sticky/task (0.15504ms)
+✔ task eligibility sticky/note (0.111435ms)
+✔ task eligibility memo/task (0.062968ms)
+✔ task eligibility projects/project (0.068169ms)
+✔ task eligibility projects/task (0.13964ms)
+✔ task eligibility todo/web (0.066525ms)
+✔ task eligibility todo/weather (0.056646ms)
+✔ task eligibility todo/tracker (0.557767ms)
+✔ task eligibility library/task (0.2982ms)
+✔ rendering semantics preserve memo precedence (0.321231ms)
+✔ exclude exact managed scope NAND/习惯/a/习惯.md (0.37648ms)
+✔ exclude exact managed scope NAND/番茄钟/活动.md (0.091109ms)
+✔ exclude exact managed scope NAND/记账/records.md (0.358857ms)
+✔ exclude exact managed scope NAND/阅读/a.md (0.100242ms)
+✔ exclude exact managed scope NAND/自动化/a/操作.md (0.207047ms)
+✔ exclude exact managed scope Boards/Current.md (0.255791ms)
+✔ exclude exact managed scope Boards/Other.md (0.101612ms)
+✔ exclude exact managed scope People/档案格式说明.md (0.074661ms)
+✔ exclude exact managed scope People/个人档案/A/基本信息.md (0.05547ms)
+✔ exclude exact managed scope People/企业档案/B/基本信息.md (0.040615ms)
+✔ exclude exact managed scope .nand/test.md (0.058489ms)
+✔ exclude exact managed scope Notes/.hidden/note.md (0.042452ms)
+✔ keep user material NAND/技术笔记/note.md (0.095887ms)
+✔ keep user material NAND-笔记/习惯.md (0.097052ms)
+✔ keep user material Notes/活动.md (0.074558ms)
+✔ keep user material Notes/dashboard.md (0.046876ms)
+✔ keep user material Notes/2026-10-04.md (0.04162ms)
+✔ keep user material People/个人档案/A/资料.md (0.046752ms)
+✔ keep user material People/个人档案/A/sub/基本信息.md (0.047434ms)
+✔ custom roots and workspace preferences are evaluated, not cached globally (0.157372ms)
+✔ new defaults are language neutral and three recent-document call sites pass their host scope (0.380421ms)
+✔ default document uses creation-time language zh (16.489753ms)
+✔ default document uses creation-time language en (3.85759ms)
+✔ default document uses creation-time language zh (4.123176ms)
+✔ only two default targets and direct delivery cannot write a memo (6.237754ms)
+✔ legal delivery is idempotent; a target changing type fails without writes (17.437957ms)
+✔ duplicate IDs are neither candidates nor writable and disabled modules expose no targets (7.529516ms)
+ℹ tests 38
+ℹ suites 0
+ℹ pass 38
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 72.497789
+(node:343317) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+✔ queued A/B/C revisions after a first conflict retain C and external bytes (52.051806ms)
+✔ an older recovery completion cannot mark a newer edit saved (18.357553ms)
+✔ recovery failure remains explicit; retry persists the latest snapshot (21.538071ms)
+✔ normal close drains a quiet change into recovery and separate boards never share copies (14.780303ms)
+✔ reload refuses to discard a newer revision admitted during recovery IO (10.526085ms)
+✔ observed UI promises still reject to awaiting callers but ignored events do not leak (4.50112ms)
+✔ both languages show actual recovery path and no obsolete directory (8.292361ms)
+ℹ tests 7
+ℹ suites 0
+ℹ pass 7
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 140.510953
+$ esbuild scripts/verify-reliability.ts --bundle --platform=node --format=cjs --outfile=scripts/tmp/verify-reliability.cjs --alias:obsidian=./scripts/obsidian-stub.ts --log-level=warning && node --test scripts/tmp/verify-reliability.cjs
+✔ replacement JSON store drains pending writes (2.230239ms)
+✔ unreadable and corrupt data remain untouched; failed writes report unsaved and can retry (5.203871ms)
+✔ concurrent additions do not resurrect deleted habits or check-ins (2.303288ms)
+✔ dashboard preserves unknown YAML, comments, free prose and unchanged cards (17.855026ms)
+✔ closing cancels uncooperative and queued browser operations immediately (0.641766ms)
+✔ managed tables and sections preserve author prose, reject malformed markers and merge independent edits (3.453741ms)
+✔ Markdown collection survives restart, external edits and deletes without reading installation JSON (11.647348ms)
+✔ open editor contents block disk writes and preserve the pending draft (2.15364ms)
+✔ all seven action descriptors round-trip as Markdown; manual-only actions reject scheduling (23.402451ms)
+✔ explicit New York timezone skips spring gap and resolves both repeated hours independent of host TZ (13.068524ms)
+✔ 10,000 ledger records update one daily document without rereading the full collection (1100.409916ms)
+ℹ {"records":10000,"documents":101,"initialMs":1057,"updateMs":35,"reads":2,"writes":1}
+✔ habit cold startup rescans when layout settles and file events refresh without reopening a view (15.191011ms)
+✔ refresh queued during a write preserves edits made before that write completes (0.90518ms)
+ℹ tests 13
+ℹ suites 0
+ℹ pass 13
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1303.903004
+$ node scripts/verify-i18n.mjs
+I18N: 25 dictionaries, 3873 keys, matching placeholders and literal references.
+$ node scripts/verify-docs.mjs
+Documentation: 653 Markdown files (skill=15, agent-handbook=1, root-entry=4, license=1, user-doc=20, test-fixture=20, speculo-tooling=288, specdev=37, specdev-change=264, source-template=3), 1792 local links, 407 external links (fetch not requested).
+$ esbuild scripts/verify-workbench-lifecycle.ts --bundle --platform=node --format=cjs --outfile=scripts/tmp/verify-workbench-lifecycle.cjs --log-level=warning && node --test scripts/tmp/verify-workbench-lifecycle.cjs
+✔ repeated resources share a presentation and visibility owns both content and object navigation (8.570827ms)
+✔ cancelling a new async page removes it immediately and late completion is cleaned exactly once (6.490425ms)
+✔ A to B to A while B mounts cannot resurrect B or create another A (1.645331ms)
+✔ module disable during create prevents late onOpen, and dispose remains idempotent (1.089627ms)
+✔ mount rejection releases component ownership and allows a clean retry (1.379523ms)
+✔ a missing target on an existing editor preserves its presentation and draft (1.284952ms)
+✔ hidden browser guests are not silently evicted by a visibility-only cache rule (1.721623ms)
+✔ lightweight notification projections release on hide without stopping other pages (1.373675ms)
+✔ restoration never coerces an unknown feature into a phantom dashboard page (0.638137ms)
+✔ closing the active tab shows its neighbour; closing another page returns to the most recent one (1.018205ms)
+ℹ tests 10
+ℹ suites 0
+ℹ pass 10
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 109.749476
+$ node --test scripts/verify-workbench-entry.mjs
+✔ one ribbon registration owner opens the workbench (18.052221ms)
+✔ the shell UI only consumes contracts, the design system and shared code (0.749776ms)
+✔ only the workbench and the comments panel are registered views (17.374528ms)
+ℹ tests 3
+ℹ suites 0
+ℹ pass 3
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 116.806868
+$ node scripts/build-styles.mjs --check
+styles.css matches 111 ordered author sources (757462 bytes)
+$ vitest run
+
+ RUN  v5.0.3 <repository>
+
+Automatic merge went well; stopped before committing as requested
+
+ Test Files  215 passed | 1 skipped (216)
+      Tests  1826 passed | 1 skipped (1827)
+   Start at  04:26:52
+   Duration  310.62s (tests 88%, transform 7%, import 3%, setup 2%)
+
+{"total":50,"passed":50,"failed":[]}

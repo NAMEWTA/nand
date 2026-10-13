@@ -9,15 +9,16 @@
       "candidate": "speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/evidence/knowledge-candidates/adr/0001-module-contract.md.txt",
       "sourceSha256": "64ec8af9f455db54a314605afcc7faba80697bf714e935bd54ceb196990972c2",
       "canonicalBeforeSha256": "089a560be5d2211bc1e5824c6b3cb4d29241bef4767e4865066ca17563e931f6",
-      "candidateSha256": "eefb16ce9b19ebfabfa0cc2fd90637acd144ca55ed6857b734493468961091c9",
+      "candidateSha256": "b2fa36cfcdf5214872580e6b9d48f7a66165dc061e072db3f1261d369dc1a8a4",
       "beforeCharacters": 5736,
-      "afterCharacters": 1902,
+      "afterCharacters": 1922,
       "status": "candidate-not-promoted",
       "owner": "A",
       "sources": [
         "2026-10-11-vault-data-unification/ADR.md",
         "T-01..T-06 immutable implementation/Evidence",
-        "99af3ef5c45da68539ec00f39f24b9685d3fc995"
+        "99af3ef5c45da68539ec00f39f24b9685d3fc995",
+        "T-08 source 9c0bd5c0c926e8d75b50e6587db37cc03240db71; release 38370493282 success, fresh13/13, upgrade15/15"
       ]
     },
     {
@@ -26,15 +27,16 @@
       "candidate": "speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/evidence/knowledge-candidates/adr/0002-lazy-loading-and-budgets.md.txt",
       "sourceSha256": "aa6b877808ba1ad210aafe928281913624d117e7c1cad7619036900bca1e2881",
       "canonicalBeforeSha256": "bf37b607771536bcea17ca20b9620de7c9761415748e598079e2b55066f54956",
-      "candidateSha256": "a8743c53b4a6b4e6f19bae581260a83dab250ad1fbc6c44887c41d37ac150cd9",
+      "candidateSha256": "315df6110c07aa926ca803b720ff0b80359d4a382bb18f617cb4187fe4b2f4f3",
       "beforeCharacters": 4680,
-      "afterCharacters": 1507,
+      "afterCharacters": 1527,
       "status": "candidate-not-promoted",
       "owner": "A",
       "sources": [
         "2026-10-11-vault-data-unification/ADR.md",
         "T-01..T-06 immutable implementation/Evidence",
-        "99af3ef5c45da68539ec00f39f24b9685d3fc995"
+        "99af3ef5c45da68539ec00f39f24b9685d3fc995",
+        "T-08 source 9c0bd5c0c926e8d75b50e6587db37cc03240db71; release 38370493282 success, fresh13/13, upgrade15/15"
       ]
     },
     {
@@ -43,15 +45,16 @@
       "candidate": "speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/evidence/knowledge-candidates/adr/0003-namespaced-settings-store.md.txt",
       "sourceSha256": "33c3c8af78fbc7ce841ae13d2fd6bb9dadd0fa930d520496bc698222edf5b554",
       "canonicalBeforeSha256": "26242ef6ae435d8c25e7565e060b3d2984fd0ad2d73bda4a6e691f812bb5325d",
-      "candidateSha256": "402c674d2f6ccd0e120ec430b589f5bc94b1e4b9ad36c1a877225680f9cc17eb",
+      "candidateSha256": "419c10d025f5497fedae9fcc828f2572ffd70171dc7718b99eb74949f67122bb",
       "beforeCharacters": 4559,
-      "afterCharacters": 1565,
+      "afterCharacters": 1585,
       "status": "candidate-not-promoted",
       "owner": "A",
       "sources": [
         "2026-10-11-vault-data-unification/ADR.md",
         "T-01..T-06 immutable implementation/Evidence",
-        "99af3ef5c45da68539ec00f39f24b9685d3fc995"
+        "99af3ef5c45da68539ec00f39f24b9685d3fc995",
+        "T-08 source 9c0bd5c0c926e8d75b50e6587db37cc03240db71; release 38370493282 success, fresh13/13, upgrade15/15"
       ]
     },
     {
@@ -60,15 +63,16 @@
       "candidate": "speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/evidence/knowledge-candidates/adr/0004-data-placement.md.txt",
       "sourceSha256": "ebf84d32b6cae1b10a5feef4fbbe7f3b118e610eec91326355c75e51ce0a8490",
       "canonicalBeforeSha256": "38f1ba23dacb44c5dce3da1ca37ed88ef7125dd1a3bc0ec1e84a1b81f9bdec47",
-      "candidateSha256": "b599ff88eb2081944f492c8da1564053b0dc3f34a59eafa39e59af8cf7abb040",
+      "candidateSha256": "2df70a1030fa177be2e71094ec45e377af057255e3ce60d2fb7a74f8701c1f87",
       "beforeCharacters": 6434,
-      "afterCharacters": 2247,
+      "afterCharacters": 2267,
       "status": "candidate-not-promoted",
       "owner": "A",
       "sources": [
         "2026-10-11-vault-data-unification/ADR.md",
         "T-01..T-06 immutable implementation/Evidence",
-        "99af3ef5c45da68539ec00f39f24b9685d3fc995"
+        "99af3ef5c45da68539ec00f39f24b9685d3fc995",
+        "T-08 source 9c0bd5c0c926e8d75b50e6587db37cc03240db71; release 38370493282 success, fresh13/13, upgrade15/15"
       ]
     },
     {
@@ -77,15 +81,16 @@
       "candidate": "speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/evidence/knowledge-candidates/adr/0005-three-column-workbench.md.txt",
       "sourceSha256": "57aeabfcd76a72a821e5cd810ff40b72c3ba83159148687549e40028a02f9b6b",
       "canonicalBeforeSha256": "73e7c702b17600cdb0796f2c3bb53b1a5bfbf8a61f7d130c8def8be83b556b9c",
-      "candidateSha256": "14c4b115fdfb042eee967f59fcbf2b46bba5f1ae99c607182b0782caef34216a",
+      "candidateSha256": "49704f6c9b2a084273014a0ac7772b20ec2355df399e029b495545b898db0fd8",
       "beforeCharacters": 5610,
-      "afterCharacters": 1760,
+      "afterCharacters": 1780,
       "status": "candidate-not-promoted",
       "owner": "A",
       "sources": [
         "2026-10-11-vault-data-unification/ADR.md",
         "T-01..T-06 immutable implementation/Evidence",
-        "99af3ef5c45da68539ec00f39f24b9685d3fc995"
+        "99af3ef5c45da68539ec00f39f24b9685d3fc995",
+        "T-08 source 9c0bd5c0c926e8d75b50e6587db37cc03240db71; release 38370493282 success, fresh13/13, upgrade15/15"
       ]
     },
     {
@@ -94,15 +99,16 @@
       "candidate": "speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/evidence/knowledge-candidates/adr/0006-global-theme.md.txt",
       "sourceSha256": "2c4f8100ca912fa755efb3db4b088a8a0816cce78d4d5b7b96e86b8db9e152a7",
       "canonicalBeforeSha256": "d66390ee6a533aafb00e2cd4c2625e3234c05e72e9160cdadea9552e923279a1",
-      "candidateSha256": "59a3e8da55b86946da3b02948dc5f56ae8b7e5c4c6e50e87482b74d334ee9c5e",
+      "candidateSha256": "7663f1842052e0e5a606febe6431f940567abf3677a408bb92826937cc080ad4",
       "beforeCharacters": 3664,
-      "afterCharacters": 1306,
+      "afterCharacters": 1326,
       "status": "candidate-not-promoted",
       "owner": "A",
       "sources": [
         "2026-10-11-vault-data-unification/ADR.md",
         "T-01..T-06 immutable implementation/Evidence",
-        "99af3ef5c45da68539ec00f39f24b9685d3fc995"
+        "99af3ef5c45da68539ec00f39f24b9685d3fc995",
+        "T-08 source 9c0bd5c0c926e8d75b50e6587db37cc03240db71; release 38370493282 success, fresh13/13, upgrade15/15"
       ]
     },
     {
@@ -111,15 +117,16 @@
       "candidate": "speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/evidence/knowledge-candidates/adr/0007-interface-language.md.txt",
       "sourceSha256": "b19cb76f4d07b6fbc256efa56fdefbfedfde6f2d5a03ab04d60c87530a76685e",
       "canonicalBeforeSha256": "56f100906909a7a37f96e39fdafd01903e79e65390bdc28c6b12d83298d30a03",
-      "candidateSha256": "91bdb6a9bd3fefbf56ccfd4be9394500f8f4d337a822d69d1f4a670976553553",
+      "candidateSha256": "17e90fddeb7bcea0b17e1409f74ede68bbf52fe0a2b3d15eca47f4fa425df91c",
       "beforeCharacters": 3439,
-      "afterCharacters": 1081,
+      "afterCharacters": 1101,
       "status": "candidate-not-promoted",
       "owner": "A",
       "sources": [
         "2026-10-11-vault-data-unification/ADR.md",
         "T-01..T-06 immutable implementation/Evidence",
-        "99af3ef5c45da68539ec00f39f24b9685d3fc995"
+        "99af3ef5c45da68539ec00f39f24b9685d3fc995",
+        "T-08 source 9c0bd5c0c926e8d75b50e6587db37cc03240db71; release 38370493282 success, fresh13/13, upgrade15/15"
       ]
     },
     {
@@ -128,15 +135,16 @@
       "candidate": "speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/evidence/knowledge-candidates/adr/0008-terminal-helper.md.txt",
       "sourceSha256": "242de59ca3f2bf98b404ffd98ca45e81d68aa49d7bb69b3bf1b764f8d8defe9f",
       "canonicalBeforeSha256": "8439fa7650bb304ddeca70fa32ca2584edcf9f398bcc7c75effd9724350811db",
-      "candidateSha256": "5de6074c4144bedd3622ff2e82fb3002454f7702d58e35de05f6cf2b15e3a82b",
+      "candidateSha256": "1d2433beb9f8bb72c8cb463663ea10399ada33eb01c0b1ad17069967ab503767",
       "beforeCharacters": 6259,
-      "afterCharacters": 2121,
+      "afterCharacters": 2190,
       "status": "candidate-not-promoted",
       "owner": "A",
       "sources": [
         "2026-10-11-vault-data-unification/ADR.md",
         "T-01..T-06 immutable implementation/Evidence",
-        "99af3ef5c45da68539ec00f39f24b9685d3fc995"
+        "99af3ef5c45da68539ec00f39f24b9685d3fc995",
+        "T-08 source 9c0bd5c0c926e8d75b50e6587db37cc03240db71; release 38370493282 success, fresh13/13, upgrade15/15"
       ]
     },
     {
@@ -145,15 +153,16 @@
       "candidate": "speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/evidence/knowledge-candidates/adr/0009-agent-sessions-and-history.md.txt",
       "sourceSha256": "a36be656b1fe8b43a764aed271b78922bb92f0991ad96e0c91ca14b35e2b58a6",
       "canonicalBeforeSha256": "9bb65d1c1f2472db3c382107fb220004ae82a14bf3c431376eeec6e7f53de03b",
-      "candidateSha256": "070283dd20bcdec1ae018666a6eee300e9b7f7e874086dabba2483b1aeffea4e",
+      "candidateSha256": "b8c150d3ac6e22faf387f4d2ddc58e2555d5d9e4c98ade00dacb2812b7ff108f",
       "beforeCharacters": 4976,
-      "afterCharacters": 1946,
+      "afterCharacters": 1966,
       "status": "candidate-not-promoted",
       "owner": "A",
       "sources": [
         "2026-10-11-vault-data-unification/ADR.md",
         "T-01..T-06 immutable implementation/Evidence",
-        "99af3ef5c45da68539ec00f39f24b9685d3fc995"
+        "99af3ef5c45da68539ec00f39f24b9685d3fc995",
+        "T-08 source 9c0bd5c0c926e8d75b50e6587db37cc03240db71; release 38370493282 success, fresh13/13, upgrade15/15"
       ]
     },
     {
@@ -162,15 +171,16 @@
       "candidate": "speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/evidence/knowledge-candidates/adr/0010-browser-sessions.md.txt",
       "sourceSha256": "36772667f129a64944f88139c3050d7702d0c40fb65ba29042c54cdf23eec1ff",
       "canonicalBeforeSha256": "24258a7e732099cb4d1b328435d374f95b9e91138288e49191dd66b1af8a443f",
-      "candidateSha256": "3171f7381bc28063228f368616bcbd7a700a31f9cf765a4c3637c5bb181e963d",
+      "candidateSha256": "13add841ee566f0e1e464503fdc675499bebbdcdd004162f50952d19b3aa6b7b",
       "beforeCharacters": 5435,
-      "afterCharacters": 1880,
+      "afterCharacters": 1961,
       "status": "candidate-not-promoted",
       "owner": "A",
       "sources": [
         "2026-10-11-vault-data-unification/ADR.md",
         "T-01..T-06 immutable implementation/Evidence",
-        "99af3ef5c45da68539ec00f39f24b9685d3fc995"
+        "99af3ef5c45da68539ec00f39f24b9685d3fc995",
+        "T-08 source 9c0bd5c0c926e8d75b50e6587db37cc03240db71; release 38370493282 success, fresh13/13, upgrade15/15"
       ]
     },
     {
@@ -179,15 +189,16 @@
       "candidate": "speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/evidence/knowledge-candidates/adr/0011-automation-and-notifications.md.txt",
       "sourceSha256": "f0dbd623858a28330802ffbda276a00290f34c7d66210c64d91024341aa1d2b0",
       "canonicalBeforeSha256": "33d428c8dd514b2db41a30804aa74e538007c2a31b42c8131593c74a2016ae9d",
-      "candidateSha256": "44c48e2b89c4aad479869e840eebfcd611df377e14aa5d68f5035fe0ffb21124",
+      "candidateSha256": "f11ba1447fed1baa3e31fe041356dfe7cf7d2736e6aa70c12dcabf6c14fa8dc9",
       "beforeCharacters": 6045,
-      "afterCharacters": 1953,
+      "afterCharacters": 1973,
       "status": "candidate-not-promoted",
       "owner": "A",
       "sources": [
         "2026-10-11-vault-data-unification/ADR.md",
         "T-01..T-06 immutable implementation/Evidence",
-        "99af3ef5c45da68539ec00f39f24b9685d3fc995"
+        "99af3ef5c45da68539ec00f39f24b9685d3fc995",
+        "T-08 source 9c0bd5c0c926e8d75b50e6587db37cc03240db71; release 38370493282 success, fresh13/13, upgrade15/15"
       ]
     },
     {
@@ -196,15 +207,16 @@
       "candidate": "speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/evidence/knowledge-candidates/adr/0012-git-sync.md.txt",
       "sourceSha256": "32ead99f02df5d28ec7d069e96817bf7a247a9c36b5d6110ce3962eccaf08217",
       "canonicalBeforeSha256": "1e476f2f53d51307f48e978ff0060ef7ce417b8f3793dfca959f45acd0e55694",
-      "candidateSha256": "08491d848a5cef2a808d063a24fa8c3ee0f019e64c1484da7f62e998ae1b5291",
+      "candidateSha256": "b3558f86d9717e76c6d5894db8dd6defe537288168c15bc16c9c1424d8f84dc9",
       "beforeCharacters": 6624,
-      "afterCharacters": 2228,
+      "afterCharacters": 2248,
       "status": "candidate-not-promoted",
       "owner": "A",
       "sources": [
         "2026-10-11-vault-data-unification/ADR.md",
         "T-01..T-06 immutable implementation/Evidence",
-        "99af3ef5c45da68539ec00f39f24b9685d3fc995"
+        "99af3ef5c45da68539ec00f39f24b9685d3fc995",
+        "T-08 source 9c0bd5c0c926e8d75b50e6587db37cc03240db71; release 38370493282 success, fresh13/13, upgrade15/15"
       ]
     },
     {
@@ -213,15 +225,16 @@
       "candidate": "speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/evidence/knowledge-candidates/adr/0013-license-and-attribution.md.txt",
       "sourceSha256": "16296f3c5e28fac5855e5bf2d04dd3122e4e84ea1fc4db1e0114476f6a483629",
       "canonicalBeforeSha256": "5dbc7bd8a70c56c134ec29d8c17c26ebb446fbface3fd970525382346311372c",
-      "candidateSha256": "8ca82cc4c624ec63d5771991a97127749323aded4e8c17673e51c5216ba66576",
+      "candidateSha256": "68a2cefadda575396c383192f157189d6eb1e1bf9b647ab513c801664170cc6b",
       "beforeCharacters": 5866,
-      "afterCharacters": 2010,
+      "afterCharacters": 2030,
       "status": "candidate-not-promoted",
       "owner": "A",
       "sources": [
         "2026-10-11-vault-data-unification/ADR.md",
         "T-01..T-06 immutable implementation/Evidence",
-        "99af3ef5c45da68539ec00f39f24b9685d3fc995"
+        "99af3ef5c45da68539ec00f39f24b9685d3fc995",
+        "T-08 source 9c0bd5c0c926e8d75b50e6587db37cc03240db71; release 38370493282 success, fresh13/13, upgrade15/15"
       ]
     },
     {
@@ -238,7 +251,8 @@
       "sources": [
         "2026-10-11-vault-data-unification/ADR.md",
         "T-01..T-06 immutable implementation/Evidence",
-        "99af3ef5c45da68539ec00f39f24b9685d3fc995"
+        "99af3ef5c45da68539ec00f39f24b9685d3fc995",
+        "T-08 source 9c0bd5c0c926e8d75b50e6587db37cc03240db71; release 38370493282 success, fresh13/13, upgrade15/15"
       ]
     },
     {
@@ -247,15 +261,16 @@
       "candidate": "speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/evidence/knowledge-candidates/context/current-baseline.md.txt",
       "sourceSha256": "30e0ed3692c52629d345815e7c95b755f3f79e2a6d8d964167c1de90bb4b8578",
       "canonicalBeforeSha256": "6ab7a2d4857d3992ce2f33c4cad35bd48d865f1eb7752e27b3abc6a361a7d7bd",
-      "candidateSha256": "3080102f82ebf101532ebd060eb96f58b7a9fdd0a05c4b6ae72713d41c26d8cc",
+      "candidateSha256": "56e2338e7eac4d0caf6553f0a539a4afa189f2768063356c23f296ba25a7ea8f",
       "beforeCharacters": 13247,
-      "afterCharacters": 4609,
+      "afterCharacters": 4629,
       "status": "candidate-not-promoted",
       "owner": "A",
       "sources": [
         "2026-10-11-vault-data-unification/ADR.md",
         "T-01..T-06 immutable implementation/Evidence",
-        "99af3ef5c45da68539ec00f39f24b9685d3fc995"
+        "99af3ef5c45da68539ec00f39f24b9685d3fc995",
+        "T-08 source 9c0bd5c0c926e8d75b50e6587db37cc03240db71; release 38370493282 success, fresh13/13, upgrade15/15"
       ]
     },
     {
@@ -264,15 +279,16 @@
       "candidate": "speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/evidence/knowledge-candidates/context/validation.md.txt",
       "sourceSha256": "fc10a476442691b5cd47239b2a3036b642c80a0267fad55fc02d503c897e339b",
       "canonicalBeforeSha256": "f315bb4d88e882e34c37a21fa383f4b534282e7165a6d91142b3e38e2b5e734a",
-      "candidateSha256": "cb8586ec5f02a3d460b816e183e9a413531b1a57d5b04e0add34a383d97633d6",
+      "candidateSha256": "179b9b034954e20ea0b1ccc91c1f50a0f8b3af6df7f85e12af350dd14b075f80",
       "beforeCharacters": 8914,
-      "afterCharacters": 696,
+      "afterCharacters": 1063,
       "status": "candidate-not-promoted",
       "owner": "A",
       "sources": [
         "2026-10-11-vault-data-unification/ADR.md",
         "T-01..T-06 immutable implementation/Evidence",
-        "99af3ef5c45da68539ec00f39f24b9685d3fc995"
+        "99af3ef5c45da68539ec00f39f24b9685d3fc995",
+        "T-08 source 9c0bd5c0c926e8d75b50e6587db37cc03240db71; release 38370493282 success, fresh13/13, upgrade15/15"
       ]
     },
     {
@@ -289,7 +305,8 @@
       "sources": [
         "2026-10-11-vault-data-unification/ADR.md",
         "T-01..T-06 immutable implementation/Evidence",
-        "99af3ef5c45da68539ec00f39f24b9685d3fc995"
+        "99af3ef5c45da68539ec00f39f24b9685d3fc995",
+        "T-08 source 9c0bd5c0c926e8d75b50e6587db37cc03240db71; release 38370493282 success, fresh13/13, upgrade15/15"
       ]
     },
     {
@@ -306,7 +323,8 @@
       "sources": [
         "2026-10-11-vault-data-unification/ADR.md",
         "T-01..T-06 immutable implementation/Evidence",
-        "99af3ef5c45da68539ec00f39f24b9685d3fc995"
+        "99af3ef5c45da68539ec00f39f24b9685d3fc995",
+        "T-08 source 9c0bd5c0c926e8d75b50e6587db37cc03240db71; release 38370493282 success, fresh13/13, upgrade15/15"
       ]
     }
   ],

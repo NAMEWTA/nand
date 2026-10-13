@@ -1,0 +1,52 @@
+{
+  "version": "0.0.1-alpha.2",
+  "platform": "linux",
+  "upgrade": false,
+  "realAccountsVerified": false,
+  "passed": false,
+  "rows": [
+    {
+      "name": "installed-real-asset-main.js",
+      "passed": true
+    },
+    {
+      "name": "installed-real-asset-manifest.json",
+      "passed": true
+    },
+    {
+      "name": "installed-real-asset-styles.css",
+      "passed": true
+    },
+    {
+      "name": "helper-closes-inherited-host-descriptors",
+      "passed": false,
+      "detail": [
+        {
+          "fd": "0",
+          "target": "socket:[1913642]"
+        },
+        {
+          "fd": "1",
+          "target": "socket:[1913644]"
+        },
+        {
+          "fd": "2",
+          "target": "socket:[1913646]"
+        },
+        {
+          "fd": "3",
+          "target": "<repository>/scripts/tmp/vault-unification-resume/T-08/release-fresh-02/vault/.nand/terminal-agent/029eefde-7b0d-4327-9818-8cffbe639c34/index.sqlite"
+        },
+        {
+          "fd": "4",
+          "target": "<repository>/scripts/tmp/vault-unification-resume/T-08/release-fresh-02/vault/.nand/terminal-agent/029eefde-7b0d-4327-9818-8cffbe639c34/index.sqlite-journal"
+        }
+      ]
+    },
+    {
+      "name": "acceptance-failure",
+      "passed": false,
+      "detail": "AssertionError [ERR_ASSERTION]: helper-closes-inherited-host-descriptors\n    at check (file://<repository>/scripts/obsidian-acceptance/release-vault-install.mjs:17:87)\n    at file://<repository>/scripts/obsidian-acceptance/release-vault-install.mjs:48:3"
+    }
+  ]
+}

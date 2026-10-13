@@ -7,7 +7,7 @@
 | | |
 |---|---|
 | 显示名、插件编号 | NAND，`nand` |
-| 版本 | 0.0.1-alpha.1（`manifest.json`、`package.json`、`versions.json`） |
+| 版本 | 0.0.1-alpha.2（`manifest.json`、`package.json`、`versions.json`） |
 | `minAppVersion` | `1.13.0`，仅为声明 |
 | `isDesktopOnly` | `false` |
 | 许可证 | MIT |
@@ -92,7 +92,7 @@
 
 ## 持续集成与发布
 
-质量workflow支持workflow_call，Linux Node22/24与Windows Node24执行同一完整检查。Release只接受同SHA的完整checks和五平台helper均success，失败/取消/跳过阻止发布。保留版本/changelog、产物/源码一致、zip/helper摘要、许可证与attestation检查。实际发布与CI结果见验证，不把配置当成已执行。
+质量workflow支持workflow_call，Linux Node22/24与Windows Node24执行同一完整检查。Release只接受同SHA的完整checks和五平台helper均success，失败/取消/跳过阻止发布。保留版本/changelog、产物/源码一致、zip/helper摘要、许可证与attestation检查。生成的样式与第三方许可清单固定LF检出；实际发布与CI结果见验证，不把配置当成已执行。
 
 ## 终端辅助进程
 

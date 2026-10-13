@@ -1,0 +1,37 @@
+{
+  "version": "0.0.1-alpha.2",
+  "platform": "linux",
+  "upgrade": false,
+  "realAccountsVerified": false,
+  "passed": false,
+  "rows": [
+    {
+      "name": "installed-real-asset-main.js",
+      "passed": true
+    },
+    {
+      "name": "installed-real-asset-manifest.json",
+      "passed": true
+    },
+    {
+      "name": "installed-real-asset-styles.css",
+      "passed": true
+    },
+    {
+      "name": "helper-closes-inherited-host-descriptors",
+      "passed": false,
+      "detail": [
+        "0",
+        "1",
+        "2",
+        "3",
+        "4"
+      ]
+    },
+    {
+      "name": "acceptance-failure",
+      "passed": false,
+      "detail": "AssertionError [ERR_ASSERTION]: helper-closes-inherited-host-descriptors\n    at check (file://<repository>/scripts/obsidian-acceptance/release-vault-install.mjs:17:87)\n    at file://<repository>/scripts/obsidian-acceptance/release-vault-install.mjs:47:3"
+    }
+  ]
+}

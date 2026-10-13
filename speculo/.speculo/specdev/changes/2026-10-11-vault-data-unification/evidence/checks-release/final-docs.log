@@ -1,0 +1,4 @@
+Already up to date
+Done in 321ms using pnpm v11.1.3
+$ node scripts/verify-docs.mjs
+Documentation: 657 Markdown files (skill=15, agent-handbook=1, root-entry=4, license=1, user-doc=20, test-fixture=20, speculo-tooling=288, specdev=37, specdev-change=268, source-template=3), 1792 local links, 420 external links (fetch not requested).

@@ -1,0 +1,92 @@
+{
+  "version": "0.0.1-alpha.2",
+  "platform": "linux",
+  "upgrade": true,
+  "realAccountsVerified": false,
+  "passed": true,
+  "rows": [
+    {
+      "name": "installed-real-asset-main.js",
+      "passed": true
+    },
+    {
+      "name": "installed-real-asset-manifest.json",
+      "passed": true
+    },
+    {
+      "name": "installed-real-asset-styles.css",
+      "passed": true
+    },
+    {
+      "name": "upgrade-needs-main-process-restart",
+      "passed": true
+    },
+    {
+      "name": "native-history-initial-scan-ready",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "helper-closes-inherited-host-descriptors",
+      "passed": true,
+      "detail": [
+        {
+          "fd": "0",
+          "target": "socket:[1921298]"
+        },
+        {
+          "fd": "1",
+          "target": "socket:[1921300]"
+        },
+        {
+          "fd": "2",
+          "target": "socket:[1921302]"
+        }
+      ]
+    },
+    {
+      "name": "official-helper-shell-NAND_RELEASE_FRESH",
+      "passed": true,
+      "detail": {
+        "ok": true,
+        "state": "connected"
+      }
+    },
+    {
+      "name": "native-input-output-NAND_RELEASE_FRESH",
+      "passed": true
+    },
+    {
+      "name": "helper-has-official-release-digest",
+      "passed": true
+    },
+    {
+      "name": "plugin-runtime-data-retired",
+      "passed": true
+    },
+    {
+      "name": "old-helper-recovery-copy-preserved",
+      "passed": true
+    },
+    {
+      "name": "official-helper-shell-NAND_RELEASE_RESTART",
+      "passed": true,
+      "detail": {
+        "ok": true,
+        "state": "connected"
+      }
+    },
+    {
+      "name": "native-input-output-NAND_RELEASE_RESTART",
+      "passed": true
+    },
+    {
+      "name": "cached-helper-executable-mode-repaired",
+      "passed": true
+    },
+    {
+      "name": "restart-keeps-exact-helper-bytes",
+      "passed": true
+    }
+  ]
+}

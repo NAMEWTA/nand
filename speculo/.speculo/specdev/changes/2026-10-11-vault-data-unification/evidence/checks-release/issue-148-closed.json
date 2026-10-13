@@ -1,0 +1,18 @@
+{
+  "operation": "issue-comment-close",
+  "provider": "github",
+  "repo": "NAMEWTA/nand",
+  "mode": "apply",
+  "number": 148,
+  "url": "https://github.com/NAMEWTA/nand/issues/148",
+  "state_before": "OPEN",
+  "marker": "specdev:2026-10-11-vault-data-unification:completion",
+  "comment_required": true,
+  "close_required": true,
+  "steps": [
+    "commented",
+    "closed"
+  ],
+  "state_after": "CLOSED",
+  "status": "closed"
+}

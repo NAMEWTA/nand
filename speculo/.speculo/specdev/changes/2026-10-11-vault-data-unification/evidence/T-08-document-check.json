@@ -1,0 +1,74 @@
+[
+  {
+    "path": ".agents/skills/dev/references/build-and-release.md",
+    "beforeCharacters": 3637,
+    "afterCharacters": 3733,
+    "beforeSha256": "3365d1f37cc571dbd819ade4c2013020728487c3d9b6081b828e7badad8a2964",
+    "afterSha256": "2af836b6f2101e20287d18bf9b688ef8ff764050c7436c015d4a4db044d6378f",
+    "backup": "scripts/tmp/vault-unification-resume/T-08/resume-backups/base/.agents/skills/dev/references/build-and-release.md"
+  },
+  {
+    "path": ".agents/skills/dev/references/licensing.md",
+    "beforeCharacters": 2191,
+    "afterCharacters": 2192,
+    "beforeSha256": "309783d96aca6bdf6287ae9a7e84619286300e06c3a08c776576c613387ccfbb",
+    "afterSha256": "365a2bea5fb71efb0aab7f81fdf7d58eb0d999cf87a53a201d00b455aeb74db4",
+    "backup": "scripts/tmp/vault-unification-resume/T-08/resume-backups/base/.agents/skills/dev/references/licensing.md"
+  },
+  {
+    "path": "CHANGELOG.md",
+    "beforeCharacters": 3011,
+    "afterCharacters": 3417,
+    "beforeSha256": "ff2d841d6ca15885b4db312be99ebfb3800cea2e033977a59238dc7ef698676a",
+    "afterSha256": "0e246a371d09479f4dec0782bfc3e567ff0353d635cf64f7f00480f3dc3eb2c2",
+    "backup": "scripts/tmp/vault-unification-resume/T-08/resume-backups/base/CHANGELOG.md"
+  },
+  {
+    "path": "README.ZH.md",
+    "beforeCharacters": 2863,
+    "afterCharacters": 2858,
+    "beforeSha256": "344f634fbe7259e883b145a0e1922e9bcf45d323ab1f64a45058adcfbf6625e3",
+    "afterSha256": "3df80f148ba48bb2995db39bbe0ee4f5b1a85c5185584ad48fbbf89cef2cdc98",
+    "backup": "scripts/tmp/vault-unification-resume/T-08/resume-backups/base/README.ZH.md"
+  },
+  {
+    "path": "README.md",
+    "beforeCharacters": 5372,
+    "afterCharacters": 5357,
+    "beforeSha256": "fed39210ef993f6cb3fb53d9f1c18cf1ae838853502eeeb5bed3b59834f291df",
+    "afterSha256": "2d90fa7def88b4fb80758553567eedfdea7035922e51e035a073db4406076a7b",
+    "backup": "scripts/tmp/vault-unification-resume/T-08/resume-backups/base/README.md"
+  },
+  {
+    "path": "speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/LOG.md",
+    "beforeCharacters": 2534,
+    "afterCharacters": 2700,
+    "beforeSha256": "d9b182d58d7423d874906d1708f1df7099f2244595c39e4b11c16d660446d2a2",
+    "afterSha256": "feb0d1e85a2b4ea7ab84752a2aabef3c58bbbf52918746f58adc8c459a1937ab",
+    "backup": "scripts/tmp/vault-unification-resume/T-08/resume-backups/base/speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/LOG.md"
+  },
+  {
+    "path": "speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/ticket/08-alpha2-delivery.md",
+    "beforeCharacters": 5197,
+    "afterCharacters": 9742,
+    "beforeSha256": "a2e8bd6c39a969bf5ba84985b57ef4fe6b3363850400230f416301ccd003c6d6",
+    "afterSha256": "1a0334a748929cf994b4d8308dafcf64110b4324e33e45b4ee8f5eb7799c3c4a",
+    "backup": "scripts/tmp/vault-unification-resume/T-08/resume-backups/base/speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/ticket/08-alpha2-delivery.md"
+  },
+  {
+    "path": "speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/tickets-map.md",
+    "beforeCharacters": 3773,
+    "afterCharacters": 3779,
+    "beforeSha256": "b1087c79a179ebf3dcd40b25a110486351bc1f7206c0867395688e32f29206dd",
+    "afterSha256": "f87a81a4bd3c331451f0a9d64288baca6b05a96cabc08bd48893e88a1a83271e",
+    "backup": "scripts/tmp/vault-unification-resume/T-08/resume-backups/base/speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/tickets-map.md"
+  },
+  {
+    "path": "speculo/.speculo/specdev/triage-runs/TRI-001.md",
+    "beforeCharacters": 0,
+    "afterCharacters": 3872,
+    "beforeSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "afterSha256": "cff9afff782bc2248c664cb092df88cf8a8b8224f4bb6d051dc3d207d2a7f1c3",
+    "backup": "scripts/tmp/vault-unification-resume/T-08/resume-backups/base/speculo/.speculo/specdev/triage-runs/TRI-001.md"
+  }
+]

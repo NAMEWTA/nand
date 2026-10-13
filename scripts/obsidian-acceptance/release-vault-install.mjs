@@ -43,8 +43,11 @@ try {
 	await page();
 	const helperPid = await c.evaluate(`ac.sessions.ensureHelper().then(helper=>helper.pid)`);
 	if (process.platform === 'linux') {
+		await until("ac.historyState==='ready'||ac.historyState==='error'");
+		check('native-history-initial-scan-ready', await c.evaluate("ac.historyState==='ready'"), await c.evaluate('ac.historyError'));
 		const descriptors = (await fs.readdir(`/proc/${helperPid}/fd`)).sort();
-		check('helper-closes-inherited-host-descriptors', JSON.stringify(descriptors) === JSON.stringify(['0','1','2']), descriptors);
+		const links = await Promise.all(descriptors.map(async fd => ({fd, target:await fs.readlink(`/proc/${helperPid}/fd/${fd}`).catch(error=>error.code)})));
+		check('helper-closes-inherited-host-descriptors', JSON.stringify(descriptors) === JSON.stringify(['0','1','2']), links);
 	}
 	await shell('NAND_RELEASE_FRESH');
 	const identity = JSON.parse(await fs.readFile(path.join(runtime.vault,'.nand/config/identity.json'),'utf8')), device = Object.keys(identity.devices)[0];

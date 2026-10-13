@@ -23,3 +23,5 @@
 T-07实施检查点：当前指南22组重复副本已合并删除，根README双语保留；数据/CLI/浏览器/Git/开发规则已按代码更新，policy定向3/3及test:docs通过。18份永久知识中文候选在evidence/knowledge-candidates/*.md.txt与knowledge-plan.json，原永久namespace未写。完整65源字符统计及备份在T-07-document-check.json和scripts/tmp/vault-unification-resume/T-07。最终串行Node24/单worker检查正在运行，exec session20786（需回读活句柄确认），不要在存活时重启；产品代码HEAD99af3ef，T-07工作区未提交。下一动作等该句柄结果、复核候选有效独有信息/原始许可/历史未改后固定提交与两轴顺序自审；继续T-08真实alpha.2与A，Goal不可提前完成。
 
 T-07 done：f26c7502f278404003c718db5d8e6a4f1fa342aa，55项目路径，22重复实体删除，根README双语；18知识候选prepared-not-applied。build/lint/docs/i18n和完整50/50/1816测试通过，两轴顺序自审局限保留。下一T-08：缓存helper执行权限、alpha.2、同SHA CI、真实发行下载新装/升级、issue及最终A。
+
+2026-10-13 T-08发行交付：产品9c0bd5c，正式run38370493282成功，alpha.2的18资产核对、fresh13/13、upgrade15/15、浏览器36/36通过，151/148已CLOSED。本地1826通过1跳过、50/50。最后仅夹具扫描时机和证据收尾；知识候选未提升，待A具体计划确认。

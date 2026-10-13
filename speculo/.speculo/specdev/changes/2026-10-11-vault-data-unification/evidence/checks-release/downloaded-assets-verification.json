@@ -1,0 +1,29 @@
+{
+  "version": "0.0.1-alpha.2",
+  "sha": "9c0bd5c0c926e8d75b50e6587db37cc03240db71",
+  "assets": {
+    "LICENSE": "2daf2b1d1f70436c7afc6401c7f5cda3e820430499bcd92d0617a6d4dcc8ca4e",
+    "NOTICE": "27c88edf11ce872aee56dddf3a5d4b5e03d2871ff90695842f953748c85f027d",
+    "SHA256SUMS.txt": "afa94b5ccbd7f8ec3fbcf4626151202001f0fc6afc66a5689dee7fc8b6a81c7f",
+    "THIRD-PARTY-NOTICES.md": "efe4ef8d57a8815d13493adaed068975128106a926d982ef5a2278379e3710e1",
+    "main.js": "b37b34a7992885e677c489679557c40afe23aa7abad170641ba9455bc1f689a2",
+    "manifest.json": "3085bc36ee48a0bd3da6ca38ac1cdbc95938723230b4caa27222ff07687d0499",
+    "nand-0.0.1-alpha.2.zip": "cb101a0ec64f2c3cd8326b370f5b51a86b953bd2c6e129d3617ab98dc156a198",
+    "nand-pty-darwin-arm64": "c78e4c050f63eafeb376a573ccb63db0ff344edeef8e4d985ed8c780fb729e7f",
+    "nand-pty-darwin-arm64.sha256": "371ee9dc301b0392fc5a96ce19e6e7de08c9bddaa088e02686ecc5e76e9fca91",
+    "nand-pty-darwin-x64": "ba1943e78b89d948be1ea84e8c924ec220d5287b91ef36de6faee1f1f0a11371",
+    "nand-pty-darwin-x64.sha256": "ae4777f33893eed6253d8de41819ba813865c846bd846e26da517d6bd612ed27",
+    "nand-pty-linux-arm64": "63d6a4f88e568395ac683683a6155e4b5c3b32fb4071ae68e1ad107031bcc9f4",
+    "nand-pty-linux-arm64.sha256": "1ea0587173415f412dacf87fe519afe5f248e309c8fc7ac9925fb06278a6b365",
+    "nand-pty-linux-x64": "d1fa8499349c7b0e83e90962b5344e43ac91008f9bcbf1b00521dc1c2b21b812",
+    "nand-pty-linux-x64.sha256": "c0c237d438dcbf56db08cad87a98294de30ee0e6edf1f36b224e753bcf577e89",
+    "nand-pty-win32-x64.exe": "1232fb2c3e3403d95f4bd3ecefb26aab1a8ac58c76f77e43f640f8954b9b9df2",
+    "nand-pty-win32-x64.exe.sha256": "128b033590c352ae680ad9db715fd190ae22a081661513007f2c895dff3b3a98",
+    "styles.css": "bc7c2ba61f72b2020bd6bb6fa64a490dc571ffa9581243c26433140601b0f477"
+  },
+  "assetCount": 18,
+  "pluginAndLicensesEqualGitTag": true,
+  "zipContentsExact": true,
+  "allPublishedDigestsVerified": true,
+  "fiveHelpersVerified": true
+}

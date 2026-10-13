@@ -1,11 +1,12 @@
 {
   "fixed_point": "ceb87931dd67733dd03249570c6b2ecc17c1bc59",
-  "head": "81fe6c8733a6c594c258acbc84cd9497eb1f62fa",
-  "diff_command": "git diff ceb87931dd67733dd03249570c6b2ecc17c1bc59...81fe6c8733a6c594c258acbc84cd9497eb1f62fa",
+  "head": "9c0bd5c0c926e8d75b50e6587db37cc03240db71",
+  "diff_command": "git diff ceb87931dd67733dd03249570c6b2ecc17c1bc59...9c0bd5c0c926e8d75b50e6587db37cc03240db71",
   "commit_log": [
     "b30eb965d39149709226e6f04b1909c393cfa0a4",
     "84e4812f5d4cfb3498c86490d863c9f02eb31ac3",
-    "81fe6c8733a6c594c258acbc84cd9497eb1f62fa"
+    "81fe6c8733a6c594c258acbc84cd9497eb1f62fa",
+    "9c0bd5c0c926e8d75b50e6587db37cc03240db71"
   ],
   "isolation": "用户禁止其他agent；同一root顺序自审，无独立reviewer隔离。",
   "standards": {
@@ -45,7 +46,7 @@
       "CI发现的跨平台产物差异在T-08新增明确写集；Windows宿主门已取消，但完整CI矩阵和发布成功依赖不变。"
     ]
   },
-  "previous_head": "84e4812f5d4cfb3498c86490d863c9f02eb31ac3",
+  "previous_head": "81fe6c8733a6c594c258acbc84cd9497eb1f62fa",
   "working_tree_followup": {
     "base": "84e4812f5d4cfb3498c86490d863c9f02eb31ac3",
     "standards": "pass",
@@ -69,8 +70,22 @@
       "Actual Linux Obsidian repro: download completed in native session but renderer still showed progressing. Register listeners then read getState; release listeners after completed/cancelled snapshot or done event. No download destination/permission checks changed.",
       "Four download observer regressions fail before snapshot fix, pass afterward. Real host rerun 36/36 passes including restart and unsafe download rejection.",
       "THIRD-PARTY-NOTICES.md pinned LF; autocrlf=true failed before fix; both generated files and both autocrlf values pass. Actual notice check passes 14 npm / 62 crates without license text edits.",
-      "New helper stays in existing desktop partition; generated main.js rebuilt. Build/lint and targeted 9 tests pass. Full suite/new CI pending."
+      "New helper stays in existing desktop partition; generated main.js rebuilt. Build/lint/notice/budget pass. Full suite 50/50, 1826 passed / 1 skipped. Real browser host 36/36; exact SHA CI pending."
     ],
-    "reviewer": "root sequential standards/spec self-review; no independent agent"
+    "reviewer": "root sequential standards/spec self-review; no independent agent",
+    "head": "9c0bd5c0c926e8d75b50e6587db37cc03240db71"
+  },
+  "final_delivery": {
+    "release": "https://github.com/NAMEWTA/nand/releases/tag/0.0.1-alpha.2",
+    "releaseRun": 38370493282,
+    "allCI": "success",
+    "downloadedAssets": 18,
+    "freshChecks": 13,
+    "upgradeChecks": 15,
+    "browserChecks": 36,
+    "issue151": "closed",
+    "issue148": "closed",
+    "fixtureFollowupReview": "pass: waits for historyState ready before the unchanged exact 0/1/2 descriptor assertion; no product byte changes; real fresh/upgrade rerun passed. Final lint/docs pass.",
+    "remaining": "A plan confirmation, knowledge promotion and archive; not counted as completed."
   }
 }

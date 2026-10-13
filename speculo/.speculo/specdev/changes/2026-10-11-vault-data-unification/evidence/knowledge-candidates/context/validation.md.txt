@@ -12,4 +12,6 @@ Windows历史证据保留在原T-01～T-05 Evidence：JsonStore、隐藏内容/�
 
 真实平台账号认证、当前源码macOS宿主，以及当前源码Windows宿主未验证。合成CLI环境回执不证明真实登录、SSO或凭据跨设备可移植。Obsidian minAppVersion 1.13.0是声明，不等于该版本真实全量验收。允许跨设备重新认证。
 
-公开发行、同SHA的完整CI、真实Release新装/旧helper升级与最终知识/归档，须在T-08和A阶段以实际URL、SHA与运行证据补齐；本页候选不能代替这些成果。原始历史证据留在归档，不复制无定位的旧数值为现行结果。
+2026-10-13 T-08：产品源9c0bd5c0c926e8d75b50e6587db37cc03240db71；本地Node26完整50/50、1826通过1跳过，build/lint/包体/许可通过。Linux浏览器36/36；正式[alpha.2](https://github.com/NAMEWTA/nand/releases/tag/0.0.1-alpha.2)18资产摘要及标签字节核对通过，Linux Obsidian新装13/13、旧helper升级15/15；终端交互、重启、执行位恢复、旧文件保留和无继承宿主句柄已验证。三环境完整CI与五平台helper检查见[正式run](https://github.com/NAMEWTA/nand/actions/runs/38370493282)，不把CI当作Windows/macOS宿主验证。来源声明API中的摘要/SHA/run一致，本机未独立验签。
+
+原始失败、修复和最终结果见归档change的T-08 Evidence；历史证据不替代现行结果。知识正式提升及归档由A网关执行。

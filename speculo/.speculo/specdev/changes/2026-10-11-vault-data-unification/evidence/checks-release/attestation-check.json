@@ -1,0 +1,67 @@
+{
+  "apiBundles": 1,
+  "subjectsMatchDownloadedBytes": true,
+  "sourceShaMatches": true,
+  "workflowRunMatches": true,
+  "localSignatureVerification": "not-performed; installed gh 2.46 has no attestation command",
+  "statement": {
+    "_type": "https://in-toto.io/Statement/v1",
+    "subject": [
+      {
+        "name": "nand-0.0.1-alpha.2.zip",
+        "digest": {
+          "sha256": "cb101a0ec64f2c3cd8326b370f5b51a86b953bd2c6e129d3617ab98dc156a198"
+        }
+      },
+      {
+        "name": "main.js",
+        "digest": {
+          "sha256": "b37b34a7992885e677c489679557c40afe23aa7abad170641ba9455bc1f689a2"
+        }
+      },
+      {
+        "name": "styles.css",
+        "digest": {
+          "sha256": "bc7c2ba61f72b2020bd6bb6fa64a490dc571ffa9581243c26433140601b0f477"
+        }
+      }
+    ],
+    "predicateType": "https://slsa.dev/provenance/v1",
+    "predicate": {
+      "buildDefinition": {
+        "buildType": "https://actions.github.io/buildtypes/workflow/v1",
+        "externalParameters": {
+          "workflow": {
+            "ref": "refs/tags/0.0.1-alpha.2",
+            "repository": "https://github.com/NAMEWTA/nand",
+            "path": ".github/workflows/release.yml"
+          }
+        },
+        "internalParameters": {
+          "github": {
+            "event_name": "push",
+            "repository_id": "1384926004",
+            "repository_owner_id": "67400687",
+            "runner_environment": "github-hosted"
+          }
+        },
+        "resolvedDependencies": [
+          {
+            "uri": "git+https://github.com/NAMEWTA/nand@refs/tags/0.0.1-alpha.2",
+            "digest": {
+              "gitCommit": "9c0bd5c0c926e8d75b50e6587db37cc03240db71"
+            }
+          }
+        ]
+      },
+      "runDetails": {
+        "builder": {
+          "id": "https://github.com/NAMEWTA/nand/.github/workflows/release.yml@refs/tags/0.0.1-alpha.2"
+        },
+        "metadata": {
+          "invocationId": "https://github.com/NAMEWTA/nand/actions/runs/38370493282/attempts/1"
+        }
+      }
+    }
+  }
+}

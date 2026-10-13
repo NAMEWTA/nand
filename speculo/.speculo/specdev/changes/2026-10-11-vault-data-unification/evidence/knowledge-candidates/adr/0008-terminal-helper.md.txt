@@ -1,6 +1,6 @@
 # ADR-0008：终端辅助进程与 stdio 帧协议
 
-状态：已接受。来源由当前代码与 vault-data-unification 实现证据核对；保留稳定决定。
+状态：已接受。2026-10-13 依据 2026-10-11-vault-data-unification 的实现与验收证据核对；保留稳定决定。
 
 ## 问题
 
@@ -14,7 +14,7 @@
 - **每个会话一个权威模型。** 输出先进入插件中的 headless xterm 模型，模型解析后确认字节数。某个会话未确认的数据超过 1 MiB 时，辅助进程暂停读取，低于 256 KiB 时恢复。设备查询（DA、CPR、DSR、DECRQM、颜色、尺寸、kitty 标志）只由模型应答；可见视图吞掉这些查询，因此隐藏会话和自动化会话不会卡住，应答也不会重复。
 - **视图可随时丢弃。** 可见视图先重放模型的序列化快照，再跟随实时输出。关闭页面或叶子只释放视图，会话继续运行。关闭模块或卸载插件会结束所有会话。
 - **历史在同一个进程中。** 原生历史的扫描、查询、读取和取消，都是发给同一个辅助进程的请求（`history`），同一时间只有一次扫描在写索引。见 [ADR-0009](0009-agent-sessions-and-history.md)。
-- **分发。** helper只由CI为五个平台构建并发布，安装到 `.nand/helpers/<device-id>/<platform-arch>/<version>/`，严格匹配插件Release正式摘要。各版本独立，升级保留旧文件；开发override只复制到库内执行。旧明文stamp不能授予执行信任，旧匹配字节需正式摘要核验后复用；可信本机保护回执供离线复用，异机/失效/无保护需重新在线核验。Linux basic_text不作可信保护。
+- **分发。** helper只由CI为五个平台构建并发布，安装到 `.nand/helpers/<device-id>/<platform-arch>/<version>/`，严格匹配插件Release正式摘要。各版本独立，升级保留旧文件；开发override只复制到库内执行。旧明文stamp不能授予执行信任，旧匹配字节需正式摘要核验后复用；可信本机保护回执供离线复用，异机/失效/无保护需重新在线核验。Linux basic_text不作可信保护。可信缓存丢失POSIX执行位时，只在摘要或受保护回执通过后恢复0700；不可信离线字节不改变权限。
 - **运行数据。** helper与普通Shell的HOME、配置、缓存和临时目录也在vault/.nand。CLI会话采用各自的库内账号环境。
 - **来源。** 辅助进程和终端代码是为 NAND 编写的，以 MIT 许可证发布。它们依据公开的规范和文档构建：xterm 控制序列、kitty 键盘协议、win32-input-mode、ConPTY、OSC 7 与 shell 集成序列，以及 xterm.js 和 `portable-pty` 的文档。Orca（MIT）在 `NOTICE` 中署名。见 [ADR-0013](0013-license-and-attribution.md)。
 

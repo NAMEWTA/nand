@@ -1,6 +1,6 @@
 # ADR-0010：浏览器分区、权限与页面生命周期
 
-状态：已接受。来源由当前代码与 vault-data-unification 实现证据核对；保留稳定决定。
+状态：已接受。2026-10-13 依据 2026-10-11-vault-data-unification 的实现与验收证据核对；保留稳定决定。
 
 ## 问题
 
@@ -8,7 +8,7 @@
 
 ## 决定
 
-- **库内显式Session。** 所有NAND网页表面使用 `.nand/browser/<device-id>/profiles/<profile>/session/` 的绝对Session目录，按设备/profile隔离；Cookie、站点数据、缓存均在其中，下载/桥接/截图说明也进入库内。主进程在guest附着时绑定实际Session并核对storagePath；无支持API或目录校验失败时停止，不回退全局persist分区。旧会话需冷重启迁移、正式打开确认和可恢复来源退休。
+- **库内显式Session。** 所有NAND网页表面使用 `.nand/browser/<device-id>/profiles/<profile>/session/` 的绝对Session目录，按设备/profile隔离；Cookie、站点数据、缓存均在其中，下载/桥接/截图说明也进入库内。主进程在guest附着时绑定实际Session并核对storagePath；无支持API或目录校验失败时停止，不回退全局persist分区。旧会话需冷重启迁移、正式打开确认和可恢复来源退休。主进程使用原生规范vault路径，逐级拒绝库内链接；下载注册事件监听后回读当前状态，避免小文件先完成、界面永远显示进行中。
 
 - **Guest 策略。** 只有满足以下条件的 guest 才被接受：类型是 `webview`、关闭 Node 集成、绑定 NAND 显式库内Session。只加载允许的网址。脚本打开的窗口受到频率和数量限制：普通链接交给 NAND 作为页面打开，带明确窗口特性的请求则成为使用同一Session和策略的子窗口。
 - **权限是按来源的决定。** 摄像头和麦克风、位置、通知、读取剪贴板和全屏，除非用户对该来源授予了该权限，否则一律拒绝；来自其他来源或子框架的请求不会继承顶层页面的授权。授权和最近的浏览历史保存在 `.nand/browser/<device-id>/state.json`。
