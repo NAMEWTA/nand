@@ -1,0 +1,18 @@
+[
+  {
+    "check": "build-review",
+    "exitCode": 0
+  },
+  {
+    "check": "actionlint",
+    "exitCode": 0
+  },
+  {
+    "check": "sync-final",
+    "exitCode": 0
+  },
+  {
+    "check": "accounts-final",
+    "exitCode": 0
+  }
+]

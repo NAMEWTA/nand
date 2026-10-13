@@ -20,7 +20,7 @@ status: "in_progress"
 | Applies To | Project Skill | Trigger / Scope | Read Timing | Purpose |
 |---|---|---|---|---|
 | ALL | <Path>.agents/skills/dev/SKILL.md</Path> | 插件、存储、测试、文档与发布 | Map 后 Ticket 前 | 架构与验证 |
-| T-02,T-03,T-04,T-05,T-08 | <Path>.agents/skills/ui/SKILL.md</Path> | 内容与账号界面、浏览器、宿主验收 | Map 后 Ticket 前 | 工作台与可访问性 |
+| T-02,T-03,T-04,T-05,T-06,T-08 | <Path>.agents/skills/ui/SKILL.md</Path> | 内容与账号界面、浏览器、宿主验收 | Map 后 Ticket 前 | 工作台与可访问性 |
 
 ## 2. 执行清单
 
@@ -31,7 +31,7 @@ status: "in_progress"
 | T-03 | <Path>{roots.state}/specdev/changes/2026-10-11-vault-data-unification/ticket/03-hidden-content.md</Path> | 隐藏目录中的内容访问和迁移 | T-02 | deep | high | yes | root | AC-003 | done |
 | T-04 | <Path>{roots.state}/specdev/changes/2026-10-11-vault-data-unification/ticket/04-browser-sessions.md</Path> | 浏览器会话与产物进入 vault | T-02 | deep | high | yes | root | AC-004 | done |
 | T-05 | <Path>{roots.state}/specdev/changes/2026-10-11-vault-data-unification/ticket/05-agent-accounts.md</Path> | 账号身份、凭据与终端辅助程序 | T-02 | deep | high | yes | root | AC-005 | done |
-| T-06 | <Path>{roots.state}/specdev/changes/2026-10-11-vault-data-unification/ticket/06-git-release-gates.md</Path> | Git 冲突判定与发布检查依赖 | — | deep | high | yes | root | AC-006 | ready |
+| T-06 | <Path>{roots.state}/specdev/changes/2026-10-11-vault-data-unification/ticket/06-git-release-gates.md</Path> | Git 冲突判定与发布检查依赖 | — | deep | high | yes | root | AC-006 | done |
 | T-07 | <Path>{roots.state}/specdev/changes/2026-10-11-vault-data-unification/ticket/07-current-docs.md</Path> | 当前规范中文化与旧文档清理 | T-01, T-02, T-03, T-04, T-05, T-06 | deep | high | yes | root | AC-007 | ready |
 | T-08 | <Path>{roots.state}/specdev/changes/2026-10-11-vault-data-unification/ticket/08-alpha2-delivery.md</Path> | Windows 验收、alpha.2 发布与归档 | T-01, T-02, T-03, T-04, T-05, T-06, T-07 | deep | high | yes | root | AC-008 | ready |
 

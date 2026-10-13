@@ -1,0 +1,14 @@
+
+ RUN  v5.0.3 /home/wta/projects/nand
+
+Debugger listening on ws://127.0.0.1:9229/fae97a19-9cd5-43d3-b0de-085327323016
+For help, see: https://nodejs.org/learn/getting-started/debugging
+Debugger attached.
+Debugger ending on ws://127.0.0.1:9229/fae97a19-9cd5-43d3-b0de-085327323016
+For help, see: https://nodejs.org/learn/getting-started/debugging
+
+ Test Files  2 passed (2)
+      Tests  839 passed (839)
+   Start at  21:58:02
+   Duration  217.98s (tests 100%)
+

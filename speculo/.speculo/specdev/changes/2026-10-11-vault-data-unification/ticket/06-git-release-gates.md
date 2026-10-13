@@ -2,13 +2,13 @@
 schema_version: 3
 plan_contract_version: 1
 skill_scan: "已扫描 .agents/skills：dev 适用全部实现，ui 适用内容/浏览器/账号界面及验收。"
-skill_bindings: [{"id":"dev","path":"<Path>.agents/skills/dev/SKILL.md</Path>","sha256":"13ff2185ff85752e85e4171d1cb4e5517f201c36bdaa35f4004dfe5248ffdf8a","phase":"implement","operation":"implement-and-verify","inputs":["本票合同、真实源码与定向差异"],"outputs":["实现、定向验证与 Evidence"],"required":true,"on_failure":"block-ticket"}]
+skill_bindings: [{"id":"dev","path":"<Path>.agents/skills/dev/SKILL.md</Path>","sha256":"13ff2185ff85752e85e4171d1cb4e5517f201c36bdaa35f4004dfe5248ffdf8a","phase":"implement","operation":"implement-and-verify","inputs":["本票合同、真实源码与定向差异"],"outputs":["实现、定向验证与 Evidence"],"required":true,"on_failure":"block-ticket"},{"id":"ui","path":"<Path>.agents/skills/ui/SKILL.md</Path>","sha256":"f78f3e974ff373077a66c78144be01ff7c4ca1775ca75f94186b4ce65bdc1723","phase":"implement","operation":"implement-and-verify","inputs":["本票合同、真实源码与定向差异"],"outputs":["实现、定向验证与 Evidence"],"required":true,"on_failure":"block-ticket"}]
 resource_claims: ["current-workspace:root"]
 artifact: "ticket"
 change: "2026-10-11-vault-data-unification"
 id: "T-06"
 title: "Git 冲突判定与发布检查依赖"
-status: "ready"
+status: "done"
 kind: "feature"
 planning_depth: "deep"
 planning_depth_reason: "涉及公共持久化、数据迁移、身份隔离或发布；用户已批准完整计划及实施。"
@@ -17,11 +17,11 @@ risk: "high"
 blocked_by: []
 contract_ids: ["AC-006"]
 owner: "root"
-expected_changes: ["<Path>src/modules/sync/**</Path>","<Path>test/sync/**</Path>","<Path>test/release/**</Path>","<Path>.github/workflows/**</Path>","<Path>scripts/**</Path>"]
-writable_paths: ["<Path>src/modules/sync/**</Path>","<Path>test/sync/**</Path>","<Path>test/release/**</Path>","<Path>.github/workflows/**</Path>","<Path>scripts/**</Path>"]
+expected_changes: ["<Path>src/modules/sync/**</Path>","<Path>test/sync/**</Path>","<Path>test/release/**</Path>","<Path>.github/workflows/**</Path>","<Path>scripts/**</Path>","<Path>main.js</Path>","<Path>src/modules/agent/platform/desktop/hooks/settings-write.test.ts</Path>","<Path>src/app/workbench/compose-workbench.ts</Path>","<Path>src/shell/host/workbench-surface.tsx</Path>","<Path>src/host/desktop/browser-session-main.test.ts</Path>","<Path>src/host/desktop/browser-session-recovery.test.ts</Path>","<Path>src/host/desktop/owned-permissions.ts</Path>","<Path>src/host/desktop/owned-permissions.test.ts</Path>"]
+writable_paths: ["<Path>src/modules/sync/**</Path>","<Path>test/sync/**</Path>","<Path>test/release/**</Path>","<Path>.github/workflows/**</Path>","<Path>scripts/**</Path>","<Path>main.js</Path>","<Path>src/modules/agent/platform/desktop/hooks/settings-write.test.ts</Path>","<Path>src/app/workbench/compose-workbench.ts</Path>","<Path>src/shell/host/workbench-surface.tsx</Path>","<Path>src/host/desktop/browser-session-main.test.ts</Path>","<Path>src/host/desktop/browser-session-recovery.test.ts</Path>","<Path>src/host/desktop/owned-permissions.ts</Path>","<Path>src/host/desktop/owned-permissions.test.ts</Path>"]
 read_only_paths: []
-shared_paths: ["<Path>src/modules/sync/**</Path>","<Path>test/sync/**</Path>","<Path>test/release/**</Path>","<Path>.github/workflows/**</Path>","<Path>scripts/**</Path>"]
-shared_path_owners: ["<Path>src/modules/sync/**</Path> => root","<Path>test/sync/**</Path> => root","<Path>test/release/**</Path> => root","<Path>.github/workflows/**</Path> => root","<Path>scripts/**</Path> => root"]
+shared_paths: ["<Path>src/modules/sync/**</Path>","<Path>test/sync/**</Path>","<Path>test/release/**</Path>","<Path>.github/workflows/**</Path>","<Path>scripts/**</Path>","<Path>main.js</Path>","<Path>src/modules/agent/platform/desktop/hooks/settings-write.test.ts</Path>","<Path>src/app/workbench/compose-workbench.ts</Path>","<Path>src/shell/host/workbench-surface.tsx</Path>","<Path>src/host/desktop/browser-session-main.test.ts</Path>","<Path>src/host/desktop/browser-session-recovery.test.ts</Path>","<Path>src/host/desktop/owned-permissions.ts</Path>","<Path>src/host/desktop/owned-permissions.test.ts</Path>"]
+shared_path_owners: ["<Path>src/modules/sync/**</Path> => root","<Path>test/sync/**</Path> => root","<Path>test/release/**</Path> => root","<Path>.github/workflows/**</Path> => root","<Path>scripts/**</Path> => root","<Path>main.js</Path> => root","<Path>src/modules/agent/platform/desktop/hooks/settings-write.test.ts</Path> => root","<Path>src/app/workbench/compose-workbench.ts</Path> => root","<Path>src/shell/host/workbench-surface.tsx</Path> => root","<Path>src/host/desktop/browser-session-main.test.ts</Path> => root","<Path>src/host/desktop/browser-session-recovery.test.ts</Path> => root","<Path>src/host/desktop/owned-permissions.ts</Path> => root","<Path>src/host/desktop/owned-permissions.test.ts</Path> => root"]
 ---
 
 # T-06 Git 冲突判定与发布检查依赖
@@ -80,10 +80,20 @@ E2E owner/environment: root / current-workspace。提交已获用户授权；imp
 
 ## 10. 验收标准
 
-- [ ] AC-006：merge/rebase 退出零仍检查冲突；回执、通知、自动同步计数一致；Release 必须依赖同一 SHA 的完整检查和 helper；失败、取消、跳过不能发布。
-- [ ] 非空实现、验证和双轴审查事实写入 <Path>{roots.state}/specdev/changes/2026-10-11-vault-data-unification/evidence/T-06.md</Path>。
-- [ ] 实际路径、Skill 摘要、命令结果、未验证范围与 Map 一致。
+- [x] AC-006：merge/rebase 退出零仍检查冲突；回执、通知、自动同步计数一致；Release 必须依赖同一 SHA 的完整检查和 helper；失败、取消、跳过不能发布。
+- [x] 非空实现、验证和双轴审查事实写入 <Path>{roots.state}/specdev/changes/2026-10-11-vault-data-unification/evidence/T-06.md</Path>。
+- [x] 实际路径、Skill 摘要、命令结果、未验证范围与 Map 一致。
 
 ## 12. 停止、检查点与交付
 
 记录 HEAD、写集和每次验证结果。遇到契约失效或失败则保留证据和可恢复数据，解决后重跑；完成后记录 implementation commit 和 direct-parent result，不将未执行的步骤写为通过。
+
+恢复接线：本机完整 build 揭示既有 Hook 测试适配器把 Node PathLike 收窄为 string 的类型错误。本票允许仅修正该测试签名以完成跨平台检查，不改变 Hook 产品实现。
+
+本机冷重启反例：Sync 模块 active 而恢复页面仍 not-ready。允许补齐上述工作台装配路径的模块状态订阅，保留所有页面/视图形态，并使用原宿主断言验证。
+
+跨平台门禁补正：旧浏览器测试使用 rmdirSync 删除 junction，在 Linux 链接上 ENOTDIR；本票仅替换为不递归删除链接本身的 rmSync，保留全部安全断言。
+
+恢复故障枚举在 Linux/Node24 实测超过单测试120秒，并留下未结束的异步循环。保持全部 before/after 故障点、来源/恢复/新凭据断言及原超时上限，改为逐故障点独立测试，避免汇总大循环超时污染后续测试；不改变迁移产品实现。
+
+全量回归确认继承的账号子树检查与 Hook 安装改名存在 ENOENT 竞态。允许在 owned-permissions 接缝有限次重扫当前树，并定向验证改名恢复、新插入链接仍拒绝；不跳过消失条目后直接宣称检查通过。

@@ -1,0 +1,77 @@
+{
+  "platform": "linux",
+  "passed": true,
+  "rows": [
+    {
+      "name": "zero-exit-autostash-is-a-failed-pull",
+      "passed": true,
+      "detail": {
+        "action": "pull",
+        "steps": [
+          {
+            "step": "pull",
+            "state": "conflict",
+            "count": 1
+          }
+        ],
+        "at": 1791858821577,
+        "auto": true,
+        "ok": false
+      }
+    },
+    {
+      "name": "host-ui-shows-conflict-and-delivers-error-notice",
+      "passed": true,
+      "detail": {
+        "text": "Pull stopped on conflicts in 1 file(s)",
+        "error": true
+      }
+    },
+    {
+      "name": "host-service-counts-the-first-failure",
+      "passed": true
+    },
+    {
+      "name": "no-operation-abort-keeps-conflict-and-stash",
+      "passed": true
+    },
+    {
+      "name": "three-failures-pause-automatic-sync",
+      "passed": true
+    },
+    {
+      "name": "cold-restart-keeps-conflict-and-pause",
+      "passed": true
+    },
+    {
+      "name": "resolution-pushes-and-clears-failures",
+      "passed": true,
+      "detail": {
+        "action": "commit-and-sync",
+        "steps": [
+          {
+            "step": "commit",
+            "state": "done",
+            "count": 1
+          },
+          {
+            "step": "pull",
+            "state": "nothing"
+          },
+          {
+            "step": "push",
+            "state": "done",
+            "count": 1
+          }
+        ],
+        "at": 1791858823564,
+        "auto": false,
+        "ok": true
+      }
+    },
+    {
+      "name": "local-edit-recovery-copy-is-still-retained",
+      "passed": true
+    }
+  ]
+}

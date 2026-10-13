@@ -1,0 +1,59 @@
+Already up to date
+Done in 451ms using pnpm v11.1.3
+Already up to date
+Done in 313ms using pnpm v11.1.3
+
+ RUN  v5.0.3 /home/wta/projects/nand
+
+ ❯ |unit| test/sync/git-flow.test.ts (39 tests | 4 failed | 35 skipped) 1896ms
+   ❯ conflicts and recovery (10)
+     × merge reports an autostash conflict after a successful integration (diverged=false) 496ms
+     × merge reports an autostash conflict after a successful integration (diverged=true) 485ms
+     × rebase reports an autostash conflict after a successful integration (diverged=false) 457ms
+     × rebase reports an autostash conflict after a successful integration (diverged=true) 446ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 4 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |unit| test/sync/git-flow.test.ts > conflicts and recovery > merge reports an autostash conflict after a successful integration (diverged=false)
+ FAIL  |unit| test/sync/git-flow.test.ts > conflicts and recovery > merge reports an autostash conflict after a successful integration (diverged=true)
+ FAIL  |unit| test/sync/git-flow.test.ts > conflicts and recovery > rebase reports an autostash conflict after a successful integration (diverged=false)
+ FAIL  |unit| test/sync/git-flow.test.ts > conflicts and recovery > rebase reports an autostash conflict after a successful integration (diverged=true)
+AssertionError: Expected values to be strictly deep-equal:
++ actual - expected
+
+  [
+    'skipped',
++   'done',
++   'failed'
+-   'conflict',
+-   'skipped'
+  ]
+
+
+- Expected
++ Received
+
+  [
+    "skipped",
+-   "conflict",
+-   "skipped",
++   "done",
++   "failed",
+  ]
+
+ ❯ test/sync/git-flow.test.ts:226:10
+    224|   write(w.a, 'note.md', 'unstaged local edit\n');
+    225|   const steps = await commitAndSync(repo, options({ mode: 'staged', me…
+    226|   assert.deepEqual(states(steps), ['skipped', 'conflict', 'skipped']);
+       |          ^
+    227|   assert.equal(steps[1]?.count, 1);
+    228|   assert.equal(steps[2]?.reason, 'blocked');
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/4]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  4 failed | 35 skipped (39)
+   Start at  21:28:33
+   Duration  2.61s (tests 76%, transform 19%, setup 2%, import 2%)
+

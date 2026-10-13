@@ -1,0 +1,64 @@
+Already up to date
+Done in 357ms using pnpm v11.1.3
+Already up to date
+Done in 410ms using pnpm v11.1.3
+
+ RUN  v5.0.3 /home/wta/projects/nand
+
+ ❯ |unit| test/sync/git-flow.test.ts (43 tests | 2 failed | 41 skipped) 881ms
+   ❯ the sync service (10)
+     × merge continuation reports a second conflict when the final autostash is restored 419ms
+     × rebase continuation reports a second conflict when the final autostash is restored 456ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |unit| test/sync/git-flow.test.ts > the sync service > merge continuation reports a second conflict when the final autostash is restored
+AssertionError: Expected values to be strictly equal:
+
+true !== false
+
+
+- Expected
++ Received
+
+- false
++ true
+
+ ❯ test/sync/git-flow.test.ts:594:11
+    592|    write(w.a, 'note.md', 'resolved first conflict\n'); await service.m…
+    593|    const continued = await service.continueOperation();
+    594|    assert.equal(continued.ok, false); assert.deepEqual(continued.steps…
+       |           ^
+    595|    assert.equal(service.snapshot.operation, null);
+    596|    assert.deepEqual(service.snapshot.status?.conflicted.map(row => row…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  |unit| test/sync/git-flow.test.ts > the sync service > rebase continuation reports a second conflict when the final autostash is restored
+AssertionError: Expected values to be strictly equal:
+
+true !== false
+
+
+- Expected
++ Received
+
+- false
++ true
+
+ ❯ test/sync/git-flow.test.ts:594:11
+    592|    write(w.a, 'note.md', 'resolved first conflict\n'); await service.m…
+    593|    const continued = await service.continueOperation();
+    594|    assert.equal(continued.ok, false); assert.deepEqual(continued.steps…
+       |           ^
+    595|    assert.equal(service.snapshot.operation, null);
+    596|    assert.deepEqual(service.snapshot.status?.conflicted.map(row => row…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  2 failed | 41 skipped (43)
+   Start at  21:32:50
+   Duration  1.54s (tests 62%, transform 30%, import 4%, setup 3%)
+

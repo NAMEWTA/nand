@@ -1,0 +1,456 @@
+{
+  "passed": true,
+  "realAccountsVerified": false,
+  "rows": [
+    {
+      "name": "old-owned-data-requires-cold-restart",
+      "passed": true
+    },
+    {
+      "name": "old-account-still-exists-before-restart",
+      "passed": true
+    },
+    {
+      "name": "module-reload-cannot-bypass-cold-gate",
+      "passed": true
+    },
+    {
+      "name": "old-account-retained-under-vault",
+      "passed": true
+    },
+    {
+      "name": "old-helper-retained-under-vault",
+      "passed": true
+    },
+    {
+      "name": "plugin-data-retired",
+      "passed": true
+    },
+    {
+      "name": "explicit-legacy-choice-a.b",
+      "passed": true
+    },
+    {
+      "name": "launch-claude-code-a.b",
+      "passed": true,
+      "detail": {
+        "ok": true
+      }
+    },
+    {
+      "name": "native-environment-claude-code-a.b",
+      "passed": true,
+      "detail": {
+        "HOME": "scripts/tmp/vault-unification-resume/accounts-linux-final/vault/.nand/agents/02ab6caf-438e-41ad-ab73-27bfc1664ccc/accounts/claude-code/2e7336dc8eba87ef472df568c35482abf2575dc3e5eac0c5c62b8ffaeac2c934/home",
+        "USERPROFILE": "scripts/tmp/vault-unification-resume/accounts-linux-final/vault/.nand/agents/02ab6caf-438e-41ad-ab73-27bfc1664ccc/accounts/claude-code/2e7336dc8eba87ef472df568c35482abf2575dc3e5eac0c5c62b8ffaeac2c934/home",
+        "APPDATA": "scripts/tmp/vault-unification-resume/accounts-linux-final/vault/.nand/agents/02ab6caf-438e-41ad-ab73-27bfc1664ccc/accounts/claude-code/2e7336dc8eba87ef472df568c35482abf2575dc3e5eac0c5c62b8ffaeac2c934/home/AppData/Roaming",
+        "LOCALAPPDATA": "scripts/tmp/vault-unification-resume/accounts-linux-final/vault/.nand/agents/02ab6caf-438e-41ad-ab73-27bfc1664ccc/accounts/claude-code/2e7336dc8eba87ef472df568c35482abf2575dc3e5eac0c5c62b8ffaeac2c934/home/AppData/Local",
+        "TMP": "scripts/tmp/vault-unification-resume/accounts-linux-final/vault/.nand/agents/02ab6caf-438e-41ad-ab73-27bfc1664ccc/accounts/claude-code/2e7336dc8eba87ef472df568c35482abf2575dc3e5eac0c5c62b8ffaeac2c934/tmp",
+        "TEMP": "scripts/tmp/vault-unification-resume/accounts-linux-final/vault/.nand/agents/02ab6caf-438e-41ad-ab73-27bfc1664ccc/accounts/claude-code/2e7336dc8eba87ef472df568c35482abf2575dc3e5eac0c5c62b8ffaeac2c934/tmp",
+        "TMPDIR": "scripts/tmp/vault-unification-resume/accounts-linux-final/vault/.nand/agents/02ab6caf-438e-41ad-ab73-27bfc1664ccc/accounts/claude-code/2e7336dc8eba87ef472df568c35482abf2575dc3e5eac0c5c62b8ffaeac2c934/tmp",
+        "XDG_CONFIG_HOME": "scripts/tmp/vault-unification-resume/accounts-linux-final/vault/.nand/agents/02ab6caf-438e-41ad-ab73-27bfc1664ccc/accounts/claude-code/2e7336dc8eba87ef472df568c35482abf2575dc3e5eac0c5c62b8ffaeac2c934/xdg/config",
+        "XDG_CACHE_HOME": "scripts/tmp/vault-unification-resume/accounts-linux-final/vault/.nand/agents/02ab6caf-438e-41ad-ab73-27bfc1664ccc/accounts/claude-code/2e7336dc8eba87ef472df568c35482abf2575dc3e5eac0c5c62b8ffaeac2c934/xdg/cache",
+        "XDG_DATA_HOME": "scripts/tmp/vault-unification-resume/accounts-linux-final/vault/.nand/agents/02ab6caf-438e-41ad-ab73-27bfc1664ccc/accounts/claude-code/2e7336dc8eba87ef472df568c35482abf2575dc3e5eac0c5c62b8ffaeac2c934/xdg/data",
+        "XDG_STATE_HOME": "scripts/tmp/vault-unification-resume/accounts-linux-final/vault/.nand/agents/02ab6caf-438e-41ad-ab73-27bfc1664ccc/accounts/claude-code/2e7336dc8eba87ef472df568c35482abf2575dc3e5eac0c5c62b8ffaeac2c934/xdg/state",
+        "CLAUDE_CONFIG_DIR": "scripts/tmp/vault-unification-resume/accounts-linux-final/vault/.nand/agents/02ab6caf-438e-41ad-ab73-27bfc1664ccc/accounts/claude-code/2e7336dc8eba87ef472df568c35482abf2575dc3e5eac0c5c62b8ffaeac2c934/legacy-config",
+        "CODEX_HOME": "scripts/tmp/vault-unification-resume/accounts-linux-final/vault/.nand/agents/02ab6caf-438e-41ad-ab73-27bfc1664ccc/accounts/claude-code/2e7336dc8eba87ef472df568c35482abf2575dc3e5eac0c5c62b8ffaeac2c934/home/.codex",
+        "GEMINI_CLI_HOME": "scripts/tmp/vault-unification-resume/accounts-linux-final/vault/.nand/agents/02ab6caf-438e-41ad-ab73-27bfc1664ccc/accounts/claude-code/2e7336dc8eba87ef472df568c35482abf2575dc3e5eac0c5c62b8ffaeac2c934/home",
+        "GROK_HOME": "scripts/tmp/vault-unification-resume/accounts-linux-final/vault/.nand/agents/02ab6caf-438e-41ad-ab73-27bfc1664ccc/accounts/claude-code/2e7336dc8eba87ef472df568c35482abf2575dc3e5eac0c5c62b8ffaeac2c934/home/.grok",
+        "PI_CODING_AGENT_DIR": "scripts/tmp/vault-unification-resume/accounts-linux-final/vault/.nand/agents/02ab6caf-438e-41ad-ab73-27bfc1664ccc/accounts/claude-code/2e7336dc8eba87ef472df568c35482abf2575dc3e5eac0c5c62b8ffaeac2c934/home/.pi/agent",
+        "PI_CODING_AGENT_SESSION_DIR": "scripts/tmp/vault-unification-resume/accounts-linux-final/vault/.nand/agents/02ab6caf-438e-41ad-ab73-27bfc1664ccc/accounts/claude-code/2e7336dc8eba87ef472df568c35482abf2575dc3e5eac0c5c62b8ffaeac2c934/home/.pi/agent/sessions",
+        "OPENCODE_CONFIG_DIR": "scripts/tmp/vault-unification-resume/accounts-linux-final/vault/.nand/agents/02ab6caf-438e-41ad-ab73-27bfc1664ccc/accounts/claude-code/2e7336dc8eba87ef472df568c35482abf2575dc3e5eac0c5c62b8ffaeac2c934/xdg/config/opencode",
+        "NAND_ACCOUNT_ROOT": "scripts/tmp/vault-unification-resume/accounts-linux-final/vault/.nand/agents/02ab6caf-438e-41ad-ab73-27bfc1664ccc/accounts/claude-code/2e7336dc8eba87ef472df568c35482abf2575dc3e5eac0c5c62b8ffaeac2c934",
+        "NAND_ACCOUNT_ID": "claude-code/2e7336dc8eba87ef472df568c35482abf2575dc3e5eac0c5c62b8ffaeac2c934",
+        "NAND_ACCOUNT_NAME": "a.b",
+        "NAND_HOOK_DIR": "scripts/tmp/vault-unification-resume/accounts-linux-final/vault/.nand/agents/02ab6caf-438e-41ad-ab73-27bfc1664ccc/accounts/claude-code/2e7336dc8eba87ef472df568c35482abf2575dc3e5eac0c5c62b8ffaeac2c934/runtime/hooks/terminal-ZrebYZ"
+      }
+    },
+    {
+      "name": "selected-old-credentials-used",
+      "passed": true
+    },
+    {
+      "name": "explicit-legacy-choice-ab",
+      "passed": true
+    },
+    {
+      "name": "launch-claude-code-ab",
+      "passed": true,
+      "detail": {
+        "ok": true
+      }
+    },
+    {
+      "name": "native-environment-claude-code-ab",
+      "passed": true,
+      "detail": {
+        "HOME": "scripts/tmp/vault-unification-resume/accounts-linux-final/vault/.nand/agents/02ab6caf-438e-41ad-ab73-27bfc1664ccc/accounts/claude-code/fb8e20fc2e4c3f248c60c39bd652f3c1347298bb977b8b4d5903b85055620603/home",
+        "USERPROFILE": "scripts/tmp/vault-unification-resume/accounts-linux-final/vault/.nand/agents/02ab6caf-438e-41ad-ab73-27bfc1664ccc/accounts/claude-code/fb8e20fc2e4c3f248c60c39bd652f3c1347298bb977b8b4d5903b85055620603/home",
+        "APPDATA": "scripts/tmp/vault-unification-resume/accounts-linux-final/vault/.nand/agents/02ab6caf-438e-41ad-ab73-27bfc1664ccc/accounts/claude-code/fb8e20fc2e4c3f248c60c39bd652f3c1347298bb977b8b4d5903b85055620603/home/AppData/Roaming",
+        "LOCALAPPDATA": "scripts/tmp/vault-unification-resume/accounts-linux-final/vault/.nand/agents/02ab6caf-438e-41ad-ab73-27bfc1664ccc/accounts/claude-code/fb8e20fc2e4c3f248c60c39bd652f3c1347298bb977b8b4d5903b85055620603/home/AppData/Local",
+        "TMP": "scripts/tmp/vault-unification-resume/accounts-linux-final/vault/.nand/agents/02ab6caf-438e-41ad-ab73-27bfc1664ccc/accounts/claude-code/fb8e20fc2e4c3f248c60c39bd652f3c1347298bb977b8b4d5903b85055620603/tmp",
+        "TEMP": "scripts/tmp/vault-unification-resume/accounts-linux-final/vault/.nand/agents/02ab6caf-438e-41ad-ab73-27bfc1664ccc/accounts/claude-code/fb8e20fc2e4c3f248c60c39bd652f3c1347298bb977b8b4d5903b85055620603/tmp",
+        "TMPDIR": "scripts/tmp/vault-unification-resume/accounts-linux-final/vault/.nand/agents/02ab6caf-438e-41ad-ab73-27bfc1664ccc/accounts/claude-code/fb8e20fc2e4c3f248c60c39bd652f3c1347298bb977b8b4d5903b85055620603/tmp",
+        "XDG_CONFIG_HOME": "scripts/tmp/vault-unification-resume/accounts-linux-final/vault/.nand/agents/02ab6caf-438e-41ad-ab73-27bfc1664ccc/accounts/claude-code/fb8e20fc2e4c3f248c60c39bd652f3c1347298bb977b8b4d5903b85055620603/xdg/config",
+        "XDG_CACHE_HOME": "scripts/tmp/vault-unification-resume/accounts-linux-final/vault/.nand/agents/02ab6caf-438e-41ad-ab73-27bfc1664ccc/accounts/claude-code/fb8e20fc2e4c3f248c60c39bd652f3c1347298bb977b8b4d5903b85055620603/xdg/cache",
+        "XDG_DATA_HOME": "scripts/tmp/vault-unification-resume/accounts-linux-final/vault/.nand/agents/02ab6caf-438e-41ad-ab73-27bfc1664ccc/accounts/claude-code/fb8e20fc2e4c3f248c60c39bd652f3c1347298bb977b8b4d5903b85055620603/xdg/data",
+        "XDG_STATE_HOME": "scripts/tmp/vault-unification-resume/accounts-linux-final/vault/.nand/agents/02ab6caf-438e-41ad-ab73-27bfc1664ccc/accounts/claude-code/fb8e20fc2e4c3f248c60c39bd652f3c1347298bb977b8b4d5903b85055620603/xdg/state",
+        "CLAUDE_CONFIG_DIR": "scripts/tmp/vault-unification-resume/accounts-linux-final/vault/.nand/agents/02ab6caf-438e-41ad-ab73-27bfc1664ccc/accounts/claude-code/fb8e20fc2e4c3f248c60c39bd652f3c1347298bb977b8b4d5903b85055620603/home/.claude",
+        "CODEX_HOME": "scripts/tmp/vault-unification-resume/accounts-linux-final/vault/.nand/agents/02ab6caf-438e-41ad-ab73-27bfc1664ccc/accounts/claude-code/fb8e20fc2e4c3f248c60c39bd652f3c1347298bb977b8b4d5903b85055620603/home/.codex",
+        "GEMINI_CLI_HOME": "scripts/tmp/vault-unification-resume/accounts-linux-final/vault/.nand/agents/02ab6caf-438e-41ad-ab73-27bfc1664ccc/accounts/claude-code/fb8e20fc2e4c3f248c60c39bd652f3c1347298bb977b8b4d5903b85055620603/home",
+        "GROK_HOME": "scripts/tmp/vault-unification-resume/accounts-linux-final/vault/.nand/agents/02ab6caf-438e-41ad-ab73-27bfc1664ccc/accounts/claude-code/fb8e20fc2e4c3f248c60c39bd652f3c1347298bb977b8b4d5903b85055620603/home/.grok",
+        "PI_CODING_AGENT_DIR": "scripts/tmp/vault-unification-resume/accounts-linux-final/vault/.nand/agents/02ab6caf-438e-41ad-ab73-27bfc1664ccc/accounts/claude-code/fb8e20fc2e4c3f248c60c39bd652f3c1347298bb977b8b4d5903b85055620603/home/.pi/agent",
+        "PI_CODING_AGENT_SESSION_DIR": "scripts/tmp/vault-unification-resume/accounts-linux-final/vault/.nand/agents/02ab6caf-438e-41ad-ab73-27bfc1664ccc/accounts/claude-code/fb8e20fc2e4c3f248c60c39bd652f3c1347298bb977b8b4d5903b85055620603/home/.pi/agent/sessions",
+        "OPENCODE_CONFIG_DIR": "scripts/tmp/vault-unification-resume/accounts-linux-final/vault/.nand/agents/02ab6caf-438e-41ad-ab73-27bfc1664ccc/accounts/claude-code/fb8e20fc2e4c3f248c60c39bd652f3c1347298bb977b8b4d5903b85055620603/xdg/config/opencode",
+        "NAND_ACCOUNT_ROOT": "scripts/tmp/vault-unification-resume/accounts-linux-final/vault/.nand/agents/02ab6caf-438e-41ad-ab73-27bfc1664ccc/accounts/claude-code/fb8e20fc2e4c3f248c60c39bd652f3c1347298bb977b8b4d5903b85055620603",
+        "NAND_ACCOUNT_ID": "claude-code/fb8e20fc2e4c3f248c60c39bd652f3c1347298bb977b8b4d5903b85055620603",
+        "NAND_ACCOUNT_NAME": "ab",
+        "NAND_HOOK_DIR": "scripts/tmp/vault-unification-resume/accounts-linux-final/vault/.nand/agents/02ab6caf-438e-41ad-ab73-27bfc1664ccc/accounts/claude-code/fb8e20fc2e4c3f248c60c39bd652f3c1347298bb977b8b4d5903b85055620603/runtime/hooks/terminal-c6vcg1"
+      }
+    },
+    {
+      "name": "lossy-collision-does-not-reuse-credentials",
+      "passed": true
+    },
+    {
+      "name": "explicit-legacy-choice-",
+      "passed": true
+    },
+    {
+      "name": "launch-claude-code-",
+      "passed": true,
+      "detail": {
+        "ok": true
+      }
+    },
+    {
+      "name": "native-environment-claude-code-",
+      "passed": true,
+      "detail": {
+        "HOME": "scripts/tmp/vault-unification-resume/accounts-linux-final/vault/.nand/agents/02ab6caf-438e-41ad-ab73-27bfc1664ccc/accounts/claude-code/default/home",
+        "USERPROFILE": "scripts/tmp/vault-unification-resume/accounts-linux-final/vault/.nand/agents/02ab6caf-438e-41ad-ab73-27bfc1664ccc/accounts/claude-code/default/home",
+        "APPDATA": "scripts/tmp/vault-unification-resume/accounts-linux-final/vault/.nand/agents/02ab6caf-438e-41ad-ab73-27bfc1664ccc/accounts/claude-code/default/home/AppData/Roaming",
+        "LOCALAPPDATA": "scripts/tmp/vault-unification-resume/accounts-linux-final/vault/.nand/agents/02ab6caf-438e-41ad-ab73-27bfc1664ccc/accounts/claude-code/default/home/AppData/Local",
+        "TMP": "scripts/tmp/vault-unification-resume/accounts-linux-final/vault/.nand/agents/02ab6caf-438e-41ad-ab73-27bfc1664ccc/accounts/claude-code/default/tmp",
+        "TEMP": "scripts/tmp/vault-unification-resume/accounts-linux-final/vault/.nand/agents/02ab6caf-438e-41ad-ab73-27bfc1664ccc/accounts/claude-code/default/tmp",
+        "TMPDIR": "scripts/tmp/vault-unification-resume/accounts-linux-final/vault/.nand/agents/02ab6caf-438e-41ad-ab73-27bfc1664ccc/accounts/claude-code/default/tmp",
+        "XDG_CONFIG_HOME": "scripts/tmp/vault-unification-resume/accounts-linux-final/vault/.nand/agents/02ab6caf-438e-41ad-ab73-27bfc1664ccc/accounts/claude-code/default/xdg/config",
+        "XDG_CACHE_HOME": "scripts/tmp/vault-unification-resume/accounts-linux-final/vault/.nand/agents/02ab6caf-438e-41ad-ab73-27bfc1664ccc/accounts/claude-code/default/xdg/cache",
+        "XDG_DATA_HOME": "scripts/tmp/vault-unification-resume/accounts-linux-final/vault/.nand/agents/02ab6caf-438e-41ad-ab73-27bfc1664ccc/accounts/claude-code/default/xdg/data",
+        "XDG_STATE_HOME": "scripts/tmp/vault-unification-resume/accounts-linux-final/vault/.nand/agents/02ab6caf-438e-41ad-ab73-27bfc1664ccc/accounts/claude-code/default/xdg/state",
+        "CLAUDE_CONFIG_DIR": "scripts/tmp/vault-unification-resume/accounts-linux-final/vault/.nand/agents/02ab6caf-438e-41ad-ab73-27bfc1664ccc/accounts/claude-code/default/home/.claude",
+        "CODEX_HOME": "scripts/tmp/vault-unification-resume/accounts-linux-final/vault/.nand/agents/02ab6caf-438e-41ad-ab73-27bfc1664ccc/accounts/claude-code/default/home/.codex",
+        "GEMINI_CLI_HOME": "scripts/tmp/vault-unification-resume/accounts-linux-final/vault/.nand/agents/02ab6caf-438e-41ad-ab73-27bfc1664ccc/accounts/claude-code/default/home",
+        "GROK_HOME": "scripts/tmp/vault-unification-resume/accounts-linux-final/vault/.nand/agents/02ab6caf-438e-41ad-ab73-27bfc1664ccc/accounts/claude-code/default/home/.grok",
+        "PI_CODING_AGENT_DIR": "scripts/tmp/vault-unification-resume/accounts-linux-final/vault/.nand/agents/02ab6caf-438e-41ad-ab73-27bfc1664ccc/accounts/claude-code/default/home/.pi/agent",
+        "PI_CODING_AGENT_SESSION_DIR": "scripts/tmp/vault-unification-resume/accounts-linux-final/vault/.nand/agents/02ab6caf-438e-41ad-ab73-27bfc1664ccc/accounts/claude-code/default/home/.pi/agent/sessions",
+        "OPENCODE_CONFIG_DIR": "scripts/tmp/vault-unification-resume/accounts-linux-final/vault/.nand/agents/02ab6caf-438e-41ad-ab73-27bfc1664ccc/accounts/claude-code/default/xdg/config/opencode",
+        "NAND_ACCOUNT_ROOT": "scripts/tmp/vault-unification-resume/accounts-linux-final/vault/.nand/agents/02ab6caf-438e-41ad-ab73-27bfc1664ccc/accounts/claude-code/default",
+        "NAND_ACCOUNT_ID": "claude-code/default",
+        "NAND_ACCOUNT_NAME": "",
+        "NAND_HOOK_DIR": "scripts/tmp/vault-unification-resume/accounts-linux-final/vault/.nand/agents/02ab6caf-438e-41ad-ab73-27bfc1664ccc/accounts/claude-code/default/runtime/hooks/terminal-6N7YmA"
+      }
+    },
+    {
+      "name": "launch-codex-",
+      "passed": true,
+      "detail": {
+        "ok": true
+      }
+    },
+    {
+      "name": "native-environment-codex-",
+      "passed": true,
+      "detail": {
+        "HOME": "scripts/tmp/vault-unification-resume/accounts-linux-final/vault/.nand/agents/02ab6caf-438e-41ad-ab73-27bfc1664ccc/accounts/codex/default/home",
+        "USERPROFILE": "scripts/tmp/vault-unification-resume/accounts-linux-final/vault/.nand/agents/02ab6caf-438e-41ad-ab73-27bfc1664ccc/accounts/codex/default/home",
+        "APPDATA": "scripts/tmp/vault-unification-resume/accounts-linux-final/vault/.nand/agents/02ab6caf-438e-41ad-ab73-27bfc1664ccc/accounts/codex/default/home/AppData/Roaming",
+        "LOCALAPPDATA": "scripts/tmp/vault-unification-resume/accounts-linux-final/vault/.nand/agents/02ab6caf-438e-41ad-ab73-27bfc1664ccc/accounts/codex/default/home/AppData/Local",
+        "TMP": "scripts/tmp/vault-unification-resume/accounts-linux-final/vault/.nand/agents/02ab6caf-438e-41ad-ab73-27bfc1664ccc/accounts/codex/default/tmp",
+        "TEMP": "scripts/tmp/vault-unification-resume/accounts-linux-final/vault/.nand/agents/02ab6caf-438e-41ad-ab73-27bfc1664ccc/accounts/codex/default/tmp",
+        "TMPDIR": "scripts/tmp/vault-unification-resume/accounts-linux-final/vault/.nand/agents/02ab6caf-438e-41ad-ab73-27bfc1664ccc/accounts/codex/default/tmp",
+        "XDG_CONFIG_HOME": "scripts/tmp/vault-unification-resume/accounts-linux-final/vault/.nand/agents/02ab6caf-438e-41ad-ab73-27bfc1664ccc/accounts/codex/default/xdg/config",
+        "XDG_CACHE_HOME": "scripts/tmp/vault-unification-resume/accounts-linux-final/vault/.nand/agents/02ab6caf-438e-41ad-ab73-27bfc1664ccc/accounts/codex/default/xdg/cache",
+        "XDG_DATA_HOME": "scripts/tmp/vault-unification-resume/accounts-linux-final/vault/.nand/agents/02ab6caf-438e-41ad-ab73-27bfc1664ccc/accounts/codex/default/xdg/data",
+        "XDG_STATE_HOME": "scripts/tmp/vault-unification-resume/accounts-linux-final/vault/.nand/agents/02ab6caf-438e-41ad-ab73-27bfc1664ccc/accounts/codex/default/xdg/state",
+        "CLAUDE_CONFIG_DIR": "scripts/tmp/vault-unification-resume/accounts-linux-final/vault/.nand/agents/02ab6caf-438e-41ad-ab73-27bfc1664ccc/accounts/codex/default/home/.claude",
+        "CODEX_HOME": "scripts/tmp/vault-unification-resume/accounts-linux-final/vault/.nand/agents/02ab6caf-438e-41ad-ab73-27bfc1664ccc/accounts/codex/default/home/.codex",
+        "GEMINI_CLI_HOME": "scripts/tmp/vault-unification-resume/accounts-linux-final/vault/.nand/agents/02ab6caf-438e-41ad-ab73-27bfc1664ccc/accounts/codex/default/home",
+        "GROK_HOME": "scripts/tmp/vault-unification-resume/accounts-linux-final/vault/.nand/agents/02ab6caf-438e-41ad-ab73-27bfc1664ccc/accounts/codex/default/home/.grok",
+        "PI_CODING_AGENT_DIR": "scripts/tmp/vault-unification-resume/accounts-linux-final/vault/.nand/agents/02ab6caf-438e-41ad-ab73-27bfc1664ccc/accounts/codex/default/home/.pi/agent",
+        "PI_CODING_AGENT_SESSION_DIR": "scripts/tmp/vault-unification-resume/accounts-linux-final/vault/.nand/agents/02ab6caf-438e-41ad-ab73-27bfc1664ccc/accounts/codex/default/home/.pi/agent/sessions",
+        "OPENCODE_CONFIG_DIR": "scripts/tmp/vault-unification-resume/accounts-linux-final/vault/.nand/agents/02ab6caf-438e-41ad-ab73-27bfc1664ccc/accounts/codex/default/xdg/config/opencode",
+        "NAND_ACCOUNT_ROOT": "scripts/tmp/vault-unification-resume/accounts-linux-final/vault/.nand/agents/02ab6caf-438e-41ad-ab73-27bfc1664ccc/accounts/codex/default",
+        "NAND_ACCOUNT_ID": "codex/default",
+        "NAND_ACCOUNT_NAME": "",
+        "NAND_HOOK_DIR": "scripts/tmp/vault-unification-resume/accounts-linux-final/vault/.nand/agents/02ab6caf-438e-41ad-ab73-27bfc1664ccc/accounts/codex/default/runtime/hooks/terminal-DkGrPd"
+      }
+    },
+    {
+      "name": "launch-gemini-",
+      "passed": true,
+      "detail": {
+        "ok": true
+      }
+    },
+    {
+      "name": "native-environment-gemini-",
+      "passed": true,
+      "detail": {
+        "HOME": "scripts/tmp/vault-unification-resume/accounts-linux-final/vault/.nand/agents/02ab6caf-438e-41ad-ab73-27bfc1664ccc/accounts/gemini/default/home",
+        "USERPROFILE": "scripts/tmp/vault-unification-resume/accounts-linux-final/vault/.nand/agents/02ab6caf-438e-41ad-ab73-27bfc1664ccc/accounts/gemini/default/home",
+        "APPDATA": "scripts/tmp/vault-unification-resume/accounts-linux-final/vault/.nand/agents/02ab6caf-438e-41ad-ab73-27bfc1664ccc/accounts/gemini/default/home/AppData/Roaming",
+        "LOCALAPPDATA": "scripts/tmp/vault-unification-resume/accounts-linux-final/vault/.nand/agents/02ab6caf-438e-41ad-ab73-27bfc1664ccc/accounts/gemini/default/home/AppData/Local",
+        "TMP": "scripts/tmp/vault-unification-resume/accounts-linux-final/vault/.nand/agents/02ab6caf-438e-41ad-ab73-27bfc1664ccc/accounts/gemini/default/tmp",
+        "TEMP": "scripts/tmp/vault-unification-resume/accounts-linux-final/vault/.nand/agents/02ab6caf-438e-41ad-ab73-27bfc1664ccc/accounts/gemini/default/tmp",
+        "TMPDIR": "scripts/tmp/vault-unification-resume/accounts-linux-final/vault/.nand/agents/02ab6caf-438e-41ad-ab73-27bfc1664ccc/accounts/gemini/default/tmp",
+        "XDG_CONFIG_HOME": "scripts/tmp/vault-unification-resume/accounts-linux-final/vault/.nand/agents/02ab6caf-438e-41ad-ab73-27bfc1664ccc/accounts/gemini/default/xdg/config",
+        "XDG_CACHE_HOME": "scripts/tmp/vault-unification-resume/accounts-linux-final/vault/.nand/agents/02ab6caf-438e-41ad-ab73-27bfc1664ccc/accounts/gemini/default/xdg/cache",
+        "XDG_DATA_HOME": "scripts/tmp/vault-unification-resume/accounts-linux-final/vault/.nand/agents/02ab6caf-438e-41ad-ab73-27bfc1664ccc/accounts/gemini/default/xdg/data",
+        "XDG_STATE_HOME": "scripts/tmp/vault-unification-resume/accounts-linux-final/vault/.nand/agents/02ab6caf-438e-41ad-ab73-27bfc1664ccc/accounts/gemini/default/xdg/state",
+        "CLAUDE_CONFIG_DIR": "scripts/tmp/vault-unification-resume/accounts-linux-final/vault/.nand/agents/02ab6caf-438e-41ad-ab73-27bfc1664ccc/accounts/gemini/default/home/.claude",
+        "CODEX_HOME": "scripts/tmp/vault-unification-resume/accounts-linux-final/vault/.nand/agents/02ab6caf-438e-41ad-ab73-27bfc1664ccc/accounts/gemini/default/home/.codex",
+        "GEMINI_CLI_HOME": "scripts/tmp/vault-unification-resume/accounts-linux-final/vault/.nand/agents/02ab6caf-438e-41ad-ab73-27bfc1664ccc/accounts/gemini/default/home",
+        "GROK_HOME": "scripts/tmp/vault-unification-resume/accounts-linux-final/vault/.nand/agents/02ab6caf-438e-41ad-ab73-27bfc1664ccc/accounts/gemini/default/home/.grok",
+        "PI_CODING_AGENT_DIR": "scripts/tmp/vault-unification-resume/accounts-linux-final/vault/.nand/agents/02ab6caf-438e-41ad-ab73-27bfc1664ccc/accounts/gemini/default/home/.pi/agent",
+        "PI_CODING_AGENT_SESSION_DIR": "scripts/tmp/vault-unification-resume/accounts-linux-final/vault/.nand/agents/02ab6caf-438e-41ad-ab73-27bfc1664ccc/accounts/gemini/default/home/.pi/agent/sessions",
+        "OPENCODE_CONFIG_DIR": "scripts/tmp/vault-unification-resume/accounts-linux-final/vault/.nand/agents/02ab6caf-438e-41ad-ab73-27bfc1664ccc/accounts/gemini/default/xdg/config/opencode",
+        "NAND_ACCOUNT_ROOT": "scripts/tmp/vault-unification-resume/accounts-linux-final/vault/.nand/agents/02ab6caf-438e-41ad-ab73-27bfc1664ccc/accounts/gemini/default",
+        "NAND_ACCOUNT_ID": "gemini/default",
+        "NAND_ACCOUNT_NAME": "",
+        "NAND_HOOK_DIR": "scripts/tmp/vault-unification-resume/accounts-linux-final/vault/.nand/agents/02ab6caf-438e-41ad-ab73-27bfc1664ccc/accounts/gemini/default/runtime/hooks/terminal-VufqR1"
+      }
+    },
+    {
+      "name": "launch-grok-",
+      "passed": true,
+      "detail": {
+        "ok": true
+      }
+    },
+    {
+      "name": "native-environment-grok-",
+      "passed": true,
+      "detail": {
+        "HOME": "scripts/tmp/vault-unification-resume/accounts-linux-final/vault/.nand/agents/02ab6caf-438e-41ad-ab73-27bfc1664ccc/accounts/grok/default/home",
+        "USERPROFILE": "scripts/tmp/vault-unification-resume/accounts-linux-final/vault/.nand/agents/02ab6caf-438e-41ad-ab73-27bfc1664ccc/accounts/grok/default/home",
+        "APPDATA": "scripts/tmp/vault-unification-resume/accounts-linux-final/vault/.nand/agents/02ab6caf-438e-41ad-ab73-27bfc1664ccc/accounts/grok/default/home/AppData/Roaming",
+        "LOCALAPPDATA": "scripts/tmp/vault-unification-resume/accounts-linux-final/vault/.nand/agents/02ab6caf-438e-41ad-ab73-27bfc1664ccc/accounts/grok/default/home/AppData/Local",
+        "TMP": "scripts/tmp/vault-unification-resume/accounts-linux-final/vault/.nand/agents/02ab6caf-438e-41ad-ab73-27bfc1664ccc/accounts/grok/default/tmp",
+        "TEMP": "scripts/tmp/vault-unification-resume/accounts-linux-final/vault/.nand/agents/02ab6caf-438e-41ad-ab73-27bfc1664ccc/accounts/grok/default/tmp",
+        "TMPDIR": "scripts/tmp/vault-unification-resume/accounts-linux-final/vault/.nand/agents/02ab6caf-438e-41ad-ab73-27bfc1664ccc/accounts/grok/default/tmp",
+        "XDG_CONFIG_HOME": "scripts/tmp/vault-unification-resume/accounts-linux-final/vault/.nand/agents/02ab6caf-438e-41ad-ab73-27bfc1664ccc/accounts/grok/default/xdg/config",
+        "XDG_CACHE_HOME": "scripts/tmp/vault-unification-resume/accounts-linux-final/vault/.nand/agents/02ab6caf-438e-41ad-ab73-27bfc1664ccc/accounts/grok/default/xdg/cache",
+        "XDG_DATA_HOME": "scripts/tmp/vault-unification-resume/accounts-linux-final/vault/.nand/agents/02ab6caf-438e-41ad-ab73-27bfc1664ccc/accounts/grok/default/xdg/data",
+        "XDG_STATE_HOME": "scripts/tmp/vault-unification-resume/accounts-linux-final/vault/.nand/agents/02ab6caf-438e-41ad-ab73-27bfc1664ccc/accounts/grok/default/xdg/state",
+        "CLAUDE_CONFIG_DIR": "scripts/tmp/vault-unification-resume/accounts-linux-final/vault/.nand/agents/02ab6caf-438e-41ad-ab73-27bfc1664ccc/accounts/grok/default/home/.claude",
+        "CODEX_HOME": "scripts/tmp/vault-unification-resume/accounts-linux-final/vault/.nand/agents/02ab6caf-438e-41ad-ab73-27bfc1664ccc/accounts/grok/default/home/.codex",
+        "GEMINI_CLI_HOME": "scripts/tmp/vault-unification-resume/accounts-linux-final/vault/.nand/agents/02ab6caf-438e-41ad-ab73-27bfc1664ccc/accounts/grok/default/home",
+        "GROK_HOME": "scripts/tmp/vault-unification-resume/accounts-linux-final/vault/.nand/agents/02ab6caf-438e-41ad-ab73-27bfc1664ccc/accounts/grok/default/home/.grok",
+        "PI_CODING_AGENT_DIR": "scripts/tmp/vault-unification-resume/accounts-linux-final/vault/.nand/agents/02ab6caf-438e-41ad-ab73-27bfc1664ccc/accounts/grok/default/home/.pi/agent",
+        "PI_CODING_AGENT_SESSION_DIR": "scripts/tmp/vault-unification-resume/accounts-linux-final/vault/.nand/agents/02ab6caf-438e-41ad-ab73-27bfc1664ccc/accounts/grok/default/home/.pi/agent/sessions",
+        "OPENCODE_CONFIG_DIR": "scripts/tmp/vault-unification-resume/accounts-linux-final/vault/.nand/agents/02ab6caf-438e-41ad-ab73-27bfc1664ccc/accounts/grok/default/xdg/config/opencode",
+        "NAND_ACCOUNT_ROOT": "scripts/tmp/vault-unification-resume/accounts-linux-final/vault/.nand/agents/02ab6caf-438e-41ad-ab73-27bfc1664ccc/accounts/grok/default",
+        "NAND_ACCOUNT_ID": "grok/default",
+        "NAND_ACCOUNT_NAME": "",
+        "NAND_HOOK_DIR": "scripts/tmp/vault-unification-resume/accounts-linux-final/vault/.nand/agents/02ab6caf-438e-41ad-ab73-27bfc1664ccc/accounts/grok/default/runtime/hooks/terminal-0hLFJR"
+      }
+    },
+    {
+      "name": "launch-pi-",
+      "passed": true,
+      "detail": {
+        "ok": true
+      }
+    },
+    {
+      "name": "native-environment-pi-",
+      "passed": true,
+      "detail": {
+        "HOME": "scripts/tmp/vault-unification-resume/accounts-linux-final/vault/.nand/agents/02ab6caf-438e-41ad-ab73-27bfc1664ccc/accounts/pi/default/home",
+        "USERPROFILE": "scripts/tmp/vault-unification-resume/accounts-linux-final/vault/.nand/agents/02ab6caf-438e-41ad-ab73-27bfc1664ccc/accounts/pi/default/home",
+        "APPDATA": "scripts/tmp/vault-unification-resume/accounts-linux-final/vault/.nand/agents/02ab6caf-438e-41ad-ab73-27bfc1664ccc/accounts/pi/default/home/AppData/Roaming",
+        "LOCALAPPDATA": "scripts/tmp/vault-unification-resume/accounts-linux-final/vault/.nand/agents/02ab6caf-438e-41ad-ab73-27bfc1664ccc/accounts/pi/default/home/AppData/Local",
+        "TMP": "scripts/tmp/vault-unification-resume/accounts-linux-final/vault/.nand/agents/02ab6caf-438e-41ad-ab73-27bfc1664ccc/accounts/pi/default/tmp",
+        "TEMP": "scripts/tmp/vault-unification-resume/accounts-linux-final/vault/.nand/agents/02ab6caf-438e-41ad-ab73-27bfc1664ccc/accounts/pi/default/tmp",
+        "TMPDIR": "scripts/tmp/vault-unification-resume/accounts-linux-final/vault/.nand/agents/02ab6caf-438e-41ad-ab73-27bfc1664ccc/accounts/pi/default/tmp",
+        "XDG_CONFIG_HOME": "scripts/tmp/vault-unification-resume/accounts-linux-final/vault/.nand/agents/02ab6caf-438e-41ad-ab73-27bfc1664ccc/accounts/pi/default/xdg/config",
+        "XDG_CACHE_HOME": "scripts/tmp/vault-unification-resume/accounts-linux-final/vault/.nand/agents/02ab6caf-438e-41ad-ab73-27bfc1664ccc/accounts/pi/default/xdg/cache",
+        "XDG_DATA_HOME": "scripts/tmp/vault-unification-resume/accounts-linux-final/vault/.nand/agents/02ab6caf-438e-41ad-ab73-27bfc1664ccc/accounts/pi/default/xdg/data",
+        "XDG_STATE_HOME": "scripts/tmp/vault-unification-resume/accounts-linux-final/vault/.nand/agents/02ab6caf-438e-41ad-ab73-27bfc1664ccc/accounts/pi/default/xdg/state",
+        "CLAUDE_CONFIG_DIR": "scripts/tmp/vault-unification-resume/accounts-linux-final/vault/.nand/agents/02ab6caf-438e-41ad-ab73-27bfc1664ccc/accounts/pi/default/home/.claude",
+        "CODEX_HOME": "scripts/tmp/vault-unification-resume/accounts-linux-final/vault/.nand/agents/02ab6caf-438e-41ad-ab73-27bfc1664ccc/accounts/pi/default/home/.codex",
+        "GEMINI_CLI_HOME": "scripts/tmp/vault-unification-resume/accounts-linux-final/vault/.nand/agents/02ab6caf-438e-41ad-ab73-27bfc1664ccc/accounts/pi/default/home",
+        "GROK_HOME": "scripts/tmp/vault-unification-resume/accounts-linux-final/vault/.nand/agents/02ab6caf-438e-41ad-ab73-27bfc1664ccc/accounts/pi/default/home/.grok",
+        "PI_CODING_AGENT_DIR": "scripts/tmp/vault-unification-resume/accounts-linux-final/vault/.nand/agents/02ab6caf-438e-41ad-ab73-27bfc1664ccc/accounts/pi/default/home/.pi/agent",
+        "PI_CODING_AGENT_SESSION_DIR": "scripts/tmp/vault-unification-resume/accounts-linux-final/vault/.nand/agents/02ab6caf-438e-41ad-ab73-27bfc1664ccc/accounts/pi/default/home/.pi/agent/sessions",
+        "OPENCODE_CONFIG_DIR": "scripts/tmp/vault-unification-resume/accounts-linux-final/vault/.nand/agents/02ab6caf-438e-41ad-ab73-27bfc1664ccc/accounts/pi/default/xdg/config/opencode",
+        "NAND_ACCOUNT_ROOT": "scripts/tmp/vault-unification-resume/accounts-linux-final/vault/.nand/agents/02ab6caf-438e-41ad-ab73-27bfc1664ccc/accounts/pi/default",
+        "NAND_ACCOUNT_ID": "pi/default",
+        "NAND_ACCOUNT_NAME": "",
+        "NAND_HOOK_DIR": "scripts/tmp/vault-unification-resume/accounts-linux-final/vault/.nand/agents/02ab6caf-438e-41ad-ab73-27bfc1664ccc/accounts/pi/default/runtime/hooks/terminal-T0EqzI"
+      }
+    },
+    {
+      "name": "launch-opencode-",
+      "passed": true,
+      "detail": {
+        "ok": true
+      }
+    },
+    {
+      "name": "native-environment-opencode-",
+      "passed": true,
+      "detail": {
+        "HOME": "scripts/tmp/vault-unification-resume/accounts-linux-final/vault/.nand/agents/02ab6caf-438e-41ad-ab73-27bfc1664ccc/accounts/opencode/default/home",
+        "USERPROFILE": "scripts/tmp/vault-unification-resume/accounts-linux-final/vault/.nand/agents/02ab6caf-438e-41ad-ab73-27bfc1664ccc/accounts/opencode/default/home",
+        "APPDATA": "scripts/tmp/vault-unification-resume/accounts-linux-final/vault/.nand/agents/02ab6caf-438e-41ad-ab73-27bfc1664ccc/accounts/opencode/default/home/AppData/Roaming",
+        "LOCALAPPDATA": "scripts/tmp/vault-unification-resume/accounts-linux-final/vault/.nand/agents/02ab6caf-438e-41ad-ab73-27bfc1664ccc/accounts/opencode/default/home/AppData/Local",
+        "TMP": "scripts/tmp/vault-unification-resume/accounts-linux-final/vault/.nand/agents/02ab6caf-438e-41ad-ab73-27bfc1664ccc/accounts/opencode/default/tmp",
+        "TEMP": "scripts/tmp/vault-unification-resume/accounts-linux-final/vault/.nand/agents/02ab6caf-438e-41ad-ab73-27bfc1664ccc/accounts/opencode/default/tmp",
+        "TMPDIR": "scripts/tmp/vault-unification-resume/accounts-linux-final/vault/.nand/agents/02ab6caf-438e-41ad-ab73-27bfc1664ccc/accounts/opencode/default/tmp",
+        "XDG_CONFIG_HOME": "scripts/tmp/vault-unification-resume/accounts-linux-final/vault/.nand/agents/02ab6caf-438e-41ad-ab73-27bfc1664ccc/accounts/opencode/default/xdg/config",
+        "XDG_CACHE_HOME": "scripts/tmp/vault-unification-resume/accounts-linux-final/vault/.nand/agents/02ab6caf-438e-41ad-ab73-27bfc1664ccc/accounts/opencode/default/xdg/cache",
+        "XDG_DATA_HOME": "scripts/tmp/vault-unification-resume/accounts-linux-final/vault/.nand/agents/02ab6caf-438e-41ad-ab73-27bfc1664ccc/accounts/opencode/default/xdg/data",
+        "XDG_STATE_HOME": "scripts/tmp/vault-unification-resume/accounts-linux-final/vault/.nand/agents/02ab6caf-438e-41ad-ab73-27bfc1664ccc/accounts/opencode/default/xdg/state",
+        "CLAUDE_CONFIG_DIR": "scripts/tmp/vault-unification-resume/accounts-linux-final/vault/.nand/agents/02ab6caf-438e-41ad-ab73-27bfc1664ccc/accounts/opencode/default/home/.claude",
+        "CODEX_HOME": "scripts/tmp/vault-unification-resume/accounts-linux-final/vault/.nand/agents/02ab6caf-438e-41ad-ab73-27bfc1664ccc/accounts/opencode/default/home/.codex",
+        "GEMINI_CLI_HOME": "scripts/tmp/vault-unification-resume/accounts-linux-final/vault/.nand/agents/02ab6caf-438e-41ad-ab73-27bfc1664ccc/accounts/opencode/default/home",
+        "GROK_HOME": "scripts/tmp/vault-unification-resume/accounts-linux-final/vault/.nand/agents/02ab6caf-438e-41ad-ab73-27bfc1664ccc/accounts/opencode/default/home/.grok",
+        "PI_CODING_AGENT_DIR": "scripts/tmp/vault-unification-resume/accounts-linux-final/vault/.nand/agents/02ab6caf-438e-41ad-ab73-27bfc1664ccc/accounts/opencode/default/home/.pi/agent",
+        "PI_CODING_AGENT_SESSION_DIR": "scripts/tmp/vault-unification-resume/accounts-linux-final/vault/.nand/agents/02ab6caf-438e-41ad-ab73-27bfc1664ccc/accounts/opencode/default/home/.pi/agent/sessions",
+        "OPENCODE_CONFIG_DIR": "scripts/tmp/vault-unification-resume/accounts-linux-final/vault/.nand/agents/02ab6caf-438e-41ad-ab73-27bfc1664ccc/accounts/opencode/default/xdg/config/opencode",
+        "NAND_ACCOUNT_ROOT": "scripts/tmp/vault-unification-resume/accounts-linux-final/vault/.nand/agents/02ab6caf-438e-41ad-ab73-27bfc1664ccc/accounts/opencode/default",
+        "NAND_ACCOUNT_ID": "opencode/default",
+        "NAND_ACCOUNT_NAME": "",
+        "NAND_HOOK_DIR": "scripts/tmp/vault-unification-resume/accounts-linux-final/vault/.nand/agents/02ab6caf-438e-41ad-ab73-27bfc1664ccc/accounts/opencode/default/runtime/hooks/terminal-iSmkbM"
+      }
+    },
+    {
+      "name": "launch-codex-中文.账号",
+      "passed": true,
+      "detail": {
+        "ok": true
+      }
+    },
+    {
+      "name": "native-environment-codex-中文.账号",
+      "passed": true,
+      "detail": {
+        "HOME": "scripts/tmp/vault-unification-resume/accounts-linux-final/vault/.nand/agents/02ab6caf-438e-41ad-ab73-27bfc1664ccc/accounts/codex/189cd4a241bc9d92a287c16922db5fa792c282b1d5b4dcd31bff8b4874254cb8/home",
+        "USERPROFILE": "scripts/tmp/vault-unification-resume/accounts-linux-final/vault/.nand/agents/02ab6caf-438e-41ad-ab73-27bfc1664ccc/accounts/codex/189cd4a241bc9d92a287c16922db5fa792c282b1d5b4dcd31bff8b4874254cb8/home",
+        "APPDATA": "scripts/tmp/vault-unification-resume/accounts-linux-final/vault/.nand/agents/02ab6caf-438e-41ad-ab73-27bfc1664ccc/accounts/codex/189cd4a241bc9d92a287c16922db5fa792c282b1d5b4dcd31bff8b4874254cb8/home/AppData/Roaming",
+        "LOCALAPPDATA": "scripts/tmp/vault-unification-resume/accounts-linux-final/vault/.nand/agents/02ab6caf-438e-41ad-ab73-27bfc1664ccc/accounts/codex/189cd4a241bc9d92a287c16922db5fa792c282b1d5b4dcd31bff8b4874254cb8/home/AppData/Local",
+        "TMP": "scripts/tmp/vault-unification-resume/accounts-linux-final/vault/.nand/agents/02ab6caf-438e-41ad-ab73-27bfc1664ccc/accounts/codex/189cd4a241bc9d92a287c16922db5fa792c282b1d5b4dcd31bff8b4874254cb8/tmp",
+        "TEMP": "scripts/tmp/vault-unification-resume/accounts-linux-final/vault/.nand/agents/02ab6caf-438e-41ad-ab73-27bfc1664ccc/accounts/codex/189cd4a241bc9d92a287c16922db5fa792c282b1d5b4dcd31bff8b4874254cb8/tmp",
+        "TMPDIR": "scripts/tmp/vault-unification-resume/accounts-linux-final/vault/.nand/agents/02ab6caf-438e-41ad-ab73-27bfc1664ccc/accounts/codex/189cd4a241bc9d92a287c16922db5fa792c282b1d5b4dcd31bff8b4874254cb8/tmp",
+        "XDG_CONFIG_HOME": "scripts/tmp/vault-unification-resume/accounts-linux-final/vault/.nand/agents/02ab6caf-438e-41ad-ab73-27bfc1664ccc/accounts/codex/189cd4a241bc9d92a287c16922db5fa792c282b1d5b4dcd31bff8b4874254cb8/xdg/config",
+        "XDG_CACHE_HOME": "scripts/tmp/vault-unification-resume/accounts-linux-final/vault/.nand/agents/02ab6caf-438e-41ad-ab73-27bfc1664ccc/accounts/codex/189cd4a241bc9d92a287c16922db5fa792c282b1d5b4dcd31bff8b4874254cb8/xdg/cache",
+        "XDG_DATA_HOME": "scripts/tmp/vault-unification-resume/accounts-linux-final/vault/.nand/agents/02ab6caf-438e-41ad-ab73-27bfc1664ccc/accounts/codex/189cd4a241bc9d92a287c16922db5fa792c282b1d5b4dcd31bff8b4874254cb8/xdg/data",
+        "XDG_STATE_HOME": "scripts/tmp/vault-unification-resume/accounts-linux-final/vault/.nand/agents/02ab6caf-438e-41ad-ab73-27bfc1664ccc/accounts/codex/189cd4a241bc9d92a287c16922db5fa792c282b1d5b4dcd31bff8b4874254cb8/xdg/state",
+        "CLAUDE_CONFIG_DIR": "scripts/tmp/vault-unification-resume/accounts-linux-final/vault/.nand/agents/02ab6caf-438e-41ad-ab73-27bfc1664ccc/accounts/codex/189cd4a241bc9d92a287c16922db5fa792c282b1d5b4dcd31bff8b4874254cb8/home/.claude",
+        "CODEX_HOME": "scripts/tmp/vault-unification-resume/accounts-linux-final/vault/.nand/agents/02ab6caf-438e-41ad-ab73-27bfc1664ccc/accounts/codex/189cd4a241bc9d92a287c16922db5fa792c282b1d5b4dcd31bff8b4874254cb8/home/.codex",
+        "GEMINI_CLI_HOME": "scripts/tmp/vault-unification-resume/accounts-linux-final/vault/.nand/agents/02ab6caf-438e-41ad-ab73-27bfc1664ccc/accounts/codex/189cd4a241bc9d92a287c16922db5fa792c282b1d5b4dcd31bff8b4874254cb8/home",
+        "GROK_HOME": "scripts/tmp/vault-unification-resume/accounts-linux-final/vault/.nand/agents/02ab6caf-438e-41ad-ab73-27bfc1664ccc/accounts/codex/189cd4a241bc9d92a287c16922db5fa792c282b1d5b4dcd31bff8b4874254cb8/home/.grok",
+        "PI_CODING_AGENT_DIR": "scripts/tmp/vault-unification-resume/accounts-linux-final/vault/.nand/agents/02ab6caf-438e-41ad-ab73-27bfc1664ccc/accounts/codex/189cd4a241bc9d92a287c16922db5fa792c282b1d5b4dcd31bff8b4874254cb8/home/.pi/agent",
+        "PI_CODING_AGENT_SESSION_DIR": "scripts/tmp/vault-unification-resume/accounts-linux-final/vault/.nand/agents/02ab6caf-438e-41ad-ab73-27bfc1664ccc/accounts/codex/189cd4a241bc9d92a287c16922db5fa792c282b1d5b4dcd31bff8b4874254cb8/home/.pi/agent/sessions",
+        "OPENCODE_CONFIG_DIR": "scripts/tmp/vault-unification-resume/accounts-linux-final/vault/.nand/agents/02ab6caf-438e-41ad-ab73-27bfc1664ccc/accounts/codex/189cd4a241bc9d92a287c16922db5fa792c282b1d5b4dcd31bff8b4874254cb8/xdg/config/opencode",
+        "NAND_ACCOUNT_ROOT": "scripts/tmp/vault-unification-resume/accounts-linux-final/vault/.nand/agents/02ab6caf-438e-41ad-ab73-27bfc1664ccc/accounts/codex/189cd4a241bc9d92a287c16922db5fa792c282b1d5b4dcd31bff8b4874254cb8",
+        "NAND_ACCOUNT_ID": "codex/189cd4a241bc9d92a287c16922db5fa792c282b1d5b4dcd31bff8b4874254cb8",
+        "NAND_ACCOUNT_NAME": "中文.账号",
+        "NAND_HOOK_DIR": "scripts/tmp/vault-unification-resume/accounts-linux-final/vault/.nand/agents/02ab6caf-438e-41ad-ab73-27bfc1664ccc/accounts/codex/189cd4a241bc9d92a287c16922db5fa792c282b1d5b4dcd31bff8b4874254cb8/runtime/hooks/terminal-7UFE18"
+      }
+    },
+    {
+      "name": "launch-codex-中文账号",
+      "passed": true,
+      "detail": {
+        "ok": true
+      }
+    },
+    {
+      "name": "native-environment-codex-中文账号",
+      "passed": true,
+      "detail": {
+        "HOME": "scripts/tmp/vault-unification-resume/accounts-linux-final/vault/.nand/agents/02ab6caf-438e-41ad-ab73-27bfc1664ccc/accounts/codex/f5030fddc4e7ac2364beb8920352f3501173714b09adada9d0e92e9d189557f4/home",
+        "USERPROFILE": "scripts/tmp/vault-unification-resume/accounts-linux-final/vault/.nand/agents/02ab6caf-438e-41ad-ab73-27bfc1664ccc/accounts/codex/f5030fddc4e7ac2364beb8920352f3501173714b09adada9d0e92e9d189557f4/home",
+        "APPDATA": "scripts/tmp/vault-unification-resume/accounts-linux-final/vault/.nand/agents/02ab6caf-438e-41ad-ab73-27bfc1664ccc/accounts/codex/f5030fddc4e7ac2364beb8920352f3501173714b09adada9d0e92e9d189557f4/home/AppData/Roaming",
+        "LOCALAPPDATA": "scripts/tmp/vault-unification-resume/accounts-linux-final/vault/.nand/agents/02ab6caf-438e-41ad-ab73-27bfc1664ccc/accounts/codex/f5030fddc4e7ac2364beb8920352f3501173714b09adada9d0e92e9d189557f4/home/AppData/Local",
+        "TMP": "scripts/tmp/vault-unification-resume/accounts-linux-final/vault/.nand/agents/02ab6caf-438e-41ad-ab73-27bfc1664ccc/accounts/codex/f5030fddc4e7ac2364beb8920352f3501173714b09adada9d0e92e9d189557f4/tmp",
+        "TEMP": "scripts/tmp/vault-unification-resume/accounts-linux-final/vault/.nand/agents/02ab6caf-438e-41ad-ab73-27bfc1664ccc/accounts/codex/f5030fddc4e7ac2364beb8920352f3501173714b09adada9d0e92e9d189557f4/tmp",
+        "TMPDIR": "scripts/tmp/vault-unification-resume/accounts-linux-final/vault/.nand/agents/02ab6caf-438e-41ad-ab73-27bfc1664ccc/accounts/codex/f5030fddc4e7ac2364beb8920352f3501173714b09adada9d0e92e9d189557f4/tmp",
+        "XDG_CONFIG_HOME": "scripts/tmp/vault-unification-resume/accounts-linux-final/vault/.nand/agents/02ab6caf-438e-41ad-ab73-27bfc1664ccc/accounts/codex/f5030fddc4e7ac2364beb8920352f3501173714b09adada9d0e92e9d189557f4/xdg/config",
+        "XDG_CACHE_HOME": "scripts/tmp/vault-unification-resume/accounts-linux-final/vault/.nand/agents/02ab6caf-438e-41ad-ab73-27bfc1664ccc/accounts/codex/f5030fddc4e7ac2364beb8920352f3501173714b09adada9d0e92e9d189557f4/xdg/cache",
+        "XDG_DATA_HOME": "scripts/tmp/vault-unification-resume/accounts-linux-final/vault/.nand/agents/02ab6caf-438e-41ad-ab73-27bfc1664ccc/accounts/codex/f5030fddc4e7ac2364beb8920352f3501173714b09adada9d0e92e9d189557f4/xdg/data",
+        "XDG_STATE_HOME": "scripts/tmp/vault-unification-resume/accounts-linux-final/vault/.nand/agents/02ab6caf-438e-41ad-ab73-27bfc1664ccc/accounts/codex/f5030fddc4e7ac2364beb8920352f3501173714b09adada9d0e92e9d189557f4/xdg/state",
+        "CLAUDE_CONFIG_DIR": "scripts/tmp/vault-unification-resume/accounts-linux-final/vault/.nand/agents/02ab6caf-438e-41ad-ab73-27bfc1664ccc/accounts/codex/f5030fddc4e7ac2364beb8920352f3501173714b09adada9d0e92e9d189557f4/home/.claude",
+        "CODEX_HOME": "scripts/tmp/vault-unification-resume/accounts-linux-final/vault/.nand/agents/02ab6caf-438e-41ad-ab73-27bfc1664ccc/accounts/codex/f5030fddc4e7ac2364beb8920352f3501173714b09adada9d0e92e9d189557f4/home/.codex",
+        "GEMINI_CLI_HOME": "scripts/tmp/vault-unification-resume/accounts-linux-final/vault/.nand/agents/02ab6caf-438e-41ad-ab73-27bfc1664ccc/accounts/codex/f5030fddc4e7ac2364beb8920352f3501173714b09adada9d0e92e9d189557f4/home",
+        "GROK_HOME": "scripts/tmp/vault-unification-resume/accounts-linux-final/vault/.nand/agents/02ab6caf-438e-41ad-ab73-27bfc1664ccc/accounts/codex/f5030fddc4e7ac2364beb8920352f3501173714b09adada9d0e92e9d189557f4/home/.grok",
+        "PI_CODING_AGENT_DIR": "scripts/tmp/vault-unification-resume/accounts-linux-final/vault/.nand/agents/02ab6caf-438e-41ad-ab73-27bfc1664ccc/accounts/codex/f5030fddc4e7ac2364beb8920352f3501173714b09adada9d0e92e9d189557f4/home/.pi/agent",
+        "PI_CODING_AGENT_SESSION_DIR": "scripts/tmp/vault-unification-resume/accounts-linux-final/vault/.nand/agents/02ab6caf-438e-41ad-ab73-27bfc1664ccc/accounts/codex/f5030fddc4e7ac2364beb8920352f3501173714b09adada9d0e92e9d189557f4/home/.pi/agent/sessions",
+        "OPENCODE_CONFIG_DIR": "scripts/tmp/vault-unification-resume/accounts-linux-final/vault/.nand/agents/02ab6caf-438e-41ad-ab73-27bfc1664ccc/accounts/codex/f5030fddc4e7ac2364beb8920352f3501173714b09adada9d0e92e9d189557f4/xdg/config/opencode",
+        "NAND_ACCOUNT_ROOT": "scripts/tmp/vault-unification-resume/accounts-linux-final/vault/.nand/agents/02ab6caf-438e-41ad-ab73-27bfc1664ccc/accounts/codex/f5030fddc4e7ac2364beb8920352f3501173714b09adada9d0e92e9d189557f4",
+        "NAND_ACCOUNT_ID": "codex/f5030fddc4e7ac2364beb8920352f3501173714b09adada9d0e92e9d189557f4",
+        "NAND_ACCOUNT_NAME": "中文账号",
+        "NAND_HOOK_DIR": "scripts/tmp/vault-unification-resume/accounts-linux-final/vault/.nand/agents/02ab6caf-438e-41ad-ab73-27bfc1664ccc/accounts/codex/f5030fddc4e7ac2364beb8920352f3501173714b09adada9d0e92e9d189557f4/runtime/hooks/terminal-2SHap7"
+      }
+    },
+    {
+      "name": "unicode-and-punctuation-identities-stay-distinct",
+      "passed": true
+    },
+    {
+      "name": "nonempty-invalid-name-is-visible",
+      "passed": true,
+      "detail": "账号名最多 128 个字符，不能含控制字符或只有空白；完全留空表示使用当前库的默认账号。"
+    },
+    {
+      "name": "launch-claude-code-a.b",
+      "passed": true,
+      "detail": {
+        "ok": true
+      }
+    },
+    {
+      "name": "native-environment-claude-code-a.b",
+      "passed": true,
+      "detail": {
+        "HOME": "scripts/tmp/vault-unification-resume/accounts-linux-final/vault/.nand/agents/02ab6caf-438e-41ad-ab73-27bfc1664ccc/accounts/claude-code/2e7336dc8eba87ef472df568c35482abf2575dc3e5eac0c5c62b8ffaeac2c934/home",
+        "USERPROFILE": "scripts/tmp/vault-unification-resume/accounts-linux-final/vault/.nand/agents/02ab6caf-438e-41ad-ab73-27bfc1664ccc/accounts/claude-code/2e7336dc8eba87ef472df568c35482abf2575dc3e5eac0c5c62b8ffaeac2c934/home",
+        "APPDATA": "scripts/tmp/vault-unification-resume/accounts-linux-final/vault/.nand/agents/02ab6caf-438e-41ad-ab73-27bfc1664ccc/accounts/claude-code/2e7336dc8eba87ef472df568c35482abf2575dc3e5eac0c5c62b8ffaeac2c934/home/AppData/Roaming",
+        "LOCALAPPDATA": "scripts/tmp/vault-unification-resume/accounts-linux-final/vault/.nand/agents/02ab6caf-438e-41ad-ab73-27bfc1664ccc/accounts/claude-code/2e7336dc8eba87ef472df568c35482abf2575dc3e5eac0c5c62b8ffaeac2c934/home/AppData/Local",
+        "TMP": "scripts/tmp/vault-unification-resume/accounts-linux-final/vault/.nand/agents/02ab6caf-438e-41ad-ab73-27bfc1664ccc/accounts/claude-code/2e7336dc8eba87ef472df568c35482abf2575dc3e5eac0c5c62b8ffaeac2c934/tmp",
+        "TEMP": "scripts/tmp/vault-unification-resume/accounts-linux-final/vault/.nand/agents/02ab6caf-438e-41ad-ab73-27bfc1664ccc/accounts/claude-code/2e7336dc8eba87ef472df568c35482abf2575dc3e5eac0c5c62b8ffaeac2c934/tmp",
+        "TMPDIR": "scripts/tmp/vault-unification-resume/accounts-linux-final/vault/.nand/agents/02ab6caf-438e-41ad-ab73-27bfc1664ccc/accounts/claude-code/2e7336dc8eba87ef472df568c35482abf2575dc3e5eac0c5c62b8ffaeac2c934/tmp",
+        "XDG_CONFIG_HOME": "scripts/tmp/vault-unification-resume/accounts-linux-final/vault/.nand/agents/02ab6caf-438e-41ad-ab73-27bfc1664ccc/accounts/claude-code/2e7336dc8eba87ef472df568c35482abf2575dc3e5eac0c5c62b8ffaeac2c934/xdg/config",
+        "XDG_CACHE_HOME": "scripts/tmp/vault-unification-resume/accounts-linux-final/vault/.nand/agents/02ab6caf-438e-41ad-ab73-27bfc1664ccc/accounts/claude-code/2e7336dc8eba87ef472df568c35482abf2575dc3e5eac0c5c62b8ffaeac2c934/xdg/cache",
+        "XDG_DATA_HOME": "scripts/tmp/vault-unification-resume/accounts-linux-final/vault/.nand/agents/02ab6caf-438e-41ad-ab73-27bfc1664ccc/accounts/claude-code/2e7336dc8eba87ef472df568c35482abf2575dc3e5eac0c5c62b8ffaeac2c934/xdg/data",
+        "XDG_STATE_HOME": "scripts/tmp/vault-unification-resume/accounts-linux-final/vault/.nand/agents/02ab6caf-438e-41ad-ab73-27bfc1664ccc/accounts/claude-code/2e7336dc8eba87ef472df568c35482abf2575dc3e5eac0c5c62b8ffaeac2c934/xdg/state",
+        "CLAUDE_CONFIG_DIR": "scripts/tmp/vault-unification-resume/accounts-linux-final/vault/.nand/agents/02ab6caf-438e-41ad-ab73-27bfc1664ccc/accounts/claude-code/2e7336dc8eba87ef472df568c35482abf2575dc3e5eac0c5c62b8ffaeac2c934/legacy-config",
+        "CODEX_HOME": "scripts/tmp/vault-unification-resume/accounts-linux-final/vault/.nand/agents/02ab6caf-438e-41ad-ab73-27bfc1664ccc/accounts/claude-code/2e7336dc8eba87ef472df568c35482abf2575dc3e5eac0c5c62b8ffaeac2c934/home/.codex",
+        "GEMINI_CLI_HOME": "scripts/tmp/vault-unification-resume/accounts-linux-final/vault/.nand/agents/02ab6caf-438e-41ad-ab73-27bfc1664ccc/accounts/claude-code/2e7336dc8eba87ef472df568c35482abf2575dc3e5eac0c5c62b8ffaeac2c934/home",
+        "GROK_HOME": "scripts/tmp/vault-unification-resume/accounts-linux-final/vault/.nand/agents/02ab6caf-438e-41ad-ab73-27bfc1664ccc/accounts/claude-code/2e7336dc8eba87ef472df568c35482abf2575dc3e5eac0c5c62b8ffaeac2c934/home/.grok",
+        "PI_CODING_AGENT_DIR": "scripts/tmp/vault-unification-resume/accounts-linux-final/vault/.nand/agents/02ab6caf-438e-41ad-ab73-27bfc1664ccc/accounts/claude-code/2e7336dc8eba87ef472df568c35482abf2575dc3e5eac0c5c62b8ffaeac2c934/home/.pi/agent",
+        "PI_CODING_AGENT_SESSION_DIR": "scripts/tmp/vault-unification-resume/accounts-linux-final/vault/.nand/agents/02ab6caf-438e-41ad-ab73-27bfc1664ccc/accounts/claude-code/2e7336dc8eba87ef472df568c35482abf2575dc3e5eac0c5c62b8ffaeac2c934/home/.pi/agent/sessions",
+        "OPENCODE_CONFIG_DIR": "scripts/tmp/vault-unification-resume/accounts-linux-final/vault/.nand/agents/02ab6caf-438e-41ad-ab73-27bfc1664ccc/accounts/claude-code/2e7336dc8eba87ef472df568c35482abf2575dc3e5eac0c5c62b8ffaeac2c934/xdg/config/opencode",
+        "NAND_ACCOUNT_ROOT": "scripts/tmp/vault-unification-resume/accounts-linux-final/vault/.nand/agents/02ab6caf-438e-41ad-ab73-27bfc1664ccc/accounts/claude-code/2e7336dc8eba87ef472df568c35482abf2575dc3e5eac0c5c62b8ffaeac2c934",
+        "NAND_ACCOUNT_ID": "claude-code/2e7336dc8eba87ef472df568c35482abf2575dc3e5eac0c5c62b8ffaeac2c934",
+        "NAND_ACCOUNT_NAME": "a.b",
+        "NAND_HOOK_DIR": "scripts/tmp/vault-unification-resume/accounts-linux-final/vault/.nand/agents/02ab6caf-438e-41ad-ab73-27bfc1664ccc/accounts/claude-code/2e7336dc8eba87ef472df568c35482abf2575dc3e5eac0c5c62b8ffaeac2c934/runtime/hooks/terminal-DGHU6j"
+      }
+    },
+    {
+      "name": "binding-survives-cold-restart",
+      "passed": true
+    },
+    {
+      "name": "archived-original-survives-new-launches",
+      "passed": true
+    },
+    {
+      "name": "native-children-exit",
+      "passed": true
+    }
+  ]
+}

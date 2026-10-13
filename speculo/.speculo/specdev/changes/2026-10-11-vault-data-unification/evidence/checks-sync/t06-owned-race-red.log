@@ -1,0 +1,51 @@
+
+ RUN  v5.0.3 /home/wta/projects/nand
+
+ ❯ |unit| src/host/desktop/owned-permissions.test.ts (2 tests | 2 failed) 26ms
+   × account tree checks rescan renamed hook directories and reject new links (link=false) 18ms
+   × account tree checks rescan renamed hook directories and reject new links (link=true) 7ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |unit| src/host/desktop/owned-permissions.test.ts > account tree checks rescan renamed hook directories and reject new links (link=false)
+AssertionError: promise rejected "Error: ENOENT: no such file or directory,… { …(4) }" instead of resolving
+ ❯ src/host/desktop/owned-permissions.test.ts:31:29
+     29|   const checked = checkOwnedDirectory(vault, '.nand/account');
+     30|   if (linked) await expect(checked).rejects.toThrow('private-storage.s…
+     31|   else await expect(checked).resolves.toBeUndefined();
+       |                             ^
+     32|   expect(change.changed).toBe(true);
+     33|   expect(await readFile(path.join(published, 'original'), 'utf8')).toB…
+
+Caused by: Error: ENOENT: no such file or directory, lstat '/tmp/nand-owned-check-XM7wvE/.nand/account/hooks.nand-install'
+ ❯ visit src/host/desktop/owned-permissions.ts:54:16
+ ❯ visit src/host/desktop/owned-permissions.ts:56:68
+ ❯ Module.checkOwnedDirectory src/host/desktop/owned-permissions.ts:58:2
+ ❯ src/host/desktop/owned-permissions.test.ts:31:8
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
+Serialized Error: { errno: -2, code: 'ENOENT', syscall: 'lstat', path: '/tmp/nand-owned-check-XM7wvE/.nand/account/hooks.nand-install' }
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  |unit| src/host/desktop/owned-permissions.test.ts > account tree checks rescan renamed hook directories and reject new links (link=true)
+AssertionError: expected [Function] to throw error including 'private-storage.symlink' but got 'ENOENT: no such file or directory, ls…'
+
+Expected: "private-storage.symlink"
+Received: "ENOENT: no such file or directory, lstat '/tmp/nand-owned-check-LDm3lK/.nand/account/hooks.nand-install'"
+
+ ❯ src/host/desktop/owned-permissions.test.ts:30:36
+     28|  try {
+     29|   const checked = checkOwnedDirectory(vault, '.nand/account');
+     30|   if (linked) await expect(checked).rejects.toThrow('private-storage.s…
+       |                                    ^
+     31|   else await expect(checked).resolves.toBeUndefined();
+     32|   expect(change.changed).toBe(true);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  2 failed (2)
+   Start at  22:13:47
+   Duration  480ms (transform 73%, setup 13%, tests 7%, import 5%, worker 1%)
+

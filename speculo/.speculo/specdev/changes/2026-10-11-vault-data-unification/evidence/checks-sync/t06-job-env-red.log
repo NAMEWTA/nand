@@ -1,0 +1,33 @@
+
+ RUN  v5.0.3 /home/wta/projects/nand
+
+ ❯ |unit| test/release/workflow-gates.test.ts (2 tests | 1 failed) 51ms
+   × the reusable quality matrix runs the full checks on Linux 22/24 and Windows 24 12ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |unit| test/release/workflow-gates.test.ts > the reusable quality matrix runs the full checks on Linux 22/24 and Windows 24
+AssertionError: expected ' runner.os == \'Windows\' && \'true\'…' not to match /\b(?:runner|job|steps|env)\./
+
+- Expected:
+/\b(?:runner|job|steps|env)\./
+
++ Received:
+" runner.os == 'Windows' && 'true' || 'false' "
+
+ ❯ test/release/workflow-gates.test.ts:37:95
+     35|  expect(build.if).toBeUndefined();
+     36|  for (const value of Object.values(build.env ?? {})) {
+     37|   for (const expression of value.matchAll(/\$\{\{([\s\S]*?)\}\}/g)) ex…
+       |                                                                                               ^
+     38|  }
+     39|  expect(build.strategy?.matrix.include).toEqual([
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 1 passed (2)
+   Start at  22:27:35
+   Duration  610ms (transform 71%, tests 11%, setup 11%, import 6%, worker 1%)
+
