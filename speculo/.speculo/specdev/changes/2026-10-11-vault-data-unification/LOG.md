@@ -25,3 +25,5 @@ T-07实施检查点：当前指南22组重复副本已合并删除，根README�
 T-07 done：f26c7502f278404003c718db5d8e6a4f1fa342aa，55项目路径，22重复实体删除，根README双语；18知识候选prepared-not-applied。build/lint/docs/i18n和完整50/50/1816测试通过，两轴顺序自审局限保留。下一T-08：缓存helper执行权限、alpha.2、同SHA CI、真实发行下载新装/升级、issue及最终A。
 
 2026-10-13 T-08发行交付：产品9c0bd5c，正式run38370493282成功，alpha.2的18资产核对、fresh13/13、upgrade15/15、浏览器36/36通过，151/148已CLOSED。本地1826通过1跳过、50/50。最后仅夹具扫描时机和证据收尾；知识候选未提升，待A具体计划确认。
+
+T-08本地完成：implementation/source/result=a2cf403e8749ce8f3958687f2cbfc9f6183d2fcc；product/tag=9c0bd5c。current/main direct-parent检查与真实发行验收passed；八票done，change completed。A知识提升/归档仍待计划确认，Goal保持active。

@@ -8,7 +8,7 @@ artifact: "ticket"
 change: "2026-10-11-vault-data-unification"
 id: "T-08"
 title: "发行验收、alpha.2 发布与 A 交接"
-status: "in_progress"
+status: "done"
 kind: "operations"
 planning_depth: "deep"
 planning_depth_reason: "涉及公共持久化、数据迁移、身份隔离或发布；用户已批准完整计划及实施。"
@@ -80,9 +80,9 @@ E2E owner/environment: root / current-workspace。提交已获用户授权；imp
 
 ## 10. 验收标准
 
-- [ ] AC-008：发布 0.0.1-alpha.2；真实下载验证全新安装及旧 helper 升级；Windows专属门由2026-10-12用户取消，真实账号和其他平台据实列未验证；满足条件后关闭 #151/#148 并归档。
-- [ ] 非空实现、验证和双轴审查事实写入 <Path>{roots.state}/specdev/changes/2026-10-11-vault-data-unification/evidence/T-08.md</Path>。
-- [ ] 实际路径、Skill 摘要、命令结果、未验证范围与 Map 一致。
+- [x] AC-008：alpha.2正式发布及真实下载新装/旧helper升级通过，#151/#148已关闭；按plan_revision2完成本地A交接，正式知识提升/归档继续由A执行，整个Goal尚未完成。Windows宿主门已取消，未测范围如实保留。
+- [x] 非空实现、验证和双轴审查事实写入 <Path>{roots.state}/specdev/changes/2026-10-11-vault-data-unification/evidence/T-08.md</Path>。
+- [x] 实际路径、Skill 摘要、命令结果、未验证范围与 Map 一致。
 
 ## 12. 停止、检查点与交付
 

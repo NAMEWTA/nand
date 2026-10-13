@@ -1,6 +1,7 @@
 [
   {
     "path": ".agents/skills/dev/references/build-and-release.md",
+    "beforeExisted": true,
     "beforeCharacters": 3637,
     "afterCharacters": 3733,
     "beforeSha256": "3365d1f37cc571dbd819ade4c2013020728487c3d9b6081b828e7badad8a2964",
@@ -9,6 +10,7 @@
   },
   {
     "path": ".agents/skills/dev/references/licensing.md",
+    "beforeExisted": true,
     "beforeCharacters": 2191,
     "afterCharacters": 2192,
     "beforeSha256": "309783d96aca6bdf6287ae9a7e84619286300e06c3a08c776576c613387ccfbb",
@@ -17,6 +19,7 @@
   },
   {
     "path": "CHANGELOG.md",
+    "beforeExisted": true,
     "beforeCharacters": 3011,
     "afterCharacters": 3417,
     "beforeSha256": "ff2d841d6ca15885b4db312be99ebfb3800cea2e033977a59238dc7ef698676a",
@@ -25,6 +28,7 @@
   },
   {
     "path": "README.ZH.md",
+    "beforeExisted": true,
     "beforeCharacters": 2863,
     "afterCharacters": 2858,
     "beforeSha256": "344f634fbe7259e883b145a0e1922e9bcf45d323ab1f64a45058adcfbf6625e3",
@@ -33,6 +37,7 @@
   },
   {
     "path": "README.md",
+    "beforeExisted": true,
     "beforeCharacters": 5372,
     "afterCharacters": 5357,
     "beforeSha256": "fed39210ef993f6cb3fb53d9f1c18cf1ae838853502eeeb5bed3b59834f291df",
@@ -41,30 +46,79 @@
   },
   {
     "path": "speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/LOG.md",
+    "beforeExisted": true,
     "beforeCharacters": 2534,
-    "afterCharacters": 2700,
+    "afterCharacters": 2895,
     "beforeSha256": "d9b182d58d7423d874906d1708f1df7099f2244595c39e4b11c16d660446d2a2",
-    "afterSha256": "feb0d1e85a2b4ea7ab84752a2aabef3c58bbbf52918746f58adc8c459a1937ab",
+    "afterSha256": "cc8edf991537c0641b7c966f7bb236808fccbacf2f1a410cdf7d13f6d91956b8",
     "backup": "scripts/tmp/vault-unification-resume/T-08/resume-backups/base/speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/LOG.md"
   },
   {
+    "path": "speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/evidence/T-08.md",
+    "beforeExisted": false,
+    "beforeCharacters": 0,
+    "afterCharacters": 3756,
+    "beforeSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "afterSha256": "67516a1a426c29abb51ea75e5b5796b0b46e7381d71656cf2004bc76e80aca4f",
+    "backup": "scripts/tmp/vault-unification-resume/T-08/resume-backups/base/speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/evidence/T-08.md"
+  },
+  {
+    "path": "speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/evidence/checks-release/issue-148-comment.md",
+    "beforeExisted": false,
+    "beforeCharacters": 0,
+    "afterCharacters": 684,
+    "beforeSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "afterSha256": "5826dd6b693c7bb25e3c8d969b6e469e1f798e8dcecdfe6336d22740dbe6820c",
+    "backup": "scripts/tmp/vault-unification-resume/T-08/resume-backups/base/speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/evidence/checks-release/issue-148-comment.md"
+  },
+  {
+    "path": "speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/evidence/checks-release/issue-151-comment.md",
+    "beforeExisted": false,
+    "beforeCharacters": 0,
+    "afterCharacters": 816,
+    "beforeSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "afterSha256": "2d66d8b879b346484f69b8d3000afb5b989c24841dc7e35f8fbd7c631a7e3754",
+    "backup": "scripts/tmp/vault-unification-resume/T-08/resume-backups/base/speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/evidence/checks-release/issue-151-comment.md"
+  },
+  {
+    "path": "speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/evidence/checks-release/release-notes.md",
+    "beforeExisted": false,
+    "beforeCharacters": 0,
+    "afterCharacters": 1056,
+    "beforeSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "afterSha256": "e0bd45c5e415d3b79e630662568f3c9d8008ce8bb3b5e24973dca8a29ec88705",
+    "backup": "scripts/tmp/vault-unification-resume/T-08/resume-backups/base/speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/evidence/checks-release/release-notes.md"
+  },
+  {
+    "path": "speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/evidence/goal-delivery.md",
+    "beforeExisted": false,
+    "beforeCharacters": 0,
+    "afterCharacters": 371,
+    "beforeSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "afterSha256": "565315bead81cc73bf117b391e0deec8648672bc7cbb6d43aacd30db4d897bbd",
+    "backup": "scripts/tmp/vault-unification-resume/T-08/resume-backups/base/speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/evidence/goal-delivery.md"
+  },
+  {
     "path": "speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/ticket/08-alpha2-delivery.md",
+    "beforeExisted": true,
     "beforeCharacters": 5197,
-    "afterCharacters": 9742,
+    "afterCharacters": 9748,
     "beforeSha256": "a2e8bd6c39a969bf5ba84985b57ef4fe6b3363850400230f416301ccd003c6d6",
-    "afterSha256": "1a0334a748929cf994b4d8308dafcf64110b4324e33e45b4ee8f5eb7799c3c4a",
+    "afterSha256": "5d168d7111b365c4e29b8eb7153bab242affebcb150cab8bbcafa7bdd9a4460e",
     "backup": "scripts/tmp/vault-unification-resume/T-08/resume-backups/base/speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/ticket/08-alpha2-delivery.md"
   },
   {
     "path": "speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/tickets-map.md",
+    "beforeExisted": true,
     "beforeCharacters": 3773,
-    "afterCharacters": 3779,
+    "afterCharacters": 3767,
     "beforeSha256": "b1087c79a179ebf3dcd40b25a110486351bc1f7206c0867395688e32f29206dd",
-    "afterSha256": "f87a81a4bd3c331451f0a9d64288baca6b05a96cabc08bd48893e88a1a83271e",
+    "afterSha256": "cfa9baaadd7469770189774ae1115564d512a0316ce3e664cc126f51936734a9",
     "backup": "scripts/tmp/vault-unification-resume/T-08/resume-backups/base/speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/tickets-map.md"
   },
   {
     "path": "speculo/.speculo/specdev/triage-runs/TRI-001.md",
+    "beforeExisted": false,
     "beforeCharacters": 0,
     "afterCharacters": 3872,
     "beforeSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",

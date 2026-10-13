@@ -87,5 +87,7 @@
     "issue148": "closed",
     "fixtureFollowupReview": "pass: waits for historyState ready before the unchanged exact 0/1/2 descriptor assertion; no product byte changes; real fresh/upgrade rerun passed. Final lint/docs pass.",
     "remaining": "A plan confirmation, knowledge promotion and archive; not counted as completed."
-  }
+  },
+  "integration_checkpoint": "a2cf403e8749ce8f3958687f2cbfc9f6183d2fcc",
+  "completion_validation": "complete, TRI-001 and package validators: 0 errors / 0 warnings; docs 659 files pass; A dry-run ready"
 }

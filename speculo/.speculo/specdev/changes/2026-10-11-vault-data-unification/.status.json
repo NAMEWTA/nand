@@ -2,10 +2,11 @@
   "schema_version": 6,
   "artifact": "change-status",
   "change": "2026-10-11-vault-data-unification",
-  "change_status": "active",
-  "current_work": "specdev/implement",
+  "change_status": "completed",
+  "current_work": "specdev/archive-and-consolidate",
   "works_run": [
-    "specdev/tickets"
+    "specdev/tickets",
+    "specdev/implement"
   ],
   "claimed_investigations": [],
   "execution_authorization": {
@@ -35,8 +36,8 @@
     "history": []
   },
   "created_at": "2026-10-11T05:11:40.581Z",
-  "updated_at": "2026-10-13T04:04:02.464926+00:00",
-  "completed_at": null,
+  "updated_at": "2026-10-13T09:06:48.350461+00:00",
+  "completed_at": "2026-10-13T09:01:17.222006+00:00",
   "archived": false,
   "archive_path": null,
   "blockers": [],
@@ -353,37 +354,37 @@
       "parent_branch": "main",
       "branch": "main",
       "workspace_ref": "current",
-      "source_checkpoint": null,
-      "status": "active",
-      "updated_at": "2026-10-13T04:04:02.464926+00:00",
+      "source_checkpoint": "a2cf403e8749ce8f3958687f2cbfc9f6183d2fcc",
+      "status": "integrated",
+      "updated_at": "2026-10-13T09:01:17.222006+00:00",
       "integration": {
-        "status": "pending",
+        "status": "passed",
         "parent_ref": "main",
         "parent_before_sha": "ceb87931dd67733dd03249570c6b2ecc17c1bc59",
-        "source_sha": null,
+        "source_sha": "a2cf403e8749ce8f3958687f2cbfc9f6183d2fcc",
         "candidate_sha": null,
         "candidate_tree_sha": null,
         "candidate_branch": null,
         "candidate_workspace_ref": null,
-        "result_sha": null,
+        "result_sha": "a2cf403e8749ce8f3958687f2cbfc9f6183d2fcc",
         "method": "direct-parent",
         "conflict_paths": [],
-        "verification": "pending",
+        "verification": "passed",
         "full_suite": {
           "required": true,
-          "status": "pending",
+          "status": "passed",
           "reason": null,
           "evidence": "<Path>{roots.state}/specdev/changes/2026-10-11-vault-data-unification/evidence/T-08.md</Path>"
         },
         "e2e": {
           "required": true,
-          "status": "pending",
-          "reason": null,
+          "status": "passed",
+          "reason": "Linux正式资产新装13/13、旧helper升级15/15、浏览器36/36；Windows宿主门由用户取消，完整Windows CI通过。",
           "evidence": "<Path>{roots.state}/specdev/changes/2026-10-11-vault-data-unification/evidence/T-08.md</Path>"
         },
         "evidence": "<Path>{roots.state}/specdev/changes/2026-10-11-vault-data-unification/evidence/T-08.md</Path>",
-        "attempts": 0,
-        "promotion_status": "pending"
+        "attempts": 5,
+        "promotion_status": "applied"
       }
     }
   ]
