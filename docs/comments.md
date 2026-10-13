@@ -1,38 +1,36 @@
-English | [简体中文](comments.ZH.md)
+# 编辑器与评论
 
-# Editor and comments
+评论让你围绕 Markdown 笔记中的一段文字展开讨论，而不改动笔记。评论内容不会插入或写入原笔记。这项功能是 **编辑器** 模块，默认开启（**设置 → 常规 → 功能模块 → 编辑器**）。
 
-Comments let you discuss a passage of a Markdown note without changing the note. The comment text is never inserted into or written to the note. The feature is the **Editor** module, which is on by default (**Settings → General → Modules → Editor**).
+## 添加和查看评论
 
-## Add and read comments
+1. 在编辑器中选中 Markdown 笔记里的文字（实时预览或源码模式）。
+2. 点击选区上方浮层中的“评论”，或运行命令 `NAND: 给选区加评论`。即使关闭了浮层，命令仍然可用。
+3. 写下评论。**Ctrl/Cmd+Enter** 提交，Enter 换行。
 
-1. Select text in a Markdown note in the editor (Live Preview or Source mode).
-2. Click **Comment** in the popover above the selection, or run the command `NAND: Comment on selection`. The command works even if the popover is turned off.
-3. Write the comment. **Ctrl/Cmd+Enter** submits and Enter starts a new line.
+前置元数据和代码块里不能加评论。有评论的文字在源码模式、实时预览和阅读视图中都会高亮；点击高亮会选中对应的线程。
 
-You cannot comment inside frontmatter or code blocks. Commented text is highlighted in Source mode, Live Preview and Reading view; clicking a highlight selects its thread.
+右侧栏的 **编辑器面板** 显示当前笔记的评论线程，用命令 `NAND: 打开编辑器面板` 打开。在线程中可以回复、解决和重新打开、删除，以及跳转到引用的原文。也可以从工作台的 **批注** 页处理线程：它的侧栏列出所有有评论的笔记，可在“未解决”和“全部”之间切换，每篇笔记旁边显示未解决和全部线程的数量。选中一篇笔记即可查看并处理它的线程，或选择“打开笔记”。
 
-The **editor panel** in the right sidebar shows the threads of the current note. Open it with the command `NAND: Open editor panel`. In a thread you can reply, resolve and reopen, delete, and jump to the quoted text. A thread can also be opened from the **Comments** page of the workbench: its side panel lists every note that has comments, switchable between **Unresolved** and **All**, with the number of open and total threads next to each note. Select a note to see and handle its threads, or choose **Open note**.
+## 锚点与脱离的评论
 
-## Anchors and detached comments
+评论以文件、选区和带上下文的引用原文关联笔记。编辑、重命名或移动笔记后，NAND 会尽量维护锚点。无法确认位置时，线程显示为 **已脱离**；脱离的线程不会被当作可靠的定位，也不会自行重新打开。重新选中文字并选择“重新挂上”，即可把它绑定到新的位置。
 
-A comment is tied to the file, the selection and the quoted text with some text around it. After you edit, rename or move the note, NAND keeps the anchor up to date when it can. When it cannot confirm the position, the thread is marked **Detached**; a detached thread is never treated as a reliable location and does not reopen by itself. Select new text and choose **Attach again** to bind it to a new passage.
+## 关闭模块
 
-## Turning it off
+关闭评论面板只是隐藏面板。关闭编辑器模块会移除编辑器高亮、选区浮层、阅读视图标记和相关命令，并完成已接收的保存。已保存的评论保留，重新开启模块后恢复显示。请在关闭前完成尚未提交的输入。
 
-Closing the editor panel only hides the panel. Turning the Editor module off removes the highlights, the selection popover, the Reading view marks and the related commands, and finishes the saves it already accepted. Saved comments are kept and appear again when you turn the module on. Finish unsubmitted input before turning it off.
+## 设置
 
-## Settings
+**设置 → 编辑器** 有两个开关，默认都开启：
 
-**Settings → Editor** has two switches, both on by default:
-
-| Setting | Effect |
+| 设置 | 作用 |
 |---|---|
-| Show comment highlights | Highlights stay on after the editor panel is closed |
-| Selection comment button | Shows the **Comment** popover above a selection; the command still works if it is off |
+| 显示评论高亮 | 关掉右侧编辑器面板后，高亮仍然保留 |
+| 划词评论按钮 | 在选区上方显示“评论”浮层；关闭后仍可用命令添加 |
 
-## Storage and recovery
+## 保存与恢复
 
-Comments, the thread index and the recovery journal are sidecar JSON files in `.nand/editor/comments/` (`index.json`, `pending.json` and `files/<hash>.json`). Back up this folder together with your notes: copying only the notes does not take the comments with them. Because `.nand/` starts with a dot, Obsidian Sync does not sync comments; use Git, iCloud, Syncthing or a similar tool for the whole vault (see [Data and recovery](data.md)).
+评论、线程索引和恢复日志是 `.nand/editor/comments/` 中的旁路 JSON 文件（`index.json`、`pending.json` 和 `files/<hash>.json`）。备份笔记时请同时备份这个目录：只复制笔记不会带走评论。因为 `.nand/` 以点开头，Obsidian Sync 不会同步评论，请用 Git、iCloud、Syncthing 等方式同步整个库（见[数据与恢复](data.md)）。
 
-If saving fails, check that the note and the sidecar folder are readable and writable. Do not delete anchor or journal files to force a repair: copy the input you want to keep, make a backup, then look at the error and the last valid snapshot. Anchor recovery does not replace a file backup.
+保存失败后，检查笔记和旁路目录是否可读写。不要删除锚点或日志文件来强行修复：先复制需要保留的输入并备份，再检查错误信息和最近一次有效的快照。评论位置的恢复不能代替文件备份。

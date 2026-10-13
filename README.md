@@ -42,7 +42,7 @@ Each module has its own switch in the settings. A module that is off is not load
 
 ## Data and sync
 
-Your content is Markdown in visible folders. NAND's configuration and runtime data live in the `.nand/` folder of the vault. `.nand/` starts with a dot, and Obsidian Sync does not sync dot folders. To use several devices, sync the whole vault with Git (for example with the Git sync module), iCloud, Syncthing or similar. [Data and recovery](docs/data.md) lists the folders, sync, backup and restore steps.
+All NAND-managed data lives in the current vault's `.nand/`: managed Markdown and attachments in `.nand/content/`, configuration, device identity, browser sessions/downloads/bridge files, CLI homes/credentials/hooks and versioned helpers. Use the workbench to browse and edit managed documents. Ordinary notes, host data and Git metadata keep their locations. Obsidian Sync excludes dot folders, including all of `.nand/content/`; use a file sync tool that includes hidden folders. Browser and CLI login state may require authentication again on another device. [Data and recovery](docs/data.md) explains migration, backup and failure recovery. Current maintained guides are in Chinese; this README also has a Chinese version.
 
 ## Development
 

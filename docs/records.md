@@ -1,55 +1,53 @@
-English | [简体中文](records.ZH.md)
+# 业务记录：习惯、记账、阅读与番茄钟
 
-# Records: habits, expenses, reading and pomodoros
+业务记录属于[看板](dashboard.md)。在 **设置 → 看板** 中开启所需的小组件。小组件负责日常输入；统计在 **首页 → 记录** 下的页面里：从首页侧栏打开，或点小组件上的统计按钮。侧栏只为已开启的小组件列出对应的记录页。
 
-Records belong to the [Dashboard](dashboard.md). Turn on the widgets you need under **Settings → Dashboard**. The widgets handle day-to-day input; the statistics are pages under **Home → Records**. Open one from the Home side panel, or with the statistics button on the widget. The side panel lists a Records page only for widgets that are turned on.
+番茄钟和阅读计时由看板模块统一持有，所以同时打开多份看板也只有一个计时器。
 
-The pomodoro and reading timers belong to the dashboard module as a whole, so there is one timer even when several boards are open.
+## 各页面显示什么
 
-## What each page shows
-
-| Page | Input in the widget | Statistics page |
+| 页面 | 小组件里的输入 | 统计页 |
 |---|---|---|
-| Habits | Add habits and check them off for today; **Backfill yesterday** checks off missed habits for the previous day only | Streak, completion rate of the last 30 days, total check-ins, a 12-week heatmap; rename and delete habits |
-| Expenses | Log an expense or income with an amount, category, note and date; future dates are not accepted | Totals, net, daily average, category share, trends, income versus expense and category ranking by week, month, year or history; a ledger of all records |
-| Pomodoro | Start focus and break periods for an activity | Pomodoros today, efficiency, interruptions, break adherence, 7-day average, month and year focus time, daily goal gauge, time-of-day distribution, today's timeline, heatmap; filter the trend by activity |
-| Reading | Pick a book by searching a title or ISBN, or type its name, then start the timer | Totals, today, books, streak, recent reading and a book list; ending a session records the date, duration and progress as pages or percent, and can mark the book as finished |
+| 习惯 | 添加习惯并勾选今天已完成；“补打卡”只能为前一天补打未完成的习惯 | 连续天数、近 30 天完成率、累计打卡次数、近 12 周热力图；可重命名和删除习惯 |
+| 记账 | 记一笔支出或收入，包含金额、类目、备注和日期；不接受未来日期 | 按周、月、年或历史查看合计、净额、日均支出、类目占比、趋势、收支对比和类目排名；另有收支明细 |
+| 番茄钟 | 为某个活动开始专注和休息 | 今日番茄数、效率分、打断次数、休息遵守率、近 7 日均值、本月和今年专注时间、每日目标仪表、时段分布、今日时间轴、热力图；可按活动筛选趋势 |
+| 阅读 | 搜索书名或 ISBN 选书，或手动输入书名，然后开始计时 | 总计、今日、书籍数、连续天数、最近阅读和书籍列表；结束一次阅读时记录日期、时长和进度（页码或百分比），并可标记为已读完 |
 
-Settings for these widgets (durations, daily goal, sounds, currency symbol and so on) are under **Settings → Dashboard**. The daily pomodoro goal is 1 to 16. The currency symbol is shown before amounts.
+这些小组件的设置（时长、每日目标、提示音、货币符号等）在 **设置 → 看板** 中。每日番茄目标为 1 到 16。货币符号显示在金额前。
 
-### Expense ledger
+### 收支明细
 
-The ledger lists every record with search, filters and sorting, and supports editing, deleting a selection, CSV import and CSV export. Import expects the columns `date,type,category,amount,note` and reports how many rows were imported or skipped. Export writes the current filter to `expense-export-<date>.csv` in the vault root.
+明细列出全部记录，支持搜索、筛选和排序，也支持编辑、批量删除、导入 CSV 和导出 CSV。导入要求列为 `date,type,category,amount,note`，并报告导入和跳过的行数。导出把当前筛选结果写入当前库的 `.nand/content/exports/` 下的 `.nand/content/exports/expense-export-<日期>.csv`。
 
-Categories come in two levels. Built-in categories cannot be removed. You can add up to 30 custom categories (names of 1 to 12 characters) and up to 10 primary groups. Removing a custom category keeps the data and label of records that used it.
+类目分两级。内置类目不可删除。可以添加最多 30 个自定义类目（名称 1 到 12 个字）和最多 10 个一级分类。删除自定义类目时，使用过它的记录保留数据和名称。
 
-## Where the data is stored
+## 资料保存在哪里
 
-| Domain | Data | Default location |
+| 领域 | 资料 | 默认位置 |
 |---|---|---|
-| Habits | Habit definitions and check-ins | `NAND/习惯/` |
-| Expenses | Categories, income and expense records | `NAND/记账/` |
-| Reading | Books and reading records | `NAND/阅读/` |
-| Pomodoro | Activities and focus records | `NAND/番茄钟/` |
+| 习惯 | 习惯定义和打卡记录 | `.nand/content/NAND/习惯/` |
+| 记账 | 类目、收入和支出记录 | `.nand/content/NAND/记账/` |
+| 阅读 | 书籍和阅读记录 | `.nand/content/NAND/阅读/` |
+| 番茄钟 | 活动和专注记录 | `.nand/content/NAND/番茄钟/` |
 
-The folder names are Chinese in every interface language. Files:
+无论界面使用什么语言，文件夹名称都是中文。文件结构如下：
 
-- Habits and books each have a folder named `<name>-<last 8 characters of the id>` with `习惯.md` (habit) or `书籍.md` (book).
-- Expense categories are in `分类.md` and pomodoro activities in `活动.md` in the domain folder.
-- Records are split by year and date: `记录/<year>/<date>.md`. A row in the table of a daily file has a stable id.
+- 习惯和书籍各有一个名为 `<名称>-<ID 末 8 位>` 的文件夹，里面是 `习惯.md`（习惯）或 `书籍.md`（书籍）。
+- 记账类目在领域目录的 `分类.md` 中，番茄钟活动在 `活动.md` 中。
+- 记录按年份和日期分文件：`记录/<年份>/<日期>.md`。每日文件正文表格中的行有稳定的 ID。
 
-All of them are ordinary Markdown with YAML properties; `nand-type` and the ids identify NAND's data. Editing identifiers or managed tables by hand can make NAND stop recognizing a record. Back up before you do.
+它们都是带 YAML 属性的普通 Markdown，`nand-type` 和各种 ID 用来标识 NAND 的数据。手工修改标识或受管表格可能让 NAND 认不出某条记录，修改前请先备份。
 
-Deleting something in NAND marks its file with `nand-deleted: true`; the file is kept and is not deleted automatically. Records are never trimmed because of paging or because automation history is limited.
+在 NAND 中删除某项时，它的文件会被加上 `nand-deleted: true` 标记，文件本身保留，不会自动清除。记录不会因为界面分页或自动化历史的数量限制而被清理。
 
-## Saving
+## 保存
 
-The interface distinguishes **Saving…**, **Saved**, **Not saved** and **Conflicting edits**. When you see *Not saved*, open the error details, check file permissions and sync status, and retry. Rely on a restart to restore your input only after a save has succeeded.
+界面区分 **保存中…**、**已保存**、**未保存** 和 **存在冲突**。出现“未保存”时，打开错误详情，检查文件权限和同步状态，然后重试。只有保存成功后，才能依赖重启来恢复你的输入。
 
-A file that cannot be read or is damaged is never treated as empty and overwritten. When several changes arrive together, NAND compares the state at open time, your edit and the latest file on disk: independent changes are merged, and a conflict on the same record keeps both versions. A deletion is not brought back by a simple union.
+读取失败或已损坏的文件不会被当成空数据覆盖。多处修改同时到达时，NAND 比较打开时的基线、当前编辑和磁盘上的最新内容：互不相关的修改会合并，对同一条记录的冲突则保留双方内容。删除不会因为简单的并集而恢复。
 
-Recovery drafts are kept in `.nand/recovery/drafts/`. Back up the whole domain folder, see [Data and recovery](data.md).
+故障草稿保存在 `.nand/recovery/drafts/`。请备份整个领域目录，见[数据与恢复](data.md)。
 
-## Network use
+## 联网
 
-Searching for a book in the Reading widget sends the text you typed to `book.douban.com`. Nothing else in Records contacts the network. See [Privacy and data boundaries](privacy.md#network).
+在阅读小组件中搜索书籍时，输入的文字会发送到 `book.douban.com`。业务记录的其他部分不联网。见[隐私与数据边界](privacy.md#联网)。

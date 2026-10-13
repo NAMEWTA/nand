@@ -26,7 +26,7 @@
 
 ## 只有中文
 
-`.agents/skills` 只有中文。`SKILL.md` 带 frontmatter，工具加载它；`references/*.md` 在某一步被点名时再读。不另存英文版，也不写语言切换行。使用指南和仓库入口文档仍是双语，规则在 `SKILL.md`。
+`.agents/skills` 只有中文。`SKILL.md` 带 frontmatter，工具加载它；`references/*.md` 在某一步被点名时再读。不另存英文版，也不写语言切换行。当前维护文档为中文单源，只有根 README 保持双语；产品界面 en/zh、许可和历史原文保持。规则在 `SKILL.md`。
 
 ## 怎样修订
 

@@ -1,80 +1,78 @@
-English | [简体中文](CHANGELOG.ZH.md)
-
-# Changelog
+# 变更说明
 
 ## 0.0.1-alpha.1
 
-The first public pre-release of NAND. It is a pre-release: expect rough edges, and report problems in the repository's Issues. What each feature does is described in the [user guide](docs/README.md).
+NAND 的第一个公开预发布版。这是预发布：可能有不完善之处，请在仓库的 Issues 中反馈问题。各项功能的用法见[使用指南](docs/README.md)。
 
-### Requirements and install
+### 要求与安装
 
-- Obsidian 1.13.0 or later. The terminal, coding agents, the built-in browser and Git sync need the desktop app; the other modules also run on mobile.
-- Install `main.js`, `manifest.json` and `styles.css` from the release into `.obsidian/plugins/nand/`.
-- The terminal helper `nand-pty` is a release asset for Linux (x64, arm64), macOS (x64, arm64) and Windows (x64). NAND downloads the one for your platform the first time you open a terminal, checks its SHA-256 digest and keeps it in the plugin folder. Other platforms have no helper.
-- The interface is English or Simplified Chinese. A new vault follows Obsidian's language, and the choice can be changed in settings.
+- 需要 Obsidian 1.13.0 或更高版本。终端、编程智能体、内置浏览器和 Git 同步需要桌面版；其余模块在手机上也能运行。
+- 将 Release 里的 `main.js`、`manifest.json`、`styles.css` 放入 `.obsidian/plugins/nand/`。
+- 终端辅助程序 `nand-pty` 是 Release 的附件，提供 Linux（x64、arm64）、macOS（x64、arm64）和 Windows（x64）版本。第一次打开终端时，NAND 下载适合你平台的版本，校验 SHA-256 摘要，并保存在插件目录中。其他平台没有辅助程序。
+- 界面提供英文与简体中文。新库跟随 Obsidian 的语言，可在设置中更改。
 
-### Workbench
+### 工作台
 
-- One workbench view with three columns: an icon rail, a side panel for the current module and the page. The ribbon has a single "Open workbench" icon. See [Workbench](docs/workbench.md).
-- Clicking the active module icon collapses or expands the panel; switching modules returns to the last place in that module; the panel width can be dragged. Medium windows show the panel as an overlay; narrow windows and phones merge the rail and panel into one drawer. F6 moves focus between the columns.
-- "Open in new tab" and "Open in split" show one page in focus mode. Open pages, including browser tabs, are restored with the workspace.
-- Notifications and settings sit at the bottom of the rail. A module that is off disappears from the rail; one that failed to start is marked while the others keep working.
+- 一个三栏的工作台视图：图标轨、当前模块的侧栏和页面。功能区只有一个「打开工作台」图标。见[工作台](docs/workbench.md)。
+- 点击当前模块的图标收起或展开侧栏；切换模块回到该模块上次的位置；侧栏宽度可拖动。中等宽度的窗口把侧栏显示为覆盖层；窄窗口和手机把图标轨与侧栏合成一个抽屉。F6 在三栏之间移动焦点。
+- 「在新标签页打开」和「在分屏中打开」以专注模式只显示一个页面。已打开的页面（包括浏览器标签）随工作区恢复。
+- 通知和设置在图标轨底部。关闭的模块从图标轨消失；启动失败的模块会被标出，其他模块照常工作。
 
-### Settings and appearance
+### 设置与外观
 
-- Settings live in the workbench: General (language, status line, module switches), Appearance, one page per module and About. Obsidian's own settings tab keeps only the entry points. See [Settings](docs/settings.md).
-- Global appearance covers the Obsidian interface, notes (live preview, source and reading) and NAND's pages: Follow system (the default, which changes nothing), Claude Code and Eye care; heading and bold styles for Markdown, reading line height, light and dark accent colors, and copy, paste and reset. See [Appearance](docs/appearance.md).
+- 设置在工作台里：常规（语言、状态栏、模块开关）、外观、每个模块一页和关于。Obsidian 自己的设置页只保留入口。见[设置](docs/settings.md)。
+- 全局外观覆盖 Obsidian 界面、笔记（实时预览、源码与阅读模式）和 NAND 自己的页面：跟随系统（默认，不做任何修改）、Claude Code、护眼绿；Markdown 的标题与加粗样式、阅读行高、浅色与深色强调色，以及复制、粘贴和重置。见[外观](docs/appearance.md)。
 
-### Modules
+### 模块
 
-- Nine modules load on demand: home (dashboard and records), agent (terminal), browser, archives, automations, notifications, icons, comments and sync. Each has a switch, and a module that is off runs no code at startup and leaves no commands, editor extensions or processes behind. Startup code is budgeted at 120 KiB.
-- Git sync is off by default; every other module is on.
+- 九个模块按需加载：首页（看板与记录）、智能体（终端）、浏览器、档案、自动化、通知、图标、评论和 Git 同步。每个模块都有开关；关闭的模块在启动时不运行任何代码，也不留下命令、编辑器扩展或进程。启动代码的预算是 120 KiB。
+- Git 同步默认关闭，其他模块默认开启。
 
-### Dashboard and records
+### 看板与记录
 
-- Boards are Markdown notes with a banner, sections, cards and widgets. Several boards can be created, renamed and ordered. Cards cover tasks, memos, projects, web shortcuts, weather and trackers; widgets include the calendar with lunar dates, countdowns, anniversaries, year progress, albums and music; library and query sections list notes by folder, tag or property. See [Dashboard](docs/dashboard.md).
-- Habits, expenses, reading (with WeRead import) and a pomodoro timer keep their data as Markdown under `NAND/`, with a statistics page for each under the home icon. Saves report saving, saved, unsaved and conflict states, merge independent edits and keep drafts for recovery. See [Records](docs/records.md).
+- 看板是带横幅、栏目、卡片和小组件的 Markdown 笔记，可以新建多份并重命名、排序。卡片包括待办、备忘、项目、网页快捷入口、天气和追踪器；小组件包括带农历的日历、倒数日、纪念日、年度进度、相册和音乐；书库与查询栏目按文件夹、标签或属性列出笔记。见[看板](docs/dashboard.md)。
+- 习惯、记账、阅读（可导入微信读书）和番茄钟把数据保存为 `NAND/` 下的 Markdown，首页图标下各有一个统计页。保存会报告保存中、已保存、未保存和冲突状态，合并相互独立的修改，并保留草稿以便恢复。见[业务记录](docs/records.md)。
 
-### Coding agents
+### 编程智能体
 
-- A terminal workbench with tabs and splits, built on xterm.js and the native `nand-pty` helper over standard input and output: kitty keyboard protocol and win32-input-mode, input methods, links, search, shell integration marks and flow control. See [Agent workbench](docs/agent-workbench.md).
-- Claude Code, Codex, Gemini CLI, OpenCode, Pi and Grok launch from a menu, next to plain shells. Session status comes from each agent's own lifecycle events.
-- Native history stays inside the current vault: browse, search, resume with the agent's own resume flags, title, favorite, archive and export to a note. A usage view reads each agent's usage data.
-- Sessions survive closing the page and are replayed from the authoritative screen; they end when the module is turned off or Obsidian closes.
+- 带标签与分屏的终端工作台，基于 xterm.js 和原生 `nand-pty` 辅助程序，通过标准输入输出通信：支持 kitty 键盘协议与 win32-input-mode、输入法、链接、查找、shell 集成标记和流控。见[Agent 工作台](docs/agent-workbench.md)。
+- Claude Code、Codex、Gemini CLI、OpenCode、Pi 和 Grok 可与普通 Shell 一起从菜单启动。会话状态来自各智能体自己的生命周期事件。
+- 原生历史只限当前库：浏览、搜索，用智能体自己的恢复参数继续，设置标题、收藏、归档并导出为笔记。用量视图读取各智能体的用量数据。
+- 会话在关闭页面后继续运行，回来时从权威屏幕重放；关闭模块或退出 Obsidian 时结束。
 
-### Browser
+### 浏览器
 
-- Web pages open as tabs in the workbench, with address bar suggestions, find, zoom, screenshots with markup, downloads and a shared login per vault. See [Browser](docs/browser.md).
-- Site permissions and recent history are stored per device. Agents can read and operate the same page through a CLI; this is off by default and uses a token that lasts for one run.
+- 网页以标签显示在工作台中，带地址建议、查找、缩放、带标注的截图、下载，同一个库共享登录。见[浏览器](docs/browser.md)。
+- 站点权限和最近历史按设备保存。智能体可以通过 CLI 读取并操作同一网页；这项能力默认关闭，使用只在本次运行有效的令牌。
 
-### Archives
+### 档案
 
-- People and companies are Markdown folders with a main record, positions, relationships and related material, shown as a list or cards. Full-text search combines space-separated terms with AND. See [Archives](docs/contacts.md).
-- Reminders from archive records become automations.
+- 个人与企业是 Markdown 文件夹，包含主记录、任职、关系和相关资料，可用列表或卡片查看。全文搜索把空格分开的多个词按「且」组合。见[档案](docs/contacts.md)。
+- 档案记录里的提醒会成为自动化。
 
-### Comments
+### 评论
 
-- Comments attach to a selection with a text-quote anchor and never rewrite the note. They appear as highlights and a selection popover in live preview, source and reading modes, in a side panel, and in a workbench page that lists every commented note. Anchors follow edits, renames and moves; a comment whose text is gone is marked orphaned instead of guessed. See [Comments](docs/comments.md).
+- 评论用文本引用锚点挂在选区上，不改写笔记。评论在实时预览、源码与阅读模式中显示为高亮和选区浮层，也出现在侧边面板，以及列出所有有评论的笔记的工作台页面里。锚点跟随编辑、重命名和移动；原文消失的评论标记为失效，而不是猜测位置。见[评论](docs/comments.md)。
 
-### Icons
+### 图标
 
-- Icons and colors for files, folders, tags, properties, bookmarks and interface entries, with a rule book that applies them in bulk and a picker for icons and emoji. See [Icons](docs/icons.md).
+- 为文件、文件夹、标签、属性、书签和界面入口设置图标与颜色，规则书可批量应用，选择器同时支持图标和 Emoji。见[图标](docs/icons.md)。
 
-### Automations and notifications
+### 自动化与通知
 
-- Seven action types share manual and scheduled runs: script (PowerShell or Bash), Obsidian command, open note, open web page, notify, create a task and run a coding agent. Schedules are manual, once or recurring (cron). Each run belongs to one device and keeps its history. Dashboard quick actions refer to saved actions by id. See [Automations](docs/automation.md).
-- Notifications reach an in-app inbox with an unread badge, or the system. Results can notify always, only on failure, or never.
+- 七种动作统一手动与定时执行：脚本（PowerShell 或 Bash）、Obsidian 命令、打开笔记、打开网页、通知、新建待办、运行编程智能体。时间可以是手动、一次或周期（cron）。每次运行归属一台设备并保留历史。看板快捷操作用 ID 引用已保存的动作。见[自动化](docs/automation.md)。
+- 通知进入带未读数的应用内收件箱，或发给系统。结果可选择总是通知、仅失败时通知或不通知。
 
-### Git sync
+### Git 同步
 
-- Commit, pull and push the vault with the system git, by hand or on a timer: changes and history pages, staging and diffs per file, commit and sync in one step, optional squash of unpushed commits before a push, and conflict handling with keep-above, keep-below and keep-both buttons in the editor, continue and abort. Credentials stay with git's credential manager or SSH agent. Desktop only. See [Git sync](docs/sync.md).
+- 用系统 Git 提交、拉取和推送整个库，可手动也可定时：变更与历史页、逐文件暂存与差异、一步提交并同步、推送前可选压缩未推送的提交，以及冲突处理（编辑器中的保留上方、保留下方、保留两者按钮，继续和中止）。凭据交给 Git 的凭据管理器或 SSH agent。仅桌面端。见[Git 同步](docs/sync.md)。
 
-### Data
+### 数据
 
-- Your content is Markdown in visible folders; configuration and runtime data are JSON under the vault's `.nand/`, by domain and device. Writes keep the last valid file, merge independent edits and keep recovery drafts. See [Data and recovery](docs/data.md) and [Privacy](docs/privacy.md).
-- Obsidian Sync does not sync dot folders, so `.nand/` needs Git, iCloud, Syncthing or similar to reach other devices.
-- Diagnostic logs are redacted before they are printed.
+- 你的内容是可见文件夹里的 Markdown；配置与运行数据是库内 `.nand/` 下按领域和设备划分的 JSON。写入时保留上一份有效文件，合并相互独立的修改，并保留恢复草稿。见[数据与恢复](docs/data.md)和[隐私](docs/privacy.md)。
+- Obsidian Sync 不同步以点开头的文件夹，所以 `.nand/` 需要用 Git、iCloud、Syncthing 等才能到达其他设备。
+- 诊断日志在打印前脱敏。
 
-### License
+### 许可证
 
-- NAND is released under the MIT License. Attribution for adapted works is in `NOTICE`; bundled packages are in `THIRD-PARTY-NOTICES.md`.
+- NAND 使用 MIT 许可证。改编作品的署名在 `NOTICE`，打包依赖在 `THIRD-PARTY-NOTICES.md`。

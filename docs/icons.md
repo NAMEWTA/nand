@@ -1,92 +1,90 @@
-English | [简体中文](icons.ZH.md)
+# 图标
 
-# Icons
+图标模块可以为文件、文件夹、标签页、书签、标签、属性以及部分界面入口设置图标和颜色，也可以用规则批量应用。模块默认开启，需要 Obsidian 1.13.0 或更高版本。图标设置在工作台图标栏的 **图标** 页里。
 
-The icons module sets icons and colors for files, folders, tabs, bookmarks, tags, properties and some interface entries, and applies them in bulk with rules. It is on by default and needs Obsidian 1.13.0 or newer. The icon settings are on the **Icons** page of the workbench rail.
+## 开始使用
 
-## Get started
+1. 在 **设置 → 常规 → 功能模块** 中确认“图标”已开启。
+2. 打开一篇笔记，在命令面板执行 `NAND: 更改当前文件的图标`。
+3. 在选择器中搜索图标，例如 `star` 或 `folder`，点击搜索结果即可应用并关闭选择器。底部按钮可在图标和表情符号搜索之间切换。
+4. 需要调整颜色时，使用搜索框旁的颜色控件。只改颜色时，点击“保存”。
 
-1. Check under **Settings → General → Modules** that **Icons** is on.
-2. Open a note and run `NAND: Change icon of the current file` in the command palette.
-3. Search for an icon in the picker, for example `star` or `folder`, and click a result to apply it and close the picker. The buttons at the bottom switch between icon and emoji search.
-4. To change the color, use the color control next to the search field. If you change only the color, click **Save**.
+也可以在受支持项目的右键菜单中更改图标（“更改图标…”“删除图标”“重置颜色”）。桌面端默认点击图标即可打开选择器，这个行为由“可点击的图标”设置决定。
 
-You can also change an icon from the context menu of supported items (**Change icon…**, **Remove icon**, **Reset color**). On desktop, clicking an icon opens the picker by default; the **Clickable icons** setting changes that.
+界面文案跟随 NAND 的语言设置。图标名称和搜索关键词来自上游的英文资源，用英文关键词搜索通常更直接。
 
-Interface text follows NAND's language setting. Icon names and search keywords come from upstream English resources, so searching in English is usually more direct.
+## 用规则批量设置
 
-## Bulk icons with rules
+在图标页用 **规则书 → 管理** 打开规则书，或执行 `NAND: 打开规则书`。文件规则和文件夹规则分别管理。
 
-Open the rulebook with **Rulebook → Manage** on the Icons page, or run `NAND: Open rulebook`. File rules and folder rules are managed separately.
+例如，为所有 Markdown 文件统一设置图标：
 
-For example, to give every Markdown file the same icon:
+1. 在文件规则中添加规则，填写便于识别的名称。
+2. 添加条件：*扩展名* *是* `md`。
+3. 选择图标和颜色，启用规则并保存。
 
-1. In file rules, add a rule and give it a recognizable name.
-2. Add a condition: *Extension* *is* `md`.
-3. Choose an icon and color, enable the rule and save.
+条件可以使用名称、文件名、扩展名、文件夹树、路径、标题、链接、嵌入链接、标签、属性、创建和修改时间以及系统时钟。有多个条件时，可以选择“全部”“任意”或“无”满足。多条已启用的规则匹配同一项目时，按规则列表的顺序采用第一条命中的规则；规则可以移到顶部、移到底部，或拖动调整顺序。
 
-Conditions can use the name, filename, extension, folder path, path, headings, links, embeds, tags, properties, created and modified time, and the system clock. With several conditions you choose whether *All*, *Any* or *None* must match. When several enabled rules match the same item, the first matching rule in the list order wins; you can move rules (to top, to bottom, or by dragging).
+如果手动更改图标后的显示与预期不同，先在规则书里检查是否有命中的规则。选择器会提示影响当前项目的规则。规则和图标数据一起保存，不会写进笔记正文。
 
-If an icon looks different from what you chose by hand, look in the rulebook for a matching rule. The picker points out rules that affect the current item. Rules are stored with the icon data, never in the note body.
+## 设置与默认值
 
-## Settings
+图标页的侧栏列出六个分区。下表列出每项设置及其默认值；“规则书”和“查看未使用的图标”是另外两个管理入口。
 
-The side panel of the Icons page lists six sections. The table shows each setting with its default; the two manage buttons are **Rulebook** and **View unused icons**.
-
-| Section | Setting | Default |
+| 分区 | 设置 | 默认值 |
 |---|---|---|
-| General | Bigger icons | Mobile only |
-| General | Clickable icons (tappable on mobile) | Desktop only |
-| Sidebars & tabs | Show all file icons | Off |
-| Sidebars & tabs | Show all folder icons | Off |
-| Sidebars & tabs | Minimal folder icons | On |
-| Sidebars & tabs | Show Markdown tab icons | On |
-| Editor | Show title icons | On |
-| Editor | Show tag pill icons | Off |
-| Menus & dialogs | Show menu actions | On |
-| Menus & dialogs | Show suggestion icons | Off |
-| Menus & dialogs | Show quick switcher icons | On |
-| Menus & dialogs | Show “Move file” icons | On |
-| Icon picker | Show item name | Desktop only |
-| Icon picker | Use search keywords | On |
-| Icon picker | Maximum search results | 100 (slider from 50 to 500) |
-| Icon picker | Main color picker | List of colors |
-| Icon picker | Second color picker | RGB picker |
-| Advanced | Colorless hover | Off |
-| Advanced | Colorless drag | Off |
-| Advanced | Colorless selection | Off |
-| Advanced | Colorless ribbon button | Off |
-| Advanced | Maximum automatic backups | 2 (None, or 1 to 9) |
+| 常规 | 更大的图标 | 仅限移动设备 |
+| 常规 | 可点击的图标（移动端为可触摸图标） | 仅限桌面 |
+| 侧边栏和标签页标题 | 显示所有文件图标 | 关闭 |
+| 侧边栏和标签页标题 | 显示所有文件夹图标 | 关闭 |
+| 侧边栏和标签页标题 | 极简文件夹图标 | 开启 |
+| 侧边栏和标签页标题 | 显示 Markdown 标签图标 | 开启 |
+| 编辑器 | 显示标题图标 | 开启 |
+| 编辑器 | 显示标签胶囊图标 | 关闭 |
+| 菜单和对话框 | 显示菜单操作 | 开启 |
+| 菜单和对话框 | 显示建议图标 | 关闭 |
+| 菜单和对话框 | 显示快速切换器图标 | 开启 |
+| 菜单和对话框 | 显示「将文件移动」图标 | 开启 |
+| 图标选择器 | 显示项目名称 | 仅限桌面 |
+| 图标选择器 | 使用搜索关键词 | 开启 |
+| 图标选择器 | 最大搜索结果 | 100（滑块范围 50 到 500） |
+| 图标选择器 | 主颜色选择器 | 颜色列表 |
+| 图标选择器 | 第二个颜色选择器 | RGB 选择器 |
+| 高级 | 无色悬停 | 关闭 |
+| 高级 | 无色拖动 | 关闭 |
+| 高级 | 无色选择 | 关闭 |
+| 高级 | 无色功能区按钮 | 关闭 |
+| 高级 | 最大自动备份次数 | 2（无，或 1 到 9） |
 
-Settings with a platform choice take *On*, *Desktop only*, *Mobile only* or *Off*. *Show all file icons* and *Show all folder icons* decide whether items without a custom icon also get one; switching them off does not turn the icons module off.
+带平台选择的设置可取“开启”“仅限桌面”“仅限移动设备”或“关闭”。“显示所有文件图标”和“显示所有文件夹图标”决定未自定义的项目是否也显示图标；关闭它们不等于关闭图标模块。
 
-Commands toggle most of these settings: Toggle bigger icons, Toggle clickable icons, Toggle all file icons, Toggle all folder icons, Toggle minimal folder icons, Toggle Markdown tab icons, Toggle title icons, Toggle tag pill icons, Toggle menu actions, Toggle suggestion icons, Toggle quick switcher icons and Toggle “Move file” dialog icons.
+大部分设置都有对应的切换命令：切换更大图标、切换可点击图标、切换所有文件图标、切换所有文件夹图标、切换极简文件夹图标、切换 Markdown 标签图标、切换标题图标、切换标签胶囊图标、切换菜单操作、切换建议图标、切换快速切换器图标、切换「将文件移动」图标。
 
-## Data, backups and turning the module off
+## 数据备份与关闭模块
 
-The icon data is stored in the vault at `.nand/icons/iconic.json`, and its backups are in the same folder.
+图标数据保存在库内的 `.nand/icons/iconic.json`，备份保存在同一目录。
 
-| File | Contents |
+| 文件 | 内容 |
 |---|---|
-| `.nand/config/settings.json` | NAND's main settings; for icons it holds only the module switch |
-| `iconic.json` | Icons and colors, file and folder rules, icon preferences, picker state |
-| `iconic.json.backup1`, `.backup2` and so on | Automatic backups of the icon data; a lower number is newer |
+| `.nand/config/settings.json` | NAND 的主设置；图标领域只在其中保存模块开关 |
+| `iconic.json` | 图标与颜色、文件和文件夹规则、图标偏好、选择器状态 |
+| `iconic.json.backup1`、`.backup2` 等 | 图标数据的自动备份；编号越小越新 |
 
-Saving coalesces changes made within about 300 ms. Automatic backups keep 2 copies by default (0 to 9 allowed); a backup rotates in when the last one is at least 3 hours old when you save. This is not a history version for every change.
+保存时会合并约 300 毫秒内的连续修改。自动备份默认保留 2 份（可设为 0 到 9 份）；保存时若距上一份备份已满 3 小时，才会轮换出新的备份。这不是每次修改都产生一个历史版本。
 
-If the main file is missing, cannot be parsed or is an empty object and a first backup exists, NAND restores `.backup1` and shows a notice. It uses `.backup1` only and does not look for later backups. To restore by hand, turn the icons module off, save copies of the current main file and the backups, copy the backup you trust over `iconic.json`, and turn the module on again.
+主文件缺失、无法解析或为空对象，且存在第一份备份时，NAND 会恢复 `.backup1` 并给出提示。它只使用 `.backup1`，不会去找后面的备份。需要手动恢复时：先关闭图标模块，另存当前的主文件和备份，把确认有效的备份复制为 `iconic.json`，再重新开启模块。
 
-Turning the module off removes the icon changes from the interface (including editor and Reading view), closes its dialogs and removes its commands from the palette; the saved data stays. The icon search keywords and emoji data load the first time you open the picker (rules that match by icon name load them in the background after the module turns on). While the module is on, outside changes to `iconic.json` are picked up through file watching and window focus checks.
+关闭图标模块会撤下界面上的图标修改（包括编辑器和阅读视图），关闭相关弹窗，并把它的命令从命令面板中移除；已保存的数据会保留。图标搜索用的关键词和表情数据在第一次打开选择器时才加载（按图标名称匹配的规则，会在模块开启后于后台加载）。模块开启期间，对 `iconic.json` 的外部修改会通过文件监听和窗口重新聚焦检查被重新读取。
 
-## Troubleshooting
+## 常见问题
 
-| Symptom | What to check |
+| 现象 | 检查方法 |
 |---|---|
-| No Icons entry in the rail | Turn Icons on under **Settings → General → Modules**; a feature that is off shows no entry |
-| The command “Change icon of the current file” is missing | Make sure the module is on and a file is open |
-| An icon cannot be found by a Chinese description | Try the English name or keyword and check the icon/emoji search mode |
-| A new icon is overridden | Look at the rulebook, the matching conditions and the rule order |
-| An icon remains after you removed the custom icon | Check matching rules and the *Show all file/folder icons* settings |
-| The standalone Iconic plugin is also installed | Disable it while you use NAND's icons so both do not change the same interface; NAND does not import its data |
+| 图标栏上没有“图标” | 在 **设置 → 常规 → 功能模块** 中开启图标；关闭的功能不显示入口 |
+| 找不到“更改当前文件的图标”命令 | 确认模块已开启，并先打开一个文件 |
+| 用中文描述搜不到图标 | 尝试英文名称或关键词，并检查图标/表情符号搜索模式 |
+| 新图标被规则覆盖 | 检查规则书、命中条件和规则顺序 |
+| 删除自定义图标后仍显示图标 | 检查匹配的规则和“显示所有文件/文件夹图标”设置 |
+| 同时装有独立的 Iconic 插件 | 使用 NAND 的图标模块时请停用它，避免两者修改同一处界面；NAND 不会导入它的数据 |
 
-Real-host runs cover Obsidian desktop on Linux only, see [Validation](../speculo/.speculo/specdev/context/validation.md); the declared minimum version is not the same as a completed run on that version.
+实机运行只覆盖 Linux 上的 Obsidian 桌面端，见[验证说明](../speculo/.speculo/specdev/context/validation.md)；声明的最低版本不等于已在该版本上完成实机运行。

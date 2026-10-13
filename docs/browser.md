@@ -1,227 +1,231 @@
-English | [简体中文](browser.ZH.md)
+# 内置浏览器
 
-# Browser
+内置浏览器把网页作为工作台的页面打开。在 **设置 → 常规 → 功能模块 → 浏览器** 中开启，再点击图标栏上的地球图标，或运行 `NAND: 打开网页`。浏览器独立于看板和终端。手机上没有内置浏览器：该命令和看板的网页快捷入口会改用系统浏览器打开网页。
 
-The built-in browser opens web pages as pages of the workbench. Turn it on under **Settings → General → Modules → Browser**, then click the globe icon in the rail or run `NAND: Open web page`. The browser is independent of the dashboard and the terminal. On a phone there is no built-in browser: the command and board web shortcuts open the page in the system browser.
+打开的网页在第 3 栏上方显示为标签，也列在第 2 栏。“新建页面”打开一个空白页。关闭其中一个网页会切到相邻的网页，不会关闭工作台。最多同时打开 50 个页面。需要独立叶子时，使用页头菜单的“在原生标签页中打开”或“在分屏中打开”。关闭浏览器模块会关闭所有网页和本地连接。
 
-Open pages are tabs above the page (column 3) and entries in the side panel (column 2). **New page** opens a blank page. Closing a page switches to the neighboring one and does not close the workbench. Up to 50 pages can be open. Use **Open in a native tab** or **Open in a split** from the page header menu for a page of its own leaf. Turning the browser module off closes every page and the local connection.
+## AI 工作台
 
-## AI workspace
+任务列表中的 **MAIW 历史迁移** 接受不超过 50 MiB 的 v3 JSONL 文件。检查统计、来源记录和冲突，再 **导入已预览的历史**。非法版本、未知字段、重复标识、孤儿记录和非官方面板网址会在写入前被拒绝。重复导入未变化的来源记录会跳过，保留本地编辑；相同来源 ID 内容变化时阻止整次导入。本地历史变化后须重新预览。请保留来源文件；保存失败时会保留完整待保存草稿，可 **重试保存** 或用恢复阅读器查看草稿及已落盘记录。重试不会向网站输入内容。
 
-**MAIW history migration** on the task list accepts v3 JSONL files up to 50 MiB. Review counts, source records and conflicts, then **Import reviewed history**. Invalid versions, unknown fields, duplicate identities, orphan records and nonofficial panel URLs are rejected before writing. Unchanged source records are skipped on repeat import, preserving local edits; changed content with the same source ID blocks the import. Local changes invalidate a pending preview. Keep the source file. A failed save retains the complete pending draft; use **Retry saving** or the recovery reader to inspect it and any records already saved. Retrying never sends website input.
+导入的问题、组合提示词、已应用模板快照、原始状态和答案正文均可阅读、搜索，纯文本和 Markdown 都会保留。**导入的 MAIW 历史** 未经核验：来源报告完成不代表网站身份或采集完整性已核验。v3 没有已核验的会话／消息标识、完整采集快照或独立模板库；已应用模板也没有来源版本号，NAND 使用本地快照版本，不推断上游版本。历史面板布局元数据保留用于 v3 导出。导入目标默认不勾选接收方、不打开网页；后续轮次须先选择本地账号并 **绑定所选账号**，再明确打开、核验网站，历史快照保持不变。
 
-Imported questions, combined prompts, applied template snapshots, original statuses and answer bodies remain readable and searchable. Plain text and Markdown are both preserved. **Imported MAIW history** is unverified: reported completion does not prove website identity or capture coverage. V3 has no verified conversation/message identities, full acquisition snapshots or independent template library. Applied templates have no source revision; NAND uses a local snapshot revision, not an inferred upstream version. Historical panel layout metadata is retained for v3 export. Targets start with no recipients selected or pages open. For future rounds, choose a local account and **Bind selected account**, then explicitly open and verify the website; historical snapshots remain unchanged.
+**导出 MAIW v3** 按任务选择，预览全部已保存轮次、当前答案和已应用模板，再保存为 `Exports/` 下新的 `.maiw.jsonl` 文件。账号设置、提交日志、早期采集版本和独立模板库不在导出范围内。v3 每站只允许一个当前面板，额外同站面板保留为历史答案记录。导入记录保留支持的来源字段，包括原始状态和官方面板网址；用户正文不会被脱敏。原生任务网址采用已验证的官方地址。超出 v3 限制时会拒绝导出，不截断内容，可改用 Markdown 导出。
 
-**Export MAIW v3** selects tasks and previews all saved rounds, current answers and applied templates, then saves a new `.maiw.jsonl` file under `Exports/`. Account settings, journals, earlier capture revisions and the independent template library are excluded. V3 allows one current panel per website; extra same-site panels remain as historical answer records. Imported records retain supported source fields, including original statuses and official panel URLs. User-authored content is not redacted. Native URLs use validated official locations. Content exceeding v3 limits is rejected without truncation; use Markdown export for it.
+在浏览器侧栏选择 **AI 工作台**，填写标题，选择 AI 网站和浏览器账号来创建任务。打开任务只读取已保存文档，不会打开官网或恢复发送。草稿随输入保存；置顶任务显示在任务列表顶部。
 
-Choose **AI workspace** in the browser side panel to create a task with a title, AI website and browser account. Opening a task reads its saved documents; it does not open a website or resume a submission. Drafts save as you type. Pinning a task keeps it at the top of the task list.
+在任务列表或问题旁展开 **提示词库**，可以新建、编辑、预览、排序和移除 Markdown 模板。在任务中勾选多个模板，它们会按库中的顺序放在问题之前，勾选和顺序在重启后保留。**预览发送** 显示完整的组合提示词，也可只选择模板发送。已保存轮次保留当时模板的 ID、版本、标题和正文；展开 **本轮已发送的模板与提示词** 即可查看。后续编辑或移除模板不会改变这些副本。旧编辑窗口须重新打开已变化的模板后才能保存。移除模板会清除当前勾选，并在本地 Markdown 文档中标记删除、保留正文，不改变网站会话。
 
-Open **Prompt library** on the task list or beside the question to create, edit, preview, reorder or remove Markdown templates. Select several templates in a task; they precede the question in library order. The selection and order survive restart. **Preview send** shows the exact combined prompt, including when only templates are selected. Saved rounds retain the template IDs, revisions, titles and bodies used at the time; expand **Templates and prompt sent in this round** to inspect them. Later edits or removals leave those copies intact. An outdated editor must reload a changed template before saving. Removing a template clears current selections and marks its local Markdown document deleted while retaining its text; it does not change a website conversation.
+**任务历史** 可搜索任务标题、问题草稿、已保存问题和答案版本。在列表中改名和置顶；改名保留稳定身份。打开任务可直接阅读各轮内容，不会重新打开网站。**删除本地任务** 会先列出受影响的任务、轮次和答案文档，也包括先前已移除目标的历史答案。确认后仅在本地标记删除，Markdown 正文仍保留。其他任务、模板、导出文件和网站会话不受影响。若预览后的内容发生变化，须重新查看删除范围。
 
-**Task history** searches task titles, question drafts, saved questions and answer revisions. Rename and pin tasks from this list; renaming keeps their stable identity. Open a task to read its rounds without reopening a website. **Delete local task** first lists the affected task, rounds and answer documents, including answers from targets removed earlier. Confirming marks those documents deleted locally and keeps their Markdown text. Other tasks, templates, exports and website conversations remain available. If the reviewed content changes, review it again before deleting.
+使用 **导出 Markdown** 选择任务、网站目标，以及全部轮次或每个任务的最新轮次。预览包含问题、冻结的组合提示词、答案当前版本、来源和完整性。最新答案不完整或缺失时，不会改用旧的完整版本。可复制预览的完整内容，或将其保存为`.nand/content/` 内的工作区文件夹下 `Exports/` 中的新 Markdown 文件。导出文件是普通文档，不属于任务删除范围；发送日志、账号分区、凭据和原始网络包不会导出。
 
-Use **Export Markdown** to choose tasks, website targets and either all rounds or each task's latest round. The preview includes questions, frozen combined prompts, current answer versions, source and completeness. A latest partial or missing answer does not fall back to an older complete version. Copy the exact preview or save it as a new Markdown file under the workspace folder's `Exports/` directory. Export files are ordinary documents outside task deletion. Sending journals, account partitions, credentials and raw network payloads are excluded.
+可选择 DeepSeek、Kimi、ChatGPT、Claude、千问、豆包、扣子或 MiniMax，再 **打开官网**，按需在网页中登录，明确执行 **确认当前会话** 或 **新建官网会话**。新建操作必须验证官网上下文为空，才能将目标标为就绪。任务网页固定使用所选账号；重新打开网页后，需要验证新的页面实例再发送。登录或验证页面保留给用户手动处理，并阻止任务提交。
 
-Choose DeepSeek, Kimi, ChatGPT, Claude, Qianwen, Doubao, Coze or MiniMax, then **Open official page**. Sign in on that page if needed, then explicitly **Use current conversation** or **New website conversation**. The latter must verify an empty website context before the target becomes ready. Each task page keeps its selected account. After reopening a page, verify its new instance before sending. Login or verification screens remain available for manual action and block task submission.
+使用 **添加目标** 将另一个网站和账号加入任务；新目标默认不参与发送。**移除目标** 会关闭当前网页，保留已保存的轮次和答案。**选择全部目标** 和 **清空发送集合** 改变接收方；**显示网页** 单独控制可见性，在采集答案期间仍可切换。
 
-Use **Add target** to include another website and account in the task. Added targets start unselected. **Remove target** closes its current page and keeps saved rounds and answers. **Select all targets** and **Clear recipients** change the sending selection. **Show page** controls visibility separately and remains available while answers are being collected.
+每个已打开的网站面板都有 **面板前移／后移**、支持键盘调节的 **面板相对宽度** 滑块，以及 **最大化面板／恢复面板布局**。这些操作只改变展示，保留发送集合、问题草稿、网页实例和已冻结的发送预览。面板共享可用宽度，空间不足时换行；窄窗口只展示当前焦点面板，可用按钮切换已显示的网站。布局偏好在重启后保留，网页仍须明确打开。网页工具栏中的 **刷新** 只刷新当前页面，不提交问题；会话或页面状态变化时需重新核验。
 
-Each open website panel has **Move panel earlier/later**, a keyboard-accessible **Relative panel width** slider, and **Maximize panel / Restore panel layout**. These change presentation only: sending recipients, question drafts, website instances and frozen send previews remain intact. Panels share available width and wrap when needed; narrow windows show one focused panel with buttons to switch between visible sites. Layout preferences survive restart, while website pages remain closed until explicitly opened. The page toolbar's **Reload** refreshes that page without submitting a question; verify the website again if its conversation or state changes.
+输入问题后选择 **预览发送**。每个已选网页都会重新检查，不输入文字、不改变焦点，并逐站显示就绪状态或停止原因。默认要求所有目标就绪且官网草稿为空；**仅预览就绪目标** 只预览就绪的子集，不改变任务保存的发送集合。核对准确的提示词和接收方后，再选择 **发送此预览**。所有目标的草稿都完整读回后才开始提交。每次发送产生独立轮次，相同问题也不会覆盖旧轮次。提交、答案完整性和保存分别显示状态：完整答案写入失败时保留“完整”并显示“保存失败”；**重试保存** 只重试本地存储。
 
-Enter a question and choose **Preview send**. Every selected page is checked again without typing or changing focus; each target shows its readiness or reason for stopping. The default preview requires every target to be ready with an empty website draft. **Preview ready targets only** reviews the ready subset without changing the task's saved selection. Review the exact prompt and recipients, then choose **Send this preview**. All selected drafts must pass readback before any submission. Each send creates a separate round, including repeated questions. Submission, answer completeness and saving have independent statuses. A confirmed answer whose write failed remains complete with **Save failed**; **Retry saving** only retries local storage.
+**暂停任务** 会停止后续任务操作；**暂停并操作网页** 还会显示所选网页，供手动处理。官网已经接受的提交仍可能继续生成。手动处理后可 **重新检查目标**，只读取当前状态，不恢复发送。任务占用网页期间，控制 API 和本地桥接可以读取它，但不能写入、激活或关闭它。重启、关闭任务或停用模块都不会自动重发问题。移动端可阅读已保存的任务和答案，官网控制需要桌面 Obsidian。
 
-**Pause task** stops further task operations. **Pause and use page** also reveals the selected page for manual work. An already accepted website submission may continue generating there. **Recheck targets** reads current readiness after manual work; it does not resume sending. While a task owns a page, the control API and local bridge can read it but cannot write, activate or close it. Restarting, closing a task or disabling the module never automatically resends a question. Restored documents and answers remain readable on mobile; website control requires desktop Obsidian.
+**重新采集此答案** 只读取已确认提交所关联的答案，要求重新核实的网页仍属于同一会话。它保留官网草稿，不创建发送记录。提交结果未知时需先检查，不能仅凭问题文字认领消息。每次采集保存新版本；新版本不完整时，即使旧版本完整，也保持“不完整”。展开 **先前保存的采集版本** 可阅读旧内容。采集后写入失败，可用 **重试保存** 持久化已有答案，不会再次采集或发送。
 
-**Collect this answer again** reads the answer linked to its confirmed submission on the same verified conversation. It preserves website drafts and creates no send attempt. Unknown submissions require review and cannot be matched by question text alone. Each collection saves a new revision: a new partial capture stays incomplete even if an earlier one was complete. Expand **Earlier saved captures** to read previous versions. **Retry saving** can persist a collected answer after a write failure without collecting or submitting again.
+对于未发送、已暂停或提交未知的结果，**查看重发预览** 会重新检查单个目标，显示原轮次的准确提示词和当前账号绑定。先前存在未知尝试时会提示重复风险。确认 **向此站点重发** 后才新增一次尝试；已成功的站点和原轮次提示词保留。修改任务或重新绑定网页后，需要重新预览；官网草稿发生变化会阻止提交。
 
-For an unsent, paused or unknown submission, **Review resend** checks that single target again and displays the original round's exact prompt and current account binding. An unknown earlier attempt carries a duplicate warning. **Resend to this target** creates one new attempt only after confirmation; successful targets and the round's original prompt remain intact. Editing the task or rebinding the page requires a new preview. A changed website draft blocks submission.
+在同一轮选择 2–3 个已保存答案，再选择 **比较答案**。宽窗口并列显示答案；窄窗口通过目标按钮逐个阅读。比较视图保留选定的采集版本；出现新版本后，旧选择会标为 **先前版本**，重新选择即可比较最新版本。**采集详情** 显示来源、适配器版本和会话／消息 ID；未验证的模型名称保持“未验证”。**复制答案 Markdown** 只复制当前显示的版本。**打开原始答案** 使用该答案的账号和官方会话，再按消息 ID、父消息 ID 定位公开答案。消息尚未加载或身份无法核实时，会明确提示，不按文字猜测。
 
-Choose 2–3 saved answers in a round and select **Compare answers**. Wide windows show the answers together; narrow windows provide target buttons to read one at a time. A comparison keeps its selected capture versions. If a new capture arrives, the old selection is labeled **Earlier version**; select it again to compare the latest capture. **Capture details** shows the source, adapter version and conversation/message IDs. Unverified model names stay unverified. **Copy answer Markdown** copies only the displayed capture. **Open original answer** uses that answer's account and official conversation, then locates the public answer by message and parent IDs. If the message is not loaded or its identity cannot be verified, it reports that limit without guessing from text.
+**向此站点追问** 会为下一问题选中一个已有会话，并聚焦问题编辑框。它保留草稿和网页显示状态；编辑问题、核对接收方后再预览发送。目标已重新绑定到其他会话时，不能继续此追问。即使生成已经结束，空内容、仅含已确认会话标题的内容和网站状态文字也保持“不完整”。
 
-**Ask this target** selects one existing conversation for the next question and focuses the question editor. It preserves the draft and page visibility; edit the question and review the displayed recipients before sending. A target rebound to another conversation cannot receive this follow-up. Empty captures, confirmed conversation-title-only content and website status text stay incomplete, even when generation ended.
+无法取得已核实的会话数据时，采集可使用当前答案的网站复制控件。只接受与已加载答案全文一致的内容，保留系统剪贴板，不聚焦网页。不支持、含糊或延迟的复制结果会回退到限定答案区域的页面内容。网站复制结果仍标为“不完整”，因为尚未验证完整答案的覆盖范围；答案旁会显示来源和这项限制。
 
-When verified conversation data is unavailable, collection can use the current answer's website copy control. It accepts only content that matches the whole loaded answer, preserves the system clipboard and does not focus the webpage. Unsupported, ambiguous or delayed copy responses fall back to the scoped page content. Website-copy captures remain incomplete because full answer coverage has not been verified; their source and limitation appear beside the answer.
+任务、轮次和答案的 Markdown 默认位于 **.nand/content/NAND/AI Workspace**。可在 **设置 → 浏览器 → 工作台文件夹** 中选择 `.nand/content/` 内文件夹，重启浏览器模块后生效；现有文件保留在原目录。私有浏览器文件夹中的设备发送日志保存提交身份和提示词哈希。
 
-Task, round and answer Markdown lives under **NAND/AI Workspace** by default. Set a visible vault folder under **Settings → Browser → Workspace folder**; it applies after restarting the browser module, and existing files stay in their current folder. The device send journal contains submission identities and prompt hashes under the private browser folder.
+各站答案在采集完成后分别保存。文档无法写入时，后续答案也会进入 `.nand/recovery/drafts/` 下按设备和工作台文件夹区分的恢复快照。不同运行期间的快照分别保留，重启后再次写入失败也不会覆盖旧快照。选择 **查看本地恢复**，按时间和答案数量选择快照、检查内容，再执行 **恢复已查看的草稿**。恢复会与当前文档合并，不发送问题。预览后内容变化需重新检查；存在编辑冲突时，可阅读、复制需要的答案，不替换当前文档。发送日志损坏、任务无法加载时，也可使用这个阅读入口。修复无法读取的文件后选择 **重新加载任务**；现有内容会保留。
 
-Each website's answer saves as soon as its collection finishes. If a document cannot be written, later answers also enter a recovery snapshot under `.nand/recovery/drafts/`, scoped to this device and workspace folder. Separate snapshots preserve earlier runs if saving fails again after restart. Choose **Review local recovery**, select a snapshot by its time and answer count, inspect it, then **Restore reviewed draft**. Restoration merges with current documents and does not send questions. A changed preview requires another review; conflicting edits remain available for reading and copying instead of replacing current documents. This reader is also available when a damaged send journal prevents task loading. Repair unreadable files and choose **Reload tasks**; existing content is retained.
+生产任务界面与 DeepSeek、Kimi、ChatGPT、Claude、千问、豆包适配器已通过本地 Electron 样本验证，真实账号和当前官网兼容性仍未验证。无法确认身份或完成证据时，任务会显示失败原因或不完整答案，并在答案旁说明原因。Kimi 和豆包仅使用被动观察到的历史分页。ChatGPT、Claude、千问和豆包要求核实当前会话分支，排除非公开内容，并要求明确的完成证据。不按时间戳或数组顺序推断消息关系。千问保留含糊的文本片段并标为不完整，不自行选择或合并。历史缺失或消息未完成时，答案保持不完整；豆包分页结束本身不能证明父链完整或回答已经结束。
 
-The production task interface and DeepSeek/Kimi/ChatGPT/Claude/Qianwen/Doubao adapters have been tested with local Electron fixtures. Real accounts and current website compatibility remain unverified. When identity or completion cannot be established, the task reports the failure or an incomplete answer, with an explanation beside it. Kimi and Doubao only use passively observed history pages. ChatGPT, Claude, Qianwen and Doubao require an identified current conversation branch, exclude private content and require explicit completion evidence. Message relationships are not inferred from timestamps or array order. Qianwen retains ambiguous text fragments as incomplete instead of selecting or merging them. Missing history or unfinished message states keep answers incomplete; an exhausted Doubao cursor alone does not prove a complete parent chain or finished answer.
+2026 年 10 月 11 日验证状态：
 
-Validation status, October 11, 2026:
-
-| Provider | Local Windows Obsidian fixtures | Real account and current website |
+| 网站 | Windows Obsidian 本地样本 | 真实账号与当前官网 |
 | --- | --- | --- |
-| DeepSeek | Passed: native input, current-answer identity, three rounds, long answers and restart | Unverified |
-| Kimi | Passed: rich-text input, passive pagination and current-answer capture | Unverified |
-| ChatGPT | Passed: native input, current branch, public answer and completion checks | Unverified |
-| Claude | Passed: native input, current branch, repeated text and restart | Unverified |
-| Qianwen | Passed: current branch and conservative handling of ambiguous fragments | Unverified |
-| Doubao | Passed: cursor/parent checks and conservative completion handling | Unverified |
-| Coze | Passed locally; limited to scoped page/copy capture, with incomplete coverage | Unverified |
-| MiniMax | Passed locally; limited to scoped page/copy capture, with incomplete coverage | Unverified |
+| DeepSeek | 通过：原生输入、当前答案身份、三轮、长文和重启 | 未验证 |
+| Kimi | 通过：富文本输入、被动分页和当前答案采集 | 未验证 |
+| ChatGPT | 通过：原生输入、当前分支、公开答案与完成检查 | 未验证 |
+| Claude | 通过：原生输入、当前分支、重复正文和重启 | 未验证 |
+| 千问 | 通过：当前分支及含糊片段的保守处理 | 未验证 |
+| 豆包 | 通过：分页游标、父消息检查及保守的完成判断 | 未验证 |
+| 扣子 | 本地通过；仅局部网页／复制采集，覆盖范围不完整 | 未验证 |
+| MiniMax | 本地通过；仅局部网页／复制采集，覆盖范围不完整 | 未验证 |
 
-These checks use controlled pages in real Windows Obsidian. Recent runs used Obsidian 1.14.4 with installer 1.13.7 / Electron 43.3; they do not establish compatibility with authenticated websites. The DeepSeek/Kimi/ChatGPT live-account gate remains unverified, independently of the five later adapters. macOS/Linux browser behavior, phone hardware, operating-system IME composition and real CLI-account synthesis/assistant runs also remain unverified. The user chose to defer account acceptance; no credentials are needed for the local checks.
+这些检查在真实 Windows Obsidian 中使用受控页面。近期运行环境为 Obsidian 1.14.4，安装器 1.13.7 / Electron 43.3；不能据此认定已登录官网兼容。DeepSeek、Kimi、ChatGPT 三站真实账号门禁仍未验证，与后续五站适配分别记录。macOS／Linux 浏览器行为、真机手机、操作系统输入法组合输入，以及真实 CLI 账号的综合／助手运行也未验证。用户选择暂缓账号验收，本地检查不需要提供凭据。
 
-Coze uses scoped public page content and the website's answer-copy control, with no response acquisition hook. It requires explicit conversation, message and parent identities; unavailable identities block sending or capture. Coverage remains unverified, so saved answers stay incomplete. Both official Coze hosts can be selected through the page, but changing hosts requires rechecking the target. No conversation permalink format has been verified: **Open original answer** can locate the answer only while its original page instance remains available. Saved Markdown remains readable after that page closes. Local fixtures verify three rounds, long answers, repeated text, copy boundaries, host rechecking and restart; real-account compatibility remains unverified.
+扣子只读取局部公开内容和网站答案复制控件，不安装响应采集监听器。它要求明确的会话、消息及父消息身份；身份缺失时阻止发送或采集。覆盖范围仍未验证，保存的答案保持不完整。网页可使用两个扣子官方域名，切换域名后须重新检查目标。目前未验证会话永久链接格式，**打开原始答案**只能在原页面实例仍可用时定位答案；页面关闭后，已保存的 Markdown 仍可阅读。本地样本验证了三轮发送、长文、重复正文、复制边界、域名重验和重启，真实账号兼容性仍未验证。
 
-MiniMax follows the same scoped-page/copy policy, with its own message selectors. The allowed entries are `agent.minimax.io`, `chat.minimax.io` and `agent.minimax.cn`; a host change requires explicit rechecking even for an empty conversation. The `chat.minimax.io` entry redirected to `agent.minimax.cn` during the October 11, 2026 review. MiniMax results stay incomplete and original-answer navigation requires the captured page instance. Local fixtures verify three rounds, copy boundaries, both alternate hosts, closing and reopening the official homepage, and restart. Coze and MiniMax can reopen their homepage after a saved conversation's page closes; verify the displayed context again before sending. Real accounts, current private website markup and conversation permalinks remain unverified.
+MiniMax 使用相同的局部网页与复制策略，并使用自己的消息选择器。允许的入口为 `agent.minimax.io`、`chat.minimax.io` 和 `agent.minimax.cn`；即使会话为空，切换域名后也须明确重新确认。2026 年 10 月 11 日审查时，`chat.minimax.io` 跳转到了 `agent.minimax.cn`。MiniMax 答案保持不完整，原文定位要求原页面实例仍可用。本地样本验证了三轮发送、复制边界、两个备用域名、关闭后重开官网首页及重启。扣子和 MiniMax 的已保存会话页面关闭后，都可重新打开官网首页；发送前须再次确认显示的上下文。真实账号、当前官网私有页面结构和会话永久链接仍未验证。
 
-### Answer synthesis
+### 答案综合
 
-**Enable answer synthesis** is off by default. Choose specific saved capture versions, a title, an instruction and a target, then **Review synthesis material and target**. The preview retains each selected source, question, provider, version and completeness, including explicitly selected partial answers. Imported MAIW transcripts have no verified capture versions and are not offered here. Ordinary website sending and recollection do not call an additional model.
+**启用答案综合**默认关闭。选择具体的已保存采集版本，填写标题、指令并选择目标，再点击**预览综合材料与目标**。预览保留每个所选来源、问题、站点、版本和完整性，也包括你明确选择的部分答案。导入的 MAIW 历史没有经过验证的采集版本，不出现在此选择中。普通官网发送和重新采集不会额外调用模型。
 
-**Run automatic synthesis** uses one additional call through the selected configured agent. **Authorize and run once** consumes that preview; it does not submit to any website. Running, needs-attention, completed, cancelled, interrupted and timeout states come from the agent owner. Use **Open running agent** when it needs attention, or **Cancel synthesis**. A completed text result and reported token usage are recorded independently. **Paste into an existing session** only pastes the reviewed material: submit it yourself there. A paste receipt is not model completion, and this mode does not collect a synthesis result from the terminal.
+**自动执行综合**通过所选已配置智能体额外调用一次模型。**授权并执行一次**会消耗当前预览，不向任何官网提交内容。执行中、需要处理、完成、取消、中断和超时状态来自智能体所属模块。需要处理时可**打开执行中的智能体**，也可**取消综合**。完成的文本和已报告令牌用量独立记录。**粘贴到已有会话**仅粘贴预览材料，需要你自行在会话内提交。粘贴回执不等于模型完成，此方式不会从终端采集综合结果。
 
-Records are visible Markdown under the workspace folder's `综合/` directory. Each stores the exact instruction, prompt, selected source copies and capture references separately from original answers. Read them in the task or **Synthesis records** on the task list; they remain available after deleting the original task. Source links open the official conversation where a supported URL exists. Agreement between answers is not evidence of truth.
+记录是`.nand/content/` 内的工作区文件夹下 `综合/` 目录中的工作台中的 Markdown。每份记录保存准确的指令、提示词、所选来源副本及采集引用，与原答案分开。在任务内或任务列表的**综合记录**中阅读；删除原任务后仍可阅读。存在受支持的网址时，来源链接打开官网会话。多个答案一致不代表内容真实。
 
-An unavailable agent requires enabling the Agent module and configuring its CLI/account, then refreshing the list. Failed requests retain original answers. A failed result write keeps the completed text available for copying and recovery; **Retry saving** never repeats the model call. Concurrent edits to a saved request cannot silently change the sources associated with its result: the result remains in recovery for review and conflict resolution. A saved unfinished request becomes interrupted on restart and is never resumed automatically. Local owner-capability fixtures verify this integration; real CLI-account synthesis remains unverified.
+智能体不可用时，需启用智能体模块、配置命令行程序与账号，再刷新列表。请求失败保留原答案。结果写入失败时，完成文本仍可复制并进入恢复草稿；**重试保存**不会再次调用模型。并发编辑已保存请求时，不会悄悄改变结果关联的来源：结果保留在恢复草稿中，供检查和解决冲突。重启后，已保存但未完成的请求标为中断，不会自动继续。本地智能体能力夹具已验证此集成，真实命令行账号综合仍未验证。
 
-### Selected excerpts
+### 用户选取的片段
 
-Use **Select element** on an official page opened by a task. In the selection preview, explicitly choose a saved round and **Save selected excerpt**. This saves up to 2,000 characters with the page, account, page instance, URL, selector and selection bounds. Public conversation/message IDs are included only when the selected element declares them. Associating a round does not establish message identity.
+在任务打开的官网页面使用**选择元素**。在选区预览中明确选择一个已保存轮次，再点击**保存选中片段**。这会保存最多 2,000 个字符，以及页面、账号、页面实例、网址、选择器和选区边界。只有选中元素明确提供公开会话或消息 ID 时才保存这些 ID；关联轮次不代表已证明消息身份。
 
-Excerpts remain incomplete and separate from website capture versions. They never replace the current answer. Choose an excerpt in a comparison's version selector, or explicitly include it in opt-in synthesis to explain that region. Comparison still needs 2–3 different targets in the same round. The task's Markdown retains the excerpt and provenance; current-answer export continues to use the current website capture.
+片段始终标记为不完整，与官网采集版本分开保存，不会替换当前答案。可在比较区域的版本选择器中选择片段，或明确将其加入可选的答案综合来解释该区域。比较仍要求同一轮次的 2–3 个不同目标。任务 Markdown 保留片段和来源；当前答案导出仍使用官网的当前采集版本。
 
-### Website adapter rules
+### 网站适配规则
 
-Open **Website adapter rules** in a supported official page's toolbar. A rule is scoped to that provider, exact official origin, account and URL pathname. Use an exact pathname, or a final `*` for a prefix. Choose or type three CSS selectors: composer, submit button and answer content. **Select an element on the page** uses the existing selection tool; then use the selection for the appropriate role. An answer selector must match one content region inside each public assistant message. Replace a selector tied to one old message with a reusable selector before verification. Rules do not supply missing website message identities.
+在受支持的官网页面工具栏打开**网站适配规则**。每条规则限定站点、精确官网来源、账号和 URL 路径；路径可以精确匹配，也可以在末尾加 `*` 表示前缀。选择或填写输入框、发送按钮和答案内容的三个 CSS 选择器。**在页面上选择元素**复用已有选择工具，再将选区用于相应角色。答案选择器需在每条公开助手消息内匹配唯一的内容区域；验证前，应将只指向某条旧消息的选择器改成可复用的选择器。规则不能补造网站缺失的消息身份。
 
-**Save candidate** writes a visible Markdown record under `<workspace folder>/适配规则/` and does not enable it. Describe the verification scenario and enter one question. **Precheck and preview verification** creates a local task and reviews the exact account, rule version, selectors and prompt without typing. **Send verification once** performs one submission through the normal task safeguards and saves its receipt and partial answer. Review that answer, then **Confirm answer and enable rule**. NAND rereads the current message and selected content before saving the verification links and enabling the rule. Failed or unknown submissions cannot enable it or replay the consumed send.
+**保存候选规则**将工作台中的 Markdown 写入 `<.nand/content/内工作区文件夹>/适配规则/`，不会启用规则。填写验证场景和一个问题，点击**预检并预览验证**，创建本地任务并查看准确的账号、规则版本、选择器和提示词；此时不会向网页输入。**发送一次验证**沿用任务发送的保护措施，提交一次并保存回执与部分答案。查看答案后，点击**确认答案并启用规则**；NAND 再次读取当前消息和指定内容，核对后保存验证引用并启用。失败或结果未知的提交不能启用规则，也不能重放已消费的发送。
 
-An enabled rule applies to matching future actions. Existing task bindings need **Use current conversation** again when the rule changes; their previews display the bound rule version. Editing a saved definition creates a new candidate version and removes its verification. **Withdraw rule** revokes its use immediately; future actions use the built-in adapter after reviewing the target again. Conflicting enabled rules stop the action and require withdrawal of the conflict. **Pause and use page** on the target revokes the current task's page ownership. Restarting or disabling the module discards candidate verification permissions and never replays a send. **Retry saving** retries only a failed local rule write.
+启用的规则用于后续匹配的操作。规则改变后，已有任务绑定需要重新**确认当前会话**，发送预览会显示绑定的规则版本。修改已保存的定义会创建新候选版本并移除验证。**撤回规则**立即撤销其使用权；重新检查目标后，后续操作恢复使用内建适配器。多条启用规则发生冲突时，操作停止，需先撤回冲突规则。目标上的**暂停并操作网页**会撤销当前任务的页面占用。重启或停用模块会丢弃候选验证权限，不会重放发送。**重试保存**仅重试失败的本地规则写入。
 
-## Scoped web assistant
+## 受限网页助手
 
-Open **Browser → Web assistant** and enable **Set up a web assistant task**. Choose an agent, a goal, specific open pages and the permitted operations. Each page is bound to its current account and guest instance. Review the full prompt, page list, operation limit (including observations) and time limit, then authorize one run. The limits are at most 200 operations and 30 minutes. The Agent module must provide the selected installed agent; opening the assistant does not start it.
+打开 **浏览器 → 网页助手**，勾选 **设置网页助手任务**。选择智能体、目标、已打开的具体页面和允许的操作。每个页面绑定当前账号及页面实例。查看完整提示词、页面清单、操作次数上限（包括观察）和时间上限后，仅授权本次运行。上限最多为 200 次操作、30 分钟。智能体模块须提供所选的已安装智能体；打开助手页面不会启动它。
 
-A fresh run calls the selected agent once and gives it temporary access only to the reviewed pages and operations. It cannot open or close pages, enumerate other pages or execute page JavaScript through this grant. Choosing an existing session only pastes planning material: it does not attach browser access or mean that the task ran. Website text is observation data and cannot expand the authorization.
+新运行只调用一次所选智能体，并临时授予已查看的页面和操作权限。这份授权不能新建或关闭页面、列举其他页面，也不能执行页面 JavaScript。选择已有会话只会贴入规划材料，不附带浏览器权限，也不代表任务已经执行。网站文字仅作为观察数据，不能扩大授权范围。
 
-The original page shows the active task with **Pause**, **Stop** and **Take over this page**. These revoke the run's access; takeover returns control to the same page. Closing or replacing a guest, disabling Browser, expiration or the operation limit also ends access. **Review a new run** creates a new authorization using previous evidence and fresh page observations. It never reuses an old confirmation or automatically resumes a task.
+原网页会显示当前任务及 **暂停**、**停止**、**人工接管此页**。这些操作都会撤销本次运行的权限；接管将控制权交还同一页面。关闭或替换页面实例、禁用浏览器、超时或达到操作上限也会结束权限。**预览新的运行** 会结合已有证据和新的页面观察建立新授权，不复用旧确认，也不自动恢复任务。
 
-Clicks and key presses require a separate, one-use review of the visible control, current form content and declared destination. Filling a draft does not require this extra confirmation. Declining, changing the reviewed material or leaving the request unanswered for one minute prevents the action. A missing declared destination or a sensitive credential form requires manual takeover. This review covers observable page content; it cannot establish what hidden website scripts will do. Check the resulting page evidence before treating a submission as accepted.
+点击和按键需要单独查看可见控件、当前表单内容及声明的提交位置，并作出一次性确认；仅填写草稿不需要这次额外确认。拒绝、查看后的内容变化，或一分钟未回应，都会阻止操作。页面没有声明提交位置或表单包含敏感凭据时，需要人工接管。这份确认只覆盖可观察的页面内容，不能推断网站隐藏脚本的行为；认定提交成功前，请核对结果页面的证据。
 
-Tasks, full prompts, step evidence, final output and reported usage are saved as independent Markdown documents under `<workspace folder>/网页助手/`. An action acknowledgment and an agent's completed response are shown separately from website acceptance. After a restart, unfinished tasks become interrupted and unfinished steps have unknown results; no page action is replayed. **Retry saving** writes retained results without rerunning the agent. **Review local recovery** reads this device and workspace's drafts even if the main documents cannot load. Select and inspect a draft before restoring it; changed documents are checked again, conflicts remain available to read, and restoration never starts a task.
+任务、完整提示词、步骤证据、最终输出及已报告的用量，以独立 Markdown 文档保存在 `<.nand/content/内工作区文件夹>/网页助手/`。原生操作返回、智能体回答结束和网站是否接受提交分别呈现。重启后，未结束的任务标为中断，未结束的步骤标为结果未知，不会重放网页操作。**重试保存** 只写回保留的结果，不重新运行智能体。**查看本地恢复** 可独立阅读当前设备和`.nand/content/` 内工作区的草稿，即使主文档无法加载。先选择并查看草稿，再执行恢复；恢复前会再次核对当前文档，有冲突时仍可阅读双方内容，恢复不会启动任务。
 
-The local integration has been exercised with controlled Electron pages and a fixture at the public agent interface. Live websites, actual CLI accounts, SSO/passkeys and mobile native control remain separate acceptance gates.
+本地联调使用了受控 Electron 页面和公共智能体接口处的测试替身。真实网站、实际 CLI 账号、SSO／通行密钥，以及移动端原生控制仍须分别验收。
 
-## Reusable browser workflows
+## 可复用浏览器流程
 
-Open **Browser → Browser workflows** to save a finite sequence of observations, reads, fills, clicks, key presses and navigation. Add an explicit page scope with its account, origin and path prefix. **Inspect page elements** reads the selected page’s accessibility roles and names; use a unique match in each step. Every step needs before and after checks. A fill also needs the expected current field value and a check of the resulting value. There are no scripts, loops or automatic retries.
+打开**浏览器 → 浏览器流程**，保存有限的观察、读取、填写、点击、按键和导航步骤。添加明确的页面范围，包括账号、来源和路径前缀。**查看页面元素**读取所选页面的无障碍角色和名称，在步骤中使用唯一匹配。每一步都需要前置和后置检查；填写还必须指定输入框当前应有的值，并检查填写后的值。流程不支持脚本、循环或自动重试。
 
-Variables can be text, numbers, booleans or secrets. For each manual run, choose the pages and variable values, review the scope, then start. Manual input reveals the selected page. Submission-capable actions require another confirmation on that page, bound to the current action and its contents. A changed input value stops a fill instead of overwriting someone’s draft. Secrets stay in memory; a workflow declaring secret variables omits observed values, page evidence and result text from its saved run documents.
+变量可以是文本、数字、布尔值或秘密。每次手动运行都需选择页面和变量值，核对范围后启动。手动输入会显示所选页面。可能提交内容的操作还需在该页面再次确认，确认绑定当时的动作和内容。输入框当前值发生变化时停止填写，避免覆盖人工草稿。秘密仅保留在内存；声明了秘密变量的流程不会在运行文档中保存观察值、页面证据或结果正文。
 
-**Take over this page** pauses the run and releases control. **Resume with fresh checks** checks the same page and account again. If an earlier action may have happened, resuming checks its result without repeating it; unresolved results stay paused. **Stop** prevents further steps but does not undo website actions. Runs are limited to ten minutes, including pauses, and 200 browser operations. Closing a result page does not stop its run. Restarting Obsidian interrupts unfinished runs and never replays them.
+**接管此页面**暂停流程并释放控制。**重新检查并恢复**会再次检查同一页面和账号。先前动作可能已发生时，只检查结果，不重复执行；结果仍不确定时保持暂停。**停止**阻止后续步骤，但不撤销网站上已发生的操作。每次运行最多十分钟（含暂停），最多执行 200 次浏览器操作。关闭结果页不停止运行。重启 Obsidian 会将未完成流程标为中断，不自动重放。
 
-After a successful run, **Mark these verified steps reusable** makes that exact version available in Automations. Editing the definition requires verification again. Automations stores the single run ID and receipt; browser documents contain the step checks and results. A save failure stops further actions; retrying the save only writes the retained record.
+成功运行后，**将已验证步骤标为可复用**使该确切版本可供自动化选择。编辑定义后需要重新验证。自动化保存唯一运行 ID 和回执，浏览器文档保存各步检查和结果。保存失败会停止后续动作；重试保存只写入保留的记录。
 
-Templates are visible Markdown under the workspace’s `流程/` folder, with run documents under `流程/运行/`. Do not put secret defaults or secret literals in templates. See [Automations](automation.md#browser-workflows) for explicit page selection, scheduling and module shutdown behavior. Controlled local pages have been tested in native Windows Obsidian; real-account website acceptance remains unverified.
+模板是工作区 `流程/` 下的工作台中的 Markdown，运行文档位于 `流程/运行/`。不要把秘密默认值或秘密正文写进模板。明确选择页面、调度和关闭模块的行为见[自动化](automation.md#浏览器流程)。受控本地页面已在 Windows 原生 Obsidian 中验证，真实账号网站验收仍未验证。
 
-## Address bar and toolbar
+## 地址栏与工具栏
 
-The address bar accepts full addresses (`https://example.com`), bare domains (`example.com`) and local addresses (`localhost:3000`). Local hosts (`localhost`, `127.x.x.x`, `0.0.0.0`, IPv6 literals) use HTTP; other domains and `host:port` use HTTPS. Anything else is searched with your search engine: Google (default), Bing or DuckDuckGo, set under **Settings → Browser**. Addresses with a user name or password, file paths and schemes other than http(s) are refused.
+地址栏接受完整地址（`https://example.com`）、裸域名（`example.com`）和本地地址（`localhost:3000`）。本地主机（`localhost`、`127.x.x.x`、`0.0.0.0`、IPv6 字面量）使用 HTTP；其他域名和 `主机:端口` 使用 HTTPS。其他文字交给搜索引擎：Google（默认）、Bing 或 DuckDuckGo，在 **设置 → 浏览器** 中选择。带用户名或密码的地址、文件路径以及 http(s) 之外的协议会被拒绝。
 
-The toolbar has back, forward, reload or stop, find, zoom and select element. The **More actions** menu has hard reload, copy address, open in system browser, developer tools, screenshot, full-page screenshot and annotate screenshot. While the address bar, toolbar or find field has focus, `Ctrl/Cmd+L` selects the address and `Ctrl/Cmd+F` opens and focuses find. Esc closes find and returns to the page; in a browser dialog, another Esc closes the dialog. These local shortcuts follow the focused browser pane, including popout windows. The webpage and note editor keep their own shortcuts. A page that fails to load offers **Retry** and **Open in system browser**.
+工具栏提供后退、前进、刷新或停止、查找、缩放和选择元素。“更多操作”菜单包含强制刷新、复制地址、在系统浏览器打开、开发者工具、截图、整页截图和标注截图。焦点在地址栏、工具栏或查找框时，`Ctrl/Cmd+L` 选中地址，`Ctrl/Cmd+F` 打开并聚焦查找栏。Esc 关闭查找并返回网页；在浏览器对话框中，再按 Esc 关闭对话框。这些局部快捷键跟随当前聚焦的浏览器页面，在弹出窗口中同样有效；网页和笔记编辑器保留各自的快捷键。加载失败后可以“重试”或“在系统浏览器打开”。
 
-## Board shortcuts
+## 看板快捷入口
 
-In a Sticky Notes section of a [board](dashboard.md#web-shortcuts), add a card and choose **Web shortcut**. Fill in a name, a URL and **Open in**. A dialog is the default; a tab is the other choice. The card menu can switch the choice for one visit or open the page in the system browser. The dialog has a button that moves the page into a native tab.
+在[看板](dashboard.md#网页快捷入口)的便利贴分区中添加卡片，选择“网页快捷卡片”，填写名称、网址和打开方式。默认在弹窗中打开，也可以选标签页。卡片菜单可以临时切换打开方式，或在系统浏览器打开。弹窗里有一个按钮，可以把网页转到原生标签页。
 
-A shortcut is stored in the board Markdown, for example:
+快捷卡片保存在看板 Markdown 中，例如：
 
 ```markdown
-### Dev server
+### 开发服务
 type: web
 link: http://localhost:3000/
 openIn: modal
 ```
 
-`openIn` is `modal` or `tab`; when it is missing, `modal` is used. A separate **Web** section type embeds a page in the board itself (configure it with the gear icon: URL and display zoom); its title bar can open the page in a dialog or a tab.
+`openIn` 取 `modal` 或 `tab`，缺省时为 `modal`。另有一种“网页”分区类型，把网页嵌入看板本身（用齿轮图标配置网址和显示比例），它的标题栏可以在弹窗或标签页中打开该网页。
 
-## Sign-in, downloads and restoring pages
+## 登录、下载与恢复
 
-Pages using the same account in a vault share sign-in state. The default account retains the vault's existing login session. Under **Settings → Browser → Browser accounts**, create named isolated accounts for separate logins and site permissions. Open an account from this list, or choose it in a page's account selector to open a new page with the same address. Each existing page keeps its original account. Different vaults use separate sessions.
+同一个库内使用相同账号的页面共享登录状态，默认账号保留本库原有的登录会话。在 **设置 → 浏览器 → 浏览器账号** 中创建具名隔离账号，即可分别保存登录状态和站点权限。从列表打开某个账号，或在网页的账号选择器中选择它，会使用该账号打开新页面；已有页面始终保留原来的账号。不同的库使用独立会话。
 
-You can rename or delete an isolated account. Deletion lists its affected pages for confirmation, closes those pages and clears only that account's website data and permissions. If the page list changes, review and confirm again. An interrupted deletion remains available to retry; it cannot open new pages. The default account cannot be deleted here.
+隔离账号可以重命名或删除。删除前会列出受影响的页面供确认，随后关闭这些页面，只清除此账号的网站数据和权限。页面列表变化后需要重新查看并确认。删除中断时可以重试，此时不能用该账号打开新页面。默认账号不能在这里删除。
 
-A sign-in pop-up with a name or window features keeps its link and account session from the page that opened it; an ordinary link to a new window opens as a NAND tab using the same account.
+带名称或窗口参数的登录弹窗保留与原网页的联系，并使用原网页的账号会话；普通的新窗口链接则作为使用同一账号的 NAND 网页标签页打开。页面的账号 ID 会随工作区保存，重启或移动到弹出窗口后仍使用原来的账号。
 
-Downloads use the system save flow. The browser shows progress, cancel, open file and show in folder. Closing the page cancels downloads that are still running.
+下载使用系统的保存流程。浏览器内显示进度、取消、打开文件和显示所在文件夹。关闭所属页面会取消仍在进行的下载。
 
-The Obsidian workspace stores each page's account ID, address, title, zoom and a restorable scroll position; pages that are not active load later. Switching between tabs keeps the page alive. Moving a page to a new window, or from a dialog to a tab, rebuilds it, so an unsubmitted form can be lost. Turning the module off releases pages and the local connection but keeps sign-in data and settings; native tabs then show that the module is off, and turning it on again restores them.
+Obsidian 工作区保存每个网页的地址、标题、缩放和可恢复的滚动位置；未激活的页面延后加载。普通的标签页切换会保留网页。转到新窗口，或从弹窗转成标签页，会重建网页，未提交的表单可能丢失。关闭模块会释放网页和本地连接，保留登录数据和设置；原生标签页此时显示模块已关闭，重新开启模块即可恢复。
 
-The latest 500 history entries and the site permissions are stored in `.nand/browser/<device-id>/state.json` and feed address suggestions. Cookies live in Obsidian's local Electron session on this computer, not in the plugin settings or the vault sync files. A page address can still be synced through the Obsidian workspace file.
+最近 500 条浏览历史和站点权限保存在 `.nand/browser/<device-id>/state.json`，用于地址建议。Cookie、站点数据、缓存位于当前库的显式 Session 目录 `.nand/browser/<device-id>/profiles/<profile>/session/`，下载在同 profile 的 `downloads/`。所有 NAND 网页表面均绑定库内 Session，不能静默退回宿主全局分区。网页地址仍可能通过 Obsidian 工作区文件同步。
 
-## Let agents use the same pages
+## 让智能体操作同一批网页
 
-This is off by default. Turn on **Let agent sessions use the browser** under **Settings → Browser**; only then does NAND start a local connection. With it off, no terminal starts one. It needs Node.js on this computer; nothing has to be installed globally.
+这项能力默认关闭。在 **设置 → 浏览器** 中打开“允许智能体会话使用浏览器”后，NAND 才会启动本地连接；关闭时任何终端都不会启动它。需要本机已安装 Node.js，无需全局安装任何包。
 
-Shell sessions and terminal scripts do not inherit the `NAND_BROWSER_*` variables. Only agent sessions that NAND starts get the current connection: `NAND_BROWSER_CLI`, `NAND_BROWSER_CONTEXT`, `NAND_BROWSER_TOKEN` and `NAND_BROWSER_GUIDE`. NAND's managed Obsidian context skill tells the agent to read the usage guide. An agent that is already running without these variables can use the explicit connection below.
+普通 Shell 和终端脚本不会继承 `NAND_BROWSER_*` 变量。只有由 NAND 启动的智能体会话才会获得当前连接：`NAND_BROWSER_CLI`、`NAND_BROWSER_CONTEXT`、`NAND_BROWSER_TOKEN` 和 `NAND_BROWSER_GUIDE`。NAND 托管的 Obsidian 上下文技能会提示智能体读取使用说明。已经在运行、没有这些变量的智能体，可以使用下面的显式连接方式。
 
-**External client with a limited grant.** Open **Browser → Local access**, enter the task or purpose, select the already loaded pages/accounts and allowed operations, then review and create the connection. This page is also available from **Settings → Browser → Manage local access**. Merely opening it starts no connection. Grants last 1–30 minutes and allow at most 200 browser operations. Page listings contain only the selected live page instances. A replacement guest, another account or another task is rejected.
+**为外部客户端创建限定授权。** 打开**浏览器 → 本地外接**，填写任务或用途，选择已经加载的页面、账号和允许的操作，核对后创建连接。也可从**设置 → 浏览器 → 管理本地外接**进入。仅打开管理页面不会建立连接。授权有效期为 1–30 分钟，最多执行 200 次浏览器操作。页面列表仅包含选定的活动页面实例；替换后的页面实例、其他账号或其他任务都会被拒绝。
 
-The connection command appears once and supplies `NAND_BROWSER_CLI`, `NAND_BROWSER_CONTEXT`, `NAND_BROWSER_TOKEN` and `NAND_BROWSER_TASK`. Copy it to the local client's terminal and keep the task variable with the token. Credentials stay in memory; the connection JSON contains only the local endpoint. Closing the access page keeps its grants active. **Revoke access** invalidates a connection, while **Revoke access and take over** on the original page revokes every grant for that page and cancels waiting actions. Expiry and module shutdown also stop queued actions. A dispatched action remains returned or unknown; it is never replayed or undone automatically. Restarting creates no grants.
+连接命令仅显示一次，提供 `NAND_BROWSER_CLI`、`NAND_BROWSER_CONTEXT`、`NAND_BROWSER_TOKEN` 和 `NAND_BROWSER_TASK`。复制到本地客户端的终端，并保留令牌对应的任务变量。凭据仅保留在内存，连接 JSON 只有本地端点。关闭外接管理页后授权继续有效。**撤回授权**使连接失效；原页面上的**撤回授权并接管**会撤回该页面的全部外接授权并取消等待中的动作。到期和关闭模块同样阻止排队动作。已经派发的动作如实记录为已返回或结果未知，不自动重放或撤销。重启不会创建授权。
 
-Limited grants expose observations, element reads, screenshots, explicit page reveal/navigation, guarded fills and confirmed clicks/key presses, according to your selection. They cannot create or close other pages or execute scripts. Reads do not reveal a page or take keyboard focus. Input requires a visible page, a fresh snapshot reference and page ownership; another workflow or client keeps its existing control. `fill` additionally needs `--expectedValue` matching the current draft (`--expectedValue=` for empty). A click or key press waits for the same final action review on the original page; without confirmation it fails. CLI failures include symbolic `code`, `reason` and `retryAction`, without raw native exception text.
+限定授权按所选范围开放观察、读取元素、截图、明确显示或导航页面、带草稿检查的填写，以及经确认的点击和按键。不能创建或关闭其他页面，也不能执行脚本。读取不显示页面、不抢键盘焦点。输入要求页面可见、使用新快照引用并获得页面控制权；已有流程或客户端保留其占用。`fill` 还要求 `--expectedValue` 与当前草稿一致，空草稿写为 `--expectedValue=`。点击或按键在原页面等待同一套最终动作核对，未确认就失败。CLI 错误包含稳定的 `code`、`reason` 和 `retryAction`，不回传原生异常正文。
 
-The session-wide setting above and **Copy CLI connection command** give broader access to this vault's pages, including page creation and closing. Turning that setting off invalidates its credentials and queued input; enabling it again issues a new credential. Explicit limited grants have their own lifetime. Both use the same local named pipe/socket and existing native browser controller; neither opens a network server.
+上述面向整个会话的设置和“复制 CLI 连接命令”允许更广的库内页面访问，包括创建和关闭页面。关闭该设置会使其凭据及排队输入失效，重新启用后发放新凭据。明确创建的限定授权有各自的生命周期。两者均使用同一本地命名管道或 socket 和现有原生浏览器控制器，不开放网络服务器。
 
-PowerShell examples:
+PowerShell 示例：
 
 ```powershell
 node $env:NAND_BROWSER_CLI tab list
 node $env:NAND_BROWSER_CLI tab create --url http://localhost:3000
 node $env:NAND_BROWSER_CLI snapshot --page PAGE_ID
 node $env:NAND_BROWSER_CLI click --page PAGE_ID --revision SNAPSHOT_REVISION --element '@e2'
-node $env:NAND_BROWSER_CLI fill --page PAGE_ID --revision SNAPSHOT_REVISION --element '@e3' --value 'test text' --expectedValue=
+node $env:NAND_BROWSER_CLI fill --page PAGE_ID --revision SNAPSHOT_REVISION --element '@e3' --value '测试文字' --expectedValue=
 node $env:NAND_BROWSER_CLI screenshot --page PAGE_ID --full --output screenshot.png
 ```
 
-Use the real `PAGE_ID` and `SNAPSHOT_REVISION` values. Every operation returns JSON. After navigation, a reload or a stale element, take a new snapshot; element references from another page or an old snapshot are rejected. The screenshot output path must not exist yet.
+请使用实际返回的 `PAGE_ID` 和 `SNAPSHOT_REVISION`。所有操作都返回 JSON。网页导航、重载或元素失效后，请重新获取快照；来自其他页面或旧快照的元素引用会被拒绝。截图的输出路径必须尚不存在。
 
-Reading a live background page keeps the foreground page and keyboard focus. Saved pages that have not loaded must first be opened with `tab switch`. Screenshots require a visible page and report this immediately for hidden pages. `tab list` includes each live page's account and generation; pass `--profileId` and `--generation` to reject a replaced target. Moving a page to another window creates a new generation, so list pages and take a fresh snapshot before continuing.
+读取已加载的后台页面会保留前台页面和键盘焦点。尚未加载的已保存页面需要先用 `tab switch` 打开。截图要求页面可见，隐藏页面会立即返回提示。`tab list` 包含已加载页面的账号和 generation；传入 `--profileId` 和 `--generation` 可以拒绝已重建的目标。页面移到其他窗口后会产生新的 generation，因此继续操作前需要重新列出页面并获取快照。
 
-Typing, clicking and other native input also require a visible page. Use `tab switch` explicitly to reveal the target; input focuses that guest. If focus leaves before dispatch, the action fails instead of taking focus back. Reading a page and navigating its address do not reveal it.
+输入文字、点击等原生输入同样要求页面可见。请明确使用 `tab switch` 显示目标，输入操作会聚焦该网页。如果派发前焦点离开，操作会失败，不会重新夺回焦点。读取页面和导航地址不会显示后台页面。
 
-| Capability | Commands and main arguments |
+| 能力 | 命令与主要参数 |
 |---|---|
-| Pages | `tab list/create/switch/close`; `create --url`, the others take `--page` |
-| Navigation | `goto --url`, `back`, `forward`, `reload [--hard]`, `stop` |
-| Understanding | `snapshot`, `get --element`, `screenshot [--full] [--output]` |
-| Interaction | `click`, `dblclick`, `hover`, `focus`, `fill --value`, `type --value`, `select --value`, `check --checked true/false` |
-| Drag and keyboard | `drag --from @e1 --to @e2`; `keypress --key Enter` or `Control+a` |
-| Page | `scroll --direction down --amount 600`; `viewport --width 1280 --height 800` (0 for both resets) |
-| Waiting | `wait --text`, `--url`, `--selector`, `--load load/domcontentloaded/networkidle`, `--timeout` up to 60000 ms |
-| Debugging | `console`, `network`: the latest 100 diagnostic summaries each, recorded from the first time control is attached |
+| 网页 | `tab list/create/switch/close`；`create --url`，其余用 `--page` 指定 |
+| 导航 | `goto --url`、`back`、`forward`、`reload [--hard]`、`stop` |
+| 理解 | `snapshot`、`get --element`、`screenshot [--full] [--output]` |
+| 交互 | `click`、`dblclick`、`hover`、`focus`、`fill --value`、`type --value`、`select --value`、`check --checked true/false` |
+| 拖动与键盘 | `drag --from @e1 --to @e2`；`keypress --key Enter` 或 `Control+a` |
+| 页面 | `scroll --direction down --amount 600`；`viewport --width 1280 --height 800`（两者设为 0 恢复） |
+| 等待 | `wait --text`、`--url`、`--selector`、`--load load/domcontentloaded/networkidle`，`--timeout` 最多 60000 毫秒 |
+| 调试 | `console`、`network`：各保留最近 100 条诊断摘要，从首次接入控制时开始记录 |
 
-Element operations also need `--revision`. A value that starts with `--` can be written as `--value=--example`. References carry the iframe they belong to; dragging across iframes is refused with an error. Developer tools can disconnect the control connection on some Electron versions; browsing keeps working, and closing developer tools and reopening the page restores control.
+元素操作还需要 `--revision`。以 `--` 开头的填入文字可以写成 `--value=--example`。引用带有它所属 iframe 的信息；跨 iframe 拖动会明确报错。开发者工具在部分 Electron 版本上会断开控制连接，普通浏览不受影响；关闭开发者工具并重新打开该网页即可恢复控制。
 
-Console summaries contain the event type, timestamp and argument types. Network summaries contain resource type, timestamp, cancellation and symbolic failure code. Raw console arguments, request URLs, headers and bodies are not retained in these diagnostics. Closing the guest clears its summaries and listeners.
+Console 摘要只包含事件类型、时间和参数类型。网络摘要只包含资源类型、时间、取消状态和错误代码。这些诊断不保存 console 参数原文，也不保存请求地址、请求头或正文。关闭网页时会清空其摘要并移除监听。
 
-## Design mode and annotations
+## 元素选择与标注
 
-Click the select-element icon in the toolbar, hover to highlight, click to capture, Escape to leave. The preview shows the element's text, selector, an HTML excerpt, computed styles and a screenshot when one can be taken. A source location is shown only when the page itself provides development source information; NAND never guesses a file path.
+点击工具栏的选择元素图标，悬停高亮，点击采集，Esc 退出。预览包含元素文字、选择器、HTML 摘要、计算样式，以及可获取时的截图。只有页面自身提供开发源码信息时才显示源码位置，NAND 不会猜测文件路径。
 
-From the preview you can copy the text or the screenshot, or choose a running NAND agent and attach it. The material reaches the agent input as local files and text and is **not sent automatically**: check it and press Enter. If the agent's input is not ready you get a notice to try later. Page material is reference content, not a new instruction to the agent.
+在预览中可以复制文字或截图，也可以选择一个正在运行的 NAND 智能体并附加。材料以本机文件和文字的形式进入智能体的输入区，**不会自动发送**，请检查后按 Enter。智能体输入区尚未就绪时会提示稍后重试。网页材料是参考内容，不代表对智能体的新指令。
 
-**Annotate screenshot** in the more menu offers pen, highlight, arrow, rectangle, ellipse, text, undo and redo. An element screenshot can also be annotated, then copied and attached. The agent changes the project source; a site with hot reload updates itself, otherwise reload the page to check.
+更多菜单中的“标注截图”提供画笔、高亮、箭头、矩形、椭圆、文字、撤销和重做。元素截图也可以进入标注，完成后复制并附加。智能体修改的是项目源码；支持热更新的网站会自行更新，否则请刷新网页验证。
 
-## Site permissions
+## 站点权限
 
-Sensitive site permissions are denied by default. The shield menu in the toolbar grants camera and microphone, location, notifications, clipboard read and full screen per site. Sign-in pop-ups use the same session and policy. A cross-origin request does not inherit the permissions of the main page.
+敏感的站点权限默认拒绝。工具栏的盾牌菜单按站点授权摄像头和麦克风、位置、通知、读取剪贴板和全屏。登录弹窗使用同一会话和策略。跨来源请求不会继承主页面的授权。
 
-Navigation waits at most 30 seconds. Closing or cancelling ends the caller's wait at once. A page that cannot continue safely releases its native guest; click retry or enter a new address to create it again, and an old operation never writes into the new page.
+导航最多等待 30 秒。关闭或取消会立即结束调用方的等待。无法安全继续的页面会释放原生的 guest；点击重试或输入新地址即可重新创建页面，旧操作不会写回新页面。
 
-## Local run files and attachments
+## 本地运行文件与附件
 
-The temporary connection, CLI and usage guide are kept in `nand-browser/<vault-id>/<run-id>/` inside Obsidian's application data folder. Turning the module off, uninstalling the plugin or a normal quit removes this run's files. A stale run left by a crash is cleaned the next time the bridge starts, without touching other vaults or running instances.
+临时连接、CLI、截图和使用说明位于当前库 `.nand/browser/` 下的设备运行目录。停用模块、卸载插件或正常退出时会清理本次运行的文件；异常退出留下的失效运行，在下次启动桥接时回收，不影响其他库或仍在运行的实例。
 
-Images and descriptions already delivered to an agent are stored in `artifacts/` in the same vault folder and are not removed when the bridge stops. They are outside the vault, so back them up separately and clear them yourself once no session needs them. Do not delete a run folder recursively as if it were a plain cache while attachments are still referenced from it. The token is never written to these files.
+已交给智能体的图片和说明保存在同一库目录下的 `artifacts/`，不会随桥接停用而删除。它们不在库内，需要单独备份；确认会话不再需要后可自行清理。不要把仍被引用的附件所在的运行目录当作纯临时缓存递归删除。令牌不会写入这些文件。
 
-## Supported range
+## 支持范围
 
-Desktop Obsidian, HTTP(S) sites and local services. Some sign-in services refuse embedded browsers, and DRM or browser-extension features may be limited; use the system browser then. A very large page is refused as a full-page screenshot; capture the visible area instead. Named accounts use separate local browser sessions. External cookie import, SSH network forwarding, remote browsers and an MCP server are not provided.
+面向桌面版 Obsidian 的 HTTP(S) 网站和本地服务。部分登录服务会拒绝嵌入式浏览器，DRM、依赖浏览器扩展的功能也可能受限，此时请使用系统浏览器。超大网页会明确拒绝整页截图，可改用可见区域截图。命名账号使用彼此隔离的本地浏览器会话。不提供外部 Cookie 导入、SSH 网络转发、远程浏览器或 MCP 服务。
 
-Windows review runs cover local browser control, account isolation and provider fixtures in real Obsidian; provider fixtures do not establish live website compatibility. Other host checks are listed in [Validation](../speculo/.speculo/specdev/context/validation.md). Chinese text typed by automation is not the same as a verified operating system input-method composition.
+Windows 审查运行已在真实 Obsidian 中覆盖本地页面控制、账号隔离和站点样本；样本不代表当前官网兼容性。其他宿主检查见[验证说明](../speculo/.speculo/specdev/context/validation.md)。中文文字由自动化填写，不等同于经过验证的操作系统输入法组合输入。
 
-Browser interaction and parts of the algorithms follow [Orca](https://github.com/stablyai/orca/tree/d74388f8a2dad2bd4bbfe3b937aba66e6648258b) under its MIT license; see [Orca sources and adapted parts](third-party/orca-terminal-workbench.md).
+浏览交互和部分算法参考 [Orca](https://github.com/stablyai/orca/tree/d74388f8a2dad2bd4bbfe3b937aba66e6648258b)，遵循其 MIT 许可，见 [Orca 来源与适配范围](third-party/orca-terminal-workbench.md)。
+
+## 会话迁移与跨设备
+
+设备与 profile 使用独立 Session 目录。旧会话迁移需要一次主进程冷重启：复制并校验后切换，真实 Session 打开确认后再退休来源，原始恢复副本保留在库内。共享旧会话归属不明确时需明确选择，不猜测。路径逃逸、内部链接、来源变化或不支持的 Session API 都会停止该分支。
+
+支持点目录的文件同步可以备份 `.nand/`，Obsidian Sync 不包含它。Cookie/登录状态不能承诺跨设备可用，允许重新登录；不要把同步到的旧运行记录当成重放授权。

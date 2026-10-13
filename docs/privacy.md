@@ -1,61 +1,57 @@
-English | [简体中文](privacy.ZH.md)
+# 隐私与数据边界
 
-# Privacy and data boundaries
+本页只写当前代码里的边界。它不是“绝不上传”或“全部加密”的承诺。你之后在 CLI、浏览器或系统里做的事，由那些程序和你自己的操作决定。NAND 没有遥测，也没有统计分析。
 
-This page describes the boundaries in the current code. It is not a promise that nothing is uploaded or that everything is encrypted. What you do later in a CLI, the browser or the operating system is decided by those programs and by you. NAND has no telemetry or analytics.
+## 记录什么
 
-## What is recorded
+全部 NAND 管理的数据在当前库 `.nand/`。档案正文及其他受管 Markdown/附件在 `.nand/content/`，每个人或企业一份 `基本信息.md`；普通笔记、宿主自身数据与 Git 元数据保留原位置。请把 `.nand/recovery/` 当作敏感资料对待：里面是你正在编辑内容的恢复副本。浏览历史和站点权限在 `.nand/browser/`，终端智能体的历史标注在 `.nand/terminal-agent/`。各个目录的分工见[数据与恢复](data.md)。
 
-Archive text is in the archive folder you choose, one `基本信息.md` per person or company. NAND's own configuration and runtime data are in `.nand/` of the vault. Treat `.nand/recovery/` as sensitive: it holds recovery copies of what you were editing. Browser history and site permissions are in `.nand/browser/`, and the history labels of terminal agents are in `.nand/terminal-agent/`. Which folder holds what is listed in [Data and recovery](data.md).
+设置是明文 JSON。如果你为看板填写了微信读书 API 密钥，它会以文本形式保存在 `.nand/config/settings.json` 中。
 
-Settings are plain JSON. If you enter a WeRead API key for the dashboard, it is stored as text in `.nand/config/settings.json`.
+看板技能模板是笔记中可见的 YAML。派发历史在 `.nand/automation/<device-id>/runtime.json` 中以明文保留最终提示词、选中文件引用、来源和交付回执。新会话把这些材料交给所选 CLI 及其配置的服务商；粘贴到既有会话时由你自行提交。这些快照不是诊断日志，不经过日志脱敏。
 
-Board skill templates are visible YAML in board notes. Dispatch history under `.nand/automation/<device-id>/runtime.json` retains the final prompt and selected file references as plain text, together with the source and delivery receipt. A new session passes this material to the selected CLI and its configured provider; pasting into an existing session leaves submission to you. These snapshots are not diagnostic logs and are not redacted.
+技能选择器读取本地 `SKILL.md` 以提取名称，不执行文件，也不把内容发送给服务商。只有打开或刷新时才扫描文档列出的三个库内目录。额外目录由用户在设备设置中明确配置，仅桌面端读取；留空时不扫描额外目录。记住的名称和目录路径保存在设备设置中，可在智能体设置里清除；发现过程不修改技能文件。
 
-The skill picker reads local `SKILL.md` files to extract names; it does not execute them or send their contents to a provider. It scans the three documented vault directories only on opening or refresh. Additional directories are an explicit device setting, read on desktop only; leaving the setting empty makes no additional scan. Remembered names and directory paths are stored in device settings and can be cleared under Agents. Discovery does not change skill files.
+新闻把采集文本、分析和 CLI 原始回复保存在 `.nand/news/<device-id>/`，采集及运行历史保留窗口为 30 天。收藏、简报和可选的日报是 `.nand/content/NAND/新闻/` 下的工作台中的 Markdown。清理采集缓存会保留这些笔记和当日额度。来源、视图、关注点随库共享，CLI 选择和工作目录属于当前设备。见[新闻](news.md)。
 
-News stores collected text, analysis and raw CLI replies in `.nand/news/<device-id>/`, with a 30-day collected/run-history window. Favorites, briefs and optional daily notes are visible Markdown under `NAND/新闻/`. Clearing collected cache keeps those notes and current quota. Source/view/interest settings are shared with the vault; the selected CLI and working directory are device-specific. See [News](news.md).
+在桌面 POSIX 环境 上，私有 `.nand/` 目录使用 `0700`，文件使用 `0600`；启动时会收紧既有托管文件的权限，Git 克隆后也会重新应用。NAND 拒绝私有路径中的软链接，不修改普通笔记权限。这是本机访问控制，不是加密，也不限制 Git 上传。账号/helper在 Windows 通过 DACL 限定为当前用户与 SYSTEM，权限失败阻止启动；移动端权限行为不能冒称已实测。修复行为见[数据与恢复](data.md#私有文件权限)。
 
-On desktop macOS and Linux, private `.nand/` directories use `0700` and files use `0600`; existing managed files are tightened at startup, including after a Git clone. NAND refuses symlinked private paths and does not change ordinary note permissions. This is local access control, not encryption or a Git upload restriction. Windows and mobile retain their native permission behavior. See [Data and recovery](data.md#private-file-permissions) for repair behavior.
+诊断日志在打印前会做脱敏：库路径和用户主目录会被替换，URL 里的账号信息，以及常见的令牌、口令和密钥查询参数会被遮住，Bearer 令牌和 `token=…` 形式的赋值也会被遮住，过长的文字会被截断。终端画面、你的 Markdown 和你自己复制的内容不经过这个脱敏，调试开关也不能绕过它。
 
-Diagnostic logs are redacted before they are printed: the vault path and home folder are replaced, credentials in URLs and common token, password and key query parameters are masked, bearer tokens and `token=…`-style assignments are masked, and long text is cut. Terminal screens, your Markdown and text you copy yourself do not pass through this redaction, and a debug switch cannot bypass it.
+## 联网
 
-## Network
+档案搜索和列表/卡片切换只读已经建好的内存索引，不发网络请求。下面的功能只在开启并被使用时才联网。NAND 不监听任何端口：给智能体用的浏览器连接和终端组件使用本地命名管道或套接字，以及标准输入输出。
 
-Archive search and the list/card switch read only an in-memory index and make no network request. The features below talk to the network only when they are on and used. NAND opens no listening port: the browser connection for agents and the terminal helper use a local named pipe or socket and standard input and output.
-
-| Feature | When | What is sent, and to whom |
+| 功能 | 何时 | 发送什么，发给谁 |
 |---|---|---|
-| Browser | You open a page, search, download | Whatever the sites you visit receive. Text that is not an address goes to your chosen search engine (Google, Bing or DuckDuckGo) |
-| News collection (off by default) | You preview or refresh sources, or enable a background refresh policy | HTTP requests to the configured feed/static-page addresses; static source scripts are not executed |
-| News analysis and briefs (off by default) | You request analysis or a brief | Bounded report excerpts, configured interests and templates go to the selected CLI/account; its provider handles the model request. NAND stores no model API key and does not call a model API directly |
-| Web section on a board | The section is shown | The configured address is requested once to read its framing headers, and the page is then loaded in the board. Web shortcut cards load nothing until you open them |
-| Terminal helper | The first time you open a terminal | A download of `nand-pty-<platform>-<arch>` and its checksum from the GitHub release of the plugin's version. No vault data is sent. Offline mode never connects |
-| Agent quota | The Usage page is open, or quota is shown in the status bar | For each enabled agent, NAND reads the sign-in that the CLI saved on this computer and calls the provider's quota endpoint (Anthropic, OpenAI/ChatGPT, Google, xAI/Grok, OpenCode and others) |
-| Weather widget (off by default) | The widget is on | The coordinates of the city you picked go to Met.no, wttr.in and Open-Meteo; a city search goes to Open-Meteo |
-| Lunar calendar widget (on by default) | The widget is shown | The year, to get public holiday data from `timor.tech`; the answer is cached for a day |
-| Reading widget | You search for a book | The text you typed, to `book.douban.com`; book cover addresses are fetched |
-| WeRead section | You entered an API key | Requests with your key to the WeRead gateway at `weread.qq.com` |
-| Music player (off by default; not on phones) | You search or play | Requests to `music.163.com`; the optional sign-in uses a window of that site |
-| Git sync (off by default) | Fetch, pull and push, by hand or on a timer | Git connects to the remote you configured. Commits stay on this computer until you push |
-| Agents and scripts | You run them | Whatever the CLI or your script does. NAND does not control it |
+| 浏览器 | 你打开网页、搜索、下载 | 你访问的网站收到的内容。不是地址的文字会发给你选择的搜索引擎（Google、Bing 或 DuckDuckGo） |
+| 新闻采集（默认关闭） | 预览、刷新来源，或启用后台刷新策略 | 向配置的订阅／静态网页地址发出 HTTP 请求；不执行静态来源中的脚本 |
+| 新闻分析和简报（默认关闭） | 请求分析或简报 | 有长度限制的报道摘录、关注点和模板交给选定 CLI 及账户，由其提供方处理模型请求；NAND 不保存模型 API 密钥，也不直接调用模型 API |
+| 看板的网页分区 | 分区显示时 | 配置的地址会被请求一次以读取其框架策略头，随后网页在看板中加载。网页快捷卡片在你打开之前什么也不加载 |
+| 终端组件 | 第一次打开终端时 | 从插件版本对应的 GitHub Release 下载 `nand-pty-<平台>-<架构>` 及其校验值，不发送库内数据。离线模式从不联网 |
+| 智能体额度 | 用量页打开，或额度显示在状态栏 | 对每个已启用的智能体，NAND 读取 CLI 保存在本机的登录信息，并调用提供方的额度接口（Anthropic、OpenAI/ChatGPT、Google、xAI/Grok、OpenCode 等） |
+| 天气小组件（默认关闭） | 小组件开启 | 你选的城市的坐标发给 Met.no、wttr.in 和 Open-Meteo；城市搜索发给 Open-Meteo |
+| 农历万年历小组件（默认开启） | 小组件显示时 | 年份，用来向 `timor.tech` 获取公共假日数据；结果缓存一天 |
+| 阅读小组件 | 你搜索书籍时 | 你输入的文字发给 `book.douban.com`；并会获取书籍封面地址 |
+| 微信读书分区 | 你填写了 API 密钥 | 带着你的密钥向 `weread.qq.com` 的网关发请求 |
+| 音乐播放器（默认关闭；手机不可用） | 你搜索或播放时 | 向 `music.163.com` 发请求；可选的登录使用该网站的窗口 |
+| Git 同步（默认关闭） | 获取、拉取和推送，手动或定时 | Git 连接你配置的远端。提交在你推送之前只留在本机 |
+| 智能体和脚本 | 你运行它们时 | CLI 或你的脚本做的事，NAND 无法控制 |
 
-## Git sync
+## Git 同步
 
-Git sync is off by default. When it is on, NAND starts the `git` of your computer in the vault folder. Git connects to your remote only when you pull, push or fetch, by hand or on a schedule; committing happens locally. NAND neither asks for nor stores account names and passwords: sign-in is handled by Git's credential helper or your SSH agent, and the Git error text shown to you has the account and token in addresses masked.
+Git 同步默认关闭。开启后，NAND 在库目录中启动本机的 `git` 进程。只有在拉取、推送或获取（手动或按设置定时）时，Git 才会连接你配置的远端；提交只发生在本机。NAND 不询问也不保存账号密码，认证由 Git 的凭据管理器或 SSH agent 完成；显示给你的 Git 错误输出会遮去地址中的账号和令牌。
 
-What gets committed is the files of the vault. Notes, attachments and the settings in `.nand/` that are not excluded by `.gitignore` all go into the repository, including recovery drafts, browser history and the settings file with any API key. Check who can read the remote before you push, and add the paths you do not want to publish to `.gitignore`. The clock and pause state of automatic sync are written only to `.git/nand-sync.json`, which is not committed. See [Git sync](sync.md).
+提交的内容就是库里的文件。`.gitignore` 之外的笔记、附件和 `.nand/` 中的设置都会进入仓库，包括恢复草稿、浏览历史和可能含有 API 密钥的设置文件。推送前请确认谁能读取远端，并把不想公开的路径加入 `.gitignore`。自动同步的计时与暂停状态位于 `.nand/sync/` 的设备/仓库文件；同步后也不会自动领取另一设备的运行。详见 [Git 同步](sync.md)。
 
-## Material handed to agents
+## 交给智能体的材料
 
-Web page text and screenshots are untrusted material. When you attach them to a running agent session, NAND pastes them into the input as a bracketed paste and does not add Enter at the end. Escape and other control characters in the material are removed so that a piece of page text cannot end the paste by itself and turn into a keystroke. Shell sessions do not inherit the browser variables meant for agents. The browser token stays in the memory of the current run; the `connection.json` file written for the CLI holds only the endpoint, no token. Turning the browser off removes the known temporary files of that run. It does not recursively delete `.nand/recovery/` and does not take away attachments already handed to an agent.
+网页正文和截图是不可信的材料。把它们附加到运行中的智能体会话时，NAND 用括号粘贴放进输入区，不在末尾追加 Enter。材料里的 ESC 和其他控制字符会被去掉，避免一段网页文字自己结束粘贴并变成按键。普通 Shell 不会继承给智能体用的浏览器变量。浏览器令牌只留在当次运行的内存里，写给 CLI 的 `connection.json` 里只有端点，没有令牌。停用浏览器时，会清掉该次运行已知的临时文件，不会递归删除 `.nand/recovery/`，也不会收走已经交给智能体的附件。
 
-The native CLI history is read-only. Ownership is decided by the real path of the vault, so a similar folder prefix does not bring sessions from outside the vault into view. NAND does not change the CLIs' own log files.
+原生 CLI 历史只读。归属按库目录的真实路径判断，不会因为相似的目录前缀就把库外的会话算进来。NAND 不会修改 CLI 自己的日志文件。
 
-## Files outside the vault
+## 库之外的文件
 
-Some features write outside the vault; all of them are described in the guides:
+NAND 自身的新数据不写到全局 CLI HOME、Obsidian 应用数据或插件运行目录。Hook、浏览器连接/截图/说明、下载和凭据均按库内设备/账号/profile划分。由用户自行维护的全局 CLI 配置、普通笔记、宿主数据与 Git 自有元数据不自动搬迁。
 
-- **Status hooks.** NAND adds a small status hook to the user configuration of Claude Code, Codex, Gemini, Grok, Pi and OpenCode, and keeps a `.nand-backup` copy of merged files. The hook only acts for processes that NAND started. See [Agent workbench](agent-workbench.md#status-hooks).
-- **Separate agent logins.** If you give Claude Code or Codex an account ID, the login is kept in the plugin folder, which is inside the vault's `.obsidian` folder. Keep it out of Git and shared sync.
-- **Browser files.** Temporary connection files and delivered attachments are in Obsidian's application data folder, see [Browser](browser.md#local-run-files-and-attachments).
+配置、账号凭据、Cookie、草稿、运行提示词和会话记录可能含敏感内容。`.nand/` 的访问控制不是全量加密；受保护 helper 回执也不加密全部资料。选择同步或 Git 推送时，请自行核对远端访问范围。登录状态跨设备可能无法使用，需要重新认证。

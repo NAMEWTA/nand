@@ -1,148 +1,150 @@
-English | [简体中文](agent-workbench.ZH.md)
+# 智能体工作台
 
-# Agent workbench
+工作台的 **AI Agent** 页把终端、编程智能体的原生会话历史和用量放在一起。它可以运行普通 Shell，以及这些 CLI 智能体：Claude Code、Codex、Gemini CLI、OpenCode、Pi（`@mariozechner/pi-coding-agent`）和 Grok（`xai-org/grok-build`）。仅桌面端可用。请先在本机安装各 CLI；从 NAND 启动后，在当前库身份中完成登录和目录信任。NAND 不会替你安装或登录，也不隐式继承全局账号。
 
-The **AI Agent** page of the workbench puts terminals, the native history of coding agents and their usage in one place. It runs plain shells and these CLI agents: Claude Code, Codex, Gemini CLI, OpenCode, Pi (`@mariozechner/pi-coding-agent`) and Grok (`xai-org/grok-build`). It is available on desktop only. Install each CLI, sign in and accept its directory trust on this computer first; NAND starts the CLI but does not install or sign in for you.
+六个智能体默认都已启用。可以在 **设置 → 智能体** 中分别关闭，并设置程序路径。
 
-All six agents are enabled by default. You can turn each one off, and set its program path, under **Settings → Agents**.
+## 会话与布局
 
-## Sessions and layout
+侧栏顶部的“新建会话”菜单列出可用的 Shell、已启用的智能体和你的启动预设。侧栏列出已打开的会话（状态显示在名称右侧）、当前库的最近历史和“用量”。这里只列出你自己启动的会话；自动化启动的会话从运行记录中打开。只是浏览智能体页、历史或用量，不会启动任何终端。
 
-The **New session** menu at the top of the side panel lists the available shells, the enabled agents and your launch presets. The panel lists the open sessions (the status is at the right of the name), the recent history of this vault and **Usage**. Only sessions you started yourself are listed; sessions started by automations are opened from the run history. Browsing the page, the history or the usage never starts a terminal.
+主区域顶部是标签条。每个标签可以向右或向下分屏，每个标签最多四个终端；拖动分隔线调整比例，拖动标签调整顺序。每个终端上方显示名称、状态与目录，以及查找、分屏和更多操作。右键菜单提供复制（含去掉行尾空格的复制）、粘贴、全选、选中当前行、查找、上一个/下一个提示符、上一个失败的命令、清屏、清除回滚、文字大小、复制当前目录路径、在文件管理器中显示目录、重命名、复制会话 ID 和结束会话。智能体会话还有“附加笔记或档案…”。
 
-The main area has a tab strip. Each tab can be split to the right or down, up to four terminals per tab. Drag a divider to change the proportions and drag a tab to reorder. Each terminal shows its name, status and folder above it, with find, split and more actions. The right-click menu offers copy (also copy without trailing spaces), paste, select all, select the current line, find, previous and next prompt, last failed command, clear screen, clear scrollback, text size, copy the current folder path, show the folder in the file manager, rename, copy session ID and end session. Agent sessions also have **Attach note or archive…**.
+- **键盘。** 应用启用 kitty 键盘协议或 Windows 的 win32-input-mode 时，按该协议发送按键。两者都未启用时，Shift+Enter 发送 `ESC CR`，Claude Code、Codex 等把它当作换行。输入法组合期间不发送按键，只发送最终提交的文本。
+- **粘贴。** 应用要求时，文本按括号粘贴整体包裹。粘贴内容中的 ESC 等控制字符会被去掉，换行统一为回车。有选区时 Ctrl/Cmd+C 复制，无选区时中断。
+- **链接。** 网址用系统浏览器打开。`路径:行:列` 形式的引用，位于库内时在 Obsidian 中打开到对应行，库外的文件交给系统打开。拖入文件会插入其绝对路径（含空格时加引号），拖入文本按粘贴处理。
+- **Shell 集成。** 发出公开的 OSC 133、OSC 633 和 OSC 7 标记的 Shell，可以使用提示符导航、跳到上一个失败的命令，并跟踪当前目录。
 
-- **Keyboard.** When the application enables the kitty keyboard protocol, or Windows' win32-input-mode, keys are sent in that protocol. With neither, Shift+Enter sends `ESC CR`, which Claude Code, Codex and similar CLIs read as a newline. While an input method is composing, no keys are sent; only the committed text is.
-- **Paste.** Text is wrapped as a bracketed paste when the application asks for it. Escape and other control characters in pasted text are removed and line breaks become carriage returns. Ctrl/Cmd+C copies when there is a selection and interrupts when there is none.
-- **Links.** Web addresses open in the system browser. A reference like `path:line:column` that points inside the vault opens in Obsidian at that line; files outside the vault go to the system. Dropping a file inserts its absolute path (quoted if it contains spaces); dropping text is handled like a paste.
-- **Shell integration.** Shells that emit the public OSC 133, OSC 633 and OSC 7 marks enable prompt navigation, jumping to the last failed command and tracking of the current folder.
+关闭工作台页或叶子只隐藏界面，会话继续运行，回来时从会话的权威屏幕重放。结束会话需要确认并会终止对应进程，CLI 自己的历史仍由 CLI 保存。停用智能体模块或卸载插件会结束全部会话。Obsidian 重启后，以前的会话已不存在：指向它们的链接只打开 AI Agent 页，不会自动新建会话，也不会重新提交提示词。
 
-Closing the workbench page or leaf only hides the interface. The sessions keep running and are replayed from the session's authoritative screen when you return. Ending a session asks for confirmation and stops its process; the CLI keeps its own history. Turning the Agents module off, or uninstalling the plugin, ends all sessions. After Obsidian restarts, earlier sessions no longer exist: a link to one only opens the AI Agent page and never starts a session or submits a prompt again.
+会话状态分两类。连接状态：启动中、已连接、已断开、已退出、启动失败。智能体活动（工作中、等待输入、空闲）只来自 CLI 的原生生命周期事件；没有可靠事件时显示“状态未知”，输出停顿从不被当作完成。普通 Shell 只显示连接状态，不计入运行中的工作。
 
-A session has two kinds of status. The connection is *Starting*, *Connected*, *Disconnected*, *Exited* or *Failed to start*. The agent's activity (*Working*, *Needs input*, *Idle*) comes only from the CLI's own lifecycle events; without a reliable event the status is *Status unknown*, and a pause in the output is never taken as completion. A plain shell shows only its connection status and is not counted as running work.
+## 启动智能体
 
-## Starting an agent
+新会话默认在库目录中启动（“在库目录中启动”）。“确认提示”默认是 **YOLO**：第一次启动带有此类参数的智能体时，NAND 会询问“让智能体跳过确认？”，并说明智能体可以不经询问修改库里的文件。在 **设置 → 智能体** 中选择 **Manual** 可保留 CLI 自己的确认提示。
 
-By default the new session starts in the vault folder (**Start in the vault folder**). The default **Approval prompts** setting is **YOLO**: the first time you launch an agent that has such flags, NAND asks *Let agents skip approval prompts?* and explains that the agent may change files in the vault without asking. Choose **Manual** under **Settings → Agents** to keep the CLI's own prompts.
-
-| CLI | Program | Flags added by YOLO |
+| CLI | 程序 | YOLO 添加的参数 |
 |---|---|---|
 | Claude Code | `claude` | `--dangerously-skip-permissions` |
 | Codex | `codex` | `--dangerously-bypass-approvals-and-sandbox` |
-| Gemini CLI | `gemini` | none |
-| OpenCode | `opencode` | none |
-| Pi | `pi` | none |
+| Gemini CLI | `gemini` | 无 |
+| OpenCode | `opencode` | 无 |
+| Pi | `pi` | 无 |
 | Grok | `grok` | `--permission-mode bypassPermissions` |
 
-If the program is not found, NAND reports it with the install link; set the path under **Settings → Agents** if it is installed in an unusual place. For Claude Code and Codex, **Account** can hold an ID: the session then uses a separate login that NAND keeps in the plugin folder under `accounts/<claude or codex>/<id>/home`. That folder is inside the vault's `.obsidian` folder, so keep it out of Git and shared sync.
+找不到程序时，NAND 会提示并给出安装链接；特殊位置可在 **设置 → 智能体** 中填写程序路径。六种 CLI 都可以填写账号名称，支持中文与标点；名称以 NFC/trim 规范化后使用完整 SHA-256 作为内部标识，显示名称保留。完全留空是当前库的默认账号，非空非法名称会报错。默认账号与命名账号均使用 `.nand/agents/<device-id>/accounts/<provider>/<stable-id>/`，HOME、配置、数据、缓存和临时目录从此身份派生。
 
-## Native history
+旧插件账号目录和 helper 必须完成一次 Obsidian 主进程冷重启后才迁移。旧有损目录名可能碰撞时，需明确选择旧目录或新建身份，不猜测归属。来源先复制/校验再切换，恢复副本保留在库内；重启不会把活跃凭据退回复制阶段。登录状态跨设备不保证可移植，允许重新认证。
 
-History lists only conversations whose working directory, after resolving real paths, is inside this vault or one of its subfolders. A similar folder name, a symbolic link that leaves the vault or missing information about the working directory never widens the scope. Switching vaults never shows global chat history.
+## 原生历史
 
-The panel lists the latest 50 conversations. **All history…** opens a searchable list with filters (Active, Favorites, Archived) at 100 entries per page. Select a conversation to see its full text. You can **Resume** it (NAND starts the CLI with its native resume arguments after checking the working directory and the native record again; a missing record is reported and never replaced by a new session), set a title and tags, favorite, archive, or **Export to note**. The history is not refreshed live; use **Refresh** for the latest.
+历史只接受工作目录经真实路径解析后位于当前库或其子目录的对话。相似的目录名、指向库外的符号链接、缺少可信的工作目录信息，都不会扩大范围。切换库后不会显示全局聊天记录。
 
-| CLI | Where NAND reads |
+侧栏列出最近 50 个对话。“全部历史…”打开可搜索、可筛选（活动、收藏、已归档）、每页 100 条的列表。选中对话可查看全文，并可以 **继续对话**（NAND 再次检查工作目录和原生记录后，用 CLI 原生的恢复参数启动；记录不存在时报告错误，不会用新会话顶替）、设置标题与标签、收藏、归档或 **导出为笔记**。历史不会实时刷新，需要最新记录时使用“刷新”。
+
+| CLI | 读取位置 |
 |---|---|
-| Claude Code | `projects` JSONL files in the configuration folder (`CLAUDE_CONFIG_DIR` or `~/.claude`, or the account folder) |
-| Codex | `sessions` JSONL files in `CODEX_HOME` (or `~/.codex`) |
-| Gemini CLI | JSON and JSONL chats in `.gemini/tmp/*/chats` (`GEMINI_CLI_HOME` or the home folder); the working directory comes from the record, `.project_root` or `projects.json` |
-| OpenCode | `opencode.db`, opened read-only; root sessions with messages and text parts |
-| Pi | `sessions` JSONL files in `PI_CODING_AGENT_DIR` (or `~/.pi/agent`) |
-| Grok | `session.json` and `chat_history.jsonl` in `GROK_HOME/sessions` (or `~/.grok`) |
+| Claude Code | 当前库账号的 `CLAUDE_CONFIG_DIR`中 `projects` 下的 JSONL |
+| Codex | 当前库账号的 `CODEX_HOME`中 `sessions` 下的 JSONL |
+| Gemini CLI | `.gemini/tmp/*/chats` 中的 JSON 和 JSONL（当前库账号的 `GEMINI_CLI_HOME`）；工作目录来自记录、`.project_root` 或 `projects.json` |
+| OpenCode | 只读打开 `opencode.db`；读取根会话及其消息和文本部分 |
+| Pi | 当前库账号的 `PI_CODING_AGENT_DIR`中 `sessions` 下的 JSONL |
+| Grok | 当前库账号的 `GROK_HOME/sessions`中的 `session.json` 与 `chat_history.jsonl` |
 
-NAND's own titles, tags, favorites and archive state are stored in `.nand/terminal-agent/<device>/history.json`; the CLI's logs are never modified. An index that can be rebuilt is next to it as `index.sqlite`. An export is written to the visible folder `NAND Exports/` and opened; a name that already exists gets a numeric suffix and nothing is overwritten.
+NAND 自己的标题、标签、收藏和归档状态保存在 `.nand/terminal-agent/<device>/history.json`，不会修改 CLI 的日志。同目录的 `index.sqlite` 是可重建的索引。导出写入 `.nand/content/NAND Exports/` 文件夹并自动打开；重名时加编号后缀，不覆盖已有文件。
 
-## Quota and usage
+## 额度与用量
 
-Subscription quota is account state returned by the provider and is shown apart from token use. The usage page shows, for each provider, the window or model, the remaining share, the reset time and the time of the check. If a refresh fails, the last valid result stays and is marked as stale. Gemini keeps a quota per model. A provider without a quota interface shows no remaining share and none is made up. Turn on **Show quota in the status bar** under **Settings → Agents** to see quota in the bottom status.
+订阅额度是提供方返回的账户状态，与 token 用量分开显示。用量页按提供方显示窗口或模型、剩余比例、重置时间和检查时间。刷新失败时保留最近一次有效结果并标记为过期。Gemini 保留每个模型各自的额度。没有额度接口的提供方不显示剩余比例，也不会编造。在 **设置 → 智能体** 中开启“在状态栏显示额度”，可在底部状态中查看额度。
 
-Tokens come from the native logs. Input includes cache reads and writes; the cache figures are a breakdown of the input. Codex uses the session total and Claude deduplicates repeated usage of the same message. Cost is only the value the CLI recorded. When sessions are missing from a total it is marked *sessions with known use only*, and if any session has no cost the total cost shows *cost unknown*. Automations use the difference of the native totals before and after a run.
+token 来自原生日志。输入包含缓存读写，缓存数字是输入中的明细。Codex 取会话累计值，Claude 对同一消息的重复用量去重。费用只显示 CLI 原生记录的值。汇总缺少某些会话时标注“仅统计已知用量的会话”，任何会话缺少费用时，汇总费用显示“费用未知”。自动化使用运行前后原生累计值的差额。
 
-## Context material
+## 上下文材料
 
-Choose **Attach note or archive…** in the right-click menu of an agent session. The selected note (the editor's content when the note is open) is pasted into the input as one bracketed paste once the agent's input is ready; no Enter is added. Text, elements and screenshots captured in the [browser](browser.md) are attached through the same interface. If the session ends, or the input is not ready within 10 seconds, NAND reports an error.
+在智能体会话的右键菜单中选择“附加笔记或档案…”。选中的笔记（已打开的笔记使用编辑器中的内容）会在智能体输入就绪后，作为一次括号粘贴放进输入区，不追加回车。[浏览器](browser.md)采集的文本、元素和截图通过同一接口附加。会话已结束，或输入区在 10 秒内没有就绪时，NAND 会报告错误。
 
-## Board skill buttons
+## 看板技能按钮
 
-In Home, open **Board widgets** and add **Agent skills**. Configure buttons inside the widget: name, icon, agent, skill name, prompt template and a new or existing session. Buttons belong to this board's Markdown. Cancelling an edit writes nothing. An empty skill name sends a plain prompt.
+在首页打开“看板组件”，添加“智能体技能”，然后在组件内配置按钮名称、图标、智能体、技能名称、提示词模板及新会话或既有会话。按钮保存在当前看板的 Markdown 中，取消编辑不写入。技能名称留空时发送普通提示词。
 
-**Choose a discovered skill** reads `.agents/skills`, `.claude/skills` and `.codex/skills` only when you open or refresh the list. A skill's name comes from its `SKILL.md` frontmatter, or its directory name if no name is set; body text does not supply a name. Duplicate names show their sources. Saving a valid button remembers its name for that agent on this device, so a moved directory does not remove the remembered choice. Cancelling does not remember a draft. **Settings → Agents → Skill discovery** lets you clear remembered names or explicitly add directories, one absolute path per line. `~` expands on desktop. An empty setting scans no additional directories. Mobile supports vault discovery and remembered names; it does not read additional directories or run terminals.
+“选择已发现的技能”只在打开或刷新列表时读取 `.agents/skills`、`.claude/skills` 和 `.codex/skills`。名称取自 `SKILL.md` 的 frontmatter，未设置时使用目录名，不读取正文中的名称字段；重名技能合并展示各个来源。有效按钮保存后，会在本设备上为所选智能体记住名称，目录移走后仍可选择；取消草稿不会记忆。**设置 → 智能体 → 技能发现** 可清除记住的名称，或明确添加额外目录，每行一个绝对路径，桌面端支持 `~`。留空时不扫描额外目录。移动端支持库内发现和名称记忆，不读取额外目录，也不运行终端。
 
-Explicit invocation syntax was checked against official documentation on October 10, 2026:
+以下显式调用语法已于 2026 年 10 月 10 日核对官方文档：
 
-| Agent | Skill name in the prompt | Reference |
+| 智能体 | 提示词中的技能名称 | 参考 |
 |---|---|---|
-| Claude Code | `/name`, including `/plugin:skill` | [Skills](https://code.claude.com/docs/en/skills) |
+| Claude Code | `/name`，支持 `/plugin:skill` | [Skills](https://code.claude.com/docs/en/skills) |
 | Codex | `$name` | [Build skills](https://learn.chatgpt.com/docs/build-skills) |
-| Grok | `/name`, including qualified names | [Skills guide](https://github.com/xai-org/grok-build/blob/main/crates/codegen/xai-grok-pager/docs/user-guide/08-skills.md) |
+| Grok | `/name`，支持带限定前缀的名称 | [Skills guide](https://github.com/xai-org/grok-build/blob/main/crates/codegen/xai-grok-pager/docs/user-guide/08-skills.md) |
 | Pi | `/skill:name` | [Skills guide](https://github.com/earendil-works/pi/blob/main/packages/coding-agent/docs/skills.md) |
-| OpenCode | Plain prompt; the documented skill tool is selected by the model | [Agent skills](https://opencode.ai/docs/skills/) |
-| Gemini CLI | Plain prompt; `/skills` manages skills, and the model activates them | [Agent skills](https://geminicli.com/docs/cli/skills/) |
+| OpenCode | 普通提示词；文档中的 skill 工具由模型选择 | [Agent skills](https://opencode.ai/docs/skills/) |
+| Gemini CLI | 普通提示词；`/skills` 管理技能，由模型激活技能 | [Agent skills](https://geminicli.com/docs/cli/skills/) |
 
-NAND does not invent a user command for a model-selected skill tool. Discovery lists local names; it does not confirm that a CLI has loaded a skill. Actual provider execution still depends on that CLI's configuration and permissions.
+NAND 不会为模型选择的技能工具猜测用户命令。发现列表展示本地名称，不代表 CLI 已加载该技能；实际运行仍依赖 CLI 的配置和权限。
 
-Templates support `{{path}}`, `{{title}}`, `{{folder}}`, `{{stage}}`, `{{paths}}` and `{{input}}`. Values are inserted once; braces inside a value and unknown variables remain literal. The widget supplies the current board path and title, with no selected files by default. The preview lets you add vault files, enter additional input, choose the destination and edit the final prompt. Once you edit the final text, changing template inputs does not overwrite it; **Rebuild from template** explicitly replaces it. Sending uses the final text as written and appends the selected file references.
+模板支持 `{{path}}`、`{{title}}`、`{{folder}}`、`{{stage}}`、`{{paths}}` 和 `{{input}}`。值只替换一次，值里的花括号和未知变量原样保留。技能组件提供当前看板路径和标题，默认没有选中文件。预览可以添加库内文件、填写补充输入、选择目标并编辑最终提示词。编辑最终文本后，改变模板输入不会覆盖它；点击“从模板重新生成”才会明确替换。发送使用最终文本原文，并附上本次选中的文件引用。
 
-The sparkle button beside fleeting capture and in ordinary card headers opens this board's saved skills. Capture supplies its selected text, or the entire draft when nothing is selected, and its existing target note. An unsaved capture has an empty path and file scope; running a skill neither creates a note nor clears the draft. A linked card supplies the note's current path and title after moves or renames; an inline card supplies its title and board path. Only text selected inside that card becomes input. The preview can exclude context files, and cancelling leaves the capture and note unchanged.
+快念输入旁和普通卡片标题栏的闪光图标会列出当前看板已保存的技能。快念提供选中文本，没有选区时提供完整草稿，并使用已存在的目标笔记。尚未保存的快念路径和文件范围为空，运行技能不会创建笔记或清空草稿。关联笔记的卡片在文件移动或重命名后使用当前路径和标题；内嵌卡片使用卡片标题和看板路径。只有在该卡片内选中的文字才会作为输入。预览可取消选择上下文文件，取消预览不会改变草稿或笔记。
 
-Preview is the default. **Skip preview for this button** applies only to that button and uses its current context immediately. Confirmation closes the preview. A new session uses the selected agent's existing account and permission settings; an existing session receives one unsent block, without Enter. Missing, ended or busy sessions report an error and never fall back to a new session. A disabled Agents module stays disabled.
+默认先预览。“此按钮跳过预览”仅作用于该按钮，并立即使用当前上下文。确认后预览关闭。新会话使用所选智能体已有的账号和权限设置；既有会话只收到一个未发送的文本块，不附加 Enter。会话缺失、结束或忙碌时显示错误，不会自动改为新会话。智能体模块关闭时不会自动开启。
 
-The automation run history records the final prompt, file references, source and terminal. It saves the invocation before starting or pasting and deduplicates repeated invocation IDs. **Started** is delivery, with completion reported by the CLI's native lifecycle; **Pasted · awaiting your submission** is not a completed model task. The 10-second delivery deadline ends waiting, so check run history for any task already accepted. Closing the page cancels its pending delivery wait, while accepted runtime tasks follow the existing automation lifecycle.
+自动化运行记录保存最终提示词、文件引用、来源和终端标识；启动或粘贴前先保存调用记录，相同调用 ID 不重复执行。“已启动”只表示交付，完成状态由 CLI 原生生命周期报告；“已粘贴 · 等待你发送”不表示模型任务完成。10 秒交付超时只结束等待，已接受任务请查看运行记录。关闭页面会取消其等待中的交付，已由运行时接受的任务遵循现有自动化生命周期。
 
-## Settings
+## 设置
 
-Under **Settings → Agents** (stored per device):
+在 **设置 → 智能体** 中（按设备保存）：
 
-| Group | Settings |
+| 分组 | 设置 |
 |---|---|
-| Shell | Default shell (system default, bash, zsh, pwsh, PowerShell, cmd, Git Bash, WSL or a custom program), arguments, start in the vault folder |
-| Appearance | Font, text size (8 to 32), line height (1 to 2), cursor style and blinking, scrollback lines (100 to 10,000), renderer (WebGL or DOM), Obsidian colors or your own |
-| Launch presets | Name, icon, shell or program, arguments, folder and a line to run after start; shown in the New session menu |
-| Coding agents | Approval prompts (YOLO or Manual), quota in the status bar, and for each agent: on or off, program path, approval override, extra arguments (they replace the default flags), account and usage |
-| Terminal helper | Offline mode and a check button |
+| 终端 | 默认终端（系统默认、bash、zsh、pwsh、PowerShell、cmd、Git Bash、WSL 或自定义程序）、参数、在库目录中启动 |
+| 外观 | 字体、文字大小（8 到 32）、行高（1 到 2）、光标样式和闪烁、回滚行数（100 到 10,000）、渲染器（WebGL 或 DOM）、使用 Obsidian 配色或自选颜色 |
+| 启动预设 | 名称、图标、终端或程序、参数、目录，以及启动后执行的一行；显示在“新建会话”菜单中 |
+| 编程智能体 | 确认提示（YOLO 或 Manual）、在状态栏显示额度，以及每个智能体的开关、程序路径、确认提示覆盖、额外参数（会替换默认参数）、账户和用量 |
+| 终端组件 | 离线模式和检查按钮 |
 
-## Status hooks
+## 状态 hook
 
-To learn when an agent is working, waiting or idle, NAND installs a small status hook in the CLI's own user configuration when it starts a Claude Code, Codex, Gemini, Grok, Pi or OpenCode session, interactively or from an automation:
+为了知道智能体是在工作、等待还是空闲，NAND 在启动 Claude Code、Codex、Gemini、Grok、Pi 或 OpenCode 会话（交互式或由自动化启动）时，会在当前库账号的 CLI 配置中安装一个小型状态 Hook：
 
-| CLI | File NAND writes |
+| CLI | NAND 写入的文件 |
 |---|---|
-| Claude Code | `settings.json` in the Claude configuration folder (merged) |
-| Codex | `hooks.json` in `CODEX_HOME` (merged) |
-| Gemini CLI | `~/.gemini/settings.json` (merged) |
-| Grok | `hooks/nand-status.json` in `GROK_HOME` |
-| Pi | `extensions/nand-status.ts` in the Pi agent folder |
-| OpenCode | `plugins/nand-status.mjs` in `~/.config/opencode` |
+| Claude Code | Claude 配置目录中的 `settings.json`（合并） |
+| Codex | `CODEX_HOME` 中的 `hooks.json`（合并） |
+| Gemini CLI | 账号 HOME 下的 `.gemini/settings.json`（合并） |
+| Grok | `GROK_HOME` 中的 `hooks/nand-status.json` |
+| Pi | Pi 智能体目录中的 `extensions/nand-status.ts` |
+| OpenCode | 账号的 `OPENCODE_CONFIG_DIR` 中的 `plugins/nand-status.mjs` |
 
-Merged files keep your settings and other hooks, and the original is copied to a `.nand-backup` file next to it. The hook script itself is the file `nand-automation-hook.cjs` in a `hooks` folder inside a `.nand` folder in your home folder (outside the vault). The hook does nothing unless the process was started by NAND with its private event folder; it has no network access and does not log prompts. Pi waits for the real idle state, and OpenCode ignores child sessions and recoverable errors.
+安装保留用户设置和其他 Hook，先原子认领实际原文件，再以无覆盖发布写入；并发或中断版本留在账号内的 `.nand-install` / `.nand-backup-<id>` 恢复目录。脚本位于账号的 `runtime/nand-automation-hook.cjs`，每个终端的事件目录也在账号内。没有本终端令牌时 Hook 不执行事件写入；它不联网、不记录提示词，写入前再次检查归属与链接。Pi 等待真正空闲，OpenCode 忽略子会话和可恢复错误。
 
-The directory trust, login and hook permissions of each CLI stay under the CLI's control. Codex requires review of new or changed hooks through its `/hooks` command; NAND does not bypass that review. See the [Codex hook reference](https://learn.chatgpt.com/docs/hooks).
+各 CLI 的目录信任、登录和 hook 权限仍由 CLI 自己管理。Codex 要求通过 `/hooks` 命令审查新增或变更的 hook，NAND 不会跳过这一步，详见 [Codex hook 文档](https://learn.chatgpt.com/docs/hooks)。
 
-Prompt tasks used by other NAND modules have a default ten-minute deadline. The task can expose its terminal while waiting for login, trust or permissions. Cancellation and timeout stop that task's process. A completed task normally closes its terminal; a caller can explicitly retain it for inspection and remains responsible for closing it. Other manually opened terminals are unaffected.
+其他 NAND 模块发起的提示词任务默认最多运行十分钟。等待登录、目录信任或权限时，任务可以显示所属终端；取消或超时会结束该任务的进程。任务完成后通常关闭终端；调用方可以明确保留终端供查看，并负责后续关闭。其他手动打开的终端不受影响。
 
-A prompt result comes from the CLI's native completion event and complete answer. Claude Code and Codex supply the final message in their hooks; Gemini supplies `prompt_response`; Pi supplies the settled turn's assistant message; OpenCode supplies the current turn's completed text parts through its local session client. Missing answers, process exit without an answer and answers exceeding 2 MiB of UTF-8 text return an error. Large hook input also produces an explicit error. No prompt or tool input is stored in the hook event spool. Tasks use the selected CLI's existing account and permission settings, and available usage comes from its native records.
+提示词结果来自 CLI 的原生完成事件和完整答案。Claude Code 与 Codex 的 hook 提供最后一条回答，Gemini 提供 `prompt_response`，Pi 提供本轮结束后的 assistant 消息，OpenCode 通过本地会话接口提供当前轮已完成的文本部分。没有答案、进程退出却没有答案，或答案超过 2 MiB UTF-8 文本时，任务明确失败；过大的 hook 输入也会产生明确错误。hook 事件暂存中不保存提示词或工具输入。任务沿用所选 CLI 的现有账户与权限设置，可用的用量来自原生记录。
 
-## Terminal helper
+## 终端组件
 
-Terminals run in a small native program, `nand-pty` (MIT, source in `native/pty-server`). The plugin talks to it only over its standard input and output; it opens no port and needs no token. NAND checks the protocol version (3) at start and fails clearly on a mismatch. The helper ends all terminals when the plugin stops. On Windows it uses ConPTY and a job object so child processes end with it.
+终端由一个小型原生程序 `nand-pty` 运行（MIT，源码在 `native/pty-server`）。插件只通过它的标准输入输出通信，不监听端口，也不需要令牌。启动时 NAND 核对协议版本（3），版本不符时明确失败。插件停止时，它会结束全部终端。在 Windows 上使用 ConPTY，并通过作业对象保证子进程随之退出。
 
-The helper is published for Windows x64, macOS x64 and arm64, and Linux x64 and arm64. On first use, NAND downloads `nand-pty-<platform>-<arch>` (`.exe` on Windows) and its `.sha256` file from the release of the same plugin version, never from another version, and keeps them in the plugin's `binaries/` folder. If the checksum is missing, damaged or different, installation stops and the existing file stays. You can place the matching files of that release in `binaries/` yourself: with a network NAND checks them against the official digest and accepts them; with **Offline mode** on it never connects and only uses what is installed. After a failed download, open a terminal again to retry; no reload is needed. Developers can point the environment variable `NAND_PTY_BINARY` at a local build.
+组件为 Windows x64、macOS x64/arm64、Linux x64/arm64 发布，始终由 CI 构建。首次使用从插件同版本 Release 下载 `nand-pty-<平台>-<架构>`（Windows 加 `.exe`）与正式摘要，保存到 `.nand/helpers/<device-id>/<platform-arch>/<version>/`。各版本独立，升级保留旧文件。摘要缺失或不匹配时停止并保留来源。
 
-Download errors identify the failed step. HTTP 404 means that this release has not published the helper or checksum for your platform; other HTTP failures show the status and plugin version. Connection failures and timeouts have separate messages. The developer console records the original release asset address, without redirect signatures or authentication details. A failed attempt keeps the installed binary and can be retried.
+已有匹配字节可在正式摘要核验后复用，旧明文回执不能赋予执行信任。本机受保护回执允许已验证文件离线复用；异机无法解密、证明失效或宿主保护不可用时需要重新联网核验。Linux `basic_text` 不作为可信保护，不能承诺离线可用。开发 `NAND_PTY_BINARY` 只复制到库内执行，不直接在库外运行。
 
-## Commands
+下载错误会说明失败原因。HTTP 404 表示此版本尚未发布当前平台的组件或校验文件；其他 HTTP 错误显示状态码和插件版本，连接失败与超时分别提示。开发者控制台记录原始 Release 资产地址，不记录重定向签名或认证信息。失败后保留已安装的二进制，可以重新尝试。
 
-| Command | Result |
+## 命令
+
+| 命令 | 结果 |
 |---|---|
-| New terminal | Starts a shell session |
-| New Claude Code session, New Codex session, New Gemini CLI session, New OpenCode session, New Pi session, New Grok session | Starts that agent (only while it is enabled) |
-| Switch terminal session | Opens a picker for the open sessions |
-| Send selection to terminal, Send current note to terminal, Send current file path to terminal | Pastes the text into the current terminal without Enter |
-| Insert absolute reference into terminal | Inserts the absolute reference of the current note |
-| Show agent usage | Opens the usage page |
-| Agent settings | Opens Settings → Agents |
+| 新建终端 | 启动一个 Shell 会话 |
+| 新建 Claude Code 会话、新建 Codex 会话、新建 Gemini CLI 会话、新建 OpenCode 会话、新建 Pi 会话、新建 Grok 会话 | 启动对应的智能体（仅在其已启用时可用） |
+| 切换终端会话 | 打开已打开会话的选择器 |
+| 发送选中文本到终端、发送当前笔记到终端、发送当前文件路径到终端 | 把文本粘贴到当前终端，不追加回车 |
+| 在终端插入绝对引用 | 插入当前笔记的绝对引用 |
+| 查看智能体用量 | 打开用量页 |
+| 智能体设置 | 打开 设置 → 智能体 |
 
-## Limits
+## 使用限制
 
-Install and sign in to each CLI on this computer first, and complete its own directory trust and permission prompts. Terminals and automations stop when Obsidian quits. CLIs differ in the history, completion events and quota they provide; missing information is shown as unknown or unavailable. Windows helper installation, shell input/resize and prompt process cleanup have been tested in real Obsidian. The prompt tests use a native-hook protocol fixture; complete answers from real Claude/Codex model runs, other CLI adapters, macOS and Linux still require validation. See the [runner evidence](../speculo/.speculo/specdev/archive/2026-10/2026-10-08-news-aihot/evidence/review-runner.json) and [Validation](../speculo/.speculo/specdev/context/validation.md).
+请先在本机安装并登录各 CLI，并完成它自己的目录信任和权限提示。Obsidian 退出后，终端和自动化任务不会继续运行。不同 CLI 提供的历史、完成事件和额度信息不同，缺失的信息显示为未知或不可用。Windows 上已在真实 Obsidian 验证组件安装、Shell 输入与尺寸调整、提示词任务的进程清理。提示词测试使用原生 hook 协议测试程序；Claude/Codex 真实模型运行的完整答案、其他 CLI 适配器，以及 macOS 和 Linux 仍待验证，见 [runner 证据](../speculo/.speculo/specdev/archive/2026-10/2026-10-08-news-aihot/evidence/review-runner.json)和[验证说明](../speculo/.speculo/specdev/context/validation.md)。

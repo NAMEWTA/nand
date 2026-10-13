@@ -1,78 +1,76 @@
-English | [简体中文](settings.ZH.md)
+# 设置
 
-# Settings
+NAND 的设置在工作台里：点击左侧图标栏底部的齿轮，第 2 栏列出分类，第 3 栏是所选的设置页。修改即时保存。
 
-NAND settings live in the workbench: click the gear at the bottom of the left icon rail. The second column lists the categories and the third column shows the selected page. Changes are saved as you make them.
-
-| Category | Contents |
+| 分类 | 内容 |
 |---|---|
-| General | Language, bottom status, module switches, and help for the copy-reference commands |
-| Appearance | Global style, Markdown heading and bold looks, reading line height, accent colors, copy/paste/reset (see [Appearance](appearance.md)) |
-| Dashboard, Browser, News, Editor, Agents, Archives, Automations, Git sync | Settings of each feature; a page is listed only while its feature is on |
-| About | A short description of NAND and a link to the author's GitHub profile |
+| 常规 | 语言、底部状态、功能模块开关，以及复制引用命令的说明 |
+| 外观 | 全局样式、Markdown 标题与加粗外观、阅读行高、强调色，以及复制、粘贴和重置（见[外观](appearance.md)） |
+| 看板、浏览器、新闻、编辑器、智能体、档案、自动化、Git 同步 | 各功能自己的设置；只有功能开启时才列出对应页面 |
+| 关于 | NAND 的简短介绍和作者的 GitHub 主页链接 |
 
-Icon settings are on the Icons page of the rail, not in the settings categories. Notifications and Records have no settings page of their own.
+图标设置在图标栏的“图标”页里，不在设置分类中。通知和记录没有独立的设置页。
 
-Obsidian's own **Settings → NAND** is a short entry point: a button that opens the workbench settings, the language, the bottom status, the style and the module switches. Everything else is in the workbench.
+Obsidian 自带的 **设置 → NAND** 只是一个简短入口：打开工作台设置的按钮、语言、底部状态、样式和功能模块开关。其余设置都在工作台中。
 
-## Language
+## 语言
 
-**Language** offers **简体中文** and **English**. A new vault uses Chinese when Obsidian's interface language is Chinese and English otherwise. The choice applies at once and is kept across restarts. If saving fails, the previous choice stays and NAND shows a notice.
+“语言”可选择 **简体中文** 或 **English**。新库在 Obsidian 界面语言为中文时使用中文，否则使用英文。选择后立即生效，重启后保留。保存失败时保留原选择并提示。
 
-The language changes NAND's titles, menus, buttons, notices and accessible names, and the language of sample content created from then on (a new board, a new archive format guide). It does not translate your notes, scripts, prompts, web pages, CLI output, icon names and search keywords, or the Chinese fortune sticks. It never renames or moves files and folders, and it does not re-run actions or restart running terminals.
+语言影响 NAND 的标题、菜单、按钮、提示和无障碍名称，以及此后新建的示例内容（新看板、新的档案格式说明）的语言。笔记、脚本、提示词、网页、CLI 输出、图标名称与搜索关键词、中文签文等原文内容不会被翻译。切换语言不会重命名或移动任何文件和文件夹，不会重新执行操作，也不会重启运行中的终端。
 
-## Bottom status
+## 底部状态
 
-**Bottom status** has two values: *Show when needed* (default) and *Hide*. On desktop, NAND adds an item to Obsidian's status bar that shows only running work and items that need attention. See [Workbench](workbench.md#bottom-status).
+“底部状态”有两个值：*需要时展示*（默认）和 *隐藏*。在桌面端，NAND 向 Obsidian 状态栏添加一项，只显示运行中的工作和需要处理的事项。详见[工作台](workbench.md#底部状态)。
 
-## Modules
+## 功能模块
 
-Each feature is a module with its own switch under **General → Modules**.
+每个功能是一个模块，在 **常规 → 功能模块** 中各有一个开关。
 
-| Switch | Feature | Default | Platforms |
+| 开关 | 功能 | 默认 | 平台 |
 |---|---|---|---|
-| Browser | Web pages in the workbench, web shortcuts, browser tools for agents | On | Desktop; on phones, pages open in the system browser |
-| News | Feed collection, analysis, event reading and briefs ([News](news.md)) | Off | Desktop; saved Markdown is readable on mobile |
-| Dashboard | Boards, widgets, to-dos and [Records](records.md) | On | Desktop and mobile |
-| Editor | [Comments](comments.md) on Markdown notes | On | Desktop and mobile |
-| Archives | People and companies ([Archives](contacts.md)) | On | Desktop and mobile |
-| Agents | Terminal sessions and coding agents ([Agent workbench](agent-workbench.md)) | On | Desktop only |
-| Icons | File, folder and interface icons ([Icons](icons.md)) | On | Desktop and mobile |
-| Notifications | Inbox for automation results, news results and reminders | On | Desktop and mobile |
-| Automations | Manual and scheduled actions | On | Desktop and mobile; agents and scripts need desktop |
-| Git sync | Commit, pull and push with the system Git ([Git sync](sync.md)) | Off | Desktop only |
+| 浏览器 | 工作台中的网页、网页快捷入口、供智能体使用的浏览器工具 | 开启 | 桌面端；手机上用系统浏览器打开网页 |
+| 看板 | 看板、小组件、待办和[业务记录](records.md) | 开启 | 桌面端与移动端 |
+| 编辑器 | Markdown 笔记的[评论](comments.md) | 开启 | 桌面端与移动端 |
+| 档案 | 人物与企业（[档案](contacts.md)） | 开启 | 桌面端与移动端 |
+| 新闻 | 订阅采集、分析、事件阅读和简报（[新闻](news.md)） | 关闭 | 桌面端；已保存 Markdown 在移动端可读 |
+| 智能体 | 终端会话与编程智能体（[智能体工作台](agent-workbench.md)） | 开启 | 仅桌面端 |
+| 图标 | 文件、文件夹和界面图标（[图标](icons.md)） | 开启 | 桌面端与移动端 |
+| 通知 | 自动化结果、新闻结果与提醒的收件箱 | 开启 | 桌面端与移动端 |
+| 自动化 | 手动与定时操作 | 开启 | 桌面端与移动端；智能体和脚本需要桌面端 |
+| Git 同步 | 用系统 Git 提交、拉取和推送（[Git 同步](sync.md)） | 关闭 | 仅桌面端 |
 
-A switch decides whether a feature runs at all. It is not the same as closing a tab.
+模块开关决定这项功能是否运行，不等同于关闭一个标签页。
 
-- A feature that is off is not loaded at startup, and its rail icon, settings page and commands are hidden.
-- Turning a feature off stops what it owns and keeps your data: Dashboard stops its services, Agents ends its terminal processes, Browser closes its pages and local connection, Automations stops its runs, Git sync stops its timers and ends running Git processes.
-- If the workbench is on the page of a feature that is off, the page says the feature is turned off and offers **Turn on in settings**. It does not jump to another page.
-- If one feature fails to start, only that feature is marked as failed (a warning dot on its rail icon). The others keep working.
+- 关闭的功能不会在启动时加载，它的图标栏入口、设置页和命令都会隐藏。
+- 关闭功能会停止它拥有的运行部分，但保留你的数据：看板停止所属服务，智能体结束终端进程，浏览器关闭页面和本地连接，自动化停止它的运行，Git 同步停止定时器并结束正在运行的 Git 进程。
+- 工作台停留在已关闭功能的页面时，页面提示该功能已关闭，并提供“在设置中开启”，不会跳到别的页面。
+- 某个功能启动失败时，只有它被标记为失败（图标栏图标上出现警告点），其他功能照常可用。
 
-## Copy-reference commands
+## 复制引用命令
 
-Two commands are available whatever modules are on, and they never change your notes. Find them in the command palette or bind them in Obsidian's hotkeys.
+无论开启了哪些模块，下面两个命令都可用，并且不会修改笔记。可在命令面板中找到，或在 Obsidian 快捷键中绑定。
 
-| Command | Result |
+| 命令 | 结果 |
 |---|---|
-| Copy relative reference | Copies a reference relative to the vault for the current note or the files selected in the file explorer, with the selected lines when available |
-| Copy absolute reference | Copies a reference with the full file system path when available, for external tools |
+| 复制相对引用 | 为当前笔记或文件列表中选中的文件复制相对于库的引用，选中行时附带行范围 |
+| 复制绝对引用 | 在可用时复制带完整文件系统路径的引用，供外部工具使用 |
 
-## Install and platforms
+## 安装与平台
 
-1. Download `main.js`, `manifest.json` and `styles.css` from the GitHub release of the version you want.
-2. Put the three files in `.obsidian/plugins/nand/` inside the vault and enable NAND under **Settings → Community plugins**.
-3. NAND requires Obsidian 1.13.0 or newer. The first time you enable it, NAND opens the workbench and shows a short introduction once.
+1. 从所需版本的 GitHub Release 下载 `main.js`、`manifest.json` 和 `styles.css`。
+2. 把三个文件放入库的 `.obsidian/plugins/nand/`，然后在 **设置 → 第三方插件** 中启用 NAND。
+3. NAND 需要 Obsidian 1.13.0 或更高版本。第一次启用时，NAND 会打开工作台并显示一次简短介绍。
 
-CLI agents, the terminal helper and the built-in browser need the desktop app. Phones keep the dashboard, archives, comments, icons, automations and notifications; desktop-only entries are hidden. The terminal helper is downloaded the first time you use a terminal (see [Agent workbench](agent-workbench.md#terminal-helper)).
+CLI 智能体、终端组件和内置浏览器需要桌面版。手机上保留看板、档案、评论、图标、自动化和通知，桌面专属入口不显示。终端组件在第一次使用终端时下载（见[智能体工作台](agent-workbench.md#终端组件)）。
 
-## Where settings are stored
+## 配置保存在哪里
 
-| File | Contents |
+| 文件 | 内容 |
 |---|---|
-| `.nand/config/settings.json` | Settings shared by every device of the vault: language, module switches, appearance, dashboard, browser, news sources and reading policies, comments, archives, Git sync behavior |
-| `.nand/config/devices/<device-id>.json` | Settings of one device: Agents settings, News agent selection and working directory, and the Git program and repository folder of Git sync |
+| `.nand/config/settings.json` | 库的所有设备共用的设置：语言、模块开关、外观、看板、浏览器、新闻来源与阅读策略、评论、档案、Git 同步行为 |
+| `.nand/config/devices/<device-id>.json` | 单台设备的设置：智能体设置、新闻的智能体选择与工作目录，以及 Git 同步的 Git 程序和仓库文件夹 |
 
-A vault with no settings files starts from defaults. The device id is kept in Obsidian's local storage, not in the vault, so copying a vault does not make two computers the same device.
+没有设置文件的库从默认值开始。设备映射位于 `.nand/config/identity.json`，结合宿主只读身份识别当前设备；复制库需要核对设备归属，不会自动接管旧运行队列。
 
-Obsidian Sync does not sync folders that start with a dot, so `.nand/` is not synced by it. To keep several devices consistent, sync the whole vault with Git, iCloud, Syncthing or a similar tool. See [Data and recovery](data.md#several-devices-and-sync) for backup steps.
+Obsidian Sync 不同步以点开头的目录，因此不会同步 `.nand/`。需要在多台设备间保持一致时，请用 Git、iCloud、Syncthing 等方式同步整个库。备份步骤见[数据与恢复](data.md#多设备与同步)。

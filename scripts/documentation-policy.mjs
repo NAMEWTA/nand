@@ -1,4 +1,4 @@
-/** Inventory follows ownership: durable guides are bilingual, captured/workflow artifacts retain their language. */
+/** Current project guides are Chinese; the root README is bilingual. Workflow/fixture owners retain their language. */
 export function documentationKind(rel) {
 	if (rel === 'NOTICE' || rel === 'THIRD-PARTY-NOTICES.md' || rel.endsWith('/NOTICE.txt')) return 'license';
 	if (rel.startsWith('docs/')) return 'user-doc';
@@ -9,6 +9,7 @@ export function documentationKind(rel) {
 	if (rel.startsWith('speculo/.speculo/specdev/')) return 'specdev';
 	if (rel.startsWith('speculo/')) return 'speculo-tooling';
 	if (rel.startsWith('src/')) return 'source-template';
+	if (rel.startsWith('scripts/fixtures/')) return 'test-fixture';
 	if (rel.startsWith('scripts/')) return 'script-doc';
 	if (rel.startsWith('test/')) return 'test-fixture';
 	if (rel.startsWith('processes/')) return 'process-doc';

@@ -1,150 +1,148 @@
-English | [简体中文](contacts.ZH.md)
+# 档案
 
-# Archives
+档案是工作台里的一页（图标栏上的 **档案** 图标）。你通过卡片、列表和详情页查看、编辑人物与企业资料；资料本身是 Markdown，便于备份、直接阅读和交给 AI。
 
-Archives is a page of the workbench (the **Archives** icon in the rail). You view and edit people and companies through cards, lists and detail pages. The data itself is Markdown, so it is easy to back up, read directly and hand to an AI.
+## 开始使用
 
-## Get started
+1. 在 **设置 → 常规 → 功能模块** 中确认“档案”已开启。
+2. 打开 **设置 → 档案**，选择或输入档案资料文件夹，点击 **预览并应用**。确认框会显示目标目录以及识别到的档案数量。
+3. 点击图标栏上的档案图标，或运行命令 `NAND: 打开档案`。侧栏在“个人”和“企业”之间切换。
+4. 在 **联系人** 页点击 **新增**，填写姓名和联系方式并保存。点击卡片进入详情页，继续添加履历、关系和备注。
+5. 在 **企业** 页建档，记录企业的特别情况；也可以在新增工作经历时，通过企业选择器创建企业。
 
-1. Check under **Settings → General → Modules** that **Archives** is on.
-2. Open **Settings → Archives**, choose or type the archive folder and click **Preview and apply**. The confirmation shows the target folder and how many records were found.
-3. Click the Archives icon in the rail, or run `NAND: Open archives`. The side panel switches between **People** and **Companies**.
-4. On the **People** page click **Add**, fill in a name and contact details and save. Click a card to open its detail page and add positions, relationships and notes.
-5. On the **Companies** page create a company and note anything special about it. You can also create a company from the company picker when you add a position.
+新增与编辑在档案页内的表单中进行。有未保存的修改时，取消、按 Esc 或切换到别的分区都会先询问。未保存的草稿尚未写入 Markdown，重启后无法恢复。在工作经历里新建企业会打开一个小对话框，它是单独的保存操作，随后取消工作经历不会删除已经创建的企业。
 
-Adding and editing happen in a form on the Archives page. If you have unsaved changes, Cancel, Esc and switching to another section ask first. An unsaved draft has not been written to Markdown and cannot be restored by restarting. Creating a company from within a position opens a small dialog; that is a separate save, and cancelling the position afterwards does not delete the company.
+## 设置
 
-## Settings
-
-| Setting | Default | Effect |
+| 设置 | 默认值 | 作用 |
 |---|---|---|
-| Archives module switch | On | Under **General → Modules**. Turning it off keeps the files |
-| Archive folder | `档案` | A visible folder inside the vault. It may not exist yet and is created when the first record is saved |
-| Maximum card columns | 6 | 5 or 6; narrow windows and phones show fewer |
+| 档案模块开关 | 开启 | 在 **常规 → 功能模块** 中切换。关闭模块会保留资料文件 |
+| 档案资料文件夹 | `.nand/content/档案` | `.nand/content/` 内目录；可以填尚不存在的目录，首次保存档案时创建 |
+| 卡片最大列数 | 6 | 可选 5 或 6；窗口变窄和手机上会自动减少 |
 
-An example path is `Contacts/Archive`. Absolute paths outside the vault, hidden folders and `..` are not accepted. Editing the folder text changes nothing until you use **Preview and apply**. Switching never moves or deletes files in the old folder; switching to an empty folder shows an empty panel, and switching back reads the old data again.
+路径示例：`资料/档案`。不支持库外的绝对路径、隐藏目录和 `..` 上级路径。修改目录文本后，必须经过“预览并应用”才会切换。切换不会搬移或删除旧目录中的文件；切换到空目录时面板显示为空，切回旧目录即可重新读取旧资料。
 
-## People and companies
+## 人物与企业
 
-| Data | How to fill it in |
+| 资料 | 填写方式 |
 |---|---|
-| Name, aliases | A name is required. People with the same name can have separate records; an independent id tells them apart |
-| Mobile, phone, WeChat, email | One per line; **Add another** adds a line. You can paste several lines; duplicates are removed. Phone numbers are stored as text, keeping leading zeros and country codes |
-| Date of birth, birthplace | A date control; leave empty when unknown |
-| Current region, tags | Used for search and filters. A person's current region and a company's region are separate values |
-| Employment | Company, department, role, start and end date, current or former, key role and notes |
-| Relationships | Link another person, choose the relationship, optionally add a company and notes |
-| Personality and preferences, habits, notes | Plain text or Markdown; previewed on the detail page |
-| Company data | Name, contact details, website, region, tags and company notes; the people list comes from the employment of people |
+| 姓名、别名 | 姓名必填。同名人物可以分别建档，系统用独立的身份标识区分 |
+| 手机、固定电话、微信、邮箱 | 每项一行，点“添加一项”增加一行；可以粘贴多行，自动去重；电话按文本保存，保留前导零和国际区号 |
+| 出生日期、出生地 | 使用日期控件，不知道时可留空 |
+| 当前地区、标签 | 用于查找和筛选。人物的当前地区与企业地区分别填写 |
+| 工作经历 | 企业、部门、职务、起止日期、现任/曾任、关键角色和任职备注 |
+| 人际关系 | 关联另一位联系人，选择关系，可补充关联企业和备注 |
+| 性格与偏好、生活习惯、备注 | 普通文字或 Markdown，保存后在详情页中预览 |
+| 企业资料 | 名称、联系方式、网址、地区、标签和企业特别情况；人员列表来自人物的工作经历 |
 
-### Employment
+### 记录履历
 
-Add a position under **Employment** on a person's detail page. Dates are `YYYY-MM` or `YYYY-MM-DD`, or empty. The status is the choice you make, *Current* or *Former*: after someone leaves, set *Former*, even if the end date is unknown. A *Current* position cannot have an end date. A person can hold positions at several companies at once.
+在人物详情的 **工作经历** 中添加任职。日期用 `YYYY-MM` 或 `YYYY-MM-DD`，也可以留空。状态以你明确选择的“现任”或“曾任”为准：离职后设为“曾任”，即使结束时间不清楚也可以保留；“现任”不能填写结束日期。同一个人可以同时在多家企业任职。
 
-Set the **Key role** of a current position to *Leader* or *Key contact* and the person appears under **Key people** on the company's detail page. This is a role at the company and is recorded separately from the manager/report relationship between two people.
+把现任经历的 **关键角色** 设为“负责人”或“关键联系人”，该人物就会出现在企业详情的 **关键人物** 中。这是在企业中的任职角色，与两个人之间的“领导/下属”关系分别记录。
 
-The company detail page lists current and former personnel. The count means **recorded current contacts**, not the real number of employees; a person with several positions at one company is counted once.
+企业详情列出当前任职和曾任职的人员。人数表示 **已收录的在职联系人**，不是企业的实际员工总数；同一个人在同一企业有多段职务时只计一次。
 
-### Relationships
+### 记录人际关系
 
-The relationship field reads "**the other person is this person's …**". In Zhang San's record, choose Li Si with the relationship *Manager*: Li Si is Zhang San's manager. Li Si's detail page shows Zhang San as a direct report in return.
+关系字段的含义是“**对方是此人的……**”。例如，在张三的档案里选择李四，关系选“领导”，表示李四是张三的领导；李四的详情页会反过来显示张三是其下属。
 
-*Manager* and *Direct report* are each other's inverse; *Colleague* and *Friend* are shown both ways. You enter a relationship once; the inverse is calculated and nothing is written to the other record. To change a relationship that comes from the other person's record, go back to that record. A custom relationship shows its source and the original label, and NAND does not guess a matching label for the other side.
+“领导”和“下属”互为反向，“同事”和“朋友”双向显示。关系只需录入一次，反向显示由计算得出，不会再写入另一份记录。来自对方档案的关系，请回到对方的档案修改。自定义关系会显示来源和原始称谓，NAND 不会推断另一方的称谓。
 
-Working at the same company only creates a link through employment; it does not create friend or colleague relationships. A person who has no record yet must be created first, then linked.
+在同一家企业任职只构成任职关联，不会自动生成朋友或同事关系。尚未建档的人物，需要先创建联系人，再添加直接关系。
 
-## Search and browse
+## 查找和浏览
 
-| Way | Scope |
+| 方式 | 范围 |
 |---|---|
-| Search | Searches this record's `基本信息.md` by default: basic data, contact details, employment, personality, habits, notes, relationship notes and the free text outside the managed regions. Attachments and other notes are not searched |
-| Basic fields only | Only the basic data, role and company names of employment |
-| People filters | Current company, former company, current region, tags, relationship type |
-| Company filters | Region, tags |
-| Sort | By name, or recently modified. A match does not change the order |
+| 搜索 | 默认搜索这份 `基本信息.md`：基本资料、联系方式、任职、性格、习惯、备注、关系备注，以及受管区域之外的正文。不搜索附件和其他笔记 |
+| 仅基本信息 | 只匹配基本资料、职务和任职企业名称 |
+| 联系人筛选 | 当前公司、曾任公司、当前地区、标签、关系类型 |
+| 企业筛选 | 企业地区、标签 |
+| 排序 | 按姓名，或最近修改。命中不会改变顺序 |
 
-Several choices in one filter mean *or*; different filters mean *and*. Choosing companies A and B and the region Hangzhou shows people who work at A or B and whose current region is Hangzhou. Words separated by spaces (half-width or full-width) in the search box are combined with *and*: every word must appear somewhere in the record, possibly in different sections, for example one in the notes and one in a position. A word does not span sections. English is case-insensitive and Chinese matches substrings. The record's `nand-id` and the `<!-- nand:row … -->` markers are not searchable text; other ids written in the note are. A match shows the line of the original `基本信息.md` when it can be mapped; otherwise no line number is made up. An email address is only contact data: records with the same email are not merged, and identity is still `nand-id`.
+同一筛选项内的多选表示“或”，不同筛选项之间表示“且”。例如，当前公司选 A 和 B，地区选杭州，结果是“在 A 或 B 任职，并且当前地区为杭州”的联系人。搜索框里用空格（半角或全角）分开的几个词按“且”组合：每个词都要出现在这份档案里，可以分别在不同分区，例如一个在备注、一个在任职。单个词不会跨分区拼接。英文不区分大小写，中文按子串匹配。这条档案的 `nand-id` 和 `<!-- nand:row … -->` 标记不作为搜索正文；笔记里写出的其他编号仍可搜到。命中能对应到 `基本信息.md` 原文行时会给出该行，对不上就不编造行号。邮箱只是联系方式，相同邮箱不会合并，身份仍然是 `nand-id`。
 
-The list and the cards are two views of the same query. A new Archives page lists people and shows companies as cards. After you switch, people and companies each remember their last choice and new pages start from it; each page's own layout wins and survives a reload. The list shows, on a wide pane, name, current position, region, first email and tags for a person, and name, region, website and the count of recorded current contacts for a company; a narrow pane keeps the name and two lines of detail. A match adds a plain-text summary line with its source, for example *Hit: Notes*; for a company the notes read *Hit: Company notes*. With several words, the summary uses the passage that contains the most of them. Clicking it opens that section of the detail page; a match in the free text says roughly at which line it is, and the **Open original note** button opens the note at that line. The detail page does not render the whole free text again.
+列表和卡片是同一次查询的两种显示。新打开的档案页，联系人用列表，企业用卡片。切换之后，联系人和企业各自记住上一次的选择，之后新打开的页面沿用它；每个页面自己的布局优先，刷新后仍在。宽窗格里的列表对人物显示姓名、当前任职、地区、首个邮箱和标签，对企业显示名称、地区、网站和已收录的在职联系人数；窄窗格只保留名称和两行辅助信息。命中时多一行纯文本摘要和来源，例如“命中：备注”；企业的备注显示为“命中：企业特别情况”。有多个词时，摘要取包含词最多的那一段。点这条摘要会打开详情里对应的分区；命中自由正文时会说明大约在第几行，“打开原始笔记”按钮可跳到该行，详情页不会把整段自由正文再渲染一遍。
 
-Card lists, lists and company personnel lists show up to 60 entries per page. Links to companies and people continue inside Archives, and Back restores what you saw in the layout you used. On a phone, Add, filters, sort and delete are in the tab menu. The top of a detail page edits the basic data; the other sections keep their own Add and Edit buttons. **Open original note** is for the moments you need to inspect the underlying file.
+卡片列表、列表和企业人员列表每页最多 60 条。点击企业或人物链接可以在档案内继续浏览，返回时恢复你在当前布局中看到的记录。手机上的新增、筛选、排序和删除入口在标签页菜单里。详情页顶部可编辑基本信息，其他分区保留各自的添加和编辑按钮。“打开原始笔记”是需要检查底层文件时的辅助入口。
 
-An older saved page without layout fields opens as cards unless you have explicitly chosen a layout for that record type. Each layout keeps its own scroll anchor. Restarting on a detail page preserves the search and page to return to.
+旧页面保存的状态没有布局字段时，默认显示卡片；如果已为该类型明确选择过布局，则优先使用该选择。两种布局各自保留滚动锚点。在详情页重启后，返回时仍保留原来的搜索条件和页码。
 
-## Detail page and related files
+## 详情页与相关资料
 
-The basic data and related material share one page. Employment, relationships, company personnel, personality, habits and notes are collapsed by default; click the title to expand. Forms group fields (identity, contact details and so on); aliases and tags are removable chips; long text starts at three lines. A failed save keeps the draft; conflicts offer copy and reload.
+基本信息和相关资料显示在同一页。工作经历、关系、企业人员、性格、习惯和备注默认收起，点击标题展开。表单按身份、联系方式等分组；别名和标签是可移除的标签，长文字从三行开始。保存失败会保留草稿，冲突时提供复制和重新载入。
 
-**Related files** lists, recursively, every ordinary file in the archive's folder. The entry `基本信息.md` is reached through the more menu: **Open original note**. A file belongs to a record because of the folder it is in; nothing needs to be linked one by one.
+“相关资料”递归列出该档案文件夹里的全部普通文件。入口 `基本信息.md` 通过更多菜单的“打开原始笔记”访问。资料归属由实际所在的目录决定，不需要逐个登记链接。
 
-- **New note**: enter a name; NAND creates the Markdown file in the archive folder and opens it in a native tab.
-- **Add files**: choose local files to copy into the archive; on desktop you can also drag files onto the list. The source files stay, and a name that exists gets a number instead of being overwritten. Adding several files reports each one and keeps the successful ones.
-- You can make subfolders yourself. Added, edited, renamed, moved or deleted files update the list. Search matches names and relative paths only; sort by modified time or name; 60 entries per page.
-- A click opens the file with Obsidian: PDFs in the PDF viewer, Markdown in the editor, other formats as far as the host supports them. The more menu can reveal the archive folder.
+- **新建笔记**：输入名称，NAND 在档案目录创建 Markdown 文件，并用原生标签页打开。
+- **添加资料**：选择本机文件复制进档案；桌面端也可把文件拖入资料列表。来源文件保留，同名时加序号，不覆盖。批量添加会逐项报告结果，成功的项目保留。
+- 可以自行建立子目录。文件新增、修改、改名、移动或删除都会更新列表。搜索只匹配名称和相对路径，可按最近修改或名称排序，每页 60 项。
+- 点击文件会用 Obsidian 原生方式打开：PDF 用 PDF 阅读器，Markdown 用编辑器，其他格式取决于宿主支持。更多菜单可以定位档案目录。
 
-## Files, backup and disabling
+## 文件、备份与停用
 
-Every person and company has its own folder with the basic data as Markdown. This is the default layout; a folder with the same name as another one gets a short id suffix:
+每个人、每家企业各有一个独立目录，基本信息保存为 Markdown。以下是默认布局；与其他目录同名时，会加一个短 ID 后缀：
 
 ```text
 档案/
   个人档案/
-    Example Person/
+    示例人物/
       基本信息.md
-      First meeting.md
-      resume.pdf
-      project-files/proposal.pdf
-    Another Contact/基本信息.md
+      初次沟通.md
+      简历.pdf
+      项目资料/合作说明.pdf
+    另一位联系人/基本信息.md
   企业档案/
-    Example Tech/基本信息.md
+    示例科技/基本信息.md
   档案格式说明.md
 ```
 
-NAND recognizes only the file `基本信息.md` in an entity folder directly under `个人档案` (people) or `企业档案` (companies). The folder names and the file names stay the same in every interface language. A changed display name does not move the folder; if you rename the folder in Obsidian, the record is still recognized by its stable id.
+NAND 只识别直接位于 `个人档案`（人物）或 `企业档案`（企业）下的实体目录里的 `基本信息.md`。无论界面使用什么语言，目录名和文件名都保持不变。显示名称变化不会移动目录；在 Obsidian 中重命名目录后，NAND 仍按稳定的 ID 识别这条记录。
 
-Basic fields are YAML properties, positions and relationships are tables in the body, and personality, habits and notes are body regions. HTML comments mark identity and editing boundaries; the facts remain ordinary Markdown. Reminders you create for a record (see [Automations and notifications](automation.md)) are stored in the same note between `<!-- nand:reminders -->` markers. The full rules are in `档案格式说明.md`, a guide NAND creates in the archive folder, in the current interface language, when it saves the first record and no guide exists yet. An existing guide is never overwritten.
+基本字段保存在 YAML 属性中，履历和关系保存在正文表格中，性格、习惯和备注保存在正文区域。HTML 注释标记身份和编辑边界，实际资料仍是普通 Markdown。为某条档案创建的提醒（见[自动化与通知](automation.md)）保存在同一篇笔记里的 `<!-- nand:reminders -->` 标记之间。完整规则在 `档案格式说明.md` 中：NAND 在第一次保存档案、且目录里还没有说明时，按当前界面语言在档案目录生成这份说明；已有的说明不会被覆盖。
 
-The panel builds an in-memory index from the files. Archive data does not depend on any database or on `data.json` in the plugin folder; the settings keep only the chosen folder and display preferences.
+面板从文件建立内存索引。档案资料不依赖任何数据库，也不依赖插件目录中的 `data.json`；插件设置只保留所选目录和显示偏好。
 
-### Backup and moving
+### 备份与迁移
 
-1. Finish and save edits in the panel or in the original notes.
-2. Copy the whole archive folder, keeping the subfolders. If a body links to images or attachments outside the folder, back those up too.
-3. In another vault, put the folder in place and choose it in the settings. The records and their relationships are rebuilt from the files. The folder choice and the panel layout are not part of the backup.
+1. 完成并保存面板或原始笔记中的编辑。
+2. 复制整个档案目录，保留子目录结构。若正文引用了目录外的图片或附件，也要一并备份。
+3. 在另一个库中放入该目录，并在设置中选择它；档案内容和关联关系会从文件重建。目录选择和面板布局不随档案目录备份。
 
-When you move the folder inside the same vault, finish editing first, move it as a whole and choose it again.
+在同一个库内移动目录时，同样先完成编辑，整体移动后重新选择目录。
 
-Turning the module off or uninstalling NAND keeps the saved Markdown. You can read it with Obsidian, a text editor or an AI; turn NAND on again and choose the folder to get the panel back. That keeps your data independent of the panel, but a disk failure or an accidental deletion still needs an independent backup.
+关闭模块或卸载 NAND 会保留已保存的 Markdown。此后可以用 Obsidian、文本编辑器或 AI 直接读取；重新启用 NAND 并选择资料目录，即可恢复面板。这样资料不依赖面板而存在，但磁盘损坏或误删仍需要独立备份。
 
-### Deleting and restoring
+### 删除与恢复
 
-The delete confirmation shows the name, the folder, the number of files and the number of affected links. After you confirm, the whole entity folder, with all its files, is handled according to Obsidian's deletion setting. Other archives are not deleted along with it. Deletion stops if the folder content changed after you confirmed or if a note in the folder has unsaved edits; check the real scope and try again. Other people's past positions, relationship text and references stay, and a target that cannot be found is shown as a broken link.
+删除确认会显示姓名、目录、文件数和受影响的关联数。确认后，整个实体目录（包括其中所有文件）按 Obsidian 的删除设置处理，其他档案不会被一并删除。确认之后目录内容有变化，或目录里的笔记有未保存的编辑时，删除会停止；请检查实际范围后重新操作。其他人的历史履历、关系文字和引用会保留，找不到的目标显示为失效关联。
 
-To restore, bring back the whole entity folder from your trash or backup with its original `nand-id`. Do not create a new record with the same name instead; a new record has a different identity.
+需要恢复时，从回收站或备份中恢复整个实体目录，并保留原来的 `nand-id`；不要仅创建一个同名的新档案来代替，因为新档案有不同的身份。
 
-## External edits and problems
+## 外部编辑与问题处理
 
-Saving an original note refreshes the panel. When the panel saves, it compares the content when the form was opened with the file now: changes to different basic fields or different body regions can be merged; a concurrent change to the same field or the same employment or relationship table is reported as a conflict, never merged line by line.
+原始笔记保存后，面板会刷新。面板保存时，会比较打开表单时的内容和现在的文件：不同的基本字段或不同的正文区域可以合并；同一字段或同一张履历/关系表的并发修改会报告冲突，不会逐行自动合并。
 
-| Message or symptom | What to do |
+| 提示或现象 | 处理方式 |
 |---|---|
-| The same field changed elsewhere | The form keeps your draft. **Copy draft** first, then **Reload original record**, check the latest content and edit again. The copy is JSON text to recover your input; it is not a Markdown export and cannot be imported |
-| The original note has unsaved edits | Save in the original note first, then come back to the draft |
-| The archive folder was switched | Copy any draft you want to keep, then reopen the archive from the current folder; an old form cannot write to the new folder |
-| Invalid properties, tables or region markers | Open the original note and fix it against the format guide; the panel refuses to overwrite damaged content |
-| Several files use the same id | Check whether you copied a file. To create another person, add it in the panel and do not copy an identity |
-| The visible link and the linked identity disagree | Check the link target and the identity comment in the original note; do not change only one of them |
-| Some records could not be read | Check that the files are readable, then use **Reload**; other records still show |
-| The record was saved but the format guide could not be created | The record is written; check the folder's write permission. Later saves try to create the missing guide again |
+| 相同字段已被修改 | 表单保留你的草稿。先点“复制草稿”留存，再点“重新载入原始资料”，检查最新内容后重新编辑。复制结果是 JSON 文本，用于找回输入，不是 Markdown 导出，也不能直接导入 |
+| 原始笔记有未保存的编辑 | 先在原始笔记中保存，再回到面板处理草稿 |
+| 资料文件夹已切换 | 先复制需要保留的草稿，再从当前目录重新打开档案；旧表单不能写入新目录 |
+| 属性、表格或区域标记无效 | 打开原始笔记，对照格式说明修正；面板会拒绝覆盖已损坏的内容 |
+| 多份文件使用同一个 ID | 检查是否复制了原文件；要创建另一个人，请在面板里新增，不要复制身份标识 |
+| 可见链接与关联身份不一致 | 对照原始笔记核对链接目标和身份注释，不要只改其中一项 |
+| 部分档案读取失败 | 检查相关文件是否可读，再点“重新读取”；其他正常的档案仍可显示 |
+| 档案已保存，但格式说明未能创建 | 档案已写入；检查目录的写入权限。之后保存档案时会再次尝试生成缺失的说明 |
 
-A draft exists only in the current form: save or copy it before closing the workbench or restarting. The panel's conflict check does not replace how your sync tool handles cross-device file conflicts.
+草稿只保留在当前表单中，关闭工作台或重启前请先保存或复制。面板的冲突检查不能代替同步工具对跨设备文件冲突的处理。
 
-## Let an AI read it
+## 让 AI 阅读
 
-Give the AI the archive folder and its `档案格式说明.md`; no panel interface is needed. For example: "Read this archive folder and list the recorded current contacts of Xinghe Tech with their roles and source files. Separate current from former and do not infer relationships that are not recorded."
+把档案目录和其中的 `档案格式说明.md` 提供给 AI 即可，无需面板接口。例如：“读取这个档案目录，列出星河科技已收录的现任联系人及职务，附上来源文件；区分现任和曾任，不要推测未记录的关系。”
 
-Relative links in the files trace people and companies, and `nand-id` tells records with the same name apart. Whether to send files to an external AI service is your choice; Archives has no automatic AI upload or sync.
+文件中的相对链接可用于追踪人物与企业，`nand-id` 可用于区分同名记录。是否把文件发送到外部 AI 服务由你决定，档案本身不提供自动上传或同步 AI 的功能。
 
-## Scope
+## 当前范围
 
-Included: creating records by hand, editing in the panel, the company view, positions, direct relationships, combined filters and Markdown storage. Not included: CSV or Excel import, syncing a phone address book, a relationship graph, automatic birthday reminders and coordination of cross-device conflicts.
+已包含：手工建档、面板内编辑、企业视角、任职履历、直接人际关系、组合筛选和 Markdown 存储。不包含：CSV 或 Excel 导入、手机通讯录同步、关系网络图、自动生日提醒，以及跨设备冲突的协调。

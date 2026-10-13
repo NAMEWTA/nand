@@ -1,106 +1,104 @@
-English | [简体中文](workbench.ZH.md)
+# 工作台
 
-# Workbench
+功能区只有一个 NAND 图标“打开工作台”，同名命令的 ID 是 `open-workbench`。NAND 的所有页面都在工作台里。Obsidian 自带的 **设置 → NAND** 只保留一个简短入口，完整设置在工作台中（见[设置](settings.md)）。
 
-The ribbon has one NAND icon, **Open workbench**. The command with the same name has the id `open-workbench`. Every page of NAND lives in the workbench. Obsidian's own **Settings → NAND** only holds a short entry point; the full settings are in the workbench (see [Settings](settings.md)).
+## 三栏布局
 
-## Three columns
-
-| Column | Contents |
+| 栏 | 内容 |
 |---|---|
-| 1. Icon rail | One icon per feature. Notifications and Settings sit at the bottom. Click the icon of the current feature to collapse or expand column 2; click another icon to return to where you last were in that feature |
-| 2. Side panel | The objects and sections of the current feature: the board list and Records, agent sessions and history, browser pages, archive groups, automation tasks, icon settings sections, settings categories. Panels with many items have a search field |
-| 3. Page | The page header shows where you are, status chips and a **Page actions** menu. Browser pages have a tab strip above the page |
+| ① 图标栏 | 每个功能一个图标，通知和设置在底部。点击当前功能的图标收起或展开第 ② 栏；点击其他图标回到那个功能上次所在的位置 |
+| ② 侧栏 | 当前功能的对象与分区：看板列表与记录、智能体会话与历史、浏览器页面、档案分组、自动化任务、图标设置分区、设置分类。条目较多的侧栏带搜索框 |
+| ③ 页面 | 页头显示位置、状态标签和“页面操作”菜单。浏览器页面上方有标签条 |
 
-Rail icons, top to bottom: Home, AI Agent, Browser, Archives, Automations, Git sync, Icons, Comments; at the bottom: Notifications (with an unread count) and Settings. Home and Settings are always listed. The other icons are hidden while their feature is off or not supported on the device. A feature that failed to start has a warning dot on its icon.
+图标栏从上到下依次是：首页、AI Agent、浏览器、档案、自动化、Git 同步、图标、批注；底部是通知（带未读数）和设置。首页和设置始终列出，其他图标在对应功能关闭或当前设备不支持时隐藏。功能启动失败时，它的图标上出现警告点。
 
-Keyboard: the arrow keys, Home and End move between rail icons. F6 and Shift+F6 move focus between the rail, the side panel and the page.
+键盘：方向键、Home 和 End 在图标栏图标之间移动，F6 与 Shift+F6 在图标栏、侧栏和页面之间移动焦点。
 
-The side panel is 220 to 360 pixels wide (260 by default). Drag its right edge to resize it; double-click the edge to reset it. With the edge focused, the left and right arrows change the width by 8 pixels, and Home and End jump to the limits.
+侧栏宽度为 220 到 360 像素（默认 260）。拖动右边缘调整宽度，双击边缘复位；边缘获得焦点后，左右方向键每次调整 8 像素，Home 和 End 跳到上下限。
 
-### Narrow windows
+### 窄窗口
 
-| Container width | Layout |
+| 容器宽度 | 布局 |
 |---|---|
-| 960 px or more | Rail and side panel are shown next to the page |
-| 600 to 959 px | The rail stays; the side panel opens over the page |
-| Under 600 px, and on phones | Rail and side panel are combined in one drawer that opens from the left of the page header; Escape closes it |
+| 960 像素及以上 | 图标栏和侧栏并排显示在页面旁 |
+| 600 到 959 像素 | 图标栏保留，侧栏覆盖在页面上 |
+| 不足 600 像素，以及手机 | 图标栏与侧栏合成一个抽屉，从页头左侧打开；按 Esc 关闭 |
 
-## Pages
+## 页面
 
-| Page | Feature ID | View type |
+| 页面 | 功能 ID | 视图类型 |
 |---|---|---|
-| Workbench | — | `nand-workbench-view` |
-| Home (boards) | `dashboard` | — |
-| Records (habits, expenses, pomodoro, reading) | `records` | — |
+| 工作台 | — | `nand-workbench-view` |
+| 首页（看板） | `dashboard` | — |
+| 记录（习惯、记账、番茄钟、阅读） | `records` | — |
 | AI Agent | `terminal` | — |
-| Browser | `browser` | — |
-| Archives | `contacts` | — |
-| Automations | `automations` | — |
-| Git sync | `sync` | — |
-| Icons | `icons` | — |
-| Comments | `comments` | — |
-| Notifications | `notifications` | — |
-| Settings | `settings` | — |
-| Editor panel (right sidebar) | — | `nand-comments-view` |
+| 浏览器 | `browser` | — |
+| 档案 | `contacts` | — |
+| 自动化 | `automations` | — |
+| Git 同步 | `sync` | — |
+| 图标 | `icons` | — |
+| 批注 | `comments` | — |
+| 通知 | `notifications` | — |
+| 设置 | `settings` | — |
+| 编辑器面板（右侧栏） | — | `nand-comments-view` |
 
-The workbench and the editor panel are the only two Obsidian views NAND registers. The editor panel shows the threads of the current note, see [Editor and comments](comments.md).
+NAND 只注册这两个 Obsidian 视图：工作台和编辑器面板。编辑器面板显示当前笔记的评论线程，见[编辑器与评论](comments.md)。
 
-Records is not a separate feature module. It belongs to Home: open it from the Home side panel or with the **Statistics** button on a widget, and the rail keeps Home highlighted. Only the widgets that are turned on list a Records page.
+记录不是独立的功能模块，它属于首页：从首页侧栏或小组件上的“统计”按钮打开，图标栏仍高亮首页。只有已开启的小组件才会列出对应的记录页。
 
-Names differ slightly between the rail, the module switches and the settings pages:
+图标栏、模块开关和设置页里的名称略有不同：
 
-| Rail icon | Module switch | Settings page |
+| 图标栏 | 模块开关 | 设置页 |
 |---|---|---|
-| Home | Dashboard | Dashboard |
-| AI Agent | Agents | Agents |
-| Archives | Archives | Archives |
-| Comments | Editor | Editor |
-| Icons | Icons | (on the Icons page) |
-| Notifications | Notifications | — |
+| 首页 | 看板 | 看板 |
+| AI Agent | 智能体 | 智能体 |
+| 档案 | 档案 | 档案 |
+| 批注 | 编辑器 | 编辑器 |
+| 图标 | 图标 | （在图标页内） |
+| 通知 | 通知 | — |
 
-## Focus mode
+## 专注模式
 
-**Open in a native tab** and **Open in a split** in the **Page actions** menu open a new workbench leaf that shows only that page, without rail or side panel. Its page header has **Open in workbench**, which puts the page back into a full workbench. A browser page opened this way is a new page with the same address, title, zoom and scroll position; the original stays where it was.
+“页面操作”菜单中的“在原生标签页中打开”和“在分屏中打开”会新开一个只显示该页面的工作台叶子，没有图标栏和侧栏。它的页头有“在工作台中打开”，可把页面放回完整的工作台。以这种方式打开的浏览器页面是一个新页面，沿用原来的地址、标题、缩放和滚动位置，原页面保持不变。
 
-Browser pages are limited to 50 open pages. Close one before opening another.
+浏览器页面最多同时打开 50 个，打开新页面前请先关闭一个。
 
-## Bottom status
+## 底部状态
 
-On desktop, NAND adds an item to Obsidian's status bar. It lists only what needs attention, up to two items plus a **More status items** menu; clicking an item opens the related page.
+在桌面端，NAND 向 Obsidian 状态栏添加一项，只列出需要处理的事项：最多显示两项，其余放进“更多状态”菜单；点击某项会打开相关页面。
 
-- automations that are running, and a failed automation load
-- notifications with failed or interrupted runs that are still unread
-- agent sessions that are working or waiting for input
-- Git sync: a running action, conflicts, a failed last run, automatic sync paused after repeated failures, commits that are not pushed
-- a board that cannot be saved
-- the subscription quota of agents, when **Show quota in the status bar** is on in the Agents settings
+- 正在运行的自动化，以及自动化数据加载失败
+- 仍未读的、运行失败或被中断的通知
+- 工作中或等待输入的智能体会话
+- Git 同步：正在执行的操作、冲突、上次同步失败、因连续失败而暂停的自动同步、尚未推送的提交
+- 无法保存的看板
+- 在智能体设置中开启“在状态栏显示额度”后，各智能体的订阅额度
 
-**Settings → General → Bottom status** can hide the item. Errors, running work and unread items also appear as chips in the page header (up to three).
+**设置 → 常规 → 底部状态** 可以隐藏这一项。错误、运行中和未读事项也会以标签的形式显示在页头（最多三个）。
 
-## Unavailable pages
+## 页面不可用时
 
-A page can show a message instead of its content:
+页面可能显示一条消息，而不是内容：
 
-- The feature is turned off. Your data is kept. **Turn on in settings** opens the settings.
-- The feature is not supported on this device.
-- The feature is not ready yet or failed to start. **Retry** tries again.
-- The selected resource no longer exists, for example a deleted board or archive record.
+- 功能已关闭，数据仍然保留。“在设置中开启”会打开设置。
+- 当前设备不支持此功能。
+- 功能尚未就绪或启动失败，可点“重试”再试。
+- 所选资源已不存在，例如已删除的看板或档案。
 
-## Restarting Obsidian
+## 重启 Obsidian
 
-The workbench saves its pages, the side panel width and the last position of each feature with the Obsidian workspace. Browser pages return with address, title, zoom and scroll position and load when they are shown.
+工作台把页面、侧栏宽度和每个功能上次所在的位置随 Obsidian 工作区一起保存。浏览器页面带着地址、标题、缩放和滚动位置恢复，并在显示时才加载。
 
-Terminal sessions do not survive a restart: nothing is started again and no earlier command is replayed. A saved link to a session that no longer exists opens the AI Agent page instead of failing. A link to a board, archive record or browser page that no longer exists does fail with a message.
+终端会话活不过重启：不会自动重新启动，也不会重放之前的命令。指向已不存在的会话的链接会打开 AI Agent 页面，而不是失败。指向已不存在的看板、档案记录或浏览器页面的链接则会失败并给出提示。
 
-## Commands
+## 命令
 
-Shell commands are always available:
+下面的命令始终可用：
 
-| Command | Result |
+| 命令 | 结果 |
 |---|---|
-| Open workbench | Opens the workbench in the current window |
-| Cycle to next theme | Switches the global style, see [Appearance](appearance.md) |
-| Copy relative reference, Copy absolute reference | See [Settings](settings.md#copy-reference-commands) |
+| 打开工作台 | 在当前窗口打开工作台 |
+| 切换到下一个主题 | 切换全局样式，见[外观](appearance.md) |
+| 复制相对引用、复制绝对引用 | 见[设置](settings.md#复制引用命令) |
 
-The commands of a feature are available while the feature is on. They are listed in each feature's guide.
+各功能的命令在功能开启时可用，列在各自的指南里。

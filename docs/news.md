@@ -1,87 +1,85 @@
-English | [简体中文](news.ZH.md)
+# 新闻
 
-# News
+新闻模块把 RSS、Atom、JSON Feed 和配置好的静态网页列表收集到 NAND 工作台。可选的分析功能使用已安装的 CLI 智能体及其选定账户。先在**设置 → 模块**启用新闻，再到**设置 → 新闻**配置。采集、分析、后台刷新和日报写入默认关闭。模块在桌面端运行；保存的 Markdown 在移动端或停用 NAND 后仍可阅读。
 
-News collects RSS, Atom, JSON Feed and configured static web lists into the NAND workbench. Optional analysis uses an installed CLI agent and its selected account. Enable News in **Settings → Modules**, then configure it in **Settings → News**. Collection, analysis, background refresh and daily-note writing start disabled. The module runs on desktop; saved Markdown remains readable on mobile and without NAND.
+## 来源与采集
 
-## Sources and collection
+在**来源**添加订阅地址，或导入 OPML。导入按 URL 合并来源并保留已有配置。新导入的来源默认未分级，请按实际情况设置等级和参与角色。OPML 导出保留受支持的 NAND 来源选项。
 
-Add a feed URL in **Sources**, or import OPML. Imports merge sources by URL and preserve existing configuration. Imported feeds start unlisted; assign a tier and participation role deliberately. OPML export preserves the supported NAND source options.
+静态网页列表需要配置条目、链接和标题选择器，日期选择器可选。正式采集前可预览匹配结果。这类来源只读取返回的 HTML，不执行网页脚本；依赖前端脚本渲染的页面需要换用其他来源。
 
-Static web lists require selectors for the item, link and title; a date selector is optional. Preview checks the selected items before collection. These sources read returned HTML without executing page scripts. A page that requires client-side rendering needs another source.
+已验证的公开示例是 [Go 博客](https://go.dev/blog/)：条目 `p.blogtitle`，链接 `a`，标题 `a`，日期 `.date`。其“More articles”链接也匹配该条目选择器，但没有发布日期。站点修改 HTML 后，选择器可能需要调整。
 
-A verified public example is the [Go blog](https://go.dev/blog/): item `p.blogtitle`, link `a`, title `a`, date `.date`. Its “More articles” link also matches that item selector and has no publication date. Selectors may need updating when a site changes its HTML.
+**刷新**会采集启用的来源。启动刷新、回到页面时刷新过期内容、定时刷新分别按需开启。来源列表显示健康状态和失败信息。首次导入的历史内容、缺少发布时间和较旧的报道会保留，但不会直接进入今日要闻。
 
-**Refresh** collects enabled sources. Startup refresh, refresh when returning to stale content, and periodic refresh are separate opt-in settings. The source list shows health and failures. First-import history, missing publication dates and old reports remain available without being promoted into today's edition.
+## 分析与阅读
 
-## Analysis and reading
+重复采集会复用报道身份。只有空白变化不会产生内容修订，标题、正文或摘要变化才会产生。后续订阅缺少正文或摘要时保留已存文本；其他来源链接到同一规范地址时，不覆盖原来源和内容。在缓存保留期间，轮换回先前已接受的文本会保留当前修订，避免重复分析。
 
-Repeated collection reuses a report's identity. Whitespace-only changes do not create a content revision; a changed title, body or summary does. A feed that later omits body or summary retains the stored text. Another source linking to the same canonical article does not overwrite its original source or content. While the cache is retained, rotating back to an earlier accepted text keeps the current revision and avoids another analysis.
+在新闻设置中启用分析并选择已安装的智能体。智能体和工作目录属于当前设备；工作目录留空时使用笔记库。CLI 的登录、信任和权限提示仍由 CLI 控制。请求需要处理时，可通过**打开终端**查看。
 
-Enable analysis and select an installed agent in News settings. The agent and working directory are device-specific; a blank directory uses the vault. CLI login, trust and permission prompts remain under the CLI's control. **Open terminal** shows a running request when it needs attention.
+**分析批次／简报超时（分钟）**默认为 10，可设置 1 至 120 的整数。每批分析的首次回复、格式修复和独立二次评分共享一个截止时间，每份简报单独计时。批次超时后不会再启动修复或评分，未发送的调用不扣额度。超时会停止该次调用的终端。完成后默认关闭终端；启用**保留已完成的终端供查看，直到关闭新闻或智能体模块**后，可从运行记录重新打开。格式修复复用同一个终端。关闭任一模块会释放保留的终端，重启后不会恢复它们。
 
-**Analysis batch / brief timeout (minutes)** defaults to 10 and accepts whole minutes from 1 to 120. An analysis batch shares one deadline across its initial reply, format repair and independent second score; each brief has its own deadline. An expired batch cannot start another repair or scoring call, and an unsent call does not use quota. A timed-out call stops its terminal. Completed terminals close by default; enable **Keep completed terminals for inspection until News or Agent is turned off** to reopen them from run history. Format repair reuses the same terminal. Retained terminals are released when either module stops and are not restored after restart.
+**AI 分析前的本地过滤**可按屏蔽词、标题与内容的最少字符数、订阅源声明的语言，在新调用前排除材料，包括手动重新分析。屏蔽词按字面匹配，不区分大小写并统一字符宽度，每行一项。语言来自 RSS、Atom 或 JSON Feed 元数据：`en` 包含 `en-US`，没有语言元数据的报道仍允许分析。空列表和零最小长度表示关闭过滤。原始报道仍可阅读；移除过滤后可分析待处理材料，不会重分析已完成的修订，也不会丢弃已保存的回复。
 
-**Local filters before AI analysis** can exclude literal blocked terms, short title/content combinations, or declared feed languages before a new call, including explicit reanalysis. Terms ignore case and normalize character width; use one entry per line. Language comes from RSS, Atom or JSON Feed metadata: `en` accepts `en-US`, while a report without language metadata remains eligible. Empty lists and a zero minimum disable these filters. Raw reports remain readable. Clearing a filter lets pending reports be analyzed; it does not reanalyze completed revisions or discard saved replies.
+**分类与标签词表**可分别配置分类、主题标签和实体标签，每行一项。至少保留一个分类；每个列表最多 200 项，每项最多 100 字。提示词和回复校验使用同一词表，耐久批次保存自己的词表，重启恢复时继续使用。**恢复默认词表**会重置列表，不调用 AI。
 
-**Category and tag vocabulary** configures categories, topic tags and entity tags, one value per line. Keep at least one category; each list allows up to 200 values of 100 characters. The prompt and reply validator use the same vocabulary. A durable batch retains its vocabulary for restart recovery. **Restore default vocabulary** resets the lists without making an AI call.
+四类提示词模板提供独立的**保存修改**和**恢复四类默认模板**操作。显示的实际 SHA-256 包含展开后的模板、依赖、词表、兴趣和正文摘录上限，未保存的模板草稿不会改变它。未知变量、缺失或循环包含会阻止保存。保存失败时保留草稿，并恢复受影响的已存设置。模板和词表修改对新分析生效；已完成的修订须手动重新分析。修改评分权重或精选阈值会在本地重算已存分数。
 
-The four prompt templates have explicit **Save changes** and **Restore all four default templates** controls. The displayed effective SHA-256 includes the expanded templates, dependencies, vocabulary, interests and body excerpt limit; unsaved template edits do not change it. Unknown variables and missing or recursive includes prevent saving. A failed save retains the draft and restores the affected saved settings. Template or vocabulary changes apply to new analyses; completed revisions require explicit reanalysis. Changing score weights or featured thresholds recalculates saved scores locally.
+分析、格式修复、独立二次评分、事件合并复核和深入了解简报共用每日调用上限，默认 20 次。额度按设备的本地自然日计算。明确未提交的失败不扣次数；结果未知的中断请求保留已预留次数，必须显式重试，重试可能继续消耗配额。可获取的原生用量会显示；缺少费用数据时标为未知。
 
-Analysis, format repair, independent second scoring, event merge review and in-depth briefs share the daily call limit (20 by default). The limit follows the device's local calendar day. A known failure before submission costs no call; an interrupted request with an unknown outcome keeps its reservation. Retrying that request is explicit and can consume quota. Available native usage is shown; missing cost data is labelled unknown.
+**详细摘要分数下限（严格大于）**默认为 50，可设置 0–100。比较使用未取整的均分，因此均分 50.5 即使显示为 50，仍严格大于 50。达到来源等级精选门槛的材料仍可入选。修改下限会在本地重算已有分析。
 
-**Detailed summary score floor (exclusive)** defaults to 50 and accepts 0–100. The comparison uses the unrounded mean, so a mean of 50.5 exceeds 50 even when the displayed score is 50. Tier-qualified material remains eligible. Changing the floor recalculates existing analysis locally.
+**事件召回与关系置信度**可配置已保留资料的候选窗口（1–365 天，默认 14 天）、最低词法相似度（0–100%，默认 25%）和关系置信度（0–100%，默认 80%），需要显式保存或恢复默认。设置对新分析批次生效。每个耐久批次保存候选 ID 与置信度门槛，恢复旧回复时继续使用原值。修改设置不会重新解释已有事件成员关系。
 
-**Event recall and relation confidence** controls the retained-candidate window (1–365 days, default 14), minimum lexical similarity (0–100%, default 25%) and relation confidence (0–100%, default 80%). Save or restore defaults explicitly. These settings apply to new analysis batches. Each durable batch stores its candidate IDs and confidence threshold; recovering an old reply preserves them. Existing event memberships are not reinterpreted when these settings change.
+阅读器包含**精选**、**全部新闻**、**热门**、**今日要闻**、**收藏**、**来源**和**运行记录**。当前版本分析提供中文标题、摘要、理由、分类和标签，详情也展示原始评分维度。报道保留原始标题和 URL。原文修订后，旧版本分析会暂时隐藏，直到完成该版本分析。
 
-The reader has **Featured**, **All news**, **Hot**, **Today's edition**, **Favorites**, **Sources** and **Run history** sections. Current analysis supplies Chinese titles, summaries, reasons, categories and tags, with raw scoring dimensions available in the detail. Reports retain original titles and URLs. A changed report's old analysis is withheld until that revision is analyzed.
+事件详情汇集相关报道和进展。可切换时间线正倒序、标为已读或隐藏报道。**打开原文**优先使用已启用的 NAND 浏览器，不可用时交给系统浏览器。**送入智能体**列出已有交互会话；新建会话后重新展开列表即可刷新。它把选定的标题、URL 和摘要作为一个未发送的文本块粘贴到会话。
 
-Event details group related reports and developments. Reverse the timeline order, mark a report read or hide it. **Open original** uses the enabled NAND browser, with a system-browser fallback. **Send to agent** lists existing interactive sessions; reopen the list after starting a session. It pastes the selected title, URL and excerpt as one unsent block.
+搜索、分类、标签、来源和最低分数可保存为命名视图。更新视图保留标识，复制则新建，最多保存 100 个视图。每个工作台叶子分别保存自己的筛选、选择和时间线顺序。
 
-Search, category, tags, sources and minimum score can be saved as a named view. Updating a view preserves its identity; copying creates another. Up to 100 views are retained. Each workbench leaf keeps its own filter, selection and timeline order.
+新闻设置还提供**热点排行与趋势**和**今日要闻条数与记忆**。保存草稿后根据已有数据重新计算，不调用智能体，也可恢复该组默认值。热度可配置窗口、半衰期、最少参与方、榜单条数、对比间隔、上升门槛和突增人数／占比。榜单与历史曲线使用同一组已存规则；修改后记录新的热度规则版本，未观测小时仍保留缺口。默认仍为 48 小时窗口、24 小时半衰期、两个参与方、十条榜单和六小时对比。
 
-News settings also provides **Hot ranking and trends** and **Daily edition limits and memory**. Save a draft to recalculate existing data without an agent call, or restore that section's defaults. Heat controls include the window, half-life, minimum participants, list length, comparison interval, rising threshold and surge count/share. Ranking and historical curves use the same saved rules; changing them records a new heat rule version and keeps unobserved hours as gaps. Defaults remain 48 hours, 24 hours, two participants, ten entries and a six-hour comparison.
+今日要闻默认为正文十二条、快讯十条、每个主报道来源最多两条正文、记忆七天发布记录。可配置正文 1–100 条、快讯 0–100 条、每信源正文 1–100 条、记忆 1–30 天。已发布记录最多保留 30 天，延长记忆时可重新使用已有记录。未保存的草稿不生效，保存失败会保留草稿供重试。
 
-Daily edition defaults are twelve main stories, ten flashes, two main stories per leading source and seven days of publication memory. The controls allow 1–100 main stories, 0–100 flashes, 1–100 main stories per source and 1–30 memory days. Published issues are retained for up to 30 days so extending memory can reuse available issues. An unsaved draft has no effect; a failed save keeps it for retry.
+## 深入了解简报
 
-## In-depth briefs
+在已分析的事件中点击**深入了解**。简报使用最多 12 条当前有效、可见且已分析的来源报道，以及配置的关注点。提示词限制来源摘要长度，并保留实际输入的引用 URL 集合。有效回复必须包含有正文的**背景**、**影响**和**时间线** Markdown 章节，并链接全部输入来源。
 
-From an analyzed event, choose **Read in depth**. A brief uses up to 12 current, visible, analyzed source reports and the configured interests. Its prompt bounds source excerpts and preserves the exact cited URL set. A valid reply needs populated **背景**, **影响** and **时间线** Markdown sections and links to every supplied source.
+只有回复成功写入工作台中的 Markdown 笔记后，才会显示保存成功。详情直接渲染该笔记，并提供**打开已保存笔记**。更新简报消耗配额。在 `.nand/content/NAND/新闻/` 内重命名简报仍能保持身份，后续更新保留读者批注和额外 frontmatter。
 
-Success is reported after the reply is written to a visible Markdown note. The detail renders that saved note and provides **Open saved note**. Regeneration uses quota. Renaming a brief within `NAND/新闻/` preserves its identity, and regeneration keeps reader annotations and extra frontmatter.
+如果生成区域已被编辑，或打开的编辑器中还有未保存内容，NAND 会保留原笔记。收到的回复仍保存在运行记录中。解决冲突后，点击**重试保存（不调用 CLI）**即可在本地写入，不会重新请求智能体。重启时也会尝试在本地应用尚未保存的耐久回复。CLI 请求中断则需要明确重试，可能消耗配额。
 
-If the generated region was edited, or an open editor has unsaved changes, NAND leaves the old note intact. The received reply remains in run history. **Retry saving (no CLI call)** applies it locally after the conflict is resolved; it does not invoke an agent again. Restart also attempts to apply durable, unsaved replies locally. An interrupted CLI request instead requires an explicit retry that may use quota.
+通知默认只报告失败，并发送到应用内收件箱。可选择始终通知、仅失败或从不通知，以及可用的应用内／系统通道。同一运行结果的通知具有幂等标识，**打开**会通过新闻自己的运行记录定位。关闭通知模块不会阻止简报保存。
 
-Notifications default to failures in the in-app inbox. Choose always, failure-only or never, and select available in-app/system channels. Each run outcome has an idempotent notification; **Open** resolves it through News's run history. Disabling Notifications does not prevent saving a brief.
+## 首页小组件
 
-## Home widgets
+在首页的**看板小组件**中添加**精选新闻**、**热榜**或**新闻视图**。**创建并添加**会建立独立实例；**配置**会更新所有引用该实例的看板。每个实例独立保存名称、显示条数（1–50）、摘要开关和过期阈值（15–1440 分钟）。视图组件按稳定 ID 引用已保存的视图。精选和视图列表对同一事件只显示一篇匹配报道；热榜条目打开事件详情。标题打开对应的新闻分区或已保存视图。
 
-In Home's **Board widgets**, add **Featured news**, **Hot news** or a **News view**. **Create and add** makes a separate instance; **Configure** changes that instance wherever it is used. Each has its own name, item limit (1–50), summary switch and stale threshold (15–1440 minutes). A view widget refers to a saved view by its stable ID. Featured and view lists show one matching report per event; hot entries open their event detail. The heading opens the corresponding News section or saved view.
+组件显示最近一次信源成功更新时间，以及当前采集、分析进度。**刷新**共享信源请求，并遵守到期时间与失败退避。只有开启**打开时刷新过期新闻**且组件可见时，才按该实例的阈值自动刷新。打开组件不会自行开启采集或分析。从看板移除组件会释放它自己的资源，已经发起的全局刷新仍可完成。
 
-Widgets show the latest successful source update and current collection/analysis activity. **Refresh** shares source requests and respects their due time and retry backoff. Automatic stale refresh runs only when **Refresh stale news when opened** is enabled and the widget is visible, using its threshold. Opening a widget never enables collection or analysis. Removing a widget from a board releases its own resources while an already requested global refresh can finish.
+**设置 → 新闻 → 首页新闻小组件**可创建、配置和删除实例配置。从看板移除成员会保留配置；删除配置后，看板保留占位。已保存视图缺失时会提示重新选择。关闭新闻模块保留看板引用和实例配置，重新开启后恢复可用实例。
 
-**Settings → News → Home news widgets** creates, configures and deletes instance configurations. Removing board membership keeps its configuration. Deleting a configuration leaves a placeholder on its boards; a missing saved view asks you to choose another. Turning off News retains both the board references and configurations, and turning it on restores available instances.
+## 收藏、日报与存储
 
-## Favorites, editions and storage
+**采集与笔记存储**可保存 1–365 天的资料保留期限（默认 30 天），开关自适应抓取间隔，并选择收藏和日报目录。关闭自适应后使用各信源设定的间隔，失败时仍会退避。修改信源间隔会在本地更新下次抓取时间。保留期限在下次缓存写入时应用，不删除工作台中的 Markdown，也不改变独立的 30 天 CLI 回执窗口。
 
-**Collection and note storage** lets you save a material retention period of 1–365 days (default 30), switch adaptive collection intervals on or off, and choose favorite and daily-note folders. With adaptation off, a source uses its configured interval; failure backoff still applies. Changing a source interval updates its due time locally. Retention applies on the next cache write and never deletes visible Markdown or changes the separate 30-day CLI receipt window.
+目录须为`.nand/content/` 内目录，修改仅影响新笔记。已有收藏、简报和日报保留身份与位置，手动移动到其他受管目录并重启后仍可识别。NAND 根据 `nand-type` 和 `nand-id` 元数据发现它们，只更新未被读者编辑的管理区域。移动笔记时请保留这些属性。
 
-Folder paths must be visible folders inside the vault. Changes affect new notes. Existing favorites, briefs and daily editions keep their identity and location, including after a manual move to another visible folder and restart. NAND discovers them by their `nand-type` and `nand-id` metadata and updates only its untouched managed content. Keep these properties when moving a note.
+**收藏**写入一份稳定的笔记，包含可用的中文标题和摘要、来源 URL、分数、标签及个人批注，不会自动转载全文。刷新保留生成区域之外的读者内容；生成区域内的改动会阻止覆盖。
 
-**Save** writes one favorite note containing the Chinese title/summary when available, its source URL, score and tags, plus your annotations. It does not copy a full article automatically. Your notes outside the generated region survive refreshes; changes inside that region prevent replacement.
+今日要闻按本地午夜至次日午夜划分，默认使用此前七个本地日期的编排记忆。打开页面只是读取。**重新编排**、成功采集和分析会记录编排结果；开启**写入日报笔记**后，每天可生成一份 Markdown。默认最多包含 12 条主条目和 10 条快讯，同一主来源最多占两条主条目。不提供周报、月报页面。
 
-Today's edition uses local midnight-to-midnight boundaries and defaults to seven prior local days of compilation memory. Opening it is a read operation. **Rebuild edition**, successful collection and analysis record the edition; **Write daily note** optionally creates one Markdown file per day. Default limits are 12 main entries and 10 flashes, with at most two main entries from one leading source. Weekly and monthly report views are not provided.
-
-| Data | Location and retention |
+| 数据 | 位置与保留规则 |
 |---|---|
-| Favorites | `NAND/新闻/收藏/` by default; configurable visible Markdown folder, retained until you remove it |
-| Briefs | `NAND/新闻/简报/`; visible Markdown, retained until you remove it |
-| Daily notes | `NAND/新闻/日报/YYYY-MM-DD.md` by default; configurable folder, written only when enabled |
-| Collected reports, analysis and reader state | `.nand/news/<device>/`; material retention defaults to 30 days and is configurable from 1–365 days |
-| CLI receipts and quota | `.nand/news/<device>/runs.json`; 30-day history, including raw replies; clearing the cache preserves history within this window and the current day's quota |
-| Shared configuration | `.nand/config/settings.json`; sources, views, widget instances, interests and policies |
-| Device configuration | `.nand/config/devices/<device>.json`; agent selection and working directory |
+| 收藏 | 默认 `.nand/content/NAND/新闻/收藏/`；可配置工作台中的 Markdown 目录，直到自行删除 |
+| 简报 | `.nand/content/NAND/新闻/简报/`；工作台中的 Markdown，直到自行删除 |
+| 日报 | 默认 `.nand/content/NAND/新闻/日报/YYYY-MM-DD.md`；目录可配置，仅在开启写入后创建 |
+| 采集内容、分析和阅读状态 | `.nand/news/<device>/`；资料默认保留 30 天，可配置为 1–365 天 |
+| CLI 回执和额度 | `.nand/news/<device>/runs.json`；保留 30 天历史及原始回复；清理缓存保留此窗口内的记录和当日额度 |
+| 共享配置 | `.nand/config/settings.json`；来源、视图、小组件实例、关注点和策略 |
+| 设备配置 | `.nand/config/devices/<device>.json`；智能体选择和工作目录 |
 
-Clearing the cache retains visible notes and can rediscover favorites and briefs from their Markdown identity. Disabling News stops its work and preserves files. If a favorite cannot be indexed, the source note remains on disk for inspection.
+清理缓存会保留可见笔记，并能根据 Markdown 身份重新发现收藏和简报。关闭新闻模块会停止工作并保留文件。无法索引的收藏源文件仍留在磁盘，可直接检查。
 
-Algorithm provenance, pinned upstream versions, formulas and deliberate differences are documented in [AIHOT news references](third-party/aihot-news.md).
+算法出处、固定上游版本、公式和有意差异见 [AIHOT 新闻参考](third-party/aihot-news.md)。

@@ -1,6 +1,6 @@
 # 架构
 
-移动文件、跨区导入、添加命令或重命名任何持久化内容之前先读本文。这些规则背后的原因见[开发文档索引](../../../../speculo/.speculo/specdev/.config/domain-layout.ZH.md)里列出的架构决定。
+移动文件、跨区导入、添加命令或重命名任何持久化内容之前先读本文。这些规则背后的原因见[开发文档索引](../../../../speculo/.speculo/specdev/.config/domain-layout.md)里列出的架构决定。
 
 ## 分区
 
@@ -103,31 +103,31 @@ id 不带插件 id 前缀；名称里不写「命令」二字；没有默认快�
 
 ## 持久化名称
 
-没有记录在案的决定，不要重命名它们；它们是用户数据或用户配置。
+持久化以当前 vault/.nand 为唯一 NAND 根。下表是现行代码位置；旧位置只能作为可恢复迁移来源，不能作为新写入回退。
 
 | 数据 | 位置 | 负责方 |
 |---|---|---|
 | 设置（整个库） | `.nand/config/settings.json`（`{ version: 1, namespaces: { app, theme, home, … } }`） | `app/settings/runtime.ts` |
 | 设置（本机） | `.nand/config/devices/<device-id>.json` | 同上；设备范围的字段（智能体 Shell 与路径、音乐音量、面板尺寸） |
-| 设备 id | Obsidian 本地存储键 `nand.device-id`，从不在库里 | `host/obsidian/storage/device-id.ts` |
+| 设备 id | `.nand/config/identity.json`，库内设备映射与宿主只读身份 | `host/obsidian/storage/device-id.ts` |
 | 评论线程 | `.nand/editor/comments/` | 评论（`editor-comments.md`） |
 | 图标与规则 | `.nand/icons/iconic.json` + `.backupN`（上游 Iconic 的模式） | 图标 |
-| 自动化运行 | `.nand/automation/<device-id>/runtime.json`；定义在 `NAND/自动化/<名称>-<id>/操作.md` | 自动化 |
+| 自动化运行 | `.nand/automation/<device-id>/runtime.json`；定义在 `.nand/content/NAND/自动化/<名称>-<id>/操作.md` | 自动化 |
 | 通知 | `.nand/notifications/<device-id>/inbox.json` | 通知 |
-| Git 同步的设备状态 | `<git dir>/nand-sync.json`（自动同步的时钟与暂停；在 `.git` 内，从不提交） | 同步 |
+| Git 同步的设备状态 | `.nand/sync/<device-id>/<repository-hash>.json`（计时与暂停） | 同步 |
 | 智能体历史标注、自动化会话与缓存 | `.nand/terminal-agent/<device-id>/`（`history.json`、`automation-sessions.json`；`index.sqlite` 是可重建的缓存） | 智能体 |
-| 智能体生命周期钩子脚本 | `~/.nand/hooks/nand-automation-hook.cjs`，注册在各 CLI 自己的设置里，并留有 `.nand-backup` 副本 | 智能体 |
-| 终端辅助程序 | `<插件目录>/binaries/nand-pty-<平台>-<架构>[.exe]` 和 `nand-pty.json`（版本与摘要） | 智能体 |
+| 智能体生命周期钩子脚本 | `.nand/agents/<device-id>/accounts/<provider>/<stable-id>/runtime/`；配置与事件均在账号内 | 智能体 |
+| 终端辅助程序 | `.nand/helpers/<device-id>/<platform-arch>/<version>/`，官方摘要及本机受保护回执 | 智能体 |
 | 浏览历史与站点授权 | `.nand/browser/<device-id>/state.json` | 浏览器 |
 | 新闻采集、分析、事件、热度与回执 | `.nand/news/<device-id>/`（`materials.json`、`analyses.json`、`events.json`、`heat.json`、`runs.json`、`reader-state.json`） | 新闻 |
-| 新闻收藏、简报与日报 | `NAND/新闻/收藏/`、`NAND/新闻/简报/`、`NAND/新闻/日报/` | 新闻；可见 Markdown |
+| 新闻收藏、简报与日报 | `.nand/content/NAND/新闻/收藏/`、`简报/`、`日报/` | 新闻；受管 Markdown |
 | 恢复草稿与看板冲突 | `.nand/recovery/drafts/`、`.nand/recovery/dashboard/conflicts/` | 共享存储、首页 |
 | 缓存 | `.nand/cache/`（微信读书进度） | 首页 |
-| 记录 | `NAND/习惯/`、`NAND/记账/`、`NAND/番茄钟/`、`NAND/阅读/` 下的 Markdown | 首页 |
-| 档案 | 配置的可见文件夹（默认 `档案`）、`个人档案/<姓名>/基本信息.md`、`企业档案/<名称>/基本信息.md` | 档案 |
-| 看板 | 用户的看板笔记 | 首页（`platform/board/`） |
-| Electron 分区 | `persist:nand-browser-<库本地 id>`、`persist:nand-dashboard-music-<库名>`、`persist:nand-dashboard-web` | 浏览器、首页 |
-| 库本地的界面状态 | `App.saveLocalStorage` 键 `nand.*` | 所属模块 |
+| 记录 | `.nand/content/NAND/习惯/`、`记账/`、`番茄钟/`、`阅读/` | 首页 |
+| 档案 | `.nand/content/` 内文件夹，默认 `档案/个人档案/<姓名>/基本信息.md`、`档案/企业档案/<名称>/基本信息.md` | 档案 |
+| 看板 | `.nand/content/` 内 Markdown，默认 `.nand/content/dashboard.md` | 首页 |
+| Electron 分区 | `.nand/browser/<device-id>/profiles/<profile>/session/` 显式 Session；下载与桥接也在库内 | 浏览器、首页 |
+| 库本地的界面状态 | `.nand/config/` 下的内部状态；旧 nand.* localStorage 只作迁移来源 | 所属模块 |
 | 功能区 id | `src/app/ribbon.ts` 里的 `ribbon-<id>`（id 稳定，标签会翻译） | app |
 
 Obsidian Sync 不同步以点开头的文件夹，所以 `.nand/` 需要 Git、iCloud、Syncthing 等；使用指南里会说明。

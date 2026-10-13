@@ -1,188 +1,192 @@
-English | [简体中文](sync.ZH.md)
+# Git 同步
 
-# Git sync
+Git 同步用本机安装的 Git 提交、拉取和推送整个库，可以手动操作，也可以定时进行。它只在桌面端可用，默认关闭。NAND 不保存账号或密码，认证交给 Git 自己的凭据管理器或 SSH agent。
 
-Git sync commits, pulls and pushes the whole vault with the Git installed on your computer, by hand or on a schedule. It is available on desktop only and is **off by default**. NAND stores no account or password; authentication is left to Git's own credential helper or SSH agent.
+## 开启与接入
 
-## Turn it on and connect
+1. 在 **设置 → 常规 → 功能模块** 中打开“Git 同步”。图标栏上会出现分支图标，页面有“变更”和“历史”两页。
+2. NAND 依次查找：设置中填写的程序路径、`PATH` 里的 `git`，以及常见的安装位置（Windows 为 `C:\Program Files\Git`，macOS 和 Linux 为 Homebrew 和系统目录）。找不到时，变更页会说明原因，并提供打开设置的入口。
+3. 库还不是 Git 仓库时，点“创建仓库”，NAND 会在库目录执行 `git init`。默认同时写入一份 `.gitignore`（仅在不存在时写入），忽略每台设备各自的布局文件（配置目录下的 `workspace.json` 和 `workspace-mobile.json`）、`.trash/` 和 `.DS_Store`。
+4. 没有远端时，变更页顶部有“添加远端”；Git 不知道作者姓名和邮箱时，有“设置作者”，只写入本仓库的配置。
+5. 第一次“提交并同步”会询问是否把当前分支推送到远端并设为上游，确认后执行 `git push -u`。
 
-1. Turn on **Git sync** under **Settings → General → Modules**. A branch icon appears in the rail, and the page has **Changes** and **History**.
-2. NAND looks for Git in this order: the program path in the settings, `git` on the `PATH`, and the usual install locations (`C:\Program Files\Git` on Windows, Homebrew and system folders on macOS and Linux). If it finds none, the Changes page explains why and offers to open the settings.
-3. If the vault is not a Git repository, click **Create repository**; NAND runs `git init` in the vault folder. By default it also writes a `.gitignore` (only when none exists) that ignores each device's own layout files (`workspace.json` and `workspace-mobile.json` in the configuration folder), `.trash/` and `.DS_Store`.
-4. With no remote, the top of the Changes page has **Add remote**. When Git does not know the author's name and email, **Set author** writes them to this repository's configuration only.
-5. The first **Commit and sync** asks whether to push the current branch to the remote and set it as upstream, then runs `git push -u`.
+库本来就在某个仓库里（包括库只是仓库中的一个子目录）时，NAND 直接使用那个仓库，只提交库目录下的变更。也可以在设置中把“仓库文件夹”指向库内的某个文件夹。
 
-If the vault already lies inside a repository (including a vault that is only a subfolder of one), NAND uses that repository and commits only changes below the vault folder. You can also point **Repository folder** in the settings at a folder inside the vault.
+要在新设备上使用已有仓库，在 Git 同步页展开“克隆已有仓库”，填写仓库地址和当前库之外的新目录或空目录的绝对路径，父目录须已存在。确认目标后开始，运行时可点“取消克隆”。认证使用系统 Git 凭据；地址中包含密码或 HTTPS 凭据时会拒绝克隆。
 
-To use an existing repository on a new device, expand **Clone an existing repository** on the Git sync page. Enter the repository URL and an absolute path to a new or empty folder outside the current vault; its parent folder must already exist. Confirm the destination to start, or use **Cancel clone** while it runs. Credentials come from system Git; URLs with embedded passwords or HTTPS credentials are refused.
+NAND 先克隆到相邻的临时目录，完成后再次检查目标目录，再将结果移入。目标中已有的文件，包括克隆期间新增的文件，都会保留。失败或取消不会触发递归清理；若留下文件，页面会显示临时路径，供你检查。成功后请在 Obsidian 的库切换器中选择“打开文件夹作为库”。切换前当前库会保持打开。
 
-NAND clones into a temporary sibling directory and checks the destination again before moving the result there. A non-empty destination, including files added while cloning, is preserved. Failed or cancelled attempts never trigger recursive cleanup: any retained files are reported with their temporary path for you to inspect. After success, open Obsidian's vault switcher and choose **Open folder as vault**. NAND keeps the current vault open until you switch.
+## 认证
 
-## Authentication
+推送和拉取使用本机 Git 的认证方式，只需在本机配置一次：
 
-Pushing and pulling use the authentication of the Git on your computer. Set it up once there:
+- HTTPS：使用 Git 的凭据管理器。Windows 版 Git 自带 Git Credential Manager；macOS 可用 `git config --global credential.helper osxkeychain`；也可以用 `gh auth setup-git`。
+- SSH：把密钥加入 SSH agent，并确认在终端里 `git push` 不需要再输入口令。
 
-- HTTPS: use a Git credential helper. Git for Windows ships Git Credential Manager; on macOS you can use `git config --global credential.helper osxkeychain`; `gh auth setup-git` also works.
-- SSH: add your key to the SSH agent and make sure `git push` in a terminal does not ask for a passphrase.
+NAND 运行 Git 时关闭了交互提示（`GIT_TERMINAL_PROMPT=0`）。缺少凭据会立即以“认证失败”结束，不会一直卡住。添加远端或克隆时会拒绝含凭据、查询参数或片段的地址。错误详情中的 URL 凭据和查询参数会被遮去；请通过系统 Git 凭据管理器或 SSH agent 配置认证。
 
-NAND runs Git with prompts disabled (`GIT_TERMINAL_PROMPT=0`). A missing credential ends at once as *authentication failed* instead of hanging. Adding a remote or cloning refuses URLs with embedded credentials, query parameters or fragments. URL credentials and query strings in error details are masked; configure authentication through your system Git credential helper or SSH agent.
+## 变更页
 
-## The Changes page
+- 顶部显示当前分支、上游、领先和落后的提交数，以及上次操作的结果。失败时附上 Git 的原始输出。
+- 文件分为“冲突”“已暂存”“变更”三组。每个文件可以打开、查看差异、暂存或取消暂存、放弃更改（新文件会移到回收站，需先确认）。冲突文件可以标记为已解决。
+- 提交说明可以手写；留空则使用设置中的模板。`Ctrl/Cmd+Enter` 等同于“提交并同步”。
+- 按钮依次为：提交并同步、提交，以及“更多提交方式”菜单（仅提交已暂存、提交全部变更、仅提交已暂存并同步、全部暂存、全部取消暂存）；右侧是拉取、推送、获取、刷新，以及暂停或恢复自动同步。
+- “历史”页按时间倒序列出提交，展开后可以看到每个文件的差异。
 
-- The top shows the current branch, the upstream, the number of commits ahead and behind, and the result of the last action. A failure includes Git's original output.
-- Files are grouped as **Conflicts**, **Staged** and **Changes**. For each file you can open it, show the diff, stage or unstage it, or discard the changes (a new file is moved to the trash, after you confirm). A conflicted file can be marked as resolved.
-- Write the commit message yourself, or leave it empty to use the template from the settings. `Ctrl/Cmd+Enter` equals **Commit and sync**.
-- The buttons are **Commit and sync**, **Commit** and a **More commit options** menu (commit staged only, commit all changes, commit staged and sync, stage all, unstage all). On the right are pull, push, fetch, refresh, and pause or resume of automatic sync.
-- **History** lists commits newest first; expand one to see the diff of each file.
+## 命令
 
-## Commands
+命令面板中的命令都以“Git：”开头：
 
-All commands start with `Git:` in the command palette:
-
-| Command | Result |
+| 命令 | 结果 |
 |---|---|
-| Git: Commit and sync | Commit all changes, then pull and push as set |
-| Git: Commit staged and sync | Commit only what is staged, then pull and push |
-| Git: Commit (staged first) | Commit the staged changes, or all changes if nothing is staged and the setting allows |
-| Git: Commit staged only | Commit only what is staged |
-| Git: Commit all changes | Stage and commit everything |
-| Git: Pull, Git: Push, Git: Fetch | The single Git action |
-| Git: Pause or resume automatic sync | Pauses the timers on this device |
-| Git: Open sync page | Opens the Changes page |
-| Git: Stage current file, Git: Unstage current file | For the active file |
+| Git：提交并同步 | 提交全部变更，然后按设置拉取和推送 |
+| Git：仅提交已暂存并同步 | 只提交已暂存的内容，然后拉取和推送 |
+| Git：提交（优先已暂存） | 提交已暂存的内容；没有暂存内容且设置允许时提交全部 |
+| Git：仅提交已暂存 | 只提交已暂存的内容 |
+| Git：提交全部变更 | 暂存并提交全部 |
+| Git：拉取、Git：推送、Git：获取 | 单独执行对应的 Git 操作 |
+| Git：暂停或恢复自动同步 | 暂停本设备的定时任务 |
+| Git：打开同步页 | 打开变更页 |
+| Git：暂存当前文件、Git：取消暂存当前文件 | 针对当前打开的文件 |
 
-## What each action commits
+## 各操作提交什么
 
-| Action | What is committed |
+| 操作 | 提交什么 |
 |---|---|
-| Commit (staged first) | The staged changes if there are any. If nothing is staged: everything when *Commit stages everything when nothing is staged* is on, otherwise nothing |
-| Commit staged only | Only the staged content; nothing if there is none |
-| Commit all changes | Stages every addition, change, deletion and rename of the vault, then commits |
-| Commit and sync | Commits all changes, then pulls and pushes as set |
-| Commit staged and sync | Commits only staged content, leaves unstaged changes as they are, then pulls and pushes |
-| Automatic commit and sync | Commits everything by default; only staged content when *Automatic commits include only staged changes* is on |
+| 提交（优先已暂存） | 有已暂存内容时只提交这些；没有时，“没有已暂存内容时，提交会暂存全部”开启则提交全部，关闭则不提交 |
+| 仅提交已暂存 | 只提交已暂存的内容；没有就不提交 |
+| 提交全部变更 | 暂存库中的全部新增、修改、删除和重命名后提交 |
+| 提交并同步 | 提交全部变更，然后按设置拉取和推送 |
+| 仅提交已暂存并同步 | 只提交已暂存内容，未暂存的修改原样留在本地，然后拉取和推送 |
+| 自动提交并同步 | 默认提交全部；开启“自动提交只包含已暂存内容”后只提交已暂存的 |
 
-**Commit and sync** performs three steps and reports each one, for example *Committed 3 file(s) · Already up to date · Pushed 1 commit(s)*:
+“提交并同步”依次执行三步，每一步单独报告结果，例如“已提交 3 个文件 · 已是最新 · 已推送 1 个提交”：
 
-1. **Commit.** With no changes it reports *No changes to commit* but still runs the next steps, so commits that were not pushed yet are pushed.
-2. **Pull**, when *Pull before pushing* is on: a fetch, then merge or rebase as set. It reports *Already up to date* when there is nothing new.
-3. **Push**, unless *Do not push* is on. With no new commits it reports *No commits to push*.
+1. **提交**：没有变更时报告“没有可提交的更改”，但仍会继续执行后两步，所以尚未推送的已有提交也会被推送。
+2. **拉取**（“推送前先拉取”开启时）：先获取，再按设置合并或变基。没有新内容时报告“已是最新”。
+3. **推送**（“不推送”关闭时）：没有新提交时报告“没有可推送的提交”。
 
-If a step fails, the later steps do not run and the result is shown as a failure, never as a completed sync. After a failed pull or a conflict nothing is pushed.
+任何一步失败，后面的步骤不会执行，结果显示为失败，不会报告同步完成。拉取失败或出现冲突后不会推送。
 
-## Pull method
+## 拉取方式
 
-- **Merge** keeps both histories and makes a merge commit when needed.
-- **Rebase** puts your new commits after the remote commits and keeps the history linear.
+- **合并（merge）**：保留双方历史，需要时生成一个合并提交。
+- **变基（rebase）**：把本地的新提交接在远端提交之后，历史保持线性。
 
-Both use `--autostash`: with *Commit staged and sync*, unstaged changes are put aside during the pull and restored afterwards. NAND offers no reset method and no strategy that silently takes one side (ours/theirs), because they would drop history or content without telling you. A conflict always stops and waits for you.
+两种方式都带 `--autostash`：“仅提交已暂存并同步”时，未暂存的修改会在拉取期间被临时收起，拉取后放回。NAND 不提供 `reset` 方式，也不提供自动选取一方（ours/theirs）的策略，因为它们会悄悄丢掉一方的历史或内容。遇到冲突一律暂停，等待你处理。
 
-## Push
+## 推送
 
-- When the branch has no upstream, a manual action asks first; automatic sync never opens a dialog and never creates an upstream by itself. The status bar then shows *Git: last sync failed*, and the message says the branch has no upstream and that you should sync manually once to publish it.
-- When the remote has commits you do not have, the push is rejected with *pull first*. NAND never force-pushes.
-- If the remote branch was deleted, the next push creates it again.
+- 分支没有上游时，手动操作会先询问；自动同步不会弹窗，也不会擅自创建上游。这时状态栏显示“Git：上次同步失败”，提示说明原因：分支没有上游，请手动同步一次以发布分支。
+- 远端有本地没有的提交时，推送会被拒绝，提示“请先拉取”。NAND 从不强制推送。
+- 远端分支被删除后，下次推送会重新建立它。
 
-### Squash unpushed commits before pushing
+### 推送前压缩未推送的提交
 
-When on, several unpushed commits are combined into one before the push, keeping the newest commit's message. It happens only when all of these hold; otherwise it is skipped and the push goes on:
+开启后，推送前会把尚未推送的多个提交合并为一个，保留最新那个提交的说明。只有同时满足下列条件才会压缩，否则跳过并照常推送：
 
-- the remote branch is an ancestor of the local branch, so the remote has no commits you have not merged;
-- nothing is staged but uncommitted;
-- there are at least two unpushed commits and none is a merge commit;
-- no other reference, including a remote tracking branch, contains those commits.
+- 远端分支是本地分支的祖先，即远端没有你尚未合并的提交；
+- 没有已暂存但未提交的内容；
+- 未推送的提交至少有两个，且其中没有合并提交；
+- 没有其他引用（包括远端跟踪分支）包含这些提交。
 
-NAND reads and fetches the actual push destination before choosing the range. If the destination is ambiguous, squashing is skipped and Git uses its configured push behavior. The result explains why squashing was skipped. Forced refspecs and mirror pushes are refused.
+NAND 先读取并获取实际推送目标，再确定压缩范围。目标无法唯一确认时跳过压缩，普通推送仍按 Git 配置执行。结果会解释跳过原因。强制推送引用配置和镜像推送会被拒绝。
 
-If the squash commit fails, the branch returns to its original HEAD. If squashing succeeds but pushing fails, the failure shows the original commit, retained at `refs/nand/pre-squash`; use `git branch nand-recovery refs/nand/pre-squash` to inspect that history without changing current files. This reference is replaced before the next squash.
+压缩提交失败时，分支恢复到原 HEAD。压缩成功但推送失败时，错误会显示原提交，并通过 `refs/nand/pre-squash` 保留；可运行 `git branch nand-recovery refs/nand/pre-squash` 创建分支后查看原历史，不会改动当前文件。下次压缩前会更新此恢复引用。
 
-## Automatic sync
+## 自动同步
 
-| Setting | Effect |
+| 设置 | 作用 |
 |---|---|
-| Commit and sync every (minutes) | 0 turns it off. After a restart the clock continues from the last run on this device, so short sessions still sync on time |
-| Wait for editing to stop | Waits the interval after the last change in the vault instead of using a fixed clock |
-| Push on its own interval | The interval above then only commits; pushing follows *Push every (minutes)* |
-| Pull every (minutes) | An independent pull clock |
-| Pull when Obsidian starts | Runs once after the workspace has loaded |
-| Pause automatic sync on this device | Stops the timers on this device only; manual actions still work |
+| 每隔多少分钟提交并同步 | 0 表示关闭。本设备重启后会接着上次的时间计算，短时间的多次启动也会按时同步 |
+| 等编辑停止后再同步 | 在库中最后一次修改之后再等上面的间隔，而不是按固定时钟 |
+| 推送使用单独的间隔 | 开启后上面的间隔只提交，推送按“每隔多少分钟推送”进行 |
+| 每隔多少分钟拉取 | 独立的拉取时钟 |
+| Obsidian 启动时拉取 | 工作区加载完成后执行一次 |
+| 在本设备暂停自动同步 | 只停止本设备的定时任务，手动操作照常可用 |
 
-- Manual actions, timers and refreshes triggered by file changes go through one queue, so only one Git operation runs at a time; queued actions of the same kind are kept once.
-- Vault changes caused by Git writing files are not counted as edits, so one pull does not trigger the next automatic commit at once.
-- While there are conflicts or a merge or rebase is in progress, automatic commit and push are skipped and the status bar shows the conflicts.
-- Failures that need a person (authentication, permission, remote refusal, no upstream and so on) pause automatic sync on this device after three in a row, with *Automatic sync paused after repeated failures* in the status bar. The next successful manual action resumes it. Network loss, timeouts and a busy repository do not count; the next interval tries again.
-- The clock and the pause state are kept in the repository's Git folder as `.git/nand-sync.json`; they are not committed and not synced to other devices.
-- Turning the module off or uninstalling the plugin stops the timers, cancels queued operations and ends running Git processes.
+- 手动操作、定时任务和文件变化触发的刷新都经过同一个队列，同一时刻只有一个 Git 操作在运行；同类操作在排队时只保留一次。
+- Git 自己写文件引起的库变化不会被当成编辑，所以一次拉取不会立刻触发下一次自动提交。
+- 存在冲突，或合并、变基进行中时，自动提交和推送会跳过，状态栏显示冲突。
+- 需要人处理的失败（认证、权限、远端拒绝、没有上游等）连续出现三次后，本设备的自动同步会暂停，状态栏显示“自动同步因连续失败已暂停”。下一次手动操作成功后会自动恢复。断网、超时和仓库被占用不计入，下个周期会再试。
+- 计时和暂停状态保存在 `.nand/sync/<device-id>/<repository-hash>.json`，按库内设备与仓库相对路径隔离；旧 Git 目录状态经可恢复清单迁移。
+- 关闭模块或卸载插件时，会停止定时器、取消排队中的操作，并结束正在运行的 Git 进程。
 
-## Conflicts
+## 冲突
 
-When two devices change the same place in the same file, a pull stops on a conflict:
+两台设备改了同一个文件的同一处，拉取就会停在冲突上：
 
-1. The top of the Changes page shows *merge stopped on conflicts* (or *rebase*), the conflicted files are listed under **Conflicts**, and the status bar shows the number. Nothing is pushed and automatic sync waits.
-2. Open a conflicted file. Every `<<<<<<<` line has the buttons **Keep upper**, **Keep lower** and **Keep both** (and **Keep base** for diff3 conflicts); you can also edit by hand. In a merge the upper part is your local content and the lower part the remote one; in a rebase it is the other way round, and the buttons show the labels Git gave.
-3. When the file is right, click **Mark resolved**. If conflict markers remain, NAND asks once more.
-4. When every conflict is resolved, click **Continue**; NAND finishes the merge commit or continues the rebase. Then **Commit and sync** pushes.
-5. To give up the pull, click **Abort**; the repository returns to its state before the pull. Your own commits are kept, and the conflict work done so far is lost.
+1. 变更页顶部出现“合并因冲突暂停”（或“变基因冲突暂停”），冲突文件列在“冲突”组，状态栏显示冲突数量。此时不会推送，自动同步也会等待。
+2. 打开冲突文件。每个 `<<<<<<<` 行上都有“保留上方”“保留下方”“保留两者”按钮（diff3 格式的冲突还有“保留共同祖先”），也可以直接手动编辑。合并时，上方是本地内容、下方是远端内容；变基时两者相反，按钮上会标出 Git 给的标签。
+3. 改好后点“标记为已解决”。文件中仍有冲突标记时会再确认一次。
+4. 所有冲突都解决后点“继续”，NAND 会完成合并提交或继续变基；之后“提交并同步”即可推送。
+5. 想放弃这次拉取时点“中止”，仓库回到拉取之前的状态。你自己的提交会保留，已做的冲突处理会丢失。
 
-Other cases:
+其他情况：
 
-- One side deletes a file and the other changes it: shown as a conflict. Stage the file to keep it, or delete it in Git to accept the deletion.
-- One side renames and the other changes the file: Git usually merges automatically and the change appears under the new name.
-- Binary attachments (images, PDFs) have no conflict markers. Abort, or pick one version in a terminal with `git checkout --ours/--theirs <file>` and mark it resolved.
-- Unstaged changes restored after a pull can conflict too. Git then keeps them in the stash, and the conflicted files are listed under **Conflicts** as well.
+- 一边删除、另一边修改：显示为冲突。要保留文件就暂存它，接受删除就在 Git 中删除它。
+- 一边重命名、另一边修改：Git 通常能自动合并，修改会出现在新文件名下。
+- 二进制附件（图片、PDF）没有冲突标记。可以中止，或在终端里用 `git checkout --ours/--theirs <文件>` 选择一份后标记为已解决。
+- 未暂存的修改在拉取后放回时也可能冲突。这时 Git 会把它们保留在 stash 中，冲突文件同样列在“冲突”组。
 
-## Failures and troubleshooting
+## 失败与排查
 
-| Message | Meaning and what to do |
+| 提示 | 含义与处理 |
 |---|---|
-| git could not be started | Install Git, or enter the full path of the Git program in the settings |
-| not a Git repository | Create a repository, or check the **Repository folder** setting |
-| the remote could not be reached | Offline, a proxy problem or the server is down. Local commits are kept; sync again when you are online |
-| authentication failed | Set up a credential helper or an SSH key on this computer (see Authentication), then check that `git push` in a terminal works |
-| the remote refused access | No write permission, or a protected branch |
-| the remote repository was not found | Check the remote URL |
-| the remote has commits you do not have | Pull first. *Commit and sync* pulls first by itself |
-| another Git process is using this repository | A terminal or IDE is working on the repository. Wait and retry; a leftover `.git/index.lock` should be removed only when no Git is running |
-| uncommitted changes would be overwritten | Commit or stage those changes first |
-| git needs your name and email | Click **Set author** on the Changes page |
-| not on a branch (detached HEAD) | Switch to a branch with Git first |
-| git took too long and was stopped | Network operations are limited to 10 minutes, others to 2 minutes. For a slow first push of large attachments, push once from a terminal |
+| 无法启动 git | 安装 Git，或在设置中填写 Git 程序的完整路径 |
+| 不是 Git 仓库 | 创建仓库，或检查“仓库文件夹”设置 |
+| 无法连接远端 | 离线、代理问题或服务器不可用。本地提交已保留，联网后再同步 |
+| 认证失败 | 在本机配置凭据管理器或 SSH 密钥（见“认证”），然后在终端里确认 `git push` 可以直接成功 |
+| 远端拒绝访问 | 没有写权限，或分支受保护 |
+| 找不到远端仓库 | 检查远端地址 |
+| 远端有本地没有的提交 | 先拉取。“提交并同步”会自动先拉取 |
+| 另一个 Git 进程正在使用此仓库 | 终端或 IDE 正在操作仓库。等它结束后重试；残留的 `.git/index.lock` 要在确认没有 Git 在运行后才可删除 |
+| 未提交的更改会被覆盖 | 先提交或暂存这些更改 |
+| Git 需要先设置作者姓名和邮箱 | 在变更页点“设置作者” |
+| 不在分支上（游离 HEAD） | 先用 Git 切换到某个分支 |
+| git 运行超时，已停止 | 网络操作上限为 10 分钟，其他操作为 2 分钟。大附件首次推送较慢时，可以先在终端里推送一次 |
 
-A failure never loses local edits or commits. Refresh the Changes page before retrying to see the current state.
+失败不会丢失本地编辑或提交。重试前可以先刷新变更页，确认当前状态。
 
-## Settings
+## 设置
 
-Under **Settings → Git sync**. Commit messages, pull method, push behavior and intervals are shared by the whole vault; **Git program** and **Repository folder** belong to this device only.
+在 **设置 → Git 同步** 中。提交说明、拉取方式、推送行为和定时间隔由整个库共用；“Git 程序”和“仓库文件夹”只属于本设备。
 
-| Group | Settings |
+| 分组 | 设置 |
 |---|---|
-| Repository | The detected Git version and repository with **Detect again**; Git program (this device); Repository folder (this device) |
-| Commits | Commit message; Automatic commit message; Date format (Moment.js, used by `{{date}}`); List changed files in the message body; Commit stages everything when nothing is staged |
-| Pull and push | How to combine remote changes (merge or rebase); Pull before pushing; Do not push; Squash unpushed commits before pushing |
-| Automatic sync | The intervals and switches in the table above; Automatic commits include only staged changes |
-| Notices | Notice when there is nothing to do (manual runs); Notices for automatic failures (manual failures are always shown) |
+| 仓库 | 检测到的 Git 版本和仓库，以及“重新检测”；Git 程序（本设备）；仓库文件夹（本设备） |
+| 提交 | 提交说明；自动提交说明；日期格式（Moment.js，用于 `{{date}}`）；在提交说明正文中列出变更文件；没有已暂存内容时，提交会暂存全部 |
+| 拉取与推送 | 合并远端更改的方式（合并或变基）；推送前先拉取；不推送；推送前压缩未推送的提交 |
+| 自动同步 | 上表中的间隔和开关；自动提交只包含已暂存内容 |
+| 提示 | 没有可做的操作时也提示（手动操作）；自动同步失败时提示（手动操作失败总会提示） |
 
-Message templates accept `{{date}}`, `{{hostname}}`, `{{numFiles}}` and `{{files}}`. The defaults are `vault backup: {{date}}` and the date format `YYYY-MM-DD HH:mm:ss`.
+提交说明模板支持 `{{date}}`、`{{hostname}}`、`{{numFiles}}` 和 `{{files}}`。默认值为 `vault backup: {{date}}`，日期格式为 `YYYY-MM-DD HH:mm:ss`。
 
-## What goes into the repository
+## 哪些内容会进入仓库
 
-Git commits the files of the vault: every note and attachment outside `.gitignore`, and the settings in `.nand/`. That includes `.nand/config/settings.json` (which can hold the WeRead API key, if you entered one), browser history and site permissions in `.nand/browser/`, agent history labels in `.nand/terminal-agent/`, recovery drafts in `.nand/recovery/`, and the comments in `.nand/editor/`. Before you push, make sure the remote's access is as restricted as that content needs, and add paths you do not want to publish to `.gitignore`. Anything that is already pushed stays in the history. See [Privacy and data boundaries](privacy.md#git-sync).
+Git 提交的是库里的文件：`.gitignore` 之外的所有笔记和附件，以及 `.nand/` 中的设置。这包括 `.nand/config/settings.json`（如果你填了微信读书 API 密钥，它会出现在其中）、`.nand/browser/` 中的浏览历史和站点权限、`.nand/terminal-agent/` 中的智能体历史标注、`.nand/recovery/` 中的恢复草稿，以及 `.nand/editor/` 中的评论。推送前请确认远端的访问范围与这些内容的敏感程度相符，并把不想公开的路径加入 `.gitignore`。已经推送的内容会留在历史里。见[隐私与数据边界](privacy.md#git-同步)。
 
-## Desktop and mobile
+## 桌面端与移动端
 
-| Capability | Desktop | Mobile |
+| 能力 | 桌面端 | 移动端 |
 |---|---|---|
-| Commit, pull, push, automatic sync | Supported, with the system Git | Not supported |
-| SSH and credential helpers | Provided by the system Git | — |
-| Merge and rebase | Supported | — |
-| Submodules | Not managed (the system Git runs as configured) | — |
+| 提交、拉取、推送、自动同步 | 支持，使用系统 Git | 不支持 |
+| SSH 与凭据管理器 | 由系统 Git 提供 | — |
+| 合并与变基 | 支持 | — |
+| 子模块 | 不管理（由系统 Git 按其配置运行） | — |
 
-Obsidian mobile does not expose the desktop Git runner, so NAND does not offer Git sync there. To sync a phone, use another app that supports Git on the same repository.
+Obsidian 移动端没有桌面版的 Git 进程接口，因此 NAND 在移动端不提供 Git 同步。要在手机上同步，请用其他支持 Git 的应用操作同一个仓库。
 
-Not included: blame, hunk-level staging, a branch switcher, submodule management and raw Git commands. The behavior of this module follows [obsidian-git](https://github.com/Vinzent03/obsidian-git) (MIT license); attribution and license text are in [NOTICE](../NOTICE).
+不包含：行作者（blame）、hunk 级暂存、分支切换界面、子模块管理和原始 Git 命令。本模块的行为参考 [obsidian-git](https://github.com/Vinzent03/obsidian-git)（MIT 许可）；署名和许可原文见 [NOTICE](../NOTICE)。
 
-Tests run against real Git with local bare remotes. HTTPS credential managers, SSH agents, a hosting provider's rejection messages and a large first push over a real network have not been exercised, see [Validation](../speculo/.speculo/specdev/context/validation.md).
+测试使用真实 Git 和本地裸仓库进行。HTTPS 凭据管理器、SSH agent、托管服务的拒绝信息，以及真实网络上的大型首次推送，尚未验证，见[验证说明](../speculo/.speculo/specdev/context/validation.md)。
 
-## Other sync tools
+## 与其他同步方式
 
-Obsidian Sync does not sync folders that start with a dot, so the settings and runtime records in `.nand/` need a tool that syncs the whole vault, such as Git (see [Data and recovery](data.md#several-devices-and-sync)). Do not let Git and another sync tool manage the same vault folder at the same time: both writing at once creates conflicts that are hard to tell apart.
+Obsidian Sync 不同步以点开头的目录，所以 `.nand/` 中的设置和运行记录需要用 Git 这类同步整个库的方式（见[数据与恢复](data.md#多设备与同步)）。不要让 Git 和其他同步工具同时管理同一个库目录：两边同时写入会产生难以分辨的冲突。
+
+## autostash 恢复冲突
+
+合并或 rebase 返回零，也可能在恢复未提交修改时留下冲突。NAND 会读取真实 Git operation 和未合并条目，报告拉取冲突并阻止推送；通知与自动失败计数采用同一结果。三次需要处理的失败会暂停自动同步。
+
+没有活动 merge/rebase 时，不执行不存在的中止操作；先检查冲突文件和 Git 保留的 stash，解决并暂存后再提交同步。`git checkout --ours/--theirs <file>` 会选择一侧内容，操作前应先检查双方。解决后的手动成功会清除失败计数和失败暂停。

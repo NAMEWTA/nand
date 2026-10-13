@@ -181,6 +181,13 @@ function readSource(directory, into) {
 const sources = [];
 readSource(path.join(root, 'src'), sources);
 const sourceText = sources.join('\n');
+const constructedPaths = new Set();
+for (const match of sourceText.matchAll(/\b(nandPath|contentPath)\(\s*((?:'[^'\n]*'|"[^"\n]*")(?:\s*,\s*(?:'[^'\n]*'|"[^"\n]*"))*)\s*\)/g)) {
+	const parts = [...match[2].matchAll(/['"]([^'"]*)['"]/g)].map(value => value[1]);
+	constructedPaths.add([match[1] === 'contentPath' ? '.nand/content' : '.nand', ...parts].join('/'));
+}
+// The default board setting is extensionless; ContentFiles resolves its Markdown document.
+for (const match of sourceText.matchAll(/\bdashboardFile:\s*['"]([^'"]+)['"]/g)) constructedPaths.add(match[1].endsWith('.md') ? match[1] : match[1] + '.md');
 
 const viewTypes = new Set();
 for (const match of sourceText.matchAll(/export const [A-Z0-9_]*VIEW_TYPE = '([^']+)'/g)) viewTypes.add(match[1]);
@@ -198,23 +205,23 @@ for (const feature of documentedFeatures) {
 if (!workbench.includes('open-workbench') || !sourceText.includes("id: 'open-workbench'")) failures.push('open-workbench command is not documented against source');
 if (!workbench.includes('`records`')) failures.push('docs/workbench.md: records pages must be documented as part of home');
 const minAppVersion = JSON.parse(fs.readFileSync(path.join(root, 'manifest.json'), 'utf8')).minAppVersion;
-for (const file of ['docs/settings.md', 'docs/settings.ZH.md'])
+for (const file of ['docs/settings.md'])
 	if (!fs.readFileSync(path.join(root, file), 'utf8').includes(`Obsidian ${minAppVersion}`)) failures.push(`${file}: minimum Obsidian version must match manifest.json (${minAppVersion})`);
 
-for (const file of ['docs/data.md', 'docs/privacy.md', 'docs/records.md', 'docs/agent-workbench.md'].flatMap((name) => [name, name.replace(/\.md$/, '.ZH.md')])) {
+for (const file of ['docs/data.md', 'docs/privacy.md', 'docs/records.md', 'docs/agent-workbench.md']) {
 	const body = bodies.get(file) ?? '';
 	for (const match of body.matchAll(/\.nand\/[A-Za-z0-9_./<>\-]+/g)) {
 		const prefix = match[0].split('<')[0].replace(/\/+$/g, '');
-		if (prefix === '.nand' || sourceText.includes(prefix)) continue;
+		if (prefix === '.nand' || sourceText.includes(prefix) || constructedPaths.has(prefix)) continue;
 		failures.push(`${file}: data path ${match[0]} is not in source`);
 	}
 }
-// User docs, root entries and permanent SpecDev knowledge stay bilingual; Change artifacts keep their source language.
-const bilingual = new Set(['user-doc', 'root-entry', 'specdev']);
+// Project guides have one Chinese source. A owns permanent knowledge; captured/archived artifacts stay immutable.
+const bilingual = new Set(['README.md', 'README.ZH.md']);
 const english = '[English](';
 const chinese = '[简体中文](';
 for (const file of files) {
-	if (!bilingual.has(classify(file))) continue;
+	if (!bilingual.has(file)) continue;
 	const zh = file.endsWith('.ZH.md');
 	const partner = zh ? file.replace(/\.ZH\.md$/, '.md') : file.replace(/\.md$/, '.ZH.md');
 	if (!fs.existsSync(path.join(root, partner))) failures.push(`${file}: missing ${zh ? 'English' : 'Chinese'} version ${partner}`);
@@ -226,11 +233,17 @@ if ((bodies.get('docs/privacy.md') ?? '').includes('connection.json') && !source
 	failures.push('docs/privacy.md: connection.json is not in source');
 }
 
-for (const [file, suffix] of [['README.md', '.md'], ['README.ZH.md', '.ZH.md']]) {
+for (const file of ['README.md', 'README.ZH.md']) {
 	const readme = fs.readFileSync(path.join(root, file), 'utf8');
-	if (!readme.includes(`docs/workbench${suffix}`) || !readme.includes(`docs/privacy${suffix}`)) failures.push(`${file}: missing workbench or privacy link`);
-	const index = fs.readFileSync(path.join(root, `docs/${file}`), 'utf8');
-	if (!index.includes(`workbench${suffix}`) || !index.includes(`privacy${suffix}`)) failures.push(`docs/${file}: missing workbench or privacy link`);
+	if (!readme.includes('docs/workbench.md') || !readme.includes('docs/privacy.md')) failures.push(`${file}: missing workbench or privacy link`);
+}
+const guideIndex = fs.readFileSync(path.join(root, 'docs/README.md'), 'utf8');
+if (!guideIndex.includes('workbench.md') || !guideIndex.includes('privacy.md')) failures.push('docs/README.md: missing workbench or privacy link');
+for (const file of files) {
+	if (!['user-doc', 'root-entry'].includes(classify(file)) || bilingual.has(file)) continue;
+	if (file.endsWith('.ZH.md') && !fs.lstatSync(path.join(root, file)).isSymbolicLink()) failures.push(`${file}: duplicate maintained guide; use one Chinese source`);
+	const body = bodies.get(file) ?? fs.readFileSync(path.join(root, file), 'utf8');
+	if (!/[\u3400-\u9fff]/.test(body)) failures.push(`${file}: current guide must contain its Chinese content`);
 }
 const layout = fs.readFileSync(path.join(root, `${state}/.config/domain-layout.md`), 'utf8');
 if (!layout.includes('context/current-baseline.md') || !layout.includes('context/validation.md')) failures.push('domain-layout.md: current baseline links missing');

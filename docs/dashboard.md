@@ -1,201 +1,199 @@
-English | [简体中文](dashboard.ZH.md)
+# 看板
 
-# Dashboard
+看板是工作台里的 **首页**。一份看板是一篇 Markdown 笔记，包含横幅、带卡片的分区，以及旁边显示的小组件的设置。可以保留多份看板，首页侧栏会列出它们。习惯、记账、番茄钟和阅读的统计是首页下的“记录”页面，见[业务记录](records.md)。
 
-The dashboard is the **Home** page of the workbench. A board is a Markdown note that holds a banner, sections with cards, and settings for the widgets shown next to them. You can keep several boards; the Home side panel lists them. Habit, expense, pomodoro and reading statistics are the **Records** pages under Home, see [Records](records.md).
+看板模块默认开启。模块开关叫 **看板**，图标栏上的图标叫 **首页**。
 
-The dashboard module is on by default. The module switch is called **Dashboard**; the rail icon is called **Home**.
+## 看板列表
 
-## Boards
+- 首页侧栏（第 2 栏）有“新建看板”，并在“看板”下列出所有看板。选择一份即可打开。看板行的菜单有“上移看板”“下移看板”“重命名工作台”和“移除工作台”。排序在重启后保留；移除只是把它从列表中去掉，笔记仍保留在库中。至少要保留一份看板。看板超过六份时，列表带搜索框。
+- 第一份看板是库根目录下的笔记 `dashboard.md`。“新建看板”询问名称和布局后创建并打开笔记，取消不会创建文件。新看板使用 NAND 当前语言的示例内容。
+- 看板也叫 *工作台*：命令“切换到下一个工作台”“切换到上一个工作台”，以及 **设置 → 看板 → 多工作台** 都这样称呼。在设置里可以拖动调整看板顺序，移动笔记后修改看板路径，以及重命名和移除。
+- 每个工作台页面和每个窗口各自记住自己显示的是哪份看板。
 
-- The Home side panel (column 2) has **New board** and lists your boards under **Boards**. Select a board to open it. The menu of a board row has **Move board up**, **Move board down**, **Rename workspace** and **Remove workspace**. The order survives a restart; removing only takes the board off the list, the note stays in the vault. At least one board must remain. With more than six boards the list gets a search field.
-- The first board is the note `dashboard.md` in the vault root. **New board** asks for a name and a layout, then creates and opens its note. Cancelling creates nothing. New boards use sample content in NAND's current language.
-- Boards are also called *workspaces*: in the commands **Switch to next workspace** and **Switch to previous workspace**, and in **Settings → Dashboard → Workspaces**, where you can reorder boards by dragging, change a board's path after moving its note, rename and remove.
-- Each workbench page and each window remembers which board it shows.
+用页面上的 **看板布局**，或看板行菜单中的布局项，选择 **侧边布局**（小组件位于分区旁）、**堆叠布局**（小组件位于分区上方）或 **沉浸式网格**（小组件、分区和独立卡片共用一个网格）。选择只属于当前看板，重启后保留。打开旧看板或调整窗口大小不会向笔记写入布局；未保存布局时沿用有效的历史设置，否则使用堆叠布局。手机显示侧边排列，同时保留桌面端的已存选择。
 
-Use **Board layout** on the page, or a layout entry in the board row's menu, to choose **Side layout** (widgets beside sections), **Stacked layout** (widgets above sections), or **Immersive grid** (widgets, sections and standalone cards in one grid). The choice belongs to that board and survives a restart. Opening or resizing an older board does not write a layout into its note; its historical layout setting is used when present, otherwise it opens stacked. Phones display the side arrangement while retaining the saved choice for desktop.
+沉浸式网格按 12 列保存位置。拖动内容块的标题可移动它，拖动右下角的 **调整大小** 控件可设定固定尺寸。开启 **适应内容** 后，高度随内容变化，但不超过已保存的高度上限。使用键盘时，聚焦标题后按 Enter 或空格拾起、放下，方向键移动，Shift+方向键缩放，Escape 取消。放下时一次保存整个移动结果，包括被交换位置的内容块。
 
-The immersive grid saves positions in 12 columns. Drag a tile's title to move it, or its bottom-right **Resize** handle to set a fixed size. **Fit content** lets its height follow the content within the saved height limit. For keyboard control, focus the title and press Enter or Space to pick up or drop the tile; arrows move it, Shift+arrows resize it, and Escape cancels. Dropping saves the complete move once, including any tile exchanged with it.
+窄页面会临时投影为 6 列或 3 列，加宽页面后可编辑位置。改变页面宽度、内容自动适应和取消操作都会保留已保存的布局。暂不可用的小组件或缺失内容保留占位；无效的已存布局值会显示提示并采用安全的显示值，明确编辑布局后才保存修正值。
 
-Narrow panes show a temporary 6- or 3-column arrangement. Widen the page to edit positions; resizing the pane, fitting content and cancelling a gesture leave the saved geometry intact. An unavailable widget or missing tile keeps its place. Invalid saved values show a notice and a safe display; an explicit layout edit saves the corrected values.
+## 横幅
 
-## Banner
+看板顶部的横幅显示 **海报与名言**（背景图加一句名言）或 **数据统计**（库的笔记数量、活跃情况和任务统计）。用横幅上的编辑按钮编辑；命令“切换横幅视图（海报名言 / 数据统计）”切换模式。书签按钮用来收起和展开横幅。
 
-The banner at the top of a board shows either **Poster & quotes** (a background image and a quote) or **Statistics** (note counts, activity and a task completion summary of the vault). Edit the banner from its edit button; the command **Toggle banner view (poster & quotes / statistics)** switches the mode. The bookmark button collapses and expands the banner.
+新看板的横幅不发任何网络请求：没有设置图片时，横幅使用主题渐变。
 
-A new board makes no network requests for the banner: with no image set, the banner uses the theme's gradient.
+编辑器可分别设置每张横幅图和卡片封面的裁剪位置。拖动预览、使用方向键（按住 Shift 每次移动 10%），或输入水平和垂直百分比。**图片居中** 只重置当前图片；Escape 取消拖动，取消按钮放弃表单草稿。预览与看板使用同一套铺满裁剪百分比，改变窗口尺寸也会保留位置。两种横幅模式都保留各张轮播图的位置；在库中重命名图片或其文件夹时，图片引用和保存的位置会一起迁移。
 
-Each banner image and each card cover has its own crop position in the editor. Drag the preview, use the arrow keys (Shift moves by 10%), or enter horizontal and vertical percentages. **Center image** resets only that image; Escape cancels a drag, and Cancel discards the form. The preview uses the same cover-position percentages as the board, including when the window changes size. Both banner modes retain the positions of all carousel images. Renaming a vault image or its folder moves its saved position with the reference.
+## 分区与卡片
 
-## Sections and cards
+用命令“添加新分区”或看板上的添加入口新建分区：选择类型，可选地填写名称（默认使用类型名称），然后保存。双击分区标题可以重命名。拖动分区可调整顺序，拖动卡片可在分区之间移动。
 
-Add a section with the command **Add new section** or the add control on the board. Choose a type, optionally name it (the type name is the default), and save. Double-click a section title to rename it. Drag sections to reorder them and drag cards between sections.
-
-| Type | What it shows |
+| 类型 | 显示内容 |
 |---|---|
-| Notes | Cards that link to notes and show progress |
-| Notes (no cover) | The same without cover images |
-| Todo | Checkable task lists with due dates and reminders; completed tasks can be archived |
-| Memo | Free-form notes with a color; a memo can be saved as a note |
-| Sticky Notes | A mix of memo cards, to-do cards and web shortcut cards |
-| Dataview | The result of a query written in the Dataview query language (DQL), as a table or list. NAND evaluates the query with its own engine, so the Dataview plugin is not required |
-| Library | Notes selected by folder, tags and properties, shown as grid, gallery, list, table or kanban, with search, filters and sorting |
-| Folder | Notes in the folders you pick |
-| Workflow | Notes in configured stages, with status changes, optional folder moves, checklists, reminders and scoped skills |
-| Images, Videos | Media files in your vault, as grid or list, grouped by folder or tag, with tags you can edit |
-| Calendar | A month or week calendar of the tasks in your vault |
-| Web | A web page shown inside the board |
-| Weread | WeRead bookshelf, reading statistics, notes and highlights (needs an API key) |
+| 笔记 | 链接到笔记并显示进度的卡片 |
+| 笔记 (无封面) | 同上，不带封面图 |
+| 待办 | 可勾选的任务清单，支持截止日期和提醒；已完成的任务可以归档 |
+| 备忘 | 可选颜色的自由记录；备忘可以保存为笔记 |
+| 便利贴 | 备忘卡片、待办卡片和网页快捷卡片的混合 |
+| 数据视图 | 用 Dataview 查询语言（DQL）写的查询的结果，以表格或列表显示。NAND 用自己的引擎执行查询，不需要安装 Dataview 插件 |
+| 数据库 | 按文件夹、标签和属性选出的笔记，以网格、画廊、列表、表格或看板显示，支持搜索、筛选和排序 |
+| 文件夹 | 你选定的文件夹中的笔记 |
+| 工作流 | 按配置阶段组织笔记，支持状态推进、可选目录移动、任务清单、提醒和限定范围的技能 |
+| 图片、视频 | 库中的媒体文件，以网格或列表显示，可按文件夹或标签分组，标签可编辑 |
+| 日历 | 库中任务的月历或周历 |
+| 网页 | 在看板内显示的网页 |
+| 微信读书 | 微信读书的书架、阅读统计、笔记与划线（需要 API 密钥） |
 
-Task lines in a Todo section can have a reminder: the bell button on a task opens the automation editor with that task as the source (see [Automations and notifications](automation.md)).
+待办分区里的任务行可以设置提醒：任务上的铃铛按钮会以该任务为来源打开自动化编辑器（见[自动化与通知](automation.md)）。
 
-Library and Folder file cards expose **Delete** on hover or keyboard focus, and keep it visible on touch screens, including grid, gallery and kanban views. The confirmation defaults to **Cancel**. Confirming uses Obsidian's trash operation and refreshes the count; cancelling or a failed deletion keeps the file and card. Pressing the delete button does not open or drag the card.
+资料库和文件夹分区的文件卡在悬停或键盘聚焦时显示**删除**按钮，触屏上保持可见，网格、画廊和看板视图均可使用。确认框默认聚焦**取消**。确认后使用 Obsidian 的移入回收站操作并刷新数量；取消或删除失败会保留文件和卡片。按下删除按钮不会打开或拖动卡片。
 
-The board file is a Markdown note with YAML properties and a Markdown body. NAND updates the fields and regions it manages and keeps unknown YAML, comments and free text. Do not delete a card's `id` line or copy an existing id to create another card.
+看板文件由 YAML 属性和 Markdown 正文组成。NAND 更新自己管理的字段和区域，保留未知 YAML、注释和自由文字。不要删除卡片的 `id` 行，也不要复制已有的 id 来创建另一张卡片。
 
-## Note templates in Library and Folder sections
+## 资料库和文件夹分区的笔记模板
 
-Open the section's **Configure** button and edit **New-note template**. Add paths or browse existing notes, reorder the list with its arrow buttons, or remove entries. These changes stay in the form until **Save**; **Cancel** leaves the board unchanged.
+打开分区的**配置**按钮，在**新笔记模板**中输入路径或浏览已有笔记，用箭头调整顺序，或移除条目。点击**保存**后才会应用；**取消**会保留原看板。
 
-**New note** creates a blank note when the list is empty, uses a single template directly, and asks you to select one when several are configured. Cancelling the title prompt or template chooser creates nothing. Creation keeps the existing title/date substitutions, prefills supported section filters and chooses a unique file name.
+点击**新建笔记**时，列表为空则新建空白笔记，只有一项则直接使用，多项则先选择其中一个。取消标题输入或模板选择都不会创建文件。新建流程保留已有的标题／日期替换，预填支持的分区筛选属性，并避开重名文件。
 
-An older `templatePath` is read as a one-item list without rewriting the board. Saving the template configuration records ordered `templatePaths` and mirrors its first item into `templatePath`; an explicit empty list means blank notes. Older NAND versions understand only that first-item mirror, so edit multi-template configurations with a version that supports the list.
+旧 `templatePath` 只读投影为单项列表，不会因打开看板而改写文件。保存模板配置时会记录有序的 `templatePaths`，并将首项镜像到 `templatePath`；显式空列表表示新建空白笔记。旧版 NAND 只认识首项镜像，请使用支持列表的版本编辑多模板配置。
 
-## Large grouped lists and kanban boards
+## 大型分组列表与看板
 
-Grouped views and kanban initially show up to 50 notes per group. **Show more** adds the next 50 while keeping the notes already on screen. Each group's footer distinguishes the number shown, the number currently available and the full group total.
+分组视图和看板每组初始最多显示 50 条笔记，点击**再显示**会追加下一批 50 条，并保留已有笔记节点。每组底部分别显示已显示、可加载和全组的完整数量。
 
-After filtering and sorting, each section makes its first 500 matching notes available across all groups. When more match, a message asks you to narrow the filters; a search can find notes outside that initial range. Changing the query starts the groups at 50 again. These limits are temporary display state and never remove files or write note properties. Ordinary ungrouped views keep their page-size controls.
+筛选、排序后，每个分区在所有分组间共用前 500 条匹配笔记的范围。超过时会提示缩小筛选，搜索也能找到初始范围以外的笔记。改变查询后，各组重新从 50 条开始。这些限额只是临时显示状态，不会删除文件或改写笔记属性。普通未分组视图保留原有的每页条数设置。
 
-## Table columns
+## 表格列
 
-In a Library or Folder section's **Table** view, open **Table columns**. Check a field to show it, uncheck to hide it, or use the up/down buttons to reorder it. These controls support the keyboard and save to the current section. They do not change note properties or the badges shown in card views.
+在资料库或文件夹分区的**表格**视图中，打开**表格列**，勾选或取消勾选来控制显隐，用上下箭头调整顺序。这些控件支持键盘，并保存到当前分区；不会改动笔记属性值或卡片视图中的属性徽章。
 
-Candidates come from all matching notes, including other pages and groups. A field that disappears from the results keeps its saved order and visibility and is marked **Not in current results** in the editor. New fields appear at the end; returning fields reuse their preferences. **Reset table columns** removes only that section's preferences and restores the default derived columns.
+候选列来自全部匹配笔记，包括其他页和分组。字段暂时消失后仍保留已保存的顺序和显隐，编辑区会标注**当前结果中没有此字段**。新字段追加到末尾并显示，旧字段返回时恢复原偏好。**重置表格列**只清除当前分区的列偏好，恢复默认派生列。
 
-## Workflows
+## 工作流
 
-Add a **Workflow** section and use **Configure workflow** inside it. Choose a root folder, the status property, and each stage's label and stored value. A stage folder is relative to the root; leaving it empty changes only the status. Excluded folders and the optional archive folder are vault-relative. No folders are preselected. Save applies the configuration; Cancel keeps the previous values. Only notes under the root, outside exclusions and with a matching status appear. Status matching ignores case and surrounding spaces.
+添加 **工作流** 分区，在分区内选择 **配置工作流**。设置根目录、状态字段以及各阶段的显示名称和存储值。阶段目录相对于根目录；留空时只改状态。排除目录和可选的归档目录相对于库根目录。初始配置不预选任何目录。保存才应用配置，取消保留原值。只有根目录下、排除目录外且状态匹配的笔记会入列，状态匹配忽略大小写及首尾空格。
 
-Drag a note's title to another stage or use its **Move to stage** selector with the keyboard. NAND reads the current note before updating its status and uses Obsidian's file move operation when a stage has a folder; internal links follow Obsidian's update-links setting. An occupied destination is refused before changing the source. If the status saves but moving fails, the message reports the completed step and current path. **Retry unfinished move** finishes the remaining operation. **Archive note** writes `archived` and moves to your configured archive folder, removing the note from active stages.
+拖动笔记标题到另一阶段，或用键盘操作 **移动到阶段** 选择框。NAND 读取最新笔记后修改状态；阶段配置了目录时，通过 Obsidian 移动文件，内部链接按宿主的链接更新设置处理。目标已被占用时，会在修改原文件前拒绝。如果状态已保存但移动失败，提示会列出已完成步骤和当前路径；**重试未完成的移动** 只补做剩余操作。**归档笔记** 写入 `archived` 状态并移到你配置的归档目录，使笔记离开活动阶段。
 
-Search, property filters, sorting and column widths belong to this section. Save search text with its Save button or Enter; the other controls save on change. A width field also supports the arrow keys. Counts cover all matches; filtering and sorting happen before the 500-note display limit. Each stage first renders up to 50 notes, with **Show 50 more** retaining existing cards. Skills use their actual file scope, including matches beyond the display limit.
+搜索、属性筛选、排序和列宽保存在当前分区中。搜索文字用旁边的保存按钮或 Enter 保存，其他控件在修改后保存；列宽输入框也支持方向键。计数包含全部匹配项，先筛选和排序，再应用 500 篇的显示上限。每列先渲染最多 50 篇，**再显示 50 篇** 会保留已显示的卡片。技能使用实际文件范围，也包含显示上限之外的匹配项。
 
-Expand a card's checklist to change a task in its latest Markdown text. If that exact task was edited or appears more than once, refresh the card and resolve the ambiguity before retrying. **Due date** edits the note's `due` and `remind` fields. **Remind me on this device** creates a reminder in the existing [Automations and notifications](automation.md) system; keep those modules enabled. Clearing the due date removes that reminder. **New note** uses one of your configured templates, prefills the selected property filters and stage status, and chooses a unique file name. Cancelling the form creates nothing.
+展开卡片的任务清单，可修改最新 Markdown 中的任务。如果该任务文字已改动或完全相同的任务出现多次，请刷新并消除歧义后重试。**截止日期** 修改笔记的 `due`、`remind` 字段。启用 **在此设备提醒我** 会把提醒接入现有的[自动化与通知](automation.md)，请保持这两个模块开启。清除截止日期会移除该提醒。**新建笔记** 使用配置中的模板，预填已选属性筛选和阶段状态，并避开重名文件；取消表单不创建文件。
 
-The configuration form can add skills for a card or a whole stage, optionally limited to named status values. Its inner skill edits remain a draft until you save the workflow configuration. Stage previews list all currently filtered notes in that column and let you select a subset; an explicitly configured direct-send button uses the full column. Card skills use that note's current path, title, folder, stage and selected card text. Empty columns offer no files. These buttons use the shared [skill delivery and session choices](agent-workbench.md#board-skill-buttons).
+配置表单可添加作用于单张卡片或整列的技能，也可限制适用的状态值。内部技能编辑仍是草稿，保存工作流配置后才持久化。列头预览列出当前筛选后的整列笔记，可勾选子集；明确配置为直发的按钮使用整列。卡片技能提供笔记当前的路径、标题、目录、阶段，以及卡片内选中的文字。空列不提供文件。这些按钮复用[技能派发与会话选择](agent-workbench.md#看板技能按钮)。
 
-## Widgets
+## 小组件
 
-News contributes **Featured news**, **Hot news** and saved **News view** widgets when its module is enabled. Use **Create and add** for independent instances and **Configure** for their item count, summaries, stale threshold and saved view. The News settings page also manages these configurations. See [Home news widgets](news.md#home-widgets) for refresh behavior and navigation.
+启用新闻模块后，可添加**精选新闻**、**热榜**和已保存的**新闻视图**组件。用**创建并添加**建立独立实例，用**配置**调整显示条数、摘要、过期阈值和已保存视图。新闻设置页也能管理这些配置。刷新行为与导航见[首页新闻小组件](news.md#首页小组件)。
 
-Add **Agent skills** to configure this board's skill buttons. The widget edits its buttons in place and previews their prompt before delivery by default. The sparkle buttons beside fleeting capture and in card headers use the same saved skills with their local text and current note context. See [Board skill buttons](agent-workbench.md#board-skill-buttons) for templates, file scope and session choices.
+添加 **智能体技能** 后可在组件内编辑当前看板的技能按钮，默认先预览提示词再派发。快念旁和卡片标题栏的闪光图标复用这些已保存的技能，并提供触发处的文字及当前笔记上下文。模板、文件范围和会话选择见[看板技能按钮](agent-workbench.md#看板技能按钮)。
 
-**Quick Buttons** shares the same widget list and can contain saved automation actions. Turning Automations off disables those actions immediately; turning it back on restores their current availability without changing board membership or layout. Home also respects the system's reduced-motion setting for widget and page transitions.
+**快捷按钮**使用同一份组件列表，可放入已保存的自动化操作。关闭自动化模块后，这些操作立即停用；重新开启后恢复当前可用状态，看板成员和布局保持不变。首页组件和页面过渡也遵守系统的减少动效设置。
 
-Widgets sit in a strip below the banner in stacked layout, beside the sections in side layout, or in the immersive grid. **Board widgets** lets you add existing widgets, remove them from this board, and move them up or down. Save applies the list; Cancel leaves the list unchanged. You can also drag widgets to change their order on this board.
+堆叠布局的小组件排在横幅下方，侧边布局的小组件位于分区旁，沉浸式布局的小组件位于网格中。**看板组件** 可添加已有组件、从当前看板移除组件，以及上移或下移。保存后应用列表，取消保留原列表。也可以拖动组件调整当前看板中的顺序。
 
-For albums, countdowns and anniversaries, **Create and add** opens the configuration editor, including when no instance exists yet. Confirming saves the instance and adds it to the current board; cancelling the editor saves nothing. **Configure** updates an existing instance shared by all its boards. In the immersive grid, a widget's × button or **Remove from board** menu action removes it immediately from the current board. These controls also work with the keyboard, and the × button supports touch.
+相册、倒计时和纪念日提供 **创建并添加** 入口，即使还没有实例，也能直接打开配置编辑器。确认后保存实例并添加到当前看板，取消编辑器不保存任何内容。**配置** 会更新各看板共享的已有实例。在沉浸式网格中，组件上的 × 按钮或菜单中的 **从看板移除** 会立即从当前看板移除它。这些控件支持键盘操作，× 按钮也支持触摸。
 
-Widget configuration is shared: removing a countdown, anniversary or album from one board keeps its configuration and its references on other boards. Add it again from the same list. When a provider such as News is disabled, its widgets keep their places and show a settings link; enabling the provider restores them. Older boards use the global widget switches and order until you explicitly save their layout or member list. Simply opening a board does not migrate its file.
+组件配置由各看板共享：从一份看板移除倒计时、纪念日或相册，会保留其配置及其他看板的引用，可从同一列表重新添加。新闻等提供方关闭后，组件保留原位并提供设置入口；重新开启后恢复。旧看板在明确保存布局或组件列表之前，沿用全局组件开关和顺序。只读打开不会迁移文件。
 
-| Widget | Default | What it does |
+| 小组件 | 默认 | 作用 |
 |---|---|---|
-| Quick Buttons | On | Buttons for files, Obsidian commands and saved automation actions |
-| Lunar Calendar | On | The Chinese lunar date, holidays and a daily almanac |
-| Pomodoro timer | On | Focus and break timer with a daily goal and an optional floating mini timer |
-| Countdown | Sample on in a new vault | Counts down to dates you set; each can have a reminder |
-| Habit Tracker | Sample on in a new vault | A daily check-in list |
-| Anniversaries | Sample on in a new vault | Time elapsed since a past date, with an optional yearly reminder |
-| Reading Tracker | Off | A reading timer |
-| Weather | Off | Forecast for a city you search for |
-| Year Progress | Off | How much of the year has passed |
-| Calendar | Off | A month or week calendar of vault tasks; click a day to see or add tasks |
-| Expense Tracker | Off | Quick entry of expenses and income |
-| Photo Album | Off | A slideshow of the images in a vault folder |
-| Music Player | Off | NetEase Cloud Music songs; not on phones; sign-in for member tracks is desktop only |
+| 快捷按钮 | 开启 | 一键打开文件、运行 Obsidian 命令或已保存的自动化操作 |
+| 农历万年历 | 开启 | 农历日期、节假日和每日宜言 |
+| 番茄钟 | 开启 | 专注与休息计时，带每日目标和可选的浮动迷你计时面板 |
+| 倒计时 | 新库中带示例并开启 | 倒数到你设定的日期，每个倒计时可设置提醒 |
+| 习惯打卡 | 新库中带示例并开启 | 每日打卡清单 |
+| 纪念日 | 新库中带示例并开启 | 距某个过去日期已过去的时间，可选每年提醒 |
+| 阅读记录 | 关闭 | 阅读计时器 |
+| 天气 | 关闭 | 你搜索的城市的天气预报 |
+| 年度进度 | 关闭 | 当年已过去的比例 |
+| 日历 | 关闭 | 库中任务的月历或周历，点某天可查看或添加任务 |
+| 记账小组件 | 关闭 | 快速记一笔支出或收入 |
+| 相册 | 关闭 | 轮播库中某个文件夹里的图片 |
+| 音乐播放器 | 关闭 | 播放网易云音乐歌曲；手机不可用，登录会员账号仅限桌面端 |
 
-Habit, expense, pomodoro and reading data are stored as Markdown, see [Records](records.md). The pomodoro and reading timers belong to the dashboard module as a whole, so there is one timer even when several boards are open.
+习惯、记账、番茄钟和阅读的资料保存为 Markdown，见[业务记录](records.md)。番茄钟和阅读计时由看板模块统一持有，所以同时打开多份看板也只有一个计时器。
 
-### Lunar anniversaries
+### 农历纪念日
 
-In an anniversary's editor, choose **Solar** or **Lunar**. Lunar input accepts a year, month, day and **Leap month**, and shows the corresponding solar date. Switching calendars keeps the same historical date, including an existing time; the elapsed-time precision also stays unchanged. Invalid or nonexistent dates block Save. Cancel discards the draft.
+在纪念日编辑器中选择 **阳历** 或 **农历**。农历输入包含年份、月份、日期和 **闰月**，并显示对应阳历日期。切换历法保留同一个历史日期及已有时间，已过去时间的显示精度也不变。无效或不存在的日期不能保存；取消会放弃草稿。
 
-Annual reminders and the widget use the same rule: a missing leap month becomes the ordinary month with the same number, and a missing day becomes that month's last day. For example, lunar leap 4/2 in 2020 (May 24) becomes ordinary 4/2 in 2021 (May 13); lunar 2/30 in 2023 (March 21) becomes 2/29 in 2025 (March 28). Before Lunar New Year, late-month anniversaries still belong to the preceding lunar year. A conversion failure is shown explicitly. Dates remain stored as solar ISO values; lunar mode changes their annual recurrence.
+每年提醒与组件使用同一规则：当年没有对应闰月时使用同名普通月，缺少对应日期时使用该月最后一天。例如，2020 年闰四月初二（5 月 24 日）在 2021 年对应普通四月初二（5 月 13 日）；2023 年二月三十（3 月 21 日）在 2025 年对应二月廿九（3 月 28 日）。春节前的年末月份仍属于上一农历年。转换失败会明确显示错误。日期始终按真实阳历 ISO 值保存，农历模式决定其每年的纪念日。
 
-## Quick actions
+## 快捷操作
 
-**Quick Buttons** shows buttons that run an action with one click. **Add action** offers three tabs: **File** (open a note), **Command** (run any Obsidian command) and **Saved actions** (an action defined in the Automations page).
+**快捷按钮** 显示一键运行某个操作的按钮。“添加操作”有三个标签：**文件**（打开笔记）、**命令**（运行任意 Obsidian 命令）和 **保存的操作**（在自动化页面中定义的操作）。
 
-To put an automation on a board, create it on the Automations page with the schedule **Shortcut (manual)**, then use **Add to dashboard** and pick the board. The same action can be pinned to several boards. A button points to the definition, so renaming or editing the action updates every button. Removing a button keeps the definition; deleting the definition makes its buttons show as unavailable. While an action runs you can see its status, open its terminal or stop it, when the action supports that.
+要把自动化放到看板上：先在自动化页面创建一个运行方式为“快捷操作（手动）”的自动化，再使用“添加到看板”并选择目标看板。同一个操作可以固定到多个看板。按钮引用的是定义，所以改名或修改操作后所有按钮同步更新；移除按钮会保留定义，删除定义后原按钮显示为不可用。操作运行期间，可以查看状态，也可以在操作支持时打开它的终端或停止它。
 
-Buttons work with Tab, Enter and Space, and Alt plus the arrow keys reorders them.
+快捷按钮支持 Tab、Enter 和 Space，Alt 加方向键调整顺序。
 
-## Common actions
+## 常用操作
 
-**Common Actions** is an optional bar at the top of the board (on in a new vault). Under **Settings → Dashboard → Common actions → Configure** you can add:
+**常用操作** 是看板顶部的可选工具条（新库中默认开启）。在 **设置 → 看板 → 常用操作 → 配置** 中可以添加：
 
-- create buttons that make a note from a template into a folder (file names accept `{{date}}`, `{{time}}` and `{{title}}`)
-- pinned notes that open with one click
-- quick commands that run any Obsidian command
-- a capture box that appends a line to a note, or creates a new note per capture
-- a **Today** button that opens or creates today's daily note (it needs Obsidian's core Daily notes plugin)
+- 创建按钮：从模板在指定文件夹新建笔记（文件名支持 `{{date}}`、`{{time}}` 和 `{{title}}`）
+- 置顶笔记：一键打开
+- 快捷命令：运行任意 Obsidian 命令
+- 收集框：把一行文字追加到指定笔记，或每次收集新建一篇笔记
+- “今日”按钮：打开或创建今天的日记（需要 Obsidian 核心的“日记”插件）
 
-Use a button's icon to choose from Obsidian's full icon list. Common icons appear first in the empty search; fuzzy name search scans the complete list and displays at most 400 suggestions. The picker also works with NAND's Icons module disabled.
+点击按钮的图标，可从 Obsidian 的完整图标列表中选择。空搜索优先显示常用图标；名称模糊搜索覆盖完整列表，每次最多显示 400 条建议。关闭 NAND 的图标模块后仍可使用。
 
-## Web shortcuts
+## 网页快捷入口
 
-In a Sticky Notes section, add a card and choose **Web shortcut**. Enter a name, a URL and **Open in** (dialog or tab). A dialog is the default. The card menu can switch the choice for one visit or open the page in the system browser. See [Browser](browser.md#board-shortcuts).
+在便利贴分区中添加卡片，选择“网页快捷卡片”，填写名称、网址和打开方式（弹窗或标签页），默认弹窗。卡片菜单可以临时切换打开方式，或在系统浏览器中打开。见[内置浏览器](browser.md#看板快捷入口)。
 
-## Notes and the recently edited list
+## 笔记与最近编辑
 
-Clicking a document card opens the note in an editing popover on the board. **Open notes directly in a tab** in the settings, or the command **Toggle: open notes directly in a tab**, opens notes in a tab instead.
+点击文档卡片，会在看板上的编辑弹窗中打开笔记。开启设置里的 **直接在标签页打开笔记**，或使用命令“切换：直接在标签页打开笔记”，则改为在标签页中打开。
 
-Project document rows preserve wiki aliases and heading/block targets, such as `[[Plan.md#Next steps|Roadmap]]`. Tab to the link and press Enter to open that location. The add-document search excludes files already linked under an alias; Tab to a result and press Enter or Space to add it, then continue from the search field. **Remove document link** asks for confirmation and removes only the card's link; the note stays in the vault. Dragging a document row still moves its nested links together.
+项目文档行保留 wiki 别名以及标题、块定位，例如 `[[Plan.md#Next steps|Roadmap]]`。按 Tab 聚焦链接，再按 Enter 打开对应位置。添加文档的搜索会排除已用别名关联的文件；按 Tab 进入结果，按 Enter 或空格添加，随后可继续在搜索框操作。**移除文档链接**会要求确认，只移除卡片里的关联，笔记仍保留在库中。拖动文档行仍会一起移动其嵌套链接。
 
-**Recently Edited** lists recently changed notes; its length is **Recent documents count** (3 to 15, default 5). It leaves out files and folders whose names start with a dot, the managed folders of NAND (`NAND/习惯`, `NAND/番茄钟`, `NAND/记账`, `NAND/阅读`, `NAND/自动化`), the board notes, and the entry notes and format guide of the [archives](contacts.md). Other notes, including other notes under `NAND/`, are not hidden.
+**最近编辑** 列出最近修改的笔记，数量由 **最近文档数量** 决定（3 到 15，默认 5）。它不包含名称以点开头的文件和文件夹、NAND 管理的目录（`.nand/content/NAND/习惯`、`.nand/content/NAND/番茄钟`、`.nand/content/NAND/记账`、`.nand/content/NAND/阅读`、`.nand/content/NAND/自动化`）、看板笔记，以及[档案](contacts.md)的入口笔记和格式说明。其他笔记（包括 `.nand/content/NAND/` 下的其他笔记）不会被隐藏。
 
-## Settings → Dashboard
+## 设置 → 看板
 
-| Group | What you can set |
+| 分组 | 可设置的内容 |
 |---|---|
-| Board appearance | See below |
-| Common actions | The bar described above |
-| Recent documents count | 3 to 15 |
-| Workspaces | The list of boards: order, path, rename, remove |
-| Memo | Folder where memo cards are saved as notes (empty: the vault root) and an optional template note |
-| Task archive | Archive completed tasks to a fixed file (default `Archive/Done.md`) or to today's daily note |
-| Library | Folder where the new-note button of a Library section creates notes |
-| Open notes directly in a tab | Skip the editing popover |
-| Weread | API key and the folder where highlights are imported as notes (default `Weread/Highlights`, one file per book) |
-| Widgets | Switches and options for each widget in the table above |
+| 看板外观 | 见下文 |
+| 常用操作 | 上面介绍的工具条 |
+| 最近文档数量 | 3 到 15 |
+| 多工作台 | 看板列表：顺序、路径、重命名、移除 |
+| 备忘 | 备忘卡片保存为笔记的文件夹（留空为库根目录）和可选的模板笔记 |
+| 待办归档 | 把已完成的待办归档到固定文件（默认 `Archive/Done.md`）或当天日记 |
+| 数据库 | 数据库分区的“新建笔记”按钮创建笔记的文件夹 |
+| 直接在标签页打开笔记 | 跳过编辑弹窗 |
+| 微信读书 | API 密钥，以及划线导入为笔记的文件夹（默认 `Weread/Highlights`，每本书一个文件） |
+| 小组件 | 上表中各小组件的开关和选项 |
 
-The default paths are the same in every interface language. Switching language does not move files.
+默认路径在所有界面语言下都相同，切换语言不会移动文件。
 
-### Board appearance
+### 看板外观
 
-**Settings → Dashboard → Board appearance → Customize appearance** opens a dialog with a background image (browse the vault; dimming, blur, cover or contain), card opacity, glass blur, corner radius and text size (small, medium, large). Changes apply live to all open boards. Colors are not part of it: boards follow the global colors from [Appearance](appearance.md).
+**设置 → 看板 → 看板外观 → 自定义外观** 打开一个对话框，可设置背景图（从库中浏览；暗化、模糊、填满或完整显示）、卡片透明度、玻璃模糊、圆角和文字大小（小、中、大）。改动实时应用到所有已打开的看板。颜色不在其中：看板使用[外观](appearance.md)中的全局颜色。
 
-**Saved appearances** stores a named combination of the current global theme and Home decoration, including background focus. Enter a unique name and choose **Save current appearance**. **Apply** restores the theme preset, heading/emphasis styles, both accent colors, reading line height and Home decoration across all boards, editors and popout windows. Names ignore surrounding spaces and letter case when checking duplicates. Deleting a saved appearance removes its snapshot and selection marker while retaining the current look.
+**已保存的外观** 将当前全局主题与首页装饰（包括背景焦点）保存为命名组合。输入不重复的名称，选择**保存当前外观**；**应用**会在所有看板、编辑器和弹出窗口恢复主题样式、标题及强调样式、两种明暗模式的强调色、阅读行高与首页装饰。名称判重时忽略首尾空格和字母大小写。删除已保存的外观只移除快照及选择标记，当前外观保持不变。
 
-Success appears after settings are written. If saving fails, the visible changes remain in the current session and the form shows **Retry saving**, including after reopening it. Retry before restarting to retain those changes. Background focus supports dragging, arrow keys (Shift moves 10%), percentage fields and a center reset; Escape cancels an active drag.
+设置写入成功后才显示成功。保存失败时，改动仍在本次会话中可见，表单会显示**重试保存**，关闭后重新打开也保留错误状态。请在重启前重试，以便保留改动。背景焦点支持拖动、方向键（按住 Shift 每次移动 10%）、百分比输入与重置居中；Escape 取消当前拖动。
 
-## Saving and conflicts
+## 保存与冲突
 
-A board save runs in the background. If someone else edits the note while you edit the board, NAND pauses saving to the original and keeps a recovery copy at `.nand/recovery/dashboard/conflicts/<id>.json`; the status area on the board shows the path. A saved recovery copy does not mean the original was updated. The status area offers **Copy local draft**, **Copy recovery path**, **Retry saving** and **Reload original** (after a confirmation that keeps the recovery copy). The recovery file holds the original, current and external text as JSON; it is not board Markdown and must not be pasted over the board.
+看板在后台保存。如果你编辑看板时笔记被别处修改，NAND 会暂停写入原笔记，并把恢复副本保存到 `.nand/recovery/dashboard/conflicts/<id>.json`，看板上的状态区会显示实际路径。“副本已保存”不表示修改已写入原文。状态区提供“复制当前草稿”“复制副本路径”“重试保存”和“重新载入原文”（需要确认，并保留恢复副本）。恢复文件以 JSON 保存原始、当前和外部三份文本，不是看板 Markdown，不能直接覆盖到看板上。
 
-If you also have the board note open in an editor with unsaved changes, finish that edit before saving from the board. Do not overwrite the whole note to resolve a conflict. A forced exit or an unwritable disk cannot guarantee that input which never reached the disk is saved.
+如果看板笔记同时在编辑器中打开并有未保存的修改，请先完成那边的编辑再从看板保存。不要把覆盖整篇笔记当作冲突恢复方式。强制结束进程或磁盘不可写时，不能保证尚未落盘的输入被保存。
 
-## Commands
+## 命令
 
-| Command | Result |
+| 命令 | 结果 |
 |---|---|
-| Open dashboard | Opens Home |
-| Switch to next workspace, Switch to previous workspace | Cycles through the boards |
-| Add new section | Adds a section to the active board |
-| Toggle banner view (poster & quotes / statistics) | Switches the banner mode |
-| Toggle: open notes directly in a tab | Switches how document cards open |
+| 打开看板 | 打开首页 |
+| 切换到下一个工作台、切换到上一个工作台 | 在看板之间循环切换 |
+| 添加新分区 | 在当前看板中添加分区 |
+| 切换横幅视图（海报名言 / 数据统计） | 切换横幅模式 |
+| 切换：直接在标签页打开笔记 | 切换文档卡片的打开方式 |
 
-## Phones
+## 手机
 
-On a phone or narrow window, expand **Board widgets** below the banner and select a widget. These buttons follow the current board's saved membership and order, including Agent skills and module contributions. Closing the panel releases that widget's subscriptions and pending work. Unavailable providers show their settings link. The banner also gives access to quick actions and recent documents; web shortcuts open in the system browser on mobile.
+手机或窄窗口中，展开横幅下的“看板小组件”，再选择一个组件。这些按钮按当前看板保存的成员和顺序排列，包括智能体技能和模块贡献的组件。关闭面板会释放该组件的订阅和进行中的工作。提供方不可用时显示设置入口。横幅还提供快捷操作和最近编辑入口；移动端的网页快捷入口用系统浏览器打开。

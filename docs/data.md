@@ -1,90 +1,87 @@
-English | [简体中文](data.ZH.md)
+# 数据与恢复
 
-# Data and recovery
+全部 NAND 自身生成、下载、持久化和管理的数据位于当前 vault 的 `.nand/`。NAND 管理的 Markdown 和附件在 `.nand/content/`，由工作台编辑、索引、搜索和打开；普通笔记、宿主自己的数据与 Git 自有元数据保留原位置。插件安装目录只保留 Obsidian 加载所需的代码、清单和样式。
 
-Your content is Markdown in visible folders. NAND's own configuration and runtime data live in the `.nand/` folder of the current vault. Nothing in the plugin installation folder is business data, apart from the terminal helper and separate agent logins listed below.
+## 数据保存在哪里
 
-## Where data is stored
-
-| Data | Location |
+| 数据 | 位置 |
 |---|---|
-| Boards | The board notes you choose (the first one is `dashboard.md` in the vault root) |
-| Board skill buttons | The `skills` YAML field of each board; includes template, selected agent, destination and per-button preview choice |
-| Library and Folder note templates | The column's `library.templatePaths` ordered list. Missing lists read `templatePath` as one item without a migration write; explicit `[]` means blank notes. Saving the configuration also mirrors the first item into `templatePath` for older readers. |
-| Table column preferences | Per-section `library.tableOrder` and `library.tableHidden` lists. Stable column ids are `file.name`, `file.modified`, and `property:<key>` for a frontmatter property. Missing fields keep their preferences; reset removes only these two lists. Card badges use the separate `visibleProperties` field. |
-| Workflow sections | Each board column's `pipeline` YAML object stores its root, stages, filters, templates, widths and scoped skills. Notes keep their status, tasks, `due` and `remind`; reminders enabled from a workflow also store an existing-format definition in `nandAutomation`, with the owning device id. Do not duplicate its id between notes. |
-| Remembered skill names and additional directories | Device settings under `.nand/config/devices/<device-id>.json`, in the `agent` namespace (`knownSkills`, `skillDirectories`); names are isolated by agent |
-| People, companies and their files | The archive folder you choose, default `档案/` with `个人档案/` and `企业档案/` inside |
-| Independent automation actions | `NAND/自动化/<name>-<short id>/操作.md` |
-| Habits, expenses, reading, pomodoro | Domain folders under `NAND/` (`NAND/习惯`, `NAND/记账`, `NAND/阅读`, `NAND/番茄钟`) |
-| Global settings | `.nand/config/settings.json` |
-| Saved appearances | `home.appearancePresets` in global settings stores `{id,name,theme,home}` snapshots; `activeAppearancePresetId` marks the last saved or applied one. Theme fields are `preset`, `headings`, `emphasis`, `accentLight`, `accentDark`, `lineHeight`; Home fields are `bgImage`, `bgDim`, `bgBlur`, `bgSize`, optional `bgFocal`, `surfaceOpacity`, `glassBlur`, `radiusScale`, `fontScale`. Board paths, widget configuration, credentials and device settings are excluded. Applying updates the existing `theme` and `home` namespaces in one settings write batch. |
-| Device settings | `.nand/config/devices/<device-id>.json` |
-| Icons and their backups | `.nand/icons/` |
-| Comments and anchors | `.nand/editor/comments/` |
-| Automation runs, notification receipts | `.nand/automation/<device-id>/`, `.nand/notifications/<device-id>/` |
-| Agent dispatch snapshots | The same automation `runtime.json`; final prompt, file references, source, invocation ID and delivery receipt |
-| Terminal index, history labels, automation sessions | `.nand/terminal-agent/<device-id>/` |
-| Browser history, account metadata and site permissions | `.nand/browser/<device-id>/state.json` and `profiles.json` |
-| News cache, analysis, reader state and CLI receipts | `.nand/news/<device-id>/`; retention and recovery in [News](news.md#favorites-editions-and-storage) |
-| News analysis policy | Vault settings `news.prefilter` stores blocked terms, minimum characters and allowed language tags; `news.vocabulary` stores category/topic/entity lists. `news.templates` stores four editable templates. Each new analysis receipt snapshots its vocabulary alongside the effective prompt hash and prompt text, so recovery does not reinterpret a saved reply using later settings. |
-| News local editorial controls | Vault settings `news.understandFloor`, `news.heatRules`, `news.editionRules` and `news.groupingRules` hold numeric policies. Heat observations carry the applied rule version. New analysis plans and accepted analyses retain `groupingConfidence`, so changes affect future batches without reinterpreting saved memberships. |
-| News widget configurations | `news.widgets` in vault settings: `{id,mode,name,count,showSummary,staleMinutes,viewId?}`, with modes `featured`, `hot`, `view`. `viewId` refers to `news.views`. Board Markdown stores only its member's provider/kind/instance ID and layout; removing a member leaves the configuration. |
-| News favorites, briefs and daily notes | Default folders `NAND/新闻/收藏/`, `NAND/新闻/简报/`, `NAND/新闻/日报/`; retained independently of cache. Vault settings `news.favoriteFolder` and `news.editionFolder` change new-note destinations. Existing tagged notes retain identity after a move within visible vault folders. `news.retentionDays` controls raw materials and analysis; CLI receipt history remains 30 days. |
-| Recovery drafts and board conflict copies | `.nand/recovery/` |
-| Caches (WeRead progress) | `.nand/cache/` |
-| Agent conversations exported as notes | `NAND Exports/` |
-| Expense CSV exports | `expense-export-<date>.csv` in the vault root |
-| Git sync clock and pause state | `.git/nand-sync.json` inside the repository, never committed |
-| Terminal helper | `binaries/` in the plugin folder |
-| Separate agent logins (optional) | `accounts/` in the plugin folder |
+| 看板 | 你选择的看板笔记（默认 `.nand/content/dashboard.md`） |
+| 看板技能按钮 | 各看板 YAML 的 `skills` 字段，包含模板、智能体、目标及每个按钮的预览选择 |
+| 资料库和文件夹的笔记模板 | 列的 `library.templatePaths` 有序列表。列表缺失时只读投影旧 `templatePath` 为单项，不写迁移；显式 `[]` 表示空白笔记。保存配置时另将首项镜像到 `templatePath`，供旧版读取。 |
+| 表格列偏好 | 每分区的 `library.tableOrder` 和 `library.tableHidden` 列表。列标识为 `file.name`、`file.modified`，以及表示笔记属性的 `property:<字段名>`。缺席字段保留偏好，重置只删除这两个列表；卡片徽章另用 `visibleProperties`。 |
+| 工作流分区 | 各看板列的 `pipeline` YAML 对象保存根目录、阶段、筛选、模板、列宽和限定范围的技能。笔记保存状态、任务、`due`、`remind`；在工作流中启用提醒时，还会在 `nandAutomation` 中保存现有格式的自动化定义及所属设备 id。不要在笔记间复制该定义的 id。 |
+| 已记住的技能名称与额外目录 | `.nand/config/devices/<device-id>.json` 的 `agent` 命名空间，字段为 `knownSkills`、`skillDirectories`；名称按智能体隔离 |
+| 人物、企业及其资料文件 | `.nand/content/` 内的档案文件夹，默认 `.nand/content/档案/`，其中有 `个人档案/` 和 `企业档案/` |
+| 独立的自动化操作 | `.nand/content/NAND/自动化/<名称>-<短 ID>/操作.md` |
+| 习惯、记账、阅读、番茄钟 | `.nand/content/NAND/` 下各领域目录（`.nand/content/NAND/习惯`、`.nand/content/NAND/记账`、`.nand/content/NAND/阅读`、`.nand/content/NAND/番茄钟`） |
+| 全局设置 | `.nand/config/settings.json` |
+| 已保存的外观 | 全局设置中的 `home.appearancePresets` 保存 `{id,name,theme,home}` 快照，`activeAppearancePresetId` 标记上次保存或应用的组合。主题字段为 `preset`、`headings`、`emphasis`、`accentLight`、`accentDark`、`lineHeight`；首页字段为 `bgImage`、`bgDim`、`bgBlur`、`bgSize`、可选 `bgFocal`、`surfaceOpacity`、`glassBlur`、`radiusScale`、`fontScale`。不包含看板路径、小组件配置、凭证或设备设置。应用时通过同一设置写入批次更新既有 `theme` 和 `home` 命名空间。 |
+| 设备设置 | `.nand/config/devices/<device-id>.json` |
+| 图标及其备份 | `.nand/icons/` |
+| 评论与锚点 | `.nand/editor/comments/` |
+| 自动化运行、通知回执 | `.nand/automation/<device-id>/`、`.nand/notifications/<device-id>/` |
+| 智能体派发快照 | 同一自动化 `runtime.json`，包含最终提示词、文件引用、来源、调用 ID 和交付回执 |
+| 终端索引、历史标注、自动化会话 | `.nand/terminal-agent/<device-id>/` |
+| 浏览历史、账号元数据与站点权限 | `.nand/browser/<device-id>/state.json` 与 `profiles.json` |
+| 新闻缓存、分析、阅读状态和 CLI 回执 | `.nand/news/<device-id>/`；保留与恢复规则见[新闻](news.md) |
+| 新闻分析策略 | 库级设置 `news.prefilter` 保存屏蔽词、最少字符数和允许的语言；`news.vocabulary` 保存分类、主题和实体词表；`news.templates` 保存四类可编辑模板。新分析回执在实际提示词哈希与文本之外保存词表快照，恢复时不会用后来的设置重新解释已保存回复。 |
+| 新闻本地编排参数 | 库级设置 `news.understandFloor`、`news.heatRules`、`news.editionRules` 和 `news.groupingRules` 保存数值策略。热度观测携带实际规则版本；新分析计划和已接收分析保存 `groupingConfidence`，修改设置只影响后续批次，不重新解释已保存的成员关系。 |
+| 新闻小组件配置 | 库级设置的 `news.widgets`：`{id,mode,name,count,showSummary,staleMinutes,viewId?}`，模式为 `featured`、`hot`、`view`；`viewId` 引用 `news.views`。看板 Markdown 只保存成员的 provider/kind/instance ID 与布局，移除成员保留配置。 |
+| 新闻收藏、简报与日报 | 默认目录为 `.nand/content/NAND/新闻/收藏/`、`.nand/content/NAND/新闻/简报/`、`.nand/content/NAND/新闻/日报/`，独立于缓存保留。库级设置 `news.favoriteFolder` 和 `news.editionFolder` 修改新笔记的目标目录；已有带身份属性的笔记在`.nand/content/` 内目录间移动后仍保留身份。`news.retentionDays` 控制原始资料和分析的保留期，CLI 回执历史仍为 30 天。 |
+| 恢复草稿与看板冲突副本 | `.nand/recovery/` |
+| 缓存（微信读书进度） | `.nand/cache/` |
+| 导出为笔记的智能体对话 | `.nand/content/NAND Exports/` |
+| 记账导出的 CSV | `.nand/content/exports/expense-export-<日期>.csv` |
+| Git 同步的计时与暂停状态 | `.nand/sync/<device-id>/<repository-hash>.json`，以及相邻恢复副本 |
+| 终端组件 | `.nand/helpers/<device-id>/<platform-arch>/<version>/` |
+| 独立的智能体登录（可选） | `.nand/agents/<device-id>/accounts/<provider>/<stable-id>/`（空名称为 default） |
 
-The folder names `档案`, `个人档案`, `企业档案`, `NAND/自动化`, `NAND/习惯`, `NAND/记账`, `NAND/阅读` and `NAND/番茄钟` are Chinese in every interface language, and file names such as `基本信息.md` and `操作.md` are too. A vault starts from defaults when it has no settings files.
+`档案`、`个人档案`、`企业档案`、`.nand/content/NAND/自动化`、`.nand/content/NAND/习惯`、`.nand/content/NAND/记账`、`.nand/content/NAND/阅读`、`.nand/content/NAND/番茄钟` 这些文件夹名在所有界面语言下都是中文，`基本信息.md`、`操作.md` 等文件名也一样。没有设置文件的库从默认值开始。
 
-## Private file permissions
+## 私有文件权限
 
-On desktop macOS and Linux, NAND creates its `.nand/` directories with mode `0700` and files with mode `0600`, including recovery copies and the native history database. Startup repairs existing managed paths once, with a bounded scan; permission failures are reported without deleting data. Symlinked private paths are refused. Ordinary notes retain their permissions, and Windows, mobile and non-filesystem adapters keep their native behavior. Git does not preserve these permission bits, so NAND reapplies them when a cloned vault first loads. These modes restrict local access; they do not encrypt files or prevent you from syncing them.
+桌面 POSIX 路径以 `0700` 创建目录、`0600` 创建普通文件，helper 使用 `0700`。账号及 helper 私有目录在 Windows 通过 DACL 限定为当前用户与 SYSTEM；权限失败阻止交付进程。交付前检查当前子树并拒绝链接，迁移保留恢复来源。访问控制不等于加密，也不会阻止你同步文件。普通笔记保持原权限；移动端和非文件系统适配器的具体权限行为据实说明，不冒称已实测。
 
-## Outside the vault
+## 库之外的数据
 
-- The native logs, history and sign-in of CLI agents belong to those CLIs. NAND reads the history and never copies it into the vault. NAND adds small status hooks to the CLIs' own configuration files, see [Agent workbench](agent-workbench.md#status-hooks).
-- Browser cookies stay in Obsidian's Electron session on this computer.
-- The browser connection files, and the screenshots and descriptions handed to agents, are in `nand-browser/<vault-id>/` inside Obsidian's application data folder, not in the vault, and are not part of a vault backup. Back them up separately if you want to keep them.
-- The device id is in Obsidian's local storage. Copying or syncing a vault does not make two computers the same device, and a copy does not replace device ownership or CLI sign-in. The connection token exists only while NAND runs.
+NAND 新启动的 CLI 使用库内的 HOME、提供方配置目录、XDG/Windows 数据目录和临时目录，状态 Hook 与事件文件同属账号。浏览器 Cookie、站点数据、缓存、下载、桥接与截图/说明进入库内的设备/profile 目录。库外由用户自行维护的 CLI homes 不自动搬迁；NAND 不以它们作为默认账号的回退来源。
 
-## Several devices and sync
+设备映射位于 `.nand/config/identity.json`，利用宿主只读身份识别当前设备。复制库需要识别或明确选择设备归属，不会自动接管另一设备的运行队列。普通笔记、宿主配置、系统 IPC 对象与 Git 自有元数据不是 NAND 业务数据。
 
-`.nand/` starts with a dot, and **Obsidian Sync does not sync folders that start with a dot**. NAND's settings, comments, icon rules, automation runs and notification receipts therefore do not reach another device through Obsidian Sync, while Markdown content such as boards, archives, records and independent actions does. To keep several devices consistent, use a tool that syncs the whole vault including hidden folders: Git, iCloud, Syncthing or similar. On desktop you can use NAND's own [Git sync](sync.md).
+## 多设备与同步
 
-- `.nand/config/settings.json` is shared by all devices of the vault. `.nand/config/devices/<device-id>.json` and the per-module `<device-id>` folders belong to one device and do not overwrite each other after a sync.
-- Automations run only on the device they belong to, see [Automations and notifications](automation.md#devices).
-- Before writing a JSON file, NAND merges outside changes on disk with its own changes (a three-way merge) and keeps the previous valid content in a `.backup` file. Conflict copies made by a sync tool still need manual handling.
+`.nand/` 以点开头，**Obsidian Sync 不同步以点开头的目录**。所以 `.nand/content/` 中的看板、档案、记录、操作和其他 NAND 数据也不会经 Obsidian Sync 到达另一台设备。需要在多台设备间保持一致时，请用会同步整个库（包括隐藏目录）的工具：Git、iCloud、Syncthing 等。桌面端可以直接使用 NAND 的 [Git 同步](sync.md)。
 
-## Everyday backup
+- `.nand/config/settings.json` 由库的所有设备共用；`.nand/config/devices/<device-id>.json` 和各模块的 `<device-id>` 目录只属于一台设备，同步后互不覆盖。
+- 自动化只在它所属的设备上运行，见[自动化与通知](automation.md#设备归属)。
+- 写入 JSON 前，NAND 会把磁盘上的外部修改与自己的修改做三方合并，并把上一份有效内容保留为 `.backup` 文件。同步工具自己产生的冲突副本仍需手动处理。
 
-1. Finish saving in editors and panels, and check that nothing shows *Not saved* or *Conflicting edits*.
-2. Back up your Markdown, related attachments and the whole `.nand/` folder. The backup tool must include hidden folders.
-3. Before restoring, turn the affected modules off, keep a copy of the current damaged files and restore the contents and settings you know are valid.
-4. Turn the modules on again and check the content and the device settings. Do not replay interrupted external actions just to get things running.
+## 日常备份
 
-Caches and indexes can be rebuilt. Entity text, business records, comments and notification receipts must not be cleaned up as if they were caches. Browser cookies and CLI accounts and logs need backups in the ways their own hosts provide.
+1. 在编辑器和面板中完成保存，确认没有“未保存”或“存在冲突”的状态。
+2. 备份你的 Markdown、相关附件和整个 `.nand/` 目录。备份工具需要包含隐藏目录。
+3. 恢复前，先关闭相关模块，保留当前出问题的文件副本，再恢复确认有效的内容和设置。
+4. 重新开启模块后检查内容和设备设置。不要为了让功能恢复运行而重放被中断的外部操作。
 
-## Save failures and conflicts
+缓存和索引可以重建。实体正文、业务记录、评论和通知回执不能当作缓存清理。浏览器会话与 CLI 账号也在 `.nand/` 中，应按敏感数据备份；登录状态跨设备不保证可用，可能需要重新认证。
 
-A file that cannot be read, a damaged file or a managed region that cannot be parsed blocks writing. Saving a JSON file keeps the previous valid snapshot as `.backup`. If the main file is damaged and a `.backup` exists, NAND loads the backup and keeps the damaged file as `.corrupt`; without a backup NAND reports the error and does not overwrite the file. Icons use their own backup rotation, see [Icons](icons.md#data-backups-and-turning-the-module-off). A disk error is never shown as a successful save.
+## 保存失败与冲突
 
-When an error appears, keep your current input first, then check permissions, sync conflicts and the file content. Panels that support retry offer error details and a retry; recovery drafts are in `.nand/recovery/drafts/`. For archives, copy the draft and then reload the original record; the draft JSON is not importable Markdown.
+读取失败、已损坏的文件或无法解析的受管区域会阻止写入。保存 JSON 文件时会把上一份有效快照保留为 `.backup`。主文件损坏且存在有效 `.backup` 时，NAND 加载备份并保留损坏主文件的恢复版本；没有备份时，NAND 报告错误，并且不会覆盖该文件。图标使用自己的备份轮换规则，见[图标](icons.md#数据备份与关闭模块)。磁盘错误不会被显示为保存成功。
 
-Changes to different fields or records merge; a change to the same field needs a decision from you. If the original note has unsaved edits, save the editor first; NAND does not bypass that protection to write. A deleted entity file can carry a `nand-deleted` marker: that is a logical delete, not a normal record waiting to be restored.
+出现错误时，先保留当前输入，再检查权限、同步冲突和文件内容。支持重试的面板提供错误详情和重试；恢复草稿位于 `.nand/recovery/drafts/`。档案冲突时，先复制草稿，再重新载入原始资料；草稿 JSON 不是可直接导入的 Markdown。
 
-## Board conflicts
+不同字段或记录的并发修改可以合并，对同一字段的修改需要你来决定。原始笔记有未保存的编辑时，请先保存编辑器；NAND 不会绕过这个保护去写入。删除后的实体文件可能带有 `nand-deleted` 标记，这是逻辑删除，不是等待恢复的正常记录。
 
-When an outside edit and a board save collide, NAND pauses writing to the original board and keeps a recovery copy at `.nand/recovery/dashboard/conflicts/<id>.json`. The message shows the real file path. *Recovery copy saved* does not mean the change reached the original; further edits update the latest revision of the same conflict.
+## 看板冲突
 
-The status area on the board offers **Copy local draft**, **Copy recovery path**, **Retry saving** and **Reload original**. If the copy fails, the page stays open: copy the draft first, fix the disk or permissions and retry. Reloading needs a confirmation and keeps the recovery copy. The copy is JSON with the original, current and outside text; do not use it as board Markdown to overwrite the board. A forced exit or an unwritable disk cannot guarantee that input that never reached the disk is saved.
+外部编辑与看板保存发生冲突时，NAND 暂停写入原看板，并把恢复副本保存到 `.nand/recovery/dashboard/conflicts/<id>.json`。提示中显示实际的文件路径。“副本已保存”不表示修改已写入原文；继续编辑会更新同一冲突的最新修订。
 
-## Formats and language
+看板上的状态区提供“复制当前草稿”“复制副本路径”“重试保存”和“重新载入原文”。副本保存失败时页面保持打开：先复制草稿，修复磁盘或权限后再重试。重新载入需要确认，并保留恢复副本。副本是包含原始、当前和外部文本的 JSON，不能当作看板 Markdown 去覆盖看板。强制结束进程或磁盘不可写时，不能保证尚未落盘的输入被保存。
 
-Image crop positions live in board Markdown: `banner.imagePos` maps each image path to an `"x,y"` string, and a card's `coverPos` line stores its cover position. Coordinates are integer percentages from 0 to 100; no value means `50,50`. Reading clamps out-of-range coordinates for display and shows malformed values at center, without rewriting them. Editing or resetting one image changes only its position; other raw entries, including unused paths, remain. The image files themselves are unchanged.
+## 格式与语言
 
-The language setting changes only the interface. It never changes file paths, identities, note text or action parameters.
+图片裁剪位置保存在看板 Markdown 中：`banner.imagePos` 按图片路径保存 `"x,y"` 字符串，卡片的 `coverPos` 行保存封面位置。坐标是 0 到 100 的整数百分比，未设置时为 `50,50`。只读时仅对显示归一化，越界值限制在范围内，无效值按居中显示，不自动改写原文。编辑或重置某张图片只改它的位置，其他原始条目（包括未使用的路径）保留，图片文件本身不变。
+
+语言设置只影响界面，从不改变文件路径、身份标识、笔记正文或操作参数。

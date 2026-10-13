@@ -19,7 +19,7 @@
 
 ## 项目
 
-NAND 是 Obsidian 插件，插件 id 为 `nand`。源码是 TypeScript 和 Preact，用 esbuild 打成提交在仓库里的 `main.js`。原生终端辅助程序是 `native/pty-server` 里的 Rust。
+NAND 是 Obsidian 插件，插件 id 为 `nand`。源码是 TypeScript 和 Preact，用 esbuild 打成提交在仓库里的 `main.js`。原生终端辅助程序是 `native/pty-server` 里的 Rust。全部 NAND 管理的数据位于当前 vault 的 `.nand/`，受管 Markdown/附件在 `.nand/content/`；普通笔记、宿主自身数据和 Git 元数据保留原位。
 
 本文件只记稳定事实。任务交接、会话笔记和会过期的状态不要写进来。
 
@@ -50,7 +50,7 @@ NAND 是 Obsidian 插件，插件 id 为 `nand`。源码是 TypeScript 和 Preac
 
 - 改插件代码、设置、测试、构建或发版：[开发规则](.agents/skills/dev/SKILL.md)
 - 改工作台页面、面板、对话框或样式：[界面规则](.agents/skills/ui/SKILL.md)
-- 查领域术语、架构决定或当前基线：[开发文档索引](speculo/.speculo/specdev/.config/domain-layout.ZH.md)
+- 查领域术语、架构决定或当前基线：[开发文档索引](speculo/.speculo/specdev/.config/domain-layout.md)
 
 ## 结构
 
@@ -74,7 +74,7 @@ NAND 是 Obsidian 插件，插件 id 为 `nand`。源码是 TypeScript 和 Preac
 
 ## 文档
 
-使用指南和仓库入口（`README`、`CHANGELOG`、`SECURITY`、`docs/`）保持双语：英文是 `名称.md`，中文是 `名称.ZH.md`，两份一起改。`.agents/skills` 只有中文。不要恢复 `CLAUDE.md`。
+当前项目维护文档只保留中文；根目录 README.md / README.ZH.md 保持双语。删除重复版本前合并仍成立的独有信息。产品界面继续保留 t() 与 en/zh；原始许可、署名、测试夹具和历史归档保留原文。永久 ADR/context 只经 SpecDev A 网关更新，不在普通实现中直接改写。不要恢复 CLAUDE.md。
 
 ## Git
 

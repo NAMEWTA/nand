@@ -39,7 +39,7 @@
 
 ## CI
 
-`.github/workflows/lint.yml` 在每次推送和 PR 时运行：Linux（Node 22 和 24）执行安装、构建、`check:bundle`、`git diff --exit-code -- main.js`、lint、`lint:css`、`test:all`、`check:notices`、`check:native`；Windows（Node 24）执行构建、`main.js` 差异检查、lint、`lint:css` 和 `test:all`。`.github/workflows/terminal-build.yml` 为 linux-x64、linux-arm64、darwin-x64、darwin-arm64 和 win32-x64 构建并测试辅助程序，并在每个平台运行 `scripts/verify-pty-helper.mjs`。
+`.github/workflows/lint.yml` 可被 workflow_call 复用；Linux Node22/24 与 Windows Node24 使用同一完整检查集合：安装、构建、main.js/styles.css 差异、包体、lint/CSS、test:all、许可和Rust。Release 同时依赖同一 SHA 的完整 checks 与五平台 helper，只有两者 success 才发布；失败、取消、跳过均阻止发布。helper继续由CI构建，各平台执行真实 stdio 验证。
 
 pnpm 版本固定在 `package.json`；CI 使用 `pnpm install --frozen-lockfile`。
 
@@ -52,7 +52,7 @@ pnpm 版本固定在 `package.json`；CI 使用 `pnpm install --frozen-lockfile`
 | `manifest.json` 的 `version` | 新版本号，不带 `v` 前缀 |
 | `package.json` 的 `version` | 相同 |
 | `versions.json` | `"<version>": "<minAppVersion>"` |
-| `CHANGELOG.md`、`CHANGELOG.ZH.md` | 各有一个 `## <version>` 小节，且没有「未发布」小节 |
+| `CHANGELOG.md` | 有一个 `## <version>` 小节，且没有「未发布」小节 |
 | `main.js` | 用该提交重建 |
 
 `scripts/verify-release-artifacts.mjs <version>` 把前四项与标签核对，`CHANGELOG.md` 里有 `## Unreleased` 小节时失败。提高 `minAppVersion` 会让部分用户无法升级；只有在有记录的理由时才这样做。
@@ -63,10 +63,10 @@ pnpm 版本固定在 `package.json`；CI 使用 `pnpm install --frozen-lockfile`
 
 推送 `main`，再推送标签（`git tag <version> && git push origin <version>`）。`.github/workflows/release.yml` 是唯一创建 Release 的地方：
 
-1. 为五个目标构建辅助程序（`terminal-build.yml`）。
+1. 先通过同一 SHA 的完整质量检查，再为五个目标构建辅助程序（`terminal-build.yml`）。
 2. 把标签与 `manifest.json`、`package.json`、`versions.json`、`CHANGELOG.md` 核对，构建，并在构建出的 `main.js` 或 `styles.css` 与提交的不同时失败。
 3. 收集 `main.js`、`manifest.json`、`styles.css` 和 `nand-<version>.zip`，用 `scripts/verify-release-artifacts.mjs --plugin` 检查，并为 zip、`main.js` 和 `styles.css` 生成来源证明。
 4. 用各自的 `.sha256` 文件核对五个 `nand-pty-<平台>-<架构>[.exe]` 二进制，并用 `scripts/verify-pty-helper.mjs` 运行 Linux 版本。
 5. 为所有附件写入 `SHA256SUMS.txt`，并创建带插件文件、zip、辅助程序、校验和、`LICENSE`、`NOTICE` 和 `THIRD-PARTY-NOTICES.md` 的 GitHub Release。
 
-Obsidian 从 Release 安装 `main.js`、`manifest.json` 和 `styles.css`。第一次使用终端时，插件从自己版本的 Release 下载当前平台的辅助程序，校验 SHA-256 并保存在插件目录（开发时可用 `NAND_PTY_BINARY` 覆盖）。永远不要提交辅助程序的二进制文件。
+Obsidian 从 Release 安装 `main.js`、`manifest.json` 和 `styles.css`。第一次使用终端时，插件从自己版本的 Release 下载当前平台的辅助程序，校验正式 SHA-256 并保存在当前 vault 的 `.nand/helpers/<device-id>/<platform-arch>/<version>/`（开发 override 只复制到库内执行）。永远不要提交辅助程序的二进制文件。
