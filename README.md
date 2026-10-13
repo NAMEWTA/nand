@@ -4,7 +4,7 @@ English | [简体中文](README.ZH.md)
 
 A personal workbench for Obsidian: dashboards, comments, coding agents, a built-in browser, contact archives, icons, automations, notifications and Git sync. Everything opens from one three-column workbench, and a global appearance covers the Obsidian interface and Markdown.
 
-NAND is at version 0.0.1-alpha.2, a pre-release.
+NAND is at version 0.0.2-alpha.1, a pre-release.
 
 The interface is available in English and Simplified Chinese. A new vault follows Obsidian's interface language; change it later in the workbench under **Settings → General → Language**.
 
