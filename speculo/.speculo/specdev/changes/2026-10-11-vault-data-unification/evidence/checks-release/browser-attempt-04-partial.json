@@ -1,0 +1,73 @@
+{
+  "rows": [
+    {
+      "name": "legacy-profile-restart-requires-cold-restart",
+      "passed": true
+    },
+    {
+      "name": "legacy-profile-published-requires-cold-restart",
+      "passed": true
+    },
+    {
+      "name": "legacy-profile-complete-requires-cold-restart",
+      "passed": true
+    },
+    {
+      "name": "legacy-session-requires-full-restart",
+      "passed": true,
+      "detail": "请关闭所有 Obsidian 窗口并重新启动，以安全迁移旧浏览器会话。"
+    },
+    {
+      "name": "module-reload-does-not-bypass-cold-migration",
+      "passed": true
+    },
+    {
+      "name": "delete-before-migration-retries-after-cold-restart",
+      "passed": true
+    },
+    {
+      "name": "cold-copy-opens-only-vault-session",
+      "passed": true,
+      "detail": "<repository>/scripts/tmp/vault-unification-resume/T-08/browser-final-04/vault/.nand/browser/66baff4e-5c89-4734-951c-40a96a10dda3/profiles/default/session"
+    },
+    {
+      "name": "legacy-cookie-and-site-data-survive-copy",
+      "passed": true
+    },
+    {
+      "name": "old-bridge-artifacts-retained-in-vault",
+      "passed": true
+    },
+    {
+      "name": "old-bridge-source-cleaned-after-verification",
+      "passed": true
+    },
+    {
+      "name": "legacy-original-retained-until-next-boot",
+      "passed": true
+    },
+    {
+      "name": "native-login-popup-shares-vault-session",
+      "passed": true
+    },
+    {
+      "name": "native-popup-cookie-is-shared",
+      "passed": true
+    },
+    {
+      "name": "download-has-vault-destination",
+      "passed": true
+    },
+    {
+      "name": "download-bytes-are-complete",
+      "passed": true
+    },
+    {
+      "name": "unsafe-download-visible-and-no-outside-file",
+      "passed": true
+    }
+  ],
+  "error": "Error: ENOTDIR: not a directory, rmdir '<repository>/scripts/tmp/vault-unification-resume/T-08/browser-final-04/vault/.nand/browser/66baff4e-5c89-4734-951c-40a96a10dda3/profiles/default/downloads'",
+  "body": "vault\nNAND\n工作台导航\n浏览器\n浏览器\nhttp://127.0.0.1:35961/\nhttp://127.0.0.1:35961/\nhttp://127.0.0.1:35961/\nVault browser fixture\nVault browser fixture\nVault browser fixture\nVault browser fixture\n默认账号\npublished\ncomplete\n50%\n75%\n90%\n100%\n110%\n125%\n150%\n200%\nvault-proof.txt\n\n下载失败。请检查当前库中浏览器下载目录及其权限，然后重试下载。\n\n重试\n在系统浏览器打开\n浏览器",
+  "errors": []
+}

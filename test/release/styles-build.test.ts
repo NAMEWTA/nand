@@ -33,19 +33,19 @@ it('checks and writes the same stylesheet with CRLF sources and an LF package st
 });
 
 
-it.each(['true', 'false'])('checks out the generated stylesheet with identical bytes (autocrlf=%s)', autocrlf => {
+it.each(['true', 'false'].flatMap(autocrlf => ['styles.css', 'THIRD-PARTY-NOTICES.md'].map(file => ({ autocrlf, file }))))('checks out $file with identical bytes (autocrlf=$autocrlf)', ({ autocrlf, file }) => {
 	const root = mkdtempSync(path.join(tmpdir(), 'nand-styles-checkout-'));
 	dirs.push(root);
 	const expected = Buffer.from('/* 主题 */\n.page { color: red; }\n');
 	writeFileSync(path.join(root, '.gitattributes'), readFileSync(path.resolve('.gitattributes')));
-	writeFileSync(path.join(root, 'styles.css'), expected);
+	writeFileSync(path.join(root, file), expected);
 	const git = (...args: string[]) => {
 		const result = spawnSync('git', ['-c', `core.autocrlf=${autocrlf}`, ...args], { cwd: root, encoding: 'utf8' });
 		expect(result.status, result.stderr).toBe(0);
 	};
 	git('init');
-	git('add', '.gitattributes', 'styles.css');
-	rmSync(path.join(root, 'styles.css'));
-	git('checkout-index', '--force', 'styles.css');
-	expect(readFileSync(path.join(root, 'styles.css'))).toEqual(expected);
+	git('add', '.gitattributes', file);
+	rmSync(path.join(root, file));
+	git('checkout-index', '--force', file);
+	expect(readFileSync(path.join(root, file))).toEqual(expected);
 });

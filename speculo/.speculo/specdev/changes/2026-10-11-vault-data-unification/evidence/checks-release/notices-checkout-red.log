@@ -1,0 +1,56 @@
+Already up to date
+Done in 634ms using pnpm v11.1.3
+
+ RUN  v5.0.3 <repository>
+
+ ❯ |unit| test/release/styles-build.test.ts (5 tests | 1 failed) 534ms
+   × checks out THIRD-PARTY-NOTICES.md with identical bytes (autocrlf=true) 56ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |unit| test/release/styles-build.test.ts > checks out THIRD-PARTY-NOTICES.md with identical bytes (autocrlf=true)
+AssertionError: expected Buffer[ 47, 42, 32, 228, 184, …(-149) ] to deeply equal Buffer[ 47, 42, 32, 228, 184, …(-151) ]
+
+- Expected
++ Received
+
+@@ -10,10 +10,11 @@
+      162,
+      152,
+      32,
+      42,
+      47,
++     13,
+      10,
+      46,
+      112,
+      97,
+      103,
+@@ -32,9 +33,10 @@
+      101,
+      100,
+      59,
+      32,
+      125,
++     13,
+      10,
+    ],
+    "type": "Buffer",
+  }
+
+ ❯ test/release/styles-build.test.ts:50:46
+     48|  rmSync(path.join(root, file));
+     49|  git('checkout-index', '--force', file);
+     50|  expect(readFileSync(path.join(root, file))).toEqual(expected);
+       |                                              ^
+     51| });
+     52|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 4 passed (5)
+   Start at  04:23:52
+   Duration  1.30s (tests 49%, transform 40%, setup 8%, import 2%, worker 1%)
+

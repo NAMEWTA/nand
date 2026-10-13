@@ -8,6 +8,7 @@ import {
 	type WebviewElement,
 } from './electron-api';
 import { BrowserAutomation } from './automation';
+import { watchDownload } from './download-progress';
 import { installGuestPolicy } from './guest-policy';
 import type { VaultSessionLease } from '../../../../host/desktop/browser-session';
 
@@ -266,14 +267,7 @@ export class BrowserPage {
 					row.path = item.getSavePath();
 					this.emit();
 				};
-				const offUpdate = listenNative(item, 'updated', (_e, status) => update(status));
-				const offDone = listenNative(item, 'done', (_e, status) => {
-					update(status);
-					offUpdate();
-					offDone();
-					this.downloadItems.delete(id);
-				});
-				this.guestCleanups.push(offUpdate, offDone);
+				this.guestCleanups.push(watchDownload(item, update, () => this.downloadItems.delete(id)));
 				this.emit();
 			}),
 		);

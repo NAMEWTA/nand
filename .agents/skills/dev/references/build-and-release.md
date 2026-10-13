@@ -22,7 +22,7 @@
 
 在所属方的 `styles/` 文件夹里编辑作者文件（`src/ui`、`src/theme`、`src/shell`、`src/app`、`src/modules/<id>`），保持它在 `src/styles.json` 中的位置，然后运行 `node scripts/build-styles.mjs --write`。`src/styles.json` 里的顺序就是层叠顺序，不要按文件名排序。CSS 不能懒加载（Obsidian 只允许一个样式表），所以模块 CSS 限定在模块自己的类名下，或限定在模块激活期间添加的 body 类名下。
 
-样式构建器把每个源文件（包括依赖包的样式表）的 CRLF 统一为 LF。`--write` 输出 LF；`--check` 也会归一化检出的 `styles.css`，因此 Windows 的检出设置不会影响结果。生成的 `styles.css` 另由 `.gitattributes` 固定为 LF 检出，保证各平台的包体预算与发行字节一致。
+样式构建器把每个源文件（包括依赖包的样式表）的 CRLF 统一为 LF。`--write` 输出 LF；`--check` 也会归一化检出的 `styles.css`，因此 Windows 的检出设置不会影响结果。生成的 `styles.css` 和 `THIRD-PARTY-NOTICES.md` 由 `.gitattributes` 固定为 LF 检出，保证各平台的包体预算、许可校验与发行字节一致。
 
 ## esbuild
 

@@ -78,7 +78,7 @@ try {
  await script(id, `location.href=${JSON.stringify(url + '/download')};true`);
  await until(`document.querySelector('[data-page-id="${id}"]')?.textContent.includes('下载失败')`);
  check('unsafe-download-visible-and-no-outside-file', (await fs.readdir(outside)).length === 0);
- await runtime.shot('download-error'); await fs.rmdir(downloadDir); await fs.rename(parked, downloadDir);
+ await runtime.shot('download-error'); await fs.rm(downloadDir); await fs.rename(parked, downloadDir);
  const published = profiles.find(profile=>profile.phase==='published');
  const publishedDownloads = path.join(runtime.vault,'.nand/browser',device,'profiles',published.id,'downloads');
  await fs.writeFile(path.join(publishedDownloads,'saved-material.txt'),'keep saved material');
@@ -123,7 +123,7 @@ try {
  await until(`document.querySelector('.dashboard-web-fallback')?.textContent.includes('下载失败')`);
  check('home-download-error-visible-and-no-outside-file',(await fs.readdir(outside)).length===0);
  check('download-failure-keeps-other-home-webview-alive', await c.evaluate(`document.querySelector('[data-column="Other web"] webview')?.getWebContentsId()===${unaffectedGuest}&&!require('@electron/remote').webContents.fromId(${unaffectedGuest}).isDestroyed()`));
- await runtime.shot('home-download-error'); await fs.rmdir(homeDownloads); await fs.rename(homeParked,homeDownloads);
+ await runtime.shot('home-download-error'); await fs.rm(homeDownloads); await fs.rename(homeParked,homeDownloads);
  await c.evaluate(`document.querySelector('.dashboard-web-fallback-btn').click();true`);
  await until(`document.querySelector('.dashboard-web-frame')?.getURL?.()===${JSON.stringify(url + '/')}`);
  check('home-download-error-can-retry',true);
@@ -142,6 +142,10 @@ try {
  check('no-host-errors', await c.evaluate('nandAcceptanceErrors.length') === 0, await c.evaluate('nandAcceptanceErrors'));
  await fs.writeFile(path.join(runtime.evidence,'result.json'),JSON.stringify({rows},null,2));
 } catch (error) {
+ if (runtime) {
+  const nativeDownloads = "(()=>Array.from(globalThis[Symbol.for('nand.vault-session.runtime.v1')].sessions,([dir,e])=>({dir,pending:Array.from(e.pending.keys(),item=>({state:item.getState(),received:item.getReceivedBytes(),total:item.getTotalBytes(),path:item.getSavePath(),paused:item.isPaused()}))})))()";
+  await fs.writeFile(path.join(runtime.evidence,'native-downloads.json'),JSON.stringify(await c.evaluate(`require('@electron/remote').require('node:vm').runInThisContext(${JSON.stringify(nativeDownloads)})`).catch(e=>({error:String(e)})),null,2));
+  await runtime.shot('failure').catch(()=>{}); await fs.writeFile(path.join(runtime.evidence,'download-diagnostics.json'),JSON.stringify(await c.evaluate(`({buttons:[...document.querySelectorAll('.nand-browser-downloads button')].map(b=>({label:b.getAttribute('aria-label'),disabled:b.disabled})),pages:${surfaces}.map(s=>({id:s.state?.id,downloads:s.page?.downloads??s.host?.downloads}))})`).catch(e=>({error:String(e)})),null,2)); }
  if (runtime) await fs.writeFile(path.join(runtime.evidence,'partial.json'),JSON.stringify({rows,error:String(error),body:await c.evaluate('document.body.innerText').catch(()=>''),errors:await c.evaluate('nandAcceptanceErrors').catch(()=>[])},null,2));
  throw error;
 } finally {

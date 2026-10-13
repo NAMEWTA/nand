@@ -1,10 +1,11 @@
 {
   "fixed_point": "ceb87931dd67733dd03249570c6b2ecc17c1bc59",
-  "head": "84e4812f5d4cfb3498c86490d863c9f02eb31ac3",
-  "diff_command": "git diff ceb87931dd67733dd03249570c6b2ecc17c1bc59...84e4812f5d4cfb3498c86490d863c9f02eb31ac3",
+  "head": "81fe6c8733a6c594c258acbc84cd9497eb1f62fa",
+  "diff_command": "git diff ceb87931dd67733dd03249570c6b2ecc17c1bc59...81fe6c8733a6c594c258acbc84cd9497eb1f62fa",
   "commit_log": [
     "b30eb965d39149709226e6f04b1909c393cfa0a4",
-    "84e4812f5d4cfb3498c86490d863c9f02eb31ac3"
+    "84e4812f5d4cfb3498c86490d863c9f02eb31ac3",
+    "81fe6c8733a6c594c258acbc84cd9497eb1f62fa"
   ],
   "isolation": "用户禁止其他agent；同一root顺序自审，无独立reviewer隔离。",
   "standards": {
@@ -44,7 +45,7 @@
       "CI发现的跨平台产物差异在T-08新增明确写集；Windows宿主门已取消，但完整CI矩阵和发布成功依赖不变。"
     ]
   },
-  "previous_head": "b30eb965d39149709226e6f04b1909c393cfa0a4",
+  "previous_head": "84e4812f5d4cfb3498c86490d863c9f02eb31ac3",
   "working_tree_followup": {
     "base": "84e4812f5d4cfb3498c86490d863c9f02eb31ac3",
     "standards": "pass",
@@ -56,6 +57,20 @@
       "Raw vault path retained in main policy fixture; exact-path mocks and account ownership assertions use canonical fixture roots; assertions not removed.",
       "Production changes rebuilt in main.js. Targeted 878 passed / 1 skipped; final fixture tests 13 passed. Build/lint/test types/full suite 50 of 50 (1820 tests passed / 1 skipped)/budget exit 0. New Windows CI pending."
     ],
-    "reviewer": "root sequential self-review; no independent agent"
+    "reviewer": "root sequential self-review; no independent agent",
+    "head": "81fe6c8733a6c594c258acbc84cd9497eb1f62fa"
+  },
+  "download_notices_followup": {
+    "base": "81fe6c8733a6c594c258acbc84cd9497eb1f62fa",
+    "standards": "pass",
+    "specification": "pass",
+    "findings": [],
+    "checks": [
+      "Actual Linux Obsidian repro: download completed in native session but renderer still showed progressing. Register listeners then read getState; release listeners after completed/cancelled snapshot or done event. No download destination/permission checks changed.",
+      "Four download observer regressions fail before snapshot fix, pass afterward. Real host rerun 36/36 passes including restart and unsafe download rejection.",
+      "THIRD-PARTY-NOTICES.md pinned LF; autocrlf=true failed before fix; both generated files and both autocrlf values pass. Actual notice check passes 14 npm / 62 crates without license text edits.",
+      "New helper stays in existing desktop partition; generated main.js rebuilt. Build/lint and targeted 9 tests pass. Full suite/new CI pending."
+    ],
+    "reviewer": "root sequential standards/spec self-review; no independent agent"
   }
 }

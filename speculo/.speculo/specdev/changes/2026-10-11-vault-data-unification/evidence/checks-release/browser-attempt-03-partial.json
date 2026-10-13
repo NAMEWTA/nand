@@ -1,0 +1,69 @@
+{
+  "rows": [
+    {
+      "name": "legacy-profile-restart-requires-cold-restart",
+      "passed": true
+    },
+    {
+      "name": "legacy-profile-published-requires-cold-restart",
+      "passed": true
+    },
+    {
+      "name": "legacy-profile-complete-requires-cold-restart",
+      "passed": true
+    },
+    {
+      "name": "legacy-session-requires-full-restart",
+      "passed": true,
+      "detail": "请关闭所有 Obsidian 窗口并重新启动，以安全迁移旧浏览器会话。"
+    },
+    {
+      "name": "module-reload-does-not-bypass-cold-migration",
+      "passed": true
+    },
+    {
+      "name": "delete-before-migration-retries-after-cold-restart",
+      "passed": true
+    },
+    {
+      "name": "cold-copy-opens-only-vault-session",
+      "passed": true,
+      "detail": "<repository>/scripts/tmp/vault-unification-resume/T-08/browser-final-03/vault/.nand/browser/23d4ecb2-5306-4c4f-a54c-db97cfd91ba1/profiles/default/session"
+    },
+    {
+      "name": "legacy-cookie-and-site-data-survive-copy",
+      "passed": true
+    },
+    {
+      "name": "old-bridge-artifacts-retained-in-vault",
+      "passed": true
+    },
+    {
+      "name": "old-bridge-source-cleaned-after-verification",
+      "passed": true
+    },
+    {
+      "name": "legacy-original-retained-until-next-boot",
+      "passed": true
+    },
+    {
+      "name": "native-login-popup-shares-vault-session",
+      "passed": true
+    },
+    {
+      "name": "native-popup-cookie-is-shared",
+      "passed": true
+    },
+    {
+      "name": "download-has-vault-destination",
+      "passed": true
+    },
+    {
+      "name": "download-bytes-are-complete",
+      "passed": true
+    }
+  ],
+  "error": "Error: Timed out: !!document.querySelector('[data-page-id=\"961e5cbb-babf-4b32-856e-6a340b384eea\"] .nand-browser-downloads button[aria-label=\"打开文件\"]:not([disabled])')",
+  "body": "vault\nNAND\n工作台导航\n浏览器\n浏览器\nhttp://127.0.0.1:37773/\nhttp://127.0.0.1:37773/\nhttp://127.0.0.1:37773/\nVault browser fixture\nVault browser fixture\nVault browser fixture\nVault browser fixture\n默认账号\npublished\ncomplete\n50%\n75%\n90%\n100%\n110%\n125%\n150%\n200%\nvault-proof.txt\n浏览器",
+  "errors": []
+}

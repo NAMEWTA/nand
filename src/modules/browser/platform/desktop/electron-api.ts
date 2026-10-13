@@ -40,6 +40,7 @@ export interface GuestSession extends NativeEvents {
 	): void;
 }
 export interface DownloadItem extends NativeEvents {
+	getState(): string;
 	getFilename(): string;
 	getReceivedBytes(): number;
 	getTotalBytes(): number;

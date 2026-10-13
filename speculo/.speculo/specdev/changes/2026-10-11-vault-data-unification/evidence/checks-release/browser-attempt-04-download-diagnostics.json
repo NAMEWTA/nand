@@ -1,0 +1,30 @@
+{
+  "buttons": [
+    {
+      "label": "打开文件",
+      "disabled": false
+    },
+    {
+      "label": "显示所在文件夹",
+      "disabled": false
+    },
+    {
+      "label": "移除记录",
+      "disabled": false
+    }
+  ],
+  "pages": [
+    {
+      "id": "f6fb106b-b056-446f-aa92-c1ff0d479845"
+    },
+    {
+      "id": "3fe6b456-b6bb-4a0b-96ce-d89f93b477e7"
+    },
+    {
+      "id": "5676e5cd-515d-4096-a872-8b2d01ba3f01"
+    },
+    {
+      "id": "fc94f9f8-65a9-453d-868a-8da28927d702"
+    }
+  ]
+}
