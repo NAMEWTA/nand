@@ -1,0 +1,22 @@
+[
+  {
+    "check": "build",
+    "exitCode": 0
+  },
+  {
+    "check": "lint",
+    "exitCode": 0
+  },
+  {
+    "check": "docs",
+    "exitCode": 0
+  },
+  {
+    "check": "i18n",
+    "exitCode": 0
+  },
+  {
+    "check": "all",
+    "exitCode": 0
+  }
+]

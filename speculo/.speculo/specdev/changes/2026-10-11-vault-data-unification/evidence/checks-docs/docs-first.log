@@ -1,0 +1,35 @@
+Already up to date
+Done in 395ms using pnpm v11.1.3
+$ node scripts/verify-docs.mjs
+node:internal/modules/run_main:111
+    triggerUncaughtException(
+    ^
+
+AssertionError [ERR_ASSERTION]: Documentation links, anchors, contracts, and inventory
++ actual - expected
+
++ [
++   'README.ZH.md: missing local link CHANGELOG.ZH.md',
++   'docs/data.md: data path .nand/content/dashboard.md is not in source',
++   'docs/data.md: data path .nand/config/identity.json is not in source'
++ ]
+- []
+
+    at file:///home/wta/projects/nand/scripts/verify-docs.mjs:250:8
+    at ModuleJob.run (node:internal/modules/esm/module_job:569:25)
+    at async node:internal/modules/esm/loader:650:26
+    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:105:5) {
+  generatedMessage: false,
+  code: 'ERR_ASSERTION',
+  actual: [
+    'README.ZH.md: missing local link CHANGELOG.ZH.md',
+    'docs/data.md: data path .nand/content/dashboard.md is not in source',
+    'docs/data.md: data path .nand/config/identity.json is not in source'
+  ],
+  expected: [],
+  operator: 'deepStrictEqual',
+  diff: 'simple'
+}
+
+Node.js v26.11.1
+[ELIFECYCLE] Command failed with exit code 1.

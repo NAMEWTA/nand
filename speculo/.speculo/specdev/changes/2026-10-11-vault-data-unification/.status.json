@@ -35,7 +35,7 @@
     "history": []
   },
   "created_at": "2026-10-11T05:11:40.581Z",
-  "updated_at": "2026-10-13T02:57:25.349453+00:00",
+  "updated_at": "2026-10-13T03:59:16.630679+00:00",
   "completed_at": null,
   "archived": false,
   "archive_path": null,
@@ -296,6 +296,49 @@
           "evidence": "<Path>{roots.state}/specdev/changes/2026-10-11-vault-data-unification/evidence/T-06.md</Path>"
         },
         "evidence": "<Path>{roots.state}/specdev/changes/2026-10-11-vault-data-unification/evidence/T-06.md</Path>",
+        "attempts": 1,
+        "promotion_status": "applied"
+      }
+    },
+    {
+      "ticket_id": "T-07",
+      "owner": "root",
+      "implementation_owner": "root",
+      "integration_owner": "root",
+      "provider": "git",
+      "base_sha": "99af3ef5c45da68539ec00f39f24b9685d3fc995",
+      "parent_branch": "main",
+      "branch": "main",
+      "workspace_ref": "current",
+      "source_checkpoint": "f26c7502f278404003c718db5d8e6a4f1fa342aa",
+      "status": "integrated",
+      "updated_at": "2026-10-13T03:11:56.640107+00:00",
+      "integration": {
+        "status": "passed",
+        "parent_ref": "main",
+        "parent_before_sha": "99af3ef5c45da68539ec00f39f24b9685d3fc995",
+        "source_sha": "f26c7502f278404003c718db5d8e6a4f1fa342aa",
+        "candidate_sha": null,
+        "candidate_tree_sha": null,
+        "candidate_branch": null,
+        "candidate_workspace_ref": null,
+        "result_sha": "f26c7502f278404003c718db5d8e6a4f1fa342aa",
+        "method": "direct-parent",
+        "conflict_paths": [],
+        "verification": "passed",
+        "full_suite": {
+          "required": true,
+          "status": "passed",
+          "reason": null,
+          "evidence": "<Path>{roots.state}/specdev/changes/2026-10-11-vault-data-unification/evidence/T-07.md</Path>"
+        },
+        "e2e": {
+          "required": false,
+          "status": "not-required",
+          "reason": "文档与知识候选，宿主行为不变；用户已取消Windows专属门。",
+          "evidence": null
+        },
+        "evidence": "<Path>{roots.state}/specdev/changes/2026-10-11-vault-data-unification/evidence/T-07.md</Path>",
         "attempts": 1,
         "promotion_status": "applied"
       }

@@ -1,0 +1,101 @@
+# 当前基线
+
+本文陈述代码现在是什么。声明的目标不会写成实测结果：实测数据和尚未验证的项目见[验证](validation.md)。
+
+## 身份
+
+| | |
+|---|---|
+| 显示名、插件编号 | NAND，`nand` |
+| 版本 | 0.0.1-alpha.1（`manifest.json`、`package.json`、`versions.json`） |
+| `minAppVersion` | `1.13.0`，仅为声明 |
+| `isDesktopOnly` | `false` |
+| 许可证 | MIT |
+| 入口 | `src/app/main.ts`，构建为已提交的 `main.js` |
+| 样式 | 一份已提交的 `styles.css`，由 `src/styles.json` 列出的作者文件拼接而成 |
+| 原生辅助进程 | `native/pty-server`（`nand-pty`），由 CI 构建，作为 Release 附件发布 |
+| 界面语言 | 简体中文（`zh`）与英文（`en`） |
+
+## 视图与入口
+
+- 注册两个视图类型：`nand-workbench-view`（工作台）和 `nand-comments-view`（评论侧栏）。
+- 功能区只有一个入口，用来打开工作台。命令 `open-workbench` 作用相同。
+- 外壳还提供打开浏览器、自动化、通知、档案的命令，新建自动化、切换主题预置和复制笔记引用的命令。各模块在启用期间添加自己的命令。
+- 设置是工作台里的页面（常规、外观、每个已启用产品一页、关于）。Obsidian 的设置页只保留打开它们的入口。
+
+## 模块
+
+`src/app/manifests.ts` 列出十个模块。每个模块有纯数据的清单和懒加载入口。
+
+| 模块 | 顺序 | 平台 | 默认 | 激活时机 | 工作台中的功能 |
+|---|---:|---|---|---|---|
+| `browser` | 10 | 桌面、移动 | 开 | startup | `browser`（页面需要 Electron，仅桌面） |
+| `home` | 20 | 桌面、移动 | 开 | startup | `dashboard`、`records` |
+| `news` | 25 | 桌面 | 关 | startup | `news` |
+| `comments` | 30 | 桌面、移动 | 开 | startup | `comments`；编辑器扩展；侧栏 |
+| `archives` | 40 | 桌面、移动 | 开 | startup | `contacts` |
+| `agent` | 50 | 桌面、移动技能目录 | 开 | startup | `terminal` |
+| `icons` | 60 | 桌面、移动 | 开 | startup | `icons` |
+| `notifications` | 70 | 桌面、移动 | 开 | startup | `notifications`（位于图标轨底部） |
+| `automations` | 80 | 桌面、移动 | 开 | startup | `automations` |
+| `sync` | 90 | 桌面 | 关 | layout-ready | `sync` |
+
+`settings` 功能属于应用本身。`records` 功能（习惯、记账、番茄钟、阅读）在图标轨上是 `dashboard` 的子项。
+
+跨模块的服务和贡献点：`agent.sessions`、`agent.workbench`、`agent.automation-runtime`、`automations.ui`、`automations.sources`、`browser.open`、`browser.agent-bridge`、`comments.panel`、`comments.index`、`home.workbench`、`notifications.inbox`、`notifications.openers`、`sync.workbench`。
+
+## 设置与数据位置
+
+设置是命名空间（`app`、`theme`，以及每个有设置的模块一个），保存在两个文件：`.nand/config/settings.json`（库级）和 `.nand/config/devices/<device-id>.json`（设备级）。见 [ADR-0003](../adr/0003-namespaced-settings-store.md)。
+
+| 数据 | 位置 |
+|---|---|
+| 评论线程 | `.nand/editor/comments/` |
+| 图标规则与偏好 | `.nand/icons/iconic.json` 及轮换备份 |
+| 自动化运行记录 | `.nand/automation/<device-id>/runtime.json` |
+| 自动化定义 | `.nand/content/NAND/自动化/`（Markdown），以及看板和档案文档 |
+| 通知收件箱与回执 | `.nand/notifications/<device-id>/inbox.json` |
+| Agent 历史标注与缓存 | `.nand/terminal-agent/<device-id>/`（`index.sqlite` 是可重建的缓存） |
+| 浏览历史与站点权限 | `.nand/browser/<device-id>/state.json` |
+| 恢复草稿、看板备份与冲突 | `.nand/recovery/` |
+| 缓存 | `.nand/cache/` |
+| 业务记录 | `.nand/content/NAND/习惯/`、`.nand/content/NAND/记账/`、`.nand/content/NAND/番茄钟/`、`.nand/content/NAND/阅读/`（Markdown） |
+| 档案 | `.nand/content/` 内文件夹（默认 `档案`），其中有 `个人档案/<名称>/基本信息.md` 和 `企业档案/<名称>/基本信息.md` |
+| Agent 会话导出 | `.nand/content/NAND Exports/` |
+| Git 同步的计时与暂停状态 | `.nand/sync/<device-id>/<repository-hash>.json`，不会被提交 |
+| 终端辅助进程二进制 | `.nand/helpers/<device-id>/<platform-arch>/<version>/` |
+
+受管看板与其他NAND Markdown位于 `.nand/content/`，由Adapter/工作台索引、编辑、搜索与链接；普通笔记不迁移。Obsidian Sync 不同步以点开头的目录，所以 `.nand/` 需要 Git 或其他会复制隐藏目录的工具。
+
+## 体积预算
+
+现行上限与增长理由以 [bundle-budget.json](../../../../scripts/bundle-budget.json) 为唯一权威，check:bundle超限失败。启动集合不得静态到达重型模块库；具体本地数值与源提交见验证证据，不沿用历史数字作为当前预算。
+
+## 门禁
+
+| 命令 | 检查内容 |
+|---|---|
+| `pnpm run build` | 源码与测试的类型检查、样式文件检查、`main.js` 的生产构建 |
+| `pnpm run lint` | ESLint，零警告 |
+| `pnpm run lint:css` | stylelint，配合只减不增的文件基线（`scripts/stylelint-baseline.json`） |
+| `pnpm test:architecture` | 分区导入矩阵、宿主包、仅桌面代码、桶文件和运行时环；没有基线 |
+| `pnpm run check:bundle` | 启动、各模块和总体预算 |
+| `pnpm test` | Vitest 单元、DOM 以及用户数据格式黄金样例（`test/golden`） |
+| `pnpm test:i18n` | `zh` 与 `en` 的键一致、占位符、未知键 |
+| `pnpm test:docs` | 文档清单、链接、锚点、SpecDev 状态索引 |
+| `pnpm run test:all` | 全部 `test:*` 脚本 |
+| `pnpm run check:notices` | `THIRD-PARTY-NOTICES.md` 与打包内容和 crate 依赖图一致 |
+| `pnpm run check:native` | 对终端辅助进程执行 `cargo test --locked` |
+| `node scripts/verify-pty-helper.mjs <binary>` | 通过 stdio 运行构建出的辅助进程：会话、流控、stdin 关闭后退出 |
+| `node scripts/verify-release-artifacts.mjs <version>` | 版本、变更记录与发布文件一致 |
+| `scripts/obsidian-acceptance/` | 在一次性的库中，通过调试端口驱动真实的 Obsidian |
+
+## 持续集成与发布
+
+质量workflow支持workflow_call，Linux Node22/24与Windows Node24执行同一完整检查。Release只接受同SHA的完整checks和五平台helper均success，失败/取消/跳过阻止发布。保留版本/changelog、产物/源码一致、zip/helper摘要、许可证与attestation检查。实际发布与CI结果见验证，不把配置当成已执行。
+
+## 终端辅助进程
+
+协议版本为 3。帧由 4 字节大端长度、1 字节类型（控制 JSON、会话输入、会话输出）和正文组成，最大 16 MiB。某个会话未确认的输出超过 1 MiB 时，辅助进程暂停读取该会话，低于 256 KiB 时恢复。插件从与自身版本相同的 Release 下载 `nand-pty-<platform>-<arch>[.exe]`，校验 SHA-256 后运行。`NAND_PTY_BINARY` 仅将开发字节复制到库内执行。见 [ADR-0008](../adr/0008-terminal-helper.md)。
+
+设备身份与库内账号/浏览器/同步数据的现行根目录见ADR-0004、0008～0010、0012。当前版本由manifest.json/package.json/versions.json及真实Release证据共同核对；最终A执行前再次刷新这些字段。

@@ -2,13 +2,13 @@
 schema_version: 3
 plan_contract_version: 1
 skill_scan: "已扫描 .agents/skills：dev 适用全部实现，ui 适用内容/浏览器/账号界面及验收。"
-skill_bindings: [{"id":"dev","path":"<Path>.agents/skills/dev/SKILL.md</Path>","sha256":"13ff2185ff85752e85e4171d1cb4e5517f201c36bdaa35f4004dfe5248ffdf8a","phase":"implement","operation":"implement-and-verify","inputs":["本票合同、真实源码与定向差异"],"outputs":["实现、定向验证与 Evidence"],"required":true,"on_failure":"block-ticket"}]
+skill_bindings: [{"id":"dev","path":"<Path>.agents/skills/dev/SKILL.md</Path>","sha256":"7dbefc0a07f8d8617ab95f5fc00184fb602e66a235cde5ccb4063c9d242e154f","phase":"implement","operation":"implement-and-verify","inputs":["本票合同、真实源码与定向差异"],"outputs":["实现、定向验证与 Evidence"],"required":true,"on_failure":"block-ticket"}]
 resource_claims: ["current-workspace:root"]
 artifact: "ticket"
 change: "2026-10-11-vault-data-unification"
 id: "T-07"
 title: "当前规范中文化与旧文档清理"
-status: "ready"
+status: "done"
 kind: "documentation"
 planning_depth: "deep"
 planning_depth_reason: "涉及公共持久化、数据迁移、身份隔离或发布；用户已批准完整计划及实施。"
@@ -30,7 +30,7 @@ shared_path_owners: ["<Path>AGENTS.md</Path> => root","<Path>.agents/skills/**</
 
 ## 1. 战略与来源
 
-来源：2026-10-11 用户批准的新计划及 issue #151/#148。基线 239a16a181dbd3fbdedff35eeeac84aba05707d1。目标：当前项目文档除 README 外使用中文；删除旧重复文档，保留仍成立的独有信息；ADR/context 经 A 网关提升；原始许可与历史归档保持原文；产品 i18n 保留。
+来源：2026-10-11 用户批准的新计划及 issue #151/#148。基线 239a16a181dbd3fbdedff35eeeac84aba05707d1。目标：当前项目文档除 README 外使用中文；删除旧重复文档，保留仍成立的独有信息；ADR/context 的中文合并候选经 A 网关检查后，在本地完成的最终归档阶段提升；原始许可与历史归档保持原文；产品 i18n 保留。
 
 ## 2. 决策状态
 
@@ -67,7 +67,7 @@ IN：当前规范中文化与旧文档清理。REUSE：当前模块、工作台�
 | 错误和边界 | 在上述接缝注入对应读写/外部状态失败 | 无静默数据丢失或跨范围副作用 |
 | 集成 | 类型检查、build、lint；最终完整 CI | 同一提交可复现 |
 
-E2E disposition: not-required：本票以存储集成或文档校验验证，Windows 总体验收由 T-08 执行。
+E2E disposition: not-required：本票以存储集成或文档校验验证，Windows 专属要求由用户取消，真实发行资产验收由 T-08 执行。
 E2E owner/environment: root / current-workspace。提交已获用户授权；implementation commit、direct-parent 的 result SHA 与 Evidence 由 root 记录。
 
 ## 9. 发布、迁移与恢复
@@ -80,10 +80,14 @@ E2E owner/environment: root / current-workspace。提交已获用户授权；imp
 
 ## 10. 验收标准
 
-- [ ] AC-007：当前项目文档除 README 外使用中文；删除旧重复文档，保留仍成立的独有信息；ADR/context 经 A 网关提升；原始许可与历史归档保持原文；产品 i18n 保留。
-- [ ] 非空实现、验证和双轴审查事实写入 <Path>{roots.state}/specdev/changes/2026-10-11-vault-data-unification/evidence/T-07.md</Path>。
-- [ ] 实际路径、Skill 摘要、命令结果、未验证范围与 Map 一致。
+- [x] AC-007：当前项目文档除 README 外使用中文；删除旧重复文档，保留仍成立的独有信息；ADR/context 的中文合并候选经 A 网关检查后，在本地完成的最终归档阶段提升；原始许可与历史归档保持原文；产品 i18n 保留。
+- [x] 非空实现、验证和双轴审查事实写入 <Path>{roots.state}/specdev/changes/2026-10-11-vault-data-unification/evidence/T-07.md</Path>。
+- [x] 实际路径、Skill 摘要、命令结果、未验证范围与 Map 一致。
 
 ## 12. 停止、检查点与交付
 
 记录 HEAD、写集和每次验证结果。遇到契约失效或失败则保留证据和可恢复数据，解决后重跑；完成后记录 implementation commit 和 direct-parent result，不将未执行的步骤写为通过。
+
+### 归属与完成顺序
+
+A wrapper 只接受 completed change。T-07负责当前项目文档、完整中文知识候选和提升/删除清单；原永久 namespace 保持只读。正式ADR/context归并和目录移动由本地实现及T-08交付完成后的A工作拥有，属于整个Goal的必需交付。T-07结项不声明正式提升或归档已执行，Goal不得在A结果缺失时完成。此顺序澄清保留AC-007、AC-008和一个alpha.2的完整目标，不新增替代change。

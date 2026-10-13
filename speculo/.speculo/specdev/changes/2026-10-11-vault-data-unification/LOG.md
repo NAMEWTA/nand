@@ -17,3 +17,9 @@
 2026-10-12 恢复：HEAD 8603b09，产品仍为40f2aca，工作区干净。用户取消 Windows 专属验收，明确优先编码、单并发、无其他 agent。Linux账号验收38/38、定向125项通过，未复现末次冷重启超时；保留 Windows 历史失败和根因未确认。T-05两轴顺序自审，无独立 reviewer 隔离；治理校验后结项，再串行T-06。
 
 2026-10-12 T-06 done：e92d3938759af4e90a271a7f0118421009fc0cc7，current/main/direct-parent，root唯一writer。真实Git/发布门及阻断回归修复；Node24完整50/50、1815测试通过，actionlint0，最终Linux同步8/8和账号38/38；两轴顺序自审，独立上下文局限保留，用户取消Windows门。详见本票Evidence。随后串行T-07；T-08需另核对helper匹配缓存文件执行权限及真实alpha.2新装/升级，不将本票alpha.1下载当成alpha.2交付。
+
+2026-10-12 T-07开始：base99af3ef，root单并发。plan_revision2保留完整交付，澄清A只接受completed change，T-07准备当前中文项目文档/完整知识候选，T-08交付后由A正式提升/归档；Goal最终审计仍逐项核对AC-007/8，不把候选算作永久成果。
+
+T-07实施检查点：当前指南22组重复副本已合并删除，根README双语保留；数据/CLI/浏览器/Git/开发规则已按代码更新，policy定向3/3及test:docs通过。18份永久知识中文候选在evidence/knowledge-candidates/*.md.txt与knowledge-plan.json，原永久namespace未写。完整65源字符统计及备份在T-07-document-check.json和scripts/tmp/vault-unification-resume/T-07。最终串行Node24/单worker检查正在运行，exec session20786（需回读活句柄确认），不要在存活时重启；产品代码HEAD99af3ef，T-07工作区未提交。下一动作等该句柄结果、复核候选有效独有信息/原始许可/历史未改后固定提交与两轴顺序自审；继续T-08真实alpha.2与A，Goal不可提前完成。
+
+T-07 done：f26c7502f278404003c718db5d8e6a4f1fa342aa，55项目路径，22重复实体删除，根README双语；18知识候选prepared-not-applied。build/lint/docs/i18n和完整50/50/1816测试通过，两轴顺序自审局限保留。下一T-08：缓存helper执行权限、alpha.2、同SHA CI、真实发行下载新装/升级、issue及最终A。

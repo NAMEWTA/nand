@@ -1,0 +1,54 @@
+
+ RUN  v5.0.3 /home/wta/projects/nand
+
+ ❯ |unit| test/release/documentation-policy.test.ts (3 tests | 1 failed) 13ms
+   × current project guides have one Chinese source, with only the root README bilingual 10ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |unit| test/release/documentation-policy.test.ts > current project guides have one Chinese source, with only the root README bilingual
+AssertionError: expected [ 'docs/README.ZH.md', …(19) ] to deeply equal []
+
+- Expected
++ Received
+
+- []
++ [
++   "docs/README.ZH.md",
++   "docs/agent-workbench.ZH.md",
++   "docs/appearance.ZH.md",
++   "docs/automation.ZH.md",
++   "docs/browser.ZH.md",
++   "docs/comments.ZH.md",
++   "docs/contacts.ZH.md",
++   "docs/dashboard.ZH.md",
++   "docs/data.ZH.md",
++   "docs/icons.ZH.md",
++   "docs/news.ZH.md",
++   "docs/privacy.ZH.md",
++   "docs/records.ZH.md",
++   "docs/settings.ZH.md",
++   "docs/sync.ZH.md",
++   "docs/third-party/aihot-news.ZH.md",
++   "docs/third-party/apex-dashboard.ZH.md",
++   "docs/third-party/maiw-browser-workspace.ZH.md",
++   "docs/third-party/orca-terminal-workbench.ZH.md",
++   "docs/workbench.ZH.md",
++ ]
+
+ ❯ test/release/documentation-policy.test.ts:16:17
+     14|  };
+     15|  walk('docs');
+     16|  expect(copies).toEqual([]);
+       |                 ^
+     17|  for (const file of ['CHANGELOG.ZH.md', 'SECURITY.ZH.md']) expect(exis…
+     18|  expect(existsSync('README.md') && existsSync('README.ZH.md')).toBe(tr…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 2 passed (3)
+   Start at  23:20:36
+   Duration  336ms (transform 76%, setup 15%, tests 5%, import 3%, worker 1%)
+

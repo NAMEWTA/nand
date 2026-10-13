@@ -1,0 +1,979 @@
+{
+  "sourceHead": "99af3ef5c45da68539ec00f39f24b9685d3fc995",
+  "files": [
+    {
+      "path": "docs/comments.md",
+      "beforeCharacters": 3211,
+      "beforeBytes": 3227,
+      "beforeSha256": "d014144e9dba4aa593b67d5410ce7a71d333ae4822b527fc339b89724d63ea88",
+      "mode": "0o644",
+      "symlink": false,
+      "backup": "scripts/tmp/vault-unification-resume/T-07/backups/docs/comments.md",
+      "afterCharacters": 1189,
+      "afterBytes": 2897,
+      "afterSha256": "9f43493b1d296872958ec7e5623b4d36c75c62684df852f66ba522b4bd9db5be",
+      "removed": false
+    },
+    {
+      "path": "docs/sync.md",
+      "beforeCharacters": 16842,
+      "beforeBytes": 16864,
+      "beforeSha256": "dea98b6ac99860863bb217aadd1be670ea722b51da4fce80fc7f01ab9f854e83",
+      "mode": "0o644",
+      "symlink": false,
+      "backup": "scripts/tmp/vault-unification-resume/T-07/backups/docs/sync.md",
+      "afterCharacters": 7055,
+      "afterBytes": 16361,
+      "afterSha256": "2873a98b8d22e5c44c3005b5234f4c5af53d28ee6a761b7d36b3eacc6e87fd22",
+      "removed": false
+    },
+    {
+      "path": "docs/data.md",
+      "beforeCharacters": 11848,
+      "beforeBytes": 11984,
+      "beforeSha256": "1224ab4f677e6a71bd79fd9e24d2ba1f620d65cfa62e5962d0ac6e9d75dadd6c",
+      "mode": "0o644",
+      "symlink": false,
+      "backup": "scripts/tmp/vault-unification-resume/T-07/backups/docs/data.md",
+      "afterCharacters": 5804,
+      "afterBytes": 11236,
+      "afterSha256": "76a0cdd9c04f171c77436397a713461dc9b8546732e82e3e64098ef9f72cd6d2",
+      "removed": false
+    },
+    {
+      "path": "docs/README.ZH.md",
+      "beforeCharacters": 2007,
+      "beforeBytes": 3789,
+      "beforeSha256": "fd987f0a2cc31850715ab04dc962c2ca60fed0acf412eb085825a814fabdc7d0",
+      "mode": "0o644",
+      "symlink": false,
+      "backup": "scripts/tmp/vault-unification-resume/T-07/backups/docs/README.ZH.md",
+      "afterCharacters": 0,
+      "afterBytes": 0,
+      "afterSha256": null,
+      "removed": true
+    },
+    {
+      "path": "docs/icons.ZH.md",
+      "beforeCharacters": 2856,
+      "beforeBytes": 6738,
+      "beforeSha256": "9c7650c45bc6a2e9aeb127078c4c02ed0f46205a4b9420f57fcc85a695797bdc",
+      "mode": "0o664",
+      "symlink": false,
+      "backup": "scripts/tmp/vault-unification-resume/T-07/backups/docs/icons.ZH.md",
+      "afterCharacters": 0,
+      "afterBytes": 0,
+      "afterSha256": null,
+      "removed": true
+    },
+    {
+      "path": "docs/sync.ZH.md",
+      "beforeCharacters": 6784,
+      "beforeBytes": 15758,
+      "beforeSha256": "aa05861b68e9ba7a8ea5c374f62dba7b2464c844119ecc523839005c4ea6f74d",
+      "mode": "0o644",
+      "symlink": false,
+      "backup": "scripts/tmp/vault-unification-resume/T-07/backups/docs/sync.ZH.md",
+      "afterCharacters": 0,
+      "afterBytes": 0,
+      "afterSha256": null,
+      "removed": true
+    },
+    {
+      "path": "docs/workbench.md",
+      "beforeCharacters": 6051,
+      "beforeBytes": 6093,
+      "beforeSha256": "f48eedcc7ccc5004c9bb5fc4138844ecbb25cc51169c566fc6e4e603939ef59a",
+      "mode": "0o644",
+      "symlink": false,
+      "backup": "scripts/tmp/vault-unification-resume/T-07/backups/docs/workbench.md",
+      "afterCharacters": 2482,
+      "afterBytes": 5538,
+      "afterSha256": "836012b15f421233451bb597ae473b55fb147a3afe867c44e4a1076677479b85",
+      "removed": false
+    },
+    {
+      "path": "docs/workbench.ZH.md",
+      "beforeCharacters": 2526,
+      "beforeBytes": 5590,
+      "beforeSha256": "4073605dcca482e7b61f20501623f632d915d13b78f407d2829c4bd5e7699ca2",
+      "mode": "0o664",
+      "symlink": false,
+      "backup": "scripts/tmp/vault-unification-resume/T-07/backups/docs/workbench.ZH.md",
+      "afterCharacters": 0,
+      "afterBytes": 0,
+      "afterSha256": null,
+      "removed": true
+    },
+    {
+      "path": "docs/automation.md",
+      "beforeCharacters": 12542,
+      "beforeBytes": 12578,
+      "beforeSha256": "e0b0a4aaf5a9a2fd23de9b9f5cf155966243c2fdc33dcd0877947abcc6cec568",
+      "mode": "0o644",
+      "symlink": false,
+      "backup": "scripts/tmp/vault-unification-resume/T-07/backups/docs/automation.md",
+      "afterCharacters": 4697,
+      "afterBytes": 11505,
+      "afterSha256": "4e5b3796ac86f7b2505409e2a8d3f9fc1ef8449cbfbac0c724b59a7684b55531",
+      "removed": false
+    },
+    {
+      "path": "docs/contacts.ZH.md",
+      "beforeCharacters": 5460,
+      "beforeBytes": 14070,
+      "beforeSha256": "5ea80f386b93915d98e99e1e7abe5b49df28331d481919c036fc3cdc46fef8bc",
+      "mode": "0o644",
+      "symlink": false,
+      "backup": "scripts/tmp/vault-unification-resume/T-07/backups/docs/contacts.ZH.md",
+      "afterCharacters": 0,
+      "afterBytes": 0,
+      "afterSha256": null,
+      "removed": true
+    },
+    {
+      "path": "docs/appearance.md",
+      "beforeCharacters": 2835,
+      "beforeBytes": 2851,
+      "beforeSha256": "af1e060b0b49e01d67332c1dc6c96d0dc7b99a7f6cb8ea162fc3de2ae01bc779",
+      "mode": "0o644",
+      "symlink": false,
+      "backup": "scripts/tmp/vault-unification-resume/T-07/backups/docs/appearance.md",
+      "afterCharacters": 1135,
+      "afterBytes": 2651,
+      "afterSha256": "2b12a9e9cba1156ce07b9494b7fd2b501d0c9ef8a6b56a52b475b3dc7d4c541b",
+      "removed": false
+    },
+    {
+      "path": "docs/README.md",
+      "beforeCharacters": 3924,
+      "beforeBytes": 3940,
+      "beforeSha256": "a409dfdaeec18471531a9249c6abc63a93f447b9d10bb659a82e280ec2166a10",
+      "mode": "0o644",
+      "symlink": false,
+      "backup": "scripts/tmp/vault-unification-resume/T-07/backups/docs/README.md",
+      "afterCharacters": 1924,
+      "afterBytes": 3698,
+      "afterSha256": "77c634e7cf7910db60885d49c1ff319493bf14936071240df29c46c16dd622e0",
+      "removed": false
+    },
+    {
+      "path": "docs/records.md",
+      "beforeCharacters": 4576,
+      "beforeBytes": 4630,
+      "beforeSha256": "2b2d79c41896e954d266b70238ac3e033ee10af01bddd5f445ac60796f3ff95a",
+      "mode": "0o644",
+      "symlink": false,
+      "backup": "scripts/tmp/vault-unification-resume/T-07/backups/docs/records.md",
+      "afterCharacters": 1927,
+      "afterBytes": 4377,
+      "afterSha256": "858831c299f866305084108fb390772c84dfb183c5a30eec5b91be752245a2ba",
+      "removed": false
+    },
+    {
+      "path": "docs/comments.ZH.md",
+      "beforeCharacters": 1223,
+      "beforeBytes": 2939,
+      "beforeSha256": "0c08799e5ca3f8be9c2252823411db3bb8e6bb88b4e48c9fdfb3fc5ca838d784",
+      "mode": "0o664",
+      "symlink": false,
+      "backup": "scripts/tmp/vault-unification-resume/T-07/backups/docs/comments.ZH.md",
+      "afterCharacters": 0,
+      "afterBytes": 0,
+      "afterSha256": null,
+      "removed": true
+    },
+    {
+      "path": "docs/settings.ZH.md",
+      "beforeCharacters": 2651,
+      "beforeBytes": 5873,
+      "beforeSha256": "c4bd3e2f299fca6dd9f0400e815ffd1bf31c941045d320549a52d59ce620db76",
+      "mode": "0o644",
+      "symlink": false,
+      "backup": "scripts/tmp/vault-unification-resume/T-07/backups/docs/settings.ZH.md",
+      "afterCharacters": 0,
+      "afterBytes": 0,
+      "afterSha256": null,
+      "removed": true
+    },
+    {
+      "path": "docs/privacy.ZH.md",
+      "beforeCharacters": 3485,
+      "beforeBytes": 7801,
+      "beforeSha256": "aecc4c604f576551ddbaf1e38a9fd0ce7c16e6f5fc45f12e23bebb03a7601de1",
+      "mode": "0o644",
+      "symlink": false,
+      "backup": "scripts/tmp/vault-unification-resume/T-07/backups/docs/privacy.ZH.md",
+      "afterCharacters": 0,
+      "afterBytes": 0,
+      "afterSha256": null,
+      "removed": true
+    },
+    {
+      "path": "docs/appearance.ZH.md",
+      "beforeCharacters": 1171,
+      "beforeBytes": 2695,
+      "beforeSha256": "2a81179f25b482ff192461b6c619273dfe65ed942c7f096be3994fde916ada8c",
+      "mode": "0o664",
+      "symlink": false,
+      "backup": "scripts/tmp/vault-unification-resume/T-07/backups/docs/appearance.ZH.md",
+      "afterCharacters": 0,
+      "afterBytes": 0,
+      "afterSha256": null,
+      "removed": true
+    },
+    {
+      "path": "docs/agent-workbench.md",
+      "beforeCharacters": 19099,
+      "beforeBytes": 19130,
+      "beforeSha256": "8241eee75b5c420650560636d4a0a0af2d0d1e93987520c240d81e97a036d3e6",
+      "mode": "0o644",
+      "symlink": false,
+      "backup": "scripts/tmp/vault-unification-resume/T-07/backups/docs/agent-workbench.md",
+      "afterCharacters": 8592,
+      "afterBytes": 18113,
+      "afterSha256": "71ae10e1f681b0d066c51d9a24bf974076a0bf0bcbcf668c11fa8ff7d406defb",
+      "removed": false
+    },
+    {
+      "path": "docs/news.md",
+      "beforeCharacters": 13405,
+      "beforeBytes": 13491,
+      "beforeSha256": "a618ab47cd1f568ac9d60434f86d0db02965ad26c30fb9ef23d19d9b8f9e5fd7",
+      "mode": "0o644",
+      "symlink": false,
+      "backup": "scripts/tmp/vault-unification-resume/T-07/backups/docs/news.md",
+      "afterCharacters": 4872,
+      "afterBytes": 12296,
+      "afterSha256": "f216612e5bdc83344732efcd6f71ef01614808b30bc52ef4257a7c7bc6ccc972",
+      "removed": false
+    },
+    {
+      "path": "docs/browser.ZH.md",
+      "beforeCharacters": 14791,
+      "beforeBytes": 36109,
+      "beforeSha256": "43dbd869cdc69f85a99f63b698a4543f612c35be4d2e6444447837fe6f88be28",
+      "mode": "0o644",
+      "symlink": false,
+      "backup": "scripts/tmp/vault-unification-resume/T-07/backups/docs/browser.ZH.md",
+      "afterCharacters": 0,
+      "afterBytes": 0,
+      "afterSha256": null,
+      "removed": true
+    },
+    {
+      "path": "docs/settings.md",
+      "beforeCharacters": 6182,
+      "beforeBytes": 6204,
+      "beforeSha256": "2d71f59c4ea0474750d875fbe3466a9626f517dbe5635efd219358cde9972fcc",
+      "mode": "0o644",
+      "symlink": false,
+      "backup": "scripts/tmp/vault-unification-resume/T-07/backups/docs/settings.md",
+      "afterCharacters": 2613,
+      "afterBytes": 5841,
+      "afterSha256": "57bcf50369079977163231e8f6d9dfd54e0b9dabdba61e4ccb9bdd1ad85d81eb",
+      "removed": false
+    },
+    {
+      "path": "docs/browser.md",
+      "beforeCharacters": 39750,
+      "beforeBytes": 39830,
+      "beforeSha256": "1ac624f15f2db25ad3922f41bc2bff87c89912139eb7ba82147045e66e217af6",
+      "mode": "0o644",
+      "symlink": false,
+      "backup": "scripts/tmp/vault-unification-resume/T-07/backups/docs/browser.md",
+      "afterCharacters": 15206,
+      "afterBytes": 36948,
+      "afterSha256": "11de665c612b001e1bd051cd6efb9a50b18e21f02b68d99a9e86214444552f9c",
+      "removed": false
+    },
+    {
+      "path": "docs/records.ZH.md",
+      "beforeCharacters": 1862,
+      "beforeBytes": 4320,
+      "beforeSha256": "7c7aeaf49e74d1969086a01a9281ec8a5e9a7049282bac7d67bd1215dcc230f5",
+      "mode": "0o664",
+      "symlink": false,
+      "backup": "scripts/tmp/vault-unification-resume/T-07/backups/docs/records.ZH.md",
+      "afterCharacters": 0,
+      "afterBytes": 0,
+      "afterSha256": null,
+      "removed": true
+    },
+    {
+      "path": "docs/privacy.md",
+      "beforeCharacters": 8568,
+      "beforeBytes": 8590,
+      "beforeSha256": "fae06c894d707c6ee71a7cc383939c8a618561bcb701f6de8b477ac7666b278e",
+      "mode": "0o644",
+      "symlink": false,
+      "backup": "scripts/tmp/vault-unification-resume/T-07/backups/docs/privacy.md",
+      "afterCharacters": 3434,
+      "afterBytes": 7872,
+      "afterSha256": "99bba6973280f55c727b47a4c671eb5e0834f356628aaac7a7635a488fde70e8",
+      "removed": false
+    },
+    {
+      "path": "docs/agent-workbench.ZH.md",
+      "beforeCharacters": 8412,
+      "beforeBytes": 17551,
+      "beforeSha256": "f9f88d7660002668a322a1f5288625423fdb0d29c60a79cb19693fd5aaef01f5",
+      "mode": "0o644",
+      "symlink": false,
+      "backup": "scripts/tmp/vault-unification-resume/T-07/backups/docs/agent-workbench.ZH.md",
+      "afterCharacters": 0,
+      "afterBytes": 0,
+      "afterSha256": null,
+      "removed": true
+    },
+    {
+      "path": "docs/icons.md",
+      "beforeCharacters": 6654,
+      "beforeBytes": 6686,
+      "beforeSha256": "6f1fa057182a6bf676672474fa70b3cdf077a14f63e5990255b4df5a44ddd935",
+      "mode": "0o644",
+      "symlink": false,
+      "backup": "scripts/tmp/vault-unification-resume/T-07/backups/docs/icons.md",
+      "afterCharacters": 2825,
+      "afterBytes": 6699,
+      "afterSha256": "0104db6a16c9bdf8ce00c4897e79affddebc3a054c7336dd003a2a2d6589618b",
+      "removed": false
+    },
+    {
+      "path": "docs/data.ZH.md",
+      "beforeCharacters": 5470,
+      "beforeBytes": 11020,
+      "beforeSha256": "5aedd9ff057d45569df04b5bb4c22d8376cf55f938841ff1174e16215a5f1412",
+      "mode": "0o644",
+      "symlink": false,
+      "backup": "scripts/tmp/vault-unification-resume/T-07/backups/docs/data.ZH.md",
+      "afterCharacters": 0,
+      "afterBytes": 0,
+      "afterSha256": null,
+      "removed": true
+    },
+    {
+      "path": "docs/contacts.md",
+      "beforeCharacters": 15266,
+      "beforeBytes": 15418,
+      "beforeSha256": "9e30986951a9665c416a5e797ca5523e163f1443e2c7591df8ab39740a650f36",
+      "mode": "0o644",
+      "symlink": false,
+      "backup": "scripts/tmp/vault-unification-resume/T-07/backups/docs/contacts.md",
+      "afterCharacters": 5451,
+      "afterBytes": 14041,
+      "afterSha256": "aa7f0059daa29854448d89477d87d2e5a758cf686f9188b61224b6b98225c3ce",
+      "removed": false
+    },
+    {
+      "path": "docs/dashboard.ZH.md",
+      "beforeCharacters": 8504,
+      "beforeBytes": 21588,
+      "beforeSha256": "00c835e5ec0afad0d1fd7d83c3bb11316c2e7cf3d479a99906497020f993cc3e",
+      "mode": "0o644",
+      "symlink": false,
+      "backup": "scripts/tmp/vault-unification-resume/T-07/backups/docs/dashboard.ZH.md",
+      "afterCharacters": 0,
+      "afterBytes": 0,
+      "afterSha256": null,
+      "removed": true
+    },
+    {
+      "path": "docs/dashboard.md",
+      "beforeCharacters": 23210,
+      "beforeBytes": 23262,
+      "beforeSha256": "1ead4386b87c5418a83647def40bd2b285dadd2466ab534c4e4423ba27d9ae15",
+      "mode": "0o644",
+      "symlink": false,
+      "backup": "scripts/tmp/vault-unification-resume/T-07/backups/docs/dashboard.md",
+      "afterCharacters": 8526,
+      "afterBytes": 21602,
+      "afterSha256": "670ea5ae6c934ed267b2cd18c31c2edb881d685ba4dd880ae6b259b1e43f7f28",
+      "removed": false
+    },
+    {
+      "path": "docs/automation.ZH.md",
+      "beforeCharacters": 4708,
+      "beforeBytes": 11510,
+      "beforeSha256": "1477cf6de0775818492562a43606417a2e7ec8e33d609ead13bd9576ba090a85",
+      "mode": "0o644",
+      "symlink": false,
+      "backup": "scripts/tmp/vault-unification-resume/T-07/backups/docs/automation.ZH.md",
+      "afterCharacters": 0,
+      "afterBytes": 0,
+      "afterSha256": null,
+      "removed": true
+    },
+    {
+      "path": "docs/news.ZH.md",
+      "beforeCharacters": 4820,
+      "beforeBytes": 12234,
+      "beforeSha256": "44c8b17bffa0a316d01a8ca5b800e137e3b4f852b8dc3e99b7cfab873ba7b059",
+      "mode": "0o644",
+      "symlink": false,
+      "backup": "scripts/tmp/vault-unification-resume/T-07/backups/docs/news.ZH.md",
+      "afterCharacters": 0,
+      "afterBytes": 0,
+      "afterSha256": null,
+      "removed": true
+    },
+    {
+      "path": "docs/third-party/aihot-news.ZH.md",
+      "beforeCharacters": 4378,
+      "beforeBytes": 8873,
+      "beforeSha256": "9c21a574d4e03e3d598f03a812b88abab8632d9aa6f77ee15bfc7a955f48c815",
+      "mode": "0o644",
+      "symlink": false,
+      "backup": "scripts/tmp/vault-unification-resume/T-07/backups/docs/third-party/aihot-news.ZH.md",
+      "afterCharacters": 0,
+      "afterBytes": 0,
+      "afterSha256": null,
+      "removed": true
+    },
+    {
+      "path": "docs/third-party/aihot-news.md",
+      "beforeCharacters": 10006,
+      "beforeBytes": 10035,
+      "beforeSha256": "afdab28619c5997cee87168fdb02cac38ff1a94ec61c9c7654978136e8a2a637",
+      "mode": "0o644",
+      "symlink": false,
+      "backup": "scripts/tmp/vault-unification-resume/T-07/backups/docs/third-party/aihot-news.md",
+      "afterCharacters": 4345,
+      "afterBytes": 8832,
+      "afterSha256": "f65b37c93cb0f1778853c84fa97871ecc281cc778ae183c5534f0ecf42819a48",
+      "removed": false
+    },
+    {
+      "path": "docs/third-party/maiw-browser-workspace.md",
+      "beforeCharacters": 10564,
+      "beforeBytes": 10576,
+      "beforeSha256": "7e71db93021f34a9dbf6be27df199e8778ac46c635ee2d05fac6173a5a4eb227",
+      "mode": "0o644",
+      "symlink": false,
+      "backup": "scripts/tmp/vault-unification-resume/T-07/backups/docs/third-party/maiw-browser-workspace.md",
+      "afterCharacters": 5080,
+      "afterBytes": 9492,
+      "afterSha256": "8a6bb674b53a965e3069877943a848977ac09a5ed13a963b140af2bf82537795",
+      "removed": false
+    },
+    {
+      "path": "docs/third-party/orca-terminal-workbench.md",
+      "beforeCharacters": 4058,
+      "beforeBytes": 4066,
+      "beforeSha256": "4d3fc9078301b9066b2ca7f637ef2c08ccb4aa7bfdd13394ace36c9e75a0c690",
+      "mode": "0o644",
+      "symlink": false,
+      "backup": "scripts/tmp/vault-unification-resume/T-07/backups/docs/third-party/orca-terminal-workbench.md",
+      "afterCharacters": 2768,
+      "afterBytes": 3904,
+      "afterSha256": "94acbae6436a0755db1f666f0ba138a41a4a2de796318d8e09ebbab98f422fa4",
+      "removed": false
+    },
+    {
+      "path": "docs/third-party/apex-dashboard.ZH.md",
+      "beforeCharacters": 3958,
+      "beforeBytes": 6694,
+      "beforeSha256": "ba901f02e5812792871db3077ce8a349c2e0272da2d3331a1eb1f52c180e9358",
+      "mode": "0o644",
+      "symlink": false,
+      "backup": "scripts/tmp/vault-unification-resume/T-07/backups/docs/third-party/apex-dashboard.ZH.md",
+      "afterCharacters": 0,
+      "afterBytes": 0,
+      "afterSha256": null,
+      "removed": true
+    },
+    {
+      "path": "docs/third-party/orca-terminal-workbench.ZH.md",
+      "beforeCharacters": 2814,
+      "beforeBytes": 3958,
+      "beforeSha256": "970b8bf1dd356cb568d9676f6b3c0e30906dfb2494f89eb137625163f6d6c6a1",
+      "mode": "0o664",
+      "symlink": false,
+      "backup": "scripts/tmp/vault-unification-resume/T-07/backups/docs/third-party/orca-terminal-workbench.ZH.md",
+      "afterCharacters": 0,
+      "afterBytes": 0,
+      "afterSha256": null,
+      "removed": true
+    },
+    {
+      "path": "docs/third-party/apex-dashboard.md",
+      "beforeCharacters": 7443,
+      "beforeBytes": 7451,
+      "beforeSha256": "e24c999a0ae4553f8893eceabc2643fdd37d6f9b2f9c69473f05d6dffb11eddd",
+      "mode": "0o644",
+      "symlink": false,
+      "backup": "scripts/tmp/vault-unification-resume/T-07/backups/docs/third-party/apex-dashboard.md",
+      "afterCharacters": 3921,
+      "afterBytes": 6649,
+      "afterSha256": "414245c6743d92158aad919bb2bff4cd3aea0f3bb5f2a190f9625d429dae83c9",
+      "removed": false
+    },
+    {
+      "path": "docs/third-party/maiw-browser-workspace.ZH.md",
+      "beforeCharacters": 5131,
+      "beforeBytes": 9551,
+      "beforeSha256": "63711bbd1d50995e5663ad79af54d0ef3f4ecf8e2e160052d11324e4e3c99639",
+      "mode": "0o644",
+      "symlink": false,
+      "backup": "scripts/tmp/vault-unification-resume/T-07/backups/docs/third-party/maiw-browser-workspace.ZH.md",
+      "afterCharacters": 0,
+      "afterBytes": 0,
+      "afterSha256": null,
+      "removed": true
+    },
+    {
+      "path": ".agents/skills/ui/SKILL.md",
+      "beforeCharacters": 3142,
+      "beforeBytes": 5238,
+      "beforeSha256": "f78f3e974ff373077a66c78144be01ff7c4ca1775ca75f94186b4ce65bdc1723",
+      "mode": "0o664",
+      "symlink": false,
+      "backup": "scripts/tmp/vault-unification-resume/T-07/backups/.agents/skills/ui/SKILL.md",
+      "afterCharacters": 3142,
+      "afterBytes": 5238,
+      "afterSha256": "f78f3e974ff373077a66c78144be01ff7c4ca1775ca75f94186b4ce65bdc1723",
+      "removed": false
+    },
+    {
+      "path": ".agents/skills/dev/SKILL.md",
+      "beforeCharacters": 4624,
+      "beforeBytes": 7332,
+      "beforeSha256": "13ff2185ff85752e85e4171d1cb4e5517f201c36bdaa35f4004dfe5248ffdf8a",
+      "mode": "0o644",
+      "symlink": false,
+      "backup": "scripts/tmp/vault-unification-resume/T-07/backups/.agents/skills/dev/SKILL.md",
+      "afterCharacters": 4712,
+      "afterBytes": 7544,
+      "afterSha256": "7dbefc0a07f8d8617ab95f5fc00184fb602e66a235cde5ccb4063c9d242e154f",
+      "removed": false
+    },
+    {
+      "path": ".agents/skills/dev/references/settings-and-i18n.md",
+      "beforeCharacters": 2915,
+      "beforeBytes": 4797,
+      "beforeSha256": "9d0c10748081b092c0f133949ff572a6414824eec625deaf724773ad2c9b9804",
+      "mode": "0o664",
+      "symlink": false,
+      "backup": "scripts/tmp/vault-unification-resume/T-07/backups/.agents/skills/dev/references/settings-and-i18n.md",
+      "afterCharacters": 2915,
+      "afterBytes": 4797,
+      "afterSha256": "9d0c10748081b092c0f133949ff572a6414824eec625deaf724773ad2c9b9804",
+      "removed": false
+    },
+    {
+      "path": ".agents/skills/dev/references/build-and-release.md",
+      "beforeCharacters": 3718,
+      "beforeBytes": 5678,
+      "beforeSha256": "185a8191984ecb4fadf8d1d39f197ed05d56398b78ccf8ac43f87ca01e049193",
+      "mode": "0o664",
+      "symlink": false,
+      "backup": "scripts/tmp/vault-unification-resume/T-07/backups/.agents/skills/dev/references/build-and-release.md",
+      "afterCharacters": 3637,
+      "afterBytes": 5669,
+      "afterSha256": "3365d1f37cc571dbd819ade4c2013020728487c3d9b6081b828e7badad8a2964",
+      "removed": false
+    },
+    {
+      "path": ".agents/skills/dev/references/obsidian-api.md",
+      "beforeCharacters": 4894,
+      "beforeBytes": 8065,
+      "beforeSha256": "c515700efbe2ea4d57f58852e9225beb7ee17ad58484328450112068de13de7b",
+      "mode": "0o664",
+      "symlink": false,
+      "backup": "scripts/tmp/vault-unification-resume/T-07/backups/.agents/skills/dev/references/obsidian-api.md",
+      "afterCharacters": 4894,
+      "afterBytes": 8065,
+      "afterSha256": "c515700efbe2ea4d57f58852e9225beb7ee17ad58484328450112068de13de7b",
+      "removed": false
+    },
+    {
+      "path": ".agents/skills/dev/references/licensing.md",
+      "beforeCharacters": 2191,
+      "beforeBytes": 3753,
+      "beforeSha256": "309783d96aca6bdf6287ae9a7e84619286300e06c3a08c776576c613387ccfbb",
+      "mode": "0o664",
+      "symlink": false,
+      "backup": "scripts/tmp/vault-unification-resume/T-07/backups/.agents/skills/dev/references/licensing.md",
+      "afterCharacters": 2191,
+      "afterBytes": 3753,
+      "afterSha256": "309783d96aca6bdf6287ae9a7e84619286300e06c3a08c776576c613387ccfbb",
+      "removed": false
+    },
+    {
+      "path": ".agents/skills/dev/references/architecture.md",
+      "beforeCharacters": 7402,
+      "beforeBytes": 11802,
+      "beforeSha256": "b2df84d363251985589f9243de05b6fdbf916dac920bdcca49f693fde6c97190",
+      "mode": "0o644",
+      "symlink": false,
+      "backup": "scripts/tmp/vault-unification-resume/T-07/backups/.agents/skills/dev/references/architecture.md",
+      "afterCharacters": 7481,
+      "afterBytes": 11879,
+      "afterSha256": "3bc79f05ba14376dccf54438b1282c4944cfa9c7e73b2f200151d148b2b09ddb",
+      "removed": false
+    },
+    {
+      "path": ".agents/skills/dev/references/testing.md",
+      "beforeCharacters": 3484,
+      "beforeBytes": 5274,
+      "beforeSha256": "a073cad17a5bb3d782eae6157e7e110683ae6a8dbfca4c54970c8ab275252978",
+      "mode": "0o664",
+      "symlink": false,
+      "backup": "scripts/tmp/vault-unification-resume/T-07/backups/.agents/skills/dev/references/testing.md",
+      "afterCharacters": 3484,
+      "afterBytes": 5274,
+      "afterSha256": "a073cad17a5bb3d782eae6157e7e110683ae6a8dbfca4c54970c8ab275252978",
+      "removed": false
+    },
+    {
+      "path": ".agents/skills/dev/references/editor-comments.md",
+      "beforeCharacters": 3912,
+      "beforeBytes": 7554,
+      "beforeSha256": "c91cf56536aa6252e6823354089a3ae4446ef80912211c0aaeb7948226e944a8",
+      "mode": "0o664",
+      "symlink": false,
+      "backup": "scripts/tmp/vault-unification-resume/T-07/backups/.agents/skills/dev/references/editor-comments.md",
+      "afterCharacters": 3912,
+      "afterBytes": 7554,
+      "afterSha256": "c91cf56536aa6252e6823354089a3ae4446ef80912211c0aaeb7948226e944a8",
+      "removed": false
+    },
+    {
+      "path": ".agents/skills/dev/references/module-authoring.md",
+      "beforeCharacters": 8371,
+      "beforeBytes": 15281,
+      "beforeSha256": "55c32829e2bcccacb1f85a286771ac93c1fb5013594efd6c6f875f69caf98e4e",
+      "mode": "0o644",
+      "symlink": false,
+      "backup": "scripts/tmp/vault-unification-resume/T-07/backups/.agents/skills/dev/references/module-authoring.md",
+      "afterCharacters": 8389,
+      "afterBytes": 15299,
+      "afterSha256": "f6981a7b212971d3661cb3f24e506ed1a05f5ec672099385b4a0fa99a1c5eff3",
+      "removed": false
+    },
+    {
+      "path": ".agents/skills/dev/references/skill-maintenance.md",
+      "beforeCharacters": 1965,
+      "beforeBytes": 3909,
+      "beforeSha256": "2689e1c377a34da0a76e8091ea08140c252c8907ef40fc1a3ad39a0ae2c0091a",
+      "mode": "0o664",
+      "symlink": false,
+      "backup": "scripts/tmp/vault-unification-resume/T-07/backups/.agents/skills/dev/references/skill-maintenance.md",
+      "afterCharacters": 1998,
+      "afterBytes": 3980,
+      "afterSha256": "caaf77b95d24c886982e4bdf1ab8c355bb34e096c027f676b23c29ffbbc48415",
+      "removed": false
+    },
+    {
+      "path": ".agents/skills/ui/references/design-system.md",
+      "beforeCharacters": 3799,
+      "beforeBytes": 5745,
+      "beforeSha256": "3320b960e15b308a2f5fa0573e00c80ec91bef911bbc5497f4bbc8d7dc10d59c",
+      "mode": "0o664",
+      "symlink": false,
+      "backup": "scripts/tmp/vault-unification-resume/T-07/backups/.agents/skills/ui/references/design-system.md",
+      "afterCharacters": 3799,
+      "afterBytes": 5745,
+      "afterSha256": "3320b960e15b308a2f5fa0573e00c80ec91bef911bbc5497f4bbc8d7dc10d59c",
+      "removed": false
+    },
+    {
+      "path": ".agents/skills/ui/references/theme.md",
+      "beforeCharacters": 2075,
+      "beforeBytes": 3561,
+      "beforeSha256": "bb1ae95092c78850146654f46428652e7279293603b8b6e8b5fdcfba6542602e",
+      "mode": "0o664",
+      "symlink": false,
+      "backup": "scripts/tmp/vault-unification-resume/T-07/backups/.agents/skills/ui/references/theme.md",
+      "afterCharacters": 2075,
+      "afterBytes": 3561,
+      "afterSha256": "bb1ae95092c78850146654f46428652e7279293603b8b6e8b5fdcfba6542602e",
+      "removed": false
+    },
+    {
+      "path": ".agents/skills/ui/references/motion-a11y.md",
+      "beforeCharacters": 1615,
+      "beforeBytes": 3043,
+      "beforeSha256": "afc7b79fc9844989f7d295acdcbe5b4a6c31f5cb7add3b1e53e51c2a75f1980c",
+      "mode": "0o664",
+      "symlink": false,
+      "backup": "scripts/tmp/vault-unification-resume/T-07/backups/.agents/skills/ui/references/motion-a11y.md",
+      "afterCharacters": 1615,
+      "afterBytes": 3043,
+      "afterSha256": "afc7b79fc9844989f7d295acdcbe5b4a6c31f5cb7add3b1e53e51c2a75f1980c",
+      "removed": false
+    },
+    {
+      "path": ".agents/skills/ui/references/shell.md",
+      "beforeCharacters": 3315,
+      "beforeBytes": 6518,
+      "beforeSha256": "c2922b602b0a9639c0e533fe1622ddfcd573b0b5686e4a295933fb492614dc23",
+      "mode": "0o644",
+      "symlink": false,
+      "backup": "scripts/tmp/vault-unification-resume/T-07/backups/.agents/skills/ui/references/shell.md",
+      "afterCharacters": 3315,
+      "afterBytes": 6518,
+      "afterSha256": "c2922b602b0a9639c0e533fe1622ddfcd573b0b5686e4a295933fb492614dc23",
+      "removed": false
+    },
+    {
+      "path": "AGENTS.md",
+      "beforeCharacters": 2030,
+      "beforeBytes": 3442,
+      "beforeSha256": "d1f5cdf8c393ab75a6d4003ca22a35f2d856b02380cf84510dfeef5c618146a2",
+      "mode": "0o644",
+      "symlink": false,
+      "backup": "scripts/tmp/vault-unification-resume/T-07/backups/AGENTS.md",
+      "afterCharacters": 2162,
+      "afterBytes": 3754,
+      "afterSha256": "d00ef57726c96741e2669f3afdd487ea18e606b8ca7e1bfc388f8cb94a3aacd9",
+      "removed": false
+    },
+    {
+      "path": "README.md",
+      "beforeCharacters": 5052,
+      "beforeBytes": 5066,
+      "beforeSha256": "2819d5c3ed63ecd7c21b8f214b27cf3da4c6d31313beac3abe9f8f8839e294f6",
+      "mode": "0o644",
+      "symlink": false,
+      "backup": "scripts/tmp/vault-unification-resume/T-07/backups/README.md",
+      "afterCharacters": 5372,
+      "afterBytes": 5386,
+      "afterSha256": "fed39210ef993f6cb3fb53d9f1c18cf1ae838853502eeeb5bed3b59834f291df",
+      "removed": false
+    },
+    {
+      "path": "README.ZH.md",
+      "beforeCharacters": 2706,
+      "beforeBytes": 4708,
+      "beforeSha256": "088d390df4e1106c066895dcc7af4ea9e1876bef33d9901c5ed28fc9a7568a6c",
+      "mode": "0o644",
+      "symlink": false,
+      "backup": "scripts/tmp/vault-unification-resume/T-07/backups/README.ZH.md",
+      "afterCharacters": 2863,
+      "afterBytes": 5029,
+      "afterSha256": "344f634fbe7259e883b145a0e1922e9bcf45d323ab1f64a45058adcfbf6625e3",
+      "removed": false
+    },
+    {
+      "path": "CHANGELOG.md",
+      "beforeCharacters": 7222,
+      "beforeBytes": 7230,
+      "beforeSha256": "f54259eceeedc75468350eabbe782127727c8be9be9ed6295e3610a3703dfedc",
+      "mode": "0o644",
+      "symlink": false,
+      "backup": "scripts/tmp/vault-unification-resume/T-07/backups/CHANGELOG.md",
+      "afterCharacters": 3011,
+      "afterBytes": 6819,
+      "afterSha256": "ff2d841d6ca15885b4db312be99ebfb3800cea2e033977a59238dc7ef698676a",
+      "removed": false
+    },
+    {
+      "path": "CHANGELOG.ZH.md",
+      "beforeCharacters": 3088,
+      "beforeBytes": 6904,
+      "beforeSha256": "f32ce20fb480dd8f6627c14c9dc4412e879879390e71681a46eb8187cbb16f13",
+      "mode": "0o664",
+      "symlink": false,
+      "backup": "scripts/tmp/vault-unification-resume/T-07/backups/CHANGELOG.ZH.md",
+      "afterCharacters": 0,
+      "afterBytes": 0,
+      "afterSha256": null,
+      "removed": true
+    },
+    {
+      "path": "SECURITY.md",
+      "beforeCharacters": 754,
+      "beforeBytes": 762,
+      "beforeSha256": "8bff1dc69948c802736201fa4c6bfa682d53284201e9d7ed9f420353ff382155",
+      "mode": "0o644",
+      "symlink": false,
+      "backup": "scripts/tmp/vault-unification-resume/T-07/backups/SECURITY.md",
+      "afterCharacters": 340,
+      "afterBytes": 646,
+      "afterSha256": "08dc70f0ed5ff469aaa06d8e40d7b63eaca654cc96efffa85c4a9e962b6df387",
+      "removed": false
+    },
+    {
+      "path": "SECURITY.ZH.md",
+      "beforeCharacters": 371,
+      "beforeBytes": 685,
+      "beforeSha256": "305f0df4d8157e8de964fa5e8253b3ddea16f677bcfaccfed8d3a5f7da5aa988",
+      "mode": "0o664",
+      "symlink": false,
+      "backup": "scripts/tmp/vault-unification-resume/T-07/backups/SECURITY.ZH.md",
+      "afterCharacters": 0,
+      "afterBytes": 0,
+      "afterSha256": null,
+      "removed": true
+    },
+    {
+      "path": "scripts/documentation-policy.mjs",
+      "beforeCharacters": 1499,
+      "beforeBytes": 1499,
+      "beforeSha256": "94ca98d3da53e780272de08f35a973060501ddf0fd0bf9291ed845cf8e5e0414",
+      "mode": "0o644",
+      "symlink": false,
+      "backup": "scripts/tmp/vault-unification-resume/T-07/backups/scripts/documentation-policy.mjs",
+      "afterCharacters": 1567,
+      "afterBytes": 1567,
+      "afterSha256": "3d366fa6ee1ec6c6e3dd377c5ff6efaa1151c72b7cb969656627cf9f7430f7e3",
+      "removed": false
+    },
+    {
+      "path": "scripts/verify-docs.mjs",
+      "beforeCharacters": 12008,
+      "beforeBytes": 12030,
+      "beforeSha256": "9f6e851fe24c0b1e1630317a36770dd1aacfc9ceaafa79ee665e7fee7d125e4c",
+      "mode": "0o644",
+      "symlink": false,
+      "backup": "scripts/tmp/vault-unification-resume/T-07/backups/scripts/verify-docs.mjs",
+      "afterCharacters": 12991,
+      "afterBytes": 13013,
+      "afterSha256": "0c76463906ffb24603846349ad869f693c157ce14714f90fa4e1f475c1c1c260",
+      "removed": false
+    },
+    {
+      "path": "test/release/documentation-policy.test.ts",
+      "beforeCharacters": 1885,
+      "beforeBytes": 1885,
+      "beforeSha256": "7242ad7079ddd6b707fe8069ef970f080ad353430e65ffc26d438b45e6c3dd39",
+      "mode": "0o644",
+      "symlink": false,
+      "backup": "scripts/tmp/vault-unification-resume/T-07/backups/test/release/documentation-policy.test.ts",
+      "afterCharacters": 2853,
+      "afterBytes": 2889,
+      "afterSha256": "36940f7f091eff6e1b1bc58623801c717c0af9a77f1bffb401b3694818646a24",
+      "removed": false
+    }
+  ],
+  "pairDifferences": [
+    {
+      "file": "docs/comments.md",
+      "englishOnlyIdentifiers": [
+        "NAND: Comment on selection",
+        "NAND: Open editor panel"
+      ]
+    },
+    {
+      "file": "docs/sync.md",
+      "englishOnlyIdentifiers": [
+        "Git:",
+        "git checkout --ours/--theirs <file>"
+      ]
+    },
+    {
+      "file": "docs/data.md",
+      "englishOnlyIdentifiers": [
+        "expense-export-<date>.csv",
+        "property:<key>"
+      ]
+    },
+    {
+      "file": "docs/workbench.md",
+      "englishOnlyIdentifiers": []
+    },
+    {
+      "file": "docs/automation.md",
+      "englishOnlyIdentifiers": []
+    },
+    {
+      "file": "docs/appearance.md",
+      "englishOnlyIdentifiers": [
+        "NAND: Cycle to next theme"
+      ]
+    },
+    {
+      "file": "docs/README.md",
+      "englishOnlyIdentifiers": [
+        "NAND: Open workbench"
+      ]
+    },
+    {
+      "file": "docs/records.md",
+      "englishOnlyIdentifiers": [
+        "expense-export-<date>.csv"
+      ]
+    },
+    {
+      "file": "docs/agent-workbench.md",
+      "englishOnlyIdentifiers": [
+        "accounts/<claude or codex>/<id>/home",
+        "nand-pty-<platform>-<arch>",
+        "path:line:column"
+      ]
+    },
+    {
+      "file": "docs/news.md",
+      "englishOnlyIdentifiers": []
+    },
+    {
+      "file": "docs/settings.md",
+      "englishOnlyIdentifiers": []
+    },
+    {
+      "file": "docs/browser.md",
+      "englishOnlyIdentifiers": [
+        "<workspace folder>/网页助手/",
+        "<workspace folder>/适配规则/",
+        "NAND: Open web page",
+        "host:port"
+      ]
+    },
+    {
+      "file": "docs/privacy.md",
+      "englishOnlyIdentifiers": [
+        "nand-pty-<platform>-<arch>"
+      ]
+    },
+    {
+      "file": "docs/icons.md",
+      "englishOnlyIdentifiers": [
+        "NAND: Open rulebook"
+      ]
+    },
+    {
+      "file": "docs/contacts.md",
+      "englishOnlyIdentifiers": [
+        "Contacts/Archive",
+        "NAND: Open archives"
+      ]
+    },
+    {
+      "file": "docs/dashboard.md",
+      "englishOnlyIdentifiers": []
+    },
+    {
+      "file": "docs/third-party/aihot-news.md",
+      "englishOnlyIdentifiers": [
+        "(score ?? 50) + 5 log2(1 + participants) + official × 5 − follow-up × 6",
+        "4 × (days carried − 1)",
+        "5 log2(1 + maximum sources)"
+      ]
+    },
+    {
+      "file": "docs/third-party/maiw-browser-workspace.md",
+      "englishOnlyIdentifiers": []
+    },
+    {
+      "file": "docs/third-party/orca-terminal-workbench.md",
+      "englishOnlyIdentifiers": []
+    },
+    {
+      "file": "docs/third-party/apex-dashboard.md",
+      "englishOnlyIdentifiers": []
+    },
+    {
+      "file": "README.md",
+      "englishOnlyIdentifiers": []
+    },
+    {
+      "file": "CHANGELOG.md",
+      "englishOnlyIdentifiers": []
+    },
+    {
+      "file": "SECURITY.md",
+      "englishOnlyIdentifiers": []
+    }
+  ]
+}
