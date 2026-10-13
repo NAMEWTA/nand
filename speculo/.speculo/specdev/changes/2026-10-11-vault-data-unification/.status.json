@@ -35,7 +35,7 @@
     "history": []
   },
   "created_at": "2026-10-11T05:11:40.581Z",
-  "updated_at": "2026-10-13T03:59:16.630679+00:00",
+  "updated_at": "2026-10-13T04:04:02.464926+00:00",
   "completed_at": null,
   "archived": false,
   "archive_path": null,
@@ -341,6 +341,49 @@
         "evidence": "<Path>{roots.state}/specdev/changes/2026-10-11-vault-data-unification/evidence/T-07.md</Path>",
         "attempts": 1,
         "promotion_status": "applied"
+      }
+    },
+    {
+      "ticket_id": "T-08",
+      "owner": "root",
+      "implementation_owner": "root",
+      "integration_owner": "root",
+      "provider": "git",
+      "base_sha": "ceb87931dd67733dd03249570c6b2ecc17c1bc59",
+      "parent_branch": "main",
+      "branch": "main",
+      "workspace_ref": "current",
+      "source_checkpoint": null,
+      "status": "active",
+      "updated_at": "2026-10-13T04:04:02.464926+00:00",
+      "integration": {
+        "status": "pending",
+        "parent_ref": "main",
+        "parent_before_sha": "ceb87931dd67733dd03249570c6b2ecc17c1bc59",
+        "source_sha": null,
+        "candidate_sha": null,
+        "candidate_tree_sha": null,
+        "candidate_branch": null,
+        "candidate_workspace_ref": null,
+        "result_sha": null,
+        "method": "direct-parent",
+        "conflict_paths": [],
+        "verification": "pending",
+        "full_suite": {
+          "required": true,
+          "status": "pending",
+          "reason": null,
+          "evidence": "<Path>{roots.state}/specdev/changes/2026-10-11-vault-data-unification/evidence/T-08.md</Path>"
+        },
+        "e2e": {
+          "required": true,
+          "status": "pending",
+          "reason": null,
+          "evidence": "<Path>{roots.state}/specdev/changes/2026-10-11-vault-data-unification/evidence/T-08.md</Path>"
+        },
+        "evidence": "<Path>{roots.state}/specdev/changes/2026-10-11-vault-data-unification/evidence/T-08.md</Path>",
+        "attempts": 0,
+        "promotion_status": "pending"
       }
     }
   ]

@@ -10,10 +10,10 @@ import { setTimeout as delay } from 'node:timers/promises';
 import { connect } from './cdp.mjs';
 
 /**
- * @param {{ root: string; files?: Record<string, string>; settings?: unknown; port?: number }} options
+ * @param {{ root: string; files?: Record<string, string>; settings?: unknown; port?: number; pluginSource?: string }} options
  * `files` are vault-relative paths; `settings` is written to .nand/config/settings.json.
  */
-export async function launchFreshVault({ root, files = {}, settings, port = 9237 }) {
+export async function launchFreshVault({ root, files = {}, settings, port = 9237, pluginSource = process.cwd() }) {
 	const executable = process.env.NAND_OBSIDIAN_EXECUTABLE;
 	assert.ok(executable && path.isAbsolute(executable), 'NAND_OBSIDIAN_EXECUTABLE must be absolute');
 	assert.ok(path.isAbsolute(root) && path.parse(root).root !== root, 'root must be an absolute, non-root path');
@@ -21,10 +21,10 @@ export async function launchFreshVault({ root, files = {}, settings, port = 9237
 	const vault = path.join(root, 'vault');
 	const profile = path.join(root, 'profile');
 	const evidence = path.join(root, 'evidence');
-	const manifest = JSON.parse(await fs.readFile('manifest.json', 'utf8'));
+	const manifest = JSON.parse(await fs.readFile(path.join(pluginSource, 'manifest.json'), 'utf8'));
 	const pluginDir = path.join(vault, '.obsidian', 'plugins', manifest.id);
 	for (const dir of [vault, profile, evidence, pluginDir, path.join(root, 'home'), path.join(root, 'config'), path.join(root, 'runtime'), path.join(vault, '.nand', 'config')]) await fs.mkdir(dir, { recursive: true });
-	for (const file of ['main.js', 'styles.css', 'manifest.json']) await fs.copyFile(file, path.join(pluginDir, file));
+	for (const file of ['main.js', 'styles.css', 'manifest.json']) await fs.copyFile(path.join(pluginSource, file), path.join(pluginDir, file));
 	await fs.writeFile(path.join(vault, '.obsidian', 'community-plugins.json'), JSON.stringify([manifest.id]));
 	await fs.writeFile(path.join(vault, '.obsidian', 'app.json'), JSON.stringify({ livePreview: true }));
 	if (settings) await fs.writeFile(path.join(vault, '.nand', 'config', 'settings.json'), JSON.stringify(settings));

@@ -132,11 +132,15 @@ async function installHelper(options: InstallOptions): Promise<string> {
 	const context = JSON.stringify([dir, name]);
 	const stamp = readStamp(dir, options.receipt);
 	const verified = exists && stamp?.context === context && stamp.version === options.version && stamp.source === source && sha256(file) === stamp.sha256 && (!localDigest || stamp.sha256 === localDigest);
+	const ready = () => {
+		if (process.platform !== 'win32') fs.chmodSync(file, 0o700);
+		return file;
+	};
 	if (options.offline) {
 		if (!verified) throw new BinaryError('offlineMissing', 'Offline mode requires a verified terminal helper for this version');
-		return file;
+		return ready();
 	}
-	if (verified) return file;
+	if (verified) return ready();
 
 	const fetch = async (url: string, limit: number) => {
 		try { return await (options.fetch ?? downloadHelperBytes)(url, limit); }
@@ -161,7 +165,7 @@ async function installHelper(options: InstallOptions): Promise<string> {
 	// A matching file placed by hand (same release) is accepted without downloading again.
 	if (exists && sha256(file) === digest) {
 		await remember();
-		return file;
+		return ready();
 	}
 	const retained = await absoluteNandPath(options.vault, `.nand/helpers/${options.device}/legacy-plugin/files/${name}`);
 	const retainedBytes = !localBytes && fs.existsSync(retained) && fs.lstatSync(retained).isFile() && fs.statSync(retained).size <= 256 * 1024 * 1024 ? fs.readFileSync(retained) : undefined;
@@ -178,7 +182,6 @@ async function installHelper(options: InstallOptions): Promise<string> {
 		fs.rmSync(temporary, { force: true });
 		throw new BinaryError('inUse', `The terminal helper could not be replaced: ${error instanceof Error ? error.message : String(error)}`);
 	}
-	if (process.platform !== 'win32') fs.chmodSync(file, 0o700);
 	await remember();
-	return file;
+	return ready();
 }

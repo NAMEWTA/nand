@@ -57,7 +57,7 @@ pnpm 版本固定在 `package.json`；CI 使用 `pnpm install --frozen-lockfile`
 
 `scripts/verify-release-artifacts.mjs <version>` 把前四项与标签核对，`CHANGELOG.md` 里有 `## Unreleased` 小节时失败。提高 `minAppVersion` 会让部分用户无法升级；只有在有记录的理由时才这样做。
 
-当前版本是 `0.0.1-alpha.1`，是预发布版。标签中 `-` 之后带后缀的版本会成为 GitHub 预发布，不会标为最新版。
+当前版本是 `0.0.1-alpha.2`，是预发布版。标签中 `-` 之后带后缀的版本会成为 GitHub 预发布，不会标为最新版。
 
 ## 发版
 

@@ -33,7 +33,7 @@ status: "in_progress"
 | T-05 | <Path>{roots.state}/specdev/changes/2026-10-11-vault-data-unification/ticket/05-agent-accounts.md</Path> | 账号身份、凭据与终端辅助程序 | T-02 | deep | high | yes | root | AC-005 | done |
 | T-06 | <Path>{roots.state}/specdev/changes/2026-10-11-vault-data-unification/ticket/06-git-release-gates.md</Path> | Git 冲突判定与发布检查依赖 | — | deep | high | yes | root | AC-006 | done |
 | T-07 | <Path>{roots.state}/specdev/changes/2026-10-11-vault-data-unification/ticket/07-current-docs.md</Path> | 当前规范中文化与旧文档清理 | T-01, T-02, T-03, T-04, T-05, T-06 | deep | high | yes | root | AC-007 | done |
-| T-08 | <Path>{roots.state}/specdev/changes/2026-10-11-vault-data-unification/ticket/08-alpha2-delivery.md</Path> | Windows 验收、alpha.2 发布与归档 | T-01, T-02, T-03, T-04, T-05, T-06, T-07 | deep | high | yes | root | AC-008 | ready |
+| T-08 | <Path>{roots.state}/specdev/changes/2026-10-11-vault-data-unification/ticket/08-alpha2-delivery.md</Path> | Windows 验收、alpha.2 发布与归档 | T-01, T-02, T-03, T-04, T-05, T-06, T-07 | deep | high | yes | root | AC-008 | in_progress |
 
 ## 4. 合同覆盖矩阵
 

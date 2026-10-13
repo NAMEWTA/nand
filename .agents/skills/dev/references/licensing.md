@@ -9,7 +9,7 @@ NAND 使用 MIT 许可证（`LICENSE`）。保持这一点：发布在 `main.js`
 | `LICENSE` | NAND 的 MIT 许可证，只有英文 | 手写 |
 | `NOTICE` | NAND 改编的作品：apex-dashboard 与 obsidian-dashboard（MIT，看板设计）、Orca（MIT，含提交对应关系）、Iconic（MIT-0）、obsidian-git（MIT，Git 同步）；只有英文 | 手写 |
 | `src/modules/icons/core/res/NOTICE.txt` | Lucide（ISC）、源自 Feather 的图标（MIT）、Unicode 数据和其他图标资源 | 手写；随横幅发布 |
-| `docs/third-party/orca-terminal-workbench.md`、`.ZH.md`、`orca-LICENSE.txt` | 固定的 Orca 提交和改编内容；Orca 许可证原文 | 手写 |
+| `docs/third-party/orca-terminal-workbench.md`、`orca-LICENSE.txt` | 固定的 Orca 提交和改编内容；Orca 许可证原文 | 手写 |
 | `THIRD-PARTY-NOTICES.md` | 打包进 `main.js` 的每个 npm 包和链接进 `nand-pty` 的每个 crate，附许可证原文 | `pnpm run notices`；CI 运行 `check:notices` |
 | `main.js` 横幅 | `LICENSE`、`NOTICE`、图标资源声明、Orca 许可证、打包依赖的许可证 | `scripts/esbuild-options.mjs` |
 
@@ -26,7 +26,7 @@ Release 附件包含 `LICENSE`、`NOTICE` 和 `THIRD-PARTY-NOTICES.md`。
 
 ## 改编外部代码
 
-- MIT、ISC 或 BSD 项目的代码可以改编：写一段头部注释，注明来源和上游提交（`Adapted from Orca (MIT). Copyright (c) 2026 Lovecast Inc.`），在 `NOTICE` 里添加或更新条目，并在该上游的第三方说明文档（`docs/third-party/`，两种语言）里记录文件对应关系。
+- MIT、ISC 或 BSD 项目的代码可以改编：写一段头部注释，注明来源和上游提交（`Adapted from Orca (MIT). Copyright (c) 2026 Lovecast Inc.`），在 `NOTICE` 里添加或更新条目，并在该上游的第三方说明文档（`docs/third-party/`，中文维护说明，许可证保留原文）里记录文件对应关系。
 - 保留上游的许可证文本。`NOTICE` 和 `docs/third-party/orca-LICENSE.txt` 里的版权行照抄上游，不改写。
 - GPL 项目只能用来了解公开行为和用户可见的概念。编写 NAND 代码时不要打开它们的源码，也不要改写它们。
 

@@ -8,7 +8,7 @@ artifact: "ticket"
 change: "2026-10-11-vault-data-unification"
 id: "T-08"
 title: "发行验收、alpha.2 发布与 A 交接"
-status: "ready"
+status: "in_progress"
 kind: "operations"
 planning_depth: "deep"
 planning_depth_reason: "涉及公共持久化、数据迁移、身份隔离或发布；用户已批准完整计划及实施。"
@@ -17,11 +17,11 @@ risk: "high"
 blocked_by: ["T-01","T-02","T-03","T-04","T-05","T-06","T-07"]
 contract_ids: ["AC-008"]
 owner: "root"
-expected_changes: ["<Path>manifest.json</Path>","<Path>package.json</Path>","<Path>versions.json</Path>","<Path>CHANGELOG.md</Path>","<Path>main.js</Path>","<Path>styles.css</Path>","<Path>scripts/**</Path>","<Path>docs/**</Path>","<Path>test/**</Path>","<Path>src/modules/agent/platform/desktop/pty/binary.ts</Path>","<Path>src/modules/agent/platform/desktop/pty/binary.test.ts</Path>"]
-writable_paths: ["<Path>manifest.json</Path>","<Path>package.json</Path>","<Path>versions.json</Path>","<Path>CHANGELOG.md</Path>","<Path>main.js</Path>","<Path>styles.css</Path>","<Path>scripts/**</Path>","<Path>docs/**</Path>","<Path>test/**</Path>","<Path>src/modules/agent/platform/desktop/pty/binary.ts</Path>","<Path>src/modules/agent/platform/desktop/pty/binary.test.ts</Path>"]
+expected_changes: ["<Path>manifest.json</Path>","<Path>package.json</Path>","<Path>versions.json</Path>","<Path>CHANGELOG.md</Path>","<Path>main.js</Path>","<Path>styles.css</Path>","<Path>scripts/**</Path>","<Path>docs/**</Path>","<Path>test/**</Path>","<Path>src/modules/agent/platform/desktop/pty/binary.ts</Path>","<Path>src/modules/agent/platform/desktop/pty/binary.test.ts</Path>","<Path>README.md</Path>","<Path>README.ZH.md</Path>","<Path>.agents/skills/dev/references/build-and-release.md</Path>","<Path>.agents/skills/dev/references/licensing.md</Path>"]
+writable_paths: ["<Path>manifest.json</Path>","<Path>package.json</Path>","<Path>versions.json</Path>","<Path>CHANGELOG.md</Path>","<Path>main.js</Path>","<Path>styles.css</Path>","<Path>scripts/**</Path>","<Path>docs/**</Path>","<Path>test/**</Path>","<Path>src/modules/agent/platform/desktop/pty/binary.ts</Path>","<Path>src/modules/agent/platform/desktop/pty/binary.test.ts</Path>","<Path>README.md</Path>","<Path>README.ZH.md</Path>","<Path>.agents/skills/dev/references/build-and-release.md</Path>","<Path>.agents/skills/dev/references/licensing.md</Path>"]
 read_only_paths: []
-shared_paths: ["<Path>manifest.json</Path>","<Path>package.json</Path>","<Path>versions.json</Path>","<Path>CHANGELOG.md</Path>","<Path>main.js</Path>","<Path>styles.css</Path>","<Path>scripts/**</Path>","<Path>docs/**</Path>","<Path>test/**</Path>","<Path>src/modules/agent/platform/desktop/pty/binary.ts</Path>","<Path>src/modules/agent/platform/desktop/pty/binary.test.ts</Path>"]
-shared_path_owners: ["<Path>manifest.json</Path> => root","<Path>package.json</Path> => root","<Path>versions.json</Path> => root","<Path>CHANGELOG.md</Path> => root","<Path>main.js</Path> => root","<Path>styles.css</Path> => root","<Path>scripts/**</Path> => root","<Path>docs/**</Path> => root","<Path>test/**</Path> => root","<Path>src/modules/agent/platform/desktop/pty/binary.ts</Path> => root","<Path>src/modules/agent/platform/desktop/pty/binary.test.ts</Path> => root"]
+shared_paths: ["<Path>manifest.json</Path>","<Path>package.json</Path>","<Path>versions.json</Path>","<Path>CHANGELOG.md</Path>","<Path>main.js</Path>","<Path>styles.css</Path>","<Path>scripts/**</Path>","<Path>docs/**</Path>","<Path>test/**</Path>","<Path>src/modules/agent/platform/desktop/pty/binary.ts</Path>","<Path>src/modules/agent/platform/desktop/pty/binary.test.ts</Path>","<Path>README.md</Path>","<Path>README.ZH.md</Path>","<Path>.agents/skills/dev/references/build-and-release.md</Path>","<Path>.agents/skills/dev/references/licensing.md</Path>"]
+shared_path_owners: ["<Path>manifest.json</Path> => root","<Path>package.json</Path> => root","<Path>versions.json</Path> => root","<Path>CHANGELOG.md</Path> => root","<Path>main.js</Path> => root","<Path>styles.css</Path> => root","<Path>scripts/**</Path> => root","<Path>docs/**</Path> => root","<Path>test/**</Path> => root","<Path>src/modules/agent/platform/desktop/pty/binary.ts</Path> => root","<Path>src/modules/agent/platform/desktop/pty/binary.test.ts</Path> => root","<Path>README.md</Path> => root","<Path>README.ZH.md</Path> => root","<Path>.agents/skills/dev/references/build-and-release.md</Path> => root","<Path>.agents/skills/dev/references/licensing.md</Path> => root"]
 ---
 
 # T-08 发行验收、alpha.2 发布与 A 交接

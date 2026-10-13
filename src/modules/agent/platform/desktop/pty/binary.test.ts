@@ -42,6 +42,18 @@ function setup() {
 	return { receipt, pluginDir, binary, requests, fetch, setDigest: (value: string) => { digest = value; }, file: path.join(pluginDir, '.nand/helpers/fixture-device/linux-x64/0.0.1-alpha.1', 'nand-pty-linux-x64') };
 }
 
+test.skipIf(process.platform === 'win32').each([false, true])('verified cached helpers recover their executable permissions (offline=%s)', async offline => {
+	const f = setup(), options = { vault: f.pluginDir, receipt: f.receipt, device: 'fixture-device', version: '0.0.1-alpha.1', offline: false, platform: 'linux', arch: 'x64', fetch: f.fetch };
+	try {
+		await ensureHelper(options);
+		fs.chmodSync(f.file, 0o600); f.requests.length = 0;
+		assert.equal(await ensureHelper({ ...options, offline }), f.file);
+		assert.equal(fs.statSync(f.file).mode & 0o777, 0o700);
+		assert.deepEqual(f.requests, [], 'the protected matching receipt still needs no network');
+		assert.deepEqual(fs.readFileSync(f.file), f.binary);
+	} finally { fs.rmSync(f.pluginDir, { recursive: true, force: true }); }
+});
+
 test('a replaced binary and matching self-written receipt never grant execution trust, online or offline', async () => {
 	const f = setup();
 	const options = { vault: f.pluginDir, receipt: f.receipt, device: 'fixture-device', version: '0.0.1-alpha.1', offline: false, platform: 'linux', arch: 'x64', fetch: f.fetch };
@@ -115,9 +127,10 @@ test('downloads from the matching release, verifies, then reuses the verified fi
 test('a hand-placed file is accepted only when it matches the published digest', async () => {
 	const f = setup();
 	fs.mkdirSync(path.dirname(f.file), { recursive: true });
-	fs.writeFileSync(f.file, f.binary);
+	fs.writeFileSync(f.file, f.binary, { mode: 0o600 });
 	await ensureHelper({ vault: f.pluginDir, receipt: f.receipt, device: 'fixture-device', version: '0.0.1-alpha.1', offline: false, platform: 'linux', arch: 'x64', fetch: f.fetch });
 	assert.equal(f.requests.length, 1, 'only the digest was requested');
+	if (process.platform !== 'win32') assert.equal(fs.statSync(f.file).mode & 0o777, 0o700);
 	const g = setup();
 	fs.mkdirSync(path.dirname(g.file), { recursive: true });
 	fs.writeFileSync(g.file, 'unknown');
@@ -141,9 +154,10 @@ test('offline mode never downloads and requires an installed file', async () => 
 	const f = setup();
 	await assert.rejects(ensureHelper({ vault: f.pluginDir, receipt: f.receipt, device: 'fixture-device', version: '0.0.1-alpha.1', offline: true, platform: 'linux', arch: 'x64', fetch: f.fetch }), (error: unknown) => error instanceof BinaryError && error.code === 'offlineMissing');
 	fs.mkdirSync(path.dirname(f.file), { recursive: true });
-	fs.writeFileSync(f.file, 'any');
+	fs.writeFileSync(f.file, 'any', { mode: 0o600 });
 	await assert.rejects(ensureHelper({ vault: f.pluginDir, receipt: f.receipt, device: 'fixture-device', version: '0.0.1-alpha.1', offline: true, platform: 'linux', arch: 'x64', fetch: f.fetch }), (error) => error instanceof BinaryError && error.code === 'offlineMissing');
 	assert.deepEqual(f.requests, []);
+	if (process.platform !== 'win32') assert.equal(fs.statSync(f.file).mode & 0o777, 0o600, 'untrusted bytes must remain non-executable');
 	await assert.rejects(ensureHelper({ vault: f.pluginDir, receipt: f.receipt, device: 'fixture-device', version: '0.0.1-alpha.1', offline: false, platform: 'win32', arch: 'arm64', fetch: f.fetch }), (error: unknown) => error instanceof BinaryError && error.code === 'unsupported');
 });
 
