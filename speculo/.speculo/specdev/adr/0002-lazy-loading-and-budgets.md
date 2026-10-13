@@ -1,26 +1,24 @@
-English | [简体中文](0002-lazy-loading-and-budgets.ZH.md)
+# ADR-0002：懒加载与打包预算
 
-# ADR-0002: Lazy loading and bundle budgets
+状态：已接受。2026-10-13 依据 2026-10-11-vault-data-unification 的实现与验收证据核对；保留稳定决定。
 
-Status: accepted. Checked against the code on 2026-10-08.
+## 问题
 
-## Problem
+Obsidian 只加载一个 `main.js`。在单个 CommonJS 文件里，启动代码的任何一条静态导入，都会让被导入的代码在启动时执行，不论用户是否使用该功能。插件带有大型库（终端模拟器、图表、日历、图标数据），不加管理的导入会让每次 Obsidian 启动都为这些库付出代价。
 
-Obsidian loads one `main.js`. In a single CommonJS file, any static import from startup code makes the imported code run at startup, whether or not the user uses the feature. The plugin carries large libraries (terminal emulator, charts, calendars, icon data), so unmanaged imports would make every Obsidian start pay for all of them.
+## 决定
 
-## Decision
+- **一个包，惰性初始化。** esbuild 把 `src/app/main.ts` 构建为一个不做代码拆分的 CommonJS `main.js`。只能经 `import()` 到达的文件会被包进惰性初始化器，在首次导入时执行。启动代码里的一条静态边，会把目标的整个闭包拉进启动集合。
+- **哪些是启动代码。** `src/app/main.ts` 及其静态导入：注册表、设置运行时、清单、所有 `api.ts`、设置 schema、工作台与评论叶子类、主题运行时和启动词典。
+- **哪些是懒加载。** 外壳在工作台叶子打开时加载。模块代码经 `manifest.load()` 加载。页面和设置页在首次使用时，从模块实例的 `pages` 与 `settingsPage` 加载器加载。重型库（`chart.js`、`lunar-typescript`、xterm、图标数据）在模块内部的第二层 `import()` 之后加载。`module.ts` 从不静态导入自己的 `ui/`。导入说明符是字面量，没有任何东西靠导入副作用来注册自己。
+- **预算。** `scripts/check-bundle.mjs` 用 esbuild metafile 在内存中构建，计算启动时执行的集合和每个模块的激活闭包。`scripts/bundle-budget.json` 保存现行上限：启动、每个模块的激活上限、不得进入启动集合的库清单，以及 main.js 与 styles.css的总量上限。超出任一上限时 `pnpm run check:bundle` 失败，CI 会运行它。当前数值见[当前基线](../context/current-baseline.md)。
+- **总量只降不升。** 总量上限限制增长。提高上限需要在提出该修改的 change 中写明理由。
+- **样式。** Obsidian 只允许一份样式表，CSS 无法懒加载。`styles.css` 是一份已提交的文件，由 `src/styles.json` 列出的作者文件按该顺序（即层叠顺序）拼接。作用于 Obsidian 自身界面的模块规则，挂在模块只在启用期间才添加的 body 类之下。
 
-- **One bundle, lazy initializers.** esbuild builds `src/app/main.ts` into one CommonJS `main.js` without code splitting. A file reachable only through `import()` is wrapped in a lazy initializer and runs on first import. One static edge from startup code pulls the whole closure of its target into the startup set.
-- **What is startup code.** `src/app/main.ts` and what it imports statically: the registry, the settings runtime, the manifests, every `api.ts`, the settings schemas, the workbench and comments leaf classes, the theme runtime and the startup dictionaries.
-- **What is lazy.** The shell loads when a workbench leaf opens. Module code loads through `manifest.load()`. Pages and settings pages load on first use from the `pages` and `settingsPage` loaders of the module instance. Heavy libraries (`chart.js`, `lunar-typescript`, xterm, icon data) load behind a second `import()` inside the module. `module.ts` never imports its own `ui/` statically. Import specifiers are literals, and nothing registers itself through an import side effect.
-- **Budgets.** `scripts/check-bundle.mjs` builds in memory with an esbuild metafile and computes the startup-evaluated set and each module's activation closure. `scripts/bundle-budget.json` holds the ceilings: 120 KiB at startup, an activation ceiling per module, a list of libraries that may not enter the startup set, and ceilings for the total `main.js` (3.75 MiB) and `styles.css` (720 KiB). `pnpm run check:bundle` fails when a ceiling is exceeded, and CI runs it. The current values are in the [current baseline](../context/current-baseline.md).
-- **Totals only go down.** The total ceilings limit growth. Raising one needs a written reason in the change that raises it.
-- **Styles.** Obsidian allows one stylesheet, so CSS cannot load lazily. `styles.css` is one committed file joined from the author files listed in `src/styles.json`, in that cascade order. Module rules that affect Obsidian's own interface are scoped under a body class that the module adds only while it is active.
+## 影响
 
-## Consequences
+懒加载的文件仍然作为同一个文件的一部分被读取和预解析，所以总量要有自己的上限。启动代码不能使用模块的内部实现，只能读取清单和 `api.ts`。
 
-Lazy files are still read and pre-parsed as part of the one file, which is why the totals have ceilings of their own. Startup code cannot use a module's internals; it reads manifests and `api.ts` files only.
+## 依据
 
-## Evidence
-
-[Bundle check](../../../../scripts/check-bundle.mjs), [budgets](../../../../scripts/bundle-budget.json), [esbuild options](../../../../scripts/esbuild-options.mjs). `pnpm run check:bundle` in CI; `pnpm test:architecture` rejects static edges from `app` to module internals and from `module.ts` to its `ui/`.
+[打包检查](../../../../scripts/check-bundle.mjs)、[预算](../../../../scripts/bundle-budget.json)、[esbuild 选项](../../../../scripts/esbuild-options.mjs)。CI 中的 `pnpm run check:bundle`；`pnpm test:architecture` 拒绝 `app` 到模块内部、`module.ts` 到自己 `ui/` 的静态边。

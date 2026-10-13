@@ -1,82 +1,80 @@
-English | [简体中文](domain-layout.ZH.md)
+# NAND 开发文档入口
 
-# NAND development documentation
+本页是贡献者和编程智能体的入口。英文是默认文本，也是规范文本。这里的每份文档在同目录下都有简体中文版本，文件名在扩展名前加 `.ZH`。
 
-This is the entry point for contributors and coding agents. English is the default and canonical text. Every document here has a Simplified Chinese counterpart next to it, with `.ZH` before the extension.
+## 从哪里读起
 
-## Where to read
-
-| You want to know | Open |
+| 想了解 | 打开 |
 |---|---|
-| How to change code: modules, lazy loading, settings, strings, tests, build, licensing | [Development rules](../../../../.agents/skills/dev/SKILL.md) |
-| How to render inside the workbench: shell, design system, theme, motion, accessibility | [Interface rules](../../../../.agents/skills/ui/SKILL.md) |
-| What the code is now: modules, data locations, budgets, gates | [Current baseline](../context/current-baseline.md) |
-| What has been verified and what has not | [Validation](../context/validation.md) |
-| Which module owns which data and how modules cooperate | [Domain map](../context/context-map.md) |
-| Why the architecture is the way it is | the ADR index below |
-| What users see: settings, data, privacy, each page | [User guides](../../../../docs/README.md) |
+| 如何修改代码：模块、懒加载、设置、文案、测试、构建、许可 | [开发规则](../../../../.agents/skills/dev/SKILL.md) |
+| 如何在工作台内渲染：外壳、设计系统、主题、动效、无障碍 | [界面规则](../../../../.agents/skills/ui/SKILL.md) |
+| 代码现在是什么：模块、数据位置、预算、门禁 | [当前基线](../context/current-baseline.md) |
+| 已验证与未验证的内容 | [验证](../context/validation.md) |
+| 各模块拥有哪些数据、如何协作 | [领域图](../context/context-map.md) |
+| 架构为什么是现在这样 | 下面的 ADR 索引 |
+| 用户看到什么：设置、数据、隐私、各个页面 | [用户指南](../../../../docs/README.md) |
 
-## Domain terms
+## 领域术语
 
-These terms are used the same way in code, documents and the interface. Terms that belong to one module are in the [domain map](../context/context-map.md).
+下列术语在代码、文档和界面中含义一致。只属于某个模块的术语见[领域图](../context/context-map.md)。
 
-| Term | Meaning |
+| 术语 | 含义 |
 |---|---|
-| Workbench | The one product view, `nand-workbench-view`: a rail, a side panel and a page area. The comments side panel, `nand-comments-view`, is the only other registered view type. |
-| Rail, side panel, page | The three columns of the workbench: module icons, the selected module's navigation, and the content. |
-| Module | A feature with a manifest, a lazy entry and its own lifecycle. The ids are `home`, `agent`, `browser`, `archives`, `automations`, `notifications`, `icons`, `comments` and `sync`. |
-| Feature | A workbench destination owned by a module: `dashboard` (home), `terminal` (agent), `browser`, `contacts` (archives), `automations`, `notifications`, `icons`, `comments`, `records` (home), `sync`, and `settings` (the app). |
-| Manifest | The data-only description of a module, read at startup. Module code is reached only through its `load()`. |
-| Service, contribution point | The only way modules cooperate. A service is a typed interface one module provides; a contribution point collects values from several modules. Both are declared in the owner's `api.ts`. |
-| Lease | The result of acquiring a service. Its `revoked` signal aborts when the providing module stops. |
-| Settings namespace | One schema-backed group of settings, such as `app`, `theme` or a module id. |
-| Vault scope, device scope | Where a setting is stored: shared by every device of the vault, or only on this machine. |
-| Device id | A stable id of this machine, used to keep per-device state apart inside a synced vault. |
-| `.nand/` | The vault folder for NAND configuration and runtime JSON, organized by domain and device. |
-| Terminal helper | The native `nand-pty` program that owns pseudo-terminals and talks to the plugin over standard input and output. |
-| Board | A Markdown note rendered by the home module as sections and widgets. |
-| Archive | A person or company entry stored as a folder with a Markdown record in the archives module. |
+| 工作台 | 唯一的产品视图 `nand-workbench-view`，由图标轨、二级面板和页面区组成。评论侧栏 `nand-comments-view` 是仅有的另一个视图类型。 |
+| 图标轨、二级面板、页面 | 工作台的三栏：模块图标、所选模块的导航、内容。 |
+| 模块 | 带清单、懒加载入口和独立生命周期的功能。编号为 `home`、`agent`、`browser`、`archives`、`automations`、`notifications`、`icons`、`comments`、`sync`。 |
+| 功能 | 由模块拥有的工作台目的地：`dashboard`（home）、`terminal`（agent）、`browser`、`contacts`（archives）、`automations`、`notifications`、`icons`、`comments`、`records`（home）、`sync`，以及属于应用本身的 `settings`。 |
+| 清单 | 模块的纯数据描述，启动时读取。模块代码只能经它的 `load()` 到达。 |
+| 服务、贡献点 | 模块之间唯一的协作方式。服务是一个模块提供的带类型接口；贡献点汇集多个模块提供的值。二者都声明在所有者的 `api.ts` 中。 |
+| 租约 | 获取服务的结果。提供服务的模块停止时，它的 `revoked` 信号中止。 |
+| 设置命名空间 | 一组由 schema 约束的设置，例如 `app`、`theme` 或某个模块编号。 |
+| 库级、设备级 | 设置的保存范围：同一个库的所有设备共用，或只属于这台设备。 |
+| 设备编号 | 这台设备的稳定编号，用来在被同步的库中区分各设备自己的状态。 |
+| `.nand/` | 库中存放 NAND 配置和运行时 JSON 的目录，按领域和设备组织。 |
+| 终端辅助进程 | 原生程序 `nand-pty`，持有伪终端，并通过标准输入输出与插件通信。 |
+| 看板 | 由 home 模块渲染为栏目和小组件的 Markdown 笔记。 |
+| 档案 | archives 模块中以文件夹加 Markdown 记录保存的人物或企业条目。 |
 
-## Where things live
+## 各部分所在位置
 
-| Path | Content |
+| 路径 | 内容 |
 |---|---|
-| `src/app/` | Plugin entry, module registry and contracts, settings runtime, commands, workbench composition |
-| `src/shell/`, `src/ui/`, `src/theme/` | Workbench UI, design system, global theme |
-| `src/host/`, `src/shared/` | Obsidian and desktop adapters; pure utilities, settings store, storage helpers, i18n runtime |
-| `src/modules/<id>/` | One folder per module: `manifest.ts`, `api.ts`, `module.ts`, `settings.ts`, `i18n.ts`, `core`, `platform`, `services`, `contrib`, `ui`, `styles` |
-| `native/pty-server/` | The Rust terminal helper |
-| `scripts/` | Build, budget, architecture, i18n, docs, notice and acceptance scripts |
-| `test/` | Shared fixtures, including the user-format golden samples |
-| `docs/` | User guides and third-party attribution notes |
-| `.agents/skills/` | The development and interface rules |
-| `speculo/` | The SpecDev tooling (commands, skills, workflows, `config.json`) |
-| `speculo/.speculo/` | SpecDev runtime state; `README.md` there describes its contract |
-| `speculo/.speculo/specdev/` | This project's knowledge: `adr/`, `context/`, `.config/`, `status.json`, and the empty `changes/`, `archive/` and `research/` folders |
+| `src/app/` | 插件入口、模块注册表与契约、设置运行时、命令、工作台装配 |
+| `src/shell/`、`src/ui/`、`src/theme/` | 工作台界面、设计系统、全局主题 |
+| `src/host/`、`src/shared/` | Obsidian 与桌面适配；纯工具、设置存储、存储辅助、i18n 运行时 |
+| `src/modules/<id>/` | 每个模块一个目录：`manifest.ts`、`api.ts`、`module.ts`、`settings.ts`、`i18n.ts`、`core`、`platform`、`services`、`contrib`、`ui`、`styles` |
+| `native/pty-server/` | Rust 终端辅助进程 |
+| `scripts/` | 构建、预算、架构、i18n、文档、署名与验收脚本 |
+| `test/` | 共享夹具，包括用户数据格式的黄金样例 |
+| `docs/` | 用户指南与第三方署名说明 |
+| `.agents/skills/` | 开发规则与界面规则 |
+| `speculo/` | SpecDev 工具（commands、skills、workflows、`config.json`） |
+| `speculo/.speculo/` | SpecDev 运行时状态；其中的 `README.md` 说明约定 |
+| `speculo/.speculo/specdev/` | 本项目的知识：`adr/`、`context/`、`.config/`、`status.json`，以及活动 `changes/`、历史 `archive/` 和研究 `research/` |
 
-## Architecture decisions
+## 架构决定
 
-| ADR | Decision |
+| ADR | 决定 |
 |---|---|
-| [0001](../adr/0001-module-contract.md) | Zones, module contract, registry, services and contribution points |
-| [0002](../adr/0002-lazy-loading-and-budgets.md) | One bundle, lazy module code, startup and size budgets |
-| [0003](../adr/0003-namespaced-settings-store.md) | Namespaced settings with vault and device scopes |
-| [0004](../adr/0004-data-placement.md) | Markdown for user content, `.nand/` for configuration and runtime state, safe document writes |
-| [0005](../adr/0005-three-column-workbench.md) | The three-column workbench and its two view types |
-| [0006](../adr/0006-global-theme.md) | The global theme |
-| [0007](../adr/0007-interface-language.md) | Interface language and dictionaries |
-| [0008](../adr/0008-terminal-helper.md) | The terminal helper and its stdio frame protocol |
-| [0009](../adr/0009-agent-sessions-and-history.md) | Agent sessions and vault-scoped native history |
-| [0010](../adr/0010-browser-sessions.md) | Browser partitions, permissions and page lifetime |
-| [0011](../adr/0011-automation-and-notifications.md) | Device-owned automation runs and independent notification receipts |
-| [0012](../adr/0012-git-sync.md) | Git sync with the system git |
-| [0013](../adr/0013-license-and-attribution.md) | MIT license and third-party attribution |
+| [0001](../adr/0001-module-contract.md) | 分区、模块契约、注册表、服务与贡献点 |
+| [0002](../adr/0002-lazy-loading-and-budgets.md) | 单一打包文件、模块代码懒加载、启动与体积预算 |
+| [0003](../adr/0003-namespaced-settings-store.md) | 带库级与设备级范围的命名空间设置 |
+| [0004](../adr/0004-data-placement.md) | 用户内容用 Markdown，配置与运行状态进 `.nand/`，安全写入文档 |
+| [0005](../adr/0005-three-column-workbench.md) | 三栏工作台及其两个视图类型 |
+| [0006](../adr/0006-global-theme.md) | 全局主题 |
+| [0007](../adr/0007-interface-language.md) | 界面语言与词典 |
+| [0008](../adr/0008-terminal-helper.md) | 终端辅助进程与 stdio 帧协议 |
+| [0009](../adr/0009-agent-sessions-and-history.md) | Agent 会话与限定在当前库的原生历史 |
+| [0010](../adr/0010-browser-sessions.md) | 浏览器分区、权限与页面生命周期 |
+| [0011](../adr/0011-automation-and-notifications.md) | 设备所属的自动化运行与独立的通知回执 |
+| [0012](../adr/0012-git-sync.md) | 使用系统 git 的 Git 同步 |
+| [0013](../adr/0013-license-and-attribution.md) | MIT 许可与第三方署名 |
 
-## Documentation rules
+## 文档规则
 
-- The source and reproducible checks outrank prose. When they disagree, fix the document.
-- Documents describe what is true now, in the present tense. A claim about a platform, version or account is written as verified only when [validation](../context/validation.md) says so.
-- Each document has one owner: user guides describe operation and data; the domain map defines terms and ownership; ADRs explain decisions; the baseline and validation documents state facts and measured results. They do not copy each other.
-- User guides, repository entries and permanent SpecDev knowledge are bilingual: the English file is canonical, the Chinese file mirrors it, and each starts with a language switch line. Change and archive workflow artifacts keep their working or captured source language; immutable issue captures are not rewritten for translation. Skills under `.agents/` are Chinese only. Original license texts keep their original language; third-party reference guides under `docs/` remain bilingual.
-- `changes/` holds only work in progress and `status.json` lists exactly those directories. `pnpm test:docs` checks links, anchors, the status index and the required documents.
-- Third-party licenses and source attributions are kept with the code that uses them (`NOTICE`, `THIRD-PARTY-NOTICES.md`).
+- 源码与可复现的检查优先于文字说明。两者不一致时，修改文档。
+- 文档只写当前成立的事实，用现在时。关于平台、版本或账号的说法，只有[验证](../context/validation.md)写明已验证时才能写成已验证。
+- 每份文档只有一个归属：用户指南说明操作与数据；领域图定义术语与归属；ADR 解释决定；基线与验证文档陈述事实和实测结果。彼此不复制。
+- 当前维护文档只保留中文，根README保留双语；产品t()与en/zh不变。原始许可、署名、测试夹具与历史归档保留原文。永久知识只经A网关提升，过时重复副本合并后删除。
+- `changes/` 只放进行中的工作，`status.json` 恰好列出这些目录。`pnpm test:docs` 检查链接、锚点、状态索引和必备文档。
+- 第三方许可与来源署名与使用它们的代码放在一起（`NOTICE`、`THIRD-PARTY-NOTICES.md`）。

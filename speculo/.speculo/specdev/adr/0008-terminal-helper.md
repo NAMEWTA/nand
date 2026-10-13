@@ -1,28 +1,27 @@
-English | [简体中文](0008-terminal-helper.ZH.md)
+# ADR-0008：终端辅助进程与 stdio 帧协议
 
-# ADR-0008: Terminal helper and stdio frame protocol
+状态：已接受。2026-10-13 依据 2026-10-11-vault-data-unification 的实现与验收证据核对；保留稳定决定。
 
-Status: accepted. Checked against the code on 2026-10-08.
+## 问题
 
-## Problem
+终端需要原生伪终端（Windows 上是 ConPTY），但 Obsidian 渲染进程无法持有伪终端。本地端口上的网络服务会带来端口冲突、鉴权和重连状态。辅助进程还必须能以 MIT 许可证分发。
 
-The terminal needs native pseudo-terminals (ConPTY on Windows), but the Obsidian renderer process cannot hold one. A network service on a local port would add port conflicts, authentication and reconnection state. The helper must also be distributable under the MIT license.
+## 决定
 
-## Decision
+- **一个辅助进程。** `nand-pty`（`native/pty-server`，Rust，基于 `portable-pty`）由agent模块按需持有，活跃会话共享；辅助进程退出后可按需重新启动。插件只通过它的标准输入和标准输出与它通信。它不打开端口，也不需要令牌。
+- **帧。** 帧由 4 字节大端长度、1 字节类型（控制、会话输入、会话输出）和正文组成。控制正文是 UTF-8 JSON（`hello`、`spawn`、`resize`、`ack`、`end`、`history`）。会话帧以 4 字节会话编号开头。帧正文最大 16 MiB。握手 `hello` 携带协议版本（3）；辅助进程不接受时，会以明确的错误失败。
+- **生命周期。** 标准输入关闭时，辅助进程结束所有会话并退出。在 Windows 上，它加入一个作业对象，退出时作业对象终止其子进程。在类 Unix 系统上，结束会话时先挂断进程组，等待 2 秒，再强制终止。
+- **每个会话一个权威模型。** 输出先进入插件中的 headless xterm 模型，模型解析后确认字节数。某个会话未确认的数据超过 1 MiB 时，辅助进程暂停读取，低于 256 KiB 时恢复。设备查询（DA、CPR、DSR、DECRQM、颜色、尺寸、kitty 标志）只由模型应答；可见视图吞掉这些查询，因此隐藏会话和自动化会话不会卡住，应答也不会重复。
+- **视图可随时丢弃。** 可见视图先重放模型的序列化快照，再跟随实时输出。关闭页面或叶子只释放视图，会话继续运行。关闭模块或卸载插件会结束所有会话。
+- **历史在同一个进程中。** 原生历史的扫描、查询、读取和取消，都是发给同一个辅助进程的请求（`history`），同一时间只有一次扫描在写索引。见 [ADR-0009](0009-agent-sessions-and-history.md)。
+- **分发。** helper只由CI为五个平台构建并发布，安装到 `.nand/helpers/<device-id>/<platform-arch>/<version>/`，严格匹配插件Release正式摘要。各版本独立，升级保留旧文件；开发override只复制到库内执行。旧明文stamp不能授予执行信任，旧匹配字节需正式摘要核验后复用；可信本机保护回执供离线复用，异机/失效/无保护需重新在线核验。Linux basic_text不作可信保护。可信缓存丢失POSIX执行位时，只在摘要或受保护回执通过后恢复0700；不可信离线字节不改变权限。
+- **运行数据。** helper与普通Shell的HOME、配置、缓存和临时目录也在vault/.nand。CLI会话采用各自的库内账号环境。
+- **来源。** 辅助进程和终端代码是为 NAND 编写的，以 MIT 许可证发布。它们依据公开的规范和文档构建：xterm 控制序列、kitty 键盘协议、win32-input-mode、ConPTY、OSC 7 与 shell 集成序列，以及 xterm.js 和 `portable-pty` 的文档。Orca（MIT）在 `NOTICE` 中署名。见 [ADR-0013](0013-license-and-attribution.md)。
 
-- **One helper process.** `nand-pty` (`native/pty-server`, Rust, built on `portable-pty`) is started at most once per plugin load. The plugin talks to it only through its standard input and output. It opens no port and needs no token.
-- **Frames.** A frame is a 4-byte big-endian length, a 1-byte kind (control, session input, session output) and the body. Control bodies are UTF-8 JSON (`hello`, `spawn`, `resize`, `ack`, `end` and `history`). Session frames start with a 4-byte session number. A frame body is at most 16 MiB. The handshake `hello` carries the protocol version (3); a helper that does not accept it fails with a clear error.
-- **Lifetime.** When its standard input closes, the helper ends every session and exits. On Windows it joins a job object that kills its children when it exits. On Unix-like systems, ending a session hangs up the process group, waits 2 seconds and then forces it down.
-- **One authoritative model per session.** Output first goes into a headless xterm model in the plugin, which acknowledges bytes after parsing them. The helper pauses reading a session when more than 1 MiB is unacknowledged and resumes below 256 KiB. Device queries (DA, CPR, DSR, DECRQM, colors, size, kitty flags) are answered only by the model; visible views swallow them, so hidden sessions and automation sessions never stall and answers are never duplicated.
-- **Views are disposable.** A visible view replays a serialized snapshot of the model, then follows live output. Closing a page or a leaf releases the view and the session continues. Turning the module off or unloading the plugin ends every session.
-- **History in the same process.** Native history scanning, querying, reading and cancelling are requests (`history`) to the same helper, with one scan writing the index at a time. See [ADR-0009](0009-agent-sessions-and-history.md).
-- **Distribution.** The helper is built only by CI, for linux-x64, linux-arm64, darwin-x64, darwin-arm64 and win32-x64, and published as release assets `nand-pty-<platform>-<arch>[.exe]` with a `.sha256` file. On first use the plugin downloads the asset of the release with its own version into `<plugin folder>/binaries/`, checks the SHA-256 and runs it. Offline mode uses only a helper that is already installed. `NAND_PTY_BINARY` points development runs at a local build. No binary is committed.
-- **Provenance.** The helper and the terminal code are written for NAND and released under the MIT license. They are built from public specifications and documentation: xterm control sequences, the kitty keyboard protocol, win32-input-mode, ConPTY, OSC 7 and shell integration sequences, and the documentation of xterm.js and `portable-pty`. Orca (MIT) is credited in `NOTICE`. See [ADR-0013](0013-license-and-attribution.md).
+## 影响
 
-## Consequences
+一个进程承载所有会话，所以辅助进程崩溃会让它们全部断开。插件显示原因，并在下次需要终端时重启辅助进程。作为交换，没有端口、令牌和重连状态。
 
-One process hosts all sessions, so a helper crash disconnects all of them. The plugin shows the reason and restarts the helper the next time a terminal is needed. In exchange there is no port, token or reconnect state.
+## 依据
 
-## Evidence
-
-[Frames](../../../../native/pty-server/src/frame.rs), [helper main](../../../../native/pty-server/src/main.rs), [sessions](../../../../native/pty-server/src/session.rs), [session model](../../../../src/modules/agent/services/terminal/session.ts), [session manager](../../../../src/modules/agent/services/terminal/sessions.ts), [binary installer](../../../../src/modules/agent/platform/desktop/pty/binary.ts). `cargo test --locked` (frames, sessions, flow control, hangup, stdio end to end); Vitest suites for the session model and for a real helper process; `scripts/verify-pty-helper.mjs` on five targets in CI; the terminal pages of the real-Obsidian probe.
+[帧](../../../../native/pty-server/src/frame.rs)、[辅助进程入口](../../../../native/pty-server/src/main.rs)、[会话](../../../../native/pty-server/src/session.rs)、[会话模型](../../../../src/modules/agent/services/terminal/session.ts)、[会话管理](../../../../src/modules/agent/services/terminal/sessions.ts)、[二进制安装](../../../../src/modules/agent/platform/desktop/pty/binary.ts)。`cargo test --locked`（帧、会话、流控、挂断、stdio 端到端）；针对会话模型和真实辅助进程的 Vitest 用例；CI 在五个目标上运行 `scripts/verify-pty-helper.mjs`；真实 Obsidian 探针中的终端页面。

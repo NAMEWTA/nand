@@ -1,11 +1,7 @@
 {
   "schema_version": 5,
   "workflow": "specdev",
-  "active": [
-    {
-      "change": "2026-10-11-vault-data-unification"
-    }
-  ],
+  "active": [],
   "archived": [
     "2026-10-08-all-open-issues",
     "2026-10-08-archives-completion",
@@ -15,6 +11,7 @@
     "2026-10-08-news-aihot",
     "2026-10-08-private-storage-permissions",
     "2026-10-08-terminal-reliability",
-    "2026-10-08-workbench-regressions"
+    "2026-10-08-workbench-regressions",
+    "2026-10-11-vault-data-unification"
   ]
 }

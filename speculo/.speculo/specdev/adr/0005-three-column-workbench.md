@@ -1,29 +1,27 @@
-English | [简体中文](0005-three-column-workbench.ZH.md)
+# ADR-0005：三栏工作台
 
-# ADR-0005: Three-column workbench
+状态：已接受。2026-10-13 依据 2026-10-11-vault-data-unification 的实现与验收证据核对；保留稳定决定。
 
-Status: accepted. Checked against the code on 2026-10-08.
+## 问题
 
-## Problem
+九个功能需要界面、设置和导航。如果每个功能都有自己的视图类型和功能区入口，导航会散落在 Obsidian 界面各处，并与业务生命周期绑在一起：关闭一个标签页可能结束终端会话，显示一个页面可能启动一个进程。
 
-Nine features need screens, settings and navigation. One view type and one ribbon entry per feature would scatter navigation across the Obsidian UI and tie it to business lifecycles: closing a tab could end a terminal session, and showing a page could start a process.
+## 决定
 
-## Decision
+- **两个视图类型。** 插件注册 `nand-workbench-view`（工作台）和 `nand-comments-view`（评论侧栏）。任何产品界面都没有自己的视图类型。功能区只有一个入口，用来打开工作台。
+- **三栏。** 图标轨（第 1 栏）放模块图标：上部是 home、agent、browser、archives、automations、sync、icons 和 comments，下部是 notifications（带未读角标）和设置。二级面板（第 2 栏）显示所选模块的导航。页面区（第 3 栏）显示内容。点击当前图标会收起或展开面板；点击其他图标会回到该模块在该叶子中的上次路由。关闭的模块从图标轨消失，失败的模块显示警告，已停用模块的路由显示「启用该模块」状态，而不是重定向。
+- **宽度跟随叶子。** 布局取决于叶子自身的宽度，而不是窗口的宽度：960 px 及以上为 `wide`，面板内嵌；600 至 959 px 为 `medium`，面板作为覆盖层；小于 600 px 或在手机上为 `narrow`，图标轨和面板合并为一个抽屉。
+- **贡献与页面。** `compose-workbench.ts` 为每个功能声明一个贡献：图标轨位置、导航树、二级面板模型、可用性（已启用、受支持、已就绪）、恢复时保留的页面状态键，以及 `create` 函数。功能的页面来自所属模块的 `ModuleInstance.pages`；打开页面会激活处于 idle 的模块。页面通过 `NativeSurface` 渲染。
+- **导航没有副作用。** 导航、切换分区或恢复路由，都不会启动会话、guest 页面或网络请求。关闭页面只释放呈现，业务状态归模块所有。隐藏的页面保持存活（`inert`），但标记为隐藏时释放的页面除外，例如通知收件箱。
+- **专注模式。** 「在新标签页中打开」和「在分屏中打开」会创建另一个锁定到某条路由、没有图标轨和面板的工作台叶子。叶子状态为 `{ target, focus, panelOpen, panelWidth, lastTargets, pages }`，加载时做规范化。保存的路由所指资源已不存在时，打开其所在分区。
+- **设置在工作台内。** 常规、外观、每个已启用产品一页以及关于，都是 `settings` 功能的页面。Obsidian 的设置页保留一个打开它们的入口。
+- **状态。** 状态（运行中的自动化、等待输入的 Agent 会话、需要处理的通知、同步行、看板保存失败）来自模块服务。有 Obsidian 状态栏时显示在状态栏，否则显示在页头。
+- **记录属于 home。** 习惯、记账、番茄钟和阅读页面是 `records` 功能，在图标轨上是 `dashboard` 的子项。
 
-- **Two view types.** The plugin registers `nand-workbench-view`, the workbench, and `nand-comments-view`, the comments side panel. No product screen has its own view type. The ribbon has one entry that opens the workbench.
-- **Three columns.** The rail (column 1) holds module icons: top slot for home, agent, browser, archives, automations, sync, icons and comments, bottom slot for notifications (with an unread badge) and settings. The side panel (column 2) shows the selected module's navigation. The page area (column 3) shows the content. Clicking the active icon collapses or expands the panel; clicking another icon returns to that module's last route in the leaf. A module that is off disappears from the rail, a failed module shows a warning, and a disabled module's route shows an "enable the module" state instead of redirecting.
-- **Width follows the leaf.** The layout depends on the leaf's own width, not the window's: 960 px or more is `wide` with an inline panel, 600 to 959 px is `medium` with the panel as an overlay, and under 600 px or on a phone is `narrow` with the rail and panel merged into one drawer.
-- **Contributions and pages.** `compose-workbench.ts` declares one contribution per feature: rail slot, navigation tree, side panel model, availability (enabled, supported, ready), the page state keys that survive restore, and a `create` function. A feature's page comes from the owning module's `ModuleInstance.pages`; opening it activates an idle module. Pages render through `NativeSurface`.
-- **Navigation has no side effects.** Navigating, switching a section or restoring a route never starts a session, a guest page or a network request. Closing a page releases its presentation only; business state belongs to the module. Hidden pages stay alive (`inert`), except those marked to be released when hidden, such as the notifications inbox.
-- **Focus mode.** "Open in new tab" and "open in split" create another workbench leaf locked to one route, without rail and panel. The leaf state is `{ target, focus, panelOpen, panelWidth, lastTargets, pages }` and is normalized on load. A saved route whose resource is gone opens its section.
-- **Settings are in the workbench.** General, Appearance, one page per enabled product and About are pages of the `settings` feature. Obsidian's settings tab keeps an entry that opens them.
-- **Status.** Statuses (running automations, agent sessions that wait for input, notifications that need attention, sync rows, board save failures) come from module services. They go to Obsidian's status bar when it exists and to the page header otherwise.
-- **Records belong to home.** Habit, expense, pomodoro and reading pages are the `records` feature, a child of `dashboard` on the rail.
+## 影响
 
-## Consequences
+新增功能是增加一个贡献和一个模块页面，而不是新增视图类型。导航不创建任何东西，所以很轻。外壳只看到契约，因此独立于模块内部实现。
 
-Adding a feature is a contribution plus a module page, not a new view type. Navigation stays cheap because it creates nothing. The shell stays independent of module internals because it sees only contracts.
+## 依据
 
-## Evidence
-
-[Workbench leaf](../../../../src/app/workbench/workbench-leaf.ts), [composition](../../../../src/app/workbench/compose-workbench.ts), [shell surface](../../../../src/shell/host/workbench-surface.tsx), [contracts](../../../../src/app/contracts/workbench.ts), [layout](../../../../src/shell/layout.ts). The layout, navigation-state and workbench-lifecycle tests, and the real-Obsidian probe.
+[工作台叶子](../../../../src/app/workbench/workbench-leaf.ts)、[装配](../../../../src/app/workbench/compose-workbench.ts)、[外壳界面](../../../../src/shell/host/workbench-surface.tsx)、[契约](../../../../src/app/contracts/workbench.ts)、[布局](../../../../src/shell/layout.ts)。布局、导航状态和工作台生命周期测试，以及真实 Obsidian 探针。

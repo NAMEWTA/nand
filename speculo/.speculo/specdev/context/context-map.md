@@ -1,106 +1,108 @@
-English | [简体中文](context-map.ZH.md)
+# 领域图
 
-# Domain map
-
-This map states which module owns which data and how modules cooperate. The source zones (`core`, `platform`, `services`, `ui`) are a code structure and do not match these domains. Terms that apply to the whole product are in the [documentation entry](../.config/domain-layout.md).
+本图说明各模块拥有哪些数据、模块之间如何协作。源码中的 `core`、`platform`、`services`、`ui` 是代码结构，与这里的领域划分不对应。适用于整个产品的术语见[文档入口](../.config/domain-layout.md)。
 
 ```mermaid
 flowchart TB
-  Shell["App: module registry, settings, workbench"] --> Pages["Module pages in the workbench"]
-  Home["home: boards, widgets, records"] -- contributes automation sources --> Automations
-  Archives["archives: people and companies"] -- contributes automation sources --> Automations
-  Automations["automations: definitions and runs"] -- uses agent runtime --> Agent
-  Automations -- sends requests --> Notifications["notifications: inbox and receipts"]
-  Automations -- contributes openers --> Notifications
-  Browser["browser: pages and permissions"] -- attaches material --> Agent["agent: terminal sessions and history"]
-  Home -- opens pages --> Browser
-  Automations -- opens pages --> Browser
-  Comments["comments: threads on notes"] -. editor and panel .-> Pages
-  Icons["icons: file icons and rules"] -. host decoration .-> Pages
-  Sync["sync: git for the vault"] -. status rows .-> Pages
+  Shell["App：模块注册表、设置、工作台"] --> Pages["工作台中的模块页面"]
+  Home["home：看板、小组件、记录"] -- 贡献自动化来源 --> Automations
+  Archives["archives：人物与企业"] -- 贡献自动化来源 --> Automations
+  Automations["automations：定义与运行"] -- 使用 agent 运行时 --> Agent
+  Automations -- 发送请求 --> Notifications["notifications：收件箱与回执"]
+  Automations -- 贡献打开器 --> Notifications
+  Browser["browser：页面与权限"] -- 附加材料 --> Agent["agent：终端会话与历史"]
+  Home -- 打开页面 --> Browser
+  Automations -- 打开页面 --> Browser
+  Comments["comments：笔记上的评论线程"] -. 编辑器与面板 .-> Pages
+  Icons["icons：文件图标与规则"] -. 宿主装饰 .-> Pages
+  Sync["sync：库的 git 同步"] -. 状态行 .-> Pages
 ```
 
-## Ownership
+## 数据归属
 
-| Domain | Owns | Cooperates through |
+| 领域 | 拥有 | 协作方式 |
 |---|---|---|
-| App | Module switches, language, theme, workbench layout, navigation, settings pages | Manifests, services, contribution points |
-| home | Boards, cards, todos, widgets, quick action references, habit, expense, pomodoro and reading records | Contributes `automations.sources`; provides `home.workbench` |
-| agent | The terminal helper, sessions, the authoritative buffer, native history index, agent launch catalog | Provides `agent.sessions`, `agent.workbench` and `agent.automation-runtime` |
-| browser | Pages, partitions, site permissions, restore metadata, the agent bridge | Provides `browser.open` and `browser.agent-bridge`; uses `agent.sessions` to attach material |
-| archives | People, companies, employments, relations, folder attachments | Contributes `automations.sources` |
-| automations | Automation definitions, schedule cursors, run records | Uses `agent.automation-runtime`; contributes `notifications.openers`; provides `automations.ui` |
-| notifications | The inbox and delivery receipts | Provides `notifications.inbox` |
-| icons | Icon rules, preferences, backups | Host decoration while active |
-| comments | Threads, anchors, message bodies | Provides `comments.panel` and `comments.index`; editor extension |
-| sync | The git repository state of the vault, commit, pull and push runs, per-device sync clock | Provides `sync.workbench` |
+| App | 模块开关、语言、主题、工作台布局、导航、设置页 | 清单、服务、贡献点 |
+| home | 看板、卡片、待办、小组件、快捷操作引用，习惯、记账、番茄钟与阅读记录 | 贡献 `automations.sources`；提供 `home.workbench` |
+| agent | 终端辅助进程、会话、权威缓冲、原生历史索引、Agent 启动目录 | 提供 `agent.sessions`、`agent.workbench`、`agent.automation-runtime` |
+| browser | 页面、分区、站点权限、恢复元数据、Agent 桥 | 提供 `browser.open` 与 `browser.agent-bridge`；通过 `agent.sessions` 附加材料 |
+| archives | 人物、企业、履历、关系、目录附件 | 贡献 `automations.sources` |
+| automations | 自动化定义、调度游标、运行记录 | 使用 `agent.automation-runtime`；贡献 `notifications.openers`；提供 `automations.ui` |
+| notifications | 收件箱与投递回执 | 提供 `notifications.inbox` |
+| icons | 图标规则、偏好、备份 | 模块启用期间装饰宿主界面 |
+| comments | 线程、锚点、消息正文 | 提供 `comments.panel` 与 `comments.index`；编辑器扩展 |
+| sync | 库的 git 仓库状态、提交／拉取／推送运行、每台设备的同步计时 | 提供 `sync.workbench` |
 
-Showing several domains in one workbench does not change who owns their data.
+多个领域显示在同一个工作台里，不改变它们数据的归属。
 
 ## home
 
-- **Board document**: a Markdown note chosen by the user. It holds a banner, sections, cards, todos and widgets.
-- **Managed region**: the part of a note that NAND updates in place. Anything outside it belongs to the user.
-- **Quick action reference**: the stable id of an automation definition. It does not copy parameters or run state.
-- **Widget**: one presentation of a domain service. Closing a panel does not delete records.
-- **Records**: habits, expenses, pomodoro sessions and reading. They are pages of the home module (feature `records`), not a separate module. Entity documents hold stable identities such as a habit or a book; per-day record files are split by domain, year and date, and each record has a stable row id.
-- **Document baseline**: the content observed when editing started. It is the base of a three-way comparison with the current edit and the latest content on disk.
-- **Save state**: saved, saving, unsaved or conflict. A failed save is never shown as saved.
-- **Logical delete**: the document is kept and gets `nand-deleted`; the business file is not removed.
-- **Recovery draft**: the input kept when a save fails. It is not a committed record.
+- **看板文档**：`.nand/content/` 内的受管 Markdown，包含横幅、栏目、卡片、待办和小组件。
+- **受管区域**：笔记中由 NAND 原地更新的部分。区域之外的内容属于用户。
+- **快捷操作引用**：指向自动化定义的稳定编号，不复制参数和运行状态。
+- **小组件**：某个领域服务的一种呈现。关闭面板不会删除记录。
+- **记录**：习惯、记账、番茄钟和阅读。它们是 home 模块的页面（功能 `records`），不是独立模块。实体文档保存习惯、书籍这类稳定身份；按日记录文件按领域、年份和日期拆分，每条记录有稳定的行编号。
+- **文档基线**：开始编辑时观察到的内容，用于与当前编辑内容、磁盘上的最新内容做三方比较。
+- **保存状态**：已保存、保存中、未保存或冲突。保存失败不会显示为已保存。
+- **逻辑删除**：保留文档并设置 `nand-deleted`，不删除业务文件。
+- **恢复草稿**：保存失败时保留的输入，不是已提交的记录。
 
 ## agent
 
-- **Terminal helper**: the MIT native program `nand-pty` that creates and drives pseudo-terminals over stdio frames. Its binary is downloaded per platform from the release of the same version and checked against a SHA-256 file.
-- **Native session**: a PTY and its CLI state held by the session manager. Its lifetime is independent of leaves and pages.
-- **Authoritative buffer**: the terminal output parsed by a headless xterm model. A visible view replays it before showing live output.
-- **Native history**: logs and resume protocols owned by each CLI. NAND reads them, limited to the current vault, and never modifies them.
-- **Context material**: a web page, an element, a screenshot, a note or an archive reference. It is pasted into the target session's input without being submitted. The target session is shown before attaching.
-- **Unknown state**: no reliable native event or data exists. NAND does not infer success from silence.
-- **Agent catalog**: the CLIs NAND can launch and detect: Claude Code, Codex, Gemini CLI, OpenCode, Pi and Grok.
+- **终端辅助进程**：MIT 许可的原生程序 `nand-pty`，通过 stdio 帧创建并驱动伪终端。二进制按平台从同版本的 Release 下载，并用 SHA-256 文件校验。
+- **原生会话**：会话管理器持有的 PTY 及其 CLI 状态，生命周期独立于叶子和页面。
+- **权威缓冲**：headless xterm 模型解析后的终端输出。可见视图先重放它，再显示实时输出。
+- **原生历史**：各 CLI 自己拥有的日志和恢复协议。NAND 只读取当前库范围内的部分，从不修改。
+- **上下文材料**：网页、元素、截图、笔记或档案引用。它被粘贴到目标会话的输入里，但不会提交；附加前先显示目标会话。
+- **未知状态**：没有可靠的原生事件或数据。NAND 不会因为没有输出就推断成功。
+- **Agent 目录**：NAND 可以检测和启动的 CLI：Claude Code、Codex、Gemini CLI、OpenCode、Pi 和 Grok。
 
 ## browser
 
-- **Partition**: the Electron session boundary shared by the vault's tabs, popups and sign-in windows (`persist:nand-browser-<vault id>`).
-- **Page identity**: a page instance and its version. A result from an old instance never writes into a new page.
-- **Element reference**: a reference valid inside one snapshot. Navigation or a version change requires a new snapshot.
-- **Site permission**: a decision recorded per origin. Sensitive permissions are denied unless granted.
-- **Page retirement**: after cancellation or a crash, a guest that cannot be used safely is released and a new page is created on demand.
+- **Session**：vault内按设备/profile划分的显式目录，所有NAND网页表面绑定它；Cookie/缓存/下载/桥接也归当前库。
+- **页面身份**：页面实例及其版本。旧实例的结果不会写入新页面。
+- **元素引用**：只在某一次快照内有效的引用。导航或版本变化后需要重新采集快照。
+- **站点权限**：按来源记录的决定。敏感权限在未授权时拒绝。
+- **页面退役**：取消或崩溃之后，无法安全使用的 guest 被释放，需要时再创建新页面。
 
 ## archives
 
-- **Entry**: a person or a company with a stable `nand-id`. The same name is not the same identity.
-- **Entry folder**: the folder one level below a category (`个人档案` for people, `企业档案` for companies) holding `基本信息.md` and related material.
-- **Employment**: a person's career record with an explicit current or former flag.
-- **Relation**: recorded on the person. Reverse views and a company's member list are derived.
-- **Attachment ownership**: decided by the folder. Search and lists use an incremental index.
+- **条目**：具有稳定 `nand-id` 的人物或企业。同名不代表同一身份。
+- **条目目录**：分类（人物为 `个人档案`，企业为 `企业档案`）下一层的目录，内含 `基本信息.md` 及相关资料。
+- **履历**：人物的任职记录，现任或曾任是明确字段。
+- **关系**：记录在人物上。反向视图和企业的成员列表由推导得到。
+- **附件归属**：由所在目录决定。搜索和列表使用增量索引。
 
-## automations and notifications
+## automations 与 notifications
 
-- **Standalone definition**: a Markdown file with a stable id, an action, a schedule and a device owner, under `NAND/自动化/`.
-- **Source definition**: a definition owned by a board todo, an archive or a widget. Automations index and update it through the source's contribution.
-- **Manual plan**: a definition without a time. It runs only on an explicit command.
-- **Run intent**: the record written before an action starts. A run that is still pending after a restart becomes interrupted and is not replayed.
-- **Executing device**: the local device id a definition is bound to. Copying or syncing the vault does not move it.
-- **Visible notification**: a readable and hideable message in the inbox.
-- **Delivery receipt**: the channel result of one run, stored apart from the message's visible state.
-- **Unknown delivery**: delivery could not be confirmed. External side effects are not retried automatically.
+- **独立定义**：`.nand/content/NAND/自动化/` 下的 Markdown 文件，带稳定编号、动作、时间和设备归属。
+- **来源定义**：由看板待办、档案或小组件拥有的定义。自动化通过来源的贡献点索引并更新它。
+- **手动计划**：没有时间的定义，只在显式命令下运行。
+- **运行意图**：动作开始前写下的记录。重启后仍未完成的运行会变为中断，不会重放。
+- **执行设备**：定义绑定的本机设备编号。复制或同步库不会转移它。
+- **可见通知**：收件箱中可读、可隐藏的消息。
+- **投递回执**：某次运行在各渠道的结果，与消息的可见状态分开保存。
+- **未知投递**：无法确认是否送达。外部副作用不会自动重试。
+
+## news
+
+资料、分析、热度与回执在 `.nand/news/<device-id>/`，收藏/简报/日报在 `.nand/content/`。news通过home小组件、agent提示词运行与通知打开器协作，不形成全局账号回退。
 
 ## icons
 
-- **Icon domain**: icons, colors and rules for files and native UI, independent of board settings.
-- **Rule**: a declaration matched in order that selects an icon or color.
-- **Independent store**: `.nand/icons/iconic.json` with rotating backups. The global settings only keep the module switch.
+- **图标领域**：文件与原生界面的图标、颜色和规则，独立于看板设置。
+- **规则**：按顺序匹配、选择图标或颜色的声明。
+- **独立存储**：`.nand/icons/iconic.json` 及轮换备份。全局设置只保存模块开关。
 
 ## comments
 
-- **Thread**: a comment and its replies attached to one anchor.
-- **Anchor**: a file, a text quote with surrounding context and cached offsets. A quote that cannot be located marks the thread orphaned and needs an explicit action.
-- **Sidecar storage**: comment JSON under `.nand/editor/comments/`. The note is never rewritten.
+- **线程**：围绕一个锚点的评论及回复。
+- **锚点**：文件、带上下文的文本引文和缓存的偏移量。无法定位的引文会把线程标为失效，需要用户显式处理。
+- **旁路存储**：`.nand/editor/comments/` 下的评论 JSON，从不改写笔记。
 
 ## sync
 
-- **Repository place**: the git repository around the vault, or around a folder inside it chosen on this device.
-- **Commit mode**: smart, staged only, or all. Smart commits what is staged and stages everything only when the index is empty and that option is on.
-- **Sync run**: commit, pull and push reported as steps. A failed or conflicted pull stops the push.
-- **Device sync state**: the automatic-sync clock and pause flag, kept inside the git directory so they are never committed.
+- **仓库位置**：库所在的 git 仓库，或本设备选定的库内某个文件夹所在的仓库。
+- **提交模式**：智能、仅已暂存、全部。智能模式提交已暂存的内容，只有索引为空且该选项开启时才暂存全部。
+- **同步运行**：提交、拉取、推送，按步骤报告。拉取失败或有冲突时，推送停止。
+- **设备同步状态**：自动同步的计时和暂停标记，保存在 git 目录内，因此不会被提交。

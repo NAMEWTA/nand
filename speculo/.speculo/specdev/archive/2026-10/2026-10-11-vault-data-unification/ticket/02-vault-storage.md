@@ -26,7 +26,7 @@ shared_path_owners: ["<Path>src/shared/**</Path> => root","<Path>src/host/**</Pa
 
 # T-02 统一路径、设备身份与内部状态
 
-先读取总体 Map <Path>{roots.state}/specdev/changes/2026-10-11-vault-data-unification/tickets-map.md</Path>，再读取其适用项目 Skill，最后读取本票；Skill 矩阵是最低要求。
+先读取总体 Map <Path>{roots.state}/specdev/archive/2026-10/2026-10-11-vault-data-unification/tickets-map.md</Path>，再读取其适用项目 Skill，最后读取本票；Skill 矩阵是最低要求。
 
 ## 1. 战略与来源
 
@@ -81,7 +81,7 @@ E2E owner/environment: root / current-workspace。提交已获用户授权；imp
 ## 10. 验收标准
 
 - [x] AC-002：所有 NAND 内部持久化进入当前 vault 的 .nand；禁止路径逃逸；设备映射只在库内保存，复制库不能误领其他设备的任务；迁移 localStorage 和同步业务状态。
-- [x] 非空实现、验证和双轴审查事实写入 <Path>{roots.state}/specdev/changes/2026-10-11-vault-data-unification/evidence/T-02.md</Path>。
+- [x] 非空实现、验证和双轴审查事实写入 <Path>{roots.state}/specdev/archive/2026-10/2026-10-11-vault-data-unification/evidence/T-02.md</Path>。
 - [x] 实际路径、Skill 摘要、命令结果、未验证范围与 Map 一致。
 
 ## 12. 停止、检查点与交付

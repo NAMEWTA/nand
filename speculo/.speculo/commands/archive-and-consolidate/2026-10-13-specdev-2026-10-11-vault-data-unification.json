@@ -1,9 +1,9 @@
 {
-  "mode": "dry-run",
+  "mode": "executed",
   "scope": "archive-single",
   "workflow": "specdev",
   "generated_at": "2026-10-13T09:06:48.350461+00:00",
-  "confirmed": false,
+  "confirmed": true,
   "path_context": {
     "project_root": ".",
     "state_root": "speculo/.speculo/specdev",
@@ -20,326 +20,382 @@
     {
       "target": "speculo/.speculo/specdev/adr/0001-module-contract.md",
       "removeDuplicate": "speculo/.speculo/specdev/adr/0001-module-contract.ZH.md",
-      "candidate": "speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/evidence/knowledge-candidates/adr/0001-module-contract.md.txt",
+      "candidate": "speculo/.speculo/specdev/archive/2026-10/2026-10-11-vault-data-unification/evidence/knowledge-candidates/adr/0001-module-contract.md.txt",
       "sourceSha256": "64ec8af9f455db54a314605afcc7faba80697bf714e935bd54ceb196990972c2",
       "canonicalBeforeSha256": "089a560be5d2211bc1e5824c6b3cb4d29241bef4767e4865066ca17563e931f6",
       "candidateSha256": "b2fa36cfcdf5214872580e6b9d48f7a66165dc061e072db3f1261d369dc1a8a4",
       "beforeCharacters": 5736,
       "afterCharacters": 1922,
-      "status": "candidate-not-promoted",
+      "status": "promoted-verified",
       "owner": "A",
       "sources": [
         "2026-10-11-vault-data-unification/ADR.md",
         "T-01..T-06 immutable implementation/Evidence",
         "99af3ef5c45da68539ec00f39f24b9685d3fc995",
         "T-08 source 9c0bd5c0c926e8d75b50e6587db37cc03240db71; release 38370493282 success, fresh13/13, upgrade15/15"
-      ]
+      ],
+      "verified_at": "2026-10-13T09:42:02.692138+00:00",
+      "promotedSha256": "b2fa36cfcdf5214872580e6b9d48f7a66165dc061e072db3f1261d369dc1a8a4",
+      "promotedCharacters": 1922
     },
     {
       "target": "speculo/.speculo/specdev/adr/0002-lazy-loading-and-budgets.md",
       "removeDuplicate": "speculo/.speculo/specdev/adr/0002-lazy-loading-and-budgets.ZH.md",
-      "candidate": "speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/evidence/knowledge-candidates/adr/0002-lazy-loading-and-budgets.md.txt",
+      "candidate": "speculo/.speculo/specdev/archive/2026-10/2026-10-11-vault-data-unification/evidence/knowledge-candidates/adr/0002-lazy-loading-and-budgets.md.txt",
       "sourceSha256": "aa6b877808ba1ad210aafe928281913624d117e7c1cad7619036900bca1e2881",
       "canonicalBeforeSha256": "bf37b607771536bcea17ca20b9620de7c9761415748e598079e2b55066f54956",
       "candidateSha256": "315df6110c07aa926ca803b720ff0b80359d4a382bb18f617cb4187fe4b2f4f3",
       "beforeCharacters": 4680,
       "afterCharacters": 1527,
-      "status": "candidate-not-promoted",
+      "status": "promoted-verified",
       "owner": "A",
       "sources": [
         "2026-10-11-vault-data-unification/ADR.md",
         "T-01..T-06 immutable implementation/Evidence",
         "99af3ef5c45da68539ec00f39f24b9685d3fc995",
         "T-08 source 9c0bd5c0c926e8d75b50e6587db37cc03240db71; release 38370493282 success, fresh13/13, upgrade15/15"
-      ]
+      ],
+      "verified_at": "2026-10-13T09:42:02.692138+00:00",
+      "promotedSha256": "315df6110c07aa926ca803b720ff0b80359d4a382bb18f617cb4187fe4b2f4f3",
+      "promotedCharacters": 1527
     },
     {
       "target": "speculo/.speculo/specdev/adr/0003-namespaced-settings-store.md",
       "removeDuplicate": "speculo/.speculo/specdev/adr/0003-namespaced-settings-store.ZH.md",
-      "candidate": "speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/evidence/knowledge-candidates/adr/0003-namespaced-settings-store.md.txt",
+      "candidate": "speculo/.speculo/specdev/archive/2026-10/2026-10-11-vault-data-unification/evidence/knowledge-candidates/adr/0003-namespaced-settings-store.md.txt",
       "sourceSha256": "33c3c8af78fbc7ce841ae13d2fd6bb9dadd0fa930d520496bc698222edf5b554",
       "canonicalBeforeSha256": "26242ef6ae435d8c25e7565e060b3d2984fd0ad2d73bda4a6e691f812bb5325d",
       "candidateSha256": "419c10d025f5497fedae9fcc828f2572ffd70171dc7718b99eb74949f67122bb",
       "beforeCharacters": 4559,
       "afterCharacters": 1585,
-      "status": "candidate-not-promoted",
+      "status": "promoted-verified",
       "owner": "A",
       "sources": [
         "2026-10-11-vault-data-unification/ADR.md",
         "T-01..T-06 immutable implementation/Evidence",
         "99af3ef5c45da68539ec00f39f24b9685d3fc995",
         "T-08 source 9c0bd5c0c926e8d75b50e6587db37cc03240db71; release 38370493282 success, fresh13/13, upgrade15/15"
-      ]
+      ],
+      "verified_at": "2026-10-13T09:42:02.692138+00:00",
+      "promotedSha256": "419c10d025f5497fedae9fcc828f2572ffd70171dc7718b99eb74949f67122bb",
+      "promotedCharacters": 1585
     },
     {
       "target": "speculo/.speculo/specdev/adr/0004-data-placement.md",
       "removeDuplicate": "speculo/.speculo/specdev/adr/0004-data-placement.ZH.md",
-      "candidate": "speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/evidence/knowledge-candidates/adr/0004-data-placement.md.txt",
+      "candidate": "speculo/.speculo/specdev/archive/2026-10/2026-10-11-vault-data-unification/evidence/knowledge-candidates/adr/0004-data-placement.md.txt",
       "sourceSha256": "ebf84d32b6cae1b10a5feef4fbbe7f3b118e610eec91326355c75e51ce0a8490",
       "canonicalBeforeSha256": "38f1ba23dacb44c5dce3da1ca37ed88ef7125dd1a3bc0ec1e84a1b81f9bdec47",
       "candidateSha256": "2df70a1030fa177be2e71094ec45e377af057255e3ce60d2fb7a74f8701c1f87",
       "beforeCharacters": 6434,
       "afterCharacters": 2267,
-      "status": "candidate-not-promoted",
+      "status": "promoted-verified",
       "owner": "A",
       "sources": [
         "2026-10-11-vault-data-unification/ADR.md",
         "T-01..T-06 immutable implementation/Evidence",
         "99af3ef5c45da68539ec00f39f24b9685d3fc995",
         "T-08 source 9c0bd5c0c926e8d75b50e6587db37cc03240db71; release 38370493282 success, fresh13/13, upgrade15/15"
-      ]
+      ],
+      "verified_at": "2026-10-13T09:42:02.692138+00:00",
+      "promotedSha256": "2df70a1030fa177be2e71094ec45e377af057255e3ce60d2fb7a74f8701c1f87",
+      "promotedCharacters": 2267
     },
     {
       "target": "speculo/.speculo/specdev/adr/0005-three-column-workbench.md",
       "removeDuplicate": "speculo/.speculo/specdev/adr/0005-three-column-workbench.ZH.md",
-      "candidate": "speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/evidence/knowledge-candidates/adr/0005-three-column-workbench.md.txt",
+      "candidate": "speculo/.speculo/specdev/archive/2026-10/2026-10-11-vault-data-unification/evidence/knowledge-candidates/adr/0005-three-column-workbench.md.txt",
       "sourceSha256": "57aeabfcd76a72a821e5cd810ff40b72c3ba83159148687549e40028a02f9b6b",
       "canonicalBeforeSha256": "73e7c702b17600cdb0796f2c3bb53b1a5bfbf8a61f7d130c8def8be83b556b9c",
       "candidateSha256": "49704f6c9b2a084273014a0ac7772b20ec2355df399e029b495545b898db0fd8",
       "beforeCharacters": 5610,
       "afterCharacters": 1780,
-      "status": "candidate-not-promoted",
+      "status": "promoted-verified",
       "owner": "A",
       "sources": [
         "2026-10-11-vault-data-unification/ADR.md",
         "T-01..T-06 immutable implementation/Evidence",
         "99af3ef5c45da68539ec00f39f24b9685d3fc995",
         "T-08 source 9c0bd5c0c926e8d75b50e6587db37cc03240db71; release 38370493282 success, fresh13/13, upgrade15/15"
-      ]
+      ],
+      "verified_at": "2026-10-13T09:42:02.692138+00:00",
+      "promotedSha256": "49704f6c9b2a084273014a0ac7772b20ec2355df399e029b495545b898db0fd8",
+      "promotedCharacters": 1780
     },
     {
       "target": "speculo/.speculo/specdev/adr/0006-global-theme.md",
       "removeDuplicate": "speculo/.speculo/specdev/adr/0006-global-theme.ZH.md",
-      "candidate": "speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/evidence/knowledge-candidates/adr/0006-global-theme.md.txt",
+      "candidate": "speculo/.speculo/specdev/archive/2026-10/2026-10-11-vault-data-unification/evidence/knowledge-candidates/adr/0006-global-theme.md.txt",
       "sourceSha256": "2c4f8100ca912fa755efb3db4b088a8a0816cce78d4d5b7b96e86b8db9e152a7",
       "canonicalBeforeSha256": "d66390ee6a533aafb00e2cd4c2625e3234c05e72e9160cdadea9552e923279a1",
       "candidateSha256": "7663f1842052e0e5a606febe6431f940567abf3677a408bb92826937cc080ad4",
       "beforeCharacters": 3664,
       "afterCharacters": 1326,
-      "status": "candidate-not-promoted",
+      "status": "promoted-verified",
       "owner": "A",
       "sources": [
         "2026-10-11-vault-data-unification/ADR.md",
         "T-01..T-06 immutable implementation/Evidence",
         "99af3ef5c45da68539ec00f39f24b9685d3fc995",
         "T-08 source 9c0bd5c0c926e8d75b50e6587db37cc03240db71; release 38370493282 success, fresh13/13, upgrade15/15"
-      ]
+      ],
+      "verified_at": "2026-10-13T09:42:02.692138+00:00",
+      "promotedSha256": "7663f1842052e0e5a606febe6431f940567abf3677a408bb92826937cc080ad4",
+      "promotedCharacters": 1326
     },
     {
       "target": "speculo/.speculo/specdev/adr/0007-interface-language.md",
       "removeDuplicate": "speculo/.speculo/specdev/adr/0007-interface-language.ZH.md",
-      "candidate": "speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/evidence/knowledge-candidates/adr/0007-interface-language.md.txt",
+      "candidate": "speculo/.speculo/specdev/archive/2026-10/2026-10-11-vault-data-unification/evidence/knowledge-candidates/adr/0007-interface-language.md.txt",
       "sourceSha256": "b19cb76f4d07b6fbc256efa56fdefbfedfde6f2d5a03ab04d60c87530a76685e",
       "canonicalBeforeSha256": "56f100906909a7a37f96e39fdafd01903e79e65390bdc28c6b12d83298d30a03",
       "candidateSha256": "17e90fddeb7bcea0b17e1409f74ede68bbf52fe0a2b3d15eca47f4fa425df91c",
       "beforeCharacters": 3439,
       "afterCharacters": 1101,
-      "status": "candidate-not-promoted",
+      "status": "promoted-verified",
       "owner": "A",
       "sources": [
         "2026-10-11-vault-data-unification/ADR.md",
         "T-01..T-06 immutable implementation/Evidence",
         "99af3ef5c45da68539ec00f39f24b9685d3fc995",
         "T-08 source 9c0bd5c0c926e8d75b50e6587db37cc03240db71; release 38370493282 success, fresh13/13, upgrade15/15"
-      ]
+      ],
+      "verified_at": "2026-10-13T09:42:02.692138+00:00",
+      "promotedSha256": "17e90fddeb7bcea0b17e1409f74ede68bbf52fe0a2b3d15eca47f4fa425df91c",
+      "promotedCharacters": 1101
     },
     {
       "target": "speculo/.speculo/specdev/adr/0008-terminal-helper.md",
       "removeDuplicate": "speculo/.speculo/specdev/adr/0008-terminal-helper.ZH.md",
-      "candidate": "speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/evidence/knowledge-candidates/adr/0008-terminal-helper.md.txt",
+      "candidate": "speculo/.speculo/specdev/archive/2026-10/2026-10-11-vault-data-unification/evidence/knowledge-candidates/adr/0008-terminal-helper.md.txt",
       "sourceSha256": "242de59ca3f2bf98b404ffd98ca45e81d68aa49d7bb69b3bf1b764f8d8defe9f",
       "canonicalBeforeSha256": "8439fa7650bb304ddeca70fa32ca2584edcf9f398bcc7c75effd9724350811db",
       "candidateSha256": "1d2433beb9f8bb72c8cb463663ea10399ada33eb01c0b1ad17069967ab503767",
       "beforeCharacters": 6259,
       "afterCharacters": 2190,
-      "status": "candidate-not-promoted",
+      "status": "promoted-verified",
       "owner": "A",
       "sources": [
         "2026-10-11-vault-data-unification/ADR.md",
         "T-01..T-06 immutable implementation/Evidence",
         "99af3ef5c45da68539ec00f39f24b9685d3fc995",
         "T-08 source 9c0bd5c0c926e8d75b50e6587db37cc03240db71; release 38370493282 success, fresh13/13, upgrade15/15"
-      ]
+      ],
+      "verified_at": "2026-10-13T09:42:02.692138+00:00",
+      "promotedSha256": "1d2433beb9f8bb72c8cb463663ea10399ada33eb01c0b1ad17069967ab503767",
+      "promotedCharacters": 2190
     },
     {
       "target": "speculo/.speculo/specdev/adr/0009-agent-sessions-and-history.md",
       "removeDuplicate": "speculo/.speculo/specdev/adr/0009-agent-sessions-and-history.ZH.md",
-      "candidate": "speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/evidence/knowledge-candidates/adr/0009-agent-sessions-and-history.md.txt",
+      "candidate": "speculo/.speculo/specdev/archive/2026-10/2026-10-11-vault-data-unification/evidence/knowledge-candidates/adr/0009-agent-sessions-and-history.md.txt",
       "sourceSha256": "a36be656b1fe8b43a764aed271b78922bb92f0991ad96e0c91ca14b35e2b58a6",
       "canonicalBeforeSha256": "9bb65d1c1f2472db3c382107fb220004ae82a14bf3c431376eeec6e7f53de03b",
       "candidateSha256": "b8c150d3ac6e22faf387f4d2ddc58e2555d5d9e4c98ade00dacb2812b7ff108f",
       "beforeCharacters": 4976,
       "afterCharacters": 1966,
-      "status": "candidate-not-promoted",
+      "status": "promoted-verified",
       "owner": "A",
       "sources": [
         "2026-10-11-vault-data-unification/ADR.md",
         "T-01..T-06 immutable implementation/Evidence",
         "99af3ef5c45da68539ec00f39f24b9685d3fc995",
         "T-08 source 9c0bd5c0c926e8d75b50e6587db37cc03240db71; release 38370493282 success, fresh13/13, upgrade15/15"
-      ]
+      ],
+      "verified_at": "2026-10-13T09:42:02.692138+00:00",
+      "promotedSha256": "b8c150d3ac6e22faf387f4d2ddc58e2555d5d9e4c98ade00dacb2812b7ff108f",
+      "promotedCharacters": 1966
     },
     {
       "target": "speculo/.speculo/specdev/adr/0010-browser-sessions.md",
       "removeDuplicate": "speculo/.speculo/specdev/adr/0010-browser-sessions.ZH.md",
-      "candidate": "speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/evidence/knowledge-candidates/adr/0010-browser-sessions.md.txt",
+      "candidate": "speculo/.speculo/specdev/archive/2026-10/2026-10-11-vault-data-unification/evidence/knowledge-candidates/adr/0010-browser-sessions.md.txt",
       "sourceSha256": "36772667f129a64944f88139c3050d7702d0c40fb65ba29042c54cdf23eec1ff",
       "canonicalBeforeSha256": "24258a7e732099cb4d1b328435d374f95b9e91138288e49191dd66b1af8a443f",
       "candidateSha256": "13add841ee566f0e1e464503fdc675499bebbdcdd004162f50952d19b3aa6b7b",
       "beforeCharacters": 5435,
       "afterCharacters": 1961,
-      "status": "candidate-not-promoted",
+      "status": "promoted-verified",
       "owner": "A",
       "sources": [
         "2026-10-11-vault-data-unification/ADR.md",
         "T-01..T-06 immutable implementation/Evidence",
         "99af3ef5c45da68539ec00f39f24b9685d3fc995",
         "T-08 source 9c0bd5c0c926e8d75b50e6587db37cc03240db71; release 38370493282 success, fresh13/13, upgrade15/15"
-      ]
+      ],
+      "verified_at": "2026-10-13T09:42:02.692138+00:00",
+      "promotedSha256": "13add841ee566f0e1e464503fdc675499bebbdcdd004162f50952d19b3aa6b7b",
+      "promotedCharacters": 1961
     },
     {
       "target": "speculo/.speculo/specdev/adr/0011-automation-and-notifications.md",
       "removeDuplicate": "speculo/.speculo/specdev/adr/0011-automation-and-notifications.ZH.md",
-      "candidate": "speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/evidence/knowledge-candidates/adr/0011-automation-and-notifications.md.txt",
+      "candidate": "speculo/.speculo/specdev/archive/2026-10/2026-10-11-vault-data-unification/evidence/knowledge-candidates/adr/0011-automation-and-notifications.md.txt",
       "sourceSha256": "f0dbd623858a28330802ffbda276a00290f34c7d66210c64d91024341aa1d2b0",
       "canonicalBeforeSha256": "33d428c8dd514b2db41a30804aa74e538007c2a31b42c8131593c74a2016ae9d",
       "candidateSha256": "f11ba1447fed1baa3e31fe041356dfe7cf7d2736e6aa70c12dcabf6c14fa8dc9",
       "beforeCharacters": 6045,
       "afterCharacters": 1973,
-      "status": "candidate-not-promoted",
+      "status": "promoted-verified",
       "owner": "A",
       "sources": [
         "2026-10-11-vault-data-unification/ADR.md",
         "T-01..T-06 immutable implementation/Evidence",
         "99af3ef5c45da68539ec00f39f24b9685d3fc995",
         "T-08 source 9c0bd5c0c926e8d75b50e6587db37cc03240db71; release 38370493282 success, fresh13/13, upgrade15/15"
-      ]
+      ],
+      "verified_at": "2026-10-13T09:42:02.692138+00:00",
+      "promotedSha256": "f11ba1447fed1baa3e31fe041356dfe7cf7d2736e6aa70c12dcabf6c14fa8dc9",
+      "promotedCharacters": 1973
     },
     {
       "target": "speculo/.speculo/specdev/adr/0012-git-sync.md",
       "removeDuplicate": "speculo/.speculo/specdev/adr/0012-git-sync.ZH.md",
-      "candidate": "speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/evidence/knowledge-candidates/adr/0012-git-sync.md.txt",
+      "candidate": "speculo/.speculo/specdev/archive/2026-10/2026-10-11-vault-data-unification/evidence/knowledge-candidates/adr/0012-git-sync.md.txt",
       "sourceSha256": "32ead99f02df5d28ec7d069e96817bf7a247a9c36b5d6110ce3962eccaf08217",
       "canonicalBeforeSha256": "1e476f2f53d51307f48e978ff0060ef7ce417b8f3793dfca959f45acd0e55694",
       "candidateSha256": "b3558f86d9717e76c6d5894db8dd6defe537288168c15bc16c9c1424d8f84dc9",
       "beforeCharacters": 6624,
       "afterCharacters": 2248,
-      "status": "candidate-not-promoted",
+      "status": "promoted-verified",
       "owner": "A",
       "sources": [
         "2026-10-11-vault-data-unification/ADR.md",
         "T-01..T-06 immutable implementation/Evidence",
         "99af3ef5c45da68539ec00f39f24b9685d3fc995",
         "T-08 source 9c0bd5c0c926e8d75b50e6587db37cc03240db71; release 38370493282 success, fresh13/13, upgrade15/15"
-      ]
+      ],
+      "verified_at": "2026-10-13T09:42:02.692138+00:00",
+      "promotedSha256": "b3558f86d9717e76c6d5894db8dd6defe537288168c15bc16c9c1424d8f84dc9",
+      "promotedCharacters": 2248
     },
     {
       "target": "speculo/.speculo/specdev/adr/0013-license-and-attribution.md",
       "removeDuplicate": "speculo/.speculo/specdev/adr/0013-license-and-attribution.ZH.md",
-      "candidate": "speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/evidence/knowledge-candidates/adr/0013-license-and-attribution.md.txt",
+      "candidate": "speculo/.speculo/specdev/archive/2026-10/2026-10-11-vault-data-unification/evidence/knowledge-candidates/adr/0013-license-and-attribution.md.txt",
       "sourceSha256": "16296f3c5e28fac5855e5bf2d04dd3122e4e84ea1fc4db1e0114476f6a483629",
       "canonicalBeforeSha256": "5dbc7bd8a70c56c134ec29d8c17c26ebb446fbface3fd970525382346311372c",
       "candidateSha256": "68a2cefadda575396c383192f157189d6eb1e1bf9b647ab513c801664170cc6b",
       "beforeCharacters": 5866,
       "afterCharacters": 2030,
-      "status": "candidate-not-promoted",
+      "status": "promoted-verified",
       "owner": "A",
       "sources": [
         "2026-10-11-vault-data-unification/ADR.md",
         "T-01..T-06 immutable implementation/Evidence",
         "99af3ef5c45da68539ec00f39f24b9685d3fc995",
         "T-08 source 9c0bd5c0c926e8d75b50e6587db37cc03240db71; release 38370493282 success, fresh13/13, upgrade15/15"
-      ]
+      ],
+      "verified_at": "2026-10-13T09:42:02.692138+00:00",
+      "promotedSha256": "68a2cefadda575396c383192f157189d6eb1e1bf9b647ab513c801664170cc6b",
+      "promotedCharacters": 2030
     },
     {
       "target": "speculo/.speculo/specdev/context/context-map.md",
       "removeDuplicate": "speculo/.speculo/specdev/context/context-map.ZH.md",
-      "candidate": "speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/evidence/knowledge-candidates/context/context-map.md.txt",
+      "candidate": "speculo/.speculo/specdev/archive/2026-10/2026-10-11-vault-data-unification/evidence/knowledge-candidates/context/context-map.md.txt",
       "sourceSha256": "5921e60206e24a2cf52992a790d145bc3514912ef9d38216b1defc7a79c63b7b",
       "canonicalBeforeSha256": "7c2b9b0345ca6dab141f14f7f5803944994ceddb38cd45f866bed76ca0c49d21",
       "candidateSha256": "18e0e06f7832b5781a65ed6e4e781ca5c92d393386bf8ffa4ee47b0bc6121ef6",
       "beforeCharacters": 12064,
       "afterCharacters": 3904,
-      "status": "candidate-not-promoted",
+      "status": "promoted-verified",
       "owner": "A",
       "sources": [
         "2026-10-11-vault-data-unification/ADR.md",
         "T-01..T-06 immutable implementation/Evidence",
         "99af3ef5c45da68539ec00f39f24b9685d3fc995",
         "T-08 source 9c0bd5c0c926e8d75b50e6587db37cc03240db71; release 38370493282 success, fresh13/13, upgrade15/15"
-      ]
+      ],
+      "verified_at": "2026-10-13T09:42:02.692138+00:00",
+      "promotedSha256": "18e0e06f7832b5781a65ed6e4e781ca5c92d393386bf8ffa4ee47b0bc6121ef6",
+      "promotedCharacters": 3904
     },
     {
       "target": "speculo/.speculo/specdev/context/current-baseline.md",
       "removeDuplicate": "speculo/.speculo/specdev/context/current-baseline.ZH.md",
-      "candidate": "speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/evidence/knowledge-candidates/context/current-baseline.md.txt",
+      "candidate": "speculo/.speculo/specdev/archive/2026-10/2026-10-11-vault-data-unification/evidence/knowledge-candidates/context/current-baseline.md.txt",
       "sourceSha256": "30e0ed3692c52629d345815e7c95b755f3f79e2a6d8d964167c1de90bb4b8578",
       "canonicalBeforeSha256": "6ab7a2d4857d3992ce2f33c4cad35bd48d865f1eb7752e27b3abc6a361a7d7bd",
       "candidateSha256": "56e2338e7eac4d0caf6553f0a539a4afa189f2768063356c23f296ba25a7ea8f",
       "beforeCharacters": 13247,
       "afterCharacters": 4629,
-      "status": "candidate-not-promoted",
+      "status": "promoted-verified",
       "owner": "A",
       "sources": [
         "2026-10-11-vault-data-unification/ADR.md",
         "T-01..T-06 immutable implementation/Evidence",
         "99af3ef5c45da68539ec00f39f24b9685d3fc995",
         "T-08 source 9c0bd5c0c926e8d75b50e6587db37cc03240db71; release 38370493282 success, fresh13/13, upgrade15/15"
-      ]
+      ],
+      "verified_at": "2026-10-13T09:42:02.692138+00:00",
+      "promotedSha256": "b18873ab7abf8e8aedb55f6997b9c4c945b80634c73eaa67dbfb81eeca410847",
+      "promotedCharacters": 4614,
+      "finalization": "仅退役A执行前提醒、更新为已发生的发行/归档事实；原候选保留。"
     },
     {
       "target": "speculo/.speculo/specdev/context/validation.md",
       "removeDuplicate": "speculo/.speculo/specdev/context/validation.ZH.md",
-      "candidate": "speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/evidence/knowledge-candidates/context/validation.md.txt",
+      "candidate": "speculo/.speculo/specdev/archive/2026-10/2026-10-11-vault-data-unification/evidence/knowledge-candidates/context/validation.md.txt",
       "sourceSha256": "fc10a476442691b5cd47239b2a3036b642c80a0267fad55fc02d503c897e339b",
       "canonicalBeforeSha256": "f315bb4d88e882e34c37a21fa383f4b534282e7165a6d91142b3e38e2b5e734a",
       "candidateSha256": "179b9b034954e20ea0b1ccc91c1f50a0f8b3af6df7f85e12af350dd14b075f80",
       "beforeCharacters": 8914,
       "afterCharacters": 1063,
-      "status": "candidate-not-promoted",
+      "status": "promoted-verified",
       "owner": "A",
       "sources": [
         "2026-10-11-vault-data-unification/ADR.md",
         "T-01..T-06 immutable implementation/Evidence",
         "99af3ef5c45da68539ec00f39f24b9685d3fc995",
         "T-08 source 9c0bd5c0c926e8d75b50e6587db37cc03240db71; release 38370493282 success, fresh13/13, upgrade15/15"
-      ]
+      ],
+      "verified_at": "2026-10-13T09:42:02.692138+00:00",
+      "promotedSha256": "d6b75bea3e743d3fd069ec7d139a4e7ac1d59f2234245e3b90f1e7f5c2c048fe",
+      "promotedCharacters": 1070,
+      "finalization": "仅退役A执行前提醒、更新为已发生的发行/归档事实；原候选保留。"
     },
     {
       "target": "speculo/.speculo/specdev/.config/domain-layout.md",
       "removeDuplicate": "speculo/.speculo/specdev/.config/domain-layout.ZH.md",
-      "candidate": "speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/evidence/knowledge-candidates/.config/domain-layout.md.txt",
+      "candidate": "speculo/.speculo/specdev/archive/2026-10/2026-10-11-vault-data-unification/evidence/knowledge-candidates/.config/domain-layout.md.txt",
       "sourceSha256": "ead56613083c9b0b122c3f583cdac945d8294ee0da27e2bbea05178bb8c315a9",
       "canonicalBeforeSha256": "5d45b0539223f10cb4e1a65f0497832e4981803764b2cfe42c3d78122f932c94",
       "candidateSha256": "5cddcc4322ad1e5d759d519c8bfe68163b63b5fd64f1b27319237c534e378281",
       "beforeCharacters": 11019,
       "afterCharacters": 3702,
-      "status": "candidate-not-promoted",
+      "status": "promoted-verified",
       "owner": "A",
       "sources": [
         "2026-10-11-vault-data-unification/ADR.md",
         "T-01..T-06 immutable implementation/Evidence",
         "99af3ef5c45da68539ec00f39f24b9685d3fc995",
         "T-08 source 9c0bd5c0c926e8d75b50e6587db37cc03240db71; release 38370493282 success, fresh13/13, upgrade15/15"
-      ]
+      ],
+      "verified_at": "2026-10-13T09:42:02.692138+00:00",
+      "promotedSha256": "5cddcc4322ad1e5d759d519c8bfe68163b63b5fd64f1b27319237c534e378281",
+      "promotedCharacters": 3702
     },
     {
       "target": "speculo/.speculo/specdev/.config/tracking.md",
       "removeDuplicate": "speculo/.speculo/specdev/.config/tracking.ZH.md",
-      "candidate": "speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/evidence/knowledge-candidates/.config/tracking.md.txt",
+      "candidate": "speculo/.speculo/specdev/archive/2026-10/2026-10-11-vault-data-unification/evidence/knowledge-candidates/.config/tracking.md.txt",
       "sourceSha256": "bd997acc6ff105a3915ffbfd2941e32aac0dd1387d1ceda8a4367308b02d698e",
       "canonicalBeforeSha256": "077a63e0da043a0586b1f6b2f056a7218144b58381cab24abcf07a5adf368257",
       "candidateSha256": "c3866d9a922266da6b379077a29a6683b695665551f0ba8f34ab6bb3008603f5",
       "beforeCharacters": 2643,
       "afterCharacters": 851,
-      "status": "candidate-not-promoted",
+      "status": "promoted-verified",
       "owner": "A",
       "sources": [
         "2026-10-11-vault-data-unification/ADR.md",
         "T-01..T-06 immutable implementation/Evidence",
         "99af3ef5c45da68539ec00f39f24b9685d3fc995",
         "T-08 source 9c0bd5c0c926e8d75b50e6587db37cc03240db71; release 38370493282 success, fresh13/13, upgrade15/15"
-      ]
+      ],
+      "verified_at": "2026-10-13T09:42:02.692138+00:00",
+      "promotedSha256": "c3866d9a922266da6b379077a29a6683b695665551f0ba8f34ab6bb3008603f5",
+      "promotedCharacters": 851
     }
   ],
   "source_files": [
@@ -1510,5 +1566,1643 @@
     "speculo/.speculo/commands/archive-and-consolidate/2026-10-13-specdev-2026-10-11-vault-data-unification.md",
     "speculo/.speculo/commands/archive-and-consolidate/2026-10-13-specdev-2026-10-11-vault-data-unification.json",
     "selected change metadata and Markdown Path references; historical logs and prior archives unchanged"
-  ]
+  ],
+  "authorization": {
+    "source": "用户：继续执行计划",
+    "confirmed_at": "2026-10-13T09:42:02.692138+00:00"
+  },
+  "executed_at": "2026-10-13T09:42:02.692138+00:00",
+  "verification": {
+    "verdict": "verified",
+    "verified_at": "2026-10-13T09:44:21.804977+00:00",
+    "re_read_passed": true,
+    "inconsistencies": [],
+    "source_files_preserved": 287,
+    "metadata_or_markdown_updated": [
+      ".status.json",
+      "evidence/T-01.md",
+      "evidence/T-05.md",
+      "evidence/T-06.md",
+      "evidence/T-07.md",
+      "evidence/goal-delivery.md",
+      "evidence/knowledge-plan.json",
+      "ticket/01-durable-storage.md",
+      "ticket/02-vault-storage.md",
+      "ticket/03-hidden-content.md",
+      "ticket/04-browser-sessions.md",
+      "ticket/05-agent-accounts.md",
+      "ticket/06-git-release-gates.md",
+      "ticket/07-current-docs.md",
+      "ticket/08-alpha2-delivery.md",
+      "tickets-map.md"
+    ],
+    "knowledge_promoted": 18,
+    "duplicates_removed": 18,
+    "complete_validator": "0 errors, 0 warnings",
+    "package_validator": "0 errors, 0 warnings",
+    "triage_validator": "0 errors, 0 warnings",
+    "docs": "642 Markdown, 1668 local links, 422 external links",
+    "product_diff": "empty versus alpha.2",
+    "prior_archives_diff": "empty"
+  },
+  "finalization_notes": [
+    "归档README新增，满足项目文档索引合同。",
+    "archive_path按schema写为rooted Path；integration.evidence保留schema要求的原changes来源，归档README解释其现行位置。",
+    "两份context仅清除执行前提醒、更新已完成事实；candidateSha256保留审批时快照，promotedSha256记录最终内容。"
+  ],
+  "document_counts": [
+    {
+      "before": "speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/.status.json",
+      "after": "speculo/.speculo/specdev/archive/2026-10/2026-10-11-vault-data-unification/.status.json",
+      "beforeCharacters": 14433,
+      "afterCharacters": 14635,
+      "changed": true
+    },
+    {
+      "before": "speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/ADR.md",
+      "after": "speculo/.speculo/specdev/archive/2026-10/2026-10-11-vault-data-unification/ADR.md",
+      "beforeCharacters": 503,
+      "afterCharacters": 503,
+      "changed": false
+    },
+    {
+      "before": "speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/CONTEXT.md",
+      "after": "speculo/.speculo/specdev/archive/2026-10/2026-10-11-vault-data-unification/CONTEXT.md",
+      "beforeCharacters": 184,
+      "afterCharacters": 184,
+      "changed": false
+    },
+    {
+      "before": "speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/LOG.md",
+      "after": "speculo/.speculo/specdev/archive/2026-10/2026-10-11-vault-data-unification/LOG.md",
+      "beforeCharacters": 2895,
+      "afterCharacters": 2895,
+      "changed": false
+    },
+    {
+      "before": "speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/evidence/T-01.md",
+      "after": "speculo/.speculo/specdev/archive/2026-10/2026-10-11-vault-data-unification/evidence/T-01.md",
+      "beforeCharacters": 3416,
+      "afterCharacters": 3424,
+      "changed": true
+    },
+    {
+      "before": "speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/evidence/T-02.md",
+      "after": "speculo/.speculo/specdev/archive/2026-10/2026-10-11-vault-data-unification/evidence/T-02.md",
+      "beforeCharacters": 5508,
+      "afterCharacters": 5508,
+      "changed": false
+    },
+    {
+      "before": "speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/evidence/T-03.md",
+      "after": "speculo/.speculo/specdev/archive/2026-10/2026-10-11-vault-data-unification/evidence/T-03.md",
+      "beforeCharacters": 8798,
+      "afterCharacters": 8798,
+      "changed": false
+    },
+    {
+      "before": "speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/evidence/T-04.md",
+      "after": "speculo/.speculo/specdev/archive/2026-10/2026-10-11-vault-data-unification/evidence/T-04.md",
+      "beforeCharacters": 10231,
+      "afterCharacters": 10231,
+      "changed": false
+    },
+    {
+      "before": "speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/evidence/T-05.md",
+      "after": "speculo/.speculo/specdev/archive/2026-10/2026-10-11-vault-data-unification/evidence/T-05.md",
+      "beforeCharacters": 8097,
+      "afterCharacters": 8113,
+      "changed": true
+    },
+    {
+      "before": "speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/evidence/T-06-document-check.json",
+      "after": "speculo/.speculo/specdev/archive/2026-10/2026-10-11-vault-data-unification/evidence/T-06-document-check.json",
+      "beforeCharacters": 1467,
+      "afterCharacters": 1467,
+      "changed": false
+    },
+    {
+      "before": "speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/evidence/T-06.md",
+      "after": "speculo/.speculo/specdev/archive/2026-10/2026-10-11-vault-data-unification/evidence/T-06.md",
+      "beforeCharacters": 5733,
+      "afterCharacters": 5765,
+      "changed": true
+    },
+    {
+      "before": "speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/evidence/T-07-document-check.json",
+      "after": "speculo/.speculo/specdev/archive/2026-10/2026-10-11-vault-data-unification/evidence/T-07-document-check.json",
+      "beforeCharacters": 35102,
+      "afterCharacters": 35102,
+      "changed": false
+    },
+    {
+      "before": "speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/evidence/T-07.md",
+      "after": "speculo/.speculo/specdev/archive/2026-10/2026-10-11-vault-data-unification/evidence/T-07.md",
+      "beforeCharacters": 3600,
+      "afterCharacters": 3624,
+      "changed": true
+    },
+    {
+      "before": "speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/evidence/T-08-document-check.json",
+      "after": "speculo/.speculo/specdev/archive/2026-10/2026-10-11-vault-data-unification/evidence/T-08-document-check.json",
+      "beforeCharacters": 6948,
+      "afterCharacters": 6948,
+      "changed": false
+    },
+    {
+      "before": "speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/evidence/T-08-review.json",
+      "after": "speculo/.speculo/specdev/archive/2026-10/2026-10-11-vault-data-unification/evidence/T-08-review.json",
+      "beforeCharacters": 5041,
+      "afterCharacters": 5041,
+      "changed": false
+    },
+    {
+      "before": "speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/evidence/T-08.md",
+      "after": "speculo/.speculo/specdev/archive/2026-10/2026-10-11-vault-data-unification/evidence/T-08.md",
+      "beforeCharacters": 3756,
+      "afterCharacters": 3756,
+      "changed": false
+    },
+    {
+      "before": "speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/evidence/checks-agent/resume-linux-targeted.log",
+      "after": "speculo/.speculo/specdev/archive/2026-10/2026-10-11-vault-data-unification/evidence/checks-agent/resume-linux-targeted.log",
+      "beforeCharacters": 848,
+      "afterCharacters": 848,
+      "changed": false
+    },
+    {
+      "before": "speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/evidence/checks-agent/review2-all.log",
+      "after": "speculo/.speculo/specdev/archive/2026-10/2026-10-11-vault-data-unification/evidence/checks-agent/review2-all.log",
+      "beforeCharacters": 22215,
+      "afterCharacters": 22215,
+      "changed": false
+    },
+    {
+      "before": "speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/evidence/checks-agent/review2-budget.log",
+      "after": "speculo/.speculo/specdev/archive/2026-10/2026-10-11-vault-data-unification/evidence/checks-agent/review2-budget.log",
+      "beforeCharacters": 1868,
+      "afterCharacters": 1868,
+      "changed": false
+    },
+    {
+      "before": "speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/evidence/checks-agent/review2-build-final.log",
+      "after": "speculo/.speculo/specdev/archive/2026-10/2026-10-11-vault-data-unification/evidence/checks-agent/review2-build-final.log",
+      "beforeCharacters": 628,
+      "afterCharacters": 628,
+      "changed": false
+    },
+    {
+      "before": "speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/evidence/checks-agent/review2-docs.log",
+      "after": "speculo/.speculo/specdev/archive/2026-10/2026-10-11-vault-data-unification/evidence/checks-agent/review2-docs.log",
+      "beforeCharacters": 709,
+      "afterCharacters": 709,
+      "changed": false
+    },
+    {
+      "before": "speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/evidence/checks-agent/review2-lint-final.log",
+      "after": "speculo/.speculo/specdev/archive/2026-10/2026-10-11-vault-data-unification/evidence/checks-agent/review2-lint-final.log",
+      "beforeCharacters": 438,
+      "afterCharacters": 438,
+      "changed": false
+    },
+    {
+      "before": "speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/evidence/checks-agent/review2-terminal2.log",
+      "after": "speculo/.speculo/specdev/archive/2026-10/2026-10-11-vault-data-unification/evidence/checks-agent/review2-terminal2.log",
+      "beforeCharacters": 124,
+      "afterCharacters": 124,
+      "changed": false
+    },
+    {
+      "before": "speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/evidence/checks-browser/profiles-result.json",
+      "after": "speculo/.speculo/specdev/archive/2026-10/2026-10-11-vault-data-unification/evidence/checks-browser/profiles-result.json",
+      "beforeCharacters": 7033,
+      "afterCharacters": 7033,
+      "changed": false
+    },
+    {
+      "before": "speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/evidence/checks-browser/profiles-review2-result.json",
+      "after": "speculo/.speculo/specdev/archive/2026-10/2026-10-11-vault-data-unification/evidence/checks-browser/profiles-review2-result.json",
+      "beforeCharacters": 7033,
+      "afterCharacters": 7033,
+      "changed": false
+    },
+    {
+      "before": "speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/evidence/checks-browser/shared-choice-result.json",
+      "after": "speculo/.speculo/specdev/archive/2026-10/2026-10-11-vault-data-unification/evidence/checks-browser/shared-choice-result.json",
+      "beforeCharacters": 580,
+      "afterCharacters": 580,
+      "changed": false
+    },
+    {
+      "before": "speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/evidence/checks-browser/shared-choice-review-result.json",
+      "after": "speculo/.speculo/specdev/archive/2026-10/2026-10-11-vault-data-unification/evidence/checks-browser/shared-choice-review-result.json",
+      "beforeCharacters": 580,
+      "afterCharacters": 580,
+      "changed": false
+    },
+    {
+      "before": "speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/evidence/checks-browser/vault-final-reviewed-result.json",
+      "after": "speculo/.speculo/specdev/archive/2026-10/2026-10-11-vault-data-unification/evidence/checks-browser/vault-final-reviewed-result.json",
+      "beforeCharacters": 4464,
+      "afterCharacters": 4464,
+      "changed": false
+    },
+    {
+      "before": "speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/evidence/checks-browser/vault-result.json",
+      "after": "speculo/.speculo/specdev/archive/2026-10/2026-10-11-vault-data-unification/evidence/checks-browser/vault-result.json",
+      "beforeCharacters": 3314,
+      "afterCharacters": 3314,
+      "changed": false
+    },
+    {
+      "before": "speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/evidence/checks-browser/vault-review-result.json",
+      "after": "speculo/.speculo/specdev/archive/2026-10/2026-10-11-vault-data-unification/evidence/checks-browser/vault-review-result.json",
+      "beforeCharacters": 4365,
+      "afterCharacters": 4365,
+      "changed": false
+    },
+    {
+      "before": "speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/evidence/checks-browser/vault-review2-result.json",
+      "after": "speculo/.speculo/specdev/archive/2026-10/2026-10-11-vault-data-unification/evidence/checks-browser/vault-review2-result.json",
+      "beforeCharacters": 4464,
+      "afterCharacters": 4464,
+      "changed": false
+    },
+    {
+      "before": "speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/evidence/checks-browser/vault-review3-result.json",
+      "after": "speculo/.speculo/specdev/archive/2026-10/2026-10-11-vault-data-unification/evidence/checks-browser/vault-review3-result.json",
+      "beforeCharacters": 4464,
+      "afterCharacters": 4464,
+      "changed": false
+    },
+    {
+      "before": "speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/evidence/checks-docs/all-final.log",
+      "after": "speculo/.speculo/specdev/archive/2026-10/2026-10-11-vault-data-unification/evidence/checks-docs/all-final.log",
+      "beforeCharacters": 22122,
+      "afterCharacters": 22122,
+      "changed": false
+    },
+    {
+      "before": "speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/evidence/checks-docs/build-final.log",
+      "after": "speculo/.speculo/specdev/archive/2026-10/2026-10-11-vault-data-unification/evidence/checks-docs/build-final.log",
+      "beforeCharacters": 263,
+      "afterCharacters": 263,
+      "changed": false
+    },
+    {
+      "before": "speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/evidence/checks-docs/check-summary.json",
+      "after": "speculo/.speculo/specdev/archive/2026-10/2026-10-11-vault-data-unification/evidence/checks-docs/check-summary.json",
+      "beforeCharacters": 243,
+      "afterCharacters": 243,
+      "changed": false
+    },
+    {
+      "before": "speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/evidence/checks-docs/docs-final.log",
+      "after": "speculo/.speculo/specdev/archive/2026-10/2026-10-11-vault-data-unification/evidence/checks-docs/docs-final.log",
+      "beforeCharacters": 334,
+      "afterCharacters": 334,
+      "changed": false
+    },
+    {
+      "before": "speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/evidence/checks-docs/docs-first.log",
+      "after": "speculo/.speculo/specdev/archive/2026-10/2026-10-11-vault-data-unification/evidence/checks-docs/docs-first.log",
+      "beforeCharacters": 1160,
+      "afterCharacters": 1160,
+      "changed": false
+    },
+    {
+      "before": "speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/evidence/checks-docs/docs-second.log",
+      "after": "speculo/.speculo/specdev/archive/2026-10/2026-10-11-vault-data-unification/evidence/checks-docs/docs-second.log",
+      "beforeCharacters": 334,
+      "afterCharacters": 334,
+      "changed": false
+    },
+    {
+      "before": "speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/evidence/checks-docs/i18n-final.log",
+      "after": "speculo/.speculo/specdev/archive/2026-10/2026-10-11-vault-data-unification/evidence/checks-docs/i18n-final.log",
+      "beforeCharacters": 163,
+      "afterCharacters": 163,
+      "changed": false
+    },
+    {
+      "before": "speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/evidence/checks-docs/lint-final.log",
+      "after": "speculo/.speculo/specdev/archive/2026-10/2026-10-11-vault-data-unification/evidence/checks-docs/lint-final.log",
+      "beforeCharacters": 80,
+      "afterCharacters": 80,
+      "changed": false
+    },
+    {
+      "before": "speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/evidence/checks-docs/policy-final.log",
+      "after": "speculo/.speculo/specdev/archive/2026-10/2026-10-11-vault-data-unification/evidence/checks-docs/policy-final.log",
+      "beforeCharacters": 193,
+      "afterCharacters": 193,
+      "changed": false
+    },
+    {
+      "before": "speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/evidence/checks-docs/policy-green.log",
+      "after": "speculo/.speculo/specdev/archive/2026-10/2026-10-11-vault-data-unification/evidence/checks-docs/policy-green.log",
+      "beforeCharacters": 193,
+      "afterCharacters": 193,
+      "changed": false
+    },
+    {
+      "before": "speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/evidence/checks-docs/policy-red.log",
+      "after": "speculo/.speculo/specdev/archive/2026-10/2026-10-11-vault-data-unification/evidence/checks-docs/policy-red.log",
+      "beforeCharacters": 1630,
+      "afterCharacters": 1630,
+      "changed": false
+    },
+    {
+      "before": "speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/evidence/checks-release/all.log",
+      "after": "speculo/.speculo/specdev/archive/2026-10/2026-10-11-vault-data-unification/evidence/checks-release/all.log",
+      "beforeCharacters": 23113,
+      "afterCharacters": 23113,
+      "changed": false
+    },
+    {
+      "before": "speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/evidence/checks-release/archive-plan-docs-2.log",
+      "after": "speculo/.speculo/specdev/archive/2026-10/2026-10-11-vault-data-unification/evidence/checks-release/archive-plan-docs-2.log",
+      "beforeCharacters": 334,
+      "afterCharacters": 334,
+      "changed": false
+    },
+    {
+      "before": "speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/evidence/checks-release/attestation-check.json",
+      "after": "speculo/.speculo/specdev/archive/2026-10/2026-10-11-vault-data-unification/evidence/checks-release/attestation-check.json",
+      "beforeCharacters": 2039,
+      "afterCharacters": 2039,
+      "changed": false
+    },
+    {
+      "before": "speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/evidence/checks-release/browser-attempt-03-download-diagnostics.json",
+      "after": "speculo/.speculo/specdev/archive/2026-10/2026-10-11-vault-data-unification/evidence/checks-release/browser-attempt-03-download-diagnostics.json",
+      "beforeCharacters": 352,
+      "afterCharacters": 352,
+      "changed": false
+    },
+    {
+      "before": "speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/evidence/checks-release/browser-attempt-03-native-downloads.json",
+      "after": "speculo/.speculo/specdev/archive/2026-10/2026-10-11-vault-data-unification/evidence/checks-release/browser-attempt-03-native-downloads.json",
+      "beforeCharacters": 645,
+      "afterCharacters": 645,
+      "changed": false
+    },
+    {
+      "before": "speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/evidence/checks-release/browser-attempt-03-partial.json",
+      "after": "speculo/.speculo/specdev/archive/2026-10/2026-10-11-vault-data-unification/evidence/checks-release/browser-attempt-03-partial.json",
+      "beforeCharacters": 2115,
+      "afterCharacters": 2115,
+      "changed": false
+    },
+    {
+      "before": "speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/evidence/checks-release/browser-attempt-04-download-diagnostics.json",
+      "after": "speculo/.speculo/specdev/archive/2026-10/2026-10-11-vault-data-unification/evidence/checks-release/browser-attempt-04-download-diagnostics.json",
+      "beforeCharacters": 477,
+      "afterCharacters": 477,
+      "changed": false
+    },
+    {
+      "before": "speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/evidence/checks-release/browser-attempt-04-native-downloads.json",
+      "after": "speculo/.speculo/specdev/archive/2026-10/2026-10-11-vault-data-unification/evidence/checks-release/browser-attempt-04-native-downloads.json",
+      "beforeCharacters": 645,
+      "afterCharacters": 645,
+      "changed": false
+    },
+    {
+      "before": "speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/evidence/checks-release/browser-attempt-04-partial.json",
+      "after": "speculo/.speculo/specdev/archive/2026-10/2026-10-11-vault-data-unification/evidence/checks-release/browser-attempt-04-partial.json",
+      "beforeCharacters": 2288,
+      "afterCharacters": 2288,
+      "changed": false
+    },
+    {
+      "before": "speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/evidence/checks-release/browser-final-result.json",
+      "after": "speculo/.speculo/specdev/archive/2026-10/2026-10-11-vault-data-unification/evidence/checks-release/browser-final-result.json",
+      "beforeCharacters": 4415,
+      "afterCharacters": 4415,
+      "changed": false
+    },
+    {
+      "before": "speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/evidence/checks-release/budget.log",
+      "after": "speculo/.speculo/specdev/archive/2026-10/2026-10-11-vault-data-unification/evidence/checks-release/budget.log",
+      "beforeCharacters": 1504,
+      "afterCharacters": 1504,
+      "changed": false
+    },
+    {
+      "before": "speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/evidence/checks-release/build.log",
+      "after": "speculo/.speculo/specdev/archive/2026-10/2026-10-11-vault-data-unification/evidence/checks-release/build.log",
+      "beforeCharacters": 263,
+      "afterCharacters": 263,
+      "changed": false
+    },
+    {
+      "before": "speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/evidence/checks-release/checkout-budget.log",
+      "after": "speculo/.speculo/specdev/archive/2026-10/2026-10-11-vault-data-unification/evidence/checks-release/checkout-budget.log",
+      "beforeCharacters": 1504,
+      "afterCharacters": 1504,
+      "changed": false
+    },
+    {
+      "before": "speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/evidence/checks-release/checkout-build.log",
+      "after": "speculo/.speculo/specdev/archive/2026-10/2026-10-11-vault-data-unification/evidence/checks-release/checkout-build.log",
+      "beforeCharacters": 263,
+      "afterCharacters": 263,
+      "changed": false
+    },
+    {
+      "before": "speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/evidence/checks-release/checkout-docs.log",
+      "after": "speculo/.speculo/specdev/archive/2026-10/2026-10-11-vault-data-unification/evidence/checks-release/checkout-docs.log",
+      "beforeCharacters": 334,
+      "afterCharacters": 334,
+      "changed": false
+    },
+    {
+      "before": "speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/evidence/checks-release/checkout-green.log",
+      "after": "speculo/.speculo/specdev/archive/2026-10/2026-10-11-vault-data-unification/evidence/checks-release/checkout-green.log",
+      "beforeCharacters": 229,
+      "afterCharacters": 229,
+      "changed": false
+    },
+    {
+      "before": "speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/evidence/checks-release/checkout-lint.log",
+      "after": "speculo/.speculo/specdev/archive/2026-10/2026-10-11-vault-data-unification/evidence/checks-release/checkout-lint.log",
+      "beforeCharacters": 79,
+      "afterCharacters": 79,
+      "changed": false
+    },
+    {
+      "before": "speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/evidence/checks-release/checkout-red.log",
+      "after": "speculo/.speculo/specdev/archive/2026-10/2026-10-11-vault-data-unification/evidence/checks-release/checkout-red.log",
+      "beforeCharacters": 1304,
+      "afterCharacters": 1304,
+      "changed": false
+    },
+    {
+      "before": "speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/evidence/checks-release/checks.json",
+      "after": "speculo/.speculo/specdev/archive/2026-10/2026-10-11-vault-data-unification/evidence/checks-release/checks.json",
+      "beforeCharacters": 248,
+      "afterCharacters": 248,
+      "changed": false
+    },
+    {
+      "before": "speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/evidence/checks-release/ci-attempt-1.json",
+      "after": "speculo/.speculo/specdev/archive/2026-10/2026-10-11-vault-data-unification/evidence/checks-release/ci-attempt-1.json",
+      "beforeCharacters": 490,
+      "afterCharacters": 490,
+      "changed": false
+    },
+    {
+      "before": "speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/evidence/checks-release/ci-attempt-2.json",
+      "after": "speculo/.speculo/specdev/archive/2026-10/2026-10-11-vault-data-unification/evidence/checks-release/ci-attempt-2.json",
+      "beforeCharacters": 670,
+      "afterCharacters": 670,
+      "changed": false
+    },
+    {
+      "before": "speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/evidence/checks-release/ci-attempt-3.json",
+      "after": "speculo/.speculo/specdev/archive/2026-10/2026-10-11-vault-data-unification/evidence/checks-release/ci-attempt-3.json",
+      "beforeCharacters": 474,
+      "afterCharacters": 474,
+      "changed": false
+    },
+    {
+      "before": "speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/evidence/checks-release/ci-final.json",
+      "after": "speculo/.speculo/specdev/archive/2026-10/2026-10-11-vault-data-unification/evidence/checks-release/ci-final.json",
+      "beforeCharacters": 9284,
+      "afterCharacters": 9284,
+      "changed": false
+    },
+    {
+      "before": "speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/evidence/checks-release/complete-A-ready.log",
+      "after": "speculo/.speculo/specdev/archive/2026-10/2026-10-11-vault-data-unification/evidence/checks-release/complete-A-ready.log",
+      "beforeCharacters": 34,
+      "afterCharacters": 34,
+      "changed": false
+    },
+    {
+      "before": "speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/evidence/checks-release/completion-docs-2.log",
+      "after": "speculo/.speculo/specdev/archive/2026-10/2026-10-11-vault-data-unification/evidence/checks-release/completion-docs-2.log",
+      "beforeCharacters": 334,
+      "afterCharacters": 334,
+      "changed": false
+    },
+    {
+      "before": "speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/evidence/checks-release/completion-validator-2.log",
+      "after": "speculo/.speculo/specdev/archive/2026-10/2026-10-11-vault-data-unification/evidence/checks-release/completion-validator-2.log",
+      "beforeCharacters": 34,
+      "afterCharacters": 34,
+      "changed": false
+    },
+    {
+      "before": "speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/evidence/checks-release/docs.log",
+      "after": "speculo/.speculo/specdev/archive/2026-10/2026-10-11-vault-data-unification/evidence/checks-release/docs.log",
+      "beforeCharacters": 334,
+      "afterCharacters": 334,
+      "changed": false
+    },
+    {
+      "before": "speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/evidence/checks-release/download-all.log",
+      "after": "speculo/.speculo/specdev/archive/2026-10/2026-10-11-vault-data-unification/evidence/checks-release/download-all.log",
+      "beforeCharacters": 23024,
+      "afterCharacters": 23024,
+      "changed": false
+    },
+    {
+      "before": "speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/evidence/checks-release/download-budget.log",
+      "after": "speculo/.speculo/specdev/archive/2026-10/2026-10-11-vault-data-unification/evidence/checks-release/download-budget.log",
+      "beforeCharacters": 1504,
+      "afterCharacters": 1504,
+      "changed": false
+    },
+    {
+      "before": "speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/evidence/checks-release/download-build.log",
+      "after": "speculo/.speculo/specdev/archive/2026-10/2026-10-11-vault-data-unification/evidence/checks-release/download-build.log",
+      "beforeCharacters": 263,
+      "afterCharacters": 263,
+      "changed": false
+    },
+    {
+      "before": "speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/evidence/checks-release/download-lint.log",
+      "after": "speculo/.speculo/specdev/archive/2026-10/2026-10-11-vault-data-unification/evidence/checks-release/download-lint.log",
+      "beforeCharacters": 80,
+      "afterCharacters": 80,
+      "changed": false
+    },
+    {
+      "before": "speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/evidence/checks-release/download-notices-green.log",
+      "after": "speculo/.speculo/specdev/archive/2026-10/2026-10-11-vault-data-unification/evidence/checks-release/download-notices-green.log",
+      "beforeCharacters": 235,
+      "afterCharacters": 235,
+      "changed": false
+    },
+    {
+      "before": "speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/evidence/checks-release/download-state-green.log",
+      "after": "speculo/.speculo/specdev/archive/2026-10/2026-10-11-vault-data-unification/evidence/checks-release/download-state-green.log",
+      "beforeCharacters": 234,
+      "afterCharacters": 234,
+      "changed": false
+    },
+    {
+      "before": "speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/evidence/checks-release/download-state-red.log",
+      "after": "speculo/.speculo/specdev/archive/2026-10/2026-10-11-vault-data-unification/evidence/checks-release/download-state-red.log",
+      "beforeCharacters": 3540,
+      "afterCharacters": 3540,
+      "changed": false
+    },
+    {
+      "before": "speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/evidence/checks-release/downloaded-assets-verification.json",
+      "after": "speculo/.speculo/specdev/archive/2026-10/2026-10-11-vault-data-unification/evidence/checks-release/downloaded-assets-verification.json",
+      "beforeCharacters": 1966,
+      "afterCharacters": 1966,
+      "changed": false
+    },
+    {
+      "before": "speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/evidence/checks-release/final-docs.log",
+      "after": "speculo/.speculo/specdev/archive/2026-10/2026-10-11-vault-data-unification/evidence/checks-release/final-docs.log",
+      "beforeCharacters": 334,
+      "afterCharacters": 334,
+      "changed": false
+    },
+    {
+      "before": "speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/evidence/checks-release/final-fixture-lint.log",
+      "after": "speculo/.speculo/specdev/archive/2026-10/2026-10-11-vault-data-unification/evidence/checks-release/final-fixture-lint.log",
+      "beforeCharacters": 80,
+      "afterCharacters": 80,
+      "changed": false
+    },
+    {
+      "before": "speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/evidence/checks-release/helper-mode-green.log",
+      "after": "speculo/.speculo/specdev/archive/2026-10/2026-10-11-vault-data-unification/evidence/checks-release/helper-mode-green.log",
+      "beforeCharacters": 374,
+      "afterCharacters": 374,
+      "changed": false
+    },
+    {
+      "before": "speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/evidence/checks-release/helper-mode-red.log",
+      "after": "speculo/.speculo/specdev/archive/2026-10/2026-10-11-vault-data-unification/evidence/checks-release/helper-mode-red.log",
+      "beforeCharacters": 1365,
+      "afterCharacters": 1365,
+      "changed": false
+    },
+    {
+      "before": "speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/evidence/checks-release/issue-148-closed.json",
+      "after": "speculo/.speculo/specdev/archive/2026-10/2026-10-11-vault-data-unification/evidence/checks-release/issue-148-closed.json",
+      "beforeCharacters": 427,
+      "afterCharacters": 427,
+      "changed": false
+    },
+    {
+      "before": "speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/evidence/checks-release/issue-148-comment.md",
+      "after": "speculo/.speculo/specdev/archive/2026-10/2026-10-11-vault-data-unification/evidence/checks-release/issue-148-comment.md",
+      "beforeCharacters": 684,
+      "afterCharacters": 684,
+      "changed": false
+    },
+    {
+      "before": "speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/evidence/checks-release/issue-151-closed.json",
+      "after": "speculo/.speculo/specdev/archive/2026-10/2026-10-11-vault-data-unification/evidence/checks-release/issue-151-closed.json",
+      "beforeCharacters": 427,
+      "afterCharacters": 427,
+      "changed": false
+    },
+    {
+      "before": "speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/evidence/checks-release/issue-151-comment.md",
+      "after": "speculo/.speculo/specdev/archive/2026-10/2026-10-11-vault-data-unification/evidence/checks-release/issue-151-comment.md",
+      "beforeCharacters": 816,
+      "afterCharacters": 816,
+      "changed": false
+    },
+    {
+      "before": "speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/evidence/checks-release/lint.log",
+      "after": "speculo/.speculo/specdev/archive/2026-10/2026-10-11-vault-data-unification/evidence/checks-release/lint.log",
+      "beforeCharacters": 80,
+      "afterCharacters": 80,
+      "changed": false
+    },
+    {
+      "before": "speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/evidence/checks-release/native.log",
+      "after": "speculo/.speculo/specdev/archive/2026-10/2026-10-11-vault-data-unification/evidence/checks-release/native.log",
+      "beforeCharacters": 3488,
+      "afterCharacters": 3488,
+      "changed": false
+    },
+    {
+      "before": "speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/evidence/checks-release/notices-checkout-red.log",
+      "after": "speculo/.speculo/specdev/archive/2026-10/2026-10-11-vault-data-unification/evidence/checks-release/notices-checkout-red.log",
+      "beforeCharacters": 1274,
+      "afterCharacters": 1274,
+      "changed": false
+    },
+    {
+      "before": "speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/evidence/checks-release/notices-final.log",
+      "after": "speculo/.speculo/specdev/archive/2026-10/2026-10-11-vault-data-unification/evidence/checks-release/notices-final.log",
+      "beforeCharacters": 162,
+      "afterCharacters": 162,
+      "changed": false
+    },
+    {
+      "before": "speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/evidence/checks-release/notices.log",
+      "after": "speculo/.speculo/specdev/archive/2026-10/2026-10-11-vault-data-unification/evidence/checks-release/notices.log",
+      "beforeCharacters": 162,
+      "afterCharacters": 162,
+      "changed": false
+    },
+    {
+      "before": "speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/evidence/checks-release/package-validator.log",
+      "after": "speculo/.speculo/specdev/archive/2026-10/2026-10-11-vault-data-unification/evidence/checks-release/package-validator.log",
+      "beforeCharacters": 34,
+      "afterCharacters": 34,
+      "changed": false
+    },
+    {
+      "before": "speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/evidence/checks-release/release-final.json",
+      "after": "speculo/.speculo/specdev/archive/2026-10/2026-10-11-vault-data-unification/evidence/checks-release/release-final.json",
+      "beforeCharacters": 14654,
+      "afterCharacters": 14654,
+      "changed": false
+    },
+    {
+      "before": "speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/evidence/checks-release/release-fresh-attempt-1.json",
+      "after": "speculo/.speculo/specdev/archive/2026-10/2026-10-11-vault-data-unification/evidence/checks-release/release-fresh-attempt-1.json",
+      "beforeCharacters": 922,
+      "afterCharacters": 922,
+      "changed": false
+    },
+    {
+      "before": "speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/evidence/checks-release/release-fresh-attempt-2.json",
+      "after": "speculo/.speculo/specdev/archive/2026-10/2026-10-11-vault-data-unification/evidence/checks-release/release-fresh-attempt-2.json",
+      "beforeCharacters": 1534,
+      "afterCharacters": 1534,
+      "changed": false
+    },
+    {
+      "before": "speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/evidence/checks-release/release-fresh-result.json",
+      "after": "speculo/.speculo/specdev/archive/2026-10/2026-10-11-vault-data-unification/evidence/checks-release/release-fresh-result.json",
+      "beforeCharacters": 1716,
+      "afterCharacters": 1716,
+      "changed": false
+    },
+    {
+      "before": "speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/evidence/checks-release/release-metadata.json",
+      "after": "speculo/.speculo/specdev/archive/2026-10/2026-10-11-vault-data-unification/evidence/checks-release/release-metadata.json",
+      "beforeCharacters": 8452,
+      "afterCharacters": 8452,
+      "changed": false
+    },
+    {
+      "before": "speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/evidence/checks-release/release-notes.md",
+      "after": "speculo/.speculo/specdev/archive/2026-10/2026-10-11-vault-data-unification/evidence/checks-release/release-notes.md",
+      "beforeCharacters": 1056,
+      "afterCharacters": 1056,
+      "changed": false
+    },
+    {
+      "before": "speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/evidence/checks-release/release-upgrade-result.json",
+      "after": "speculo/.speculo/specdev/archive/2026-10/2026-10-11-vault-data-unification/evidence/checks-release/release-upgrade-result.json",
+      "beforeCharacters": 1887,
+      "afterCharacters": 1887,
+      "changed": false
+    },
+    {
+      "before": "speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/evidence/checks-release/release-validator.log",
+      "after": "speculo/.speculo/specdev/archive/2026-10/2026-10-11-vault-data-unification/evidence/checks-release/release-validator.log",
+      "beforeCharacters": 34,
+      "afterCharacters": 34,
+      "changed": false
+    },
+    {
+      "before": "speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/evidence/checks-release/similarity.json",
+      "after": "speculo/.speculo/specdev/archive/2026-10/2026-10-11-vault-data-unification/evidence/checks-release/similarity.json",
+      "beforeCharacters": 1306,
+      "afterCharacters": 1306,
+      "changed": false
+    },
+    {
+      "before": "speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/evidence/checks-release/similarity.log",
+      "after": "speculo/.speculo/specdev/archive/2026-10/2026-10-11-vault-data-unification/evidence/checks-release/similarity.log",
+      "beforeCharacters": 677,
+      "afterCharacters": 677,
+      "changed": false
+    },
+    {
+      "before": "speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/evidence/checks-release/versions.log",
+      "after": "speculo/.speculo/specdev/archive/2026-10/2026-10-11-vault-data-unification/evidence/checks-release/versions.log",
+      "beforeCharacters": 46,
+      "afterCharacters": 46,
+      "changed": false
+    },
+    {
+      "before": "speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/evidence/checks-release/windows-fix-all.log",
+      "after": "speculo/.speculo/specdev/archive/2026-10/2026-10-11-vault-data-unification/evidence/checks-release/windows-fix-all.log",
+      "beforeCharacters": 23023,
+      "afterCharacters": 23023,
+      "changed": false
+    },
+    {
+      "before": "speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/evidence/checks-release/windows-fix-budget.log",
+      "after": "speculo/.speculo/specdev/archive/2026-10/2026-10-11-vault-data-unification/evidence/checks-release/windows-fix-budget.log",
+      "beforeCharacters": 1504,
+      "afterCharacters": 1504,
+      "changed": false
+    },
+    {
+      "before": "speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/evidence/checks-release/windows-fix-build.log",
+      "after": "speculo/.speculo/specdev/archive/2026-10/2026-10-11-vault-data-unification/evidence/checks-release/windows-fix-build.log",
+      "beforeCharacters": 263,
+      "afterCharacters": 263,
+      "changed": false
+    },
+    {
+      "before": "speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/evidence/checks-release/windows-fix-fixtures.log",
+      "after": "speculo/.speculo/specdev/archive/2026-10/2026-10-11-vault-data-unification/evidence/checks-release/windows-fix-fixtures.log",
+      "beforeCharacters": 225,
+      "afterCharacters": 225,
+      "changed": false
+    },
+    {
+      "before": "speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/evidence/checks-release/windows-fix-lint.log",
+      "after": "speculo/.speculo/specdev/archive/2026-10/2026-10-11-vault-data-unification/evidence/checks-release/windows-fix-lint.log",
+      "beforeCharacters": 80,
+      "afterCharacters": 80,
+      "changed": false
+    },
+    {
+      "before": "speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/evidence/checks-release/windows-fix-targeted-2.log",
+      "after": "speculo/.speculo/specdev/archive/2026-10/2026-10-11-vault-data-unification/evidence/checks-release/windows-fix-targeted-2.log",
+      "beforeCharacters": 244,
+      "afterCharacters": 244,
+      "changed": false
+    },
+    {
+      "before": "speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/evidence/checks-release/windows-fix-test-types.log",
+      "after": "speculo/.speculo/specdev/archive/2026-10/2026-10-11-vault-data-unification/evidence/checks-release/windows-fix-test-types.log",
+      "beforeCharacters": 52,
+      "afterCharacters": 52,
+      "changed": false
+    },
+    {
+      "before": "speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/evidence/checks-sync/t06-actionlint.log",
+      "after": "speculo/.speculo/specdev/archive/2026-10/2026-10-11-vault-data-unification/evidence/checks-sync/t06-actionlint.log",
+      "beforeCharacters": 605,
+      "afterCharacters": 605,
+      "changed": false
+    },
+    {
+      "before": "speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/evidence/checks-sync/t06-autostash-green.log",
+      "after": "speculo/.speculo/specdev/archive/2026-10/2026-10-11-vault-data-unification/evidence/checks-sync/t06-autostash-green.log",
+      "beforeCharacters": 300,
+      "afterCharacters": 300,
+      "changed": false
+    },
+    {
+      "before": "speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/evidence/checks-sync/t06-autostash-red.log",
+      "after": "speculo/.speculo/specdev/archive/2026-10/2026-10-11-vault-data-unification/evidence/checks-sync/t06-autostash-red.log",
+      "beforeCharacters": 2114,
+      "afterCharacters": 2114,
+      "changed": false
+    },
+    {
+      "before": "speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/evidence/checks-sync/t06-browser-matrix-green.log",
+      "after": "speculo/.speculo/specdev/archive/2026-10/2026-10-11-vault-data-unification/evidence/checks-sync/t06-browser-matrix-green.log",
+      "beforeCharacters": 459,
+      "afterCharacters": 459,
+      "changed": false
+    },
+    {
+      "before": "speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/evidence/checks-sync/t06-browser-node24.log",
+      "after": "speculo/.speculo/specdev/archive/2026-10/2026-10-11-vault-data-unification/evidence/checks-sync/t06-browser-node24.log",
+      "beforeCharacters": 45933,
+      "afterCharacters": 45933,
+      "changed": false
+    },
+    {
+      "before": "speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/evidence/checks-sync/t06-continuation-red.log",
+      "after": "speculo/.speculo/specdev/archive/2026-10/2026-10-11-vault-data-unification/evidence/checks-sync/t06-continuation-red.log",
+      "beforeCharacters": 2058,
+      "afterCharacters": 2058,
+      "changed": false
+    },
+    {
+      "before": "speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/evidence/checks-sync/t06-final2-all.log",
+      "after": "speculo/.speculo/specdev/archive/2026-10/2026-10-11-vault-data-unification/evidence/checks-sync/t06-final2-all.log",
+      "beforeCharacters": 22138,
+      "afterCharacters": 22138,
+      "changed": false
+    },
+    {
+      "before": "speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/evidence/checks-sync/t06-final2-budget.log",
+      "after": "speculo/.speculo/specdev/archive/2026-10/2026-10-11-vault-data-unification/evidence/checks-sync/t06-final2-budget.log",
+      "beforeCharacters": 1504,
+      "afterCharacters": 1504,
+      "changed": false
+    },
+    {
+      "before": "speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/evidence/checks-sync/t06-final2-build.log",
+      "after": "speculo/.speculo/specdev/archive/2026-10/2026-10-11-vault-data-unification/evidence/checks-sync/t06-final2-build.log",
+      "beforeCharacters": 263,
+      "afterCharacters": 263,
+      "changed": false
+    },
+    {
+      "before": "speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/evidence/checks-sync/t06-final2-docs.log",
+      "after": "speculo/.speculo/specdev/archive/2026-10/2026-10-11-vault-data-unification/evidence/checks-sync/t06-final2-docs.log",
+      "beforeCharacters": 348,
+      "afterCharacters": 348,
+      "changed": false
+    },
+    {
+      "before": "speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/evidence/checks-sync/t06-final2-lint.log",
+      "after": "speculo/.speculo/specdev/archive/2026-10/2026-10-11-vault-data-unification/evidence/checks-sync/t06-final2-lint.log",
+      "beforeCharacters": 80,
+      "afterCharacters": 80,
+      "changed": false
+    },
+    {
+      "before": "speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/evidence/checks-sync/t06-final2-native.log",
+      "after": "speculo/.speculo/specdev/archive/2026-10/2026-10-11-vault-data-unification/evidence/checks-sync/t06-final2-native.log",
+      "beforeCharacters": 3570,
+      "afterCharacters": 3570,
+      "changed": false
+    },
+    {
+      "before": "speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/evidence/checks-sync/t06-final2-notices.log",
+      "after": "speculo/.speculo/specdev/archive/2026-10/2026-10-11-vault-data-unification/evidence/checks-sync/t06-final2-notices.log",
+      "beforeCharacters": 162,
+      "afterCharacters": 162,
+      "changed": false
+    },
+    {
+      "before": "speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/evidence/checks-sync/t06-gates-green.log",
+      "after": "speculo/.speculo/specdev/archive/2026-10/2026-10-11-vault-data-unification/evidence/checks-sync/t06-gates-green.log",
+      "beforeCharacters": 297,
+      "afterCharacters": 297,
+      "changed": false
+    },
+    {
+      "before": "speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/evidence/checks-sync/t06-gates-red.log",
+      "after": "speculo/.speculo/specdev/archive/2026-10/2026-10-11-vault-data-unification/evidence/checks-sync/t06-gates-red.log",
+      "beforeCharacters": 2180,
+      "afterCharacters": 2180,
+      "changed": false
+    },
+    {
+      "before": "speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/evidence/checks-sync/t06-job-env-green.log",
+      "after": "speculo/.speculo/specdev/archive/2026-10/2026-10-11-vault-data-unification/evidence/checks-sync/t06-job-env-green.log",
+      "beforeCharacters": 392,
+      "afterCharacters": 392,
+      "changed": false
+    },
+    {
+      "before": "speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/evidence/checks-sync/t06-job-env-red.log",
+      "after": "speculo/.speculo/specdev/archive/2026-10/2026-10-11-vault-data-unification/evidence/checks-sync/t06-job-env-red.log",
+      "beforeCharacters": 1189,
+      "afterCharacters": 1189,
+      "changed": false
+    },
+    {
+      "before": "speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/evidence/checks-sync/t06-owned-race-green.log",
+      "after": "speculo/.speculo/specdev/archive/2026-10/2026-10-11-vault-data-unification/evidence/checks-sync/t06-owned-race-green.log",
+      "beforeCharacters": 393,
+      "afterCharacters": 393,
+      "changed": false
+    },
+    {
+      "before": "speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/evidence/checks-sync/t06-owned-race-red.log",
+      "after": "speculo/.speculo/specdev/archive/2026-10/2026-10-11-vault-data-unification/evidence/checks-sync/t06-owned-race-red.log",
+      "beforeCharacters": 2583,
+      "afterCharacters": 2583,
+      "changed": false
+    },
+    {
+      "before": "speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/evidence/checks-sync/t06-review-final-summary.json",
+      "after": "speculo/.speculo/specdev/archive/2026-10/2026-10-11-vault-data-unification/evidence/checks-sync/t06-review-final-summary.json",
+      "beforeCharacters": 225,
+      "afterCharacters": 225,
+      "changed": false
+    },
+    {
+      "before": "speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/evidence/checks-sync/t06-service-continue-red.log",
+      "after": "speculo/.speculo/specdev/archive/2026-10/2026-10-11-vault-data-unification/evidence/checks-sync/t06-service-continue-red.log",
+      "beforeCharacters": 1454,
+      "afterCharacters": 1454,
+      "changed": false
+    },
+    {
+      "before": "speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/evidence/checks-sync/t06-service-green-final.log",
+      "after": "speculo/.speculo/specdev/archive/2026-10/2026-10-11-vault-data-unification/evidence/checks-sync/t06-service-green-final.log",
+      "beforeCharacters": 299,
+      "afterCharacters": 299,
+      "changed": false
+    },
+    {
+      "before": "speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/evidence/checks-sync/t06-service-red.log",
+      "after": "speculo/.speculo/specdev/archive/2026-10/2026-10-11-vault-data-unification/evidence/checks-sync/t06-service-red.log",
+      "beforeCharacters": 1434,
+      "afterCharacters": 1434,
+      "changed": false
+    },
+    {
+      "before": "speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/evidence/checks-sync/t06-targeted.log",
+      "after": "speculo/.speculo/specdev/archive/2026-10/2026-10-11-vault-data-unification/evidence/checks-sync/t06-targeted.log",
+      "beforeCharacters": 354,
+      "afterCharacters": 354,
+      "changed": false
+    },
+    {
+      "before": "speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/evidence/goal-delivery.md",
+      "after": "speculo/.speculo/specdev/archive/2026-10/2026-10-11-vault-data-unification/evidence/goal-delivery.md",
+      "beforeCharacters": 371,
+      "afterCharacters": 608,
+      "changed": true
+    },
+    {
+      "before": "speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/evidence/knowledge-candidates/.config/domain-layout.md.txt",
+      "after": "speculo/.speculo/specdev/archive/2026-10/2026-10-11-vault-data-unification/evidence/knowledge-candidates/.config/domain-layout.md.txt",
+      "beforeCharacters": 3702,
+      "afterCharacters": 3702,
+      "changed": false
+    },
+    {
+      "before": "speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/evidence/knowledge-candidates/.config/tracking.md.txt",
+      "after": "speculo/.speculo/specdev/archive/2026-10/2026-10-11-vault-data-unification/evidence/knowledge-candidates/.config/tracking.md.txt",
+      "beforeCharacters": 851,
+      "afterCharacters": 851,
+      "changed": false
+    },
+    {
+      "before": "speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/evidence/knowledge-candidates/adr/0001-module-contract.md.txt",
+      "after": "speculo/.speculo/specdev/archive/2026-10/2026-10-11-vault-data-unification/evidence/knowledge-candidates/adr/0001-module-contract.md.txt",
+      "beforeCharacters": 1922,
+      "afterCharacters": 1922,
+      "changed": false
+    },
+    {
+      "before": "speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/evidence/knowledge-candidates/adr/0002-lazy-loading-and-budgets.md.txt",
+      "after": "speculo/.speculo/specdev/archive/2026-10/2026-10-11-vault-data-unification/evidence/knowledge-candidates/adr/0002-lazy-loading-and-budgets.md.txt",
+      "beforeCharacters": 1527,
+      "afterCharacters": 1527,
+      "changed": false
+    },
+    {
+      "before": "speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/evidence/knowledge-candidates/adr/0003-namespaced-settings-store.md.txt",
+      "after": "speculo/.speculo/specdev/archive/2026-10/2026-10-11-vault-data-unification/evidence/knowledge-candidates/adr/0003-namespaced-settings-store.md.txt",
+      "beforeCharacters": 1585,
+      "afterCharacters": 1585,
+      "changed": false
+    },
+    {
+      "before": "speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/evidence/knowledge-candidates/adr/0004-data-placement.md.txt",
+      "after": "speculo/.speculo/specdev/archive/2026-10/2026-10-11-vault-data-unification/evidence/knowledge-candidates/adr/0004-data-placement.md.txt",
+      "beforeCharacters": 2267,
+      "afterCharacters": 2267,
+      "changed": false
+    },
+    {
+      "before": "speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/evidence/knowledge-candidates/adr/0005-three-column-workbench.md.txt",
+      "after": "speculo/.speculo/specdev/archive/2026-10/2026-10-11-vault-data-unification/evidence/knowledge-candidates/adr/0005-three-column-workbench.md.txt",
+      "beforeCharacters": 1780,
+      "afterCharacters": 1780,
+      "changed": false
+    },
+    {
+      "before": "speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/evidence/knowledge-candidates/adr/0006-global-theme.md.txt",
+      "after": "speculo/.speculo/specdev/archive/2026-10/2026-10-11-vault-data-unification/evidence/knowledge-candidates/adr/0006-global-theme.md.txt",
+      "beforeCharacters": 1326,
+      "afterCharacters": 1326,
+      "changed": false
+    },
+    {
+      "before": "speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/evidence/knowledge-candidates/adr/0007-interface-language.md.txt",
+      "after": "speculo/.speculo/specdev/archive/2026-10/2026-10-11-vault-data-unification/evidence/knowledge-candidates/adr/0007-interface-language.md.txt",
+      "beforeCharacters": 1101,
+      "afterCharacters": 1101,
+      "changed": false
+    },
+    {
+      "before": "speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/evidence/knowledge-candidates/adr/0008-terminal-helper.md.txt",
+      "after": "speculo/.speculo/specdev/archive/2026-10/2026-10-11-vault-data-unification/evidence/knowledge-candidates/adr/0008-terminal-helper.md.txt",
+      "beforeCharacters": 2190,
+      "afterCharacters": 2190,
+      "changed": false
+    },
+    {
+      "before": "speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/evidence/knowledge-candidates/adr/0009-agent-sessions-and-history.md.txt",
+      "after": "speculo/.speculo/specdev/archive/2026-10/2026-10-11-vault-data-unification/evidence/knowledge-candidates/adr/0009-agent-sessions-and-history.md.txt",
+      "beforeCharacters": 1966,
+      "afterCharacters": 1966,
+      "changed": false
+    },
+    {
+      "before": "speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/evidence/knowledge-candidates/adr/0010-browser-sessions.md.txt",
+      "after": "speculo/.speculo/specdev/archive/2026-10/2026-10-11-vault-data-unification/evidence/knowledge-candidates/adr/0010-browser-sessions.md.txt",
+      "beforeCharacters": 1961,
+      "afterCharacters": 1961,
+      "changed": false
+    },
+    {
+      "before": "speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/evidence/knowledge-candidates/adr/0011-automation-and-notifications.md.txt",
+      "after": "speculo/.speculo/specdev/archive/2026-10/2026-10-11-vault-data-unification/evidence/knowledge-candidates/adr/0011-automation-and-notifications.md.txt",
+      "beforeCharacters": 1973,
+      "afterCharacters": 1973,
+      "changed": false
+    },
+    {
+      "before": "speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/evidence/knowledge-candidates/adr/0012-git-sync.md.txt",
+      "after": "speculo/.speculo/specdev/archive/2026-10/2026-10-11-vault-data-unification/evidence/knowledge-candidates/adr/0012-git-sync.md.txt",
+      "beforeCharacters": 2248,
+      "afterCharacters": 2248,
+      "changed": false
+    },
+    {
+      "before": "speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/evidence/knowledge-candidates/adr/0013-license-and-attribution.md.txt",
+      "after": "speculo/.speculo/specdev/archive/2026-10/2026-10-11-vault-data-unification/evidence/knowledge-candidates/adr/0013-license-and-attribution.md.txt",
+      "beforeCharacters": 2030,
+      "afterCharacters": 2030,
+      "changed": false
+    },
+    {
+      "before": "speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/evidence/knowledge-candidates/context/context-map.md.txt",
+      "after": "speculo/.speculo/specdev/archive/2026-10/2026-10-11-vault-data-unification/evidence/knowledge-candidates/context/context-map.md.txt",
+      "beforeCharacters": 3904,
+      "afterCharacters": 3904,
+      "changed": false
+    },
+    {
+      "before": "speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/evidence/knowledge-candidates/context/current-baseline.md.txt",
+      "after": "speculo/.speculo/specdev/archive/2026-10/2026-10-11-vault-data-unification/evidence/knowledge-candidates/context/current-baseline.md.txt",
+      "beforeCharacters": 4629,
+      "afterCharacters": 4629,
+      "changed": false
+    },
+    {
+      "before": "speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/evidence/knowledge-candidates/context/validation.md.txt",
+      "after": "speculo/.speculo/specdev/archive/2026-10/2026-10-11-vault-data-unification/evidence/knowledge-candidates/context/validation.md.txt",
+      "beforeCharacters": 1063,
+      "afterCharacters": 1063,
+      "changed": false
+    },
+    {
+      "before": "speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/evidence/knowledge-plan.json",
+      "after": "speculo/.speculo/specdev/archive/2026-10/2026-10-11-vault-data-unification/evidence/knowledge-plan.json",
+      "beforeCharacters": 19066,
+      "afterCharacters": 22565,
+      "changed": true
+    },
+    {
+      "before": "speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/evidence/linux-agent-accounts-resume/application.log",
+      "after": "speculo/.speculo/specdev/archive/2026-10/2026-10-11-vault-data-unification/evidence/linux-agent-accounts-resume/application.log",
+      "beforeCharacters": 1494,
+      "afterCharacters": 1494,
+      "changed": false
+    },
+    {
+      "before": "speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/evidence/linux-agent-accounts-resume/result.json",
+      "after": "speculo/.speculo/specdev/archive/2026-10/2026-10-11-vault-data-unification/evidence/linux-agent-accounts-resume/result.json",
+      "beforeCharacters": 49334,
+      "afterCharacters": 49334,
+      "changed": false
+    },
+    {
+      "before": "speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/evidence/linux-agent-final/application.log",
+      "after": "speculo/.speculo/specdev/archive/2026-10/2026-10-11-vault-data-unification/evidence/linux-agent-final/application.log",
+      "beforeCharacters": 1562,
+      "afterCharacters": 1562,
+      "changed": false
+    },
+    {
+      "before": "speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/evidence/linux-agent-final/result.json",
+      "after": "speculo/.speculo/specdev/archive/2026-10/2026-10-11-vault-data-unification/evidence/linux-agent-final/result.json",
+      "beforeCharacters": 49994,
+      "afterCharacters": 49994,
+      "changed": false
+    },
+    {
+      "before": "speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/evidence/linux-sync-final/application.log",
+      "after": "speculo/.speculo/specdev/archive/2026-10/2026-10-11-vault-data-unification/evidence/linux-sync-final/application.log",
+      "beforeCharacters": 1038,
+      "afterCharacters": 1038,
+      "changed": false
+    },
+    {
+      "before": "speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/evidence/linux-sync-final/result.json",
+      "after": "speculo/.speculo/specdev/archive/2026-10/2026-10-11-vault-data-unification/evidence/linux-sync-final/result.json",
+      "beforeCharacters": 1619,
+      "afterCharacters": 1619,
+      "changed": false
+    },
+    {
+      "before": "speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/evidence/resume-document-check.json",
+      "after": "speculo/.speculo/specdev/archive/2026-10/2026-10-11-vault-data-unification/evidence/resume-document-check.json",
+      "beforeCharacters": 3380,
+      "afterCharacters": 3380,
+      "changed": false
+    },
+    {
+      "before": "speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/evidence/storage-recovery-red.txt",
+      "after": "speculo/.speculo/specdev/archive/2026-10/2026-10-11-vault-data-unification/evidence/storage-recovery-red.txt",
+      "beforeCharacters": 1426,
+      "afterCharacters": 1426,
+      "changed": false
+    },
+    {
+      "before": "speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/evidence/windows-agent-accounts/result.json",
+      "after": "speculo/.speculo/specdev/archive/2026-10/2026-10-11-vault-data-unification/evidence/windows-agent-accounts/result.json",
+      "beforeCharacters": 54381,
+      "afterCharacters": 54381,
+      "changed": false
+    },
+    {
+      "before": "speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/evidence/windows-agent-terminal/result.json",
+      "after": "speculo/.speculo/specdev/archive/2026-10/2026-10-11-vault-data-unification/evidence/windows-agent-terminal/result.json",
+      "beforeCharacters": 2589,
+      "afterCharacters": 2589,
+      "changed": false
+    },
+    {
+      "before": "speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/evidence/windows-agent-terminal-review2/application.log",
+      "after": "speculo/.speculo/specdev/archive/2026-10/2026-10-11-vault-data-unification/evidence/windows-agent-terminal-review2/application.log",
+      "beforeCharacters": 2838,
+      "afterCharacters": 2838,
+      "changed": false
+    },
+    {
+      "before": "speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/evidence/windows-agent-terminal-review2/result.json",
+      "after": "speculo/.speculo/specdev/archive/2026-10/2026-10-11-vault-data-unification/evidence/windows-agent-terminal-review2/result.json",
+      "beforeCharacters": 3161,
+      "afterCharacters": 3161,
+      "changed": false
+    },
+    {
+      "before": "speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/evidence/windows-content/application.log",
+      "after": "speculo/.speculo/specdev/archive/2026-10/2026-10-11-vault-data-unification/evidence/windows-content/application.log",
+      "beforeCharacters": 3976,
+      "afterCharacters": 3976,
+      "changed": false
+    },
+    {
+      "before": "speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/evidence/windows-content/result.json",
+      "after": "speculo/.speculo/specdev/archive/2026-10/2026-10-11-vault-data-unification/evidence/windows-content/result.json",
+      "beforeCharacters": 9459,
+      "afterCharacters": 9459,
+      "changed": false
+    },
+    {
+      "before": "speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/evidence/windows-content-boundaries/application.log",
+      "after": "speculo/.speculo/specdev/archive/2026-10/2026-10-11-vault-data-unification/evidence/windows-content-boundaries/application.log",
+      "beforeCharacters": 2701,
+      "afterCharacters": 2701,
+      "changed": false
+    },
+    {
+      "before": "speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/evidence/windows-content-boundaries/result.json",
+      "after": "speculo/.speculo/specdev/archive/2026-10/2026-10-11-vault-data-unification/evidence/windows-content-boundaries/result.json",
+      "beforeCharacters": 3798,
+      "afterCharacters": 3798,
+      "changed": false
+    },
+    {
+      "before": "speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/evidence/windows-content-consumers/application.log",
+      "after": "speculo/.speculo/specdev/archive/2026-10/2026-10-11-vault-data-unification/evidence/windows-content-consumers/application.log",
+      "beforeCharacters": 2762,
+      "afterCharacters": 2762,
+      "changed": false
+    },
+    {
+      "before": "speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/evidence/windows-content-consumers/result.json",
+      "after": "speculo/.speculo/specdev/archive/2026-10/2026-10-11-vault-data-unification/evidence/windows-content-consumers/result.json",
+      "beforeCharacters": 1434,
+      "afterCharacters": 1434,
+      "changed": false
+    },
+    {
+      "before": "speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/evidence/windows-content-gallery/application.log",
+      "after": "speculo/.speculo/specdev/archive/2026-10/2026-10-11-vault-data-unification/evidence/windows-content-gallery/application.log",
+      "beforeCharacters": 2754,
+      "afterCharacters": 2754,
+      "changed": false
+    },
+    {
+      "before": "speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/evidence/windows-content-gallery/result.json",
+      "after": "speculo/.speculo/specdev/archive/2026-10/2026-10-11-vault-data-unification/evidence/windows-content-gallery/result.json",
+      "beforeCharacters": 1711,
+      "afterCharacters": 1711,
+      "changed": false
+    },
+    {
+      "before": "speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/evidence/windows-content-renames/application.log",
+      "after": "speculo/.speculo/specdev/archive/2026-10/2026-10-11-vault-data-unification/evidence/windows-content-renames/application.log",
+      "beforeCharacters": 2698,
+      "afterCharacters": 2698,
+      "changed": false
+    },
+    {
+      "before": "speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/evidence/windows-content-renames/result.json",
+      "after": "speculo/.speculo/specdev/archive/2026-10/2026-10-11-vault-data-unification/evidence/windows-content-renames/result.json",
+      "beforeCharacters": 904,
+      "afterCharacters": 904,
+      "changed": false
+    },
+    {
+      "before": "speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/evidence/windows-storage/result.json",
+      "after": "speculo/.speculo/specdev/archive/2026-10/2026-10-11-vault-data-unification/evidence/windows-storage/result.json",
+      "beforeCharacters": 884,
+      "afterCharacters": 884,
+      "changed": false
+    },
+    {
+      "before": "speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/spec.md",
+      "after": "speculo/.speculo/specdev/archive/2026-10/2026-10-11-vault-data-unification/spec.md",
+      "beforeCharacters": 2251,
+      "afterCharacters": 2251,
+      "changed": false
+    },
+    {
+      "before": "speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/ticket/01-durable-storage.md",
+      "after": "speculo/.speculo/specdev/archive/2026-10/2026-10-11-vault-data-unification/ticket/01-durable-storage.md",
+      "beforeCharacters": 4589,
+      "afterCharacters": 4605,
+      "changed": true
+    },
+    {
+      "before": "speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/ticket/02-vault-storage.md",
+      "after": "speculo/.speculo/specdev/archive/2026-10/2026-10-11-vault-data-unification/ticket/02-vault-storage.md",
+      "beforeCharacters": 5537,
+      "afterCharacters": 5553,
+      "changed": true
+    },
+    {
+      "before": "speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/ticket/03-hidden-content.md",
+      "after": "speculo/.speculo/specdev/archive/2026-10/2026-10-11-vault-data-unification/ticket/03-hidden-content.md",
+      "beforeCharacters": 4244,
+      "afterCharacters": 4260,
+      "changed": true
+    },
+    {
+      "before": "speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/ticket/04-browser-sessions.md",
+      "after": "speculo/.speculo/specdev/archive/2026-10/2026-10-11-vault-data-unification/ticket/04-browser-sessions.md",
+      "beforeCharacters": 4101,
+      "afterCharacters": 4117,
+      "changed": true
+    },
+    {
+      "before": "speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/ticket/05-agent-accounts.md",
+      "after": "speculo/.speculo/specdev/archive/2026-10/2026-10-11-vault-data-unification/ticket/05-agent-accounts.md",
+      "beforeCharacters": 4266,
+      "afterCharacters": 4282,
+      "changed": true
+    },
+    {
+      "before": "speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/ticket/06-git-release-gates.md",
+      "after": "speculo/.speculo/specdev/archive/2026-10/2026-10-11-vault-data-unification/ticket/06-git-release-gates.md",
+      "beforeCharacters": 6328,
+      "afterCharacters": 6344,
+      "changed": true
+    },
+    {
+      "before": "speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/ticket/07-current-docs.md",
+      "after": "speculo/.speculo/specdev/archive/2026-10/2026-10-11-vault-data-unification/ticket/07-current-docs.md",
+      "beforeCharacters": 4302,
+      "afterCharacters": 4318,
+      "changed": true
+    },
+    {
+      "before": "speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/ticket/08-alpha2-delivery.md",
+      "after": "speculo/.speculo/specdev/archive/2026-10/2026-10-11-vault-data-unification/ticket/08-alpha2-delivery.md",
+      "beforeCharacters": 9748,
+      "afterCharacters": 9764,
+      "changed": true
+    },
+    {
+      "before": "speculo/.speculo/specdev/changes/2026-10-11-vault-data-unification/tickets-map.md",
+      "after": "speculo/.speculo/specdev/archive/2026-10/2026-10-11-vault-data-unification/tickets-map.md",
+      "beforeCharacters": 3767,
+      "afterCharacters": 3839,
+      "changed": true
+    },
+    {
+      "before": "speculo/.speculo/specdev/adr/0001-module-contract.md",
+      "after": "speculo/.speculo/specdev/adr/0001-module-contract.md",
+      "beforeCharacters": 3816,
+      "afterCharacters": 1922,
+      "changed": true
+    },
+    {
+      "before": "speculo/.speculo/specdev/adr/0001-module-contract.ZH.md",
+      "after": null,
+      "beforeCharacters": 1920,
+      "afterCharacters": 0,
+      "changed": true
+    },
+    {
+      "before": "speculo/.speculo/specdev/adr/0002-lazy-loading-and-budgets.md",
+      "after": "speculo/.speculo/specdev/adr/0002-lazy-loading-and-budgets.md",
+      "beforeCharacters": 3115,
+      "afterCharacters": 1527,
+      "changed": true
+    },
+    {
+      "before": "speculo/.speculo/specdev/adr/0002-lazy-loading-and-budgets.ZH.md",
+      "after": null,
+      "beforeCharacters": 1565,
+      "afterCharacters": 0,
+      "changed": true
+    },
+    {
+      "before": "speculo/.speculo/specdev/adr/0003-namespaced-settings-store.md",
+      "after": "speculo/.speculo/specdev/adr/0003-namespaced-settings-store.md",
+      "beforeCharacters": 2987,
+      "afterCharacters": 1585,
+      "changed": true
+    },
+    {
+      "before": "speculo/.speculo/specdev/adr/0003-namespaced-settings-store.ZH.md",
+      "after": null,
+      "beforeCharacters": 1572,
+      "afterCharacters": 0,
+      "changed": true
+    },
+    {
+      "before": "speculo/.speculo/specdev/adr/0004-data-placement.md",
+      "after": "speculo/.speculo/specdev/adr/0004-data-placement.md",
+      "beforeCharacters": 4278,
+      "afterCharacters": 2267,
+      "changed": true
+    },
+    {
+      "before": "speculo/.speculo/specdev/adr/0004-data-placement.ZH.md",
+      "after": null,
+      "beforeCharacters": 2156,
+      "afterCharacters": 0,
+      "changed": true
+    },
+    {
+      "before": "speculo/.speculo/specdev/adr/0005-three-column-workbench.md",
+      "after": "speculo/.speculo/specdev/adr/0005-three-column-workbench.md",
+      "beforeCharacters": 3825,
+      "afterCharacters": 1780,
+      "changed": true
+    },
+    {
+      "before": "speculo/.speculo/specdev/adr/0005-three-column-workbench.ZH.md",
+      "after": null,
+      "beforeCharacters": 1785,
+      "afterCharacters": 0,
+      "changed": true
+    },
+    {
+      "before": "speculo/.speculo/specdev/adr/0006-global-theme.md",
+      "after": "speculo/.speculo/specdev/adr/0006-global-theme.md",
+      "beforeCharacters": 2343,
+      "afterCharacters": 1326,
+      "changed": true
+    },
+    {
+      "before": "speculo/.speculo/specdev/adr/0006-global-theme.ZH.md",
+      "after": null,
+      "beforeCharacters": 1321,
+      "afterCharacters": 0,
+      "changed": true
+    },
+    {
+      "before": "speculo/.speculo/specdev/adr/0007-interface-language.md",
+      "after": "speculo/.speculo/specdev/adr/0007-interface-language.md",
+      "beforeCharacters": 2337,
+      "afterCharacters": 1101,
+      "changed": true
+    },
+    {
+      "before": "speculo/.speculo/specdev/adr/0007-interface-language.ZH.md",
+      "after": null,
+      "beforeCharacters": 1102,
+      "afterCharacters": 0,
+      "changed": true
+    },
+    {
+      "before": "speculo/.speculo/specdev/adr/0008-terminal-helper.md",
+      "after": "speculo/.speculo/specdev/adr/0008-terminal-helper.md",
+      "beforeCharacters": 4157,
+      "afterCharacters": 2190,
+      "changed": true
+    },
+    {
+      "before": "speculo/.speculo/specdev/adr/0008-terminal-helper.ZH.md",
+      "after": null,
+      "beforeCharacters": 2102,
+      "afterCharacters": 0,
+      "changed": true
+    },
+    {
+      "before": "speculo/.speculo/specdev/adr/0009-agent-sessions-and-history.md",
+      "after": "speculo/.speculo/specdev/adr/0009-agent-sessions-and-history.md",
+      "beforeCharacters": 3326,
+      "afterCharacters": 1966,
+      "changed": true
+    },
+    {
+      "before": "speculo/.speculo/specdev/adr/0009-agent-sessions-and-history.ZH.md",
+      "after": null,
+      "beforeCharacters": 1650,
+      "afterCharacters": 0,
+      "changed": true
+    },
+    {
+      "before": "speculo/.speculo/specdev/adr/0010-browser-sessions.md",
+      "after": "speculo/.speculo/specdev/adr/0010-browser-sessions.md",
+      "beforeCharacters": 3667,
+      "afterCharacters": 1961,
+      "changed": true
+    },
+    {
+      "before": "speculo/.speculo/specdev/adr/0010-browser-sessions.ZH.md",
+      "after": null,
+      "beforeCharacters": 1768,
+      "afterCharacters": 0,
+      "changed": true
+    },
+    {
+      "before": "speculo/.speculo/specdev/adr/0011-automation-and-notifications.md",
+      "after": "speculo/.speculo/specdev/adr/0011-automation-and-notifications.md",
+      "beforeCharacters": 4075,
+      "afterCharacters": 1973,
+      "changed": true
+    },
+    {
+      "before": "speculo/.speculo/specdev/adr/0011-automation-and-notifications.ZH.md",
+      "after": null,
+      "beforeCharacters": 1970,
+      "afterCharacters": 0,
+      "changed": true
+    },
+    {
+      "before": "speculo/.speculo/specdev/adr/0012-git-sync.md",
+      "after": "speculo/.speculo/specdev/adr/0012-git-sync.md",
+      "beforeCharacters": 4493,
+      "afterCharacters": 2248,
+      "changed": true
+    },
+    {
+      "before": "speculo/.speculo/specdev/adr/0012-git-sync.ZH.md",
+      "after": null,
+      "beforeCharacters": 2131,
+      "afterCharacters": 0,
+      "changed": true
+    },
+    {
+      "before": "speculo/.speculo/specdev/adr/0013-license-and-attribution.md",
+      "after": "speculo/.speculo/specdev/adr/0013-license-and-attribution.md",
+      "beforeCharacters": 3830,
+      "afterCharacters": 2030,
+      "changed": true
+    },
+    {
+      "before": "speculo/.speculo/specdev/adr/0013-license-and-attribution.ZH.md",
+      "after": null,
+      "beforeCharacters": 2036,
+      "afterCharacters": 0,
+      "changed": true
+    },
+    {
+      "before": "speculo/.speculo/specdev/context/context-map.md",
+      "after": "speculo/.speculo/specdev/context/context-map.md",
+      "beforeCharacters": 8271,
+      "afterCharacters": 3904,
+      "changed": true
+    },
+    {
+      "before": "speculo/.speculo/specdev/context/context-map.ZH.md",
+      "after": null,
+      "beforeCharacters": 3793,
+      "afterCharacters": 0,
+      "changed": true
+    },
+    {
+      "before": "speculo/.speculo/specdev/context/current-baseline.md",
+      "after": "speculo/.speculo/specdev/context/current-baseline.md",
+      "beforeCharacters": 8071,
+      "afterCharacters": 4614,
+      "changed": true
+    },
+    {
+      "before": "speculo/.speculo/specdev/context/current-baseline.ZH.md",
+      "after": null,
+      "beforeCharacters": 5176,
+      "afterCharacters": 0,
+      "changed": true
+    },
+    {
+      "before": "speculo/.speculo/specdev/context/validation.md",
+      "after": "speculo/.speculo/specdev/context/validation.md",
+      "beforeCharacters": 5955,
+      "afterCharacters": 1070,
+      "changed": true
+    },
+    {
+      "before": "speculo/.speculo/specdev/context/validation.ZH.md",
+      "after": null,
+      "beforeCharacters": 2959,
+      "afterCharacters": 0,
+      "changed": true
+    },
+    {
+      "before": "speculo/.speculo/specdev/.config/domain-layout.md",
+      "after": "speculo/.speculo/specdev/.config/domain-layout.md",
+      "beforeCharacters": 7150,
+      "afterCharacters": 3702,
+      "changed": true
+    },
+    {
+      "before": "speculo/.speculo/specdev/.config/domain-layout.ZH.md",
+      "after": null,
+      "beforeCharacters": 3869,
+      "afterCharacters": 0,
+      "changed": true
+    },
+    {
+      "before": "speculo/.speculo/specdev/.config/tracking.md",
+      "after": "speculo/.speculo/specdev/.config/tracking.md",
+      "beforeCharacters": 1761,
+      "afterCharacters": 851,
+      "changed": true
+    },
+    {
+      "before": "speculo/.speculo/specdev/.config/tracking.ZH.md",
+      "after": null,
+      "beforeCharacters": 882,
+      "afterCharacters": 0,
+      "changed": true
+    },
+    {
+      "before": "speculo/.speculo/specdev/status.json",
+      "after": "speculo/.speculo/specdev/status.json",
+      "beforeCharacters": 489,
+      "afterCharacters": 463,
+      "changed": true
+    },
+    {
+      "before": "speculo/.speculo/specdev/triage-runs/TRI-001.md",
+      "after": "speculo/.speculo/specdev/triage-runs/TRI-001.md",
+      "beforeCharacters": 3872,
+      "afterCharacters": 3880,
+      "changed": true
+    },
+    {
+      "before": null,
+      "after": "speculo/.speculo/specdev/archive/2026-10/2026-10-11-vault-data-unification/README.md",
+      "beforeCharacters": 0,
+      "afterCharacters": 603,
+      "changed": true
+    }
+  ],
+  "character_totals": {
+    "before": 881988,
+    "after": 807594,
+    "scope": "全部受影响原文件及归档README，包含未改字节的移动文本；本报告及自描述JSON单独记录，二进制不计字符。"
+  },
+  "report_character_counts": {
+    "before": 3701,
+    "after": 4421,
+    "manifestBefore": 65574,
+    "manifestAfter": 147296
+  }
 }

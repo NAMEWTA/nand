@@ -1,24 +1,22 @@
-English | [简体中文](0006-global-theme.ZH.md)
+# ADR-0006：全局主题
 
-# ADR-0006: Global theme
+状态：已接受。2026-10-13 依据 2026-10-11-vault-data-unification 的实现与验收证据核对；保留稳定决定。
 
-Status: accepted. Checked against the code on 2026-10-08.
+## 问题
 
-## Problem
+NAND 的界面和用户的 Markdown 笔记应该看起来是同一个产品，NAND 的颜色也应该跟随 Obsidian 的明暗主题。各个功能里的私有调色板会与 Obsidian 主题冲突，也无法改变笔记的外观。
 
-NAND's screens and the user's Markdown notes should look like one product, and NAND's colors should follow Obsidian's light and dark themes. Private palettes inside individual features fight with the Obsidian theme and cannot change how notes look.
+## 决定
 
-## Decision
+- **body 类与变量。** 主题以 `body` 上的类应用，覆盖 Obsidian 自己的变量（背景、文字、强调色、标题、加粗、链接、引用、代码），编辑器、阅读视图和 NAND 界面同时变化，而不必与选择器对抗。类有 `nand-theme--<预置>`、`nand-md-headings--<样式>`、`nand-md-emphasis--<样式>`，以及 `nand-theme-accent-light`、`nand-theme-accent-dark`、`nand-theme-line-height`，对应变量 `--nand-user-accent-light`、`--nand-user-accent-dark`、`--nand-user-line-height`。
+- **预置。** `system`（默认，不设置任何覆盖）、`claude-code` 和 `eye-care`，各有明、暗两种变体。外观页可调整标题样式（`preset`、`accented`、`plain`）、强调样式（`preset`、`accent`、`highlight`、`plain`）、明暗两种强调色（`#rrggbb`，留空则使用预置的颜色）和阅读行高（0 表示使用预置的值）。该页还能导入和导出这些选择。
+- **所有窗口共用一个运行时。** `ThemeRuntime` 把状态应用到主窗口和每个弹出窗口，`theme` 命名空间变化时重新应用，卸载时移除所有类和变量。
+- **没有私有调色板。** NAND 界面使用由 Obsidian 变量派生的令牌（`src/ui/styles/000-foundation.css`）。功能不定义自己的调色板。
 
-- **Body classes and variables.** The theme is applied as classes on `body` that override Obsidian's own variables (background, text, accent, headings, bold, links, quotes, code), so the editor, reading view and NAND's interface change together without fighting selectors. The classes are `nand-theme--<preset>`, `nand-md-headings--<style>`, `nand-md-emphasis--<style>`, and `nand-theme-accent-light`, `nand-theme-accent-dark` and `nand-theme-line-height` with the variables `--nand-user-accent-light`, `--nand-user-accent-dark` and `--nand-user-line-height`.
-- **Presets.** `system` (the default, which sets no override), `claude-code` and `eye-care`, each with a light and a dark variant. The Appearance page adjusts heading style (`preset`, `accented`, `plain`), emphasis style (`preset`, `accent`, `highlight`, `plain`), the accent color for light and dark (`#rrggbb` or empty to keep the preset's), and the reading line height (0 keeps the preset's). The page also imports and exports these choices.
-- **One runtime for every window.** `ThemeRuntime` applies the state to the main window and to every popout window, reapplies it when the `theme` namespace changes, and removes every class and variable on unload.
-- **No private palettes.** NAND's interface uses tokens derived from Obsidian's variables (`src/ui/styles/000-foundation.css`). A feature does not define its own palette.
+## 影响
 
-## Consequences
+选择 `system` 之外的预置时，可能与社区主题叠加；外观页会提示这一点。默认设置不触碰 Obsidian。
 
-A preset other than `system` can stack with a community theme; the Appearance page says so. The default leaves Obsidian untouched.
+## 依据
 
-## Evidence
-
-[Theme settings](../../../../src/theme/settings.ts), [runtime](../../../../src/theme/runtime.ts), [preset styles](../../../../src/theme/styles/presets.css), [foundation tokens](../../../../src/ui/styles/000-foundation.css). The preset and settings tests (`src/theme/presets.test.ts`, `src/theme/settings.test.ts`) and the screenshot matrix `scripts/obsidian-acceptance/theme-matrix.mjs`.
+[主题设置](../../../../src/theme/settings.ts)、[运行时](../../../../src/theme/runtime.ts)、[预置样式](../../../../src/theme/styles/presets.css)、[基础令牌](../../../../src/ui/styles/000-foundation.css)。预置与设置测试（`src/theme/presets.test.ts`、`src/theme/settings.test.ts`），以及截图矩阵 `scripts/obsidian-acceptance/theme-matrix.mjs`。

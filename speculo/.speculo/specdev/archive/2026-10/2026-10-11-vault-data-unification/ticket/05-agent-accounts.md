@@ -26,7 +26,7 @@ shared_path_owners: ["<Path>src/shared/**</Path> => root","<Path>src/host/**</Pa
 
 # T-05 账号身份、凭据与终端辅助程序
 
-先读取总体 Map <Path>{roots.state}/specdev/changes/2026-10-11-vault-data-unification/tickets-map.md</Path>，再读取其适用项目 Skill，最后读取本票；Skill 矩阵是最低要求。
+先读取总体 Map <Path>{roots.state}/specdev/archive/2026-10/2026-10-11-vault-data-unification/tickets-map.md</Path>，再读取其适用项目 Skill，最后读取本票；Skill 矩阵是最低要求。
 
 ## 1. 战略与来源
 
@@ -81,7 +81,7 @@ E2E owner/environment: root / current-workspace。提交已获用户授权；imp
 ## 10. 验收标准
 
 - [x] AC-005：中文及标点账号映射稳定且不碰撞；非空非法账号报错；默认账号也使用 vault 目录；各 CLI、Hook 和 helper 统一 .nand；旧碰撞目录不得猜测归属；平台权限据实验证。
-- [x] 非空实现、验证和双轴审查事实写入 <Path>{roots.state}/specdev/changes/2026-10-11-vault-data-unification/evidence/T-05.md</Path>。
+- [x] 非空实现、验证和双轴审查事实写入 <Path>{roots.state}/specdev/archive/2026-10/2026-10-11-vault-data-unification/evidence/T-05.md</Path>。
 - [x] 实际路径、Skill 摘要、命令结果、未验证范围与 Map 一致。
 
 ## 12. 停止、检查点与交付

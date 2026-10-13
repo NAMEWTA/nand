@@ -1,29 +1,27 @@
-English | [简体中文](0012-git-sync.ZH.md)
+# ADR-0012：使用系统 git 的 Git 同步
 
-# ADR-0012: Git sync with the system git
+状态：已接受。2026-10-13 依据 2026-10-11-vault-data-unification 的实现与验收证据核对；保留稳定决定。
 
-Status: accepted. Checked against the code on 2026-10-08.
+## 问题
 
-## Problem
+Obsidian Sync 不携带以点开头的目录，所以 NAND 自己放在 `.nand/` 里的数据需要另一条在设备间传递的途径。Git 本来就在给库做版本管理，凭据也保存在用户自己的工具里。同步功能不能保存凭据，不能丢失任何一方的历史，不能在库处于冲突状态时推送，也不能留下运行中的进程。
 
-Obsidian Sync does not carry dot-folders, so NAND's own data in `.nand/` needs another way to travel between devices. Git already versions the vault and keeps credentials in the user's own tools. A sync feature must not store credentials, lose either side's history, push while the vault is in conflict or leave processes running.
+## 决定
 
-## Decision
+- **一个默认关闭、仅限桌面的模块。** `sync` 模块在 `layout-ready` 时启动，因为它会启动进程并访问远端。它在移动端不受支持：那里没有系统 git，也没有 SSH，模块也不内置 JavaScript 版的 git。
+- **系统 git。** 每次 git 调用都是在仓库目录里的独立进程（`execFile`）。交互提示关闭（`GIT_TERMINAL_PROMPT=0`、`GCM_INTERACTIVE=never`），消息使用英文（`LC_ALL=C`）以便分类失败原因，不打开分页器或编辑器，每次调用都有超时：默认两分钟，fetch 和 push 为十分钟。关闭模块会终止正在运行的 git 进程并拒绝新的调用。git 可执行文件依次从设备级的路径设置、`PATH`、常见安装位置查找。
+- **凭据留在 git 里。** NAND 不索取、不保存也不记录凭据。认证由用户的凭据管理器或 SSH agent 完成。显示给用户的错误文本，会遮去网址中的账号和令牌。
+- **仓库在哪里。** 仓库是包围库的那个仓库，或包围库内某个文件夹的仓库，该文件夹由设备级的 `repoSubPath` 指定。没有仓库时，页面提供 `git init`。NAND 从不把远端克隆进已有的库。
+- **提交模式。** `smart` 提交已暂存的内容，只有索引为空且 `autoStageOnEmptyIndex` 打开时才暂存全部；`staged` 只提交已暂存的内容；`all` 先暂存全部更改。提交信息来自模板，支持 `{{date}}`、`{{hostname}}`、`{{numFiles}}` 和 `{{files}}`。提交模式的判定和冲突块的解析改编自 obsidian-git（MIT），署名见 `NOTICE`。
+- **同步是分步报告的。** 提交并同步把提交、拉取、推送作为独立步骤执行。拉取失败或有冲突时，推送停止。冲突或分离的 HEAD 会停止整个运行。从不强制推送。没有 reset 同步方式，也不会自动选择 ours 或 theirs。拉取保留autostash，merge/rebase返回零后仍检查真实operation和未合并条目。恢复冲突会阻止推送；回执、通知和失败计数采用同一结果，无operation时不胡乱abort。推送前的压缩只在上游是祖先、且范围内没有其他引用时才进行。
+- **串行队列。** 操作一次执行一个，重复的请求会合并。由 git 自己引起的库事件会被忽略。
+- **冲突交给用户。** 同步页显示带「继续」和「中止」的冲突横幅。在编辑器里，冲突块带有保留上方、保留下方或两者都保留的按钮。标记为已解决时，如果仍有冲突标记会给出警告。
+- **自动同步。** 提交并同步、拉取、推送的间隔、最后一次编辑之后的模式以及启动时拉取，都是库级设置。连续三次需要人工处理的失败，会暂停自动同步，直到一次手动运行成功。计时和暂停标记按设备、按仓库保存在 `.nand/sync/<device-id>/<repository-hash>.json`，同属于库内设备数据；同步到其他设备不授权自动接管运行。
 
-- **A module, off by default, desktop only.** The `sync` module starts at `layout-ready`, because it starts processes and talks to a remote. It is unsupported on mobile: there is no system git and no SSH there, and the module does not bundle a JavaScript git.
-- **The system git.** Each git call is its own process (`execFile`) in the repository directory. Prompts are off (`GIT_TERMINAL_PROMPT=0`, `GCM_INTERACTIVE=never`), messages are in English (`LC_ALL=C`) so failures can be classified, no pager or editor opens, and each call has a timeout: two minutes by default and ten minutes for fetch and push. Turning the module off kills running git processes and refuses new ones. The git binary is found from the device-scoped path setting, then `PATH`, then the usual install locations.
-- **Credentials stay with git.** NAND does not ask for, store or log credentials. Authentication is the user's credential helper or SSH agent. Error text shown to the user has account names and tokens in URLs redacted.
-- **Where the repository is.** The repository is the one around the vault, or around a folder inside the vault chosen in the device-scoped `repoSubPath`. When there is no repository, the page offers `git init`. NAND never clones a remote into an existing vault.
-- **Commit modes.** `smart` commits what is staged and stages everything only when the index is empty and `autoStageOnEmptyIndex` is on; `staged` commits only what is staged; `all` stages every change first. Messages come from templates with `{{date}}`, `{{hostname}}`, `{{numFiles}}` and `{{files}}`. Commit mode resolution and conflict-block parsing are adapted from obsidian-git (MIT), credited in `NOTICE`.
-- **Sync is reported steps.** Commit-and-sync runs commit, pull and push as separate steps. A failed or conflicted pull stops the push. A conflict or a detached HEAD stops the run. Nothing is force-pushed. There is no reset sync method and no automatic choice of ours or theirs. Pull merges or rebases onto the upstream with autostash. Squashing before push happens only when the upstream is an ancestor and no other ref lies in the range.
-- **A serial queue.** Operations run one at a time and duplicate requests coalesce. Vault events caused by git itself are ignored.
-- **Conflicts are the user's.** The sync page shows a conflict banner with continue and abort. In the editor, conflict blocks get buttons to keep the upper side, the lower side or both. Marking a file resolved warns while markers remain.
-- **Automatic sync.** Intervals for commit-and-sync, pull and push, an after-last-edit mode and pull on start are settings of the vault. Three consecutive failures that need attention pause automatic sync until a manual run succeeds. The clock and the pause flag are per device and per repository, kept in `<git dir>/nand-sync.json`, so they are never committed or synced.
+## 影响
 
-## Consequences
+Git 同步依赖用户自己安装的 git，以及用户如何配置凭据。它从不悄悄解决冲突，也从不改写远端历史。作为 Git 仓库的库也会提交 `.nand/` 的内容，所以远端的访问范围很重要。
 
-Git sync adds a dependency on a user-installed git and on how the user set up credentials. It never silently resolves a conflict and never rewrites remote history. A vault that is a Git repository commits `.nand/` content too, so the remote's access scope matters.
+## 依据
 
-## Evidence
-
-[Module](../../../../src/modules/sync/module.ts), [flow](../../../../src/modules/sync/core/flow.ts), [repository operations](../../../../src/modules/sync/core/repo.ts), [git runner](../../../../src/modules/sync/platform/desktop/git-runner.ts), [service](../../../../src/modules/sync/services/sync-service.ts). The sync suites in `src/modules/sync/` and `test/sync/git-flow.test.ts` run real git against a bare remote and two clones (first publish, merge and rebase, conflicts with abort and continue, rename, binary files, a missing remote, rejected push, `index.lock`, squash rules, CJK and wildcard paths, 1,001 files with a 20 MB attachment). The probe covers set-up, publish, a real conflict, abort and turning the module off in Obsidian. Authentication against real hosting is not verified ([validation](../context/validation.md)).
+[模块](../../../../src/modules/sync/module.ts)、[流程](../../../../src/modules/sync/core/flow.ts)、[仓库操作](../../../../src/modules/sync/core/repo.ts)、[git 运行器](../../../../src/modules/sync/platform/desktop/git-runner.ts)、[服务](../../../../src/modules/sync/services/sync-service.ts)。`src/modules/sync/` 中的同步测试和 `test/sync/git-flow.test.ts` 对一个裸远端和两个克隆运行真实的 git（首次发布、合并与变基、带中止和继续的冲突、重命名、二进制文件、缺少远端、推送被拒、`index.lock`、压缩规则、中日韩文与通配符路径、含 20 MB 附件的 1,001 个文件）。探针覆盖了在 Obsidian 中的配置、发布、真实冲突、中止和关闭模块。对真实托管服务的认证没有验证（见[验证](../context/validation.md)）。

@@ -26,7 +26,7 @@ shared_path_owners: ["<Path>manifest.json</Path> => root","<Path>package.json</P
 
 # T-08 发行验收、alpha.2 发布与 A 交接
 
-先读取总体 Map <Path>{roots.state}/specdev/changes/2026-10-11-vault-data-unification/tickets-map.md</Path>，再读取其适用项目 Skill，最后读取本票；Skill 矩阵是最低要求。
+先读取总体 Map <Path>{roots.state}/specdev/archive/2026-10/2026-10-11-vault-data-unification/tickets-map.md</Path>，再读取其适用项目 Skill，最后读取本票；Skill 矩阵是最低要求。
 
 ## 1. 战略与来源
 
@@ -81,7 +81,7 @@ E2E owner/environment: root / current-workspace。提交已获用户授权；imp
 ## 10. 验收标准
 
 - [x] AC-008：alpha.2正式发布及真实下载新装/旧helper升级通过，#151/#148已关闭；按plan_revision2完成本地A交接，正式知识提升/归档继续由A执行，整个Goal尚未完成。Windows宿主门已取消，未测范围如实保留。
-- [x] 非空实现、验证和双轴审查事实写入 <Path>{roots.state}/specdev/changes/2026-10-11-vault-data-unification/evidence/T-08.md</Path>。
+- [x] 非空实现、验证和双轴审查事实写入 <Path>{roots.state}/specdev/archive/2026-10/2026-10-11-vault-data-unification/evidence/T-08.md</Path>。
 - [x] 实际路径、Skill 摘要、命令结果、未验证范围与 Map 一致。
 
 ## 12. 停止、检查点与交付

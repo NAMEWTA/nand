@@ -26,7 +26,7 @@ shared_path_owners: ["<Path>src/modules/sync/**</Path> => root","<Path>test/sync
 
 # T-06 Git 冲突判定与发布检查依赖
 
-先读取总体 Map <Path>{roots.state}/specdev/changes/2026-10-11-vault-data-unification/tickets-map.md</Path>，再读取其适用项目 Skill，最后读取本票；Skill 矩阵是最低要求。
+先读取总体 Map <Path>{roots.state}/specdev/archive/2026-10/2026-10-11-vault-data-unification/tickets-map.md</Path>，再读取其适用项目 Skill，最后读取本票；Skill 矩阵是最低要求。
 
 ## 1. 战略与来源
 
@@ -81,7 +81,7 @@ E2E owner/environment: root / current-workspace。提交已获用户授权；imp
 ## 10. 验收标准
 
 - [x] AC-006：merge/rebase 退出零仍检查冲突；回执、通知、自动同步计数一致；Release 必须依赖同一 SHA 的完整检查和 helper；失败、取消、跳过不能发布。
-- [x] 非空实现、验证和双轴审查事实写入 <Path>{roots.state}/specdev/changes/2026-10-11-vault-data-unification/evidence/T-06.md</Path>。
+- [x] 非空实现、验证和双轴审查事实写入 <Path>{roots.state}/specdev/archive/2026-10/2026-10-11-vault-data-unification/evidence/T-06.md</Path>。
 - [x] 实际路径、Skill 摘要、命令结果、未验证范围与 Map 一致。
 
 ## 12. 停止、检查点与交付

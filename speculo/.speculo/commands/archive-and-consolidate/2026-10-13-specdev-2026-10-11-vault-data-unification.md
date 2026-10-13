@@ -14,7 +14,7 @@
 
 18项：13 ADR、3 context、2配置索引。每项均为**改写规范目标并删除其同目录.ZH.md重复文件**，风险中等；已先合并两种版本仍有效的独有事实，并按源码与T-01至T-08证据更新。原始许可、测试夹具、旧归档、根README双语版本均保留。
 
-[完整候选路径、原始/候选摘要及字符数](../../specdev/changes/2026-10-11-vault-data-unification/evidence/knowledge-plan.json)。下表路径相对于 `speculo/.speculo/specdev/`，候选位于该change的 `evidence/knowledge-candidates/` 对应路径加 `.txt`。
+[完整候选路径、原始/候选摘要及字符数](../../specdev/archive/2026-10/2026-10-11-vault-data-unification/evidence/knowledge-plan.json)。下表路径相对于 `speculo/.speculo/specdev/`，候选位于该change的 `evidence/knowledge-candidates/` 对应路径加 `.txt`。
 
 | 项 | 规范目标（改写） | 同目录重复版本（删除） | 原两份字符数 → 合并后 | 动作 |
 |---|---|---|---|---|
@@ -56,3 +56,13 @@
 就计划中的归档与永久知识目标而言：**未修改任何文件。此为 dry-run 计划，请确认后执行。**
 
 确认门来自 `speculo/skills/archive-and-consolidate/SKILL.md`：“预执行完整计划 → 用户显式确认 → 执行”；该技能明确不得将初始“完成后清理”视为这份具体计划的确认。
+
+## 执行补遗
+
+用户明确授权：“继续执行计划”。执行时间：2026-10-13T09:42:02.692138+00:00。预检源文件及18组知识摘要无漂移，源目录原子移动后逐文件摘要一致。现已归档1个change、逐项提升18份候选并删除18份重复版本；没有跳过项。历史日志与旧归档保持原样。完整源备份：`scripts/tmp/vault-unification-resume/T-08/A-backup`；执行前提交：`9734ea9d0850843b735a5bb0068d3c1b8ae450a7`。上方dry-run内容保留为审批时计划，当前结果以本补遗为准。
+
+验证完成：complete、包级self-check及TRI-001均0错误0警告；test:docs通过（642份Markdown、1668本地链接、422外部链接，仅校验链接格式）。源目录不存在、归档完整、索引一致、18项提升及18项删除均回读确认。原始日志/二进制证据与旧归档不变，产品文件与alpha.2一致。
+
+归档新增README作为索引；archive_path按schema采用rooted Path，八票integration.evidence保留schema要求的历史changes来源。两份context清除A执行前提醒并更新完成事实，候选原文不改，最终摘要单独记录。逐文件前后字符数、元数据更新清单及18项提升摘要见同名JSON。
+
+文本字符合计（含移动文本，报告自身另记）：881988 → 807594；备份可按原路径恢复，Git前置提交亦可回读。未完成项：无本地实现/交付/归档项；本次文档收尾提交推送随后核对。

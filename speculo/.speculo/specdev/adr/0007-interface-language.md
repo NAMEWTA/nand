@@ -1,26 +1,24 @@
-English | [简体中文](0007-interface-language.ZH.md)
+# ADR-0007：界面语言与词典
 
-# ADR-0007: Interface language and dictionaries
+状态：已接受。2026-10-13 依据 2026-10-11-vault-data-unification 的实现与验收证据核对；保留稳定决定。
 
-Status: accepted. Checked against the code on 2026-10-08.
+## 问题
 
-## Problem
+NAND 同时用于中文和英文。语言偏好属于插件，而不是某个可以被关闭的功能。用户可能永远不会启用的功能，其词典不应在启动时就付出代价。
 
-NAND is used in Chinese and English. A language preference belongs to the plugin, not to a feature that can be switched off. Dictionaries for features users may never enable should not be paid for at startup.
+## 决定
 
-## Decision
+- **一个偏好。** `app` 设置命名空间的 `language` 字段取 `zh` 或 `en`。新库在 Obsidian 界面为中文时使用中文，否则使用英文；存储的值无效时回到该默认值。偏好在工作台的「设置 → 常规 → 语言」中修改，不依赖任何模块是否开启。
+- **发布变更。** 语言变更依次写入，只有写入成功后才把新语言发布给订阅者。写入失败则保留原语言。语言变更发布后，所有打开的窗口（包括弹出窗口）中的本地化文字都会刷新。
+- **每个字符串两种语言。** 面向用户的文字都经过 `t(key, params)`，每个键在 `en` 和 `zh` 中都存在且占位符相同。缺失的键先回退到英文，再回退到键本身。
+- **词典放在哪里。** 启动代码会读取的键放在 `src/shared/i18n/`，启动时合并。每个模块有自己的 `i18n.ts`，在其 `module.ts` 加载时用 `registerMessages` 注册。多个模块共用的词典放在 `src/shared/i18n/lazy/`。
+- **内容不翻译。** 用户笔记、路径、编号和导入材料的原文保持原样。
+- **由脚本检查。** `scripts/verify-i18n.mjs` 对只存在于一种语言的键、占位符不一致，以及 `t()` 以字面量键调用了没有词典定义的键，都会失败。
 
-- **One preference.** The `language` field of the `app` settings namespace is `zh` or `en`. A new vault gets Chinese when Obsidian's interface is Chinese and English otherwise; an invalid stored value falls back to that default. The preference is changed in the workbench under Settings, General, Language. It does not depend on any module being on.
-- **Publishing a change.** Language changes are written one after another, and the new language is published to subscribers only after the write succeeds. A failed write keeps the old language. A published change refreshes the localized text in every open window, including popout windows.
-- **Every string has two languages.** User-facing text goes through `t(key, params)`, and every key exists in both `en` and `zh` with the same placeholders. Missing keys fall back to English, then to the key.
-- **Where dictionaries live.** Dictionaries holding keys that startup code reads are in `src/shared/i18n/` and are merged at startup. Each module has its own `i18n.ts`, registered with `registerMessages` when its `module.ts` loads. Dictionaries shared by several modules are in `src/shared/i18n/lazy/`.
-- **Content is not translated.** User notes, paths, ids and the original text of imported material stay as they are.
-- **Checked by a script.** `scripts/verify-i18n.mjs` fails on a key that exists in one language only, on placeholder mismatches and on `t()` calls with a literal key that no dictionary defines.
+## 影响
 
-## Consequences
+关闭一个模块，就把它的词典成本从启动中去掉了。增加一种语言意味着给每份词典增加一个字段，检查脚本会强制这一点。
 
-Switching a module off removes its dictionary cost from startup. Adding a language means adding a field to every dictionary, which the check enforces.
+## 依据
 
-## Evidence
-
-[Runtime](../../../../src/shared/i18n/runtime.ts), [app schema](../../../../src/app/settings/app-schema.ts), [language handling](../../../../src/app/settings/language.ts), [i18n check](../../../../scripts/verify-i18n.mjs). `pnpm test:i18n`; the language tests (`src/app/settings/language.test.ts`).
+[运行时](../../../../src/shared/i18n/runtime.ts)、[app schema](../../../../src/app/settings/app-schema.ts)、[语言处理](../../../../src/app/settings/language.ts)、[i18n 检查](../../../../scripts/verify-i18n.mjs)。`pnpm test:i18n`；语言测试（`src/app/settings/language.test.ts`）。

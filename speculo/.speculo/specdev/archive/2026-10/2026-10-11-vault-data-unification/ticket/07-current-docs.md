@@ -26,7 +26,7 @@ shared_path_owners: ["<Path>AGENTS.md</Path> => root","<Path>.agents/skills/**</
 
 # T-07 当前规范中文化与旧文档清理
 
-先读取总体 Map <Path>{roots.state}/specdev/changes/2026-10-11-vault-data-unification/tickets-map.md</Path>，再读取其适用项目 Skill，最后读取本票；Skill 矩阵是最低要求。
+先读取总体 Map <Path>{roots.state}/specdev/archive/2026-10/2026-10-11-vault-data-unification/tickets-map.md</Path>，再读取其适用项目 Skill，最后读取本票；Skill 矩阵是最低要求。
 
 ## 1. 战略与来源
 
@@ -81,7 +81,7 @@ E2E owner/environment: root / current-workspace。提交已获用户授权；imp
 ## 10. 验收标准
 
 - [x] AC-007：当前项目文档除 README 外使用中文；删除旧重复文档，保留仍成立的独有信息；ADR/context 的中文合并候选经 A 网关检查后，在本地完成的最终归档阶段提升；原始许可与历史归档保持原文；产品 i18n 保留。
-- [x] 非空实现、验证和双轴审查事实写入 <Path>{roots.state}/specdev/changes/2026-10-11-vault-data-unification/evidence/T-07.md</Path>。
+- [x] 非空实现、验证和双轴审查事实写入 <Path>{roots.state}/specdev/archive/2026-10/2026-10-11-vault-data-unification/evidence/T-07.md</Path>。
 - [x] 实际路径、Skill 摘要、命令结果、未验证范围与 Map 一致。
 
 ## 12. 停止、检查点与交付

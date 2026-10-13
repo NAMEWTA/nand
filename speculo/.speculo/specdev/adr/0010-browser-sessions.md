@@ -1,28 +1,27 @@
-English | [简体中文](0010-browser-sessions.ZH.md)
+# ADR-0010：浏览器分区、权限与页面生命周期
 
-# ADR-0010: Browser partitions, permissions and page lifetime
+状态：已接受。2026-10-13 依据 2026-10-11-vault-data-unification 的实现与验收证据核对；保留稳定决定。
 
-Status: accepted. Checked against the code on 2026-10-08.
+## 问题
 
-## Problem
+浏览器模块在 Obsidian 内嵌入网页（Electron `webview` guest）。标签页、弹窗和登录窗口必须共用同一个登录会话，网页不能触及 Node 或库，一次永远没有响应的导航不能让关闭操作或 Agent 调用悬挂。Agent CLI 可以驱动浏览器，而这项能力在用户打开之前必须保持关闭。
 
-The browser module embeds web pages (Electron `webview` guests) inside Obsidian. Tabs, popups and sign-in windows must share one login session, web pages must not reach Node or the vault, and a navigation that never answers must not leave a close or an agent call hanging. Agent CLIs can drive the browser, which must stay off unless the user turns it on.
+## 决定
 
-## Decision
+- **库内显式Session。** 所有NAND网页表面使用 `.nand/browser/<device-id>/profiles/<profile>/session/` 的绝对Session目录，按设备/profile隔离；Cookie、站点数据、缓存均在其中，下载/桥接/截图说明也进入库内。主进程在guest附着时绑定实际Session并核对storagePath；无支持API或目录校验失败时停止，不回退全局persist分区。旧会话需冷重启迁移、正式打开确认和可恢复来源退休。主进程使用原生规范vault路径，逐级拒绝库内链接；下载注册事件监听后回读当前状态，避免小文件先完成、界面永远显示进行中。
 
-- **One partition per vault.** Pages of a vault use the Electron partition `persist:nand-browser-<vault id>`. Popups and sign-in windows use the same partition and the same policy. Cookies stay in the local Electron session; they are not written to settings or to the vault.
-- **Guest policy.** A guest is accepted only if it is a `webview` with Node integration off and a NAND browser partition. Only allowed URLs are loaded. A window opened by a script is limited in rate and count: a plain link is passed to NAND to open as a page, and a window with explicit features becomes a child window in the same partition and policy.
-- **Permissions are decisions per origin.** Camera and microphone, location, notifications, clipboard read and fullscreen are denied unless the user granted that permission to that origin, and a request from another origin or a frame does not inherit the top page's grant. Grants and the recent browsing history are stored in `.nand/browser/<device-id>/state.json`.
-- **Page identity and operations.** A page has a stable identity and a snapshot revision. An element reference is valid only inside the snapshot that produced it, so a stale reference is rejected. Operations on a page run through a per-page queue. Closing the page closes the queue: queued work is rejected, running callers settle at once, and a late native result is dropped.
-- **Retirement.** Replacing an in-flight load, or a page that cannot be stopped safely, retires the guest: it is released and a new one is created on demand, so late events never reach the new page.
-- **The agent bridge is opt-in.** With the setting "allow agent sessions to use the browser" off, no connection is started. With it on, the module provides a local connection and a CLI source; only sessions that NAND starts as agents receive the connection variables (`NAND_BROWSER_CLI`, `NAND_BROWSER_CONTEXT`, `NAND_BROWSER_TOKEN`, `NAND_BROWSER_GUIDE`). The token is valid only while the connection runs, and stale connection files are cleaned up.
-- **Material goes through sessions.** Pages, selected elements and screenshots reach an agent as pasted material through `agent.sessions` ([ADR-0009](0009-agent-sessions-and-history.md)); the browser does not own agent processes.
-- **Opening pages.** Other modules open pages through the `browser.open` service. Browser pages are resource pages of the workbench: they can be copied into a focus-mode leaf, and a copy gets a new page id.
+- **Guest 策略。** 只有满足以下条件的 guest 才被接受：类型是 `webview`、关闭 Node 集成、绑定 NAND 显式库内Session。只加载允许的网址。脚本打开的窗口受到频率和数量限制：普通链接交给 NAND 作为页面打开，带明确窗口特性的请求则成为使用同一Session和策略的子窗口。
+- **权限是按来源的决定。** 摄像头和麦克风、位置、通知、读取剪贴板和全屏，除非用户对该来源授予了该权限，否则一律拒绝；来自其他来源或子框架的请求不会继承顶层页面的授权。授权和最近的浏览历史保存在 `.nand/browser/<device-id>/state.json`。
+- **页面身份与操作。** 页面有稳定的身份和快照版本。元素引用只在产生它的快照内有效，过期的引用会被拒绝。对页面的操作经过每个页面一个的队列。关闭页面会关闭队列：排队的工作被拒绝，正在运行的调用方立刻结束，晚到的原生结果被丢弃。
+- **退役。** 替换正在进行的加载，或页面无法被安全停止时，guest 被退役：它被释放，需要时再创建新的，所以晚到的事件不会影响新页面。
+- **Agent 桥需要主动开启。** 「允许智能体会话使用浏览器」设置关闭时，不会启动任何连接。打开后，模块提供本地连接和 CLI 来源；只有由 NAND 以 Agent 身份启动的会话才会得到连接变量（`NAND_BROWSER_CLI`、`NAND_BROWSER_CONTEXT`、`NAND_BROWSER_TOKEN`、`NAND_BROWSER_GUIDE`）。令牌只在连接运行期间有效，过期的连接文件会被清理。
+- **材料经由会话。** 页面、选中的元素和截图，通过 `agent.sessions` 作为粘贴的材料到达 Agent（[ADR-0009](0009-agent-sessions-and-history.md)）；浏览器不拥有 Agent 进程。
+- **打开页面。** 其他模块通过 `browser.open` 服务打开页面。浏览器页面是工作台的资源页面：可以复制到专注模式的叶子里，副本使用新的页面编号。
 
-## Consequences
+## 影响
 
-Web content is isolated from the plugin, at the cost of the Electron `webview` restrictions. The browser works on desktop only; on mobile the workbench marks it unsupported.
+网页内容与插件隔离，代价是受 Electron `webview` 的限制。浏览器只在桌面端工作；在移动端，工作台把它标为不受支持。
 
-## Evidence
+## 依据
 
-[Guest policy](../../../../src/modules/browser/platform/desktop/guest-policy.ts), [operation queue](../../../../src/modules/browser/core/operation-queue.ts), [page](../../../../src/modules/browser/platform/desktop/page.ts), [store](../../../../src/modules/browser/platform/store.ts), [module](../../../../src/modules/browser/module.ts). The browser tests (`src/modules/browser/browser.test.ts`) and the browser guest checks of the real-Obsidian probe.
+[Guest 策略](../../../../src/modules/browser/platform/desktop/guest-policy.ts)、[操作队列](../../../../src/modules/browser/core/operation-queue.ts)、[页面](../../../../src/modules/browser/platform/desktop/page.ts)、[存储](../../../../src/modules/browser/platform/store.ts)、[模块](../../../../src/modules/browser/module.ts)。浏览器测试（`src/modules/browser/browser.test.ts`）和真实 Obsidian 探针中的浏览器 guest 检查。

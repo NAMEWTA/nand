@@ -1,33 +1,31 @@
-English | [简体中文](0011-automation-and-notifications.ZH.md)
+# ADR-0011：设备所属的自动化运行与独立的通知回执
 
-# ADR-0011: Device-owned automation runs and independent notification receipts
+状态：已接受。2026-10-13 依据 2026-10-11-vault-data-unification 的实现与验收证据核对；保留稳定决定。
 
-Status: accepted. Checked against the code on 2026-10-08.
+## 问题
 
-## Problem
+同一个库可能在多台设备上打开，Obsidian 也随时可能关闭。自动化会执行带有外部影响的动作：启动 Agent 和脚本、打开页面、发送通知。这类影响不能因为定时器触发了两次、设备重启、库被同步或收件箱被清理而重复发生。
 
-A vault can be open on several devices, and Obsidian can close at any time. Automations run actions with external effects: they start agents and scripts, open pages and send notifications. Such an effect must not repeat because a timer fired twice, a device restarted, a vault was synced or an inbox was cleaned.
+## 决定
 
-## Decision
+**定义是 Markdown。** 独立定义是 `.nand/content/NAND/自动化/` 下带稳定编号的 Markdown 文档。归属于某个产品的定义留在该产品的文档里：看板待办和小组件（`home`）、档案提醒（`archives`）。这些模块向 `automations.sources` 贡献 `AutomationSource`，由它列出、保存和打开它们的定义。动作种类有 `script`、`agent`、`obsidian-command`、`open-file`、`open-url`、`notify` 和 `create-task`。计划有 `manual`、`once` 和 `recurring` 三种；重复计划可以带时区，定义还有处理晚启动的宽限时间。
 
-**Definitions are Markdown.** A standalone definition is a Markdown document with a stable id under `NAND/自动化/`. Definitions owned by a product stay in that product's documents: board todos and widgets (`home`) and archive reminders (`archives`). Those modules contribute an `AutomationSource` to `automations.sources`, which lists, saves and opens their definitions. The action kinds are `script`, `agent`, `obsidian-command`, `open-file`, `open-url`, `notify` and `create-task`. A schedule is `manual`, `once` or `recurring`; a recurring schedule can carry its time zone, and a definition has a grace period for late starts.
+**定义属于某台设备。** 每个定义有一个取自本机的执行设备编号。复制或同步库不会转移它。运行状态按设备分开：`.nand/automation/<device-id>/runtime.json` 保存调度游标和运行记录。
 
-**A definition belongs to a device.** Each definition has an executing device id taken from the machine. Copying or syncing the vault does not move it. Runtime state is per device: `.nand/automation/<device-id>/runtime.json` holds schedule cursors and run records.
+**先持久化意图。** 运行在动作开始之前先以 `pending` 写下。重启后，仍处于 pending 或 running 的运行会变为 `interrupted`，NAND 不会重放它。晚于宽限时间的定时运行会被跳过。手动定义从不进入定时队列。状态转换串行执行，持久化之后才发布给界面。状态有 `pending`、`running`、`unknown`、`succeeded`、`failed`、`cancelled`、`interrupted` 和 `skipped`。
 
-**Intent is persisted first.** A run is written as `pending` before its action starts. After a restart, a run that was still pending or running becomes `interrupted`. NAND does not replay it. A scheduled run that is later than its grace period is skipped. Manual definitions never enter the schedule queue. State transitions are serialized and published to the interface only after they are persisted. The statuses are `pending`, `running`, `unknown`, `succeeded`, `failed`, `cancelled`, `interrupted` and `skipped`.
+**来源由事件索引。** 调度读取一份随库事件变化的内存索引，不会按计时器重新读取整个库。计时器和库监听器属于模块的生命周期，因此关闭模块会停止它们，并停止或中断自己拥有的运行。
 
-**Sources are indexed by events.** Scheduling reads an in-memory index of definitions that changes with vault events; it does not reread the vault on a timer. Timers and vault listeners belong to the module lifetime, so turning the module off stops them and stops or interrupts owned runs.
+**运行时端口是独立的。** Agent 和脚本动作通过 `agent.automation-runtime` 运行，该服务由桌面端的 agent 模块提供。没有它时，这些动作会报告不可用。
 
-**The runtime port is separate.** Agent and script actions run through `agent.automation-runtime`, which the agent module provides on desktop. Without it the actions report that they are unavailable.
+**通知把回执分开保存。** 收件箱分别保存可见消息和以请求编号为键的投递回执。编号已有回执的请求会被忽略，所以隐藏或裁剪消息不会造成第二次投递。插件停止时仍处于 `pending` 的投递，加载时变为 `unknown`，且不会自动重试。渠道有 `in-app` 和 `system`；系统渠道取决于操作系统的权限。通知失败不会改变它所报告的运行的原生结果。停止时，服务先拒绝新请求，再完成它已接受的持久化。收件箱按设备保存：`.nand/notifications/<device-id>/inbox.json`。
 
-**Notifications keep receipts apart.** The inbox stores visible messages and, separately, delivery receipts keyed by the request id. A request whose id already has a receipt is ignored, so hiding or trimming messages cannot cause a second delivery. A delivery that was `pending` when the plugin stopped is loaded as `unknown` and is never retried automatically. The channels are `in-app` and `system`; the system channel depends on the operating system's permission. A notification failure does not change the native result of the run it reports. On stop, the service first refuses new requests and then finishes the persistence it accepted. The inbox is per device: `.nand/notifications/<device-id>/inbox.json`.
+**打开器由贡献点提供。** 发送某类通知的模块向 `notifications.openers` 贡献打开器。automations 模块贡献打开运行记录或其来源的打开器。
 
-**Openers are contributed.** A module that sends a kind of notification contributes an opener to `notifications.openers`. The automations module contributes the opener that opens a run or its source.
+## 影响
 
-## Consequences
+NAND 对外部影响提供至多一次的处理，而不是恰好一次：被关闭的宿主打断的运行会被报告，而不会被重复执行。Obsidian 关闭期间不会运行任何东西。
 
-NAND gives at-most-once treatment to external effects, not exactly-once: a run interrupted by a closing host is reported, not repeated. Nothing runs while Obsidian is closed.
+## 依据
 
-## Evidence
-
-[Automation service](../../../../src/modules/automations/core/service.ts), [definitions](../../../../src/modules/automations/core/documents.ts), [runtime](../../../../src/modules/automations/services/runtime.ts), [automation api](../../../../src/modules/automations/api.ts), [notification service](../../../../src/modules/notifications/core/service.ts), [notification api](../../../../src/modules/notifications/api.ts). The automation and notification suites (`pnpm test`) and `pnpm run test:safety-regressions`.
+[自动化服务](../../../../src/modules/automations/core/service.ts)、[定义](../../../../src/modules/automations/core/documents.ts)、[运行时](../../../../src/modules/automations/services/runtime.ts)、[自动化 api](../../../../src/modules/automations/api.ts)、[通知服务](../../../../src/modules/notifications/core/service.ts)、[通知 api](../../../../src/modules/notifications/api.ts)。自动化与通知测试（`pnpm test`）以及 `pnpm run test:safety-regressions`。
