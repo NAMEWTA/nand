@@ -1,7 +1,7 @@
 import path from 'node:path';
 import { createHash } from 'node:crypto';
 import { tmpdir } from 'node:os';
-import { mkdtemp, mkdir, readFile, writeFile, rm, readdir } from 'node:fs/promises';
+import { realpath, mkdtemp, mkdir, readFile, writeFile, rm, readdir } from 'node:fs/promises';
 import { expect, test, vi } from 'vitest';
 import { prepareSessionDirectory, confirmSessionDirectory, retainLegacyDirectory, clearSessionRecovery } from './browser-session-migration';
 
@@ -34,7 +34,7 @@ vi.mock('node:fs/promises', async original => {
 
 test('initialization never adopts or overwrites a concurrently arriving primary or backup as its own baseline', async () => {
 	for (const duringChoice of [false, true]) for (const backupOnly of [false, true]) {
-		const root = await mkdtemp(path.join(tmpdir(), 'nand-initial-receipt-')), source = path.join(root, 'source'), vault = path.join(root, 'vault');
+		const root = await realpath(await mkdtemp(path.join(tmpdir(), 'nand-initial-receipt-'))), source = path.join(root, 'source'), vault = path.join(root, 'vault');
 		await mkdir(source); await mkdir(vault); await writeFile(path.join(source, 'Cookies'), 'old');
 		const options = { source, vault, relative: '.nand/browser/device/profiles/default', boot: 'one', active: () => false };
 		const primary = path.join(vault, options.relative, 'migration.json'), session = path.join(vault, options.relative, 'session');
@@ -59,7 +59,7 @@ test('initialization never adopts or overwrites a concurrently arriving primary 
 
 test('synced receipt rollback between sealing commits stops confirmation or cleanup and preserves recovery bytes', async () => {
 	for (const clear of [false, true]) {
-		const root = await mkdtemp(path.join(tmpdir(), 'nand-receipt-sync-')), source = path.join(root, 'source'), vault = path.join(root, 'vault');
+		const root = await realpath(await mkdtemp(path.join(tmpdir(), 'nand-receipt-sync-'))), source = path.join(root, 'source'), vault = path.join(root, 'vault');
 		await mkdir(source); await mkdir(vault); await writeFile(path.join(source, 'Cookies'), 'credential');
 		const options = { source, vault, relative: '.nand/browser/device/profiles/default', boot: 'one', active: () => false };
 		try {
@@ -85,7 +85,7 @@ test('synced receipt rollback between sealing commits stops confirmation or clea
 
 test('a recipient interrupted by shared-source retirement recovers its verified backup or explicitly chooses fresh', async () => {
 	for (const backupReady of [false, true]) {
-		const root = await mkdtemp(path.join(tmpdir(), 'nand-session-interleave-')), source = path.join(root, 'source'), a = path.join(root, 'a'), b = path.join(root, 'b');
+		const root = await realpath(await mkdtemp(path.join(tmpdir(), 'nand-session-interleave-'))), source = path.join(root, 'source'), a = path.join(root, 'a'), b = path.join(root, 'b');
 		await mkdir(source); await mkdir(a); await mkdir(b); await writeFile(path.join(source, 'Cookies'), 'original');
 		const options = { source, relative: '.nand/browser/device/profiles/home-web', boot: 'one', active: () => false, ambiguous: true, choose: async () => 'copy' as const };
 		try {
@@ -107,7 +107,7 @@ test('a recipient interrupted by shared-source retirement recovers its verified 
 
 test('source changes at retirement keep the actual moved version and never delete a replacement source', async () => {
 	for (const legacy of [false, true]) for (const replaced of [false, true]) {
-		const root = await mkdtemp(path.join(tmpdir(), 'nand-session-race-')), vault = path.join(root, 'vault'), source = path.join(root, 'old');
+		const root = await realpath(await mkdtemp(path.join(tmpdir(), 'nand-session-race-'))), vault = path.join(root, 'vault'), source = path.join(root, 'old');
 		await mkdir(vault); await mkdir(source); await writeFile(path.join(source, 'Cookies'), 'original');
 		const options = { vault, source, relative: '.nand/browser/device/profiles/default', boot: 'one', active: () => false };
 		try {

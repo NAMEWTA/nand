@@ -1,9 +1,10 @@
 {
   "fixed_point": "ceb87931dd67733dd03249570c6b2ecc17c1bc59",
-  "head": "b30eb965d39149709226e6f04b1909c393cfa0a4",
-  "diff_command": "git diff ceb87931dd67733dd03249570c6b2ecc17c1bc59...b30eb965d39149709226e6f04b1909c393cfa0a4",
+  "head": "84e4812f5d4cfb3498c86490d863c9f02eb31ac3",
+  "diff_command": "git diff ceb87931dd67733dd03249570c6b2ecc17c1bc59...84e4812f5d4cfb3498c86490d863c9f02eb31ac3",
   "commit_log": [
-    "b30eb965d39149709226e6f04b1909c393cfa0a4"
+    "b30eb965d39149709226e6f04b1909c393cfa0a4",
+    "84e4812f5d4cfb3498c86490d863c9f02eb31ac3"
   ],
   "isolation": "用户禁止其他agent；同一root顺序自审，无独立reviewer隔离。",
   "standards": {
@@ -23,7 +24,8 @@
       "所有返回可执行路径均在官方摘要/受保护回执或开发override摘要验证后恢复0700；离线不下载且不可信字节不chmod。",
       "未改变模块接口/跨区导入/文案/数据格式。chmod失败传播，不返回假成功；stamp保留允许重试。",
       "正式验收夹具使用全新隔离目录、禁止开发override、原进程退出后重启，finally停止自己拥有的宿主。",
-      "构建/lint/test:all 50/50/1818通过1跳过/包体/版本检查通过；README及许可指南遗漏已修正。"
+      "构建/lint/test:all 50/50/1818通过1跳过/包体/版本检查通过；README及许可指南遗漏已修正。",
+      "新增.gitattributes明确生成styles.css使用LF；通过真实Git core.autocrlf=true/false检出字节测试，失败再修复；预算保持757760，生成物无改变。"
     ]
   },
   "specification": {
@@ -38,7 +40,22 @@
       "alpha.2四个版本文件及main.js一致，插件id/minAppVersion不变。",
       "正式发行验收覆盖三插件文件逐字节、官方helper摘要、Linux仅0/1/2 fd、交互、重启及丢失执行位修复、旧helper冷迁移保留。",
       "变更路径在本票声明范围；单writer，无agent；不把Windows或真实账号列已验证。",
-      "这是固定代码的审查结果；实际远端CI/Release/真实下载/issue/A仍待执行，T-08不标done。"
+      "这是固定代码的审查结果；实际远端CI/Release/真实下载/issue/A仍待执行，T-08不标done。",
+      "CI发现的跨平台产物差异在T-08新增明确写集；Windows宿主门已取消，但完整CI矩阵和发布成功依赖不变。"
     ]
+  },
+  "previous_head": "b30eb965d39149709226e6f04b1909c393cfa0a4",
+  "working_tree_followup": {
+    "base": "84e4812f5d4cfb3498c86490d863c9f02eb31ac3",
+    "standards": "pass",
+    "specification": "pass",
+    "findings": [],
+    "checks": [
+      "ACL verification reads FileSystemInfo.GetAccessControl after SetAccessControl without requiring the PowerShell Security module; protection and allowed SID checks unchanged.",
+      "Main session policy uses native vault realpath consistent with renderer; each owned descendant still undergoes lstat and rejects links.",
+      "Raw vault path retained in main policy fixture; exact-path mocks and account ownership assertions use canonical fixture roots; assertions not removed.",
+      "Production changes rebuilt in main.js. Targeted 878 passed / 1 skipped; final fixture tests 13 passed. Build/lint/test types/full suite 50 of 50 (1820 tests passed / 1 skipped)/budget exit 0. New Windows CI pending."
+    ],
+    "reviewer": "root sequential self-review; no independent agent"
   }
 }

@@ -1,6 +1,6 @@
 import path from 'node:path';
 import { createRequire } from 'node:module';
-import { mkdtemp, mkdir, rm, writeFile } from 'node:fs/promises';
+import { realpath, mkdtemp, mkdir, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import type { App } from 'obsidian';
 import { expect, test, vi } from 'vitest';
@@ -12,7 +12,7 @@ import { prepareLegacyAccounts } from '../../src/modules/agent/platform/desktop/
 import { deviceId } from '../../src/host/obsidian/storage/device-id';
 
 test('launch and resume derive an owned account environment instead of accepting stored path overrides', async () => {
-	const vault = await mkdtemp(path.join(tmpdir(), 'nand-agent-launch-'));
+	const vault = await realpath(await mkdtemp(path.join(tmpdir(), 'nand-agent-launch-')));
 	vi.stubGlobal('window', { require: createRequire(import.meta.url) });
 	const app = { vault: { adapter: { ...nativeVaultStorage(vault), getBasePath: () => vault } } } as unknown as App;
 	const settings = normalizeAgentSettings(null); settings.yoloAcknowledged = true; settings.agents.codex.cliPath = process.execPath;
@@ -36,7 +36,7 @@ test('launch and resume derive an owned account environment instead of accepting
 }, 30000);
 
 test('an explicitly bound legacy session resumes with its retained transcript and the new account environment', async () => {
-	const vault = await mkdtemp(path.join(tmpdir(), 'nand-agent-legacy-launch-')), plugin = path.join(vault, '.obsidian/plugins/nand');
+	const vault = await realpath(await mkdtemp(path.join(tmpdir(), 'nand-agent-legacy-launch-'))), plugin = path.join(vault, '.obsidian/plugins/nand');
 	const old = path.join(plugin, 'accounts/claude/ab/home');
 	await mkdir(old, { recursive: true }); await writeFile(path.join(old, 'session.jsonl'), '{}');
 	vi.stubGlobal('window', { require: createRequire(import.meta.url) });

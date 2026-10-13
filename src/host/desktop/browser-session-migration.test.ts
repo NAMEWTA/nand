@@ -1,4 +1,4 @@
-import { mkdtemp, mkdir, readFile, writeFile, readdir, symlink, rm } from 'node:fs/promises';
+import { realpath, mkdtemp, mkdir, readFile, writeFile, readdir, symlink, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { afterEach, expect, test } from 'vitest';
@@ -7,7 +7,7 @@ import { prepareSessionDirectory, confirmSessionDirectory, retainLegacyDirectory
 const roots: string[] = [];
 afterEach(async () => { for (const root of roots.splice(0)) await rm(root, { recursive: true, force: true }); });
 async function fixture() {
-	const root = await mkdtemp(path.join(tmpdir(), 'nand-session-')); roots.push(root);
+	const root = await realpath(await mkdtemp(path.join(tmpdir(), 'nand-session-'))); roots.push(root);
 	const vault = path.join(root, 'vault'), source = path.join(root, 'host', 'Partitions', 'nand-browser-test');
 	await mkdir(vault); await mkdir(path.join(source, 'Local Storage'), { recursive: true });
 	await writeFile(path.join(source, 'Local Storage', 'data'), 'login-data');

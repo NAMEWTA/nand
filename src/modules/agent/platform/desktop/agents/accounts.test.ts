@@ -1,5 +1,5 @@
 import path from 'node:path';
-import { mkdtemp, mkdir, symlink, rm, stat } from 'node:fs/promises';
+import { realpath, mkdtemp, mkdir, symlink, rm, stat } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { expect, test } from 'vitest';
 import { accountConfigDir, accountEnv } from './accounts';
@@ -17,7 +17,7 @@ test('Chinese, punctuation and case-sensitive account names retain distinct port
 });
 
 test('every provider including its default identity uses the opened vault for homes, cache and temporary data', async () => {
-	const vault = await mkdtemp(path.join(tmpdir(), 'nand-agent-env-'));
+	const vault = await realpath(await mkdtemp(path.join(tmpdir(), 'nand-agent-env-')));
 	try {
 		for (const agent of AGENT_CATALOG) for (const name of ['', '测试.!']) {
 			const env = await accountEnv(agent, name, vault, 'fixture-device');
@@ -32,7 +32,7 @@ test('every provider including its default identity uses the opened vault for ho
 }, 30000);
 
 test('a junction arriving after permission repair cannot be handed to a child process', async () => {
-	const root = await mkdtemp(path.join(tmpdir(), 'nand-agent-link-')), vault = path.join(root, 'vault'), outside = path.join(root, 'outside');
+	const root = await realpath(await mkdtemp(path.join(tmpdir(), 'nand-agent-link-'))), vault = path.join(root, 'vault'), outside = path.join(root, 'outside');
 	await mkdir(vault); await mkdir(outside);
 	try {
 		const agent = AGENT_CATALOG.find(row => row.id === 'codex')!;
@@ -43,7 +43,7 @@ test('a junction arriving after permission repair cannot be handed to a child pr
 }, 30000);
 
 test('vault accounts cannot silently inherit host-global provider tokens or credential files', async () => {
-	const vault = await mkdtemp(path.join(tmpdir(), 'nand-agent-credentials-'));
+	const vault = await realpath(await mkdtemp(path.join(tmpdir(), 'nand-agent-credentials-')));
 	try {
 		const env = await accountEnv(AGENT_CATALOG[0]!, '', vault, 'fixture-device');
 		for (const key of ['ANTHROPIC_API_KEY', 'ANTHROPIC_AUTH_TOKEN', 'CLAUDE_CODE_OAUTH_TOKEN', 'OPENAI_API_KEY', 'CODEX_API_KEY', 'GROK_API_KEY', 'XAI_API_KEY', 'GEMINI_API_KEY', 'GOOGLE_API_KEY', 'GOOGLE_APPLICATION_CREDENTIALS', 'OPENCODE_API_KEY']) expect(env[key]).toBe('');

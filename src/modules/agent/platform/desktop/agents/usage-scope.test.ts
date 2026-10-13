@@ -1,6 +1,6 @@
 import path from 'node:path';
 import { tmpdir } from 'node:os';
-import { mkdtemp, mkdir, writeFile, symlink, rm } from 'node:fs/promises';
+import { realpath, mkdtemp, mkdir, writeFile, symlink, rm } from 'node:fs/promises';
 import { expect, test, vi } from 'vitest';
 import { normalizeAgentSettings } from '../../../core/launch/defaults';
 import { readUsageSnapshots } from './usage';
@@ -17,7 +17,7 @@ vi.mock('node:fs', async original => {
 });
 
 test('usage readers only consult the current vault account including default and providers without old account selectors', async () => {
-	const vault = await mkdtemp(path.join(tmpdir(), 'nand-usage-scope-'));
+	const vault = await realpath(await mkdtemp(path.join(tmpdir(), 'nand-usage-scope-')));
 	try {
 		observed.active = true; observed.reads = [];
 		const snapshots = await readUsageSnapshots(['claude-code', 'codex', 'grok', 'gemini', 'opencode'], { settings: normalizeAgentSettings(null), vault, device: 'fixture-device' });
@@ -28,7 +28,7 @@ test('usage readers only consult the current vault account including default and
 }, 30000);
 
 test('a linked provider credential directory is a visible failure and never reads another account', async () => {
-	const root = await mkdtemp(path.join(tmpdir(), 'nand-usage-link-')), vault = path.join(root, 'vault'), outside = path.join(root, 'outside');
+	const root = await realpath(await mkdtemp(path.join(tmpdir(), 'nand-usage-link-'))), vault = path.join(root, 'vault'), outside = path.join(root, 'outside');
 	await mkdir(vault); await mkdir(outside); await writeFile(path.join(outside, 'oauth_creds.json'), JSON.stringify({ access_token: 'fixture-token', expiry_date: 1 }));
 	try {
 		const env = await accountEnv(getAgent('gemini'), '', vault, 'fixture-device');

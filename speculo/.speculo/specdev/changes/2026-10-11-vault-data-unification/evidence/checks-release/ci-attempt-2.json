@@ -1,0 +1,14 @@
+{
+  "run_id": 38364973058,
+  "sha": "84e4812f5d4cfb3498c86490d863c9f02eb31ac3",
+  "url": "https://github.com/NAMEWTA/nand/actions/runs/38364973058",
+  "linux_node_22": "success",
+  "linux_node_24": "success",
+  "windows_node_24": "failure",
+  "windows_job_id": 115187806654,
+  "failures": [
+    "PowerShell Get-Acl module autoload fails under inherited pwsh environment",
+    "Short tmp path and native canonical path disagree in test fixtures and browser main runtime"
+  ],
+  "recovery": "Use FileSystemInfo.GetAccessControl; native realpath in main session policy; canonical test fixture roots without removing alias/junction assertions. Windows CI rerun required."
+}

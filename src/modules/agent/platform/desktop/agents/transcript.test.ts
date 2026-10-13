@@ -1,11 +1,11 @@
 import path from 'node:path';
-import { mkdtemp, mkdir, writeFile, symlink, rm } from 'node:fs/promises';
+import { realpath, mkdtemp, mkdir, writeFile, symlink, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { expect, test } from 'vitest';
 import { checkAccountTranscript } from './transcript';
 
 test('vault aliases resolve account transcripts while inner junctions remain forbidden', async () => {
-	const root = await mkdtemp(path.join(tmpdir(), 'nand-transcript-alias-'));
+	const root = await realpath(await mkdtemp(path.join(tmpdir(), 'nand-transcript-alias-')));
 	const vault = path.join(root, 'vault'), alias = path.join(root, 'alias');
 	const owner = path.join(vault, '.nand/agents/device/accounts/codex/default');
 	await mkdir(owner, { recursive: true }); await symlink(vault, alias, 'junction');

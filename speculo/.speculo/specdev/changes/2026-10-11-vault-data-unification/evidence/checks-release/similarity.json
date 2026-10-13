@@ -1,0 +1,72 @@
+{
+	"k": 25,
+	"window": 20,
+	"minimum": 0.05,
+	"ours": [
+		"src",
+		"native/pty-server/src",
+		"scripts",
+		"test"
+	],
+	"theirs": [
+		"daemon"
+	],
+	"results": [
+		{
+			"file": "src/modules/archives/core/persist/column-labels.ts",
+			"tokens": 111,
+			"raw": {
+				"share": 0,
+				"match": null,
+				"run": 0
+			},
+			"normalized": {
+				"share": 0.25,
+				"match": "pty-subprocess/spawn-file-foreground-rejected-agents.test.ts",
+				"run": 41
+			}
+		},
+		{
+			"file": "src/modules/home/ui/expense/expense-charts.ts",
+			"tokens": 303,
+			"raw": {
+				"share": 0,
+				"match": null,
+				"run": 0
+			},
+			"normalized": {
+				"share": 0.08,
+				"match": "pty-subprocess/spawn-file-foreground-rejected-agents.test.ts",
+				"run": 42
+			}
+		},
+		{
+			"file": "src/modules/news/platform/notes.test.ts",
+			"tokens": 230,
+			"raw": {
+				"share": 0,
+				"match": null,
+				"run": 0
+			},
+			"normalized": {
+				"share": 0.071,
+				"match": "pty-subprocess/spawn-file-foreground-rejected-agents.test.ts",
+				"run": 47
+			}
+		},
+		{
+			"file": "src/modules/news/platform/opml.test.ts",
+			"tokens": 397,
+			"raw": {
+				"share": 0,
+				"match": null,
+				"run": 0
+			},
+			"normalized": {
+				"share": 0.065,
+				"match": "pty-subprocess/spawn-file-foreground-rejected-agents.test.ts",
+				"run": 35
+			}
+		}
+	]
+}

@@ -35,7 +35,7 @@ while($pending.Count -gt 0) {
   $acl.AddAccessRule($rule)
  }
  $item.SetAccessControl($acl)
- $actual=Get-Acl -LiteralPath $item.FullName
+ $actual=$item.GetAccessControl()
  if(-not $actual.AreAccessRulesProtected) { throw 'private-storage.permissions' }
  foreach($rule in $actual.GetAccessRules($true,$true,[Security.Principal.SecurityIdentifier])) {
   if($rule.IdentityReference.Value -ne $sid.Value -and $rule.IdentityReference.Value -ne $system.Value) { throw 'private-storage.permissions' }

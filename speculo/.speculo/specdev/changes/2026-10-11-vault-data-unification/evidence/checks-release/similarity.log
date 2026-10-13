@@ -1,0 +1,5 @@
+compared 1526 files against 40 reference files (k=25, window=20); 4 at or above 0.05
+0.000 raw (run 0)  0.250 norm (run 41)  src/modules/archives/core/persist/column-labels.ts  ~ pty-subprocess/spawn-file-foreground-rejected-agents.test.ts
+0.000 raw (run 0)  0.080 norm (run 42)  src/modules/home/ui/expense/expense-charts.ts  ~ pty-subprocess/spawn-file-foreground-rejected-agents.test.ts
+0.000 raw (run 0)  0.071 norm (run 47)  src/modules/news/platform/notes.test.ts  ~ pty-subprocess/spawn-file-foreground-rejected-agents.test.ts
+0.000 raw (run 0)  0.065 norm (run 35)  src/modules/news/platform/opml.test.ts  ~ pty-subprocess/spawn-file-foreground-rejected-agents.test.ts

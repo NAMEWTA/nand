@@ -26,7 +26,7 @@ function hostReceipt() {
 
 function setup() {
 	const receipt = hostReceipt();
-	const pluginDir = fs.mkdtempSync(path.join(os.tmpdir(), 'nand-helper-'));
+	const pluginDir = fs.realpathSync.native(fs.mkdtempSync(path.join(os.tmpdir(), 'nand-helper-')));
 	const binary = Buffer.from('helper-binary-v1');
 	const requests: string[] = [];
 	let digest = `${sha(binary)}  nand-pty-linux-x64\n`;

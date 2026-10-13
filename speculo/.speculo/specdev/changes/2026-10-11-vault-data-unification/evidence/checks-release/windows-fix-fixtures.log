@@ -1,0 +1,11 @@
+Already up to date
+Done in 307ms using pnpm v11.1.3
+
+ RUN  v5.0.3 <repository>
+
+
+ Test Files  5 passed (5)
+      Tests  13 passed (13)
+   Start at  04:12:28
+   Duration  7.99s (tests 85%, transform 12%, import 2%, setup 1%)
+

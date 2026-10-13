@@ -19,7 +19,7 @@ import { getAgent } from '../../../core/launch/catalog';
 globalThis.window = { require: createRequire(import.meta.url) } as unknown as Window & typeof globalThis;
 const page: HistoryPage = { rows: [], total: 0, usage: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0, cost: null, known: false }, revision: 1 };
 test('an unbound legacy account produces a warning while other account history is scanned', async () => {
-	const vault = await fs.mkdtemp(path.join(os.tmpdir(), 'nand-history-unbound-'));
+	const vault = await fs.realpath(await fs.mkdtemp(path.join(os.tmpdir(), 'nand-history-unbound-')));
 	const plugin = path.join(vault, '.obsidian/plugins/nand');
 	await fs.mkdir(path.join(plugin, 'accounts/claude/old/home'), { recursive: true });
 	await fs.writeFile(path.join(plugin, 'accounts/claude/old/home/auth.json'), '{}');
@@ -54,7 +54,7 @@ test('an unbound legacy account produces a warning while other account history i
 	} finally { await fs.rm(vault, { recursive: true, force: true }); }
 }, 30000);
 test('history scan sends only vault account sources and the same resumable account environment', async () => {
-	const vault = await fs.mkdtemp(path.join(os.tmpdir(), 'nand-history-owned-'));
+	const vault = await fs.realpath(await fs.mkdtemp(path.join(os.tmpdir(), 'nand-history-owned-')));
 	try {
 		const app = { vault: { adapter: { ...nativeVaultStorage(vault), getBasePath: () => vault } } } as unknown as App;
 		await initializeTestDevice(app);
@@ -73,7 +73,7 @@ test('history scan sends only vault account sources and the same resumable accou
 	} finally { await fs.rm(vault, { recursive: true, force: true }); }
 }, 30000);
 test('native history shares scan/query/usage, revisions invalidate leaves, and aborts are consumer scoped', async () => {
-	const fixture = await fs.mkdtemp(path.join(os.tmpdir(), 'nand-history-model-'));
+	const fixture = await fs.realpath(await fs.mkdtemp(path.join(os.tmpdir(), 'nand-history-model-')));
 	try {
 		const files = new Map<string, string>(), requests: Array<{ operation: string; signal: AbortSignal | undefined }> = [];
 		let release!: () => void;
@@ -123,7 +123,7 @@ test('native history shares scan/query/usage, revisions invalidate leaves, and a
 }, 30000);
 
 test('history requests cancelled while awaiting a client never execute the native operation', async () => {
-	const fixture = await fs.mkdtemp(path.join(os.tmpdir(), 'nand-history-cancel-'));
+	const fixture = await fs.realpath(await fs.mkdtemp(path.join(os.tmpdir(), 'nand-history-cancel-')));
 	try {
 		const files = new Map<string, string>();
 		const app = { loadLocalStorage: () => '11111111-1111-4111-8111-111111111111', vault: { adapter: { getBasePath: () => fixture, exists: async (name: string) => files.has(name), read: async (name: string) => files.get(name), write: async (name: string, body: string) => { files.set(name, body); }, mkdir: async () => {} } } } as unknown as App;

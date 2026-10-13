@@ -1,4 +1,4 @@
-import { mkdtemp, mkdir, symlink, rm, writeFile, readFile } from 'node:fs/promises';
+import { realpath, mkdtemp, mkdir, symlink, rm, writeFile, readFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { expect, test } from 'vitest';
@@ -6,7 +6,7 @@ import { absoluteNandPath } from './nand-paths';
 import { privateTextStorage } from './private-mode';
 
 test('Windows junctions and POSIX symlinks cannot redirect owned writes outside .nand', async () => {
-	const root = await mkdtemp(path.join(tmpdir(), 'nand-path-'));
+	const root = await realpath(await mkdtemp(path.join(tmpdir(), 'nand-path-')));
 	try {
 		await mkdir(path.join(root, 'vault/.nand'), { recursive: true }); await mkdir(path.join(root, 'outside'));
 		await writeFile(path.join(root, 'outside/keep'), 'keep');

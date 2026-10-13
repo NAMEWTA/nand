@@ -1024,7 +1024,7 @@ while($pending.Count -gt 0) {
   $acl.AddAccessRule($rule)
  }
  $item.SetAccessControl($acl)
- $actual=Get-Acl -LiteralPath $item.FullName
+ $actual=$item.GetAccessControl()
  if(-not $actual.AreAccessRulesProtected) { throw 'private-storage.permissions' }
  foreach($rule in $actual.GetAccessRules($true,$true,[Security.Principal.SecurityIdentifier])) {
   if($rule.IdentityReference.Value -ne $sid.Value -and $rule.IdentityReference.Value -ne $system.Value) { throw 'private-storage.permissions' }
@@ -1437,7 +1437,7 @@ const state=globalThis[key]??=( {boot:crypto.randomUUID(),sessions:new Map()} );
 exports.boot=state.boot;
 exports.active=directory=>webContents.getAllWebContents().some(wc=>!wc.isDestroyed()&&wc.session.storagePath===directory);
 const checked=(vault,file)=>{
- const root=fs.realpathSync(vault),relative=path.relative(root,file);
+ const root=fs.realpathSync.native(vault),relative=path.relative(root,file);
  if(path.isAbsolute(relative)||relative.split(path.sep)[0]!=='.nand')throw Error('browser_session_path');
  let current=root;for(const part of relative.split(path.sep)){current=path.join(current,part);if(fs.existsSync(current)&&fs.lstatSync(current).isSymbolicLink())throw Error('private-storage.symlink');}
  return file;

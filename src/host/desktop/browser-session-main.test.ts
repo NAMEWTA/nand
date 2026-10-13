@@ -1,4 +1,4 @@
-import { mkdtempSync, mkdirSync, rmSync, symlinkSync } from 'node:fs';
+import { realpathSync, mkdtempSync, mkdirSync, rmSync, symlinkSync } from 'node:fs';
 import path from 'node:path';
 import { tmpdir } from 'node:os';
 import { EventEmitter } from 'node:events';
@@ -8,7 +8,7 @@ import { expect, test } from 'vitest';
 import { SESSION_RUNTIME_SOURCE } from './browser-session';
 
 test('bundled main policy attaches explicit sessions, constrains downloads and guards the final asynchronous guest teardown', () => {
-	const root = mkdtempSync(path.join(tmpdir(), 'nand-native-session-')), directory = path.join(root, '.nand/browser/profile/session'), downloads = path.join(root, '.nand/browser/profile/downloads');
+	const vault = mkdtempSync(path.join(tmpdir(), 'nand-native-session-')), root = realpathSync.native(vault), directory = path.join(root, '.nand/browser/profile/session'), downloads = path.join(root, '.nand/browser/profile/downloads');
 	mkdirSync(directory, { recursive: true }); mkdirSync(downloads);
 	const session = Object.assign(new EventEmitter(), { storagePath: directory, setCodeCachePath: (_path: string) => {}, setPermissionRequestHandler: (_fn: unknown) => {}, setPermissionCheckHandler: (_fn: unknown) => {} });
 	const owner = Object.assign(new EventEmitter(), { id: 1, isDestroyed: () => false, session: {} });
@@ -18,7 +18,7 @@ test('bundled main policy attaches explicit sessions, constrains downloads and g
 	const exported: { acquire?: (vault: string, directory: string, downloads: string) => { session: unknown; onDownloadError(listener: () => void): void; bind(owner: number, token: string): void; protect(id: number): void; dispose(): void } } = {};
 	runInNewContext(SESSION_RUNTIME_SOURCE, { exports: exported, require: (name: string) => name === 'electron' ? { session: { fromPath: (file: string) => { expect(file).toBe(directory); return session; } }, webContents: { fromId: (id: number) => id === 1 ? owner : guest, getAllWebContents: () => [owner, guest] } } : nativeRequire(name), URL });
 	try {
-		const first = exported.acquire!(root, directory, downloads), second = exported.acquire!(root, directory, downloads);
+		const first = exported.acquire!(vault, directory, downloads), second = exported.acquire!(vault, directory, downloads);
 		first.bind(1, 'routing-only');
 		const prefs: Record<string, unknown> = { partition: 'routing-only', nodeIntegration: true, preload: 'unsafe' };
 		owner.emit('will-attach-webview', {}, prefs, { partition: 'routing-only' });
@@ -38,10 +38,10 @@ test('bundled main policy attaches explicit sessions, constrains downloads and g
 		second.dispose(); expect(session.listenerCount('will-download')).toBe(1);
 		session.emit('will-download', event, item); expect(cancelled).toBe(true);
 		destroyed = true; guest.emit('destroyed'); expect(session.listenerCount('will-download')).toBe(0); expect(guest.listenerCount('will-navigate')).toBe(0);
-		expect(() => exported.acquire!(root, path.join(root, 'outside'), downloads)).toThrow('browser_session_path');
+		expect(() => exported.acquire!(vault, path.join(root, 'outside'), downloads)).toThrow('browser_session_path');
 		symlinkSync(downloads, path.join(root, '.nand/linked'), 'junction');
-		expect(() => exported.acquire!(root, path.join(root, '.nand/linked'), downloads)).toThrow('symlink');
+		expect(() => exported.acquire!(vault, path.join(root, '.nand/linked'), downloads)).toThrow('symlink');
 		symlinkSync(downloads, path.join(directory, 'Code Cache'), 'junction');
-		expect(() => exported.acquire!(root, directory, downloads)).toThrow('symlink');
+		expect(() => exported.acquire!(vault, directory, downloads)).toThrow('symlink');
 	} finally { rmSync(root, { recursive: true, force: true }); }
 });

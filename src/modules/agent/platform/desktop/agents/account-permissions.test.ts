@@ -13,7 +13,7 @@ test('account creation repairs existing private data and uses the actual platfor
 	try {
 		await accountEnv(getAgent('codex'), '', vault, 'fixture-device');
 		if (process.platform === 'win32') {
-			const script = '$a=Get-Acl -LiteralPath $env:NAND_PERMISSION_PROBE; $s=[System.Security.Principal.WindowsIdentity]::GetCurrent().User.Value; @{protected=$a.AreAccessRulesProtected; unexpected=@($a.GetAccessRules($true,$true,[System.Security.Principal.SecurityIdentifier]) | Where-Object {$_.IdentityReference.Value -ne $s -and $_.IdentityReference.Value -ne "S-1-5-18"}).Count} | ConvertTo-Json -Compress';
+			const script = '$a=(Get-Item -LiteralPath $env:NAND_PERMISSION_PROBE -Force).GetAccessControl(); $s=[System.Security.Principal.WindowsIdentity]::GetCurrent().User.Value; @{protected=$a.AreAccessRulesProtected; unexpected=@($a.GetAccessRules($true,$true,[System.Security.Principal.SecurityIdentifier]) | Where-Object {$_.IdentityReference.Value -ne $s -and $_.IdentityReference.Value -ne "S-1-5-18"}).Count} | ConvertTo-Json -Compress';
 			for (const file of [root, path.join(root, 'existing')]) {
 				const result = await promisify(execFile)('powershell.exe', ['-NoProfile', '-NonInteractive', '-EncodedCommand', Buffer.from(script, 'utf16le').toString('base64')], { windowsHide: true, env: { ...process.env, NAND_PERMISSION_PROBE: file } });
 				expect(JSON.parse(result.stdout)).toEqual({ protected: true, unexpected: 0 });
