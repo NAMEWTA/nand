@@ -1,3 +1,4 @@
+/** @jsxImportSource preact */
 import { useEffect, useState } from 'preact/hooks';
 import type { AgentSessionSummary } from '../../../agent/api';
 import type { SkillShortcut } from '../../core/board/types/model';

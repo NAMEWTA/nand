@@ -1,3 +1,4 @@
+/** @jsxImportSource preact */
 import type { App } from 'obsidian';
 import { useLayoutEffect, useState } from 'preact/hooks';
 import type { BannerStatsConfig } from '../../core/board/types';

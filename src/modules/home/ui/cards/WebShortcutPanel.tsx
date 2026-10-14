@@ -1,3 +1,4 @@
+/** @jsxImportSource preact */
 import { Menu } from 'obsidian';
 import { normalizeWebUrl } from '../../../../shared/web-url';
 import { t } from '../../../../shared/i18n';

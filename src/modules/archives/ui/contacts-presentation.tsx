@@ -1,3 +1,4 @@
+/** @jsxImportSource preact */
 import { contentFiles } from '../../../host/obsidian/storage/content-files';
 import { NativeSurface, type NativeSurfaceContext } from '../../../ui/native-surface';
 import {

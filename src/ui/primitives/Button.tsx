@@ -1,3 +1,4 @@
+/** @jsxImportSource preact */
 import type { ComponentChildren, TargetedMouseEvent } from 'preact';
 import { Icon } from './Icon';
 

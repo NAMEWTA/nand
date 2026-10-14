@@ -1,3 +1,4 @@
+/** @jsxImportSource preact */
 import { Modal, type App } from 'obsidian';
 import { render } from 'preact';
 import type { UsageSnapshot } from '../../core/launch/types';

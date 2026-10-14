@@ -1,3 +1,4 @@
+/** @jsxImportSource preact */
 import { useEffect, useLayoutEffect, useReducer, useRef, useState } from 'preact/hooks';
 import { onLanguageChanged, t } from '../../../../shared/i18n';
 import { Button } from '../../../../ui/primitives/Button';

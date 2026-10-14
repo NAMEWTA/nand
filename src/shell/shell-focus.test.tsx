@@ -1,3 +1,4 @@
+/** @jsxImportSource preact */
 import assert from 'node:assert/strict';
 import { h, render } from 'preact';
 import { act } from 'preact/test-utils';

@@ -1,3 +1,4 @@
+/** @jsxImportSource preact */
 import type { HolidayInfo } from '../../platform/calendar/holiday-service';
 import { getLanguage, t } from '../../../../shared/i18n';
 import { useEffect, useState } from 'preact/hooks';

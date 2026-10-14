@@ -1,3 +1,4 @@
+/** @jsxImportSource preact */
 import { Platform, type App } from 'obsidian';
 import { h } from 'preact';
 import { useLayoutEffect, useRef, useState } from 'preact/hooks';

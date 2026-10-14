@@ -1,3 +1,4 @@
+/** @jsxImportSource preact */
 import { t } from '../../../shared/i18n';
 import { boardLayout } from '../core/board/layout';
 import type { BoardLayout } from '../core/board/types/model';

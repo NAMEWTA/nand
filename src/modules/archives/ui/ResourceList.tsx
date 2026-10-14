@@ -1,3 +1,4 @@
+/** @jsxImportSource preact */
 import { useState } from 'preact/compat';
 import type { ArchiveRecord } from '../core/model';
 import { queryResources } from '../core/resources';

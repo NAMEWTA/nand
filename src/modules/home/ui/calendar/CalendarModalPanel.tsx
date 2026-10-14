@@ -1,3 +1,4 @@
+/** @jsxImportSource preact */
 import type { App } from 'obsidian';
 import type { ContentFile } from '../../../../host/obsidian/storage/content-files';
 import { Menu } from 'obsidian';

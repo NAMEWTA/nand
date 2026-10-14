@@ -1,3 +1,4 @@
+/** @jsxImportSource preact */
 import { useLayoutEffect, useMemo, useState } from 'preact/hooks';
 import { moreGroupItems, progressiveGroup, sectionCandidates } from '../../core/board/progressive-results';
 import type { LibraryFileResult } from './library-file-result';

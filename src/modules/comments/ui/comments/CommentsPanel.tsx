@@ -1,3 +1,4 @@
+/** @jsxImportSource preact */
 import type { CommentThread } from '../../core/model';
 import { t } from '../../../../shared/i18n';
 import { EmptyState } from '../../../../ui/primitives/EmptyState';

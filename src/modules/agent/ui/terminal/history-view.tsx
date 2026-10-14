@@ -1,3 +1,4 @@
+/** @jsxImportSource preact */
 import { contentFiles } from '../../../../host/obsidian/storage/content-files';
 import { Notice } from 'obsidian';
 import { render } from 'preact';

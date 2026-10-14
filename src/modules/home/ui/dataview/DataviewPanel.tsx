@@ -1,3 +1,4 @@
+/** @jsxImportSource preact */
 import { Platform } from 'obsidian';
 import { useCallback, useLayoutEffect, useRef, useState } from 'preact/hooks';
 import type { DataviewConfig } from '../../core/board/types';

@@ -1,3 +1,4 @@
+/** @jsxImportSource preact */
 import { setIcon } from 'obsidian';
 import { useEffect, useRef } from 'preact/compat';
 import { ct } from './labels';

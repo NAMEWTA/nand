@@ -1,3 +1,4 @@
+/** @jsxImportSource preact */
 import type { WorkbenchStatus } from '../app/contracts/workbench';
 import { t } from '../shared/i18n';
 import { Button } from '../ui/primitives/Button';

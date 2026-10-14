@@ -1,3 +1,4 @@
+/** @jsxImportSource preact */
 import { useState } from 'preact/hooks';
 import type { App } from 'obsidian';
 import type { DashboardColumn } from '../../core/board/types/model';

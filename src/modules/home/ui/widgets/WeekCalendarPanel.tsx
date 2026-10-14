@@ -1,3 +1,4 @@
+/** @jsxImportSource preact */
 import { getLanguage } from '../../../../shared/i18n';
 import { useWindowClock } from './use-window-clock';
 export function WeekCalendarPanel({ win, accentLight }: { win: Window; accentLight: boolean }) {

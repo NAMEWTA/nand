@@ -22,6 +22,7 @@ export function settingsCategories(plugin: DashboardPlugin): Array<{ id: string;
 		...visibleProducts(productGates((id) => plugin.moduleEnabled(id)))
 			.filter((product): product is Exclude<SettingsProduct, 'home' | 'iconic'> => product !== 'home' && product !== 'iconic')
 			.map((product) => ({ id: product, label: t(products[product].labelKey), icon: products[product].icon })),
+		...(plugin.appSettings.get().devGallery ? [{ id: 'components', label: t('settings.componentGallery'), icon: 'blocks' }] : []),
 		{ id: 'about', label: t('settings.tabAbout'), icon: 'info' },
 	];
 }

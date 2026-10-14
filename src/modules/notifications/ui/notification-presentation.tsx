@@ -1,3 +1,4 @@
+/** @jsxImportSource preact */
 import { render } from 'preact';
 import { t, onLanguageChanged } from '../../../shared/i18n';
 import type { NotificationService } from '../core/service';

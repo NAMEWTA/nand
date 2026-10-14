@@ -1,3 +1,4 @@
+/** @jsxImportSource preact */
 import type { App } from 'obsidian';
 import { createPortal } from 'preact/compat';
 import { useLayoutEffect, useRef, useState } from 'preact/hooks';

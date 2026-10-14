@@ -1,3 +1,4 @@
+/** @jsxImportSource preact */
 import type { TargetedKeyboardEvent } from 'preact';
 import { useId } from 'preact/hooks';
 import { t } from '../../shared/i18n';

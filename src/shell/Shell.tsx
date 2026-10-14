@@ -1,3 +1,4 @@
+/** @jsxImportSource preact */
 import { useEffect, useId, useLayoutEffect, useRef, useState } from 'preact/hooks';
 import type { Ref } from 'preact';
 import type { PanelModel, WorkbenchFeature, WorkbenchStatus, WorkbenchTarget } from '../app/contracts/workbench';

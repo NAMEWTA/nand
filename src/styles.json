@@ -1,5 +1,10 @@
 {
 	"sources": [
+		"src/ui/styles/fonts.generated.css",
+		"src/ui/styles/tokens.css",
+		"src/ui/styles/base.css",
+		"src/ui/styles/neutralize.css",
+		"build/tailwind.scoped.css",
 		"src/ui/styles/000-foundation.css",
 		"src/ui/styles/001-primitives.css",
 		"src/app/styles/content.css",

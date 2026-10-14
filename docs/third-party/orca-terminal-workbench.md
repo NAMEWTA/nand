@@ -41,6 +41,22 @@ NAND 改编了 [Orca](https://github.com/stablyai/orca)（stablyai/orca）的部
 | 弹窗分类 | `src/modules/browser/platform/desktop/guest-policy.ts` |
 | 网址分类 | `src/shared/web-url.ts` |
 
+## React 设计系统（464bd5a）
+
+上游提交：`464bd5a54b3364021c5cc0319859616e5ec41bbf`。
+
+| Orca 的部分 | NAND 中的位置 |
+|---|---|
+| `src/renderer/src/components/ui/*.tsx` | `src/ui/components/`：保留布局、尺寸、交互与变体；改用 NAND 令牌、i18n、所属窗口 Portal 和 IME 保护。上游缺少的 AlertDialog、Resizable、Table、Skeleton 按 shadcn/ui new-york-v4 配方补齐。 |
+| `components/settings/SettingsFormControls.tsx` | `src/ui/components/nand/SettingsFormControls.tsx`：设置行、开关行、分段控件、徽标、小节标题、颜色和数字输入。 |
+| `components/settings/SettingsDisabledControlTooltip.tsx` | `src/ui/components/nand/SettingsDisabledControlTooltip.tsx`：禁用控件的可聚焦提示包装。 |
+| `components/ShortcutKeyCombo.tsx` | `src/ui/components/nand/ShortcutKeyCombo.tsx`：快捷键键帽。平台判断改用 Obsidian API。 |
+| `components/status-bar/icons.tsx` | `src/ui/components/nand/agent-icons/`：Claude、OpenAI/Codex、Gemini SVG 组件；Gemini 实例标识改用 React `useId`。 |
+
+紧凑控件保留上游视觉尺寸，通过预留空间与透明伪元素补足 NAND 的 32/44px 命中范围。动效时长改用宿主令牌，过渡限于 transform/opacity。27 个基础组件和设置禁用提示包装的文件头包含固定提交与原路径。
+
+4 个 shadcn 补齐项的来源配方路径为 `shadcn-ui/ui/apps/v4/registry/new-york-v4/ui/{alert-dialog,resizable,table,skeleton}.tsx`，版权为 Copyright (c) 2023 shadcn，MIT。未记录该配方的固定提交，不把兼容版本（React 19、Radix UI 1.6.7、react-resizable-panels 3.0.6）当成上游提交；没有声称与某个官方版本逐字一致。
+
 ## NAND 不采用的部分
 
-NAND 使用自己的 Preact 面板、Obsidian 叶子、主题令牌和 stdio 辅助进程（协议 3）。不使用 Orca 的应用状态树、窗格树、Electron 主进程和私有的 xterm 渲染补丁。回归测试覆盖被改编的行为，不构成与 Orca 应用兼容的保证。
+NAND 使用自己的 Obsidian 叶子、主题令牌和 stdio 辅助进程（协议 3）；设计系统采用 React，旧 Preact 界面在迁移期保留。不使用 Orca 的应用状态树、窗格树、Electron 主进程和私有的 xterm 渲染补丁。回归测试覆盖被改编的行为，不构成与 Orca 应用兼容的保证。

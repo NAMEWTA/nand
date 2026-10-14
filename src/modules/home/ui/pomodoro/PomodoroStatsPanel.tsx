@@ -1,3 +1,4 @@
+/** @jsxImportSource preact */
 import { Fragment, type ComponentChildren } from 'preact';
 import { useLayoutEffect, useRef, useState } from 'preact/hooks';
 import { datesForRange, type PomodoroRangeKey } from '../../core/pomodoro/stats';

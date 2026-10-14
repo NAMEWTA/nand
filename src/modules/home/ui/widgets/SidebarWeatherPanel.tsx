@@ -1,3 +1,4 @@
+/** @jsxImportSource preact */
 import { useLayoutEffect, useState } from 'preact/hooks';
 import type { DashboardSettings, WeatherData } from '../../core/board/types/index';
 import {

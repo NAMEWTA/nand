@@ -1,3 +1,4 @@
+/** @jsxImportSource preact */
 import assert from 'node:assert/strict';
 import { render } from 'preact';
 import { useState } from 'preact/hooks';

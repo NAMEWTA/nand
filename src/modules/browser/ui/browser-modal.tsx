@@ -1,3 +1,4 @@
+/** @jsxImportSource preact */
 import { Modal } from 'obsidian';
 import { render } from 'preact';
 import type { BrowserPageState } from '../core/model';

@@ -1,3 +1,4 @@
+/** @jsxImportSource preact */
 import { useId, useMemo, useState } from 'preact/hooks';
 import type { Ref, TargetedKeyboardEvent } from 'preact';
 import type { PanelItem, PanelModel, WorkbenchTarget } from '../app/contracts/workbench';

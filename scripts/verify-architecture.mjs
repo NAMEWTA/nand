@@ -9,7 +9,18 @@ import ts from 'typescript';
 
 const root = path.resolve(import.meta.dirname, '..');
 const nodeBuiltins = new Set([...builtinModules, ...builtinModules.map((n) => `node:${n}`)]);
-const hostPackages = new Set([...nodeBuiltins, 'obsidian', 'electron', 'preact', 'react', 'react-dom']);
+const hostPackages = new Set([...nodeBuiltins, 'obsidian', 'electron', 'preact', 'react', 'react-dom', 'radix-ui']);
+const uiPackages = new Set(['react', 'react-dom', 'radix-ui', 'lucide-react', 'class-variance-authority', 'clsx', 'tailwind-merge', 'cmdk', 'sonner', 'zustand', '@dnd-kit/core', '@dnd-kit/sortable', '@dnd-kit/utilities', '@tanstack/react-virtual', 'react-resizable-panels']);
+function allowedPackage(zone, specifier) {
+ const name = specifier.startsWith('@') ? specifier.split('/').slice(0, 2).join('/') : specifier.split('/')[0];
+ if (!uiPackages.has(name)) return true;
+ if (specifier === 'zustand/vanilla') return ['services', 'ui', 'shell', 'app'].includes(zone);
+ return ['ui', 'shell', 'app'].includes(zone);
+}
+assert.equal(allowedPackage('services', 'zustand/vanilla'), true);
+assert.equal(allowedPackage('services', 'zustand'), false);
+assert.equal(allowedPackage('core', 'radix-ui/dialog'), false);
+assert.equal(allowedPackage('ui', 'radix-ui/dialog'), true);
 const forbiddenGlobals = new Set([
 	'window',
 	'activeWindow',
@@ -222,6 +233,7 @@ for (const file of files) {
 		if (target && !allowedEdge(own, zoneOf(target), target, lazy.has(specifier)))
 			errors.add(`${relative(file)} -> ${relative(target)}: forbidden zone direction`);
 		if (!target && !specifier.startsWith('.')) {
+			if (!allowedPackage(own.zone, specifier)) errors.add(`${relative(file)} -> ${specifier}: UI dependency outside a UI zone`);
 			if (pure && (hostPackages.has(specifier) || /^(?:@codemirror|@xterm|preact|react)(?:\/|$)/.test(specifier)))
 				errors.add(`${relative(file)} -> ${specifier}: host dependency in ${own.zone}`);
 			else if ((specifier === 'electron' || nodeBuiltins.has(specifier)) && !desktop)

@@ -1,3 +1,4 @@
+/** @jsxImportSource preact */
 import { cardKind } from '../../core/board/card-kind';
 import { focalPosition } from '../../core/board/focal-point';
 export { cardKind } from '../../core/board/card-kind';

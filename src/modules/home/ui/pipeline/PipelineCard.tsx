@@ -1,3 +1,4 @@
+/** @jsxImportSource preact */
 import { useEffect, useRef, useState } from 'preact/hooks';
 import type { PipelineConfig, PipelineNote, PipelineSkill } from '../../core/pipeline/model';
 import { pipelineTasks } from '../../core/pipeline/rules';

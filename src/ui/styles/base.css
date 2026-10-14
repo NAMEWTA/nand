@@ -1,0 +1,62 @@
+.nand-ui {
+	--nd-hit-size: 32px;
+	font-family: var(--nd-font-sans);
+	letter-spacing: .01em;
+	color: var(--foreground);
+	-webkit-font-smoothing: antialiased;
+}
+.nand-ui *, .nand-ui ::before, .nand-ui ::after { box-sizing: border-box; }
+.nand-portal-root { display: contents; }
+.nand-ui .scrollbar-sleek { scrollbar-width: thin; scrollbar-color: var(--border) transparent; }
+.nand-ui .scrollbar-sleek-parent { scrollbar-width: thin; scrollbar-color: transparent transparent; }
+.nand-ui .scrollbar-sleek-parent:hover { scrollbar-color: var(--border) transparent; }
+.nand-ui .scrollbar-none { scrollbar-width: none; }
+.nand-ui .scrollbar-none::-webkit-scrollbar { display: none; }
+.nand-ui [data-sonner-toaster] { z-index: var(--layer-notice); }
+
+/* Hit boxes never participate in layout. Page spacing decides whether adjacent
+ * compact targets overlap; preserve the upstream geometry and shared borders. */
+/* Author display utilities must not undo the control's native hidden attribute. */
+.nand-ui [data-hit-control][hidden]:not(#\#) { display: none; }
+:where(.nand-ui [data-hit-control]) { position: relative; }
+.nand-ui [data-hit-control]::before {
+	content: "";
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	width: max(100%, var(--nd-hit-size));
+	height: max(100%, var(--nd-hit-size));
+	transform: translate(-50%, -50%);
+}
+/* Joined items keep their own inline partition. Only the group's outside block
+ * edges expand; a single item can use the entire minimum target. */
+.nand-ui [data-hit-group] > [data-hit-control]:not(:only-child)::before { width: 100%; }
+
+.nand-ui :is(button, input:not([type="hidden"]), textarea, select, [role="button"], [role="combobox"], [role="menuitem"], [role="menuitemcheckbox"], [role="menuitemradio"], [role="option"], [data-slot="slider"], [data-slot="select-scroll-up-button"], [data-slot="select-scroll-down-button"]):not([data-hit-control]) {
+	min-height: var(--nd-hit-size);
+	min-width: var(--nd-hit-size);
+}
+.nand-ui [data-slot="scroll-area-thumb"][data-orientation="vertical"] { min-height: var(--nd-hit-size); }
+.nand-ui [data-slot="scroll-area-thumb"][data-orientation="horizontal"] { min-width: var(--nd-hit-size); }
+.nand-ui [data-slot="tabs-trigger"] { min-width: var(--nd-hit-size); }
+.nand-ui [data-slot="tabs-list"] { min-height: calc(var(--nd-hit-size) + 6px); }
+@media (pointer: coarse) {
+	.nand-ui { --nd-hit-size: 44px; }
+}
+/* All utility/presence animations follow the host, including default durations. */
+.nand-ui, .nand-ui * {
+	--default-transition-duration: var(--anim-duration-fast);
+	--tw-duration: var(--anim-duration-fast);
+	--tw-animation-duration: var(--tw-duration, var(--anim-duration-fast));
+}
+.nand-ui :is([data-sonner-toaster], [data-sonner-toast], [data-sonner-toast] *):not(#\#):not(#\#) {
+	transition-property: transform, opacity;
+	transition-duration: var(--anim-duration-moderate);
+	animation-duration: var(--anim-duration-moderate);
+}
+@media (prefers-reduced-motion: reduce) {
+	/* Beat the scoped utility/state selectors without !important; never affect host content. */
+	:is(.nand-ui, .nand-ui *):not(#\#):not(#\#),
+	.nand-ui:not(#\#):not(#\#) ::before,
+	.nand-ui:not(#\#):not(#\#) ::after { animation: none; transition: none; scroll-behavior: auto; }
+}

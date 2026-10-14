@@ -1,3 +1,4 @@
+/** @jsxImportSource preact */
 import { useLayoutEffect, useRef, useState } from 'preact/hooks';
 import type { DocNode } from '../../core/board/types/index';
 import { documentLink } from '../../core/board/document-link';

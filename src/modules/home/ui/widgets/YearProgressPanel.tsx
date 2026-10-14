@@ -1,3 +1,4 @@
+/** @jsxImportSource preact */
 import { t } from '../../../../shared/i18n';
 import { useWindowClock } from './use-window-clock';
 export function YearProgressPanel({ win }: { win: Window }) {

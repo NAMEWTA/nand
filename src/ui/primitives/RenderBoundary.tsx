@@ -1,3 +1,4 @@
+/** @jsxImportSource preact */
 import { Component, type ComponentChildren } from 'preact';
 
 /** Isolate a contributed component's render/update failure from adjacent components. */

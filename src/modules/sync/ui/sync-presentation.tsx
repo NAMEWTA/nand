@@ -1,3 +1,4 @@
+/** @jsxImportSource preact */
 import { moment, Notice, TFile, type App } from 'obsidian';
 import { render } from 'preact';
 import { useEffect, useState } from 'preact/hooks';

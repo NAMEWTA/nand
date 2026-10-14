@@ -1,3 +1,4 @@
+/** @jsxImportSource preact */
 import { Fragment } from 'preact';
 import { useRef, useState } from 'preact/hooks';
 import type { ExpenseBar, ExpenseRankRow, ExpenseSlice } from './expense-charts';

@@ -1,3 +1,4 @@
+/** @jsxImportSource preact */
 import { SaveStatus, type SaveStatusSource } from '../../../../ui/primitives/SaveStatus';
 import { t } from '../../../../shared/i18n';
 import { Icon } from '../../../../ui/primitives/Icon';

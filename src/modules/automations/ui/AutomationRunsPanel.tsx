@@ -1,3 +1,4 @@
+/** @jsxImportSource preact */
 import { t } from '../../../shared/i18n';
 import { Icon } from '../../../ui/primitives/Icon';
 import { AutomationRunList } from './AutomationRunList';

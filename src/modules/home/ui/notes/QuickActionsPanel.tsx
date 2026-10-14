@@ -1,3 +1,4 @@
+/** @jsxImportSource preact */
 import type { AutomationUiPort } from '../../../../shared/automation/types';
 import { useEffect, useRef, useState } from 'preact/hooks';
 import { buildOrderedActions } from '../../core/board/quick-actions';

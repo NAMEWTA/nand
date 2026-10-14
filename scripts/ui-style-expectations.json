@@ -1,0 +1,10 @@
+[
+  { "name": "未加类名的按钮被中和", "selector": "#plain-button", "expect": { "background-color": { "equals": "rgba(0, 0, 0, 0)" }, "box-shadow": { "equals": "none" }, "padding-left": { "equals": "0px" } } },
+  { "name": "ghost 按钮常态透明、无阴影", "selector": "#ghost-button", "expect": { "background-color": { "equals": "rgba(0, 0, 0, 0)" }, "box-shadow": { "equals": "none" } } },
+  { "name": "ghost 按钮悬停有底色", "selector": "#ghost-button", "state": ["hover"], "expect": { "background-color": { "not": "rgba(0, 0, 0, 0)" } } },
+  { "name": "outline 按钮 36px 高、1px 边框", "selector": "#outline-button", "expect": { "height": { "equals": "36px" }, "border-top-width": { "equals": "1px" } } },
+  { "name": "输入框 36px 高、1px 边框、12px 内边距", "selector": "#text-input", "expect": { "height": { "equals": "36px" }, "border-top-width": { "equals": "1px" }, "padding-left": { "equals": "12px" } } },
+  { "name": "亮色下输入框悬停仍透明（Obsidian 的悬停底色没有漏进来）", "selector": "#text-input", "state": ["hover"], "themes": ["theme-light"], "expect": { "background-color": { "equals": "rgba(0, 0, 0, 0)" } } },
+  { "name": "Markdown 渲染区里的按钮保留 Obsidian 样式", "selector": "#md-button", "expect": { "padding-left": { "not": "0px" }, "box-shadow": { "not": "none" } } },
+  { "name": "带 nand-native 的复选框保留 Obsidian 样式", "selector": "#native-checkbox", "expect": { "border-top-width": { "equals": "1px" } } }
+]

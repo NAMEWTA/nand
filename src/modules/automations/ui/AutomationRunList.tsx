@@ -1,3 +1,4 @@
+/** @jsxImportSource preact */
 import type { AutomationRun } from '../../../shared/automation/types';
 import { isActiveRun } from '../../../shared/automation/types';
 import { automationMessage } from '../../../shared/automation/errors';

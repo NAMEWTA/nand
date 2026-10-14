@@ -1,3 +1,4 @@
+/** @jsxImportSource preact */
 import type { ComponentChildren, TargetedKeyboardEvent } from 'preact';
 import { Icon } from './Icon';
 

@@ -1,3 +1,4 @@
+/** @jsxImportSource preact */
 import { useState } from 'preact/hooks';
 import type { SkillShortcut } from '../../core/board/types/model';
 import { skillError, skillPrompt } from '../../services/skill-shortcuts';

@@ -1,3 +1,4 @@
+/** @jsxImportSource preact */
 import type { ComponentChildren } from 'preact';
 
 export function Badge({ tone, children, label }: { tone?: 'accent' | 'error' | 'success' | 'warning'; children: ComponentChildren; label?: string }) {

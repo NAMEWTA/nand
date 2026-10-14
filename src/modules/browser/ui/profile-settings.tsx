@@ -1,3 +1,4 @@
+/** @jsxImportSource preact */
 import { Setting } from 'obsidian';
 import type { SettingsPageHost } from '../../../app/contracts/module';
 import { t } from '../../../shared/i18n';

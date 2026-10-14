@@ -1,3 +1,4 @@
+/** @jsxImportSource preact */
 import { Menu, Notice, Platform, type App } from 'obsidian';
 import { contentFiles, type ContentFile } from '../../../../host/obsidian/storage/content-files';
 import { useCallback, useLayoutEffect, useRef, useState } from 'preact/hooks';

@@ -1,3 +1,4 @@
+/** @jsxImportSource preact */
 import { useLayoutEffect, useRef, useState } from 'preact/hooks';
 import { activityColor, type PomodoroService } from '../../platform/pomodoro/pomodoro-service';
 import { t } from '../../../../shared/i18n';

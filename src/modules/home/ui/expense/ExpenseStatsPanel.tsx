@@ -1,3 +1,4 @@
+/** @jsxImportSource preact */
 import { SaveStatus } from '../../../../ui/primitives/SaveStatus';
 import { Menu, Notice } from 'obsidian';
 import type { ComponentChildren } from 'preact';

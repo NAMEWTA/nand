@@ -89,6 +89,12 @@ class SettingsSurface extends NativeSurface {
 		page.createEl('h2', { cls: 'nand-settings-page-title', text: category?.label ?? t('workbench.settings') });
 		const body = page.createDiv({ cls: 'nand-settings-page-body' });
 		switch (this.category) {
+			case 'components':
+				void import('../../ui/react/gallery').then(({ mountGallery }) => {
+					if (id !== this.renderId) return;
+					this.kept.push(mountGallery(body));
+				}).catch((error: unknown) => { if (id === this.renderId) body.setText(error instanceof Error ? error.message : String(error)); });
+				return;
 			case 'general':
 				renderPreferences.call(this.tab, body);
 				renderModuleToggles.call(this.tab, body);

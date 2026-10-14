@@ -1,3 +1,4 @@
+/** @jsxImportSource preact */
 import type { App } from 'obsidian';
 import { useLayoutEffect, useRef, useState } from 'preact/hooks';
 import type { DashboardCard, TaskItem } from '../../core/board/types/index';

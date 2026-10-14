@@ -1,3 +1,4 @@
+/** @jsxImportSource preact */
 import type { App } from 'obsidian';
 import { useState } from 'preact/hooks';
 import { openDialog } from '../../../../ui/primitives/dialog';

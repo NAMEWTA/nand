@@ -1,3 +1,4 @@
+/** @jsxImportSource preact */
 import { Notice, type App } from 'obsidian';
 import { useLayoutEffect, useMemo, useRef, useState } from 'preact/hooks';
 import type { WereadConfig, WereadWidget } from '../../core/board/types';

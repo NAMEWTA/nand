@@ -1,3 +1,4 @@
+/** @jsxImportSource preact */
 import { Fragment } from 'preact';
 import { useLayoutEffect, useState } from 'preact/hooks';
 import type { WereadWidget } from '../../core/board/types';

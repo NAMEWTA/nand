@@ -1,3 +1,4 @@
+/** @jsxImportSource preact */
 import type { App } from 'obsidian';
 import { t } from '../../../../shared/i18n/index';
 import { Button } from '../../../../ui/primitives/Button';

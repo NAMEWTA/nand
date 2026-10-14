@@ -1,3 +1,4 @@
+/** @jsxImportSource preact */
 import { h } from 'preact';
 import type { HomeWidgetContext, HomeWidgetKind } from '../../api';
 import type { BoardWidgetMember } from '../../core/board/types/model';

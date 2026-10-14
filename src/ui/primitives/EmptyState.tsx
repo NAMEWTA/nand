@@ -1,3 +1,4 @@
+/** @jsxImportSource preact */
 import { setIcon } from 'obsidian';
 import type { EmptyStateOptions } from './empty-state';
 

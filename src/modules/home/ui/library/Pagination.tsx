@@ -1,3 +1,4 @@
+/** @jsxImportSource preact */
 export function Pagination({ page, pages, change }: { page: number; pages: number; change: (page: number) => void }) {
 	let start = Math.max(1, page - 2);
 	const end = Math.min(pages, start + 4);

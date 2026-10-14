@@ -1,3 +1,4 @@
+/** @jsxImportSource preact */
 import { render } from 'preact';
 import { Notice } from 'obsidian';
 import type { HomeWidgetContext } from '../../api';

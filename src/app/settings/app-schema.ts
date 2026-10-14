@@ -11,6 +11,7 @@ const moduleFlags = Object.fromEntries(
 export function appSchema(defaultLanguage: 'en' | 'zh') {
 	return defineSettings({
 		language: f.enum(['en', 'zh'] as const, { default: defaultLanguage }),
+		devGallery: f.boolean({ default: false, scope: 'device' }),
 		introSeen: f.boolean({ default: false }),
 		workbenchStatus: f.enum(['automatic', 'hidden'] as const, { default: 'automatic' }),
 		modules: f.object(moduleFlags),

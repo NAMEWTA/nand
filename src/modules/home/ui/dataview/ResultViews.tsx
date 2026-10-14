@@ -1,3 +1,4 @@
+/** @jsxImportSource preact */
 import { contentFiles } from '../../../../host/obsidian/storage/content-files';
 import { Fragment } from 'preact';
 import { useLayoutEffect, useRef, useState } from 'preact/hooks';

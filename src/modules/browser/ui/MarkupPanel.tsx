@@ -1,3 +1,4 @@
+/** @jsxImportSource preact */
 import { useLayoutEffect, useRef, useState } from 'preact/hooks';
 import {
 	canRedo,

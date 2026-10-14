@@ -1,3 +1,4 @@
+/** @jsxImportSource preact */
 import { Menu, Notice, Platform, type Scope } from 'obsidian';
 import { useLayoutEffect, useRef, useState } from 'preact/hooks';
 import type { BrowserAgent, BrowserGrab, BrowserPageState } from '../core/model';

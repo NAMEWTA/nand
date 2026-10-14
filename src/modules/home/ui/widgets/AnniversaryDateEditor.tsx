@@ -1,3 +1,4 @@
+/** @jsxImportSource preact */
 import { render } from 'preact';
 import { onLanguageChanged, t } from '../../../../shared/i18n';
 import { TextField } from '../../../../ui/primitives/TextField';

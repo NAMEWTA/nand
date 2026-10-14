@@ -1,3 +1,4 @@
+/** @jsxImportSource preact */
 import { isManagedFile, type ContentFile } from '../../../../host/obsidian/storage/content-files';
 import { Platform, type App } from 'obsidian';
 import type { TargetedMouseEvent } from 'preact';

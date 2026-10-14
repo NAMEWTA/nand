@@ -1,3 +1,4 @@
+/** @jsxImportSource preact */
 import type { UsageSnapshot, UsageWindow } from '../../core/launch/types';
 import { remainingPercent, usageStatusText } from '../../core/launch/usage-format';
 import { getLanguage, t } from '../../../../shared/i18n';

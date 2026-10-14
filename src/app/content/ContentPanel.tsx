@@ -1,3 +1,4 @@
+/** @jsxImportSource preact */
 import { Component, MarkdownRenderer, type App } from 'obsidian';
 import { useEffect, useRef, useState } from 'preact/hooks';
 import { contentFiles, type ContentFile } from '../../host/obsidian/storage/content-files';

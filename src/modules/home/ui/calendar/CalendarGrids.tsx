@@ -1,3 +1,4 @@
+/** @jsxImportSource preact */
 import { useLayoutEffect, useRef } from 'preact/hooks';
 import {
 	calendarSpan,

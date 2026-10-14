@@ -1,3 +1,4 @@
+/** @jsxImportSource preact */
 import { Modal, type App } from 'obsidian';
 import { render, type ComponentChildren } from 'preact';
 

@@ -1,3 +1,4 @@
+/** @jsxImportSource preact */
 import type { ContentFile } from '../../../../host/obsidian/storage/content-files';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';

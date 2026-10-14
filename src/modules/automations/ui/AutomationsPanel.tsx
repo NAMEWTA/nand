@@ -1,3 +1,4 @@
+/** @jsxImportSource preact */
 import { actionText } from '../core/switch-action';
 import { actionDescriptors } from '../core/actions/executor';
 import { nextOccurrence } from '../core/schedule';

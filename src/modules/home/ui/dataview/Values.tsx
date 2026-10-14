@@ -1,3 +1,4 @@
+/** @jsxImportSource preact */
 import { Platform } from 'obsidian';
 import { Fragment } from 'preact';
 import type { DqlLink, DqlValue, ResultRow } from '../../core/dql/types';

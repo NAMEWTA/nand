@@ -1,3 +1,4 @@
+/** @jsxImportSource preact */
 import { useLayoutEffect, useState } from 'preact/hooks';
 import { h, render } from 'preact';
 import { dashboardSaveMessage } from '../core/board/save-state';

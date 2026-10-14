@@ -1,3 +1,4 @@
+/** @jsxImportSource preact */
 import { Menu } from 'obsidian';
 import { Icon } from '../../../../ui/primitives/Icon';
 import type { ToolbarDropdownItem } from './toolbar-dropdown';

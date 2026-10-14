@@ -1,3 +1,4 @@
+/** @jsxImportSource preact */
 import { SaveStatus } from '../../../../ui/primitives/SaveStatus';
 import { Notice } from 'obsidian';
 import { useLayoutEffect, useRef, useState } from 'preact/hooks';

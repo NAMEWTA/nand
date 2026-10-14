@@ -1,3 +1,4 @@
+/** @jsxImportSource preact */
 import { Notice, Setting, type App } from 'obsidian';
 import { useState } from 'preact/hooks';
 import type { SettingsPageRenderer } from '../../../app/contracts/module';

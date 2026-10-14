@@ -1,3 +1,4 @@
+/** @jsxImportSource preact */
 import { useEffect, useState } from 'preact/hooks';
 import type { SkillScan } from '../../../agent/api';
 import { homeServices } from '../../services/instances';

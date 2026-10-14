@@ -1,3 +1,4 @@
+/** @jsxImportSource preact */
 import { useState } from 'preact/hooks';
 import type { PipelineConfig as Config, PipelineStage } from '../../core/pipeline/model';
 import { pipelineConfigError } from '../../core/pipeline/rules';

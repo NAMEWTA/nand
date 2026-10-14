@@ -1,3 +1,4 @@
+/** @jsxImportSource preact */
 import { SaveStatus } from '../../../../ui/primitives/SaveStatus';
 import { useLayoutEffect, useState } from 'preact/hooks';
 import { resolveCoverAsObjectUrl } from '../../platform/reading/book-service';

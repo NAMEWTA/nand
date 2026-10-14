@@ -1,3 +1,4 @@
+/** @jsxImportSource preact */
 import { t } from '../../../../shared/i18n';
 import type { RecentDoc } from '../ui/recent';
 import { formatRelativeTime } from '../ui/recent-time';

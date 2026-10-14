@@ -1,3 +1,4 @@
+/** @jsxImportSource preact */
 import { anniversaryDateThisYear, formatElapsed, parseAnniversaryDate } from '../../core/anniversaries/calendar';
 import { civilDate } from '../../core/anniversaries/civil-date';
 import { resolveWidgetLabel } from '../../core/board/default-widget-label';

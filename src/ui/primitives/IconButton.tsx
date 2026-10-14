@@ -1,3 +1,4 @@
+/** @jsxImportSource preact */
 import { setTooltip } from 'obsidian';
 import type { TargetedKeyboardEvent, TargetedMouseEvent } from 'preact';
 import { Icon } from './Icon';

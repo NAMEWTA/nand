@@ -1,3 +1,4 @@
+/** @jsxImportSource preact */
 import { useLayoutEffect, useRef, useState } from 'preact/hooks';
 import { resolveWidgetLabel } from '../../core/board/default-widget-label';
 import type { CountdownConfig } from '../../core/board/types';

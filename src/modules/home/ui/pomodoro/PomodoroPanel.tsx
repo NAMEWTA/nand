@@ -1,3 +1,4 @@
+/** @jsxImportSource preact */
 import { SaveStatus } from '../../../../ui/primitives/SaveStatus';
 import { useLayoutEffect, useRef, useState } from 'preact/hooks';
 import type { DashboardSettings } from '../../core/board/types/index';

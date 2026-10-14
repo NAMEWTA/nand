@@ -1,3 +1,4 @@
+/** @jsxImportSource preact */
 import { Component, MarkdownRenderer } from 'obsidian';
 import { useLayoutEffect, useRef, useState } from 'preact/hooks';
 import { extractCardParts } from '../../core/board/parser/index';

@@ -86,6 +86,8 @@ Adapted parts, with the upstream commits they are taken from:
 - Browser snapshot traversal, interactive element discovery, screenshot
   markup, element grab context, debugger lease, popup and URL classification:
   commit d74388f8a2dad2bd4bbfe3b937aba66e6648258b.
+- React UI components, settings form controls, shortcut key caps and agent
+  icon glyphs: commit 464bd5a54b3364021c5cc0319859616e5ec41bbf.
 Full license text: docs/third-party/orca-LICENSE.txt
 
 --------------------------------------------------------------------------------
@@ -141,3 +143,33 @@ Terminal
 
 The terminal (src/modules/agent) and its native helper (native/pty-server) are
 written for NAND.
+
+--------------------------------------------------------------------------------
+shadcn/ui (new-york-v4)
+--------------------------------------------------------------------------------
+
+https://github.com/shadcn-ui/ui
+React component recipes in src/ui/components, including AlertDialog,
+Resizable, Table and Skeleton; other recipes are adapted through Orca.
+
+MIT License
+
+Copyright (c) 2023 shadcn
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.

@@ -1,3 +1,4 @@
+/** @jsxImportSource preact */
 import { Component, Menu, Platform } from 'obsidian';
 import { render } from 'preact';
 import { onLanguageChanged, t } from '../../shared/i18n';

@@ -34,3 +34,5 @@ scripts/tmp/
 temp/
 native/pty-server/target/
 
+
+build/

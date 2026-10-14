@@ -1,3 +1,4 @@
+/** @jsxImportSource preact */
 import type { App } from 'obsidian';
 import { useLayoutEffect, useReducer, useState } from 'preact/hooks';
 import type { BoardWidgetMember } from '../../core/board/types/model';

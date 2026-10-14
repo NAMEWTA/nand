@@ -1,3 +1,4 @@
+/** @jsxImportSource preact */
 import { setVaultPreference } from '../../../../host/obsidian/storage/preferences';
 import { Notice, type App } from 'obsidian';
 import { type ContentFile } from '../../../../host/obsidian/storage/content-files';

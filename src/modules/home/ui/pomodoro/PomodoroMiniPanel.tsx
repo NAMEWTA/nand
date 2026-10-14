@@ -1,3 +1,4 @@
+/** @jsxImportSource preact */
 import { useLayoutEffect } from 'preact/hooks';
 import type { PomodoroService } from '../../platform/pomodoro/pomodoro-service';
 import { t } from '../../../../shared/i18n';

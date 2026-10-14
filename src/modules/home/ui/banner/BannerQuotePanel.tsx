@@ -1,3 +1,4 @@
+/** @jsxImportSource preact */
 import { useLayoutEffect, useState } from 'preact/hooks';
 import type { BannerData } from '../../core/board/types';
 import { BANNER_QUOTE_OFFSET_MS, BANNER_QUOTE_ROTATION_MS } from '../view/timing';

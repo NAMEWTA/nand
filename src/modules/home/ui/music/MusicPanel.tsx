@@ -1,3 +1,4 @@
+/** @jsxImportSource preact */
 import { Notice } from 'obsidian';
 import { useLayoutEffect, useRef, useState } from 'preact/hooks';
 import type { MusicTrack } from '../../core/board/types';

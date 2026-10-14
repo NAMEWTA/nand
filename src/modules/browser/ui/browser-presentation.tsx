@@ -1,3 +1,4 @@
+/** @jsxImportSource preact */
 import { NativeSurface, nativeSurfaces, type NativeSurfaceContext } from '../../../ui/native-surface';
 import { Platform, type ViewStateResult } from 'obsidian';
 import { render } from 'preact';

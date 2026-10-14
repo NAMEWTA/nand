@@ -1,3 +1,4 @@
+/** @jsxImportSource preact */
 import { setIcon } from 'obsidian';
 
 /** Obsidian owns the SVG content; Preact owns the surrounding element. */

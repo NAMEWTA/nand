@@ -1,3 +1,4 @@
+/** @jsxImportSource preact */
 import { AutomationRunsPanel, type RunHistoryState } from './AutomationRunsPanel';
 import type { ViewStateResult } from 'obsidian';
 import { NativeSurface, type NativeSurfaceContext } from '../../../ui/native-surface';

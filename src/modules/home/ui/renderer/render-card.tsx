@@ -1,3 +1,4 @@
+/** @jsxImportSource preact */
 import type { App } from 'obsidian';
 import type { DashboardCard, DashboardData, DashboardSettings } from '../../core/board/types/index';
 import { CardPanel, cardKind } from '../cards/CardPanel';

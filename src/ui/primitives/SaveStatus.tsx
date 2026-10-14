@@ -1,3 +1,4 @@
+/** @jsxImportSource preact */
 import { useEffect, useState } from 'preact/hooks';
 import type { SaveState } from '../../shared/storage/durable-state';
 import { t } from '../../shared/i18n';

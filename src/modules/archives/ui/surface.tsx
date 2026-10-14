@@ -1,3 +1,4 @@
+/** @jsxImportSource preact */
 import { useEffect, useRef, useState, type ReactNode } from 'preact/compat';
 import type { ArchiveRecord, EntityRef } from '../core/model';
 import { ct, relationDescription } from './labels';

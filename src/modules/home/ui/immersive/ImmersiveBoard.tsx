@@ -1,3 +1,4 @@
+/** @jsxImportSource preact */
 import { useLayoutEffect, useRef } from 'preact/hooks';
 import { t } from '../../../../shared/i18n';
 import type { GridTile } from '../../core/board/immersive-grid';

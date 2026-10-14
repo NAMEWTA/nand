@@ -1,3 +1,4 @@
+/** @jsxImportSource preact */
 import type { LibraryConfig } from '../../core/board/types/model';
 import { libraryTableColumns } from '../../core/board/table-columns';
 import { t } from '../../../../shared/i18n';

@@ -1,3 +1,4 @@
+/** @jsxImportSource preact */
 import type { App } from 'obsidian';
 import { useLayoutEffect, useRef } from 'preact/hooks';
 import type { CardSize, DashboardCard, TrackerDataPoint } from '../../core/board/types/index';

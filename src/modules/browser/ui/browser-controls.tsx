@@ -1,3 +1,4 @@
+/** @jsxImportSource preact */
 import type { Ref } from 'preact';
 import type { BrowserAgent, BrowserGrab, BrowserHistoryEntry } from '../core/model';
 import { grabText } from '../core/text';

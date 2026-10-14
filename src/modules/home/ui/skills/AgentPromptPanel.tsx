@@ -1,3 +1,4 @@
+/** @jsxImportSource preact */
 import { SuggestModal, type App } from 'obsidian';
 import { contentFiles, type ContentFile } from '../../../../host/obsidian/storage/content-files';
 import { useState } from 'preact/hooks';

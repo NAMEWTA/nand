@@ -1,3 +1,4 @@
+/** @jsxImportSource preact */
 import type { TargetedKeyboardEvent } from 'preact';
 import { useId } from 'preact/hooks';
 import type { WorkbenchFeature } from '../app/contracts/workbench';

@@ -1,3 +1,4 @@
+/** @jsxImportSource preact */
 import { notificationBody } from '../core/service';
 import type { NotificationRecord } from '../api';
 import { getLanguage, t } from '../../../shared/i18n';
