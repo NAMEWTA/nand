@@ -4,7 +4,7 @@ import { ChevronRight, RefreshCw } from 'lucide-react';
 import type { StatusBarPreferences, UsageSnapshot, WorkbenchTarget } from '../../app/contracts/workbench';
 import { t } from '../../shared/i18n';
 import { useOwnerDocument } from '../../ui/react/contexts';
-import { DropdownMenuItem } from '../../ui/components/dropdown-menu';
+import { DropdownMenuSub, DropdownMenuSubTrigger, DropdownMenuSubContent, DropdownMenuRadioGroup, DropdownMenuRadioItem, DropdownMenuSeparator, DropdownMenuItem } from '../../ui/components/dropdown-menu';
 import { SegmentedControl } from '../../ui/components/nand/SettingsFormControls';
 import { AgentIcon } from '../../ui/components/nand/AgentIcon';
 import { maxUsed, shownPercent, usageTone } from './ProviderSegment';
@@ -14,7 +14,9 @@ export function UsageRosterPanel({
 	onPreferences,
 	refresh,
 	navigate,
+ selectAccount,
 }: {
+	selectAccount?: (provider: string, accountId: string) => void;
 	snapshot: UsageSnapshot;
 	preferences: StatusBarPreferences;
 	onPreferences: (value: StatusBarPreferences) => void;
@@ -82,10 +84,12 @@ export function UsageRosterPanel({
 			<div className="border-t border-border/70" />
 			{[...snapshot.providers]
 				.sort((a, b) => maxUsed(b) - maxUsed(a))
-				.map((p) => (
-					<DropdownMenuItem
+				.map((p) => {
+ const Row = p.accounts ? DropdownMenuSubTrigger : DropdownMenuItem;
+ const row = (
+					<Row
 						key={p.id}
-						onSelect={() => navigate({ feature: 'terminal', section: 'usage', resourceId: p.id })}
+						onSelect={p.accounts ? undefined : () => navigate({ feature: 'terminal', section: 'usage', resourceId: p.id })}
 						className="w-full cursor-pointer rounded-none px-3.5 py-2.5"
 					>
 						<div data-usage-mode={preferences.usageMode} className="flex min-w-0 flex-1 flex-col gap-1">
@@ -101,7 +105,7 @@ export function UsageRosterPanel({
 								</span>
 								<span className="shrink-0 text-[11px] text-muted-foreground">
 									{!p.windows.length
-										? p.status
+										? (p.statusLabel ?? p.status)
 										: preferences.usageMode === 'compact'
 											? `${shownPercent(maxUsed(p), preferences.usageDisplay)}%`
 											: resetLabel(p.windows.flatMap((w) => (w.resetsAt ? [w.resetsAt] : [])))}
@@ -128,9 +132,15 @@ export function UsageRosterPanel({
 								</div>
 							)}
 						</div>
-						<ChevronRight size={14} className="text-muted-foreground" />
-					</DropdownMenuItem>
-				))}
+						{!p.accounts && <ChevronRight size={14} className="text-muted-foreground" />}
+					</Row>
+ );
+ return p.accounts ? <DropdownMenuSub key={p.id}>{row}<DropdownMenuSubContent className="w-56">
+ <DropdownMenuRadioGroup value={p.accountId ?? ''} onValueChange={id => selectAccount?.(p.id, id)}>{p.accounts.map(account => <DropdownMenuRadioItem key={account.id} value={account.id}>{account.name}</DropdownMenuRadioItem>)}</DropdownMenuRadioGroup>
+ <DropdownMenuSeparator /><DropdownMenuItem onSelect={() => navigate({ feature: 'settings', section: 'terminal', resourceId: 'accounts' })}>{t('shell.addAccount')}</DropdownMenuItem>
+ <DropdownMenuItem onSelect={() => navigate({ feature: 'settings', section: 'terminal', resourceId: 'accounts' })}>{t('shell.manageAccounts')}</DropdownMenuItem>
+ </DropdownMenuSubContent></DropdownMenuSub> : row;
+ })}
 			<div className="border-t border-border/70" />
 			<DropdownMenuItem
 				onSelect={() => navigate({ feature: 'terminal', section: 'usage' })}

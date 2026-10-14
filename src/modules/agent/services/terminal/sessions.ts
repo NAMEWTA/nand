@@ -164,7 +164,8 @@ export class TerminalSessions {
 		this.changed();
 	}
 
-	async create(request: CreateSession): Promise<TerminalSession> {
+ clearStatusHooks(): void { for (const close of this.hooks.values()) close(); this.hooks.clear(); }
+ async create(request: CreateSession): Promise<TerminalSession> {
 		request.signal?.throwIfAborted();
 		const helper = await this.ensureHelper();
 		const environment = await this.host.environment();

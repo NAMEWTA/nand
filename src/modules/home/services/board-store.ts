@@ -18,6 +18,8 @@ import { fetchWeather, geocodeCity } from '../platform/widgets/weather-service';
 import type { HomeHost } from './home-host';
 import { queryVaultFiles } from './library-query';
 import { homeServices } from './instances';
+import { SUPPORTED_FILE_EXTS } from '../../../shared/file-types';
+import { isRecentUserDocument } from '../core/board/recent-doc-policy';
 
 export interface BoardSnapshot {
 	path: string;
@@ -94,9 +96,10 @@ export class BoardStore {
 		const changed = () => {
 			if (this.visible && !this.disposed) this.state.setState((s) => ({ widgetRevision: s.widgetRevision + 1 }));
 		};
-		for (const service of [homeServices.habit, homeServices.expense, homeServices.pomodoro])
+		for (const service of [homeServices.habit, homeServices.expense, homeServices.pomodoro, homeServices.reading])
 			if (service) this.cleanup.push(service.subscribe(changed));
 		if (homeServices.pomodoro) this.cleanup.push(homeServices.pomodoro.subscribeTick(changed));
+		if (homeServices.reading) this.cleanup.push(homeServices.reading.subscribeTick(changed));
 		this.cleanup.push(contentFiles(host.app).subscribe(() => this.refreshFiles()));
 		if (host.automationHost?.subscribe) this.cleanup.push(host.automationHost.subscribe(changed));
 	}
@@ -110,6 +113,18 @@ export class BoardStore {
 				.getMarkdownFiles()
 				.sort((a, b) => b.stat.mtime - a.stat.mtime),
 		});
+	}
+	searchFiles(query: string): ContentFile[] {
+		const q = query.trim().toLowerCase();
+		if (!q) return [];
+		return contentFiles(this.host.app).getFiles()
+			.filter((file) => SUPPORTED_FILE_EXTS.has(file.extension) &&
+				!file.path.replace(/^\.nand\/content\//, '').split('/').some((part) => part.startsWith('.')))
+			.filter((file) => file.path.toLowerCase().includes(q) || file.basename.toLowerCase().includes(q))
+			.sort((a, b) => a.basename.length - b.basename.length).slice(0, 8);
+	}
+	recentFiles(): ContentFile[] {
+		return this.state.getState().files.filter((file) => isRecentUserDocument(file.path, this.host.settings)).slice(0, 10);
 	}
 	switch(path: string): Promise<void> {
 		const run = this.switchTail.then(async () => {

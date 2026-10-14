@@ -1,8 +1,9 @@
 import type { App } from 'obsidian';
 import type { ContentFile } from '../../../../host/obsidian/storage/content-files';
-import { h } from 'preact';
+import { createElement as h } from 'react';
+import { mountRecordPanel } from '../dialogs/mount-record-panel';
 import type { DashboardSettings } from '../../core/board/types/index';
-import { getRenderContext, mountDashboardPanel } from '../renderer/render-context';
+import { getRenderContext } from '../renderer/render-context';
 import type { DashboardSettingsAccess } from '../settings-access';
 import { CalendarPanel } from './CalendarPanel';
 import { CalendarMonthModal, DayAgendaModal } from './calendar-modal';
@@ -24,7 +25,7 @@ export function renderSidebarCalendar(
 ): void {
 	const widget = container.createDiv({ cls: 'dashboard-sidebar-widget dashboard-sidebar-calendar' });
 	const content = widget.createDiv({ cls: 'dashboard-library-content dashboard-calendar-content' });
-	mountDashboardPanel(
+	mountRecordPanel(
 		content,
 		h(CalendarPanel, {
 			root: widget,

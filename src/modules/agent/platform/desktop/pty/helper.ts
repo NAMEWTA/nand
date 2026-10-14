@@ -121,6 +121,7 @@ export class PtyHelper {
 			case 'exit':
 				this.events.exit(sid, typeof message.code === 'number' ? message.code : null, typeof message.signal === 'string' ? message.signal : null);
 				return;
+			case 'cookies-result':
 			case 'history-result': {
 				const id = typeof message.rid === 'string' ? message.rid : '';
 				const pending = this.requests.get(id);
@@ -161,11 +162,15 @@ export class PtyHelper {
 	}
 
 	history<T>(op: 'scan' | 'query' | 'read', payload: Record<string, unknown>, signal?: AbortSignal): Promise<T> {
+		return this.request<T>('history', op, payload, signal);
+	}
+
+	request<T>(type: 'history' | 'cookies', op: string, payload: Record<string, unknown>, signal?: AbortSignal): Promise<T> {
 		if (this.ended) return Promise.reject(new Error('History service disconnected'));
 		return new Promise<T>((resolve, reject) => {
 			const rid = crypto.randomUUID();
 			const cancel = () => {
-				this.send({ type: 'history', op: 'cancel', rid });
+				if (type === 'history') this.send({ type, op: 'cancel', rid });
 				const pending = this.requests.get(rid);
 				this.requests.delete(rid);
 				pending?.cleanup();
@@ -182,7 +187,7 @@ export class PtyHelper {
 			});
 			signal?.addEventListener('abort', cancel, { once: true });
 			if (signal?.aborted) return cancel();
-			this.send({ type: 'history', op, rid, payload });
+			this.send({ type, op, rid, payload });
 		});
 	}
 

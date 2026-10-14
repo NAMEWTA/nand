@@ -42,6 +42,7 @@ export function normalizeAgentSettings(value: Partial<AgentSettings> | null | un
 	return {
 		globalPermissionMode: mode,
 		yoloAcknowledged: Boolean(value?.yoloAcknowledged),
+		yoloAcknowledgedAgents: value?.yoloAcknowledgedAgents?.filter(id => AGENT_IDS.includes(id)) ?? [],
 		usageRefreshSec: Number.isFinite(refresh) && refresh >= 15 ? refresh : 45,
 		showUsageInStatusBar: value?.showUsageInStatusBar === true,
 		agents,

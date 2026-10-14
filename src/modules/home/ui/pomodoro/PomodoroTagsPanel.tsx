@@ -1,8 +1,12 @@
-/** @jsxImportSource preact */
-import { useLayoutEffect, useRef, useState } from 'preact/hooks';
+import { Choice } from '../board/controls';
+// Layout and interaction adapted from PandoraReads/apex-dashboard ac4d2c7 (MIT), Copyright (c) 2025 PandoraReads: src/pomodoro-stats-modal.ts
+import { RecordButton as Button } from '../dialogs/RecordButton';
+import { Input } from '../../../../ui/components/input';
+import { widgetClasses } from '../theme/widget-classes';
+import { useLayoutEffect, useRef, useState } from 'react';
 import { activityColor, type PomodoroService } from '../../platform/pomodoro/pomodoro-service';
 import { t } from '../../../../shared/i18n';
-import { Icon } from '../../../../ui/primitives/Icon';
+import { ObsidianIcon as Icon } from '../../../../ui/components/nand/ObsidianIcon';
 type Prompt = { kind: 'rename' | 'merge' | 'delete'; name: string };
 export function PomodoroTagsPanel({
 	service,
@@ -75,85 +79,103 @@ export function PomodoroTagsPanel({
 		});
 	return (
 		<>
-			<div class="dashboard-pomodoro-stats-header">
-				<div class="dashboard-pomodoro-stats-header-title">{t('pomodoro.tagTitle')}</div>
-				<button class="dashboard-pomodoro-stats-close" aria-label={t('common.close')} onClick={close}>
+			<div className={widgetClasses('dashboard-pomodoro-stats-header')}>
+				<div className={widgetClasses('dashboard-pomodoro-stats-header-title')}>{t('pomodoro.tagTitle')}</div>
+				<Button
+					variant="ghost"
+					className={widgetClasses('dashboard-pomodoro-stats-close')}
+					aria-label={t('common.close')}
+					onClick={close}
+				>
 					<Icon name="x" />
-				</button>
+				</Button>
 			</div>
-			<div class="dashboard-pomodoro-tagmanager-hint">{t('pomodoro.tagHint')}</div>
-			<div class="dashboard-pomodoro-tagmanager-list">
+			<div className={widgetClasses('dashboard-pomodoro-tagmanager-hint')}>{t('pomodoro.tagHint')}</div>
+			<div className={widgetClasses('dashboard-pomodoro-tagmanager-list')}>
 				{names.length ? (
 					names.map((name) => {
 						const pinned = service.getTags().some((tag) => tag.name === name && tag.pinned);
 						return (
 							<div
 								key={name}
-								class={`dashboard-pomodoro-tagmanager-row${open === name ? ' dashboard-pomodoro-tagmanager-row--open' : ''}`}
+								className={widgetClasses(
+									`dashboard-pomodoro-tagmanager-row${open === name ? ' dashboard-pomodoro-tagmanager-row--open' : ''}`,
+								)}
 							>
-								<button
-									class={`dashboard-pomodoro-tagmanager-chip${pinned ? ' dashboard-pomodoro-tagmanager-chip--pinned' : ''}`}
+								<Button
+									variant="ghost"
+									className={widgetClasses(
+										`dashboard-pomodoro-tagmanager-chip${pinned ? ' dashboard-pomodoro-tagmanager-chip--pinned' : ''}`,
+									)}
 									onClick={() => setOpen(open === name ? null : name)}
 								>
 									<span
-										class="dashboard-pomodoro-donut-legend-dot"
+										className={widgetClasses('dashboard-pomodoro-donut-legend-dot')}
 										style={{ backgroundColor: activityColor(name) }}
 									/>
-									<span class="dashboard-pomodoro-tagmanager-chip-name">{name}</span>
+									<span className={widgetClasses('dashboard-pomodoro-tagmanager-chip-name')}>
+										{name}
+									</span>
 									{pinned && <Icon name="pin" />}
-								</button>
-								<div class="dashboard-pomodoro-tagmanager-actions">
-									<button
-										class="dashboard-pomodoro-tagmanager-action"
+								</Button>
+								<div className={widgetClasses('dashboard-pomodoro-tagmanager-actions')}>
+									<Button
+										variant="ghost"
+										className={widgetClasses('dashboard-pomodoro-tagmanager-action')}
 										disabled={busy}
 										title={t('pomodoro.tagPinHint')}
 										onClick={() => void run(() => service.setTagPinned(name, !pinned))}
 									>
 										<Icon name={pinned ? 'pin-off' : 'pin'} />
 										{t(pinned ? 'pomodoro.tagUnpin' : 'pomodoro.tagPin')}
-									</button>
-									<button
-										class="dashboard-pomodoro-tagmanager-action"
+									</Button>
+									<Button
+										variant="ghost"
+										className={widgetClasses('dashboard-pomodoro-tagmanager-action')}
 										disabled={busy}
 										onClick={() => begin('rename', name)}
 									>
 										<Icon name="pencil" />
 										{t('pomodoro.tagRename')}
-									</button>
-									<button
-										class="dashboard-pomodoro-tagmanager-action"
+									</Button>
+									<Button
+										variant="ghost"
+										className={widgetClasses('dashboard-pomodoro-tagmanager-action')}
 										disabled={busy || names.length < 2}
 										title={t('pomodoro.tagMergeHint')}
 										onClick={() => begin('merge', name)}
 									>
 										<Icon name="git-merge" />
 										{t('pomodoro.tagMerge')}
-									</button>
-									<button
-										class="dashboard-pomodoro-tagmanager-action dashboard-pomodoro-tagmanager-action--danger"
+									</Button>
+									<Button
+										variant="ghost"
+										className={widgetClasses(
+											'dashboard-pomodoro-tagmanager-action dashboard-pomodoro-tagmanager-action--danger',
+										)}
 										disabled={busy}
 										onClick={() => begin('delete', name)}
 									>
 										<Icon name="trash-2" />
 										{t('pomodoro.tagDelete')}
-									</button>
+									</Button>
 								</div>
 							</div>
 						);
 					})
 				) : (
-					<div class="dashboard-pomodoro-donut-empty">{t('pomodoro.tagNoTags')}</div>
+					<div className={widgetClasses('dashboard-pomodoro-donut-empty')}>{t('pomodoro.tagNoTags')}</div>
 				)}
 			</div>
 			{prompt && (
 				<form
-					class="dashboard-pomodoro-tagmanager-prompt"
+					className={widgetClasses('dashboard-pomodoro-tagmanager-prompt')}
 					onSubmit={(e) => {
 						e.preventDefault();
 						void confirm();
 					}}
 				>
-					<div class="dashboard-pomodoro-tagmanager-prompt-label">
+					<div className={widgetClasses('dashboard-pomodoro-tagmanager-prompt-label')}>
 						{t(
 							prompt.kind === 'rename'
 								? 'pomodoro.tagRenamePrompt'
@@ -164,42 +186,41 @@ export function PomodoroTagsPanel({
 						)}
 					</div>
 					{prompt.kind === 'merge' ? (
-						<select
-							class="dashboard-pomodoro-tagmanager-prompt-select"
+						<Choice
+							className={widgetClasses('dashboard-pomodoro-tagmanager-prompt-select')}
+							label={t('pomodoro.tagMerge')}
 							value={value}
-							disabled={busy}
-							onChange={(e) => setValue(e.currentTarget.value)}
-						>
-							{others.map((name) => (
-								<option key={name} value={name}>
-									{name}
-								</option>
-							))}
-						</select>
+							onChange={setValue}
+							options={others.map((name) => ({ value: name, label: name }))}
+						/>
 					) : (
 						prompt.kind === 'rename' && (
-							<input
+							<Input
 								ref={input}
-								class="dashboard-pomodoro-tagmanager-prompt-input"
+								className={widgetClasses('dashboard-pomodoro-tagmanager-prompt-input')}
 								value={value}
 								disabled={busy}
 								onInput={(e) => setValue(e.currentTarget.value)}
 							/>
 						)
 					)}
-					<div class="dashboard-pomodoro-tagmanager-prompt-error">{error}</div>
-					<div class="dashboard-pomodoro-tagmanager-prompt-btns">
-						<button
+					<div className={widgetClasses('dashboard-pomodoro-tagmanager-prompt-error')}>{error}</div>
+					<div className={widgetClasses('dashboard-pomodoro-tagmanager-prompt-btns')}>
+						<Button
+							variant="ghost"
 							type="button"
-							class="dashboard-pomodoro-tagmanager-prompt-cancel"
+							className={widgetClasses('dashboard-pomodoro-tagmanager-prompt-cancel')}
 							disabled={busy}
 							onClick={() => setPrompt(null)}
 						>
 							{t('common.cancel')}
-						</button>
-						<button
+						</Button>
+						<Button
+							variant="ghost"
 							type="submit"
-							class={`dashboard-pomodoro-tagmanager-prompt-ok${prompt.kind === 'delete' ? ' dashboard-pomodoro-tagmanager-prompt-ok--danger' : ''}`}
+							className={widgetClasses(
+								`dashboard-pomodoro-tagmanager-prompt-ok${prompt.kind === 'delete' ? ' dashboard-pomodoro-tagmanager-prompt-ok--danger' : ''}`,
+							)}
 							disabled={busy}
 						>
 							{t(
@@ -209,11 +230,13 @@ export function PomodoroTagsPanel({
 										? 'pomodoro.tagMerge'
 										: 'pomodoro.tagDelete',
 							)}
-						</button>
+						</Button>
 					</div>
 				</form>
 			)}
-			{error && !prompt && <div class="dashboard-pomodoro-tagmanager-prompt-error">{error}</div>}
+			{error && !prompt && (
+				<div className={widgetClasses('dashboard-pomodoro-tagmanager-prompt-error')}>{error}</div>
+			)}
 		</>
 	);
 }

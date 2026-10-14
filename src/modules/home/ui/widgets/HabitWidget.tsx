@@ -1,5 +1,5 @@
 // Layout and interaction adapted from PandoraReads/apex-dashboard ac4d2c7 (MIT), Copyright (c) 2025 PandoraReads: src/habit-widget.ts
-import { useState } from 'react';
+import { lazy, Suspense, useState } from 'react';
 import { useStore } from 'zustand';
 import { Plus, History, Flame, Target } from 'lucide-react';
 import { Checkbox } from '../../../../ui/components/checkbox';
@@ -9,8 +9,12 @@ import type { BoardStore } from '../../services/board-store';
 import { todayStr } from '../../core/habit/model';
 import { IconButton } from '../board/controls';
 import { DashboardDialog } from '../dialogs/DashboardDialog';
+import { RecordDialog } from '../dialogs/RecordDialog';
+import { BarChart2 } from 'lucide-react';
+const Stats = lazy(() => import('../habit/HabitStatsPanel').then((m) => ({ default: m.HabitStatsPanel })));
 export function HabitWidget({ store }: { store: BoardStore }) {
 	useStore(store.state, (s) => s.widgetRevision);
+	const [stats, setStats] = useState(false);
 	const t = useT(),
 		service = store.widgets.habit,
 		[adding, setAdding] = useState(false),
@@ -23,6 +27,17 @@ export function HabitWidget({ store }: { store: BoardStore }) {
 	const key = `${yesterday.getFullYear()}-${String(yesterday.getMonth() + 1).padStart(2, '0')}-${String(yesterday.getDate()).padStart(2, '0')}`;
 	return (
 		<>
+			{stats && (
+				<RecordDialog
+					title={t('habit.statsTitle')}
+					classes="dashboard-habit-stats-modal"
+					onClose={() => setStats(false)}
+				>
+					<Suspense fallback={null}>
+						<Stats service={service} close={() => setStats(false)} />
+					</Suspense>
+				</RecordDialog>
+			)}
 			<div className="mb-1.5 flex h-5 items-center gap-1.5">
 				<h3 className="m-0 flex min-w-0 items-center gap-1 text-[.7em] font-semibold tracking-[.08em] text-primary">
 					<Target className="size-3" />
@@ -32,6 +47,9 @@ export function HabitWidget({ store }: { store: BoardStore }) {
 					{habits.length ? `${service.getDoneOn(todayStr()).length}/${habits.length}` : ''}
 				</span>
 				<div className="ml-auto flex">
+					<IconButton className="size-5" label={t('habit.statsTitle')} onClick={() => setStats(true)}>
+						<BarChart2 className="size-3" />
+					</IconButton>
 					<IconButton
 						className="size-5"
 						label={t('home.dashboard.yesterday')}

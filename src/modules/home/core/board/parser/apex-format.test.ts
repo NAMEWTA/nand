@@ -1,4 +1,4 @@
-// Samples adapted from PandoraReads/apex-dashboard ac4d2c7 (MIT), dashboard-template.md and scripts/verify-{pair-width,library-card-size,notes-cover}.ts
+// Samples adapted from PandoraReads/apex-dashboard ac4d2c7 (MIT), Copyright (c) 2025 PandoraReads, dashboard-template.md and scripts/verify-{pair-width,library-card-size,notes-cover}.ts
 import { expect, test } from 'vitest';
 import template from './__fixtures__/apex-dashboard-template.md';
 import { parse, serialize } from './parse';

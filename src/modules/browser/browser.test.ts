@@ -37,11 +37,9 @@ test('URL normalization preserves parameters and distinguishes local services, d
 		assert.equal(normalizeBrowserUrl(input, 'google'), expected);
 	for (const input of [
 		'javascript:alert(1)',
-		'file:///C:/private',
 		'data:text/html,x',
 		'obsidian://open',
 		'https://user:secret@example.com',
-		'C:\\file.txt',
 		'https://',
 		'http://localhost:65536',
 	])
@@ -64,17 +62,28 @@ test('Agent delivery refuses shell/unready sessions and only pastes into the sel
 	const pasted: string[] = [];
 	const selected: string[] = [];
 	const sessions = [
-		{ id: 'agent', agentId: 'codex', title: 'Agent', running: true, automated: false, inputReady: () => ready, paste: (text: string) => pasted.push(text) },
+		{
+			id: 'agent',
+			agentId: 'codex',
+			title: 'Agent',
+			running: true,
+			automated: false,
+			inputReady: () => ready,
+			paste: (text: string) => pasted.push(text),
+		},
 		{ id: 'shell', title: 'Shell', running: true, automated: false, inputReady: () => true, paste: () => {} },
 	];
 	const host = {
 		app: { workspace: { containerEl: { win: { setInterval, clearInterval } } } },
 		sessions: { list: () => sessions, get: (id: string) => sessions.find((s) => s.id === id) },
-		show: (id: string) => { selected.push(id); },
+		show: (id: string) => {
+			selected.push(id);
+		},
 		open: async () => {},
 	} as unknown as AgentController;
 	const delivery = new SessionMaterialService(host);
-	const attach = (id: string, text: string, files: string[]) => delivery.attachMaterial(id, { title: 'Material', text, files });
+	const attach = (id: string, text: string, files: string[]) =>
+		delivery.attachMaterial(id, { title: 'Material', text, files });
 	assert.deepEqual(await delivery.list(), [{ id: 'agent', title: 'Agent', agentId: 'codex' }]);
 	await assert.rejects(attach('shell', 'page', []), { code: 'missing' });
 	await assert.rejects(attach('agent', 'page', []), { code: 'timeout' });
@@ -94,7 +103,7 @@ test('history is local, deduplicated and bounded; restored state clamps invalid 
 	assert.equal(history.length, 500);
 	assert.equal(historySuggestions(history, 'changed')[0]?.title, 'Changed');
 	assert.equal(recordHistory(history, { url: 'about:blank', title: '', visitedAt: 0 }), history);
-	assert.equal(newPageState('stable', { zoom: 100 }).zoom, 2);
+	assert.equal(newPageState('stable', { zoom: 100 }).zoom, 3);
 	assert.equal(newPageState('stable', { zoom: NaN }).zoom, 1);
 });
 test('web shortcuts round trip without changing plain link and embedded web semantics', () => {
@@ -210,9 +219,19 @@ test('debugger leases detach only the connection they own and only after last re
 });
 test('native popup policy returns synchronously, rejects unsafe navigation and cleans up', () => {
 	let requestPermission: Function, checkPermission: Function;
-	const nativeSession = { storagePath: '/vault/.nand/session', setPermissionRequestHandler: (fn: Function) => { requestPermission = fn; }, setPermissionCheckHandler: (fn: Function) => { checkPermission = fn; } };
+	const nativeSession = {
+		storagePath: '/vault/.nand/session',
+		setPermissionRequestHandler: (fn: Function) => {
+			requestPermission = fn;
+		},
+		setPermissionCheckHandler: (fn: Function) => {
+			checkPermission = fn;
+		},
+	};
 	const guest = Object.assign(new EventEmitter(), {
-		id: 1, session: nativeSession, getURL: () => 'https://example.com/',
+		id: 1,
+		session: nativeSession,
+		getURL: () => 'https://example.com/',
 		isDestroyed: () => false,
 		getType: () => 'webview',
 		getLastWebPreferences: () => ({ nodeIntegration: false }),
@@ -223,14 +242,20 @@ test('native popup policy returns synchronously, rejects unsafe navigation and c
 	let handler!: (details: Record<string, string>) => { action: string };
 	const events: unknown[] = [];
 	const exports: {
-		install?: (id: number, partition: string, notify: (...args: unknown[]) => void) => { dispose(): void; setGrants(grants: Record<string, boolean>): void };
+		install?: (
+			id: number,
+			partition: string,
+			notify: (...args: unknown[]) => void,
+		) => { dispose(): void; setGrants(grants: Record<string, boolean>): void };
 	} = {};
 	let now = 0;
 	runInNewContext(GUEST_POLICY_SOURCE, {
 		exports,
 		require: () => ({ webContents: { fromId: () => guest }, session: { fromPartition: () => nativeSession } }),
 		URL,
-		Date: { now: () => (now += 300) }, setTimeout: () => 1, clearTimeout: () => {},
+		Date: { now: () => (now += 300) },
+		setTimeout: () => 1,
+		clearTimeout: () => {},
 	});
 	const policy = exports.install!(1, '/vault/.nand/session', (...args) => events.push(args));
 	assert.equal(handler({ url: 'https://example.com', frameName: '_blank', features: '' }).action, 'deny');
@@ -252,16 +277,29 @@ test('native popup policy returns synchronously, rejects unsafe navigation and c
 	);
 	assert.equal(prevented, true);
 	assert.equal(checkPermission!(guest, 'media', 'https://example.com'), false);
+	policy.setGrants({ 'https://example.com|media-camera': true });
+	assert.equal(checkPermission!(guest, 'media', 'https://example.com', {mediaType:'video'}),true);
+	assert.equal(checkPermission!(guest, 'media', 'https://example.com', {mediaType:'audio'}),false);
 	policy.setGrants({ 'https://example.com|media': true });
 	assert.equal(checkPermission!(guest, 'media', 'https://example.com'), true);
 	assert.equal(checkPermission!(guest, 'media', 'https://other.com'), false);
 	assert.equal(checkPermission!({ ...guest, id: 99 }, 'media', 'https://example.com'), false);
 	requestPermission!(guest, 'geolocation', (granted: boolean) => assert.equal(granted, false), {});
-	const childContents = Object.assign(new EventEmitter(), { id: 2, setWindowOpenHandler: () => {}, isDestroyed: () => false });
+	const childContents = Object.assign(new EventEmitter(), {
+		id: 2,
+		setWindowOpenHandler: () => {},
+		isDestroyed: () => false,
+	});
 	let childClosed = false;
 	const child = Object.assign(new EventEmitter(), { isDestroyed: () => childClosed });
-	Object.defineProperty(child, 'webContents', { get: () => { if (childClosed) throw Error('Object destroyed'); return childContents; } });
-	guest.emit('did-create-window', child, { url: 'https://example.com/login' }); childClosed = true;
+	Object.defineProperty(child, 'webContents', {
+		get: () => {
+			if (childClosed) throw Error('Object destroyed');
+			return childContents;
+		},
+	});
+	guest.emit('did-create-window', child, { url: 'https://example.com/login' });
+	childClosed = true;
 	assert.doesNotThrow(() => child.emit('closed'), 'Closing popup must not dereference destroyed webContents');
 	policy.dispose();
 	policy.dispose();

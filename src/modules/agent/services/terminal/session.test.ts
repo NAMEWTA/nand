@@ -6,6 +6,14 @@ import { hookActivity } from './sessions';
 const ESC = '\x1b';
 const encoder = new TextEncoder();
 
+test('disposed terminals stop readiness waits and reject late prompt writes', () => {
+	const { session, sent } = fixture();
+	session.dispose();
+	assert.equal(session.running, false);
+	session.input('late prompt\r');
+	assert.deepEqual(sent, []);
+});
+
 function fixture(over: Partial<ConstructorParameters<typeof TerminalSession>[0]> = {}) {
 	const sent: string[] = [];
 	const acks: number[] = [];

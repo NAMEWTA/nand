@@ -1,4 +1,4 @@
-// Behavior adapted from PandoraReads/apex-dashboard ac4d2c7 (MIT), scripts/verify-pomodoro-stopwatch.ts
+// Behavior adapted from PandoraReads/apex-dashboard ac4d2c7 (MIT), Copyright (c) 2025 PandoraReads, scripts/verify-pomodoro-stopwatch.ts
 import { afterEach,expect,test,vi } from 'vitest';
 import { PomodoroApplication } from './application';
 import { DEFAULT_DASHBOARD_SETTINGS } from '../board/types/model';

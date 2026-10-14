@@ -1,10 +1,19 @@
-import type { SearchEngine } from '../../../shared/web-url';
+import type { SearchEngine } from './url';
 
 export type { SearchEngine };
 export const BROWSER_PAGE_TYPE = 'nand-browser-view';
 export type BrowserTarget = 'tab' | 'modal';
 export interface BrowserSettings {
 	searchEngine: SearchEngine;
+	customSearchTemplate: string;
+	homePage: string;
+	defaultZoom: number;
+	defaultProfileId: string;
+	identity: 'cleaned' | 'native';
+	linkTarget: 'nand' | 'system';
+	reverseLinkModifier: boolean;
+	terminalLinkMenu: boolean;
+	interceptNoteLinks: boolean;
 }
 export interface BrowserOpenRequest {
 	profileId?: string;
@@ -34,6 +43,9 @@ export interface BrowserHistoryEntry {
 	visitedAt: number;
 }
 export interface BrowserDownload {
+	url?: string;
+	updatedAt?: number;
+	speed?: number;
 	id: string;
 	name: string;
 	received: number;
@@ -74,7 +86,7 @@ export interface BrowserAgent {
 	title: string;
 }
 export interface BrowserAgentDeliveryPort {
-	list(): Promise<BrowserAgent[]>;
+	list(pageId?: string): Promise<BrowserAgent[]>;
 	attach(agentId: string, text: string, files: string[]): Promise<void>;
 }
 export class BrowserError extends Error {
@@ -104,10 +116,24 @@ export function newPageState(id: string, value: Partial<BrowserPageState> = {}):
 	};
 }
 export function clampZoom(value?: number): number {
-	return typeof value === 'number' && Number.isFinite(value) ? Math.min(2, Math.max(0.5, value)) : 1;
+	return typeof value === 'number' && Number.isFinite(value) ? Math.min(3, Math.max(0.25, value)) : 1;
 }
 export function normalizeBrowserSettings(raw: unknown): BrowserSettings {
 	const value = raw as Partial<BrowserSettings> | null;
 	const engine = value?.searchEngine;
-	return { searchEngine: engine === 'bing' || engine === 'duckduckgo' ? engine : 'google' };
+	return {
+		searchEngine:
+			engine === 'bing' || engine === 'duckduckgo' || engine === 'baidu' || engine === 'custom'
+				? engine
+				: 'google',
+		customSearchTemplate: typeof value?.customSearchTemplate === 'string' ? value.customSearchTemplate : '',
+		homePage: typeof value?.homePage === 'string' ? value.homePage : '',
+		defaultZoom: clampZoom(value?.defaultZoom),
+		defaultProfileId: typeof value?.defaultProfileId === 'string' ? value.defaultProfileId : 'default',
+		identity: value?.identity === 'native' ? 'native' : 'cleaned',
+		linkTarget: value?.linkTarget === 'system' ? 'system' : 'nand',
+		reverseLinkModifier: value?.reverseLinkModifier !== false,
+		terminalLinkMenu: value?.terminalLinkMenu !== false,
+		interceptNoteLinks: value?.interceptNoteLinks === true,
+	};
 }

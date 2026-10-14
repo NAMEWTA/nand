@@ -14,6 +14,8 @@ export function effectivePermission(settings: AgentSettings, agentId: AgentId): 
 }
 
 export function launchArgs(settings: AgentSettings, agentId: AgentId): string[] {
+	const override = settings.agents[agentId]?.argsOverride;
+	if (override !== undefined) return splitArgs(override);
 	const extra = (settings.agents[agentId]?.extraArgs ?? '').trim();
 	if (extra.length > 0) {
 		return splitArgs(extra);
@@ -22,6 +24,16 @@ export function launchArgs(settings: AgentSettings, agentId: AgentId): string[] 
 		return [...YOLO_FLAGS[agentId]];
 	}
 	return [];
+}
+
+/** Check the actual arguments so a custom manual override ignores the global mode. */
+export function needsYoloConfirmation(settings: AgentSettings, agentId: AgentId): boolean {
+	if (settings.yoloAcknowledgedAgents?.includes(agentId)) return false;
+	const args = launchArgs(settings, agentId),
+		flags = YOLO_FLAGS[agentId];
+	if (!flags.length) return false;
+	const start = args.indexOf(flags[0]!);
+	return start >= 0 && flags.every((flag, index) => args[start + index] === flag);
 }
 
 export function splitArgs(value: string): string[] {

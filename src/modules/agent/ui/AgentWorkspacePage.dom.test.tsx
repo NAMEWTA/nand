@@ -30,6 +30,7 @@ function fixture() {
 	};
 	const controller = {
 		workspace,
+  usageStore:{observeWindow:()=>()=>{}},
 		app: { keymap: { pushScope: vi.fn(), popScope: vi.fn() } },
 	} as unknown as AgentController;
 	const content = (visible: boolean) => (

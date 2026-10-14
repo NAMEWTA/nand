@@ -8,9 +8,6 @@
 	"src/modules/archives/styles/113-independent-archive-surface.css": [
 		"no-duplicate-selectors"
 	],
-	"src/modules/browser/styles/116-independent-browser-native-leaves-and-modal-shar.css": [
-		"declaration-property-value-allowed-list"
-	],
 	"src/modules/icons/styles/112-iconic-1-1-10-268e133c-mit-0-declarations-preser.css": [
 		"declaration-no-important",
 		"function-disallowed-list",

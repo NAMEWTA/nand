@@ -6,6 +6,7 @@ import { TestProviders } from '../../../../ui/react/test-providers';
 import { t } from '../../../../shared/i18n';
 import { emptyWorkspace } from '../../core/workspace/model';
 import type { AgentController } from '../../services/controller';
+import { normalizeTerminalSettings } from '../../core/terminal/settings';
 import { Omnibox } from './Omnibox';
 function fixture() {
 	const workspace = {
@@ -18,10 +19,13 @@ function fixture() {
 		}),
 		activate: vi.fn(),
 	};
-	const controller = {
+	const settings=normalizeTerminalSettings(undefined);
+ const agents=[{id:'claude-code',title:'Claude Code',installed:true,enabled:true}];
+ const controller = {
 		workspace,
 		runtime: { listAgents: () => [{ id: 'claude-code', title: 'Claude Code', installed: true, enabled: true }] },
-		settings: { get: () => ({ agents: { agents: { 'claude-code': { cliPath: '' } } } }) },
+		settings: { get: () => settings, subscribe: () => () => {} },
+  agents: {store:createStore(()=>({detected:{},refreshing:false,failed:false})),list:()=>agents},
 		agentTitle: () => 'Claude Code',
 		shells: () => [{ choice: 'default', title: 'Shell' }],
 		open: vi.fn(async () => {}),

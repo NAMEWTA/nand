@@ -73,6 +73,10 @@ export interface DashboardSettings {
 	widgetYearProgressEnabled: boolean;
 	/** Calendar widget: a month/week calendar of vault tasks in the sidebar. */
 	widgetCalendarEnabled: boolean;
+	widgetQuickCaptureEnabled: boolean;
+	widgetFileSearchEnabled: boolean;
+	widgetSkillsEnabled: boolean;
+	skillWidgetButtons: SkillShortcut[];
 	/** Folders whose tasks are excluded from the calendar widget/section. */
 	calendarExcludeFolders: string[];
 	/** Active task filter in the full-screen calendar modal ('all' default).
@@ -279,6 +283,10 @@ export const DEFAULT_DASHBOARD_SETTINGS: DashboardSettings = {
 	widgetLunarEnabled: true,
 	widgetYearProgressEnabled: false,
 	widgetCalendarEnabled: false,
+	widgetQuickCaptureEnabled: false,
+	widgetFileSearchEnabled: false,
+	widgetSkillsEnabled: false,
+	skillWidgetButtons: [],
 	calendarExcludeFolders: [],
 	calendarTaskFilter: 'all',
 	calendarTaskInsertPosition: 'start',

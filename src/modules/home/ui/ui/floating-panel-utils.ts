@@ -51,6 +51,7 @@ function applyClampedPos(panel: HTMLElement, doc: Document, left: number, top: n
 	// stylesheet right/bottom would fight the inline left/top and stretch
 	// the panel across the viewport instead of moving it.
 	panel.addClass('dashboard-floating-mini--pinned');
+	panel.setCssProps({ right: 'auto', bottom: 'auto' });
 	const maxX = Math.max(EDGE_MARGIN_PX, view.innerWidth - panel.offsetWidth - EDGE_MARGIN_PX);
 	const maxY = Math.max(EDGE_MARGIN_PX, view.innerHeight - panel.offsetHeight - EDGE_MARGIN_PX);
 	panel.style.left = `${Math.min(Math.max(left, EDGE_MARGIN_PX), maxX)}px`;

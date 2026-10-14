@@ -106,7 +106,10 @@ export class PomodoroApplication {
 		storage: TextStorage,
 		path: string,
 	) {
-		this.repository = new DurableState<PomodoroData>(storage, path, emptyData, normalizeData, () => this.notify());
+		this.repository = new DurableState<PomodoroData>(storage, path, emptyData, normalizeData, () => {
+			this.currentActivity = this.data.currentActivity;
+			this.notify();
+		});
 	}
 	get saveState() {
 		return this.repository.state;

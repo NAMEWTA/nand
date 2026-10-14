@@ -20,8 +20,10 @@ export function Choice({
 	label,
 	options,
 	className,
+	compact = false,
 }: {
 	className?: string;
+	compact?: boolean;
 	value: string;
 	onChange(this: void, value: string): void;
 	label: string;
@@ -31,7 +33,14 @@ export function Choice({
 		layout = useDashboardLayout();
 	return (
 		<Select value={value} onValueChange={onChange}>
-			<SelectTrigger size="sm" aria-label={label} className={className ?? 'h-8 min-w-0 text-xs'}>
+			<SelectTrigger
+				data-hit-control={compact || undefined}
+				size="sm"
+				aria-label={label}
+				className={
+					compact ? `data-[size=sm]:h-[30px] ${className ?? ''}` : (className ?? 'h-8 min-w-0 text-xs')
+				}
+			>
 				<SelectValue />
 			</SelectTrigger>
 			<SelectContent

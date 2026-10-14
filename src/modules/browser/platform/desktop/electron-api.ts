@@ -16,11 +16,17 @@ export interface GuestDebugger extends NativeEvents {
 }
 export interface GuestContents extends NativeEvents {
 	id: number;
+	navigationHistory: {
+		getAllEntries(): Array<{ url: string; title: string }>;
+		getActiveIndex(): number;
+		restore(history: GuestHistory): Promise<void>;
+	};
 	debugger: GuestDebugger;
 	session: GuestSession;
 	isDestroyed(): boolean;
 	getURL(): string;
 	getTitle(): string;
+	downloadURL(url: string): void;
 	close(): void;
 	setWindowOpenHandler(
 		handler: (details: { url: string; frameName: string; disposition: string; features: string }) => {
@@ -30,6 +36,10 @@ export interface GuestContents extends NativeEvents {
 	): void;
 	executeJavaScript(code: string, userGesture?: boolean): Promise<unknown>;
 	capturePage(rect?: { x: number; y: number; width: number; height: number }): Promise<NativeImage>;
+}
+export interface GuestHistory {
+	entries: Array<{ url: string; title: string }>;
+	index: number;
 }
 export interface GuestSession extends NativeEvents {
 	storagePath: string;
@@ -42,6 +52,7 @@ export interface GuestSession extends NativeEvents {
 export interface DownloadItem extends NativeEvents {
 	getState(): string;
 	getFilename(): string;
+	getURL?(): string;
 	getReceivedBytes(): number;
 	getTotalBytes(): number;
 	getSavePath(): string;

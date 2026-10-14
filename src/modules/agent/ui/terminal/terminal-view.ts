@@ -23,6 +23,7 @@ export interface TerminalViewHost {
 	vaultPath(): string | undefined;
 	focused(view: TerminalView): void;
 	menu?(view: TerminalView, event: MouseEvent): void;
+ openLink?(url:string,event:MouseEvent):void;
 }
 
 export interface SearchOptions {
@@ -125,7 +126,7 @@ export class TerminalView {
 		term.loadAddon(
 			new WebLinksAddon((event, uri) => {
 				event.preventDefault();
-				this.el.ownerDocument.defaultView?.open(uri);
+				if(this.host.openLink)this.host.openLink(uri,event);else this.el.ownerDocument.defaultView?.open(uri);
 			}),
 		);
 		swallowQueries(term);

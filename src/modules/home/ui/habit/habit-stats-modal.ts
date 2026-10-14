@@ -1,12 +1,11 @@
-import { h } from 'preact';
-import { homePages } from '../../services/instances';
+// Layout and interaction adapted from PandoraReads/apex-dashboard ac4d2c7 (MIT), Copyright (c) 2025 PandoraReads, src/habit-stats-modal.ts
+import { createElement } from 'react';
+import { t } from '../../../../shared/i18n';
 import type { HabitService } from '../../platform/habit/habit-service';
-import { DashboardPanelModal } from '../ui/panel-modal';
+import { openRecordDialog } from '../dialogs/open-record-dialog';
 import { HabitStatsPanel } from './HabitStatsPanel';
-export function showHabitStats(_doc: Document, service: HabitService): void {
-	// Statistics are workbench pages; the dialog remains for hosts without a workbench.
-	if (homePages.openRecords) return homePages.openRecords('habits');
-	new DashboardPanelModal(service.getApp(), 'dashboard-habit-stats-modal', (close) =>
-		h(HabitStatsPanel, { service, close }),
-	).open();
+export function showHabitStats(doc: Document, service: HabitService): void {
+	openRecordDialog(doc, t('habit.statsTitle'), 'dashboard-habit-stats-modal', (close) =>
+		createElement(HabitStatsPanel, { service, close }),
+	);
 }

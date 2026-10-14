@@ -1,3 +1,4 @@
+import type { BrowserHost } from '../../../browser/api';
 /** File references in terminal output: `path`, `path:line` or `path:line:column`. */
 
 export interface FileReference {
@@ -10,7 +11,8 @@ export interface FileReference {
 }
 
 // A path is either absolute (/x, ~/x, C:\x) or relative with at least one separator or an extension.
-const REFERENCE = /(?:^|[\s"'`([{<=])((?:[A-Za-z]:[\\/]|~?\/|\.{1,2}\/)?(?:[\w.@+-]+[\\/])*[\w.@+-]*\.[A-Za-z0-9]{1,8}|(?:[A-Za-z]:[\\/]|~?\/|\.{1,2}\/)(?:[\w.@+-]+[\\/]?)+)(?::(\d+)(?::(\d+))?)?/g;
+const REFERENCE =
+	/(?:^|[\s"'`([{<=])((?:[A-Za-z]:[\\/]|~?\/|\.{1,2}\/)?(?:[\w.@+-]+[\\/])*[\w.@+-]*\.[A-Za-z0-9]{1,8}|(?:[A-Za-z]:[\\/]|~?\/|\.{1,2}\/)(?:[\w.@+-]+[\\/]?)+)(?::(\d+)(?::(\d+))?)?/g;
 
 export function findFileReferences(text: string): FileReference[] {
 	const found: FileReference[] = [];
@@ -31,4 +33,9 @@ export function findFileReferences(text: string): FileReference[] {
 		});
 	}
 	return found;
+}
+
+/** URLs go through the browser routing settings; local file references remain unchanged. */
+export function openTerminalUrl(url: string, event: MouseEvent, browser: BrowserHost | undefined, fallback: () => void): void {
+ if (browser) browser.routeLink(url,event); else fallback();
 }

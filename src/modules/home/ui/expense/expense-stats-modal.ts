@@ -1,14 +1,14 @@
-import { h } from 'preact';
-import { homePages } from '../../services/instances';
+// Layout and interaction adapted from PandoraReads/apex-dashboard ac4d2c7 (MIT), Copyright (c) 2025 PandoraReads, src/expense-stats-modal.ts
+import { createElement } from 'react';
+import { t } from '../../../../shared/i18n';
 import type { ExpenseService } from '../../platform/expense/expense-service';
-import { DashboardPanelModal } from '../ui/panel-modal';
+import { openRecordDialog } from '../dialogs/open-record-dialog';
 import { ExpenseStatsPanel } from './ExpenseStatsPanel';
-export function showExpenseStats(_doc: Document, service: ExpenseService): void {
-	// Statistics are workbench pages; the dialog remains for hosts without a workbench.
-	if (homePages.openRecords) return homePages.openRecords('expenses');
-	new DashboardPanelModal(
-		service.getApp(),
+export function showExpenseStats(doc: Document, service: ExpenseService): void {
+	openRecordDialog(
+		doc,
+		t('expense.statsTitle'),
 		'dashboard-expense-stats-modal dashboard-expense-stats-modal--wide',
-		(close, root) => h(ExpenseStatsPanel, { service, close, root }),
-	).open();
+		(close) => createElement(ExpenseStatsPanel, { service, close }),
+	);
 }

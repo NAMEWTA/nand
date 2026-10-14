@@ -44,7 +44,7 @@ export function ProviderSegment({
 			) : provider.failed ? (
 				<>
 					<TriangleAlert className="size-3" />
-					{mode === 'verbose' && <span>{provider.status ?? t('shell.usageFailed')}</span>}
+					{mode === 'verbose' && <span>{provider.statusLabel ?? provider.status ?? t('shell.usageFailed')}</span>}
 				</>
 			) : (
 				<span className="opacity-50">--</span>

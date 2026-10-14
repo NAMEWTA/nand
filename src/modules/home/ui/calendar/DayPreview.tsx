@@ -1,9 +1,12 @@
-/** @jsxImportSource preact */
+// Layout and interaction adapted from PandoraReads/apex-dashboard ac4d2c7 (MIT), Copyright (c) 2025 PandoraReads: src/calendar-grid.ts
+import { widgetClasses } from '../theme/widget-classes';
 import type { App } from 'obsidian';
-import { createPortal } from 'preact/compat';
-import { useLayoutEffect, useRef, useState } from 'preact/hooks';
+import { createPortal } from 'react-dom';
+import { usePortalContainer } from '../../../../ui/react/contexts';
+import { useDashboardTheme } from '../theme/ThemeBridge';
+import { useCallback, useLayoutEffect, useRef, useState } from 'react';
 import { dateBucketOf, type VaultTask } from '../../platform/calendar/alltasks-scan';
-import { InlineLinks } from '../cards/InlineLinks';
+import { InlineLinks } from './CalendarLinks';
 import type { DashboardRenderContext } from '../renderer/render-context';
 import { OriginMark } from './CalendarGrids';
 import { byDayTaskTime, taskDayTime } from './calendar-layout';
@@ -13,7 +16,9 @@ interface Preview {
 	tasks: VaultTask[];
 }
 function DayPreview({ preview, app, context }: { preview: Preview; app: App; context: DashboardRenderContext }) {
-	const node = useRef<HTMLDivElement>(null);
+	const node = useRef<HTMLDivElement>(null),
+		portal = usePortalContainer(),
+		theme = useDashboardTheme();
 	useLayoutEffect(() => {
 		const popup = node.current;
 		if (!popup) return;
@@ -33,20 +38,28 @@ function DayPreview({ preview, app, context }: { preview: Preview; app: App; con
 		popup.style.top = `${Math.min(Math.max(margin, rect.top), Math.max(margin, doc.documentElement.clientHeight - height - margin))}px`;
 	}, [preview, context]);
 	return createPortal(
-		<div ref={node} class="dashboard-calendar-day-preview">
-			<div class="dashboard-calendar-day-preview-list">
+		<div
+			ref={node}
+			data-theme={theme}
+			className={widgetClasses('nand-dashboard-root dashboard-calendar-day-preview')}
+		>
+			<div className={widgetClasses('dashboard-calendar-day-preview-list')}>
 				{preview.tasks
 					.slice()
 					.sort(byDayTaskTime(preview.iso))
 					.map((task) => (
 						<div
 							key={task.path + ':' + task.line}
-							class={`dashboard-calendar-event${task.checked ? ' is-done' : ''}${task.priority ? ` prio-${task.priority}` : ''}${!task.checked && dateBucketOf(task.due) === 'overdue' ? ' is-overdue' : ''}`}
+							className={widgetClasses(
+								`dashboard-calendar-event${task.checked ? ' is-done' : ''}${task.priority ? ` prio-${task.priority}` : ''}${!task.checked && dateBucketOf(task.due) === 'overdue' ? ' is-overdue' : ''}`,
+							)}
 						>
 							{taskDayTime(task, preview.iso) && (
-								<div class="dashboard-calendar-event-time">{taskDayTime(task, preview.iso)}</div>
+								<div className={widgetClasses('dashboard-calendar-event-time')}>
+									{taskDayTime(task, preview.iso)}
+								</div>
 							)}
-							<div class="dashboard-calendar-event-text">
+							<div className={widgetClasses('dashboard-calendar-event-text')}>
 								<InlineLinks text={task.text} app={app} context={context} />
 							</div>
 							<OriginMark task={task} iso={preview.iso} />
@@ -54,23 +67,24 @@ function DayPreview({ preview, app, context }: { preview: Preview; app: App; con
 					))}
 			</div>
 		</div>,
-		preview.anchor.ownerDocument.body,
+		portal,
 	);
 }
 export function useDayPreview(app: App, context: DashboardRenderContext) {
 	const [preview, setPreview] = useState<Preview | null>(null);
 	const timer = useRef<{ win: Window; id: number } | null>(null);
-	const clear = () => {
+	const clear = useCallback(() => {
 		if (timer.current) timer.current.win.clearTimeout(timer.current.id);
 		timer.current = null;
-	};
-	useLayoutEffect(() => clear, []);
+	}, []);
+	useLayoutEffect(() => clear, [clear]);
+	const close = useCallback(() => {
+		clear();
+		setPreview(null);
+	}, [clear]);
 	return {
 		content: preview ? <DayPreview preview={preview} app={app} context={context} /> : null,
-		close: () => {
-			clear();
-			setPreview(null);
-		},
+		close,
 		hover: (anchor: HTMLElement, iso: string, tasks: VaultTask[]) => {
 			clear();
 			const win = anchor.ownerDocument.defaultView;

@@ -1,3 +1,4 @@
+import { openTerminalUrl } from '../../core/terminal/links';
 // Adapted from stablyai/orca 464bd5a (MIT), Copyright (c) 2026 Lovecast Inc.: src/renderer/src/components/terminal-pane/TerminalContextMenu.tsx, TerminalProcessExitOverlay.tsx
 import { useEffect, useLayoutEffect, useRef, useState, Fragment } from 'react';
 import { RotateCw, X } from 'lucide-react';
@@ -15,6 +16,7 @@ import {
 	ContextMenuContent,
 	ContextMenuItem,
 	ContextMenuSeparator,
+ ContextMenuSub, ContextMenuSubContent, ContextMenuSubTrigger,
 	ContextMenuTrigger,
 } from '../../../../ui/components/context-menu';
 import { EmptyState } from '../../../../ui/components/nand/EmptyState';
@@ -24,6 +26,7 @@ import { TerminalView } from './terminal-view';
 import { HiddenRendererRetention } from './hidden-renderer-retention';
 import { useWorkspaceUI } from '../workspace/workspace-context';
 import { openPath } from '../../platform/desktop/files';
+import { useAgentSettings } from '../settings/settings-context';
 import { pickMaterial } from './material-picker';
 
 export function TerminalHost({
@@ -43,6 +46,7 @@ export function TerminalHost({
 		workspace = controller.workspace,
 		t = useT(),
 		doc = useOwnerDocument();
+	const settings = useAgentSettings(controller.settings);
 	const session = controller.sessions.get(sessionId),
 		ref = useRef<HTMLDivElement>(null),
 		view = useRef<TerminalView | undefined>(undefined);
@@ -70,6 +74,7 @@ export function TerminalHost({
 			retention,
 			vaultPath: () => controller.vaultPath(),
 			focused: () => workspace.focusSession(sessionId),
+ openLink:(url,event)=>openTerminalUrl(url,event,controller.browserHost(),()=>{ref.current?.win.open(url);}),
 		});
 		view.current = current;
 		const host = ref.current,
@@ -195,7 +200,8 @@ export function TerminalHost({
 								{t('agent.selectLine')}
 							</ContextMenuItem>
 							<ContextMenuItem onSelect={showSearch}>{t('agent.search')}</ContextMenuItem>
-							<ContextMenuSeparator />
+							<ContextMenuSub><ContextMenuSubTrigger disabled={!settings.quickCommands.length}>{t('agent.quick.insert')}</ContextMenuSubTrigger><ContextMenuSubContent>{settings.quickCommands.map(command=><ContextMenuItem key={command.id} onSelect={()=>{session.paste(command.content);}}>{command.name}</ContextMenuItem>)}</ContextMenuSubContent></ContextMenuSub>
+        <ContextMenuSeparator />
 							<ContextMenuItem onSelect={() => view.current?.clear()}>{t('agent.clear')}</ContextMenuItem>
 							<ContextMenuItem onSelect={() => view.current?.clearScrollback()}>
 								{t('agent.clearScrollback')}

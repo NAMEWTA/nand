@@ -7,6 +7,8 @@ import type { AgentController } from '../../services/controller';
 import type { TerminalTabData } from '../../core/workspace/model';
 import { HiddenRendererRetention } from './hidden-renderer-retention';
 import { TerminalHost } from './TerminalTabView';
+import { normalizeTerminalSettings } from '../../core/terminal/settings';
+const terminalSettings = normalizeTerminalSettings(undefined);
 import { t } from '../../../../shared/i18n';
 vi.mock('../../platform/desktop/files', () => ({ openPath: vi.fn() }));
 vi.mock('./material-picker', () => ({ pickMaterial: vi.fn() }));
@@ -30,7 +32,7 @@ test('adopting a live terminal into another document disposes the old renderer a
 	const controller = {
 		app: { workspace: { on: vi.fn(() => ({})), offref: vi.fn() } },
 		sessions: { get: () => session },
-		settings: { subscribe: () => off },
+		settings: { get: () => terminalSettings, subscribe: () => off },
 		workspace: { focusSession: vi.fn() },
 	} as unknown as AgentController;
 	const tab: TerminalTabData = {
@@ -64,7 +66,7 @@ test('adopting a live terminal into another document disposes the old renderer a
 	expect(off).toHaveBeenCalledOnce();
 	view.unmount();
 	expect(created[1]?.dispose).toHaveBeenCalledOnce();
-	expect(off).toHaveBeenCalledTimes(2);
+	expect(off).toHaveBeenCalledTimes(3);
 });
 
 test.each([
@@ -80,7 +82,7 @@ test.each([
 			get: () =>
 				live ? { id: 'pane', running: true, agentId, connection: 'connected', activity: 'idle' } : undefined,
 		},
-		settings: { subscribe: () => () => {} },
+		settings: { get: () => terminalSettings, subscribe: () => () => {} },
 		workspace: { focusSession: vi.fn() },
 	} as unknown as AgentController;
 	const tab: TerminalTabData = {

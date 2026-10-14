@@ -5,11 +5,13 @@ import {
 	listenNative,
 	type DownloadItem,
 	type GuestContents,
+	type GuestHistory,
 	type WebviewElement,
 } from './electron-api';
 import { BrowserAutomation } from './automation';
 import { watchDownload } from './download-progress';
 import { installGuestPolicy } from './guest-policy';
+import { prepareHistoryGuest } from './history-guest';
 import type { VaultSessionLease } from '../../../../host/desktop/browser-session';
 
 export interface PageActions {
@@ -18,7 +20,7 @@ export interface PageActions {
 	visited(url: string, title: string): void;
 	permissions?(): Record<string, boolean>;
 }
-/** Native guest is stable while Preact chrome re-renders. Owns every guest listener. */
+/** Native guest remains in its retained host while React chrome re-renders. Owns every guest listener. */
 export class BrowserPage {
 	readonly profileId: string;
 	readonly webview: WebviewElement;
@@ -31,7 +33,7 @@ export class BrowserPage {
 	private guestCleanups: Array<() => void> = [];
 	private permissionPolicy?: ReturnType<typeof installGuestPolicy>;
 	private sessionLease?: VaultSessionLease;
-	private navigation?: { cancel: (reason: string) => void };
+	private navigation?: { cancel: (reason: string, retire?: boolean) => void };
 	permissionDenied = '';
 	private downloadItems = new Map<string, DownloadItem>();
 	shortcut?: (key: string) => void;
@@ -44,18 +46,26 @@ export class BrowserPage {
 	private loadReject!: (error: Error) => void;
 	private startupTimer?: number;
 	private readonly win: Window;
+	/** Kept in memory before the owner window closes; never stores Chromium pageState. */
+	history?: GuestHistory;
+	private restoringHistory: boolean;
+	private rendererReady = false;
 	constructor(
 		readonly state: BrowserPageState,
 		container: HTMLElement,
 		prepareSession: () => Promise<VaultSessionLease>,
 		private actions: PageActions,
+		private readonly brokerWindow: Window = container.win,
+		history?: GuestHistory,
 	) {
+		this.history = history;
+		this.restoringHistory = !!history;
 		this.profileId = state.profileId ?? 'default';
 		const initialUrl = normalizeBrowserUrl(state.url);
 		const initialScroll = state.scroll;
 		let initialized = false;
 		this.win = container.win;
-		this.api = electronBrowserApi(this.win);
+		this.api = electronBrowserApi(this.brokerWindow);
 		this.ready = new Promise((resolve, reject) => {
 			this.readyResolve = resolve;
 			this.readyReject = reject;
@@ -74,45 +84,68 @@ export class BrowserPage {
 			'webpreferences',
 			'nodeIntegration=false,contextIsolation=true,sandbox=true,webSecurity=true,disableHtmlFullscreenWindowResize=true',
 		);
+		// Native IPC and state callbacks use the persistent renderer; DOM listeners
+		// and layout timers still belong to the guest's own window.
 		const on = (name: string, handler: (event: Event) => void) => {
-			this.webview.addEventListener(name, handler);
-			this.cleanups.push(() => this.webview.removeEventListener(name, handler));
+			const listener = (event: Event) => {
+				if (this.win === this.brokerWindow) handler(event);
+				else
+					this.brokerWindow.setTimeout(() => {
+						if (!this.disposed) handler(event);
+					}, 0);
+			};
+			this.webview.addEventListener(name, listener);
+			this.cleanups.push(() => this.webview.removeEventListener(name, listener));
+		};
+		on('zoom-changed', (event) => {
+			this.zoom(
+				this.state.zoom + ((event as Event & { zoomDirection: string }).zoomDirection === 'in' ? 0.1 : -0.1),
+			);
+		});
+		const startInitialLoad = () => {
+			if (initialized) return;
+			initialized = true;
+			this.state.url = initialUrl;
+			const load = history
+				? this.navigateNative(() => this.guest!.navigationHistory.restore(history))
+				: initialUrl === 'about:blank'
+					? Promise.resolve()
+					: this.loadUrl(initialUrl);
+			void load
+				.catch((error: unknown) => {
+					const code = (error as { code?: string })?.code;
+					if (code !== 'ERR_ABORTED' && code !== 'browser_navigation_cancelled') throw error;
+				})
+				.then(async () => {
+					// Main-process restore can begin before the renderer exists. Scroll and
+					// page consumers must also wait for the renderer's dom-ready event.
+					await this.ready;
+					if (this.disposed) return;
+					this.restoringHistory = false;
+					if (initialScroll) {
+						try {
+							await this.guest?.executeJavaScript(`scrollTo(${initialScroll.x},${initialScroll.y})`);
+						} catch {
+							/* Page navigated. */
+						}
+					}
+					this.loadResolve();
+					this.sync();
+				})
+				.catch((error: unknown) => this.failInitialization(error));
 		};
 		on('dom-ready', () => {
 			if (this.disposed) return;
 			try {
 				this.installGuest();
+				this.webview.setZoomFactor(this.state.zoom);
+				this.rendererReady = true;
 				this.win.clearTimeout(this.startupTimer);
-				this.webview.setZoomFactor(state.zoom);
+				startInitialLoad();
 				this.readyResolve();
-				if (!initialized) {
-					initialized = true;
-					this.state.url = initialUrl;
-					const load = initialUrl === 'about:blank' ? Promise.resolve() : this.loadUrl(initialUrl);
-					void load
-						.catch((error: unknown) => {
-							if (!this.disposed && (error as { code?: string })?.code !== 'ERR_ABORTED')
-								this.fail(error instanceof Error ? error.message : 'browser_load_failed');
-						})
-						.then(async () => {
-							if (this.disposed) return;
-							if (initialScroll) {
-								try {
-									await this.guest?.executeJavaScript(
-										`scrollTo(${initialScroll.x},${initialScroll.y})`,
-									);
-								} catch {
-									/* Page navigated. */
-								}
-							}
-							this.loadResolve();
-							this.sync();
-						});
-				} else this.sync();
+				this.sync();
 			} catch (error) {
-				this.fail(error instanceof Error ? error.message : String(error));
-				this.readyReject(new BrowserError('browser_unavailable'));
-				this.loadReject(new BrowserError('browser_unavailable'));
+				this.failInitialization(error);
 			}
 		});
 		on('did-start-loading', () => {
@@ -176,24 +209,38 @@ export class BrowserPage {
 		}, 1000);
 		this.cleanups.push(() => this.win.clearInterval(scrollTimer));
 		// Bind the native Session before creating a guest, including its initial blank page.
-		void prepareSession().then(lease => {
-			if (this.disposed) { lease.dispose(); return; }
-			this.sessionLease = lease;
-			lease.onDownloadError(() => { if (!this.disposed) this.fail('browser_session_download'); });
-			lease.bind(this.webview);
-			this.startupTimer = this.win.setTimeout(() => {
-				this.fail('browser_unavailable');
-				this.readyReject(new BrowserError('browser_unavailable'));
-				this.loadReject(new BrowserError('browser_unavailable'));
-				this.dispose();
-			}, 20000);
-			this.webview.setAttribute('src', 'about:blank');
-		}).catch((error: unknown) => {
-			if (this.disposed) return;
-			const failure = error instanceof Error ? error : new BrowserError('browser_unavailable');
-			this.fail(failure.message); this.readyReject(failure); this.loadReject(failure);
-			this.dispose();
-		});
+		void prepareSession()
+			.then((lease) => {
+				if (this.disposed) {
+					lease.dispose();
+					return;
+				}
+				this.sessionLease = lease;
+				lease.onDownloadError(() => {
+					if (!this.disposed) this.fail('browser_session_download');
+				});
+				lease.bind(this.webview);
+				if (history)
+					this.cleanups.push(
+						prepareHistoryGuest(this.brokerWindow, this.webview, (id) => {
+							if (this.disposed) return;
+							try {
+								// restore() requires a guest that has never loaded, so it must
+								// begin at attachment. No renderer-side webview methods here.
+								this.installGuest(id);
+								startInitialLoad();
+							} catch (error) {
+								this.failInitialization(error);
+							}
+						}),
+					);
+				this.startupTimer = this.win.setTimeout(
+					() => this.failInitialization(new BrowserError('browser_unavailable')),
+					20000,
+				);
+				this.webview.setAttribute('src', 'about:blank');
+			})
+			.catch((error: unknown) => this.failInitialization(error));
 	}
 	findResult = { matches: 0, activeMatchOrdinal: 0 };
 	subscribe(listener: () => void): () => void {
@@ -211,22 +258,39 @@ export class BrowserPage {
 		this.state.loading = false;
 		this.emit();
 	}
-	private sync(visited = false): void {
+	private failInitialization(error: unknown): void {
 		if (this.disposed) return;
+		const failure = error instanceof Error ? error : new BrowserError('browser_unavailable');
+		this.fail(failure.message);
+		this.readyReject(failure);
+		this.loadReject(failure);
+		// A rejected ready promise cannot be reused. Release the native instance so
+		// Retry creates a new guest instead of reloading this half-initialized one.
+		this.dispose();
+	}
+	private sync(visited = false): void {
+		if (this.disposed || this.restoringHistory) return;
 		try {
-			const url = this.webview.getURL();
-			if (url && !url.startsWith('chrome-error:')) this.state.url = url;
-			this.state.title = this.state.url === 'about:blank' ? '' : this.webview.getTitle();
-			this.state.canGoBack = this.webview.canGoBack();
-			this.state.canGoForward = this.webview.canGoForward();
-			if (visited) this.actions.visited(this.state.url, this.state.title);
+			if (this.guest) {
+				// Navigation events can precede dom-ready. Read the main-process guest,
+				// keeping recovery current without calling renderer-only webview methods.
+				const entries = this.guest.navigationHistory.getAllEntries().map(({ url, title }) => ({ url, title }));
+				const index = this.guest.navigationHistory.getActiveIndex();
+				if (entries.length) this.history = { entries, index };
+				const url = this.guest.getURL();
+				if (url && !url.startsWith('chrome-error:')) this.state.url = url;
+				this.state.title = this.state.url === 'about:blank' ? '' : this.guest.getTitle();
+				this.state.canGoBack = index > 0;
+				this.state.canGoForward = index >= 0 && index < entries.length - 1;
+				if (visited) this.actions.visited(this.state.url, this.state.title);
+			}
 		} catch {
-			/* Before dom-ready. */
+			/* Native guest is closing. Keep the last complete navigation snapshot. */
 		}
 		this.emit();
 	}
-	private installGuest(): void {
-		const guest = this.api.webContents.fromId(this.webview.getWebContentsId());
+	private installGuest(id = this.webview.getWebContentsId()): void {
+		const guest = this.api.webContents.fromId(id);
 		if (!guest) throw new BrowserError('browser_unavailable');
 		if (guest.id === this.guest?.id && this.automation) return;
 		this.automation?.dispose();
@@ -235,12 +299,22 @@ export class BrowserPage {
 		this.automation = new BrowserAutomation(guest, this);
 		if (!this.sessionLease) throw new BrowserError('browser_unavailable');
 		this.sessionLease.protect(guest.id);
-		this.permissionPolicy = installGuestPolicy(this.win, this.api, guest, this.sessionLease.storagePath, (event, value) => {
+		this.permissionPolicy = installGuestPolicy(
+			this.brokerWindow,
+			this.api,
+			guest,
+			this.sessionLease.storagePath,
+			(event, value) => {
 				if (this.disposed) return;
 				if (event === 'open') this.actions.open(value);
 				else if (event === 'shortcut') this.shortcut?.(value);
-				else if (event === 'permission') { this.permissionDenied = value; this.emit(); }
-			}, this.actions.permissions?.());
+				else if (event === 'permission') {
+					this.permissionDenied = value;
+					this.emit();
+				}
+			},
+			this.actions.permissions?.(),
+		);
 		this.guestCleanups.push(() => this.permissionPolicy?.dispose());
 		this.guestCleanups.push(
 			listenNative(guest.session, 'will-download', (_event, value, owner) => {
@@ -253,12 +327,18 @@ export class BrowserPage {
 					received: 0,
 					total: item.getTotalBytes(),
 					state: 'progressing',
+					url: item.getURL?.(),
+					updatedAt: Date.now(),
 					path: '',
 				};
 				this.downloads.push(row);
 				this.downloadItems.set(id, item);
 				const update = (state: unknown) => {
-					row.received = item.getReceivedBytes();
+					const now = Date.now(),
+						received = item.getReceivedBytes();
+					row.speed = (received - row.received) / Math.max(0.001, (now - (row.updatedAt ?? now)) / 1000);
+					row.updatedAt = now;
+					row.received = received;
 					row.total = item.getTotalBytes();
 					row.state = String(state);
 					row.path = item.getSavePath();
@@ -269,14 +349,16 @@ export class BrowserPage {
 			}),
 		);
 	}
-	updatePermissions(): void { this.permissionPolicy?.setGrants(this.actions.permissions?.() ?? {}); }
+	updatePermissions(): void {
+		this.permissionPolicy?.setGrants(this.actions.permissions?.() ?? {});
+	}
 	private loadUrl(url: string): Promise<void> {
 		return this.navigateNative(() => this.webview.loadURL(url));
 	}
 	private navigateNative(work: () => Promise<void>): Promise<void> {
 		if (this.disposed) return Promise.reject(new BrowserError('browser_page_closed'));
-		// Replacing an in-flight native load retires that guest rather than allowing late events.
-		if (this.navigation) { this.navigation.cancel('browser_navigation_cancelled'); return Promise.reject(new BrowserError('browser_page_closed')); }
+		// A new navigation replaces the pending operation while retaining the guest.
+		if (this.navigation) this.navigation.cancel('browser_navigation_cancelled', false);
 		return new Promise<void>((resolve, reject) => {
 			let settled = false;
 			const finish = (error?: unknown) => {
@@ -284,17 +366,28 @@ export class BrowserPage {
 				settled = true;
 				this.win.clearTimeout(timer);
 				this.navigation = undefined;
-				if (error) reject(error instanceof Error ? error : new Error(typeof error === 'string' ? error : 'Browser navigation failed')); else resolve();
+				if (error)
+					reject(
+						error instanceof Error
+							? error
+							: new Error(typeof error === 'string' ? error : 'Browser navigation failed'),
+					);
+				else resolve();
 			};
-			const cancel = (reason: string) => {
+			const cancel = (reason: string, retire = true) => {
 				finish(new BrowserError(reason));
-				this.fail(reason);
-				this.dispose();
+				if (retire) {
+					this.fail(reason);
+					this.dispose();
+				}
 			};
 			const timer = this.win.setTimeout(() => cancel('browser_navigation_timeout'), 30000);
 			this.navigation = { cancel };
-			try { void work().then(() => finish(), finish); }
-			catch (error) { finish(error); }
+			try {
+				void work().then(() => finish(), finish);
+			} catch (error) {
+				finish(error);
+			}
 		});
 	}
 	async navigate(url: string): Promise<void> {
@@ -306,21 +399,40 @@ export class BrowserPage {
 		try {
 			await this.loadUrl(next);
 		} catch (error) {
-			if ((error as { code?: string })?.code !== 'ERR_ABORTED') throw error;
+			if (
+				(error as { code?: string })?.code !== 'ERR_ABORTED' &&
+				(error as { code?: string })?.code !== 'browser_navigation_cancelled'
+			)
+				throw error;
 		}
 	}
 	private historyNavigation(work: () => void): Promise<void> {
-		return this.navigateNative(() => new Promise<void>((resolve, reject) => {
-			const cleanup = () => {
-				this.webview.removeEventListener('did-stop-loading', done);
-				const index = this.cleanups.indexOf(cancel); if (index >= 0) this.cleanups.splice(index, 1);
-			};
-			const done = () => { cleanup(); resolve(); };
-			const cancel = () => { cleanup(); reject(new BrowserError('browser_page_closed')); };
-			this.cleanups.push(cancel);
-			this.webview.addEventListener('did-stop-loading', done);
-			try { work(); } catch (error) { cleanup(); reject(error instanceof Error ? error : new BrowserError('browser_failed')); }
-		}));
+		return this.navigateNative(
+			() =>
+				new Promise<void>((resolve, reject) => {
+					const cleanup = () => {
+						this.webview.removeEventListener('did-stop-loading', done);
+						const index = this.cleanups.indexOf(cancel);
+						if (index >= 0) this.cleanups.splice(index, 1);
+					};
+					const done = () => {
+						cleanup();
+						resolve();
+					};
+					const cancel = () => {
+						cleanup();
+						reject(new BrowserError('browser_page_closed'));
+					};
+					this.cleanups.push(cancel);
+					this.webview.addEventListener('did-stop-loading', done);
+					try {
+						work();
+					} catch (error) {
+						cleanup();
+						reject(error instanceof Error ? error : new BrowserError('browser_failed'));
+					}
+				}),
+		);
 	}
 	async back(): Promise<void> {
 		if (this.state.canGoBack) {
@@ -337,21 +449,24 @@ export class BrowserPage {
 	async reload(hard = false): Promise<void> {
 		this.state.error = null;
 		this.automation?.invalidate();
-		await this.historyNavigation(() => { if (hard) this.webview.reloadIgnoringCache(); else this.webview.reload(); });
+		await this.historyNavigation(() => {
+			if (hard) this.webview.reloadIgnoringCache();
+			else this.webview.reload();
+		});
 	}
 	stop(): void {
-		if (this.navigation) { this.navigation.cancel('browser_navigation_cancelled'); return; }
+		this.navigation?.cancel('browser_navigation_cancelled', false);
 		this.webview.stop();
 		this.state.loading = false;
 		this.emit();
 	}
 	zoom(value: number): void {
 		this.state.zoom = clampZoom(value);
-		if (this.guest) this.webview.setZoomFactor(this.state.zoom);
+		if (this.rendererReady) this.webview.setZoomFactor(this.state.zoom);
 		this.emit();
 	}
-	find(text: string, forward = true, next = false): void {
-		if (text) this.webview.findInPage(text, { forward, findNext: next });
+	find(text: string, forward = true, next = false, matchCase = false): void {
+		if (text) this.webview.findInPage(text, { forward, findNext: !next, matchCase });
 		else this.webview.stopFindInPage('clearSelection');
 	}
 	async screenshot(full = false): Promise<string> {
@@ -373,6 +488,7 @@ export class BrowserPage {
 	dispose(): void {
 		if (this.disposed) return;
 		this.disposed = true;
+		this.rendererReady = false;
 		this.navigation?.cancel('browser_page_closed');
 		this.win.clearTimeout(this.startupTimer);
 		this.readyReject(new BrowserError('browser_page_closed'));
@@ -396,7 +512,8 @@ export class BrowserPage {
 		}
 		// Removing the element owns guest destruction; do not close it twice across IPC.
 		this.webview.remove();
-		this.sessionLease?.dispose(); this.sessionLease = undefined;
+		this.sessionLease?.dispose();
+		this.sessionLease = undefined;
 		this.guest = undefined;
 	}
 }

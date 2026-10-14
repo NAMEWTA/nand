@@ -6,6 +6,7 @@ export interface WorkspaceUI {
 		context: NativeSurfaceContext;
 		menu: string | undefined;
 		setMenu: (groupId: string | undefined) => void;
+  view?: import('../../services/workspace-view').WorkspaceViewStore;
 	};
 	controller: AgentController;
 	confirm: (message: string) => Promise<boolean>;

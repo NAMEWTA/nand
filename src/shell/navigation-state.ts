@@ -18,12 +18,10 @@ export const PANEL_MAX = 500;
 export const PANEL_DEFAULT = 280;
 
 const sections: Partial<Record<WorkbenchFeature, readonly string[]>> = {
-	browser: [],
-	terminal: ['running', 'history', 'usage'],
+	terminal: ['running', 'history', 'usage', 'board', 'jump'],
 	contacts: ['person', 'company'],
 	automations: ['tasks', 'runs'],
 	notifications: ['unread', 'all'],
-	records: ['habits', 'expenses', 'pomodoro', 'reading'],
 	sync: ['changes', 'history'],
 };
 /** Features whose sections are open-ended ids (settings categories, icon settings pages). */

@@ -1,4 +1,7 @@
-import { h, render } from 'preact';
+import { createElement as h } from 'react';
+import { createRoot, type Root } from 'react-dom/client';
+import { NandProviders } from '../../../../ui/react/providers';
+import { widgetClasses } from '../theme/widget-classes';
 import type { ReadingService } from '../../platform/reading/reading-service';
 import { t } from '../../../../shared/i18n';
 import { applyModalTheme } from '../appearance/modal-theme';
@@ -11,9 +14,11 @@ export interface ReadingMiniTimer {
 }
 export function createReadingMiniTimer(service: ReadingService, doc: Document): ReadingMiniTimer {
 	let root: HTMLElement | null = null;
+	let reactRoot: Root | null = null;
 	const unmount = () => {
 		if (root) {
-			render(null, root);
+			reactRoot?.unmount();
+			reactRoot = null;
 			root.remove();
 			root = null;
 		}
@@ -31,8 +36,9 @@ export function createReadingMiniTimer(service: ReadingService, doc: Document): 
 			return;
 		}
 		if (!root) {
-			root = doc.body.createDiv({ cls: 'dashboard-reading-mini' });
+			root = doc.body.createDiv({ cls: widgetClasses('nand-ui nand-dashboard-root dashboard-reading-mini') });
 			applyModalTheme(root);
+			reactRoot = createRoot(root);
 			wireFloatingDrag(
 				root,
 				doc,
@@ -44,7 +50,12 @@ export function createReadingMiniTimer(service: ReadingService, doc: Document): 
 		}
 		root.toggleClass('dashboard-reading-mini--paused', state.status === 'paused');
 		root.title = `${state.currentBook.title} · ${t(state.status === 'paused' ? 'reading.miniPaused' : 'reading.miniReading')}`;
-		render(h(ReadingMiniPanel, { elapsed: state.elapsedSeconds, stop }), root);
+		reactRoot?.render(
+			h(NandProviders, {
+				ownerDocument: doc,
+				children: h(ReadingMiniPanel, { elapsed: state.elapsedSeconds, stop }),
+			}),
+		);
 	}
 	const data = service.subscribe(refresh),
 		tick = service.subscribeTick(refresh);

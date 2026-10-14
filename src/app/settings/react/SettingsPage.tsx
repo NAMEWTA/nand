@@ -26,7 +26,7 @@ import { LegacySettings } from './LegacySettings';
 import { GeneralSettings } from './GeneralSettings';
 import { SettingsSearchContext } from './SearchableSetting';
 const ComponentGallery = lazy(() => import('../../../ui/react/gallery').then((m) => ({ default: m.ComponentGallery })));
-function ModuleSettings({ plugin, category }: { plugin: DashboardPlugin; category: string }) {
+function ModuleSettings({ plugin, category, resourceId }: { plugin: DashboardPlugin; category: string; resourceId?: string }) {
 	const [loaded, setLoaded] = useState<{
 		render?: SettingsPageRenderer;
 		Component?: ComponentType<SettingsPageHost>;
@@ -80,7 +80,7 @@ function ModuleSettings({ plugin, category }: { plugin: DashboardPlugin; categor
 				{loaded.error}
 			</p>
 		);
-	if (loaded.Component) return <loaded.Component {...host} />;
+	if (loaded.Component) return <loaded.Component key={resourceId} {...host} resourceId={resourceId} />;
 	if (loaded.render)
 		return (
 			<div hidden={!matches} data-settings-results={matches > 0} className="[&[hidden]]:hidden">
@@ -114,10 +114,12 @@ function BuiltInSettings({ plugin, category }: { plugin: DashboardPlugin; catego
 export function SettingsPage({
 	plugin,
 	category,
+ resourceId,
 	navigate,
 }: {
 	plugin: DashboardPlugin;
 	category: string;
+ resourceId?: string;
 	navigate: (target: WorkbenchTarget) => void;
 }) {
 	const translate = useT();
@@ -173,7 +175,7 @@ export function SettingsPage({
 										) : section.id === 'appearance' || section.id === 'about' ? (
 											<BuiltInSettings plugin={plugin} category={section.id} />
 										) : (
-											<ModuleSettings plugin={plugin} category={section.id} />
+											<ModuleSettings plugin={plugin} category={section.id} resourceId={resourceId} />
 										)}
 									</SettingsSection>
 								),

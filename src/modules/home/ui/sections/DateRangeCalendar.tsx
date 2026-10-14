@@ -1,4 +1,4 @@
-// Layout and interaction adapted from PandoraReads/apex-dashboard ac4d2c7 (MIT), src/library-section.ts
+// Layout and interaction adapted from PandoraReads/apex-dashboard ac4d2c7 (MIT), Copyright (c) 2025 PandoraReads: src/library-section.ts
 import { useRef, useState } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { Button } from '../../../../ui/components/button';

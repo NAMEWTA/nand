@@ -2,12 +2,13 @@ import { contentFiles, type ContentFile } from '../../../../host/obsidian/storag
 import { deviceId as getDeviceId } from '../../../../host/obsidian/storage/device-id';
 import { privateVaultStorage } from '../../../../host/obsidian/storage/private-storage';
 import type { App } from 'obsidian';
-import type { AgentSettings } from '../../core/launch/types';
+import type { AgentId, AgentSettings } from '../../core/launch/types';
 import { t } from '../../../../shared/i18n/index';
 import { JsonStore } from '../../../../shared/json-store';
 import { accountEnv } from '../desktop/agents/accounts';
 import { legacyReferences } from '../desktop/agents/legacy-references';
 import { AGENT_CATALOG } from '../../core/launch/catalog';
+import { readHistoryDetails } from '../desktop/history/details';
 import { historyNodeModules } from '../desktop/history/node-modules';
 import { absoluteNandPath } from '../../../../host/desktop/nand-paths';
 import type { HistoryClient, HistoryClientSource, HistoryPage, NativeSession, NativeSessionSummary, NativeUsage } from '../desktop/server/agent-data-client';
@@ -79,6 +80,7 @@ export class NativeHistory {
 		private app: App,
 		private service: HistoryClientSource,
 		private settings: () => AgentSettings,
+  private accounts: () => Partial<Record<AgentId,string[]>> = () => ({}),
 	) {
 		const device = getDeviceId(app);
 		this.store = new JsonStore(
@@ -180,18 +182,18 @@ export class NativeHistory {
 	}
 
 	private scanScope() {
-		const settings = structuredClone(this.settings()), key = JSON.stringify(settings);
+		const settings = structuredClone(this.settings()), accounts = structuredClone(this.accounts()), key = JSON.stringify([settings,accounts]);
 		if (this.preparingScope?.key === key) return this.preparingScope.promise;
-		const promise = this.loadScanScope(settings).finally(() => { if (this.preparingScope?.promise === promise) this.preparingScope = undefined; });
+		const promise = this.loadScanScope(settings,accounts).finally(() => { if (this.preparingScope?.promise === promise) this.preparingScope = undefined; });
 		this.preparingScope = { key, promise };
 		return promise;
 	}
-	private async loadScanScope(settings: AgentSettings) {
+	private async loadScanScope(settings: AgentSettings, accounts: Partial<Record<AgentId,string[]>>) {
 		const [path] = await historyNodeModules();
 		const scope = await this.scope(), roots = [], warnings: string[] = [], aliases = new Map<string, string>();
-		for (const agent of AGENT_CATALOG) {
+		for (const agent of AGENT_CATALOG) for (const name of new Set(['',settings.agents[agent.id].accountId,...(accounts[agent.id] ?? [])])) {
 			try {
-			const env = await accountEnv(agent, settings.agents[agent.id].accountId, scope.vault, getDeviceId(this.app));
+			const env = await accountEnv(agent, name, scope.vault, getDeviceId(this.app));
 			const sources = {
 				'claude-code': path.join(env.CLAUDE_CONFIG_DIR!, 'projects'),
 				codex: path.join(env.CODEX_HOME!, 'sessions'),
@@ -208,7 +210,7 @@ export class NativeHistory {
 			} catch (error) { warnings.push(agent.title + ': ' + (error instanceof Error ? error.message : String(error))); }
 		}
 		this.accountAliases = aliases;
-		return { ...scope, roots, warnings };
+		return { ...scope, roots, warnings, scope: 'account' };
 	}
 	async scan(signal?: AbortSignal): Promise<string[]> {
 		this.active();
@@ -238,7 +240,7 @@ export class NativeHistory {
 		// leaf shares that same scan instead of launching another traversal.
 		return this.scan(signal);
 	}
-	async query(query = '', offset = 0, signal?: AbortSignal, filter = 'all'): Promise<HistoryPage> {
+	async query(query = '', offset = 0, signal?: AbortSignal, filter = 'all', historyScope: 'account' | 'vault' = 'account'): Promise<HistoryPage> {
 		this.active();
 		await this.loaded;
 		if (signal?.aborted) throw new Error('History request cancelled');
@@ -247,12 +249,12 @@ export class NativeHistory {
 		const client = await this.service.historyClient();
 		checkCancelled(signal);
 		this.observeClient(client);
-		const key = JSON.stringify([scope, this.revision, this.clientRevision, query, offset, filter]);
+		const key = JSON.stringify([scope, this.revision, this.clientRevision, query, offset, filter, historyScope]);
 		let read = this.pages.get(key);
 		if (!read || read.abort.signal.aborted) {
 			const metadata = this.mappedMetadata();
 			read = this.createRead(async sharedSignal => client.request<HistoryPage>(
-				'query', { vault: scope.vault, index: scope.index, query, offset, filter, metadata }, sharedSignal,
+				'query', { vault: scope.vault, index: scope.index, query, offset, filter, metadata, scope: historyScope }, sharedSignal,
 			));
 			this.pages.set(key, read);
 			const current = read;
@@ -275,9 +277,12 @@ export class NativeHistory {
 			const client = await this.service.historyClient();
 			checkCancelled(sharedSignal);
 			this.active();
-			return client.request<NativeSession>('read', { ...scope, key: session.key }, sharedSignal);
+			return client.request<NativeSession>('read', { ...scope, key: session.key, scope: 'account' }, sharedSignal);
 		}), signal);
 	}
+ async details(session: NativeSessionSummary, text: string, signal: AbortSignal) {
+  return readHistoryDetails(session,(await this.scope()).vault,getDeviceId(this.app),text,signal);
+ }
 	async export(session: NativeSessionSummary): Promise<ContentFile> {
 		let full: NativeSession;
 		try {

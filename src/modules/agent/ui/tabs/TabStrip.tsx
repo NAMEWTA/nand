@@ -15,6 +15,8 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '../../../../ui/componen
 import { useT } from '../../../../ui/react/hooks';
 import { useWorkspaceUI } from '../workspace/workspace-context';
 import { WorkspaceTab } from './WorkspaceTab';
+import { BrowserWorkspaceTab } from '../browser/BrowserWorkspaceTab';
+import { QuickCommandsButton } from '../quick-commands/QuickCommandsButton';
 import { NewTabMenu } from '../create/NewTabMenu';
 export function TabStrip({ group }: { group: TabGroup }) {
 	const { controller, close, chrome } = useWorkspaceUI(),
@@ -96,17 +98,7 @@ export function TabStrip({ group }: { group: TabGroup }) {
 						else if (event.clientX > box.right - 24) el.scrollLeft += 12;
 					}}
 				>
-					{group.tabIds.map(
-						(id) =>
-							state.tabs[id] && (
-								<WorkspaceTab
-									key={id}
-									tab={state.tabs[id]}
-									groupId={group.id}
-									active={id === group.activeTabId}
-								/>
-							),
-					)}
+					{group.tabIds.map(id => { const tab=state.tabs[id]; return tab?.kind === 'browser' ? <BrowserWorkspaceTab key={id} tab={tab} groupId={group.id} active={id===group.activeTabId}/> : tab ? <WorkspaceTab key={id} tab={tab} groupId={group.id} active={id===group.activeTabId}/> : null; })}
 				</div>
 			</SortableContext>
 			{overflow && (
@@ -132,6 +124,7 @@ export function TabStrip({ group }: { group: TabGroup }) {
 				onOpenChange={chrome ? (open) => chrome.setMenu(open ? group.id : undefined) : undefined}
 			/>
 
+			<QuickCommandsButton controller={controller} groupId={group.id} />
 			<DropdownMenu>
 				<DropdownMenuTrigger asChild>
 					<Button
@@ -164,13 +157,14 @@ export function TabStrip({ group }: { group: TabGroup }) {
 								variant="ghost"
 								size="icon-xs"
 								className="my-auto"
-								aria-disabled="true"
+								aria-pressed={chrome.view?.getState().history}
+        onClick={() => chrome.view?.setState(s => ({history:!s.history}))}
 								aria-label={t('agent.history')}
 							>
 								<PanelRight className="size-4 text-muted-foreground/50" />
 							</Button>
 						</TooltipTrigger>
-						<TooltipContent>{t('agent.workspace.future')}</TooltipContent>
+						<TooltipContent>{t('agent.history')}</TooltipContent>
 					</Tooltip>
 					<Tooltip>
 						<TooltipTrigger asChild>

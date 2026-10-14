@@ -1,0 +1,20 @@
+import { afterEach, expect, test, vi } from 'vitest';
+import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { TestProviders } from '../../../../ui/react/test-providers';
+import { setLanguage, t } from '../../../../shared/i18n';
+import { CalendarModalPanel } from './CalendarModalPanel';
+import { CalendarPanel } from './CalendarPanel';
+import { DashboardRenderContext } from '../renderer/render-context';
+import { DEFAULT_DASHBOARD_SETTINGS } from '../../core/board/types/model';
+import { memoryVault } from '../../../../../scripts/fixtures/memory-vault';
+afterEach(cleanup);
+test.each(['widget', 'fullscreen'])('%s calendar month/week navigation has accessible names', (kind) => {
+	setLanguage('en'); const { app } = memoryVault({}, window), root = document.createElement('div'), context = new DashboardRenderContext(root);
+	render(<TestProviders>{kind === 'widget' ? <CalendarPanel root={root} context={context} app={app} settings={DEFAULT_DASHBOARD_SETTINGS} widget openDay={vi.fn()} /> : <CalendarModalPanel app={app} context={context} actions={{ onToggle: vi.fn() }} byDay={new Map()} initialView="month" openDay={vi.fn()} />}</TestProviders>);
+	expect(screen.getByRole('button', { name: t('calendar.previousMonth') })).toBeTruthy();
+	expect(screen.getByRole('button', { name: t('calendar.nextMonth') })).toBeTruthy();
+	const toggle = kind === 'widget' ? screen.getByRole('button', { name: t('calendar.switchToWeek') }) : screen.getByRole('button', { name: t('calendar.viewWeek') });
+	fireEvent.click(toggle);
+	expect(screen.getByRole('button', { name: t('calendar.previousWeek') })).toBeTruthy();
+	expect(screen.getByRole('button', { name: t('calendar.nextWeek') })).toBeTruthy();
+});

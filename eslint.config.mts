@@ -40,6 +40,9 @@ export default tseslint.config(
 	...obsidianmd.configs.recommended,
 	{ files: ['src/**/*.tsx'], ignores: preactFiles, plugins: { 'react-hooks': reactHooks }, rules: { ...reactHooks.configs.recommended.rules } },
 	{ plugins: { nand: { rules: { "no-obsidian-thenable": noObsidianThenable } } }, rules: { "nand/no-obsidian-thenable": "error" } },
+	// TanStack Virtual owns a mutable measurement instance. This component intentionally
+	// opts out of React Compiler memoization; the virtualizer drives its own updates.
+	{ files: ['src/modules/agent/ui/history/SessionHistoryPanel.tsx'], rules: { 'react-hooks/incompatible-library': 'off' } },
 	// keyCode 229 is the WebKit IME fallback after compositionend, before Enter keydown.
 	{ files: ['src/ui/react/ime.ts'], rules: { '@typescript-eslint/no-deprecated': 'off' } },
 	// TypeScript resolves identifiers itself; core `no-undef` misreads type-only globals such as `NodeJS`.

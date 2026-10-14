@@ -1,0 +1,61 @@
+import { afterEach, expect, test, vi } from 'vitest';
+import { act, cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
+import { TestProviders } from '../../../../ui/react/test-providers';
+import { setLanguage, t } from '../../../../shared/i18n';
+import { memoryVault } from '../../../../../scripts/fixtures/memory-vault';
+import { ReadingService } from '../../platform/reading/reading-service';
+import type { WidgetSettingsHost } from '../../platform/widget-settings-host';
+import { DEFAULT_DASHBOARD_SETTINGS } from '../../core/board/types/model';
+import { ReadingStatsPanel } from './ReadingDialogs';
+import { ReadingPanel } from './ReadingPanel';
+vi.mock('../../platform/audio/chime', () => ({ playDing: vi.fn(), unlockChime: vi.fn() }));
+const active: ReadingService[] = [];
+afterEach(() => { cleanup(); active.splice(0).forEach(s => s.destroy()); vi.useRealTimers(); });
+async function fixture() {
+	setLanguage('en'); vi.useFakeTimers({ now: new Date('2026-10-14T12:00:00'), toFake: ['Date'] });
+	const path = '.nand/content/NAND/阅读/reading.json';
+	const book = { title: 'Book', author: '', coverUrl: '', isbn: '', source: 'manual' as const, totalPages: 100, currentPage: 10, finished: false };
+	const record = { timestamp: '2026-10-14T10:00:00', bookTitle: 'Book', bookAuthor: '', coverUrl: '', durationSeconds: 600, isbn: '', startPage: 0, endPage: 10, finished: false };
+	const data = { activeBooks: [book], sessions: [{ date: '2026-10-14', records: [record] }, { date: '2025-01-01', records: [{ ...record, timestamp: '2025-01-01T10:00:00' }] }] };
+	const vault = memoryVault({ [path]: JSON.stringify(data) }, window);
+	Object.assign(vault.app.workspace, { containerEl: Object.assign(document.createElement('div'), { win: window }) });
+	const service = new ReadingService({ app: vault.app, settings: structuredClone(DEFAULT_DASHBOARD_SETTINGS) } as unknown as WidgetSettingsHost);
+	active.push(service); await service.loadSessions();
+	return { service, vault, path, book };
+}
+test('book-history deletion names its full scope, focuses Cancel, and requires explicit confirmation', async () => {
+	const f = await fixture(); render(<TestProviders><ReadingStatsPanel service={f.service} /></TestProviders>);
+	const trigger = screen.getByRole('button', { name: t('reading.editDeleteBook') });
+	trigger.focus(); fireEvent.click(trigger);
+	const alert = await screen.findByRole('alertdialog');
+	expect(alert.textContent).toContain(t('reading.deleteBookRecordsConfirm', { title: 'Book' }));
+	await waitFor(() => expect(document.activeElement).toBe(within(alert).getByRole('button', { name: t('common.cancel') })));
+	fireEvent.click(within(alert).getByRole('button', { name: t('common.cancel') }));
+	expect(f.service.getTotalSeconds()).toBe(1200);
+	await waitFor(() => expect(document.activeElement).toBe(trigger));
+	fireEvent.click(trigger); fireEvent.click(within(await screen.findByRole('alertdialog')).getByRole('button', { name: t('common.confirm') }));
+	await act(() => f.service.flush());
+	expect(JSON.parse(f.vault.contents.get(f.path)!).sessions).toEqual([]);
+	expect(f.service.getActiveBooks()).toHaveLength(1);
+});
+test('confirmed deletion reports a failed write and preserves the on-disk history and recovery draft', async () => {
+	const f = await fixture(); const before = f.vault.contents.get(f.path);
+	f.vault.adapter.process = async () => { throw Error('disk unavailable'); };
+	render(<TestProviders><ReadingStatsPanel service={f.service} /></TestProviders>);
+	fireEvent.click(screen.getByRole('button', { name: t('reading.editDeleteBook') }));
+	fireEvent.click(within(await screen.findByRole('alertdialog')).getByRole('button', { name: t('common.confirm') }));
+	await act(async () => { await expect(f.service.flush()).rejects.toThrow('disk unavailable'); });
+	expect(f.vault.contents.get(f.path)).toBe(before);
+	expect(screen.getByRole('status').textContent).toContain(t('storage.unsaved'));
+	expect(screen.getByRole('button', { name: t('storage.retry') })).toBeTruthy();
+	expect([...f.vault.contents.keys()].some(p => p.startsWith('.nand/recovery/drafts/'))).toBe(true);
+});
+test('reading controls have names and removing an active book requires confirmation while retaining history', async () => {
+	const f = await fixture(); f.service.startReading(f.book);
+	render(<TestProviders><ReadingPanel service={f.service} add={vi.fn()} edit={vi.fn()} finish={vi.fn()} statistics={vi.fn()} /></TestProviders>);
+	expect(screen.getByRole('button', { name: t('reading.endTitle') })).toBeTruthy();
+	expect(screen.getByRole('button', { name: t('reading.editTitle') })).toBeTruthy();
+	fireEvent.click(screen.getByRole('button', { name: t('reading.editDeleteBook') }));
+	fireEvent.click(within(await screen.findByRole('alertdialog')).getByRole('button', { name: t('common.confirm') }));
+	await act(() => f.service.flush()); expect(f.service.getActiveBooks()).toEqual([]); expect(f.service.getTotalSeconds()).toBe(1200);
+});

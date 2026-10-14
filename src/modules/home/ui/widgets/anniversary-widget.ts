@@ -1,7 +1,8 @@
 import type { App } from 'obsidian';
-import { h } from 'preact';
+import { createElement as h } from 'react';
+import { mountRecordPanel } from '../dialogs/mount-record-panel';
 import type { AnniversaryConfig } from '../../core/board/types';
-import { getRenderContext, mountDashboardPanel } from '../renderer/render-context';
+import { getRenderContext } from '../renderer/render-context';
 import { closeOwnedDashboardDialogs, openOwnedDashboardModal } from '../ui/dialog-scope';
 import { AnniversaryPanel } from './AnniversaryPanel';
 import { AnniversarySettingsModal } from './anniversary-settings-modal';
@@ -15,7 +16,7 @@ export function renderSidebarAnniversaryWidget(
 	const widget = container.createDiv({ cls: 'dashboard-sidebar-widget dashboard-sidebar-anniversary' });
 	if (app && onEdit) widget.addClass('dashboard-sidebar-widget--cfg');
 	if (app) getRenderContext(widget).resources.set(widget, () => closeOwnedDashboardDialogs(app, widget));
-	mountDashboardPanel(
+	mountRecordPanel(
 		widget,
 		h(AnniversaryPanel, {
 			config,

@@ -35,3 +35,8 @@ export function droppedFilePath(file: File): string {
 export function vaultFilePath(vault: string, vaultPath: string): string {
 	return path.join(vault, ...vaultPath.split('/'));
 }
+
+export function revealPath(target: string): Promise<void> {
+	(shell as typeof shell & { showItemInFolder(path: string): void }).showItemInFolder(target);
+	return Promise.resolve();
+}

@@ -15,7 +15,7 @@ test('launch and resume derive an owned account environment instead of accepting
 	const vault = await realpath(await mkdtemp(path.join(tmpdir(), 'nand-agent-launch-')));
 	vi.stubGlobal('window', { require: createRequire(import.meta.url) });
 	const app = { vault: { adapter: { ...nativeVaultStorage(vault), getBasePath: () => vault } } } as unknown as App;
-	const settings = normalizeAgentSettings(null); settings.yoloAcknowledged = true; settings.agents.codex.cliPath = process.execPath;
+	const settings = normalizeAgentSettings(null); settings.yoloAcknowledgedAgents = ['codex','claude-code']; settings.agents.codex.cliPath = process.execPath;
 	const started: LaunchRequest[] = [];
 	const host: LaunchHost = { app, getVaultPath: () => vault, getAgentSettings: () => settings, saveAgentSettings: async () => {}, start: async request => { started.push(request); } };
 	try {
@@ -41,7 +41,7 @@ test('an explicitly bound legacy session resumes with its retained transcript an
 	await mkdir(old, { recursive: true }); await writeFile(path.join(old, 'session.jsonl'), '{}');
 	vi.stubGlobal('window', { require: createRequire(import.meta.url) });
 	const app = { vault: { adapter: { ...nativeVaultStorage(vault), getBasePath: () => vault } } } as unknown as App;
-	const settings = normalizeAgentSettings(null); settings.yoloAcknowledged = true;
+	const settings = normalizeAgentSettings(null); settings.yoloAcknowledgedAgents = ['codex','claude-code'];
 	Object.assign(settings.agents['claude-code'], { enabled: true, accountId: 'a.b', cliPath: process.execPath });
 	const started: LaunchRequest[] = [];
 	const host: LaunchHost = { app, getVaultPath: () => vault, getAgentSettings: () => settings, saveAgentSettings: async () => {}, start: async request => { started.push(request); } };

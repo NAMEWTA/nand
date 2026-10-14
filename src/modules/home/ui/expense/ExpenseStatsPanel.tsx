@@ -1,8 +1,10 @@
-/** @jsxImportSource preact */
-import { SaveStatus } from '../../../../ui/primitives/SaveStatus';
-import { Menu, Notice } from 'obsidian';
-import type { ComponentChildren } from 'preact';
-import { useLayoutEffect, useState } from 'preact/hooks';
+// Layout and interaction adapted from PandoraReads/apex-dashboard ac4d2c7 (MIT), Copyright (c) 2025 PandoraReads: src/expense-stats-modal.ts
+import { RecordConfirm } from '../dialogs/RecordConfirm';
+import { RecordButton as Button } from '../dialogs/RecordButton';
+import { widgetClasses } from '../theme/widget-classes';
+import { RecordSaveStatus as SaveStatus } from '../dialogs/RecordSaveStatus';
+import type { ReactNode } from 'react';
+import { useLayoutEffect, useState } from 'react';
 import {
 	periodLabel,
 	periodShift,
@@ -19,8 +21,8 @@ import {
 } from '../../core/expense/model';
 import type { ExpenseService } from '../../platform/expense/expense-service';
 import { t } from '../../../../shared/i18n';
-import { Icon } from '../../../../ui/primitives/Icon';
-import { categoryLabel } from './expense-category-ui';
+import { ObsidianIcon as Icon } from '../../../../ui/components/nand/ObsidianIcon';
+import { categoryLabel } from './expense-label';
 import {
 	categoryColor,
 	EXPENSE_BAR_COLOR,
@@ -29,18 +31,14 @@ import {
 	type ExpenseBar,
 	type ExpenseSlice,
 } from './expense-charts';
-import { showExpenseLedger } from './expense-ledger-modal';
+import { Choice } from '../board/controls';
+import { RecordDialog } from '../dialogs/RecordDialog';
+import { ExpenseLedgerPanel } from './ExpenseLedgerPanel';
 import { ExpenseDonut, ExpenseLines, ExpenseRanking, ExpenseTrend } from './ExpenseCharts';
-export function ExpenseStatsPanel({
-	service,
-	close,
-	root,
-}: {
-	service: ExpenseService;
-	close?: () => void;
-	root: HTMLElement;
-}) {
-	const [, refresh] = useState(0);
+export function ExpenseStatsPanel({ service, close }: { service: ExpenseService; close?: () => void }) {
+	const [deleting, setDeleting] = useState<string | null>(null);
+	const [, refresh] = useState(0),
+		[ledger, setLedger] = useState(false);
 	useLayoutEffect(() => service.subscribe(() => refresh((n) => n + 1)), [service]);
 	const [activeRange, setRange] = useState<PeriodKind | 'history'>('week'),
 		[activeType, setType] = useState<ExpenseType>('expense'),
@@ -59,22 +57,14 @@ export function ExpenseStatsPanel({
 	const shift = (delta: 1 | -1) => {
 		if (canShift(delta)) setAnchor(periodShift(historyKind, historyAnchor, delta));
 	};
-	const periodMenu = (event: MouseEvent) => {
-		const menu = new Menu();
-		let anchor = today;
-		for (let i = 0; i < 2000; i++) {
-			const period = windowFor(historyKind, anchor, today);
-			if (period.curEnd < minDate) break;
-			menu.addItem((item) =>
-				item
-					.setTitle(periodLabel(historyKind, period))
-					.setChecked(period.curStart === win.curStart)
-					.onClick(() => setAnchor(period.curStart)),
-			);
-			anchor = periodShift(historyKind, anchor, -1);
-		}
-		menu.showAtMouseEvent(event);
-	};
+	const periods: { value: string; label: string }[] = [];
+	let anchor = today;
+	for (let i = 0; i < 2000; i++) {
+		const period = windowFor(historyKind, anchor, today);
+		if (period.curEnd < minDate) break;
+		periods.push({ value: period.curStart, label: periodLabel(historyKind, period) });
+		anchor = periodShift(historyKind, anchor, -1);
+	}
 	function breakdownSlices(win: RangeWindow): ExpenseSlice[] {
 		const raw = service.getCategoryBreakdown(win.curStart, win.curEnd, activeType);
 		const totals =
@@ -138,87 +128,128 @@ export function ExpenseStatsPanel({
 		empty = t('expense.noRecords');
 	return (
 		<>
+			{ledger && (
+				<RecordDialog
+					title={t('expense.ledger.title')}
+					classes="dashboard-expense-stats-modal dashboard-expense-ledger-modal"
+					onClose={() => setLedger(false)}
+				>
+					<ExpenseLedgerPanel service={service} close={() => setLedger(false)} />
+				</RecordDialog>
+			)}
 			<SaveStatus source={service} />
-			<div class="dashboard-expense-stats-header">
-				<div class="dashboard-expense-stats-header-titlewrap">
-					<div class="dashboard-expense-stats-header-title">{t('expense.statsTitle')}</div>
-					<div class="dashboard-expense-insight">{periodLabel(kind, win)}</div>
+			<RecordConfirm open={deleting !== null} onOpenChange={open => { if (!open) setDeleting(null); }}
+				title={t('expense.deleteRecord')} description={t('expense.ledger.batchDeleteMessage', { n: 1 })}
+				onConfirm={() => { if (deleting !== null) service.deleteRecord(deleting); setDeleting(null); }} />
+			<div className={widgetClasses('dashboard-expense-stats-header')}>
+				<div className={widgetClasses('dashboard-expense-stats-header-titlewrap')}>
+					<div className={widgetClasses('dashboard-expense-stats-header-title')}>
+						{t('expense.statsTitle')}
+					</div>
+					<div className={widgetClasses('dashboard-expense-insight')}>{periodLabel(kind, win)}</div>
 				</div>
-				<div class="dashboard-expense-stats-header-right">
-					<div class="dashboard-expense-range-toggle">
+				<div className={widgetClasses('dashboard-expense-stats-header-right')}>
+					<div className={widgetClasses('dashboard-expense-range-toggle')}>
 						{(['week', 'month', 'year', 'history'] as const).map((range) => (
-							<button
+							<Button
+								variant="ghost"
 								key={range}
-								class={`dashboard-expense-range-btn${range === activeRange ? ' dashboard-expense-range-btn--active' : ''}`}
+								className={widgetClasses(
+									`dashboard-expense-range-btn${range === activeRange ? ' dashboard-expense-range-btn--active' : ''}`,
+								)}
 								onClick={() => setRange(range)}
 							>
 								{t(`expense.range${range[0]!.toUpperCase() + range.slice(1)}`)}
-							</button>
+							</Button>
 						))}
 					</div>
 					{activeRange === 'history' && (
 						<>
-							<div class="dashboard-expense-subrange-toggle dashboard-expense-subrange-toggle--visible">
+							<div
+								className={widgetClasses(
+									'dashboard-expense-subrange-toggle dashboard-expense-subrange-toggle--visible',
+								)}
+							>
 								{(['week', 'month', 'year'] as const).map((k) => (
-									<button
+									<Button
+										variant="ghost"
 										key={k}
-										class={`dashboard-expense-subrange-btn${k === historyKind ? ' dashboard-expense-subrange-btn--active' : ''}`}
+										className={widgetClasses(
+											`dashboard-expense-subrange-btn${k === historyKind ? ' dashboard-expense-subrange-btn--active' : ''}`,
+										)}
 										onClick={() => {
 											setKind(k);
 											setAnchor(today);
 										}}
 									>
 										{t(`expense.range${k[0]!.toUpperCase() + k.slice(1)}`)}
-									</button>
+									</Button>
 								))}
 							</div>
-							<div class="dashboard-expense-year-nav dashboard-expense-year-nav--visible">
-								<button
-									class="dashboard-expense-year-nav-btn"
+							<div
+								className={widgetClasses(
+									'dashboard-expense-year-nav dashboard-expense-year-nav--visible',
+								)}
+							>
+								<Button
+									variant="ghost"
+									className={widgetClasses('dashboard-expense-year-nav-btn')}
 									disabled={!canShift(-1)}
 									aria-label={t('expense.prevPeriod')}
 									onClick={() => shift(-1)}
 								>
 									<Icon name="chevron-left" />
-								</button>
-								<button
-									class={`dashboard-expense-year-nav-label${historyKind === 'week' ? ' dashboard-expense-year-nav-label--wide' : ''}`}
-									onClick={periodMenu}
-								>
-									{periodLabel(historyKind, win)}
-								</button>
-								<button
-									class="dashboard-expense-year-nav-btn"
+								</Button>
+								<Choice
+									className={widgetClasses(
+										`dashboard-expense-year-nav-label${historyKind === 'week' ? ' dashboard-expense-year-nav-label--wide' : ''}`,
+									)}
+									label={t('expense.prevPeriod')}
+									value={win.curStart}
+									options={periods}
+									onChange={setAnchor}
+								/>
+								<Button
+									variant="ghost"
+									className={widgetClasses('dashboard-expense-year-nav-btn')}
 									disabled={!canShift(1)}
 									aria-label={t('expense.nextPeriod')}
 									onClick={() => shift(1)}
 								>
 									<Icon name="chevron-right" />
-								</button>
+								</Button>
 							</div>
 						</>
 					)}
-					<div class="dashboard-expense-type-toggle">
+					<div className={widgetClasses('dashboard-expense-type-toggle')}>
 						{(['expense', 'income'] as const).map((type) => (
-							<button
+							<Button
+								variant="ghost"
 								key={type}
-								class={`dashboard-expense-type-btn${type === activeType ? ' dashboard-expense-type-btn--active' : ''}`}
+								className={widgetClasses(
+									`dashboard-expense-type-btn${type === activeType ? ' dashboard-expense-type-btn--active' : ''}`,
+								)}
 								onClick={() => setType(type)}
 							>
 								{t(type === 'expense' ? 'expense.typeExpense' : 'expense.typeIncome')}
-							</button>
+							</Button>
 						))}
 					</div>
 					{close && (
-						<button class="dashboard-expense-stats-close" onClick={close} aria-label={t('common.close')}>
+						<Button
+							variant="ghost"
+							className={widgetClasses('dashboard-expense-stats-close')}
+							onClick={close}
+							aria-label={t('common.close')}
+						>
 							<Icon name="x" />
-						</button>
+						</Button>
 					)}
 				</div>
 			</div>
-			<div class="dashboard-expense-stats-body">
-				<div class="dashboard-expense-kpi-col">
-					<div class="dashboard-expense-stats-summary">
+			<div className={widgetClasses('dashboard-expense-stats-body')}>
+				<div className={widgetClasses('dashboard-expense-kpi-col')}>
+					<div className={widgetClasses('dashboard-expense-stats-summary')}>
 						<Kpi
 							value={fmt(totals.expense)}
 							label={t('expense.kpiExpenseTotal')}
@@ -231,7 +262,7 @@ export function ExpenseStatsPanel({
 							delta={delta(totals.income, prev.income)}
 						/>
 					</div>
-					<div class="dashboard-expense-stats-summary">
+					<div className={widgetClasses('dashboard-expense-stats-summary')}>
 						<Kpi value={`${net < 0 ? '-' : ''}${fmt(Math.abs(net))}`} label={t('expense.kpiNet')} />
 						<Kpi
 							value={fmt(totals.expense / Math.max(1, win.elapsedDays))}
@@ -241,18 +272,19 @@ export function ExpenseStatsPanel({
 					<Section
 						title={t('expense.records')}
 						action={
-							<button
-								class="dashboard-expense-records-viewall"
-								onClick={() => showExpenseLedger(root.ownerDocument, service)}
+							<Button
+								variant="ghost"
+								className={widgetClasses('dashboard-expense-records-viewall')}
+								onClick={() => setLedger(true)}
 							>
 								{t('expense.viewAll')}
 								<Icon name="chevron-right" />
-							</button>
+							</Button>
 						}
 					>
 						{records.length ? (
-							<div class="dashboard-expense-records-scroll">
-								<table class="dashboard-expense-records-table">
+							<div className={widgetClasses('dashboard-expense-records-scroll')}>
+								<table className={widgetClasses('dashboard-expense-records-table')}>
 									<thead>
 										<tr>
 											{[
@@ -273,7 +305,9 @@ export function ExpenseStatsPanel({
 										{records.slice(0, 50).map((r) => (
 											<tr key={r.id}>
 												<td
-													class={`dashboard-expense-records-type dashboard-expense-records-type--${r.type}`}
+													className={widgetClasses(
+														`dashboard-expense-records-type dashboard-expense-records-type--${r.type}`,
+													)}
 												>
 													<Icon
 														name={
@@ -282,33 +316,36 @@ export function ExpenseStatsPanel({
 													/>
 												</td>
 												<td
-													class={`dashboard-expense-records-amount${r.type === 'income' ? ' dashboard-expense-records-amount--income' : ''}`}
+													className={widgetClasses(
+														`dashboard-expense-records-amount${r.type === 'income' ? ' dashboard-expense-records-amount--income' : ''}`,
+													)}
 												>
 													{r.type === 'income' ? '+' : ''}
 													{fmt(r.amount)}
 												</td>
-												<td class="dashboard-expense-records-category">
+												<td className={widgetClasses('dashboard-expense-records-category')}>
 													{categoryLabel(r.category)}
 												</td>
-												<td class="dashboard-expense-records-note" title={r.note}>
+												<td
+													className={widgetClasses('dashboard-expense-records-note')}
+													title={r.note}
+												>
 													{r.note}
 												</td>
-												<td class="dashboard-expense-records-date">
+												<td className={widgetClasses('dashboard-expense-records-date')}>
 													{Number(r.date.slice(0, 4)) === new Date().getFullYear()
 														? r.date.slice(5)
 														: r.date}
 												</td>
-												<td class="dashboard-expense-records-actions">
-													<button
-														class="dashboard-expense-records-delete"
+												<td className={widgetClasses('dashboard-expense-records-actions')}>
+													<Button
+														variant="ghost"
+														className={widgetClasses('dashboard-expense-records-delete')}
 														aria-label={t('expense.deleteRecord')}
-														onClick={() => {
-															if (service.deleteRecord(r.id))
-																new Notice(t('expense.recordDeleted'));
-														}}
+														onClick={() => setDeleting(r.id)}
 													>
 														<Icon name="trash-2" />
-													</button>
+													</Button>
 												</td>
 											</tr>
 										))}
@@ -316,33 +353,36 @@ export function ExpenseStatsPanel({
 								</table>
 							</div>
 						) : (
-							<div class="dashboard-expense-donut-empty">{empty}</div>
+							<div className={widgetClasses('dashboard-expense-donut-empty')}>{empty}</div>
 						)}
 					</Section>
 				</div>
-				<div class="dashboard-expense-mid-col">
+				<div className={widgetClasses('dashboard-expense-mid-col')}>
 					<Section
 						title={t('expense.categoryShare')}
 						action={
-							<div class="dashboard-expense-level-toggle">
+							<div className={widgetClasses('dashboard-expense-level-toggle')}>
 								{(['secondary', 'primary'] as const).map((level) => (
-									<button
+									<Button
+										variant="ghost"
 										key={level}
-										class={`dashboard-expense-level-btn${categoryLevel === level ? ' dashboard-expense-level-btn--active' : ''}`}
+										className={widgetClasses(
+											`dashboard-expense-level-btn${categoryLevel === level ? ' dashboard-expense-level-btn--active' : ''}`,
+										)}
 										onClick={() => setLevel(level)}
 									>
 										{t(level === 'secondary' ? 'expense.levelSecondary' : 'expense.levelPrimary')}
-									</button>
+									</Button>
 								))}
 							</div>
 						}
 					>
-						<div class="dashboard-expense-donut-container">
+						<div className={widgetClasses('dashboard-expense-donut-container')}>
 							<ExpenseDonut slices={slices} formatValue={fmt} emptyText={empty} />
 						</div>
 					</Section>
 					<Section title={t('expense.ranking')}>
-						<div class="dashboard-expense-rank-container">
+						<div className={widgetClasses('dashboard-expense-rank-container')}>
 							<ExpenseRanking
 								rows={slices}
 								colorOf={(key) =>
@@ -354,7 +394,7 @@ export function ExpenseStatsPanel({
 						</div>
 					</Section>
 				</div>
-				<div class="dashboard-expense-right-col">
+				<div className={widgetClasses('dashboard-expense-right-col')}>
 					<Section title={t(kind === 'year' ? 'expense.trendMonthly' : 'expense.trendDaily')}>
 						<ExpenseTrend
 							bars={bars}
@@ -390,35 +430,29 @@ function Kpi({
 	invert?: boolean;
 }) {
 	return (
-		<div class="dashboard-expense-stats-card">
-			<div class="dashboard-expense-stats-card-value-row">
-				<div class="dashboard-expense-stats-card-value">{value}</div>
+		<div className={widgetClasses('dashboard-expense-stats-card')}>
+			<div className={widgetClasses('dashboard-expense-stats-card-value-row')}>
+				<div className={widgetClasses('dashboard-expense-stats-card-value')}>{value}</div>
 				{delta !== undefined && Number.isFinite(delta) && (
 					<div
-						class={`dashboard-expense-stats-card-delta dashboard-expense-stats-card-delta--${(invert ? delta < 0 : delta >= 0) ? 'up' : 'down'}`}
+						className={widgetClasses(
+							`dashboard-expense-stats-card-delta dashboard-expense-stats-card-delta--${(invert ? delta < 0 : delta >= 0) ? 'up' : 'down'}`,
+						)}
 						title={t('pomodoro.vsPrev')}
 					>
 						{delta >= 0 ? '↑' : '↓'} {Math.abs(Math.round(delta))}%
 					</div>
 				)}
 			</div>
-			<div class="dashboard-expense-stats-card-label">{label}</div>
+			<div className={widgetClasses('dashboard-expense-stats-card-label')}>{label}</div>
 		</div>
 	);
 }
-function Section({
-	title,
-	action,
-	children,
-}: {
-	title: string;
-	action?: ComponentChildren;
-	children: ComponentChildren;
-}) {
+function Section({ title, action, children }: { title: string; action?: ReactNode; children: ReactNode }) {
 	return (
-		<div class="dashboard-expense-stats-section">
-			<div class="dashboard-expense-stats-section-title-row">
-				<div class="dashboard-expense-stats-section-title">{title}</div>
+		<div className={widgetClasses('dashboard-expense-stats-section')}>
+			<div className={widgetClasses('dashboard-expense-stats-section-title-row')}>
+				<div className={widgetClasses('dashboard-expense-stats-section-title')}>{title}</div>
 				{action}
 			</div>
 			{children}

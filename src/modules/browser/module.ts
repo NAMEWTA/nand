@@ -1,90 +1,107 @@
-import { AGENT_SESSIONS } from '../agent/api';
-import { BROWSER_OPEN, BROWSER_PROFILES, type BrowserOpener, type BrowserProfiles } from './api';
-import type { BrowserWorkbenchPort } from './services/page-host';
 import { Notice } from 'obsidian';
 import type { ModuleContext, ModuleInstance } from '../../app/contracts/module';
-import { registerMessages, t } from '../../shared/i18n';
-import { BrowserError, newPageState, type BrowserAgentDeliveryPort } from './core/model';
-import { browserError } from './core/text';
-import { BrowserModule } from './services';
+import { AGENT_SESSIONS, AGENT_BROWSER_TABS, NATIVE_HELPER_SQLITE } from '../agent/api';
+import { BROWSER_HOST, BROWSER_OPEN, BROWSER_PROFILES, type BrowserOpener } from './api';
+import { BrowserEngine } from './services/host';
+import { observeNoteLinks } from './platform/note-links';
 import { browserSettings } from './settings';
-import { messages as browserStrings } from '../../shared/i18n/lazy/browser';
-import { messages as profileStrings } from './i18n';
-
-registerMessages(browserStrings);
-registerMessages(profileStrings);
-
-/**
- * Browser module: one browser host per activation (guests, history and permissions).
- * Pages live in the workbench; turning the module off closes every guest.
- */
+import { registerMessages, t } from '../../shared/i18n';
+import { messages as shared } from '../../shared/i18n/lazy/browser';
+import { messages } from './i18n';
+registerMessages(shared);
+registerMessages(messages);
 export default function createBrowserModule(context: ModuleContext): ModuleInstance {
-	const { app, shell } = context;
 	const settings = context.settings.bind('browser', browserSettings);
-	let host: BrowserModule | undefined;
+	let host: BrowserEngine | undefined;
 	const current = () => {
-		if (!host) throw new BrowserError('browser_disabled');
+		if (!host) throw new Error(t('browser.browser_disabled'));
 		return host;
 	};
-	const workbench: BrowserWorkbenchPort = {
-		open: (state, ownerWindow) => shell.open({ feature: 'browser', resourceId: state.id }, ownerWindow, { ...state }),
-		openTab: (state, ownerWindow) => shell.openFocus({ feature: 'browser', resourceId: state.id }, { ...state }, ownerWindow),
-		list: () => shell.savedPages('browser').flatMap((page) => (!page.target.section && page.target.resourceId ? [newPageState(page.target.resourceId, page.state)] : [])),
-		activate: (id) => shell.activateResource('browser', id),
-		close: (id) => shell.closeResource('browser', id),
-	};
-	// Material goes only to agent sessions that exist right now; the browser never starts the agent module.
-	const agents: BrowserAgentDeliveryPort = {
-		list: async () => (await context.services.peek(AGENT_SESSIONS)?.list()) ?? [],
-		attach: async (sessionId, text, files) => {
-			const sessions = context.services.peek(AGENT_SESSIONS);
-			if (!sessions) throw new BrowserError('browser_agent_unavailable');
-			await sessions.attachMaterial(sessionId, { title: t('browser.contextMaterial'), text, files });
-		},
-	};
-	const opener: BrowserOpener = {
+	const open: BrowserOpener = {
 		open: async (request) => {
-			try {
-				return await current().open(request);
-			} catch (error) {
-				throw new Error(browserError(error));
-			}
+			const lease = await context.services.acquire(AGENT_BROWSER_TABS);
+			if (!lease) throw new Error(t('browser.browser_agent_unavailable'));
+			return lease.value.open(request.url, request.profileId, request.reuse);
 		},
 		show: async (request) => {
 			try {
-				if (!request.url && !request.target) await shell.open({ feature: 'browser' });
-				else await current().open(request);
+				await open.open(request);
 			} catch (error) {
-				new Notice(browserError(error));
+				new Notice(String(error));
 			}
 		},
 	};
-	const profiles: BrowserProfiles = {
-		list: () => current().profiles(),
-		create: label => current().createProfile(label),
-		rename: (id, label) => current().renameProfile(id, label),
-		affectedPages: id => current().profilePages(id),
-		remove: (id, pages) => current().removeProfile(id, pages),
-		subscribe: listener => current().subscribe(listener),
-	};
 	return {
-		services: [[BROWSER_OPEN, opener], [BROWSER_PROFILES, profiles]],
-		pages: {
-			browser: async () => (await import('./ui/workbench-page')).createBrowserPage(current),
+		get services() {
+			return host
+				? [
+						[BROWSER_HOST, host] as const,
+						[BROWSER_OPEN, open] as const,
+						[
+							BROWSER_PROFILES,
+							{
+								list: () => current().profiles.getState().profiles,
+								create: (name: string) => current().createProfile(name),
+								rename: (id: string, name: string) => current().renameProfile(id, name),
+								affectedPages: (id: string) => current().affectedPages(id),
+								remove: (id: string, pages: readonly string[]) => current().deleteProfile(id, pages),
+								subscribe: (fn: () => void) => current().profiles.subscribe(fn),
+							},
+						] as const,
+					]
+				: [];
 		},
-		settingsPage: async () => (await import('./ui/settings-page')).browserSettingsPage(current, settings, opener),
+		settingsPageKind: 'react',
+		settingsPage: async () => (await import('./ui/settings-page')).browserSettingsPage(current()),
 		async activate() {
-			host = new BrowserModule(app, () => settings.get(), agents, workbench, async (state, closed) => {
-				const { BrowserModal } = await import('./ui/browser-modal');
-				const modal = new BrowserModal(current(), state, closed);
-				modal.open();
-				return modal;
-			});
+			if (!context.env.desktop) return;
+			host = new BrowserEngine(
+				context.app,
+				settings,
+				{
+					list: async (pageId) => {
+						const sessions = (await context.services.peek(AGENT_SESSIONS)?.list()) ?? [];
+						const local = pageId
+							? (context.services.peek(AGENT_BROWSER_TABS)?.sessionOrder(pageId) ?? [])
+							: [];
+						return sessions.sort((a, b) => Number(local.includes(b.id)) - Number(local.includes(a.id)));
+					},
+					attach: async (id, text, files) => {
+						const sessions = context.services.peek(AGENT_SESSIONS);
+						if (!sessions) throw new Error(t('browser.browser_agent_unavailable'));
+						await sessions.attachMaterial(id, { title: t('browser.contextMaterial'), text, files });
+					},
+				},
+				{
+					open: (url, profileId, reuse) => open.open({ url, profileId, reuse }),
+					list: () => context.services.peek(AGENT_BROWSER_TABS)?.list() ?? [],
+					close: async (id) => {
+						await context.services.peek(AGENT_BROWSER_TABS)?.close(id);
+					},
+					activate: (id) => context.services.peek(AGENT_BROWSER_TABS)?.activate(id),
+				},
+				async () => {
+					const lease = await context.services.acquire(NATIVE_HELPER_SQLITE);
+					if (!lease) throw new Error(t('browser.browser_agent_unavailable'));
+					return { readCookies: (path, kind, signal) => lease.value.readCookies(path, kind, signal) };
+				},
+				async (page) => (await import('./ui/chrome-loader')).browserChrome(current(), page),
+				() => {
+					void context.shell.open({ feature: 'settings', section: 'browser' });
+				},
+			);
 			await host.ready;
-			host.setEnabled(true);
+			context.lifetime.register(
+				observeNoteLinks(
+					context.app.workspace,
+					() => settings.get().interceptNoteLinks,
+					(url, event) => current().routeLink(url, event, 'note'),
+				),
+			);
 		},
 		async dispose() {
-			try { await host?.dispose(); } finally { host = undefined; }
+			await host?.dispose();
+			host = undefined;
 		},
 	};
 }

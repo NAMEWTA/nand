@@ -1,4 +1,4 @@
-// Layout and interaction adapted from PandoraReads/apex-dashboard ac4d2c7 (MIT), src/pomodoro-mini-panel.ts
+// Layout and interaction adapted from PandoraReads/apex-dashboard ac4d2c7 (MIT), Copyright (c) 2025 PandoraReads: src/pomodoro-mini-panel.ts
 import { createPortal } from 'react-dom';
 import { useStore } from 'zustand';
 import { Pause, Play, SkipForward } from 'lucide-react';

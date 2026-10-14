@@ -1,5 +1,5 @@
 // Layout and interaction adapted from PandoraReads/apex-dashboard ac4d2c7 (MIT), Copyright (c) 2025 PandoraReads: src/settings.ts
-import { useEffect, useState } from 'react';
+import { lazy, Suspense, useEffect, useState } from 'react';
 import { useStore } from 'zustand';
 import { Trash2 } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../../../ui/components/tabs';
@@ -14,8 +14,13 @@ import { dashboardSettingsStore } from '../../services/settings-store';
 import { WIDGETS } from '../widgets/WidgetDeck';
 import { Choice, IconButton } from '../board/controls';
 import { DraftList } from '../quickbar/DraftList';
+import type { AnniversaryConfig } from '../../core/board/types';
+const AnniversaryEditor = lazy(() =>
+	import('../widgets/AnniversaryEditor').then((m) => ({ default: m.AnniversaryEditor })),
+);
 export function DashboardSettings({ host }: { host: HomeHost }) {
-	const [store] = useState(() => dashboardSettingsStore(host));
+	const [store] = useState(() => dashboardSettingsStore(host)),
+		[anniversary, setAnniversary] = useState<AnniversaryConfig | null>(null);
 	useEffect(() => store.connect(), [store]);
 	const settings = useStore(store.state, (s) => s.settings),
 		t = useT();
@@ -180,6 +185,80 @@ export function DashboardSettings({ host }: { host: HomeHost }) {
 							}}
 						/>
 					))}
+					<SettingsSwitchRow
+						label={t('settings.readingSound')}
+						checked={settings.readingSoundEnabled}
+						onChange={() => {
+							void store.update((s) => {
+								s.readingSoundEnabled = !s.readingSoundEnabled;
+							});
+						}}
+					/>
+					<SettingsRow
+						label={t('home.dashboard.widget.reading')}
+						control={
+							<Choice
+								label={t('home.dashboard.heightRatio')}
+								value={settings.readingHeightRatio}
+								options={['full', 'twoThirds', 'half', 'third'].map((value) => ({
+									value,
+									label: t(`home.dashboard.ratio.${value}`),
+								}))}
+								onChange={(value) => {
+									void store.update((s) => {
+										s.readingHeightRatio = value as typeof s.readingHeightRatio;
+									});
+								}}
+							/>
+						}
+					/>
+					{settings.anniversaryEnabled && (
+						<>
+							{settings.anniversaries.map((config) => (
+								<SettingsRow
+									key={config.id}
+									label={config.label || t('anniversary.unnamed')}
+									control={
+										<Button variant="outline" onClick={() => setAnniversary({ ...config })}>
+											{t('common.edit')}
+										</Button>
+									}
+								/>
+							))}
+							<Button
+								variant="outline"
+								onClick={() =>
+									setAnniversary({
+										id: crypto.randomUUID(),
+										label: '',
+										startDate: new Date().toLocaleDateString('sv-SE'),
+										calendar: 'solar',
+										precision: 'ymd',
+										annualReminder: true,
+									})
+								}
+							>
+								{t('anniversary.addTitle')}
+							</Button>
+						</>
+					)}
+					{anniversary && (
+						<Suspense fallback={null}>
+							<AnniversaryEditor
+								initial={anniversary}
+								onClose={() => setAnniversary(null)}
+								onSave={(value) => {
+									void store
+										.update((s) => {
+											const i = s.anniversaries.findIndex((c) => c.id === value.id);
+											if (i < 0) s.anniversaries.push(value);
+											else s.anniversaries[i] = value;
+										})
+										.then(() => setAnniversary(null));
+								}}
+							/>
+						</Suspense>
+					)}
 					<SettingsRow
 						label={t('settings.expenseCurrency')}
 						control={

@@ -3,30 +3,30 @@ import type { ExpenseType } from '../../core/expense/model';
 /** Fixed per-category palettes (index-stable across views, unlike a hash the
  *  preset keys keep their color even when records are sparse). */
 const EXPENSE_PALETTE: Record<string, string> = {
-	food: '#e74c3c',
-	transport: '#e67e22',
-	shopping: '#f1c40f',
-	housing: '#9b59b6',
-	utilities: '#3498db',
-	entertainment: '#e91e63',
-	medical: '#1abc9c',
-	education: '#00bcd4',
-	social: '#ff7043',
-	other: '#95a5a6',
+	food: 'var(--db-expense-color-1)',
+	transport: 'var(--db-expense-color-2)',
+	shopping: 'var(--db-expense-color-3)',
+	housing: 'var(--db-expense-color-4)',
+	utilities: 'var(--db-expense-color-5)',
+	entertainment: 'var(--db-expense-color-6)',
+	medical: 'var(--db-expense-color-7)',
+	education: 'var(--db-expense-color-8)',
+	social: 'var(--db-expense-color-9)',
+	other: 'var(--db-expense-color-10)',
 };
 
 const INCOME_PALETTE: Record<string, string> = {
-	salary: '#2ecc71',
-	bonus: '#27ae60',
-	investment: '#1abc9c',
-	sideJob: '#3498db',
-	gift: '#f1c40f',
-	other: '#95a5a6',
+	salary: 'var(--db-expense-color-11)',
+	bonus: 'var(--db-expense-color-12)',
+	investment: 'var(--db-expense-color-7)',
+	sideJob: 'var(--db-expense-color-5)',
+	gift: 'var(--db-expense-color-3)',
+	other: 'var(--db-expense-color-10)',
 };
 
 /** Neutral gray for empty keys and the ungrouped primary bucket (a real
  *  color would imply a category the user never created). */
-export const EXPENSE_FALLBACK_COLOR = '#95a5a6';
+export const EXPENSE_FALLBACK_COLOR = 'var(--db-expense-color-10)';
 
 const FALLBACK_COLOR = EXPENSE_FALLBACK_COLOR;
 
@@ -52,8 +52,8 @@ export function categoryColor(type: ExpenseType, key: string): string {
 }
 
 /** Bar colors shared by the widget/stats convention. */
-export const EXPENSE_BAR_COLOR = 'var(--db-danger, #e74c3c)';
-export const INCOME_BAR_COLOR = '#2ecc71';
+export const EXPENSE_BAR_COLOR = 'var(--db-danger, var(--db-expense-color-1))';
+export const INCOME_BAR_COLOR = 'var(--db-expense-color-11)';
 
 export interface ExpenseSlice {
 	key: string;

@@ -1,19 +1,17 @@
 /** Rendering and navigation contracts; no Plugin, Vault, PTY or service locator. */
 import type { ModuleId } from './module';
 
-export const WORKBENCH_FEATURES = ['dashboard', 'terminal', 'browser', 'contacts', 'automations', 'notifications', 'icons', 'records', 'sync', 'content', 'settings'] as const;
+export const WORKBENCH_FEATURES = ['dashboard', 'terminal', 'contacts', 'automations', 'notifications', 'icons', 'sync', 'content', 'settings'] as const;
 export type WorkbenchFeature = typeof WORKBENCH_FEATURES[number];
 
 /** The module that owns each workbench feature (`settings` belongs to the app). */
 export const FEATURE_MODULES: Readonly<Record<WorkbenchFeature, ModuleId | 'app'>> = {
 	dashboard: 'home',
 	terminal: 'agent',
-	browser: 'browser',
 	contacts: 'archives',
 	automations: 'automations',
 	notifications: 'notifications',
 	icons: 'icons',
-	records: 'home',
 	sync: 'sync',
 	settings: 'app',
 	content: 'app',
@@ -111,19 +109,29 @@ export interface StatusBarPreferences {
 }
 /** Transport-only quota model; shell never imports a module implementation. */
 export interface UsageProvider {
+ provider?: string;
+ rateStatus?: 'idle' | 'fetching' | 'ok' | 'error' | 'unavailable';
+ planType?: string;
+ updatedAt?: number;
+ error?: string;
+ accountId?: string;
+ accounts?: readonly { id: string; name: string; selected: boolean }[];
  id: string;
  name: string;
  account?: string;
  status?: string;
+ statusLabel?: string;
  stale?: boolean;
  failed?: boolean;
- windows: readonly { label: string; usedPercent: number; resetsAt?: number }[];
+ windows: readonly { key?: string; windowMinutes?: number; label: string; usedPercent: number; resetsAt?: number }[];
 }
 export interface UsageSnapshot {
+ lastRefreshAt?: number;
  providers: readonly UsageProvider[];
  refreshing: boolean;
 }
 export interface AgentUsage {
+ selectAccount?(provider: string, accountId: string): Promise<void>;
  snapshot(): UsageSnapshot;
  subscribe(listener: () => void): () => void;
  refresh(): Promise<void>;

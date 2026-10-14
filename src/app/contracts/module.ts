@@ -126,6 +126,8 @@ export interface ModuleContext {
 
 /** What a module's settings page gets from the workbench settings page showing it. */
 export interface SettingsPageHost {
+ /** Optional module subsection requested by a workbench deep link. */
+ resourceId?: string;
 	/** Redraw the whole page (after a change that adds or removes rows). */
 	refresh(): void;
 	/** Keep a subscription for as long as the page is shown. */

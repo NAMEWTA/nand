@@ -15,7 +15,7 @@ import { ReadingService } from './platform/reading/reading-service';
 import { BoardRegistry } from './services/board-registry';
 import { registerHomeCommands } from './services/commands';
 import { createHomeHost, repointBoards } from './services/home-host';
-import { homePages, homeServices } from './services/instances';
+import { homeServices } from './services/instances';
 import { homeSettings } from './settings';
 import { registerMessages } from '../../shared/i18n/index';
 import { messages } from './i18n';
@@ -30,19 +30,23 @@ registerMessages(messages);
 
 /**
  * Home (board) module: the boards and their registry, widget services (one each per activation), board
- * commands, the records pages and the dashboard automation source. Board code reads and writes the `home`
+ * commands and the dashboard automation source. Board code reads and writes the `home`
  * settings namespace through the module's host.
  */
 export default function createHomeModule(context: ModuleContext): ModuleInstance {
 	const app = context.app;
 	const host = createHomeHost(context, context.settings.bind('home', homeSettings));
-	const widgets = builtinHomeWidgets(() => host.settings, async (key, root, ctx) => {
-		const ui = await import('./ui/widgets/widget-loader');
-		if (!ctx.signal.aborted) await ui.mountBuiltinWidget(key, root, ctx);
-	}, async (key, ctx, create) => {
-		const ui = await import('./ui/widgets/widget-loader');
-		return ctx.signal.aborted ? null : ui.configureBuiltinWidget(host, key, ctx, create);
-	});
+	const widgets = builtinHomeWidgets(
+		() => host.settings,
+		async (key, root, ctx) => {
+			const ui = await import('./ui/widgets/widget-loader');
+			if (!ctx.signal.aborted) await ui.mountBuiltinWidget(key, root, ctx);
+		},
+		async (key, ctx, create) => {
+			const ui = await import('./ui/widgets/widget-loader');
+			return ctx.signal.aborted ? null : ui.configureBuiltinWidget(host, key, ctx, create);
+		},
+	);
 	let widgetGeneration = 0;
 	let widgetSubscriptions: (() => void)[] = [];
 	const widgetListeners = new Set<() => void>();
@@ -65,18 +69,24 @@ export default function createHomeModule(context: ModuleContext): ModuleInstance
 		},
 		pages: {
 			board: async () => (await import('./ui/workbench-page')).boardPage(host),
-			records: async () => (await import('./ui/records-page')).createRecordsPage(),
 		},
 		settingsPageKind: 'react',
 		settingsPage: async () => (await import('./ui/settings-page')).homeSettingsPage(host),
 		async activate() {
 			// Board UI helpers that must run on dispose (synchronously) and the workbench panel load now.
-			const [{ closeDashboardPanelModals }, { teardownBasenameIndex }, { homeWorkbench }] = await Promise.all([
-				import('./ui/ui/panel-modal'),
-				import('./ui/renderer/render-context'),
-				import('./ui/workbench-panel'),
-			]);
-			ui = { closeModals: closeDashboardPanelModals, teardown: teardownBasenameIndex };
+			const [{ closeDashboardPanelModals }, { teardownBasenameIndex }, { closeRecordDialogs }] =
+				await Promise.all([
+					import('./ui/ui/panel-modal'),
+					import('./ui/renderer/render-context'),
+					import('./ui/dialogs/record-lifetime'),
+				]);
+			ui = {
+				closeModals: (app) => {
+					closeRecordDialogs();
+					closeDashboardPanelModals(app);
+				},
+				teardown: teardownBasenameIndex,
+			};
 			const media = new MediaTagService(host);
 			media.load();
 			const habit = new HabitService(host);
@@ -86,20 +96,36 @@ export default function createHomeModule(context: ModuleContext): ModuleInstance
 			const music = context.env.phone ? undefined : new MusicService(host);
 			// Disposed with the module even if loading fails; published to widgets once loaded.
 			owned = { mediaTags: media, habit, expense, pomodoro, reading, music };
-			await Promise.all([habit.load(), expense.load(), pomodoro.loadSessions(), reading.loadSessions(), music?.load()]);
+			await Promise.all([
+				habit.load(),
+				expense.load(),
+				pomodoro.loadSessions(),
+				reading.loadSessions(),
+				music?.load(),
+			]);
 			Object.assign(homeServices, owned);
 			homeServices.acquireDispatch = () => Promise.resolve(context.services.peek(AGENT_DISPATCH));
 			homeServices.agents = () => context.services.peek(AGENT_DIRECTORY)?.list() ?? [];
 			homeServices.sessions = () => context.services.peek(AGENT_SESSIONS);
 			homeServices.skills = () => context.services.peek(AGENT_SKILLS);
-			homeServices.watchAgents = listener => {
+			homeServices.watchAgents = (listener) => {
 				const stopDirectory = context.services.watch(AGENT_DIRECTORY, listener);
 				const stopSkills = context.services.watch(AGENT_SKILLS, listener);
-				return () => { stopDirectory(); stopSkills(); };
+				return () => {
+					stopDirectory();
+					stopSkills();
+				};
 			};
-			homeServices.watchWidgets = listener => { widgetListeners.add(listener); return () => { widgetListeners.delete(listener); }; };
+			homeServices.watchWidgets = (listener) => {
+				widgetListeners.add(listener);
+				return () => {
+					widgetListeners.delete(listener);
+				};
+			};
 			context.lifetime.register(() => widgetListeners.clear());
-			context.lifetime.register(() => { for (const off of widgetSubscriptions.splice(0)) off(); });
+			context.lifetime.register(() => {
+				for (const off of widgetSubscriptions.splice(0)) off();
+			});
 			const notifyWidgets = () => {
 				homeServices.widgetRevision = (homeServices.widgetRevision ?? 0) + 1;
 				for (const listener of widgetListeners) listener();
@@ -113,17 +139,29 @@ export default function createHomeModule(context: ModuleContext): ModuleInstance
 					if (generation !== widgetGeneration) return;
 					const next = indexWidgetProviders([
 						{ module: 'home', bundle: widgets },
-						...contributed.filter((item) => item.module !== 'home').map((item) => ({ module: item.module, bundle: item.value })),
+						...contributed
+							.filter((item) => item.module !== 'home')
+							.map((item) => ({ module: item.module, bundle: item.value })),
 					]);
 					const previous = homeServices.widgets;
-					if (previous && previous.byKey.size === next.byKey.size && [...next.byKey].every(([key, value]) => previous.byKey.get(key)?.kind === value.kind) && previous.errors.join() === next.errors.join()) return;
+					if (
+						previous &&
+						previous.byKey.size === next.byKey.size &&
+						[...next.byKey].every(([key, value]) => previous.byKey.get(key)?.kind === value.kind) &&
+						previous.errors.join() === next.errors.join()
+					)
+						return;
 					homeServices.widgets = next;
 					for (const off of widgetSubscriptions.splice(0)) off();
 					for (const item of contributed) {
 						try {
-							const off = item.value.subscribeInstances?.(() => { if (homeServices.widgets === next) notifyWidgets(); });
+							const off = item.value.subscribeInstances?.(() => {
+								if (homeServices.widgets === next) notifyWidgets();
+							});
 							if (off) widgetSubscriptions.push(off);
-						} catch (error) { console.error('Home widget instance subscription failed', item.module, error); }
+						} catch (error) {
+							console.error('Home widget instance subscription failed', item.module, error);
+						}
 					}
 					notifyWidgets();
 				} catch (error) {
@@ -132,13 +170,20 @@ export default function createHomeModule(context: ModuleContext): ModuleInstance
 			};
 			homeServices.widgets = indexWidgetProviders([{ module: 'home', bundle: widgets }]);
 			homeServices.widgetRevision = 0;
-			context.lifetime.register(context.contributions.watch(HOME_WIDGETS, () => { void publishWidgets(); }));
+			context.lifetime.register(
+				context.contributions.watch(HOME_WIDGETS, () => {
+					void publishWidgets();
+				}),
+			);
 			void publishWidgets();
-			homePages.openRecords = (section) => { void context.shell.open({ feature: 'records', section }); };
 			const boards = new BoardRegistry({
 				settings: () => host.settings,
 				app,
-				read: () => ({ workspaceFiles: host.settings.workspaceFiles, workspaceNames: host.settings.workspaceNames, dashboardFile: host.settings.dashboardFile }),
+				read: () => ({
+					workspaceFiles: host.settings.workspaceFiles,
+					workspaceNames: host.settings.workspaceNames,
+					dashboardFile: host.settings.dashboardFile,
+				}),
 				write: async (next) => {
 					host.settings = { ...host.settings, ...next };
 					await host.saveSettings();
@@ -148,7 +193,7 @@ export default function createHomeModule(context: ModuleContext): ModuleInstance
 				refreshAll: () => host.refreshAllDashboards(),
 			});
 			await boards.recoverMoves();
-			boards.watch(dispose => context.lifetime.register(dispose));
+			boards.watch((dispose) => context.lifetime.register(dispose));
 			app.workspace.onLayoutReady(() => {
 				if (host.boards === boards) void boards.prune();
 			});
@@ -161,11 +206,21 @@ export default function createHomeModule(context: ModuleContext): ModuleInstance
 				shell: context.shell,
 				registerEvent: (ref) => context.lifetime.registerEvent(ref),
 			});
-			workbench = homeWorkbench(host, (listener) => {
-				listeners.add(listener);
-				return () => listeners.delete(listener);
-			});
-			// Widget switches change the records rows; board saves change the save statuses.
+			workbench = {
+				saveStatuses: () =>
+					host.boardSurfaces().map((surface) => ({
+						path: surface.plugin.settings.dashboardFile,
+						status: surface.sync.getSaveState().status,
+						message: surface.saveMessage(),
+					})),
+				subscribe: (listener) => {
+					listeners.add(listener);
+					return () => {
+						listeners.delete(listener);
+					};
+				},
+			};
+			// Board saves change the save statuses.
 			context.lifetime.register(context.settings.bind('home', homeSettings).subscribe(changed));
 			registerHomeCommands(host, context.commands, () => context.shell.open({ feature: 'dashboard' }));
 			if (app.workspace.layoutReady) host.refreshAllDashboards();
@@ -180,7 +235,6 @@ export default function createHomeModule(context: ModuleContext): ModuleInstance
 			const { mediaTags, habit, expense, pomodoro, reading, music } = owned;
 			owned = {};
 			for (const key of Object.keys(homeServices) as Array<keyof typeof homeServices>) delete homeServices[key];
-			homePages.openRecords = undefined;
 			if (mediaTags) void mediaTags.flush();
 			mediaTags?.destroy();
 			habit?.destroy();

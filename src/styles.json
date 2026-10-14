@@ -13,7 +13,6 @@
 		"src/modules/home/ui/theme/themes.css",
 		"src/modules/home/ui/theme/bridge.css",
 		"src/modules/home/ui/theme/dashboard.css",
-		"src/modules/home/ui/theme/records.css",
 		"src/app/styles/006-settings-footer.css",
 		"src/app/styles/008-settings-fallback-tab-bar-pre-1-13-builds.css",
 		"src/app/styles/009-about-author-page.css",

@@ -1,4 +1,4 @@
-// Layout and interaction adapted from PandoraReads/apex-dashboard ac4d2c7 (MIT), src/notes-config-modal.ts, src/template-modal.ts
+// Layout and interaction adapted from PandoraReads/apex-dashboard ac4d2c7 (MIT), Copyright (c) 2025 PandoraReads: src/notes-config-modal.ts, src/template-modal.ts
 import { useState } from 'react';
 import type { DashboardColumn, TaskTemplate } from '../../core/board/types/model';
 import type { BoardStore } from '../../services/board-store';

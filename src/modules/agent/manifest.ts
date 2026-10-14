@@ -1,3 +1,4 @@
+import { AGENT_BROWSER_TABS, NATIVE_HELPER_SQLITE } from './api';
 import type { ModuleManifest } from '../../app/contracts/module';
 import { AUTOMATION_AGENT_RUNTIME } from '../automations/api';
 import { AGENT_SESSIONS, AGENT_USAGE, AGENT_WORKBENCH, AGENT_DIRECTORY, AGENT_DISPATCH, AGENT_PROMPT_RUNNER, AGENT_SKILLS } from './api';
@@ -12,6 +13,6 @@ export const agentManifest: ModuleManifest = {
 	platforms: { desktop: true, mobile: true },
 	defaultEnabled: true,
 	activation: 'startup',
-	provides: [AUTOMATION_AGENT_RUNTIME, AGENT_SESSIONS, AGENT_USAGE, AGENT_WORKBENCH, AGENT_DIRECTORY, AGENT_DISPATCH, AGENT_PROMPT_RUNNER, AGENT_SKILLS],
+	provides: [AGENT_BROWSER_TABS, NATIVE_HELPER_SQLITE, AUTOMATION_AGENT_RUNTIME, AGENT_SESSIONS, AGENT_USAGE, AGENT_WORKBENCH, AGENT_DIRECTORY, AGENT_DISPATCH, AGENT_PROMPT_RUNNER, AGENT_SKILLS],
 	load: () => import('./module'),
 };

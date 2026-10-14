@@ -27,7 +27,7 @@ The [user guide](docs/README.md) covers every feature, including settings, appea
 |---|---|
 | Workbench | [Three-column layout, pages, focus mode and terminal sessions](docs/workbench.md) |
 | Settings and appearance | [Language and module switches](docs/settings.md); [styles, Markdown headings and accent colors](docs/appearance.md) |
-| Dashboard and records | [Sections, cards, widgets and quick actions](docs/dashboard.md); [habits, expenses, reading and pomodoro](docs/records.md) |
+| Dashboard and records | [Sections, cards, widgets and quick actions](docs/dashboard.md); [habits, expenses, reading and pomodoro](docs/dashboard.md#统计与账本) |
 | Automations | [Manual and scheduled actions, device ownership and notifications](docs/automation.md) |
 | Coding agents | [Terminal sessions, native history, usage and context](docs/agent-workbench.md) |
 | Browser | [Web pages, site permissions and material capture](docs/browser.md) |

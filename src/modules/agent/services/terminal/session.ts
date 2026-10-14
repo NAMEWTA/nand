@@ -86,6 +86,9 @@ export class TerminalSession {
 	activity: Activity;
 	activityAt = Date.now();
 	nativeSessionId?: string;
+ lastMessage = '';
+ generatedTitle = '';
+ appliedGeneratedTitle = '';
 	transcriptPath?: string;
 	exitCode?: number;
 	error?: string;
@@ -247,13 +250,14 @@ export class TerminalSession {
 	get renamed(): boolean {
 		return !!this.userTitle;
 	}
-	rename(title: string): void {
+ setGeneratedTitle(title: string): void { if(!title || this.autoTitle===title)return;this.autoTitle=title;this.appliedGeneratedTitle=title;this.changed(); }
+ rename(title: string): void {
 		this.userTitle = title.trim().slice(0, 200);
 		this.changed();
 	}
 
 	get running(): boolean {
-		return this.connection === 'connected' || this.connection === 'starting';
+		return !this.disposed && (this.connection === 'connected' || this.connection === 'starting');
 	}
 
 	get keyboard(): KeyboardModes {
@@ -325,6 +329,10 @@ export class TerminalSession {
 	setActivity(activity: Activity, data: Record<string, unknown> = {}): void {
 		if (!this.running) return;
 		const nativeId = data.session_id ?? data.sessionId;
+  const message = data.last_assistant_message ?? data.lastMessage ?? data.message ?? data.prompt;
+  if (typeof message === 'string') this.lastMessage = message.slice(0, 2000);
+  const title = data.session_title ?? data.title;
+  if (typeof title === 'string') this.generatedTitle = title.slice(0, 200);
 		if (typeof nativeId === 'string') this.nativeSessionId = nativeId;
 		if (typeof data.transcript_path === 'string') this.transcriptPath = data.transcript_path;
 		this.activityAt = Date.now();
@@ -333,7 +341,7 @@ export class TerminalSession {
 	}
 
 	input(data: string | Uint8Array): void {
-		if (this.connection !== 'connected' || !data.length) return;
+		if (this.disposed || this.connection !== 'connected' || !data.length) return;
 		this.port?.input(this.sid, data);
 	}
 

@@ -1,19 +1,22 @@
-/** @jsxImportSource preact */
+// Layout and interaction adapted from PandoraReads/apex-dashboard ac4d2c7 (MIT), Copyright (c) 2025 PandoraReads: src/renderer.ts
+import { RecordButton as Button } from '../dialogs/RecordButton';
+import { widgetClasses } from '../theme/widget-classes';
 import { t } from '../../../../shared/i18n';
-import { Icon } from '../../../../ui/primitives/Icon';
+import { ObsidianIcon as Icon } from '../../../../ui/components/nand/ObsidianIcon';
 export function ReadingMiniPanel({ elapsed, stop }: { elapsed: number; stop: () => void }) {
 	const hours = Math.floor(elapsed / 3600),
 		minutes = String(Math.floor((elapsed % 3600) / 60)).padStart(2, '0'),
 		seconds = String(elapsed % 60).padStart(2, '0');
 	return (
 		<>
-			<Icon className="dashboard-reading-mini-icon" name="book-open" />
-			<div class="dashboard-reading-mini-time" style={{ width: '8ch' }}>
+			<Icon className={widgetClasses('dashboard-reading-mini-icon')} name="book-open" />
+			<div className={widgetClasses('dashboard-reading-mini-time')} style={{ width: '8ch' }}>
 				{hours > 0 ? `${hours}:` : ''}
 				{minutes}:{seconds}
 			</div>
-			<div
-				class="dashboard-reading-mini-btn"
+			<Button
+				variant="ghost"
+				className={widgetClasses('dashboard-reading-mini-btn')}
 				role="button"
 				tabIndex={0}
 				aria-label={t('reading.miniStop')}
@@ -27,7 +30,7 @@ export function ReadingMiniPanel({ elapsed, stop }: { elapsed: number; stop: () 
 				}}
 			>
 				<Icon name="square" />
-			</div>
+			</Button>
 		</>
 	);
 }

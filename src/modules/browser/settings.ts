@@ -5,6 +5,6 @@ export type { BrowserSettings } from './core/model';
 
 /** Settings namespace `browser`. */
 export const browserSettings = domainSettings<BrowserSettings>({
-	defaults: () => ({ searchEngine: 'google' }),
+	defaults: () => normalizeBrowserSettings({}),
 	normalize: normalizeBrowserSettings,
 });

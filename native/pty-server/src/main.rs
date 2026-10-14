@@ -4,6 +4,7 @@
 //! every session, when its standard input closes.
 
 mod agent_data;
+mod cookies;
 mod data;
 mod frame;
 mod inherited_fds;
@@ -60,6 +61,7 @@ enum Message {
         #[serde(default)]
         payload: Value,
     },
+    Cookies { op: String, rid: String, #[serde(default)] payload: Value },
     Shutdown,
 }
 
@@ -106,6 +108,7 @@ fn dispatch(out: &Outbox, sessions: &Sessions, history: &data::History, body: &[
         Message::Ack { sid, bytes } => sessions.acknowledge(sid, bytes),
         Message::End { sid, force } => sessions.end(sid, force),
         Message::History { op, rid, payload } => history.handle(&op, rid, payload),
+        Message::Cookies { op, rid, payload } => cookies::handle(out.clone(), op, rid, payload),
         Message::Shutdown => return false,
     }
     true

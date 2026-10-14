@@ -149,6 +149,7 @@ export function UsageCluster({
 							className="w-[360px] max-w-[calc(100vw-16px)] p-0"
 						>
 							<UsageRosterPanel
+                                selectAccount={(provider, id) => { void usage?.selectAccount?.(provider, id).catch(report); }}
 								snapshot={snapshot}
 								preferences={preferences}
 								onPreferences={onPreferences}

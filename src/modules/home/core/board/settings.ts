@@ -2,6 +2,7 @@ import { DEFAULT_DASHBOARD_SETTINGS, type DashboardSettings } from './types/mode
 import type { AlbumConfig, AnniversaryConfig, CountdownConfig } from './types/index';
 import { normalizeWorkspaces } from '../workspace/workspace-registry';
 import { sanitizeMediaTags } from '../media/tags';
+import { readSkillShortcuts } from './skill-shortcuts';
 
 const isRecord = (value: unknown): value is Record<string, unknown> => !!value && typeof value === 'object' && !Array.isArray(value);
 
@@ -18,6 +19,10 @@ export function normalizeDashboardSettings(input: unknown): DashboardSettings {
 		anniversaries: Array.isArray(raw.anniversaries)
 			? (raw.anniversaries as AnniversaryConfig[]).filter((a) => a && typeof a.id === 'string' && typeof a.startDate === 'string') : [],
 		mediaTags: sanitizeMediaTags(raw.mediaTags),
+		widgetQuickCaptureEnabled: raw.widgetQuickCaptureEnabled === true,
+		widgetFileSearchEnabled: raw.widgetFileSearchEnabled === true,
+		widgetSkillsEnabled: raw.widgetSkillsEnabled === true,
+		skillWidgetButtons: readSkillShortcuts(raw.skillWidgetButtons) ?? [],
 		workspaceFiles: workspace.files,
 		workspaceNames: workspace.names,
 		dashboardFile: workspace.active,

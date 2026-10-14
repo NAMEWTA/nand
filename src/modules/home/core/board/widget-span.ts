@@ -49,6 +49,8 @@ export const STACKED_FIXED_SPANS: Record<string, number> = {
 	music: 3,
 	lunar: 2,
 	yearProgress: 2,
+	quickCapture: 2,
+	fileSearch: 2,
 };
 
 /** One card's packing spec, in DOM order. */

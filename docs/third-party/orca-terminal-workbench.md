@@ -100,4 +100,36 @@ NAND 使用自己的 Obsidian 叶子、主题令牌和 stdio 辅助进程（协�
 | `terminal-pane/TerminalContextMenu.tsx`、`TerminalProcessExitOverlay.tsx` | `ui/terminal/TerminalTabView.tsx`：菜单与退出条带、窗格状态/标题和平分操作；重置经 NAND 权威终端模型同步，复制上下文使用最近 200 行。`TerminalSearch.tsx` 恢复 NAND 原有大小写/正则/前后项与未匹配反馈，保留 xterm/PTY、Hook、附件与原生会话恢复接口。 |
 | `AgentStateDot.tsx`、`AgentWorkingSpinner.tsx`、`AgentQuestionIcon.tsx` | `src/ui/components/nand/StatusDot.tsx`、`AgentWorkingSpinner.tsx`、`AgentQuestionIcon.tsx`：状态图标和动效，改用 NAND 语义令牌、i18n、所属窗口 Tooltip；保留已有 `StatusDot.status` 调用兼容。 |
 
-历史面板、看板、快捷命令和智能体管理属于阶段 4b，核心页面预留入口。工作区服务与归一化为 NAND 实现；保留每窗格的原生会话标识与账号信息，但不会在启动时自动重启进程。普通 Shell 的输出停顿不作为智能体完成事件。
+阶段 4b 已接入历史面板、看板、快捷命令和智能体管理。工作区服务与归一化为 NAND 实现；保留每窗格的原生会话标识与账号信息，但不会在启动时自动重启进程。普通 Shell 的输出停顿不作为智能体完成事件。
+
+
+## 智能体历史、管理和统计（464bd5a，阶段 4b）
+
+上游路径相对 `src/renderer/src/components/`，版权与 MIT 许可沿用本页顶部说明。
+
+| 上游文件 | NAND 中的位置与适配 |
+|---|---|
+| `right-sidebar/AiVaultPanelHeader.tsx`、`AiVaultPanelControls.tsx`、`AiVaultSessionVirtualList.tsx`、`AiVaultSessionRow.tsx`、`AiVaultSessionDetails.tsx` | `agent/ui/history/SessionHistoryPanel.tsx`；保留侧栏、控制菜单、详情和虚拟列表布局；扫描、账号校验、标注与导出接入 NativeHistory。 |
+| `dashboard/AgentDashboardDrawer.tsx`、`DashboardAgentRow.tsx`、`sidebar/WorkspaceKanbanCard.tsx` | `agent/ui/dashboard/AgentBoard.tsx`；从 NAND 会话仓库派生四列，预览来自 Hook 或原生历史，隐藏标签组时暂停渲染资源。 |
+| `tab-bar/TabBarQuickCommandsButton.tsx`、`TabBarQuickCommandsMenu.tsx`、`terminal-quick-commands/TerminalQuickCommandDialog.tsx` | `agent/ui/quick-commands/`；保留分体按钮、分组菜单及编辑 Dialog，设置存入 `agent.quickCommands`；智能体提示词走现有输入就绪协议。 |
+| `WorktreeJumpPalette.tsx` | `agent/ui/jump/JumpPalette.tsx`；CommandDialog、最近标签、历史与命令；不引入 worktree 或 Orca IPC。 |
+| `settings/AgentsPane.tsx`、`AgentDetectionCatalog.tsx`、`AgentCatalogRow.tsx`、`AgentLaunchDefaultsEditor.tsx`、`TerminalPane.tsx`、`QuickCommandsPane.tsx`、`SettingsFormControls.tsx` | `agent/ui/settings/`；保留检测目录、覆盖编辑、终端设置和快捷命令布局，服务与持久化由 NAND 管理。 |
+| `stats/StatsPane.tsx`、`StatCard.tsx`、`ClaudeUsageDailyChart.tsx`、`UsageRecentSessionsTable.tsx`、`usage-overview-sections.tsx` | `agent/ui/usage/`；计数来自本设备 stats.json，token 来自只读原生日志；chart.js 按需加载，未知模型或费用不推测。 |
+
+账号菜单由 `AGENT_USAGE` 的模块仓库供数；设置页子区通过通用 `SettingsPageHost.resourceId` 接收导航。历史“全部”仍只读本库账号，恢复入口继续验证工作目录。
+
+
+## 浏览器标签（464bd5a，阶段 5）
+
+| 上游文件 | NAND 中的位置与适配 |
+|---|---|
+| `src/renderer/src/components/browser-pane/browser-client-page-retained-elements.ts`、`browser-client-page-position-driver.ts` | `src/modules/browser/platform/desktop/retained-page.ts`：按 Document 保留宿主，使用共享帧循环、ResizeObserver、滚动与尺寸同步；`<webview>` 不换父节点。接入 NAND 的库内 Session 和页面释放。 |
+| `src/shared/browser-url.ts` | `browser/core/url.ts`：地址分类，扩展百度和 HTTPS 自定义模板，保留凭据与协议拒绝规则。 |
+| `src/main/browser/browser-cookie-detection-types.ts`、`browser-cookie-key.ts`、`browser-cookie-decryption.ts`、`browser-cookie-import-policy.ts` | `browser/platform/desktop/cookies/{detect,keys,decrypt,policy}.ts`：本机目录、密钥、CBC/GCM、域名及 Google 排除；SQLite 通过 NAND 的协议 3 控制消息读取库内临时副本，文件导入与写入回滚为 NAND 接点。 |
+| `src/main/browser/browser-process-user-agent.ts`、`browser-session-ua.ts`、`browser-google-auth-ua.ts` | `browser/platform/desktop/user-agent.ts`：每个资料 Session 的清理 UA、Google 登录兼容与引用计数清理，不改宿主全局 UA。 |
+| `browser-pane/assemble-chrome/browser-navigation-control-row.tsx`、`browser-chrome-toolbar.tsx`、`BrowserAddressBar.tsx`、`BrowserAddressBarSuggestionList.tsx`、`BrowserFind.tsx`、`browser-toolbar-menu-dropdown.tsx`；`browser-pane/navigate/browser-page-download-list.tsx`、`browser-load-failure-overlay.tsx` | `browser/ui/BrowserChrome.tsx`、`ui/cookies/CookieImport.tsx`：保留工具栏／菜单／查找／下载布局与 Tailwind 类，改用 NAND 的 zustand 页面状态、词典、所属窗口 Portal 与设置服务。 |
+| `settings/BrowserPane.tsx`、`BrowserSearchEngineSetting.tsx`、`BrowserProfileRow.tsx`、`BrowserLinkRoutingSetting.tsx`、`BrowserNewProfileDialog.tsx` | `browser/ui/settings/BrowserSettings.tsx`、`NewProfileDialog.tsx`：设置行、资料列表与新建对话框；数据写入 NAND 的每设备文件。 |
+| `browser-pane/annotate/MarkupOverlay.tsx`、`MarkupToolbar.tsx`、`MarkupDrawButton.tsx`；`assemble-chrome/browser-chrome-element-tool-buttons.tsx` | `browser/ui/design/`：截图绘制层与独立 `MarkupToolbar.tsx` 保留上游图标、Tooltip、色块／线宽／字号 Popover 结构与类名。复用 NAND 的既有六种绘制工具及 markup-model 算法；不新增橡皮工具，文字输入与完成／取消为宿主截图流程接点。预览按阶段 5 设计采用锚定 Popover，材料只经 `AGENT_SESSIONS.attachMaterial` 发送至输入区，不提交。 |
+| `tab-bar/SortableTab.tsx` | `agent/ui/browser/BrowserWorkspaceTab.tsx`：与终端一致的标签尺寸、焦点／激活类，增加网页图标、资料切换及网页上下文菜单；`BrowserTabView.tsx` 只经 `browser/api.ts` 挂载与渲染。 |
+
+表中组件路径未写前缀时，相对上游 `src/renderer/src/components/`。原始许可保留在 [orca-LICENSE.txt](orca-LICENSE.txt)。不引入 Orca IPC、数据目录或自动发送行为；原生 SQLite 读取使用 NAND 已有 rusqlite，无新增依赖。

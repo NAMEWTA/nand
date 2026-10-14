@@ -93,6 +93,11 @@ Adapted parts, with the upstream commits they are taken from:
 - Automation page, list, editor, detail and run-history layouts, plus the
   automation CLI argument allowlist: commit 464bd5a54b3364021c5cc0319859616e5ec41bbf
   (mapping: docs/third-party/orca-terminal-workbench.md).
+- Browser retained-element positioning, address classification, Cookie browser
+  detection/key retrieval/decryption/import policy, browser chrome, profile
+  settings, download shelf and Design Mode layouts:
+  commit 464bd5a54b3364021c5cc0319859616e5ec41bbf
+  (mapping: docs/third-party/orca-terminal-workbench.md).
 Full license text: docs/third-party/orca-LICENSE.txt
 
 --------------------------------------------------------------------------------

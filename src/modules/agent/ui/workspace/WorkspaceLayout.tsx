@@ -1,9 +1,10 @@
+import { BrowserTabView } from '../browser/BrowserTabView';
 // Adapted from stablyai/orca 464bd5a (MIT), Copyright (c) 2026 Lovecast Inc.: src/renderer/src/components/tab-group/TabGroupSplitNodeTree.tsx, TabGroupPanel.tsx
 import { Fragment, useRef, useState } from 'react';
 import { DndContext, PointerSensor, useSensor, useSensors, pointerWithin, rectIntersection } from '@dnd-kit/core';
 import { Panel, PanelGroup, PanelResizeHandle, type ImperativePanelGroupHandle } from 'react-resizable-panels';
 import { useStore } from 'zustand';
-import { Globe, TerminalSquare } from 'lucide-react';
+import { TerminalSquare } from 'lucide-react';
 import type { GroupLayoutNode } from '../../core/workspace/model';
 import { useVisible } from '../../../../ui/react/contexts';
 import { EmptyState } from '../../../../ui/components/nand/EmptyState';
@@ -29,8 +30,7 @@ function Tree({
 	const { controller } = useWorkspaceUI(),
 		workspace = controller.workspace,
 		state = useStore(workspace.store),
-		visible = useVisible(),
-		t = useT();
+		visible = useVisible();
 	const panel = useRef<ImperativePanelGroupHandle>(null);
 	if (node.kind === 'group') {
 		const group = state.groups.find((g) => g.id === node.groupId);
@@ -65,14 +65,9 @@ function Tree({
 								{tab.kind === 'terminal' ? (
 									<TerminalTabView tab={tab} active={active && visible} retention={retention} />
 								) : (
-									<EmptyState
-										className="h-full"
-										icon={<Globe />}
-										title={t('agent.workspace.browserDisabled')}
-										description={tab.url}
-									/>
-								)}
-							</div>
+<BrowserTabView tab={tab} active={active && visible} />
+                                )}
+                            </div>
 						);
 					})}
 					{dragging && <DropZones groupId={group.id} />}
@@ -107,10 +102,10 @@ function Tree({
 	);
 }
 export function WorkspaceLayout() {
+	const t=useT();
 	const { controller } = useWorkspaceUI(),
 		workspace = controller.workspace,
-		state = useStore(workspace.store),
-		t = useT();
+		state = useStore(workspace.store);
 	const [dragging, setDragging] = useState(false),
 		[retention] = useState(() => new HiddenRendererRetention(2));
 	const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 6 } }));

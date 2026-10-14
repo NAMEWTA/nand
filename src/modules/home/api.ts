@@ -1,6 +1,5 @@
 /** Public surface of the home module (types and service keys). */
 import { contributionPoint, serviceKey } from '../../app/contracts/module';
-import type { PanelModel, WorkbenchTarget } from '../../app/contracts/workbench';
 import type { BoardLayout } from './core/board/types/model';
 
 export interface HomeWidgetContext {
@@ -17,7 +16,11 @@ export interface HomeWidgetContext {
 	openSettings(this: void): void;
 }
 
-export interface HomeWidgetInstance { id: string; label?: string; icon?: string; }
+export interface HomeWidgetInstance {
+	id: string;
+	label?: string;
+	icon?: string;
+}
 
 export interface HomeWidgetKind {
 	key: string;
@@ -74,10 +77,8 @@ export interface BoardSurfaceApi {
 	readonly sync: { getSaveState(): { status: string }; setBoardLayout(layout: BoardLayout): Promise<void> };
 }
 
-/** What the workbench shows for Home: the board and records panel, records titles and board save problems. */
+/** Board save problems exposed to the workbench status bar. */
 export interface HomeWorkbench {
-	panel(target: WorkbenchTarget): PanelModel;
-	recordsTitle(section: string | undefined): string;
 	saveStatuses(): ReadonlyArray<{ path: string; status: string; message: string }>;
 	subscribe(listener: () => void): () => void;
 }

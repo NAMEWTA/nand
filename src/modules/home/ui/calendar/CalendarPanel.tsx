@@ -1,7 +1,10 @@
-/** @jsxImportSource preact */
-import { Menu, Notice, Platform, type App } from 'obsidian';
+import { Choice } from '../board/controls';
+// Layout and interaction adapted from PandoraReads/apex-dashboard ac4d2c7 (MIT), Copyright (c) 2025 PandoraReads: src/calendar-grid.ts
+import { RecordButton as Button } from '../dialogs/RecordButton';
+import { widgetClasses } from '../theme/widget-classes';
+import { Notice, Platform, type App } from 'obsidian';
 import { contentFiles, type ContentFile } from '../../../../host/obsidian/storage/content-files';
-import { useCallback, useLayoutEffect, useRef, useState } from 'preact/hooks';
+import { useCallback, useLayoutEffect, useRef, useState } from 'react';
 import type { CalendarTaskFilter } from '../../core/calendar/task-filter';
 import type { DashboardSettings } from '../../core/board/types/index';
 import {
@@ -16,7 +19,7 @@ import {
 	type VaultTask,
 } from '../../platform/calendar/alltasks-scan';
 import { t } from '../../../../shared/i18n/index';
-import { Icon } from '../../../../ui/primitives/Icon';
+import { ObsidianIcon as Icon } from '../../../../ui/components/nand/ObsidianIcon';
 import type { DashboardRenderContext } from '../renderer/render-context';
 import type { DashboardSettingsAccess } from '../settings-access';
 import { MonthGrid, WeekGrid, WeekTimeGrid } from './CalendarGrids';
@@ -64,14 +67,17 @@ export function CalendarPanel({
 	const [filter, setFilter] = useState<CalendarTaskFilter>(() => readCalendarTaskFilter(settingsAccess));
 	const [byDay, setByDay] = useState(new Map<string, VaultTask[]>()),
 		[loaded, setLoaded] = useState(false),
-		[error, setError] = useState(false);
+		[error, setError] = useState(false),
+		[hasStarted, setHasStarted] = useState(!widget || !Platform.isPhone || !!autoLoad);
 	const started = useRef(!widget || !Platform.isPhone || !!autoLoad),
 		generation = useRef(0),
 		alive = useRef(true);
-	const preview = useDayPreview(app, context);
+	const preview = useDayPreview(app, context),
+		closePreview = preview.close;
 	const excludeKey = JSON.stringify(settings.calendarExcludeFolders ?? []);
 	const load = useCallback(async () => {
 		started.current = true;
+
 		const version = ++generation.current;
 		try {
 			const tasks = await collectVaultTasks(app, JSON.parse(excludeKey) as string[], settings.dashboardFile);
@@ -79,6 +85,7 @@ export function CalendarPanel({
 			const indexed = indexTasksByDay(tasks.filter(isCalendarRelevant));
 			setByDay(indexed);
 			setLoaded(true);
+			setHasStarted(true);
 			setError(false);
 			return indexed;
 		} catch (error) {
@@ -91,15 +98,18 @@ export function CalendarPanel({
 	}, [app, excludeKey, settings.dashboardFile]);
 	useLayoutEffect(() => {
 		alive.current = true;
-		if (started.current) void load();
+		if (started.current) void Promise.resolve().then(load);
 		return () => {
 			alive.current = false;
-			generation.current++;
 		};
 	}, [load]);
-	useLayoutEffect(() => contentFiles(app).subscribe(event => {
-		if (event.path.endsWith('.md') && started.current) void load();
-	}), [app, load]);
+	useLayoutEffect(
+		() =>
+			contentFiles(app).subscribe((event) => {
+				if (event.path.endsWith('.md') && started.current) void load();
+			}),
+		[app, load],
+	);
 	useLayoutEffect(() => {
 		calendarReloaders.set(root, async (reset) => {
 			if (!started.current) return;
@@ -109,14 +119,16 @@ export function CalendarPanel({
 				setWeek(mondayOf(now));
 				setView('month');
 			}
-			preview.close();
+			closePreview();
 			await load();
 		});
-		return () => calendarReloaders.delete(root);
-	}, [root, load]);
+		return () => {
+			calendarReloaders.delete(root);
+		};
+	}, [root, load, closePreview]);
 	useLayoutEffect(() => {
-		preview.close();
-	}, [date, week, view, byDay, filter]);
+		closePreview();
+	}, [date, week, view, byDay, filter, closePreview]);
 	const visible = widget ? byDay : filterTasksByDay(byDay, filter, toIsoDate(new Date()));
 	const toggle = async (task: VaultTask, checked: boolean) => {
 		try {
@@ -159,27 +171,44 @@ export function CalendarPanel({
 		if (!loaded) void load();
 	};
 	const label =
-		!loaded && widget && !started.current
+		!loaded && widget && !hasStarted
 			? t('calendar.today')
 			: view === 'week'
 				? weekLabel(week)
 				: monthLabel(date.getFullYear(), date.getMonth());
 	return (
 		<>
-			<div class={`dashboard-calendar-nav${widget ? '' : ' dashboard-calendar-section-nav'}`}>
-				<div class="dashboard-calendar-nav-btn" role="button" tabIndex={0} onClick={() => shift(-1)}>
+			<div className={widgetClasses(`dashboard-calendar-nav${widget ? '' : ' dashboard-calendar-section-nav'}`)}>
+				<Button
+					variant="ghost"
+					className={widgetClasses('dashboard-calendar-nav-btn')}
+					role="button"
+					tabIndex={0}
+					aria-label={t(view === 'week' ? 'calendar.previousWeek' : 'calendar.previousMonth')}
+					onClick={() => shift(-1)}
+				>
 					<Icon name="chevron-left" />
-				</div>
-				<div class="dashboard-calendar-nav-label">{label}</div>
-				<div class="dashboard-calendar-nav-btn" role="button" tabIndex={0} onClick={() => shift(1)}>
+				</Button>
+				<div className={widgetClasses('dashboard-calendar-nav-label')}>{label}</div>
+				<Button
+					variant="ghost"
+					className={widgetClasses('dashboard-calendar-nav-btn')}
+					role="button"
+					tabIndex={0}
+					aria-label={t(view === 'week' ? 'calendar.nextWeek' : 'calendar.nextMonth')}
+					onClick={() => shift(1)}
+				>
 					<Icon name="chevron-right" />
-				</div>
-				<div class="dashboard-library-view-toggle dashboard-calendar-view-toggle">
+				</Button>
+				<div className={widgetClasses('dashboard-library-view-toggle dashboard-calendar-view-toggle')}>
 					{(widget ? ([view === 'month' ? 'week' : 'month'] as const) : (['month', 'week'] as const)).map(
 						(next) => (
-							<div
+							<Button
+								variant="ghost"
 								key={next}
-								class={`dashboard-library-view-btn${widget ? ' dashboard-calendar-view-btn' : view === next ? ' active' : ''}`}
+								className={widgetClasses(
+									`dashboard-library-view-btn${widget ? ' dashboard-calendar-view-btn' : view === next ? ' active' : ''}`,
+								)}
 								role="button"
 								tabIndex={0}
 								aria-label={t(
@@ -197,15 +226,16 @@ export function CalendarPanel({
 								}}
 							>
 								<Icon name={next === 'week' ? 'calendar-range' : 'calendar'} />
-							</div>
+							</Button>
 						),
 					)}
 				</div>
 				{widget ? (
 					<>
-						<div class="dashboard-library-toolbar-spacer" />
-						<button
-							class="dashboard-calendar-today-btn"
+						<div className={widgetClasses('dashboard-library-toolbar-spacer')} />
+						<Button
+							variant="ghost"
+							className={widgetClasses('dashboard-calendar-today-btn')}
 							aria-label={t('calendar.fullscreen')}
 							onClick={(event) => {
 								event.stopPropagation();
@@ -215,13 +245,14 @@ export function CalendarPanel({
 							}}
 						>
 							<Icon name="maximize-2" />
-						</button>
+						</Button>
 					</>
 				) : (
 					<>
-						<button
+						<Button
+							variant="ghost"
 							type="button"
-							class="dashboard-modal-btn dashboard-modal-btn--cancel"
+							className={widgetClasses('dashboard-modal-btn dashboard-modal-btn--cancel')}
 							onClick={() => {
 								const now = new Date();
 								setDate(now);
@@ -229,44 +260,27 @@ export function CalendarPanel({
 							}}
 						>
 							{t('calendar.today')}
-						</button>
-						<button
-							type="button"
-							class={`dashboard-modal-btn dashboard-modal-btn--cancel dashboard-calendar-filter-btn${filter === 'all' ? '' : ' is-filtered'}`}
-							aria-haspopup="menu"
-							aria-label={t('calendar.filter')}
-							onClick={(event) => {
-								const menu = new Menu();
-								for (const next of CALENDAR_TASK_FILTERS)
-									menu.addItem((item) =>
-										item
-											.setTitle(t(`calendar.filter.${next}`))
-											.setChecked(next === filter)
-											.onClick(() => {
-												if (next !== filter)
-													void writeCalendarTaskFilter(settingsAccess, next).then((saved) => {
-														if (saved && alive.current) setFilter(next);
-													});
-											}),
-									);
-								const button = event.currentTarget;
-								button.setAttribute('aria-expanded', 'true');
-								menu.onHide(() => button.setAttribute('aria-expanded', 'false'));
-								menu.showAtMouseEvent(event);
+						</Button>
+						<Choice
+							className={widgetClasses(
+								`dashboard-modal-btn dashboard-modal-btn--cancel dashboard-calendar-filter-btn${filter === 'all' ? '' : ' is-filtered'}`,
+							)}
+							label={t('calendar.filter')}
+							value={filter}
+							options={CALENDAR_TASK_FILTERS.map((value) => ({
+								value,
+								label: t(`calendar.filter.${value}`),
+							}))}
+							onChange={(value) => {
+								void writeCalendarTaskFilter(settingsAccess, value as typeof filter).then((saved) => {
+									if (saved) setFilter(value as typeof filter);
+								});
 							}}
-						>
-							<span class="dashboard-calendar-filter-icon">
-								<Icon name="filter" />
-							</span>
-							<span class="dashboard-calendar-filter-label">{t(`calendar.filter.${filter}`)}</span>
-							<span class="dashboard-calendar-filter-caret">
-								<Icon name="chevron-down" />
-							</span>
-						</button>
+						/>
 					</>
 				)}
 			</div>
-			<div class={widget ? 'dashboard-calendar-host' : 'dashboard-calendar-section-body'}>
+			<div className={widgetClasses(widget ? 'dashboard-calendar-host' : 'dashboard-calendar-section-body')}>
 				{loaded ? (
 					view === 'month' ? (
 						<MonthGrid
@@ -282,12 +296,13 @@ export function CalendarPanel({
 						<WeekTimeGrid weekStart={week} byDay={visible} opts={gridOptions} context={context} />
 					)
 				) : error ? (
-					<div class="dashboard-library-empty">{t('calendar.noEvents')}</div>
-				) : widget && !started.current ? (
+					<div className={widgetClasses('dashboard-library-empty')}>{t('calendar.noEvents')}</div>
+				) : widget && !hasStarted ? (
 					<>
-						<div class="dashboard-library-empty">{t('calendar.mobileManualLoad')}</div>
-						<button
-							class="dashboard-calendar-refresh-btn"
+						<div className={widgetClasses('dashboard-library-empty')}>{t('calendar.mobileManualLoad')}</div>
+						<Button
+							variant="ghost"
+							className={widgetClasses('dashboard-calendar-refresh-btn')}
 							type="button"
 							aria-label={t('calendar.refresh')}
 							onClick={(event) => {
@@ -296,7 +311,7 @@ export function CalendarPanel({
 							}}
 						>
 							<Icon name="rotate-cw" />
-						</button>
+						</Button>
 					</>
 				) : null}
 			</div>

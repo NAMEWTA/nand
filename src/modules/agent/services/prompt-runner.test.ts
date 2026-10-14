@@ -3,7 +3,7 @@ import { afterEach, test, vi } from 'vitest';
 import type { AgentRunContextProvider } from '../api';
 import type { AgentRunHandle } from '../../../shared/automation/types';
 import type { AgentExecution } from './agent-runtime';
-import { PromptRunner } from './prompt-runner';
+import { PromptRunner, submitInteractivePrompt } from './prompt-runner';
 
 const deferred = <T>() => {
 	let resolve!: (value: T) => void;
@@ -12,6 +12,25 @@ const deferred = <T>() => {
 };
 const clock = { setTimeout: (fn: () => void, ms: number) => Number(setTimeout(fn, ms)), clearTimeout: (id: number) => clearTimeout(id) };
 afterEach(() => vi.useRealTimers());
+
+test('interactive quick prompts wait for readiness and never submit to an unready agent', async () => {
+	vi.useFakeTimers();
+	let ready = false;
+	const writes: string[] = [];
+	const target = { running: true, inputReady: () => ready, prompts: () => ({ lines: [] }), paste: (s: string) => { writes.push(s); }, input: (s: string) => { writes.push(s); } };
+	const first = submitInteractivePrompt(target, 'prompt', clock);
+	await vi.advanceTimersByTimeAsync(200);
+	assert.deepEqual(writes, []);
+	ready = true; await vi.advanceTimersByTimeAsync(100);
+	assert.equal(await first, true); assert.deepEqual(writes, ['prompt', '\r']);
+	ready = false; writes.length = 0;
+	const timeout = submitInteractivePrompt(target, 'unsafe', clock, true, 200);
+	await vi.advanceTimersByTimeAsync(200);
+	assert.equal(await timeout, false); assert.deepEqual(writes, []);
+	const closing = submitInteractivePrompt(target, 'late', clock);
+	target.running = false; await vi.advanceTimersByTimeAsync(100);
+	assert.equal(await closing, false); assert.equal(vi.getTimerCount(), 0);
+});
 
 function fixture(providers: readonly AgentRunContextProvider[] = []) {
 	const complete = deferred<Awaited<AgentRunHandle['completion']>>();

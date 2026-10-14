@@ -59,41 +59,8 @@ export function composeWorkbench(plugin: DashboardPlugin) {
 			] },
 			title: (target) => plugin.services.peek(AGENT_WORKBENCH)?.title(target),
 			availability: () => ({ ...ready(), enabled: plugin.moduleEnabled('agent'), supported: Platform.isDesktopApp, ready: !!plugin.services.peek(AGENT_WORKBENCH) }),
-			stateKeys: [],
+			stateKeys: ['agentView', 'agentHistory', 'agentHistoryWidth'],
 			create: modulePage('agent', 'terminal'),
-		},
-		{
-			id: 'browser',
-			rail: { slot: 'top' },
-			navigation: { id: 'browser', labelKey: 'workbench.browser', icon: 'globe', target: { feature: 'browser' }, children: [
-				{ id: 'browser-pages', labelKey: 'workbench.pages', icon: 'globe', target: { feature: 'browser' } },
-			] },
-			panel: ({ pages, target }) => ({
-				primary: { label: t('workbench.newPage'), icon: 'plus', run: () => plugin.openWorkbench({ feature: 'browser', resourceId: crypto.randomUUID() }) },
-				searchable: true,
-				sections: [{
-					id: 'browser-sections',
-					items: [
-						{ id: 'browser-pages', label: t('workbench.pages'), icon: 'globe', target: { feature: 'browser' }, active: !target.section },
-					],
-				}, {
-					id: 'pages',
-					title: t('workbench.pages'),
-					emptyText: t('browser.empty'),
-					items: pages('browser').filter(page => !page.target.section).map((page) => ({
-						id: page.target.resourceId ?? '',
-						label: (typeof page.state.title === 'string' && page.state.title) || (typeof page.state.url === 'string' && page.state.url) || t('workbench.browser'),
-						icon: 'globe',
-						target: page.target,
-						active: page.target.resourceId === target.resourceId,
-					})),
-				}],
-			}),
-			availability: () => ({ ...ready(), enabled: plugin.moduleEnabled('browser') }),
-			stateKeys: ['id', 'url', 'title', 'zoom', 'scroll', 'profileId'],
-			resourcePages: true,
-			resourceTabs: target => !target.section,
-			create: modulePage('browser', 'browser'),
 		},
 		{
 			id: 'contacts',
@@ -143,16 +110,6 @@ export function composeWorkbench(plugin: DashboardPlugin) {
 			availability: () => ({ ...ready(), enabled: plugin.moduleEnabled('icons'), ready: plugin.moduleState('icons') === 'active' }),
 			stateKeys: [],
 			create: modulePage('icons', 'icons'),
-		},
-		{
-			id: 'records',
-			railParent: 'dashboard',
-			navigation: { id: 'records', labelKey: 'workbench.records', icon: 'chart-column', target: { feature: 'records', section: 'habits' } },
-			panel: ({ target }) => home()?.panel(target),
-			title: (target) => home()?.recordsTitle(target.section) ?? t('workbench.records'),
-			availability: () => ({ ...ready(), enabled: plugin.moduleEnabled('home'), ready: plugin.moduleState('home') === 'active' }),
-			stateKeys: [],
-			create: modulePage('home', 'records'),
 		},
 		{
 			id: 'notifications',
@@ -262,7 +219,7 @@ export function composeWorkbench(plugin: DashboardPlugin) {
 			return () => { listeners.delete(listener); };
 		},
 		openSettings: (feature) => {
-			const product = { dashboard: 'dashboard', terminal: 'terminal', browser: 'browser', contacts: 'contacts', automations: 'automation', notifications: 'general', icons: 'iconic', records: 'dashboard', sync: 'sync', content: 'general', settings: 'general' } as const;
+			const product = { dashboard: 'dashboard', terminal: 'terminal', contacts: 'contacts', automations: 'automation', notifications: 'general', icons: 'iconic', sync: 'sync', content: 'general', settings: 'general' } as const;
 			void plugin.openWorkbenchSettings(feature ? product[feature] : 'general').catch(report);
 		},
 		openFocus: async (target, state, placement, ownerWindow) => {
@@ -331,7 +288,7 @@ export function composeWorkbench(plugin: DashboardPlugin) {
 		refresh();
 	});
 	plugin.register(() => { offInbox?.(); offInboxWatch(); });
-	// Boards and records refresh the home panel while that module is active.
+	// Board saves refresh the home status while that module is active.
 	let offHome = plugin.services.peek(HOME_WORKBENCH)?.subscribe(() => refresh());
 	const offHomeWatch = plugin.services.watch(HOME_WORKBENCH, (service) => {
 		offHome?.();

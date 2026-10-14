@@ -1,5 +1,5 @@
 // Adapted from PandoraReads/apex-dashboard ac4d2c7 (MIT), src/expense-widget.ts.
-import { useRef, useState } from 'react';
+import { lazy, Suspense, useRef, useState } from 'react';
 import { useStore } from 'zustand';
 import { ArrowDownRight, ArrowUpRight, CalendarPlus, Wallet } from 'lucide-react';
 import { Input } from '../../../../ui/components/input';
@@ -8,15 +8,22 @@ import { useT } from '../../../../ui/react/hooks';
 import type { BoardStore } from '../../services/board-store';
 import { todayStr } from '../../core/habit/model';
 import { Choice, IconButton } from '../board/controls';
-import { DashboardDialog } from '../dialogs/DashboardDialog';
+import { ExpenseEntryPanel } from '../expense/ExpenseEntryPanel';
+import { RecordDialog } from '../dialogs/RecordDialog';
+import { BarChart2 } from 'lucide-react';
+const Categories = lazy(() =>
+	import('../expense/ExpenseCategoryPanel').then((m) => ({ default: m.ExpenseCategoryPanel })),
+);
+const Stats = lazy(() => import('../expense/ExpenseStatsPanel').then((m) => ({ default: m.ExpenseStatsPanel })));
 export function ExpenseWidget({ store, compact = false }: { store: BoardStore; compact?: boolean }) {
 	useStore(store.state, (s) => s.widgetRevision);
+	const [stats, setStats] = useState(false),
+		[manage, setManage] = useState(false);
 	const t = useT(),
 		service = store.widgets.expense,
 		[amounts, setAmounts] = useState({ expense: '', income: '' }),
 		[categories, setCategories] = useState({ expense: '', income: '' }),
 		[note, setNote] = useState(''),
-		[date, setDate] = useState(todayStr),
 		[backfill, setBackfill] = useState(false),
 		[invalid, setInvalid] = useState(false),
 		active = useRef<'expense' | 'income'>('expense');
@@ -28,7 +35,7 @@ export function ExpenseWidget({ store, compact = false }: { store: BoardStore; c
 			amount: +amounts[type],
 			category: categories[type] || service.getOrderedCategories(type)[0] || '',
 			note,
-			date,
+			date: todayStr(),
 		});
 		setInvalid(!result);
 		if (result) {
@@ -38,6 +45,28 @@ export function ExpenseWidget({ store, compact = false }: { store: BoardStore; c
 	};
 	return (
 		<>
+			{manage && (
+				<RecordDialog
+					title={t('expense.cat.manageTitle')}
+					classes="dashboard-expense-stats-modal"
+					onClose={() => setManage(false)}
+				>
+					<Suspense fallback={null}>
+						<Categories service={service} close={() => setManage(false)} />
+					</Suspense>
+				</RecordDialog>
+			)}
+			{stats && (
+				<RecordDialog
+					title={t('expense.statsTitle')}
+					classes="dashboard-expense-stats-modal dashboard-expense-stats-modal--wide"
+					onClose={() => setStats(false)}
+				>
+					<Suspense fallback={null}>
+						<Stats service={service} close={() => setStats(false)} />
+					</Suspense>
+				</RecordDialog>
+			)}
 			<div className={`flex h-5 items-center gap-1.5 ${compact ? 'mb-1' : 'mb-1.5'}`}>
 				<h3 className="m-0 flex items-center gap-1 text-[.7em] font-semibold tracking-[.08em] text-primary">
 					<Wallet className="size-3" />
@@ -48,11 +77,10 @@ export function ExpenseWidget({ store, compact = false }: { store: BoardStore; c
 						? `${service.getCurrency()}${(totals.income - totals.expense).toFixed(2)}`
 						: ''}
 				</span>
-				<IconButton
-					className="ml-auto size-5"
-					label={t('expense.backfillTitle')}
-					onClick={() => setBackfill(true)}
-				>
+				<IconButton className="ml-auto size-5" label={t('expense.statsTitle')} onClick={() => setStats(true)}>
+					<BarChart2 className="size-3" />
+				</IconButton>
+				<IconButton className="size-5" label={t('expense.backfillTitle')} onClick={() => setBackfill(true)}>
 					<CalendarPlus className="size-3" />
 				</IconButton>
 			</div>
@@ -95,14 +123,20 @@ export function ExpenseWidget({ store, compact = false }: { store: BoardStore; c
 								className="h-8 w-auto min-w-0 max-w-[42%] shrink border-0 bg-transparent px-1 py-[3px] text-[.68em] shadow-none"
 								label={t('home.dashboard.category')}
 								value={category}
-								onChange={(value) => setCategories({ ...categories, [type]: value })}
-								options={options.map((value) => ({
-									value,
-									label:
-										t(`expense.cat.${value}`) === `expense.cat.${value}`
-											? value
-											: t(`expense.cat.${value}`),
-								}))}
+								onChange={(value) => {
+									if (value === '_manage') setManage(true);
+									else setCategories({ ...categories, [type]: value });
+								}}
+								options={[
+									...options.map((value) => ({
+										value,
+										label:
+											t(`expense.cat.${value}`) === `expense.cat.${value}`
+												? value
+												: t(`expense.cat.${value}`),
+									})),
+									{ value: '_manage', label: t('expense.cat.manageOption') },
+								]}
 							/>
 						</div>
 					);
@@ -128,18 +162,17 @@ export function ExpenseWidget({ store, compact = false }: { store: BoardStore; c
 				</div>
 			</div>
 			{backfill && (
-				<DashboardDialog
+				<RecordDialog
 					title={t('expense.backfillTitle')}
+					classes="dashboard-library-config-modal"
 					onClose={() => setBackfill(false)}
-					onSave={() => setBackfill(false)}
 				>
-					<Input
-						aria-label={t('home.dashboard.date')}
-						type="date"
-						value={date}
-						onChange={(e) => setDate(e.target.value)}
+					<ExpenseEntryPanel
+						service={service}
+						close={() => setBackfill(false)}
+						onSave={(input) => !!service.addRecord(input)}
 					/>
-				</DashboardDialog>
+				</RecordDialog>
 			)}
 		</>
 	);

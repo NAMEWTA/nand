@@ -1,7 +1,8 @@
 import type { App } from 'obsidian';
-import { h } from 'preact';
+import { createElement as h } from 'react';
+import { openRecordOverlay } from '../dialogs/open-record-dialog';
+import { mountRecordPanel } from '../dialogs/mount-record-panel';
 import type { HolidayInfo } from '../../platform/calendar/holiday-service';
-import { mountDashboardPanel } from '../renderer/render-context';
 import { LunarPanel } from './LunarPanel';
 export function renderSidebarLunarWidget(
 	container: HTMLElement,
@@ -9,14 +10,18 @@ export function renderSidebarLunarWidget(
 	app?: App,
 ): void {
 	const root = container.createDiv({ cls: 'dashboard-sidebar-widget dashboard-sidebar-lunar' });
-	mountDashboardPanel(
+	mountRecordPanel(
 		root,
 		h(LunarPanel, {
 			holidays: holidayData,
 			win: root.ownerDocument.defaultView!,
 			fortune: () => {
 				// The fortune texts (~175 KB) load when the dialog is opened.
-				if (app) void import('./fortune-stick-modal').then(({ FortuneStickModal }) => new FortuneStickModal().open());
+				if (app)
+					void import('./FortuneDialog').then(({ FortuneDialog }) => {
+						if (root.isConnected)
+							openRecordOverlay(root.ownerDocument, (close) => h(FortuneDialog, { onClose: close }));
+					});
 			},
 		}),
 	);

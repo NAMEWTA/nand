@@ -1,4 +1,4 @@
-// Layout and interaction adapted from PandoraReads/apex-dashboard ac4d2c7 (MIT), src/banner.ts
+// Layout and interaction adapted from PandoraReads/apex-dashboard ac4d2c7 (MIT), Copyright (c) 2025 PandoraReads, src/banner.ts
 /** Curated quote-font choices. `value` is a full CSS font-family stack so one
  * setting renders on macOS / Windows / iPad without per-OS editing; labels are
  * proper nouns and intentionally not localized. */

@@ -1,4 +1,4 @@
-// Layout and interaction adapted from PandoraReads/apex-dashboard ac4d2c7 (MIT), src/quick-note-config-modal.ts
+// Layout and interaction adapted from PandoraReads/apex-dashboard ac4d2c7 (MIT), Copyright (c) 2025 PandoraReads: src/quick-note-config-modal.ts
 import { Trash2 } from 'lucide-react';
 import { Button } from '../../../../ui/components/button';
 import { Input } from '../../../../ui/components/input';

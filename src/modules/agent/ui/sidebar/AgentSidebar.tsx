@@ -36,6 +36,7 @@ import { useWorkspaceUI } from '../workspace/workspace-context';
 import { TabLeadingIcon } from '../tabs/TabLeadingIcon';
 import { NewTabMenu } from '../create/NewTabMenu';
 import { sessionBucket } from '../../core/workspace/sidebar';
+import { useAgentSettings } from '../settings/settings-context';
 import { pickMaterial } from '../terminal/material-picker';
 import { openPath } from '../../platform/desktop/files';
 export function shortPath(path: string): string {
@@ -43,7 +44,7 @@ export function shortPath(path: string): string {
 	return parts.length > 2 ? `…/${parts.slice(-2).join('/')}` : path;
 }
 function SessionCard({ tab }: { tab: WorkspaceTab }) {
-	const { controller, close, confirm } = useWorkspaceUI(),
+	const { controller, close, confirm, chrome } = useWorkspaceUI(),
 		workspace = controller.workspace,
 		t = useT(),
 		doc = useOwnerDocument();
@@ -145,7 +146,10 @@ function SessionCard({ tab }: { tab: WorkspaceTab }) {
 						<button
 							type="button"
 							className="flex min-w-0 flex-1 flex-col items-stretch justify-start rounded-sm text-left outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
-							onClick={() => workspace.activate(tab.id)}
+							onClick={() => {
+								workspace.activate(tab.id);
+								chrome?.view?.setState({ view: 'running' });
+							}}
 							onDoubleClick={actions[0]!.run}
 						>
 							<span className="flex items-center gap-2">
@@ -233,14 +237,14 @@ function SessionCard({ tab }: { tab: WorkspaceTab }) {
 	);
 }
 export function AgentSidebar({ togglePanel }: { togglePanel?: () => void }) {
-	const { controller } = useWorkspaceUI(),
+	const { controller, chrome } = useWorkspaceUI(),
 		state = useStore(controller.workspace.store),
 		t = useT();
 	const [query, setQuery] = useState(''),
-		[search, setSearch] = useState(false),
 		[collapsed, setCollapsed] = useState<string[]>([]);
 	const [filters, setFilters] = useState({ terminal: true, browser: true, done: true, idle: false }),
 		[grouping, setGrouping] = useState<'status' | 'agent' | 'none'>('status');
+	const settings = useAgentSettings(controller.settings);
 	const grouped: Record<string, WorkspaceTab[]> = {};
 	for (const tab of Object.values(state.tabs)) {
 		if (!(tab.customTitle || tab.title).toLocaleLowerCase().includes(query.toLocaleLowerCase())) continue;
@@ -284,49 +288,76 @@ export function AgentSidebar({ togglePanel }: { togglePanel?: () => void }) {
 			<div className="flex flex-col gap-0.5 px-2 pt-2 pb-1">
 				<button
 					type="button"
-					onClick={() => setSearch(!search)}
+					onClick={() => {
+						chrome?.view?.setState({ jump: true });
+						void controller.historyStore.refresh(false);
+					}}
 					className="group flex w-full items-center justify-start gap-2 rounded-md bg-foreground/5 px-2 py-1.5 text-left text-[13px] font-medium tracking-tight text-foreground/60 hover:bg-foreground/8"
 				>
 					<Search className="size-4 text-foreground/30" strokeWidth={1.75} />
 					<span className="flex-1">{t('agent.search')}</span>
 				</button>
-				{search && (
-					<Input
-						autoFocus
-						value={query}
-						onChange={(e) => setQuery(e.target.value)}
-						aria-label={t('agent.search')}
-						className="h-8 text-xs"
-					/>
-				)}
+
 				{[
 					{ key: 'board', icon: LayoutDashboard },
 					{ key: 'automations', icon: Timer },
 					{ key: 'stats', icon: ChartNoAxesColumn },
-				].map((item) => (
-					<Tooltip key={item.key}>
-						<TooltipTrigger asChild>
-							<button
-								type="button"
-								aria-disabled={item.key !== 'automations'}
-								onClick={() => {
-									if (item.key === 'automations') void controller.open({ feature: 'automations' });
-								}}
-								className="flex w-full items-center justify-start gap-2 rounded-md px-2 py-1.5 text-left text-[13px] font-medium text-sidebar-foreground/60 hover:bg-sidebar-foreground/8 aria-disabled:opacity-50"
-							>
-								<item.icon className="size-4 text-sidebar-foreground/30" strokeWidth={1.75} />
-								{t(`agent.workspace.nav.${item.key}`)}
-							</button>
-						</TooltipTrigger>
-						<TooltipContent>
-							{t(
-								item.key === 'automations'
-									? 'agent.workspace.nav.automations'
-									: 'agent.workspace.future',
-							)}
-						</TooltipContent>
-					</Tooltip>
-				))}
+				]
+					.filter((item) => !settings.hiddenNavigation.includes(item.key))
+					.map((item) => (
+						<ContextMenu key={item.key}>
+							<ContextMenuTrigger>
+								<Tooltip>
+									<TooltipTrigger asChild>
+										<button
+											type="button"
+											aria-current={
+												chrome?.view?.getState().view ===
+												(item.key === 'stats' ? 'usage' : item.key)
+													? 'page'
+													: undefined
+											}
+											onClick={() => {
+												if (item.key === 'automations')
+													void controller.open({ feature: 'automations' });
+												else
+													chrome?.view?.setState({
+														view: item.key === 'stats' ? 'usage' : 'board',
+													});
+											}}
+											className="flex w-full items-center justify-start gap-2 rounded-md px-2 py-1.5 text-left text-[13px] font-medium text-sidebar-foreground/60 hover:bg-sidebar-foreground/8 aria-disabled:opacity-50"
+										>
+											<item.icon
+												className="size-4 text-sidebar-foreground/30"
+												strokeWidth={1.75}
+											/>
+											{t(`agent.workspace.nav.${item.key}`)}
+										</button>
+									</TooltipTrigger>
+									<TooltipContent>
+										{t(
+											item.key === 'automations'
+												? 'agent.workspace.nav.automations'
+												: `agent.workspace.nav.${item.key}`,
+										)}
+									</TooltipContent>
+								</Tooltip>
+							</ContextMenuTrigger>
+							<ContextMenuContent>
+								<ContextMenuItem
+									onSelect={() => {
+										void controller.settings
+											.update((d) => {
+												d.hiddenNavigation = [...d.hiddenNavigation, item.key];
+											})
+											.catch((e) => controller.workspace.report(e));
+									}}
+								>
+									{t('agent.workspace.hideNav')}
+								</ContextMenuItem>
+							</ContextMenuContent>
+						</ContextMenu>
+					))}
 			</div>
 			<div className="flex items-center px-3 pt-3 pb-1">
 				<span className="flex-1 text-2xs font-semibold uppercase tracking-wide text-muted-foreground">

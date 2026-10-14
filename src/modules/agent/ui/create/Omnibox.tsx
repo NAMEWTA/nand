@@ -1,12 +1,13 @@
 // Adapted from stablyai/orca 464bd5a (MIT), Copyright (c) 2026 Lovecast Inc.: src/renderer/src/components/tab-bar/TabBarCreateEntry.tsx, TabBarCreateEntryRow.tsx, tab-bar-surface.tsx
 import { Command } from 'cmdk';
 import { ArrowLeft, Bot, ChevronRight, Globe, Loader2, Search, Settings, TerminalSquare } from 'lucide-react';
-import { Fragment, useMemo, useState } from 'react';
+import { Fragment, useState } from 'react';
 import { Platform } from 'obsidian';
 import { useStore } from 'zustand';
 import type { AgentController } from '../../services/controller';
 import { AgentIcon } from '../../../../ui/components/nand/AgentIcon';
 import { useT } from '../../../../ui/react/hooks';
+import { useAgentSettings } from '../settings/settings-context';
 import { classifyInput, matchingAgents, type InputAction } from './classify-input';
 import type { ShellChoice } from '../../core/terminal/settings';
 
@@ -19,6 +20,7 @@ interface Option {
 		| InputAction
 		| { kind: 'tab'; tabId: string }
 		| { kind: 'settings' }
+		| { kind: 'quick'; commandId: string }
 		| { kind: 'shells' | 'back' }
 		| { kind: 'shell'; shell: ShellChoice };
 	shortcut?: string;
@@ -40,17 +42,16 @@ export function Omnibox({
 		[error, setError] = useState(''),
 		[shellMenu, setShellMenu] = useState(false);
 	const mod = Platform.isMacOS ? '⌘' : 'Ctrl';
-	const detected = useMemo(() => controller.runtime.listAgents(), [controller]);
-	const agents = useMemo(
-		() =>
-			detected
-				.filter((a) => a.enabled && a.installed)
-				.map((a) => ({
-					...a,
-					command: controller.settings.get().agents.agents[a.id].cliPath.split(/[\\/]/).at(-1),
-				})),
-		[controller, detected],
-	);
+	const settings = useAgentSettings(controller.settings);
+	const detection = useStore(controller.agents.store);
+	const detected = controller.runtime.listAgents();
+	const agents = controller.agents
+		.list()
+		.map((a) => ({
+			...a,
+			command: settings.overrides[a.id]?.command || detection.detected[a.id] || a.detectCommand,
+		}));
+
 	const actionOption = (action: InputAction): Option => ({
 		id: JSON.stringify(action),
 		action,
@@ -107,6 +108,15 @@ export function Omnibox({
 		for (const agent of matchingAgents(query, agents))
 			if (classified.kind !== 'agent' || classified.agentId !== agent.id)
 				options.push(actionOption({ kind: 'agent', agentId: agent.id }));
+		for (const command of settings.quickCommands)
+			if (command.name.toLowerCase().includes(query.toLowerCase()))
+				options.push({
+					id: 'quick:' + command.id,
+					label: command.name,
+					icon: TerminalSquare,
+					action: { kind: 'quick', commandId: command.id },
+				});
+
 	} else {
 		options.push({ ...actionOption({ kind: 'terminal' }), shortcut: `${mod} T` });
 		if (Platform.isWin || shellMenu)
@@ -160,7 +170,10 @@ export function Omnibox({
 			else if (action.kind === 'terminal' || action.kind === 'shell')
 				await workspace.newTerminal({ groupId, shell: action.kind === 'shell' ? action.shell : undefined });
 			else if (action.kind === 'agent') await workspace.newAgent(action.agentId, { groupId });
-			else if (action.kind === 'settings') await controller.open({ feature: 'settings', section: 'agent' });
+			else if (action.kind === 'quick') {
+				const command = settings.quickCommands.find((c) => c.id === action.commandId);
+				if (command) await controller.runQuickCommand(command, groupId);
+			} else if (action.kind === 'settings') await controller.open({ feature: 'settings', section: 'terminal' });
 			else
 				workspace.newBrowser(
 					action.kind === 'url' ? action.url : action.kind === 'search' ? `?${action.query}` : undefined,

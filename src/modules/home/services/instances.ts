@@ -28,6 +28,3 @@ export const homeServices: {
 	skills?: () => AgentSkills | undefined;
 	watchAgents?: (listener: () => void) => () => void;
 } = {};
-
-/** Opens a records page (habits, expenses, Pomodoro, reading) in the workbench; set while the home module is active. */
-export const homePages: { openRecords?: (section: 'habits' | 'expenses' | 'pomodoro' | 'reading') => void } = {};

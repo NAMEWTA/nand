@@ -1,4 +1,4 @@
-// Layout and interaction adapted from PandoraReads/apex-dashboard ac4d2c7 (MIT), src/note-popover-modal.ts
+// Layout and interaction adapted from PandoraReads/apex-dashboard ac4d2c7 (MIT), Copyright (c) 2025 PandoraReads: src/note-popover-modal.ts
 import { useEffect, useState } from 'react';
 import { useStore } from 'zustand';
 import type { BoardStore } from '../../services/board-store';

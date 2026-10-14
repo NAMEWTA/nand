@@ -6,7 +6,7 @@ import { useT } from '../../../../ui/react/hooks';
 import { Button } from '../../../../ui/components/button';
 import type { BoardStore } from '../../services/board-store';
 import { Board } from '../board/Board';
-import { WidgetDeck, enabledWidgets } from '../widgets/WidgetDeck';
+import { WidgetDeck, enabledWidgets, widgetKind } from '../widgets/WidgetDeck';
 export function MobileLayout({ store }: { store: BoardStore }) {
 	const settings = useStore(store.state, (s) => s.settings),
 		[active, setActive] = useState(''),
@@ -19,7 +19,7 @@ export function MobileLayout({ store }: { store: BoardStore }) {
 						key={id}
 						variant={active === id ? 'secondary' : 'ghost'}
 						size="icon-xs"
-						aria-label={t(`home.dashboard.widget.${id}`)}
+						aria-label={t(`home.dashboard.widget.${widgetKind(id)}`)}
 						aria-expanded={active === id}
 						onClick={() => setActive(active === id ? '' : id)}
 					>
@@ -33,8 +33,16 @@ export function MobileLayout({ store }: { store: BoardStore }) {
 										countdown: 'hourglass',
 										habit: 'check-circle',
 										expense: 'wallet',
+										reading: 'book-open',
+										lunar: 'moon',
+										calendar: 'calendar-days',
+										yearProgress: 'chart-no-axes-column',
+										anniversary: 'heart',
+										quickCapture: 'pencil',
+										fileSearch: 'search',
+										skills: 'sparkles',
 									} as Record<string, string>
-								)[id] ?? 'box'
+								)[widgetKind(id)] ?? 'box'
 							}
 						/>
 					</Button>

@@ -39,3 +39,9 @@
 `core/board/parser/__fixtures__/apex-dashboard-template.md` 是固定版本原始样本；解析与回写测试保留未知字段、缩进、子任务和文档树。`services/board-store.ts` 复用 NAND 的串行文档写入及受管内容层，不引入上游全局插件实例。工作台注册表存储为 `home.workspaces`，仅保留内存适配字段供现有服务使用。
 
 旧 P0 页面入口、旧布局选择与组件目录界面和 `home/styles/` 已由本轮结构替代；统计记录界面按阶段边界保留至 8b，其样式单独限制于 `.nand-records-page`。后续 P1 分区与统计服务保留，不在本轮开放替代实现。
+
+## 阶段 8b（v3.8.4）
+
+番茄、习惯、记账、账本和阅读统计，以及农历/抽签、年度进度、日历、纪念日改为 React。布局配方在 `home/ui/theme/widget-classes.ts`，由上游对应选择器的声明转为静态 Tailwind 类；固定图表与签纸色通过同目录 `themes.css` 的 `--db-record-*` 变量提供。对话框使用 NAND 的 shadcn/Radix 门户。旧 records 页面、侧栏和样式已删除，领域数据按 Apex JSON 写入 `.nand/content/NAND/`。
+
+阶段 8b 同时移植 `src/capture-search-widgets.ts`、`src/skill-widget.ts` 的独立输入条与实体技能键布局；配置复用 NAND 的 React 技能编辑器，发送只通过 `AGENT_DISPATCH`。对应静态样式配方为 `input-widget-classes.ts`。

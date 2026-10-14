@@ -11,6 +11,7 @@ import { Banner } from './banner/Banner';
 import { SideLayout } from './layout/SideLayout';
 import { StackedLayout } from './layout/StackedLayout';
 import { MobileLayout } from './layout/MobileLayout';
+import { ReadingMini } from './widgets/ReadingMini';
 import { PomodoroMini } from './widgets/PomodoroMini';
 import { BoardDnd } from './board/dnd';
 import { NotePreview } from './dialogs/NotePreview';
@@ -58,6 +59,7 @@ export function DashboardPage({ store, context }: { store: BoardStore; context: 
 						)}
 					</BoardDnd>
 					<PomodoroMini store={store} />
+					<ReadingMini store={store} />
 					<NotePreview store={store} />
 				</ThemeBridge>
 			) : (

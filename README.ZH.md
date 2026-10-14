@@ -27,7 +27,7 @@ NAND 当前版本为 0.0.2-alpha.1，是预发布版。
 |---|---|
 | 工作台 | [三栏布局、页面、专注模式和终端会话](docs/workbench.md) |
 | 设置与外观 | [语言与模块开关](docs/settings.md)；[样式、Markdown 标题与强调色](docs/appearance.md) |
-| 看板与记录 | [栏目、卡片、小组件和快捷操作](docs/dashboard.md)；[习惯、记账、阅读、番茄钟](docs/records.md) |
+| 看板与记录 | [栏目、卡片、小组件和快捷操作](docs/dashboard.md)；[习惯、记账、阅读、番茄钟](docs/dashboard.md#统计与账本) |
 | 自动化 | [手动／定时动作、设备归属和通知](docs/automation.md) |
 | 编程智能体 | [终端会话、原生历史、用量和上下文](docs/agent-workbench.md) |
 | 浏览器 | [网页、站点权限与材料采集](docs/browser.md) |

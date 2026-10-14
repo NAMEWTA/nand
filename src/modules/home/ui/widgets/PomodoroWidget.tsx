@@ -1,5 +1,5 @@
 // Layout and interaction adapted from PandoraReads/apex-dashboard ac4d2c7 (MIT), Copyright (c) 2025 PandoraReads: src/renderer.ts (renderSidebarPomodoro)
-import { useState } from 'react';
+import { lazy, Suspense, useState } from 'react';
 import { useStore } from 'zustand';
 import { SkipForward, Settings } from 'lucide-react';
 import { Button } from '../../../../ui/components/button';
@@ -10,8 +10,14 @@ import { useT } from '../../../../ui/react/hooks';
 import type { BoardStore } from '../../services/board-store';
 import { IconButton, Choice } from '../board/controls';
 import { DashboardDialog } from '../dialogs/DashboardDialog';
+import { RecordDialog } from '../dialogs/RecordDialog';
+import { BarChart2 } from 'lucide-react';
+const Tags = lazy(() => import('../pomodoro/PomodoroTagsPanel').then((m) => ({ default: m.PomodoroTagsPanel })));
+const Stats = lazy(() => import('../pomodoro/PomodoroStatsPanel').then((m) => ({ default: m.PomodoroStatsPanel })));
 export function PomodoroWidget({ store, compact = false }: { store: BoardStore; compact?: boolean }) {
 	useStore(store.state, (s) => s.widgetRevision);
+	const [stats, setStats] = useState(false),
+		[tags, setTags] = useState(false);
 	const t = useT(),
 		service = store.widgets.pomodoro,
 		[open, setOpen] = useState(false),
@@ -23,6 +29,28 @@ export function PomodoroWidget({ store, compact = false }: { store: BoardStore; 
 		seconds = String(displaySeconds % 60).padStart(2, '0');
 	return (
 		<>
+			{tags && (
+				<RecordDialog
+					title={t('pomodoro.tagTitle')}
+					classes="dashboard-pomodoro-stats-modal"
+					onClose={() => setTags(false)}
+				>
+					<Suspense fallback={null}>
+						<Tags service={service} close={() => setTags(false)} onChange={() => {}} />
+					</Suspense>
+				</RecordDialog>
+			)}
+			{stats && (
+				<RecordDialog
+					title={t('pomodoro.statsTitle')}
+					classes="dashboard-pomodoro-stats-modal dashboard-pomodoro-stats-modal--wide"
+					onClose={() => setStats(false)}
+				>
+					<Suspense fallback={null}>
+						<Stats service={service} close={() => setStats(false)} />
+					</Suspense>
+				</RecordDialog>
+			)}
 			<div className="relative flex h-5 w-full items-center justify-between">
 				<span className="absolute left-0 text-[.6em] text-muted-foreground">
 					{t('pomodoro.today')} {service.getTodayCount()}
@@ -39,6 +67,9 @@ export function PomodoroWidget({ store, compact = false }: { store: BoardStore; 
 					]}
 				/>
 				<div className="flex min-w-0 flex-1 justify-end">
+					<IconButton className="size-5" label={t('pomodoro.statsTitle')} onClick={() => setStats(true)}>
+						<BarChart2 className="size-3" />
+					</IconButton>
 					<IconButton className="size-5" label={t('home.dashboard.settings')} onClick={() => setOpen(true)}>
 						<Settings className="size-3" />
 					</IconButton>
@@ -148,6 +179,9 @@ export function PomodoroWidget({ store, compact = false }: { store: BoardStore; 
 							/>
 						</Label>
 					))}
+					<Button variant="outline" onClick={() => setTags(true)}>
+						{t('pomodoro.tagManage')}
+					</Button>
 					<Input
 						aria-label={t('home.dashboard.activity')}
 						defaultValue={service.getActivity()}

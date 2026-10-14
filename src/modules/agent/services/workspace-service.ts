@@ -1,3 +1,4 @@
+import type { BrowserPageHandle, BrowserViewState } from '../../browser/api';
 import { t } from '../../../shared/i18n';
 import {
 	activeTab,
@@ -45,7 +46,8 @@ export interface WorkspaceBrowserHost {
 		title: string;
 		profileId: string;
 	};
-	disposePage(id: string): void;
+	getPage?(id: string): BrowserPageHandle | undefined;
+ disposePage(id: string): void;
 }
 export interface WorkspaceLaunchPort {
 	shell(options: { shell?: ShellChoice; cwd?: string }): Promise<TerminalSession | undefined>;
@@ -152,7 +154,7 @@ export class WorkspaceService {
 		const host = this.browser();
 		if (!host) throw new Error(t('agent.workspace.browserDisabled'));
 		const page = host.createPage({
-			url: input ? (host.resolveInput(input) ?? undefined) : undefined,
+			url: input ? (host.resolveInput(input) ?? (() => { throw new Error(t('browser.browser_invalid_url')); })()) : undefined,
 			profileId: options.profileId,
 		});
 		const tab: BrowserTabData = {
@@ -167,6 +169,12 @@ export class WorkspaceService {
 		};
 		this.update((s) => openTab(s, options.groupId, tab));
 	}
+	updateBrowser(tabId:string,state:BrowserViewState):void {
+  this.update(s=>{const tab=s.tabs[tabId];if(tab?.kind!=='browser')return s;
+   const next={...tab,url:state.url,title:state.title||(state.url==='about:blank'?t('browser.newTab'):new URL(state.url).hostname||state.url),profileId:state.profileId??'default',zoom:state.zoom,faviconUrl:state.favicon};
+   return JSON.stringify(next)===JSON.stringify(tab)?s:{...s,tabs:{...s.tabs,[tabId]:next}};
+  });
+ }
 	activate(tabId: string): void {
 		this.update((s) => activateTab(s, tabId));
 		const tab = this.store.getState().tabs[tabId];
@@ -229,7 +237,7 @@ export class WorkspaceService {
 					};
 				const next = {
 					...tab,
-					title: tab.agentId ? tab.title : focused.title,
+					title: tab.agentId ? focused.appliedGeneratedTitle || tab.title : focused.title,
 					panes,
 					state,
 					updatedAt: Math.max(...sessions.map((s) => s.activityAt)),
@@ -249,6 +257,10 @@ export class WorkspaceService {
 	async close(tabId: string, confirm: (message: string) => Promise<boolean>): Promise<void> {
 		const tab = this.store.getState().tabs[tabId];
 		if (!tab) return;
+		if (tab.kind === 'browser') {
+ const count=this.browser()?.getPage?.(tab.pageId)?.store.getState().downloads.filter(d=>d.state==='progressing').length??0;
+ if(count && !(await confirm(t('browser.closeDownloads',{count}))))return;
+ }
 		if (tab.kind === 'terminal') {
 			const running = tab.sessionIds.filter((id) => this.sessions.get(id)?.running);
 			if (
@@ -450,12 +462,12 @@ export class WorkspaceService {
 			this.restoring.delete(key);
 		}
 	}
-	reopen(): void {
-		const tab = this.store.getState().closedTabs[0];
+	reopen(id?: string): void {
+		const tab = id ? this.store.getState().closedTabs.find(tab => tab.id === id) : this.store.getState().closedTabs[0];
 		if (!tab) return;
 		this.update((s) =>
 			openTab(
-				{ ...s, closedTabs: s.closedTabs.slice(1) },
+				{ ...s, closedTabs: s.closedTabs.filter(closed => closed.id !== tab.id) },
 				s.activeGroupId,
 				tab.kind === 'terminal' ? { ...tab, resume: tab.panes[tab.focusedSessionId], unread: false } : tab,
 			),

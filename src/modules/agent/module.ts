@@ -3,6 +3,8 @@ import { registerMessages } from '../../shared/i18n/index';
 import { AUTOMATION_AGENT_RUNTIME, AUTOMATION_INVOCATIONS } from '../automations/api';
 import {
 	AGENT_DIRECTORY,
+	NATIVE_HELPER_SQLITE,
+	AGENT_BROWSER_TABS,
 	AGENT_DISPATCH,
 	AGENT_PROMPT_RUNNER,
 	AGENT_SESSIONS,
@@ -16,8 +18,8 @@ import { messages as commonStrings } from '../../shared/i18n/lazy/common';
 import type { AgentController } from './services/controller';
 import { createAgentDispatch } from './services/prompt-port';
 import { sessionMaterialPort } from './services/session-material';
-import { agentUsage } from './services/usage-adapter';
 import { agentWorkbench } from './services/workbench';
+import { cookieClient } from './platform/desktop/server/cookie-client';
 import { agentSettings } from './settings';
 import { AgentSkillDirectory } from './services/skills';
 
@@ -48,8 +50,22 @@ export default function createAgentModule(context: ModuleContext): ModuleInstanc
 							? [
 									[AUTOMATION_AGENT_RUNTIME, current.runtime] as const,
 									[AGENT_SESSIONS, sessionMaterialPort(current)] as const,
+ [AGENT_BROWSER_TABS, {
+  sessionOrder: (pageId:string) => {const state=current.workspace.store.getState();const tab=Object.values(state.tabs).find(t=>t.kind==='browser'&&t.pageId===pageId);const group=tab?current.workspace.group(tab.id):undefined;return (group?.tabIds??[]).flatMap(id=>{const t=state.tabs[id];return t?.kind==='terminal'?t.sessionIds:[];});},
+  open: async (url?:string,profileId?:string,reuse?:boolean) => {
+   await current.workspace.persistence.ready;
+   const found=reuse?Object.values(current.workspace.store.getState().tabs).find(tab=>tab.kind==='browser'&&tab.url===url&&(!profileId||tab.profileId===profileId)):undefined;
+   if(found)current.workspace.activate(found.id);else current.workspace.newBrowser(url,{profileId});
+   await context.shell.open({feature:'terminal'});
+   const tab=current.workspace.active;return tab?.kind==='browser'?tab.pageId:'';
+  },
+  close: async (id:string) => {const tab=Object.values(current.workspace.store.getState().tabs).find(tab=>tab.kind==='browser'&&tab.pageId===id);if(tab)await current.workspace.close(tab.id,async()=>true);},
+  list: () => Object.values(current.workspace.store.getState().tabs).flatMap(tab=>tab.kind==='browser'?[{id:tab.pageId,title:tab.title,url:tab.url,profileId:tab.profileId}]:[]),
+  activate: (id:string) => {const tab=Object.values(current.workspace.store.getState().tabs).find(tab=>tab.kind==='browser'&&tab.pageId===id);if(tab)current.workspace.activate(tab.id);},
+ }] as const,
+                                    [NATIVE_HELPER_SQLITE, cookieClient(() => current.sessions.ensureHelper())] as const,
 									[AGENT_WORKBENCH, agentWorkbench(current)] as const,
-									[AGENT_USAGE, agentUsage(current)] as const,
+									[AGENT_USAGE, current.usageStore] as const,
 									[AGENT_PROMPT_RUNNER, current.prompts] as const,
 									[AGENT_DIRECTORY, { list: () => current.runtime.listAgents() }] as const,
 									[AGENT_DISPATCH, dispatch!] as const,
@@ -61,6 +77,7 @@ export default function createAgentModule(context: ModuleContext): ModuleInstanc
 		pages: {
 			terminal: async () => (await import('./ui/workbench-page')).createAgentPage(() => controller),
 		},
+		settingsPageKind: 'react',
 		settingsPage: async () =>
 			(await import('./ui/settings-page')).agentSettingsPage(() => controller, settings, context.env.desktop),
 		async activate() {
