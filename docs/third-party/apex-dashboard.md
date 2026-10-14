@@ -17,7 +17,7 @@
 
 | NAND 实现 | 固定的上游源码 | 行为与差异 |
 |---|---|---|
-| `src/modules/home/contrib/widgets.ts`、`ui/widgets/`、`ui/immersive/` | `src/immersive.ts`、`src/renderer.ts` | 共享目录、首个实例创建、成员移除和网格交互。NAND 每模块提供一个贡献包，独立管理生命周期，并使用可访问的原生控件；新闻和已保存的自动化快捷操作与内置组件使用同一注册表。 |
+| `src/modules/home/contrib/widgets.ts`、`ui/widgets/`、`ui/immersive/` | `src/immersive.ts`、`src/renderer.ts` | 共享目录、首个实例创建、成员移除和网格交互。NAND 每模块提供一个贡献包，独立管理生命周期，并使用可访问的原生控件；已保存的自动化快捷操作与内置组件使用同一注册表。 |
 | `src/modules/home/core/board/skill-shortcuts.ts`、`services/skill-shortcuts.ts`、`ui/skills/`、`src/shared/agent-dispatch.ts` | `src/agent-dispatch.ts`、`src/agent-prompt-modal.ts`、`src/skill-widget.ts` | 模板替换、预览、直发和交付结果。NAND 的最终提示词可编辑，文件可明确选择，经智能体公开端口派发，分开记录交付与完成；已有会话仅粘贴。不改编外部应用启动器。 |
 | `src/modules/agent/` 技能发现、`src/modules/home/ui/skills/` | `src/skill-registry.ts` | 库内技能发现与名称记忆。额外目录必须明确指定，各 CLI 的直接调用语法按其官方文档核对，不猜测不支持的语法。 |
 | `src/modules/home/core/board/board-experience.ts`、`ui/ui/template-modal.ts` | `src/types.ts`、`src/parser.ts`、资料库与文件夹配置 | 多模板排序和创建时选择。明确空选择与缺省设置不同，只读打开旧文档保留原字节。 |
@@ -28,6 +28,6 @@
 | `src/modules/home/ui/ui/icon-picker-modal.ts` | `src/icon-picker-modal.ts`、`src/icon-names.ts` | 常用建议、模糊搜索和最多 400 个显示结果。完整图标来自 Obsidian 已安装的目录，可选复用 NAND 关键词查询。 |
 | `src/modules/home/ui/` 中的资料库与文件夹卡片控件 | `src/library-section.ts` | 悬停删除复用既有回收站操作；NAND 同时在键盘聚焦与触摸时显示按钮，确认框归属触发窗口并默认聚焦取消。 |
 
-集成审查在真实 Windows Obsidian 中覆盖全部 14 种内置组件和三种新闻组件，包括模块可用性、布局持久化、重启和减少动效。真实手机、其他操作系统及登录后的模型执行仍未验证。另行固定的 GPL home-pages 树仅供相似度脚本输出路径和数值，不作为实现来源。
+集成审查在真实 Windows Obsidian 中覆盖全部 14 种内置组件及已保存的自动化快捷操作，包括模块可用性、布局持久化、重启和减少动效。真实手机、其他操作系统及登录后的模型执行仍未验证。另行固定的 GPL home-pages 树仅供相似度脚本输出路径和数值，不作为实现来源。
 
 本参考不整体搬入上游样式表、单体渲染器、设置持久化或外部智能体适配器；改编不包含 GPL 项目的实现代码。

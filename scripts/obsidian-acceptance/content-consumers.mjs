@@ -16,8 +16,7 @@ const check = (name, passed) => { rows.push({ name, passed }); assert.ok(passed,
 const surfaces = "app.workspace.getLeavesOfType('nand-workbench-view').flatMap(l=>l.view.getNativeSurfaces())";
 try {
  runtime = await launchFreshVault({ root: process.argv[2], port: 9443, settings: { version: 1, namespaces: {
-  app: { language: 'zh', introSeen: true, modules: Object.fromEntries(['home','agent','browser','news','archives','automations','notifications','icons','comments','sync'].map(id => [id, false])) },
-  news: { analysisEnabled: false, autoRefresh: false, sources: [] },
+  app: { language: 'zh', introSeen: true, modules: Object.fromEntries(['home','agent','browser','archives','automations','notifications','icons','comments','sync'].map(id => [id, false])) },
  } } }); c = runtime.connection;
  await c.evaluate(`${p}.setModuleEnabled('home',true)`);
  await c.evaluate(`${p}.openWorkbench({feature:'dashboard'},window)`);
@@ -54,13 +53,6 @@ try {
  check('native-archive-create-writes-markdown', record.path.startsWith('.nand/content/') && (await fs.readFile(path.join(runtime.vault, record.path), 'utf8')).includes('Keep this annotation'));
  const attachment = await c.evaluate(`archives.createNote(${JSON.stringify(record.id)},'Related note')`);
  check('archive-attached-note-is-managed', attachment.startsWith(record.folderPath + '/') && await c.evaluate(`${p}.managedContent.getFileByPath(${JSON.stringify(attachment)})?.kind==='managed'`));
- await c.evaluate(`${p}.setModuleEnabled('news',true)`); await c.evaluate(`${p}.openWorkbench({feature:'news',section:'all'},window)`);
- await until(`${surfaces}.some(s=>s.getViewType()==='nand-news-view')`);
- await c.evaluate(`window.news=${surfaces}.find(s=>s.getViewType()==='nand-news-view').service; news.ready`);
- const material = { id: 'acceptance-material', sourceId: 'local', sourceItemId: 'one', title: 'Windows fixture', originalUrl: 'https://example.invalid/local', canonicalKey: 'https://example.invalid/local', bodyExcerpt: 'Local fixture only', revision: 1, contentHash: 'fixture', discoveredAt: Date.now() };
- await c.evaluate(`news.saveFavorite(${JSON.stringify(material)},'News annotation')`);
- const favorite = await c.evaluate(`news.favoriteLocation('acceptance-material')`);
- check('news-favorite-is-hidden-markdown', favorite.startsWith('.nand/content/') && (await fs.readFile(path.join(runtime.vault, favorite), 'utf8')).includes('News annotation'));
  check('no-errors-before-restart', await c.evaluate('(window.nandAcceptanceErrors??[]).length===0'));
  await runtime.shot('native-content-consumers'); await runtime.restart(); c = runtime.connection;
  await c.evaluate(`${p}.openWorkbench({feature:'contacts',resourceId:${JSON.stringify(record.path)}},window)`);

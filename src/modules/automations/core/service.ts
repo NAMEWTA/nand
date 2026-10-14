@@ -15,7 +15,6 @@ import { latestOccurrence, validateSchedule } from './schedule';
 import type { AutomationDefinitionsRepository } from './documents';
 import { actionAvailability, type ActionExecutor } from './actions/executor';
 import { dispatchIdentity, dispatchMaterial, type AgentDispatchRequest, type AgentDispatchReceipt } from '../../../shared/agent-dispatch';
-import type { AutomationWorkflowRequest, AutomationWorkflowReceipt } from '../api';
 
 export interface AutomationState {
 	definitions: AutomationDefinition[];
@@ -53,7 +52,6 @@ export class AutomationService {
 	private pendingMaterials = new Map<string, AbortController>();
 	private pendingActions = new Map<string, AbortController>();
 	private ownedActions = new Map<string, { handle: AutomationActionHandle; abort: AbortController }>();
-	private workflowInvocations = new Map<string, { identity: string; result: Promise<AutomationWorkflowReceipt> }>();
 	constructor(
 		storage: TextStorage,
 		path: string,
@@ -178,11 +176,6 @@ export class AutomationService {
 		const unavailable = actionAvailability(d.action.kind, d.schedule.kind === 'manual' ? 'manual' : 'scheduled', this.options.desktop !== false);
 		if (unavailable) throw new Error(t(unavailable));
 		const old = this.definitions.find((item) => item.id === d.id);
-		if (d.action.kind === 'browser-workflow') {
-			if (!this.options.executor?.validate) throw new AutomationError('workflowUnavailable');
-			await this.options.executor.validate(d.action);
-			this.requireExecution();
-		}
 		if (old && old.deviceId !== this.deviceId) throw new AutomationError('otherDevice');
 		const changed =
 			!old ||
@@ -307,45 +300,6 @@ export class AutomationService {
 		void result.finally(() => { this.invocations.delete(snapshot.invocationId); this.launches.delete(launch); }).catch(() => {});
 		return result;
 	}
-	workflowReceipt(invocationId: string): AutomationWorkflowReceipt | undefined {
-		const run = this.state.runs.find(row => row.workflowInvocation?.invocationId === invocationId);
-		return run && { invocationId, runId: run.id, status: run.status, errorCode: run.errorCode, output: run.output };
-	}
-	/** The browser keeps secret inputs and its one-use review in memory. Only the validated public request is journaled. */
-	invokeWorkflow(request: AutomationWorkflowRequest, options?: { signal?: AbortSignal; authorizationId?: string }): Promise<AutomationWorkflowReceipt> {
-		this.requireExecution();
-		if (!this.loaded || this.loadError) return Promise.reject(new AutomationError('failedLoad'));
-		const input = structuredClone(request);
-		if (!input || !/^[\w-]{1,100}$/.test(input.invocationId) || typeof input.title !== 'string' || !input.title.trim()
-			|| input.source?.kind !== 'browser-workflow' || options?.signal?.aborted) return Promise.reject(new AutomationError('workflowInvalid'));
-		const now = Date.now();
-		const definition: AutomationDefinition = { id: `workflow:${input.invocationId}`, name: input.title, enabled: true,
-			deviceId: this.deviceId, revision: 1, schedule: { kind: 'manual' }, action: input.action, source: input.source,
-			channels: ['in-app'], notifyOn: 'failure', graceMinutes: 0, createdAt: now, updatedAt: now };
-		if (!validDefinition(definition)) return Promise.reject(new AutomationError('workflowInvalid'));
-		const a = input.action;
-		const identity = JSON.stringify([input.title, input.source.kind, input.source.path, input.source.id, a.workflowId, a.version,
-			Object.entries(a.variables).sort(([left], [right]) => left.localeCompare(right)),
-			a.scope.map(s => [s.id, s.pageId, s.profileId]).sort(([left], [right]) => left!.localeCompare(right!))]);
-		const pending = this.workflowInvocations.get(input.invocationId);
-		if (pending) return pending.identity === identity ? pending.result : Promise.reject(new AutomationError('invocationConflict'));
-		const recorded = this.state.runs.find(run => run.workflowInvocation?.invocationId === input.invocationId);
-		if (recorded) return recorded.workflowInvocation?.identity === identity ? Promise.resolve(this.workflowReceipt(input.invocationId)!) : Promise.reject(new AutomationError('invocationConflict'));
-		const launch = (async () => {
-			if (!this.options.executor?.validate) throw new AutomationError('workflowUnavailable');
-			await this.options.executor.validate(input.action);
-			this.requireExecution();
-			if (options?.signal?.aborted) throw new AutomationError('workflowInvalid');
-			const run = await this.execute(definition, 'manual', now, now, undefined, options?.signal,
-				{ invocation: { invocationId: input.invocationId, identity }, authorizationId: options?.authorizationId });
-			if (!run) throw new AutomationError('workflowUnavailable');
-			return this.workflowReceipt(input.invocationId)!;
-		})();
-		this.launches.add(launch);
-		this.workflowInvocations.set(input.invocationId, { identity, result: launch });
-		void launch.finally(() => { this.workflowInvocations.delete(input.invocationId); this.launches.delete(launch); }).catch(() => {});
-		return launch;
-	}
 	private async execute(
 		d: AutomationDefinition,
 		trigger: 'manual' | 'scheduled' = 'manual',
@@ -353,7 +307,6 @@ export class AutomationService {
 		now = Date.now(),
 		invocation?: AgentDispatchRequest,
 		deliverySignal?: AbortSignal,
-		workflow?: { invocation: NonNullable<AutomationRun['workflowInvocation']>; authorizationId?: string },
 	): Promise<AutomationRun | undefined> {
 		this.requireExecution();
 		if (!this.loaded || this.stopped || this.launching.has(d.id)) return undefined;
@@ -368,18 +321,7 @@ export class AutomationService {
 		}
 		this.launching.add(d.id);
 		d = structuredClone(d);
-		let admissionError: Error | undefined;
-		if (d.action.kind === 'browser-workflow') {
-			try {
-				if (!this.options.executor?.validate) throw new AutomationError('workflowUnavailable');
-				await this.options.executor.validate(d.action);
-			} catch (error) {
-				// A manually edited definition may contain a secret value. Never copy unvalidated inputs into history.
-				admissionError = error instanceof AutomationError ? error : new AutomationError('workflowInvalid'); d.action.variables = {};
-			}
-		}
 		const run: AutomationRun = {
-			...(workflow ? { workflowInvocation: workflow.invocation } : {}),
 			...(invocation ? { invocation: { request: invocation } } : {}),
 			definition: d,
 			id: crypto.randomUUID(),
@@ -406,7 +348,6 @@ export class AutomationService {
 		}
 		try {
 			if (!this.executionEnabled || !isActiveRun(run)) return run;
-			if (admissionError) throw admissionError;
 			if (invocation && deliverySignal?.aborted) {
 				const timeout = deliverySignal.reason === 'timeout';
 				await this.updateRun(run, { status: timeout ? 'failed' : 'cancelled', endedAt: Date.now(), invocation: { request: invocation,
@@ -482,7 +423,7 @@ export class AutomationService {
 					this.pendingActions.set(run.id, abort);
 					try {
 						if (deliverySignal?.aborted || !this.executionEnabled || !isActiveRun(run)) { cancel(); return run; }
-						const result = await this.options.executor.execute(d.action, { run, desktop: this.options.desktop !== false, signal: abort.signal, authorizationId: workflow?.authorizationId });
+						const result = await this.options.executor.execute(d.action, { run, desktop: this.options.desktop !== false, signal: abort.signal });
 						message = result.message;
 						if (result.handle) {
 							void result.handle.completion.catch(() => undefined);
@@ -498,7 +439,7 @@ export class AutomationService {
 								if (isActiveRun(run)) await this.updateRun(run, { ...completion, endedAt: Date.now() });
 								if (!this.stopped) await this.publish(run, d);
 							}, async error => {
-								if (isActiveRun(run)) await this.updateRun(run, { status: 'failed', endedAt: Date.now(), ...automationFailure(d.action.kind === 'browser-workflow' ? new AutomationError('workflowInvalid') : error) });
+								if (isActiveRun(run)) await this.updateRun(run, { status: 'failed', endedAt: Date.now(), ...automationFailure(error) });
 								if (!this.stopped) await this.publish(run, d);
 							}).finally(() => {
 								deliverySignal?.removeEventListener('abort', cancel);
@@ -516,7 +457,7 @@ export class AutomationService {
 				...(invocation ? { invocation: { request: invocation, receipt: { invocationId: invocation.invocationId, runId: run.id, delivery: code === 'timeout' ? 'timeout' as const : 'rejected' as const, errorCode: code } } } : {}),
 				status: 'failed',
 				endedAt: Date.now(),
-				...automationFailure(d.action.kind === 'browser-workflow' && !(error instanceof AutomationError) ? new AutomationError('workflowInvalid') : error),
+				...automationFailure(error),
 			});
 		} finally {
 			this.launching.delete(d.id);
@@ -543,7 +484,7 @@ export class AutomationService {
 			if (this.ownedAgents.get(run.id) === owned) this.ownedAgents.delete(run.id);
 			if (this.ownedActions.get(run.id) === action) this.ownedActions.delete(run.id);
 		} catch (error) {
-			await this.updateRun(run, { status: 'unknown', endedAt: undefined, ...automationFailure(run.definition?.action.kind === 'browser-workflow' ? new AutomationError('workflowInvalid') : error) }, true);
+			await this.updateRun(run, { status: 'unknown', endedAt: undefined, ...automationFailure(error) }, true);
 			throw error;
 		}
 	}

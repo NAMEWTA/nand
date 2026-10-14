@@ -22,7 +22,7 @@ process.stdin.setRawMode?.(true);process.stdin.resume();if(!process.argv.include
 process.stdin.on('data',data=>fs.appendFileSync(path.join(process.cwd(),'interactive-input.jsonl'),JSON.stringify(data.toString())+'\n'));setInterval(()=>{},1000);`;
 const board='---\nlayout: stacked\nwidgets: [{memberId: quick, provider: home, kind: quick-actions, instanceId: default}]\nquickActions: [{name: Review native, icon: terminal, type: command, target: "skill:codex:review"}]\n---\n';
 const runtime=await launchFreshVault({root:process.argv[2],port:9265,files:{'A.md':board,'B.md':board,'dispatch-cli.cjs':cli,'interactive-cli.cjs':interactive},settings:{version:1,namespaces:{
-	app:{language:'en',introSeen:true,modules:{home:true,agent:true,automations:true,news:false,browser:false,archives:false,notifications:false,sync:false,comments:false,icons:false}},
+	app:{language:'en',introSeen:true,modules:{home:true,agent:true,automations:true,browser:false,archives:false,notifications:false,sync:false,comments:false,icons:false}},
 	home:{dashboardFile:'A',workspaceFiles:['A','B'],workspaceNames:['A','B'],widgetLunarEnabled:false,widgetWeatherEnabled:false,widgetMusicEnabled:false,pomodoroEnabled:false},
 }}});
 let c=runtime.connection;const rows=[];const check=(name,passed,detail)=>{rows.push({name,passed,detail});assert.ok(passed,name);};
@@ -143,5 +143,5 @@ try{
 	check('no-runtime-errors',await c.evaluate('nandAcceptanceErrors.length===0'),await c.evaluate('nandAcceptanceErrors'));
 	const beforeRestart=await boardBytes();await runtime.restart();c=runtime.connection;await navigate({feature:'dashboard',resourceId:'A'});await until(`!!document.querySelector('.nand-skills-widget')`);
 	check('restart-preserves-declarations-and-does-not-auto-start',await boardBytes()===beforeRestart&&(await calls()).length===totalCalls&&await c.evaluate(`!!${skillButton('Configured review')}`));
-	await fs.writeFile(path.join(runtime.evidence,'review.json'),JSON.stringify({rows,unverified:['Actual provider/model execution','Context entrypoints and browser-workflow automation','Actual mobile hardware and skill preview in a popout window']},null,2));
+	await fs.writeFile(path.join(runtime.evidence,'review.json'),JSON.stringify({rows,unverified:['Actual provider/model execution','Context entrypoints','Actual mobile hardware and skill preview in a popout window']},null,2));
 }catch(error){await fs.writeFile(path.join(runtime.evidence,'partial-review.json'),JSON.stringify(rows,null,2));await fs.writeFile(path.join(runtime.evidence,'diagnostic.json'),JSON.stringify(await c.evaluate(`({pointer:window.pointerEvidence,errors:window.nandAcceptanceErrors,clicks:window.nativeClicks,notices:[...document.querySelectorAll('.notice')].map(e=>e.textContent),modals:[...document.querySelectorAll('.modal-container')].map(e=>e.textContent),dispatch:typeof app.plugins.plugins.nand.registry.services.peek({owner:'agent',id:'dispatch'})?.dispatch})`).catch(e=>String(e)),null,2));await runtime.shot('failure').catch(()=>{});throw error;}finally{console.log(JSON.stringify({evidence:runtime.evidence,checks:rows.length,failed:rows.filter(r=>!r.passed)}));await runtime.stop();}

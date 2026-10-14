@@ -18,7 +18,7 @@ try {
   '.nand/content/Ref.md':'[[Old/Note#Note|Keep target]]',
   'Ordinary.md':'[Keep target](Old/Note.md#Note)',
   'Archive/Done.md':'# Personal archive',
- },settings:{version:1,namespaces:{app:{language:'zh',introSeen:true,modules:Object.fromEntries(['home','agent','browser','news','archives','automations','notifications','icons','comments','sync'].map(id=>[id,false]))}}}});c=runtime.connection;
+ },settings:{version:1,namespaces:{app:{language:'zh',introSeen:true,modules:Object.fromEntries(['home','agent','browser','archives','automations','notifications','icons','comments','sync'].map(id=>[id,false]))}}}});c=runtime.connection;
  check('ordinary-default-archive-keeps-its-owner',await fs.readFile(path.join(runtime.vault,'Archive/Done.md'),'utf8')==='# Personal archive');
  await open('.nand/content/Old/Note.md');
  await c.evaluate(`${p}.managedContent.rename(${p}.managedContent.getFileByPath('.nand/content/Old/Note.md'),'.nand/content/New/Note.md')`);

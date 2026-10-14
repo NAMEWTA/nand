@@ -41,11 +41,11 @@ test('complete native answer and usage survive; short-lived context is revoked e
 	const resolve = vi.fn(async (_handle, run) => {
 		assert.equal(run.cwd, 'C:/vault/canonical');
 		assert.ok(run.runId);
-		return { env: { NAND_BROWSER_TOKEN: 'one-run-secret' }, dispose: disposed };
+		return { env: { FIXTURE_CONTEXT_TOKEN: 'one-run-secret' }, dispose: disposed };
 	});
-	const f = fixture([{ id: 'browser', resolve }]);
+	const f = fixture([{ id: 'fixture', resolve }]);
 	const answer = JSON.stringify(Array.from({ length: 3000 }, (_, id) => ({ id, text: '完整回答' })));
-	const work = f.runner.run({ prompt: 'score', purpose: 'news', runContext: { provider: 'browser', handle: 'opaque' }, keepTerminal: true });
+	const work = f.runner.run({ prompt: 'score', purpose: 'automation', runContext: { provider: 'fixture', handle: 'opaque' }, keepTerminal: true });
 	await f.entered.promise;
 	const usage = { input: 10, output: 20, cacheRead: 2, cacheWrite: 0, cost: null, known: true };
 	f.complete.resolve({ status: 'succeeded', message: answer, output: '\x1b[31mnot an answer', usage });
@@ -55,7 +55,7 @@ test('complete native answer and usage survive; short-lived context is revoked e
 	assert.ok(!JSON.stringify(result).includes('one-run-secret'));
 	assert.equal(disposed.mock.calls.length, 1);
 	assert.deepEqual(f.stopped, []);
-	assert.equal((await f.runner.run({ prompt: 'again', purpose: 'news', continueTerminalId: 'owned' })).errorCode, 'runContextInvalid');
+	assert.equal((await f.runner.run({ prompt: 'again', purpose: 'automation', continueTerminalId: 'owned' })).errorCode, 'runContextInvalid');
 	assert.equal(f.calls(), 1, 'a revoked contextual process cannot receive another prompt');
 	await f.runner.open('manual');
 	await f.runner.open('owned');
@@ -67,10 +67,10 @@ test('complete native answer and usage survive; short-lived context is revoked e
 
 test('permission state opens the owned terminal; cancellation and module disable finish and stop only owned work', async () => {
 	const disposed = vi.fn();
-	const f = fixture([{ id: 'browser', resolve: async () => ({ env: { NAND_BROWSER_TOKEN: 'secret' }, dispose: disposed }) }]);
+	const f = fixture([{ id: 'fixture', resolve: async () => ({ env: { FIXTURE_CONTEXT_TOKEN: 'secret' }, dispose: disposed }) }]);
 	const controller = new AbortController();
 	const states: string[] = [];
-	const work = f.runner.run({ prompt: 'run', purpose: 'news', signal: controller.signal, runContext: { provider: 'browser', handle: 'h' }, onState: state => states.push(state.status) });
+	const work = f.runner.run({ prompt: 'run', purpose: 'automation', signal: controller.signal, runContext: { provider: 'fixture', handle: 'h' }, onState: state => states.push(state.status) });
 	const execution = await f.entered.promise;
 	execution.onState?.('running', 'owned');
 	execution.onState?.('needs-attention', 'owned');
@@ -81,7 +81,7 @@ test('permission state opens the owned terminal; cancellation and module disable
 	assert.deepEqual(f.stopped, ['owned']);
 	assert.equal(disposed.mock.calls.length, 1);
 	const g = fixture();
-	const disabled = g.runner.run({ prompt: 'run', purpose: 'news' });
+	const disabled = g.runner.run({ prompt: 'run', purpose: 'automation' });
 	await g.entered.promise;
 	await g.runner.dispose();
 	assert.equal((await disabled).status, 'interrupted');
@@ -93,12 +93,12 @@ test('timeout also covers pending context resolution; a late grant is revoked an
 	const lease = deferred<{ env: Record<string, string>; dispose(): void }>();
 	const requested = deferred<void>();
 	const disposed = vi.fn();
-	const f = fixture([{ id: 'browser', resolve: async () => { requested.resolve(); return lease.promise; } }]);
-	const work = f.runner.run({ prompt: 'run', purpose: 'news', timeoutMs: 50, runContext: { provider: 'browser', handle: 'h' } });
+	const f = fixture([{ id: 'fixture', resolve: async () => { requested.resolve(); return lease.promise; } }]);
+	const work = f.runner.run({ prompt: 'run', purpose: 'automation', timeoutMs: 50, runContext: { provider: 'fixture', handle: 'h' } });
 	await requested.promise;
 	await vi.advanceTimersByTimeAsync(51);
 	assert.equal((await work).status, 'timeout');
-	lease.resolve({ env: { NAND_BROWSER_TOKEN: 'late-secret' }, dispose: disposed });
+	lease.resolve({ env: { FIXTURE_CONTEXT_TOKEN: 'late-secret' }, dispose: disposed });
 	await vi.advanceTimersByTimeAsync(1);
 	assert.equal(disposed.mock.calls.length, 1);
 	assert.deepEqual(f.stopped, []);
@@ -107,14 +107,14 @@ test('timeout also covers pending context resolution; a late grant is revoked an
 
 test('absent or invalid context fails before spawning, and a native failure never returns terminal output', async () => {
 	const absent = fixture();
-	assert.equal((await absent.runner.run({ prompt: 'run', purpose: 'news', continueTerminalId: 'manual' })).errorCode, 'sessionMissing');
-	assert.equal((await absent.runner.run({ prompt: 'run', purpose: 'news', runContext: { provider: 'missing', handle: 'h' } })).errorCode, 'runContextUnavailable');
+	assert.equal((await absent.runner.run({ prompt: 'run', purpose: 'automation', continueTerminalId: 'manual' })).errorCode, 'sessionMissing');
+	assert.equal((await absent.runner.run({ prompt: 'run', purpose: 'automation', runContext: { provider: 'missing', handle: 'h' } })).errorCode, 'runContextUnavailable');
 	assert.equal(absent.calls(), 0);
-	const invalid = fixture([{ id: 'browser', resolve: async () => undefined }]);
-	assert.equal((await invalid.runner.run({ prompt: 'run', purpose: 'news', runContext: { provider: 'browser', handle: 'used' } })).errorCode, 'runContextInvalid');
+	const invalid = fixture([{ id: 'fixture', resolve: async () => undefined }]);
+	assert.equal((await invalid.runner.run({ prompt: 'run', purpose: 'automation', runContext: { provider: 'fixture', handle: 'used' } })).errorCode, 'runContextInvalid');
 	assert.deepEqual(invalid.env, []);
 	const f = fixture();
-	const work = f.runner.run({ prompt: 'run', purpose: 'news' });
+	const work = f.runner.run({ prompt: 'run', purpose: 'automation' });
 	await f.entered.promise;
 	f.complete.resolve({ status: 'failed', message: 'partial', output: 'screen tail', errorCode: 'answerTooLarge' });
 	assert.deepEqual(await work, { status: 'failed', text: '', terminalId: 'owned', usage: undefined, errorCode: 'answerTooLarge' });
@@ -124,8 +124,8 @@ test('absent or invalid context fails before spawning, and a native failure neve
 test('module disposal waits for the active grant to be revoked', async () => {
 	const release = deferred<void>();
 	const releasing = deferred<void>();
-	const f = fixture([{ id: 'browser', resolve: async () => ({ env: {}, dispose: async () => { releasing.resolve(); await release.promise; } }) }]);
-	const work = f.runner.run({ prompt: 'run', purpose: 'news', runContext: { provider: 'browser', handle: 'h' } });
+	const f = fixture([{ id: 'fixture', resolve: async () => ({ env: {}, dispose: async () => { releasing.resolve(); await release.promise; } }) }]);
+	const work = f.runner.run({ prompt: 'run', purpose: 'automation', runContext: { provider: 'fixture', handle: 'h' } });
 	await f.entered.promise;
 	let done = false;
 	const disposal = f.runner.dispose().then(() => { done = true; });

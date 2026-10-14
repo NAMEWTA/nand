@@ -9,7 +9,7 @@ import { t } from '../../../shared/i18n/index';
 import { BROWSER_OPEN } from '../../browser/api';
 import { AGENT_SESSIONS } from '../../agent/api';
 import type { NotificationOpener, NotificationRequest } from '../../notifications/api';
-import { AUTOMATION_AGENT_RUNTIME, AUTOMATION_SOURCES, AUTOMATION_WORKFLOW_RUNNERS, type AutomationSource, type AutomationWorkflowChoice, type AutomationWorkflowRunner } from '../api';
+import { AUTOMATION_AGENT_RUNTIME, AUTOMATION_SOURCES, type AutomationSource } from '../api';
 import { actionAvailability } from '../core/actions/executor';
 import { AutomationService } from '../core/service';
 import { MarkdownAutomationDefinitions } from '../platform/definitions';
@@ -20,8 +20,6 @@ export interface AutomationRuntime {
 	readonly opener: NotificationOpener;
 	/** Active products that store definitions in their documents. */
 	sources(): Promise<AutomationSource[]>;
-	workflows(): Promise<AutomationWorkflowChoice[]>;
-	workflowPages(): Promise<ReturnType<AutomationWorkflowRunner['pages']>>;
 	/** Re-read definitions and run history after a failed load. */
 	readonly retry: () => Promise<void>;
 	actions(): Array<{ id: string; name: string; status?: string; running: boolean; unavailable?: string }>;
@@ -43,12 +41,6 @@ export async function createAutomationRuntime(context: ModuleContext, notify: (r
 	const definitions = new MarkdownAutomationDefinitions(app);
 	const providers = async () => (await context.contributions.collect(AUTOMATION_SOURCES)).map((entry) => entry.value);
 	const owner = async (kind: SourceRef['kind']) => (await providers()).find((provider) => provider.kinds.includes(kind));
-	const workflowRunner = async () => {
-		const rows = await context.contributions.collect(AUTOMATION_WORKFLOW_RUNNERS);
-		const runner = rows.length === 1 && rows[0]?.module === 'browser' ? rows[0].value : undefined;
-		if (!runner || runner.revoked.aborted) throw new AutomationError('workflowUnavailable');
-		return runner;
-	};
 	const sources: AutomationSourcePort = {
 		list: async () => {
 			// Archive indexing waits for layoutReady; activation must never wait for it.
@@ -123,21 +115,7 @@ export async function createAutomationRuntime(context: ModuleContext, notify: (r
 				await sessions.attachMaterial(target.id, { title: '', text: request.finalPrompt, files: request.files }, { agentId: target.agentId, signal });
 			},
 			executor: {
-				validate: async action => { if (action.kind === 'browser-workflow') await (await workflowRunner()).validate(action); },
-				open: async run => { if (run.definition?.action.kind === 'browser-workflow') await (await workflowRunner()).open(run.id); },
-				execute: async (action, execution) => {
-					if (action.kind === 'browser-workflow') {
-						const runner = await workflowRunner(), abort = new AbortController();
-						const cancel = () => abort.abort(execution.signal.reason), revoked = () => abort.abort('module-disabled');
-						const release = () => { execution.signal.removeEventListener('abort', cancel); runner.revoked.removeEventListener('abort', revoked); };
-						execution.signal.addEventListener('abort', cancel, { once: true }); runner.revoked.addEventListener('abort', revoked, { once: true });
-						try {
-							if (execution.signal.aborted || runner.revoked.aborted) throw new AutomationError('workflowUnavailable');
-							const handle = await runner.start(action, { runId: execution.run.id, trigger: execution.run.trigger, signal: abort.signal, authorizationId: execution.authorizationId });
-							void handle.completion.catch(() => undefined);
-							return { message: '', handle: { open: () => handle.open(), cancel: async () => { abort.abort('cancelled'); await handle.cancel(); }, completion: handle.completion.finally(release) } };
-						} catch (error) { release(); throw error; }
-					}
+				execute: async (action) => {
 					if (action.kind === 'open-file') {
 						if (!app.vault.getFileByPath(action.path)) throw new AutomationError('sourceMissing');
 						await app.workspace.openLinkText(action.path, '', true);
@@ -192,8 +170,6 @@ export async function createAutomationRuntime(context: ModuleContext, notify: (r
 		service,
 		opener,
 		sources: providers,
-		workflows: async () => (await workflowRunner()).list(),
-		workflowPages: async () => (await workflowRunner()).pages(),
 		retry,
 		actions: () => service.definitions.map((definition: AutomationDefinition) => {
 			const run = latestRun(definition.id);

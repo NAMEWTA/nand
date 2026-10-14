@@ -29,10 +29,10 @@ const delivery = (system = false) => {
 const request = (id = 'run') => ({ id, title: 'Title', body: 'Body', channels: ['in-app', 'system'] as NotificationChannelId[] });
 
 describe('NotificationService', () => {
-	it('opener capability supports news records without an automation target and changes with the sender', async () => {
+	it('opener capability supports automations records without an automation target and changes with the sender', async () => {
 		let active = true;
-		const inbox = new NotificationService(new MemoryStorage(), 'inbox.json', async () => {}, delivery().adapter, async record => active && record.id.startsWith('news:'));
-		await inbox.load(); await inbox.send(request('news:run:complete'));
+		const inbox = new NotificationService(new MemoryStorage(), 'inbox.json', async () => {}, delivery().adapter, async record => active && record.id.startsWith('automations:'));
+		await inbox.load(); await inbox.send(request('automations:run:complete'));
 		expect(inbox.records[0]!.target).toBeUndefined(); expect(inbox.records[0]!.source).toBeUndefined();
 		expect(await inbox.canOpen(inbox.records[0]!)).toBe(true);
 		let redraws = 0; inbox.subscribe(() => { redraws++; });

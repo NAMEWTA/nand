@@ -12,7 +12,7 @@ let runtime,c;
 const check=(name,passed)=>{rows.push({name,passed});assert.ok(passed,name);};
 const until=async expression=>{const end=Date.now()+25000;while(Date.now()<end){try{if(await c.evaluate(expression))return;}catch{}await delay(80);}throw Error(expression);};
 try{
- runtime=await launchFreshVault({root:process.argv[2],port:9445,settings:{version:1,namespaces:{app:{language:'zh',introSeen:true,modules:Object.fromEntries(['home','agent','browser','news','archives','automations','notifications','icons','comments','sync'].map(id=>[id,false]))}}}});c=runtime.connection;
+ runtime=await launchFreshVault({root:process.argv[2],port:9445,settings:{version:1,namespaces:{app:{language:'zh',introSeen:true,modules:Object.fromEntries(['home','agent','browser','archives','automations','notifications','icons','comments','sync'].map(id=>[id,false]))}}}});c=runtime.connection;
  await c.evaluate(`(async()=>{const e=document.createElement('webview');e.partition='persist:nand-dashboard-web';const ready=new Promise(resolve=>e.addEventListener('dom-ready',resolve,{once:true}));e.src=${JSON.stringify(url)};document.body.append(e);await ready;await e.executeJavaScript("document.cookie='shared=yes;path=/;max-age=86400';localStorage.owner='old-shared';true");await require('@electron/remote').webContents.fromId(e.getWebContentsId()).session.cookies.flushStore();e.remove();return true})()`);
  await c.evaluate(`${p}.setModuleEnabled('home',true)`);await c.evaluate(`${p}.openWorkbench({feature:'dashboard'},window)`);
  await until(`${surfaces}.some(s=>s.sync?.getData())`);

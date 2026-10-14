@@ -15,7 +15,7 @@ const entries=[
 for(const entry of entries)entry.defaultLabel=false;
 const members=entries.map(e=>({memberId:e.id,provider:'home',kind:'anniversary',instanceId:e.id}));
 const board=`---\nlayout: side\nwidgets: ${JSON.stringify(members)}\ncustom: retain # author\n---\n## Notes\n`;
-const runtime=await launchFreshVault({root:process.argv[2],port:9273,files:{'Board.md':board},settings:{version:1,namespaces:{app:{language:'en',introSeen:true,modules:{home:true,agent:false,automations:false,news:false,browser:false,archives:false,notifications:false,sync:false,comments:false,icons:false}},home:{dashboardFile:'Board',workspaceFiles:['Board'],workspaceNames:['Board'],anniversaryEnabled:true,anniversaries:entries,widgetLunarEnabled:false,widgetWeatherEnabled:false,widgetMusicEnabled:false,pomodoroEnabled:false}}}});
+const runtime=await launchFreshVault({root:process.argv[2],port:9273,files:{'Board.md':board},settings:{version:1,namespaces:{app:{language:'en',introSeen:true,modules:{home:true,agent:false,automations:false,browser:false,archives:false,notifications:false,sync:false,comments:false,icons:false}},home:{dashboardFile:'Board',workspaceFiles:['Board'],workspaceNames:['Board'],anniversaryEnabled:true,anniversaries:entries,widgetLunarEnabled:false,widgetWeatherEnabled:false,widgetMusicEnabled:false,pomodoroEnabled:false}}}});
 let c=runtime.connection;const rows=[];
 const check=(name,passed,detail)=>{rows.push({name,passed,detail});assert.ok(passed,name);};
 const until=async expression=>{const end=Date.now()+25000;while(Date.now()<end){if(await c.evaluate(expression))return;await delay(70);}throw Error(expression);};

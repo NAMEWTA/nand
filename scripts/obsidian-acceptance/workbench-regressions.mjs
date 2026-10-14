@@ -7,7 +7,7 @@ import { launchFreshVault } from './fresh-vault.mjs';
 import { connect } from './cdp.mjs';
 
 const runtime = await launchFreshVault({ root: process.argv[2], port: 9248, files: { 'Welcome.md': '# Review fixture\n' }, settings: { version: 1, namespaces: {
-	app: { language: 'en', introSeen: true, modules: { home: true, archives: true, automations: true, icons: true, agent: false, browser: false, news: false, sync: false, comments: false, notifications: false } },
+	app: { language: 'en', introSeen: true, modules: { home: true, archives: true, automations: true, icons: true, agent: false, browser: false, sync: false, comments: false, notifications: false } },
 } } });
 const c = runtime.connection, rows = [];
 const until = async expression => {

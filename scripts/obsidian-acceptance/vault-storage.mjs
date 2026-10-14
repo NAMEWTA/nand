@@ -14,7 +14,7 @@ const check = (name, actual) => { rows.push({ name, passed: !!actual }); assert.
 const until = async read => { const end = Date.now() + 25000; while (Date.now() < end) { if (await read()) return; await delay(100); } throw new Error('Acceptance condition timed out'); };
 try {
 	runtime = await launchFreshVault({ root: process.argv[2], port: 9439, settings: { version: 1, namespaces: {
-		app: { language: 'zh', introSeen: true, modules: Object.fromEntries(['home','agent','browser','news','archives','automations','notifications','icons','comments','sync'].map(id => [id, false])) },
+		app: { language: 'zh', introSeen: true, modules: Object.fromEntries(['home','agent','browser','archives','automations','notifications','icons','comments','sync'].map(id => [id, false])) },
 		sync: { autoPullOnBoot: false, autoSaveInterval: 0, autoPullInterval: 0, autoPushInterval: 0 },
 	} } });
 	let c = runtime.connection;

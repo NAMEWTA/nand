@@ -23,8 +23,6 @@ test('unknown targets fall back to the home board; settings is its own page', ()
 test('restoration accepts known sections and excludes unrelated or secret fields', () => {
 	assert.deepEqual(normalizeTarget({ feature: 'contacts', section: 'person', resourceId: 'stable-id', token: 'secret', dom: {} }), { feature: 'contacts', section: 'person', resourceId: 'stable-id' });
 	assert.deepEqual(normalizeTarget({ feature: 'browser', section: 'history', resourceId: '\u0000bad' }), { feature: 'browser' });
-	assert.deepEqual(normalizeTarget({ feature: 'browser', section: 'multi-ai', resourceId: 'task' }), { feature: 'browser', section: 'multi-ai', resourceId: 'task' });
-	assert.deepEqual(normalizeTarget({ feature: 'browser', section: 'assistant', resourceId: 'task' }), { feature: 'browser', section: 'assistant', resourceId: 'task' });
 });
 test('panel width and open state are bounded and deterministic', () => {
 	assert.equal(panelWidth(NaN), 260); assert.equal(panelWidth(100), 220); assert.equal(panelWidth(500), 360);
@@ -217,8 +215,6 @@ test('a browser split copies the page and mints a new id without session secrets
 	const contacts = splitLeafState({ feature: 'contacts', section: 'person', resourceId: 'person-a' }, { selectedId: 'person-a', query: { kind: 'person' } });
 	assert.equal(contacts.target.resourceId, 'person-a');
 	assert.equal((contacts.pages[0]?.state as { selectedId: string }).selectedId, 'person-a');
-	const task = splitLeafState({ feature: 'browser', section: 'multi-ai', resourceId: 'task-a' }, {});
-	assert.deepEqual(task.target, { feature: 'browser', section: 'multi-ai', resourceId: 'task-a' });
 });
 
 test('a window without a native status bar keeps the filtered rows and save errors stay on their board', () => {

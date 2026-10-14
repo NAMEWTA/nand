@@ -24,11 +24,6 @@
 | 智能体派发快照 | 同一自动化 `runtime.json`，包含最终提示词、文件引用、来源、调用 ID 和交付回执 |
 | 终端索引、历史标注、自动化会话 | `.nand/terminal-agent/<device-id>/` |
 | 浏览历史、账号元数据与站点权限 | `.nand/browser/<device-id>/state.json` 与 `profiles.json` |
-| 新闻缓存、分析、阅读状态和 CLI 回执 | `.nand/news/<device-id>/`；保留与恢复规则见[新闻](news.md) |
-| 新闻分析策略 | 库级设置 `news.prefilter` 保存屏蔽词、最少字符数和允许的语言；`news.vocabulary` 保存分类、主题和实体词表；`news.templates` 保存四类可编辑模板。新分析回执在实际提示词哈希与文本之外保存词表快照，恢复时不会用后来的设置重新解释已保存回复。 |
-| 新闻本地编排参数 | 库级设置 `news.understandFloor`、`news.heatRules`、`news.editionRules` 和 `news.groupingRules` 保存数值策略。热度观测携带实际规则版本；新分析计划和已接收分析保存 `groupingConfidence`，修改设置只影响后续批次，不重新解释已保存的成员关系。 |
-| 新闻小组件配置 | 库级设置的 `news.widgets`：`{id,mode,name,count,showSummary,staleMinutes,viewId?}`，模式为 `featured`、`hot`、`view`；`viewId` 引用 `news.views`。看板 Markdown 只保存成员的 provider/kind/instance ID 与布局，移除成员保留配置。 |
-| 新闻收藏、简报与日报 | 默认目录为 `.nand/content/NAND/新闻/收藏/`、`.nand/content/NAND/新闻/简报/`、`.nand/content/NAND/新闻/日报/`，独立于缓存保留。库级设置 `news.favoriteFolder` 和 `news.editionFolder` 修改新笔记的目标目录；已有带身份属性的笔记在`.nand/content/` 内目录间移动后仍保留身份。`news.retentionDays` 控制原始资料和分析的保留期，CLI 回执历史仍为 30 天。 |
 | 恢复草稿与看板冲突副本 | `.nand/recovery/` |
 | 缓存（微信读书进度） | `.nand/cache/` |
 | 导出为笔记的智能体对话 | `.nand/content/NAND Exports/` |
@@ -45,7 +40,7 @@
 
 ## 库之外的数据
 
-NAND 新启动的 CLI 使用库内的 HOME、提供方配置目录、XDG/Windows 数据目录和临时目录，状态 Hook 与事件文件同属账号。浏览器 Cookie、站点数据、缓存、下载、桥接与截图/说明进入库内的设备/profile 目录。库外由用户自行维护的 CLI homes 不自动搬迁；NAND 不以它们作为默认账号的回退来源。
+NAND 新启动的 CLI 使用库内的 HOME、提供方配置目录、XDG/Windows 数据目录和临时目录，状态 Hook 与事件文件同属账号。浏览器 Cookie、站点数据、缓存和下载进入库内的设备/profile 目录，截图与说明保存在 `.nand/content/NAND/浏览器/附件/`。库外由用户自行维护的 CLI homes 不自动搬迁；NAND 不以它们作为默认账号的回退来源。
 
 设备映射位于 `.nand/config/identity.json`，利用宿主只读身份识别当前设备。复制库需要识别或明确选择设备归属，不会自动接管另一设备的运行队列。普通笔记、宿主配置、系统 IPC 对象与 Git 自有元数据不是 NAND 业务数据。
 

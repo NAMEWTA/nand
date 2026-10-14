@@ -17,7 +17,7 @@ const page = async () => {
 	await c.evaluate(`window.ac=app.workspace.getLeavesOfType('nand-workbench-view').flatMap(l=>l.view.getNativeSurfaces()).find(s=>s.getViewType()==='nand-agent-page').controller;true`);
 };
 try {
-	runtime = await launchFreshVault({ root, port: 9455, files: { '.nand/acceptance/cli.cjs': fixtureCli, '.obsidian/plugins/nand/accounts/claude/ab/home/.credentials.json': '{"fixture":"old-owned-account"}', '.obsidian/plugins/nand/binaries/nand-pty-old.exe': 'retained old executable fixture' }, settings: { version: 1, namespaces: { app: { language: 'zh', introSeen: true, modules: Object.fromEntries(['home','agent','browser','news','archives','automations','notifications','icons','comments','sync'].map(id => [id,false])) } } } }); c = runtime.connection;
+	runtime = await launchFreshVault({ root, port: 9455, files: { '.nand/acceptance/cli.cjs': fixtureCli, '.obsidian/plugins/nand/accounts/claude/ab/home/.credentials.json': '{"fixture":"old-owned-account"}', '.obsidian/plugins/nand/binaries/nand-pty-old.exe': 'retained old executable fixture' }, settings: { version: 1, namespaces: { app: { language: 'zh', introSeen: true, modules: Object.fromEntries(['home','agent','browser','archives','automations','notifications','icons','comments','sync'].map(id => [id,false])) } } } }); c = runtime.connection;
 	await c.evaluate(`${plugin}.setModuleEnabled('agent',true)`);
 	check('old-owned-data-requires-cold-restart', await c.evaluate(`${plugin}.moduleState('agent')==='failed'`));
 	check('old-account-still-exists-before-restart', (await fs.readFile(path.join(runtime.vault,'.obsidian/plugins/nand/accounts/claude/ab/home/.credentials.json'),'utf8')).includes('old-owned-account'));

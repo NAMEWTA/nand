@@ -7,13 +7,13 @@ import { launchFreshVault } from './fresh-vault.mjs';
 import { connect } from './cdp.mjs';
 
 const body = '\r\n<!-- Keep this introduction -->\r\n\r\n## Notes\r\n\r\n### Grouped memo\r\nid: grouped\r\ntype: generic\r\nVisible grouped body.\r\n\r\n### Standalone memo\r\nid: single\r\ntype: generic\r\nVisible standalone body.\r\n';
-const members = [{ memberId: 'year', provider: 'home', kind: 'year-progress', instanceId: 'default' }, { memberId: 'disabled', provider: 'news', kind: 'news-raw', instanceId: 'default' }];
+const members = [{ memberId: 'year', provider: 'home', kind: 'year-progress', instanceId: 'default' }, { memberId: 'disabled', provider: 'automations', kind: 'missing-widget', instanceId: 'default' }];
 const tiles = [{ id: 'year', w: 3, cap: 30, x: 0, y: 0 }, { id: 'disabled', w: 3, cap: 30, x: 3, y: 0 }, { id: 'section', w: 6, cap: 40, fixed: true, x: 6, y: 0 }, { id: 'single', w: 6, cap: 40, x: 0, y: 40 }, { id: 'missing-reference', w: 6, cap: 30, x: 6, y: 40 }];
 const legacy = `---\r\n# Personal header\r\ncustom: [one, two] # keep\r\ncolumns: [{name: Notes, type: memo, height: 310}]\r\n---\r\n${body}`;
 const mixed = `---\r\nlayout: immersive\r\nwidgets: ${JSON.stringify(members)}\r\nimmersive: ${JSON.stringify(tiles)}\r\ncolumns: [{id: section, name: Notes, type: memo}]\r\ncustom: keep\r\n---\r\n${body}`;
 const invalid = mixed.replace(JSON.stringify(tiles),JSON.stringify([{id:'year',w:99,cap:-1,x:-5,y:0},{id:'missing-reference',w:3,h:2,x:0,y:0}]));
 const runtime = await launchFreshVault({ root: process.argv[2], port: 9263, files: { 'Legacy.md': legacy, 'Mixed.md': mixed, 'Invalid.md':invalid }, settings: { version: 1, namespaces: {
-	app: { language: 'en', introSeen: true, modules: { home: true, news: false, agent: false, browser: false, archives: false, automations: false, notifications: false, icons: false, comments: false, sync: false } },
+	app: { language: 'en', introSeen: true, modules: { home: true, agent: false, browser: false, archives: false, automations: false, notifications: false, icons: false, comments: false, sync: false } },
 	home: { dashboardFile: 'Legacy', workspaceFiles: ['Legacy', 'Mixed','Invalid'], workspaceNames: ['Legacy', 'Mixed','Invalid'], quickNotesEnabled: true, widgetWeatherEnabled: false, widgetLunarEnabled: false, widgetMusicEnabled: false, pomodoroEnabled: false, widgetQuickActionsEnabled: false, widgetYearProgressEnabled: true },
 } } });
 let c = runtime.connection;
@@ -95,10 +95,6 @@ try {
 	await countWrites();await focus('year');await key('Enter');await key('ArrowDown');await navigate('Legacy');await delay(100);
 	check('navigation-cancels-pending-gesture',await bytes('Mixed')===saved&&await c.evaluate('gridWrites')===0);
 	await navigate('Mixed');await countWrites();
-	await c.evaluate('app.plugins.plugins.nand.setModuleEnabled("news",true)');await until(`!!document.querySelector('[data-widget-member="disabled"] .dashboard-sidebar-news')`);
-	check('provider-enable-mounts-in-grid-no-save',await bytes('Mixed')===saved&&await c.evaluate('gridWrites')===0);
-	await c.evaluate('app.plugins.plugins.nand.setModuleEnabled("news",false)');await until(`document.querySelector('[data-widget-member="disabled"]')?.textContent.includes('unavailable')`);
-	check('provider-disable-keeps-geometry-no-save',await bytes('Mixed')===saved&&await c.evaluate('gridWrites')===0);
 	for(const preset of ['system','claude-code','eye-care'])for(const dark of [false,true]){
 		await c.evaluate(`app.plugins.plugins.nand.theme.update(d=>{d.preset=${JSON.stringify(preset)}});app.changeTheme(${JSON.stringify(dark?'obsidian':'moonstone')});true`);
 		for(const viewport of [640,1100,1700]){await width(viewport);const visible=await c.evaluate(`(()=>{const g=document.querySelector('.nand-immersive-grid'),rs=[...g.querySelectorAll('[data-tile]')].map(e=>e.getBoundingClientRect());return {overflow:g.scrollWidth>g.clientWidth+1,overlap:rs.some((a,i)=>rs.slice(i+1).some(b=>Math.min(a.right,b.right)>Math.max(a.left,b.left)+1&&Math.min(a.bottom,b.bottom)>Math.max(a.top,b.top)+1)),small:[...g.querySelectorAll('[data-grid-action]')].some(e=>{const r=e.getBoundingClientRect();return r.width<31||r.height<31})}})()`);check(`theme-${preset}-${dark?'dark':'light'}-${viewport}`,!visible.overflow&&!visible.overlap&&!visible.small,visible);await runtime.shot(`grid-${preset}-${dark?'dark':'light'}-${viewport}`);}

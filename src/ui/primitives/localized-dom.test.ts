@@ -24,7 +24,7 @@ describe('localized dropdown refresh', () => {
 			});
 			setLanguage('en');
 			let measured = '';
-			bindLocalizedOptions({ selectEl: select as unknown as HTMLSelectElement, getValue: () => selected, setValue(value: string) { selected = value; measured = option.textContent ?? ''; return this; } }, { en: ['news.title'] });
+			bindLocalizedOptions({ selectEl: select as unknown as HTMLSelectElement, getValue: () => selected, setValue(value: string) { selected = value; measured = option.textContent ?? ''; return this; } }, { en: ['workbench.home'] });
 			const before = option.textContent;
 			const listeners = select.addEventListener;
 			let added = 0;

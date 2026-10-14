@@ -3,7 +3,7 @@ import type { ModuleContext, ModuleInstance } from '../../app/contracts/module';
 import type { AutomationDefinition, SourceRef } from '../../shared/automation/types';
 import { t } from '../../shared/i18n/index';
 import { NOTIFICATION_INBOX, NOTIFICATION_OPENERS, type NotificationOpener, type NotificationRequest } from '../notifications/api';
-import { AUTOMATIONS, AUTOMATION_INVOCATIONS, AUTOMATION_WORKFLOW_INVOCATIONS, type AutomationsService, type AutomationInvocations, type AutomationWorkflowInvocations } from './api';
+import { AUTOMATIONS, AUTOMATION_INVOCATIONS, type AutomationsService, type AutomationInvocations } from './api';
 import { AutomationError } from '../../shared/automation/errors';
 import type { AutomationEditRequest } from './core/api';
 import { createAutomationRuntime, type AutomationRuntime } from './services/runtime';
@@ -89,24 +89,9 @@ export default function createAutomationsModule(context: ModuleContext): ModuleI
 			return receipt ? structuredClone(receipt) : undefined;
 		},
 	};
-	const workflows: AutomationWorkflowInvocations = {
-		invoke: (request, options) => {
-			if (!runtime) return Promise.reject(new AutomationError('moduleOff'));
-			return runtime.service.invokeWorkflow(request, options);
-		},
-		receipt: id => runtime?.service.workflowReceipt(id),
-		cancel: async id => {
-			const run = runtime?.service.state.runs.find(row => row.id === id);
-			if (run) await runtime?.service.stop(run);
-		},
-		open: async id => {
-			const run = runtime?.service.state.runs.find(row => row.id === id);
-			if (run) await runtime?.service.openRun(run);
-		},
-	};
 
 	return {
-		services: [[AUTOMATIONS, api], [AUTOMATION_INVOCATIONS, invocations], [AUTOMATION_WORKFLOW_INVOCATIONS, workflows]],
+		services: [[AUTOMATIONS, api], [AUTOMATION_INVOCATIONS, invocations]],
 		contributions: [[NOTIFICATION_OPENERS, opener]],
 		pages: {
 			automations: async () => (await import('./ui/workbench-page')).createAutomationsPage(() => runtime && {
@@ -121,8 +106,6 @@ export default function createAutomationsModule(context: ModuleContext): ModuleI
 					return request;
 				},
 				taskTargets,
-				workflowSources: { workflows: () => runtime?.workflows() ?? Promise.reject(new AutomationError('workflowUnavailable')),
-					pages: () => runtime?.workflowPages() ?? Promise.reject(new AutomationError('workflowUnavailable')) },
 				cwd: app.vault.adapter instanceof FileSystemAdapter ? app.vault.adapter.getBasePath() : '',
 			}, () => new Error(t('automation.failedLoad'))),
 		},

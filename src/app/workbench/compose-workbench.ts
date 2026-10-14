@@ -12,14 +12,12 @@ import { WORKBENCH_VIEW_TYPE, WorkbenchView } from './workbench-leaf';
 import type { WorkbenchContribution, WorkbenchHost } from '../contracts/workbench-host';
 import { dashboardSaveStatuses, visibleStatuses } from './status-policy';
 import { focusLeafState } from './focus-state';
-import { NEWS_WORKBENCH } from '../../modules/news/api';
 import { NOTIFICATION_INBOX } from '../../modules/notifications/api';
 import { AGENT_WORKBENCH } from '../../modules/agent/api';
 import { HOME_WORKBENCH } from '../../modules/home/api';
 import { AUTOMATIONS } from '../../modules/automations/api';
 import { COMMENTS_INDEX } from '../../modules/comments/api';
 import { SYNC_WORKBENCH } from '../../modules/sync/api';
-import { BROWSER_ASSISTANT, BROWSER_WORKSPACE, BROWSER_WORKFLOWS } from '../../modules/browser/api';
 import { commentsPanel } from './comments-panel';
 
 export function composeWorkbench(plugin: DashboardPlugin) {
@@ -67,40 +65,16 @@ export function composeWorkbench(plugin: DashboardPlugin) {
 			rail: { slot: 'top' },
 			navigation: { id: 'browser', labelKey: 'workbench.browser', icon: 'globe', target: { feature: 'browser' }, children: [
 				{ id: 'browser-pages', labelKey: 'workbench.pages', icon: 'globe', target: { feature: 'browser' } },
-				{ id: 'browser-workspace', labelKey: 'workbench.browserWorkspace', icon: 'messages-square', target: { feature: 'browser', section: 'multi-ai' } },
-				{ id: 'browser-assistant', labelKey: 'workbench.browserAssistant', icon: 'bot', target: { feature: 'browser', section: 'assistant' } },
-				{ id: 'browser-workflows', labelKey: 'workbench.browserWorkflows', icon: 'workflow', target: { feature: 'browser', section: 'workflows' } },
-				{ id: 'browser-access', labelKey: 'workbench.browserAccess', icon: 'key-round', target: { feature: 'browser', section: 'access' } },
 			] },
 			panel: ({ pages, target }) => ({
-				primary: target.section === 'access' ? { label: t('workbench.browserAccess'), icon: 'key-round', run: () => plugin.openWorkbench({ feature: 'browser', section: 'access' }) } : target.section === 'workflows' ? { label: t('workbench.browserWorkflows'), icon: 'workflow', run: () => plugin.openWorkbench({ feature: 'browser', section: 'workflows' }) } : target.section === 'multi-ai' || target.section === 'assistant'
-					? { label: t('workbench.browserNewTask'), icon: 'plus', run: () => plugin.openWorkbench({ feature: 'browser', section: target.section }) }
-					: { label: t('workbench.newPage'), icon: 'plus', run: () => plugin.openWorkbench({ feature: 'browser', resourceId: crypto.randomUUID() }) },
+				primary: { label: t('workbench.newPage'), icon: 'plus', run: () => plugin.openWorkbench({ feature: 'browser', resourceId: crypto.randomUUID() }) },
 				searchable: true,
 				sections: [{
 					id: 'browser-sections',
 					items: [
 						{ id: 'browser-pages', label: t('workbench.pages'), icon: 'globe', target: { feature: 'browser' }, active: !target.section },
-						{ id: 'browser-workspace', label: t('workbench.browserWorkspace'), icon: 'messages-square', target: { feature: 'browser', section: 'multi-ai' }, active: target.section === 'multi-ai' },
-						{ id: 'browser-assistant', label: t('workbench.browserAssistant'), icon: 'bot', target: { feature: 'browser', section: 'assistant' }, active: target.section === 'assistant' },
-						{ id: 'browser-workflows', label: t('workbench.browserWorkflows'), icon: 'workflow', target: { feature: 'browser', section: 'workflows' }, active: target.section === 'workflows' },
-						{ id: 'browser-access', label: t('workbench.browserAccess'), icon: 'key-round', target: { feature: 'browser', section: 'access' }, active: target.section === 'access' },
 					],
-				}, ...(target.section === 'multi-ai' ? [{
-					id: 'tasks', title: t('workbench.tasks'), emptyText: t('workbench.browserNoTasks'),
-					items: [...(plugin.services.peek(BROWSER_WORKSPACE)?.snapshot()?.tasks ?? [])]
-						.sort((a, b) => Number(b.pinned) - Number(a.pinned) || b.updatedAt - a.updatedAt)
-						.map(task => ({ id: task.id, label: task.title, icon: task.pinned ? 'pin' : 'messages-square',
-							target: { feature: 'browser' as const, section: 'multi-ai', resourceId: task.id }, active: target.resourceId === task.id })),
-				}] : target.section === 'assistant' ? [{
-					id: 'assistant-tasks', title: t('workbench.tasks'), emptyText: t('workbench.browserNoTasks'),
-					items: (plugin.services.peek(BROWSER_ASSISTANT)?.snapshot() ?? []).map(task => ({ id: task.id, label: task.title, icon: 'bot',
-						target: { feature: 'browser' as const, section: 'assistant', resourceId: task.id }, active: target.resourceId === task.id })),
-				}] : target.section === 'workflows' ? [{
-					id: 'workflow-runs', title: t('workbench.browserWorkflows'), emptyText: t('workbench.browserNoTasks'),
-					items: (plugin.services.peek(BROWSER_WORKFLOWS)?.records() ?? []).map(run => ({ id: run.runId, label: run.spec.title, icon: 'workflow',
-						target: { feature: 'browser' as const, section: 'workflows', resourceId: run.runId }, active: target.resourceId === run.runId })),
-				}] : [{
+				}, {
 					id: 'pages',
 					title: t('workbench.pages'),
 					emptyText: t('browser.empty'),
@@ -111,7 +85,7 @@ export function composeWorkbench(plugin: DashboardPlugin) {
 						target: page.target,
 						active: page.target.resourceId === target.resourceId,
 					})),
-				}])],
+				}],
 			}),
 			availability: () => ({ ...ready(), enabled: plugin.moduleEnabled('browser') }),
 			stateKeys: ['id', 'url', 'title', 'zoom', 'scroll', 'profileId'],
@@ -153,16 +127,6 @@ export function composeWorkbench(plugin: DashboardPlugin) {
 			availability: () => ({ ...ready(), enabled: plugin.moduleEnabled('sync'), supported: Platform.isDesktopApp, ready: plugin.moduleState('sync') === 'active' }),
 			stateKeys: ['section', 'selected', 'message'],
 			create: modulePage('sync', 'sync'),
-		},
-		{
-			id: 'news',
-			rail: { slot: 'top' },
-			navigation: { id: 'news', labelKey: 'news.title', icon: 'newspaper', target: { feature: 'news' } },
-			panel: ({ target }) => plugin.services.peek(NEWS_WORKBENCH)?.panel(target),
-			title: target => plugin.services.peek(NEWS_WORKBENCH)?.title(target),
-			availability: () => ({ ...ready(), enabled: plugin.moduleEnabled('news'), ready: plugin.moduleState('news') === 'active' }),
-			stateKeys: ['section', 'selected', 'view', 'filter', 'order'],
-			create: modulePage('news', 'news'),
 		},
 		{
 			id: 'icons',
@@ -306,7 +270,7 @@ export function composeWorkbench(plugin: DashboardPlugin) {
 			return () => { listeners.delete(listener); };
 		},
 		openSettings: (feature) => {
-			const product = { dashboard: 'dashboard', terminal: 'terminal', browser: 'browser', contacts: 'contacts', automations: 'automation', notifications: 'general', icons: 'iconic', comments: 'editor', records: 'dashboard', sync: 'sync', news: 'news', content: 'general', settings: 'general' } as const;
+			const product = { dashboard: 'dashboard', terminal: 'terminal', browser: 'browser', contacts: 'contacts', automations: 'automation', notifications: 'general', icons: 'iconic', comments: 'editor', records: 'dashboard', sync: 'sync', content: 'general', settings: 'general' } as const;
 			void plugin.openWorkbenchSettings(feature ? product[feature] : 'general').catch(report);
 		},
 		openFocus: async (target, state, placement, ownerWindow) => {
@@ -400,16 +364,6 @@ export function composeWorkbench(plugin: DashboardPlugin) {
 		refresh();
 	});
 	plugin.register(() => { offSync?.(); offSyncWatch(); });
-	let offNews = plugin.services.peek(NEWS_WORKBENCH)?.subscribe(() => refresh());
-	const offNewsWatch = plugin.services.watch(NEWS_WORKBENCH, service => {
-		offNews?.(); offNews = service?.subscribe(() => refresh()); refresh();
-	});
-	plugin.register(() => { offNews?.(); offNewsWatch(); });
-	let offBrowserWorkspace = plugin.services.peek(BROWSER_WORKSPACE)?.subscribe(() => refresh());
-	const offBrowserWorkspaceWatch = plugin.services.watch(BROWSER_WORKSPACE, service => {
-		offBrowserWorkspace?.(); offBrowserWorkspace = service?.subscribe(() => refresh()); refresh();
-	});
-	plugin.register(() => { offBrowserWorkspace?.(); offBrowserWorkspaceWatch(); });
 	// Agent sessions, history and usage refresh the agent panel and statuses while that module is active.
 	let offAgent = plugin.services.peek(AGENT_WORKBENCH)?.subscribe(() => refresh());
 	const offAgentWatch = plugin.services.watch(AGENT_WORKBENCH, (agent) => {

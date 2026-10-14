@@ -30,8 +30,7 @@ NAND 当前版本为 0.0.2-alpha.1，是预发布版。
 | 看板与记录 | [栏目、卡片、小组件和快捷操作](docs/dashboard.md)；[习惯、记账、阅读、番茄钟](docs/records.md) |
 | 自动化 | [手动／定时动作、设备归属和通知](docs/automation.md) |
 | 编程智能体 | [终端会话、原生历史、用量和上下文](docs/agent-workbench.md) |
-| 浏览器 | [网页、站点权限、CLI 与材料采集](docs/browser.md) |
-| 新闻 | [订阅、分析、事件阅读、收藏和简报（桌面端，默认关闭）](docs/news.md) |
+| 浏览器 | [网页、站点权限与材料采集](docs/browser.md) |
 | 档案 | [个人、企业、任职、关系和相关资料](docs/contacts.md) |
 | 评论 | [不改写笔记正文的评论](docs/comments.md) |
 | 图标 | [文件和界面图标、颜色及规则](docs/icons.md) |
@@ -42,7 +41,7 @@ NAND 当前版本为 0.0.2-alpha.1，是预发布版。
 
 ## 数据与同步
 
-全部 NAND 管理数据位于当前库的 `.nand/`：受管 Markdown/附件在 `.nand/content/`，配置、设备身份、浏览器会话/下载/桥接、CLI HOME/凭据/Hook 和按版本保存的 helper 均在其中。受管文档通过工作台浏览和编辑；普通笔记、宿主数据和 Git 元数据保留原位。Obsidian Sync 不包含点目录，`.nand/content/` 也不例外；请使用支持隐藏目录的文件同步工具。浏览器与 CLI 登录状态跨设备可能需要重新认证。[数据与恢复](docs/data.md)说明迁移、备份和故障恢复。当前维护指南只保留中文，根 README 保持双语。
+全部 NAND 管理数据位于当前库的 `.nand/`：受管 Markdown/附件在 `.nand/content/`，配置、设备身份、浏览器会话/下载、CLI HOME/凭据/Hook 和按版本保存的 helper 均在其中。受管文档通过工作台浏览和编辑；普通笔记、宿主数据和 Git 元数据保留原位。Obsidian Sync 不包含点目录，`.nand/content/` 也不例外；请使用支持隐藏目录的文件同步工具。浏览器与 CLI 登录状态跨设备可能需要重新认证。[数据与恢复](docs/data.md)说明迁移、备份和故障恢复。当前维护指南只保留中文，根 README 保持双语。
 
 ## 开发
 
@@ -56,7 +55,7 @@ NAND 当前版本为 0.0.2-alpha.1，是预发布版。
 
 NAND 使用 MIT 许可证，见 [LICENSE](LICENSE)。第三方署名：
 
-- [NOTICE](NOTICE) 列出 NAND 改编的作品并保留它们的许可证原文：apex-dashboard 与 obsidian-dashboard（看板设计）、Orca（终端与浏览器部分）、Iconic（图标规则）、obsidian-git（Git 同步）和 AIHOT（新闻算法）。见 [Orca 对照](docs/third-party/orca-terminal-workbench.md)和[新闻对照](docs/third-party/aihot-news.md)。
+- [NOTICE](NOTICE) 列出 NAND 改编的作品并保留它们的许可证原文：apex-dashboard 与 obsidian-dashboard（看板设计）、Orca（终端与浏览器部分）、Iconic（图标规则）和 obsidian-git（Git 同步）。见 [Orca 对照](docs/third-party/orca-terminal-workbench.md)。
 - [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md) 列出打包进插件的 npm 依赖和终端辅助程序的 Rust 依赖。
 - 图标、Emoji 与 Unicode 数据的声明见 [src/modules/icons/core/res/NOTICE.txt](src/modules/icons/core/res/NOTICE.txt)。
 

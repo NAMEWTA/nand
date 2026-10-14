@@ -9,12 +9,6 @@ import { AddressBar, DownloadsBar, FindBar, PageMessage, SelectionPanel, Toolbar
 import type { BrowserHost } from '../services/page-host';
 import { MarkupPanel } from './MarkupPanel';
 import { browserError, grabText } from '../core/text';
-import { AssistantBanner } from './AssistantBanner';
-import { WorkflowBanner } from './WorkflowBanner';
-import { AccessBanner } from './AccessBanner';
-import { SelectionGuidance } from './SelectionGuidance';
-import { UserAdapterEditor } from './UserAdapterEditor';
-import type { BrowserPageTarget } from '../core/control';
 
 export { browserError, grabText };
 export function BrowserPanel({
@@ -49,8 +43,6 @@ export function BrowserPanel({
 	const [failure, setFailure] = useState(''),
 		[design, setDesign] = useState(false),
 		[grab, setGrab] = useState<BrowserGrab | null>(null);
-	const [grabTarget, setGrabTarget] = useState<BrowserPageTarget>();
-	const [adapterOpen, setAdapterOpen] = useState(false);
 	const [markup, setMarkup] = useState<{ data: string; width: number; selection?: BrowserGrab } | null>(null),
 		[agents, setAgents] = useState<BrowserAgent[]>([]);
 	const [agent, setAgent] = useState(''),
@@ -217,7 +209,6 @@ export function BrowserPanel({
 					: (selection) => {
 							setDesign(false);
 							setGrab(selection);
-							setGrabTarget({ pageId: page.state.id, profileId: page.profileId, generation: page.generation });
 							loadAgents();
 						},
 			);
@@ -323,7 +314,6 @@ export function BrowserPanel({
 					))}
 				</select>
 				<ToolbarButton label="design" icon="mouse-pointer-2" onClick={toggleDesign} disabled={!ready} />
-				{host.getUserAdapters && <ToolbarButton label="userAdapter" icon="settings-2" onClick={() => setAdapterOpen(!adapterOpen)} disabled={!ready} />}
 				<ToolbarButton label="more" icon="ellipsis" onClick={(e) => menu(e)} />
 				{modal && (
 					<ToolbarButton
@@ -339,9 +329,6 @@ export function BrowserPanel({
 				)}
 				{modal && <ToolbarButton label="close" icon="x" onClick={() => close?.()} />}
 			</div>
-			{page && <AssistantBanner host={host} target={{ pageId: state.id, profileId: page.profileId, generation: page.generation }} />}
-			{page && <WorkflowBanner host={host} target={{ pageId: state.id, profileId: page.profileId, generation: page.generation }} />}
-			{page && <AccessBanner host={host} target={{ pageId: state.id, profileId: page.profileId, generation: page.generation }} />}
 			{find !== null && (
 				<FindBar
 					inputRef={findInput}
@@ -386,7 +373,7 @@ export function BrowserPanel({
 						onExternal={external}
 					/>
 				)}
-				{grab && !adapterOpen && (
+				{grab && (
 					<SelectionPanel
 						grab={grab}
 						agents={agents}
@@ -406,16 +393,10 @@ export function BrowserPanel({
 							})
 						}
 					>
-						{grabTarget && host.guidanceChoices && host.saveGuidance && <SelectionGuidance host={host} target={grabTarget} grab={grab} saved={() => setGrab(null)} />}
 					</SelectionPanel>
 				)}
 				{markup && <MarkupPanel data={markup.data} viewportWidth={markup.width || 1000} close={() => setMarkup(null)} finish={finishMarkup} />}
 			</div>
-			{adapterOpen && page && <div class="nand-browser-adapter-container" hidden={design}>
-				<UserAdapterEditor key={page.generation} host={host} target={{ pageId: page.state.id, profileId: page.profileId, generation: page.generation }} url={state.url}
-					grab={grab && grabTarget?.pageId === page.state.id && grabTarget.generation === page.generation && grabTarget.profileId === page.profileId ? grab : undefined}
-					pick={toggleDesign} close={() => setAdapterOpen(false)} />
-			</div>}
 		</div>
 	);
 }

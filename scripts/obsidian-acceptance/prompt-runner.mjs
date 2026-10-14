@@ -11,7 +11,7 @@ const home=process.env.CODEX_HOME, prompt=process.argv.at(-1);
 const hooks=JSON.parse(fs.readFileSync(path.join(home,'hooks.json'),'utf8')).hooks;
 const script=/"([^\"]+nand-automation-hook.cjs)"/.exec(hooks.Stop[0].hooks[0].command)?.[1];
 if(!script) throw Error('Missing installed hook');
-fs.writeFileSync(path.join(home,'probe.json'),JSON.stringify({pid:process.pid,promptLength:prompt.length,hookDir:process.env.NAND_HOOK_DIR,hasGrant:!!process.env.NAND_BROWSER_TOKEN}));
+fs.writeFileSync(path.join(home,'probe.json'),JSON.stringify({pid:process.pid,promptLength:prompt.length,hookDir:process.env.NAND_HOOK_DIR,hasContext:!!process.env.FIXTURE_CONTEXT_TOKEN}));
 const post=(event,data={})=>cp.spawnSync(process.execPath,[script,event],{input:JSON.stringify(data),env:process.env,windowsHide:true});
 post('UserPromptSubmit');
 process.stdout.write('SCREEN_ONLY_NO_ANSWER\\n');
@@ -25,7 +25,7 @@ setInterval(()=>{},1000);
 `;
 const runtime = await launchFreshVault({ root: process.argv[2], port: 9253,
 	files: { 'runner-fixture.cjs': fixture }, settings: { version: 1, namespaces: {
-		app: { language: 'en', introSeen: true, modules: { agent: true, home: false, archives: false, browser: false, news: false, sync: false, comments: false, notifications: false, automations: false, icons: false } },
+		app: { language: 'en', introSeen: true, modules: { agent: true, home: false, archives: false, browser: false, sync: false, comments: false, notifications: false, automations: false, icons: false } },
 	} } });
 const rows = [];
 const check = (name, passed, detail) => { rows.push({ name, passed, detail }); assert.ok(passed, name); };

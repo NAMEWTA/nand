@@ -26,12 +26,10 @@ const moveAfterDownloadCloses = async (from, to) => {
  for (;;) { try { await fs.rename(from,to); return; } catch(error) { if(!['EPERM','EBUSY'].includes(error.code)||Date.now()>deadline)throw error; await delay(80); } }
 };
 try {
- runtime = await launchFreshVault({ root: process.argv[2], port: 9445, settings: { version: 1, namespaces: { app: { language: 'zh', introSeen: true, modules: Object.fromEntries(['home','agent','browser','news','archives','automations','notifications','icons','comments','sync'].map(id => [id,false])) } } } }); c = runtime.connection;
+ runtime = await launchFreshVault({ root: process.argv[2], port: 9445, settings: { version: 1, namespaces: { app: { language: 'zh', introSeen: true, modules: Object.fromEntries(['home','agent','browser','archives','automations','notifications','icons','comments','sync'].map(id => [id,false])) } } } }); c = runtime.connection;
  const identityPath = path.join(runtime.vault, '.nand/config/identity.json'), identity = JSON.parse(await fs.readFile(identityPath, 'utf8')), device = Object.keys(identity.devices)[0];
  identity.devices[device].legacyBrowserVaultId = legacyId; await fs.writeFile(identityPath, JSON.stringify(identity));
  const legacyPath = await c.evaluate(`(async()=>{const e=document.createElement('webview');e.partition='persist:nand-browser-${legacyId}';const ready=new Promise(resolve=>e.addEventListener('dom-ready',resolve,{once:true}));e.src=${JSON.stringify(url)};document.body.append(e);await ready;await e.executeJavaScript("document.cookie='account=legacy;path=/;max-age=86400';localStorage.account='legacy';true");const s=require('@electron/remote').webContents.fromId(e.getWebContentsId()).session;await s.cookies.flushStore();const directory=s.storagePath;e.remove();return directory})()`);
- const oldRuntime = path.join(path.dirname(path.dirname(legacyPath)),'nand-browser',legacyId);
- await fs.mkdir(path.join(oldRuntime,'artifacts'),{recursive:true}); await fs.writeFile(path.join(oldRuntime,'artifacts','11223344-5566-4777-8888-1234567890ac.txt'),'retained legacy context');
  await runtime.restart(); c = runtime.connection;
  await c.evaluate(`${p}.setModuleEnabled('browser',true)`); await bind();
  const profiles = [];
@@ -57,8 +55,6 @@ try {
  const id = await open(), directory = await c.evaluate(`${native(id)}.session.storagePath`);
  check('cold-copy-opens-only-vault-session', directory === path.join(runtime.vault, '.nand/browser', device, 'profiles/default/session'), directory);
  check('legacy-cookie-and-site-data-survive-copy', await script(id, "document.cookie==='account=legacy'&&localStorage.account==='legacy'"));
- check('old-bridge-artifacts-retained-in-vault', await fs.readFile(path.join(runtime.vault,'.nand/browser',device,'legacy-runtime/files/artifacts/11223344-5566-4777-8888-1234567890ac.txt'),'utf8') === 'retained legacy context');
- check('old-bridge-source-cleaned-after-verification', await fs.stat(oldRuntime).then(()=>false,error=>error.code==='ENOENT'));
  check('legacy-original-retained-until-next-boot', (await fs.stat(legacyPath)).isDirectory());
  await script(id, "document.cookie='account=current;path=/;max-age=86400';localStorage.account='current';true");
  await c.evaluate(`${native(id)}.session.cookies.flushStore()`);
@@ -86,9 +82,7 @@ try {
  check('published-profile-delete-clears-old-source-and-backup', await fs.stat(published.source).then(()=>false,error=>error.code==='ENOENT') && await fs.stat(path.join(publishedDownloads,'../legacy-original')).then(()=>false,error=>error.code==='ENOENT'));
  check('profile-delete-retains-saved-downloads', await fs.readFile(path.join(publishedDownloads,'saved-material.txt'),'utf8') === 'keep saved material');
  const artifacts = await c.evaluate(`(async()=>{window.bh=${surfaces}.find(s=>s.state?.id===${JSON.stringify(id)}).host;return bh.saveImage('data:image/png;base64,aGVsbG8=','context')})()`);
- const runtimeRoot = path.join(runtime.vault,'.nand/browser',device,'runtime'), run = (await fs.readdir(runtimeRoot)).find(name => /^[a-f\d-]{36}$/.test(name));
- assert.ok(run); const bridgePaths = { artifacts, context: path.join(runtimeRoot,run,'connection.json'), cli: path.join(runtimeRoot,run,'nand-browser.cjs') };
- check('bridge-and-artifacts-use-vault-device-root', [bridgePaths.context,bridgePaths.cli,...bridgePaths.artifacts].every(file => file.startsWith(path.join(runtime.vault,'.nand/browser',device)+path.sep)), bridgePaths);
+ check('captured-artifacts-use-managed-content', artifacts.every(file => file.startsWith(path.join(runtime.vault,'.nand/content')+path.sep)), artifacts);
  await runtime.shot('vault-browser-and-download');
  await runtime.restart(); c = runtime.connection; await bind(); const restored = await open();
  const complete = profiles.find(profile=>profile.phase==='complete'); await c.evaluate(`bo.open({url:${JSON.stringify(url)},profileId:'${complete.id}'})`);
@@ -99,8 +93,7 @@ try {
  check('migrated-session-retains-new-data-after-restart', await script(restored, "document.cookie==='account=current'&&localStorage.account==='current'"));
  check('legacy-source-cleaned-only-after-validation', await fs.stat(legacyPath).then(() => false, error => error.code === 'ENOENT'));
  check('legacy-source-preserved-inside-vault', (await fs.stat(path.join(runtime.vault,'.nand/browser',device,'profiles/default/legacy-original'))).isDirectory());
- check('closed-runtime-removes-connection', await fs.stat(bridgePaths.context).then(() => false, error => error.code === 'ENOENT'));
- check('published-artifacts-remain-in-vault', await fs.readFile(bridgePaths.artifacts.find(file=>file.endsWith('.txt')), 'utf8') === 'context');
+ check('published-artifacts-remain-in-vault', await fs.readFile(artifacts.find(file=>file.endsWith('.txt')), 'utf8') === 'context');
  await c.evaluate(`${p}.setModuleEnabled('home',true)`);
  await c.evaluate(`${p}.openWorkbench({feature:'dashboard'},window)`);
  await until(`${surfaces}.some(s=>s.sync?.getData())`);

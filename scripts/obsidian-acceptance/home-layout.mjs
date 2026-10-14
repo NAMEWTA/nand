@@ -7,7 +7,7 @@ import { launchFreshVault } from './fresh-vault.mjs';
 const old = '---\r\n# Keep my header\r\ncustom: [one, two] # personal\r\nbanner:\r\n  quote: "A board with its own layout"\r\n  author: "Fixture"\r\n---\r\n\r\n<!-- Keep my introduction -->\r\n\r\n## Notes\r\n\r\n### First card\r\nid: stable-card\r\ntype: generic\r\nPersonal text.\r\n';
 const modern = old.replace('# Keep my header\r\n','layout: stacked\r\n# Keep my header\r\n');
 const runtime=await launchFreshVault({root:process.argv[2],port:9261,files:{'Old.md':old,'Modern.md':modern},settings:{version:1,namespaces:{
-	app:{language:'en',introSeen:true,modules:{home:true,news:false,agent:false,browser:false,archives:false,automations:false,notifications:false,icons:false,comments:false,sync:false}},
+	app:{language:'en',introSeen:true,modules:{home:true,agent:false,browser:false,archives:false,automations:false,notifications:false,icons:false,comments:false,sync:false}},
 	home:{dashboardFile:'Old',workspaceFiles:['Old','Modern'],workspaceNames:['Old','Modern'],layoutMode:'side',quickNotesEnabled:true,widgetLunarEnabled:false,widgetWeatherEnabled:false,widgetMusicEnabled:false,pomodoroEnabled:false,widgetQuickActionsEnabled:false,widgetYearProgressEnabled:true},
 }}});
 let c=runtime.connection;

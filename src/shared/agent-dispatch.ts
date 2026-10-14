@@ -2,7 +2,7 @@
 export interface AgentDispatchRequest {
 	invocationId: string;
 	title: string;
-	source: { kind: 'dashboard' | 'widget' | 'contacts' | 'news' | 'browser' | 'browser-workflow'; path: string; id: string };
+	source: { kind: 'dashboard' | 'widget' | 'contacts'; path: string; id: string };
 	agentId: string;
 	destination: { kind: 'fresh'; cwd: string } | { kind: 'existing'; sessionId: string };
 	finalPrompt: string;

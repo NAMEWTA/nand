@@ -15,15 +15,13 @@
 	margin-block: var(--nand-space-2);
 }
 
-.nand-widget-status button,
-.dashboard-sidebar-news button {
+.nand-widget-status button {
 	min-height: var(--nand-control-height);
 	white-space: normal;
 	text-align: start;
 }
 
-.nand-widget-status button:focus-visible,
-.dashboard-sidebar-news button:focus-visible {
+.nand-widget-status button:focus-visible {
 	box-shadow: var(--nand-focus-ring);
 }
 

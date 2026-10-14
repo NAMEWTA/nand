@@ -31,8 +31,6 @@ export function AutomationRunList({ runs, service, actions, selected }: {
 													{t('automation.open')}
 												</button>
 											)}
-											{run.definition?.action.kind === 'browser-workflow' && <button className="nand-ui-btn nand-ui-btn-ghost" disabled={!service.openRun}
-												onClick={() => actions.run(async () => service.openRun?.(run))}><Icon name="workflow" />{t('automation.workflowResult')}</button>}
 											{isActiveRun(run) && (
 												<button
 													className="nand-ui-btn nand-ui-btn-ghost nand-automation-btn-danger"

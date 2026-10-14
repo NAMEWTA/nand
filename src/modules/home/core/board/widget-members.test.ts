@@ -33,8 +33,8 @@ test('widget resources release once, including late async registration and throw
 test('same names in different providers coexist while a duplicate inside a provider is reported', () => {
 	const kind: HomeWidgetKind = { key: 'calendar', titleKey: 'calendar', icon: 'calendar', defaultSize: { w: 4, h: 40 }, minSize: { w: 2, h: 3 }, instances: () => [{ id: 'default' }], render: () => undefined };
 	const duplicate = { ...kind, icon: 'other' };
-	const index = indexWidgetProviders([{ module: 'home', bundle: { kinds: [kind, duplicate] } }, { module: 'news', bundle: { kinds: [duplicate] } }]);
+	const index = indexWidgetProviders([{ module: 'home', bundle: { kinds: [kind, duplicate] } }, { module: 'automations', bundle: { kinds: [duplicate] } }]);
 	expect(index.byKey.get(widgetProviderKey('home', 'calendar'))?.kind).toBe(kind);
-	expect(index.byKey.get(widgetProviderKey('news', 'calendar'))?.kind).toBe(duplicate);
+	expect(index.byKey.get(widgetProviderKey('automations', 'calendar'))?.kind).toBe(duplicate);
 	expect(index.errors).toEqual(['home/calendar']);
 });

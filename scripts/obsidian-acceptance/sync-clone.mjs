@@ -11,7 +11,7 @@ import { launchFreshVault } from './fresh-vault.mjs';
 const root = process.argv[2];
 assert.ok(root && path.isAbsolute(root));
 const runtime = await launchFreshVault({ root, port: 9246, files: { 'Welcome.md': 'Current vault sentinel\n' }, settings: {
-	version: 1, namespaces: { app: { language: 'en', introSeen: true, modules: { home: false, agent: false, browser: false, archives: false, automations: false, notifications: false, icons: false, comments: false, news: false, sync: true } } },
+	version: 1, namespaces: { app: { language: 'en', introSeen: true, modules: { home: false, agent: false, browser: false, archives: false, automations: false, notifications: false, icons: false, comments: false, sync: true } } },
 } });
 const { connection: c, evidence, vault } = runtime;
 const rows = [];

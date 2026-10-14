@@ -14,7 +14,6 @@ export interface ActionDescriptor {
 	unavailableReason?: string;
 }
 export const actionDescriptors: readonly ActionDescriptor[] = [
-	{ kind: 'browser-workflow', name: 'automation.browser-workflow', manual: true, scheduled: true, desktop: true },
 	{ kind: 'agent', name: 'automation.agent', manual: true, scheduled: true, desktop: true },
 	{ kind: 'script', name: 'automation.script', manual: true, scheduled: true, desktop: true },
 	{ kind: 'create-task', name: 'automation.create-task', manual: true, scheduled: true, desktop: false },
@@ -31,11 +30,8 @@ export interface ActionContext {
 	run: AutomationRun;
 	desktop: boolean;
 	signal: AbortSignal;
-	/** Runtime-only, single-use producer review. Never copied into the run journal. */
-	authorizationId?: string;
 }
 export interface ActionExecutor {
-	validate?(action: AutomationAction): Promise<void>;
 	open?(run: AutomationRun): Promise<void>;
 	execute(action: AutomationAction, context: ActionContext): Promise<ActionResult>;
 }

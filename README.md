@@ -30,8 +30,7 @@ The [user guide](docs/README.md) covers every feature, including settings, appea
 | Dashboard and records | [Sections, cards, widgets and quick actions](docs/dashboard.md); [habits, expenses, reading and pomodoro](docs/records.md) |
 | Automations | [Manual and scheduled actions, device ownership and notifications](docs/automation.md) |
 | Coding agents | [Terminal sessions, native history, usage and context](docs/agent-workbench.md) |
-| Browser | [Web pages, site permissions, CLI and material capture](docs/browser.md) |
-| News | [Feeds, analysis, event reading, favorites and briefs (desktop, off by default)](docs/news.md) |
+| Browser | [Web pages, site permissions and material capture](docs/browser.md) |
 | Archives | [People, companies, positions, relationships and related material](docs/contacts.md) |
 | Comments | [Comments that never rewrite the note](docs/comments.md) |
 | Icons | [File and interface icons, colors and rules](docs/icons.md) |
@@ -42,7 +41,7 @@ Each module has its own switch in the settings. A module that is off is not load
 
 ## Data and sync
 
-All NAND-managed data lives in the current vault's `.nand/`: managed Markdown and attachments in `.nand/content/`, configuration, device identity, browser sessions/downloads/bridge files, CLI homes/credentials/hooks and versioned helpers. Use the workbench to browse and edit managed documents. Ordinary notes, host data and Git metadata keep their locations. Obsidian Sync excludes dot folders, including all of `.nand/content/`; use a file sync tool that includes hidden folders. Browser and CLI login state may require authentication again on another device. [Data and recovery](docs/data.md) explains migration, backup and failure recovery. Current maintained guides are in Chinese; this README also has a Chinese version.
+All NAND-managed data lives in the current vault's `.nand/`: managed Markdown and attachments in `.nand/content/`, configuration, device identity, browser sessions and downloads, CLI homes/credentials/hooks and versioned helpers. Use the workbench to browse and edit managed documents. Ordinary notes, host data and Git metadata keep their locations. Obsidian Sync excludes dot folders, including all of `.nand/content/`; use a file sync tool that includes hidden folders. Browser and CLI login state may require authentication again on another device. [Data and recovery](docs/data.md) explains migration, backup and failure recovery. Current maintained guides are in Chinese; this README also has a Chinese version.
 
 ## Development
 
@@ -56,7 +55,7 @@ Changes by version are in the [changelog](CHANGELOG.md).
 
 NAND is released under the MIT License: see [LICENSE](LICENSE). Third-party attribution:
 
-- [NOTICE](NOTICE) names the works NAND adapts and keeps their license texts: apex-dashboard and obsidian-dashboard (board design), Orca (terminal and browser parts), Iconic (icon rules), obsidian-git (Git sync) and AIHOT (news algorithms). See the [Orca mapping](docs/third-party/orca-terminal-workbench.md) and [news mapping](docs/third-party/aihot-news.md).
+- [NOTICE](NOTICE) names the works NAND adapts and keeps their license texts: apex-dashboard and obsidian-dashboard (board design), Orca (terminal and browser parts), Iconic (icon rules), and obsidian-git (Git sync). See the [Orca mapping](docs/third-party/orca-terminal-workbench.md).
 - [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md) lists the npm packages bundled into the plugin and the Rust crates of the terminal helper.
 - Icon, emoji and Unicode data notices are in [src/modules/icons/core/res/NOTICE.txt](src/modules/icons/core/res/NOTICE.txt).
 

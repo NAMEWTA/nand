@@ -22,7 +22,7 @@ const open = async () => {
 };
 try {
 	runtime = await launchFreshVault({ root, port: 9456, files: { 'note.md': 'base\n', '.gitignore': '.obsidian/\n.nand/\n' }, settings: {
-		version: 1, namespaces: { app: { language: 'en', introSeen: true, modules: Object.fromEntries(['home','agent','browser','news','archives','automations','notifications','icons','comments','sync'].map(id => [id,false])) } },
+		version: 1, namespaces: { app: { language: 'en', introSeen: true, modules: Object.fromEntries(['home','agent','browser','archives','automations','notifications','icons','comments','sync'].map(id => [id,false])) } },
 	} }); c = runtime.connection;
 	await fs.writeFile(path.join(root, 'gitconfig'), '[init]\n defaultBranch = main\n[user]\n name = Tester\n email = tester@example.com\n[commit]\n gpgsign = false\n');
 	const remote = path.join(root, 'remote.git'), peer = path.join(root, 'peer');

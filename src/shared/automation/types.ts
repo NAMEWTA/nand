@@ -11,7 +11,7 @@ export type NotificationChannelId = 'in-app' | 'system';
 export type ScheduleSpec =
 	{ kind: 'manual' } | { kind: 'once'; at: number } | { kind: 'recurring'; expression: string; start: number; timezone?: string };
 export interface SourceRef {
-	kind: 'dashboard' | 'contacts' | 'widget' | 'news' | 'browser' | 'browser-workflow';
+	kind: 'dashboard' | 'contacts' | 'widget';
 	path: string;
 	id: string;
 }
@@ -26,7 +26,6 @@ export interface AgentSessionRef {
 	terminalId?: string;
 }
 export type AutomationAction =
-	| BrowserWorkflowAction
 	| { kind: 'script'; script: string; cwd: string; shell: 'powershell' | 'bash' }
 	| { kind: 'obsidian-command'; command: string }
 	| { kind: 'open-file'; path: string }
@@ -41,15 +40,6 @@ export type AutomationAction =
 			sessionMode: 'fresh' | 'reuse' | 'specific';
 			session?: AgentSessionRef;
 	  };
-/** Only public values belong in saved definitions. Secrets and review grants stay in the producer's memory. */
-export interface BrowserWorkflowAction {
-	kind: 'browser-workflow';
-	workflowId: string;
-	version: number;
-	variables: Record<string, string | number | boolean>;
-	/** Explicit persistent page/account choices; a runner must bind their current runtime generations. */
-	scope: Array<{ id: string; pageId: string; profileId: string }>;
-}
 export interface AutomationActionCompletion extends AutomationMessage {
 	status: 'succeeded' | 'failed' | 'cancelled' | 'interrupted';
 	output?: string;
@@ -83,7 +73,6 @@ export interface AutomationMessage {
 	errorParams?: Record<string, string | number>;
 }
 export interface AutomationRun extends AutomationMessage {
-	workflowInvocation?: { invocationId: string; identity: string };
 	invocation?: { request: AgentDispatchRequest; receipt?: AgentDispatchReceipt };
 	definition?: AutomationDefinition;
 	notificationAttempted?: boolean;

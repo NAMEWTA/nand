@@ -8,7 +8,7 @@ import { connect } from './cdp.mjs';
 
 const original='---\r\nlayout: immersive\r\nwidgets: []\r\nimmersive: []\r\ncustom: keep # personal\r\n---\r\n\r\n<!-- Keep my body -->\r\n';
 const runtime=await launchFreshVault({root:process.argv[2],port:9264,files:{'A.md':original,'B.md':original,'Photos/sample.svg':'<svg xmlns="http://www.w3.org/2000/svg" width="160" height="120"><rect width="160" height="120" fill="gray"/></svg>'},settings:{version:1,namespaces:{
-	app:{language:'en',introSeen:true,modules:{home:true,news:false,agent:false,browser:false,archives:false,automations:false,notifications:false,icons:false,comments:false,sync:false}},
+	app:{language:'en',introSeen:true,modules:{home:true,agent:false,browser:false,archives:false,automations:false,notifications:false,icons:false,comments:false,sync:false}},
 	home:{dashboardFile:'A',workspaceFiles:['A','B'],workspaceNames:['A','B'],albums:[],anniversaries:[],countdowns:[],widgetWeatherEnabled:false,widgetLunarEnabled:false,widgetMusicEnabled:false,pomodoroEnabled:false,widgetQuickActionsEnabled:false,widgetYearProgressEnabled:false},
 }}});
 let c=runtime.connection;

@@ -1,14 +1,10 @@
 import type { SearchEngine } from '../../../shared/web-url';
-import { DEFAULT_WORKSPACE_FOLDER, workspaceFolder } from './workspace/location';
 
 export type { SearchEngine };
 export const BROWSER_PAGE_TYPE = 'nand-browser-view';
 export type BrowserTarget = 'tab' | 'modal';
 export interface BrowserSettings {
 	searchEngine: SearchEngine;
-	/** Let agent sessions started from NAND control the browser through the local bridge (off by default). */
-	agentAccess: boolean;
-	workspaceFolder?: string;
 }
 export interface BrowserOpenRequest {
 	profileId?: string;
@@ -49,7 +45,7 @@ export interface BrowserSnapshotRef {
 	ref: string;
 	role: string;
 	name: string;
-	/** Display ordinal suffixes do not make a repeated role/name a stable workflow locator. */
+	/** Whether multiple elements share this role and name. */
 	ambiguous?: boolean;
 }
 export interface BrowserRect {
@@ -80,9 +76,6 @@ export interface BrowserAgent {
 export interface BrowserAgentDeliveryPort {
 	list(): Promise<BrowserAgent[]>;
 	attach(agentId: string, text: string, files: string[]): Promise<void>;
-}
-export interface BrowserAutomationPort {
-	execute(method: string, params: Record<string, unknown>, admission?: () => void): Promise<unknown>;
 }
 export class BrowserError extends Error {
 	constructor(
@@ -116,6 +109,5 @@ export function clampZoom(value?: number): number {
 export function normalizeBrowserSettings(raw: unknown): BrowserSettings {
 	const value = raw as Partial<BrowserSettings> | null;
 	const engine = value?.searchEngine;
-	return { searchEngine: engine === 'bing' || engine === 'duckduckgo' ? engine : 'google', agentAccess: value?.agentAccess === true,
-		workspaceFolder: workspaceFolder(value?.workspaceFolder) ?? DEFAULT_WORKSPACE_FOLDER };
+	return { searchEngine: engine === 'bing' || engine === 'duckduckgo' ? engine : 'google' };
 }

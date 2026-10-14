@@ -4,7 +4,7 @@ import { parse } from './parser/parse';
 
 test('mixed sources render standalone cards once and retain unavailable tile references', () => {
 	const data = parse('## Notes\n\n### One\nid: one\ntype: generic\nBody one.\n\n### Two\nid: two\ntype: generic\nBody two.\n');
-	data.widgets = [{ memberId: 'news', provider: 'news', kind: 'news-hot', instanceId: 'default' }];
+	data.widgets = [{ memberId: 'automations', provider: 'automations', kind: 'automations-hot', instanceId: 'default' }];
 	data.immersive = [{ id: 'one', w: 4, cap: 40 }, { id: 'deleted-reference', w: 3, cap: 30, x: 0, y: 100 }];
 	const sources = boardTileSources(data, data.widgets);
 	expect(sources.map(source => source.type)).toEqual(['widget', 'section', 'card', 'missing']);

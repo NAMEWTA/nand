@@ -6,7 +6,7 @@ import { setTimeout as delay } from 'node:timers/promises';
 import { launchFreshVault } from './fresh-vault.mjs';
 import { connect } from './cdp.mjs';
 const board='## Projects\r\n### Card\r\nid: card\r\nlink: [[A]]\r\nAuthor introduction. <!-- keep -->\r\n[[A.md]] <!--collapsed-->\r\n    - [[Child.md|Alias]]\r\n\r\nKeep this footer.\r\n';
-const runtime=await launchFreshVault({root:process.argv[2],port:9274,files:{'Board.md':board,'A.md':'A','Child.md':'Child','B.md':'B'},settings:{version:1,namespaces:{app:{language:'en',introSeen:true,modules:{home:true,agent:false,browser:false,news:false,archives:false,automations:false,sync:false,icons:false,comments:false,notifications:false}},home:{dashboardFile:'Board',workspaceFiles:['Board'],workspaceNames:['Board']}}}});
+const runtime=await launchFreshVault({root:process.argv[2],port:9274,files:{'Board.md':board,'A.md':'A','Child.md':'Child','B.md':'B'},settings:{version:1,namespaces:{app:{language:'en',introSeen:true,modules:{home:true,agent:false,browser:false,archives:false,automations:false,sync:false,icons:false,comments:false,notifications:false}},home:{dashboardFile:'Board',workspaceFiles:['Board'],workspaceNames:['Board']}}}});
 let c=runtime.connection;const rows=[];
 const check=(name,passed,detail)=>{rows.push({name,passed,detail});assert.ok(passed,name);};
 const until=async expression=>{const end=Date.now()+25000;while(Date.now()<end){if(await c.evaluate(expression))return;await delay(70);}throw Error(expression);};

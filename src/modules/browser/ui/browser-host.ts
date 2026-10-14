@@ -15,10 +15,5 @@ export function browserHost(module: BrowserModule, ownerWindow: () => Window): B
 		open: request => module.openInWindow(request, ownerWindow()),
 		copyText: text => module.copyText(text), copyImage: data => module.copyImage(data),
 		saveImage: (data, context) => module.saveImage(data, context),
-		peekAssistant: () => module.peekAssistant(), openAssistant: (taskId, win) => module.openAssistant(taskId, win ?? ownerWindow()),
-		guidanceChoices: target => module.guidanceChoices(target), saveGuidance: (target, grab, exchangeId) => module.saveGuidance(target, grab, exchangeId, ownerWindow()),
-		getUserAdapters: () => module.getUserAdapters(),
-		peekWorkflows: () => module.peekWorkflows(), openWorkflows: (id, win) => module.openWorkflows(id, win ?? ownerWindow()),
-		peekGrants: () => module.peekGrants(), openAccess: win => module.openAccess(win ?? ownerWindow()),
 	};
 }

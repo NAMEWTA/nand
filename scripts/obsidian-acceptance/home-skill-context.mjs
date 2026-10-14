@@ -10,7 +10,7 @@ const skill={id:'context',label:'Context review',agentId:'codex',skillName:'revi
 const board=`---\nlayout: side\nwidgets: []\nskills: ${JSON.stringify([skill])}\ncolumns: [{name: Notes, type: notes}, {name: Memo, type: memo}]\n---\n\n## Notes\n\n### Linked note\nid: linked\ntype: note\nlink: [[Inbox/Source]]\n\n## Memo\n\n### Inline card\nid: inline\ntype: generic\nA selectable inline body.\n`;
 const interactive=String.raw`const fs=require('fs'),path=require('path');process.stdin.setRawMode?.(true);process.stdin.resume();process.stdout.write('\x1b[?2004hREADY');process.stdin.on('data',d=>fs.appendFileSync(path.join(process.cwd(),'context-input.jsonl'),JSON.stringify(d.toString())+'\n'));setInterval(()=>{},1000);`;
 const runtime=await launchFreshVault({root:process.argv[2],port:9266,files:{'Board.md':board,'Inbox/Source.md':'# Source\n','Inbox/Capture.md':'# Capture\n','interactive.cjs':interactive},settings:{version:1,namespaces:{
-	app:{language:'en',introSeen:true,modules:{home:true,agent:true,automations:true,news:false,browser:false,archives:false,notifications:false,sync:false,comments:false,icons:false}},
+	app:{language:'en',introSeen:true,modules:{home:true,agent:true,automations:true,browser:false,archives:false,notifications:false,sync:false,comments:false,icons:false}},
 	home:{dashboardFile:'Board',workspaceFiles:['Board'],workspaceNames:['Board'],quickNotesEnabled:true,quickCaptureEnabled:true,quickCaptureTarget:'Inbox/Capture',quickCaptureFolder:'Inbox',quickDailyEnabled:false,widgetLunarEnabled:false,widgetWeatherEnabled:false,widgetMusicEnabled:false,pomodoroEnabled:false},
 }}});
 const c=runtime.connection,rows=[];

@@ -20,8 +20,6 @@ export interface PageActions {
 }
 /** Native guest is stable while Preact chrome re-renders. Owns every guest listener. */
 export class BrowserPage {
-	private guestGeneration = crypto.randomUUID();
-	get generation(): string { return this.guestGeneration; }
 	readonly profileId: string;
 	readonly webview: WebviewElement;
 	readonly downloads: BrowserDownload[] = [];
@@ -234,7 +232,6 @@ export class BrowserPage {
 		this.automation?.dispose();
 		for (const cleanup of this.guestCleanups.splice(0)) cleanup();
 		this.guest = guest;
-		this.guestGeneration = crypto.randomUUID();
 		this.automation = new BrowserAutomation(guest, this);
 		if (!this.sessionLease) throw new BrowserError('browser_unavailable');
 		this.sessionLease.protect(guest.id);

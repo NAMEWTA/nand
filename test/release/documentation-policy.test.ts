@@ -24,7 +24,7 @@ test('change artifacts retain source language while permanent knowledge and thir
 	expect(documentationKind('speculo/.speculo/specdev/archive/2026-10/example/source.md')).toBe('specdev-change');
 	expect(documentationKind('speculo/.speculo/specdev/context/current-baseline.md')).toBe('specdev');
 	expect(documentationKind('speculo/.speculo/specdev/.config/domain-layout.ZH.md')).toBe('specdev');
-	expect(documentationKind('docs/third-party/aihot-news.md')).toBe('user-doc');
+	expect(documentationKind('docs/third-party/orca-terminal-workbench.md')).toBe('user-doc');
 	expect(documentationKind('THIRD-PARTY-NOTICES.md')).toBe('license');
 });
 

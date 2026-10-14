@@ -91,7 +91,7 @@ bindTestPreferences(app);
 const makeColumn = (name: string, config: LibraryConfig): DashboardColumn =>
 	({ name, color: '', sectionType: 'folder', cards: [], libraryConfig: config }) as unknown as DashboardColumn;
 
-const newsCfg: LibraryConfig = {
+const articlesCfg: LibraryConfig = {
 	filters: [],
 	viewMode: 'grid',
 	sortBy: 'modified',
@@ -100,7 +100,7 @@ const newsCfg: LibraryConfig = {
 	excludeFolders: ['rss/hidden'],
 };
 const columns: DashboardColumn[] = [
-	makeColumn('News', newsCfg),
+	makeColumn('Articles', articlesCfg),
 	makeColumn('Wiki', { filters: [], viewMode: 'grid', sortBy: 'modified', sortDesc: true, folders: ['wiki'] }),
 	{ ...makeColumn('All', { filters: [], viewMode: 'grid', sortBy: 'modified', sortDesc: true }), sectionType: 'library' },
 ];
@@ -158,9 +158,9 @@ const inScope = (col: DashboardColumn, lowerPaths: readonly string[]): boolean =
 };
 const changed = ['rss/new.md'];
 
-// 1. Predicate filter: News and All requery in place; Wiki is untouched.
+// 1. Predicate filter: Articles and All requery in place; Wiki is untouched.
 const wikiBefore = rowOf('Wiki');
-const newsBefore = rowOf('News');
+const articlesBefore = rowOf('Articles');
 let n = refreshScanningSections(
 	kanban as unknown as HTMLElement,
 	data,
@@ -172,13 +172,13 @@ let n = refreshScanningSections(
 	'board-a',
 );
 assert.equal(n, 0, 'mounted panels refresh without replacing their rows');
-assert.deepEqual(refreshedNames.splice(0), ['News', 'All'], 'predicate filters in-place refreshes');
-assert.equal(rowOf('News'), newsBefore, 'in-scope section keeps its controls and focus');
+assert.deepEqual(refreshedNames.splice(0), ['Articles', 'All'], 'predicate filters in-place refreshes');
+assert.equal(rowOf('Articles'), articlesBefore, 'in-scope section keeps its controls and focus');
 assert.equal(rowOf('Wiki'), wikiBefore, 'out-of-scope section DOM untouched');
 console.log('scope predicate filter: PASS');
 
 // 2. Signature skip: nothing changed, second refresh swaps nothing.
-const newsAfterFirst = rowOf('News');
+const articlesAfterFirst = rowOf('Articles');
 n = refreshScanningSections(
 	kanban as unknown as HTMLElement,
 	data,
@@ -191,7 +191,7 @@ n = refreshScanningSections(
 );
 assert.equal(n, 0, 'unchanged inputs skip the DOM swap');
 assert.deepEqual(refreshedNames.splice(0), [], 'unchanged inputs do not requery');
-assert.equal(rowOf('News'), newsAfterFirst, 'in-scope section identity kept when unchanged');
+assert.equal(rowOf('Articles'), articlesAfterFirst, 'in-scope section identity kept when unchanged');
 console.log('signature skip: PASS');
 
 // 3. In-scope mtime bump refreshes mounted panels again.
@@ -207,13 +207,13 @@ n = refreshScanningSections(
 	'board-a',
 );
 assert.equal(n, 0, 'mtime changes keep mounted controls');
-assert.deepEqual(refreshedNames.splice(0), ['News', 'All'], 'mtime changes refresh matching sections');
-assert.equal(rowOf('News'), newsAfterFirst, 'News row retained after mtime bump');
+assert.deepEqual(refreshedNames.splice(0), ['Articles', 'All'], 'mtime changes refresh matching sections');
+assert.equal(rowOf('Articles'), articlesAfterFirst, 'Articles row retained after mtime bump');
 console.log('mtime in-place refresh: PASS');
 
 // 4. Excluded-folder write: prefix check passes (rss/hidden is under rss/)
-//    but the signature excludes the file from the News section.
-const newsAfterMtime = rowOf('News');
+//    but the signature excludes the file from the Articles section.
+const articlesAfterMtime = rowOf('Articles');
 files[1]!.stat.mtime = 300;
 n = refreshScanningSections(
 	kanban as unknown as HTMLElement,
@@ -227,7 +227,7 @@ n = refreshScanningSections(
 );
 assert.equal(n, 0, 'excluded-folder write needs no DOM swap');
 assert.deepEqual(refreshedNames.splice(0), ['All'], 'excluded-folder write refreshes only the whole-vault section');
-assert.equal(rowOf('News'), newsAfterMtime, 'News skips rebuild for excluded-folder write');
+assert.equal(rowOf('Articles'), articlesAfterMtime, 'Articles skips rebuild for excluded-folder write');
 console.log('excluded-folder skip: PASS');
 
 // 5. Invalidation forces a requery on the next pass despite no change.
@@ -243,7 +243,7 @@ n = refreshScanningSections(
 	'board-a',
 );
 assert.equal(n, 0, 'invalidated cache retains controls');
-assert.deepEqual(refreshedNames.splice(0), ['News', 'All'], 'invalidated cache refreshes relevant sections');
+assert.deepEqual(refreshedNames.splice(0), ['Articles', 'All'], 'invalidated cache refreshes relevant sections');
 console.log('signature invalidation: PASS');
 
 // 6. A different board scope keeps its own cache.
@@ -258,7 +258,7 @@ n = refreshScanningSections(
 	'board-b',
 );
 assert.equal(n, 0, 'fresh signature scope retains controls');
-assert.deepEqual(refreshedNames.splice(0), ['News', 'All'], 'fresh signature scope refreshes independently');
+assert.deepEqual(refreshedNames.splice(0), ['Articles', 'All'], 'fresh signature scope refreshes independently');
 console.log('scope isolation: PASS');
 
 console.log('verify-refresh-scope: ALL PASS');

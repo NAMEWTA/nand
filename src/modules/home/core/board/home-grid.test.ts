@@ -246,13 +246,13 @@ describe('home grid and board rules', () => {
 				},
 			},
 			{
-				module: 'news',
+				module: 'automations',
 				bundle: {
 					kinds: [
 						{
 							key: 'calendar',
-							titleKey: 'news.widget.raw',
-							icon: 'newspaper',
+							titleKey: 'automations.widget.raw',
+							icon: 'automationspaper',
 							defaultSize: { w: 4, h: 4 },
 							minSize: { w: 2, h: 2 },
 							instances: () => [{ id: 'default' }],
@@ -264,11 +264,11 @@ describe('home grid and board rules', () => {
 		]);
 		assert.equal(index.byKey.get(widgetProviderKey('home', 'calendar'))?.module, 'home');
 		assert.equal(index.errors.length, 0);
-		assert.equal(index.byKey.get(widgetProviderKey('news', 'calendar'))?.module, 'news');
+		assert.equal(index.byKey.get(widgetProviderKey('automations', 'calendar'))?.module, 'automations');
 		const members = normalizeMembers(
 			[
-				{ memberId: 'm1', kind: 'calendar', provider: 'news' },
-				{ memberId: 'm1', kind: 'calendar', provider: 'news' },
+				{ memberId: 'm1', kind: 'calendar', provider: 'automations' },
+				{ memberId: 'm1', kind: 'calendar', provider: 'automations' },
 			],
 		);
 		assert.equal(members.length, 1);

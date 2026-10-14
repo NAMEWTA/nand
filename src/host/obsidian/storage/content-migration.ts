@@ -10,7 +10,7 @@ import { contentFiles, type ContentFiles } from './content-files';
 import { copyContentExclusive } from './content-io';
 import { t } from '../../../shared/i18n';
 
-const OWNED_TYPES = new Set(['habit', 'habit-records', 'expense-settings', 'expense-records', 'pomodoro-settings', 'pomodoro-records', 'book', 'reading-records', 'automation', 'person', 'company', 'news', 'news-brief', 'news-edition', 'browser-task', 'browser-turn', 'browser-exchange', 'browser-prompt', 'browser-synthesis', 'browser-assistant', 'browser-workflow', 'browser-workflow-run', 'browser-user-adapter']);
+const OWNED_TYPES = new Set(['habit', 'habit-records', 'expense-settings', 'expense-records', 'pomodoro-settings', 'pomodoro-records', 'book', 'reading-records', 'automation', 'person', 'company']);
 const object = (value: unknown): Record<string, unknown> => value && typeof value === 'object' && !Array.isArray(value) ? value as Record<string, unknown> : {};
 
 function migrationPort(app: App): { port: ContentMigrationPort; guard: (path: string) => Promise<void> } {
@@ -62,7 +62,7 @@ export async function prepareVaultContent(app: App): Promise<ContentFiles> {
 		const sources = new Set<string>();
 		const base = await review.load(emptyReview());
 		const settings = await new JsonStore<Record<string, unknown> | null>(privateStorage, '.nand/config/settings.json', (value): value is Record<string, unknown> | null => value === null || !!value && typeof value === 'object' && !Array.isArray(value)).load(null);
-		const namespaces = object(settings?.namespaces), home = object(namespaces.home), browser = object(namespaces.browser);
+		const namespaces = object(settings?.namespaces), home = object(namespaces.home);
 		const workspaceFiles: unknown[] = Array.isArray(home.workspaceFiles) ? home.workspaceFiles : [];
 		const boards = new Set([home.dashboardFile, ...workspaceFiles].filter((value): value is string => typeof value === 'string' && !!value.trim()).map(value => value.replace(/^\.nand\/content\//, '')).map(value => value.endsWith('.md') ? value : value + '.md'));
 		const legacy = (value: unknown, fallback: string) => typeof value === 'string' && value.trim() ? value.replace(/^\.nand\/content\//, '').replace(/^\/+|\/+$/g, '') : fallback;
@@ -95,8 +95,7 @@ export async function prepareVaultContent(app: App): Promise<ContentFiles> {
 		}
 		for (const path of all) if (!base.ordinary.includes(path) && [...recordFolders].some(folder => path.startsWith(folder + '/'))) sources.add(path);
 		for (const source of sources) await guard(source);
-		const exportRoot = legacy(browser.workspaceFolder, 'NAND/AI Workspace') + '/Exports/';
-		unresolved = all.filter(path => !sources.has(path) && !base.ordinary.includes(path) && (path === archive || path.startsWith('NAND Exports/') || path.startsWith(exportRoot)));
+		unresolved = all.filter(path => !sources.has(path) && !base.ordinary.includes(path) && (path === archive || path.startsWith('NAND Exports/')));
 		if (JSON.stringify(base.paths) !== JSON.stringify(unresolved)) await review.commit({ base, value: { ...base, paths: unresolved } });
 		return [...sources].filter(path => !isContentPath(path));
 	};
