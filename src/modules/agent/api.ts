@@ -113,3 +113,6 @@ export interface AgentDispatch {
 }
 
 export const AGENT_DISPATCH = serviceKey<AgentDispatch>('agent', 'dispatch');
+
+export type { AgentUsage, UsageSnapshot } from '../../app/contracts/workbench';
+export const AGENT_USAGE = serviceKey<import('../../app/contracts/workbench').AgentUsage>('agent', 'usage');

@@ -1,7 +1,5 @@
 import { useEffect, useState } from 'react';
-import { createRoot } from 'react-dom/client';
 import { Bold, Italic, Plus, Inbox } from 'lucide-react';
-import { ContainerProviders } from './providers';
 import { useT } from './hooks';
 import { usePortalContainer } from './contexts';
 import { Button } from '../components/button';
@@ -618,19 +616,4 @@ export function ComponentGallery() {
 			</SettingsSection>
 		</div>
 	);
-}
-
-/** Temporary bridge for the legacy settings renderer; stage 3 can render ComponentGallery directly. */
-export function mountGallery(container: HTMLElement): () => void {
-	container.addClass('nand-ui');
-	const root = createRoot(container);
-	root.render(
-		<ContainerProviders container={container}>
-			<ComponentGallery />
-		</ContainerProviders>,
-	);
-	return () => {
-		root.unmount();
-		container.removeClass('nand-ui');
-	};
 }

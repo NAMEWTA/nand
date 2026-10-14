@@ -3,7 +3,7 @@ import { readFileSync } from 'node:fs';
 import { test } from 'vitest';
 
 const stacked = readFileSync('src/modules/home/styles/021-stacked-layout-desktop-tablet-only.css', 'utf8');
-const workbench = readFileSync('src/shell/styles/workbench-pages.css', 'utf8');
+const workbench = readFileSync('src/app/workbench/legacy-pages.css', 'utf8');
 const agent = readFileSync('src/modules/agent/styles/agent.css', 'utf8');
 
 test('stacked layout still hides the sidebar calendar and recent notes', () => {

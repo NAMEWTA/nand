@@ -1,3 +1,4 @@
+import type { ComponentType } from 'react';
 import type { App, Command, Component, MarkdownPostProcessor, PluginManifest } from 'obsidian';
 import type { Extension } from '@codemirror/state';
 import type { SettingsStore } from '../../shared/settings/store';
@@ -140,7 +141,9 @@ export interface ModuleInstance {
 	/** Workbench pages by id; each loader imports its page code on first use. */
 	readonly pages?: Readonly<Record<string, () => Promise<PageCreate>>>;
 	/** The module's page in workbench settings; loaded on first use. */
-	readonly settingsPage?: () => Promise<SettingsPageRenderer>;
+	readonly settingsPage?: () => Promise<ComponentType<SettingsPageHost> | SettingsPageRenderer>;
+	/** Explicit during migration: omitted means the existing DOM renderer. Stage 9 removes this flag. */
+	readonly settingsPageKind?: 'react';
 }
 
 export type ModuleFactory = (context: ModuleContext) => ModuleInstance | Promise<ModuleInstance>;

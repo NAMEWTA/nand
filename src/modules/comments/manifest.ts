@@ -4,7 +4,7 @@ import { COMMENTS_INDEX, COMMENTS_PANEL } from './api';
 export const commentsManifest: ModuleManifest = {
 	id: 'comments',
 	order: 30,
-	icon: 'pen-line',
+	icon: 'message-square-text',
 	titleKey: 'modules.editor',
 	descriptionKey: 'modules.editorDesc',
 	platforms: { desktop: true, mobile: true },

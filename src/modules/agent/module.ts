@@ -1,13 +1,14 @@
 import type { ModuleContext, ModuleInstance } from '../../app/contracts/module';
 import { registerMessages } from '../../shared/i18n/index';
 import { AUTOMATION_AGENT_RUNTIME, AUTOMATION_INVOCATIONS } from '../automations/api';
-import { AGENT_DIRECTORY, AGENT_DISPATCH, AGENT_PROMPT_RUNNER, AGENT_SESSIONS, AGENT_SKILLS, AGENT_WORKBENCH } from './api';
+import { AGENT_DIRECTORY, AGENT_DISPATCH, AGENT_PROMPT_RUNNER, AGENT_SESSIONS, AGENT_SKILLS, AGENT_WORKBENCH, AGENT_USAGE } from './api';
 import { messages } from './i18n';
 import { messages as automationStrings } from '../../shared/i18n/lazy/automation';
 import { messages as commonStrings } from '../../shared/i18n/lazy/common';
 import type { AgentController } from './services/controller';
 import { createAgentDispatch } from './services/prompt-port';
 import { sessionMaterialPort } from './services/session-material';
+import { agentUsage } from './services/usage-adapter';
 import { agentWorkbench } from './services/workbench';
 import { agentSettings } from './settings';
 import { AgentSkillDirectory } from './services/skills';
@@ -38,6 +39,7 @@ export default function createAgentModule(context: ModuleContext): ModuleInstanc
 						[AUTOMATION_AGENT_RUNTIME, current.runtime] as const,
 						[AGENT_SESSIONS, sessionMaterialPort(current)] as const,
 						[AGENT_WORKBENCH, agentWorkbench(current)] as const,
+						[AGENT_USAGE, agentUsage(current)] as const,
 						[AGENT_PROMPT_RUNNER, current.prompts] as const,
 						[AGENT_DIRECTORY, { list: () => current.runtime.listAgents() }] as const,
 						[AGENT_DISPATCH, dispatch!] as const,

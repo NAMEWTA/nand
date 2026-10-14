@@ -1,14 +1,15 @@
-/** @jsxImportSource preact */
 import { Component, Menu, Platform } from 'obsidian';
-import { render } from 'preact';
+import { createRoot, type Root } from 'react-dom/client';
+import { flushSync } from 'react-dom';
+import { NandProviders } from '../../ui/react/providers';
+import { acquirePortalRoot, releasePortalRoot } from '../../ui/react/portal';
 import { onLanguageChanged, t } from '../../shared/i18n';
 import type { PanelModel, WorkbenchFeature, WorkbenchTarget } from '../../app/contracts/workbench';
-import { Shell } from '../Shell';
-import type { RailItem } from '../Rail';
+import { ShellRoot } from '../ShellRoot';
+import type { RailItem } from '../rail/Rail';
 import { railAction, rememberTarget } from '../layout';
 import { normalizeWorkbenchState, panelWidth, targetKey, type WorkbenchState } from '../navigation-state';
 import { NavigationTransition } from '../navigation-transition';
-import { headerStatuses } from '../status-policy';
 import { refreshLeafTitle } from '../../host/obsidian/workspace-title';
 import type { WorkbenchContribution, WorkbenchHost, WorkbenchLeafView, WorkbenchSurface } from '../../app/contracts/workbench-host';
 import type { NativeSurface } from '../../ui/native-surface';
@@ -21,9 +22,13 @@ export function createWorkbenchSurface(view: WorkbenchLeafView, host: WorkbenchH
 
 class WorkbenchShellSurface implements WorkbenchSurface {
 	private state: WorkbenchState;
+	private readonly root: Root;
+	private readonly navigationActions = { current: null as { open: () => void; toggle: () => void } | null };
+	private portalDocument?: Document;
 	private readonly transition = new NavigationTransition();
 	private pages?: WorkbenchPages;
 	private opened = false;
+	private visible = true;
 	private pending: WorkbenchTarget = { feature: 'dashboard' };
 	private busy = false;
 	private availabilityPending = false;
@@ -32,17 +37,21 @@ class WorkbenchShellSurface implements WorkbenchSurface {
 	private savedPages: unknown;
 	private revision = 0;
 	/** Page-owned panel content (e.g. agent sessions) lives here and moves into the panel when it is shown. */
-	private readonly navigationHost = createDiv({ cls: 'nand-workbench-context' });
+	private readonly navigationHost: HTMLDivElement;
 	/** Listeners of this surface; the leaf outlives it when the plugin unloads. */
 	private readonly lifetime: Component;
 
 	constructor(private readonly view: WorkbenchLeafView, private readonly host: WorkbenchHost, saved: Record<string, unknown>) {
 		this.state = normalizeWorkbenchState(saved);
+		this.navigationHost = view.contentEl.ownerDocument.createElement('div');
+		this.navigationHost.className = 'nand-workbench-context min-h-0 empty:hidden';
+		view.contentEl.addClass('nand-ui', 'h-full', 'p-0', 'overflow-hidden');
+		this.root = createRoot(view.contentEl);
 		this.savedPages = saved.pages;
 		this.lifetime = view.addChild(new Component());
 		this.opened = true;
 		view.contentEl.addClass('nand-workbench-view');
-		this.draw();
+		flushSync(() => this.draw());
 		this.pages?.restore(this.savedPages);
 		this.lifetime.register(onLanguageChanged(() => this.draw()));
 		this.lifetime.register(host.subscribe(() => {
@@ -134,7 +143,7 @@ class WorkbenchShellSurface implements WorkbenchSurface {
 					void this.refreshAvailability().catch(this.host.report);
 				}
 				if (keyboard && !this.error) this.view.contentEl.win.requestAnimationFrame(() => {
-					if (this.opened && revision === this.revision) this.view.contentEl.querySelector<HTMLElement>('[data-workbench-focus="title"]')?.focus({ preventScroll: true });
+					if (this.opened && this.visible && revision === this.revision) this.view.contentEl.querySelector<HTMLElement>('[data-workbench-focus="title"]')?.focus({ preventScroll: true });
 				});
 			}
 		}
@@ -171,11 +180,22 @@ class WorkbenchShellSurface implements WorkbenchSurface {
 		this.transition.dispose();
 		await this.pages?.dispose();
 		this.pages = undefined;
-		render(null, this.view.contentEl);
+		this.root.unmount();
+		if (this.portalDocument) releasePortalRoot(this.portalDocument);
+		this.view.contentEl.removeClass('nand-ui');
 		this.view.removeChild(this.lifetime);
 	}
 	onResize(): void {
 		this.pages?.getCurrent()?.surface.onResize();
+	}
+	setVisible(visible: boolean): void {
+		if (!this.opened || this.visible === visible) return;
+		this.visible = visible;
+		// Leaf activation is synchronous: release the old modal scopes before the next page receives input.
+		flushSync(() => {
+			this.draw();
+			this.pages?.setVisible(visible);
+		});
 	}
 	onPaneMenu(menu: Menu, source: string): void {
 		const binding = this.pages?.getCurrent();
@@ -230,9 +250,7 @@ class WorkbenchShellSurface implements WorkbenchSurface {
 		if (contribution.panel) {
 			return contribution.panel({ target: this.state.target, pages: (feature) => this.getSavedPages(feature), navigate: (target) => this.requestNavigation(target) });
 		}
-		const children = contribution.navigation.children ?? [];
-		if (!children.length) return undefined;
-		return { sections: [{ id: 'sections', items: children.map((child) => ({ id: child.id, label: t(child.labelKey), icon: child.icon, target: child.target, badge: child.badge })) }] };
+		return undefined;
 	}
 	private browserTabs() {
 		const contribution = this.contribution(this.state.target.feature);
@@ -284,7 +302,8 @@ class WorkbenchShellSurface implements WorkbenchSurface {
 				this.state = rememberTarget(this.state, this.pages?.getCurrent()?.getTarget?.() ?? this.state.target);
 				this.draw();
 				this.view.app.workspace.requestSaveLayout();
-			}, this.navigationHost, () => this.change({ panelOpen: true }));
+			}, this.navigationHost, () => this.navigationActions.current?.open(), this.more, () => this.navigationActions.current?.toggle());
+			this.pages.restore(this.savedPages);
 		}
 	};
 	private customPanel = (element: HTMLDivElement | null): void => {
@@ -292,8 +311,18 @@ class WorkbenchShellSurface implements WorkbenchSurface {
 	};
 	private draw(): void {
 		if (!this.opened) return;
-		const hasNativeStatusBar = Platform.isDesktopApp && !!this.view.contentEl.doc.querySelector('.status-bar');
-		const statuses = headerStatuses(hasNativeStatusBar, this.host.statuses?.() ?? []);
+		const statuses = this.host.contributions.flatMap(item => item.statusSegments?.() ?? []).sort((a, b) => a.order - b.order);
+		const preferences = this.host.statusBar?.() ?? { visible: true, segments: {}, usageMode: 'verbose', usageDisplay: 'used', mirrorToObsidian: false };
+		const appearance = this.host.appearance?.();
+		this.view.contentEl.dataset.font = appearance?.font ?? 'geist';
+		this.view.contentEl.dataset.palette = appearance?.palette ?? 'host';
+		if (this.portalDocument !== this.view.contentEl.ownerDocument) {
+			if (this.portalDocument) releasePortalRoot(this.portalDocument);
+			this.portalDocument = this.view.contentEl.ownerDocument;
+			acquirePortalRoot(this.portalDocument);
+		}
+		const portal = this.portalDocument.querySelector<HTMLElement>('.nand-portal-root');
+		if (portal) { portal.dataset.font = appearance?.font ?? 'geist'; portal.dataset.palette = appearance?.palette ?? 'host'; }
 		const contribution = this.contribution(this.state.target.feature);
 		const unavailable = this.unavailable
 			? {
@@ -301,9 +330,16 @@ class WorkbenchShellSurface implements WorkbenchSurface {
 					action: this.unavailable.message === t('workbench.disabled') ? { label: t('workbench.enableModule'), run: () => this.host.openSettings('settings') } : undefined,
 				}
 			: undefined;
-		render(
-			<Shell
+		this.root.render(
+			<NandProviders ownerDocument={this.view.contentEl.ownerDocument} visible={this.visible}><ShellRoot
+				visible={this.visible}
 				state={this.state}
+				chrome={contribution?.chrome}
+				navigationContext={contribution?.navigationContext}
+				navigationActions={this.navigationActions}
+				statusBar={preferences}
+				setStatusBar={next => { void this.host.setStatusBar?.(next).catch(this.host.report); }}
+				usage={this.host.usage?.()}
 				rail={this.railItems()}
 				railCurrent={contribution?.railParent ?? this.state.target.feature}
 				title={this.pageTitle() ?? t('workbench.title')}
@@ -316,7 +352,9 @@ class WorkbenchShellSurface implements WorkbenchSurface {
 				unavailable={unavailable}
 				ownerWindow={this.view.contentEl.win}
 				phone={Platform.isPhone}
+				mobile={Platform.isMobile}
 				onRail={this.onRail}
+				onOpen={(feature, placement) => { void this.host.openFocus(this.state.lastTargets[feature] ?? { feature }, {}, placement, this.view.contentEl.win).catch(this.host.report); }}
 				onNavigate={(target) => this.requestNavigation(target)}
 				onPanelOpen={(open) => this.change({ panelOpen: open })}
 				onPanelWidth={(width) => this.change({ panelWidth: panelWidth(width) })}
@@ -329,8 +367,7 @@ class WorkbenchShellSurface implements WorkbenchSurface {
 				report={this.host.report}
 				contentRef={this.content}
 				panelCustomRef={this.customPanel}
-			/>,
-			this.view.contentEl,
+			/></NandProviders>,
 		);
 	}
 }

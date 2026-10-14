@@ -17,9 +17,10 @@ export class WorkbenchPages {
  private readonly saved = new Map<string, SavedPage>();
  private readonly last = new Map<WorkbenchFeature, string>();
  private disposed = false;
+ private visible = true;
  private visits = 0;
  private active?: PageEntry;
- constructor(private readonly owner: ItemView, private readonly root: HTMLElement, private readonly contributions: readonly WorkbenchContribution[], private readonly navigate: (target: WorkbenchTarget) => Promise<void>, private readonly report: (error: unknown) => void, private readonly changed: () => void = () => {}, private readonly navigationRoot?: HTMLElement, private readonly openNavigation?: () => void) {}
+ constructor(private readonly owner: ItemView, private readonly root: HTMLElement, private readonly contributions: readonly WorkbenchContribution[], private readonly navigate: (target: WorkbenchTarget) => Promise<void>, private readonly report: (error: unknown) => void, private readonly changed: () => void = () => {}, private readonly navigationRoot?: HTMLElement, private readonly openNavigation?: () => void, private readonly openPageMenu?: (event: MouseEvent) => void, private readonly togglePanel?: () => void) {}
  contribution(feature: WorkbenchFeature): WorkbenchContribution | undefined { return this.contributions.find((item) => item.id === feature); }
  resolve(raw: WorkbenchTarget): WorkbenchTarget {
   const target = normalizeTarget(raw), contribution = this.contribution(target.feature);
@@ -58,6 +59,10 @@ export class WorkbenchPages {
  list(feature?: WorkbenchFeature): SavedPage[] { return this.getState().filter((page) => !feature || page.target.feature === feature); }
  getSurfaces(): NativeSurface[] { return [...this.entries.values()].flatMap((entry) => entry.alive && entry.binding ? [entry.binding.surface] : []); }
  getCurrent(): WorkbenchPageBinding | undefined { return this.active?.binding; }
+ setVisible(visible: boolean): void {
+  this.visible = visible;
+  this.active?.binding?.surface.setVisible(visible);
+ }
  async prepare(target: WorkbenchTarget, signal: AbortSignal, initial?: Record<string, unknown>): Promise<PageEntry | undefined> {
   if (this.disposed || signal.aborted) return undefined;
   const contribution = this.contribution(target.feature);
@@ -67,15 +72,15 @@ export class WorkbenchPages {
   const created = !entry;
   if (!entry) {
    if (contribution.resourcePages && !this.saved.has(key) && this.list(target.feature).length >= 50) throw new Error(t('workbench.pageLimit'));
-   const element = this.root.createDiv({ cls: 'nand-workbench-page' }); element.hidden = true; element.inert = true;
-   const navigationElement = contribution.navigationContext ? this.navigationRoot?.createDiv({ cls: 'nand-workbench-context-page' }) : undefined;
+   const element = this.root.createDiv({ cls: 'nand-workbench-page nand-native h-full w-full min-h-0 min-w-0 overflow-auto [container-type:inline-size]' }); element.hidden = true; element.inert = true;
+   const navigationElement = contribution.navigationContext ? this.navigationRoot?.createDiv({ cls: 'nand-workbench-context-page h-full min-h-0' }) : undefined;
    if (navigationElement) { navigationElement.hidden = true; navigationElement.inert = true; }
    const controller = new AbortController();
    const next: PageEntry = { key, target, element, navigationElement, alive: true, controller, ready: Promise.resolve() };
    this.entries.set(key, next); entry = next;
    const state = this.cleanState(contribution, initial ?? this.saved.get(key)?.state);
    next.ready = Promise.resolve().then(async () => {
-    const binding = await contribution.create({ app: this.owner.app, leaf: this.owner.leaf, contentEl: element, containerEl: element, embedded: true, navigationEl: navigationElement, openNavigation: this.openNavigation, changed: () => { if (next.alive) this.changed(); }, close: () => this.close(next.key), activate: () => this.navigate(binding.getTarget?.() ?? next.target) }, target, state, controller.signal);
+    const binding = await contribution.create({ app: this.owner.app, leaf: this.owner.leaf, contentEl: element, containerEl: element, embedded: true, navigationEl: navigationElement, openNavigation: this.openNavigation, openPageMenu: this.openPageMenu, togglePanel: this.togglePanel, changed: () => { if (next.alive) this.changed(); }, close: () => this.close(next.key), activate: () => this.navigate(binding.getTarget?.() ?? next.target) }, target, state, controller.signal);
     next.binding = binding;
     const actual = binding.getTarget?.() ?? next.target;
     const actualKey = this.key(actual);
@@ -130,7 +135,7 @@ export class WorkbenchPages {
   entry.visited = ++this.visits;
   entry.element.hidden = false; entry.element.inert = false;
   if (entry.navigationElement) { entry.navigationElement.hidden = false; entry.navigationElement.inert = false; }
-  entry.binding?.surface.setVisible(true);
+  entry.binding?.surface.setVisible(this.visible);
   // A browser guest may own a form, download or collection operation. Never silently
   // evict it based only on visibility; explicit page close owns that destructive action.
   // Stateless inbox projections opt in to releaseWhenHidden instead.

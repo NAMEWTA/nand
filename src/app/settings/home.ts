@@ -57,18 +57,7 @@ export function renderPreferences(this: HomeSettingsHost, containerEl: HTMLEleme
 					}
 				});
 		});
-	new Setting(containerEl)
-		.setName(t('workbench.statusSetting')).setDesc(t('workbench.statusSettingDesc'))
-		.addDropdown((dropdown) => {
-			dropdown.addOptions({ automatic: t('workbench.statusAutomatic'), hidden: t('workbench.statusHidden') })
-				.setValue(this.plugin.appSettings.get().workbenchStatus ?? 'automatic').onChange(async (value) => {
-					const previous = this.plugin.appSettings.get().workbenchStatus;
-					dropdown.setDisabled(true);
-					try { await this.plugin.appSettings.update((draft) => { draft.workbenchStatus = value === 'hidden' ? 'hidden' : 'automatic'; }); }
-					catch { dropdown.setValue(previous ?? 'automatic'); new Notice(t('settings.writeFailed')); }
-					finally { dropdown.setDisabled(false); }
-				});
-		});
+
 }
 
 /** Settings → Appearance (global theme and Markdown styles). */

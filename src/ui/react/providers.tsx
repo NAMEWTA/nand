@@ -1,9 +1,9 @@
-import { useCallback, useEffect, useState, useSyncExternalStore, type ReactNode } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useState, useSyncExternalStore, type ReactNode } from 'react';
 import { registerMessages } from '../../shared/i18n';
 import { messages } from '../../shared/i18n/lazy/ui';
 import { TooltipProvider } from '../components/tooltip';
 import { Toaster } from '../components/sonner';
-import { OwnerDocumentContext, PortalContainerContext, VisibilityContext } from './contexts';
+import { OwnerDocumentContext, PortalContainerContext, VisibilityContext, usePortalContainer } from './contexts';
 import { acquirePortalRoot, registerToastHost, releasePortalRoot } from './portal';
 import { useContainerDocument } from './owner-document';
 import { ErrorBoundary } from './error-boundary';
@@ -56,6 +56,19 @@ export function NandProviders({
 	);
 }
 
+function SurfaceAppearance({ container }: { container: HTMLElement }) {
+	const portal = usePortalContainer();
+	useLayoutEffect(() => {
+		const sync = () => { container.setAttribute('data-font', portal.dataset.font ?? 'geist'); container.setAttribute('data-palette', portal.dataset.palette ?? 'host'); };
+		sync();
+		const Observer = (portal.ownerDocument.defaultView as Window & { MutationObserver?: typeof MutationObserver } | null)?.MutationObserver;
+		const observer = Observer ? new Observer(sync) : undefined;
+		observer?.observe(portal, { attributes: true, attributeFilter: ['data-font', 'data-palette'] });
+		return () => observer?.disconnect();
+	}, [container, portal]);
+	return null;
+}
+
 export function ContainerProviders({
 	container,
 	visible = true,
@@ -68,6 +81,7 @@ export function ContainerProviders({
 	const ownerDocument = useContainerDocument(container);
 	return (
 		<NandProviders ownerDocument={ownerDocument} visible={visible}>
+			<SurfaceAppearance container={container} />
 			{children}
 		</NandProviders>
 	);

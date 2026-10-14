@@ -100,7 +100,7 @@
 		"src/modules/home/styles/089-floating-pomodoro-mini-panel.css",
 		"src/modules/home/styles/090-floating-reading-mini-timer.css",
 		"src/modules/home/styles/records-page.css",
-		"src/modules/comments/styles/091-editor-product-comments-does-not-use-dashboard-t.css",
+		"src/modules/comments/styles/comments.css",
 		"node_modules/@xterm/xterm/css/xterm.css",
 		"src/modules/agent/styles/agent.css",
 		"src/ui/styles/111-nand-surface-polish-host-theme-outside-the-board.css",
@@ -110,8 +110,7 @@
 		"src/modules/automations/styles/114-automation-surfaces-share-the-app-s-visual-scale.css",
 		"src/modules/sync/styles/sync.css",
 		"src/modules/browser/styles/116-independent-browser-native-leaves-and-modal-shar.css",
-		"src/shell/styles/shell.css",
-		"src/shell/styles/workbench-pages.css",
+		"src/app/workbench/legacy-pages.css",
 		"src/modules/home/styles/skills.css",
 		"src/modules/home/styles/pipeline.css"
 	]

@@ -60,3 +60,17 @@ NAND 改编了 [Orca](https://github.com/stablyai/orca)（stablyai/orca）的部
 ## NAND 不采用的部分
 
 NAND 使用自己的 Obsidian 叶子、主题令牌和 stdio 辅助进程（协议 3）；设计系统采用 React，旧 Preact 界面在迁移期保留。不使用 Orca 的应用状态树、窗格树、Electron 主进程和私有的 xterm 渲染补丁。回归测试覆盖被改编的行为，不构成与 Orca 应用兼容的保证。
+
+## 工作台外壳、状态栏与设置框架（464bd5a）
+
+| 上游文件（相对 `src/renderer/src/`） | NAND 中的位置与适配 |
+|---|---|
+| `app-shell/AppWorkspaceShell.tsx` | `src/shell/ShellRoot.tsx`：保留 flex 外框，换成 Obsidian 叶子宽度、独立页面根、图标轨与 Sheet 导航。文档将上游目录写在 components 下，实际位于 app-shell。 |
+| `components/sidebar/index.tsx` | `src/shell/panel/SidePanel.tsx`：通用列表与宽度分隔条，范围 220～500px；不带 worktree 功能。 |
+| `components/status-bar/StatusBarSurface.tsx` | `src/shell/status-bar/StatusBar.tsx`、`UsageCluster.tsx`：24px 容器、左右簇、向上弹出的用量菜单与测量标记。 |
+| `components/status-bar/StatusBarProviderSegment.tsx`、`UsageRosterPanel.tsx` | 同名 NAND 用量组件：替换为现有 `controller.usage` 适配快照；详细/精简、百分比、阈值、分钟边界倒计时与排序。 |
+| `components/status-bar/status-bar-usage-collapse.ts` | `src/shell/status-bar/collapse.ts`：按阶段 3 明确的算法先精简，再从右向左折叠，隐藏片段继续测量。 |
+| `components/status-bar/StatusBarVisibilityMenu.tsx` | `src/shell/status-bar/VisibilityMenu.tsx`：改用当前窗口 ContextMenu，偏好进入 app 设置命名空间。 |
+| `components/settings/Settings.tsx`、`settings-page-renderer.tsx`、`SearchableSetting.tsx`、`settings-search.ts` | `src/app/settings/react/`：保留 renderer 的独立滚动区、`gap-10 px-8 pt-10 pb-24 max-w-4xl` 内容容器、空结果态，以及设置行与搜索包装；分类由 NAND PanelModel 提供，搜索按 NAND 要求移到内容顶部，模块状态和旧 DOM 渲染器生命周期由 NAND 提供。 |
+
+底部状态栏不包含 Orca 的 SSH、资源监视、宠物或更新通知。组件样板直接由新设置页渲染 React 组件。旧模块设置仍通过单一 DOM 容器包装，以显式 `settingsPageKind: 'react'` 区分后续 React 设置组件；阶段 9 移除旧渲染路径。

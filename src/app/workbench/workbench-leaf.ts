@@ -62,7 +62,9 @@ export class WorkbenchView extends ItemView implements WorkbenchLeafView {
 	async onOpen(): Promise<void> {
 		this.registerEvent(this.app.workspace.on('active-leaf-change', (leaf) => {
 			if (leaf === this.leaf) this.lastActivatedAt = Date.now();
+			this.setVisible(this.contentEl.isShown());
 		}));
+		this.registerEvent(this.app.workspace.on('layout-change', () => this.setVisible(this.contentEl.isShown())));
 		this.loading = import('../../shell/host/workbench-surface').then(
 			({ createWorkbenchSurface }) => (this.surface = createWorkbenchSurface(this, this.host, this.saved)),
 			(error: unknown) => {
@@ -71,6 +73,7 @@ export class WorkbenchView extends ItemView implements WorkbenchLeafView {
 			},
 		);
 		await this.loading;
+		this.setVisible(this.contentEl.isShown());
 	}
 	async prepareModuleChanges(disabled: ReadonlySet<WorkbenchFeature>): Promise<void> {
 		await this.surface?.prepareModuleChanges(disabled);
@@ -87,7 +90,11 @@ export class WorkbenchView extends ItemView implements WorkbenchLeafView {
 		return this.disposeSurface();
 	}
 	onResize(): void {
+		this.setVisible(this.contentEl.isShown());
 		this.surface?.onResize();
+	}
+	setVisible(visible: boolean): void {
+		this.surface?.setVisible(visible);
 	}
 	onPaneMenu(menu: Menu, source: string): void {
 		this.surface?.onPaneMenu(menu, source);

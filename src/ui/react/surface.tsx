@@ -8,6 +8,7 @@ export abstract class ReactSurface extends NativeSurface {
 	private visible = true;
 	protected abstract renderContent(): ReactNode;
 	override onOpen(): Promise<void> {
+		this.contentEl.removeClass('nand-native');
 		this.contentEl.addClass('nand-ui');
 		this.root ??= createRoot(this.contentEl);
 		this.rerender();

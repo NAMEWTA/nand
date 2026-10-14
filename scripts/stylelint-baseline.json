@@ -11,9 +11,6 @@
 	"src/modules/browser/styles/116-independent-browser-native-leaves-and-modal-shar.css": [
 		"declaration-property-value-allowed-list"
 	],
-	"src/modules/comments/styles/091-editor-product-comments-does-not-use-dashboard-t.css": [
-		"declaration-property-value-allowed-list"
-	],
 	"src/modules/home/styles/003-shared-transparent-sections-for-neon-volt-magma-.css": [
 		"declaration-no-important"
 	],

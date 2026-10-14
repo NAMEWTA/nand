@@ -3,7 +3,7 @@ installPreactMiniDom();
 import { registerShellCommands } from '../src/app/commands';
 import type DashboardPlugin from '../src/app/main';
 import assert from 'node:assert/strict';
-import { Scope, Notice, type App } from 'obsidian';
+import { type App } from 'obsidian';
 import { El, findTag } from './mini-dom';
 import { Setting as StubSetting } from './obsidian-stub';
 import { resolveWidgetLabel } from '../src/modules/home/core/board/default-widget-label';
@@ -12,16 +12,14 @@ import { parse, serialize } from '../src/modules/home/core/board/parser';
 import type { AnniversaryConfig, CountdownConfig } from '../src/modules/home/core/board/types';
 import { CountdownSettingsModal } from '../src/modules/home/ui/widgets/countdown-modal';
 import { AnniversarySettingsModal } from '../src/modules/home/ui/widgets/anniversary-settings-modal';
-import { mountCommentComposer } from '../src/modules/comments/ui/comments/composer';
 import { createDashboardSettingsAccess } from '../src/modules/home/ui/settings-access';
 import { readCalendarTaskFilter, writeCalendarTaskFilter } from '../src/modules/home/ui/calendar/calendar-preferences';
 import { onLanguageChanged, setLanguage, t } from '../src/shared/i18n/index';
 import { registerLocalizedCommand, type LocalizedCommand } from '../src/host/obsidian/localized-command';
-import { registerCommentCommands } from '../src/modules/comments/ui/comments/commands';
+import { registerCommentCommands } from '../src/modules/comments/ui/commands';
 import { registerCopyCommands } from '../src/app/copy-commands';
-import type { CommentsEnv } from '../src/modules/comments/ui/comments/env';
+import type { CommentsEnv } from '../src/modules/comments/ui/env';
 import type { Command, Plugin } from 'obsidian';
-import { intersectRects, placePopover } from '../src/modules/comments/ui/comments/popover-position';
 import {
 	refreshLeafTitle,
 	retitleDeferredLeaves,
@@ -116,7 +114,7 @@ async function main() {
 	const originalCallbacks = commands.map((command) => command.callback ?? command.editorCallback);
 	for (const language of ['en', 'zh', 'zh', 'en'] as const) {
 		setLanguage(language);
-		const keys = ['editor.comments.add', 'editor.copy.relative', 'editor.copy.absolute'];
+		const keys = ['editor.comments.add', 'editor.comments.openPanel', 'editor.comments.atCursor', 'editor.comments.next', 'editor.comments.previous', 'editor.comments.resolveAll', 'editor.copy.relative', 'editor.copy.absolute'];
 		keys.forEach((key, index) => assert.equal(commands[index]!.name, `NAND: ${t(key)}`));
 		assert.equal(workflow.name, `NAND: ${t('workbench.agent')}: ${scriptName}`);
 		assert.equal(workflow.hotkeys, hotkeys);
@@ -126,15 +124,15 @@ async function main() {
 	scriptName = '用户改名 / Keep English';
 	setLanguage('zh');
 	assert.equal(workflow.name, `NAND: ${t('workbench.agent')}: ${scriptName}`);
-	assert.equal(commands.length, 4, 'Repeated language events do not register commands again');
-	assert.equal(commandCleanups.length, 4);
+	assert.equal(commands.length, 9, 'Repeated language events do not register commands again');
+	assert.equal(commandCleanups.length, 9);
 	const disposedNames = commands.map((command) => command.name);
 	commandCleanups.forEach((off) => off());
 	setLanguage('en');
 	assert.deepEqual(commands.map((command) => command.name), disposedNames, 'Plugin unload releases name subscriptions');
 	let automationOpens = 0, inboxOpens = 0, browserOpens = 0;
 	registerShellCommands({ addCommand, moduleState: () => 'active', openBrowser: async () => { browserOpens++; }, openWorkbench: async (target: { feature: string }) => { if (target.feature === 'notifications') inboxOpens++; }, automationHost: { open: async () => { automationOpens++; } } } as unknown as DashboardPlugin);
-	const shellCommands = commands.slice(4);
+	const shellCommands = commands.slice(9);
 	// Board commands are registered by the home module itself.
 	const expectedShellIds = ['open-workbench', 'open-browser', 'open-automations', 'open-notifications', 'new-automation', 'open-contacts', 'open-editor-view', 'cycle-theme'].map(id => `nand:${id}`).sort();
 	assert.deepEqual(shellCommands.map(command => command.id).sort(), expectedShellIds);
@@ -151,122 +149,15 @@ async function main() {
 		assert.equal(t('automation.inbox'), language === 'zh' ? '通知中心' : 'Notifications');
 		for (const command of [openAutomation, openInbox, openBrowser]) assert.equal(command.checkCallback?.(false), true, 'Module commands run while the module is active');
 		assert.deepEqual(shellCommands.map(command => command.callback ?? command.checkCallback), shellCallbacks);
-		assert.deepEqual(commands.slice(4).map(command => command.id).sort(), expectedShellIds);
-		shellCommands.forEach((command, i) => assert.equal(commands[i + 4], command));
+		assert.deepEqual(commands.slice(9).map(command => command.id).sort(), expectedShellIds);
+		shellCommands.forEach((command, i) => assert.equal(commands[i + 9], command));
 		assert.equal(commandCleanups.length, commands.length, 'One subscription per command');
 	}
 	assert.deepEqual([automationOpens, inboxOpens, browserOpens], [3, 3, 3]);
-	commandCleanups.slice(4).forEach(off => off());
-	const scopes: Scope[] = [];
-	const app = {
-		scope: new Scope(),
-		keymap: {
-			pushScope: (s: Scope) => scopes.push(s),
-			popScope: (s: Scope) => {
-				scopes.splice(scopes.indexOf(s), 1);
-			},
-		},
-	} as unknown as App;
-	const win = new El('window');
-	const parent = new El('div');
-	parent.ownerDocument = { defaultView: win, activeElement: null, hasFocus: () => false };
-	let saves = 0,
-		text = '',
-		focused = 0,
-		fail = false;
-	let finish: (() => void) | undefined;
-	const composer = mountCommentComposer(
-		parent as unknown as HTMLElement,
-		app,
-		async (value) => {
-			saves++;
-			text = value;
-			if (fail) throw Error('disk full');
-			await new Promise<void>((resolve) => {
-				finish = resolve;
-			});
-		},
-		() => {
-			focused++;
-		},
-	);
-	const button = parent.children[0]!,
-		input = parent.children[1]! as El & { hidden: boolean; placeholder: string },
-		hint = parent.children[2]!,
-		actions = parent.children[3]!;
-	const cancel = actions.children[0]!,
-		submit = actions.children[1]!;
-	const click = (el: El) => el.dispatchEvent({ type: 'click' });
-	const type = (value: string) => {
-		input.value = value;
-		input.dispatchEvent({ type: 'input' });
-	};
-	const key = (name: string, composing = false) => {
-		const handlers = (
-			scopes[scopes.length - 1] as unknown as {
-				handlers: { key: string; modifiers: string[]; callback: (e: unknown) => void }[];
-			}
-		)?.handlers;
-		handlers?.find((h) => h.key === name)?.callback({ isComposing: composing });
-	};
-	assert.equal(input.getAttribute('aria-label'), null);
-	assert.equal(parent.children[4]!.getAttribute('for'), (input as unknown as HTMLTextAreaElement).id);
-	assert.equal(input.hidden, true);
-	assert.equal(scopes.length, 0);
-	click(button);
-	assert.equal(input.hidden, false);
-	assert.equal(scopes.length, 1);
-	assert.equal(submit.disabled, true);
-	type('  ');
-	click(submit);
-	key('Enter');
-	assert.equal(saves, 0);
-	type('first\nsecond');
-	key('Enter', true);
-	assert.equal(saves, 0, 'IME must not submit');
+	commandCleanups.slice(9).forEach(off => off());
+	// React composer/IME/draft/error behavior is covered by comments DOM tests.
+
 	setLanguage('en');
-	assert.equal(input.value, 'first\nsecond');
-	assert.match(hint.textContent, /Ctrl/);
-	assert.equal(submit.textContent, 'Submit');
-	key('Enter');
-	click(submit);
-	assert.equal(saves, 1, 'pending save cannot submit twice');
-	assert.equal(text, 'first\nsecond');
-	assert.equal(submit.disabled, true);
-	finish?.();
-	await Promise.resolve();
-	await Promise.resolve();
-	assert.equal(input.hidden, true);
-	assert.equal(input.value, '');
-	assert.equal(scopes.length, 0);
-	assert.equal(focused, 1);
-	click(button);
-	type('keep my draft');
-	composer.setVisible(false);
-	assert.equal(scopes.length, 0);
-	click(submit);
-	assert.equal(saves, 1);
-	assert.equal(input.value, 'keep my draft');
-	composer.setVisible(true);
-	parent.dispatchEvent({ type: 'focusin' });
-	fail = true;
-	key('Enter');
-	await Promise.resolve();
-	await Promise.resolve();
-	assert.equal(input.value, 'keep my draft');
-	assert.equal(input.hidden, false);
-	assert.equal(submit.disabled, false);
-	assert.ok((Notice as unknown as { messages: string[] }).messages.length);
-	key('Escape');
-	assert.equal(input.hidden, true);
-	assert.equal(scopes.length, 0);
-	click(button);
-	type('cancel');
-	click(cancel);
-	assert.equal(input.value, '');
-	click(button);
-	composer.dispose();
-	assert.equal(scopes.length, 0, 'unmount releases its scope');
 	let changed = 0;
 	const off = onLanguageChanged(() => changed++);
 	setLanguage('zh');
@@ -275,11 +166,6 @@ async function main() {
 	setLanguage('en');
 	assert.equal(changed, 1, 'language notification is idempotent and disposable');
 
-	const bounds = { left: 100, top: 100, right: 500, bottom: 400 };
-	assert.deepEqual(placePopover({ left: 490, right: 495, top: 110, bottom: 126 }, bounds, 260, 160), { left: 232, top: 134 });
-	assert.deepEqual(placePopover({ left: 110, right: 120, top: 390, bottom: 400 }, bounds, 260, 160), { left: 110, top: 222 });
-	assert.equal(placePopover(bounds, bounds, 390, 290), null, 'too small panes hide the popup');
-	assert.equal(intersectRects(bounds, { left: 510, right: 600, top: 100, bottom: 200 }), null);
 	let mainTitle = '', popoutTitle = '', headerCalls = 0, layoutSaves = 0;
 	let mainActive = 'Note', popupActive = 'Terminal';
 	const root = {};
@@ -432,7 +318,7 @@ async function main() {
 	assert.equal(owner.settings, previous);
 	assert.equal(refreshes, 2, 'failed save must not report a successful refresh');
 	assert.equal(await writeCalendarTaskFilter(undefined, 'all'), false, 'missing persistence must be visible');
-	console.log('verify-issue-regressions: default-name localization, edit intent, composer, language lifecycle and settings persistence passed');
+	console.log('verify-issue-regressions: default-name localization, edit intent, command registration, language lifecycle and settings persistence passed');
 }
 void main().catch((error) => {
 	console.error(error);

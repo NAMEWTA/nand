@@ -1,7 +1,7 @@
 // Adapted from stablyai/orca 464bd5a54b3364021c5cc0319859616e5ec41bbf (MIT), Copyright (c) 2026 Lovecast Inc.; shadcn/ui (MIT).
 // Original: src/renderer/src/components/ui/context-menu.tsx
 import * as React from 'react';
-import { ChevronRightIcon, CircleIcon } from 'lucide-react';
+import { CheckIcon, ChevronRightIcon, CircleIcon } from 'lucide-react';
 import * as ContextMenuPrimitive from 'radix-ui/context-menu';
 
 import { usePortalContainer } from '../react/contexts';
@@ -113,6 +113,12 @@ function ContextMenuItem({
 	);
 }
 
+function ContextMenuCheckboxItem({ className, children, checked, ...props }: React.ComponentProps<typeof ContextMenuPrimitive.CheckboxItem>) {
+ return <ContextMenuPrimitive.CheckboxItem data-slot="context-menu-checkbox-item" checked={checked} className={cn("relative flex cursor-default items-center gap-2 rounded-md py-[4px] pr-2 pl-8 text-[12px] leading-[17px] font-[450] outline-hidden select-none focus:bg-foreground/8 dark:focus:bg-foreground/14 focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50", className)} {...props}>
+  <span className="pointer-events-none absolute left-2 flex size-3.5 items-center justify-center"><ContextMenuPrimitive.ItemIndicator><CheckIcon className="size-3.5" /></ContextMenuPrimitive.ItemIndicator></span>{children}
+ </ContextMenuPrimitive.CheckboxItem>;
+}
+
 function ContextMenuRadioItem({
 	className,
 	children,
@@ -183,6 +189,7 @@ export {
 	ContextMenuContent,
 	ContextMenuItem,
 	ContextMenuRadioItem,
+	ContextMenuCheckboxItem,
 	ContextMenuLabel,
 	ContextMenuSeparator,
 	ContextMenuShortcut,

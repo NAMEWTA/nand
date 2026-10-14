@@ -25,7 +25,7 @@ export class CommentsLeaf extends ItemView {
 		return t('editor.viewTitle');
 	}
 	getIcon(): string {
-		return 'pen-line';
+		return 'message-square-text';
 	}
 	onOpen(): Promise<void> {
 		this.register(this.host.services.watch(COMMENTS_PANEL, () => this.draw()));
@@ -52,7 +52,7 @@ export class CommentsLeaf extends ItemView {
 			return;
 		}
 		renderEmptyState(this.contentEl, {
-			icon: 'pen-line',
+			icon: 'message-square-text',
 			title: t('modules.editor'),
 			description: t('modules.editorOff'),
 			action: { label: t('workbench.enableModule'), run: () => { void this.host.openWorkbenchSettings('general'); } },

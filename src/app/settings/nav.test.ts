@@ -4,7 +4,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 
 import { visibleProducts } from './nav.ts';
-import { normalizeCommentsSettings } from '../../modules/comments/settings.ts';
+import { DEFAULT_COMMENTS_SETTINGS, normalizeCommentsSettings } from '../../modules/comments/settings.ts';
 
 const ALL_ON = {
 	browser: true,
@@ -58,7 +58,7 @@ test('stored editor placeholder selections return to comments while preserving p
 	for (const activeDomain of ['comments', 'writing-stats', 'focus', 'unknown']) {
 		assert.deepEqual(
 			normalizeCommentsSettings({ activeDomain, sidebarWidth: 300, highlightEnabled: false, popoverEnabled: false }),
-			{ sidebarWidth: 300, highlightEnabled: false, popoverEnabled: false },
+			{ ...DEFAULT_COMMENTS_SETTINGS, sidebarWidth: 300, highlightEnabled: false, popoverEnabled: false },
 		);
 	}
 });

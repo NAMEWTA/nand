@@ -11,6 +11,8 @@ export interface NativeSurfaceContext {
 	/** Same-window object navigation, owned and hidden by the workbench. */
 	navigationEl?: HTMLElement;
 	openNavigation?: () => void;
+	togglePanel?: () => void;
+	openPageMenu?: (event: MouseEvent) => void;
 	changed?: () => void;
 	addAction?: (icon: string, title: string, callback: (event: MouseEvent) => void) => HTMLElement;
 	close: () => void | Promise<void>;

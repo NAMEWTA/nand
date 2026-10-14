@@ -1,4 +1,4 @@
-import { locateAnchor, makeAnchor } from './anchor';
+import { locateAnchor, createAnchor } from './anchor';
 import type { CommentFileDoc, CommentIndex, CommentMessage, CommentThread, NewCommentInput } from './model';
 
 const ROOT = '.nand/editor/comments';
@@ -36,6 +36,7 @@ export interface CommentStoreOptions {
 	timers: CommentTimers;
 	debounceMs?: number;
 	onError?: (error: unknown) => void;
+	fuzzyThreshold?: () => number;
 }
 
 function filePath(hash: string): string {
@@ -60,7 +61,7 @@ async function sha16(path: string): Promise<string> {
 }
 
 function emptyIndex(): CommentIndex {
-	return { version: 1, files: {} };
+	return { version: 2, files: {} };
 }
 
 function asRecord(raw: unknown): Record<string, unknown> | null {
@@ -69,50 +70,32 @@ function asRecord(raw: unknown): Record<string, unknown> | null {
 
 function normalizeMessage(raw: unknown): CommentMessage | null {
 	const rec = asRecord(raw);
-	if (!rec) return null;
-	if (typeof rec['id'] !== 'string' || typeof rec['text'] !== 'string' || typeof rec['ts'] !== 'string') return null;
-	return { id: rec['id'], text: rec['text'], ts: rec['ts'] };
+	if (!rec || typeof rec['id'] !== 'string' || typeof rec['text'] !== 'string' || typeof rec['createdAt'] !== 'string' || typeof rec['author'] !== 'string') return null;
+	if (rec['editedAt'] !== undefined && typeof rec['editedAt'] !== 'string') return null;
+	return { id: rec['id'], text: rec['text'], createdAt: rec['createdAt'], author: rec['author'], ...(typeof rec['editedAt'] === 'string' ? { editedAt: rec['editedAt'] } : {}) };
 }
 
-function normalizeThread(raw: unknown, path: string): CommentThread | null {
+function normalizeThread(raw: unknown): CommentThread | null {
 	const rec = asRecord(raw);
-	if (!rec || typeof rec['id'] !== 'string') return null;
+	if (!rec || typeof rec['id'] !== 'string' || (rec['kind'] !== 'line' && rec['kind'] !== 'range')) return null;
 	const status = rec['status'];
 	if (status !== 'open' && status !== 'resolved' && status !== 'orphaned') return null;
-	const target = asRecord(rec['target']);
-	const quote = target ? asRecord(target['quote']) : null;
-	if (!target || !quote) return null;
-	if (
-		typeof quote['exact'] !== 'string' ||
-		typeof quote['prefix'] !== 'string' ||
-		typeof quote['suffix'] !== 'string'
-	) {
-		return null;
-	}
-	if (typeof target['start'] !== 'number' || typeof target['end'] !== 'number') return null;
-	if (!Array.isArray(rec['thread'])) return null;
-	const messages = rec['thread'].map(normalizeMessage);
-	if (messages.some((message) => message === null)) return null;
-	return {
-		id: rec['id'],
-		status,
-		target: {
-			path: typeof target['path'] === 'string' ? target['path'] : path,
-			quote: { exact: quote['exact'], prefix: quote['prefix'], suffix: quote['suffix'] },
-			start: target['start'],
-			end: target['end'],
-		},
-		thread: messages as CommentMessage[],
-		createdAt: typeof rec['createdAt'] === 'string' ? rec['createdAt'] : nowIso(),
-		updatedAt: typeof rec['updatedAt'] === 'string' ? rec['updatedAt'] : nowIso(),
-	};
+	const anchor = asRecord(rec['anchor']);
+	if (!anchor || anchor['kind'] !== rec['kind']) return null;
+	for (const key of ['text', 'textHash', 'before', 'after']) if (typeof anchor[key] !== 'string') return null;
+	for (const key of ['start', 'end', 'lineHint']) if (typeof anchor[key] !== 'number' || !Number.isInteger(anchor[key]) || anchor[key] < 0) return null;
+	if ((anchor['end'] as number) < (anchor['start'] as number) || (anchor['lineHint'] as number) < 1) return null;
+	if (!Array.isArray(rec['messages']) || !rec['messages'].length) return null;
+	const messages = rec['messages'].map(normalizeMessage);
+	if (messages.some(message => message === null) || typeof rec['createdAt'] !== 'string' || typeof rec['updatedAt'] !== 'string') return null;
+	return { id: rec['id'], kind: rec['kind'], status, anchor: anchor as unknown as CommentThread['anchor'], messages: messages as CommentMessage[], createdAt: rec['createdAt'], updatedAt: rec['updatedAt'] };
 }
 
 function normalizeFile(raw: unknown, path: string): CommentThread[] {
 	const rec = asRecord(raw);
-	if (!rec || rec['version'] !== 1 || !Array.isArray(rec['comments'])) throw new Error('Invalid comment sidecar');
-	const threads = rec['comments'].map((item) => normalizeThread(item, path));
-	if (threads.some((thread) => thread === null)) throw new Error('Invalid comment thread');
+	if (!rec || rec['version'] !== 2 || !Array.isArray(rec['threads']) || typeof rec['path'] !== 'string' || (path && rec['path'] !== path)) throw new Error('Invalid comment sidecar');
+	const threads = rec['threads'].map(normalizeThread);
+	if (threads.some(thread => thread === null)) throw new Error('Invalid comment thread');
 	return threads as CommentThread[];
 }
 
@@ -120,7 +103,7 @@ function normalizeIndex(raw: unknown): CommentIndex {
 	const out = emptyIndex();
 	const rec = asRecord(raw);
 	const files = rec ? asRecord(rec['files']) : null;
-	if (!files || rec?.['version'] !== 1) throw new Error('Invalid comment index');
+	if (!files || rec?.['version'] !== 2) throw new Error('Invalid comment index');
 	for (const [path, value] of Object.entries(files)) {
 		const entry = asRecord(value);
 		if (!entry || typeof entry['hash'] !== 'string' || !/^[a-f0-9]{16}$/.test(entry['hash']))
@@ -141,13 +124,15 @@ function normalizeIndex(raw: unknown): CommentIndex {
  */
 export class CommentStore {
 	revision = 0;
-	focusedId: string | null = null;
 
 	private readonly debounceMs: number;
+	private readonly fuzzyThreshold: () => number;
 	private index: CommentIndex | null = null;
 	private readonly cache = new Map<string, CommentThread[]>();
 	/** Paths whose quotes have been checked against the current document. */
 	private readonly reconciled = new Set<string>();
+	/** The document revision whose offsets the shared anchors currently describe. */
+	private readonly documents = new Map<string, string>();
 	private readonly dirty = new Map<string, number>();
 	private change = 0;
 	private readonly obsolete = new Set<string>();
@@ -160,6 +145,10 @@ export class CommentStore {
 	private chain: Promise<void> = Promise.resolve();
 	private readonly listeners = new Set<() => void>();
 	private closed = false;
+	legacyData = false;
+	readonly damagedFiles: string[] = [];
+	private readonly legacyPaths = new Set<string>();
+	private readonly damagedPaths = new Set<string>();
 	private closing: Promise<void> | null = null;
 
 	constructor(
@@ -167,6 +156,7 @@ export class CommentStore {
 		opts: CommentStoreOptions,
 	) {
 		this.timers = opts.timers;
+		this.fuzzyThreshold = opts.fuzzyThreshold ?? (() => 0.3);
 		this.debounceMs = opts.debounceMs ?? DEFAULT_DEBOUNCE_MS;
 		this.onError = opts.onError;
 	}
@@ -183,11 +173,6 @@ export class CommentStore {
 		this.emit();
 	}
 
-	focus(id: string | null): void {
-		this.focusedId = id;
-		this.emit();
-	}
-
 	/** Notes that have comments, with their open and total thread counts (from the sidecar index). */
 	async listFiles(): Promise<Array<{ path: string; open: number; total: number; updatedAt: string }>> {
 		const index = await this.enqueue(() => this.readIndex(), true);
@@ -196,7 +181,7 @@ export class CommentStore {
 		for (const [path, threads] of this.cache) {
 			if (!threads.length) rows.delete(path);
 			else rows.set(path, {
-				open: threads.filter((thread) => thread.status === 'open').length,
+				open: threads.filter((thread) => thread.status !== 'resolved').length,
 				total: threads.length,
 				updatedAt: threads.reduce((latest, thread) => (thread.updatedAt > latest ? thread.updatedAt : latest), ''),
 			});
@@ -223,17 +208,14 @@ export class CommentStore {
 	add(path: string, input: NewCommentInput): Promise<CommentThread> {
 		return this.enqueue(async () => {
 			const threads = await this.readThreads(path);
+			if (this.legacyPaths.size) throw new Error('Legacy comments are read-only');
 			const now = nowIso();
 			const thread: CommentThread = {
 				id: nid('c'),
 				status: 'open',
-				target: {
-					path,
-					quote: input.quote,
-					start: input.start,
-					end: input.end,
-				},
-				thread: [{ id: nid('m'), ts: now, text: input.text }],
+				kind: input.anchor.kind,
+				anchor: structuredClone(input.anchor),
+				messages: [{ id: nid('m'), createdAt: now, author: input.author ?? '', text: input.text }],
 				createdAt: now,
 				updatedAt: now,
 			};
@@ -245,12 +227,12 @@ export class CommentStore {
 		});
 	}
 
-	reply(id: string, text: string): Promise<CommentThread> {
+	reply(id: string, text: string, author = ''): Promise<CommentThread> {
 		return this.enqueue(async () => {
 			const found = await this.locate(id);
 			if (!found) throw new Error(`Comment not found: ${id}`);
 			const now = nowIso();
-			found.thread.thread.push({ id: nid('m'), ts: now, text });
+			found.thread.messages.push({ id: nid('m'), createdAt: now, text, author });
 			found.thread.updatedAt = now;
 			this.markDirty(found.path);
 			this.emit();
@@ -272,23 +254,57 @@ export class CommentStore {
 			if (!found) return;
 			const idx = found.threads.findIndex((thread) => thread.id === id);
 			if (idx >= 0) found.threads.splice(idx, 1);
-			if (this.focusedId === id) this.focusedId = null;
 			this.markDirty(found.path);
 			this.emit();
 		});
 	}
 
-	reanchor(id: string, next: { quote: NewCommentInput['quote']; start: number; end: number }): Promise<void> {
+	reanchor(id: string, anchor: NewCommentInput['anchor']): Promise<void> {
 		return this.enqueue(async () => {
 			const found = await this.locate(id);
 			if (!found) return;
-			found.thread.target = {
-				path: found.thread.target.path,
-				quote: next.quote,
-				start: next.start,
-				end: next.end,
-			};
+			found.thread.anchor = structuredClone(anchor);
+			found.thread.kind = anchor.kind;
 			found.thread.status = 'open';
+			found.thread.updatedAt = nowIso();
+			this.markDirty(found.path);
+			this.emit();
+		});
+	}
+
+	editMessage(id: string, messageId: string, text: string, author: string): Promise<void> {
+		return this.enqueue(async () => {
+			const found = await this.locate(id);
+			const message = found?.thread.messages.find(item => item.id === messageId);
+			if (!found || !message) throw new Error('Comment not found');
+			if (message.author && message.author !== author) throw new Error('Comment author does not match');
+			message.text = text;
+			message.editedAt = nowIso();
+			found.thread.updatedAt = message.editedAt;
+			this.markDirty(found.path);
+			this.emit();
+		});
+	}
+
+	removeReply(id: string, messageId: string): Promise<CommentMessage | null> {
+		return this.enqueue(async () => {
+			const found = await this.locate(id);
+			const index = found?.thread.messages.findIndex(item => item.id === messageId) ?? -1;
+			if (!found || index <= 0) return null;
+			const removed = found.thread.messages.splice(index, 1)[0] ?? null;
+			found.thread.updatedAt = nowIso();
+			this.markDirty(found.path);
+			this.emit();
+			return removed;
+		});
+	}
+
+	restoreReply(id: string, message: CommentMessage): Promise<void> {
+		return this.enqueue(async () => {
+			const found = await this.locate(id);
+			if (!found || found.thread.messages.some(item => item.id === message.id)) return;
+			found.thread.messages.push(message);
+			found.thread.messages.sort((a, b) => a.createdAt.localeCompare(b.createdAt));
 			found.thread.updatedAt = nowIso();
 			this.markDirty(found.path);
 			this.emit();
@@ -301,34 +317,41 @@ export class CommentStore {
 	 * No-ops until {@link reconcile} has run for this path, so a keystroke
 	 * during the initial load cannot drag a stale offset.
 	 */
-	applyChanges(path: string | null, mapper: PosMapper, doc: string): void {
+	applyChanges(path: string | null, mapper: PosMapper, doc: string, before: string): void {
 		if (this.closed || !path || !this.reconciled.has(path)) return;
+		const current = this.documents.get(path);
+		// Obsidian broadcasts one revision to every view of a file. A second view
+		// must not map shared offsets again; an older broadcast must not rewind them.
+		if (current === doc || (current !== undefined && current !== before)) return;
+		this.documents.set(path, doc);
 		const threads = this.cache.get(path);
 		if (!threads || threads.length === 0) return;
 		let changed = false;
 		for (const thread of threads) {
 			if (thread.status === 'orphaned') continue;
-			const start = mapper.mapPos(thread.target.start, 1);
-			const end = mapper.mapPos(thread.target.end, -1);
-			if (end <= start) {
+			let start = mapper.mapPos(thread.anchor.start, 1);
+			let end = mapper.mapPos(thread.anchor.end, -1);
+			// Inserting into an annotated empty line reverses the two endpoint associations.
+			if (thread.kind === 'line' && !thread.anchor.text && end < start) [start, end] = [end, start];
+			if (end < start || (end === start && thread.anchor.text.length > 0)) {
 				thread.status = 'orphaned';
 				thread.updatedAt = nowIso();
 				changed = true;
 				continue;
 			}
 			const exact = doc.slice(start, end);
-			if (!exact) {
+			if (!exact && thread.kind !== 'line') {
 				thread.status = 'orphaned';
 				thread.updatedAt = nowIso();
 				changed = true;
 				continue;
 			}
-			if (start === thread.target.start && end === thread.target.end && exact === thread.target.quote.exact) {
+			if (start === thread.anchor.start && end === thread.anchor.end && exact === thread.anchor.text) {
 				continue;
 			}
-			thread.target.start = start;
-			thread.target.end = end;
-			thread.target.quote = makeAnchor(doc, start, end);
+			thread.anchor.start = start;
+			thread.anchor.end = end;
+			thread.anchor = createAnchor(doc, start, end, thread.kind);
 			thread.updatedAt = nowIso();
 			changed = true;
 		}
@@ -339,25 +362,27 @@ export class CommentStore {
 
 	/** Relocate open threads against `doc`. Failures become `orphaned` and are not guessed. */
 	reconcile(path: string, doc: string): void {
+		const revision = this.documents.get(path);
 		void this.enqueue(async () => {
 			const threads = await this.readThreads(path);
+			if (this.documents.get(path) !== revision || revision === doc) return;
 			let changed = false;
 			for (const thread of threads) {
 				if (thread.status === 'orphaned') continue;
-				const located = locateAnchor(doc, thread.target.quote, thread.target.start, thread.target.end);
+				const located = locateAnchor(doc, thread.anchor, this.fuzzyThreshold());
 				if (!located) {
 					thread.status = 'orphaned';
 					thread.updatedAt = nowIso();
 					changed = true;
 					continue;
 				}
-				if (thread.target.start !== located.start || thread.target.end !== located.end) {
-					thread.target.start = located.start;
-					thread.target.end = located.end;
+				if (thread.anchor.start !== located.start || thread.anchor.end !== located.end || thread.anchor.text !== doc.slice(located.start, located.end)) {
+					thread.anchor = createAnchor(doc, located.start, located.end, thread.kind);
 					changed = true;
 				}
 			}
 			this.reconciled.add(path);
+			this.documents.set(path, doc);
 			if (changed) {
 				this.markDirty(path);
 				this.emit();
@@ -369,10 +394,12 @@ export class CommentStore {
 		return this.enqueue(async () => {
 			if (oldPath === newPath) return;
 			const threads = await this.readThreads(oldPath);
-			for (const thread of threads) thread.target.path = newPath;
 			this.cache.delete(oldPath);
 			this.cache.set(newPath, threads);
 			if (this.reconciled.delete(oldPath)) this.reconciled.add(newPath);
+			const document = this.documents.get(oldPath);
+			this.documents.delete(oldPath);
+			if (document !== undefined) this.documents.set(newPath, document);
 			const index = await this.readIndex();
 			const prev = index.files[oldPath];
 			delete index.files[oldPath];
@@ -395,6 +422,7 @@ export class CommentStore {
 			delete index.files[path];
 			this.cache.delete(path);
 			this.reconciled.delete(path);
+			this.documents.delete(path);
 			this.dirty.delete(path);
 			if (prev) this.obsolete.add(filePath(prev.hash));
 			this.indexDirty = true;
@@ -463,32 +491,60 @@ export class CommentStore {
 		const cached = this.cache.get(path);
 		if (cached) return cached;
 		const meta = (await this.readIndex()).files[path];
-		// A referenced but missing sidecar is a damaged store, not an empty note.
-		const threads = meta ? normalizeFile(JSON.parse(await this.fs.read(filePath(meta.hash))), path) : [];
+		const storagePath = filePath(meta?.hash ?? await sha16(path));
+		const raw = meta || await this.fs.exists(storagePath) ? await this.readDocument(storagePath) : null;
+		let threads: CommentThread[] = [];
+		if (raw !== null) {
+			try { threads = normalizeFile(raw, path); }
+			catch (error) { await this.quarantine(storagePath); throw error; }
+		}
 		this.cache.set(path, threads);
 		return threads;
+	}
+
+	private async readDocument(path: string): Promise<unknown> {
+		if (this.damagedPaths.has(path)) throw new Error('Comment data was set aside: ' + path);
+		const body = await this.fs.read(path);
+		let raw: unknown;
+		try { raw = JSON.parse(body); }
+		catch (error) { await this.quarantine(path, body); throw error; }
+		if (asRecord(raw)?.['version'] === 1) {
+			this.legacyData = true;
+			this.legacyPaths.add(path);
+			return null;
+		}
+		return raw;
+	}
+
+	private async quarantine(path: string, body?: string): Promise<void> {
+		const saved = `${ROOT}/set-aside/${nid('damaged')}-${path.split('/').pop() ?? 'data.json'}`;
+		await this.fs.write(saved, body ?? await this.fs.read(path));
+		await this.fs.remove(path);
+		this.damagedPaths.add(path);
+		this.damagedFiles.push(saved);
+		this.emit();
 	}
 
 	private async readIndex(): Promise<CommentIndex> {
 		if (this.index) return this.index;
 		if (await this.fs.exists(PENDING_PATH)) {
-			const raw = JSON.parse(await this.fs.read(PENDING_PATH)) as CommentWrite;
-			normalizeIndex(raw.index);
-			if (
-				!raw.files ||
-				!Array.isArray(raw.remove) ||
-				[...Object.keys(raw.files), ...raw.remove].some(
-					(path) => !/^\.nand\/editor\/comments\/files\/[a-f0-9]{16}\.json$/.test(path),
-				)
-			)
-				throw new Error('Invalid pending comment write');
-			for (const body of Object.values(raw.files)) normalizeFile(JSON.parse(body), '');
-			await this.persist(raw);
+			const raw = await this.readDocument(PENDING_PATH) as CommentWrite | null;
+			if (raw && asRecord(raw.index)?.['version'] === 1) {
+				this.legacyData = true;
+				this.legacyPaths.add(PENDING_PATH);
+			} else if (raw) {
+				try {
+					normalizeIndex(raw.index);
+					if (!raw.files || !Array.isArray(raw.remove) || [...Object.keys(raw.files), ...raw.remove].some(path => !/^\.nand\/editor\/comments\/files\/[a-f0-9]{16}\.json$/.test(path))) throw new Error('Invalid pending comment write');
+					for (const body of Object.values(raw.files)) normalizeFile(JSON.parse(body), '');
+				} catch (error) { await this.quarantine(PENDING_PATH); throw error; }
+				await this.persist(raw);
+			}
 		}
-		// exists failures and read/parse failures propagate; only confirmed absence is empty.
-		this.index = (await this.fs.exists(INDEX_PATH))
-			? normalizeIndex(JSON.parse(await this.fs.read(INDEX_PATH)))
-			: emptyIndex();
+		if (this.damagedPaths.has(INDEX_PATH)) throw new Error('Comment index was set aside');
+		const raw = await this.fs.exists(INDEX_PATH) ? await this.readDocument(INDEX_PATH) : null;
+		try { this.index = raw === null ? emptyIndex() : normalizeIndex(raw); }
+		catch (error) { await this.quarantine(INDEX_PATH); throw error; }
 		return this.index;
 	}
 
@@ -541,13 +597,17 @@ export class CommentStore {
 						continue;
 					}
 					const hash = await sha16(path);
+					if (await this.fs.exists(filePath(hash)) && !index.files[path]) {
+						const existing = await this.readDocument(filePath(hash));
+						if (existing === null) throw new Error('Legacy comments are read-only');
+					}
 					index.files[path] = {
 						hash,
-						open: threads.filter((t) => t.status === 'open').length,
+						open: threads.filter((t) => t.status !== 'resolved').length,
 						total: threads.length,
 						updatedAt: nowIso(),
 					};
-					const body: CommentFileDoc = { version: 1, path, comments: threads };
+					const body: CommentFileDoc = { version: 2, path, threads };
 					files[filePath(hash)] = JSON.stringify(body, null, 2);
 				}
 				const referenced = new Set(Object.values(index.files).map((entry) => filePath(entry.hash)));
@@ -556,6 +616,7 @@ export class CommentStore {
 					files,
 					remove: [...removals].filter((path) => !referenced.has(path)),
 				};
+				if (this.legacyPaths.size) throw new Error('Legacy comments are read-only; preserve them outside the active comments folder before creating v2 data');
 				// Save recoverable intent before replacing any existing data.
 				await this.fs.write(PENDING_PATH, JSON.stringify(write));
 				this.transaction = { write, versions, removals: [...removals] };

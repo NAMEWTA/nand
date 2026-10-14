@@ -23,7 +23,7 @@ test('the active rail icon toggles the panel; another icon restores that moduleâ
 
 test('saved shell state is bounded and keeps per-module routes only for their own module', () => {
 	const state = normalizeWorkbenchState({ panelWidth: 999, panelOpen: false, focus: true, lastTargets: { contacts: { feature: 'contacts', section: 'person' }, terminal: { feature: 'browser' }, bogus: {} }, target: { feature: 'settings', section: 'appearance' } });
-	assert.equal(state.panelWidth, 360);
+	assert.equal(state.panelWidth, 500);
 	assert.equal(state.panelOpen, false);
 	assert.equal(state.focus, true);
 	assert.deepEqual(state.lastTargets, { contacts: { feature: 'contacts', section: 'person' } });

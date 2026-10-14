@@ -56,13 +56,12 @@ function assertUnique(names: string[]): void {
 
 test('the Obsidian settings tab is a short entry point into the workbench settings', () => {
 	try {
-		for (const [language, open, home] of [['zh', 'NAND 设置', '全局设置'], ['en', 'NAND settings', 'Global settings']] as const) {
+		for (const [language, open] of [['zh', 'NAND 设置'], ['en', 'NAND settings']] as const) {
 			setLanguage(language);
 			const names = definitionNames();
 			assertUnique(names);
 			assert.equal(names[0], open);
-			assert.ok(names.includes(home), `${language}: ${names.join(', ')}`);
-			assert.equal(names.length, 2);
+			assert.equal(names.length, 1);
 		}
 	} finally {
 		setLanguage('zh');

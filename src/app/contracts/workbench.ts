@@ -1,7 +1,7 @@
 /** Rendering and navigation contracts; no Plugin, Vault, PTY or service locator. */
 import type { ModuleId } from './module';
 
-export const WORKBENCH_FEATURES = ['dashboard', 'terminal', 'browser', 'contacts', 'automations', 'notifications', 'icons', 'comments', 'records', 'sync', 'content', 'settings'] as const;
+export const WORKBENCH_FEATURES = ['dashboard', 'terminal', 'browser', 'contacts', 'automations', 'notifications', 'icons', 'records', 'sync', 'content', 'settings'] as const;
 export type WorkbenchFeature = typeof WORKBENCH_FEATURES[number];
 
 /** The module that owns each workbench feature (`settings` belongs to the app). */
@@ -13,7 +13,6 @@ export const FEATURE_MODULES: Readonly<Record<WorkbenchFeature, ModuleId | 'app'
 	automations: 'automations',
 	notifications: 'notifications',
 	icons: 'icons',
-	comments: 'comments',
 	records: 'home',
 	sync: 'sync',
 	settings: 'app',
@@ -91,4 +90,42 @@ export interface WorkbenchStatus {
 	kind: 'error' | 'running' | 'unread' | 'info';
 	label: string;
 	target: WorkbenchTarget;
+}
+
+export type PageChrome = 'standard' | 'none';
+export interface StatusSegment {
+ id: string;
+ icon: string;
+ label: string;
+ tone?: 'neutral' | 'running' | 'attention' | 'error';
+ count?: number;
+ target?: WorkbenchTarget;
+ order: number;
+}
+export interface StatusBarPreferences {
+ visible: boolean;
+ segments: Record<string, boolean>;
+ usageMode: 'verbose' | 'compact';
+ usageDisplay: 'used' | 'remaining';
+ mirrorToObsidian: boolean;
+}
+/** Transport-only quota model; shell never imports a module implementation. */
+export interface UsageProvider {
+ id: string;
+ name: string;
+ account?: string;
+ status?: string;
+ stale?: boolean;
+ failed?: boolean;
+ windows: readonly { label: string; usedPercent: number; resetsAt?: number }[];
+}
+export interface UsageSnapshot {
+ providers: readonly UsageProvider[];
+ refreshing: boolean;
+}
+export interface AgentUsage {
+ snapshot(): UsageSnapshot;
+ subscribe(listener: () => void): () => void;
+ refresh(): Promise<void>;
+ setDisplay(display: StatusBarPreferences['usageDisplay']): void;
 }
