@@ -9,7 +9,7 @@ import { closeOwnedDashboardDialogs, openOwnedDashboardModal } from '../ui/dialo
 import type { BgSize, DashboardSettings } from '../../core/board/types/index';
 import { t } from '../../../../shared/i18n/index';
 import type { DashboardHost } from '../host';
-import { resolveVaultImage } from '../banner/banner';
+import { resolveVaultImage } from '../banner/image-resource';
 import { showConfirmDialog } from '../ui/confirm-dialog';
 import { refreshAppearanceLive } from './appearance';
 import { applyModalTheme } from './modal-theme';

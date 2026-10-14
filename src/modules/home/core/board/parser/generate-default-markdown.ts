@@ -124,6 +124,7 @@ export function parseColumnDefs(fm: Record<string, unknown>): Array<{
 	name: string;
 	color: string;
 	sectionType?: string;
+	showCover?: boolean;
 	libraryConfig?: LibraryConfig;
 	pipelineConfig?: PipelineConfig;
 	wereadConfig?: WereadConfig;
@@ -141,6 +142,7 @@ export function parseColumnDefs(fm: Record<string, unknown>): Array<{
 		name: String((item.name ?? 'Unnamed') as string | number | boolean),
 		color: String((item.color ?? '#6366f1') as string | number | boolean),
 		sectionType: item.type ? String(item.type as string | number | boolean) : undefined,
+		showCover: item.showCover === false ? false : undefined,
 		libraryConfig: item.library ? parseLibraryConfig(item.library as Record<string, unknown>) : undefined,
 		pipelineConfig: item.pipeline ? readPipelineConfig(item.pipeline) : undefined,
 		wereadConfig: item.weread ? parseWereadConfig(item.weread as Record<string, unknown>) : undefined,
@@ -159,7 +161,8 @@ export function parseColumns(
 		name: string;
 		color: string;
 		sectionType?: string;
-		libraryConfig?: LibraryConfig;
+		showCover?: boolean;
+	libraryConfig?: LibraryConfig;
 		pipelineConfig?: PipelineConfig;
 		wereadConfig?: WereadConfig;
 		dataviewConfig?: DataviewConfig;
@@ -191,6 +194,7 @@ export function parseColumns(
 			sectionType: resolvedType,
 			// Memo rendering includes task/doc trees; retain their structure on reload.
 			cards,
+			showCover: def?.showCover,
 			libraryConfig: def?.libraryConfig,
 			pipelineConfig: def?.pipelineConfig,
 			wereadConfig: def?.wereadConfig,

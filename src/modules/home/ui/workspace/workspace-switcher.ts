@@ -6,7 +6,6 @@ import { t } from '../../../../shared/i18n/index';
 import type { DashboardHost } from '../host';
 import { showConfirmDialog } from '../ui/confirm-dialog';
 import { showPromptDialog } from '../ui/prompt-dialog';
-import { promptNewBoard } from '../NewBoardDialog';
 
 /** Display label for a workspace: its name, else the file path. */
 function workspaceLabel(name: string, path: string): string {
@@ -15,8 +14,8 @@ function workspaceLabel(name: string, path: string): string {
 
 /** Open the "new workspace" dialog and create the workspace on confirm. */
 async function promptNewWorkspace(plugin: DashboardHost): Promise<void> {
-	const result = await promptNewBoard(plugin.app);
-	if (result) await plugin.createWorkspace(result.name, result.layout);
+	const name = await showPromptDialog(plugin.app, {title:t('workbench.newBoard')});
+	if(name) await plugin.createWorkspace(name);
 }
 
 /** Long-press / right-click management menu for one workspace button. */

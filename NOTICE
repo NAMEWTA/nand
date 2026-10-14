@@ -18,6 +18,8 @@ https://github.com/PandoraReads/apex-dashboard
 Home layout and height-codec reference pinned to:
 db9d2892032c27f5f8899a72c0dca61d72572a9a (manifest version 3.7.5).
 The coarse-height conversion is adapted in home/core/board/board-codec.ts.
+React dashboard layouts, P0 interactions and all thirteen theme token sets
+are adapted from ac4d2c7 (v3.8.4), in home/ui and home/core/board/parser.
 Source and behavior mappings: docs/third-party/apex-dashboard.md.
 
 MIT License
@@ -88,6 +90,9 @@ Adapted parts, with the upstream commits they are taken from:
   commit d74388f8a2dad2bd4bbfe3b937aba66e6648258b.
 - React UI components, settings form controls, shortcut key caps and agent
   icon glyphs: commit 464bd5a54b3364021c5cc0319859616e5ec41bbf.
+- Automation page, list, editor, detail and run-history layouts, plus the
+  automation CLI argument allowlist: commit 464bd5a54b3364021c5cc0319859616e5ec41bbf
+  (mapping: docs/third-party/orca-terminal-workbench.md).
 Full license text: docs/third-party/orca-LICENSE.txt
 
 --------------------------------------------------------------------------------

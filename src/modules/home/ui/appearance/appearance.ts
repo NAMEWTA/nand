@@ -1,7 +1,7 @@
 import { Platform, type App } from 'obsidian';
 import { displayFocal } from '../../core/board/board-experience';
 import type { DashboardSettings } from '../../core/board/types/index';
-import { resolveVaultImage } from '../banner/banner';
+import { resolveVaultImage } from '../banner/image-resource';
 
 const DEFAULT_DIM = 40;
 

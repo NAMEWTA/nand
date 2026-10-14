@@ -6,7 +6,7 @@ import { t } from '../../../../shared/i18n/index';
 import { applyModalTheme } from '../appearance/modal-theme';
 import { cardDocumentPaths, editCardDocuments } from '../../core/board/card-links';
 import { formatFocalPoint } from '../../core/board/focal-point';
-import { resolveVaultImage } from '../banner/banner';
+import { resolveVaultImage } from '../banner/image-resource';
 import { mountFocalEditor } from '../images/focal-editor';
 
 type CardEdit = Pick<DashboardCard, 'title' | 'docs' | 'coverImage' | 'coverPos'>;

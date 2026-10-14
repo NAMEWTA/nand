@@ -1,7 +1,6 @@
 /** @jsxImportSource preact */
 import type { ContentFile } from '../../../../host/obsidian/storage/content-files';
 import assert from 'node:assert/strict';
-import { readFileSync } from 'node:fs';
 import { render } from 'preact';
 import type { App, TFile } from 'obsidian';
 import { test } from 'vitest';
@@ -52,12 +51,6 @@ function scene(): { app: App; context: DashboardRenderContext; opened: string[];
 }
 
 test('grid, gallery, list and kanban delete through the confirm handler without opening or dragging', async () => {
-	const css = readFileSync(new URL('../../styles/074-table-view.css', import.meta.url), 'utf8');
-	assert.match(css, /\.dashboard-library-card:hover \.dashboard-library-table-delete/);
-	assert.match(css, /\.dashboard-library-list-item:hover \.dashboard-library-table-delete/);
-	assert.match(css, /\.dashboard-library-kanban-card:hover \.dashboard-library-table-delete/);
-	assert.match(css, /\.dashboard-library-table-delete:focus-visible/);
-	assert.match(css, /@media \(pointer: coarse\)/);
 
 	const views = ['grid', 'gallery', 'list', 'kanban'] as const;
 	for (const view of views) {

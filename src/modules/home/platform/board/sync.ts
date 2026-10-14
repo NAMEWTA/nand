@@ -470,6 +470,16 @@ export class SyncEngine {
 		this.scheduleDeferredWrite();
 	}
 
+	/** React subscribers need the updated snapshot as well as the durable write. */
+	async toggleCollapseTask(cardId: string, taskPath: TaskPath): Promise<void> {
+		this.assertOpen();
+		if (!this.data) return;
+		this.data = this.mapCardTasks(this.data, cardId, (tasks) =>
+			updateTaskAt(tasks, taskPath, (task) => ({ ...task, collapsed: !task.collapsed })),
+		);
+		await this.writeToDisk();
+	}
+
 	async updateCard(
 		cardId: string,
 		updates: Partial<

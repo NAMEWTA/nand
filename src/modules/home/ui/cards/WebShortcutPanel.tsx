@@ -6,7 +6,7 @@ import { Icon } from '../../../../ui/primitives/Icon';
 import type { CardBodyProps } from './TaskPanel';
 
 export function WebShortcutPanel({ card, callbacks, context }: CardBodyProps) {
-	const open = (target = card.openIn ?? 'modal') => callbacks.onOpenWeb?.(card.url, target);
+	const open = (target = card.openIn ?? 'modal') => target==='system' ? context.root.win.open(normalizeWebUrl(card.url)??'about:blank','_blank') : callbacks.onOpenWeb?.(card.url, target);
 	return (
 		<div class="nand-browser-shortcut">
 			<button class="nand-ui-btn-ghost nand-browser-shortcut-open" onClick={() => open()}>

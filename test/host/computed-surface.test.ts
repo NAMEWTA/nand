@@ -53,12 +53,12 @@ test('a 288px desktop column keeps the quick note at content height', () => {
 	const measured = chrome<{ height: number; flex: string; main: number; gap: number }>(`<!doctype html>
 <html><head><link rel="stylesheet" href="${styles}"></head>
 <body>
-<div class="nand-dashboard-root" data-layout="stacked" style="width:288px;height:1950px">
-  <div class="dashboard-main">
-    <div class="dashboard-quicknote"><span class="dashboard-quicknote-chip">Today</span><span>capture</span></div>
-    <div class="dashboard-scroll-region"><div class="next">week</div></div>
+<div id="nand-ui-root"><div class="nand-ui nand-dashboard-root flex h-full min-h-0 flex-col" data-layout="stacked" style="width:288px;height:1950px">
+  <div class="dashboard-main flex min-h-0 flex-1 flex-col gap-2.5 overflow-hidden px-4 pt-2">
+    <div class="dashboard-quicknote flex shrink-0 items-center gap-2 px-3 py-2"><span class="dashboard-quicknote-chip">Today</span><span>capture</span></div>
+    <div class="dashboard-stacked-scroll min-h-0 flex-1 overflow-y-auto"><div class="next">week</div></div>
   </div>
-</div>
+</div></div>
 <pre id="out"></pre>
 <script>
 const q = document.querySelector('.dashboard-quicknote');

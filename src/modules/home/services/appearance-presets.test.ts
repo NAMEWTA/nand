@@ -30,7 +30,7 @@ test('named snapshots whitelist all theme/decor fields and apply both namespaces
 	const f = await fixture();
 	await Promise.all([
 		f.theme.update(d => Object.assign(d, { preset: 'eye-care', headings: 'accented', emphasis: 'highlight', accentLight: '#123456', accentDark: '#abcdef', lineHeight: 1.8 })),
-		f.home.update(d => Object.assign(d, { bgImage: 'Images/bg.png', bgFocal: { x: 12, y: 78 }, bgDim: 32, bgBlur: 4, bgSize: 'contain', surfaceOpacity: 72, glassBlur: 6, radiusScale: 19, fontScale: 'large', dashboardFile: 'Keep', workspaceFiles: ['Keep'], wereadApiKey: 'must-not-copy' })),
+		f.home.update(d => Object.assign(d, { bgImage: 'Images/bg.png', bgFocal: { x: 12, y: 78 }, bgDim: 32, bgBlur: 4, bgSize: 'contain', surfaceOpacity: 72, glassBlur: 6, radiusScale: 19, fontScale: 'large', workspaces: {files:['Keep'],names:[''],active:0}, wereadApiKey: 'must-not-copy' })),
 	]);
 	const expectedTheme = structuredClone(f.theme.get()), expectedHome = homeDecor(f.home.get());
 	await f.service.save('  Evening  ');

@@ -162,6 +162,7 @@ function serializeManaged(data: DashboardData): string {
 		if (col.sectionType) {
 			lines.push(`    type: ${col.sectionType}`);
 		}
+		if (col.showCover === false) lines.push('    showCover: false');
 		if (col.pipelineConfig) lines.push(`    pipeline: ${JSON.stringify(col.pipelineConfig)}`);
 		if (col.libraryConfig) {
 			lines.push('    library:');
@@ -370,7 +371,7 @@ function serializeManaged(data: DashboardData): string {
 			if (card.noteStyle) lines.push(`noteStyle: ${card.noteStyle}`);
 
 			if (card.type === 'generic') lines.push('type: generic');
-			if (card.type === 'web') lines.push('type: web', `openIn: ${card.openIn === 'tab' ? 'tab' : 'modal'}`);
+			if (card.type === 'web') lines.push('type: web', `openIn: ${card.openIn === 'system' ? 'system' : card.openIn === 'tab' ? 'tab' : 'modal'}`);
 
 			if (card.type === 'task') {
 				lines.push(`type: task`);

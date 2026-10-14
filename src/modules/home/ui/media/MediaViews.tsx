@@ -4,7 +4,7 @@ import { type ContentFile } from '../../../../host/obsidian/storage/content-file
 import { useLayoutEffect, useRef, useState } from 'preact/hooks';
 import { t } from '../../../../shared/i18n';
 import { Icon } from '../../../../ui/primitives/Icon';
-import { resolveVaultImage } from '../banner/banner';
+import { resolveVaultImage } from '../banner/image-resource';
 import {
 	formatDate,
 	formatFileSize,

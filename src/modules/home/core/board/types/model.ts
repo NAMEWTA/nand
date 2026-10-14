@@ -18,6 +18,14 @@ export interface CalendarTaskTarget {
 }
 
 export interface DashboardSettings {
+	/** Canonical persisted workspace registry (apex-style indices). */
+	workspaces: { files: string[]; names: string[]; active: number };
+	stylePreset: string;
+	useThemeFont: boolean;
+	sidebarPinned: boolean;
+	bannerCollapsed: boolean;
+	collapsedSections: string[];
+	quickCaptureMode: 'capture' | 'search';
 	/** Global theme + Home decor snapshots, independent of board content. */
 	appearancePresets: AppearancePreset[];
 	activeAppearancePresetId?: string;
@@ -54,6 +62,8 @@ export interface DashboardSettings {
 	pomodoroLongBreakInterval: number;
 	/** Daily pomodoro completion goal (count), shown as "1/8" in KPIs/gauge. */
 	pomodoroDailyGoal: number;
+	pomodoroMode: 'countdown' | 'stopwatch';
+	pomodoroRemindInterval: number;
 	pomodoroAutoStartBreak: boolean;
 	pomodoroSoundEnabled: boolean;
 	/** Floating body-level mini countdown panel shown while a pomodoro runs. */
@@ -239,6 +249,8 @@ export interface QuickCommand {
 }
 
 export const DEFAULT_DASHBOARD_SETTINGS: DashboardSettings = {
+	workspaces: { files: ['.nand/content/dashboard'], names: [''], active: 0 },
+	stylePreset: 'mono', useThemeFont: false, sidebarPinned: false, bannerCollapsed: false, collapsedSections: [], quickCaptureMode: 'capture',
 	appearancePresets: [],
 	dashboardFile: '.nand/content/dashboard',
 	workspaceFiles: ['.nand/content/dashboard'],
@@ -259,6 +271,8 @@ export const DEFAULT_DASHBOARD_SETTINGS: DashboardSettings = {
 	pomodoroLongBreakMinutes: 15,
 	pomodoroLongBreakInterval: 4,
 	pomodoroDailyGoal: 8,
+	pomodoroMode: 'countdown',
+	pomodoroRemindInterval: 25,
 	pomodoroAutoStartBreak: true,
 	pomodoroSoundEnabled: true,
 	pomodoroMiniPanelEnabled: true,
@@ -484,7 +498,7 @@ export type CardSize = 'S' | 'M' | 'L';
 
 export interface DashboardCard {
 	/** Only web shortcut cards use this. */
-	openIn?: 'modal' | 'tab';
+	openIn?: 'modal' | 'tab' | 'system';
 	/** Original note appearance when a note is moved into a mixed sticky section. */
 	noteStyle?: 'cover' | 'plain';
 	id: string;
@@ -805,6 +819,7 @@ export interface PipelineConfig {
 }
 
 export interface DashboardColumn {
+	showCover?: boolean;
 	/** Stable layout identity; assigned on the first explicit layout edit. */
 	id?: string;
 	name: string;

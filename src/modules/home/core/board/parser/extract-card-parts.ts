@@ -244,7 +244,7 @@ function parseCard(block: { title: string; body: string }, columnName: string): 
 		id: metadata.id ?? generateId(block.title, columnName),
 		title: block.title,
 		type: cardType,
-		...(cardType === 'web' ? { openIn: metadata.openIn === 'tab' ? ('tab' as const) : ('modal' as const) } : {}),
+		...(cardType === 'web' ? { openIn: metadata.openIn === 'system' ? ('system' as const) : metadata.openIn === 'tab' ? ('tab' as const) : ('modal' as const) } : {}),
 		noteStyle: metadata.noteStyle === 'cover' || metadata.noteStyle === 'plain' ? metadata.noteStyle : undefined,
 		column: columnName,
 		body: cleanBody,

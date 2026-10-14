@@ -23,6 +23,12 @@ export function isDefinition(value: unknown): value is AutomationDefinition {
 		Number.isFinite(d.updatedAt)
 	))
 		return false;
+	if (d.templateId !== undefined && typeof d.templateId !== 'string') return false;
+	if (
+		d.precheck !== undefined &&
+		(!d.precheck || typeof d.precheck.command !== 'string' || !['powershell', 'bash'].includes(d.precheck.shell))
+	)
+		return false;
 	const schedule = d.schedule;
 	if (!(
 		schedule.kind === 'manual' ||
@@ -31,9 +37,20 @@ export function isDefinition(value: unknown): value is AutomationDefinition {
 	))
 		return false;
 	const action = d.action;
-	if (action.kind === 'script') return typeof action.script === 'string' && typeof action.cwd === 'string' && ['powershell', 'bash'].includes(action.shell);
+	if (action.kind === 'script')
+		return (
+			typeof action.script === 'string' &&
+			typeof action.cwd === 'string' &&
+			['powershell', 'bash'].includes(action.shell)
+		);
 	if (action.kind === 'open-file') return typeof action.path === 'string' && !!action.path;
-	if (action.kind === 'open-url') { try { return ['http:', 'https:'].includes(new URL(action.url).protocol); } catch { return false; } }
+	if (action.kind === 'open-url') {
+		try {
+			return ['http:', 'https:'].includes(new URL(action.url).protocol);
+		} catch {
+			return false;
+		}
+	}
 	if (action.kind === 'obsidian-command') return typeof action.command === 'string' && !!action.command;
 	if (action.kind === 'notify') return typeof action.body === 'string';
 	if (action.kind === 'create-task')
@@ -43,6 +60,7 @@ export function isDefinition(value: unknown): value is AutomationDefinition {
 		typeof action.agentId !== 'string' ||
 		typeof action.prompt !== 'string' ||
 		typeof action.cwd !== 'string' ||
+		(action.extraArgs !== undefined && typeof action.extraArgs !== 'string') ||
 		!['fresh', 'reuse', 'specific'].includes(action.sessionMode)
 	)
 		return false;

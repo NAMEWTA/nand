@@ -1,10 +1,15 @@
-import { Notice, Platform } from 'obsidian';
+import { FileSystemAdapter, Notice, Platform } from 'obsidian';
 import type { ModuleContext } from '../../../app/contracts/module';
 import type { AppWithCommands } from '../../../host/obsidian/obsidian-internal';
 import { deviceId as getDeviceId } from '../../../host/obsidian/storage/device-id';
 import { privateVaultStorage } from '../../../host/obsidian/storage/private-storage';
 import { AutomationError, automationOutcome } from '../../../shared/automation/errors';
-import { isActiveRun, type AutomationDefinition, type AutomationSourcePort, type SourceRef } from '../../../shared/automation/types';
+import {
+	isActiveRun,
+	type AutomationDefinition,
+	type AutomationSourcePort,
+	type SourceRef,
+} from '../../../shared/automation/types';
 import { t } from '../../../shared/i18n/index';
 import { BROWSER_OPEN } from '../../browser/api';
 import { AGENT_SESSIONS } from '../../agent/api';
@@ -13,9 +18,11 @@ import { AUTOMATION_AGENT_RUNTIME, AUTOMATION_SOURCES, type AutomationSource } f
 import { actionAvailability } from '../core/actions/executor';
 import { AutomationService } from '../core/service';
 import { MarkdownAutomationDefinitions } from '../platform/definitions';
+import { createAutomationViewStore, type AutomationViewStore } from './view-store';
 
 export interface AutomationRuntime {
 	readonly service: AutomationService;
+	readonly store: AutomationViewStore;
 	/** Opens the source or run an automation notification points at. */
 	readonly opener: NotificationOpener;
 	/** Active products that store definitions in their documents. */
@@ -35,12 +42,24 @@ export interface AutomationRuntime {
  * and in the documents of contributing products; run history is per device. Timers and vault listeners
  * belong to the module lifetime, so turning the module off stops everything.
  */
-export async function createAutomationRuntime(context: ModuleContext, notify: (request: NotificationRequest) => Promise<void>): Promise<AutomationRuntime> {
+export async function createAutomationRuntime(
+	context: ModuleContext,
+	notify: (request: NotificationRequest) => Promise<void>,
+): Promise<AutomationRuntime> {
 	const { app, shell } = context;
 	const deviceId = getDeviceId(app);
+	const precheck =
+		Platform.isDesktopApp && app.vault.adapter instanceof FileSystemAdapter
+			? (await import('../platform/desktop/precheck')).createPrecheckRunner(
+					app.vault.adapter.getBasePath(),
+					deviceId,
+					app.workspace.containerEl.win,
+				)
+			: undefined;
 	const definitions = new MarkdownAutomationDefinitions(app);
 	const providers = async () => (await context.contributions.collect(AUTOMATION_SOURCES)).map((entry) => entry.value);
-	const owner = async (kind: SourceRef['kind']) => (await providers()).find((provider) => provider.kinds.includes(kind));
+	const owner = async (kind: SourceRef['kind']) =>
+		(await providers()).find((provider) => provider.kinds.includes(kind));
 	const sources: AutomationSourcePort = {
 		list: async () => {
 			// Archive indexing waits for layoutReady; activation must never wait for it.
@@ -64,9 +83,11 @@ export async function createAutomationRuntime(context: ModuleContext, notify: (r
 		},
 		open: async (source) => {
 			// Capture the requesting window before any asynchronous lookup.
-			const ownerWindow = app.workspace.getMostRecentLeaf()?.view.containerEl.win ?? app.workspace.containerEl.win;
+			const ownerWindow =
+				app.workspace.getMostRecentLeaf()?.view.containerEl.win ?? app.workspace.containerEl.win;
 			const provider = await owner(source.kind);
-			if (!provider) throw new AutomationError(source.kind === 'widget' ? 'widgetModuleDisabled' : 'sourceMissing');
+			if (!provider)
+				throw new AutomationError(source.kind === 'widget' ? 'widgetModuleDisabled' : 'sourceMissing');
 			await provider.open(source, ownerWindow);
 		},
 		createTask: async (action, runId) => {
@@ -75,7 +96,11 @@ export async function createAutomationRuntime(context: ModuleContext, notify: (r
 			await provider.createTask(action, runId);
 		},
 	};
-	const openRuns = (resourceId?: string) => shell.open({ feature: 'automations', section: 'runs', resourceId }, app.workspace.getMostRecentLeaf()?.view.containerEl.win);
+	const openRuns = (resourceId?: string) =>
+		shell.open(
+			{ feature: 'automations', section: 'runs', resourceId },
+			app.workspace.getMostRecentLeaf()?.view.containerEl.win,
+		);
 	const opener: NotificationOpener = {
 		canOpen: (record) => !!record.source || !!record.target,
 		open: async (record) => {
@@ -90,13 +115,28 @@ export async function createAutomationRuntime(context: ModuleContext, notify: (r
 		sources,
 		() => context.services.peek(AUTOMATION_AGENT_RUNTIME),
 		async (run, definition) => {
-			if (definition.notifyOn === 'never' || (definition.notifyOn === 'failure' && run.status !== 'failed' && run.status !== 'interrupted')) return;
+			if (
+				definition.notifyOn === 'never' ||
+				(definition.notifyOn === 'failure' && run.status !== 'failed' && run.status !== 'interrupted')
+			)
+				return;
 			const plainNotice = definition.action.kind === 'notify' && run.status === 'succeeded';
 			await notify({
 				id: run.id,
 				title: definition.name,
-				body: plainNotice && definition.action.kind === 'notify' ? definition.action.body : automationOutcome(run),
-				presentation: plainNotice ? undefined : { kind: 'automation-run', status: run.status, message: run.message, errorCode: run.errorCode, errorParams: run.errorParams },
+				body:
+					plainNotice && definition.action.kind === 'notify'
+						? definition.action.body
+						: automationOutcome(run),
+				presentation: plainNotice
+					? undefined
+					: {
+							kind: 'automation-run',
+							status: run.status,
+							message: run.message,
+							errorCode: run.errorCode,
+							errorParams: run.errorParams,
+						},
 				source: definition.source,
 				target: { runId: run.id, automationId: definition.id, terminalId: run.terminalId },
 				channels: definition.channels,
@@ -106,13 +146,21 @@ export async function createAutomationRuntime(context: ModuleContext, notify: (r
 		{
 			definitions,
 			desktop: Platform.isDesktopApp,
+			precheck,
+			vaultName: app.vault.getName(),
 			attachMaterial: async (request, signal) => {
 				if (request.destination.kind !== 'existing') throw new AutomationError('invalid');
 				const sessionId = request.destination.sessionId;
 				const sessions = context.services.peek(AGENT_SESSIONS);
-				const target = (await sessions?.list())?.find(session => session.id === sessionId && session.agentId === request.agentId);
+				const target = (await sessions?.list())?.find(
+					(session) => session.id === sessionId && session.agentId === request.agentId,
+				);
 				if (!sessions || !target?.agentId) throw new AutomationError('sessionMissing');
-				await sessions.attachMaterial(target.id, { title: '', text: request.finalPrompt, files: request.files }, { agentId: target.agentId, signal });
+				await sessions.attachMaterial(
+					target.id,
+					{ title: '', text: request.finalPrompt, files: request.files },
+					{ agentId: target.agentId, signal },
+				);
 			},
 			executor: {
 				execute: async (action) => {
@@ -143,6 +191,7 @@ export async function createAutomationRuntime(context: ModuleContext, notify: (r
 		}
 	};
 	await retry();
+	const view = createAutomationViewStore(service);
 
 	const win = app.workspace.containerEl.win;
 	const tick = () => {
@@ -155,27 +204,50 @@ export async function createAutomationRuntime(context: ModuleContext, notify: (r
 	const changed = (file: { path: string }) => {
 		if (!file.path.endsWith('.md')) return;
 		if (refreshTimer !== undefined) win.clearTimeout(refreshTimer);
-		refreshTimer = win.setTimeout(() => { void service.refresh().catch(console.error); }, 500);
+		refreshTimer = win.setTimeout(() => {
+			void service.refresh().catch(console.error);
+		}, 500);
 	};
 	context.lifetime.registerEvent(app.vault.on('modify', changed));
 	context.lifetime.registerEvent(app.vault.on('create', changed));
 	context.lifetime.registerEvent(app.vault.on('delete', changed));
-	context.lifetime.registerEvent(app.vault.on('rename', (file, old) => { changed({ path: old }); changed(file); }));
-	context.lifetime.register(() => { if (refreshTimer !== undefined) win.clearTimeout(refreshTimer); });
+	context.lifetime.registerEvent(
+		app.vault.on('rename', (file, old) => {
+			changed({ path: old });
+			changed(file);
+		}),
+	);
+	context.lifetime.register(() => {
+		if (refreshTimer !== undefined) win.clearTimeout(refreshTimer);
+	});
 	app.workspace.onLayoutReady(tick);
 
 	const latestRun = (id: string, filter: (run: (typeof service.state.runs)[number]) => boolean = () => true) =>
 		[...service.state.runs].reverse().find((run) => run.automationId === id && filter(run));
 	return {
 		service,
+		store: view.store,
 		opener,
 		sources: providers,
 		retry,
-		actions: () => service.definitions.map((definition: AutomationDefinition) => {
-			const run = latestRun(definition.id);
-			const reason = !service.executionEnabled ? 'automation.moduleOff' : definition.deviceId !== service.deviceId ? 'automation.otherDevice' : actionAvailability(definition.action.kind, 'manual', Platform.isDesktopApp);
-			return { id: definition.id, name: definition.name, status: run?.status, running: !!run && isActiveRun(run), unavailable: reason ? t(reason) : undefined };
-		}),
+		actions: () =>
+			service.definitions
+				.filter((definition) => definition.schedule.kind === 'manual' && !definition.removedAction)
+				.map((definition: AutomationDefinition) => {
+					const run = latestRun(definition.id);
+					const reason = !service.executionEnabled
+						? 'automation.moduleOff'
+						: definition.deviceId !== service.deviceId
+							? 'automation.otherDevice'
+							: actionAvailability(definition.action.kind, 'manual', Platform.isDesktopApp);
+					return {
+						id: definition.id,
+						name: definition.name,
+						status: run?.status,
+						running: !!run && isActiveRun(run),
+						unavailable: reason ? t(reason) : undefined,
+					};
+				}),
 		runAction: async (id) => {
 			await service.refresh();
 			const definition = service.definitions.find((row) => row.id === id);
@@ -191,10 +263,14 @@ export async function createAutomationRuntime(context: ModuleContext, notify: (r
 			if (run?.terminalId && isActiveRun(run)) await service.agent()?.open(run.terminalId);
 			else {
 				const last = latestRun(id);
-				await shell.open({ feature: 'automations', section: last ? 'runs' : 'tasks', resourceId: last?.id }, app.workspace.getMostRecentLeaf()?.view.containerEl.win);
+				await shell.open(
+					{ feature: 'automations', section: last ? 'runs' : 'tasks', resourceId: last?.id },
+					app.workspace.getMostRecentLeaf()?.view.containerEl.win,
+				);
 			}
 		},
 		shutdown: async (reason) => {
+			view.dispose();
 			try {
 				if (reason === 'disabled') await service.setExecutionEnabled(false);
 				await service.shutdown();

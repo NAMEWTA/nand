@@ -18,6 +18,8 @@ import { targetKey } from '../navigation-state';
 import { useShellCloseAutoFocus } from '../interaction-lifetime';
 export interface SidePanelProps {
 	title: string;
+	/** The page supplies its own navigation header and content. */
+	custom?: boolean;
 	model?: PanelModel;
 	current: WorkbenchTarget;
 	customRef: Ref<HTMLDivElement>;
@@ -25,7 +27,7 @@ export interface SidePanelProps {
 	onClose?: () => void;
 	report: (error: unknown) => void;
 }
-export function SidePanel({ title, model, current, customRef, onNavigate, onClose, report }: SidePanelProps) {
+export function SidePanel({ title, custom, model, current, customRef, onNavigate, onClose, report }: SidePanelProps) {
 	const closeAutoFocus = useShellCloseAutoFocus();
 	const id = useId();
 	const [query, setQuery] = useState('');
@@ -55,10 +57,11 @@ export function SidePanel({ title, model, current, customRef, onNavigate, onClos
 		<aside
 			data-shell-region="panel"
 			tabIndex={-1}
-			aria-labelledby={id}
+			aria-labelledby={custom ? undefined : id}
+			aria-label={custom ? title : undefined}
 			className="nand-panel flex h-full min-h-0 min-w-0 flex-col border-r border-sidebar-border bg-sidebar"
 		>
-			<header className="flex h-11 shrink-0 items-center gap-2 px-3">
+			{!custom && <header className="flex h-11 shrink-0 items-center gap-2 px-3">
 				<h2 id={id} className="min-w-0 flex-1 truncate text-sm font-semibold">
 					{title}
 				</h2>
@@ -77,7 +80,7 @@ export function SidePanel({ title, model, current, customRef, onNavigate, onClos
 						<TooltipContent>{t('workbench.closeNavigation')}</TooltipContent>
 					</Tooltip>
 				)}
-			</header>
+			</header>}
 			{model?.primary && (
 				<div className="px-3 pb-2">
 					<Button

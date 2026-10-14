@@ -1,23 +1,8 @@
-import { installPreactMiniDom } from './preact-mini-dom';
 import { strict as assert } from 'node:assert';
-import type { App } from 'obsidian';
-import { El, findByClass } from './mini-dom';
-installPreactMiniDom();
 import { parse, serialize } from '../src/modules/home/core/board/parser/index';
-import { renderBanner, QUOTE_FONT_GROUPS, firstFontName } from '../src/modules/home/ui/banner/banner';
-import type { BannerData } from '../src/modules/home/core/board/types/index';
+import { QUOTE_FONT_GROUPS, firstFontName } from '../src/modules/home/ui/banner/quote-fonts';
 
-// Banner quote font: frontmatter round-trip (incl. CJK names with quotes)
-// and renderBanner applying quoteFont to both quote and author elements.
-
-function makeApp(): App {
-	return {
-		vault: {
-			getFileByPath: () => null,
-			adapter: {},
-		},
-	} as unknown as App;
-}
+// Format/font catalog checks; React rendering assertions live in Banner.dom.test.tsx.
 
 const md = [
 	'---',
@@ -28,8 +13,6 @@ const md = [
 	'',
 	'## 板块',
 ].join('\n');
-
-const banner = (extra: Partial<BannerData>): BannerData => ({ ...parse(md).banner, ...extra });
 
 function main(): void {
 	// 1. serialize -> parse round-trip keeps quoteFont.
@@ -56,38 +39,7 @@ function main(): void {
 		assert.ok(!out.includes('quoteFont'), '3: key omitted when unset');
 	}
 
-	// 4. renderBanner applies the font to quote and author.
-	{
-		const host = new El('div');
-		renderBanner(host as unknown as HTMLElement, banner({ quoteFont: 'Georgia' }), () => {}, makeApp());
-		const quote = findByClass(host, 'dashboard-banner-quote')[0];
-		const author = findByClass(host, 'dashboard-banner-author')[0];
-		assert.ok(quote && author, '4: quote and author rendered');
-		assert.equal(
-			(quote as unknown as { style: { fontFamily?: string } }).style.fontFamily,
-			'Georgia',
-			'4: quote font set',
-		);
-		assert.equal(
-			(author as unknown as { style: { fontFamily?: string } }).style.fontFamily,
-			'Georgia',
-			'4: author font set',
-		);
-	}
-
-	// 5. No quoteFont -> no inline fontFamily (inherits theme).
-	{
-		const host = new El('div');
-		renderBanner(host as unknown as HTMLElement, banner({}), () => {}, makeApp());
-		const quote = findByClass(host, 'dashboard-banner-quote')[0];
-		assert.equal(
-			(quote as unknown as { style: { fontFamily?: string } }).style.fontFamily,
-			'',
-			'5: no inline font when unset',
-		);
-	}
-
-	// 6. Dropdown catalog: both locales' groups present, values are unique
+	// 4. Dropdown catalog: both locales' groups present, values are unique
 	//    non-empty CSS stacks ending in a generic family, labels non-empty.
 	{
 		const groups = QUOTE_FONT_GROUPS.map((g) => g.labelKey);
@@ -108,14 +60,14 @@ function main(): void {
 		assert.ok(kaiti, '6: kaiti stack spans macOS and Windows names');
 	}
 
-	// 7. firstFontName labels hand-typed values for the dropdown.
+	// 5. firstFontName labels hand-typed values for the dropdown.
 	{
 		assert.equal(firstFontName('"Kaiti SC","KaiTi",serif'), 'Kaiti SC', '7: leading quoted family wins');
 		assert.equal(firstFontName('Georgia,serif'), 'Georgia', '7: bare family extracted');
 		assert.equal(firstFontName('  楷体  '), '楷体', '7: single bare name trimmed');
 	}
 
-	console.log('verify-banner-quote-font: all 7 checks passed');
+	console.log('verify-banner-quote-font: all 5 checks passed');
 }
 
 function valuesHas(values: Set<string>, pred: (v: string) => boolean): boolean {

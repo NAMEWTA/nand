@@ -12,6 +12,7 @@ import { checkAccountTranscript } from '../platform/desktop/agents/transcript';
 import { accountArgs } from '../platform/desktop/agents/account-args';
 import { isCwdInsideVault } from '../platform/desktop/history/scope';
 import { AutomationError } from '../../../shared/automation/errors';
+import { validatedExtraArgs } from '../../../shared/automation/extra-args';
 import type {
 	AgentRunHandle,
 	AgentRuntimePort,
@@ -411,7 +412,7 @@ export class TerminalAutomationRuntime implements AgentRuntimePort {
 				const args = automationArgs(
 					id,
 					action.prompt,
-					accountArgs(id, launchArgs(settings, id), env),
+					[...accountArgs(id, launchArgs(settings, id), env), ...(action.sessionMode === 'reuse' ? [] : validatedExtraArgs(action.agentId, action.extraArgs ?? ''))],
 					action.sessionMode === 'specific' ? action.session : undefined,
 				);
 				const argv = [command, ...args];

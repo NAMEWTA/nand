@@ -1,4 +1,4 @@
-import { Menu, Notice, Platform, type App } from 'obsidian';
+import { Notice, Platform, type App } from 'obsidian';
 import { SessionMaterialService } from './session-material';
 import type { ModuleContext } from '../../../app/contracts/module';
 import type { WorkbenchTarget } from '../../../app/contracts/workbench';
@@ -10,10 +10,14 @@ import { AGENT_CATALOG, getAgent } from '../core/launch/catalog';
 import type { AgentId } from '../core/launch/types';
 import { AgentUsageSource } from '../core/launch/usage-source';
 import type { VaultSession, VaultSessionAgent } from '../core/history/types';
-import { activate, activeTab, canSplit, openTab, removeSession, sessionsOf, split, tabOf, type SplitDirection } from '../core/terminal/layout';
+import type { SplitDirection } from '../core/terminal/layout';
+import { WorkspaceService } from './workspace-service';
+import { createWorkspaceStore } from './workspace-store';
+import { privateVaultStorage } from '../../../host/obsidian/storage/private-storage';
+import type { ResumeInfo } from '../core/workspace/model';
 import { splitArgs } from '../core/launch/flags';
 import type { LaunchPreset, ShellChoice, TerminalSettings } from '../core/terminal/settings';
-import { absolutePluginDir } from '../platform/desktop/agents/accounts';
+import { accountEnv, absolutePluginDir } from '../platform/desktop/agents/accounts';
 import { readUsageSnapshots } from '../platform/desktop/agents/usage';
 import { AutomationHooks } from '../platform/desktop/hooks/automation-hooks';
 import { BinaryError, ensureHelper } from '../platform/desktop/pty/binary';
@@ -39,7 +43,13 @@ function cssColor(element: HTMLElement, property: string): string {
 	const value = element.win.getComputedStyle(element).getPropertyValue(property);
 	const match = /rgba?\(\s*(\d+)[\s,]+(\d+)[\s,]+(\d+)/.exec(value);
 	if (!match) return /^#[0-9a-f]{6}$/i.test(value.trim()) ? value.trim() : '';
-	return '#' + match.slice(1, 4).map((part) => Number(part).toString(16).padStart(2, '0')).join('');
+	return (
+		'#' +
+		match
+			.slice(1, 4)
+			.map((part) => Number(part).toString(16).padStart(2, '0'))
+			.join('')
+	);
 }
 
 export type Placement = { split: { from: string; direction: SplitDirection } } | { tab: true };
@@ -47,7 +57,6 @@ export type Placement = { split: { from: string; direction: SplitDirection } } |
 /** Dialogs the controller shows; supplied by the module (the UI code loads on first use). */
 export interface ControllerDialogs {
 	confirm(app: App, message: string): Promise<boolean>;
-	switchSession(controller: AgentController): void;
 }
 
 /**
@@ -56,6 +65,7 @@ export interface ControllerDialogs {
  */
 export class AgentController {
 	readonly sessions: TerminalSessions;
+	readonly workspace: WorkspaceService;
 	readonly usage: AgentUsageSource;
 	readonly runtime: TerminalAutomationRuntime;
 	readonly prompts: PromptRunner;
@@ -73,7 +83,11 @@ export class AgentController {
 	private colorsReadAt = 0;
 	private installing?: Promise<string>;
 
-	constructor(private readonly context: ModuleContext, readonly settings: SettingsHandle<TerminalSettings>, private readonly dialogs: ControllerDialogs) {
+	constructor(
+		private readonly context: ModuleContext,
+		readonly settings: SettingsHandle<TerminalSettings>,
+		private readonly dialogs: ControllerDialogs,
+	) {
 		const app = context.app;
 		const win = app.workspace.containerEl.win;
 		this.hooks = new AutomationHooks(win, () => ({ vault: this.vaultPath() ?? '', device: deviceId(app) }));
@@ -91,9 +105,50 @@ export class AgentController {
 					if (next) activity(next, event.data);
 				}),
 		});
+		this.workspace = new WorkspaceService(
+			createWorkspaceStore(privateVaultStorage(app), deviceId(app), win, report),
+			this.sessions,
+			{
+				shell: async (options) => {
+					const settings = this.settings.get(),
+						shell = resolveShell(options.shell ?? settings.shell, settings);
+					return this.sessions.create({
+						kind: 'shell',
+						file: shell.file,
+						args: shell.args,
+						title: shell.title,
+						cwd: options.cwd ?? sessionDirectory(this.vaultPath(), settings.startInVault),
+						env: {},
+					});
+				},
+				agent: async (id, options) => {
+					let session: TerminalSession | undefined;
+					await launchAgent(
+						this.captureLaunchHost(async (request) => {
+							session = await this.sessions.create({ ...request, kind: 'agent', hooks: true });
+							if (options.prompt) void this.typeWhenReady(session, options.prompt);
+						}),
+						id,
+						options,
+					);
+					return session;
+				},
+				resume: (info, title) => this.restoreSession(info, title),
+				account: (id) => this.settings.get().agents.agents[id].accountId,
+				report,
+			},
+		);
+		context.lifetime.register(this.workspace.store.subscribe(() => this.changed()));
+		const idleTimer = win.setInterval(() => this.workspace.refreshStates(), 60_000);
+		context.lifetime.register(() => win.clearInterval(idleTimer));
 		context.lifetime.register(this.sessions.subscribe(() => this.changed()));
 		this.usage = new AgentUsageSource({
-			read: () => readUsageSnapshots(this.usageAgents(), { settings: this.settings.get().agents, vault: this.vaultPath() ?? '', device: deviceId(app) }),
+			read: () =>
+				readUsageSnapshots(this.usageAgents(), {
+					settings: this.settings.get().agents,
+					vault: this.vaultPath() ?? '',
+					device: deviceId(app),
+				}),
 			active: () => true,
 			delay: (failures) => usageDelay(this.settings.get().agents.usageRefreshSec, failures),
 			now: () => Date.now(),
@@ -102,12 +157,14 @@ export class AgentController {
 		});
 		this.usage.setPinned(this.usagePinned());
 		context.lifetime.register(this.usage.subscribe(() => this.changed()));
-		context.lifetime.register(this.settings.subscribe(() => {
-			this.usage.setPinned(this.usagePinned());
-			this.usage.invalidate();
-			for (const session of this.sessions.list()) session.setScrollback(this.settings.get().scrollback);
-			this.changed();
-		}));
+		context.lifetime.register(
+			this.settings.subscribe(() => {
+				this.usage.setPinned(this.usagePinned());
+				this.usage.invalidate();
+				for (const session of this.sessions.list()) session.setScrollback(this.settings.get().scrollback);
+				this.changed();
+			}),
+		);
 		this.runtime = new TerminalAutomationRuntime({
 			app,
 			pluginDir: context.manifest.dir ?? '',
@@ -119,9 +176,18 @@ export class AgentController {
 				this.show(id);
 				await this.open({ feature: 'terminal', section: 'running', resourceId: id });
 			},
-			shell: (kind) => resolveShell(kind === 'powershell' ? (Platform.isWin ? 'powershell' : 'pwsh') : 'bash', this.settings.get()),
+			shell: (kind) =>
+				resolveShell(
+					kind === 'powershell' ? (Platform.isWin ? 'powershell' : 'pwsh') : 'bash',
+					this.settings.get(),
+				),
 		});
-		this.prompts = new PromptRunner(this.runtime, () => this.vaultPath() ?? '', async () => (await context.contributions.collect(AGENT_RUN_CONTEXTS)).map(item => item.value), win);
+		this.prompts = new PromptRunner(
+			this.runtime,
+			() => this.vaultPath() ?? '',
+			async () => (await context.contributions.collect(AGENT_RUN_CONTEXTS)).map((item) => item.value),
+			win,
+		);
 		this.materials = new SessionMaterialService(this);
 	}
 
@@ -193,12 +259,18 @@ export class AgentController {
 	/** Agents turned on in settings, in catalog order. */
 	enabledAgents(): Array<{ id: AgentId; title: string }> {
 		const agents = this.settings.get().agents.agents;
-		return AGENT_CATALOG.filter((agent) => agents[agent.id]?.enabled).map((agent) => ({ id: agent.id, title: agent.title }));
+		return AGENT_CATALOG.filter((agent) => agents[agent.id]?.enabled).map((agent) => ({
+			id: agent.id,
+			title: agent.title,
+		}));
 	}
 
 	usageAgents(): AgentId[] {
 		const { agents } = this.settings.get().agents;
-		return AGENT_CATALOG.filter((agent) => agent.usage !== 'none' && agents[agent.id]?.enabled !== false && agents[agent.id]?.showUsage !== false).map((agent) => agent.id);
+		return AGENT_CATALOG.filter(
+			(agent) =>
+				agent.usage !== 'none' && agents[agent.id]?.enabled !== false && agents[agent.id]?.showUsage !== false,
+		).map((agent) => agent.id);
 	}
 
 	usagePinned(): boolean {
@@ -219,13 +291,20 @@ export class AgentController {
 			const body = this.app.workspace.containerEl.doc.body;
 			this.colors = {
 				foreground: cssColor(body, 'color') || this.colors.foreground,
-				background: cssColor(this.app.workspace.containerEl, 'background-color') || cssColor(body, 'background-color') || this.colors.background,
+				background:
+					cssColor(this.app.workspace.containerEl, 'background-color') ||
+					cssColor(body, 'background-color') ||
+					this.colors.background,
 				cursor: cssColor(body, 'caret-color') || cssColor(body, 'color') || this.colors.cursor,
 			};
 		}
 		return {
-			foreground: settings.useObsidianTheme ? this.colors.foreground : settings.foreground || this.colors.foreground,
-			background: settings.useObsidianTheme ? this.colors.background : settings.background || this.colors.background,
+			foreground: settings.useObsidianTheme
+				? this.colors.foreground
+				: settings.foreground || this.colors.foreground,
+			background: settings.useObsidianTheme
+				? this.colors.background
+				: settings.background || this.colors.background,
 			cursor: this.colors.cursor,
 		};
 	}
@@ -243,14 +322,27 @@ export class AgentController {
 					offline: this.settings.get().offline,
 					progress: (state) => {
 						notice?.hide();
-						notice = new Notice(t(state === 'downloading' ? 'agent.helper.downloading' : 'agent.helper.verifying'), 0);
+						notice = new Notice(
+							t(state === 'downloading' ? 'agent.helper.downloading' : 'agent.helper.verifying'),
+							0,
+						);
 					},
 				});
 			} catch (error) {
-				const message = error instanceof BinaryError
-					? t(error.code === 'http' && error.detail?.status === 404 ? 'agent.helper.unpublished' : `agent.helper.${error.code}`, {
-						status: error.detail?.status ?? 0, version: this.context.manifest.version,
-					}) : error instanceof Error ? error.message : String(error);
+				const message =
+					error instanceof BinaryError
+						? t(
+								error.code === 'http' && error.detail?.status === 404
+									? 'agent.helper.unpublished'
+									: `agent.helper.${error.code}`,
+								{
+									status: error.detail?.status ?? 0,
+									version: this.context.manifest.version,
+								},
+							)
+						: error instanceof Error
+							? error.message
+							: String(error);
 				if (error instanceof BinaryError) console.warn('[NAND terminal helper]', error.code, error.detail);
 				new Notice(t('agent.helper.failed', { message }), 10_000);
 				throw error;
@@ -276,22 +368,21 @@ export class AgentController {
 	/** Put a session on screen: its tab becomes active (a new tab when it has none). */
 	show(id: string): void {
 		const session = this.sessions.get(id);
-		if (!session) return;
-		const state = this.sessions.tabs;
-		this.sessions.setTabs(tabOf(state, id) ? activate(state, id) : openTab(state, `tab-${crypto.randomUUID()}`, id));
-		this.sessions.focus(id);
+		if (session) {
+			this.workspace.attach(session);
+			this.workspace.focusSession(id);
+		}
 	}
 
-	private place(session: TerminalSession, placement: Placement): void {
-		let state = this.sessions.tabs;
-		if ('split' in placement && canSplit(state, placement.split.from)) state = split(state, placement.split.from, placement.split.direction, session.id);
-		else state = openTab(state, `tab-${crypto.randomUUID()}`, session.id);
-		this.sessions.setTabs(state);
-		this.sessions.focus(session.id);
+	private place(session: TerminalSession, _placement: Placement): void {
+		this.workspace.attach(session);
 	}
 
 	/** Start a session from a launch request and show it. */
-	async start(request: LaunchRequest & { kind?: 'shell' | 'agent' | 'preset'; input?: string }, placement: Placement = { tab: true }): Promise<TerminalSession> {
+	async start(
+		request: LaunchRequest & { kind?: 'shell' | 'agent' | 'preset'; input?: string },
+		placement: Placement = { tab: true },
+	): Promise<TerminalSession> {
 		const session = await this.sessions.create({
 			kind: request.kind ?? (request.agentId ? 'agent' : 'shell'),
 			title: request.title,
@@ -312,7 +403,12 @@ export class AgentController {
 	private async typeWhenReady(session: TerminalSession, text: string): Promise<void> {
 		const win = this.app.workspace.containerEl.win;
 		const deadline = Date.now() + 5000;
-		while (session.running && Date.now() < deadline && !session.inputReady() && session.prompts().lines.length === 0) {
+		while (
+			session.running &&
+			Date.now() < deadline &&
+			!session.inputReady() &&
+			session.prompts().lines.length === 0
+		) {
 			await new Promise((resolve) => win.setTimeout(resolve, 100));
 		}
 		if (!session.running) return;
@@ -325,25 +421,51 @@ export class AgentController {
 			app: this.app,
 			getVaultPath: () => this.vaultPath(),
 			getAgentSettings: () => this.settings.get().agents,
-			saveAgentSettings: (agents) => this.settings.update((draft) => { draft.agents = agents; }),
-			start: async (request) => { await this.start(request, placement); },
+			saveAgentSettings: (agents) =>
+				this.settings.update((draft) => {
+					draft.agents = agents;
+				}),
+			start: async (request) => {
+				await this.start(request, placement);
+			},
 		};
 	}
 
 	async newShell(choice?: ShellChoice, placement: Placement = { tab: true }): Promise<TerminalSession | undefined> {
-		const settings = this.settings.get();
-		const shell = resolveShell(choice ?? settings.shell, settings);
-		return this.start({ kind: 'shell', file: shell.file, args: shell.args, cwd: sessionDirectory(this.vaultPath(), settings.startInVault), env: {}, title: shell.title }, placement);
+		if ('split' in placement) {
+			await this.workspace.splitPane(placement.split.from, placement.split.direction);
+			return this.target();
+		}
+		const id = await this.workspace.newTerminal({ shell: choice });
+		await this.open();
+		return id ? this.sessions.get(id) : undefined;
 	}
 
-	async newAgent(agentId: AgentId, placement: Placement = { tab: true }): Promise<void> {
-		await launchAgent(this.launchHost(placement), agentId);
+	async newAgent(agentId: AgentId, _placement: Placement = { tab: true }): Promise<void> {
+		await this.workspace.newAgent(agentId);
+		await this.open();
 	}
 
 	async newPreset(preset: LaunchPreset, placement: Placement = { tab: true }): Promise<TerminalSession | undefined> {
 		const settings = this.settings.get();
-		const shell = preset.program.trim() ? { file: preset.program.trim(), args: splitArgs(preset.args), title: preset.name } : resolveShell(preset.shell, { customShellPath: settings.customShellPath, shellArgs: preset.args || settings.shellArgs });
-		return this.start({ kind: 'preset', file: shell.file, args: shell.args, cwd: sessionDirectory(this.vaultPath(), true, preset.cwd), env: {}, title: preset.name, input: preset.input }, placement);
+		const shell = preset.program.trim()
+			? { file: preset.program.trim(), args: splitArgs(preset.args), title: preset.name }
+			: resolveShell(preset.shell, {
+					customShellPath: settings.customShellPath,
+					shellArgs: preset.args || settings.shellArgs,
+				});
+		return this.start(
+			{
+				kind: 'preset',
+				file: shell.file,
+				args: shell.args,
+				cwd: sessionDirectory(this.vaultPath(), true, preset.cwd),
+				env: {},
+				title: preset.name,
+				input: preset.input,
+			},
+			placement,
+		);
 	}
 
 	/** Resume a conversation from native history in its CLI. */
@@ -351,7 +473,10 @@ export class AgentController {
 		let env: Record<string, string> = {};
 		try {
 			const parsed: unknown = JSON.parse(row.accountKey || '{}');
-			if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) env = Object.fromEntries(Object.entries(parsed).filter((entry): entry is [string, string] => typeof entry[1] === 'string'));
+			if (parsed && typeof parsed === 'object' && !Array.isArray(parsed))
+				env = Object.fromEntries(
+					Object.entries(parsed).filter((entry): entry is [string, string] => typeof entry[1] === 'string'),
+				);
 		} catch {
 			env = {};
 		}
@@ -369,43 +494,59 @@ export class AgentController {
 
 	/** Split a pane with a new session of the default shell. */
 	async splitSession(id: string, direction: SplitDirection): Promise<void> {
-		if (!canSplit(this.sessions.tabs, id)) {
-			new Notice(t('agent.splitLimit'));
-			return;
-		}
-		await this.newShell(undefined, { split: { from: id, direction } });
+		await this.workspace.splitPane(id, direction);
 	}
-
-	/** End a session (after confirmation when it is running) and remove its pane. */
 	async closeSession(id: string, confirmRunning = true): Promise<void> {
-		const session = this.sessions.get(id);
-		if (!session) return;
-		if (session.running && confirmRunning && !(await this.confirm(t('agent.endConfirm', { title: session.title })))) return;
-		this.sessions.setTabs(removeSession(this.sessions.tabs, id));
-		this.sessions.remove(id);
+		await this.workspace.closePane(id, (message) =>
+			confirmRunning ? this.confirm(message) : Promise.resolve(true),
+		);
 	}
-
 	async closeTab(tabId: string): Promise<void> {
-		const tab = this.sessions.tabs.tabs.find((item) => item.id === tabId);
-		if (!tab) return;
-		const ids = sessionsOf(tab.root);
-		const running = ids.filter((id) => this.sessions.get(id)?.running).length;
-		if (running && !(await this.confirm(t('agent.closeTabConfirm', { count: running })))) return;
-		for (const id of ids) {
-			this.sessions.setTabs(removeSession(this.sessions.tabs, id));
-			this.sessions.remove(id);
-		}
+		await this.workspace.close(tabId, (message) => this.confirm(message));
 	}
-
 	private confirm(message: string): Promise<boolean> {
 		return this.dialogs.confirm(this.app, message);
 	}
-
-	/** The session that commands send text to: the focused pane of the active tab, else the latest running one. */
 	target(): TerminalSession | undefined {
-		const tab = activeTab(this.sessions.tabs);
-		const focused = tab ? this.sessions.get(tab.focused) : undefined;
+		const tab = this.workspace.active;
+		const focused = tab?.kind === 'terminal' ? this.sessions.get(tab.focusedSessionId) : undefined;
 		return focused?.running ? focused : this.sessions.focused;
+	}
+
+	private captureLaunchHost(start: (request: LaunchRequest) => Promise<void>): LaunchHost {
+		return { ...this.launchHost({ tab: true }), start };
+	}
+	private async restoreSession(info: ResumeInfo, title: string): Promise<TerminalSession | undefined> {
+		if (!info.agentId || !info.nativeSessionId) throw new Error(t('agent.sessionMissing'));
+		const vault = this.vaultPath();
+		if (!vault) throw new Error(t('agent.vaultMissing'));
+		const env = await accountEnv(getAgent(info.agentId), info.accountId ?? '', vault, deviceId(this.app), false);
+		let transcriptPath = info.transcriptPath;
+		if (!transcriptPath) {
+			const history = this.history();
+			await history.scan();
+			const page = await history.query(info.nativeSessionId, 0, undefined, 'all');
+			transcriptPath = page.rows.find(
+				(row) => row.sessionId === info.nativeSessionId && row.cwd === info.cwd,
+			)?.transcriptPath;
+		}
+		if (!transcriptPath) throw new Error(t('agent.sessionMissing'));
+		let result: TerminalSession | undefined;
+		await resumeAgent(
+			this.captureLaunchHost(async (request) => {
+				result = await this.sessions.create({ ...request, kind: 'agent', hooks: true });
+			}),
+			{
+				agentId: info.agentId,
+				sessionId: info.nativeSessionId,
+				cwd: info.cwd,
+				title,
+				transcriptPath,
+				modifiedAtMs: 0,
+				env,
+			},
+		);
+		return result;
 	}
 
 	/** Paste into one session and do not press Enter. */
@@ -429,23 +570,60 @@ export class AgentController {
 		return true;
 	}
 
-	/** "New session" menu: shells, enabled agents and presets. */
-	newSessionMenu(): Menu {
-		const menu = new Menu();
-		for (const shell of this.shells()) menu.addItem((item) => item.setTitle(shell.choice === 'default' ? t('agent.shell') : shell.title).setIcon('terminal').onClick(() => { void this.newShell(shell.choice).catch(report); }));
-		const agents = AGENT_CATALOG.filter((agent) => this.settings.get().agents.agents[agent.id]?.enabled);
-		if (agents.length) menu.addSeparator();
-		for (const agent of agents) menu.addItem((item) => item.setTitle(agent.title).setIcon('bot').onClick(() => { void this.newAgent(agent.id).catch(report); }));
-		const presets = this.settings.get().presets;
-		if (presets.length) menu.addSeparator();
-		for (const preset of presets) menu.addItem((item) => item.setTitle(preset.name).setIcon(preset.icon || 'terminal').onClick(() => { void this.newPreset(preset).catch(report); }));
-		return menu;
-	}
-
 	/** Palette commands (removed with the module). */
 	registerCommands(): void {
 		const add = this.context.commands.add.bind(this.context.commands);
-		add({ id: 'terminal-new', name: t('agent.cmd.newShell'), nameKey: 'agent.cmd.newShell', callback: () => { void this.newShell().catch(report); } });
+		for (const action of [
+			'newAgent',
+			'newBrowser',
+			'newMenu',
+			'close',
+			'reopen',
+			'next',
+			'previous',
+			'recent',
+			'splitRight',
+			'splitDown',
+		] as const) {
+			const nameKey = `agent.workspace.cmd.${action}`;
+			add({
+				id: `workspace-${action}`,
+				name: t(nameKey),
+				nameKey,
+				callback: () => {
+					void (async () => {
+						await this.open();
+						const tab = this.workspace.active;
+						if (action === 'newAgent') {
+							const agent = this.runtime.listAgents().find((a) => a.enabled && a.installed);
+							if (agent) await this.workspace.newAgent(agent.id);
+						} else if (action === 'newBrowser') this.workspace.newBrowser();
+						else if (action === 'newMenu') this.workspace.requestMenu();
+						else if (action === 'close' && tab && !tab.pinned) await this.closeTab(tab.id);
+						else if (action === 'reopen') this.workspace.reopen();
+						else if (action === 'next' || action === 'previous')
+							this.workspace.next(action === 'next' ? 1 : -1);
+						else if (action === 'recent') this.workspace.recent();
+						else if (tab && (action === 'splitRight' || action === 'splitDown')) {
+							const group = this.workspace.group(tab.id);
+							if (group)
+								this.workspace.move(tab.id, {
+									split: action === 'splitRight' ? 'right' : 'down',
+									ofGroupId: group.id,
+								});
+						}
+					})().catch(report);
+				},
+			});
+		}
+		add({
+			id: 'terminal-new',
+			name: t('agent.cmd.newShell'),
+			nameKey: 'agent.cmd.newShell',
+			callback: () => {
+				void this.newShell().catch(report);
+			},
+		});
 		for (const agent of AGENT_CATALOG) {
 			add({
 				id: `terminal-new-${agent.id}`,
@@ -457,8 +635,20 @@ export class AgentController {
 				},
 			});
 		}
-		add({ id: 'terminal-switch', name: t('agent.cmd.switch'), nameKey: 'agent.cmd.switch', callback: () => this.dialogs.switchSession(this) });
-		const sendCommand = (id: string, nameKey: string, read: () => string | null | Promise<string | null>, missingKey: string) =>
+		add({
+			id: 'terminal-switch',
+			name: t('agent.cmd.switch'),
+			nameKey: 'agent.cmd.switch',
+			callback: () => {
+				void this.open().then(() => this.workspace.requestMenu());
+			},
+		});
+		const sendCommand = (
+			id: string,
+			nameKey: string,
+			read: () => string | null | Promise<string | null>,
+			missingKey: string,
+		) =>
 			add({
 				id,
 				name: t(nameKey),
@@ -470,29 +660,77 @@ export class AgentController {
 					});
 				},
 			});
-		sendCommand('terminal-send-selection', 'agent.cmd.sendSelection', () => this.app.workspace.activeEditor?.editor?.getSelection() || null, 'agent.noSelection');
-		sendCommand('terminal-send-note', 'agent.cmd.sendNote', async () => {
-			const file = this.app.workspace.getActiveFile();
-			if (!file) return null;
-			const editor = this.app.workspace.activeEditor;
-			return editor?.file === file && editor.editor ? editor.editor.getValue() : this.app.vault.cachedRead(file);
-		}, 'agent.noNote');
-		sendCommand('terminal-send-path', 'agent.cmd.sendPath', () => {
-			const file = this.app.workspace.getActiveFile();
-			const vault = this.vaultPath();
-			return file && vault ? `${vault}${Platform.isWin ? '\\' : '/'}${Platform.isWin ? file.path.replace(/\//g, '\\') : file.path}` : null;
-		}, 'agent.noNote');
-		sendCommand('terminal-insert-reference', 'agent.cmd.insertReference', () => {
-			const text = collectReferences(this.app, 'absolute');
-			return text ? `${text.split('\n').filter(Boolean).join(' ')} ` : null;
-		}, 'agent.noReference');
-		add({ id: 'terminal-usage', name: t('agent.cmd.usage'), nameKey: 'agent.cmd.usage', callback: () => { void this.open({ feature: 'terminal', section: 'usage' }); } });
-		add({ id: 'terminal-settings', name: t('agent.cmd.settings'), nameKey: 'agent.cmd.settings', callback: () => { void this.context.shell.open({ feature: 'settings', section: 'terminal' }); } });
+		sendCommand(
+			'terminal-send-selection',
+			'agent.cmd.sendSelection',
+			() => this.app.workspace.activeEditor?.editor?.getSelection() || null,
+			'agent.noSelection',
+		);
+		sendCommand(
+			'terminal-send-note',
+			'agent.cmd.sendNote',
+			async () => {
+				const file = this.app.workspace.getActiveFile();
+				if (!file) return null;
+				const editor = this.app.workspace.activeEditor;
+				return editor?.file === file && editor.editor
+					? editor.editor.getValue()
+					: this.app.vault.cachedRead(file);
+			},
+			'agent.noNote',
+		);
+		sendCommand(
+			'terminal-send-path',
+			'agent.cmd.sendPath',
+			() => {
+				const file = this.app.workspace.getActiveFile();
+				const vault = this.vaultPath();
+				return file && vault
+					? `${vault}${Platform.isWin ? '\\' : '/'}${Platform.isWin ? file.path.replace(/\//g, '\\') : file.path}`
+					: null;
+			},
+			'agent.noNote',
+		);
+		sendCommand(
+			'terminal-insert-reference',
+			'agent.cmd.insertReference',
+			() => {
+				const text = collectReferences(this.app, 'absolute');
+				return text ? `${text.split('\n').filter(Boolean).join(' ')} ` : null;
+			},
+			'agent.noReference',
+		);
+		add({
+			id: 'terminal-usage',
+			name: t('agent.cmd.usage'),
+			nameKey: 'agent.cmd.usage',
+			callback: () => {
+				void this.open({ feature: 'terminal', section: 'usage' });
+			},
+		});
+		add({
+			id: 'terminal-settings',
+			name: t('agent.cmd.settings'),
+			nameKey: 'agent.cmd.settings',
+			callback: () => {
+				void this.context.shell.open({ feature: 'settings', section: 'terminal' });
+			},
+		});
 	}
 
 	/** Statuses for the workbench status bar (interactive sessions only). */
 	status(): Array<{ id: string; status: 'running' | 'waiting'; automated: boolean }> {
-		return this.sessions.list().flatMap((session) => (session.running && session.agentId && (session.activity === 'running' || session.activity === 'waiting') ? [{ id: session.id, status: session.activity, automated: session.automated }] : []));
+		return Object.values(this.workspace.store.getState().tabs).flatMap((tab) =>
+			tab.kind === 'terminal' && tab.agentId && ['working', 'waiting', 'permission'].includes(tab.state)
+				? [
+						{
+							id: tab.focusedSessionId,
+							status: tab.state === 'working' ? ('running' as const) : ('waiting' as const),
+							automated: false,
+						},
+					]
+				: [],
+		);
 	}
 
 	agentTitle(id: AgentId): string {
@@ -500,6 +738,7 @@ export class AgentController {
 	}
 
 	async dispose(): Promise<void> {
+		await this.workspace.dispose();
 		this.materials.dispose();
 		await this.prompts.dispose();
 		this.runtime.dispose();

@@ -181,6 +181,7 @@ export function ShellRoot(props: ShellProps) {
 		<SidePanel
 			key={`${state.target.feature}-${generation}`}
 			title={props.panelTitle}
+			custom={props.navigationContext && !props.panel}
 			model={props.panel}
 			current={state.target}
 			customRef={props.panelCustomRef}

@@ -1,28 +1,20 @@
-import type { AutomationsApi } from '../core/api';
+import type { AutomationsApi, AutomationEditRequest } from '../core/api';
 import type { AutomationDefinition } from '../../../shared/automation/types';
-import type { AutomationEditRequest } from '../core/api';
-import type { TaskTarget } from './editor';
+import type { AutomationViewStore } from '../services/view-store';
+
+export type TaskTarget = { path: string; cardId: string; title: string };
 export interface AutomationViewHost {
 	service: AutomationsApi;
+	store: AutomationViewStore;
+	skipDeleteConfirmation?(): boolean;
+	setSkipDeleteConfirmation?(value: boolean): Promise<void>;
 	edit(definition?: AutomationDefinition): void;
-	readonly pin?: (definition: AutomationDefinition) => Promise<void>;
 	inbox(): void;
 	retry(): Promise<void>;
-	/** The pending edit request for the inline editor (taken once when the page navigates to `focusId: 'edit'`). */
+	refresh(): Promise<void>;
 	takeEdit?(): AutomationEditRequest | undefined;
-	/** Cards a "create task" action can target. */
 	taskTargets?(): Promise<TaskTarget[]>;
-	/** Default working directory for agent and script actions (the vault folder on desktop). */
+	paths(): Array<{ path: string; kind: 'file' | 'folder' }>;
+	commands(): Array<{ id: string; name: string }>;
 	readonly cwd?: string;
-}
-export interface AutomationPanelState {
-	selected: string;
-	search: string;
-	filter: string;
-	agentFilter: string;
-}
-export interface AutomationPanelActions {
-	clearHistory(): void;
-	remove(definition: AutomationDefinition): void;
-	run(operation: () => Promise<unknown>): void;
 }

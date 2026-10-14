@@ -20,6 +20,7 @@ const TITLES: Record<ShellChoice, string> = {
 	default: 'Shell',
 	bash: 'Bash',
 	zsh: 'Zsh',
+	fish: 'Fish',
 	pwsh: 'PowerShell 7',
 	powershell: 'Windows PowerShell',
 	cmd: 'Command Prompt',
@@ -29,7 +30,11 @@ const TITLES: Record<ShellChoice, string> = {
 };
 
 function gitBash(): string | null {
-	const roots = [process.env.ProgramFiles, process.env['ProgramFiles(x86)'], process.env.LOCALAPPDATA && path.join(process.env.LOCALAPPDATA, 'Programs')].filter((root): root is string => !!root);
+	const roots = [
+		process.env.ProgramFiles,
+		process.env['ProgramFiles(x86)'],
+		process.env.LOCALAPPDATA && path.join(process.env.LOCALAPPDATA, 'Programs'),
+	].filter((root): root is string => !!root);
 	for (const root of roots) {
 		const candidate = path.join(root, 'Git', 'bin', 'bash.exe');
 		if (fs.existsSync(candidate)) return candidate;
@@ -49,6 +54,8 @@ function locate(choice: ShellChoice): string | null {
 			return resolveCli('bash', '', '');
 		case 'zsh':
 			return resolveCli('zsh', '', '');
+		case 'fish':
+			return resolveCli('fish', '', '');
 		case 'pwsh':
 			return resolveCli('pwsh', '', '');
 		case 'powershell':
@@ -80,7 +87,10 @@ function defaultShell(): ShellCommand {
 }
 
 /** Program and arguments for a shell session. Unix shells start as login shells. */
-export function resolveShell(choice: ShellChoice, settings: Pick<TerminalSettings, 'customShellPath' | 'shellArgs'>): ShellCommand {
+export function resolveShell(
+	choice: ShellChoice,
+	settings: Pick<TerminalSettings, 'customShellPath' | 'shellArgs'>,
+): ShellCommand {
 	const extra = splitArgs(settings.shellArgs);
 	if (choice === 'custom') {
 		const file = settings.customShellPath.trim();
@@ -93,14 +103,23 @@ export function resolveShell(choice: ShellChoice, settings: Pick<TerminalSetting
 	}
 	const file = locate(choice);
 	if (!file) return defaultShell();
-	const args = extra.length ? extra : choice === 'bash' || choice === 'zsh' ? ['-l'] : choice === 'gitbash' ? ['--login', '-i'] : choice === 'pwsh' || choice === 'powershell' ? ['-NoLogo'] : [];
+	const args = extra.length
+		? extra
+		: choice === 'bash' || choice === 'zsh' || choice === 'fish'
+			? ['-l']
+			: choice === 'gitbash'
+				? ['--login', '-i']
+				: choice === 'pwsh' || choice === 'powershell'
+					? ['-NoLogo']
+					: [];
 	return { file, args, title: TITLES[choice] };
 }
 
 /** Shells offered in the "new session" menu on this machine. */
 export function availableShells(): ShellOption[] {
 	const options: ShellOption[] = [{ choice: 'default', title: TITLES.default }];
-	const candidates: ShellChoice[] = process.platform === 'win32' ? ['pwsh', 'powershell', 'cmd', 'gitbash', 'wsl'] : ['bash', 'zsh'];
+	const candidates: ShellChoice[] =
+		process.platform === 'win32' ? ['pwsh', 'powershell', 'cmd', 'gitbash', 'wsl'] : ['bash', 'zsh', 'fish'];
 	for (const choice of candidates) if (locate(choice)) options.push({ choice, title: TITLES[choice] });
 	return options;
 }

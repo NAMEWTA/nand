@@ -1,6 +1,5 @@
 import type { App } from 'obsidian';
 import type { AgentId } from '../../core/launch/types';
-import { EMPTY_TABS, type TabsState } from '../../core/terminal/layout';
 import type { TerminalSettings } from '../../core/terminal/settings';
 import type { HistoryClient } from '../../platform/desktop/server/agent-data-client';
 import type { PtyHelper } from '../../platform/desktop/pty/helper';
@@ -18,7 +17,11 @@ export interface TerminalHost {
 	/** Install or locate the helper; reports download progress through notices. */
 	binary(): Promise<string>;
 	/** Native lifecycle events for an agent session (hooks), returning extra environment. */
-	agentHooks?(agentId: AgentId, env: Record<string, string>, activity: (activity: Activity, data: Record<string, unknown>) => void): Promise<{ env: Record<string, string>; close(): void }>;
+	agentHooks?(
+		agentId: AgentId,
+		env: Record<string, string>,
+		activity: (activity: Activity, data: Record<string, unknown>) => void,
+	): Promise<{ env: Record<string, string>; close(): void }>;
 }
 
 export interface CreateSession {
@@ -44,9 +47,14 @@ const DEFAULT_ROWS = 32;
 
 /** Activity reported by a CLI's native lifecycle event. */
 export function hookActivity(event: string): Activity | undefined {
-	if (event === 'UserPromptSubmit' || event === 'BeforeAgent' || event === 'PreToolUse' || event === 'BeforeTool') return 'running';
-	if (event === 'Notification' || event === 'PermissionRequest') return 'waiting';
-	if (event === 'Stop' || event === 'AfterAgent' || event === 'StopFailure' || event === 'StopCancelled' || event === 'Interrupt' || event === 'SessionStart') return 'idle';
+	if (event === 'UserPromptSubmit' || event === 'BeforeAgent' || event === 'PreToolUse' || event === 'BeforeTool')
+		return 'running';
+	if (event === 'Notification') return 'waiting';
+	if (event === 'PermissionRequest') return 'permission';
+	if (event === 'Stop' || event === 'AfterAgent') return 'done';
+	if (event === 'StopFailure') return 'failed';
+	if (event === 'StopCancelled' || event === 'Interrupt') return 'interrupted';
+	if (event === 'SessionStart') return 'idle';
 	return undefined;
 }
 
@@ -65,7 +73,6 @@ export class TerminalSessions {
 	private connectionRevision = 0;
 	private nextSid = 1;
 	private disposed = false;
-	private tabState: TabsState = EMPTY_TABS;
 	/** The session that "send to terminal" commands target. */
 	private lastFocused?: string;
 
@@ -88,16 +95,6 @@ export class TerminalSessions {
 		return this.sessions.get(id);
 	}
 
-	get tabs(): TabsState {
-		return this.tabState;
-	}
-
-	setTabs(state: TabsState): void {
-		if (state === this.tabState) return;
-		this.tabState = state;
-		this.changed();
-	}
-
 	focus(id: string): void {
 		if (!this.sessions.has(id) || this.lastFocused === id) return;
 		this.lastFocused = id;
@@ -107,7 +104,9 @@ export class TerminalSessions {
 	get focused(): TerminalSession | undefined {
 		const last = this.lastFocused ? this.sessions.get(this.lastFocused) : undefined;
 		if (last?.running) return last;
-		return this.list().filter((session) => session.running && !session.automated).at(-1);
+		return this.list()
+			.filter((session) => session.running && !session.automated)
+			.at(-1);
 	}
 
 	/** Start the helper if needed (installing it first). */
@@ -120,13 +119,18 @@ export class TerminalSessions {
 			if (this.disposed) throw new Error('The terminal module is off');
 			const { PtyHelper } = await import('../../platform/desktop/pty/helper');
 			let started: PtyHelper | undefined;
-			const helper = await PtyHelper.start(binary, {
-				output: (sid, bytes) => this.bySid.get(sid)?.receive(bytes),
-				exit: (sid, code, signal) => this.exited(sid, code, signal),
-				closed: (reason) => {
-					if (started) this.helperClosed(started, reason);
+			const helper = await PtyHelper.start(
+				binary,
+				{
+					output: (sid, bytes) => this.bySid.get(sid)?.receive(bytes),
+					exit: (sid, code, signal) => this.exited(sid, code, signal),
+					closed: (reason) => {
+						if (started) this.helperClosed(started, reason);
+					},
 				},
-			}, this.host.app.workspace.containerEl.win, environment);
+				this.host.app.workspace.containerEl.win,
+				environment,
+			);
 			started = helper;
 			if (this.disposed) {
 				helper.dispose();
@@ -176,6 +180,7 @@ export class TerminalSessions {
 			title: request.title,
 			cwd: request.cwd,
 			agentId: request.agentId,
+			accountId: request.env?.NAND_ACCOUNT_NAME,
 			automated: request.automated,
 			cols: request.cols ?? DEFAULT_COLS,
 			rows: request.rows ?? DEFAULT_ROWS,
@@ -197,18 +202,29 @@ export class TerminalSessions {
 			NAND_SESSION_ID: session.id,
 		};
 		let spawning = false;
-		const abort = () => { if (spawning) helper.end(sid, true); };
+		const abort = () => {
+			if (spawning) helper.end(sid, true);
+		};
 		request.signal?.addEventListener('abort', abort, { once: true });
 		try {
 			if (request.hooks && request.agentId && this.host.agentHooks) {
-				const hook = await this.host.agentHooks(request.agentId, env, (activity) => session.setActivity(activity));
+				const hook = await this.host.agentHooks(request.agentId, env, (activity, data) =>
+					session.setActivity(activity, data),
+				);
 				env = { ...env, ...hook.env };
 				this.hooks.set(session.id, () => hook.close());
 			}
 			request.signal?.throwIfAborted();
 			if (this.disposed || !this.sessions.has(session.id)) throw new Error('The terminal session is closed');
 			spawning = true;
-			const pid = await helper.spawnSession(sid, { file: request.file, args: request.args, cwd: request.cwd, env, cols: session.cols, rows: session.rows });
+			const pid = await helper.spawnSession(sid, {
+				file: request.file,
+				args: request.args,
+				cwd: request.cwd,
+				env,
+				cols: session.cols,
+				rows: session.rows,
+			});
 			if (request.signal?.aborted || this.disposed || !this.sessions.has(session.id)) {
 				helper.end(sid, true);
 				throw new Error('The terminal session is closed');
@@ -259,7 +275,8 @@ export class TerminalSessions {
 	historyClient(): HistoryClient {
 		const revision = () => this.connectionRevision;
 		return {
-			request: async <T>(op: 'scan' | 'query' | 'read', payload: Record<string, unknown>, signal?: AbortSignal) => (await this.ensureHelper()).history<T>(op, payload, signal),
+			request: async <T>(op: 'scan' | 'query' | 'read', payload: Record<string, unknown>, signal?: AbortSignal) =>
+				(await this.ensureHelper()).history<T>(op, payload, signal),
 			isConnected: () => !!this.helper?.alive,
 			get connectionRevision() {
 				return revision();

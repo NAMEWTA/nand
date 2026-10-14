@@ -18,9 +18,9 @@ const scope = { dashboardFile:'Boards/Current', workspaceFiles:['Boards/Other.md
 for (const p of ['NAND/习惯/a/习惯.md','NAND/番茄钟/活动.md','NAND/记账/records.md','NAND/阅读/a.md','NAND/自动化/a/操作.md','Boards/Current.md','Boards/Other.md','People/档案格式说明.md','People/个人档案/A/基本信息.md','People/企业档案/B/基本信息.md','.nand/test.md','Notes/.hidden/note.md']) test('exclude exact managed scope ' + p,()=>assert.equal(isRecentUserDocument(p,scope),false));
 for (const p of ['NAND/技术笔记/note.md','NAND-笔记/习惯.md','Notes/活动.md','Notes/dashboard.md','Notes/2026-10-04.md','People/个人档案/A/资料.md','People/个人档案/A/sub/基本信息.md']) test('keep user material ' + p,()=>assert.equal(isRecentUserDocument(p,scope),true));
 test('custom roots and workspace preferences are evaluated, not cached globally',()=>{assert.equal(isRecentUserDocument('People/个人档案/A/基本信息.md',{contacts:{rootFolder:'Elsewhere'}}),true); assert.equal(isRecentUserDocument('Boards/Current.md',{}),true);});
-test('new defaults are language neutral and three recent-document call sites pass their host scope',()=>{
+test('new defaults are language neutral and React recent documents use their host scope',()=>{
   assert.equal(DEFAULT_TASK_ARCHIVE_PATH,'.nand/content/Archive/Done.md');assert.equal(DEFAULT_HIGHLIGHT_IMPORT_PATH,'.nand/content/Weread/Highlights');
-  for(const file of ['sidebar.ts','mobile.ts','vault-refresh.ts']) assert.ok(fs.readFileSync('src/modules/home/ui/view/'+file,'utf8').includes('getRecentDocs(this.app, this.plugin.settings.recentDocCount, this.plugin.settings)'));
+  assert.ok(fs.readFileSync('src/modules/home/ui/sidebar/RecentDocs.tsx','utf8').includes('isRecentUserDocument(file.path, settings)'));
 });
 for (const language of ['zh','en','zh']) test('default document uses creation-time language '+language,()=>{
   setLanguage(language);const data=parse(generateDefaultMarkdown());

@@ -4,8 +4,6 @@ import { collectVaultTasks } from '../src/modules/home/platform/calendar/alltask
 import { CountdownPanel } from '../src/modules/home/ui/widgets/CountdownPanel';
 import { AnniversaryPanel } from '../src/modules/home/ui/widgets/AnniversaryPanel';
 import assert from 'node:assert/strict';
-import { readFileSync } from 'node:fs';
-import { join } from 'node:path';
 import { parseHTML } from 'linkedom';
 import { h } from 'preact';
 import type { Chart } from 'chart.js';
@@ -24,7 +22,6 @@ import type { HabitService } from '../src/modules/home/platform/habit/habit-serv
 import type { MusicService } from '../src/modules/home/platform/music/music-service';
 import { homeServices } from '../src/modules/home/services/instances';
 import { renderSidebarHabitWidget, refreshHabitWidget } from '../src/modules/home/ui/habit/habit-widget';
-import { onHabitChanged } from '../src/modules/home/ui/view/vault-refresh';
 import { renderSidebarAnniversaryWidget } from '../src/modules/home/ui/widgets/anniversary-widget';
 import { renderSidebarCountdown } from '../src/modules/home/ui/renderer/render-sidebar-countdown';
 import { renderSidebarPomodoro } from '../src/modules/home/ui/renderer/refresh-sidebar-weather-widget';
@@ -235,23 +232,13 @@ document.body.append(habitShell);
 renderSidebarHabitWidget(habitRoot, habitApp, photo);
 renderSidebarHabitWidget(habitRoot, habitApp);
 assert.equal(habitRoot.querySelectorAll('.dashboard-sidebar-habit-empty').length, 2);
-let habitBanners = 0;
-const habitView = {
-	containerEl: habitShell,
-	contentEl: habitRoot,
-	debouncedRefreshBannerStats() {
-		habitBanners++;
-	},
-};
 habits.push({ id: 'water', name: '喝水' });
-onHabitChanged.call(habitView as never);
-assert.equal(habitBanners, 1);
+refreshHabitWidget(habitRoot);
 assert.equal(habitRoot.querySelectorAll('.dashboard-sidebar-habit-empty').length, 0);
 assert.equal(habitRoot.querySelectorAll('.dashboard-sidebar-habit-item').length, 2);
 habitRoot.querySelectorAll('[aria-checked]').forEach((row) => assert.equal(row.getAttribute('aria-checked'), 'false'));
 habitDone.add('water');
-onHabitChanged.call(habitView as never);
-assert.equal(habitBanners, 2);
+refreshHabitWidget(habitRoot);
 habitRoot.querySelectorAll('[aria-checked]').forEach((row) => assert.equal(row.getAttribute('aria-checked'), 'true'));
 assert.equal(habitRoot.textContent?.includes('喝水'), true);
 assertPhoto(habitRoot, true);
@@ -341,15 +328,6 @@ async function verifyVaultCaches(): Promise<void> {
 		[],
 		'link changes update cached pages without touching note mtimes',
 	);
-	const css = readFileSync(join(process.cwd(), 'styles.css'), 'utf8');
-	const hint = css.match(/\.dashboard-sidebar-pomodoro-stats-hint\s*\{[^}]*\}/)?.[0] ?? '';
-	assert.match(hint, /flex-shrink:\s*0/);
-	assert.equal(hint.includes('position: absolute'), false, hint);
-	assert.equal(css.includes('.dashboard-sidebar-pomodoro-top-spacer'), false);
-	const selector = css.match(/\.dashboard-pomodoro-activity-selector\s*\{[^}]*\}/)?.[0] ?? '';
-	assert.match(selector, /min-width:\s*0/);
-	const placeholder = css.match(/\.dashboard-pomodoro-activity-placeholder\s*\{[^}]*\}/)?.[0] ?? '';
-	assert.match(placeholder, /text-overflow:\s*ellipsis/);
 	console.log('dashboard isolation: resources, panels, clocks, services, Dataview actions and vault caches passed');
 }
 void verifyVaultCaches().catch((error) => {

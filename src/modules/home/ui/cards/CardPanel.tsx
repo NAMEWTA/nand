@@ -6,7 +6,7 @@ import { useLayoutEffect, useRef, useState } from 'preact/hooks';
 import type { CardSize } from '../../core/board/types/index';
 import { t } from '../../../../shared/i18n/index';
 import { Icon } from '../../../../ui/primitives/Icon';
-import { resolveVaultImage } from '../banner/banner';
+import { resolveVaultImage } from '../banner/image-resource';
 import { MemoPanel } from './MemoPanel';
 import { ProjectPanel } from './ProjectPanel';
 import { TaskPanel, type CardBodyProps } from './TaskPanel';

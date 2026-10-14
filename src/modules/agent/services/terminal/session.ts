@@ -6,7 +6,8 @@ import { pasteSequence } from '../../core/terminal/paste';
 import { parseOsc133, parseOsc633, parseOsc7, PromptHistory, type ShellMark } from '../../core/terminal/shell-marks';
 
 export type ConnectionState = 'starting' | 'connected' | 'disconnected' | 'exited' | 'failed';
-export type Activity = 'unknown' | 'running' | 'waiting' | 'idle' | 'exited';
+export type Activity =
+	'unknown' | 'running' | 'waiting' | 'permission' | 'done' | 'failed' | 'interrupted' | 'idle' | 'exited';
 export type SessionKind = 'shell' | 'agent' | 'preset' | 'automation' | 'script';
 
 /** Output for automation observers: text as it arrives, then the exit. */
@@ -33,6 +34,7 @@ export interface SessionInit {
 	title: string;
 	cwd: string;
 	agentId?: AgentId;
+	accountId?: string;
 	automated?: boolean;
 	cols: number;
 	rows: number;
@@ -50,9 +52,17 @@ interface Subscriber {
 /** `#rrggbb` (or `#rgb`) as the `rgb:rrrr/gggg/bbbb` form used in OSC color replies. */
 export function oscColor(hex: string): string | undefined {
 	let value = hex.trim().replace(/^#/, '');
-	if (/^[0-9a-f]{3}$/i.test(value)) value = value.split('').map((c) => c + c).join('');
+	if (/^[0-9a-f]{3}$/i.test(value))
+		value = value
+			.split('')
+			.map((c) => c + c)
+			.join('');
 	if (!/^[0-9a-f]{6}/i.test(value)) return undefined;
-	const part = (at: number) => value.slice(at, at + 2).repeat(2).toLowerCase();
+	const part = (at: number) =>
+		value
+			.slice(at, at + 2)
+			.repeat(2)
+			.toLowerCase();
 	return `rgb:${part(0)}/${part(2)}/${part(4)}`;
 }
 
@@ -67,12 +77,16 @@ export class TerminalSession {
 	readonly sid: number;
 	readonly kind: SessionKind;
 	readonly agentId?: AgentId;
+	readonly accountId?: string;
 	readonly automated: boolean;
 	readonly createdAt = Date.now();
 	readonly startCwd: string;
 	cwd: string;
 	connection: ConnectionState = 'starting';
 	activity: Activity;
+	activityAt = Date.now();
+	nativeSessionId?: string;
+	transcriptPath?: string;
 	exitCode?: number;
 	error?: string;
 	pid?: number;
@@ -98,6 +112,7 @@ export class TerminalSession {
 		this.sid = init.sid;
 		this.kind = init.kind;
 		this.agentId = init.agentId;
+		this.accountId = init.accountId;
 		this.automated = init.automated === true;
 		this.autoTitle = init.title;
 		this.cwd = this.startCwd = init.cwd;
@@ -105,7 +120,13 @@ export class TerminalSession {
 		this.colors = init.colors;
 		this.activity = init.agentId ? 'unknown' : 'idle';
 		// Size reports in characters (XTWINOPS 18) come from the model itself.
-		this.model = new Model({ cols: init.cols, rows: init.rows, scrollback: init.scrollback, allowProposedApi: true, windowOptions: { getWinSizeChars: true } });
+		this.model = new Model({
+			cols: init.cols,
+			rows: init.rows,
+			scrollback: init.scrollback,
+			allowProposedApi: true,
+			windowOptions: { getWinSizeChars: true },
+		});
 		this.model.loadAddon(this.serializer);
 		this.installHandlers();
 	}
@@ -156,7 +177,11 @@ export class TerminalSession {
 			return false;
 		});
 		// Foreground, background and cursor color queries follow the view's theme.
-		for (const [ident, key] of [[10, 'foreground'], [11, 'background'], [12, 'cursor']] as const) {
+		for (const [ident, key] of [
+			[10, 'foreground'],
+			[11, 'background'],
+			[12, 'cursor'],
+		] as const) {
 			model.parser.registerOscHandler(ident, (data) => {
 				if (data !== '?') return false;
 				const color = oscColor(this.colors()[key]);
@@ -277,8 +302,11 @@ export class TerminalSession {
 		if (tail) this.receive(new TextEncoder().encode(tail));
 		this.connection = 'exited';
 		this.activity = 'exited';
+		this.activityAt = Date.now();
 		this.exitCode = code ?? (signal ? -1 : 0);
-		this.writeLocal(`\r\n\x1b[2m[${signal ? `Process ended: ${signal}` : `Process exited: ${this.exitCode}`}]\x1b[0m\r\n`);
+		this.writeLocal(
+			`\r\n\x1b[2m[${signal ? `Process ended: ${signal}` : `Process exited: ${this.exitCode}`}]\x1b[0m\r\n`,
+		);
 		for (const observer of [...this.observers]) observer({ kind: 'exit', code: this.exitCode });
 		this.changed();
 	}
@@ -294,8 +322,12 @@ export class TerminalSession {
 		this.changed();
 	}
 
-	setActivity(activity: Activity): void {
-		if (this.activity === activity || !this.running) return;
+	setActivity(activity: Activity, data: Record<string, unknown> = {}): void {
+		if (!this.running) return;
+		const nativeId = data.session_id ?? data.sessionId;
+		if (typeof nativeId === 'string') this.nativeSessionId = nativeId;
+		if (typeof data.transcript_path === 'string') this.transcriptPath = data.transcript_path;
+		this.activityAt = Date.now();
 		this.activity = activity;
 		this.changed();
 	}
@@ -345,7 +377,8 @@ export class TerminalSession {
 	text(lines = 200): string {
 		const buffer = this.model.buffer.active;
 		const out: string[] = [];
-		for (let y = Math.max(0, buffer.length - lines); y < buffer.length; y++) out.push(buffer.getLine(y)?.translateToString(true) ?? '');
+		for (let y = Math.max(0, buffer.length - lines); y < buffer.length; y++)
+			out.push(buffer.getLine(y)?.translateToString(true) ?? '');
 		return out.join('\n').replace(/\n+$/, '');
 	}
 
@@ -368,6 +401,11 @@ export class TerminalSession {
 			if (exitCode !== undefined) history.finished(exitCode);
 		}
 		return history;
+	}
+
+	reset(): void {
+		// RIS resets both the authoritative parser and every attached renderer.
+		this.writeLocal('\x1bc');
 	}
 
 	clearScrollback(): void {

@@ -31,3 +31,11 @@
 集成审查在真实 Windows Obsidian 中覆盖全部 14 种内置组件及已保存的自动化快捷操作，包括模块可用性、布局持久化、重启和减少动效。真实手机、其他操作系统及登录后的模型执行仍未验证。另行固定的 GPL home-pages 树仅供相似度脚本输出路径和数值，不作为实现来源。
 
 本参考不整体搬入上游样式表、单体渲染器、设置持久化或外部智能体适配器；改编不包含 GPL 项目的实现代码。
+
+## 阶段 8a（v3.8.4）
+
+本轮首页以 `ac4d2c7` 为唯一布局与交互参照。`home/ui/theme/themes.css` 保留 13 套上游主题及亮暗覆盖变量；`ThemeBridge` 将变量接到 React 控件。`DashboardPage`、`layout/`、`sidebar/`、`banner/`、`quickbar/`、`sections/`、`cards/` 与六个 P0 `*Widget.tsx` 对照上游 `view.ts`、`renderer.ts`、`banner.ts`、`quick-note-section.ts`、`library-section.ts` 与各小组件入口，文件头保留 MIT 来源。
+
+`core/board/parser/__fixtures__/apex-dashboard-template.md` 是固定版本原始样本；解析与回写测试保留未知字段、缩进、子任务和文档树。`services/board-store.ts` 复用 NAND 的串行文档写入及受管内容层，不引入上游全局插件实例。工作台注册表存储为 `home.workspaces`，仅保留内存适配字段供现有服务使用。
+
+旧 P0 页面入口、旧布局选择与组件目录界面和 `home/styles/` 已由本轮结构替代；统计记录界面按阶段边界保留至 8b，其样式单独限制于 `.nand-records-page`。后续 P1 分区与统计服务保留，不在本轮开放替代实现。

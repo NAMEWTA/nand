@@ -1,32 +1,70 @@
-import { Check, Circle, CircleHelp, Loader2, Pause, X } from 'lucide-react';
-import { cn } from '../../lib/utils';
+// Adapted from stablyai/orca 464bd5a (MIT), Copyright (c) 2026 Lovecast Inc.: src/renderer/src/components/AgentStateDot.tsx
+import { CircleCheck, CircleDashed } from 'lucide-react';
 import { useT } from '../../react/hooks';
+import { cn } from '../../lib/utils';
+import { AgentQuestionIcon } from './AgentQuestionIcon';
+import { AgentWorkingSpinner } from './AgentWorkingSpinner';
 import { Tooltip, TooltipContent, TooltipTrigger } from '../tooltip';
-const states = {
-	idle: { icon: Circle, color: 'text-muted-foreground', label: 'ui.idle' },
-	working: {
-		icon: Loader2,
-		color: 'text-foreground animate-spin motion-reduce:animate-none',
-		label: 'ui.working',
-	},
-	question: { icon: CircleHelp, color: 'text-agent-question', label: 'ui.question' },
-	completed: { icon: Check, color: 'text-status-success', label: 'ui.completed' },
-	interrupted: { icon: Pause, color: 'text-muted-foreground', label: 'ui.interrupted' },
-	failed: { icon: X, color: 'text-destructive', label: 'ui.failed' },
-	unknown: { icon: CircleHelp, color: 'text-muted-foreground', label: 'ui.unknown' },
-};
-export type AgentStatus = keyof typeof states;
-export function StatusDot({ status, className }: { status: AgentStatus; className?: string }) {
+export type AgentStatus = 'idle' | 'working' | 'question' | 'completed' | 'interrupted' | 'failed' | 'unknown';
+type State = 'working' | 'waiting' | 'permission' | 'done' | 'idle' | 'failed' | 'interrupted' | 'unknown';
+export function StatusDot({
+	state: supplied,
+	status,
+	label: suppliedLabel,
+	size = 'sm',
+	sidebar = false,
+	className,
+}: {
+	state?: State;
+	status?: AgentStatus;
+	label?: string;
+	size?: 'sm' | 'md';
+	sidebar?: boolean;
+	className?: string;
+}) {
 	const t = useT();
-	const { icon: Icon, color, label } = states[status];
+	const state =
+		supplied ?? (status === 'question' ? 'permission' : status === 'completed' ? 'done' : (status ?? 'unknown'));
+	const label =
+		suppliedLabel ??
+		t(
+			`ui.${status ?? (state === 'done' ? 'completed' : state === 'permission' || state === 'waiting' ? 'question' : state)}`,
+		);
+	const icon = size === 'md' ? 'size-3' : 'size-2.5',
+		inner = size === 'md' ? 'size-2' : 'size-1.5';
 	return (
 		<Tooltip>
 			<TooltipTrigger asChild>
-				<span tabIndex={0} role="img" aria-label={t(label)} className="inline-flex">
-					<Icon aria-hidden className={cn('size-3.5', color, className)} />
+				<span
+					role="img"
+					tabIndex={0}
+					aria-label={label}
+					className={cn('inline-flex shrink-0 items-center justify-center', icon, className)}
+				>
+					{state === 'working' ? (
+						<AgentWorkingSpinner className={inner} />
+					) : state === 'waiting' || state === 'permission' ? (
+						<AgentQuestionIcon className={icon} />
+					) : state === 'unknown' ? (
+						<CircleDashed className={cn('text-status-warning', icon)} />
+					) : state === 'done' && !sidebar ? (
+						<CircleCheck className={cn('text-status-success', icon)} />
+					) : (
+						<span
+							className={cn(
+								'block rounded-full',
+								inner,
+								state === 'done'
+									? 'bg-status-success'
+									: state === 'failed' || state === 'interrupted'
+										? 'bg-status-error'
+										: 'bg-muted-foreground/50',
+							)}
+						/>
+					)}
 				</span>
 			</TooltipTrigger>
-			<TooltipContent>{t(label)}</TooltipContent>
+			<TooltipContent>{label}</TooltipContent>
 		</Tooltip>
 	);
 }

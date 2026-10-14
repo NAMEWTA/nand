@@ -37,6 +37,7 @@ export function composeWorkbench(plugin: DashboardPlugin) {
 	const contributions: WorkbenchContribution[] = [
 		{
 			id: 'dashboard',
+			chrome: 'none',
 			statusSegments: () => dashboardSaveStatuses(home()?.saveStatuses() ?? []).map(row => ({ id: `dashboard-save:${row.id}`, icon: 'save-off', label: row.label, target: row.target, tone: 'error', order: 60 })),
 			rail: { slot: 'top' },
 			navigation: { id: 'dashboard', labelKey: 'workbench.home', icon: 'home', target: { feature: 'dashboard' } },
@@ -47,6 +48,8 @@ export function composeWorkbench(plugin: DashboardPlugin) {
 		},
 		{
 			id: 'terminal',
+			chrome: 'none',
+			navigationContext: true,
 			statusSegments: agentSegments,
 			rail: { slot: 'top' },
 			navigation: { id: 'terminal', labelKey: 'workbench.agent', icon: 'bot', target: { feature: 'terminal' }, children: [
@@ -54,7 +57,6 @@ export function composeWorkbench(plugin: DashboardPlugin) {
 				{ id: 'terminal-history', labelKey: 'workbench.history', icon: 'history', target: { feature: 'terminal', section: 'history' } },
 				{ id: 'terminal-usage', labelKey: 'workbench.usage', icon: 'chart-no-axes-column', target: { feature: 'terminal', section: 'usage' } },
 			] },
-			panel: ({ target }) => plugin.services.peek(AGENT_WORKBENCH)?.panel(target),
 			title: (target) => plugin.services.peek(AGENT_WORKBENCH)?.title(target),
 			availability: () => ({ ...ready(), enabled: plugin.moduleEnabled('agent'), supported: Platform.isDesktopApp, ready: !!plugin.services.peek(AGENT_WORKBENCH) }),
 			stateKeys: [],
@@ -107,6 +109,7 @@ export function composeWorkbench(plugin: DashboardPlugin) {
 		},
 		{
 			id: 'automations',
+			chrome: 'none',
 			statusSegments: automationSegments,
 			rail: { slot: 'top' },
 			navigation: { id: 'automations', labelKey: 'workbench.automations', icon: 'workflow', target: { feature: 'automations' }, children: [
@@ -114,7 +117,7 @@ export function composeWorkbench(plugin: DashboardPlugin) {
 				{ id: 'automations-runs', labelKey: 'workbench.runs', icon: 'history', target: { feature: 'automations', section: 'runs' } },
 			] },
 			availability: () => ({ ...ready(), enabled: plugin.moduleEnabled('automations'), ready: !!plugin.services.peek(AUTOMATIONS) }),
-			stateKeys: ['selected', 'search', 'filter', 'agentFilter', 'section', 'runHistory'],
+			stateKeys: ['selected', 'search', 'filter', 'sort'],
 			create: modulePage('automations', 'automations'),
 		},
 		{

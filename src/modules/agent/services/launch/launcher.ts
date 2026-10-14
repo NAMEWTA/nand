@@ -31,7 +31,11 @@ export interface LaunchHost {
 	start: (request: LaunchRequest) => Promise<void>;
 }
 
-export async function launchAgent(host: LaunchHost, agentId: AgentId): Promise<void> {
+export async function launchAgent(
+	host: LaunchHost,
+	agentId: AgentId,
+	options: { cwd?: string; accountId?: string } = {},
+): Promise<void> {
 	const settings = host.getAgentSettings();
 	const entry = settings.agents[agentId];
 	if (!entry?.enabled) {
@@ -59,12 +63,12 @@ export async function launchAgent(host: LaunchHost, agentId: AgentId): Promise<v
 		return;
 	}
 
-	const env = await accountEnv(agent, entry.accountId, cwd, deviceId(host.app), true);
+	const env = await accountEnv(agent, options.accountId ?? entry.accountId, cwd, deviceId(host.app), true);
 	await host.start({
 		file: command,
 		args: accountArgs(agentId, launchArgs(settings, agentId), env),
 		agentId,
-		cwd,
+		cwd: options.cwd ?? cwd,
 		env,
 		title: agent.title,
 	});
@@ -78,7 +82,13 @@ export async function resumeAgent(host: LaunchHost, session: VaultSession): Prom
 	const settings = host.getAgentSettings();
 	const entry = settings.agents[session.agentId];
 	const agent = getAgent(session.agentId);
-	const { env, transcriptPath } = await restoredAccountReference(agent, session.env, vault, deviceId(host.app), session.transcriptPath);
+	const { env, transcriptPath } = await restoredAccountReference(
+		agent,
+		session.env,
+		vault,
+		deviceId(host.app),
+		session.transcriptPath,
+	);
 	await checkAccountTranscript(vault, env, transcriptPath);
 	if (!entry?.enabled) {
 		new Notice(t('agent.agentOff', { title: agent.title }));

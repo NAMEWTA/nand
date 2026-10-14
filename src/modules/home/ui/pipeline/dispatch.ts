@@ -1,5 +1,5 @@
 import { Notice } from 'obsidian';
-import type { DashboardSurface } from '../view/dashboard-surface';
+import type { SkillSurface } from '../skills/surface';
 import { PipelineVault } from '../../platform/pipeline/vault';
 import { resolvePipelineSkill } from '../../services/pipeline';
 import { dispatchSkillShortcut } from '../../services/skill-shortcuts';
@@ -7,7 +7,7 @@ import { homeServices } from '../../services/instances';
 import { previewSkill } from '../skills/AgentPromptPanel';
 import { t } from '../../../../shared/i18n';
 
-export async function runPipelineSkill(surface: DashboardSurface, columnName: string, skillId: string, stageId: string, path?: string, input?: string, signal?: AbortSignal): Promise<void> {
+export async function runPipelineSkill(surface: SkillSurface, columnName: string, skillId: string, stageId: string, path?: string, input?: string, signal?: AbortSignal): Promise<void> {
 	if (!surface.isOpen || signal?.aborted) return;
 	const column = surface.data?.columns.find(column => column.name === columnName), config = column?.pipelineConfig;
 	const skill = config?.skills.find(skill => skill.id === skillId);

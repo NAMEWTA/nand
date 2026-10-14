@@ -5,7 +5,7 @@ import { displayFocal, focalForWrite } from '../../core/board/board-experience';
 import type { DashboardSettings } from '../../core/board/types';
 import { t } from '../../../../shared/i18n';
 import { Icon } from '../../../../ui/primitives/Icon';
-import { resolveVaultImage } from '../banner/banner';
+import { resolveVaultImage } from '../banner/image-resource';
 import {
 	ALBUM_FADE_MS,
 	TRANSITION_CLASSES,

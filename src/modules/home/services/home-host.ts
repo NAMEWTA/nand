@@ -23,6 +23,8 @@ export interface HomeHost {
 	readonly appearance: AppearancePresets;
 	settings: HomeSettingsView;
 	saveSettings(): Promise<void>;
+	subscribeSettings(listener: () => void): () => void;
+	updateSettings(update: (draft: DashboardSettings) => void): Promise<void>;
 	boards?: BoardOperations;
 	readonly automationHost: AutomationUiPort | undefined;
 	refreshAllDashboards(): void;
@@ -84,7 +86,13 @@ export function createHomeHost(context: ModuleContext, handle: SettingsHandle<Da
 			const target = handle.get() as unknown as Record<string, unknown>;
 			for (const [key, value] of Object.entries(next)) if (key !== 'modules' && target[key] !== value) target[key] = value;
 		},
-		saveSettings: () => handle.touch(),
+		saveSettings: () => {
+			const value = handle.get();
+			value.workspaces = { files: [...value.workspaceFiles], names: [...(value.workspaceNames ?? [])], active: Math.max(0, value.workspaceFiles.indexOf(value.dashboardFile)) };
+			return handle.touch();
+		},
+		subscribeSettings: listener => handle.subscribe(listener),
+		updateSettings: update => handle.update(update),
 		get automationHost() {
 			return context.services.peek(AUTOMATIONS);
 		},

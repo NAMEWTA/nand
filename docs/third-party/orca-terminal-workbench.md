@@ -14,7 +14,7 @@ NAND 改编了 [Orca](https://github.com/stablyai/orca)（stablyai/orca）的部
 
 | Orca 的部分 | NAND 中的位置 |
 |---|---|
-| `recent-tab-switching` | `src/modules/agent/core/terminal/recent-sessions.ts`：稳定的最近使用顺序、去重、移除失效身份、活动会话优先。选择器是 Obsidian 的建议弹窗。 |
+| `recent-tab-switching` | `src/modules/agent/core/terminal/recent-sessions.ts`：稳定的最近使用顺序、去重、移除失效身份、活动会话优先。旧建议选择器已移除；工作区最近标签顺序现由 `core/workspace/ops.ts` 管理。 |
 | `pane-fit-resize-observer`、`pane-fit-client-size` | `src/modules/agent/ui/terminal/stable-terminal-fit.ts`：合并尺寸检查，等待稳定的字符尺寸，避免重复调整 PTY 大小。使用所属窗口和公开的 `FitAddon` 接口。 |
 | `terminal-webgl-hidden-retention` | `src/modules/agent/ui/terminal/hidden-renderer-retention.ts`：实例级 LRU，最多保留两个隐藏的图形上下文。可见的渲染器不拥有 PTY 的生命周期。 |
 | `terminal-structural-replay-coordinator`、滚动缓冲快照、滚动意图 | `src/modules/agent/ui/terminal/terminal-presentation.ts`：依据权威的 headless 快照重放，与实时输出串行衔接，并恢复滚动意图。 |
@@ -74,3 +74,30 @@ NAND 使用自己的 Obsidian 叶子、主题令牌和 stdio 辅助进程（协�
 | `components/settings/Settings.tsx`、`settings-page-renderer.tsx`、`SearchableSetting.tsx`、`settings-search.ts` | `src/app/settings/react/`：保留 renderer 的独立滚动区、`gap-10 px-8 pt-10 pb-24 max-w-4xl` 内容容器、空结果态，以及设置行与搜索包装；分类由 NAND PanelModel 提供，搜索按 NAND 要求移到内容顶部，模块状态和旧 DOM 渲染器生命周期由 NAND 提供。 |
 
 底部状态栏不包含 Orca 的 SSH、资源监视、宠物或更新通知。组件样板直接由新设置页渲染 React 组件。旧模块设置仍通过单一 DOM 容器包装，以显式 `settingsPageKind: 'react'` 区分后续 React 设置组件；阶段 9 移除旧渲染路径。
+
+## 自动化页面与参数校验（464bd5a）
+
+上游界面路径相对 `src/renderer/src/components/automations/`。所有改编文件头包含原始文件路径，MIT 版权归 Lovecast Inc.。
+
+| 上游文件或职责 | NAND 中的位置与适配 |
+|---|---|
+| `AutomationsPage.tsx`、`AutomationsPageSurface.tsx`、`AutomationsPageTopBar.tsx` | `src/modules/automations/ui/AutomationsPage.tsx`、`TopBar.tsx`；保留页面容器与面包屑，接入 NAND 页面状态及独立 ReactSurface。 |
+| 列表工具栏、搜索、筛选、表格和 `AutomationListLocalRow.tsx` | `ui/list/`；保留表格网格、固定首列与表头、悬停按钮布局，删除远程操作和浏览器流程，接入七种 NAND 动作。 |
+| 编辑对话框、内容区、设置栏、计划与会话选择 | `ui/editor/`；保留 1080px 双栏 Dialog 与右侧 360px 设置栏，接入 vault 目录、命令、笔记、待办、时区与预检。 |
+| `AutomationDetail.tsx`、`AutomationsDetailPane.tsx`、`AutomationPromptDisclosure.tsx` 及运行记录 | `ui/detail/`、`ui/runs/`；采用 NAND 本设备运行快照、预检结果和终端 API。 |
+| 额外参数白名单 | `src/shared/automation/extra-args.ts`；允许模型、推理强度与 Claude 附加目录，使用参数数组传入 CLI，拒绝未授权参数。 |
+
+模板为 NAND 自有数据；调度、持久化、60 秒预检进程、资源释放与看板来源仍使用 NAND 的服务，不引入 Orca IPC、远程同步或工作流引擎。已删除动作的旧文档只保留原文供显式删除，不迁移或执行。
+
+## 智能体工作区核心（464bd5a，阶段 4a）
+
+| 上游文件（相对 `src/renderer/src/components/`） | NAND 中的位置与适配 |
+|---|---|
+| `sidebar/SidebarNav.tsx`、`sidebar/worktree-card-surface.tsx`、`sidebar/StatusIndicator.tsx` | `src/modules/agent/ui/sidebar/AgentSidebar.tsx`：保留导航、状态分组与两行卡片的尺寸、布局和类名；数据来自工作区仓库，通过所属叶子的导航槽位 Portal 渲染。 |
+| `tab-bar/tab-bar-surface.tsx`、`SortableTab.tsx`、`TerminalTabLeadingIcon.tsx` | `ui/tabs/`、`ui/create/NewTabMenu.tsx`：单层标签带、激活线、关闭/颜色/置顶、拖放与新建菜单；导航开关放在首组，页面与历史入口放在末组。 |
+| `tab-bar/TabBarCreateEntry.tsx`、`TabBarCreateEntryRow.tsx`、`tab-bar-surface.tsx` | `ui/create/Omnibox.tsx`：保留输入框、条目与终端动作/智能体/设置的分组和分隔线，接入 cmdk、NAND 的智能体目录、输入分类与创建服务。浏览器引擎缺失时保留输入并显示禁用原因。 |
+| `tab-group/TabGroupSplitNodeTree.tsx`、`TabGroupPanel.tsx`、`TabGroupDropOverlay.tsx` | `ui/workspace/`：最多四组，保持分隔条、四边放置区；布局存入每设备的工作区文件。 |
+| `terminal-pane/TerminalContextMenu.tsx`、`TerminalProcessExitOverlay.tsx` | `ui/terminal/TerminalTabView.tsx`：菜单与退出条带、窗格状态/标题和平分操作；重置经 NAND 权威终端模型同步，复制上下文使用最近 200 行。`TerminalSearch.tsx` 恢复 NAND 原有大小写/正则/前后项与未匹配反馈，保留 xterm/PTY、Hook、附件与原生会话恢复接口。 |
+| `AgentStateDot.tsx`、`AgentWorkingSpinner.tsx`、`AgentQuestionIcon.tsx` | `src/ui/components/nand/StatusDot.tsx`、`AgentWorkingSpinner.tsx`、`AgentQuestionIcon.tsx`：状态图标和动效，改用 NAND 语义令牌、i18n、所属窗口 Tooltip；保留已有 `StatusDot.status` 调用兼容。 |
+
+历史面板、看板、快捷命令和智能体管理属于阶段 4b，核心页面预留入口。工作区服务与归一化为 NAND 实现；保留每窗格的原生会话标识与账号信息，但不会在启动时自动重启进程。普通 Shell 的输出停顿不作为智能体完成事件。

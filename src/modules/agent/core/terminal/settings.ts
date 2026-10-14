@@ -3,7 +3,18 @@ import type { AgentSettings } from '../launch/types';
 import { AGENT_IDS } from '../launch/defaults';
 import { validSkillName } from '../../../../shared/agent-prompt';
 
-export const SHELL_CHOICES = ['default', 'bash', 'zsh', 'pwsh', 'powershell', 'cmd', 'gitbash', 'wsl', 'custom'] as const;
+export const SHELL_CHOICES = [
+	'default',
+	'bash',
+	'zsh',
+	'fish',
+	'pwsh',
+	'powershell',
+	'cmd',
+	'gitbash',
+	'wsl',
+	'custom',
+] as const;
 export type ShellChoice = (typeof SHELL_CHOICES)[number];
 
 /** A named way to start a session: a shell (or program) with arguments, a directory and text typed after start. */
@@ -69,12 +80,16 @@ export const DEFAULT_TERMINAL_SETTINGS: TerminalSettings = {
 	knownSkills: {},
 };
 
-const isRecord = (value: unknown): value is Record<string, unknown> => !!value && typeof value === 'object' && !Array.isArray(value);
-const text = (value: unknown, fallback: string, max = 2000): string => (typeof value === 'string' ? value.slice(0, max) : fallback);
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+	!!value && typeof value === 'object' && !Array.isArray(value);
+const text = (value: unknown, fallback: string, max = 2000): string =>
+	typeof value === 'string' ? value.slice(0, max) : fallback;
 const number = (value: unknown, fallback: number, min: number, max: number): number =>
 	typeof value === 'number' && Number.isFinite(value) ? Math.min(max, Math.max(min, value)) : fallback;
-const color = (value: unknown): string => (typeof value === 'string' && /^#[0-9a-f]{3,8}$/i.test(value.trim()) ? value.trim() : '');
-const choice = <T extends string>(value: unknown, values: readonly T[], fallback: T): T => (values.includes(value as T) ? (value as T) : fallback);
+const color = (value: unknown): string =>
+	typeof value === 'string' && /^#[0-9a-f]{3,8}$/i.test(value.trim()) ? value.trim() : '';
+const choice = <T extends string>(value: unknown, values: readonly T[], fallback: T): T =>
+	values.includes(value as T) ? (value as T) : fallback;
 
 function normalizePreset(value: unknown, index: number): LaunchPreset | undefined {
 	if (!isRecord(value)) return undefined;
@@ -94,7 +109,12 @@ function normalizePreset(value: unknown, index: number): LaunchPreset | undefine
 
 export function normalizeTerminalSettings(raw: unknown): TerminalSettings {
 	const value = isRecord(raw) ? raw : {};
-	const presets = Array.isArray(value.presets) ? value.presets.map(normalizePreset).filter((preset): preset is LaunchPreset => !!preset).slice(0, 50) : [];
+	const presets = Array.isArray(value.presets)
+		? value.presets
+				.map(normalizePreset)
+				.filter((preset): preset is LaunchPreset => !!preset)
+				.slice(0, 50)
+		: [];
 	const ids = new Set<string>();
 	for (const preset of presets) {
 		while (ids.has(preset.id)) preset.id = `${preset.id}-1`;
@@ -118,10 +138,33 @@ export function normalizeTerminalSettings(raw: unknown): TerminalSettings {
 		offline: value.offline === true,
 		presets,
 		agents: normalizeAgentSettings(isRecord(value.agents) ? value.agents : undefined),
-		skillDirectories: Array.isArray(value.skillDirectories) ? [...new Set(value.skillDirectories.filter((path): path is string => typeof path === 'string' && !!path.trim()).map(path => path.trim()))].slice(0, 20) : [],
-		knownSkills: Object.fromEntries(AGENT_IDS.flatMap(id => {
-			const names = isRecord(value.knownSkills) ? value.knownSkills[id] : undefined;
-			return Array.isArray(names) ? [[id, [...new Set(names.filter((name): name is string => typeof name === 'string' && validSkillName(name)))].slice(-200)]] : [];
-		})),
+		skillDirectories: Array.isArray(value.skillDirectories)
+			? [
+					...new Set(
+						value.skillDirectories
+							.filter((path): path is string => typeof path === 'string' && !!path.trim())
+							.map((path) => path.trim()),
+					),
+				].slice(0, 20)
+			: [],
+		knownSkills: Object.fromEntries(
+			AGENT_IDS.flatMap((id) => {
+				const names = isRecord(value.knownSkills) ? value.knownSkills[id] : undefined;
+				return Array.isArray(names)
+					? [
+							[
+								id,
+								[
+									...new Set(
+										names.filter(
+											(name): name is string => typeof name === 'string' && validSkillName(name),
+										),
+									),
+								].slice(-200),
+							],
+						]
+					: [];
+			}),
+		),
 	};
 }

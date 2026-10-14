@@ -46,10 +46,14 @@ export const automationDocuments: DocumentCollectionCodec<DefinitionCollection> 
 		'repeat',
 		'start',
 		'timezone',
+		'extraArgs',
+		'precheck',
+		'templateId',
 	],
 	empty: () => ({ definitions: [] }),
 	encode: ({ definitions }) =>
 		definitions.map((definition) => {
+			if (definition.removedAction) return structuredClone(definition.removedAction);
 			const { action, schedule, source: _source, ...metadata } = definition;
 			const { kind: _kind, ...parameters } = action;
 			for (const key of ['prompt', 'body', 'text', 'script']) delete (parameters as Record<string, unknown>)[key];
@@ -81,20 +85,22 @@ export const automationDocuments: DocumentCollectionCodec<DefinitionCollection> 
 			.map((document) => {
 				const p = document.properties;
 				const kind = p.action as AutomationAction['kind'];
-				if (!actionDescriptors.some((descriptor) => descriptor.kind === kind))
+				const removed = p.action === 'browser-workflow';
+				if (!removed && !actionDescriptors.some((descriptor) => descriptor.kind === kind))
 					throw new Error(`Invalid action: ${document.path}`);
-				const action = switchAutomationAction({ kind: 'notify', body: '' }, kind, {
+				const action = switchAutomationAction({ kind: 'notify', body: '' }, removed ? 'notify' : kind, {
 					agentId: typeof p.agentId === 'string' ? p.agentId : '',
 					cwd: typeof p.cwd === 'string' ? p.cwd : '.',
 				});
 				Object.assign(
 					action,
-					...['shell', 'sessionMode', 'session', 'cardId', 'path', 'command', 'url']
+					...['shell', 'sessionMode', 'session', 'cardId', 'path', 'command', 'url', 'extraArgs']
 						.filter((key) => p[key] !== undefined)
 						.map((key) => ({ [key]: p[key] })),
 				);
 				setActionText(action, document.sections?.[kind === 'script' ? 'script' : 'prompt'] ?? '');
 				const definition = {
+					...(removed ? { removedAction: structuredClone(document) } : {}),
 					name: p.name,
 					enabled: p.enabled,
 					deviceId: p.deviceId,
@@ -104,6 +110,8 @@ export const automationDocuments: DocumentCollectionCodec<DefinitionCollection> 
 					notifyOn: p.notifyOn,
 					createdAt: p.createdAt,
 					updatedAt: p.updatedAt,
+					...(p.precheck !== undefined ? { precheck: p.precheck } : {}),
+					...(p.templateId !== undefined ? { templateId: p.templateId } : {}),
 					id: document.id,
 					action,
 					schedule:

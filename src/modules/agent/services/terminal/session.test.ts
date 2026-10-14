@@ -22,18 +22,22 @@ function fixture(over: Partial<ConstructorParameters<typeof TerminalSession>[0]>
 		colors: () => ({ foreground: '#d4d4d4', background: '#1e1e1e', cursor: '#ffffff' }),
 		...over,
 	});
-	session.attach({
-		input: (_sid, data) => sent.push(typeof data === 'string' ? data : new TextDecoder().decode(data)),
-		resize: () => {},
-		acknowledge: (_sid, bytes) => acks.push(bytes),
-		end: () => {},
-	}, 1234);
+	session.attach(
+		{
+			input: (_sid, data) => sent.push(typeof data === 'string' ? data : new TextDecoder().decode(data)),
+			resize: () => {},
+			acknowledge: (_sid, bytes) => acks.push(bytes),
+			end: () => {},
+		},
+		1234,
+	);
 	/** Feed output and wait until the model parsed it. */
-	const feed = (text: string) => new Promise<void>((resolve) => {
-		session.receive(encoder.encode(text));
-		session.subscribe(() => {})();
-		setTimeout(resolve, 20);
-	});
+	const feed = (text: string) =>
+		new Promise<void>((resolve) => {
+			session.receive(encoder.encode(text));
+			session.subscribe(() => {})();
+			setTimeout(resolve, 20);
+		});
 	return { session, sent, acks, feed };
 }
 
@@ -118,6 +122,22 @@ test('helpers: OSC color format and native lifecycle activity', () => {
 	assert.equal(oscColor('blue'), undefined);
 	assert.equal(hookActivity('UserPromptSubmit'), 'running');
 	assert.equal(hookActivity('Notification'), 'waiting');
-	assert.equal(hookActivity('Stop'), 'idle');
+	assert.equal(hookActivity('Stop'), 'done');
 	assert.equal(hookActivity('Whatever'), undefined);
+});
+
+test('terminal reset clears the authoritative output and keyboard modes, and reaches attached renderers', async () => {
+	const { session, feed } = fixture();
+	const rendered: string[] = [],
+		off = session.subscribe((text) => rendered.push(text));
+	await feed(`${ESC}[>1u${ESC}[?9001hOld output`);
+	assert.ok(session.text().includes('Old output'));
+	assert.equal(session.keyboard.win32, true);
+	session.reset();
+	await feed('');
+	assert.ok(!session.text().includes('Old output'));
+	assert.deepEqual(session.keyboard, { kitty: 0, win32: false });
+	assert.ok(rendered.includes(`${ESC}c`));
+	off();
+	session.dispose();
 });
