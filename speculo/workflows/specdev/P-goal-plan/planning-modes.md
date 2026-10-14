@@ -1,6 +1,6 @@
 # Goal Plan 规划模式与输入门禁
 
-规划模式描述 Goal Plan 需要额外解决的工程问题。Goal Plan 创建时单独询问 Ticket 是否开启 worktree，默认使用当前 workspace；worktree 与 direct-parent/candidate-merge 由该次 Goal Plan 固定。
+规划模式描述 Goal Plan 需要额外解决的工程问题。Goal Plan 创建时沿用用户明确的 worktree 选择；未指定时按风险采用默认 current，只有隔离选择实质影响交付时才询问；worktree 与 direct-parent/candidate-merge 由该次 Goal Plan 固定。
 
 本文件定义单 change 的规划与全局执行门。多 change 父编排创建仍要求成员全员 Ready，遵守 `<Path>{roots.workflows}/specdev/common/rules/parent-implementation-orchestration.md</Path>`。
 
@@ -34,7 +34,7 @@
 
 ## 3. Goal Plan 工作区选择
 
-- 创建 Goal Plan 时询问“是否开启 worktree 开发？”，默认 `否`；
+- 创建 Goal Plan 时沿用已有隔离选择；无偏好时默认 current，按风险判断是否需要澄清；
 - 用户选择 `否` 时写入 `ticket_workspace_policy: current` 与 `integration_gate: direct-parent`；
 - 用户选择 `是` 时写入 `ticket_workspace_policy: required` 与 `integration_gate: candidate-merge`；
 - 该选择只作用于当前 Goal Plan，不读取或修改全局配置；

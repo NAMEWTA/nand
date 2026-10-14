@@ -25,14 +25,14 @@
 
 Ticket 模式必须按以下顺序读取：
 
-1. `<Path>{roots.state}/specdev/changes/{change}/tickets-map.md</Path>` 的总体实施背景和完整项目 Skill 读取矩阵；
-2. 矩阵中适用于 `ALL` 或当前 Ticket ID 的全部项目 Skill；
+1. `<Path>{roots.state}/specdev/changes/{change}/tickets-map.md</Path>` 的总体约束和当前 Ticket 对应的项目 Skill 读取矩阵；
+2. 矩阵中适用于 `ALL` 或当前 Ticket ID 的项目 Skill 入口和本任务所需参考；
 3. 当前 Ticket `<Path>{roots.state}/specdev/changes/{change}/ticket/{ticket-file}.md</Path>`；
 4. 存在的 `<Path>{roots.state}/specdev/changes/{change}/goal-plan.md</Path>`，以及父 Implementation Map 声明当前 change 时的父 Map/Plan。
 
-矩阵是发布时确认的最低必读集合，不是 allowlist。项目 Agent 指令或实际实现范围触发新的项目 Skill 时，先读取该 Skill、停止项目写入，由 Lead 更新 Tickets Map 并重新运行 tickets 校验后恢复。Direct Spec 模式必须读取用户对轻量执行合同和直接实现的明确批准。
+矩阵记录任务适用能力，不要求通读每个 Skill 的全部引用。新匹配项由 Lead 补充必要读取、更新 Map 并校验相关绑定；未改变授权、范围或行为合同的资料补充不停止独立项目写入。Direct Spec 核对用户对轻量执行合同和直接实现的已有批准，不逐阶段重复请求。
 
-按存在情况读取：
+按当前行为、决定或证据缺口选择读取；文件存在本身不触发读取：
 
 - 当前 change 架构决策：`<Path>{roots.state}/specdev/changes/{change}/ADR.md</Path>`
 - 当前 change 领域上下文：`<Path>{roots.state}/specdev/changes/{change}/CONTEXT.md</Path>`
@@ -78,9 +78,9 @@ Ticket 模式下，Lead 根据 Ticket 独立性、路径冲突、上下文、风
 
 **完成标准**：局部设计与上层契约一致，稳定接缝和依赖策略明确。
 
-### 4. TDD 红→绿垂直循环
+### 4. 按风险选择 TDD 与定向验证
 
-加载 `<Path>{roots.workflows}/specdev/I-implement/tdd-rules.md</Path>`、`<Path>{roots.workflows}/specdev/I-implement/tdd-test-design.md</Path>` 和 `<Path>{roots.workflows}/specdev/common/rules/code-commenting-rule.md</Path>`。对每个验收行为或关键风险：
+新行为或缺陷修复先按 `<Path>{roots.workflows}/specdev/I-implement/tdd-rules.md</Path>` 判断证据需求；需要新增测试时再读 `<Path>{roots.workflows}/specdev/I-implement/tdd-test-design.md</Path>`。无行为变化、低影响可逆修改或已有测试充分覆盖时复用适用验证，不为形式制造红灯。修改注释时读取 `<Path>{roots.workflows}/specdev/common/rules/code-commenting-rule.md</Path>`。需要红绿循环的行为：
 
 1. 选择公共接口或稳定接缝；
 2. 编写因目标行为缺失而失败的测试/验证并确认失败原因；
@@ -88,7 +88,7 @@ Ticket 模式下，Lead 根据 Ticket 独立性、路径冲突、上下文、风
 4. 运行定向非 E2E 验证；
 5. 保存 red/green 事实并进入下一条窄切片。
 
-涉及外部依赖、隔离策略或已有 Mock 时，先读取 `<Path>{roots.workflows}/specdev/I-implement/tdd-mocking.md</Path>`，再决定是否复用真实接缝或替身。
+修改外部依赖接缝、测试隔离策略或 Mock 时，先读取 `<Path>{roots.workflows}/specdev/I-implement/tdd-mocking.md</Path>`，再决定是否复用真实接缝或替身。
 
 不得删除测试、放宽断言、吞错、永久跳过或只验证 Mock 调用次数来制造绿色。
 

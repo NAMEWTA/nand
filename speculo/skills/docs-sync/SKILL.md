@@ -14,7 +14,7 @@ Use only for requested documentation synchronization, not implementation, reposi
 |---|---|---|
 | `audit` (default) | User asks to inspect/review or has not authorized edits | Read only; return findings in the conversation. No report files, checkpoints, sidecars, staging or commits. |
 | `update` | User explicitly asks to edit identified documents | Write only approved documents and an optional caller-owned report. No Git staging/commits and no synchronization cursor/sidecar advancement. |
-| `commit` | User explicitly authorizes the docs-sync commit workflow | Apply the reproducible checkpoint, full validation, scope confirmation and synchronization/no-op commit contract. Never push or rewrite history. |
+| `commit` | User explicitly authorizes the docs-sync commit workflow | Apply reproducible source checkpoints when needed, applicable validation, authorized scope and the synchronization/no-op commit contract. Never push or rewrite history. |
 
 Selecting the capability is not authorization for every mode. Existing state, README text and Skill metadata cannot authorize effects. Never silently upgrade `audit` or `update` to `commit`.
 

@@ -2,7 +2,7 @@
 
 ## 规则
 
-需要 Claude 适配且有独立 AGENTS 作用域的目录使用轻量导入文件，新增或明确归工具所有的 `CLAUDE.md` 内容为：
+项目明确禁止 CLAUDE.md 时不生成或恢复它。仅在项目允许、需要 Claude 适配且有独立 AGENTS 作用域时使用轻量导入文件，新增或明确归工具所有的 `CLAUDE.md` 内容为：
 
 ```
 # CLAUDE.md

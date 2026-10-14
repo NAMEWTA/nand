@@ -1,6 +1,6 @@
 # NAND 开发文档入口
 
-本页是贡献者和编程智能体的入口。英文是默认文本，也是规范文本。这里的每份文档在同目录下都有简体中文版本，文件名在扩展名前加 `.ZH`。
+本页是贡献者和编程智能体的按需导航。当前维护文档使用中文单源；根 README 保留双语，许可、夹具和历史归档保留原文。只读取与任务相关的条目。
 
 ## 从哪里读起
 
@@ -22,15 +22,15 @@
 |---|---|
 | 工作台 | 唯一的产品视图 `nand-workbench-view`，由图标轨、二级面板和页面区组成。评论侧栏 `nand-comments-view` 是仅有的另一个视图类型。 |
 | 图标轨、二级面板、页面 | 工作台的三栏：模块图标、所选模块的导航、内容。 |
-| 模块 | 带清单、懒加载入口和独立生命周期的功能。编号为 `home`、`agent`、`browser`、`archives`、`automations`、`notifications`、`icons`、`comments`、`sync`。 |
-| 功能 | 由模块拥有的工作台目的地：`dashboard`（home）、`terminal`（agent）、`browser`、`contacts`（archives）、`automations`、`notifications`、`icons`、`comments`、`records`（home）、`sync`，以及属于应用本身的 `settings`。 |
+| 模块 | 带清单、懒加载入口和独立生命周期的功能。编号为 `home`、`agent`、`browser`、`news`、`archives`、`automations`、`notifications`、`icons`、`comments`、`sync`。 |
+| 功能 | 由模块拥有的工作台目的地：`dashboard`（home）、`terminal`（agent）、`browser`、`news`、`contacts`（archives）、`automations`、`notifications`、`icons`、`comments`、`records`（home）、`sync`，以及属于应用本身的 `settings`。 |
 | 清单 | 模块的纯数据描述，启动时读取。模块代码只能经它的 `load()` 到达。 |
 | 服务、贡献点 | 模块之间唯一的协作方式。服务是一个模块提供的带类型接口；贡献点汇集多个模块提供的值。二者都声明在所有者的 `api.ts` 中。 |
 | 租约 | 获取服务的结果。提供服务的模块停止时，它的 `revoked` 信号中止。 |
 | 设置命名空间 | 一组由 schema 约束的设置，例如 `app`、`theme` 或某个模块编号。 |
 | 库级、设备级 | 设置的保存范围：同一个库的所有设备共用，或只属于这台设备。 |
 | 设备编号 | 这台设备的稳定编号，用来在被同步的库中区分各设备自己的状态。 |
-| `.nand/` | 库中存放 NAND 配置和运行时 JSON 的目录，按领域和设备组织。 |
+| `.nand/` | NAND 自身管理的数据根；受管 Markdown/附件在 `.nand/content/`，配置和运行数据按领域、设备与身份组织。普通笔记、宿主数据与 Git 元数据保留原位。 |
 | 终端辅助进程 | 原生程序 `nand-pty`，持有伪终端，并通过标准输入输出与插件通信。 |
 | 看板 | 由 home 模块渲染为栏目和小组件的 Markdown 笔记。 |
 | 档案 | archives 模块中以文件夹加 Markdown 记录保存的人物或企业条目。 |

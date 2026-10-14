@@ -55,7 +55,7 @@
 
 ### 3. 一次决定全局执行策略
 
-只询问一次是否开启 Ticket worktree，默认不开启，并把选择写入父 Plan：
+沿用用户明确的 Ticket worktree 选择；无偏好时默认 current，只有隔离选择实质影响交付时才询问，并把最终策略写入父 Plan：
 
 - `current/direct-parent`：全部成员的待实现 Ticket 全局严格串行，只允许一个 current workspace implementation writer；
 - `required/candidate-merge`：依赖满足且无 serialization/path/resource 冲突的 Tickets 可跨 change 并行，每个 Ticket 使用自己的 source worktree。

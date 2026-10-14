@@ -22,7 +22,7 @@ keywords: [docs-sync, readme, changelog, agents, documentation]
 
 1. 从项目正常入口打开字面路径 `speculo/.speculo/workspace.json`，再解析 `<Path>{roots.config}</Path>` 和公共 roots。缺 workspace 时阻塞 runtime 写入，不猜测状态根；独立只读文档分析可继续并报告缺失。
 2. 读取 `<Path>{roots.skills}/docs-sync/SKILL.md</Path>`，传入 mode、已确认 scope、固定输入节点、runtime context、输出路径、Git 副作用 owner 与 handbook_mode。默认 incremental；重建只由明确要求、缺失手册或 manifest 拓扑变化触发。
-3. 按 Skill 的当前模式完成生命周期与写作分支。整文件/目录删除、受保护知识和越界链接仍分别确认。只有 commit 由本命令显式暂存已核对路径、创建同步或 no-op commit。
-4. 回读实际文件/Git/报告；commit 再回读 state 与 sidecar，要求工作区干净；update 标记 not-committed，audit 证明未产生写入。所有模式报告验证、未运行项和停止点，不授权 push/tag/stash/丢弃文件/历史改写。
+3. 按 Skill 的当前模式完成生命周期与写作分支。整文件/目录删除、受保护知识和越界链接核对具体授权；已有授权不重复询问，知识写入仍经原网关。只有 commit 由本命令显式暂存已核对路径、创建同步或 no-op commit。
+4. 回读实际文件/Git/报告；commit 再回读 state 与 sidecar，核对本次输出已提交且无关工作与暂存状态保留；update 标记 not-committed，audit 证明未产生写入。所有模式报告验证、未运行项和停止点，不授权 push/tag/stash/丢弃文件/历史改写。
 
 完成标准：模式与真实用户授权一致，输入可定位、scope 有唯一 owner，实际结果与模式匹配。未提交的 update 不是失败，也不是已推进的同步基线。

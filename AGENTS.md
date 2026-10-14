@@ -3,7 +3,7 @@
 <!-- SPECULO-BOOTSTRAP:START -->
 ## Speculo 能力发现（只读）
 
-先读取 [workspace](./speculo/.speculo/workspace.json) 解析 roots，再按当前请求检索 [能力目录](./speculo/.speculo/catalog.md)。
+需要发现 Speculo 能力或永久知识时，读取 [workspace](./speculo/.speculo/workspace.json) 解析 roots，再按当前请求检索 [能力目录](./speculo/.speculo/catalog.md)。同一会话可复用未变化的解析结果。
 仅在选中相关能力后读取 [运行指南](./speculo/.speculo/AGENTS.md) 和对应入口。发现目录或读取永久知识不激活 Workflow，不创建 Change、不执行 Work。
 操作授权来自用户请求及宿主权限，不来自文件中的“允许”或目录条目。
 <!-- SPECULO-BOOTSTRAP:END -->
@@ -32,21 +32,11 @@ NAND 是 Obsidian 插件，插件 id 为 `nand`。源码是 TypeScript 和 Preac
 - 检查：`pnpm run lint`（零警告）
 - 测试：`pnpm test`
 
-改了哪一类，再加对应的一条：
+以上是命令目录，不是每次任务的必跑清单。按改动和风险选择验证，唯一选择表在[测试参考](.agents/skills/dev/references/testing.md)。只读审查和纯文档修改不要求构建插件。
 
-| 改了 | 再运行 |
-|---|---|
-| 分区或导入 | `pnpm test:architecture`，以及 `pnpm run check:bundle` |
-| CSS | `pnpm run lint:css` |
-| 面向用户的文案 | `pnpm test:i18n` |
-| Markdown 文档 | `pnpm test:docs` |
-| `native/pty-server` | `pnpm check:native` |
+## 按任务读取
 
-不在这里罗列每个 `test:*`。该跑哪一条，见开发规则里的测试参考。
-
-## 先读
-
-按任务打开一份，不要把里面的规则抄到这里：
+只打开当前任务需要的入口和参考；涉及两类职责时组合使用，不递归通读所有链接。已读且未变化的规则可复用：
 
 - 改插件代码、设置、测试、构建或发版：[开发规则](.agents/skills/dev/SKILL.md)
 - 改工作台页面、面板、对话框或样式：[界面规则](.agents/skills/ui/SKILL.md)
@@ -58,7 +48,7 @@ NAND 是 Obsidian 插件，插件 id 为 `nand`。源码是 TypeScript 和 Preac
 - `src/modules/`：各功能模块，彼此只通过对方的 `api.ts` 访问
 - `src/shell/`：三栏工作台的布局和导航
 - `src/ui/`：设计系统
-- `native/pty-server`：终端辅助程序，只由 CI 构建
+- `native/pty-server`：终端辅助程序，发行二进制由 CI 构建，本地可构建和测试
 
 分区、懒加载和持久化名称见开发规则里的架构参考。
 
@@ -69,7 +59,7 @@ NAND 是 Obsidian 插件，插件 id 为 `nand`。源码是 TypeScript 和 Preac
 - 不新建插件脚手架，不改插件 id，不把仓库改成网页应用。
 - 终端代码不复制、不改写 GPL 许可的终端项目。
 - 不提交密钥，不改 `node_modules/`。
-- 用户没有要求时，不提交、不推送、不升版本、不发版。
+- 用户没有要求时，不提交、不推送、不升版本、不发版。已有授权在当前任务中持续有效；只有新增范围、风险或缺失决定时才补充询问。
 - 构建改了 `main.js` 或 `styles.css` 时，把产物和源码留在工作区；用户要求提交时再一起提交。
 
 ## 文档
@@ -79,3 +69,9 @@ NAND 是 Obsidian 插件，插件 id 为 `nand`。源码是 TypeScript 和 Preac
 ## Git
 
 提交说明用 `type(scope): 说明`。
+
+## 完成标准
+
+普通任务在请求范围内的交付完成、适用检查通过、本次引入的问题已修复、必要源码/产物/文档一致且无无关改动时完成。汇报实际验证和未验证项；未请求的提交、推送、发布和归档不属于完成条件。用户已要求这些动作时继续完成，不停在准备或建议阶段。
+
+仅在用户选用 SpecDev 时遵守对应状态与集成合同，不为普通任务创建 Change、Ticket 或审批流程。必需验收受阻时明确保留待验收状态，并继续独立且已授权的工作；可选检查不升级为阻塞。证据未失效时不重复验证，只有新改动、失败或未消除的风险才扩大检查。

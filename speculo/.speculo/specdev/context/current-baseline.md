@@ -7,13 +7,13 @@
 | | |
 |---|---|
 | 显示名、插件编号 | NAND，`nand` |
-| 版本 | 0.0.1-alpha.2（`manifest.json`、`package.json`、`versions.json`） |
+| 版本 | 以 [manifest.json](../../../../manifest.json)、[package.json](../../../../package.json) 和 [versions.json](../../../../versions.json) 为准；实测发行记录见验证文档 |
 | `minAppVersion` | `1.13.0`，仅为声明 |
 | `isDesktopOnly` | `false` |
 | 许可证 | MIT |
 | 入口 | `src/app/main.ts`，构建为已提交的 `main.js` |
 | 样式 | 一份已提交的 `styles.css`，由 `src/styles.json` 列出的作者文件拼接而成 |
-| 原生辅助进程 | `native/pty-server`（`nand-pty`），由 CI 构建，作为 Release 附件发布 |
+| 原生辅助进程 | `native/pty-server`（`nand-pty`），发行二进制由 CI 构建并作为 Release 附件发布；本地可构建和测试 |
 | 界面语言 | 简体中文（`zh`）与英文（`en`） |
 
 ## 视图与入口

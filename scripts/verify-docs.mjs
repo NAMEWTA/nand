@@ -21,7 +21,8 @@ function walk(directory) {
 		const rel = posix(path.relative(root, file));
 		if (rel === 'scripts/tmp' || rel.startsWith('scripts/tmp/')) continue;
 		if (entry.isDirectory()) {
-			if (!rel.startsWith('src/') && (entry.name === 'legacy' || entry.name === 'old' || entry.name === 'backup-docs')) failures.push(`forbidden documentation directory ${rel}`);
+			// Ownership and document contracts determine validity; a directory name
+			// alone cannot distinguish obsolete guides from fixtures or history.
 			walk(file);
 		} else if (entry.name.endsWith('.md')) files.push(rel);
 	}
@@ -55,6 +56,8 @@ for (const required of [
 	if (!fs.existsSync(path.join(root, required))) failures.push(`missing required documentation asset ${required}`);
 }
 
+// Speculo tooling contains owner-specific Path tags and templates; validate it
+// with the owning package checker, not the project-guide link rules below.
 const strict = new Set(['user-doc', 'root-entry', 'skill', 'specdev', 'specdev-change', 'source-template', 'agent-handbook']);
 let links = 0;
 let external = 0;

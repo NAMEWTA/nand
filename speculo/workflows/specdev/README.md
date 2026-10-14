@@ -20,13 +20,13 @@ Ticket frontmatter 拥有本票状态、依赖、写集与 Skill 调用绑定；
 
 CLI 初始化和刷新保持原 namespace、三方配置合并、schema migrator 与 opaque 文件按字节保留。Work 不写 CLI-owned backup、install 或 managed 元数据。创建、恢复、迁移、关闭或归档时必须读取 `<Path>{roots.workflows}/specdev/common/rules/workflow-state-and-lifecycle.md</Path>`。
 
-永久 ADR/context/research 仅 A 在完成证据、毕业评估和用户确认后通过原网关提升；其他 Work 只读，初始化不写知识内容。
+永久 ADR/context/research 的新结论仅 A 在完成证据、毕业评估和用户授权后通过原网关提升；其他 Work 只读，初始化不写知识内容。现有 context 的机械事实纠正由 A 的 refresh-facts 分支按来源核对与授权完成，见 `<Path>{roots.workflows}/specdev/A-archive-and-consolidate/fact-refresh.md</Path>`；架构决定和历史证据不适用该分支。
 
 ## 启动协议
 
 1. 先打开 `<Path>{roots.state}/workspace.json</Path>` 解析 roots，再读取 `<Path>{roots.workflows}/specdev/common/rules/activation-and-memory.md</Path>`；定位相关 entry 后回读必要原文，不默认整读索引。
 2. 读取 `<Path>{roots.state}/specdev/config.json</Path>`；不存在时使用 `<Path>{roots.workflows}/specdev/I-init-setup/I-init-setup.md</Path>`。保留已知配置，不重复询问。
-3. 纯初始化和 T-triage capture 按各自无 change 分支执行；其他 Work 从 `<Path>{roots.state}/specdev/status.json</Path>` 定位用户指定或唯一 active change；多个候选需要真实消歧，无候选按原规则创建。
+3. 纯初始化、T-triage capture 和 A refresh-facts 按各自无 change 分支执行；其他 Work 从 `<Path>{roots.state}/specdev/status.json</Path>` 定位用户指定或唯一 active change；多个候选需要真实消歧，无候选按原规则创建。
 4. 读取 `<Path>{roots.state}/specdev/changes/{change}/.status.json</Path>`；恢复、创建或状态修改时加载上述状态细则。child 归属未完成父 Goal 时读取对应父 Map/Plan，不接管或覆盖其 owner。
 5. current_work 非空则恢复或显式 handoff；暂停保留恢复键，成功才去重更新 works_run 并清空。其他任务冲突只暂停受影响分支，继续独立、已授权工作。
 6. 按 Work/模式读取必要参考，完成产物、运行验证、回读真实源与状态后再推进。全局状态仅更新本任务 active/archived 索引。

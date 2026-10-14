@@ -34,7 +34,7 @@ SpecDev 通过分层工件避免同一决策被多个模型反复重做。每个
 
 UI 设计包中的 `{design-id}` 由 P-prototype 分配为当前 change 内最小未占用的 `UI-NNN`；设计系统文档是唯一设计权威，comparison 与 final 不建立第二套规则。
 
-Change CONTEXT/ADR 是 active change 内的执行权威，不是 workflow 级永久知识。G 和其他设计/执行 Works 只读 `<Path>{roots.state}/specdev/context/</Path>` 与 `<Path>{roots.state}/specdev/adr/</Path>`；只有 A 在 change 完成、实现证据验证、毕业评估和用户确认后才能写入永久 namespace。未毕业内容随归档 change 保留，不能从 change 工件消失。
+Change CONTEXT/ADR 是 active change 内的执行权威，不是 workflow 级永久知识。G 和其他设计/执行 Works 只读 `<Path>{roots.state}/specdev/context/</Path>` 与 `<Path>{roots.state}/specdev/adr/</Path>`；新结论只有 A 在 change 完成、实现证据验证、毕业评估和用户授权后才能提升。现有 context 的机械事实纠正仅由 A 按 `<Path>{roots.workflows}/specdev/A-archive-and-consolidate/fact-refresh.md</Path>` 执行，不改变 ADR 或历史证据。未毕业内容随归档 change 保留，不能从 change 工件消失。
 
 ## 2. 权威顺序
 

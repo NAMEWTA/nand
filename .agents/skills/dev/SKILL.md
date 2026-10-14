@@ -1,18 +1,12 @@
 ---
 name: dev
 description: >-
-  Development rules for the NAND Obsidian plugin in this repository
-  (plugin id nand): module system, lazy loading, settings store, i18n,
-  storage under .nand/, tests, build budgets, licensing and releases. Use
-  when editing src/, native/pty-server, styles, main.js, manifest.json,
-  package.json scripts, esbuild, eslint, CI workflows or a GitHub release,
-  or when the user mentions NAND, nand, 模块, 看板, 仪表盘, 评论, 终端, 智能体,
-  浏览器, 档案, 自动化, 通知, 图标, 设置, Git 同步, 发版, or Obsidian 插件.
-  Project rules override generic Obsidian plugin advice. Rendering inside the
-  workbench is the ui skill.
+  修改或审查本仓库插件实现、设置、持久化、测试、依赖、构建和发布配置时使用。
+  负责模块边界、懒加载、i18n、数据归属与质量验证；界面渲染同时参照 ui。
+  普通产品问答、只读资料查询和未涉及工程规则的文档修订不触发开发流程。
 license: MIT
 metadata:
-  short-description: Plugin development rules
+  short-description: 插件开发规则
   adapted-from: https://github.com/gapmiss/obsidian-plugin-skill (MIT, skill version 1.11.0, eslint-plugin-obsidianmd v0.4.x)
 ---
 
@@ -20,7 +14,9 @@ metadata:
 
 本技能只适用于本仓库。它改编了 `metadata.adapted-from` 所列的 Obsidian 插件规则；两者冲突时以本文为准。不要新建插件脚手架、不要改插件 id、不要把仓库改成网页应用。
 
-## 修改前先读
+## 按任务读取
+
+从下表选择与本次改动有关的参考和章节；不因文件互相链接而展开整套资料。只读审查不执行实现收尾，普通任务的授权和完成标准见根 [AGENTS.md](../../../AGENTS.md)。
 
 | 要做的事 | 打开 |
 |---|---|
@@ -49,7 +45,7 @@ metadata:
 | 许可证 | MIT（`LICENSE`；署名在 `NOTICE` 与 `THIRD-PARTY-NOTICES.md`） |
 | 入口 | `src/app/main.ts` → 提交到仓库的 `main.js` |
 | 样式 | 一个提交到仓库的 `styles.css`，由 `src/styles.json` 列出的作者文件拼接而成 |
-| 原生辅助程序 | `native/pty-server`（`nand-pty`），只由 CI 构建，作为 Release 附件发布 |
+| 原生辅助程序 | `native/pty-server`（`nand-pty`），发行二进制由 CI 构建并作为 Release 附件发布；本地可构建和测试 |
 
 版本号在 `manifest.json`；升版本的方法见 `references/build-and-release.md`。
 
@@ -65,20 +61,19 @@ metadata:
 8. Node 和 Electron 只在 `desktop/` 文件夹里使用，且只在桌面端到达。core 和 shared 代码完全不使用宿主包。
 9. 代码检查零警告通过（`pnpm run lint`）。不要为此关闭规则；修改代码，或在 `eslint.config.mts` 里记录带理由的局部例外。
 10. 终端代码是为 NAND 编写的。不得复制或改写 GPL 许可的终端项目的代码；允许的参考来源见 `references/licensing.md`。
-11. 只做被要求的事。修复缺陷不重新设计小组件的样式；修改评论不重排看板。
-12. 当前维护文档只保留中文，根目录 README.md 与 README.ZH.md 保持双语；产品 t() 与 en/zh 不变。删除旧重复版本前保留仍成立的独有信息。原始许可、署名、测试夹具和历史归档保持原文；永久 ADR/context 只经 SpecDev A 网关更新。`.agents/skills` 只有中文。代理从 AGENTS.md 进入，不另写 CLAUDE.md。
-13. 修改本技能负责的事实时，在同一次变更里更新负责它的那一份文件（`references/skill-maintenance.md`）。
+11. 范围、提交授权和文档语言遵守根 [AGENTS.md](../../../AGENTS.md)，不在本技能另设一套规则。
+12. 修改本技能负责的事实时，在同一次变更里更新负责它的那一份文件（`references/skill-maintenance.md`）。
 
 ## 完成之前
 
-运行 `pnpm run build`（会重建 `main.js`）、`pnpm run lint`，以及覆盖所改内容的测试（`references/testing.md`）。结构性变更后再运行 `pnpm test:architecture` 和 `pnpm run check:bundle`；改了 CSS 运行 `pnpm run lint:css`；改了文档运行 `pnpm test:docs`。把重建后的 `main.js` 和 `styles.css` 与源码一起提交。
+按 [references/testing.md](references/testing.md) 选择验证和需要重建的产物。已通过的检查在输入、环境和风险未变时复用。把必要产物留在工作区；获得提交授权后与源码一起提交。
 
 ## 检查清单
 
-- [ ] 只注册了两种视图类型；持久化名称没变
-- [ ] 架构检查与包体预算通过
-- [ ] 关闭再开启模块后没有残留
-- [ ] 新文案在所属词典里有两种语言
-- [ ] 用户数据格式没变，或有意修改并更新了黄金样本
-- [ ] 当前维护文档已按中文单源更新；根 README 两种语言一起维护，技能文件只维护中文
-- [ ] `pnpm run build`、`pnpm run lint` 和对应测试通过；`main.js` 已重建
+只检查本次触及的约束；不适用项不产生额外任务。
+
+- 视图、导入或启动边界变化：核对视图契约、架构和包体。
+- 生命周期变化：核对关闭、重开及失败路径的资源释放。
+- 新增或修改产品文案：所属词典保留 en/zh。
+- 持久化变化：保持格式兼容，或按有意变更更新样本与相关文档。
+- 构建输入变化：适用检查通过，产物与源码一致。

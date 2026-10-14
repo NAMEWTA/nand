@@ -17,7 +17,7 @@ Packet 对 implementation 明确：
 - 越界、合同冲突、基线漂移、共享路径争用和无法提交时立即停止；
 - 固定返回字段、未验证声明规则与恢复条件。
 
-原生 implementation subagent 从干净上下文开始时，必须先完整读取 Packet 指向的 Tickets Map 和适用项目 Skill，再读取当前 Ticket。Packet 必须包含完成任务所需的全部相关决定和定位信息；不得依赖 Lead 对话中未显式传入的隐含上下文。项目 Agent 指令触发矩阵外的新 Skill 时，subagent 停止写入并返回 Lead 更新 Map。
+原生 implementation subagent 从干净上下文开始时，先读取 Packet 指向的 Map 总体约束、本票及直接依赖，按读取条件加载适用 Skill 入口和必要参考。Packet 必须包含完成任务所需的全部相关决定和定位信息；不得依赖 Lead 对话中未显式传入的隐含上下文。项目 Agent 指令触发矩阵外的新 Skill 时，subagent 向 Lead 返回相关绑定，由 Lead 更新 Map；不改变合同或权限的资料补充不阻塞独立工作，失效的写集暂停。
 
 ## 返回
 

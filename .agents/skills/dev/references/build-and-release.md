@@ -16,7 +16,7 @@
 | `format`、`format:check` | 用 prettier 处理 `src/**/*.{ts,tsx}` 和 `scripts/**/*.ts`；不属于 CI |
 | `test`、`test:*`、`test:all` | 见 `testing.md` |
 
-`main.js` 和 `styles.css` 提交到仓库。重建后与源码一起提交；重建的 `main.js` 与提交的不同时 CI 会失败。
+`main.js` 和 `styles.css` 是受版本管理的产物。按 `testing.md` 在构建输入变化时重建并留在工作区；用户授权提交后与源码一起提交。CI 会检查产物与源码是否一致。
 
 ## 样式
 
@@ -57,7 +57,7 @@ pnpm 版本固定在 `package.json`；CI 使用 `pnpm install --frozen-lockfile`
 
 `scripts/verify-release-artifacts.mjs <version>` 把前四项与标签核对，`CHANGELOG.md` 里有 `## Unreleased` 小节时失败。提高 `minAppVersion` 会让部分用户无法升级；只有在有记录的理由时才这样做。
 
-当前版本是 `0.0.2-alpha.1`，是预发布版。标签中 `-` 之后带后缀的版本会成为 GitHub 预发布，不会标为最新版。
+当前版本以 `manifest.json`、`package.json` 和 `versions.json` 为准。标签中 `-` 之后带后缀的版本会成为 GitHub 预发布，不会标为最新版。
 
 ## 发版
 

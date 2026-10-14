@@ -1,24 +1,21 @@
 ---
 name: ui
 description: >-
-  How NAND draws its interface: the three-column workbench (icon rail, side
-  panel, page), workbench pages and panels, dialogs, the design system
-  (tokens, primitives, patterns), the global theme and Markdown styles, and
-  motion and accessibility rules. Use when adding or changing a page, panel,
-  settings page, dialog, component or CSS in this repository, or when the
-  user mentions 工作台, 三栏, 图标轨, 侧栏, 页面, 界面, 样式, 主题, 外观, 动画,
-  组件, Preact, workbench, rail, panel, theme or design system. Module
-  wiring, settings storage and builds are the dev skill.
+  添加、修改或审查本仓库工作台页面、面板、对话框、组件、主题或 CSS 时使用。
+  负责布局、设计系统、动效与无障碍；模块装配和构建参照 dev。
+  普通产品问答、界面使用说明和仅提到页面或主题的讨论不触发实现与验收流程。
 license: MIT
 metadata:
-  short-description: Workbench UI, design system and theme
+  short-description: 工作台界面、设计系统与主题
 ---
 
 # 工作台界面
 
 本技能只适用于本仓库。`dev` 技能负责分区、模块装配、设置存储、文案和构建；本技能负责界面在屏幕上的样子和行为。
 
-## 修改前先读
+## 按任务读取
+
+仅读取当前改动触及的参考和章节；不递归展开全部链接。下文流程用于界面实现，只读审查只核对适用约束。
 
 | 要做的事 | 打开 |
 |---|---|
@@ -58,8 +55,8 @@ NAND 只注册一个工作台视图。它的叶子显示 ① 52px 的图标轨�
 1. 按上面的表格决定放在哪里。如果是页面，按 `references/shell.md` 和 `../dev/references/module-authoring.md` 里的页面步骤做。
 2. 文件放进模块的 `ui/` 文件夹：组件用 PascalCase（`InboxPanel.tsx`），逻辑和加载器用 kebab-case（`workbench-page.ts`）。
 3. 组合原语；在它们旁边加模块自己的类名来做布局。两个模块都需要的通用原语放进 `src/ui/`。
-4. 在模块的 `styles/` 文件里写 CSS，限定在它的类名下；重建 `styles.css`（`node scripts/build-styles.mjs --write`）并运行 `pnpm run lint:css`。
-5. 检查浅色与深色、三种主题样式，以及三种宽度（≥960、600–960、<600／手机）。真实 Obsidian 探针覆盖多种宽度下的工作台；视觉改动要截图。
+4. CSS 改动放在所属方的 `styles/` 文件里并限定作用域；按 [验证选择表](../dev/references/testing.md) 重建、检查和验收。
+5. 局部视觉改动检查受影响的页面、状态与尺寸并截图；主题、全局布局或宿主边界变化按验证选择表扩展矩阵或使用真实 Obsidian。
 
 ## 检查清单
 
@@ -67,5 +64,7 @@ NAND 只注册一个工作台视图。它的叶子显示 ① 52px 的图标轨�
 - [ ] 关闭时卸载；使用元素所在的窗口
 - [ ] 只用原语和令牌；没有字面量颜色、`!important`、`:has` 或原始 z-index
 - [ ] 键盘可达、有名称、焦点可见；遵守减少动效
-- [ ] 在浅色／深色、所有主题样式和三种宽度下都正常
-- [ ] `pnpm run build`、`pnpm run lint` 和 `pnpm run lint:css` 通过
+- [ ] 与改动风险相符的视觉、行为和无障碍检查通过
+- [ ] 验证选择表要求的检查通过，受影响产物已更新
+
+清单只适用于本次触及的行为；原语未变的局部调整不重验整个工作台。

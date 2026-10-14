@@ -28,7 +28,7 @@
 
 - `active` 数组移除对应 change 条目
 - `archived` 数组去重追加 change 名称；路径、时间和 promotion 明细只写归档 `.status.json`
-- 每个归档 change 的 `.status.json` 更新：`change_status: archived`, `archived: true`
+- 每个归档 change 的 `.status.json` 按调用方 schema 更新归档终态、字段和路径；不添加未声明的 `archived` 字段
 
 ## 阻塞项详情
 

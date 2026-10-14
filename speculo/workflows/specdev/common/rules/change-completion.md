@@ -1,6 +1,6 @@
 # Change Completion
 
-本规则是 change 从 active/blocked 转为 completed 的唯一合同。
+本规则仅是已激活 SpecDev change 从 active/blocked 转为 completed 的合同。普通任务按项目 AGENTS 的工作区交付标准完成，不因未提交而自动进入本流程。Ticket 集成模式要求不可变提交；用户未选择该模式或未授权提交时，使用普通工作区交付，或在已激活 SpecDev 且符合条件时使用 Direct Spec，不伪造 Ticket done。
 
 ## 完成门
 

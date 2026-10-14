@@ -1,17 +1,17 @@
 # Git 与全局 State 契约
 
-本契约仅用于用户明确授权的 `mode=commit`，定义可复现输入、工作区清洁提交和 docs-sync state v4。audit/update 不执行本契约中的任何 Git 或 state 写入；调用方拥有 Git 与持久化副作用。
+本契约仅用于用户明确授权的 `mode=commit`，定义可复现输入、限定范围的提交和 docs-sync state v4。audit/update 不执行本契约中的任何 Git 或 state 写入；调用方拥有 Git 与持久化副作用。
 
-## 运行前清洁
+## 固定输入与提交范围
 
-1. 确认当前目录属于唯一 Git 仓库，且不处于 merge、rebase、cherry-pick、revert 或 bisect。
-2. 收集 `git status --short --branch`、`git diff --check`、staged、unstaged 与 untracked 路径；逐项读取内容和归属。
-3. 运行仓库声明的最小完整校验。缺少校验命令时记录事实，不虚构命令。
-4. 若存在冲突、校验失败、疑似密钥、异常大文件、无法判断用途的 untracked 文件或不相关用户改动，停止且不改变 Git 状态。
-5. 其余改动按显式路径暂存，并创建一个 `chore(docs-sync): checkpoint workspace` commit。禁止使用 `git add .`、stash、reset、clean、amend、rebase 或丢弃内容。
-6. 重新读取 `git status --short`；非空即继续分类，无法安全收敛时阻塞。
+1. 确认唯一仓库、HEAD 与 Git 操作状态；未完成的 merge/rebase/cherry-pick 等只阻塞受影响的提交，独立审计仍可继续。
+2. 记录 staged、unstaged 与 untracked 路径及归属。保留无关改动和暂存状态，不为清洁工作区提交、stash、reset 或删除它们。
+3. 将提交范围固定到本次文档、报告、state 和 sidecar；核对该范围的 diff、敏感信息与适用验证。无法归属的改动或漂移仅阻塞重叠写集及其依赖。
+4. 同步游标只能覆盖可由固定 commit 重建的事实。若目标文档依赖未提交源码，先核对用户是否已授权提交这些具体源码；已授权才按显式路径创建来源 checkpoint 并验证，否则完成可独立更新的文档，相关输出保留 update 状态，不推进该同步游标。
+5. 无关 dirty 文件不妨碍提交。存在其他暂存改动时使用限定路径的提交方式（如 `git commit --only -- <paths>`），核对 commit 实际内容及剩余 index；不将无关文件纳入提交，不改写其暂存状态。
+6. 固定 `INPUT_HEAD`，记录来源 checkpoint（若有）、提交路径和验证结果。空工作区不是前置条件。
 
-完成标准：`INPUT_HEAD=$(git rev-parse HEAD)` 已记录，工作区为空，checkpoint 的文件清单与验证结果进入报告。
+完成标准：输入可复现，授权路径和 Git 基线明确，现有用户工作保持不变。
 
 ## State v4
 
@@ -62,6 +62,6 @@
 1. 验证通过后写同目录临时文件，再原子 rename state、报告和 sidecar；JSON 使用 2 空格和尾部换行。
 2. 更新 `last_range={from_sha: FROM_SHA, to_sha: INPUT_HEAD}`、运行时间、计数和实际同步资产；正常输出将 baseline 设为 `{mode: "state-file-commit", sha: null}`。
 3. 显式暂存本次文档、报告、state 和 sidecar。实际修改使用 `docs(docs-sync): synchronize project documentation`；no-op 使用 `chore(docs-sync): record no-op synchronization`。
-4. commit 失败时保留证据并阻塞，不重写历史或丢弃文件。成功后 `git status --short` 必须为空。
+4. commit 失败时保留证据并阻塞，不重写历史或丢弃文件。成功后回读 commit 的路径与内容，确认本次输出均已提交、剩余改动与初始无关工作一致；不要求整个工作区为空。
 
 下次运行通过 state 文件的 Git 历史定位本次输出 commit，因此不会把本次报告和文档提交重复纳入输入范围。

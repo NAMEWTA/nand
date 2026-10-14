@@ -46,7 +46,7 @@ docs-sync 必须遵循每个 workflow 的 `INDEX.md`。`docs-sync.json` 是 comm
 
 - 固定 archive 始终可作为只读证据；优先读取本次区间新增或变更、且与受影响模块或术语相关的高信号产物。
 - 归档中的稳定决策、术语、经验和文档漂移信号只提炼结论并保留来源路径，不复制大段正文。
-- `existing-only` store 永远只读。RULES/policy、ADR、CONTEXT、语义冲突和任何知识文件删除均进入 `propose-only`，按目标 workflow 规则取得逐次确认。
+- `existing-only` store 永远只读。RULES/policy、ADR、CONTEXT、语义冲突和任何知识文件删除均进入 `propose-only`，由目标 workflow 网关核对具体授权；当前任务中已有的明确授权可复用。
 - 不跨 workflow 搬运知识；共享结论必须先确认唯一归属。
 
 完成标准：commit 模式所有已安装 workflow 都有有效 sidecar；audit/update 不产生 sidecar；每个有效目标都有唯一 owner、声明边界和确认记录；所有受保护动作均未越权。

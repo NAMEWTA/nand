@@ -69,4 +69,4 @@ OPS 2.2 没有 change 归档 Work。读取 OPS 自身 README，按 host_id/proje
 - dry-run、确认、移动、回滚和最终验证均有报告；
 - 报告只出现在 `<Path>{roots.state}/commands/archive-and-consolidate/</Path>`；`path_context.commands_root` 等于 `{roots.state}/commands`，不等于 `{roots.commands}`；
 - 原始 Markdown 内容不被覆盖，跨路径引用通过 stable ID/locations 解析；
-- 未确认或失败事务不留下部分移动或 context 写入。
+- 未授权时不移动或写入知识；失败事务由 owner 按恢复合同核对并回滚本次动作，无法安全恢复时明确记录残留和恢复入口，不宣称成功。

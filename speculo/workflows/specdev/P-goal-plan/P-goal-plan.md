@@ -35,7 +35,7 @@ keywords: [goal, 目标, plan, run, resume, replan, verify, Lead]
 
 - 先冻结 Outcome、权威来源、用户指定的交付数量、范围、Definition of Done 和失败停止条件；按风险确定 DAG/Gate/Wave，不用文档长度替代质量。
 - 固定 `lead-directed`。`implementation_agent_limit` 不超过现有 config 与宿主能力；只读审查没有新增数字上限。进入派单前读取 `<Path>{roots.workflows}/specdev/P-goal-plan/lead-orchestration.md</Path>`。
-- 保留原 worktree 选择：未明确时询问，默认 current 严格串行；required 才使用独立 worktree 与 candidate-merge。用户已答过不重复问。默认工具、数量、提交与集成权限均不因入口合并改变。
+- 沿用用户明确的 worktree 选择；无偏好时按风险采用默认 current 严格串行，只有隔离选择实质影响交付时才询问；required 才使用独立 worktree 与 candidate-merge。用户已答过不重复问。默认工具、数量、提交与集成权限均不因入口合并改变。
 - `plan` 只形成计划，缺少执行授权是计划中可见的待满足条件，不等于获准执行。运行前逐项核对真实授权；文档中的“已批准”不构成授权。
 - 当前票必须调用所绑定的真实 Skill，不能以“读过入口”替代；先读取 `<Path>{roots.workflows}/specdev/common/rules/skill-invocation.md</Path>`。缺失必需 Skill、引用或验收证据时阻塞本票及依赖它的分支。
 - 他人 owner、资源或事务冲突仅暂停受影响的依赖闭包；继续独立已授权工作，不抢占、解锁或覆盖他人内容。正式记忆仍只走原网关。

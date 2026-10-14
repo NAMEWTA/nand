@@ -130,7 +130,7 @@ E2E 由实际跨边界行为与风险决定，不限于 UI；required 模式不�
 ## 10. 验收标准
 
 - [ ] `AC-001`：<可判定结果>。
-- [ ] 实现开始前已完整读取 Tickets Map，已读取项目 Skill 入口并完整展开其中适用于 `ALL`/`T-01` 的匹配项；新发现的匹配 Skill 已由 Lead 同步回 Map。
+- [ ] 实现开始前已读取 Tickets Map 的总体约束、本票与直接依赖，已读取适用项目 Skill 入口和当前分支必要参考；新匹配项由 Lead 同步回 Map，只有合同或授权失效才暂停受影响写入。
 - [ ] 验证矩阵全部执行并记录到 `<Path>{roots.state}/specdev/changes/{change}/evidence/T-01.md</Path>`。
 - [ ] 实际项目修改未超出 `writable_paths`，shared path 由指定 owner 修改。
 - [ ] Ticket 已按 Goal Plan 策略形成非空 implementation/source commit，direct-parent 或 candidate 验证通过且父分支 result 已记录。

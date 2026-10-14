@@ -22,7 +22,7 @@
 - 永久领域上下文：`<Path>{roots.state}/specdev/context/</Path>`
 - 永久研究：`<Path>{roots.state}/specdev/research/</Path>`
 
-初始化只保证永久目录存在，不写知识内容。只有 A-archive-and-consolidate 在 change 完成、实现证据验证、毕业评估和用户确认后，才能创建、合并或改写这些永久 namespace 中的内容；其他 Works 只读。
+初始化只保证永久目录存在，不写知识内容。永久 namespace 的新结论只由 A-archive-and-consolidate 在 change 完成、实现证据验证、毕业评估和用户授权后提升；其他 Works 只读。A 可按 `<Path>{roots.workflows}/specdev/A-archive-and-consolidate/fact-refresh.md</Path>` 纠正现有 context 的机械事实；该分支不创建或改变 workflow 状态，不用于架构决定与历史证据。
 
 单个 change 可以包含：
 
