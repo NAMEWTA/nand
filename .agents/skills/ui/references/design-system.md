@@ -1,72 +1,63 @@
 # 设计系统
 
-代码：`src/ui/styles/000-foundation.css`（令牌）、`src/ui/styles/001-primitives.css`（`nand-ui-*` 类名）、`src/ui/primitives/`（Preact 组件和原生封装）。一切都派生自 Obsidian 变量，所以当前的 Obsidian 主题、社区主题和 NAND 主题样式都能贯通。不要在模块里重新定义令牌。
+唯一视觉规范是 [03 设计系统](../../../../docs/refor/03-设计系统.md)。本文是实施速查；完整令牌取值、组件变体、尺寸和上游文件映射以该文档为准。React 19 + shadcn/ui（new-york-v4）组件放在 `src/ui/components/`，NAND 组合组件放在 `components/nand/`；迁移期约定见 [ui 技能](../SKILL.md)。
 
-## 令牌
+## 令牌速查
 
-| 用途 | 令牌 |
+令牌定义在 `src/ui/styles/tokens.css` 的 `.nand-ui` 上，默认派生自 Obsidian 变量，经 `src/ui/tailwind/index.css` 的 `@theme inline` 映射。组件优先写语义工具类（如 `bg-card text-muted-foreground`），不直接写颜色值。
+
+| 用途 | 令牌或工具类 |
 |---|---|
-| 间距（4px 基准） | `--nand-space-1` … `--nand-space-8` |
-| 圆角 | `--nand-radius-xs` 4px（小标签、轨道）、`-sm` 6px（控件、行）、`-md` 8px（卡片、浮层）、`-lg` 12px（对话框）、`-pill` |
-| 表面 | `--nand-surface`、`--nand-surface-muted`、`--nand-surface-hover`、`--nand-surface-active` |
-| 边框 | `--nand-border`、`--nand-border-color`、`--nand-border-color-strong` |
-| 强调色 | `--nand-accent`、`--nand-accent-soft`（选中填充）、`--nand-accent-softer`（放置目标）、`--nand-accent-border`，文字用 `--text-accent` |
-| 状态（仅表达含义） | `--nand-tone-success`、`-warning`、`-error`、`-info` |
-| 层级阴影 | `--nand-shadow-xs` 静止、`-sm` 悬停、`-md` 浮层、`-lg` 悬浮 |
-| 字号 | `--nand-text-caption`、`-body`、`-title`、`-heading`；文字颜色 `--text-normal`、`--text-muted`、`--text-faint` |
-| 控件 | `--nand-control-height-sm` 28px、`--nand-control-height` 32px、`-lg` 36px、`--nand-touch-target` 44px、`--nand-icon-size` 16px |
-| 外壳 | `--nand-rail-width` 52px、`--nand-panel-width`、`--nand-header-height` 44px、`--nand-list-row-height` 32px |
-| 层 | `--nand-z-base`、`-sticky`、`-overlay`、`-popover`、`-modal`、`-toast`（最高 50） |
-| 动效 | `--nand-duration-fast` 120ms、`--nand-duration` 180ms、`--nand-duration-slow` 240ms、`--nand-ease` |
-| 焦点 | `--nand-focus-ring` |
+| 页面、卡片、弹层 | `--background` / `--foreground`、`--card` / `--card-foreground`、`--popover` / `--popover-foreground` |
+| 主操作、次要操作、弱化内容、悬停 | `--primary`、`--secondary`、`--muted`、`--accent` 及各自 `-foreground` |
+| 危险、边线、输入、焦点 | `--destructive` / `--destructive-foreground`、`--border`、`--input`、`--ring` |
+| 侧栏 | `--sidebar`、`--sidebar-foreground`、`--sidebar-accent`、`--sidebar-accent-foreground`、`--sidebar-border` |
+| 状态、智能体等待、图表 | `--status-success`、`--status-warning`、`--status-error`、`--status-info`、`--status-working`、`--agent-question`、`--chart-1`～`--chart-5` |
+| 字体 | `--nd-font-sans`（Geist + 中文系统回退）、`--nd-font-mono`（Geist Mono）；终端字体独立设置 |
+| 圆角 | `--radius: 0.625rem`；`rounded-sm/md/lg/xl` = 6/8/10/14px，药丸用 `rounded-full` |
+| 间距、字号 | 4px 基准；`text-3xs/2xs/xs/sm` = 10/11/12/14px；密集行 `text-[13px]`，数字 `tabular-nums` |
+| 阴影 | 细线 → `shadow-xs` + 细线 → 弹层 `shadow-floating`，不另造层级 |
+| 层级 | 粘性内容用规范指定的 `z-10`；拖拽、菜单、模态框、提示、通知分别用 `--layer-dragged-item`、`--layer-menu`、`--layer-modal`、`--layer-tooltip`、`--layer-notice`（如 `z-[var(--layer-menu)]`） |
+| 动效 | `--anim-duration-fast`、`--anim-duration-moderate`；细则见 [动效与无障碍](motion-a11y.md) |
 
-需要对齐的数字（计数、金额、时间）使用 `font-variant-numeric: tabular-nums`。嵌套圆角等于外层圆角减去内边距。
+默认跟随 Obsidian；可选 `.nand-ui[data-palette="orca"]` 中性配色。看板是主题例外：`.nand-dashboard-root[data-theme]` 保留 apex 的 `--db-*`，再映射为同一组组件令牌。看板弹窗也加 `nand-dashboard-root` 和 `data-dashboard-theme` 镜像主题，不能依赖它在看板 DOM 下继承。主题字体开关默认关，界面默认统一 Geist。
 
-## 原语
+## 组件清单
 
-`src/ui/primitives/` 里的 Preact 组件：
-
-| 组件 | 用途 |
+| 用途 | `src/ui/components/` |
 |---|---|
-| `Button`（变体 default/primary/ghost/danger，尺寸 sm/md）、`IconButton` | 操作；`IconButton` 需要 `label`（它会成为 `aria-label` 和提示） |
-| `TextField`、`SearchField` | 带标签的输入框／文本域；面板和列表搜索 |
-| `Tabs`（分段式，`aria-pressed`）、`TabStrip` | 小范围的互斥选择；页面区的资源标签 |
-| `ListItem` | 可选中的行，带图标、元信息、徽标和悬停操作 |
-| `Badge`、`SaveStatus`、`Skeleton`、`EmptyState` / `renderEmptyState` | 状态标签、保存中／已保存／错误、加载占位、空／停用／错误状态 |
-| `Icon` | 组件里的 Obsidian `setIcon` |
-| `openDialog`、`promptText` | 带 Preact 内容的 Obsidian `Modal`；单字段输入框 |
-| `showMenu` | 由条目生成的 Obsidian `Menu` |
-| `localized-dom`、`localized-form` | 无需重绘就能跟随语言的原生标签 |
+| 操作与表单 | `Button`、`Input`、`Textarea`、`Label`、`Select`、`Switch`、`Checkbox`、`Slider`、`Progress` |
+| 切换与容器 | `Toggle`、`ToggleGroup`、`Tabs`、`ScrollArea`、`Separator`、`Collapsible`、`Accordion`、`Resizable` |
+| 菜单与选择 | `DropdownMenu`、`ContextMenu`、`Command`（cmdk） |
+| 弹层 | `Tooltip`、`Popover`、`HoverCard`、`Dialog`、`Sheet`、`AlertDialog` |
+| 展示与反馈 | `Badge`、`Card`、`Skeleton`、`Table`、`Toaster` / `toast`（sonner） |
+| NAND 组合 | `EmptyState`、`SettingsSection`、`SettingsRow`、`SettingsSwitchRow`、`SegmentedControl`、`SettingsBadge`、`StatusDot`、`AgentIcon`、`ObsidianIcon`、`ShortcutKeyCombo`、`RelativeTime`、`InlineRename`、`ConfirmDialog`、`PathPicker`、`IconPicker`、`ColorField`、`NumberField` |
 
-`001-primitives.css` 里只有 CSS 的构件：`nand-ui-card`（`is-interactive`、`is-selected`）、`nand-ui-btn`、`nand-ui-btn-ghost`、`nand-ui-icon-btn`、`nand-ui-segmented`、`nand-ui-field`、`nand-ui-badge`（`--accent`、`--success`、`--warning`、`--error`、`--info`）、`nand-ui-dot`、`nand-ui-list`、`nand-ui-list-item`（`-title`、`-meta`）、`nand-ui-section-label`、`nand-ui-toolbar`、`nand-ui-spacer`、`nand-ui-stack`、`nand-ui-divider`、`nand-ui-scroll`、`nand-ui-panel-muted`。
+Button 变体为 `default/secondary/outline/ghost/link/destructive`；取消不是危险操作。图标用 `lucide-react`，只有用户配置的 Obsidian 图标名通过 `ObsidianIcon` 包装 `setIcon`。设置页用 React 设置行；自动化编辑、外观工作室和统计使用设计规定的大对话框。可编辑批注浮窗用受控 `Popover`，不能用 `Tooltip` 或 `HoverCard` 装表单。
 
-shell 模式（`src/shell/`）：`Rail`、`SidePanel`、`PageHeader`。设置页使用原生 `Setting` 行，并用 `setHeading()` 分组。
+保留上游 Tailwind 类名与 `data-slot`；类名由 `cn()` 合并，调用方 `className` 最后传入。`tailwind-merge` 登记自定义字号 `2xs/3xs`，防止与文字颜色类冲突。表单关联 Label 和说明；IME 组合期间不响应 Enter 提交。可访问名称、焦点和触控尺寸见动效与无障碍参考。
 
-## 组合
+## CSS 与 Portal
 
-- 每个页面或对话框只有一个主操作。次要操作用 ghost 或图标按钮；破坏性操作用 danger 变体或 `mod-warning`。
-- 先用留白分隔，其次用弱化的表面，最后才用细边框。静止的卡片不同时使用强边框和重阴影。
-- 悬停只变化一级（填充、边框或一级阴影）。不做缩放跳变。
-- 默认中性；颜色用来标记选中和含义，从不用于装饰。
-- 层级靠字重和字号：标题 600，正文常规，元信息用 `--text-muted` 的小字。
-- 组与组之间的间距至少是组内间距的两倍。卡片内边距 12–16px。
-- 阅读和表单页面限制宽度（760–960px）；看板、终端和浏览器使用全宽。
-- 空、加载和错误状态要经过设计并居中，使用同样的令牌。
+隔离算法见 [02 架构文档 §5](../../../../docs/refor/02-架构文档.md#5-样式构建流水线)：
 
-## CSS 规则
+- 所有 React 根带 `.nand-ui`；Tailwind 输出展开 `@layer`，顶层选择器追加 `:is(.nand-ui, .nand-ui *):not(#\#)`，把 `:root/:host` 变量限定到 `.nand-ui`。保留上游类名，不添加类名前缀。
+- 中和层只清除 NAND 作用域内的宿主表单样式，跳过 `.markdown-rendered`、`.nand-native`、`.cm-editor`。Obsidian `MarkdownRenderer` 的外层加 `nand-native`。
+- 每个 Document 共用按引用计数管理的 `div.nand-ui.nand-portal-root`（`display: contents`）。Radix 的所有 Portal 和 sonner 均使用所属窗口的容器；最后一个使用者释放时移除。
+- 能用 Tailwind 就不手写 CSS。xterm、CodeMirror、动画关键帧等作者 CSS 放在所属模块的 `styles/`，以 `.nand-ui` 或模块根类限定。主题令牌和看板主题放在各自专用文件。
+- 字面量颜色只在 `src/theme/`、令牌层和获准的看板主题文件中出现；模块布局只用语义令牌。不用 `!important`，不自造裸数字 z-index；粘性元素的 `z-10` 是规范指定例外。
+- `pnpm run lint:css` 检查作者 CSS，手写规则不使用 `:has`；上游 Tailwind 的 `has-*` 变体随生成产物保留。`build/tailwind.scoped.css` 和 `src/ui/styles/fonts.generated.css` 不参与作者样式检查。构建顺序见 [构建参考](../../dev/references/build-and-release.md)。
 
-由 `pnpm run lint:css` 强制（stylelint，`stylelint.config.mjs`；列在只减不增的基线 `scripts/stylelint-baseline.json` 里的文件，可以保留为它们列出的违规）：
+## 允许的库
 
-- 除 `src/theme/` 和令牌层之外，不用字面量颜色（十六进制、`rgb()`、`hsl()`……）。
-- 不用 `!important`，不用 `:has`。
-- `z-index` 只通过 `--nand-z-*` 令牌。
-- 没有重复选择器。
-- 限定在模块的类名下；给 Obsidian 自身 DOM 设样式的规则挂在模块激活期间添加的 body 类名下（`body.nand-iconic-enabled`、`body.nand-theme--…`）。
+| 用途 | 允许 |
+|---|---|
+| 运行时与组件 | `react`、`react-dom`（19 系列）、`radix-ui`、shadcn/ui 源码 |
+| 样式与变体 | `tailwindcss` / `@tailwindcss/cli`（v4）、`tw-animate-css`、`class-variance-authority`、`clsx`、`tailwind-merge` |
+| 图标、搜索、提示 | `lucide-react`、`cmdk`、`sonner` |
+| 状态 | `zustand`；服务层只用 `zustand/vanilla`，分区规则见 dev 架构参考 |
+| 拖拽、虚拟列表、分屏 | `@dnd-kit/core`、`@dnd-kit/sortable`、`@dnd-kit/utilities`、`@tanstack/react-virtual`、`react-resizable-panels` |
+| 专用渲染 | chart.js（按需加载图表）、xterm.js / `@xterm/*`（终端） |
+| 宿主集成 | Obsidian `MarkdownRenderer`、`FuzzySuggestModal`、工作台外 `Notice`、原生设置入口与菜单适配 |
 
-看板的 `--db-*` 变量是在全局令牌基础上一次性定义的别名（`src/modules/home/styles/004-root.css`）。它们属于看板及其对话框；新的界面使用 `--nand-*` 令牌。
-
-## 库
-
-允许：`preact`（`react` 导入用 `preact/compat`）、Obsidian 自带的控件（`Setting`、`Menu`、`Modal`、`SuggestModal`、`setIcon`、`setTooltip`）、在单个窗口内拖动用的指针事件、chart.js（懒加载，首页图表）、xterm.js（智能体）。
-
-拒绝：React 19 / `react-dom`、MUI、Chakra、Ant Design、shadcn、Tailwind、Bootstrap、styled-components、Emotion、dnd-kit、react-beautiful-dnd、flatpickr、choices.js、取色器包。如果用这些做不到，就停下来说明。
+不引入第二套界面库（MUI、Chakra、Ant Design、Bootstrap 等）或 CSS-in-JS。组件来源、版权注释、字体许可和分发声明见 [许可参考](../../dev/references/licensing.md)。

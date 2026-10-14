@@ -45,6 +45,10 @@ context.lifetime.register(settings.subscribe(refresh));
 - `touch()` 用来保存原地修改，为首页模块的看板代码而存在；新代码使用 `update`。
 - 密钥（API key、令牌）不应放进库级设置；放在设备范围里，或根本不放进库，并在界面上说明。
 
+## React 设置界面
+
+工作台设置用 React 的 `SettingsSection` / `SettingsRow` / `SettingsSwitchRow`，模块 `settingsPage` 返回懒加载组件；迁移期旧渲染器的清理合同见 [模块编写](module-authoring.md)。界面订阅设置句柄，不持有第二份持久状态；编辑草稿可留在组件内，保存失败保留草稿。快捷命令归属 `agent.quickCommands`，数据位置见 [架构参考](architecture.md)。
+
 ## 文案
 
 `t(key, params?)`（`src/shared/i18n`）先在当前语言里查键，再查英文，最后返回键本身。参数替换 `{name}`。
@@ -64,6 +68,6 @@ context.lifetime.register(settings.subscribe(refresh));
 
 ## 语言
 
-语言偏好是 `app.language`（`zh` 或 `en`）。新库跟随 Obsidian 的语言（中文 → `zh`，否则 `en`）。切换语言先保存，再调用 `setLanguage`；保存失败则保持原语言。显示文案的组件用 `onLanguageChanged` 订阅并重绘，不丢失草稿；只创建一次的原生标签使用 `src/ui/primitives/localized-dom.ts` 和 `localized-form.ts` 里的绑定。用户内容、路径、标识符、提示词和 CLI 输出从不翻译。
+语言偏好是 `app.language`（`zh` 或 `en`）。新库跟随 Obsidian 的语言（中文 → `zh`，否则 `en`）。切换语言先保存，再调用 `setLanguage`；保存失败则保持原语言。React 组件用 `NandProviders` 中的语言上下文与 `useT()` 订阅语言变化，底层仍走 `t()`，切换不丢草稿；必要的原生入口通过 `onLanguageChanged` 更新并清理订阅。用户内容、路径、标识符、提示词和 CLI 输出从不翻译。
 
 英文界面文字用句首大写。命令名称来自 `nameKey`，因此跟随语言。

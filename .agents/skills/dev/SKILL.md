@@ -12,7 +12,7 @@ metadata:
 
 # 插件开发
 
-本技能只适用于本仓库。它改编了 `metadata.adapted-from` 所列的 Obsidian 插件规则；两者冲突时以本文为准。不要新建插件脚手架、不要改插件 id、不要把仓库改成网页应用。
+本技能只适用于本仓库。重构目标以 [决策记录](../../../docs/refor/00-决策记录.md) 为准，技术栈与迁移期规则见 [ui 技能](../ui/SKILL.md)。它改编了 `metadata.adapted-from` 所列的 Obsidian 插件规则；两者冲突时以本文为准。不要新建插件脚手架、不要改插件 id、不要把仓库改成网页应用。
 
 ## 按任务读取
 
@@ -39,7 +39,7 @@ metadata:
 | 显示名称 | `NAND` |
 | 插件 id | `nand` |
 | 视图类型 | `nand-workbench-view`（工作台）、`nand-comments-view`（评论侧栏） |
-| 模块 | `home`、`agent`、`browser`、`news`、`archives`、`automations`、`notifications`、`icons`、`comments`、`sync` |
+| 模块 | `home`、`agent`、`browser`、`archives`、`automations`、`notifications`、`icons`、`comments`、`sync` |
 | `minAppVersion` | `1.13.0`（不要使用标注 `@since 1.13.1` 或更高的 API） |
 | `isDesktopOnly` | `false` |
 | 许可证 | MIT（`LICENSE`；署名在 `NOTICE` 与 `THIRD-PARTY-NOTICES.md`） |
@@ -56,7 +56,7 @@ metadata:
 3. 模块代码是懒加载的。启动代码（`app`、清单、`api.ts`、启动词典）不得静态导入模块的 `module.ts`、`core`、`platform`、`services`、`contrib` 或 `ui`，`module.ts` 也不得静态导入自己的 `ui/`。`pnpm run check:bundle` 检查启动预算和各模块预算。
 4. 模块自己启动、自己停止。它创建的一切都在 `dispose()` 里，或通过 `context.lifetime`、`context.commands`、`context.editor` 释放；关闭模块后不得留下监听器、命令、编辑器扩展、body 类名或进程。一个模块失败不影响其他模块。
 5. 设置是设置存储里的命名空间：用 `context.settings.bind(name, schema)` 绑定模块的模式，用 `update` 修改值。不要新增平铺的插件设置，也不要调用 `saveData`。
-6. 全部 NAND 自身生成、下载、持久化和管理的数据以当前 vault/.nand 为唯一根：受管 Markdown/附件在 `.nand/content/`，配置、身份、运行状态、浏览器 Cookie/缓存/下载/桥接、CLI 凭据/HOME/临时目录/Hook 及 helper 均在其中，按领域、设备和身份隔离。插件目录仅保留宿主加载资产；普通笔记、宿主数据和 Git 元数据不搬迁。评论从不改写笔记。用户数据格式由测试锁定：看板、档案、自动化和记录由黄金样本锁定，评论旁路文件由评论测试锁定，`iconic.json` 由 Iconic 移植测试锁定。只有有意修改时才改，并同时更新样本。
+6. 全部 NAND 自身生成、下载、持久化和管理的数据以当前 vault/.nand 为唯一根：受管 Markdown/附件在 `.nand/content/`，配置、身份、运行状态、浏览器 Cookie/缓存/下载、CLI 凭据/HOME/临时目录/Hook 及 helper 均在其中，按领域、设备和身份隔离。插件目录仅保留宿主加载资产；普通笔记、宿主数据和 Git 元数据不搬迁。评论从不改写笔记。用户数据格式由测试锁定：看板、档案、自动化和记录由黄金样本锁定，评论旁路文件由评论测试锁定，`iconic.json` 由 Iconic 移植测试锁定。只有有意修改时才改，并同时更新样本；本次重构按 D01/D13 采用新格式，不写迁移、不删除不可读的旧数据。
 7. 每条面向用户的文案都通过 `t()`，在模块自己的 `i18n.ts` 里同时提供 `en` 和 `zh`，在 `module.ts` 加载时注册。`src/shared/i18n/` 里的启动词典只放启动代码读取的键。
 8. Node 和 Electron 只在 `desktop/` 文件夹里使用，且只在桌面端到达。core 和 shared 代码完全不使用宿主包。
 9. 代码检查零警告通过（`pnpm run lint`）。不要为此关闭规则；修改代码，或在 `eslint.config.mts` 里记录带理由的局部例外。
