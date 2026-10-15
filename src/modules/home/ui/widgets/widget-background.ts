@@ -1,6 +1,6 @@
-import { bindLocalizedOptions } from '../../../../ui/primitives/localized-dom';
-import { bindLocalizedControl } from '../../../../ui/primitives/localized-dom';
-import { localizedAttributes, localizedText } from '../../../../ui/primitives/localized-dom';
+import { bindLocalizedOptions } from '../../../../host/obsidian/localized-dom';
+import { bindLocalizedControl } from '../../../../host/obsidian/localized-dom';
+import { localizedAttributes, localizedText } from '../../../../host/obsidian/localized-dom';
 import { App, Modal, Setting, setIcon, type TextComponent } from 'obsidian';
 import { DEFAULT_WIDGET_BACKGROUND, type WidgetBackground } from '../../core/board/types/index';
 import { t } from '../../../../shared/i18n/index';
@@ -129,7 +129,6 @@ export class WidgetBackgroundModal extends Modal {
 		const { contentEl, containerEl } = this;
 		contentEl.empty();
 		contentEl.addClass('dashboard-library-config-modal');
-		containerEl.addClass('modal--dashboard');
 		containerEl.parentElement?.addClass('modal-bg--dashboard');
 		applyModalTheme(containerEl);
 

@@ -1,0 +1,15 @@
+/* CodeMirror widgets live in the host editor, outside the React .nand-ui scope. */
+.nand-sync-conflict-actions {
+	display: inline-flex;
+	flex-wrap: wrap;
+	gap: var(--size-4-1);
+	margin-inline-start: var(--size-4-2);
+	vertical-align: middle;
+}
+
+.nand-sync-conflict-button {
+	height: auto;
+	padding: 0 var(--size-4-2);
+	font-family: var(--font-interface);
+	font-size: var(--font-ui-smaller);
+}

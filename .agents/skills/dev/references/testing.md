@@ -27,7 +27,7 @@
 
 ## Vitest
 
-目标配置保留 `unit`（Obsidian 别名到 `scripts/obsidian-stub.ts`，node 环境）与 `settings-iconic`（列出的设置/Iconic 测试，使用专用桩），新增 `dom`（happy-dom，包含 `src/**/*.dom.test.tsx`，Obsidian 使用普通桩）。`unit` 排除 `*.dom.test.tsx`，避免同一组件测试在 node 中重复执行。JSX 默认 React，删除 React → Preact 别名；旧 JSX 的文件级注释按 [ui 技能](../../ui/SKILL.md) 保留。初始化文件 `scripts/module-strings.ts` 注册模块词典和懒加载词典，所以组件渲染的是真实文案。`.svg` 和 `.md` 导入与打包一样按文本加载。
+目标配置保留 `unit`（Obsidian 别名到 `scripts/obsidian-stub.ts`，node 环境）与 `settings-iconic`（列出的设置/Iconic 测试，使用专用桩），新增 `dom`（happy-dom，包含 `src/**/*.dom.test.tsx`，Obsidian 使用普通桩）。`unit` 排除 `*.dom.test.tsx`，避免同一组件测试在 node 中重复执行。JSX 统一为 React，不设置兼容运行时别名；组件约定见 [ui 技能](../../ui/SKILL.md)。初始化文件 `scripts/module-strings.ts` 注册模块词典和懒加载词典，所以组件渲染的是真实文案。`.svg` 和 `.md` 导入与打包一样按文本加载。
 
 纯逻辑测试是就近的 `*.test.ts`，React 交互测试是 `*.dom.test.tsx` 文件，从 `vitest` 导入 `test`/`vi`，而不是新增验证脚本。测试在 `pnpm run build` 期间由 `tsconfig.test.json` 做类型检查。测试依赖的时区或时钟要固定（`vi.useFakeTimers({ now, toFake: ['Date'] })`）。
 

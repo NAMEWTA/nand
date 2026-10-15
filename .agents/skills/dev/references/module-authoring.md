@@ -56,7 +56,7 @@
 
 目标接口由 `settingsPage` 懒加载并返回 React 组件，例如 `settingsPage: () => import('./ui/settings/XxxSettings').then(m => m.default)`。在工作台设置导航中注册分类（`src/app/settings/nav.ts` 与 `src/app/workbench/settings-categories.ts`）；页面使用 `SettingsSection` / `SettingsRow` / `SettingsSwitchRow`，通过设置句柄读取和更新值。Obsidian 设置页 `src/app/settings/entry-tab.ts` 仅保留打开工作台设置的入口按钮。
 
-阶段 3～8 的 React 模块需同时声明 `settingsPageKind: 'react'`，避免用函数参数数量猜测类型。迁移期宿主仍支持旧 `(container, host) => void` 渲染函数，由 React 包装容器挂载：`host.refresh()` 重绘，`host.keep(off)` 绑定显示期间订阅；阶段 9 删除旧路径。新设置只写 React，组件订阅在卸载时清理。宿主在隐藏、关闭、重绘或模块停用时释放旧宿主资源；停用后退出对应分类，不因无关模块变化丢失草稿，异步结果必须检查是否失效。
+模块设置只使用懒加载 React 组件，不再声明迁移期开关或支持旧 DOM 渲染函数。组件订阅在卸载时清理；停用后退出对应分类，不因无关模块变化丢失草稿，异步结果必须检查是否失效。
 
 状态仓库放在 `services/`，变换放 `core/`，组件只订阅并调用动作；具体边界见 [架构参考](architecture.md)。
 

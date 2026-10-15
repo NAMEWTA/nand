@@ -9,7 +9,7 @@ import ts from 'typescript';
 
 const root = path.resolve(import.meta.dirname, '..');
 const nodeBuiltins = new Set([...builtinModules, ...builtinModules.map((n) => `node:${n}`)]);
-const hostPackages = new Set([...nodeBuiltins, 'obsidian', 'electron', 'preact', 'react', 'react-dom', 'radix-ui']);
+const hostPackages = new Set([...nodeBuiltins, 'obsidian', 'electron', 'react', 'react-dom', 'radix-ui']);
 const uiPackages = new Set(['react', 'react-dom', 'radix-ui', 'lucide-react', 'class-variance-authority', 'clsx', 'tailwind-merge', 'cmdk', 'sonner', 'zustand', '@dnd-kit/core', '@dnd-kit/sortable', '@dnd-kit/utilities', '@tanstack/react-virtual', 'react-resizable-panels']);
 function allowedPackage(zone, specifier) {
  const name = specifier.startsWith('@') ? specifier.split('/').slice(0, 2).join('/') : specifier.split('/')[0];
@@ -234,7 +234,7 @@ for (const file of files) {
 			errors.add(`${relative(file)} -> ${relative(target)}: forbidden zone direction`);
 		if (!target && !specifier.startsWith('.')) {
 			if (!allowedPackage(own.zone, specifier)) errors.add(`${relative(file)} -> ${specifier}: UI dependency outside a UI zone`);
-			if (pure && (hostPackages.has(specifier) || /^(?:@codemirror|@xterm|preact|react)(?:\/|$)/.test(specifier)))
+			if (pure && (hostPackages.has(specifier) || /^(?:@codemirror|@xterm|react)(?:\/|$)/.test(specifier)))
 				errors.add(`${relative(file)} -> ${specifier}: host dependency in ${own.zone}`);
 			else if ((specifier === 'electron' || nodeBuiltins.has(specifier)) && !desktop)
 				errors.add(`${relative(file)} -> ${specifier}: desktop-only dependency outside a desktop folder`);

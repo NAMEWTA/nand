@@ -1,7 +1,7 @@
 import type { Chart } from 'chart.js';
 import type { EventRef, HoverParent } from 'obsidian';
 import { App, Component, TFile } from 'obsidian';
-import { refreshLocalizedDom } from '../../../../ui/primitives/localized-dom';
+import { refreshLocalizedDom } from '../../../../host/obsidian/localized-dom';
 import { SUPPORTED_FILE_EXTS } from '../../../../shared/file-types';
 import { contentFiles, type ContentFile } from '../../../../host/obsidian/storage/content-files';
 

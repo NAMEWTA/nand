@@ -1,5 +1,5 @@
 import { Notice, TFile } from 'obsidian';
-import { showMenu } from '../../../../ui/primitives/menu';
+import { showMenu } from '../../../../host/obsidian/menu';
 import { t } from '../../../../shared/i18n';
 import { buildSkillContext, type SkillContext } from '../../core/skills/context';
 import { dispatchSkillShortcut } from '../../services/skill-shortcuts';

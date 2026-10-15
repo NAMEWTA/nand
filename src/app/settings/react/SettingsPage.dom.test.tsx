@@ -1,8 +1,7 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { expect, test, vi } from 'vitest';
 import { act, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import type { SettingsPageHost } from '../../contracts/module';
 import { TestProviders } from '../../../ui/react/test-providers';
 import { SettingsPage } from './SettingsPage';
 
@@ -12,15 +11,16 @@ vi.mock('../../workbench/settings-categories', () => ({
 }));
 vi.mock('./GeneralSettings', () => ({ GeneralSettings: () => null }));
 
-test('React settings loader refreshes without remounting and releases host subscriptions', async () => {
+test('React settings keeps component state across updates and releases its own subscriptions', async () => {
 	const mount = vi.fn(),
 		off = vi.fn();
-	function ModulePage(host: SettingsPageHost) {
+	function ModulePage() {
+		const [revision, setRevision] = useState(0);
 		useEffect(() => {
 			mount();
-			host.keep(off);
-		}, [host.keep]);
-		return <button onClick={host.refresh}>Refresh settings</button>;
+			return off;
+		}, []);
+		return <button onClick={() => setRevision(revision + 1)}>Refresh settings {revision}</button>;
 	}
 	const load = vi.fn(async () => ModulePage);
 	const settings = {};
@@ -36,7 +36,8 @@ test('React settings loader refreshes without remounting and releases host subsc
 			<SettingsPage plugin={plugin} category="browser" navigate={vi.fn()} />
 		</TestProviders>,
 	);
-	await userEvent.setup().click(await screen.findByRole('button', { name: 'Refresh settings' }));
+	await userEvent.setup().click(await screen.findByRole('button', { name: 'Refresh settings 0' }));
+	expect(screen.getByRole('button', { name: 'Refresh settings 1' })).toBeTruthy();
 	expect(mount).toHaveBeenCalledOnce();
 	expect(load).toHaveBeenCalledOnce();
 	expect(off).not.toHaveBeenCalled();

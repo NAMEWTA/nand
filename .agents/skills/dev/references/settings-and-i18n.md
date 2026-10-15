@@ -47,7 +47,7 @@ context.lifetime.register(settings.subscribe(refresh));
 
 ## React 设置界面
 
-工作台设置用 React 的 `SettingsSection` / `SettingsRow` / `SettingsSwitchRow`，模块 `settingsPage` 返回懒加载组件；迁移期旧渲染器的清理合同见 [模块编写](module-authoring.md)。界面订阅设置句柄，不持有第二份持久状态；编辑草稿可留在组件内，保存失败保留草稿。快捷命令归属 `agent.quickCommands`，数据位置见 [架构参考](architecture.md)。
+工作台设置用 React 的 `SettingsSection` / `SettingsRow` / `SettingsSwitchRow`，模块 `settingsPage` 返回懒加载组件；组件清理合同见 [模块编写](module-authoring.md)。界面订阅设置句柄，不持有第二份持久状态；编辑草稿可留在组件内，保存失败保留草稿。快捷命令归属 `agent.quickCommands`，数据位置见 [架构参考](architecture.md)。
 
 ## 文案
 

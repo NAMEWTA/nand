@@ -1,7 +1,7 @@
 .nand-terminal-view {
 	position: absolute;
 	inset: 0;
-	padding: var(--nand-space-1) 0 0 var(--nand-space-2);
+	padding: var(--size-4-1) 0 0 var(--size-4-2);
 	overflow: hidden;
 	background: var(--nand-terminal-background, var(--background-primary));
 }
@@ -13,99 +13,6 @@
 }
 .nand-terminal-view.is-hidden { display: none; }
 .nand-terminal-view .xterm { height: 100%; }
-
-.nand-agent-section {
-	height: 100%;
-	overflow-y: auto;
-	padding: var(--nand-space-4) var(--nand-space-6);
-}
-
-.nand-agent-history,
-.nand-agent-preview,
-.nand-agent-usage { max-width: 960px; margin: 0 auto; }
-.nand-agent-history-toolbar,
-.nand-agent-preview-toolbar,
-.nand-agent-usage-toolbar {
-	display: flex;
-	flex-wrap: wrap;
-	align-items: center;
-	gap: var(--nand-space-2);
-	margin-bottom: var(--nand-space-3);
-}
-.nand-agent-history-search { flex: 1; min-width: 12rem; }
-.nand-agent-history-usage,
-.nand-agent-preview-meta {
-	color: var(--text-muted);
-	font-size: var(--nand-text-caption);
-}
-.nand-agent-history-warning { color: var(--nand-tone-warning); }
-.nand-agent-history-error { color: var(--nand-tone-error); }
-.nand-agent-history-loading { color: var(--text-muted); }
-.nand-agent-history-list {
-	list-style: none;
-	margin: 0;
-	padding: 0;
-}
-.nand-agent-history-row {
-	display: flex;
-	flex-direction: column;
-	align-items: flex-start;
-	gap: 2px;
-	width: 100%;
-	height: auto;
-	padding: var(--nand-space-2) var(--nand-space-3);
-	border: none;
-	border-radius: var(--nand-radius-sm);
-	background: transparent;
-	box-shadow: none;
-	text-align: start;
-}
-.nand-agent-history-row:hover { background: var(--nand-surface-hover); }
-.nand-agent-history-title { color: var(--text-normal); font-weight: var(--font-semibold); }
-.nand-agent-history-meta { color: var(--text-muted); font-size: var(--nand-text-caption); }
-.nand-agent-history-pages {
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	gap: var(--nand-space-3);
-	margin-top: var(--nand-space-3);
-	color: var(--text-muted);
-}
-
-.nand-agent-preview-title { margin: var(--nand-space-2) 0 var(--nand-space-1); }
-.nand-agent-preview-text {
-	margin-top: var(--nand-space-3);
-	padding: var(--nand-space-3);
-	border: var(--nand-border);
-	border-radius: var(--nand-radius-sm);
-	background: var(--background-secondary);
-	font-family: var(--font-monospace);
-	font-size: var(--nand-text-caption);
-	white-space: pre-wrap;
-	overflow-wrap: anywhere;
-	user-select: text;
-}
-
-.nand-agent-usage-vault { margin-top: var(--nand-space-4); }
-
-.nand-agent-preset-form {
-	display: flex;
-	flex-direction: column;
-	gap: var(--nand-space-2);
-}
-.nand-agent-preset-shell {
-	display: flex;
-	align-items: center;
-	justify-content: space-between;
-	gap: var(--nand-space-3);
-}
-.nand-agent-settings-agent {
-	margin-block: var(--nand-space-3);
-	padding: 0 var(--nand-space-4);
-	border: var(--nand-border);
-	border-radius: var(--nand-radius-md);
-	background: var(--nand-surface);
-}
 
 /* Group/pane separators retain Orca's 1px seam with a larger pointer target. */
 .nand-ui .nand-agent-resize { position: relative; }

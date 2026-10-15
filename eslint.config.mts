@@ -1,21 +1,9 @@
-import fs from 'node:fs';
-import path from 'node:path';
 import reactHooks from 'eslint-plugin-react-hooks';
 import noObsidianThenable from './scripts/no-obsidian-thenable.mjs';
 import tseslint from 'typescript-eslint';
 import obsidianmd from "eslint-plugin-obsidianmd";
 import globals from "globals";
 import { globalIgnores } from "eslint/config";
-
-// React Compiler diagnostics do not understand Preact hooks. Apply the full recommended
-// rules to React files; legacy files opt out only while their explicit Preact pragma remains.
-function legacyTsx(directory: string): string[] {
- return fs.readdirSync(directory, { withFileTypes: true }).flatMap((entry) => {
-  const file = path.join(directory, entry.name);
-  return entry.isDirectory() ? legacyTsx(file) : file.endsWith('.tsx') && fs.readFileSync(file, 'utf8').startsWith('/** @jsxImportSource preact */') ? [file.replaceAll(path.sep, '/')] : [];
- });
-}
-const preactFiles = legacyTsx('src');
 
 export default tseslint.config(
 	{
@@ -38,7 +26,7 @@ export default tseslint.config(
 		},
 	},
 	...obsidianmd.configs.recommended,
-	{ files: ['src/**/*.tsx'], ignores: preactFiles, plugins: { 'react-hooks': reactHooks }, rules: { ...reactHooks.configs.recommended.rules } },
+	{ files: ['src/**/*.tsx'], plugins: { 'react-hooks': reactHooks }, rules: { ...reactHooks.configs.recommended.rules } },
 	{ plugins: { nand: { rules: { "no-obsidian-thenable": noObsidianThenable } } }, rules: { "nand/no-obsidian-thenable": "error" } },
 	// TanStack Virtual owns a mutable measurement instance. This component intentionally
 	// opts out of React Compiler memoization; the virtualizer drives its own updates.

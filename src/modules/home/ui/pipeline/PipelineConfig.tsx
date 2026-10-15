@@ -1,5 +1,4 @@
 // Layout and interaction adapted from PandoraReads/apex-dashboard ac4d2c7 (MIT), Copyright (c) 2025 PandoraReads: src/pipeline-section.ts
-import { p1Classes } from '../theme/p1-classes';
 import { useState } from 'react';
 import type { PipelineConfig as Config, PipelineStage } from '../../core/pipeline/model';
 import { pipelineConfigError } from '../../core/pipeline/rules';
@@ -51,7 +50,7 @@ export function PipelineConfig({
 		}
 	};
 	return (
-		<section className={p1Classes('nand-ui-stack nand-pipeline-config')}>
+		<section className="nand-pipeline-config flex min-w-0 flex-col gap-[var(--size-4-2)]">
 			<h4>{t('home.pipeline.configure')}</h4>
 			<TextField
 				label={t('home.pipeline.root')}
@@ -64,7 +63,7 @@ export function PipelineConfig({
 				onInput={(statusField) => patch({ statusField })}
 			/>
 			{draft.stages.map((item) => (
-				<fieldset key={item.id} className={p1Classes('nand-ui-stack')}>
+				<fieldset key={item.id} className="flex min-w-0 flex-col gap-[var(--size-4-2)]">
 					<legend>{item.label || t('home.pipeline.stage')}</legend>
 					<TextField
 						label={t('home.pipeline.stageLabel')}
@@ -131,9 +130,9 @@ export function PipelineConfig({
 				}
 			/>
 			{draft.skills.map((skill) => (
-				<fieldset key={skill.id} className={p1Classes('nand-ui-stack')}>
+				<fieldset key={skill.id} className="flex min-w-0 flex-col gap-[var(--size-4-2)]">
 					<legend>{skill.label}</legend>
-					<label className={p1Classes('nand-field')}>
+					<label className="flex min-w-0 flex-col gap-[var(--size-4-1)]">
 						<span>{t('home.pipeline.skillScope')}</span>
 						<select
 							value={skill.scope}
@@ -170,7 +169,7 @@ export function PipelineConfig({
 				</fieldset>
 			))}
 			{error && <p role="alert">{error}</p>}
-			<div className={p1Classes('nand-ui-toolbar')}>
+			<div className="flex min-w-0 flex-wrap items-center gap-[var(--size-4-2)]">
 				<Button disabled={pending} onClick={close}>
 					{t('common.cancel')}
 				</Button>

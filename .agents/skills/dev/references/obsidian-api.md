@@ -66,7 +66,7 @@ if (node.instanceOf(Text)) {
 - NAND 工作台设置标题与行用 React `SettingsSection` / `SettingsRow`；只有 Obsidian 原生设置适配才使用 `Setting.setHeading()`，不把原生 Setting 约束套到 React 组件上。
 - 设置放进设置存储的命名空间（见 `settings-and-i18n.md`）；绝不用 `saveData`。评论、图标这类领域存储拥有自己记录在案的文件。
 - 新设置放在所属模块的工作台设置页（或「常规」／「外观」）。Obsidian 的设置页（`src/app/settings/entry-tab.ts`，只用声明式的 `getSettingDefinitions()`）只放打开工作台设置的入口按钮。
-- 原生设置入口用自己的 `refresh()`；工作台 React 设置订阅句柄更新，迁移期旧渲染器才用 `host.refresh()`。不要调用 Obsidian 设置页的 `display()`。
+- 原生设置入口用自己的 `refresh()`；工作台 React 设置订阅句柄更新。不要调用 Obsidian 设置页的 `display()`。
 - 在设置回调里，`activeDocument` 是设置窗口。要操作主工作区，用 `this.app.workspace.containerEl.ownerDocument`。
 
 ## DOM 与 CSS

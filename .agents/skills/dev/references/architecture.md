@@ -1,6 +1,6 @@
 # 架构
 
-移动文件、跨区导入、添加命令或重命名任何持久化内容之前先读本文。重构目标以 [02 架构文档](../../../../docs/refor/02-架构文档.md) 和 [00 决策记录](../../../../docs/refor/00-决策记录.md) 为准；历史架构背景可按需查阅[开发文档索引](../../../../speculo/.speculo/specdev/.config/domain-layout.md)。阶段 2 工具链按这些目标更新检查器；React/Preact 并存约定见 [ui 技能](../../ui/SKILL.md)。
+移动文件、跨区导入、添加命令或重命名任何持久化内容之前先读本文。重构目标以 [02 架构文档](../../../../docs/refor/02-架构文档.md) 和 [00 决策记录](../../../../docs/refor/00-决策记录.md) 为准；历史架构背景可按需查阅[开发文档索引](../../../../speculo/.speculo/specdev/.config/domain-layout.md)。阶段 2 工具链按这些目标更新检查器；React 界面约定见 [ui 技能](../../ui/SKILL.md)。
 
 ## 分区
 
@@ -58,7 +58,7 @@ UI 包允许列表见 [设计系统参考](../../ui/references/design-system.md)
 
 检查器还强制以下规则：
 
-- `electron`、Node 内置模块和 `window.require(...)` 只能出现在 `desktop/` 文件夹下。core 和 shared 代码不使用任何宿主包（`obsidian`、`electron`、`react`、`react-dom`、`radix-ui`、迁移期 `preact`、`@codemirror/*`、`@xterm/*`），也不使用 `window`、`document`、`navigator`、`process`、`HTMLElement` 这类宿主全局。
+- `electron`、Node 内置模块和 `window.require(...)` 只能出现在 `desktop/` 文件夹下。core 和 shared 代码不使用任何宿主包（`obsidian`、`electron`、`react`、`react-dom`、`radix-ui`、`@codemirror/*`、`@xterm/*`），也不使用 `window`、`document`、`navigator`、`process`、`HTMLElement` 这类宿主全局。
 - 不要在自己的目录树内部导入包含它的桶文件（`index.ts`）。
 - 运行时导入循环（包括经过懒加载导入形成的循环）会失败。
 

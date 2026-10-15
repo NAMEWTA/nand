@@ -2,9 +2,6 @@ import { memoryVault } from '../../../scripts/fixtures/memory-vault';
 import { contentFiles } from '../../host/obsidian/storage/content-files';
 // Fixed time zone: localized dates and DST cases below assume America/New_York.
 process.env.TZ = 'America/New_York';
-import { renderHomeSettings } from '../../app/settings/home';
-import { themeSettings } from '../../theme/settings';
-import type { DashboardSettingTab } from '../../app/settings/settings-tab';
 import { parseHTML } from 'linkedom';
 import { createElement as h } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
@@ -15,8 +12,6 @@ import { homeSettings } from '../../modules/home/settings';
 import { automationArgs, RESUME_FLAGS, TerminalAutomationRuntime } from '../../modules/agent/services/agent-runtime';
 import { AutomationError, automationMessage, automationOutcome } from '../../shared/automation/errors';
 import { setLanguage, t } from '../../shared/i18n/index';
-import { Setting } from 'obsidian';
-import type { StubControl } from '../../../scripts/obsidian-stub';
 import { AGENT_CATALOG } from '../../modules/agent/core/launch/catalog';
 import assert from 'node:assert/strict';
 import { test } from 'vitest';
@@ -905,58 +900,6 @@ test('cleared once history reads only the matching revision cursor and never rep
 		assert.equal(f.notified.length, notified);
 		assert.equal(taskAttempts, 1);
 		assert.deepEqual(service.state.cursors, cursors);
-	}
-});
-
-test('module switches show the saved state after a failed change and stay usable', async () => {
-	const rows = Setting as unknown as { created: { name: string; toggles: StubControl[] }[] };
-	let enabled = true,
-		failWrite = true,
-		failApply = false;
-	const tab = {
-		plugin: {
-			appSettings: { get: () => ({ language: 'zh', workbenchStatus: 'automatic' }), update: async () => {} },
-			moduleManifests: () => [
-				{
-					id: 'automations',
-					order: 80,
-					icon: 'workflow',
-					titleKey: 'automation.title',
-					descriptionKey: 'modules.automationDesc',
-				},
-			],
-			moduleEnabled: () => enabled,
-			setModuleEnabled: async (_id: string, value: boolean) => {
-				if (failWrite) throw Error('disk full');
-				enabled = value;
-				if (failApply) throw Error('stop failed');
-			},
-			theme: { get: () => themeSettings.defaults(), subscribe: () => () => {}, update: async () => {} },
-		},
-		refresh: () => {},
-		keepSubscription: () => {},
-	} as unknown as DashboardSettingTab;
-	for (const language of ['zh', 'en', 'zh'] as const) {
-		setLanguage(language);
-		rows.created.length = 0;
-		enabled = true;
-		failWrite = true;
-		failApply = false;
-		renderHomeSettings.call(tab, new Setting({} as HTMLElement).settingEl);
-		const toggle = rows.created.find((row) => row.name === t('automation.title'))!.toggles[0]!;
-		assert.equal(toggle.value, true);
-		await toggle.fire!(false);
-		assert.equal(toggle.value, true);
-		assert.equal(toggle.disabled, false);
-		failWrite = false;
-		failApply = true;
-		await toggle.fire!(false);
-		assert.equal(toggle.value, false);
-		assert.equal(toggle.disabled, false);
-		failApply = false;
-		await toggle.fire!(true);
-		assert.equal(enabled, true);
-		assert.equal(toggle.disabled, false);
 	}
 });
 

@@ -2,7 +2,7 @@ import { SuggestModal, type App } from 'obsidian';
 import type { VaultDevice } from '../shared/storage/vault-identity';
 import { registerMessages, t } from '../shared/i18n';
 import { messages } from '../shared/i18n/lazy/common';
-import { promptText } from '../ui/primitives/prompt';
+import { promptText } from '../ui/react/prompt';
 
 registerMessages(messages);
 

@@ -72,7 +72,6 @@ export default function createHomeModule(context: ModuleContext): ModuleInstance
 		pages: {
 			board: async () => (await import('./ui/workbench-page')).boardPage(host),
 		},
-		settingsPageKind: 'react',
 		settingsPage: async () => (await import('./ui/settings-page')).homeSettingsPage(host),
 		async activate() {
 			// Board UI helpers that must run on dispose (synchronously) and the workbench panel load now.

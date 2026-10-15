@@ -31,7 +31,7 @@
 
 ## esbuild
 
-`esbuild.config.mjs` 使用 `scripts/esbuild-options.mjs`（与 `check:bundle` 和 `notices` 共用）：单一入口（`src/app/main.ts`）、CommonJS、ES2021、生产构建压缩、`.md`/`.svg` 作为文本、`jsxImportSource: react`，不设置 `preact/compat` 别名。外部依赖：`obsidian`、`electron`、`@codemirror/*`、`@lezer/*`、Node 内置模块。横幅内嵌 `LICENSE`、`NOTICE`、图标资源声明、Orca 许可证和打包依赖的许可证。不要增加第二个入口，也不要打包 CodeMirror。保持浏览器平台的 `process.env.NODE_ENV` 构建替换，不改为 `platform: node`；按文件并存约定见 [ui 技能](../../ui/SKILL.md)。
+`esbuild.config.mjs` 使用 `scripts/esbuild-options.mjs`（与 `check:bundle` 和 `notices` 共用）：单一入口（`src/app/main.ts`）、CommonJS、ES2021、生产构建压缩、`.md`/`.svg` 作为文本、`jsxImportSource: react`，不设置兼容运行时别名。外部依赖：`obsidian`、`electron`、`@codemirror/*`、`@lezer/*`、Node 内置模块。横幅内嵌 `LICENSE`、`NOTICE`、图标资源声明、Orca 许可证和打包依赖的许可证。不要增加第二个入口，也不要打包 CodeMirror。保持浏览器平台的 `process.env.NODE_ENV` 构建替换，不改为 `platform: node`；React 界面约定见 [ui 技能](../../ui/SKILL.md)。
 
 ## 预算
 

@@ -1,14 +1,5 @@
 {
-	"src/app/styles/006-settings-footer.css": [
-		"declaration-no-important"
-	],
-	"src/ui/styles/111-nand-surface-polish-host-theme-outside-the-board.css": [
-		"no-duplicate-selectors"
-	],
-	"src/modules/archives/styles/113-independent-archive-surface.css": [
-		"no-duplicate-selectors"
-	],
-	"src/modules/icons/styles/112-iconic-1-1-10-268e133c-mit-0-declarations-preser.css": [
+	"src/modules/icons/styles/host-icons.css": [
 		"declaration-no-important",
 		"function-disallowed-list",
 		"selector-pseudo-class-disallowed-list"

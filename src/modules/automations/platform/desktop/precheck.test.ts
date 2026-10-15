@@ -46,12 +46,26 @@ test.skipIf(process.platform !== 'linux').each([
 	['normal', '(sleep 0.7; echo survived > survivor.txt) >/dev/null 2>&1 & exit 0'],
 	['detached-normal', "setsid bash -c 'sleep 0.7; echo survived > survivor.txt' >/dev/null 2>&1 & exit 0"],
 	['timeout', "setsid bash -c 'sleep 0.7; echo survived > survivor.txt' & wait"],
-	['abort', "setsid bash -c 'sleep 0.7; echo survived > survivor.txt' & wait"],
+	['abort', "setsid bash -c 'sleep 0.7; echo survived > survivor.txt' & echo ready > ready.txt; wait"],
 	['error-exit', "setsid bash -c 'sleep 0.7; echo survived > survivor.txt' >/dev/null 2>&1 & exit 7"],
 ])('reaps the identifiable descendants after %s without waiting for inherited pipes', async (mode, command) => {
 	const vault = await mkdtemp(path.join(tmpdir(), 'nand-precheck-tree-'));
 	const controller = new AbortController();
-	const timer = mode === 'abort' ? setTimeout(() => controller.abort(), 100) : undefined;
+	// Abort an actual running process tree, not the preceding async directory setup.
+	// A fixed timer from before run() can fire during setup on a busy filesystem.
+	let finished = false;
+	const abortRunningTree = async () => {
+		if (mode !== 'abort') return;
+		while (!finished) {
+			try {
+				await readFile(path.join(vault, 'ready.txt'));
+				await new Promise(resolve => setTimeout(resolve, 100));
+				if (!finished) controller.abort();
+				return;
+			} catch { await new Promise(resolve => setTimeout(resolve, 10)); }
+		}
+	};
+	const abortTask = abortRunningTree();
 	try {
 		const start = Date.now();
 		const result = await createPrecheckRunner(
@@ -70,7 +84,8 @@ test.skipIf(process.platform !== 'linux').each([
 		await new Promise((resolve) => setTimeout(resolve, 800));
 		await expect(readFile(path.join(vault, 'survivor.txt'), 'utf8')).rejects.toThrow();
 	} finally {
-		clearTimeout(timer);
+		finished = true;
+		await abortTask;
 		await rm(vault, { recursive: true, force: true });
 	}
 });

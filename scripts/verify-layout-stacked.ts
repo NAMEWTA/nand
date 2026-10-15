@@ -1,4 +1,4 @@
-// React dashboard regression entry; the replaced Preact renderer is no longer shipped.
+// React dashboard regression entry.
 import { runHomeReactChecks } from './run-home-react-checks';
 runHomeReactChecks([
 	'ui/board/dnd.test.ts',

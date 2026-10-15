@@ -1,0 +1,4 @@
+/* Native workbench leaf boundary; internal layout is owned by React. */
+.workspace-leaf-content[data-type="nand-workbench-view"] > .view-content { padding: 0; overflow: hidden; }
+body:not(.is-mobile) .workspace-leaf-content[data-type="nand-workbench-view"] > .view-header { display: none; }
+.nand-workbench-page[hidden] { display: none; }

@@ -1,5 +1,5 @@
-import { bindLocalizedOptions } from '../../../../ui/primitives/localized-dom';
-import { bindLocalizedElement, bindLocalizedControl } from '../../../../ui/primitives/localized-dom';
+import { bindLocalizedOptions } from '../../../../host/obsidian/localized-dom';
+import { bindLocalizedElement, bindLocalizedControl } from '../../../../host/obsidian/localized-dom';
 import { App, Modal, Setting, setIcon } from 'obsidian';
 import { resolveWidgetLabel, usesDefaultWidgetLabel } from '../../core/board/default-widget-label';
 import type { CountdownConfig } from '../../core/board/types/index';
@@ -49,7 +49,6 @@ export class CountdownSettingsModal extends Modal {
 		const { contentEl, containerEl } = this;
 		contentEl.empty();
 		contentEl.addClass('dashboard-library-config-modal');
-		this.modalEl.addClass('modal--dashboard');
 		containerEl.addClass('modal-bg--dashboard');
 		applyModalTheme(containerEl);
 

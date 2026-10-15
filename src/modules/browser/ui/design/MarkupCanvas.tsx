@@ -168,8 +168,9 @@ export function MarkupPanel({
 					</Button>
 				</div>
 			</div>
-			<div className="nand-browser-markup-canvas">
+			<div className="min-h-0 flex-1 overflow-auto">
 				<canvas
+					className="max-w-full touch-none"
 					ref={canvas}
 					data-ready={imageReady}
 					onPointerDown={(e) => {

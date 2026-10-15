@@ -3,7 +3,6 @@ import type { ServiceAccess } from '../contracts/module';
 import { COMMENTS_PANEL } from '../../modules/comments/api';
 import { t } from '../../shared/i18n';
 import { onLeafLanguageChanged } from '../../host/obsidian/workspace-title';
-import { renderEmptyState } from '../../ui/primitives/empty-state';
 
 export const COMMENTS_VIEW_TYPE = 'nand-comments-view';
 
@@ -13,6 +12,7 @@ export const COMMENTS_VIEW_TYPE = 'nand-comments-view';
  */
 export class CommentsLeaf extends ItemView {
 	private unmount: (() => void) | null = null;
+	private generation = 0;
 
 	constructor(leaf: WorkspaceLeaf, private readonly host: { services: ServiceAccess; openWorkbenchSettings(category?: string): Promise<void> }) {
 		super(leaf);
@@ -40,6 +40,7 @@ export class CommentsLeaf extends ItemView {
 		return Promise.resolve();
 	}
 	private clear(): void {
+		this.generation++;
 		this.unmount?.();
 		this.unmount = null;
 		this.contentEl.empty();
@@ -51,11 +52,10 @@ export class CommentsLeaf extends ItemView {
 			this.unmount = panel.mount(this.contentEl);
 			return;
 		}
-		renderEmptyState(this.contentEl, {
-			icon: 'message-square-text',
-			title: t('modules.editor'),
-			description: t('modules.editorOff'),
-			action: { label: t('workbench.enableModule'), run: () => { void this.host.openWorkbenchSettings('general'); } },
-		});
+		const generation = this.generation;
+		void import('./CommentsEmptyState').then(({ mountCommentsEmptyState }) => {
+			if (generation !== this.generation) return;
+			this.unmount = mountCommentsEmptyState(this.contentEl, () => { void this.host.openWorkbenchSettings('general'); });
+		}).catch((error: unknown) => console.error('[NAND] Comments empty state failed', error));
 	}
 }

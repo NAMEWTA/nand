@@ -1,5 +1,5 @@
 import { contentFiles } from '../../../../host/obsidian/storage/content-files';
-import { bindLocalizedElement } from '../../../../ui/primitives/localized-dom';
+import { bindLocalizedElement } from '../../../../host/obsidian/localized-dom';
 import { App, Modal, setIcon, TFolder } from 'obsidian';
 import { t } from '../../../../shared/i18n/index';
 import { applyModalTheme } from '../appearance/modal-theme';
@@ -71,7 +71,6 @@ export class PathPickerModal extends Modal {
 	onOpen(): void {
 		const { contentEl, containerEl } = this;
 		contentEl.empty();
-		containerEl.addClass('modal--dashboard');
 		containerEl.parentElement?.addClass('modal-bg--dashboard');
 		applyModalTheme(containerEl);
 		containerEl.setCssProps({

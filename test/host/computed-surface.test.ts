@@ -2,12 +2,17 @@ import assert from 'node:assert/strict';
 import { createElement } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { ArchiveCardGrid } from '../../src/modules/archives/ui/ArchiveCardGrid';
+import { PipelineConfig } from '../../src/modules/home/ui/pipeline/PipelineConfig';
+import { emptyPipeline } from '../../src/modules/home/core/pipeline/model';
 import { spawnSync } from 'node:child_process';
 import { existsSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { pathToFileURL } from 'node:url';
-import { afterEach, test } from 'vitest';
+import { afterEach, test, vi } from 'vitest';
+
+// Skill pickers own client-only portals; the configuration's fields, scope and footer are rendered unchanged.
+vi.mock('../../src/modules/home/ui/quickbar/SkillList', () => ({ SkillList: () => null }));
 
 const styles = pathToFileURL(path.resolve('styles.css')).href;
 const chromeExecutable = process.env.NAND_CHROME_EXECUTABLE ?? [
@@ -105,6 +110,64 @@ document.getElementById('out').textContent = JSON.stringify({ light, dark });
 	assert.notEqual(measured.dark.text, measured.dark.background);
 	assert.notEqual(measured.light.text, measured.dark.text);
 	assert.notEqual(measured.light.background, measured.dark.background);
+}, 35_000);
+
+test('pipeline configuration keeps vertical fields and separated footer actions', () => {
+	const initial = {
+		...emptyPipeline(),
+		stages: [{ id: 'draft', label: 'Draft', value: 'draft' }],
+		skills: [{
+			id: 'review', label: 'Review', agentId: 'codex', skillName: 'review', promptTemplate: '{{input}}',
+			directSend: false, destination: { kind: 'fresh' as const, cwd: '' },
+			scope: 'card' as const, stages: [],
+		}],
+	};
+	const markup = renderToStaticMarkup(createElement(PipelineConfig, { initial, save: async () => {}, close: () => {} }));
+	const measured = chrome<{ stacks: Array<{ display: string; direction: string; gap: string }>; scope: { display: string; direction: string; gap: string }; footer: { display: string; wrap: string; gap: string; separation: number }; legacy: number }>(`<!doctype html>
+<html><head><link rel="stylesheet" href="${styles}"></head>
+<body style="--size-4-1:4px;--size-4-2:8px"><div class="nand-ui" style="width:480px">${markup}</div><pre id="out"></pre>
+<script>
+const root = document.querySelector('.nand-pipeline-config');
+const measure = e => { const s = getComputedStyle(e); return { display:s.display, direction:s.flexDirection, gap:s.gap }; };
+const footer = root.lastElementChild, buttons = footer.querySelectorAll('button');
+document.getElementById('out').textContent = JSON.stringify({
+ stacks: [root, ...root.querySelectorAll('fieldset')].map(measure),
+ scope: measure(root.querySelector('select').parentElement),
+ footer: { ...measure(footer), wrap:getComputedStyle(footer).flexWrap, separation:buttons[1].getBoundingClientRect().left-buttons[0].getBoundingClientRect().right },
+ legacy: [...root.querySelectorAll('[class]'), root].flatMap(e => [...e.classList]).filter(name => name.startsWith('nand-ui-') || name === 'nand-field').length,
+});
+</script></body></html>`);
+	assert.equal(measured.stacks.length, 3);
+	for (const stack of measured.stacks) assert.deepEqual(stack, { display: 'flex', direction: 'column', gap: '8px' });
+	assert.deepEqual(measured.scope, { display: 'flex', direction: 'column', gap: '4px' });
+	assert.equal(measured.footer.display, 'flex');
+	assert.equal(measured.footer.wrap, 'wrap');
+	assert.equal(measured.footer.gap, '8px');
+	assert.equal(measured.footer.separation, 8);
+	assert.equal(measured.legacy, 0);
+}, 35_000);
+
+test('editor conflict actions retain compact host styling outside the React scope', () => {
+	const measured = chrome<{ display: string; wrap: string; gap: string; margin: string; font: string; padding: string; height: number; separation: number; host: string }>(`<!doctype html>
+<html><head><style>button { height:32px; padding:4px 12px; font-size:16px; }</style><link rel="stylesheet" href="${styles}"></head>
+<body style="--size-4-1:4px;--size-4-2:8px;--font-interface:Arial;--font-ui-smaller:12px">
+<div class="cm-editor"><span class="nand-sync-conflict-actions"><button class="nand-sync-conflict-button">Keep upper</button><button class="nand-sync-conflict-button">Keep lower</button></span><button id="host">Host control</button></div><pre id="out"></pre>
+<script>
+const bar = document.querySelector('.nand-sync-conflict-actions'), buttons = bar.querySelectorAll('button');
+const b = getComputedStyle(bar), s = getComputedStyle(buttons[0]);
+document.getElementById('out').textContent = JSON.stringify({ display:b.display, wrap:b.flexWrap, gap:b.gap, margin:b.marginInlineStart,
+ font:s.fontSize, padding:s.padding, height:buttons[0].getBoundingClientRect().height,
+ separation:buttons[1].getBoundingClientRect().left-buttons[0].getBoundingClientRect().right, host:getComputedStyle(document.getElementById('host')).height });
+</script></body></html>`);
+	assert.equal(measured.display, 'inline-flex');
+	assert.equal(measured.wrap, 'wrap');
+	assert.equal(measured.gap, '4px');
+	assert.equal(measured.margin, '8px');
+	assert.equal(measured.font, '12px');
+	assert.equal(measured.padding, '0px 8px');
+	assert.equal(measured.separation, 4);
+	assert.ok(measured.height < 32, JSON.stringify(measured));
+	assert.equal(measured.host, '32px');
 }, 35_000);
 
 

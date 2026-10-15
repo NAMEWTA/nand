@@ -2,9 +2,9 @@ import { SuggestModal, type App } from 'obsidian';
 import { afterEach, expect, test, vi } from 'vitest';
 import { chooseVaultDevice } from './device-choice';
 import type { VaultDevice } from '../shared/storage/vault-identity';
-import { promptText } from '../ui/primitives/prompt';
+import { promptText } from '../ui/react/prompt';
 
-vi.mock('../ui/primitives/prompt', () => ({ promptText: vi.fn() }));
+vi.mock('../ui/react/prompt', () => ({ promptText: vi.fn() }));
 
 afterEach(() => vi.restoreAllMocks());
 

@@ -126,12 +126,8 @@ export interface ModuleContext {
 
 /** What a module's settings page gets from the workbench settings page showing it. */
 export interface SettingsPageHost {
- /** Optional module subsection requested by a workbench deep link. */
- resourceId?: string;
-	/** Redraw the whole page (after a change that adds or removes rows). */
-	refresh(): void;
-	/** Keep a subscription for as long as the page is shown. */
-	keep(off: () => void): void;
+	/** Optional module subsection requested by a workbench deep link. */
+	resourceId?: string;
 }
 
 export interface ModuleInstance {
@@ -143,8 +139,6 @@ export interface ModuleInstance {
 	readonly pages?: Readonly<Record<string, () => Promise<PageCreate>>>;
 	/** The module's page in workbench settings; loaded on first use. */
 	readonly settingsPage?: () => Promise<ComponentType<SettingsPageHost>>;
-	/** @deprecated 仅兼容并行迁移中的 home 声明；设置框架已统一为 React，不再读取此标记。 */
-	readonly settingsPageKind?: 'react';
 }
 
 export type ModuleFactory = (context: ModuleContext) => ModuleInstance | Promise<ModuleInstance>;

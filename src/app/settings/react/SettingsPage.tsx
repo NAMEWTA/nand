@@ -4,8 +4,6 @@ import {
 	Suspense,
 	useCallback,
 	useEffect,
-	useMemo,
-	useRef,
 	useState,
 	useSyncExternalStore,
 	type ComponentType,
@@ -37,7 +35,6 @@ function ModuleSettings({
 		Component?: ComponentType<SettingsPageHost>;
 		error?: string;
 	}>({});
-	const [, setRevision] = useState(0);
 	const module = PRODUCT_MODULES[category as keyof typeof PRODUCT_MODULES];
 	const load = module ? plugin.moduleInstance(module)?.settingsPage : undefined;
 	useEffect(() => {
@@ -56,23 +53,6 @@ function ModuleSettings({
 			alive = false;
 		};
 	}, [load]);
-	const kept = useRef(new Set<() => void>());
-	useEffect(() => {
-		const subscriptions = kept.current;
-		return () => {
-			for (const off of subscriptions) off();
-			subscriptions.clear();
-		};
-	}, [load]);
-	const host = useMemo(
-		() => ({
-			refresh: () => setRevision((r) => r + 1),
-			keep: (off: () => void) => {
-				kept.current.add(off);
-			},
-		}),
-		[kept, setRevision],
-	);
 	if (loaded.loader === load && loaded.error)
 		return (
 			<p role="alert" data-settings-results="true" className="text-destructive">
@@ -80,7 +60,7 @@ function ModuleSettings({
 			</p>
 		);
 	if (loaded.loader === load && loaded.Component)
-		return <loaded.Component key={resourceId} {...host} resourceId={resourceId} />;
+		return <loaded.Component key={resourceId} resourceId={resourceId} />;
 	return (
 		<p role="status" data-settings-pending className="text-xs text-muted-foreground">
 			{t('workbench.loading')}

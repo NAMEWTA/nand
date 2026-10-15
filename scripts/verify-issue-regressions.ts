@@ -1,5 +1,3 @@
-import { installPreactMiniDom } from './preact-mini-dom';
-installPreactMiniDom();
 import { registerShellCommands } from '../src/app/commands';
 import type DashboardPlugin from '../src/app/main';
 import assert from 'node:assert/strict';
@@ -27,21 +25,9 @@ import {
 	translatedLeafTitle,
 } from '../src/host/obsidian/workspace-title';
 import type { DashboardSettings } from '../src/modules/home/core/board/types/index';
-import { renderCopyHelp } from '../src/app/settings/editor-settings';
 
 async function main() {
 	runHomeReactChecks(['ui/widgets/anniversary-editor.dom.test.tsx']);
-	for (const language of ['zh', 'en'] as const) {
-		setLanguage(language);
-		const beforeHelp = StubSetting.created.length;
-		renderCopyHelp(new El('div') as never);
-		const help = StubSetting.created.slice(beforeHelp);
-		assert.deepEqual(
-			help.map((row) => row.name),
-			['editor.copy.title', 'editor.copy.relative', 'editor.copy.absolute'].map((key) => t(key)),
-		);
-		assert.ok(help.every((row) => row.desc.length > 20 && row.toggles.length === 0));
-	}
 	const exampleCountdown: CountdownConfig = {
 		id: 'cd-default',
 		label: 'New Year Countdown',

@@ -16,20 +16,6 @@
 	width: 100%;
 	height: 100%;
 }
-.nand-browser-toolbar .nand-browser-tool {
-	min-width: 32px;
-	min-height: 32px;
-}
-.nand-browser-markup-canvas {
-	overflow: auto;
-	min-height: 0;
-	flex: 1;
-}
-.nand-browser-markup-canvas canvas {
-	max-width: 100%;
-	touch-action: none;
-}
-
 .nand-browser-retained-host.is-visible {
 	left: var(--browser-left);
 	pointer-events: auto;

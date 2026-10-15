@@ -1,6 +1,6 @@
 # 设计系统
 
-唯一视觉规范是 [03 设计系统](../../../../docs/refor/03-设计系统.md)。本文是实施速查；完整令牌取值、组件变体、尺寸和上游文件映射以该文档为准。React 19 + shadcn/ui（new-york-v4）组件放在 `src/ui/components/`，NAND 组合组件放在 `components/nand/`；迁移期约定见 [ui 技能](../SKILL.md)。
+唯一视觉规范是 [03 设计系统](../../../../docs/refor/03-设计系统.md)。本文是实施速查；完整令牌取值、组件变体、尺寸和上游文件映射以该文档为准。React 19 + shadcn/ui（new-york-v4）组件放在 `src/ui/components/`，NAND 组合组件放在 `components/nand/`；组件约定见 [ui 技能](../SKILL.md)。
 
 ## 令牌速查
 

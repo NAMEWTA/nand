@@ -22,13 +22,11 @@ import { Notice } from 'obsidian';
 import { NeteaseAccount } from '../src/modules/home/platform/desktop/netease-account';
 import { fetchSongUrl } from '../src/modules/home/platform/music/netease-client';
 import { MusicService } from '../src/modules/home/platform/music/music-service';
+import { musicMediaBlob } from '../src/modules/home/platform/music/media-bytes';
 import type { MusicTrack } from '../src/modules/home/core/board/types/index';
 import { resetNetwork, calls, audioCalls, coverCalls } from './music-network-stub';
 import { musicVaultFixture } from './music-vault-fixture';
-import { h, render } from 'preact';
-import { installPreactMiniDom } from './preact-mini-dom';
-import { El, findTag } from './mini-dom';
-import { MusicPanel } from '../src/modules/home/ui/music/MusicPanel';
+import { runHomeReactChecks } from './run-home-react-checks';
 import { setCookies, windows, flushes, setFailLoad } from './music-electron-stub';
 
 // Electron renderer timers, without a running Obsidian application.
@@ -231,18 +229,12 @@ async function run(): Promise<void> {
 		'anonymous fee-1 click keeps the vipSkipped notice',
 	);
 	assert.equal(calls.length, 0, 'no network for a pre-flight skip');
-	installPreactMiniDom();
-	const panel = new El('div');
-	render(h(MusicPanel, { service: svc, root: panel as unknown as HTMLElement }), panel as unknown as HTMLElement);
-	await sleep(30);
-	const cover = findTag(panel, 'img')[0]!.getAttribute('src')!;
-	assert.match(cover, /^blob:/, 'cover is never loaded by the host default session');
-	assert.equal(await (await fetch(cover)).text(), 'cover-fixture');
+	const cover = await musicMediaBlob(track(11, 'dead1').picUrl!, 'image/jpeg');
+	assert.equal(await cover.text(), 'cover-fixture', 'cover bytes come through the isolated request adapter');
 	assert.equal(coverCalls.length, 1);
-	render(null, panel as unknown as HTMLElement);
-	await assert.rejects(fetch(cover), 'closing the panel revokes its temporary cover bytes');
 
 	svc.destroy(); await fixture.dispose();
+	runHomeReactChecks(['ui/widgets/media.dom.test.tsx']);
 	process.stdout.write(
 		'verify-music-account: login, cancellation, cleanup, account-isolated playback and -110 retry/skip notices OK\n',
 	);

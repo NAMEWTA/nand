@@ -85,7 +85,7 @@ function Tool({
 				<Button
 					size="icon"
 					variant="ghost"
-					className="nand-browser-tool relative h-7 w-7 shrink-0"
+					className="relative h-7 w-7 min-h-8 min-w-8 shrink-0"
 					aria-label={label}
 					disabled={disabled}
 					onClick={onClick}
