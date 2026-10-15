@@ -100,12 +100,15 @@ test('subscribers get one snapshot then live output, with nothing lost or repeat
 	const seen: string[] = [];
 	const off = session.subscribe((text) => seen.push(text));
 	session.receive(encoder.encode('after'));
-	await new Promise((resolve) => setTimeout(resolve, 20));
+	// Acks follow xterm's asynchronous write callbacks; a loaded CI worker can take longer than one fixed delay.
+	const acked = () => acks.reduce((sum, value) => sum + value, 0);
+	for (let waited = 0; acked() < 'before after'.length && waited < 2000; waited += 10)
+		await new Promise((resolve) => setTimeout(resolve, 10));
 	off();
 	assert.equal(seen.length, 2);
 	assert.ok(seen[0]!.includes('before') && !seen[0]!.includes('after'), JSON.stringify(seen));
 	assert.equal(seen[1], 'after');
-	assert.ok(acks.reduce((sum, value) => sum + value, 0) >= 'before after'.length);
+	assert.ok(acked() >= 'before after'.length);
 });
 
 test('exit reaches observers after the output and the title follows OSC 2 unless renamed', async () => {
