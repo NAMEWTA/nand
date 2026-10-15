@@ -1,4 +1,4 @@
-# Orca 来源与适配范围
+# Orca 改编范围
 
 NAND 改编了 [Orca](https://github.com/stablyai/orca)（stablyai/orca）的部分内容。Orca 使用 MIT 许可证，Copyright (c) 2026 Lovecast Inc.。完整的 [MIT 许可证](orca-LICENSE.txt)保持原文，并嵌入构建产物 `main.js` 的许可证声明。署名摘要见 [NOTICE](../../NOTICE)（仅英文）。
 
@@ -6,6 +6,7 @@ NAND 改编了 [Orca](https://github.com/stablyai/orca)（stablyai/orca）的部
 
 | 上游 | 提交 |
 |---|---|
+| 当前工作台、智能体、浏览器、自动化和设计系统 | [464bd5a54b3364021c5cc0319859616e5ec41bbf](https://github.com/stablyai/orca/tree/464bd5a54b3364021c5cc0319859616e5ec41bbf) |
 | Agent 运行时、自动化调度 | [27b823f934f739bc85914dd717b776835f60bcf7](https://github.com/stablyai/orca/tree/27b823f934f739bc85914dd717b776835f60bcf7) |
 | 终端工作台（Orca v1.4.217） | [11d97896628d90c4990365127812667b00e28c82](https://github.com/stablyai/orca/tree/11d97896628d90c4990365127812667b00e28c82) |
 | 浏览器 | [d74388f8a2dad2bd4bbfe3b937aba66e6648258b](https://github.com/stablyai/orca/tree/d74388f8a2dad2bd4bbfe3b937aba66e6648258b) |
@@ -59,7 +60,7 @@ NAND 改编了 [Orca](https://github.com/stablyai/orca)（stablyai/orca）的部
 
 ## NAND 不采用的部分
 
-NAND 使用自己的 Obsidian 叶子、主题令牌和 stdio 辅助进程（协议 3）；设计系统采用 React，旧 Preact 界面在迁移期保留。不使用 Orca 的应用状态树、窗格树、Electron 主进程和私有的 xterm 渲染补丁。回归测试覆盖被改编的行为，不构成与 Orca 应用兼容的保证。
+NAND 使用自己的 Obsidian 叶子、主题令牌和 stdio 辅助进程（协议 3）；界面统一采用 React，旧 Preact 运行时与迁移包装已经移除。不使用 Orca 的应用状态树、窗格树、Electron 主进程和私有的 xterm 渲染补丁。回归测试覆盖被改编的行为，不构成与 Orca 应用兼容的保证。
 
 ## 工作台外壳、状态栏与设置框架（464bd5a）
 
@@ -71,9 +72,9 @@ NAND 使用自己的 Obsidian 叶子、主题令牌和 stdio 辅助进程（协�
 | `components/status-bar/StatusBarProviderSegment.tsx`、`UsageRosterPanel.tsx` | 同名 NAND 用量组件：替换为现有 `controller.usage` 适配快照；详细/精简、百分比、阈值、分钟边界倒计时与排序。 |
 | `components/status-bar/status-bar-usage-collapse.ts` | `src/shell/status-bar/collapse.ts`：按阶段 3 明确的算法先精简，再从右向左折叠，隐藏片段继续测量。 |
 | `components/status-bar/StatusBarVisibilityMenu.tsx` | `src/shell/status-bar/VisibilityMenu.tsx`：改用当前窗口 ContextMenu，偏好进入 app 设置命名空间。 |
-| `components/settings/Settings.tsx`、`settings-page-renderer.tsx`、`SearchableSetting.tsx`、`settings-search.ts` | `src/app/settings/react/`：保留 renderer 的独立滚动区、`gap-10 px-8 pt-10 pb-24 max-w-4xl` 内容容器、空结果态，以及设置行与搜索包装；分类由 NAND PanelModel 提供，搜索按 NAND 要求移到内容顶部，模块状态和旧 DOM 渲染器生命周期由 NAND 提供。 |
+| `components/settings/Settings.tsx`、`settings-page-renderer.tsx`、`SearchableSetting.tsx`、`settings-search.ts` | `src/app/settings/react/`：保留 renderer 的独立滚动区、`gap-10 px-8 pt-10 pb-24 max-w-4xl` 内容容器、空结果态，以及设置行与搜索包装；分类由 NAND PanelModel 提供，搜索移到内容顶部，模块状态和 React 设置生命周期由 NAND 提供。 |
 
-底部状态栏不包含 Orca 的 SSH、资源监视、宠物或更新通知。组件样板直接由新设置页渲染 React 组件。阶段 9a 已统一模块设置的 React 加载接口，移除旧 DOM 渲染包装；并行 home 声明留下的 `settingsPageKind` 仅作类型兼容，不参与渲染判断。
+底部状态栏不包含 Orca 的 SSH、资源监视、宠物或更新通知。组件样板直接由新设置页渲染 React 组件。所有模块设置已统一 React 加载接口；旧 DOM 包装与临时 settingsPageKind 字段均已移除。
 
 ## 自动化页面与参数校验（464bd5a）
 
@@ -142,4 +143,4 @@ NAND 使用自己的 Obsidian 叶子、主题令牌和 stdio 辅助进程（协�
 | `right-sidebar/source-control/commit/commit-message-composer.tsx`、`right-sidebar/source-control/sync/git-history-row.tsx` | `sync/ui/sync-presentation.tsx`：复用提交输入框和历史行布局／类名；动作和历史数据仍由 NAND Git 服务提供，行目标按 NAND 无障碍规则增至 32px，不引入上游远程、图历史或 AI 提交服务。 |
 | 阶段 2 已署名的 `ui/*` 原语及设置／列表组合 | 档案列表和详情、通知收件箱、图标选择／规则／使用检查、内容搜索和编辑：替换旧 DOM 或 Preact 呈现；保留 NAND 的数据格式、业务服务和功能，图标模型与匹配算法仍沿用 Iconic 移植。 |
 
-`ui/react/dialog.tsx` 是 NAND 的外部命令适配器：弹窗进入所属窗口的 Portal，关闭、所属表面移除或窗口关闭时释放 React 根并恢复焦点。图标对话框与同步确认按需加载；模块激活不提前加载 React 弹窗代码。本阶段不删除共享旧原语、旧 CSS 或 Preact 依赖，清理归阶段 9b。
+`ui/react/dialog.tsx` 是 NAND 的外部命令适配器：弹窗进入所属窗口的 Portal，关闭、所属表面移除或窗口关闭时释放 React 根并恢复焦点。图标对话框与同步确认按需加载；模块激活不提前加载 React 弹窗代码。共享旧原语、旧 CSS 与 Preact 依赖已在收尾移除。

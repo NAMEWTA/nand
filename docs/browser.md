@@ -16,7 +16,7 @@
 
 “默认”个人资料始终存在，不能删除。设置页或更多菜单可创建个人资料，名称为 1～40 个字符。每份个人资料隔离 Cookie、localStorage 和缓存；切换资料会先确认，再重新加载当前网页。删除资料会确认受影响的标签、关闭它们并清理网站数据，已下载文件保留。
 
-只有打开导入菜单时才扫描本机浏览器。支持检测 Chrome、Chromium、Edge、Brave、Firefox，以及有相应平台安装目录的 Arc、Comet、Helium。读取前复制 SQLite 数据库及 WAL/SHM 到库内临时目录，使用终端辅助程序只读读取，用后清理。macOS 可能请求钥匙串授权；Linux v11 需要可用的钥匙环；Windows 应用绑定加密 Cookie 无法移植时，会给出跳过统计和文件导入建议。
+只有打开导入菜单时才扫描本机浏览器。支持检测 Chrome、Chromium、Edge、Brave、Firefox，以及有相应平台安装目录的 Arc、Comet、Helium。读取前复制 SQLite 数据库及 WAL/SHM 到库内临时目录，使用终端辅助程序只读读取，用后清理。macOS 可能请求钥匙串授权；Linux v11 需要可用的钥匙环；Windows 应用绑定加密 Cookie 无法移植时，会给出跳过统计和文件导入建议。系统密钥桥的输入走 stdin；最终 `security` / `secret-tool` CLI 仅经 argv 接收非机密的 service/account/application 查询元数据，密码从 stdout 返回，Cookie 密文和密钥不放入 argv。详见[Cookie 导入隐私](privacy.md#cookie-导入)。
 
 也可导入 Netscape `cookies.txt` 或 Cookie-Editor／EditThisCookie 的 JSON 数组。只替换成功验证的精确导入域名（忽略域名前的点）；未列入导入的父域、子域及其他域名保持原状；Google 及其子域不会导入，请在 NAND 中直接登录。完全无法写入时保留原 Cookie。成功后可“全部刷新”当前资料的标签，使登录状态生效。
 
@@ -38,4 +38,4 @@ Session 始终使用库内显式目录，不回退到 Obsidian 全局会话。�
 
 旧会话迁移仍使用库内 Session 的冷重启与恢复副本机制；遇到来源归属不明、路径逃逸、链接或来源变化时停止该分支。默认浏览器身份清理 Electron／Obsidian 标识，并对 Google 登录页使用兼容 UA；更改身份设置需要重启后生效。
 
-部分登录服务、DRM 和依赖浏览器扩展的网站仍可能限制嵌入式浏览器，可用系统浏览器打开。超大网页无法整页截图时，可改用可见区域截图。Windows 和 macOS 的 Cookie 密钥读取需要对应系统实测；Linux 实测结果见本次实施报告。界面与算法来源见 [Orca 来源与适配范围](third-party/orca-terminal-workbench.md)。
+部分登录服务、DRM 和依赖浏览器扩展的网站仍可能限制嵌入式浏览器，可用系统浏览器打开。超大网页无法整页截图时，可改用可见区域截图。Windows 和 macOS 的 Cookie 密钥读取需要对应系统实测；Linux 的本地 Chrome/Cookie 夹具可验证读取与隔离流程，不代表真实账号登录或所有钥匙环后端都已验证。界面与算法来源见 [Orca 来源与适配范围](third-party/orca-terminal-workbench.md)。

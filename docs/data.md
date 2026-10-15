@@ -7,32 +7,53 @@
 | 数据 | 位置 |
 |---|---|
 | 看板 | 你选择的看板笔记（默认 `.nand/content/dashboard.md`） |
-| 看板技能按钮 | 各看板 YAML 的 `skills` 字段，包含模板、智能体、目标及每个按钮的预览选择 |
+| 常用操作条技能按钮 | 各看板 YAML 的 `skills` 字段，包含名称、图标、模板、技能名称、智能体、目标及直接发送开关 |
+| 技能小组件按钮 | 全局设置的 `home.skillWidgetButtons`，按钮字段同上，各看板共用；与常用操作条列表独立 |
 | 资料库和文件夹的笔记模板 | 列的 `library.templatePaths` 有序列表。列表缺失时只读投影旧 `templatePath` 为单项，不写迁移；显式 `[]` 表示空白笔记。保存配置时另将首项镜像到 `templatePath`，供旧版读取。 |
 | 表格列偏好 | 每分区的 `library.tableOrder` 和 `library.tableHidden` 列表。列标识为 `file.name`、`file.modified`，以及表示笔记属性的 `property:<字段名>`。缺席字段保留偏好，重置只删除这两个列表；卡片徽章另用 `visibleProperties`。 |
 | 工作流分区 | 各看板列的 `pipeline` YAML 对象保存根目录、阶段、筛选、模板、列宽和限定范围的技能。笔记保存状态、任务、`due`、`remind`；在工作流中启用提醒时，还会在 `nandAutomation` 中保存现有格式的自动化定义及所属设备 id。不要在笔记间复制该定义的 id。 |
 | 已记住的技能名称与额外目录 | `.nand/config/devices/<device-id>.json` 的 `agent` 命名空间，字段为 `knownSkills`、`skillDirectories`；名称按智能体隔离 |
 | 人物、企业及其资料文件 | `.nand/content/` 内的档案文件夹，默认 `.nand/content/档案/`，其中有 `个人档案/` 和 `企业档案/` |
 | 独立的自动化操作 | `.nand/content/NAND/自动化/<名称>-<短 ID>/操作.md` |
-| 习惯、记账、阅读、番茄钟 | `.nand/content/NAND/` 下各领域目录（`.nand/content/NAND/习惯`、`.nand/content/NAND/记账`、`.nand/content/NAND/阅读`、`.nand/content/NAND/番茄钟`） |
-| 全局设置 | `.nand/config/settings.json` |
-| 已保存的外观 | 全局设置中的 `home.appearancePresets` 保存 `{id,name,theme,home}` 快照，`activeAppearancePresetId` 标记上次保存或应用的组合。主题字段为 `preset`、`headings`、`emphasis`、`accentLight`、`accentDark`、`lineHeight`；首页字段为 `bgImage`、`bgDim`、`bgBlur`、`bgSize`、可选 `bgFocal`、`surfaceOpacity`、`glassBlur`、`radiusScale`、`fontScale`。不包含看板路径、小组件配置、凭证或设备设置。应用时通过同一设置写入批次更新既有 `theme` 和 `home` 命名空间。 |
+| 习惯、记账、阅读、番茄钟 | `.nand/content/NAND/习惯/habits.json`、`记账/expense.json`、`阅读/reading.json`、`番茄钟/pomodoro.json`（后三项同属 `.nand/content/NAND/`） |
+| 全局设置 | `.nand/config/settings.json`，按 app、theme、home、browser、comments 等命名空间保存 |
+| 工作台列表 | 全局设置 `home.workspaces` 的 files、names、active |
+| 已保存的看板外观 | 全局设置的 `home.customThemes` 保存“我的主题”，每项含 `id`、`name`、基础主题 `base`、颜色 `colors`，以及 `bgImage`、`bgDim`、`bgBlur`、`bgSize`、`surfaceOpacity`、`glassBlur`、`radiusScale`、`fontScale`。`colors` 可含 `accent`、`accentLight`、`bg`、`bgCard`、`bgSection`、`text`、`textMuted`、`borderCard`。`home.activeCustomThemeId` 标记上次保存或应用的主题。应用只更新 `home` 的 `stylePreset`、`customColors` 和上述装饰字段，不修改全局 `theme`，不包含看板路径、小组件配置、凭证或设备设置。 |
 | 设备设置 | `.nand/config/devices/<device-id>.json` |
 | 图标及其备份 | `.nand/icons/` |
-| 评论与锚点 | `.nand/editor/comments/` |
+| 批注与锚点（v2） | `.nand/editor/comments/` 下的 `index.json`、`pending.json`、`files/<笔记路径 SHA-256 前 16 位>.json`；损坏副本在 `set-aside/` |
 | 自动化运行、通知回执 | `.nand/automation/<device-id>/`、`.nand/notifications/<device-id>/` |
 | 智能体派发快照 | 同一自动化 `runtime.json`，包含最终提示词、文件引用、来源、调用 ID 和交付回执 |
-| 终端索引、历史标注、自动化会话 | `.nand/terminal-agent/<device-id>/` |
-| 浏览历史、账号元数据与站点权限 | `.nand/browser/<device-id>/state.json` 与 `profiles.json` |
+| 智能体标签布局与统计 | `.nand/terminal-agent/<device-id>/workspace.json`、`stats.json` |
+| 原生历史索引、标注、自动化会话 | 同目录 `index.sqlite`、`history.json`、`automation-sessions.json` |
+| 快捷命令 | 本设备设置 `agent.quickCommands`；不读取旧 presets |
+| 浏览历史、个人资料与站点权限 | `.nand/browser/<device-id>/state.json` 与 `profiles.json` |
+| Cookie、网站缓存及下载 | `.nand/browser/<device-id>/profiles/<id>/session/`、`downloads/` |
+| Cookie 导入快照 | `.nand/browser/<device-id>/tmp/<随机 ID>/`，读取完成或失败后清理 |
+| 浏览器抓取、截图与标注附件 | `.nand/browser/<device-id>/artifacts/` |
+| 自动化预检环境 | `.nand/automation/<device-id>/precheck-home/` |
 | 恢复草稿与看板冲突副本 | `.nand/recovery/` |
-| 缓存（微信读书进度） | `.nand/cache/` |
+| RSS 与微信读书缓存 | `.nand/cache/`；RSS 列表、正文、已读标记为 `rss/rss.json` |
+| 看板定时备份 | `.nand/recovery/dashboard/backups/`，含看板 Markdown、四类记录 JSON 及来源/完整性清单 |
 | 导出为笔记的智能体对话 | `.nand/content/NAND Exports/` |
 | 记账导出的 CSV | `.nand/content/exports/expense-export-<日期>.csv` |
 | Git 同步的计时与暂停状态 | `.nand/sync/<device-id>/<repository-hash>.json`，以及相邻恢复副本 |
 | 终端组件 | `.nand/helpers/<device-id>/<platform-arch>/<version>/` |
-| 独立的智能体登录（可选） | `.nand/agents/<device-id>/accounts/<provider>/<stable-id>/`（空名称为 default） |
+| 智能体账号与登录环境 | `.nand/agents/<device-id>/accounts/<provider>/<stable-id>/`（空名称为 default） |
 
 `档案`、`个人档案`、`企业档案`、`.nand/content/NAND/自动化`、`.nand/content/NAND/习惯`、`.nand/content/NAND/记账`、`.nand/content/NAND/阅读`、`.nand/content/NAND/番茄钟` 这些文件夹名在所有界面语言下都是中文，`基本信息.md`、`操作.md` 等文件名也一样。没有设置文件的库从默认值开始。
+
+## 本次重构的格式边界
+
+升级前先备份整个 `.nand/` 和有关笔记。本次不提供旧 NAND 数据到新结构的迁移：
+
+- 看板使用 Apex v3.8.4 Markdown 格式；默认路径不变，不会为了“兼容”把未知旧格式当空看板覆盖。建议用新文件创建工作台，再人工整理需要的内容。
+- 四类记录改存上表 JSON。旧 Markdown 记录原位保留，不自动导入。
+- 批注改用 v2 旁路文件。检测到 v1 会提示只读并阻止新写入；先另存整个旧批注目录，再在活动位置创建 v2，避免混用。
+- 不保证旧设置字段或工作台叶子状态兼容。无法识别的选项回到默认值；旧启动预设需重新建立为快捷命令。升级不会主动删除全部设置。
+- 已删除功能的数据原位保留，不恢复其运行入口；废弃的自动化动作不执行。不要把旧运行历史当作待重放队列。
+
+浏览器导入只读取用户选择的来源，导入快照是敏感 Cookie 数据，清理不是安全擦除。密钥读取、域名替换及同步边界见[隐私说明](privacy.md#cookie-导入)。
 
 ## 私有文件权限
 
@@ -40,7 +61,7 @@
 
 ## 库之外的数据
 
-NAND 新启动的 CLI 使用库内的 HOME、提供方配置目录、XDG/Windows 数据目录和临时目录，状态 Hook 与事件文件同属账号。浏览器 Cookie、站点数据、缓存和下载进入库内的设备/profile 目录，截图与说明保存在 `.nand/content/NAND/浏览器/附件/`。库外由用户自行维护的 CLI homes 不自动搬迁；NAND 不以它们作为默认账号的回退来源。
+NAND 新启动的 CLI 使用库内的 HOME、提供方配置目录、XDG/Windows 数据目录和临时目录，状态 Hook 与事件文件同属账号。浏览器 Cookie、站点数据、缓存和下载进入库内的设备/profile 目录，抓取与标注附件保存在 `.nand/browser/<device-id>/artifacts/`。库外由用户自行维护的 CLI homes 不自动搬迁；NAND 不以它们作为默认账号的回退来源。
 
 设备映射位于 `.nand/config/identity.json`，利用宿主只读身份识别当前设备。复制库需要识别或明确选择设备归属，不会自动接管另一设备的运行队列。普通笔记、宿主配置、系统 IPC 对象与 Git 自有元数据不是 NAND 业务数据。
 
