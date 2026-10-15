@@ -50,7 +50,8 @@ function pushFixture(name: string, upstream = 'main') {
 	return { remote, work, repo: new GitRepo(createGitRunner('git', work)) };
 }
 
-describe('git vault boundary', () => {
+// Every case drives real Git repositories; Windows runners exceed the 5s unit default under full-suite IO load.
+describe('git vault boundary', { timeout: 30_000 }, () => {
 	test('forced and mirror push configuration is refused before a squash changes HEAD', async () => {
 		for (const mirror of [false, true]) {
 			const { remote, work, repo } = pushFixture(mirror ? 'mirror' : 'forced');
