@@ -9,6 +9,7 @@ import { DEFAULT_DASHBOARD_SETTINGS } from '../core/board/types/model';
 import { memoCardText } from '../platform/board/card-move';
 import { BoardStore } from './board-store';
 import type { HomeHost } from './home-host';
+import { Card } from '../ui/cards/Card';
 import { MemoBody } from '../ui/cards/MemoBody';
 import { TaskList } from '../ui/cards/TaskList';
 import { CaptureBox } from '../ui/quickbar/CaptureBox';
@@ -265,4 +266,28 @@ test('layout remounts restore the controlled capture draft and skills read the s
 		);
 		expect(store.captureDraft).toBe('Unsubmitted thought');
 	}
+});
+
+test('card save action routes exactly once, and real note creation keeps templates, properties and collisions', async () => {
+	const { vault, store, files } = await fixture();
+	const card = store.state.getState().data!.columns[0]!.cards.find((c) => c.title === 'Memo')!;
+	const save = vi.spyOn(store, 'saveCard').mockResolvedValue();
+	render(
+		<TestProviders>
+			<Card store={store} card={card} index={0} />
+		</TestProviders>,
+	);
+	fireEvent.click(screen.getByRole('button', { name: t('home.dashboard.saveNote') }));
+	expect(save).toHaveBeenCalledExactlyOnceWith(card);
+	vi.spyOn(store, 'openFile').mockResolvedValue();
+	await vault.adapter.write('.nand/content/Template.md', '---\ncustom: keep\nstatus: old\n---\n# {{title}}\nBody');
+	await files.refresh();
+	const first = await store.newNote('Notes', 'Test', 'Template.md', { status: 'draft' });
+	const second = await store.newNote('Notes', 'Test', 'Template.md', { status: 'draft' });
+	expect(first).toBe('.nand/content/Notes/Test.md');
+	expect(second).toBe('.nand/content/Notes/Test-2.md');
+	expect(vault.contents.get(first)).toContain('custom: keep');
+	expect(vault.contents.get(first)).toContain('status: draft');
+	expect(vault.contents.get(first)).toContain('# Test');
+	expect(vault.contents.get(first)).toContain('Body');
 });

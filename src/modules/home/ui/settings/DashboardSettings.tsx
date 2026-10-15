@@ -1,7 +1,8 @@
-import { ReadingServiceSettings, MediaServiceSettings } from './ServiceSettings';
+// Layout and interaction adapted from PandoraReads/apex-dashboard ac4d2c7 (MIT), Copyright (c) 2025 PandoraReads: src/settings.ts
+import { TickTickLoginDialog } from '../ticktick/TickTickDialogs';
+import { ReadingServiceSettings, MediaServiceSettings, TickTickServiceSettings } from './ServiceSettings';
 import { DashboardDialog } from '../dialogs/DashboardDialog';
 import { observeBoardAction } from '../board/actions';
-// Layout and interaction adapted from PandoraReads/apex-dashboard ac4d2c7 (MIT), Copyright (c) 2025 PandoraReads: src/settings.ts
 import { lazy, Suspense, useEffect, useState } from 'react';
 import { useStore } from 'zustand';
 import { Trash2 } from 'lucide-react';
@@ -28,6 +29,7 @@ const AnniversaryEditor = lazy(() =>
 export function DashboardSettings({ host }: { host: HomeHost }) {
 	const [store] = useState(() => dashboardSettingsStore(host)),
 		[studio, setStudio] = useState(false),
+		[ticktick, setTicktick] = useState(false),
 		[newWorkspace, setNewWorkspace] = useState<string | null>(null),
 		[removeWorkspace, setRemoveWorkspace] = useState<string | null>(null),
 		[removeAnniversary, setRemoveAnniversary] = useState<AnniversaryConfig | null>(null),
@@ -215,6 +217,14 @@ export function DashboardSettings({ host }: { host: HomeHost }) {
 							}}
 						/>
 					</SettingsSection>
+					<TickTickServiceSettings
+						settings={settings}
+						update={store.update}
+						onLogin={() => setTicktick(true)}
+					/>
+					{ticktick && (
+						<TickTickLoginDialog host={host} settings={settings} onClose={() => setTicktick(false)} />
+					)}
 					<ReadingServiceSettings settings={settings} update={store.update} />
 					<GeneralExtras host={host} settings={settings} update={store.update} />
 				</TabsContent>

@@ -28,3 +28,5 @@ export const P1_SECTIONS: readonly string[] = [
 	'videos',
 	'web',
 ];
+
+export const P2_SECTIONS: readonly string[] = ['rss', 'weread', 'ticktick'];

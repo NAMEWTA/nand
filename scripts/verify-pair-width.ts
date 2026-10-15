@@ -1,25 +1,13 @@
-/**
- * Verifies the paired-section ("双排") width drag:
- *
- * 1. column-pairs transforms clear `width` wherever they clear `half`
- *    (unpartner / move-to-own-row / normalize self-heal / move-beside
- *    eviction) — a stale split must never leak onto a full-width row.
- * 2. Parser round-trip — `width` (left member's share %) persists beside
- *    `half`, is dropped without it, and out-of-range values are rejected.
- * 3. applyPairWidth — the left member owns the split (basis var + divider
- *    handle + pair-left anchor class), the right member mirrors the
- *    complement; 50% default; out-of-range storage clamps.
- *
- * Run: `pnpm run test:pair-width`
- */
+// Retained baseline logic assertions; renderer behavior is verified against the current React components.
 import { strict as assert } from 'node:assert';
-import { unpartnerAt, moveToOwnRow, moveBeside, normalizeColumnPairs } from '../src/modules/home/core/board/column-pairs';
-import { parse, serialize } from '../src/modules/home/core/board/parser/index';
-import { applyPairWidth } from '../src/modules/home/ui/renderer/index';
-import { El, findByClass } from './mini-dom';
-import type { DashboardColumn, DashboardData } from '../src/modules/home/core/board/types/index';
-import type { RenderCallbacks } from '../src/modules/home/ui/render-contract';
-
+import { runHomeReactChecks } from './run-home-react-checks';
+import { parse, serialize } from '../src/modules/home/core/board/parser';
+import {
+	unpartnerAt,
+	moveToOwnRow,
+	moveBeside,
+	normalizeColumnPairs,
+} from '../src/modules/home/core/board/column-pairs';
 // ---------- 1. column-pairs clears width with half ----------
 
 const col = (name: string, half?: boolean, width?: number): { name: string; half?: boolean; width?: number } => ({
@@ -88,68 +76,4 @@ for (const bad of [5, 95, -1, 101]) {
 
 console.log('parser width round-trip: PASS');
 
-// ---------- 3. applyPairWidth rendering ----------
-
-const callbacks = { onColumnWidthChange: (_n: string, _p: number) => {} } as unknown as RenderCallbacks;
-const dataPair: DashboardData = {
-	banner: { quote: '', author: '', image: '' },
-	quickActions: [],
-	columns: [
-		{ name: 'A', color: '', cards: [], half: true, width: 40 },
-		{ name: 'B', color: '', cards: [], half: true },
-	],
-};
-
-const makeEl = (column: DashboardColumn, data: DashboardData): El => {
-	const el = new El('div');
-	el.addClass('dashboard-section-row--half');
-	applyPairWidth(el as unknown as HTMLElement, column, data, callbacks);
-	return el;
-};
-
-const leftEl = makeEl(dataPair.columns[0]!, dataPair);
-assert.ok(leftEl.hasClass('dashboard-section-row--pair-left'), 'left member anchors the divider');
-assert.equal(leftEl.style.getPropertyValue('--db-pair-basis'), '40%', 'left basis var from stored width');
-assert.equal(findByClass(leftEl, 'dashboard-pair-width-handle').length, 1, 'divider handle on the left member');
-
-const rightEl = makeEl(dataPair.columns[1]!, dataPair);
-assert.ok(!rightEl.hasClass('dashboard-section-row--pair-left'), 'right member does not anchor');
-assert.equal(rightEl.style.getPropertyValue('--db-pair-basis'), '60%', 'right mirrors the complement');
-assert.equal(findByClass(rightEl, 'dashboard-pair-width-handle').length, 0, 'no divider on the right member');
-
-// Default 50/50 without a stored split.
-const dataEven: DashboardData = {
-	...dataPair,
-	columns: [
-		{ name: 'A', color: '', cards: [], half: true },
-		{ name: 'B', color: '', cards: [], half: true },
-	],
-};
-assert.equal(
-	makeEl(dataEven.columns[0]!, dataEven).style.getPropertyValue('--db-pair-basis'),
-	'50%',
-	'default split 50%',
-);
-assert.equal(
-	makeEl(dataEven.columns[1]!, dataEven).style.getPropertyValue('--db-pair-basis'),
-	'50%',
-	'default mirror 50%',
-);
-
-// Out-of-range storage clamps at render (hand-edited file).
-const dataClamp: DashboardData = {
-	...dataPair,
-	columns: [
-		{ name: 'A', color: '', cards: [], half: true, width: 500 },
-		{ name: 'B', color: '', cards: [], half: true },
-	],
-};
-assert.equal(makeEl(dataClamp.columns[0]!, dataClamp).style.getPropertyValue('--db-pair-basis'), '80%', 'clamp high');
-assert.equal(
-	makeEl(dataClamp.columns[1]!, dataClamp).style.getPropertyValue('--db-pair-basis'),
-	'20%',
-	'mirror clamps low',
-);
-
-console.log('applyPairWidth rendering: PASS');
-console.log('verify-pair-width: all assertions passed');
+runHomeReactChecks(['ui/board/controls.dom.test.tsx', 'core/board/layout.test.ts']);

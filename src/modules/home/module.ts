@@ -1,3 +1,4 @@
+import { closeRssStore } from './platform/rss/rss-store';
 import type { ModuleContext, ModuleInstance } from '../../app/contracts/module';
 import { deviceId } from '../../host/obsidian/storage/device-id';
 import { AGENT_DIRECTORY, AGENT_DISPATCH, AGENT_SESSIONS, AGENT_SKILLS } from '../agent/api';
@@ -41,7 +42,7 @@ export default function createHomeModule(context: ModuleContext): ModuleInstance
 		() => host.settings,
 		async (key, root, ctx) => {
 			const ui = await import('./ui/widgets/widget-loader');
-			if (!ctx.signal.aborted) await ui.mountBuiltinWidget(key, root, ctx);
+			if (!ctx.signal.aborted) await ui.mountBuiltinWidget(host, key, root, ctx);
 		},
 		async (key, ctx, create) => {
 			const ui = await import('./ui/widgets/widget-loader');
@@ -256,6 +257,7 @@ export default function createHomeModule(context: ModuleContext): ModuleInstance
 			pomodoro?.destroy();
 			reading?.destroy();
 			music?.destroy();
+			void closeRssStore(app).catch((error) => console.error('[NAND RSS save]', error));
 			if (reason === 'disabled' && app.workspace.layoutReady) host.refreshAllDashboards();
 		},
 	};

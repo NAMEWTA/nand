@@ -81,11 +81,14 @@ export function GeneralExtras({ host, settings, update }: Props) {
 					<Choice
 						label={t('home.p1.backupPeriod')}
 						value={settings.backupPeriod}
-						options={['daily', 'weekly'].map((value) => ({ value, label: t(`home.p1.${value}`) }))}
+						options={['hourly', 'daily', 'weekly', 'monthly'].map((value) => ({
+							value,
+							label: t(`home.p1.${value}`),
+						}))}
 						onChange={(value) =>
 							run(() =>
 								update((s) => {
-									s.backupPeriod = value as 'daily' | 'weekly';
+									s.backupPeriod = value as DashboardSettings['backupPeriod'];
 								}),
 							)
 						}

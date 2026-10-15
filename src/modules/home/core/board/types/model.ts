@@ -45,7 +45,7 @@ export interface DashboardSettings {
 	workspaceNames?: string[];
 	rssReadRetentionDays: number;
 	backupEnabled: boolean;
-	backupPeriod: 'daily' | 'weekly';
+	backupPeriod: 'hourly' | 'daily' | 'weekly' | 'monthly';
 	backupMaxCount: number;
 	backupLastRun?: number;
 	recentDocCount: number;
@@ -154,6 +154,11 @@ export interface DashboardSettings {
 	widgetOrder: string[];
 	/** Weread (WeChat Read) official API key (wrk-...), shared account-wide. */
 	wereadApiKey: string;
+	ticktickRegion: 'dida365' | 'ticktick';
+	ticktickCookie: string;
+	ticktickCsrf: string;
+	ticktickDeviceVersion: string;
+	ticktickTimezone: string;
 	/** Folder where weread highlights are imported as notes. */
 	wereadImportPath: string;
 	/** Skip the note popover: open notes directly in a tab on card click. */
@@ -323,6 +328,13 @@ export const DEFAULT_DASHBOARD_SETTINGS: DashboardSettings = {
 	anniversaryEnabled: false,
 	anniversaries: [],
 	widgetMusicEnabled: false,
+	musicBackground: {
+		image: 'https://images.pexels.com/photos/22710827/pexels-photo-22710827.jpeg',
+		opacity: 100,
+		dim: 45,
+		blur: 0,
+		foreground: 'light',
+	},
 	musicVolume: 0.8,
 	musicRepeatMode: 'list',
 	musicPlaylist: [] as MusicTrack[],
@@ -343,6 +355,11 @@ export const DEFAULT_DASHBOARD_SETTINGS: DashboardSettings = {
 		'music',
 	],
 	wereadApiKey: '',
+	ticktickRegion: 'dida365',
+	ticktickCookie: '',
+	ticktickCsrf: '',
+	ticktickDeviceVersion: '',
+	ticktickTimezone: 'Asia/Shanghai',
 	wereadImportPath: DEFAULT_HIGHLIGHT_IMPORT_PATH,
 	disableNotePopover: false,
 	bgImage: '',
@@ -979,6 +996,8 @@ export interface DashboardColumn {
 	pipelineConfig?: PipelineConfig;
 	/** Weread section config (sectionType 'weread'). */
 	wereadConfig?: WereadConfig;
+	rssConfig?: RssConfig;
+	ticktickConfig?: TickTickConfig;
 	/** Dataview section config (sectionType 'dataview'). */
 	dataviewConfig?: DataviewConfig;
 	/** Web embed section config (sectionType 'web'). */
@@ -1048,4 +1067,42 @@ export interface DashboardData {
 	quickActionOrder?: string[];
 	hiddenPresets?: string[];
 	columns: DashboardColumn[];
+}
+
+export interface TickTickConfig {
+	view: 'today' | 'lists';
+	/** Project IDs hidden in 'lists' view. */
+	hiddenProjects?: string[];
+	/** Per-project card width in 'lists' view (px), persisted on resize. */
+	projectWidths?: Record<string, number>;
+}
+
+export interface RssFeedSource {
+	/** Optional display label; defaults to the feed's own title once fetched. */
+	name?: string;
+	/** Feed URL (RSS 2.0 / Atom). Normalized + validated via web-precheck. */
+	url: string;
+	/** Optional group label — feeds sharing one form a filter bucket in the
+	 *  section toolbar (all / unread / per-group), separate from read state. */
+	group?: string;
+}
+
+/** RSS section config (sectionType 'rss'): subscription list + where article
+ *  downloads land. Fetched feed content and read/saved state live in the
+ *  plugin's rss.json cache (see rss-store), not here. */
+export interface RssConfig {
+	feeds: RssFeedSource[];
+	/** Folder article downloads are saved into ('' = vault root). */
+	downloadFolder: string;
+	/** Managed group list (config-modal order = filter-menu order). Feeds may
+	 *  reference groups not in this list (hand-edited files) — the effective
+	 *  set is the union, see rssGroupNames. */
+	groups?: string[];
+	/** What the section toolbar's filter buckets group by: 'group' (managed
+	 *  groups, the default when unset), 'feed' (one bucket per source), or
+	 *  'none' (all/unread only). */
+	groupBy?: 'none' | 'group' | 'feed';
+	/** List page size (library-section idiom; one of 10/20/50/100, default 20).
+	 *  Persisted so a long board survives re-renders at the user's density. */
+	pageSize?: number;
 }

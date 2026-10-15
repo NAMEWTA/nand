@@ -1,10 +1,12 @@
-/** @jsxImportSource preact */
+// Layout and interaction adapted from PandoraReads/apex-dashboard ac4d2c7 (MIT), Copyright (c) 2025 PandoraReads: src/album-widget.ts
+import { RecordButton } from '../dialogs/RecordButton';
+import { p2Classes } from '../theme/p2-classes';
 import type { App } from 'obsidian';
-import { useLayoutEffect, useRef, useState } from 'preact/hooks';
+import { useCallback, useLayoutEffect, useRef, useState } from 'react';
 import { displayFocal, focalForWrite } from '../../core/board/board-experience';
 import type { DashboardSettings } from '../../core/board/types';
 import { t } from '../../../../shared/i18n';
-import { Icon } from '../../../../ui/primitives/Icon';
+import { ObsidianIcon as Icon } from '../../../../ui/components/nand/ObsidianIcon';
 import { resolveVaultImage } from '../banner/image-resource';
 import {
 	ALBUM_FADE_MS,
@@ -44,7 +46,9 @@ export function AlbumPanel({
 	const current = images[index],
 		src = current ? resolveVaultImage(app, current) : null;
 	const state = useRef({ images, index });
-	state.current = { images, index };
+	useLayoutEffect(() => {
+		state.current = { images, index };
+	}, [images, index]);
 	useLayoutEffect(() => {
 		albumControllers.set(root, {
 			setImages: (next) => {
@@ -58,25 +62,30 @@ export function AlbumPanel({
 				changing.current = false;
 			},
 		});
-		return () => albumControllers.delete(root);
+		return () => {
+			albumControllers.delete(root);
+		};
 	}, [root]);
-	const advance = (delta: number) => {
-		const live = state.current;
-		if (changing.current || live.images.length < 2) return;
-		let target = (live.index + delta + live.images.length) % live.images.length;
-		for (let i = 0; i < live.images.length; i++) {
-			const candidate = (target + i) % live.images.length;
-			if (resolveVaultImage(app, live.images[candidate]!)) {
-				target = candidate;
-				break;
+	const advance = useCallback(
+		(delta: number) => {
+			const live = state.current;
+			if (changing.current || live.images.length < 2) return;
+			let target = (live.index + delta + live.images.length) % live.images.length;
+			for (let i = 0; i < live.images.length; i++) {
+				const candidate = (target + i) % live.images.length;
+				if (resolveVaultImage(app, live.images[candidate]!)) {
+					target = candidate;
+					break;
+				}
 			}
-		}
-		if (target === live.index) return;
-		changing.current = true;
-		setPrevious(live.images[live.index] ?? null);
-		setIndex(target);
-		setPhase('start');
-	};
+			if (target === live.index) return;
+			changing.current = true;
+			setPrevious(live.images[live.index] ?? null);
+			setIndex(target);
+			setPhase('start');
+		},
+		[app],
+	);
 	useLayoutEffect(() => {
 		if (images.length < 2) return;
 		const timer = win.setInterval(() => {
@@ -87,7 +96,7 @@ export function AlbumPanel({
 			if (!paused.current) advance(1);
 		}, interval);
 		return () => win.clearInterval(timer);
-	}, [win, interval, images, reset]);
+	}, [win, interval, images, reset, root, advance]);
 	useLayoutEffect(() => {
 		if (phase === 'idle') return;
 		if (phase === 'start') {
@@ -103,10 +112,10 @@ export function AlbumPanel({
 			changing.current = false;
 		}, ALBUM_FADE_MS);
 		return () => win.clearTimeout(timer);
-	}, [phase, win]);
+	}, [phase, win, root]);
 	useLayoutEffect(() => {
-		root.toggleClass('dashboard-sidebar-album--empty', !src);
-		root.toggleClass('dashboard-sidebar-album--single', images.length < 2);
+		root.classList.toggle('dashboard-sidebar-album--empty', !src);
+		root.classList.toggle('dashboard-sidebar-album--single', images.length < 2);
 		if (images.length > 1) {
 			const next = resolveVaultImage(app, images[(index + 1) % images.length]!);
 			if (next) {
@@ -114,7 +123,7 @@ export function AlbumPanel({
 				image.src = next;
 			}
 		}
-	}, [src, images, index, root]);
+	}, [src, images, index, root, app]);
 	const anim = TRANSITION_CLASSES[transition];
 	const point = displayFocal(focal);
 	const place = `${point.x}% ${point.y}%`;
@@ -122,15 +131,18 @@ export function AlbumPanel({
 		if (!onFocal) return;
 		const rect = event.currentTarget.getBoundingClientRect();
 		if (!rect.width || !rect.height) return;
-		const next = focalForWrite({ x: ((event.clientX - rect.left) / rect.width) * 100, y: ((event.clientY - rect.top) / rect.height) * 100 });
+		const next = focalForWrite({
+			x: ((event.clientX - rect.left) / rect.width) * 100,
+			y: ((event.clientY - rect.top) / rect.height) * 100,
+		});
 		if (next) onFocal(next);
 	};
 	return (
-		<div class="dashboard-sidebar-album-body">
+		<div className={p2Classes('dashboard-sidebar-album-body')}>
 			{!src ? (
-				<div class="dashboard-sidebar-album-placeholder">
-					<Icon className="dashboard-sidebar-album-placeholder-icon" name="image" />
-					<div class="dashboard-sidebar-album-placeholder-text">
+				<div className={p2Classes('dashboard-sidebar-album-placeholder')}>
+					<Icon className={p2Classes('dashboard-sidebar-album-placeholder-icon')} name="image" />
+					<div className={p2Classes('dashboard-sidebar-album-placeholder-text')}>
 						{t(
 							normalizeAlbumFolder(settings.widgetAlbumFolder)
 								? 'album.placeholderEmpty'
@@ -140,7 +152,7 @@ export function AlbumPanel({
 				</div>
 			) : (
 				<div
-					class={`dashboard-sidebar-album-frame dashboard-sidebar-album-frame--${transition}`}
+					className={p2Classes(`dashboard-sidebar-album-frame dashboard-sidebar-album-frame--${transition}`)}
 					onMouseEnter={() => {
 						paused.current = true;
 					}}
@@ -149,7 +161,9 @@ export function AlbumPanel({
 					}}
 				>
 					<img
-						class={`dashboard-sidebar-album-layer dashboard-sidebar-album-layer--top${phase === 'start' ? ` dashboard-sidebar-album-layer--instant ${anim.start}` : ''}`}
+						className={p2Classes(
+							`dashboard-sidebar-album-layer dashboard-sidebar-album-layer--top${phase === 'start' ? ` dashboard-sidebar-album-layer--instant ${anim.start}` : ''}`,
+						)}
 						src={src}
 						alt={basename(current!)}
 						draggable={false}
@@ -157,18 +171,23 @@ export function AlbumPanel({
 						onClick={chooseFocal}
 					/>
 					<img
-						class={`dashboard-sidebar-album-layer dashboard-sidebar-album-layer--bottom${previous ? (phase === 'run' && anim.out ? ` ${anim.out}` : '') : ' dashboard-sidebar-album-layer--instant dashboard-sidebar-album-layer--start-fade'}`}
+						className={p2Classes(
+							`dashboard-sidebar-album-layer dashboard-sidebar-album-layer--bottom${previous ? (phase === 'run' && anim.out ? ` ${anim.out}` : '') : ' dashboard-sidebar-album-layer--instant dashboard-sidebar-album-layer--start-fade'}`,
+						)}
 						src={previous ? (resolveVaultImage(app, previous) ?? undefined) : undefined}
 						draggable={false}
 						style={{ objectPosition: place }}
 					/>
-					<div class="dashboard-sidebar-album-index">
+					<div className={p2Classes('dashboard-sidebar-album-index')}>
 						{index + 1}/{images.length}
 					</div>
 					{([-1, 1] as const).map((delta) => (
-						<button
+						<RecordButton
+							variant="ghost"
 							key={delta}
-							class={`dashboard-sidebar-album-nav dashboard-sidebar-album-nav--${delta < 0 ? 'prev' : 'next'}`}
+							className={p2Classes(
+								`dashboard-sidebar-album-nav dashboard-sidebar-album-nav--${delta < 0 ? 'prev' : 'next'}`,
+							)}
 							aria-label={t(delta < 0 ? 'album.prev' : 'album.next')}
 							onClick={(e) => {
 								e.stopPropagation();
@@ -177,7 +196,7 @@ export function AlbumPanel({
 							}}
 						>
 							<Icon name={delta < 0 ? 'chevron-left' : 'chevron-right'} />
-						</button>
+						</RecordButton>
 					))}
 				</div>
 			)}

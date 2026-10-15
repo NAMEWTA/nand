@@ -11,7 +11,7 @@ import { generateDefaultMarkdown } from '../src/modules/home/core/board/parser/d
 import { parse, serialize } from '../src/modules/home/core/board/parser';
 import type { AnniversaryConfig, CountdownConfig } from '../src/modules/home/core/board/types';
 import { CountdownSettingsModal } from '../src/modules/home/ui/widgets/countdown-modal';
-import { AnniversarySettingsModal } from '../src/modules/home/ui/widgets/anniversary-settings-modal';
+import { runHomeReactChecks } from './run-home-react-checks';
 import { createDashboardSettingsAccess } from '../src/modules/home/ui/settings-access';
 import { readCalendarTaskFilter, writeCalendarTaskFilter } from '../src/modules/home/ui/calendar/calendar-preferences';
 import { onLanguageChanged, setLanguage, t } from '../src/shared/i18n/index';
@@ -30,45 +30,98 @@ import type { DashboardSettings } from '../src/modules/home/core/board/types/ind
 import { renderCopyHelp } from '../src/app/settings/editor-settings';
 
 async function main() {
+	runHomeReactChecks(['ui/widgets/anniversary-editor.dom.test.tsx']);
 	for (const language of ['zh', 'en'] as const) {
 		setLanguage(language);
 		const beforeHelp = StubSetting.created.length;
 		renderCopyHelp(new El('div') as never);
 		const help = StubSetting.created.slice(beforeHelp);
-		assert.deepEqual(help.map(row => row.name), ['editor.copy.title', 'editor.copy.relative', 'editor.copy.absolute'].map(key => t(key)));
-		assert.ok(help.every(row => row.desc.length > 20 && row.toggles.length === 0));
+		assert.deepEqual(
+			help.map((row) => row.name),
+			['editor.copy.title', 'editor.copy.relative', 'editor.copy.absolute'].map((key) => t(key)),
+		);
+		assert.ok(help.every((row) => row.desc.length > 20 && row.toggles.length === 0));
 	}
-	const exampleCountdown: CountdownConfig = { id: 'cd-default', label: 'New Year Countdown', targetDate: '2030-12-31T23:55', displayMode: 'hours', reminderDays: 0 };
-	const exampleAnniversary: AnniversaryConfig = { id: 'av-default', label: '纪念日', startDate: '2025-09-29', precision: 'ymd', annualReminder: false };
+	const exampleCountdown: CountdownConfig = {
+		id: 'cd-default',
+		label: 'New Year Countdown',
+		targetDate: '2030-12-31T23:55',
+		displayMode: 'hours',
+		reminderDays: 0,
+	};
+	const exampleAnniversary: AnniversaryConfig = {
+		id: 'av-default',
+		label: '纪念日',
+		startDate: '2025-09-29',
+		precision: 'ymd',
+		annualReminder: false,
+	};
 	for (const language of ['zh', 'en', 'zh'] as const) {
 		setLanguage(language);
 		assert.equal(resolveWidgetLabel(exampleCountdown, 'countdown'), language === 'zh' ? '新年' : 'New Year');
-		assert.equal(resolveWidgetLabel({ ...exampleCountdown, label: 'Countdown to New Year' }, 'countdown'), language === 'zh' ? '新年' : 'New Year');
-		assert.equal(resolveWidgetLabel({ ...exampleCountdown, label: 'Countdown to New Year', defaultLabel: false }, 'countdown'), 'Countdown to New Year');
-		assert.equal(resolveWidgetLabel(exampleAnniversary, 'anniversary'), language === 'zh' ? '纪念日' : 'Anniversary');
-		assert.equal(resolveWidgetLabel({ ...exampleAnniversary, label: 'Wedding / 结婚' }, 'anniversary'), 'Wedding / 结婚');
+		assert.equal(
+			resolveWidgetLabel({ ...exampleCountdown, label: 'Countdown to New Year' }, 'countdown'),
+			language === 'zh' ? '新年' : 'New Year',
+		);
+		assert.equal(
+			resolveWidgetLabel(
+				{ ...exampleCountdown, label: 'Countdown to New Year', defaultLabel: false },
+				'countdown',
+			),
+			'Countdown to New Year',
+		);
+		assert.equal(
+			resolveWidgetLabel(exampleAnniversary, 'anniversary'),
+			language === 'zh' ? '纪念日' : 'Anniversary',
+		);
+		assert.equal(
+			resolveWidgetLabel({ ...exampleAnniversary, label: 'Wedding / 结婚' }, 'anniversary'),
+			'Wedding / 结婚',
+		);
 		assert.equal(resolveWidgetLabel({ ...exampleAnniversary, id: 'user-entry' }, 'anniversary'), '纪念日');
-		assert.equal(resolveWidgetLabel({ ...exampleCountdown, defaultLabel: false }, 'countdown'), 'New Year Countdown');
-		assert.equal(resolveWidgetLabel({ ...exampleAnniversary, label: 'Anniversary', defaultLabel: false }, 'anniversary'), 'Anniversary', 'Explicitly entered default-looking names remain custom');
+		assert.equal(
+			resolveWidgetLabel({ ...exampleCountdown, defaultLabel: false }, 'countdown'),
+			'New Year Countdown',
+		);
+		assert.equal(
+			resolveWidgetLabel({ ...exampleAnniversary, label: 'Anniversary', defaultLabel: false }, 'anniversary'),
+			'Anniversary',
+			'Explicitly entered default-looking names remain custom',
+		);
 		const fresh = parse(generateDefaultMarkdown());
-		assert.deepEqual(fresh.columns.slice(0, 2).map((column) => column.name), language === 'zh' ? ['备忘', '待办'] : ['Memo', 'Todo']);
-		for (const column of fresh.columns.slice(0, 2)) assert.ok(column.cards.every((card) => card.column === column.name), 'Translated section and card ownership stay aligned');
+		assert.deepEqual(
+			fresh.columns.slice(0, 2).map((column) => column.name),
+			language === 'zh' ? ['备忘', '待办'] : ['Memo', 'Todo'],
+		);
+		for (const column of fresh.columns.slice(0, 2))
+			assert.ok(
+				column.cards.every((card) => card.column === column.name),
+				'Translated section and card ownership stay aligned',
+			);
 		fresh.columns[0]!.name = 'My memo / 自定义';
 		const saved = serialize(fresh);
 		setLanguage(language === 'zh' ? 'en' : 'zh');
-		assert.equal(parse(saved).columns[0]!.name, 'My memo / 自定义', 'Language changes never rewrite saved section names');
+		assert.equal(
+			parse(saved).columns[0]!.name,
+			'My memo / 自定义',
+			'Language changes never rewrite saved section names',
+		);
 	}
 	setLanguage('en');
 	(globalThis as unknown as { activeDocument: unknown }).activeDocument = { querySelector: () => null };
 	let savedCountdown: CountdownConfig | undefined;
 	const editCountdown = (input: boolean) => {
 		const before = StubSetting.created.length;
-		const modal = new CountdownSettingsModal({} as App, exampleCountdown, (updated) => { savedCountdown = updated; });
+		const modal = new CountdownSettingsModal({} as App, exampleCountdown, (updated) => {
+			savedCountdown = updated;
+		});
 		modal.onOpen();
-		const name = StubSetting.created.slice(before).find(row => row.name === t('countdown.label'))!.texts[0]!;
+		const name = StubSetting.created.slice(before).find((row) => row.name === t('countdown.label'))!.texts[0]!;
 		assert.equal(name.value, 'New Year');
 		if (input) name.fire!('Anniversary');
-		findTag(modal.contentEl as unknown as El, 'button').find((button) => button.textContent === t('common.save'))!.click();
+		findTag(modal.contentEl as unknown as El, 'button')
+			.find((button) => button.textContent === t('common.save'))!
+			.click();
 	};
 	editCountdown(false);
 	assert.equal(savedCountdown!.defaultLabel, true, 'Saving another field preserves localized default mode');
@@ -79,47 +132,60 @@ async function main() {
 	setLanguage('zh');
 	assert.equal(savedCountdown!.defaultLabel, false);
 	assert.equal(resolveWidgetLabel(savedCountdown!, 'countdown'), 'Anniversary');
-	let savedAnniversary: AnniversaryConfig | undefined;
-	const anniversaryModal = new AnniversarySettingsModal({} as App, exampleAnniversary, (updated) => { savedAnniversary = updated; });
-	const beforeSettings = StubSetting.created.length;
-	anniversaryModal.onOpen();
-	const labelSetting = StubSetting.created.slice(beforeSettings).find((setting) => setting.name === t('anniversary.label'))!;
-	assert.equal(labelSetting.texts[0]!.value, '纪念日');
-	labelSetting.texts[0]!.fire!('Anniversary');
-	findTag(anniversaryModal.contentEl as unknown as El, 'button').find((button) => button.textContent === t('common.save'))!.click();
-	assert.equal(savedAnniversary!.defaultLabel, false);
-	setLanguage('en');
-	assert.equal(resolveWidgetLabel(savedAnniversary!, 'anniversary'), 'Anniversary');
-	setLanguage('zh');
-	assert.equal(resolveWidgetLabel(savedAnniversary!, 'anniversary'), 'Anniversary', 'Typing an English default name is explicit user intent');
 	const commandCleanups: Array<() => void> = [];
 	const commands: Command[] = [];
 	const commandHost = {
 		manifest: { name: 'NAND' } as Plugin['manifest'],
 		register: (off: () => void) => commandCleanups.push(off),
 	};
-	const addCommand = (command: LocalizedCommand) => registerLocalizedCommand(commandHost, command, (native) => {
-		const registered = { ...native, id: `nand:${native.id}`, name: `NAND: ${native.name}` };
-		commands.push(registered);
-		return registered;
-	});
+	const addCommand = (command: LocalizedCommand) =>
+		registerLocalizedCommand(commandHost, command, (native) => {
+			const registered = { ...native, id: `nand:${native.id}`, name: `NAND: ${native.name}` };
+			commands.push(registered);
+			return registered;
+		});
 	setLanguage('zh');
-	registerCommentCommands({ app: {}, store: () => null, settings: () => ({ highlightEnabled: true, popoverEnabled: true }) } as unknown as CommentsEnv, { add: addCommand });
+	registerCommentCommands(
+		{
+			app: {},
+			store: () => null,
+			settings: () => ({ highlightEnabled: true, popoverEnabled: true }),
+		} as unknown as CommentsEnv,
+		{ add: addCommand },
+	);
 	registerCopyCommands({ app: {} as never, addCommand });
 	let scriptName = 'My workflow 中文';
 	const callback = () => {};
 	const hotkeys: Command['hotkeys'] = [{ modifiers: ['Mod'], key: '9' }];
-	const workflow = addCommand({ id: 'custom-workflow', name: '', nameResolver: () => `${t('workbench.agent')}: ${scriptName}`, callback, hotkeys });
+	const workflow = addCommand({
+		id: 'custom-workflow',
+		name: '',
+		nameResolver: () => `${t('workbench.agent')}: ${scriptName}`,
+		callback,
+		hotkeys,
+	});
 	const originalCommands = [...commands];
 	const originalCallbacks = commands.map((command) => command.callback ?? command.editorCallback);
 	for (const language of ['en', 'zh', 'zh', 'en'] as const) {
 		setLanguage(language);
-		const keys = ['editor.comments.add', 'editor.comments.openPanel', 'editor.comments.atCursor', 'editor.comments.next', 'editor.comments.previous', 'editor.comments.resolveAll', 'editor.copy.relative', 'editor.copy.absolute'];
+		const keys = [
+			'editor.comments.add',
+			'editor.comments.openPanel',
+			'editor.comments.atCursor',
+			'editor.comments.next',
+			'editor.comments.previous',
+			'editor.comments.resolveAll',
+			'editor.copy.relative',
+			'editor.copy.absolute',
+		];
 		keys.forEach((key, index) => assert.equal(commands[index]!.name, `NAND: ${t(key)}`));
 		assert.equal(workflow.name, `NAND: ${t('workbench.agent')}: ${scriptName}`);
 		assert.equal(workflow.hotkeys, hotkeys);
 		assert.deepEqual(commands, originalCommands, 'Language changes update the existing registered objects');
-		assert.deepEqual(commands.map((command) => command.callback ?? command.editorCallback), originalCallbacks);
+		assert.deepEqual(
+			commands.map((command) => command.callback ?? command.editorCallback),
+			originalCallbacks,
+		);
 	}
 	scriptName = '用户改名 / Keep English';
 	setLanguage('zh');
@@ -129,17 +195,48 @@ async function main() {
 	const disposedNames = commands.map((command) => command.name);
 	commandCleanups.forEach((off) => off());
 	setLanguage('en');
-	assert.deepEqual(commands.map((command) => command.name), disposedNames, 'Plugin unload releases name subscriptions');
-	let automationOpens = 0, inboxOpens = 0, browserOpens = 0;
-	registerShellCommands({ addCommand, moduleState: () => 'active', openBrowser: async () => { browserOpens++; }, openWorkbench: async (target: { feature: string }) => { if (target.feature === 'notifications') inboxOpens++; }, automationHost: { open: async () => { automationOpens++; } } } as unknown as DashboardPlugin);
+	assert.deepEqual(
+		commands.map((command) => command.name),
+		disposedNames,
+		'Plugin unload releases name subscriptions',
+	);
+	let automationOpens = 0,
+		inboxOpens = 0,
+		browserOpens = 0;
+	registerShellCommands({
+		addCommand,
+		moduleState: () => 'active',
+		openBrowser: async () => {
+			browserOpens++;
+		},
+		openWorkbench: async (target: { feature: string }) => {
+			if (target.feature === 'notifications') inboxOpens++;
+		},
+		automationHost: {
+			open: async () => {
+				automationOpens++;
+			},
+		},
+	} as unknown as DashboardPlugin);
 	const shellCommands = commands.slice(9);
 	// Board commands are registered by the home module itself.
-	const expectedShellIds = ['open-workbench', 'open-browser', 'open-automations', 'open-notifications', 'new-automation', 'open-contacts', 'open-editor-view', 'cycle-theme'].map(id => `nand:${id}`).sort();
-	assert.deepEqual(shellCommands.map(command => command.id).sort(), expectedShellIds);
-	const openBrowser = shellCommands.find(command => command.id === 'nand:open-browser')!;
-	const openAutomation = shellCommands.find(command => command.id === 'nand:open-automations')!;
-	const openInbox = shellCommands.find(command => command.id === 'nand:open-notifications')!;
-	const shellCallbacks = shellCommands.map(command => command.callback ?? command.checkCallback);
+	const expectedShellIds = [
+		'open-workbench',
+		'open-browser',
+		'open-automations',
+		'open-notifications',
+		'new-automation',
+		'open-contacts',
+		'open-editor-view',
+		'cycle-theme',
+	]
+		.map((id) => `nand:${id}`)
+		.sort();
+	assert.deepEqual(shellCommands.map((command) => command.id).sort(), expectedShellIds);
+	const openBrowser = shellCommands.find((command) => command.id === 'nand:open-browser')!;
+	const openAutomation = shellCommands.find((command) => command.id === 'nand:open-automations')!;
+	const openInbox = shellCommands.find((command) => command.id === 'nand:open-notifications')!;
+	const shellCallbacks = shellCommands.map((command) => command.callback ?? command.checkCallback);
 	for (const language of ['zh', 'en', 'zh'] as const) {
 		setLanguage(language);
 		assert.equal(openBrowser.name, `NAND: ${t('browser.open')}`);
@@ -147,14 +244,24 @@ async function main() {
 		assert.equal(openInbox.name, language === 'zh' ? 'NAND: 打开通知中心' : 'NAND: Open notifications');
 		assert.equal(t('automation.title'), language === 'zh' ? '自动化' : 'Automations');
 		assert.equal(t('automation.inbox'), language === 'zh' ? '通知中心' : 'Notifications');
-		for (const command of [openAutomation, openInbox, openBrowser]) assert.equal(command.checkCallback?.(false), true, 'Module commands run while the module is active');
-		assert.deepEqual(shellCommands.map(command => command.callback ?? command.checkCallback), shellCallbacks);
-		assert.deepEqual(commands.slice(9).map(command => command.id).sort(), expectedShellIds);
+		for (const command of [openAutomation, openInbox, openBrowser])
+			assert.equal(command.checkCallback?.(false), true, 'Module commands run while the module is active');
+		assert.deepEqual(
+			shellCommands.map((command) => command.callback ?? command.checkCallback),
+			shellCallbacks,
+		);
+		assert.deepEqual(
+			commands
+				.slice(9)
+				.map((command) => command.id)
+				.sort(),
+			expectedShellIds,
+		);
 		shellCommands.forEach((command, i) => assert.equal(commands[i + 9], command));
 		assert.equal(commandCleanups.length, commands.length, 'One subscription per command');
 	}
 	assert.deepEqual([automationOpens, inboxOpens, browserOpens], [3, 3, 3]);
-	commandCleanups.slice(9).forEach(off => off());
+	commandCleanups.slice(9).forEach((off) => off());
 	// React composer/IME/draft/error behavior is covered by comments DOM tests.
 
 	setLanguage('en');
@@ -166,19 +273,41 @@ async function main() {
 	setLanguage('en');
 	assert.equal(changed, 1, 'language notification is idempotent and disposable');
 
-	let mainTitle = '', popoutTitle = '', headerCalls = 0, layoutSaves = 0;
-	let mainActive = 'Note', popupActive = 'Terminal';
+	let mainTitle = '',
+		popoutTitle = '',
+		headerCalls = 0,
+		layoutSaves = 0;
+	let mainActive = 'Note',
+		popupActive = 'Terminal';
 	const root = {};
-	const popupWindow = { updateTitle() { popoutTitle = popupActive; } };
+	const popupWindow = {
+		updateTitle() {
+			popoutTitle = popupActive;
+		},
+	};
 	const titleApp = {
 		workspace: {
 			rootSplit: root,
-			updateTitle() { mainTitle = mainActive; },
-			requestSaveLayout() { layoutSaves++; },
+			updateTitle() {
+				mainTitle = mainActive;
+			},
+			requestSaveLayout() {
+				layoutSaves++;
+			},
 		},
 	};
-	const mainLeaf = { getContainer: () => root, updateHeader() { headerCalls++; } };
-	const popupLeaf = { getContainer: () => popupWindow, updateHeader() { headerCalls++; } };
+	const mainLeaf = {
+		getContainer: () => root,
+		updateHeader() {
+			headerCalls++;
+		},
+	};
+	const popupLeaf = {
+		getContainer: () => popupWindow,
+		updateHeader() {
+			headerCalls++;
+		},
+	};
 	refreshLeafTitle(titleApp as never, mainLeaf as never);
 	assert.equal(mainTitle, 'Note', 'background terminal refresh preserves the current note title');
 	mainActive = '智能体';
@@ -210,7 +339,14 @@ async function main() {
 	assert.equal(translatedLeafTitle('My session', terminalPairs, 'zh'), undefined);
 	assert.equal(translatedLeafTitle('Terminal', [{ en: 'Dashboard', zh: '看板' }], 'zh'), undefined);
 	assert.equal(translatedLeafTitle(undefined, terminalPairs, 'zh'), undefined);
-	for (const type of ['nand-dashboard-view', 'nand-editor-view', 'nand-contacts-view', 'nand-automation-view', 'terminal-view', 'nand-browser-view']) {
+	for (const type of [
+		'nand-dashboard-view',
+		'nand-editor-view',
+		'nand-contacts-view',
+		'nand-automation-view',
+		'terminal-view',
+		'nand-browser-view',
+	]) {
 		for (const language of ['en', 'zh'] as const) {
 			const placeholder = { type, title: language === 'en' ? 'Product' : '产品' };
 			assert.equal(translatedLeafTitle(type, terminalPairs, language, placeholder), placeholder.title);
@@ -218,7 +354,13 @@ async function main() {
 			assert.equal(translatedLeafTitle('other-view', terminalPairs, language, placeholder), undefined);
 		}
 	}
-	const deferred = { view: { title: 'Terminal' }, loaded: false, loadIfDeferred() { this.loaded = true; } };
+	const deferred = {
+		view: { title: 'Terminal' },
+		loaded: false,
+		loadIfDeferred() {
+			this.loaded = true;
+		},
+	};
 	assert.equal(setDeferredLeafTitle(deferred as never, '终端'), true);
 	assert.equal(deferred.view.title, '终端');
 	assert.equal(deferred.loaded, false);
@@ -277,7 +419,10 @@ async function main() {
 	assert.equal(englishLeaf.view.title, 'Terminal');
 	assert.equal(englishLeaf.loaded, false);
 	const rawLeaf = deferredLeaf('terminal-view');
-	retitleDeferredLeaves([rawLeaf] as never, terminalPairs, 'en', countRefresh as never, { type: 'terminal-view', title: 'Agents' });
+	retitleDeferredLeaves([rawLeaf] as never, terminalPairs, 'en', countRefresh as never, {
+		type: 'terminal-view',
+		title: 'Agents',
+	});
 	assert.equal(rawLeaf.view.title, 'Agents');
 	assert.equal(rawLeaf.loaded, false);
 	assert.equal(titleRefreshes.get(rawLeaf), 1);
@@ -318,7 +463,9 @@ async function main() {
 	assert.equal(owner.settings, previous);
 	assert.equal(refreshes, 2, 'failed save must not report a successful refresh');
 	assert.equal(await writeCalendarTaskFilter(undefined, 'all'), false, 'missing persistence must be visible');
-	console.log('verify-issue-regressions: default-name localization, edit intent, command registration, language lifecycle and settings persistence passed');
+	console.log(
+		'verify-issue-regressions: default-name localization, edit intent, command registration, language lifecycle and settings persistence passed',
+	);
 }
 void main().catch((error) => {
 	console.error(error);

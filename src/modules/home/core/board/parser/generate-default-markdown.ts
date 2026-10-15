@@ -1,3 +1,5 @@
+import { parseRssConfig, parseTickTickConfig } from '../p2-config';
+import type { RssConfig, TickTickConfig } from '../types';
 import { readPmConfig, readSkillsConfig } from '../p1-config';
 import { readMarkdownDocument, readYaml } from '../../../../../shared/storage/markdown-document';
 import { normalizeColumnPairs } from '../column-pairs';
@@ -140,6 +142,8 @@ export function parseColumnDefs(fm: Record<string, unknown>): Array<{
 	pmConfig?: PmConfig;
 	skillsConfig?: SkillsSectionConfig;
 	wereadConfig?: WereadConfig;
+	rssConfig?: RssConfig;
+	ticktickConfig?: TickTickConfig;
 	dataviewConfig?: DataviewConfig;
 	webConfig?: WebEmbedConfig;
 	height?: number;
@@ -159,6 +163,8 @@ export function parseColumnDefs(fm: Record<string, unknown>): Array<{
 		pmConfig: readPmConfig(item.pm),
 		skillsConfig: readSkillsConfig(item.skills),
 		pipelineConfig: item.pipeline ? readPipelineConfig(item.pipeline) : undefined,
+		rssConfig: item.rss ? parseRssConfig(item.rss as Record<string, unknown>) : undefined,
+		ticktickConfig: item.ticktick ? parseTickTickConfig(item.ticktick as Record<string, unknown>) : undefined,
 		wereadConfig: item.weread ? parseWereadConfig(item.weread as Record<string, unknown>) : undefined,
 		dataviewConfig: item.dataview ? parseDataviewConfig(item.dataview as Record<string, unknown>) : undefined,
 		webConfig: item.web ? parseWebConfig(item.web as Record<string, unknown>) : undefined,
@@ -181,6 +187,8 @@ export function parseColumns(
 		pmConfig?: PmConfig;
 		skillsConfig?: SkillsSectionConfig;
 		wereadConfig?: WereadConfig;
+		rssConfig?: RssConfig;
+		ticktickConfig?: TickTickConfig;
 		dataviewConfig?: DataviewConfig;
 		webConfig?: WebEmbedConfig;
 		height?: number;
@@ -216,6 +224,8 @@ export function parseColumns(
 			pmConfig: def?.pmConfig,
 			skillsConfig: def?.skillsConfig,
 			wereadConfig: def?.wereadConfig,
+			rssConfig: def?.rssConfig,
+			ticktickConfig: def?.ticktickConfig,
 			dataviewConfig: def?.dataviewConfig,
 			webConfig: def?.webConfig,
 			height: def?.height,

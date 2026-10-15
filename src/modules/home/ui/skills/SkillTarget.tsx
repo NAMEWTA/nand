@@ -1,11 +1,10 @@
-/** @jsxImportSource preact */
-import { useEffect, useState } from 'preact/hooks';
+import { useEffect, useState } from 'react';
 import type { AgentSessionSummary } from '../../../agent/api';
 import type { SkillShortcut } from '../../core/board/types/model';
 import { homeServices } from '../../services/instances';
 import { t } from '../../../../shared/i18n';
-import { Button } from '../../../../ui/primitives/Button';
-import { TextField } from '../../../../ui/primitives/TextField';
+import { Button } from '../../../../ui/components/button';
+import { TextField } from '../skills/PromptField';
 
 export function useSkillAgents() {
 	const [revision, refresh] = useState(0);
@@ -27,24 +26,26 @@ export function SkillTarget({
 }) {
 	const { revision } = useSkillAgents();
 	const [refresh, setRefresh] = useState(0);
-	const [sessions, setSessions] = useState<AgentSessionSummary[]>([]);
-	const [loading, setLoading] = useState(false);
+	const [result, setSessions] = useState<{
+		agentId: string;
+		revision: number;
+		refresh: number;
+		rows: AgentSessionSummary[];
+	} | null>(null);
+	const sessions =
+		result?.agentId === agentId && result.revision === revision && result.refresh === refresh ? result.rows : [];
+	const loading = !(result?.agentId === agentId && result.revision === revision && result.refresh === refresh);
 	useEffect(() => {
 		let closed = false;
-		setLoading(true);
-		setSessions([]);
-		void (homeServices.sessions?.()?.list() ?? Promise.resolve([]))
-			.then(
-				(list) => {
-					if (!closed) setSessions(list.filter((row) => row.agentId === agentId));
-				},
-				() => {
-					if (!closed) setSessions([]);
-				},
-			)
-			.finally(() => {
-				if (!closed) setLoading(false);
-			});
+		void (homeServices.sessions?.()?.list() ?? Promise.resolve([])).then(
+			(list) => {
+				if (!closed)
+					setSessions({ agentId, revision, refresh, rows: list.filter((row) => row.agentId === agentId) });
+			},
+			() => {
+				if (!closed) setSessions({ agentId, revision, refresh, rows: [] });
+			},
+		);
 		return () => {
 			closed = true;
 		};
@@ -52,9 +53,9 @@ export function SkillTarget({
 	const valid = value.kind === 'fresh' || (!loading && sessions.some((row) => row.id === value.sessionId));
 	useEffect(() => validity?.(valid), [valid, validity]);
 	return (
-		<div class="nand-ui-stack">
-			<label class="nand-field">
-				<span class="nand-field-label">{t('home.skills.destination')}</span>
+		<div className="flex flex-col gap-3">
+			<label className="flex flex-col gap-1">
+				<span className="text-sm font-medium">{t('home.skills.destination')}</span>
 				<select
 					value={value.kind}
 					onChange={(event) =>
@@ -78,8 +79,8 @@ export function SkillTarget({
 				/>
 			) : (
 				<>
-					<label class="nand-field">
-						<span class="nand-field-label">{t('home.skills.session')}</span>
+					<label className="flex flex-col gap-1">
+						<span className="text-sm font-medium">{t('home.skills.session')}</span>
 						<select
 							value={value.sessionId}
 							onChange={(event) => change({ kind: 'existing', sessionId: event.currentTarget.value })}

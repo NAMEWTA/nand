@@ -14,11 +14,112 @@ import { Choice } from '../board/controls';
 import { DashboardFolderPicker } from '../dialogs/DashboardFolderPicker';
 import { DashboardDialog } from '../dialogs/DashboardDialog';
 import { WidgetBackgroundEditor } from './WidgetBackgroundEditor';
+import { isValidTz } from '../../core/ticktick/ticktick-tz';
 type Props = {
 	app?: App;
 	settings: DashboardSettings;
 	update(this: void, change: (s: DashboardSettings) => void): Promise<void>;
 };
+export function TickTickServiceSettings({ settings, update, onLogin }: Props & { onLogin: () => void }) {
+	const t = useT(),
+		[error, setError] = useState('');
+	const change = (fn: (s: DashboardSettings) => void) => {
+		void update(fn).catch((e) => setError(String(e)));
+	};
+	return (
+		<SettingsSection title={t('ticktick.configure')}>
+			<SettingsRow
+				label={t('settings.ticktickRegion')}
+				description={t('settings.ticktickRegionDesc')}
+				control={
+					<Choice
+						compact
+						label={t('settings.ticktickRegion')}
+						value={settings.ticktickRegion}
+						options={['dida365', 'ticktick'].map((value) => ({
+							value,
+							label: t(
+								value === 'dida365' ? 'settings.ticktickRegionDida' : 'settings.ticktickRegionTick',
+							),
+						}))}
+						onChange={(value) =>
+							change((s) => {
+								s.ticktickRegion = value as typeof s.ticktickRegion;
+							})
+						}
+					/>
+				}
+			/>
+			<SettingsRow
+				label={t('settings.ticktickCookie')}
+				description={t('settings.ticktickCookieDesc')}
+				control={
+					<div className="flex gap-2">
+						<Button onClick={onLogin}>{t('settings.ticktickGetCookie')}</Button>
+						<Button
+							variant="outline"
+							disabled={!settings.ticktickCookie}
+							onClick={() =>
+								change((s) => {
+									s.ticktickCookie = '';
+									s.ticktickCsrf = '';
+								})
+							}
+						>
+							{t('settings.ticktickClearCookie')}
+						</Button>
+					</div>
+				}
+			/>
+			<SettingsRow
+				label={t('settings.ticktickCookieStatus')}
+				description={t(settings.ticktickCookie ? 'settings.ticktickCookieSet' : 'settings.ticktickCookieEmpty')}
+				control={null}
+			/>
+			<SettingsRow
+				label={t('settings.ticktickDeviceVersion')}
+				description={t('settings.ticktickDeviceVersionDesc')}
+				control={
+					<Input
+						value={settings.ticktickDeviceVersion}
+						onChange={(e) => {
+							const value = e.target.value;
+							change((s) => {
+								s.ticktickDeviceVersion = value;
+							});
+						}}
+					/>
+				}
+			/>
+			<SettingsRow
+				label={t('settings.ticktickTimezone')}
+				description={t('settings.ticktickTimezoneDesc')}
+				control={
+					<Input
+						key={settings.ticktickTimezone}
+						defaultValue={settings.ticktickTimezone}
+						onBlur={(e) => {
+							const value = e.target.value.trim();
+							if (!isValidTz(value)) {
+								setError(t('settings.ticktickTimezoneInvalid'));
+								return;
+							}
+							setError('');
+							change((s) => {
+								s.ticktickTimezone = value;
+							});
+						}}
+					/>
+				}
+			/>
+			{error && (
+				<p role="alert" className="text-destructive">
+					{error}
+				</p>
+			)}
+		</SettingsSection>
+	);
+}
 export function ReadingServiceSettings({ settings, update }: Props) {
 	const t = useT(),
 		[error, setError] = useState('');
@@ -220,11 +321,23 @@ export function MediaServiceSettings({ app, settings, update }: Props) {
 						{t('settings.widgetAlbumInterval')}
 						<Input
 							type="number"
-							min={1}
+							min={3}
+							max={60}
 							value={album.intervalSec}
-							onChange={(event) => setAlbum({ ...album, intervalSec: Math.max(1, +event.target.value) })}
+							onChange={(event) =>
+								setAlbum({ ...album, intervalSec: Math.max(3, Math.min(60, +event.target.value)) })
+							}
 						/>
 					</Label>
+					<Choice
+						label={t('settings.widgetAlbumRatio')}
+						value={album.ratio}
+						options={[
+							{ value: '1:1', label: '1:1' },
+							{ value: '3:4', label: '3:4' },
+						]}
+						onChange={(ratio) => setAlbum({ ...album, ratio: ratio as AlbumConfig['ratio'] })}
+					/>
 					<SettingsSwitchRow
 						label={t('settings.widgetAlbumRecursive')}
 						checked={album.recursive}

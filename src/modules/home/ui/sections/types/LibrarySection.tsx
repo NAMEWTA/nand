@@ -1,5 +1,8 @@
-import { observeBoardAction } from '../../board/actions';
 // Layout and interaction adapted from PandoraReads/apex-dashboard ac4d2c7 (MIT), Copyright (c) 2025 PandoraReads: src/library-section.ts, src/table-columns-modal.ts
+import { buildNewNoteProps } from '../../library/library-new-note';
+import { selectBadgeKeys } from '../../library/library-presentation';
+import { PinnedProperties } from '../../library/PinnedProperties';
+import { observeBoardAction } from '../../board/actions';
 import { RelativeTime } from '../../../../../ui/components/nand/RelativeTime';
 import { useState } from 'react';
 import { useStore } from 'zustand';
@@ -31,11 +34,13 @@ function FileCard({
 	store,
 	row,
 	mode,
+	config,
 	onDelete,
 }: {
 	store: BoardStore;
 	row: LibraryFileResult;
 	mode: string;
+	config: LibraryConfig;
 	onDelete(this: void): void;
 }) {
 	const t = useT(),
@@ -62,17 +67,34 @@ function FileCard({
 					<span className="min-w-0 flex-1 truncate">{row.file.path.split('/').slice(0, -1).join('/')}/</span>
 					<RelativeTime value={row.mtime} />
 				</span>
-				{Object.entries(row.frontmatter)
-					.filter(([key]) => !['cover', '封面', 'tags', 'aliases', 'cssclasses'].includes(key))
-					.slice(0, 3)
-					.map(([key, value]) => (
-						<span
-							key={key}
-							className="mt-1 max-w-full truncate rounded bg-secondary px-1.5 py-px text-[.625em] leading-[1.3] text-secondary-foreground"
-						>
-							<span className="text-primary">{key}:</span> {display(value)}
-						</span>
-					))}
+				{(config.showProperties === false
+					? []
+					: selectBadgeKeys(
+							Object.fromEntries(
+								Object.entries(row.frontmatter).filter(
+									([key]) =>
+										![
+											'cover',
+											'封面',
+											'aliases',
+											'cssclasses',
+											...(mode === 'kanban' && config.groupMode !== 'folder'
+												? [config.kanbanGroupBy ?? 'status']
+												: []),
+										].includes(key),
+								),
+							),
+							config.visibleProperties,
+							config.propertyLimit ?? 3,
+						)
+				).map((key) => (
+					<span
+						key={key}
+						className="mt-1 max-w-full truncate rounded bg-secondary px-1.5 py-px text-[.625em] leading-[1.3] text-secondary-foreground"
+					>
+						<span className="text-primary">{key}:</span> {display(row.frontmatter[key])}
+					</span>
+				))}
 			</Button>
 			<IconButton
 				label={t('common.delete')}
@@ -181,20 +203,24 @@ function LibraryGroup({
 					) : config.viewMode === 'list' ? (
 						<div>
 							{shown.map((row) => (
-								<Button
-									key={row.file.path}
-									variant="ghost"
-									className="h-8 w-full justify-start text-xs"
-									onClick={() => {
-										void store.openFile(row.file.path);
-									}}
-								>
-									<FileText className="size-3" />
-									<span className="min-w-0 flex-1 truncate text-left">{row.basename}</span>
-									<span className="text-muted-foreground">
-										{new Date(row.mtime).toLocaleDateString()}
-									</span>
-								</Button>
+								<div key={row.file.path} className="flex items-center">
+									<Button
+										variant="ghost"
+										className="h-8 w-full justify-start text-xs"
+										onClick={() => {
+											void store.openFile(row.file.path);
+										}}
+									>
+										<FileText className="size-3" />
+										<span className="min-w-0 flex-1 truncate text-left">{row.basename}</span>
+										<span className="text-muted-foreground">
+											{new Date(row.mtime).toLocaleDateString()}
+										</span>
+									</Button>
+									<IconButton label={t('common.delete')} onClick={() => onDelete(row)}>
+										<Trash2 className="size-3" />
+									</IconButton>
+								</div>
 							))}
 						</div>
 					) : (
@@ -206,6 +232,7 @@ function LibraryGroup({
 									key={row.file.path}
 									row={row}
 									mode={config.viewMode}
+									config={config}
 									store={store}
 									onDelete={() => onDelete(row)}
 								/>
@@ -458,9 +485,16 @@ export function LibrarySection({ store, column }: { store: BoardStore; column: D
 					title={t('home.dashboard.settings')}
 					onClose={() => setDialog(null)}
 					onSave={() => {
-						void observeBoardAction(store.sync.updateLibraryConfig(column.name, draft).then(() => setDialog(null)));
+						void observeBoardAction(
+							store.sync.updateLibraryConfig(column.name, draft).then(() => setDialog(null)),
+						);
 					}}
 				>
+					<PinnedProperties
+						config={draft}
+						keys={candidates.filter((k) => k.startsWith('property:')).map((k) => k.slice(9))}
+						onChange={setDraft}
+					/>
 					<Label>
 						{t('home.dashboard.folders')}
 						<Input
@@ -633,11 +667,7 @@ export function LibrarySection({ store, column }: { store: BoardStore; column: D
 								column.sectionType === 'folder' ? folder : '',
 								name || t('home.dashboard.newNote'),
 								template,
-								Object.fromEntries(
-									config.filters
-										.filter((f) => f.values.length && (!f.operator || f.operator === 'equals'))
-										.map((f) => [f.property, f.values.length === 1 ? f.values[0] : f.values]),
-								),
+								buildNewNoteProps(config).props,
 							)
 							.then(() => setDialog(null));
 					}}

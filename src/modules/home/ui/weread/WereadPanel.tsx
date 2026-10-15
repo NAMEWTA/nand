@@ -1,6 +1,8 @@
-/** @jsxImportSource preact */
+// Layout and interaction adapted from PandoraReads/apex-dashboard ac4d2c7 (MIT), Copyright (c) 2025 PandoraReads: src/weread-section.ts
+import { RecordButton } from '../dialogs/RecordButton';
+import { p2Classes } from '../theme/p2-classes';
 import { Notice, type App } from 'obsidian';
-import { useLayoutEffect, useMemo, useRef, useState } from 'preact/hooks';
+import { useLayoutEffect, useMemo, useRef, useState } from 'react';
 import type { WereadConfig, WereadWidget } from '../../core/board/types';
 import { filterWereadBooks, groupWereadBooks, mergeNotebookStats } from '../../core/weread/weread-shelf-model';
 import {
@@ -9,18 +11,11 @@ import {
 	type WereadBookmarkLike,
 	type WereadNotebookLike,
 } from '../../core/weread/widget-model';
-import {
-	getWereadProgressStore,
-	type WereadProgressStore,
-} from '../../platform/weread/weread-progress-store';
-import {
-	sharedWereadClient,
-	wereadErrorMessage,
-	type WereadClient,
-} from '../../platform/weread/weread-service';
+import { getWereadProgressStore, type WereadProgressStore } from '../../platform/weread/weread-progress-store';
+import { sharedWereadClient, wereadErrorMessage, type WereadClient } from '../../platform/weread/weread-service';
 import { enrichProgress, importHighlightsToObsidian } from '../../platform/weread/widget-data';
 import { t } from '../../../../shared/i18n';
-import { Icon } from '../../../../ui/primitives/Icon';
+import { ObsidianIcon as Icon } from '../../../../ui/components/nand/ObsidianIcon';
 import { computeShelfCapacity, contentTypeLabel, groupIcon, groupLabel, readingStateLabel } from './shelf-presentation';
 import { WereadHint, WereadStats } from './WereadStats';
 export function WereadPanel({
@@ -55,9 +50,12 @@ export function WereadPanel({
 	return (
 		<>
 			{normalizedWidgets(config).map((widget) => (
-				<div key={widget.id} class="dashboard-weread-widget">
-					{widget.title && <div class="dashboard-weread-widget-title">{widget.title}</div>}
-					<div class="dashboard-weread-content">
+				<div
+					key={`${widget.id}:${revision}:${JSON.stringify(widget)}`}
+					className={p2Classes('dashboard-weread-widget')}
+				>
+					{widget.title && <div className={p2Classes('dashboard-weread-widget-title')}>{widget.title}</div>}
+					<div className={p2Classes('dashboard-weread-content')}>
 						{widget.view === 'stats' ? (
 							<WereadStats client={client} store={store} widget={widget} revision={revision} />
 						) : (
@@ -97,8 +95,6 @@ function BooksWidget({
 		[error, setError] = useState('');
 	useLayoutEffect(() => {
 		let active = true;
-		setStatus('loading');
-		setError('');
 		void (async () => {
 			try {
 				if (widget.view === 'notes') {
@@ -142,16 +138,28 @@ function BooksWidget({
 }
 function Pager({ page, pages, change }: { page: number; pages: number; change: (page: number) => void }) {
 	return pages <= 1 ? null : (
-		<div class="dashboard-weread-pager">
-			<button class="dashboard-weread-pager-btn" disabled={page <= 1} onClick={() => change(page - 1)}>
-				<span>‹</span>
-			</button>
-			<span class="dashboard-weread-pager-info">
+		<div className={p2Classes('dashboard-weread-pager')}>
+			<RecordButton
+				variant="ghost"
+				className={p2Classes('dashboard-weread-pager-btn')}
+				aria-label={t('home.p2.prev')}
+				disabled={page <= 1}
+				onClick={() => change(page - 1)}
+			>
+				<span aria-hidden>‹</span>
+			</RecordButton>
+			<span className={p2Classes('dashboard-weread-pager-info')}>
 				{page} / {pages}
 			</span>
-			<button class="dashboard-weread-pager-btn" disabled={page >= pages} onClick={() => change(page + 1)}>
-				<span>›</span>
-			</button>
+			<RecordButton
+				variant="ghost"
+				className={p2Classes('dashboard-weread-pager-btn')}
+				aria-label={t('home.p2.next')}
+				disabled={page >= pages}
+				onClick={() => change(page + 1)}
+			>
+				<span aria-hidden>›</span>
+			</RecordButton>
 		</div>
 	);
 }
@@ -176,32 +184,41 @@ function Shelf({ books, widget }: { books: WereadBookLike[]; widget: WereadWidge
 		current = Math.min(page, pages),
 		slice = ordered.slice((current - 1) * capacity, current * capacity);
 	const grid = (items: WereadBookLike[]) => (
-		<div class="dashboard-weread-grid">
+		<div className={p2Classes('dashboard-weread-grid')}>
 			{items.map((book) => (
-				<div key={book.bookId} class="dashboard-weread-book">
+				<div key={book.bookId} className={p2Classes('dashboard-weread-book')}>
 					<div
-						class={`dashboard-weread-book-cover${book.cover ? '' : ' dashboard-weread-book-cover--placeholder'}`}
+						className={p2Classes(
+							`dashboard-weread-book-cover${book.cover ? '' : ' dashboard-weread-book-cover--placeholder'}`,
+						)}
 						style={book.cover ? { backgroundImage: `url(${JSON.stringify(book.cover)})` } : undefined}
 					/>
-					<div class="dashboard-weread-book-info">
-						<div class="dashboard-weread-book-title">{book.title}</div>
-						<div class="dashboard-weread-book-author">{book.author}</div>
-						<div class="dashboard-weread-book-meta">
-							<div class="dashboard-weread-book-kind">{contentTypeLabel(book.contentType)}</div>
+					<div className={p2Classes('dashboard-weread-book-info')}>
+						<div className={p2Classes('dashboard-weread-book-title')}>{book.title}</div>
+						<div className={p2Classes('dashboard-weread-book-author')}>{book.author}</div>
+						<div className={p2Classes('dashboard-weread-book-meta')}>
+							<div className={p2Classes('dashboard-weread-book-kind')}>
+								{contentTypeLabel(book.contentType)}
+							</div>
 							{(book.noteCount ?? 0) + (book.reviewCount ?? 0) > 0 && (
-								<div class="dashboard-weread-book-notes">
+								<div className={p2Classes('dashboard-weread-book-notes')}>
 									{t('weread.noteBadge', {
 										count: String((book.noteCount ?? 0) + (book.reviewCount ?? 0)),
 									})}
 								</div>
 							)}
 						</div>
-						<div class="dashboard-weread-progress">
-							<div class="dashboard-weread-progress-fill" style={{ width: `${book.progress}%` }} />
+						<div className={p2Classes('dashboard-weread-progress')}>
+							<div
+								className={p2Classes('dashboard-weread-progress-fill')}
+								style={{ width: `${book.progress}%` }}
+							/>
 						</div>
-						<div class="dashboard-weread-progress-meta">
-							<div class="dashboard-weread-book-state">{readingStateLabel(book.readingState)}</div>
-							<div class="dashboard-weread-book-pct">{book.progress}%</div>
+						<div className={p2Classes('dashboard-weread-progress-meta')}>
+							<div className={p2Classes('dashboard-weread-book-state')}>
+								{readingStateLabel(book.readingState)}
+							</div>
+							<div className={p2Classes('dashboard-weread-book-pct')}>{book.progress}%</div>
 						</div>
 					</div>
 				</div>
@@ -217,16 +234,23 @@ function Shelf({ books, widget }: { books: WereadBookLike[]; widget: WereadWidge
 					{groupBy === 'none' ? (
 						grid(slice)
 					) : (
-						<div class="dashboard-weread-groups">
+						<div className={p2Classes('dashboard-weread-groups')}>
 							{groupWereadBooks(slice, groupBy).map((group) => (
 								<div
 									key={group.key}
-									class={`dashboard-weread-group dashboard-weread-group--${group.key}`}
+									className={p2Classes(`dashboard-weread-group dashboard-weread-group--${group.key}`)}
 								>
-									<div class="dashboard-weread-group-head">
-										<Icon className="dashboard-weread-group-icon" name={groupIcon(group.key)} />
-										<div class="dashboard-weread-group-name">{groupLabel(group.key)}</div>
-										<div class="dashboard-weread-group-count">{group.books.length}</div>
+									<div className={p2Classes('dashboard-weread-group-head')}>
+										<Icon
+											className={p2Classes('dashboard-weread-group-icon')}
+											name={groupIcon(group.key)}
+										/>
+										<div className={p2Classes('dashboard-weread-group-name')}>
+											{groupLabel(group.key)}
+										</div>
+										<div className={p2Classes('dashboard-weread-group-count')}>
+											{group.books.length}
+										</div>
 									</div>
 									{grid(group.books)}
 								</div>
@@ -257,7 +281,7 @@ function Notebooks({
 		<WereadHint title={t('weread.noNotes')} />
 	) : (
 		<>
-			<div class="dashboard-weread-notebooks">
+			<div className={p2Classes('dashboard-weread-notebooks')}>
 				{notebooks.slice((current - 1) * 10, current * 10).map((note) => (
 					<Notebook key={note.bookId} note={note} client={client} app={app} importPath={importPath} />
 				))}
@@ -331,16 +355,22 @@ function Notebook({
 		}
 	};
 	return (
-		<div class="dashboard-weread-notebook">
-			<div class="dashboard-weread-notebook-head" onClick={() => void toggle()}>
-				<div class="dashboard-weread-notebook-meta">
-					<div class="dashboard-weread-book-title">{note.title}</div>
-					<div class="dashboard-weread-notebook-count">
+		<div className={p2Classes('dashboard-weread-notebook')}>
+			<div className={p2Classes('dashboard-weread-notebook-head')}>
+				<RecordButton
+					variant="ghost"
+					aria-expanded={open}
+					onClick={() => void toggle()}
+					className={p2Classes('dashboard-weread-notebook-meta')}
+				>
+					<div className={p2Classes('dashboard-weread-book-title')}>{note.title}</div>
+					<div className={p2Classes('dashboard-weread-notebook-count')}>
 						{t('weread.noteCount', { n: String(note.noteCount) })}
 					</div>
-				</div>
-				<button
-					class="dashboard-weread-notebook-import"
+				</RecordButton>
+				<RecordButton
+					variant="ghost"
+					className={p2Classes('dashboard-weread-notebook-import')}
 					disabled={importing}
 					aria-label={t('weread.importHighlights')}
 					title={t('weread.importHighlights')}
@@ -350,20 +380,26 @@ function Notebook({
 					}}
 				>
 					<Icon name="file-down" />
-				</button>
+				</RecordButton>
 				<Icon
-					className="dashboard-weread-notebook-chevron"
+					className={p2Classes('dashboard-weread-notebook-chevron')}
 					name={loading ? 'loader' : open ? 'chevron-down' : 'chevron-right'}
 				/>
 			</div>
-			<div class={`dashboard-weread-notebook-detail${open ? ' dashboard-weread-notebook-detail--open' : ''}`}>
+			<div
+				className={p2Classes(
+					`dashboard-weread-notebook-detail${open ? ' dashboard-weread-notebook-detail--open' : ''}`,
+				)}
+			>
 				{marks?.length
 					? marks.map((mark, i) => (
-							<div key={i} class="dashboard-weread-highlight">
+							<div key={i} className={p2Classes('dashboard-weread-highlight')}>
 								{mark.markText}
 							</div>
 						))
-					: marks && <div class="dashboard-weread-hint-desc">{t('weread.noHighlights')}</div>}
+					: marks && (
+							<div className={p2Classes('dashboard-weread-hint-desc')}>{t('weread.noHighlights')}</div>
+						)}
 			</div>
 		</div>
 	);

@@ -168,6 +168,8 @@ function serializeManaged(data: DashboardData): string {
 		}
 		if (col.showCover === false) lines.push('    showCover: false');
 		if (col.pmConfig) lines.push(`    pm: ${JSON.stringify(col.pmConfig)}`);
+		if (col.rssConfig) lines.push(`    rss: ${JSON.stringify(col.rssConfig)}`);
+		if (col.ticktickConfig) lines.push(`    ticktick: ${JSON.stringify(col.ticktickConfig)}`);
 		if (col.skillsConfig) lines.push(`    skills: ${JSON.stringify(col.skillsConfig)}`);
 		if (col.pipelineConfig) lines.push(`    pipeline: ${JSON.stringify(col.pipelineConfig)}`);
 		if (col.libraryConfig) {

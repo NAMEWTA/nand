@@ -1,13 +1,13 @@
-/** @jsxImportSource preact */
 import { SuggestModal, type App } from 'obsidian';
 import { contentFiles, type ContentFile } from '../../../../host/obsidian/storage/content-files';
-import { useState } from 'preact/hooks';
+import { useState } from 'react';
 import type { SkillShortcut } from '../../core/board/types/model';
 import { skillError, skillPrompt, type SkillContext, type SkillDraft } from '../../services/skill-shortcuts';
 import { t } from '../../../../shared/i18n';
-import { Button } from '../../../../ui/primitives/Button';
-import { TextField } from '../../../../ui/primitives/TextField';
-import { openDialog } from '../../../../ui/primitives/dialog';
+import { Button } from '../../../../ui/components/button';
+import { TextField } from '../skills/PromptField';
+import { openRecordOverlay } from '../dialogs/open-record-dialog';
+import { P2Dialog } from '../dialogs/P2Dialog';
 import { SkillTarget } from './SkillTarget';
 import { ownAgentPreview } from './preview-lifetime';
 
@@ -38,7 +38,15 @@ function chooseFile(app: App, signal: AbortSignal, owner: unknown): Promise<stri
 		const close = () => modal.close();
 		modal.setPlaceholder(t('home.skills.chooseFile'));
 		modal.open();
-		release = ownAgentPreview(app, close, owner, signal);
+		release = ownAgentPreview(
+			app,
+			() => {
+				resolve(null);
+				close();
+			},
+			owner,
+			signal,
+		);
 	});
 }
 
@@ -79,7 +87,7 @@ export function AgentPromptPanel({
 		if (!edited) rebuild(input, next);
 	};
 	return (
-		<div class="nand-ui-stack nand-agent-prompt-preview nand-skills-preview">
+		<div className="flex flex-col gap-3 nand-agent-prompt-preview nand-skills-preview">
 			<p>{t('quickActions.skillTarget', { name: skill.agentId })}</p>
 			<SkillTarget agentId={skill.agentId} value={destination} change={setDestination} validity={setValid} />
 			<TextField
@@ -97,7 +105,7 @@ export function AgentPromptPanel({
 				<legend>{t('home.skills.files')}</legend>
 				{!candidates.length && <p>{t('home.skills.emptyScope')}</p>}
 				{candidates.map((path) => (
-					<label class="nand-skills-check" key={path}>
+					<label className="flex items-center gap-2" key={path}>
 						<input
 							type="checkbox"
 							checked={files.includes(path)}
@@ -142,7 +150,7 @@ export function AgentPromptPanel({
 			/>
 			{edited && (
 				<>
-					<p class="nand-field-hint">{t('home.skills.editedHint')}</p>
+					<p className="text-xs text-muted-foreground">{t('home.skills.editedHint')}</p>
 					<Button
 						onClick={() => {
 							rebuild(input, files);
@@ -154,10 +162,10 @@ export function AgentPromptPanel({
 				</>
 			)}
 			{error && <p role="alert">{error}</p>}
-			<div class="nand-dialog-footer">
+			<div className="flex justify-end gap-2">
 				<Button onClick={close}>{t('common.cancel')}</Button>
 				<Button
-					variant="primary"
+					variant="default"
 					disabled={!draft.trim() || !valid || !!error || choosing}
 					onClick={() => confirm({ finalPrompt: draft, files, destination })}
 				>
@@ -182,27 +190,46 @@ export function previewSkill(
 	return new Promise((resolve) => {
 		let result: SkillDraft | null = null;
 		let release = () => {};
-		const close = openDialog(app, {
-			title: skill.label || t('quickActions.skillPreview'),
-			className: 'nand-skill-preview-dialog',
-			content: (close) => (
-				<AgentPromptPanel
-					skill={skill}
-					context={context}
-					initial={initial}
-					close={close}
-					confirm={(value) => {
-						result = value;
+		const close = openRecordOverlay(
+			app.workspace.getMostRecentLeaf()?.view.containerEl.ownerDocument ??
+				app.workspace.containerEl.ownerDocument,
+			(close) => (
+				<P2Dialog
+					title={skill.label || t('quickActions.skillPreview')}
+					onClose={() => {
+						release();
+						resolve(result);
 						close();
 					}}
-					addFile={allowAddFiles ? () => chooseFile(app, signal, owner) : undefined}
-				/>
+				>
+					<AgentPromptPanel
+						skill={skill}
+						context={context}
+						initial={initial}
+						close={() => {
+							release();
+							resolve(null);
+							close();
+						}}
+						confirm={(value) => {
+							result = value;
+							release();
+							resolve(value);
+							close();
+						}}
+						addFile={allowAddFiles ? () => chooseFile(app, signal, owner) : undefined}
+					/>
+				</P2Dialog>
 			),
-			onClose: () => {
-				release();
-				resolve(result);
+		);
+		release = ownAgentPreview(
+			app,
+			() => {
+				resolve(null);
+				close();
 			},
-		});
-		release = ownAgentPreview(app, close, owner, signal);
+			owner,
+			signal,
+		);
 	});
 }

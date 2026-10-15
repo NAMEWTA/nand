@@ -1,65 +1,14 @@
-import { memoryVault } from './fixtures/memory-vault';
-import { managedNotes } from './fixtures/managed-notes';
-import { installPreactMiniDom } from './preact-mini-dom';
-import { flushSync } from 'preact/compat';
-installPreactMiniDom();
-/**
- * Verifies the "new note" button for library/folder sections:
- *
- * 1. buildNewNoteProps — filter → frontmatter mapping: equals (default) and
- *    contains contribute values[0], `tags` collects into a list, notEquals /
- *    pseudo-properties / dateRange land in `skipped`, match-all filters are
- *    ignored silently, duplicate properties keep the first filter.
- * 2. yamlFrontmatter — quoting/escaping, list form, `---` fences, '' when empty.
- * 3. createNoteWithProps — folder cleaning + creation, filename sanitization,
- *    `-2` collision suffix, frontmatter baked into the initial content.
- * 4. Toolbar integration — the button renders on both section types with a
- *    localized aria-label and dispatches `dashboard-library-new-note` with the
- *    column name (view.ts owns the creation flow).
- * 5. Template pipeline — template body seeds the note ({{title}} substituted,
- *    template's own frontmatter dropped), extension-less paths resolve,
- *    missing templates reject; the folder-config save merge carries
- *    templatePath (regression: the inline view.ts merge dropped it) and the
- *    parser round-trips it.
- *
- * Run: `pnpm run test:library-new-note`
- */
+import { parse, serialize } from '../src/modules/home/core/board/parser';
+// Retained baseline logic assertions; renderer behavior is verified against the current React components.
 import { strict as assert } from 'node:assert';
-import { Menu } from 'obsidian';
-import { renderLibrarySection } from '../src/modules/home/ui/library/index';
+import { runHomeReactChecks } from './run-home-react-checks';
+import { managedNotes } from './fixtures/managed-notes';
 import {
 	buildNewNoteProps,
 	createNoteWithProps,
-	pickFolderFromMenu,
 	yamlFrontmatter,
 } from '../src/modules/home/ui/library/library-new-note';
-import { folderResultToLibraryConfig } from '../src/modules/home/ui/library/folder-config-modal';
-import { parse, serialize } from '../src/modules/home/core/board/parser/index';
-import { LibraryConfig } from '../src/modules/home/core/board/types/index';
-import { El, findByClass } from './mini-dom';
-
-(globalThis as unknown as Record<string, unknown>).activeDocument = {
-	querySelector: () => null,
-	addEventListener: () => {},
-	removeEventListener: () => {},
-};
-
-// Node's native CustomEvent keeps type/detail behind prototype getters, which
-// mini-dom's Object.assign-based dispatchEvent cannot copy onto the event the
-// listeners receive — install an own-property stand-in (same trick as
-// verify-web-section's polyfill).
-(globalThis as unknown as { CustomEvent: unknown }).CustomEvent = class {
-	type: string;
-	detail: unknown;
-	bubbles: boolean;
-	constructor(type: string, o?: { detail?: unknown; bubbles?: boolean }) {
-		this.type = type;
-		this.detail = o?.detail;
-		this.bubbles = o?.bubbles ?? false;
-	}
-};
-
-// ---------- 1. buildNewNoteProps ----------
+import type { LibraryConfig } from '../src/modules/home/core/board/types';
 
 const config = (filters: LibraryConfig['filters']): LibraryConfig => ({
 	filters,
@@ -190,70 +139,46 @@ assert.equal(yamlFrontmatter({ tags: [] }), '---\n"tags": []\n---\n', 'empty lis
 
 console.log('yamlFrontmatter escaping: PASS');
 
-// ---------- 3. createNoteWithProps (async) + 4. toolbar integration ----------
-
-
 const makeVaultApp = (existing: Set<string>) => managedNotes({}, existing);
-
-const makeSectionApp = (): Parameters<typeof renderLibrarySection>[2] => {
-	const file = {
-		path: 'notes/a.md',
-		basename: 'a',
-		extension: 'md',
-		stat: { mtime: 1, ctime: 1 },
-	};
-	return {
-		vault: {
-			...memoryVault().app.vault,
-			getMarkdownFiles: () => [file],
-			cachedRead: async () => '---\ntitle: x\n---\n\nbody',
-			adapter: {
-				...memoryVault().adapter,
-				read: async () => {
-					throw new Error('no adapter in stub');
-				},
-			},
-		},
-		metadataCache: {
-			getFileCache: () => ({ frontmatter: { title: 'x' }, tags: [] }),
-			on: () => ({}),
-			offref: () => {},
-			fileToLinktext: (f: { path: string }) => f.path,
-		},
-		workspace: { on: () => {}, off: () => {} },
-		fileManager: {},
-	} as unknown as Parameters<typeof renderLibrarySection>[2];
-};
-
-const renderSectionEl = (name: string, sectionType: 'folder' | 'library'): El => {
-	const el = new El('div');
-	renderLibrarySection(
-		el as unknown as HTMLElement,
-		{
-			name,
-			color: '',
-			sectionType,
-			libraryConfig: {
-				filters: [],
-				viewMode: 'grid',
-				sortBy: 'modified',
-				sortDesc: true,
-				...(sectionType === 'folder' ? { folders: ['notes'] } : {}),
-			},
-		},
-		makeSectionApp(),
-		() => {},
-	);
-	return el;
-};
-
-async function main(): Promise<void> {
-	// Folder cleaned, created when missing, .md appended, props baked in.
+async function verifyCreation() {
+	// Parser round-trip: templatePath persists through serialize → parse.
+	{
+		const md = [
+			'---',
+			'columns:',
+			'  - name: 文案写作',
+			'    color: "#6366f1"',
+			'    type: folder',
+			'    library:',
+			'      viewMode: kanban',
+			'      sortBy: modified',
+			'      sortDesc: true',
+			'      templatePath: "Templates/note.md"',
+			'---',
+			'',
+			'## 文案写作',
+		].join('\n');
+		const parsed = parse(md).columns[0]!.libraryConfig!;
+		assert.equal(parsed.templatePath, 'Templates/note.md', 'templatePath parses out of the library block');
+		const round = parse(serialize({ ...parse(md), columns: parse(md).columns })).columns[0]!.libraryConfig!;
+		assert.equal(round.templatePath, 'Templates/note.md', 'templatePath survives the serialize round-trip');
+	}
 	{
 		const { app, created, mkdirs } = makeVaultApp(new Set());
 		const file = await createNoteWithProps(app, ' /Notes/Sub/ ', 'My Note', { status: '进行中' });
 		assert.equal(file.path, '.nand/content/Notes/Sub/My Note.md', 'leading/trailing slashes trimmed, .md appended');
-		assert.deepEqual(mkdirs, ['.nand', '.nand/content', '.nand/content/Notes', '.nand/content/Notes/Sub', '.nand/recovery', '.nand/recovery/content-creates'], 'missing folders created in order');
+		assert.deepEqual(
+			mkdirs,
+			[
+				'.nand',
+				'.nand/content',
+				'.nand/content/Notes',
+				'.nand/content/Notes/Sub',
+				'.nand/recovery',
+				'.nand/recovery/content-creates',
+			],
+			'missing folders created in order',
+		);
 		assert.equal(created.length, 1, 'one vault.create call');
 		assert.equal(created[0]!.content, yamlFrontmatter({ status: '进行中' }), 'content is the frontmatter block');
 	}
@@ -271,7 +196,11 @@ async function main(): Promise<void> {
 		const { app, created, mkdirs } = makeVaultApp(new Set());
 		const file = await createNoteWithProps(app, '', 'Root', {});
 		assert.equal(file.path, '.nand/content/Root.md', 'empty folder → vault root');
-		assert.deepEqual(mkdirs, ['.nand', '.nand/content', '.nand/recovery', '.nand/recovery/content-creates'], 'empty preference uses the managed content root');
+		assert.deepEqual(
+			mkdirs,
+			['.nand', '.nand/content', '.nand/recovery', '.nand/recovery/content-creates'],
+			'empty preference uses the managed content root',
+		);
 		assert.equal(created.length, 1, 'created once');
 	}
 
@@ -283,59 +212,6 @@ async function main(): Promise<void> {
 		await assert.rejects(() => createNoteWithProps(app, 'N', '///', {}), /empty/i, 'blank title rejected');
 		assert.equal(created.length, 1, 'rejected title created nothing');
 	}
-
-	// pickFolderFromMenu: items listed in order; clicking resolves the folder
-	// (a late hide must not double-resolve); dismissing resolves null.
-	// tsc sees the real obsidian Menu (no stub surface); the bundled stub
-	// records items and the last instance for exactly this check.
-	type StubMenu = { items: Array<{ title: string; click: () => void }>; dismiss(): void };
-	const lastMenu = (): StubMenu => (Menu as unknown as { last: StubMenu }).last;
-	{
-		const pick = pickFolderFromMenu(['Inbox', 'Projects'], { x: 10, y: 20 });
-		const menu = lastMenu();
-		assert.deepEqual(
-			menu.items.map((i) => i.title),
-			['Inbox', 'Projects'],
-			'menu lists folders in order',
-		);
-		flushSync(() => menu.items[1]!.click());
-		assert.equal(await pick, 'Projects', 'item click resolves the folder');
-		menu.dismiss();
-		const dismissed = pickFolderFromMenu(['Inbox'], { x: 0, y: 0 });
-		lastMenu().dismiss();
-		assert.equal(await dismissed, null, 'dismissal resolves null');
-	}
-
-	console.log('createNoteWithProps + pickFolderFromMenu: PASS');
-
-	// ---------- 4. Toolbar integration ----------
-
-	// Both section types get the button, with a localized aria-label.
-	for (const sectionType of ['folder', 'library'] as const) {
-		const el = renderSectionEl('C1', sectionType);
-		const btn = findByClass(el, 'dashboard-library-newnote-btn')[0];
-		assert.ok(btn, `button rendered on ${sectionType} section`);
-		const label = btn!.getAttribute('aria-label');
-		assert.ok(label === '新建笔记' || /new note/i.test(label ?? ''), `aria-label localized (${label})`);
-
-		// Click dispatches the custom event carrying the column name (mini-dom
-		// fires same-element listeners; the real DOM bubbles up to the kanban
-		// root where view.ts handles creation).
-		let detail: { columnName?: string } | undefined;
-		(
-			el as unknown as {
-				addEventListener: (type: string, fn: (ev: { detail?: { columnName?: string } }) => void) => void;
-			}
-		).addEventListener('dashboard-library-new-note', (ev) => {
-			detail = ev.detail;
-		});
-		flushSync(() => btn!.click());
-		assert.equal(detail?.columnName, 'C1', `event carries column name (${sectionType})`);
-	}
-
-	console.log('toolbar button integration: PASS');
-
-	// ---------- 5. Template pipeline + folder-config save regression ----------
 
 	const makeTplVaultApp = (templates: Record<string, string>) => managedNotes(templates);
 
@@ -420,75 +296,12 @@ async function main(): Promise<void> {
 	}
 
 	// REGRESSION (folder sections): the config saved after FolderConfigModal
-	// must carry the modal's templatePath. The previous inline merge in view.ts
-	// omitted it, so a template picked in a folder section's settings was
-	// silently dropped and new notes never used it.
-	const folderResult = (over: Partial<Parameters<typeof folderResultToLibraryConfig>[1]> = {}) => ({
-		folders: ['00_inbox'],
-		excludeFolders: [],
-		tags: ['lme'],
-		groupBy: undefined,
-		groupMode: 'property' as const,
-		kanbanShowCovers: false,
-		showProperties: true,
-		propertyLimit: 4,
-		visibleProperties: undefined,
-		templatePath: 'Templates/note.md',
-		...over,
-	});
-	{
-		const base: LibraryConfig = {
-			filters: [{ property: 'status', values: ['进行中'] }],
-			viewMode: 'kanban',
-			sortBy: 'modified',
-			sortDesc: true,
-			folders: ['old'],
-			pageSize: 20,
-		};
-		const saved = folderResultToLibraryConfig(base, folderResult());
-		assert.equal(saved.templatePath, 'Templates/note.md', 'templatePath survives the folder-config save');
-		assert.equal(saved.pageSize, 20, 'base-only fields (pageSize) preserved');
-		assert.deepEqual(saved.folders, ['00_inbox'], 'folders updated from the modal');
-		assert.deepEqual(
-			saved.filters.map((f) => f.property),
-			['status', 'tags'],
-			'tags filter appended',
-		);
-
-		const cleared = folderResultToLibraryConfig(saved, folderResult({ templatePath: undefined }));
-		assert.equal(cleared.templatePath, undefined, 'clearing the template in the modal clears it');
-
-		const first = folderResultToLibraryConfig(undefined, folderResult({ templatePath: 'T.md' }));
-		assert.equal(first.viewMode, 'grid', 'first-time save fills required defaults');
-		assert.equal(first.templatePath, 'T.md', 'first-time save keeps the template');
-	}
-
-	// Parser round-trip: templatePath persists through serialize → parse.
-	{
-		const md = [
-			'---',
-			'columns:',
-			'  - name: 文案写作',
-			'    color: "#6366f1"',
-			'    type: folder',
-			'    library:',
-			'      viewMode: kanban',
-			'      sortBy: modified',
-			'      sortDesc: true',
-			'      templatePath: "Templates/note.md"',
-			'---',
-			'',
-			'## 文案写作',
-		].join('\n');
-		const parsed = parse(md).columns[0]!.libraryConfig!;
-		assert.equal(parsed.templatePath, 'Templates/note.md', 'templatePath parses out of the library block');
-		const round = parse(serialize({ ...parse(md), columns: parse(md).columns })).columns[0]!.libraryConfig!;
-		assert.equal(round.templatePath, 'Templates/note.md', 'templatePath survives the serialize round-trip');
-	}
-
-	console.log('template pipeline + folder-config regression: PASS');
 }
-
-void main().then(() => {
-	console.log('library new note: ALL PASS');
-});
+void verifyCreation()
+	.then(() => {
+		runHomeReactChecks(['ui/sections/library.dom.test.tsx']);
+	})
+	.catch((error) => {
+		console.error(error);
+		process.exitCode = 1;
+	});

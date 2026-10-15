@@ -321,3 +321,31 @@ test('archive records keep their Markdown layout and parse back without errors',
 	}
 	await expect(files.join('\n')).toMatchFileSnapshot(snapshot('archives.md'));
 });
+
+test('Apex P2 RSS, WeRead and TickTick configurations round trip without carrying service credentials', async () => {
+	const board = parse(
+		'---\ncolumns:\n - name: Feeds\n   type: rss\n - name: Books\n   type: weread\n - name: Tasks\n   type: ticktick\n---\n## Feeds\n\n## Books\n\n## Tasks\n',
+	);
+	board.columns[0]!.rssConfig = {
+		feeds: [{ name: 'News', url: 'https://example.com/rss', group: 'Tech' }],
+		downloadFolder: 'NAND/RSS',
+		groups: ['Tech'],
+		groupBy: 'feed',
+		pageSize: 50,
+	};
+	board.columns[1]!.wereadConfig = {
+		widgets: [
+			{ id: 'shelf', view: 'shelf', groupBy: 'readingState', progressFilters: ['reading'] },
+			{ id: 'stats', view: 'stats', statsItems: ['trend', 'kpi'] },
+			{ id: 'notes', view: 'notes' },
+		],
+	};
+	board.columns[2]!.ticktickConfig = { view: 'lists', hiddenProjects: ['archive'], projectWidths: { inbox: 320 } };
+	const text = serialize(board);
+	await expect(text).toMatchFileSnapshot(snapshot('board-p2.md'));
+	const restored = parse(text);
+	expect(restored.columns.map((c) => [c.rssConfig, c.wereadConfig, c.ticktickConfig])).toMatchObject(
+		board.columns.map((c) => [c.rssConfig, c.wereadConfig, c.ticktickConfig]),
+	);
+	assert.equal(serialize(restored), text);
+});

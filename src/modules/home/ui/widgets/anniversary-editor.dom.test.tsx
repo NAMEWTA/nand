@@ -7,17 +7,54 @@ import type { AnniversaryConfig } from '../../core/board/types';
 afterEach(cleanup);
 test('custom anniversary foreground survives save/reopen and cancelled edits leave the stored value intact', () => {
 	setLanguage('en');
-	const initial: AnniversaryConfig = { id: 'test', label: 'Test', startDate: '2020-01-01', precision: 'days', annualReminder: false, background: { image: 'cover.png', opacity: 100, dim: 30, blur: 0, foreground: '#123456' } };
-	const save = vi.fn(), close = vi.fn();
-	const draw = (value: AnniversaryConfig) => <TestProviders><AnniversaryEditor initial={value} onSave={save} onClose={close} /></TestProviders>;
+	const initial: AnniversaryConfig = {
+		id: 'test',
+		label: 'Test',
+		startDate: '2020-01-01',
+		precision: 'days',
+		annualReminder: false,
+		background: { image: 'cover.png', opacity: 100, dim: 30, blur: 0, foreground: '#123456' },
+	};
+	const save = vi.fn(),
+		close = vi.fn();
+	const draw = (value: AnniversaryConfig) => (
+		<TestProviders>
+			<AnniversaryEditor initial={value} onSave={save} onClose={close} />
+		</TestProviders>
+	);
 	const view = render(draw(initial));
 	expect(screen.getByRole('combobox', { name: t('wbg.foreground') }).textContent).toContain(t('wbg.fgCustom'));
 	fireEvent.change(screen.getByLabelText(t('wbg.fgCustom')), { target: { value: '#abcdef' } });
 	fireEvent.click(screen.getByRole('button', { name: t('common.save') }));
 	expect(save.mock.calls[0]?.[0].background.foreground).toBe('#abcdef');
-	view.unmount(); const saved = save.mock.calls[0]![0] as AnniversaryConfig; render(draw(saved));
+	view.unmount();
+	const saved = save.mock.calls[0]![0] as AnniversaryConfig;
+	render(draw(saved));
 	expect((screen.getByLabelText(t('wbg.fgCustom')) as HTMLInputElement).value).toBe('#abcdef');
 	fireEvent.change(screen.getByLabelText(t('wbg.fgCustom')), { target: { value: '#ffffff' } });
 	fireEvent.click(screen.getByRole('button', { name: t('common.cancel') }));
-	expect(close).toHaveBeenCalledOnce(); expect(save).toHaveBeenCalledOnce(); expect(saved.background?.foreground).toBe('#abcdef');
+	expect(close).toHaveBeenCalledOnce();
+	expect(save).toHaveBeenCalledOnce();
+	expect(saved.background?.foreground).toBe('#abcdef');
+});
+test('editing a localized default label makes it explicit while cancelling preserves original', () => {
+	setLanguage('en');
+	const initial: AnniversaryConfig = {
+			id: 'test',
+			label: 'Anniversary',
+			defaultLabel: true,
+			startDate: '2020-01-01',
+			precision: 'days',
+			annualReminder: false,
+		},
+		save = vi.fn();
+	render(
+		<TestProviders>
+			<AnniversaryEditor initial={initial} onSave={save} onClose={() => {}} />
+		</TestProviders>,
+	);
+	fireEvent.change(screen.getByLabelText(t('anniversary.label')), { target: { value: 'Wedding' } });
+	fireEvent.click(screen.getByRole('button', { name: t('common.save') }));
+	expect(save.mock.calls[0]?.[0]).toMatchObject({ label: 'Wedding', defaultLabel: false });
+	expect(initial.defaultLabel).toBe(true);
 });

@@ -1,10 +1,9 @@
-import { installPreactMiniDom } from './preact-mini-dom';
+Object.assign(globalThis, { window: globalThis });
 import { strict as assert } from 'node:assert';
-import { Platform, type App } from 'obsidian';
-import { El, findByClass, findTag } from './mini-dom';
+import { runHomeReactChecks } from './run-home-react-checks';
+import { parse, serialize } from '../src/modules/home/core/board/parser';
 import { generateDefaultMarkdown } from '../src/modules/home/core/board/parser/default-document';
-import { parse, serialize } from '../src/modules/home/core/board/parser/index';
-import type { DashboardData, DashboardColumn } from '../src/modules/home/core/board/types/index';
+import type { DashboardColumn, DashboardData } from '../src/modules/home/core/board/types';
 import {
 	classifyFramePolicy,
 	clearPrecheckCache,
@@ -15,12 +14,6 @@ import {
 	precheckEmbed,
 	type HeaderFetcher,
 } from '../src/modules/home/ui/web/web-precheck';
-import { renderWebSection } from '../src/modules/home/ui/web/web-section';
-
-// The current contract uses owned desktop sessions and has no host iframe fallback.
-const flush = (): Promise<void> => new Promise((r) => setTimeout(r, 20));
-
-/** Deterministic header fetcher factory — records calls, returns a queue. */
 function fakeFetcher(responses: Array<Record<string, string> | Error>): HeaderFetcher & { calls: string[] } {
 	const calls: string[] = [];
 	let i = 0;
@@ -52,51 +45,7 @@ function dataWith(col: DashboardColumn): DashboardData {
 	const base = parse(generateDefaultMarkdown());
 	return { ...base, columns: [col] };
 }
-
-/** Render into a fresh El and return the registered reload closure. */
-function render(
-	column: DashboardColumn,
-	options?: { timeoutMs?: number },
-): { host: El; reload: () => void } {
-	const host = new El('div');
-	let reload: () => void = () => {};
-	renderWebSection(
-		host as unknown as HTMLElement,
-		{} as App,
-		column,
-		(fn) => {
-			reload = fn;
-		},
-		options,
-	);
-	return { host, reload };
-}
-
-async function main(): Promise<void> {
-	// Globals the section code touches: window (setTimeout/clearTimeout/open)
-	// and CustomEvent (the configure button's routing event).
-	let opened: string[] = [];
-	(globalThis as unknown as { window: unknown }).window = {
-		setTimeout: (fn: () => void, ms?: number) => setTimeout(fn, ms),
-		clearTimeout: (id: unknown) => clearTimeout(id as ReturnType<typeof setTimeout>),
-		open: (url: string) => {
-			opened.push(url);
-		},
-	};
-	if (typeof CustomEvent === 'undefined') {
-		(globalThis as unknown as { CustomEvent: unknown }).CustomEvent = class {
-			type: string;
-			detail: unknown;
-			constructor(type: string, o?: { detail?: unknown }) {
-				this.type = type;
-				this.detail = o?.detail;
-			}
-		};
-	}
-	installPreactMiniDom();
-	const doc = document as unknown as { defaultView: unknown; body: El }; doc.defaultView = window; doc.body = new El('body');
-	clearPrecheckCache();
-
+async function verify() {
 	/* ---------------- A. parser round-trip ---------------- */
 
 	// 1. Full config serializes every field and parses back equal.
@@ -232,49 +181,10 @@ async function main(): Promise<void> {
 	assert.equal(getCachedVerdict('https://cached.com'), undefined, '13: cleared per-url');
 	const reprobe = fakeFetcher([CLEAN]);
 	assert.equal((await precheckEmbed('https://cached.com', reprobe)).verdict, 'allowed', '13: re-probe after clear');
-
-	/* ---------------- C. render state machine ---------------- */
-
-	// 14. Empty URL -> guide state; configure button routes the config event.
-	const empty = render(webColumn('Guide', ''));
-	const emptyWrap = findByClass(empty.host, 'dashboard-web-empty')[0]!;
-	assert.ok(emptyWrap, '14: empty state rendered');
-	assert.equal(findTag(empty.host, 'iframe').length, 0, '14: no iframe for empty URL');
-	let routed = false;
-	empty.host.addEventListener('dashboard-library-config', () => {
-		routed = true;
-	});
-	findByClass(empty.host, 'dashboard-web-fallback-btn')[0]!.click();
-	assert.ok(routed, '14: configure button dispatched the config event');
-
-	// Desktop never navigates before acquiring its vault Session, even for frameable sites.
-	await precheckEmbed('https://frame.me', fakeFetcher([CLEAN]));
-	const desktop = render(webColumn('F', 'https://frame.me'));
-	assert.equal(findTag(desktop.host, 'iframe').length, 0);
-	const guest = findTag(desktop.host, 'webview')[0]!;
-	assert.ok(guest);
-	assert.equal(guest.getAttribute('src'), null);
-	assert.equal(guest.getAttribute('partition'), null);
-	assert.match(guest.getAttribute('webpreferences')!, /nodeIntegration=false/);
-	await flush(); await flush();
-	assert.equal(findTag(desktop.host, 'iframe').length, 0);
-	assert.ok(findByClass(desktop.host, 'dashboard-web-fallback').length, 'unsupported native host reports a visible failure');
-	desktop.reload(); await flush();
-	assert.equal(findTag(desktop.host, 'iframe').length, 0, 'retry never falls back to host storage');
-	const wasMobile = Platform.isMobile; Platform.isMobile = true;
-	try {
-		for (const target of ['https://frame.me', 'https://deny.com']) {
-			const mobile = render(webColumn('M', target)); await flush();
-			assert.equal(findTag(mobile.host, 'webview').length + findTag(mobile.host, 'iframe').length, 0);
-			const card = findByClass(mobile.host, 'dashboard-web-fallback')[0]!;
-			assert.ok(card); const before = opened.length;
-			findByClass(card, 'dashboard-web-fallback-btn')[0]!.click(); assert.equal(opened.length, before + 1);
-		}
-	} finally { Platform.isMobile = wasMobile; }
-	console.log('verify-web-section: parser, URL policy, vault-session admission and mobile fallback OK');
 }
-
-void main().catch((err) => {
-	console.error(err);
-	process.exit(1);
-});
+void verify()
+	.then(() => runHomeReactChecks(['platform/desktop/session-lifetime.test.ts']))
+	.catch((error) => {
+		console.error(error);
+		process.exitCode = 1;
+	});

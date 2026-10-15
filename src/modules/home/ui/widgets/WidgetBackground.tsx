@@ -1,4 +1,5 @@
 // Layout and interaction adapted from PandoraReads/apex-dashboard ac4d2c7 (MIT), Copyright (c) 2025 PandoraReads: src/widget-background.ts
+import { p2Classes } from '../theme/p2-classes';
 import { useLayoutEffect, useRef, type CSSProperties, type ReactNode } from 'react';
 import { useStore } from 'zustand';
 import type { BoardStore } from '../../services/board-store';
@@ -15,9 +16,11 @@ export function useWidgetBackground(
 				? s.settings.pomodoroBackground
 				: kind === 'habit'
 					? s.settings.habitBackground
-					: kind === 'yearProgress'
-						? s.settings.yearProgressBackground
-						: undefined,
+					: kind === 'music'
+						? s.settings.musicBackground
+						: kind === 'yearProgress'
+							? s.settings.yearProgressBackground
+							: undefined,
 	);
 	const url = useImage(store, bg?.image.trim() ?? '');
 	if (!bg || !url) return { className: '', style: {}, layer: null };
@@ -99,7 +102,13 @@ export function ImmersiveWidgetFrame({
 		};
 	}, [kind]);
 	return (
-		<div ref={ref} className={`dashboard-sidebar-widget p-3 ${background.className}`} style={background.style}>
+		<div
+			ref={ref}
+			className={p2Classes(
+				`dashboard-sidebar-widget ${kind === 'album' ? 'p-0 h-full' : 'p-3'} ${kind === 'music' ? 'dashboard-sidebar-music' : ''} ${background.className}`,
+			)}
+			style={background.style}
+		>
 			{background.layer}
 			{children}
 		</div>

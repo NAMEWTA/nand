@@ -42,6 +42,8 @@ export const SECTION_TYPES = new Set([
 	'calendar',
 	'dataview',
 	'weread',
+	'rss',
+	'ticktick',
 	'sticky',
 	'web',
 ]);

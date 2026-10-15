@@ -1,5 +1,8 @@
-import { useWidgetBackground } from './WidgetBackground';
 // Layout and interaction adapted from PandoraReads/apex-dashboard ac4d2c7 (MIT), Copyright (c) 2025 PandoraReads: src/renderer.ts (renderSidebarWidgets)
+import { p2Classes } from '../theme/p2-classes';
+import { MusicWidget } from './MusicWidget';
+import { AlbumWidget } from './AlbumWidget';
+import { useWidgetBackground } from './WidgetBackground';
 import type { ComponentType } from 'react';
 import { useStore } from 'zustand';
 import { SortableContext, useSortable, verticalListSortingStrategy, rectSortingStrategy } from '@dnd-kit/sortable';
@@ -32,6 +35,8 @@ export const WIDGETS: Record<
 		component: ComponentType<{ store: BoardStore; compact?: boolean; entryId?: string }>;
 	}
 > = {
+	music: { enabled: 'widgetMusicEnabled', component: MusicWidget },
+	album: { enabled: 'widgetAlbumEnabled', component: AlbumWidget },
 	quickCapture: { enabled: 'widgetQuickCaptureEnabled', component: QuickCaptureWidget },
 	fileSearch: { enabled: 'widgetFileSearchEnabled', component: FileSearchWidget },
 	skills: { enabled: 'widgetSkillsEnabled', component: SkillWidget },
@@ -48,19 +53,28 @@ export const WIDGETS: Record<
 	expense: { enabled: 'widgetExpenseEnabled', component: ExpenseWidget },
 };
 export function widgetKind(id: string): string {
-	return id.startsWith('anniversary-') ? 'anniversary' : id.startsWith('countdown-') ? 'countdown' : id;
+	return id.startsWith('album-')
+		? 'album'
+		: id.startsWith('anniversary-')
+			? 'anniversary'
+			: id.startsWith('countdown-')
+				? 'countdown'
+				: id;
 }
 export function enabledWidgets(settings: DashboardSettings): string[] {
 	const candidates = [...settings.widgetOrder, ...Object.keys(WIDGETS)].flatMap((id) =>
-		id === 'anniversary' && settings.anniversaries.length
-			? settings.anniversaries.map((c) => `anniversary-${c.id}`)
-			: [id],
+		id === 'album'
+			? settings.albums.map((a) => `album-${a.id}`)
+			: id === 'anniversary' && settings.anniversaries.length
+				? settings.anniversaries.map((c) => `anniversary-${c.id}`)
+				: [id],
 	);
 	return [...new Set(candidates)].filter((id) => {
 		const kind = widgetKind(id);
 		return (
 			WIDGETS[kind] &&
-			settings[WIDGETS[kind].enabled] &&
+			(kind === 'album' ? settings.albums.length > 0 : settings[WIDGETS[kind].enabled]) &&
+			(!id.startsWith('album-') || settings.albums.some((a) => id === `album-${a.id}`)) &&
 			(!id.startsWith('anniversary-') || settings.anniversaries.some((c) => id === `anniversary-${c.id}`))
 		);
 	});
@@ -92,9 +106,11 @@ function WidgetFrame({ store, id, mobile, span }: { store: BoardStore; id: strin
 				if (!(event.target as Element).closest('button,input,textarea,select,a,[role="checkbox"]'))
 					listeners?.onPointerDown?.(event);
 			}}
-			className={inputWidgetClasses(
-				widgetClasses(
-					`dashboard-sidebar-widget ${background.className} group/widget min-w-0 shrink-0 rounded-[var(--db-radius-md)] border border-[var(--db-border-card)] bg-card ${id === 'quickActions' ? 'dashboard-quick-actions' : ''} ${id === 'pomodoro' ? 'dashboard-sidebar-pomodoro' : ''} ${id === 'expense' ? 'dashboard-sidebar-expense' : ''} ${id === 'reading' ? 'dashboard-sidebar-reading' : ''} ${id === 'lunar' ? 'dashboard-sidebar-lunar' : ''} ${id === 'yearProgress' ? 'dashboard-sidebar-year-progress' : ''} ${id === 'calendar' ? 'dashboard-sidebar-calendar' : ''} ${id === 'quickCapture' || id === 'fileSearch' ? 'dashboard-sidebar-capturebar' : ''} ${id === 'fileSearch' ? 'dashboard-sidebar-filesearch' : ''} ${id === 'skills' ? `dashboard-sidebar-skills ${multiSkills ? 'dashboard-sidebar-skills--multi' : ''}` : ''}`,
+			className={p2Classes(
+				inputWidgetClasses(
+					widgetClasses(
+						`dashboard-sidebar-widget ${background.className} group/widget min-w-0 shrink-0 rounded-[var(--db-radius-md)] border border-[var(--db-border-card)] bg-card ${id === 'quickActions' ? 'dashboard-quick-actions' : ''} ${kind === 'music' ? 'dashboard-sidebar-music' : ''} ${kind === 'album' ? 'dashboard-sidebar-album p-[11px] overflow-hidden' : ''} ${id === 'pomodoro' ? 'dashboard-sidebar-pomodoro' : ''} ${id === 'expense' ? 'dashboard-sidebar-expense' : ''} ${id === 'reading' ? 'dashboard-sidebar-reading' : ''} ${id === 'lunar' ? 'dashboard-sidebar-lunar' : ''} ${id === 'yearProgress' ? 'dashboard-sidebar-year-progress' : ''} ${id === 'calendar' ? 'dashboard-sidebar-calendar' : ''} ${id === 'quickCapture' || id === 'fileSearch' ? 'dashboard-sidebar-capturebar' : ''} ${id === 'fileSearch' ? 'dashboard-sidebar-filesearch' : ''} ${id === 'skills' ? `dashboard-sidebar-skills ${multiSkills ? 'dashboard-sidebar-skills--multi' : ''}` : ''}`,
+					),
 				),
 			)}
 			style={{
@@ -118,6 +134,8 @@ function WidgetFrame({ store, id, mobile, span }: { store: BoardStore; id: strin
 				'quickCapture',
 				'fileSearch',
 				'skills',
+				'music',
+				'album',
 			].includes(kind) && (
 				<div className="mb-2 flex items-center gap-1">
 					<h3 className="m-0 flex-1 text-[.8em] font-semibold">{t(`home.dashboard.widget.${kind}`)}</h3>
@@ -136,7 +154,15 @@ function WidgetFrame({ store, id, mobile, span }: { store: BoardStore; id: strin
 			<Component
 				store={store}
 				compact={!!span}
-				entryId={id.startsWith('anniversary-') ? id.slice('anniversary-'.length) : undefined}
+				entryId={
+					id.startsWith('album-')
+						? id.slice(6)
+						: id.startsWith('anniversary-')
+							? id.slice('anniversary-'.length)
+							: id.startsWith('countdown-')
+								? id.slice(10)
+								: undefined
+				}
 			/>
 		</section>
 	);
@@ -157,7 +183,7 @@ export function WidgetDeck({
 	const spans = resolveStackedSpans(
 		buildStackedSpanSpecs(
 			ids.map((id) => (id === 'countdown' ? 'countdown-all' : id)),
-			{ habit: settings.habitHeightRatio, reading: settings.readingHeightRatio },
+			{ habit: settings.habitHeightRatio, reading: settings.readingHeightRatio, albums: settings.albums },
 		),
 	);
 	return (

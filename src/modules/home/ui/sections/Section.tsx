@@ -1,9 +1,12 @@
+// Layout and interaction adapted from PandoraReads/apex-dashboard ac4d2c7 (MIT), Copyright (c) 2025 PandoraReads: src/renderer.ts
 import { observeBoardAction } from '../board/actions';
-import { P1_SECTIONS } from './registry';
+import { P2_SECTIONS, P1_SECTIONS } from './registry';
+import { RssSection } from '../rss/RssSection';
+import { TickTickSection } from '../ticktick/TickTickSection';
+import { WereadSection } from '../weread/WereadSection';
 import { P1Section } from './P1Section';
 import { ProjectSection } from '../pm/ProjectSection';
 import { SkillsSection } from '../skills/SkillsSection';
-// Layout and interaction adapted from PandoraReads/apex-dashboard ac4d2c7 (MIT), Copyright (c) 2025 PandoraReads: src/renderer.ts
 import { useRef, useState, type CSSProperties } from 'react';
 import { useStore } from 'zustand';
 import { SortableContext, horizontalListSortingStrategy, useSortable } from '@dnd-kit/sortable';
@@ -52,6 +55,7 @@ export function Section({
 		type = column.sectionType ?? column.name.toLowerCase(),
 		library = type === 'library' || type === 'folder',
 		p1 = P1_SECTIONS.includes(type),
+		p2 = P2_SECTIONS.includes(type),
 		partner = partnerIndexOf(columns, index),
 		left = partner === index + 1;
 	const baseWidth = left ? (column.width ?? 50) : partner >= 0 ? 100 - (columns[partner]?.width ?? 50) : 100;
@@ -75,7 +79,7 @@ export function Section({
 					opacity: isDragging ? 0.4 : undefined,
 					outline: isOver ? '1px solid var(--db-accent)' : undefined,
 					height:
-						collapsed || mobile || type === 'skills' || type === 'pm'
+						collapsed || mobile || p2 || type === 'skills' || type === 'pm'
 							? undefined
 							: (height ?? column.height),
 					maxHeight: collapsed || mobile ? undefined : (height ?? column.height ?? (library ? 800 : 500)),
@@ -117,8 +121,8 @@ export function Section({
 					<ChevronDown className={`size-3 ${collapsed ? '-rotate-90' : ''}`} />
 				</IconButton>
 				<div className="ml-auto flex gap-0.5 opacity-0 group-hover/section:opacity-100 focus-within:opacity-100 pointer-coarse:opacity-100">
-					{p1 && <div ref={setActions} className="flex items-center gap-1" />}
-					{!library && !p1 && (
+					{(p1 || p2) && <div ref={setActions} className="flex items-center gap-1" />}
+					{!library && !p1 && !p2 && (
 						<>
 							<IconButton
 								label={t('home.dashboard.archiveTasks')}
@@ -159,7 +163,13 @@ export function Section({
 			</div>
 			{!collapsed && (
 				<>
-					{type === 'pm' ? (
+					{type === 'rss' ? (
+						<RssSection store={store} column={column} actions={actions} />
+					) : type === 'ticktick' ? (
+						<TickTickSection store={store} column={column} actions={actions} />
+					) : type === 'weread' ? (
+						<WereadSection store={store} column={column} actions={actions} />
+					) : type === 'pm' ? (
 						<ProjectSection store={store} column={column} actions={actions} />
 					) : type === 'skills' ? (
 						<SkillsSection store={store} column={column} actions={actions} />

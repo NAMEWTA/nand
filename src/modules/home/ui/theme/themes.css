@@ -1811,3 +1811,49 @@
 	--db-imm-color-27: rgba(255,255,255,0.75);
 	--db-imm-color-28: #ffffff;
 }
+
+/* Apex P2 media and service palette. */
+:where(.nand-dashboard-root[data-theme]) {
+	--db-ticktick-today: #ef4444;
+	--db-ticktick-done: #10b981;
+	--db-ticktick-habit: #3b82f6;
+	--db-ticktick-project: #5b8def;
+	--db-p2-color-1: rgba(0,0,0,0.45);
+	--db-p2-color-2: #fff;
+	--db-p2-color-3: rgba(0,0,0,0.35);
+	--db-p2-color-4: rgba(0,0,0,0.6);
+	--db-p2-color-5: rgba(255,255,255,0.18);
+	--db-p2-color-6: rgba(0,0,0,0.03);
+	--db-p2-color-7: rgba(0,0,0,0.05);
+	--db-p2-color-8: rgba(255,255,255,0.10);
+	--db-p2-color-9: #8b5cf6;
+	--db-p2-color-10: rgba(255,255,255,0.08);
+	--db-p2-color-11: rgba(255,255,255,0.06);
+	--db-p2-color-12: rgba(255,255,255,0.05);
+	--db-p2-color-13: rgba(139,92,246,0.10);
+	--db-p2-color-14: #e0e0e0;
+	--db-p2-color-15: rgba(0,0,0,0.15);
+	--db-p2-color-16: #1a1a1a;
+	--db-p2-color-17: #ddd;
+	--db-p2-color-18: #f5f5f5;
+	--db-p2-color-19: #333;
+	--db-p2-color-20: rgba(255,255,255,0.04);
+	--db-p2-color-21: white;
+	--db-p2-color-22: #ef4444;
+	--db-p2-color-23: #2f9e73;
+	--db-p2-color-24: #d38345;
+	--db-p2-color-25: #318f9f;
+	--db-p2-color-26: rgba(128,128,128,0.12);
+	--db-p2-color-27: rgba(128,128,128,0.08);
+	--db-p2-color-28: #10b981;
+	--db-p2-color-29: rgba(255,255,255,0.22);
+	--db-p2-color-30: #6366f1;
+	--db-p2-color-31: rgba(245,158,11,0.12);
+	--db-p2-color-32: rgba(245,158,11,0.35);
+	--db-p2-color-33: #f59e0b;
+	--db-p2-color-34: rgba(255,255,255,0.12);
+	--db-p2-color-35: #e06c75;
+	--db-p2-color-36: rgba(127,127,127,0.08);
+	--db-p2-color-37: rgba(0,0,0,0.32);
+	--db-p2-color-38: rgba(127,127,127,0.1);
+}

@@ -1,7 +1,7 @@
+// Layout and interaction adapted from PandoraReads/apex-dashboard ac4d2c7 (MIT), Copyright (c) 2025 PandoraReads: src/immersive.ts
 import { ImmersiveWidgetFrame } from '../widgets/WidgetBackground';
 import { widgetChoices } from '../../core/board/widget-choices';
 import { observeBoardAction } from '../board/actions';
-// Layout and interaction adapted from PandoraReads/apex-dashboard ac4d2c7 (MIT), Copyright (c) 2025 PandoraReads: src/immersive.ts
 import { useCallback, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { useStore } from 'zustand';
 import { Plus, X, WandSparkles, Ellipsis, Maximize2, GripVertical } from 'lucide-react';
@@ -34,6 +34,8 @@ import { CountdownEditor } from '../widgets/CountdownWidget';
 import { AnniversaryEditor } from '../widgets/AnniversaryEditor';
 import type { CountdownConfig, AnniversaryConfig } from '../../core/board/types';
 const defaults: Record<string, { w: number; h: number }> = {
+	music: { w: 3, h: 15 },
+	album: { w: 3, h: 28 },
 	quickActions: { w: 4, h: 28 },
 	calendar: { w: 4, h: 28 },
 	weather: { w: 3, h: 19 },
