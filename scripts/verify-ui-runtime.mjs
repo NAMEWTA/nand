@@ -37,7 +37,10 @@ try {
 	cdp.on('Runtime.exceptionThrown', details => result.errors.push(details));
 	await cdp.send('Runtime.enable'); await cdp.send('Page.enable');
 	await cdp.send('Page.navigate', { url: pathToFileURL(path.join(work, 'runtime.html')).href });
-	for (let i = 0; i < 50; i++) { if (await cdp.evaluate('!!window.uiFixture?.controls.other')) break; await delay(100); }
+	// The fixture bundles React and two documents; a loaded machine can need far more than a few seconds.
+	let ready = false;
+	for (let i = 0; i < 300 && !ready; i++) { ready = await cdp.evaluate('!!window.uiFixture?.controls.other').catch(() => false); if (!ready) await delay(100); }
+	assert(ready, 'UI runtime fixture did not become ready within 30s');
 	await delay(250);
 	const evaluate = cdp.evaluate;
 	const snapshot = () => evaluate(`Object.fromEntries(Object.entries(uiFixture.docs).map(([id,d])=>{const w=d.defaultView;const wheel=new w.WheelEvent('wheel',{bubbles:true,cancelable:true,deltaY:100});d.body.dispatchEvent(wheel);const touch=new w.Event('touchmove',{bubbles:true,cancelable:true});d.body.dispatchEvent(touch);return [id,{dialogs:d.querySelectorAll('[role=dialog]').length,guards:d.querySelectorAll('[data-radix-focus-guard]').length,lock:d.body.getAttribute('data-scroll-locked'),wheel:wheel.defaultPrevented,touch:touch.defaultPrevented,pointer:d.body.style.pointerEvents,styles:d.head.querySelectorAll('style').length,hidden:d.querySelectorAll('[aria-hidden=true]').length,listeners:uiFixture.listenerCounts(d)}]}))`);
