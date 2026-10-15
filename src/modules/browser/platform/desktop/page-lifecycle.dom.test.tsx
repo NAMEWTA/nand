@@ -320,3 +320,13 @@ it('releases a failed main-process restore and retries its history in a fresh gu
 	expect(handle.url).toBe('https://example.com/latest');
 	expect(handle.store.getState().error).toBeNull();
 });
+
+it('creates guests with an opaque canvas so undeclared pages stay readable on dark hosts', async () => {
+	const handle = page();
+	const native = handle.native!;
+	await ready(native);
+	const preferences = native.webview.getAttribute('webpreferences')!.split(',');
+	expect(preferences).toContain('transparent=false');
+	expect(preferences).toContain('sandbox=true');
+	expect(preferences).toContain('contextIsolation=true');
+});

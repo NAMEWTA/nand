@@ -80,9 +80,11 @@ export class BrowserPage {
 			cls: 'nand-browser-webview',
 		}) as unknown as WebviewElement;
 		this.webview.setAttribute('allowpopups', '');
+		// Electron guests are transparent by default; an opaque canvas lets pages without a background
+		// keep the browser's readable default instead of showing NAND's dark surface (Orca does the same).
 		this.webview.setAttribute(
 			'webpreferences',
-			'nodeIntegration=false,contextIsolation=true,sandbox=true,webSecurity=true,disableHtmlFullscreenWindowResize=true',
+			'nodeIntegration=false,contextIsolation=true,sandbox=true,webSecurity=true,disableHtmlFullscreenWindowResize=true,transparent=false',
 		);
 		// Native IPC and state callbacks use the persistent renderer; DOM listeners
 		// and layout timers still belong to the guest's own window.

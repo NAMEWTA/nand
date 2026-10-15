@@ -112,7 +112,8 @@ function Webview({
 	return h('webview', {
 		ref: frame,
 		className: p1Classes('dashboard-web-frame'),
-		webpreferences: 'nodeIntegration=false,contextIsolation=true,sandbox=true,webSecurity=true',
+		// Opaque guest canvas: pages without a background stay readable on dark dashboard themes.
+		webpreferences: 'nodeIntegration=false,contextIsolation=true,sandbox=true,webSecurity=true,transparent=false',
 		style: { colorScheme: scheme },
 	});
 }
