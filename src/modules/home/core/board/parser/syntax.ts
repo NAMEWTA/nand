@@ -33,6 +33,8 @@ export const SECTION_TYPES = new Set([
 	'dashboard',
 	'library',
 	'pipeline',
+	'pm',
+	'skills',
 	'folder',
 	'images',
 	'videos',
@@ -40,6 +42,8 @@ export const SECTION_TYPES = new Set([
 	'calendar',
 	'dataview',
 	'weread',
+	'rss',
+	'ticktick',
 	'sticky',
 	'web',
 ]);

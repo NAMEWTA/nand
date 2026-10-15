@@ -1,3 +1,4 @@
+import type { ComponentType } from 'react';
 import type { App, Command, Component, MarkdownPostProcessor, PluginManifest } from 'obsidian';
 import type { Extension } from '@codemirror/state';
 import type { SettingsStore } from '../../shared/settings/store';
@@ -5,8 +6,8 @@ import type { PageCreate } from './workbench-host';
 import type { SavedPage, WorkbenchFeature, WorkbenchTarget } from './workbench';
 
 /** Feature modules shipped in NAND. */
-export type ModuleId = 'home' | 'agent' | 'browser' | 'archives' | 'automations' | 'notifications' | 'icons' | 'comments' | 'sync' | 'news';
-export const MODULE_IDS: readonly ModuleId[] = ['home', 'agent', 'browser', 'archives', 'automations', 'notifications', 'icons', 'comments', 'sync', 'news'];
+export type ModuleId = 'home' | 'agent' | 'browser' | 'archives' | 'automations' | 'notifications' | 'icons' | 'comments' | 'sync';
+export const MODULE_IDS: readonly ModuleId[] = ['home', 'agent', 'browser', 'archives', 'automations', 'notifications', 'icons', 'comments', 'sync'];
 
 /**
  * When a module is created:
@@ -125,12 +126,9 @@ export interface ModuleContext {
 
 /** What a module's settings page gets from the workbench settings page showing it. */
 export interface SettingsPageHost {
-	/** Redraw the whole page (after a change that adds or removes rows). */
-	refresh(): void;
-	/** Keep a subscription for as long as the page is shown. */
-	keep(off: () => void): void;
+	/** Optional module subsection requested by a workbench deep link. */
+	resourceId?: string;
 }
-export type SettingsPageRenderer = (container: HTMLElement, host: SettingsPageHost) => void;
 
 export interface ModuleInstance {
 	activate?(signal: AbortSignal): Promise<void> | void;
@@ -140,7 +138,7 @@ export interface ModuleInstance {
 	/** Workbench pages by id; each loader imports its page code on first use. */
 	readonly pages?: Readonly<Record<string, () => Promise<PageCreate>>>;
 	/** The module's page in workbench settings; loaded on first use. */
-	readonly settingsPage?: () => Promise<SettingsPageRenderer>;
+	readonly settingsPage?: () => Promise<ComponentType<SettingsPageHost>>;
 }
 
 export type ModuleFactory = (context: ModuleContext) => ModuleInstance | Promise<ModuleInstance>;

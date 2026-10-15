@@ -1,13 +1,15 @@
+// Layout and interaction adapted from PandoraReads/apex-dashboard ac4d2c7 (MIT), Copyright (c) 2025 PandoraReads: src/dataview-section.ts
+import { p1Classes } from '../theme/p1-classes';
 import { contentFiles } from '../../../../host/obsidian/storage/content-files';
-import { Fragment } from 'preact';
-import { useLayoutEffect, useRef, useState } from 'preact/hooks';
+import { Fragment } from 'react';
+import { useLayoutEffect, useRef, useState } from 'react';
 import type { DataviewConfig } from '../../core/board/types';
 import type { DqlValue, QueryResult, ResultRow } from '../../core/dql/types';
 import { coerceNumber, formatValue, kindOf } from '../../core/dql/values';
 import { toggleTaskInFile } from '../../platform/calendar/alltasks-scan';
 import { invalidatePath } from '../../platform/dql/page-builder';
 import { t } from '../../../../shared/i18n';
-import { Icon } from '../../../../ui/primitives/Icon';
+import { ObsidianIcon as Icon } from '../../../../ui/components/nand/ObsidianIcon';
 import type { DataviewContext } from './context';
 import {
 	buildDataviewWeekColumns,
@@ -23,11 +25,11 @@ import { chooseDataviewCellSize, computeDataviewMonthLabels, ymdKey } from './va
 import { InlineValue, Value, rowOpen } from './Values';
 export function EmptyResult({ message, hint }: { message: string; hint?: boolean | string }) {
 	return (
-		<div class="dashboard-dataview-empty">
-			<div class="dashboard-dataview-empty-icon" />
-			<div class="dashboard-dataview-empty-text">{t(message)}</div>
+		<div className={p1Classes('dashboard-dataview-empty')}>
+			<div className={p1Classes('dashboard-dataview-empty-icon')} />
+			<div className={p1Classes('dashboard-dataview-empty-text')}>{t(message)}</div>
 			{hint && (
-				<div class="dashboard-dataview-empty-hint">
+				<div className={p1Classes('dashboard-dataview-empty-hint')}>
 					{t(typeof hint === 'string' ? hint : 'dataview.configureHint')}
 				</div>
 			)}
@@ -56,7 +58,7 @@ function TaskCheck({
 	useLayoutEffect(() => setChecked(task.checked), [task.checked]);
 	return (
 		<input
-			class="dashboard-dataview-task-checkbox"
+			className={p1Classes('dashboard-dataview-task-checkbox')}
 			type="checkbox"
 			checked={checked}
 			disabled={busy || task.line < 0}
@@ -112,7 +114,9 @@ export function ResultTable({
 	const activeIndex = view?.sortCol == null ? -1 : layout.sortableIdx[layout.sortValueIdx.indexOf(view.sortCol)];
 	return (
 		<table
-			class={`dashboard-library-table dashboard-dataview-table${config?.striped ? ' is-striped' : ''}${config?.density === 'compact' ? ' is-compact' : ''}`}
+			className={p1Classes(
+				`dashboard-library-table dashboard-dataview-table${config?.striped ? ' is-striped' : ''}${config?.density === 'compact' ? ' is-compact' : ''}`,
+			)}
 		>
 			<colgroup>
 				{layout.colWidths.map((width, i) => (
@@ -127,11 +131,11 @@ export function ResultTable({
 						return (
 							<th
 								key={i}
-								class={
+								className={p1Classes(
 									slot < 0
 										? `is-source-col${layout.checkboxCol && !label ? ' dashboard-dataview-check-head' : ''}${layout.showSource && i === layout.labels.length - 1 ? ' is-datetime' : ''}`
-										: `is-sortable${active ? (view?.sortDir === 'desc' ? ' is-sorted-desc' : ' is-sorted-asc') : ''}`
-								}
+										: `is-sortable${active ? (view?.sortDir === 'desc' ? ' is-sorted-desc' : ' is-sorted-asc') : ''}`,
+								)}
 								title={
 									slot < 0
 										? undefined
@@ -150,7 +154,7 @@ export function ResultTable({
 								{label}
 								{slot >= 0 && (
 									<Icon
-										className="dashboard-dataview-sort-ind"
+										className={p1Classes('dashboard-dataview-sort-ind')}
 										name={
 											active
 												? view?.sortDir === 'desc'
@@ -173,16 +177,21 @@ export function ResultTable({
 							key={row.task ? `${row.task.path}:${row.task.line}` : (row.page?.file.path ?? i)}
 							{...rowOpen(context, row)}
 						>
-							{config?.rowNumbers && <td class="dashboard-dataview-rownum">{offset + i + 1}</td>}
+							{config?.rowNumbers && (
+								<td className={p1Classes('dashboard-dataview-rownum')}>{offset + i + 1}</td>
+							)}
 							{result.grouped ? (
 								<>
-									<td class="dashboard-dataview-group-key">
+									<td className={p1Classes('dashboard-dataview-group-key')}>
 										<Value value={row.groupKey ?? null} context={context} />
 									</td>
-									<td class="dashboard-dataview-group-members-cell">
+									<td className={p1Classes('dashboard-dataview-group-members-cell')}>
 										{row.rows?.length
 											? row.rows.map((member, j) => (
-													<div key={j} class="dashboard-dataview-group-member">
+													<div
+														key={j}
+														className={p1Classes('dashboard-dataview-group-member')}
+													>
 														<Value value={member.values[0] ?? null} context={context} />
 													</div>
 												))
@@ -205,7 +214,7 @@ export function ResultTable({
 							) : (
 								<>
 									{layout.checkboxCol && (
-										<td class="dashboard-dataview-check-col">
+										<td className={p1Classes('dashboard-dataview-check-col')}>
 											{row.task && (
 												<TaskCheck task={row.task} context={context} reload={reload} />
 											)}
@@ -214,19 +223,19 @@ export function ResultTable({
 									{row.values.slice(start).map((value, j) => (
 										<td
 											key={j}
-											class={
-												value != null && kindOf(value) === 'number' ? 'is-numeric' : undefined
-											}
+											className={p1Classes(
+												value != null && kindOf(value) === 'number' ? 'is-numeric' : undefined,
+											)}
 										>
-											<div class="dashboard-dataview-cell">
+											<div className={p1Classes('dashboard-dataview-cell')}>
 												<Value value={value} context={context} />
 											</div>
 										</td>
 									))}
 									{layout.noteFrom !== 'none' && (
-										<td class="dashboard-dataview-src-note">
+										<td className={p1Classes('dashboard-dataview-src-note')}>
 											{layout.noteFrom === 'values0' ? (
-												<div class="dashboard-dataview-cell">
+												<div className={p1Classes('dashboard-dataview-cell')}>
 													<Value value={row.values[0] ?? null} context={context} />
 												</div>
 											) : (
@@ -236,10 +245,15 @@ export function ResultTable({
 									)}
 									{layout.showSource && (
 										<>
-											<td class="dashboard-dataview-src-path" title={src?.path ?? ''}>
+											<td
+												className={p1Classes('dashboard-dataview-src-path')}
+												title={src?.path ?? ''}
+											>
 												{src?.path ?? '—'}
 											</td>
-											<td class="dashboard-dataview-src-created">{src?.created ?? '—'}</td>
+											<td className={p1Classes('dashboard-dataview-src-created')}>
+												{src?.created ?? '—'}
+											</td>
 										</>
 									)}
 								</>
@@ -255,7 +269,9 @@ export function ResultList({ result, rows, context, config, reload }: Props) {
 	const start = displayColumns(result).hasImplicitFileCol ? 1 : 0;
 	return (
 		<div
-			class={`dashboard-library-list dashboard-dataview-list${config?.striped ? ' is-striped' : ''}${config?.density === 'compact' ? ' is-compact' : ''}`}
+			className={p1Classes(
+				`dashboard-library-list dashboard-dataview-list${config?.striped ? ' is-striped' : ''}${config?.density === 'compact' ? ' is-compact' : ''}`,
+			)}
 		>
 			{rows.map((row, i) => {
 				const src = sourceInfoOf(row),
@@ -265,16 +281,18 @@ export function ResultList({ result, rows, context, config, reload }: Props) {
 					<div
 						key={i}
 						{...events}
-						class={`dashboard-library-list-item dashboard-dataview-list-item ${events.class}`}
+						className={p1Classes(
+							`dashboard-library-list-item dashboard-dataview-list-item ${events.className}`,
+						)}
 					>
 						{result.grouped && row.groupKey !== undefined ? (
 							<>
-								<div class="dashboard-dataview-list-group">
+								<div className={p1Classes('dashboard-dataview-list-group')}>
 									<Value value={row.groupKey} context={context} />
 								</div>
-								<div class="dashboard-dataview-list-members">
+								<div className={p1Classes('dashboard-dataview-list-members')}>
 									{row.rows?.map((member, j) => (
-										<div key={j} class="dashboard-dataview-list-member">
+										<div key={j} className={p1Classes('dashboard-dataview-list-member')}>
 											<Value value={member.values[0] ?? null} context={context} />
 										</div>
 									))}
@@ -283,13 +301,17 @@ export function ResultList({ result, rows, context, config, reload }: Props) {
 						) : (
 							<>
 								<div
-									class={`dashboard-dataview-list-main${task ? ' dashboard-dataview-task-row' : ''}`}
+									className={p1Classes(
+										`dashboard-dataview-list-main${task ? ' dashboard-dataview-task-row' : ''}`,
+									)}
 								>
 									{task ? (
 										<>
 											<TaskCheck task={task} context={context} reload={reload} />
 											<span
-												class={`dashboard-dataview-task-text${task.checked ? ' is-done' : ''}`}
+												className={p1Classes(
+													`dashboard-dataview-task-text${task.checked ? ' is-done' : ''}`,
+												)}
 											>
 												<InlineValue
 													text={formatValue(row.values[0] ?? null)}
@@ -306,7 +328,9 @@ export function ResultList({ result, rows, context, config, reload }: Props) {
 											{(result.queryType === 'TABLE' || start > 0) &&
 												row.values.slice(start + 1).map((value, j) => (
 													<Fragment key={j}>
-														<span class="dashboard-dataview-list-sep">·</span>
+														<span className={p1Classes('dashboard-dataview-list-sep')}>
+															·
+														</span>
 														<Value value={value} context={context} />
 													</Fragment>
 												))}
@@ -314,7 +338,7 @@ export function ResultList({ result, rows, context, config, reload }: Props) {
 									)}
 								</div>
 								{config?.showSource !== false && src && (
-									<div class="dashboard-dataview-list-source">
+									<div className={p1Classes('dashboard-dataview-list-source')}>
 										{src.path} · {src.created}
 									</div>
 								)}
@@ -334,15 +358,21 @@ export function FreeList({ result, rows, context, reload }: Props) {
 		if (!bare && !result.withoutId && src) values.push({ kind: 'link', path: src.path });
 		values.push(...row.values);
 		return (
-			<li key={index} class="dashboard-dataview-free-item">
+			<li key={index} className={p1Classes('dashboard-dataview-free-item')}>
 				<div
-					class={`dashboard-dataview-free-main${result.queryType === 'TASK' && row.task ? ' dashboard-dataview-task-row' : ''}`}
+					className={p1Classes(
+						`dashboard-dataview-free-main${result.queryType === 'TASK' && row.task ? ' dashboard-dataview-task-row' : ''}`,
+					)}
 				>
 					{result.queryType === 'TASK' ? (
 						row.task ? (
 							<>
 								<TaskCheck task={row.task} context={context} reload={reload} />
-								<span class={`dashboard-dataview-task-text${row.task.checked ? ' is-done' : ''}`}>
+								<span
+									className={p1Classes(
+										`dashboard-dataview-task-text${row.task.checked ? ' is-done' : ''}`,
+									)}
+								>
 									<InlineValue text={row.task.text} context={context} />
 								</span>
 							</>
@@ -352,7 +382,7 @@ export function FreeList({ result, rows, context, reload }: Props) {
 					) : (
 						values.map((value, j) => (
 							<Fragment key={j}>
-								{j > 0 && <span class="dashboard-dataview-free-sep">–</span>}
+								{j > 0 && <span className={p1Classes('dashboard-dataview-free-sep')}>–</span>}
 								<Value value={value} context={context} />
 							</Fragment>
 						))
@@ -362,14 +392,14 @@ export function FreeList({ result, rows, context, reload }: Props) {
 		);
 	};
 	return (
-		<ul class="dashboard-dataview-free-list">
+		<ul className={p1Classes('dashboard-dataview-free-list')}>
 			{rows.map((row, i) =>
 				result.grouped && row.groupKey !== undefined ? (
-					<li key={i} class="dashboard-dataview-free-group">
-						<div class="dashboard-dataview-free-group-title">
+					<li key={i} className={p1Classes('dashboard-dataview-free-group')}>
+						<div className={p1Classes('dashboard-dataview-free-group-title')}>
 							<Value value={row.groupKey} context={context} />
 						</div>
-						<ul class="dashboard-dataview-free-list is-nested">
+						<ul className={p1Classes('dashboard-dataview-free-list is-nested')}>
 							{(row.rows?.length ? row.rows : [row]).map(item)}
 						</ul>
 					</li>
@@ -393,27 +423,33 @@ export function ResultCalendar({ result, rows, context }: Props) {
 	const start = new Date(cursor),
 		days = new Date(start.getFullYear(), start.getMonth() + 1, 0).getDate();
 	return (
-		<div class="dashboard-dataview-calendar">
-			<div class="dashboard-dataview-calendar-grid">
-				<div class="dashboard-dataview-calendar-header">
-					<button class="dashboard-dataview-calendar-nav" onClick={() => setCursor(shiftMonth(cursor, -1))}>
+		<div className={p1Classes('dashboard-dataview-calendar')}>
+			<div className={p1Classes('dashboard-dataview-calendar-grid')}>
+				<div className={p1Classes('dashboard-dataview-calendar-header')}>
+					<button
+						className={p1Classes('dashboard-dataview-calendar-nav')}
+						onClick={() => setCursor(shiftMonth(cursor, -1))}
+					>
 						<Icon name="chevron-left" />
 					</button>
-					<div class="dashboard-dataview-calendar-title">{monthLabel(cursor)}</div>
-					<button class="dashboard-dataview-calendar-nav" onClick={() => setCursor(shiftMonth(cursor, 1))}>
+					<div className={p1Classes('dashboard-dataview-calendar-title')}>{monthLabel(cursor)}</div>
+					<button
+						className={p1Classes('dashboard-dataview-calendar-nav')}
+						onClick={() => setCursor(shiftMonth(cursor, 1))}
+					>
 						<Icon name="chevron-right" />
 					</button>
 				</div>
-				<div class="dashboard-dataview-calendar-weekdays">
+				<div className={p1Classes('dashboard-dataview-calendar-weekdays')}>
 					{['S', 'M', 'T', 'W', 'T', 'F', 'S'].map((day, i) => (
-						<div key={i} class="dashboard-dataview-calendar-wd">
+						<div key={i} className={p1Classes('dashboard-dataview-calendar-wd')}>
 							{day}
 						</div>
 					))}
 				</div>
-				<div class="dashboard-dataview-calendar-cells">
+				<div className={p1Classes('dashboard-dataview-calendar-cells')}>
 					{Array.from({ length: start.getDay() }, (_, i) => (
-						<div key={`blank${i}`} class="dashboard-dataview-calendar-cell is-blank" />
+						<div key={`blank${i}`} className={p1Classes('dashboard-dataview-calendar-cell is-blank')} />
 					))}
 					{Array.from({ length: days }, (_, i) => {
 						const day = i + 1,
@@ -422,21 +458,25 @@ export function ResultCalendar({ result, rows, context }: Props) {
 						return (
 							<div
 								key={day}
-								class={`dashboard-dataview-calendar-cell${items.length ? ' has-dots' : ''}`}
+								className={p1Classes(
+									`dashboard-dataview-calendar-cell${items.length ? ' has-dots' : ''}`,
+								)}
 								onClick={() => {
 									const path = items[0]?.page?.file.path;
 									const file = path ? contentFiles(context.app).getFileByPath(path) : null;
 									if (file) context.opener?.(file);
 								}}
 							>
-								<div class="dashboard-dataview-calendar-day">{day}</div>
+								<div className={p1Classes('dashboard-dataview-calendar-day')}>{day}</div>
 								{items.length > 0 && (
-									<div class="dashboard-dataview-calendar-dots">
+									<div className={p1Classes('dashboard-dataview-calendar-dots')}>
 										{items.slice(0, 3).map((_, j) => (
-											<div key={j} class="dashboard-dataview-calendar-dot" />
+											<div key={j} className={p1Classes('dashboard-dataview-calendar-dot')} />
 										))}
 										{items.length > 3 && (
-											<div class="dashboard-dataview-calendar-more">+{items.length - 3}</div>
+											<div className={p1Classes('dashboard-dataview-calendar-more')}>
+												+{items.length - 3}
+											</div>
 										)}
 									</div>
 								)}
@@ -469,23 +509,37 @@ export function ResultHeatmap({ rows }: { rows: readonly ResultRow[] }) {
 	const ref = useRef<HTMLDivElement>(null),
 		[cell, setCell] = useState(10);
 	useLayoutEffect(() => {
-		if (ref.current) setCell(chooseDataviewCellSize(ref.current.parentElement?.clientWidth ?? 800, columns.length));
+		const el = ref.current,
+			win = el?.ownerDocument.defaultView;
+		if (!el || !win) return;
+		const resize = () => setCell(chooseDataviewCellSize(el.parentElement?.clientWidth ?? 800, columns.length));
+		const frame = win.requestAnimationFrame(resize);
+		const observer = new win.ResizeObserver(resize);
+		observer.observe(el);
+		return () => {
+			win.cancelAnimationFrame(frame);
+			observer.disconnect();
+		};
 	}, [columns.length]);
 	if (!totals.size) return <EmptyResult message="dataview.heatmapNoData" />;
 	return (
-		<div class="dashboard-heatmap-section-body dashboard-dataview-heatmap-body">
-			<div ref={ref} class="dashboard-heatmap-year" style={{ '--hm-cell': `${cell}px` }}>
+		<div className={p1Classes('dashboard-heatmap-section-body dashboard-dataview-heatmap-body')}>
+			<div
+				ref={ref}
+				className={p1Classes('dashboard-heatmap-year')}
+				style={{ '--hm-cell': `${cell}px` } as import('react').CSSProperties}
+			>
 				<div
-					class="dashboard-heatmap-months-top"
+					className={p1Classes('dashboard-heatmap-months-top')}
 					style={{ gridTemplateColumns: `repeat(${columns.length}, ${cell}px)` }}
 				>
 					{labels.map((label, i) => (
-						<div key={i} class="dashboard-heatmap-month-label-top">
+						<div key={i} className={p1Classes('dashboard-heatmap-month-label-top')}>
 							{label}
 						</div>
 					))}
 				</div>
-				<div class="dashboard-heatmap-grid">
+				<div className={p1Classes('dashboard-heatmap-grid')}>
 					{columns.flatMap((column, i) =>
 						Array.from({ length: 7 }, (_, j) => {
 							const point = column[j],
@@ -494,7 +548,9 @@ export function ResultHeatmap({ rows }: { rows: readonly ResultRow[] }) {
 							return (
 								<div
 									key={`${i}:${j}`}
-									class={`dashboard-sidebar-heatmap-cell${value == null ? ' dashboard-sidebar-heatmap-cell--empty' : ''}`}
+									className={p1Classes(
+										`dashboard-sidebar-heatmap-cell${value == null ? ' dashboard-sidebar-heatmap-cell--empty' : ''}`,
+									)}
 									title={value == null ? undefined : `${point!.date}: ${value}`}
 									style={
 										value == null

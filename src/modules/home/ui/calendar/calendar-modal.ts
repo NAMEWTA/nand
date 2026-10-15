@@ -1,101 +1,104 @@
-import { App, Modal, Notice } from 'obsidian';
-import { h } from 'preact';
-import { type VaultTask } from '../../platform/calendar/alltasks-scan';
-import { insertTaskForDay, type TaskInsertTarget } from '../../platform/calendar/daily-notes';
+// Layout and interaction adapted from PandoraReads/apex-dashboard ac4d2c7 (MIT), Copyright (c) 2025 PandoraReads: src/calendar-modal.ts
+import { createElement } from 'react';
+import { Notice, type App } from 'obsidian';
+import type { VaultTask } from '../../platform/calendar/alltasks-scan';
+import { insertTaskForDay } from '../../platform/calendar/daily-notes';
 import { t } from '../../../../shared/i18n';
-import { applyModalTheme } from '../appearance/modal-theme';
-import {
-	DashboardRenderContext,
-	bindRenderContext,
-	mountDashboardPanel,
-	unmountDashboardPanelsIn,
-} from '../renderer/render-context';
+import { DashboardRenderContext } from '../renderer/render-context';
+import { openRecordDialog } from '../dialogs/open-record-dialog';
 import { CalendarModalPanel, DayAgendaPanel, type CalendarModalCallbacks } from './CalendarModalPanel';
 import { readTaskInsertPosition, readTaskTarget } from './calendar-preferences';
-import { contentFiles, isManagedFile } from '../../../../host/obsidian/storage/content-files';
-
-/** Native modal lifecycle and keyboard scope; business rendering belongs to the panel. */
-export class CalendarMonthModal extends Modal {
-	private shift: ((delta: number) => void) | null = null;
+import { contentFiles } from '../../../../host/obsidian/storage/content-files';
+function calendarContext(app: App, root: HTMLElement, cb: CalendarModalCallbacks) {
+	const context = new DashboardRenderContext(root);
+	context.noteOpener = (file, subpath) => {
+		if (cb.onOpenNote) cb.onOpenNote(file);
+		else void contentFiles(app).open(file.path + (subpath ?? ''), root.ownerDocument.defaultView ?? undefined);
+	};
+	return context;
+}
+export class CalendarMonthModal {
+	private cleanup?: () => void;
+	private child?: DayAgendaModal;
 	constructor(
-		app: App,
-		private readonly byDay: Map<string, VaultTask[]>,
-		private readonly cb: CalendarModalCallbacks,
-		private readonly initialView: 'month' | 'week' = 'month',
-		private readonly initialWeekStart?: Date,
-		private readonly dashboardFile?: string,
-	) {
-		super(app);
-	}
-	onOpen(): void {
-		this.contentEl.addClass('dashboard-calendar-fullscreen');
-		this.modalEl.addClass('dashboard-calendar-fullscreen-modal');
-		const context = prepareModal(this, this.cb);
-		this.scope.register([], 'ArrowLeft', () => {
-			this.shift?.(-1);
-			return false;
-		});
-		this.scope.register([], 'ArrowRight', () => {
-			this.shift?.(1);
-			return false;
-		});
-		mountDashboardPanel(
-			this.contentEl,
-			h(CalendarModalPanel, {
-				app: this.app,
-				context,
-				actions: this.cb,
-				byDay: this.byDay,
-				initialView: this.initialView,
-				initialWeekStart: this.initialWeekStart,
-				registerShift: (callback) => {
-					this.shift = callback;
-				},
-				openDay: (iso, tasks, focus) =>
-					new DayAgendaModal(this.app, iso, tasks, this.cb, this.dashboardFile, focus).open(),
-			}),
+		private app: App,
+		private byDay: Map<string, VaultTask[]>,
+		private cb: CalendarModalCallbacks,
+		private initialView: 'month' | 'week' = 'month',
+		private initialWeekStart?: Date,
+		private dashboardFile?: string,
+		private doc = app.workspace.containerEl.ownerDocument,
+	) {}
+	open(): void {
+		this.cleanup = openRecordDialog(
+			this.doc,
+			t('calendar.fullscreen'),
+			'dashboard-calendar-fullscreen-modal',
+			(close, root) =>
+				createElement(CalendarModalPanel, {
+					app: this.app,
+					context: calendarContext(this.app, root, this.cb),
+					actions: this.cb,
+					byDay: this.byDay,
+					initialView: this.initialView,
+					initialWeekStart: this.initialWeekStart,
+					close,
+					openDay: (iso, tasks, focus) => {
+						this.child?.close();
+						this.child = new DayAgendaModal(
+							this.app,
+							iso,
+							tasks,
+							this.cb,
+							this.dashboardFile,
+							focus,
+							this.doc,
+						);
+						this.child.open();
+					},
+				}),
 		);
 	}
-	onClose(): void {
-		unmountDashboardPanelsIn(this.contentEl);
-		this.contentEl.empty();
+	close(): void {
+		this.child?.close();
+		this.cleanup?.();
+		this.cleanup = undefined;
 	}
 }
-export class DayAgendaModal extends Modal {
+export class DayAgendaModal {
+	private cleanup?: () => void;
 	constructor(
-		app: App,
-		private readonly iso: string,
-		private readonly tasks: VaultTask[],
-		private readonly cb: CalendarModalCallbacks,
-		private readonly dashboardFile?: string,
-		private readonly focusAddInput = false,
-	) {
-		super(app);
-	}
-	onOpen(): void {
-		this.contentEl.addClass('dashboard-library-config-modal');
-		this.containerEl.parentElement?.addClass('modal-bg--dashboard');
-		const context = prepareModal(this, this.cb);
-		mountDashboardPanel(
-			this.contentEl,
-			h(DayAgendaPanel, {
-				app: this.app,
-				context,
-				actions: this.cb,
-				iso: this.iso,
-				tasks: this.tasks,
-				focusInput: this.focusAddInput,
-				addTask: (title, time) => this.addTask(title, time),
-				close: () => this.close(),
-			}),
+		private app: App,
+		private iso: string,
+		private tasks: VaultTask[],
+		private cb: CalendarModalCallbacks,
+		private dashboardFile?: string,
+		private focusAddInput = false,
+		private doc = app.workspace.containerEl.ownerDocument,
+	) {}
+	open(): void {
+		this.cleanup = openRecordDialog(
+			this.doc,
+			t('calendar.dayAgenda'),
+			'dashboard-library-config-modal',
+			(close, root) =>
+				createElement(DayAgendaPanel, {
+					app: this.app,
+					context: calendarContext(this.app, root, this.cb),
+					actions: this.cb,
+					iso: this.iso,
+					tasks: this.tasks,
+					focusInput: this.focusAddInput,
+					addTask: (title, time) => this.addTask(title, time),
+					close,
+				}),
 		);
 	}
 	private async addTask(title: string, time: string): Promise<VaultTask | null> {
 		const reminder = time ? `${this.iso} ${time}` : undefined;
 		const line = reminder ? `- [ ] ${title} ⏰ ${reminder}` : `- [ ] ${title} 📅 ${this.iso}`;
-		let target: TaskInsertTarget | null = null;
 		try {
-			target = await insertTaskForDay(
+			const target = await insertTaskForDay(
 				this.app,
 				this.iso,
 				line,
@@ -103,54 +106,31 @@ export class DayAgendaModal extends Modal {
 				readTaskInsertPosition(this.cb.settingsAccess),
 				readTaskTarget(this.cb.settingsAccess),
 			);
-		} catch (err) {
-			console.error('[Dashboard] add task failed:', err);
-			new Notice(t('calendar.taskAddFailed'), 4000);
+			if (!target) {
+				new Notice(t('calendar.dailyNotesDisabled'));
+				return null;
+			}
+			return {
+				file: target.file,
+				path: target.file.path,
+				line: target.line,
+				originalLine: target.writtenLine,
+				checked: false,
+				text: title,
+				reminder,
+				due: this.iso,
+				time: time || undefined,
+				mtime: Date.now(),
+				ctime: Date.now(),
+			};
+		} catch (error) {
+			console.error('[Dashboard] add task failed', error);
+			new Notice(t('calendar.taskAddFailed'));
 			return null;
 		}
-		if (!target) {
-			new Notice(t('calendar.dailyNotesDisabled'), 5000);
-			return null;
-		}
-		new Notice(t('calendar.taskAddedDaily', { path: target.file.path }), 3000);
-
-		return {
-			file: target.file,
-			path: target.file.path,
-			line: target.line,
-			originalLine: target.writtenLine,
-			checked: false,
-			text: title,
-			reminder,
-			due: this.iso,
-			time: time || undefined,
-			priority: undefined,
-			mtime: Date.now(),
-			ctime: Date.now(),
-		};
 	}
-	onClose(): void {
-		unmountDashboardPanelsIn(this.contentEl);
-		this.contentEl.empty();
+	close(): void {
+		this.cleanup?.();
+		this.cleanup = undefined;
 	}
-}
-function prepareModal(modal: Modal, actions: CalendarModalCallbacks): DashboardRenderContext {
-	unmountDashboardPanelsIn(modal.contentEl);
-	modal.contentEl.empty();
-	applyModalTheme(modal.containerEl);
-	modal.containerEl.addClass('modal--dashboard');
-	modal.containerEl.setCssProps({
-		background: 'transparent',
-		backgroundColor: 'transparent',
-		border: 'none',
-		boxShadow: 'none',
-	});
-	const context = new DashboardRenderContext(modal.contentEl);
-	context.noteOpener = (file, subpath) => {
-		if (isManagedFile(file)) { void contentFiles(modal.app).open(file.path + (subpath ?? '')); return; }
-		if (actions.onOpenNote) actions.onOpenNote(file);
-		else void modal.app.workspace.openLinkText(file.path + (subpath ?? ''), '');
-	};
-	bindRenderContext(modal.contentEl, context);
-	return context;
 }

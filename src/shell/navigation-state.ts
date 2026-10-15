@@ -3,7 +3,7 @@ import { WORKBENCH_FEATURES, type WorkbenchFeature, type WorkbenchTarget } from 
 /** Per-leaf shell state, saved with the workspace layout. */
 export interface WorkbenchState {
 	target: WorkbenchTarget;
-	/** Side panel width in px (220–360). */
+	/** Side panel width in px (220–500). */
 	panelWidth: number;
 	/** ChatGPT-style: the active rail icon toggles this; switching modules keeps it. */
 	panelOpen: boolean;
@@ -14,19 +14,15 @@ export interface WorkbenchState {
 }
 
 export const PANEL_MIN = 220;
-export const PANEL_MAX = 360;
-export const PANEL_DEFAULT = 260;
+export const PANEL_MAX = 500;
+export const PANEL_DEFAULT = 280;
 
 const sections: Partial<Record<WorkbenchFeature, readonly string[]>> = {
-	browser: ['multi-ai', 'assistant', 'workflows', 'access'],
-	terminal: ['running', 'history', 'usage'],
+	terminal: ['running', 'history', 'usage', 'board', 'jump'],
 	contacts: ['person', 'company'],
 	automations: ['tasks', 'runs'],
 	notifications: ['unread', 'all'],
-	comments: ['open', 'all'],
-	records: ['habits', 'expenses', 'pomodoro', 'reading'],
 	sync: ['changes', 'history'],
-	news: ['featured', 'all', 'hot', 'today', 'favorites', 'sources', 'runs', 'views'],
 };
 /** Features whose sections are open-ended ids (settings categories, icon settings pages). */
 const freeSections = new Set<WorkbenchFeature>(['settings', 'icons']);

@@ -1,4 +1,4 @@
-import { bindLocalizedElement } from '../../../../ui/primitives/localized-dom';
+import { bindLocalizedElement } from '../../../../host/obsidian/localized-dom';
 import type { App } from 'obsidian';
 import { t } from '../../../../shared/i18n/index';
 import { applyModalTheme } from '../appearance/modal-theme';

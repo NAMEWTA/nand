@@ -31,7 +31,7 @@ try {
   '.nand/content/CyclicObject.md': '---\nloop: &self {self: *self}\n---\nKeep cyclic object\n',
   ".nand/content/Old/pic's.svg": image('green'), ".nand/content/New/pic's.svg": image('blue'),
  }, settings: { version: 1, namespaces: {
-  app: { language: 'zh', introSeen: true, modules: Object.fromEntries(['home','agent','browser','news','archives','automations','notifications','icons','comments','sync'].map(id => [id, false])) },
+  app: { language: 'zh', introSeen: true, modules: Object.fromEntries(['home','agent','browser','archives','automations','notifications','icons','comments','sync'].map(id => [id, false])) },
  } } }); c = runtime.connection;
  await c.evaluate(`${p}.setModuleEnabled('home',true)`); await openBoard();
  await c.evaluate(`board.sync.addColumn('Cover test','library')`);

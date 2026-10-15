@@ -1,48 +1,36 @@
-import { homePages } from '../../services/instances';
-import { h } from 'preact';
+// Layout and interaction adapted from PandoraReads/apex-dashboard ac4d2c7 (MIT), Copyright (c) 2025 PandoraReads, src/renderer.ts (reading dialogs)
+import { createElement as h } from 'react';
+import { t } from '../../../../shared/i18n';
 import type { BookInfo, ReadingService } from '../../platform/reading/reading-service';
-import { DashboardPanelModal } from '../ui/panel-modal';
+import { openRecordDialog } from '../dialogs/open-record-dialog';
 import { BookSearchPanel, EditBookPanel, EndReadingPanel, ReadingStatsPanel } from './ReadingDialogs';
-export function openEditBookInfo(_doc: Document, service: ReadingService, book: BookInfo, onDone: () => void): void {
-	new DashboardPanelModal(
-		service.getApp(),
-		'dashboard-reading-end-modal',
-		(close) => h(EditBookPanel, { service, book, close, done: onDone }),
-		service,
-	).open();
+export function openEditBookInfo(doc: Document, service: ReadingService, book: BookInfo, onDone: () => void): void {
+	openRecordDialog(doc, t('reading.title'), 'dashboard-reading-end-modal', (close) =>
+		h(EditBookPanel, { service, book, close, done: onDone }),
+	);
 }
 export function openBookSearch(
-	_doc: Document,
+	doc: Document,
 	service: ReadingService,
 	onSelect: (book: BookInfo | null) => void,
 ): void {
-	new DashboardPanelModal(
-		service.getApp(),
-		'dashboard-reading-book-modal',
-		(close, root) => h(BookSearchPanel, { service, close, win: root.ownerDocument.defaultView!, select: onSelect }),
-		service,
-	).open();
+	openRecordDialog(doc, t('reading.title'), 'dashboard-reading-book-modal', (close, root) =>
+		h(BookSearchPanel, { service, close, win: root.ownerDocument.defaultView!, select: onSelect }),
+	);
 }
-export function showReadingStats(_doc: Document, service: ReadingService): void {
-	if (homePages.openRecords) return homePages.openRecords('reading');
-	new DashboardPanelModal(
-		service.getApp(),
-		'dashboard-pomodoro-stats-modal',
-		(close) => h(ReadingStatsPanel, { service, close }),
-		service,
-	).open();
+export function showReadingStats(doc: Document, service: ReadingService): void {
+	openRecordDialog(doc, t('reading.title'), 'dashboard-pomodoro-stats-modal', (close) =>
+		h(ReadingStatsPanel, { service, close }),
+	);
 }
 export function openEndReadingModal(
-	_doc: Document,
+	doc: Document,
 	service: ReadingService,
 	book: BookInfo,
 	elapsedSeconds: number,
 	onDone: () => void,
 ): void {
-	new DashboardPanelModal(
-		service.getApp(),
-		'dashboard-reading-end-modal',
-		(close) => h(EndReadingPanel, { service, book, elapsed: elapsedSeconds, close, done: onDone }),
-		service,
-	).open();
+	openRecordDialog(doc, t('reading.title'), 'dashboard-reading-end-modal', (close) =>
+		h(EndReadingPanel, { service, book, elapsed: elapsedSeconds, close, done: onDone }),
+	);
 }

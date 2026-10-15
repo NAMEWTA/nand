@@ -1,9 +1,7 @@
 import type { Chart } from 'chart.js';
 import type { EventRef, HoverParent } from 'obsidian';
 import { App, Component, TFile } from 'obsidian';
-import { cloneElement, h, isValidElement, render, type ComponentChild } from 'preact';
-import { RenderBoundary } from '../../../../ui/primitives/RenderBoundary';
-import { refreshLocalizedDom } from '../../../../ui/primitives/localized-dom';
+import { refreshLocalizedDom } from '../../../../host/obsidian/localized-dom';
 import { SUPPORTED_FILE_EXTS } from '../../../../shared/file-types';
 import { contentFiles, type ContentFile } from '../../../../host/obsidian/storage/content-files';
 
@@ -23,7 +21,6 @@ export class DashboardRenderContext {
 	markdownComponent: Component | null = null;
 }
 const contexts = new WeakMap<HTMLElement, DashboardRenderContext>();
-const panelContent = new WeakMap<HTMLElement, ComponentChild>();
 export function bindRenderContext(element: HTMLElement, context: DashboardRenderContext): void {
 	contexts.set(element, context);
 }
@@ -44,20 +41,9 @@ export function destroyChart(element: HTMLElement, cardId: string): void {
 	charts.get(cardId)?.destroy();
 	charts.delete(cardId);
 }
-export function mountDashboardPanel(element: HTMLElement, panel: ComponentChild): void {
-	const context = getRenderContext(element);
-	context.panels.add(element);
-	panelContent.set(element, panel);
-	render(context.onError ? h(RenderBoundary, { onError: context.onError, children: panel }) : panel, element);
-}
-/** Reconcile existing roots: inputs, component state, guests and effects stay mounted. */
 export function refreshDashboardLanguage(root: HTMLElement): void {
 	refreshLocalizedDom(root);
 	for (const element of getRenderContext(root).resources.keys()) refreshDashboardLanguage(element);
-	for (const element of getRenderContext(root).panels) {
-		const panel = panelContent.get(element);
-		if (isValidElement(panel)) mountDashboardPanel(element, cloneElement(panel, {}));
-	}
 }
 /** Release nested panels before a partial DOM replacement (for example a mobile widget tab). */
 export function unmountDashboardPanelsIn(container: HTMLElement): void {
@@ -67,11 +53,6 @@ export function unmountDashboardPanelsIn(container: HTMLElement): void {
 		context.resources.delete(element);
 		dispose();
 	}
-	for (const element of context.panels) {
-		if (!container.contains(element)) continue;
-		render(null, element);
-		context.panels.delete(element);
-	}
 }
 export function destroyDashboardPanels(root: HTMLElement, preserveWidgets?: HTMLElement | null): void {
 	const context = getRenderContext(root);
@@ -79,11 +60,6 @@ export function destroyDashboardPanels(root: HTMLElement, preserveWidgets?: HTML
 		if (preserveWidgets?.contains(element)) continue;
 		context.resources.delete(element);
 		dispose();
-	}
-	for (const element of context.panels) {
-		if (preserveWidgets?.contains(element)) continue;
-		render(null, element);
-		context.panels.delete(element);
 	}
 }
 export function destroyAllCharts(root: HTMLElement, preserveWidgets?: HTMLElement | null): void {
@@ -139,7 +115,9 @@ export function relativeLuminance(r: number, g: number, b: number): number {
 export const VAULT_FILE_EXTS = SUPPORTED_FILE_EXTS;
 
 export function getSearchableFiles(app: App) {
-	return contentFiles(app).getFiles().filter((f) => VAULT_FILE_EXTS.has(f.extension));
+	return contentFiles(app)
+		.getFiles()
+		.filter((f) => VAULT_FILE_EXTS.has(f.extension));
 }
 
 const basenameIndexes = new WeakMap<App, { index: Map<string, TFile>; refs: EventRef[] }>();

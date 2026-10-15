@@ -9,7 +9,7 @@ const runtime = await launchFreshVault({
  root: process.argv[2], port: 9276,
  files: { 'Board.md': '---\nlayout: stacked\nwidgets:\n  - memberId: lunar\n    provider: home\n    kind: lunar\n    instanceId: default\n---\n## Notes\n### Welcome\nLunar layout acceptance.\n' },
  settings: { version: 1, namespaces: {
-  app: { language: 'en', introSeen: true, modules: { home: true, agent: false, automations: false, news: false, browser: false, archives: false, notifications: false, sync: false, comments: false, icons: false } },
+  app: { language: 'en', introSeen: true, modules: { home: true, agent: false, automations: false, browser: false, archives: false, notifications: false, sync: false, comments: false, icons: false } },
   home: { dashboardFile: 'Board', workspaceFiles: ['Board'], workspaceNames: ['Board'], widgetLunarEnabled: true, widgetWeatherEnabled: false, widgetMusicEnabled: false, pomodoroEnabled: false },
  } },
 });

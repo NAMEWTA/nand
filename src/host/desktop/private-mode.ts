@@ -6,7 +6,7 @@ import { absoluteNandPath } from './nand-paths';
 
 export const PRIVATE_DIR_MODE = 0o700;
 export const PRIVATE_FILE_MODE = 0o600;
-const MANAGED_DIRECTORIES = ['config', 'browser', 'terminal-agent', 'automation', 'notifications', 'editor', 'icons', 'recovery', 'cache', 'news'];
+const MANAGED_DIRECTORIES = ['config', 'browser', 'terminal-agent', 'automation', 'notifications', 'editor', 'icons', 'recovery', 'cache'];
 
 export function chmodAllowed(platform: string): boolean {
 	return ['linux', 'darwin', 'freebsd', 'openbsd', 'aix', 'sunos'].includes(platform);

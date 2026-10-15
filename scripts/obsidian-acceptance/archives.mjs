@@ -32,7 +32,7 @@ files[special.path] = createMarkdown(special) + freeBody;
 const root = process.argv[2];
 assert.ok(root && path.isAbsolute(root));
 const runtime = await launchFreshVault({ root, port: 9247, files, settings: { version: 1, namespaces: {
-	app: { language: 'en', introSeen: true, modules: { home: false, agent: false, browser: false, archives: true, automations: false, notifications: false, icons: false, comments: false, news: false, sync: false } },
+	app: { language: 'en', introSeen: true, modules: { home: false, agent: false, browser: false, archives: true, automations: false, notifications: false, icons: false, comments: false, sync: false } },
 } } });
 let c = runtime.connection;
 const rows = [];

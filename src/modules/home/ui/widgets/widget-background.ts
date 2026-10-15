@@ -1,11 +1,11 @@
-import { bindLocalizedOptions } from '../../../../ui/primitives/localized-dom';
-import { bindLocalizedControl } from '../../../../ui/primitives/localized-dom';
-import { localizedAttributes, localizedText } from '../../../../ui/primitives/localized-dom';
+import { bindLocalizedOptions } from '../../../../host/obsidian/localized-dom';
+import { bindLocalizedControl } from '../../../../host/obsidian/localized-dom';
+import { localizedAttributes, localizedText } from '../../../../host/obsidian/localized-dom';
 import { App, Modal, Setting, setIcon, type TextComponent } from 'obsidian';
 import { DEFAULT_WIDGET_BACKGROUND, type WidgetBackground } from '../../core/board/types/index';
 import { t } from '../../../../shared/i18n/index';
 import { applyModalTheme } from '../appearance/modal-theme';
-import { resolveVaultImage } from '../banner/banner';
+import { resolveVaultImage } from '../banner/image-resource';
 import { PathPickerModal } from '../ui/path-picker-modal';
 
 /** Mount the half-hidden gear button at a card's top-right corner. Revealed
@@ -129,7 +129,6 @@ export class WidgetBackgroundModal extends Modal {
 		const { contentEl, containerEl } = this;
 		contentEl.empty();
 		contentEl.addClass('dashboard-library-config-modal');
-		containerEl.addClass('modal--dashboard');
 		containerEl.parentElement?.addClass('modal-bg--dashboard');
 		applyModalTheme(containerEl);
 

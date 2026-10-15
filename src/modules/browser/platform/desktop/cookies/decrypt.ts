@@ -1,0 +1,100 @@
+// Adapted from stablyai/orca 464bd5a (MIT), Copyright (c) 2026 Lovecast Inc.: src/main/browser/browser-cookie-decryption.ts
+import { createDecipheriv, createHash } from 'node:crypto';
+import type { EncryptionKeyResult } from './keys';
+
+// Why: Chromium 127+ prepends a 32-byte HMAC before the value; a hash is ~half non-printable, so ≥8 non-printable of the first 32 bytes flags the prefix.
+const CHROMIUM_COOKIE_HMAC_LEN = 32;
+
+function hasHmacPrefix(buf: Buffer): boolean {
+	if (buf.length <= CHROMIUM_COOKIE_HMAC_LEN) {
+		return false;
+	}
+	let nonPrintable = 0;
+	for (let i = 0; i < CHROMIUM_COOKIE_HMAC_LEN; i++) {
+		if (buf[i]! < 0x20 || buf[i]! > 0x7e) {
+			nonPrintable++;
+		}
+	}
+	return nonPrintable >= 8;
+}
+
+// Why: DB schema 24+ prefixes SHA-256(host_key); an exact match also catches empty values, where the
+// plaintext is only the 32-byte hash and the length-gated heuristic below keeps it as the value.
+function hasHostKeyHashPrefix(buf: Buffer, hostKey: string): boolean {
+	return (
+		buf.length >= CHROMIUM_COOKIE_HMAC_LEN &&
+		buf.subarray(0, CHROMIUM_COOKIE_HMAC_LEN).equals(createHash('sha256').update(hostKey).digest())
+	);
+}
+
+function stripHmac(buf: Buffer, hostKey: string): Buffer {
+	return hasHostKeyHashPrefix(buf, hostKey) || hasHmacPrefix(buf) ? buf.subarray(CHROMIUM_COOKIE_HMAC_LEN) : buf;
+}
+
+// Why: the version prefix is the only thing that survives a failed decrypt, so read it once and
+// share it between the decrypt path and the failure attribution.
+export function cookieEncryptionVersion(encryptedBuffer: Buffer): string | null {
+	if (encryptedBuffer.length < 3) {
+		return null;
+	}
+	const version = encryptedBuffer.subarray(0, 3).toString('utf-8');
+	return /^v\d\d$/.test(version) ? version : null;
+}
+
+export function decryptCookieValueRaw(
+	encryptedBuffer: Buffer,
+	keyResult: EncryptionKeyResult,
+	hostKey: string,
+): Buffer | null {
+	if (!encryptedBuffer || encryptedBuffer.length === 0) {
+		return null;
+	}
+	const version = encryptedBuffer.subarray(0, 3).toString('utf-8');
+	if (!/^v\d\d$/.test(version)) {
+		return null;
+	}
+
+	if (version !== 'v10' && version !== 'v11') return null;
+	if (keyResult.mode === 'aes-256-gcm') {
+		return decryptAes256Gcm(encryptedBuffer.subarray(3), keyResult.key, hostKey);
+	}
+
+	// AES-128-CBC (macOS and Linux)
+	const key = version === 'v10' || version === 'v11' ? keyResult.keysByVersion[version] : undefined;
+	if (!key) {
+		return null;
+	}
+
+	const ciphertext = encryptedBuffer.subarray(3);
+	if (!ciphertext.length) {
+		return null;
+	}
+
+	try {
+		const iv = Buffer.alloc(16, ' ');
+		const decipher = createDecipheriv('aes-128-cbc', key, iv);
+		decipher.setAutoPadding(true);
+		const decrypted = Buffer.concat([decipher.update(ciphertext), decipher.final()]);
+		return stripHmac(decrypted, hostKey);
+	} catch {
+		return null;
+	}
+}
+
+function decryptAes256Gcm(payload: Buffer, key: Buffer, hostKey: string): Buffer | null {
+	// Why: Windows AES-256-GCM layout is: [12-byte nonce][ciphertext][16-byte auth tag]
+	if (payload.length < 12 + 16) {
+		return null;
+	}
+	const nonce = payload.subarray(0, 12);
+	const authTag = payload.subarray(-16);
+	const ciphertext = payload.subarray(12, -16);
+	try {
+		const decipher = createDecipheriv('aes-256-gcm', key, nonce);
+		decipher.setAuthTag(authTag);
+		const decrypted = Buffer.concat([decipher.update(ciphertext), decipher.final()]);
+		return stripHmac(decrypted, hostKey);
+	} catch {
+		return null;
+	}
+}

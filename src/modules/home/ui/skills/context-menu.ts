@@ -1,10 +1,10 @@
 import { Notice, TFile } from 'obsidian';
-import { showMenu } from '../../../../ui/primitives/menu';
+import { showMenu } from '../../../../host/obsidian/menu';
 import { t } from '../../../../shared/i18n';
 import { buildSkillContext, type SkillContext } from '../../core/skills/context';
 import { dispatchSkillShortcut } from '../../services/skill-shortcuts';
 import { homeServices } from '../../services/instances';
-import type { DashboardSurface } from '../view/dashboard-surface';
+import type { SkillSurface } from '../skills/surface';
 import { ownDialog } from '../ui/dialog-scope';
 import { previewSkill } from './AgentPromptPanel';
 
@@ -18,13 +18,13 @@ export function cardSkillInput(root: HTMLElement): string {
 	return selection?.anchorNode && selection.focusNode && root.contains(selection.anchorNode) && root.contains(selection.focusNode) ? selection.toString() : '';
 }
 
-function boardPath(surface: DashboardSurface): string {
+function boardPath(surface: SkillSurface): string {
 	const path = surface.plugin.settings.dashboardFile;
 	return path.endsWith('.md') ? path : `${path}.md`;
 }
 
 /** Context is resolved when a menu choice runs, after any intervening file move. */
-function skillMenu(surface: DashboardSurface, anchor: HTMLElement, id: string, context: () => SkillContext | undefined): void {
+function skillMenu(surface: SkillSurface, anchor: HTMLElement, id: string, context: () => SkillContext | undefined): void {
 	const path = boardPath(surface);
 	const skills = surface.data?.skills ?? [];
 	const agents = homeServices.agents?.() ?? [];
@@ -53,7 +53,7 @@ function skillMenu(surface: DashboardSurface, anchor: HTMLElement, id: string, c
 	menu.onHide(release);
 }
 
-export function quickNoteSkillMenu(surface: DashboardSurface, anchor: HTMLElement, input: string): void {
+export function quickNoteSkillMenu(surface: SkillSurface, anchor: HTMLElement, input: string): void {
 	skillMenu(surface, anchor, 'quicknote', () => {
 		const settings = surface.plugin.settings;
 		const target = settings.quickCaptureTarget.trim();
@@ -64,7 +64,7 @@ export function quickNoteSkillMenu(surface: DashboardSurface, anchor: HTMLElemen
 	});
 }
 
-export function cardSkillMenu(surface: DashboardSurface, anchor: HTMLElement, cardId: string, input: string): void {
+export function cardSkillMenu(surface: SkillSurface, anchor: HTMLElement, cardId: string, input: string): void {
 	skillMenu(surface, anchor, `card:${cardId}`, () => {
 		const card = surface.data?.columns.flatMap(column => column.cards).find(card => card.id === cardId);
 		if (!card) return;

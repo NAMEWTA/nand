@@ -25,7 +25,7 @@ const guest=id=>`document.querySelector('[data-page-id="${id}"] webview')`;
 const script=(id,expression)=>c.evaluate(`${guest(id)}.executeJavaScript(${JSON.stringify(expression)})`);
 const open=async(profileId='default')=>c.evaluate(`bo.open({url:${JSON.stringify(url)},profileId:${JSON.stringify(profileId)}})`);
 try{
- runtime=await launchFreshVault({root:process.argv[2],port:9276,settings:{version:1,namespaces:{app:{language:'en',introSeen:true,modules:{browser:true,home:false,agent:false,news:false,archives:false,sync:false,comments:false,notifications:false,automations:false,icons:false}}}}});c=runtime.connection;
+ runtime=await launchFreshVault({root:process.argv[2],port:9276,settings:{version:1,namespaces:{app:{language:'en',introSeen:true,modules:{browser:true,home:false,agent:false,archives:false,sync:false,comments:false,notifications:false,automations:false,icons:false}}}}});c=runtime.connection;
  await c.evaluate('app.workspace.leftSplit?.collapse();app.workspace.rightSplit?.collapse();true');await bind();
  const original=await open();const identity=JSON.parse(await fs.readFile(path.join(runtime.vault,'.nand/config/identity.json'),'utf8'));const device=Object.keys(identity.devices)[0],profileRoot=path.join(runtime.vault,'.nand/browser',device,'profiles');
  check('default-session-is-inside-vault',await c.evaluate(`require('@electron/remote').webContents.fromId(${guest(original)}.getWebContentsId()).session.storagePath`)===path.join(profileRoot,'default','session'));

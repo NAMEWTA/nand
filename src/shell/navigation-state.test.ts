@@ -22,12 +22,10 @@ test('unknown targets fall back to the home board; settings is its own page', ()
 });
 test('restoration accepts known sections and excludes unrelated or secret fields', () => {
 	assert.deepEqual(normalizeTarget({ feature: 'contacts', section: 'person', resourceId: 'stable-id', token: 'secret', dom: {} }), { feature: 'contacts', section: 'person', resourceId: 'stable-id' });
-	assert.deepEqual(normalizeTarget({ feature: 'browser', section: 'history', resourceId: '\u0000bad' }), { feature: 'browser' });
-	assert.deepEqual(normalizeTarget({ feature: 'browser', section: 'multi-ai', resourceId: 'task' }), { feature: 'browser', section: 'multi-ai', resourceId: 'task' });
-	assert.deepEqual(normalizeTarget({ feature: 'browser', section: 'assistant', resourceId: 'task' }), { feature: 'browser', section: 'assistant', resourceId: 'task' });
+	assert.deepEqual(normalizeTarget({ feature: 'browser', section: 'history', resourceId: '\u0000bad' }), { feature: 'dashboard' });
 });
 test('panel width and open state are bounded and deterministic', () => {
-	assert.equal(panelWidth(NaN), 260); assert.equal(panelWidth(100), 220); assert.equal(panelWidth(500), 360);
+	assert.equal(panelWidth(NaN), 280); assert.equal(panelWidth(100), 220); assert.equal(panelWidth(600), 500);
 	assert.equal(normalizeWorkbenchState({ panelOpen: false }).panelOpen, false);
 	assert.equal(normalizeWorkbenchState({}).panelOpen, true);
 });
@@ -58,7 +56,7 @@ test('returning to the visible page cancels a pending different page and applies
 test('dispose and module invalidation cancel late requests', async () => {
 	for (const action of ['dispose', 'invalidate'] as const) {
 		const navigation = new NavigationTransition(), slow = deferred(); let committed = false;
-		const pending = navigation.navigate({ feature: 'browser' }, () => slow.promise, () => { committed = true; });
+		const pending = navigation.navigate({ feature: 'terminal' }, () => slow.promise, () => { committed = true; });
 		navigation[action](); slow.resolve(); assert.equal(await pending, false); assert.equal(committed, false);
 	}
 });
@@ -201,24 +199,10 @@ test('invalidating navigation while a board switch is waiting restores the previ
 	assert.equal(path, 'A');
 });
 
-test('a browser split copies the page and mints a new id without session secrets', () => {
-	const id = 'page-1';
-	const split = splitLeafState({ feature: 'browser', resourceId: id }, { id, profileId: 'isolated', url: 'https://example.test/a', title: 'A', zoom: 1.25, scroll: { x: 0, y: 40 }, cookie: 'nope', token: 'nope' });
-	assert.equal(split.target.feature, 'browser');
-	assert.notEqual(split.target.resourceId, id);
-	assert.equal(split.pages[0]?.target.resourceId, split.target.resourceId);
-	assert.equal(split.pages[0]?.state.url, 'https://example.test/a');
-	assert.equal(split.pages[0]?.state.zoom, 1.25);
-	assert.equal(split.pages[0]?.state.profileId, 'isolated');
-	assert.deepEqual(split.pages[0]?.state.scroll, { x: 0, y: 40 });
-	assert.equal(split.pages[0]?.state.id, split.target.resourceId);
-	assert.equal(Object.prototype.hasOwnProperty.call(split.pages[0]?.state ?? {}, 'cookie'), false);
-	assert.equal(Object.prototype.hasOwnProperty.call(split.pages[0]?.state ?? {}, 'token'), false);
+test('a focus leaf retains the selected resource', () => {
 	const contacts = splitLeafState({ feature: 'contacts', section: 'person', resourceId: 'person-a' }, { selectedId: 'person-a', query: { kind: 'person' } });
 	assert.equal(contacts.target.resourceId, 'person-a');
 	assert.equal((contacts.pages[0]?.state as { selectedId: string }).selectedId, 'person-a');
-	const task = splitLeafState({ feature: 'browser', section: 'multi-ai', resourceId: 'task-a' }, {});
-	assert.deepEqual(task.target, { feature: 'browser', section: 'multi-ai', resourceId: 'task-a' });
 });
 
 test('a window without a native status bar keeps the filtered rows and save errors stay on their board', () => {

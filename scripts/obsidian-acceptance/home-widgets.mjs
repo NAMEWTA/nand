@@ -7,15 +7,14 @@ import { launchFreshVault } from './fresh-vault.mjs';
 const members = [
 	{ memberId: 'year', provider: 'home', kind: 'year-progress', instanceId: 'default' },
 	{ memberId: 'countdown', provider: 'home', kind: 'countdown', instanceId: 'shared', label: 'Shared countdown' },
-	{ memberId: 'news', provider: 'news', kind: 'news-featured', instanceId: 'featured', label: 'News reader' },
 	{ memberId: 'external', provider: 'browser', kind: 'calendar', instanceId: 'default', label: 'External calendar' },
 	{ memberId: 'broken', provider: 'browser', kind: 'broken', instanceId: 'default' },
 	{ memberId: 'slow', provider: 'browser', kind: 'slow', instanceId: 'default' },
 ];
-const board = layout => `---\r\nlayout: ${layout}\r\nwidgets: ${JSON.stringify(members)}\r\nimmersive: [{id: news, w: 4, cap: 40, x: 0, y: 0}]\r\ncustom: keep # personal\r\n---\r\n\r\n<!-- Keep this body -->\r\n\r\n## Notes\r\n`;
+const board = layout => `---\r\nlayout: ${layout}\r\nwidgets: ${JSON.stringify(members)}\r\nimmersive: [{id: year, w: 4, cap: 40, x: 0, y: 0}]\r\ncustom: keep # personal\r\n---\r\n\r\n<!-- Keep this body -->\r\n\r\n## Notes\r\n`;
 const originals = { 'A.md': board('stacked'), 'B.md': board('side') };
 const runtime = await launchFreshVault({ root: process.argv[2], port: 9262, files: originals, settings: { version: 1, namespaces: {
-	app: { language: 'en', introSeen: true, modules: { home: true, news: false, agent: false, browser: false, archives: false, automations: false, notifications: false, icons: false, comments: false, sync: false } },
+	app: { language: 'en', introSeen: true, modules: { home: true, agent: false, browser: false, archives: false, automations: false, notifications: false, icons: false, comments: false, sync: false } },
 	home: { dashboardFile: 'A', workspaceFiles: ['A', 'B'], workspaceNames: ['A', 'B'], widgetWeatherEnabled: false, widgetLunarEnabled: false, widgetMusicEnabled: false, pomodoroEnabled: false, widgetQuickActionsEnabled: false, widgetYearProgressEnabled: false, countdownEnabled: false, countdowns: [{ id: 'shared', label: 'Shared countdown', targetDate: '2030-01-01', displayMode: 'days', reminderDays: 0 }], widgetOrder: ['calendar', 'weather'] },
 } } });
 let c = runtime.connection;
@@ -50,26 +49,16 @@ try {
 	await navigate('A');
 	await until(`!!document.querySelector('.dashboard-sidebar-year-progress')`);
 	let state = await snapshot();
-	check('saved-members-ignore-old-global-enable-flags', state.length === 6 && state.some(item => item.id === 'countdown' && item.text.includes('Shared countdown')), state);
-	check('disabled-and-unknown-members-visible', state.filter(item => ['news', 'external', 'broken', 'slow'].includes(item.id)).every(item => item.text.includes('unavailable')));
+	check('saved-members-ignore-old-global-enable-flags', state.length === 5 && state.some(item => item.id === 'countdown' && item.text.includes('Shared countdown')), state);
+	check('disabled-and-unknown-members-visible', state.filter(item => [ 'external', 'broken', 'slow'].includes(item.id)).every(item => item.text.includes('unavailable')));
 	await navigate('B'); await until(`!!document.querySelector('.dashboard-sidebar-year-progress')`);
-	check('side-and-stacked-use-same-host', (await snapshot()).length === 6);
+	check('side-and-stacked-use-same-host', (await snapshot()).length === 5);
 	check('readonly-both-files-byte-identical', await bytes('A') === originals['A.md'] && await bytes('B') === originals['B.md']);
 	await navigate('A');
-	await c.evaluate('app.plugins.plugins.nand.setModuleEnabled("news",true)');
-	await until(`!!document.querySelector('[data-widget-member="news"] .dashboard-sidebar-news')`);
-	check('news-contribution-mounted-in-existing-member', (await snapshot()).find(item => item.id === 'news')?.text.includes('No news to show'));
-	check('provider-enable-no-board-writes', await bytes('A') === originals['A.md']);
-	await c.evaluate('app.plugins.plugins.nand.setModuleEnabled("news",false)');
-	await until(`document.querySelector('[data-widget-member="news"]')?.textContent.includes('unavailable')`);
-	check('provider-disable-preserves-position-and-bytes', (await snapshot()).findIndex(item => item.id === 'news') === 2 && await bytes('A') === originals['A.md']);
-	await c.evaluate('app.plugins.plugins.nand.setModuleEnabled("news",true)');
-	await until(`document.querySelectorAll('[data-widget-member="news"] .dashboard-sidebar-news').length===1`);
-	check('provider-reenable-mounts-once', true);
 	await c.evaluate(fixture);
 	await until(`document.querySelector('[data-widget-member="external"]')?.textContent.includes('External calendar mounted')`);
 	await until(`document.querySelector('[data-widget-member="broken"]')?.textContent.includes('fixture render failure')`);
-	check('external-same-kind-name-and-local-error-isolation', !!await c.evaluate(`document.querySelector('.dashboard-sidebar-year-progress')&&document.querySelector('.dashboard-sidebar-news')`));
+	check('external-same-kind-name-and-local-error-isolation', !!await c.evaluate(`document.querySelector('.dashboard-sidebar-year-progress')&&document.querySelector('[data-widget-member=external]')`));
 	await delay(60);
 	check('mounted-provider-timer-really-runs', await c.evaluate('widgetEvents.ticks') > 0);
 	await c.evaluate(`fixtureWidgetContext.reportError(new Error('fixture async update failure'))`);
@@ -139,7 +128,7 @@ try {
 	check('home-disable-cleans-mounted-and-pending-provider', await c.evaluate('widgetEvents.dispose===widgetEvents.mount&&widgetEvents.lateDispose===1'));
 	check('home-disable-closes-owned-dialog', !await c.evaluate(`!!document.querySelector('.nand-widget-catalog')`));
 	const errors = await c.evaluate('window.nandAcceptanceErrors'); check('no-unhandled-runtime-errors', errors.length === 0, errors);
-	await fs.writeFile(path.join(runtime.evidence, 'review.json'), JSON.stringify({ rows, scope: 'Real Obsidian, real news module toggles, controlled external contribution fixture; no model calls or news source collection. Existing home services may fetch holiday data.' }, null, 2));
+	await fs.writeFile(path.join(runtime.evidence, 'review.json'), JSON.stringify({ rows, scope: 'Real Obsidian, controlled external contribution fixture; no model calls. Existing home services may fetch holiday data.' }, null, 2));
 	const failed = rows.filter(row => !row.passed); console.log(JSON.stringify({ evidence: runtime.evidence, checks: rows.length, failed }, null, 2)); assert.equal(failed.length, 0);
 } catch (error) { await fs.writeFile(path.join(runtime.evidence, 'partial-review.json'), JSON.stringify(rows, null, 2)); await fs.writeFile(path.join(runtime.evidence, 'failure-state.json'), JSON.stringify(await c.evaluate(`({errors:window.nandAcceptanceErrors,notices:[...document.querySelectorAll('.notice')].map(e=>e.textContent),dialog:document.querySelector('.nand-dialog')?.outerHTML,callbacks:Object.keys(${surface}.createCallbacks()),state:app.plugins.plugins.nand.moduleState('home')})`), null, 2)); await runtime.shot('failure').catch(() => undefined); throw error; }
 finally { await runtime.stop(); }

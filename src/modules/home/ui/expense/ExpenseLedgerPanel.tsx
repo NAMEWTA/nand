@@ -1,6 +1,10 @@
-import { SaveStatus } from '../../../../ui/primitives/SaveStatus';
+// Layout and interaction adapted from PandoraReads/apex-dashboard ac4d2c7 (MIT), Copyright (c) 2025 PandoraReads: src/expense-stats-modal.ts
+import { RecordButton as Button } from '../dialogs/RecordButton';
+import { Input } from '../../../../ui/components/input';
+import { widgetClasses } from '../theme/widget-classes';
+import { RecordSaveStatus as SaveStatus } from '../dialogs/RecordSaveStatus';
 import { Notice } from 'obsidian';
-import { useLayoutEffect, useRef, useState } from 'preact/hooks';
+import { useLayoutEffect, useRef, useState } from 'react';
 import {
 	type ExpenseRecord,
 	type ExpenseType,
@@ -10,15 +14,20 @@ import {
 } from '../../core/expense/model';
 import type { ExpenseService } from '../../platform/expense/expense-service';
 import { t } from '../../../../shared/i18n';
-import { Icon } from '../../../../ui/primitives/Icon';
-import { showConfirmDialog } from '../ui/confirm-dialog';
-import { ExpenseBackfillModal } from './expense-backfill-modal';
-import { categoryLabel } from './expense-category-ui';
+import { ObsidianIcon as Icon } from '../../../../ui/components/nand/ObsidianIcon';
+import { RecordConfirm } from '../dialogs/RecordConfirm';
+import { RecordDialog } from '../dialogs/RecordDialog';
+import { Choice } from '../board/controls';
+import { Checkbox } from '../../../../ui/components/checkbox';
+import { ExpenseEntryPanel } from './ExpenseEntryPanel';
+import { categoryLabel } from './expense-label';
 import { ledgerCsv } from './ledger-csv';
 type SortKey = 'date' | 'type' | 'category' | 'primary' | 'amount' | 'note';
 const COLUMNS: SortKey[] = ['date', 'amount', 'type', 'primary', 'category', 'note'];
 export function ExpenseLedgerPanel({ service, close }: { service: ExpenseService; close: () => void }) {
-	const [version, refresh] = useState(0),
+	const [editing, setEditing] = useState<ExpenseRecord | null>(null),
+		[deleting, setDeleting] = useState<string[]>([]),
+		[, refresh] = useState(0),
 		[typeFilter, setType] = useState<'all' | ExpenseType>('all'),
 		[categoryFilter, setCategory] = useState(''),
 		[primaryFilter, setPrimary] = useState(''),
@@ -57,12 +66,7 @@ export function ExpenseLedgerPanel({ service, close }: { service: ExpenseService
 				]),
 			).values(),
 		];
-	useLayoutEffect(() => {
-		const ids = new Set(service.getRecords().map((r) => r.id));
-		setSelected((old) => new Set([...old].filter((id) => ids.has(id))));
-		if (categoryFilter && !categories.includes(categoryFilter)) setCategory('');
-		if (primaryFilter && primaryFilter !== UNGROUPED_PRIMARY && !primaries.includes(primaryFilter)) setPrimary('');
-	}, [version, service]);
+
 	const fmt = (n: number) => `${service.getCurrency()}${formatExpenseAmount(n)}`,
 		primaryOf = (r: ExpenseRecord) => service.getCategoryParent(r.type, r.category) ?? '';
 	const comparators: Record<SortKey, (a: ExpenseRecord, b: ExpenseRecord) => number> = {
@@ -108,14 +112,6 @@ export function ExpenseLedgerPanel({ service, close }: { service: ExpenseService
 			}
 			return next;
 		});
-	const edit = (record: ExpenseRecord) =>
-		new ExpenseBackfillModal(
-			service.getApp(),
-			(input) => {
-				if (!service.updateRecord(record.id, input)) new Notice(t('expense.invalidAmount'));
-			},
-			{ initial: record, aboveOverlay: true },
-		).open();
 	const run = async (action: () => Promise<void>) => {
 		if (pending.current) return;
 		pending.current = true;
@@ -127,22 +123,6 @@ export function ExpenseLedgerPanel({ service, close }: { service: ExpenseService
 			if (alive.current) setBusy(false);
 		}
 	};
-	const deleteSelected = () =>
-		run(async () => {
-			const ids = [...selected];
-			if (!ids.length) return;
-			if (
-				!(await showConfirmDialog(service.getApp(), {
-					title: t('expense.ledger.batchDeleteTitle'),
-					message: t('expense.ledger.batchDeleteMessage', { n: ids.length }),
-				})) ||
-				!alive.current
-			)
-				return;
-			const n = service.deleteRecords(ids);
-			setSelected(new Set());
-			if (n) new Notice(t('expense.ledger.recordsDeleted', { n }));
-		});
 	const csv = ledgerCsv(service),
 		expense = filtered.filter((r) => r.type === 'expense').reduce((n, r) => n + r.amount, 0),
 		income = filtered.filter((r) => r.type === 'income').reduce((n, r) => n + r.amount, 0);
@@ -152,88 +132,124 @@ export function ExpenseLedgerPanel({ service, close }: { service: ExpenseService
 	};
 	return (
 		<>
+			{editing && (
+				<RecordDialog
+					title={t('expense.editTitle')}
+					classes="dashboard-library-config-modal"
+					onClose={() => setEditing(null)}
+				>
+					<ExpenseEntryPanel
+						service={service}
+						initial={editing}
+						close={() => setEditing(null)}
+						onSave={(input) => !!service.updateRecord(editing.id, input)}
+					/>
+				</RecordDialog>
+			)}
+			<RecordConfirm
+				open={deleting.length > 0}
+				onOpenChange={(open) => {
+					if (!open) setDeleting([]);
+				}}
+				title={t('expense.ledger.batchDeleteTitle')}
+				description={t('expense.ledger.batchDeleteMessage', { n: deleting.length })}
+				onConfirm={() => {
+					service.deleteRecords(deleting);
+					setSelected(new Set());
+					setDeleting([]);
+				}}
+			/>
 			<SaveStatus source={service} />
-			<div class="dashboard-expense-stats-header">
-				<div class="dashboard-expense-stats-header-title">{t('expense.ledger.title')}</div>
-				<button class="dashboard-expense-stats-close" onClick={close} aria-label={t('common.close')}>
+			<div className={widgetClasses('dashboard-expense-stats-header')}>
+				<div className={widgetClasses('dashboard-expense-stats-header-title')}>{t('expense.ledger.title')}</div>
+				<Button
+					variant="ghost"
+					className={widgetClasses('dashboard-expense-stats-close')}
+					onClick={close}
+					aria-label={t('common.close')}
+				>
 					<Icon name="x" />
-				</button>
+				</Button>
 			</div>
-			<div class="dashboard-expense-ledger-toolbar">
-				<div class="dashboard-expense-ledger-filters">
-					<select
-						class="dashboard-expense-ledger-select"
+			<div className={widgetClasses('dashboard-expense-ledger-toolbar')}>
+				<div className={widgetClasses('dashboard-expense-ledger-filters')}>
+					<Choice
+						compact
+						className={widgetClasses('dashboard-expense-ledger-select')}
+						label={t('expense.colType')}
 						value={typeFilter}
-						onChange={(e) => {
-							setType(e.currentTarget.value as typeof typeFilter);
+						onChange={(value) => {
+							setType(value as typeof typeFilter);
 							setPage(0);
 						}}
-					>
-						{(['all', 'expense', 'income'] as const).map((type) => (
-							<option key={type} value={type}>
-								{t(
-									type === 'all'
-										? 'expense.ledger.filterAll'
-										: type === 'expense'
-											? 'expense.typeExpense'
-											: 'expense.typeIncome',
-								)}
-							</option>
-						))}
-					</select>
-					<select
-						class="dashboard-expense-ledger-select dashboard-expense-ledger-select--category"
-						aria-label={t('expense.colCategory')}
-						value={categoryFilter}
-						onChange={(e) => changeFilter(setCategory, e.currentTarget.value)}
-					>
-						<option value="">{t('expense.colCategory')}</option>
-						{categories.map((key) => (
-							<option key={key} value={key}>
-								{categoryLabel(key)}
-							</option>
-						))}
-					</select>
-					<select
-						class="dashboard-expense-ledger-select dashboard-expense-ledger-select--primary"
-						aria-label={t('expense.colPrimary')}
-						value={primaryFilter}
-						onChange={(e) => changeFilter(setPrimary, e.currentTarget.value)}
-					>
-						<option value="">{t('expense.colPrimary')}</option>
-						{primaries.map((name) => (
-							<option key={name} value={name}>
-								{name}
-							</option>
-						))}
-						<option value={UNGROUPED_PRIMARY}>{t('expense.cat.ungrouped')}</option>
-					</select>
-					<input
-						class="dashboard-expense-ledger-date"
+						options={(['all', 'expense', 'income'] as const).map((value) => ({
+							value,
+							label: t(
+								value === 'all'
+									? 'expense.ledger.filterAll'
+									: value === 'expense'
+										? 'expense.typeExpense'
+										: 'expense.typeIncome',
+							),
+						}))}
+					/>
+					<Choice
+						compact
+						className={widgetClasses(
+							'dashboard-expense-ledger-select dashboard-expense-ledger-select--category',
+						)}
+						label={t('expense.colCategory')}
+						value={categoryFilter || '_all'}
+						onChange={(value) => changeFilter(setCategory, value === '_all' ? '' : value)}
+						options={[
+							{ value: '_all', label: t('expense.colCategory') },
+							...categories.map((value) => ({ value, label: categoryLabel(value) })),
+						]}
+					/>
+					<Choice
+						compact
+						className={widgetClasses(
+							'dashboard-expense-ledger-select dashboard-expense-ledger-select--primary',
+						)}
+						label={t('expense.colPrimary')}
+						value={primaryFilter || '_all'}
+						onChange={(value) => changeFilter(setPrimary, value === '_all' ? '' : value)}
+						options={[
+							{ value: '_all', label: t('expense.colPrimary') },
+							...primaries.map((value) => ({ value, label: value })),
+							{ value: UNGROUPED_PRIMARY, label: t('expense.cat.ungrouped') },
+						]}
+					/>
+					<Input
+						data-hit-control
+						className={widgetClasses('dashboard-expense-ledger-date h-[30px] md:text-[0.72em]')}
 						type="date"
 						aria-label={t('expense.ledger.dateFrom')}
 						max={expenseToday()}
 						value={dateFrom}
 						onChange={(e) => changeFilter(setFrom, e.currentTarget.value)}
 					/>
-					<input
-						class="dashboard-expense-ledger-date"
+					<Input
+						data-hit-control
+						className={widgetClasses('dashboard-expense-ledger-date h-[30px] md:text-[0.72em]')}
 						type="date"
 						aria-label={t('expense.ledger.dateTo')}
 						max={expenseToday()}
 						value={dateTo}
 						onChange={(e) => changeFilter(setTo, e.currentTarget.value)}
 					/>
-					<input
-						class="dashboard-expense-ledger-search"
+					<Input
+						data-hit-control
+						className={widgetClasses('dashboard-expense-ledger-search h-[30px] md:text-[0.72em]')}
 						type="text"
 						autoComplete="off"
 						placeholder={t('expense.ledger.searchPlaceholder')}
 						value={search}
 						onInput={(e) => changeFilter(setSearch, e.currentTarget.value)}
 					/>
-					<button
-						class="dashboard-expense-ledger-btn dashboard-expense-ledger-btn--ghost"
+					<Button
+						variant="ghost"
+						className={widgetClasses('dashboard-expense-ledger-btn dashboard-expense-ledger-btn--ghost')}
 						onClick={() => {
 							setType('all');
 							setCategory('');
@@ -245,12 +261,13 @@ export function ExpenseLedgerPanel({ service, close }: { service: ExpenseService
 						}}
 					>
 						{t('expense.ledger.clearFilters')}
-					</button>
+					</Button>
 				</div>
-				<div class="dashboard-expense-ledger-actions">
-					<input
+				<div className={widgetClasses('dashboard-expense-ledger-actions')}>
+					<Input
+						data-hit-control
 						ref={fileInput}
-						class="dashboard-expense-ledger-file"
+						className={widgetClasses('dashboard-expense-ledger-file')}
 						type="file"
 						accept=".csv,text/csv,text/plain"
 						onChange={(e) => {
@@ -267,48 +284,48 @@ export function ExpenseLedgerPanel({ service, close }: { service: ExpenseService
 								});
 						}}
 					/>
-					<button
-						class="dashboard-expense-ledger-btn"
+					<Button
+						variant="ghost"
+						className={widgetClasses('dashboard-expense-ledger-btn')}
 						disabled={busy}
 						title={t('expense.ledger.importHint')}
 						onClick={() => fileInput.current?.click()}
 					>
 						{t('expense.ledger.import')}
-					</button>
-					<button
-						class="dashboard-expense-ledger-btn"
+					</Button>
+					<Button
+						variant="ghost"
+						className={widgetClasses('dashboard-expense-ledger-btn')}
 						disabled={busy || !filtered.length}
 						title={t('expense.ledger.exportHint')}
 						onClick={() => void run(() => csv.exportCsv(filtered))}
 					>
 						{t('expense.ledger.export')}
-					</button>
-					<button
-						class="dashboard-expense-ledger-btn dashboard-expense-ledger-btn--danger"
+					</Button>
+					<Button
+						variant="ghost"
+						className={widgetClasses('dashboard-expense-ledger-btn dashboard-expense-ledger-btn--danger')}
 						disabled={busy || !selected.size}
-						onClick={() => void deleteSelected()}
+						onClick={() => setDeleting([...selected])}
 					>
 						{t('expense.ledger.deleteSelected', { n: selected.size })}
-					</button>
+					</Button>
 				</div>
 			</div>
-			<div ref={tableWrap} class="dashboard-expense-ledger-wrap">
-				<table class="dashboard-expense-ledger-table">
+			<div ref={tableWrap} className={widgetClasses('dashboard-expense-ledger-wrap')}>
+				<table className={widgetClasses('dashboard-expense-ledger-table')}>
 					<thead>
 						<tr>
-							<th class="dashboard-expense-ledger-th-check">
-								<input
-									class="dashboard-expense-ledger-check"
-									type="checkbox"
-									checked={allChecked}
-									ref={(input) => {
-										if (input) input.indeterminate = !allChecked && someChecked;
-									}}
+							<th className={widgetClasses('dashboard-expense-ledger-th-check')}>
+								<Checkbox
+									className={widgetClasses('dashboard-expense-ledger-check')}
+
+									checked={allChecked ? true : someChecked ? 'indeterminate' : false}
 									aria-label={t('expense.ledger.selectAllPage')}
-									onChange={(e) =>
+									onCheckedChange={(checked) =>
 										toggle(
 											rows.map((r) => r.id),
-											e.currentTarget.checked,
+											checked === true,
 										)
 									}
 								/>
@@ -316,11 +333,14 @@ export function ExpenseLedgerPanel({ service, close }: { service: ExpenseService
 							{COLUMNS.map((col) => (
 								<th
 									key={col}
-									class={`dashboard-expense-ledger-th dashboard-expense-ledger-th-${col}`}
+									className={widgetClasses(
+										`dashboard-expense-ledger-th dashboard-expense-ledger-th-${col}`,
+									)}
 									scope="col"
 									aria-sort={sortKey === col ? (sortAsc ? 'ascending' : 'descending') : 'none'}
 								>
-									<button
+									<Button
+										variant="ghost"
 										onClick={() => {
 											if (sortKey === col) setAsc(!sortAsc);
 											else {
@@ -331,18 +351,20 @@ export function ExpenseLedgerPanel({ service, close }: { service: ExpenseService
 									>
 										{t(`expense.col${col[0]!.toUpperCase() + col.slice(1)}`)}
 										{sortKey === col && (
-											<span class="dashboard-expense-ledger-sort">{sortAsc ? '↑' : '↓'}</span>
+											<span className={widgetClasses('dashboard-expense-ledger-sort')}>
+												{sortAsc ? '↑' : '↓'}
+											</span>
 										)}
-									</button>
+									</Button>
 								</th>
 							))}
-							<th class="dashboard-expense-ledger-th-actions" />
+							<th className={widgetClasses('dashboard-expense-ledger-th-actions')} />
 						</tr>
 					</thead>
 					<tbody>
 						{!rows.length ? (
 							<tr>
-								<td class="dashboard-expense-ledger-empty" colSpan={8}>
+								<td className={widgetClasses('dashboard-expense-ledger-empty')} colSpan={8}>
 									{t(records.length ? 'expense.ledger.emptyFiltered' : 'expense.ledger.emptyAll')}
 								</td>
 							</tr>
@@ -350,57 +372,69 @@ export function ExpenseLedgerPanel({ service, close }: { service: ExpenseService
 							rows.map((r) => (
 								<tr
 									key={r.id}
-									class={selected.has(r.id) ? 'dashboard-expense-ledger-row--selected' : ''}
+									className={widgetClasses(
+										selected.has(r.id) ? 'dashboard-expense-ledger-row--selected' : '',
+									)}
 								>
-									<td class="dashboard-expense-ledger-td-check">
-										<input
-											class="dashboard-expense-ledger-check"
-											type="checkbox"
+									<td className={widgetClasses('dashboard-expense-ledger-td-check')}>
+										<Checkbox
+											className={widgetClasses('dashboard-expense-ledger-check')}
+
 											checked={selected.has(r.id)}
 											aria-label={t('expense.ledger.selectRow')}
-											onChange={(e) => toggle([r.id], e.currentTarget.checked)}
+											onCheckedChange={(checked) => toggle([r.id], checked === true)}
 										/>
 									</td>
-									<td class="dashboard-expense-ledger-td-date">{r.date}</td>
+									<td className={widgetClasses('dashboard-expense-ledger-td-date')}>{r.date}</td>
 									<td
-										class={`dashboard-expense-ledger-td-amount${r.type === 'income' ? ' dashboard-expense-records-amount--income' : ''}`}
+										className={widgetClasses(
+											`dashboard-expense-ledger-td-amount${r.type === 'income' ? ' dashboard-expense-records-amount--income' : ''}`,
+										)}
 									>
 										{r.type === 'income' ? '+' : ''}
 										{fmt(r.amount)}
 									</td>
 									<td
-										class={`dashboard-expense-ledger-td-type dashboard-expense-records-type--${r.type}`}
+										className={widgetClasses(
+											`dashboard-expense-ledger-td-type dashboard-expense-records-type--${r.type}`,
+										)}
 									>
 										<Icon
-											className="dashboard-expense-ledger-type-icon"
+											className={widgetClasses('dashboard-expense-ledger-type-icon')}
 											name={r.type === 'expense' ? 'arrow-down-right' : 'arrow-up-right'}
 										/>
 										<span>
 											{t(r.type === 'expense' ? 'expense.typeExpense' : 'expense.typeIncome')}
 										</span>
 									</td>
-									<td class="dashboard-expense-ledger-td-primary">{primaryOf(r) || '—'}</td>
-									<td class="dashboard-expense-ledger-td-category">{categoryLabel(r.category)}</td>
-									<td class="dashboard-expense-ledger-td-note" title={r.note}>
+									<td className={widgetClasses('dashboard-expense-ledger-td-primary')}>
+										{primaryOf(r) || '—'}
+									</td>
+									<td className={widgetClasses('dashboard-expense-ledger-td-category')}>
+										{categoryLabel(r.category)}
+									</td>
+									<td className={widgetClasses('dashboard-expense-ledger-td-note')} title={r.note}>
 										{r.note}
 									</td>
-									<td class="dashboard-expense-ledger-td-actions">
-										<button
-											class="dashboard-expense-ledger-action"
+									<td className={widgetClasses('dashboard-expense-ledger-td-actions')}>
+										<Button
+											variant="ghost"
+											className={widgetClasses('dashboard-expense-ledger-action')}
 											aria-label={t('expense.ledger.editRecord')}
-											onClick={() => edit(r)}
+											onClick={() => setEditing(r)}
 										>
 											<Icon name="pencil" />
-										</button>
-										<button
-											class="dashboard-expense-ledger-action"
+										</Button>
+										<Button
+											variant="ghost"
+											className={widgetClasses('dashboard-expense-ledger-action')}
 											aria-label={t('expense.deleteRecord')}
 											onClick={() => {
-												if (service.deleteRecord(r.id)) new Notice(t('expense.recordDeleted'));
+												setDeleting([r.id]);
 											}}
 										>
 											<Icon name="trash-2" />
-										</button>
+										</Button>
 									</td>
 								</tr>
 							))
@@ -408,30 +442,32 @@ export function ExpenseLedgerPanel({ service, close }: { service: ExpenseService
 					</tbody>
 				</table>
 			</div>
-			<div class="dashboard-expense-ledger-footer">
-				<div class="dashboard-expense-ledger-footer-info">
+			<div className={widgetClasses('dashboard-expense-ledger-footer')}>
+				<div className={widgetClasses('dashboard-expense-ledger-footer-info')}>
 					{t('expense.ledger.footerTotals', { n: filtered.length, e: fmt(expense), i: fmt(income) })}
 				</div>
-				<div class="dashboard-expense-ledger-pager">
-					<button
-						class="dashboard-expense-year-nav-btn dashboard-expense-ledger-pager-btn"
+				<div className={widgetClasses('dashboard-expense-ledger-pager')}>
+					<Button
+						variant="ghost"
+						className={widgetClasses('dashboard-expense-year-nav-btn dashboard-expense-ledger-pager-btn')}
 						disabled={currentPage <= 0}
 						aria-label={t('expense.ledger.prevPage')}
 						onClick={() => go(currentPage - 1)}
 					>
 						<Icon name="chevron-left" />
-					</button>
-					<div class="dashboard-expense-ledger-pager-label">
+					</Button>
+					<div className={widgetClasses('dashboard-expense-ledger-pager-label')}>
 						{t('expense.ledger.page', { p: currentPage + 1, total: pages })}
 					</div>
-					<button
-						class="dashboard-expense-year-nav-btn dashboard-expense-ledger-pager-btn"
+					<Button
+						variant="ghost"
+						className={widgetClasses('dashboard-expense-year-nav-btn dashboard-expense-ledger-pager-btn')}
 						disabled={currentPage >= pages - 1}
 						aria-label={t('expense.ledger.nextPage')}
 						onClick={() => go(currentPage + 1)}
 					>
 						<Icon name="chevron-right" />
-					</button>
+					</Button>
 				</div>
 			</div>
 		</>

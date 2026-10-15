@@ -14,7 +14,7 @@ const runtime=await launchFreshVault({root:process.argv[2],port:9268,files:{
 	'Work/Templates/Hidden.md':note('Hidden'),'Outside.md':note('Outside'),'Work/Unknown.md':note('Unknown','Unknown'),
 	'Work/Templates/Template.md':'---\nstatus: Ignored\nchannel: ignored\ntags: [template]\n---\n# {{title}}\nTemplate body.\n',
 	'Reference.md':'[[Work/A]]\n', '.obsidian/app.json':JSON.stringify({livePreview:true,alwaysUpdateLinks:true}),
-},settings:{version:1,namespaces:{app:{language:'en',introSeen:true,modules:{home:true,agent:true,automations:true,news:false,browser:false,archives:false,notifications:true,sync:false,comments:false,icons:false}},home:{dashboardFile:'Board',workspaceFiles:['Board'],workspaceNames:['Board'],widgetLunarEnabled:false,widgetWeatherEnabled:false,widgetMusicEnabled:false,pomodoroEnabled:false}}}});
+},settings:{version:1,namespaces:{app:{language:'en',introSeen:true,modules:{home:true,agent:true,automations:true,browser:false,archives:false,notifications:true,sync:false,comments:false,icons:false}},home:{dashboardFile:'Board',workspaceFiles:['Board'],workspaceNames:['Board'],widgetLunarEnabled:false,widgetWeatherEnabled:false,widgetMusicEnabled:false,pomodoroEnabled:false}}}});
 let c=runtime.connection;const rows=[];
 const check=(name,passed,detail)=>{rows.push({name,passed,detail});assert.ok(passed,name);};
 const until=async expression=>{const end=Date.now()+25000;while(Date.now()<end){if(await c.evaluate(expression))return;await delay(60);}throw Error(expression);};

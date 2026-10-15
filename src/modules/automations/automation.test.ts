@@ -2,23 +2,16 @@ import { memoryVault } from '../../../scripts/fixtures/memory-vault';
 import { contentFiles } from '../../host/obsidian/storage/content-files';
 // Fixed time zone: localized dates and DST cases below assume America/New_York.
 process.env.TZ = 'America/New_York';
-import { renderHomeSettings } from '../../app/settings/home';
-import { themeSettings } from '../../theme/settings';
-import type { DashboardSettingTab } from '../../app/settings/settings-tab';
-import { AutomationsPanel } from '../../modules/automations/ui/AutomationsPanel';
 import { parseHTML } from 'linkedom';
-import { h, render } from 'preact';
+import { createElement as h } from 'react';
+import { renderToStaticMarkup } from 'react-dom/server';
 import { InboxPanel } from '../../modules/notifications/ui/InboxPanel';
 import type { NotificationRecord } from '../../modules/notifications/api';
 import { DashboardAutomationSource } from '../../modules/home/platform/board/automation';
 import { homeSettings } from '../../modules/home/settings';
 import { automationArgs, RESUME_FLAGS, TerminalAutomationRuntime } from '../../modules/agent/services/agent-runtime';
-import { AutomationEditorForm, type AutomationEditRequest } from '../../modules/automations/ui/editor';
 import { AutomationError, automationMessage, automationOutcome } from '../../shared/automation/errors';
 import { setLanguage, t } from '../../shared/i18n/index';
-import type { AutomationsApi } from '../../modules/automations/core/api';
-import { Modal, Notice, Setting } from 'obsidian';
-import type { StubControl } from '../../../scripts/obsidian-stub';
 import { AGENT_CATALOG } from '../../modules/agent/core/launch/catalog';
 import assert from 'node:assert/strict';
 import { test } from 'vitest';
@@ -38,94 +31,6 @@ import type {
 	AutomationSourcePort,
 } from '../../shared/automation/types';
 import { mergeNativeHooks } from '../../modules/agent/platform/desktop/hooks/automation-hooks';
-
-test('agent editor uses the same availability set for defaults, controls and save, without replacing stale choices', async () => {
-	const settings = Setting as unknown as {
-		created: { name: string; desc: string; dropdowns: StubControl[]; buttons: StubControl[] }[];
-	};
-	const notices = Notice as unknown as { messages: string[] };
-	let agents = [
-		{ id: 'claude-code', title: 'Claude Code', enabled: true, installed: false },
-		{ id: 'codex', title: 'Codex', enabled: true, installed: true },
-	];
-	const saved: AutomationDefinition[] = [];
-	let runtimeAvailable = true;
-	const api = {
-		deviceId: 'device',
-		agent: () => runtimeAvailable ? ({ listAgents: () => agents }) : undefined,
-		save: async (value: AutomationDefinition) => {
-			saved.push(structuredClone(value));
-		},
-		tick: async () => {},
-	} as unknown as AutomationsApi;
-	const form = (request: AutomationEditRequest = {}) => new AutomationEditorForm({} as App, new Modal({} as App).contentEl as unknown as HTMLElement, api, async () => [], '/vault', request, () => {});
-	const inspect = (editor: AutomationEditorForm) =>
-		editor as unknown as { draft: AutomationDefinition; save(): Promise<void> };
-	try {
-		for (const language of ['zh', 'en', 'zh'] as const) {
-			setLanguage(language);
-			const editor = form();
-			const state = inspect(editor);
-			assert.equal(state.draft.action.kind === 'agent' && state.draft.action.agentId, 'codex');
-			settings.created.length = 0;
-			editor.open();
-			const row = settings.created.find((row) => row.name === t('automation.agent'))!;
-			assert.deepEqual(row.dropdowns[0]!.options, ['', 'codex']);
-			assert.equal(row.dropdowns[0]!.value, 'codex');
-			state.draft.name = 'Untouched user title';
-			if (state.draft.action.kind !== 'agent') throw Error('Expected agent draft');
-			state.draft.action.prompt = 'Untouched user prompt';
-			await state.save();
-			assert.equal(
-				saved[saved.length - 1]?.action.kind === 'agent' &&
-					(saved[saved.length - 1]!.action as { agentId: string }).agentId,
-				'codex',
-			);
-			const count = saved.length;
-			agents[1]!.installed = false;
-			await state.save();
-			assert.equal(saved.length, count, 'Availability is rechecked after the editor opens');
-			assert.equal(notices.messages[notices.messages.length - 1], t('automation.agentSelectionUnavailable'));
-			const stale = form({ existing: state.draft });
-			settings.created.length = 0;
-			stale.open();
-			const staleRow = settings.created.find((row) => row.name === t('automation.agent'))!;
-			assert.equal(staleRow.desc, t('automation.agentSelectionUnavailable'));
-			assert.equal(staleRow.dropdowns[0]!.value, 'codex');
-			assert.ok(staleRow.dropdowns[0]!.labels?.codex?.includes(t('automation.unavailable')));
-			await inspect(stale).save();
-			assert.equal(saved.length, count);
-			assert.deepEqual(
-				inspect(stale).draft.action,
-				state.draft.action,
-				'Invalid editing preserves the selected identity and user input',
-			);
-			const empty = form();
-			const emptyState = inspect(empty);
-			emptyState.draft.name = 'No CLI';
-			if (emptyState.draft.action.kind !== 'agent') throw Error('Expected agent draft');
-			assert.equal(emptyState.draft.action.agentId, '');
-			emptyState.draft.action.prompt = 'Keep me';
-			await emptyState.save();
-			assert.equal(saved.length, count);
-			agents[1]!.installed = true;
-			agents[1]!.enabled = false;
-			await state.save();
-			assert.equal(saved.length, count, 'Disabled agents cannot be saved');
-			agents[1]!.enabled = true;
-			runtimeAvailable = false;
-			await state.save();
-			assert.equal(saved.length, count, 'A disabled terminal module cannot save an agent action');
-			runtimeAvailable = true;
-			editor.close();
-			stale.close();
-			empty.close();
-		}
-	} finally {
-		setLanguage('zh');
-	}
-});
-
 
 function memory() {
 	const files = new Map<string, string>();
@@ -208,12 +113,15 @@ function fixture(agent?: AgentRuntimePort) {
 
 test('Home execution gate survives restart, keeps history and cursors, and resumes only unhandled occurrences', async () => {
 	const f = fixture();
-	let service = f.make(); await service.load();
-	await service.save(definition()); await service.tick(1000);
+	let service = f.make();
+	await service.load();
+	await service.save(definition());
+	await service.tick(1000);
 	await service.save(definition({ id: 'later', schedule: { kind: 'once', at: 2000 } }));
 	await service.save(definition({ id: 'expired', schedule: { kind: 'once', at: -500000 }, graceMinutes: 0 }));
 	await service.save(definition({ id: 'foreign', deviceId: 'another-device' }));
-	const before = structuredClone(service.state), deliveries = f.notified.length;
+	const before = structuredClone(service.state),
+		deliveries = f.notified.length;
 	await service.setExecutionEnabled(false);
 	await service.tick(3000);
 	await assert.rejects(service.run(definition()), /./);
@@ -221,38 +129,72 @@ test('Home execution gate survives restart, keeps history and cursors, and resum
 	await assert.rejects(service.remove(definition()), /./);
 	await assert.rejects(service.clearHistory(), /./);
 	assert.deepEqual(JSON.parse(JSON.stringify(service.state)), JSON.parse(JSON.stringify(before)));
-	service = new AutomationService(f.app.vault.adapter, '.nand/automation/test.json', 'device', f.source,
-		() => undefined, async run => { f.notified.push(run.id); }, false);
-	await service.load(); await service.tick(3000);
-	assert.equal(service.executionEnabled, false); assert.deepEqual(JSON.parse(JSON.stringify(service.state)), JSON.parse(JSON.stringify(before)));
+	service = new AutomationService(
+		f.app.vault.adapter,
+		'.nand/automation/test.json',
+		'device',
+		f.source,
+		() => undefined,
+		async (run) => {
+			f.notified.push(run.id);
+		},
+		false,
+	);
+	await service.load();
+	await service.tick(3000);
+	assert.equal(service.executionEnabled, false);
+	assert.deepEqual(JSON.parse(JSON.stringify(service.state)), JSON.parse(JSON.stringify(before)));
 	assert.equal(f.notified.length, deliveries);
 	for (let i = 0; i < 5; i++) {
-		await service.setExecutionEnabled(true); await service.tick(3000);
+		await service.setExecutionEnabled(true);
+		await service.tick(3000);
 		await service.setExecutionEnabled(false);
 	}
-	assert.equal(service.state.runs.length, 3); assert.equal(f.notified.length, deliveries + 1);
-	assert.equal(service.state.runs.find(run => run.automationId === 'expired')?.status, 'skipped');
-	assert.equal(service.state.runs.some(run => run.automationId === 'foreign'), false);
+	assert.equal(service.state.runs.length, 3);
+	assert.equal(f.notified.length, deliveries + 1);
+	assert.equal(service.state.runs.find((run) => run.automationId === 'expired')?.status, 'skipped');
+	assert.equal(
+		service.state.runs.some((run) => run.automationId === 'foreign'),
+		false,
+	);
 	assert.deepEqual(service.state.cursors, { 'a:1': 1000, 'later:1': 2000, 'expired:1': -500000 });
 });
 
 test('shutdown waits for an in-flight agent start and stops only its returned terminal before resolving', async () => {
 	let launch!: (handle: AgentRunHandle) => void;
 	let entered!: () => void;
-	const starting = new Promise<void>(resolve => { entered = resolve; });
+	const starting = new Promise<void>((resolve) => {
+		entered = resolve;
+	});
 	const stopped: string[] = [];
 	const agent: AgentRuntimePort = {
-		listAgents: () => [], listSessions: async () => [], open: async () => {},
-		stop: async id => { stopped.push(id); },
-		start: () => new Promise(resolve => { launch = resolve; entered(); }),
+		listAgents: () => [],
+		listSessions: async () => [],
+		open: async () => {},
+		stop: async (id) => {
+			stopped.push(id);
+		},
+		start: () =>
+			new Promise((resolve) => {
+				launch = resolve;
+				entered();
+			}),
 	};
-	const f = fixture(agent), service = f.make(); await service.load();
-	const d = definition({ action: { kind: 'agent', agentId: 'codex', cwd: '/vault', prompt: 'test', sessionMode: 'fresh' } });
+	const f = fixture(agent),
+		service = f.make();
+	await service.load();
+	const d = definition({
+		action: { kind: 'agent', agentId: 'codex', cwd: '/vault', prompt: 'test', sessionMode: 'fresh' },
+	});
 	await service.save(d);
-	const run = service.run(d); await starting;
+	const run = service.run(d);
+	await starting;
 	let closed = false;
-	const closing = service.setExecutionEnabled(false).then(() => { closed = true; });
-	await Promise.resolve(); assert.equal(closed, false);
+	const closing = service.setExecutionEnabled(false).then(() => {
+		closed = true;
+	});
+	await Promise.resolve();
+	assert.equal(closed, false);
 	await assert.rejects(service.run(d));
 	launch({ terminalId: 'automation-owned', completion: new Promise(() => {}) });
 	await Promise.all([run, closing]);
@@ -262,23 +204,40 @@ test('shutdown waits for an in-flight agent start and stops only its returned te
 });
 
 test('failed shutdown persistence or stop stays disabled and retries without losing owned execution', async () => {
-	let stops = 0, failStop = false;
+	let stops = 0,
+		failStop = false;
 	const agent: AgentRuntimePort = {
-		listAgents: () => [], listSessions: async () => [], open: async () => {},
-		stop: async () => { stops++; if (failStop) throw Error('stop unavailable'); },
+		listAgents: () => [],
+		listSessions: async () => [],
+		open: async () => {},
+		stop: async () => {
+			stops++;
+			if (failStop) throw Error('stop unavailable');
+		},
 		start: async () => ({ terminalId: 'owned', completion: new Promise(() => {}) }),
 	};
-	const f = fixture(agent), service = f.make(); await service.load();
-	const d = definition({ action: { kind: 'agent', agentId: 'codex', cwd: '/vault', prompt: 'test', sessionMode: 'fresh' } });
-	await service.save(d); await service.run(d);
-	f.fail(); await assert.rejects(service.setExecutionEnabled(false), /disk full/);
-	assert.equal(service.executionEnabled, false); assert.equal(stops, 0);
-	f.fail(false); failStop = true;
+	const f = fixture(agent),
+		service = f.make();
+	await service.load();
+	const d = definition({
+		action: { kind: 'agent', agentId: 'codex', cwd: '/vault', prompt: 'test', sessionMode: 'fresh' },
+	});
+	await service.save(d);
+	await service.run(d);
+	f.fail();
+	await assert.rejects(service.setExecutionEnabled(false), /disk full/);
+	assert.equal(service.executionEnabled, false);
+	assert.equal(stops, 0);
+	f.fail(false);
+	failStop = true;
 	await assert.rejects(service.setExecutionEnabled(false), /stop unavailable/);
 	assert.equal(service.state.runs[0]?.status, 'unknown');
-	failStop = false; await service.setExecutionEnabled(false);
-	assert.equal(stops, 2); assert.equal(service.state.runs[0]?.status, 'cancelled');
-	await service.setExecutionEnabled(true); assert.equal(service.executionEnabled, true);
+	failStop = false;
+	await service.setExecutionEnabled(false);
+	assert.equal(stops, 2);
+	assert.equal(service.state.runs[0]?.status, 'cancelled');
+	await service.setExecutionEnabled(true);
+	assert.equal(service.executionEnabled, true);
 });
 
 test('manual, once, cron and supported RRULE honor start times and reject unsupported rules', () => {
@@ -360,9 +319,12 @@ test('active agents do not overlap; a slow agent startup does not hold reminders
 	});
 	await service.save(d);
 	await service.save(definition({ id: 'reminder' }));
-	const reminder = new Promise<void>(resolve => {
+	const reminder = new Promise<void>((resolve) => {
 		const stop = service.subscribe(() => {
-			if (service.state.runs.find(r => r.automationId === 'reminder')?.status === 'succeeded') { stop(); resolve(); }
+			if (service.state.runs.find((r) => r.automationId === 'reminder')?.status === 'succeeded') {
+				stop();
+				resolve();
+			}
 		});
 	});
 	const tick = service.tick(2000);
@@ -500,10 +462,11 @@ test('every agent passes the prompt through its own transport and the native res
 	]);
 	assert.throws(() => automationArgs('pi', prompt, [], { ...session, agentId: 'pi' }));
 	assert.deepEqual(
-		automationArgs('pi', prompt, [], { ...session, agentId: 'pi', transcriptPath: '/sessions/history.jsonl' }).slice(
-			0,
-			2,
-		),
+		automationArgs('pi', prompt, [], {
+			...session,
+			agentId: 'pi',
+			transcriptPath: '/sessions/history.jsonl',
+		}).slice(0, 2),
 		['--session', '/sessions/history.jsonl'],
 	);
 });
@@ -536,27 +499,54 @@ test('dashboard source indexes explicit ownership, ignores plain task lines and 
 	let raw = '# Board\n\n## Todo\n\n### Tasks\n\n- [ ] Parent\n  - [ ] Nested ⏰ 2026-09-27 09:00\n';
 	const file = { path: '.nand/content/Board.md', basename: 'Board' };
 	const settings = { ...homeSettings.defaults(), dashboardFile: 'Board', workspaceFiles: [] };
-	const vault = memoryVault({ [file.path]: raw }), app = vault.app;
-	const read = vault.adapter.read.bind(vault.adapter), write = vault.adapter.write.bind(vault.adapter);
-	vault.adapter.read = async path => path === file.path ? raw : read(path);
-	vault.adapter.write = async (path, value) => { if (path === file.path) raw = value; await write(path, value); };
-	const source = new DashboardAutomationSource(app, () => settings, 'first-device', async () => {}, () => true);
+	const vault = memoryVault({ [file.path]: raw }),
+		app = vault.app;
+	const read = vault.adapter.read.bind(vault.adapter),
+		write = vault.adapter.write.bind(vault.adapter);
+	vault.adapter.read = async (path) => (path === file.path ? raw : read(path));
+	vault.adapter.write = async (path, value) => {
+		if (path === file.path) raw = value;
+		await write(path, value);
+	};
+	const source = new DashboardAutomationSource(
+		app,
+		() => settings,
+		'first-device',
+		async () => {},
+		() => true,
+	);
 	assert.equal((await source.list()).length, 0, 'a plain task line is not an automation');
-	raw = raw.replace('Nested ⏰ 2026-09-27 09:00', 'Nested' + taskMetaSuffix({ id: 'nested-id', automation: definition({ deviceId: 'first-device' }) }));
+	raw = raw.replace(
+		'Nested ⏰ 2026-09-27 09:00',
+		'Nested' + taskMetaSuffix({ id: 'nested-id', automation: definition({ deviceId: 'first-device' }) }),
+	);
 	source.invalidate(file.path);
-	const [original] = await source.list(); assert.ok(original?.source?.id); assert.equal(original.deviceId, 'first-device');
-	const other = new DashboardAutomationSource(app, () => settings, 'other-device', async () => {}, () => true);
+	const [original] = await source.list();
+	assert.ok(original?.source?.id);
+	assert.equal(original.deviceId, 'first-device');
+	const other = new DashboardAutomationSource(
+		app,
+		() => settings,
+		'other-device',
+		async () => {},
+		() => true,
+	);
 	assert.equal((await other.list())[0]?.deviceId, 'first-device');
-	raw = raw.replace('- [ ] Nested', '- [x] Nested'); source.invalidate(file.path); assert.equal((await source.list()).length, 0);
-	const [target] = await source.targets(); assert.ok(target);
+	raw = raw.replace('- [ ] Nested', '- [x] Nested');
+	source.invalidate(file.path);
+	assert.equal((await source.list()).length, 0);
+	const [target] = await source.targets();
+	assert.ok(target);
 	const action = { kind: 'create-task' as const, ...target, text: 'Scheduled todo' };
-	await source.createTask(action, 'one-run'); await source.createTask(action, 'one-run');
+	await source.createTask(action, 'one-run');
+	await source.createTask(action, 'one-run');
 	assert.equal(raw.split('Scheduled todo').length - 1, 1);
-	assert.equal(readTaskMeta(raw.split('\n').find(line => line.includes('Scheduled todo'))!).runId, 'one-run');
+	assert.equal(readTaskMeta(raw.split('\n').find((line) => line.includes('Scheduled todo'))!).runId, 'one-run');
 });
 
 test('failed state commits are invisible and retry preserves scheduler cursors', async () => {
-	const f = fixture(), service = f.make();
+	const f = fixture(),
+		service = f.make();
 	await service.load();
 	await service.save(definition());
 	f.fail();
@@ -572,12 +562,16 @@ test('failed state commits are invisible and retry preserves scheduler cursors',
 });
 
 test('edits keep list order and deletion retains run snapshots', async () => {
-	const f = fixture(), service = f.make();
+	const f = fixture(),
+		service = f.make();
 	await service.load();
 	await service.save(definition());
 	await service.save(definition({ id: 'b' }));
 	await service.save(definition({ name: 'edited' }));
-	assert.deepEqual(service.definitions.map((d) => d.id), ['a', 'b']);
+	assert.deepEqual(
+		service.definitions.map((d) => d.id),
+		['a', 'b'],
+	);
 	await service.run(service.definitions[0]!);
 	await service.remove(service.definitions[0]!);
 	assert.equal(service.state.runs[0]?.definition?.name, 'edited');
@@ -585,7 +579,8 @@ test('edits keep list order and deletion retains run snapshots', async () => {
 
 test('partial primary write recovers last valid data and a later write can succeed', async () => {
 	const m = memory();
-	const validate = (v: unknown): v is { revision: number } => !!v && typeof v === 'object' && typeof (v as { revision?: unknown }).revision === 'number';
+	const validate = (v: unknown): v is { revision: number } =>
+		!!v && typeof v === 'object' && typeof (v as { revision?: unknown }).revision === 'number';
 	const store = new JsonStore(m.app.vault.adapter, 'store.json', validate);
 	const initial = await store.load({ revision: 0 });
 	const next = await store.commit({ base: initial, value: { revision: 1 } });
@@ -607,12 +602,38 @@ test('widget sources resolve dashboard paths with and without the .md extension 
 			settings.dashboardFile = path;
 			settings.workspaceFiles = [path];
 			settings.countdownEnabled = settings.anniversaryEnabled = true;
-			settings.countdowns = [{ ...settings.countdowns[0]!, id: 'count', label: 'User countdown', targetDate: '2027-01-01', reminderDays: 1 }];
-			settings.anniversaries = [{ ...settings.anniversaries[0]!, id: 'ann', label: 'User anniversary', startDate: '2020-01-01', annualReminder: true }];
+			settings.countdowns = [
+				{
+					...settings.countdowns[0]!,
+					id: 'count',
+					label: 'User countdown',
+					targetDate: '2027-01-01',
+					reminderDays: 1,
+				},
+			];
+			settings.anniversaries = [
+				{
+					...settings.anniversaries[0]!,
+					id: 'ann',
+					label: 'User anniversary',
+					startDate: '2020-01-01',
+					annualReminder: true,
+				},
+			];
 			const file = { path: '.nand/content/' + (path.endsWith('.md') ? path : path + '.md') };
-			let enabled = true, saves = 0;
-			const vault = memoryVault({ [file.path]: '' }), app = vault.app;
-			const source = new DashboardAutomationSource(app, () => settings, 'original-device', async () => { saves++; }, () => enabled);
+			let enabled = true,
+				saves = 0;
+			const vault = memoryVault({ [file.path]: '' }),
+				app = vault.app;
+			const source = new DashboardAutomationSource(
+				app,
+				() => settings,
+				'original-device',
+				async () => {
+					saves++;
+				},
+				() => enabled,
+			);
 			const rows = await source.list();
 			assert.equal(rows.length, 2);
 			const persisted = JSON.stringify([settings.countdowns, settings.anniversaries]);
@@ -620,27 +641,35 @@ test('widget sources resolve dashboard paths with and without the .md extension 
 			for (const row of rows) {
 				assert.equal(row.source?.path, file.path);
 				assert.equal(source.resolveWidgetSource(row.source!).path, file.path);
-				assert.equal(source.resolveWidgetSource({ ...row.source!, path: file.path.slice(0, -3) }).path, file.path);
+				assert.equal(
+					source.resolveWidgetSource({ ...row.source!, path: file.path.slice(0, -3) }).path,
+					file.path,
+				);
 				assert.equal(row.deviceId, 'original-device');
 			}
 			assert.deepEqual(await source.list(), rows);
 			assert.equal(saves, 1, 'Reading/resolving never rewrites persisted definitions');
 			const ref = rows[0]!.source!;
-			vault.contents.delete(file.path); await contentFiles(app).refresh();
+			vault.contents.delete(file.path);
+			await contentFiles(app).refresh();
 			assert.throws(() => source.resolveWidgetSource(ref), { message: t('automation.widgetDashboardMissing') });
-			await vault.adapter.write(file.path, ''); await contentFiles(app).refresh();
+			await vault.adapter.write(file.path, '');
+			await contentFiles(app).refresh();
 			enabled = false;
 			assert.throws(() => source.resolveWidgetSource(ref), { message: t('automation.widgetModuleDisabled') });
 			enabled = true;
 			settings.countdownEnabled = false;
 			assert.throws(() => source.resolveWidgetSource(ref), { message: t('automation.widgetMissing') });
 			settings.countdownEnabled = true;
-			assert.throws(() => source.resolveWidgetSource({ ...ref, id: 'widget:deleted' }), { message: t('automation.widgetMissing') });
+			assert.throws(() => source.resolveWidgetSource({ ...ref, id: 'widget:deleted' }), {
+				message: t('automation.widgetMissing'),
+			});
 			assert.equal(JSON.stringify([settings.countdowns, settings.anniversaries]), persisted);
 			settings.countdowns.push({ ...settings.countdowns[0]! });
 			assert.throws(() => source.resolveWidgetSource(ref), { message: t('automation.widgetMissing') });
 			settings.countdowns.pop();
-			settings.dashboardFile = 'Other'; settings.workspaceFiles = ['Other'];
+			settings.dashboardFile = 'Other';
+			settings.workspaceFiles = ['Other'];
 			assert.throws(() => source.resolveWidgetSource(ref), { message: t('automation.widgetDashboardMissing') });
 			assert.equal(saves, 1);
 		}
@@ -655,25 +684,63 @@ test('inbox renders structured reasons in the current language and deduplicates 
 	try {
 		const panel = document.createElement('div');
 		const records = [
-			{ id: 'structured', title: 'User title 保留', body: 'Old delivery snapshot', presentation: { kind: 'automation-run', status: 'failed', message: 'Original failure', errorCode: 'cliMissing' } },
+			{
+				id: 'structured',
+				title: 'User title 保留',
+				body: 'Old delivery snapshot',
+				presentation: {
+					kind: 'automation-run',
+					status: 'failed',
+					message: 'Original failure',
+					errorCode: 'cliMissing',
+				},
+			},
 			{ id: 'plain', title: 'Plain', body: 'Keep original free text 原文' },
 			{ id: 'same', title: 'Exact reminder', body: 'Exact reminder' },
 			{ id: 'different', title: 'Different', body: 'Different ' },
-		].map(row => ({ ...row, createdAt: Date.UTC(2026, 8, 28, 12), read: false, channels: ['in-app'], deliveries: { 'in-app': 'sent' } }));
+		].map((row) => ({
+			...row,
+			createdAt: Date.UTC(2026, 8, 28, 12),
+			read: false,
+			channels: ['in-app'],
+			deliveries: { 'in-app': 'sent' },
+		}));
 		for (const language of ['zh', 'en', 'zh'] as const) {
 			setLanguage(language);
-			render(h(InboxPanel, { records: records as NotificationRecord[], filter: 'all', markRead: () => {}, clearRead: () => {}, open: () => {}, openable: new Set(['plain']) }), panel);
-			assert.equal([...panel.querySelectorAll('button')].filter(button => button.textContent === t('automation.open')).length, 1, 'An opener can expose a record without legacy source or target fields');
-			assert.ok(panel.textContent!.includes(t('automation.cliMissing')), 'Persisted system reason follows the current language');
+			panel.innerHTML = renderToStaticMarkup(
+				h(InboxPanel, {
+					records: records as NotificationRecord[],
+					filter: 'all',
+					markRead: () => {},
+					clearRead: () => {},
+					open: () => {},
+					openable: new Set(['plain']),
+				}),
+			);
+			assert.equal(
+				[...panel.querySelectorAll('button')].filter((button) => button.textContent === t('automation.open'))
+					.length,
+				1,
+				'An opener can expose a record without legacy source or target fields',
+			);
+			assert.ok(
+				panel.textContent!.includes(t('automation.cliMissing')),
+				'Persisted system reason follows the current language',
+			);
 			assert.ok(panel.textContent!.includes('Keep original free text 原文'));
 			assert.equal(panel.textContent!.split('Exact reminder').length - 1, 1);
 			assert.ok(panel.textContent!.includes('Different '), 'Whitespace differences are user content');
 			assert.ok(panel.textContent!.includes(language === 'zh' ? '应用内：已提交' : 'In-app: Submitted'));
-			assert.ok(panel.textContent!.includes(new Date(records[0]!.createdAt).toLocaleString(language === 'zh' ? 'zh-CN' : 'en-US')));
+			assert.ok(
+				panel.textContent!.includes(
+					new Date(records[0]!.createdAt).toLocaleString(language === 'zh' ? 'zh-CN' : 'en-US'),
+				),
+			);
 		}
-		render(null, panel);
+		panel.replaceChildren();
 	} finally {
-		if (prior === undefined) Reflect.deleteProperty(globalThis, 'document'); else Object.assign(globalThis, { document: prior });
+		if (prior === undefined) Reflect.deleteProperty(globalThis, 'document');
+		else Object.assign(globalThis, { document: prior });
 		setLanguage('zh');
 	}
 });
@@ -681,74 +748,124 @@ test('inbox renders structured reasons in the current language and deduplicates 
 test('structured failures survive run and inbox persistence, language changes, cleanup and recovery without redelivery', async () => {
 	const m = memory();
 	let delivered = 0;
-	const adapter = { available: () => true, send: () => { delivered++; }, dispose: () => {} };
+	const adapter = {
+		available: () => true,
+		send: () => {
+			delivered++;
+		},
+		dispose: () => {},
+	};
 	const inbox = () => new NotificationService(m.app.vault.adapter, 'notifications.json', async () => {}, adapter);
-	let notifications = inbox(); await notifications.load();
+	let notifications = inbox();
+	await notifications.load();
 	let failure: Error = new AutomationError('processExit', { code: 17 });
-	const source: AutomationSourcePort = { list: async () => [], save: async () => {}, remove: async () => {}, open: async () => {}, createTask: async () => { throw failure; } };
-	const make = () => new AutomationService(m.app.vault.adapter, 'automation.json', 'device', source, () => undefined, async (run, d) => {
-		await notifications.send({ id: run.id, title: d.name, body: automationOutcome(run), channels: d.channels, presentation: { kind: 'automation-run', status: run.status, message: run.message, errorCode: run.errorCode, errorParams: run.errorParams } });
-	});
-	let service = make(); await service.load();
+	const source: AutomationSourcePort = {
+		list: async () => [],
+		save: async () => {},
+		remove: async () => {},
+		open: async () => {},
+		createTask: async () => {
+			throw failure;
+		},
+	};
+	const make = () =>
+		new AutomationService(
+			m.app.vault.adapter,
+			'automation.json',
+			'device',
+			source,
+			() => undefined,
+			async (run, d) => {
+				await notifications.send({
+					id: run.id,
+					title: d.name,
+					body: automationOutcome(run),
+					channels: d.channels,
+					presentation: {
+						kind: 'automation-run',
+						status: run.status,
+						message: run.message,
+						errorCode: run.errorCode,
+						errorParams: run.errorParams,
+					},
+				});
+			},
+		);
+	let service = make();
+	await service.load();
 	const d = definition({ action: { kind: 'create-task', path: 'Board.md', cardId: 'one', text: 'User text 原文' } });
-	await service.save(d); const run = (await service.run(d))!;
-	assert.equal(run.errorCode, 'processExit'); assert.deepEqual(run.errorParams, { code: 17 });
-	const id = run.id, snapshot = notifications.records[0]!.body;
+	await service.save(d);
+	const run = (await service.run(d))!;
+	assert.equal(run.errorCode, 'processExit');
+	assert.deepEqual(run.errorParams, { code: 17 });
+	const id = run.id,
+		snapshot = notifications.records[0]!.body;
 	for (const language of ['en', 'zh', 'en'] as const) {
-		setLanguage(language); notifications = inbox(); await notifications.load(); service = make(); await service.load();
-		const persisted = service.state.runs.find(r => r.id === id)!;
+		setLanguage(language);
+		notifications = inbox();
+		await notifications.load();
+		service = make();
+		await service.load();
+		const persisted = service.state.runs.find((r) => r.id === id)!;
 		assert.equal(automationMessage(persisted), t('automation.processExit', { code: 17 }));
 		assert.equal(notificationBody(notifications.records[0]!), automationOutcome(persisted));
-		assert.equal(notifications.records[0]!.body, snapshot, 'Stored delivery text is not migrated on language changes');
+		assert.equal(
+			notifications.records[0]!.body,
+			snapshot,
+			'Stored delivery text is not migrated on language changes',
+		);
 		assert.equal(delivered, 1, 'Reload never submits the notification twice');
 	}
 	failure = new Error('External failure 原文');
 	const generic = (await service.run(d))!;
-	assert.equal(generic.errorCode, 'operationFailed'); assert.deepEqual(generic.errorParams, { detail: 'External failure 原文' });
+	assert.equal(generic.errorCode, 'operationFailed');
+	assert.deepEqual(generic.errorParams, { detail: 'External failure 原文' });
 	assert.ok(automationMessage(generic).includes('External failure 原文'));
 	const record = notifications.records[0]!;
-	assert.equal(notificationBody({ ...record, presentation: { kind: 'automation-run', status: 'failed', message: 'Stored fallback', errorCode: 'futureUnknown' } }), t('automation.failed') + t('automation.colon') + 'Stored fallback');
+	assert.equal(
+		notificationBody({
+			...record,
+			presentation: {
+				kind: 'automation-run',
+				status: 'failed',
+				message: 'Stored fallback',
+				errorCode: 'futureUnknown',
+			},
+		}),
+		t('automation.failed') + t('automation.colon') + 'Stored fallback',
+	);
 	assert.equal(automationMessage({ message: 'Old English 原文', errorCode: 'futureUnknown' }), 'Old English 原文');
 	assert.equal(automationMessage({ message: 'Missing params', errorCode: 'processExit' }), 'Missing params');
-	assert.equal(automationMessage({ message: 'Malformed params', errorCode: 'processExit', errorParams: [] as never }), 'Malformed params');
-	await notifications.markRead(); await notifications.clearRead();
-	const count = delivered; notifications = inbox(); await notifications.load(); service = make(); await service.load();
-	assert.equal(notifications.records.length, 0); assert.equal(delivered, count);
-	m.files.set('notifications.json', 'broken'); notifications = inbox(); await notifications.load();
+	assert.equal(
+		automationMessage({ message: 'Malformed params', errorCode: 'processExit', errorParams: [] as never }),
+		'Malformed params',
+	);
+	await notifications.markRead();
+	await notifications.clearRead();
+	const count = delivered;
+	notifications = inbox();
+	await notifications.load();
+	service = make();
+	await service.load();
+	assert.equal(notifications.records.length, 0);
+	assert.equal(delivered, count);
+	m.files.set('notifications.json', 'broken');
+	notifications = inbox();
+	await notifications.load();
 	assert.equal(m.files.get('notifications.json.corrupt'), 'broken');
 	assert.equal(delivered, count);
 	setLanguage('zh');
 });
 
-test('automation panel localizes next/run dates and system reasons while preserving prompt, output and unknown text', () => {
-	const { document } = parseHTML('<html><body></body></html>');
-	const prior = globalThis.document; Object.assign(globalThis, { document });
-	try {
-		const panel = document.createElement('div'), now = Date.now();
-		const d = definition({ schedule: { kind: 'once', at: now + 86400000 }, action: { kind: 'notify', body: 'User prompt 原文' } });
-		const f = fixture(), service = f.make();
-		service.state.definitions = [d];
-		service.state.runs = [{ id: 'run', automationId: d.id, revision: 1, title: d.name, scheduledFor: now, trigger: 'manual', status: 'failed', startedAt: now, message: 'Original detail', errorCode: 'processExit', errorParams: { code: 17 }, output: 'CLI output 原文' }];
-		for (const language of ['zh', 'en', 'zh'] as const) {
-			setLanguage(language);
-			render(h(AutomationsPanel, { host: { service, edit: () => {}, inbox: () => {}, retry: async () => {} }, state: { selected: d.id, search: '', filter: '', agentFilter: '' }, refresh: () => {}, actions: { clearHistory: () => {}, remove: () => {}, run: () => {} } }), panel);
-			const text = panel.textContent!;
-			assert.ok(text.includes(new Date(now).toLocaleString(language === 'zh' ? 'zh-CN' : 'en-US')));
-			assert.ok(text.includes(t('automation.next') + t('automation.colon') + new Date(now + 86400000).toLocaleString(language === 'zh' ? 'zh-CN' : 'en-US')));
-			assert.ok(text.includes(t('automation.processExit', { code: 17 })));
-			assert.ok(text.includes('User prompt 原文')); assert.ok(text.includes('CLI output 原文'));
-		}
-		render(null, panel);
-	} finally {
-		if (prior === undefined) Reflect.deleteProperty(globalThis, 'document'); else Object.assign(globalThis, { document: prior });
-		setLanguage('zh');
-	}
-});
-
 test('cleared once history reads only the matching revision cursor and never replays failed, succeeded or skipped work', async () => {
-	const f = fixture(); let taskAttempts = 0;
-	f.source.createTask = async () => { taskAttempts++; throw new AutomationError('sourceMissing'); };
-	let service = f.make(); await service.load();
+	const f = fixture();
+	let taskAttempts = 0;
+	f.source.createTask = async () => {
+		taskAttempts++;
+		throw new AutomationError('sourceMissing');
+	};
+	let service = f.make();
+	await service.load();
 	for (const d of [
 		definition({ id: 'success' }),
 		definition({ id: 'failure', action: { kind: 'create-task', path: 'missing', cardId: 'none', text: 'Keep' } }),
@@ -757,122 +874,108 @@ test('cleared once history reads only the matching revision cursor and never rep
 		definition({ id: 'manual', schedule: { kind: 'manual' } }),
 		definition({ id: 'recurring', schedule: { kind: 'recurring', expression: '* * * * *', start: 1000000 } }),
 		definition({ id: 'revised' }),
-	]) await service.save(d);
+	])
+		await service.save(d);
 	await service.tick(2000);
-	assert.deepEqual(service.state.runs.map(r => r.status), ['succeeded', 'failed', 'skipped', 'succeeded']);
-	const revised = service.definitions.find(d => d.id === 'revised')!;
+	assert.deepEqual(
+		service.state.runs.map((r) => r.status),
+		['succeeded', 'failed', 'skipped', 'succeeded'],
+	);
+	const revised = service.definitions.find((d) => d.id === 'revised')!;
 	await service.save({ ...revised, schedule: { kind: 'once', at: 1000000 } });
 	service.state.cursors['future:0'] = 1000000;
 	service.state.cursors['future:1'] = 999999;
 	service.state.cursors['manual:1'] = 1000000;
 	service.state.cursors['recurring:1'] = 1000000;
-	const { document } = parseHTML('<html><body></body></html>'), prior = globalThis.document;
-	Object.assign(globalThis, { document });
-	const panel = document.createElement('div');
-	const labels = () => {
-		render(h(AutomationsPanel, { host: { service, edit: () => {}, inbox: () => {}, retry: async () => {} }, state: { selected: '', search: '', filter: '', agentFilter: '' }, refresh: () => {}, actions: { clearHistory: () => {}, remove: () => {}, run: () => {} } }), panel);
-		return Array.from(panel.querySelectorAll('.nand-automation-list > button')).map(button => button.querySelector('small:last-child')?.textContent);
-	};
-	try {
-		setLanguage('zh');
-		assert.deepEqual(labels(), ['已完成', '失败', '已跳过', '待执行', '待执行', '待执行', '待执行']);
-		const cursors = structuredClone(service.state.cursors), notified = f.notified.length;
-		await service.clearHistory(); assert.deepEqual(service.state.cursors, cursors);
-		for (const language of ['zh', 'en', 'zh'] as const) {
-			setLanguage(language);
-			assert.deepEqual(labels(), [t('automation.processed'), t('automation.processed'), t('automation.processed'), ...Array(4).fill(t('automation.pending'))]);
-			await service.tick(2000); service = f.make(); await service.load(); await service.tick(3000);
-			assert.equal(service.state.runs.length, 0); assert.equal(f.notified.length, notified); assert.equal(taskAttempts, 1);
-			assert.deepEqual(service.state.cursors, cursors);
-		}
-	} finally {
-		render(null, panel);
-		if (prior === undefined) Reflect.deleteProperty(globalThis, 'document'); else Object.assign(globalThis, { document: prior });
-		setLanguage('zh');
+	const cursors = structuredClone(service.state.cursors),
+		notified = f.notified.length;
+	await service.clearHistory();
+	assert.deepEqual(service.state.cursors, cursors);
+	for (let i = 0; i < 3; i++) {
+		await service.tick(2000);
+		service = f.make();
+		await service.load();
+		await service.tick(3000);
+		assert.equal(service.state.runs.length, 0);
+		assert.equal(f.notified.length, notified);
+		assert.equal(taskAttempts, 1);
+		assert.deepEqual(service.state.cursors, cursors);
 	}
 });
 
-
-test('module switches show the saved state after a failed change and stay usable', async () => {
- const rows = Setting as unknown as { created: { name: string; toggles: StubControl[] }[] };
- let enabled = true, failWrite = true, failApply = false;
- const tab = {
-  plugin: {
-   appSettings: { get: () => ({ language: 'zh', workbenchStatus: 'automatic' }), update: async () => {} },
-   moduleManifests: () => [{ id: 'automations', order: 80, icon: 'workflow', titleKey: 'automation.title', descriptionKey: 'modules.automationDesc' }],
-   moduleEnabled: () => enabled,
-   setModuleEnabled: async (_id: string, value: boolean) => {
-    if (failWrite) throw Error('disk full');
-    enabled = value;
-    if (failApply) throw Error('stop failed');
-   },
-   theme: { get: () => themeSettings.defaults(), subscribe: () => () => {}, update: async () => {} },
-  },
-  refresh: () => {}, keepSubscription: () => {},
- } as unknown as DashboardSettingTab;
- for (const language of ['zh', 'en', 'zh'] as const) {
-  setLanguage(language); rows.created.length = 0; enabled = true; failWrite = true; failApply = false;
-  renderHomeSettings.call(tab, new Setting({} as HTMLElement).settingEl);
-  const toggle = rows.created.find(row => row.name === t('automation.title'))!.toggles[0]!;
-  assert.equal(toggle.value, true);
-  await toggle.fire!(false);
-  assert.equal(toggle.value, true); assert.equal(toggle.disabled, false);
-  failWrite = false; failApply = true; await toggle.fire!(false);
-  assert.equal(toggle.value, false); assert.equal(toggle.disabled, false);
-  failApply = false; await toggle.fire!(true);
-  assert.equal(enabled, true); assert.equal(toggle.disabled, false);
- }
-});
-test('disabled panel retains history and notifications but disables definition and execution mutations', async () => {
- const f = fixture(), service = f.make(); await service.load(); await service.save(definition()); await service.tick(1000);
- await service.setExecutionEnabled(false);
- const { document } = parseHTML('<html><body></body></html>'), prior = globalThis.document;
- Object.assign(globalThis, { document }); const panel = document.createElement('div');
- try {
-  for (const language of ['zh', 'en', 'zh'] as const) {
-   setLanguage(language);
-   render(h(AutomationsPanel, { host: { service, edit: () => {}, inbox: () => {}, retry: async () => {} }, state: { selected: 'a', search: '', filter: '', agentFilter: '' }, refresh: () => {}, actions: { clearHistory: () => {}, remove: () => {}, run: () => {} } }), panel);
-   assert.ok(panel.textContent!.includes(t('automation.moduleOff')));
-   for (const key of ['new', 'clearHistory', 'run', 'edit', 'pause', 'delete']) {
-    const button = Array.from(panel.querySelectorAll('button')).find(button => button.textContent === t(`automation.${key}`))!;
-    assert.ok(button.hasAttribute('disabled'), key);
-   }
-   assert.equal(Array.from(panel.querySelectorAll('button')).find(button => button.textContent === t('automation.inbox'))!.hasAttribute('disabled'), false);
-   assert.equal(panel.querySelectorAll('.nand-automation-run').length, 1);
-  }
- } finally { render(null, panel); if (prior === undefined) Reflect.deleteProperty(globalThis, 'document'); else Object.assign(globalThis, { document: prior }); setLanguage('zh'); }
-});
-
-
 test('shutdown drains an already-started file effect without undoing it or sending new notifications', async () => {
- const f = fixture(); let release!: () => void, entered!: () => void;
- const gate = new Promise<void>(resolve => { release = resolve; });
- const starting = new Promise<void>(resolve => { entered = resolve; });
- f.source.createTask = async (_, id) => { entered(); await gate; f.effects.push(id); };
- const service = f.make(); await service.load();
- const d = definition({ action: { kind: 'create-task', path: 'Board.md', cardId: 'c', text: 'Preserve effect' } });
- await service.save(d); const running = service.run(d); await starting;
- let closed = false; const closing = service.setExecutionEnabled(false).then(() => { closed = true; });
- await Promise.resolve(); assert.equal(closed, false); release();
- const [run] = await Promise.all([running, closing]);
- assert.deepEqual(f.effects, [run!.id]); assert.equal(service.state.runs[0]?.status, 'cancelled');
- assert.equal(f.notified.length, 0);
+	const f = fixture();
+	let release!: () => void, entered!: () => void;
+	const gate = new Promise<void>((resolve) => {
+		release = resolve;
+	});
+	const starting = new Promise<void>((resolve) => {
+		entered = resolve;
+	});
+	f.source.createTask = async (_, id) => {
+		entered();
+		await gate;
+		f.effects.push(id);
+	};
+	const service = f.make();
+	await service.load();
+	const d = definition({ action: { kind: 'create-task', path: 'Board.md', cardId: 'c', text: 'Preserve effect' } });
+	await service.save(d);
+	const running = service.run(d);
+	await starting;
+	let closed = false;
+	const closing = service.setExecutionEnabled(false).then(() => {
+		closed = true;
+	});
+	await Promise.resolve();
+	assert.equal(closed, false);
+	release();
+	const [run] = await Promise.all([running, closing]);
+	assert.deepEqual(f.effects, [run!.id]);
+	assert.equal(service.state.runs[0]?.status, 'cancelled');
+	assert.equal(f.notified.length, 0);
 });
 
 test('an agent handle arriving during failed cancellation persistence remains owned for retry', async () => {
- let launch!: (handle: AgentRunHandle) => void, entered!: () => void;
- const starting = new Promise<void>(resolve => { entered = resolve; }), stopped: string[] = [];
- const agent: AgentRuntimePort = { listAgents: () => [], listSessions: async () => [], open: async () => {},
-  stop: async id => { stopped.push(id); }, start: () => new Promise(resolve => { launch = resolve; entered(); }) };
- const f = fixture(agent), service = f.make(); await service.load();
- const d = definition({ action: { kind: 'agent', agentId: 'codex', cwd: '/vault', prompt: 'test', sessionMode: 'fresh' } });
- await service.save(d); const run = service.run(d); await starting; f.fail();
- const closing = assert.rejects(service.setExecutionEnabled(false), /disk full/);
- launch({ terminalId: 'late-owned', completion: new Promise(() => {}) }); await Promise.all([run, closing]);
- assert.equal(service.executionEnabled, false); assert.deepEqual(stopped, []);
- f.fail(false); await service.setExecutionEnabled(true);
- assert.deepEqual(stopped, ['late-owned']); assert.equal(service.state.runs[0]?.terminalId, 'late-owned');
- assert.equal(service.state.runs[0]?.status, 'cancelled'); assert.equal(service.executionEnabled, true);
+	let launch!: (handle: AgentRunHandle) => void, entered!: () => void;
+	const starting = new Promise<void>((resolve) => {
+			entered = resolve;
+		}),
+		stopped: string[] = [];
+	const agent: AgentRuntimePort = {
+		listAgents: () => [],
+		listSessions: async () => [],
+		open: async () => {},
+		stop: async (id) => {
+			stopped.push(id);
+		},
+		start: () =>
+			new Promise((resolve) => {
+				launch = resolve;
+				entered();
+			}),
+	};
+	const f = fixture(agent),
+		service = f.make();
+	await service.load();
+	const d = definition({
+		action: { kind: 'agent', agentId: 'codex', cwd: '/vault', prompt: 'test', sessionMode: 'fresh' },
+	});
+	await service.save(d);
+	const run = service.run(d);
+	await starting;
+	f.fail();
+	const closing = assert.rejects(service.setExecutionEnabled(false), /disk full/);
+	launch({ terminalId: 'late-owned', completion: new Promise(() => {}) });
+	await Promise.all([run, closing]);
+	assert.equal(service.executionEnabled, false);
+	assert.deepEqual(stopped, []);
+	f.fail(false);
+	await service.setExecutionEnabled(true);
+	assert.deepEqual(stopped, ['late-owned']);
+	assert.equal(service.state.runs[0]?.terminalId, 'late-owned');
+	assert.equal(service.state.runs[0]?.status, 'cancelled');
+	assert.equal(service.executionEnabled, true);
 });
 
 test('switching an automation action keeps the shared text and drops kind-specific fields', () => {
@@ -938,7 +1041,13 @@ test('anniversary reminders use the singular English year only for a difference 
 					},
 				];
 				const { app } = memoryVault();
-				const source = new DashboardAutomationSource(app, () => settings, 'device', async () => {}, () => true);
+				const source = new DashboardAutomationSource(
+					app,
+					() => settings,
+					'device',
+					async () => {},
+					() => true,
+				);
 				const [row] = await source.list();
 				const body = row?.action.kind === 'notify' ? row.action.body : '';
 				if (language === 'en') {

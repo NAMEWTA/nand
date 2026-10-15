@@ -1,0 +1,22 @@
+/* src/ui/styles/neutralize.css
+ * 把 Obsidian（及社区主题）对表单元素的样式在 .nand-ui 内清零。
+ * 特异性 (1,0,1)：高于任何纯类选择器的 Obsidian 规则（最高 (0,3,1)，包括 button:hover、
+ * input:focus 这类状态规则），低于作用域化后的 Tailwind 工具类（(1,2,0) 起），所以组件写的
+ * 工具类总能生效，也不需要单独的悬停/聚焦中和规则。
+ * .markdown-rendered 内部、.nand-native 元素及其内部、.cm-editor 内部是 Obsidian 原生内容，不中和。
+ * 注意：选择器必须写在同一行。`:is(...)` 和 `:not(...)` 之间只要有空格或换行，就变成了
+ * “后代选择器”，整条规则会悄悄失效。 */
+:where(.nand-ui) :is(button, input, textarea, select):not(:where(.markdown-rendered *, .nand-native, .nand-native *, .cm-editor *)):not(#\#) {
+	background: transparent;
+	box-shadow: none;
+	border: 0 solid;
+	border-radius: 0;
+	padding: 0;
+	height: auto;
+	font: inherit;
+	color: inherit;
+	outline: none;
+	-webkit-appearance: none;
+	appearance: none;
+}
+/* 复选框与单选框用 Radix 组件，不用原生 input；若必须用原生，给元素加 .nand-native */

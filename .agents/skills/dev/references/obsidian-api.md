@@ -20,7 +20,7 @@
 
 长期运行的服务属于模块，随模块结束（见 `module-authoring.md`）。视图和页面不是服务。
 
-在组件之外创建 DOM 的浮层和对话框，必须在 `destroy` / `onClose` 里移除这些 DOM。评论浮层被追加到 `view.dom.ownerDocument.body`，并在 CodeMirror 插件的 `destroy()` 里移除。
+在组件之外创建 DOM 的浮层和对话框，必须在 `destroy` / `onClose` 里移除这些 DOM。批注通过所属窗口的 `CommentsOverlay` React 根渲染到 `.nand-ui.nand-portal-root`；编辑器插件销毁时释放自己的监听器和计时器，模块停用卸载 Overlay 并释放 Portal 引用。
 
 ## 类型
 
@@ -63,21 +63,21 @@ if (node.instanceOf(Text)) {
 
 - 英文界面和 `t()` 的值用句首大写。专有名词保持大写。文案放在哪里见 `settings-and-i18n.md`。
 - 命令 id 与名称遵循 `architecture.md` 的「命令」一节。用 `addCommand` 注册，在模块内部用 `context.commands.add`。
-- 设置标题用 `Setting.setHeading()`，不要手写 `<h2>`，也不要命名为「General」「Settings」或显示名称。
+- NAND 工作台设置标题与行用 React `SettingsSection` / `SettingsRow`；只有 Obsidian 原生设置适配才使用 `Setting.setHeading()`，不把原生 Setting 约束套到 React 组件上。
 - 设置放进设置存储的命名空间（见 `settings-and-i18n.md`）；绝不用 `saveData`。评论、图标这类领域存储拥有自己记录在案的文件。
-- 新设置放在所属模块的工作台设置页（或「常规」／「外观」）。Obsidian 的设置页（`src/app/settings/entry-tab.ts`，只用声明式的 `getSettingDefinitions()`）只放入口行：打开工作台设置、语言、状态、主题样式、模块开关。
-- 用设置页自己的 `refresh()` 重绘 Obsidian 设置页；用 `host.refresh()` 重绘工作台设置页。不要调用 `display()`。
+- 新设置放在所属模块的工作台设置页（或「常规」／「外观」）。Obsidian 的设置页（`src/app/settings/entry-tab.ts`，只用声明式的 `getSettingDefinitions()`）只放打开工作台设置的入口按钮。
+- 原生设置入口用自己的 `refresh()`；工作台 React 设置订阅句柄更新。不要调用 Obsidian 设置页的 `display()`。
 - 在设置回调里，`activeDocument` 是设置窗口。要操作主工作区，用 `this.app.workspace.containerEl.ownerDocument`。
 
 ## DOM 与 CSS
 
-- 在父 `HTMLElement` 上用 `createEl` / `createDiv` / `createSpan` / `createSvg` 构建界面。不要用 `document.createElement`。
+- NAND 业务界面用 React。需要手动挂载宿主容器、原生 Markdown 或编辑器适配时，在所属文档的父元素上使用 `createEl` / `createDiv` / `createSpan` / `createSvg`；不要捕获主窗口 document。
 - 样式放在 SKILL.md 身份表所列的唯一样式表里。不要注入 `<style>` 或 `<link>`。能用类名时不要在 TypeScript 里赋大段样式。坐标（评论浮层的 `left` / `top`）是例外。
-- 使用 NAND 令牌和 Obsidian 变量；颜色只存在于 `src/theme/` 和令牌层（`../../ui/references/design-system.md`）。`pnpm run lint:css` 会拒绝基线之外的字面量颜色、`!important`、`:has`、原始 z-index 值和重复选择器。
+- 颜色、层级、Tailwind 隔离与字面量白名单以 [设计系统参考](../../ui/references/design-system.md) 为准。`pnpm run lint:css` 检查作者文件；生成的 Tailwind 与字体样式按构建规则排除。
 - 选择器限定在模块的类名下（`.nand-editor-…`、`.nand-contacts-…`、`.dashboard-…`）。不写裸的 `button { }` 规则。给 Obsidian 自身 DOM 设样式的规则挂在模块激活期间添加的 body 类名下。
 - 直接编辑模块 `styles/` 文件夹下的作者文件，不要在别处追加覆盖。
-- 用 TypeScript 切换类名，而不是去用 `!important` 或 `:has`。
-- 只有图标的按钮需要可访问名称（`aria-label` 或 `setTooltip`）。触屏上的可交互目标至少 44×44px。不要去掉 `:focus-visible` 轮廓。
+- 自有状态用 React 属性或类名表达，作者 CSS 不用 `!important` 或 `:has`；复制的 Tailwind 变体由作用域流水线处理。
+- NAND 的图标按钮需要 `aria-label` 和 Radix Tooltip，原生宿主适配也要有可访问名称。触屏上的可交互目标至少 44×44px。不要去掉 `:focus-visible` 轮廓。
 - 键盘：不是原生 `button` 的可点击控件，也必须支持 Enter / Space。
 
 ## 计时器与 Promise

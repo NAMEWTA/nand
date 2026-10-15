@@ -32,7 +32,7 @@ const shell = async marker => {
 	await c.evaluate('ac.sessions.end(rs.id,true);true'); await until('!rs.running');
 };
 try {
-	runtime = await launchFreshVault({ root, pluginSource, port: 9463, settings: { version: 1, namespaces: { app: { language: 'en', introSeen: true, modules: Object.fromEntries(['home','agent','browser','news','archives','automations','notifications','icons','comments','sync'].map(id=>[id,false])) } } } }); c = runtime.connection;
+	runtime = await launchFreshVault({ root, pluginSource, port: 9463, settings: { version: 1, namespaces: { app: { language: 'en', introSeen: true, modules: Object.fromEntries(['home','agent','browser','archives','automations','notifications','icons','comments','sync'].map(id=>[id,false])) } } } }); c = runtime.connection;
 	for (const file of ['main.js','manifest.json','styles.css']) check('installed-real-asset-' + file, sha(await fs.readFile(path.join(runtime.vault,'.obsidian/plugins/nand',file))) === sha(await fs.readFile(path.join(pluginSource,file))));
 	if (oldHelper) {
 		const legacy = path.join(runtime.vault,'.obsidian/plugins/nand/binaries',asset); await fs.mkdir(path.dirname(legacy),{recursive:true}); await fs.copyFile(oldHelper,legacy);

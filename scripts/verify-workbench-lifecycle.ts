@@ -40,7 +40,7 @@ function fixture(options: { slow?: Promise<void>; fail?: boolean; resourcePages?
    return { surface, getTarget: () => target, navigate: async (next: WorkbenchTarget, navigationSignal: AbortSignal) => { if (navigationSignal.aborted) return; if (next.resourceId === 'missing') throw Error('missing resource'); item.selected.push(next.resourceId ?? next.feature); } } satisfies WorkbenchPageBinding;
   },
  });
- const pages = new WorkbenchPages(owner as never, root, [contribution('dashboard'), contribution('contacts'), contribution('browser'), contribution('notifications')], async (target) => { navigated.push(target); }, (error) => errors.push(error), () => {}, navigation);
+ const pages = new WorkbenchPages(owner as never, root, [contribution('dashboard'), contribution('contacts'), contribution('terminal'), contribution('notifications')], async (target) => { navigated.push(target); }, (error) => errors.push(error), () => {}, navigation);
  const prepare = async (target: WorkbenchTarget, controller = new AbortController()) => pages.prepare(target, controller.signal);
  return { root, navigation, children, instances, errors, navigated, pages, prepare, disable() { enabled = false; } };
 }
@@ -62,7 +62,7 @@ test('repeated resources share a presentation and visibility owns both content a
 
 test('cancelling a new async page removes it immediately and late completion is cleaned exactly once', async () => {
  const slow = deferred(), f = fixture({ slow: slow.promise }), controller = new AbortController();
- const pending = f.prepare({ feature: 'browser', resourceId: 'one' }, controller);
+ const pending = f.prepare({ feature: 'terminal', resourceId: 'one' }, controller);
  await flush(); controller.abort();
  assert.equal(f.pages.getSurfaces().length, 0); assert.equal(f.instances[0]!.signal.aborted, true);
  slow.resolve(); assert.equal(await pending, undefined); await flush();
@@ -72,7 +72,7 @@ test('cancelling a new async page removes it immediately and late completion is 
 
 test('A to B to A while B mounts cannot resurrect B or create another A', async () => {
  const slow = deferred(), f = fixture({ slow: slow.promise }), controller = new AbortController();
- const pending = f.prepare({ feature: 'browser', resourceId: 'one' }, controller); await flush(); controller.abort();
+ const pending = f.prepare({ feature: 'terminal', resourceId: 'one' }, controller); await flush(); controller.abort();
  const current = await f.prepare({ feature: 'contacts' }); f.pages.show(current);
  slow.resolve(); await pending; await flush();
  assert.equal(f.pages.getCurrent(), current!.binding); assert.equal(f.pages.getSurfaces().length, 1);
@@ -102,11 +102,11 @@ test('a missing target on an existing editor preserves its presentation and draf
  assert.deepEqual(f.pages.getState()[0]!.state, { filter: { search: 'draft' } }); await f.pages.dispose();
 });
 
-test('hidden browser guests are not silently evicted by a visibility-only cache rule', async () => {
+test('hidden stateful resource pages are not silently evicted by a visibility-only cache rule', async () => {
  const f = fixture({ resourcePages: true });
- for (let i = 0; i < 6; i++) f.pages.show(await f.prepare({ feature: 'browser', resourceId: String(i) }));
+ for (let i = 0; i < 6; i++) f.pages.show(await f.prepare({ feature: 'terminal', resourceId: String(i) }));
  assert.equal(f.instances.length, 6); assert.equal(f.instances.reduce((sum, item) => sum + item.closed, 0), 0);
- await f.pages.closeResource('browser', '0');
+ await f.pages.closeResource('terminal', '0');
  assert.equal(f.instances[0]!.closed, 1); assert.equal(f.pages.getSurfaces().length, 5); await f.pages.dispose();
 });
 
@@ -119,20 +119,20 @@ test('lightweight notification projections release on hide without stopping othe
 
 test('restoration never coerces an unknown feature into a phantom dashboard page', async () => {
  const f = fixture({ resourcePages: true });
- f.pages.restore([{ target: { feature: 'not-a-feature' }, state: { filter: 'unexpected' } }, { target: { feature: 'browser' }, state: { filter: 'missing id' } }, { target: { feature: 'contacts', resourceId: 'person' }, state: { filter: { search: 'safe', authorization: 'secret', action() {} } } }]);
+ f.pages.restore([{ target: { feature: 'not-a-feature' }, state: { filter: 'unexpected' } }, { target: { feature: 'terminal' }, state: { filter: 'missing id' } }, { target: { feature: 'contacts', resourceId: 'person' }, state: { filter: { search: 'safe', authorization: 'secret', action() {} } } }]);
  assert.deepEqual(f.pages.getState(), [{ target: { feature: 'contacts', resourceId: 'person' }, state: { filter: { search: 'safe' } } }]); await f.pages.dispose();
 });
 
 test('closing the active tab shows its neighbour; closing another page returns to the most recent one', async () => {
  const f = fixture({ resourcePages: true });
  const home = await f.prepare({ feature: 'dashboard', resourceId: 'home' }); f.pages.show(home);
- const one = await f.prepare({ feature: 'browser', resourceId: 'one' }); f.pages.show(one);
- const two = await f.prepare({ feature: 'browser', resourceId: 'two' }); f.pages.show(two);
+ const one = await f.prepare({ feature: 'terminal', resourceId: 'one' }); f.pages.show(one);
+ const two = await f.prepare({ feature: 'terminal', resourceId: 'two' }); f.pages.show(two);
  f.pages.show(home); f.pages.show(two);
- await f.pages.closeResource('browser', 'two');
- assert.deepEqual(f.navigated.at(-1), { feature: 'browser', resourceId: 'one' });
+ await f.pages.closeResource('terminal', 'two');
+ assert.deepEqual(f.navigated.at(-1), { feature: 'terminal', resourceId: 'one' });
  f.pages.show(one); const contacts = await f.prepare({ feature: 'contacts', resourceId: 'c' }); f.pages.show(contacts);
  await f.pages.closeResource('contacts', 'c');
- assert.deepEqual(f.navigated.at(-1), { feature: 'browser', resourceId: 'one' });
+ assert.deepEqual(f.navigated.at(-1), { feature: 'terminal', resourceId: 'one' });
  await f.pages.dispose();
 });

@@ -206,12 +206,12 @@ for (const feature of documentedFeatures) {
 	if (!features.has(feature)) failures.push(`docs/workbench.md: unknown feature ${feature}`);
 }
 if (!workbench.includes('open-workbench') || !sourceText.includes("id: 'open-workbench'")) failures.push('open-workbench command is not documented against source');
-if (!workbench.includes('`records`')) failures.push('docs/workbench.md: records pages must be documented as part of home');
+if (workbench.includes('`records`')) failures.push('docs/workbench.md: removed records feature must not be listed');
 const minAppVersion = JSON.parse(fs.readFileSync(path.join(root, 'manifest.json'), 'utf8')).minAppVersion;
 for (const file of ['docs/settings.md'])
 	if (!fs.readFileSync(path.join(root, file), 'utf8').includes(`Obsidian ${minAppVersion}`)) failures.push(`${file}: minimum Obsidian version must match manifest.json (${minAppVersion})`);
 
-for (const file of ['docs/data.md', 'docs/privacy.md', 'docs/records.md', 'docs/agent-workbench.md']) {
+for (const file of ['docs/data.md', 'docs/privacy.md', 'docs/dashboard.md', 'docs/agent-workbench.md']) {
 	const body = bodies.get(file) ?? '';
 	for (const match of body.matchAll(/\.nand\/[A-Za-z0-9_./<>\-]+/g)) {
 		const prefix = match[0].split('<')[0].replace(/\/+$/g, '');

@@ -1,8 +1,11 @@
+// Layout and interaction adapted from PandoraReads/apex-dashboard ac4d2c7 (MIT), Copyright (c) 2025 PandoraReads: src/lunar-widget.ts
+import { RecordButton as Button } from '../dialogs/RecordButton';
+import { widgetClasses } from '../theme/widget-classes';
 import type { HolidayInfo } from '../../platform/calendar/holiday-service';
 import { getLanguage, t } from '../../../../shared/i18n';
-import { useEffect, useState } from 'preact/hooks';
+import { useEffect, useState } from 'react';
 import { loadLunar, lunarCompute } from './lunar-model';
-import { useWindowClock } from './use-window-clock';
+import { useWindowClock } from './use-record-clock';
 export function LunarPanel({
 	holidays,
 	win,
@@ -15,8 +18,18 @@ export function LunarPanel({
 	const now = useWindowClock(win);
 	const [lunar, setLunar] = useState(lunarCompute);
 	useEffect(() => {
-		if (!lunar) void loadLunar().then(() => setLunar(lunarCompute), () => undefined);
-	}, []);
+		let live = true;
+		if (!lunar)
+			void loadLunar().then(
+				() => {
+					if (live) setLunar(lunarCompute);
+				},
+				() => undefined,
+			);
+		return () => {
+			live = false;
+		};
+	}, [lunar]);
 	if (!lunar) return null;
 	let data;
 	try {
@@ -34,24 +47,34 @@ export function LunarPanel({
 	].filter((item) => item !== null);
 	return (
 		<>
-			<button type="button" class="dashboard-sidebar-lunar-fortune-btn" aria-label={t('fortune.title')} onClick={fortune}>
+			<Button
+				variant="ghost"
+				type="button"
+				className={widgetClasses('dashboard-sidebar-lunar-fortune-btn')}
+				aria-label={t('fortune.title')}
+				onClick={fortune}
+			>
 				🎐
-			</button>
-			<div class="dashboard-sidebar-lunar-header">
-				<div class="dashboard-sidebar-lunar-meta">
-					<span class="dashboard-sidebar-lunar-ganzhi">{t('lunar.year', { value: data.ganZhiYear })}</span>
-					<span class="dashboard-sidebar-lunar-zodiac">{data.zodiac}</span>
-					<span class="dashboard-sidebar-lunar-ganzhi">
+			</Button>
+			<div className={widgetClasses('dashboard-sidebar-lunar-header')}>
+				<div className={widgetClasses('dashboard-sidebar-lunar-meta')}>
+					<span className={widgetClasses('dashboard-sidebar-lunar-ganzhi')}>
+						{t('lunar.year', { value: data.ganZhiYear })}
+					</span>
+					<span className={widgetClasses('dashboard-sidebar-lunar-zodiac')}>{data.zodiac}</span>
+					<span className={widgetClasses('dashboard-sidebar-lunar-ganzhi')}>
 						{t('lunar.monthDay', { month: data.ganZhiMonth, day: data.ganZhiDay })}
 					</span>
-					{data.jieQi && <span class="dashboard-sidebar-lunar-jieqi">{data.jieQi}</span>}
+					{data.jieQi && <span className={widgetClasses('dashboard-sidebar-lunar-jieqi')}>{data.jieQi}</span>}
 				</div>
-				<div class="dashboard-sidebar-lunar-date">
+				<div className={widgetClasses('dashboard-sidebar-lunar-date')}>
 					<span>{data.lunarDate}</span>
 					{badges.map((badge, i) => (
 						<div
 							key={i}
-							class={`dashboard-sidebar-lunar-badge dashboard-sidebar-lunar-badge--${badge.kind} dashboard-sidebar-lunar-badge--inline`}
+							className={widgetClasses(
+								`dashboard-sidebar-lunar-badge dashboard-sidebar-lunar-badge--${badge.kind} dashboard-sidebar-lunar-badge--inline`,
+							)}
 						>
 							{badge.text}
 						</div>
@@ -59,14 +82,18 @@ export function LunarPanel({
 				</div>
 			</div>
 			{zh && (
-				<div class="dashboard-sidebar-lunar-almanac">
+				<div className={widgetClasses('dashboard-sidebar-lunar-almanac')}>
 					{comma < 0 ? (
-						<span class="dashboard-sidebar-lunar-almanac-text">{data.almanac}</span>
+						<span className={widgetClasses('dashboard-sidebar-lunar-almanac-text')}>{data.almanac}</span>
 					) : (
 						<>
-							<span class="dashboard-sidebar-lunar-almanac-text">{data.almanac.slice(0, comma + 1)}</span>
+							<span className={widgetClasses('dashboard-sidebar-lunar-almanac-text')}>
+								{data.almanac.slice(0, comma + 1)}
+							</span>
 							<br />
-							<span class="dashboard-sidebar-lunar-almanac-text">{data.almanac.slice(comma + 1)}</span>
+							<span className={widgetClasses('dashboard-sidebar-lunar-almanac-text')}>
+								{data.almanac.slice(comma + 1)}
+							</span>
 						</>
 					)}
 				</div>

@@ -19,7 +19,7 @@ export interface ExpenseRecord {
 	createdAt: number;
 }
 
-/** In-memory domain snapshot; production persistence uses Markdown documents. */
+/** In-memory domain snapshot; production persistence uses the Apex expense.json schema. */
 export interface ExpenseData {
 	version: 1;
 	/** Append-ordered; never pruned (financial history spans years). */

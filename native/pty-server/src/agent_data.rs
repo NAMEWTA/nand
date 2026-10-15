@@ -38,6 +38,15 @@ struct Session {
     #[serde(default)]
     text: String,
     usage: Usage,
+    // Every file consulted by the parser, including optional companions. Old
+    // index entries without provenance must be rescanned before account reads.
+    #[serde(default)]
+    sources: Vec<HistorySource>,
+}
+#[derive(Clone, Serialize, Deserialize, Debug)]
+struct HistorySource {
+    path: PathBuf,
+    required: bool,
 }
 #[derive(Clone, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -62,9 +71,15 @@ pub(crate) struct Request {
     #[serde(default)]
     offset: usize,
     #[serde(default)]
+    scope: String,
+    #[serde(default)]
     key: String,
 }
-pub(crate) fn execute(operation: &str, request: &Request, cancel: &AtomicBool) -> Result<Value, String> {
+pub(crate) fn execute(
+    operation: &str,
+    request: &Request,
+    cancel: &AtomicBool,
+) -> Result<Value, String> {
     check_cancel(cancel)?;
     let vault = fs::canonicalize(&request.vault).map_err(|e| e.to_string())?;
     // Resolve the vault once, then anchor its relative index path to that same
@@ -100,8 +115,18 @@ pub(crate) fn execute(operation: &str, request: &Request, cancel: &AtomicBool) -
             if !path.exists() {
                 continue;
             }
+            if request.scope == "account" && !account_path(&vault, path) {
+                warnings.push(format!(
+                    "{}: history source outside vault accounts",
+                    root.agent_id
+                ));
+                continue;
+            }
+            if !path.exists() {
+                continue;
+            }
             if root.agent_id == "opencode" && path.extension().is_some_and(|e| e == "db") {
-                match opencode(path, root, &vault, cancel) {
+                match opencode(path, root, &vault, cancel, request.scope == "account") {
                     Ok(rows) => {
                         for row in rows {
                             pending.push((row, "sqlite".to_owned()));
@@ -130,6 +155,14 @@ pub(crate) fn execute(operation: &str, request: &Request, cancel: &AtomicBool) -
                 if !relevant {
                     continue;
                 }
+                let sources = match history_sources(&vault, &path, root, request.scope == "account")
+                {
+                    Ok(sources) => sources,
+                    Err(error) => {
+                        warnings.push(format!("{}: {}", path.display(), error));
+                        continue;
+                    }
+                };
                 let meta = match fs::metadata(&path) {
                     Ok(m) => m,
                     Err(_) => continue,
@@ -140,10 +173,19 @@ pub(crate) fn execute(operation: &str, request: &Request, cancel: &AtomicBool) -
                     .and_then(|v| v.duration_since(UNIX_EPOCH).ok())
                     .map(|v| v.as_millis() as u64)
                     .unwrap_or(0);
-                let mut stamp = format!("{}:{}", modified, meta.len());
+                let mut stamp = format!("sources-v1:{}:{}:{}", request.scope, modified, meta.len());
                 let mut modified = modified;
-                if root.agent_id == "grok" {
-                    if let Ok(chat) = fs::metadata(path.with_file_name("chat_history.jsonl")) {
+                let companions = if sources.is_empty() && root.agent_id == "grok" {
+                    vec![path.with_file_name("chat_history.jsonl")]
+                } else {
+                    sources
+                        .iter()
+                        .skip(1)
+                        .map(|source| source.path.clone())
+                        .collect()
+                };
+                for companion in companions {
+                    if let Ok(chat) = fs::metadata(companion) {
                         let at = chat
                             .modified()
                             .ok()
@@ -165,7 +207,14 @@ pub(crate) fn execute(operation: &str, request: &Request, cancel: &AtomicBool) -
                 if cached {
                     continue;
                 }
-                match parse(&path, root, &vault, modified, cancel) {
+                match parse(
+                    &path,
+                    root,
+                    &vault,
+                    modified,
+                    cancel,
+                    request.scope == "account",
+                ) {
                     Ok(Some(session)) => {
                         pending.push((session, stamp));
                         flush_if_ready(&mut db, &mut pending, cancel)?;
@@ -188,7 +237,7 @@ pub(crate) fn execute(operation: &str, request: &Request, cancel: &AtomicBool) -
             .map_err(|e| e.to_string())?;
         let mut session: Session = serde_json::from_str(&raw).map_err(|e| e.to_string())?;
         session.text = text;
-        if !inside(&vault, &session.cwd) {
+        if !session_allowed(&vault, &session, &request.scope) {
             return Err("session outside vault".into());
         }
         return Ok(json!(session));
@@ -202,7 +251,9 @@ pub(crate) fn execute(operation: &str, request: &Request, cancel: &AtomicBool) -
 /// History is private vault metadata. Tighten only NAND-owned paths and never
 /// follow a symlink while doing so.
 fn secure_private_path(vault: &Path, parent: &Path, index: &Path) -> Result<(), String> {
-    let relative = parent.strip_prefix(vault).map_err(|_| "index outside vault")?;
+    let relative = parent
+        .strip_prefix(vault)
+        .map_err(|_| "index outside vault")?;
     let mut current = vault.to_path_buf();
     let mut directories = Vec::new();
     // Validate before creating anything, even when a link targets a normal folder in this vault.
@@ -212,13 +263,17 @@ fn secure_private_path(vault: &Path, parent: &Path, index: &Path) -> Result<(), 
         directories.push(current.clone());
     }
     for suffix in ["", "-wal", "-shm", "-journal"] {
-        reject_private_link(&PathBuf::from(format!("{}{}", index.display(), suffix)), false)?;
+        reject_private_link(
+            &PathBuf::from(format!("{}{}", index.display(), suffix)),
+            false,
+        )?;
     }
     for directory in directories {
         let builder = fs::DirBuilder::new();
         #[cfg(unix)]
         let mut builder = builder;
-        #[cfg(unix)] {
+        #[cfg(unix)]
+        {
             use std::os::unix::fs::DirBuilderExt;
             builder.mode(0o700);
         }
@@ -233,7 +288,8 @@ fn secure_private_path(vault: &Path, parent: &Path, index: &Path) -> Result<(), 
     // SQLite derives new sidecar modes from the DB. Create the DB privately first.
     let mut options = fs::OpenOptions::new();
     options.write(true).create_new(true);
-    #[cfg(unix)] {
+    #[cfg(unix)]
+    {
         use std::os::unix::fs::OpenOptionsExt;
         options.mode(0o600).custom_flags(libc::O_NOFOLLOW);
     }
@@ -251,7 +307,12 @@ fn reject_private_link(path: &Path, directory: bool) -> Result<(), String> {
     match fs::symlink_metadata(path) {
         Ok(metadata) => {
             if metadata.file_type().is_symlink() {
-                return Err(if directory { "symlinked history directory" } else { "symlinked index" }.into());
+                return Err(if directory {
+                    "symlinked history directory"
+                } else {
+                    "symlinked index"
+                }
+                .into());
             }
             if (directory && !metadata.is_dir()) || (!directory && !metadata.is_file()) {
                 return Err("invalid private history path".into());
@@ -264,15 +325,24 @@ fn reject_private_link(path: &Path, directory: bool) -> Result<(), String> {
 }
 
 fn tighten_private_mode(path: &Path, bits: u32) {
-    #[cfg(unix)] {
+    #[cfg(unix)]
+    {
         use std::os::unix::fs::PermissionsExt;
-        if fs::symlink_metadata(path).ok().is_some_and(|meta| meta.file_type().is_symlink()) { return; }
+        if fs::symlink_metadata(path)
+            .ok()
+            .is_some_and(|meta| meta.file_type().is_symlink())
+        {
+            return;
+        }
         if let Err(error) = fs::set_permissions(path, fs::Permissions::from_mode(bits)) {
             // Category and OS code only; history paths may contain identifying data.
             eprintln!("NAND history permissions: {:?}", error.kind());
         }
     }
-    #[cfg(not(unix))] { let _ = (path, bits); }
+    #[cfg(not(unix))]
+    {
+        let _ = (path, bits);
+    }
 }
 
 /// Tighten modes after SQLite has created the index and its sidecars.
@@ -282,7 +352,9 @@ fn tighten_private_modes(parent: &Path, index: &Path) {
     tighten_private_mode(index, 0o600);
     for suffix in ["-wal", "-shm", "-journal"] {
         let sidecar = PathBuf::from(format!("{}{}", index.display(), suffix));
-        if sidecar.exists() { tighten_private_mode(&sidecar, 0o600); }
+        if sidecar.exists() {
+            tighten_private_mode(&sidecar, 0o600);
+        }
     }
 }
 fn save(db: &Connection, row: &Session, stamp: &str) -> rusqlite::Result<usize> {
@@ -419,21 +491,23 @@ fn query(
 ) -> Result<Value, String> {
     check_cancel(cancel)?;
     let tx = db.transaction().map_err(|e| e.to_string())?;
-    // Revalidate each distinct directory, rather than each transcript. This
-    // keeps symlink/moved-directory scope enforcement without N filesystem IOs.
+    // Vault queries retain the real-directory check. Account queries validate
+    // each source path instead, and never trust an old index row outside .nand/agents.
     let mut allowed = Vec::new();
     {
         let mut stmt = tx
-            .prepare("SELECT DISTINCT cwd FROM history")
+            .prepare("SELECT key,summary FROM history")
             .map_err(|e| e.to_string())?;
         for cwd in stmt
-            .query_map([], |r| r.get::<_, String>(0))
+            .query_map([], |r| Ok((r.get::<_, String>(0)?, r.get::<_, String>(1)?)))
             .map_err(|e| e.to_string())?
         {
             check_cancel(cancel)?;
-            let cwd = cwd.map_err(|e| e.to_string())?;
-            if inside(vault, &cwd) {
-                allowed.push(cwd);
+            let (key, summary) = cwd.map_err(|e| e.to_string())?;
+            if serde_json::from_str::<Session>(&summary)
+                .is_ok_and(|session| session_allowed(vault, &session, &request.scope))
+            {
+                allowed.push(key);
             }
         }
     }
@@ -456,7 +530,7 @@ fn query(
     let allowed = serde_json::to_string(&allowed).unwrap();
     let archived = serde_json::to_string(&archived).unwrap();
     let favorites = serde_json::to_string(&favorites).unwrap();
-    let predicate = "FROM history WHERE cwd IN (SELECT value FROM json_each(?3)) AND (?1='' OR instr(body,?1)>0 OR key IN (SELECT value FROM json_each(?2))) AND (CASE ?4 WHEN 'active' THEN key NOT IN (SELECT value FROM json_each(?5)) WHEN 'archived' THEN key IN (SELECT value FROM json_each(?5)) WHEN 'favorite' THEN key IN (SELECT value FROM json_each(?6)) ELSE 1 END)";
+    let predicate = "FROM history WHERE key IN (SELECT value FROM json_each(?3)) AND (?1='' OR instr(body,?1)>0 OR key IN (SELECT value FROM json_each(?2))) AND (CASE ?4 WHEN 'active' THEN key NOT IN (SELECT value FROM json_each(?5)) WHEN 'archived' THEN key IN (SELECT value FROM json_each(?5)) WHEN 'favorite' THEN key IN (SELECT value FROM json_each(?6)) ELSE 1 END)";
     let bind = params![
         pattern,
         matching,
@@ -495,6 +569,125 @@ fn query(
         );
     }
     Ok(json!({"rows":page,"total":total,"usage":usage,"revision":revision(&tx)?}))
+}
+// Account history never traverses host-global homes or symlinks. The working directory
+// can be outside the vault only when the source itself belongs to its managed accounts.
+fn account_path(vault: &Path, source: &Path) -> bool {
+    account_source_path(vault, source, true)
+}
+fn account_source_path(vault: &Path, source: &Path, required: bool) -> bool {
+    // Node supplies ordinary Windows paths; Rust canonicalize returns verbatim
+    // paths. Strip only that representation difference before checking each
+    // account component, without canonicalizing away a forbidden symlink.
+    #[cfg(windows)]
+    let ordinary_vault = PathBuf::from(ordinary_windows_path(&vault.to_string_lossy()));
+    let relative = source.strip_prefix(vault);
+    #[cfg(windows)]
+    let relative = relative.or_else(|_| source.strip_prefix(&ordinary_vault));
+    let Ok(relative) = relative else {
+        return false;
+    };
+    if !relative.starts_with(".nand/agents")
+        || relative
+            .components()
+            .any(|component| !matches!(component, std::path::Component::Normal(_)))
+    {
+        return false;
+    }
+    let mut current = vault.to_path_buf();
+    for component in relative.components() {
+        current.push(component);
+        let meta = match fs::symlink_metadata(&current) {
+            Ok(meta) => meta,
+            Err(error) => return !required && error.kind() == std::io::ErrorKind::NotFound,
+        };
+        if meta.file_type().is_symlink() {
+            return false;
+        }
+    }
+    true
+}
+fn account_session(vault: &Path, session: &Session) -> bool {
+    session
+        .sources
+        .first()
+        .is_some_and(|source| source.required && source.path == Path::new(&session.transcript_path))
+        && session
+            .sources
+            .iter()
+            .all(|source| account_source_file(vault, source))
+}
+fn account_source_file(vault: &Path, source: &HistorySource) -> bool {
+    account_source_path(vault, &source.path, source.required)
+        && match fs::symlink_metadata(&source.path) {
+            Ok(meta) => meta.is_file(),
+            Err(error) => !source.required && error.kind() == std::io::ErrorKind::NotFound,
+        }
+}
+fn session_allowed(vault: &Path, session: &Session, scope: &str) -> bool {
+    let managed = managed_source(vault, Path::new(&session.transcript_path));
+    (scope != "account" && !managed || account_session(vault, session))
+        && (scope == "account" || inside(vault, &session.cwd))
+}
+fn managed_source(vault: &Path, source: &Path) -> bool {
+    #[cfg(windows)]
+    let vault = PathBuf::from(ordinary_windows_path(&vault.to_string_lossy()));
+    #[cfg(windows)]
+    let source = PathBuf::from(ordinary_windows_path(&source.to_string_lossy()));
+    source.starts_with(vault.join(".nand/agents"))
+}
+fn history_sources(
+    vault: &Path,
+    path: &Path,
+    root: &Root,
+    account: bool,
+) -> Result<Vec<HistorySource>, String> {
+    if !account && !managed_source(vault, path) {
+        return Ok(Vec::new());
+    }
+    let mut paths = vec![path.to_path_buf()];
+    match root.agent_id.as_str() {
+        "grok" => paths.push(path.with_file_name("chat_history.jsonl")),
+        "gemini" => {
+            if let Some(project) = path.parent().and_then(Path::parent) {
+                paths.push(project.join(".project_root"));
+            }
+            if let Some(home) = Path::new(&root.path).parent() {
+                paths.push(home.join("projects.json"));
+            }
+        }
+        "opencode" => {
+            for suffix in ["-wal", "-shm", "-journal"] {
+                let mut sidecar = path.as_os_str().to_os_string();
+                sidecar.push(suffix);
+                paths.push(PathBuf::from(sidecar));
+            }
+        }
+        _ => {}
+    }
+    paths
+        .into_iter()
+        .enumerate()
+        .map(|(index, path)| {
+            let required = index == 0 || fs::symlink_metadata(&path).is_ok();
+            let source = HistorySource { path, required };
+            if !account_source_file(vault, &source) {
+                return Err(format!(
+                    "history source outside vault accounts: {}",
+                    source.path.display()
+                ));
+            }
+            Ok(source)
+        })
+        .collect()
+}
+#[cfg(any(windows, test))]
+fn ordinary_windows_path(path: &str) -> String {
+    if let Some(rest) = path.strip_prefix(r"\\?\UNC\") {
+        format!(r"\\{}", rest)
+    } else {
+        path.strip_prefix(r"\\?\").unwrap_or(path).to_owned()
+    }
 }
 fn inside(vault: &Path, cwd: &str) -> bool {
     !cwd.is_empty() && fs::canonicalize(cwd).is_ok_and(|p| p.starts_with(vault))
@@ -698,12 +891,14 @@ fn parse(
     vault: &Path,
     modified: u64,
     cancel: &AtomicBool,
+    include_outside: bool,
 ) -> Result<Option<Session>, String> {
     let mut session = Session {
         agent_id: root.agent_id.clone(),
         account_key: root.account_key.clone(),
         transcript_path: path.to_string_lossy().into(),
         modified_at_ms: modified,
+        sources: history_sources(vault, path, root, include_outside)?,
         ..Default::default()
     };
     let mut seen = HashMap::new();
@@ -714,7 +909,7 @@ fn parse(
         let data: Value = serde_json::from_reader(File::open(path).map_err(|e| e.to_string())?)
             .map_err(|e| e.to_string())?;
         session.cwd = string(&data["info"], "cwd");
-        if !inside(vault, &session.cwd) {
+        if !include_outside && !inside(vault, &session.cwd) {
             return Ok(None);
         }
         session.session_id = string(&data["info"], "id");
@@ -739,14 +934,6 @@ fn parse(
         if data["cwd"].is_string() {
             session.cwd = string(&data, "cwd");
         }
-        if session.cwd.is_empty() {
-            if let Some(project) = path.parent().and_then(Path::parent) {
-                session.cwd = fs::read_to_string(project.join(".project_root"))
-                    .unwrap_or_default()
-                    .trim()
-                    .to_string();
-            }
-        }
         if let Some(messages) = data["messages"].as_array() {
             for msg in messages {
                 consume_gemini(&mut session, msg);
@@ -769,13 +956,13 @@ fn parse(
                 } else {
                     consume(&mut session, &row, &mut seen);
                 }
-                if !session.cwd.is_empty() && !inside(vault, &session.cwd) {
+                if !include_outside && !session.cwd.is_empty() && !inside(vault, &session.cwd) {
                     return Ok(None);
                 }
             }
         }
     }
-    if session.session_id.is_empty() || !inside(vault, &session.cwd) {
+    if session.session_id.is_empty() || (!include_outside && !inside(vault, &session.cwd)) {
         return Ok(None);
     }
     if session.title.is_empty() {
@@ -791,7 +978,9 @@ fn opencode(
     root: &Root,
     vault: &Path,
     cancel: &AtomicBool,
+    include_outside: bool,
 ) -> Result<Vec<Session>, String> {
+    let sources = history_sources(vault, path, root, include_outside)?;
     let db = Connection::open_with_flags(
         path,
         OpenFlags::SQLITE_OPEN_READ_ONLY | OpenFlags::SQLITE_OPEN_NO_MUTEX,
@@ -820,7 +1009,7 @@ fn opencode(
             return Err("cancelled".into());
         }
         let (id, cwd, title, modified) = row.map_err(|e| e.to_string())?;
-        if !inside(vault, &cwd) {
+        if !include_outside && !inside(vault, &cwd) {
             continue;
         }
         let mut s = Session {
@@ -832,6 +1021,7 @@ fn opencode(
             title,
             modified_at_ms: modified,
             transcript_path: path.to_string_lossy().into(),
+            sources: sources.clone(),
             ..Default::default()
         };
         let mut messages = db
@@ -904,6 +1094,7 @@ mod tests {
             metadata: HashMap::new(),
             filter: String::new(),
             offset: 0,
+            scope: String::new(),
             key: String::new(),
         }
     }
@@ -1033,7 +1224,7 @@ mod tests {
         };
         let file = temp.0.join("pi.jsonl");
         fs::write(&file,format!("{}\n{}\n",json!({"type":"session","id":"same","cwd":temp.0}),json!({"type":"message","message":{"role":"user","content":[{"type":"text","text":"hello"}]}}))).unwrap();
-        let row = parse(&file, &root, &temp.0, 0, &AtomicBool::new(false))
+        let row = parse(&file, &root, &temp.0, 0, &AtomicBool::new(false), false)
             .unwrap()
             .unwrap();
         assert_eq!(row.title, "hello");
@@ -1047,6 +1238,7 @@ mod tests {
             &temp.0,
             0,
             &AtomicBool::new(false),
+            false,
         )
         .unwrap()
         .unwrap();
@@ -1093,6 +1285,7 @@ mod tests {
             },
             &temp.0,
             &AtomicBool::new(false),
+            false,
         )
         .unwrap();
         assert_eq!(rows.len(), 1);
@@ -1219,10 +1412,19 @@ mod tests {
             fs::create_dir_all(link.parent().unwrap()).unwrap();
             symlink(&notes, &link).unwrap();
             let mut req = request(&temp.0, vec![]);
-            req.index = link.join("new/device/index.sqlite").to_string_lossy().into();
-            assert_eq!(execute("scan", &req, &cancel).unwrap_err(), "symlinked history directory");
+            req.index = link
+                .join("new/device/index.sqlite")
+                .to_string_lossy()
+                .into();
+            assert_eq!(
+                execute("scan", &req, &cancel).unwrap_err(),
+                "symlinked history directory"
+            );
             assert!(!notes.join("new").exists());
-            assert_eq!(fs::metadata(&notes).unwrap().permissions().mode() & 0o777, 0o755);
+            assert_eq!(
+                fs::metadata(&notes).unwrap().permissions().mode() & 0o777,
+                0o755
+            );
         }
         for suffix in ["-wal", "-shm", "-journal"] {
             for dangling in [false, true] {
@@ -1235,13 +1437,22 @@ mod tests {
                     fs::set_permissions(&secret, fs::Permissions::from_mode(0o644)).unwrap();
                 }
                 let sidecar = PathBuf::from(format!("{}{}", req.index, suffix));
-                if sidecar.exists() { fs::remove_file(&sidecar).unwrap(); }
+                if sidecar.exists() {
+                    fs::remove_file(&sidecar).unwrap();
+                }
                 symlink(&secret, &sidecar).unwrap();
-                assert_eq!(execute("scan", &req, &cancel).unwrap_err(), "symlinked index");
-                if dangling { assert!(!secret.exists()); }
-                else {
+                assert_eq!(
+                    execute("scan", &req, &cancel).unwrap_err(),
+                    "symlinked index"
+                );
+                if dangling {
+                    assert!(!secret.exists());
+                } else {
                     assert_eq!(fs::read(&secret).unwrap(), b"keep");
-                    assert_eq!(fs::metadata(&secret).unwrap().permissions().mode() & 0o777, 0o644);
+                    assert_eq!(
+                        fs::metadata(&secret).unwrap().permissions().mode() & 0o777,
+                        0o644
+                    );
                 }
             }
         }
@@ -1280,7 +1491,12 @@ mod tests {
         assert!(fs::symlink_metadata(&shm).unwrap().file_type().is_symlink());
         assert_eq!(fs::read(&secret).unwrap(), b"keep");
         assert_eq!(mode(&secret), before);
-        println!("posix dir={:03o} file={:03o} wal={:03o}", mode(&nand), mode(&index), mode(&wal));
+        println!(
+            "posix dir={:03o} file={:03o} wal={:03o}",
+            mode(&nand),
+            mode(&index),
+            mode(&wal)
+        );
     }
     #[test]
     fn new_index_gets_the_current_schema_and_a_newer_index_is_refused() {
@@ -1387,5 +1603,266 @@ mod tests {
             execute("query", &req, &AtomicBool::new(true)).unwrap_err(),
             "cancelled"
         );
+    }
+    #[test]
+    fn account_scope_includes_external_cwd_but_never_global_or_symlinked_sources() {
+        let vault = Temp::new();
+        let outside = Temp::new();
+        let source = vault
+            .0
+            .join(".nand/agents/test/accounts/claude-code/default/home/.claude/projects/test");
+        fs::create_dir_all(&source).unwrap();
+        let transcript = |id: &str, cwd: &Path| {
+            format!(
+                "{}\n",
+                json!({"type":"user","sessionId":id,"cwd":cwd,"message":{"role":"user","content":"Full prompt"}})
+            )
+        };
+        fs::write(source.join("inside.jsonl"), transcript("inside", &vault.0)).unwrap();
+        fs::write(
+            source.join("outside.jsonl"),
+            transcript("outside", &outside.0),
+        )
+        .unwrap();
+        fs::write(
+            outside.0.join("global.jsonl"),
+            transcript("global", &outside.0),
+        )
+        .unwrap();
+        #[cfg(unix)]
+        std::os::unix::fs::symlink(outside.0.join("global.jsonl"), source.join("linked.jsonl"))
+            .unwrap();
+        let mut req = request(
+            &vault.0,
+            vec![
+                Root {
+                    agent_id: "claude-code".into(),
+                    path: source.to_string_lossy().into(),
+                    account_key: "account".into(),
+                },
+                Root {
+                    agent_id: "claude-code".into(),
+                    path: outside.0.to_string_lossy().into(),
+                    account_key: "global".into(),
+                },
+            ],
+        );
+        req.scope = "account".into();
+        let cancel = AtomicBool::new(false);
+        let scan = execute("scan", &req, &cancel).unwrap();
+        assert_eq!(scan["warnings"].as_array().unwrap().len(), 1);
+        let all = execute("query", &req, &cancel).unwrap();
+        assert_eq!(all["total"], 2);
+        req.key = all["rows"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .find(|r| r["sessionId"] == "outside")
+            .unwrap()["key"]
+            .as_str()
+            .unwrap()
+            .into();
+        assert!(execute("read", &req, &cancel).unwrap()["text"]
+            .as_str()
+            .unwrap()
+            .contains("Full prompt"));
+        req.scope.clear();
+        assert_eq!(execute("query", &req, &cancel).unwrap()["total"], 1);
+        assert_eq!(
+            execute("read", &req, &cancel).unwrap_err(),
+            "session outside vault"
+        );
+        req.scope = "account".into();
+        fs::remove_file(source.join("outside.jsonl")).unwrap();
+        assert_eq!(execute("query", &req, &cancel).unwrap()["total"], 1);
+        assert!(execute("read", &req, &cancel).is_err());
+    }
+    #[test]
+    fn account_scope_accepts_node_windows_path_spellings() {
+        assert_eq!(ordinary_windows_path(r"\\?\C:\vault"), r"C:\vault");
+        assert_eq!(
+            ordinary_windows_path(r"\\?\UNC\host\share\vault"),
+            r"\\host\share\vault"
+        );
+        assert_eq!(ordinary_windows_path(r"C:\vault"), r"C:\vault");
+    }
+
+    #[test]
+    #[cfg(unix)]
+    fn grok_companion_cannot_escape_or_survive_in_cached_account_reads() {
+        use std::os::unix::fs::symlink;
+        let vault = Temp::new();
+        let outside = Temp::new();
+        let source = vault
+            .0
+            .join(".nand/agents/test/accounts/grok/default/home/.grok/sessions/test");
+        fs::create_dir_all(&source).unwrap();
+        fs::write(
+            source.join("session.json"),
+            json!({"info":{"id":"grok-one","cwd":outside.0}}).to_string(),
+        )
+        .unwrap();
+        let global = outside.0.join("global-chat.jsonl");
+        fs::write(
+            &global,
+            json!({"type":"user","content":"GLOBAL_SECRET"}).to_string(),
+        )
+        .unwrap();
+        let chat = source.join("chat_history.jsonl");
+        symlink(&global, &chat).unwrap();
+        let mut req = request(
+            &vault.0,
+            vec![Root {
+                agent_id: "grok".into(),
+                path: source.to_string_lossy().into(),
+                account_key: "local".into(),
+            }],
+        );
+        req.scope = "account".into();
+        let cancel = AtomicBool::new(false);
+        assert!(!execute("scan", &req, &cancel).unwrap()["warnings"]
+            .as_array()
+            .unwrap()
+            .is_empty());
+        assert_eq!(execute("query", &req, &cancel).unwrap()["total"], 0);
+        let db = Connection::open(&req.index).unwrap();
+        assert_eq!(
+            db.query_row("SELECT count(*) FROM history", [], |r| r.get::<_, u64>(0))
+                .unwrap(),
+            0
+        );
+
+        fs::remove_file(&chat).unwrap();
+        fs::write(
+            &chat,
+            json!({"type":"user","content":"Local account conversation"}).to_string(),
+        )
+        .unwrap();
+        assert!(execute("scan", &req, &cancel).unwrap()["warnings"]
+            .as_array()
+            .unwrap()
+            .is_empty());
+        let page = execute("query", &req, &cancel).unwrap();
+        assert_eq!(page["total"], 1);
+        req.key = page["rows"][0]["key"].as_str().unwrap().into();
+        let session = execute("read", &req, &cancel).unwrap();
+        assert!(session["text"]
+            .as_str()
+            .unwrap()
+            .contains("Local account conversation"));
+        assert!(!session["text"].as_str().unwrap().contains("GLOBAL_SECRET"));
+        req.scope = "vault".into();
+        assert_eq!(execute("query", &req, &cancel).unwrap()["total"], 0);
+        assert!(execute("read", &req, &cancel).is_err());
+        req.scope = "account".into();
+
+        // Without rescanning, replacement/removal of a file that contributed to
+        // the cache invalidates both listing and transcript reads.
+        fs::remove_file(&chat).unwrap();
+        assert_eq!(execute("query", &req, &cancel).unwrap()["total"], 0);
+        assert!(execute("read", &req, &cancel).is_err());
+        fs::create_dir(&chat).unwrap();
+        assert_eq!(execute("query", &req, &cancel).unwrap()["total"], 0);
+        assert!(execute("read", &req, &cancel).is_err());
+        fs::remove_dir(&chat).unwrap();
+        symlink(&global, &chat).unwrap();
+        assert_eq!(execute("query", &req, &cancel).unwrap()["total"], 0);
+        assert!(execute("read", &req, &cancel).is_err());
+        assert!(!execute("scan", &req, &cancel).unwrap()["warnings"]
+            .as_array()
+            .unwrap()
+            .is_empty());
+        fs::remove_file(&chat).unwrap();
+        fs::write(
+            &chat,
+            json!({"type":"user","content":"Local account conversation"}).to_string(),
+        )
+        .unwrap();
+
+        // Legacy cache rows do not acquire trust just because their primary
+        // file is valid; a scan must populate all source provenance first.
+        db.execute(
+            "UPDATE history SET summary=json_remove(summary,'$.sources'),stamp='old'",
+            [],
+        )
+        .unwrap();
+        assert_eq!(execute("query", &req, &cancel).unwrap()["total"], 0);
+        assert!(execute("read", &req, &cancel).is_err());
+        execute("scan", &req, &cancel).unwrap();
+        assert_eq!(execute("query", &req, &cancel).unwrap()["total"], 1);
+
+        let moved = outside.0.join("moved-session");
+        fs::rename(&source, &moved).unwrap();
+        symlink(&moved, &source).unwrap();
+        assert_eq!(execute("query", &req, &cancel).unwrap()["total"], 0);
+        assert!(execute("read", &req, &cancel).is_err());
+        assert!(
+            history_sources(&vault.0, &source.join("session.json"), &req.roots[0], true).is_err()
+        );
+    }
+
+    #[test]
+    #[cfg(unix)]
+    fn every_provider_checks_primary_child_and_auxiliary_account_paths() {
+        use std::os::unix::fs::symlink;
+        let vault = Temp::new();
+        let outside = Temp::new();
+        let global = outside.0.join("global");
+        fs::write(&global, "GLOBAL_SECRET").unwrap();
+        let cancel = AtomicBool::new(false);
+        for agent in ["claude-code", "codex", "pi", "grok", "gemini", "opencode"] {
+            let home = vault
+                .0
+                .join(format!(".nand/agents/test/accounts/{agent}/default/home"));
+            let root_path = if agent == "gemini" {
+                home.join("tmp")
+            } else {
+                home.clone()
+            };
+            let source = match agent {
+                "grok" => home.join("sessions/child/session.json"),
+                "gemini" => root_path.join("project/chats/session.jsonl"),
+                "opencode" => home.join("opencode.db"),
+                _ => home.join("sessions/child/session.jsonl"),
+            };
+            fs::create_dir_all(source.parent().unwrap()).unwrap();
+            fs::write(&source, "{}").unwrap();
+            let root = Root {
+                agent_id: agent.into(),
+                path: if agent == "opencode" {
+                    source.to_string_lossy().into()
+                } else {
+                    root_path.to_string_lossy().into()
+                },
+                account_key: "local".into(),
+            };
+            let sources = history_sources(&vault.0, &source, &root, true).unwrap();
+            for dependency in &sources {
+                if dependency.path.exists() {
+                    fs::remove_file(&dependency.path).unwrap();
+                }
+                symlink(&global, &dependency.path).unwrap();
+                assert!(
+                    history_sources(&vault.0, &source, &root, true).is_err(),
+                    "{agent}: {}",
+                    dependency.path.display()
+                );
+                // The parser/SQLite reader rejects the dependency before opening it.
+                if agent == "opencode" {
+                    assert!(opencode(&source, &root, &vault.0, &cancel, true)
+                        .unwrap_err()
+                        .contains("outside vault accounts"));
+                } else {
+                    assert!(parse(&source, &root, &vault.0, 0, &cancel, true)
+                        .unwrap_err()
+                        .contains("outside vault accounts"));
+                }
+                fs::remove_file(&dependency.path).unwrap();
+                if dependency.required {
+                    fs::write(&dependency.path, "{}").unwrap();
+                }
+            }
+            assert_eq!(fs::read_to_string(&global).unwrap(), "GLOBAL_SECRET");
+        }
     }
 }

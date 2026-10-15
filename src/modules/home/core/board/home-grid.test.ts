@@ -1,7 +1,4 @@
 import assert from 'node:assert/strict';
-import { readFileSync } from 'node:fs';
-import path from 'node:path';
-import { fileURLToPath } from 'node:url';
 import { describe, test } from 'vitest';
 import { lunarAnniversaryThisYear } from '../anniversaries/lunar-map';
 import {
@@ -246,13 +243,13 @@ describe('home grid and board rules', () => {
 				},
 			},
 			{
-				module: 'news',
+				module: 'automations',
 				bundle: {
 					kinds: [
 						{
 							key: 'calendar',
-							titleKey: 'news.widget.raw',
-							icon: 'newspaper',
+							titleKey: 'automations.widget.raw',
+							icon: 'automationspaper',
 							defaultSize: { w: 4, h: 4 },
 							minSize: { w: 2, h: 2 },
 							instances: () => [{ id: 'default' }],
@@ -264,11 +261,11 @@ describe('home grid and board rules', () => {
 		]);
 		assert.equal(index.byKey.get(widgetProviderKey('home', 'calendar'))?.module, 'home');
 		assert.equal(index.errors.length, 0);
-		assert.equal(index.byKey.get(widgetProviderKey('news', 'calendar'))?.module, 'news');
+		assert.equal(index.byKey.get(widgetProviderKey('automations', 'calendar'))?.module, 'automations');
 		const members = normalizeMembers(
 			[
-				{ memberId: 'm1', kind: 'calendar', provider: 'news' },
-				{ memberId: 'm1', kind: 'calendar', provider: 'news' },
+				{ memberId: 'm1', kind: 'calendar', provider: 'automations' },
+				{ memberId: 'm1', kind: 'calendar', provider: 'automations' },
 			],
 		);
 		assert.equal(members.length, 1);
@@ -276,26 +273,6 @@ describe('home grid and board rules', () => {
 		const removed = removeBoardMember(members, { shared: { title: 'keep' } }, 'm1');
 		assert.deepEqual(removed.members, []);
 		assert.deepEqual(removed.instances, { shared: { title: 'keep' } });
-	});
-
-	test('the narrow desktop home stylesheet keeps the quick note at content height', () => {
-		const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../../../..');
-		const quick = readFileSync(
-			path.join(root, 'src/modules/home/styles/087-quick-notes-region-single-line-accent-navbar-mas.css'),
-			'utf8',
-		);
-		assert.match(quick, /\.dashboard-main > \.dashboard-quicknote \{[^}]*flex:\s*0 0 auto/s);
-		// Banner clearance is measured in the real host by home-quicknote.mjs;
-		// a fixed padding assertion missed both wrapping and the <=640 override.
-		const icons = readFileSync(
-			path.join(root, 'src/ui/styles/111-nand-surface-polish-host-theme-outside-the-board.css'),
-			'utf8',
-		);
-		assert.match(icons, /\.nand-settings-page \.nand-home-module-icon/);
-		const immersive = readFileSync(path.join(root, 'src/modules/home/styles/071b-immersive-grid.css'), 'utf8');
-		assert.doesNotMatch(immersive, /transition|animation/);
-		// home-integration.mjs checks computed reduced-motion styles in Obsidian.
-		// A literal CSS assertion passed while more-specific widget rules still animated.
 	});
 
 	test('a pointer on the scrollport edge steps, and the middle or a blocked side does not', () => {

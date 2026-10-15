@@ -25,7 +25,7 @@ try {
   '.nand/content/Old/image(1).svg':'<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14"><rect width="14" height="14" fill="red"/></svg>',
   'Native.md':'[[Old/Note|native link]]\n\n'+code,
   'Archive/Done.md':'Personal archive',
- },settings:{version:1,namespaces:{app:{language:'zh',introSeen:true,modules:Object.fromEntries(['home','agent','browser','news','archives','automations','notifications','icons','comments','sync'].map(id=>[id,false]))}}}});c=runtime.connection;
+ },settings:{version:1,namespaces:{app:{language:'zh',introSeen:true,modules:Object.fromEntries(['home','agent','browser','archives','automations','notifications','icons','comments','sync'].map(id=>[id,false]))}}}});c=runtime.connection;
  await c.evaluate(`(async()=>{window.nativeLeaf=app.workspace.getLeaf('tab');await nativeLeaf.openFile(app.vault.getFileByPath('Native.md'),{state:{mode:'source'}})})()`);
  await until(`window.nativeLeaf?.view.editor.getValue().includes('[[Old/Note|native link]]')`);
  await c.evaluate(`${p}.managedContent.rename(${p}.managedContent.getFileByPath('.nand/content/Old/Note.md'),'.nand/content/New/Note.md')`);

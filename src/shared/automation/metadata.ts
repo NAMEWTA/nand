@@ -23,6 +23,12 @@ export function isDefinition(value: unknown): value is AutomationDefinition {
 		Number.isFinite(d.updatedAt)
 	))
 		return false;
+	if (d.templateId !== undefined && typeof d.templateId !== 'string') return false;
+	if (
+		d.precheck !== undefined &&
+		(!d.precheck || typeof d.precheck.command !== 'string' || !['powershell', 'bash'].includes(d.precheck.shell))
+	)
+		return false;
 	const schedule = d.schedule;
 	if (!(
 		schedule.kind === 'manual' ||
@@ -31,10 +37,20 @@ export function isDefinition(value: unknown): value is AutomationDefinition {
 	))
 		return false;
 	const action = d.action;
-	if (action.kind === 'browser-workflow') return isBrowserWorkflowAction(action);
-	if (action.kind === 'script') return typeof action.script === 'string' && typeof action.cwd === 'string' && ['powershell', 'bash'].includes(action.shell);
+	if (action.kind === 'script')
+		return (
+			typeof action.script === 'string' &&
+			typeof action.cwd === 'string' &&
+			['powershell', 'bash'].includes(action.shell)
+		);
 	if (action.kind === 'open-file') return typeof action.path === 'string' && !!action.path;
-	if (action.kind === 'open-url') { try { return ['http:', 'https:'].includes(new URL(action.url).protocol); } catch { return false; } }
+	if (action.kind === 'open-url') {
+		try {
+			return ['http:', 'https:'].includes(new URL(action.url).protocol);
+		} catch {
+			return false;
+		}
+	}
 	if (action.kind === 'obsidian-command') return typeof action.command === 'string' && !!action.command;
 	if (action.kind === 'notify') return typeof action.body === 'string';
 	if (action.kind === 'create-task')
@@ -44,6 +60,7 @@ export function isDefinition(value: unknown): value is AutomationDefinition {
 		typeof action.agentId !== 'string' ||
 		typeof action.prompt !== 'string' ||
 		typeof action.cwd !== 'string' ||
+		(action.extraArgs !== undefined && typeof action.extraArgs !== 'string') ||
 		!['fresh', 'reuse', 'specific'].includes(action.sessionMode)
 	)
 		return false;
@@ -56,20 +73,6 @@ export function isDefinition(value: unknown): value is AutomationDefinition {
 			typeof session.cwd === 'string' &&
 			typeof session.accountKey === 'string')
 	);
-}
-export function isBrowserWorkflowAction(value: unknown): boolean {
-	if (!value || typeof value !== 'object') return false;
-	const a = value as Record<string, unknown>;
-	const id = (v: unknown): v is string => typeof v === 'string' && /^[\w-]{1,100}$/.test(v);
-	return Object.keys(a).every(k => ['kind', 'workflowId', 'version', 'variables', 'scope'].includes(k)) && a.kind === 'browser-workflow'
-		&& id(a.workflowId) && Number.isSafeInteger(a.version) && (a.version as number) > 0
-		&& !!a.variables && typeof a.variables === 'object' && !Array.isArray(a.variables) && Object.keys(a.variables).length <= 16
-		&& Object.entries(a.variables).every(([name, v]) => /^[A-Za-z_][\w-]{0,63}$/.test(name) && !['__proto__', 'constructor', 'prototype'].includes(name)
-			&& (typeof v === 'boolean' || (typeof v === 'number' && Number.isFinite(v)) || (typeof v === 'string' && v.length <= 16_000)))
-		&& Array.isArray(a.scope) && a.scope.length > 0 && a.scope.length <= 8
-		&& a.scope.every((s: unknown) => !!s && typeof s === 'object' && Object.keys(s).every(k => ['id', 'pageId', 'profileId'].includes(k))
-			&& id((s as Record<string, unknown>).id) && id((s as Record<string, unknown>).pageId) && id((s as Record<string, unknown>).profileId))
-		&& new Set(a.scope.map(s => (s as { id: string }).id)).size === a.scope.length;
 }
 export const TASK_META_REGEX = /\s*<!-- nand-task:([^>]+) -->/;
 export interface TaskAutomationMeta {

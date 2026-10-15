@@ -54,3 +54,12 @@ test('module deactivation cannot publish late quota or schedule another read', a
  f.deactivate(); resolve([snapshot()]); await pending;
  assert.equal(f.source.getState().snapshots.length, 0); assert.equal(f.timers.size, 0);
 });
+test('account invalidation clears previous quota and ignores an old account response', async () => {
+ let resolve!: (value: UsageSnapshot[]) => void;
+ const f=fixture(()=>new Promise(done=>{resolve=done;}));
+ f.source.setPinned(true);const pending=f.source.refresh();await Promise.resolve();
+ f.source.invalidate(true);resolve([snapshot()]);await pending;
+ assert.equal(f.source.getState().snapshots.length,0);
+ assert.equal([...f.timers.values()][0]?.delay,0);
+ f.source.dispose();
+});

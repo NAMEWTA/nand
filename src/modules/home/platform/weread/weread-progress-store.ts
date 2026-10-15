@@ -157,10 +157,12 @@ export class WereadProgressStore {
 	}
 }
 
-let store: WereadProgressStore | null = null;
-
-/** App-session singleton — every weread section render shares one store. */
+const stores = new WeakMap<App, WereadProgressStore>();
 export function getWereadProgressStore(app: App): WereadProgressStore {
-	if (!store) store = new WereadProgressStore(app);
+	let store = stores.get(app);
+	if (!store) {
+		store = new WereadProgressStore(app);
+		stores.set(app, store);
+	}
 	return store;
 }

@@ -1,5 +1,5 @@
-import { bindLocalizedOptions } from '../../../../ui/primitives/localized-dom';
-import { bindLocalizedElement, bindLocalizedControl } from '../../../../ui/primitives/localized-dom';
+import { bindLocalizedOptions } from '../../../../host/obsidian/localized-dom';
+import { bindLocalizedElement, bindLocalizedControl } from '../../../../host/obsidian/localized-dom';
 import { App, Modal, Setting, type TextComponent } from 'obsidian';
 import type { AlbumConfig, WidgetHeightRatio } from '../../core/board/types/index';
 import { t } from '../../../../shared/i18n/index';
@@ -25,7 +25,6 @@ export class AlbumSettingsModal extends Modal {
 		const { contentEl, containerEl } = this;
 		contentEl.empty();
 		contentEl.addClass('dashboard-library-config-modal');
-		containerEl.addClass('modal--dashboard');
 		containerEl.parentElement?.addClass('modal-bg--dashboard');
 		applyModalTheme(containerEl);
 

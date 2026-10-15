@@ -1,30 +1,40 @@
-import { useLayoutEffect, useRef, useState } from 'preact/hooks';
+import { RecordSaveStatus } from '../dialogs/RecordSaveStatus';
+import { Checkbox } from '../../../../ui/components/checkbox';
+// Layout and interaction adapted from PandoraReads/apex-dashboard ac4d2c7 (MIT), Copyright (c) 2025 PandoraReads: src/renderer.ts
+import { RecordConfirm } from '../dialogs/RecordConfirm';
+import { RecordButton as Button } from '../dialogs/RecordButton';
+import { Input } from '../../../../ui/components/input';
+import { widgetClasses } from '../theme/widget-classes';
+import { useLayoutEffect, useRef, useState } from 'react';
 import { formatReadingDuration } from '../../core/reading/duration';
-import {
-	resolveCoverAsObjectUrl,
-	searchBooks,
-	type BookSearchResult,
-} from '../../platform/reading/book-service';
+import { resolveCoverAsObjectUrl, searchBooks, type BookSearchResult } from '../../platform/reading/book-service';
 import type { BookInfo, ReadingService } from '../../platform/reading/reading-service';
 import { t } from '../../../../shared/i18n';
-import { Icon } from '../../../../ui/primitives/Icon';
-import { useService } from '../widgets/use-service';
+import { ObsidianIcon as Icon } from '../../../../ui/components/nand/ObsidianIcon';
+import { useService } from '../widgets/use-record-service';
 interface DialogProps {
 	service: ReadingService;
 	close: () => void;
 }
 function Header({ title, close, search = false }: { title: string; close: () => void; search?: boolean }) {
 	return (
-		<div class={search ? 'dashboard-reading-book-header' : 'dashboard-reading-end-header'}>
-			<div class={search ? 'dashboard-reading-book-header-title' : 'dashboard-reading-end-title'}>{t(title)}</div>
+		<div className={widgetClasses(search ? 'dashboard-reading-book-header' : 'dashboard-reading-end-header')}>
 			<div
-				class={search ? 'dashboard-reading-book-close' : 'dashboard-reading-end-close'}
+				className={widgetClasses(
+					search ? 'dashboard-reading-book-header-title' : 'dashboard-reading-end-title',
+				)}
+			>
+				{t(title)}
+			</div>
+			<Button
+				variant="ghost"
+				className={widgetClasses(search ? 'dashboard-reading-book-close' : 'dashboard-reading-end-close')}
 				role="button"
 				aria-label={t('common.close')}
 				onClick={close}
 			>
 				<Icon name="x" />
-			</div>
+			</Button>
 		</div>
 	);
 }
@@ -32,19 +42,29 @@ function Cover({ url, service, className }: { url: string; service: ReadingServi
 	const [src, setSrc] = useState('');
 	useLayoutEffect(() => {
 		let active = true;
-		setSrc('');
+		let owned = '';
 		if (url)
 			void resolveCoverAsObjectUrl(url, service.getApp()).then((value) => {
-				if (active) setSrc(value ?? '');
+				if (active) {
+					owned = value;
+					setSrc(value ?? '');
+				} else if (value.startsWith('blob:')) URL.revokeObjectURL(value);
 			});
 		return () => {
 			active = false;
+			if (owned.startsWith('blob:')) URL.revokeObjectURL(owned);
 		};
 	}, [url, service]);
-	return <div class={className} style={src ? { backgroundImage: `url(${JSON.stringify(src)})` } : undefined} />;
+	return (
+		<div
+			className={widgetClasses(className)}
+			style={src ? { backgroundImage: `url(${JSON.stringify(src)})` } : undefined}
+		/>
+	);
 }
 export function EditBookPanel({ service, book, close, done }: { book: BookInfo; done: () => void } & DialogProps) {
 	const [title, setTitle] = useState(book.title),
+		[removing, setRemoving] = useState(false),
 		[author, setAuthor] = useState(book.author),
 		[cover, setCover] = useState(book.coverUrl),
 		[pages, setPages] = useState(String(book.totalPages || '')),
@@ -67,8 +87,11 @@ export function EditBookPanel({ service, book, close, done }: { book: BookInfo; 
 					coverUrl: cover.trim(),
 					totalPages: Math.max(0, parseInt(pages) || 0),
 				});
+			await service.flush();
 			close();
 			done();
+		} catch {
+			// Save status retains the failed draft and offers retry.
 		} finally {
 			pending.current = false;
 			setBusy(false);
@@ -77,54 +100,67 @@ export function EditBookPanel({ service, book, close, done }: { book: BookInfo; 
 	return (
 		<>
 			<Header title="reading.editTitle" close={close} />
-			<div class="dashboard-reading-end-body">
-				<div class="dashboard-reading-end-label">{t('reading.editBookName')}</div>
-				<input
+			<RecordSaveStatus source={service} />
+			<RecordConfirm open={removing} onOpenChange={setRemoving} title={t('reading.editDeleteBook')}
+				description={t('reading.removeBookConfirm', { title: book.title })} onConfirm={() => { void save(true); }} />
+			<div className={widgetClasses('dashboard-reading-end-body')}>
+				<div className={widgetClasses('dashboard-reading-end-label')}>{t('reading.editBookName')}</div>
+				<Input
 					ref={input}
-					class="dashboard-reading-end-input"
+					className={widgetClasses('dashboard-reading-end-input')}
+					aria-label={t('reading.editBookName')}
 					value={title}
 					onInput={(e) => setTitle(e.currentTarget.value)}
 				/>
-				<div class="dashboard-reading-end-label">{t('reading.editAuthorName')}</div>
-				<input
-					class="dashboard-reading-end-input"
+				<div className={widgetClasses('dashboard-reading-end-label')}>{t('reading.editAuthorName')}</div>
+				<Input
+					className={widgetClasses('dashboard-reading-end-input')}
+					aria-label={t('reading.editAuthorName')}
 					value={author}
 					onInput={(e) => setAuthor(e.currentTarget.value)}
 				/>
-				<div class="dashboard-reading-end-label">{t('reading.editTotalPages')}</div>
-				<input
-					class="dashboard-reading-end-input"
+				<div className={widgetClasses('dashboard-reading-end-label')}>{t('reading.editTotalPages')}</div>
+				<Input
+					className={widgetClasses('dashboard-reading-end-input')}
 					type="number"
 					min="0"
+					aria-label={t('reading.editTotalPages')}
 					value={pages}
 					onInput={(e) => setPages(e.currentTarget.value)}
 				/>
-				<div class="dashboard-reading-end-label">{t('reading.editCoverUrl')}</div>
-				<input
-					class="dashboard-reading-end-input"
+				<div className={widgetClasses('dashboard-reading-end-label')}>{t('reading.editCoverUrl')}</div>
+				<Input
+					className={widgetClasses('dashboard-reading-end-input')}
 					placeholder={t('reading.editCoverPlaceholder')}
+					aria-label={t('reading.editCoverUrl')}
 					value={cover}
 					onInput={(e) => setCover(e.currentTarget.value)}
 				/>
 			</div>
-			<div class="dashboard-reading-end-footer">
-				<button
-					class="dashboard-reading-end-btn dashboard-reading-end-btn--confirm"
+			<div className={widgetClasses('dashboard-reading-end-footer')}>
+				<Button
+					variant="ghost"
+					className={widgetClasses('dashboard-reading-end-btn dashboard-reading-end-btn--confirm')}
 					disabled={busy}
 					onClick={() => void save()}
 				>
 					{t('reading.editConfirm')}
-				</button>
-				<button class="dashboard-reading-end-btn dashboard-reading-end-btn--cancel" onClick={close}>
+				</Button>
+				<Button
+					variant="ghost"
+					className={widgetClasses('dashboard-reading-end-btn dashboard-reading-end-btn--cancel')}
+					onClick={close}
+				>
 					{t('reading.endCancel')}
-				</button>
-				<button
-					class="dashboard-reading-end-btn dashboard-reading-end-btn--delete"
+				</Button>
+				<Button
+					variant="ghost"
+					className={widgetClasses('dashboard-reading-end-btn dashboard-reading-end-btn--delete')}
 					disabled={busy}
-					onClick={() => void save(true)}
+					onClick={() => setRemoving(true)}
 				>
 					{t('reading.editDeleteBook')}
-				</button>
+				</Button>
 			</div>
 		</>
 	);
@@ -145,8 +181,6 @@ export function BookSearchPanel({
 	}, []);
 	useLayoutEffect(() => {
 		let active = true;
-		setResults([]);
-		setBusy(!!query.trim());
 		const timer = win.setTimeout(() => {
 			if (!query.trim()) return;
 			void searchBooks(query.trim())
@@ -170,60 +204,81 @@ export function BookSearchPanel({
 	return (
 		<>
 			<Header title="reading.selectBook" close={close} search />
-			<div class="dashboard-reading-book-input-area">
-				<input
+			<div className={widgetClasses('dashboard-reading-book-input-area')}>
+				<Input
 					ref={input}
-					class="dashboard-reading-book-input"
+					className={widgetClasses('dashboard-reading-book-input')}
+					aria-label={t('reading.searchBook')}
 					value={query}
 					placeholder={t('reading.searchBook')}
-					onInput={(e) => setQuery(e.currentTarget.value)}
+					onInput={(e) => {
+						setQuery(e.currentTarget.value);
+						setResults([]);
+						setBusy(!!e.currentTarget.value.trim());
+					}}
 				/>
 			</div>
-			<div class="dashboard-reading-book-results">
+			<div className={widgetClasses('dashboard-reading-book-results')}>
 				{busy ? (
-					<div class="dashboard-reading-book-searching">{t('reading.searching')}</div>
+					<div className={widgetClasses('dashboard-reading-book-searching')}>{t('reading.searching')}</div>
 				) : query.trim() && !results.length ? (
-					<div class="dashboard-reading-book-no-results">{t('reading.noResults')}</div>
+					<div className={widgetClasses('dashboard-reading-book-no-results')}>{t('reading.noResults')}</div>
 				) : (
 					results.map((book, i) => (
 						<div
 							key={`${book.isbn}:${i}`}
-							class="dashboard-reading-book-item"
+							className={widgetClasses('dashboard-reading-book-item')}
+							role="button"
+							tabIndex={0}
+							onKeyDown={(event) => {
+								if (event.key === 'Enter' || event.key === ' ') {
+									event.preventDefault();
+									pick({ ...book, source: 'google' });
+								}
+							}}
 							onClick={() => pick({ ...book, source: 'google' })}
 						>
 							{book.coverUrl ? (
 								<Cover
 									url={book.coverUrl}
 									service={service}
-									className="dashboard-reading-book-item-cover"
+									className={widgetClasses('dashboard-reading-book-item-cover')}
 								/>
 							) : (
-								<div class="dashboard-reading-book-item-nocover" />
+								<div className={widgetClasses('dashboard-reading-book-item-nocover')} />
 							)}
-							<div class="dashboard-reading-book-item-info">
-								<div class="dashboard-reading-book-item-title">{book.title}</div>
-								{book.author && <div class="dashboard-reading-book-item-author">{book.author}</div>}
+							<div className={widgetClasses('dashboard-reading-book-item-info')}>
+								<div className={widgetClasses('dashboard-reading-book-item-title')}>{book.title}</div>
+								{book.author && (
+									<div className={widgetClasses('dashboard-reading-book-item-author')}>
+										{book.author}
+									</div>
+								)}
 							</div>
 						</div>
 					))
 				)}
-				<div class="dashboard-reading-book-manual">
-					<div class="dashboard-reading-book-manual-label">{t('reading.manualInput')}</div>
-					<input
-						class="dashboard-reading-book-manual-input"
+				<div className={widgetClasses('dashboard-reading-book-manual')}>
+					<div className={widgetClasses('dashboard-reading-book-manual-label')}>
+						{t('reading.manualInput')}
+					</div>
+					<Input
+						className={widgetClasses('dashboard-reading-book-manual-input')}
+						aria-label={t('reading.manualInput')}
 						value={manual}
 						placeholder={t('reading.manualPlaceholder')}
 						onInput={(e) => setManual(e.currentTarget.value)}
 					/>
-					<button
-						class="dashboard-reading-book-manual-btn"
+					<Button
+						variant="ghost"
+						className={widgetClasses('dashboard-reading-book-manual-btn')}
 						onClick={() => {
 							if (manual.trim())
 								pick({ title: manual.trim(), author: '', coverUrl: '', isbn: '', source: 'manual' });
 						}}
 					>
 						{t('common.confirm')}
-					</button>
+					</Button>
 				</div>
 			</div>
 		</>
@@ -270,7 +325,7 @@ export function EndReadingPanel({
 	return (
 		<>
 			<Header title="reading.endTitle" close={close} />
-			<div class="dashboard-reading-end-body">
+			<div className={widgetClasses('dashboard-reading-end-body')}>
 				{[
 					{
 						label: 'reading.endDate',
@@ -278,18 +333,23 @@ export function EndReadingPanel({
 					},
 					{ label: 'reading.endDuration', value: formatReadingDuration(elapsed) },
 				].map((row) => (
-					<div key={row.label} class="dashboard-reading-end-row">
-						<div class="dashboard-reading-end-label">{t(row.label)}</div>
-						<div class="dashboard-reading-end-value">{row.value}</div>
+					<div key={row.label} className={widgetClasses('dashboard-reading-end-row')}>
+						<div className={widgetClasses('dashboard-reading-end-label')}>{t(row.label)}</div>
+						<div className={widgetClasses('dashboard-reading-end-value')}>{row.value}</div>
 					</div>
 				))}
-				<div class="dashboard-reading-end-section">
-					<div class="dashboard-reading-end-section-title">{t('reading.endProgress')}</div>
-					<div class="dashboard-reading-end-mode-toggle">
+				<div className={widgetClasses('dashboard-reading-end-section')}>
+					<div className={widgetClasses('dashboard-reading-end-section-title')}>
+						{t('reading.endProgress')}
+					</div>
+					<div className={widgetClasses('dashboard-reading-end-mode-toggle')}>
 						{(['page', 'pct'] as const).map((value) => (
-							<div
+							<Button
+								variant="ghost"
 								key={value}
-								class={`dashboard-reading-end-mode-btn${mode === value ? ' dashboard-reading-end-mode-btn--active' : ''}`}
+								className={widgetClasses(
+									`dashboard-reading-end-mode-btn${mode === value ? ' dashboard-reading-end-mode-btn--active' : ''}`,
+								)}
 								role="button"
 								onClick={() => {
 									setMode(value);
@@ -297,42 +357,52 @@ export function EndReadingPanel({
 								}}
 							>
 								{t(value === 'page' ? 'reading.endModePage' : 'reading.endModePct')}
-							</div>
+							</Button>
 						))}
 					</div>
-					<div class="dashboard-reading-end-inputs">
-						<div class="dashboard-reading-end-page-row">
-							<div class="dashboard-reading-end-page-col">
-								<div class="dashboard-reading-end-page-label">{t('reading.endStartPage')}</div>
-								<div class="dashboard-reading-end-page-readonly">
+					<div className={widgetClasses('dashboard-reading-end-inputs')}>
+						<div className={widgetClasses('dashboard-reading-end-page-row')}>
+							<div className={widgetClasses('dashboard-reading-end-page-col')}>
+								<div className={widgetClasses('dashboard-reading-end-page-label')}>
+									{t('reading.endStartPage')}
+								</div>
+								<div className={widgetClasses('dashboard-reading-end-page-readonly')}>
 									{mode === 'pct'
 										? `${book.totalPages > 0 ? Math.round((book.currentPage / book.totalPages) * 100) : 0}%`
 										: book.currentPage}
 								</div>
 							</div>
-							<div class="dashboard-reading-end-page-arrow" />
-							<div class="dashboard-reading-end-page-col">
-								<div class="dashboard-reading-end-page-label">{t('reading.endEndPage')}</div>
-								<input
+							<div className={widgetClasses('dashboard-reading-end-page-arrow')} />
+							<div className={widgetClasses('dashboard-reading-end-page-col')}>
+								<div className={widgetClasses('dashboard-reading-end-page-label')}>
+									{t('reading.endEndPage')}
+								</div>
+								<Input
 									ref={input}
-									class="dashboard-reading-end-page-input"
+									className={widgetClasses('dashboard-reading-end-page-input')}
 									type="number"
 									min="0"
 									max={mode === 'pct' ? 100 : undefined}
 									placeholder={mode === 'pct' ? '0%' : '0'}
+									aria-label={t('reading.endEndPage')}
 									value={end}
 									onInput={(e) => setEnd(e.currentTarget.value)}
 								/>
 							</div>
 						</div>
 						{mode === 'page' && !book.totalPages && (
-							<div class="dashboard-reading-end-total-row">
-								<div class="dashboard-reading-end-page-label">{t('reading.endTotalPages')}</div>
-								<input
-									class="dashboard-reading-end-page-input dashboard-reading-end-page-input--total"
+							<div className={widgetClasses('dashboard-reading-end-total-row')}>
+								<div className={widgetClasses('dashboard-reading-end-page-label')}>
+									{t('reading.endTotalPages')}
+								</div>
+								<Input
+									className={widgetClasses(
+										'dashboard-reading-end-page-input dashboard-reading-end-page-input--total',
+									)}
 									type="number"
 									min="0"
 									placeholder="?"
+									aria-label={t('reading.endTotalPages')}
 									value={total}
 									onInput={(e) => setTotal(e.currentTarget.value)}
 								/>
@@ -340,22 +410,29 @@ export function EndReadingPanel({
 						)}
 					</div>
 				</div>
-				<label class="dashboard-reading-end-finished">
-					<input
-						class="dashboard-reading-end-checkbox"
-						type="checkbox"
+				<label className={widgetClasses('dashboard-reading-end-finished')}>
+					<Checkbox
+						className={widgetClasses('dashboard-reading-end-checkbox')}
+
 						checked={finished}
-						onChange={(e) => setFinished(e.currentTarget.checked)}
+						onCheckedChange={(checked) => setFinished(checked === true)}
 					/>
-					<span class="dashboard-reading-end-checkbox-label">{t('reading.endMarkFinished')}</span>
+					<span className={widgetClasses('dashboard-reading-end-checkbox-label')}>
+						{t('reading.endMarkFinished')}
+					</span>
 				</label>
 			</div>
-			<div class="dashboard-reading-end-footer">
-				<button class="dashboard-reading-end-btn dashboard-reading-end-btn--cancel" onClick={close}>
+			<div className={widgetClasses('dashboard-reading-end-footer')}>
+				<Button
+					variant="ghost"
+					className={widgetClasses('dashboard-reading-end-btn dashboard-reading-end-btn--cancel')}
+					onClick={close}
+				>
 					{t('reading.endCancel')}
-				</button>
-				<button
-					class="dashboard-reading-end-btn dashboard-reading-end-btn--discard"
+				</Button>
+				<Button
+					variant="ghost"
+					className={widgetClasses('dashboard-reading-end-btn dashboard-reading-end-btn--discard')}
 					onClick={() => {
 						service.discardSession();
 						close();
@@ -363,20 +440,22 @@ export function EndReadingPanel({
 					}}
 				>
 					{t('reading.endDiscard')}
-				</button>
-				<button
-					class="dashboard-reading-end-btn dashboard-reading-end-btn--confirm"
+				</Button>
+				<Button
+					variant="ghost"
+					className={widgetClasses('dashboard-reading-end-btn dashboard-reading-end-btn--confirm')}
 					disabled={busy}
 					onClick={() => void save()}
 				>
 					{t('reading.endConfirm')}
-				</button>
+				</Button>
 			</div>
 		</>
 	);
 }
 export function ReadingStatsPanel({ service, close }: { service: ReadingService; close?: () => void }) {
 	useService(service);
+	const [deleting, setDeleting] = useState<{ title?: string; timestamp?: string } | null>(null);
 	const [days, setDays] = useState(30),
 		books = service.getBookBreakdownInRange(days),
 		records = service.getRecentRecords(10);
@@ -388,78 +467,108 @@ export function ReadingStatsPanel({ service, close }: { service: ReadingService;
 	];
 	return (
 		<>
-			<div class="dashboard-pomodoro-stats-header">
-				<div class="dashboard-pomodoro-stats-header-title">{t('reading.statsTitle')}</div>
+			<RecordSaveStatus source={service} />
+			<RecordConfirm open={deleting !== null} onOpenChange={open => { if (!open) setDeleting(null); }}
+				title={t('common.delete')}
+				description={deleting?.title !== undefined ? t('reading.deleteBookRecordsConfirm', { title: deleting.title }) : t('reading.deleteRecordConfirm')}
+				onConfirm={() => {
+					if (deleting?.title !== undefined) void service.deleteBookRecords(deleting.title);
+					else if (deleting?.timestamp) void service.deleteRecord(deleting.timestamp);
+					setDeleting(null);
+				}} />
+			<div className={widgetClasses('dashboard-pomodoro-stats-header')}>
+				<div className={widgetClasses('dashboard-pomodoro-stats-header-title')}>{t('reading.statsTitle')}</div>
 				{close && (
-					<div class="dashboard-pomodoro-stats-close" role="button" aria-label={t('common.close')} onClick={close}>
+					<Button
+						variant="ghost"
+						className={widgetClasses('dashboard-pomodoro-stats-close')}
+						role="button"
+						aria-label={t('common.close')}
+						onClick={close}
+					>
 						<Icon name="x" />
-					</div>
+					</Button>
 				)}
 			</div>
-			<div class="dashboard-reading-stats-content">
-				<div class="dashboard-reading-stats-card">
-					<div class="dashboard-reading-stats-summary">
+			<div className={widgetClasses('dashboard-reading-stats-content')}>
+				<div className={widgetClasses('dashboard-reading-stats-card')}>
+					<div className={widgetClasses('dashboard-reading-stats-summary')}>
 						{summary.map((item) => (
-							<div key={item.label} class="dashboard-reading-stats-summary-item">
-								<div class="dashboard-reading-stats-summary-value">{item.value}</div>
-								<div class="dashboard-reading-stats-summary-label">{t(item.label)}</div>
+							<div key={item.label} className={widgetClasses('dashboard-reading-stats-summary-item')}>
+								<div className={widgetClasses('dashboard-reading-stats-summary-value')}>
+									{item.value}
+								</div>
+								<div className={widgetClasses('dashboard-reading-stats-summary-label')}>
+									{t(item.label)}
+								</div>
 							</div>
 						))}
 					</div>
 				</div>
-				<div class="dashboard-reading-stats-card">
-					<div class="dashboard-reading-stats-card-title">{t('reading.bookList')}</div>
-					<div class="dashboard-reading-stats-range">
+				<div className={widgetClasses('dashboard-reading-stats-card')}>
+					<div className={widgetClasses('dashboard-reading-stats-card-title')}>{t('reading.bookList')}</div>
+					<div className={widgetClasses('dashboard-reading-stats-range')}>
 						{[
 							{ days: 7, key: 'Week' },
 							{ days: 30, key: 'Month' },
 							{ days: 365, key: 'Year' },
 						].map((range) => (
-							<div
+							<Button
+								variant="ghost"
 								key={range.key}
-								class={`dashboard-reading-stats-range-btn${days === range.days ? ' dashboard-reading-stats-range-btn--active' : ''}`}
+								className={widgetClasses(
+									`dashboard-reading-stats-range-btn${days === range.days ? ' dashboard-reading-stats-range-btn--active' : ''}`,
+								)}
 								role="button"
 								onClick={() => setDays(range.days)}
 							>
 								{t(`reading.range${range.key}`)}
-							</div>
+							</Button>
 						))}
 					</div>
-					<div class="dashboard-reading-book-list">
+					<div className={widgetClasses('dashboard-reading-book-list')}>
 						{!books.length ? (
-							<div class="dashboard-reading-stats-empty">{t('reading.noRecords')}</div>
+							<div className={widgetClasses('dashboard-reading-stats-empty')}>
+								{t('reading.noRecords')}
+							</div>
 						) : (
 							books.map((book) => (
-								<div key={book.title} class="dashboard-reading-book-list-row">
+								<div key={book.title} className={widgetClasses('dashboard-reading-book-list-row')}>
 									{book.coverUrl ? (
 										<Cover
 											url={book.coverUrl}
 											service={service}
-											className="dashboard-reading-book-list-cover"
+											className={widgetClasses('dashboard-reading-book-list-cover')}
 										/>
 									) : (
-										<div class="dashboard-reading-book-list-nocover" />
+										<div className={widgetClasses('dashboard-reading-book-list-nocover')} />
 									)}
-									<div class="dashboard-reading-book-list-info">
-										<div class="dashboard-reading-book-list-title">{book.title}</div>
+									<div className={widgetClasses('dashboard-reading-book-list-info')}>
+										<div className={widgetClasses('dashboard-reading-book-list-title')}>
+											{book.title}
+										</div>
 										{book.author && (
-											<div class="dashboard-reading-book-list-author">{book.author}</div>
+											<div className={widgetClasses('dashboard-reading-book-list-author')}>
+												{book.author}
+											</div>
 										)}
 									</div>
-									<div class="dashboard-reading-book-list-meta">
-										<div class="dashboard-reading-book-list-duration">
+									<div className={widgetClasses('dashboard-reading-book-list-meta')}>
+										<div className={widgetClasses('dashboard-reading-book-list-duration')}>
 											{formatReadingDuration(book.totalSeconds)}
 										</div>
-										<div class="dashboard-reading-book-list-sessions">
+										<div className={widgetClasses('dashboard-reading-book-list-sessions')}>
 											{t('reading.times', { count: book.sessions })}
 										</div>
-										<div
-											class="dashboard-reading-stats-record-del"
+										<Button
+											variant="ghost"
+											className={widgetClasses('dashboard-reading-stats-record-del')}
 											role="button"
-											onClick={() => void service.deleteBookRecords(book.title)}
+											aria-label={t('reading.editDeleteBook')}
+											onClick={() => setDeleting({ title: book.title })}
 										>
 											<Icon name="trash-2" />
-										</div>
+										</Button>
 									</div>
 								</div>
 							))
@@ -467,27 +576,33 @@ export function ReadingStatsPanel({ service, close }: { service: ReadingService;
 					</div>
 				</div>
 				{records.length > 0 && (
-					<div class="dashboard-reading-stats-card">
-						<div class="dashboard-reading-stats-card-title">{t('reading.recentRecords')}</div>
+					<div className={widgetClasses('dashboard-reading-stats-card')}>
+						<div className={widgetClasses('dashboard-reading-stats-card-title')}>
+							{t('reading.recentRecords')}
+						</div>
 						{records.map((record) => {
 							const ts = new Date(record.timestamp);
 							return (
-								<div key={record.timestamp} class="dashboard-reading-stats-record">
-									<div class="dashboard-reading-stats-record-date">
+								<div key={record.timestamp} className={widgetClasses('dashboard-reading-stats-record')}>
+									<div className={widgetClasses('dashboard-reading-stats-record-date')}>
 										{ts.getMonth() + 1}/{ts.getDate()} {String(ts.getHours()).padStart(2, '0')}:
 										{String(ts.getMinutes()).padStart(2, '0')}
 									</div>
-									<div class="dashboard-reading-stats-record-book">{record.bookTitle}</div>
-									<div class="dashboard-reading-stats-record-dur">
+									<div className={widgetClasses('dashboard-reading-stats-record-book')}>
+										{record.bookTitle}
+									</div>
+									<div className={widgetClasses('dashboard-reading-stats-record-dur')}>
 										{formatReadingDuration(record.durationSeconds)}
 									</div>
-									<div
-										class="dashboard-reading-stats-record-del"
+									<Button
+										variant="ghost"
+										className={widgetClasses('dashboard-reading-stats-record-del')}
 										role="button"
-										onClick={() => void service.deleteRecord(record.timestamp)}
+										aria-label={t('common.delete')}
+										onClick={() => setDeleting({ timestamp: record.timestamp })}
 									>
 										<Icon name="trash-2" />
-									</div>
+									</Button>
 								</div>
 							);
 						})}

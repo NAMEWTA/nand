@@ -1,5 +1,4 @@
-import { Component, setIcon, setTooltip, type App, type Menu, type ViewStateResult, type WorkspaceLeaf } from 'obsidian';
-import { refreshLocalizedDom } from './primitives/localized-dom';
+import { Component, type App, type Menu, type ViewStateResult, type WorkspaceLeaf } from 'obsidian';
 
 /** A real native host supplies capabilities. This is not an ItemView or a fake leaf. */
 export interface NativeSurfaceContext {
@@ -11,8 +10,9 @@ export interface NativeSurfaceContext {
 	/** Same-window object navigation, owned and hidden by the workbench. */
 	navigationEl?: HTMLElement;
 	openNavigation?: () => void;
+	togglePanel?: () => void;
+	openPageMenu?: (event: MouseEvent) => void;
 	changed?: () => void;
-	addAction?: (icon: string, title: string, callback: (event: MouseEvent) => void) => HTMLElement;
 	close: () => void | Promise<void>;
 	activate?: () => Promise<void>;
 }
@@ -33,8 +33,6 @@ export abstract class NativeSurface extends Component {
 	onClose(): Promise<void> { return Promise.resolve(); }
 	setVisible(visible: boolean): void {
 		if (visible) {
-			// Native dropdowns cannot measure while the workbench page is hidden.
-			refreshLocalizedDom(this.contentEl);
 			this.onResize();
 		}
 	}
@@ -43,13 +41,6 @@ export abstract class NativeSurface extends Component {
 	getState(): Record<string, unknown> { return {}; }
 	setState(state: Record<string, unknown>, result: ViewStateResult): Promise<void> {
 		void state; void result; return Promise.resolve();
-	}
-	addAction(icon: string, title: string, callback: (event: MouseEvent) => void): HTMLElement {
-		if (this.context.addAction) return this.context.addAction(icon, title, callback);
-		const button = this.contentEl.createEl('button', { cls: 'nand-ui-icon-btn', attr: { type: 'button', 'aria-label': title } });
-		setIcon(button, icon); setTooltip(button, title);
-		this.registerDomEvent(button, 'click', callback);
-		return button;
 	}
 }
 

@@ -1,8 +1,8 @@
 import { Notice, Platform } from 'obsidian';
 import type { ModuleId } from '../contracts/module';
 import type { PageCreate } from '../contracts/workbench-host';
-import { FEATURE_MODULES, type WorkbenchFeature, type WorkbenchStatus, type WorkbenchTarget } from '../contracts/workbench';
-import { registerWorkbenchStatus } from './surfaces/status-bar';
+import { FEATURE_MODULES, type WorkbenchFeature, type StatusSegment, type WorkbenchTarget } from '../contracts/workbench';
+import { registerUsageMirror } from './surfaces/usage-mirror';
 import { registerWorkbenchRibbon } from './surfaces/ribbon';
 import { settingsCategories, settingsPanel } from './settings-categories';
 import { iconsPanel, iconsTitle } from './icons-panel';
@@ -10,17 +10,13 @@ import type DashboardPlugin from '../main';
 import { t } from '../../shared/i18n';
 import { WORKBENCH_VIEW_TYPE, WorkbenchView } from './workbench-leaf';
 import type { WorkbenchContribution, WorkbenchHost } from '../contracts/workbench-host';
-import { dashboardSaveStatuses, visibleStatuses } from './status-policy';
+import { dashboardSaveStatuses } from './status-policy';
 import { focusLeafState } from './focus-state';
-import { NEWS_WORKBENCH } from '../../modules/news/api';
 import { NOTIFICATION_INBOX } from '../../modules/notifications/api';
-import { AGENT_WORKBENCH } from '../../modules/agent/api';
+import { AGENT_WORKBENCH, AGENT_USAGE } from '../../modules/agent/api';
 import { HOME_WORKBENCH } from '../../modules/home/api';
 import { AUTOMATIONS } from '../../modules/automations/api';
-import { COMMENTS_INDEX } from '../../modules/comments/api';
 import { SYNC_WORKBENCH } from '../../modules/sync/api';
-import { BROWSER_ASSISTANT, BROWSER_WORKSPACE, BROWSER_WORKFLOWS } from '../../modules/browser/api';
-import { commentsPanel } from './comments-panel';
 
 export function composeWorkbench(plugin: DashboardPlugin) {
 	const listeners = new Set<() => void>();
@@ -41,86 +37,34 @@ export function composeWorkbench(plugin: DashboardPlugin) {
 	const contributions: WorkbenchContribution[] = [
 		{
 			id: 'dashboard',
+			chrome: 'none',
+			statusSegments: () => dashboardSaveStatuses(home()?.saveStatuses() ?? []).map(row => ({ id: `dashboard-save:${row.id}`, icon: 'save-off', label: row.label, target: row.target, tone: 'error', order: 60 })),
 			rail: { slot: 'top' },
 			navigation: { id: 'dashboard', labelKey: 'workbench.home', icon: 'home', target: { feature: 'dashboard' } },
-			panel: ({ target }) => home()?.panel(target),
+
 			availability: () => ({ ...ready(), enabled: plugin.moduleEnabled('home') }),
 			stateKeys: ['dashboardFile'],
 			create: modulePage('home', 'board'),
 		},
 		{
 			id: 'terminal',
+			chrome: 'none',
+			navigationContext: true,
+			statusSegments: agentSegments,
 			rail: { slot: 'top' },
-			navigation: { id: 'terminal', labelKey: 'workbench.agent', icon: 'terminal', target: { feature: 'terminal' }, children: [
+			navigation: { id: 'terminal', labelKey: 'workbench.agent', icon: 'bot', target: { feature: 'terminal' }, children: [
 				{ id: 'terminal-running', labelKey: 'workbench.running', icon: 'terminal-square', target: { feature: 'terminal', section: 'running' } },
 				{ id: 'terminal-history', labelKey: 'workbench.history', icon: 'history', target: { feature: 'terminal', section: 'history' } },
 				{ id: 'terminal-usage', labelKey: 'workbench.usage', icon: 'chart-no-axes-column', target: { feature: 'terminal', section: 'usage' } },
 			] },
-			panel: ({ target }) => plugin.services.peek(AGENT_WORKBENCH)?.panel(target),
 			title: (target) => plugin.services.peek(AGENT_WORKBENCH)?.title(target),
 			availability: () => ({ ...ready(), enabled: plugin.moduleEnabled('agent'), supported: Platform.isDesktopApp, ready: !!plugin.services.peek(AGENT_WORKBENCH) }),
-			stateKeys: [],
+			stateKeys: ['agentView', 'agentHistory', 'agentHistoryWidth'],
 			create: modulePage('agent', 'terminal'),
 		},
 		{
-			id: 'browser',
-			rail: { slot: 'top' },
-			navigation: { id: 'browser', labelKey: 'workbench.browser', icon: 'globe', target: { feature: 'browser' }, children: [
-				{ id: 'browser-pages', labelKey: 'workbench.pages', icon: 'globe', target: { feature: 'browser' } },
-				{ id: 'browser-workspace', labelKey: 'workbench.browserWorkspace', icon: 'messages-square', target: { feature: 'browser', section: 'multi-ai' } },
-				{ id: 'browser-assistant', labelKey: 'workbench.browserAssistant', icon: 'bot', target: { feature: 'browser', section: 'assistant' } },
-				{ id: 'browser-workflows', labelKey: 'workbench.browserWorkflows', icon: 'workflow', target: { feature: 'browser', section: 'workflows' } },
-				{ id: 'browser-access', labelKey: 'workbench.browserAccess', icon: 'key-round', target: { feature: 'browser', section: 'access' } },
-			] },
-			panel: ({ pages, target }) => ({
-				primary: target.section === 'access' ? { label: t('workbench.browserAccess'), icon: 'key-round', run: () => plugin.openWorkbench({ feature: 'browser', section: 'access' }) } : target.section === 'workflows' ? { label: t('workbench.browserWorkflows'), icon: 'workflow', run: () => plugin.openWorkbench({ feature: 'browser', section: 'workflows' }) } : target.section === 'multi-ai' || target.section === 'assistant'
-					? { label: t('workbench.browserNewTask'), icon: 'plus', run: () => plugin.openWorkbench({ feature: 'browser', section: target.section }) }
-					: { label: t('workbench.newPage'), icon: 'plus', run: () => plugin.openWorkbench({ feature: 'browser', resourceId: crypto.randomUUID() }) },
-				searchable: true,
-				sections: [{
-					id: 'browser-sections',
-					items: [
-						{ id: 'browser-pages', label: t('workbench.pages'), icon: 'globe', target: { feature: 'browser' }, active: !target.section },
-						{ id: 'browser-workspace', label: t('workbench.browserWorkspace'), icon: 'messages-square', target: { feature: 'browser', section: 'multi-ai' }, active: target.section === 'multi-ai' },
-						{ id: 'browser-assistant', label: t('workbench.browserAssistant'), icon: 'bot', target: { feature: 'browser', section: 'assistant' }, active: target.section === 'assistant' },
-						{ id: 'browser-workflows', label: t('workbench.browserWorkflows'), icon: 'workflow', target: { feature: 'browser', section: 'workflows' }, active: target.section === 'workflows' },
-						{ id: 'browser-access', label: t('workbench.browserAccess'), icon: 'key-round', target: { feature: 'browser', section: 'access' }, active: target.section === 'access' },
-					],
-				}, ...(target.section === 'multi-ai' ? [{
-					id: 'tasks', title: t('workbench.tasks'), emptyText: t('workbench.browserNoTasks'),
-					items: [...(plugin.services.peek(BROWSER_WORKSPACE)?.snapshot()?.tasks ?? [])]
-						.sort((a, b) => Number(b.pinned) - Number(a.pinned) || b.updatedAt - a.updatedAt)
-						.map(task => ({ id: task.id, label: task.title, icon: task.pinned ? 'pin' : 'messages-square',
-							target: { feature: 'browser' as const, section: 'multi-ai', resourceId: task.id }, active: target.resourceId === task.id })),
-				}] : target.section === 'assistant' ? [{
-					id: 'assistant-tasks', title: t('workbench.tasks'), emptyText: t('workbench.browserNoTasks'),
-					items: (plugin.services.peek(BROWSER_ASSISTANT)?.snapshot() ?? []).map(task => ({ id: task.id, label: task.title, icon: 'bot',
-						target: { feature: 'browser' as const, section: 'assistant', resourceId: task.id }, active: target.resourceId === task.id })),
-				}] : target.section === 'workflows' ? [{
-					id: 'workflow-runs', title: t('workbench.browserWorkflows'), emptyText: t('workbench.browserNoTasks'),
-					items: (plugin.services.peek(BROWSER_WORKFLOWS)?.records() ?? []).map(run => ({ id: run.runId, label: run.spec.title, icon: 'workflow',
-						target: { feature: 'browser' as const, section: 'workflows', resourceId: run.runId }, active: target.resourceId === run.runId })),
-				}] : [{
-					id: 'pages',
-					title: t('workbench.pages'),
-					emptyText: t('browser.empty'),
-					items: pages('browser').filter(page => !page.target.section).map((page) => ({
-						id: page.target.resourceId ?? '',
-						label: (typeof page.state.title === 'string' && page.state.title) || (typeof page.state.url === 'string' && page.state.url) || t('workbench.browser'),
-						icon: 'globe',
-						target: page.target,
-						active: page.target.resourceId === target.resourceId,
-					})),
-				}])],
-			}),
-			availability: () => ({ ...ready(), enabled: plugin.moduleEnabled('browser') }),
-			stateKeys: ['id', 'url', 'title', 'zoom', 'scroll', 'profileId'],
-			resourcePages: true,
-			resourceTabs: target => !target.section,
-			create: modulePage('browser', 'browser'),
-		},
-		{
 			id: 'contacts',
+			panel: ({ target }) => ({ sections: [{ id: 'contacts', items: [{ id: 'person', label: t('workbench.people'), icon: 'user', target: { feature: 'contacts', section: 'person' }, active: target.section !== 'company' }, { id: 'company', label: t('workbench.companies'), icon: 'building-2', target: { feature: 'contacts', section: 'company' }, active: target.section === 'company' }] }] }),
 			rail: { slot: 'top' },
 			navigation: { id: 'contacts', labelKey: 'workbench.contacts', icon: 'contact-round', target: { feature: 'contacts' }, children: [
 				{ id: 'contacts-person', labelKey: 'workbench.people', icon: 'user', target: { feature: 'contacts', section: 'person' } },
@@ -132,17 +76,20 @@ export function composeWorkbench(plugin: DashboardPlugin) {
 		},
 		{
 			id: 'automations',
+			chrome: 'none',
+			statusSegments: automationSegments,
 			rail: { slot: 'top' },
 			navigation: { id: 'automations', labelKey: 'workbench.automations', icon: 'workflow', target: { feature: 'automations' }, children: [
 				{ id: 'automations-tasks', labelKey: 'workbench.tasks', icon: 'list-checks', target: { feature: 'automations', section: 'tasks' } },
 				{ id: 'automations-runs', labelKey: 'workbench.runs', icon: 'history', target: { feature: 'automations', section: 'runs' } },
 			] },
 			availability: () => ({ ...ready(), enabled: plugin.moduleEnabled('automations'), ready: !!plugin.services.peek(AUTOMATIONS) }),
-			stateKeys: ['selected', 'search', 'filter', 'agentFilter', 'section', 'runHistory'],
+			stateKeys: ['selected', 'search', 'filter', 'sort'],
 			create: modulePage('automations', 'automations'),
 		},
 		{
 			id: 'sync',
+			statusSegments: () => (plugin.services.peek(SYNC_WORKBENCH)?.status() ?? []).map(row => ({ id: `sync:${row.id}`, icon: 'git-branch', label: row.label, tone: row.kind === 'error' ? 'error' : 'neutral', target: { feature: 'sync', section: row.section }, order: 50 })),
 			rail: { slot: 'top' },
 			navigation: { id: 'sync', labelKey: 'workbench.sync', icon: 'git-branch', target: { feature: 'sync' }, children: [
 				{ id: 'sync-changes', labelKey: 'workbench.syncChanges', icon: 'file-diff', target: { feature: 'sync', section: 'changes' } },
@@ -155,16 +102,6 @@ export function composeWorkbench(plugin: DashboardPlugin) {
 			create: modulePage('sync', 'sync'),
 		},
 		{
-			id: 'news',
-			rail: { slot: 'top' },
-			navigation: { id: 'news', labelKey: 'news.title', icon: 'newspaper', target: { feature: 'news' } },
-			panel: ({ target }) => plugin.services.peek(NEWS_WORKBENCH)?.panel(target),
-			title: target => plugin.services.peek(NEWS_WORKBENCH)?.title(target),
-			availability: () => ({ ...ready(), enabled: plugin.moduleEnabled('news'), ready: plugin.moduleState('news') === 'active' }),
-			stateKeys: ['section', 'selected', 'view', 'filter', 'order'],
-			create: modulePage('news', 'news'),
-		},
-		{
 			id: 'icons',
 			rail: { slot: 'top' },
 			navigation: { id: 'icons', labelKey: 'modules.iconic', icon: 'images', target: { feature: 'icons' } },
@@ -175,27 +112,8 @@ export function composeWorkbench(plugin: DashboardPlugin) {
 			create: modulePage('icons', 'icons'),
 		},
 		{
-			id: 'records',
-			railParent: 'dashboard',
-			navigation: { id: 'records', labelKey: 'workbench.records', icon: 'chart-column', target: { feature: 'records', section: 'habits' } },
-			panel: ({ target }) => home()?.panel(target),
-			title: (target) => home()?.recordsTitle(target.section) ?? t('workbench.records'),
-			availability: () => ({ ...ready(), enabled: plugin.moduleEnabled('home'), ready: plugin.moduleState('home') === 'active' }),
-			stateKeys: [],
-			create: modulePage('home', 'records'),
-		},
-		{
-			id: 'comments',
-			rail: { slot: 'top' },
-			navigation: { id: 'comments', labelKey: 'workbench.comments', icon: 'message-square', target: { feature: 'comments', section: 'open' } },
-			panel: ({ target }) => commentsPanel(plugin.services.peek(COMMENTS_INDEX)?.notes() ?? [], target),
-			title: (target) => (target.resourceId ? `${t('workbench.comments')} · ${target.resourceId.split('/').pop()?.replace(/\.md$/, '') ?? ''}` : undefined),
-			availability: () => ({ ...ready(), enabled: plugin.moduleEnabled('comments'), ready: plugin.moduleState('comments') === 'active' }),
-			stateKeys: [],
-			create: modulePage('comments', 'comments'),
-		},
-		{
 			id: 'notifications',
+			statusSegments: () => { const count = plugin.services.peek(NOTIFICATION_INBOX)?.unread ?? 0; return count ? [{ id: 'notifications', icon: 'bell', count, label: t('workbench.unreadCount', { count }), target: { feature: 'notifications' }, order: 90 }] : []; },
 			rail: { slot: 'bottom', badge: () => plugin.services.peek(NOTIFICATION_INBOX)?.unread ?? 0 },
 			navigation: { id: 'notifications', labelKey: 'workbench.notifications', icon: 'bell', target: { feature: 'notifications' }, children: [
 				{ id: 'notifications-unread', labelKey: 'workbench.unread', icon: 'mail', target: { feature: 'notifications', section: 'unread' } },
@@ -233,25 +151,20 @@ export function composeWorkbench(plugin: DashboardPlugin) {
 		},
 	];
 
-	const statusRows = (): WorkbenchStatus[] => {
-		const rows: WorkbenchStatus[] = [];
-		const automation = plugin.services.peek(AUTOMATIONS);
-		if (automation?.loadError) rows.push({ id: 'automation-load', kind: 'error', label: t('automation.failedLoad'), target: { feature: 'automations' } });
-		const attention = plugin.services.peek(NOTIFICATION_INBOX)?.records.filter((record) => !record.read && (record.presentation?.status === 'failed' || record.presentation?.status === 'interrupted' || Object.values(record.deliveries).includes('failed'))) ?? [];
-		if (attention.length) rows.push({ id: 'attention', kind: 'error', label: t('workbench.statusAttention', { count: attention.length }), target: { feature: 'notifications' } });
-		const runs = automation?.activeRuns() ?? [];
-		if (runs.length) rows.push({ id: 'automations-running', kind: 'running', label: t('workbench.statusRunning', { count: runs.length }), target: { feature: 'automations', section: 'runs', resourceId: runs.length === 1 ? runs[0]?.id : undefined } });
+	function agentSegments(): StatusSegment[] {
 		const sessions = plugin.services.peek(AGENT_WORKBENCH)?.status() ?? [];
-		for (const kind of ['waiting', 'running'] as const) {
-			const items = sessions.filter((session) => session.status === kind);
-			if (items.length) rows.push({ id: 'terminal-' + kind, kind: kind === 'waiting' ? 'error' : 'running', label: t(kind === 'waiting' ? 'workbench.statusWaiting' : 'workbench.statusSessions', { count: items.length }), target: { feature: 'terminal', section: 'running', resourceId: items.length === 1 ? items[0]?.id : undefined } });
-		}
-		for (const row of plugin.services.peek(SYNC_WORKBENCH)?.status() ?? [])
-			rows.push({ id: `sync-${row.id}`, kind: row.kind, label: row.label, target: { feature: 'sync', section: row.section } });
-		const saves = home()?.saveStatuses() ?? [];
-		rows.push(...dashboardSaveStatuses(saves));
+		return (['waiting', 'running'] as const).flatMap(kind => {
+			const items = sessions.filter(session => session.status === kind);
+			return items.length ? [{ id: `agents-${kind}`, icon: kind === 'waiting' ? 'circle-help' : 'loader-circle', tone: kind === 'waiting' ? 'attention' as const : 'running' as const, count: items.length, label: t(kind === 'waiting' ? 'workbench.statusWaiting' : 'workbench.statusSessions', { count: items.length }), target: { feature: 'terminal' as const, section: 'running', resourceId: items[0]?.id }, order: kind === 'waiting' ? 10 : 20 }] : [];
+		});
+	}
+	function automationSegments(): StatusSegment[] {
+		const service = plugin.services.peek(AUTOMATIONS), runs = service?.activeRuns() ?? [];
+		const rows: StatusSegment[] = [];
+		if (runs.length) rows.push({ id: 'automations', icon: 'timer', count: runs.length, label: t('workbench.statusRunning', { count: runs.length }), target: { feature: 'automations', section: 'runs' }, order: 30 });
+		if (service?.loadError) rows.push({ id: 'automation-load', icon: 'triangle-alert', tone: 'error', label: t('automation.failedLoad'), target: { feature: 'automations' }, order: 40 });
 		return rows;
-	};
+	}
 
 	// Scope recency to the window's central area. Sidebar leaves do not anchor a
 	// new tab, so choosing one can send programmatic navigation to another window.
@@ -306,7 +219,7 @@ export function composeWorkbench(plugin: DashboardPlugin) {
 			return () => { listeners.delete(listener); };
 		},
 		openSettings: (feature) => {
-			const product = { dashboard: 'dashboard', terminal: 'terminal', browser: 'browser', contacts: 'contacts', automations: 'automation', notifications: 'general', icons: 'iconic', comments: 'editor', records: 'dashboard', sync: 'sync', news: 'news', content: 'general', settings: 'general' } as const;
+			const product = { dashboard: 'dashboard', terminal: 'terminal', contacts: 'contacts', automations: 'automation', notifications: 'general', icons: 'iconic', sync: 'sync', content: 'general', settings: 'general' } as const;
 			void plugin.openWorkbenchSettings(feature ? product[feature] : 'general').catch(report);
 		},
 		openFocus: async (target, state, placement, ownerWindow) => {
@@ -320,7 +233,10 @@ export function composeWorkbench(plugin: DashboardPlugin) {
 			const module = FEATURE_MODULES[feature];
 			return module !== 'app' && plugin.moduleState(module) === 'failed';
 		},
-		statuses: () => visibleStatuses(statusRows(), false),
+		usage: () => plugin.services.peek(AGENT_USAGE),
+		statusBar: () => plugin.appSettings.get().statusBar,
+		setStatusBar: async preferences => { await plugin.appSettings.update(draft => { draft.statusBar = preferences; }); plugin.services.peek(AGENT_USAGE)?.setDisplay(preferences.usageDisplay); },
+		appearance: () => ({ font: plugin.appSettings.get().font, palette: plugin.appSettings.get().palette }),
 		report,
 	};
 	plugin.registerView(WORKBENCH_VIEW_TYPE, (leaf) => new WorkbenchView(leaf, host));
@@ -349,14 +265,10 @@ export function composeWorkbench(plugin: DashboardPlugin) {
 		}
 	};
 
-	const status = registerWorkbenchStatus(plugin, {
-		enabled: () => plugin.appSettings.get().workbenchStatus !== 'hidden',
-		quota: () => {
-			const usage = plugin.services.peek(AGENT_WORKBENCH)?.usage();
-			return { source: usage?.source, pinned: !!usage?.pinned, chips: usage?.chips };
-		},
-		read: statusRows,
-		open: (target, ownerWindow) => open(target, ownerWindow),
+	const status = registerUsageMirror(plugin, {
+		preferences: () => plugin.appSettings.get().statusBar,
+		usage: () => plugin.services.peek(AGENT_USAGE),
+		open: ownerWindow => open({ feature: 'terminal', section: 'usage' }, ownerWindow),
 		report,
 	});
 	// The automation host can appear after the workbench (module enabled later or a retried start).
@@ -376,15 +288,7 @@ export function composeWorkbench(plugin: DashboardPlugin) {
 		refresh();
 	});
 	plugin.register(() => { offInbox?.(); offInboxWatch(); });
-	// The comments panel lists commented notes from the module's index.
-	let offComments = plugin.services.peek(COMMENTS_INDEX)?.subscribe(() => refresh());
-	const offCommentsWatch = plugin.services.watch(COMMENTS_INDEX, (index) => {
-		offComments?.();
-		offComments = index?.subscribe(() => refresh());
-		refresh();
-	});
-	plugin.register(() => { offComments?.(); offCommentsWatch(); });
-	// Boards and records refresh the home panel while that module is active.
+	// Board saves refresh the home status while that module is active.
 	let offHome = plugin.services.peek(HOME_WORKBENCH)?.subscribe(() => refresh());
 	const offHomeWatch = plugin.services.watch(HOME_WORKBENCH, (service) => {
 		offHome?.();
@@ -400,16 +304,6 @@ export function composeWorkbench(plugin: DashboardPlugin) {
 		refresh();
 	});
 	plugin.register(() => { offSync?.(); offSyncWatch(); });
-	let offNews = plugin.services.peek(NEWS_WORKBENCH)?.subscribe(() => refresh());
-	const offNewsWatch = plugin.services.watch(NEWS_WORKBENCH, service => {
-		offNews?.(); offNews = service?.subscribe(() => refresh()); refresh();
-	});
-	plugin.register(() => { offNews?.(); offNewsWatch(); });
-	let offBrowserWorkspace = plugin.services.peek(BROWSER_WORKSPACE)?.subscribe(() => refresh());
-	const offBrowserWorkspaceWatch = plugin.services.watch(BROWSER_WORKSPACE, service => {
-		offBrowserWorkspace?.(); offBrowserWorkspace = service?.subscribe(() => refresh()); refresh();
-	});
-	plugin.register(() => { offBrowserWorkspace?.(); offBrowserWorkspaceWatch(); });
 	// Agent sessions, history and usage refresh the agent panel and statuses while that module is active.
 	let offAgent = plugin.services.peek(AGENT_WORKBENCH)?.subscribe(() => refresh());
 	const offAgentWatch = plugin.services.watch(AGENT_WORKBENCH, (agent) => {
@@ -422,6 +316,7 @@ export function composeWorkbench(plugin: DashboardPlugin) {
 		for (const listener of listeners) listener();
 	};
 	plugin.register(plugin.onModuleChanged(refresh));
+	plugin.register(plugin.appSettings.subscribe(refresh));
 	plugin.register(() => { offAgent?.(); offAgentWatch(); status.dispose(); });
 	registerWorkbenchRibbon(plugin, (ownerWindow) => open(undefined, ownerWindow), report);
 	refresh();

@@ -23,7 +23,7 @@ try {
 	const vault = path.join(root, 'vault');
 	fs.mkdirSync(vault);
 	const cli = path.join(root, 'never-executed-cli');
-	fs.writeFileSync(cli, 'test fixture; no execution');
+	fs.writeFileSync(cli, 'test fixture; no execution', { mode: 0o700 });
 	globalThis.window = { require: createRequire(path.join(process.cwd(), 'package.json')) };
 	const settings = normalizeAgentSettings({});
 	settings.agents.grok.enabled = true;

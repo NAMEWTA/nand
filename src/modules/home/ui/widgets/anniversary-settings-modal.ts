@@ -1,5 +1,5 @@
-import { bindLocalizedOptions } from '../../../../ui/primitives/localized-dom';
-import { bindLocalizedElement, bindLocalizedControl } from '../../../../ui/primitives/localized-dom';
+import { bindLocalizedOptions } from '../../../../host/obsidian/localized-dom';
+import { bindLocalizedElement, bindLocalizedControl } from '../../../../host/obsidian/localized-dom';
 import { App, Modal, Setting } from 'obsidian';
 import { formatElapsed, parseAnniversaryDate } from '../../core/anniversaries/calendar';
 import { resolveWidgetLabel, usesDefaultWidgetLabel } from '../../core/board/default-widget-label';
@@ -36,7 +36,6 @@ export class AnniversarySettingsModal extends Modal {
 		const { contentEl, containerEl } = this;
 		contentEl.empty();
 		contentEl.addClass('dashboard-library-config-modal', 'nand-anniversary-modal');
-		this.modalEl.addClass('modal--dashboard');
 		containerEl.addClass('modal-bg--dashboard');
 		applyModalTheme(containerEl);
 

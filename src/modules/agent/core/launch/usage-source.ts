@@ -25,6 +25,7 @@ export class AgentUsageSource {
  private inflight?: Promise<readonly UsageSnapshot[]>;
  private nextAt = 0;
  private failures = 0;
+ private revision = 0;
  constructor(options: UsageSourceOptions) { this.options = options; }
  getState(): UsageState { return this.state; }
  get hasDemand(): boolean { return this.pinned || this.consumers > 0; }
@@ -47,26 +48,27 @@ export class AgentUsageSource {
   this.pinned = pinned;
   if (this.hasDemand) this.schedule(); else this.cancelTimer();
  }
- invalidate(): void { this.nextAt = 0; this.cancelTimer(); this.schedule(); }
+ invalidate(clear = false): void { if (clear) { this.revision++; this.state = { snapshots: [], refreshing: !!this.inflight }; this.emit(); } this.nextAt = 0; this.cancelTimer(); this.schedule(); }
  refresh(force = false): Promise<readonly UsageSnapshot[]> {
   if (this.stopped || !this.options.active()) return Promise.resolve(this.state.snapshots);
   if (this.inflight) return this.inflight;
   if (!force && (!this.hasDemand || this.options.now() < this.nextAt)) { this.schedule(); return Promise.resolve(this.state.snapshots); }
   this.cancelTimer();
+  const revision = this.revision;
   const pending = Promise.resolve().then(() => this.options.read()).then((snapshots) => {
-   if (this.stopped || !this.options.active()) return this.state.snapshots;
+   if (this.stopped || !this.options.active() || revision !== this.revision) return this.state.snapshots;
    this.failures = snapshots.some((snapshot) => snapshot.failed) ? this.failures + 1 : 0;
    this.state = { snapshots, refreshing: true };
    return snapshots;
   }, (error: unknown) => {
-   if (this.stopped || !this.options.active()) return this.state.snapshots;
+   if (this.stopped || !this.options.active() || revision !== this.revision) return this.state.snapshots;
    this.failures++;
    this.state = { snapshots: this.state.snapshots.map((snapshot) => ({ ...snapshot, stale: true })), refreshing: true, error: error instanceof Error ? error.message : String(error) };
    throw error;
   }).finally(() => {
    if (this.inflight !== pending) return;
    this.inflight = undefined;
-   this.nextAt = this.options.now() + Math.max(1000, this.options.delay(this.failures));
+   this.nextAt = revision !== this.revision ? 0 : this.options.now() + Math.max(1000, this.options.delay(this.failures));
    this.state = { ...this.state, refreshing: false };
    if (!this.stopped) { this.emit(); this.schedule(); }
   });

@@ -1,0 +1,25 @@
+import { it,expect,vi } from 'vitest';
+import { render,screen,act,fireEvent,waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { createStore } from 'zustand/vanilla';
+import { Scope } from 'obsidian';
+import { TestProviders } from '../../../ui/react/test-providers';
+import { t } from '../../../shared/i18n';
+import { BrowserChrome } from './BrowserChrome';
+import { newPageState,normalizeBrowserSettings } from '../core/model';
+import { normalizeBrowserNavigationUrl } from '../core/url';
+import type { BrowserPageHandle,BrowserViewState } from '../api';
+import type { BrowserEngine } from '../services/host';
+it('keeps pristine focused addresses current, rejects unsafe input and navigates selected input',async()=>{
+ Object.defineProperty(HTMLElement.prototype,'win',{configurable:true,get(){return this.ownerDocument.defaultView;}});
+ const store=createStore<BrowserViewState>(()=>({...newPageState('page',{url:'about:blank'}),downloads:[],find:{matches:0,activeMatchOrdinal:0},permissionDenied:'',annotations:[]}));
+ const navigate=vi.fn(async()=>{});
+ const page={id:'page',profileId:'default',store,navigate,stopFind:vi.fn(),setShortcutHandler:vi.fn(),viewportBounds:()=>({left:0,top:0,width:900,height:600})} as unknown as BrowserPageHandle;
+ const settings=normalizeBrowserSettings({});
+ const host={app:{scope:new Scope(),keymap:{pushScope:vi.fn(),popScope:vi.fn()}},profiles:createStore(()=>({profiles:[{id:'default',label:'',kind:'default',state:'ready'}],defaultProfileId:'default'})),settings:{get:()=>settings},cookieCount:async()=>1,historyStore:{history:[]},workspace:{list:()=>[]},permissions:()=>({}),resolveInput:(value:string)=>normalizeBrowserNavigationUrl(value)} as unknown as BrowserEngine;
+ render(<TestProviders><BrowserChrome host={host} page={page}/></TestProviders>);
+ const input=screen.getByRole('textbox',{name:t('browser.address')}) as HTMLInputElement,user=userEvent.setup();
+ input.focus();act(()=>store.setState({url:'http://localhost:3000/',title:'Loaded'}));expect(input.value).toBe('http://localhost:3000/');
+ await user.clear(input);await user.type(input,'javascript:alert(1)');await user.keyboard('{Enter}');expect(screen.getByRole('alert').textContent).toBe(t('browser.unsupportedAddress'));expect(navigate).not.toHaveBeenCalled();
+ await user.clear(input);await user.type(input,'example.com');fireEvent.keyDown(input,{key:'Enter',isComposing:true});expect(navigate).not.toHaveBeenCalled();await user.keyboard('{Enter}');await waitFor(()=>expect(navigate).toHaveBeenCalledWith('https://example.com/'));
+});

@@ -1,4 +1,7 @@
-import { useLayoutEffect, useRef } from 'preact/hooks';
+// Layout and interaction adapted from PandoraReads/apex-dashboard ac4d2c7 (MIT), Copyright (c) 2025 PandoraReads: src/calendar-grid.ts
+import { Checkbox } from '../../../../ui/components/checkbox';
+import { widgetClasses } from '../theme/widget-classes';
+import { useLayoutEffect, useRef } from 'react';
 import {
 	calendarSpan,
 	dateBucketOf,
@@ -7,8 +10,8 @@ import {
 	type VaultTask,
 } from '../../platform/calendar/alltasks-scan';
 import { t } from '../../../../shared/i18n/index';
-import { Icon } from '../../../../ui/primitives/Icon';
-import { InlineLinks } from '../cards/InlineLinks';
+import { ObsidianIcon as Icon } from '../../../../ui/components/nand/ObsidianIcon';
+import { InlineLinks } from './CalendarLinks';
 import type { DashboardRenderContext } from '../renderer/render-context';
 import {
 	COMPACT_MAX_PER_DAY,
@@ -37,13 +40,12 @@ function dayTrigger(iso: string, action?: (iso: string) => void) {
 				tabIndex: 0,
 				'aria-label': t('calendar.dayNumAddTask'),
 				title: t('calendar.dayNumAddTask'),
-				onClick: (event: MouseEvent) => {
+				onClick: (event: React.MouseEvent) => {
 					event.stopPropagation();
 					action(iso);
 				},
-				onKeyDown: (event: KeyboardEvent) => {
+				onKeyDown: (event: React.KeyboardEvent) => {
 					if (event.key === 'Enter' || event.key === ' ') {
-						event.preventDefault();
 						action(iso);
 					}
 				},
@@ -54,7 +56,9 @@ export function OriginMark({ task, iso }: { task: VaultTask; iso: string }) {
 	const kind = taskDayKind(task, iso);
 	return kind === 'scheduled' || kind === 'completion' ? (
 		<div
-			class={`dashboard-calendar-mark dashboard-calendar-mark--${kind === 'scheduled' ? 'scheduled' : 'done'}`}
+			className={widgetClasses(
+				`dashboard-calendar-mark dashboard-calendar-mark--${kind === 'scheduled' ? 'scheduled' : 'done'}`,
+			)}
 			aria-label={t(kind === 'scheduled' ? 'calendar.markerScheduled' : 'calendar.markerDone')}
 			title={t(kind === 'scheduled' ? 'calendar.markerScheduled' : 'calendar.markerDone')}
 		>
@@ -68,32 +72,36 @@ function DayTask({ task, iso, opts, context }: Omit<GridProps, 'byDay'> & { task
 		time = taskDayTime(task, iso);
 	return (
 		<div
-			class={`dashboard-calendar-event${task.checked ? ' is-done' : ''}${multi ? ' is-multi' : ''}${task.priority ? ` prio-${task.priority}` : ''}${overdue ? ' is-overdue' : ''}${!opts.compact && opts.onOpenNote ? ' is-jumpable' : ''}`}
+			className={widgetClasses(
+				`dashboard-calendar-event${task.checked ? ' is-done' : ''}${multi ? ' is-multi' : ''}${task.priority ? ` prio-${task.priority}` : ''}${overdue ? ' is-overdue' : ''}${!opts.compact && opts.onOpenNote ? ' is-jumpable' : ''}`,
+			)}
 			onClick={(event) => {
-				if (opts.compact || (event.target as HTMLElement).closest('input, a')) return;
+				if (opts.compact || (event.target as HTMLElement).closest('input, [role="checkbox"], a')) return;
 				event.stopPropagation();
 				opts.onOpenNote?.(task.file, task.line);
 			}}
 		>
 			{!opts.compact && opts.onToggle && (
-				<input
-					class="dashboard-calendar-check"
-					type="checkbox"
+				<Checkbox
+					className={widgetClasses('dashboard-calendar-check')}
 					checked={task.checked}
+					aria-label={task.text}
+					onCheckedChange={(checked) => opts.onToggle?.(task, checked === true)}
 					onClick={(event) => {
-						event.preventDefault();
 						event.stopPropagation();
-						opts.onToggle?.(task, !task.checked);
 					}}
 				/>
 			)}
-			{opts.showTimes && time && <div class="dashboard-calendar-event-time">{time}</div>}
-			<div class="dashboard-calendar-event-text">
+			{opts.showTimes && time && <div className={widgetClasses('dashboard-calendar-event-time')}>{time}</div>}
+			<div className={widgetClasses('dashboard-calendar-event-text')}>
 				<InlineLinks text={task.text} app={opts.app} context={context} />
 			</div>
 			<OriginMark task={task} iso={iso} />
 			{multi && (
-				<div class="dashboard-calendar-multi-mark" aria-label={`${task.start} → ${task.end}`}>
+				<div
+					className={widgetClasses('dashboard-calendar-multi-mark')}
+					aria-label={`${task.start} → ${task.end}`}
+				>
 					<Icon name="arrow-right-left" />
 				</div>
 			)}
@@ -115,7 +123,9 @@ function DayCell({
 		click = !!(opts.compact || opts.dotMode) && !!opts.onDayClick;
 	return (
 		<div
-			class={`dashboard-calendar-cell${date.getMonth() === month ? '' : ' is-outside'}${iso === today ? ' is-today' : ''}${tasks.length ? ' has-tasks' : ''}${click ? ' is-clickable' : ''}`}
+			className={widgetClasses(
+				`dashboard-calendar-cell${date.getMonth() === month ? '' : ' is-outside'}${iso === today ? ' is-today' : ''}${tasks.length ? ' has-tasks' : ''}${click ? ' is-clickable' : ''}`,
+			)}
 			onClick={() => {
 				if (click) opts.onDayClick?.(iso);
 			}}
@@ -133,7 +143,9 @@ function DayCell({
 			}}
 		>
 			<div
-				class={`dashboard-calendar-cell-num${!opts.compact && !opts.dotMode && opts.onDayNumClick ? ' is-clickable' : ''}`}
+				className={widgetClasses(
+					`dashboard-calendar-cell-num${!opts.compact && !opts.dotMode && opts.onDayNumClick ? ' is-clickable' : ''}`,
+				)}
 				{...dayTrigger(iso, !opts.compact && !opts.dotMode ? opts.onDayNumClick : undefined)}
 			>
 				{date.getDate()}
@@ -141,11 +153,13 @@ function DayCell({
 			{opts.dotMode ? (
 				tasks.length > 0 && (
 					<div
-						class={`dashboard-calendar-cell-dot${tasks.every((task) => task.checked) ? ' is-done' : ''}`}
+						className={widgetClasses(
+							`dashboard-calendar-cell-dot${tasks.every((task) => task.checked) ? ' is-done' : ''}`,
+						)}
 					/>
 				)
 			) : (
-				<div class="dashboard-calendar-cell-list">
+				<div className={widgetClasses('dashboard-calendar-cell-list')}>
 					{shown.map((task) => (
 						<DayTask
 							key={task.path + ':' + task.line}
@@ -156,7 +170,7 @@ function DayCell({
 						/>
 					))}
 					{opts.compact && sorted.length > COMPACT_MAX_PER_DAY && (
-						<div class="dashboard-calendar-more">
+						<div className={widgetClasses('dashboard-calendar-more')}>
 							{t('calendar.moreCount', { count: sorted.length - COMPACT_MAX_PER_DAY })}
 						</div>
 					)}
@@ -175,18 +189,20 @@ function TaskBar({ bar, opts, context }: Omit<GridProps, 'byDay'> & { bar: BarEn
 		(bar.contRight ? ` · ${t('calendar.barContRight')}` : '');
 	return (
 		<div
-			class={`dashboard-calendar-bar${task.checked ? ' is-done' : ''}${task.priority ? ` prio-${task.priority}` : ''}${bar.contLeft ? ' is-cont-left' : ''}${bar.contRight ? ' is-cont-right' : ''}`}
+			className={widgetClasses(
+				`dashboard-calendar-bar${task.checked ? ' is-done' : ''}${task.priority ? ` prio-${task.priority}` : ''}${bar.contLeft ? ' is-cont-left' : ''}${bar.contRight ? ' is-cont-right' : ''}`,
+			)}
 			style={{
-				'--bar-cs': String(bar.fromCol + 1),
-				'--bar-len': String(bar.len),
-				'--bar-row': String(bar.lane + 1),
+				gridColumnStart: bar.fromCol + 1,
+				gridColumnEnd: `span ${bar.len}`,
+				gridRow: bar.lane + 1,
 			}}
 			{...dayTrigger(bar.firstIso, opts.onBarClick)}
 			aria-label={label}
 			title={task.text}
 		>
-			{time && <div class="dashboard-calendar-bar-time">{time}</div>}
-			<div class="dashboard-calendar-bar-text">
+			{time && <div className={widgetClasses('dashboard-calendar-bar-time')}>{time}</div>}
+			<div className={widgetClasses('dashboard-calendar-bar-text')}>
 				<InlineLinks text={task.text} app={opts.app} context={context} />
 			</div>
 		</div>
@@ -204,15 +220,15 @@ export function MonthGrid({ year, month, byDay, opts, context }: GridProps & { y
 		days = daysFrom(new Date(year, month, 1 - leading), 42),
 		bars = !opts.compact && !opts.dotMode;
 	return (
-		<div class={`dashboard-calendar${bars ? ' is-full' : ' is-compact'}`}>
-			<div class="dashboard-calendar-weekdays">
+		<div className={widgetClasses(`dashboard-calendar${bars ? ' is-full' : ' is-compact'}`)}>
+			<div className={widgetClasses('dashboard-calendar-weekdays')}>
 				{weekdayLabels().map((label) => (
-					<div key={label} class="dashboard-calendar-weekday">
+					<div key={label} className={widgetClasses('dashboard-calendar-weekday')}>
 						{label}
 					</div>
 				))}
 			</div>
-			<div class={`dashboard-calendar-body${bars ? ' dashboard-calendar-body--bars' : ''}`}>
+			<div className={widgetClasses(`dashboard-calendar-body${bars ? ' dashboard-calendar-body--bars' : ''}`)}>
 				{!bars
 					? days.map(({ date, iso }) => (
 							<DayCell
@@ -239,11 +255,11 @@ export function MonthGrid({ year, month, byDay, opts, context }: GridProps & { y
 									packed.filter((bar) => bar.lane === -1).map((bar) => [bar.task, bar.firstIso]),
 								);
 							return (
-								<div key={week[0]!.iso} class="dashboard-calendar-week">
+								<div key={week[0]!.iso} className={widgetClasses('dashboard-calendar-week')}>
 									<div
-										class="dashboard-calendar-barlayer"
+										className={widgetClasses('dashboard-calendar-barlayer')}
 										style={{
-											'--bar-lanes': String(Math.max(0, ...packed.map((bar) => bar.lane + 1))),
+											gridTemplateRows: `repeat(${Math.max(0, ...packed.map((bar) => bar.lane + 1))}, 20px)`,
 										}}
 									>
 										{packed
@@ -257,7 +273,7 @@ export function MonthGrid({ year, month, byDay, opts, context }: GridProps & { y
 												/>
 											))}
 									</div>
-									<div class="dashboard-calendar-week-days">
+									<div className={widgetClasses('dashboard-calendar-week-days')}>
 										{week.map(({ date, iso }) => (
 											<DayCell
 												key={iso}
@@ -282,17 +298,25 @@ export function WeekGrid({ weekStart, byDay, opts, context }: GridProps & { week
 	const labels = weekdayLabels(),
 		today = toIsoDate(new Date());
 	return (
-		<div class={`dashboard-calendar dashboard-calendar--week${opts.compact ? ' is-compact' : ' is-full'}`}>
+		<div
+			className={widgetClasses(
+				`dashboard-calendar dashboard-calendar--week${opts.compact ? ' is-compact' : ' is-full'}`,
+			)}
+		>
 			{daysFrom(weekStart).map(({ date, iso }, index) => {
 				const tasks = (byDay.get(iso) ?? []).slice().sort(byDayTaskTime(iso)),
 					shown = opts.compact ? tasks.slice(0, WEEK_COMPACT_MAX) : tasks;
 				return (
 					<div
 						key={iso}
-						class={`dashboard-calendar-week-row${iso === today ? ' is-today' : ''}${tasks.length ? ' has-tasks' : ''}`}
+						className={widgetClasses(
+							`dashboard-calendar-week-row${iso === today ? ' is-today' : ''}${tasks.length ? ' has-tasks' : ''}`,
+						)}
 					>
 						<div
-							class={`dashboard-calendar-week-row-head${opts.compact && opts.onDayClick ? ' is-clickable' : ''}`}
+							className={widgetClasses(
+								`dashboard-calendar-week-row-head${opts.compact && opts.onDayClick ? ' is-clickable' : ''}`,
+							)}
 							onClick={() => {
 								if (opts.compact) opts.onDayClick?.(iso);
 							}}
@@ -305,15 +329,17 @@ export function WeekGrid({ weekStart, byDay, opts, context }: GridProps & { week
 							}}
 							onBlur={() => opts.onDayLeave?.()}
 						>
-							<div class="dashboard-calendar-week-row-namewrap">
-								<div class="dashboard-calendar-week-row-name">{labels[index]}</div>
-								<div class="dashboard-calendar-week-row-date">
+							<div className={widgetClasses('dashboard-calendar-week-row-namewrap')}>
+								<div className={widgetClasses('dashboard-calendar-week-row-name')}>{labels[index]}</div>
+								<div className={widgetClasses('dashboard-calendar-week-row-date')}>
 									{date.getMonth() + 1}/{date.getDate()}
 								</div>
 							</div>
-							{tasks.length > 0 && <div class="dashboard-calendar-week-row-count">{tasks.length}</div>}
+							{tasks.length > 0 && (
+								<div className={widgetClasses('dashboard-calendar-week-row-count')}>{tasks.length}</div>
+							)}
 						</div>
-						<div class="dashboard-calendar-cell-list dashboard-calendar-week-row-list">
+						<div className={widgetClasses('dashboard-calendar-cell-list dashboard-calendar-week-row-list')}>
 							{shown.map((task) => (
 								<DayTask
 									key={task.path + ':' + task.line}
@@ -324,7 +350,7 @@ export function WeekGrid({ weekStart, byDay, opts, context }: GridProps & { week
 								/>
 							))}
 							{opts.compact && tasks.length > WEEK_COMPACT_MAX && (
-								<div class="dashboard-calendar-more">
+								<div className={widgetClasses('dashboard-calendar-more')}>
 									{t('calendar.moreCount', { count: tasks.length - WEEK_COMPACT_MAX })}
 								</div>
 							)}
@@ -353,6 +379,7 @@ export function WeekTimeGrid({ weekStart, byDay, opts, context }: GridProps & { 
 	);
 	const starts = timed.flat().map((event) => event.start),
 		earliest = starts.length ? Math.max(0, Math.min(...starts) - 60) : 420;
+	const weekTime = weekStart.getTime();
 	useLayoutEffect(() => {
 		const element = scroll.current,
 			win = element?.ownerDocument.defaultView;
@@ -361,83 +388,95 @@ export function WeekTimeGrid({ weekStart, byDay, opts, context }: GridProps & { 
 			element.scrollTop = Math.round((earliest * TIMEGRID_HOUR_PX) / 60);
 		});
 		return () => win.cancelAnimationFrame(id);
-	}, [weekStart.getTime()]);
+	}, [weekTime, earliest]);
 	return (
-		<div class="dashboard-calgrid">
-			<div class="dashboard-calgrid-head">
-				<div class="dashboard-calgrid-corner" />
+		<div className={widgetClasses('dashboard-calgrid')}>
+			<div className={widgetClasses('dashboard-calgrid-head')}>
+				<div className={widgetClasses('dashboard-calgrid-corner')} />
 				{days.map(({ date, iso }, index) => (
 					<div
 						key={iso}
-						class={`dashboard-calgrid-dayhead${iso === today ? ' is-today' : ''}${opts.onDayNumClick ? ' is-clickable' : ''}`}
+						className={widgetClasses(
+							`dashboard-calgrid-dayhead${iso === today ? ' is-today' : ''}${opts.onDayNumClick ? ' is-clickable' : ''}`,
+						)}
 						{...dayTrigger(iso, opts.onDayNumClick)}
 					>
-						<div class="dashboard-calgrid-dayhead-wd">{labels[index]}</div>
-						<div class="dashboard-calgrid-dayhead-date">
+						<div className={widgetClasses('dashboard-calgrid-dayhead-wd')}>{labels[index]}</div>
+						<div className={widgetClasses('dashboard-calgrid-dayhead-date')}>
 							{date.getMonth() + 1}/{date.getDate()}
 						</div>
 					</div>
 				))}
 			</div>
-			<div class="dashboard-calgrid-allday">
-				<div class="dashboard-calgrid-allday-corner">{t('calendar.allDay')}</div>
+			<div className={widgetClasses('dashboard-calgrid-allday')}>
+				<div className={widgetClasses('dashboard-calgrid-allday-corner')}>{t('calendar.allDay')}</div>
 				{days.map(({ iso }) => {
 					const tasks = (byDay.get(iso) ?? [])
 						.filter((task) => !taskDayTime(task, iso))
 						.sort(byDayTaskTime(iso));
 					return (
-						<div key={iso} class="dashboard-calgrid-allday-cell">
+						<div key={iso} className={widgetClasses('dashboard-calgrid-allday-cell')}>
 							{tasks.slice(0, 3).map((task) => (
 								<div
 									key={task.path + ':' + task.line}
-									class={`dashboard-calgrid-allday-chip${task.checked ? ' is-done' : ''}${opts.onOpenNote ? ' is-jumpable' : ''}`}
+									className={widgetClasses(
+										`dashboard-calgrid-allday-chip${task.checked ? ' is-done' : ''}${opts.onOpenNote ? ' is-jumpable' : ''}`,
+									)}
 									onClick={() => opts.onOpenNote?.(task.file, task.line)}
 								>
 									{task.text}
 								</div>
 							))}
-							{tasks.length > 3 && <div class="dashboard-calgrid-allday-more">+{tasks.length - 3}</div>}
+							{tasks.length > 3 && (
+								<div className={widgetClasses('dashboard-calgrid-allday-more')}>
+									+{tasks.length - 3}
+								</div>
+							)}
 						</div>
 					);
 				})}
 			</div>
-			<div ref={scroll} class="dashboard-calgrid-scroll">
-				<div class="dashboard-calgrid-body">
-					<div class="dashboard-calgrid-hours">
+			<div ref={scroll} className={widgetClasses('dashboard-calgrid-scroll')}>
+				<div className={widgetClasses('dashboard-calgrid-body')}>
+					<div className={widgetClasses('dashboard-calgrid-hours')}>
 						{Array.from({ length: 24 }, (_, hour) => (
-							<div key={hour} class="dashboard-calgrid-hour">
+							<div key={hour} className={widgetClasses('dashboard-calgrid-hour')}>
 								{String(hour).padStart(2, '0')}:00
 							</div>
 						))}
 					</div>
 					{days.map(({ iso }, index) => (
-						<div key={iso} class={`dashboard-calgrid-daycol${iso === today ? ' is-today' : ''}`}>
+						<div
+							key={iso}
+							className={widgetClasses(`dashboard-calgrid-daycol${iso === today ? ' is-today' : ''}`)}
+						>
 							{timed[index]!.map(({ task, time, start, end }) => (
 								<div
 									key={task.path + ':' + task.line}
-									class={`dashboard-calgrid-event${task.checked ? ' is-done' : ''}${task.priority ? ` prio-${task.priority}` : ''}${opts.onOpenNote ? ' is-jumpable' : ''}`}
+									className={widgetClasses(
+										`dashboard-calgrid-event${task.checked ? ' is-done' : ''}${task.priority ? ` prio-${task.priority}` : ''}${opts.onOpenNote ? ' is-jumpable' : ''}`,
+									)}
 									style={{
 										top: Math.round((start * TIMEGRID_HOUR_PX) / 60),
 										height: Math.max(Math.round(((end - start) * TIMEGRID_HOUR_PX) / 60), 20),
 									}}
 									onClick={(event) => {
-										if (!(event.target as HTMLElement).closest('input, a'))
+										if (!(event.target as HTMLElement).closest('input, [role="checkbox"], a'))
 											opts.onOpenNote?.(task.file, task.line);
 									}}
 								>
-									<div class="dashboard-calgrid-event-time">{time}</div>
-									<div class="dashboard-calgrid-event-title">
+									<div className={widgetClasses('dashboard-calgrid-event-time')}>{time}</div>
+									<div className={widgetClasses('dashboard-calgrid-event-title')}>
 										<InlineLinks text={task.text} app={opts.app} context={context} />
 									</div>
 									{!opts.compact && opts.onToggle && (
-										<input
-											class="dashboard-calgrid-event-check"
-											type="checkbox"
+										<Checkbox
+											className={widgetClasses('dashboard-calgrid-event-check')}
 											checked={task.checked}
+											aria-label={task.text}
+											onCheckedChange={(checked) => opts.onToggle?.(task, checked === true)}
 											onClick={(event) => {
-												event.preventDefault();
 												event.stopPropagation();
-												opts.onToggle?.(task, !task.checked);
 											}}
 										/>
 									)}
@@ -447,7 +486,7 @@ export function WeekTimeGrid({ weekStart, byDay, opts, context }: GridProps & { 
 					))}
 					{days.some((day) => day.iso === today) && (
 						<div
-							class="dashboard-calgrid-nowline"
+							className={widgetClasses('dashboard-calgrid-nowline')}
 							style={{
 								top: Math.round(((now.getHours() * 60 + now.getMinutes()) * TIMEGRID_HOUR_PX) / 60),
 							}}

@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { SyncEngine } from '../../src/modules/home/platform/board/sync.ts';
 import { DashboardSaveError } from '../../src/modules/home/core/board/save-state.ts';
-import { observeDashboardPromise, guardDashboardCallbacks } from '../../src/modules/home/ui/save-feedback.ts';
+import { observeBoardAction } from '../../src/modules/home/ui/board/actions.ts';
 import { generateDefaultMarkdown } from '../../src/modules/home/core/board/parser/default-document.ts';
 import { parse, serialize } from '../../src/modules/home/core/board/parser/index.ts';
 import { setLanguage } from '../../src/shared/i18n/index.ts';
@@ -50,8 +50,8 @@ test('reload refuses to discard a newer revision admitted during recovery IO',as
 });
 test('observed UI promises still reject to awaiting callers but ignored events do not leak',async()=>{
  const failures=[];const listener=e=>failures.push(e);process.on('unhandledRejection',listener);
- try{const error=new DashboardSaveError('conflict','handled by save state');const promise=Promise.reject(error);assert.equal(observeDashboardPromise(promise),promise);await assert.rejects(promise,e=>e===error);
- const callbacks=guardDashboardCallbacks({onToggle:async()=>{throw error;},settings:{id:1}});callbacks.onToggle();await new Promise(r=>setImmediate(r));assert.deepEqual(failures,[]);assert.deepEqual(callbacks.settings,{id:1});}finally{process.off('unhandledRejection',listener);}
+ try{const f=await fixture();f.disk+='\n<!-- external event edit -->';const promise=f.engine.updateBanner({quote:'React event'});assert.equal(observeBoardAction(promise),promise);await assert.rejects(promise,e=>e instanceof DashboardSaveError);
+ const onToggle=()=>{void observeBoardAction(f.engine.updateBanner({quote:'ignored React event'}).then(()=>assert.fail('conflict must not succeed')));};onToggle();await new Promise(r=>setImmediate(r));await f.engine.flush();assert.deepEqual(failures,[]);assert.equal(parse(f.recovery().local).banner.quote,'ignored React event');await f.engine.close();}finally{process.off('unhandledRejection',listener);}
 });
 test('both languages show actual recovery path and no obsolete directory',async()=>{
  const f=await fixture();await conflict(f);for(const language of ['zh','en','zh']){setLanguage(language);const message=Notice.messages.at(-1);assert.ok(message.includes(f.engine.getSaveState().recoveryPath));assert.ok(!message.includes('.dashboard-backup'));}await f.engine.close();

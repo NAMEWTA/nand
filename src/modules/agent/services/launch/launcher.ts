@@ -1,6 +1,6 @@
 import { Modal, Notice, Platform, type App } from 'obsidian';
 import { getAgent } from '../../core/launch/catalog';
-import { launchArgs } from '../../core/launch/flags';
+import { launchArgs, needsYoloConfirmation } from '../../core/launch/flags';
 import type { AgentId, AgentSettings } from '../../core/launch/types';
 import type { VaultSession } from '../../core/history/types';
 import { accountEnv, restoredAccountReference } from '../../platform/desktop/agents/accounts';
@@ -31,7 +31,11 @@ export interface LaunchHost {
 	start: (request: LaunchRequest) => Promise<void>;
 }
 
-export async function launchAgent(host: LaunchHost, agentId: AgentId): Promise<void> {
+export async function launchAgent(
+	host: LaunchHost,
+	agentId: AgentId,
+	options: { cwd?: string; accountId?: string } = {},
+): Promise<void> {
 	const settings = host.getAgentSettings();
 	const entry = settings.agents[agentId];
 	if (!entry?.enabled) {
@@ -39,12 +43,7 @@ export async function launchAgent(host: LaunchHost, agentId: AgentId): Promise<v
 		return;
 	}
 
-	if (needsYoloConfirm(settings, agentId)) {
-		const accepted = await confirmYolo(host.app);
-		if (!accepted) return;
-		settings.yoloAcknowledged = true;
-		await host.saveAgentSettings(settings);
-	}
+	if (!await confirmLaunchPermissions(host, agentId)) return;
 
 	const agent = getAgent(agentId);
 	const command = resolveCli(agent.detectCommand, entry.cliPath, '');
@@ -59,13 +58,13 @@ export async function launchAgent(host: LaunchHost, agentId: AgentId): Promise<v
 		return;
 	}
 
-	const env = await accountEnv(agent, entry.accountId, cwd, deviceId(host.app), true);
+	const env = await accountEnv(agent, options.accountId ?? entry.accountId, cwd, deviceId(host.app), true);
 	await host.start({
 		file: command,
 		args: accountArgs(agentId, launchArgs(settings, agentId), env),
 		agentId,
-		cwd,
-		env,
+		cwd: options.cwd ?? cwd,
+		env: { ...entry.env, ...env },
 		title: agent.title,
 	});
 }
@@ -78,19 +77,20 @@ export async function resumeAgent(host: LaunchHost, session: VaultSession): Prom
 	const settings = host.getAgentSettings();
 	const entry = settings.agents[session.agentId];
 	const agent = getAgent(session.agentId);
-	const { env, transcriptPath } = await restoredAccountReference(agent, session.env, vault, deviceId(host.app), session.transcriptPath);
+	const { env, transcriptPath } = await restoredAccountReference(
+		agent,
+		session.env,
+		vault,
+		deviceId(host.app),
+		session.transcriptPath,
+	);
 	await checkAccountTranscript(vault, env, transcriptPath);
 	if (!entry?.enabled) {
 		new Notice(t('agent.agentOff', { title: agent.title }));
 		return;
 	}
 
-	if (needsYoloConfirm(settings, session.agentId)) {
-		const accepted = await confirmYolo(host.app);
-		if (!accepted) return;
-		settings.yoloAcknowledged = true;
-		await host.saveAgentSettings(settings);
-	}
+	if (!await confirmLaunchPermissions(host, session.agentId)) return;
 
 	const command = resolveCli(agent.detectCommand, entry.cliPath, '');
 	if (!command) {
@@ -107,16 +107,18 @@ export async function resumeAgent(host: LaunchHost, session: VaultSession): Prom
 			accountArgs(session.agentId, launchArgs(settings, session.agentId), env),
 		),
 		cwd: session.cwd,
-		env,
+		env: { ...entry.env, ...env },
 		title: session.title || agent.title,
 	});
 }
 
-function needsYoloConfirm(settings: AgentSettings, agentId: AgentId): boolean {
-	if (settings.yoloAcknowledged) return false;
-	const mode = settings.agents[agentId]?.permissionMode ?? 'inherit';
-	const effective = mode === 'inherit' ? settings.globalPermissionMode : mode;
-	return effective === 'yolo' && launchArgs(settings, agentId).length > 0;
+export async function confirmLaunchPermissions(host: LaunchHost, agentId: AgentId): Promise<boolean> {
+	const settings = host.getAgentSettings();
+	if (!needsYoloConfirmation(settings, agentId)) return true;
+	if (!await confirmYolo(host.app)) return false;
+	settings.yoloAcknowledgedAgents = [...(settings.yoloAcknowledgedAgents ?? []), agentId];
+	await host.saveAgentSettings(settings);
+	return true;
 }
 
 function confirmYolo(app: App): Promise<boolean> {

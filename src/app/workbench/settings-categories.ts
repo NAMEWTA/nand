@@ -14,7 +14,6 @@ export function settingsCategories(plugin: DashboardPlugin): Array<{ id: string;
 		contacts: { labelKey: 'contacts.title', icon: 'contact-round' },
 		automation: { labelKey: 'automation.title', icon: 'workflow' },
 		sync: { labelKey: 'workbench.sync', icon: 'git-branch' },
-		news: { labelKey: 'news.title', icon: 'newspaper' },
 	};
 	return [
 		{ id: 'general', label: t('settings.tabGeneral'), icon: 'settings' },
@@ -23,6 +22,7 @@ export function settingsCategories(plugin: DashboardPlugin): Array<{ id: string;
 		...visibleProducts(productGates((id) => plugin.moduleEnabled(id)))
 			.filter((product): product is Exclude<SettingsProduct, 'home' | 'iconic'> => product !== 'home' && product !== 'iconic')
 			.map((product) => ({ id: product, label: t(products[product].labelKey), icon: products[product].icon })),
+		...(plugin.appSettings.get().devGallery ? [{ id: 'components', label: t('settings.componentGallery'), icon: 'blocks' }] : []),
 		{ id: 'about', label: t('settings.tabAbout'), icon: 'info' },
 	];
 }

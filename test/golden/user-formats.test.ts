@@ -22,28 +22,10 @@ import { parse, serialize } from '../../src/modules/home/core/board/parser/parse
 import { generateDefaultMarkdown } from '../../src/modules/home/core/board/parser/default-document';
 import { createMarkdown, parseRecord } from '../../src/modules/archives/core/persist/markdown';
 import { newRecord, type ArchiveRecord } from '../../src/modules/archives/core/model';
-import { upsertMaterial } from '../../src/modules/news/core/materials';
-import { favoriteMaterial, refreshEditionNote, serializeEdition, serializeMaterial } from '../../src/modules/news/platform/notes';
-import type { NewsEdition } from '../../src/modules/news/core/model';
-import { messages as newsMessages } from '../../src/modules/news/i18n';
-import { getLanguage, registerMessages, setLanguage } from '../../src/shared/i18n';
 import { emptyPipeline } from '../../src/modules/home/core/pipeline/model';
 import { patchPipelineFields } from '../../src/modules/home/platform/pipeline/vault';
 import { normalizeDashboardSettings } from '../../src/modules/home/core/board/settings';
-import { newsSettings } from '../../src/modules/news/settings';
 
-test('news widget instances persist independent view, count, summary and stale configuration', async () => {
-	const widgets = [
-		{ id: 'hot-main', mode: 'hot', name: 'Top events', count: 5, showSummary: false, staleMinutes: 30 },
-		{ id: 'view-one', mode: 'view', name: 'Research', viewId: 'research-view', count: 3, showSummary: true, staleMinutes: 120 },
-		{ id: 'view-two', mode: 'view', name: '', viewId: 'tools-view', count: 8, showSummary: false, staleMinutes: 60 },
-	];
-	const saved = newsSettings.normalize({ widgets }).widgets;
-	assert.deepEqual(saved, widgets);
-	const serialized = JSON.stringify({ widgets: saved }, null, 2) + '\n';
-	await expect(serialized).toMatchFileSnapshot(snapshot('news-widget-settings.json'));
-	assert.deepEqual(newsSettings.normalize(JSON.parse(serialized)).widgets, widgets);
-});
 import { editImageFocal } from '../../src/modules/home/core/board/focal-point';
 import { homeSettings } from '../../src/modules/home/settings';
 
@@ -141,31 +123,7 @@ test('board skills persist each button destination and direct-send choice', asyn
 	assert.equal(serialize(parse(text)), text);
 });
 
-test('news daily edition keeps local boundaries, citations and reader-owned annotations', async () => {
-	const language = getLanguage(); registerMessages(newsMessages); setLanguage('zh');
-	try {
-		const material = await upsertMaterial(undefined, { sourceId: 'example', url: 'https://example.com/story', title: '模型发布', summary: '官方公布模型。', publishedAt: Date.UTC(2026, 9, 9, 4) }, Date.UTC(2026, 9, 9, 5));
-		const edition: NewsEdition = { id: 'edition-2026-10-09', date: '2026-10-09', startAt: Date.UTC(2026, 9, 8, 16), endAt: Date.UTC(2026, 9, 9, 16), timeZone: 'Asia/Shanghai', offsetMinutes: -480, generatedAt: Date.UTC(2026, 9, 9, 6),
-			main: [{ materialId: material.id, storyId: 'event-one', occurrenceIds: ['occ-one'], relatedIds: [], sourceIds: ['example'], participants: 3, official: true, importance: 95, followUp: '2026-10-08' }], flashes: [], materialIds: [material.id], storyIds: ['event-one'] };
-		const markdown = serializeEdition(edition, [material], [], []);
-		await expect(markdown).toMatchFileSnapshot(snapshot('news-edition.md'));
-		const custom = markdown.replace('---\n', '---\nreader: keep # comment\n') + '\n## 我的批注\n明天再看\n';
-		const next = refreshEditionNote(custom, edition, [{ ...material, summary: '更新的短摘要。' }], [], []);
-		assert.match(next, /reader: keep # comment/); assert.match(next, /明天再看/); assert.match(next, /更新的短摘要/);
-	} finally { setLanguage(language); }
-});
 
-test('news favorites keep visible Markdown identity, source metadata, excerpt and reader annotation', async () => {
-	const language = getLanguage();
-	registerMessages(newsMessages);
-	setLanguage('zh');
-	try {
-		const material = await upsertMaterial(undefined, { sourceId: 'example', sourceItemId: 'article-1', url: 'https://example.com/news?topic=ai', title: '新闻: 示例', summary: '摘要，不转载全文。', publishedAt: Date.UTC(2026, 9, 9, 12) }, Date.UTC(2026, 9, 9, 13));
-		const markdown = serializeMaterial(material, '我的想法\n\n- 后续跟进');
-		await expect(markdown).toMatchFileSnapshot(snapshot('news-favorite.md'));
-		assert.equal(favoriteMaterial(markdown)?.id, material.id);
-	} finally { setLanguage(language); }
-});
 
 /** Writes `data` through the production Markdown collection storage; returns every file it created plus what a restart reads back. */
 async function writeCollection<T>(codec: DocumentCollectionCodec<T>, data: T): Promise<{ files: string; readBack: T }> {
@@ -362,4 +320,32 @@ test('archive records keep their Markdown layout and parse back without errors',
 		files.push(`=== ${value.path} ===\n${markdown}`);
 	}
 	await expect(files.join('\n')).toMatchFileSnapshot(snapshot('archives.md'));
+});
+
+test('Apex P2 RSS, WeRead and TickTick configurations round trip without carrying service credentials', async () => {
+	const board = parse(
+		'---\ncolumns:\n - name: Feeds\n   type: rss\n - name: Books\n   type: weread\n - name: Tasks\n   type: ticktick\n---\n## Feeds\n\n## Books\n\n## Tasks\n',
+	);
+	board.columns[0]!.rssConfig = {
+		feeds: [{ name: 'News', url: 'https://example.com/rss', group: 'Tech' }],
+		downloadFolder: 'NAND/RSS',
+		groups: ['Tech'],
+		groupBy: 'feed',
+		pageSize: 50,
+	};
+	board.columns[1]!.wereadConfig = {
+		widgets: [
+			{ id: 'shelf', view: 'shelf', groupBy: 'readingState', progressFilters: ['reading'] },
+			{ id: 'stats', view: 'stats', statsItems: ['trend', 'kpi'] },
+			{ id: 'notes', view: 'notes' },
+		],
+	};
+	board.columns[2]!.ticktickConfig = { view: 'lists', hiddenProjects: ['archive'], projectWidths: { inbox: 320 } };
+	const text = serialize(board);
+	await expect(text).toMatchFileSnapshot(snapshot('board-p2.md'));
+	const restored = parse(text);
+	expect(restored.columns.map((c) => [c.rssConfig, c.wereadConfig, c.ticktickConfig])).toMatchObject(
+		board.columns.map((c) => [c.rssConfig, c.wereadConfig, c.ticktickConfig]),
+	);
+	assert.equal(serialize(restored), text);
 });

@@ -7,7 +7,7 @@ import { launchFreshVault } from './fresh-vault.mjs';
 
 const board = '---\nbanner:\n  quote: "Small steps each day make room for meaningful progress."\n  author: "Layout fixture"\n---\n\n## Review section\n\n### Visible card\n\nContent follows the shortcut bar.\n';
 const runtime = await launchFreshVault({ root: process.argv[2], port: 9260, files: { 'dashboard.md': board, 'Welcome.md': '# Fixture note\n' }, settings: { version: 1, namespaces: {
-	app: { language: 'en', introSeen: true, modules: { home: true, archives: false, automations: false, icons: false, agent: false, browser: false, news: false, sync: false, comments: false, notifications: false } },
+	app: { language: 'en', introSeen: true, modules: { home: true, archives: false, automations: false, icons: false, agent: false, browser: false, sync: false, comments: false, notifications: false } },
 	home: { quickNotesEnabled: true, widgetLunarEnabled: false, widgetWeatherEnabled: false, widgetMusicEnabled: false, widgetQuickActionsEnabled: false, pomodoroEnabled: false },
 } } });
 const c = runtime.connection, rows = [];

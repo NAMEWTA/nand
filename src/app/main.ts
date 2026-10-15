@@ -19,7 +19,7 @@ import { refreshLeafTitle, retitleDeferredLeaves, type LeafTitlePair } from '../
 import { registerLocalizedCommand, type LocalizedCommand } from '../host/obsidian/localized-command';
 import { setDiagnosticRoots } from '../shared/diagnostics/redact';
 import { getLanguage, onLanguageChanged, setLanguage, t, tFor } from '../shared/i18n/index';
-import { refreshLocalizedDom } from '../ui/primitives/localized-dom';
+import { refreshLocalizedDom } from '../host/obsidian/localized-dom';
 import { AUTOMATIONS, type AutomationsService } from '../modules/automations/api';
 import { COMMENTS_VIEW_TYPE, CommentsLeaf } from './workbench/comments-leaf';
 import { collectReferences } from '../host/obsidian/references';

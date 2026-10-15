@@ -8,6 +8,7 @@ import { createServer } from 'node:http';
 import { once } from 'node:events';
 import { setTimeout as delay } from 'node:timers/promises';
 import { connect } from './cdp.mjs';
+import { probeHomeRecords } from './home-records-probe.mjs';
 assert.equal(process.env.NAND_ALLOW_BROWSER_E2E, '1');
 for (const key of ['NAND_ACCEPTANCE_DIR', 'NAND_ACCEPTANCE_VAULT', 'NAND_ACCEPTANCE_PROFILE']) assert.ok(path.isAbsolute(process.env[key] || ''), key);
 assert.match(process.env.NAND_EXPECT_MAIN_SHA || '', /^[a-f0-9]{64}$/);
@@ -96,7 +97,7 @@ try {
 		const shell = await call(`({layout:nandProbe.layout(),rail:nandProbe.rail(),panel:nandProbe.panel(),header:nandProbe.header(),nativeHeader:getComputedStyle(${wbExpr}.containerEl.querySelector('.view-header')).display})`);
 		assert.equal(shell.layout.kind, 'wide'); assert.equal(shell.layout.panelOpen, true); assert.ok(shell.layout.width >= 960);
 		assert.ok(Math.abs(shell.layout.main - (shell.layout.width - 52 - shell.layout.panel)) <= 2, JSON.stringify(shell.layout));
-		assert.deepEqual(shell.rail.filter((r) => r.slot === 'top').map((r) => r.id), ['dashboard', 'browser', 'contacts', 'automations', 'news', 'comments']);
+		assert.deepEqual(shell.rail.filter((r) => r.slot === 'top').map((r) => r.id), ['dashboard', 'browser', 'contacts', 'automations',  'comments']);
 		assert.deepEqual(shell.rail.filter((r) => r.slot === 'bottom').map((r) => r.id), ['notifications', 'settings']);
 		assert.deepEqual(shell.rail.filter((r) => r.active).map((r) => r.id), ['dashboard']);
 		assert.equal(shell.rail.find((r) => r.active).expanded, 'true');
@@ -314,17 +315,7 @@ try {
 		assert.equal(await call(`app.workspace.getLeavesOfType('nand-workbench-view').length`), 1);
 		assert.equal(await call(`nandProbe.target().feature`), 'browser');
 		check('closing-a-browser-tab-keeps-the-workbench-and-shows-the-neighbour');
-		// Browser: the agent bridge is opt-in, the settings page comes from the module, off closes guests.
-		const bridgeOff = await call(`(async()=>Object.keys(await app.plugins.plugins.nand.services.peek({owner:'browser',id:'agent-bridge'}).environment()))()`);
-		assert.deepEqual(bridgeOff, []);
-		await call(`app.plugins.plugins.nand.openWorkbench({feature:'settings',section:'browser'})`);
-		const accessRow = await until(`(()=>{const rows=[...nandProbe.visiblePage()?.querySelectorAll('.setting-item')??[]];const row=rows.find(r=>/智能体会话|agent sessions/i.test(r.innerText));return row&&{rows:rows.length,checked:row.querySelector('.checkbox-container')?.classList.contains('is-enabled')}})()`, 'browser settings page');
-		assert.equal(accessRow.checked, false);
-		await call(`[...nandProbe.visiblePage().querySelectorAll('.setting-item')].find(r=>/智能体会话|agent sessions/i.test(r.innerText)).querySelector('.checkbox-container').click()`);
-		const bridgeOn = await until(`(async()=>{const env=await app.plugins.plugins.nand.services.peek({owner:'browser',id:'agent-bridge'}).environment();return env.NAND_BROWSER_TOKEN?Object.keys(env).sort():false})()`, 'bridge after opting in', 30000);
-		assert.ok(bridgeOn.includes('NAND_BROWSER_CLI'));
-		await call(`[...nandProbe.visiblePage().querySelectorAll('.setting-item')].find(r=>/智能体会话|agent sessions/i.test(r.innerText)).querySelector('.checkbox-container').click()`);
-		check('browser-agent-bridge-is-opt-in-from-the-module-settings-page', { accessRow, bridgeOn });
+		// Turning the browser off closes its native guests.
 		await call(`app.plugins.plugins.nand.setModuleEnabled('browser',false)`); await settle();
 		const browserOff = await call(`({surfaces:nandProbe.surfaces('nand-browser-view').length,rail:nandProbe.rail().map(r=>r.id),service:!!app.plugins.plugins.nand.services.peek({owner:'browser',id:'open'})})`);
 		assert.deepEqual([browserOff.surfaces, browserOff.rail.includes('browser'), browserOff.service], [0, false, false]);
@@ -415,24 +406,10 @@ try {
 		check('home-overview-calendar-and-recent-visible', overview);
 		await shot('home-overview-1280');
 
-		// ---- Records pages: habit, expense, Pomodoro and reading records are pages under Home ----------
+		// ---- Home statistics use document-owned dialogs; records is no longer a route. ----------
 		await call(`require('@electron/remote').getCurrentWindow().setSize(1440,1000)`); await settle();
-		await call(`(async()=>{const p=app.plugins.plugins.nand;const home=p.settingsNamespace('home');Object.assign(home.get(),{widgetHabitEnabled:true,widgetExpenseEnabled:true,pomodoroEnabled:true,readingEnabled:true});await home.touch();await p.openWorkbench({feature:'dashboard'});})()`);
-		const recordLabels = await until(`(()=>{const labels=nandProbe.panel()?.items.map(i=>i.label)??[];return ['Habits','Expenses','Pomodoro','Reading'].every(l=>labels.includes(l))&&labels})()`, 'home panel lists the records pages');
-		const strip = await until(`(()=>{const s=nandProbe.surfaces('nand-dashboard-view')[0];return s?.contentEl.querySelectorAll('.dashboard-sidebar-widgets-row').length??0})()`, 'stacked widget strip');
-		const recordPages = {};
-		for (const [label, section, cls] of [['Habits', 'habits', 'dashboard-habit-stats-modal'], ['Expenses', 'expenses', 'dashboard-expense-stats-modal'], ['Pomodoro', 'pomodoro', 'dashboard-pomodoro-stats-modal'], ['Reading', 'reading', 'dashboard-reading-stats-modal']]) {
-			await call(`nandProbe.clickPanelItem(${JSON.stringify(label)})`);
-			recordPages[section] = await until(`(()=>{const t=nandProbe.target();const body=nandProbe.visiblePage()?.querySelector('.nand-records-page-body.${cls}');return t?.feature==='records'&&t.section===${JSON.stringify(section)}&&body&&body.childElementCount>0&&{rail:nandProbe.rail().filter(r=>r.active).map(r=>r.id),title:nandProbe.header()?.title,active:nandProbe.panel()?.items.filter(i=>i.active).map(i=>i.label),modals:document.querySelectorAll('.modal-container').length}})()`, 'records page ' + section);
-			assert.deepEqual(recordPages[section].rail, ['dashboard']); assert.deepEqual(recordPages[section].active, [label]); assert.equal(recordPages[section].modals, 0);
-			await shot('records-' + section);
-		}
-		await call(`app.plugins.plugins.nand.openWorkbench({feature:'dashboard'})`);
-		await until(`!!nandProbe.surfaces('nand-dashboard-view')[0]?.contentEl.querySelector('.dashboard-sidebar-pomodoro-stats-btn')`, 'pomodoro widget');
-		await call(`nandProbe.surfaces('nand-dashboard-view')[0].contentEl.querySelector('.dashboard-sidebar-pomodoro-stats-btn').click()`);
-		const statsButton = await until(`(()=>{const t=nandProbe.target();return t?.feature==='records'&&t.section==='pomodoro'&&{modals:document.querySelectorAll('.modal-container').length}})()`, 'stats button opens the records page');
-		assert.equal(statsButton.modals, 0);
-		check('records-are-pages-under-home-and-boards-are-stacked', { recordLabels, strip, recordPages, statsButton });
+		await call(`(async()=>{const p=app.plugins.plugins.nand;const home=p.runtime.store.handleOf('home');await home.update(s=>({...s,widgetHabitEnabled:true,widgetExpenseEnabled:true,pomodoroEnabled:true,readingEnabled:true}));await p.openWorkbench({feature:'dashboard'});})()`);
+		check('home-statistics-dialogs-and-no-records-route', await probeHomeRecords({ call, until, shot, escape: async () => { await c.send('Input.dispatchKeyEvent', { type: 'keyDown', key: 'Escape', code: 'Escape', windowsVirtualKeyCode: 27 }); await c.send('Input.dispatchKeyEvent', { type: 'keyUp', key: 'Escape', code: 'Escape', windowsVirtualKeyCode: 27 }); } }));
 
 		// ---- Agent terminal on the native helper ---------------------------
 		await call(`require('@electron/remote').getCurrentWindow().setSize(1440,1000)`);

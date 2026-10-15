@@ -452,7 +452,7 @@ export class ReadingApplication {
 
 function normalizeBook(b: BookInfo): BookInfo {
 	return {
-		id: b.id ?? crypto.randomUUID(),
+		...(b.id ? { id: b.id } : {}),
 		title: b.title ?? '',
 		author: b.author ?? '',
 		coverUrl: b.coverUrl ?? '',

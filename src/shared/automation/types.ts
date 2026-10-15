@@ -9,9 +9,11 @@ export interface AgentUsage {
 }
 export type NotificationChannelId = 'in-app' | 'system';
 export type ScheduleSpec =
-	{ kind: 'manual' } | { kind: 'once'; at: number } | { kind: 'recurring'; expression: string; start: number; timezone?: string };
+	| { kind: 'manual' }
+	| { kind: 'once'; at: number }
+	| { kind: 'recurring'; expression: string; start: number; timezone?: string };
 export interface SourceRef {
-	kind: 'dashboard' | 'contacts' | 'widget' | 'news' | 'browser' | 'browser-workflow';
+	kind: 'dashboard' | 'contacts' | 'widget';
 	path: string;
 	id: string;
 }
@@ -26,7 +28,6 @@ export interface AgentSessionRef {
 	terminalId?: string;
 }
 export type AutomationAction =
-	| BrowserWorkflowAction
 	| { kind: 'script'; script: string; cwd: string; shell: 'powershell' | 'bash' }
 	| { kind: 'obsidian-command'; command: string }
 	| { kind: 'open-file'; path: string }
@@ -40,16 +41,8 @@ export type AutomationAction =
 			prompt: string;
 			sessionMode: 'fresh' | 'reuse' | 'specific';
 			session?: AgentSessionRef;
+			extraArgs?: string;
 	  };
-/** Only public values belong in saved definitions. Secrets and review grants stay in the producer's memory. */
-export interface BrowserWorkflowAction {
-	kind: 'browser-workflow';
-	workflowId: string;
-	version: number;
-	variables: Record<string, string | number | boolean>;
-	/** Explicit persistent page/account choices; a runner must bind their current runtime generations. */
-	scope: Array<{ id: string; pageId: string; profileId: string }>;
-}
 export interface AutomationActionCompletion extends AutomationMessage {
 	status: 'succeeded' | 'failed' | 'cancelled' | 'interrupted';
 	output?: string;
@@ -61,6 +54,8 @@ export interface AutomationActionHandle {
 	open(): Promise<void>;
 }
 export interface AutomationDefinition {
+	/** Removed actions are read-only tombstones; retain their original document until explicit deletion. */
+	removedAction?: import('../storage/document-collection').CollectionDocument;
 	id: string;
 	name: string;
 	enabled: boolean;
@@ -71,6 +66,8 @@ export interface AutomationDefinition {
 	channels: NotificationChannelId[];
 	notifyOn: 'always' | 'failure' | 'never';
 	graceMinutes: number;
+	precheck?: { command: string; shell: 'powershell' | 'bash' };
+	templateId?: string;
 	source?: SourceRef;
 	createdAt: number;
 	updatedAt: number;
@@ -83,7 +80,8 @@ export interface AutomationMessage {
 	errorParams?: Record<string, string | number>;
 }
 export interface AutomationRun extends AutomationMessage {
-	workflowInvocation?: { invocationId: string; identity: string };
+	timeline?: Array<{ phase: 'queued' | 'precheck' | 'launching' | 'submitted' | 'completed'; at: number }>;
+	precheckResult?: { exitCode: number | null; timedOut: boolean; output: string };
 	invocation?: { request: AgentDispatchRequest; receipt?: AgentDispatchReceipt };
 	definition?: AutomationDefinition;
 	notificationAttempted?: boolean;

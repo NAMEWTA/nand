@@ -1,7 +1,7 @@
 import { deviceId as getDeviceId } from '../../../host/obsidian/storage/device-id';
 import { privateVaultStorage } from '../../../host/obsidian/storage/private-storage';
 import { AGENT_CATALOG, getAgent } from '../core/launch/catalog';
-import { effectivePermission, launchArgs } from '../core/launch/flags';
+import { launchArgs, needsYoloConfirmation } from '../core/launch/flags';
 import type { AgentId, AgentSettings } from '../core/launch/types';
 import { AutomationHooks, type NativeHookEvent } from '../platform/desktop/hooks/automation-hooks';
 import { accountEnv, restoredAccountReference } from '../platform/desktop/agents/accounts';
@@ -12,6 +12,7 @@ import { checkAccountTranscript } from '../platform/desktop/agents/transcript';
 import { accountArgs } from '../platform/desktop/agents/account-args';
 import { isCwdInsideVault } from '../platform/desktop/history/scope';
 import { AutomationError } from '../../../shared/automation/errors';
+import { validatedExtraArgs } from '../../../shared/automation/extra-args';
 import type {
 	AgentRunHandle,
 	AgentRuntimePort,
@@ -277,11 +278,7 @@ export class TerminalAutomationRuntime implements AgentRuntimePort {
 		} catch {
 			throw new AutomationError('cwdInvalid');
 		}
-		if (
-			effectivePermission(settings, id) === 'yolo' &&
-			!settings.yoloAcknowledged &&
-			launchArgs(settings, id).length
-		)
+		if (needsYoloConfirmation(settings, id))
 			throw new AutomationError('permissionRequired');
 		if (
 			action.sessionMode === 'specific' &&
@@ -411,7 +408,7 @@ export class TerminalAutomationRuntime implements AgentRuntimePort {
 				const args = automationArgs(
 					id,
 					action.prompt,
-					accountArgs(id, launchArgs(settings, id), env),
+					[...accountArgs(id, launchArgs(settings, id), env), ...(action.sessionMode === 'reuse' ? [] : validatedExtraArgs(action.agentId, action.extraArgs ?? ''))],
 					action.sessionMode === 'specific' ? action.session : undefined,
 				);
 				const argv = [command, ...args];
@@ -434,7 +431,7 @@ export class TerminalAutomationRuntime implements AgentRuntimePort {
 						file: command,
 						args,
 						cwd: action.cwd,
-						env: { ...contextEnv, ...env, ...hook.env, ...(execution.kind === 'automation' ? { NAND_AUTOMATION_RUN_ID: execution.id } : {}) },
+						env: { ...entry.env, ...contextEnv, ...env, ...hook.env, ...(execution.kind === 'automation' ? { NAND_AUTOMATION_RUN_ID: execution.id } : {}) },
 						signal: execution.signal,
 						agentId: id,
 						automated: true,

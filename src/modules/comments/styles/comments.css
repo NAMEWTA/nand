@@ -1,0 +1,40 @@
+/* Adapted from jonaas-dev/obsidian-margin-comments f727e38 (MIT), Copyright (c) 2026 jonaas-dev: styles.css (editor and reading marks). */
+.nand-comments-editor { --nd-comment-color: var(--interactive-accent); }
+.nand-comment-hl {
+	background: color-mix(in srgb, var(--nd-comment-color, var(--interactive-accent)) 22%, transparent);
+	border-bottom: 1px solid color-mix(in srgb, var(--nd-comment-color, var(--interactive-accent)) 60%, transparent);
+	cursor: pointer;
+}
+.nand-comments-editor .nand-comment-line { background: color-mix(in srgb, var(--nd-comment-color) 8%, transparent); }
+.nand-comments-editor .nand-comment-gutter { width: 18px; }
+.nand-comments-editor .nand-comment-marker {
+	position: relative;
+	display: inline-flex;
+	width: 18px;
+	height: 18px;
+	align-items: center;
+	justify-content: center;
+	color: var(--text-muted);
+	cursor: pointer;
+}
+.nand-comments-editor .nand-comment-marker::before { content: ''; position: absolute; inset: -7px; }
+.nand-comments-editor .nand-comment-marker.is-open { color: var(--interactive-accent); }
+.nand-comments-editor .nand-comment-marker:hover { color: var(--text-normal); }
+.nand-comments-editor .nand-comment-marker-icon { position: relative; display: inline-flex; }
+.nand-comments-editor .nand-comment-marker svg { width: 14px; height: 14px; }
+.nand-comments-editor .nand-comment-marker-count {
+	position: absolute;
+	top: -6px;
+	right: -6px;
+	font-size: var(--font-smallest);
+	line-height: 1;
+	color: var(--text-on-accent);
+	background: var(--interactive-accent);
+	border-radius: var(--radius-s);
+}
+.nand-comment-reading-marker { color: var(--interactive-accent); min-width: 32px; min-height: 32px; }
+.nand-comment-reading-marker svg { width: 14px; height: 14px; }
+@media (pointer: coarse) {
+	.nand-comments-editor .nand-comment-marker::before { inset: -13px; }
+	.nand-comment-reading-marker { min-width: 44px; min-height: 44px; }
+}

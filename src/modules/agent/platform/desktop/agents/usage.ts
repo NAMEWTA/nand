@@ -162,6 +162,7 @@ async function readCodexUsage(home: string): Promise<ProviderSnapshot> {
 	const plan = typeof data.plan_type === 'string' ? data.plan_type : null;
 	return {
 		provider: 'Codex',
+  planType: plan ?? undefined,
 		account: plan,
 		status: windows.length > 0 ? t('agent.usage.status.readOk') : t('agent.usage.status.noNumbers'),
 		statusKey: windows.length > 0 ? 'readOk' : 'noNumbers',

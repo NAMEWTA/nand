@@ -11,6 +11,8 @@ export interface AgentEntrySettings {
 	cliPath: string;
 	permissionMode: AgentPermissionMode;
 	extraArgs: string;
+ argsOverride?: string;
+ env?: Record<string, string>;
 	accountId: string;
 	showUsage: boolean;
 }
@@ -18,6 +20,7 @@ export interface AgentEntrySettings {
 export interface AgentSettings {
 	globalPermissionMode: PermissionMode;
 	yoloAcknowledged: boolean;
+ yoloAcknowledgedAgents?: AgentId[];
 	usageRefreshSec: number;
 	showUsageInStatusBar: boolean;
 	agents: Record<AgentId, AgentEntrySettings>;
@@ -37,6 +40,7 @@ export interface UsageSnapshot {
 	source?: string;
 	agentId: AgentId;
 	provider: string;
+ planType?: string;
 	account: string | null;
 	status: string;
 	/** Known local states are translated when displayed; provider errors retain their original text. */

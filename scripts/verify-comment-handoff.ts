@@ -1,10 +1,11 @@
+import { createAnchor } from '../src/modules/comments/core/anchor';
 import assert from 'node:assert/strict';
 import { CommentStore, type CommentFs } from '../src/modules/comments/core/store';
 import { beginCommentStoreActivation } from '../src/modules/comments/platform/store-handoff';
 
 const timers = { set: (callback: () => void, ms: number) => setTimeout(callback, ms), clear: (handle: unknown) => clearTimeout(handle as ReturnType<typeof setTimeout>) };
 
-const input = { start: 0, end: 5, quote: { exact: 'alpha', prefix: '', suffix: '' }, text: 'original' };
+const input = { anchor: createAnchor('alpha', 0, 5), text: 'original' };
 const root = '.nand/editor/comments/';
 function deferred() {
 	let resolve!: () => void;
@@ -55,7 +56,7 @@ export async function verifyCommentHandoff(): Promise<void> {
 			else await waiting;
 			const fresh = new CommentStore(fs, { timers, debounceMs: 1e6 });
 			const loaded = await fresh.loadFile('note.md');
-			if (phase === 'sidecar') assert.deepEqual(loaded[0]!.thread.map(m => m.text), ['original', 'accepted']);
+			if (phase === 'sidecar') assert.deepEqual(loaded[0]!.messages.map(m => m.text), ['original', 'accepted']);
 			else { assert.deepEqual(loaded, []); await assert.rejects(fresh.reply(thread.id, 'ghost'), /not found/); }
 			assert.equal(files.has(root + 'pending.json'), false);
 			await fresh.close(); checks++;

@@ -1,27 +1,11 @@
 import { contentFiles, type ContentFile } from '../../../../host/obsidian/storage/content-files';
 import { contentPath } from '../../../../shared/storage/content-paths';
 import { App, Notice } from 'obsidian';
-import { h } from 'preact';
 import type { DashboardSettings, PinnedNote, QuickNotePreset } from '../../core/board/types/index';
-import {
-	getOrCreateDailyNote,
-	substituteTemplateVars,
-} from '../../platform/calendar/daily-notes';
+import { getOrCreateDailyNote, substituteTemplateVars } from '../../platform/calendar/daily-notes';
 import { MomentLike, nowMoment } from '../../../../host/obsidian/datetime';
 import { t } from '../../../../shared/i18n/index';
-import type { RenderCallbacks } from '../render-contract';
-import { mountDashboardPanel } from '../renderer/render-context';
 import { showPromptDialog } from '../ui/prompt-dialog';
-import { QuickNotesPanel } from './QuickNotesPanel';
-
-export function renderQuickNoteRegion(
-	container: HTMLElement,
-	settings: DashboardSettings,
-	callbacks: RenderCallbacks,
-): void {
-	const root = container.createDiv({ cls: 'dashboard-quicknote' });
-	mountDashboardPanel(root, h(QuickNotesPanel, { settings, callbacks, root }));
-}
 
 // ── Behaviors (called from view.ts callbacks) ──────────────────────────────
 
@@ -76,7 +60,9 @@ export async function captureThought(app: App, settings: DashboardSettings, text
 	if (target) {
 		const file = await getOrCreateNote(app, target);
 		if (file) {
-			await contentFiles(app).process(file.path, raw => placeCaptureLine(raw ?? '', line, settings.quickCapturePosition));
+			await contentFiles(app).process(file.path, (raw) =>
+				placeCaptureLine(raw ?? '', line, settings.quickCapturePosition),
+			);
 			new Notice(t('quickNote.captured'));
 			return;
 		}

@@ -141,6 +141,7 @@ export async function precheckEmbed(
 	url: string,
 	fetcher: HeaderFetcher = requestUrlFetcher,
 	timeoutMs: number = PRECHECK_TIMEOUT_MS,
+	win: Window = window,
 ): Promise<PrecheckResult> {
 	if (!isValidWebUrl(url)) return { verdict: 'unknown', reason: 'invalid' };
 	const cached = getCachedVerdict(url);
@@ -153,10 +154,10 @@ export async function precheckEmbed(
 		const headers = await Promise.race([
 			fetcher(url),
 			new Promise<never>((_, reject) => {
-				timer = window.setTimeout((): void => reject(new Error('precheck timeout')), timeoutMs);
+				timer = win.setTimeout((): void => reject(new Error('precheck timeout')), timeoutMs);
 			}),
 		]);
-		if (timer !== undefined) window.clearTimeout(timer);
+		if (timer !== undefined) win.clearTimeout(timer);
 		const verdict = classifyFramePolicy(headers);
 		verdictCache.set(url, { verdict, at: Date.now() });
 		return {
@@ -164,7 +165,7 @@ export async function precheckEmbed(
 			reason: verdict === 'blocked' ? (headers['x-frame-options'] !== undefined ? 'xfo' : 'csp') : undefined,
 		};
 	} catch (err) {
-		if (timer !== undefined) window.clearTimeout(timer); // fetch lost the race — cancel the bound
+		if (timer !== undefined) win.clearTimeout(timer); // fetch lost the race — cancel the bound
 		console.error('[Dashboard] web precheck failed:', url, err);
 		verdictCache.set(url, { verdict: 'unknown', at: Date.now() });
 		return { verdict: 'unknown', reason: 'network' };

@@ -1,3 +1,4 @@
+import reactHooks from 'eslint-plugin-react-hooks';
 import noObsidianThenable from './scripts/no-obsidian-thenable.mjs';
 import tseslint from 'typescript-eslint';
 import obsidianmd from "eslint-plugin-obsidianmd";
@@ -25,7 +26,13 @@ export default tseslint.config(
 		},
 	},
 	...obsidianmd.configs.recommended,
+	{ files: ['src/**/*.tsx'], plugins: { 'react-hooks': reactHooks }, rules: { ...reactHooks.configs.recommended.rules } },
 	{ plugins: { nand: { rules: { "no-obsidian-thenable": noObsidianThenable } } }, rules: { "nand/no-obsidian-thenable": "error" } },
+	// TanStack Virtual owns a mutable measurement instance. This component intentionally
+	// opts out of React Compiler memoization; the virtualizer drives its own updates.
+	{ files: ['src/modules/agent/ui/history/SessionHistoryPanel.tsx'], rules: { 'react-hooks/incompatible-library': 'off' } },
+	// keyCode 229 is the WebKit IME fallback after compositionend, before Enter keydown.
+	{ files: ['src/ui/react/ime.ts'], rules: { '@typescript-eslint/no-deprecated': 'off' } },
 	// TypeScript resolves identifiers itself; core `no-undef` misreads type-only globals such as `NodeJS`.
 	{ files: ["**/*.ts", "**/*.tsx"], rules: { "no-undef": "off" } },
 	// Desktop folders are the only place Node and Electron are allowed (architecture rule R5, enforced by
@@ -50,6 +57,7 @@ export default tseslint.config(
 	globalIgnores([
 		"node_modules",
 		"dist",
+		"build",
 		"esbuild.config.mjs",
 		"eslint.config.js",
 		"eslint.config.mts",

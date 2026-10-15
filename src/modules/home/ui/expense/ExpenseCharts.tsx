@@ -1,8 +1,10 @@
-import { Fragment } from 'preact';
-import { useRef, useState } from 'preact/hooks';
+// Layout and interaction adapted from PandoraReads/apex-dashboard ac4d2c7 (MIT), Copyright (c) 2025 PandoraReads: src/expense-stats-modal.ts
+import { widgetClasses } from '../theme/widget-classes';
+import { Fragment } from 'react';
+import { useState } from 'react';
 import type { ExpenseBar, ExpenseRankRow, ExpenseSlice } from './expense-charts';
 function Empty({ text }: { text: string }) {
-	return <div class="dashboard-expense-donut-empty">{text}</div>;
+	return <div className={widgetClasses('dashboard-expense-donut-empty')}>{text}</div>;
 }
 export function ExpenseDonut({
 	slices,
@@ -16,50 +18,65 @@ export function ExpenseDonut({
 	const [hover, setHover] = useState<string | null>(null);
 	const total = slices.reduce((a, b) => a + b.value, 0),
 		active = slices.find((s) => s.key === hover);
-	let offset = 0;
 	const circumference = 2 * Math.PI * 85,
 		gap = slices.length > 1 ? 3 : 0;
 	if (total <= 0) return <Empty text={emptyText} />;
 	return (
 		<>
-			<div class="dashboard-expense-donut-wrap">
-				<svg class="dashboard-expense-donut-svg" viewBox="0 0 200 200" width="200" height="200">
-					<circle class="dashboard-expense-donut-bg" cx="100" cy="100" r="85" fill="none" stroke-width="30" />
+			<div className={widgetClasses('dashboard-expense-donut-wrap')}>
+				<svg
+					className={widgetClasses('dashboard-expense-donut-svg')}
+					viewBox="0 0 200 200"
+					width="200"
+					height="200"
+				>
+					<circle
+						className={widgetClasses('dashboard-expense-donut-bg')}
+						cx="100"
+						cy="100"
+						r="85"
+						fill="none"
+						strokeWidth="30"
+					/>
 					<text
-						class="dashboard-expense-donut-center-value"
+						className={widgetClasses('dashboard-expense-donut-center-value')}
 						x="100"
 						y="94"
-						text-anchor="middle"
-						dominant-baseline="middle"
+						textAnchor="middle"
+						dominantBaseline="middle"
 					>
 						{formatValue(active?.value ?? total)}
 					</text>
 					<text
-						class="dashboard-expense-donut-center-label"
+						className={widgetClasses('dashboard-expense-donut-center-label')}
 						x="100"
 						y="116"
-						text-anchor="middle"
-						dominant-baseline="middle"
+						textAnchor="middle"
+						dominantBaseline="middle"
 					>
 						{active ? `${active.label} · ${Math.round((active.value / total) * 100)}%` : ''}
 					</text>
-					{slices.map((slice) => {
+					{slices.map((slice, index) => {
 						const dash = Math.max(0, (circumference * slice.value) / total - gap),
-							start = offset;
-						offset += dash + gap;
+							start = slices
+								.slice(0, index)
+								.reduce(
+									(sum, item) => sum + Math.max(0, (circumference * item.value) / total - gap) + gap,
+									0,
+								);
 						return (
 							<circle
 								key={slice.key}
-								class="dashboard-expense-donut-segment"
+								className={widgetClasses('dashboard-expense-donut-segment')}
 								cx="100"
 								cy="100"
 								r="85"
 								fill="none"
-								stroke-width={hover === slice.key ? 36 : 30}
-								stroke-dasharray={`${dash} ${circumference - dash}`}
-								stroke-dashoffset={-start}
+								strokeWidth={hover === slice.key ? 36 : 30}
+								strokeDasharray={`${dash} ${circumference - dash}`}
+								strokeDashoffset={-start}
 								transform="rotate(-90 100 100)"
-								stroke-linecap="butt"
+								strokeLinecap="butt"
 								style={{ stroke: slice.color }}
 								onMouseEnter={() => setHover(slice.key)}
 								onMouseLeave={() => setHover(null)}
@@ -68,13 +85,20 @@ export function ExpenseDonut({
 					})}
 				</svg>
 			</div>
-			<div class="dashboard-expense-donut-legend dashboard-expense-donut-legend--grid">
+			<div className={widgetClasses('dashboard-expense-donut-legend dashboard-expense-donut-legend--grid')}>
 				{slices.map((s) => (
-					<div key={s.key} class="dashboard-expense-donut-legend-item">
-						<div class="dashboard-expense-donut-legend-dot" style={{ backgroundColor: s.color }} />
-						<div class="dashboard-expense-donut-legend-name">{s.label}</div>
-						<div class="dashboard-expense-donut-legend-pct">{Math.round((s.value / total) * 100)}%</div>
-						<div class="dashboard-expense-donut-legend-amount">{formatValue(s.value)}</div>
+					<div key={s.key} className={widgetClasses('dashboard-expense-donut-legend-item')}>
+						<div
+							className={widgetClasses('dashboard-expense-donut-legend-dot')}
+							style={{ backgroundColor: s.color }}
+						/>
+						<div className={widgetClasses('dashboard-expense-donut-legend-name')}>{s.label}</div>
+						<div className={widgetClasses('dashboard-expense-donut-legend-pct')}>
+							{Math.round((s.value / total) * 100)}%
+						</div>
+						<div className={widgetClasses('dashboard-expense-donut-legend-amount')}>
+							{formatValue(s.value)}
+						</div>
 					</div>
 				))}
 			</div>
@@ -82,12 +106,12 @@ export function ExpenseDonut({
 	);
 }
 function useChartTip() {
-	const root = useRef<HTMLDivElement>(null),
+	const [root, setRoot] = useState<HTMLDivElement | null>(null),
 		[tip, setTip] = useState<{ text: string; left: number; top: number; above: boolean } | null>(null);
 	return {
-		root,
+		setRoot,
 		show: (target: Element, text: string) => {
-			const c = root.current?.getBoundingClientRect();
+			const c = root?.getBoundingClientRect();
 			if (!c) return;
 			const b = target.getBoundingClientRect(),
 				above = b.top - c.top >= 34;
@@ -101,7 +125,9 @@ function useChartTip() {
 		hide: () => setTip(null),
 		tip: (
 			<div
-				class={`dashboard-expense-chart-tip${tip ? ' dashboard-expense-chart-tip--visible' : ''}`}
+				className={widgetClasses(
+					`dashboard-expense-chart-tip${tip ? ' dashboard-expense-chart-tip--visible' : ''}`,
+				)}
 				style={
 					tip
 						? {
@@ -119,15 +145,20 @@ function useChartTip() {
 }
 type ChartProps = { bars: ExpenseBar[]; primaryColor: string; secondaryColor: string; emptyText: string };
 export function ExpenseTrend({ bars, primaryColor, secondaryColor, emptyText }: ChartProps) {
-	const tip = useChartTip();
+	const { setRoot, show, hide, tip } = useChartTip();
 	if (!bars.some((b) => b.value > 0 || (b.secondary ?? 0) > 0)) return <Empty text={emptyText} />;
 	const paired = bars.some((b) => (b.secondary ?? 0) > 0),
 		max = Math.max(...bars.map((b) => Math.max(b.value, b.secondary ?? 0)), 1),
 		step = 520 / bars.length,
 		w = paired ? Math.max(2, Math.min(14, step * 0.32)) : Math.max(2, Math.min(18, step * 0.6));
 	return (
-		<div ref={tip.root} class="dashboard-expense-trend-container">
-			<svg class="dashboard-expense-trend-svg" viewBox="0 0 520 146" width="100%" height="146">
+		<div ref={setRoot} className={widgetClasses('dashboard-expense-trend-container')}>
+			<svg
+				className={widgetClasses('dashboard-expense-trend-svg')}
+				viewBox="0 0 520 146"
+				width="100%"
+				height="146"
+			>
 				{bars.map((bar, i) => (
 					<Fragment key={i}>
 						{(paired ? [bar.value, bar.secondary ?? 0] : [bar.value]).map((value, j) => {
@@ -135,15 +166,15 @@ export function ExpenseTrend({ bars, primaryColor, secondaryColor, emptyText }: 
 							return (
 								<rect
 									key={j}
-									class="dashboard-expense-trend-bar"
+									className={widgetClasses('dashboard-expense-trend-bar')}
 									x={i * step + (step - (paired ? w * 2 + 2 : w)) / 2 + j * (w + 2)}
 									y={130 - h}
 									width={w}
 									height={Math.max(value > 0 ? 2 : 0, h)}
 									rx="2"
 									style={{ fill: j ? secondaryColor : primaryColor }}
-									onMouseEnter={(e) => tip.show(e.currentTarget, bar.tooltip)}
-									onMouseLeave={tip.hide}
+									onMouseEnter={(e) => show(e.currentTarget, bar.tooltip)}
+									onMouseLeave={hide}
 								>
 									<title>{bar.tooltip}</title>
 								</rect>
@@ -151,10 +182,10 @@ export function ExpenseTrend({ bars, primaryColor, secondaryColor, emptyText }: 
 						})}
 						{(bars.length <= 14 || i % Math.ceil(bars.length / 12) === 0) && (
 							<text
-								class="dashboard-expense-trend-tick"
+								className={widgetClasses('dashboard-expense-trend-tick')}
 								x={i * step + step / 2}
 								y="142"
-								text-anchor="middle"
+								textAnchor="middle"
 							>
 								{bar.label}
 							</text>
@@ -162,7 +193,7 @@ export function ExpenseTrend({ bars, primaryColor, secondaryColor, emptyText }: 
 					</Fragment>
 				))}
 			</svg>
-			{tip.tip}
+			{tip}
 		</div>
 	);
 }
@@ -182,15 +213,18 @@ export function ExpenseRanking({
 	return (
 		<>
 			{rows.map((row) => (
-				<div key={row.key} class="dashboard-expense-rank-row">
-					<div class="dashboard-expense-rank-head">
-						<div class="dashboard-expense-donut-legend-dot" style={{ backgroundColor: colorOf(row.key) }} />
-						<div class="dashboard-expense-rank-name">{row.label}</div>
-						<div class="dashboard-expense-rank-amount">{formatValue(row.value)}</div>
-					</div>
-					<div class="dashboard-expense-rank-bar-wrap">
+				<div key={row.key} className={widgetClasses('dashboard-expense-rank-row')}>
+					<div className={widgetClasses('dashboard-expense-rank-head')}>
 						<div
-							class="dashboard-expense-rank-bar"
+							className={widgetClasses('dashboard-expense-donut-legend-dot')}
+							style={{ backgroundColor: colorOf(row.key) }}
+						/>
+						<div className={widgetClasses('dashboard-expense-rank-name')}>{row.label}</div>
+						<div className={widgetClasses('dashboard-expense-rank-amount')}>{formatValue(row.value)}</div>
+					</div>
+					<div className={widgetClasses('dashboard-expense-rank-bar-wrap')}>
+						<div
+							className={widgetClasses('dashboard-expense-rank-bar')}
 							style={{
 								width: `${Math.max(3, Math.round((row.value / max) * 100))}%`,
 								backgroundColor: colorOf(row.key),
@@ -210,31 +244,44 @@ export function ExpenseLines({
 	secondaryLabel,
 	emptyText,
 }: ChartProps & { primaryLabel: string; secondaryLabel: string }) {
-	const tip = useChartTip(),
+	const { setRoot, show, hide, tip } = useChartTip(),
 		[hover, setHover] = useState<number | null>(null);
 	if (!bars.some((b) => b.value > 0 || (b.secondary ?? 0) > 0)) return <Empty text={emptyText} />;
 	const max = Math.max(...bars.map((b) => Math.max(b.value, b.secondary ?? 0)), 1),
 		step = 520 / bars.length,
 		y = (v: number) => 120 - Math.round((v / max) * 110);
 	return (
-		<div ref={tip.root} class="dashboard-expense-lines-container">
-			<div class="dashboard-expense-lines-legend">
+		<div ref={setRoot} className={widgetClasses('dashboard-expense-lines-container')}>
+			<div className={widgetClasses('dashboard-expense-lines-legend')}>
 				{[
 					[primaryColor, primaryLabel],
 					[secondaryColor, secondaryLabel],
 				].map(([color, label], i) => (
-					<div key={i} class="dashboard-expense-donut-legend-item dashboard-expense-lines-legend-item">
-						<div class="dashboard-expense-donut-legend-dot" style={{ backgroundColor: color }} />
-						<div class="dashboard-expense-lines-legend-name">{label}</div>
+					<div
+						key={i}
+						className={widgetClasses(
+							'dashboard-expense-donut-legend-item dashboard-expense-lines-legend-item',
+						)}
+					>
+						<div
+							className={widgetClasses('dashboard-expense-donut-legend-dot')}
+							style={{ backgroundColor: color }}
+						/>
+						<div className={widgetClasses('dashboard-expense-lines-legend-name')}>{label}</div>
 					</div>
 				))}
 			</div>
-			<svg class="dashboard-expense-lines-svg" viewBox="0 0 520 136" width="100%" height="136">
-				<line class="dashboard-expense-lines-baseline" x1="0" y1="120" x2="520" y2="120" />
+			<svg
+				className={widgetClasses('dashboard-expense-lines-svg')}
+				viewBox="0 0 520 136"
+				width="100%"
+				height="136"
+			>
+				<line className={widgetClasses('dashboard-expense-lines-baseline')} x1="0" y1="120" x2="520" y2="120" />
 				{[primaryColor, secondaryColor].map((color, j) => (
 					<Fragment key={j}>
 						<polyline
-							class="dashboard-expense-lines-line"
+							className={widgetClasses('dashboard-expense-lines-line')}
 							points={bars
 								.map((b, i) => `${i * step + step / 2},${y(j ? (b.secondary ?? 0) : b.value)}`)
 								.join(' ')}
@@ -243,7 +290,7 @@ export function ExpenseLines({
 						{bars.map((b, i) => (
 							<circle
 								key={i}
-								class="dashboard-expense-lines-dot"
+								className={widgetClasses('dashboard-expense-lines-dot')}
 								cx={i * step + step / 2}
 								cy={y(j ? (b.secondary ?? 0) : b.value)}
 								r="2"
@@ -253,7 +300,9 @@ export function ExpenseLines({
 					</Fragment>
 				))}
 				<line
-					class={`dashboard-expense-lines-guide${hover !== null ? ' dashboard-expense-lines-guide--visible' : ''}`}
+					className={widgetClasses(
+						`dashboard-expense-lines-guide${hover !== null ? ' dashboard-expense-lines-guide--visible' : ''}`,
+					)}
 					x1={(hover ?? 0) * step + step / 2}
 					x2={(hover ?? 0) * step + step / 2}
 					y1="0"
@@ -262,26 +311,26 @@ export function ExpenseLines({
 				{bars.map((b, i) => (
 					<Fragment key={i}>
 						<rect
-							class="dashboard-expense-lines-slot"
+							className={widgetClasses('dashboard-expense-lines-slot')}
 							x={i * step}
 							y="0"
 							width={step}
 							height="120"
 							onMouseEnter={(e) => {
 								setHover(i);
-								tip.show(e.currentTarget, b.tooltip);
+								show(e.currentTarget, b.tooltip);
 							}}
 							onMouseLeave={() => {
 								setHover(null);
-								tip.hide();
+								hide();
 							}}
 						/>
 						{(bars.length <= 14 || i % Math.ceil(bars.length / 12) === 0) && (
 							<text
-								class="dashboard-expense-trend-tick"
+								className={widgetClasses('dashboard-expense-trend-tick')}
 								x={i * step + step / 2}
 								y="132"
-								text-anchor="middle"
+								textAnchor="middle"
 							>
 								{b.label}
 							</text>
@@ -289,7 +338,7 @@ export function ExpenseLines({
 					</Fragment>
 				))}
 			</svg>
-			{tip.tip}
+			{tip}
 		</div>
 	);
 }

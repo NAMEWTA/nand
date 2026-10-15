@@ -1,8 +1,6 @@
 import { Platform } from 'obsidian';
 import type IconicController from '../platform/host/controller';
 import { t } from '../../../shared/i18n';
-import IconPicker from './dialogs/icon-picker';
-import RulePicker from './dialogs/rule-picker';
 
 export function registerIconicCommands(controller: IconicController): void {
 	// COMMAND: Open rulebook
@@ -11,7 +9,7 @@ export function registerIconicCommands(controller: IconicController): void {
 		get name() {
 			return t('iconic.commands.openRulebook');
 		},
-		callback: () => RulePicker.open(controller),
+		callback: () => controller.dialogsPort.openRulePicker(),
 	});
 
 	// COMMAND: Toggle bigger icons
@@ -224,7 +222,7 @@ export function registerIconicCommands(controller: IconicController): void {
 			if (file === null) return false;
 
 			if (!checking) {
-				IconPicker.openSingle(controller, file, (newIcon, newColor) => {
+				controller.dialogsPort.openSingle(file, (newIcon, newColor) => {
 					controller.saveFileIcon(file, newIcon, newColor);
 					controller.refreshManagers('file');
 				});

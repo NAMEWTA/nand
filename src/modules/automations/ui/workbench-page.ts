@@ -2,19 +2,22 @@ import type { PageCreate } from '../../../app/contracts/workbench-host';
 import type { AutomationViewHost } from './panel-contract';
 import { AutomationPresentation } from './automation-presentation';
 
-/** Automations page: tasks and run history. */
-export const createAutomationsPage = (host: () => AutomationViewHost | undefined, unavailable: () => Error): PageCreate => async (context) => {
-	const panelHost = host();
-	if (!panelHost) throw unavailable();
-	const surface = new AutomationPresentation(context, panelHost);
-	return {
-		surface,
-		getTarget: () => surface.getTarget(),
-		navigate: async (target, signal) => {
-			if (signal.aborted) return;
-			if (target.focusId === 'edit') surface.startEdit(panelHost.takeEdit?.() ?? {});
-			else if (target.resourceId) surface.showRun(target.resourceId);
-			else surface.showSection(target.section);
-		},
+export const createAutomationsPage =
+	(host: () => AutomationViewHost | undefined, unavailable: () => Error): PageCreate =>
+	async (context, target, state, signal) => {
+		const panelHost = host();
+		if (!panelHost) throw unavailable();
+		signal.throwIfAborted();
+		const surface = new AutomationPresentation(context, panelHost, target, state);
+		return {
+			surface,
+			getTarget: () => surface.getTarget(),
+			getState: () => surface.getState(),
+			restore: async (value) => {
+				surface.restore(value);
+			},
+			navigate: async (next, abort) => {
+				if (!abort.aborted) surface.navigate(next);
+			},
+		};
 	};
-};

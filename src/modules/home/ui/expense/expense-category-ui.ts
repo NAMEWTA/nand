@@ -1,4 +1,4 @@
-import { bindLocalizedElement } from '../../../../ui/primitives/localized-dom';
+import { bindLocalizedElement } from '../../../../host/obsidian/localized-dom';
 import { Notice, setIcon } from 'obsidian';
 import {
 	categoriesFor,

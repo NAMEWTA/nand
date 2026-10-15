@@ -356,10 +356,10 @@ test('10,000 ledger records update one daily document without rereading the full
 
 test('habit cold startup rescans when layout settles and file events refresh without reopening a view', async () => {
 	const { HabitService } = await import('../src/modules/home/platform/habit/habit-service');
-	const file = '.nand/content/NAND/习惯/read/习惯.md';
-	const fixture = memoryVault({ [file]: '---\nnand-id: existing\nnand-type: habit\nname: Read\ncreatedAt: 2026-10-01\n---\n' });
-	const scan = fixture.adapter.list;
-	fixture.adapter.list = async () => ({ files: [], folders: [] });
+	const file = '.nand/content/NAND/习惯/habits.json';
+	const habit = { id: 'existing', name: 'Read', createdAt: '2026-10-01' };
+	const fixture = memoryVault();
+	const write = (habits: typeof habit[]) => fixture.adapter.write(file, JSON.stringify({ version: 1, habits, records: {} }));
 	let layout!: () => void;
 	const doc = new EventTarget();
 	Object.assign(fixture.app.workspace, { onLayoutReady: (callback: () => void) => { layout = callback; }, containerEl: { ownerDocument: doc } });
@@ -370,20 +370,25 @@ test('habit cold startup rescans when layout settles and file events refresh wit
 		assert.equal(service.getHabits().length, 0);
 		assert.equal(service.isLoading, true, 'The incomplete first scan is not an empty-library state');
 		assert.equal(service.readyForEdits, false);
-		fixture.adapter.list = scan;
+		await write([habit]);
 		layout(); await tick(); await service.flush();
 		assert.equal(service.isLoading, false);
 		assert.equal(service.readyForEdits, true);
 		assert.equal(service.getHabits()[0]?.name, 'Read');
-		await fixture.adapter.write(file, fixture.contents.get(file)!.replace('name: Read', 'name: Read daily'));
+		await write([{ ...habit, name: 'Read daily' }]);
 		await contentFiles(fixture.app).refresh();
 		await tick(); await service.flush();
 		assert.equal(service.getHabits()[0]?.name, 'Read daily');
 		service.addHabit('Another'); await service.flush(); await tick();
 		assert.equal(service.getHabits().length, 2);
+		await write(service.getHabits().filter(h => h.id !== habit.id));
+		await contentFiles(fixture.app).refresh(); await tick(); await service.flush();
+		assert.deepEqual(service.getHabits().map(h => h.name), ['Another']);
 		fixture.contents.delete(file); await contentFiles(fixture.app).refresh();
 		await tick(); await service.flush();
-		assert.deepEqual(service.getHabits().map(h => h.name), ['Another']);
+		assert.deepEqual(service.getHabits(), []);
+		await write([habit]); await contentFiles(fixture.app).refresh(); await tick(); await service.flush();
+		assert.equal(service.getHabits()[0]?.name, 'Read');
 	} finally { service.destroy(); await tick(); }
 });
 

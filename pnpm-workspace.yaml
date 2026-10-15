@@ -1,8 +1,9 @@
 allowBuilds:
+  '@parcel/watcher': false
+  '@tailwindcss/oxide': false
   esbuild: true
 
 peerDependencyRules:
   allowedVersions:
     "@xterm/xterm": "6"
     obsidian: "1.13.1"
-

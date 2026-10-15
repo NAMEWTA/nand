@@ -113,3 +113,21 @@ export interface AgentDispatch {
 }
 
 export const AGENT_DISPATCH = serviceKey<AgentDispatch>('agent', 'dispatch');
+
+export type { AgentUsage, UsageSnapshot } from '../../app/contracts/workbench';
+export const AGENT_USAGE = serviceKey<import('../../app/contracts/workbench').AgentUsage>('agent', 'usage');
+
+/** Read-only SQLite access for user-initiated browser Cookie snapshot imports. */
+export interface NativeHelperSqlite {
+ readCookies(path: string, kind: 'chromium' | 'firefox', signal?: AbortSignal): Promise<{ rows: Array<Record<string, unknown>> }>;
+}
+export const NATIVE_HELPER_SQLITE = serviceKey<NativeHelperSqlite>('agent', 'native-helper-sqlite');
+
+export interface AgentBrowserTabs {
+ sessionOrder(pageId:string):string[];
+ open(url?:string,profileId?:string,reuse?:boolean):Promise<string>;
+ close(pageId:string):Promise<void>;
+ list():Array<{id:string;title:string;url:string;profileId:string}>;
+ activate(pageId:string):void;
+}
+export const AGENT_BROWSER_TABS=serviceKey<AgentBrowserTabs>('agent','browser-tabs');

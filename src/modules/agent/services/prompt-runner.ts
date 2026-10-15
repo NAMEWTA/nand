@@ -4,6 +4,31 @@ import { AutomationError } from '../../../shared/automation/errors';
 import type { AgentDescription, AgentRunHandle, AutomationAction } from '../../../shared/automation/types';
 import type { AgentExecution } from './agent-runtime';
 
+interface InteractivePromptTarget {
+	readonly running: boolean;
+	inputReady(): boolean;
+	prompts(): { lines: readonly unknown[] };
+	paste(text: string): void;
+	input(text: string): void;
+}
+/** Interactive quick commands use the terminal's input-ready protocol, never CLI prompt arguments. */
+export async function submitInteractivePrompt(
+	target: InteractivePromptTarget,
+	text: string,
+	clock: Pick<Window, 'setTimeout'>,
+	requireReady = true,
+	timeoutMs = 5000,
+): Promise<boolean> {
+	const ready = () => target.inputReady() || target.prompts().lines.length > 0;
+	const deadline = Date.now() + timeoutMs;
+	while (target.running && !ready() && Date.now() < deadline)
+		await new Promise<void>(resolve => clock.setTimeout(resolve, 100));
+	if (!target.running || (requireReady && !ready())) return false;
+	target.paste(text);
+	target.input('\r');
+	return true;
+}
+
 interface PromptRuntime {
 	listAgents(): AgentDescription[];
 	execute(action: Extract<AutomationAction, { kind: 'agent' }>, execution: AgentExecution, previousTerminal?: string): Promise<AgentRunHandle>;

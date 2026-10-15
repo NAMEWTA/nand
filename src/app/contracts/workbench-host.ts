@@ -1,5 +1,5 @@
 import type { ItemView, Menu } from 'obsidian';
-import type { FeatureAvailability, NavigationItem, PanelModel, SavedPage, WorkbenchFeature, WorkbenchStatus, WorkbenchTarget } from './workbench';
+import type { AgentUsage, PageChrome, StatusBarPreferences, StatusSegment, FeatureAvailability, NavigationItem, PanelModel, SavedPage, WorkbenchFeature, WorkbenchStatus, WorkbenchTarget } from './workbench';
 import type { NativeSurface, NativeSurfaceContext } from '../../ui/native-surface';
 
 export interface WorkbenchPageBinding {
@@ -24,7 +24,9 @@ export interface WorkbenchContribution {
 	rail?: { slot: 'top' | 'bottom'; badge?: () => number };
 	/** A feature without its own rail entry highlights this one instead (records pages belong to Home). */
 	railParent?: WorkbenchFeature;
-	/** The side panel; defaults to the navigation children as rows. */
+	/** Omitted means no side panel unless navigationContext is set. */
+	chrome?: PageChrome;
+	statusSegments?: () => readonly StatusSegment[];
 	panel?: (context: PanelContext) => PanelModel | undefined;
 	/** Page title for the header (defaults to the navigation label, plus the section). */
 	title?: (target: WorkbenchTarget) => string | undefined;
@@ -50,6 +52,10 @@ export interface WorkbenchHost {
 	/** Whether a module failed to start (shown as a warning on its rail icon). */
 	failed: (feature: WorkbenchFeature) => boolean;
 	statuses?: () => readonly WorkbenchStatus[];
+	usage?: () => AgentUsage | undefined;
+	statusBar?: () => StatusBarPreferences;
+	setStatusBar?: (preferences: StatusBarPreferences) => Promise<void>;
+	appearance?: () => { font: 'geist' | 'host'; palette: 'host' | 'orca' };
 	report: (error: unknown) => void;
 }
 
@@ -74,6 +80,7 @@ export interface WorkbenchSurface {
 	getNativeSurfaces(): readonly NativeSurface[];
 	getState(): Record<string, unknown>;
 	setState(raw: Record<string, unknown>): Promise<void>;
+	setVisible(visible: boolean): void;
 	prepareModuleChanges(disabled: ReadonlySet<WorkbenchFeature>): Promise<void>;
 	onResize(): void;
 	onPaneMenu(menu: Menu, source: string): void;

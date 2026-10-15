@@ -1,7 +1,7 @@
 import { CONTENT_ROOT, contentPath, isContentPath } from '../../../../shared/storage/content-paths';
 import { readMarkdownDocument } from '../../../../shared/storage/markdown-document';
 import { contentFiles, type ContentFile } from '../../../../host/obsidian/storage/content-files';
-import { bindLocalizedElement } from '../../../../ui/primitives/localized-dom';
+import { bindLocalizedElement } from '../../../../host/obsidian/localized-dom';
 import { App } from 'obsidian';
 import type { LibraryConfig, PropertyFilter } from '../../core/board/types/index';
 import { isUnderExcludedFolder, normalizeExcludeFolders } from '../../../../shared/exclude-folders';

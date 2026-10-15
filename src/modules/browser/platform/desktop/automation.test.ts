@@ -5,28 +5,32 @@ import { BrowserAutomation } from './automation';
 import type { BrowserPage } from './page';
 import type { GuestContents } from './electron-api';
 
-test('native diagnostic listener stores only summaries and releases retained history with its guest', async () => {
+test('capture tools retain viewport and screenshots and release their native listeners', async () => {
 	let attached = false;
+	const commands: Array<{ method: string; params: unknown }> = [];
 	const debug = Object.assign(new EventEmitter(), {
 		isAttached: () => attached, attach: () => { attached = true; }, detach: () => { attached = false; },
-		sendCommand: async () => ({}),
+		sendCommand: async (method: string, params: unknown) => {
+			commands.push({ method, params });
+			return method === 'Page.captureScreenshot' ? { data: 'aGVsbG8=' } : {};
+		},
 	});
 	const guest = Object.assign(new EventEmitter(), { isDestroyed: () => false, debugger: debug }) as unknown as GuestContents;
-	const page = { state: { id: 'a' }, disposed: false, webview: { win: { setTimeout, clearTimeout } } } as unknown as BrowserPage;
+	const page = { state: { id: 'a' }, disposed: false, webview: { win: { setTimeout, clearTimeout }, getBoundingClientRect: () => ({ width: 800 }) } } as unknown as BrowserPage;
 	const automation = new BrowserAutomation(guest, page);
-	assert.deepEqual(await automation.execute('console', {}), []);
+	assert.deepEqual(await automation.execute('viewport', { width: 640, height: 480 }), { width: 640, height: 480 });
+	assert.ok(commands.some(row => row.method === 'Emulation.setDeviceMetricsOverride'));
+	assert.deepEqual(await automation.execute('screenshot', {}), { dataUrl: 'data:image/png;base64,aGVsbG8=' });
+	assert.deepEqual(await automation.execute('viewport', {}), { width: 0, height: 0 });
+	assert.ok(commands.some(row => row.method === 'Emulation.clearDeviceMetricsOverride'));
+	for (const method of ['click', 'fill', 'keypress', 'console', 'network', 'review']) {
+		await assert.rejects(automation.execute(method, {}), { code: 'browser_unknown_method' });
+	}
+	assert.equal(commands.some(row => row.method.startsWith('Input.')), false);
 	assert.equal(debug.listenerCount('message'), 1);
-	const secret = 'fixture-private-value';
-	debug.emit('message', {}, 'Runtime.consoleAPICalled', { type: 'error', args: [{ type: 'string', value: secret }] });
-	debug.emit('message', {}, 'Network.loadingFailed', { type: 'Fetch', errorText: secret, requestId: secret });
-	assert.equal(JSON.stringify(await automation.execute('console', {})).includes(secret), false);
-	assert.equal(JSON.stringify(await automation.execute('network', {})).includes(secret), false);
-	assert.equal(automation.consoleMessages.length, 1);
 	automation.dispose(); automation.dispose();
 	assert.equal(debug.listenerCount('message'), 0);
 	assert.equal(debug.listenerCount('detach'), 0);
 	assert.equal(attached, false);
-	assert.deepEqual(automation.consoleMessages, []);
-	assert.deepEqual(automation.networkFailures, []);
-	await assert.rejects(automation.execute('console', {}), /browser_page_closed/);
+	await assert.rejects(automation.execute('viewport', {}), /browser_page_closed/);
 });

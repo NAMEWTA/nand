@@ -11,7 +11,7 @@ const runtime = await launchFreshVault({ root: process.argv[2], port: 9249,
 	// The host export is read-only; an owned fixture copy provides the download error seam.
 	files: { '.obsidian/plugins/nand/main.js': 'window.nandAcceptanceObsidian = {...require("obsidian")};\n' + (await fs.readFile('main.js', 'utf8')).replaceAll('require("obsidian")', 'window.nandAcceptanceObsidian') },
 	settings: { version: 1, namespaces: {
-	app: { language: 'en', introSeen: true, modules: { agent: true, home: false, archives: false, browser: false, news: false, sync: false, comments: false, notifications: false, automations: false, icons: false } },
+	app: { language: 'en', introSeen: true, modules: { agent: true, home: false, archives: false, browser: false, sync: false, comments: false, notifications: false, automations: false, icons: false } },
 } } });
 const rows = [];
 const check = (name, passed, detail) => { rows.push({ name, passed, detail }); assert.ok(passed, name); };

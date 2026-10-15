@@ -25,7 +25,7 @@ const monitor = async connection => {
 };
 try {
  runtime = await launchFreshVault({ root: process.argv[2], port: 9442, files: sourceFiles, settings: { version: 1, namespaces: {
-  app: { language: 'zh', introSeen: true, modules: Object.fromEntries(['home','agent','browser','news','archives','automations','notifications','icons','comments','sync'].map(id => [id, false])) },
+  app: { language: 'zh', introSeen: true, modules: Object.fromEntries(['home','agent','browser','archives','automations','notifications','icons','comments','sync'].map(id => [id, false])) },
   home: { dashboardFile: 'Boards/work', workspaceFiles: ['Boards/work'], workspaceNames: ['Work'] },
  } } }); c = runtime.connection; await monitor(c);
  const manifestPath = path.join(runtime.vault, '.nand/migrations/content/manifest.json');

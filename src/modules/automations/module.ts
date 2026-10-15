@@ -1,9 +1,16 @@
-import { FileSystemAdapter, Notice } from 'obsidian';
+import { FileSystemAdapter, Notice, TFile } from 'obsidian';
+import { contentFiles } from '../../host/obsidian/storage/content-files';
+import type { AppWithCommands } from '../../host/obsidian/obsidian-internal';
 import type { ModuleContext, ModuleInstance } from '../../app/contracts/module';
 import type { AutomationDefinition, SourceRef } from '../../shared/automation/types';
 import { t } from '../../shared/i18n/index';
-import { NOTIFICATION_INBOX, NOTIFICATION_OPENERS, type NotificationOpener, type NotificationRequest } from '../notifications/api';
-import { AUTOMATIONS, AUTOMATION_INVOCATIONS, AUTOMATION_WORKFLOW_INVOCATIONS, type AutomationsService, type AutomationInvocations, type AutomationWorkflowInvocations } from './api';
+import {
+	NOTIFICATION_INBOX,
+	NOTIFICATION_OPENERS,
+	type NotificationOpener,
+	type NotificationRequest,
+} from '../notifications/api';
+import { AUTOMATIONS, AUTOMATION_INVOCATIONS, type AutomationsService, type AutomationInvocations } from './api';
 import { AutomationError } from '../../shared/automation/errors';
 import type { AutomationEditRequest } from './core/api';
 import { createAutomationRuntime, type AutomationRuntime } from './services/runtime';
@@ -11,6 +18,7 @@ import { registerMessages } from '../../shared/i18n/index';
 import { messages } from './i18n';
 import { messages as automationStrings } from '../../shared/i18n/lazy/automation';
 import { messages as commonStrings } from '../../shared/i18n/lazy/common';
+import { automationSettings } from './settings';
 
 registerMessages(automationStrings);
 registerMessages(commonStrings);
@@ -23,6 +31,7 @@ registerMessages(messages);
  */
 export default function createAutomationsModule(context: ModuleContext): ModuleInstance {
 	const { app, shell } = context;
+	const preferences = context.settings.bind('automations', automationSettings);
 	let runtime: AutomationRuntime | undefined;
 	const listeners = new Set<() => void>();
 	/** The request the automations page shows when it navigates to `focusId: 'edit'`. */
@@ -32,16 +41,10 @@ export default function createAutomationsModule(context: ModuleContext): ModuleI
 	const notify = async (request: NotificationRequest): Promise<void> => {
 		const inbox = await context.services.acquire(NOTIFICATION_INBOX);
 		if (inbox) return inbox.value.send(request);
-		if (request.channels.length) new Notice(request.title === request.body ? request.title : `${request.title}\n${request.body}`);
+		if (request.channels.length)
+			new Notice(request.title === request.body ? request.title : `${request.title}\n${request.body}`);
 	};
 
-	/** Board quick actions: pin a definition to one of the boards a source offers. */
-	const pin = async (definition: AutomationDefinition) => {
-		const boards = (await runtime?.sources())?.find((source) => source.pin && source.pinTargets);
-		if (!boards?.pin || !boards.pinTargets) return;
-		const { pinActionModal } = await import('./ui/pin-action');
-		pinActionModal(app, definition, boards.pinTargets(), (path) => boards.pin!(path, definition));
-	};
 	const edit = (source?: SourceRef, title?: string, existing?: AutomationDefinition) => {
 		const current = runtime;
 		if (!current?.service.executionEnabled) {
@@ -52,15 +55,26 @@ export default function createAutomationsModule(context: ModuleContext): ModuleI
 			new Notice(t('automation.failedLoad'));
 			return;
 		}
-		const definition = existing ?? current.service.definitions.find((row) => source?.kind === 'dashboard' && row.source?.id === source.id);
+		const definition =
+			existing ??
+			current.service.definitions.find((row) => source?.kind === 'dashboard' && row.source?.id === source.id);
 		pendingEdit = { source, title, existing: definition };
-		void shell.open({ feature: 'automations', section: 'tasks', focusId: 'edit' }, app.workspace.getMostRecentLeaf()?.view.containerEl.win).catch(report);
+		void shell
+			.open(
+				{ feature: 'automations', section: 'tasks', focusId: 'edit' },
+				app.workspace.getMostRecentLeaf()?.view.containerEl.win,
+			)
+			.catch(report);
 	};
-	const taskTargets = async () => (await (await runtime?.sources())?.find((item) => item.taskTargets)?.taskTargets?.()) ?? [];
+	const taskTargets = async () =>
+		(await (await runtime?.sources())?.find((item) => item.taskTargets)?.taskTargets?.()) ?? [];
 
 	const api: AutomationsService = {
-		get loadError() { return runtime?.service.loadError ?? ''; },
-		activeRuns: () => runtime?.service.state.runs.filter((run) => run.status === 'running' || run.status === 'pending') ?? [],
+		get loadError() {
+			return runtime?.service.loadError ?? '';
+		},
+		activeRuns: () =>
+			runtime?.service.state.runs.filter((run) => run.status === 'running' || run.status === 'pending') ?? [],
 		subscribe: (listener) => {
 			listeners.add(listener);
 			return () => listeners.delete(listener);
@@ -70,66 +84,95 @@ export default function createAutomationsModule(context: ModuleContext): ModuleI
 			if (!runtime) throw new AutomationError('moduleOff');
 			await runtime.runAction(id);
 		},
-		stopAction: async (id) => { await runtime?.stopAction(id); },
-		openAction: async (id) => { await runtime?.openAction(id); },
+		stopAction: async (id) => {
+			await runtime?.stopAction(id);
+		},
+		openAction: async (id) => {
+			await runtime?.openAction(id);
+		},
 		edit,
 		open: () => shell.open({ feature: 'automations' }),
 	};
 	const opener: NotificationOpener = {
 		canOpen: (record) => !!runtime?.opener.canOpen(record),
-		open: async (record) => { await runtime?.opener.open(record); },
+		open: async (record) => {
+			await runtime?.opener.open(record);
+		},
 	};
 	const invocations: AutomationInvocations = {
 		invoke: (request, options) => {
 			if (!runtime) return Promise.reject(new AutomationError('moduleOff'));
 			return runtime.service.invokeAgent(request, options?.signal);
 		},
-		receipt: id => {
-			const receipt = runtime?.service.state.runs.find(run => run.invocation?.request.invocationId === id)?.invocation?.receipt;
+		receipt: (id) => {
+			const receipt = runtime?.service.state.runs.find((run) => run.invocation?.request.invocationId === id)
+				?.invocation?.receipt;
 			return receipt ? structuredClone(receipt) : undefined;
-		},
-	};
-	const workflows: AutomationWorkflowInvocations = {
-		invoke: (request, options) => {
-			if (!runtime) return Promise.reject(new AutomationError('moduleOff'));
-			return runtime.service.invokeWorkflow(request, options);
-		},
-		receipt: id => runtime?.service.workflowReceipt(id),
-		cancel: async id => {
-			const run = runtime?.service.state.runs.find(row => row.id === id);
-			if (run) await runtime?.service.stop(run);
-		},
-		open: async id => {
-			const run = runtime?.service.state.runs.find(row => row.id === id);
-			if (run) await runtime?.service.openRun(run);
 		},
 	};
 
 	return {
-		services: [[AUTOMATIONS, api], [AUTOMATION_INVOCATIONS, invocations], [AUTOMATION_WORKFLOW_INVOCATIONS, workflows]],
+		services: [
+			[AUTOMATIONS, api],
+			[AUTOMATION_INVOCATIONS, invocations],
+		],
 		contributions: [[NOTIFICATION_OPENERS, opener]],
 		pages: {
-			automations: async () => (await import('./ui/workbench-page')).createAutomationsPage(() => runtime && {
-				service: runtime.service,
-				retry: runtime.retry,
-				edit: (definition) => edit(definition?.source, definition?.name, definition),
-				inbox: () => { void shell.open({ feature: 'notifications' }).catch(report); },
-				pin,
-				takeEdit: () => {
-					const request = pendingEdit;
-					pendingEdit = undefined;
-					return request;
-				},
-				taskTargets,
-				workflowSources: { workflows: () => runtime?.workflows() ?? Promise.reject(new AutomationError('workflowUnavailable')),
-					pages: () => runtime?.workflowPages() ?? Promise.reject(new AutomationError('workflowUnavailable')) },
-				cwd: app.vault.adapter instanceof FileSystemAdapter ? app.vault.adapter.getBasePath() : '',
-			}, () => new Error(t('automation.failedLoad'))),
+			automations: async () =>
+				(await import('./ui/workbench-page')).createAutomationsPage(
+					() =>
+						runtime && {
+							service: runtime.service,
+							store: runtime.store,
+							skipDeleteConfirmation: () => preferences.get().skipDeleteConfirmation,
+							setSkipDeleteConfirmation: (value: boolean) =>
+								preferences.update((draft) => {
+									draft.skipDeleteConfirmation = value;
+								}),
+							refresh: () => runtime!.service.refresh(),
+							retry: runtime.retry,
+							edit: (definition) => edit(definition?.source, definition?.name, definition),
+							inbox: () => {
+								void shell.open({ feature: 'notifications' }).catch(report);
+							},
+							takeEdit: () => {
+								const request = pendingEdit;
+								pendingEdit = undefined;
+								return request;
+							},
+							taskTargets,
+							paths: () => [
+								{ path: '/', kind: 'folder' as const },
+								...contentFiles(app)
+									.getFiles()
+									.map((file) => ({ path: file.path, kind: 'file' as const })),
+								...app.vault
+									.getAllLoadedFiles()
+									.filter((file) => !!file.path && !(file instanceof TFile))
+									.map((file) => ({ path: file.path, kind: 'folder' as const })),
+								...contentFiles(app)
+									.allDirectories()
+									.map((path) => ({ path, kind: 'folder' as const })),
+							],
+							commands: () =>
+								Object.entries((app as AppWithCommands).commands.commands).map(([id, command]) => ({
+									id,
+									name: command.name ?? id,
+								})),
+							cwd: app.vault.adapter instanceof FileSystemAdapter ? app.vault.adapter.getBasePath() : '',
+						},
+					() => new Error(t('automation.failedLoad')),
+				),
 		},
-		settingsPage: async () => (await import('./ui/settings-page')).automationsSettingsPage({
-			tasks: () => { void shell.open({ feature: 'automations' }).catch(report); },
-			inbox: () => { void shell.open({ feature: 'notifications' }).catch(report); },
-		}),
+		settingsPage: async () =>
+			(await import('./ui/settings-page')).automationsSettingsPage({
+				tasks: () => {
+					void shell.open({ feature: 'automations' }).catch(report);
+				},
+				inbox: () => {
+					void shell.open({ feature: 'notifications' }).catch(report);
+				},
+			}),
 		async activate() {
 			try {
 				runtime = await createAutomationRuntime(context, notify);
@@ -137,10 +180,12 @@ export default function createAutomationsModule(context: ModuleContext): ModuleI
 				new Notice(t('automation.failedLoad'));
 				throw error;
 			}
-			context.lifetime.register(runtime.service.subscribe(() => {
-				for (const listener of [...listeners]) listener();
-				shell.refresh();
-			}));
+			context.lifetime.register(
+				runtime.service.subscribe(() => {
+					for (const listener of [...listeners]) listener();
+					shell.refresh();
+				}),
+			);
 		},
 		async dispose(reason) {
 			const current = runtime;

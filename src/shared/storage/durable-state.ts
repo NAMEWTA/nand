@@ -116,11 +116,21 @@ export class DurableState<T> {
 		this.state = { status: 'saving' };
 		this.changed();
 		void this.enqueue(async () => {
-			const remote = await this.read(); // A failed read/parse can never reach write().
 			const local = structuredClone(this.value);
-			const merged = threeWayMerge(this.baseline, local, remote);
-			await ensureDirectory(this.storage, this.path.split('/').slice(0, -1).join('/'));
-			await this.storage.write(this.path, JSON.stringify(merged));
+			let merged: T;
+			if (this.storage.updateAtomically) {
+				// Merge inside the host transaction, after competing writers have committed.
+				const saved = await this.storage.updateAtomically(this.path, (current) => {
+					const remote = current === null ? this.empty() : this.decode(JSON.parse(current));
+					return JSON.stringify(threeWayMerge(this.baseline, local, remote));
+				});
+				merged = this.decode(JSON.parse(saved));
+			} else {
+				const remote = await this.read(); // A failed read/parse can never reach write().
+				merged = threeWayMerge(this.baseline, local, remote);
+				await ensureDirectory(this.storage, this.path.split('/').slice(0, -1).join('/'));
+				await this.storage.write(this.path, JSON.stringify(merged));
+			}
 			this.baseline = structuredClone(merged);
 			// Edits received while the write was in flight still belong to the next save.
 			this.value = threeWayMerge(local, this.value, merged);

@@ -17,7 +17,7 @@ const textResources: Plugin = {
 
 const shared = {
 	plugins: [textResources],
-	oxc: { jsx: { runtime: 'automatic' as const, importSource: 'preact' } },
+	oxc: { jsx: { runtime: 'automatic' as const, importSource: 'react' } },
 };
 
 /** Settings definition tests render against the Iconic stub, as their former esbuild bundles did. */
@@ -26,14 +26,15 @@ const iconicStubTests = ['src/app/settings/setting-definitions.test.ts', 'src/mo
 export default defineConfig({
 	test: {
 		projects: [
+			{ ...shared, resolve: { alias: { obsidian: repo('./scripts/obsidian-stub.ts') } }, test: { name: 'dom', include: ['src/**/*.dom.test.tsx'], environment: 'happy-dom', setupFiles: ['./scripts/module-strings.ts', './scripts/dom-setup.ts'] } },
 			{
 				...shared,
-				resolve: { alias: { obsidian: repo('./scripts/obsidian-stub.ts'), react: 'preact/compat' } },
-				test: { name: 'unit', include: ['src/**/*.test.{ts,tsx}', 'test/**/*.test.ts'], exclude: iconicStubTests, environment: 'node', setupFiles: ['./scripts/module-strings.ts'] },
+				resolve: { alias: { obsidian: repo('./scripts/obsidian-stub.ts') } },
+				test: { name: 'unit', include: ['src/**/*.test.{ts,tsx}', 'test/**/*.test.ts'], exclude: [...iconicStubTests, 'src/**/*.dom.test.tsx'], environment: 'node', setupFiles: ['./scripts/module-strings.ts'] },
 			},
 			{
 				...shared,
-				resolve: { alias: { obsidian: repo('./scripts/iconic-obsidian-stub.ts'), react: 'preact/compat' } },
+				resolve: { alias: { obsidian: repo('./scripts/iconic-obsidian-stub.ts') } },
 				test: { name: 'settings-iconic', include: iconicStubTests, environment: 'node', setupFiles: ['./scripts/module-strings.ts'] },
 			},
 		],

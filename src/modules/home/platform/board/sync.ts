@@ -1,9 +1,15 @@
 import { boardTileSources, boardTiles, persistedBoardTiles, type TileDefaults } from '../../core/board/board-tiles';
 import { withStableSectionIds } from '../../core/board/section-identity';
-import { legacyBoardMembers } from '../../core/board/widget-members';
+import { legacyBoardMembers, widgetPresentationKey } from '../../core/board/widget-members';
 import { effectiveBoardLayout } from '../../core/board/layout';
 import type { BoardTile, BoardWidgetMember } from '../../core/board/types/model';
-import { DASHBOARD_CONFLICT_DIR, DashboardSaveError, dashboardSaveMessage, type DashboardSaveState, type DashboardSaveStatus } from '../../core/board/save-state';
+import {
+	DASHBOARD_CONFLICT_DIR,
+	DashboardSaveError,
+	dashboardSaveMessage,
+	type DashboardSaveState,
+	type DashboardSaveStatus,
+} from '../../core/board/save-state';
 import { ensureDirectory } from '../../../../shared/storage/durable-state';
 import { privateVaultStorage } from '../../../../host/obsidian/storage/private-storage';
 import { contentFiles, type ContentFile } from '../../../../host/obsidian/storage/content-files';
@@ -59,27 +65,47 @@ type TaskDropMode = 'before' | 'after' | 'nest';
 export class SyncEngine {
 	private localRevision = 0;
 	private recoveryRevision = 0;
-	private saveState: Readonly<DashboardSaveState> = Object.freeze({ status: 'saved', localRevision: 0, recoveryRevision: 0, recoveryPath: null, detail: '' });
+	private saveState: Readonly<DashboardSaveState> = Object.freeze({
+		status: 'saved',
+		localRevision: 0,
+		recoveryRevision: 0,
+		recoveryPath: null,
+		detail: '',
+	});
 	private saveListeners = new Set<(state: Readonly<DashboardSaveState>) => void>();
 	private saveNotice: Notice | null = null;
 	private languageCleanup: (() => void) | null = null;
 	private closingTask: Promise<void> | null = null;
 	private closed = false;
 
-	getSaveState(): Readonly<DashboardSaveState> { return this.saveState; }
-	getLocalDraft(): string { return this.data ? serialize(this.data) : ''; }
+	getSaveState(): Readonly<DashboardSaveState> {
+		return this.saveState;
+	}
+	getLocalDraft(): string {
+		return this.data ? serialize(this.data) : '';
+	}
 	onSaveStateUpdate(callback: (state: Readonly<DashboardSaveState>) => void): () => void {
-		this.saveListeners.add(callback); callback(this.saveState);
+		this.saveListeners.add(callback);
+		callback(this.saveState);
 		return () => this.saveListeners.delete(callback);
 	}
 	private setSaveState(status: DashboardSaveStatus, detail = ''): void {
-		this.saveState = Object.freeze({ status, localRevision: this.localRevision, recoveryRevision: this.recoveryRevision,
-			recoveryPath: this.conflict ? DASHBOARD_CONFLICT_DIR + '/' + this.conflict.id + '.json' : null, detail });
+		this.saveState = Object.freeze({
+			status,
+			localRevision: this.localRevision,
+			recoveryRevision: this.recoveryRevision,
+			recoveryPath: this.conflict ? DASHBOARD_CONFLICT_DIR + '/' + this.conflict.id + '.json' : null,
+			detail,
+		});
 		for (const callback of this.saveListeners) callback(this.saveState);
 		this.refreshSaveNotice();
 	}
 	private refreshSaveNotice(): void {
-		if (this.saveState.status === 'saved') { this.saveNotice?.hide(); this.saveNotice = null; return; }
+		if (this.saveState.status === 'saved') {
+			this.saveNotice?.hide();
+			this.saveNotice = null;
+			return;
+		}
 		if (this.saveState.status === 'saving' && !this.saveNotice) return;
 		const message = dashboardSaveMessage(this.saveState);
 		if (this.saveNotice) this.saveNotice.setMessage(message);
@@ -89,31 +115,63 @@ export class SyncEngine {
 		const detail = error instanceof Error ? error.message : String(error);
 		const recovered = this.recoveryRevision === this.localRevision;
 		const conflict = error instanceof DashboardSaveError && error.code === 'conflict';
-		this.setSaveState(this.blocked ? conflict ? recovered ? 'conflict-saved' : 'conflict-pending' : 'recovery-error' : 'save-error', detail);
-		return error instanceof DashboardSaveError ? error : new DashboardSaveError(this.blocked ? 'recoveryFailed' : 'saveFailed', detail);
+		this.setSaveState(
+			this.blocked
+				? conflict
+					? recovered
+						? 'conflict-saved'
+						: 'conflict-pending'
+					: 'recovery-error'
+				: 'save-error',
+			detail,
+		);
+		return error instanceof DashboardSaveError
+			? error
+			: new DashboardSaveError(this.blocked ? 'recoveryFailed' : 'saveFailed', detail);
 	}
 	private assertOpen(): void {
 		if (this.closed) throw new DashboardSaveError('closed', t('dashboard.sync.closed'));
 	}
 	/** Drains admitted work. A durable recovery copy does not mean the original note was saved. */
 	async flush(): Promise<void> {
-		if (this.deferredWriteTimer !== null) { window.clearTimeout(this.deferredWriteTimer); this.deferredWriteTimer = null; }
+		if (this.deferredWriteTimer !== null) {
+			window.clearTimeout(this.deferredWriteTimer);
+			this.deferredWriteTimer = null;
+		}
 		let queue: Promise<void>;
-		do { queue = this.writeQueue; await queue; } while (queue !== this.writeQueue);
+		do {
+			queue = this.writeQueue;
+			await queue;
+		} while (queue !== this.writeQueue);
 		if (!this.localDirty) return;
-		try { await this.writeToDisk(true); }
-		catch (error) {
-			if (!(error instanceof DashboardSaveError && error.code === 'conflict' && this.recoveryRevision === this.localRevision)) throw error;
+		try {
+			await this.writeToDisk(true);
+		} catch (error) {
+			if (!(
+				error instanceof DashboardSaveError &&
+				error.code === 'conflict' &&
+				this.recoveryRevision === this.localRevision
+			))
+				throw error;
 		}
 	}
-	async retrySave(): Promise<void> { await this.flush(); }
+	async retrySave(): Promise<void> {
+		await this.flush();
+	}
 	close(): Promise<void> {
 		if (this.closingTask) return this.closingTask;
 		this.closed = true;
 		this.unregisterFileWatchers();
 		const closing = this.flush().finally(() => this.destroy());
 		this.closingTask = closing;
-		void closing.then(() => { if (this.closingTask === closing) this.closingTask = null; }, () => { if (this.closingTask === closing) this.closingTask = null; });
+		void closing.then(
+			() => {
+				if (this.closingTask === closing) this.closingTask = null;
+			},
+			() => {
+				if (this.closingTask === closing) this.closingTask = null;
+			},
+		);
 		return closing;
 	}
 
@@ -140,7 +198,14 @@ export class SyncEngine {
 	private static readonly BACKUP_DIR = '.nand/recovery/dashboard';
 	private static readonly MAX_BACKUPS = 5;
 
-	constructor(app: App, settings: DashboardSettings, private readonly widgetDefaults: (member: BoardWidgetMember, legacy: boolean) => TileDefaults | undefined = () => undefined) {
+	constructor(
+		app: App,
+		settings: DashboardSettings,
+		private readonly widgetDefaults: (
+			member: BoardWidgetMember,
+			legacy: boolean,
+		) => TileDefaults | undefined = () => undefined,
+	) {
 		this.app = app;
 		this.settings = settings;
 	}
@@ -170,7 +235,10 @@ export class SyncEngine {
 		this.languageCleanup?.();
 		this.languageCleanup = null;
 		this.saveListeners.clear();
-		if (this.saveState.status !== 'save-error' && this.saveState.status !== 'recovery-error') { this.saveNotice?.hide(); this.saveNotice = null; }
+		if (this.saveState.status !== 'save-error' && this.saveState.status !== 'recovery-error') {
+			this.saveNotice?.hide();
+			this.saveNotice = null;
+		}
 		this.unregisterFileWatchers();
 		if (this.debounceTimer) {
 			window.clearTimeout(this.debounceTimer);
@@ -183,7 +251,8 @@ export class SyncEngine {
 	/** Detach the vault modify/rename watchers. Called on destroy and before
 	    re-pointing the engine at another workspace file (switchFile). */
 	private unregisterFileWatchers(): void {
-		this.contentUnsubscribe?.(); this.contentUnsubscribe = null;
+		this.contentUnsubscribe?.();
+		this.contentUnsubscribe = null;
 		if (this.renameEventRef) {
 			this.app.vault.offref(this.renameEventRef);
 			this.renameEventRef = null;
@@ -206,7 +275,10 @@ export class SyncEngine {
 	 */
 	async reloadFromDisk(): Promise<void> {
 		this.assertOpen();
-		if (this.deferredWriteTimer !== null) { window.clearTimeout(this.deferredWriteTimer); this.deferredWriteTimer = null; }
+		if (this.deferredWriteTimer !== null) {
+			window.clearTimeout(this.deferredWriteTimer);
+			this.deferredWriteTimer = null;
+		}
 		this.writeQueuePending++;
 		const task = this.writeQueue.then(async () => {
 			try {
@@ -215,20 +287,38 @@ export class SyncEngine {
 				const file = this.file && contentFiles(this.app).getFileByPath(this.file.path);
 				if (!file) throw new DashboardSaveError('saveFailed', t('dashboard.sync.sourceMissing'));
 				const remote = await contentFiles(this.app).read(file);
-				if (revision !== this.localRevision) throw new DashboardSaveError('changed', t('dashboard.sync.changed'));
+				if (revision !== this.localRevision)
+					throw new DashboardSaveError('changed', t('dashboard.sync.changed'));
 				if (this.localDirty) {
-					this.conflict ??= { id: crypto.randomUUID(), path: file.path, base: this.baseline ?? '', local: this.getLocalDraft(), candidate: this.getLocalDraft(), remote };
+					this.conflict ??= {
+						id: crypto.randomUUID(),
+						path: file.path,
+						base: this.baseline ?? '',
+						local: this.getLocalDraft(),
+						candidate: this.getLocalDraft(),
+						remote,
+					};
 					this.blocked = true;
 					await this.saveConflict(this.getLocalDraft(), revision);
 				}
-				if (revision !== this.localRevision) throw new DashboardSaveError('changed', t('dashboard.sync.changed'));
+				if (revision !== this.localRevision)
+					throw new DashboardSaveError('changed', t('dashboard.sync.changed'));
 				if (this.debounceTimer !== null) window.clearTimeout(this.debounceTimer);
 				this.debounceTimer = null;
-				this.file = file; this.baseline = remote; this.data = parse(remote);
-				this.blocked = false; this.localDirty = false; this.conflict = null; this.recoveryRevision = 0;
-				this.setSaveState('saved'); this.notifyCallbacks('external');
-			} catch (error) { throw this.saveFailure(error); }
-			finally { this.writeQueuePending--; }
+				this.file = file;
+				this.baseline = remote;
+				this.data = parse(remote);
+				this.blocked = false;
+				this.localDirty = false;
+				this.conflict = null;
+				this.recoveryRevision = 0;
+				this.setSaveState('saved');
+				this.notifyCallbacks('external');
+			} catch (error) {
+				throw this.saveFailure(error);
+			} finally {
+				this.writeQueuePending--;
+			}
 		});
 		this.writeQueue = task.catch(() => undefined);
 		await task;
@@ -470,6 +560,16 @@ export class SyncEngine {
 		this.scheduleDeferredWrite();
 	}
 
+	/** React subscribers need the updated snapshot as well as the durable write. */
+	async toggleCollapseTask(cardId: string, taskPath: TaskPath): Promise<void> {
+		this.assertOpen();
+		if (!this.data) return;
+		this.data = this.mapCardTasks(this.data, cardId, (tasks) =>
+			updateTaskAt(tasks, taskPath, (task) => ({ ...task, collapsed: !task.collapsed })),
+		);
+		await this.writeToDisk();
+	}
+
 	async updateCard(
 		cardId: string,
 		updates: Partial<
@@ -543,6 +643,7 @@ export class SyncEngine {
 				...col,
 				cards: col.cards.filter((c) => c.id !== cardId),
 			})),
+			immersive: this.data.immersive?.filter((tile) => tile.id !== cardId && tile.id !== `card:${cardId}`),
 		};
 		await this.writeToDisk();
 	}
@@ -633,10 +734,18 @@ export class SyncEngine {
 		await this.writeToDisk();
 	}
 
-	async updatePipelineConfig(columnName: string, config: import('../../core/board/types/model').PipelineConfig): Promise<void> {
+	async updatePipelineConfig(
+		columnName: string,
+		config: import('../../core/board/types/model').PipelineConfig,
+	): Promise<void> {
 		this.assertOpen();
 		if (!this.data) return;
-		this.data = { ...this.data, columns: this.data.columns.map(column => column.name === columnName ? { ...column, pipelineConfig: config } : column) };
+		this.data = {
+			...this.data,
+			columns: this.data.columns.map((column) =>
+				column.name === columnName ? { ...column, pipelineConfig: config } : column,
+			),
+		};
 		await this.writeToDisk();
 	}
 
@@ -775,6 +884,11 @@ export class SyncEngine {
 		this.data = {
 			...this.data,
 			columns: this.data.columns.map((col, i) => (i === idx ? { ...col, name: uniqueNew } : col)),
+			immersive: this.data.immersive?.map((tile) =>
+				tile.id === `section:${oldName}` || tile.id === `section:${oldName}:${idx}`
+					? { ...tile, id: `section:${uniqueNew}` }
+					: tile,
+			),
 		};
 		await this.writeToDisk();
 	}
@@ -789,6 +903,15 @@ export class SyncEngine {
 		this.data = {
 			...this.data,
 			columns: unpartnerAt(this.data.columns, idx).filter((_, i) => i !== idx),
+			immersive: this.data.immersive?.filter(
+				(tile) =>
+					![
+						this.data!.columns[idx]!.id,
+						`section:${columnName}`,
+						`section:${columnName}:${idx}`,
+						...this.data!.columns[idx]!.cards.flatMap((card) => [card.id, `card:${card.id}`]),
+					].includes(tile.id),
+			),
 		};
 		await this.writeToDisk();
 	}
@@ -1027,7 +1150,10 @@ export class SyncEngine {
 	async setBoardSkills(skills: readonly import('../../core/board/types/model').SkillShortcut[]): Promise<void> {
 		this.assertOpen();
 		if (!this.data) return;
-		this.data = { ...this.data, skills: skills.map(skill => ({ ...skill, destination: { ...skill.destination } })) };
+		this.data = {
+			...this.data,
+			skills: skills.map((skill) => ({ ...skill, destination: { ...skill.destination } })),
+		};
 		await this.writeToDisk();
 	}
 
@@ -1036,7 +1162,7 @@ export class SyncEngine {
 		this.assertOpen();
 		if (!this.data) return;
 		if (JSON.stringify(this.data.immersive) === JSON.stringify(tiles)) return;
-		this.data = { ...this.data, immersive: tiles.map(tile => ({ ...tile })) };
+		this.data = { ...this.data, immersive: tiles.map((tile) => ({ ...tile })) };
 		this.materializeBoard(false);
 		this.data.layoutNeedsRepair = undefined;
 		await this.writeToDisk();
@@ -1055,22 +1181,45 @@ export class SyncEngine {
 	async setBoardMembers(members: readonly BoardWidgetMember[]): Promise<void> {
 		this.assertOpen();
 		if (!this.data) return;
-		const previous = this.data.widgets ?? legacyBoardMembers(this.settings, effectiveBoardLayout(this.data.layout, this.settings.layoutMode) !== 'side');
-		const kept = new Set(members.map(member => member.memberId));
-		const removed = new Set(previous.filter(member => !kept.has(member.memberId)).map(member => member.memberId));
-		this.data = { ...this.data, widgets: members.map(member => ({ ...member })), immersive: this.data.immersive?.filter(tile => !removed.has(tile.id)) };
+		const previous =
+			this.data.widgets ??
+			legacyBoardMembers(
+				this.settings,
+				effectiveBoardLayout(this.data.layout, this.settings.layoutMode) !== 'side',
+			);
+		const kept = new Set(members.map((member) => member.memberId));
+		const removed = new Set(
+			previous
+				.filter((member) => !kept.has(member.memberId))
+				.flatMap((member) => [member.memberId, `widget:${widgetPresentationKey(member)}`]),
+		);
+		this.data = {
+			...this.data,
+			widgets: members.map((member) => ({ ...member })),
+			immersive: this.data.immersive?.filter((tile) => !removed.has(tile.id)),
+		};
 		this.materializeBoard(this.data.layout === 'immersive');
 		await this.writeToDisk();
 	}
 
 	private materializeBoard(grid: boolean): void {
 		const legacy = this.data!.widgets === undefined;
-		const widgets = this.data!.widgets ?? legacyBoardMembers(this.settings, effectiveBoardLayout(this.data!.layout, this.settings.layoutMode) !== 'side');
+		const widgets =
+			this.data!.widgets ??
+			legacyBoardMembers(
+				this.settings,
+				effectiveBoardLayout(this.data!.layout, this.settings.layoutMode) !== 'side',
+			);
 		this.data = withStableSectionIds({ ...this.data!, widgets }, () => `section-${crypto.randomUUID()}`);
 		if (grid) {
 			// A cap is not measured content height. Existing fit tiles may have adjacent
 			// positions inside each other's caps; adding a member must not move them.
-			this.data.immersive = persistedBoardTiles(boardTiles(this.data, boardTileSources(this.data, widgets), member => this.widgetDefaults(member, legacy)), true);
+			this.data.immersive = persistedBoardTiles(
+				boardTiles(this.data, boardTileSources(this.data, widgets), (member) =>
+					this.widgetDefaults(member, legacy),
+				),
+				true,
+			);
 			this.data.layoutNeedsRepair = undefined;
 		}
 	}
@@ -1113,7 +1262,8 @@ export class SyncEngine {
 	private async findOrCreateFile(): Promise<void> {
 		const rawPath = this.settings.dashboardFile.trim();
 		const path = rawPath.endsWith('.md') ? rawPath : `${rawPath}.md`;
-		const files = contentFiles(this.app); await files.refresh();
+		const files = contentFiles(this.app);
+		await files.refresh();
 		const existing = files.getFileByPath(path);
 		if (existing) {
 			this.file = existing;
@@ -1133,7 +1283,7 @@ export class SyncEngine {
 
 	private registerFileWatcher(): void {
 		const filePath = this.file?.path;
-		this.contentUnsubscribe = contentFiles(this.app).subscribe(event => {
+		this.contentUnsubscribe = contentFiles(this.app).subscribe((event) => {
 			if (event.kind === 'modify' && event.path === filePath) {
 				this.onFileModify();
 			}
@@ -1168,7 +1318,10 @@ export class SyncEngine {
 
 		const banner = { ...this.data.banner, image: replace(this.data.banner.image) };
 		if (banner.images) banner.images = banner.images.map(replace);
-		if (banner.imagePos) banner.imagePos = Object.fromEntries(Object.entries(banner.imagePos).map(([path, value]) => [replace(path), value]));
+		if (banner.imagePos)
+			banner.imagePos = Object.fromEntries(
+				Object.entries(banner.imagePos).map(([path, value]) => [replace(path), value]),
+			);
 
 		const columns = this.data.columns.map((col) => ({
 			...col,
@@ -1269,7 +1422,9 @@ export class SyncEngine {
 	private async writeToDisk(silent = false): Promise<void> {
 		if (!this.data || !this.file) return;
 		this.localDirty = true;
-		const fileRef = this.file, content = serialize(this.data), revision = ++this.localRevision;
+		const fileRef = this.file,
+			content = serialize(this.data),
+			revision = ++this.localRevision;
 		this.setSaveState(this.blocked ? 'conflict-pending' : 'saving');
 		this.writeQueuePending++;
 		const task = this.writeQueue.then(async () => {
@@ -1281,26 +1436,44 @@ export class SyncEngine {
 				const base = this.baseline;
 				if (base === null) throw new DashboardSaveError('saveFailed', t('dashboard.sync.sourceMissing'));
 				await this.createBackup(base);
-				let remote = base, conflict = false;
+				let remote = base,
+					conflict = false;
 				try {
-					await contentFiles(this.app).process(fileRef.path, current => {
-						if (current === null) throw new DashboardSaveError('saveFailed', t('dashboard.sync.sourceMissing'));
+					await contentFiles(this.app).process(fileRef.path, (current) => {
+						if (current === null)
+							throw new DashboardSaveError('saveFailed', t('dashboard.sync.sourceMissing'));
 						remote = current;
-						if (current !== base) { conflict = true; throw new DashboardSaveError('conflict', t('dashboard.sync.conflictPending')); }
+						if (current !== base) {
+							conflict = true;
+							throw new DashboardSaveError('conflict', t('dashboard.sync.conflictPending'));
+						}
 						return content;
 					});
 				} catch (error) {
 					if (conflict) {
 						this.blocked = true;
-						this.conflict = { id: crypto.randomUUID(), path: fileRef.path, base, local: content, candidate: content, remote };
+						this.conflict = {
+							id: crypto.randomUUID(),
+							path: fileRef.path,
+							base,
+							local: content,
+							candidate: content,
+							remote,
+						};
 						await this.saveConflict(content, revision);
 					}
 					throw error;
 				}
 				this.baseline = content;
-				if (revision === this.localRevision) { this.localDirty = false; this.setSaveState('saved'); }
-			} catch (error) { throw this.saveFailure(error); }
-			finally { this.writeQueuePending--; }
+				if (revision === this.localRevision) {
+					this.localDirty = false;
+					this.setSaveState('saved');
+				}
+			} catch (error) {
+				throw this.saveFailure(error);
+			} finally {
+				this.writeQueuePending--;
+			}
 		});
 		// Only the internal queue observes rejection here. Public operations still reject.
 		this.writeQueue = task.catch(() => undefined);

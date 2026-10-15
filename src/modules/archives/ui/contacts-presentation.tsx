@@ -1,14 +1,8 @@
 import { contentFiles } from '../../../host/obsidian/storage/content-files';
-import { NativeSurface, type NativeSurfaceContext } from '../../../ui/native-surface';
-import {
-	Component,
-	MarkdownRenderer,
-	Menu,
-	Notice,
-	Platform,
-	type ViewStateResult,
-	} from 'obsidian';
-import { render } from 'preact/compat';
+import { type NativeSurfaceContext } from '../../../ui/native-surface';
+import { Component, MarkdownRenderer, Menu, Notice, Platform, type ViewStateResult } from 'obsidian';
+import { ReactSurface } from '../../../ui/react/surface';
+import { ArchiveEditor, type ArchiveEditorHandle, type ArchiveEditorProps } from './forms';
 import { emptyQuery } from '../core/index-store';
 import type { ContactsLayoutMode } from './panel-contract';
 import { applyLayout, contactsTarget, emptyPanelState, restoreContactsState, showContactKind } from './panel-state';
@@ -16,7 +10,7 @@ import { ContactsError, newRecord, type ArchiveRecord, type RecordKind } from '.
 import { type ContactsController } from '../platform/controller';
 import { t } from '../../../shared/i18n/index';
 import { onLeafLanguageChanged } from '../../../host/obsidian/workspace-title';
-import { confirm, ct, deleteRow, editBase, errorText, FilterModal, RecordEditorForm, type EditScope } from './forms';
+import { confirm, ct, deleteRow, editBase, errorText, FilterModal, type EditScope } from './forms';
 import type { ContactsHost } from '../services/page-host';
 import type { ContactsPanelState } from './panel-contract';
 import { ContactsSurface } from './surface';
@@ -24,14 +18,13 @@ import { ArchiveNoteModal } from './note-modal';
 import type { ArchiveResource } from '../core/resources';
 
 export const CONTACTS_PAGE_TYPE = 'nand-contacts-view';
-export class ContactsPresentation extends NativeSurface {
+export class ContactsPresentation extends ReactSurface {
 	state: ContactsPanelState = emptyPanelState();
 	controller?: ContactsController;
 	private unsubscribe?: () => void;
 	private history: Array<{ path: string; id: string }> = [];
-	private root?: HTMLElement;
-	private editorRoot?: HTMLElement;
-	private editor?: RecordEditorForm;
+	private editor?: Omit<ArchiveEditorProps, 'ref'>;
+	private editorHandle: { current: ArchiveEditorHandle | null } = { current: null };
 	private pendingInput?: HTMLInputElement;
 	constructor(
 		context: NativeSurfaceContext,
@@ -66,11 +59,7 @@ export class ContactsPresentation extends NativeSurface {
 		return 'contact-round';
 	}
 	onOpen(): Promise<void> {
-		this.contentEl.addClass('nand-contacts-view');
-		this.contentEl.toggleClass('nand-contacts-phone', Platform.isPhone);
-		this.root = this.contentEl.createDiv();
-		this.editorRoot = this.contentEl.createDiv({ cls: 'nand-contacts-editor-page' });
-		this.editorRoot.hide();
+		void super.onOpen();
 		this.register(this.host.settings.subscribe(() => this.render()));
 		if (Platform.isPhone) {
 			const navbar = this.contentEl.doc.querySelector('.mobile-navbar');
@@ -87,12 +76,6 @@ export class ContactsPresentation extends NativeSurface {
 			}
 		}
 		this.register(onLeafLanguageChanged(this.app, this.leaf, () => this.render()));
-		this.register(
-			this.contentEl.onWindowMigrated(() => {
-				if (this.root) render(null, this.root);
-				this.render();
-			}),
-		);
 		this.registerDomEvent(this.contentEl, 'scroll', () => {
 			if (this.state.selectedPath) return;
 			this.state.scroll = this.contentEl.scrollTop;
@@ -127,24 +110,25 @@ export class ContactsPresentation extends NativeSurface {
 				this.state.selectedId = tracked.id;
 			}
 		}
-		if (this.root) render(<ContactsSurface view={this} />, this.root);
+		this.rerender();
 	}
 	onClose(): Promise<void> {
 		this.disposeSurface();
-		return Promise.resolve();
+		return super.onClose();
 	}
 	disposeSurface(): void {
-		this.editor?.dispose();
 		this.editor = undefined;
 		this.pendingInput?.remove();
 		this.pendingInput = undefined;
 		this.unsubscribe?.();
 		this.unsubscribe = undefined;
-		if (this.root) {
-			render(null, this.root);
-			this.root.remove();
-			this.root = undefined;
-		}
+	}
+	protected renderContent() {
+		return this.editor ? (
+			<ArchiveEditor {...this.editor} ref={this.editorHandle} />
+		) : (
+			<ContactsSurface view={this} />
+		);
 	}
 	getState(): Record<string, unknown> {
 		return { ...this.state };
@@ -188,7 +172,8 @@ export class ContactsPresentation extends NativeSurface {
 		const kind = this.state.query.kind;
 		const anchor = this.state.anchors[kind][this.state.layout[kind]];
 		this.contentEl.win.requestAnimationFrame(() => {
-			if (anchor && this.controller?.index.query(this.state.query).some((record) => record.path === anchor)) this.scrollToPath(anchor);
+			if (anchor && this.controller?.index.query(this.state.query).some((record) => record.path === anchor))
+				this.scrollToPath(anchor);
 			else this.contentEl.scrollTop = this.state.scroll;
 		});
 	}
@@ -293,28 +278,25 @@ export class ContactsPresentation extends NativeSurface {
 			.catch((error: unknown) => new Notice(errorText(error)));
 	}
 	/** Show the record form in place of the list or detail. */
-	private openEditor(base: ArchiveRecord, scope: EditScope, rowId: string | undefined, done: (record: ArchiveRecord) => void): void {
+	private openEditor(
+		base: ArchiveRecord,
+		scope: EditScope,
+		rowId: string | undefined,
+		done: (record: ArchiveRecord) => void,
+	): void {
 		const controller = this.controller;
-		const host = this.editorRoot;
-		if (!controller || !host || !this.root) return;
-		this.editor?.dispose();
-		host.empty();
-		host.className = 'nand-contacts-editor-page';
-		this.root.hide();
-		host.show();
-		this.editor = new RecordEditorForm(controller, base, scope, rowId, done, host, () => this.closeEditor());
-		this.editor.open();
+		if (!controller) return;
+		this.editor = { controller, base, scope, rowId, done, exit: () => this.closeEditor() };
+		this.render();
 	}
 	private closeEditor(): void {
 		this.editor = undefined;
-		this.editorRoot?.empty();
-		this.editorRoot?.hide();
-		this.root?.show();
 		this.render();
 	}
+
 	/** Leave an open form first (asking about unsaved changes); used before navigating elsewhere in the page. */
 	leaveEditor(): void {
-		this.editor?.close();
+		this.editorHandle.current?.close();
 	}
 	deleteRow(record: ArchiveRecord, scope: 'employment' | 'relation', id: string): void {
 		if (this.controller) void deleteRow(this.controller, record, scope, id);
@@ -335,10 +317,14 @@ export class ContactsPresentation extends NativeSurface {
 		}).open();
 	}
 	openResource(path: string, _line?: number): void {
-		void contentFiles(this.app).open(path).catch((error: unknown) => new Notice(errorText(error)));
+		void contentFiles(this.app)
+			.open(path)
+			.catch((error: unknown) => new Notice(errorText(error)));
 	}
 	revealFolder(record: ArchiveRecord): void {
-		void contentFiles(this.app).open(record.folderPath).catch((error: unknown) => new Notice(errorText(error)));
+		void contentFiles(this.app)
+			.open(record.folderPath)
+			.catch((error: unknown) => new Notice(errorText(error)));
 	}
 	addResources(record: ArchiveRecord, files?: File[]): void {
 		const controller = this.controller;
@@ -419,58 +405,56 @@ export class ContactsPresentation extends NativeSurface {
 				error instanceof ContactsError &&
 				error.code === 'deleteChanged' &&
 				this.enabled &&
-				this.root?.isConnected
+				this.contentEl.isConnected
 			) {
 				const current = this.controller?.index.get(record.id);
 				if (current) await this.remove(current);
 			}
 		}
 	}
-	private recordMenu(menu: Menu, record: ArchiveRecord): void {
-		menu.addItem((item) =>
-			item
-				.setTitle(ct('editBasic'))
-				.setIcon('pencil')
-				.setDisabled(!!this.controller?.index.issues(record).length)
-				.onClick(() => this.edit(record, 'basic')),
-		);
-		menu.addItem((item) =>
-			item
-				.setTitle(ct('revealFolder'))
-				.setIcon('folder-open')
-				.onClick(() => this.revealFolder(record)),
-		);
-		menu.addItem((item) =>
-			item
-				.setTitle(t('automation.new'))
-				.setIcon('bell-plus')
-				.setDisabled(!this.host.newReminder)
-				.onClick(() => this.host.newReminder?.(record)),
-		);
-		menu.addItem((item) =>
-			item
-				.setTitle(ct('source'))
-				.setIcon('file-text')
-				.onClick(() => {
-					void contentFiles(this.app).open(record.path).catch(error => new Notice(String(error)));
-				}),
-		);
-		menu.addItem((item) =>
-			item
-				.setTitle(ct('delete'))
-				.setIcon('trash-2')
-				.setDisabled(!!this.controller?.index.issues(record).length)
-				.onClick(() => {
+	recordActions(record: ArchiveRecord) {
+		return [
+			{
+				title: ct('editBasic'),
+				icon: 'pencil',
+				disabled: !!this.controller?.index.issues(record).length,
+				run: () => this.edit(record, 'basic'),
+			},
+			{ title: ct('revealFolder'), icon: 'folder-open', run: () => this.revealFolder(record) },
+			{
+				title: t('automation.new'),
+				icon: 'bell-plus',
+				disabled: !this.host.newReminder,
+				run: () => {
+					this.host.newReminder?.(record);
+				},
+			},
+			{
+				title: ct('source'),
+				icon: 'file-text',
+				run: () => {
+					void contentFiles(this.app)
+						.open(record.path)
+						.catch((error) => new Notice(String(error)));
+				},
+			},
+			{
+				title: ct('delete'),
+				icon: 'trash-2',
+				disabled: !!this.controller?.index.issues(record).length,
+				run: () => {
 					void this.remove(record);
-				}),
-		);
+				},
+			},
+		];
 	}
-	more(record: ArchiveRecord): void {
-		const menu = new Menu();
-		this.recordMenu(menu, record);
-		const rect = this.contentEl.getBoundingClientRect();
-		menu.showAtPosition({ x: rect.right - 180, y: rect.top + 40 });
+	private recordMenu(menu: Menu, record: ArchiveRecord): void {
+		for (const action of this.recordActions(record))
+			menu.addItem((item) =>
+				item.setTitle(action.title).setIcon(action.icon).setDisabled(!!action.disabled).onClick(action.run),
+			);
 	}
+
 	onPaneMenu(menu: Menu, source: string): void {
 		if (this.enabled) {
 			menu.addItem((i) =>

@@ -1,26 +1,30 @@
 import { contentFiles } from '../../host/obsidian/storage/content-files';
-import { archiveLocation, safeArchiveName, queryResources, normalizeValues } from '../../modules/archives/core/resources';
+import {
+	archiveLocation,
+	safeArchiveName,
+	queryResources,
+	normalizeValues,
+} from '../../modules/archives/core/resources';
 import { WriteQueue } from '../../shared/storage/write-queue';
 import { t, setLanguage } from '../../shared/i18n/index';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { test } from 'vitest';
-import { Setting, TFile, TFolder, type App } from 'obsidian';
-import { archivesSettingsPage } from '../../modules/archives/ui/settings-page';
+import { TFile, TFolder, type App } from 'obsidian';
 import { cloneRecord, newRecord, emptyRef, ContactsError, type ArchiveRecord } from '../../modules/archives/core/model';
 import { createMarkdown, parseRecord, patchMarkdown, relativeLink } from '../../modules/archives/core/persist/markdown';
 import { ContactsIndex, emptyQuery } from '../../modules/archives/core/index-store';
 import { ContactsController } from '../../modules/archives/platform/controller';
 import { normalizeContactsSettings, validContactsFolder } from '../../shared/contacts-settings';
-import { FilterModal } from '../../modules/archives/ui/forms';
-import { El } from '../../../scripts/mini-dom';
-import { Setting as StubSetting } from '../../../scripts/obsidian-stub';
-import { parseHTML } from 'linkedom';
-import { h, render } from 'preact';
-import { ContactsSurface } from '../../modules/archives/ui/surface';
-import { ResourceList } from '../../modules/archives/ui/ResourceList';
-import type { ContactsPanelHost } from '../../modules/archives/ui/panel-contract';
-import { applyLayout, contactsTarget, CONTACTS_PAGE_STATE_KEYS, emptyPanelState, layoutsFor, restoreContactsState, showContactKind } from '../../modules/archives/ui/panel-state';
+import {
+	applyLayout,
+	contactsTarget,
+	CONTACTS_PAGE_STATE_KEYS,
+	emptyPanelState,
+	layoutsFor,
+	restoreContactsState,
+	showContactKind,
+} from '../../modules/archives/ui/panel-state';
 import { navigateContacts } from '../../modules/archives/ui/navigate';
 import { cleanPageState } from '../../shell/navigation-state';
 
@@ -286,7 +290,12 @@ function memoryVault() {
 	const listeners = new Map<string, Array<(...args: unknown[]) => void>>();
 	const emit = (event: string, ...args: unknown[]) => {
 		const entry = args[0] as { path?: string } | undefined;
-		if (app && entry?.path?.startsWith('.nand/')) { queueMicrotask(() => { void contentFiles(app).refresh(); }); return; }
+		if (app && entry?.path?.startsWith('.nand/')) {
+			queueMicrotask(() => {
+				void contentFiles(app).refresh();
+			});
+			return;
+		}
 		for (const listener of listeners.get(event) ?? []) listener(...args);
 	};
 	let fail = false;
@@ -294,26 +303,64 @@ function memoryVault() {
 	const adapter = {
 		exists: async (path: string) => files.has(path),
 		read: async (path: string) => vault.read(files.get(path) as TFile),
-		write: async (path: string, value: string) => { if (fail) throw new Error('disk full'); const existing = files.get(path); if (existing instanceof TFolder) throw new Error('folder'); if (existing) await vault.process(existing, () => value); else await vault.create(path, value); },
-		mkdir: async (path: string) => { await vault.createFolder(path); },
-		stat: async (path: string) => { const file = files.get(path); return !file ? null : file instanceof TFolder ? { type: 'folder', ctime: 1, mtime: 1, size: 0 } : { type: 'file', ...file.stat }; },
-		list: async (path: string) => { const prefix = path ? path + '/' : ''; const children = [...files.values()].filter(file => file.path.startsWith(prefix) && !file.path.slice(prefix.length).includes('/')); return { files: children.filter(file => file instanceof TFile).map(file => file.path), folders: children.filter(file => file instanceof TFolder).map(file => file.path) }; },
+		write: async (path: string, value: string) => {
+			if (fail) throw new Error('disk full');
+			const existing = files.get(path);
+			if (existing instanceof TFolder) throw new Error('folder');
+			if (existing) await vault.process(existing, () => value);
+			else await vault.create(path, value);
+		},
+		mkdir: async (path: string) => {
+			await vault.createFolder(path);
+		},
+		stat: async (path: string) => {
+			const file = files.get(path);
+			return !file
+				? null
+				: file instanceof TFolder
+					? { type: 'folder', ctime: 1, mtime: 1, size: 0 }
+					: { type: 'file', ...file.stat };
+		},
+		list: async (path: string) => {
+			const prefix = path ? path + '/' : '';
+			const children = [...files.values()].filter(
+				(file) => file.path.startsWith(prefix) && !file.path.slice(prefix.length).includes('/'),
+			);
+			return {
+				files: children.filter((file) => file instanceof TFile).map((file) => file.path),
+				folders: children.filter((file) => file instanceof TFolder).map((file) => file.path),
+			};
+		},
 		process: (path: string, update: (raw: string) => string) => vault.process(files.get(path) as TFile, update),
 		writeBinary: async (path: string, bytes: ArrayBuffer) => adapter.write(path, new TextDecoder().decode(bytes)),
-		copy: async (source: string, target: string) => { const value = text.get(source); if (value === undefined) throw new Error('missing'); if (files.has(target)) throw new Error('exists'); await adapter.write(target, value); },
-		remove: async (path: string) => { files.delete(path); text.delete(path); },
+		copy: async (source: string, target: string) => {
+			const value = text.get(source);
+			if (value === undefined) throw new Error('missing');
+			if (files.has(target)) throw new Error('exists');
+			await adapter.write(target, value);
+		},
+		remove: async (path: string) => {
+			files.delete(path);
+			text.delete(path);
+		},
 		rename: (source: string, target: string) => vault.rename(files.get(source)!, target),
 	};
 	const vault = {
 		adapter,
-		offref: ({ event, callback }: { event: string; callback: (...args: unknown[]) => void }) => { listeners.set(event, (listeners.get(event) ?? []).filter(fn => fn !== callback)); },
+		offref: ({ event, callback }: { event: string; callback: (...args: unknown[]) => void }) => {
+			listeners.set(
+				event,
+				(listeners.get(event) ?? []).filter((fn) => fn !== callback),
+			);
+		},
 		on: (event: string, callback: (...args: unknown[]) => void) => {
 			const list = listeners.get(event) ?? [];
 			list.push(callback);
 			listeners.set(event, list);
 			return { event, callback };
 		},
-		getMarkdownFiles: () => [...files.values()].filter((f): f is TFile => f instanceof TFile && !f.path.startsWith('.')),
+		getMarkdownFiles: () =>
+			[...files.values()].filter((f): f is TFile => f instanceof TFile && !f.path.startsWith('.')),
 		getFileByPath: (path: string) => {
 			const f = files.get(path);
 			return f instanceof TFile && !path.startsWith('.') ? f : null;
@@ -692,25 +739,6 @@ test('both format guides document table headings accepted by the real Markdown p
 	}
 });
 
-test('archive folder row is the only contacts setting that reserves description width', () => {
-	setLanguage('zh');
-	const registry = (
-		Setting as unknown as {
-			created: Array<{ name: string; settingEl: { classList: { contains(name: string): boolean } } }>;
-		}
-	).created;
-	const before = registry.length;
-	const settings = { get: () => ({ rootFolder: '.nand/content/档案', maxColumns: 6 }), update: async () => {}, subscribe: () => () => {} };
-	archivesSettingsPage({} as App, {} as ContactsController, settings as never)({ appendChild() {} } as never, { refresh() {}, keep() {} });
-	const created = registry.slice(before);
-	const folder = created.find((row) => row.name === t('contacts.folder'));
-	const columns = created.find((row) => row.name === t('contacts.columns'));
-	assert.ok(folder);
-	assert.equal(folder.settingEl.classList.contains('nand-contacts-folder-setting'), true);
-	assert.ok(columns);
-	assert.equal(columns.settingEl.classList.contains('nand-contacts-folder-setting'), false);
-});
-
 test('strict folder entry rules exclude flat archives, ordinary material notes and nested fake entries', async () => {
 	const f = memoryVault();
 	const valid = await f.controller.create(newNamed('person', '王天肖'));
@@ -858,256 +886,6 @@ test('company contact fields and normalized pasted values retain string semantic
 	record.fields.emails = ['info@example.com'];
 	assert.deepEqual(round(record).fields.phones, ['+1 212', '00123', '00999']);
 	assert.deepEqual(round(record).fields.emails, ['info@example.com']);
-});
-
-test('resource list paginates at 60 and preserves search on live updates without opening stale rows', async () => {
-	const environment = globalThis as { document?: Document },
-		previous = environment.document;
-	const { document } = parseHTML('<html><body></body></html>');
-	Object.assign(globalThis, { document });
-	const target = document.createElement('div');
-	document.body.appendChild(target);
-	const record = fixture();
-	let files = Array.from({ length: 65 }, (_, index) => ({
-		path: record.folderPath + `/资料${index}.pdf`,
-		relativePath: `资料${index}.pdf`,
-		name: `资料${index}.pdf`,
-		extension: 'pdf',
-		size: index,
-		modified: index,
-	}));
-	let opened = '';
-	const view = {
-		resources: () => files,
-		newNote() {},
-		addResources() {},
-		openResource(path: string) {
-			opened = path;
-		},
-	} as unknown as ContactsPanelHost;
-	const paint = () => render(h(ResourceList, { view, record }), target);
-	const settle = () => new Promise((resolve) => setTimeout(resolve, 50));
-	try {
-		paint();
-		await settle();
-		assert.equal(target.querySelectorAll('button.nand-contacts-resource-row').length, 60);
-		target.querySelectorAll<HTMLButtonElement>('.nand-contacts-pagination button')[1]!.click();
-		await settle();
-		assert.equal(target.querySelectorAll('button.nand-contacts-resource-row').length, 5);
-		const search = target.querySelector('input')!;
-		search.value = '资料64';
-		search.dispatchEvent(new document.defaultView!.Event('input', { bubbles: true }));
-		await settle();
-		assert.equal(target.querySelectorAll('button.nand-contacts-resource-row').length, 1);
-		const added = {
-			...files[0]!,
-			path: record.folderPath + '/项目/资料64.pdf',
-			relativePath: '项目/资料64.pdf',
-			name: '资料64.pdf',
-		};
-		files = [...files, added];
-		paint();
-		await settle();
-		assert.equal(search.value, '资料64');
-		assert.equal(target.querySelectorAll('button.nand-contacts-resource-row').length, 2);
-		target.querySelector<HTMLButtonElement>('button.nand-contacts-resource-row')!.click();
-		assert.equal(opened, record.folderPath + '/资料64.pdf');
-		files = [];
-		paint();
-		await settle();
-		assert.equal(target.querySelectorAll('button.nand-contacts-resource-row').length, 0);
-	} finally {
-		render(null, target);
-		if (previous) environment.document = previous;
-		else delete environment.document;
-	}
-});
-
-test('empty archive filters explain missing data and preserve existing choices on apply', () => {
-	try {
-		for (const language of ['zh', 'en'] as const) {
-			setLanguage(language);
-			for (const kind of ['person', 'company'] as const) {
-				const index = new ContactsIndex();
-				const controller = { app: {}, index, choices: () => [] } as unknown as ContactsController;
-				const query = { ...emptyQuery(), kind };
-				const empty = new FilterModal(controller, query, () => {});
-				Object.assign(empty, { modalEl: new El('div'), setTitle() { return empty; } });
-				empty.onOpen();
-				const emptyContent = empty.contentEl as unknown as El;
-				assert.equal(
-					emptyContent.querySelectorAll('.nand-contacts-placeholder').length,
-					kind === 'person' ? 5 : 2,
-				);
-				assert.equal(emptyContent.querySelector('p')?.textContent, t('contacts.filterEmpty'));
-				for (const placeholder of emptyContent.querySelectorAll('.nand-contacts-placeholder')) {
-					assert.equal(placeholder.textContent, t('contacts.noFilterOptions'));
-					assert.ok(placeholder.hasClass('nand-contacts-muted'));
-				}
-				empty.onClose();
-				assert.equal(emptyContent.childElementCount, 0);
-
-				const record = fixture(kind);
-				record.fields.region = '上海';
-				index.set(record);
-				query.regions = ['Previous region'];
-				let applied = { ...emptyQuery(), kind };
-				const before = (Setting as unknown as typeof StubSetting).created.length;
-				const partial = new FilterModal(controller, query, (next) => {
-					applied = next;
-				});
-				Object.assign(partial, { modalEl: new El('div'), setTitle() { return partial; } });
-				partial.onOpen();
-				const partialContent = partial.contentEl as unknown as El;
-				assert.equal(
-					partialContent.querySelectorAll('.nand-contacts-placeholder').length,
-					kind === 'person' ? 4 : 1,
-				);
-				assert.equal(partialContent.textContent.includes(t('contacts.filterEmpty')), false);
-				const settings = (Setting as unknown as typeof StubSetting).created.slice(before);
-				settings.find((setting) => setting.name === '上海')!.toggles[0]!.fire!(true);
-				assert.deepEqual(
-					query.regions,
-					['Previous region'],
-					'Editing the modal does not mutate the original query',
-				);
-				settings.at(-1)!.buttons[1]!.click!();
-				assert.deepEqual(applied.regions, ['Previous region', '上海']);
-				partial.onClose();
-			}
-		}
-	} finally {
-		setLanguage('zh');
-	}
-});
-
-test('archive search follows the selected kind and empty prose stays distinct from user text', async () => {
-	const environment = globalThis as { document?: Document };
-	const previousDocument = environment.document;
-	const { document } = parseHTML('<html><body></body></html>');
-	Object.assign(globalThis, { document });
-	const panel = document.createElement('div');
-	document.body.appendChild(panel);
-	const waitForEffects = () => new Promise<void>((resolve) => setTimeout(resolve, 160));
-	const index = new ContactsIndex();
-	const person = fixture();
-	const company = fixture('company', 'Example Company');
-	index.set(person);
-	index.set(company);
-	const mounted: string[] = [];
-	let unmounted = 0;
-	const view: ContactsPanelHost = {
-		state: emptyPanelState(),
-		enabled: true,
-		columns: 6,
-		controller: { index, error: '', loading: false, reload: async () => {} },
-		mountMarkdown(target, text) {
-			mounted.push(text);
-			const p = document.createElement('p');
-			p.textContent = text;
-			target.appendChild(p);
-			return () => {
-				unmounted++;
-				target.textContent = '';
-			};
-		},
-		select(path) {
-			view.state.selectedPath = path;
-			paint();
-		},
-		back() {
-			view.state.selectedPath = '';
-			paint();
-		},
-		changeKind(kind) {
-			view.state.query.kind = kind;
-			paint();
-		},
-		layout(mode) {
-			view.state = applyLayout(view.state, mode);
-			paint();
-		},
-		setScope(value) {
-			view.state.query = { ...view.state.query, scope: value };
-			paint();
-		},
-		search(value) {
-			view.state.query.search = value;
-			paint();
-		},
-		sort() {},
-		page() {},
-		clearFilters() {},
-		filters() {},
-		add() {},
-		edit() {},
-		deleteRow() {},
-		more() {},
-		resources: () => [],
-		newNote() {},
-		addResources() {},
-		openResource() {},
-		revealFolder() {},
-	};
-	const paint = () => render(h(ContactsSurface, { view }), panel);
-	try {
-		for (const language of ['zh', 'en'] as const) {
-			setLanguage(language);
-			view.state.query = emptyQuery();
-			view.state.selectedPath = '';
-			paint();
-			const input = panel.querySelector('input')!;
-			assert.equal(input.getAttribute('placeholder'), t('contacts.searchPeople'));
-			panel.querySelectorAll<HTMLButtonElement>('.nand-contacts-tabs button')[1]!.click();
-			assert.equal(panel.querySelector('input'), input, 'Changing archive kind retains the search control');
-			assert.equal(input.getAttribute('placeholder'), t('contacts.searchCompanies'));
-			assert.equal(input.getAttribute('aria-label'), t('contacts.searchCompanies'));
-			input.value = 'Example';
-			input.dispatchEvent(new document.defaultView!.Event('input', { bubbles: true }));
-			assert.equal(view.state.query.search, 'Example');
-			for (const record of [person, company]) {
-				const keys = record.kind === 'person' ? (['traits', 'habits', 'notes'] as const) : (['notes'] as const);
-				for (const key of keys) record.prose[key] = ' \n ';
-				view.state.selectedPath = record.path;
-				const before = mounted.length;
-				paint();
-				await waitForEffects();
-				const proseSections = Array.from(panel.querySelectorAll<HTMLElement>('.nand-contacts-section')).slice(
-					-keys.length,
-				);
-				for (const section of proseSections) {
-					section.querySelector<HTMLButtonElement>('.nand-contacts-section-toggle')!.click();
-					await waitForEffects();
-					const placeholder = section.querySelector('p')!;
-					assert.equal(placeholder.textContent, t('contacts.noDetails'));
-					assert.ok(placeholder.classList.contains('nand-contacts-muted'));
-					assert.ok(placeholder.classList.contains('nand-contacts-placeholder'));
-				}
-				assert.equal(mounted.length, before, 'Empty prose does not invoke the Markdown renderer');
-				const userText = t('contacts.noDetails');
-				for (const key of keys) record.prose[key] = userText;
-				paint();
-				await waitForEffects();
-				assert.deepEqual(
-					mounted.slice(before),
-					keys.map(() => userText),
-					'Literal user text matching the placeholder stays real Markdown',
-				);
-				for (const section of proseSections)
-					assert.equal(section.querySelector('.nand-contacts-placeholder'), null);
-				const beforeCleanup = unmounted;
-				for (const key of keys) record.prose[key] = '';
-				paint();
-				await waitForEffects();
-				assert.equal(unmounted - beforeCleanup, keys.length, 'Clearing prose releases its Markdown renderer');
-			}
-		}
-	} finally {
-		render(null, panel);
-		if (previousDocument) environment.document = previousDocument;
-		else delete environment.document;
-		setLanguage('zh');
-	}
 });
 
 test('new and restored archive leaves pick layouts without throwing on bad values', () => {
@@ -1432,100 +1210,6 @@ test('hot queries answer from the index after the note text is gone', () => {
 	assert.equal(index.query({ ...emptyQuery(), search: '磁盘备注' }).length, 0);
 	assert.equal(index.query({ ...emptyQuery(), search: '磁盘姓名' }).length, 0);
 	assert.equal(index.query({ ...emptyQuery(), search: records[42]!.id }).length, 0);
-});
-
-test('list and card render the same paths, and switching layout does not reload', async () => {
-	const environment = globalThis as { document?: Document };
-	const previousDocument = environment.document;
-	const { document } = parseHTML('<html><body></body></html>');
-	Object.assign(globalThis, { document });
-	const panel = document.createElement('div');
-	document.body.appendChild(panel);
-	const index = new ContactsIndex();
-	const person = fixture('person', '列表甲');
-	person.fields.emails = ['a@example.com', 'b@example.com'];
-	person.fields.region = '杭州';
-	person.prose.notes = '只在备注';
-	index.set(person);
-	index.set(fixture('person', '列表乙'));
-	let reloads = 0;
-	const view: ContactsPanelHost = {
-		state: emptyPanelState(),
-		enabled: true,
-		columns: 6,
-		controller: { index, error: '', loading: false, reload: async () => { reloads += 1; } },
-		mountMarkdown: () => () => {},
-		select() {},
-		back() {},
-		changeKind() {},
-		search() {},
-		sort() {},
-		page() {},
-		clearFilters() {},
-		filters() {},
-		add() {},
-		edit() {},
-		deleteRow() {},
-		more() {},
-		resources: () => [],
-		newNote() {},
-		addResources() {},
-		openResource() {},
-		revealFolder() {},
-		layout(mode) {
-			const query = view.state.query;
-			const page = view.state.page;
-			const selectedPath = view.state.selectedPath;
-			view.state = applyLayout(view.state, mode);
-			assert.equal(view.state.query, query);
-			assert.equal(view.state.page, page);
-			assert.equal(view.state.selectedPath, selectedPath);
-			paint();
-		},
-		setScope() {},
-	};
-	const paint = () => render(h(ContactsSurface, { view }), panel);
-	const paths = () => Array.from(panel.querySelectorAll<HTMLElement>('[data-path]'), (node) => node.dataset.path);
-	try {
-		view.state.query.search = '只在备注';
-		paint();
-		const listed = paths();
-		const hitText = () => panel.querySelector('.nand-contacts-hit')?.textContent ?? '';
-		assert.deepEqual(listed, index.query(view.state.query).map((record) => record.path));
-		assert.equal(hitText().includes('<'), false);
-		assert.equal(hitText().includes(t('contacts.hit.notes')), true);
-		assert.ok(panel.querySelector('.nand-contacts-row-copy'));
-		assert.equal(panel.querySelector('button.nand-contacts-row-name button'), null);
-		panel.querySelectorAll<HTMLButtonElement>('.nand-contacts-layout button')[1]!.click();
-		assert.equal(reloads, 0);
-		assert.deepEqual(paths(), listed);
-		assert.equal(view.state.layout.person, 'card');
-		assert.equal(hitText().includes('<'), false);
-		assert.equal(hitText().includes(t('contacts.hit.notes')), true);
-		const searches: string[] = [];
-		view.search = (value: string) => {
-			searches.push(value);
-		};
-		const input = panel.querySelector<HTMLInputElement>('input[type=search]');
-		assert.ok(input);
-		const ViewEvent = input.ownerDocument.defaultView!.Event;
-		const fire = (type: string) => input.dispatchEvent(new ViewEvent(type, { bubbles: true }));
-		input.value = '王';
-		fire('input');
-		assert.deepEqual(searches, ['王']);
-		searches.length = 0;
-		input.value = 'zhong';
-		fire('compositionstart');
-		fire('input');
-		assert.deepEqual(searches, []);
-		input.value = '中';
-		fire('compositionend');
-		assert.deepEqual(searches, ['中']);
-	} finally {
-		render(null, panel);
-		if (previousDocument) environment.document = previousDocument;
-		else delete environment.document;
-	}
 });
 
 test('hot entry-note queries stay in memory', () => {

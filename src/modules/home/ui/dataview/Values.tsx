@@ -1,5 +1,7 @@
+// Layout and interaction adapted from PandoraReads/apex-dashboard ac4d2c7 (MIT), Copyright (c) 2025 PandoraReads: src/dataview-section.ts
+import { p1Classes } from '../theme/p1-classes';
 import { Platform } from 'obsidian';
-import { Fragment } from 'preact';
+import { Fragment } from 'react';
 import type { DqlLink, DqlValue, ResultRow } from '../../core/dql/types';
 import { formatValue, kindOf } from '../../core/dql/values';
 import type { DataviewContext } from './context';
@@ -8,8 +10,8 @@ import { contentFiles, isManagedFile } from '../../../../host/obsidian/storage/c
 export function rowOpen(context: DataviewContext, row: ResultRow) {
 	const file = row.page ? contentFiles(context.app).getFileByPath(row.page.file.path) : null;
 	return {
-		class: file ? 'is-clickable' : '',
-		onMouseOver: (event: MouseEvent) => {
+		className: file ? 'is-clickable' : '',
+		onMouseOver: (event: import('react').MouseEvent) => {
 			if (file && !isManagedFile(file) && context.hoverParent && !Platform.isMobile)
 				context.app.workspace.trigger('hover-link', {
 					event,
@@ -20,7 +22,7 @@ export function rowOpen(context: DataviewContext, row: ResultRow) {
 					sourcePath: '',
 				});
 		},
-		onClick: (event: MouseEvent) => {
+		onClick: (event: import('react').MouseEvent) => {
 			if (
 				file &&
 				!(event.target as HTMLElement).closest('a,.dashboard-wikilink,.dashboard-dataview-task-checkbox')
@@ -43,7 +45,7 @@ function Link({ content, context }: { content: string; context: DataviewContext 
 	};
 	return (
 		<span
-			class="dashboard-wikilink"
+			className={p1Classes('dashboard-wikilink')}
 			role="link"
 			tabIndex={0}
 			onClick={(e) => {
@@ -85,15 +87,20 @@ export function InlineValue({ text, context }: { text: string; context: Dataview
 				)
 					content = <strong>{inner(2)}</strong>;
 				else if (part.startsWith('==') && part.endsWith('==') && part.length > 4)
-					content = <mark class="dashboard-dataview-mark">{inner(2)}</mark>;
+					content = <mark className={p1Classes('dashboard-dataview-mark')}>{inner(2)}</mark>;
 				else if (part.startsWith('~~') && part.endsWith('~~') && part.length > 4) content = <s>{inner(2)}</s>;
 				else if (part.startsWith('*') && part.endsWith('*') && part.length > 2) content = <em>{inner(1)}</em>;
 				else if (part.startsWith('`') && part.endsWith('`') && part.length > 2)
-					content = <code class="dashboard-dataview-code">{part.slice(1, -1)}</code>;
+					content = <code className={p1Classes('dashboard-dataview-code')}>{part.slice(1, -1)}</code>;
 				else {
 					const ext = part.match(/^\[([^\]]+)\]\(([^)]+)\)$/);
 					content = ext ? (
-						<a class="dashboard-dataview-extlink" href={ext[2]} target="_blank" rel="noopener">
+						<a
+							className={p1Classes('dashboard-dataview-extlink')}
+							href={ext[2]}
+							target="_blank"
+							rel="noopener"
+						>
 							{ext[1]}
 						</a>
 					) : (
@@ -106,7 +113,8 @@ export function InlineValue({ text, context }: { text: string; context: Dataview
 	);
 }
 export function Value({ value, context }: { value: DqlValue; context: DataviewContext }) {
-	if (value == null || (Array.isArray(value) && !value.length)) return <span class="dashboard-dataview-null">—</span>;
+	if (value == null || (Array.isArray(value) && !value.length))
+		return <span className={p1Classes('dashboard-dataview-null')}>—</span>;
 	if (kindOf(value) === 'link') {
 		const link = value as DqlLink;
 		return <Link content={`${link.path}${link.display ? `|${link.display}` : ''}`} context={context} />;
@@ -123,7 +131,7 @@ export function Value({ value, context }: { value: DqlValue; context: DataviewCo
 			</>
 		);
 	return (
-		<span class="dashboard-dataview-text">
+		<span className={p1Classes('dashboard-dataview-text')}>
 			<InlineValue text={formatValue(value)} context={context} />
 		</span>
 	);

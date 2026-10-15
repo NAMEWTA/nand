@@ -20,7 +20,7 @@ const panel=`(document.querySelector('.nand-browser-modal .nand-browser-panel')?
 const address=`${panel}.querySelector('.nand-browser-address')`;
 const snapshot=()=>c.evaluate(`({find:!!${panel}.querySelector('.nand-browser-find'),findValue:${panel}.querySelector('.nand-browser-find input')?.value,address:${address}.value,active:document.activeElement?.outerHTML.slice(0,400)})`);
 try{
- runtime=await launchFreshVault({root:process.argv[2],port:9276,files:{'Note.md':'# Editor\n\nOriginal note.\n'},settings:{version:1,namespaces:{app:{language:'en',introSeen:true,modules:{browser:true,home:false,agent:false,news:false,archives:false,sync:false,comments:false,notifications:false,automations:false,icons:false}},browser:{enabled:true}}}});c=runtime.connection;
+ runtime=await launchFreshVault({root:process.argv[2],port:9276,files:{'Note.md':'# Editor\n\nOriginal note.\n'},settings:{version:1,namespaces:{app:{language:'en',introSeen:true,modules:{browser:true,home:false,agent:false,archives:false,sync:false,comments:false,notifications:false,automations:false,icons:false}},browser:{enabled:true}}}});c=runtime.connection;
  await c.evaluate(`app.workspace.leftSplit?.collapse();app.workspace.rightSplit?.collapse();window.reviewScopes=new Set();const pushScope=app.keymap.pushScope.bind(app.keymap),popScope=app.keymap.popScope.bind(app.keymap);app.keymap.pushScope=s=>{reviewScopes.add(s);pushScope(s)};app.keymap.popScope=s=>{reviewScopes.delete(s);popScope(s)};window.openerService=${p}.services.peek({owner:'browser',id:'open'});openerService.open({url:${JSON.stringify(url)}})`);
  await until(`!!${panel}?.querySelector('webview')&&${address}.value===${JSON.stringify(url)}`);
  for(let i=1;i<=3;i++){

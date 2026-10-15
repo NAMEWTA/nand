@@ -8,6 +8,8 @@ export type PomodoroPhase = 'work' | 'short-break' | 'long-break';
 export type PomodoroStatus = 'idle' | 'running' | 'paused';
 
 export interface PomodoroState {
+	mode: 'countdown' | 'stopwatch';
+	elapsedSeconds: number;
 	phase: PomodoroPhase;
 	status: PomodoroStatus;
 	remainingSeconds: number;
@@ -87,6 +89,7 @@ export class PomodoroApplication {
 	/** Pending work record awaiting its break-adherence outcome. */
 	private pendingBreak: { record: PomodoroRecord; breakPhaseStartedAt: number } | null = null;
 	private completedWorkSessions = 0;
+	private remindedIntervals = 0;
 	private tickInterval: number | null = null;
 	private readonly tickListeners = new Set<() => void>();
 
@@ -103,7 +106,10 @@ export class PomodoroApplication {
 		storage: TextStorage,
 		path: string,
 	) {
-		this.repository = new DurableState<PomodoroData>(storage, path, emptyData, normalizeData, () => this.notify());
+		this.repository = new DurableState<PomodoroData>(storage, path, emptyData, normalizeData, () => {
+			this.currentActivity = this.data.currentActivity;
+			this.notify();
+		});
 	}
 	get saveState() {
 		return this.repository.state;
@@ -166,6 +172,7 @@ export class PomodoroApplication {
 	}
 
 	private getRemainingSeconds(): number {
+		if(this.status==='idle') return Math.ceil(this.getPhaseDurationMs(this.phase)/1000);
 		if (this.status !== 'running') return Math.ceil(this.pausedRemaining / 1000);
 		const elapsed = Date.now() - this.startedAt;
 		return Math.max(0, Math.ceil((this.durationMs - elapsed) / 1000));
@@ -175,6 +182,8 @@ export class PomodoroApplication {
 		const totalSeconds =
 			Math.round(this.durationMs / 1000) || Math.round(this.getPhaseDurationMs(this.phase) / 1000);
 		return {
+			mode: this.getSettings().pomodoroMode,
+			elapsedSeconds: Math.floor(this.currentFocusedMs()/1000),
 			phase: this.phase,
 			status: this.status,
 			remainingSeconds: this.getRemainingSeconds(),
@@ -221,6 +230,7 @@ export class PomodoroApplication {
 
 	reset(): void {
 		this.status = 'idle';
+		this.remindedIntervals = 0;
 		this.phase = 'work';
 		this.durationMs = this.getPhaseDurationMs('work');
 		this.pausedRemaining = 0;
@@ -240,6 +250,7 @@ export class PomodoroApplication {
 	}
 
 	skip(): void {
+		if(this.getSettings().pomodoroMode==='stopwatch') { const minutes = Math.round(this.currentFocusedMs()/60000); if(minutes>0) { void this.recordSession(minutes); this.completedWorkSessions++; } this.reset(); return; }
 		this.transitionToNextPhase();
 	}
 
@@ -268,6 +279,7 @@ export class PomodoroApplication {
 	}
 
 	private tick(): void {
+		if(this.getSettings().pomodoroMode==='stopwatch' && this.status==='running') { const intervals=Math.floor(this.currentFocusedMs()/(Math.max(1,this.getSettings().pomodoroRemindInterval)*60000)); if(intervals>this.remindedIntervals){this.remindedIntervals=intervals;this.playSound();this.plugin.notify(t('home.dashboard.focusReminder'));} this.notifyTick();return; }
 		if (this.status !== 'running') return;
 		const remaining = this.getRemainingSeconds();
 		if (remaining <= 0) {
