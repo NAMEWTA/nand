@@ -25,7 +25,11 @@ export function readTaskTarget(
 	access?: DashboardSettingsAccess,
 ): import('../../core/board/types/index').CalendarTaskTarget | undefined {
 	const target = access?.getSettings().calendarTaskTarget;
-	return target && target.path?.trim() && (target.kind === 'file' || target.kind === 'folder') ? target : undefined;
+	return target &&
+		target.path?.trim() &&
+		(target.kind === 'file' || target.kind === 'folder' || target.kind === 'task')
+		? target
+		: undefined;
 }
 
 export function readTaskInsertPosition(access?: DashboardSettingsAccess): 'start' | 'end' {

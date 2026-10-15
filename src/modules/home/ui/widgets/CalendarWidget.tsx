@@ -7,7 +7,7 @@ import { DashboardRenderContext } from '../renderer/render-context';
 import { CalendarPanel } from '../calendar/CalendarPanel';
 import { CalendarMonthModal, DayAgendaModal } from '../calendar/calendar-modal';
 import { widgetClasses } from '../theme/widget-classes';
-export function CalendarWidget({ store }: { store: BoardStore }) {
+export function CalendarWidget({ store, section = false }: { store: BoardStore; section?: boolean }) {
 	const settings = useStore(store.state, (s) => s.settings),
 		doc = useOwnerDocument(),
 		visible = useVisible();
@@ -29,7 +29,10 @@ export function CalendarWidget({ store }: { store: BoardStore }) {
 		void store.openFile(file.path);
 	};
 	return (
-		<div ref={setRoot} className={widgetClasses('dashboard-calendar-content')}>
+		<div
+			ref={setRoot}
+			className={widgetClasses(section ? 'dashboard-calendar-section' : 'dashboard-calendar-content')}
+		>
 			{root && (
 				<CalendarPanel
 					root={root}
@@ -37,7 +40,7 @@ export function CalendarWidget({ store }: { store: BoardStore }) {
 					app={store.host.app}
 					settings={settings}
 					settingsAccess={access}
-					widget
+					widget={!section}
 					onOpenNote={openNote}
 					openDay={(iso, tasks, focus, onToggle) => {
 						dialog.current?.close();

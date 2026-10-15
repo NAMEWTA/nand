@@ -50,17 +50,21 @@ function geometryCommitBaseline(data: DashboardData, generated: string): string 
 	const baseDoc = readYaml(before.yaml);
 	const base = baseDoc.toJSON() as Record<string, unknown>;
 	const next = splitFrontmatter(generated).frontmatter;
-	if (['layout', 'widgets', 'immersive'].every(key => JSON.stringify(base[key]) === JSON.stringify(next[key]))) return snapshot.baseline;
+	if (['layout', 'widgets', 'immersive'].every((key) => JSON.stringify(base[key]) === JSON.stringify(next[key])))
+		return snapshot.baseline;
 	const raw = splitFrontmatter(snapshot.source).frontmatter.immersive;
 	if (!Array.isArray(raw)) return snapshot.baseline;
 	// Retain ownership of legacy h until the explicit write removes it. Unknown
 	// fields remain in the source node, outside this owned baseline projection.
 	const keys = ['id', 'w', 'cap', 'h', 'fixed', 'x', 'y'];
-	baseDoc.set('immersive', raw.map((entry: unknown) => {
-		if (!entry || typeof entry !== 'object' || Array.isArray(entry)) return entry;
-		const value = entry as Record<string, unknown>;
-		return Object.fromEntries(keys.filter(key => key in value).map(key => [key, value[key]]));
-	}));
+	baseDoc.set(
+		'immersive',
+		raw.map((entry: unknown) => {
+			if (!entry || typeof entry !== 'object' || Array.isArray(entry)) return entry;
+			const value = entry as Record<string, unknown>;
+			return Object.fromEntries(keys.filter((key) => key in value).map((key) => [key, value[key]]));
+		}),
+	);
 	return `---\n${baseDoc.toString({ lineWidth: 0 })}---\n${before.body}`;
 }
 function serializeManaged(data: DashboardData): string {
@@ -163,6 +167,8 @@ function serializeManaged(data: DashboardData): string {
 			lines.push(`    type: ${col.sectionType}`);
 		}
 		if (col.showCover === false) lines.push('    showCover: false');
+		if (col.pmConfig) lines.push(`    pm: ${JSON.stringify(col.pmConfig)}`);
+		if (col.skillsConfig) lines.push(`    skills: ${JSON.stringify(col.skillsConfig)}`);
 		if (col.pipelineConfig) lines.push(`    pipeline: ${JSON.stringify(col.pipelineConfig)}`);
 		if (col.libraryConfig) {
 			lines.push('    library:');
@@ -351,6 +357,8 @@ function serializeManaged(data: DashboardData): string {
 		if (
 			column.sectionType === 'library' ||
 			column.sectionType === 'pipeline' ||
+			column.sectionType === 'pm' ||
+			column.sectionType === 'skills' ||
 			column.sectionType === 'folder' ||
 			column.sectionType === 'images' ||
 			column.sectionType === 'videos' ||
@@ -371,7 +379,11 @@ function serializeManaged(data: DashboardData): string {
 			if (card.noteStyle) lines.push(`noteStyle: ${card.noteStyle}`);
 
 			if (card.type === 'generic') lines.push('type: generic');
-			if (card.type === 'web') lines.push('type: web', `openIn: ${card.openIn === 'system' ? 'system' : card.openIn === 'tab' ? 'tab' : 'modal'}`);
+			if (card.type === 'web')
+				lines.push(
+					'type: web',
+					`openIn: ${card.openIn === 'system' ? 'system' : card.openIn === 'tab' ? 'tab' : 'modal'}`,
+				);
 
 			if (card.type === 'task') {
 				lines.push(`type: task`);

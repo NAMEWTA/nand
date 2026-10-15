@@ -1,72 +1,38 @@
-import { App, Modal } from 'obsidian';
-import { type ContentFile } from '../../../../host/obsidian/storage/content-files';
-import { h } from 'preact';
-import {
-	bindRenderContext,
-	DashboardRenderContext,
-	mountDashboardPanel,
-	unmountDashboardPanelsIn,
-} from '../renderer/render-context';
-import { MediaLightboxPanel } from './MediaLightboxPanel';
+// Layout and interaction adapted from PandoraReads/apex-dashboard ac4d2c7 (MIT), Copyright (c) 2025 PandoraReads: src/media-lightbox-modal.ts
+import type { App } from 'obsidian';
+import { createElement } from 'react';
+import type { ContentFile } from '../../../../host/obsidian/storage/content-files';
+import { openRecordOverlay } from '../dialogs/open-record-dialog';
+import { MediaLightbox } from './MediaLightbox';
 export interface MediaTagHooks {
 	getTags(file: ContentFile): string[];
 	getAllTags(): string[];
 	onTagsChange(file: ContentFile, tags: string[]): void;
 }
-
-export class MediaLightboxModal extends Modal {
-	private index: number;
-	private readonly backdrop = (event: MouseEvent) => {
-		if (event.target === this.contentEl) this.close();
-	};
+export class MediaLightboxModal {
+	private dispose?: () => void;
 	constructor(
-		app: App,
-		private readonly files: ContentFile[],
-		startIndex: number,
-		private readonly kind: 'image' | 'video',
-		private readonly tagHooks?: MediaTagHooks,
-	) {
-		super(app);
-		this.index = Math.max(0, Math.min(startIndex, files.length - 1));
-	}
-	onOpen(): void {
-		this.contentEl.addClass('dashboard-media-lightbox');
-		this.modalEl.addClass('dashboard-media-lightbox-modal');
-		this.containerEl.addClass('dashboard-media-lightbox-container');
-		bindRenderContext(this.contentEl, new DashboardRenderContext(this.contentEl));
-		this.scope.register([], 'ArrowLeft', () => {
-			this.show(this.index - 1);
-			return false;
-		});
-		this.scope.register([], 'ArrowRight', () => {
-			this.show(this.index + 1);
-			return false;
-		});
-		this.contentEl.addEventListener('click', this.backdrop);
-		this.renderCurrent();
-	}
-	private show(index: number): void {
-		if (index < 0 || index >= this.files.length) return;
-		this.index = index;
-		this.renderCurrent();
-	}
-	private renderCurrent(): void {
-		mountDashboardPanel(
-			this.contentEl,
-			h(MediaLightboxPanel, {
+		private app: App,
+		private files: ContentFile[],
+		private index: number,
+		private kind: 'image' | 'video',
+		private tagHooks?: MediaTagHooks,
+		private doc?: Document,
+	) {}
+	open(): void {
+		this.dispose = openRecordOverlay(this.doc ?? this.app.workspace.containerEl.ownerDocument, (close) =>
+			createElement(MediaLightbox, {
 				app: this.app,
 				files: this.files,
-				index: this.index,
+				startIndex: this.index,
 				kind: this.kind,
 				tagHooks: this.tagHooks,
-				show: (index) => this.show(index),
-				close: () => this.close(),
+				close,
 			}),
 		);
 	}
-	onClose(): void {
-		this.contentEl.removeEventListener('click', this.backdrop);
-		unmountDashboardPanelsIn(this.contentEl);
-		this.contentEl.empty();
+	close(): void {
+		this.dispose?.();
+		this.dispose = undefined;
 	}
 }

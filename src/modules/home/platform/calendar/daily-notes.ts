@@ -1,3 +1,5 @@
+import { contentFiles, type ContentFile } from '../../../../host/obsidian/storage/content-files';
+import { contentPath } from '../../../../shared/storage/content-paths';
 import { App, TFile } from 'obsidian';
 import { MomentLike, momentOf, nowMoment } from '../../../../host/obsidian/datetime';
 
@@ -144,7 +146,7 @@ export async function appendTaskToDailyNote(app: App, iso: string, taskLine: str
 /** Where a calendar-added task line landed — drives the success Notice wording
  *  and the optimistic row's click-to-jump target. */
 export interface TaskInsertTarget {
-	file: TFile;
+	file: ContentFile;
 	/** 0-based line index the task was written to. */
 	line: number;
 	/** The exact line as written — the optimistic row's originalLine so an
@@ -192,6 +194,30 @@ export async function insertTaskForDay(
 	// task). Entirely replaces the daily-note chain when set.
 	if (customTarget && customTarget.path.trim()) {
 		const clean = customTarget.path.trim().replace(/^\/+|\/+$/g, '');
+		if (customTarget.kind === 'task') {
+			const files = contentFiles(app);
+			const title =
+				taskLine
+					.replace(/^\s*-\s*\[[^\]]*\]\s*/, '')
+					.replace(/\s*(?:📅|⏰).*$/, '')
+					.trim()
+					.replace(/[\\/:*?"<>|]/g, '-')
+					.slice(0, 100) || iso;
+			const base = contentPath(`${clean}/${title}`);
+			let path = base + '.md',
+				n = 1;
+			while (files.getFileByPath(path)) path = `${base} ${++n}.md`;
+			const template = customTarget.template ? files.resolveLink(customTarget.template) : null;
+			const body = template
+				? substituteTemplateVars(await files.read(template), { title, now: momentOf(iso) })
+				: '';
+			const lines = body.split('\n'),
+				at = position === 'end' ? lines.length : topInsertIndex(lines);
+			lines.splice(at, 0, taskLine);
+			const file = await files.create(path, lines.join('\n') + '\n');
+			return { file, line: at, writtenLine: taskLine, kind: 'daily-created' };
+		}
+
 		if (customTarget.kind === 'file') {
 			const filePath = clean.toLowerCase().endsWith('.md') ? clean : `${clean}.md`;
 			const existing = app.vault.getFileByPath(filePath);

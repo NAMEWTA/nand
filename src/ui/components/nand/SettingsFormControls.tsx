@@ -1,6 +1,7 @@
 // Adapted from stablyai/orca 464bd5a54b3364021c5cc0319859616e5ec41bbf (MIT), Copyright (c) 2026 Lovecast Inc.: src/renderer/src/components/settings/SettingsFormControls.tsx
 import type React from 'react';
-import { useState } from 'react';
+import { useContext, useState } from 'react';
+import { SettingsSearchContext, SearchHighlight, matchesSettingsSearch } from '../../react/settings-search';
 import { Input } from '../input';
 import { Label } from '../label';
 import { Tooltip, TooltipContent, TooltipTrigger } from '../tooltip';
@@ -56,11 +57,14 @@ export function SettingsRow({
 	labelId,
 	alignTop,
 }: SettingsRowProps): React.JSX.Element {
+	const query = useContext(SettingsSearchContext);
+	if (typeof label === 'string' && !matchesSettingsSearch(query, { title: label, description: typeof description === 'string' ? description : undefined })) return <></>;
 	return (
 		<div
 			data-slot="settings-row"
+			data-searchable-setting
 			className={cn(
-				'flex gap-4',
+				'flex flex-wrap gap-4',
 				description ? 'py-3' : 'py-2',
 				alignTop ? 'items-start' : 'items-center justify-between',
 				className,
@@ -68,7 +72,7 @@ export function SettingsRow({
 		>
 			<div className={cn('min-w-0 flex-1', description ? 'space-y-1' : 'space-y-0.5')}>
 				<Label id={labelId} className="select-text">
-					{label}
+					{typeof label === 'string' ? <SearchHighlight text={label} /> : label}
 				</Label>
 				{description ? <p className="select-text text-xs text-muted-foreground">{description}</p> : null}
 			</div>

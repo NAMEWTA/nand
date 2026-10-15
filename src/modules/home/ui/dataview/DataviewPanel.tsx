@@ -1,14 +1,16 @@
-/** @jsxImportSource preact */
+// Layout and interaction adapted from PandoraReads/apex-dashboard ac4d2c7 (MIT), Copyright (c) 2025 PandoraReads: src/dataview-section.ts
+import { useOwnerDocument } from '../../../../ui/react/contexts';
+import { p1Classes } from '../theme/p1-classes';
 import { Platform } from 'obsidian';
-import { useCallback, useLayoutEffect, useRef, useState } from 'preact/hooks';
+import { useCallback, useLayoutEffect, useRef, useState } from 'react';
 import type { DataviewConfig } from '../../core/board/types';
 import { executeDql } from '../../core/dql';
 import type { QueryResult } from '../../core/dql/types';
 import { buildPages } from '../../platform/dql/page-builder';
 import { isUnderExcludedFolder, normalizeExcludeFolders } from '../../../../shared/exclude-folders';
 import { t } from '../../../../shared/i18n';
-import { Icon } from '../../../../ui/primitives/Icon';
-import { Pagination } from '../library/Pagination';
+import { ObsidianIcon as Icon } from '../../../../ui/components/nand/ObsidianIcon';
+import { Pagination } from '../sections/P1Controls';
 import type { DataviewContext } from './context';
 import {
 	DEFAULT_PAGE_SIZE,
@@ -34,6 +36,7 @@ export function DataviewPanel({
 	const [result, setResult] = useState<QueryResult | null>(null),
 		[status, setStatus] = useState(Platform.isMobile ? 'manual' : 'scanning'),
 		[error, setError] = useState('');
+	const doc = useOwnerDocument();
 	const hasResult = useRef(false);
 	const epoch = useRef(0),
 		mounted = useRef(true);
@@ -73,27 +76,35 @@ export function DataviewPanel({
 		reloadRegister(() => {
 			if (mounted.current) void load();
 		});
-		if (!Platform.isMobile) void load();
+		const win = doc.defaultView!;
+		const frame = !Platform.isMobile
+			? win.requestAnimationFrame(() => {
+					void load();
+				})
+			: 0;
 		return () => {
 			mounted.current = false;
-			epoch.current++;
+			win.cancelAnimationFrame(frame);
+			reloadRegister(() => {});
 		};
-	}, [load]);
+	}, [load, reloadRegister, doc]);
 	if (status === 'manual')
 		return <EmptyResult message="dataview.mobileManualRun" hint="dataview.mobileManualRunHint" />;
 	if (status === 'emptyQuery') return <EmptyResult message="dataview.emptyQuery" hint />;
 	if (status === 'scanning')
 		return (
-			<div class="dashboard-dataview-scanning">
-				<Icon className="dashboard-dataview-spinner" name="loader-circle" />
+			<div className={p1Classes('dashboard-dataview-scanning')}>
+				<Icon className={p1Classes('dashboard-dataview-spinner')} name="loader-circle" />
 				<span>{t('dataview.scanning')}</span>
 			</div>
 		);
 	if (status === 'error')
 		return (
-			<div class="dashboard-dataview-error">
-				<Icon className="dashboard-dataview-error-icon" name="alert-triangle" />
-				<div class="dashboard-dataview-error-text">{t('dataview.parseError', { message: error })}</div>
+			<div className={p1Classes('dashboard-dataview-error')}>
+				<Icon className={p1Classes('dashboard-dataview-error-icon')} name="alert-triangle" />
+				<div className={p1Classes('dashboard-dataview-error-text')}>
+					{t('dataview.parseError', { message: error })}
+				</div>
 			</div>
 		);
 	return result ? (
@@ -160,7 +171,11 @@ function ResultPanel({
 				needle ? { shown: rows.length, total: capped.length } : { count: capped.length },
 			)}
 			{!needle && windowed.truncated && (
-				<button type="button" class="dashboard-dataview-capped" onClick={() => setShown(windowed.next)}>
+				<button
+					type="button"
+					className={p1Classes('dashboard-dataview-capped')}
+					onClick={() => setShown(windowed.next)}
+				>
 					{t('dataview.capped', { count: windowed.count })}
 				</button>
 			)}
@@ -170,28 +185,28 @@ function ResultPanel({
 	if (!paginated)
 		return (
 			<>
-				<div class="dashboard-dataview-count">{count}</div>
-				<div class="dashboard-dataview-body">{body}</div>
+				<div className={p1Classes('dashboard-dataview-count')}>{count}</div>
+				<div className={p1Classes('dashboard-dataview-body')}>{body}</div>
 			</>
 		);
 	return (
 		<>
-			<div class="dashboard-dataview-toolbar">
+			<div className={p1Classes('dashboard-dataview-toolbar')}>
 				<input
-					class="dashboard-dataview-search"
+					className={p1Classes('dashboard-dataview-search')}
 					type="text"
 					placeholder={t('dataview.filterPlaceholder')}
-					spellcheck={false}
+					spellCheck={false}
 					value={view.filter}
 					onInput={(e) => {
 						setView({ ...view, filter: e.currentTarget.value });
 						setPage(1);
 					}}
 				/>
-				<span class="dashboard-dataview-count">{count}</span>
-				<div class="dashboard-dataview-toolbar-spacer" />
+				<span className={p1Classes('dashboard-dataview-count')}>{count}</span>
+				<div className={p1Classes('dashboard-dataview-toolbar-spacer')} />
 				<select
-					class="dashboard-library-page-size"
+					className={p1Classes('dashboard-library-page-size')}
 					value={String(size)}
 					onChange={(e) => {
 						const value = Number(e.currentTarget.value) || DEFAULT_PAGE_SIZE;
@@ -206,13 +221,24 @@ function ResultPanel({
 						</option>
 					))}
 				</select>
-				<div class="dashboard-library-view-toggle dashboard-dataview-view-toggle">
+				<div
+					data-hit-group
+					className={p1Classes('dashboard-library-view-toggle dashboard-dataview-view-toggle')}
+				>
 					{(['table', 'list', 'auto'] as const).map((value) => (
 						<div
 							key={value}
-							class={`dashboard-library-view-btn${value === mode ? ' active' : ''}`}
+							className={p1Classes(`dashboard-library-view-btn${value === mode ? ' active' : ''}`)}
 							data-view={value}
+							data-hit-control
 							role="button"
+							tabIndex={0}
+							onKeyDown={(e) => {
+								if (e.key === 'Enter' || e.key === ' ') {
+									e.preventDefault();
+									e.currentTarget.click();
+								}
+							}}
 							title={t(`dataview.view${value[0]!.toUpperCase()}${value.slice(1)}`)}
 							onClick={() => {
 								setMode(value);
@@ -225,9 +251,9 @@ function ResultPanel({
 					))}
 				</div>
 			</div>
-			<div class="dashboard-dataview-pages">
-				<div class="dashboard-dataview-body">{body}</div>
-				<div class="dashboard-dataview-pagination">
+			<div className={p1Classes('dashboard-dataview-pages')}>
+				<div className={p1Classes('dashboard-dataview-body')}>{body}</div>
+				<div className={p1Classes('dashboard-dataview-pagination')}>
 					{pages > 1 && <Pagination page={current} pages={pages} change={setPage} />}
 				</div>
 			</div>

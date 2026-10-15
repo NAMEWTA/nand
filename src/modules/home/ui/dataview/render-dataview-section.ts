@@ -1,8 +1,8 @@
 import type { App, HoverParent } from 'obsidian';
 import type { ContentFile } from '../../../../host/obsidian/storage/content-files';
-import { h } from 'preact';
+import { createElement as h } from 'react';
 import type { DashboardColumn, DataviewConfig } from '../../core/board/types';
-import { mountDashboardPanel } from '../renderer/render-context';
+import { mountRecordPanel } from '../dialogs/mount-record-panel';
 import { DataviewPanel } from './DataviewPanel';
 import { bindDataviewContext } from './context';
 export function renderDataviewSection(
@@ -17,7 +17,7 @@ export function renderDataviewSection(
 	const context = { app, hoverParent, opener: onOpenNote };
 	bindDataviewContext(el, context);
 	const root = el.createDiv({ cls: 'dashboard-dataview-content' });
-	mountDashboardPanel(
+	mountRecordPanel(
 		root,
 		h(DataviewPanel, {
 			context,

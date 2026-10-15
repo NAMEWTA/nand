@@ -4,7 +4,8 @@ import { normalizeWorkspaces } from '../workspace/workspace-registry';
 import { sanitizeMediaTags } from '../media/tags';
 import { readSkillShortcuts } from './skill-shortcuts';
 
-const isRecord = (value: unknown): value is Record<string, unknown> => !!value && typeof value === 'object' && !Array.isArray(value);
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+	!!value && typeof value === 'object' && !Array.isArray(value);
 
 /** Defaults merged with stored values; lists and the workspace registry are validated. */
 export function normalizeDashboardSettings(input: unknown): DashboardSettings {
@@ -13,11 +14,21 @@ export function normalizeDashboardSettings(input: unknown): DashboardSettings {
 	return {
 		...structuredClone(DEFAULT_DASHBOARD_SETTINGS),
 		...(raw as Partial<DashboardSettings>),
-		layoutMode: raw.layoutMode === 'side' || raw.layoutMode === 'stacked' ? raw.layoutMode : undefined,
-		countdowns: Array.isArray(raw.countdowns) ? (raw.countdowns as CountdownConfig[]).filter((c) => c && typeof c.id === 'string') : [],
-		albums: Array.isArray(raw.albums) ? (raw.albums as AlbumConfig[]).filter((a) => a && typeof a.id === 'number') : [],
+		layoutMode:
+			raw.layoutMode === 'side' || raw.layoutMode === 'stacked' || raw.layoutMode === 'immersive'
+				? raw.layoutMode
+				: undefined,
+		countdowns: Array.isArray(raw.countdowns)
+			? (raw.countdowns as CountdownConfig[]).filter((c) => c && typeof c.id === 'string')
+			: [],
+		albums: Array.isArray(raw.albums)
+			? (raw.albums as AlbumConfig[]).filter((a) => a && typeof a.id === 'number')
+			: [],
 		anniversaries: Array.isArray(raw.anniversaries)
-			? (raw.anniversaries as AnniversaryConfig[]).filter((a) => a && typeof a.id === 'string' && typeof a.startDate === 'string') : [],
+			? (raw.anniversaries as AnniversaryConfig[]).filter(
+					(a) => a && typeof a.id === 'string' && typeof a.startDate === 'string',
+				)
+			: [],
 		mediaTags: sanitizeMediaTags(raw.mediaTags),
 		widgetQuickCaptureEnabled: raw.widgetQuickCaptureEnabled === true,
 		widgetFileSearchEnabled: raw.widgetFileSearchEnabled === true,
@@ -38,14 +49,36 @@ function oneYearBefore(today: Date): string {
 }
 
 /** First-run board: a few widgets turned on with sample entries. No remote images are referenced. */
-export function seedDashboardSettings(settings: DashboardSettings, labels: { countdown: string; anniversary: string }, today = new Date()): DashboardSettings {
+export function seedDashboardSettings(
+	settings: DashboardSettings,
+	labels: { countdown: string; anniversary: string },
+	today = new Date(),
+): DashboardSettings {
 	return {
 		...settings,
 		quickNotesEnabled: true,
 		widgetHabitEnabled: true,
 		countdownEnabled: true,
-		countdowns: [{ id: 'cd-default', label: labels.countdown, defaultLabel: true, targetDate: `${today.getFullYear()}-12-31T23:55`, displayMode: 'hours', reminderDays: 0 }],
+		countdowns: [
+			{
+				id: 'cd-default',
+				label: labels.countdown,
+				defaultLabel: true,
+				targetDate: `${today.getFullYear()}-12-31T23:55`,
+				displayMode: 'hours',
+				reminderDays: 0,
+			},
+		],
 		anniversaryEnabled: true,
-		anniversaries: [{ id: 'av-default', label: labels.anniversary, defaultLabel: true, startDate: oneYearBefore(today), precision: 'ymd', annualReminder: false }],
+		anniversaries: [
+			{
+				id: 'av-default',
+				label: labels.anniversary,
+				defaultLabel: true,
+				startDate: oneYearBefore(today),
+				precision: 'ymd',
+				annualReminder: false,
+			},
+		],
 	};
 }

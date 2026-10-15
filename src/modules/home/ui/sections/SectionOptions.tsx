@@ -1,3 +1,4 @@
+import { observeBoardAction } from '../board/actions';
 // Layout and interaction adapted from PandoraReads/apex-dashboard ac4d2c7 (MIT), Copyright (c) 2025 PandoraReads: src/notes-config-modal.ts, src/template-modal.ts
 import { useState } from 'react';
 import type { DashboardColumn, TaskTemplate } from '../../core/board/types/model';
@@ -31,7 +32,7 @@ export function SectionOptions({
 			title={t('home.dashboard.settings')}
 			onClose={onClose}
 			onSave={() => {
-				void (
+				void observeBoardAction((
 					project
 						? store.edit((data) => {
 								const col = data.columns.find((c) => c.name === column.name);
@@ -54,7 +55,7 @@ export function SectionOptions({
 						: store.settings((s) => {
 								s.taskTemplates = tasks;
 							})
-				).then(onClose);
+				).then(onClose));
 			}}
 		>
 			{project ? (
@@ -98,7 +99,7 @@ export function SectionOptions({
 								<Button
 									variant="outline"
 									onClick={() => {
-										void store.sync
+										void observeBoardAction(store.sync
 											.addCard(column.name, {
 												title: task.name,
 												type: 'task',
@@ -106,7 +107,7 @@ export function SectionOptions({
 													.filter(Boolean)
 													.map((text) => ({ text, checked: false })),
 											})
-											.then(onClose);
+											.then(onClose));
 									}}
 								>
 									{t('home.dashboard.useTemplate')}

@@ -8,6 +8,7 @@ import { useT } from '../../../ui/react/hooks';
 import type { BoardStore } from '../services/board-store';
 import { ThemeBridge } from './theme/ThemeBridge';
 import { Banner } from './banner/Banner';
+import { ImmersiveLayout } from './layout/ImmersiveLayout';
 import { SideLayout } from './layout/SideLayout';
 import { StackedLayout } from './layout/StackedLayout';
 import { MobileLayout } from './layout/MobileLayout';
@@ -41,16 +42,20 @@ export function DashboardPage({ store, context }: { store: BoardStore; context: 
 	const mobile = Platform.isPhone || narrow,
 		layout = mobile
 			? 'mobile'
-			: data?.layout === 'stacked' || (!data?.layout && settings.layoutMode === 'stacked')
-				? 'stacked'
-				: 'side';
+			: data?.layout === 'immersive'
+				? 'immersive'
+				: data?.layout === 'stacked' || (!data?.layout && settings.layoutMode === 'stacked')
+					? 'stacked'
+					: 'side';
 	return (
 		<div ref={ref} className="h-full min-h-0" aria-label={t('workbench.home')}>
 			{data ? (
 				<ThemeBridge store={store} layout={layout}>
 					<BoardDnd store={store}>
-						<Banner store={store} context={context} mobile={mobile} />
-						{mobile ? (
+						{layout !== 'immersive' && <Banner store={store} context={context} mobile={mobile} />}
+						{layout === 'immersive' ? (
+							<ImmersiveLayout store={store} context={context} />
+						) : mobile ? (
 							<MobileLayout store={store} />
 						) : layout === 'stacked' ? (
 							<StackedLayout store={store} />

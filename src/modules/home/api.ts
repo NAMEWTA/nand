@@ -74,7 +74,11 @@ export interface BoardSurfaceApi {
 	toggleBannerMode(): Promise<void>;
 	/** Unsaved, failed or conflicting board writes, as one sentence (empty when saved). */
 	saveMessage(): string;
-	readonly sync: { getSaveState(): { status: string }; setBoardLayout(layout: BoardLayout): Promise<void> };
+	readonly sync: {
+		flush?(): Promise<void>;
+		getSaveState(): { status: string };
+		setBoardLayout(layout: BoardLayout): Promise<void>;
+	};
 }
 
 /** Board save problems exposed to the workbench status bar. */

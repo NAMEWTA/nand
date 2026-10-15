@@ -1,3 +1,4 @@
+import { observeBoardAction } from '../board/actions';
 // Layout and interaction adapted from PandoraReads/apex-dashboard ac4d2c7 (MIT), Copyright (c) 2025 PandoraReads: src/renderer.ts
 import { useState } from 'react';
 import { useSortable, SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
@@ -113,7 +114,7 @@ export function ProjectCard({ store, card }: { store: BoardStore; card: Dashboar
 								variant="ghost"
 								className="h-7 w-full justify-start text-xs"
 								onClick={() => {
-									void store.sync.addDocToCard(card.id, file.path).then(() => setSearch(''));
+									void observeBoardAction(store.sync.addDocToCard(card.id, file.path).then(() => setSearch('')));
 								}}
 							>
 								{file.basename}

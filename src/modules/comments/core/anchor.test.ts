@@ -47,7 +47,8 @@ test('full-quote fuzzy search keeps the rendering thread responsive without cont
 	const result = locateAnchor(doc, anchor);
 	const elapsed = performance.now() - started;
 	expect(result).toEqual({ start: filler.length * 50, end: filler.length * 50 + edited.length });
-	expect(elapsed).toBeLessThan(100);
+	// The quadratic per-start search took ~5s here; leave headroom for loaded CI workers.
+	expect(elapsed).toBeLessThan(300);
 });
 test('range fuzzy search includes line hint -200 and excludes -201', () => {
 	const anchor = { ...createAnchor('abcdefghij', 0, 10), lineHint: 201 };

@@ -51,7 +51,6 @@ export default function createBrowserModule(context: ModuleContext): ModuleInsta
 					]
 				: [];
 		},
-		settingsPageKind: 'react',
 		settingsPage: async () => (await import('./ui/settings-page')).browserSettingsPage(current()),
 		async activate() {
 			if (!context.env.desktop) return;

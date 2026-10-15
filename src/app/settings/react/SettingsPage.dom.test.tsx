@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { expect, test, vi } from 'vitest';
-import { render, screen, waitFor } from '@testing-library/react';
+import { act, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import type { SettingsPageHost } from '../../contracts/module';
 import { TestProviders } from '../../../ui/react/test-providers';
@@ -10,9 +10,6 @@ vi.mock('../nav', () => ({ PRODUCT_MODULES: { browser: 'browser' } }));
 vi.mock('../../workbench/settings-categories', () => ({
 	settingsCategories: () => [{ id: 'browser', label: 'Browser' }],
 }));
-vi.mock('../settings-tab', () => ({ DashboardSettingTab: class {} }));
-vi.mock('../home', () => ({ renderAppearanceSection: vi.fn() }));
-vi.mock('../about', () => ({ renderAbout: vi.fn() }));
 vi.mock('./GeneralSettings', () => ({ GeneralSettings: () => null }));
 
 test('React settings loader refreshes without remounting and releases host subscriptions', async () => {
@@ -28,7 +25,7 @@ test('React settings loader refreshes without remounting and releases host subsc
 	const load = vi.fn(async () => ModulePage);
 	const settings = {};
 	const plugin = {
-		moduleInstance: () => ({ settingsPage: load, settingsPageKind: 'react' }),
+		moduleInstance: () => ({ settingsPage: load }),
 		onModuleChanged: () => () => {},
 		moduleManifests: () => [{ id: 'browser' }],
 		moduleState: () => 'active',
@@ -47,16 +44,15 @@ test('React settings loader refreshes without remounting and releases host subsc
 	expect(off).toHaveBeenCalledOnce();
 });
 
-test('unmarked one-argument legacy loaders still render inside the bridge', async () => {
-	const renderer = vi.fn((container: HTMLElement) => {
-		const row = container.ownerDocument.createElement('div');
-		row.className = 'setting-item';
-		row.textContent = 'Legacy settings';
-		container.append(row);
-	});
+test('module loader failure is visible', async () => {
 	const settings = {};
+	const load = async () => {
+		throw new Error('Unavailable');
+	};
 	const plugin = {
-		moduleInstance: () => ({ settingsPage: async () => renderer }),
+		moduleInstance: () => ({
+			settingsPage: load,
+		}),
 		onModuleChanged: () => () => {},
 		moduleManifests: () => [{ id: 'browser' }],
 		moduleState: () => 'active',
@@ -67,7 +63,40 @@ test('unmarked one-argument legacy loaders still render inside the bridge', asyn
 			<SettingsPage plugin={plugin} category="browser" navigate={vi.fn()} />
 		</TestProviders>,
 	);
-	await waitFor(() => expect(screen.getByText('Legacy settings').closest('.nand-native')).toBeTruthy());
-	expect(renderer).toHaveBeenCalledOnce();
+	await waitFor(() => expect(screen.getByRole('alert').textContent).toBe('Unavailable'));
 	view.unmount();
+});
+
+test('replacing a module loader hides the old page and ignores an obsolete async result', async () => {
+	const settings = {},
+		old = () => <p>Old page</p>,
+		fresh = () => <p>New page</p>;
+	let finish!: (page: typeof old) => void;
+	let loader = async () => old;
+	const plugin = {
+		moduleInstance: () => ({ settingsPage: loader }),
+		onModuleChanged: () => () => {},
+		moduleManifests: () => [{ id: 'browser' }],
+		moduleState: () => 'active',
+		appSettings: { subscribe: () => () => {}, get: () => settings },
+	} as unknown as Parameters<typeof SettingsPage>[0]['plugin'];
+	const node = () => (
+		<TestProviders>
+			<SettingsPage plugin={plugin} category="browser" navigate={vi.fn()} />
+		</TestProviders>
+	);
+	const view = render(node());
+	await screen.findByText('Old page');
+	loader = () =>
+		new Promise((resolve) => {
+			finish = resolve;
+		});
+	view.rerender(node());
+	expect(screen.queryByText('Old page')).toBeNull();
+	loader = async () => fresh;
+	view.rerender(node());
+	await screen.findByText('New page');
+	await act(async () => finish(old));
+	expect(screen.queryByText('Old page')).toBeNull();
+	expect(screen.getByText('New page')).toBeTruthy();
 });

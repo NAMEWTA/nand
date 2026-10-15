@@ -11,7 +11,7 @@ import {
 	type ComponentType,
 } from 'react';
 import type DashboardPlugin from '../../main';
-import type { SettingsPageHost, SettingsPageRenderer } from '../../contracts/module';
+import type { SettingsPageHost } from '../../contracts/module';
 import type { WorkbenchTarget } from '../../contracts/workbench';
 import { t } from '../../../shared/i18n';
 import { useT } from '../../../ui/react/hooks';
@@ -19,43 +19,43 @@ import { Input } from '../../../ui/components/input';
 import { SettingsSection } from '../../../ui/components/nand/SettingsSection';
 import { settingsCategories } from '../../workbench/settings-categories';
 import { PRODUCT_MODULES } from '../nav';
-import { DashboardSettingTab } from '../settings-tab';
-import { renderAppearanceSection } from '../home';
-import { renderAbout } from '../about';
-import { LegacySettings } from './LegacySettings';
+import { AppearanceSettings, AboutSettings } from './BuiltInSettings';
 import { GeneralSettings } from './GeneralSettings';
 import { SettingsSearchContext } from './SearchableSetting';
 const ComponentGallery = lazy(() => import('../../../ui/react/gallery').then((m) => ({ default: m.ComponentGallery })));
-function ModuleSettings({ plugin, category, resourceId }: { plugin: DashboardPlugin; category: string; resourceId?: string }) {
+function ModuleSettings({
+	plugin,
+	category,
+	resourceId,
+}: {
+	plugin: DashboardPlugin;
+	category: string;
+	resourceId?: string;
+}) {
 	const [loaded, setLoaded] = useState<{
-		render?: SettingsPageRenderer;
+		loader?: () => Promise<ComponentType<SettingsPageHost>>;
 		Component?: ComponentType<SettingsPageHost>;
 		error?: string;
 	}>({});
 	const [, setRevision] = useState(0);
 	const module = PRODUCT_MODULES[category as keyof typeof PRODUCT_MODULES];
 	const load = module ? plugin.moduleInstance(module)?.settingsPage : undefined;
-	const kind = module ? plugin.moduleInstance(module)?.settingsPageKind : undefined;
 	useEffect(() => {
 		let alive = true;
 		if (load)
 			void load().then(
 				(value) => {
-					if (alive)
-						setLoaded(
-							kind === 'react'
-								? { Component: value as ComponentType<SettingsPageHost> }
-								: { render: value as SettingsPageRenderer },
-						);
+					if (alive) setLoaded({ loader: load, Component: value });
 				},
 				(error: unknown) => {
-					if (alive) setLoaded({ error: error instanceof Error ? error.message : String(error) });
+					if (alive)
+						setLoaded({ loader: load, error: error instanceof Error ? error.message : String(error) });
 				},
 			);
 		return () => {
 			alive = false;
 		};
-	}, [load, kind]);
+	}, [load]);
 	const kept = useRef(new Set<() => void>());
 	useEffect(() => {
 		const subscriptions = kept.current;
@@ -73,53 +73,29 @@ function ModuleSettings({ plugin, category, resourceId }: { plugin: DashboardPlu
 		}),
 		[kept, setRevision],
 	);
-	const [matches, setMatches] = useState(1);
-	if (loaded.error)
+	if (loaded.loader === load && loaded.error)
 		return (
 			<p role="alert" data-settings-results="true" className="text-destructive">
 				{loaded.error}
 			</p>
 		);
-	if (loaded.Component) return <loaded.Component key={resourceId} {...host} resourceId={resourceId} />;
-	if (loaded.render)
-		return (
-			<div hidden={!matches} data-settings-results={matches > 0} className="[&[hidden]]:hidden">
-				<LegacySettings render={loaded.render} onResult={setMatches} />
-			</div>
-		);
+	if (loaded.loader === load && loaded.Component)
+		return <loaded.Component key={resourceId} {...host} resourceId={resourceId} />;
 	return (
 		<p role="status" data-settings-pending className="text-xs text-muted-foreground">
 			{t('workbench.loading')}
 		</p>
 	);
 }
-function BuiltInSettings({ plugin, category }: { plugin: DashboardPlugin; category: string }) {
-	const [matches, setMatches] = useState(1);
-	const render = useMemo<SettingsPageRenderer>(
-		() => (el, host) => {
-			const tab = new DashboardSettingTab(plugin.app, plugin);
-			host.keep(() => tab.dispose());
-			host.keep(tab.onRefresh(() => host.refresh()));
-			if (category === 'appearance') renderAppearanceSection.call(tab, el);
-			else renderAbout(el);
-		},
-		[plugin, category],
-	);
-	return (
-		<div hidden={!matches} data-settings-results={matches > 0} className="[&[hidden]]:hidden">
-			<LegacySettings render={render} onResult={setMatches} />
-		</div>
-	);
-}
 export function SettingsPage({
 	plugin,
 	category,
- resourceId,
+	resourceId,
 	navigate,
 }: {
 	plugin: DashboardPlugin;
 	category: string;
- resourceId?: string;
+	resourceId?: string;
 	navigate: (target: WorkbenchTarget) => void;
 }) {
 	const translate = useT();
@@ -173,9 +149,17 @@ export function SettingsPage({
 												<ComponentGallery />
 											</Suspense>
 										) : section.id === 'appearance' || section.id === 'about' ? (
-											<BuiltInSettings plugin={plugin} category={section.id} />
+											section.id === 'appearance' ? (
+												<AppearanceSettings plugin={plugin} />
+											) : (
+												<AboutSettings />
+											)
 										) : (
-											<ModuleSettings plugin={plugin} category={section.id} resourceId={resourceId} />
+											<ModuleSettings
+												plugin={plugin}
+												category={section.id}
+												resourceId={resourceId}
+											/>
 										)}
 									</SettingsSection>
 								),

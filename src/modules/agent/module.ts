@@ -77,7 +77,6 @@ export default function createAgentModule(context: ModuleContext): ModuleInstanc
 		pages: {
 			terminal: async () => (await import('./ui/workbench-page')).createAgentPage(() => controller),
 		},
-		settingsPageKind: 'react',
 		settingsPage: async () =>
 			(await import('./ui/settings-page')).agentSettingsPage(() => controller, settings, context.env.desktop),
 		async activate() {

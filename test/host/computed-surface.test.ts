@@ -1,4 +1,7 @@
 import assert from 'node:assert/strict';
+import { createElement } from 'react';
+import { renderToStaticMarkup } from 'react-dom/server';
+import { ArchiveCardGrid } from '../../src/modules/archives/ui/ArchiveCardGrid';
 import { spawnSync } from 'node:child_process';
 import { existsSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
@@ -22,7 +25,7 @@ afterEach(() => {
 	}
 });
 
-function chrome<T>(html: string): T {
+function chrome<T>(html: string, windowSize = '1200,800'): T {
 	const dir = mkdtempSync(path.join(tmpdir(), 'nand-surface-'));
 	fixtures.push(dir);
 	const file = path.join(dir, 'page.html');
@@ -35,7 +38,7 @@ function chrome<T>(html: string): T {
 			'--no-sandbox',
 			'--allow-file-access-from-files',
 			`--user-data-dir=${path.join(dir, 'profile')}`,
-			'--window-size=1200,800',
+			`--window-size=${windowSize}`,
 			'--virtual-time-budget=2000',
 			'--dump-dom',
 			pathToFileURL(file).href,
@@ -84,14 +87,13 @@ type Tone = { text: string; background: string };
 test('archive text and paper differ in light and dark', () => {
 	const measured = chrome<{ light: Tone; dark: Tone }>(`<!doctype html>
 <html><head><link rel="stylesheet" href="${styles}"></head>
-<body class="nand-theme--claude-code theme-light">
-<div class="nand-contacts-surface"><button class="nand-contacts-row-name">王</button></div>
+<body class="theme-light">
+<div class="nand-ui bg-background text-foreground" data-palette="orca" data-p9-archive><button class="text-foreground" data-p9-row>王</button></div>
 <pre id="out"></pre>
 <script>
 function tone() {
-  const button = document.querySelector('.nand-contacts-row-name');
-  const surface = document.querySelector('.nand-contacts-surface');
-  surface.style.background = 'var(--background-primary)';
+  const button = document.querySelector('[data-p9-row]');
+  const surface = document.querySelector('[data-p9-archive]');
   return { text: getComputedStyle(button).color, background: getComputedStyle(surface).backgroundColor };
 }
 const light = tone();
@@ -103,4 +105,24 @@ document.getElementById('out').textContent = JSON.stringify({ light, dark });
 	assert.notEqual(measured.dark.text, measured.dark.background);
 	assert.notEqual(measured.light.text, measured.dark.text);
 	assert.notEqual(measured.light.background, measured.dark.background);
+}, 35_000);
+
+
+test('archive cards follow their container width and respect the five/six-column cap', () => {
+ const cards = Array.from({ length: 8 }, (_, i) => createElement('button', { key: i, className: 'min-w-0 whitespace-normal p-4 [overflow-wrap:anywhere]' }, 'Readable person name ' + i));
+ const markup = [5, 6].map(columns => `<section data-cap="${columns}" style="width:500px">${renderToStaticMarkup(createElement(ArchiveCardGrid, { columns, children: cards }))}</section>`).join('');
+ const measured = chrome<Array<{ cap: number; width: number; tracks: number; card: number; overflow: number }>>(`<!doctype html>
+ <html><head><link rel="stylesheet" href="${styles}"></head><body><div class="nand-ui">${markup}</div><pre id="out"></pre><script>
+ const results=[];
+ for(const section of document.querySelectorAll('section')) for(const width of [240,500,900,2200]) {
+  section.style.width=width+'px';const grid=section.firstElementChild, card=grid.firstElementChild;
+  results.push({cap:Number(section.dataset.cap),width,tracks:getComputedStyle(grid).gridTemplateColumns.split(' ').length,card:card.getBoundingClientRect().width,overflow:card.scrollWidth-card.clientWidth});
+ }
+ document.getElementById('out').textContent=JSON.stringify(results);
+ </script></body></html>`, '1600,900');
+ for(const item of measured) {
+  assert.equal(item.tracks, item.width < 544 ? 1 : item.width === 900 ? 3 : item.cap, JSON.stringify(item));
+  assert.ok(item.card >= Math.min(272,item.width), JSON.stringify(item));
+  assert.equal(item.overflow,0,JSON.stringify(item));
+ }
 }, 35_000);

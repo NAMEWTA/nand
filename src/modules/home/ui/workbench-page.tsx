@@ -75,7 +75,9 @@ export function createDashboardPage(
 			return Promise.resolve();
 		}
 		toggleBannerMode(): Promise<void> {
-			return Promise.resolve();
+			return store.edit((data) => {
+				data.banner.mode = data.banner.mode === 'stats' ? 'quote' : 'stats';
+			});
 		}
 		saveMessage(): string {
 			return dashboardSaveMessage(store.state.getState().save);

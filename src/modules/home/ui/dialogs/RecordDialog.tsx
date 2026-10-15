@@ -2,7 +2,7 @@
 import { useRef, type ReactNode } from 'react';
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from '../../../../ui/components/dialog';
 import { useOwnerDocument, useVisible } from '../../../../ui/react/contexts';
-import { useDashboardLayout, useDashboardTheme } from '../theme/ThemeBridge';
+import { useDashboardAppearance, useDashboardLayout, useDashboardTheme } from '../theme/ThemeBridge';
 import { widgetClasses } from '../theme/widget-classes';
 
 /** Keep Apex's content/header dimensions while Radix owns focus, Escape and the document portal. */
@@ -19,7 +19,9 @@ export function RecordDialog({
 	children: ReactNode;
 	theme?: string;
 }) {
-	const doc = useOwnerDocument(), opener = useRef(doc.activeElement as HTMLElement | null);
+	const appearanceRef = useDashboardAppearance();
+	const doc = useOwnerDocument(),
+		opener = useRef(doc.activeElement as HTMLElement | null);
 	const size = classes.includes('fortune-card--result')
 		? 'w-auto sm:max-w-[280px]'
 		: classes.includes('fortune-card')
@@ -46,6 +48,7 @@ export function RecordDialog({
 			}}
 		>
 			<DialogContent
+				ref={appearanceRef}
 				onCloseAutoFocus={(event) => {
 					event.preventDefault();
 					if (opener.current?.isConnected) opener.current.focus();

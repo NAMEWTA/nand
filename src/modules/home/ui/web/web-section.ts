@@ -1,7 +1,7 @@
-import { h } from 'preact';
+import { createElement as h } from 'react';
 import type { App } from 'obsidian';
 import type { DashboardColumn } from '../../core/board/types/index';
-import { mountDashboardPanel } from '../renderer/render-context';
+import { mountRecordPanel } from '../dialogs/mount-record-panel';
 import { WebPanel, type WebRenderOptions } from './WebPanel';
 export function renderWebSection(
 	el: HTMLElement,
@@ -11,5 +11,5 @@ export function renderWebSection(
 	options?: WebRenderOptions,
 ): void {
 	const content = el.createDiv({ cls: 'dashboard-web-content' });
-	mountDashboardPanel(content, h(WebPanel, { app, root: el, column, reloadRegister, options }));
+	mountRecordPanel(content, h(WebPanel, { app, root: el, column, reloadRegister, options }));
 }

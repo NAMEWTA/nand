@@ -17,3 +17,14 @@ export const SECTION_TYPES = [
 	'ticktick',
 ] as const;
 export const P0_SECTIONS: readonly string[] = ['sticky', 'folder', 'library', 'projects'];
+
+export const P1_SECTIONS: readonly string[] = [
+	'dataview',
+	'pm',
+	'pipeline',
+	'skills',
+	'calendar',
+	'images',
+	'videos',
+	'web',
+];

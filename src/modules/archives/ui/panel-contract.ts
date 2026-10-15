@@ -40,7 +40,7 @@ export interface ContactsPanelHost {
 	add(kind: RecordKind): void;
 	edit(record: ArchiveRecord, scope: EditScope, id?: string): void;
 	deleteRow(record: ArchiveRecord, scope: 'employment' | 'relation', id: string): void;
-	more(record: ArchiveRecord): void;
+	recordActions(record: ArchiveRecord): Array<{ title: string; icon: string; disabled?: boolean; run: () => void }>;
 	resources(record: ArchiveRecord): ArchiveResource[];
 	newNote(record: ArchiveRecord): void;
 	addResources(record: ArchiveRecord, files?: File[]): void;

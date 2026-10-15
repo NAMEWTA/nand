@@ -1,3 +1,4 @@
+import { observeBoardAction } from '../board/actions';
 // Layout and interaction adapted from PandoraReads/apex-dashboard ac4d2c7 (MIT), Copyright (c) 2025 PandoraReads: src/quick-actions.ts
 import { useState } from 'react';
 import { useStore } from 'zustand';
@@ -47,7 +48,7 @@ export function QuickActionsWidget({ store }: { store: BoardStore }) {
 						}}
 						onContextMenu={(e) => {
 							e.preventDefault();
-							void store.sync.removeQuickActionByKey(item.key);
+							void observeBoardAction(store.sync.removeQuickActionByKey(item.key));
 						}}
 						onKeyDown={(e) => {
 							if (!e.altKey || !['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.key))
@@ -70,7 +71,7 @@ export function QuickActionsWidget({ store }: { store: BoardStore }) {
 								order = actions.map((a) => a.key);
 							order.splice(index, 1);
 							order.splice(next, 0, item.key);
-							void store.sync.reorderQuickActions(order);
+							void observeBoardAction(store.sync.reorderQuickActions(order));
 						}}
 					>
 						<ObsidianIcon name={item.action.icon} className="size-3" />
@@ -92,7 +93,7 @@ export function QuickActionsWidget({ store }: { store: BoardStore }) {
 					onClose={() => setAdding(false)}
 					onSave={() => {
 						if (draft.target && draft.name)
-							void store.sync.addQuickAction(draft).then(() => setAdding(false));
+							void observeBoardAction(store.sync.addQuickAction(draft).then(() => setAdding(false)));
 					}}
 				>
 					<Tabs

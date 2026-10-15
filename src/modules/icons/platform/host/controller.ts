@@ -97,7 +97,7 @@ export default class IconicController {
 	private ready = false;
 	private disposed = false;
 	private generation = 0;
-	private readonly dialogs = new Set<Modal>();
+	private readonly dialogs = new Set<Pick<Modal, 'close'>>();
 	private readonly bodies = new Set<HTMLElement>();
 	private readonly registeredCommands: Array<{ registered: Command; definition: Command }> = [];
 
@@ -152,10 +152,22 @@ export default class IconicController {
 	register(cleanup: () => void): void {
 		this.scope?.register(cleanup);
 	}
-	trackDialog(dialog: Modal): void {
+	/** UI mutations retain the Iconic store's existing persistence contract. */
+	updatePreference<K extends keyof IconicController['settings']>(
+		key: K,
+		value: IconicController['settings'][K],
+	): Promise<void> {
+		this.settings[key] = value;
+		return this.saveSettings();
+	}
+	updateDialogState(patch: Partial<IconicController['settings']['dialogState']>): void {
+		Object.assign(this.settings.dialogState, patch);
+	}
+
+	trackDialog(dialog: Pick<Modal, 'close'>): void {
 		this.dialogs.add(dialog);
 	}
-	forgetDialog(dialog: Modal): void {
+	forgetDialog(dialog: Pick<Modal, 'close'>): void {
 		this.dialogs.delete(dialog);
 	}
 

@@ -1,6 +1,8 @@
+import { observeBoardAction } from '../board/actions';
 // Layout and interaction adapted from PandoraReads/apex-dashboard ac4d2c7 (MIT), Copyright (c) 2025 PandoraReads: src/banner.ts, src/focal-point-picker.ts
 import { useState } from 'react';
 import { Plus, Trash2 } from 'lucide-react';
+import { BannerStatsEditor } from './BannerStatsEditor';
 import type { BannerData } from '../../core/board/types/model';
 import { displayedFocalPoint, editImageFocal, focalPosition } from '../../core/board/focal-point';
 import type { BoardStore } from '../../services/board-store';
@@ -143,12 +145,16 @@ export function BannerEditDialog({
 			title={t('banner.editTitle')}
 			onClose={onClose}
 			onSave={() => {
-				void store.sync.updateBanner(draft).then(onClose);
+				void observeBoardAction(store.sync.updateBanner(draft).then(onClose));
 			}}
 		>
-			<Tabs defaultValue="poster">
+			<Tabs
+				defaultValue={draft.mode === 'stats' ? 'stats' : 'poster'}
+				onValueChange={(value) => setDraft({ ...draft, mode: value === 'stats' ? 'stats' : 'quote' })}
+			>
 				<TabsList>
 					<TabsTrigger value="poster">{t('home.dashboard.poster')}</TabsTrigger>
+					<TabsTrigger value="stats">{t('banner.tabStats')}</TabsTrigger>
 				</TabsList>
 				<TabsContent value="poster" className="grid gap-4">
 					<Label>
@@ -292,6 +298,12 @@ export function BannerEditDialog({
 						<Plus />
 						{t('home.dashboard.image')}
 					</Button>
+				</TabsContent>
+				<TabsContent value="stats">
+					<BannerStatsEditor
+						value={draft.statsConfig ?? {}}
+						onChange={(statsConfig) => setDraft({ ...draft, statsConfig })}
+					/>
 				</TabsContent>
 			</Tabs>
 		</DashboardDialog>

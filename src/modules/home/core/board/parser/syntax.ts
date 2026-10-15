@@ -33,6 +33,8 @@ export const SECTION_TYPES = new Set([
 	'dashboard',
 	'library',
 	'pipeline',
+	'pm',
+	'skills',
 	'folder',
 	'images',
 	'videos',

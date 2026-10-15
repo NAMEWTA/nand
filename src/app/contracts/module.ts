@@ -133,7 +133,6 @@ export interface SettingsPageHost {
 	/** Keep a subscription for as long as the page is shown. */
 	keep(off: () => void): void;
 }
-export type SettingsPageRenderer = (container: HTMLElement, host: SettingsPageHost) => void;
 
 export interface ModuleInstance {
 	activate?(signal: AbortSignal): Promise<void> | void;
@@ -143,8 +142,8 @@ export interface ModuleInstance {
 	/** Workbench pages by id; each loader imports its page code on first use. */
 	readonly pages?: Readonly<Record<string, () => Promise<PageCreate>>>;
 	/** The module's page in workbench settings; loaded on first use. */
-	readonly settingsPage?: () => Promise<ComponentType<SettingsPageHost> | SettingsPageRenderer>;
-	/** Explicit during migration: omitted means the existing DOM renderer. Stage 9 removes this flag. */
+	readonly settingsPage?: () => Promise<ComponentType<SettingsPageHost>>;
+	/** @deprecated 仅兼容并行迁移中的 home 声明；设置框架已统一为 React，不再读取此标记。 */
 	readonly settingsPageKind?: 'react';
 }
 

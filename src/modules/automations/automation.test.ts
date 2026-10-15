@@ -6,7 +6,8 @@ import { renderHomeSettings } from '../../app/settings/home';
 import { themeSettings } from '../../theme/settings';
 import type { DashboardSettingTab } from '../../app/settings/settings-tab';
 import { parseHTML } from 'linkedom';
-import { h, render } from 'preact';
+import { createElement as h } from 'react';
+import { renderToStaticMarkup } from 'react-dom/server';
 import { InboxPanel } from '../../modules/notifications/ui/InboxPanel';
 import type { NotificationRecord } from '../../modules/notifications/api';
 import { DashboardAutomationSource } from '../../modules/home/platform/board/automation';
@@ -711,7 +712,7 @@ test('inbox renders structured reasons in the current language and deduplicates 
 		}));
 		for (const language of ['zh', 'en', 'zh'] as const) {
 			setLanguage(language);
-			render(
+			panel.innerHTML = renderToStaticMarkup(
 				h(InboxPanel, {
 					records: records as NotificationRecord[],
 					filter: 'all',
@@ -720,7 +721,6 @@ test('inbox renders structured reasons in the current language and deduplicates 
 					open: () => {},
 					openable: new Set(['plain']),
 				}),
-				panel,
 			);
 			assert.equal(
 				[...panel.querySelectorAll('button')].filter((button) => button.textContent === t('automation.open'))
@@ -742,7 +742,7 @@ test('inbox renders structured reasons in the current language and deduplicates 
 				),
 			);
 		}
-		render(null, panel);
+		panel.replaceChildren();
 	} finally {
 		if (prior === undefined) Reflect.deleteProperty(globalThis, 'document');
 		else Object.assign(globalThis, { document: prior });

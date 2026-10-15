@@ -1,37 +1,95 @@
-/** @jsxImportSource preact */
+import { useState } from 'react';
 import type { App } from 'obsidian';
-import { t } from '../../../shared/i18n/index';
-import { Button } from '../../../ui/primitives/Button';
-import { openDialog } from '../../../ui/primitives/dialog';
-import { promptText } from '../../../ui/primitives/prompt';
-import type { SyncDialogs } from '../services/sync-service';
+import { t } from '../../../shared/i18n';
+import { useT } from '../../../ui/react/hooks';
+import { Button } from '../../../ui/components/button';
+import { Input } from '../../../ui/components/input';
+import { Label } from '../../../ui/components/label';
+import { openReactDialog, dialogOwner } from '../../../ui/react/dialog';
 
-/** Ask before an action; resolves true only when the action button was pressed. */
-export function confirmAction(app: App, options: { title: string; message: string; action: string; danger?: boolean }): Promise<boolean> {
+export function confirmAction(
+	app: App,
+	options: { title: string; message: string; action: string; danger?: boolean },
+): Promise<boolean> {
 	return new Promise((resolve) => {
 		let confirmed = false;
-		openDialog(app, {
+		openReactDialog(dialogOwner(app), {
 			title: options.title,
-			content: () => <p class="nand-sync-dialog-text">{options.message}</p>,
-			footer: (close) => (
-				<>
-					<Button onClick={close}>{t('common.cancel')}</Button>
-					<Button variant={options.danger ? 'danger' : 'primary'} onClick={() => { confirmed = true; close(); }}>{options.action}</Button>
-				</>
+			description: options.message,
+			content: (close) => (
+				<div className="flex justify-end gap-2">
+					<Button variant="outline" onClick={close}>
+						{t('common.cancel')}
+					</Button>
+					<Button
+						variant={options.danger ? 'destructive' : 'default'}
+						onClick={() => {
+							confirmed = true;
+							close();
+						}}
+					>
+						{options.action}
+					</Button>
+				</div>
 			),
 			onClose: () => resolve(confirmed),
 		});
 	});
 }
-
-export function askText(app: App, title: string, label: string, value = '', placeholder = ''): Promise<string | null> {
-	return promptText(app, { title, label, value, placeholder });
+function Prompt({
+	label,
+	initial,
+	placeholder,
+	accept,
+	close,
+}: {
+	label: string;
+	initial: string;
+	placeholder: string;
+	accept: (value: string) => void;
+	close: () => void;
+}) {
+	const t = useT(),
+		[value, setValue] = useState(initial);
+	return (
+		<form
+			className="space-y-4"
+			onSubmit={(e) => {
+				e.preventDefault();
+				accept(value);
+				close();
+			}}
+		>
+			<Label>
+				{label}
+				<Input autoFocus value={value} placeholder={placeholder} onChange={(e) => setValue(e.target.value)} />
+			</Label>
+			<div className="flex justify-end gap-2">
+				<Button type="button" variant="outline" onClick={close}>
+					{t('common.cancel')}
+				</Button>
+				<Button type="submit">{t('common.confirm')}</Button>
+			</div>
+		</form>
+	);
 }
-
-/** Dialogs the sync service needs while it runs. */
-export function syncDialogs(app: App): SyncDialogs {
-	return {
-		confirmUpstream: (remote, branch) =>
-			confirmAction(app, { title: t('sync.upstreamTitle'), message: t('sync.upstreamConfirm', { remote, branch }), action: t('sync.action.push') }),
-	};
+export function askText(app: App, title: string, label: string, value = '', placeholder = ''): Promise<string | null> {
+	return new Promise((resolve) => {
+		let result: string | null = null;
+		openReactDialog(dialogOwner(app), {
+			title,
+			content: (close) => (
+				<Prompt
+					label={label}
+					initial={value}
+					placeholder={placeholder}
+					close={close}
+					accept={(v) => {
+						result = v.trim() || null;
+					}}
+				/>
+			),
+			onClose: () => resolve(result),
+		});
+	});
 }

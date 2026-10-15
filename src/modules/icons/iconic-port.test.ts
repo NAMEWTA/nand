@@ -14,7 +14,6 @@ import MenuManager from '../../modules/icons/platform/managers/menu-manager';
 import IconicController, { type IconicHost } from '../../modules/icons/platform/host/controller';
 import { IconicStore } from '../../modules/icons/platform/persistence/store';
 import { DEFAULT_ICONIC_SETTINGS } from '../../modules/icons/core/settings/model';
-import { IconicSettingsSections } from '../../modules/icons/ui/settings/sections';
 import { iconicTranslations as startupIconic } from '../../shared/i18n/iconic';
 import { messages as iconsMessages } from './i18n';
 
@@ -93,11 +92,23 @@ test('defaults, all locale values, command ids and resource bytes match pinned u
 	// Reviewed NAND copy changes. The upstream oracle remains immutable.
 	locales.en['iconic.menu.changeIcon'] = 'Change icon…';
 	locales.en['iconic.backups.backupNotice'] = 'NAND could not load icon settings.';
-	for (const key of Object.keys(locales.zh) as Array<keyof typeof locales.zh>) locales.zh[key] = locales.zh[key].replaceAll('……', '…');
+	for (const key of Object.keys(locales.zh) as Array<keyof typeof locales.zh>)
+		locales.zh[key] = locales.zh[key].replaceAll('……', '…');
 	locales.zh['iconic.backups.backupNotice'] = 'NAND 无法加载图标设置。';
 	locales.zh['iconic.settings.minimalFolderIcons.name'] = '极简文件夹图标';
 	locales.zh['iconic.commands.toggleQuickSwitcherIcons'] = '切换快速切换器图标';
-	assert.deepEqual(iconicTranslations, locales);
+	assert.deepEqual(iconicTranslations, {
+		en: {
+			...locales.en,
+			'iconic.ruleEditor.enabled.name': 'Enable rule',
+			'iconic.ruleEditor.enabled.desc': 'Apply this rule to matching items.',
+		},
+		zh: {
+			...locales.zh,
+			'iconic.ruleEditor.enabled.name': '启用规则',
+			'iconic.ruleEditor.enabled.desc': '将此规则应用到匹配的项目。',
+		},
+	});
 	for (const [name, hash] of Object.entries(fixture.hashes)) {
 		const text = readFileSync('src/modules/icons/core/res/' + name, 'utf8').replaceAll('\r\n', '\n');
 		// The pinned upstream text is LF; checkout line endings may differ.
@@ -110,7 +121,12 @@ test('defaults, all locale values, command ids and resource bytes match pinned u
 	const host = {
 		app: f.app,
 		manifest: { id: 'nand', name: 'NAND' },
-		commands: { add: (command: Command) => { ids.push(command.id); return command; } },
+		commands: {
+			add: (command: Command) => {
+				ids.push(command.id);
+				return command;
+			},
+		},
 		editor: { addExtension: () => {}, addPostProcessor: () => {} },
 		lifetime,
 	} as unknown as IconicHost;
@@ -119,7 +135,10 @@ test('defaults, all locale values, command ids and resource bytes match pinned u
 	const internals = controller as unknown as { activate: () => Promise<void> };
 	internals.activate = async () => {};
 	return controller.onload().then(async () => {
-		assert.deepEqual(ids, fixture.commands.map((id) => id === 'toggle-minimal.folder-icons' ? 'toggle-minimal-folder-icons' : id));
+		assert.deepEqual(
+			ids,
+			fixture.commands.map((id) => (id === 'toggle-minimal.folder-icons' ? 'toggle-minimal-folder-icons' : id)),
+		);
 	});
 });
 
@@ -153,26 +172,6 @@ test('137 rule outcomes match the original 1.1.10 implementation', () => {
 			entry.label,
 		);
 	}
-});
-
-test('declarative settings expose folder icons in both languages and six sections', () => {
-	const f = storage();
-	const controller = new IconicController({ app: f.app, manifest: { id: 'nand' } } as unknown as IconicHost, createIconicDialogs);
-	for (const language of ['en', 'zh'] as const) {
-		setLanguage(language);
-		const groups = new IconicSettingsSections(controller).getSettingDefinitions();
-		assert.equal(groups.length, 6);
-		assert.ok(
-			groups.every((group) => group.items?.every((item) => 'render' in item && !('control' in item))),
-			'every icon preference must use the domain store, never NAND settings binding',
-		);
-		const names = groups.flatMap((group) =>
-			(group.items ?? []).map((item) => ('name' in item ? item.name : undefined)),
-		);
-		assert.ok(names.includes(iconicTranslations[language]['iconic.settings.showAllFolderIcons.name']));
-		assert.equal(names.length, 24); // 22 preferences plus rulebook and usage checker.
-	}
-	setLanguage('zh');
 });
 
 test('saves coalesce for 300ms, isolate data.json and own their defaults', async () => {

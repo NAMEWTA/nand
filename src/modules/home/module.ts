@@ -13,6 +13,7 @@ import { MusicService } from './platform/music/music-service';
 import { PomodoroService } from './platform/pomodoro/pomodoro-service';
 import { ReadingService } from './platform/reading/reading-service';
 import { BoardRegistry } from './services/board-registry';
+import { startBoardBackups } from './services/board-backups';
 import { registerHomeCommands } from './services/commands';
 import { createHomeHost, repointBoards } from './services/home-host';
 import { homeServices } from './services/instances';
@@ -222,7 +223,20 @@ export default function createHomeModule(context: ModuleContext): ModuleInstance
 			};
 			// Board saves change the save statuses.
 			context.lifetime.register(context.settings.bind('home', homeSettings).subscribe(changed));
-			registerHomeCommands(host, context.commands, () => context.shell.open({ feature: 'dashboard' }));
+			registerHomeCommands(
+				host,
+				context.commands,
+				() => context.shell.open({ feature: 'dashboard' }),
+				async () => {
+					const { openAppearanceStudio } = await import('./ui/appearance/open-appearance-studio');
+					await openAppearanceStudio(
+						host,
+						app.workspace.getMostRecentLeaf()?.view.containerEl.ownerDocument ??
+							app.workspace.containerEl.ownerDocument,
+					);
+				},
+			);
+			context.lifetime.register(startBoardBackups(host));
 			if (app.workspace.layoutReady) host.refreshAllDashboards();
 		},
 		dispose(reason) {

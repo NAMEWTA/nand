@@ -1,3 +1,4 @@
+import { observeBoardAction } from '../../board/actions';
 // Layout and interaction adapted from PandoraReads/apex-dashboard ac4d2c7 (MIT), Copyright (c) 2025 PandoraReads: src/library-section.ts, src/table-columns-modal.ts
 import { RelativeTime } from '../../../../../ui/components/nand/RelativeTime';
 import { useState } from 'react';
@@ -255,7 +256,7 @@ export function LibrarySection({ store, column }: { store: BoardStore; column: D
 		[remove, setRemove] = useState<LibraryFileResult | null>(null),
 		[collapsed, setCollapsed] = useState<string[]>([]);
 	const patch = (next: Partial<LibraryConfig>) => {
-		void store.sync.updateLibraryConfig(column.name, { ...config, ...next });
+		void observeBoardAction(store.sync.updateLibraryConfig(column.name, { ...config, ...next }));
 	};
 	const all = store
 		.library(config)
@@ -457,7 +458,7 @@ export function LibrarySection({ store, column }: { store: BoardStore; column: D
 					title={t('home.dashboard.settings')}
 					onClose={() => setDialog(null)}
 					onSave={() => {
-						void store.sync.updateLibraryConfig(column.name, draft).then(() => setDialog(null));
+						void observeBoardAction(store.sync.updateLibraryConfig(column.name, draft).then(() => setDialog(null)));
 					}}
 				>
 					<Label>

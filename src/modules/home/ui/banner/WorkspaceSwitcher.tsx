@@ -14,7 +14,7 @@ export function WorkspaceSwitcher({ store }: { store: BoardStore }) {
 		t = useT();
 	const [open, setOpen] = useState(false),
 		[name, setName] = useState(''),
-		[layout, setLayout] = useState<'side' | 'stacked'>('side');
+		[layout, setLayout] = useState<'side' | 'stacked' | 'immersive'>('side');
 	return (
 		<>
 			<div className="dashboard-workspace-switcher absolute top-2 left-3 flex gap-1 rounded-full bg-[var(--db-bg-hover)] p-1">
@@ -59,10 +59,16 @@ export function WorkspaceSwitcher({ store }: { store: BoardStore }) {
 					<Choice
 						label={t('home.dashboard.layout')}
 						value={layout}
-						onChange={(v) => setLayout(v as 'side' | 'stacked')}
-						options={['side', 'stacked'].map((value) => ({
+						onChange={(v) => setLayout(v as 'side' | 'stacked' | 'immersive')}
+						options={['side', 'stacked', 'immersive'].map((value) => ({
 							value,
-							label: t(value === 'side' ? 'renderer.layoutSide' : 'renderer.layoutStacked'),
+							label: t(
+								value === 'side'
+									? 'renderer.layoutSide'
+									: value === 'stacked'
+										? 'renderer.layoutStacked'
+										: 'renderer.layoutImmersive',
+							),
 						}))}
 					/>
 				</DashboardDialog>

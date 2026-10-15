@@ -1,3 +1,4 @@
+import { observeBoardAction } from '../board/actions';
 // Layout and interaction adapted from PandoraReads/apex-dashboard ac4d2c7 (MIT), Copyright (c) 2025 PandoraReads: src/renderer.ts
 import { useState } from 'react';
 import { useSortable } from '@dnd-kit/sortable';
@@ -23,11 +24,13 @@ export function Card({
 	card,
 	index,
 	projects = false,
+	immersive = false,
 }: {
 	store: BoardStore;
 	card: DashboardCard;
 	index: number;
 	projects?: boolean;
+	immersive?: boolean;
 }) {
 	const t = useT(),
 		[edit, setEdit] = useState(false),
@@ -35,6 +38,7 @@ export function Card({
 		[remove, setRemove] = useState(false),
 		[preview, setPreview] = useState(false);
 	const { attributes, isDragging, listeners, setNodeRef, transform } = useSortable({
+		disabled: immersive,
 		id: `card:${card.id}`,
 		data: { item: { kind: 'card', id: card.id, column: card.column, index } },
 	});
@@ -54,7 +58,7 @@ export function Card({
 			}}
 		>
 			<div
-				className="mb-1.5 flex shrink-0 items-center gap-1"
+				className="dashboard-card-header mb-1.5 flex shrink-0 items-center gap-1"
 				onPointerDown={(event) => {
 					if ((event.target as Element).closest('h4')) listeners?.onPointerDown?.(event);
 				}}
@@ -68,14 +72,18 @@ export function Card({
 					<GripVertical className="size-3" />
 				</IconButton>
 				<h4 className="m-0 min-w-0 flex-1 text-[.875em] leading-[1.3] font-semibold">
-					<RenameTitle value={card.title} onRename={(title) => store.sync.updateCard(card.id, { title })} />
+					<RenameTitle
+						immersive={immersive}
+						value={card.title}
+						onRename={(title) => store.sync.updateCard(card.id, { title })}
+					/>
 				</h4>
 				<div className="absolute top-2 right-2 flex rounded bg-card opacity-0 group-hover/card:opacity-100 focus-within:opacity-100 pointer-coarse:opacity-100">
 					{!project && (
 						<IconButton
 							label={t('home.dashboard.pinCard')}
 							onClick={() => {
-								void store.sync.moveCard(card.id, card.column, 0);
+								void observeBoardAction(store.sync.moveCard(card.id, card.column, 0));
 							}}
 						>
 							<Pin className="size-3" />
@@ -143,7 +151,7 @@ export function Card({
 					title={t('common.edit')}
 					onClose={() => setEdit(false)}
 					onSave={() => {
-						void store.sync.updateCard(card.id, draft).then(() => setEdit(false));
+						void observeBoardAction(store.sync.updateCard(card.id, draft).then(() => setEdit(false)));
 					}}
 				>
 					<Label>
@@ -248,7 +256,7 @@ export function Card({
 					<Button
 						variant="destructive"
 						onClick={() => {
-							void store.sync.deleteCard(card.id);
+							void observeBoardAction(store.sync.deleteCard(card.id));
 						}}
 					>
 						{t('common.delete')}

@@ -1,19 +1,23 @@
-/** @jsxImportSource preact */
+// Layout and interaction adapted from PandoraReads/apex-dashboard ac4d2c7 (MIT), Copyright (c) 2025 PandoraReads: src/media-section.ts
+import { p1Classes } from '../theme/p1-classes';
 import { setVaultPreference } from '../../../../host/obsidian/storage/preferences';
-import { Notice, type App } from 'obsidian';
+import { type App } from 'obsidian';
 import { type ContentFile } from '../../../../host/obsidian/storage/content-files';
-import { Fragment } from 'preact';
-import { useMemo, useState } from 'preact/hooks';
+import { Fragment } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import type { DashboardColumn } from '../../core/board/types';
 import type { MediaTagService } from '../../platform/media/media-tags';
 import { t } from '../../../../shared/i18n';
-import { Icon } from '../../../../ui/primitives/Icon';
-import { Pagination } from '../library/Pagination';
-import { ToolbarDropdown } from '../ui/ToolbarDropdown';
-import { showConfirmDialog } from '../ui/confirm-dialog';
+import { ObsidianIcon as Icon } from '../../../../ui/components/nand/ObsidianIcon';
+import { Pagination } from '../sections/P1Controls';
+import { ToolbarDropdown } from '../sections/P1Controls';
+import { DashboardDialog } from '../dialogs/DashboardDialog';
+import { Button } from '../../../../ui/components/button';
+import { contentFiles } from '../../../../host/obsidian/storage/content-files';
+import { toast } from 'sonner';
 import { MediaFilter, emptyMediaFilter, normalizeMediaFolder } from './MediaFilter';
 import { MediaViews } from './MediaViews';
-import { MediaLightboxModal } from './media-lightbox-modal';
+import { MediaLightbox } from './MediaLightbox';
 import {
 	PAGE_SIZE_OPTIONS,
 	THUMB_SIZE_STORAGE_KEY,
@@ -27,7 +31,7 @@ import {
 	type ThumbSize,
 } from './media-model';
 import { formatDate, type MediaFileResult } from './media-presentation';
-import { MediaTagEditModal } from './media-tag-editor-modal';
+import { MediaTagEditor } from './MediaTagEditor';
 import { trashMediaFile } from './media-utils';
 export function MediaPanel({
 	app,
@@ -40,6 +44,9 @@ export function MediaPanel({
 	openNote?: (file: ContentFile) => void;
 	tagService?: MediaTagService;
 }) {
+	const [tagFile, setTagFile] = useState<ContentFile | null>(null),
+		[lightbox, setLightbox] = useState<number | null>(null),
+		[deleting, setDeleting] = useState<ContentFile | null>(null);
 	const [query, setQuery] = useState(''),
 		[sort, setSort] = useState('modified'),
 		[desc, setDesc] = useState(true);
@@ -51,10 +58,11 @@ export function MediaPanel({
 		[anchor, setAnchor] = useState<HTMLElement | null>(null);
 	const [page, setPage] = useState(1),
 		[pageSize, setPageSize] = useState(20),
-		[revision, revise] = useState(0);
+		[, revise] = useState(0);
 	const refresh = () => revise((n) => n + 1);
+	useEffect(() => contentFiles(app).subscribe(refresh), [app]);
 	const kind = column.sectionType === 'videos' ? 'video' : 'image';
-	const results = useMemo(() => {
+	const results = (() => {
 		const exts = extsFor(column.sectionType ?? '');
 		if (!exts) return [];
 		const q = query.trim().toLowerCase();
@@ -76,7 +84,7 @@ export function MediaPanel({
 		});
 		sortMedia(items, sort, desc);
 		return items;
-	}, [app, column, query, sort, desc, filter, revision, tagService]);
+	})();
 	const groups = useMemo(() => groupMediaResults(results, groupBy), [results, groupBy]);
 	const pages = Math.max(1, Math.ceil(results.length / pageSize)),
 		current = Math.min(page, pages),
@@ -93,33 +101,15 @@ export function MediaPanel({
 			}
 		: undefined;
 	const remove = async (file: ContentFile) => {
-		if (
-			!(await showConfirmDialog(app, {
-				title: t('common.confirmDelete'),
-				message: t('media.confirmDelete', { name: file.basename }),
-			}))
-		)
-			return;
 		try {
 			await trashMediaFile(app, file);
-			new Notice(t('media.deleted'));
+			setDeleting(null);
 			refresh();
 		} catch (error) {
-			console.error('[Dashboard] media delete failed', error);
+			toast.error(String(error));
 		}
 	};
-	const editTags = tagService
-		? (result: MediaFileResult) =>
-				new MediaTagEditModal(
-					app,
-					result.file,
-					tagService.getTags(result.path),
-					tagService.getAllTags(),
-					(tags) => {
-						if (tagService.setTags(result.path, tags)) refresh();
-					},
-				).open()
-		: undefined;
+	const editTags = tagService ? (result: MediaFileResult) => setTagFile(result.file) : undefined;
 	const display = groupBy === 'none' ? results : groups.flatMap((group) => group.items);
 	const renderItems = (items: MediaFileResult[], offset: number) => (
 		<MediaViews
@@ -128,16 +118,8 @@ export function MediaPanel({
 			kind={kind}
 			size={size}
 			view={view}
-			open={(index) =>
-				new MediaLightboxModal(
-					app,
-					display.map((r) => r.file),
-					offset + index,
-					kind,
-					tagHooks,
-				).open()
-			}
-			remove={(file) => void remove(file)}
+			open={(index) => setLightbox(offset + index)}
+			remove={setDeleting}
 			refresh={refresh}
 			openNote={openNote}
 			editTags={editTags}
@@ -150,9 +132,46 @@ export function MediaPanel({
 	};
 	return (
 		<>
-			<div class="dashboard-library-toolbar">
+			{tagFile && tagService && (
+				<MediaTagEditor
+					name={tagFile.basename}
+					path={tagFile.path}
+					current={tagService.getTags(tagFile.path)}
+					known={tagService.getAllTags()}
+					onClose={() => setTagFile(null)}
+					onSave={(tags) => {
+						tagService.setTags(tagFile.path, tags);
+						setTagFile(null);
+						refresh();
+					}}
+				/>
+			)}
+			{lightbox !== null && (
+				<MediaLightbox
+					app={app}
+					files={display.map((r) => r.file)}
+					startIndex={lightbox}
+					kind={kind}
+					tagHooks={tagHooks}
+					close={() => setLightbox(null)}
+				/>
+			)}
+			{deleting && (
+				<DashboardDialog title={t('common.confirmDelete')} onClose={() => setDeleting(null)}>
+					<p>{t('media.confirmDelete', { name: deleting.basename })}</p>
+					<Button
+						variant="destructive"
+						onClick={() => {
+							void remove(deleting);
+						}}
+					>
+						{t('common.delete')}
+					</Button>
+				</DashboardDialog>
+			)}
+			<div className={p1Classes('dashboard-library-toolbar')}>
 				<input
-					class="dashboard-library-search"
+					className={p1Classes('dashboard-library-search')}
 					type="text"
 					placeholder={t('library.searchPlaceholder')}
 					value={query}
@@ -162,7 +181,7 @@ export function MediaPanel({
 					}}
 				/>
 				<select
-					class="dashboard-library-sort"
+					className={p1Classes('dashboard-library-sort')}
 					value={sort}
 					onChange={(e) => {
 						setSort(e.currentTarget.value);
@@ -176,8 +195,16 @@ export function MediaPanel({
 					))}
 				</select>
 				<div
-					class="dashboard-library-sort-dir"
+					className={p1Classes('dashboard-library-sort-dir')}
+					aria-label={t('library.sortName')}
 					role="button"
+					tabIndex={0}
+					onKeyDown={(e) => {
+						if (e.key === 'Enter' || e.key === ' ') {
+							e.preventDefault();
+							e.currentTarget.click();
+						}
+					}}
 					onClick={() => {
 						setDesc(!desc);
 						setPage(1);
@@ -186,7 +213,7 @@ export function MediaPanel({
 					<Icon name={desc ? 'arrow-down-wide-narrow' : 'arrow-up-wide-narrow'} />
 				</div>
 				<select
-					class="dashboard-library-sort dashboard-media-group-select"
+					className={p1Classes('dashboard-library-sort dashboard-media-group-select')}
 					aria-label={t('media.groupBy')}
 					title={t('media.groupBy')}
 					value={groupBy}
@@ -200,11 +227,20 @@ export function MediaPanel({
 					<option value="tag">{t('media.groupByTag')}</option>
 				</select>
 				<div
-					class={`dashboard-library-view-toggle dashboard-media-collapse-toggle${groups.length ? '' : ' is-hidden'}`}
+					className={p1Classes(
+						`dashboard-library-view-toggle dashboard-media-collapse-toggle${groups.length ? '' : ' is-hidden'}`,
+					)}
 				>
 					<div
-						class="dashboard-library-view-btn"
+						className={p1Classes('dashboard-library-view-btn')}
 						role="button"
+						tabIndex={0}
+						onKeyDown={(e) => {
+							if (e.key === 'Enter' || e.key === ' ') {
+								e.preventDefault();
+								e.currentTarget.click();
+							}
+						}}
 						title={t(collapseAll ? 'library.collapseAllGroups' : 'library.expandAllGroups')}
 						aria-label={t(collapseAll ? 'library.collapseAllGroups' : 'library.expandAllGroups')}
 						onClick={() => setCollapsed(collapseAll ? new Set(groups.map((g) => g.key)) : new Set())}
@@ -212,7 +248,7 @@ export function MediaPanel({
 						<Icon name={collapseAll ? 'chevrons-down-up' : 'chevrons-up-down'} />
 					</div>
 				</div>
-				<div class="dashboard-library-view-toggle">
+				<div className={p1Classes('dashboard-library-view-toggle')}>
 					<ToolbarDropdown
 						currentKey={view}
 						items={(['grid', 'list'] as const).map((key) => ({
@@ -226,7 +262,7 @@ export function MediaPanel({
 						}}
 					/>
 				</div>
-				<div class="dashboard-library-view-toggle dashboard-media-size-toggle">
+				<div className={p1Classes('dashboard-library-view-toggle dashboard-media-size-toggle')}>
 					<ToolbarDropdown
 						currentKey={size}
 						items={(['small', 'medium', 'large'] as const).map((key) => ({
@@ -241,9 +277,16 @@ export function MediaPanel({
 					/>
 				</div>
 				<div
-					class={`dashboard-library-filter-btn${hasFilter ? ' active' : ''}`}
+					className={p1Classes(`dashboard-library-filter-btn${hasFilter ? ' active' : ''}`)}
 					title={t('media.quickFilter')}
 					role="button"
+					tabIndex={0}
+					onKeyDown={(e) => {
+						if (e.key === 'Enter' || e.key === ' ') {
+							e.preventDefault();
+							e.currentTarget.click();
+						}
+					}}
 					onClick={(e) => {
 						e.stopPropagation();
 						setAnchor(anchor ? null : e.currentTarget);
@@ -251,12 +294,15 @@ export function MediaPanel({
 				>
 					<Icon name="filter" />
 				</div>
-				<div class="dashboard-library-filter-tags">
+				<div className={p1Classes('dashboard-library-filter-tags')}>
 					{filter.tags.map((tag) => (
-						<div key={tag} class="dashboard-library-filter-tag dashboard-library-filter-tag--tag">
-							<span class="dashboard-library-filter-tag-label">#{tag}</span>
+						<div
+							key={tag}
+							className={p1Classes('dashboard-library-filter-tag dashboard-library-filter-tag--tag')}
+						>
+							<span className={p1Classes('dashboard-library-filter-tag-label')}>#{tag}</span>
 							<span
-								class="dashboard-library-filter-tag-x"
+								className={p1Classes('dashboard-library-filter-tag-x')}
 								onClick={() => updateFilter({ ...filter, tags: filter.tags.filter((v) => v !== tag) })}
 							>
 								×
@@ -264,10 +310,10 @@ export function MediaPanel({
 						</div>
 					))}
 					{(filter.start || filter.end) && (
-						<div class="dashboard-library-filter-tag">
+						<div className={p1Classes('dashboard-library-filter-tag')}>
 							{filter.property}: {filter.start || '...'} ~ {filter.end || '...'}
 							<span
-								class="dashboard-library-filter-tag-x"
+								className={p1Classes('dashboard-library-filter-tag-x')}
 								onClick={() => updateFilter({ ...filter, start: '', end: '' })}
 							>
 								×
@@ -275,12 +321,12 @@ export function MediaPanel({
 						</div>
 					)}
 					{filter.folders.map((folder) => (
-						<div key={folder} class="dashboard-library-filter-tag">
-							<span class="dashboard-library-filter-tag-label" title={folder}>
+						<div key={folder} className={p1Classes('dashboard-library-filter-tag')}>
+							<span className={p1Classes('dashboard-library-filter-tag-label')} title={folder}>
 								{folder.split('/').pop()}
 							</span>
 							<span
-								class="dashboard-library-filter-tag-x"
+								className={p1Classes('dashboard-library-filter-tag-x')}
 								onClick={() =>
 									updateFilter({ ...filter, folders: filter.folders.filter((v) => v !== folder) })
 								}
@@ -290,10 +336,12 @@ export function MediaPanel({
 						</div>
 					))}
 				</div>
-				<div class="dashboard-library-toolbar-spacer" />
-				<div class="dashboard-library-count">{t('library.fileCount', { count: results.length })}</div>
+				<div className={p1Classes('dashboard-library-toolbar-spacer')} />
+				<div className={p1Classes('dashboard-library-count')}>
+					{t('library.fileCount', { count: results.length })}
+				</div>
 				<select
-					class="dashboard-library-page-size"
+					className={p1Classes('dashboard-library-page-size')}
 					value={String(pageSize)}
 					onChange={(e) => {
 						setPageSize(Number(e.currentTarget.value));
@@ -307,9 +355,9 @@ export function MediaPanel({
 					))}
 				</select>
 			</div>
-			<div class="dashboard-media-area">
+			<div className={p1Classes('dashboard-media-area')}>
 				{!results.length ? (
-					<div class="dashboard-library-empty">
+					<div className={p1Classes('dashboard-library-empty')}>
 						{t(kind === 'video' ? 'media.noVideos' : 'media.noImages')}
 					</div>
 				) : groupBy === 'none' ? (
@@ -318,7 +366,9 @@ export function MediaPanel({
 					groups.map((group) => (
 						<Fragment key={group.key}>
 							<div
-								class={`dashboard-media-group-header${collapsed.has(group.key) ? ' is-collapsed' : ''}`}
+								className={p1Classes(
+									`dashboard-media-group-header${collapsed.has(group.key) ? ' is-collapsed' : ''}`,
+								)}
 								data-group-key={group.key}
 								onClick={() =>
 									setCollapsed((old) => {
@@ -330,20 +380,24 @@ export function MediaPanel({
 								}
 							>
 								<Icon
-									className="dashboard-media-group-chevron"
+									className={p1Classes('dashboard-media-group-chevron')}
 									name={collapsed.has(group.key) ? 'chevron-right' : 'chevron-down'}
 								/>
-								<div class="dashboard-media-group-name">{group.key}</div>
-								<div class="dashboard-media-group-count">{group.items.length}</div>
+								<div className={p1Classes('dashboard-media-group-name')}>{group.key}</div>
+								<div className={p1Classes('dashboard-media-group-count')}>{group.items.length}</div>
 							</div>
-							<div class={`dashboard-media-group-body${collapsed.has(group.key) ? ' is-hidden' : ''}`}>
+							<div
+								className={p1Classes(
+									`dashboard-media-group-body${collapsed.has(group.key) ? ' is-hidden' : ''}`,
+								)}
+							>
 								{renderItems(group.items, group.offset)}
 							</div>
 						</Fragment>
 					))
 				)}
 			</div>
-			<div class="dashboard-library-pagination">
+			<div className={p1Classes('dashboard-library-pagination')}>
 				{groupBy === 'none' && pages > 1 && <Pagination page={current} pages={pages} change={setPage} />}
 			</div>
 			{anchor && (

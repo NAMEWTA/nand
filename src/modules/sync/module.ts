@@ -59,7 +59,7 @@ export default function createSyncModule(context: ModuleContext): ModuleInstance
 				import('./platform/desktop/host'),
 				import('./services/sync-service'),
 				import('./services/automatics'),
-				import('./ui/dialogs'),
+				import('./ui/dialog-factory'),
 			]);
 			const current = new Service({
 				host: desktopGitHost(adapter.getBasePath(), deviceId(app), privateVaultStorage(app)),

@@ -1,4 +1,5 @@
 // Layout and interaction adapted from PandoraReads/apex-dashboard ac4d2c7 (MIT), Copyright (c) 2025 PandoraReads: src/quick-note-config-modal.ts
+import { homeServices } from '../../services/instances';
 import { Trash2 } from 'lucide-react';
 import { Button } from '../../../../ui/components/button';
 import { Input } from '../../../../ui/components/input';
@@ -16,12 +17,12 @@ export function SkillList({
 	skills,
 	onChange,
 }: {
-	store: BoardStore;
+	store?: BoardStore;
 	skills: SkillShortcut[];
 	onChange(this: void, skills: SkillShortcut[]): void;
 }) {
 	const t = useT(),
-		agents = store.widgets.agents?.() ?? [];
+		agents = (store?.widgets ?? homeServices).agents?.() ?? [];
 	const update = (id: string, value: Partial<SkillShortcut>) =>
 		onChange(skills.map((skill) => (skill.id === id ? { ...skill, ...value } : skill)));
 	return (

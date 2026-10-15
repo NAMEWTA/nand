@@ -1,12 +1,18 @@
-/** @jsxImportSource preact */
 import { notificationBody } from '../core/service';
 import type { NotificationRecord } from '../api';
-import { getLanguage, t } from '../../../shared/i18n';
-import { EmptyState } from '../../../ui/primitives/EmptyState';
-import { Icon } from '../../../ui/primitives/Icon';
+import { getLanguage } from '../../../shared/i18n';
+import { EmptyState } from '../../../ui/components/nand/EmptyState';
+import { Button } from '../../../ui/components/button';
+import { Badge } from '../../../ui/components/badge';
+import { BellOff, CheckCheck, Check, Clock, Trash2 } from 'lucide-react';
+import { useT } from '../../../ui/react/hooks';
 
 /** Presentation only: delivery states map to semantic badge tones. */
-const DELIVERY_TONE: Record<string, string> = { sent: 'success', failed: 'error', unknown: 'warning' };
+const DELIVERY_TONE: Record<string, string> = {
+	sent: 'text-status-success',
+	failed: 'text-destructive',
+	unknown: 'text-status-warning',
+};
 
 /** The inbox list; the workbench page header already names the page, so there is no heading here. */
 export function InboxPanel({
@@ -24,68 +30,87 @@ export function InboxPanel({
 	open: (record: NotificationRecord) => void;
 	openable: ReadonlySet<string>;
 }) {
+	const t = useT();
 	const records = filter === 'unread' ? all.filter((record) => !record.read) : all;
 	return (
-		<div className="nand-inbox">
-			<div className="nand-inbox-header">
-				<div className="nand-inbox-actions nand-ui-toolbar">
-					<button className="nand-ui-btn nand-ui-btn-ghost" onClick={() => markRead()}>
-						<Icon name="check-check" />
+		<div className="mx-auto w-full max-w-4xl space-y-4 p-6">
+			<div className="flex justify-end">
+				<div className="flex flex-wrap gap-2">
+					<Button variant="ghost" onClick={() => markRead()}>
+						<CheckCheck className="size-4" />
 						{t('automation.readAll')}
-					</button>
-					<button className="nand-ui-btn nand-ui-btn-ghost" onClick={clearRead}>
-						<Icon name="trash-2" />
+					</Button>
+					<Button variant="ghost" onClick={clearRead}>
+						<Trash2 className="size-4" />
 						{t('automation.clearRead')}
-					</button>
+					</Button>
 				</div>
 			</div>
 			{!records.length && (
-				<EmptyState icon="bell-off" title={t(filter === 'unread' && all.length ? 'workbench.noUnread' : 'automation.inboxEmpty')} description="" layout="content" />
+				<EmptyState
+					icon={<BellOff />}
+					title={t(filter === 'unread' && all.length ? 'workbench.noUnread' : 'automation.inboxEmpty')}
+					description=""
+				/>
 			)}
 			{records.length > 0 && (
-				<ul className="nand-inbox-list">
+				<ul className="divide-y divide-border">
 					{[...records].reverse().map((record) => {
 						const body = notificationBody(record);
 						return (
-							<li className={`nand-inbox-item${record.read ? ' is-read' : ' is-unread'}`} key={record.id}>
+							<li
+								className={`flex flex-wrap gap-3 py-4 ${record.read ? 'opacity-70' : ''}`}
+								key={record.id}
+							>
 								{/* The unread marker is a named image so assistive tech keeps the old "●" cue. */}
 								{record.read ? (
-									<span className="nand-inbox-dot" aria-hidden="true" />
+									<span className="mt-2 size-2 shrink-0" aria-hidden="true" />
 								) : (
-									<span className="nand-inbox-dot" role="img" aria-label={t('automation.unread')} />
+									<span
+										className="mt-2 size-2 shrink-0 rounded-full bg-primary"
+										role="img"
+										aria-label={t('automation.unread')}
+									/>
 								)}
-								<div className="nand-inbox-item-main">
-									<div className="nand-inbox-item-title">{record.title}</div>
-									{body !== record.title && <div className="nand-inbox-item-body nand-notification-description">{body}</div>}
-									<div className="nand-inbox-item-meta">
-										<span className="nand-inbox-item-time">
-											<Icon className="nand-inbox-meta-icon" name="clock" />
-											{new Date(record.createdAt).toLocaleString(getLanguage() === 'zh' ? 'zh-CN' : 'en-US')}
+								<div className="min-w-0 flex-1 space-y-1">
+									<div className="text-sm font-medium">{record.title}</div>
+									{body !== record.title && (
+										<div className="whitespace-pre-wrap break-words text-sm text-muted-foreground">
+											{body}
+										</div>
+									)}
+									<div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+										<span className="inline-flex items-center gap-1">
+											<Clock className="size-3" />
+											{new Date(record.createdAt).toLocaleString(
+												getLanguage() === 'zh' ? 'zh-CN' : 'en-US',
+											)}
 										</span>
 										{record.channels.map((channel) => {
 											const delivery = record.deliveries[channel] ?? 'pending';
 											return (
-												<span
+												<Badge
+													variant="secondary"
 													key={channel}
-													className={`nand-ui-badge${DELIVERY_TONE[delivery] ? ` nand-ui-badge--${DELIVERY_TONE[delivery]}` : ''}`}
+													className={DELIVERY_TONE[delivery]}
 												>
 													{`${t(`automation.${channel}`)}${t('automation.colon')}${t(`automation.delivery.${delivery}`)}`}
-												</span>
+												</Badge>
 											);
 										})}
 									</div>
 								</div>
-								<div className="nand-inbox-item-actions">
+								<div className="flex flex-wrap items-start gap-2">
 									{openable.has(record.id) && (
-										<button className="nand-ui-btn" onClick={() => open(record)}>
+										<Button variant="outline" onClick={() => open(record)}>
 											{t('automation.open')}
-										</button>
+										</Button>
 									)}
 									{!record.read && (
-										<button className="nand-ui-btn nand-ui-btn-ghost" onClick={() => markRead(record.id)}>
-											<Icon name="check" />
+										<Button variant="ghost" onClick={() => markRead(record.id)}>
+											<Check className="size-4" />
 											{t('automation.read')}
-										</button>
+										</Button>
 									)}
 								</div>
 							</li>

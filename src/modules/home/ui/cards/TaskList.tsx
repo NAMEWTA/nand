@@ -1,3 +1,4 @@
+import { observeBoardAction } from '../board/actions';
 // Layout and interaction adapted from PandoraReads/apex-dashboard ac4d2c7 (MIT), Copyright (c) 2025 PandoraReads: src/renderer.ts
 import { useState } from 'react';
 import { useSortable, SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
@@ -39,7 +40,7 @@ function TaskRow({ store, card, task, path }: { store: BoardStore; card: string;
 					aria-label={task.text}
 					className="mt-0.5 rounded-full"
 					onCheckedChange={(checked) => {
-						void store.sync.toggleTask(card, path, checked === true);
+						void observeBoardAction(store.sync.toggleTask(card, path, checked === true));
 					}}
 				/>
 				<div className={`min-w-0 flex-1 [&_p]:m-0 ${task.checked ? 'text-muted-foreground line-through' : ''}`}>
@@ -48,14 +49,14 @@ function TaskRow({ store, card, task, path }: { store: BoardStore; card: string;
 				<IconButton
 					label={t('home.dashboard.reminder')}
 					onClick={() => {
-						void store.sync
+						void observeBoardAction(store.sync
 							.taskAutomationSource(card, path)
 							.then((source) =>
 								store.host.automationHost?.edit(
 									{ kind: 'dashboard', path: source.path, id: source.id },
 									source.title,
 								),
-							);
+							));
 					}}
 				>
 					<Bell className="size-3" />
@@ -65,7 +66,7 @@ function TaskRow({ store, card, task, path }: { store: BoardStore; card: string;
 						label={t('home.dashboard.collapse')}
 						aria-expanded={!task.collapsed}
 						onClick={() => {
-							void store.sync.toggleCollapseTask(card, path);
+							void observeBoardAction(store.sync.toggleCollapseTask(card, path));
 						}}
 					>
 						<ChevronDown className={task.collapsed ? '-rotate-90' : ''} />
@@ -121,7 +122,7 @@ export function TaskList({ store, card }: { store: BoardStore; card: DashboardCa
 				onChange={(e) => setText(e.target.value)}
 				onKeyDown={(e) => {
 					if (e.key === 'Enter' && !e.nativeEvent.isComposing && text.trim()) {
-						void store.sync.addTask(card.id, text).then(() => setText(''));
+						void observeBoardAction(store.sync.addTask(card.id, text).then(() => setText('')));
 					}
 				}}
 			/>

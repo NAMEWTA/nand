@@ -1,3 +1,4 @@
+import { readPmConfig, readSkillsConfig } from '../p1-config';
 import { readMarkdownDocument, readYaml } from '../../../../../shared/storage/markdown-document';
 import { normalizeColumnPairs } from '../column-pairs';
 import { readPipelineConfig } from '../../pipeline/codec';
@@ -11,6 +12,8 @@ import type {
 	DataviewConfig,
 	LibraryConfig,
 	PipelineConfig,
+	PmConfig,
+	SkillsSectionConfig,
 	QuickAction,
 	WebEmbedConfig,
 	WereadConfig,
@@ -56,8 +59,10 @@ export function parseBanner(fm: Record<string, unknown>): BannerData {
 		quoteFont: (raw.quoteFont as string) || undefined,
 		quotes,
 		images,
-		imagePos: raw.imagePos && typeof raw.imagePos === 'object' && !Array.isArray(raw.imagePos)
-			? { ...(raw.imagePos as Record<string, unknown>) } : undefined,
+		imagePos:
+			raw.imagePos && typeof raw.imagePos === 'object' && !Array.isArray(raw.imagePos)
+				? { ...(raw.imagePos as Record<string, unknown>) }
+				: undefined,
 		mode: raw.mode === 'stats' ? 'stats' : 'quote',
 		statsConfig: parseStatsConfig(raw.statsConfig),
 	};
@@ -97,7 +102,12 @@ export function parseQuickActions(fm: Record<string, unknown>): QuickAction[] {
 			.map((item: Record<string, string>) => ({
 				name: item.name ?? '',
 				icon: item.icon ?? (item.type === 'command' ? 'terminal' : 'file-text'),
-				type: item.type === 'action' ? ('action' as const) : item.type === 'command' ? ('command' as const) : ('file' as const),
+				type:
+					item.type === 'action'
+						? ('action' as const)
+						: item.type === 'command'
+							? ('command' as const)
+							: ('file' as const),
 				target: item.target ?? '',
 			}))
 			.filter((a) => a.name && a.target);
@@ -127,6 +137,8 @@ export function parseColumnDefs(fm: Record<string, unknown>): Array<{
 	showCover?: boolean;
 	libraryConfig?: LibraryConfig;
 	pipelineConfig?: PipelineConfig;
+	pmConfig?: PmConfig;
+	skillsConfig?: SkillsSectionConfig;
 	wereadConfig?: WereadConfig;
 	dataviewConfig?: DataviewConfig;
 	webConfig?: WebEmbedConfig;
@@ -144,6 +156,8 @@ export function parseColumnDefs(fm: Record<string, unknown>): Array<{
 		sectionType: item.type ? String(item.type as string | number | boolean) : undefined,
 		showCover: item.showCover === false ? false : undefined,
 		libraryConfig: item.library ? parseLibraryConfig(item.library as Record<string, unknown>) : undefined,
+		pmConfig: readPmConfig(item.pm),
+		skillsConfig: readSkillsConfig(item.skills),
 		pipelineConfig: item.pipeline ? readPipelineConfig(item.pipeline) : undefined,
 		wereadConfig: item.weread ? parseWereadConfig(item.weread as Record<string, unknown>) : undefined,
 		dataviewConfig: item.dataview ? parseDataviewConfig(item.dataview as Record<string, unknown>) : undefined,
@@ -162,8 +176,10 @@ export function parseColumns(
 		color: string;
 		sectionType?: string;
 		showCover?: boolean;
-	libraryConfig?: LibraryConfig;
+		libraryConfig?: LibraryConfig;
 		pipelineConfig?: PipelineConfig;
+		pmConfig?: PmConfig;
+		skillsConfig?: SkillsSectionConfig;
 		wereadConfig?: WereadConfig;
 		dataviewConfig?: DataviewConfig;
 		webConfig?: WebEmbedConfig;
@@ -197,6 +213,8 @@ export function parseColumns(
 			showCover: def?.showCover,
 			libraryConfig: def?.libraryConfig,
 			pipelineConfig: def?.pipelineConfig,
+			pmConfig: def?.pmConfig,
+			skillsConfig: def?.skillsConfig,
 			wereadConfig: def?.wereadConfig,
 			dataviewConfig: def?.dataviewConfig,
 			webConfig: def?.webConfig,

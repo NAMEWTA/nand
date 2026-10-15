@@ -6,7 +6,7 @@ import { useOwnerDocument } from '../../../../ui/react/contexts';
 import { useT } from '../../../../ui/react/hooks';
 import { Button } from '../../../../ui/components/button';
 import { ResizeHandle } from '../board/ResizeHandle';
-import { WidgetDeck } from '../widgets/WidgetDeck';
+import { WidgetDeck, enabledWidgets } from '../widgets/WidgetDeck';
 import { WeekStrip } from './WeekStrip';
 import { RecentDocs } from './RecentDocs';
 export function Sidebar({ store, stacked = false }: { store: BoardStore; stacked?: boolean }) {
@@ -25,6 +25,7 @@ export function Sidebar({ store, stacked = false }: { store: BoardStore; stacked
 		doc.addEventListener('pointerdown', close);
 		return () => doc.removeEventListener('pointerdown', close);
 	}, [doc, expanded, settings.sidebarPinned]);
+	if (stacked && !enabledWidgets(settings).length) return null;
 	const width = stacked ? settings.sidebarWidth : (size ?? settings.sidebarWidth);
 	return (
 		<aside

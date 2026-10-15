@@ -73,7 +73,7 @@ NAND 使用自己的 Obsidian 叶子、主题令牌和 stdio 辅助进程（协�
 | `components/status-bar/StatusBarVisibilityMenu.tsx` | `src/shell/status-bar/VisibilityMenu.tsx`：改用当前窗口 ContextMenu，偏好进入 app 设置命名空间。 |
 | `components/settings/Settings.tsx`、`settings-page-renderer.tsx`、`SearchableSetting.tsx`、`settings-search.ts` | `src/app/settings/react/`：保留 renderer 的独立滚动区、`gap-10 px-8 pt-10 pb-24 max-w-4xl` 内容容器、空结果态，以及设置行与搜索包装；分类由 NAND PanelModel 提供，搜索按 NAND 要求移到内容顶部，模块状态和旧 DOM 渲染器生命周期由 NAND 提供。 |
 
-底部状态栏不包含 Orca 的 SSH、资源监视、宠物或更新通知。组件样板直接由新设置页渲染 React 组件。旧模块设置仍通过单一 DOM 容器包装，以显式 `settingsPageKind: 'react'` 区分后续 React 设置组件；阶段 9 移除旧渲染路径。
+底部状态栏不包含 Orca 的 SSH、资源监视、宠物或更新通知。组件样板直接由新设置页渲染 React 组件。阶段 9a 已统一模块设置的 React 加载接口，移除旧 DOM 渲染包装；并行 home 声明留下的 `settingsPageKind` 仅作类型兼容，不参与渲染判断。
 
 ## 自动化页面与参数校验（464bd5a）
 
@@ -133,3 +133,13 @@ NAND 使用自己的 Obsidian 叶子、主题令牌和 stdio 辅助进程（协�
 | `tab-bar/SortableTab.tsx` | `agent/ui/browser/BrowserWorkspaceTab.tsx`：与终端一致的标签尺寸、焦点／激活类，增加网页图标、资料切换及网页上下文菜单；`BrowserTabView.tsx` 只经 `browser/api.ts` 挂载与渲染。 |
 
 表中组件路径未写前缀时，相对上游 `src/renderer/src/components/`。原始许可保留在 [orca-LICENSE.txt](orca-LICENSE.txt)。不引入 Orca IPC、数据目录或自动发送行为；原生 SQLite 读取使用 NAND 已有 rusqlite，无新增依赖。
+
+## 档案、通知、同步、图标及设置（464bd5a，阶段 9a）
+
+| 上游文件（相对 `src/renderer/src/components/`） | NAND 中的位置与适配 |
+|---|---|
+| `settings/SettingsFormControls.tsx`、`SettingsSection.tsx`、`SearchableSetting.tsx` | `archives/ui/` 的表单、筛选与设置，`icons/ui/settings/sections.tsx`、图标规则对话框，`comments/ui/settings-page.tsx`、`sync/ui/settings-page.tsx` 与 `app/settings/react/BuiltInSettings.tsx`：使用既有阶段 2 组件和双栏设置行，搜索命中高亮共用 `ui/react/settings-search.tsx`。 |
+| `right-sidebar/source-control/commit/commit-message-composer.tsx`、`right-sidebar/source-control/sync/git-history-row.tsx` | `sync/ui/sync-presentation.tsx`：复用提交输入框和历史行布局／类名；动作和历史数据仍由 NAND Git 服务提供，行目标按 NAND 无障碍规则增至 32px，不引入上游远程、图历史或 AI 提交服务。 |
+| 阶段 2 已署名的 `ui/*` 原语及设置／列表组合 | 档案列表和详情、通知收件箱、图标选择／规则／使用检查、内容搜索和编辑：替换旧 DOM 或 Preact 呈现；保留 NAND 的数据格式、业务服务和功能，图标模型与匹配算法仍沿用 Iconic 移植。 |
+
+`ui/react/dialog.tsx` 是 NAND 的外部命令适配器：弹窗进入所属窗口的 Portal，关闭、所属表面移除或窗口关闭时释放 React 根并恢复焦点。图标对话框与同步确认按需加载；模块激活不提前加载 React 弹窗代码。本阶段不删除共享旧原语、旧 CSS 或 Preact 依赖，清理归阶段 9b。

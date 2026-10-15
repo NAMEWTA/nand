@@ -5,7 +5,17 @@ import type { BoardStore } from '../../services/board-store';
 import { Textarea } from '../../../../ui/components/textarea';
 import { useT } from '../../../../ui/react/hooks';
 import { useOwnerDocument } from '../../../../ui/react/contexts';
-export function MarkdownBody({ text, store, sourcePath }: { text: string; store: BoardStore; sourcePath?: string }) {
+export function MarkdownBody({
+	text,
+	store,
+	sourcePath,
+	className,
+}: {
+	text: string;
+	store: BoardStore;
+	sourcePath?: string;
+	className?: string;
+}) {
 	const ref = useRef<HTMLDivElement>(null),
 		doc = useOwnerDocument();
 	useEffect(() => {
@@ -29,7 +39,7 @@ export function MarkdownBody({ text, store, sourcePath }: { text: string; store:
 	return (
 		<div
 			ref={ref}
-			className="nand-native markdown-rendered min-w-0 text-[.85em]"
+			className={className ?? 'nand-native markdown-rendered min-w-0 text-[.85em]'}
 			onClick={(e) => {
 				const link = (e.target as Element).closest<HTMLAnchorElement>('a.internal-link');
 				if (link) {

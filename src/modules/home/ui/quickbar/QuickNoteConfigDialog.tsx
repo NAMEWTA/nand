@@ -1,3 +1,4 @@
+import { observeBoardAction } from '../board/actions';
 // Layout and interaction adapted from PandoraReads/apex-dashboard ac4d2c7 (MIT), Copyright (c) 2025 PandoraReads: src/quick-note-config-modal.ts
 import { DraftList } from './DraftList';
 import { SkillList } from './SkillList';
@@ -26,7 +27,7 @@ export function QuickNoteConfigDialog({ store, onClose }: { store: BoardStore; o
 			title={t('quickNote.configTitle')}
 			onClose={onClose}
 			onSave={() => {
-				void store
+				void observeBoardAction(store
 					.settings((s) => {
 						s.quickNotesEnabled = true;
 						s.pinnedNotes = draft.pinnedNotes;
@@ -45,7 +46,7 @@ export function QuickNoteConfigDialog({ store, onClose }: { store: BoardStore; o
 							data.skills = skills;
 						}),
 					)
-					.then(onClose);
+					.then(onClose));
 			}}
 		>
 			{(['quickNotePresets', 'pinnedNotes', 'quickCommands'] as const).map((key) => (

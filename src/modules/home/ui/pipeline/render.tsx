@@ -1,17 +1,24 @@
-/** @jsxImportSource preact */
-import { useState } from 'preact/hooks';
+// Layout and interaction adapted from PandoraReads/apex-dashboard ac4d2c7 (MIT), Copyright (c) 2025 PandoraReads: src/pipeline-section.ts
 import type { App } from 'obsidian';
 import type { DashboardColumn } from '../../core/board/types/model';
 import type { RenderCallbacks } from '../render-contract';
-import { mountDashboardPanel } from '../renderer/render-context';
-import { RenderBoundary } from '../../../../ui/primitives/RenderBoundary';
+import { mountRecordPanel } from '../dialogs/mount-record-panel';
 import { PipelineSection } from './PipelineSection';
-import { pipelineError } from './PipelineCard';
-
-export function renderPipelineSection(root: HTMLElement, column: DashboardColumn, app: App, callbacks: RenderCallbacks, signal: AbortSignal): void {
-	function Guard() {
-		const [error, setError] = useState('');
-		return error ? <p role="alert">{error}</p> : <RenderBoundary onError={error => setError(pipelineError(error))}><PipelineSection app={app} column={column} callbacks={callbacks} signal={signal} win={root.win} /></RenderBoundary>;
-	}
-	mountDashboardPanel(root, <Guard />);
+export function renderPipelineSection(
+	root: HTMLElement,
+	column: DashboardColumn,
+	app: App,
+	callbacks: RenderCallbacks,
+	signal: AbortSignal,
+): void {
+	mountRecordPanel(
+		root,
+		<PipelineSection
+			app={app}
+			column={column}
+			callbacks={callbacks}
+			signal={signal}
+			win={root.ownerDocument.defaultView!}
+		/>,
+	);
 }

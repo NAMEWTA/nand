@@ -7,10 +7,12 @@ export function RenameTitle({
 	value,
 	onRename,
 	className = '',
+	immersive = false,
 }: {
 	value: string;
 	onRename(this: void, value: string): Promise<void>;
 	className?: string;
+	immersive?: boolean;
 }) {
 	const t = useT(),
 		[editing, setEditing] = useState(false),
@@ -58,6 +60,7 @@ export function RenameTitle({
 		);
 	return (
 		<Button
+			data-grid-action={immersive ? 'move' : undefined}
 			variant="ghost"
 			size="xs"
 			className={`h-auto min-w-0 justify-start truncate p-0 text-[length:inherit] font-[inherit] leading-[inherit] text-inherit ${className}`}
@@ -67,7 +70,7 @@ export function RenameTitle({
 				setEditing(true);
 			}}
 			onKeyDown={(e) => {
-				if (e.key === 'F2' || e.key === 'Enter') {
+				if (e.key === 'F2' || (e.key === 'Enter' && !immersive)) {
 					e.preventDefault();
 					cancelled.current = false;
 					setDraft(value);

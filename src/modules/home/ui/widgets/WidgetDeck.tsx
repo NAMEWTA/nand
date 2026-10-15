@@ -1,3 +1,4 @@
+import { useWidgetBackground } from './WidgetBackground';
 // Layout and interaction adapted from PandoraReads/apex-dashboard ac4d2c7 (MIT), Copyright (c) 2025 PandoraReads: src/renderer.ts (renderSidebarWidgets)
 import type { ComponentType } from 'react';
 import { useStore } from 'zustand';
@@ -47,7 +48,7 @@ export const WIDGETS: Record<
 	expense: { enabled: 'widgetExpenseEnabled', component: ExpenseWidget },
 };
 export function widgetKind(id: string): string {
-	return id.startsWith('anniversary-') ? 'anniversary' : id;
+	return id.startsWith('anniversary-') ? 'anniversary' : id.startsWith('countdown-') ? 'countdown' : id;
 }
 export function enabledWidgets(settings: DashboardSettings): string[] {
 	const candidates = [...settings.widgetOrder, ...Object.keys(WIDGETS)].flatMap((id) =>
@@ -69,6 +70,7 @@ function WidgetFrame({ store, id, mobile, span }: { store: BoardStore; id: strin
 		store.state,
 		(s) => s.settings.skillWidgetButtons.filter((skill) => skill.label.trim()).length > 4,
 	);
+	const background = useWidgetBackground(store, widgetKind(id));
 	const t = useT(),
 		{ attributes, isDragging, listeners, setNodeRef, transform } = useSortable({
 			id: `widget:${id}`,
@@ -92,15 +94,17 @@ function WidgetFrame({ store, id, mobile, span }: { store: BoardStore; id: strin
 			}}
 			className={inputWidgetClasses(
 				widgetClasses(
-					`dashboard-sidebar-widget group/widget min-w-0 shrink-0 rounded-[var(--db-radius-md)] border border-[var(--db-border-card)] bg-card ${id === 'quickActions' ? 'dashboard-quick-actions' : ''} ${id === 'pomodoro' ? 'dashboard-sidebar-pomodoro' : ''} ${id === 'expense' ? 'dashboard-sidebar-expense' : ''} ${id === 'reading' ? 'dashboard-sidebar-reading' : ''} ${id === 'lunar' ? 'dashboard-sidebar-lunar' : ''} ${id === 'yearProgress' ? 'dashboard-sidebar-year-progress' : ''} ${id === 'calendar' ? 'dashboard-sidebar-calendar' : ''} ${id === 'quickCapture' || id === 'fileSearch' ? 'dashboard-sidebar-capturebar' : ''} ${id === 'fileSearch' ? 'dashboard-sidebar-filesearch' : ''} ${id === 'skills' ? `dashboard-sidebar-skills ${multiSkills ? 'dashboard-sidebar-skills--multi' : ''}` : ''}`,
+					`dashboard-sidebar-widget ${background.className} group/widget min-w-0 shrink-0 rounded-[var(--db-radius-md)] border border-[var(--db-border-card)] bg-card ${id === 'quickActions' ? 'dashboard-quick-actions' : ''} ${id === 'pomodoro' ? 'dashboard-sidebar-pomodoro' : ''} ${id === 'expense' ? 'dashboard-sidebar-expense' : ''} ${id === 'reading' ? 'dashboard-sidebar-reading' : ''} ${id === 'lunar' ? 'dashboard-sidebar-lunar' : ''} ${id === 'yearProgress' ? 'dashboard-sidebar-year-progress' : ''} ${id === 'calendar' ? 'dashboard-sidebar-calendar' : ''} ${id === 'quickCapture' || id === 'fileSearch' ? 'dashboard-sidebar-capturebar' : ''} ${id === 'fileSearch' ? 'dashboard-sidebar-filesearch' : ''} ${id === 'skills' ? `dashboard-sidebar-skills ${multiSkills ? 'dashboard-sidebar-skills--multi' : ''}` : ''}`,
 				),
 			)}
 			style={{
+				...background.style,
 				transform: CSS.Transform.toString(transform),
 				gridRow: span ? `span ${span}` : undefined,
 				opacity: isDragging ? 0.4 : undefined,
 			}}
 		>
+			{background.layer}
 			{![
 				'pomodoro',
 				'quickActions',

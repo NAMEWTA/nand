@@ -1,5 +1,5 @@
 // Layout and interaction adapted from PandoraReads/apex-dashboard ac4d2c7 (MIT), Copyright (c) 2025 PandoraReads: src/banner.ts, src/view.ts
-import { useState } from 'react';
+import { useState, type CSSProperties } from 'react';
 import { useStore } from 'zustand';
 import { Bookmark, Pin, PinOff, WandSparkles, Ellipsis, PanelLeft } from 'lucide-react';
 import type { NativeSurfaceContext } from '../../../../ui/native-surface';
@@ -10,6 +10,8 @@ import { IconButton } from '../board/controls';
 import { useClock, useImage } from '../board/hooks';
 import { WorkspaceSwitcher } from './WorkspaceSwitcher';
 import { BannerEditDialog } from './BannerEditDialog';
+import { p1Classes } from '../theme/p1-classes';
+import { BannerStats } from './BannerStats';
 export function Banner({
 	store,
 	context,
@@ -32,13 +34,24 @@ export function Banner({
 	return (
 		<>
 			<header
-				className={`dashboard-banner group relative mx-4 mb-2 shrink-0 rounded-[var(--db-radius-lg)] bg-[var(--db-bg-banner)] bg-cover bg-center ${settings.bannerCollapsed ? 'h-1' : 'h-[120px] overflow-hidden'}`}
-				style={{
-					backgroundImage: url ? `url(${JSON.stringify(url)})` : undefined,
-					backgroundPosition: focalPosition(banner.imagePos?.[path]),
-				}}
+				className={`${banner.mode === 'stats' ? p1Classes('dashboard-banner--stats') : ''} dashboard-banner group relative mx-4 mb-2 shrink-0 rounded-[var(--db-radius-lg)] ${banner.mode === 'stats' ? '' : 'bg-[var(--db-bg-banner)]'} bg-cover bg-center ${settings.bannerCollapsed ? 'h-1' : 'h-[120px] overflow-hidden'}`}
+				style={
+					{
+						backgroundImage: url ? `url(${JSON.stringify(url)})` : undefined,
+						backgroundPosition: focalPosition(banner.imagePos?.[path]),
+						'--banner-blur': mobile ? '0px' : `${banner.statsConfig?.blur ?? 2}px`,
+						'--banner-bright': Math.max(0.3, 1 - ((banner.statsConfig?.darkness ?? 20) / 100) * 0.7),
+						'--banner-scrim': 0.25 + ((banner.statsConfig?.darkness ?? 20) / 100) * 0.5,
+						'--banner-stat-accent': banner.statsConfig?.accent ?? 'var(--db-banner-stat-default-accent)',
+					} as CSSProperties
+				}
 			>
-				{!settings.bannerCollapsed && (
+				{!settings.bannerCollapsed && banner.mode === 'stats' && (
+					<>
+						<BannerStats store={store} />
+					</>
+				)}
+				{!settings.bannerCollapsed && banner.mode !== 'stats' && (
 					<div className="dashboard-banner-overlay absolute inset-0 flex items-center justify-center px-12 py-5 text-center">
 						<div>
 							<p

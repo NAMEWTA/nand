@@ -1,7 +1,39 @@
+// Layout and interaction adapted from PandoraReads/apex-dashboard ac4d2c7 (MIT), Copyright (c) 2025 PandoraReads: src/appearance.ts
+import { CUSTOM_COLOR_TOKENS, type CustomColors } from '../../core/board/custom-theme';
 import { Platform, type App } from 'obsidian';
 import { displayFocal } from '../../core/board/board-experience';
 import type { DashboardSettings } from '../../core/board/types/index';
 import { resolveVaultImage } from '../banner/image-resource';
+
+const COLOR_PRESETS: Readonly<Record<'light' | 'dark', Readonly<Partial<Record<keyof CustomColors, string>>>>> = {
+	light: {
+		text: '#ffffff',
+		textMuted: 'rgba(255, 255, 255, 0.62)',
+		accent: '#ffffff',
+		accentLight: 'rgba(255, 255, 255, 0.7)',
+		bg: '#f5f5f7',
+		bgCard: '#ffffff',
+		bgSection: '#ededf0',
+		borderCard: 'rgba(0, 0, 0, 0.14)',
+	},
+	dark: {
+		text: '#111111',
+		textMuted: 'rgba(17, 17, 17, 0.62)',
+		accent: '#111111',
+		accentLight: 'rgba(17, 17, 17, 0.7)',
+		bg: '#141416',
+		bgCard: '#1d1d20',
+		bgSection: '#101013',
+		borderCard: 'rgba(255, 255, 255, 0.16)',
+	},
+};
+
+/** Stored color value -> concrete CSS color. 'light'/'dark' map to their
+ *  per-field preset; hex / rgba / undefined pass through untouched. */
+export function resolveCustomColorValue(field: keyof CustomColors, value: string | undefined): string | undefined {
+	if (value !== 'light' && value !== 'dark') return value;
+	return COLOR_PRESETS[value][field] ?? (value === 'light' ? '#ffffff' : '#111111');
+}
 
 const DEFAULT_DIM = 40;
 
@@ -36,6 +68,8 @@ const RADIUS_TOKENS = {
 export function applyAppearance(container: HTMLElement, app: App, settings: DashboardSettings): void {
 	// The root survives full re-renders (only its children are emptied): drop earlier inline overrides.
 	clearAdvanced(container);
+	clearColors(container);
+	applyColors(container, settings.customColors);
 	applyBackground(container, app, settings);
 	applyAdvanced(container, settings);
 	applyControlContrast(container);
@@ -48,14 +82,17 @@ export function applyAppearance(container: HTMLElement, app: App, settings: Dash
  */
 export function refreshAppearanceLive(app: App, settings: DashboardSettings): void {
 	const documents = new Set<Document>([app.workspace.containerEl.doc]);
-	app.workspace.iterateAllLeaves(leaf => documents.add(leaf.view.containerEl.doc));
-	for (const doc of documents) for (const root of doc.querySelectorAll<HTMLElement>('.nand-dashboard-root')) {
-		root.querySelectorAll(':scope > .nand-dashboard-bg').forEach((el) => el.remove());
-		clearAdvanced(root);
-		applyBackground(root, app, settings);
-		applyAdvanced(root, settings);
-		applyControlContrast(root);
-	}
+	app.workspace.iterateAllLeaves((leaf) => documents.add(leaf.view.containerEl.doc));
+	for (const doc of documents)
+		for (const root of doc.querySelectorAll<HTMLElement>('.nand-dashboard-root')) {
+			root.querySelectorAll(':scope > .nand-dashboard-bg').forEach((el) => el.remove());
+			clearAdvanced(root);
+			clearColors(root);
+			applyColors(root, settings.customColors);
+			applyBackground(root, app, settings);
+			applyAdvanced(root, settings);
+			applyControlContrast(root);
+		}
 }
 
 function applyBackground(container: HTMLElement, app: App, settings: DashboardSettings): void {
@@ -65,7 +102,9 @@ function applyBackground(container: HTMLElement, app: App, settings: DashboardSe
 	const resolved = resolveVaultImage(app, path);
 	if (!resolved) return;
 
-	const layer = container.createDiv({ cls: 'nand-dashboard-bg' });
+	const layer = container.createDiv({
+		cls: 'nand-dashboard-bg pointer-events-none absolute inset-0 -z-10 bg-center bg-no-repeat',
+	});
 	const focal = displayFocal(settings.bgFocal);
 	layer.style.backgroundImage = `url("${resolved}")`;
 	layer.style.backgroundSize = settings.bgSize === 'contain' ? 'contain' : 'cover';
@@ -80,7 +119,7 @@ function applyBackground(container: HTMLElement, app: App, settings: DashboardSe
 
 	const dim = clampNumber(settings.bgDim, 0, 100, DEFAULT_DIM);
 	if (dim > 0) {
-		const scrim = layer.createDiv({ cls: 'nand-dashboard-bg-scrim' });
+		const scrim = layer.createDiv({ cls: 'nand-dashboard-bg-scrim absolute inset-0' });
 		scrim.style.background = `rgba(0,0,0,${dim / 100})`;
 	}
 }
@@ -185,11 +224,13 @@ export function applyControlContrast(root: HTMLElement): void {
 	const base = parseRgb(computed.getPropertyValue('--db-bg')) ?? { r: 255, g: 255, b: 255 };
 	const cardColor = parseRgb(card);
 	const cardAlpha = card.startsWith('rgba') ? Number(card.slice(card.lastIndexOf(',') + 1).replace(')', '')) : 1;
-	const surface = cardColor ? {
-		r: cardColor.r * cardAlpha + base.r * (1 - cardAlpha),
-		g: cardColor.g * cardAlpha + base.g * (1 - cardAlpha),
-		b: cardColor.b * cardAlpha + base.b * (1 - cardAlpha),
-	} : base;
+	const surface = cardColor
+		? {
+				r: cardColor.r * cardAlpha + base.r * (1 - cardAlpha),
+				g: cardColor.g * cardAlpha + base.g * (1 - cardAlpha),
+				b: cardColor.b * cardAlpha + base.b * (1 - cardAlpha),
+			}
+		: base;
 	for (const [background, foreground] of [
 		['--db-accent', '--db-text-on-accent'],
 		['--db-danger', '--db-text-on-danger'],
@@ -214,10 +255,11 @@ export function applyControlContrast(root: HTMLElement): void {
 	// Transparent timer buttons need a foreground against the card, rather
 	// than against the accent fill. Preserve the requested hue when readable.
 	if (surface) {
-		const luminance = (rgb: number[]) => rgb.reduce((sum, value, i) => {
-			const c = value / 255;
-			return sum + (c <= 0.04045 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4) * [0.2126, 0.7152, 0.0722][i]!;
-		}, 0);
+		const luminance = (rgb: number[]) =>
+			rgb.reduce((sum, value, i) => {
+				const c = value / 255;
+				return sum + (c <= 0.04045 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4) * [0.2126, 0.7152, 0.0722][i]!;
+			}, 0);
 		for (const running of [false, true]) {
 			const raw = computed.getPropertyValue(running ? '--db-text-muted' : '--db-accent').trim();
 			const color = parseRgb(raw);
@@ -225,10 +267,24 @@ export function applyControlContrast(root: HTMLElement): void {
 			const background = [surface.r, surface.g, surface.b];
 			const alpha = raw.startsWith('rgba') ? Number(raw.slice(raw.lastIndexOf(',') + 1).replace(')', '')) : 1;
 			const bg = luminance(background);
-			const fg = luminance([color.r, color.g, color.b].map((value, i) => value * alpha + background[i]! * (1 - alpha)));
+			const fg = luminance(
+				[color.r, color.g, color.b].map((value, i) => value * alpha + background[i]! * (1 - alpha)),
+			);
 			const ratio = (Math.max(bg, fg) + 0.05) / (Math.min(bg, fg) + 0.05);
-			root.style.setProperty(running ? '--db-pomodoro-running-text' : '--db-pomodoro-text',
-				ratio >= 4.5 ? raw : (bg + 0.05) / 0.05 >= 1.05 / (bg + 0.05) ? '#000000' : '#ffffff');
+			root.style.setProperty(
+				running ? '--db-pomodoro-running-text' : '--db-pomodoro-text',
+				ratio >= 4.5 ? raw : (bg + 0.05) / 0.05 >= 1.05 / (bg + 0.05) ? '#000000' : '#ffffff',
+			);
 		}
+	}
+}
+
+function clearColors(root: HTMLElement): void {
+	for (const token of Object.values(CUSTOM_COLOR_TOKENS)) root.style.removeProperty(token);
+}
+function applyColors(root: HTMLElement, colors: CustomColors): void {
+	for (const [key, token] of Object.entries(CUSTOM_COLOR_TOKENS)) {
+		const value = resolveCustomColorValue(key as keyof CustomColors, colors[key as keyof CustomColors]);
+		if (value) root.style.setProperty(token, value);
 	}
 }

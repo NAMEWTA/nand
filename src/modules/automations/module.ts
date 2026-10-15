@@ -173,7 +173,6 @@ export default function createAutomationsModule(context: ModuleContext): ModuleI
 					void shell.open({ feature: 'notifications' }).catch(report);
 				},
 			}),
-		settingsPageKind: 'react',
 		async activate() {
 			try {
 				runtime = await createAutomationRuntime(context, notify);

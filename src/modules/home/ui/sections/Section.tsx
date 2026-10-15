@@ -1,3 +1,8 @@
+import { observeBoardAction } from '../board/actions';
+import { P1_SECTIONS } from './registry';
+import { P1Section } from './P1Section';
+import { ProjectSection } from '../pm/ProjectSection';
+import { SkillsSection } from '../skills/SkillsSection';
 // Layout and interaction adapted from PandoraReads/apex-dashboard ac4d2c7 (MIT), Copyright (c) 2025 PandoraReads: src/renderer.ts
 import { useRef, useState, type CSSProperties } from 'react';
 import { useStore } from 'zustand';
@@ -22,15 +27,18 @@ export function Section({
 	column,
 	index,
 	mobile,
+	immersive = false,
 }: {
 	store: BoardStore;
 	column: DashboardColumn;
 	index: number;
 	mobile: boolean;
+	immersive?: boolean;
 }) {
 	const t = useT(),
 		settings = useStore(store.state, (s) => s.settings),
 		columns = useStore(store.state, (s) => s.data!.columns),
+		[actions, setActions] = useState<HTMLDivElement | null>(null),
 		[adding, setAdding] = useState(false),
 		[options, setOptions] = useState(false),
 		[remove, setRemove] = useState(false),
@@ -40,14 +48,16 @@ export function Section({
 		[height, setHeight] = useState<number | undefined>(),
 		[width, setWidth] = useState<number | undefined>(),
 		ref = useRef<HTMLElement | null>(null);
-	const collapsed = settings.collapsedSections.includes(column.id ?? column.name),
+	const collapsed = !immersive && settings.collapsedSections.includes(column.id ?? column.name),
 		type = column.sectionType ?? column.name.toLowerCase(),
 		library = type === 'library' || type === 'folder',
+		p1 = P1_SECTIONS.includes(type),
 		partner = partnerIndexOf(columns, index),
 		left = partner === index + 1;
 	const baseWidth = left ? (column.width ?? 50) : partner >= 0 ? 100 - (columns[partner]?.width ?? 50) : 100;
 	const { attributes, isDragging, isOver, listeners, setNodeRef, transform } = useSortable({
 		id: sectionId(column),
+		disabled: immersive,
 		data: { item: { kind: 'section', index } },
 	});
 	return (
@@ -58,13 +68,16 @@ export function Section({
 			}}
 			data-column={column.name}
 			data-section-type={type}
-			className={`dashboard-section-row group/section relative flex min-w-0 shrink-0 flex-col rounded-[var(--db-radius-lg)] ${['mono', 'neon', 'volt', 'magma', 'onyx', 'tundra', 'blossom', 'matcha'].includes(settings.stylePreset) ? 'border-0 bg-transparent p-[6px]' : 'border border-[var(--db-border-section)] bg-[var(--db-bg-section)] px-4 py-3'} ${column.half && !mobile ? 'dashboard-section-row--half' : 'basis-full'}`}
+			className={`dashboard-section-row group/section relative flex min-w-0 shrink-0 flex-col rounded-[var(--db-radius-lg)] ${immersive ? 'h-full border-0 bg-transparent px-[14px] py-[12px]' : ['mono', 'neon', 'volt', 'magma', 'onyx', 'tundra', 'blossom', 'matcha'].includes(settings.stylePreset) ? 'border-0 bg-transparent p-[6px]' : 'border border-[var(--db-border-section)] bg-[var(--db-bg-section)] px-4 py-3'} ${column.half && !mobile ? 'dashboard-section-row--half' : 'basis-full'}`}
 			style={
 				{
 					transform: CSS.Transform.toString(transform),
 					opacity: isDragging ? 0.4 : undefined,
 					outline: isOver ? '1px solid var(--db-accent)' : undefined,
-					height: collapsed || mobile ? undefined : (height ?? column.height),
+					height:
+						collapsed || mobile || type === 'skills' || type === 'pm'
+							? undefined
+							: (height ?? column.height),
 					maxHeight: collapsed || mobile ? undefined : (height ?? column.height ?? (library ? 800 : 500)),
 					'--dashboard-pair-width': `${width ?? baseWidth}%`,
 					flexGrow: column.half ? 1 : undefined,
@@ -82,11 +95,13 @@ export function Section({
 				</IconButton>
 				<h3 className="m-0 min-w-0 text-[1em] font-bold">
 					<RenameTitle
+						immersive={immersive}
 						value={column.name}
 						onRename={(value) => store.sync.renameColumn(column.name, value, index)}
 					/>
 				</h3>
 				<IconButton
+					hidden={immersive}
 					label={t('home.dashboard.collapse')}
 					aria-expanded={!collapsed}
 					className="size-5"
@@ -102,7 +117,8 @@ export function Section({
 					<ChevronDown className={`size-3 ${collapsed ? '-rotate-90' : ''}`} />
 				</IconButton>
 				<div className="ml-auto flex gap-0.5 opacity-0 group-hover/section:opacity-100 focus-within:opacity-100 pointer-coarse:opacity-100">
-					{!library && (
+					{p1 && <div ref={setActions} className="flex items-center gap-1" />}
+					{!library && !p1 && (
 						<>
 							<IconButton
 								label={t('home.dashboard.archiveTasks')}
@@ -126,9 +142,11 @@ export function Section({
 							label={t('home.dashboard.half')}
 							aria-pressed={!!column.half}
 							onClick={() => {
-								void (column.half
-									? store.sync.moveColumn(index, index)
-									: store.sync.moveColumnBeside(index, index + 1, 'left'));
+								void observeBoardAction(
+									column.half
+										? store.sync.moveColumn(index, index)
+										: store.sync.moveColumnBeside(index, index + 1, 'left'),
+								);
 							}}
 						>
 							<Columns2 className="size-3" />
@@ -141,7 +159,13 @@ export function Section({
 			</div>
 			{!collapsed && (
 				<>
-					{library ? (
+					{type === 'pm' ? (
+						<ProjectSection store={store} column={column} actions={actions} />
+					) : type === 'skills' ? (
+						<SkillsSection store={store} column={column} actions={actions} />
+					) : p1 ? (
+						<P1Section store={store} column={column} actions={actions} />
+					) : library ? (
 						<LibrarySection store={store} column={column} />
 					) : (
 						<div className="dashboard-section-cards flex min-h-0 flex-1 gap-3 overflow-x-auto">
@@ -171,7 +195,7 @@ export function Section({
 							className="mt-0.5 h-2 w-full cursor-ns-resize rounded-none border-b-2 border-transparent hover:border-primary"
 							onPreview={setHeight}
 							onCommit={(value) => {
-								void store.sync.updateColumnHeight(column.name, value);
+								void observeBoardAction(store.sync.updateColumnHeight(column.name, value));
 							}}
 						/>
 					)}
@@ -192,7 +216,7 @@ export function Section({
 						if (next?.instanceOf(HTMLElement)) next.style.flexBasis = `calc(${100 - value}% - 5.5px)`;
 					}}
 					onCommit={(value) => {
-						void store.sync.updateColumnWidth(column.name, value);
+						void observeBoardAction(store.sync.updateColumnWidth(column.name, value));
 					}}
 				/>
 			)}
@@ -207,11 +231,13 @@ export function Section({
 									variant="outline"
 									className="h-20"
 									onClick={() => {
-										void store.sync
-											.addCard(column.name, {
-												type: kind as 'generic' | 'task' | 'web' | 'project',
-											})
-											.then(() => setAdding(false));
+										void observeBoardAction(
+											store.sync
+												.addCard(column.name, {
+													type: kind as 'generic' | 'task' | 'web' | 'project',
+												})
+												.then(() => setAdding(false)),
+										);
 									}}
 								>
 									{t(`home.dashboard.card.${kind}`)}
@@ -261,7 +287,7 @@ export function Section({
 					<Button
 						variant="destructive"
 						onClick={() => {
-							void store.sync.deleteColumn(column.name, index);
+							void observeBoardAction(store.sync.deleteColumn(column.name, index));
 						}}
 					>
 						{t('common.delete')}

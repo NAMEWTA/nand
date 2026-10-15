@@ -11,7 +11,7 @@
 | `src/modules/home/core/board/types/model.ts`、`parser/parse.ts` | `src/types.ts`、`src/parser.ts` | 既有看板模型与解析器改编；新增成员和网格字段使用 NAND 的模块边界及现有文档保真写入器，不替换为上游的整篇序列化写入器。 |
 | `src/modules/home/{core,platform,ui}/pipeline/` | `src/pipeline-model.ts`、`src/pipeline-due-modal.ts` | 参考根目录与状态匹配、可选阶段目录、笔记级 due/remind 字段的行为。NAND 分别实现纯规则、最新原文补丁、移动前冲突检查、显式重试未完成步骤，并接入既有自动化来源；不复制上游计时器、个人目录预设或单体渲染器。 |
 
-成员标识、分区标识、分阶段写入网格数据、Preact 控件及贡献生命周期属于 NAND 自身架构。只读打开保留原文，显式布局或几何编辑才可提交标准化字段。上游“坐标从不持久化”的注释与解析器实现不一致；NAND 以实际坐标字段为依据并保留它们。
+成员标识、分区标识、分阶段写入网格数据、控件及贡献生命周期属于 NAND 自身架构。只读打开保留原文，显式布局或几何编辑才可提交标准化字段。上游“坐标从不持久化”的注释与解析器实现不一致；NAND 以实际坐标字段为依据并保留它们。
 
 同一固定版本还提供以下行为参考，NAND 的实现复用既有服务和文档写入器：
 
@@ -20,12 +20,12 @@
 | `src/modules/home/contrib/widgets.ts`、`ui/widgets/`、`ui/immersive/` | `src/immersive.ts`、`src/renderer.ts` | 共享目录、首个实例创建、成员移除和网格交互。NAND 每模块提供一个贡献包，独立管理生命周期，并使用可访问的原生控件；已保存的自动化快捷操作与内置组件使用同一注册表。 |
 | `src/modules/home/core/board/skill-shortcuts.ts`、`services/skill-shortcuts.ts`、`ui/skills/`、`src/shared/agent-dispatch.ts` | `src/agent-dispatch.ts`、`src/agent-prompt-modal.ts`、`src/skill-widget.ts` | 模板替换、预览、直发和交付结果。NAND 的最终提示词可编辑，文件可明确选择，经智能体公开端口派发，分开记录交付与完成；已有会话仅粘贴。不改编外部应用启动器。 |
 | `src/modules/agent/` 技能发现、`src/modules/home/ui/skills/` | `src/skill-registry.ts` | 库内技能发现与名称记忆。额外目录必须明确指定，各 CLI 的直接调用语法按其官方文档核对，不猜测不支持的语法。 |
-| `src/modules/home/core/board/board-experience.ts`、`ui/ui/template-modal.ts` | `src/types.ts`、`src/parser.ts`、资料库与文件夹配置 | 多模板排序和创建时选择。明确空选择与缺省设置不同，只读打开旧文档保留原字节。 |
+| `src/modules/home/core/board/board-experience.ts`、`ui/sections/types/LibrarySection.tsx` | `src/types.ts`、`src/parser.ts`、资料库与文件夹配置 | 多模板排序和创建时选择。明确空选择与缺省设置不同，只读打开旧文档保留原字节。 |
 | `src/modules/home/core/board/table-columns.ts`、资料库与文件夹配置 | `src/table-columns-modal.ts`、`src/library-section.ts` | 各分区独立保存属性顺序与显隐，包括首屏之外的属性。NAND 增加键盘排序，并保留隐藏或暂时不存在的属性偏好。 |
 | `src/modules/home/core/board/progressive-results.ts`、资料库渲染器 | `src/library-section.ts` | 首批 50 条、每次增加 50 条、显示上限 500 条。数量、筛选、排序和智能体范围仍使用全部匹配数据。 |
 | `src/modules/home/core/anniversaries/`、`ui/widgets/AnniversaryDateEditor.tsx` | `src/anniversary-widget.ts`、`src/anniversary-settings-modal.ts` | 公农历输入以公历日期保存身份。NAND 明确处理闰月和小月，农历转换失败时不会静默替换为公历纪念日。 |
 | `src/modules/home/services/appearance-presets.ts`、`ui/appearance/` | `src/theme-studio-modal.ts` | 命名外观的保存、应用和删除。NAND 同时保存及恢复共享主题服务与首页装饰，并更新所有窗口，不建立独立私有调色板。 |
-| `src/modules/home/ui/ui/icon-picker-modal.ts` | `src/icon-picker-modal.ts`、`src/icon-names.ts` | 常用建议、模糊搜索和最多 400 个显示结果。完整图标来自 Obsidian 已安装的目录，可选复用 NAND 关键词查询。 |
+| `src/modules/home/ui/quickbar/DashboardIconPicker.tsx` | `src/icon-picker-modal.ts`、`src/icon-names.ts` | 常用建议、模糊搜索和最多 400 个显示结果。完整图标来自 Obsidian 已安装的目录，可选复用 NAND 关键词查询。 |
 | `src/modules/home/ui/` 中的资料库与文件夹卡片控件 | `src/library-section.ts` | 悬停删除复用既有回收站操作；NAND 同时在键盘聚焦与触摸时显示按钮，确认框归属触发窗口并默认聚焦取消。 |
 
 集成审查在真实 Windows Obsidian 中覆盖全部 14 种内置组件及已保存的自动化快捷操作，包括模块可用性、布局持久化、重启和减少动效。真实手机、其他操作系统及登录后的模型执行仍未验证。另行固定的 GPL home-pages 树仅供相似度脚本输出路径和数值，不作为实现来源。
@@ -45,3 +45,20 @@
 番茄、习惯、记账、账本和阅读统计，以及农历/抽签、年度进度、日历、纪念日改为 React。布局配方在 `home/ui/theme/widget-classes.ts`，由上游对应选择器的声明转为静态 Tailwind 类；固定图表与签纸色通过同目录 `themes.css` 的 `--db-record-*` 变量提供。对话框使用 NAND 的 shadcn/Radix 门户。旧 records 页面、侧栏和样式已删除，领域数据按 Apex JSON 写入 `.nand/content/NAND/`。
 
 阶段 8b 同时移植 `src/capture-search-widgets.ts`、`src/skill-widget.ts` 的独立输入条与实体技能键布局；配置复用 NAND 的 React 技能编辑器，发送只通过 `AGENT_DISPATCH`。对应静态样式配方为 `input-widget-classes.ts`。
+
+## 阶段 8c（v3.8.4）
+
+P1 分区、沉浸布局、统计横幅、外观工作室和完整看板设置继续以 `ac4d2c7` 为唯一参照，© 2025 PandoraReads，MIT。`ui/theme/p1-classes.ts` 与 `immersive-classes.ts` 将对应声明转换为静态 Tailwind 配方，固定颜色转为 `themes.css` 的令牌；不在运行时注入样式表。
+
+| NAND 文件 | 上游入口 | 改编范围 |
+|---|---|---|
+| `ui/dataview/`、`ui/sections/P1Section.tsx` | `dataview-section.ts`、配置弹窗 | 结果视图、工具栏、实时语法反馈；复用 NAND 内置 DQL |
+| `ui/media/`、`ui/web/`、`ui/pipeline/` | `media-section.ts`、`media-lightbox-modal.ts`、`web-section.ts`、`pipeline-section.ts` | React 分区、筛选、灯箱与工作流；文档修改仍走 NAND 内容层，技能经 `AGENT_DISPATCH` |
+| `core/pm/`、`services/projects.ts`、`ui/pm/` | `pm-model.ts`、`pm-section.ts`、`pm-board-modal.ts` | 字段别名、里程碑/待办、项目卡与看板 |
+| `services/skill-library.ts`、`ui/skills/{SkillsSection,SkillCard}.tsx` | `skill-store.ts`、`skill-section.ts`、`skill-detail-modal.ts` | 同名聚合、来源元数据、分组拖动、搜索、置顶、详情与实例回收；发现及调用使用智能体公开接口，本地导入副本归属 `.nand/content/NAND/技能/` |
+| `ui/layout/ImmersiveLayout.tsx` | `immersive.ts` | 海报与时钟、12 列网格、移动与缩放；复用 NAND 纯网格算法与 ownerDocument 控制器 |
+| `ui/banner/BannerStats.tsx`、`BannerStatsPanel.tsx`、`BannerStatsEditor.tsx` | `banner-stats.ts`、`banner-edit-modal.ts` | 三栏统计、热力图与配置 |
+| `ui/appearance/AppearanceStudio.tsx`、`core/board/custom-theme.ts` | `theme-studio-modal.ts`、`appearance.ts` | 颜色、背景、即时预览与命名主题；Radix 门户与焦点归属所属窗口 |
+| `ui/settings/`、`services/board-backups.ts` | `settings.ts`、`backup-service.ts` | React 三标签设置；看板备份写入 NAND 恢复目录，恢复仅允许当前看板列表 |
+
+无新增依赖。被替换且无引用的旧设置、主题弹窗、沉浸渲染入口和旧界面适配器已删除；仍被回归脚本引用的渲染适配器继续保留。
