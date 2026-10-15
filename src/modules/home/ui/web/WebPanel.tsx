@@ -134,6 +134,12 @@ export function WebPanel({
 	const [revision, setRevision] = useState(0),
 		[error, setError] = useState('');
 	const [verdict, setVerdict] = useState<FrameVerdict>('unknown');
+	// Recompute the frame color scheme when Obsidian switches light/dark without reloading the board.
+	const [, setThemeRevision] = useState(0);
+	useLayoutEffect(() => {
+		const ref = app.workspace.on('css-change', () => setThemeRevision((value) => value + 1));
+		return () => app.workspace.offref(ref);
+	}, [app]);
 	useLayoutEffect(() => {
 		if (!isValidWebUrl(target)) return;
 		let active = true;
@@ -198,10 +204,13 @@ export function WebPanel({
 		);
 	if (verdict !== 'blocked') {
 		const zoom = Math.max(0.5, Math.min(1.25, column.webConfig?.zoom ?? 1));
+		// Chromium decides at load whether a light page in a dark-scheme frame gets an opaque canvas, so a
+		// theme switch remounts the frame; otherwise the dark host shows through transparent pages.
+		const scheme = colorScheme(root);
 		return (
 			<div className="h-full min-h-64 overflow-hidden">
 				<iframe
-					key={`${target}:${revision}`}
+					key={`${target}:${revision}:${scheme}`}
 					title={column.name}
 					src={target}
 					sandbox="allow-scripts allow-forms allow-same-origin allow-popups"
@@ -214,6 +223,7 @@ export function WebPanel({
 						transform: `scale(${zoom})`,
 						transformOrigin: 'top left',
 						border: 0,
+						colorScheme: scheme,
 					}}
 					onError={() => setVerdict('blocked')}
 				/>
