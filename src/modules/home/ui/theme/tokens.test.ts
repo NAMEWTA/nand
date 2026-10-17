@@ -1,8 +1,9 @@
 import { readdirSync, readFileSync, statSync } from 'node:fs';
 import { join } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { expect, test } from 'vitest';
 
-const root = new URL('../../', import.meta.url).pathname;
+const root = fileURLToPath(new URL('../../', import.meta.url));
 const tokens = readFileSync(new URL('./tokens.css', import.meta.url), 'utf8');
 const files = (dir: string): string[] =>
 	readdirSync(dir).flatMap((name) => {

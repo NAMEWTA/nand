@@ -2,6 +2,7 @@
 import * as fs from 'node:fs/promises';
 import * as path from 'node:path';
 import { createHash, randomUUID } from 'node:crypto';
+import { setTimeout as delay } from 'node:timers/promises';
 import type { AgentId } from '../../../core/launch/types';
 import type { AccountPaths } from '../agents/system-homes';
 import { OPENCODE_EXTENSION, PI_EXTENSION } from './native-extensions';
@@ -29,6 +30,12 @@ export interface SystemHookResult { changed: string[]; skipped: Array<{ file: st
 
 const code = (error: unknown) => (error as NodeJS.ErrnoException).code;
 const digest = (text: string) => createHash('sha256').update(text).digest('hex');
+
+/** Windows can briefly deny replacement while another installer has the destination open. */
+async function waitForFileUnlock(error: unknown, attempt: number): Promise<void> {
+	if (attempt >= 2 || !['EPERM', 'EACCES', 'EBUSY'].includes(code(error) ?? '')) throw error;
+	await delay(25 * (attempt + 1));
+}
 
 export function systemHookPaths(home: string): SystemHookPaths {
 	const directory = path.join(home, '.nand', 'agent-hooks');
@@ -117,15 +124,18 @@ async function checkOwnFile(file: string): Promise<boolean> {
 
 /** Write one of our files atomically, only when its content changed. */
 async function writeOwn(file: string, text: string, mode: number): Promise<boolean> {
-	if (await checkOwnFile(file)) {
-		if (await readOptional(file) === text) { await fs.chmod(file, mode).catch(() => {}); return false; }
+	for (let attempt = 0; ; attempt++) {
+		if (await checkOwnFile(file)) {
+			if (await readOptional(file) === text) { await fs.chmod(file, mode).catch(() => {}); return false; }
+		}
+		const temporary = `${file}.tmp-${randomUUID()}`;
+		try {
+			await fs.writeFile(temporary, text, { mode, flag: 'wx' });
+			await fs.rename(temporary, file);
+			return true;
+		} catch (error) { await waitForFileUnlock(error, attempt); }
+		finally { await fs.rm(temporary, { force: true }); }
 	}
-	const temporary = `${file}.tmp-${randomUUID()}`;
-	try {
-		await fs.writeFile(temporary, text, { mode, flag: 'wx' });
-		await fs.rename(temporary, file);
-	} finally { await fs.rm(temporary, { force: true }); }
-	return true;
 }
 
 /** Refuse a link, or anything that resolves outside the user's home; the user's file itself is never followed. */
@@ -188,7 +198,8 @@ async function updateUserFile(paths: SystemHookPaths, env: SystemHookEnvironment
 			if (await readOptional(file) !== raw) continue;
 			await fs.rename(temporary, file);
 			return true;
-		} finally { await fs.rm(temporary, { force: true }); }
+		} catch (error) { await waitForFileUnlock(error, attempt); }
+		finally { await fs.rm(temporary, { force: true }); }
 	}
 	throw new SystemHookError('unreadable', file, 'changed while updating');
 }

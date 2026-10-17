@@ -39,7 +39,8 @@ test('launch and resume derive an owned account environment instead of accepting
 		for (const key of ['HOME', 'CODEX_HOME', 'XDG_CONFIG_HOME', 'OPENAI_API_KEY']) expect(system.env[key]).toBeUndefined();
 		expect(system.args.some(arg => arg.includes('cli_auth_credentials_store') || arg.includes('sqlite_home'))).toBe(false);
 		const home = path.join(vault, 'fake-home', '.codex', 'sessions'); await mkdir(home, { recursive: true });
-		vi.stubEnv('HOME', path.join(vault, 'fake-home')); vi.stubEnv('CODEX_HOME', '');
+		for (const key of ['HOME', 'USERPROFILE']) vi.stubEnv(key, path.join(vault, 'fake-home'));
+		vi.stubEnv('CODEX_HOME', '');
 		const transcript = path.join(home, 'one.jsonl'); await writeFile(transcript, '{}');
 		await resumeAgent(host, { agentId: 'codex', title: 'System', cwd: vault, sessionId: 'fixture', modifiedAtMs: 1, env: system.env, transcriptPath: transcript });
 		expect(started[3]?.env).toEqual(system.env);

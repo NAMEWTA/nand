@@ -9,7 +9,7 @@ import { accountEnv } from '../agents/accounts';
 import { systemAccountPaths } from '../agents/system-homes';
 import { AutomationHooks, HOOK_SCRIPT } from './automation-hooks';
 import { PI_EXTENSION } from './native-extensions';
-import { hookCommand, installSystemHooks, removeSystemHooks, removeSystemScripts, systemHookPaths, systemProviders } from './system-hooks';
+import { hookCommand, installSystemHooks, installSystemScripts, removeSystemHooks, removeSystemScripts, systemHookPaths, systemProviders } from './system-hooks';
 
 // Every test runs against a throwaway home; the real provider files are never involved.
 const race = vi.hoisted(() => ({ beforeRename: undefined as (() => Promise<void>) | undefined }));
@@ -38,6 +38,7 @@ test('one fixed command per event is added to the real config; groups, user comm
 		const userCommand = { type: 'command', command: 'echo USER_HOOK' };
 		const original = { model: 'keep', hooks: { Stop: [{ matcher: 'Bash', hooks: [userCommand] }] }, tail: 1 };
 		await writeFile(file, JSON.stringify(original), { mode: 0o640 });
+		const originalMode = (await stat(file)).mode & 0o777;
 		const first = await installSystemHooks('claude-code', paths, env, HOOK_SCRIPT);
 		expect(first.changed).toEqual([file]);
 		const text = await readFile(file, 'utf8'), merged = JSON.parse(text) as { hooks: Record<string, Array<{ matcher?: string; hooks: Array<{ command: string }> }>> };
@@ -46,7 +47,7 @@ test('one fixed command per event is added to the real config; groups, user comm
 		expect(merged.hooks.Stop![0]).toEqual({ matcher: 'Bash', hooks: [userCommand] });
 		expect(merged.hooks.Stop![1]!.hooks[0]!.command).toBe(stop);
 		expect(Object.keys(merged.hooks).sort()).toEqual(['PermissionRequest', 'PreToolUse', 'SessionStart', 'Stop', 'StopFailure', 'UserPromptSubmit']);
-		expect((await stat(file)).mode & 0o777).toBe(0o640);
+		expect((await stat(file)).mode & 0o777).toBe(originalMode);
 		// The command is the same for every vault and names no vault path or executable.
 		expect(stop).not.toContain('.nand/agents');
 		const before = (await stat(file)).mtimeMs;
@@ -60,7 +61,7 @@ test('one fixed command per event is added to the real config; groups, user comm
 		expect(JSON.parse(await readFile(path.join(systemHookPaths(home).backups, backups[0]!), 'utf8'))).toEqual(original);
 		// Scripts live in NAND's directory, executable, and are refreshed when their content changes.
 		const shell = systemHookPaths(home).shell;
-		expect((await stat(shell)).mode & 0o111).not.toBe(0);
+		if (process.platform !== 'win32') expect((await stat(shell)).mode & 0o111).not.toBe(0);
 		expect(await readFile(systemHookPaths(home).script, 'utf8')).toBe(HOOK_SCRIPT);
 		await installSystemHooks('claude-code', paths, env, HOOK_SCRIPT + '// newer\n');
 		expect(await readFile(systemHookPaths(home).script, 'utf8')).toBe(HOOK_SCRIPT + '// newer\n');
@@ -84,7 +85,7 @@ test('two vaults install byte-identical entries, and closing a vault or stopping
 		expect(texts[0]).toBe(texts[1]);
 		expect(texts[0]).not.toContain(root);
 		expect(JSON.parse(await readFile(file, 'utf8')).hooks.Stop).toHaveLength(1);
-		expect(await exists(systemHookPaths(home).shell)).toBe(true);
+		expect(await exists(systemHookPaths(home)[process.platform === 'win32' ? 'cmd' : 'shell'])).toBe(true);
 	} finally { await rm(root, { recursive: true, force: true }); }
 }, 30000);
 
@@ -249,10 +250,11 @@ test('NAND\'s own directory is never trusted through a link: install, removal an
 		await mkdir(path.join(home, '.nand', 'agent-hooks'), { recursive: true });
 		const external = path.join(outside, 'external.sh');
 		await writeFile(external, (await import('./system-hooks')).SHELL_SCRIPT, { mode: 0o600 });
+		const originalMode = (await stat(external)).mode & 0o777;
 		await symlink(external, systemHookPaths(home).shell);
 		result = await installSystemHooks('codex', paths, env, HOOK_SCRIPT);
 		expect(result.skipped[0]).toMatchObject({ reason: 'symlink' });
-		expect((await stat(external)).mode & 0o777).toBe(0o600);
+		expect((await stat(external)).mode & 0o777).toBe(originalMode);
 		expect(await exists(codex)).toBe(false);
 		await writeFile(systemHookPaths(home).script, 'x');
 		result = await removeSystemScripts(env);
@@ -265,6 +267,54 @@ test('NAND\'s own directory is never trusted through a link: install, removal an
 		expect(await exists(path.join(home, '.nand'))).toBe(false);
 	} finally { await rm(root, { recursive: true, force: true }); }
 }, 30000);
+
+test.each(['EPERM', 'EACCES', 'EBUSY'])('a temporary %s during replacement rereads the user config before retrying', async (code) => {
+	const { root, paths, env } = await fixture();
+	try {
+		await installSystemScripts(env, HOOK_SCRIPT);
+		const file = systemProviders(paths).codex.file;
+		await mkdir(path.dirname(file), { recursive: true });
+		await writeFile(file, '{"user":"KEEP"}');
+		race.beforeRename = async () => {
+			await writeFile(file, '{"user":"KEEP","addedWhileBusy":true}');
+			throw Object.assign(new Error('destination busy'), { code });
+		};
+		expect((await installSystemHooks('codex', paths, env, HOOK_SCRIPT)).changed).toEqual([file]);
+		expect(JSON.parse(await readFile(file, 'utf8'))).toMatchObject({ user: 'KEEP', addedWhileBusy: true, hooks: { Stop: expect.any(Array) } });
+		expect(await readdir(path.dirname(file))).toEqual(['hooks.json']);
+	} finally { await rm(root, { recursive: true, force: true }); }
+});
+
+test('shared scripts recover from a temporary replacement lock without leaving temporary files', async () => {
+	const { root, home, paths, env } = await fixture();
+	try {
+		race.beforeRename = async () => { throw Object.assign(new Error('destination busy'), { code: 'EPERM' }); };
+		await installSystemHooks('codex', paths, env, HOOK_SCRIPT);
+		expect(await readFile(systemHookPaths(home).script, 'utf8')).toBe(HOOK_SCRIPT);
+		expect((await readdir(systemHookPaths(home).directory)).filter(name => name.includes('.tmp-'))).toEqual([]);
+	} finally { await rm(root, { recursive: true, force: true }); }
+});
+
+test.each([['EPERM', 3], ['EIO', 1]] as const)('a persistent %s leaves the original config intact and stops after %s attempts', async (code, expectedAttempts) => {
+	const { root, paths, env } = await fixture();
+	try {
+		await installSystemScripts(env, HOOK_SCRIPT);
+		const file = systemProviders(paths).codex.file;
+		await mkdir(path.dirname(file), { recursive: true });
+		await writeFile(file, '{"user":"KEEP"}');
+		let attempts = 0;
+		const fail = async () => {
+			attempts++;
+			race.beforeRename = fail;
+			throw Object.assign(new Error('replacement failed'), { code });
+		};
+		race.beforeRename = fail;
+		await expect(installSystemHooks('codex', paths, env, HOOK_SCRIPT)).rejects.toMatchObject({ code });
+		expect(attempts).toBe(expectedAttempts);
+		expect(await readFile(file, 'utf8')).toBe('{"user":"KEEP"}');
+		expect(await readdir(path.dirname(file))).toEqual(['hooks.json']);
+	} finally { await rm(root, { recursive: true, force: true }); }
+});
 
 test('two installers backing up in the same moment both succeed, and each user config is kept', async () => {
 	for (let round = 0; round < 12; round++) {

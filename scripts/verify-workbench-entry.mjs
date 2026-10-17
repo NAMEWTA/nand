@@ -27,11 +27,12 @@ test('the shell UI only consumes contracts, the design system and shared code', 
 	}
 });
 
-test('only the workbench and the comments panel are registered views', () => {
+test('only the workbench, comments and navigator panels are registered views', () => {
 	const registered = new Set();
 	for (const path of files) {
 		for (const match of fs.readFileSync(path, 'utf8').matchAll(/registerView\(\s*([A-Z_]+)/g)) registered.add(match[1]);
 	}
-	assert.deepEqual([...registered].sort(), ['COMMENTS_VIEW_TYPE', 'WORKBENCH_VIEW_TYPE']);
+	assert.deepEqual([...registered].sort(), ['COMMENTS_VIEW_TYPE', 'NAVIGATOR_VIEW_TYPE', 'WORKBENCH_VIEW_TYPE']);
 	assert.match(fs.readFileSync('src/app/workbench/comments-leaf.ts', 'utf8'), /COMMENTS_VIEW_TYPE = 'nand-comments-view'/);
+	assert.match(fs.readFileSync('src/app/workbench/navigator-leaf.ts', 'utf8'), /NAVIGATOR_VIEW_TYPE = 'nand-navigator-view'/);
 });
