@@ -7,8 +7,10 @@ import { TerminalSession, type Activity, type SessionColors, type SessionKind } 
 
 export interface TerminalHost {
 	app: App;
-	/** Vault-owned home, cache and temporary directories for helper and shell processes. */
+	/** Variables added to the real user environment for helper and shell processes (login-shell PATH on a desktop-icon launch). */
 	environment(): Promise<Record<string, string>>;
+	/** Real user home, used when no environment names one. */
+	home?(): string;
 	version: string;
 	/** `process.platform` of the desktop app. */
 	platform: string;
@@ -174,7 +176,7 @@ export class TerminalSessions {
 		const settings = this.host.settings();
 		const sid = this.nextSid++;
 		const session = new TerminalSession({
-			home: request.env?.HOME ?? environment.HOME,
+			home: request.env?.HOME ?? environment.HOME ?? this.host.home?.(),
 			id: `terminal-${crypto.randomUUID()}`,
 			sid,
 			kind: request.kind,

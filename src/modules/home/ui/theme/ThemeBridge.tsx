@@ -8,6 +8,7 @@ import type { DashboardSettings } from '../../core/board/types';
 import type { BoardStore } from '../../services/board-store';
 
 const Appearance = createContext<{ host: HomeHost; settings: DashboardSettings } | null>(null);
+/** Decor overrides only (background image, blur, opacity, radius); colors come from NAND's global tokens. */
 export function useDashboardAppearance(mirrorBoard = false) {
 	const value = useContext(Appearance),
 		ref = useRef<HTMLDivElement>(null);
@@ -25,18 +26,17 @@ export function useDashboardAppearance(mirrorBoard = false) {
 			applyAppearance(el, value.host.app, value.settings);
 			const computed = root && el.ownerDocument.defaultView?.getComputedStyle(root);
 			if (computed) {
-				for (const name of Array.from(computed))
-					if (name.startsWith('--db-')) el.style.setProperty(name, computed.getPropertyValue(name));
+				for (const name of ['--db-radius-sm', '--db-radius-md', '--db-radius-lg', '--db-backdrop-blur'])
+					if (root.style.getPropertyValue(name)) el.style.setProperty(name, computed.getPropertyValue(name));
 			}
 		};
 		refresh();
-		// Mirrored inline tokens must follow a theme switch while the portal stays open.
+		// Live appearance edits rewrite the board root's inline overrides while a portal stays open.
 		const observer =
-			mirrorBoard && el.ownerDocument.defaultView
+			root && el.ownerDocument.defaultView
 				? new el.ownerDocument.defaultView.MutationObserver(refresh)
 				: undefined;
-		observer?.observe(el.ownerDocument.body, { attributes: true, attributeFilter: ['class'] });
-		if (root) observer?.observe(root, { attributes: true, attributeFilter: ['class', 'style', 'data-theme'] });
+		if (root) observer?.observe(root, { attributes: true, attributeFilter: ['style'] });
 		return () => {
 			observer?.disconnect();
 			el.querySelectorAll(':scope > .nand-dashboard-bg').forEach((node) => node.remove());
@@ -44,32 +44,25 @@ export function useDashboardAppearance(mirrorBoard = false) {
 	}, [value, mirrorBoard]);
 	return ref;
 }
-const Theme = createContext('mono');
-const Layout = createContext('side');
+export type DashboardLayoutKind = 'canvas' | 'mobile';
+const Layout = createContext<string>('canvas');
 export const useDashboardLayout = (): string => useContext(Layout);
-export const useDashboardTheme = (): string => useContext(Theme);
 export function ThemeBridge({ store, children, layout }: { store: BoardStore; children: ReactNode; layout: string }) {
 	const settings = useStore(store.state, (s) => s.settings);
 	return (
 		<Appearance value={{ host: store.host, settings }}>
-			<Theme value={settings.stylePreset}>
-				<Layout value={layout}>
-					<AppearanceRoot
-						className={`nand-dashboard-root relative isolate flex h-full min-h-0 flex-col overflow-hidden bg-background text-foreground ${layout === 'immersive' ? immersiveClasses : ''}`}
-						data-theme={settings.stylePreset}
-						data-layout={layout}
-						data-dashboard-layout={layout}
-						data-theme-font={settings.useThemeFont}
-					>
-						{children}
-					</AppearanceRoot>
-				</Layout>
-			</Theme>
+			<Layout value={layout}>
+				<AppearanceRoot
+					className={`nand-dashboard-root relative isolate flex h-full min-h-0 flex-col overflow-hidden bg-background text-foreground ${immersiveClasses}`}
+					data-layout={layout}
+					data-dashboard-layout={layout}
+					data-theme-font={settings.useThemeFont}
+				>
+					{children}
+				</AppearanceRoot>
+			</Layout>
 		</Appearance>
 	);
-}
-export function dashboardThemeProps(theme: string) {
-	return { 'data-theme': theme, 'data-dashboard-theme': theme, className: 'nand-dashboard-root' };
 }
 
 function AppearanceRoot(props: import('react').ComponentProps<'div'>) {
@@ -86,9 +79,5 @@ export function DashboardAppearanceProvider({
 	settings: DashboardSettings;
 	children: ReactNode;
 }) {
-	return (
-		<Appearance value={{ host, settings }}>
-			<Theme value={settings.stylePreset}>{children}</Theme>
-		</Appearance>
-	);
+	return <Appearance value={{ host, settings }}>{children}</Appearance>;
 }

@@ -3,6 +3,7 @@ import { CONTENT_ROOT, contentPath, isContentPath } from '../../../shared/storag
 import { validateNandPath } from '../../../shared/storage/nand-paths';
 import { ensureDirectory } from '../../../shared/storage/durable-state';
 import { storageWriteQueue } from '../../../shared/storage/write-queue';
+import { reissueIfStalled } from '../../../shared/storage/stall-guard';
 import { privateVaultStorage } from './private-storage';
 import { patchFrontmatter, readMarkdownDocument, readYaml } from '../../../shared/storage/markdown-document';
 import { stringify } from 'yaml';
@@ -127,18 +128,20 @@ export class ContentFiles {
 			await this.moves.load();
 			await this.moves.recover((path, before, after) => this.checkEditor(path, before, undefined, after));
 			const adapter = this.app.vault.adapter, storage = privateVaultStorage(this.app);
+			// The scan holds the mutation queue, so a dropped read is issued again rather than awaited forever.
+			const exists = (path: string) => reissueIfStalled('exists', () => storage.exists(path));
 			const next = new Map<string, ManagedFile>();
 			const directories = new Set<string>();
 			const visit = async (directory: string): Promise<void> => {
 				validateNandPath(directory);
-				if (!await storage.exists(directory)) return;
+				if (!await exists(directory)) return;
 				directories.add(directory);
-				const entries = await adapter.list(directory);
+				const entries = await reissueIfStalled('list', () => adapter.list(directory));
 				for (const path of entries.files) {
 					validateNandPath(path);
 					if (!path.startsWith(directory + '/') || !isContentPath(path)) throw new Error('nand-content.invalid-index');
-					await storage.exists(path);
-					const stat = await adapter.stat(path);
+					await exists(path);
+					const stat = await reissueIfStalled('stat', () => adapter.stat(path));
 					if (!stat) continue;
 					if (stat.type !== 'file') throw new Error('nand-content.invalid-index');
 					const name = path.split('/').at(-1)!;

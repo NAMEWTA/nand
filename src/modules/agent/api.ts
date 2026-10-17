@@ -117,6 +117,25 @@ export const AGENT_DISPATCH = serviceKey<AgentDispatch>('agent', 'dispatch');
 export type { AgentUsage, UsageSnapshot } from '../../app/contracts/workbench';
 export const AGENT_USAGE = serviceKey<import('../../app/contracts/workbench').AgentUsage>('agent', 'usage');
 
+/** A terminal quick command as other modules list it; the command text itself stays in the agent module. */
+export interface AgentQuickCommandInfo {
+	id: string;
+	name: string;
+	type: 'terminal' | 'agent';
+	scope: 'global' | 'vault';
+	/** The agent an `agent` command starts. */
+	agentId?: AgentId;
+}
+/** The agent module's saved terminal quick commands (service `agent.quick-commands`). */
+export interface AgentQuickCommands {
+	list(): readonly AgentQuickCommandInfo[];
+	/** Run `listener` when the saved commands change; returns the unsubscribe function. */
+	subscribe(listener: () => void): () => void;
+	/** Open a terminal or agent session and type the command into it. Rejects when the command no longer exists. */
+	run(id: string): Promise<void>;
+}
+export const AGENT_QUICK_COMMANDS = serviceKey<AgentQuickCommands>('agent', 'quick-commands');
+
 /** Read-only SQLite access for user-initiated browser Cookie snapshot imports. */
 export interface NativeHelperSqlite {
  readCookies(path: string, kind: 'chromium' | 'firefox', signal?: AbortSignal): Promise<{ rows: Array<Record<string, unknown>> }>;

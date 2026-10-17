@@ -1,6 +1,6 @@
 // Layout and interaction adapted from PandoraReads/apex-dashboard ac4d2c7 (MIT), Copyright (c) 2025 PandoraReads: src/widget-background.ts
 import { p2Classes } from '../theme/p2-classes';
-import { useLayoutEffect, useRef, type CSSProperties, type ReactNode } from 'react';
+import { type CSSProperties, type ReactNode } from 'react';
 import { useStore } from 'zustand';
 import type { BoardStore } from '../../services/board-store';
 import { useImage } from '../board/hooks';
@@ -26,9 +26,9 @@ export function useWidgetBackground(
 	if (!bg || !url) return { className: '', style: {}, layer: null };
 	const fg =
 		bg.foreground === 'light'
-			? '#ffffff'
+			? 'var(--on-image)'
 			: bg.foreground === 'dark'
-				? '#111111'
+				? 'var(--scrim)'
 				: /^#[0-9a-f]{3,8}$/i.test(bg.foreground ?? '')
 					? bg.foreground
 					: undefined;
@@ -60,12 +60,12 @@ export function useWidgetBackground(
 							transform: `scale(${1 + clamp(bg.blur, 20) * 0.05})`,
 						}}
 					/>
-					<div className="absolute inset-0 bg-black" style={{ opacity: clamp(bg.dim, 100) / 100 }} />
+					<div className="absolute inset-0 bg-[var(--scrim)]" style={{ opacity: clamp(bg.dim, 100) / 100 }} />
 				</div>
 				{kind !== 'quickActions' && (
 					<div
 						aria-hidden
-						className="dashboard-widget-frame pointer-events-none absolute inset-[6px] -z-10 rounded-[calc(var(--db-radius-md,10px)-4px)] border border-[color-mix(in_srgb,var(--db-accent)_28%,transparent)] bg-[color-mix(in_srgb,var(--db-bg-card)_65%,transparent)] shadow-[inset_0_1px_0_rgb(255_255_255/.16),0_2px_10px_rgb(0_0_0/.14)] backdrop-blur-[7px] backdrop-saturate-[1.15]"
+						className="dashboard-widget-frame pointer-events-none absolute inset-[6px] -z-10 rounded-[calc(var(--db-radius-md,10px)-4px)] border border-[color-mix(in_srgb,var(--db-accent)_28%,transparent)] bg-[color-mix(in_srgb,var(--db-bg-card)_65%,transparent)] shadow-[inset_0_1px_0_color-mix(in_srgb,var(--on-image)_16%,transparent),0_2px_10px_color-mix(in_srgb,var(--scrim)_14%,transparent)] backdrop-blur-[7px] backdrop-saturate-[1.15]"
 					/>
 				)}
 			</>
@@ -81,31 +81,11 @@ export function ImmersiveWidgetFrame({
 	kind: string;
 	children: ReactNode;
 }) {
-	const background = useWidgetBackground(store, kind),
-		ref = useRef<HTMLDivElement>(null);
-	useLayoutEffect(() => {
-		const title = ref.current?.querySelector<HTMLElement>(
-			'h3, .dashboard-sidebar-anniversary-title, .dashboard-sidebar-year-progress-header',
-		);
-		if (!title) return;
-		const previous = ['data-grid-action', 'tabindex', 'role'].map(
-			(name) => [name, title.getAttribute(name)] as const,
-		);
-		title.dataset.gridAction = 'move';
-		title.tabIndex = 0;
-		title.setAttribute('role', 'button');
-		return () => {
-			for (const [name, value] of previous) {
-				if (value === null) title.removeAttribute(name);
-				else title.setAttribute(name, value);
-			}
-		};
-	}, [kind]);
+	const background = useWidgetBackground(store, kind);
 	return (
 		<div
-			ref={ref}
 			className={p2Classes(
-				`dashboard-sidebar-widget ${kind === 'album' ? 'p-0 h-full' : 'p-3'} ${kind === 'music' ? 'dashboard-sidebar-music' : ''} ${background.className}`,
+				`dashboard-sidebar-widget h-full ${kind === 'album' ? 'p-0' : 'p-3'} ${kind === 'music' ? 'dashboard-sidebar-music' : ''} ${background.className}`,
 			)}
 			style={background.style}
 		>

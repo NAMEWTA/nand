@@ -122,8 +122,8 @@ type Tone = { text: string; background: string };
 test('archive text and paper differ in light and dark', async () => {
 	const measured = await chrome<{ light: Tone; dark: Tone }>(`<!doctype html>
 <html><head><link rel="stylesheet" href="${styles}"></head>
-<body class="theme-light">
-<div class="nand-ui bg-background text-foreground" data-palette="orca" data-p9-archive><button class="text-foreground" data-p9-row>王</button></div>
+<body class="theme-light" data-nand-palette="orca">
+<div class="nand-ui bg-background text-foreground" data-p9-archive><button class="text-foreground" data-p9-row>王</button></div>
 <pre id="out"></pre>
 <script>
 function tone() {

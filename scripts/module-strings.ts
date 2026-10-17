@@ -9,10 +9,11 @@ import { messages as automations } from '../src/modules/automations/i18n';
 import { messages as comments } from '../src/modules/comments/i18n';
 import { messages as home } from '../src/modules/home/i18n';
 import { messages as icons } from '../src/modules/icons/i18n';
+import { messages as navigator } from '../src/modules/navigator/i18n';
 import { messages as notifications } from '../src/modules/notifications/i18n';
 import { messages as sync } from '../src/modules/sync/i18n';
 import { messages as automationStrings } from '../src/shared/i18n/lazy/automation';
 import { messages as browserStrings } from '../src/shared/i18n/lazy/browser';
 import { messages as commonStrings } from '../src/shared/i18n/lazy/common';
 
-for (const messages of [uiStrings, automationStrings, browserStrings, commonStrings, agent, archives, automations, browser, comments, home, icons, notifications, sync]) registerMessages(messages);
+for (const messages of [uiStrings, automationStrings, browserStrings, commonStrings, agent, archives, automations, browser, comments, home, icons, navigator, notifications, sync]) registerMessages(messages);

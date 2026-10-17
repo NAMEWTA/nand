@@ -11,12 +11,14 @@ import {
 	AGENT_SKILLS,
 	AGENT_WORKBENCH,
 	AGENT_USAGE,
+	AGENT_QUICK_COMMANDS,
 } from './api';
 import { messages } from './i18n';
 import { messages as automationStrings } from '../../shared/i18n/lazy/automation';
 import { messages as commonStrings } from '../../shared/i18n/lazy/common';
 import type { AgentController } from './services/controller';
 import { createAgentDispatch } from './services/prompt-port';
+import { quickCommandsPort } from './services/quick-commands-port';
 import { sessionMaterialPort } from './services/session-material';
 import { agentWorkbench } from './services/workbench';
 import { cookieClient } from './platform/desktop/server/cookie-client';
@@ -69,6 +71,7 @@ export default function createAgentModule(context: ModuleContext): ModuleInstanc
 									[AGENT_PROMPT_RUNNER, current.prompts] as const,
 									[AGENT_DIRECTORY, { list: () => current.runtime.listAgents() }] as const,
 									[AGENT_DISPATCH, dispatch!] as const,
+									[AGENT_QUICK_COMMANDS, quickCommandsPort(current, settings)] as const,
 								]
 							: []),
 					]

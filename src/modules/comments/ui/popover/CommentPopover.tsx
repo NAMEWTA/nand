@@ -1,7 +1,7 @@
 // Adapted from jonaas-dev/obsidian-margin-comments f727e38 (MIT), Copyright (c) 2026 jonaas-dev: src/ui/thread-popover.ts, src/editor/bottom-sheet.ts
 import { useCallback, useMemo, useRef } from 'react';
 import { useStore } from 'zustand';
-import { Platform } from 'obsidian';
+import { Notice, Platform } from 'obsidian';
 import { Pin, X } from 'lucide-react';
 import type { CommentsEnv } from '../env';
 import type { OverlayChannel } from '../../services/overlay';
@@ -31,7 +31,7 @@ export function CommentPopover({ env, channel }: { env: CommentsEnv; channel: Ov
 		event.preventDefault();
 		content.current?.querySelectorAll('form').forEach(form => form.dispatchEvent(new request.ownerDocument.defaultView!.Event('nand-comment-cancel')));
 	};
-	const body = request.mode === 'selection' ? <Button size="xs" variant="secondary" onClick={() => channel.open({ ...request, mode: 'compose', pinned: true })}>{t('editor.comments.popover')}</Button> : request.mode === 'compose' && request.anchor ? <Composer app={env.app} key={`${request.path}:${request.anchor.start}:${request.anchor.end}`} onCancel={close} onSubmit={async (text, key) => {
+	const body = request.mode === 'selection' ? <Button size="xs" variant="secondary" onMouseDown={event => event.preventDefault()} onClick={() => { if (!channel.open({ ...request, mode: 'compose', pinned: true })) new Notice(t('editor.comments.draftBusy')); }}>{t('editor.comments.popover')}</Button> : request.mode === 'compose' && request.anchor ? <Composer app={env.app} key={`${request.path}:${request.anchor.start}:${request.anchor.end}`} onCancel={close} onSubmit={async (text, key) => {
 		await env.service.add(key, request.path, { anchor: request.anchor!, text }); close();
 	}}><div className="text-2xs text-muted-foreground">{t('editor.comments.author')}: {env.service.settings().author || <Button size="xs" variant="link" onClick={() => env.openSettings()}>{t('editor.comments.setAuthor')}</Button>}</div></Composer> : <>
 		<div className="mb-2 flex items-center justify-between text-xs text-muted-foreground"><span>{t('editor.comments.title')} ({request.threadIds?.length ?? 0})</span><div className="flex gap-2"><Action label={t(request.pinned ? 'editor.comments.pinned' : 'editor.comments.pin')} onClick={() => channel.pin()}><Pin /></Action><Action label={t('editor.comments.close')} onClick={close}><X /></Action></div></div>
@@ -43,7 +43,7 @@ export function CommentPopover({ env, channel }: { env: CommentsEnv; channel: Ov
 		<PopoverAnchor virtualRef={virtualRef} />
 		<PopoverContent aria-label={t('editor.comments.title')} ref={content} data-comments-overlay={request.mode} data-position-revision={revision} side={request.mode === 'selection' ? 'top' : 'right'} align="start" sideOffset={8} collisionPadding={12}
 			className={request.mode === 'selection' ? 'p-0' : 'w-[360px] max-w-[calc(100vw-24px)] max-h-[min(480px,70vh)] overflow-y-auto p-3'}
-			onOpenAutoFocus={event => { if (request.mode !== 'compose') event.preventDefault(); }} onCloseAutoFocus={event => { event.preventDefault(); request.focus?.(); }}
+			onOpenAutoFocus={event => { if (request.mode !== 'compose') event.preventDefault(); }} onCloseAutoFocus={event => { event.preventDefault(); if (request.mode !== 'selection') request.focus?.(); }}
 			onPointerOver={() => channel.setHovered(true)} onPointerLeave={() => { channel.setHovered(false); channel.scheduleClose(); }} onEscapeKeyDown={escape}
 			onInteractOutside={event => { if (channel.state.getState().draft) event.preventDefault(); }}>
 			{body}

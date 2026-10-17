@@ -11,10 +11,8 @@ import {
 } from 'react';
 import { flushSync } from 'react-dom';
 import type {
-	AgentUsage,
 	PageChrome,
 	PanelModel,
-	StatusBarPreferences,
 	StatusSegment,
 	WorkbenchFeature,
 	WorkbenchTarget,
@@ -31,7 +29,6 @@ import { PageSlot } from './page/PageSlot';
 import { ResourceTabs, type ResourceTabsProps } from './page/ResourceTabs';
 import { Rail, type RailItem } from './rail/Rail';
 import { SidePanel } from './panel/SidePanel';
-import { StatusBar } from './status-bar/StatusBar';
 import { ShellInteractionContext } from './interaction-lifetime';
 export interface ShellProps {
 	visible?: boolean;
@@ -45,9 +42,6 @@ export interface ShellProps {
 	chrome?: PageChrome;
 	tabs?: ResourceTabsProps;
 	statuses: readonly StatusSegment[];
-	statusBar: StatusBarPreferences;
-	usage?: AgentUsage;
-	setStatusBar: (preferences: StatusBarPreferences) => void;
 	busy: boolean;
 	error?: string;
 	unavailable?: { message: string; action?: { label: string; run: () => void } };
@@ -329,17 +323,6 @@ export function ShellRoot(props: ShellProps) {
 						<PageSlot contentRef={props.contentRef} />
 					</PageFrame>
 				</div>
-				{visible && !props.mobile && props.statusBar.visible && (
-					<StatusBar
-						key={`status-${generation}`}
-						preferences={props.statusBar}
-						onPreferences={props.setStatusBar}
-						segments={props.statuses}
-						usage={props.usage}
-						navigate={navigate}
-						report={props.report}
-					/>
-				)}
 				{/* Keep the visible rail inside the same focus scope as the drawer in both overlay layouts.
 			    A stable modal Content also preserves focus and panel state across breakpoint changes. */}
 				{visible && (
@@ -396,17 +379,7 @@ export function ShellRoot(props: ShellProps) {
 							<SheetTitle className="sr-only">{props.panelTitle}</SheetTitle>
 							<SheetDescription className="sr-only">{t('workbench.navigation')}</SheetDescription>
 							<div ref={overlayRoot} className="flex h-full min-h-0" onKeyDown={keyboard}>
-								<div
-									className="flex shrink-0"
-									style={{
-										height:
-											layout === 'medium' && !props.mobile && props.statusBar.visible
-												? bounds.height - 24
-												: '100%',
-									}}
-								>
-									{rail}
-								</div>
+								<div className="flex h-full shrink-0">{rail}</div>
 								<div className="min-w-0 flex-1">
 									{hasPanel ? (
 										panel(() => setOverlay(false))

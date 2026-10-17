@@ -221,6 +221,23 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
 --------------------------------------------------------------------------------
+Notes navigator (Navigator module)
+--------------------------------------------------------------------------------
+
+The two-pane notes navigator (src/modules/navigator) models its behavior on the
+public documentation and observable behavior of Notebook Navigator.
+
+Notebook Navigator
+https://github.com/johansan/notebook-navigator
+Licensed under the GNU General Public License v3.0.
+Only behavior was referenced (pane structure, keyboard table, search filter
+syntax, calendar and periodic notes, template tokens, create-note commands,
+vault profiles, merge notes and tag operations). No source code, comments or
+style text of Notebook Navigator is included in NAND; the module is an
+independent implementation in NAND's architecture and remains MIT licensed.
+Reference scope: docs/third-party/notebook-navigator.md.
+
+--------------------------------------------------------------------------------
 Geist and Geist Mono fonts (1.7.2)
 --------------------------------------------------------------------------------
 

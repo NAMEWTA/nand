@@ -176,7 +176,7 @@ test('edge scrolling repeats on the owner window and stops on drop', () => {
 	assert.equal(b.saves.length, 1);
 });
 
-test('fit and 6/3-column resize are read-only, cancel a pending gesture and retain canonical positions', () => {
+test('fit and 6/1-column resize are read-only, cancel a pending gesture and retain canonical positions', () => {
 	const b = board(false);
 	assert.equal(b.box().style.gridRow, '1 / span 7');
 	assert.equal(b.saves.length, 0);
@@ -187,8 +187,8 @@ test('fit and 6/3-column resize are read-only, cancel a pending gesture and reta
 	assert.equal(b.saves.length, 0);
 	assert.equal(b.control().hasAttribute('disabled'), true);
 	b.resize(400);
-	assert.equal(b.grid.dataset.columns, '3');
-	assert.match(b.box().style.gridColumn, /span 3/);
+	assert.equal(b.grid.dataset.columns, '1');
+	assert.match(b.box().style.gridColumn, /span 1/);
 	b.resize(1200);
 	assert.equal(b.box().style.gridColumn, '1 / span 6');
 	assert.equal(b.box('b').style.gridColumn, '7 / span 3');
@@ -230,14 +230,30 @@ test('absolute toolbar does not inflate content fit or persist measured height',
 	assert.equal(b.saves.length, 0);
 });
 test('actual title control moves by pointer and keyboard, while adjacent controls and Escape never save', () => {
-	const b=board();
-	const header=document.createElement('h3');
-	header.innerHTML='<button data-grid-action="move">Data</button><button>Edit</button>';
+	const b = board();
+	const header = document.createElement('h3');
+	header.innerHTML = '<button data-grid-action="move">Data</button><button>Edit</button>';
 	b.box().querySelector('.nand-immersive-content')!.prepend(header);
-	const title=header.querySelector('button')!;
-	pointer(title,'pointerdown',10,10);pointer(title,'pointermove',10,110);pump();
-	assert.equal(b.saves.length,0);pointer(title,'pointerup',10,110);assert.equal(b.saves.length,1);
-	key(title,' ');key(title,'ArrowDown');key(title,'Enter');assert.equal(b.saves.length,2);
-	key(title,'Enter');key(title,'ArrowDown');key(title,'Escape');assert.equal(b.saves.length,2);
-	const edit=header.querySelectorAll('button')[1]!;pointer(edit,'pointerdown',10,10);pointer(edit,'pointerup',10,110);key(edit,'Enter');key(edit,'ArrowDown');key(edit,'Enter');assert.equal(b.saves.length,2);
+	const title = header.querySelector('button')!;
+	pointer(title, 'pointerdown', 10, 10);
+	pointer(title, 'pointermove', 10, 110);
+	pump();
+	assert.equal(b.saves.length, 0);
+	pointer(title, 'pointerup', 10, 110);
+	assert.equal(b.saves.length, 1);
+	key(title, ' ');
+	key(title, 'ArrowDown');
+	key(title, 'Enter');
+	assert.equal(b.saves.length, 2);
+	key(title, 'Enter');
+	key(title, 'ArrowDown');
+	key(title, 'Escape');
+	assert.equal(b.saves.length, 2);
+	const edit = header.querySelectorAll('button')[1]!;
+	pointer(edit, 'pointerdown', 10, 10);
+	pointer(edit, 'pointerup', 10, 110);
+	key(edit, 'Enter');
+	key(edit, 'ArrowDown');
+	key(edit, 'Enter');
+	assert.equal(b.saves.length, 2);
 });

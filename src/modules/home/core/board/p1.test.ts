@@ -3,7 +3,6 @@ import { parse, serialize } from './parser/parse';
 import { splitFrontmatter } from './parser/generate-default-markdown';
 import { boardTileSources, boardTiles, persistedBoardTiles } from './board-tiles';
 import { readPmConfig, readSkillsConfig } from './p1-config';
-import { normalizeCustomColors, captureAppearanceSnapshot, customThemeSettingsSlice } from './custom-theme';
 import { DEFAULT_DASHBOARD_SETTINGS } from './types/model';
 import { parseProjectBody, insertProjectTask, projectBodyTemplate, removeProjectTask } from '../pm/body';
 import { togglePipelineTask } from '../pipeline/rules';
@@ -54,29 +53,6 @@ test('project milestones and todos preserve line identity and refuse stale task 
 	expect(parseProjectBody(added).todos.map((t) => t.text)).toEqual(['Finish', 'Review']);
 	expect(added).toContain('## Personal\nUntouched');
 	expect(removeProjectTask(added, 0)).toBe(added);
-});
-
-test('appearance snapshots clone color maps and restore all owned appearance fields', () => {
-	const settings = {
-		...DEFAULT_DASHBOARD_SETTINGS,
-		customColors: { accent: '#abcdef' },
-		bgImage: 'Assets/test.png',
-		bgBlur: 8,
-	};
-	const snapshot = { ...captureAppearanceSnapshot(settings), id: 'mine', name: 'Mine' };
-	settings.customColors.accent = '#111111';
-	expect(snapshot.colors.accent).toBe('#abcdef');
-	const restored = customThemeSettingsSlice(snapshot);
-	expect(restored).toMatchObject({
-		activeCustomThemeId: 'mine',
-		bgImage: 'Assets/test.png',
-		bgBlur: 8,
-		customColors: { accent: '#abcdef' },
-	});
-	expect(normalizeCustomColors({ accent: 'url(secret)', text: 'dark', bg: '#123456', unknown: '#abcdef' })).toEqual({
-		text: 'dark',
-		bg: '#123456',
-	});
 });
 
 test('P1 config readers bound settings and reject malformed collection entries', () => {

@@ -3,7 +3,7 @@ import type { ComponentProps } from 'react';
 import { Button } from '../../../../ui/components/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '../../../../ui/components/tooltip';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '../../../../ui/components/select';
-import { useDashboardLayout, useDashboardTheme } from '../theme/ThemeBridge';
+import { useDashboardLayout } from '../theme/ThemeBridge';
 export function IconButton({ label, ...props }: ComponentProps<typeof Button> & { label: string }) {
 	return (
 		<Tooltip>
@@ -29,8 +29,7 @@ export function Choice({
 	label: string;
 	options: readonly { value: string; label: string }[];
 }) {
-	const theme = useDashboardTheme(),
-		layout = useDashboardLayout();
+	const layout = useDashboardLayout();
 	return (
 		<Select value={value} onValueChange={onChange}>
 			<SelectTrigger
@@ -43,12 +42,7 @@ export function Choice({
 			>
 				<SelectValue />
 			</SelectTrigger>
-			<SelectContent
-				className="nand-dashboard-root"
-				data-theme={theme}
-				data-dashboard-layout={layout}
-				data-dashboard-theme={theme}
-			>
+			<SelectContent className="nand-dashboard-root" data-dashboard-layout={layout}>
 				{options.map((option) => (
 					<SelectItem key={option.value} value={option.value}>
 						{option.label}

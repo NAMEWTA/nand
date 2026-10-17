@@ -5,7 +5,8 @@ import type { App } from 'obsidian';
 import type { AgentId, AgentSettings } from '../../core/launch/types';
 import { t } from '../../../../shared/i18n/index';
 import { JsonStore } from '../../../../shared/json-store';
-import { accountEnv } from '../desktop/agents/accounts';
+import { accountEnv, historyAccountEnv } from '../desktop/agents/accounts';
+import { accountPaths, historyBase, historySource, isSystemAccount } from '../desktop/agents/system-homes';
 import { legacyReferences } from '../desktop/agents/legacy-references';
 import { AGENT_CATALOG } from '../../core/launch/catalog';
 import { readHistoryDetails } from '../desktop/history/details';
@@ -23,6 +24,14 @@ interface SharedRead<T> {
 	abort: AbortController;
 	consumers: number;
 	settled: boolean;
+}
+/** The provider directories a system account may read; the helper accepts a system session only inside one of them. */
+function systemBases(roots: ReadonlyArray<{ systemBase?: string }>): string[] {
+	return [...new Set(roots.flatMap(root => root.systemBase ? [root.systemBase] : []))];
+}
+/** The history sources of system accounts, which the helper must also see named before trusting an indexed row. */
+function systemRoots(roots: ReadonlyArray<{ path: string; systemBase?: string }>): string[] {
+	return [...new Set(roots.flatMap(root => root.systemBase ? [root.path] : []))];
 }
 function checkCancelled(signal?: AbortSignal): void {
 	if (signal?.aborted) throw new Error('History request cancelled');
@@ -193,20 +202,15 @@ export class NativeHistory {
 		const scope = await this.scope(), roots = [], warnings: string[] = [], aliases = new Map<string, string>();
 		for (const agent of AGENT_CATALOG) for (const name of new Set(['',settings.agents[agent.id].accountId,...(accounts[agent.id] ?? [])])) {
 			try {
-			const env = await accountEnv(agent, name, scope.vault, getDeviceId(this.app));
-			const sources = {
-				'claude-code': path.join(env.CLAUDE_CONFIG_DIR!, 'projects'),
-				codex: path.join(env.CODEX_HOME!, 'sessions'),
-				gemini: path.join(env.GEMINI_CLI_HOME!, '.gemini', 'tmp'),
-				pi: env.PI_CODING_AGENT_SESSION_DIR!,
-				grok: path.join(env.GROK_HOME!, 'sessions'),
-				opencode: path.join(env.XDG_DATA_HOME!, 'opencode', 'opencode.db'),
-			};
-			const source = await absoluteNandPath(scope.vault, path.relative(scope.vault, sources[agent.id]).split(path.sep).join('/'));
-			roots.push({ agentId: agent.id, path: source, accountKey: JSON.stringify(env) });
-			const references = await legacyReferences(scope.vault, getDeviceId(this.app), agent.id);
-			for (const reference of references) if (reference.name === env.NAND_ACCOUNT_NAME && references.filter(row => row.from === reference.from).length === 1)
-				aliases.set(JSON.stringify([agent.id, JSON.stringify(reference.env)]), JSON.stringify(env));
+			const device = getDeviceId(this.app), env = await accountEnv(agent, name, scope.vault, device), system = isSystemAccount(env);
+			const paths = accountPaths(env);
+			// A managed account's sources are confined to the vault; the system account reads the provider's own directory.
+			const source = system ? historySource(agent.id, paths) : await absoluteNandPath(scope.vault, path.relative(scope.vault, historySource(agent.id, paths)).split(path.sep).join('/'));
+			const keyEnv = await historyAccountEnv(agent, env, scope.vault, device);
+			roots.push({ agentId: agent.id, path: source, accountKey: JSON.stringify(keyEnv), ...(system ? { systemBase: historyBase(agent.id, paths) } : {}) });
+			const references = system ? [] : await legacyReferences(scope.vault, device, agent.id);
+			for (const reference of references) if (reference.name === keyEnv.NAND_ACCOUNT_NAME && references.filter(row => row.from === reference.from).length === 1)
+				aliases.set(JSON.stringify([agent.id, JSON.stringify(reference.env)]), JSON.stringify(keyEnv));
 			} catch (error) { warnings.push(agent.title + ': ' + (error instanceof Error ? error.message : String(error))); }
 		}
 		this.accountAliases = aliases;
@@ -254,7 +258,7 @@ export class NativeHistory {
 		if (!read || read.abort.signal.aborted) {
 			const metadata = this.mappedMetadata();
 			read = this.createRead(async sharedSignal => client.request<HistoryPage>(
-				'query', { vault: scope.vault, index: scope.index, query, offset, filter, metadata, scope: historyScope }, sharedSignal,
+				'query', { vault: scope.vault, index: scope.index, query, offset, filter, metadata, scope: historyScope, systemBases: systemBases(scope.roots), systemRoots: systemRoots(scope.roots) }, sharedSignal,
 			));
 			this.pages.set(key, read);
 			const current = read;
@@ -271,13 +275,13 @@ export class NativeHistory {
 	}
 	async read(session: NativeSessionSummary, signal?: AbortSignal): Promise<NativeSession> {
 		this.active();
-		const scope = await this.scope();
+		const scope = await this.scope(), systemBase = systemBases((await this.scanScope()).roots);
 		checkCancelled(signal);
 		return consume(this.createRead(async sharedSignal => {
 			const client = await this.service.historyClient();
 			checkCancelled(sharedSignal);
 			this.active();
-			return client.request<NativeSession>('read', { ...scope, key: session.key, scope: 'account' }, sharedSignal);
+			return client.request<NativeSession>('read', { ...scope, key: session.key, scope: 'account', systemBases: systemBase, systemRoots: systemRoots((await this.scanScope()).roots) }, sharedSignal);
 		}), signal);
 	}
  async details(session: NativeSessionSummary, text: string, signal: AbortSignal) {

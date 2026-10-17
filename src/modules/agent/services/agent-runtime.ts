@@ -124,7 +124,7 @@ export class TerminalAutomationRuntime implements AgentRuntimePort {
 	private store: JsonStore<AgentSessionRef[]>;
 	private loaded: Promise<void>;
 	constructor(private host: AutomationRuntimeHost) {
-		this.hooks = new AutomationHooks(host.app.workspace.containerEl.win, () => ({ vault: vaultPath(host.app), device: getDeviceId(host.app) }));
+		this.hooks = new AutomationHooks(host.app.workspace.containerEl.win, () => ({ vault: vaultPath(host.app), device: getDeviceId(host.app) }), { strict: true });
 		const device = getDeviceId(host.app);
 		const storage = privateVaultStorage(host.app);
 		const path = `.nand/terminal-agent/${device}/automation-sessions.json`;

@@ -5,6 +5,7 @@ import { getAgent } from '../../../core/launch/catalog';
 import type { AgentId, AgentSettings, UsageKind, UsageSnapshot, UsageWindow } from '../../../core/launch/types';
 import { t } from '../../../../../shared/i18n/index';
 import { accountEnv } from './accounts';
+import { accountPaths } from './system-homes';
 import { privatePathHasSymlink } from '../../../../../host/desktop/private-mode';
 import { ProviderReadError, ProviderUsageCache } from './usage-cache';
 
@@ -55,7 +56,7 @@ export async function readUsageSnapshots(
 		let env: Record<string, string>;
 		try { env = await accountEnv(agent, account, context.vault, context.device); }
 		catch (error) { jobs.push(safeRead(id, () => Promise.reject(error instanceof Error ? error : new Error(String(error))))); continue; }
-		const homes: Record<string, string> = { claude: env.CLAUDE_CONFIG_DIR!, codex: env.CODEX_HOME!, grok: env.GROK_HOME!, gemini: path.join(env.GEMINI_CLI_HOME!, '.gemini'), opencode: path.join(env.XDG_DATA_HOME!, 'opencode') };
+		const paths = accountPaths(env), homes: Record<string, string> = { claude: paths.CLAUDE_CONFIG_DIR, codex: paths.CODEX_HOME, grok: paths.GROK_HOME, gemini: path.join(paths.GEMINI_CLI_HOME, '.gemini'), opencode: path.join(paths.XDG_DATA_HOME, 'opencode') };
 		const home = homes[agent.usage]!;
 		const key = `${agent.usage}:${home}`;
 		const ttl = Math.max(60, context.settings.usageRefreshSec) * 1000;

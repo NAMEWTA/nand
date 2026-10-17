@@ -4,7 +4,8 @@ import { BoardStore } from '../../services/board-store';
 import { createRoot } from 'react-dom/client';
 import { ContainerProviders } from '../../../../ui/react/providers';
 import { ThemeBridge } from '../theme/ThemeBridge';
-import { WidgetDeck } from './WidgetDeck';
+import { WIDGET_COMPONENTS } from '../canvas/widget-components';
+import { ImmersiveWidgetFrame } from './WidgetBackground';
 /** Public providers use the same React widgets and lifetime as board pages. */
 export async function renderBuiltinWidget(
 	home: HomeHost,
@@ -12,9 +13,8 @@ export async function renderBuiltinWidget(
 	element: HTMLElement,
 	context: HomeWidgetContext,
 ): Promise<void> {
-	const aliases: Record<string, string> = { 'quick-actions': 'quickActions', 'year-progress': 'yearProgress' };
-	const key = aliases[kind] ?? kind,
-		id = ['album', 'anniversary', 'countdown'].includes(key) ? `${key}-${context.instanceId}` : key;
+	const Component = WIDGET_COMPONENTS[kind];
+	if (!Component) throw new Error(`Unknown home widget: ${kind}`);
 	const store = new BoardStore(home, context.boardPath, () => element.ownerDocument.defaultView ?? context.window),
 		root = createRoot(element);
 	let closed = false;
@@ -33,8 +33,13 @@ export async function renderBuiltinWidget(
 		if (!closed && !context.signal.aborted)
 			root.render(
 				<ContainerProviders container={element}>
-					<ThemeBridge store={store} layout="side">
-						<WidgetDeck store={store} only={id} />
+					<ThemeBridge store={store} layout="canvas">
+						<ImmersiveWidgetFrame store={store} kind={kind}>
+							<Component
+								store={store}
+								entryId={context.instanceId === 'default' ? undefined : context.instanceId}
+							/>
+						</ImmersiveWidgetFrame>
 					</ThemeBridge>
 				</ContainerProviders>,
 			);

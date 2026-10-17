@@ -1,5 +1,4 @@
-import { normalizeCustomColors } from './core/board/custom-theme';
-import { homeDecor } from './core/board/appearance-preset';
+import { readLegacyMembers } from './core/board/widget-members';
 import { domainSettings } from '../../shared/settings/schema';
 import { DEFAULT_DASHBOARD_SETTINGS, type DashboardSettings } from './core/board/types/model';
 import { normalizeDashboardSettings } from './core/board/settings';
@@ -8,6 +7,38 @@ import { themeSettings } from '../../theme/settings';
 
 export { seedDashboardSettings } from './core/board/settings';
 export type { DashboardSettings } from './core/board/types/model';
+
+/** Per-widget switches, board themes and layout choices of the pre-canvas board; the board file now owns all of it. */
+const RETIRED_KEYS = [
+	'stylePreset',
+	'customColors',
+	'customThemes',
+	'activeCustomThemeId',
+	'layoutMode',
+	'sidebarPinned',
+	'bannerCollapsed',
+	'habitHeightRatio',
+	'readingHeightRatio',
+	'sidebarWidth',
+	'widgetUnitHeight',
+	'widgetWeatherEnabled',
+	'pomodoroEnabled',
+	'widgetLunarEnabled',
+	'widgetYearProgressEnabled',
+	'widgetCalendarEnabled',
+	'widgetQuickCaptureEnabled',
+	'widgetFileSearchEnabled',
+	'widgetSkillsEnabled',
+	'widgetHabitEnabled',
+	'widgetExpenseEnabled',
+	'widgetAlbumEnabled',
+	'anniversaryEnabled',
+	'widgetMusicEnabled',
+	'widgetQuickActionsEnabled',
+	'widgetOrder',
+	'countdownEnabled',
+	'readingEnabled',
+];
 
 /** Settings namespace `home` (board, widgets and sections). */
 const schema = domainSettings<DashboardSettings>({
@@ -35,56 +66,6 @@ const schema = domainSettings<DashboardSettings>({
 			names: settings.workspaceNames ?? [],
 			active: settings.workspaceFiles.indexOf(settings.dashboardFile),
 		};
-		settings.stylePreset = [
-			'earth',
-			'nordic',
-			'aurora',
-			'blossom',
-			'aqua',
-			'island',
-			'tundra',
-			'matcha',
-			'mono',
-			'neon',
-			'volt',
-			'magma',
-			'onyx',
-		].includes(String(raw.stylePreset))
-			? String(raw.stylePreset)
-			: ((
-					{
-						prism: 'blossom',
-						dusk: 'aqua',
-						lilac: 'aqua',
-						sakura: 'blossom',
-						moonlight: 'nordic',
-						ember: 'magma',
-						haze: 'volt',
-						jade: 'matcha',
-						carbon: 'mono',
-					} as Record<string, string>
-				)[String(raw.stylePreset)] ?? 'mono');
-		settings.customColors = normalizeCustomColors(raw.customColors);
-		settings.customThemes = (Array.isArray(raw.customThemes) ? raw.customThemes : []).flatMap((item: unknown) => {
-			if (!item || typeof item !== 'object') return [];
-			const theme = item as Record<string, unknown>;
-			if (typeof theme.id !== 'string' || typeof theme.name !== 'string' || typeof theme.base !== 'string')
-				return [];
-			return [
-				{
-					...homeDecor(theme),
-					id: theme.id,
-					name: theme.name,
-					base: theme.base,
-					colors: normalizeCustomColors(theme.colors),
-				},
-			];
-		});
-		settings.activeCustomThemeId =
-			typeof raw.activeCustomThemeId === 'string' &&
-			settings.customThemes.some((theme) => theme.id === raw.activeCustomThemeId)
-				? raw.activeCustomThemeId
-				: undefined;
 		settings.backupEnabled = raw.backupEnabled === true;
 		settings.backupPeriod =
 			raw.backupPeriod === 'hourly' || raw.backupPeriod === 'weekly' || raw.backupPeriod === 'monthly'
@@ -106,8 +87,8 @@ const schema = domainSettings<DashboardSettings>({
 		for (const key of ['ticktickCookie', 'ticktickCsrf', 'ticktickDeviceVersion', 'ticktickTimezone'] as const)
 			settings[key] = typeof raw[key] === 'string' ? raw[key] : DEFAULT_DASHBOARD_SETTINGS[key];
 		settings.useThemeFont = raw.useThemeFont === true;
-		settings.sidebarPinned = raw.sidebarPinned === true;
-		settings.bannerCollapsed = raw.bannerCollapsed === true;
+		settings.legacyWidgetMembers = readLegacyMembers(raw);
+		for (const key of RETIRED_KEYS) delete (settings as unknown as Record<string, unknown>)[key];
 		settings.collapsedSections = Array.isArray(raw.collapsedSections)
 			? raw.collapsedSections.filter((name): name is string => typeof name === 'string')
 			: [];

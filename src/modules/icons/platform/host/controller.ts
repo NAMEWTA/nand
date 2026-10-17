@@ -50,6 +50,9 @@ import {
 	type TagItem,
 } from '../../core/types';
 
+import type { IconTarget, ResolvedIcon } from '../../api';
+import ColorUtils from '../utils/color-utils';
+import { ICONS, isEmoji } from '../resources';
 import { t } from '../../../../shared/i18n';
 import { onLanguageChanged } from '../../../../shared/i18n/index';
 import { IconicStore } from '../persistence/store';
@@ -91,6 +94,8 @@ export default class IconicController {
 	suggestionIconManager?: SuggestionIconManager;
 	suggestionDialogIconManager?: SuggestionDialogIconManager;
 	dialogCommands: Command[] = [];
+	/** Called after managers refresh, so other modules reading `resolveIcon` can redraw. */
+	onRefresh?: () => void;
 	private readonly store: IconicStore;
 	private scope?: Component;
 	private active = false;
@@ -438,6 +443,7 @@ export default class IconicController {
 
 		managers.delete(undefined);
 		for (const manager of managers) manager?.refreshIcons();
+		this.onRefresh?.();
 	}
 
 	/**
@@ -645,6 +651,25 @@ export default class IconicController {
 				tabEl: internalLeaf(leaf).tabHeaderEl ?? null,
 			};
 		}
+	}
+
+	/** The icon and CSS color for a target, as the rule book and per-item icons define them. */
+	resolveIcon(target: IconTarget): ResolvedIcon {
+		let item: { icon: string | null; color: string | null } | null = null;
+		if (this.active) {
+			if (target.kind === 'file' || target.kind === 'folder') {
+				const own = this.settings.fileIcons[target.key];
+				item = this.ruleManager?.checkRuling(target.kind, target.key) ?? (own ? { icon: own.icon ?? null, color: own.color ?? null } : null);
+			} else if (target.kind === 'tag') {
+				const own = this.settings.tagIcons[target.key];
+				item = own ? { icon: own.icon ?? null, color: own.color ?? null } : null;
+			} else {
+				const own = this.settings.propertyIcons[target.key];
+				item = own ? { icon: own.icon ?? null, color: own.color ?? null } : null;
+			}
+		}
+		if (!item || (!item.icon && !item.color)) return { icon: null, emoji: false, color: null };
+		return { icon: item.icon, emoji: !!item.icon && !ICONS.has(item.icon) && isEmoji(item.icon), color: item.color ? ColorUtils.toRgb(item.color) : null };
 	}
 
 	/**

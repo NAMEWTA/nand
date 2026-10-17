@@ -1,4 +1,5 @@
 import type { ModuleManifest } from '../../app/contracts/module';
+import { ICONS_SERVICE } from './api';
 
 export const iconsManifest: ModuleManifest = {
 	id: 'icons',
@@ -9,5 +10,6 @@ export const iconsManifest: ModuleManifest = {
 	platforms: { desktop: true, mobile: true },
 	defaultEnabled: true,
 	activation: 'startup',
+	provides: [ICONS_SERVICE],
 	load: () => import('./module'),
 };

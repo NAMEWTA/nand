@@ -11,12 +11,10 @@ import type { ContentFile } from '../../../../host/obsidian/storage/content-file
 import type { BoardStore } from '../../services/board-store';
 import { RecordButton } from '../dialogs/RecordButton';
 import { inputWidgetClasses as css } from '../theme/input-widget-classes';
-import { useDashboardTheme } from '../theme/ThemeBridge';
 import { formatRelativeTime } from '../ui/recent-time';
 
 function InputWidget({ store, search }: { store: BoardStore; search: boolean }) {
 	const t = useT(),
-		theme = useDashboardTheme(),
 		visible = useVisible();
 	const [text, setText] = useState(''),
 		[rows, setRows] = useState<ContentFile[]>([]),
@@ -58,7 +56,8 @@ function InputWidget({ store, search }: { store: BoardStore; search: boolean }) 
 		}
 		pending.current = true;
 		setBusy(true);
-		const submitted = text, revision = draftRevision.current;
+		const submitted = text,
+			revision = draftRevision.current;
 		void store
 			.capture(submitted)
 			.then(() => {
@@ -137,8 +136,6 @@ function InputWidget({ store, search }: { store: BoardStore; search: boolean }) 
 				className={css(
 					'nand-dashboard-root dashboard-filesearch-pop is-open [position:relative] md:backdrop-blur-none [font-size:inherit] [font-family:var(--db-font)] max-h-[min(280px,var(--radix-popover-content-available-height))]',
 				)}
-				data-theme={theme}
-				data-dashboard-theme={theme}
 				onOpenAutoFocus={(event) => event.preventDefault()}
 				onCloseAutoFocus={(event) => event.preventDefault()}
 			>

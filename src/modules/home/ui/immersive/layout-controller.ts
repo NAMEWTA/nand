@@ -16,12 +16,22 @@ import {
 	type LayoutGesture,
 } from '../../core/board/immersive-grid';
 
+export interface GridControllerOptions {
+	/** Gestures (drag, resize, keyboard moves, fit toggles) run only while this is true; fitting and projection always run. */
+	interactive?: () => boolean;
+	/** Reports the effective column count (12 canvas, 6 narrow, 1 phone) whenever it changes. */
+	onColumns?: (columns: number) => void;
+}
+
 /** One owner-window controller. Display measurements never enter the save callback. */
 export function attachGridController(
 	grid: HTMLElement,
 	source: readonly GridTile[],
 	save: (tiles: readonly GridTile[]) => void,
+	options: GridControllerOptions = {},
 ): () => void {
+	const interactive = () => options.interactive?.() ?? true;
+	let reported = 0;
 	const win = grid.ownerDocument.defaultView!;
 	const elements = new Map(
 		[...grid.querySelectorAll<HTMLElement>('[data-tile]')].map((el) => [el.dataset.tile!, el]),
@@ -70,6 +80,7 @@ export function attachGridController(
 		}
 		grid.parentElement!.querySelector<HTMLElement>('.nand-immersive-projection')!.hidden =
 			columns === CANONICAL_COLUMNS;
+		if (reported !== columns) options.onColumns?.((reported = columns));
 	};
 	const say = (id: string) => {
 		const tile = live.find((item) => item.id === id);
@@ -199,24 +210,17 @@ export function attachGridController(
 		if (!frame) frame = win.requestAnimationFrame(tick);
 	};
 	const action = (event: Event) => {
+		if (!interactive()) return null;
 		const target = event.target as HTMLElement | null;
 		if (target?.closest('input, textarea, select, [contenteditable="true"]')) return null;
 		const button = target?.closest('button, a, [role="button"]');
 		if (button && !button.hasAttribute('data-grid-action')) return null;
 		let control = target?.closest<HTMLElement>('[data-grid-action]');
-		if (!control && event.type.startsWith('pointer')) {
-			const candidate = target?.closest('.dashboard-section-header, .dashboard-card-header');
-			const header =
-				candidate?.classList.contains('dashboard-card-header') &&
-				!candidate.closest('.dashboard-card')?.parentElement?.classList.contains('nand-immersive-content')
-					? null
-					: candidate;
-			const widget = target?.closest<HTMLElement>('[data-widget-key][data-tile]');
-			const tile =
-				header?.closest<HTMLElement>('[data-tile]') ??
-				(widget && (event as PointerEvent).clientY - widget.getBoundingClientRect().top <= 44 ? widget : null);
-			control = tile?.querySelector<HTMLElement>('[data-grid-action="move"]');
-		}
+		// Editing: grabbing the tile anywhere moves it.
+		if (!control && event.type.startsWith('pointer'))
+			control =
+				target?.closest<HTMLElement>('[data-tile]')?.querySelector<HTMLElement>('[data-grid-action="move"]') ??
+				null;
 		return control && grid.contains(control) ? control : null;
 	};
 	const down = (event: PointerEvent) => {

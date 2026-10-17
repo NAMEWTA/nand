@@ -9,6 +9,7 @@ export function settingsCategories(plugin: DashboardPlugin): Array<{ id: string;
 		dashboard: { labelKey: 'settings.productDashboard', icon: 'layout-dashboard' },
 		browser: { labelKey: 'browser.title', icon: 'globe' },
 		editor: { labelKey: 'settings.productEditor', icon: 'message-square' },
+		navigator: { labelKey: 'modules.navigator', icon: 'notebook-tabs' },
 		terminal: { labelKey: 'settings.productTerminal', icon: 'terminal' },
 		iconic: { labelKey: 'modules.iconic', icon: 'images' },
 		contacts: { labelKey: 'contacts.title', icon: 'contact-round' },

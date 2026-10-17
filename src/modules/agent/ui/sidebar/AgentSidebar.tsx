@@ -303,10 +303,11 @@ export function AgentSidebar({ togglePanel }: { togglePanel?: () => void }) {
 					{ key: 'automations', icon: Timer },
 					{ key: 'stats', icon: ChartNoAxesColumn },
 				]
-					.filter((item) => !settings.hiddenNavigation.includes(item.key))
+					// Automations has no rail icon, so this entry is its only way in and cannot be hidden.
+					.filter((item) => item.key === 'automations' || !settings.hiddenNavigation.includes(item.key))
 					.map((item) => (
 						<ContextMenu key={item.key}>
-							<ContextMenuTrigger>
+							<ContextMenuTrigger disabled={item.key === 'automations'}>
 								<Tooltip>
 									<TooltipTrigger asChild>
 										<button

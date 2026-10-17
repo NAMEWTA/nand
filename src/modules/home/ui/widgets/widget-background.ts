@@ -66,8 +66,8 @@ export function appendInlineBackgroundButton(
 /** Map a foreground setting to a concrete color. null = follow theme. */
 export function resolveWidgetForeground(foreground: string | undefined): string | null {
 	if (!foreground) return null;
-	if (foreground === 'light') return '#ffffff';
-	if (foreground === 'dark') return '#111111';
+	if (foreground === 'light') return 'var(--on-image)';
+	if (foreground === 'dark') return 'var(--scrim)';
 	// Custom picker value (#rrggbb); anything malformed falls back to theme.
 	return /^#[0-9a-fA-F]{3,8}$/.test(foreground) ? foreground : null;
 }

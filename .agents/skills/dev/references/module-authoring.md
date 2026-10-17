@@ -31,7 +31,7 @@
 4. 使用 context 而不是插件实例：
    - 设置用 `context.settings.bind(name, schema)`（见 `settings-and-i18n.md`），
    - 必须随模块结束的东西用 `context.lifetime`（`registerEvent`、`registerDomEvent`、`register`），
-   - 命令面板命令用 `context.commands.add({ id, name, nameKey, … })`，
+   - 命令面板命令用 `context.commands.add({ id, name, nameKey, … })`；用户可在模块运行时增删的命令（如导航器的自定义“创建笔记”命令）用 `context.commands.remove?.(id)` 删除旧的再添加，名称不是翻译键时直接写 `name`，
    - 编辑器功能用 `context.editor.addExtension(…)` / `addPostProcessor(…)`，
    - 与其他模块交互用 `context.services`（`peek`、`acquire`、`watch`）和 `context.contributions`，
    - 显示工作台页面用 `context.shell.open(target)`，图标轨或面板显示的状态变化后调用 `context.shell.refresh()`，
@@ -44,11 +44,12 @@
 
 1. 在 `src/app/contracts/workbench.ts` 的 `WORKBENCH_FEATURES` / `FEATURE_MODULES` 注册功能与所属模块；分区加入 `src/shell/navigation-state.ts` 的允许列表。功能列表见 [架构参考](architecture.md)，浏览器标签、批注和看板记录不注册为独立工作台功能。
 2. 在 `src/app/workbench/compose-workbench.ts` 声明贡献：图标轨位置、导航、`availability`、`stateKeys` 和 `create: modulePage('<module>', '<page>')`。`chrome?: PageChrome` 默认为 `'standard'`，首页、智能体工作区、自动化用 `'none'`。
+   图标轨条目可声明 `rail.action`：点击时执行它而不是导航，用于打开工作台之外的东西（笔记导航器用它展开左侧栏视图）；这类条目仍需要 `create`，供右键“在标签页中打开”使用。
 3. `panel?: (context: PanelContext) => PanelModel | undefined` 是可选的；既不提供 `panel`、也不声明自定义 `navigationContext` 时，没有 shell 侧栏。首页和自动化不提供侧栏；智能体页面用 `createPortal` 渲染到 `context.navigationEl`。
 4. `ui/` 的页面加载器返回 `PageCreate`：接收表面上下文、目标、已保存状态、中止信号，返回 `{ surface, navigate, getTarget?, getState?, restore? }`。`surface` 使用 `src/ui/react/surface.tsx` 的 `ReactSurface`，继承 `NativeSurface`；每页一个 React 根，隐藏保留、关闭卸载，`NandProviders` 处理所属文档、Portal、语言和错误边界。
 5. `'none'` 页面自备标题或身份、`context.openPageMenu(event)` 菜单，以及需要时的 `context.togglePanel()` 导航开关；专注模式仍提供返回完整工作台的入口。详细 UI 合同见 [shell 参考](../../ui/references/shell.md)。
 6. 面板、标题、状态从 `api.ts` 服务取只读快照（如 `HOME_WORKBENCH`、`AGENT_WORKBENCH`、`SYNC_WORKBENCH`），compose-workbench 通过 `watch` 更新；可选能力用 `peek`，不因显示状态启动模块。
-7. 贡献可提供 `statusSegments?: () => readonly StatusSegment[]`。段包含 `id/icon/label/order`，可选 `tone: 'neutral' | 'running' | 'attention' | 'error'`、`count`、`target`；`label` 是翻译后的文案。用量不是普通段，shell 从 `AGENT_USAGE` 单独读取。
+7. 贡献可提供 `statusSegments?: () => readonly StatusSegment[]`。段包含 `id/icon/label/order`，可选 `tone: 'neutral' | 'running' | 'attention' | 'error'`、`count`、`target`；`label` 是翻译后的文案。这些段显示在 Obsidian 底部状态栏，不依赖工作台叶子；用量不是普通段，状态栏控制器从 `AGENT_USAGE` 单独读取。
 
 浏览器引擎在 `browser/api.ts` 暴露 `BROWSER_HOST`，由智能体工作区创建、挂载浏览器标签；页面宿主、Profile、Cookie 导入、下载、查找和权限仍归 browser。Design Mode 的元素与截图材料通过进程内服务附加到智能体输入框。
 

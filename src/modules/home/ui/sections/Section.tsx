@@ -72,7 +72,7 @@ export function Section({
 			}}
 			data-column={column.name}
 			data-section-type={type}
-			className={`dashboard-section-row group/section relative flex min-w-0 shrink-0 flex-col rounded-[var(--db-radius-lg)] ${immersive ? 'h-full border-0 bg-transparent px-[14px] py-[12px]' : ['mono', 'neon', 'volt', 'magma', 'onyx', 'tundra', 'blossom', 'matcha'].includes(settings.stylePreset) ? 'border-0 bg-transparent p-[6px]' : 'border border-[var(--db-border-section)] bg-[var(--db-bg-section)] px-4 py-3'} ${column.half && !mobile ? 'dashboard-section-row--half' : 'basis-full'}`}
+			className={`dashboard-section-row group/section relative flex min-w-0 shrink-0 flex-col rounded-[var(--db-radius-lg)] ${immersive ? 'h-full border-0 bg-transparent px-[14px] py-[12px]' : 'border border-[var(--db-border-section)] bg-[var(--db-bg-section)] px-4 py-3'} ${column.half && !mobile ? 'dashboard-section-row--half' : 'basis-full'}`}
 			style={
 				{
 					transform: CSS.Transform.toString(transform),

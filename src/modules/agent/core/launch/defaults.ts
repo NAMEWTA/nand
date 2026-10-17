@@ -7,6 +7,7 @@ function entry(): AgentEntrySettings {
 		cliPath: '',
 		permissionMode: 'inherit',
 		extraArgs: '',
+		// Empty means the system account: the CLI keeps using the login already on this computer.
 		accountId: '',
 		showUsage: true,
 	};

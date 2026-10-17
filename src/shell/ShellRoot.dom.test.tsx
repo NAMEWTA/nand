@@ -5,13 +5,6 @@ import userEvent from '@testing-library/user-event';
 import { TestProviders } from '../ui/react/test-providers';
 import { ShellRoot, type ShellProps } from './ShellRoot';
 import { t } from '../shared/i18n';
-const preferences = {
-	visible: true,
-	segments: {},
-	usageMode: 'verbose',
-	usageDisplay: 'used',
-	mirrorToObsidian: false,
-} as const;
 const base: ShellProps = {
 	state: { target: { feature: 'contacts' }, panelOpen: true, panelWidth: 280, focus: false, lastTargets: {} },
 	rail: [
@@ -25,8 +18,6 @@ const base: ShellProps = {
 		sections: [{ id: 'rows', items: [{ id: 'one', label: 'One', target: { feature: 'contacts' } }] }],
 	},
 	statuses: [],
-	statusBar: preferences,
-	setStatusBar: vi.fn(),
 	busy: false,
 	ownerWindow: window,
 	phone: false,
@@ -55,7 +46,7 @@ function size(width: number) {
 		toJSON() {},
 	});
 }
-test('F6 cycles rail, panel, page and status; reverse traversal and hidden panel are respected', async () => {
+test('F6 cycles rail, panel and page; reverse traversal and hidden panel are respected', async () => {
 	size(1200);
 	const user = userEvent.setup();
 	const { container, rerender } = render(
@@ -64,12 +55,12 @@ test('F6 cycles rail, panel, page and status; reverse traversal and hidden panel
 		</TestProviders>,
 	);
 	screen.getByRole('button', { name: 'Contacts' }).focus();
-	for (const region of ['panel', 'page', 'status', 'rail']) {
+	for (const region of ['panel', 'page', 'rail']) {
 		await user.keyboard('{F6}');
 		expect(document.activeElement?.closest('[data-shell-region]')?.getAttribute('data-shell-region')).toBe(region);
 	}
 	await user.keyboard('{Shift>}{F6}{/Shift}');
-	expect(document.activeElement?.closest('[data-shell-region]')?.getAttribute('data-shell-region')).toBe('status');
+	expect(document.activeElement?.closest('[data-shell-region]')?.getAttribute('data-shell-region')).toBe('page');
 	rerender(
 		<TestProviders>
 			<ShellRoot {...base} panel={undefined} />
@@ -240,41 +231,6 @@ test('separator supports arrows, bounds, reset and pointer commit', async () => 
 	fireEvent.pointerUp(separator, { pointerId: 1 });
 	expect(changed).toHaveBeenLastCalledWith(320);
 });
-test('status visibility menu changes preferences, hide and restore preserve them', async () => {
-	size(1200);
-	const user = userEvent.setup();
-	let saved = preferences as ShellProps['statusBar'];
-	function Fixture() {
-		const [value, setValue] = useState(saved);
-		return (
-			<ShellRoot
-				{...base}
-				statusBar={value}
-				setStatusBar={(v) => {
-					saved = v;
-					setValue(v);
-				}}
-				statuses={[{ id: 'notifications', icon: 'bell', label: 'Three unread', count: 3, order: 90 }]}
-			/>
-		);
-	}
-	const { unmount } = render(
-		<TestProviders>
-			<Fixture />
-		</TestProviders>,
-	);
-	fireEvent.contextMenu(screen.getByLabelText(t('shell.statusBar')));
-	await user.click(await screen.findByRole('menuitemcheckbox', { name: t('shell.notifications') }));
-	expect(saved.segments.notifications).toBe(false);
-	expect(screen.queryByRole('button', { name: 'Three unread' })).toBeNull();
-	unmount();
-	render(
-		<TestProviders>
-			<Fixture />
-		</TestProviders>,
-	);
-	expect(screen.queryByRole('button', { name: 'Three unread' })).toBeNull();
-});
 test('chrome none preserves the independent page slot without a shell header', () => {
 	size(1200);
 	const { container } = render(
@@ -322,21 +278,11 @@ test.each(['tab', 'split'] as const)(
 	},
 );
 
-test.each(['sheet', 'sheet-menu', 'rail-menu', 'panel-menu', 'panel-dropdown', 'status-menu', 'usage-menu'] as const)(
+test.each(['sheet', 'sheet-menu', 'rail-menu', 'panel-menu', 'panel-dropdown'] as const)(
 	'hiding a leaf clears %s without unmounting its page or restoring focus, and showing does not reopen it',
 	async (kind) => {
 		size(kind.startsWith('sheet') ? 800 : 1200);
 		const user = userEvent.setup();
-		const snapshot = {
-			refreshing: false,
-			providers: [{ id: 'codex', name: 'Codex', windows: [{ label: '5h', usedPercent: 20 }] }],
-		};
-		const usage = {
-			snapshot: () => snapshot,
-			subscribe: () => () => {},
-			refresh: async () => {},
-			setDisplay: () => {},
-		};
 		const panel = {
 			...base.panel,
 			sections: [
@@ -349,7 +295,7 @@ test.each(['sheet', 'sheet-menu', 'rail-menu', 'panel-menu', 'panel-dropdown', '
 		const renderLeaf = (visible: boolean) => (
 			<>
 				<TestProviders>
-					<ShellRoot {...base} visible={visible} usage={usage} panel={panel} />
+					<ShellRoot {...base} visible={visible} panel={panel} />
 				</TestProviders>
 				<input aria-label="Destination" />
 			</>
@@ -365,8 +311,6 @@ test.each(['sheet', 'sheet-menu', 'rail-menu', 'panel-menu', 'panel-dropdown', '
 		if (kind === 'panel-menu') fireEvent.contextMenu(screen.getByRole('button', { name: 'One' }));
 		if (kind === 'panel-dropdown')
 			await user.click(container.querySelector<HTMLButtonElement>('aside button[aria-label]')!);
-		if (kind === 'status-menu') fireEvent.contextMenu(screen.getByLabelText(t('shell.statusBar')));
-		if (kind === 'usage-menu') await user.click(screen.getByRole('button', { name: t('shell.usage') }));
 		await waitFor(() => expect(document.querySelector('[role="dialog"], [role="menu"]')).not.toBeNull());
 		rerender(renderLeaf(false));
 		expect(document.querySelector('[role="dialog"], [role="menu"], [data-slot="tooltip-content"]')).toBeNull();

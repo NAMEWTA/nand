@@ -7,13 +7,13 @@
 ```
 src/app/            插件入口（main.ts）、模块注册表、设置运行时、命令、功能区、
                     工作台叶子与组合（app/workbench）、契约（app/contracts）
-src/shell/          React 工作台外壳：图标轨、可选侧栏、页面框、状态栏（用 import() 加载）
+src/shell/          React 工作台外壳：图标轨、可选侧栏、页面框，以及 Obsidian 状态栏用量项的 React 视图（用 import() 加载）
 src/ui/             设计系统：components（shadcn）、lib（cn）、react（挂载/Portal）、tailwind、styles、fonts
 src/theme/          主题样式、Markdown 样式、把它们应用到每个窗口的运行时
 src/host/           多个模块共用的 Obsidian 与桌面适配器
 src/shared/         工具函数、设置 DSL 与存储、存储辅助、i18n 运行时与启动词典
 src/types/          环境类型声明
-src/modules/<id>/   home | agent | browser | archives | automations | notifications | icons | comments | sync
+src/modules/<id>/   home | agent | browser | archives | automations | notifications | icons | comments | navigator | sync
   manifest.ts       纯数据描述，启动时加载
   api.ts            其他模块可导入的类型和 serviceKey()/contributionPoint() 常量
   module.ts         懒加载入口：创建 ModuleInstance
@@ -90,9 +90,14 @@ esbuild 构建一个不拆分代码的 CommonJS `main.js`。只能通过 `import
 
 ## 工作台
 
-只有一个工作台视图（`app/workbench/workbench-leaf.ts` 里的 `WORKBENCH_VIEW_TYPE`）。叶子保存自己的状态，打开时加载 shell 表面。`app/workbench/compose-workbench.ts` 声明图标轨条目（功能、图标、面板、可用性），并通过 `plugin.activateModule(id)` 和 `ModuleInstance.pages` 把每个功能对应到模块页面。功能及其所属模块是 `app/contracts/workbench.ts` 里的 `WORKBENCH_FEATURES` / `FEATURE_MODULES`。目标功能列表为 `dashboard`、`terminal`、`contacts`、`automations`、`notifications`、`icons`、`sync`、`content`、`settings`。`terminal` 属于 `agent`，显示名称为「智能体」；`contacts` 属于 `archives`。`browser` 保留为引擎模块，通过 `BROWSER_HOST` 给智能体标签提供能力；批注使用右侧栏视图，记录使用看板弹窗，不再贡献独立工作台功能。shell 的 `chrome`、可选侧栏和状态栏行为见 [ui shell 参考](../../ui/references/shell.md)。
+只有一个工作台视图（`app/workbench/workbench-leaf.ts` 里的 `WORKBENCH_VIEW_TYPE`）。叶子保存自己的状态，打开时加载 shell 表面。`app/workbench/compose-workbench.ts` 声明图标轨条目（功能、图标、面板、可用性），并通过 `plugin.activateModule(id)` 和 `ModuleInstance.pages` 把每个功能对应到模块页面。功能及其所属模块是 `app/contracts/workbench.ts` 里的 `WORKBENCH_FEATURES` / `FEATURE_MODULES`。目标功能列表为 `dashboard`、`terminal`、`contacts`、`automations`、`notifications`、`icons`、`navigator`、`sync`、`content`、`settings`。`terminal` 属于 `agent`，显示名称为「智能体」；`contacts` 属于 `archives`。`browser` 保留为引擎模块，通过 `BROWSER_HOST` 给智能体标签提供能力；批注使用右侧栏视图，记录使用看板弹窗，不再贡献独立工作台功能。shell 的 `chrome`、可选侧栏和状态栏行为见 [ui shell 参考](../../ui/references/shell.md)。
 
-评论侧栏（`app/workbench/comments-leaf.ts`）是唯一的另一种视图；布局就绪后按设置用 `workspace.ensureSideLeaf()` 放入右侧栏，挂载评论模块的 React 面板，停用时保留「开启模块」的提示状态。
+另外有两种侧栏视图，都在 `main.ts` 启动时注册，使保存的叶子能恢复；对应模块关闭时显示「开启模块」的提示，模块启动后切换为模块的 React 面板：
+
+- 评论侧栏（`app/workbench/comments-leaf.ts`，`nand-comments-view`）：布局就绪后按设置用 `workspace.ensureSideLeaf()` 放入右侧栏，挂载评论模块的面板。
+- 笔记导航器（`app/workbench/navigator-leaf.ts`，`nand-navigator-view`）：首次启用时放入左侧栏一次（设置 `navigator.panelAutoPlaced`），挂载导航器模块的面板。图标轨的「笔记」条目通过 `rail.action` 调用 `plugin.openNavigator()` 展开该叶子，不切换工作台页面；它的 `create` 页面把同一个导航器放进工作台标签页。
+
+侧栏叶子的快捷键：Obsidian 的全局快捷键（如 F2）先于页面监听器，导航器在窗格获得焦点时用 `Scope` 抢先处理自己的按键，其余按键仍交给 Obsidian。
 
 ## 命令
 
@@ -136,6 +141,8 @@ id 不带插件 id 前缀；名称里不写「命令」二字；没有默认快�
 | 看板 | `.nand/content/` 内 Markdown，默认 `.nand/content/dashboard.md`，采用 apex 格式，可多份 | home |
 | 看板记录 | `.nand/content/NAND/习惯/`、`记账/`、`番茄钟/`、`阅读/` | home |
 | 图标与规则 | `.nand/icons/iconic.json` + `.backupN`（Iconic 模式） | icons |
+| 笔记导航器元数据缓存 | 浏览器 IndexedDB 库 `nand-navigator-<vault-id>`（可随时重建，不在 vault 目录内） | navigator |
+| 笔记导航器设置 | 设置命名空间 `navigator`；显示与行为随库，布局、尺寸、展开状态和选中项在设备文件 | navigator |
 | 通知 | `.nand/notifications/<device-id>/inbox.json` | notifications |
 | Git 同步设备状态 | `.nand/sync/<device-id>/<repository-hash>.json` | sync |
 | 恢复草稿与看板冲突 | `.nand/recovery/drafts/`、`.nand/recovery/dashboard/conflicts/` | 共享存储、home |

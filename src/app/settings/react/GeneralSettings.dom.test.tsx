@@ -39,3 +39,34 @@ test.each(['zh', 'en'] as const)('module switches retain saved state and recover
 	expect(screen.queryByRole('alert')).toBeNull();
 	view.unmount(); expect(listeners.size).toBe(0);
 });
+
+test('status bar section only offers per-item visibility and usage preferences', async () => {
+	setLanguage('en');
+	let settings = appSchema('en').defaults();
+	const listeners = new Set<() => void>();
+	const plugin = {
+		appSettings: {
+			get: () => settings,
+			subscribe: (listener: () => void) => { listeners.add(listener); return () => listeners.delete(listener); },
+			update: async (recipe: (draft: typeof settings) => void) => {
+				settings = structuredClone(settings);
+				recipe(settings);
+				for (const listener of listeners) listener();
+			},
+		},
+		moduleManifests: () => [],
+	} as unknown as DashboardPlugin;
+	render(<TestProviders><GeneralSettings plugin={plugin} navigate={vi.fn()} /></TestProviders>);
+	// The retired in-workbench bar had a master switch and a mirror switch; neither exists any more.
+	expect(screen.queryByRole('switch', { name: /show status bar/i })).toBeNull();
+	expect(screen.queryByText(/Obsidian status bar$/)).not.toBeNull();
+	const usage = screen.getByRole('switch', { name: 'Show Usage' });
+	expect(usage.getAttribute('aria-checked')).toBe('true');
+	fireEvent.click(usage);
+	await waitFor(() => expect(settings.statusBar.segments).toEqual({ usage: false }));
+	await waitFor(() => expect(screen.getByRole('switch', { name: 'Show Usage' }).getAttribute('aria-checked')).toBe('false'));
+	fireEvent.click(screen.getByRole('switch', { name: 'Show Git sync' }));
+	await waitFor(() => expect(settings.statusBar.segments).toEqual({ usage: false, sync: false }));
+	fireEvent.click(screen.getByRole('switch', { name: 'Show Usage' }));
+	await waitFor(() => expect(settings.statusBar.segments).toEqual({ usage: true, sync: false }));
+});

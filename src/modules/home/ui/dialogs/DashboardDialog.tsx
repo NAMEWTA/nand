@@ -11,7 +11,7 @@ import {
 import { Button } from '../../../../ui/components/button';
 import { useVisible } from '../../../../ui/react/contexts';
 import { useT } from '../../../../ui/react/hooks';
-import { useDashboardAppearance, useDashboardLayout, useDashboardTheme } from '../theme/ThemeBridge';
+import { useDashboardAppearance, useDashboardLayout } from '../theme/ThemeBridge';
 export function DashboardDialog({
 	title,
 	children,
@@ -21,6 +21,7 @@ export function DashboardDialog({
 	busy = false,
 	danger = false,
 	confirmLabel,
+	cancelLabel,
 }: {
 	title: string;
 	children: ReactNode;
@@ -30,12 +31,12 @@ export function DashboardDialog({
 	busy?: boolean;
 	danger?: boolean;
 	confirmLabel?: string;
+	cancelLabel?: string;
 }) {
 	const appearanceRef = useDashboardAppearance();
 	const visible = useVisible();
 	const cancel = useRef<HTMLButtonElement>(null);
-	const theme = useDashboardTheme(),
-		layout = useDashboardLayout(),
+	const layout = useDashboardLayout(),
 		t = useT();
 	return (
 		<Dialog
@@ -48,9 +49,7 @@ export function DashboardDialog({
 				ref={appearanceRef}
 				overlayClassName={layout === 'mobile' ? 'md:backdrop-blur-none' : undefined}
 				className={`nand-dashboard-root ${layout === 'mobile' ? 'md:backdrop-blur-none' : ''} ${wide ? 'sm:max-w-4xl' : 'sm:max-w-xl'} max-h-[85vh] overflow-y-auto bg-popover text-popover-foreground`}
-				data-theme={theme}
 				data-dashboard-layout={layout}
-				data-dashboard-theme={theme}
 				onOpenAutoFocus={(e) => {
 					if (!onSave || danger) {
 						e.preventDefault();
@@ -65,7 +64,7 @@ export function DashboardDialog({
 				<div className="grid gap-4">{children}</div>
 				<DialogFooter>
 					<Button ref={cancel} variant="outline" onClick={onClose}>
-						{t('common.cancel')}
+						{cancelLabel ?? t('common.cancel')}
 					</Button>
 					{onSave && (
 						<Button variant={danger ? 'destructive' : 'default'} disabled={busy} onClick={onSave}>

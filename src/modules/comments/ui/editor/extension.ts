@@ -46,6 +46,8 @@ export function commentsCmExtension(env: CommentsEnv) {
 				this.frame = null; if (this.dead || !env.alive()) return;
 				const channel = env.overlay(this.view.dom.ownerDocument), { request, draft } = channel.state.getState();
 				if (request && request.mode !== 'selection' && (request.pinned || draft)) return;
+				// Focus moving into the popover (the button, then the composer) is not the user leaving the selection.
+				if (request?.mode === 'selection' && this.view.dom.ownerDocument.activeElement?.closest('[data-comments-overlay]')) return;
 				const selection = this.view.state.selection.main;
 				if (!selection.empty && this.view.hasFocus && env.service.settings().popoverEnabled) openComposer(this.view, env, selection.from, selection.to, true);
 				else if (request?.mode === 'selection') channel.close(false);

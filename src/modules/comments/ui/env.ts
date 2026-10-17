@@ -9,6 +9,6 @@ export interface CommentsEnv {
 	editors: Set<EditorView>;
 	alive(): boolean;
 	overlay(doc: Document): OverlayChannel;
-	open(request: OverlayRequest): void;
+	open(request: OverlayRequest): boolean;
 	openSettings(): void;
 }

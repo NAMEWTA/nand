@@ -1,4 +1,5 @@
 import { widgetPresentationKey } from './widget-members';
+import { sectionDefaultSize } from './widget-table';
 import { GRID_GAP_PX, GRID_ROW_PX, placeTiles, type GridTile } from './immersive-grid';
 import type { BoardTile, BoardWidgetMember, DashboardCard, DashboardColumn, DashboardData } from './types/model';
 
@@ -64,24 +65,28 @@ export function boardTiles(
 	data: DashboardData,
 	sources: readonly BoardTileSource[],
 	widgetDefaults: WidgetTileDefaults = () => undefined,
+	/** Starting sizes chosen by the user for tiles that have no saved geometry yet (add-widget panel). */
+	chosen: ReadonlyMap<string, { w: number; h: number }> = new Map(),
 ): GridTile[] {
 	const saved = new Map(data.immersive?.map((tile) => [tile.id, tile]) ?? []);
 	const defaults = (source: BoardTileSource): TileDefaults => {
 		if (source.type === 'widget') return widgetDefaults(source.member) ?? { w: 3, h: 40 };
-		if (source.type === 'section')
+		if (source.type === 'section') {
+			const size = sectionDefaultSize(source.column.sectionType, source.column.half);
 			return {
-				w: source.column.half ? 6 : 12,
-				h: source.column.height ? pixelsToRows(source.column.height) : 60,
-				minW: 1,
-				minH: 3,
+				...size,
+				h: source.column.height ? pixelsToRows(source.column.height) : size.h,
+				minW: size.minW,
+				minH: size.minH,
 			};
+		}
 		if (source.type === 'card')
 			return { w: source.card.gridCols || 4, h: source.card.gridRows || 30, minW: 1, minH: 3 };
 		return { w: 3, h: 40 };
 	};
 	return sources.map((source) => {
 		const tile = saved.get(source.id);
-		const fallback = defaults(source);
+		const fallback = { ...defaults(source), ...(tile ? undefined : chosen.get(source.id)) };
 		const legacy =
 			!tile && source.type === 'card' && source.card.gridCol > 0 && source.card.gridRow > 0
 				? { x: source.card.gridCol - 1, y: source.card.gridRow - 1 }
@@ -93,7 +98,8 @@ export function boardTiles(
 			cap: tile?.cap ?? fallback.h,
 			minW: Math.max(1, fallback.minW ?? 1),
 			minH: Math.max(3, fallback.minH ?? 3),
-			fixed: tile?.fixed,
+			// A widget is sized by its tier, not by its content; content sections still shrink to fit until resized.
+			fixed: tile?.fixed ?? (chosen.has(source.id) || source.type === 'widget' ? true : undefined),
 			x: tile?.x ?? legacy?.x ?? 0,
 			y: tile?.y ?? legacy?.y ?? 0,
 			explicit: (tile?.x !== undefined && tile.y !== undefined) || !!legacy,

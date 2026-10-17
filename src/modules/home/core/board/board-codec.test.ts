@@ -24,7 +24,7 @@ test('old coarse heights stay byte-stable on read and migrate once on an explici
 	data.banner.quote = 'Unrelated content edit';
 	const contentOnly = serialize(data);
 	expect((splitFrontmatter(contentOnly).frontmatter.immersive as Array<Record<string, unknown>>)[0]?.h).toBe(2);
-	data.layout = 'stacked';
+	data.layout = 'immersive';
 	const updated = serialize(data);
 	const raw = splitFrontmatter(updated).frontmatter.immersive as Array<Record<string, unknown>>;
 	expect(raw[0]).toEqual({ id: 'unknown-provider', w: 12, cap: 20, x: 0, y: 7, note: 'keep this' });
@@ -69,7 +69,7 @@ test('layout edits allocate internal section identities without rewriting apex p
 	expect(parsed.columns[0]?.id).toBeUndefined();
 	let serial = 0;
 	const edited = withStableSectionIds(parsed, () => `section-${++serial}`);
-	edited.layout = 'stacked';
+	edited.layout = 'immersive';
 	expect(edited.immersive?.[0]?.id).toBe('section:Notes');
 	expect(withStableSectionIds(edited, () => `section-${++serial}`).columns[0]?.id).toBe('section-1');
 	expect(serial).toBe(1);

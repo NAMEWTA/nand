@@ -41,6 +41,11 @@ export function AccountsSection({ controller }: { controller: AgentController })
 							<div key={id} className="flex flex-wrap items-center gap-2 text-xs">
 								<span className="min-w-0 flex-1 truncate">
 									{settings.accountLabels[a.id]?.[id] || id || t('agent.manage.defaultAccount')}
+									{!id && (
+										<span className="ml-2 text-muted-foreground" title={controller.systemAccountLocation(a.id)}>
+											{t('agent.manage.systemLocation', { path: controller.systemAccountLocation(a.id) })}
+										</span>
+									)}
 								</span>
 								{settings.agents.agents[a.id].accountId === id && (
 									<span className="text-muted-foreground">

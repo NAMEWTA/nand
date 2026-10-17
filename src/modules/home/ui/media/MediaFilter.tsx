@@ -2,7 +2,7 @@
 import { p1Classes } from '../theme/p1-classes';
 import type { App } from 'obsidian';
 import { Popover, PopoverAnchor, PopoverContent } from '../../../../ui/components/popover';
-import { useDashboardAppearance, useDashboardTheme } from '../theme/ThemeBridge';
+import { useDashboardAppearance } from '../theme/ThemeBridge';
 import { useState } from 'react';
 import { t } from '../../../../shared/i18n';
 import { DashboardFolderPicker } from '../dialogs/DashboardFolderPicker';
@@ -31,8 +31,7 @@ export function MediaFilter({
 	tags?: string[];
 	close: () => void;
 }) {
-	const popup = useDashboardAppearance(),
-		theme = useDashboardTheme();
+	const popup = useDashboardAppearance();
 	const [folder, setFolder] = useState(''),
 		[picking, setPicking] = useState(false);
 	const remove = (path: string) => update({ ...value, folders: value.folders.filter((f) => f !== path) });
@@ -46,8 +45,6 @@ export function MediaFilter({
 			>
 				<PopoverAnchor virtualRef={{ current: anchor }} />
 				<PopoverContent
-					data-theme={theme}
-
 					ref={popup}
 					className={`nand-dashboard-root p-4 ${p1Classes('dashboard-library-filter-popup')}`}
 				>

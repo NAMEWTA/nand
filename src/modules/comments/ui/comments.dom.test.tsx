@@ -128,3 +128,73 @@ test('editor reconfiguration retains its scoped class and removes it when disabl
 	expect(view.dom.classList.contains('nand-comments-editor')).toBe(false);
 	expect(f.env.editors.size).toBe(0); view.destroy(); parent.remove(); await f.dispose();
 });
+
+test('selection button keeps the editor focus on mousedown and opens the composer on click', async () => {
+	const { EditorView } = await import('@codemirror/view');
+	const { EditorState } = await import('@codemirror/state');
+	const { editorInfoField } = await import('obsidian');
+	const { commentsCmExtension } = await import('./editor/extension');
+	const f = fixture(), parent = document.createElement('div'); document.body.appendChild(parent);
+	const state = EditorState.create({ doc: 'alpha beta', extensions: [editorInfoField.init(() => ({ file: { path: 'a.md' } }) as never), commentsCmExtension(f.env)] });
+	const view = new EditorView({ state, parent });
+	view.focus(); view.dispatch({ selection: { anchor: 0, head: 5 } });
+	const ui = render(<NandProviders ownerDocument={document}><CommentPopover env={f.env} channel={f.channel} /></NandProviders>);
+	const button = await screen.findByRole('button', { name: 'Comment' });
+	expect(f.channel.state.getState().request?.mode).toBe('selection');
+	expect(fireEvent.mouseDown(button)).toBe(false);
+	// Even if focus does land in the popover, the selection request must survive the editor blur.
+	act(() => { button.focus(); view.dispatch({ selection: { anchor: 1, head: 5 }, userEvent: 'select' }); });
+	await new Promise(resolve => window.setTimeout(resolve, 100));
+	expect(f.channel.state.getState().request?.mode).toBe('selection');
+	fireEvent.click(button);
+	expect(await screen.findByPlaceholderText('Write a comment…')).toBeTruthy();
+	expect(f.channel.state.getState().request).toMatchObject({ mode: 'compose', pinned: true });
+	ui.unmount(); view.destroy(); parent.remove(); await f.dispose();
+});
+
+test('a selection request survives hover timers, and hover only replaces it away from the button', async () => {
+	const { HoverTracker } = await import('./editor/hover');
+	const { EditorState } = await import('@codemirror/state');
+	const { editorInfoField } = await import('obsidian');
+	const f = fixture(); const thread = await f.store.add('a.md', { anchor: createAnchor('alpha', 0, 5), text: 'one' });
+	const dom = document.createElement('div'); dom.innerHTML = `<span class="nand-comment-hl" data-comment-ids="${thread.id}">alpha</span><div data-comments-overlay="selection"></div>`; document.body.appendChild(dom);
+	const popover = dom.querySelector('[data-comments-overlay]')!; popover.getBoundingClientRect = () => new DOMRect(100, 100, 60, 24);
+	const state = EditorState.create({ doc: 'alpha', extensions: [editorInfoField.init(() => ({ file: { path: 'a.md' } }) as never)] });
+	const view = { dom, scrollDOM: dom, state, focus() {} } as unknown as import('@codemirror/view').EditorView;
+	const tracker = new HoverTracker(view, f.env);
+	const base = { path: 'a.md', ownerDocument: document, rect: () => new DOMRect(98, 130, 1, 16), anchor: createAnchor('alpha', 0, 5) };
+	f.channel.open({ ...base, mode: 'selection', pinned: false });
+	vi.useFakeTimers();
+	fireEvent.mouseMove(dom, { clientX: 120, clientY: 140 }); fireEvent.mouseOver(dom.firstElementChild!); vi.advanceTimersByTime(400);
+	expect(f.channel.state.getState().request?.mode).toBe('selection');
+	f.channel.scheduleClose(); vi.advanceTimersByTime(400); expect(f.channel.state.getState().request?.mode).toBe('selection');
+	fireEvent.mouseMove(dom, { clientX: 400, clientY: 400 }); fireEvent.mouseOut(dom.firstElementChild!); fireEvent.mouseOver(dom.firstElementChild!); vi.advanceTimersByTime(400);
+	expect(f.channel.state.getState().request?.mode).toBe('threads');
+	tracker.destroy(); dom.remove(); vi.useRealTimers(); await f.dispose();
+});
+
+test('closing the selection button does not restore the old selection', async () => {
+	const f = fixture(), focus = vi.fn();
+	f.channel.open({ path: 'a.md', ownerDocument: document, rect: () => new DOMRect(30, 30, 1, 20), mode: 'selection', anchor: createAnchor('alpha', 0, 5), pinned: false, focus });
+	const view = render(<NandProviders ownerDocument={document}><CommentPopover env={f.env} channel={f.channel} /></NandProviders>);
+	await screen.findByRole('button', { name: 'Comment' });
+	act(() => f.channel.close(false));
+	await new Promise(resolve => window.setTimeout(resolve, 50));
+	expect(focus).not.toHaveBeenCalled(); view.unmount(); await f.dispose();
+});
+
+test('clicking a highlight pins its threads, but a click that ends a drag-selection is ignored', async () => {
+	const { HoverTracker } = await import('./editor/hover');
+	const { EditorState } = await import('@codemirror/state');
+	const { editorInfoField } = await import('obsidian');
+	const f = fixture(); const thread = await f.store.add('a.md', { anchor: createAnchor('alpha', 0, 5), text: 'one' });
+	const dom = document.createElement('div'); dom.innerHTML = `<span class="nand-comment-hl" data-comment-ids="${thread.id}">alpha</span>`; document.body.appendChild(dom);
+	const make = (selection?: { anchor: number; head: number }) => EditorState.create({ doc: 'alpha', selection, extensions: [editorInfoField.init(() => ({ file: { path: 'a.md' } }) as never)] });
+	const view = { dom, scrollDOM: dom, state: make(), focus() {} } as unknown as import('@codemirror/view').EditorView & { state: ReturnType<typeof make> };
+	const tracker = new HoverTracker(view, f.env);
+	view.state = make({ anchor: 0, head: 3 }); fireEvent.click(dom.firstElementChild!);
+	expect(f.channel.state.getState().request).toBeNull();
+	view.state = make({ anchor: 2, head: 2 }); fireEvent.click(dom.firstElementChild!);
+	expect(f.channel.state.getState().request).toMatchObject({ mode: 'threads', pinned: true, threadIds: [thread.id] });
+	tracker.destroy(); dom.remove(); await f.dispose();
+});

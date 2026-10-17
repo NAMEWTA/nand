@@ -1,6 +1,7 @@
-import { expect, test } from 'vitest';
+import { afterEach, beforeEach, expect, test, vi } from 'vitest';
 import { JsonStore } from './json-store';
 import type { TextStorage } from './storage/ports';
+import { useStorageTimers, type StorageTimers } from './storage/timers';
 
 function memory() {
 	const files = new Map<string, string>();
@@ -115,4 +116,71 @@ test('conflicting edits and externally removed files are rejected without silent
 	expect(files.get('state')).toBe('{"a":2}');
 	files.delete('state');
 	await expect(store.commit({ base, value: { a: 3 } })).rejects.toThrow('removed externally');
+});
+
+/** The host never answers the first request that matches; everything else is served normally. */
+function dropping(storage: TextStorage, drop: (op: 'exists' | 'read', path: string, nth: number) => boolean): TextStorage {
+	const seen = new Map<string, number>();
+	const guard = <A extends unknown[], R>(op: 'exists' | 'read', run: (path: string, ...rest: A) => Promise<R>) => (path: string, ...rest: A): Promise<R> => {
+		const nth = (seen.get(op + path) ?? 0) + 1; seen.set(op + path, nth);
+		return drop(op, path, nth) ? new Promise<R>(() => undefined) : run(path, ...rest);
+	};
+	return { ...storage, exists: guard('exists', storage.exists), read: guard('read', storage.read) };
+}
+
+const stalled = () => {
+	beforeEach(() => { vi.useFakeTimers(); useStorageTimers(globalThis as unknown as StorageTimers); vi.spyOn(console, 'warn').mockImplementation(() => undefined); });
+	afterEach(() => { vi.useRealTimers(); useStorageTimers(undefined); vi.restoreAllMocks(); });
+};
+stalled();
+
+test('a dropped backup read during recovery does not block the store or its later saves', async () => {
+	const { files, storage } = memory();
+	files.set('state.backup', JSON.stringify({ a: 5 }));
+	const store = new JsonStore(dropping(storage, (op, path, nth) => op === 'exists' && path === 'state.backup' && nth === 1), 'state', validate);
+	const loaded = store.load({});
+	await vi.advanceTimersByTimeAsync(10000);
+	const value = await loaded;
+	expect(value).toEqual({ a: 5 });
+	const saved = store.commit({ base: value, value: { a: 6 } });
+	await vi.advanceTimersByTimeAsync(10000);
+	expect(await saved).toEqual({ a: 6 });
+	expect(JSON.parse(files.get('state')!)).toEqual({ a: 6 });
+});
+
+test('a dropped read before a commit does not block the commit or the one queued behind it', async () => {
+	const { files, storage } = memory();
+	files.set('state', JSON.stringify({ a: 1 }));
+	const store = new JsonStore(dropping(storage, (op, path, nth) => op === 'read' && path === 'state' && nth === 2), 'state', validate);
+	let local = await store.load({});
+	const first = store.commit({ base: local, value: { a: 2 } });
+	const second = store.commit({ base: { a: 2 }, value: { a: 3 } });
+	await vi.advanceTimersByTimeAsync(10000);
+	await first; local = await second;
+	expect(local).toEqual({ a: 3 });
+	expect(JSON.parse(files.get('state')!)).toEqual({ a: 3 });
+});
+
+test('a dropped verification read after a write is issued again instead of holding the queue', async () => {
+	const { files, storage } = memory();
+	files.set('state', JSON.stringify({ a: 1 }));
+	// Reads of the primary file: #1 the load, #2 the pre-commit read, #3 the verification after writing it.
+	const store = new JsonStore(dropping(storage, (op, path, nth) => op === 'read' && path === 'state' && nth === 3), 'state', validate);
+	const local = await store.load({});
+	const saved = store.commit({ base: local, value: { a: 2 } });
+	await vi.advanceTimersByTimeAsync(10000);
+	expect(await saved).toEqual({ a: 2 });
+});
+
+test('a dropped directory check while preparing a nested store path does not block either commit', async () => {
+	const { files, storage } = memory();
+	files.set('data/nested/state', JSON.stringify({ a: 1 }));
+	const store = new JsonStore(dropping(storage, (op, path, nth) => op === 'exists' && path === 'data' && nth === 1), 'data/nested/state', validate);
+	const local = await store.load({});
+	const first = store.commit({ base: local, value: { a: 2 } });
+	const second = store.commit({ base: { a: 2 }, value: { a: 3 } });
+	await vi.advanceTimersByTimeAsync(10000);
+	await first;
+	expect(await second).toEqual({ a: 3 });
+	expect(JSON.parse(files.get('data/nested/state')!)).toEqual({ a: 3 });
 });

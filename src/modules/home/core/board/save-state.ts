@@ -9,7 +9,11 @@ export interface DashboardSaveState {
 	detail: string;
 }
 export class DashboardSaveError extends Error {
-	constructor(readonly code: 'conflict' | 'saveFailed' | 'recoveryFailed' | 'changed' | 'closed', message: string) { super(message); this.name = 'DashboardSaveError'; }
+	constructor(readonly code: 'conflict' | 'saveFailed' | 'recoveryFailed' | 'changed' | 'closed' | 'switching' | 'stale', message: string) { super(message); this.name = 'DashboardSaveError'; }
+}
+/** Leaving the current board was refused before anything was touched (unsaved edits, an unresolved conflict). */
+export class SwitchRefusedError extends Error {
+	constructor(message: string, readonly reason?: unknown) { super(message); this.name = 'SwitchRefusedError'; }
 }
 export function dashboardSaveMessage(state: Readonly<DashboardSaveState>): string {
 	if (state.status === 'saved') return '';

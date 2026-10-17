@@ -27,7 +27,7 @@
 | `src/modules/home/core/board/table-columns.ts`、资料库与文件夹配置 | `src/table-columns-modal.ts`、`src/library-section.ts` | 各分区独立保存属性顺序与显隐，包括首屏之外的属性。NAND 增加键盘排序，并保留隐藏或暂时不存在的属性偏好。 |
 | `src/modules/home/core/board/progressive-results.ts`、资料库渲染器 | `src/library-section.ts` | 首批 50 条、每次增加 50 条、显示上限 500 条。数量、筛选、排序和智能体范围仍使用全部匹配数据。 |
 | `src/modules/home/core/anniversaries/`、`ui/widgets/AnniversaryDateEditor.tsx` | `src/anniversary-widget.ts`、`src/anniversary-settings-modal.ts` | 公农历输入以公历日期保存身份。NAND 明确处理闰月和小月，农历转换失败时不会静默替换为公历纪念日。 |
-| `src/modules/home/core/board/custom-theme.ts`、`ui/appearance/AppearanceStudio.tsx` | `src/theme-studio-modal.ts`、`src/appearance.ts` | “我的主题”保存于 `home.customThemes`，包含 Apex 基础主题、颜色和看板装饰；`home.activeCustomThemeId` 标记所选项。应用只更新看板的 `home` 设置并反映到打开的看板，不修改全局 NAND `theme` 外观。 |
+| `ui/appearance/AppearanceStudio.tsx`、`ui/appearance/appearance.ts` | `src/theme-studio-modal.ts`、`src/appearance.ts` | 外观工作室只保留背景图、模糊、表面不透明度、圆角与字号；Apex 的 13 套主题、自定义颜色和“我的主题”已删除，颜色由 NAND 全局令牌决定。 |
 | `src/modules/home/ui/quickbar/DashboardIconPicker.tsx` | `src/icon-picker-modal.ts`、`src/icon-names.ts` | 常用建议、模糊搜索和最多 400 个显示结果。完整图标来自 Obsidian 已安装的目录，可选复用 NAND 关键词查询。 |
 | `src/modules/home/ui/` 中的资料库与文件夹卡片控件 | `src/library-section.ts` | 悬停删除复用既有回收站操作；NAND 同时在键盘聚焦与触摸时显示按钮，确认框归属触发窗口并默认聚焦取消。 |
 
@@ -37,7 +37,7 @@
 
 ## 核心布局、交互和主题（v3.8.4）
 
-本轮首页以 `ac4d2c7` 为唯一布局与交互参照。`home/ui/theme/themes.css` 保留 13 套上游主题及亮暗覆盖变量；`ThemeBridge` 将变量接到 React 控件。`DashboardPage`、`layout/`、`sidebar/`、`banner/`、`quickbar/`、`sections/`、`cards/` 与六个 P0 `*Widget.tsx` 对照上游 `view.ts`、`renderer.ts`、`banner.ts`、`quick-note-section.ts`、`library-section.ts` 与各小组件入口，文件头保留 MIT 来源。
+本轮首页以 `ac4d2c7` 为唯一布局与交互参照。`home/ui/theme/tokens.css` 把看板的 `--db-*` 变量全部接到 NAND 全局令牌（上游的 13 套主题和 `bridge.css` 已删除，侧栏、左右与上下布局也已删除，只保留沉浸网格画布）。`DashboardPage`、`canvas/`、`banner/`、`quickbar/`、`sections/`、`cards/` 与六个 P0 `*Widget.tsx` 对照上游 `view.ts`、`renderer.ts`、`banner.ts`、`quick-note-section.ts`、`library-section.ts` 与各小组件入口，文件头保留 MIT 来源。
 
 `core/board/parser/__fixtures__/apex-dashboard-template.md` 是固定版本原始样本；解析与回写测试保留未知字段、缩进、子任务和文档树。`services/board-store.ts` 复用 NAND 的串行文档写入及受管内容层，不引入上游全局插件实例。工作台注册表存储为 `home.workspaces`，仅保留内存适配字段供现有服务使用。
 
@@ -45,13 +45,13 @@
 
 ## 小组件与统计（v3.8.4）
 
-番茄、习惯、记账、账本和阅读统计，以及农历/抽签、年度进度、日历、纪念日改为 React。布局配方在 `home/ui/theme/widget-classes.ts`，由上游对应选择器的声明转为静态 Tailwind 类；固定图表与签纸色通过同目录 `themes.css` 的 `--db-record-*` 变量提供。对话框使用 NAND 的 shadcn/Radix 门户。旧 records 页面、侧栏和样式已删除，领域数据按 Apex JSON 写入 `.nand/content/NAND/`。
+番茄、习惯、记账、账本和阅读统计，以及农历/抽签、年度进度、日历、纪念日改为 React。布局配方在 `home/ui/theme/widget-classes.ts`，由上游对应选择器的声明转为静态 Tailwind 类；固定图表与签纸色通过同目录 `tokens.css` 的 `--db-record-*` 变量提供。对话框使用 NAND 的 shadcn/Radix 门户。旧 records 页面、侧栏和样式已删除，领域数据按 Apex JSON 写入 `.nand/content/NAND/`。
 
 阶段 8b 同时移植 `src/capture-search-widgets.ts`、`src/skill-widget.ts` 的独立输入条与实体技能键布局；配置复用 NAND 的 React 技能编辑器，发送只通过 `AGENT_DISPATCH`。对应静态样式配方为 `input-widget-classes.ts`。
 
 ## 分区、沉浸与外观（v3.8.4）
 
-P1 分区、沉浸布局、统计横幅、外观工作室和完整看板设置继续以 `ac4d2c7` 为唯一参照，© 2025 PandoraReads，MIT。`ui/theme/p1-classes.ts` 与 `immersive-classes.ts` 将对应声明转换为静态 Tailwind 配方，固定颜色转为 `themes.css` 的令牌；不在运行时注入样式表。
+P1 分区、沉浸网格（现为唯一的小组件画布）、统计横幅、外观工作室和完整看板设置继续以 `ac4d2c7` 为唯一参照，© 2025 PandoraReads，MIT。`ui/theme/p1-classes.ts` 与 `immersive-classes.ts` 将对应声明转换为静态 Tailwind 配方，固定颜色转为 `ui/theme/tokens.css` 中由 NAND 全局令牌派生的变量（Apex 的 13 套主题与 `bridge.css` 已删除）；不在运行时注入样式表。
 
 | NAND 文件 | 上游入口 | 改编范围 |
 |---|---|---|
@@ -59,9 +59,9 @@ P1 分区、沉浸布局、统计横幅、外观工作室和完整看板设置�
 | `ui/media/`、`ui/web/`、`ui/pipeline/` | `media-section.ts`、`media-lightbox-modal.ts`、`web-section.ts`、`pipeline-section.ts` | React 分区、筛选、灯箱与工作流；文档修改仍走 NAND 内容层，技能经 `AGENT_DISPATCH` |
 | `core/pm/`、`services/projects.ts`、`ui/pm/` | `pm-model.ts`、`pm-section.ts`、`pm-board-modal.ts` | 字段别名、里程碑/待办、项目卡与看板 |
 | `services/skill-library.ts`、`ui/skills/{SkillsSection,SkillCard}.tsx` | `skill-store.ts`、`skill-section.ts`、`skill-detail-modal.ts` | 同名聚合、来源元数据、分组拖动、搜索、置顶、详情与实例回收；发现及调用使用智能体公开接口，本地导入副本归属 `.nand/content/NAND/技能/` |
-| `ui/layout/ImmersiveLayout.tsx` | `immersive.ts` | 海报与时钟、12 列网格、移动与缩放；复用 NAND 纯网格算法与 ownerDocument 控制器 |
+| `ui/canvas/BoardCanvas.tsx` | `immersive.ts` | 12 列网格、移动与缩放、编辑模式；复用 NAND 纯网格算法与 ownerDocument 控制器；添加小组件面板与尺寸档为 NAND 新增 |
 | `ui/banner/BannerStats.tsx`、`BannerStatsPanel.tsx`、`BannerStatsEditor.tsx` | `banner-stats.ts`、`banner-edit-modal.ts` | 三栏统计、热力图与配置 |
-| `ui/appearance/AppearanceStudio.tsx`、`core/board/custom-theme.ts` | `theme-studio-modal.ts`、`appearance.ts` | 颜色、背景、即时预览与命名主题；Radix 门户与焦点归属所属窗口 |
+| `ui/appearance/AppearanceStudio.tsx` | `theme-studio-modal.ts`、`appearance.ts` | 背景、毛玻璃、圆角与即时预览；颜色与命名主题已删除；Radix 门户与焦点归属所属窗口 |
 | `ui/settings/`、`services/board-backups.ts` | `settings.ts`、`backup-service.ts` | React 三标签设置；看板备份写入 NAND 恢复目录，恢复仅允许当前看板列表 |
 
 无新增依赖。被替换且无引用的旧设置、主题弹窗、沉浸渲染入口和旧界面适配器已删除；已失去调用方的渲染适配器随收尾删除，测试转为现行组件或模型入口。

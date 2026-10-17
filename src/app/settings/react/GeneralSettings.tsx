@@ -12,6 +12,7 @@ import {
 } from '../../../ui/components/nand/SettingsFormControls';
 import { SettingsSearchContext, SearchableSetting, SearchHighlight } from './SearchableSetting';
 import type { AppSettings } from '../app-schema';
+import { STATUS_ITEMS, itemShown, withItemShown } from '../../workbench/status-segments';
 import { Button } from '../../../ui/components/button';
 import type { WorkbenchTarget } from '../../contracts/workbench';
 export function GeneralSettings({
@@ -48,11 +49,11 @@ export function GeneralSettings({
 			/>
 		</SearchableSetting>
 	);
-	const toggle = (key: string, checked: boolean, change: () => void, description?: string) => (
-		<SearchableSetting title={t(key)} description={description} keywords={[key]}>
+	const toggle = (key: string, checked: boolean, change: () => void, description?: string, label = t(key)) => (
+		<SearchableSetting title={label} description={description} keywords={[key]}>
 			<SettingsSwitchRow
-				label={<SearchHighlight text={t(key)} />}
-				ariaLabel={t(key)}
+				label={<SearchHighlight text={label} />}
+				ariaLabel={label}
 				checked={checked}
 				onChange={change}
 				disabled={!!pending}
@@ -113,6 +114,7 @@ export function GeneralSettings({
 							{ value: 'orca', label: t('ui.orcaPalette') },
 						]}
 					/>,
+					t('shell.paletteDesc'),
 				)}
 				{settings.devGallery &&
 					row(
@@ -128,10 +130,17 @@ export function GeneralSettings({
 					)}
 			</SettingsSection>
 			<SettingsSection className={sectionClass} title={t('shell.statusBar')}>
-				{toggle('shell.showStatusBar', settings.statusBar.visible, () =>
-					save('visible', (draft) => {
-						draft.statusBar.visible = !draft.statusBar.visible;
-					}),
+				{STATUS_ITEMS.map((item) =>
+					toggle(
+						item.labelKey,
+						itemShown(settings.statusBar, item.id),
+						() =>
+							save(`status-${item.id}`, (draft) => {
+								draft.statusBar = withItemShown(draft.statusBar, item.id, !itemShown(draft.statusBar, item.id));
+							}),
+						undefined,
+						t('shell.showStatusItem', { item: t(item.labelKey) }),
+					),
 				)}
 				{row(
 					'shell.usageDisplay',
@@ -164,11 +173,6 @@ export function GeneralSettings({
 							{ value: 'compact', label: t('shell.compact') },
 						]}
 					/>,
-				)}
-				{toggle('shell.mirrorUsage', settings.statusBar.mirrorToObsidian, () =>
-					save('mirror', (draft) => {
-						draft.statusBar.mirrorToObsidian = !draft.statusBar.mirrorToObsidian;
-					}),
 				)}
 			</SettingsSection>
 			<SettingsSection className={sectionClass} title={t('settings.homeModules')}>

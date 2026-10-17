@@ -2,7 +2,7 @@
 import { RecordButton } from '../dialogs/RecordButton';
 import { p2Classes } from '../theme/p2-classes';
 import { Popover, PopoverAnchor, PopoverContent } from '../../../../ui/components/popover';
-import { useDashboardAppearance, useDashboardTheme, useDashboardLayout } from '../theme/ThemeBridge';
+import { useDashboardAppearance, useDashboardLayout } from '../theme/ThemeBridge';
 import { Input } from '../../../../ui/components/input';
 import { Slider } from '../../../../ui/components/slider';
 import { Notice } from 'obsidian';
@@ -27,7 +27,6 @@ export function MusicPanel({
 	background?: () => void;
 }) {
 	const appearance = useDashboardAppearance(true),
-		theme = useDashboardTheme(),
 		layout = useDashboardLayout(),
 		opener = useRef<HTMLElement | null>(null);
 	const anchor = useMemo(
@@ -222,7 +221,6 @@ export function MusicPanel({
 			</div>
 			<PopoverContent
 				ref={appearance}
-				data-theme={theme}
 				data-dashboard-layout={layout}
 				side="bottom"
 				align="start"

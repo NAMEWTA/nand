@@ -1,10 +1,13 @@
-import { Platform } from 'obsidian';
+import { Notice, Platform } from 'obsidian';
 import { AutomationError } from '../../../../../shared/automation/errors';
 import type { AgentId } from '../../../core/launch/types';
 import { OPENCODE_EXTENSION, PI_EXTENSION } from './native-extensions';
 import { EVENT_PAYLOAD_SCRIPT, MAX_HOOK_INPUT_BYTES } from './event-payload';
 import { getAgent } from '../../../core/launch/catalog';
-import { accountEnv } from '../agents/accounts';
+import { resolveAccountEnv } from '../agents/accounts';
+import { accountPaths, isSystemAccount } from '../agents/system-homes';
+import { installSystemHooks, type SystemHookResult } from './system-hooks';
+import { stripOwnedRows } from './hook-entries';
 import { privatePathHasSymlink } from '../../../../../host/desktop/private-mode';
 import { t } from '../../../../../shared/i18n/index';
 import { SPOOL_GUARD } from './spool-guard';
@@ -76,6 +79,8 @@ export function mergeNativeHooks(
 	script: string,
 	events: string[],
 	runtime = { platform: 'linux', execPath: 'node' },
+	/** Replace only entries of this script; a real provider file can carry entries of other vaults. */
+	own?: string,
 ): Record<string, unknown> {
 	if (!value || typeof value !== 'object' || Array.isArray(value)) throw new AutomationError('hookSettingsInvalid');
 	const settings = value as Record<string, unknown>;
@@ -88,7 +93,8 @@ export function mergeNativeHooks(
 	for (const event of events) {
 		const previous = hooks[event] ?? [];
 		if (!Array.isArray(previous)) throw new AutomationError('hookSettingsInvalid');
-		const rows = (previous as unknown[]).filter((row: unknown) => !JSON.stringify(row).includes(SCRIPT_NAME));
+		// Only our own command entries are replaced; a group shared with user commands keeps them.
+		const { rows } = stripOwnedRows(previous as unknown[], (entry) => entry.includes(own ?? SCRIPT_NAME));
 		hooks[event] = [
 			...rows,
 			{
@@ -111,16 +117,17 @@ export class AutomationHooks {
 	private timer?: number;
 	private reading = false;
 	private slots = new Map<string, { dir: string; token: string; receive: (event: NativeHookEvent) => void }>();
-	constructor(private win: Window, private scope: () => { vault: string; device: string }) {}
+	/** `strict`: a system configuration NAND cannot update is an error (automations need the events); otherwise it is a notice. */
+	constructor(private win: Window, private scope: () => { vault: string; device: string }, private options: { strict?: boolean } = {}) {}
 	async prepare(
 		agent: AgentId,
 		env: Record<string, string>,
 		receive: (event: NativeHookEvent) => void,
 	): Promise<{ env: Record<string, string>; close(): void }> {
 		if (this.disposed) throw new AutomationError('agentUnavailable');
-		const [fs, , path] = await nodeModules();
+		const [fs, , path, nodeProcess] = await nodeModules();
 		const scope = this.scope();
-		const owned = await accountEnv(getAgent(agent), env.NAND_ACCOUNT_NAME!, scope.vault, scope.device);
+		const owned = await resolveAccountEnv(getAgent(agent), env, scope.vault, scope.device);
 		if (Object.entries(owned).some(([key, value]) => env[key] !== value)) throw new Error(t('agent.accountScopeMismatch'));
 		const token = crypto.randomUUID();
 		const parent = path.join(owned.NAND_ACCOUNT_ROOT!, 'runtime', 'hooks');
@@ -147,7 +154,8 @@ export class AutomationHooks {
 			void this.poll();
 		}, 300);
 		return {
-			env: { NAND_HOOK_DIR: dir, NAND_HOOK_TOKEN: token },
+			// The shared script finds the runtime through the session's own environment, so no executable path sits in user configuration.
+			env: { NAND_HOOK_DIR: dir, NAND_HOOK_TOKEN: token, NAND_HOOK_NODE: nodeProcess.execPath },
 			close: () => {
 				this.slots.delete(token);
 				void checkOwnedPath(dir).then(() => fs.rm(dir, { recursive: true, force: true })).catch(console.error);
@@ -158,23 +166,24 @@ export class AutomationHooks {
 			},
 		};
 	}
-	private async install(agent: AgentId, env: Record<string, string>): Promise<void> {
+	private async install(agent: AgentId, account: Record<string, string>): Promise<void> {
 		const [fs, , path, process] = await nodeModules();
+		// The system account writes into the user's real provider configuration; a managed one stays inside the vault.
+		const system = isSystemAccount(account), env: Record<string, string> = { ...account, ...accountPaths(account) };
+		if (system) {
+			const [, os] = await nodeModules();
+			const result: SystemHookResult = await installSystemHooks(agent, accountPaths(account), { home: os.homedir(), platform: process.platform }, HOOK_SCRIPT);
+			if (!result.skipped.length) return;
+			// A file NAND must not touch (a link, invalid JSON, a user's own extension) stays as it is; say so once.
+			const message = t('agent.hooks.systemSkipped', { files: result.skipped.map(row => `${row.file} (${row.reason})`).join(', ') });
+			if (this.options.strict) throw new Error(message);
+			new Notice(message, 10000);
+			return;
+		}
 		if (agent === 'pi' || agent === 'opencode') {
-			const file =
-				agent === 'pi'
-					? path.join(
-							env.PI_CODING_AGENT_DIR!,
-							'extensions',
-							'nand-status.ts',
-						)
-					: path.join(
-							env.OPENCODE_CONFIG_DIR!,
-							'plugins',
-							'nand-status.mjs',
-						);
-			await checkOwnedPath(file); await fs.mkdir(path.dirname(file), { recursive: true, mode: 0o700 });
-			await fs.writeFile(file, agent === 'pi' ? PI_EXTENSION : OPENCODE_EXTENSION, { mode: 0o600 });
+			const target = path.join(agent === 'pi' ? path.join(env.PI_CODING_AGENT_DIR!, 'extensions') : path.join(env.OPENCODE_CONFIG_DIR!, 'plugins'), agent === 'pi' ? 'nand-status.ts' : 'nand-status.mjs');
+			await checkOwnedPath(target); await fs.mkdir(path.dirname(target), { recursive: true, mode: 0o700 });
+			await fs.writeFile(target, agent === 'pi' ? PI_EXTENSION : OPENCODE_EXTENSION, { mode: 0o600 });
 			return;
 		}
 		const providers: Record<Exclude<AgentId, 'pi' | 'opencode'>, { file: string; events: string[] }> = {
@@ -204,12 +213,14 @@ export class AutomationHooks {
 		};
 		const provider = providers[agent];
 		const script = path.join(env.NAND_ACCOUNT_ROOT!, 'runtime', SCRIPT_NAME);
-		await checkOwnedPath(script); await checkOwnedPath(provider.file);
+		await checkOwnedPath(script);
 		await fs.mkdir(path.dirname(script), { recursive: true, mode: 0o700 });
 		await fs.writeFile(script, HOOK_SCRIPT, { mode: 0o600 });
-		await writeHookSettings(fs, provider.file, raw => JSON.stringify(mergeNativeHooks(
+		const merge = (raw: string | undefined) => JSON.stringify(mergeNativeHooks(
 			raw === undefined ? {} : (JSON.parse(raw) as unknown), script, provider.events, process,
-		), null, 2) + '\n', checkOwnedPath);
+		), null, 2) + '\n';
+		await checkOwnedPath(provider.file);
+		await writeHookSettings(fs, provider.file, merge, checkOwnedPath);
 	}
 	private async poll(): Promise<void> {
 		const [fs, , path] = await nodeModules();

@@ -38,8 +38,8 @@ metadata:
 |---|---|
 | 显示名称 | `NAND` |
 | 插件 id | `nand` |
-| 视图类型 | `nand-workbench-view`（工作台）、`nand-comments-view`（评论侧栏） |
-| 模块 | `home`、`agent`、`browser`、`archives`、`automations`、`notifications`、`icons`、`comments`、`sync` |
+| 视图类型 | `nand-workbench-view`（工作台）、`nand-comments-view`（评论侧栏）、`nand-navigator-view`（笔记导航器，左侧栏） |
+| 模块 | `home`、`agent`、`browser`、`archives`、`automations`、`notifications`、`icons`、`comments`、`navigator`、`sync` |
 | `minAppVersion` | `1.13.0`（不要使用标注 `@since 1.13.1` 或更高的 API） |
 | `isDesktopOnly` | `false` |
 | 许可证 | MIT（`LICENSE`；署名在 `NOTICE` 与 `THIRD-PARTY-NOTICES.md`） |
@@ -51,7 +51,7 @@ metadata:
 
 ## 硬性规则
 
-1. 只注册上面的两种视图类型。产品页面是模块通过 `pages` 返回的工作台页面；「在新标签页／分屏打开」打开的是专注模式的工作台叶子，不是另一种视图类型。
+1. 只注册上面的三种视图类型：工作台，以及评论和笔记导航器两个侧栏视图（各由对应模块挂载面板，模块关闭时显示开启提示）。产品页面是模块通过 `pages` 返回的工作台页面；「在新标签页／分屏打开」打开的是专注模式的工作台叶子，不是另一种视图类型。
 2. 代码按区组织（`app`、`shell`、`ui`、`theme`、`host`、`shared`、`modules/<id>/{core,platform,services,contrib,ui}`）。导入遵守 `references/architecture.md` 里的矩阵，类型导入也算；`pnpm test:architecture` 对任何违规都会失败。模块之间只通过对方的 `api.ts` 互相访问。
 3. 模块代码是懒加载的。启动代码（`app`、清单、`api.ts`、启动词典）不得静态导入模块的 `module.ts`、`core`、`platform`、`services`、`contrib` 或 `ui`，`module.ts` 也不得静态导入自己的 `ui/`。`pnpm run check:bundle` 检查启动预算和各模块预算。
 4. 模块自己启动、自己停止。它创建的一切都在 `dispose()` 里，或通过 `context.lifetime`、`context.commands`、`context.editor` 释放；关闭模块后不得留下监听器、命令、编辑器扩展、body 类名或进程。一个模块失败不影响其他模块。

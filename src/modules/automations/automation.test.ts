@@ -601,7 +601,6 @@ test('widget sources resolve dashboard paths with and without the .md extension 
 			const settings = homeSettings.defaults();
 			settings.dashboardFile = path;
 			settings.workspaceFiles = [path];
-			settings.countdownEnabled = settings.anniversaryEnabled = true;
 			settings.countdowns = [
 				{
 					...settings.countdowns[0]!,
@@ -658,9 +657,10 @@ test('widget sources resolve dashboard paths with and without the .md extension 
 			enabled = false;
 			assert.throws(() => source.resolveWidgetSource(ref), { message: t('automation.widgetModuleDisabled') });
 			enabled = true;
-			settings.countdownEnabled = false;
+			const kept = settings.countdowns;
+			settings.countdowns = [];
 			assert.throws(() => source.resolveWidgetSource(ref), { message: t('automation.widgetMissing') });
-			settings.countdownEnabled = true;
+			settings.countdowns = kept;
 			assert.throws(() => source.resolveWidgetSource({ ...ref, id: 'widget:deleted' }), {
 				message: t('automation.widgetMissing'),
 			});
@@ -1029,8 +1029,6 @@ test('anniversary reminders use the singular English year only for a difference 
 			for (const item of cases) {
 				const settings = homeSettings.defaults();
 				settings.dashboardFile = 'dashboard.md';
-				settings.anniversaryEnabled = true;
-				settings.countdownEnabled = false;
 				settings.anniversaries = [
 					{
 						...settings.anniversaries[0]!,

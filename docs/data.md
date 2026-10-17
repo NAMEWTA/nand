@@ -9,6 +9,7 @@
 | 看板 | 你选择的看板笔记（默认 `.nand/content/dashboard.md`） |
 | 常用操作条技能按钮 | 各看板 YAML 的 `skills` 字段，包含名称、图标、模板、技能名称、智能体、目标及直接发送开关 |
 | 技能小组件按钮 | 全局设置的 `home.skillWidgetButtons`，按钮字段同上，各看板共用；与常用操作条列表独立 |
+| 快捷命令小组件按钮 | 全局设置的 `home.shortcutButtons`：`id`、`label`、`icon`、`type`（`file`/`command`/`automation`/`quick`/`agent`）、`target`（`quick` 时为智能体模块终端快捷命令的 id，命令内容仍只存在智能体设置里）；`agent` 另有 `agentId` 与 `prompt`。各看板共用 |
 | 资料库和文件夹的笔记模板 | 列的 `library.templatePaths` 有序列表。列表缺失时只读投影旧 `templatePath` 为单项，不写迁移；显式 `[]` 表示空白笔记。保存配置时另将首项镜像到 `templatePath`，供旧版读取。 |
 | 表格列偏好 | 每分区的 `library.tableOrder` 和 `library.tableHidden` 列表。列标识为 `file.name`、`file.modified`，以及表示笔记属性的 `property:<字段名>`。缺席字段保留偏好，重置只删除这两个列表；卡片徽章另用 `visibleProperties`。 |
 | 工作流分区 | 各看板列的 `pipeline` YAML 对象保存根目录、阶段、筛选、模板、列宽和限定范围的技能。笔记保存状态、任务、`due`、`remind`；在工作流中启用提醒时，还会在 `nandAutomation` 中保存现有格式的自动化定义及所属设备 id。不要在笔记间复制该定义的 id。 |
@@ -18,9 +19,13 @@
 | 习惯、记账、阅读、番茄钟 | `.nand/content/NAND/习惯/habits.json`、`记账/expense.json`、`阅读/reading.json`、`番茄钟/pomodoro.json`（后三项同属 `.nand/content/NAND/`） |
 | 全局设置 | `.nand/config/settings.json`，按 app、theme、home、browser、comments 等命名空间保存 |
 | 工作台列表 | 全局设置 `home.workspaces` 的 files、names、active |
-| 已保存的看板外观 | 全局设置的 `home.customThemes` 保存“我的主题”，每项含 `id`、`name`、基础主题 `base`、颜色 `colors`，以及 `bgImage`、`bgDim`、`bgBlur`、`bgSize`、`surfaceOpacity`、`glassBlur`、`radiusScale`、`fontScale`。`colors` 可含 `accent`、`accentLight`、`bg`、`bgCard`、`bgSection`、`text`、`textMuted`、`borderCard`。`home.activeCustomThemeId` 标记上次保存或应用的主题。应用只更新 `home` 的 `stylePreset`、`customColors` 和上述装饰字段，不修改全局 `theme`，不包含看板路径、小组件配置、凭证或设备设置。 |
+| 看板布局 | 看板 Markdown 的 frontmatter：`layout: immersive` 与 `canvas: 1` 标记画布格式（没有 `canvas` 的旧看板打开时转换一次），`banners` 保存第一个之外的横幅实例（键是实例 id），`widgets` 是画布上的小组件（`memberId`、`provider`、`kind`、`instanceId`），`immersive` 是每个小组件、分区和独立卡片的 `id`、`w`、`cap`、`x`、`y`（可含 `fixed`）。卡片与分区内容在正文里。 |
+| 已保存的看板外观 | 全局设置的 `home.appearancePresets` 保存外观预设：每项含 `id`、`name`、全局主题 `theme`，以及 `home` 的 `bgImage`、`bgDim`、`bgBlur`、`bgSize`、`bgFocal`、`surfaceOpacity`、`glassBlur`、`radiusScale`、`fontScale`；`home.activeAppearancePresetId` 标记上次应用的预设。看板没有独立配色，预设不含颜色、看板路径、小组件配置、凭证或设备设置。 |
+| 旧看板转换用的小组件列表 | 全局设置的 `home.legacyWidgetMembers`：升级时按旧的“侧栏小组件开关”记录一次，用于把旧看板转换成画布；转换后不再使用，新安装没有这一项。 |
 | 设备设置 | `.nand/config/devices/<device-id>.json` |
 | 图标及其备份 | `.nand/icons/` |
+| 笔记导航器设置 | 全局设置的 `navigator` 命名空间（显示、排序、置顶、快捷键、快捷方式、隐藏规则、文件夹笔记、按项覆盖的外观，以及周期笔记规则、模板文件夹与引擎、文件夹模板、自定义“创建笔记”命令、库配置档和它们的当前选择）；布局方向、窗格大小、展开状态、选中项、搜索框内容、日历是否展开、最近笔记（含各配置档自己的最近列表）保存在本设备设置。日历创建的周期笔记、模板生成的笔记、合并结果在库里原位置，不在 `.nand/`；标签修改的“撤销”内容只在内存里 |
+| 笔记导航器预览缓存 | 浏览器的 IndexedDB 库 `nand-navigator-<库 id>`，保存每篇笔记的预览文字和缩略图路径。它不在库目录里，可随时用“重建缓存”丢弃，不影响笔记 |
 | 批注与锚点（v2） | `.nand/editor/comments/` 下的 `index.json`、`pending.json`、`files/<笔记路径 SHA-256 前 16 位>.json`；损坏副本在 `set-aside/` |
 | 自动化运行、通知回执 | `.nand/automation/<device-id>/`、`.nand/notifications/<device-id>/` |
 | 智能体派发快照 | 同一自动化 `runtime.json`，包含最终提示词、文件引用、来源、调用 ID 和交付回执 |
@@ -39,7 +44,8 @@
 | 记账导出的 CSV | `.nand/content/exports/expense-export-<日期>.csv` |
 | Git 同步的计时与暂停状态 | `.nand/sync/<device-id>/<repository-hash>.json`，以及相邻恢复副本 |
 | 终端组件 | `.nand/helpers/<device-id>/<platform-arch>/<version>/` |
-| 智能体账号与登录环境 | `.nand/agents/<device-id>/accounts/<provider>/<stable-id>/`（空名称为 default） |
+| 托管智能体账号与登录环境 | `.nand/agents/<device-id>/accounts/<provider>/<stable-id>/`（旧版库内默认账号目录 `default` 保留，作为“库内账号（旧）”） |
+| 系统账号的运行目录（事件目录） | `.nand/agents/<device-id>/system/` |
 
 `档案`、`个人档案`、`企业档案`、`.nand/content/NAND/自动化`、`.nand/content/NAND/习惯`、`.nand/content/NAND/记账`、`.nand/content/NAND/阅读`、`.nand/content/NAND/番茄钟` 这些文件夹名在所有界面语言下都是中文，`基本信息.md`、`操作.md` 等文件名也一样。没有设置文件的库从默认值开始。
 
@@ -61,7 +67,7 @@
 
 ## 库之外的数据
 
-NAND 新启动的 CLI 使用库内的 HOME、提供方配置目录、XDG/Windows 数据目录和临时目录，状态 Hook 与事件文件同属账号。浏览器 Cookie、站点数据、缓存和下载进入库内的设备/profile 目录，抓取与标注附件保存在 `.nand/browser/<device-id>/artifacts/`。库外由用户自行维护的 CLI homes 不自动搬迁；NAND 不以它们作为默认账号的回退来源。
+默认的“系统账号”不改动 HOME、提供方配置目录或 XDG/Windows 数据目录，CLI 沿用用户本机已有的登录；NAND 只在库内保存状态 Hook 脚本与事件文件，并在状态 Hook 开启或自动化运行时确保真实 CLI 配置里有 NAND 的固定条目；共用脚本与备份在 `~/.nand/agent-hooks/`，这是库外唯一由 NAND 写入的位置（规则见[智能体工作台](agent-workbench.md#状态-hook)）。“托管账号”使用库内的 HOME、提供方配置目录、XDG/Windows 数据目录和临时目录，状态 Hook 与事件文件同属账号。浏览器 Cookie、站点数据、缓存和下载进入库内的设备/profile 目录，抓取与标注附件保存在 `.nand/browser/<device-id>/artifacts/`。库外由用户自行维护的 CLI homes 不自动搬迁；系统账号直接使用它们，托管账号不会回退到它们，也不会复制它们的登录。
 
 设备映射位于 `.nand/config/identity.json`，利用宿主只读身份识别当前设备。复制库需要识别或明确选择设备归属，不会自动接管另一设备的运行队列。普通笔记、宿主配置、系统 IPC 对象与 Git 自有元数据不是 NAND 业务数据。
 

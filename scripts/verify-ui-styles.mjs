@@ -56,21 +56,51 @@ for (let i = 0; i < 50 && !ws; i++) {
 if (!ws) { proc.kill(); throw new Error('Chrome did not expose its debugging endpoint'); }
 await new Promise((resolve, reject) => { if (ws.readyState === WebSocket.OPEN) resolve(); else { ws.addEventListener('open', resolve, { once: true }); ws.addEventListener('error', reject, { once: true }); } });
 ws.addEventListener('message', (e) => { const m = JSON.parse(e.data); const w = waiting.get(m.id); if (w) { waiting.delete(m.id); m.error ? w.rej(new Error(m.error.message)) : w.res(m.result); } });
-await send('Page.enable'); await send('DOM.enable'); await send('CSS.enable');
+await send('Page.enable'); await send('Runtime.enable'); await send('DOM.enable'); await send('CSS.enable');
 
 const expectations = JSON.parse(fs.readFileSync('scripts/ui-style-expectations.json', 'utf8'));
 let failed = 0;
+// Colours Chrome reports in their own space (oklch, color-mix) are compared as sRGB pixels through a canvas.
+const colorProbe = `(() => {
+	const ctx = Object.assign(document.createElement('canvas'), { width: 1, height: 1 }).getContext('2d', { willReadFrequently: true });
+	const pixel = (css, under) => { ctx.clearRect(0, 0, 1, 1); if (under) { ctx.fillStyle = under; ctx.fillRect(0, 0, 1, 1); } ctx.fillStyle = css; ctx.fillRect(0, 0, 1, 1); return [...ctx.getImageData(0, 0, 1, 1).data].slice(0, 3); };
+	const lum = ([r, g, b]) => [r, g, b].map((c) => { c /= 255; return c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4; }).reduce((sum, c, i) => sum + c * [0.2126, 0.7152, 0.0722][i], 0);
+	window.__nandColor = {
+		pixel,
+		same: (selector, prop, expected) => { const got = pixel(getComputedStyle(document.querySelector(selector))[prop]), want = pixel(expected); return { got, want, ok: got.every((c, i) => Math.abs(c - want[i]) <= 1) }; },
+		contrast: (selector) => {
+			const el = document.querySelector(selector), cs = getComputedStyle(el);
+			const base = getComputedStyle(el.closest('.nand-ui')).getPropertyValue('--background').trim();
+			const bg = pixel(cs.backgroundColor, base), fg = pixel(cs.color, 'rgb(' + bg.join(',') + ')');
+			const [hi, lo] = [lum(fg), lum(bg)].sort((a, b) => b - a);
+			return { fg, bg, ratio: (hi + 0.05) / (lo + 0.05) };
+		},
+	};
+	return true;
+})()`;
 for (const theme of ['theme-light', 'theme-dark']) {
 	await send('Page.navigate', { url: pathToFileURL(path.join(work, `${theme}.html`)).href }); await sleep(800);
 	const { root } = await send('DOM.getDocument', { depth: -1 });
 	for (const exp of expectations) {
 		if (exp.themes && !exp.themes.includes(theme)) continue;
+		// NAND's palette and font live on <body>; an expectation can set them (and they reset for the next one).
+		const attributes = exp.bodyAttributes ?? {};
+		await send('Runtime.evaluate', { expression: `document.body.removeAttribute('data-nand-palette');document.body.removeAttribute('data-nand-font');for (const [k, v] of Object.entries(${JSON.stringify(attributes)})) document.body.setAttribute(k, v);true` });
 		const { nodeId } = await send('DOM.querySelector', { nodeId: root.nodeId, selector: exp.selector });
 		if (!nodeId) { failed++; console.error(`✗ ${theme} ${exp.name}: 样例里没有 ${exp.selector}`); continue; }
 		await send('CSS.forcePseudoState', { nodeId, forcedPseudoClasses: exp.state ?? [] });
+		await send('Runtime.evaluate', { expression: colorProbe });
+		for (const [prop, css] of Object.entries(exp.colorEquals ?? {})) {
+			const { result } = await send('Runtime.evaluate', { expression: `window.__nandColor.same(${JSON.stringify(exp.selector)}, ${JSON.stringify(prop)}, ${JSON.stringify(css)})`, returnByValue: true });
+			if (!result.value.ok) { failed++; console.error(`✗ ${theme} ${exp.name} ${prop}: rgb(${result.value.got}) 不是 ${css} = rgb(${result.value.want})`); }
+		}
+		if (exp.contrast) {
+			const { result } = await send('Runtime.evaluate', { expression: `window.__nandColor.contrast(${JSON.stringify(exp.selector)})`, returnByValue: true });
+			if (!(result.value.ratio >= exp.contrast.min)) { failed++; console.error(`✗ ${theme} ${exp.name}: 对比度 ${result.value.ratio.toFixed(2)} < ${exp.contrast.min}（前景 rgb(${result.value.fg}) 背景 rgb(${result.value.bg})）`); }
+		}
 		const { computedStyle } = await send('CSS.getComputedStyleForNode', { nodeId });
 		const get = (name) => computedStyle.find((p) => p.name === name)?.value;
-		for (const [prop, rule] of Object.entries(exp.expect)) {
+		for (const [prop, rule] of Object.entries(exp.expect ?? {})) {
 			const value = get(prop);
 			const ok = rule.equals !== undefined ? value === rule.equals : rule.not !== undefined ? value !== rule.not : true;
 			if (!ok) { failed++; console.error(`✗ ${theme} ${exp.name} ${prop}: ${value}（期望 ${JSON.stringify(rule)}）`); }

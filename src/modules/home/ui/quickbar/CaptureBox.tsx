@@ -34,7 +34,8 @@ export function CaptureBox({ store }: { store: BoardStore }) {
 			if (file) void store.openFile(file.path).then(() => setOpen(false));
 		} else if (text.trim())
 			void store.capture(text).then(() => {
-				store.setCaptureDraft('');
+				// Only the draft that was submitted goes: text typed while the capture ran, or on another board, stays.
+				if (store.captureDraft === text) store.setCaptureDraft('');
 			});
 	};
 	return (

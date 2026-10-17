@@ -16,13 +16,11 @@ export function appSchema(defaultLanguage: 'en' | 'zh') {
 		font: f.enum(['geist', 'host'] as const, { default: 'geist' }),
 		palette: f.enum(['host', 'orca'] as const, { default: 'host' }),
 		statusBar: f.object({
-			visible: f.boolean({ default: true }),
 			segments: f.custom<Record<string, boolean>>({ default: {}, normalize: (raw) =>
 				raw && typeof raw === 'object' && !Array.isArray(raw)
 					? Object.fromEntries(Object.entries(raw).filter((entry): entry is [string, boolean] => typeof entry[1] === 'boolean')) : {} }),
 			usageMode: f.enum(['verbose', 'compact'] as const, { default: 'verbose' }),
 			usageDisplay: f.enum(['used', 'remaining'] as const, { default: 'used' }),
-			mirrorToObsidian: f.boolean({ default: false }),
 		}),
 		modules: f.object(moduleFlags),
 	});

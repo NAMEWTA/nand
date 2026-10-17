@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { test } from 'vitest';
+import { test, vi } from 'vitest';
 import { createRequire } from 'node:module';
 import * as fs from 'node:fs/promises';
 import * as os from 'node:os';
@@ -13,7 +13,7 @@ import type { HistoryPage } from './agent-data-client.ts';
 import { nativeVaultStorage } from '../../../../../host/desktop/vault-storage';
 import { deviceId } from '../../../../../host/obsidian/storage/device-id';
 import { prepareLegacyAccounts } from '../agents/legacy-accounts';
-import { accountEnv } from '../agents/accounts';
+import { LEGACY_VAULT_ACCOUNT, accountEnv } from '../agents/accounts';
 import { getAgent } from '../../../core/launch/catalog';
 
 globalThis.window = { require: createRequire(import.meta.url) } as unknown as Window & typeof globalThis;
@@ -29,13 +29,15 @@ test('an unbound legacy account produces a warning while other account history i
 		await assert.rejects(prepareLegacyAccounts({ vault, device: deviceId(app), plugin, boot: 'one' }));
 		const release = await prepareLegacyAccounts({ vault, device: deviceId(app), plugin, boot: 'two' });
 		const settings = normalizeAgentSettings({}); settings.agents['claude-code'].enabled = false;
+		settings.agents['claude-code'].accountId = LEGACY_VAULT_ACCOUNT;
 		let roots: Array<{ agentId: string; accountKey: string }> = [];
 		const client = { isConnected: () => true, connectionRevision: 1, subscribeConnection: () => () => {}, request: async (_op: string, payload: { roots: typeof roots }) => { roots = payload.roots; return { warnings: [], revision: 1 }; } };
 		const history = new NativeHistory(app, { historyClient: async () => client } as unknown as HistoryClientSource, () => settings);
 		try {
 			const warnings = await history.scan();
 			assert.ok(roots.some(row => row.agentId === 'codex'));
-			assert.ok(!roots.some(row => row.agentId === 'claude-code'));
+			// Only the system account is scanned; the unbound former default directory is a warning instead.
+			assert.deepEqual(roots.filter(row => row.agentId === 'claude-code').map(row => (JSON.parse(row.accountKey) as Record<string, string>).NAND_ACCOUNT_ID), ['claude-code/system']);
 			assert.equal(warnings.length, 1);
 			const oldKey = JSON.stringify(['claude-code', JSON.stringify({ CLAUDE_CONFIG_DIR: path.join(plugin, 'accounts/claude/old/home') }), 'session']);
 			await history.update(oldKey, { title: '保留标题', favorite: true, tags: ['重要'] });
@@ -43,7 +45,7 @@ test('an unbound legacy account produces a warning while other account history i
 			settings.agents['claude-code'].accountId = 'a.b';
 			await accountEnv(getAgent('claude-code'), 'a.b', vault, deviceId(app), true);
 			await history.scan();
-			const current = roots.find(row => row.agentId === 'claude-code')!;
+			const current = roots.find(row => row.agentId === 'claude-code' && (JSON.parse(row.accountKey) as Record<string, string>).NAND_ACCOUNT_NAME === 'a.b')!;
 			const key = JSON.stringify(['claude-code', current.accountKey, 'session']);
 			assert.deepEqual(history.meta(key), { title: '保留标题', favorite: true, tags: ['重要'] });
 			await history.update(key, { title: '新标题' });
@@ -53,24 +55,36 @@ test('an unbound legacy account produces a warning while other account history i
 		} finally { await history.dispose(); release(); }
 	} finally { await fs.rm(vault, { recursive: true, force: true }); }
 }, 30000);
-test('history scan sends only vault account sources and the same resumable account environment', async () => {
-	const vault = await fs.realpath(await fs.mkdtemp(path.join(os.tmpdir(), 'nand-history-owned-')));
+test('history scan sends managed sources from the vault and system sources from the real provider directories', async () => {
+	const vault = await fs.realpath(await fs.mkdtemp(path.join(os.tmpdir(), 'nand-history-owned-'))), home = await fs.realpath(await fs.mkdtemp(path.join(os.tmpdir(), 'nand-history-home-')));
+	vi.stubEnv('HOME', home); vi.stubEnv('USERPROFILE', home);
+	for (const key of ['CLAUDE_CONFIG_DIR', 'CODEX_HOME', 'GROK_HOME', 'GEMINI_CLI_HOME', 'PI_CODING_AGENT_DIR', 'PI_CODING_AGENT_SESSION_DIR', 'XDG_DATA_HOME', 'XDG_CONFIG_HOME', 'OPENCODE_CONFIG_DIR']) vi.stubEnv(key, '');
 	try {
 		const app = { vault: { adapter: { ...nativeVaultStorage(vault), getBasePath: () => vault } } } as unknown as App;
 		await initializeTestDevice(app);
-		const requests: Array<{ roots: Array<{ agentId: string; path: string; accountKey: string }> }> = [];
+		const requests: Array<{ roots: Array<{ agentId: string; path: string; accountKey: string; systemBase?: string }> }> = [];
 		const client = { isConnected: () => true, connectionRevision: 1, subscribeConnection: () => () => {}, request: async (_operation: string, payload: unknown) => { requests.push(payload as typeof requests[number]); return { warnings: [], revision: 1 }; } };
-		const history = new NativeHistory(app, { historyClient: async () => client } as unknown as HistoryClientSource, () => normalizeAgentSettings({}));
+		const history = new NativeHistory(app, { historyClient: async () => client } as unknown as HistoryClientSource, () => normalizeAgentSettings({}), () => ({ codex: ['a.b'] }));
 		await history.scan();
-		assert.equal(requests[0]?.roots.length, 6);
-		for (const source of requests[0]!.roots) {
-			assert.ok(source.path.startsWith(path.join(vault, '.nand', 'agents') + path.sep), source.path);
+		const roots = requests[0]!.roots;
+		assert.equal(roots.length, 7);
+		for (const source of roots) {
 			const env = JSON.parse(source.accountKey) as Record<string, string>;
 			assert.ok(env.NAND_ACCOUNT_ID?.startsWith(source.agentId + '/'));
-			assert.ok(source.path.startsWith(env.NAND_ACCOUNT_ROOT! + path.sep));
+			if (env.NAND_ACCOUNT_ID === source.agentId + '/system') {
+				// The system account reads the user's own provider directory and tells the helper which one.
+				assert.ok(source.path.startsWith(home + path.sep), source.path);
+				assert.ok(source.systemBase && source.path.startsWith(source.systemBase), source.path);
+				assert.ok(!source.path.startsWith(vault), source.path);
+			} else {
+				assert.equal(source.systemBase, undefined);
+				assert.ok(source.path.startsWith(path.join(vault, '.nand', 'agents') + path.sep), source.path);
+				assert.ok(source.path.startsWith(env.NAND_ACCOUNT_ROOT! + path.sep));
+			}
 		}
+		assert.equal(roots.filter(source => source.systemBase).length, 6);
 		await history.dispose();
-	} finally { await fs.rm(vault, { recursive: true, force: true }); }
+	} finally { vi.unstubAllEnvs(); await fs.rm(vault, { recursive: true, force: true }); await fs.rm(home, { recursive: true, force: true }); }
 }, 30000);
 test('native history shares scan/query/usage, revisions invalidate leaves, and aborts are consumer scoped', async () => {
 	const fixture = await fs.realpath(await fs.mkdtemp(path.join(os.tmpdir(), 'nand-history-model-')));

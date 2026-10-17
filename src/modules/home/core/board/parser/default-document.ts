@@ -1,6 +1,8 @@
 import { t } from '../../../../../shared/i18n/index';
 import { serialize } from './parse';
-import { DEFAULT_BANNER } from './syntax';
+import { defaultCanvas } from '../canvas';
+import type { DashboardData } from '../types/model';
+import { newBanner } from '../banner';
 
 export function generateDefaultMarkdown(): string {
 	const today = new Date();
@@ -10,8 +12,8 @@ export function generateDefaultMarkdown(): string {
 	const libraryName = t('default.libraryName');
 	const dateStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
 
-	return serialize({
-		banner: { ...DEFAULT_BANNER, images: [...(DEFAULT_BANNER.images ?? [])], quote: t('default.bannerQuote'), author: 'NAND' },
+	const board: DashboardData = {
+		banner: newBanner(),
 		quickActions: [],
 		columns: [
 			{
@@ -260,5 +262,6 @@ export function generateDefaultMarkdown(): string {
 				],
 			},
 		],
-	});
+	};
+	return serialize(defaultCanvas(board));
 }

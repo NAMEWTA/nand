@@ -3,7 +3,6 @@ import { widgetClasses } from '../theme/widget-classes';
 import type { App } from 'obsidian';
 import { createPortal } from 'react-dom';
 import { usePortalContainer } from '../../../../ui/react/contexts';
-import { useDashboardTheme } from '../theme/ThemeBridge';
 import { useCallback, useLayoutEffect, useRef, useState } from 'react';
 import { dateBucketOf, type VaultTask } from '../../platform/calendar/alltasks-scan';
 import { InlineLinks } from './CalendarLinks';
@@ -17,8 +16,7 @@ interface Preview {
 }
 function DayPreview({ preview, app, context }: { preview: Preview; app: App; context: DashboardRenderContext }) {
 	const node = useRef<HTMLDivElement>(null),
-		portal = usePortalContainer(),
-		theme = useDashboardTheme();
+		portal = usePortalContainer();
 	useLayoutEffect(() => {
 		const popup = node.current;
 		if (!popup) return;
@@ -38,11 +36,7 @@ function DayPreview({ preview, app, context }: { preview: Preview; app: App; con
 		popup.style.top = `${Math.min(Math.max(margin, rect.top), Math.max(margin, doc.documentElement.clientHeight - height - margin))}px`;
 	}, [preview, context]);
 	return createPortal(
-		<div
-			ref={node}
-			data-theme={theme}
-			className={widgetClasses('nand-dashboard-root dashboard-calendar-day-preview')}
-		>
+		<div ref={node} className={widgetClasses('nand-dashboard-root dashboard-calendar-day-preview')}>
 			<div className={widgetClasses('dashboard-calendar-day-preview-list')}>
 				{preview.tasks
 					.slice()

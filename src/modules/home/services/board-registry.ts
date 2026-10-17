@@ -7,12 +7,9 @@ import {
 	normalizeWorkspacePath,
 	pruneMissingWorkspaces,
 } from '../core/workspace/workspace-registry';
-import type { BoardLayout, DashboardSettings } from '../core/board/types/model';
+import type { DashboardSettings } from '../core/board/types/model';
 import { parse, serialize } from '../core/board/parser/parse';
 import { withStableSectionIds } from '../core/board/section-identity';
-import { legacyBoardMembers } from '../core/board/widget-members';
-import { boardTileSources, boardTiles, persistedBoardTiles } from '../core/board/board-tiles';
-import { widgetTileDefaults } from './widget-layout';
 import type { BoardOperations } from '../api';
 import { contentFiles } from '../../../host/obsidian/storage/content-files';
 
@@ -52,11 +49,13 @@ export class BoardRegistry implements BoardOperations {
 
 	/** Follow renames and deletions of board files in the vault. */
 	watch(register: (dispose: () => void) => void): void {
-		register(contentFiles(this.host.app).subscribe(event => {
-			if (!event.path.endsWith('.md')) return;
-			if (event.kind === 'rename') void this.run(() => this.followRename(event, event.oldPath!));
-			if (event.kind === 'delete') void this.run(() => this.followDelete(event));
-		}));
+		register(
+			contentFiles(this.host.app).subscribe((event) => {
+				if (!event.path.endsWith('.md')) return;
+				if (event.kind === 'rename') void this.run(() => this.followRename(event, event.oldPath!));
+				if (event.kind === 'delete') void this.run(() => this.followDelete(event));
+			}),
+		);
 	}
 
 	switch(path: string): Promise<void> {
@@ -71,17 +70,16 @@ export class BoardRegistry implements BoardOperations {
 		});
 	}
 
-	create(name: string, layout?: BoardLayout): Promise<void> {
+	create(name: string): Promise<void> {
 		return this.run(async () => {
 			const registry = this.host.read();
 			const trimmed = name.trim();
 			const path = nextWorkspacePath(registry.workspaceFiles, trimmed, (p) => this.exists(p));
 			try {
-				const data = withStableSectionIds(parse(generateDefaultMarkdown()), () => `section-${crypto.randomUUID()}`);
-				if (layout) data.layout = layout;
-				const settings = this.host.settings?.();
-				if (settings) data.widgets = legacyBoardMembers(settings, layout !== 'side');
-				if (layout === 'immersive') data.immersive = persistedBoardTiles(boardTiles(data, boardTileSources(data, data.widgets ?? []), member => settings ? widgetTileDefaults(member, settings, true) : undefined));
+				const data = withStableSectionIds(
+					parse(generateDefaultMarkdown()),
+					() => `section-${crypto.randomUUID()}`,
+				);
 				await contentFiles(this.host.app).create(path.endsWith('.md') ? path : `${path}.md`, serialize(data));
 			} catch (error) {
 				console.error('[NAND board] creation failed', error);
@@ -89,7 +87,11 @@ export class BoardRegistry implements BoardOperations {
 				return;
 			}
 			const names = alignWorkspaceNames(registry.workspaceFiles, registry.workspaceNames);
-			await this.host.write({ workspaceFiles: [...registry.workspaceFiles, path], workspaceNames: [...names, trimmed], dashboardFile: path });
+			await this.host.write({
+				workspaceFiles: [...registry.workspaceFiles, path],
+				workspaceNames: [...names, trimmed],
+				dashboardFile: path,
+			});
 			await this.host.repointAll();
 			new Notice(t('workspace.created', { name: trimmed || path }));
 		});
@@ -103,7 +105,10 @@ export class BoardRegistry implements BoardOperations {
 		const trimmed = name.trim();
 		const names = alignWorkspaceNames(registry.workspaceFiles, registry.workspaceNames);
 		if (names[index] === trimmed) return;
-		await this.host.write({ ...registry, workspaceNames: names.map((value, i) => (i === index ? trimmed : value)) });
+		await this.host.write({
+			...registry,
+			workspaceNames: names.map((value, i) => (i === index ? trimmed : value)),
+		});
 		this.host.refreshAll();
 	}
 
@@ -121,7 +126,8 @@ export class BoardRegistry implements BoardOperations {
 			await this.host.write({
 				workspaceFiles: nextFiles,
 				workspaceNames: names.filter((_, i) => i !== index),
-				dashboardFile: target === normalizeWorkspacePath(registry.dashboardFile) ? nextFiles[0]! : registry.dashboardFile,
+				dashboardFile:
+					target === normalizeWorkspacePath(registry.dashboardFile) ? nextFiles[0]! : registry.dashboardFile,
 			});
 			await this.host.repointAll();
 		});
@@ -203,7 +209,8 @@ export class BoardRegistry implements BoardOperations {
 		await this.host.write({
 			workspaceFiles: registry.workspaceFiles.map((p, i) => (i === index ? newEntry : p)),
 			workspaceNames: alignWorkspaceNames(registry.workspaceFiles, registry.workspaceNames),
-			dashboardFile: normalizeWorkspacePath(registry.dashboardFile) === oldEntry ? newEntry : registry.dashboardFile,
+			dashboardFile:
+				normalizeWorkspacePath(registry.dashboardFile) === oldEntry ? newEntry : registry.dashboardFile,
 		});
 		await this.host.repointAll();
 	}
@@ -216,14 +223,19 @@ export class BoardRegistry implements BoardOperations {
 		if (index < 0) return;
 		if (files.length <= 1) {
 			// Last board gone: reset to the default entry; the engine recreates a default board.
-			await this.host.write({ workspaceFiles: ['.nand/content/dashboard'], workspaceNames: [''], dashboardFile: '.nand/content/dashboard' });
+			await this.host.write({
+				workspaceFiles: ['.nand/content/dashboard'],
+				workspaceNames: [''],
+				dashboardFile: '.nand/content/dashboard',
+			});
 		} else {
 			const names = alignWorkspaceNames(files, registry.workspaceNames);
 			const nextFiles = files.filter((_, i) => i !== index);
 			await this.host.write({
 				workspaceFiles: nextFiles,
 				workspaceNames: names.filter((_, i) => i !== index),
-				dashboardFile: normalizeWorkspacePath(registry.dashboardFile) === entry ? nextFiles[0]! : registry.dashboardFile,
+				dashboardFile:
+					normalizeWorkspacePath(registry.dashboardFile) === entry ? nextFiles[0]! : registry.dashboardFile,
 			});
 		}
 		await this.host.repointAll();

@@ -20,7 +20,7 @@ for (const p of ['NAND/技术笔记/note.md','NAND-笔记/习惯.md','Notes/活�
 test('custom roots and workspace preferences are evaluated, not cached globally',()=>{assert.equal(isRecentUserDocument('People/个人档案/A/基本信息.md',{contacts:{rootFolder:'Elsewhere'}}),true); assert.equal(isRecentUserDocument('Boards/Current.md',{}),true);});
 test('new defaults are language neutral and React recent documents use their host scope',()=>{
   assert.equal(DEFAULT_TASK_ARCHIVE_PATH,'.nand/content/Archive/Done.md');assert.equal(DEFAULT_HIGHLIGHT_IMPORT_PATH,'.nand/content/Weread/Highlights');
-  assert.ok(fs.readFileSync('src/modules/home/ui/sidebar/RecentDocs.tsx','utf8').includes('isRecentUserDocument(file.path, settings)'));
+  assert.ok(fs.readFileSync('src/modules/home/ui/canvas/RecentWidget.tsx','utf8').includes('isRecentUserDocument(file.path, settings)'));
 });
 for (const language of ['zh','en','zh']) test('default document uses creation-time language '+language,()=>{
   setLanguage(language);const data=parse(generateDefaultMarkdown());

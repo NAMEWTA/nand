@@ -1,8 +1,9 @@
-import { expect, test } from 'vitest';
+import { afterEach, expect, test, vi } from 'vitest';
 import { MarkdownView, type WorkspaceLeaf } from 'obsidian';
 import { memoryVault } from '../../../../scripts/fixtures/memory-vault';
 import { readMarkdownDocument, readYaml } from '../../../shared/storage/markdown-document';
 import { ContentFiles, contentFiles } from './content-files';
+import { useStorageTimers, type StorageTimers } from '../../../shared/storage/timers';
 
 test('malformed frontmatter does not hide other searchable documents and remains editable', async () => {
 	const vault = memoryVault({ '.nand/content/bad.md': '---\na: [\n---\n# Keep me', '.nand/content/good.md': '---\ntag: useful\n---\n#body-tag' });
@@ -290,4 +291,24 @@ test('cyclic YAML stays editable and does not block library metadata or unrelate
 		expect(vault.contents.get('Ref.md')).toBe(prefix+'[[/.nand/content/New.md]]');
 		await new ContentFiles(vault.app).prepareMetadata();
 	}
+});
+
+afterEach(() => { vi.useRealTimers(); useStorageTimers(undefined); vi.restoreAllMocks(); });
+
+test('a dropped adapter request during a scan cannot block the mutation queue forever', async () => {
+	vi.useFakeTimers();
+	useStorageTimers(globalThis as unknown as StorageTimers);
+	vi.spyOn(console, 'warn').mockImplementation(() => undefined);
+	const vault = memoryVault({ '.nand/content/A.md': 'a' }), files = contentFiles(vault.app), stat = vault.adapter.stat;
+	let dropped = 0;
+	// The platform answers the first stat of the scan never; later requests are answered normally.
+	vault.adapter.stat = async path => (dropped++ === 0 ? new Promise<never>(() => undefined) : stat(path));
+	let created = false;
+	const refresh = files.refresh();
+	const queued = files.create('.nand/content/B.md', 'b').then(() => { created = true; });
+	await vi.advanceTimersByTimeAsync(10000);
+	await refresh; await queued;
+	expect(created).toBe(true);
+	expect(files.getFileByPath('.nand/content/A.md')).toBeTruthy();
+	expect(vault.contents.get('.nand/content/B.md')).toBe('b');
 });

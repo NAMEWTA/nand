@@ -12,9 +12,8 @@ export function openRecordDialog(
 	classes: string,
 	render: (close: () => void, root: HTMLElement) => ReactNode,
 ): () => void {
-	const theme = doc.querySelector<HTMLElement>('.nand-dashboard-root[data-theme]')?.dataset.theme ?? 'mono';
 	return openRecordOverlay(doc, (close, host) => (
-		<RecordDialog title={title} classes={classes} onClose={close} theme={theme}>
+		<RecordDialog title={title} classes={classes} onClose={close}>
 			{render(close, host)}
 		</RecordDialog>
 	));

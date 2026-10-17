@@ -1,9 +1,9 @@
-import type { CustomColors, CustomTheme } from '../custom-theme';
 import { DEFAULT_TASK_ARCHIVE_PATH, DEFAULT_HIGHLIGHT_IMPORT_PATH } from '../default-paths';
 import type { TaskAutomationMeta } from '../../../../../shared/automation/metadata';
 import type { AutomationDefinition } from '../../../../../shared/automation/types';
 import type { CalendarTaskFilter } from '../../calendar/task-filter';
 import type { AppearancePreset } from '../appearance-preset';
+import type { ShortcutButton } from '../shortcut-buttons';
 import type {
 	WereadContentType,
 	WereadGroupBy,
@@ -22,20 +22,14 @@ export interface CalendarTaskTarget {
 export interface DashboardSettings {
 	/** Canonical persisted workspace registry (apex-style indices). */
 	workspaces: { files: string[]; names: string[]; active: number };
-	stylePreset: string;
-	customColors: CustomColors;
-	customThemes: CustomTheme[];
-	activeCustomThemeId?: string;
 	useThemeFont: boolean;
-	sidebarPinned: boolean;
-	bannerCollapsed: boolean;
+	/** Widgets the pre-canvas sidebar showed, captured once from the old enable flags; used to convert old boards. */
+	legacyWidgetMembers?: BoardWidgetMember[];
 	collapsedSections: string[];
 	quickCaptureMode: 'capture' | 'search';
 	/** Global theme + Home decor snapshots, independent of board content. */
 	appearancePresets: AppearancePreset[];
 	activeAppearancePresetId?: string;
-	/** Historical read-only fallback for boards without their own layout. */
-	layoutMode?: 'side' | 'stacked' | 'immersive';
 	/** Path of the ACTIVE workspace file (no .md extension). */
 	dashboardFile: string;
 	/** All workspace board files in switcher order (button i+1). Paths follow
@@ -49,23 +43,9 @@ export interface DashboardSettings {
 	backupMaxCount: number;
 	backupLastRun?: number;
 	recentDocCount: number;
-	/** Habit card height ratio in the stacked layout (side layout ignores it;
-	    the card is content-height there). */
-	habitHeightRatio: WidgetHeightRatio;
-	/** Reading card height ratio in the stacked layout (side layout ignores it). */
-	readingHeightRatio: WidgetHeightRatio;
-	/** Side-layout sidebar width in px, clamped 180-420 (220 default). Desktop
-	    only; the drag handle persists it, and render applies it as the
-	    --db-sidebar-w CSS variable. */
-	sidebarWidth: number;
-	/** Stacked-layout widget strip unit height in px (the 6-row grid unit),
-	    clamped 240-560 (300 default). Applied as --db-widget-unit-h. */
-	widgetUnitHeight: number;
-	widgetWeatherEnabled: boolean;
 	widgetWeatherCity: string;
 	widgetWeatherLat: number;
 	widgetWeatherLon: number;
-	pomodoroEnabled: boolean;
 	pomodoroWorkMinutes: number;
 	pomodoroShortBreakMinutes: number;
 	pomodoroLongBreakMinutes: number;
@@ -78,15 +58,9 @@ export interface DashboardSettings {
 	pomodoroSoundEnabled: boolean;
 	/** Floating body-level mini countdown panel shown while a pomodoro runs. */
 	pomodoroMiniPanelEnabled: boolean;
-	widgetLunarEnabled: boolean;
-	/** Year-progress widget: shows how much % of the current year has elapsed. */
-	widgetYearProgressEnabled: boolean;
-	/** Calendar widget: a month/week calendar of vault tasks in the sidebar. */
-	widgetCalendarEnabled: boolean;
-	widgetQuickCaptureEnabled: boolean;
-	widgetFileSearchEnabled: boolean;
-	widgetSkillsEnabled: boolean;
 	skillWidgetButtons: SkillShortcut[];
+	/** Buttons of the Shortcuts widget. */
+	shortcutButtons: ShortcutButton[];
 	/** Folders whose tasks are excluded from the calendar widget/section. */
 	calendarExcludeFolders: string[];
 	/** Active task filter in the full-screen calendar modal ('all' default).
@@ -100,16 +74,8 @@ export interface DashboardSettings {
 	    per day, named YYYY-MM-DD, created on first task). Unset = the clicked
 	    day's own daily note (created in the core Daily Notes folder when missing). */
 	calendarTaskTarget?: CalendarTaskTarget;
-	/** Habit check-in widget: boolean daily check-offs tracked per habit. */
-	widgetHabitEnabled: boolean;
-	/** Expense tracker widget: quick expense/income entry in the sidebar. */
-	widgetExpenseEnabled: boolean;
 	/** Currency symbol shown before amounts in the expense widget/stats (e.g. ¥, $). */
 	expenseCurrency: string;
-	/** Photo-album widget: auto-rotating slideshow of a vault folder's images.
-	 *  The widgetAlbum* fields are the settings shape the album renderer reads;
-	 *  every albums[] entry is rendered through them (see render-sidebar-widgets). */
-	widgetAlbumEnabled: boolean;
 	/** Vault folder whose images the album rotates through ('' = unset). */
 	widgetAlbumFolder: string;
 	/** Seconds each photo stays on screen before auto-advancing. */
@@ -122,8 +88,6 @@ export interface DashboardSettings {
 	widgetAlbumTransition: 'fade' | 'slide-left' | 'slide-right' | 'zoom';
 	/** Album widgets (multiple): one slideshow card per entry. */
 	albums: AlbumConfig[];
-	/** Anniversary ("纪念日") widgets master toggle (entries in anniversaries[]). */
-	anniversaryEnabled: boolean;
 	/** Anniversary entries: elapsed time since a historical date each. */
 	anniversaries: AnniversaryConfig[];
 	/** Singleton widget card backgrounds (undefined = none). */
@@ -132,9 +96,6 @@ export interface DashboardSettings {
 	habitBackground?: WidgetBackground;
 	musicBackground?: WidgetBackground;
 	yearProgressBackground?: WidgetBackground;
-	/** Music player widget: search & play NetEase free songs in the sidebar
-	    (desktop only; no account, VIP tracks are skipped). */
-	widgetMusicEnabled: boolean;
 	/** Player volume 0-1. */
 	musicVolume: number;
 	/** Repeat mode of the music player. */
@@ -143,15 +104,12 @@ export interface DashboardSettings {
 	musicPlaylist: MusicTrack[];
 	/** Highlighted track index restored on restart; playback never auto-resumes. */
 	musicCurrentIndex: number;
-	/** Quick-buttons ("快捷按钮") rendered as a draggable sidebar widget. */
-	widgetQuickActionsEnabled: boolean;
 	/** Optional custom background color for the quick-buttons widget (user
 	 *  picked via the palette button; undefined = theme default). */
 	quickButtonsBgColor?: string;
 	/** Optional custom button color for the quick-buttons widget (palette
 	 *  picker; undefined = theme default). */
 	quickButtonsBtnColor?: string;
-	widgetOrder: string[];
 	/** Weread (WeChat Read) official API key (wrk-...), shared account-wide. */
 	wereadApiKey: string;
 	ticktickRegion: 'dida365' | 'ticktick';
@@ -203,13 +161,11 @@ export interface DashboardSettings {
 	quickCommands: QuickCommand[];
 	/** Show a "Today" button that creates/opens the core Daily Notes note. */
 	quickDailyEnabled: boolean;
-	countdownEnabled: boolean;
 	/** Multiple countdowns managed in settings; rendered in the sidebar. */
 	countdowns: CountdownConfig[];
 	/** User-defined tags for media files (images/videos sections), keyed by
 	 *  vault path. Managed by MediaTagService; optional so settings without it stay valid. */
 	mediaTags?: Record<string, string[]>;
-	readingEnabled: boolean;
 	readingSoundEnabled: boolean;
 	taskTemplates: TaskTemplate[];
 	memoSavePath: string;
@@ -272,12 +228,7 @@ export const DEFAULT_DASHBOARD_SETTINGS: DashboardSettings = {
 	backupEnabled: false,
 	backupPeriod: 'daily',
 	backupMaxCount: 10,
-	stylePreset: 'mono',
-	customColors: {},
-	customThemes: [],
 	useThemeFont: false,
-	sidebarPinned: false,
-	bannerCollapsed: false,
 	collapsedSections: [],
 	quickCaptureMode: 'capture',
 	appearancePresets: [],
@@ -286,15 +237,9 @@ export const DEFAULT_DASHBOARD_SETTINGS: DashboardSettings = {
 	workspaceNames: [''],
 	recentDocCount: 5,
 	// Defaults match the CSS spans/sizes until the user drags or picks a tier.
-	habitHeightRatio: 'twoThirds',
-	readingHeightRatio: 'half',
-	sidebarWidth: 220,
-	widgetUnitHeight: 300,
-	widgetWeatherEnabled: false,
 	widgetWeatherCity: 'Shanghai',
 	widgetWeatherLat: 31.23,
 	widgetWeatherLon: 121.47,
-	pomodoroEnabled: true,
 	pomodoroWorkMinutes: 25,
 	pomodoroShortBreakMinutes: 5,
 	pomodoroLongBreakMinutes: 15,
@@ -305,29 +250,19 @@ export const DEFAULT_DASHBOARD_SETTINGS: DashboardSettings = {
 	pomodoroAutoStartBreak: true,
 	pomodoroSoundEnabled: true,
 	pomodoroMiniPanelEnabled: true,
-	widgetLunarEnabled: true,
-	widgetYearProgressEnabled: false,
-	widgetCalendarEnabled: false,
-	widgetQuickCaptureEnabled: false,
-	widgetFileSearchEnabled: false,
-	widgetSkillsEnabled: false,
 	skillWidgetButtons: [],
+	shortcutButtons: [],
 	calendarExcludeFolders: [],
 	calendarTaskFilter: 'all',
 	calendarTaskInsertPosition: 'start',
-	widgetHabitEnabled: false,
-	widgetExpenseEnabled: false,
 	expenseCurrency: '¥',
-	widgetAlbumEnabled: false,
 	widgetAlbumFolder: '',
 	widgetAlbumIntervalSec: 8,
 	widgetAlbumRecursive: true,
 	widgetAlbumRatio: '1:1',
 	widgetAlbumTransition: 'fade',
 	albums: [],
-	anniversaryEnabled: false,
 	anniversaries: [],
-	widgetMusicEnabled: false,
 	musicBackground: {
 		image: 'https://images.pexels.com/photos/22710827/pexels-photo-22710827.jpeg',
 		opacity: 100,
@@ -339,21 +274,6 @@ export const DEFAULT_DASHBOARD_SETTINGS: DashboardSettings = {
 	musicRepeatMode: 'list',
 	musicPlaylist: [] as MusicTrack[],
 	musicCurrentIndex: -1,
-	widgetQuickActionsEnabled: true,
-	widgetOrder: [
-		'quickActions',
-		'weather',
-		'lunar',
-		'pomodoro',
-		'reading',
-		'countdown',
-		'yearProgress',
-		'calendar',
-		'habit',
-		'expense',
-		'album',
-		'music',
-	],
 	wereadApiKey: '',
 	ticktickRegion: 'dida365',
 	ticktickCookie: '',
@@ -380,10 +300,8 @@ export const DEFAULT_DASHBOARD_SETTINGS: DashboardSettings = {
 	pinnedNotes: [] as PinnedNote[],
 	quickCommands: [] as QuickCommand[],
 	quickDailyEnabled: false,
-	countdownEnabled: false,
 	countdowns: [] as CountdownConfig[],
 	mediaTags: {},
-	readingEnabled: false,
 	readingSoundEnabled: true,
 	taskTemplates: [],
 	memoSavePath: '',
@@ -1015,7 +933,8 @@ export interface DashboardColumn {
 	width?: number;
 }
 
-export type BoardLayout = 'side' | 'stacked' | 'immersive';
+/** The board file's layout marker: every board is a widget canvas. */
+export type BoardLayout = 'immersive';
 
 /** Board membership is separate from the provider's shared instance configuration. */
 export interface BoardWidgetMember {
@@ -1053,8 +972,14 @@ export interface SkillShortcut {
 export interface DashboardData {
 	/** Original text and its owned projection; retained through immutable UI updates. */
 	document?: { source: string; baseline: string };
-	/** Absent on older boards. Written only when the user picks a layout. */
+	/** Absent on boards from before the widget canvas; conversion writes it. */
 	layout?: BoardLayout;
+	/** Read diagnostics only: the retired layout an old board file declared. Never serialized. */
+	legacyLayout?: 'side' | 'stacked';
+	/** Canvas format version. Boards written before it (including the old immersive layout) convert once; a user's later removals are never undone. */
+	canvas?: 1;
+	/** Banner widgets other than the first: `banner` is instance `default`, the rest are keyed by instance id. */
+	banners?: Record<string, BannerData>;
 	widgets?: BoardWidgetMember[];
 	immersive?: BoardTile[];
 	skills?: SkillShortcut[];

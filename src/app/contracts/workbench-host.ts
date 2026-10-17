@@ -1,5 +1,5 @@
 import type { ItemView, Menu } from 'obsidian';
-import type { AgentUsage, PageChrome, StatusBarPreferences, StatusSegment, FeatureAvailability, NavigationItem, PanelModel, SavedPage, WorkbenchFeature, WorkbenchStatus, WorkbenchTarget } from './workbench';
+import type { PageChrome, StatusSegment, FeatureAvailability, NavigationItem, PanelModel, SavedPage, WorkbenchFeature, WorkbenchStatus, WorkbenchTarget } from './workbench';
 import type { NativeSurface, NativeSurfaceContext } from '../../ui/native-surface';
 
 export interface WorkbenchPageBinding {
@@ -21,7 +21,7 @@ export interface WorkbenchContribution {
 	id: WorkbenchFeature;
 	navigation: NavigationItem;
 	/** Position in the rail; features without a rail entry are reached by links only. */
-	rail?: { slot: 'top' | 'bottom'; badge?: () => number };
+	rail?: { slot: 'top' | 'bottom'; badge?: () => number; /** Runs instead of navigating, for entries that open something outside the workbench. */ action?: () => void };
 	/** A feature without its own rail entry highlights this one instead (records pages belong to Home). */
 	railParent?: WorkbenchFeature;
 	/** Omitted means no side panel unless navigationContext is set. */
@@ -52,10 +52,8 @@ export interface WorkbenchHost {
 	/** Whether a module failed to start (shown as a warning on its rail icon). */
 	failed: (feature: WorkbenchFeature) => boolean;
 	statuses?: () => readonly WorkbenchStatus[];
-	usage?: () => AgentUsage | undefined;
-	statusBar?: () => StatusBarPreferences;
-	setStatusBar?: (preferences: StatusBarPreferences) => Promise<void>;
-	appearance?: () => { font: 'geist' | 'host'; palette: 'host' | 'orca' };
+	/** Segments of every contribution, ordered for display. */
+	statusSegments?: () => readonly StatusSegment[];
 	report: (error: unknown) => void;
 }
 

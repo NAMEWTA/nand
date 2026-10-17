@@ -90,6 +90,20 @@ export function AgentsSettings({ controller }: { controller: AgentController }) 
 					})
 				}
 			/>
+			<SettingsRow
+				label={t('agent.manage.removeSystemHooks')}
+				description={t('agent.manage.removeSystemHooksHint')}
+				control={
+					<Button
+						variant="outline"
+						onClick={() => {
+							void controller.removeSystemStatusHooks().catch((e) => controller.workspace.report(e));
+						}}
+					>
+						{t('agent.manage.removeSystemHooksAction')}
+					</Button>
+				}
+			/>
 			<SettingsSwitchRow
 				label={t('agent.manage.titles')}
 				checked={settings.generatedTitles}

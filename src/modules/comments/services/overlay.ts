@@ -31,11 +31,13 @@ export function createOverlayChannel() {
 	return {
 		state, cancelClose, close,
 		setHovered(value: boolean) { hovered = value; if (value) cancelClose(); },
-		open(request: OverlayRequest) {
+		/** Returns false when the request was refused so callers can tell the user. */
+		open(request: OverlayRequest): boolean {
 			cancelClose();
 			const current = state.getState();
-			if ((current.draft && current.request !== request) || (current.request?.pinned && !request.pinned)) return;
+			if ((current.draft && current.request !== request) || (current.request?.pinned && !request.pinned)) return false;
 			state.setState({ request, draft: request.mode === 'compose', revision: current.revision + 1 });
+			return true;
 		},
 		pin() { const request = state.getState().request; if (request) state.setState({ request: { ...request, pinned: true } }); },
 		setDraft(draft: boolean) { state.setState({ draft }); },
@@ -43,7 +45,7 @@ export function createOverlayChannel() {
 		scheduleClose() {
 			cancelClose();
 			const { request, draft } = state.getState();
-			if (!request || request.pinned || draft || hovered) return;
+			if (!request || request.pinned || draft || hovered || request.mode === 'selection') return;
 			timerWindow = request.ownerDocument.defaultView;
 			closeTimer = timerWindow?.setTimeout(() => { closeTimer = null; const now = state.getState(); if (!now.request?.pinned && !now.draft && !hovered) close(false); }, 300) ?? null;
 		},

@@ -1,4 +1,4 @@
-/** Empty selects the default identity; invalid nonempty input must never select it implicitly. */
+/** Empty selects the system account (the login already on this computer); invalid nonempty input must never select it implicitly. */
 export function accountName(value: string): string {
 	if (typeof value !== 'string' || /[\p{Cc}\p{Cf}]/u.test(value)) throw new Error('agent.accountInvalid');
 	if (value === '') return '';

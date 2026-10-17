@@ -2,6 +2,7 @@ import * as fs from 'node:fs/promises';
 import * as path from 'node:path';
 import { absoluteNandPath } from '../../../../../host/desktop/nand-paths';
 import { checkAccountTranscript } from '../agents/transcript';
+import { systemAccountAgent } from '../agents/system-homes';
 import { restoredAccountReference } from '../agents/accounts';
 import { getAgent } from '../../../core/launch/catalog';
 import type { AgentId } from '../../../core/launch/types';
@@ -31,6 +32,8 @@ export async function readHistoryDetails(
 	if (row.agentId === 'opencode') return transcriptDetails(fallback);
 	const file =
 		row.agentId === 'grok' ? path.join(path.dirname(transcriptPath!), 'chat_history.jsonl') : transcriptPath!;
-	const safe = await absoluteNandPath(vault, path.relative(vault, file).split(path.sep).join('/'));
+	// A system account's transcript was checked against the provider's own history directory above.
+	const safe = systemAccountAgent(env) ? file : await absoluteNandPath(vault, path.relative(vault, file).split(path.sep).join('/'));
+	if (systemAccountAgent(env) && (await fs.lstat(file)).isSymbolicLink()) throw new Error('private-storage.symlink');
 	return transcriptDetails(await fs.readFile(safe, { encoding: 'utf8', signal }));
 }

@@ -26,9 +26,22 @@ vi.mock('obsidian', async (original) => ({
 	},
 }));
 vi.mock('./instances', () => ({ homeServices: {} }));
+import { convertToCanvas } from '../core/board/canvas';
+import { parse, serialize } from '../core/board/parser/parse';
+import { withStableSectionIds } from '../core/board/section-identity';
 const board = '.nand/content/board.md';
-const source =
-	'# Board\n\n## Todo\n\n### Tasks\n- [ ] Parent\n  - [ ] Child\n- [x] Finished\n\n### Memo\nOriginal memo\n';
+/** A board that already is a widget canvas, so opening it writes nothing. */
+const source = serialize(
+	withStableSectionIds(
+		convertToCanvas(
+			parse(
+				'# Board\n\n## Todo\n\n### Tasks\n- [ ] Parent\n  - [ ] Child\n- [x] Finished\n\n### Memo\nOriginal memo\n',
+			),
+			undefined,
+		),
+		() => `section-${crypto.randomUUID()}`,
+	),
+);
 const stores: BoardStore[] = [];
 afterEach(async () => {
 	cleanup();

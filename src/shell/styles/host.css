@@ -2,3 +2,40 @@
 .workspace-leaf-content[data-type="nand-workbench-view"] > .view-content { padding: 0; overflow: hidden; }
 body:not(.is-mobile) .workspace-leaf-content[data-type="nand-workbench-view"] > .view-header { display: none; }
 .nand-workbench-page[hidden] { display: none; }
+
+/* NAND entries in Obsidian's status bar (main window only). They borrow the host's status bar metrics. */
+.status-bar .nand-status-button {
+	display: inline-flex;
+	align-items: center;
+	gap: var(--size-2-2);
+	padding: 0 var(--size-2-2);
+	height: auto;
+	background: transparent;
+	box-shadow: none;
+	border: 0;
+	font: inherit;
+	color: inherit;
+	cursor: pointer;
+}
+.status-bar .nand-status-button:hover { background-color: var(--background-modifier-hover); }
+.status-bar .nand-status-button.is-static { cursor: default; }
+.status-bar .nand-status-button.is-static:hover { background-color: transparent; }
+.status-bar .nand-status-text {
+	max-width: 24ch;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	font-variant-numeric: tabular-nums;
+}
+.status-bar .nand-status-item[data-tone="error"] .nand-status-button { color: var(--text-error); }
+.status-bar .nand-status-item[data-tone="attention"] .nand-status-button { color: var(--color-orange); }
+.status-bar .nand-status-item[data-tone="running"] .nand-status-icon .svg-icon { animation: nand-status-spin 1.2s linear infinite; }
+@keyframes nand-status-spin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) {
+	.status-bar .nand-status-item[data-tone="running"] .nand-status-icon .svg-icon { animation: none; }
+}
+/* The usage entry hosts a React root inside .nand-ui; keep the host's font and colour instead of NAND's. */
+.status-bar .nand-status-usage { padding-block: 0; }
+.status-bar .nand-status-usage .nand-status-usage-root { display: flex; align-items: center; font-family: inherit; letter-spacing: inherit; color: inherit; }
+/* Hidden entries stay in the status bar as pooled, reusable items. */
+.status-bar .nand-status-item[hidden], .status-bar .nand-status-usage[hidden] { display: none; }

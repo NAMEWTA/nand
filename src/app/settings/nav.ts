@@ -1,14 +1,15 @@
 /** Settings products (one per module plus Home) and their order in the workbench settings list. */
 import type { ModuleId } from '../contracts/module';
 
-export type SettingsProduct = 'home' | 'dashboard' | 'browser' | 'editor' | 'terminal' | 'iconic' | 'contacts' | 'automation' | 'sync';
+export type SettingsProduct = 'home' | 'dashboard' | 'browser' | 'editor' | 'navigator' | 'terminal' | 'iconic' | 'contacts' | 'automation' | 'sync';
 
-const ORDER: readonly SettingsProduct[] = ['home', 'dashboard', 'browser', 'editor', 'terminal', 'iconic', 'contacts', 'automation', 'sync'];
+const ORDER: readonly SettingsProduct[] = ['home', 'dashboard', 'browser', 'editor', 'navigator', 'terminal', 'iconic', 'contacts', 'automation', 'sync'];
 
 export interface ModuleGates {
 	browser: boolean;
 	dashboard: boolean;
 	editor: boolean;
+	navigator: boolean;
 	terminal: boolean;
 	contacts: boolean;
 	iconic: boolean;
@@ -26,6 +27,7 @@ export const PRODUCT_MODULES = {
 	browser: 'browser',
 	dashboard: 'home',
 	editor: 'comments',
+	navigator: 'navigator',
 	terminal: 'agent',
 	contacts: 'archives',
 	iconic: 'icons',

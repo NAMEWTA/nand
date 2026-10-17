@@ -15,13 +15,11 @@ import { Button } from '../../../../ui/components/button';
 import { useT } from '../../../../ui/react/hooks';
 import type { HomeHost } from '../../services/home-host';
 import { dashboardSettingsStore } from '../../services/settings-store';
-import { WIDGETS } from '../widgets/WidgetDeck';
-import { Choice, IconButton } from '../board/controls';
+import { IconButton } from '../board/controls';
 import { DraftList } from '../quickbar/DraftList';
 import { GeneralExtras, WidgetExtras } from './ExtraSettings';
 import { AppearanceStudio } from '../appearance/AppearanceStudio';
 import { DashboardAppearanceProvider } from '../theme/ThemeBridge';
-import { customThemeSettingsSlice } from '../../core/board/custom-theme';
 import type { AnniversaryConfig } from '../../core/board/types';
 const AnniversaryEditor = lazy(() =>
 	import('../widgets/AnniversaryEditor').then((m) => ({ default: m.AnniversaryEditor })),
@@ -49,54 +47,6 @@ export function DashboardSettings({ host }: { host: HomeHost }) {
 				</TabsList>
 				<TabsContent value="general" className="space-y-8">
 					<SettingsSection title={t('home.dashboard.tab.general')}>
-						<SettingsRow
-							label={t('home.dashboard.theme')}
-							control={
-								<Choice
-									value={
-										settings.activeCustomThemeId
-											? `custom:${settings.activeCustomThemeId}`
-											: settings.stylePreset
-									}
-									label={t('home.dashboard.theme')}
-									onChange={(value) => {
-										void store.update((s) => {
-											const theme = s.customThemes.find(
-												(theme) => `custom:${theme.id}` === value,
-											);
-											if (theme) Object.assign(s, customThemeSettingsSlice(theme));
-											else {
-												s.stylePreset = value;
-												s.customColors = {};
-												delete s.activeCustomThemeId;
-											}
-										});
-									}}
-									options={[
-										'earth',
-										'nordic',
-										'aurora',
-										'blossom',
-										'aqua',
-										'island',
-										'tundra',
-										'matcha',
-										'mono',
-										'neon',
-										'volt',
-										'magma',
-										'onyx',
-									]
-										.map((value) => ({ value, label: t(`home.dashboard.theme.${value}`) }))
-										.concat(
-											settings.customThemes.map((theme) => ({
-												value: `custom:${theme.id}`,
-												label: `${t('home.p1.myThemes')} · ${theme.name}`,
-											})),
-										)}
-								/>
-							}
-						/>
 						<Button variant="outline" onClick={() => setStudio(true)}>
 							{t('themeStudio.modalTitle')}
 						</Button>
@@ -108,33 +58,6 @@ export function DashboardSettings({ host }: { host: HomeHost }) {
 									s.useThemeFont = !s.useThemeFont;
 								});
 							}}
-						/>
-						<SettingsRow
-							label={t('home.dashboard.layout')}
-							control={
-								<Choice
-									label={t('home.dashboard.layout')}
-									value={settings.layoutMode ?? 'side'}
-									onChange={(value) => {
-										void store.update((s) => {
-											s.layoutMode = value as 'side' | 'stacked' | 'immersive';
-										});
-										void host
-											.activeDashboard()
-											?.sync.setBoardLayout(value as 'side' | 'stacked' | 'immersive');
-									}}
-									options={['side', 'stacked', 'immersive'].map((value) => ({
-										value,
-										label: t(
-											value === 'side'
-												? 'renderer.layoutSide'
-												: value === 'immersive'
-													? 'renderer.layoutImmersive'
-													: 'renderer.layoutStacked',
-										),
-									}))}
-								/>
-							}
 						/>
 					</SettingsSection>
 					<SettingsSection title={t('workbench.boards')}>
@@ -239,18 +162,6 @@ export function DashboardSettings({ host }: { host: HomeHost }) {
 								});
 							}}
 						/>
-						{Object.entries(WIDGETS).map(([id, widget]) => (
-							<SettingsSwitchRow
-								key={id}
-								label={t(`home.dashboard.widget.${id}`)}
-								checked={!!settings[widget.enabled]}
-								onChange={() => {
-									void store.update((s) => {
-										Object.assign(s, { [widget.enabled]: !s[widget.enabled] });
-									});
-								}}
-							/>
-						))}
 						<SettingsSwitchRow
 							label={t('settings.readingSound')}
 							checked={settings.readingSoundEnabled}
@@ -260,25 +171,7 @@ export function DashboardSettings({ host }: { host: HomeHost }) {
 								});
 							}}
 						/>
-						<SettingsRow
-							label={t('home.dashboard.widget.reading')}
-							control={
-								<Choice
-									label={t('home.dashboard.heightRatio')}
-									value={settings.readingHeightRatio}
-									options={['full', 'twoThirds', 'half', 'third'].map((value) => ({
-										value,
-										label: t(`home.dashboard.ratio.${value}`),
-									}))}
-									onChange={(value) => {
-										void store.update((s) => {
-											s.readingHeightRatio = value as typeof s.readingHeightRatio;
-										});
-									}}
-								/>
-							}
-						/>
-						{settings.anniversaryEnabled && (
+						{
 							<>
 								{settings.anniversaries.map((config) => (
 									<SettingsRow
@@ -312,7 +205,7 @@ export function DashboardSettings({ host }: { host: HomeHost }) {
 									{t('anniversary.add')}
 								</Button>
 							</>
-						)}
+						}
 						{anniversary && (
 							<Suspense fallback={null}>
 								<AnniversaryEditor
@@ -346,24 +239,6 @@ export function DashboardSettings({ host }: { host: HomeHost }) {
 											s.expenseCurrency = value;
 										});
 									}}
-								/>
-							}
-						/>
-						<SettingsRow
-							label={t('home.dashboard.heightRatio')}
-							control={
-								<Choice
-									label={t('home.dashboard.heightRatio')}
-									value={settings.habitHeightRatio}
-									onChange={(value) => {
-										void store.update((s) => {
-											s.habitHeightRatio = value as typeof s.habitHeightRatio;
-										});
-									}}
-									options={['full', 'twoThirds', 'half', 'third'].map((value) => ({
-										value,
-										label: t(`home.dashboard.ratio.${value}`),
-									}))}
 								/>
 							}
 						/>

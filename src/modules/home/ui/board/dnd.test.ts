@@ -2,9 +2,8 @@ import { expect, test, vi } from 'vitest';
 import { commitDrop } from './dnd';
 import type { BoardStore } from '../../services/board-store';
 test('every supported drop calls exactly one persistence operation', async () => {
-	const sync = { moveColumn: vi.fn(), moveCard: vi.fn(), moveTaskToCard: vi.fn(), moveDocToCard: vi.fn() },
-		settings = vi.fn();
-	const store = { sync, settings } as unknown as BoardStore;
+	const sync = { moveColumn: vi.fn(), moveCard: vi.fn(), moveTaskToCard: vi.fn(), moveDocToCard: vi.fn() };
+	const store = { sync } as unknown as BoardStore;
 	await commitDrop(store, { kind: 'section', index: 0 }, { kind: 'section', index: 1 });
 	await commitDrop(
 		store,
@@ -13,8 +12,7 @@ test('every supported drop calls exactly one persistence operation', async () =>
 	);
 	await commitDrop(store, { kind: 'task', card: 'A', path: [0] }, { kind: 'task', card: 'B', path: [0] }, 'nest');
 	await commitDrop(store, { kind: 'doc', card: 'A', path: [0] }, { kind: 'doc', card: 'B', path: [0] });
-	await commitDrop(store, { kind: 'widget', id: 'weather' }, { kind: 'widget', id: 'habit' });
-	for (const method of [...Object.values(sync), settings]) expect(method).toHaveBeenCalledTimes(1);
+	for (const method of Object.values(sync)) expect(method).toHaveBeenCalledTimes(1);
 	expect(sync.moveTaskToCard).toHaveBeenCalledWith('A', [0], 'B', [0], 'nest');
 });
 

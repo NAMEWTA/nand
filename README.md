@@ -25,13 +25,14 @@ The [user guide](docs/README.md) covers every feature, including settings, appea
 
 | Feature | Guide |
 |---|---|
-| Workbench | [Responsive rail and side panel, focus mode and usage status bar](docs/workbench.md) |
+| Workbench | [Responsive rail and side panel, focus mode, usage and status in the Obsidian status bar](docs/workbench.md) |
 | Settings and appearance | [Language and module switches](docs/settings.md); [styles, Markdown headings and accent colors](docs/appearance.md) |
-| Dashboard and records | [Three Apex layouts, 15 section types, widgets and 13 themes](docs/dashboard.md); [habits, expenses, reading and pomodoro](docs/dashboard.md#统计与账本) |
+| Dashboard and records | [A free widget canvas on the Apex grid: add, drag, resize and size presets](docs/dashboard.md); [habits, expenses, reading and pomodoro](docs/dashboard.md#统计与账本) |
 | Automations | [Templates, scheduled actions, prechecks, run history and notifications](docs/automation.md) |
 | Coding agents | [Terminal/browser tab groups, resume, native history, quick commands and usage](docs/agent-workbench.md) |
 | Browser | [Profiles, Cookie import, downloads and material capture](docs/browser.md) |
 | Archives | [People, companies, positions, relationships and related material](docs/contacts.md) |
+| Notes navigator | [Two-pane folder and tag browser with search, shortcuts, calendar and periodic notes, templates, vault profiles, merge and tag tools](docs/navigator.md) |
 | Comments | [Line and selection comments, hover threads and an Obsidian sidebar](docs/comments.md) |
 | Icons | [File and interface icons, colors and rules](docs/icons.md) |
 | Git sync | [Commit, pull and push the vault with the system git; resolve conflicts (desktop, off by default)](docs/sync.md) |
@@ -57,7 +58,7 @@ Changes by version are in the [changelog](CHANGELOG.md).
 
 NAND is released under the MIT License: see [LICENSE](LICENSE). Third-party attribution:
 
-- [NOTICE](NOTICE) names the works NAND adapts and keeps their license texts: apex-dashboard and obsidian-dashboard (board design), Orca (workbench, agent, browser and automation UI), Margin Comments (anchors and comment interactions), shadcn/ui (components), Geist fonts, Iconic (icon rules), and obsidian-git (Git sync). See the [Orca mapping](docs/third-party/orca-terminal-workbench.md).
+- [NOTICE](NOTICE) names the works NAND adapts and keeps their license texts: apex-dashboard and obsidian-dashboard (board design), Orca (workbench, agent, browser and automation UI), Margin Comments (anchors and comment interactions), shadcn/ui (components), Geist fonts, Iconic (icon rules), and obsidian-git (Git sync). The notes navigator reimplements the behavior of Notebook Navigator without including its code; see [its reference scope](docs/third-party/notebook-navigator.md) and the [Orca mapping](docs/third-party/orca-terminal-workbench.md).
 - [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md) lists the npm packages bundled into the plugin, CSS and font licenses, and the Rust crates of the terminal helper.
 - Icon, emoji and Unicode data notices are in [src/modules/icons/core/res/NOTICE.txt](src/modules/icons/core/res/NOTICE.txt).
 

@@ -2,6 +2,7 @@ import path from 'node:path';
 import { constants } from 'node:fs';
 import { chmod, lstat, mkdir, open, opendir, realpath } from 'node:fs/promises';
 import type { TextStorage } from '../../shared/storage/ports';
+import { reissueIfStalled } from '../../shared/storage/stall-guard';
 import { absoluteNandPath } from './nand-paths';
 
 export const PRIVATE_DIR_MODE = 0o700;
@@ -23,7 +24,7 @@ function code(error: unknown): string {
 }
 
 async function metadata(absolute: string) {
-	try { return await lstat(absolute); }
+	try { return await reissueIfStalled('lstat', () => lstat(absolute)); }
 	catch (error) { if (code(error) === 'ENOENT') return undefined; throw error; }
 }
 
@@ -57,7 +58,7 @@ export function privateTextStorage(inner: TextStorage, vaultRoot: string): TextS
 		async write(relative, content) { if (isPrivateRelative(relative)) await absoluteNandPath(vaultRoot, relative); await inner.write(relative, content); },
 	};
 	// Resolve aliases outside the vault (e.g. macOS /var); links inside .nand are forbidden.
-	const root = realpath(vaultRoot);
+	const root = reissueIfStalled('realpath', () => realpath(vaultRoot));
 	const reported = new Set<string>();
 	const report = (relative: string, reason: string) => {
 		const category = relative.split('/').slice(0, 2).join('/');

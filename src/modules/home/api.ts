@@ -1,6 +1,6 @@
 /** Public surface of the home module (types and service keys). */
 import { contributionPoint, serviceKey } from '../../app/contracts/module';
-import type { BoardLayout } from './core/board/types/model';
+import type { HomeWidgetCategory, HomeWidgetTier } from './core/board/widget-tiers';
 
 export interface HomeWidgetContext {
 	readonly boardPath: string;
@@ -22,14 +22,28 @@ export interface HomeWidgetInstance {
 	icon?: string;
 }
 
+export {
+	HOME_WIDGET_CATEGORIES,
+	HOME_WIDGET_TIERS,
+	type HomeWidgetCategory,
+	type HomeWidgetTier,
+} from './core/board/widget-tiers';
+
 export interface HomeWidgetKind {
 	key: string;
 	titleKey: string;
 	icon: string;
-	/** Width in canonical columns and height in 10px fine rows. */
-	defaultSize: { w: number; h: number };
+	/** Group shown in the add-widget panel. */
+	category: HomeWidgetCategory;
+	/** The one size table of this widget: the tiers it supports, as grid cells (w columns × h fine rows). */
+	sizes: Readonly<Partial<Record<HomeWidgetTier, { w: number; h: number }>>>;
+	/** The tier a new instance starts at; it must be one of `sizes`. */
+	defaultTier: HomeWidgetTier;
+	/** Smallest size a free resize may reach. */
 	minSize: { w: number; h: number };
 	multiple?: boolean;
+	/** A board content section (notes, projects, library...) this kind creates; such kinds have no provider instances. */
+	section?: string;
 	/** The provider owns instance configuration; absent instances remain as board placeholders. */
 	instances(): readonly HomeWidgetInstance[];
 	create?(context: HomeWidgetContext): Promise<HomeWidgetInstance | null>;
@@ -49,7 +63,7 @@ export const HOME_WIDGETS = contributionPoint<HomeWidgetBundle>('home', 'widgets
 /** Multi-board registry operations exposed to the shell and other modules. */
 export interface BoardOperations {
 	switch(path: string): Promise<void>;
-	create(name: string, layout?: BoardLayout): Promise<void>;
+	create(name: string): Promise<void>;
 	rename(path: string, name: string): Promise<void>;
 	remove(path: string): Promise<void>;
 	reorder(from: number, to: number): Promise<void>;
@@ -77,7 +91,6 @@ export interface BoardSurfaceApi {
 	readonly sync: {
 		flush?(): Promise<void>;
 		getSaveState(): { status: string };
-		setBoardLayout(layout: BoardLayout): Promise<void>;
 	};
 }
 

@@ -3,7 +3,7 @@ import type { ReactNode } from 'react';
 import { useRef } from 'react';
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from '../../../../ui/components/dialog';
 import { useVisible, useOwnerDocument } from '../../../../ui/react/contexts';
-import { useDashboardAppearance, useDashboardTheme } from '../theme/ThemeBridge';
+import { useDashboardAppearance } from '../theme/ThemeBridge';
 import { p1Classes } from '../theme/p1-classes';
 /** Apex content geometry; the design-system Dialog owns portal, focus trap and Escape. */
 export function P1Dialog({
@@ -24,7 +24,6 @@ export function P1Dialog({
 	contentHeight?: string;
 }) {
 	const visible = useVisible(),
-		theme = useDashboardTheme(),
 		ref = useDashboardAppearance(true),
 		doc = useOwnerDocument(),
 		opener = useRef(doc.activeElement as HTMLElement | null);
@@ -37,7 +36,6 @@ export function P1Dialog({
 		>
 			<DialogContent
 				ref={ref}
-				data-theme={theme}
 				className="nand-dashboard-root block max-h-[85vh] overflow-y-auto p-4 [scrollbar-width:thin] sm:max-w-none"
 				style={{ width: `min(${width}px, calc(100vw - 40px))`, height, maxHeight: height }}
 				onCloseAutoFocus={(e) => {

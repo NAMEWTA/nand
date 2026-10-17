@@ -4,7 +4,7 @@
 
 ## 布局
 
-外壳由 52px 图标轨、可选侧栏、页面框和底部 24px 状态栏组成。侧栏宽 220～500px，默认 280px；`chrome: 'standard'` 有 44px 页头，`chrome: 'none'` 由页面自己画顶部。
+外壳由 52px 图标轨、可选侧栏和页面框组成；状态栏不在外壳内，见下文“状态栏”。侧栏宽 220～500px，默认 280px；`chrome: 'standard'` 有 44px 页头，`chrome: 'none'` 由页面自己画顶部。
 
 | 叶子宽度 | 布局 |
 |---|---|
@@ -12,13 +12,13 @@
 | 600～960px（medium，不含 960） | 图标轨保留；侧栏作为覆盖层，遮罩或 Esc 关闭，焦点进入并在关闭后返回 |
 | <600px 或手机（narrow） | 图标轨和侧栏合成左侧 Sheet，由页面菜单按钮打开 |
 
-档位由 `ResizeObserver` 测量叶子自身宽度，再调用 `shell/layout.ts` 的 `layoutFor()`。手机隐藏底部状态栏，页头或自绘顶部显示最多 3 个状态芯片。桌面视图隐藏 Obsidian 原生头部。
+档位由 `ResizeObserver` 测量叶子自身宽度，再调用 `shell/layout.ts` 的 `layoutFor()`。手机没有 Obsidian 状态栏，页头或自绘顶部显示最多 3 个状态芯片。桌面视图隐藏 Obsidian 原生头部。
 
 ## 图标轨与侧栏
 
 | 位置 | 功能 id | 名称 | 侧栏 |
 |---|---|---|---|
-| 上 | `dashboard` | 首页 | 无；看板自己的侧栏与横幅切换属于页面内部 |
+| 上 | `dashboard` | 首页 | 无；看板是单一的小组件画布，编辑模式属于页面内部 |
 | 上 | `terminal` | 智能体 | Orca 会话栏，由页面经 `navigationEl` 渲染；桌面端 |
 | 上 | `contacts` | 档案 | 分组与筛选 |
 | 上 | `automations` | 自动化 | 无，页面全宽 |
@@ -55,13 +55,13 @@
 
 ## 状态栏
 
-默认在所有 NAND 页面显示。左侧 `UsageCluster` 从 `agent/api.ts` 的 `AGENT_USAGE` 读取快照；右侧汇总贡献的 `statusSegments()`，按 `order` 排序。`StatusSegment` 包含 `id/icon/label/order`，可选 `tone/count/target`；文案已经翻译，点击可跳转目标。
+工作台不绘制状态栏。用量和状态段注册在 Obsidian 自己的底部状态栏（`app/workbench/surfaces/obsidian-status.ts`，经 `plugin.addStatusBarItem()`），任何页面可见，不依赖工作台叶子。用量来自 `agent/api.ts` 的 `AGENT_USAGE`，状态段来自各贡献的 `statusSegments()`（`app/workbench/status-segments.ts` 汇总，按 `order` 排序）。`StatusSegment` 包含 `id/icon/label/order`，可选 `tone/count/target`；文案已经翻译，点击可跳转目标。
 
-- 左簇空间不足时先精简，再将提供方收进 `+N`，最后隐藏单位标签；右簇不裁剪，必要时横向滚动。
-- 右簇依次显示等待输入、运行中智能体、运行中自动化、自动化错误、Git 同步、看板保存失败、未读通知；无对应状态时隐藏。
-- 用量区点击向上打开面板，提供刷新、详细/精简、账号切换、用量详情与账号管理。额度阈值、折叠测量与时间刷新按 04 §5 实现。
-- 空白处右键可隐藏各段、选择已用/剩余及详细/精简，或隐藏整条状态栏；常规设置可重新开启。
-- Obsidian 原生状态栏的精简用量是默认关闭的独立选项；原有待处理事项状态栏由工作台状态栏取代。
+- 用量项挂一个带 `ContainerProviders` 的 React 根（`shell/status-bar/mount-usage.tsx`，经 `import()` 懒加载），点击打开受控 `DropdownMenu` 内的 `UsageRosterPanel`：刷新、详细/精简、账号切换、用量详情与账号管理。同时有多个提供方时，用量最高的几个直接显示，其余折叠为 `+N`（`usage-plan.ts`）。无提供方时不显示。
+- 状态段是普通 DOM 项目（`status-bar-item` + `clickable-icon`），图标用 Obsidian `setIcon`，依次为等待输入、运行中智能体、运行中自动化、自动化错误、Git 同步、看板保存失败、未读通知；无对应状态时不存在。
+- 右键任一项目弹出 Obsidian 原生菜单：勾选显示或隐藏用量与各类事项，选择已用/剩余及详细/精简。偏好存于 `app.statusBar`（`segments`、`usageMode`、`usageDisplay`）。
+- Obsidian 状态栏只在主窗口存在：项目只注册一次，不在弹出窗口重复。用量项调用 `observeWindow`，主窗口聚焦时刷新。模块停用、服务消失、设置变化或插件卸载时项目、React 根和订阅一并释放。
+- 手机没有 Obsidian 状态栏，页头显示最多三个状态标签。
 
 ## 专注模式、标签与恢复
 
@@ -72,4 +72,4 @@
 - 原生叶子的可见性经 `WorkbenchView` → `WorkbenchSurface.setVisible()` 传给外壳和当前页面；分屏中仍显示的叶子不因失去活动焦点而隐藏。隐藏时卸载外壳的抽屉、菜单及 Tooltip，保留独立页面根，恢复显示不重开旧弹层。轨道打开原生标签/分屏前先结束当前交互；旧弹层延迟回焦不能抢走新叶子的焦点。
 - 不嵌套 ItemView；不因普通渲染启动终端或动作。浏览器标签的恢复按保存布局执行，不能因此发送网页操作。
 
-键盘与焦点（含 F6 在图标轨、侧栏、页面、状态栏循环）见 [动效与无障碍](motion-a11y.md)。
+键盘与焦点（含 F6 在图标轨、侧栏、页面循环）见 [动效与无障碍](motion-a11y.md)。

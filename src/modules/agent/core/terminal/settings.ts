@@ -191,7 +191,7 @@ export function normalizeTerminalSettings(raw: unknown): TerminalSettings {
 		notifications: value.notifications !== false,
 		hiddenNavigation: Array.isArray(value.hiddenNavigation)
 			? value.hiddenNavigation.filter(
-					(v): v is string => typeof v === 'string' && ['board', 'stats', 'automations'].includes(v),
+					(v): v is string => typeof v === 'string' && ['board', 'stats'].includes(v),
 				)
 			: [],
 		usageRefreshSec: Math.round(number(value.usageRefreshSec, 300, 60, 3600)),

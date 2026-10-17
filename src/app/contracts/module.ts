@@ -6,8 +6,8 @@ import type { PageCreate } from './workbench-host';
 import type { SavedPage, WorkbenchFeature, WorkbenchTarget } from './workbench';
 
 /** Feature modules shipped in NAND. */
-export type ModuleId = 'home' | 'agent' | 'browser' | 'archives' | 'automations' | 'notifications' | 'icons' | 'comments' | 'sync';
-export const MODULE_IDS: readonly ModuleId[] = ['home', 'agent', 'browser', 'archives', 'automations', 'notifications', 'icons', 'comments', 'sync'];
+export type ModuleId = 'home' | 'agent' | 'browser' | 'archives' | 'automations' | 'notifications' | 'icons' | 'comments' | 'navigator' | 'sync';
+export const MODULE_IDS: readonly ModuleId[] = ['home', 'agent', 'browser', 'archives', 'automations', 'notifications', 'icons', 'comments', 'navigator', 'sync'];
 
 /**
  * When a module is created:
@@ -97,6 +97,8 @@ export interface ShellAccess {
 export interface CommandAccess {
 	/** Add a command; it is removed when the module is disposed. With `nameKey` the name follows the language. */
 	add(command: Command & { nameKey?: string }): Command;
+	/** Remove a command this module added earlier (for commands the user can edit while the module runs). */
+	remove?(id: string): void;
 }
 
 /** Editor integrations that exist only while the module is active. */

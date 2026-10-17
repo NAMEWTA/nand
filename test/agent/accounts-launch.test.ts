@@ -20,7 +20,7 @@ test('launch and resume derive an owned account environment instead of accepting
 	const host: LaunchHost = { app, getVaultPath: () => vault, getAgentSettings: () => settings, saveAgentSettings: async () => {}, start: async request => { started.push(request); } };
 	try {
 		await initializeTestDevice(app);
-		await launchAgent(host, 'codex');
+		await launchAgent(host, 'codex', { accountId: 'a.b' });
 		expect(started[0]?.env.CODEX_HOME).toContain(path.join(vault, '.nand', 'agents'));
 		expect(started[0]?.args).toContain('cli_auth_credentials_store="file"');
 		expect(started[0]?.args).toContain('sqlite_home=' + JSON.stringify(started[0]!.env.CODEX_HOME));
@@ -32,7 +32,20 @@ test('launch and resume derive an owned account environment instead of accepting
 		const outside = path.join(vault, 'outside-session.jsonl'); await writeFile(outside, 'external');
 		await expect(resumeAgent(host, { ...session, env: started[0]!.env, transcriptPath: outside })).rejects.toThrow();
 		expect(started).toHaveLength(2);
-	} finally { vi.unstubAllGlobals(); await rm(vault, { recursive: true, force: true }); }
+		// The default account is the system account: no moved home, no storage overrides, and it resumes as itself.
+		await launchAgent(host, 'codex');
+		const system = started[2]!;
+		expect(system.env.NAND_ACCOUNT_ID).toBe('codex/system');
+		for (const key of ['HOME', 'CODEX_HOME', 'XDG_CONFIG_HOME', 'OPENAI_API_KEY']) expect(system.env[key]).toBeUndefined();
+		expect(system.args.some(arg => arg.includes('cli_auth_credentials_store') || arg.includes('sqlite_home'))).toBe(false);
+		const home = path.join(vault, 'fake-home', '.codex', 'sessions'); await mkdir(home, { recursive: true });
+		vi.stubEnv('HOME', path.join(vault, 'fake-home')); vi.stubEnv('CODEX_HOME', '');
+		const transcript = path.join(home, 'one.jsonl'); await writeFile(transcript, '{}');
+		await resumeAgent(host, { agentId: 'codex', title: 'System', cwd: vault, sessionId: 'fixture', modifiedAtMs: 1, env: system.env, transcriptPath: transcript });
+		expect(started[3]?.env).toEqual(system.env);
+		await expect(resumeAgent(host, { agentId: 'codex', title: 'System', cwd: vault, sessionId: 'fixture', modifiedAtMs: 1, env: system.env, transcriptPath: outside })).rejects.toThrow();
+		expect(started).toHaveLength(4);
+	} finally { vi.unstubAllEnvs(); vi.unstubAllGlobals(); await rm(vault, { recursive: true, force: true }); }
 }, 30000);
 
 test('an explicitly bound legacy session resumes with its retained transcript and the new account environment', async () => {

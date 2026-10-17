@@ -8,13 +8,12 @@ import { Label } from '../../../../ui/components/label';
 import { useT } from '../../../../ui/react/hooks';
 import type { BoardStore } from '../../services/board-store';
 import { DashboardDialog } from '../dialogs/DashboardDialog';
-import { Choice, IconButton } from '../board/controls';
+import { IconButton } from '../board/controls';
 export function WorkspaceSwitcher({ store }: { store: BoardStore }) {
 	const { settings, path } = useStore(store.state),
 		t = useT();
 	const [open, setOpen] = useState(false),
-		[name, setName] = useState(''),
-		[layout, setLayout] = useState<'side' | 'stacked' | 'immersive'>('side');
+		[name, setName] = useState('');
 	return (
 		<>
 			<div className="dashboard-workspace-switcher absolute top-2 left-3 flex gap-1 rounded-full bg-[var(--db-bg-hover)] p-1">
@@ -47,7 +46,7 @@ export function WorkspaceSwitcher({ store }: { store: BoardStore }) {
 					onClose={() => setOpen(false)}
 					onSave={() => {
 						void store.host
-							.createWorkspace(name, layout)
+							.createWorkspace(name)
 							.then(() => store.switch(store.host.settings.dashboardFile))
 							.then(() => setOpen(false));
 					}}
@@ -56,21 +55,6 @@ export function WorkspaceSwitcher({ store }: { store: BoardStore }) {
 						{t('home.dashboard.name')}
 						<Input value={name} onChange={(e) => setName(e.target.value)} />
 					</Label>
-					<Choice
-						label={t('home.dashboard.layout')}
-						value={layout}
-						onChange={(v) => setLayout(v as 'side' | 'stacked' | 'immersive')}
-						options={['side', 'stacked', 'immersive'].map((value) => ({
-							value,
-							label: t(
-								value === 'side'
-									? 'renderer.layoutSide'
-									: value === 'stacked'
-										? 'renderer.layoutStacked'
-										: 'renderer.layoutImmersive',
-							),
-						}))}
-					/>
 				</DashboardDialog>
 			)}
 		</>

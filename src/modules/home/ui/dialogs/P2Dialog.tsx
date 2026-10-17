@@ -4,7 +4,7 @@ import { Dialog, DialogContent, DialogTitle, DialogDescription } from '../../../
 import { Button } from '../../../../ui/components/button';
 import { useOwnerDocument, useVisible } from '../../../../ui/react/contexts';
 import { useT } from '../../../../ui/react/hooks';
-import { useDashboardAppearance, useDashboardTheme, useDashboardLayout } from '../theme/ThemeBridge';
+import { useDashboardAppearance, useDashboardLayout } from '../theme/ThemeBridge';
 import { p2Classes as c } from '../theme/p2-classes';
 export function P2Dialog({
 	title,
@@ -31,7 +31,6 @@ export function P2Dialog({
 		doc = useOwnerDocument(),
 		opener = useRef(doc.activeElement as HTMLElement | null),
 		visible = useVisible(),
-		theme = useDashboardTheme(),
 		layout = useDashboardLayout(),
 		ref = useDashboardAppearance(true),
 		[busy, setBusy] = useState(false),
@@ -45,7 +44,6 @@ export function P2Dialog({
 		>
 			<DialogContent
 				ref={ref}
-				data-theme={theme}
 				data-dashboard-layout={layout}
 				className={`nand-dashboard-root block border-0 bg-transparent shadow-none p-4 ${raw ? 'h-[86vh] max-h-[86vh] overflow-hidden' : 'max-h-[85vh] overflow-y-auto'} sm:max-w-none`}
 				showCloseButton={!raw}

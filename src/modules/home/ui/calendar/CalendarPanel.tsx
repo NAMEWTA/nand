@@ -34,6 +34,8 @@ export interface CalendarPanelProps {
 	settings: DashboardSettings;
 	settingsAccess?: DashboardSettingsAccess;
 	widget?: boolean;
+	/** The widget's tile decides the view it starts in and returns to when the tile changes size. */
+	viewHint?: 'month' | 'week';
 	autoLoad?: boolean;
 	onOpenNote?: (file: ContentFile, line?: number) => void;
 	openDay: (
@@ -56,6 +58,7 @@ export function CalendarPanel({
 	settings,
 	settingsAccess,
 	widget = false,
+	viewHint,
 	autoLoad,
 	onOpenNote,
 	openDay,
@@ -63,7 +66,7 @@ export function CalendarPanel({
 }: CalendarPanelProps) {
 	const [date, setDate] = useState(new Date()),
 		[week, setWeek] = useState(() => mondayOf(new Date())),
-		[view, setView] = useState<'month' | 'week'>('month');
+		[view, setView] = useState<'month' | 'week'>(widget && viewHint ? viewHint : 'month');
 	const [filter, setFilter] = useState<CalendarTaskFilter>(() => readCalendarTaskFilter(settingsAccess));
 	const [byDay, setByDay] = useState(new Map<string, VaultTask[]>()),
 		[loaded, setLoaded] = useState(false),
@@ -74,6 +77,13 @@ export function CalendarPanel({
 		alive = useRef(true);
 	const preview = useDayPreview(app, context),
 		closePreview = preview.close;
+	// A tile that changes size class switches view (adjusting state while rendering, as React recommends).
+	const [seenHint, setSeenHint] = useState(viewHint);
+	if (widget && viewHint && viewHint !== seenHint) {
+		setSeenHint(viewHint);
+		setView(viewHint);
+		if (viewHint === 'week') setWeek(mondayOf(new Date()));
+	}
 	const excludeKey = JSON.stringify(settings.calendarExcludeFolders ?? []);
 	const load = useCallback(async () => {
 		started.current = true;

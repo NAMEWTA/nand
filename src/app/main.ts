@@ -14,14 +14,17 @@ import { NandSettingTab } from './settings/entry-tab';
 import { IntroModal } from './intro-modal';
 import { registerShellCommands } from './commands';
 import { ThemeRuntime } from '../theme/runtime';
+import { AppearanceRuntime } from './appearance-runtime';
 import { THEME_PRESETS } from '../theme/settings';
 import { refreshLeafTitle, retitleDeferredLeaves, type LeafTitlePair } from '../host/obsidian/workspace-title';
 import { registerLocalizedCommand, type LocalizedCommand } from '../host/obsidian/localized-command';
 import { setDiagnosticRoots } from '../shared/diagnostics/redact';
+import { useStorageTimers } from '../shared/storage/timers';
 import { getLanguage, onLanguageChanged, setLanguage, t, tFor } from '../shared/i18n/index';
 import { refreshLocalizedDom } from '../host/obsidian/localized-dom';
 import { AUTOMATIONS, type AutomationsService } from '../modules/automations/api';
 import { COMMENTS_VIEW_TYPE, CommentsLeaf } from './workbench/comments-leaf';
+import { NAVIGATOR_VIEW_TYPE, NavigatorLeaf } from './workbench/navigator-leaf';
 import { collectReferences } from '../host/obsidian/references';
 import { registerCopyCommands } from './copy-commands';
 import { BROWSER_OPEN, type BrowserOpenRequest } from '../modules/browser/api';
@@ -48,6 +51,7 @@ export default class DashboardPlugin extends Plugin {
 	private readonly postProcessors = new Set<MarkdownPostProcessor>();
 
 	async onload(): Promise<void> {
+		useStorageTimers(window);
 		setLanguage(defaultLanguage());
 		await initializeDevice(this.app, {
 			machineIdentity: desktopMachineIdentity,
@@ -58,6 +62,7 @@ export default class DashboardPlugin extends Plugin {
 		catch (error) { new Notice(t('content.migrationFailed', { error: error instanceof Error ? error.message : String(error) }), 0); throw error; }
 		await this.loadSettings();
 		new ThemeRuntime(this.runtime.theme).attach(this);
+		new AppearanceRuntime(this.runtime.ns.app).attach(this);
 		const adapter = this.app.vault.adapter as { getBasePath?: () => string };
 		setDiagnosticRoots({ vault: typeof adapter.getBasePath === 'function' ? adapter.getBasePath() : undefined });
 		this.register(onLanguageChanged(() => {
@@ -70,6 +75,7 @@ export default class DashboardPlugin extends Plugin {
 		// registerView can restore leaves after onLayoutReady, especially for hosts that load asynchronously.
 		this.registerEvent(this.app.workspace.on('layout-change', () => this.rewriteDeferredLeafTitles()));
 		this.registerView(COMMENTS_VIEW_TYPE, (leaf) => new CommentsLeaf(leaf, this));
+		this.registerView(NAVIGATOR_VIEW_TYPE, (leaf) => new NavigatorLeaf(leaf, this));
 
 		this.registry = new ModuleRegistry(MANIFESTS, {
 			env: { desktop: Platform.isDesktopApp, mobile: Platform.isMobile, phone: Platform.isPhone },
@@ -90,6 +96,7 @@ export default class DashboardPlugin extends Plugin {
 						lifetime.register(() => this.removeCommand(command.id));
 						return registered;
 					},
+					remove: (id) => this.removeCommand(id),
 				};
 				const editor: EditorAccess = {
 					addExtension: (extension) => {
@@ -284,6 +291,17 @@ export default class DashboardPlugin extends Plugin {
 		void this.app.workspace.revealLeaf(leaf);
 	}
 
+	/** Reveal the notes navigator in the left sidebar (the rail's Notes entry), or explain how to turn it on. */
+	async openNavigator(): Promise<void> {
+		if (!this.moduleEnabled('navigator')) {
+			new Notice(t('modules.disabledNotice'));
+			this.openSettings();
+			return;
+		}
+		await new Promise<void>((resolve) => this.app.workspace.onLayoutReady(resolve));
+		await this.app.workspace.ensureSideLeaf(NAVIGATOR_VIEW_TYPE, 'left', { active: true, reveal: true });
+	}
+
 	/** Settings handle of the global theme (Settings → Appearance). */
 	get theme() {
 		return this.runtime.theme;
@@ -303,6 +321,7 @@ export default class DashboardPlugin extends Plugin {
 		const pair = (key: string): LeafTitlePair => ({ en: tFor('en', key), zh: tFor('zh', key) });
 		const byType: Record<string, readonly LeafTitlePair[]> = {
 			[COMMENTS_VIEW_TYPE]: [pair('editor.viewTitle')],
+			[NAVIGATOR_VIEW_TYPE]: [pair('modules.navigator')],
 		};
 		for (const [type, pairs] of Object.entries(byType)) {
 			const title = pairs[0]![language];

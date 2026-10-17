@@ -27,7 +27,11 @@ import type { QuickCommand, ShellChoice, TerminalSettings } from '../core/termin
 import { openPath, revealPath } from '../platform/desktop/files';
 import { resumeArgs } from '../platform/desktop/history/scope';
 import { launchArgs } from '../core/launch/flags';
-import { accountEnv, absolutePluginDir, restoredAccountReference } from '../platform/desktop/agents/accounts';
+import { accountEnv, absolutePluginDir, restoredAccountReference, LEGACY_VAULT_ACCOUNT } from '../platform/desktop/agents/accounts';
+import { legacyDefaultAccountsToAdopt, markLegacyDefaultAdopted, inLegacyDefaultAccount } from '../platform/desktop/agents/legacy-default';
+import type { SystemHookResult } from '../platform/desktop/hooks/system-hooks';
+import { systemAccountLocation, systemAccountPaths } from '../platform/desktop/agents/system-homes';
+import { loginShellEnvironment } from '../platform/desktop/detection/shell-path';
 import { canonicalVaultCwd } from '../platform/desktop/history/canonical-cwd';
 import { checkAccountTranscript } from '../platform/desktop/agents/transcript';
 import { accountArgs } from '../platform/desktop/agents/account-args';
@@ -36,7 +40,7 @@ import { readUsageSnapshots } from '../platform/desktop/agents/usage';
 import { AutomationHooks } from '../platform/desktop/hooks/automation-hooks';
 import { BinaryError, ensureHelper } from '../platform/desktop/pty/binary';
 import { protectedReceipt } from '../../../host/desktop/protected-receipt';
-import { terminalEnvironment } from '../platform/desktop/pty/runtime-environment';
+import { terminalEnvironment, userHome } from '../platform/desktop/pty/runtime-environment';
 import { availableShells, resolveShell, sessionDirectory, type ShellOption } from '../platform/desktop/pty/shells';
 import type { NativeSessionSummary } from '../platform/desktop/server/agent-data-client';
 import { NativeHistory } from '../platform/history/service';
@@ -121,7 +125,8 @@ export class AgentController {
 			app,
 			version: context.manifest.version,
 			platform: Platform.isWin ? 'win32' : Platform.isMacOS ? 'darwin' : 'linux',
-			environment: () => terminalEnvironment(this.vaultPath() ?? '', deviceId(app)),
+			environment: () => terminalEnvironment(),
+			home: userHome,
 			settings: () => this.settings.get(),
 			colors: () => this.themeColors(),
 			binary: () => this.binary(),
@@ -204,9 +209,9 @@ export class AgentController {
     this.usage.invalidate(accounts !== usageAccounts); usageAccounts = accounts;
     if(this.lastHooks && !this.settings.get().statusHooks) {
      this.sessions.clearStatusHooks();
-     // A live automation owns its completion hooks independently of interactive status display.
-     // Do not remove its provider configuration while it is executing.
-     void Promise.all(AGENT_CATALOG.filter(agent => !this.sessions.list().some(session => session.automated && session.running && session.agentId === agent.id)).flatMap(agent => [...new Set(['',this.settings.get().agents.agents[agent.id].accountId,...(this.settings.get().accounts[agent.id]??[])])].map(async name => removeStatusHooks(agent.id, await accountEnv(agent,name,this.vaultPath()??'',deviceId(app)))))).catch(report);
+     // A managed account's hooks live inside the vault and go with the setting. A live automation keeps its own.
+     // The system account's entries are shared with every vault and stay until the user removes them explicitly.
+     void Promise.all(AGENT_CATALOG.filter(agent => !this.sessions.list().some(session => session.automated && session.running && session.agentId === agent.id)).map(agent => this.removeAgentHooks(agent.id))).catch(report);
     }
     this.lastHooks=this.settings.get().statusHooks;
 				for (const session of this.sessions.list()) session.setScrollback(this.settings.get().scrollback);
@@ -240,7 +245,46 @@ export class AgentController {
   this.usageStore = new UsageStore(this, win);
   this.stats = new StatsService(privateVaultStorage(app), deviceId(app), win, this.sessions, report);
   this.historyStore = new HistoryStore(() => this.history(), () => this.vaultPath() ?? '');
+		// A desktop-icon launch lacks what the user's shell rc exports; recover it before the first terminal needs it.
+		void loginShellEnvironment().catch(report);
+		void this.adoptLegacyDefaultAccounts().catch(report);
+	}
 
+	/** Remove the status-hook entries of every managed account of one agent. */
+	private async removeAgentHooks(id: AgentId): Promise<void> {
+		const agent = getAgent(id), vault = this.vaultPath() ?? '', device = deviceId(this.app);
+		for (const name of new Set([this.settings.get().agents.agents[id].accountId, ...(this.settings.get().accounts[id] ?? [])]))
+			if (name !== '') await removeStatusHooks(id, await accountEnv(agent, name, vault, device));
+	}
+
+	/**
+	 * The user's explicit "remove system status hooks": exactly NAND's commands in the real provider files, and NAND's own
+	 * unmodified extension files. Returns what was changed and what was left alone (a link, invalid JSON, a user's file).
+	 */
+	async removeSystemStatusHooks(): Promise<SystemHookResult> {
+		const { removeSystemHooks, removeSystemScripts } = await import('../platform/desktop/hooks/system-hooks');
+		const env = { home: userHome(), platform: (Platform.isWin ? 'win32' : Platform.isMacOS ? 'darwin' : 'linux') as NodeJS.Platform };
+		const result: SystemHookResult = await removeSystemHooks(systemAccountPaths(), env);
+		if (!result.skipped.length) {
+			const scripts = await removeSystemScripts(env);
+			result.changed.push(...scripts.changed); result.skipped.push(...scripts.skipped);
+		}
+		new Notice(result.skipped.length ? t('agent.hooks.systemSkipped', { files: result.skipped.map(row => `${row.file} (${row.reason})`).join(', ') }) : t('agent.hooks.systemRemoved', { count: result.changed.length }), 8000);
+		return result;
+	}
+
+	/** The vault's former default account becomes a named managed account; the empty name now selects the system account. */
+	private async adoptLegacyDefaultAccounts(): Promise<void> {
+		const vault = this.vaultPath(), device = deviceId(this.app);
+		if (!vault || !Platform.isDesktop) return;
+		const agents = await legacyDefaultAccountsToAdopt(vault, device);
+		if (agents.length) await this.settings.update(draft => {
+			for (const id of agents) {
+				draft.accounts[id] = [...new Set([...(draft.accounts[id] ?? []), LEGACY_VAULT_ACCOUNT])];
+				(draft.accountLabels[id] ??= {})[LEGACY_VAULT_ACCOUNT] ??= t('agent.manage.legacyVaultAccount');
+			}
+		});
+		await markLegacyDefaultAdopted(vault, device);
 	}
 
  agentSettings() { return launchSettings(this.settings.get(), this.agents.store.getState().detected); }
@@ -509,9 +553,12 @@ export class AgentController {
  }
 
  async addAccount(id: AgentId, name: string) {
+  if (!name.trim() || name === LEGACY_VAULT_ACCOUNT) throw new Error(t('agent.accountInvalid'));
   await accountEnv(getAgent(id), name, this.vaultPath() ?? '', deviceId(this.app));
   await this.settings.update(d => { d.accounts[id] = [...new Set([...(d.accounts[id] ?? []), name])]; });
  }
+ /** Where the system account's login lives for this provider, home-relative where possible. */
+ systemAccountLocation(id: AgentId): string { return systemAccountLocation(id, userHome()); }
  async selectAccount(id: AgentId, name: string) {
   await this.settings.update(d => { d.agents.agents[id].accountId = name; });
   void this.historyStore.refresh();
@@ -592,7 +639,10 @@ export class AgentController {
 		if (!info.agentId || !info.nativeSessionId) throw new Error(t('agent.sessionMissing'));
 		const vault = this.vaultPath();
 		if (!vault) throw new Error(t('agent.vaultMissing'));
-		const env = await accountEnv(getAgent(info.agentId), info.accountId ?? '', vault, deviceId(this.app), false);
+		let accountId = info.accountId ?? '';
+		// A session saved while the vault default account existed resumes in that directory.
+		if (accountId === '' && info.transcriptPath && await inLegacyDefaultAccount(vault, deviceId(this.app), info.agentId, info.transcriptPath)) accountId = LEGACY_VAULT_ACCOUNT;
+		const env = await accountEnv(getAgent(info.agentId), accountId, vault, deviceId(this.app), false);
 		let transcriptPath = info.transcriptPath;
 		if (!transcriptPath) {
 			const history = this.history();

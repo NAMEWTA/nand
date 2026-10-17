@@ -107,7 +107,7 @@ export function PomodoroWidget({ store, compact = false }: { store: BoardStore; 
 					</div>
 				)}
 			</div>
-			<div className="relative flex h-[var(--input-height,30px)] items-center justify-center">
+			<div className="flex h-[var(--input-height,30px)] items-center justify-center gap-1">
 				<Button
 					size="xs"
 					className={`h-[var(--input-height,30px)] rounded-[var(--db-radius-md)] py-0 ${compact ? 'px-[14px] text-[.7em]' : 'px-4 text-[.75em]'}`}
@@ -116,7 +116,7 @@ export function PomodoroWidget({ store, compact = false }: { store: BoardStore; 
 					{t(state.status === 'running' ? 'home.dashboard.pause' : 'home.dashboard.focus')}
 				</Button>
 				<IconButton
-					className="absolute left-full ml-1 size-5"
+					className="size-5 shrink-0"
 					label={t('home.dashboard.skip')}
 					onClick={() => service.skip()}
 				>

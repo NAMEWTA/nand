@@ -7,18 +7,15 @@ import { useOwnerDocument, useVisible } from '../../../ui/react/contexts';
 import { useT } from '../../../ui/react/hooks';
 import type { BoardStore } from '../services/board-store';
 import { ThemeBridge } from './theme/ThemeBridge';
-import { Banner } from './banner/Banner';
-import { ImmersiveLayout } from './layout/ImmersiveLayout';
-import { SideLayout } from './layout/SideLayout';
-import { StackedLayout } from './layout/StackedLayout';
-import { MobileLayout } from './layout/MobileLayout';
+import { BoardCanvas } from './canvas/BoardCanvas';
 import { ReadingMini } from './widgets/ReadingMini';
 import { PomodoroMini } from './widgets/PomodoroMini';
 import { BoardDnd } from './board/dnd';
 import { NotePreview } from './dialogs/NotePreview';
+/** The board page: one widget canvas. At 600px and below the same canvas projects to a single column. */
 export function DashboardPage({ store, context }: { store: BoardStore; context: NativeSurfaceContext }) {
 	const data = useStore(store.state, (s) => s.data),
-		settings = useStore(store.state, (s) => s.settings),
+		generation = useStore(store.state, (s) => s.generation),
 		doc = useOwnerDocument(),
 		visible = useVisible(),
 		ref = useRef<HTMLDivElement>(null),
@@ -39,33 +36,18 @@ export function DashboardPage({ store, context }: { store: BoardStore; context: 
 		store.setVisible(visible);
 		if (!visible) store.setDialog(null);
 	}, [visible, store]);
-	const mobile = Platform.isPhone || narrow,
-		layout = mobile
-			? 'mobile'
-			: data?.layout === 'immersive'
-				? 'immersive'
-				: data?.layout === 'stacked' || (!data?.layout && settings.layoutMode === 'stacked')
-					? 'stacked'
-					: 'side';
+	const mobile = Platform.isPhone || narrow;
 	return (
 		<div ref={ref} className="h-full min-h-0" aria-label={t('workbench.home')}>
 			{data ? (
-				<ThemeBridge store={store} layout={layout}>
-					<BoardDnd store={store}>
-						{layout !== 'immersive' && <Banner store={store} context={context} mobile={mobile} />}
-						{layout === 'immersive' ? (
-							<ImmersiveLayout store={store} context={context} />
-						) : mobile ? (
-							<MobileLayout store={store} />
-						) : layout === 'stacked' ? (
-							<StackedLayout store={store} />
-						) : (
-							<SideLayout store={store} />
-						)}
+				// One generation per board shown: switching replaces the whole tree and hands it a store view of that generation.
+				<ThemeBridge key={generation} store={store.view(generation)} layout={mobile ? 'mobile' : 'canvas'}>
+					<BoardDnd store={store.view(generation)}>
+						<BoardCanvas store={store} context={context} mobile={mobile} />
 					</BoardDnd>
-					<PomodoroMini store={store} />
-					<ReadingMini store={store} />
-					<NotePreview store={store} />
+					<PomodoroMini store={store.view(generation)} />
+					<ReadingMini store={store.view(generation)} />
+					<NotePreview store={store.view(generation)} />
 				</ThemeBridge>
 			) : (
 				<div role="status">{t('home.dashboard.loading')}</div>

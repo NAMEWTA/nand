@@ -1,11 +1,13 @@
 import { boardTileSources, boardTiles, persistedBoardTiles, type TileDefaults } from '../../core/board/board-tiles';
 import { withStableSectionIds } from '../../core/board/section-identity';
-import { legacyBoardMembers, widgetPresentationKey } from '../../core/board/widget-members';
-import { effectiveBoardLayout } from '../../core/board/layout';
+import { widgetPresentationKey } from '../../core/board/widget-members';
+import { mapBanners, withBanner } from '../../core/board/banner';
+import { builtinTileDefaults, convertToCanvas, needsCanvasConversion } from '../../core/board/canvas';
 import type { BoardTile, BoardWidgetMember } from '../../core/board/types/model';
 import {
 	DASHBOARD_CONFLICT_DIR,
 	DashboardSaveError,
+	SwitchRefusedError,
 	dashboardSaveMessage,
 	type DashboardSaveState,
 	type DashboardSaveStatus,
@@ -43,7 +45,6 @@ import {
 } from '../../core/board/task-tree';
 import type {
 	BannerData,
-	BoardLayout,
 	CardType,
 	DashboardCard,
 	DashboardData,
@@ -131,6 +132,31 @@ export class SyncEngine {
 	}
 	private assertOpen(): void {
 		if (this.closed) throw new DashboardSaveError('closed', t('dashboard.sync.closed'));
+		if (this.switchLock) throw new DashboardSaveError('switching', t('dashboard.sync.switching'));
+		// An edit made through a view of an earlier board generation (a dialog opened before a switch) is void.
+		if (this.callerEpoch !== undefined && this.callerEpoch !== this.epoch)
+			throw new DashboardSaveError('stale', t('dashboard.sync.stale'));
+	}
+	private epoch = 0;
+	private callerEpoch: number | undefined;
+	/** Board generation the page is on; bumped by the store whenever a switch starts. */
+	setEpoch(epoch: number): void {
+		this.epoch = epoch;
+	}
+	/** Run the synchronous start of an engine call on behalf of a view of generation `epoch` (async methods admit their edit first). */
+	runAs<T>(epoch: number, call: () => T): T {
+		const previous = this.callerEpoch;
+		this.callerEpoch = epoch;
+		try {
+			return call();
+		} finally {
+			this.callerEpoch = previous;
+		}
+	}
+	/** While the page moves to another board file the engine already points at the target: refuse every edit meanwhile. */
+	private switchLock = false;
+	setSwitchLock(locked: boolean): void {
+		this.switchLock = locked;
 	}
 	/** Drains admitted work. A durable recovery copy does not mean the original note was saved. */
 	async flush(): Promise<void> {
@@ -201,10 +227,7 @@ export class SyncEngine {
 	constructor(
 		app: App,
 		settings: DashboardSettings,
-		private readonly widgetDefaults: (
-			member: BoardWidgetMember,
-			legacy: boolean,
-		) => TileDefaults | undefined = () => undefined,
+		private readonly widgetDefaults: (member: BoardWidgetMember) => TileDefaults | undefined = builtinTileDefaults,
 	) {
 		this.app = app;
 		this.settings = settings;
@@ -228,6 +251,16 @@ export class SyncEngine {
 		await this.findOrCreateFile();
 		this.registerFileWatcher();
 		await this.load();
+	}
+
+	/** An old (side/stacked/undeclared) board becomes a widget canvas once; cards and banner data are kept. */
+	private async convertOldBoard(): Promise<void> {
+		if (!this.data || this.closed || !needsCanvasConversion(this.data)) return;
+		this.data = withStableSectionIds(
+			convertToCanvas(this.data, this.settings.legacyWidgetMembers, this.widgetDefaults),
+			() => `section-${crypto.randomUUID()}`,
+		);
+		await this.writeToDisk();
 	}
 
 	destroy(): void {
@@ -336,24 +369,53 @@ export class SyncEngine {
 	 * loading to defeat load()'s serialize-equality skip — two workspaces with
 	 * byte-identical content (e.g. two fresh defaults) must still re-render.
 	 */
-	async switchFile(): Promise<void> {
-		if (this.deferredWriteTimer) {
-			window.clearTimeout(this.deferredWriteTimer);
-			this.deferredWriteTimer = null;
-			if (this.data) await this.writeToDisk(true);
+	/**
+	 * Point the engine at `settings.dashboardFile`. `discard` is for backing out of a failed switch: the only unsaved
+	 * state then is the failed target's in-memory conversion, which is dropped instead of blocking the way back.
+	 */
+	async switchFile(discard = false): Promise<void> {
+		if (discard) {
+			if (this.deferredWriteTimer) {
+				window.clearTimeout(this.deferredWriteTimer);
+				this.deferredWriteTimer = null;
+			}
+			if (this.debounceTimer) {
+				window.clearTimeout(this.debounceTimer);
+				this.debounceTimer = null;
+			}
+			await this.writeQueue;
+			this.blocked = false;
+			this.localDirty = false;
+			this.conflict = null;
+		} else {
+			// Everything up to the pointer change can refuse the switch; a refusal leaves this board exactly as it is.
+			try {
+				if (this.deferredWriteTimer) {
+					window.clearTimeout(this.deferredWriteTimer);
+					this.deferredWriteTimer = null;
+					if (this.data) await this.writeToDisk(true);
+				}
+				await this.writeQueue;
+				if (this.blocked || this.localDirty)
+					throw new Error(
+						dashboardSaveMessage(this.saveState) ||
+							t('dashboard.sync.conflict', { path: DASHBOARD_CONFLICT_DIR }),
+					);
+			} catch (error) {
+				throw new SwitchRefusedError(error instanceof Error ? error.message : String(error), error);
+			}
+			if (this.debounceTimer) {
+				window.clearTimeout(this.debounceTimer);
+				this.debounceTimer = null;
+			}
 		}
-		if (this.debounceTimer) {
-			window.clearTimeout(this.debounceTimer);
-			this.debounceTimer = null;
-		}
-		await this.writeQueue;
-		if (this.blocked || this.localDirty) throw new Error(t('dashboard.sync.conflict'));
 		this.baseline = null;
 		this.unregisterFileWatchers();
 		this.data = null;
 		await this.findOrCreateFile();
 		this.registerFileWatcher();
 		await this.load();
+		if (discard) this.setSaveState('saved');
 	}
 
 	private mapCardTasks(
@@ -926,13 +988,10 @@ export class SyncEngine {
 		await this.writeToDisk();
 	}
 
-	async updateBanner(updates: Partial<BannerData>): Promise<void> {
+	async updateBanner(updates: Partial<BannerData>, instanceId = 'default'): Promise<void> {
 		this.assertOpen();
 		if (!this.data) return;
-		this.data = {
-			...this.data,
-			banner: { ...this.data.banner, ...updates },
-		};
+		this.data = withBanner(this.data, instanceId, updates);
 		await this.writeToDisk();
 	}
 
@@ -1162,18 +1221,17 @@ export class SyncEngine {
 		this.assertOpen();
 		if (!this.data) return;
 		if (JSON.stringify(this.data.immersive) === JSON.stringify(tiles)) return;
-		this.data = { ...this.data, immersive: tiles.map((tile) => ({ ...tile })) };
-		this.materializeBoard(false);
+		this.data = withStableSectionIds(
+			{
+				...this.data,
+				widgets: this.data.widgets ?? [],
+				layout: 'immersive',
+				canvas: 1,
+				immersive: tiles.map((tile) => ({ ...tile })),
+			},
+			() => `section-${crypto.randomUUID()}`,
+		);
 		this.data.layoutNeedsRepair = undefined;
-		await this.writeToDisk();
-	}
-
-	/** User layout choice. Packing runs here, never on open, content fit or resize. */
-	async setBoardLayout(layout: BoardLayout): Promise<void> {
-		this.assertOpen();
-		if (!this.data || this.data.layout === layout) return;
-		this.materializeBoard(layout === 'immersive');
-		this.data = { ...this.data, layout };
 		await this.writeToDisk();
 	}
 
@@ -1181,12 +1239,7 @@ export class SyncEngine {
 	async setBoardMembers(members: readonly BoardWidgetMember[]): Promise<void> {
 		this.assertOpen();
 		if (!this.data) return;
-		const previous =
-			this.data.widgets ??
-			legacyBoardMembers(
-				this.settings,
-				effectiveBoardLayout(this.data.layout, this.settings.layoutMode) !== 'side',
-			);
+		const previous = this.data.widgets ?? [];
 		const kept = new Set(members.map((member) => member.memberId));
 		const removed = new Set(
 			previous
@@ -1198,30 +1251,63 @@ export class SyncEngine {
 			widgets: members.map((member) => ({ ...member })),
 			immersive: this.data.immersive?.filter((tile) => !removed.has(tile.id)),
 		};
-		this.materializeBoard(this.data.layout === 'immersive');
+		this.materializeBoard();
 		await this.writeToDisk();
 	}
 
-	private materializeBoard(grid: boolean): void {
-		const legacy = this.data!.widgets === undefined;
-		const widgets =
-			this.data!.widgets ??
-			legacyBoardMembers(
-				this.settings,
-				effectiveBoardLayout(this.data!.layout, this.settings.layoutMode) !== 'side',
-			);
-		this.data = withStableSectionIds({ ...this.data!, widgets }, () => `section-${crypto.randomUUID()}`);
-		if (grid) {
-			// A cap is not measured content height. Existing fit tiles may have adjacent
-			// positions inside each other's caps; adding a member must not move them.
-			this.data.immersive = persistedBoardTiles(
-				boardTiles(this.data, boardTileSources(this.data, widgets), (member) =>
-					this.widgetDefaults(member, legacy),
-				),
-				true,
-			);
-			this.data.layoutNeedsRepair = undefined;
+	/**
+	 * Add a widget (or a content section) to the canvas in one write, at the size the user picked.
+	 * Existing tiles keep their positions.
+	 */
+	async addToCanvas(
+		item: { member: BoardWidgetMember } | { section: { name: string; type: string } },
+		size: { w: number; h: number },
+	): Promise<void> {
+		this.assertOpen();
+		if (!this.data) return;
+		let id: string;
+		if ('member' in item) {
+			if ((this.data.widgets ?? []).some((member) => member.memberId === item.member.memberId)) return;
+			this.data = { ...this.data, widgets: [...(this.data.widgets ?? []), { ...item.member }] };
+			id = `widget:${widgetPresentationKey(item.member)}`;
+		} else {
+			const name = this.uniqueColumnName(item.section.name);
+			const libraryConfig =
+				item.section.type === 'library'
+					? {
+							filters: [] as import('../../core/board/types/index').PropertyFilter[],
+							viewMode: 'grid' as import('../../core/board/types/index').LibraryViewMode,
+							sortBy: 'modified',
+							sortDesc: true,
+						}
+					: undefined;
+			this.data = {
+				...this.data,
+				columns: [
+					...this.data.columns,
+					{ name, color: '#6366f1', sectionType: item.section.type, cards: [], libraryConfig },
+				],
+			};
+			id = `section:${name}`;
 		}
+		this.materializeBoard(new Map([[id, size]]));
+		await this.writeToDisk();
+	}
+
+	/** Give every canvas source a saved tile. Positions already saved are never recomputed. */
+	private materializeBoard(chosen?: ReadonlyMap<string, { w: number; h: number }>): void {
+		const widgets = this.data!.widgets ?? [];
+		this.data = withStableSectionIds(
+			{ ...this.data!, widgets, layout: 'immersive', canvas: 1 },
+			() => `section-${crypto.randomUUID()}`,
+		);
+		// A cap is not measured content height. Existing fit tiles may have adjacent
+		// positions inside each other's caps; adding a member must not move them.
+		this.data.immersive = persistedBoardTiles(
+			boardTiles(this.data, boardTileSources(this.data, widgets), this.widgetDefaults, chosen),
+			true,
+		);
+		this.data.layoutNeedsRepair = undefined;
 	}
 
 	async updateProjectCover(cardId: string, coverImage: string): Promise<void> {
@@ -1316,12 +1402,15 @@ export class SyncEngine {
 			return { ...action, target: newPath, name: newName };
 		});
 
-		const banner = { ...this.data.banner, image: replace(this.data.banner.image) };
-		if (banner.images) banner.images = banner.images.map(replace);
-		if (banner.imagePos)
-			banner.imagePos = Object.fromEntries(
-				Object.entries(banner.imagePos).map(([path, value]) => [replace(path), value]),
-			);
+		const renameBanner = (source: BannerData): BannerData => {
+			const banner = { ...source, image: replace(source.image) };
+			if (banner.images) banner.images = banner.images.map(replace);
+			if (banner.imagePos)
+				banner.imagePos = Object.fromEntries(
+					Object.entries(banner.imagePos).map(([path, value]) => [replace(path), value]),
+				);
+			return banner;
+		};
 
 		const columns = this.data.columns.map((col) => ({
 			...col,
@@ -1339,7 +1428,7 @@ export class SyncEngine {
 			this.debounceTimer = null;
 		}
 
-		this.data = { ...this.data, banner, quickActions, columns };
+		this.data = { ...mapBanners(this.data, renameBanner), quickActions, columns };
 		void this.writeToDisk().catch(() => undefined);
 	}
 
@@ -1409,6 +1498,12 @@ export class SyncEngine {
 		if (this.data && serialize(newData) === serialize(this.data)) return;
 
 		this.data = newData;
+		// An old board converts once, here, so every way a board file is opened (first open, switching boards,
+		// an old device's sync) ends in the canvas format before it is shown.
+		if (needsCanvasConversion(newData)) {
+			await this.convertOldBoard();
+			return;
+		}
 		this.notifyCallbacks('external');
 	}
 

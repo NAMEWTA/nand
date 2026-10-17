@@ -1,4 +1,5 @@
-import type { AgentDispatch, AgentDirectoryEntry, AgentSessionsPort, AgentSkills } from '../../agent/api';
+import type { AgentDispatch, AgentDirectoryEntry, AgentSessionsPort, AgentQuickCommands, AgentSkills, AgentUsage } from '../../agent/api';
+import type { NavigatorLists } from '../../navigator/api';
 import type { IndexedWidgets } from '../core/board/widget-registry';
 import type { ExpenseService } from '../platform/expense/expense-service';
 import type { HabitService } from '../platform/habit/habit-service';
@@ -27,4 +28,11 @@ export const homeServices: {
 	sessions?: () => AgentSessionsPort | undefined;
 	skills?: () => AgentSkills | undefined;
 	watchAgents?: (listener: () => void) => () => void;
+	/** The agent module's provider quotas while it is active. */
+	quickCommands?: () => AgentQuickCommands | undefined;
+	usage?: () => AgentUsage | undefined;
+	watchUsage?: (listener: () => void) => () => void;
+	/** The navigator's recent notes and shortcuts while that module is active. */
+	navigatorLists?: () => NavigatorLists | undefined;
+	watchNavigatorLists?: (listener: () => void) => () => void;
 } = {};

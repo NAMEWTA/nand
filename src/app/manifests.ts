@@ -6,6 +6,7 @@ import { browserManifest } from '../modules/browser/manifest';
 import { commentsManifest } from '../modules/comments/manifest';
 import { homeManifest } from '../modules/home/manifest';
 import { iconsManifest } from '../modules/icons/manifest';
+import { navigatorManifest } from '../modules/navigator/manifest';
 import { notificationsManifest } from '../modules/notifications/manifest';
 import { syncManifest } from '../modules/sync/manifest';
 
@@ -14,6 +15,7 @@ export const MANIFESTS: readonly ModuleManifest[] = [
 	browserManifest,
 	homeManifest,
 	commentsManifest,
+	navigatorManifest,
 	archivesManifest,
 	agentManifest,
 	iconsManifest,

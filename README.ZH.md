@@ -25,13 +25,14 @@ NAND 当前版本为 0.0.2-alpha.1，是预发布版。
 
 | 功能 | 指南 |
 |---|---|
-| 工作台 | [响应式图标轨与侧栏、专注模式和用量状态栏](docs/workbench.md) |
+| 工作台 | [响应式图标轨与侧栏、专注模式，用量与状态显示在 Obsidian 状态栏](docs/workbench.md) |
 | 设置与外观 | [语言与模块开关](docs/settings.md)；[样式、Markdown 标题与强调色](docs/appearance.md) |
-| 看板与记录 | [三种 Apex 布局、15 类分区、小组件和 13 款主题](docs/dashboard.md)；[习惯、记账、阅读、番茄钟](docs/dashboard.md#统计与账本) |
+| 看板与记录 | [基于 Apex 网格的自由小组件画布：添加、拖动、缩放和尺寸档](docs/dashboard.md)；[习惯、记账、阅读、番茄钟](docs/dashboard.md#统计与账本) |
 | 自动化 | [模板、定时动作、预检、运行记录与通知](docs/automation.md) |
 | 编程智能体 | [终端/网页标签组、恢复、历史、快捷命令与用量](docs/agent-workbench.md) |
 | 浏览器 | [个人资料、Cookie 导入、下载与材料采集](docs/browser.md) |
 | 档案 | [个人、企业、任职、关系和相关资料](docs/contacts.md) |
+| 笔记导航器 | [双栏文件夹和标签浏览，搜索、快捷方式、日历与周期笔记、模板、库配置档、合并笔记与标签操作](docs/navigator.md) |
 | 批注 | [行级/选区批注、悬停线程和 Obsidian 侧栏](docs/comments.md) |
 | 图标 | [文件和界面图标、颜色及规则](docs/icons.md) |
 | Git 同步 | [用系统 Git 提交、拉取、推送整个库并处理冲突（桌面端，默认关闭）](docs/sync.md) |
@@ -57,7 +58,7 @@ NAND 当前版本为 0.0.2-alpha.1，是预发布版。
 
 NAND 使用 MIT 许可证，见 [LICENSE](LICENSE)。第三方署名：
 
-- [NOTICE](NOTICE) 列出 NAND 改编的作品并保留它们的许可证原文：apex-dashboard 与 obsidian-dashboard（看板设计）、Orca（工作台、智能体、浏览器与自动化界面）、Margin Comments（批注锚点和交互）、shadcn/ui（组件）、Geist 字体、Iconic（图标规则）和 obsidian-git（Git 同步）。见 [Orca 对照](docs/third-party/orca-terminal-workbench.md)。
+- [NOTICE](NOTICE) 列出 NAND 改编的作品并保留它们的许可证原文：apex-dashboard 与 obsidian-dashboard（看板设计）、Orca（工作台、智能体、浏览器与自动化界面）、Margin Comments（批注锚点和交互）、shadcn/ui（组件）、Geist 字体、Iconic（图标规则）和 obsidian-git（Git 同步）。笔记导航器参考 Notebook Navigator 的行为独立重写，未包含其代码，见[参考范围](docs/third-party/notebook-navigator.md)与 [Orca 对照](docs/third-party/orca-terminal-workbench.md)。
 - [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md) 列出打包进插件的 npm 依赖、CSS/字体许可和终端辅助程序的 Rust 依赖。
 - 图标、Emoji 与 Unicode 数据的声明见 [src/modules/icons/core/res/NOTICE.txt](src/modules/icons/core/res/NOTICE.txt)。
 

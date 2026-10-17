@@ -1,7 +1,6 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { Bold, Italic, Plus, Inbox } from 'lucide-react';
 import { useT } from './hooks';
-import { usePortalContainer } from './contexts';
 import { Button } from '../components/button';
 import { Input } from '../components/input';
 import { Textarea } from '../components/textarea';
@@ -68,7 +67,6 @@ import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from '../compone
 import { EmptyState } from '../components/nand/EmptyState';
 import { SettingsSection } from '../components/nand/SettingsSection';
 import {
-	SettingsRow,
 	SettingsSwitchRow,
 	SegmentedControl,
 	SettingsBadge,
@@ -91,7 +89,6 @@ const buttonVariants = ['default', 'secondary', 'outline', 'ghost', 'link', 'des
 
 export function ComponentGallery() {
 	const t = useT();
-	const portal = usePortalContainer();
 	const [checked, setChecked] = useState(false);
 	const [segment, setSegment] = useState('first');
 	const [commandOpen, setCommandOpen] = useState(false);
@@ -100,63 +97,21 @@ export function ComponentGallery() {
 	const [path, setPath] = useState('');
 	const [icon, setIcon] = useState('file');
 	const [name, setName] = useState('NAND');
-	const [palette, setPalette] = useState('host');
-	const [font, setFont] = useState('geist');
 	const options = [
 		{ value: 'first', label: t('ui.optionA') },
 		{ value: 'second', label: t('ui.optionB') },
 		{ value: 'third', label: t('ui.optionC'), disabled: true, tooltip: t('ui.disabled') },
 	];
 	const [sampleTime] = useState(() => Date.now() - 60_000);
-	useEffect(() => {
-		const oldPalette = portal.getAttribute('data-palette');
-		const oldFont = portal.getAttribute('data-font');
-		portal.setAttribute('data-palette', palette);
-		portal.setAttribute('data-font', font);
-		return () => {
-			if (oldPalette === null) portal.removeAttribute('data-palette');
-			else portal.setAttribute('data-palette', oldPalette);
-			if (oldFont === null) portal.removeAttribute('data-font');
-			else portal.setAttribute('data-font', oldFont);
-		};
-	}, [portal, palette, font]);
 	return (
 		<div
 			className="nand-ui min-w-0 space-y-8 p-4 [&_[data-slot=settings-row]]:flex-wrap [&_[data-slot=settings-row]>div]:max-w-full [&_[data-slot=settings-row]_button]:max-w-full [&_[data-slot=settings-row]_.flex]:flex-wrap"
-			data-palette={palette}
-			data-font={font}
 			data-slot="component-gallery"
 		>
-			<SettingsSection title={t('ui.gallery')} description={t('ui.galleryDescription')}>
-				<SettingsRow
-					label={t('ui.appearance')}
-					control={
-						<SegmentedControl
-							wrap
-							value={palette}
-							onChange={setPalette}
-							options={[
-								{ value: 'host', label: t('ui.hostPalette') },
-								{ value: 'orca', label: t('ui.orcaPalette') },
-							]}
-						/>
-					}
-				/>
-				<SettingsRow
-					label={t('ui.text')}
-					control={
-						<SegmentedControl
-							wrap
-							value={font}
-							onChange={setFont}
-							options={[
-								{ value: 'geist', label: t('ui.geistFont') },
-								{ value: 'host', label: t('ui.hostFont') },
-							]}
-						/>
-					}
-				/>
-			</SettingsSection>
+			<header className="space-y-1">
+				<h2 className="text-lg font-semibold">{t('ui.gallery')}</h2>
+				<p className="text-sm text-muted-foreground">{t('ui.galleryDescription')}</p>
+			</header>
 			<SettingsSection title={t('ui.buttons')}>
 				{buttonVariants.map((variant) => (
 					<div key={variant} className="flex flex-wrap items-center gap-2">

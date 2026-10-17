@@ -26,7 +26,6 @@ test('React music settings preserve pause, login, logout and album creation fiel
 		logout,
 	} as unknown as NonNullable<typeof homeServices.music>;
 	let current = structuredClone(DEFAULT_DASHBOARD_SETTINGS);
-	current.widgetMusicEnabled = true;
 	function Harness() {
 		const [settings, set] = useState(current);
 		return (
@@ -44,9 +43,6 @@ test('React music settings preserve pause, login, logout and album creation fiel
 		);
 	}
 	render(<Harness />);
-	fireEvent.click(screen.getByRole('switch', { name: t('settings.widgetMusic') }));
-	expect(current.widgetMusicEnabled).toBe(false);
-	expect(pause).toHaveBeenCalledOnce();
 	fireEvent.click(screen.getByRole('button', { name: t('music.accountLogin') }));
 	await waitFor(() => expect(login).toHaveBeenCalledOnce());
 	await waitFor(() =>

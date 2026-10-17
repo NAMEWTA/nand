@@ -14,6 +14,13 @@ import {
 	parseQuickActions,
 	splitFrontmatter,
 } from './generate-default-markdown';
+function readBanners(value: unknown): DashboardData['banners'] {
+	if (!value || typeof value !== 'object' || Array.isArray(value)) return undefined;
+	const entries = Object.entries(value as Record<string, unknown>)
+		.filter(([id, banner]) => !!id.trim() && !!banner && typeof banner === 'object')
+		.map(([id, banner]) => [id, parseBanner({ banner })] as const);
+	return entries.length ? Object.fromEntries(entries) : undefined;
+}
 export function parse(markdown: string): DashboardData {
 	const { frontmatter, body } = splitFrontmatter(markdown);
 	const banner = parseBanner(frontmatter);
@@ -24,7 +31,11 @@ export function parse(markdown: string): DashboardData {
 
 	const data: DashboardData = { banner, quickActions, columns };
 	const layout = frontmatter.layout;
-	if (layout === 'side' || layout === 'stacked' || layout === 'immersive') data.layout = layout;
+	if (layout === 'immersive') data.layout = layout;
+	else if (layout === 'side' || layout === 'stacked') data.legacyLayout = layout;
+	if (frontmatter.canvas === 1) data.canvas = 1;
+	const banners = readBanners(frontmatter.banners);
+	if (banners) data.banners = banners;
 	if (frontmatter.gridPacked === true) data.gridPacked = true;
 	data.widgets = readBoardMembers(frontmatter.widgets);
 	data.immersive = readBoardTiles(frontmatter.immersive);
@@ -50,7 +61,7 @@ function geometryCommitBaseline(data: DashboardData, generated: string): string 
 	const baseDoc = readYaml(before.yaml);
 	const base = baseDoc.toJSON() as Record<string, unknown>;
 	const next = splitFrontmatter(generated).frontmatter;
-	if (['layout', 'widgets', 'immersive'].every((key) => JSON.stringify(base[key]) === JSON.stringify(next[key])))
+	if (['layout', 'canvas', 'widgets', 'immersive'].every((key) => JSON.stringify(base[key]) === JSON.stringify(next[key])))
 		return snapshot.baseline;
 	const raw = splitFrontmatter(snapshot.source).frontmatter.immersive;
 	if (!Array.isArray(raw)) return snapshot.baseline;
@@ -73,6 +84,8 @@ function serializeManaged(data: DashboardData): string {
 	lines.push('---');
 	lines.push('dashboard: true');
 	if (data.layout) lines.push(`layout: ${data.layout}`);
+	if (data.canvas) lines.push('canvas: 1');
+	if (data.banners && Object.keys(data.banners).length) lines.push(`banners: ${JSON.stringify(data.banners)}`);
 	if (data.gridPacked) lines.push('gridPacked: true');
 	if (data.widgets) lines.push(`widgets: ${JSON.stringify(data.widgets)}`);
 	if (data.immersive) lines.push(`immersive: ${JSON.stringify(data.immersive)}`);

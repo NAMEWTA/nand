@@ -42,6 +42,13 @@ struct Session {
     // index entries without provenance must be rescanned before account reads.
     #[serde(default)]
     sources: Vec<HistorySource>,
+    // Set for a system account: the provider directory of the user's real home that holds
+    // every source. Such a row is only trusted while the caller still names that directory.
+    #[serde(default)]
+    system_base: Option<String>,
+    // The history directory (or database file) the session was read from.
+    #[serde(default)]
+    system_root: Option<String>,
 }
 #[derive(Clone, Serialize, Deserialize, Debug)]
 struct HistorySource {
@@ -54,6 +61,8 @@ struct Root {
     agent_id: String,
     path: String,
     account_key: String,
+    #[serde(default)]
+    system_base: Option<String>,
 }
 #[derive(Clone, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -74,6 +83,11 @@ pub(crate) struct Request {
     scope: String,
     #[serde(default)]
     key: String,
+    // Provider directories of system accounts the caller currently reads, and their history sources.
+    #[serde(default)]
+    system_bases: Vec<String>,
+    #[serde(default)]
+    system_roots: Vec<String>,
 }
 pub(crate) fn execute(
     operation: &str,
@@ -115,7 +129,15 @@ pub(crate) fn execute(
             if !path.exists() {
                 continue;
             }
-            if request.scope == "account" && !account_path(&vault, path) {
+            if let Some(base) = &root.system_base {
+                if !system_root(Path::new(base), path) {
+                    warnings.push(format!(
+                        "{}: history source outside the system provider directory",
+                        root.agent_id
+                    ));
+                    continue;
+                }
+            } else if request.scope == "account" && !account_path(&vault, path) {
                 warnings.push(format!(
                     "{}: history source outside vault accounts",
                     root.agent_id
@@ -237,7 +259,13 @@ pub(crate) fn execute(
             .map_err(|e| e.to_string())?;
         let mut session: Session = serde_json::from_str(&raw).map_err(|e| e.to_string())?;
         session.text = text;
-        if !session_allowed(&vault, &session, &request.scope) {
+        if !session_allowed(
+            &vault,
+            &session,
+            &request.scope,
+            &request.system_bases,
+            &request.system_roots,
+        ) {
             return Err("session outside vault".into());
         }
         return Ok(json!(session));
@@ -504,9 +532,15 @@ fn query(
         {
             check_cancel(cancel)?;
             let (key, summary) = cwd.map_err(|e| e.to_string())?;
-            if serde_json::from_str::<Session>(&summary)
-                .is_ok_and(|session| session_allowed(vault, &session, &request.scope))
-            {
+            if serde_json::from_str::<Session>(&summary).is_ok_and(|session| {
+                session_allowed(
+                    vault,
+                    &session,
+                    &request.scope,
+                    &request.system_bases,
+                    &request.system_roots,
+                )
+            }) {
                 allowed.push(key);
             }
         }
@@ -624,10 +658,93 @@ fn account_source_file(vault: &Path, source: &HistorySource) -> bool {
             Err(error) => !source.required && error.kind() == std::io::ErrorKind::NotFound,
         }
 }
-fn session_allowed(vault: &Path, session: &Session, scope: &str) -> bool {
+fn session_allowed(
+    vault: &Path,
+    session: &Session,
+    scope: &str,
+    bases: &[String],
+    roots: &[String],
+) -> bool {
+    if let Some(base) = &session.system_base {
+        // A system session is the user's own provider history. It is trusted only inside the
+        // directory the caller names now, and a working directory still scopes the vault view.
+        return bases.iter().any(|allowed| allowed == base)
+            && session
+                .system_root
+                .as_ref()
+                .is_some_and(|root| roots.iter().any(|allowed| allowed == root))
+            && system_session(Path::new(base), session)
+            && (scope == "account" || inside(vault, &session.cwd));
+    }
     let managed = managed_source(vault, Path::new(&session.transcript_path));
     (scope != "account" && !managed || account_session(vault, session))
         && (scope == "account" || inside(vault, &session.cwd))
+}
+// A system source stays inside the provider directory and is reached without following a
+// link below it. The directory itself may be a link: dotfile managers commonly make it one.
+fn system_root(base: &Path, source: &Path) -> bool {
+    let Ok(relative) = source.strip_prefix(base) else {
+        return false;
+    };
+    relative
+        .components()
+        .all(|component| matches!(component, std::path::Component::Normal(_)))
+}
+fn system_source_path(base: &Path, source: &Path, required: bool) -> bool {
+    if !system_root(base, source) {
+        return false;
+    }
+    let mut current = base.to_path_buf();
+    for component in source.strip_prefix(base).unwrap().components() {
+        current.push(component);
+        match fs::symlink_metadata(&current) {
+            Ok(meta) if meta.file_type().is_symlink() => return false,
+            Ok(_) => {}
+            Err(error) => return !required && error.kind() == std::io::ErrorKind::NotFound,
+        }
+    }
+    true
+}
+fn system_source_file(base: &Path, source: &HistorySource) -> bool {
+    system_source_path(base, &source.path, source.required)
+        && match fs::symlink_metadata(&source.path) {
+            Ok(meta) => meta.is_file(),
+            Err(error) => !source.required && error.kind() == std::io::ErrorKind::NotFound,
+        }
+}
+// A transcript is a session log of its provider, not any file under the provider directory: a
+// login or settings file next to the history is never one.
+fn system_transcript(session: &Session) -> bool {
+    let (Some(root), path) = (&session.system_root, Path::new(&session.transcript_path)) else {
+        return false;
+    };
+    let name = path.file_name().and_then(|n| n.to_str()).unwrap_or("");
+    let root = Path::new(root);
+    match session.agent_id.as_str() {
+        "opencode" => path == root,
+        agent => {
+            path.starts_with(root)
+                && path != root
+                && match agent {
+                    "grok" => name == "session.json",
+                    "gemini" => {
+                        (name.ends_with(".json") || name.ends_with(".jsonl"))
+                            && path.parent().is_some_and(|p| p.ends_with("chats"))
+                    }
+                    _ => name.ends_with(".jsonl"),
+                }
+        }
+    }
+}
+fn system_session(base: &Path, session: &Session) -> bool {
+    system_transcript(session)
+        && session.sources.first().is_some_and(|source| {
+            source.required && source.path == Path::new(&session.transcript_path)
+        })
+        && session
+            .sources
+            .iter()
+            .all(|source| system_source_file(base, source))
 }
 fn managed_source(vault: &Path, source: &Path) -> bool {
     #[cfg(windows)]
@@ -642,7 +759,7 @@ fn history_sources(
     root: &Root,
     account: bool,
 ) -> Result<Vec<HistorySource>, String> {
-    if !account && !managed_source(vault, path) {
+    if root.system_base.is_none() && !account && !managed_source(vault, path) {
         return Ok(Vec::new());
     }
     let mut paths = vec![path.to_path_buf()];
@@ -671,7 +788,11 @@ fn history_sources(
         .map(|(index, path)| {
             let required = index == 0 || fs::symlink_metadata(&path).is_ok();
             let source = HistorySource { path, required };
-            if !account_source_file(vault, &source) {
+            let allowed = match &root.system_base {
+                Some(base) => system_source_file(Path::new(base), &source),
+                None => account_source_file(vault, &source),
+            };
+            if !allowed {
                 return Err(format!(
                     "history source outside vault accounts: {}",
                     source.path.display()
@@ -899,6 +1020,8 @@ fn parse(
         transcript_path: path.to_string_lossy().into(),
         modified_at_ms: modified,
         sources: history_sources(vault, path, root, include_outside)?,
+        system_base: root.system_base.clone(),
+        system_root: root.system_base.as_ref().map(|_| root.path.clone()),
         ..Default::default()
     };
     let mut seen = HashMap::new();
@@ -1022,6 +1145,8 @@ fn opencode(
             modified_at_ms: modified,
             transcript_path: path.to_string_lossy().into(),
             sources: sources.clone(),
+            system_base: root.system_base.clone(),
+            system_root: root.system_base.as_ref().map(|_| root.path.clone()),
             ..Default::default()
         };
         let mut messages = db
@@ -1096,6 +1221,8 @@ mod tests {
             offset: 0,
             scope: String::new(),
             key: String::new(),
+            system_bases: Vec::new(),
+            system_roots: Vec::new(),
         }
     }
     #[test]
@@ -1174,6 +1301,7 @@ mod tests {
                 agent_id: "codex".into(),
                 path: source.to_string_lossy().into(),
                 account_key: "{}".into(),
+                system_base: None,
             }],
         );
         let cancel = AtomicBool::new(false);
@@ -1207,6 +1335,7 @@ mod tests {
                 agent_id: "pi".into(),
                 path: temp.0.to_string_lossy().into(),
                 account_key: "{}".into(),
+                system_base: None,
             }],
         );
         assert_eq!(
@@ -1221,6 +1350,7 @@ mod tests {
             agent_id: "pi".into(),
             path: temp.0.to_string_lossy().into(),
             account_key: "account-A".into(),
+            system_base: None,
         };
         let file = temp.0.join("pi.jsonl");
         fs::write(&file,format!("{}\n{}\n",json!({"type":"session","id":"same","cwd":temp.0}),json!({"type":"message","message":{"role":"user","content":[{"type":"text","text":"hello"}]}}))).unwrap();
@@ -1282,6 +1412,7 @@ mod tests {
                 agent_id: "opencode".into(),
                 path: file.to_string_lossy().into(),
                 account_key: "{}".into(),
+                system_base: None,
             },
             &temp.0,
             &AtomicBool::new(false),
@@ -1320,11 +1451,13 @@ mod tests {
                     agent_id: "gemini".into(),
                     path: home.join("tmp").to_string_lossy().into(),
                     account_key: "{}".into(),
+                    system_base: None,
                 },
                 Root {
                     agent_id: "grok".into(),
                     path: temp.0.join("grok").to_string_lossy().into(),
                     account_key: "{}".into(),
+                    system_base: None,
                 },
             ],
         );
@@ -1639,11 +1772,13 @@ mod tests {
                     agent_id: "claude-code".into(),
                     path: source.to_string_lossy().into(),
                     account_key: "account".into(),
+                    system_base: None,
                 },
                 Root {
                     agent_id: "claude-code".into(),
                     path: outside.0.to_string_lossy().into(),
                     account_key: "global".into(),
+                    system_base: None,
                 },
             ],
         );
@@ -1716,6 +1851,7 @@ mod tests {
                 agent_id: "grok".into(),
                 path: source.to_string_lossy().into(),
                 account_key: "local".into(),
+                system_base: None,
             }],
         );
         req.scope = "account".into();
@@ -1835,6 +1971,7 @@ mod tests {
                     root_path.to_string_lossy().into()
                 },
                 account_key: "local".into(),
+                system_base: None,
             };
             let sources = history_sources(&vault.0, &source, &root, true).unwrap();
             for dependency in &sources {
@@ -1864,5 +2001,122 @@ mod tests {
             }
             assert_eq!(fs::read_to_string(&global).unwrap(), "GLOBAL_SECRET");
         }
+    }
+    #[test]
+    fn system_account_history_stays_inside_the_named_provider_directory() {
+        let vault = Temp::new();
+        let home = Temp::new();
+        let base = home.0.join(".codex");
+        let sessions = base.join("sessions");
+        fs::create_dir_all(&sessions).unwrap();
+        fs::write(
+            sessions.join("one.jsonl"),
+            format!(
+                "{}\n",
+                json!({"type":"session_meta","payload":{"id":"sys","cwd":home.0}})
+            ),
+        )
+        .unwrap();
+        let root = Root {
+            agent_id: "codex".into(),
+            path: sessions.to_string_lossy().into(),
+            account_key: "system".into(),
+            system_base: Some(base.to_string_lossy().into()),
+        };
+        let mut req = request(&vault.0, vec![root.clone()]);
+        req.scope = "account".into();
+        let cancel = AtomicBool::new(false);
+        let scan = execute("scan", &req, &cancel).unwrap();
+        assert_eq!(scan["warnings"].as_array().unwrap().len(), 0);
+        // Without the caller naming the directory, an indexed system row is not trusted.
+        assert_eq!(execute("query", &req, &cancel).unwrap()["total"], 0);
+        req.system_bases = vec![base.to_string_lossy().into()];
+        // The history directory must be named as well: a row indexed from another one is not trusted.
+        assert_eq!(execute("query", &req, &cancel).unwrap()["total"], 0);
+        req.system_roots = vec![sessions.to_string_lossy().into()];
+        assert_eq!(execute("query", &req, &cancel).unwrap()["total"], 1);
+        // The vault view still filters by working directory.
+        req.scope = "vault".into();
+        assert_eq!(execute("query", &req, &cancel).unwrap()["total"], 0);
+        // A different directory is not the one the row was indexed under.
+        req.scope = "account".into();
+        req.system_bases = vec![home.0.join(".other").to_string_lossy().into()];
+        assert_eq!(execute("query", &req, &cancel).unwrap()["total"], 0);
+        // A root that escapes its base is refused instead of walked.
+        let mut escaping = request(
+            &vault.0,
+            vec![Root {
+                path: home.0.to_string_lossy().into(),
+                ..root
+            }],
+        );
+        escaping.scope = "account".into();
+        let warned = execute("scan", &escaping, &cancel).unwrap();
+        assert_eq!(warned["warnings"].as_array().unwrap().len(), 1);
+    }
+    #[test]
+    fn only_session_logs_count_as_system_transcripts() {
+        let root = "/home/u/.codex/sessions";
+        let session = |agent: &str, root: &str, path: &str| Session {
+            agent_id: agent.into(),
+            system_root: Some(root.into()),
+            transcript_path: path.into(),
+            ..Default::default()
+        };
+        assert!(system_transcript(&session(
+            "codex",
+            root,
+            "/home/u/.codex/sessions/2026/a.jsonl"
+        )));
+        assert!(!system_transcript(&session(
+            "codex",
+            root,
+            "/home/u/.codex/auth.json"
+        )));
+        assert!(!system_transcript(&session(
+            "codex",
+            root,
+            "/home/u/.codex/history.jsonl"
+        )));
+        assert!(!system_transcript(&session(
+            "claude-code",
+            "/home/u/.claude/projects",
+            "/home/u/.claude/.credentials.json"
+        )));
+        assert!(!system_transcript(&session(
+            "claude-code",
+            "/home/u/.claude/projects",
+            "/home/u/.claude/settings.json"
+        )));
+        assert!(system_transcript(&session(
+            "grok",
+            "/home/u/.grok/sessions",
+            "/home/u/.grok/sessions/x/session.json"
+        )));
+        assert!(!system_transcript(&session(
+            "grok",
+            "/home/u/.grok/sessions",
+            "/home/u/.grok/auth.json"
+        )));
+        assert!(system_transcript(&session(
+            "gemini",
+            "/home/u/.gemini/tmp",
+            "/home/u/.gemini/tmp/p/chats/s.json"
+        )));
+        assert!(!system_transcript(&session(
+            "gemini",
+            "/home/u/.gemini/tmp",
+            "/home/u/.gemini/oauth_creds.json"
+        )));
+        assert!(system_transcript(&session(
+            "opencode",
+            "/d/opencode/opencode.db",
+            "/d/opencode/opencode.db"
+        )));
+        assert!(!system_transcript(&session(
+            "opencode",
+            "/d/opencode/opencode.db",
+            "/d/opencode/auth.json"
+        )));
     }
 }

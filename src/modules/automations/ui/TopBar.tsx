@@ -3,6 +3,7 @@ import { ArrowLeft, ChevronRight, Menu, MoreHorizontal } from 'lucide-react';
 import { Button } from '../../../ui/components/button';
 import { useT } from '../../../ui/react/hooks';
 import { IconButton } from './parts';
+/** The navigation button opens the rail sheet; in the wide layout the rail is always visible, so it is hidden there. */
 export function TopBar({
 	name,
 	detail,
@@ -21,7 +22,7 @@ export function TopBar({
 	const t = useT();
 	return (
 		<header className="flex shrink-0 items-center gap-2 px-6 pb-3">
-			<IconButton label={t('workbench.navigation')} onClick={onNavigation}>
+			<IconButton label={t('workbench.navigation')} className="in-data-[layout=wide]:hidden" onClick={onNavigation}>
 				<Menu className="size-4" />
 			</IconButton>
 			{name ? (

@@ -6,7 +6,7 @@ import { acquirePortalRoot, releasePortalRoot } from '../../../../ui/react/porta
 import type { CommentsEnv } from '../env';
 import { CommentPopover } from './CommentPopover';
 export function mountCommentsOverlay(doc: Document, channel: OverlayChannel, env: CommentsEnv) {
-	const container = acquirePortalRoot(doc).createDiv({ cls: 'nand-ui nand-comments-overlay-root' });
+	const container = acquirePortalRoot(doc).createDiv({ cls: 'nand-comments-overlay-root' });
 	const root = createRoot(container);
 	root.render(<NandProviders ownerDocument={doc}><CommentPopover env={env} channel={channel} /></NandProviders>);
 	return () => { root.unmount(); container.remove(); releasePortalRoot(doc); };

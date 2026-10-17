@@ -2,7 +2,8 @@ import { Notice, Platform } from 'obsidian';
 import type { ModuleId } from '../contracts/module';
 import type { PageCreate } from '../contracts/workbench-host';
 import { FEATURE_MODULES, type WorkbenchFeature, type StatusSegment, type WorkbenchTarget } from '../contracts/workbench';
-import { registerUsageMirror } from './surfaces/usage-mirror';
+import { registerObsidianStatus } from './surfaces/obsidian-status';
+import { collectStatusSegments } from './status-segments';
 import { registerWorkbenchRibbon } from './surfaces/ribbon';
 import { settingsCategories, settingsPanel } from './settings-categories';
 import { iconsPanel, iconsTitle } from './icons-panel';
@@ -78,7 +79,7 @@ export function composeWorkbench(plugin: DashboardPlugin) {
 			id: 'automations',
 			chrome: 'none',
 			statusSegments: automationSegments,
-			rail: { slot: 'top' },
+			railParent: 'terminal',
 			navigation: { id: 'automations', labelKey: 'workbench.automations', icon: 'workflow', target: { feature: 'automations' }, children: [
 				{ id: 'automations-tasks', labelKey: 'workbench.tasks', icon: 'list-checks', target: { feature: 'automations', section: 'tasks' } },
 				{ id: 'automations-runs', labelKey: 'workbench.runs', icon: 'history', target: { feature: 'automations', section: 'runs' } },
@@ -110,6 +111,15 @@ export function composeWorkbench(plugin: DashboardPlugin) {
 			availability: () => ({ ...ready(), enabled: plugin.moduleEnabled('icons'), ready: plugin.moduleState('icons') === 'active' }),
 			stateKeys: [],
 			create: modulePage('icons', 'icons'),
+		},
+		{
+			// The rail entry reveals the left-sidebar navigator instead of opening a workbench page.
+			id: 'navigator',
+			rail: { slot: 'top', action: () => { void plugin.openNavigator().catch(report); } },
+			navigation: { id: 'navigator', labelKey: 'modules.navigator', icon: 'notebook-tabs', target: { feature: 'navigator' } },
+			availability: () => ({ ...ready(), enabled: plugin.moduleEnabled('navigator'), ready: plugin.moduleState('navigator') === 'active' }),
+			stateKeys: [],
+			create: modulePage('navigator', 'notes'),
 		},
 		{
 			id: 'notifications',
@@ -219,7 +229,7 @@ export function composeWorkbench(plugin: DashboardPlugin) {
 			return () => { listeners.delete(listener); };
 		},
 		openSettings: (feature) => {
-			const product = { dashboard: 'dashboard', terminal: 'terminal', contacts: 'contacts', automations: 'automation', notifications: 'general', icons: 'iconic', sync: 'sync', content: 'general', settings: 'general' } as const;
+			const product = { dashboard: 'dashboard', terminal: 'terminal', contacts: 'contacts', automations: 'automation', notifications: 'general', icons: 'iconic', navigator: 'navigator', sync: 'sync', content: 'general', settings: 'general' } as const;
 			void plugin.openWorkbenchSettings(feature ? product[feature] : 'general').catch(report);
 		},
 		openFocus: async (target, state, placement, ownerWindow) => {
@@ -233,10 +243,7 @@ export function composeWorkbench(plugin: DashboardPlugin) {
 			const module = FEATURE_MODULES[feature];
 			return module !== 'app' && plugin.moduleState(module) === 'failed';
 		},
-		usage: () => plugin.services.peek(AGENT_USAGE),
-		statusBar: () => plugin.appSettings.get().statusBar,
-		setStatusBar: async preferences => { await plugin.appSettings.update(draft => { draft.statusBar = preferences; }); plugin.services.peek(AGENT_USAGE)?.setDisplay(preferences.usageDisplay); },
-		appearance: () => ({ font: plugin.appSettings.get().font, palette: plugin.appSettings.get().palette }),
+		statusSegments: () => collectStatusSegments(contributions),
 		report,
 	};
 	plugin.registerView(WORKBENCH_VIEW_TYPE, (leaf) => new WorkbenchView(leaf, host));
@@ -265,12 +272,18 @@ export function composeWorkbench(plugin: DashboardPlugin) {
 		}
 	};
 
-	const status = registerUsageMirror(plugin, {
+	// Status entries live in Obsidian's own status bar and do not depend on an open workbench leaf.
+	const status = registerObsidianStatus(plugin, {
+		segments: () => collectStatusSegments(contributions),
 		preferences: () => plugin.appSettings.get().statusBar,
+		setPreferences: async (preferences) => { await plugin.appSettings.update((draft) => { draft.statusBar = preferences; }); },
 		usage: () => plugin.services.peek(AGENT_USAGE),
-		open: ownerWindow => open({ feature: 'terminal', section: 'usage' }, ownerWindow),
+		open: (target, ownerWindow) => open(target, ownerWindow),
 		report,
 	});
+	// Usage arrives and leaves with the agent module's service.
+	const offUsageWatch = plugin.services.watch(AGENT_USAGE, () => status.refresh());
+	plugin.register(offUsageWatch);
 	// The automation host can appear after the workbench (module enabled later or a retried start).
 	// Run statuses follow the automations service while that module is active.
 	let offAutomations = plugin.services.peek(AUTOMATIONS)?.subscribe(() => refresh());

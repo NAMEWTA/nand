@@ -183,18 +183,6 @@ export function MediaServiceSettings({ app, settings, update }: Props) {
 	return (
 		<>
 			<SettingsSection title={t('settings.widgetMusic')}>
-				<SettingsSwitchRow
-					label={t('settings.widgetMusic')}
-					checked={settings.widgetMusicEnabled}
-					onChange={() =>
-						run(
-							update((s) => {
-								s.widgetMusicEnabled = !s.widgetMusicEnabled;
-								if (!s.widgetMusicEnabled) service?.pause();
-							}),
-						)
-					}
-				/>
 				{Platform.isDesktopApp && service && (
 					<SettingsRow
 						label={t('music.accountTitle')}

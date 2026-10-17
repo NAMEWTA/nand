@@ -20,7 +20,7 @@
 | 层级 | 粘性内容用规范指定的 `z-10`；拖拽、菜单、模态框、提示、通知分别用 `--layer-dragged-item`、`--layer-menu`、`--layer-modal`、`--layer-tooltip`、`--layer-notice`（如 `z-[var(--layer-menu)]`） |
 | 动效 | `--anim-duration-fast`、`--anim-duration-moderate`；细则见 [动效与无障碍](motion-a11y.md) |
 
-默认跟随 Obsidian；可选 `.nand-ui[data-palette="orca"]` 中性配色。看板是主题例外：`.nand-dashboard-root[data-theme]` 保留 apex 的 `--db-*`，再映射为同一组组件令牌。看板弹窗也加 `nand-dashboard-root` 和 `data-dashboard-theme` 镜像主题，不能依赖它在看板 DOM 下继承。主题字体开关默认关，界面默认统一 Geist。
+默认跟随 Obsidian；可选 `body[data-nand-palette="orca"] .nand-ui` 中性配色（含 destructive、status-*、chart-*、agent-question，亮/暗各一套）；属性由插件在每个窗口的 `<body>` 上统一设置，嵌套或直接挂在 body 下的 `.nand-ui` 都命中同一套令牌，新增表面不要自己写 `data-palette`。看板没有独立主题：`.nand-dashboard-root` 把 `--db-*` 全部从这组全局令牌派生（`src/modules/home/ui/theme/tokens.css`），不要在看板里写十六进制颜色或新增主题。看板弹窗加 `nand-dashboard-root` 以获得 `--db-*`，圆角、模糊等装饰覆盖由 `useDashboardAppearance` 镜像。主题字体开关默认关，界面默认统一 Geist。
 
 ## 组件清单
 

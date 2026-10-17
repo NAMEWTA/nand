@@ -15,8 +15,7 @@ import type { BoardStore } from '../../services/board-store';
 export type DragItem =
 	| { kind: 'section'; index: number }
 	| { kind: 'card'; id: string; column: string; index: number }
-	| { kind: 'task' | 'doc'; card: string; path: number[] }
-	| { kind: 'widget'; id: string };
+	| { kind: 'task' | 'doc'; card: string; path: number[] };
 export async function commitDrop(
 	store: BoardStore,
 	source: DragItem,
@@ -62,27 +61,6 @@ export async function commitDrop(
 			else await store.sync.moveDocToCard(source.card, source.path, card.id, [card.docs.length], 'before');
 		}
 	}
-
-	if (source.kind === 'widget' && target.kind === 'widget' && source.id !== target.id)
-		await store.settings((settings) => {
-			const order = [
-					...new Set([
-						...settings.widgetOrder,
-						'quickActions',
-						'weather',
-						'pomodoro',
-						'countdown',
-						'habit',
-						'expense',
-					]),
-				],
-				from = order.indexOf(source.id),
-				to = order.indexOf(target.id);
-			if (from < 0 || to < 0) return;
-			order.splice(from, 1);
-			order.splice(to, 0, source.id);
-			settings.widgetOrder = order;
-		});
 }
 const collision: CollisionDetection = (args) => {
 	const kind = (args.active.data.current?.item as DragItem | undefined)?.kind;

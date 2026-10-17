@@ -1,7 +1,7 @@
 /** Rendering and navigation contracts; no Plugin, Vault, PTY or service locator. */
 import type { ModuleId } from './module';
 
-export const WORKBENCH_FEATURES = ['dashboard', 'terminal', 'contacts', 'automations', 'notifications', 'icons', 'sync', 'content', 'settings'] as const;
+export const WORKBENCH_FEATURES = ['dashboard', 'terminal', 'contacts', 'automations', 'notifications', 'icons', 'navigator', 'sync', 'content', 'settings'] as const;
 export type WorkbenchFeature = typeof WORKBENCH_FEATURES[number];
 
 /** The module that owns each workbench feature (`settings` belongs to the app). */
@@ -12,6 +12,7 @@ export const FEATURE_MODULES: Readonly<Record<WorkbenchFeature, ModuleId | 'app'
 	automations: 'automations',
 	notifications: 'notifications',
 	icons: 'icons',
+	navigator: 'navigator',
 	sync: 'sync',
 	settings: 'app',
 	content: 'app',
@@ -101,11 +102,10 @@ export interface StatusSegment {
  order: number;
 }
 export interface StatusBarPreferences {
- visible: boolean;
+ /** Per-item visibility keyed by item group (`usage`, `sync`, …); a missing key means shown. */
  segments: Record<string, boolean>;
  usageMode: 'verbose' | 'compact';
  usageDisplay: 'used' | 'remaining';
- mirrorToObsidian: boolean;
 }
 /** Transport-only quota model; shell never imports a module implementation. */
 export interface UsageProvider {
@@ -136,4 +136,20 @@ export interface AgentUsage {
  subscribe(listener: () => void): () => void;
  refresh(): Promise<void>;
  setDisplay(display: StatusBarPreferences['usageDisplay']): void;
+ /** Refresh on focus of this window while the caller shows usage there. Returns the release function. */
+ observeWindow?(win: Window): () => void;
+}
+/** What the Obsidian status bar usage entry needs from the host; the React view is mounted from `shell`. */
+export interface UsageStatusProps {
+ usage: AgentUsage;
+ preferences: StatusBarPreferences;
+ /** Changes when the language does, so labels rendered with `t()` refresh. */
+ revision: number;
+ onPreferences: (next: StatusBarPreferences) => void;
+ navigate: (target: WorkbenchTarget) => void;
+ report: (error: unknown) => void;
+}
+export interface UsageStatusHandle {
+ update(props: UsageStatusProps): void;
+ dispose(): void;
 }

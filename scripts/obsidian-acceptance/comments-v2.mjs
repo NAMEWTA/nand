@@ -20,6 +20,12 @@ const readFiles = async () => { const dir = path.join(runtime.vault, '.nand/edit
 try {
  await until(`app.plugins.plugins.nand.moduleState('comments')==='active' && app.workspace.getLeavesOfType('nand-comments-view').length===1`);
  check('auto-placed-once', await c.evaluate(`app.plugins.plugins.nand.namespaces?.comments?.get?.().panelAutoPlaced ?? app.workspace.getLeavesOfType('nand-comments-view').length===1`));
+ if (process.env.NAND_COMMENTS_THEME === 'minimal') {
+  const themeDir = path.join(runtime.vault, '.obsidian/themes/Minimal'); await fs.mkdir(themeDir, { recursive: true });
+  for (const file of ['theme.css', 'manifest.json']) await fs.copyFile(path.join(process.env.NAND_MINIMAL_THEME_DIR ?? path.join(process.env.HOME, 'refs/obsidian-minimal-9.0.2'), file), path.join(themeDir, file));
+  await c.evaluate(`(async()=>{await app.customCss.readThemes();await app.customCss.setTheme('Minimal');return true})()`);
+  await until(`Array.from(document.styleSheets).some(s=>s.ownerNode?.textContent?.includes('Minimal Theme for Obsidian'))`); check('minimal-theme-loaded', true);
+ }
  await c.evaluate(`window.noteLeaf=app.workspace.getLeaf(false);noteLeaf.openFile(app.vault.getFileByPath('Note.md'))`);
  await until(`!!document.querySelector('.nand-comments-editor')`);
  await c.evaluate(`app.commands.executeCommandById('nand:comments-open-panel');true`); await until(`!!document.querySelector('.nand-comments-panel')`);
@@ -38,8 +44,52 @@ try {
  await c.send('Input.dispatchMouseEvent', { type: 'mouseMoved', x: 20, y: 20 }); await delay(400);
  await runtime.shot('line-and-sidebar');
  // Selection button and overlapping thread ids.
- await c.evaluate(`(()=>{const cm=noteLeaf.view.editor.cm;cm.focus();const start=cm.state.doc.toString().indexOf('alpha target');cm.dispatch({selection:{anchor:start,head:start+12}});return true})()`);
- await until(`!!document.querySelector('[data-comments-overlay="selection"]')`); await click(button('Comment')); await submit('Range comment [[Second]]');
+ // Seed a range comment that extends past the text we are about to select, so the drag below starts on plain text and ends inside an existing highlight (a drag that starts inside a highlight is a click on it and pins the thread popover instead).
+ await c.evaluate(`(()=>{const cm=noteLeaf.view.editor.cm;cm.focus();const start=cm.state.doc.toString().indexOf('target belongs');cm.dispatch({selection:{anchor:start,head:start+'target belongs here'.length}});app.commands.executeCommandById('nand:add-comment-to-selection');return true})()`);
+ await submit('Seeded range'); await delay(400); await c.evaluate(`(()=>{const cm=noteLeaf.view.editor.cm;cm.dispatch({selection:{anchor:cm.state.doc.length}});return true})()`);
+ await until(`!document.querySelector('[data-comments-overlay]')`);
+ await until(`[...document.querySelectorAll('.cm-content .nand-comment-hl')].some(el=>el.textContent.includes('target belongs'))`); check('seeded-highlight-under-path', true);
+ // Real mouse (a human holds the button ~100ms; the editor blur is handled in the next frame): drag-select text, move to the floating button and click it (JS .click() hides focus/hover bugs).
+ const mouse = (type, point, extra = {}) => c.send('Input.dispatchMouseEvent', { type, x: point.x, y: point.y, button: type === 'mouseMoved' && !extra.buttons ? 'none' : 'left', clickCount: type === 'mouseMoved' ? 0 : 1, ...extra });
+ const pointOf = expression => c.evaluate(`(()=>{const r=(${expression}).getBoundingClientRect();return{x:r.x+r.width/2,y:r.y+r.height/2}})()`);
+ const ends = await c.evaluate(`(()=>{const cm=noteLeaf.view.editor.cm,start=cm.state.doc.toString().indexOf('alpha target'),a=cm.coordsAtPos(start),b=cm.coordsAtPos(start+12);return{from:{x:a.left+1,y:(a.top+a.bottom)/2},to:{x:b.left,y:(b.top+b.bottom)/2}}})()`);
+ await mouse('mouseMoved', ends.from); await mouse('mousePressed', ends.from, { buttons: 1 });
+ for (let i = 1; i <= 6; i++) await mouse('mouseMoved', { x: ends.from.x + (ends.to.x - ends.from.x) * i / 6, y: ends.to.y }, { buttons: 1 });
+ await mouse('mouseReleased', ends.to, { buttons: 0 });
+ await delay(500); // longer than the 350ms hover delay: the highlight hover fires while the pointer rests at the selection end
+ await until(`!!document.querySelector('[data-comments-overlay="selection"]')`); check('selection-button-shown', true);
+ await runtime.shot('selection-button');
+ // The pointer rests inside the seeded highlight and its 350ms hover timer has fired; the selection button must still be there while the pointer walks to it.
+ check('hover-did-not-replace-selection', await c.evaluate(`!!document.querySelector('[data-comments-overlay="selection"]') && !document.querySelector('[data-comments-overlay="threads"]')`));
+ const approach = await pointOf(button('Comment'));
+ for (let i = 1; i <= 8; i++) { await mouse('mouseMoved', { x: ends.to.x + (approach.x - ends.to.x) * i / 8, y: ends.to.y + (approach.y - ends.to.y) * i / 8 }); await delay(60); }
+ await delay(500); check('selection-button-survives-approach', await c.evaluate(`!!document.querySelector('[data-comments-overlay="selection"]')`));
+ const clickPoint = await pointOf(button('Comment')); await mouse('mousePressed', clickPoint, { buttons: 1 }); await delay(150); await mouse('mouseReleased', clickPoint, { buttons: 0 });
+ await until(`!!document.querySelector('[data-comments-overlay="compose"] textarea')`); check('real-click-opens-composer', true);
+ await runtime.shot('compose-from-selection');
+ await c.evaluate(`document.body.classList.replace('theme-light','theme-dark');true`); await delay(300); await runtime.shot('compose-from-selection-dark'); await c.evaluate(`document.body.classList.replace('theme-dark','theme-light');true`); await delay(200);
+ check('composer-focused', await c.evaluate(`document.activeElement?.tagName==='TEXTAREA' && !!document.activeElement.closest('[data-comments-overlay="compose"]')`));
+ await c.send('Input.insertText', { text: 'Range comment [[Second]]' }); await delay(120);
+ const save = await pointOf(button('Comment')); await mouse('mouseMoved', save); await mouse('mousePressed', save, { buttons: 1 }); await delay(150); await mouse('mouseReleased', save, { buttons: 0 });
+ await until(`!document.querySelector('[data-comments-overlay="compose"]')`);
+ check('real-click-saved', (await readFiles())[0].threads.some(thread => thread.kind === 'range' && JSON.stringify(thread).includes('Range comment [[Second]]')));
+ // A drag that starts AND ends inside one highlight also fires click on it; the selection button must still win over the pinned thread popover.
+ await c.evaluate(`(()=>{const cm=noteLeaf.view.editor.cm;cm.dispatch({selection:{anchor:cm.state.doc.length}});return true})()`); await delay(500);
+ await until(`!document.querySelector('[data-comments-overlay]')`);
+ const inner = await c.evaluate(`(()=>{const cm=noteLeaf.view.editor.cm,start=cm.state.doc.toString().indexOf('alpha target'),a=cm.coordsAtPos(start+1),b=cm.coordsAtPos(start+4),span=document.elementFromPoint(a.left+1,(a.top+a.bottom)/2),span2=document.elementFromPoint(b.left-1,(b.top+b.bottom)/2);return{from:{x:a.left+1,y:(a.top+a.bottom)/2},to:{x:b.left-1,y:(b.top+b.bottom)/2},same:span===span2&&span.classList.contains('nand-comment-hl')}})()`);
+ check('drag-inside-one-highlight', inner.same, inner);
+ await mouse('mouseMoved', inner.from); await mouse('mousePressed', inner.from, { buttons: 1 });
+ for (let i = 1; i <= 4; i++) await mouse('mouseMoved', { x: inner.from.x + (inner.to.x - inner.from.x) * i / 4, y: inner.to.y }, { buttons: 1 });
+ await mouse('mouseReleased', inner.to, { buttons: 0 }); await delay(600);
+ check('drag-inside-highlight-shows-button', await c.evaluate(`!!document.querySelector('[data-comments-overlay="selection"]') && !document.querySelector('[data-comments-overlay="threads"]')`));
+ await runtime.shot('drag-inside-highlight');
+ // Collapsing the selection must dismiss the button and stay collapsed (no selection restore on close).
+ await c.evaluate(`(()=>{const cm=noteLeaf.view.editor.cm;cm.dispatch({selection:{anchor:cm.state.doc.length}});return true})()`); await delay(500);
+ check('collapse-dismisses-button', await c.evaluate(`!document.querySelector('[data-comments-overlay]') && noteLeaf.view.editor.cm.state.selection.main.empty`));
+ // A plain click on the highlight (no selection) still pins its threads.
+ const plain = await pointOf(`document.querySelector('.cm-content .nand-comment-hl')`); await mouse('mouseMoved', plain); await mouse('mousePressed', plain, { buttons: 1 }); await delay(80); await mouse('mouseReleased', plain, { buttons: 0 });
+ await until(`!!document.querySelector('[data-comments-overlay="threads"]')`); check('plain-click-pins-threads', await c.evaluate(`!!document.querySelector('[data-comments-overlay="threads"]')`));
+ await key('Escape'); await mouse('mouseMoved', { x: 20, y: 20 }); await delay(500); await until(`!document.querySelector('[data-comments-overlay]')`);
  check('note-bytes-unchanged', await fs.readFile(path.join(runtime.vault, 'Note.md'), 'utf8') === source);
  await until(`!!document.querySelector('.cm-content .nand-comment-hl')`);
  await hover('.cm-content .nand-comment-hl'); await delay(200); check('hover-waits-350ms', !await c.evaluate(`!!document.querySelector('[data-comments-overlay="threads"]')`)); await until(`!!document.querySelector('[data-comments-overlay="threads"]')`);

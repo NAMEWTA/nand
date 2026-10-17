@@ -31,11 +31,29 @@ import { parse, serialize } from './parser/parse';
 import { planDashboardUpdate } from './render-update';
 import { advanceStage } from './pipeline';
 import { fillTemplate, planSkillDispatch } from './skill-prompt';
-import { indexWidgetProviders, memberMount, normalizeMembers, removeBoardMember, widgetProviderKey } from './widget-registry';
+import {
+	indexWidgetProviders,
+	memberMount,
+	normalizeMembers,
+	removeBoardMember,
+	widgetProviderKey,
+} from './widget-registry';
 
 describe('home grid and board rules', () => {
 	test('choosing the immersive layout rebuilds the whole board', () => {
-		const plain = ['---', 'dashboard: true', '---', '', '## Memo', '', '### Hello', 'id: card-1', 'type: generic', 'A note.', ''].join('\n');
+		const plain = [
+			'---',
+			'dashboard: true',
+			'---',
+			'',
+			'## Memo',
+			'',
+			'### Hello',
+			'id: card-1',
+			'type: generic',
+			'A note.',
+			'',
+		].join('\n');
 		const entered = plain.replace('dashboard: true\n', 'dashboard: true\nlayout: immersive\ngridPacked: true\n');
 		assert.equal(planDashboardUpdate(parse(plain), parse(entered), 'local').kind, 'full');
 		const moved = entered.replace('type: generic\n', 'type: generic\ncols: 5\n');
@@ -68,7 +86,7 @@ describe('home grid and board rules', () => {
 	test('immersive placement is one non-overlapping 12-column grid and cancel writes nothing', () => {
 		assert.equal(effectiveColumns(960), 12);
 		assert.equal(effectiveColumns(600), 6);
-		assert.equal(effectiveColumns(288), 3);
+		assert.equal(effectiveColumns(288), 1);
 		assert.equal(CANONICAL_COLUMNS, 12);
 		assert.equal(SNAP_PX, 8);
 		const canonical = [
@@ -81,7 +99,9 @@ describe('home grid and board rules', () => {
 		assert.ok(placed.every((tile) => tile.x >= 0 && tile.x + tile.w <= 12 && tile.h >= 3));
 		const narrow = projectLayout(placed, 288);
 		assert.equal(narrow.writes, 0);
-		assert.equal(narrow.columns, 3);
+		assert.equal(narrow.columns, 1);
+		// A phone shows one column: every tile is full width and the order follows the canonical reading order.
+		assert.ok(narrow.display.every((tile) => tile.x === 0 && tile.w === 1));
 		assert.deepEqual(
 			placed.map((tile) => [tile.x, tile.y]),
 			placed.map((tile) => [tile.x, tile.y]),
@@ -107,7 +127,6 @@ describe('home grid and board rules', () => {
 		);
 		assert.equal(tilesOverlap(swapped), false);
 		assert.equal(tilesOverlap(resizeTile(placed, 'a', 3, 2)), false);
-
 	});
 
 	test('skill prompts substitute once and do not submit', () => {
@@ -215,7 +234,11 @@ describe('home grid and board rules', () => {
 	});
 
 	test('the icon authority keeps the full host list, promotes preferred names and invents none', () => {
-		const hosts = [...Array.from({ length: 900 }, (_, index) => `icon-${String(index).padStart(3, '0')}`), 'star', 'star'];
+		const hosts = [
+			...Array.from({ length: 900 }, (_, index) => `icon-${String(index).padStart(3, '0')}`),
+			'star',
+			'star',
+		];
 		const rows = orderedHostIcons(hosts);
 		assert.equal(rows.length, 901);
 		assert.equal(rows[0], 'star');
@@ -234,7 +257,9 @@ describe('home grid and board rules', () => {
 							key: 'calendar',
 							titleKey: 'home.widget.calendar',
 							icon: 'calendar',
-							defaultSize: { w: 4, h: 4 },
+							category: 'time',
+							sizes: { M: { w: 4, h: 4 } },
+							defaultTier: 'M',
 							minSize: { w: 2, h: 2 },
 							instances: () => [{ id: 'default' }],
 							render: () => undefined,
@@ -250,7 +275,9 @@ describe('home grid and board rules', () => {
 							key: 'calendar',
 							titleKey: 'automations.widget.raw',
 							icon: 'automationspaper',
-							defaultSize: { w: 4, h: 4 },
+							category: 'time',
+							sizes: { M: { w: 4, h: 4 } },
+							defaultTier: 'M',
 							minSize: { w: 2, h: 2 },
 							instances: () => [{ id: 'default' }],
 							render: () => undefined,
@@ -262,12 +289,10 @@ describe('home grid and board rules', () => {
 		assert.equal(index.byKey.get(widgetProviderKey('home', 'calendar'))?.module, 'home');
 		assert.equal(index.errors.length, 0);
 		assert.equal(index.byKey.get(widgetProviderKey('automations', 'calendar'))?.module, 'automations');
-		const members = normalizeMembers(
-			[
-				{ memberId: 'm1', kind: 'calendar', provider: 'automations' },
-				{ memberId: 'm1', kind: 'calendar', provider: 'automations' },
-			],
-		);
+		const members = normalizeMembers([
+			{ memberId: 'm1', kind: 'calendar', provider: 'automations' },
+			{ memberId: 'm1', kind: 'calendar', provider: 'automations' },
+		]);
 		assert.equal(members.length, 1);
 		assert.equal(memberMount({ kind: 'calendar', provider: 'home' }, index, new Set()), 'disabled');
 		const removed = removeBoardMember(members, { shared: { title: 'keep' } }, 'm1');

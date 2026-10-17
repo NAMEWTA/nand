@@ -18,11 +18,10 @@ import { DraftList } from '../quickbar/DraftList';
 import { QUOTE_FONT_GROUPS, firstFontName } from './quote-fonts';
 import { Popover, PopoverTrigger, PopoverContent } from '../../../../ui/components/popover';
 import { Command, CommandInput, CommandList, CommandEmpty, CommandItem } from '../../../../ui/components/command';
-import { useDashboardLayout, useDashboardTheme } from '../theme/ThemeBridge';
+import { useDashboardLayout } from '../theme/ThemeBridge';
 import { useImage } from '../board/hooks';
 function ImagePicker({ store, onChange }: { store: BoardStore; onChange(this: void, path: string): void }) {
 	const t = useT(),
-		theme = useDashboardTheme(),
 		layout = useDashboardLayout(),
 		[open, setOpen] = useState(false);
 	return (
@@ -30,12 +29,7 @@ function ImagePicker({ store, onChange }: { store: BoardStore; onChange(this: vo
 			<PopoverTrigger asChild>
 				<Button variant="outline">{t('ui.choosePath')}</Button>
 			</PopoverTrigger>
-			<PopoverContent
-				className="nand-dashboard-root w-80 p-0"
-				data-theme={theme}
-				data-dashboard-layout={layout}
-				data-dashboard-theme={theme}
-			>
+			<PopoverContent className="nand-dashboard-root w-80 p-0" data-dashboard-layout={layout}>
 				<Command>
 					<CommandInput aria-label={t('home.dashboard.image')} placeholder={t('ui.search')} />
 					<CommandList>
@@ -130,10 +124,12 @@ export function ImagePosition({
 export function BannerEditDialog({
 	store,
 	banner,
+	instanceId = 'default',
 	onClose,
 }: {
 	store: BoardStore;
 	banner: BannerData;
+	instanceId?: string;
 	onClose(this: void): void;
 }) {
 	const t = useT(),
@@ -145,7 +141,7 @@ export function BannerEditDialog({
 			title={t('banner.editTitle')}
 			onClose={onClose}
 			onSave={() => {
-				void observeBoardAction(store.sync.updateBanner(draft).then(onClose));
+				void observeBoardAction(store.sync.updateBanner(draft, instanceId).then(onClose));
 			}}
 		>
 			<Tabs

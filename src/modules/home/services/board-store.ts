@@ -7,13 +7,14 @@ import { memoCardText } from '../platform/board/card-move';
 import { archiveCompleted } from '../core/board/task-tree';
 import { extractCardParts } from '../core/board/parser/extract-card-parts';
 import type { DashboardCard } from '../core/board/types/model';
+import { hotkeyKeys } from '../core/board/shortcut-buttons';
 import { nowMoment } from '../../../host/obsidian/datetime';
 import { placeCaptureLine } from '../core/board/capture';
 import { t } from '../../../shared/i18n';
 import { getOrCreateDailyNote, substituteTemplateVars } from '../platform/calendar/daily-notes';
 import { SyncEngine } from '../platform/board/sync';
 import type { DashboardData, DashboardSettings, QuickAction, WeatherData } from '../core/board/types/model';
-import type { DashboardSaveState } from '../core/board/save-state';
+import { DashboardSaveError, SwitchRefusedError, type DashboardSaveState } from '../core/board/save-state';
 import { fetchWeather, geocodeCity } from '../platform/widgets/weather-service';
 import type { HomeHost } from './home-host';
 import { queryVaultFiles } from './library-query';
@@ -31,11 +32,38 @@ export interface BoardSnapshot {
 	weatherError: string;
 	widgetRevision: number;
 	dialog: 'section' | null;
+	/** True while the page is moving to another board file: data and path are published together when it ends. */
+	switching: boolean;
+	/** Counts board switches. Everything opened before a switch belongs to an older generation and is void afterwards. */
+	generation: number;
+	/** Why the last switch failed (empty when it did not). */
+	switchError: string;
 	previewPath: string | null;
 	captureDraft: string;
 }
 
+/** Store methods that change the board or notes on the board's behalf; a view of an older generation refuses them. */
+/** Shared page state that asynchronous completions touch: a call from an older generation is ignored, never applied. */
+const BOARD_STATE_SETTERS: ReadonlySet<string> = new Set(['setCaptureDraft', 'setDialog', 'closePreview', 'openFile']);
+
+/** Synchronous side effects on the host (Obsidian commands): a view of an older generation does nothing and reports false. */
+const BOARD_HOST_ACTIONS: ReadonlySet<string> = new Set(['runCommand']);
+
+const BOARD_WRITERS: ReadonlySet<string> = new Set([
+	'edit',
+	'saveMemo',
+	'archiveTasks',
+	'saveCard',
+	'newNote',
+	'capture',
+	'trash',
+	'action',
+	'today',
+]);
+
 /** One page's file pointer; durable writes and conflict recovery remain in SyncEngine. */
+type HotkeyLike = { modifiers: readonly string[]; key: string };
+
 export class BoardStore {
 	readonly sync: SyncEngine;
 	get ownerWindow(): Window | undefined {
@@ -54,6 +82,12 @@ export class BoardStore {
 	readonly state;
 	private readonly cleanup: (() => void)[] = [];
 	private disposed = false;
+	private readonly root: BoardStore = this;
+	private readonly views = new Map<number, BoardStore>();
+	private switching = false;
+	/** A failed switch could not be undone: the page stays read-only until another board is chosen. */
+	private broken = false;
+	private heldData: DashboardData | undefined;
 	private visible = true;
 	setVisible(value: boolean): void {
 		this.visible = value;
@@ -77,10 +111,20 @@ export class BoardStore {
 			weatherError: '',
 			widgetRevision: 0,
 			dialog: null,
+			switching: false,
+			generation: 0,
+			switchError: '',
 			previewPath: null,
 			captureDraft: '',
 		}));
-		this.cleanup.push(this.sync.onDataUpdate((data) => this.state.setState({ data: structuredClone(data) })));
+		this.cleanup.push(
+			this.sync.onDataUpdate((data) => {
+				// While switching, the engine already holds the target board but the page still shows the old one:
+				// hold the new data back so path and data change in one commit.
+				if (this.switching) this.heldData = data;
+				else this.state.setState({ data: structuredClone(data) });
+			}),
+		);
 		this.cleanup.push(
 			this.sync.onSaveStateUpdate((save) => {
 				this.state.setState({ save });
@@ -117,26 +161,136 @@ export class BoardStore {
 	searchFiles(query: string): ContentFile[] {
 		const q = query.trim().toLowerCase();
 		if (!q) return [];
-		return contentFiles(this.host.app).getFiles()
-			.filter((file) => SUPPORTED_FILE_EXTS.has(file.extension) &&
-				!file.path.replace(/^\.nand\/content\//, '').split('/').some((part) => part.startsWith('.')))
+		return contentFiles(this.host.app)
+			.getFiles()
+			.filter(
+				(file) =>
+					SUPPORTED_FILE_EXTS.has(file.extension) &&
+					!file.path
+						.replace(/^\.nand\/content\//, '')
+						.split('/')
+						.some((part) => part.startsWith('.')),
+			)
 			.filter((file) => file.path.toLowerCase().includes(q) || file.basename.toLowerCase().includes(q))
-			.sort((a, b) => a.basename.length - b.basename.length).slice(0, 8);
+			.sort((a, b) => a.basename.length - b.basename.length)
+			.slice(0, 8);
 	}
 	recentFiles(): ContentFile[] {
-		return this.state.getState().files.filter((file) => isRecentUserDocument(file.path, this.host.settings)).slice(0, 10);
+		return this.state
+			.getState()
+			.files.filter((file) => isRecentUserDocument(file.path, this.host.settings))
+			.slice(0, 10);
 	}
+	/**
+	 * Move the page to another board file as one transaction. The page goes read-only and the engine refuses edits
+	 * while it loads (and, for an old board, converts) the target in memory. Only when that succeeded are the new
+	 * path and the new data published together; on failure the engine is pointed back at the board being left, whose
+	 * path and data are the only ones ever shown.
+	 */
 	switch(path: string): Promise<void> {
 		const run = this.switchTail.then(async () => {
-			if (this.disposed || path === this.state.getState().path) return;
-			await this.sync.flush();
-			if (this.disposed) return;
-			this.sync.updateSettings({ ...this.host.settings, dashboardFile: path });
-			await this.sync.switchFile();
-			if (!this.disposed) this.state.setState({ path });
+			if (this.disposed || (path === this.state.getState().path && !this.broken)) return;
+			const from = this.state.getState().path;
+			const messageOf = (error: unknown) => (error instanceof Error ? error.message : String(error));
+			// Start of the transaction: the board's page goes read-only and everything opened on it is closed and
+			// voided (dialogs, previews, views of the old generation), not merely hidden.
+			const generation = this.state.getState().generation + 1;
+			this.switching = true;
+			this.heldData = undefined;
+			this.sync.setEpoch?.(generation);
+			this.host.closeOverlays?.();
+			this.state.setState({ switching: true, switchError: '', generation, dialog: null, previewPath: null });
+			try {
+				await this.sync.flush();
+			} catch (error) {
+				// Unsaved edits of the board being left stay where they are: nothing was switched, nothing to undo.
+				this.finishSwitch({ switchError: messageOf(error) });
+				throw error;
+			}
+			try {
+				this.sync.setSwitchLock?.(true);
+				this.sync.updateSettings({ ...this.host.settings, dashboardFile: path });
+				await this.sync.switchFile(this.broken);
+				const data = this.sync.getData?.() ?? this.heldData;
+				this.broken = false;
+				this.finishSwitch({ path, ...(data ? { data: structuredClone(data) } : {}) });
+			} catch (error) {
+				if (error instanceof SwitchRefusedError) {
+					// Refused before the engine moved: the board being left keeps its data, dirty state and conflicts untouched.
+					this.sync.updateSettings({ ...this.host.settings, dashboardFile: from });
+					this.finishSwitch({ switchError: error.message });
+					throw error;
+				}
+				// The engine had already moved to the target: reload the board being left; nothing of the target is published.
+				try {
+					this.sync.updateSettings({ ...this.host.settings, dashboardFile: from });
+					await this.sync.switchFile(true);
+					const data = this.sync.getData?.() ?? this.heldData;
+					this.broken = false;
+					this.finishSwitch({
+						switchError: messageOf(error),
+						...(data ? { data: structuredClone(data) } : {}),
+					});
+				} catch (rollback) {
+					// Neither board is reliably loaded: stay read-only with the reason until a board is picked again.
+					this.broken = true;
+					this.heldData = undefined;
+					if (!this.disposed) this.state.setState({ switchError: messageOf(rollback) });
+				}
+				throw error;
+			}
 		});
 		this.switchTail = run.catch(() => undefined);
 		return run;
+	}
+	/**
+	 * A view of this store for one board generation. Writers called through it after a later switch started throw, so
+	 * a dialog, menu or timer callback that outlives its board cannot act on the one now shown.
+	 */
+	view(generation: number = this.state.getState().generation): BoardStore {
+		const root = this.root;
+		let view = root.views.get(generation);
+		if (view) return view;
+		type Call = (...args: unknown[]) => unknown;
+		const isStale = () => root.state.getState().generation !== generation;
+		const sync = new Proxy(root.sync, {
+			get(target, prop) {
+				const value: unknown = Reflect.get(target, prop, target);
+				return typeof value === 'function'
+					? (...args: unknown[]) => target.runAs(generation, () => (value as Call).apply(target, args))
+					: value;
+			},
+		});
+		view = new Proxy(root, {
+			get(target, prop, receiver) {
+				if (prop === 'sync') return sync;
+				const value: unknown = Reflect.get(target, prop, receiver);
+				if (typeof prop === 'string' && BOARD_STATE_SETTERS.has(prop) && typeof value === 'function')
+					return (...args: unknown[]) => {
+						if (!isStale()) return (value as Call).apply(receiver, args);
+						// openFile is asynchronous; the setters are not. Either way a stale call changes nothing.
+						return prop === 'openFile' ? Promise.resolve() : undefined;
+					};
+				if (prop === 'isCurrent') return () => !isStale();
+				if (typeof prop === 'string' && BOARD_HOST_ACTIONS.has(prop) && typeof value === 'function')
+					return (...args: unknown[]) => (isStale() ? false : (value as Call).apply(receiver, args));
+				if (typeof prop === 'string' && BOARD_WRITERS.has(prop) && typeof value === 'function')
+					return (...args: unknown[]) =>
+						// Every writer is asynchronous: a void call is a rejected promise like any other failed write.
+						isStale()
+							? Promise.reject(new DashboardSaveError('stale', t('dashboard.sync.stale')))
+							: (value as Call).apply(receiver, args);
+				return value;
+			},
+		});
+		root.views.set(generation, view);
+		return view;
+	}
+	private finishSwitch(next: Partial<BoardSnapshot>): void {
+		this.switching = false;
+		this.heldData = undefined;
+		this.sync.setSwitchLock?.(false);
+		if (!this.disposed) this.state.setState({ switching: false, ...next });
 	}
 	async dispose(): Promise<void> {
 		this.disposed = true;
@@ -260,6 +414,35 @@ export class BoardStore {
 			id,
 			name: cmd.name ?? id,
 		}));
+	}
+	/** False on a view whose board has been left: what it started must no longer act. */
+	isCurrent(): boolean {
+		return true;
+	}
+	/** Whether a note path or link still resolves to a note. */
+	hasFile(path: string): boolean {
+		return !!contentFiles(this.host.app).resolveLink(path, this.state.getState().path + '.md');
+	}
+	hasCommand(id: string): boolean {
+		return !!(this.host.app as AppWithCommands).commands.commands[id];
+	}
+	/** Run an Obsidian command; false when Obsidian could not (the command is gone or its check failed). */
+	runCommand(id: string): boolean {
+		const registry = (this.host.app as AppWithCommands).commands as { executeCommandById(id: string): boolean | void };
+		return registry.executeCommandById(id) !== false;
+	}
+	/** The first hotkey of an Obsidian command as key names (user binding first, then the default); empty without one. */
+	hotkeysOf(commandId: string): string[] {
+		const manager = (
+			this.host.app as unknown as {
+				hotkeyManager?: {
+					getHotkeys?(id: string): HotkeyLike[] | undefined;
+					getDefaultHotkeys?(id: string): HotkeyLike[] | undefined;
+				};
+			}
+		).hotkeyManager;
+		const first = (manager?.getHotkeys?.(commandId) ?? manager?.getDefaultHotkeys?.(commandId) ?? [])[0];
+		return first ? hotkeyKeys(first) : [];
 	}
 	async action(action: QuickAction): Promise<void> {
 		if (action.type === 'command' && action.target === 'daily-notes') {

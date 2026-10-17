@@ -16,7 +16,7 @@ test('native hooks and per-terminal event spools use only the selected vault acc
 	const hooks = new AutomationHooks(win, () => ({ vault, device: 'fixture-device' }));
 	try {
 		for (const agent of AGENT_CATALOG) {
-			const env = await accountEnv(agent, '', vault, 'fixture-device');
+			const env = await accountEnv(agent, 'a.b', vault, 'fixture-device');
 			const other = new AutomationHooks(win, () => ({ vault, device: 'fixture-device' }));
 			const [handle, concurrent] = await Promise.all([hooks.prepare(agent.id, env, () => {}), other.prepare(agent.id, env, () => {})]);
 			expect(handle.env.NAND_HOOK_DIR!.startsWith(env.NAND_ACCOUNT_ROOT! + path.sep)).toBe(true);
@@ -30,7 +30,7 @@ test('native hooks and per-terminal event spools use only the selected vault acc
 test('a provider update arriving at the replacement boundary is preserved and reported', async () => {
 	const vault = await mkdtemp(path.join(tmpdir(), 'nand-hooks-race-'));
 	const requireNode = createRequire(import.meta.url), fs = requireNode('node:fs/promises') as typeof import('node:fs/promises');
-	const env = await accountEnv(AGENT_CATALOG[0]!, '', vault, 'fixture-device');
+	const env = await accountEnv(AGENT_CATALOG[0]!, 'a.b', vault, 'fixture-device');
 	const file = path.join(env.CLAUDE_CONFIG_DIR!, 'settings.json');
 	await writeFile(file, '{"before":true}');
 	let injected = false;
@@ -50,3 +50,4 @@ test('a provider update arriving at the replacement boundary is preserved and re
 		handle.close();
 	} finally { hooks.dispose(); vi.unstubAllGlobals(); await rm(vault, { recursive: true, force: true }); }
 }, 30000);
+

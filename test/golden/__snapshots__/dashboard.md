@@ -84,6 +84,10 @@ progress: 15%
 === default ===
 ---
 dashboard: true
+layout: immersive
+canvas: 1
+widgets: [{"memberId":"home:banner:default","provider":"home","kind":"banner","instanceId":"default"},{"memberId":"home:calendar:default","provider":"home","kind":"calendar","instanceId":"default"},{"memberId":"home:quick-actions:default","provider":"home","kind":"quick-actions","instanceId":"default"},{"memberId":"home:pomodoro:default","provider":"home","kind":"pomodoro","instanceId":"default"}]
+immersive: [{"id":"widget:banner","w":12,"cap":12,"fixed":true,"x":0,"y":0},{"id":"widget:calendar","w":4,"cap":50,"fixed":true,"x":0,"y":12},{"id":"widget:quickActions","w":4,"cap":28,"fixed":true,"x":0,"y":62},{"id":"widget:pomodoro","w":3,"cap":24,"fixed":true,"x":4,"y":62},{"id":"section:备忘","w":4,"cap":50,"x":4,"y":12},{"id":"section:待办","w":4,"cap":50,"x":8,"y":12},{"id":"section:项目","w":5,"cap":28,"x":7,"y":62},{"id":"section:书库","w":12,"cap":50,"x":0,"y":90}]
 banner:
   quote: "每天留下一点看得见的进步。"
   author: "NAND"

@@ -274,6 +274,11 @@ class WorkbenchShellSurface implements WorkbenchSurface {
 		};
 	}
 	private onRail = (feature: WorkbenchFeature): 'toggled' | 'navigated' => {
+		const external = this.contribution(feature)?.rail?.action;
+		if (external) {
+			external();
+			return 'navigated';
+		}
 		const action = railAction(this.state, feature);
 		if (action.kind === 'toggle-panel') return 'toggled';
 		this.requestNavigation(action.target);
@@ -311,18 +316,13 @@ class WorkbenchShellSurface implements WorkbenchSurface {
 	};
 	private draw(): void {
 		if (!this.opened) return;
-		const statuses = this.host.contributions.flatMap(item => item.statusSegments?.() ?? []).sort((a, b) => a.order - b.order);
-		const preferences = this.host.statusBar?.() ?? { visible: true, segments: {}, usageMode: 'verbose', usageDisplay: 'used', mirrorToObsidian: false };
-		const appearance = this.host.appearance?.();
-		this.view.contentEl.dataset.font = appearance?.font ?? 'geist';
-		this.view.contentEl.dataset.palette = appearance?.palette ?? 'host';
+		// Only the mobile page header shows statuses; on desktop they live in Obsidian's status bar.
+		const statuses = this.host.statusSegments?.() ?? [];
 		if (this.portalDocument !== this.view.contentEl.ownerDocument) {
 			if (this.portalDocument) releasePortalRoot(this.portalDocument);
 			this.portalDocument = this.view.contentEl.ownerDocument;
 			acquirePortalRoot(this.portalDocument);
 		}
-		const portal = this.portalDocument.querySelector<HTMLElement>('.nand-portal-root');
-		if (portal) { portal.dataset.font = appearance?.font ?? 'geist'; portal.dataset.palette = appearance?.palette ?? 'host'; }
 		const contribution = this.contribution(this.state.target.feature);
 		const unavailable = this.unavailable
 			? {
@@ -337,9 +337,6 @@ class WorkbenchShellSurface implements WorkbenchSurface {
 				chrome={contribution?.chrome}
 				navigationContext={contribution?.navigationContext}
 				navigationActions={this.navigationActions}
-				statusBar={preferences}
-				setStatusBar={next => { void this.host.setStatusBar?.(next).catch(this.host.report); }}
-				usage={this.host.usage?.()}
 				rail={this.railItems()}
 				railCurrent={contribution?.railParent ?? this.state.target.feature}
 				title={this.pageTitle() ?? t('workbench.title')}

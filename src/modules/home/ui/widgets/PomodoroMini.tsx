@@ -5,7 +5,7 @@ import { Pause, Play, SkipForward } from 'lucide-react';
 import { usePortalContainer, useVisible } from '../../../../ui/react/contexts';
 import { useT } from '../../../../ui/react/hooks';
 import type { BoardStore } from '../../services/board-store';
-import { useDashboardLayout, useDashboardTheme } from '../theme/ThemeBridge';
+import { useDashboardLayout } from '../theme/ThemeBridge';
 import { IconButton } from '../board/controls';
 export function PomodoroMini({ store }: { store: BoardStore }) {
 	const settings = useStore(store.state, (s) => s.settings);
@@ -13,26 +13,16 @@ export function PomodoroMini({ store }: { store: BoardStore }) {
 	const container = usePortalContainer(),
 		visible = useVisible(),
 		t = useT(),
-		theme = useDashboardTheme(),
 		layout = useDashboardLayout(),
 		timer = store.widgets.pomodoro,
 		state = timer?.getState();
-	if (
-		!container ||
-		!visible ||
-		!settings.pomodoroEnabled ||
-		!settings.pomodoroMiniPanelEnabled ||
-		!state ||
-		!timer ||
-		state.status === 'idle'
-	)
+	if (!container || !visible || !settings.pomodoroMiniPanelEnabled || !state || !timer || state.status === 'idle')
 		return null;
 	const seconds = state.mode === 'stopwatch' ? state.elapsedSeconds : state.remainingSeconds;
 	return createPortal(
 		<aside
 			aria-label={t('home.dashboard.mini')}
 			className="nand-dashboard-root fixed right-6 bottom-10 z-[var(--layer-popover)] flex items-center gap-2 rounded-full border bg-popover px-3 py-1 shadow-floating"
-			data-theme={theme}
 			data-dashboard-layout={layout}
 		>
 			<span className="text-xs tabular-nums">

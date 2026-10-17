@@ -10,7 +10,7 @@ import {
 	AlertDialogAction,
 } from '../../../../ui/components/alert-dialog';
 import { useT } from '../../../../ui/react/hooks';
-import { useDashboardTheme, useDashboardLayout } from '../theme/ThemeBridge';
+import { useDashboardLayout } from '../theme/ThemeBridge';
 export function RecordConfirm({
 	open,
 	onOpenChange,
@@ -25,7 +25,6 @@ export function RecordConfirm({
 	onConfirm(this: void): void;
 }) {
 	const t = useT(),
-		theme = useDashboardTheme(),
 		layout = useDashboardLayout(),
 		cancel = useRef<HTMLButtonElement>(null),
 		opener = useRef<HTMLElement | null>(null);
@@ -33,7 +32,6 @@ export function RecordConfirm({
 		<AlertDialog open={open} onOpenChange={onOpenChange}>
 			<AlertDialogContent
 				className="nand-dashboard-root"
-				data-theme={theme}
 				data-dashboard-layout={layout}
 				onOpenAutoFocus={(e) => {
 					e.preventDefault();

@@ -23,10 +23,10 @@ export class DashboardAutomationSource {
 	async pinAction(path: string, definition: AutomationDefinition): Promise<void> {
 		const file = contentFiles(this.app).getFileByPath(widgetDashboardPath(path));
 		if (!file) throw new AutomationError('sourceMissing');
-		await contentFiles(this.app).process(file.path, raw => {
+		await contentFiles(this.app).process(file.path, (raw) => {
 			if (raw === null) throw new AutomationError('sourceMissing');
 			const data = parseDashboard(raw);
-			if (!data.quickActions.some(action => action.type === 'action' && action.target === definition.id))
+			if (!data.quickActions.some((action) => action.type === 'action' && action.target === definition.id))
 				data.quickActions.push({ type: 'action', target: definition.id, name: definition.name, icon: 'play' });
 			return serializeDashboard(data);
 		});
@@ -38,7 +38,9 @@ export class DashboardAutomationSource {
 		if (!this.pipeline) throw new AutomationError('sourceMissing');
 		return this.pipeline.resolve(source);
 	}
-	invalidate(path: string): void { this.cache.delete(path); }
+	invalidate(path: string): void {
+		this.cache.delete(path);
+	}
 	constructor(
 		private app: App,
 		private settings: () => DashboardSettings,
@@ -54,10 +56,9 @@ export class DashboardAutomationSource {
 		const file = contentFiles(this.app).getFileByPath(path);
 		if (!file || ![settings.dashboardFile, ...settings.workspaceFiles].some((p) => widgetDashboardPath(p) === path))
 			throw new AutomationError('widgetDashboardMissing');
-		const matches = [
-			...(settings.countdownEnabled ? settings.countdowns : []),
-			...(settings.anniversaryEnabled ? settings.anniversaries : []),
-		].filter((entry) => `widget:${entry.id}` === source.id);
+		const matches = [...settings.countdowns, ...settings.anniversaries].filter(
+			(entry) => `widget:${entry.id}` === source.id,
+		);
 		if (matches.length !== 1) throw new AutomationError('widgetMissing');
 		return file;
 	}
@@ -77,7 +78,11 @@ export class DashboardAutomationSource {
 			try {
 				const stamp = file.stat ? `${file.stat.mtime}:${file.stat.size}` : '';
 				const cached = this.cache.get(file.path);
-				if (cached && cached.stamp === stamp) { result.push(...cached.rows); pipelines.push(...cached.pipelines.map(config => ({ boardPath: file.path, config }))); continue; }
+				if (cached && cached.stamp === stamp) {
+					result.push(...cached.rows);
+					pipelines.push(...cached.pipelines.map((config) => ({ boardPath: file.path, config })));
+					continue;
+				}
 				const offset = result.length;
 				const raw = await contentFiles(this.app).read(file);
 				// Task lines that carry an automation block become definitions.
@@ -88,8 +93,10 @@ export class DashboardAutomationSource {
 					const source: SourceRef = { kind: 'dashboard', path: file.path, id: meta.id };
 					result.push({ ...meta.automation, source });
 				}
-				const configs = parseDashboard(raw).columns.flatMap(column => column.sectionType === 'pipeline' && column.pipelineConfig ? [column.pipelineConfig] : []);
-				pipelines.push(...configs.map(config => ({ boardPath: file.path, config })));
+				const configs = parseDashboard(raw).columns.flatMap((column) =>
+					column.sectionType === 'pipeline' && column.pipelineConfig ? [column.pipelineConfig] : [],
+				);
+				pipelines.push(...configs.map((config) => ({ boardPath: file.path, config })));
 				this.cache.set(file.path, { stamp, rows: result.slice(offset), pipelines: configs });
 			} catch (error) {
 				console.error('[NAND reminders]', file.path, error);
@@ -97,7 +104,7 @@ export class DashboardAutomationSource {
 		}
 		if (pipelines.length || this.pipeline) {
 			this.pipeline ??= new (await import('../pipeline/automation')).PipelineAutomationSource(this.app);
-			result.push(...await this.pipeline.list(pipelines));
+			result.push(...(await this.pipeline.list(pipelines)));
 		}
 		return [...result, ...(await this.widgets())];
 	}
@@ -150,26 +157,23 @@ export class DashboardAutomationSource {
 				action: { kind: 'notify', body },
 			});
 		};
-		if (settings.countdownEnabled)
-			for (const entry of settings.countdowns) {
-				if (!entry.targetDate || entry.reminderDays <= 0) continue;
-				const target = new Date(
-					entry.targetDate.includes('T') ? entry.targetDate : `${entry.targetDate}T00:00:00`,
-				);
-				const due = new Date(target);
-				due.setDate(due.getDate() - entry.reminderDays);
-				const label = resolveWidgetLabel(entry, 'countdown') || entry.targetDate;
-				add(
-					entry,
+		for (const entry of settings.countdowns) {
+			if (!entry.targetDate || entry.reminderDays <= 0) continue;
+			const target = new Date(entry.targetDate.includes('T') ? entry.targetDate : `${entry.targetDate}T00:00:00`);
+			const due = new Date(target);
+			due.setDate(due.getDate() - entry.reminderDays);
+			const label = resolveWidgetLabel(entry, 'countdown') || entry.targetDate;
+			add(
+				entry,
+				label,
+				due.getTime(),
+				t('countdown.reminderNotice', {
 					label,
-					due.getTime(),
-					t('countdown.reminderNotice', {
-						label,
-						days: String(Math.max(0, Math.ceil((target.getTime() - now.getTime()) / 86400000))),
-					}),
-				);
-			}
-		if (settings.anniversaryEnabled) {
+					days: String(Math.max(0, Math.ceil((target.getTime() - now.getTime()) / 86400000))),
+				}),
+			);
+		}
+		{
 			const lookup = settings.anniversaries.some((entry) => entry.calendar === 'lunar' && entry.annualReminder)
 				? await (await import('../calendar/lunar-lookup')).createLunarLookup()
 				: undefined;
@@ -242,14 +246,16 @@ export class DashboardAutomationSource {
 		for (const file of this.files()) {
 			const data = parseDashboard(await contentFiles(this.app).read(file));
 			const counts = new Map<string, number>();
-			for (const column of data.columns) for (const card of column.cards) counts.set(card.id, (counts.get(card.id) ?? 0) + 1);
+			for (const column of data.columns)
+				for (const card of column.cards) counts.set(card.id, (counts.get(card.id) ?? 0) + 1);
 			for (const column of data.columns)
 				for (const card of column.cards)
-					if (counts.get(card.id) === 1 && canReceiveTask(column, card)) result.push({
-						path: file.path,
-						cardId: card.id,
-						title: `${file.basename} / ${column.name} / ${card.title}`,
-					});
+					if (counts.get(card.id) === 1 && canReceiveTask(column, card))
+						result.push({
+							path: file.path,
+							cardId: card.id,
+							title: `${file.basename} / ${column.name} / ${card.title}`,
+						});
 		}
 		return result;
 	}
@@ -261,7 +267,9 @@ export class DashboardAutomationSource {
 			if (raw === null) throw new AutomationError('sourceMissing');
 			if (raw.split('\n').some((line) => readTaskMeta(line).runId === runId)) return raw;
 			const data = parseDashboard(raw);
-			const matches = data.columns.flatMap(column => column.cards.map(card => ({ column, card }))).filter(entry => entry.card.id === action.cardId);
+			const matches = data.columns
+				.flatMap((column) => column.cards.map((card) => ({ column, card })))
+				.filter((entry) => entry.card.id === action.cardId);
 			const target = matches.length === 1 ? matches[0] : undefined;
 			if (!target) throw new AutomationError('sourceMissing');
 			if (!canReceiveTask(target.column, target.card)) throw new AutomationError('taskTargetInvalid');

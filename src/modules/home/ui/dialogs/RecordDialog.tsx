@@ -2,7 +2,7 @@
 import { useRef, type ReactNode } from 'react';
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from '../../../../ui/components/dialog';
 import { useOwnerDocument, useVisible } from '../../../../ui/react/contexts';
-import { useDashboardAppearance, useDashboardLayout, useDashboardTheme } from '../theme/ThemeBridge';
+import { useDashboardAppearance, useDashboardLayout } from '../theme/ThemeBridge';
 import { widgetClasses } from '../theme/widget-classes';
 
 /** Keep Apex's content/header dimensions while Radix owns focus, Escape and the document portal. */
@@ -11,13 +11,11 @@ export function RecordDialog({
 	classes,
 	onClose,
 	children,
-	theme: suppliedTheme,
 }: {
 	title: string;
 	classes: string;
 	onClose(this: void): void;
 	children: ReactNode;
-	theme?: string;
 }) {
 	const appearanceRef = useDashboardAppearance();
 	const doc = useOwnerDocument(),
@@ -38,7 +36,6 @@ export function RecordDialog({
 								? 'sm:max-w-[400px]'
 								: 'sm:max-w-[380px]';
 	const visible = useVisible(),
-		theme = useDashboardTheme(),
 		layout = useDashboardLayout();
 	return (
 		<Dialog
@@ -58,8 +55,6 @@ export function RecordDialog({
 					`nand-dashboard-root block gap-0 md:backdrop-blur-none ${classes} ${size} [position:fixed] [font-size:inherit] [font-family:var(--db-font)]`,
 				)}
 				overlayClassName="md:backdrop-blur-none"
-				data-theme={suppliedTheme ?? theme}
-				data-dashboard-theme={suppliedTheme ?? theme}
 				data-dashboard-layout={layout}
 			>
 				<DialogTitle className="sr-only">{title}</DialogTitle>

@@ -79,6 +79,7 @@ export class Notice {
 // exposes the most recently created menu to the test.
 export interface StubMenuItem {
 	title: string;
+	checked?: boolean;
 	click(): void;
 }
 export class Menu {
@@ -94,6 +95,7 @@ export class Menu {
 		let clickFn: (() => void) | null = null;
 		const item = {
 			title: '',
+			checked: undefined as boolean | undefined,
 			setTitle(t: string) {
 				this.title = t;
 				return this;
@@ -101,7 +103,8 @@ export class Menu {
 			setIcon(_icon: string) {
 				return this;
 			},
-			setChecked(_checked: boolean) {
+			setChecked(checked: boolean) {
+				this.checked = checked;
 				return this;
 			},
 			setDisabled(_disabled: boolean) {
@@ -146,7 +149,9 @@ export function normalizePath(path: string): string {
 }
 export const Platform = { isMacOS: false, isWin: false, isMobile: false, isMobileApp: false, isDesktop: true, isDesktopApp: true };
 export class FileSystemAdapter {}
-export function setIcon(_el: unknown, _icon: string): void {}
+export function setIcon(el: unknown, icon: string): void {
+	(el as { setAttribute?: (name: string, value: string) => void }).setAttribute?.('data-icon', icon);
+}
 export function setTooltip(_el: unknown, _tooltip: string, _options?: unknown): void {}
 export function getLanguage(): string { return 'en'; }
 export class ToggleComponent {

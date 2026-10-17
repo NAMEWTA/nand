@@ -1,7 +1,8 @@
 import { closeRssStore } from './platform/rss/rss-store';
 import type { ModuleContext, ModuleInstance } from '../../app/contracts/module';
 import { deviceId } from '../../host/obsidian/storage/device-id';
-import { AGENT_DIRECTORY, AGENT_DISPATCH, AGENT_SESSIONS, AGENT_SKILLS } from '../agent/api';
+import { AGENT_DIRECTORY, AGENT_DISPATCH, AGENT_SESSIONS, AGENT_SKILLS, AGENT_USAGE, AGENT_QUICK_COMMANDS } from '../agent/api';
+import { NAVIGATOR_LISTS } from '../navigator/api';
 import { AUTOMATIONS, AUTOMATION_SOURCES, type AutomationSource } from '../automations/api';
 import { HOME_WIDGETS, HOME_WORKBENCH, type HomeWorkbench } from './api';
 import { indexWidgetProviders } from './core/board/widget-registry';
@@ -117,6 +118,11 @@ export default function createHomeModule(context: ModuleContext): ModuleInstance
 					stopSkills();
 				};
 			};
+			homeServices.quickCommands = () => context.services.peek(AGENT_QUICK_COMMANDS);
+			homeServices.usage = () => context.services.peek(AGENT_USAGE);
+			homeServices.watchUsage = (listener) => context.services.watch(AGENT_USAGE, () => listener());
+			homeServices.navigatorLists = () => context.services.peek(NAVIGATOR_LISTS);
+			homeServices.watchNavigatorLists = (listener) => context.services.watch(NAVIGATOR_LISTS, () => listener());
 			homeServices.watchWidgets = (listener) => {
 				widgetListeners.add(listener);
 				return () => {
@@ -199,6 +205,7 @@ export default function createHomeModule(context: ModuleContext): ModuleInstance
 				if (host.boards === boards) void boards.prune();
 			});
 			host.boards = boards;
+			host.closeOverlays = () => ui?.closeModals(app);
 			automationSource = dashboardAutomationSource({
 				app,
 				settings: () => host.settings,
@@ -244,6 +251,7 @@ export default function createHomeModule(context: ModuleContext): ModuleInstance
 			ui?.closeModals(app);
 			if (reason === 'unload') ui?.teardown(app);
 			host.boards = undefined;
+			host.closeOverlays = undefined;
 			workbench = undefined;
 			listeners.clear();
 			const { mediaTags, habit, expense, pomodoro, reading, music } = owned;

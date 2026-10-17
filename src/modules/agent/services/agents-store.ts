@@ -22,7 +22,7 @@ export class AgentsStore {
 		this.store.setState({ refreshing: true });
 		this.pending = Promise.resolve().then(async () => {
 			try {
-				if (force || this.path === null) this.path = await loginShellPath();
+				if (force || this.path === null) this.path = await loginShellPath(undefined, force);
 				const detected = probeAgents(this.settings.get().overrides, this.path || '');
 				if (!this.stopped) this.store.setState({ detected, failed: false, error: '' });
 			} catch (error) {

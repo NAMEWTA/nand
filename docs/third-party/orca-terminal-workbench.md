@@ -28,6 +28,8 @@ NAND 改编了 [Orca](https://github.com/stablyai/orca)（stablyai/orca）的部
 | 原生恢复能力集合 | `src/modules/agent/services/agent-runtime.ts` |
 | 原生会话布局、Claude 项目路径编码、历史范围 | `src/modules/agent/platform/desktop/history/scope.ts`；历史格式见 `native/pty-server/src/agent_data.rs` |
 | 原生生命周期钩子与扩展 | `src/modules/agent/platform/desktop/hooks/native-extensions.ts` |
+| 默认继承真实环境（464bd5a `local-pty-spawn-environment.ts`）；系统默认账号不注入 CLI home、Claude 系统默认不设 `CLAUDE_CONFIG_DIR`（`claude-profile-router.ts`、`runtime-home-service-home-routing.ts`） | `src/modules/agent/platform/desktop/agents/system-homes.ts`（真实目录解析）、`accounts.ts`（系统/托管账号环境）、`credentials.ts`（旧默认账号数据识别）、`pty/runtime-environment.ts` |
+| 登录 shell 环境探测（464bd5a `startup/login-shell-environment.ts`） | `src/modules/agent/platform/desktop/detection/shell-path.ts`；仅保留 PATH、CLI 目录变量、密钥与代理变量，有超时，Windows 跳过 |
 | 调度与 cron 解析、下一次触发时间计算 | `src/modules/automations/core/schedule/`（`automation-cron-field-parsing.ts`、`automation-cron-occurrence.ts`、`automation-schedule-occurrences.ts`、`automation-schedule-parsing.ts`） |
 
 ## 浏览器（d74388f）
@@ -68,10 +70,8 @@ NAND 使用自己的 Obsidian 叶子、主题令牌和 stdio 辅助进程（协�
 |---|---|
 | `app-shell/AppWorkspaceShell.tsx` | `src/shell/ShellRoot.tsx`：保留 flex 外框，换成 Obsidian 叶子宽度、独立页面根、图标轨与 Sheet 导航。文档将上游目录写在 components 下，实际位于 app-shell。 |
 | `components/sidebar/index.tsx` | `src/shell/panel/SidePanel.tsx`：通用列表与宽度分隔条，范围 220～500px；不带 worktree 功能。 |
-| `components/status-bar/StatusBarSurface.tsx` | `src/shell/status-bar/StatusBar.tsx`、`UsageCluster.tsx`：24px 容器、左右簇、向上弹出的用量菜单与测量标记。 |
+| `components/status-bar/StatusBarSurface.tsx` | `src/shell/status-bar/mount-usage.tsx`：用量项触发器和向上弹出的用量面板，挂在 Obsidian 底部状态栏的用量项里（不再有工作台内部的 24px 容器）。 |
 | `components/status-bar/StatusBarProviderSegment.tsx`、`UsageRosterPanel.tsx` | 同名 NAND 用量组件：替换为现有 `controller.usage` 适配快照；详细/精简、百分比、阈值、分钟边界倒计时与排序。 |
-| `components/status-bar/status-bar-usage-collapse.ts` | `src/shell/status-bar/collapse.ts`：按阶段 3 明确的算法先精简，再从右向左折叠，隐藏片段继续测量。 |
-| `components/status-bar/StatusBarVisibilityMenu.tsx` | `src/shell/status-bar/VisibilityMenu.tsx`：改用当前窗口 ContextMenu，偏好进入 app 设置命名空间。 |
 | `components/settings/Settings.tsx`、`settings-page-renderer.tsx`、`SearchableSetting.tsx`、`settings-search.ts` | `src/app/settings/react/`：保留 renderer 的独立滚动区、`gap-10 px-8 pt-10 pb-24 max-w-4xl` 内容容器、空结果态，以及设置行与搜索包装；分类由 NAND PanelModel 提供，搜索移到内容顶部，模块状态和 React 设置生命周期由 NAND 提供。 |
 
 底部状态栏不包含 Orca 的 SSH、资源监视、宠物或更新通知。组件样板直接由新设置页渲染 React 组件。所有模块设置已统一 React 加载接口；旧 DOM 包装与临时 settingsPageKind 字段均已移除。

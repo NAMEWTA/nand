@@ -3,6 +3,7 @@ import type { AlbumConfig, AnniversaryConfig, CountdownConfig } from './types/in
 import { normalizeWorkspaces } from '../workspace/workspace-registry';
 import { sanitizeMediaTags } from '../media/tags';
 import { readSkillShortcuts } from './skill-shortcuts';
+import { readShortcutButtons } from './shortcut-buttons';
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
 	!!value && typeof value === 'object' && !Array.isArray(value);
@@ -14,10 +15,6 @@ export function normalizeDashboardSettings(input: unknown): DashboardSettings {
 	return {
 		...structuredClone(DEFAULT_DASHBOARD_SETTINGS),
 		...(raw as Partial<DashboardSettings>),
-		layoutMode:
-			raw.layoutMode === 'side' || raw.layoutMode === 'stacked' || raw.layoutMode === 'immersive'
-				? raw.layoutMode
-				: undefined,
 		countdowns: Array.isArray(raw.countdowns)
 			? (raw.countdowns as CountdownConfig[]).filter((c) => c && typeof c.id === 'string')
 			: [],
@@ -30,10 +27,8 @@ export function normalizeDashboardSettings(input: unknown): DashboardSettings {
 				)
 			: [],
 		mediaTags: sanitizeMediaTags(raw.mediaTags),
-		widgetQuickCaptureEnabled: raw.widgetQuickCaptureEnabled === true,
-		widgetFileSearchEnabled: raw.widgetFileSearchEnabled === true,
-		widgetSkillsEnabled: raw.widgetSkillsEnabled === true,
 		skillWidgetButtons: readSkillShortcuts(raw.skillWidgetButtons) ?? [],
+		shortcutButtons: readShortcutButtons(raw.shortcutButtons),
 		workspaceFiles: workspace.files,
 		workspaceNames: workspace.names,
 		dashboardFile: workspace.active,
@@ -57,8 +52,6 @@ export function seedDashboardSettings(
 	return {
 		...settings,
 		quickNotesEnabled: true,
-		widgetHabitEnabled: true,
-		countdownEnabled: true,
 		countdowns: [
 			{
 				id: 'cd-default',
@@ -69,7 +62,6 @@ export function seedDashboardSettings(
 				reminderDays: 0,
 			},
 		],
-		anniversaryEnabled: true,
 		anniversaries: [
 			{
 				id: 'av-default',

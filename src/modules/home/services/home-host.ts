@@ -5,8 +5,7 @@ import type { AutomationUiPort } from '../../../shared/automation/types';
 import { AUTOMATIONS } from '../../automations/api';
 import { BROWSER_OPEN, type BrowserOpenRequest } from '../../browser/api';
 import { BOARD_SURFACE_TYPE, type BoardOperations, type BoardSurfaceApi } from '../api';
-import type { BoardLayout, DashboardSettings } from '../core/board/types/model';
-import { t } from '../../../shared/i18n';
+import type { DashboardSettings } from '../core/board/types/model';
 import { normalizeWorkspacePath } from '../core/workspace/workspace-registry';
 import { AppearancePresets } from './appearance-presets';
 
@@ -26,6 +25,8 @@ export interface HomeHost {
 	subscribeSettings(listener: () => void): () => void;
 	updateSettings(update: (draft: DashboardSettings) => void): Promise<void>;
 	boards?: BoardOperations;
+	/** Close every dialog and floating panel opened on a board (a board switch voids them). */
+	closeOverlays?(): void;
 	readonly automationHost: AutomationUiPort | undefined;
 	refreshAllDashboards(): void;
 	reloadAllDashboards(): Promise<void>;
@@ -35,9 +36,8 @@ export interface HomeHost {
 	openBrowser(request: BrowserOpenRequest): Promise<void>;
 	workbenchRefresh(): void;
 	switchWorkspace(path: string): Promise<void>;
-	createWorkspace(name: string, layout?: BoardLayout): Promise<void>;
+	createWorkspace(name: string): Promise<void>;
 	openBoard(path: string): Promise<void>;
-	setBoardLayout(path: string, layout: BoardLayout): Promise<void>;
 	renameWorkspace(path: string, name: string): Promise<void>;
 	removeWorkspace(path: string): Promise<void>;
 	reorderWorkspaces(from: number, to: number): Promise<void>;
@@ -46,7 +46,11 @@ export interface HomeHost {
 
 export function createHomeHost(context: ModuleContext, handle: SettingsHandle<DashboardSettings>): HomeHost {
 	const app = context.app;
-	const modules = { get dashboard() { return true; } };
+	const modules = {
+		get dashboard() {
+			return true;
+		},
+	};
 	// Reads and in-place writes go to the namespace value; `saveSettings` persists them (`touch`).
 	let cached: { target: DashboardSettings; proxy: HomeSettingsView } | undefined;
 	const view = (): HomeSettingsView => {
@@ -55,12 +59,15 @@ export function createHomeHost(context: ModuleContext, handle: SettingsHandle<Da
 			cached = {
 				target,
 				proxy: new Proxy(target as HomeSettingsView, {
-					get: (value, key, receiver): unknown => (key === 'modules' ? modules : Reflect.get(value, key, receiver)),
+					get: (value, key, receiver): unknown =>
+						key === 'modules' ? modules : Reflect.get(value, key, receiver),
 					set: (value, key, next, receiver) => key === 'modules' || Reflect.set(value, key, next, receiver),
 					// Spreads and copies of the view keep `modules`.
 					ownKeys: (value) => [...Reflect.ownKeys(value).filter((key) => key !== 'modules'), 'modules'],
 					getOwnPropertyDescriptor: (value, key) =>
-						key === 'modules' ? { value: modules, enumerable: true, configurable: true, writable: true } : Reflect.getOwnPropertyDescriptor(value, key),
+						key === 'modules'
+							? { value: modules, enumerable: true, configurable: true, writable: true }
+							: Reflect.getOwnPropertyDescriptor(value, key),
 				}),
 			};
 		}
@@ -71,7 +78,8 @@ export function createHomeHost(context: ModuleContext, handle: SettingsHandle<Da
 		const found: BoardSurfaceApi[] = [];
 		app.workspace.iterateAllLeaves((leaf) => {
 			const owner = leaf.view as typeof leaf.view & { getNativeSurfaces?: () => readonly BoardSurfaceApi[] };
-			for (const surface of owner.getNativeSurfaces?.() ?? []) if (surface.getViewType() === BOARD_SURFACE_TYPE) found.push(surface);
+			for (const surface of owner.getNativeSurfaces?.() ?? [])
+				if (surface.getViewType() === BOARD_SURFACE_TYPE) found.push(surface);
 		});
 		return found;
 	};
@@ -84,15 +92,20 @@ export function createHomeHost(context: ModuleContext, handle: SettingsHandle<Da
 		},
 		set settings(next) {
 			const target = handle.get() as unknown as Record<string, unknown>;
-			for (const [key, value] of Object.entries(next)) if (key !== 'modules' && target[key] !== value) target[key] = value;
+			for (const [key, value] of Object.entries(next))
+				if (key !== 'modules' && target[key] !== value) target[key] = value;
 		},
 		saveSettings: () => {
 			const value = handle.get();
-			value.workspaces = { files: [...value.workspaceFiles], names: [...(value.workspaceNames ?? [])], active: Math.max(0, value.workspaceFiles.indexOf(value.dashboardFile)) };
+			value.workspaces = {
+				files: [...value.workspaceFiles],
+				names: [...(value.workspaceNames ?? [])],
+				active: Math.max(0, value.workspaceFiles.indexOf(value.dashboardFile)),
+			};
 			return handle.touch();
 		},
-		subscribeSettings: listener => handle.subscribe(listener),
-		updateSettings: update => handle.update(update),
+		subscribeSettings: (listener) => handle.subscribe(listener),
+		updateSettings: (update) => handle.update(update),
 		get automationHost() {
 			return context.services.peek(AUTOMATIONS);
 		},
@@ -106,7 +119,9 @@ export function createHomeHost(context: ModuleContext, handle: SettingsHandle<Da
 		activeDashboard: () => {
 			const leaf = app.workspace.getMostRecentLeaf();
 			const win = leaf?.view.containerEl.win ?? app.workspace.containerEl.win;
-			const candidates = surfaces().filter((surface) => surface.contentEl.win === win && !surface.contentEl.hidden);
+			const candidates = surfaces().filter(
+				(surface) => surface.contentEl.win === win && !surface.contentEl.hidden,
+			);
 			return candidates.find((surface) => surface.leaf === leaf) ?? candidates[0];
 		},
 		openSettings: () => {
@@ -119,14 +134,8 @@ export function createHomeHost(context: ModuleContext, handle: SettingsHandle<Da
 		},
 		workbenchRefresh: () => context.shell.refresh(),
 		switchWorkspace: (path) => host.boards?.switch(path) ?? Promise.resolve(),
-		createWorkspace: (name, layout) => host.boards?.create(name, layout) ?? Promise.resolve(),
-		openBoard: path => context.shell.open({ feature: 'dashboard', resourceId: normalizeWorkspacePath(path) }),
-		setBoardLayout: async (path, layout) => {
-			await host.openBoard(path);
-			const surface = host.activeDashboard();
-			if (!surface || normalizeWorkspacePath(surface.plugin.settings.dashboardFile) !== normalizeWorkspacePath(path)) throw new Error(t('workbench.missing'));
-			await surface.sync.setBoardLayout(layout);
-		},
+		createWorkspace: (name) => host.boards?.create(name) ?? Promise.resolve(),
+		openBoard: (path) => context.shell.open({ feature: 'dashboard', resourceId: normalizeWorkspacePath(path) }),
 		renameWorkspace: (path, name) => host.boards?.rename(path, name) ?? Promise.resolve(),
 		removeWorkspace: (path) => host.boards?.remove(path) ?? Promise.resolve(),
 		reorderWorkspaces: (from, to) => host.boards?.reorder(from, to) ?? Promise.resolve(),

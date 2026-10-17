@@ -2,10 +2,10 @@
 export const messages = {
 	en: {
 		"appearance.title": "Appearance",
-		"appearance.description": "One look for Obsidian, your notes and NAND.",
+		"appearance.description": "One look for Obsidian and your notes. NAND's own colours are chosen under General → NAND palette.",
 		"appearance.theme": "Theme",
 		"appearance.preset": "Style",
-		"appearance.presetDesc": "Follow system keeps your Obsidian theme exactly as it is.",
+		"appearance.presetDesc": "Follow system keeps your Obsidian theme exactly as it is. The style only changes Obsidian itself, not NAND's panels.",
 		"appearance.preset.system": "Follow system",
 		"appearance.preset.claude-code": "Claude Code",
 		"appearance.preset.eye-care": "Eye care",
@@ -40,10 +40,10 @@ export const messages = {
 	},
 	zh: {
 		"appearance.title": "外观",
-		"appearance.description": "为 Obsidian、笔记和 NAND 设置统一的外观。",
+		"appearance.description": "为 Obsidian 和笔记设置统一的外观。NAND 自己界面的颜色在“常规 → NAND 配色”中选择。",
 		"appearance.theme": "主题",
 		"appearance.preset": "样式",
-		"appearance.presetDesc": "“跟随系统”完全保持当前 Obsidian 主题。",
+		"appearance.presetDesc": "“跟随系统”完全保持当前 Obsidian 主题。风格只作用于 Obsidian 本体，不改变 NAND 的面板。",
 		"appearance.preset.system": "跟随系统",
 		"appearance.preset.claude-code": "Claude Code",
 		"appearance.preset.eye-care": "护眼绿",

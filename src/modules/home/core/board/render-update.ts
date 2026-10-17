@@ -24,7 +24,7 @@ export function planDashboardUpdate(
 	// leave the old columns on screen after the file already says immersive.
 	if (previous.layout !== next.layout || previous.gridPacked !== next.gridPacked) return { kind: 'full' };
 	if (!sameValue(previous.widgets, next.widgets) || !sameValue(previous.immersive, next.immersive) || !sameValue(previous.skills, next.skills)) return { kind: 'full' };
-	if (!sameValue(previous.banner, next.banner)) return { kind: 'full' };
+	if (!sameValue(previous.banner, next.banner) || !sameValue(previous.banners, next.banners)) return { kind: 'full' };
 	if (!sameValue(previous.quickActions, next.quickActions)) return { kind: 'full' };
 	if (!sameValue(previous.quickActionOrder, next.quickActionOrder)) return { kind: 'full' };
 	if (!sameValue(previous.hiddenPresets, next.hiddenPresets)) return { kind: 'full' };
