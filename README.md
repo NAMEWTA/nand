@@ -4,7 +4,7 @@ English | [简体中文](README.ZH.md)
 
 A personal workbench for Obsidian: dashboards, comments, coding agents, a built-in browser, contact archives, icons, automations, notifications and Git sync. Everything opens from one three-column workbench, and a global appearance covers the Obsidian interface and Markdown.
 
-NAND is at version 0.0.2-alpha.1, a pre-release.
+NAND is at version 0.0.3-alpha.1, a pre-release.
 
 The interface is available in English and Simplified Chinese. A new vault follows Obsidian's interface language; change it later in the workbench under **Settings → General → Language**.
 
@@ -44,7 +44,7 @@ Each module has its own switch in the settings. A module that is off is not load
 
 All NAND-managed data lives in the current vault's `.nand/`: managed Markdown and attachments in `.nand/content/`, configuration, device identity, browser sessions and downloads, CLI homes/credentials/hooks and versioned helpers. Use the workbench to browse and edit managed documents. Ordinary notes, host data and Git metadata keep their locations. Obsidian Sync excludes dot folders, including all of `.nand/content/`; use a file sync tool that includes hidden folders. Browser and CLI login state may require authentication again on another device. [Data and recovery](docs/data.md) explains formats, backup and failure recovery. Current maintained guides are in Chinese; this README also has a Chinese version.
 
-The unreleased redesign changes board and comment formats and replaces record Markdown with JSON. Old files are retained without migration; unsupported settings and old leaf layouts fall back to current defaults. The former headline module and browser automation extensions are removed. Back up before upgrading; see [format boundaries](docs/data.md#本次重构的格式边界) and the [changelog](CHANGELOG.md).
+The redesign in 0.0.3-alpha.1 changes board and comment formats and replaces record Markdown with JSON. Old files are retained without migration; unsupported settings and old leaf layouts fall back to current defaults. The former headline module and browser automation extensions are removed. Back up before upgrading; see [format boundaries](docs/data.md#本次重构的格式边界) and the [changelog](CHANGELOG.md).
 
 ## Development
 
